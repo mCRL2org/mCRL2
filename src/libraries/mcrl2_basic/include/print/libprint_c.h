@@ -36,15 +36,12 @@ int gsvfprintf(FILE *stream, const char *format, va_list args);
 extern void (*custom_message_handler)(gsMessageType, char*);
 
 // Helper function (wrapper around gsvfprintf) for printing to string
-static void handler_wrapper(gsMessageType t, char *Format, ...) {
+static void handler_wrapper(gsMessageType t, char *Format, va_list args) {
   FILE* stream = tmpfile();
 
   assert(stream);
 
-  va_list Args;
-  va_start(Args, Format);
-  gsvfprintf(stream, Format, Args);
-  va_end(Args);
+  gsvfprintf(stream, Format, args);
 
   size_t n = ftell(stream);
 
@@ -118,7 +115,7 @@ inline static void gsVerboseMsg(char *Format, ...)
     va_start(Args, Format);
 
     if (custom_message_handler) {
-      handler_wrapper(gs_info, Format, Args);
+      handler_wrapper(gs_notice, Format, Args);
     }
     else {
       gsvfprintf(stderr, Format, Args);

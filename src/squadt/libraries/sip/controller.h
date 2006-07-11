@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <sip/detail/common.h>
+#include <sip/detail/report.h>
 #include <sip/detail/controller_capabilities.h>
 #include <sip/detail/tool_capabilities.h>
 #include <sip/detail/layout_tool_display.h>
@@ -13,11 +14,14 @@
 namespace sip {
   namespace controller {
 
-    /** \brief The main interface to the protocol (controller-side) */
+    /**
+     * \class communicator controller.h
+     * \brief The main interface to the protocol (controller-side)
+     **/
     class communicator : public sip::messenger {
 
       protected:
-        /** Type for keeping protocol phase status */
+        /** \brief Type for keeping protocol phase status */
         enum status {
           status_initialising, ///< \brief No connection with tool yet
           status_clean,        ///< \brief Connection with tool: Phase 0
@@ -46,6 +50,9 @@ namespace sip {
         /** \brief Function type that for communicating display layouts */
         typedef boost::function < void (std::vector < sip::layout::element const* > const&) >  display_data_handler_function;
 
+        /** \brief Function type that for communicating display layouts */
+        typedef boost::function < void (sip::report::sptr) >                                   status_message_handler_function;
+
       protected:
 
         /** \brief convenience function for use with event handlers */
@@ -58,6 +65,9 @@ namespace sip {
  
         /** \brief Handler function to replace the current display layout with a new one */
         void display_data_handler(const messenger::message_ptr&, sip::layout::tool_display::sptr, display_data_handler_function);
+
+        /** \brief Handler function to replace the current display layout with a new one */
+        void status_message_handler(const messenger::message_ptr&, status_message_handler_function);
 
         /** \brief The current handler for layout change events */
         display_layout_handler_function current_layout_handler;
@@ -113,6 +123,9 @@ namespace sip {
 
         /** \brief Sets a handler for layout messages using a handler function */
         void activate_display_data_handler(sip::layout::tool_display::sptr, display_data_handler_function);
+
+        /** \brief Sets a handler for layout messages using a handler function */
+        void activate_status_message_handler(status_message_handler_function);
     };
  
     inline const controller::capabilities& communicator::get_controller_capabilities() {

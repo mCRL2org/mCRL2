@@ -75,6 +75,7 @@ feature squadt_support : disable enable : composite optional incidental ;
 if ! squadt in [ MATCH "^--disable-(squadt)-support" : [ modules.peek : ARGV ] ] {
   feature.compose <squadt_support>enable
         : <define>ENABLE_SQUADT_CONNECTIVITY
+          <dependency>/libraries/temporary//squadt_utility
           <library>/libraries/sip//sip_tool
           <xml2>interface
         ;

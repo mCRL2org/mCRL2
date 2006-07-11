@@ -106,6 +106,16 @@ namespace sip {
     }
 
     /**
+     * @param h the function that is called when a new layout for the display has been received
+     **/
+    void communicator::activate_status_message_handler(status_message_handler_function h) {
+      /* Remove any previous handlers */
+      clear_handlers(sip::message_report);
+
+      add_handler(sip::message_report, boost::bind(&communicator::status_message_handler, this, _1, h));
+    }
+
+    /**
      * @param m pointer to the message
      * @param h the function that is called when a new layout for the display has been received
      **/
@@ -130,6 +140,19 @@ namespace sip {
       d->update(reader, elements);
 
       h(elements);
+    }
+
+    /**
+     * @param m pointer to the message
+     * @param h the function that is called when a new rport has been received
+     * @param d a shared pointer to a tool display
+     **/
+    void communicator::status_message_handler(const messenger::message_ptr& m, status_message_handler_function h) {
+      xml2pp::text_reader reader(m->to_string().c_str());
+
+      sip::report::sptr r = report::read(reader);
+
+      h(r);
     }
   }
 }

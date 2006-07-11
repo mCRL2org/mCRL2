@@ -114,22 +114,31 @@ namespace squadt {
         /** \brief Sizer of the tool display control buttons */
         wxSizer*                        control_bar;
 
+        /** \brief Sizer of the tool display control buttons */
+        wxSizer*                        log;
+
       private:
+
+        /** \brief Initialises widgets */
+        void build();
 
         /** \brief Builds the specified layout within this window */
         void instantiate(sip::layout::tool_display::sptr l);
 
-        /** \brief Intialises widgets */
-        void build();
-
         /** \brief Update the (G)UI state for a list of elements */
         void update(std::vector < sip::layout::element const* >);
+
+        /** \brief Update the log with incoming status messages */
+        void update_log(sip::report::sptr l);
 
         /** \brief Set a new layout description */
         void schedule_layout_change(sip::layout::tool_display::sptr);
 
         /** \brief Set a new layout description */
         void schedule_layout_update(std::vector < sip::layout::element const* > const&);
+
+        /** \brief Set a new layout description */
+        void schedule_log_update(sip::report::sptr);
 
         /** \brief Handler for panel control button events */
         void on_panel_button_clicked(wxCommandEvent&);

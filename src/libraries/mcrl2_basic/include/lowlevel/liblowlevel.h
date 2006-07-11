@@ -70,7 +70,7 @@ extern bool gsVerbose;
 extern bool gsDebug;
 
 // Type for message distinction (by purpose)
-enum gsMessageType {gs_info, gs_warning, gs_error};
+enum gsMessageType {gs_notice, gs_warning, gs_error};
 
 // Replaces message_handler by the function pointer passed as argument
 void gsSetCustomMessageHandler(void (*)(gsMessageType, char*));

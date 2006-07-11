@@ -85,11 +85,7 @@ bool XSim::OnInit()
         lpd_file_argument = configuration->get_object(lpd_file_for_input)->get_location();
       }
       else {
-        sip::report report;
-
-        report.set_error("Invalid input combination!");
-
-        tc.send_report(report);
+        tc.send_status_report(sip::report::error, "Invalid input combination!");
 
         tc.send_signal_done();
 

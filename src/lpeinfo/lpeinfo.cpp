@@ -12,6 +12,11 @@
 //
 // ======================================================================
 
+// Squadt protocol interface
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+#include <squadt_utility.h>
+#endif
+
 #include "mcrl2_revision.h"
 
 //C++
@@ -26,11 +31,6 @@
 #include <atermpp/aterm.h>
 #include <lpe/lpe.h>
 #include <lpe/specification.h>
-
-// Squadt protocol interface
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <sip/tool.h>
-#endif
 
 using namespace std;
 using namespace atermpp;
@@ -114,6 +114,9 @@ int main(int ac, char** av) {
   if (tc.activate(ac,av)) {
     bool valid = false;
 
+    /* Initialise utility pseudo-library */
+    squadt_utility::initialise(tc);
+
     /* Static configuration cycle */
     while (!valid) {
       /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
@@ -128,11 +131,7 @@ int main(int ac, char** av) {
         file_name = configuration->get_object(lpd_file_for_input)->get_location();
       }
       else {
-        sip::report report;
-
-        report.set_error("Invalid input combination!");
-
-        tc.send_report(report);
+        tc.send_status_report(sip::report::error, "Invalid input combination!");
       }
     }
 
@@ -208,30 +207,32 @@ int main(int ac, char** av) {
 #endif
   }
   else {
-    std::string error("Error: unable to load LPE from `" + file_name + "'\n");
+    std::string error("Unable to load LPE from `" + file_name + "'\n");
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
     if (tc.is_active()) {
       /* Something went wrong, send an error report */
-      sip::report report;
-
-      report.set_error(error);
-
-      tc.send_report(report);
+      tc.send_status_report(sip::report::error, error);
 
       tc.send_signal_done();
 
       tc.await_message(sip::message_request_termination);
     }
     else {
-      std::cerr << error;
+      std::cerr << "Error: " + error;
     }
 #else
-    std::cerr << error;
+    std::cerr << "Error: " + error;
 #endif
 
     return (1);
   }
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  tc.send_signal_done();
+
+  tc.await_message(sip::message_request_termination);
+#endif
 
   return 0;
 }

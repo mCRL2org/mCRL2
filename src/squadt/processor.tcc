@@ -17,9 +17,10 @@ namespace squadt {
    * @param[in] o the processor that owns of this object
    **/
   processor::monitor::monitor(processor& o) : owner(o) {
-    on_status_change = status_change_dummy;
-    on_layout_change = display_layout_change_dummy;
-    on_state_change  = display_data_change_dummy;
+    on_status_change  = status_change_dummy;
+    on_layout_change  = display_layout_change_dummy;
+    on_message_change = status_message_change_dummy;
+    on_state_change   = display_data_change_dummy;
 
     /* Set the handler for incoming layout messages */
     activate_display_layout_handler(on_layout_change);
@@ -43,6 +44,15 @@ namespace squadt {
   inline void processor::monitor::set_display_data_handler(sip::layout::tool_display::sptr d, display_data_callback_function h) {
     /* Set the handler for incoming layout messages */
     activate_display_data_handler(d, h);
+  }
+
+  /**
+   * @param[in] d the tool display associated with this monitor
+   * @param[in] h the function or functor that is invoked at layout change
+   **/
+  inline void processor::monitor::set_status_message_handler(status_message_callback_function h) {
+    /* Set the handler for incoming layout messages */
+    activate_status_message_handler(h);
   }
 
   /**

@@ -102,7 +102,7 @@ namespace sip {
         void send_report(sip::report const&);
 
         /** \brief Sends an error report to the controller */
-        void send_error_report(std::string const&);
+        void send_status_report(sip::report::type, std::string const&);
  
         /** \brief Get the tool capabilities object that will be sent when a request is received */
         inline tool::capabilities& get_tool_capabilities();

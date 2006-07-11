@@ -594,7 +594,7 @@ namespace squadt {
      **/
     tool_display::tool_display(wxWindow* p, GUI::project* c, processor::monitor::sptr& s) :
                                 wxPanel(p, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER),
-                                context(c), event_handler(s), content(0) {
+                                context(c), event_handler(s), content(0), log(0) {
 
       build();
 
@@ -602,6 +602,7 @@ namespace squadt {
 
       /* Connect event handlers */
       s->set_display_layout_handler(boost::bind(&GUI::tool_display::schedule_layout_change, this, _1));
+      s->set_status_message_handler(boost::bind(&GUI::tool_display::schedule_log_update, this, _1));
     }
 
     void tool_display::build() {
@@ -731,6 +732,20 @@ namespace squadt {
       BOOST_FOREACH(sip::layout::element const* i, l) {
         event_handler.update(&m, i);
       }
+    }
+
+    /**
+     * @param[in] l the layout elements that have changed
+     **/
+    void tool_display::update_log(sip::report::sptr l) {
+      /* TODO */
+    }
+
+    /**
+     * @param[in] l the layout specification
+     **/
+    void tool_display::schedule_log_update(sip::report::sptr l) {
+      context->gui_builder.schedule_update(boost::bind(&tool_display::update_log, this, l));
     }
 
     /**

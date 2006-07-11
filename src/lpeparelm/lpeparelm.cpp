@@ -25,9 +25,9 @@
 #include "lpe/specification.h"
 #include "lpe/lpe_error.h"
 
-// Squadt protocol interface
+// Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <sip/tool.h>
+#include <squadt_utility.h>
 #endif
 
 using namespace std;
@@ -495,7 +495,7 @@ void realise_configuration(sip::tool::communicator& tc, ParElmObj& constelm, sip
   std::string output_file_name = c.get_object(lpd_file_for_output)->get_location();
 
   if (!constelm.loadFile(input_file_name)) {
-    tc.send_error_report("Error reading input!");
+    tc.send_status_report(sip::report::error, "Invalid input, incorrect format?");
 
     exit(1);
   }
@@ -527,6 +527,9 @@ int main(int ac, char** av) {
   if (tc.activate(ac,av)) {
     bool valid = false;
 
+    /* Initialise squadt utility pseudo-library */
+    squadt_utility::initialise(tc);
+
     /* Static configuration cycle (phase 1: obtain input combination) */
     while (!valid) {
       /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
@@ -543,7 +546,7 @@ int main(int ac, char** av) {
         configuration->add_output(lpd_file_for_output, "lpe", configuration->get_output_name(".lpe"));
       }
       else {
-        tc.send_error_report("Invalid input combination!");
+        tc.send_status_report(sip::report::error, "Invalid input combination!");
 
         exit(1);
       }
@@ -569,12 +572,6 @@ int main(int ac, char** av) {
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if (tc.is_active()) {
-    sip::report report;
-
-    report.set_comment("done with state space generation");
-
-    tc.send_report(report);
-
     tc.send_signal_done();
 
     gsRewriteFinalise();

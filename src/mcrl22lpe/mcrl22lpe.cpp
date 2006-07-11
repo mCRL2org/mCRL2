@@ -6,8 +6,9 @@
 #define INFILEEXT ".mcrl2"
 #define OUTFILEEXT ".lpe"
 
+// Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <sip/tool.h>
+#include <squadt_utility.h>
 #endif
 
 #include <assert.h>
@@ -255,6 +256,8 @@ static int parse_command_line(int argc, char *argv[],t_lin_options &lin_options)
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 
+sip::tool::communicator tc;
+
 enum mcrl22lpe_options {
        option_input_mcrl2_file_name,
        option_output_lpe_file_name,
@@ -274,8 +277,7 @@ enum mcrl22lpe_options {
        option_verbose,
        option_debug };
 
-static void get_configuration_parameters_via_squadt_display
-               (sip::tool::communicator& tc) 
+static void get_configuration_parameters_via_squadt_display() 
 { /* get parameters via the squadt display and set the
      configuration which is sent back to squadt */
     using namespace sip;
@@ -473,16 +475,20 @@ static void get_configuration_parameters_via_squadt_display
 
 static bool get_squadt_parameters(int argc, 
                                   char *argv[],
-                                  t_lin_options &lin_options,
-                                  sip::tool::communicator &tc)
+                                  t_lin_options &lin_options)
 {
   std::string infilename;
   /* Maak dit een enumerated type */
 
   sip::tool::capabilities& cp = tc.get_tool_capabilities();
+
   cp.add_input_combination(option_input_mcrl2_file_name, "Transformation", "mcrl2");
   if (tc.activate(argc,argv)) 
   { bool valid = false;
+
+    /* Initialise squadt utility pseudo-library */
+    squadt_utility::initialise(tc);
+
     /* Static configuration cycle */
     while (!valid) 
     {
@@ -502,7 +508,7 @@ static bool get_squadt_parameters(int argc,
 
     sip::configuration& configuration=tc.get_configuration();
     if (configuration.is_fresh())
-    { get_configuration_parameters_via_squadt_display(tc);
+    { get_configuration_parameters_via_squadt_display();
     }
     
     /* put the configuration data from squadt
@@ -583,7 +589,6 @@ static bool get_squadt_parameters(int argc,
 }
 #endif
 
-
 // Main 
 
 int main(int argc, char *argv[])
@@ -591,8 +596,7 @@ int main(int argc, char *argv[])
   bool terminate=0;
   t_lin_options lin_options;
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  sip::tool::communicator tc;
-  terminate=get_squadt_parameters(argc,argv,lin_options,tc);
+  terminate=get_squadt_parameters(argc,argv,lin_options);
 #else
   terminate=parse_command_line(argc,argv,lin_options);
 #endif

@@ -25,6 +25,10 @@ namespace squadt {
     std::cerr << "No custom display state change event handler connected!" << std::endl;
   }
 
+  void processor::monitor::status_message_change_dummy(sip::report::sptr) {
+    std::cerr << "Incoming report lost!" << std::endl;
+  }
+
   inline processor::processor(project_manager& p) : current_monitor(new monitor(*this)), manager(&p), selected_input_combination(0) {
   }
 

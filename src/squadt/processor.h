@@ -99,6 +99,9 @@ namespace squadt {
           /** \brief Type for functions that is used to handle incoming (G)UI state changes */
           typedef boost::function < void (sip::layout::tool_display::constant_elements const&) > display_data_callback_function;
 
+          /** \brief Type for functions that is used to handle incoming layout state changes */
+          typedef boost::function < void (sip::report::sptr) >                                   status_message_callback_function;
+
           /** \brief Convenience type for hiding shared pointer implementation */
           typedef boost::shared_ptr < monitor >                                                 sptr;
 
@@ -115,6 +118,9 @@ namespace squadt {
           /** \brief Actualisation function for user interface state changes */
           display_data_callback_function   on_state_change;
   
+          /** \brief Actualisation function for incoming change messages */
+          status_message_callback_function on_message_change;
+
           /** \brief Actualisation function for process state changes */
           status_callback_function         on_status_change;
   
@@ -131,6 +137,9 @@ namespace squadt {
 
           /** \brief The default callback function that does nothing */
           static void display_data_change_dummy(sip::layout::tool_display::constant_elements const&);
+
+          /** \brief The default callback function that does nothing */
+          static void status_message_change_dummy(sip::report::sptr);
 
           /** \brief Helper function for communication with a tool, starts a new thread with pilot() */
           inline void start_pilot(bool = true);
@@ -151,6 +160,9 @@ namespace squadt {
 
           /** \brief Constructor with a callback handler */
           inline void set_display_data_handler(sip::layout::tool_display::sptr, display_data_callback_function);
+
+          /** \brief Constructor with a callback handler */
+          inline void set_status_message_handler(status_message_callback_function);
       };
  
       /** \brief Convenience type for hiding the implementation of a list with input information */

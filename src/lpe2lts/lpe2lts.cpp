@@ -1429,11 +1429,7 @@ int main(int argc, char **argv)
         /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
         spec_fn = configuration->get_object(valid_0?lpd_file_for_input_no_lts:lpd_file_for_input_lts)->get_location();
       } else {
-        sip::report report;
-
-        report.set_error("Invalid input combination!");
-
-        tc.send_report(report);
+        tc.send_status_report(sip::report::error, "Invalid input combination!");
       }
     }
 
@@ -1448,7 +1444,7 @@ int main(int argc, char **argv)
       /* Static configuration cycle (phase 2: gather user input) */
       if (!validate_configuration(tc.get_configuration())) {
         /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
-        tc.send_error_report("Fatal error: the configuration is invalid");
+        tc.send_status_report(sip::report::error, "The configuration is invalid");
      
         exit(1);
       }
@@ -1778,11 +1774,7 @@ int main(int argc, char **argv)
   {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
     if (tc.is_active()) {
-      sip::report report;
-
-      report.set_comment("done with state space generation");
-
-      tc.send_report(report);
+      tc.send_status_report(sip::report::notice, "done with state space generation");
 
       tc.send_signal_done();
 

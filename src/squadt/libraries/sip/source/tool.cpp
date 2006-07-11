@@ -161,12 +161,10 @@ namespace sip {
     }
 
     /**
-     * @param[in] e a description of the error
+     * @param[in] e a description
      **/
-    void communicator::send_error_report(std::string const& e) {
-      sip::report report;
-
-      report.set_error(e);
+    void communicator::send_status_report(sip::report::type t, std::string const& e) {
+      sip::report report(t, e);
 
       send_report(report);
     }

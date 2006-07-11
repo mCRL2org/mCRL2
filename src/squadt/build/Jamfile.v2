@@ -7,8 +7,6 @@ project squadt
     <include>../libraries
   ;
 
-
-
 exe squadt
       : [ glob *.cpp ]
       : <source>/site-config//mcrl2_revision.h

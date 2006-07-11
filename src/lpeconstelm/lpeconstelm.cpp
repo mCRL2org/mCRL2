@@ -35,9 +35,9 @@
 #include "libstruct.h"
 #include "liblowlevel.h"
 
-// Squadt protocol interface
+// Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <sip/tool.h>
+#include <squadt_utility.h>
 #endif
 
 using namespace std;
@@ -1050,7 +1050,7 @@ void realise_configuration(sip::tool::communicator& tc, ConstelmObj& constelm, s
   std::string output_file_name = c.get_object(lpd_file_for_output)->get_location();
 
   if (!constelm.loadFile(input_file_name)) {
-    tc.send_error_report("Error reading input!");
+    tc.send_status_report(sip::report::error, "Invalid input, incorrect format?");
 
     exit(1);
   }
@@ -1110,6 +1110,9 @@ int main(int ac, char** av) {
     std::string input_file_name;
     std::string output_file_name;
 
+    /* Initialise squadt utility pseudo-library */
+    squadt_utility::initialise(tc);
+
     /* Static configuration cycle (phase 1: obtain input combination) */
     while (!valid) {
       /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
@@ -1120,7 +1123,7 @@ int main(int ac, char** av) {
       valid &= configuration->object_exists(lpd_file_for_input);
 
       if (!valid) {
-        tc.send_error_report("Invalid input combination!");
+        tc.send_status_report(sip::report::error, "Invalid input combination!");
 
         exit(1);
       }
@@ -1138,7 +1141,7 @@ int main(int ac, char** av) {
       /* Static configuration cycle (phase 2: gather user input) */
       if (!validate_configuration(tc.get_configuration())) {
         /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
-        tc.send_error_report("Fatal error: the configuration is invalid");
+        tc.send_status_report(sip::report::error, "The configuration is invalid");
      
         exit(1);
       }
@@ -1164,12 +1167,6 @@ int main(int ac, char** av) {
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if (tc.is_active()) {
-    sip::report report;
-
-    report.set_comment("done with state space generation");
-
-    tc.send_report(report);
-
     tc.send_signal_done();
 
     gsRewriteFinalise();

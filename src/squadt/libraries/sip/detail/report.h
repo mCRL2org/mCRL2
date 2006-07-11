@@ -17,28 +17,31 @@ namespace sip {
 
   /** \brief Describes a report of tool operation */
   class report {
-    private:
-      /** \brief Room for errors (any error here implies unsuccessful termination) */
-      std::string         error;
-
-      /** \brief Room for comments about anything at all */
-      std::string         comment;
-
-      /** \brief The configuration that can be used to rerun the tool and refresh its outputs */
-      configuration::sptr final_configuration;
 
     public:
+
+      /** \brief Type alias for convenience */
+      typedef boost::shared_ptr < report > sptr;
+
+      /** \brief The message class */
+      enum type {
+        notice,  //< like a warning but even less urgent
+        warning, //< warning of some kind
+        error    //< fatal error occurred
+      };
+
+    private:
+
+      /** \brief The type of the report */
+      type        report_type;
+
+      /** \brief Room for errors (any error here implies unsuccessful termination) */
+      std::string description;
+
+    public:
+
       /** \brief Constructor */
-      inline report();
-
-      /** \brief An error description (implies that tool execution was unsuccessful) */
-      inline void set_error(std::string);
-
-      /** \brief Set the configuration that was used */
-      void set_configuration(configuration::sptr o);
-
-      /** \brief Report comment (arbitrary text) */
-      inline void set_comment(std::string);
+      inline report(type const&, std::string const&);
 
       /** \brief Output XML representation to string */
       inline std::string write() const;
@@ -47,7 +50,7 @@ namespace sip {
       void write(std::ostream&) const;
 
       /** \brief Reconstructs a report from XML representation */
-      static report* read(xml2pp::text_reader&) throw ();
+      static sptr read(xml2pp::text_reader&) throw ();
   };
 
   /**
@@ -62,11 +65,11 @@ namespace sip {
     return (s);
   }
 
-  inline report::report() {
-  }
-
-  inline void report::set_error(std::string e) {
-    error = e;
+  /**
+   * @param[in] t the type of the report
+   * @param[in] d a description
+   **/
+  inline report::report(type const& t, std::string const& d) : report_type(t), description(d) {
   }
 
   inline std::string report::write() const {
@@ -75,15 +78,6 @@ namespace sip {
     write(output);
 
     return (output.str());
-  }
-
-  /** \pre{configuration must have been allocated on the heap} */
-  inline void report::set_configuration(configuration::sptr c) {
-    final_configuration = configuration::sptr (c);
-  }
-
-  inline void report::set_comment(std::string c) {
-    comment = c;
   }
 }
 
