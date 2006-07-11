@@ -12,5 +12,10 @@ import testing ;
 # Tests from Jamfiles in individual library test subdirectories
 # Please keep these in alphabetic order by test-suite name
 
-build-project ../src/libraries/aterm/test ;  # test-suite aterm
-build-project ../src/libraries/lpe/test ;    # test-suite lpe
+build-project ../src/libraries/aterm/test ;      # test-suite aterm
+build-project ../src/libraries/lpe/test ;        # test-suite lpe
+build-project ../src/libraries/lts/test ;        # test-suite lts
+build-project ../src/libraries/parser/test ;     # test-suite parser
+build-project ../src/libraries/prover/test ;     # test-suite prover
+build-project ../src/libraries/svc/test ;        # test-suite svc
+build-project ../src/libraries/temporary/test ;  # test-suite temporary

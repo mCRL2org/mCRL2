@@ -1,0 +1,12 @@
+import testing ;
+
+project libraries/lts/test
+   : requirements
+       <include>$(BOOST)
+       <source>/libraries/lts//lts
+   ;
+
+test-suite lts
+    :
+      [ run test_lib.cpp ]
+    ;

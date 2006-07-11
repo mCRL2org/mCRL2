@@ -1,0 +1,12 @@
+import testing ;
+
+project libraries/prover/test
+   : requirements
+       <include>$(BOOST)
+       <source>/libraries/prover//prover
+   ;
+
+test-suite prover
+    :
+      [ run test_lib.cpp ]
+    ;

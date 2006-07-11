@@ -1,0 +1,12 @@
+import testing ;
+
+project libraries/svc/test
+   : requirements
+       <include>$(BOOST)
+       <source>/libraries/svc//svc
+   ;
+
+test-suite parser
+    :
+      [ run test_lib.cpp ]
+    ;
