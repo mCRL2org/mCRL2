@@ -2,7 +2,7 @@
 #include <aterm2.h>
 #include <ctype.h>
 #include <assert.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include "libprint_types.h"
 #include "liblowlevel.h"
 
