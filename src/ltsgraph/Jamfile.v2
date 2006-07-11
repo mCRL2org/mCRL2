@@ -15,7 +15,7 @@ exe ltsgraph
          <wx>basic
        ;
 
-install_with_libraries install : ltsgraph : <os>MACOSX:<dependency>ltsgraph-bundle ;
+install_with_libraries install : ltsgraph : <wx>availability <os>MACOSX:<dependency>ltsgraph-bundle ;
 
 import os ;
 

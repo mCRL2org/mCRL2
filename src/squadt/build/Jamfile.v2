@@ -22,6 +22,7 @@ install_with_libraries install
 	: squadt
         : <dependency>install-images
           <dependency>install-schemas
+          <wx>availability
           <os>MACOSX:<dependency>squadt-bundle
         ;
 

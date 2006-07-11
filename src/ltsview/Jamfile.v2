@@ -41,7 +41,7 @@ exe ltsview
         <wx>gl
       ;
 
-install_with_libraries install : ltsview : <os>MACOSX:<dependency>ltsview-bundle ;
+install_with_libraries install : ltsview : <wx>availability <os>MACOSX:<dependency>ltsview-bundle ;
 
 import os ;
 

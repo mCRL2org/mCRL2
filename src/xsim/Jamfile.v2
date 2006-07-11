@@ -31,7 +31,7 @@ exe sim
          <source>/site-config//mcrl2_revision.h
        ;
 
-install_with_libraries install : xsim sim : <os>MACOSX:<dependency>xsim-bundle ;
+install_with_libraries install : xsim sim : <wx>availability <os>MACOSX:<dependency>xsim-bundle ;
 
 import os ;
 

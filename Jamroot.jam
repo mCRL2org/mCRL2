@@ -81,24 +81,27 @@ if ! squadt in [ MATCH "^--disable-(squadt)-support" : [ modules.peek : ARGV ] ]
 }
 
 # Feature for linking to the xml2 library
-feature xml2 : none interface library : composite incidental optional link-incompatible ;
+feature xml2 : availability interface library : composite incidental optional link-incompatible ;
 
 if $(XML2_CPPFLAGS) {
-  feature.compose <xml2>interface : <cxxflags>"$(XML2_CPPFLAGS)" ;
+  feature.compose <xml2>availability : <build>yes ;
+  feature.compose <xml2>interface    : <cxxflags>"$(XML2_CPPFLAGS)" ;
   feature.compose <xml2>library
         : <linkflags>"$(XML2_LDFLAGS)"
           <cxxflags>"$(XML2_CPPFLAGS)"
         ;
 }
 else {
-  feature.compose <xml2>interface : <build>no ;
-  feature.compose <xml2>library   : <build>no ;
+  feature.compose <xml2>availability : <build>no ;
+  feature.compose <xml2>interface    : <build>no ;
+  feature.compose <xml2>library      : <build>no ;
 }
 
 # Feature for linking to wx widget libraries
-feature wx : none interface basic gl : composite incidental optional link-incompatible ;
+feature wx : availability interface basic gl : composite incidental optional link-incompatible ;
 
 if $(WX_CPPFLAGS) {
+  feature.compose <wx>availability : <build>yes ;
   feature.compose <wx>interface
         : <cxxflags>"$(WX_CPPFLAGS)"
         ;
@@ -112,9 +115,10 @@ if $(WX_CPPFLAGS) {
         ;
 }
 else {
-  feature.compose <wx>interface : <build>no ;
-  feature.compose <wx>basic     : <build>no ;
-  feature.compose <wx>gl        : <build>no ;
+  feature.compose <wx>availability : <build>no ;
+  feature.compose <wx>interface    : <build>no ;
+  feature.compose <wx>basic        : <build>no ;
+  feature.compose <wx>gl           : <build>no ;
 }
 
 # Install when requested
@@ -156,6 +160,7 @@ else {
           : <install-dependencies>on <install-type>SHARED_LIB
             <location>$(LIB_DIR)
             <os>NT:<location>$(BIN_DIR)
+            $(requirements)
           ;
 
     explicit $(tools) $(name)-binaries $(name)-libraries ;

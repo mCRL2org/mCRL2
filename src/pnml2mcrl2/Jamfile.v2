@@ -14,4 +14,4 @@ exe pnml2mcrl2
          <xml2>library
        ;
 
-install_with_libraries install : pnml2mcrl2 ;
+install_with_libraries install : pnml2mcrl2 : <xml2>availability ;
