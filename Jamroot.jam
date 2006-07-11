@@ -161,7 +161,6 @@ else {
           : <install-dependencies>on <install-type>SHARED_LIB
             <location>$(LIB_DIR)
             <os>NT:<location>$(BIN_DIR)
-            $(requirements)
           ;
 
     explicit $(tools) $(name)-binaries $(name)-libraries ;
