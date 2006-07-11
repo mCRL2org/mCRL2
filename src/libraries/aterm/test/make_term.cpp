@@ -19,8 +19,6 @@
 using namespace std;
 using namespace atermpp;
 
-int f();
-
 void foo()
 {
   const int i       = 42;
@@ -53,7 +51,6 @@ int test_main(int, char*[])
   ATerm bottom_of_stack;
   ATinit(0, 0, &bottom_of_stack);
   foo();
-  int x = f();
 
   return 0;
 }
