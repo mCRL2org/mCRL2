@@ -15,6 +15,7 @@
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
+#include <wx/datetime.h>
 
 #include <sip/detail/layout_mediator.h>
 #include <sip/detail/layout_manager.h>
@@ -609,7 +610,7 @@ namespace squadt {
       wxSizer* root(new wxBoxSizer(wxVERTICAL));
 
       /* Set minimum dimensions */
-      root->SetMinSize(GetClientSize().GetWidth(), 50);
+      root->SetMinSize(GetClientSize().GetWidth(), 110);
 
       wxWindow* titlepanel(new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER));
 
@@ -643,7 +644,7 @@ namespace squadt {
             content->Show(false);
           }
           else {
-            root->SetMinSize(GetClientSize().GetWidth(), 50);
+            root->SetMinSize(GetClientSize().GetWidth(), 110);
 
             content->Show(true);
           }
@@ -698,20 +699,19 @@ namespace squadt {
         if (new_layout.get() != 0) {
           content = static_cast < tool_display_mediator::wrapper* > (new_layout.get())->release_sizer();
 
-          GetSizer()->Add(content, 1, wxALL|wxALIGN_CENTER, 2);
+          GetSizer()->Insert(1, content, 1, wxALL|wxALIGN_CENTER, 2);
 
           content->RecalcSizes();
           content->Layout();
 
           Show(true);
-
-          GetParent()->GetSizer()->RecalcSizes();
-          GetParent()->Layout();
-          GetParent()->FitInside();
         }
         else {
           content = 0;
         }
+
+        GetParent()->GetSizer()->RecalcSizes();
+        GetParent()->Layout();
       }
       catch (...) {
         /* Consider every exception a failure to correctly read the layout, and bail */
@@ -732,13 +732,34 @@ namespace squadt {
       BOOST_FOREACH(sip::layout::element const* i, l) {
         event_handler.update(&m, i);
       }
+
+      GetParent()->GetSizer()->RecalcSizes();
+      GetParent()->Layout();
     }
 
     /**
      * @param[in] l the layout elements that have changed
      **/
     void tool_display::update_log(sip::report::sptr l) {
+      wxString stamp = wxDateTime::Now().Format(wxT("%b %e %H:%M:%S "));
+
       /* TODO */
+      if (log == 0) {
+        wxSizer* sizer = GetSizer();
+
+        log = new wxTextCtrl(this, wxID_ANY, stamp + wxString(l->get_description().c_str(), wxConvLocal), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY);
+        log->SetSize(-1, 40);
+
+        sizer->Add(log, 0, wxALL|wxEXPAND|wxALIGN_CENTER, 2);
+
+        sizer->RecalcSizes();
+        sizer->Layout();
+      }
+      else {
+        log->AppendText(stamp + wxString(l->get_description().c_str(), wxConvLocal));
+
+        log->ShowPosition(log->GetLastPosition());
+      }
     }
 
     /**

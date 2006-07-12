@@ -43,6 +43,9 @@ namespace sip {
       /** \brief Constructor */
       inline report(type const&, std::string const&);
 
+      /** \brief Gets the description */
+      inline std::string get_description();
+
       /** \brief Output XML representation to string */
       inline std::string write() const;
 
@@ -70,6 +73,10 @@ namespace sip {
    * @param[in] d a description
    **/
   inline report::report(type const& t, std::string const& d) : report_type(t), description(d) {
+  }
+
+  inline std::string report::get_description() {
+    return (description);
   }
 
   inline std::string report::write() const {

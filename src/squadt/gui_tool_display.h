@@ -6,6 +6,7 @@
 #include <wx/wx.h>
 #include <wx/panel.h>
 #include <wx/event.h>
+#include <wx/textctrl.h>
 
 #include <sip/detail/layout_tool_display.h>
 
@@ -115,7 +116,7 @@ namespace squadt {
         wxSizer*                        control_bar;
 
         /** \brief Sizer of the tool display control buttons */
-        wxSizer*                        log;
+        wxTextCtrl*                     log;
 
       private:
 
