@@ -1,6 +1,3 @@
-// #define ENABLE_SQUADT_CONNECTIVITY
-
-
 #define NAME "mcrl22lpe"
 #define VERSION "0.2.1"
 #define INFILEEXT ".mcrl2"
@@ -38,12 +35,11 @@ using namespace std;
 
 //Functions used by the main program
 static ATermAppl linearise_file(t_lin_options &lin_options);
+static char const* lin_method_to_string(t_lin_method lin_method);
 static void AltIllegalOptWarning(char opt);
 static void PrintMoreInfo(char *Name);
 static void PrintVersion(void);
 static void PrintHelp(char *Name);
-static void PrintLinMethod(FILE *stream, t_lin_method lin_method);
-
 
 static int parse_command_line(int argc, char *argv[],t_lin_options &lin_options)
 { 
@@ -720,11 +716,8 @@ ATermAppl linearise_file(t_lin_options &lin_options)
     return result;
   }
   //linearise the result
-  if (gsVerbose) {
-    fprintf(stderr, "linearising processes using the ");
-    PrintLinMethod(stderr, lin_options.lin_method);
-    fprintf(stderr, " method...\n");
-  }
+  gsVerboseMsg("linearising processes using the %s method\n", lin_method_to_string(lin_options.lin_method));
+
   if (lin_options.lin_method != lmAlternative) {
     result = linearise_std(result, lin_options);
   } else { //lin_options.lin_method == lmAlternative
@@ -738,23 +731,17 @@ ATermAppl linearise_file(t_lin_options &lin_options)
   return result; 
 }
 
+inline char const* lin_method_to_string(t_lin_method lin_method)
+{
+  static const char* method[] = {"stack","regular","regular2","alternative"};
+
+  return (method[lin_method]);
+}
+
 void AltIllegalOptWarning(char opt)
 {
   gsWarningMsg(
     "option -%c is not supported by linearisation method -3, ignored\n", opt);
-}
-
-void PrintLinMethod(FILE *stream, t_lin_method lin_method)
-{
-  if (lin_method == lmStack) {
-    fprintf(stream, "stack");
-  } else if (lin_method == lmRegular) {
-    fprintf(stream, "regular");
-  } else if (lin_method == lmRegular2) {
-    fprintf(stream, "regular2");
-  } else if (lin_method == lmAlternative) {
-    fprintf(stream, "alternative");
-  }
 }
 
 void PrintMoreInfo(char *Name)

@@ -7048,9 +7048,7 @@ static ATermAppl communicationcomposition(
      a note: Calculation of communication with open terms. */
 
   /* first we sort the multiactions in communications */
-
-  gsVerboseMsg("- calculating the communication operator on %d summands",
-                        ATgetLength(linGetSums(ips)));
+  int s = ATgetLength(linGetSums(ips));
 
   ATermList resultingDeltaSummands=ATempty;
   ATermList resultingCommunications=ATempty;
@@ -7189,8 +7187,8 @@ static ATermAppl communicationcomposition(
     }
   }
   
-  gsVerboseMsg(" resulting in %d summands\n",
-                        ATgetLength(resultsumlist));
+  gsVerboseMsg("- calculating the communication operator on %d summands"
+               " resulting in %d summands\n", s, ATgetLength(resultsumlist));
 
   return linMakeInitProcSpec(
              linGetInit(ips),linGetParameters(ips),resultsumlist);
@@ -7584,16 +7582,16 @@ static ATermAppl parallelcomposition(
   pars2=linGetParameters(t2);
   
   renaming=construct_renaming(pars1,pars2,&pars3,&pars2renaming); 
-
-  gsVerboseMsg(
-    "- calculating parallel composition: %d || %d",
-    ATgetLength(linGetSums(t1)),
-    ATgetLength(linGetSums(t2)));
   result=combinesumlist(
     linGetSums(t1),
     linGetSums(t2),
     pars1,pars2renaming,pars3,renaming,spec,pars2);
-  gsVerboseMsg(" = %d\n", ATgetLength(result)); 
+
+  gsVerboseMsg(
+    "- calculating parallel composition: %d || %d = %d\n",
+    ATgetLength(linGetSums(t1)),
+    ATgetLength(linGetSums(t2)), ATgetLength(result));
+
   return linMakeInitProcSpec(
                ATconcat(init1,
                         substitute_assignmentlist(
