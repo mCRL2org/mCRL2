@@ -322,7 +322,7 @@ namespace squadt {
         case cmID_REBUILD:
           p->flush_outputs();
 
-          p->process(manager->get_project_store());
+          p->process();
           break;
         case cmID_CLEAN:
           p->flush_outputs();

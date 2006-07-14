@@ -66,7 +66,7 @@ namespace squadt {
     private:
 
       /** \brief Constructor for use by read() */
-      inline project_manager();
+      project_manager();
 
       /** \brief Constructor */
       project_manager(const boost::filesystem::path&);
@@ -79,6 +79,9 @@ namespace squadt {
  
       /** \brief Read configuration with an XML text reader */
       void read(xml2pp::text_reader&);
+
+      /** \brief Signals that a processor finished processing */
+      void finished(processor* p);
 
     public:
  
@@ -95,7 +98,7 @@ namespace squadt {
       void import_directory(const boost::filesystem::path&);
  
       /** \brief Add a file to the project under a new name */
-      inline processor::ptr import_file(const boost::filesystem::path&, const std::string& = maintain_old_name);
+      processor::ptr import_file(const boost::filesystem::path&, const std::string& = maintain_old_name);
 
       /** \brief Get a reference to the list of processors in this project */
       inline processor_iterator get_processor_iterator() const;
@@ -122,12 +125,15 @@ namespace squadt {
       inline void add(processor::ptr&);
 
       /** \brief Remove a processor and all processors that depend one one of its outputs */
-      inline void remove(processor*, bool = true);
+      void remove(processor*, bool = true);
  
       /** \brief Removes all files that cannot be recreated by any of the processors */
       void clean_store(processor* p, bool b);
 
-      /** \brief Make all specifications in the project up to date */
+      /** \brief Make objects in the project up to date */
+      void update(processor*);
+
+      /** \brief Make objects in the project up to date */
       void update();
   };
 
@@ -173,86 +179,6 @@ namespace squadt {
    **/
   inline void project_manager::add(processor::ptr& p) {
     processors.push_back(p);
-  }
-
-  /**
-   * @param s path that identifies the file that is to be imported
-   * @param d new name for the file in the project
-   *
-   * Note that:
-   *  - when d is empty, the original filename will be maintained
-   *  - when the file is already in the project store it is not copied
-   **/
-  inline processor::ptr project_manager::import_file(const boost::filesystem::path& s, const std::string& d) {
-    using namespace boost::filesystem;
-
-    assert(exists(s) && !is_directory(s) && native(d));
-
-    path           destination_path = store / path(d.empty() ? s.leaf() : d);
-    processor::ptr p                = processor::create(*this);
-
-    if (s != destination_path) {
-      copy_file(s, destination_path);
-    }
-
-    /* Add the file to the project */
-    storage_format f = storage_format_unknown;
-
-    /* TODO more intelligent file format check */
-    if (!extension(s).empty()) {
-      f = extension(s);
-
-      f.erase(f.begin());
-    }
-
-    p->append_output(f, destination_path.leaf());
-
-    processors.push_back(p);
-
-    return (p);
-  }
-
-  /**
-   * @param[in] p pointer to the processor that is to be removed
-   * @param[in] b whether or not to remove the associated files
-   *
-   * \attention all processors with inconsistent inputs are also removed
-   **/
-  inline void project_manager::remove(processor* p, bool b) {
-    processor_list::iterator i = processors.begin();
-
-    while (i != processors.end()) {
-      if ((*i).get() == p || !((*i)->consistent_inputs())) {
-        if (((*i).get() == p) && b) {
-          (*i)->flush_outputs();
-        }
-
-        i = processors.erase(i);
-      }
-      else {
-        ++i;
-      }
-    }
-  }
-
-  inline void project_manager::clean_store(processor* p, bool b) {
-    namespace bf = boost::filesystem;
-
-    std::set < std::string > objects;
-
-    for (processor_list::iterator i = processors.begin(); i != processors.end(); ++i) {
-      for (processor::output_object_iterator j = (*i)->get_output_iterator(); j.valid(); ++j) {
-        objects.insert(bf::path((*j)->location).leaf());
-      }
-    }
-
-    for (bf::directory_iterator i(store); i != bf::directory_iterator(); ++i) {
-      if (objects.find((*i).leaf()) == objects.end()) {
-        if (bf::exists((*i).leaf()) && !bf::is_directory((*i).leaf()) && !bf::symbolic_link_exists((*i).leaf())) {
-          bf::remove((*i).leaf());
-        }
-      }
-    }
   }
 }
 #endif

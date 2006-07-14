@@ -47,7 +47,6 @@ namespace squadt {
   }
 
   /**
-   * @param[in] d the tool display associated with this monitor
    * @param[in] h the function or functor that is invoked at layout change
    **/
   inline void processor::monitor::set_status_message_handler(status_message_callback_function h) {
@@ -320,6 +319,8 @@ namespace squadt {
   inline void processor::reconfigure(std::string const& w, boost::function < void() > h) {
     current_monitor->once_on_completion(h);
 
+    output_directory = w;
+
     reconfigure(w);
   }
 
@@ -333,6 +334,8 @@ namespace squadt {
   inline void processor::reconfigure(std::string const& w) {
     assert(selected_input_combination != 0);
 
+    output_directory = w;
+
     sip::configuration::sptr c(sip::controller::communicator::new_configuration(*selected_input_combination));
 
     c->add_object(current_monitor->get_configuration()->get_object(selected_input_combination->identifier));
@@ -342,10 +345,10 @@ namespace squadt {
     configure(w);
   }
 
-  inline void processor::process(std::string const& w, boost::function < void () > h) {
+  inline void processor::process(boost::function < void () > h) {
     current_monitor->once_on_completion(h);
 
-    process(w);
+    process();
   }
 
   /**
@@ -353,22 +356,29 @@ namespace squadt {
    *
    * \pre the configure member must have been called
    **/
-  inline void processor::process(std::string const& w) {
-    global_tool_manager->execute(*tool_descriptor, w, boost::dynamic_pointer_cast < execution::task_monitor, monitor > (current_monitor), false);
+  inline void processor::process() {
+    global_tool_manager->execute(*tool_descriptor, output_directory, boost::dynamic_pointer_cast < execution::task_monitor, monitor > (current_monitor), false);
 
     current_monitor->once_on_completion(boost::bind(&processor::process_configuration, this));
     current_monitor->start_pilot();
   }
 
-  inline const unsigned int processor::number_of_inputs() const {
+  inline const size_t processor::number_of_inputs() const {
     return (inputs.size());
   }
 
-  inline const unsigned int processor::number_of_outputs() const {
+  inline const size_t processor::number_of_outputs() const {
     return (outputs.size());
   }
 
-  inline const processor::output_status processor::get_output_status() const {
+  /**
+   * @param[in] b whether or not to check the status first
+   **/
+  inline bool processor::check_output_consistency(bool b) {
+    if (b) {
+      check_status(true);
+    }
+
     return(current_output_status);
   }
 

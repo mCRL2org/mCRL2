@@ -1,4 +1,5 @@
 #include <boost/filesystem/operations.hpp>
+#include <boost/thread.hpp>
 #include <boost/format.hpp>
 
 #include <xml2pp/text_reader.h>
@@ -90,18 +91,15 @@ namespace squadt {
 
   /**
    * Currently it is only checked whether a status of up_to_date is still
-   * correct with respect to the state of the inputs and ouputs on physical
+   * correct with respect to the state of the inputs and outputs on physical
    * storage. If the processor is in any other state the function will return
    * false without doing checks.
-   *
-   * Other checks simply do not look useful at this point given the way a
-   * processor is used.
    *
    * \return whether the status was adjusted or not
    *
    * @param[in] r whether to check recursively or not
    **/
-  inline bool processor::check_status(const bool r) {
+  bool processor::check_status(const bool r) {
     if (current_output_status == up_to_date) {
       output_status new_status = current_output_status;
      
@@ -203,7 +201,7 @@ namespace squadt {
       }
     }
 
-    s << ">\n";
+    s << " output-directory=\"" << output_directory << "\">";
 
     /* The last received configuration from the tool */
     sip::configuration::sptr c = current_monitor->get_configuration();
@@ -257,6 +255,8 @@ namespace squadt {
         c->selected_input_combination = c->tool_descriptor->find_input_combination(category, format);
       }
     }
+
+    c->output_directory = r.get_attribute_as_string("output-directory");
 
     r.next_element();
 
@@ -490,7 +490,7 @@ namespace squadt {
     }
   }
 
-  bool processor::consistent_inputs() const {
+  bool processor::check_input_consistency() const {
     input_list::const_iterator i = inputs.begin();
 
     while (i != inputs.end()) {

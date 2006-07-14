@@ -103,7 +103,7 @@ namespace squadt {
           typedef boost::function < void (sip::report::sptr) >                                   status_message_callback_function;
 
           /** \brief Convenience type for hiding shared pointer implementation */
-          typedef boost::shared_ptr < monitor >                                                 sptr;
+          typedef boost::shared_ptr < monitor >                                                  sptr;
 
         public:
 
@@ -164,7 +164,7 @@ namespace squadt {
           /** \brief Constructor with a callback handler */
           inline void set_status_message_handler(status_message_callback_function);
       };
- 
+
       /** \brief Convenience type for hiding the implementation of a list with input information */
       typedef std::vector < object_descriptor::wptr >                       input_list;
 
@@ -205,6 +205,9 @@ namespace squadt {
  
       /** \brief The selected input combination of the tool */
       tool::input_combination const* selected_input_combination;
+
+      /** \brief The directory from which tools should be run on behalf of this object */
+      std::string                    output_directory;
 
     private:
 
@@ -247,7 +250,10 @@ namespace squadt {
       bool check_status(bool);
 
       /** \brief Validate whether the inputs to this process are not dangling pointers */
-      bool consistent_inputs() const;
+      bool check_input_consistency() const;
+
+      /** \brief Checks or rechecks the state of the outputs with respect to the inputs */
+      bool check_output_consistency(bool = false);
 
       /** \brief Start tool configuration, with callback on completion */
       void configure(const tool::input_combination*, std::string const&, const boost::filesystem::path&, boost::function < void () >);
@@ -265,10 +271,10 @@ namespace squadt {
       void reconfigure(std::string const&);
  
       /** \brief Start processing: generate outputs from inputs */
-      void process(std::string const&, boost::function < void () >);
+      void process(boost::function < void () >);
  
       /** \brief Start processing: generate outputs from inputs */
-      void process(std::string const&);
+      void process();
  
       /** \brief Get the object for the tool associated with this processor */
       inline void set_tool(tool::sptr&);
@@ -340,20 +346,14 @@ namespace squadt {
       void print(std::ostream& stream = std::cerr) const;
  
       /** \brief The number of input objects of this processor */
-      inline const unsigned int number_of_inputs() const;
+      inline const size_t number_of_inputs() const;
  
       /** \brief The number output objects of this processor */
-      inline const unsigned int number_of_outputs() const;
+      inline const size_t number_of_outputs() const;
  
-      /** \brief Checks or rechecks the state of the outputs with respect to the inputs */
-      inline void check_output_status();
-
       /** \brief Removes the outputs of this processor from storage */
       void flush_outputs();
  
-      /** \brief Recursively set the status of specification and */
-      inline const output_status get_output_status() const;
-
       /** \brief Destructor */
       inline ~processor();
   };
