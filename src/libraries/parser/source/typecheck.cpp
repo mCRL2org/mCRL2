@@ -174,6 +174,12 @@ static ATermAppl gstcMatchSetOpSetCompl(ATermAppl Type);
 static ATermAppl gstcMatchBagOpBag2Set(ATermAppl Type);
 static ATermAppl gstcMatchBagOpBagCount(ATermAppl Type);
 
+// Typechecking modal formulas
+static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATermAppl StateFrm);
+static ATermAppl gstcTraverseRegFrm(ATermTable Vars, ATermAppl RegFrm);
+static ATermAppl gstcTraverseActFrm(ATermTable Vars, ATermAppl ActFrm);
+
+
 static ATermAppl gstcFoldSortRefs(ATermAppl Spec);
 //Pre: Spec is a specification that adheres to the internal syntax after
 //     type checking
@@ -287,17 +293,32 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, lpe::specification &lpe_spec
   //   forall, exists, mu and nu quantifiers
   //4) check for monotonicity of fixpoint variables
   //TODO in decreasing order of urgency: 1 & 2 => 3 & 4.
-  gsWarningMsg("type checking of state formulas is not yet implemented\n");
+  gsWarningMsg("type checking of state formulas is partially implemented\n");
 
+  ATermAppl Result=NULL;
+  gsDebugMsg ("type checking phase started\n");
+  gstcDataInit();
 
+  gsDebugMsg ("type checking of state formulas read-in phase started\n");
 
+  //XXX read-in from LPE (not finished)
+  (ATermList) lpe_spec.sorts();
+  if(gstcReadInActs((ATermList) lpe_spec.actions())){
+    gsDebugMsg ("type checking of state formulas read-in phase finished\n");
 
+    ATermTable Vars=ATtableCreate(63,50);
+    ATermTable StateVars=ATtableCreate(63,50);
 
+    //add LPE params as data vars??
 
+    Result=gstcTraverseStateFrm(Vars,StateVars,state_frm);
 
-
-
-  return state_frm;
+    ATtableDestroy(Vars);
+    ATtableDestroy(StateVars);
+  }
+	
+  gstcDataDestroy();
+  return Result;
 }
 
 //local functions
@@ -3100,12 +3121,9 @@ static ATermAppl gstcMatchBagOpBagCount(ATermAppl Type){
 // Type checking modal formulas
 //===================================
 
-static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATermAppl StateFrm);
-static ATermAppl gstcTraverseRegFrm(ATermTable Vars, ATermAppl RegFrm);
-static ATermAppl gstcTraverseDataVarIdInit(ATermTable Vars, ATermAppl DataVarIdInit);
-static ATermAppl gstcTraverseActFrm(ATermTable Vars, ATermAppl ActFrm);
-
 static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATermAppl StateFrm){
+  gsDebugMsg("gstcTraverseStateFrm: %T\n",StateFrm);
+
   if(gsIsStateTrue(StateFrm) || gsIsStateFalse(StateFrm) || gsIsStateDelay(StateFrm))
     return StateFrm;
   
@@ -3124,21 +3142,161 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
   }
 
   if(gsIsStateForall(StateFrm) || gsIsStateExists(StateFrm)){
+    ATermTable CopyVars=ATtableCreate(63,50);
+    gstcATermTableCopy(Vars,CopyVars);
+
+    ATermList VarList=ATLgetArgument(StateFrm,0);
+    ATermTable NewVars=gstcAddVars2Table(CopyVars,VarList);
+    if(!NewVars) {ATtableDestroy(CopyVars); return NULL;}
+
+    ATermAppl NewArg2=gstcTraverseStateFrm(NewVars,StateVars,ATAgetArgument(StateFrm,1));
+    if(!NewArg2) return NULL;
+    ATtableDestroy(CopyVars);
+
+    return ATsetArgument(StateFrm,(ATerm)NewArg2,1);
   }
   
   if(gsIsStateMust(StateFrm) || gsIsStateMay(StateFrm)){
+    ATermAppl RegFrm=gstcTraverseRegFrm(Vars,ATAgetArgument(StateFrm,0));
+    if(!RegFrm) return NULL;
+    ATermAppl NewArg2=gstcTraverseStateFrm(Vars,StateVars,ATAgetArgument(StateFrm,1));
+    if(!NewArg2) return NULL;
+    return ATsetArgument(ATsetArgument(StateFrm,(ATerm)RegFrm,0),(ATerm)NewArg2,1);
   }
 
   if(gsIsStateDelayTimed(StateFrm)){
+   ATermAppl Time=ATAgetArgument(StateFrm,0);
+   ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&Time,gstcExpandNumTypesDown(gsMakeSortIdReal()));
+   if(!NewType) {return NULL;}
+
+   if(!gstcTypeMatchA(gsMakeSortIdReal(),NewType)){
+     //upcasting
+     ATermAppl CastedNewType=gstcUpCastNumericType(gsMakeSortIdReal(),NewType,&Time);
+     if(!CastedNewType)
+       {gsErrorMsg("Cannot (up)cast time value %P to type Real (typechecking state formula %P)\n",Time,StateFrm);return NULL;}
+   }
+   return ATsetArgument(StateFrm,(ATerm)Time,0);
   }
 
   if(gsIsStateVar(StateFrm)){
+    ATermAppl StateVarName=ATAgetArgument(StateFrm,0);
+    ATermList TypeList=ATLtableGet(StateVars,(ATerm)StateVarName);
+    if(!TypeList){
+      gsErrorMsg("Undefined state variable %P (typechecking state formula %P)\n",StateVarName,StateFrm);
+      return NULL;
+    }
+
+    ATermList Pars=ATLgetArgument(StateFrm,1);
+    if(ATgetLength(TypeList)!=ATgetLength(Pars)){
+      gsErrorMsg("Incorrect number of parameters for state variable %P (typechecking state formula %P)\n",StateVarName,StateFrm);
+      return NULL;
+    }
+
+    ATermList r=ATmakeList0();
+    ATbool success=ATtrue;
+    for(;!ATisEmpty(Pars);Pars=ATgetNext(Pars),TypeList=ATgetNext(TypeList)){
+      ATermAppl Par=ATAgetFirst(Pars);
+      ATermAppl ParType=ATAgetFirst(TypeList);
+      ATermAppl NewParType=gstcTraverseVarConsTypeD(Vars,Vars,&Par,gstcExpandNumTypesDown(ParType));
+      if(!NewParType){
+        gsErrorMsg("typechecking %P\n",StateFrm);
+        success=ATfalse;
+        break;
+      }
+
+      if(!gstcTypeMatchA(ParType,NewParType)){
+        //upcasting
+        NewParType=gstcUpCastNumericType(ParType,NewParType,&Par);
+        if(!NewParType){
+          gsErrorMsg("Cannot (up)cast %P to type %P (typechecking state formula %P)\n",Par,ParType,StateFrm);
+          success=ATfalse;
+          break;
+        }
+      }
+
+      r=ATinsert(r,(ATerm)Par);
+    }
+
+    if(!success) return NULL;
+
+    return ATsetArgument(StateFrm,(ATerm)ATreverse(r),1);
+
   }
   
   if(gsIsStateNu(StateFrm) || gsIsStateMu(StateFrm)){
-  }
+    ATermTable CopyStateVars=ATtableCreate(63,50);
+    gstcATermTableCopy(StateVars,CopyStateVars);
 
+    // Make the new state variable:
+    ATermTable FormPars=ATtableCreate(63,50);
+    ATermList r=ATmakeList0();
+    ATermList t=ATmakeList0();
+    ATbool success=ATtrue;
+    for(ATermList l=ATLgetArgument(StateFrm,1);!ATisEmpty(l);l=ATgetNext(l)){
+      ATermAppl o=ATAgetFirst(l);
+      
+      ATermAppl VarName=ATAgetArgument(o,0);
+      if(ATAtableGet(FormPars,(ATerm)VarName)){
+        gsErrorMsg("Non-unique formal parameter %P (typechecking %P)\n",VarName,StateFrm);
+        success=ATfalse;
+        break;
+      }
+      
+      ATermAppl VarType=ATAgetArgument(o,1); 
+      if(!gstcIsSortExprDeclared(VarType)){
+        gsErrorMsg("The previous type error occurred while typechecking %P\n",StateFrm);
+        success=ATfalse;
+        break;
+      }	
+
+      ATtablePut(FormPars,(ATerm)VarName, (ATerm)VarType);
+
+      ATermAppl VarInit=ATAgetArgument(o,2);
+      ATermAppl VarInitType=gstcTraverseVarConsTypeD(Vars,Vars,&VarInit,gstcExpandNumTypesDown(VarType));
+      if(!VarInitType){
+        gsErrorMsg("typechecking %P\n",StateFrm);
+        success=ATfalse;
+        break;
+      }
+
+      if(!gstcTypeMatchA(VarType,VarInitType)){
+        //upcasting
+        VarInitType=gstcUpCastNumericType(VarType,VarInitType,&VarInit);
+        if(!VarInitType){
+          gsErrorMsg("Cannot (up)cast %P to type %P (typechecking state formula %P)\n",VarInit,VarType,StateFrm);
+          success=ATfalse;
+          break;
+        }
+      }
+
+      r=ATinsert(r,(ATerm)ATsetArgument(o,(ATerm)VarInit,2));
+      t=ATinsert(t,(ATerm)VarType);
+    }
+    
+    if(!success){
+      ATtableDestroy(CopyStateVars);
+      ATtableDestroy(FormPars);
+      return NULL;
+    }
+
+    StateFrm=ATsetArgument(StateFrm,(ATerm)ATreverse(r),1);
+    ATermTable CopyVars=ATtableCreate(63,50);
+    gstcATermTableCopy(Vars,CopyVars);
+    gstcATermTableCopy(FormPars,CopyVars); 
+    ATtableDestroy(FormPars);  
+
+    ATtablePut(CopyStateVars,(ATerm)ATAgetArgument(StateFrm,0),(ATerm)ATreverse(t));
+    ATermAppl NewArg=gstcTraverseStateFrm(CopyVars,CopyStateVars,ATAgetArgument(StateFrm,2));
+    ATtableDestroy(CopyStateVars);
+    ATtableDestroy(CopyVars);
+    if(!NewArg) {gsErrorMsg("while typechecking %P\n",StateFrm);return NULL;}
+    return ATsetArgument(StateFrm,(ATerm)NewArg,2);
+  }
+  
   if(gsIsDataExpr(StateFrm)){
+    ATermAppl Type=gstcTraverseVarConsTypeD(Vars, Vars, &StateFrm, gsMakeSortIdBool());
+    if(!Type) return NULL;
+    return StateFrm;
   }
 
   assert(0);
@@ -3146,7 +3304,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
 }
 
 static ATermAppl gstcTraverseRegFrm(ATermTable Vars, ATermAppl RegFrm){
-
+  gsDebugMsg("gstcTraverseRegFrm: %T\n",RegFrm);
   if(gsIsRegNil(RegFrm)){
     return RegFrm;
   }
@@ -3172,16 +3330,10 @@ static ATermAppl gstcTraverseRegFrm(ATermTable Vars, ATermAppl RegFrm){
   return NULL;
 }
 
-
-static ATermAppl gstcTraverseDataVarIdInit(ATermTable Vars, ATermAppl DataVarIdInit){
-  if(gsIsDataVarIdInit(DataVarIdInit)){
-  }
-
-  assert(0);
-  return NULL;  
-}
-
 static ATermAppl gstcTraverseActFrm(ATermTable Vars, ATermAppl ActFrm){
+  gsDebugMsg("gstcTraverseActFrm: %T\n",ActFrm);
+
+
   if(gsIsActTrue(ActFrm) || gsIsActFalse(ActFrm)){
     return ActFrm;
   }
@@ -3201,15 +3353,53 @@ static ATermAppl gstcTraverseActFrm(ATermTable Vars, ATermAppl ActFrm){
   }
   
   if(gsIsActForall(ActFrm) || gsIsExists(ActFrm)){
+    ATermTable CopyVars=ATtableCreate(63,50);
+    gstcATermTableCopy(Vars,CopyVars);
+
+    ATermList VarList=ATLgetArgument(ActFrm,0);
+    ATermTable NewVars=gstcAddVars2Table(CopyVars,VarList);
+    if(!NewVars) {ATtableDestroy(CopyVars); return NULL;}
+
+    ATermAppl NewArg2=gstcTraverseActFrm(NewVars,ATAgetArgument(ActFrm,1));
+    if(!NewArg2) return NULL;
+    ATtableDestroy(CopyVars);
+
+    return ATsetArgument(ActFrm,(ATerm)NewArg2,1);
   }
 
   if(gsIsActAt(ActFrm)){
+   ATermAppl NewArg1=gstcTraverseActFrm(Vars,ATAgetArgument(ActFrm,0));
+   if(!NewArg1) return NULL;
+   
+   ATermAppl Time=ATAgetArgument(ActFrm,1);
+   ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&Time,gstcExpandNumTypesDown(gsMakeSortIdReal()));
+   if(!NewType) {return NULL;}
+
+   if(!gstcTypeMatchA(gsMakeSortIdReal(),NewType)){
+     //upcasting
+     ATermAppl CastedNewType=gstcUpCastNumericType(gsMakeSortIdReal(),NewType,&Time);
+     if(!CastedNewType)
+       {gsErrorMsg("Cannot (up)cast time value %P to type Real (typechecking action formula %P)\n",Time,ActFrm);return NULL;}
+   }
+   return ATsetArgument(ATsetArgument(ActFrm,(ATerm)NewArg1,0),(ATerm)Time,1);
   }
 
   if(gsIsMultAct(ActFrm)){
+    ATermList r=ATmakeList0();
+    for(ATermList l=ATLgetArgument(ActFrm,0);!ATisEmpty(l);l=ATgetNext(l)){
+      ATermAppl o=ATAgetFirst(l);
+      assert(gsIsParamId(o));
+      o=gstcTraverseActProcVarConstP(Vars,o);
+      if(!o) return NULL;
+      r=ATinsert(r,(ATerm)o);
+    }
+    return ATsetArgument(ActFrm,(ATerm)ATreverse(r),0);
   }
 
-  if(gsIsDataExpr(ActFrm)){
+  if(gsIsDataExpr(ActFrm)){    
+    ATermAppl Type=gstcTraverseVarConsTypeD(Vars, Vars, &ActFrm, gsMakeSortIdBool());
+    if(!Type) return NULL;
+    return ActFrm;
   }
 
   assert(0);
