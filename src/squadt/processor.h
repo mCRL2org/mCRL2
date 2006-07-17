@@ -15,7 +15,7 @@
 #include <md5pp/md5pp.h>
 #include <xml2pp/text_reader.h>
 
-#include <iterator_wrapper/indirect_iterator.h>
+#include <utility/indirect_iterator.h>
 #include "executor.h"
 #include "tool_manager.h"
 #include "tool.h"
@@ -130,16 +130,16 @@ namespace squadt {
           inline void report_change(execution::process::status);
   
           /** \brief The default callback function that does nothing */
-          static void status_change_dummy(output_status);
+          void status_change_dummy(output_status);
 
           /** \brief The default callback function that does nothing */
-          static void display_layout_change_dummy(sip::layout::tool_display::sptr);
+          void display_layout_change_dummy(sip::layout::tool_display::sptr);
 
           /** \brief The default callback function that does nothing */
-          static void display_data_change_dummy(sip::layout::tool_display::constant_elements const&);
+          void display_data_change_dummy(sip::layout::tool_display::constant_elements const&);
 
           /** \brief The default callback function that does nothing */
-          static void status_message_change_dummy(sip::report::sptr);
+          void status_message_change_dummy(sip::report::sptr);
 
           /** \brief Helper function for communication with a tool, starts a new thread with pilot() */
           inline void start_pilot(bool = true);

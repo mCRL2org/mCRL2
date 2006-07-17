@@ -161,6 +161,7 @@ namespace sip {
     }
 
     /**
+     * @param[in] t the report type
      * @param[in] e a description
      **/
     void communicator::send_status_report(sip::report::type t, std::string const& e) {

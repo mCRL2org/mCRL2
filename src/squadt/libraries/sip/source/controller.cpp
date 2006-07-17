@@ -145,7 +145,6 @@ namespace sip {
     /**
      * @param m pointer to the message
      * @param h the function that is called when a new rport has been received
-     * @param d a shared pointer to a tool display
      **/
     void communicator::status_message_handler(const messenger::message_ptr& m, status_message_handler_function h) {
       xml2pp::text_reader reader(m->to_string().c_str());

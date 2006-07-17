@@ -1,7 +1,7 @@
 #ifndef TRANSPORT_EXCEPTION_H
 #define TRANSPORT_EXCEPTION_H
 
-#include <exception/exception.h>
+#include <utility/exception.h>
 
 namespace transport {
   namespace exception {
@@ -13,6 +13,14 @@ namespace transport {
 
     /** \brief The common exception type */
     typedef ::exception::exception < values > exception;
+
+#ifdef IMPORT_STATIC_DEFINITIONS
+    template < >
+    const char* const ::exception::exception< values >::descriptions[] = {
+      "Listener failed connection attempt!",
+      "Transceiver failed send or receive!"
+    };
+#endif
   }
 }
 

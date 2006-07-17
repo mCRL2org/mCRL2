@@ -1,7 +1,7 @@
 #ifndef SQUADT_EXCEPTION_H
 #define SQUADT_EXCEPTION_H
 
-#include <exception/exception.h>
+#include <utility/exception.h>
 
 namespace squadt {
   namespace exception {
@@ -19,6 +19,20 @@ namespace squadt {
 
     /** \brief A basic type for exceptions derived from that provided by the standard library */
     typedef ::exception::exception < values > exception;
+
+#ifdef IMPORT_GLOBAL_MEMBERS
+    /** \brief Descriptions for error messages */
+    template < >
+    const char* const exception::descriptions[] = {
+      "Cannot write to user settings directory ('%s').",
+      "Failed to load %s from `%s'.",
+      "Values for required attributes are missing in element `%s'.",
+      "Requested tool `%s' is not available!",
+      "Execution of program `%s' failed miserably.",
+      "Peer provided invalid or unexpected identifier!",
+      "Processor dependency graph has dangling edges!"
+    };
+#endif
   }
 }
 

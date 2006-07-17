@@ -83,7 +83,7 @@ WARN_LOGFILE           =
 # configuration options related to the input files
 #---------------------------------------------------------------------------
 INPUT                  = ../ \
-                         ../../exception/exception.h
+                         ../../utility/exception.h
 FILE_PATTERNS          = *.c \
                          *.cc \
                          *.cxx \

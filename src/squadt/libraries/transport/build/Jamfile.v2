@@ -3,17 +3,15 @@ project transport
        ../source
     : build-dir $(BUILD_TOP)
     : requirements
-       <include>$(BOOST)
        <include>../..
+       <include>$(BOOST)
        <define>BOOST_ALL_NO_LIB
     : usage-requirements
-       <include>../..
        <define>BOOST_ALL_NO_LIB
     ;
 
 lib transport
     : transporter.cpp
-      transport_exception.cpp
       socket_listener.cpp
       socket_transceiver.cpp
     : <dependency>/boost/thread//boost_thread

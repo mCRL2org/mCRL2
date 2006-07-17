@@ -17,10 +17,10 @@ namespace squadt {
    * @param[in] o the processor that owns of this object
    **/
   processor::monitor::monitor(processor& o) : owner(o) {
-    on_status_change  = status_change_dummy;
-    on_layout_change  = display_layout_change_dummy;
-    on_message_change = status_message_change_dummy;
-    on_state_change   = display_data_change_dummy;
+    on_status_change  = boost::bind(&processor::monitor::status_change_dummy, this, _1);
+    on_layout_change  = boost::bind(&processor::monitor::display_layout_change_dummy, this, _1);
+    on_message_change = boost::bind(&processor::monitor::status_message_change_dummy, this, _1);
+    on_state_change   = boost::bind(&processor::monitor::display_data_change_dummy, this, _1);
 
     /* Set the handler for incoming layout messages */
     activate_display_layout_handler(on_layout_change);

@@ -108,7 +108,7 @@ namespace transport {
       void connect(address const& = loopback, const long port = 0);
 
       /** \brief Creates socket connection to another transporter object (using a loopback connection by default) */
-      void connect(std::string const& host_name, const long port = 0);
+      void connect(std::string const&, const long port = 0);
 
       /** \brief Disconnect all */
       void disconnect();

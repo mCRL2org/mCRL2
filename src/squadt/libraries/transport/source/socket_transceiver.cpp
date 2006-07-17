@@ -190,7 +190,6 @@ namespace transport {
       if (w.get() != 0) {
         boost::mutex::scoped_lock k(send_lock);
 
-std::cerr << getpid() << ": message sent  (" << d << ")\n";
         ++send_count;
 
         boost::mutex::scoped_lock l(operation_lock);

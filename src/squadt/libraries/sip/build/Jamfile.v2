@@ -7,9 +7,9 @@ project sip
     : requirements
        <threading>multi
        <include>$(BOOST)
-       <include>../../
+       <include>../..
     : usage-requirements
-       <include>../../
+       <include>../..
     ;
 
 alias messenger
@@ -29,7 +29,6 @@ feature.compose <sip_side>tool       : <define>TOOL_SIDE ;
 lib sip_controller
     : controller.cpp
       common.cpp
-      sip_exception.cpp
       report.cpp
       layout.cpp
       layout_base.cpp
@@ -41,7 +40,6 @@ lib sip_controller
 lib sip_tool
     : tool.cpp
       common.cpp
-      sip_exception.cpp
       report.cpp
       layout.cpp
       layout_base.cpp

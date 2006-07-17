@@ -10,7 +10,7 @@
 #include <boost/cstdint.hpp>
 #include <boost/noncopyable.hpp>
 
-#include <iterator_wrapper/indirect_iterator.h>
+#include <utility/indirect_iterator.h>
 
 #include "processor.tcc"
 

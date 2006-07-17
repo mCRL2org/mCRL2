@@ -6,6 +6,7 @@
 #include <boost/ref.hpp>
 #include <boost/foreach.hpp>
 
+#define IMPORT_STATIC_DEFINITIONS
 #include <transport/detail/transceiver.tcc>
 #include <transport/detail/socket_listener.h>
 #include <transport/detail/direct_transceiver.h>
@@ -62,7 +63,7 @@ namespace transport {
   }
 
   /**
-   * @param h a hostname address
+   * @param h a hostname
    * @param p a port
    **/
   void transporter::connect(const std::string& h, const long p) {

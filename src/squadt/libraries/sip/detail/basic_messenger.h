@@ -14,6 +14,7 @@
 #include <boost/thread/condition.hpp>
 
 #include <transport/transporter.h>
+#include <utility/print_logger.h>
 
 #include <sip/detail/message.h>
 #include <sip/detail/common.h>
@@ -32,6 +33,7 @@ namespace sip {
      */
     template < class M >
     class basic_messenger : public transport::transporter {
+
       public:
 
         /** \brief Convenience type for messages of type M */
@@ -72,6 +74,9 @@ namespace sip {
         /** \brief The XML-like tag used for wrapping the content */
         static const std::string                                                    tag_close;
 
+        /** \brief Standard (clog) logging component */
+        static utility::print_logger                                                standard_error_logger;
+
       private:
 
         /** \brief Handlers based on message types */
@@ -95,6 +100,11 @@ namespace sip {
         /** \brief The number of tag elements (of message::tag) that have been matched at the last delivery */
         unsigned char              partially_matched;
 
+      protected:
+
+        /** \brief The component used for logging */
+        utility::logger*           logger;
+
       private:
 
         /** \brief Helper function that services the handlers */
@@ -109,7 +119,7 @@ namespace sip {
       public:
 
         /** \brief Default constructor */
-        basic_messenger();
+        basic_messenger(utility::logger* = &standard_error_logger);
  
         /** \brief Queues incoming messages */
         virtual void deliver(std::istream&, basic_transceiver*);
@@ -152,7 +162,7 @@ namespace sip {
     };
 
     template < class M >
-    inline basic_messenger< M >::basic_messenger() : message_open(false), partially_matched(0) {
+    inline basic_messenger< M >::basic_messenger(utility::logger* l) : message_open(false), partially_matched(0), logger(l) {
     }
   }
 }

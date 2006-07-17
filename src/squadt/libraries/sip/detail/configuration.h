@@ -10,7 +10,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
 
-#include <iterator_wrapper/indirect_iterator.h>
+#include <utility/indirect_iterator.h>
 
 #include <sip/detail/option.h>
 #include <sip/detail/object.h>

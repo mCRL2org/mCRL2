@@ -3,6 +3,7 @@
 #include <sip/detail/configuration.h>
 #include <sip/detail/object.h>
 #include <sip/detail/common.h>
+#include <sip/detail/exception.h>
 
 namespace sip {
   namespace messaging {
@@ -15,6 +16,8 @@ namespace sip {
     template < >
     const sip::message_identifier_t message< sip::message_identifier_t, sip::message_unknown, sip::message_any >::message_any     = sip::message_any;
 
+    template <>
+    utility::print_logger basic_messenger< sip::message >::standard_error_logger(std::clog);
   }
 }
 

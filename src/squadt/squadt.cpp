@@ -3,6 +3,8 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 
+#define IMPORT_GLOBAL_MEMBERS
+
 #include "exception.h"
 #include "tool_manager.h"
 #include "settings_manager.tcc"

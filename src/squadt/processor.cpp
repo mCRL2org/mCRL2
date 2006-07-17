@@ -15,19 +15,19 @@ namespace squadt {
   using namespace boost::filesystem;
 
   void processor::monitor::status_change_dummy(output_status) {
-    std::cerr << "No custom status change event handler connected!" << std::endl;
+    logger->log(1, "No custom status change event handler connected!\n");
   }
 
   void processor::monitor::display_layout_change_dummy(sip::layout::tool_display::sptr) {
-    std::cerr << "No custom display change event handler connected!" << std::endl;
+    logger->log(1, "No custom display change event handler connected!\n");
   }
 
   void processor::monitor::display_data_change_dummy(sip::layout::tool_display::constant_elements const&) {
-    std::cerr << "No custom display state change event handler connected!" << std::endl;
+    logger->log(1, "No custom display state change event handler connected!");
   }
 
   void processor::monitor::status_message_change_dummy(sip::report::sptr) {
-    std::cerr << "Incoming report lost!" << std::endl;
+    logger->log(1, "Incoming report lost!");
   }
 
   inline processor::processor(project_manager& p) : current_monitor(new monitor(*this)), manager(&p), selected_input_combination(0) {

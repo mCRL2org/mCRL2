@@ -34,7 +34,7 @@ namespace transport {
       public:
 
         /** \brief Constructor */
-        socket_listener(transport::transporter& m, const address& address, const short port = 0);
+        socket_listener(transport::transporter&, address const&, const short = 0);
 
         /** \brief Activate the listener */
         void activate(basic_listener::ptr);
