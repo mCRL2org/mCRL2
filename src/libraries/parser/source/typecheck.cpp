@@ -288,6 +288,15 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, lpe::specification &lpe_spec
   //4) check for monotonicity of fixpoint variables
   //TODO in decreasing order of urgency: 1 & 2 => 3 & 4.
   gsWarningMsg("type checking of state formulas is not yet implemented\n");
+
+
+
+
+
+
+
+
+
   return state_frm;
 }
 
@@ -2131,7 +2140,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable DeclaredVar
       }
 
       if(ATisEqual(gsMakeOpIdNameEltIn(),ATAgetArgument(*DataTerm,0))){
-	gsDebugMsg("Doing {List,Set,Bag}In matching Type %T, PosType %T\n",Type,PosType);    
+	gsDebugMsg("Doing {List,Set,Bag} matching Type %T, PosType %T\n",Type,PosType);    
 	ATermAppl NewType=gstcMatchListSetBagOpIn(Type);
 	if(!NewType){
 	  gsErrorMsg("the function {List,Set,Bag}In has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
@@ -2946,7 +2955,7 @@ static ATermAppl gstcMatchListSetBagOpIn(ATermAppl Type){
   ATermAppl Arg=gstcUnifyMinType(Arg1,Arg2s);
   if(!Arg) return NULL;
 
-  return gsMakeSortArrowProd(ATmakeList2((ATerm)Arg,(ATerm)Arg2),gsMakeSortIdBool());
+  return gsMakeSortArrowProd(ATmakeList2((ATerm)Arg,(ATerm)ATsetArgument(Arg2,(ATerm)Arg,0)),gsMakeSortIdBool());
 }
 
 static ATermAppl gstcMatchSetBagOpSubEq(ATermAppl Type){
@@ -3087,3 +3096,122 @@ static ATermAppl gstcMatchBagOpBagCount(ATermAppl Type){
 
 
 
+//===================================
+// Type checking modal formulas
+//===================================
+
+static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATermAppl StateFrm);
+static ATermAppl gstcTraverseRegFrm(ATermTable Vars, ATermAppl RegFrm);
+static ATermAppl gstcTraverseDataVarIdInit(ATermTable Vars, ATermAppl DataVarIdInit);
+static ATermAppl gstcTraverseActFrm(ATermTable Vars, ATermAppl ActFrm);
+
+static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATermAppl StateFrm){
+  if(gsIsStateTrue(StateFrm) || gsIsStateFalse(StateFrm) || gsIsStateDelay(StateFrm))
+    return StateFrm;
+  
+  if(gsIsStateNot(StateFrm)){
+    ATermAppl NewArg=gstcTraverseStateFrm(Vars,StateVars,ATAgetArgument(StateFrm,0));
+    if(!NewArg) return NULL;
+    return ATsetArgument(StateFrm,(ATerm)NewArg,0);
+  }
+  
+  if(gsIsStateAnd(StateFrm) || gsIsStateOr(StateFrm) || gsIsStateImp(StateFrm)){
+    ATermAppl NewArg1=gstcTraverseStateFrm(Vars,StateVars,ATAgetArgument(StateFrm,0));
+    if(!NewArg1) return NULL;
+    ATermAppl NewArg2=gstcTraverseStateFrm(Vars,StateVars,ATAgetArgument(StateFrm,1));
+    if(!NewArg2) return NULL;
+    return ATsetArgument(ATsetArgument(StateFrm,(ATerm)NewArg1,0),(ATerm)NewArg2,1);
+  }
+
+  if(gsIsStateForall(StateFrm) || gsIsStateExists(StateFrm)){
+  }
+  
+  if(gsIsStateMust(StateFrm) || gsIsStateMay(StateFrm)){
+  }
+
+  if(gsIsStateDelayTimed(StateFrm)){
+  }
+
+  if(gsIsStateVar(StateFrm)){
+  }
+  
+  if(gsIsStateNu(StateFrm) || gsIsStateMu(StateFrm)){
+  }
+
+  if(gsIsDataExpr(StateFrm)){
+  }
+
+  assert(0);
+  return NULL;
+}
+
+static ATermAppl gstcTraverseRegFrm(ATermTable Vars, ATermAppl RegFrm){
+
+  if(gsIsRegNil(RegFrm)){
+    return RegFrm;
+  }
+
+  if(gsIsSeq(RegFrm) || gsIsRegAlt(RegFrm)){
+    ATermAppl NewArg1=gstcTraverseRegFrm(Vars,ATAgetArgument(RegFrm,0));
+    if(!NewArg1) return NULL;
+    ATermAppl NewArg2=gstcTraverseRegFrm(Vars,ATAgetArgument(RegFrm,1));
+    if(!NewArg2) return NULL;
+    return ATsetArgument(ATsetArgument(RegFrm,(ATerm)NewArg1,0),(ATerm)NewArg2,1);    
+  }
+
+  if(gsIsRegTrans(RegFrm) || gsIsRegTransOrNil(RegFrm)){
+    ATermAppl NewArg=gstcTraverseRegFrm(Vars,ATAgetArgument(RegFrm,0));
+    if(!NewArg) return NULL;
+    return ATsetArgument(RegFrm,(ATerm)NewArg,0);    
+  }
+
+  if(gsIsActFrm(RegFrm))
+    return gstcTraverseActFrm(Vars, RegFrm);
+
+  assert(0);
+  return NULL;
+}
+
+
+static ATermAppl gstcTraverseDataVarIdInit(ATermTable Vars, ATermAppl DataVarIdInit){
+  if(gsIsDataVarIdInit(DataVarIdInit)){
+  }
+
+  assert(0);
+  return NULL;  
+}
+
+static ATermAppl gstcTraverseActFrm(ATermTable Vars, ATermAppl ActFrm){
+  if(gsIsActTrue(ActFrm) || gsIsActFalse(ActFrm)){
+    return ActFrm;
+  }
+
+  if(gsIsActNot(ActFrm)){
+    ATermAppl NewArg=gstcTraverseActFrm(Vars,ATAgetArgument(ActFrm,0));
+    if(!NewArg) return NULL;
+    return ATsetArgument(ActFrm,(ATerm)NewArg,0);    
+  }
+
+  if(gsIsActAnd(ActFrm) || gsIsActOr(ActFrm) || gsIsActImp(ActFrm)){
+    ATermAppl NewArg1=gstcTraverseActFrm(Vars,ATAgetArgument(ActFrm,0));
+    if(!NewArg1) return NULL;
+    ATermAppl NewArg2=gstcTraverseActFrm(Vars,ATAgetArgument(ActFrm,1));
+    if(!NewArg2) return NULL;
+    return ATsetArgument(ATsetArgument(ActFrm,(ATerm)NewArg1,0),(ATerm)NewArg2,1);    
+  }
+  
+  if(gsIsActForall(ActFrm) || gsIsExists(ActFrm)){
+  }
+
+  if(gsIsActAt(ActFrm)){
+  }
+
+  if(gsIsMultAct(ActFrm)){
+  }
+
+  if(gsIsDataExpr(ActFrm)){
+  }
+
+  assert(0);
+  return NULL;
+}
