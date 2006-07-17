@@ -330,7 +330,10 @@ namespace sip {
       private:
 
         /** \brief Constructor */
-        inline string(std::string const& = empty, unsigned int minimum = 0, unsigned int maximum = implementation_maximum_length); 
+        string();
+
+        /** \brief Constructor */
+        inline string(std::string const&, unsigned int minimum = 0, unsigned int maximum = implementation_maximum_length); 
 
         /** \brief Write method that does all the work */
         void private_write(std::ostream& o, std::string const& s) const;
@@ -423,7 +426,7 @@ namespace sip {
      * Implementation of Boolean
      ************************************************************************/
 
-#ifdef IMPORT_STATIC_MEMBERS
+#ifdef IMPORT_STATIC_DEFINITIONS
     basic_datatype::sptr boolean::standard(new boolean());
 
     const std::string boolean::true_string  = "true";
@@ -518,7 +521,7 @@ namespace sip {
      * Implementation of Integer
      ************************************************************************/
 
-#ifdef IMPORT_STATIC_MEMBERS
+#ifdef IMPORT_STATIC_DEFINITIONS
     basic_datatype::sptr integer::standard(new integer());
     basic_datatype::sptr integer::naturals(new integer(0));
     basic_datatype::sptr integer::positives(new integer(1));
@@ -651,7 +654,7 @@ namespace sip {
      * Implementation of Real 
      ************************************************************************/
 
-#ifdef IMPORT_STATIC_MEMBERS
+#ifdef IMPORT_STATIC_DEFINITIONS
     basic_datatype::sptr real::standard(new real());
     basic_datatype::sptr real::probability(new real(0,1));
     basic_datatype::sptr real::non_negatives(new real(0));
@@ -913,13 +916,16 @@ namespace sip {
      * Implementation of String
      ************************************************************************/
 
-#ifdef IMPORT_STATIC_MEMBERS
+#ifdef IMPORT_STATIC_DEFINITIONS
     const std::string  string::empty;
 
     const unsigned int string::implementation_maximum_length = UINT_MAX;
 
-    basic_datatype::sptr string::standard(new string());
+    basic_datatype::sptr string::standard(new string);
 #endif
+
+    inline string::string() : minimum_length(0), maximum_length(UINT_MAX), default_value(empty) {
+    }
 
     /**
      * @param[in] minimum the minimum length

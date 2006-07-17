@@ -157,10 +157,21 @@ namespace sip {
         /** \brief Remove a specific handlers for a message type */
         inline void remove_handler(const typename M::type_identifier_t, handler_type);
 
+        /** \brief Gets the associated logger object */
+        inline utility::logger* get_logger();
+
+        /** \brief Gets the associated logger object */
+        static utility::logger* get_standard_error_logger();
+
         /** \brief Destructor */
         ~basic_messenger();
     };
 
+    /**
+     * @param[in] l a logger object used to write logging messages to
+     *
+     * \pre l != 0
+     **/
     template < class M >
     inline basic_messenger< M >::basic_messenger(utility::logger* l) : message_open(false), partially_matched(0), logger(l) {
     }

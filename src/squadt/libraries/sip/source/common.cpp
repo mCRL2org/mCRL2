@@ -1,4 +1,4 @@
-#define IMPORT_STATIC_MEMBERS
+#define IMPORT_STATIC_DEFINITIONS
 
 #include <sip/detail/configuration.h>
 #include <sip/detail/object.h>

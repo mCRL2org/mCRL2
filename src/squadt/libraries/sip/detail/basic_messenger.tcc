@@ -116,6 +116,16 @@ namespace sip {
       }
     }
  
+    template < class M >
+    inline utility::logger* basic_messenger< M >::get_logger() {
+      return (logger);
+    }
+
+    template < class M >
+    inline utility::logger* basic_messenger< M >::get_standard_error_logger() {
+      return (&standard_error_logger);
+    }
+
     /**
      * @param data a stream that contains the data to be delived
      * @param o a pointer to the transceiver on which the data was received

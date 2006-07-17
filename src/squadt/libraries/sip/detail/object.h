@@ -110,7 +110,7 @@ namespace sip {
       inline void write(std::ostream&) const;
   };
 
-#ifdef IMPORT_STATIC_MEMBERS
+#ifdef IMPORT_STATIC_DEFINITIONS
   const char* object::type_strings[] = {
     "input"      /// \brief object is used for input
    ,"output"     /// \brief object is used for output
