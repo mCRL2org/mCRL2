@@ -54,6 +54,9 @@ namespace sip {
 
         /** \brief Pure virtual destructor */
         virtual ~basic_datatype() = 0;
+
+        /** \brief Initialises static members */
+        static bool initialise();
     };
 
     /**
@@ -107,6 +110,9 @@ namespace sip {
 
         /** \brief Establishes whether value is valid for an element of this type */
         inline bool validate(std::string const& value) const;
+
+        /** \brief Initialises static members */
+        static void initialise();
     };
 
     /**
@@ -155,6 +161,9 @@ namespace sip {
         void private_write(std::ostream& o, std::string const& s) const;
 
       public:
+
+        /** \brief Initialises static members */
+        static void initialise();
 
         /** \brief Convenience function for shared pointer instances */
         static basic_datatype::sptr create(long int d = implementation_minimum, long int = implementation_minimum, long int = implementation_maximum);
@@ -228,6 +237,9 @@ namespace sip {
 
       public:
 
+        /** \brief Initialises static members */
+        static void initialise();
+
         /** \brief Convenience function for shared pointer instances */
         static basic_datatype::sptr create(double d = implementation_minimum, double minimum = implementation_minimum, double maximum = implementation_maximum);
 
@@ -276,6 +288,9 @@ namespace sip {
         void private_write(std::ostream& o, std::string const& s) const;
 
       public:
+
+        /** \brief Initialises static members */
+        static void initialise();
 
         /** \brief Convenience function for shared pointer instances */
         static basic_datatype::sptr create();
@@ -340,6 +355,9 @@ namespace sip {
 
       public:
 
+        /** \brief Initialises static members */
+        static void initialise();
+
         /** \brief Convenience function for shared pointer instances */
         static basic_datatype::sptr create(std::string const& = empty, unsigned int = 0, unsigned int = implementation_maximum_length);
 
@@ -398,6 +416,16 @@ namespace sip {
       throw (sip::exception::exception(exception::message_unknown_type, r.element_name()));
     }
 
+    inline bool basic_datatype::initialise() {
+      string::initialise();
+      enumeration::initialise();
+      boolean::initialise();
+      integer::initialise();
+      real::initialise();
+
+      return (true);
+    }
+
     /** \brief Converts a boolean */
     template <>
     inline std::string basic_datatype::convert(bool const& s) {
@@ -427,12 +455,22 @@ namespace sip {
      ************************************************************************/
 
 #ifdef IMPORT_STATIC_DEFINITIONS
-    basic_datatype::sptr boolean::standard(new boolean());
+    basic_datatype::sptr boolean::standard;
 
-    const std::string boolean::true_string  = "true";
+    const std::string boolean::true_string;
 
-    const std::string boolean::false_string = "false";
+    const std::string boolean::false_string;
 #endif
+
+    inline void boolean::initialise() {
+      standard   = basic_datatype::sptr(new boolean);
+
+      std::string* m = const_cast < std::string* > (&true_string);
+
+      m->assign("true");
+      m = const_cast < std::string* > (&false_string);
+      m->assign("false");
+    }
 
     inline boolean::boolean() {
     }
@@ -522,9 +560,9 @@ namespace sip {
      ************************************************************************/
 
 #ifdef IMPORT_STATIC_DEFINITIONS
-    basic_datatype::sptr integer::standard(new integer());
-    basic_datatype::sptr integer::naturals(new integer(0));
-    basic_datatype::sptr integer::positives(new integer(1));
+    basic_datatype::sptr integer::standard;
+    basic_datatype::sptr integer::naturals;
+    basic_datatype::sptr integer::positives;
 
     /** \brief Implementation dependent limitation (minimum value) */
     const long int integer::implementation_minimum = LONG_MIN;
@@ -533,6 +571,11 @@ namespace sip {
     const long int integer::implementation_maximum = LONG_MAX;
 #endif
 
+    inline void integer::initialise() {
+      standard   = basic_datatype::sptr(new integer);
+      naturals   = basic_datatype::sptr(new integer(0));
+      positives  = basic_datatype::sptr(new integer(1));
+    }
     /**
      * @param[in] min the minimum value in the domain
      * @param[in] max the maximum value in the domain
@@ -655,10 +698,10 @@ namespace sip {
      ************************************************************************/
 
 #ifdef IMPORT_STATIC_DEFINITIONS
-    basic_datatype::sptr real::standard(new real());
-    basic_datatype::sptr real::probability(new real(0,1));
-    basic_datatype::sptr real::non_negatives(new real(0));
-    basic_datatype::sptr real::positives(new real(1));
+    basic_datatype::sptr real::standard;
+    basic_datatype::sptr real::probability;
+    basic_datatype::sptr real::non_negatives;
+    basic_datatype::sptr real::positives;
 
     /** \brief Implementation dependent limitation (minimum value) */
     const double real::implementation_minimum = DBL_MIN;
@@ -666,6 +709,13 @@ namespace sip {
     /** \brief Implementation dependent limitation (maximum value) */
     const double real::implementation_maximum = DBL_MAX;
 #endif
+
+    inline void real::initialise() {
+      standard      = basic_datatype::sptr(new real);
+      probability   = basic_datatype::sptr(new real(0,1));
+      non_negatives = basic_datatype::sptr(new real(0));
+      positives     = basic_datatype::sptr(new real(1));
+    }
 
     /**
      * @param[in] min the minimum value in the domain
@@ -787,6 +837,9 @@ namespace sip {
     /************************************************************************
      * Implementation of Enumeration
      ************************************************************************/
+
+    inline void enumeration::initialise() {
+    }
 
     /**
      * @param[in] s any string
@@ -921,8 +974,12 @@ namespace sip {
 
     const unsigned int string::implementation_maximum_length = UINT_MAX;
 
-    basic_datatype::sptr string::standard(new string);
+    basic_datatype::sptr string::standard;
 #endif
+
+    inline void string::initialise() {
+      standard = basic_datatype::sptr(new string);
+    }
 
     inline string::string() : minimum_length(0), maximum_length(UINT_MAX), default_value(empty) {
     }

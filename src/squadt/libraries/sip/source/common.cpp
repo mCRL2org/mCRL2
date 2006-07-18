@@ -4,6 +4,7 @@
 #include <sip/detail/object.h>
 #include <sip/detail/common.h>
 #include <sip/detail/exception.h>
+#include <sip/detail/basic_datatype.h>
 
 namespace sip {
   namespace messaging {
@@ -19,5 +20,7 @@ namespace sip {
     template <>
     utility::print_logger basic_messenger< sip::message >::standard_error_logger(std::clog);
   }
+
+  static bool initialised = datatype::basic_datatype::initialise();
 }
 

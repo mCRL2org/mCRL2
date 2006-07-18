@@ -4,6 +4,7 @@
 #include <list>
 
 #include <boost/bind.hpp>
+
 #include <sip/detail/basic_messenger.h>
 
 /* Interface classes for both the tool and the controller side of the Squadt Interaction Protocol */

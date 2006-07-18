@@ -53,48 +53,52 @@ class initialisation : public wxThread {
 };
 
 bool parse_command_line(int argc, wxChar** argv) {
-  wxCmdLineParser parser(argc, argv); 
+  bool c = 0 < argc;
 
-  parser.AddSwitch(wxT("d"),wxT("debug"),wxT(""));
-  parser.AddSwitch(wxT("h"),wxT("help"),wxT(""));
-  parser.AddSwitch(wxT("q"),wxT("quiet"),wxT(""));
-  parser.AddSwitch(wxT("v"),wxT("verbose"),wxT(""));
-  parser.AddSwitch(wxT(""),wxT("version"),wxT(""));
-
-  if (!parser.Parse(false)) {
-    if (parser.Found(wxT("d"))) {
-      sip::messenger::get_standard_error_logger()->set_filter_level(3);
-
-      return (true);
-    }
-    if (parser.Found(wxT("v"))) {
-      sip::messenger::get_standard_error_logger()->set_filter_level(2);
-
-      return (true);
-    }
-    if (parser.Found(wxT("h"))) {
-      std::cout << "Usage: " << program_name << " [OPTION]\n"
-                << "Graphical environment that provides a uniform interface for using all kinds\n"
-                << "of other connected tools.\n"
-                << "\n"
-                << "Mandatory arguments to long options are mandatory for short options too.\n"
-                << "  -d, --debug           produce lots of debug output\n"
-                << "  -h, --help            display this help message\n"
-                << "  -q, --quiet           represses unnecessary output\n"
-                << "  -v, --verbose         display additional information during operation\n"
-                << "      --version         display version information\n";
-    }
-    if (parser.Found(wxT("q"))) {
-      sip::messenger::get_standard_error_logger()->set_filter_level(1);
-
-      return (true);
-    }
-    if (parser.Found(wxT("version"))) {
-      std::cerr << program_name << " " << program_version << std::endl;
+  if (c) {
+    wxCmdLineParser parser(argc, argv); 
+ 
+    parser.AddSwitch(wxT("d"),wxT("debug"),wxT(""));
+    parser.AddSwitch(wxT("h"),wxT("help"),wxT(""));
+    parser.AddSwitch(wxT("q"),wxT("quiet"),wxT(""));
+    parser.AddSwitch(wxT("v"),wxT("verbose"),wxT(""));
+    parser.AddSwitch(wxT(""),wxT("version"),wxT(""));
+ 
+    c = parser.Parse(false) == 0;
+ 
+    if (!c) {
+      if (parser.Found(wxT("d"))) {
+        sip::messenger::get_standard_error_logger()->set_filter_level(3);
+      }
+      if (parser.Found(wxT("v"))) {
+        sip::messenger::get_standard_error_logger()->set_filter_level(2);
+      }
+      if (parser.Found(wxT("h"))) {
+        std::cout << "Usage: " << program_name << " [OPTION]\n"
+                  << "Graphical environment that provides a uniform interface for using all kinds\n"
+                  << "of other connected tools.\n"
+                  << "\n"
+                  << "Mandatory arguments to long options are mandatory for short options too.\n"
+                  << "  -d, --debug           produce lots of debug output\n"
+                  << "  -h, --help            display this help message\n"
+                  << "  -q, --quiet           represses unnecessary output\n"
+                  << "  -v, --verbose         display additional information during operation\n"
+                  << "      --version         display version information\n";
+ 
+        return (false);
+      }
+      if (parser.Found(wxT("q"))) {
+        sip::messenger::get_standard_error_logger()->set_filter_level(1);
+      }
+      if (parser.Found(wxT("version"))) {
+        std::cerr << program_name << " " << program_version << std::endl;
+ 
+        return (false);
+      }
     }
   }
 
-  return (false);
+  return (c);
 }
 
 /* Squadt class declaration */
@@ -107,7 +111,11 @@ class Squadt : public wxApp {
 
 IMPLEMENT_APP(Squadt)
 
-/* Squadt class implementation */
+/*
+ * Squadt class implementation
+ *
+ * Must return true because static initialisation might not have completed
+ */
 bool Squadt::OnInit() {
   using namespace squadt;
   using namespace squadt::GUI;
@@ -115,7 +123,6 @@ bool Squadt::OnInit() {
   bool c = parse_command_line(argc, argv);
 
   if (c) {
-
     global_settings_manager = settings_manager::ptr(new settings_manager(wxFileName::GetHomeDir().fn_str()));
  
     wxInitAllImageHandlers();
@@ -149,10 +156,11 @@ bool Squadt::OnInit() {
     SetTopWindow(new squadt::GUI::main());
   }
 
+  SetUseBestVisual(true);
+
   return (c);
 }
 
 int Squadt::OnExit() {
   return (wxApp::OnExit());
 }
-
