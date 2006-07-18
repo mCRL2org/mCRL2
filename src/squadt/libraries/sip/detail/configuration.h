@@ -166,7 +166,7 @@ namespace sip {
       inline static configuration::sptr read(xml2pp::text_reader&) throw ();
   };
 
-#ifdef IMPORT_STATIC_DEFINITIONS
+#ifdef SIP_IMPORT_STATIC_DEFINITIONS
   /** The optional constraint, option is either not present or only present once */
   const configuration::option_constraint configuration::constrain_optional = {0,1};
 

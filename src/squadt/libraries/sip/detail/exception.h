@@ -24,7 +24,7 @@ namespace sip {
     /** \brief The common exception type */
     typedef ::exception::exception < values > exception;
 
-#ifdef IMPORT_STATIC_DEFINITIONS
+#ifdef SIP_IMPORT_STATIC_DEFINITIONS
     /** \brief Messages for exceptions */
     template < >
     const char* const ::exception::exception< values >::descriptions[] = {

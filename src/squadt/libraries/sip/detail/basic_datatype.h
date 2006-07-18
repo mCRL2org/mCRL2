@@ -454,7 +454,7 @@ namespace sip {
      * Implementation of Boolean
      ************************************************************************/
 
-#ifdef IMPORT_STATIC_DEFINITIONS
+#ifdef SIP_IMPORT_STATIC_DEFINITIONS
     basic_datatype::sptr boolean::standard;
 
     const std::string boolean::true_string;
@@ -559,7 +559,7 @@ namespace sip {
      * Implementation of Integer
      ************************************************************************/
 
-#ifdef IMPORT_STATIC_DEFINITIONS
+#ifdef SIP_IMPORT_STATIC_DEFINITIONS
     basic_datatype::sptr integer::standard;
     basic_datatype::sptr integer::naturals;
     basic_datatype::sptr integer::positives;
@@ -697,7 +697,7 @@ namespace sip {
      * Implementation of Real 
      ************************************************************************/
 
-#ifdef IMPORT_STATIC_DEFINITIONS
+#ifdef SIP_IMPORT_STATIC_DEFINITIONS
     basic_datatype::sptr real::standard;
     basic_datatype::sptr real::probability;
     basic_datatype::sptr real::non_negatives;
@@ -969,7 +969,7 @@ namespace sip {
      * Implementation of String
      ************************************************************************/
 
-#ifdef IMPORT_STATIC_DEFINITIONS
+#ifdef SIP_IMPORT_STATIC_DEFINITIONS
     const std::string  string::empty;
 
     const unsigned int string::implementation_maximum_length = UINT_MAX;
