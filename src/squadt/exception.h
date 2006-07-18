@@ -20,7 +20,7 @@ namespace squadt {
     /** \brief A basic type for exceptions derived from that provided by the standard library */
     typedef ::exception::exception < values > exception;
 
-#ifdef IMPORT_STATIC_DEFINITIONS
+#ifdef SQUADT_IMPORT_STATIC_DEFINITIONS
     /** \brief Descriptions for error messages */
     template < >
     const char* const exception::descriptions[] = {

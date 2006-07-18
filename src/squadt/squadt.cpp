@@ -3,7 +3,7 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 
-#define IMPORT_STATIC_DEFINITIONS
+#define SQUADT_IMPORT_STATIC_DEFINITIONS
 
 #include "exception.h"
 #include "tool_manager.h"

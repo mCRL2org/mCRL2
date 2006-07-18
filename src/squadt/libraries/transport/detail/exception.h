@@ -16,7 +16,7 @@ namespace transport {
 
 #ifdef IMPORT_STATIC_DEFINITIONS
     template < >
-    const char* const ::exception::exception< values >::descriptions[] = {
+    const char* const ::exception::exception< transport::exception::values >::descriptions[] = {
       "Listener failed connection attempt!",
       "Transceiver failed send or receive!"
     };

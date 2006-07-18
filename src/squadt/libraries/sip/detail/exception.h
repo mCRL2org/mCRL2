@@ -27,7 +27,7 @@ namespace sip {
 #ifdef SIP_IMPORT_STATIC_DEFINITIONS
     /** \brief Messages for exceptions */
     template < >
-    const char* const ::exception::exception< values >::descriptions[] = {
+    const char* const ::exception::exception< sip::exception::values >::descriptions[] = {
       "Functionality not yet implemented!",
       "Expected the start of message sequence.",
       "Expected the end of message sequence.",
