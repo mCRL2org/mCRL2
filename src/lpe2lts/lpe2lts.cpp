@@ -671,27 +671,78 @@ static void update_status_display(unsigned long level, unsigned long long explor
     c -= a; c -= b; c ^= (b>>15); \
   }
 
-static ATermIndexedSet statevalues = NULL;
+static unsigned long sh_a,sh_b,sh_c;
+static unsigned int sh_i;
+static void calc_hash_init()
+{
+  sh_a = 0x9e3779b9;
+  sh_b = 0x65e3083a;
+  sh_c = 0xa45f7582;
+  sh_i = 0;
+}
+static void calc_hash_add(unsigned long n)
+{
+  switch ( sh_i )
+  {
+    case 0:
+      sh_a += n;
+      sh_i = 1;
+      break;
+    case 1:
+      sh_b += n;
+      sh_i = 2;
+      break;
+    case 2:
+      sh_c += n;
+      sh_i = 0;
+      mix(sh_a,sh_b,sh_c);
+      break;
+  }
+}
+static unsigned long long calc_hash_finish()
+{
+  while ( sh_i != 0 )
+  {
+    calc_hash_add(0x76a34e87);
+  }
+  return sh_a^sh_b^sh_c;
+}
+static void calc_hash_aterm(ATerm t)
+{
+  switch ( ATgetType(t) )
+  {
+    case AT_APPL:
+      calc_hash_add(0x13ad3780);
+      {
+        unsigned int len = ATgetArity(ATgetAFun((ATermAppl) t));
+        for (unsigned int i=0; i<len; i++)
+	{
+          calc_hash_aterm(ATgetArgument((ATermAppl) t, i));
+	}
+      }
+      break;
+    case AT_LIST:
+      calc_hash_add(0x7eb9cdba);
+      for (ATermList l=(ATermList) t; !ATisEmpty(l); l=ATgetNext(l))
+      {
+        calc_hash_aterm(ATgetFirst(l));
+      }
+      break;
+    case AT_INT:
+      calc_hash_add(ATgetInt((ATermInt) t));
+      break;
+    default:
+      calc_hash_add(0xaa143f06);
+      break;
+  }
+}
 static unsigned long long calc_hash(ATerm state)
 {
-  unsigned long a = 0x9e3779b9, b = 0x65e3083a, c = 0xa45f7582;
-  unsigned int statelen = ATgetArity(ATgetAFun(state));
-
-  if ( statevalues == NULL )
-  {
-    statevalues = ATindexedSetCreate(1024,50);
-  }
-
-  for (unsigned int i=0; i<statelen; i+=3)
-  {
-    ATbool isnew;
-    a += ATindexedSetPut(statevalues,ATgetArgument(state,i  ),&isnew);
-    b += (i+1<statelen)?ATindexedSetPut(statevalues,ATgetArgument(state,i+1),&isnew):i;
-    c += (i+2<statelen)?ATindexedSetPut(statevalues,ATgetArgument(state,i+2),&isnew):i;
-    mix(a,b,c);
-  }
-
-  return (a^b^c) % bithashsize;
+  calc_hash_init();
+  
+  calc_hash_aterm(state);
+  
+  return calc_hash_finish() % bithashsize;
 }
 
 static bool get_bithash(unsigned long long i)
