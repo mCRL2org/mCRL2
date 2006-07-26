@@ -53,6 +53,8 @@ source_files="mcrl2/articles \
               mcrl2/build/config.mk.in \
               mcrl2/build/config.jam.in \
               mcrl2/build/Jamfile.v2 \
+              mcrl2/build/bjam.mk \
+              mcrl2/build/macosx/* \
               mcrl2/build/test.l \
               mcrl2/build/test.y \
               mcrl2/Makefile \
@@ -87,6 +89,7 @@ if (! test -e "${archive_name}.bz2"); then
   # Find binaries and other files with no extension that should be filtered out
   find -L mcrl2 -mindepth 2 -type f \
        -not -name '*.*' \
+       -not -name 'PkgInfo' \
        -not -name 'Makefile' \
        -not -name '*revision.h' \
        -not -wholename '*boost*' > excludes
@@ -96,7 +99,7 @@ if (! test -e "${archive_name}.bz2"); then
        -name 'html' \
        -or -name 'latex' \
        -or -name 'bin' \
-       -or -wholename '*mcrl2/utility' \
+       -or -wholename '*mcrl2/build/utility' \
        -or -wholename '*jam/bootstrap' \
        -or -wholename '*boost/stage' \
        -or -wholename '*boost/lib' >> excludes

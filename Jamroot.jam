@@ -196,8 +196,8 @@ else {
        ;
 }
 
-if [ path.exists $(TOP)/utility/revision.jam ] {
-  include $(TOP)/utility/revision.jam ;
+if [ path.exists $(TOP)/build/utility/revision.jam ] {
+  include $(TOP)/build/utility/revision.jam ;
 
   import_revision ;
 }
