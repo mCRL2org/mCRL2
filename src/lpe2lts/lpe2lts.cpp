@@ -148,6 +148,11 @@ static void print_help(FILE *f, const char *Name)
     "                           states; note that this option may cause states to be\n"
     "                           mistaken for others\n"
     "  -l, --max=NUM            explore at most NUM states\n"
+    "      --todo-max=NUM       keep at most NUM states in todo lists; this option is\n"
+    "                           only relevant for breadth-first search with\n"
+    "                           bithashing, where NUM is the maximum number of states\n"
+    "                           per level, and for depth first, where NUM is the\n"
+    "                           maximum depth\n"
     "  -d, --deadlock           detect deadlocks (i.e. for every deadlock a message\n"
     "                           is printed)\n"
     "  -a, --action=NAME*       detect actions from NAME* (i.e. print a message for\n"
@@ -208,6 +213,7 @@ static exploration_strategy expl_strat = es_breadth;
 static bool bithashing = false;
 static unsigned long *bithashtable;
 static unsigned long long bithashsize = DEFAULT_BITHASHSIZE;
+static unsigned long todo_max = ULONG_MAX;
 
 static NextState *nstate;
   
@@ -716,9 +722,9 @@ static void calc_hash_aterm(ATerm t)
       {
         unsigned int len = ATgetArity(ATgetAFun((ATermAppl) t));
         for (unsigned int i=0; i<len; i++)
-	{
+        {
           calc_hash_aterm(ATgetArgument((ATermAppl) t, i));
-	}
+        }
       }
       break;
     case AT_LIST:
@@ -739,7 +745,7 @@ static void calc_hash_aterm(ATerm t)
 static unsigned long long calc_hash(ATerm state)
 {
   calc_hash_init();
-  
+
   calc_hash_aterm(state);
   
   return calc_hash_finish() % bithashsize;
@@ -785,10 +791,11 @@ static unsigned long long state_index(ATerm state)
 
 static ATerm *queue_get = NULL;
 static ATerm *queue_put = NULL;
-static unsigned int queue_size = 0;
-static unsigned int queue_get_pos = 0;
-static unsigned int queue_get_count = 0;
-static unsigned int queue_put_count = 0;
+static unsigned long queue_size = 0;
+static unsigned long queue_size_max = UINT_MAX;
+static unsigned long queue_get_pos = 0;
+static unsigned long queue_get_count = 0;
+static unsigned long queue_put_count = 0;
 static bool queue_size_fixed = false;
 
 static void add_to_queue(ATerm state)
@@ -801,9 +808,20 @@ static void add_to_queue(ATerm state)
     }
     if ( queue_size == 0 )
     {
-      queue_size = 128;
+      queue_size = (queue_size_max<128)?queue_size_max:128;
     } else {
-      queue_size = queue_size * 2;
+      if ( 2*queue_size > queue_size_max )
+      {
+        queue_size_fixed = true;
+        if ( queue_size = queue_size_max )
+        {
+          return;
+        } else {
+          queue_size = queue_size_max;
+        }
+      } else {
+        queue_size = queue_size * 2;
+      }
       ATunprotectArray(queue_get);
       ATunprotectArray(queue_put);
     }
@@ -835,7 +853,7 @@ static void add_to_queue(ATerm state)
       return;
     }
     queue_put = tmp;
-    for (unsigned int i=queue_put_count; i<queue_size; i++)
+    for (unsigned long i=queue_put_count; i<queue_size; i++)
     {
       queue_get[i] = NULL;
       queue_put[i] = NULL;
@@ -985,6 +1003,7 @@ static bool generate_lts()
       NextStateGenerator *nsgen = NULL;
       if ( bithashing )
       {
+        queue_size_max = todo_max;
         add_to_queue(state);
         swap_queues();
       }
@@ -993,7 +1012,7 @@ static bool generate_lts()
         if ( bithashing )
         {
           state = get_from_queue();
-	  assert(state != NULL);
+          assert(state != NULL);
         } else {
           state = ATindexedSetGetElem(states,current_state);
         }
@@ -1064,7 +1083,12 @@ static bool generate_lts()
             fflush(stderr);
           }
           level++;
-          nextlevelat = num_states;
+          if ( bithashing && (current_state+todo_max < num_states) )
+          {
+            nextlevelat = current_state+todo_max;
+          } else {
+            nextlevelat = num_states;
+          }
           prevcurrent = current_state;
           prevtrans = trans;
         }
@@ -1072,7 +1096,7 @@ static bool generate_lts()
       delete nsgen;
     } else if ( expl_strat == es_depth )
     {
-      unsigned int nsgens_size = 128;
+      unsigned long nsgens_size = (todo_max<128)?todo_max:128;
       NextStateGenerator **nsgens = (NextStateGenerator **) malloc(nsgens_size*sizeof(NextStateGenerator *));
       if ( nsgens == NULL )
       {
@@ -1080,13 +1104,16 @@ static bool generate_lts()
         exit(1);
       }
       nsgens[0] = nstate->getNextStates(state);
-      for (unsigned int i=1; i<nsgens_size; i++)
+      for (unsigned long i=1; i<nsgens_size; i++)
       {
         nsgens[i] = NULL;
       }
-      unsigned int nsgens_num = 1;
+      unsigned long nsgens_num = 1;
 
-      bool deadlockstate = true;
+      bool top_trans_seen = false;
+      // trans_seen(s) := we have seen a transition from state s
+      // inv:  forall i : 0 <= i < nsgens_num-1 : trans_seen(nsgens[i]->get_state())
+      //       nsgens_num > 0  ->  top_trans_seen == trans_seen(nsgens[nsgens_num-1])
       while ( nsgens_num > 0 )
       {
         NextStateGenerator *nsgen = nsgens[nsgens_num-1];
@@ -1094,30 +1121,37 @@ static bool generate_lts()
         ATermAppl Transition;
         ATerm NewState;
         bool new_state = false;
-        bool deadlockstate_new = false;
+        bool trans_seen_new = false;
         if ( nsgen->next(&Transition,&NewState) )
         {
-          deadlockstate = false;
+          top_trans_seen = true;
           if ( add_transition(state,Transition,NewState) )
           {
             new_state = true;
-            if ( nsgens_num == nsgens_size )
+            if ( (nsgens_num == nsgens_size) && (nsgens_size < todo_max) )
             {
               nsgens_size = nsgens_size*2;
+              if ( nsgens_size > todo_max )
+              {
+                nsgens_size = todo_max;
+              }
               nsgens = (NextStateGenerator **) realloc(nsgens,nsgens_size*sizeof(NextStateGenerator *));
               if ( nsgens == NULL )
               {
                 gsErrorMsg("cannot enlarge state stack\n");
                 exit(1);
               }
-              for (unsigned int i=nsgens_num; i<nsgens_size; i++)
+              for (unsigned long i=nsgens_num; i<nsgens_size; i++)
               {
                 nsgens[i] = NULL;
               }
             }
-            nsgens[nsgens_num] = nstate->getNextStates(NewState,nsgens[nsgens_num]);
-            nsgens_num++;
-            deadlockstate_new = true;
+            if ( nsgens_num < nsgens_size )
+            {
+              nsgens[nsgens_num] = nstate->getNextStates(NewState,nsgens[nsgens_num]);
+              nsgens_num++;
+              trans_seen_new = false;
+            }
           }
         } else {
           nsgens_num--;
@@ -1128,11 +1162,11 @@ static bool generate_lts()
           err = true;
           break;
         }
-        if ( deadlockstate )
+        if ( !top_trans_seen )
         {
           check_deadlock_trace(state);
         }
-        deadlockstate = deadlockstate_new;
+        top_trans_seen = trans_seen_new;
 
         if ( new_state )
         {
@@ -1160,7 +1194,7 @@ static bool generate_lts()
       }
 #endif
 
-      for (unsigned int i=0; i<nsgens_size; i++)
+      for (unsigned long i=0; i<nsgens_size; i++)
       {
         delete nsgens[i];
       }
@@ -1411,6 +1445,7 @@ int main(int argc, char **argv)
     { "svc",             no_argument,       NULL, 2   },
     { "no-info",         no_argument,       NULL, 3   },
     { "init-tsize",      required_argument, NULL, 4   },
+    { "todo-max",        required_argument, NULL, 5   },
 // aterm lib options
     { "at-help",          no_argument,       NULL, 10  },
     { "at-verbose",       no_argument,       NULL, 11  },
@@ -1667,6 +1702,15 @@ int main(int argc, char **argv)
           initial_table_size = strtoul(optarg,NULL,0);
         } else {
           gsErrorMsg("invalid argument to --init-tsize\n",optarg);
+          return 1;
+        }
+        break;
+      case 5:
+        if ( (optarg[0] >= '0') && (optarg[0] <= '9') )
+        {
+          todo_max = strtoul(optarg,NULL,0);
+        } else {
+          gsErrorMsg("invalid argument to --todo-max\n",optarg);
           return 1;
         }
         break;
