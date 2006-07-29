@@ -813,7 +813,7 @@ static void add_to_queue(ATerm state)
       if ( 2*queue_size > queue_size_max )
       {
         queue_size_fixed = true;
-        if ( queue_size = queue_size_max )
+        if ( queue_size == queue_size_max )
         {
           return;
         } else {
@@ -939,8 +939,11 @@ static bool generate_lts()
   if ( max_states != 0 )
   {
     unsigned long long nextlevelat = 1;
+    unsigned long long endoflevelat = 1;
     unsigned long long prevtrans = 0;
     unsigned long long prevcurrent = 0;
+    unsigned long long statesskipped = 0;
+    unsigned long long statestobeskipped = 0;
     num_found_same = 0;
     tracecnt = 0;
     gsVerboseMsg("generating state space with '%s' strategy...\n",expl_strat_to_str(expl_strat));
@@ -1007,7 +1010,7 @@ static bool generate_lts()
         add_to_queue(state);
         swap_queues();
       }
-      while ( current_state < num_states )
+      while ( current_state < endoflevelat )
       {
         if ( bithashing )
         {
@@ -1052,15 +1055,15 @@ static bool generate_lts()
           fprintf(stderr,
             "monitor: currently at level %lu with %llu state%s and %llu transition%s explored and %llu state%s seen.\n",
             level,
-            current_state,
-            (current_state==1)?"":"s",
+            current_state-statesskipped,
+            (current_state-statesskipped==1)?"":"s",
             trans,
             (trans==1)?"":"s",
             num_states,
             (num_states==1)?"":"s"
           );
         }
-        if ( current_state == nextlevelat )
+        if ( current_state == endoflevelat )
         {
           if ( bithashing )
           {
@@ -1083,12 +1086,16 @@ static bool generate_lts()
             fflush(stderr);
           }
           level++;
+	  statesskipped = statesskipped+statestobeskipped;
           if ( bithashing && (current_state+todo_max < num_states) )
           {
-            nextlevelat = current_state+todo_max;
+            endoflevelat = current_state+todo_max;
+	    statestobeskipped = num_states-endoflevelat;
           } else {
-            nextlevelat = num_states;
+            endoflevelat = num_states;
           }
+	  current_state = nextlevelat;
+          nextlevelat = num_states;
           prevcurrent = current_state;
           prevtrans = trans;
         }
@@ -1418,7 +1425,7 @@ int main(int argc, char **argv)
 {
   string spec_fn, lts_fn;
   FILE *SpecStream;
-  ATerm Spec;
+  ATerm bot,Spec;
   unsigned long initial_table_size = DEFAULT_INIT_TSIZE;
   #define sopts "hqvfyucrb::l:da:t::C::R:s:"
   struct option lopts[] = {
@@ -1480,7 +1487,7 @@ int main(int argc, char **argv)
       }
     } 
   
-    ATinit(a_argc,a_argv,&Spec);
+    ATinit(a_argc,a_argv,&bot);
   }
   // end handle aterm lib options 
 
@@ -1746,6 +1753,7 @@ int main(int argc, char **argv)
   
   if ( spec_fn == "" )
   {
+    gsErrorMsg("no LPE file supplied\n");
     print_help_suggestion(stderr,argv[0]);
     return 1;
   }
@@ -1757,6 +1765,7 @@ int main(int argc, char **argv)
   }
   gsVerboseMsg("reading LPE from '%s'\n", spec_fn.c_str());
   Spec = ATreadFromFile(SpecStream);
+  ATprotect(&Spec); // ATerms in main might not be protected
   if ( Spec == NULL )
   {
     gsErrorMsg("could not read LPE from '%s'\n", spec_fn.c_str());
