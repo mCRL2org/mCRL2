@@ -711,7 +711,10 @@ static unsigned long long calc_hash_finish()
   {
     calc_hash_add(0x76a34e87);
   }
-  return sh_a^sh_b^sh_c;
+  return (((unsigned long long) (sh_a & 0xffff0000)) << 24) |
+         (((unsigned long long) (sh_b & 0xffff0000)) << 16) |
+         (((unsigned long long) (sh_c & 0xffff0000))     ) |
+         (sh_a & 0x0000ffff)^(sh_b & 0x0000ffff)^(sh_c & 0x0000ffff);
 }
 static void calc_hash_aterm(ATerm t)
 {
