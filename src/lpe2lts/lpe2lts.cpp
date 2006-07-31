@@ -1832,7 +1832,14 @@ int main(int argc, char **argv)
   ATprotectAFun(afun_pair);
   if ( bithashing )
   {
-    bithashtable = (unsigned long *) malloc(bithashsize/8); // sizeof(unsigned int) * bithashsize/(8*sizeof(unsigned int))
+    unsigned long long bithashtablesize;
+    if ( bithashsize > ULLONG_MAX-4*sizeof(unsigned long) )
+    {
+      bithashtablesize = (1ULL << (sizeof(unsigned long long)*8-3)) / sizeof(unsigned long);
+    } else {
+      bithashtablesize = (bithashsize+4*sizeof(unsigned long))/(8*sizeof(unsigned long));
+    }
+    bithashtable = (unsigned long *) calloc(bithashtablesize,sizeof(unsigned long)); // sizeof(unsigned int) * bithashsize/(8*sizeof(unsigned int))
     if ( bithashtable == NULL )
     {
       gsErrorMsg("cannot create bit hash table\n");
