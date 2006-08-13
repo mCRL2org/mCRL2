@@ -2254,6 +2254,7 @@ static ATermAppl bodytovarheadGNF(
     body=bodytovarheadGNF(body,alt,freevars,first);
     newproc=newprocess(freevars,body,pCRL,canterminatebody(body,NULL,NULL,0));
     return gsMakeProcess(newproc,objectdata[objectIndex(newproc)].parameters);
+
   } 
 
   if (gsIsSeq(body))
@@ -2263,6 +2264,26 @@ static ATermAppl bodytovarheadGNF(
     if (seq>=s)
     { 
       body1=bodytovarheadGNF(body1,name,freevars,v);
+      if ((gsIsCond(body2)) && (sum>=s))
+      { /* Here we check whether the process body has the form
+           a (c -> x <> y). For state space generation it turns out
+           to be beneficial to rewrite this to c-> a x <> a y, as in
+           certain cases this leads to a reduction of the number
+           of states, despite the duplication of the a action. This
+           was observed by Yaroslav Usenko, May 2006. Implemented by JFG.
+           On industrial examples, it appears to reduce the state space
+           with a factor up to 2. */
+
+        ATermAppl body3=bodytovarheadGNF(ATAgetArgument(body2,1),seq,freevars,later);
+        ATermAppl body4=bodytovarheadGNF(ATAgetArgument(body2,2),seq,freevars,later);;
+        
+        ATermAppl c=ATAgetArgument(body2,0);
+
+        ATermAppl r= gsMakeChoice(
+                     gsMakeCond(c,gsMakeSeq(body1,body3),gsMakeDelta()),
+                     gsMakeCond(gsMakeDataExprNot(c),gsMakeSeq(body1,body4),gsMakeDelta()));
+        return r;
+      }
       body2=bodytovarheadGNF(body2,seq,freevars,later);
       return gsMakeSeq(body1,body2);
     } 
@@ -8263,7 +8284,8 @@ static ATermAppl split_body(
         result=gsMakeProcess(p,objectdata[objectIndex(p)].parameters);
       }
       else
-      { ATermAppl p=newprocess(parameters,t,pCRL,0);
+      { 
+        ATermAppl p=newprocess(parameters,t,pCRL,0);
         result=gsMakeProcess(p,objectdata[objectIndex(p)].parameters);
       }
     }
