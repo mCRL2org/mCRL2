@@ -1391,7 +1391,7 @@ void RewriterCompilingJitty::calcTerm(FILE *f, ATerm t, int startarg, ATermList 
 	      int i = 0;
 	      for (ATermList m=ATgetNext((ATermList) t); !ATisEmpty(m); m=ATgetNext(m))
 	      {
-		      if ( ATisAppl(ATgetFirst(m)) && ( (gsIsDataVarId(ATAgetFirst(m)) && (ATindexOf(nnfvars,ATgetFirst(m),0) == -1)) || (gsIsNil(ATAgetFirst(m)) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(i),0) == -1)) ) )
+		      if ( ATisAppl(ATgetFirst(m)) && (nnfvars != NULL) && ( (gsIsDataVarId(ATAgetFirst(m)) && (ATindexOf(nnfvars,ATgetFirst(m),0) == -1)) || (gsIsNil(ATAgetFirst(m)) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(i),0) == -1)) ) )
 		      {
 			      nfs = nfs | (1 << i);
 		      }
@@ -1420,7 +1420,7 @@ void RewriterCompilingJitty::calcTerm(FILE *f, ATerm t, int startarg, ATermList 
     	        int i = 0;
     	        for (ATermList m=ATgetNext((ATermList) t); !ATisEmpty(m); m=ATgetNext(m))
     	        {
-    	  	      if ( ATisAppl(ATgetFirst(m)) && ( (gsIsDataVarId(ATAgetFirst(m)) && (ATindexOf(nnfvars,ATgetFirst(m),0) == -1)) || (gsIsNil(ATAgetFirst(m)) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(i),0) == -1)) ) )
+    	  	      if ( ATisAppl(ATgetFirst(m)) && (nnfvars != NULL) && ( (gsIsDataVarId(ATAgetFirst(m)) && (ATindexOf(nnfvars,ATgetFirst(m),0) == -1)) || (gsIsNil(ATAgetFirst(m)) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(i),0) == -1)) ) )
     	  	      {
     	  		      nfs = nfs | (1 << i);
     	  	      }
