@@ -8,6 +8,7 @@ CONFIG = build/config.mk
 
 all: $(CONFIG) $(BJAM)
 	@$(BOOST_BUILD)
+	@$(MAKE) -C src/doc
 
 install:  $(CONFIG) $(BJAM)
 	@$(BOOST_BUILD) --install
