@@ -1,6 +1,6 @@
 /*======================================================================
 //
-// Copyright (c) 2005 2006 TU/e
+// Copyright (c) 2005, 2006 TU/e
 //
 // author     : Jeroen van der Wulp <J.v.d.Wulp@tue.nl>
 //
@@ -114,7 +114,7 @@ namespace xml2pp {
   }
 
   /**
-   * @param[in] n the number times to skip a succesful read
+   * @param[in] n the number times to skip a successful read
    **/
   inline void reader_wrapper::next_element(unsigned int n) throw () {
     int status = xmlTextReaderRead(reader);
@@ -135,7 +135,7 @@ namespace xml2pp {
         /* Skip whitespace */
         status = xmlTextReaderRead(reader);
       }
-      else if (1 < n) {
+      else if (1 <= n) {
         status = xmlTextReaderRead(reader);
 
         --n;
@@ -267,7 +267,7 @@ namespace xml2pp {
    * @param[in] n the number times to skip a succesful read
    **/
   void text_reader::next_element(unsigned int n) {
-    wrapped_reader->next_element();
+    wrapped_reader->next_element(n);
   }
 
   /**

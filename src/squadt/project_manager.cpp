@@ -164,17 +164,18 @@ namespace squadt {
    * @param[in] r an xml2pp text reader that has been constructed with a project file
    **/
   void project_manager::read(xml2pp::text_reader& r) {
-    /* Advance beyond project element */
+
     r.get_attribute(&count, "count");
 
-    r.next_element(1);
+    /* Advance beyond project element */
+    r.next_element();
 
     if (r.is_element("description") && !r.is_empty_element()) {
       r.next_element();
 
       r.get_value(&description);
 
-      r.next_element(2);
+      r.next_element(1);
     }
 
     processor::id_conversion_map c;

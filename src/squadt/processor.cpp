@@ -201,7 +201,12 @@ namespace squadt {
       }
     }
 
-    s << " output-directory=\"" << output_directory << "\">";
+    if (!output_directory.empty()) {
+      s << " output-directory=\"" << output_directory << "\">";
+    }
+    else {
+      s << ">";
+    }
 
     /* The last received configuration from the tool */
     sip::configuration::sptr c = current_monitor->get_configuration();
