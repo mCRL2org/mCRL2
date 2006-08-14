@@ -259,7 +259,7 @@ enum mcrl22lpe_options {
        option_output_lpe_file_name,
        option_linearisation_method,
        option_final_cluster,
-       option_intermediate_cluster,
+       option_no_intermediate_cluster,
        option_no_alpha,
        option_newstate,
        option_binary,
@@ -319,8 +319,8 @@ static void get_configuration_parameters_via_squadt_display()
     // left option column
     vertical_box* left_option_column = new vertical_box();
     option_columns->add(left_option_column,top);
-    checkbox* clusterintermediate = new checkbox("Intermediate clustering",true);
-    left_option_column->add(clusterintermediate,layout::left);
+    checkbox* noclusterintermediate = new checkbox("No intermediate clustering",false);
+    left_option_column->add(noclusterintermediate,layout::left);
     checkbox* clusterfinal = new checkbox("Final clustering",false);
     left_option_column->add(clusterfinal,layout::left);
     checkbox* newstate = new checkbox("Use enumerated states",false);
@@ -412,8 +412,8 @@ static void get_configuration_parameters_via_squadt_display()
 
     configuration.add_option(option_final_cluster).
           append_argument(sip::datatype::boolean::standard,(bool)clusterfinal->get_status());
-    configuration.add_option(option_intermediate_cluster).
-          append_argument(sip::datatype::boolean::standard,(bool)clusterintermediate->get_status());
+    configuration.add_option(option_no_intermediate_cluster).
+          append_argument(sip::datatype::boolean::standard,(bool)noclusterintermediate->get_status());
     configuration.add_option(option_no_alpha).
           append_argument(sip::datatype::boolean::standard,(bool)noalpha->get_status());
     configuration.add_option(option_newstate).
@@ -536,7 +536,7 @@ static bool get_squadt_parameters(int argc,
     lin_options.final_cluster = 
         boost::any_cast <bool> (*(configuration.get_option(option_final_cluster)->get_value_iterator()));
     lin_options.no_intermediate_cluster = 
-        boost::any_cast <bool> (*(configuration.get_option(option_intermediate_cluster)->get_value_iterator()));
+        boost::any_cast <bool> (*(configuration.get_option(option_no_intermediate_cluster)->get_value_iterator()));
     lin_options.opt_noalpha = 
         boost::any_cast <bool> (*(configuration.get_option(option_no_alpha)->get_value_iterator()));
     lin_options.newstate = 
