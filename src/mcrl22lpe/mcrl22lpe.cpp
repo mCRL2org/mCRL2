@@ -332,7 +332,7 @@ static void get_configuration_parameters_via_squadt_display()
     // right option column
     layout::vertical_box* right_option_column = new layout::vertical_box();
     option_columns->add(right_option_column,top);
-    checkbox* norewrite = new checkbox("Do not rewrite",true);
+    checkbox* norewrite = new checkbox("Do not rewrite",false);
     right_option_column->add(norewrite,layout::left);
     checkbox* noalpha = new checkbox("Do not apply alphabet axioms",false);
     right_option_column->add(noalpha,layout::left);
