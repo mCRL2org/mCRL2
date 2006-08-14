@@ -529,7 +529,8 @@ bool GraphFrame::OptimizeDrawing(double precision) {
     if (newY < CircleRadius)
         newY = 0 + CircleRadius;
 
-    vectNode[i]->SetXY( newX , newY );
+    vectNode[i]->ForceSetXY( newX , newY );
+    // Force the position of the node, a pin can go off-screen. 
   }
     
 
@@ -704,8 +705,9 @@ void GraphFrame::Resize(wxSize sz2) {
   double diff_y = (double) sz2.GetHeight() / (double) leftPanel->Get_Height();
 
   for (size_t m = 0; m < vectNode.size(); m++) 
-  { vectNode[m]->SetXY(vectNode[m]->GetX() * diff_x, 
+  { vectNode[m]->ForceSetXY(vectNode[m]->GetX() * diff_x, 
                        vectNode[m]->GetY() * diff_y);
+    // We use ForceSetXY here, otherwise the pin can fall out of the window.
   }
 
 	FillStatusBar(GetInfoWinSize(sz2),0);
@@ -727,7 +729,7 @@ int GraphFrame::FindNode(wxPoint pt) {
 static int ind_node_dragged = -1;
 
 void GraphFrame::ReplaceAfterDrag(wxPoint pt) {
-	vectNode[ind_node_dragged]->forceSetXY(pt.x,pt.y);//redefine node coord
+	vectNode[ind_node_dragged]->ForceSetXY(pt.x,pt.y);//redefine node coord
 }
 
 void GraphFrame::FixNode(int num) {

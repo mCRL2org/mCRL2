@@ -105,7 +105,7 @@ void Node::SetXY(double _x, double _y) {
     wxBell();
 }
 
-void Node::forceSetXY(double _x, double _y) {
+void Node::ForceSetXY(double _x, double _y) {
     posX = _x;
     posY = _y;
 }
