@@ -519,18 +519,37 @@ bool GraphFrame::OptimizeDrawing(double precision) {
     newX = vectNode[i]->GetX() + arraySumForceX[i];
     newY = vectNode[i]->GetY() + arraySumForceY[i];
     
+    
     //Check whether positions are outside of the window
-    if (newX + CircleRadius  > leftPanel->Get_Width())
-        newX = leftPanel->Get_Width() - CircleRadius ;
-    if (newX < CircleRadius)
-        newX = 0 + CircleRadius ;
-    if (newY + CircleRadius > leftPanel->Get_Height())
-        newY = leftPanel->Get_Height() - CircleRadius ;
-    if (newY < CircleRadius)
-        newY = 0 + CircleRadius;
+    //Use outsideWindow to monitor this result.
+    bool outsideWindow = false;
 
-    vectNode[i]->ForceSetXY( newX , newY );
-    // Force the position of the node, a pin can go off-screen. 
+    if (newX + CircleRadius  > leftPanel->Get_Width()) {
+        newX = leftPanel->Get_Width() - CircleRadius ;
+        outsideWindow = true;
+    }
+    if (newX < CircleRadius) {
+        newX = 0 + CircleRadius ;
+        outsideWindow = true;
+    }
+
+    if (newY + CircleRadius > leftPanel->Get_Height()) {
+        newY = leftPanel->Get_Height() - CircleRadius ;
+        outsideWindow = true;
+    }
+
+    if (newY < CircleRadius) {
+        newY = 0 + CircleRadius;
+        outsideWindow = true;
+    }
+    
+    if (outsideWindow) {
+      vectNode[i]->ForceSetXY( newX , newY);
+      // Force the position of the node, a pin can go off-screen. 
+    }
+    else {
+      vectNode[i]->SetXY( newX , newY );
+    }
   }
     
 
