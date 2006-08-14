@@ -7,14 +7,16 @@ Node::Node(unsigned int _num, double _posX, double _posY, wxString _lbl, bool _i
              posX(_posX), posY(_posY), lbl(_lbl), num(_num), initState(_initState)
 {
   locked = false;
-	labelsVisible = true;
+  labelsVisible = true;
+//  node_colour = wxT("Red");
+  node_colour = wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE);
 }
 
 void Node::OnPaint(wxDC * ptrDC) 
 {
   wxColour color;
   if (!locked)
-    color = wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE);
+    color = node_colour;
   else 
     color = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
 
