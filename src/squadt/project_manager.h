@@ -94,6 +94,9 @@ namespace squadt {
       /** \brief Get the path to the project store */
       inline std::string get_project_store() const;
 
+      /** \brief Get the full path to a file (by its name) in the project store */
+      inline boost::filesystem::path get_path_for_name(const std::string&) const;
+
       /** \brief Recursively add all files in a directory to the project */
       void import_directory(const boost::filesystem::path&);
  
@@ -149,6 +152,15 @@ namespace squadt {
 
   inline std::string project_manager::get_name() const {
     return (store.leaf());
+  }
+
+  /**
+   * @param n the name of the file
+   **/
+  inline boost::filesystem::path project_manager::get_path_for_name(const std::string& n) const {
+    assert(boost::filesystem::native(n));
+
+    return (store / n);
   }
 
   /**

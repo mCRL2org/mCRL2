@@ -108,7 +108,7 @@ namespace squadt {
      
       /* Check whether outputs all exist and find the minimum timestamp of the inputs */
       for (output_list::const_iterator i; i != outputs.end(); ++i) {
-        path l((*i)->location);
+        path l(manager->get_path_for_name((*i)->location));
      
         if (exists(l)) {
           /* Output exists, get timestamp */ 
@@ -130,7 +130,7 @@ namespace squadt {
           throw (exception::exception(exception::missing_object_descriptor));
         }
      
-        path l(d->location);
+        path l(manager->get_path_for_name(d->location));
      
         if (exists(l)) {
           /* Input exists, get timestamp */ 
@@ -324,7 +324,7 @@ namespace squadt {
 
     /* Make sure any output objects are removed from storage */
     for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
-      path p((*i)->location);
+      path p(manager->get_path_for_name((*i)->location));
 
       if (exists(p)) {
         remove(p);
@@ -439,7 +439,7 @@ namespace squadt {
   void processor::rename_object(object_descriptor::sptr const& o, std::string const& n) {
 
     if (o.get() != 0) {
-      path source(o->location);
+      path source(manager->get_path_for_name(o->location));
       path target(n);
 
       if (exists(source) && source != target) {
@@ -481,7 +481,7 @@ namespace squadt {
         else {
           if ((*i)->get_location() != o->location) {
             /* Output already known, but filenames do not match */
-            remove(path(o->location));
+            remove(manager->get_path_for_name(o->location));
           }
 
           replace_output(o, *(*i));
@@ -491,14 +491,11 @@ namespace squadt {
   }
 
   bool processor::check_input_consistency() const {
-    input_list::const_iterator i = inputs.begin();
 
-    while (i != inputs.end()) {
-      if ((*i).lock().get() == 0) {
+    BOOST_FOREACH(input_list::value_type i, inputs) {
+      if (i.lock().get() == 0) {
         return false;
       }
-
-      ++i;
     }
 
     return (true);
