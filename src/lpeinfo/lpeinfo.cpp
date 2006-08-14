@@ -193,6 +193,11 @@ int main(int ac, char** av) {
       display->set_top_manager(layout_manager);
 
       tc.send_display_layout(display);
+
+      /* Termination sequence */
+      tc.send_signal_done();
+
+      tc.await_message(sip::message_request_termination);
     }
     else {
 #endif
@@ -227,12 +232,6 @@ int main(int ac, char** av) {
 
     return (1);
   }
-
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-  tc.send_signal_done();
-
-  tc.await_message(sip::message_request_termination);
-#endif
 
   return 0;
 }
