@@ -324,7 +324,7 @@ namespace sip {
           }
         }
       }
-      catch (sip::exception::exception* e) {
+      catch (sip::exception* e) {
         std::cerr << e->what();
       }
     }

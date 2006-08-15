@@ -19,21 +19,23 @@ namespace squadt {
 
     /** \brief A basic type for exceptions derived from that provided by the standard library */
     typedef ::utility::exception < values > exception;
-
-#ifdef SQUADT_IMPORT_STATIC_DEFINITIONS
-    /** \brief Descriptions for error messages */
-    template < >
-    const char* const exception::descriptions[] = {
-      "Cannot write to user settings directory ('%s').",
-      "Failed to load %s from `%s'.",
-      "Values for required attributes are missing in element `%s'.",
-      "Requested tool `%s' is not available!",
-      "Execution of program `%s' failed miserably.",
-      "Peer provided invalid or unexpected identifier!",
-      "Processor dependency graph has dangling edges!"
-    };
-#endif
   }
 }
+
+#ifdef SQUADT_IMPORT_STATIC_DEFINITIONS
+namespace utility {
+  /** \brief Descriptions for error messages */
+  template < >
+  const char* const exception< squadt::exception::values >::descriptions[] = {
+    "Cannot write to user settings directory ('%s').",
+    "Failed to load %s from `%s'.",
+    "Values for required attributes are missing in element `%s'.",
+    "Requested tool `%s' is not available!",
+    "Execution of program `%s' failed miserably.",
+    "Peer provided invalid or unexpected identifier!",
+    "Dependency on object that no longer exists."
+  };
+}
+#endif
 
 #endif

@@ -49,15 +49,15 @@ namespace sip {
         inline char* parse_option(char* const);
 
         /** \brief Parses a minimum prefix of argument to search for a known scheme */
-        inline char* parse_scheme(char* const) throw ();
+        inline char* parse_scheme(char* const);
 
       public:
 
         /** \brief Constructor that performs extraction */
-        inline argument_extractor(int&, char** const) throw ();
+        inline argument_extractor(int&, char** const);
 
         /** \brief Removes protocol specific options and adjusts the argument count */
-        inline void process(int&, char** const) throw ();
+        inline void process(int&, char** const);
 
         /** \brief Get the arguments for the selected scheme */
         inline scheme_ptr get_scheme() const;
@@ -67,7 +67,7 @@ namespace sip {
     };
 
     /** Constructor */
-    inline argument_extractor::argument_extractor(int& argc, char** const argv) throw () : identifier(-1) {
+    inline argument_extractor::argument_extractor(int& argc, char** const argv) : identifier(-1) {
       process(argc, argv);
     }
   }

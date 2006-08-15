@@ -915,6 +915,17 @@ running_time(HANDLE process)
     return 0.0;
 }
 
+static double
+creation_time(HANDLE process)
+{
+    FILETIME creation, exit, kernel, user, current;
+    if (GetProcessTimes(process, &creation, &exit, &kernel, &user))
+    {
+        return filetime_seconds(creation);
+    }
+    return 0.0;
+}
+
 /* it's just stupidly silly that one has to do this! */
 typedef struct PROCESS_BASIC_INFORMATION__ {
     LONG ExitStatus;
@@ -998,10 +1009,17 @@ kill_all(DWORD pid, HANDLE process)
     TerminateProcess(process,-2);
 }
 
-int is_parent_child(DWORD parent, DWORD child)
+/* Recursive check if first process is parent (directly or indirectly) of 
+the second one. Both processes are passed as process ids, not handles.
+Special return value 2 means that the second process is smss.exe and its 
+parent process is System (first argument is ignored) */
+static int 
+is_parent_child(DWORD parent, DWORD child)
 {
     HANDLE process_snapshot_h = INVALID_HANDLE_VALUE;
 
+    if (!child)
+        return 0;
     if (parent == child)
         return 1;
 
@@ -1016,8 +1034,70 @@ int is_parent_child(DWORD parent, DWORD child)
             ok == TRUE; 
             ok = Process32Next(process_snapshot_h, &pinfo) )
         {
-            if (pinfo.th32ProcessID == child && pinfo.th32ParentProcessID)
-                return is_parent_child(parent, pinfo.th32ParentProcessID);
+            if (pinfo.th32ProcessID == child)
+            {
+                /*
+                Unfortunately, process ids are not really unique. There might 
+                be spurious "parent and child" relationship match between
+                two non-related processes if real parent process of a given
+                process has exited (while child process kept running as an 
+                "orphan") and the process id of such parent process has been 
+                reused by internals of the operating system when creating 
+                another process. Thus additional check is needed - process
+                creation time. This check may fail (ie. return 0) for system 
+                processes due to insufficient privileges, and that's OK. */
+                double tchild = 0.0;
+                double tparent = 0.0;
+                HANDLE hchild = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pinfo.th32ProcessID);
+
+                CloseHandle(process_snapshot_h);
+
+                /* csrss.exe may display message box like following:
+                    xyz.exe - Unable To Locate Component
+                    This application has failed to start because 
+                    boost_foo-bar.dll was not found. Re-installing the 
+                    application may fix the problem
+                This actually happens when starting test process that depends
+                on a dynamic library which failed to build. We want to 
+                automatically close these message boxes even though csrss.exe
+                is not our child process. We may depend on the fact that (in
+                all current versions of Windows) csrss.exe is directly 
+                child of smss.exe process, which in turn is directly child of
+                System process, which always has process id == 4 .
+                This check must be performed before comparison of process 
+                creation time */
+                if (stricmp(pinfo.szExeFile, "csrss.exe") == 0
+                    && is_parent_child(parent, pinfo.th32ParentProcessID) == 2)
+                {
+                    return 1;
+                }
+                else if (stricmp(pinfo.szExeFile, "smss.exe") == 0
+                    && pinfo.th32ParentProcessID == 4)
+                {
+                    return 2;
+                }
+
+                if (hchild != 0)
+                {
+                    HANDLE hparent = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pinfo.th32ParentProcessID);
+                    if (hparent != 0)
+                    {
+                        tchild = creation_time(hchild);
+                        tparent = creation_time(hparent);
+                        
+                        CloseHandle(hparent);
+                    }
+                    CloseHandle(hchild);
+                }
+
+                /* return 0 if one of the following is true:
+                1. we failed to read process creation time
+                2. child was created before alleged parent */
+                if (tchild == 0.0 || tparent == 0.0 || tchild < tparent)
+                    return 0;
+
+                return is_parent_child(parent, pinfo.th32ParentProcessID) & 1;
+            }
         }
 
         CloseHandle(process_snapshot_h);
@@ -1026,37 +1106,63 @@ int is_parent_child(DWORD parent, DWORD child)
     return 0;
 }
 
-int related(HANDLE h, DWORD p)
-{
-    return is_parent_child(get_process_id(h), p);
-}
+typedef struct PROCESS_HANDLE_ID {HANDLE h; DWORD pid;} PROCESS_HANDLE_ID;
 
-BOOL CALLBACK window_enum(HWND hwnd, LPARAM lParam)
+/* This function is called by the operating system for each topmost window. */
+BOOL CALLBACK
+window_enum(HWND hwnd, LPARAM lParam)
 {
-    char buf[10] = {0};
-    HANDLE h = *((HANDLE*) (lParam));
+    char buf[7] = {0};
+    PROCESS_HANDLE_ID p = *((PROCESS_HANDLE_ID*) (lParam));
     DWORD pid = 0;
+    DWORD tid = 0;
 
-    if (!GetClassNameA(hwnd, buf, 10))
-        return TRUE; // failed to read class name
+    /* we want to find and close any window that:
+    1. is visible and
+    2. is a dialog and
+    3. is displayed by any of our child processes */
+    if (!IsWindowVisible(hwnd))
+        return TRUE;
 
-    if (strcmp(buf, "#32770"))
-        return TRUE; // not a dialog
+    if (!GetClassNameA(hwnd, buf, sizeof(buf)))
+        return TRUE; /* failed to read class name; presume it's not a dialog */
+ 
+    if (strcmp(buf, "#32770") != 0)
+        return TRUE; /* not a dialog */
 
-    GetWindowThreadProcessId(hwnd, &pid);
-    if (related(h, pid))
+    /* GetWindowThreadProcessId returns 0 on error, otherwise thread id
+    of window message pump thread */
+    tid = GetWindowThreadProcessId(hwnd, &pid);
+ 
+    if (tid && is_parent_child(p.pid, pid))
     {
-        PostMessage(hwnd, WM_QUIT, 0, 0);
-        // just one window at a time
+        /* ask really nice */
+        PostMessageA(hwnd, WM_CLOSE, 0, 0);
+        /* now wait and see if it worked. If not, insist */
+        if (WaitForSingleObject(p.h, 200) == WAIT_TIMEOUT)
+        {
+            PostThreadMessageA(tid, WM_QUIT, 0, 0);
+            WaitForSingleObject(p.h, 300);
+        }
+        
+        /* done, we do not want to check any other window now */
         return FALSE;
     }
 
     return TRUE;
 }
 
-void close_alert(HANDLE process)
+static void 
+close_alert(HANDLE process)
 {
-    EnumWindows(&window_enum, (LPARAM) &process);
+    DWORD pid = get_process_id(process);
+    /* If process already exited or we just cannot get its process id, do not 
+    go any further */
+    if (pid)
+    {
+        PROCESS_HANDLE_ID p = {process, pid};
+        EnumWindows(&window_enum, (LPARAM) &p);
+    }
 }
 
 static int
@@ -1094,9 +1200,10 @@ my_wait( int *status )
     
     if ( globs.timeout > 0 )
     {
+        unsigned int alert_wait = 1;
         /* with a timeout we wait for a finish or a timeout, we check every second
          to see if something timed out */
-        for (waitcode = WAIT_TIMEOUT; waitcode == WAIT_TIMEOUT;)
+        for (waitcode = WAIT_TIMEOUT; waitcode == WAIT_TIMEOUT; ++alert_wait)
         {
             waitcode = WaitForMultipleObjects( num_active, active_handles, FALSE, 1*1000 /* 1 second */ );
             if ( waitcode == WAIT_TIMEOUT )
@@ -1105,10 +1212,16 @@ my_wait( int *status )
                 for ( i = 0; i < num_active; ++i )
                 {
                     double t = running_time(active_handles[i]);
+
+                    /* periodically (each 5 secs) check and close message boxes
+                    displayed by any of our child processes */
+                    if ((alert_wait % ((unsigned int) 5)) == 0)
+                        close_alert(active_handles[i]);
+
                     if ( t > (double)globs.timeout )
                     {
                         /* the job may have left an alert dialog around,
-                         try and get rid of it before killing */
+                        try and get rid of it before killing */
                         close_alert(active_handles[i]);
                         /* we have a "runaway" job, kill it */
                         kill_all(0,active_handles[i]);

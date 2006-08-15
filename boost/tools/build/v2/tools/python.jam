@@ -34,6 +34,7 @@ import "class" : new ;
 import os ;
 import common ;
 import toolset : flags ;
+import regex ;
 
 # Make this module a project
 project.initialize $(__name__) ;
@@ -50,6 +51,10 @@ lib dl ;
 # This contains 'openpty' function need by python. Again, on
 # some system need to pass this to linker explicitly.
 lib util ;
+# Python uses pthread symbols.
+lib pthread ;
+# Extra library needed by phtread on some platforms.
+lib rt ;
 
 
 # Initializes the Python toolset.
@@ -129,22 +134,47 @@ rule init-unix ( version ? : root ? : includes ? : libraries ? : condition * )
         flags python.capture-output PYTHON $(condition:J=/) : $(interpreter) ;
     }   
 
-    
+
     local extra-libs ;
-    if [ os.name ] = SOLARIS
+    
+    switch [ os.name ]
     {
-        extra-libs = dl ;
-    }
-    else if [ os.name ] = OSF || [ os.name ] = QNXTO
-    {
-        # Nothing.
-    }   
-    else
-    {
-        extra-libs = dl util ;
+        case SOLARIS : extra-libs = dl      ;
+        case OSF :     extra-libs =         ;
+        case QNX* :    extra-libs = util    ;
+        case * :       extra-libs = dl util ;
     }
     
+    # Depending on system, Python library is either static
+    # or shared. When it's static, we need to add 'pthread'
+    # to link line of all clients, otherwise we'll get
+    # unresolved symbols. Same effect can be accomplished
+    # by using <threading>multi on the client, but
+    # that can have performance overhead, and is not really
+    # necessary, as Python interface has nothing that's
+    # affected by threading mode.
+    extra-libs += pthread ;
     
+    extra-libs-conditional = ;
+    # Add 'rt' option on Sun. While we duplicate the
+    # logic already in sun.jam and gcc.jam, I see no easy
+    # way to refactor it.
+    # Note that for 'sun' toolset, rt is already unconditionally
+    # added.
+
+    # (MS) Question: Why not [ os.name ] in the next statement?
+    switch [ modules.peek : JAMUNAME ]
+    {
+        case SunOS* :
+        {
+            extra-libs-conditional += <toolset>gcc:<source>rt ;
+        }
+        case OSF* :
+        {
+            extra-libs-conditional += <toolset>gcc:<source>rt ;
+        }
+    }
+             
     # On Linux, we don't want to link either Boost.Python or
     # Python extensions to libpython, so that when extensions
     # loaded in the interpreter, the symbols in the interpreter
@@ -159,8 +189,8 @@ rule init-unix ( version ? : root ? : includes ? : libraries ? : condition * )
                  ;
     
     alias python
-                 :  $(extra-libs)
-                 : $(condition)
+                 : $(extra-libs) 
+                 : $(condition) $(extra-libs-conditional)
                  :
                  : <include>$(includes) 
                    <library-path>$(libraries)
@@ -267,6 +297,7 @@ rule init-nt ( version : root ? : includes ? : libraries ? : cygwin-condition ? 
         
         PYTHON_INCLUDES ?= $(root)/include [ GLOB $(root) : PC ] ;
         
+        local PYTHON_VERSION_NODOT = [ regex.match ([0-9]+[.][0-9]+).* : $(version) : 1 ] ;
         PYTHON_DLL ?= [ GLOB $(PATH) $(Path) : python$(PYTHON_VERSION_NODOT).dll ] ;
         PYTHON_DEBUG_DLL ?= [ GLOB $(PATH) $(Path) : python$(PYTHON_VERSION_NODOT)_d.dll ] ;
         PYTHON_IMPORT_LIB ?= [ GLOB $(PYTHON_LIB_PATH) : libpython$(PYTHON_VERSION_NODOT).* ] ;
@@ -527,6 +558,12 @@ generators.register-standard testing.expect-success
 
 rule capture-output ( target : sources * : properties * )
 {
+    # Setup up proper DLL search path.
+    # Here, $(sources[1]) is python module and $(sources[2]) is
+    # DLL. Only $(sources[1]) is passed to testing.capture-output,
+    # so RUN_PATH variable on $(sources[2]) is not consulted. Move it
+    # over explicitly.
+    RUN_PATH on $(sources[1]) = [ on $(sources[2]) return $(RUN_PATH) ] ;
     PYTHONPATH = [ on $(sources[2]) return $(LOCATE) ] ;
     testing.capture-output $(target) : $(sources[1]) : $(properties) ;
     local c = [ common.prepend-path-variable-command PYTHONPATH : $(PYTHONPATH) ] ;

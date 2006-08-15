@@ -61,7 +61,7 @@ namespace sip {
      *
      * \return A pointer within argv to the point upto which the option was matched.
      **/
-    inline char* argument_extractor::parse_scheme(char* const option) throw () {
+    inline char* argument_extractor::parse_scheme(char* const option) {
       unsigned int i = 0;
 
       while (i < known_scheme_number) {
@@ -127,7 +127,7 @@ namespace sip {
      * \attention the specific command line options are removed, so and argc and argv are modified
      * \return whether options were found and whether a connection is being opened with a controller
      **/
-    inline void argument_extractor::process(int& argc, char** const argv) throw () {
+    inline void argument_extractor::process(int& argc, char** const argv) {
       size_t i = 0;
       size_t j = 0;
 

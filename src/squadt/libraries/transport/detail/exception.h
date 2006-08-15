@@ -13,15 +13,18 @@ namespace transport {
 
   /** \brief The common exception type */
   typedef ::utility::exception < values > exception;
+}
 
 #ifdef IMPORT_STATIC_DEFINITIONS
+namespace utility {
+  /** \brief Descriptions for error messages */
   template < >
-  const char* const ::utility::exception< transport::values >::descriptions[] = {
+  const char* const exception< transport::values >::descriptions[] = {
     "Listener failed connection attempt!",
     "Transceiver failed send or receive!"
   };
-#endif
 }
+#endif
 
 #endif
 

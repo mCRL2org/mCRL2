@@ -88,37 +88,11 @@ class stlport-target-class : basic-target
         self.headers = $(headers) ;
         self.libraries = $(libraries) ;
         self.version = $(version) ;
-        self.version.5 = [ MATCH "^(5[.][^.]+).*" : $(version) ] ;
-    }
-
-    rule match ( property-set )
-    {
-        # Override the rule which detects if this basic-target is
-        # suitable for the specified property set.
-        # Basically, just checks that requested version is equal to
-        # self.version. We could have added stlport-$(version) to
-        # requirements, but then stlport-$(version) would show in
-        # the common properties, causing recursive building of ourselfs.
+        self.version.5 = [ MATCH "^(5[.][0123456789]+).*" : $(version) ] ;
         
-        local matched ;
-        if [ $(property-set).get <stdlib-stlport:version> ] = $(self.version)
-        {
-            if $(self.version.5)
-            {
-                # And for STLport 5.x multi-threading is required.
-                if [ $(property-set).get <threading> ] = multi
-                {
-                    matched = stlport-$(self.version) ;
-                }
-            }
-            else
-            {
-                matched = stlport-$(self.version) ;
-            }
-        }
-        matched ?= no-match ;
-        
-        return $(matched) ;
+        local requirements ;
+        requirements += <stdlib-stlport:version>$(self.version) ;
+        self.requirements = [ property-set.create $(requirements) ] ;
     }
 
     rule generate ( property-set )
@@ -128,8 +102,13 @@ class stlport-target-class : basic-target
         # cause a loop in main target references. Remove that property
         # manually.
 
-        property-set = [ property-set.create [ difference
-            [ $(property-set).raw ] : <library>/stlport//stlport <stdlib>stlport ] ] ;
+        property-set = [ property-set.create
+            [ difference
+                [ $(property-set).raw ] :
+                <library>/stlport//stlport
+                <stdlib>stlport
+                ]
+            ] ;
         return [ basic-target.generate $(property-set) ] ;
     }
 
@@ -256,6 +235,19 @@ class stlport-target-class : basic-target
             usage-requirements +=
                 <define>_STLP_NO_OWN_IOSTREAMS=1
                 <define>_STLP_HAS_NO_NEW_IOSTREAMS=1 ;
+        }
+        if $(self.version.5)
+        {
+            # Version 5.x
+            if [ $(rproperties).get <threading> ] = "single"
+            {
+                # Since STLport5 doesn't normally support single-thread
+                # we force STLport5 into the multi-thread mode. Hence
+                # getting what other libs provide of single-thread code
+                # linking against a multi-thread lib.
+                usage-requirements +=
+                    <define>_STLP_THREADS=1 ;
+            }
         }
         
         #~ Allow setting up to use STLport by only using the library target

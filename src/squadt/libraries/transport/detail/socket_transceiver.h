@@ -10,6 +10,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/thread/condition.hpp>
 
 #include <transport/transporter.h>
 #include <transport/detail/transceiver.tcc>

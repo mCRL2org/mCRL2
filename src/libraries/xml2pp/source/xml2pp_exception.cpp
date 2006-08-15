@@ -19,7 +19,6 @@
 
 namespace xml2pp {
   /** Messages for exceptions */
-  template < >
   const char* const xml2pp_exception::descriptions[] = {
     "Unable to read specified file: `%1%'!",
     "Unable to initialise reader.",

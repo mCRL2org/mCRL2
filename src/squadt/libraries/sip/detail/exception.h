@@ -22,11 +22,13 @@ namespace sip {
 
   /** \brief The common exception type */
   typedef ::utility::exception < values > exception;
+}
 
 #ifdef SIP_IMPORT_STATIC_DEFINITIONS
+namespace utility {
   /** \brief Messages for exceptions */
   template < >
-  const char* const ::utility::exception< sip::values >::descriptions[] = {
+  const char* const exception< sip::values >::descriptions[] = {
     "Functionality not yet implemented!",
     "Expected the start of message sequence.",
     "Expected the end of message sequence.",
@@ -39,7 +41,7 @@ namespace sip {
     "Parse error: expected `%1%' before `%2%'.",
     "Encountered an unknown layout element: `%1%'"
   };
-#endif
 }
+#endif
 
 #endif
