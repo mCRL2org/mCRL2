@@ -29,6 +29,8 @@ project
           <os>CYGWIN,<toolset>gcc:<runtime-link>static
           <os>CYGWIN,<toolset>gcc:<link>static
           <os>LINUX,<toolset>gcc:<cxxflags>"-std=c++98 -ansi"
+          <toolset>msvc:<define>WIN32
+          <toolset>msvc:<include>../../auxiliary/include/nt_compatibility
        : default-build
           <address-model>$(ADDRESS_MODEL)
           <variant>$(BUILD_VARIANT)
@@ -44,7 +46,7 @@ for library in [ MATCH boost/libs/(.*)/build/Jamfile.v2 : [ glob boost/libs/*/bu
   use-project /boost/$(library) : boost/libs/$(library)/build ;
 }
 
-tools = [ MATCH src/(.*)/.* : [ glob src/*/Jamfile.v2 src/*/build/Jamfile.v2 ] ] ;
+tools = [ MATCH src/(.*)/.* : [ glob src/*/Jamfile.v2 ] ] ;
 
 # Register tool projects
 for tool in $(tools) {

@@ -147,7 +147,7 @@ namespace sip {
      **/
     inline const controller::capabilities::ptr communicator::get_controller_capabilities() const {
       if (current_controller_capabilities.get() == 0) {
-        throw (sip::exception::exception(sip::exception::controller_capabilities_unknown));
+        throw (sip::exception(sip::controller_capabilities_unknown));
       }
  
       return (current_controller_capabilities);

@@ -20,7 +20,7 @@
 namespace xml2pp {
 
   /* Exception class for protocol specific exceptions. */
-  class exception : public std::exception {
+  class xml2pp_exception : public std::exception {
 
     public:
 
@@ -47,15 +47,15 @@ namespace xml2pp {
     public:
 
       /** \brief Constructor */
-      inline exception(type_identifier t);
+      inline xml2pp_exception(type_identifier t);
 
       /** \brief Constructor for messages with one argument. */
       template < typename T1 >
-      inline exception(type_identifier, T1);
+      inline xml2pp_exception(type_identifier, T1);
 
       /** \brief Constructor for messages with two arguments. */
       template < typename T1, typename T2 >
-      inline exception(type_identifier, T1, T2);
+      inline xml2pp_exception(type_identifier, T1, T2);
 
       /** \brief Get the type of the exception */
       inline type_identifier get_type() const;
@@ -67,13 +67,13 @@ namespace xml2pp {
       inline const char* what() const throw ();
 
       /** \brief Destructor */
-      inline ~exception() throw ();
+      inline ~xml2pp_exception() throw ();
   };
 
   /**
    * @param[in] t the type identifier of the exception
    **/
-  inline exception::exception(const type_identifier t) : type(t), _message(descriptions[t]) {
+  inline xml2pp_exception::xml2pp_exception(const type_identifier t) : type(t), _message(descriptions[t]) {
   }
 
   /**
@@ -81,7 +81,7 @@ namespace xml2pp {
    * @param[in] a an argument of which the value should be substituted in the message 
    **/
   template < typename T1 >
-  inline exception::exception(const type_identifier t, T1 a) : type(t), _message(descriptions[t]) {
+  inline xml2pp_exception::xml2pp_exception(const type_identifier t, T1 a) : type(t), _message(descriptions[t]) {
     _message % a;
   }
 
@@ -91,23 +91,23 @@ namespace xml2pp {
    * @param[in] a2 an argument of which the value should be substituted in the message 
    **/
   template < typename T1, typename T2 >
-  inline exception::exception(const type_identifier t, T1 a1, T2 a2) : type(t), _message(descriptions[t]) {
+  inline xml2pp_exception::xml2pp_exception(const type_identifier t, T1 a1, T2 a2) : type(t), _message(descriptions[t]) {
     _message % a1 % a2;
   }
 
-  inline exception::type_identifier exception::get_type() const {
+  inline xml2pp_exception::type_identifier xml2pp_exception::get_type() const {
     return (type); 
   }
 
-  inline boost::format& exception::message() {
+  inline boost::format& xml2pp_exception::message() {
     return (_message); 
   }
 
-  inline const char* exception::what() const throw () {
+  inline const char* xml2pp_exception::what() const throw () {
     return (boost::str(_message).c_str());
   }
 
-  inline exception::~exception() throw () {
+  inline xml2pp_exception::~xml2pp_exception() throw () {
   }
 }
 

@@ -4,24 +4,23 @@
 #include <utility/exception.h>
 
 namespace transport {
-  namespace exception {
-    /** \brief Type for exception identification */
-    enum values {
-      listener_failure,    ///< \brief a listener failed
-      transceiver_failure  ///< \brief a transceiver failed
-    };
 
-    /** \brief The common exception type */
-    typedef ::exception::exception < values > exception;
+  /** \brief Type for exception identification */
+  enum values {
+    listener_failure,    ///< \brief a listener failed
+    transceiver_failure  ///< \brief a transceiver failed
+  };
+
+  /** \brief The common exception type */
+  typedef ::utility::exception < values > exception;
 
 #ifdef IMPORT_STATIC_DEFINITIONS
-    template < >
-    const char* const ::exception::exception< transport::exception::values >::descriptions[] = {
-      "Listener failed connection attempt!",
-      "Transceiver failed send or receive!"
-    };
+  template < >
+  const char* const ::utility::exception< transport::values >::descriptions[] = {
+    "Listener failed connection attempt!",
+    "Transceiver failed send or receive!"
+  };
 #endif
-  }
 }
 
 #endif

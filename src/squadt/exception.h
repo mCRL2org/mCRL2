@@ -18,7 +18,7 @@ namespace squadt {
     };
 
     /** \brief A basic type for exceptions derived from that provided by the standard library */
-    typedef ::exception::exception < values > exception;
+    typedef ::utility::exception < values > exception;
 
 #ifdef SQUADT_IMPORT_STATIC_DEFINITIONS
     /** \brief Descriptions for error messages */

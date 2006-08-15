@@ -413,7 +413,7 @@ namespace sip {
       }
 
       /* Unknown type in configuration */
-      throw (sip::exception::exception(exception::message_unknown_type, r.element_name()));
+      throw (sip::exception(sip::message_unknown_type, r.element_name()));
     }
 
     inline bool basic_datatype::initialise() {

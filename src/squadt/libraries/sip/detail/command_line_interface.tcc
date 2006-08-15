@@ -73,7 +73,7 @@ namespace sip {
           char* s = option + l;
 
           if (last_matched != 0 && strncmp(s, "://", 3) != 0) {
-            throw (sip::exception::exception(sip::exception::cli_parse_error_expected, "://", s));
+            throw (sip::exception(sip::cli_parse_error_expected, "://", s));
           }
 
           char* t = s + 3;
@@ -139,7 +139,7 @@ namespace sip {
           s = strchr(s, '=');
 
           if (s == 0) {
-            throw (sip::exception::exception(sip::exception::cli_parse_error_expected, '=', s));
+            throw (sip::exception(sip::cli_parse_error_expected, '=', s));
           }
 
           char* t = s + 1;
@@ -150,7 +150,7 @@ namespace sip {
               s = parse_scheme(t);
 
               if (s == t) {
-                throw (sip::exception::exception(sip::exception::cli_parse_error_expected, "valid scheme", s));
+                throw (sip::exception(sip::cli_parse_error_expected, "valid scheme", s));
               }
               break;
             case 1: /* Identifier option */

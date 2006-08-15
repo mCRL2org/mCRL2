@@ -96,7 +96,7 @@ namespace sip {
     }
 
     manager::aptr manager::static_read_structure(element::read_context& r) {
-      using sip::exception::exception;
+      using sip::exception;
 
       std::string name(r.reader.element_name());
 
@@ -115,7 +115,7 @@ namespace sip {
         }
       }
       else {
-        throw (new exception(sip::exception::unknown_layout_element, name));
+        throw (new exception(sip::unknown_layout_element, name));
       }
 
       /* Read abstract element specific data */
@@ -324,7 +324,7 @@ namespace sip {
           }
         }
       }
-      catch (xml2pp::exception::exception* e) {
+      catch (sip::exception::exception* e) {
         std::cerr << e->what();
       }
     }

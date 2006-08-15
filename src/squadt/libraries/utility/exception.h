@@ -5,7 +5,7 @@
 
 #include <boost/format.hpp>
 
-namespace exception {
+namespace utility {
 
   /* Exception class for protocol specific exceptions. */
   template < typename T >
@@ -17,6 +17,7 @@ namespace exception {
       typedef T                type_identifiers;
 
     private:
+
       /** The exception type */
       T                        type;
 
@@ -67,7 +68,7 @@ namespace exception {
   template < typename T1 >
   inline exception< T >::exception(const T t, T1 a) : type(t), _message(descriptions[t]) {
     _message % a;
- }
+  }
 
   /**
    * @param[in] t the type identifier of the exception

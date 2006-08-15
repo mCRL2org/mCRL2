@@ -1,10 +1,9 @@
 project squadt
-  : source-location ..
+  : source-location .
   : build-dir $(BUILD_TOP) 
   : requirements
     <threading>multi
-    <include>../..
-    <include>../libraries
+    <include>./libraries
   ;
 
 exe squadt

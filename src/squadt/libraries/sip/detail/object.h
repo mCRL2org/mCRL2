@@ -159,20 +159,20 @@ namespace sip {
 
   /** \pre the reader must point at an object element} */
   inline object::sptr object::read(xml2pp::text_reader& r) {
-    using sip::exception::exception;
+    using sip::exception;
 
     object::identifier id = 0;
 
     assert(r.is_element("object"));
     
     if (!r.get_attribute(&id, "id")) {
-      throw (exception(sip::exception::message_missing_required_attribute, "id", "object"));
+      throw (exception(sip::message_missing_required_attribute, "id", "object"));
     }
     else {
       std::string new_type;
 
       if (!r.get_attribute(&new_type, "type")) {
-        throw (exception(sip::exception::message_missing_required_attribute, "type", "object"));
+        throw (exception(sip::message_missing_required_attribute, "type", "object"));
       }
      
       size_t i = 0;
@@ -182,13 +182,13 @@ namespace sip {
       }
      
       if (type_strings[i] == 0) {
-        throw (exception(sip::exception::message_unknown_type, new_type, "object"));
+        throw (exception(sip::message_unknown_type, new_type, "object"));
       }
      
       std::string new_format;
      
       if (!r.get_attribute(&new_format, "storage-format")) {
-        throw (exception(sip::exception::message_missing_required_attribute, "storage-format", "object"));
+        throw (exception(sip::message_missing_required_attribute, "storage-format", "object"));
       }
      
       std::string new_location;

@@ -91,7 +91,7 @@ namespace xml2pp {
 
   inline reader_wrapper::reader_wrapper(xmlTextReaderPtr r) : reader(r) {
     if (r == 0) {
-      throw (exception::exception(exception::unable_to_initialise_reader));
+      throw (xml2pp_exception::xml2pp_exception(xml2pp_exception::unable_to_initialise_reader));
     }
     else {
       /* Point to first element */
@@ -123,7 +123,7 @@ namespace xml2pp {
       if (status <= 0) {
         /* Process error, or end of file */
         if (status < 0) {
-          throw (exception::exception(exception::error_while_parsing_document));
+          throw (xml2pp_exception::xml2pp_exception(xml2pp_exception::error_while_parsing_document));
         }
         else {
           past_end_of_stream = true;

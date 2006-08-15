@@ -9,7 +9,7 @@
 namespace sip {
 
   void report::write(std::ostream& output) const {
-    using sip::exception::exception;
+    using sip::exception;
 
     output << "<report type=\"" << report_type << "\">";
 
@@ -19,7 +19,7 @@ namespace sip {
 
       /* Sanity check... (todo better would be to use Base-64 or some other encoding) */
       if (std::search(description.begin(), description.end(), pattern.begin(), pattern.end()) != description.end()) {
-        throw (new exception(sip::exception::message_forbidden_content, pattern));
+        throw (new exception(sip::message_forbidden_content, pattern));
       }
 
       output << "<description>" << description << "</description>";
