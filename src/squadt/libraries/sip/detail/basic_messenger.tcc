@@ -56,7 +56,9 @@ namespace sip {
      **/
     template < class M >
     inline void basic_messenger< M >::send_message(const message& m) {
+#ifndef _MSC_VER
       logger->log(1, boost::format("sent     id : %u, type : %u, data : \"%s\"\n") % getpid() % m.get_type() % m.to_xml());
+#endif // _MSC_VER
 
       send(tag_open + m.to_xml() + tag_close);
     }
@@ -214,7 +216,9 @@ namespace sip {
 
             message_ptr m(new message(new_string, t));
 
+#ifndef _MSC_VER
             logger->log(1, boost::format("received id : %u, type : %u, data : \"%s\"\n") % getpid() % t % new_string);
+#endif // _MSC_VER
 
             if (handlers.find(M::message_any) != handlers.end() || handlers.find(t) != handlers.end()) {
               /* Service handler */
