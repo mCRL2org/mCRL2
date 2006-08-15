@@ -1,7 +1,7 @@
 #include "node.h"
 
-const wxColour borderColor     = "BLACK";
-const wxColour borderColorInit = "RED";
+const wxColour* borderColor     = wxBLACK;
+const wxColour* borderColorInit = wxRED;
 
 Node::Node(unsigned int _num, double _posX, double _posY, wxString _lbl, bool _initState) : 
              posX(_posX), posY(_posY), lbl(_lbl), num(_num), initState(_initState)
@@ -22,11 +22,11 @@ void Node::OnPaint(wxDC * ptrDC)
 
     //Circle
 		if (initState) {
-			wxPen pen = wxPen(borderColorInit, 2, wxSOLID);
+			wxPen pen = wxPen(*borderColorInit, 2, wxSOLID);
 			ptrDC->SetPen(pen);
 		}
 		else {
-			wxPen pen = wxPen(borderColor, 1, wxSOLID);
+			wxPen pen = wxPen(*borderColor, 1, wxSOLID);
 			ptrDC->SetPen(pen);
 		}
     wxBrush myBrush(color,wxSOLID );

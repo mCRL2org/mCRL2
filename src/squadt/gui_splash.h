@@ -97,7 +97,7 @@ namespace squadt {
        * @param i a reference to the image to be displayed
        **/
       inline picture::picture(wxWindow* p, wxImage* i) :
-                wxPanel(p, wxID_ANY, wxDefaultPosition, wxSize(i->GetWidth(),i->GetHeight()), wxRAISED_BORDER), image(i) {
+                wxPanel(p, wxID_ANY, wxDefaultPosition, wxSize(i->GetWidth(),i->GetHeight()), wxRAISED_BORDER), image(*i) {
 
         Connect(wxEVT_PAINT, wxPaintEventHandler(picture::on_paint));
       }

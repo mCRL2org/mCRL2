@@ -638,7 +638,7 @@ namespace squadt {
         if (content != 0) {
           wxSizer* root = GetSizer();
 
-          if (content->IsShown()) {
+          if (root->IsShown(content)) {
             root->SetMinSize(GetClientSize().GetWidth(), root->GetItem((size_t) 0)->GetSize().GetHeight());
 
             content->Show(false);
