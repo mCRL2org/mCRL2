@@ -66,7 +66,7 @@ bool parse_command_line(int argc, wxChar** argv) {
  
     c = parser.Parse(false) == 0;
  
-    if (!c) {
+    if (c) {
       if (parser.Found(wxT("d"))) {
         sip::messenger::get_standard_error_logger()->set_filter_level(3);
       }

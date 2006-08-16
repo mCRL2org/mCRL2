@@ -18,6 +18,7 @@ namespace lts
                 , lts_bcg
 #endif
                 };
+
   enum lts_reduction { lts_red_none, lts_red_trace, lts_red_strong, lts_red_obs_trace, lts_red_branch };
 
   bool is_timed_pair(ATermAppl t);
@@ -65,15 +66,37 @@ namespace lts
 
   class lts : p_lts
   {
+    private:
+
+      /** \brief String representations for lts_type */
+      static char const* type_strings[];
+
+      /** \brief Extensions associated with elements of lts_type (except lts_none) */
+      static char const* extension_strings[];
+
+    public:
+
+      /** \brief Helper function to guess the lts format from a filename (by its extension) */
+      static lts_type guess_format(std::string const& s);
+
+      /** \brief Helper function to get storage format from a storage format specification */
+      static lts_type parse_format(char const* s);
+
+      /** \brief Helper function to get storage format for a given file extension */
+      static char const* string_for_type(const lts_type s);
+
+      /** \brief Helper function to get the extension associated to an element (of lts_type) */
+      static char const* extension_for_type(const lts_type type);
+
     public:
       lts();
       lts(std::string &filename, lts_type type = lts_none);
       lts(std::istream &is, lts_type type = lts_none);
       ~lts();
 
-      bool read_from(std::string &filename, lts_type type = lts_none);
+      bool read_from(std::string const& filename, lts_type type = lts_none);
       bool read_from(std::istream &is, lts_type type = lts_none);
-      bool write_to(std::string &filename, lts_type type = lts_mcrl2);
+      bool write_to(std::string const& filename, lts_type type = lts_mcrl2);
       bool write_to(std::ostream &os, lts_type type = lts_mcrl2);
 
       unsigned int num_states();

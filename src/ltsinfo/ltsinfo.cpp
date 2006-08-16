@@ -11,6 +11,17 @@
 #include <bcg_user.h>
 #endif
 
+// Squadt protocol interface
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+#include <squadt_utility.h>
+
+/* Constants for identifiers of options and objects */
+enum identifiers {
+    lts_file_for_input // Main input file that contains an lts
+};
+
+#endif
+
 #define NAME "ltsinfo"
 #define VERSION "0.1"
 #include "mcrl2_revision.h"
@@ -18,75 +29,8 @@
 using namespace std;
 using namespace mcrl2::lts;
 
-static string string_from_type(lts_type type)
-{
-  switch ( type )
-  {
-    case lts_aut:
-      return "AUT";
-    case lts_mcrl:
-      return "mCRL";
-    case lts_mcrl2:
-      return "mCRL2";
-    case lts_svc:
-      return "SVC";
-#ifdef MCRL2_BCG
-    case lts_bcg:
-      return "BCG";
-#endif
-    default:
-      return "unknown";
-  }
-}
-
-static lts_type get_extension(string &s)
-{
-  string::size_type pos = s.find_last_of('.');
-  
-  if ( pos != string::npos )
-  {
-    string ext = s.substr(pos+1);
-
-    if ( ext == "aut" )
-    {
-      gsVerboseMsg("detected AUT extension\n");
-      return lts_aut;
-    } else if ( ext == "svc" )
-    {
-      gsVerboseMsg("detected SVC extension; assuming mCRL2 format\n");
-      return lts_mcrl2;
-#ifdef MCRL2_BCG
-    } else if ( ext == "bcg" )
-    {
-      gsVerboseMsg("detected BCG extension\n");
-      return lts_bcg;
-#endif
-    }
-  }
-
-  return lts_none;
-}
-
-static lts_type get_format(char *s)
-{
-  if ( !strcmp(s,"aut") )
-  {
-    return lts_aut;
-  } else if ( !strcmp(s,"mcrl") )
-  {
-    return lts_mcrl;
-  } else if ( !strcmp(s,"mcrl2") )
-  {
-    return lts_mcrl2;
-#ifdef MCRL2_BCG
-  } else if ( !strcmp(s,"bcg") )
-  {
-    return lts_bcg;
-#endif
-  }
-
-  return lts_none;
-}
+/* An lts structure that stores the LTS that was last loaded */
+lts l;
 
 static void print_formats(FILE *f)
 {
@@ -130,16 +74,7 @@ static void print_version(FILE *f)
   fprintf(f,NAME " " VERSION " (revision %i)\n", REVISION);
 }
 
-int main(int argc, char **argv)
-{
-  ATerm bot;
-  ATinit(argc,argv,&bot);
-  gsEnableConstructorFunctions();
-
-#ifdef MCRL2_BCG
-  BCG_INIT();
-#endif
-
+void parse_command_line(int argc, char** argv) {
   #define ShortOptions      "hqvi:f"
   #define VersionOption     0x1
   struct option LongOptions[] = { 
@@ -162,10 +97,10 @@ int main(int argc, char **argv)
     {
       case 'h':
         print_help(stderr,argv[0]);
-        return 0;
+        exit (0);
       case VersionOption:
         print_version(stderr);
-        return 0;
+        exit (0);
       case 'v':
         verbose = true;
         break;
@@ -177,7 +112,7 @@ int main(int argc, char **argv)
         {
           fprintf(stderr,"warning: input format has already been specified; extra option ignored\n");
         } else {
-          intype = get_format(optarg);
+          intype = lts::parse_format(optarg);
           if ( intype == lts_none )
           {
             fprintf(stderr,"warning: format '%s' is not recognised; option ignored\n",optarg);
@@ -186,7 +121,7 @@ int main(int argc, char **argv)
         break;
       case 'f':
         print_formats(stderr);
-        return 0;
+        exit (0);
       default:
         break;
     }
@@ -195,7 +130,8 @@ int main(int argc, char **argv)
   if ( quiet && verbose )
   {
     gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
-    return 1;
+
+    exit (1);
   }
   if ( quiet )
   {
@@ -206,7 +142,6 @@ int main(int argc, char **argv)
     gsSetVerboseMsg();
   }
 
-
   bool use_stdin = (optind >= argc);
 
   string infile;
@@ -215,15 +150,14 @@ int main(int argc, char **argv)
     infile = argv[optind];
   }
 
-  lts l;
-
   if ( use_stdin )
   {
     gsVerboseMsg("reading LTS from stdin...\n");
     if ( !l.read_from(cin,intype) )
     {
       gsErrorMsg("cannot read LTS from stdin\n");
-      return 1;
+
+      exit (1);
     }
   } else {
     gsVerboseMsg("reading LTS from '%s'...\n",infile.c_str());
@@ -233,7 +167,7 @@ int main(int argc, char **argv)
       if ( intype == lts_none ) // XXX really do this?
       {
         gsVerboseMsg("reading failed; trying to force format by extension...\n");
-        intype = get_extension(infile);
+        intype = lts::guess_format(infile);
         if ( (intype != lts_none) && l.read_from(infile,intype) )
         {
           b = false;
@@ -242,31 +176,199 @@ int main(int argc, char **argv)
       if ( b )
       {
         gsErrorMsg("cannot read LTS from file '%s'\n",infile.c_str());
-        return 1;
+
+        exit (1);
       }
     }
   }
+}
 
-  cout << "LTS format: " << string_from_type(l.get_type()) << endl
-       << "Number of states: " << l.num_states() << endl
-       << "Number of labels: " << l.num_labels() << endl
-       << "Number of transitions: " << l.num_transitions() << endl;
-  if ( l.has_state_info() )
-  {
-    cout << "Has state information." << endl;
-  } else {
-    cout << "Does not have state information." << endl;
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+/* Extracts a configuration from a message, and validates its content */
+bool try_to_accept_configuration(sip::tool::communicator& tc, sip::messenger::message_ptr const& m) {
+  sip::configuration::sptr configuration = tc << m;
+
+  if (configuration.get() == 0) {
+    return (false);
   }
-  if ( l.has_label_info() )
-  {
-    cout << "Has label information." << endl;
-  } else {
-    cout << "Does not have label information." << endl;
+  if (configuration->object_exists(lts_file_for_input)) {
+    /* The input object is present, verify whether the specified format is supported */
+    sip::object::sptr input_object = configuration->get_object(lts_file_for_input);
+
+    lts_type t = lts::parse_format(input_object->get_format().c_str());
+
+    if (t == lts_none) {
+      tc.send_status_report(sip::report::error, boost::str(boost::format("Invalid configuration: unsupported type `%s' for main input") % lts::string_for_type(t)));
+
+      return (false);
+    }
+    if (!boost::filesystem::exists(boost::filesystem::path(input_object->get_location()))) {
+      tc.send_status_report(sip::report::error, std::string("Invalid configuration: input object does not exist"));
+
+      return (false);
+    }
   }
-  if ( l.has_creator() )
-  {
-    cout << "Created by: " << l.get_creator() << endl;
+  else {
+    return (false);
   }
+
+  tc.send_accept_configuration();
+
+  return (true);
+}
+#endif
+
+int main(int argc, char **argv)
+{
+  ATerm bot;
+  ATinit(argc,argv,&bot);
+  gsEnableConstructorFunctions();
+
+#ifdef MCRL2_BCG
+  BCG_INIT();
+#endif
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  sip::tool::communicator tc;
+
+  /* Get tool capabilities object associated to the communicator in order to modify settings */
+  sip::tool::capabilities& cp = tc.get_tool_capabilities();
+
+  /* The tool operates on LTSes (stored in some different formats) and its function can be characterised as reporting */
+  cp.add_input_combination(lts_file_for_input, "Reporting", "aut");
+#ifdef MCRL2_BCG
+  cp.add_input_combination(lts_file_for_input, "Reporting", "bcg");
+#endif
+  cp.add_input_combination(lts_file_for_input, "Reporting", "svc");
+
+  /* On purpose we do not catch exceptions */
+  if (tc.activate(argc,argv)) {
+    bool valid_configuration_present = false;
+    bool termination_requested       = false;
+
+    /* Initialise utility pseudo-library */
+    squadt_utility::initialise(tc);
+sip::messenger::get_standard_error_logger()->set_filter_level(3);
+
+    /* Main event loop for incoming messages from squadt */
+    for (sip::message_ptr m = tc.await_message(sip::message_any); !termination_requested; m = tc.await_message(sip::message_any)) {
+      assert(m.get() != 0);
+
+      switch (m->get_type()) {
+        case sip::message_offer_configuration:
+
+          /* Insert configuration in tool communicator object */
+          valid_configuration_present = try_to_accept_configuration(tc, m);
+
+          break;
+        case sip::message_signal_start:
+          if (valid_configuration_present) {
+            using namespace sip;
+            using namespace sip::layout;
+            using namespace sip::layout::elements;
+
+            sip::object::sptr input_object = tc.get_configuration().get_object(lts_file_for_input);
+
+            lts_type t = lts::parse_format(input_object->get_format().c_str());
+
+            layout::tool_display::sptr display(new layout::tool_display);
+
+            /* Create and add the top layout manager */
+            layout::manager::aptr top = layout::vertical_box::create();
+
+            /* First column */
+            layout::vertical_box* left_column = new layout::vertical_box();
+
+            layout::vertical_box::alignment a = layout::left;
+
+            if (l.read_from(input_object->get_location(), t)) {
+              left_column->add(new label("States (#):"), a);
+              left_column->add(new label("Labels (#):"), a);
+              left_column->add(new label("Transitions (#):"), a);
+              left_column->add(new label(""), a);
+              left_column->add(new label("State information:"), a);
+              left_column->add(new label("Label information:"), a);
+              left_column->add(new label(""), a);
+              left_column->add(new label("Created by:"), a);
+             
+              /* Second column */
+              layout::vertical_box* right_column = new layout::vertical_box();
+             
+              boost::format c("%u");
+             
+              right_column->add(new label(boost::str(c % l.num_states())), a);
+              right_column->add(new label(boost::str(c % l.num_labels())), a);
+              right_column->add(new label(boost::str(c % l.num_transitions())), a);
+              right_column->add(new label(""), a);
+              right_column->add(new label(l.has_state_info() ? "present" : "not present"), a);
+              right_column->add(new label(l.has_label_info() ? "present" : "not present"), a);
+              right_column->add(new label(""), a);
+              right_column->add(new label(l.get_creator()), a);
+             
+              /* Create and add a layout manager for the columns */
+              layout::manager* columns = new layout::horizontal_box();
+
+              /* Attach columns */
+              columns->add(left_column, margins(0,5,0,5));
+              columns->add(right_column, margins(0,5,0,20));
+             
+              c = boost::format("Input read from `%s' (in %s format)");
+
+              top->add(new label(boost::str(c % lts::string_for_type(t) % boost::filesystem::path(input_object->get_location()).leaf())), margins(5,0,5,0));
+              top->add(columns);
+
+              display->set_top_manager(top);
+             
+              tc.send_display_layout(display);
+             
+              /* Signal that the job is finished */
+              tc.send_signal_done();
+            }
+            else {
+              tc.send_status_report(sip::report::error, "Failure reading input from file.");
+            }
+          }
+          else {
+            /* Send error report */
+            tc.send_status_report(sip::report::error, "Start signal received without valid configuration.");
+          }
+          break;
+        case sip::message_request_termination:
+          termination_requested = true;
+          break;
+        default:
+          /* Messages with a type that do not need to be handled */
+          break;
+      }
+    }
+  }
+  else {
+#endif
+    parse_command_line(argc, argv);
+
+    cout << "LTS format: " << lts::string_for_type(l.get_type()) << endl
+         << "Number of states: " << l.num_states() << endl
+         << "Number of labels: " << l.num_labels() << endl
+         << "Number of transitions: " << l.num_transitions() << endl;
+    if ( l.has_state_info() )
+    {
+      cout << "Has state information." << endl;
+    } else {
+      cout << "Does not have state information." << endl;
+    }
+    if ( l.has_label_info() )
+    {
+      cout << "Has label information." << endl;
+    } else {
+      cout << "Does not have label information." << endl;
+    }
+    if ( l.has_creator() )
+    {
+      cout << "Created by: " << l.get_creator() << endl;
+    }
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  }
+#endif
 
   return 0;
 }

@@ -34,7 +34,7 @@ namespace squadt {
 
   const sip::tool::capabilities::ptr tool::no_capabilities(new sip::tool::capabilities());
 
-  char const* tool_manager::default_tools[] = {"lpeconstelm", "lpeinfo", "lpeparelm", "lpe2lts", "mcrl22lpe", "xsim", 0};
+  char const* tool_manager::default_tools[] = {"lpeconstelm", "lpeinfo", "lpeparelm", "lpe2lts", "ltsconvert", "ltsinfo", "ltsgraph", "ltsmin", "mcrl22lpe", "xsim", 0};
 
   tool_manager::tool_manager() : sip::controller::communicator(), free_identifier(0) {
     /* Listen for incoming socket connections on the loopback interface with the default port */

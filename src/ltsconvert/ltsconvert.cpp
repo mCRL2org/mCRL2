@@ -60,34 +60,6 @@ static string get_base(string &s)
   }
 }
 
-static lts_type get_extension(string &s)
-{
-  string::size_type pos = s.find_last_of('.');
-  
-  if ( pos != string::npos )
-  {
-    string ext = s.substr(pos+1);
-
-    if ( ext == "aut" )
-    {
-      gsVerboseMsg("detected AUT extension\n");
-      return lts_aut;
-    } else if ( ext == "svc" )
-    {
-      gsVerboseMsg("detected SVC extension; assuming mCRL2 format\n");
-      return lts_mcrl2;
-#ifdef MCRL2_BCG
-    } else if ( ext == "bcg" )
-    {
-      gsVerboseMsg("detected BCG extension\n");
-      return lts_bcg;
-#endif
-    }
-  }
-
-  return lts_none;
-}
-
 static alt_lts_type get_alt_extension(string &s)
 {
   string::size_type pos = s.find_last_of('.');
@@ -107,27 +79,6 @@ static alt_lts_type get_alt_extension(string &s)
   }
 
   return alt_lts_none;
-}
-
-static lts_type get_format(char *s)
-{
-  if ( !strcmp(s,"aut") )
-  {
-    return lts_aut;
-  } else if ( !strcmp(s,"mcrl") )
-  {
-    return lts_mcrl;
-  } else if ( !strcmp(s,"mcrl2") )
-  {
-    return lts_mcrl2;
-#ifdef MCRL2_BCG
-  } else if ( !strcmp(s,"bcg") )
-  {
-    return lts_bcg;
-#endif
-  }
-
-  return lts_none;
 }
 
 static alt_lts_type get_alt_format(char *s)
@@ -254,7 +205,7 @@ int main(int argc, char **argv)
         {
           fprintf(stderr,"warning: input format has already been specified; extra option ignored\n");
         } else {
-          intype = get_format(optarg);
+          intype = lts::parse_format(optarg);
           if ( intype == lts_none )
           {
             fprintf(stderr,"warning: format '%s' is not recognised; option ignored\n",optarg);
@@ -266,7 +217,7 @@ int main(int argc, char **argv)
         {
           fprintf(stderr,"warning: output format has already been specified; extra option ignored\n");
         } else {
-          outtype = get_format(optarg);
+          outtype = lts::parse_format(optarg);
           if ( outtype == lts_none )
           {
             alt_outtype = get_alt_format(optarg);
@@ -345,7 +296,7 @@ int main(int argc, char **argv)
         use_alt_outtype = true;
       } else {
         gsVerboseMsg("trying to detect output format by extension...\n");
-        outtype = get_extension(outfile);
+        outtype = lts::guess_format(outfile);
         if ( outtype == lts_none )
         {
           alt_outtype = get_alt_extension(outfile);
@@ -393,7 +344,7 @@ int main(int argc, char **argv)
       if ( intype == lts_none ) // XXX really do this?
       {
         gsVerboseMsg("reading failed; trying to force format by extension...\n");
-        intype = get_extension(infile);
+        intype = lts::guess_format(infile);
         if ( (intype != lts_none) && l.read_from(infile,intype) )
         {
           b = false;

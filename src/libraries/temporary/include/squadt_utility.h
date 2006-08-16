@@ -12,6 +12,9 @@
 
 #include <sip/tool.h>
 
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
+
 #include "liblowlevel.h"
 
 namespace squadt_utility {

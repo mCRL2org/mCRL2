@@ -117,7 +117,24 @@ namespace sip {
  
         /** \brief Returns whether the current status is equal to status_inactive */
         inline bool is_active() const;
+
+        /** \brief Extract a configuration from an offer_configuration message */
+        inline configuration::sptr operator<< (const sip::messenger::message_ptr& m);
     };
+
+    /**
+     * @param[in] m shared pointer reference to an offer_configuration message
+     * @param[in] c reference to a configuration object
+     **/
+    inline configuration::sptr communicator::operator<< (const sip::messenger::message_ptr& m) {
+      assert(m->get_type() == sip::message_offer_configuration);
+
+      if (m.get() != 0) {
+        current_configuration = sip::configuration::read(m->to_string());
+      }
+
+      return (current_configuration);
+    }
  
     /**
      * \return a pointer to the tool capabilities object that is sent to the controller on request

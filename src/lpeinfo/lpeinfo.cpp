@@ -107,7 +107,7 @@ int main(int ac, char** av) {
   /* Get tool capabilities in order to modify settings */
   sip::tool::capabilities& cp = tc.get_tool_capabilities();
 
-  /* The tool has only one main input combination it takes an LPE and then behaves as a reporter */
+  /* The tool has only one main input combination it takes an LPD and then behaves as a reporter */
   cp.add_input_combination(lpd_file_for_input, "Reporting", "lpe");
 
   /* On purpose we do not catch exceptions */
@@ -142,10 +142,10 @@ int main(int ac, char** av) {
     tc.await_message(sip::message_signal_start);
   }
   else {
+#endif
     parse_command_line(ac,av);
+#ifdef ENABLE_SQUADT_CONNECTIVITY
   }
-#else
-  parse_command_line(ac,av);
 #endif
 
   lpe::specification lpe_specification;

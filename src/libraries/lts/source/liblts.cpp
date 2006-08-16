@@ -120,7 +120,7 @@ void p_lts::clear()
   init();
 }
 
-lts_type p_lts::detect_type(string &filename)
+lts_type p_lts::detect_type(string const& filename)
 {
   ifstream is(filename.c_str(),ifstream::in|ifstream::binary);
   if ( !is.is_open() )
@@ -444,7 +444,7 @@ lts_type p_lts::detect_type(istream &is)
   return lts_none;
 }
 
-bool p_lts::read_from_svc(string &filename, lts_type type)
+bool p_lts::read_from_svc(string const& filename, lts_type type)
 {
   SVCfile f;
   SVCbool b;
@@ -549,7 +549,7 @@ bool p_lts::read_from_svc(string &filename, lts_type type)
   return true;
 }
 
-bool p_lts::read_from_aut(string &filename)
+bool p_lts::read_from_aut(string const& filename)
 {
   ifstream is(filename.c_str());
 
@@ -668,7 +668,7 @@ bool p_lts::read_from_bcg(string &filename)
 }
 #endif
 
-bool lts::read_from(string &filename, lts_type type)
+bool lts::read_from(string const& filename, lts_type type)
 {
   clear();
   if ( type == lts_none )
@@ -737,7 +737,7 @@ bool lts::read_from(istream &is, lts_type type)
   }
 }
 
-bool p_lts::write_to_svc(string &filename, lts_type type)
+bool p_lts::write_to_svc(string const& filename, lts_type type)
 {
   if ( type == lts_mcrl )
   {
@@ -846,7 +846,7 @@ bool p_lts::write_to_svc(string &filename, lts_type type)
   return true;
 }
 
-bool p_lts::write_to_aut(string &filename)
+bool p_lts::write_to_aut(string const& filename)
 {
   ofstream os(filename.c_str());
 
@@ -896,7 +896,7 @@ bool p_lts::write_to_aut(ostream &os)
 }
 
 #ifdef MCRL2_BCG
-bool p_lts::write_to_bcg(string &filename)
+bool p_lts::write_to_bcg(string const& filename)
 {
   BCG_IO_WRITE_BCG_SURVIVE(BCG_TRUE);
   char *s = strdup(filename.c_str());
@@ -961,7 +961,7 @@ bool p_lts::write_to_bcg(string &filename)
 }
 #endif
 
-bool lts::write_to(string &filename, lts_type type)
+bool lts::write_to(string const& filename, lts_type type)
 {
   switch ( type )
   {
@@ -1341,6 +1341,75 @@ void transition_iterator::operator ++()
   pos++;
 }
 
+/**
+ * \returns the format if successful, and lts_none otherwise
+ *
+ * @param[in] s format specification
+ **/
+lts_type lts::guess_format(string const& s) {
+  string::size_type pos = s.find_last_of('.');
+  
+  if ( pos != string::npos )
+  {
+    string ext = s.substr(pos+1);
+
+    if ( ext == "aut" )
+    {
+      gsVerboseMsg("detected AUT extension\n");
+      return lts_aut;
+    } else if ( ext == "svc" )
+    {
+      gsVerboseMsg("detected SVC extension; assuming mCRL2 format\n");
+      return lts_mcrl2;
+#ifdef MCRL2_BCG
+    } else if ( ext == "bcg" )
+    {
+      gsVerboseMsg("detected BCG extension\n");
+      return lts_bcg;
+#endif
+    }
+  }
+
+  return lts_none;
+}
+
+/**
+ * @param[in] s the file extension
+ **/
+lts_type lts::parse_format(char const* s) {
+  if ( !strcmp(s,"aut") )
+  {
+    return lts_aut;
+  } else if ( !strcmp(s,"mcrl") )
+  {
+    return lts_mcrl;
+  } else if ( !strcmp(s,"mcrl2") )
+  {
+    return lts_mcrl2;
+  } else if ( !strcmp(s,"svc") )
+  {
+    return lts_mcrl2;
+#ifdef MCRL2_BCG
+  } else if ( !strcmp(s,"bcg") )
+  {
+    return lts_bcg;
+#endif
+  }
+
+  return lts_none;
+}
+
+char const* lts::type_strings[]      = { "unknown", "AUT", "mCRL", "mCRL2", "SVC", "BCG" };
+
+char const* lts::extension_strings[] = { "", "aut", "svc", "svc", "svc", "bcg" };
+
+char const* lts::string_for_type(const lts_type type) {
+  return (type_strings[type]);
+}
+
+char const* lts::extension_for_type(const lts_type type) {
+  return (extension_strings[type]);
+}
 
 }
 }

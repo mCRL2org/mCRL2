@@ -52,7 +52,7 @@
       transition *transitions;
       unsigned int init_state;
 
-      lts_type detect_type(std::string &filename);
+      lts_type detect_type(std::string const& filename);
       lts_type detect_type(std::istream &is);
 
       void init();
@@ -64,16 +64,16 @@
                                     unsigned int label,
                                     unsigned int to);
 
-      bool read_from_aut(std::string &filename);
+      bool read_from_aut(std::string const& filename);
       bool read_from_aut(std::istream &is);
-      bool write_to_aut(std::string &filename);
-      bool write_to_aut(std::ostream &os);
+      bool write_to_aut(std::string const& filename);
+      bool write_to_aut(std::ostream& os);
 
-      bool read_from_svc(std::string &filename, lts_type type);
-      bool write_to_svc(std::string &filename, lts_type type);
+      bool read_from_svc(std::string const& filename, lts_type type);
+      bool write_to_svc(std::string const& filename, lts_type type);
 
 #ifdef MCRL2_BCG
-      bool read_from_bcg(std::string &filename);
-      bool write_to_bcg(std::string &filename);
+      bool read_from_bcg(std::string const& filename);
+      bool write_to_bcg(std::string const& filename);
 #endif
   };

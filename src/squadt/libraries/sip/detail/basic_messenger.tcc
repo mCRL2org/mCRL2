@@ -337,9 +337,11 @@ namespace sip {
 
       /* Unblock all possible waiters */
       if (id != M::message_any && 0 < waiters.count(M::message_any)) {
-        boost::mutex::scoped_lock l(waiters[id]->mutex);
+        boost::mutex::scoped_lock l(waiters[M::message_any]->mutex);
 
         if (0 < waiters.count(id)) {
+          boost::mutex::scoped_lock l(waiters[id]->mutex);
+
           waiters[id]->condition.notify_all();
         }
 
