@@ -2213,6 +2213,13 @@ static ATermAppl bodytovarheadGNF(
       alphaconvert(&sumvars,&renamevars,&renameterms,freevars,ATempty);
       body1=substitute_pCRLproc(renameterms,renamevars,body1);
       body1=bodytovarheadGNF(body1,sum,ATconcat(sumvars,freevars),first);
+      /* Due to the optimisation below, suggested by Yaroslav, bodytovarheadGNF(...,sum,...)
+         can deliver a process of the form c -> x + !c -> y. In this case, the
+         sumvars must be distributed over both summands. */
+      if (gsIsChoice(body1))
+      { return gsMakeChoice(gsMakeSum(sumvars,ATAgetArgument(body1,0)),
+                            gsMakeSum(sumvars,ATAgetArgument(body1,1)));
+      }
       return gsMakeSum(sumvars,body1);
     }
     body=bodytovarheadGNF(body,alt,freevars,first);
@@ -2261,10 +2268,10 @@ static ATermAppl bodytovarheadGNF(
   { ATermAppl body1=ATAgetArgument(body,0);
     ATermAppl body2=ATAgetArgument(body,1);
 
-    if (seq>=s)
+    if (s<=seq)
     { 
       body1=bodytovarheadGNF(body1,name,freevars,v);
-      if ((gsIsCond(body2)) && (sum>=s))
+      if ((gsIsCond(body2)) && (s<=sum))
       { /* Here we check whether the process body has the form
            a (c -> x <> y). For state space generation it turns out
            to be beneficial to rewrite this to c-> a x <> a y, as in
