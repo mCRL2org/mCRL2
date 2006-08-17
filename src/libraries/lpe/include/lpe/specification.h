@@ -16,6 +16,7 @@
 #include "lpe/lpe.h"
 #include "lpe/pretty_print.h"
 #include "lpe/aterm_wrapper.h"
+#include "lpe/data_declaration.h"
 
 namespace lpe {
 
@@ -53,10 +54,7 @@ using atermpp::read_from_named_file;
 class specification: public aterm_wrapper
 {
   protected:
-    sort_list            m_sorts;
-    function_list        m_constructors;
-    function_list        m_mappings;
-    data_equation_list   m_equations;
+    data_declaration     m_data;
     action_list          m_actions;
     LPE                  m_lpe;
     data_variable_list   m_initial_free_variables;
@@ -109,13 +107,14 @@ class specification: public aterm_wrapper
     {
       m_term = t;
       aterm_list::iterator i = m_term.argument_list().begin();
-      m_sorts               = sort_list(aterm_appl(*i++).argument(0));
-      m_constructors        = function_list(aterm_appl(*i++).argument(0));
-      m_mappings            = function_list(aterm_appl(*i++).argument(0));
-      m_equations           = data_equation_list(aterm_appl(*i++).argument(0));
-      m_actions             = action_list(aterm_appl(*i++).argument(0));
-      aterm_appl lpe        = *i++;
-      aterm_appl lpe_init   = *i;
+      sort_list          sorts        = sort_list(aterm_appl(*i++).argument(0));
+      function_list      constructors = function_list(aterm_appl(*i++).argument(0));
+      function_list      mappings     = function_list(aterm_appl(*i++).argument(0));
+      data_equation_list equations    = data_equation_list(aterm_appl(*i++).argument(0));
+      m_data = data_declaration(sorts, constructors, mappings, equations);
+      m_actions                       = action_list(aterm_appl(*i++).argument(0));
+      aterm_appl lpe                  = *i++;
+      aterm_appl lpe_init             = *i;
 
       m_lpe = LPE(lpe, m_actions);
 
@@ -148,10 +147,7 @@ class specification: public aterm_wrapper
         data_variable_list   initial_variables,
         data_expression_list initial_state)
       :
-        m_sorts         (sorts         ),
-        m_constructors  (constructors  ),
-        m_mappings      (mappings      ),
-        m_equations     (equations     ),
+        m_data(sorts, constructors, mappings, equations),
         m_actions       (actions       ),
         m_lpe           (lpe           ),
         m_initial_free_variables(initial_free_variables),        
@@ -201,49 +197,59 @@ class specification: public aterm_wrapper
       return m_lpe;
     }
 
+    /// Returns the data declaration.
+    ///
+    data_declaration data() const
+    { return m_data; }
+
+    /// Returns the data declaration.
+    ///
+    data_declaration& data()
+    { return m_data; }
+
     /// Returns the sequence of sorts.
     ///
-    sort_list sorts()
-    { return m_sorts; }
+    sort_list sorts() const
+    { return m_data.sorts(); }
 
     /// Sets the sequence of sorts.
     ///
     void set_sorts(sort_list sorts)
-    { m_sorts = sorts; }
+    { m_data.set_sorts(sorts); }
 
     /// Returns the sequence of constructors.
     ///
-    function_list constructors()
-    { return m_constructors; }
+    function_list constructors() const
+    { return m_data.constructors(); }
 
     /// Sets the sequence of constructors.
     ///
     void set_constructors(function_list constructors)
-    { m_constructors = constructors; }
+    { m_data.set_constructors(constructors); }
 
     /// Returns the sequence of mappings.
     ///
-    function_list mappings()
-    { return m_mappings; }
+    function_list mappings() const
+    { return m_data.mappings(); }
 
     /// Sets the sequence of mappings.
     ///
     void set_mappings(function_list mappings)
-    { m_mappings = mappings; }
+    { m_data.set_mappings(mappings); }
 
     /// Returns the sequence of data equations.
     ///
-    data_equation_list equations()
-    { return m_equations; }
+    data_equation_list equations() const
+    { return m_data.equations(); }
 
     /// Sets the sequence of data equations.
     ///
     void set_equations(data_equation_list equations)
-    { m_equations = equations; }
+    { m_data.set_equations(equations); }
 
     /// Returns the sequence of actions.
     ///
-    action_list actions()
+    action_list actions() const
     { return m_actions; }
 
     /// Returns the initial state of the LPE.

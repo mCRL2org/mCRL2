@@ -1,103 +1,95 @@
 ///////////////////////////////////////////////////////////////////////////////
-/// \file sort.h
-/// Contains data data structures for the LPE Library.
+/// \file data_declaration.h
 
 #ifndef LPE_DATA_DECLARATION_H
 #define LPE_DATA_DECLARATION_H
 
 #include "atermpp/aterm.h"
-#include "lpe/data.h"
 #include "lpe/sort.h"
+#include "lpe/function.h"
+#include "lpe/data.h"
 
 namespace lpe {
 
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
-using atermpp::aterm_list_iterator;
 
 ///////////////////////////////////////////////////////////////////////////////
-// DataDeclaration
+// data_declaration
 /// \brief a data declaration of a mCRL specification.
 ///
-class DataDeclaration
+class data_declaration
 {
-  // N.B. A DataDeclaration is not explicitly represented in the specification.
+  // N.B. A data_declaration is not explicitly represented in the specification.
 
   protected:
-    aterm_list m_sorts;                 // elements are of type SortDeclaration
-    aterm_list m_constructors;          // elements are of type sort
-    aterm_list m_mappings;              // elements are of type sort
-    aterm_list m_equations;             // elements are of type data_equation
+    sort_list          m_sorts;       
+    function_list      m_constructors;
+    function_list      m_mappings;    
+    data_equation_list m_equations;   
 
   public:
-    typedef sort_list::iterator     sort_iterator;
-    typedef equation_list::iterator equation_iterator;
+    typedef sort_list::iterator          sort_iterator;
+    typedef function_list::iterator      function_iterator;
+    typedef data_equation_list::iterator equation_iterator;
 
-    DataDeclaration()
+    data_declaration()
     {}
 
-    DataDeclaration(aterm_list sorts, aterm_list constructors, aterm_list mappings, aterm_list equations)
+    data_declaration(aterm_list sorts, aterm_list constructors, aterm_list mappings, aterm_list equations)
       : m_sorts(sorts),
         m_constructors(constructors),
         m_mappings(mappings),
         m_equations(equations)
     {}
 
-    /// Returns a begin iterator to the sequence of sorts.
+    /// Returns the list of sorts.
     ///
-    sort_iterator sorts_begin() const
+    sort_list sorts() const
     {
-      return sort_iterator(m_sorts);
+      return m_sorts;
     }
 
-    /// Returns an end iterator to the sequence of sorts.
+    /// Returns the list of constructors.
     ///
-    sort_iterator sorts_end() const
+    function_list constructors() const
     {
-      return sort_iterator();
-    }
-    /// Returns a begin iterator to the sequence of constructors.
-
-    ///
-    sort_iterator constructors_begin() const
-    {
-      return sort_iterator(m_constructors);
+      return m_constructors;
     }
 
-    /// Returns an end iterator to the sequence of constructors.
+    /// Returns the list of mappings.
     ///
-    sort_iterator constructors_end() const
+    function_list mappings() const
     {
-      return sort_iterator();
+      return m_mappings;
     }
 
-    /// Returns a begin iterator to the sequence of mappings.
+    /// Returns the list of equations.
     ///
-    sort_iterator mappings_begin() const
+    data_equation_list equations() const
     {
-      return sort_iterator(m_mappings);
+      return m_equations;
     }
 
-    /// Returns an end iterator to the sequence of mappings.
+    /// Sets the sequence of sorts.
     ///
-    sort_iterator mappings_end() const
-    {
-      return sort_iterator();
-    }
+    void set_sorts(sort_list sorts)
+    { m_sorts = sorts; }
 
-    /// Returns a begin iterator to the sequence of equations.
+    /// Sets the sequence of constructors.
     ///
-    equation_iterator equations_begin() const
-    {
-      return equation_iterator(m_equations);
-    }
+    void set_constructors(function_list constructors)
+    { m_constructors = constructors; }
 
-    /// Returns an end iterator to the sequence of mappings.
+    /// Sets the sequence of mappings.
     ///
-    equation_iterator equations_end() const
-    {
-      return equation_iterator();
-    }
+    void set_mappings(function_list mappings)
+    { m_mappings = mappings; }
+
+    /// Sets the sequence of data equations.
+    ///
+    void set_equations(data_equation_list equations)
+    { m_equations = equations; }
 };
 
 } // namespace mcrl
