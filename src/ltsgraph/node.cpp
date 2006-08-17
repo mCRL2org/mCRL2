@@ -1,15 +1,22 @@
 #include "node.h"
 
-const wxColour* borderColor     = wxBLACK;
-const wxColour* borderColorInit = wxRED;
+const wxColour border_color     = "BLACK";
+const wxColour border_color_init = "RED";
 
 Node::Node(unsigned int _num, double _posX, double _posY, wxString _lbl, bool _initState) : 
              posX(_posX), posY(_posY), lbl(_lbl), num(_num), initState(_initState)
 {
   locked = false;
   labelsVisible = true;
-//  node_colour = wxT("Red");
   node_colour = wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE);
+
+  if (initState) {
+    border_colour = border_color_init;
+  }
+  else {
+    border_colour = border_color;
+  }
+  
 }
 
 void Node::OnPaint(wxDC * ptrDC) 
@@ -20,18 +27,20 @@ void Node::OnPaint(wxDC * ptrDC)
   else 
     color = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
 
-    //Circle
-		if (initState) {
-			wxPen pen = wxPen(*borderColorInit, 2, wxSOLID);
-			ptrDC->SetPen(pen);
-		}
-		else {
-			wxPen pen = wxPen(*borderColor, 1, wxSOLID);
-			ptrDC->SetPen(pen);
-		}
-    wxBrush myBrush(color,wxSOLID );
-    ptrDC->SetBrush(myBrush);
-    ptrDC->DrawCircle((wxCoord)posX,(wxCoord)posY,radius);
+  //Circle
+  int pen_size;
+  if (initState) {
+    pen_size = 2;
+  }
+  else {
+    pen_size = 1;
+  }
+		
+  wxPen pen = wxPen(border_colour, pen_size, wxSOLID);
+  ptrDC->SetPen(pen);
+  wxBrush myBrush(color,wxSOLID );
+  ptrDC->SetBrush(myBrush);
+  ptrDC->DrawCircle((wxCoord)posX,(wxCoord)posY,radius);
 
     //Label
 		if (labelsVisible) {
@@ -114,5 +123,30 @@ void Node::ForceSetXY(double _x, double _y) {
 
 void Node::SetRadius(int newRadius) {
 	radius = newRadius;
+}
+
+void Node::set_node_colour(wxColour colour) {
+  node_colour = colour;
+}
+
+void Node::set_border_colour(wxColour colour) {
+  border_colour = colour;
+}
+
+wxColour Node::get_node_colour() {
+  return node_colour;
+}
+
+wxColour Node::get_border_colour() {
+  return border_colour;
+}
+
+void Node::reset_border_colour() {
+  if (initState) {
+    border_colour = border_color_init;
+  }
+  else {
+    border_colour = border_color;
+  }
 }
 

@@ -26,21 +26,23 @@ public:
   unsigned int Get_num();
   double GetX(); 
   double GetY();
-	string Get_lbl();
+  string Get_lbl();
   void SetXY(double, double);
-	void ForceSetXY(double, double);//set the x and y even if the node is locked
+  void ForceSetXY(double, double);//set the x and y even if the node is locked
   bool IsLocked();
   void Lock();
   void Unlock();
-	bool LabelVisible();
-	void ShowLabels();
-	void HideLabels();
-	void SetRadius(int);
-	bool IsInitState();
+  bool LabelVisible();
+  void ShowLabels();
+  void HideLabels();
+  void SetRadius(int);
+  bool IsInitState();
   wxColour get_node_colour();
-  wxColour get_text_colour();
+  wxColour get_border_colour();
   void set_node_colour(wxColour colour);
-  void set_text_colour(wxColour colour);
+  void set_border_colour(wxColour colour);
+  void reset_border_colour();
+  //TODO (CT): Maybe make a reset for node colour?
 
 private:
   int radius;
@@ -52,8 +54,7 @@ private:
   unsigned int num;
   bool initState;
   wxColour node_colour;
-  wxColour text_colour;
-    
+  wxColour border_colour;
 
 };
 

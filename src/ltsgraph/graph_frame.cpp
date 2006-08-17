@@ -1,4 +1,5 @@
 #include "graph_frame.h" 
+const wxColour border_colour_selected = "BLUE";
 
 BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
   EVT_MENU(wxID_OPEN, GraphFrame::OnOpen)
@@ -12,6 +13,7 @@ BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
 	EVT_CHECKBOX(ID_CHECK_NODE, GraphFrame::OnCheckNode)
 	EVT_CHECKBOX(ID_CHECK_EDGE, GraphFrame::OnCheckEdge)
 	EVT_BUTTON(ID_BUTTON_OPTI, GraphFrame::OnBtnOpti)
+	EVT_BUTTON(ID_BUTTON_COLOUR, GraphFrame::on_btn_pick_colour)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(ViewPort, wxPanel)
@@ -44,13 +46,13 @@ GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& 
   StoppedOpti = true;
 
 
-	// values below are reset later when the right panel is setuped
+  // values below are reset later when the right panel is setuped
   EdgeStiffness = 1.0; 
   NodeStrength = 1000.0; 
   NaturalLength = 20.0;
-	CircleRadius = 10;
+  CircleRadius = 10;
 
-	BuildLayout();
+  BuildLayout();
 
 }
 
@@ -146,13 +148,18 @@ void GraphFrame::BuildLayout() {
 	spinNodeRadius = new wxSpinCtrl(rightPanel, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 2, 50, 10);
 	bottomRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("State radius") ), 0, lflags, 4 );
 	bottomRightSizer->Add(spinNodeRadius, 0, rflags, 3 );
-
 	othersSettingsSizer->Add(bottomRightSizer, 1, wxEXPAND | wxALL, 0 );
+
+	// Button for opening colour picker for selected node.
+	btn_pick_colour = new wxButton(rightPanel, ID_BUTTON_COLOUR, wxT("Edit node &colour"), wxDefaultPosition, wxDefaultSize);
+	btn_pick_colour->Enable(false);
+        othersSettingsSizer->Add(btn_pick_colour, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL, 4);
+	
 	rightSizer->Add(othersSettingsSizer, 0, wxEXPAND | wxALL, 0 );
 
 	rightSizer->AddSpacer(20);
 
-	btnOptiStop = new wxButton(rightPanel, ID_BUTTON_OPTI, wxT("Optimize"), wxDefaultPosition, wxDefaultSize);
+	btnOptiStop = new wxButton(rightPanel, ID_BUTTON_OPTI, wxT("&Optimize"), wxDefaultPosition, wxDefaultSize);
 	btnOptiStop->Enable(false);
 
 	rightSizer->Add(btnOptiStop, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL, 4 );
@@ -210,7 +217,7 @@ void GraphFrame::CreateStatusBar() {
 void GraphFrame::OnOpen( wxCommandEvent& /* event */ ) {
 	StopOpti    = true;
 	StoppedOpti = true;
-	btnOptiStop->SetLabel(wxT("Optimize"));
+	btnOptiStop->SetLabel(wxT("&Optimize"));
 	wxFileDialog dialog( this, wxT("Select a LTS file (.aut .svc) or a backup file (.ltsgraph)..."), wxT(""), wxT(""), 
 											wxT("*.aut |*.aut|*.svc|*.svc|*.ltsgraph|*.ltsgraph|All files|*"));
 	if ( dialog.ShowModal() == wxID_OK ) {
@@ -243,7 +250,7 @@ void GraphFrame::OnOptimize( wxCommandEvent& /* event */ ) {
 
 	optimizeGraph->Enable(false);
 	stopOptimize->Enable(true);
-	btnOptiStop->SetLabel(wxT("Stop    "));
+	btnOptiStop->SetLabel(wxT("&Stop    "));
 	StopOpti = false;
 	StoppedOpti = false;
 	while (!OptimizeDrawing(0.0) && !StopOpti) {
@@ -258,7 +265,7 @@ void GraphFrame::OnOptimize( wxCommandEvent& /* event */ ) {
 void GraphFrame::OnStopOptimize( wxCommandEvent& /* event */ ) {
 	stopOptimize->Enable(false);
 	optimizeGraph->Enable(true);
-	btnOptiStop->SetLabel(wxT("Optimize"));
+	btnOptiStop->SetLabel(wxT("&Optimize"));
 	StopOpti = true;
 }
 
@@ -299,6 +306,28 @@ void GraphFrame::OnBtnOpti( wxCommandEvent& event ) {
 
 }
 
+void GraphFrame::on_btn_pick_colour( wxCommandEvent& /* event */ ) {
+  wxColourData colour_picker_data;
+
+  // Allow Windows users to pick full range of colours. (No effect on other
+  // platforms
+  colour_picker_data.SetChooseFull(true);
+
+  // Get colour of the currently selected node.
+  wxColour current_colour = leftPanel->get_selected_node()->get_node_colour(); 
+  colour_picker_data.SetColour(current_colour);
+  
+  // Create colour picker dialog, and show it to the user
+  wxColourDialog colour_picker(this, &colour_picker_data);
+
+  if (colour_picker.ShowModal() == wxID_OK) {
+    wxColourData returned_data = colour_picker.GetColourData();
+    wxColour new_colour = returned_data.GetColour();
+    leftPanel->get_selected_node()->set_node_colour(new_colour);
+    leftPanel->Refresh();
+  }
+  
+}
 //init vectNode & vectEdge
 void GraphFrame::Init(wxString LTSfile) {
 
@@ -788,13 +817,26 @@ wxString GraphFrame::GetInfoWinSize(wxSize sz2) const {
 
 }
 
+void GraphFrame::enable_btn_colour_picker() {
+  btn_pick_colour->Enable(true);
+}
+
+void GraphFrame::disable_btn_colour_picker() {
+  btn_pick_colour->Enable(false);
+}
+
 ////////////////////////////////VIEWPORT CLASS IMPLEMENTATION////////////////////////////////
 
 ViewPort::ViewPort(wxWindow * parent, const wxPoint& pos, const wxSize& size, long style) 
   : wxPanel(parent, wxID_ANY, pos, size, style) { 
 
-	GF = static_cast<GraphFrame*>(GetParent()->GetParent());
+  GF = static_cast<GraphFrame*>(GetParent()->GetParent());
+  selected_node = NULL;
 
+}
+
+Node * ViewPort::get_selected_node() {
+  return selected_node;
 }
 
 void ViewPort::OnPaint(wxPaintEvent& /* event */) {
@@ -823,8 +865,35 @@ void ViewPort::PressLeft(wxMouseEvent& event) {
   wxPoint pt_start = event.GetPosition();
   //Identify the node concerned by Left click
   ind_node_dragged = GF->FindNode(pt_start);
-	FillStatusBar();
 
+  if (ind_node_dragged != -1) {
+    if (selected_node) {
+      // Reset border of formerly selected node
+      selected_node->reset_border_colour();
+    }
+    //Store pointer of selected_node
+    selected_node = vectNode[ind_node_dragged];
+    
+    // Give its border a color to identify it on-screen
+    selected_node->set_border_colour(border_colour_selected);
+
+    // Activate button for colour picking:
+    GF->enable_btn_colour_picker();
+  }
+  else {
+    if (selected_node) {  
+      // Reset border colour of formerly selected node
+      selected_node->reset_border_colour();
+
+      // Reset pointer to selected node
+      selected_node = NULL;
+
+      // Disable colour picking button
+      GF->disable_btn_colour_picker();
+    }
+  }
+  FillStatusBar();
+  Refresh();
 }
 
 void ViewPort::Drag(wxMouseEvent& event) {
@@ -875,8 +944,3 @@ int ViewPort::Get_Width() {
 int ViewPort::Get_Height() {
 	return sz.GetHeight();
 }
-
-
-
-
-
