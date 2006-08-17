@@ -17,7 +17,6 @@
 #include <utility/print_logger.h>
 
 #include <sip/detail/message.h>
-#include <sip/detail/common.h>
 
 namespace sip {
 

@@ -16,6 +16,8 @@ namespace sip {
     template < typename M >
     class scheme : public boost::noncopyable {
       public:
+
+        /** \brief Destructor */
         virtual ~scheme() = 0;
  
         /** \brief Builds a connection between a tool communicator and a controller communicator */

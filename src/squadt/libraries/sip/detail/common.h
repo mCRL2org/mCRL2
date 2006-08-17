@@ -1,5 +1,5 @@
-#ifndef SIP_COMMON_H
-#define SIP_COMMON_H
+#ifndef SIP_COMMON_H_
+#define SIP_COMMON_H_
 
 #include <list>
 
