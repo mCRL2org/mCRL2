@@ -23,8 +23,8 @@ lib auxiliary
          <include>../include
        ;
 
-alias nt_compatibility
-       :
+lib nt_compatibility
+       : nt_compatibility/getopt.c nt_compatibility/getopt1.c
        :
        :
        : <include>../include/nt_compatibility
