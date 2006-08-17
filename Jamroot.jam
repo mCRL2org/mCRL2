@@ -4,9 +4,9 @@ import feature : feature ;
 import os : name ;
 
 path-constant TOP             : . ;
-path-constant BUILD_TOP       : ./bin ;
-path-constant BOOST_ROOT      : ./boost ;
-path-constant BOOST           : ./boost ;
+path-constant BUILD_TOP       : ./bin ;                  # Common build directory
+path-constant BOOST_ROOT      : ./boost ;                # Boost prefix (packaged sources)
+path-constant BOOST           : ./boost ;                # Boost prefix (possibly system)
 path-constant REVISION_HEADER : ./src/mcrl2_revision.h ;
 
 # Activate header cache
