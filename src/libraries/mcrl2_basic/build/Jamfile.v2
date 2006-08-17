@@ -47,6 +47,8 @@ lib rewrite
          <os>CYGWIN:<library>/site-config//m
          <include>../include/rewrite
          <os>LINUX:<library>/site-config//dl
+         <link>static,<toolset>gcc:<linkflags>-Wl,-export-dynamic
+         <link>static,<toolset>darwin:<linkflags>-Wl,-export-dynamic
        ;
 
 local PRINT_SOURCES = [ prepend print/ : libprint libprint_c ] ;
@@ -88,4 +90,6 @@ lib mcrl2_basic
          <include>../include/lowlevel
          <include>../include/struct
          <os>LINUX:<library>/site-config//dl
+         <link>static,<toolset>gcc:<linkflags>-Wl,-export-dynamic
+         <link>static,<toolset>darwin:<linkflags>-Wl,-export-dynamic
        ;
