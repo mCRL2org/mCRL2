@@ -33,11 +33,5 @@ exe sim
 
 install_with_libraries install : xsim sim : <wx>availability <os>MACOSX:<dependency>xsim-bundle ;
 
-import os ;
-
-if [ os.name ] = MACOSX {
-  include $(TOP)/build/macosx/bundle.jam ;
-
-  make_bundle $(TOP)/xsim : xsim xsim.plist xsim.icns ;
-}
+on_mac_install_bundle  $(TOP)/xsim : xsim xsim.plist xsim.icns ;
 

@@ -280,13 +280,14 @@ class svc_buffer
           s += c;
         }
       }
-      if ( valid && is_valid )
-      {
-        return s;
-      } else {
+
+      if (! (valid && is_valid) ) {
         valid = false;
-        return "";
+
+        s.clear();
       }
+
+      return s;
     }
 };
 

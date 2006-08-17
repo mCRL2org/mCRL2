@@ -23,13 +23,7 @@ install_with_libraries install
           <os>MACOSX:<dependency>squadt-bundle
         ;
 
-import os ;
-
-if [ os.name ] = MACOSX {
-  include $(TOP)/build/macosx/bundle.jam ;
-
-  make_bundle $(TOP)/squadt : squadt squadt.plist squadt.icns ;
-}
+on_mac_install_bundle $(TOP)/squadt : squadt squadt.plist squadt.icns ;
 
 install_data install-images : [ glob pixmaps/logo.jpg ] : images ;
 install_data install-schemas : [ glob schemas/*.xsd ] : schemas ;
