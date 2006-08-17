@@ -1,0 +1,16 @@
+project libraries/aterm/example
+   : requirements
+       <include>$(BOOST)
+       <source>/libraries/mcrl2_basic//mcrl2_basic
+       <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
+   ;
+
+exe allocator : allocator.cpp : ;
+exe std_container : std_container.cpp : ;
+
+install dist
+   :
+     allocator
+     std_container
+   :
+   ;

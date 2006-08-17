@@ -24,6 +24,7 @@
 #include <cassert>
 #include "aterm2.h"
 #include "atermpp/aterm_conversion.h"
+#include "atermpp/aterm_protect_traits.h"
 
 namespace atermpp
 {
@@ -97,6 +98,13 @@ namespace atermpp
       void unprotect()
       {
         ATunprotect(&term());
+      }
+
+      /// Mark the aterm for not being garbage collected.
+      ///
+      void mark()
+      {
+        ATmarkTerm(&term());
       }
 
       // allow conversion to ATerm
@@ -250,6 +258,35 @@ namespace atermpp
     ATerm a = bottom_of_stack;
     ATinit(0, 0, &a);
   }
+
+   template <>
+   class aterm_protect_traits<aterm>
+   {
+     public:
+       void protect(aterm t)
+       {
+#ifdef ATERM_DEBUG_PROTECTION
+std::cout << "aterm_protect_traits<aterm>::protect() " << t << std::endl;
+#endif // ATERM_DEBUG_PROTECTION
+         t.protect();
+       }
+
+       void unprotect(aterm t)
+       {
+#ifdef ATERM_DEBUG_PROTECTION
+std::cout << "aterm_protect_traits<aterm>::unprotect() " << t << std::endl;
+#endif // ATERM_DEBUG_PROTECTION
+         t.unprotect();
+       }
+
+       static void mark(aterm t)
+       {
+#ifdef ATERM_DEBUG_PROTECTION
+std::cout << "aterm_protect_traits<aterm>::mark() " << t << std::endl;
+#endif // ATERM_DEBUG_PROTECTION
+         t.mark();
+       }
+   };
 
 } // namespace atermpp
 

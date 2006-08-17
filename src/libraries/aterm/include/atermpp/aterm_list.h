@@ -426,6 +426,35 @@ namespace atermpp {
     return t;
   }
 
+   template <>
+   class aterm_protect_traits<aterm_list>
+   {
+     public:
+       static void protect(aterm_list t)
+       {
+#ifdef ATERM_DEBUG_PROTECTION
+std::cout << "aterm_protect_traits<aterm_list>::protect() " << t << std::endl;
+#endif // ATERM_DEBUG_PROTECTION
+         t.protect();
+       }
+
+       static void unprotect(aterm_list t)
+       {
+#ifdef ATERM_DEBUG_PROTECTION
+std::cout << "aterm_protect_traits<aterm_list>::unprotect() " << t << std::endl;
+#endif // ATERM_DEBUG_PROTECTION
+         t.unprotect();
+       }
+
+       static void mark(aterm_list t)
+       {
+#ifdef ATERM_DEBUG_PROTECTION
+std::cout << "aterm_protect_traits<aterm_list>::mark() " << t << std::endl;
+#endif // ATERM_DEBUG_PROTECTION
+         t.mark();
+       }
+   };
+
 } // namespace atermpp
 
 #endif // ATERM_TERM_LIST_H

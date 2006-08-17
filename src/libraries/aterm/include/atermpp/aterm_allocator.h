@@ -1,6 +1,8 @@
 #ifndef ATERM_ALLOCATOR_H
 #define ATERM_ALLOCATOR_H
 
+#include <algorithm>
+#include <cassert>
 #include <cstddef>
 #include <limits>
 #ifdef ATERM_DEBUG_ALLOCATOR
@@ -27,19 +29,18 @@ namespace atermpp {
    template <class T>
    void on_allocate(T* p, std::size_t num)
    {
-     if (num > 1)
-       ATprotectArray(p, num);
-     else
-       ATprotect(p);
+     assert(num >= 1);
+#ifndef NDEBUG // circumvent ATerm Library safety check in debug mode
+     std::fill(p, p + num, static_cast<ATerm>(0));
+#endif
+     ATprotectArray(p, num);
    }
 
    template <class T>
    void on_deallocate(T* p, std::size_t num)
    {
-     if (num > 1)
-       ATunprotectArray(p);
-     else
-       ATunprotect(p);
+     assert(num >= 1);
+     ATunprotectArray(p);
    }
 
    template <class T>
@@ -103,7 +104,9 @@ namespace atermpp {
        pointer allocate (size_type num)
        {
 #ifdef ATERM_DEBUG_ALLOCATOR
-std::cout << "<allocate> " << num << " elements" << std::endl;
+static int n = 0;
+n += num;
+std::cout << "aterm_allocator.allocate(" << num << ") " << n << " elements allocated\n";
 #endif // ATERM_DEBUG_ALLOCATOR
          // allocate memory with global new
          pointer p = (pointer)(::operator new(num*sizeof(T)));
@@ -114,8 +117,8 @@ std::cout << "<allocate> " << num << " elements" << std::endl;
        // initialize elements of allocated storage p with value value
        void construct (pointer p, const T& value) {
 #ifdef ATERM_DEBUG_ALLOCATOR
-static int c = 0;
-std::cout << "<construct> " << ++c << std::endl;
+static int n = 0;
+std::cout << "aterm_allocator.construct() " << ++n << " elements constructed" << std::endl;
 #endif // ATERM_DEBUG_ALLOCATOR
            on_construct(p);
            // initialize memory with placement new
@@ -125,8 +128,8 @@ std::cout << "<construct> " << ++c << std::endl;
        // destroy elements of initialized storage p
        void destroy (pointer p) {
 #ifdef ATERM_DEBUG_ALLOCATOR
-static int d = 0;
-std::cout << "<destroy> " << ++d << std::endl;
+static int n = 0;
+std::cout << "aterm_allocator.destroy() " << ++n << " elements destroyed" << std::endl;
 #endif // ATERM_DEBUG_ALLOCATOR
            on_destroy(p);
            // destroy objects by calling their destructor
@@ -136,7 +139,9 @@ std::cout << "<destroy> " << ++d << std::endl;
        // deallocate storage p of deleted elements
        void deallocate (pointer p, size_type num) {
 #ifdef ATERM_DEBUG_ALLOCATOR
-std::cout << "<deallocate> " << num << " elements" << std::endl;
+static int n = 0;
+n += num;
+std::cout << "aterm_allocator.deallocate(" << num << ") " << n << " elements deallocated\n";
 #endif // ATERM_DEBUG_ALLOCATOR
            on_deallocate(p, num);
            // deallocate memory with global delete

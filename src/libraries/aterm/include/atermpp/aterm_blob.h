@@ -29,6 +29,9 @@ namespace atermpp
   class aterm_blob: public aterm
   {
    public:
+      aterm_blob()
+      {}
+
       aterm_blob(ATermBlob t)
         : aterm(t)
       {}
@@ -85,6 +88,35 @@ namespace atermpp
   {
     return t;
   }
+
+   template <>
+   class aterm_protect_traits<aterm_blob>
+   {
+     public:
+       static void protect(aterm_blob t)
+       {
+#ifdef ATERM_DEBUG_PROTECTION
+std::cout << "aterm_protect_traits<aterm_blob>::protect() " << t << std::endl;
+#endif // ATERM_DEBUG_PROTECTION
+         t.protect();
+       }
+
+       static void unprotect(aterm_blob t)
+       {
+#ifdef ATERM_DEBUG_PROTECTION
+std::cout << "aterm_protect_traits<aterm_blob>::unprotect() " << t << std::endl;
+#endif // ATERM_DEBUG_PROTECTION
+         t.unprotect();
+       }
+
+       static void mark(aterm_blob t)
+       {
+#ifdef ATERM_DEBUG_PROTECTION
+std::cout << "aterm_protect_traits<aterm_blob>::mark() " << t << std::endl;
+#endif // ATERM_DEBUG_PROTECTION
+         t.mark();
+       }
+   };
 
 } // namespace atermpp
 

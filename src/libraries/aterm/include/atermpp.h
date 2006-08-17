@@ -1,3 +1,6 @@
+#ifndef ATERM_IPROTECTEDATERM
+#define ATERM_IPROTECTEDATERM
+
 #include "aterm1.h"
 
 class IProtectedATerm
@@ -9,3 +12,5 @@ class IProtectedATerm
 
 void ATprotectProtectedATerm(IProtectedATerm *i);
 void ATunprotectProtectedATerm(IProtectedATerm *i);
+
+#endif // ATERM_IPROTECTEDATERM

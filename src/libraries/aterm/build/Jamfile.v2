@@ -21,6 +21,7 @@ lib aterm
          memory.c
          tafio.c
          version.c
+         atermpp.cpp
        : <address-model>64:<define>AT_64BIT
          <toolset>darwin,<link>shared:<cflags>"-fPIC -fno-common"
          <toolset>gcc,<os>NT,<link>shared:<cflags>""

@@ -31,6 +31,9 @@ namespace atermpp
   class aterm_real: public aterm
   {
     public:
+      aterm_real()
+      {}
+      
       aterm_real(double value)
         : aterm(ATmakeReal(value))
       {}
@@ -74,6 +77,35 @@ namespace atermpp
   {
     return t;
   }
+
+   template <>
+   class aterm_protect_traits<aterm_real>
+   {
+     public:
+       static void protect(aterm_real t)
+       {
+#ifdef ATERM_DEBUG_PROTECTION
+std::cout << "aterm_protect_traits<aterm_real>::protect() " << t << std::endl;
+#endif // ATERM_DEBUG_PROTECTION
+         t.protect();
+       }
+
+       static void unprotect(aterm_real t)
+       {
+#ifdef ATERM_DEBUG_PROTECTION
+std::cout << "aterm_protect_traits<aterm_real>::unprotect() " << t << std::endl;
+#endif // ATERM_DEBUG_PROTECTION
+         t.unprotect();
+       }
+
+       static void mark(aterm_real t)
+       {
+#ifdef ATERM_DEBUG_PROTECTION
+std::cout << "aterm_protect_traits<aterm_real>::mark() " << t << std::endl;
+#endif // ATERM_DEBUG_PROTECTION
+         t.mark();
+       }
+   };
 
 } // namespace atermpp
 
