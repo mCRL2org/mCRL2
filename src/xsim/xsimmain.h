@@ -1,14 +1,7 @@
 #ifndef __xsimmain_H__
 #define __xsimmain_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "xsimmain.h"
-#endif
-
-#ifndef WX_PRECOMP
-    #include <wx/wx.h>
-#endif
-
+#include <wx/wx.h>
 #include <wx/splitter.h>
 #include <wx/listctrl.h>
 #include <aterm2.h>

@@ -248,7 +248,6 @@ int main(int argc, char **argv)
 
     /* Initialise utility pseudo-library */
     squadt_utility::initialise(tc);
-sip::messenger::get_standard_error_logger()->set_filter_level(3);
 
     /* Main event loop for incoming messages from squadt */
     for (sip::message_ptr m = tc.await_message(sip::message_any); !termination_requested; m = tc.await_message(sip::message_any)) {

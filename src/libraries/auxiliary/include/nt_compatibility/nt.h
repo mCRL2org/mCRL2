@@ -1,1 +1,0 @@
-#define snprintf _snprintf

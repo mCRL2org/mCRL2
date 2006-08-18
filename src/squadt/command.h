@@ -48,6 +48,9 @@ namespace squadt {
 
         /** \brief Get arguments as an array of constant C strings */
         inline boost::shared_array < char const* > argument_array(bool b = true) const;
+
+        /** \brief Returns the basename of the executable */
+        inline std::string get_executable_name() const;
     };
   
     /**
@@ -113,6 +116,10 @@ namespace squadt {
       *d = 0;
 
       return (p);
+    }
+
+    inline std::string command::get_executable_name() const {
+      return (boost::filesystem::path(executable).leaf());
     }
   }
 }

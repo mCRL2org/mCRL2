@@ -8,10 +8,27 @@
 #include <wx/dirctrl.h>
 
 namespace squadt {
+  /**
+   * \namespace GUI
+   *
+   * Contained in this namespace is everything that is related to the
+   * graphical user interface of squadt. All information used to construct
+   * the graphical user interface (that what is displayed) is obtained
+   * through functionality that is found elsewhere.
+   **/
   namespace GUI {
+
+    /**
+     * \namespace dialog
+     *
+     * Members of this namespace are all the custom dialogs used by squadt,
+     * and helper classes en functions.
+     **/
     namespace dialog {
 
-      /** \brief Base class for dialogs */
+      /**
+       * \brief Base class for dialogs
+       **/
       class basic : public wxDialog {
 
         protected:
@@ -39,7 +56,7 @@ namespace squadt {
         public:
 
           /** \brief Constructor */
-          basic(wxWindow*, wxString&, wxSize);
+          basic(wxWindow*, wxString const&, wxSize const&);
 
           /** \brief Destructor */
           virtual ~basic() = 0;

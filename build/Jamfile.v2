@@ -11,7 +11,7 @@ alias mcrl2_revision.h
        :
        :
        :
-       : <toolset>msvc:<source>/libraries/auxiliary//nt_compatibility
+       : <toolset>msvc:<source>/libraries/auxiliary//nt_portability
          <include>$(TOP)/src
        ;
 

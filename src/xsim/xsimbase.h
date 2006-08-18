@@ -29,14 +29,7 @@
 #ifndef __xsimbase_H__
 #define __xsimbase_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "xsimbase.h"
-#endif
-
-#ifndef WX_PRECOMP
-    #include <wx/wx.h>
-#endif
-
+#include <wx/wx.h>
 #include <list>
 #include <aterm2.h>
 #include "libnextstate.h"
@@ -52,7 +45,7 @@ typedef viewlist::iterator viewlistiterator;
 class SimulatorInterface
 {
 public:
-	virtual ~SimulatorInterface() {};
+	virtual inline ~SimulatorInterface() {};
 
 	virtual void Register(SimulatorViewInterface *View) = 0;
 	/* Register *View to this Simulator */

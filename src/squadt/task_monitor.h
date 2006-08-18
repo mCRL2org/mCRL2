@@ -236,6 +236,9 @@ namespace squadt {
         if (0 < handlers.count(connection)) {
           boost::thread s(boost::bind(&task_monitor::service_handlers, this, connection));
         }
+
+        logger->log(1, boost::str(boost::format("connection established with %s pid(%u)\n")
+                  % associated_process->get_executable_name() % associated_process->get_identifier()));
       }
     }
  
@@ -344,6 +347,9 @@ namespace squadt {
     inline void task_monitor::finish() {
       /* Let the tool know that it should prepare for termination */
       request_termination();
+
+      logger->log(1, boost::str(boost::format("sent termination request to %s pid(%u)\n")
+                % associated_process->get_executable_name() % associated_process->get_identifier()));
    
       boost::mutex::scoped_lock l(register_lock);
    
@@ -372,6 +378,9 @@ namespace squadt {
           if (0 < handlers.count(completion)) {
             boost::thread s(boost::bind(&task_monitor::service_handlers, this, completion));
           }
+
+          logger->log(1, boost::str(boost::format("process terminated (tool %s pid(%u))\n")
+                    % associated_process->get_executable_name() % associated_process->get_identifier()));
         }
       }
     }

@@ -1,16 +1,7 @@
 #ifndef __xsimtrace_H__
 #define __xsimtrace_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "xsimtrace.h"
-#endif
-
-// Include wxWindows' headers
-
-#ifndef WX_PRECOMP
-    #include <wx/wx.h>
-#endif
-
+#include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <aterm2.h>
 #include "xsimbase.h"

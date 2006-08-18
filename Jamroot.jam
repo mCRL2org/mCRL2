@@ -20,7 +20,7 @@ if ! [ path.exists $(TOP)/build/config.jam ] {
 
 include $(TOP)/build/config.jam ;
 
-project
+project toolset
        : build-dir $(BUILD_TOP)
        : requirements
           <define>_FILE_OFFSET_BITS=64
@@ -30,7 +30,7 @@ project
           <os>CYGWIN,<toolset>gcc:<link>static
           <os>LINUX,<toolset>gcc:<cxxflags>"-std=c++98 -ansi"
           <toolset>msvc:<define>WIN32
-          <toolset>msvc:<include>src/libraries/auxiliary/include/nt_compatibility
+          <toolset>msvc:<include>src/libraries/auxiliary/include/nt_portability
        : default-build
           <address-model>$(ADDRESS_MODEL)
        ;

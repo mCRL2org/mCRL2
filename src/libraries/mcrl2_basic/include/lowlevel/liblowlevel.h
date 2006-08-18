@@ -6,7 +6,7 @@
 #include <aterm2.h>
 
 #ifdef _MSC_VER
-#include <nt.h>
+#include <nt_support/substitutes.h>
 #endif
 
 #ifdef __cplusplus

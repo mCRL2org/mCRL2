@@ -5,6 +5,10 @@
 
 #include <boost/format.hpp>
 
+#ifdef _MSC_VER
+# include <nt_portability/substitutes.h>
+#endif // _MSC_VER
+
 namespace utility {
 
   /** \brief Minimal interface for a logger component */

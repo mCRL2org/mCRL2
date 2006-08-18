@@ -53,7 +53,7 @@ namespace squadt {
       private:
 
         /** \brief The system's proces identifier for this process */
-        long int                             identifier;
+        pid_t                                identifier;
 
         /** \brief The status of this process */
         mutable status                       current_status;
@@ -66,6 +66,9 @@ namespace squadt {
 
         /** \brief Thread in which actual execution and waiting is performed */
         boost::shared_ptr < boost::thread >  execution_thread;
+
+        /** \brief The command that is currently being exected (or 0) */
+        std::auto_ptr < command >            last_command;
 
       private:
 
@@ -85,6 +88,15 @@ namespace squadt {
      
         /** \brief Returns the process status */
         inline status get_status() const;
+
+        /** \brief Returns the process id */
+        inline pid_t get_identifier() const;
+ 
+        /** \brief Returns the process id */
+        inline std::string get_executable_name() const;
+
+        /** \brief Returns the last command that is (or was) executing */
+        inline command const& get_command() const;
  
         /** \brief Terminates the process */
         void terminate();
@@ -118,6 +130,18 @@ namespace squadt {
  
     inline process::status process::get_status() const {
       return (current_status);
+    }
+
+    inline pid_t process::get_identifier() const {
+      return (identifier);
+    }
+
+    inline std::string process::get_executable_name() const {
+      return (last_command->get_executable_name());
+    }
+
+    inline command const& process::get_command() const {
+      return (*last_command);
     }
   }
 }

@@ -5,6 +5,8 @@
 project auxiliary
        : source-location ../source
        : build-dir $(BUILD_TOP)
+       : usage-requirements
+         <include>../include
        ;
 
 lib auxiliary
@@ -20,12 +22,8 @@ lib auxiliary
          <include>../include
        :
        : <library>/libraries/mcrl2_basic//mcrl2_basic
-         <include>../include
        ;
 
-lib nt_compatibility
-       : nt_compatibility/getopt.c nt_compatibility/getopt1.c
-       :
-       :
-       : <include>../include/nt_compatibility
+lib nt_portability
+       : nt_portability/getopt.c nt_portability/getopt1.c
        ;

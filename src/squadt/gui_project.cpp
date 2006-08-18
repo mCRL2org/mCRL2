@@ -141,7 +141,7 @@ namespace squadt {
     void project::build() {
       process_display_view = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL|wxTAB_TRAVERSAL);
       object_view          = new wxTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-                                                        wxTR_LINES_AT_ROOT|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_SINGLE|wxSUNKEN_BORDER);
+                                        (wxTR_LINES_AT_ROOT|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_SINGLE|wxSUNKEN_BORDER)&(~wxTR_EDIT_LABELS));
 
       SetMinimumPaneSize(1);
       SplitVertically(object_view, process_display_view);
@@ -199,7 +199,12 @@ namespace squadt {
       processor::sptr                    p = reinterpret_cast < object_data* > (object_view->GetItemData(s))->get_processor();
       processor::object_descriptor::sptr t = reinterpret_cast < object_data* > (object_view->GetItemData(s))->get_object();
 
-      p->rename_output(t->location, std::string(e.GetLabel().fn_str()));
+      if (!e.GetLabel().IsEmpty()) {
+        p->rename_output(t->location, std::string(e.GetLabel().fn_str()));
+      }
+      else {
+        e.Veto();
+      }
     }
 
     void project::add() {

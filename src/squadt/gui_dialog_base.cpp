@@ -9,11 +9,11 @@ namespace squadt {
     namespace dialog {
 
       /**
-       * @param p the parent window
-       * @param t the title of the window
-       * @param d the dimensions as (width, height) in pixels of the window
+       * @param[in] p the parent window
+       * @param[in] t the title of the window
+       * @param[in] d the dimensions as (width, height) in pixels of the window
        **/
-      basic::basic(wxWindow* p, wxString& t, wxSize d) : wxDialog(p, wxID_ANY, t, wxDefaultPosition, d) {
+      basic::basic(wxWindow* p, wxString const& t, wxSize const& d) : wxDialog(p, wxID_ANY, t, wxDefaultPosition, d) {
         build();
 
         Connect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(dialog::basic::on_window_close));

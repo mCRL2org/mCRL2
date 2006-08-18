@@ -57,6 +57,8 @@ namespace squadt {
       if (0 < identifier) {
         int exit_code;
 
+        last_command = std::auto_ptr < command > (new command(c));
+
         waitpid(identifier, &exit_code, 0);
 
         current_status = (WIFEXITED(exit_code)) ? completed : aborted;

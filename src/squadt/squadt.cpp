@@ -20,14 +20,19 @@
 #include <wx/cmdline.h>
 
 const char* program_name    = "squadt";
-const char* program_version = "0.1.0";
+const char* program_version = "0.2.1";
 
+/**
+ * \namespace squadt
+ *
+ * The global namespace for all squadt components.
+ **/
 namespace squadt {
 
-  /* Global Settings Manager component */
+  /** \brief Global Settings Manager component */
   boost::shared_ptr < settings_manager > global_settings_manager;
 
-  /* Global Tool Manager component */
+  /** \brief Global Tool Manager component */
   boost::shared_ptr < tool_manager >     global_tool_manager;
 }
 
