@@ -36,7 +36,7 @@ class data_declaration
     data_declaration()
     {}
 
-    data_declaration(aterm_list sorts, aterm_list constructors, aterm_list mappings, aterm_list equations)
+    data_declaration(sort_list sorts, function_list constructors, function_list mappings, data_equation_list equations)
       : m_sorts(sorts),
         m_constructors(constructors),
         m_mappings(mappings),

@@ -5,7 +5,9 @@
 #ifndef LPE_ACTION_H
 #define LPE_ACTION_H
 
+#include <cassert>
 #include "atermpp/atermpp.h"
+#include "atermpp/aterm_list.h"
 #include "lpe/substitute.h"
 #include "lpe/data.h"
 
@@ -32,6 +34,7 @@ class action: public aterm_wrapper
     action(aterm_appl t)
      : aterm_wrapper(t)
     {
+      assert(gsIsNil(t) || gsIsActId(t) || gsIsAction(t));
       aterm_list::iterator i = aterm_appl(*this).argument_list().begin();
       m_name      = *i++;
       m_arguments = data_expression_list(*i);
@@ -67,6 +70,10 @@ class action: public aterm_wrapper
     }     
 };
 
+///////////////////////////////////////////////////////////////////////////////
+// action_list
+/// \brief singly linked list of actions
+///
 typedef term_list<action> action_list;
 
 } // namespace mcrl

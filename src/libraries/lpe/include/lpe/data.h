@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-/// \file sort.h
+/// \file data.h
 /// Contains data data structures for the LPE Library.
 
 #ifndef LPE_DATA_H
@@ -8,6 +8,7 @@
 #include <iostream> // for debugging
 
 #include <string>
+#include <cassert>
 #include "atermpp/atermpp.h"
 #include "lpe/aterm_wrapper.h"
 #include "lpe/substitute.h"
@@ -35,11 +36,23 @@ class data_expression: public aterm_wrapper
 
     data_expression(ATermAppl term)
       : aterm_wrapper(aterm_appl(term))
-    {}
+    {
+      assert(gsIsDataVarId(term) || gsIsOpId(term) || gsIsDataAppl(term));
+    }
 
     data_expression(aterm_appl term)
       : aterm_wrapper(term)
-    {}
+    {
+      assert(gsIsNil(term) || gsIsDataVarId(term) || gsIsOpId(term) || gsIsDataAppl(term));
+    }
+    /// Returns the sort of the data expression.
+    ///
+    lpe::sort sort() const
+    {
+      ATermAppl result = gsGetSort(*this);
+      assert(!gsIsUnknown(result));
+      return lpe::sort(result);
+    }     
 
     /// Returns true if the data expression equals 'nil' (meaning it has no
     /// sensible value).
@@ -65,11 +78,11 @@ class data_expression: public aterm_wrapper
     {
       assert(!is_nil());
       return *this == gsMakeDataExprFalse();
-    }     
+    }
 
     /// Returns the sort of the data_expression.
     ///
-    sort type() const
+    lpe::sort type() const
     {
       return lpe::sort(gsGetSort(m_term));
     }
@@ -108,9 +121,10 @@ class data_variable: public aterm_wrapper
 
     data_variable(aterm_appl t)
      : aterm_wrapper(t)
-    {}
-
-    data_variable(const std::string& name, const sort& s)
+    {
+      assert(gsIsDataVarId(t));
+    }
+    data_variable(const std::string& name, const lpe::sort& s)
      : aterm_wrapper(gsMakeDataVarId(gsString2ATermAppl(name.c_str()), s))
     {}
 
@@ -161,6 +175,7 @@ class data_equation: public aterm_wrapper
     data_equation(aterm_appl t)
      : aterm_wrapper(t)
     {
+      assert(gsIsDataEqn(t));
       aterm_list::iterator i = t.argument_list().begin();
       m_variables = data_variable_list(*i++);
       m_condition = data_expression(*i++);
@@ -236,12 +251,20 @@ class data_assignment: public aterm_wrapper
     data_expression m_rhs;         // right hand side of the assignment
 
   public:
+    /// Returns true if the types of the left and right hand side are equal.
+    bool is_well_typed() const
+    {
+      return gsGetSort(m_lhs) == gsGetSort(m_rhs);
+    }
+
     data_assignment(aterm_appl t)
      : aterm_wrapper(t)
     {
+      assert(gsIsAssignment(t));
       aterm_list::iterator i = t.argument_list().begin();
       m_lhs = data_variable(*i++);
       m_rhs = data_expression(*i);
+      assert(is_well_typed());
     }
 
     data_assignment(data_variable lhs, data_expression rhs)
@@ -303,7 +326,29 @@ struct assignment_list_substitution
     }
     return t;
   }
+  private:
+    assignment_list_substitution& operator=(const assignment_list_substitution&)
+    {
+      return *this;
+    }
 };
+/// Returns true if the data expression e is of sort Real.
+///
+inline
+bool is_real(data_expression e)
+{
+  return e.sort() == gsMakeSortIdReal();
+}
+
+/// Returns true if the data expression e is of sort Bool.
+///
+inline
+bool is_bool(data_expression e)
+{
+  return e.sort() == gsMakeSortIdBool();
+}
+
+// todo: Pos/Nat/Int
 
 } // namespace mcrl
 

@@ -5,15 +5,14 @@
 #ifndef LPE_FUNCTION_H
 #define LPE_FUNCTION_H
 
+#include <iostream>
+#include <cassert>
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
 #include "lpe/aterm_wrapper.h"
 #include "lpe/sort.h"
-
 #include "libstruct.h"
 #include "liblowlevel.h"
-
-#include <iostream>
 
 namespace lpe {
 
@@ -33,9 +32,10 @@ class function: public aterm_wrapper
 
     function(aterm_appl t)
       : aterm_wrapper(t)
-    {}
-    
-    
+    {
+      assert(gsIsOpId(t));
+    }
+       
     // Added 16-11-2005 by Frank S.
     // 
     sort_list input_types() const

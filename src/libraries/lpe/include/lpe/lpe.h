@@ -11,12 +11,42 @@
 #include <utility>
 #include <string>
 #include <cassert>
+#include <set>
+#include <iterator>
+#include <algorithm>
+#include <iterator>
+#include <sstream>
 #include "atermpp/aterm.h"
+#include "atermpp/aterm_list.h"
 #include "lpe/aterm_wrapper.h"
 #include "lpe/action.h"
-#include "atermpp/aterm_list.h"
+#include "lpe/data.h"
+#include "lpe/data_declaration.h"
 #include "lpe/pretty_print.h"
 #include "lpe/substitute.h"
+
+namespace {
+  /// INTERNAL ONLY
+  /// Returns a set containing the names of the variables in l.
+  inline
+  std::set<std::string> make_string_set(lpe::data_variable_list l)
+  {
+    std::set<std::string> result;
+    for (lpe::data_variable_list::iterator i = l.begin(); i != l.end(); ++i)
+    {
+      result.insert(i->name());
+    }
+    return result;
+  }
+
+  inline
+  std::string print_string_set(const std::set<std::string>& v)
+  {
+    std::ostringstream out;
+    std::copy(v.begin(), v.end(), std::ostream_iterator<std::string>(out, " "));
+    return out.str();
+  }
+} // unnamed namespace
 
 namespace lpe {
 
@@ -45,15 +75,16 @@ class LPE_summand: public aterm_wrapper
     LPE_summand(aterm_appl t)
      : aterm_wrapper(t)
     {
+      assert(gsIsLPESummand(t));
       aterm_list::iterator i = m_term.argument_list().begin();
 
       m_summation_variables = data_variable_list(*i++);
       m_condition           = data_expression(*i++);
       aterm_appl x          = *i++;
-      m_delta = x.function().name() == "Delta";
+      m_delta = gsIsDelta(x);
       if (!m_delta)
       {
-        assert(x.function().name() == "MultAct");
+        assert(gsIsMultAct(x));
         m_actions = action_list(x.argument(0));
       }
       m_time                = data_expression(*i++);
@@ -150,11 +181,27 @@ class LPE_summand: public aterm_wrapper
       return LPE_summand(m_summation_variables, condition, m_delta, actions, time, m_assignments);
     }     
 
-/*
-    Iter next_states_begin(data_expression_list d)
-    { 
+    /// Returns true if
+    /// 1) all data assignments are well typed
+    /// 2) the (optional) time has sort Real
+    /// 3) the condition has sort Bool
+    bool is_well_typed() const
+    {
+      for (data_assignment_list::iterator i = m_assignments.begin(); i != m_assignments.end(); ++i)
+      {
+        if (!i->is_well_typed())
+          return false;
+      }
+      if (has_time() && !is_real(m_time))
+      {
+        return false;
+      }
+      if (!is_bool(m_condition))
+      {
+        return false;
+      }
+      return true;
     }
-*/
 };
 
 typedef term_list<LPE_summand> summand_list;
@@ -171,7 +218,54 @@ class LPE: public aterm_wrapper
     summand_list       m_summands;
     action_list        m_actions;
 
+    typedef std::vector<std::pair<summand_list::iterator, std::set<std::string> > > name_clash_list;
+
+    /// Returns all name clashes between variables names occurring in a sum operator
+    /// of a summand and variable names occurring in the process parameters of the LPE.
+    name_clash_list variable_name_clashes() const
+    {
+      std::vector<std::pair<summand_list::iterator, std::set<std::string> > > result;
+      std::set<std::string> pv = make_string_set(process_parameters());
+      for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
+      {
+        std::set<std::string> sv = make_string_set(i->summation_variables());
+        std::set<std::string> v;
+        std::set_intersection(pv.begin(), pv.end(), sv.begin(), sv.end(), std::inserter(v, v.end()));
+        if (!v.empty())
+        {
+          result.push_back(make_pair(i, v));
+        }
+      }
+      return result;
+    }
+
   public:
+    /// Returns true if all summands are well typed
+    bool is_well_typed() const
+    {
+      for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
+      {
+        if (!i->is_well_typed())
+          return false;
+      }
+      return true;
+    }
+
+    /// Returns true if there are no name clashes between variables in all sum operators
+    /// of the summands and the process parameters of the LPE. If print is true, an
+    /// overview of the name clashes will be printed to cerr.
+    bool is_name_clash_free(bool print=false) const
+    {
+      name_clash_list v = variable_name_clashes();
+      if (print && !v.empty()) {
+        for (name_clash_list::const_iterator i = v.begin(); i != v.end(); ++i)
+        {
+          std::cerr << "LPE " << i->first->to_string() << " has name clashes " << print_string_set(i->second) << std::endl;
+        }
+      }
+      return v.empty();
+    }
+
     LPE()
     {}
 
@@ -185,11 +279,18 @@ class LPE: public aterm_wrapper
        m_process_parameters(process_parameters),
        m_summands          (summands          ),
        m_actions           (actions           )
-    {}
+    {
+      assert(is_well_typed());
+      assert(is_name_clash_free(true));
+    }
 
     LPE(aterm_appl lpe, action_list actions)
       : aterm_wrapper(lpe)
     {
+      assert(gsIsLPE(lpe));
+      assert(is_well_typed());
+      assert(is_name_clash_free(true));
+
       // unpack LPE(.,.,.) term     
       aterm_list::iterator i = lpe.argument_list().begin();
       m_free_variables     = data_variable_list(*i++);
@@ -260,7 +361,7 @@ class LPE: public aterm_wrapper
       std::string s4 = m_actions           .to_string();
       return s1 + "\n" + s2 + "\n" + s3 + "\n" + s4;
     }
-};
+  };
 
 } // namespace mcrl
 

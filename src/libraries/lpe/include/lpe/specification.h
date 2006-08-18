@@ -133,6 +133,7 @@ class specification: public aterm_wrapper
     specification(aterm_appl t)
       : aterm_wrapper(t)
     {
+      assert(gsIsSpecV1(t));
       init_term(t);
     }
 

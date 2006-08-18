@@ -39,18 +39,21 @@ int main()
   cout << "--- sort -----------" << endl;
   for (sort_list::iterator i = spec.sorts().begin(); i != spec.sorts().end(); ++i)
   {
+    lpe::sort s = *i;
     cout << str(format("%5s        %s") % i->pp() % i->to_string()) << endl;
   }
 
   cout << "--- map ------------" << endl;
   for (function_list::iterator i = spec.mappings().begin(); i != spec.mappings().end(); ++i)
   {
+    function f = *i;
     cout << str(format("%5s        %s") % i->pp() % i->to_string()) << endl;
   }
 
   cout << "--- cons -----------" << endl;
   for (function_list::iterator i = spec.constructors().begin(); i != spec.constructors().end(); ++i)
   {
+    function f = *i;
     cout << str(format("%5s        %s") % i->pp() % i->to_string()) << endl;
   }
   cout << endl;
@@ -58,6 +61,7 @@ int main()
   cout << "--- act ------------" << endl;
   for (action_list::iterator i = spec.actions().begin(); i != spec.actions().end(); ++i)
   {
+    action a = *i;
     cout << str(format("%5s        %s") % i->pp() % i->to_string()) << endl;
   }
   cout << endl;
