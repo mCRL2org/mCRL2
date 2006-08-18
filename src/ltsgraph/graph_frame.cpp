@@ -234,11 +234,6 @@ void GraphFrame::OnQuit( wxCommandEvent& /* event */ ) {
 
 void GraphFrame::OnClose(wxCloseEvent& /*event*/) {
   StopOpti = true;
-
-//std::cerr << "closeing" << std::endl;
-//  while(!StoppedOpti) {
-//    wxTheApp->Yield(true); // to allow user to interrupt optimizing
-//  }
   SetEvtHandlerEnabled(false);
 
   static_cast < wxSplitterWindow* > (leftPanel->GetParent())->Unsplit(leftPanel);
@@ -428,11 +423,27 @@ void GraphFrame::Init(wxString LTSfile) {
 }
 
 bool GraphFrame::OptimizeDrawing(double precision) {
-
-  EdgeStiffness = spinEdgeStiffness->GetValue();
-  NodeStrength  = spinNodeStrength->GetValue();
-  NaturalLength = spinNaturalLength->GetValue();
-	CircleRadius  = spinNodeRadius->GetValue();
+  /* A short explanation is required here:
+   * When the program is closed, the spinBoxes are destroyed, but when this
+   * function is still running, NULL pointers are followed,leading to a 
+   * segfault. 
+   * However, on closing, StopOpti is set to true, op the status
+   * of the spinboxes can be read from this variable (for some reason,
+   * checking the spinboxes themselves is not possible, probably since
+   * in between checking them and addressing them, They are destroyed).
+   * After this, the function can stop. It returns false, since the 
+   * function should return wether the required precision was achieved. which
+   * it doesn't if it stops before calculation.
+   */
+  if ( !StopOpti) {
+    EdgeStiffness = spinEdgeStiffness->GetValue();
+    NodeStrength  = spinNodeStrength->GetValue();
+    NaturalLength = spinNaturalLength->GetValue();
+    CircleRadius  = spinNodeRadius->GetValue();
+  }
+  else {
+    return false;
+  }
 	
   double arraySumForceX[vectNode.size()];
   double arraySumForceY[vectNode.size()];
