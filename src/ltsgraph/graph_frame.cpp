@@ -1,5 +1,5 @@
 #include "graph_frame.h" 
-const wxColour border_colour_selected = "BLUE";
+const wxColour* border_colour_selected = wxBLUE;
 
 BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
   EVT_MENU(wxID_OPEN, GraphFrame::OnOpen)
@@ -886,7 +886,7 @@ void ViewPort::PressLeft(wxMouseEvent& event) {
     selected_node = vectNode[ind_node_dragged];
     
     // Give its border a color to identify it on-screen
-    selected_node->set_border_colour(border_colour_selected);
+    selected_node->set_border_colour(*border_colour_selected);
 
     // Activate button for colour picking:
     GF->enable_btn_colour_picker();

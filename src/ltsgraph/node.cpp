@@ -1,7 +1,7 @@
 #include "node.h"
 
-const wxColour border_color     = "BLACK";
-const wxColour border_color_init = "RED";
+const wxColour* border_color      = wxBLACK;
+const wxColour* border_color_init = wxRED;
 
 Node::Node(unsigned int _num, double _posX, double _posY, wxString _lbl, bool _initState) : 
              posX(_posX), posY(_posY), lbl(_lbl), num(_num), initState(_initState)
@@ -11,10 +11,10 @@ Node::Node(unsigned int _num, double _posX, double _posY, wxString _lbl, bool _i
   node_colour = wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE);
 
   if (initState) {
-    border_colour = border_color_init;
+    border_colour = *border_color_init;
   }
   else {
-    border_colour = border_color;
+    border_colour = *border_color;
   }
   
 }
@@ -143,10 +143,10 @@ wxColour Node::get_border_colour() {
 
 void Node::reset_border_colour() {
   if (initState) {
-    border_colour = border_color_init;
+    border_colour = *border_color_init;
   }
   else {
-    border_colour = border_color;
+    border_colour = *border_color;
   }
 }
 

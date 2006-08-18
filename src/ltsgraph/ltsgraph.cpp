@@ -44,7 +44,7 @@ class GraphApp : public wxApp
       cp.add_input_combination(svc_file_for_input, "Visualising", "svc");
 
       /* On purpose we do not catch exceptions */
-      if (tc.activate(argc, argv)) {
+      if (tc.activate(argc, reinterpret_cast < char** > (argv))) {
         
         /* Initialise utility pseudo-library */
         squadt_utility::initialise(tc);
@@ -103,12 +103,12 @@ class GraphApp : public wxApp
     /* If there is a valid svc or aut, retrieve its filename*/
     if (valid_aut) {
       file_name = configuration->get_object(aut_file_for_input)->get_location();
-      frame->Init(file_name);
+      frame->Init(wxString(file_name.c_str(), wxConvLocal));
     }
       
     if (valid_svc) {
       file_name = configuration->get_object(svc_file_for_input)->get_location();
-      frame->Init(file_name);
+      frame->Init(wxString(file_name.c_str(), wxConvLocal));
     }
 
     if (!(valid_aut || valid_svc)) { 
