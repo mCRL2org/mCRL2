@@ -646,7 +646,7 @@ host
 host_cpu
 host_vendor
 host_os
-BJAM_TOOLSET
+BJAM_CXX
 HOST_OS
 ADDRESS_MODEL
 CC
@@ -1881,7 +1881,7 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
 # Default toolset to use with Boost.Build
-BJAM_TOOLSET="gcc"
+BJAM_CXX="gcc"
 
 # Flags for runtime compilation and linking
 R_CFLAGS="-Wno-unused -O3 -rdynamic"
@@ -1902,7 +1902,7 @@ case $host in
     ;;
   *-*-msdos* | *-*-go32* | *-*-windows*)
     HOST_OS="WINDOWS"
-    BJAM_TOOLSET="vc-7_1"
+    BJAM_CXX="vc-7_1"
     ;;
   *-*-linux*)
     HOST_OS="LINUX"
@@ -1916,7 +1916,7 @@ case $host in
     R_CXXFLAGS="-Wno-unused -O3"
     R_LDFLAGS="-bundle -undefined dynamic_lookup"
     R_SLDFLAGS=""
-    BJAM_TOOLSET="darwin"
+    BJAM_CXX="darwin"
     ;;
   *)
     HOST_OS="UNKNOWN"
@@ -7370,7 +7370,7 @@ echo "$as_me: Some tools will not be built if any of these libraries are missing
 { echo "$as_me:$LINENO: " >&5
 echo "$as_me: " >&6;}
 
-ac_config_files="$ac_config_files boost/tools/build/v2/user-config.jam build/config.mk build/config.jam src/setup.h"
+ac_config_files="$ac_config_files build/config.mk build/config.jam src/setup.h"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -7926,7 +7926,6 @@ cat >>$CONFIG_STATUS <<\_ACEOF
 for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
-    "boost/tools/build/v2/user-config.jam") CONFIG_FILES="$CONFIG_FILES boost/tools/build/v2/user-config.jam" ;;
     "build/config.mk") CONFIG_FILES="$CONFIG_FILES build/config.mk" ;;
     "build/config.jam") CONFIG_FILES="$CONFIG_FILES build/config.jam" ;;
     "src/setup.h") CONFIG_FILES="$CONFIG_FILES src/setup.h" ;;
@@ -8035,7 +8034,7 @@ host!$host$ac_delim
 host_cpu!$host_cpu$ac_delim
 host_vendor!$host_vendor$ac_delim
 host_os!$host_os$ac_delim
-BJAM_TOOLSET!$BJAM_TOOLSET$ac_delim
+BJAM_CXX!$BJAM_CXX$ac_delim
 HOST_OS!$HOST_OS$ac_delim
 ADDRESS_MODEL!$ADDRESS_MODEL$ac_delim
 CC!$CC$ac_delim

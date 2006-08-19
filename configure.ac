@@ -4,7 +4,7 @@ AC_PREFIX_DEFAULT([$HOME])
 AC_CONFIG_SRCDIR([src/setup.h.in])
 
 # Default toolset to use with Boost.Build
-BJAM_TOOLSET="gcc"
+BJAM_CXX="gcc"
 
 # Flags for runtime compilation and linking
 R_CFLAGS="-Wno-unused -O3 -rdynamic"
@@ -25,7 +25,7 @@ case $host in
     ;;
   *-*-msdos* | *-*-go32* | *-*-windows*)
     HOST_OS="WINDOWS"
-    BJAM_TOOLSET="vc-7_1"
+    BJAM_CXX="vc-7_1"
     ;;
   *-*-linux*)
     HOST_OS="LINUX"
@@ -39,13 +39,13 @@ case $host in
     R_CXXFLAGS="-Wno-unused -O3"
     R_LDFLAGS="-bundle -undefined dynamic_lookup"
     R_SLDFLAGS=""
-    BJAM_TOOLSET="darwin"
+    BJAM_CXX="darwin"
     ;;
   *)
     HOST_OS="UNKNOWN"
     ;;
 esac
-AC_SUBST([BJAM_TOOLSET])
+AC_SUBST([BJAM_CXX])
 AC_SUBST([HOST_OS])
 
 # Default is 32 bits, test is probably very incomplete
@@ -517,6 +517,6 @@ AC_MSG_NOTICE()
 AC_MSG_NOTICE(Some tools will not be built if any of these libraries are missing.)
 AC_MSG_NOTICE()
 
-AC_CONFIG_FILES([boost/tools/build/v2/user-config.jam build/config.mk build/config.jam src/setup.h])
+AC_CONFIG_FILES([build/config.mk build/config.jam src/setup.h])
 AC_OUTPUT
 

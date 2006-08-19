@@ -10,14 +10,14 @@
 #  creates an output file.
 #  
 #  The exact list of rules is:
-#  'compile'       -- creates .test file if compilation of sources was successfull
+#  'compile'       -- creates .test file if compilation of sources was successful
 #  'compile-fail'  -- creates .test file if compilation of sources failed
 #  'run'           -- creates .test file is running of executable produced from
-#                     sources was successfull. Also leaves behing .output file
+#                     sources was successful. Also leaves behind .output file
 #                     with the output from program run.
 #  'run-fail'      -- same as above, but .test file is created if running fails.
 #
-#  In all cases, presense of .test file is an incication that
+#  In all cases, presence of .test file is an indication that
 #  the test passed. For more convenient reporting, you might want to use C++ Boost
 #  regression testing utilities, see
 #  http://www.boost.org/more/regression.html
@@ -30,7 +30,7 @@
 # Notes:
 #  - <no-warn> is not implemented, since in Como-specific, and it's not clear how
 #     to implement it
-#  - std::locale-support is not impelemted (it's used in one test).
+#  - std::locale-support is not implemented (it's used in one test).
 
   
 import targets ;

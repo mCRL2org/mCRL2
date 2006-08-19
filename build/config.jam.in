@@ -1,5 +1,13 @@
+# This sets the tools that is being used for building
+rule import_user_config {
+  import toolset ;
+
+  # For C/C++ programs
+  toolset.using @BJAM_CXX@ ;
+}
 
 # Build specific settings
+BUILD_VARIANT   = "@BUILD_VARIANT@" ;
 ADDRESS_MODEL   = "@ADDRESS_MODEL@" ;
 
 # Library specific variables

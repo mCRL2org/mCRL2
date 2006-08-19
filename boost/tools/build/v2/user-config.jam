@@ -12,6 +12,9 @@
 #  Some important libraries can also be configured.
 #  Uncomment relevant parts to suite your local configuration and preferences.
 
+import path ;
+import build-system ;
+
 import toolset : using ;
 
 #  GCC configuration
@@ -51,4 +54,20 @@ import toolset : using ;
 #  Configure with explicit installation prefix
 #  using qt : /usr/opt/qt ;
 
-using gcc ;
+local CONFIG_JAM = [ build-system.location ] ;
+
+CONFIG_JAM = $(CONFIG_JAM)"/../../../../build/config.jam" ;
+
+if ! [ path.exists $(CONFIG_JAM) ] {
+  import errors ;
+
+  ECHO "You need to run configure from the top of the source tree!" ;
+
+  exit ;
+}
+else {
+  include $(CONFIG_JAM) ;
+
+  import_user_config ;
+}
+

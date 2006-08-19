@@ -1,8 +1,3 @@
-import path ;
-import modules ;
-import feature : feature ;
-import os : name ;
-
 path-constant TOP             : . ;
 path-constant BUILD_TOP       : ./bin ;                  # Common build directory
 path-constant BOOST_ROOT      : ./boost ;                # Boost prefix (packaged sources)
@@ -11,12 +6,6 @@ path-constant REVISION_HEADER : ./src/mcrl2_revision.h ;
 
 # Activate header cache
 #modules.poke : HCACHEFILE : .jamdeps ;
-
-if ! [ path.exists $(TOP)/build/config.jam ] {
-  ECHO "Please configure your source tree!" ;
-
-  exit ;
-}
 
 include $(TOP)/build/config.jam ;
 
@@ -32,6 +21,7 @@ project toolset
           <toolset>msvc:<define>WIN32
           <toolset>msvc:<include>src/libraries/auxiliary/include/nt_portability
        : default-build
+          <variant>$(BUILD_VARIANT)
           <address-model>$(ADDRESS_MODEL)
        ;
 
@@ -58,6 +48,8 @@ libraries = [ MATCH src/libraries/(.*)/build/.* : [ glob src/libraries/*/build/J
 for library in $(libraries) {
   use-project /libraries/$(library) : src/libraries/$(library)/build ;
 }
+
+import feature : feature ;
 
 # Feature to mark tools as basic experimental or deprecated
 feature status : basic experimental deprecated : composite optional incidental propagated ;
