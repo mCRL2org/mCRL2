@@ -19,7 +19,9 @@ namespace sip {
  
     /** \brief The main interface to the protocol implementation (tool-side) */
     class communicator : public sip::messenger {
-      friend void messaging::scheme< sip::message >::connect(basic_messenger< sip::message >*) const;
+        friend class messaging::scheme< sip::message >;
+
+      /* friend void messaging::scheme< sip::message >::connect(basic_messenger< sip::message >*) const; */
 
       friend class layout::element;
  
