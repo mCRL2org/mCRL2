@@ -21,8 +21,9 @@ project toolset
           <toolset>msvc:<define>WIN32
           <toolset>msvc:<include>src/libraries/auxiliary/include/nt_portability
        : default-build
-          <variant>$(BUILD_VARIANT)
           <address-model>$(ADDRESS_MODEL)
+          <variant>$(BUILD_VARIANT)
+          $(BUILD_OPTIONS)
        ;
 
 # The known sub projects

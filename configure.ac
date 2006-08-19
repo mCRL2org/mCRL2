@@ -228,7 +228,7 @@ AC_ARG_WITH(
   )
 )
 if test $enable_static; then
-  BUILD_VARIANT="link=static ${BUILD_VARIANT}"
+  BUILD_OPTIONS="\"<link>static\" \"<runtime-link>static\""
 fi
 
 # Check whether dymbol table stripping from binaries is requested
@@ -266,7 +266,7 @@ AC_ARG_ENABLE(
   )
 )
 if test $enable_squadt_support; then
-  BUILD_VARIANT="--disable-squadt-support ${BUILD_VARIANT}"
+  BUILD_OPTIONS="--disable-squadt-support"
 fi
 
 # Check for ATerm library and header files
@@ -472,6 +472,7 @@ then
 fi
 
 AC_SUBST([BUILD_VARIANT],[])
+AC_SUBST([BUILD_OPTIONS],[])
 
 includedir="$includedir/mcrl2"
 datadir="$datadir/mcrl2"
