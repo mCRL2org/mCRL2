@@ -9,7 +9,7 @@
 const double triangle_base = 4.0;
 const double triangle_height = 8.0;
 
-const wxColour* color = wxBLACK;
+const wxString color = wxT("BLACK");
 
 Edge::Edge(Node* _N1, Node* _N2, wxString _lbl) : N1(_N1), N2(_N2), lbl(_lbl) 
 { 
@@ -64,14 +64,14 @@ void Edge::OnPaint(wxDC * ptrDC)
     wxPoint points[3] = {*p1,*p2,*p3};
 
     //Prepare the filling
-    wxBrush myBrush(*color,wxSOLID );
+    wxBrush myBrush(color,wxSOLID );
     ptrDC->SetBrush(myBrush);
     
     //Draw the triangle
     ptrDC->DrawPolygon(3,points, newX, newY, wxWINDING_RULE);
 
     //Edge body (line)
-    wxPen myPen(*color,ARROW_WIDTH,wxSOLID);
+    wxPen myPen(color,ARROW_WIDTH,wxSOLID);
     ptrDC->SetPen(myPen);
     ptrDC->DrawLine((wxCoord)GetXpos1(),(wxCoord)GetYpos1(),(wxCoord)GetXpos2(),(wxCoord)GetYpos2());
 
