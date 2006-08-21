@@ -451,8 +451,8 @@ namespace squadt {
 
         if (!name->GetValue().IsEmpty()) {
           wxFileName n(project_store, name->GetValue());
-         
-          if (n.DirExists() || n.FileExists()) {
+
+          if (n.FileExists()) {
             wxMessageDialog(0, wxT("A file with this name is already part of the project!"), wxT("Error"), wxOK).ShowModal();
           }
           else {
