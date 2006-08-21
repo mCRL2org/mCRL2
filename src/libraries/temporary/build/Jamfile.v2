@@ -20,7 +20,8 @@ lib trace
 lib enum
        : libenum.cpp
          enum_standard.cpp
-       : <dependency>/libraries/mcrl2_basic//mcrl2_basic
+         /libraries/mcrl2_basic//mcrl2_basic
+       :
        :
        : <library>/libraries/mcrl2_basic//mcrl2_basic
        ;

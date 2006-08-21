@@ -18,8 +18,8 @@ lib auxiliary
          utilities.cpp
          expression_info.cpp
          sort_info.cpp
-       : <dependency>/libraries/mcrl2_basic//mcrl2_basic
-         <include>../include
+         /libraries/mcrl2_basic//mcrl2_basic
+       : <include>../include
        :
        : <library>/libraries/mcrl2_basic//mcrl2_basic
        ;
