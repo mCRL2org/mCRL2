@@ -463,6 +463,9 @@ namespace squadt {
 
       void add_to_project::on_selection_changed(wxTreeEvent&) {
         if (wxFileName::FileExists(file_selector->GetPath())) {
+          /* To circumvent a bug in wxWidgets: sometimes the text updated event is not triggered */
+          name->SetValue(wxT("n"));
+
           name->SetValue(wxFileName(file_selector->GetPath()).GetFullName());
         }
         else {
