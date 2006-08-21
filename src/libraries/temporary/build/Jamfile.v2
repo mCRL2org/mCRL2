@@ -11,17 +11,16 @@ project temporary
 
 lib trace
        : libtrace.cpp
-       : <dependency>/libraries/aterm//aterm
-         <dependency>/libraries/mcrl2_basic//mcrl2_basic
+         /libraries/mcrl2_basic//mcrl2_basic
        :
-       : <library>/libraries/mcrl2_basic//mcrl2_basic
+       :
+       :
        ;
 
 lib enum
        : libenum.cpp
          enum_standard.cpp
-       : <dependency>/libraries/aterm//aterm
-         <dependency>/libraries/mcrl2_basic//mcrl2_basic
+       : <dependency>/libraries/mcrl2_basic//mcrl2_basic
        :
        : <library>/libraries/mcrl2_basic//mcrl2_basic
        ;
@@ -36,7 +35,8 @@ lib dataelm
 lib nextstate
        : libnextstate.cpp
          nextstate_standard.cpp
-       : <dependency>/libraries/temporary//enum
+         /libraries/temporary//enum
+       :
        :
        : <library>/libraries/temporary//enum
        ;

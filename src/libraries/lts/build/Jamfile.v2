@@ -13,10 +13,11 @@ lib lts
          liblts_fsm.cpp
          liblts_dot.cpp
          liblts_red.cpp
-       : <dependency>/libraries/mcrl2_basic//mcrl2_basic
-         <dependency>/libraries/svc//svc
-         <dependency>/libraries/aterm//atermpp
-         <dependency>/libraries/lpe//lpe
+         /libraries/mcrl2_basic//mcrl2_basic
+         /libraries/svc//svc
+         /libraries/aterm//atermpp
+         /libraries/lpe//lpe
+       :
        :
        : <library>/libraries/svc//svc
        ;

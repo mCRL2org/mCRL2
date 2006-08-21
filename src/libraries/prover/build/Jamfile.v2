@@ -21,9 +21,8 @@ lib prover
          formula_checker.cpp
          invariant_checker.cpp
          invariant_eliminator.cpp
-       : <dependency>/libraries/auxiliary//auxiliary
-         <dependency>/libraries/pstream//pstream
+         /libraries/auxiliary//auxiliary
+       : <dependency>/libraries/pstream//pstream
        :
        : <library>/libraries/auxiliary//auxiliary
-         <library>/libraries/pstream//pstream
        ;
