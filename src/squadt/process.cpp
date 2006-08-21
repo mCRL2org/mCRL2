@@ -50,14 +50,12 @@ namespace squadt {
       /* Inform monitor */
       boost::shared_ptr < task_monitor > l = monitor.lock();
 
-      if (l.get() != 0) {
-        l->signal_change(current_status);
-      }
-
       if (0 < identifier) {
         int exit_code;
 
         last_command = std::auto_ptr < command > (new command(c));
+
+        l->signal_change(current_status);
 
         waitpid(identifier, &exit_code, 0);
 
@@ -69,6 +67,11 @@ namespace squadt {
         }
 
         signal_termination(this);
+      }
+      else {
+        if (l.get() != 0) {
+          l->signal_change(current_status);
+        }
       }
     }
 

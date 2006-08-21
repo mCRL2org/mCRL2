@@ -30,6 +30,72 @@ namespace squadt {
     logger->log(1, "Incoming report lost!");
   }
 
+  /**
+   * @param[in] o the processor that owns of this object
+   **/
+  processor::monitor::monitor(processor& o) : owner(o) {
+    on_status_change  = boost::bind(&processor::monitor::status_change_dummy, this, _1);
+    on_layout_change  = boost::bind(&processor::monitor::display_layout_change_dummy, this, _1);
+    on_message_change = boost::bind(&processor::monitor::status_message_change_dummy, this, _1);
+    on_state_change   = boost::bind(&processor::monitor::display_data_change_dummy, this, _1);
+
+    /* Set the handler for incoming layout messages */
+    activate_display_layout_handler(on_layout_change);
+
+    /* Set the handler for incoming layout messages */
+    activate_display_data_handler(sip::layout::tool_display::sptr(), on_state_change);
+  }
+
+  /**
+   * @param[in] s the new status
+   **/
+  void processor::monitor::report_change(execution::process::status s) {
+    using namespace execution;
+
+    switch (s) {
+      case process::stopped:
+        owner.set_output_status(not_up_to_date);
+        break;
+      case process::running:
+        owner.set_output_status(being_computed);
+        break;
+      case process::completed:
+        owner.set_output_status(up_to_date);
+        break;
+      case process::aborted:
+        owner.set_output_status(non_existent);
+        break;
+    }
+  }
+
+  /**
+   * @param b whether or not to send the start signal after the configuration is accepted
+   **/
+  void processor::monitor::pilot(bool b) {
+    /* Wait until the tool has connected and identified itself */
+    await_connection();
+
+    if (is_connected()) {
+      /* Make sure that the task_monitor state is not cleaned up if the tool quits unexpectedly */
+      boost::shared_ptr < execution::task_monitor_impl > p = m_state;
+
+      send_configuration();
+
+      /* Wait until configuration is accepted, or the tool has terminated */
+      if (await_message(sip::message_accept_configuration).get() != 0 && b) {
+        send_start_signal();
+
+        await_message(sip::message_signal_done);
+
+        send_message(sip::message_request_termination);
+      }
+      else {
+        /* End tool execution */
+        finish();
+      }
+    }
+  }
+
   inline processor::processor(project_manager& p) : current_monitor(new monitor(*this)), manager(&p), selected_input_combination(0) {
   }
 

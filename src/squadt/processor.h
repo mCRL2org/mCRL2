@@ -127,7 +127,7 @@ namespace squadt {
         private:
   
           /** \brief Handler function that is called when an associated process changes state */
-          inline void report_change(execution::process::status);
+          void report_change(execution::process::status);
   
           /** \brief The default callback function that does nothing */
           void status_change_dummy(output_status);
@@ -145,12 +145,12 @@ namespace squadt {
           inline void start_pilot(bool = true);
 
           /** \brief Helper function for communication with a tool */
-          inline void pilot(bool = true);
+          void pilot(bool = true);
 
         public:
   
           /** \brief Constructor with a callback handler */
-          inline monitor(processor&);
+          monitor(processor&);
 
           /** \brief Constructor with a callback handler */
           inline void set_status_handler(status_callback_function);

@@ -22,28 +22,29 @@ namespace squadt {
       friend class executor;
 
       public:
-         /** \brief state of the process */
-         enum status {
-           stopped,   ///< stopped or not yet started to run
-           running,   ///< is running
-           completed, ///< has terminated successfully 
-           aborted    ///< was aborted
-         };
+
+        /** \brief state of the process */
+        enum status {
+          stopped,   ///< stopped or not yet started to run
+          running,   ///< is running
+          completed, ///< has terminated successfully 
+          aborted    ///< was aborted
+        };
  
-         /** \brief Convenience type for weak pointer implementation */
-         typedef boost::weak_ptr < process >            wptr;
+        /** \brief Convenience type for weak pointer implementation */
+        typedef boost::weak_ptr < process >            wptr;
 
-         /** \brief Convenience type to hide shared pointer implementation */
-         typedef boost::shared_ptr < process >          sptr;
+        /** \brief Convenience type to hide shared pointer implementation */
+        typedef boost::shared_ptr < process >          sptr;
 
-         /** \brief Convenience type to hide shared pointer implementation */
-         typedef boost::shared_ptr < process >          ptr;
+        /** \brief Convenience type to hide shared pointer implementation */
+        typedef boost::shared_ptr < process >          ptr;
 
-         /** \brief Convenience type to hide shared pointer implementation */
-         typedef boost::shared_ptr < task_monitor >     task_monitor_ptr;
+        /** \brief Convenience type to hide shared pointer implementation */
+        typedef boost::shared_ptr < task_monitor >     task_monitor_ptr;
 
-         /** \brief Convenience type for handlers */
-         typedef boost::function < void (process*) >    handler;
+        /** \brief Convenience type for handlers */
+        typedef boost::function < void (process*) >    handler;
 
       private:
 

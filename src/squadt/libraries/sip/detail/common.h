@@ -5,7 +5,7 @@
 
 #include <boost/bind.hpp>
 
-#include <sip/detail/message.h>
+#include <sip/detail/basic_messenger.h>
 
 /* Interface classes for both the tool and the controller side of the Squadt Interaction Protocol */
 namespace sip {
@@ -41,11 +41,6 @@ namespace sip {
 
   /** \brief A convenience type to share the boost shared pointer implementation */
   typedef boost::shared_ptr < message >                                             message_ptr;
-}
-
-#include <sip/detail/basic_messenger.h>
-
-namespace sip {
 
   /** \brief A messenger type for communication of sip protocol messages */
   typedef messaging::basic_messenger < sip::message >                               messenger;

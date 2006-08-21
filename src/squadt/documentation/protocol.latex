@@ -17,7 +17,7 @@
   \subsection{Controller Capabilities}
 
    The controller has reserved a rectangular area of the display for a tool.
-   If a tool sends a layout that uses more space than this, then scollbars
+   If a tool sends a layout that uses more space than this, then scrollbars
    ensure that everything is still displayed.  This is often undesirable
    behaviour. A tool can request the dimensions of the rectangular area
    reserved for it and adapt a layout accordingly. The message to request the
@@ -95,7 +95,7 @@
 
    Tool configuration is performed in two steps. First the controller sends a
    partial configuration. The controller can use a previously stored
-   configuration for this tool, or it can use one of the the input combinations
+   configuration for this tool, or it can use one of the input combinations
    obtained via \msg{tool\_capabilities}.
 
    \begin{figure}[H]
@@ -198,7 +198,7 @@
 
    \noindent The data of this message is a layout specification for the display. The
    display will be cleared, and the new layout will be applied upon receipt of
-   this mssage. A user can interact with the display, and changes are
+   this message. A user can interact with the display, and changes are
    communicated back to a tool using the following message.
 
    \begin{figure}[H]

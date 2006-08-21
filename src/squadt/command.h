@@ -37,6 +37,9 @@ namespace squadt {
         /** \brief Constructor with working directory */
         inline command(const std::string&, std::string const&);
 
+        /** \brief Copy constructor */
+        inline command(command const&);
+
         /** \brief Gets the working directory */
         inline std::string get_working_directory() const;
   
@@ -65,6 +68,13 @@ namespace squadt {
      * @param[in] w path to the working directory for this tool
      **/
     inline command::command(const std::string& e, std::string const& w) : executable(e), working_directory(w) {
+    }
+
+    /**
+     * @param[in] o the object to copy
+     **/
+    inline command::command(command const& o) : executable(o.executable),
+                working_directory(o.working_directory), arguments(o.arguments) {
     }
 
     inline std::string command::get_working_directory() const {

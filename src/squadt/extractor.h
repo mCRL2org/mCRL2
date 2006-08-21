@@ -54,7 +54,7 @@ namespace squadt {
     /* Await connection */
     await_connection();
 
-    if (connected) {
+    if (is_connected()) {
       request_tool_capabilities();
     }
   }
