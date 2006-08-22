@@ -66,6 +66,9 @@ namespace squadt {
         /** \brief Closes the active project view */
         void project_open();
 
+        /** \brief Builds or rebuilds objects such that all objects in the project are up to date */
+        void project_update();
+
         /** \brief Shows a project open dialog and switches the active view to the new project */
         void project_close();
 

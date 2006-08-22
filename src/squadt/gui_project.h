@@ -158,6 +158,9 @@ namespace squadt {
         /** \brief Resolves conflicts, through user interaction, between processors that generate same output objects with the same name */
         void resolve_conflict(wxTreeItemId s, processor::object_descriptor::sptr e, processor::object_descriptor::sptr n);
 
+        /** \brief Reports a conflict by presenting a non-interactive dialog window with details */
+        void report_conflict(wxString s);
+
       public:
 
         /** \brief Constructor, with project description */

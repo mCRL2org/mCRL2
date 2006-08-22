@@ -240,14 +240,14 @@ namespace squadt {
         }
 
         switch (cr.alignment_horizontal) {
-          case layout::left:
-            flags |= wxALIGN_LEFT;
-            break;
           case layout::right:
             flags |= wxALIGN_RIGHT;
             break;
-          default: /* center */
+          case layout::center:
             flags |= wxALIGN_CENTER;
+            break;
+          default: /* center */
+            flags |= wxALIGN_LEFT;
             break;
         }
      

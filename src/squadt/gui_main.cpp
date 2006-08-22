@@ -119,6 +119,9 @@ namespace squadt {
       }
     }
 
+    void main::project_update() {
+    }
+
     void main::project_add_file() {
       project_view->add();
     }

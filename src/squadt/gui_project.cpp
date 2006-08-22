@@ -437,9 +437,15 @@ namespace squadt {
           add_to_object_view(s, j.pointer());
         }
         else {
-          gui_builder.schedule_update(boost::bind(&project::resolve_conflict, this, s, string_to_object[new_object], j.pointer()));
+          gui_builder.schedule_update(boost::bind(&project::report_conflict, this, new_object));
         }
       }
+    }
+
+    void project::report_conflict(wxString s) {
+      wxMessageDialog dialog(this, s + wxT(" was replaced"), wxT("Warning: file lost"), wxOK);
+      
+      dialog.ShowModal();
     }
 
     /**
