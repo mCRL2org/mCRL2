@@ -299,6 +299,9 @@ namespace squadt {
         send_message(sip::message_signal_termination);
 
         m_state->terminate_process();
+
+        logger->log(1, boost::str(boost::format("process terminated (tool %s pid(%u))\n")
+                  % m_state->associated_process->get_executable_name() % m_state->associated_process->get_identifier()));
       }
     }
 
@@ -344,8 +347,8 @@ namespace squadt {
     void task_monitor::signal_connection(const sip::end_point& e) {
       m_state->signal_connection(m_state, e);
 
-      logger->log(1, boost::str(boost::format("connection established with %s pid(%u)\n")
-                % m_state->associated_process->get_executable_name() % m_state->associated_process->get_identifier()));
+//      logger->log(1, boost::str(boost::format("connection established with %s pid(%u)\n")
+//                % m_state->associated_process->get_executable_name() % m_state->associated_process->get_identifier()));
     }
 
     /**
@@ -355,8 +358,6 @@ namespace squadt {
     void task_monitor::signal_change(const execution::process::status s) {
       m_state->signal_change(m_state, s);
 
-      logger->log(1, boost::str(boost::format("process terminated (tool %s pid(%u))\n")
-                % m_state->associated_process->get_executable_name() % m_state->associated_process->get_identifier()));
     }
 
     /**

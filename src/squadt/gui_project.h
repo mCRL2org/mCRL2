@@ -122,6 +122,9 @@ namespace squadt {
         /** \brief Add a file to the project */
         void add();
 
+        /** \brief Builds or rebuilds objects such that all objects in the project are up to date */
+        void update();
+
         /** \brief Loads the contents of the views (currently only file view) */
         void load_views();
 
@@ -153,7 +156,10 @@ namespace squadt {
         void add_to_object_view(wxTreeItemId& s, processor::object_descriptor::sptr);
 
         /** \brief Add a new tool display to the process_display_view */
-        GUI::tool_display* add_tool_display(processor::monitor::sptr, wxString);
+        GUI::tool_display* add_tool_display(processor::monitor::sptr, std::string const&);
+
+        /** \brief Helper function that extracts the information out of a processor and calls add_tool_display() */
+        void prepare_tool_display(processor* p);
 
         /** \brief Resolves conflicts, through user interaction, between processors that generate same output objects with the same name */
         void resolve_conflict(wxTreeItemId s, processor::object_descriptor::sptr e, processor::object_descriptor::sptr n);
@@ -166,7 +172,7 @@ namespace squadt {
         /** \brief Constructor, with project description */
         project(wxWindow* p, const boost::filesystem::path&, const std::string& = "");
 
-        /** \brief Descructor */
+        /** \brief Destructor */
         ~project();
 
         /** \brief Returns the name of the project */

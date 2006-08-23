@@ -152,16 +152,16 @@ namespace squadt {
           /** \brief Constructor with a callback handler */
           monitor(processor&);
 
-          /** \brief Constructor with a callback handler */
+          /** \brief Set the callback handler for status changes */
           inline void set_status_handler(status_callback_function);
 
-          /** \brief Constructor with a callback handler */
+          /** \brief Set the callback handler for display layout changes */
           inline void set_display_layout_handler(display_layout_callback_function);
 
-          /** \brief Constructor with a callback handler */
+          /** \brief Set the callback handler for display data changes */
           inline void set_display_data_handler(sip::layout::tool_display::sptr, display_data_callback_function);
 
-          /** \brief Constructor with a callback handler */
+          /** \brief Set the callback handler for incoming status messages */
           inline void set_status_message_handler(status_message_callback_function);
       };
 

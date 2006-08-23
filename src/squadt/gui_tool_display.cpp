@@ -244,9 +244,9 @@ namespace squadt {
             flags |= wxALIGN_RIGHT;
             break;
           case layout::center:
-            flags |= wxALIGN_CENTER;
+            flags |= wxALIGN_CENTER_HORIZONTAL;
             break;
-          default: /* center */
+          default:
             flags |= wxALIGN_LEFT;
             break;
         }
@@ -297,7 +297,7 @@ namespace squadt {
             flags |= wxALIGN_BOTTOM;
             break;
           default: /* center */
-            flags |= wxALIGN_CENTER;
+            flags |= wxALIGN_CENTER_VERTICAL;
             break;
         }
 
@@ -642,11 +642,19 @@ namespace squadt {
             root->SetMinSize(GetClientSize().GetWidth(), root->GetItem((size_t) 0)->GetSize().GetHeight());
 
             content->Show(false);
+
+            if (log != 0) {
+              log->Show(false);
+            }
           }
           else {
             root->SetMinSize(GetClientSize().GetWidth(), 110);
 
             content->Show(true);
+
+            if (log != 0) {
+              log->Show(true);
+            }
           }
 
           GetParent()->Layout();
@@ -743,7 +751,6 @@ namespace squadt {
     void tool_display::update_log(sip::report::sptr l) {
       wxString stamp = wxDateTime::Now().Format(wxT("%b %e %H:%M:%S "));
 
-      /* TODO */
       if (log == 0) {
         wxSizer* sizer = GetSizer();
 
@@ -752,8 +759,8 @@ namespace squadt {
 
         sizer->Add(log, 0, wxALL|wxEXPAND|wxALIGN_CENTER, 2);
 
-        sizer->RecalcSizes();
-        sizer->Layout();
+        GetParent()->GetSizer()->RecalcSizes();
+        GetParent()->Layout();
       }
       else {
         log->AppendText(stamp + wxString(l->get_description().c_str(), wxConvLocal));

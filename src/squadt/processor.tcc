@@ -294,10 +294,16 @@ namespace squadt {
    * \pre the configure member must have been called
    **/
   inline void processor::process() {
-    global_tool_manager->execute(*tool_descriptor, output_directory, boost::dynamic_pointer_cast < execution::task_monitor, monitor > (current_monitor), false);
+    if (0 < inputs.size()) {
+      global_tool_manager->execute(*tool_descriptor, output_directory, boost::dynamic_pointer_cast < execution::task_monitor, monitor > (current_monitor), true);
 
-    current_monitor->once_on_completion(boost::bind(&processor::process_configuration, this));
-    current_monitor->start_pilot();
+      current_monitor->once_on_completion(boost::bind(&processor::process_configuration, this));
+      current_monitor->start_pilot();
+    }
+    else {
+      /* Signal completion to environment via monitor */
+      current_monitor->signal_change(execution::process::aborted);
+    }
   }
 
   inline const size_t processor::number_of_inputs() const {

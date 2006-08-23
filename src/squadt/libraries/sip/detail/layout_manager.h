@@ -394,7 +394,7 @@ namespace sip {
      * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
      **/
     inline void horizontal_box::add(element* e, alignment const& a, margins const& m, visibility const& v) {
-      box::add(e, constraints(a, center, m, v));
+      box::add(e, constraints(a, left, m, v));
     }
 
     /**
@@ -403,7 +403,7 @@ namespace sip {
      * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
      **/
     inline void box::add(element* e, margins const& m, visibility const& v) {
-      box::add(e, constraints(middle, center, m, v));
+      box::add(e, constraints(middle, left, m, v));
     }
 
     /**
@@ -411,7 +411,7 @@ namespace sip {
      * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
      **/
     inline void box::add(element* e, visibility const& v) {
-      box::add(e, constraints(middle, center, manager::default_margins, v));
+      box::add(e, constraints(middle, left, manager::default_margins, v));
     }
 
     /**

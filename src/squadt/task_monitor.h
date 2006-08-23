@@ -22,6 +22,7 @@ namespace squadt {
      * \brief Base class for task_monitors that provide tool execution via a tool manager
      **/
     class task_monitor : public sip::controller::communicator {
+      friend class processor;
       friend class process;
       friend class executor;
       friend class squadt::tool_manager;
@@ -44,6 +45,12 @@ namespace squadt {
         /** \brief Waits until a connection has been established with the running process */
         void await_completion();
 
+        /** \brief Signals that a new connection has been established */
+        void signal_connection(const sip::end_point&);
+
+        /** \brief Checks the process status and removes */
+        void signal_change(const execution::process::status);
+
         /** \brief Unblocks waiters and requests a tool to prepare termination */
         void finish();
  
@@ -54,12 +61,6 @@ namespace squadt {
 
         /** \brief Blocks until the process has registered */
         void await_process() const;
-
-        /** \brief Signals that a new connection has been established */
-        void signal_connection(const sip::end_point&);
-
-        /** \brief Checks the process status and removes */
-        void signal_change(const execution::process::status);
 
       public:
 

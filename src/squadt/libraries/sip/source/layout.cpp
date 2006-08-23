@@ -19,7 +19,7 @@ namespace sip {
 
     const visibility    manager::default_visibility = visible;
 
-    const constraints   manager::default_constraints(middle, center, manager::default_margins, manager::default_visibility);
+    const constraints   manager::default_constraints(middle, left, manager::default_margins, manager::default_visibility);
 
     /** \brief Maps alignment to a string */
     static const char* alignment_to_text[6] = {"top","middle","bottom","left","center","right"};

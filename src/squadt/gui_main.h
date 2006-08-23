@@ -48,6 +48,9 @@ namespace squadt {
         /** \brief Closes the active project view */
         inline void on_menu_close(wxCommandEvent& /* event */);
 
+        /** \brief Triggers project update */
+        inline void on_menu_update(wxCommandEvent& /* event */);
+
         /** \brief Closes the active project view */
         inline void on_menu_add_file(wxCommandEvent& /* event */);
 
@@ -66,7 +69,7 @@ namespace squadt {
         /** \brief Closes the active project view */
         void project_open();
 
-        /** \brief Builds or rebuilds objects such that all objects in the project are up to date */
+        /** \brief Updates the active project */
         void project_update();
 
         /** \brief Shows a project open dialog and switches the active view to the new project */
@@ -130,6 +133,10 @@ namespace squadt {
 
     inline void main::on_menu_add_file(wxCommandEvent&) {
       project_add_file();
+    }
+
+    inline void main::on_menu_update(wxCommandEvent&) {
+      project_update();
     }
 
     inline void main::on_menu_close(wxCommandEvent&) {

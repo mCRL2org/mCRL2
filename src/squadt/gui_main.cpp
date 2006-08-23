@@ -7,10 +7,8 @@
 
 #include <wx/menu.h>
 
-/* Some custum identifiers for use with event handlers */
-#define cmID_START_ANALYSIS    (wxID_HIGHEST + 1)
-#define cmID_RESTART_ANALYSIS  (wxID_HIGHEST + 2)
-#define cmID_STOP_ANALYSIS     (wxID_HIGHEST + 3)
+/* Some custom identifiers for use with event handlers */
+#define cmID_UPDATE (wxID_HIGHEST)
 
 namespace squadt {
   namespace GUI {
@@ -26,6 +24,7 @@ namespace squadt {
       /* Connect event handlers */
       Connect(wxID_NEW, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_new));
       Connect(wxID_OPEN, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_open));
+      Connect(cmID_UPDATE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_update));
       Connect(wxID_ADD, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_add_file));
       Connect(wxID_CLOSE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_close));
       Connect(wxID_ABOUT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_about));
@@ -63,6 +62,7 @@ namespace squadt {
 
       project_menu->Append(wxID_NEW, wxT("&New...\tCTRL-n"));
       project_menu->Append(wxID_OPEN, wxT("&Open...\tCTRL-o"));
+      project_menu->Append(cmID_UPDATE, wxT("&Update...\tCTRL-f"))->Enable(false);
       project_menu->Append(wxID_CLOSE, wxT("&Close\tCTRL-F4"))->Enable(false);
       project_menu->AppendSeparator();
       project_menu->Append(wxID_ADD, wxT("&Add file...\tCTRL-f"))->Enable(false);
@@ -74,14 +74,6 @@ namespace squadt {
 
       edit_menu->Append(wxID_PREFERENCES, wxT("&Preferences"));
       menu->Append(edit_menu, wxT("&Edit"));
-
-      wxMenu* analysis_menu  = new wxMenu();
-
-      analysis_menu->Append(cmID_START_ANALYSIS, wxT("&Start\tCTRL-s"), wxT("Updates all outputs to complete the analysis"))->Enable(false);
-      analysis_menu->Append(cmID_RESTART_ANALYSIS, wxT("&Restart\tCTRL-r"), wxT("Starts analysis from scratch"))->Enable(false);
-      analysis_menu->Append(cmID_STOP_ANALYSIS, wxT("S&top"), wxT("Cancels generation of unfinished outputs"))->Enable(false);
-
-      menu->Append(analysis_menu, wxT("&Analysis"));
 
       wxMenu* help_menu  = new wxMenu();
 
@@ -119,9 +111,6 @@ namespace squadt {
       }
     }
 
-    void main::project_update() {
-    }
-
     void main::project_add_file() {
       project_view->add();
     }
@@ -132,6 +121,10 @@ namespace squadt {
      **/
     void main::project_close() {
       remove_project_view(project_view);
+    }
+
+    void main::project_update() {
+      project_view->update();
     }
 
     /**
@@ -158,11 +151,9 @@ namespace squadt {
 
       menu_bar.Enable(wxID_NEW, false);
       menu_bar.Enable(wxID_OPEN, false);
-      menu_bar.Enable(wxID_ADD, true);
+      menu_bar.Enable(cmID_UPDATE, true);
       menu_bar.Enable(wxID_CLOSE, true);
-      menu_bar.Enable(cmID_START_ANALYSIS, true);
-      menu_bar.Enable(cmID_RESTART_ANALYSIS, true);
-      menu_bar.Enable(cmID_STOP_ANALYSIS, true);
+      menu_bar.Enable(wxID_ADD, true);
     }
 
     /**
@@ -190,11 +181,9 @@ namespace squadt {
 
       menu_bar.Enable(wxID_NEW, true);
       menu_bar.Enable(wxID_OPEN, true);
+      menu_bar.Enable(cmID_UPDATE, false);
       menu_bar.Enable(wxID_CLOSE, false);
       menu_bar.Enable(wxID_ADD, false);
-      menu_bar.Enable(cmID_START_ANALYSIS, false);
-      menu_bar.Enable(cmID_RESTART_ANALYSIS, false);
-      menu_bar.Enable(cmID_STOP_ANALYSIS, false);
     }
   }
 }

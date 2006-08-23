@@ -270,7 +270,7 @@ namespace squadt {
                                 boost::bind(&processor::ptr::get, _2))));
   }
 
-  void project_manager::update(processor* p) {
+  void project_manager::update_single(processor* p) {
     processor_list::iterator i = processors.begin();
 
     while ((*i).get() != p && i != processors.end()) {
@@ -281,7 +281,7 @@ namespace squadt {
       /* Present in list */
       if (p->check_input_consistency()) {
         if (!p->check_output_consistency()) {
-          p->process(boost::bind(&project_manager::update, this, p));
+          p->process(boost::bind(&project_manager::update_single, this, p));
         }
       }
       else {
@@ -290,16 +290,31 @@ namespace squadt {
           processor::sptr depend((*j)->generator.lock());
 
           if (depend.get() != 0 && !depend->check_input_consistency()) {
-            update(depend.get());
+            update_single(depend.get());
           }
         }
       }
     }
   }
 
-  void project_manager::update() {
-    for (processor_list::iterator i = processors.begin(); i != processors.end(); ++i) {
-      update((*i).get());
+  /**
+   * @param[in] h a function that is called that is called just before a processor is updated
+   **/
+  void project_manager::update(boost::function < void (processor*) > h) {
+    static bool active = false;
+
+    if (!active) {
+      active = true;
+
+      BOOST_FOREACH(processor_list::value_type i, processors) {
+        if (i->get_tool()) {
+          h(i.get());
+
+          update_single(i.get());
+        }
+      }
+
+      active = false;
     }
   }
 

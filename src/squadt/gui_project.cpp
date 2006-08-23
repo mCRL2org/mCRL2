@@ -24,7 +24,7 @@
 #include <wx/filedlg.h>
 
 #define cmID_REMOVE    (wxID_HIGHEST + 1)
-#define cmID_REBUILD   (wxID_HIGHEST + 2)
+#define cmID_UPDATE    (wxID_HIGHEST + 2)
 #define cmID_RENAME    (wxID_HIGHEST + 3)
 #define cmID_CLEAN     (wxID_HIGHEST + 4)
 #define cmID_CONFIGURE (wxID_HIGHEST + 5)
@@ -165,7 +165,7 @@ namespace squadt {
      * @param[in] p the processor::monitor that is connected to the associated tool process
      * @param[in] t the title for the tool display
      **/
-    GUI::tool_display* project::add_tool_display(processor::monitor::sptr p, wxString t) {
+    GUI::tool_display* project::add_tool_display(processor::monitor::sptr p, std::string const& t) {
       wxSizer* s = process_display_view->GetSizer();
 
       GUI::tool_display* display = new GUI::tool_display(process_display_view, this, p);
@@ -174,7 +174,7 @@ namespace squadt {
 
       s->Layout();
 
-      display->set_title(t);
+      display->set_title(wxString(t.c_str(), wxConvLocal));
 
       return (display);
     }
@@ -226,6 +226,17 @@ namespace squadt {
       }
     }
 
+    /* Helper function */
+    void project::prepare_tool_display(processor* p) {
+      processor::output_object_iterator t = p->get_output_iterator();
+    
+      add_tool_display(p->get_monitor(), p->get_tool()->get_name() + " : " + boost::filesystem::path((*t)->location).leaf());
+    }
+
+    void project::update() {
+      manager->update(boost::bind(&project::prepare_tool_display, this, _1));
+    }
+
     /**
      * @param n an object_data object used to establish which tools to add to the menu
      **/
@@ -240,7 +251,7 @@ namespace squadt {
       context_menu.Append(cmID_REMOVE, wxT("Remove"));
 
       if (generated) {
-        context_menu.Append(cmID_REBUILD, wxT("Rebuild"));
+        context_menu.Append(cmID_UPDATE, wxT("Update"));
         context_menu.Append(cmID_CONFIGURE, wxT("Configure"));
         context_menu.Append(cmID_CLEAN, wxT("Clean"));
       }
@@ -320,12 +331,14 @@ namespace squadt {
 
           object_view->Delete(s);
           break;
-        case cmID_RENAME: {
-            object_view->EditLabel(s);
-          }
+        case cmID_RENAME:
+          object_view->EditLabel(s);
           break;
-        case cmID_REBUILD:
+        case cmID_UPDATE:
           p->flush_outputs();
+
+          /* Attach tool display */
+          add_tool_display(p->get_monitor(), p->get_tool()->get_name() + " : " + boost::filesystem::path(t->location).leaf());
 
           p->process();
           break;
@@ -358,8 +371,7 @@ namespace squadt {
           break;
         case cmID_CONFIGURE:
             /* Attach tool display */
-            add_tool_display(p->get_monitor(), wxString((p->get_tool()->get_name() +
-                                " : " + boost::filesystem::path(t->location).leaf()).c_str(), wxConvLocal));
+            add_tool_display(p->get_monitor(), p->get_tool()->get_name() + " : " + boost::filesystem::path(t->location).leaf());
 
             /* Start tool configuration phase */
             p->reconfigure(manager->get_project_store(),
@@ -377,8 +389,7 @@ namespace squadt {
             tp->append_input(t);
 
             /* Attach tool display */
-            add_tool_display(tp->get_monitor(), wxString(std::string(menu_item->the_tool->get_name() +
-                                " : " + boost::filesystem::path(t->location).leaf()).c_str(), wxConvLocal));
+            add_tool_display(tp->get_monitor(), menu_item->the_tool->get_name() + " : " + boost::filesystem::path(t->location).leaf());
 
             /* Start tool configuration phase */
             tp->configure(menu_item->input_combination, manager->get_project_store(),
@@ -443,7 +454,7 @@ namespace squadt {
     }
 
     void project::report_conflict(wxString s) {
-      wxMessageDialog dialog(this, s + wxT(" was replaced"), wxT("Warning: file lost"), wxOK);
+      wxMessageDialog dialog(this, s + wxT(" is replaced"), wxT("Warning: file lost"), wxOK);
       
       dialog.ShowModal();
     }

@@ -8,6 +8,7 @@
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/cstdint.hpp>
+#include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
 
 #include <utility/indirect_iterator.h>
@@ -134,10 +135,10 @@ namespace squadt {
       void clean_store(processor* p, bool b);
 
       /** \brief Make objects in the project up to date */
-      void update(processor*);
+      void update_single(processor*);
 
       /** \brief Make objects in the project up to date */
-      void update();
+      void update(boost::function< void (processor*) >);
   };
 
   inline project_manager::project_manager() {
