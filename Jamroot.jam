@@ -134,8 +134,8 @@ rule install_with_libraries ( name : tools * : requirements * ) {
     alias $(name)
           : $(name)-libraries
             $(name)-binaries
-            $(BIN_DIR)/prepare_$(tools)
           : $(requirements)
+            <os>MACOSX:<dependency>$(BIN_DIR)/prepare_$(tools)
           ;
    
     stage $(name)-binaries
