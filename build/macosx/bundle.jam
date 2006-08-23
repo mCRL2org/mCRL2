@@ -5,10 +5,12 @@ import path ;
 
 include $(TOP)/build/config.jam ;
 
-actions quietly prepare {
+actions existing prepare_executable {
   cd $(<:D)
 
   /Developer/Tools/Rez -t APPL -o $(>:B) $(TOP)/build/macosx/sample.r
+
+  # Set custom icon attribute
   /Developer/Tools/SetFile -a C $(>:B)
 }
 
@@ -20,29 +22,6 @@ rule make_bundle ( target : executable info icon : requirements * ) {
 
   if install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
 
-    notfile $(target).app/Contents/MacOS/dummy
-         : @prepare
-         : $(executable)
-         ;
- 
-    make $(target).app/Contents/Info.plist
-         : $(info)
-         : common.copy
-         ;
- 
-    explicit $(target).app/Contents/MacOS/dummy $(target).app/Contents/Info.plist ;
- 
-    install $(base_executable)-bundle
-         : $(executable)
-         : <dependency>$(target).app/Contents/MacOS/dummy
-           <conditional>@prepare
-         : <dependency>$(target).app/Contents/Info.plist
-           <dependency>$(base_executable)-info
-           <dependency>$(base_executable)-icon
-           <location>$(target).app/Contents/MacOS
-           $(requirements)
-         ;
- 
     install $(base_executable)-info
          : $(TOP)/build/macosx/PkgInfo
          : <location>$(target).app/Contents
@@ -53,21 +32,38 @@ rule make_bundle ( target : executable info icon : requirements * ) {
          : <location>$(target).app/Contents/Resources
          ;
  
+    install install-bundle-$(base_executable)
+         : $(executable)
+         : <dependency>$(target).app/Contents/Info.plist
+           <dependency>$(base_executable)-info
+           <dependency>$(base_executable)-icon
+           <location>$(target).app/Contents/MacOS
+           $(requirements)
+         ;
+ 
+    notfile $(target).app/Contents/MacOS/dummy
+         : @prepare_executable
+         : $(executable)
+         :
+         ;
+ 
+    make $(target).app/Contents/Info.plist
+         : $(info)
+         : common.copy
+         ;
+ 
+    explicit $(target).app/Contents/MacOS/dummy $(target).app/Contents/Info.plist ;
+
+    alias $(base_executable)-bundle
+         : $(target).app/Contents/MacOS/dummy
+           install-bundle-$(base_executable)
+         ;
+ 
     explicit $(base_executable)-info $(base_executable)-icon $(base_executable)-bundle ;
-
-    notfile "$(BIN_DIR)/$(base_executable)-dummy"
-           : @prepare
-           : $(executable)
-           ;
   }
-
-  notfile prepare_executable 
-       : @prepare
-       : $(executable)
-       ;
 }
 
 local caller = [ CALLER_MODULE ] ;
 
 EXPORT $(__name__) : make_bundle ;
-IMPORT $(__name__) : prepare : $(caller) : $(caller).prepare ;
+IMPORT $(__name__) : prepare_executable : $(caller) : $(caller).prepare_executable ;
