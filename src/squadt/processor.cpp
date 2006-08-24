@@ -511,7 +511,7 @@ namespace squadt {
 
     if (o.get() != 0) {
       path source(manager->get_path_for_name(o->location));
-      path target(n);
+      path target(manager->get_path_for_name(n));
 
       if (exists(source) && source != target) {
         if (exists(target)) {

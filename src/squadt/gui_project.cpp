@@ -451,6 +451,10 @@ namespace squadt {
           gui_builder.schedule_update(boost::bind(&project::report_conflict, this, new_object));
         }
       }
+
+      if (existing.size() == tp->number_of_outputs()) {
+        manager->remove(tp.get());
+      }
     }
 
     void project::report_conflict(wxString s) {
