@@ -1,0 +1,113 @@
+% The protocol used by SQuADt to communicate with adapted tools
+%
+% Major simplifications:
+%  - message content is not considered
+%  - in reality squadt uses the instance id to determine which of all tools
+%    that was started is trying to communicate via a socket connection, this
+%    model ignores this detail
+
+sort
+
+  % Type used for identifying messages sent by the controller
+  cmessage_type = struct request_tool_capabilities      % request the tools capabilities (e.g. supported protocol version)
+                     | controller_capabilities          % controller capabilities
+                     | offer_configuration              % tool configuration specification
+                     | signal_start                     % signal that a tool may commence the configured operation
+                     | interaction_data                 % communicates data resulting from user interaction
+                     | request_termination              % request the tool to terminate
+                     ;
+
+sort
+
+  % Type used for identifying messages sent by a tool instance
+  tmessage_type = struct instance_id                    % instance identifier to recognise a new tool instance
+                     | request_controller_capabilities  % request the controllers capabilities (e.g. supported protocol version)
+                     | tool_capabilities                % tool capabilities
+                     | configuration                    % signals to the controller that the current configuration is acceptable
+                     | signal_done                      % signal that the tool has finished the configured operation
+                     | display_layout                   % sends a display layout specification to the controller
+                     | display_data                     % communicates changes to layout (or what is displayed)
+                     | report                           % sends a report (warning, error or other message) to the controller
+                     | signal_termination               % signal the controller that the tool is terminating
+                     ;
+
+% Messages travel between a controller and a tool instance 
+sort
+
+  message = struct tmsg(t_address: Nat, type: tmessage_type) | cmsg(s_address: Nat, type: cmessage_type);
+
+act
+
+  send,receive:                 message; % send or receive a message
+  tool_start,start_tool,start:  Nat;     % create a new tool instance
+  deliver:                      message; % communication between send and receive actions
+  perform;                               % perform the configured operation
+  error;                                 % an error has occurred
+
+proc
+
+  % n: the tool id
+  % c: whether or not the last received configuration was accepted
+  % l: whether a display layout was communicated
+  T(a:Nat,c:Bool,l:Bool) =
+    receive(cmsg(a, request_termination)).
+      send(tmsg(a, signal_termination)) +
+    receive(cmsg(a, request_tool_capabilities)).
+      send(tmsg(a, tool_capabilities)).T(a,c,l) + 
+    receive(cmsg(a, signal_start)).
+      ((c == true) ->
+        (perform.send(tmsg(a, signal_done)).T(a,c,l)) <>
+        error.send(tmsg(a, report)).T(a,c,l)) +                                % perform configured operation
+    receive(cmsg(a, interaction_data)).                                        % receive interaction data
+      ((l == true) ->
+        T(a,c,l) <> error.send(tmsg(a, report)).T(a,c,l)) +
+    receive(cmsg(a, offer_configuration)).                                     % received a configuration description
+      (send(tmsg(a, configuration)).T(a,false,l) +                             % accept it configuration description
+        send(tmsg(a, display_layout)).T(a,true, l) +                           % send display layout
+        (l == true)->
+          send(tmsg(a, display_data)).T(a, false,l) +                          % send display data
+        send(tmsg(a, report)).T(a,false,l)) +                                  % send a report
+    send(tmsg(a, report)).T(a,c,l) +
+    send(tmsg(a, request_controller_capabilities)).T(a,c,l) +
+    send(tmsg(a, display_layout)).T(a,c,true) +
+    (l == true)->
+      (send(tmsg(a, display_data)).T(a,c,l));
+
+  % n: the number of tool instances
+  % r: the set of active tool instances
+  % c: for whether or not the last configuration for a tool in r was accepted
+  % l: for whether or not a layout was delivered previously for a tool in r
+  % s: for whether or not a tool has been sent the start signal for an operation
+  C(n:Nat,r:Set(Nat),c:Set(Nat),l:Set(Nat),s:Set(Nat)) =
+    (tool_start(n).C(n + 1,r + {n},c,l,s)) +                                       % starts a new tool instance
+    (sum a:Nat.(a < n) -> (
+      receive(tmsg(a, instance_id)).C(n,r,c,l,s) +                             % received instance identifier
+      receive(tmsg(a, request_controller_capabilities)).                       % request for capabilities
+        send(cmsg(a, controller_capabilities)).C(n,r,c,l,s) +
+      receive(tmsg(a, configuration)).
+        ((a in c) -> C(n,r,c + {a},l,s) <> error) +                            % last configuration was accepted
+      receive(tmsg(a, report)).C(n,r,c,l,s) +                                  % report delivered
+      receive(tmsg(a, display_layout)).C(n,r,c,l + {a},s) +                    % display layout delivered
+      receive(tmsg(a, display_data)).
+        ((a in l) -> C(n,r,c,l,s) <> error) +                                  % display data delivered
+      receive(tmsg(a, signal_done)).
+        ((a in s) -> C(n,r,c - {a},l,s - {a}) <> error) +                      % last operation completed
+      receive(tmsg(a, signal_termination)).
+        C(n,r - {a},c - {a},l - {a},s - {a}) +
+      send(cmsg(a, request_tool_capabilities)).
+        (receive(tmsg(a,tool_capabilities))) +
+      send(cmsg(a, offer_configuration)).C(n,r,c,l,s) +
+      (a in l) ->
+        send(cmsg(a, interaction_data)).C(n,r,c,l,s) +
+      (a in c) ->
+        send(cmsg(a, signal_start)).C(n,r,c,l,s + {a}) +
+      send(cmsg(a, request_termination))));
+
+  % Execution component (starts tools)
+  E = (sum n:Nat. start_tool(n).(E || T(n,false,false)));
+
+init
+
+  allow({send,receive,deliver,tool_start,start_tool,start,perform,error},
+     comm({send|receive -> deliver,tool_start|start_tool -> start},C(0,{},{},{},{})));
+
