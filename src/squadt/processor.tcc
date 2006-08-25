@@ -179,6 +179,7 @@ namespace squadt {
   inline void processor::append_output(const storage_format& f, const std::string& l) {
     object_descriptor::sptr p = object_descriptor::sptr(new object_descriptor);
 
+    p->generator  = this_object;
     p->format     = f;
     p->location   = l;
     p->identifier = 0;
@@ -194,6 +195,7 @@ namespace squadt {
   inline void processor::append_output(sip::object const& o) {
     object_descriptor::sptr p = object_descriptor::sptr(new object_descriptor);
 
+    p->generator  = this_object;
     p->format     = o.get_format();
     p->location   = o.get_location();
     p->identifier = o.get_id();

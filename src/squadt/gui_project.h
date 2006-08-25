@@ -40,7 +40,7 @@ namespace squadt {
          * changes of the processor. These state changes will be visualised
          * through this object.
          **/
-        class object_data : public wxTreeItemData {
+        class tool_data : public wxTreeItemData {
           friend class project;
 
           private:
@@ -59,10 +59,7 @@ namespace squadt {
           public:
 
             /** \brief Constructor */
-            inline object_data(project&);
-
-            /** \brief Constructor */
-            inline object_data(project&, processor::object_descriptor::wptr);
+            inline tool_data(project&, processor::object_descriptor::wptr);
 
             /** \brief Gets the processor that the target object descriptor is a part of */
             inline processor::sptr get_processor();
@@ -138,7 +135,7 @@ namespace squadt {
         void on_object_name_edited(wxTreeEvent& e);
 
         /** \brief Creates a context menu for the selected processor */
-        void spawn_context_menu(object_data&);
+        void spawn_context_menu(tool_data&);
 
         /** \brief Helper function to add tools by category to a context menu */
         void add_to_context_menu(const storage_format f, const miscellaneous::tool_selection_helper::tools_by_category::value_type&, wxMenu*, int*);
@@ -184,31 +181,25 @@ namespace squadt {
 
     /**
      * @param[in,out] p a shared pointer to the processor for which process is monitored and reported
-     **/
-    inline project::object_data::object_data(project& p) : parent(p) {
-    }
-
-    /**
-     * @param[in,out] p a shared pointer to the processor for which process is monitored and reported
      * @param[in] t the processor that is to be associated 
      **/
-    inline project::object_data::object_data(project& p, processor::object_descriptor::wptr t) : parent(p), target(t) {
+    inline project::tool_data::tool_data(project& p, processor::object_descriptor::wptr t) : parent(p), target(t) {
     }
 
     /**
      * @param[in] o the state of the output objects for this processor
      **/
-    inline void project::object_data::update_state(processor::output_status o) {
+    inline void project::tool_data::update_state(processor::output_status o) {
     }
 
     /**
      * @param p pointer to the process that should be associated with this
      **/
-    inline void project::object_data::associate(processor::object_descriptor::wptr p) {
+    inline void project::tool_data::associate(processor::object_descriptor::wptr p) {
       target = p;
     }
 
-    inline processor::sptr project::object_data::get_processor() {
+    inline processor::sptr project::tool_data::get_processor() {
       processor::object_descriptor::sptr t = target.lock();
       processor::sptr                    r;
 
@@ -219,7 +210,7 @@ namespace squadt {
       return (r);
     }
 
-    inline processor::object_descriptor::sptr project::object_data::get_object() {
+    inline processor::object_descriptor::sptr project::tool_data::get_object() {
       return (target.lock());
     }
   }

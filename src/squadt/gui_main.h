@@ -24,7 +24,7 @@ namespace squadt {
      * can be added with little effort.
      **/
     class main : public wxFrame {
-      friend void squadt::GUI::project::spawn_context_menu(project::object_data&);
+      friend void squadt::GUI::project::spawn_context_menu(project::tool_data&);
 
       private:
 
