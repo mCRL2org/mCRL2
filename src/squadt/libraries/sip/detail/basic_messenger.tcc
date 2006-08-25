@@ -24,15 +24,12 @@ namespace sip {
 
     template < class M >
     basic_messenger< M >::~basic_messenger() {
-      boost::mutex::scoped_lock w(waiter_lock);
+      boost::recursive_mutex::scoped_lock w(waiter_lock);
 
       // Unblock all waiters
-      const message_ptr m(new message(M::message_unknown));
-
       for (typename waiter_map::const_iterator i = waiters.begin(); i != waiters.end(); ++i) {
-        boost::mutex::scoped_lock l((*i).second->mutex);
-
-        (*i).second->condition.notify_all();
+        
+        (*i).second->wake();
       }
     }
 
@@ -86,13 +83,24 @@ namespace sip {
       return (message_queue.size());
     }
 
+    template < class M >
+    inline bool basic_messenger< M >::compare_handlers::operator()(handler_type const& l, handler_type const& r) {
+      return (&l < &r);
+    }
+
     /**
      * @param h the handler function that is to be executed
      * @param t the message type on which delivery h is to be executed
      **/
     template < class M >
     inline void basic_messenger< M >::add_handler(const typename M::type_identifier_t t, handler_type h) {
-      handlers[t] = h;
+      boost::recursive_mutex::scoped_lock w(waiter_lock);
+      
+      if (handlers.count(t) == 0) {
+        handlers[t] = std::set < handler_type, compare_handlers >();
+      }
+
+      handlers[t].insert(h);
     }
 
     /**
@@ -100,7 +108,11 @@ namespace sip {
      **/
     template < class M >
     inline void basic_messenger< M >::clear_handlers(const typename M::type_identifier_t t) {
-      handlers.erase(t);
+      boost::recursive_mutex::scoped_lock w(waiter_lock);
+
+      if (handlers.count(t) != 0) {
+        handlers.erase(t);
+      }
     }
  
     /**
@@ -109,10 +121,10 @@ namespace sip {
      **/
     template < class M >
     inline void basic_messenger< M >::remove_handler(const typename M::type_identifier_t t, handler_type h) {
-      typename handler_map::const_iterator i = std::find_if(handlers.begin(), handlers.end(), boost::bind(&boost::function_equal, h, _1));
+      boost::recursive_mutex::scoped_lock w(waiter_lock);
 
-      if (i != handlers.end()) {
-        handlers.erase(i);
+      if (handlers.count(t) != 0) {
+        handlers[t].erase(h);
       }
     }
  
@@ -216,14 +228,7 @@ namespace sip {
 
             logger->log(1, boost::format("received id : %u, type : %u, data : \"%s\"\n") % getpid() % t % new_string);
 
-            if (handlers.find(M::message_any) != handlers.end() || handlers.find(t) != handlers.end()) {
-              /* Service handler */
-              boost::thread thread(boost::bind(&basic_messenger< M >::service_handlers, this, m, o));
-            }
-            else {
-              /* Put message into queue */
-              message_queue.push_back(m);
-            }
+            boost::thread thread(boost::bind(&basic_messenger< M >::service_handlers, this, m, o));
           }
         }
         else {
@@ -279,19 +284,32 @@ namespace sip {
  
     /**
      * @param t the type of the message
-     *
-     * \pre waiter_lock must be in state locked
      **/
     template < class M >
-    inline boost::shared_ptr< M > basic_messenger< M >::find_message(typename M::type_identifier_t t) {
+    boost::shared_ptr< M > basic_messenger< M >::find_message(typename M::type_identifier_t t) {
       using namespace boost;
 
-      typename message_queue_t::iterator i = std::find_if(message_queue.begin(),
-                      message_queue.end(),
-                      bind(std::equal_to<typename M::type_identifier_t>(), t,
-                              bind(&M::get_type, bind(&message_ptr::get, _1))));
+      boost::recursive_mutex::scoped_lock w(waiter_lock);
 
-      return ((i != message_queue.end()) ? *i : message_ptr());
+      message_ptr p;
+
+      if (t == M::message_any) {
+        if (0 < message_queue.size()) {
+          p = message_queue.front();
+        }
+      }
+      else {
+        typename message_queue_t::iterator i = std::find_if(message_queue.begin(),
+                        message_queue.end(),
+                        bind(std::equal_to<typename M::type_identifier_t>(), t,
+                                bind(&M::get_type, bind(&message_ptr::get, _1))));
+
+        if (i != message_queue.end()) {
+          p = *i;
+        }
+      }
+
+      return (p);
     }
 
     /**
@@ -319,107 +337,105 @@ namespace sip {
     inline void basic_messenger< M >::service_handlers(const message_ptr m, const basic_transceiver* o) {
       typename M::type_identifier_t id = m->get_type();
 
-      typename handler_map::iterator i = handlers.find(M::message_any);
-      typename handler_map::iterator j = handlers.find(id);
+      boost::recursive_mutex::scoped_lock w(waiter_lock);
 
-      boost::mutex::scoped_lock w(waiter_lock);
-
-      if (j != handlers.end()) {
-        (*j).second(m, o);
-      }
-      if (id != M::message_any && i != handlers.end()) {
-        (*i).second(m, o);
-      }
-
-      /* Unblock all possible waiters */
-      if (id != M::message_any && 0 < waiters.count(M::message_any)) {
-        boost::mutex::scoped_lock l(waiters[M::message_any]->mutex);
-
-        if (0 < waiters.count(id)) {
-          boost::mutex::scoped_lock l(waiters[id]->mutex);
-
-          waiters[id]->condition.notify_all();
+      if (handlers.count(id)) {
+        BOOST_FOREACH(handler_type h, handlers[id]) {
+          h(m, o);
         }
-
-        waiters[M::message_any]->condition.notify_all();
       }
-      else if (0 < waiters.count(id)) {
-        boost::mutex::scoped_lock l(waiters[id]->mutex);
+      if (id != M::message_any && handlers.count(M::message_any)) {
+        BOOST_FOREACH(handler_type h, handlers[M::message_any]) {
+          h(m, o);
+        }
+      }
 
-        waiters[id]->condition.notify_all();
+      if (0 < waiters.count(id)) {
+        waiters[id]->wake(m);
+
+        waiters.erase(id);
+      }
+      if (id != M::message_any && 0 < waiters.count(M::message_any)) {
+        waiters[M::message_any]->wake(m);
+
+        waiters.erase(M::message_any);
+      }
+      if (waiters.count(id) + waiters.count(M::message_any) == 0) {
+        /* Put message into queue */
+        message_queue.push_back(m);
       }
     }
 
     /**
-     * @param m reference to the pointer to a message to deliver
-     * @param o the transceiver that delivered the message
-     * @param t reference to the message pointer of the waiter
+     * @param[in] m reference to the pointer to a message to deliver
      **/
     template < class M >
-    inline void basic_messenger< M >::deliver_to_waiter(const message_ptr& m, const basic_transceiver* o, message_ptr& t) {
-      t = m;
+    basic_messenger< M >::waiter_data::waiter_data(boost::shared_ptr < M >& m) {
+      pointers.push_back(&m);
     }
 
     /**
-     * @param m reference to the pointer to a message to deliver
-     * @param o the transceiver that delivered the message
-     * @param t reference to the message pointer of the waiter
-     * @param h the old handler to call
+     * @param[in] m reference to the pointer to a message to deliver
      **/
     template < class M >
-    inline void basic_messenger< M >::deliver_to_waiter(const message_ptr& m, const basic_transceiver* o, message_ptr& t, handler_type h) {
-      t = m;
+    void basic_messenger< M >::waiter_data::wake(boost::shared_ptr < M > const& m) {
+      boost::mutex::scoped_lock l(mutex);
 
-      /** Chain call */
-      h(m, o);
+      BOOST_FOREACH(boost::shared_ptr < M >* i, pointers) {
+        *i = m;
+      }
+
+      condition.notify_all();
     }
 
     /**
-     * @param t the type of the message
+     * @param[in] m reference to the pointer to a message to deliver
+     **/
+    template < class M >
+    void basic_messenger< M >::waiter_data::wake() {
+      boost::mutex::scoped_lock l(mutex);
+
+      condition.notify_all();
+    }
+
+    /**
+     * @param[in] h a function, called after lock on mutex is obtained and before notification
+     **/
+    template < class M >
+    void basic_messenger< M >::waiter_data::wait(boost::function < void () > h) {
+      boost::mutex::scoped_lock l(mutex);
+
+      h();
+
+      condition.wait(l);
+    }
+
+    /**
+     * @param[in] m reference to the pointer to a message to deliver
+     **/
+    template < class M >
+    basic_messenger< M >::waiter_data::~waiter_data() {
+    }
+
+    /**
+     * @param[in] t the type of the message
      **/
     template < class M >
     const boost::shared_ptr< M > basic_messenger< M >::await_message(typename M::type_identifier_t t) {
       using namespace boost;
 
-      boost::mutex::scoped_lock w(waiter_lock);
+      boost::recursive_mutex::scoped_lock w(waiter_lock);
 
       message_ptr p(find_message(t));
 
       if (p.get() == 0) {
-        handler_type              chained_handler;
-        bool                      stored = 0 < handlers.count(t);
-
-        if (stored) {
-          chained_handler = handlers[t];
-
-          add_handler(t, bind(basic_messenger< M >::deliver_to_waiter, _1, _2, ref(p), handlers[t]));
-        }
-        else {
-          add_handler(t, bind(basic_messenger< M >::deliver_to_waiter, _1, _2, ref(p)));
-        }
-        
         if (waiters.count(t) == 0) {
-          typename monitor::ptr m(new monitor);
-        
-          waiters[t] = m;
+          waiters[t] = boost::shared_ptr < waiter_data > (new waiter_data(p));
         }
 
-        w.unlock();
+        boost::shared_ptr < waiter_data > wd = waiters[t];
 
-        boost::mutex::scoped_lock l(waiters[t]->mutex);
-
-        waiters[t]->condition.wait(l);
-
-        w.lock();
-
-        if (stored) {
-          // Restore handler
-          handlers[t] = chained_handler;
-        }
-        else {
-          // Remove the added handler
-          handlers.erase(t);
-        }
+        wd->wait(boost::bind(&boost::recursive_mutex::scoped_lock::unlock, &w));
       }
       else {
         remove_message(p);

@@ -175,6 +175,9 @@ namespace squadt {
         /** \brief Destructor */
         ~project();
 
+        /** \brief Store project specification */
+        void store();
+
         /** \brief Returns the name of the project */
         wxString get_name() const;
     };

@@ -156,6 +156,13 @@ namespace squadt {
     }
 
     inline void main::quit() {
+      if (project_view != 0) {
+        project_view->store();
+      }
+
+      global_tool_manager.reset();
+
+      /* Destroy the tool manager first; it will terminate all tools */
       Destroy();
     }
   }

@@ -504,6 +504,41 @@ void realise_configuration(sip::tool::communicator& tc, ParElmObj& constelm, sip
 
   constelm.setVerbose(true);
 }
+
+/* Extracts a configuration from a message, and validates its content */
+bool try_to_accept_configuration(sip::tool::communicator& tc, sip::messenger::message_ptr const& m) {
+  sip::configuration::sptr configuration = tc << m;
+
+  if (configuration.get() == 0) {
+    return (false);
+  }
+  if (configuration->object_exists(lpd_file_for_input)) {
+    /* The input object is present */
+    sip::object::sptr input_object = configuration->get_object(lpd_file_for_input);
+
+    if (!boost::filesystem::exists(boost::filesystem::path(input_object->get_location()))) {
+      tc.send_status_report(sip::report::error, std::string("Invalid configuration: input object does not exist"));
+
+      return (false);
+    }
+  }
+  if (tc.get_configuration().is_fresh()) {
+    sip::configuration& c = tc.get_configuration();
+
+    /* Add output file to the configuration */
+    c.add_output(lpd_file_for_output, "lpe", c.get_output_name(".lpe"));
+  }
+  else {
+    /* The output object is present */
+    if (!configuration->object_exists(lpd_file_for_output)) {
+      return (false);
+    }
+  }
+
+  tc.send_accept_configuration();
+
+  return (true);
+}
 #endif
 
 int main(int ac, char** av) {
@@ -525,65 +560,61 @@ int main(int ac, char** av) {
 
   /* On purpose we do not catch exceptions */
   if (tc.activate(ac,av)) {
-    bool valid = false;
+    bool valid_configuration_present = false;
+    bool termination_requested       = false;
 
     /* Initialise squadt utility pseudo-library */
     squadt_utility::initialise(tc);
 
     /* Static configuration cycle (phase 1: obtain input combination) */
-    while (!valid) {
-      /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
-      sip::configuration::sptr configuration = tc.await_configuration();
+    for (sip::message_ptr m = tc.await_message(sip::message_any); !termination_requested; m = tc.await_message(sip::message_any)) {
+      assert(m.get() != 0);
 
-      /* Validate configuration specification, should contain a file name of an LPD that is to be read as input */
-      valid  = configuration.get() != 0;
-      valid &= configuration->object_exists(lpd_file_for_input);
+      switch (m->get_type()) {
+        case sip::message_offer_configuration:
 
-      if (valid) {
-        std::string input_file_name = configuration->get_object(lpd_file_for_input)->get_location();
+          /* Insert configuration in tool communicator object */
+          valid_configuration_present = try_to_accept_configuration(tc, m);
 
-        /* Add output file to the configuration */
-        configuration->add_output(lpd_file_for_output, "lpe", configuration->get_output_name(".lpe"));
-      }
-      else {
-        tc.send_status_report(sip::report::error, "Invalid input combination!");
+          break;
+        case sip::message_signal_start:
+          if (valid_configuration_present) {
+            using namespace sip;
 
-        exit(1);
+            realise_configuration(tc, parelm, tc.get_configuration());
+
+            parelm.filter();
+            parelm.output(); 
+
+            /* Signal that the job is finished */
+            tc.send_signal_done();
+          }
+          else {
+            tc.send_status_report(sip::report::error, "Failure reading input from file.");
+          }
+          break;
+        case sip::message_request_termination:
+
+          termination_requested = true;
+
+          break;
+        default:
+          /* Messages with a type that do not need to be handled */
+          break;
       }
     }
-
-    realise_configuration(tc, parelm, tc.get_configuration());
-
-    /* Send the controller the signal that we're ready to rumble (no further configuration necessary) */
-    tc.send_accept_configuration();
-
-    /* Wait for start message */
-    tc.await_message(sip::message_signal_start);
   }
   else {
+#endif
     parse_command_line(ac,av,parelm);
-  }
-#else
-  parse_command_line(ac,av,parelm);
-#endif
 
-  parelm.filter();
-  parelm.output(); 
-
+    parelm.filter();
+    parelm.output(); 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (tc.is_active()) {
-    tc.send_signal_done();
-
-    gsRewriteFinalise();
-
-    tc.await_message(sip::message_request_termination);
   }
-  else {
-    gsRewriteFinalise();
-  } 
-#else
-  gsRewriteFinalise();
 #endif
+
+  gsRewriteFinalise();
 
   return (0);
 }

@@ -56,6 +56,9 @@ namespace squadt {
     }
         
     project::~project() {
+    }
+
+    void project::store() {
       manager->write();
     }
 
@@ -453,7 +456,7 @@ namespace squadt {
       }
 
       if (existing.size() == tp->number_of_outputs()) {
-        manager->remove(tp.get());
+        manager->remove(tp.get(), false);
       }
     }
 
