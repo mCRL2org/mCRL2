@@ -5,16 +5,25 @@
 
 #define ARROW_WIDTH 1
 #define PI 3.14159265
-
+#define CONTROL_RADIUS 2
 const double triangle_base = 4.0;
 const double triangle_height = 8.0;
 
 const wxString color = wxT("BLACK");
+const wxString control_selected_colour = wxT("BLUE");
 
 edge::edge(Node* _N1, Node* _N2, wxString _lbl) : N1(_N1), N2(_N2), lbl(_lbl) 
 { 
 	lbl.Replace(wxT("\""), wxT(""), true);
 	labelsVisible = true;
+
+        // Initial position of control points is exactly between the nodes.
+        control_point_x = (N1->GetX()+N2->GetX()) / 2;
+        control_point_y = (N1->GetY()+N2->GetY()) / 2;
+
+        //TODO (CT): Make false the default value.
+        control_point_visible = false;
+        control_selected = false;
 }
 
 
@@ -22,12 +31,31 @@ void edge::on_paint(wxDC * ptrDC)
 {
     //Calculate triangle coord
     //angle expressed in radians
-    double alpha = atan((get_y_pos2()-get_y_pos1()) / (get_x_pos2()-get_x_pos1()));
+    /* First, we calculate the spline control point fromt the control point
+     */
+    double start_x = get_x_pos1();
+    double start_y = get_y_pos1();
+    
+    double end_x = get_x_pos2();
+    double end_y = get_y_pos2();
 
-    wxCoord newX = (int) round((get_x_pos2() + (get_x_pos2()-get_x_pos1()>0?
+    double control_x = get_x_control();
+    double control_y = get_y_control();
+
+    double spline_control_x = (8 * control_x - (start_x + end_x)) / 6;
+    double spline_control_y = (8 * control_y - (start_y + end_y)) / 6;
+
+    // To make sure division by zero does not occur
+    if ( end_x == spline_control_x ) {
+      spline_control_x += 0.001;
+    }
+
+    double alpha = atan((end_y - spline_control_y) / (end_x - spline_control_x));
+
+    wxCoord newX = (int) round((end_x + (end_x - spline_control_x >0?
                              -CIRCLE_RADIUS * cos(alpha):
                               CIRCLE_RADIUS * cos(alpha)) ));
-    wxCoord newY =  (int) round(( get_y_pos2() - (get_x_pos2()-get_x_pos1()>=0?
+    wxCoord newY =  (int) round(( end_y - (end_x - spline_control_x >=0?
                               CIRCLE_RADIUS * sin(alpha):
                              -CIRCLE_RADIUS * sin(alpha))));
     
@@ -48,7 +76,7 @@ void edge::on_paint(wxDC * ptrDC)
     double lenY3 = sin(gamma_p3) * ArrowSideLength;
     
     // coord correcting depend on position 
-    if (get_x_pos2() >= get_x_pos1()) 
+    if (get_x_pos2() >= get_x_control()) 
     {
       lenX1 = -lenX1;
       lenY1 = -lenY1;
@@ -70,10 +98,15 @@ void edge::on_paint(wxDC * ptrDC)
     //Draw the triangle
     ptrDC->DrawPolygon(3,points, newX, newY, wxWINDING_RULE);
 
-    //Edge body (line)
+    //Edge body (spline)
     wxPen myPen(color,ARROW_WIDTH,wxSOLID);
     ptrDC->SetPen(myPen);
-    ptrDC->DrawLine((wxCoord)get_x_pos1(),(wxCoord)get_y_pos1(),(wxCoord)get_x_pos2(),(wxCoord)get_y_pos2());
+
+    ptrDC->DrawSpline((wxCoord)start_x,(wxCoord)start_y,
+                      (wxCoord)spline_control_x, (wxCoord)spline_control_y,
+                      (wxCoord)end_x,(wxCoord)end_y);
+
+    
 
     //Label
 		if (labelsVisible) {
@@ -88,6 +121,16 @@ void edge::on_paint(wxDC * ptrDC)
 			double posY=(y1+y2)/2+POS_EDGE_LBL_Y;
 			ptrDC->DrawRotatedText(lbl,(int) round(posX),(int) round(posY),0);
 		}
+  // Control point
+  if (control_point_visible) {
+    if (control_selected) {
+       myBrush.SetColour(control_selected_colour);
+       ptrDC->SetBrush(myBrush);
+    }
+
+    ptrDC->DrawCircle((wxCoord)control_x, (wxCoord)control_y,CONTROL_RADIUS); 
+    
+  }
 }
 
 
@@ -121,15 +164,43 @@ double edge::get_y_pos2() {
   return N2->GetY();
 }
 
+double edge::get_x_control() {
+  return control_point_x;
+}
+
+double edge::get_y_control() {
+  return control_point_y;
+}
+
 bool edge::LabelVisible() {
-	return labelsVisible;
+  return labelsVisible;
 }
 
 void edge::ShowLabels() {
-		labelsVisible = true;
+  labelsVisible = true;
 } 
 
 void edge::HideLabels() {
-		labelsVisible = false;
-} 
+  labelsVisible = false;
+}
 
+void edge::set_x_control(double new_x) {
+  control_point_x = new_x;
+}
+
+void edge::set_y_control(double new_y) {
+  control_point_y = new_y;
+}
+
+void edge:: reset_control() {
+  control_point_x = (N1->GetX() + N2->GetX()) / 2;
+  control_point_y = (N1->GetY() + N2->GetY()) / 2;
+}
+  
+void edge::set_control_selected(bool selection_value) {
+  control_selected = selection_value;
+}
+
+void edge::set_control_visible(bool selection_value) {
+  control_point_visible = selection_value;
+}

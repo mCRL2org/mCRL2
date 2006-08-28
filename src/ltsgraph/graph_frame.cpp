@@ -12,6 +12,7 @@ BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
 	EVT_CLOSE(GraphFrame::OnClose)
 	EVT_CHECKBOX(ID_CHECK_NODE, GraphFrame::OnCheckNode)
 	EVT_CHECKBOX(ID_CHECK_EDGE, GraphFrame::OnCheckEdge)
+        EVT_CHECKBOX(ID_CHECK_CURVES, GraphFrame::on_check_curves)
 	EVT_BUTTON(ID_BUTTON_OPTI, GraphFrame::OnBtnOpti)
 	EVT_BUTTON(ID_BUTTON_COLOUR, GraphFrame::on_btn_pick_colour)
 END_EVENT_TABLE()
@@ -24,6 +25,8 @@ BEGIN_EVENT_TABLE(ViewPort, wxPanel)
   EVT_RIGHT_UP(ViewPort::PressRight)
   EVT_SIZE(ViewPort::OnResize)
 END_EVENT_TABLE()
+
+const int ctrl_radius = 3;
 
 static vector<Node*> vectNode;
 static vector<edge*> vectEdge;
@@ -141,8 +144,12 @@ void GraphFrame::BuildLayout() {
 	ckEdgeLabels = new wxCheckBox(rightPanel, ID_CHECK_EDGE, wxT("Display transition's labels"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
 	ckEdgeLabels->SetValue(true);
 
-	othersSettingsSizer->Add(ckNodeLabels, 0, lflags, 4 );
-	othersSettingsSizer->Add(ckEdgeLabels, 0, lflags, 4 );
+        ck_curve_edges = new wxCheckBox(rightPanel, ID_CHECK_CURVES, wxT("Edit edges' curves"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
+        ck_curve_edges->SetValue(false);
+
+	othersSettingsSizer->Add(ckNodeLabels,   0, lflags, 4 );
+	othersSettingsSizer->Add(ckEdgeLabels,   0, lflags, 4 );
+        othersSettingsSizer->Add(ck_curve_edges, 0, lflags, 4 );
 
 	wxFlexGridSizer* bottomRightSizer = new wxFlexGridSizer( 1, 2, 0, 0 );
 	spinNodeRadius = new wxSpinCtrl(rightPanel, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 2, 50, 10);
@@ -289,6 +296,15 @@ void GraphFrame::OnCheckEdge( wxCommandEvent& /* event */ ) {
 			vectEdge[i]->HideLabels();
 	}
 	Refresh();
+}
+
+void GraphFrame::on_check_curves(wxCommandEvent & /* event */ ) {
+  curve_edges = ck_curve_edges->IsChecked();
+
+  for (size_t i = 0; i < vectEdge.size(); i++) {
+    vectEdge[i]->set_control_visible(curve_edges);
+  }
+  Refresh();
 }
 
 void GraphFrame::OnBtnOpti( wxCommandEvent& event ) {
@@ -589,7 +605,12 @@ bool GraphFrame::OptimizeDrawing(double precision) {
     }
     else {
       vectNode[i]->SetXY( newX , newY );
-    }
+    }    
+  }
+
+  // Reset the spline control points for each edge
+  for (size_t i = 0; i < vectEdge.size(); i++) {
+    vectEdge[i]->reset_control();
   }
     
 
@@ -623,6 +644,7 @@ void GraphFrame::Draw(wxPaintDC * myDC) {
     for (size_t n = 0; n < vectNode.size(); n++) {
         vectNode[n]->OnPaint(myDC);
     }
+
 }
 
 void GraphFrame::ExportPostScript( wxCommandEvent& /* event */ ) {
@@ -773,31 +795,51 @@ void GraphFrame::Resize(wxSize sz2) {
 
 }
 
-int GraphFrame::FindNode(wxPoint pt) {
-  int ind_node_dragged_tmp = -1;
+void GraphFrame::FindNode(wxPoint pt) {
+  leftPanel->selection = none_t;
+
   for (size_t n = 0; n < vectNode.size(); n++) {
     if (vectNode[n]->GetX() > pt.x-CircleRadius && vectNode[n]->GetX() < pt.x+CircleRadius) {
       if (vectNode[n]->GetY() > pt.y-CircleRadius && vectNode[n]->GetY() < pt.y+CircleRadius) {
-        ind_node_dragged_tmp = n;
+        leftPanel->selection = node_t;
+        leftPanel->selected_node = vectNode[n];
       }
     }
   }
-  return ind_node_dragged_tmp;
+  
+  if (leftPanel->selection == none_t && curve_edges) { 
+    for (size_t n = 0; n < vectEdge.size(); n++) {
+      if (vectEdge[n]->get_x_control() > pt.x-ctrl_radius && vectEdge[n]->get_x_control() < pt.x+ctrl_radius &&
+          vectEdge[n]->get_y_control() > pt.y-ctrl_radius && vectEdge[n]->get_y_control() < pt.y+ctrl_radius) {
+        leftPanel->selection = edge_t;
+        leftPanel->selected_edge = vectEdge[n];
+      }
+    }
+  }
 }
-
-static int ind_node_dragged = -1;
 
 void GraphFrame::ReplaceAfterDrag(wxPoint pt) {
-	vectNode[ind_node_dragged]->ForceSetXY(pt.x,pt.y);//redefine node coord
+   switch(leftPanel->selection) {
+     case (node_t):
+       leftPanel->selected_node->ForceSetXY(pt.x,pt.y);//redefine node coord
+       break;
+     case (edge_t):
+       leftPanel->selected_edge->set_x_control(pt.x);
+       leftPanel->selected_edge->set_y_control(pt.y);
+       break;
+     default: 
+       break;
+   }
+      
 }
 
-void GraphFrame::FixNode(int num) {
+void GraphFrame::FixNode() {
 
-    if (vectNode[num]->IsLocked()) { 
-			vectNode[num]->Unlock();
+    if (leftPanel->selected_node->IsLocked()) { 
+      leftPanel->selected_node->Unlock();
     }
     else { 
-			vectNode[num]->Lock();
+      leftPanel->selected_node->Lock();
     }
 }
 
@@ -805,14 +847,14 @@ void GraphFrame::FillStatusBar(const wxString text, unsigned int no) {
 	statusBar->SetStatusText(text,no);
 }
 
-wxString GraphFrame::GetInfoCurrentNode(int num) const {
+wxString GraphFrame::GetInfoCurrentNode(Node* info_node) const {
 
 	wxString text;
 
 	text.Printf(wxT("Current node: %u  ( %u , %u )"), 
-							vectNode[num]->Get_num(),
-							(unsigned int) round(vectNode[num]->GetX()),
-							(unsigned int) round(vectNode[num]->GetY()));
+							info_node->Get_num(),
+							(unsigned int) round(info_node->GetX()),
+							(unsigned int) round(info_node->GetY()));
 	
 	return  text;
 
@@ -842,7 +884,9 @@ ViewPort::ViewPort(wxWindow * parent, const wxPoint& pos, const wxSize& size, lo
   : wxPanel(parent, wxID_ANY, pos, size, style) { 
 
   GF = static_cast<GraphFrame*>(GetParent()->GetParent());
+  selection = none_t;
   selected_node = NULL;
+  selected_edge = NULL;
 
 }
 
@@ -874,35 +918,40 @@ void ViewPort::OnResize(wxSizeEvent& event) {
 void ViewPort::PressLeft(wxMouseEvent& event) {
 
   wxPoint pt_start = event.GetPosition();
-  //Identify the node concerned by Left click
-  ind_node_dragged = GF->FindNode(pt_start);
 
-  if (ind_node_dragged != -1) {
-    if (selected_node) {
-      // Reset border of formerly selected node
-      selected_node->reset_border_colour();
-    }
-    //Store pointer of selected_node
-    selected_node = vectNode[ind_node_dragged];
-    
-    // Give its border a color to identify it on-screen
-    selected_node->set_border_colour(border_colour_selected);
-
-    // Activate button for colour picking:
-    GF->enable_btn_colour_picker();
+  //Reset all colours and selections
+  if (selected_node) {
+    selected_node->reset_border_colour();
   }
-  else {
-    if (selected_node) {  
-      // Reset border colour of formerly selected node
-      selected_node->reset_border_colour();
-
-      // Reset pointer to selected node
-      selected_node = NULL;
-
-      // Disable colour picking button
+  if (selected_edge) {
+    selected_edge->set_control_selected(false);
+  }
+ 
+  // Find the node that is clicked (if any)
+  GF->FindNode(pt_start);
+  
+  switch (selection) {
+    case none_t:
+      // Disable button for colour picking
       GF->disable_btn_colour_picker();
-    }
+      break;
+
+    case node_t:
+      // Give the node a colour to identify it on-screen.
+      selected_node->set_border_colour(border_colour_selected);
+      // Activate button for colour picking
+      GF->enable_btn_colour_picker();
+      break;
+
+    case edge_t:
+      // Toggle the edge as selected
+      selected_edge->set_control_selected(true);
+      break;
+
+    case edge_label_t:
+      break;
   }
+ 
   FillStatusBar();
   Refresh();
 }
@@ -910,18 +959,24 @@ void ViewPort::PressLeft(wxMouseEvent& event) {
 void ViewPort::Drag(wxMouseEvent& event) {
 
   if(event.Dragging() && !event.Moving() && !event.Entering() && !event.Leaving()) {
-    if (ind_node_dragged != -1) { //if num == -1 : no node selected
+    if (selection == node_t) {
       wxPoint pt_end = event.GetPosition();//Find the destination 
       if (pt_end.x > CircleRadius && pt_end.x < sz.GetWidth()-CircleRadius  && pt_end.y > CircleRadius && pt_end.y < sz.GetHeight()-CircleRadius) {
         GF->ReplaceAfterDrag(pt_end);
         Refresh();
       }
     }
+    else if (selection == edge_t) {
+      wxPoint pt_end = event.GetPosition(); //Find the destination
+      if (pt_end.x > ctrl_radius && pt_end.x < sz.GetWidth() - ctrl_radius && pt_end.y > ctrl_radius && pt_end.y < sz.GetHeight() - ctrl_radius) {
+        GF->ReplaceAfterDrag(pt_end);
+        Refresh();
+      }
+    } 
   }
 }
 
 void ViewPort::ReleaseLeft(wxMouseEvent& event) {
-  ind_node_dragged = -1;
 }    
 
 void ViewPort::PressRight(wxMouseEvent& event) {
@@ -929,10 +984,10 @@ void ViewPort::PressRight(wxMouseEvent& event) {
   wxPoint pt_fix = event.GetPosition();
 
   //Find the node concerned by the fixing
-  int numFix = GF->FindNode(pt_fix);
+  GF->FindNode(pt_fix);
 
-  if (numFix != -1) {
-		GF->FixNode(numFix);
+  if (selection == node_t) {
+    GF->FixNode();
     Refresh();
   }
 
@@ -940,8 +995,8 @@ void ViewPort::PressRight(wxMouseEvent& event) {
 
 void ViewPort::FillStatusBar() {
 	//Fill current node status bar
-	if (ind_node_dragged != -1) {
-		GF->FillStatusBar(GF->GetInfoCurrentNode(ind_node_dragged),1);
+	if (selection==node_t) {
+		GF->FillStatusBar(GF->GetInfoCurrentNode(selected_node),1);
 	}
 	else {
 		GF->FillStatusBar(wxT(""),1);
