@@ -14,10 +14,9 @@ cpp fsmlexer.cpp
 
 lib fsm
       : fsmparser.yy
+        /libraries/mcrl2_basic//mcrl2_basic
       : <bison.prefix>"fsm"
         <implicit-dependency>fsmlexer.cpp
-        <dependency>/libraries/mcrl2_basic//mcrl2_basic
-        <dependency>/libraries/aterm//aterm
       ;
 
 exe ltsview

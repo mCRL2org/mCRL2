@@ -17,11 +17,11 @@ lib parser
          typecheck.cpp
          dataimpl.cpp
          regfrmtrans.cpp
+         /libraries/aterm//aterm
+         /libraries/lpe//lpe
+         /libraries/mcrl2_basic//mcrl2_basic
        : <bison.prefix>"mcrl2"
          <flex.prefix>"mcrl2"
-         <dependency>/libraries/aterm//aterm
-         <dependency>/libraries/lpe//lpe
-         <dependency>/libraries/mcrl2_basic//mcrl2_basic
        :
        : <library>/libraries/aterm//aterm
          <library>/libraries/lpe//lpe
@@ -30,8 +30,9 @@ lib parser
 
 lib alpha
        : libalpha.cpp
-       : <dependency>/libraries/aterm//aterm
-         <dependency>/libraries/mcrl2_basic//mcrl2_basic
+         /libraries/aterm//aterm
+         /libraries/mcrl2_basic//mcrl2_basic
+       :
        :
        : <library>/libraries/aterm//aterm
          <library>/libraries/mcrl2_basic//mcrl2_basic

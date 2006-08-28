@@ -7,7 +7,7 @@ project xsim
 
 lib xsimtrace
        : xsimtracedll.cpp
-       : <dependency>/libraries/temporary//nextstate
+       : <library>/libraries/temporary//nextstate
          <wx>interface
        ;
 

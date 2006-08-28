@@ -175,7 +175,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
     {                                                                     
         ATerm bot;
 
-        ATinit(NULL,NULL,&bot); // XXX args?
+        ATinit(0,NULL,&bot); // XXX args?
         return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
     }
 #else

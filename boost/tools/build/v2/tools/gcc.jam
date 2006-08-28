@@ -200,8 +200,8 @@ if [ os.name ] != NT && [ os.name ] != OSF
 
 
 
-flags gcc.compile USER_OPTIONS <cflags> ;
-flags gcc.compile.c++ USER_OPTIONS <cxxflags> ;
+flags gcc.compile C_USER_OPTIONS <cflags> ;
+flags gcc.compile.c++ CXX_USER_OPTIONS <cxxflags> ;
 flags gcc.compile DEFINES <define> ;
 flags gcc.compile INCLUDES <include> ;
 
@@ -219,7 +219,7 @@ rule compile.c++
 
 actions compile.c++
 {
-    "$(CONFIG_COMMAND)" $(LANG) -ftemplate-depth-128 $(OPTIONS) $(USER_OPTIONS) -D$(DEFINES) -I"$(INCLUDES)" -c -o "$(<)" "$(>)" 
+    "$(CONFIG_COMMAND)" $(LANG) -ftemplate-depth-128 $(OPTIONS) $(CXX_USER_OPTIONS) -D$(DEFINES) -I"$(INCLUDES)" -c -o "$(<)" "$(>)" 
 }
 
 rule compile.c
@@ -236,7 +236,7 @@ rule compile.c
 
 actions compile.c
 {
-    "$(CONFIG_COMMAND)" $(LANG) $(OPTIONS) $(USER_OPTIONS) -D$(DEFINES) -I"$(INCLUDES)" -c -o "$(<)" "$(>)" 
+    "$(CONFIG_COMMAND)" $(LANG) $(OPTIONS) $(C_USER_OPTIONS) -D$(DEFINES) -I"$(INCLUDES)" -c -o "$(<)" "$(>)" 
 }
 
 rule compile.asm
