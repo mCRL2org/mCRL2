@@ -289,12 +289,6 @@ int main(int argc, char **argv)
     outfile = argv[optind+1];
     if ( (outtype == lts_none) && !use_alt_outtype )
     {
-      if ( lpefile != "" )
-      {
-        gsVerboseMsg("no output format set; using fsm because --lpe was used\n");
-        alt_outtype = alt_lts_fsm;
-        use_alt_outtype = true;
-      } else {
         gsVerboseMsg("trying to detect output format by extension...\n");
         outtype = lts::guess_format(outfile);
         if ( outtype == lts_none )
@@ -302,8 +296,15 @@ int main(int argc, char **argv)
           alt_outtype = get_alt_extension(outfile);
           if ( alt_outtype == alt_lts_none )
           {
-            gsVerboseMsg("no output format set or detected; using default (mcrl2)\n");
-            outtype = lts_mcrl2;
+            if ( lpefile != "" )
+            {
+              gsWarningMsg("no output format set; using fsm because --lpe was used\n");
+              alt_outtype = alt_lts_fsm;
+              use_alt_outtype = true;
+            } else {
+              gsWarningMsg("no output format set or detected; using default (mcrl2)\n");
+              outtype = lts_mcrl2;
+            }
           } else {
             use_alt_outtype = true;
             if ( alt_outtype == alt_lts_fsm )
@@ -312,16 +313,15 @@ int main(int argc, char **argv)
             }
           }
         }
-      }
     }
   } else {
       if ( lpefile != "" )
       {
-        gsVerboseMsg("no output format set; using fsm because --lpe was used\n");
+        gsWarningMsg("no output format set; using fsm because --lpe was used\n");
         alt_outtype = alt_lts_fsm;
         use_alt_outtype = true;
       } else {
-        gsVerboseMsg("no output format set; using default (aut)\n");
+        gsWarningMsg("no output format set; using default (aut)\n");
         outtype = lts_aut;
       }
   }
