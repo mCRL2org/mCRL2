@@ -140,6 +140,8 @@ namespace squadt {
     }
 
     inline void main::on_menu_close(wxCommandEvent&) {
+      project_view->store();
+
       project_close();
     }
 

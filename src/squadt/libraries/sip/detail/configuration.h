@@ -479,10 +479,7 @@ namespace sip {
 
     assert(reader.is_element("configuration"));
 
-    if (reader.get_attribute("fresh")) {
-      c->fresh = true;
-    }
-
+    c->fresh         = reader.get_attribute("fresh");
     c->output_prefix = reader.get_attribute_as_string("output-prefix");
 
     reader.get_attribute(&c->category, "category");
