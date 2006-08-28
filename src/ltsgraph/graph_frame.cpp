@@ -26,7 +26,7 @@ BEGIN_EVENT_TABLE(ViewPort, wxPanel)
 END_EVENT_TABLE()
 
 static vector<Node*> vectNode;
-static vector<Edge*> vectEdge;
+static vector<edge*> vectEdge;
 static int CircleRadius;
 
 double GenRandom(const int &max) {
@@ -391,7 +391,7 @@ void GraphFrame::Init(wxString LTSfile) {
 						if (vectNode[n]->Get_num() == ti.from()) { 
 							for (size_t m = 0; m < vectNode.size(); m++) { 
 									if (vectNode[m]->Get_num() == ti.to()) 
-										vectEdge.push_back(new Edge(vectNode[n],vectNode[m],*Slbl_Edge));
+										vectEdge.push_back(new edge(vectNode[n],vectNode[m],*Slbl_Edge));
 							}
 						}
 						//Init circle radius
@@ -510,19 +510,19 @@ bool GraphFrame::OptimizeDrawing(double precision) {
     { 
       bool calculate=false;
       double x2=0.0,y2=0.0;
-      if (vectEdge[n]->Get_N1() == vectNode[i] &&
-          vectEdge[n]->Get_N1()!=vectEdge[n]->Get_N2())
+      if (vectEdge[n]->get_n1() == vectNode[i] &&
+          vectEdge[n]->get_n1()!=vectEdge[n]->get_n2())
       { 
-        x2 = (vectEdge[n]->Get_N2())->GetX();
-        y2 = (vectEdge[n]->Get_N2())->GetY();
+        x2 = (vectEdge[n]->get_n2())->GetX();
+        y2 = (vectEdge[n]->get_n2())->GetY();
         calculate=true;
       }
       else
-      if (vectEdge[n]->Get_N2() == vectNode[i] &&
-          vectEdge[n]->Get_N1()!=vectEdge[n]->Get_N2())
+      if (vectEdge[n]->get_n2() == vectNode[i] &&
+          vectEdge[n]->get_n1()!=vectEdge[n]->get_n2())
       { 
-        x2 = (vectEdge[n]->Get_N1())->GetX();
-        y2 = (vectEdge[n]->Get_N1())->GetY();
+        x2 = (vectEdge[n]->get_n1())->GetX();
+        y2 = (vectEdge[n]->get_n1())->GetY();
         calculate=true;
       }
         
@@ -617,7 +617,7 @@ void GraphFrame::Draw(wxPaintDC * myDC) {
 
     //Call Edge and Node OnPaint() method (Edge 1st)
     for (size_t n = 0; n < vectEdge.size(); n++) {
-        vectEdge[n]->OnPaint(myDC);
+        vectEdge[n]->on_paint(myDC);
     }
       
     for (size_t n = 0; n < vectNode.size(); n++) {
@@ -646,7 +646,7 @@ void GraphFrame::ExportPostScript( wxCommandEvent& /* event */ ) {
 
     //Call Edge and Node OnPaint() method (Edge 1st)
     for (size_t n = 0; n < vectEdge.size(); n++) {
-        vectEdge[n]->OnPaint(&myDC);
+        vectEdge[n]->on_paint(&myDC);
     }
       
     for (size_t n = 0; n < vectNode.size(); n++) {
@@ -678,9 +678,9 @@ void GraphFrame::ExportLatex( wxCommandEvent& /* event */ ) {
 
 
 	for (size_t n = 0; n < vectEdge.size(); n++) {
-			StructEdgeLatex.numNode1 = vectEdge[n]->Get_N1()->Get_num();
-			StructEdgeLatex.numNode2 = vectEdge[n]->Get_N2()->Get_num();
-			StructEdgeLatex.lbl      = vectEdge[n]->Get_lbl();
+			StructEdgeLatex.numNode1 = vectEdge[n]->get_n1()->Get_num();
+			StructEdgeLatex.numNode2 = vectEdge[n]->get_n2()->Get_num();
+			StructEdgeLatex.lbl      = vectEdge[n]->get_lbl();
 
 			vectEdgeLatex.push_back(StructEdgeLatex);
 	}

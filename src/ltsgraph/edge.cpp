@@ -11,23 +11,23 @@ const double triangle_height = 8.0;
 
 const wxString color = wxT("BLACK");
 
-Edge::Edge(Node* _N1, Node* _N2, wxString _lbl) : N1(_N1), N2(_N2), lbl(_lbl) 
+edge::edge(Node* _N1, Node* _N2, wxString _lbl) : N1(_N1), N2(_N2), lbl(_lbl) 
 { 
 	lbl.Replace(wxT("\""), wxT(""), true);
 	labelsVisible = true;
 }
 
 
-void Edge::OnPaint(wxDC * ptrDC) 
+void edge::on_paint(wxDC * ptrDC) 
 {
     //Calculate triangle coord
     //angle expressed in radians
-    double alpha = atan((GetYpos2()-GetYpos1()) / (GetXpos2()-GetXpos1()));
+    double alpha = atan((get_y_pos2()-get_y_pos1()) / (get_x_pos2()-get_x_pos1()));
 
-    wxCoord newX = (int) round((GetXpos2() + (GetXpos2()-GetXpos1()>0?
+    wxCoord newX = (int) round((get_x_pos2() + (get_x_pos2()-get_x_pos1()>0?
                              -CIRCLE_RADIUS * cos(alpha):
                               CIRCLE_RADIUS * cos(alpha)) ));
-    wxCoord newY =  (int) round(( GetYpos2() - (GetXpos2()-GetXpos1()>=0?
+    wxCoord newY =  (int) round(( get_y_pos2() - (get_x_pos2()-get_x_pos1()>=0?
                               CIRCLE_RADIUS * sin(alpha):
                              -CIRCLE_RADIUS * sin(alpha))));
     
@@ -48,7 +48,7 @@ void Edge::OnPaint(wxDC * ptrDC)
     double lenY3 = sin(gamma_p3) * ArrowSideLength;
     
     // coord correcting depend on position 
-    if (GetXpos2() >= GetXpos1()) 
+    if (get_x_pos2() >= get_x_pos1()) 
     {
       lenX1 = -lenX1;
       lenY1 = -lenY1;
@@ -73,7 +73,7 @@ void Edge::OnPaint(wxDC * ptrDC)
     //Edge body (line)
     wxPen myPen(color,ARROW_WIDTH,wxSOLID);
     ptrDC->SetPen(myPen);
-    ptrDC->DrawLine((wxCoord)GetXpos1(),(wxCoord)GetYpos1(),(wxCoord)GetXpos2(),(wxCoord)GetYpos2());
+    ptrDC->DrawLine((wxCoord)get_x_pos1(),(wxCoord)get_y_pos1(),(wxCoord)get_x_pos2(),(wxCoord)get_y_pos2());
 
     //Label
 		if (labelsVisible) {
@@ -91,45 +91,45 @@ void Edge::OnPaint(wxDC * ptrDC)
 }
 
 
-Node* Edge::Get_N1() 
+Node* edge::get_n1() 
 {
   return N1;
 }
 
-Node* Edge::Get_N2() {
+Node* edge::get_n2() {
   return N2;
 }
 
-double Edge::GetXpos1() {
+double edge::get_x_pos1() {
   return N1->GetX();
 }
 
-string Edge::Get_lbl() {
+string edge::get_lbl() {
 	string st_lbl = string(lbl.fn_str());
 	return st_lbl;
 }
 
-double Edge::GetYpos1() {
+double edge::get_y_pos1() {
   return N1->GetY();
 }
 
-double Edge::GetXpos2() {
+double edge::get_x_pos2() {
   return N2->GetX();
 }
 
-double Edge::GetYpos2() {
+double edge::get_y_pos2() {
   return N2->GetY();
 }
 
-bool Edge::LabelVisible() {
+bool edge::LabelVisible() {
 	return labelsVisible;
 }
 
-void Edge::ShowLabels() {
+void edge::ShowLabels() {
 		labelsVisible = true;
 } 
 
-void Edge::HideLabels() {
+void edge::HideLabels() {
 		labelsVisible = false;
 } 
 

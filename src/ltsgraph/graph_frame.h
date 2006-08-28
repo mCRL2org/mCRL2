@@ -17,6 +17,7 @@
 
 // Colour dialog
 #include <wx/colordlg.h>
+
 #include <vector>
 #include <iostream>
 #include <string>
@@ -24,6 +25,7 @@
 //random
 #include <cstdlib>
 #include <ctime> 
+
 //LTS
 #include "liblts.h"
 #include "libstruct.h"
@@ -53,6 +55,13 @@ const int ID_BACKUP_CREATE  = wxID_HIGHEST + 7;
 const int ID_BACKUP_RESTORE = wxID_HIGHEST + 8;
 const int ID_BUTTON_COLOUR  = wxID_HIGHEST + 9;
 
+/* To show what is the selected item */
+enum selected_type {
+  node,
+  transition,
+  transition_label
+};
+  
 class ViewPort;
 class ExportToLatex;
 
@@ -149,7 +158,7 @@ class ViewPort : public wxPanel {
 		  void PressRight(wxMouseEvent& event);//to fix a node
 		  void FillStatusBar();
                   Node * selected_node; //Pointer to the node that was last clicked. NULL if none.
-
+		  edge * selected_edge;
 	          wxSize sz;
 		  GraphFrame * GF;
 

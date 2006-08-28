@@ -6,7 +6,7 @@
 
 LtsgraphBackup::LtsgraphBackup(wxSize _sz) : sz(_sz) {}
 
-void LtsgraphBackup::SetLayout(vector<Node*> _BackupVectNode, vector<Edge*> _BackupVectEdge) {
+void LtsgraphBackup::SetLayout(vector<Node*> _BackupVectNode, vector<edge*> _BackupVectEdge) {
 
 	BackupVectNode = _BackupVectNode;
 	BackupVectEdge = _BackupVectEdge;
@@ -91,10 +91,9 @@ bool LtsgraphBackup::Backup(string Bfilename) {
 	//EDGE:numNode1,numNode2,IsVisible?
 	//label
   for (size_t n = 0; n < BackupVectEdge.size(); n++) {
-		wxString lbl(BackupVectEdge[n]->Get_lbl().c_str(), wxConvLocal);
-		tmp.sprintf(wxT("EDGE:%d,%d,%d,"),  BackupVectEdge[n]->Get_N1()->Get_num(),
-																		 				BackupVectEdge[n]->Get_N2()->Get_num(),
-																						BackupVectEdge[n]->LabelVisible()
+		wxString lbl(BackupVectEdge[n]->get_lbl().c_str(), wxConvLocal);
+		tmp.sprintf(wxT("EDGE:%d,%d,%d,"),  
+                BackupVectEdge[n]->get_n1()->Get_num(),		 				BackupVectEdge[n]->get_n2()->Get_num(),						BackupVectEdge[n]->LabelVisible()
 							 );				
 		BckpFile.AddLine(tmp);
 		BckpFile.AddLine(lbl);
@@ -175,7 +174,7 @@ bool LtsgraphBackup::Restore(string Rfilename) {
 
 			if (!RtrFile.Eof())
 				wxstr = RtrFile.GetNextLine();
-			BackupVectEdge.push_back(new Edge(NodeMap[NumNode1],NodeMap[NumNode2],wxstr));
+			BackupVectEdge.push_back(new edge(NodeMap[NumNode1],NodeMap[NumNode2],wxstr));
 
 		}
 		else 
@@ -189,7 +188,7 @@ vector<Node*> LtsgraphBackup::GetVectNode() {
 	return BackupVectNode;
 }
 
-vector<Edge*> LtsgraphBackup::GetVectEdge() {
+vector<edge*> LtsgraphBackup::GetVectEdge() {
 	return BackupVectEdge;
 }
 		

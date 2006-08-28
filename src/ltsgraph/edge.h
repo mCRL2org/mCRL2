@@ -16,21 +16,21 @@
 
 using namespace std;
 
-class Edge
+class edge
 {
 public:
-  Edge();
-  Edge(Node* _N1, Node* _N2, wxString _Slbl);
+  edge();
+  edge(Node* _N1, Node* _N2, wxString _Slbl);
 
-  void OnPaint(wxDC * ptrDC);
-  Node* Get_N1();
-  Node* Get_N2();
-	string Get_lbl();
+  void on_paint(wxDC * ptrDC);
+  Node* get_n1();
+  Node* get_n2();
+  string get_lbl();
 
-  double GetXpos1();
-  double GetYpos1();
-  double GetXpos2();
-  double GetYpos2();
+  double get_x_pos1();
+  double get_y_pos1();
+  double get_x_pos2();
+  double get_y_pos2();
 
 	bool LabelVisible();
 	void ShowLabels();
