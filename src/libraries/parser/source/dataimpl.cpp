@@ -57,7 +57,10 @@ typedef struct {
 //The type t_data_decls represents data declarations, i.e. sort, constructor,
 //operation and data equation declarations
 
-static bool data_decls_is_initialised(t_data_decls data_decls);
+#define data_decls_is_initialised(data_decls)\
+(data_decls.sorts != NULL && data_decls.cons_ops  != NULL &&\
+ data_decls.ops   != NULL && data_decls.data_eqns != NULL)
+
 //Ret: indicates whether the elements of data_decls are initialised
 
 static ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls);
@@ -508,13 +511,6 @@ void impl_function_sorts(ATerm term, lpe::specification &lpe_spec)
   }
   //update data declarations in lpe_spec
   set_data_decls(lpe_spec, data_decls);
-}
-
-bool data_decls_is_initialised(t_data_decls data_decls)
-{
-  return
-    data_decls.sorts != NULL && data_decls.cons_ops  != NULL &&
-    data_decls.ops   != NULL && data_decls.data_eqns != NULL;
 }
 
 ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls)
