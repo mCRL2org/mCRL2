@@ -9,6 +9,7 @@ lib xsimtrace
        : xsimtracedll.cpp
        : <library>/libraries/temporary//nextstate
          <wx>interface
+         <link>shared
        ;
 
 exe xsim
@@ -22,6 +23,8 @@ exe xsim
          <source>/site-config//mcrl2_revision.h
          <squadt_support>enable
          <wx>basic
+         <linkflags>-Wl,-export-dynamic
+         <dependency>xsimtrace
        ;
 
 exe sim
