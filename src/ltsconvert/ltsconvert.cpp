@@ -307,7 +307,7 @@ int main(int argc, char **argv)
             }
           } else {
             use_alt_outtype = true;
-            if ( alt_outtype == alt_lts_fsm )
+            if ( (alt_outtype == alt_lts_fsm) && (lpefile == "") )
             {
               gsWarningMsg("parameter names are unknown (use -l/--lpe option)\n");
             }
@@ -334,6 +334,7 @@ int main(int argc, char **argv)
     if ( !l.read_from(cin,intype) )
     {
       gsErrorMsg("cannot read LTS from stdin\n");
+      gsErrorMsg("use -v/--verbose for more information\n");
       return 1;
     }
   } else {
@@ -353,6 +354,7 @@ int main(int argc, char **argv)
       if ( b )
       {
         gsErrorMsg("cannot read LTS from file '%s'\n",infile.c_str());
+        gsErrorMsg("use -v/--verbose for more information\n");
         return 1;
       }
     }
@@ -375,6 +377,7 @@ int main(int argc, char **argv)
           if ( !write_lts_to_fsm(l,cout,get_lpe(lpefile)) )
           {
             gsErrorMsg("cannot write LTS to stdout\n");
+            gsErrorMsg("use -v/--verbose for more information\n");
             return 1;
           }
           break;
@@ -384,6 +387,7 @@ int main(int argc, char **argv)
             if ( !write_lts_to_dot(l,cout,str_stdout,print_dot_state) )
             {
               gsErrorMsg("cannot write LTS to stdout\n");
+              gsErrorMsg("use -v/--verbose for more information\n");
               return 1;
             }
             break;
@@ -397,6 +401,7 @@ int main(int argc, char **argv)
       if ( !l.write_to(cout,outtype) )
       {
         gsErrorMsg("cannot write LTS to stdout\n");
+        gsErrorMsg("use -v/--verbose for more information\n");
         return 1;
       }
     }
@@ -410,6 +415,7 @@ int main(int argc, char **argv)
           if ( !write_lts_to_fsm(l,outfile,get_lpe(lpefile)) )
           {
             gsErrorMsg("cannot write LTS to file '%s'\n",outfile.c_str());
+            gsErrorMsg("use -v/--verbose for more information\n");
             return 1;
           }
           break;
@@ -419,6 +425,7 @@ int main(int argc, char **argv)
             if ( !write_lts_to_dot(l,outfile,str_base,print_dot_state) )
             {
               gsErrorMsg("cannot write LTS to file '%s'\n",outfile.c_str());
+              gsErrorMsg("use -v/--verbose for more information\n");
               return 1;
             }
             break;
@@ -429,10 +436,28 @@ int main(int argc, char **argv)
           return 1;
       }
     } else {
-      if ( !l.write_to(outfile,outtype) )
+      if ( lpefile == "" )
       {
-        gsErrorMsg("cannot write LTS to file '%s'\n",outfile.c_str());
-        return 1;
+        if ( !l.write_to(outfile,outtype) )
+        {
+          gsErrorMsg("cannot write LTS to file '%s'\n",outfile.c_str());
+          gsErrorMsg("use -v/--verbose for more information\n");
+          return 1;
+        }
+      } else {
+        lpe::specification spec;
+        if ( !spec.load(lpefile) )
+        {
+          gsErrorMsg("cannot read LPE file '%s'\n",lpefile.c_str());
+          gsErrorMsg("use -v/--verbose for more information\n");
+          return 1;
+        }
+        if ( !l.write_to(outfile,outtype,&spec) )
+        {
+          gsErrorMsg("cannot write LTS to file '%s'\n",outfile.c_str());
+          gsErrorMsg("use -v/--verbose for more information\n");
+          return 1;
+        }
       }
     }
   }

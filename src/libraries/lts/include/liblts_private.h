@@ -70,7 +70,7 @@
       bool write_to_aut(std::ostream& os);
 
       bool read_from_svc(std::string const& filename, lts_type type);
-      bool write_to_svc(std::string const& filename, lts_type type);
+      bool write_to_svc(std::string const& filename, lts_type type, lpe::specification *spec = NULL);
 
 #ifdef MCRL2_BCG
       bool read_from_bcg(std::string const& filename);

@@ -68,7 +68,7 @@ ProjDecls    ::= ProjDecl ("," ProjDecl)*
 IdDecl       ::= Id ":" SortExpr
 
 //declaration of 1 or more identifiers of the same sort
-IdDecls      ::= Ids ":" SortExpr
+IdDecls      ::= Ids ":" SortExpr ";"
 
 //comma-separated list of complex data expressions
 DataExprs   ::= DataExpr ("," DataExpr)*
@@ -155,37 +155,38 @@ ProcExpr     ::= Id                                       //action of process re
 SortSpec     ::= "sort" SortDecl+
 
 //sort declaration
-SortDecl     ::= Ids                                      //standard sort
-               | Ids "=" SortExpr                         //sort expression
-               | Ids "=" "Struct" ConstrDecl ("|" ConstrDecl)* //structured sort
+SortDecl     ::= Ids ";"                                           //standard sort
+               | Ids "=" SortExpr ";"                              //sort expression
+               | Ids "=" "Struct" ConstrDecl ("|" ConstrDecl)* ";" //structured sort
 
 //operation specification
 OpSpec       ::= ("cons" | "map") OpDecl+
 
 //operation declaration
-OpDecl       ::= IdDecls
+OpDecl       ::= IdDecls ";"
 
 //equation specification
 EqnSpec      ::= "eqn" EqnDecl+
                | "var" IdDecls+ "eqn" EqnDecl+
 
 //equation declaration
-EqnDecl      ::= DataExpr "=" DataExpr
+EqnDecl      ::= DataExpr "=" DataExpr ";"
+               | DataExpr "->" DataExpr "=" DataExpr ";"
 
 //action specification
 ActSpec      ::= "act" ActDecl+
 
 //action declaration
-ActDecl      ::= Ids (":" Domain)?
+ActDecl      ::= Ids (":" Domain)? ";"
 
 //process specification
 ProcSpec     ::= "proc" ProcDecl+
 
 //process declaration
-ProcDecl     ::= Id ("(" IdDecls ("," IdDecls)* ")")? "=" ProcExpr
+ProcDecl     ::= Id ("(" IdDecls ("," IdDecls)* ")")? "=" ProcExpr ";"
 
 //initialisation
-Init         ::= "init" ProcExpr
+Init         ::= "init" ProcExpr ";"
 
 //specification
 Spec         ::= (SortSpec | OpSpec | EqnSpec | ActSpec | ProcSpec | Init)+

@@ -6,6 +6,7 @@
 #include <atermpp/aterm_allocator.h>
 #include <iostream>
 #include <aterm2.h>
+#include "lpe/specification.h"
 #include "setup.h"
 
 namespace mcrl2
@@ -96,8 +97,8 @@ namespace lts
 
       bool read_from(std::string const& filename, lts_type type = lts_none);
       bool read_from(std::istream &is, lts_type type = lts_none);
-      bool write_to(std::string const& filename, lts_type type = lts_mcrl2);
-      bool write_to(std::ostream &os, lts_type type = lts_mcrl2);
+      bool write_to(std::string const& filename, lts_type type = lts_mcrl2, lpe::specification *spec = NULL);
+      bool write_to(std::ostream &os, lts_type type = lts_mcrl2, lpe::specification *spec = NULL);
 
       unsigned int num_states();
       unsigned int num_transitions();

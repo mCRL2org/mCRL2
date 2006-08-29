@@ -8,6 +8,10 @@
 #include "libprint_c.h"
 #include "libprint.h"
 #include "liblts.h"
+#include "lpe/specification.h"
+#include "libparse.h"
+#include "typecheck.h"
+#include "dataimpl.h"
 #include "setup.h"
 
 #ifdef MCRL2_BCG
@@ -738,8 +742,10 @@ bool lts::read_from(istream &is, lts_type type)
   }
 }
 
-bool p_lts::write_to_svc(string const& filename, lts_type type)
+bool p_lts::write_to_svc(string const& filename, lts_type type, lpe::specification *spec)
 {
+  bool applied_conversion = false;
+
   if ( type == lts_mcrl )
   {
     if ( state_info )
@@ -762,8 +768,23 @@ bool p_lts::write_to_svc(string const& filename, lts_type type)
     {
       if ( !ATisAppl(label_values[i]) || (ATgetArity(ATgetAFun((ATermAppl) label_values[i])) != 0) )
       {
-        gsVerboseMsg("cannot save LTS in mCRL format; label values are incompatible\n");
-        return false;
+        bool no_convert = true;
+        if ( ATisAppl(label_values[i]) && (gsIsMultAct((ATermAppl) label_values[i]) || is_timed_pair((ATermAppl) label_values[i])) )
+        {
+          no_convert = false;
+          if ( is_timed_pair((ATermAppl) label_values[i]) )
+          {
+            label_values[i] = ATgetArgument((ATermAppl) label_values[i],0);
+          }
+          string s = PrintPart_CXX(label_values[i],ppDefault);
+          label_values[i] = (ATerm) ATmakeAppl0(ATmakeAFun(s.c_str(),0,ATtrue));
+          applied_conversion = true;
+        }
+        if ( no_convert )
+        {
+          gsVerboseMsg("cannot save LTS in mCRL format; label values are incompatible\n");
+          return false;
+        }
       }
     }
   } else if ( type == lts_mcrl2 )
@@ -788,12 +809,54 @@ bool p_lts::write_to_svc(string const& filename, lts_type type)
     {
       if ( !ATisAppl(label_values[i]) || !(gsIsMultAct((ATermAppl) label_values[i]) || is_timed_pair((ATermAppl) label_values[i]) ) )
       {
-        gsVerboseMsg("cannot save LTS in mCRL2 format; label values are incompatible\n");
-        return false;
+        bool no_convert = true;
+        if ( (spec != NULL) )
+        {
+          char *s = ATwriteToString(label_values[i]);
+          s++;
+          s[strlen(s)-1] = '\0';
+          stringstream ss(s);
+          ATermAppl t = parse_mult_act(ss);
+          if ( t == NULL )
+          {
+            gsVerboseMsg("cannot parse action as mCRL2\n");
+          } else {
+            t = type_check_mult_act(t,*spec);
+            if ( t == NULL )
+            {
+              gsVerboseMsg("error type checking action\n");
+            } else {
+              t = implement_data_mult_act(t,*spec);
+              if ( t == NULL )
+              {
+                gsVerboseMsg("error implementing data of action\n");
+              } else {
+                no_convert = false;
+                label_values[i] = (ATerm) t;
+                applied_conversion = true;
+              }
+            }
+          }
+        }
+        if ( no_convert )
+        {
+          gsVerboseMsg("cannot save LTS in mCRL2 format; label values are incompatible\n");
+          if ( spec == NULL )
+          {
+            gsVerboseMsg("using the -l/--lpe option might help\n");
+          }
+          return false;
+        }
       }
     }
   } else {
     gsVerboseMsg("saving SVC as type 'unknown'\n");
+  }
+
+  if ( state_info && applied_conversion )
+  {
+    gsWarningMsg("state information will be lost due to conversion\n");
+    state_info = false;
   }
 
   SVCfile f;
@@ -962,7 +1025,7 @@ bool p_lts::write_to_bcg(string const& filename)
 }
 #endif
 
-bool lts::write_to(string const& filename, lts_type type)
+bool lts::write_to(string const& filename, lts_type type, lpe::specification *spec)
 {
   switch ( type )
   {
@@ -972,7 +1035,7 @@ bool lts::write_to(string const& filename, lts_type type)
       return write_to_svc(filename,lts_mcrl);
       break;
     case lts_mcrl2:
-      return write_to_svc(filename,lts_mcrl2);
+      return write_to_svc(filename,lts_mcrl2,spec);
     case lts_svc:
       return write_to_svc(filename,lts_svc);
 #ifdef MCRL2_BCG
@@ -986,7 +1049,7 @@ bool lts::write_to(string const& filename, lts_type type)
   }
 }
 
-bool lts::write_to(ostream &os, lts_type type)
+bool lts::write_to(ostream &os, lts_type type, lpe::specification*)
 {
   switch ( type )
   {
