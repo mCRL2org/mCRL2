@@ -150,3 +150,6 @@ void Node::reset_border_colour() {
   }
 }
 
+int Node::get_radius() {
+  return radius;
+}

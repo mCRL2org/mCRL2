@@ -10,20 +10,29 @@ const double triangle_base = 4.0;
 const double triangle_height = 8.0;
 
 const wxString color = wxT("BLACK");
-const wxString control_selected_colour = wxT("BLUE");
+const wxString selected_colour = wxT("BLUE");
+const wxString default_label_colour = wxT("BLACK");
 
 edge::edge(Node* _N1, Node* _N2, wxString _lbl) : N1(_N1), N2(_N2), lbl(_lbl) 
 { 
-	lbl.Replace(wxT("\""), wxT(""), true);
-	labelsVisible = true;
+  lbl.Replace(wxT("\""), wxT(""), true);
+  labelsVisible = true;
+  label_colour = default_label_colour;
 
-        // Initial position of control points is exactly between the nodes.
-        control_point_x = (N1->GetX()+N2->GetX()) / 2;
-        control_point_y = (N1->GetY()+N2->GetY()) / 2;
+  // Initial position of control points is exactly between the nodes.
+  control_point_x = (N1->GetX()+N2->GetX()) / 2;
+  control_point_y = (N1->GetY()+N2->GetY()) / 2;
 
-        //TODO (CT): Make false the default value.
-        control_point_visible = false;
-        control_selected = false;
+  control_point_visible = false;
+  control_selected = false;		
+  label_selected = false;	
+
+  double x1 = N1->GetX();
+  double x2 = N2->GetX();
+  double y1 = N1->GetY();
+  double y2 = N2->GetY();
+  label_x= (x1 + x2) / 2 + POS_EDGE_LBL_X;
+  label_y= (y1 + y2) / 2 + POS_EDGE_LBL_Y;
 }
 
 
@@ -112,19 +121,26 @@ void edge::on_paint(wxDC * ptrDC)
 		if (labelsVisible) {
 			wxFont MyFont(FONT_SIZE, wxSWISS , wxNORMAL, wxNORMAL, false, wxT("Arial"));
 			ptrDC->SetFont(MyFont);
-	
-			double x1=N1->GetX();
-			double y1=N1->GetY();
-			double x2=N2->GetX();
-			double y2=N2->GetY();
-			double posX=(x1+x2)/2+POS_EDGE_LBL_X;
-			double posY=(y1+y2)/2+POS_EDGE_LBL_Y;
-			ptrDC->DrawRotatedText(lbl,(int) round(posX),(int) round(posY),0);
+
+                        if (label_selected) {
+                          ptrDC->SetTextForeground(selected_colour);
+                        }
+                        else {
+                          ptrDC->SetTextForeground(label_colour);
+                        }
+
+			ptrDC->DrawRotatedText(lbl,static_cast<int>(label_x),static_cast<int>(label_y),0);
 		}
+  // Store label higher coordinates, now that we have a Device Context
+  wxCoord w, h;
+  ptrDC->GetTextExtent(lbl, &w, &h);
+  label_higher_x = label_x + w;
+  label_higher_y = label_y + h;
+  
   // Control point
   if (control_point_visible) {
     if (control_selected) {
-       myBrush.SetColour(control_selected_colour);
+       myBrush.SetColour(selected_colour);
        ptrDC->SetBrush(myBrush);
     }
 
@@ -203,4 +219,53 @@ void edge::set_control_selected(bool selection_value) {
 
 void edge::set_control_visible(bool selection_value) {
   control_point_visible = selection_value;
+}
+
+wxColour edge::get_label_colour() {
+  return label_colour;
+}
+
+void edge::set_label_colour(wxColour new_colour) {
+  label_colour = new_colour;
+}
+
+double edge::get_label_lower_x() {
+  return label_x;
+}
+
+double edge::get_label_lower_y() {
+  return label_y;
+}
+
+void edge::set_label_x(double new_value) {
+  label_x = new_value;
+}
+
+void edge::set_label_y(double new_value) {
+  label_y = new_value;
+}
+
+void edge::set_label_selected(bool selection_value) {
+  label_selected = selection_value;
+}
+
+double edge::get_label_higher_x() {
+  return label_higher_x;
+}
+
+double edge::get_label_higher_y() {
+  return label_higher_y;
+}
+
+void edge::reset_label() {
+  double x1 = N1->GetX();
+  double x2 = N2->GetX();
+  double y1 = N1->GetY();
+  double y2 = N2->GetY();
+  label_x= (x1 + x2) / 2 + POS_EDGE_LBL_X;
+  label_y= (y1 + y2) / 2 + POS_EDGE_LBL_Y;
+}
+
+void edge::set_label_text(wxString new_value) {
+  lbl = new_value;
 }

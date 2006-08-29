@@ -15,13 +15,16 @@
 #include <wx/sizer.h>
 #include <wx/spinctrl.h>
 
-// Colour dialog
+
+// Dialogs
 #include <wx/colordlg.h>
+#include <wx/textdlg.h>
 
 #include <vector>
 #include <iostream>
 #include <string>
 #include "stdlib.h"
+
 //random
 #include <cstdlib>
 #include <ctime> 
@@ -36,6 +39,7 @@
 #include "edge.h"
 #include "export_latex.h"
 #include "ltsgraph_backup.h"
+#include "export_svg.h"
 
 #define INITIAL_WIN_HEIGHT 780
 #define INITIAL_WIN_WIDTH  1024
@@ -44,17 +48,20 @@
 using namespace std;
 using namespace mcrl2::lts;
 
-const int ID_OPTIMIZE       = wxID_HIGHEST +  0;
-const int ID_STOP_OPTIMIZE  = wxID_HIGHEST +  1;
-const int ID_CHECK_NODE     = wxID_HIGHEST +  2;
-const int ID_CHECK_EDGE     = wxID_HIGHEST +  3;
-const int ID_BUTTON_OPTI    = wxID_HIGHEST +  4;
-const int ID_EXPORT_PS      = wxID_HIGHEST +  5;
-const int ID_EXPORT_LATEX   = wxID_HIGHEST +  6;
-const int ID_BACKUP_CREATE  = wxID_HIGHEST +  7;
-const int ID_BACKUP_RESTORE = wxID_HIGHEST +  8;
-const int ID_BUTTON_COLOUR  = wxID_HIGHEST +  9;
-const int ID_CHECK_CURVES   = wxID_HIGHEST + 10;
+const int ID_OPTIMIZE            = wxID_HIGHEST +  0;
+const int ID_STOP_OPTIMIZE       = wxID_HIGHEST +  1;
+const int ID_CHECK_NODE          = wxID_HIGHEST +  2;
+const int ID_CHECK_EDGE          = wxID_HIGHEST +  3;
+const int ID_BUTTON_OPTI         = wxID_HIGHEST +  4;
+const int ID_EXPORT_PS           = wxID_HIGHEST +  5;
+const int ID_EXPORT_LATEX        = wxID_HIGHEST +  6;
+const int ID_BACKUP_CREATE       = wxID_HIGHEST +  7;
+const int ID_BACKUP_RESTORE      = wxID_HIGHEST +  8;
+const int ID_BUTTON_COLOUR       = wxID_HIGHEST +  9;
+const int ID_CHECK_CURVES        = wxID_HIGHEST + 10;
+const int ID_BUTTON_LABEL_COLOUR = wxID_HIGHEST + 11;
+const int ID_BUTTON_LABEL_TEXT   = wxID_HIGHEST + 12;
+const int ID_EXPORT_SVG		 = wxID_HIGHEST + 13;
 
 /* To show what is the selected item */
 enum selected_type {
@@ -76,20 +83,28 @@ public:
   void Draw(wxPaintDC * myDC);
   void ExportPostScript(wxCommandEvent& event);
   void ExportLatex(wxCommandEvent& event);
+  void export_svg(wxCommandEvent& event);
   void CreateBackup(wxCommandEvent& event);
   void Resize(wxSize);
   void ReplaceAfterDrag(wxPoint);
   void FixNode();
+
   void OnOpen(wxCommandEvent& event);
   void OnQuit(wxCommandEvent& event);//When the user clicks on the Quit menu
   void OnClose(wxCloseEvent& event);//When the user clicks on the cross of the window
+
   void OnOptimize( wxCommandEvent &event );
   void OnStopOptimize( wxCommandEvent &event );
+
   void OnCheckNode( wxCommandEvent &event ); //when the user clicks on the node checkbox
   void OnCheckEdge( wxCommandEvent &event ); //when the user clicks on the edge checkbox
   void on_check_curves (wxCommandEvent &event); // when the user clicks on the curves checkbox.
+
   void OnBtnOpti( wxCommandEvent &event );
   void on_btn_pick_colour( wxCommandEvent &event ); // when the user wants to pick a colour for a node.
+  void on_btn_label_colour( wxCommandEvent &event ); // when the user wants to pick a colour for a label.
+  void on_btn_label_text( wxCommandEvent &event ); // when the user wants to change a label caption.
+
   bool OptimizeDrawing(double precision);
   void RestoreBackup();
   void FindNode(wxPoint);
@@ -100,6 +115,10 @@ public:
   wxString GetInfoWinSize(wxSize) const;
   void enable_btn_colour_picker();
   void disable_btn_colour_picker();
+  void enable_btn_label_colour();
+  void disable_btn_label_colour();
+  void enable_btn_label_text();
+  void disable_btn_label_text();
 
 private:
   bool StopOpti;
@@ -122,6 +141,7 @@ private:
   wxMenuItem * openItem;
   wxMenuItem * exportPsItem;
   wxMenuItem * exportLatexItem;
+  wxMenuItem * export_svg_item;
   wxMenuItem * backupCreate;
   wxMenuItem * quitItem;
   wxMenuItem * optimizeGraph;
@@ -146,6 +166,8 @@ private:
 
   wxButton * btnOptiStop;	
   wxButton * btn_pick_colour;
+  wxButton * btn_label_colour;
+  wxButton * btn_label_text;
 
 DECLARE_EVENT_TABLE()
 };
@@ -154,6 +176,7 @@ class ViewPort : public wxPanel {
 	friend class GraphFrame;
 	public:
 	  Node * get_selected_node();
+          edge * get_selected_edge();
 	private :
           ViewPort(wxWindow* parent, const wxPoint& pos, const wxSize& size, long style);
 	  void OnPaint(wxPaintEvent& evt);

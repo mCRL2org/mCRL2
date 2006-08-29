@@ -32,6 +32,7 @@ public:
 
   // Returns the transition label
   string get_lbl();
+  void set_label_text(wxString new_text);
 
   // Returns the x and y positions of the nodes and the spline control
   // point
@@ -53,6 +54,8 @@ public:
   void ShowLabels();
   void HideLabels();
 
+  void set_label_selected(bool selection_value);
+
   // Allows setting and resetting of control point
   void set_x_control(double new_x);
   void set_y_control(double new_y);
@@ -60,7 +63,19 @@ public:
 
   void set_control_selected(bool selection_value);
   void set_control_visible(bool selection_value);
-  
+
+  wxColour get_label_colour();
+
+  void set_label_colour(wxColour new_colour);
+
+  double get_label_lower_x();
+  double get_label_lower_y();
+  double get_label_higher_x();
+  double get_label_higher_y();
+
+  void set_label_x(double new_value);
+  void set_label_y(double new_value);
+  void reset_label();
 private:
   // Start and end nodes.
   // TODO (CT): Coding standard
@@ -77,10 +92,18 @@ private:
   // Status of label visibility
   // TODO (CT): Coding standard
   bool labelsVisible;
+  bool label_selected;
+
+  wxColour label_colour;
 
   // Status of control point visibility
   bool control_point_visible;
   bool control_selected;
+
+  double label_x;
+  double label_y;
+  double label_higher_x;
+  double label_higher_y;
     
 
 };

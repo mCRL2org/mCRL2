@@ -26,6 +26,7 @@ public:
   unsigned int Get_num();
   double GetX(); 
   double GetY();
+  int get_radius();
   string Get_lbl();
   void SetXY(double, double);
   void ForceSetXY(double, double);//set the x and y even if the node is locked

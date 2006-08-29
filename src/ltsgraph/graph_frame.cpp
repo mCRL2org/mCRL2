@@ -5,6 +5,7 @@ BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
   EVT_MENU(wxID_OPEN, GraphFrame::OnOpen)
 	EVT_MENU(ID_EXPORT_PS, GraphFrame::ExportPostScript)
 	EVT_MENU(ID_EXPORT_LATEX, GraphFrame::ExportLatex)
+        EVT_MENU(ID_EXPORT_SVG, GraphFrame::export_svg)
 	EVT_MENU(ID_BACKUP_CREATE, GraphFrame::CreateBackup)
   EVT_MENU(wxID_EXIT, GraphFrame::OnQuit)
   EVT_MENU(ID_OPTIMIZE, GraphFrame::OnOptimize)
@@ -15,6 +16,8 @@ BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
         EVT_CHECKBOX(ID_CHECK_CURVES, GraphFrame::on_check_curves)
 	EVT_BUTTON(ID_BUTTON_OPTI, GraphFrame::OnBtnOpti)
 	EVT_BUTTON(ID_BUTTON_COLOUR, GraphFrame::on_btn_pick_colour)
+        EVT_BUTTON(ID_BUTTON_LABEL_COLOUR, GraphFrame::on_btn_label_colour)
+        EVT_BUTTON(ID_BUTTON_LABEL_TEXT, GraphFrame::on_btn_label_text)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(ViewPort, wxPanel)
@@ -47,6 +50,7 @@ GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& 
 
   StopOpti = true;
   StoppedOpti = true;
+  curve_edges = false;
 
 
   // values below are reset later when the right panel is setuped
@@ -61,45 +65,43 @@ GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& 
 
 void GraphFrame::BuildLayout() {
 
-	//Menu
+  //Menu
   CreateMenu();
 
-	//Status bar
-	CreateStatusBar();
-
-	int rightPanelWidth = INITIAL_WIN_WIDTH - (INITIAL_WIN_WIDTH / 4 + 15);
-
-	wxSplitterWindow * sw = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE & !wxSP_PERMIT_UNSPLIT);
-	
+  //Status bar
+  CreateStatusBar();
+  
+  int rightPanelWidth = INITIAL_WIN_WIDTH - (INITIAL_WIN_WIDTH / 4 + 15);
+ 
+  wxSplitterWindow * sw = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE & !wxSP_PERMIT_UNSPLIT);
   leftPanel = new ViewPort( sw, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER );
   rightPanel = new wxPanel( sw, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER );
 
-	sw->SetMinimumPaneSize(10);
-	sw->SplitVertically(leftPanel,rightPanel);
-	sw->SetSashPosition(rightPanelWidth,true);
-	sw->SetSashGravity(1.0);
+  sw->SetMinimumPaneSize(10);
+  sw->SplitVertically(leftPanel,rightPanel);
+  sw->SetSashPosition(rightPanelWidth,true);
+  sw->SetSashGravity(1.0);
 
-	wxBoxSizer * winSizer = new wxBoxSizer(wxHORIZONTAL);
-	winSizer->Add(sw,1,wxEXPAND);
+  wxBoxSizer * winSizer = new wxBoxSizer(wxHORIZONTAL);
+  winSizer->Add(sw,1,wxEXPAND);
 
+  wxBoxSizer * rightSizer = new  wxBoxSizer(wxVERTICAL);
+  rightPanel->SetSizer(rightSizer);
 
-	wxBoxSizer * rightSizer = new  wxBoxSizer(wxVERTICAL);
-	rightPanel->SetSizer(rightSizer);
-
-// setup the top part (information box)
-	wxStaticBoxSizer* infoSizer = new wxStaticBoxSizer( wxVERTICAL, rightPanel, wxT("Information") );
+  // setup the top part (information box)
+  wxStaticBoxSizer* infoSizer = new wxStaticBoxSizer( wxVERTICAL, rightPanel, wxT("Information") );
   int lflags = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
   int rflags = wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL;
   
   wxFlexGridSizer* topRightSizer = new wxFlexGridSizer( 4, 2, 0, 0 );
   initialStateLabel = new wxStaticText( rightPanel, wxID_ANY, wxEmptyString,
-      wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
+    wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
   numberOfStatesLabel = new wxStaticText( rightPanel, wxID_ANY, wxEmptyString,
-      wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
+    wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
   numberOfTransitionsLabel = new wxStaticText( rightPanel, wxID_ANY, wxEmptyString,
-      wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
+    wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
   numberOfLabelsLabel = new wxStaticText( rightPanel, wxID_ANY, wxEmptyString,
-      wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
+    wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
 
   topRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("Initial state:         ") ), 0, lflags, 4 );
   topRightSizer->Add( initialStateLabel, 0, rflags, 3 );
@@ -110,71 +112,80 @@ void GraphFrame::BuildLayout() {
   topRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("Number of labels:      ") ), 0, lflags, 4 );
   topRightSizer->Add( numberOfLabelsLabel, 0, rflags, 3 );
 
-	infoSizer->Add(topRightSizer, 1, wxEXPAND | wxALL, 0 );
+  infoSizer->Add(topRightSizer, 1, wxEXPAND | wxALL, 0 );
   rightSizer->Add(infoSizer, 0, wxEXPAND | wxALL, 0 );
 
-	rightSizer->AddSpacer(20);
+  rightSizer->AddSpacer(20);
 
-// setup the middle part (algorithm settings box)
-	wxStaticBoxSizer* algoSettingsSizer = new wxStaticBoxSizer( wxVERTICAL, rightPanel, wxT("Algorithm settings") );
-	wxFlexGridSizer* middleRightSizer = new wxFlexGridSizer( 3, 2, 0, 0 );
+  // setup the middle part (algorithm settings box)
+  wxStaticBoxSizer* algoSettingsSizer = new wxStaticBoxSizer( wxVERTICAL, rightPanel, wxT("Algorithm settings") );
+  wxFlexGridSizer* middleRightSizer = new wxFlexGridSizer( 3, 2, 0, 0 );
 	
-	wxSize spinSize(1,1);
-	spinNodeStrength  = new wxSpinCtrlFloat(rightPanel, wxID_ANY, 100.0, 90000.0, 200.0, 1000.0,wxDefaultPosition,spinSize);
-	spinEdgeStiffness = new wxSpinCtrlFloat(rightPanel, wxID_ANY, 0.0, 15.0, 0.1, 1.0,wxDefaultPosition,spinSize);
-	spinNaturalLength = new wxSpinCtrlFloat(rightPanel, wxID_ANY, 2.0, 900.0, 1.0, 20.0,wxDefaultPosition,spinSize);
+  wxSize spinSize(1,1);
+  spinNodeStrength  = new wxSpinCtrlFloat(rightPanel, wxID_ANY, 100.0, 90000.0, 200.0, 1000.0,wxDefaultPosition,spinSize);
+  spinEdgeStiffness = new wxSpinCtrlFloat(rightPanel, wxID_ANY, 0.0, 15.0, 0.1, 1.0,wxDefaultPosition,spinSize);
+  spinNaturalLength = new wxSpinCtrlFloat(rightPanel, wxID_ANY, 2.0, 900.0, 1.0, 20.0,wxDefaultPosition,spinSize);
 
-	middleRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("State repulsion") ), 0, lflags, 4 );
-	middleRightSizer->Add(spinNodeStrength, 0, rflags, 3 );
-	middleRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("Transition attracting force") ), 0, lflags, 4 );
-	middleRightSizer->Add(spinEdgeStiffness, 0, rflags, 3 );
-	middleRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("Natural transition length") ), 0, lflags, 4 );
-	middleRightSizer->Add(spinNaturalLength, 0, rflags, 3 );
+  middleRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("State repulsion") ), 0, lflags, 4 );
+  middleRightSizer->Add(spinNodeStrength, 0, rflags, 3 );
+  middleRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("Transition attracting force") ), 0, lflags, 4 );
+  middleRightSizer->Add(spinEdgeStiffness, 0, rflags, 3 );
+  middleRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("Natural transition length") ), 0, lflags, 4 );
+  middleRightSizer->Add(spinNaturalLength, 0, rflags, 3 );
 
-	algoSettingsSizer->Add(middleRightSizer, 1, wxEXPAND | wxALL, 0 );
-	rightSizer->Add(algoSettingsSizer, 0, wxEXPAND | wxALL, 0 );
+  algoSettingsSizer->Add(middleRightSizer, 1, wxEXPAND | wxALL, 0 );
+  rightSizer->Add(algoSettingsSizer, 0, wxEXPAND | wxALL, 0 );
+  rightSizer->AddSpacer(20);
+  
+  // setup the bottom part (others settings box)
+  wxStaticBoxSizer* othersSettingsSizer = new wxStaticBoxSizer( wxVERTICAL, rightPanel, wxT("Other settings") );
+  ckNodeLabels = new wxCheckBox(rightPanel, ID_CHECK_NODE, wxT("Display state's labels"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
+  ckNodeLabels->SetValue(true);
+  ckEdgeLabels = new wxCheckBox(rightPanel, ID_CHECK_EDGE, wxT("Display transition's labels"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
+  ckEdgeLabels->SetValue(true);
+  ck_curve_edges = new wxCheckBox(rightPanel, ID_CHECK_CURVES, wxT("Edit edges' curves"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
+  ck_curve_edges->SetValue(false);
 
-	rightSizer->AddSpacer(20);
+  othersSettingsSizer->Add(ckNodeLabels,   0, lflags, 4 );
+  othersSettingsSizer->Add(ckEdgeLabels,   0, lflags, 4 );
+  othersSettingsSizer->Add(ck_curve_edges, 0, lflags, 4 );
 
-// setup the bottom part (others settings box)
-	wxStaticBoxSizer* othersSettingsSizer = new wxStaticBoxSizer( wxVERTICAL, rightPanel, wxT("Others settings") );
+  wxFlexGridSizer* bottomRightSizer = new wxFlexGridSizer( 1, 2, 0, 0 );
+  spinNodeRadius = new wxSpinCtrl(rightPanel, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 2, 50, 10);
+  bottomRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("State radius") ), 0, lflags, 4 );
+  bottomRightSizer->Add(spinNodeRadius, 0, rflags, 3 );
+  othersSettingsSizer->Add(bottomRightSizer, 1, wxEXPAND | wxALL, 0 );
 
-	ckNodeLabels = new wxCheckBox(rightPanel, ID_CHECK_NODE, wxT("Display state's labels"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
-	ckNodeLabels->SetValue(true);
-	ckEdgeLabels = new wxCheckBox(rightPanel, ID_CHECK_EDGE, wxT("Display transition's labels"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
-	ckEdgeLabels->SetValue(true);
+  // Button for opening colour picker for selected node.
+  btn_pick_colour = new wxButton(rightPanel, ID_BUTTON_COLOUR, wxT("Edit node &colour"), wxDefaultPosition, wxDefaultSize);
+  btn_pick_colour->Enable(false);
 
-        ck_curve_edges = new wxCheckBox(rightPanel, ID_CHECK_CURVES, wxT("Edit edges' curves"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
-        ck_curve_edges->SetValue(false);
+  // Button for opening colour picker for selected label.
+  btn_label_colour = new wxButton(rightPanel, ID_BUTTON_LABEL_COLOUR, wxT("Edit label colour"), wxDefaultPosition, wxDefaultSize);
+  btn_label_colour->Enable(false);
 
-	othersSettingsSizer->Add(ckNodeLabels,   0, lflags, 4 );
-	othersSettingsSizer->Add(ckEdgeLabels,   0, lflags, 4 );
-        othersSettingsSizer->Add(ck_curve_edges, 0, lflags, 4 );
+  // Button for opening text dialog for selected label caption
+  btn_label_text = new wxButton(rightPanel, ID_BUTTON_LABEL_TEXT, wxT("Edit label text"), wxDefaultPosition, wxDefaultSize);
+  btn_label_text->Enable(false);
 
-	wxFlexGridSizer* bottomRightSizer = new wxFlexGridSizer( 1, 2, 0, 0 );
-	spinNodeRadius = new wxSpinCtrl(rightPanel, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 2, 50, 10);
-	bottomRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("State radius") ), 0, lflags, 4 );
-	bottomRightSizer->Add(spinNodeRadius, 0, rflags, 3 );
-	othersSettingsSizer->Add(bottomRightSizer, 1, wxEXPAND | wxALL, 0 );
+  othersSettingsSizer->Add(btn_pick_colour, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL, 4);
+  othersSettingsSizer->Add(btn_label_colour, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL, 4);
+  othersSettingsSizer->Add(btn_label_text, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL, 4);
 
-	// Button for opening colour picker for selected node.
-	btn_pick_colour = new wxButton(rightPanel, ID_BUTTON_COLOUR, wxT("Edit node &colour"), wxDefaultPosition, wxDefaultSize);
-	btn_pick_colour->Enable(false);
-        othersSettingsSizer->Add(btn_pick_colour, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL, 4);
 	
-	rightSizer->Add(othersSettingsSizer, 0, wxEXPAND | wxALL, 0 );
+  rightSizer->Add(othersSettingsSizer, 0, wxEXPAND | wxALL, 0 );
 
-	rightSizer->AddSpacer(20);
+  rightSizer->AddSpacer(20);
 
-	btnOptiStop = new wxButton(rightPanel, ID_BUTTON_OPTI, wxT("&Optimize"), wxDefaultPosition, wxDefaultSize);
-	btnOptiStop->Enable(false);
+  btnOptiStop = new wxButton(rightPanel, ID_BUTTON_OPTI, wxT("&Optimize"), wxDefaultPosition, wxDefaultSize);
+  btnOptiStop->Enable(false);
 
-	rightSizer->Add(btnOptiStop, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL, 4 );
+  rightSizer->Add(btnOptiStop, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL, 4 );
 
   SetSizer(winSizer);
 
-	Layout();
-	sw->UpdateSize();
+  Layout();
+  sw->UpdateSize();
 
 }
 
@@ -185,11 +196,16 @@ void GraphFrame::CreateMenu() {
   //file
   file = new wxMenu;
   openItem        = file->Append( wxID_OPEN, wxT("&Open...\tCTRL-o"), wxT("") );
-	exports = new wxMenu;
-	file->Append(wxID_ANY,wxT("&Export"),exports);
-	exportPsItem    = exports->Append( ID_EXPORT_PS, wxT("Export to &PostScript\tCTRL-p"), wxT("") );
-	exportLatexItem = exports->Append( ID_EXPORT_LATEX, wxT("Export to &Latex\tCTRL-l"), wxT("") );
-	backupCreate    = file->Append( ID_BACKUP_CREATE, wxT("&Create a backup\tCTRL-c"), wxT("") );
+
+  exports = new wxMenu;
+  file->Append(wxID_ANY,wxT("&Export"),exports);
+
+  exportPsItem    = exports->Append( ID_EXPORT_PS, wxT("Export to &PostScript\tCTRL-p"), wxT("") );
+  exportLatexItem = exports->Append( ID_EXPORT_LATEX, wxT("Export to &Latex\tCTRL-l"), wxT("") );
+  export_svg_item = exports->Append( ID_EXPORT_SVG, wxT("Export to &SVG \tCTRL-v"), wxT("") );
+
+  backupCreate    = file->Append( ID_BACKUP_CREATE, wxT("&Create a backup\tCTRL-c"), wxT("") );
+  
   quitItem        = file->Append( wxID_EXIT, wxT("&Quit\tCTRL-q"), wxT("") );
   menu->Append( file, wxT("&File") );
 
@@ -206,6 +222,7 @@ void GraphFrame::CreateMenu() {
 	stopOptimize->Enable(false);
 	exportLatexItem->Enable(false);
 	exportPsItem->Enable(false);
+        export_svg_item->Enable(false);
 	backupCreate->Enable(false);
 }
 
@@ -256,12 +273,10 @@ void GraphFrame::OnOptimize( wxCommandEvent& /* event */ ) {
 	StopOpti = false;
 	StoppedOpti = false;
 	while (!OptimizeDrawing(0.0) && !StopOpti) {
-//std::cerr << "running'";
 		wxTheApp->Yield(true); // to allow user to interrupt optimizing
 	}
 
 	StoppedOpti = true;
-//std::cerr << "end'";
 }
 
 void GraphFrame::OnStopOptimize( wxCommandEvent& /* event */ ) {
@@ -339,6 +354,44 @@ void GraphFrame::on_btn_pick_colour( wxCommandEvent& /* event */ ) {
   }
   
 }
+
+void GraphFrame::on_btn_label_colour( wxCommandEvent& /* event */) {
+  wxColourData colour_picker_data;
+
+  /* Allow Windows users to pick full range of colours. (No effect on other
+   * platforms
+   */
+  colour_picker_data.SetChooseFull(true);
+
+  /* Get colour of the currently selected label */
+  wxColour current_colour = leftPanel->get_selected_edge()->get_label_colour();
+  colour_picker_data.SetColour(current_colour);
+
+  /* Create colour picker dialog, and show it to the user */
+  wxColourDialog colour_picker(this, &colour_picker_data);
+
+  if (colour_picker.ShowModal() == wxID_OK) {
+    wxColourData returned_data = colour_picker.GetColourData();
+    wxColour new_colour = returned_data.GetColour();
+    leftPanel->get_selected_edge()->set_label_colour(new_colour);
+    leftPanel->Refresh();
+  }
+}
+
+void GraphFrame::on_btn_label_text( wxCommandEvent& /* event */) {
+  wxString current_label= wxString(leftPanel->get_selected_edge()->get_lbl().c_str(), wxConvLocal);
+  wxTextEntryDialog label_text_dialog(this, 
+                                      wxT("Please enter the new label text"),
+                                      wxT("Edit edge label"),
+                                      current_label,
+                                      wxOK | wxCANCEL);
+
+  if (label_text_dialog.ShowModal() == wxID_OK) {
+    leftPanel->get_selected_edge()->set_label_text(label_text_dialog.GetValue());
+    Refresh();
+  }
+}
+
 //init vectNode & vectEdge
 void GraphFrame::Init(wxString LTSfile) {
 
@@ -422,6 +475,7 @@ void GraphFrame::Init(wxString LTSfile) {
 				btnOptiStop->Enable(true);
 				exportLatexItem->Enable(true);
 				exportPsItem->Enable(true);
+                                export_svg_item->Enable(true);
 				backupCreate->Enable(true);
 				Refresh();
 			}
@@ -608,10 +662,14 @@ bool GraphFrame::OptimizeDrawing(double precision) {
     }    
   }
 
-  // Reset the spline control points for each edge
-  for (size_t i = 0; i < vectEdge.size(); i++) {
-    vectEdge[i]->reset_control();
-  }
+    // Reset the spline control points for each edge
+    for (size_t i = 0; i < vectEdge.size(); i++) {
+      if (!curve_edges ) {
+        vectEdge[i]->reset_control();
+      }
+      vectEdge[i]->reset_label();
+    }
+  
     
 
   //Calculate the just achieved precision of the drawing
@@ -632,52 +690,46 @@ bool GraphFrame::OptimizeDrawing(double precision) {
 
 void GraphFrame::Draw(wxPaintDC * myDC) {
 
-		//fix a bug (the size status text disappeared)
- 		wxSize size = wxSize(leftPanel->Get_Width(), leftPanel->Get_Height());
- 		FillStatusBar(GetInfoWinSize(size),0);
+  //fix a bug (the size status text disappeared)
+  wxSize size = wxSize(leftPanel->Get_Width(), leftPanel->Get_Height());
+  FillStatusBar(GetInfoWinSize(size),0);
 
-    //Call Edge and Node OnPaint() method (Edge 1st)
-    for (size_t n = 0; n < vectEdge.size(); n++) {
-        vectEdge[n]->on_paint(myDC);
-    }
+  //Call Edge and Node OnPaint() method (Edge 1st)
+  for (size_t n = 0; n < vectEdge.size(); n++) {
+    vectEdge[n]->on_paint(myDC);
+  }
       
-    for (size_t n = 0; n < vectNode.size(); n++) {
-        vectNode[n]->OnPaint(myDC);
-    }
-
+  for (size_t n = 0; n < vectNode.size(); n++) {
+    vectNode[n]->OnPaint(myDC);
+  }
 }
 
 void GraphFrame::ExportPostScript( wxCommandEvent& /* event */ ) {
 	
+  string str(inputFileName);
+  str.append(".ps");
+  wxString wx_str(str.c_str(), wxConvLocal);
+  wxPrintData pd;
+  pd.SetFilename(wx_str);
+  pd.SetPrintMode(wxPRINT_MODE_FILE);
+  wxPostScriptDC myDC(pd);
+  myDC.StartDoc(wx_str);
 
-		string str(inputFileName);
-		str.append(".ps");
-		wxString wx_str(str.c_str(), wxConvLocal);
+  //fix a bug (the size status text disappeared)
+  wxSize size = wxSize(leftPanel->Get_Width(), leftPanel->Get_Height());
+  FillStatusBar(GetInfoWinSize(size),0);
 
-		wxPrintData pd;
-		pd.SetFilename(wx_str);
-    pd.SetPrintMode(wxPRINT_MODE_FILE);
-
-    wxPostScriptDC myDC(pd);
-		myDC.StartDoc(wx_str);
-
-
-		//fix a bug (the size status text disappeared)
- 		wxSize size = wxSize(leftPanel->Get_Width(), leftPanel->Get_Height());
- 		FillStatusBar(GetInfoWinSize(size),0);
-
-    //Call Edge and Node OnPaint() method (Edge 1st)
-    for (size_t n = 0; n < vectEdge.size(); n++) {
-        vectEdge[n]->on_paint(&myDC);
-    }
+  //Call Edge and Node OnPaint() method (Edge 1st)
+  for (size_t n = 0; n < vectEdge.size(); n++) {
+    vectEdge[n]->on_paint(&myDC);
+  }
       
-    for (size_t n = 0; n < vectNode.size(); n++) {
-        vectNode[n]->OnPaint(&myDC);
-    }
+  for (size_t n = 0; n < vectNode.size(); n++) {
+    vectNode[n]->OnPaint(&myDC);
+  }
 
-		myDC.EndDoc();
-
-		wxMessageBox(wxT("Export finished"),wxT("Information"),wxOK| wxICON_INFORMATION);
+  myDC.EndDoc();
+  wxMessageBox(wxT("Export finished"),wxT("Information"),wxOK| wxICON_INFORMATION);
 
 }
 
@@ -706,8 +758,8 @@ void GraphFrame::ExportLatex( wxCommandEvent& /* event */ ) {
 
 			vectEdgeLatex.push_back(StructEdgeLatex);
 	}
-	
- 	ExportToLatex * ltx = new ExportToLatex(strcat((char *)inputFileName.c_str(),".tex"),vectNodeLatex,vectEdgeLatex,leftPanel->Get_Height());
+        string export_file_name = inputFileName+ ".tex";
+ 	ExportToLatex * ltx = new ExportToLatex((char*)export_file_name.c_str(), vectNodeLatex,vectEdgeLatex,leftPanel->Get_Height());
  	if (ltx->Generate()) {
 		wxMessageBox(wxT("Export successful"),wxT("Information"),wxOK| wxICON_INFORMATION);
 	}
@@ -715,6 +767,59 @@ void GraphFrame::ExportLatex( wxCommandEvent& /* event */ ) {
 		wxMessageBox(wxT("Export unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR);
 	}
 
+  delete ltx;
+
+}
+
+void GraphFrame::export_svg(wxCommandEvent& event) {
+  vector<node_svg> vect_node_svg;
+  vector<edge_svg> vect_edge_svg;
+
+  node_svg struct_node_svg;
+  edge_svg struct_edge_svg;
+
+  // Export node data
+  for (size_t n = 0; n < vectNode.size(); n++) {
+    struct_node_svg.num = vectNode[n]->Get_num();
+    struct_node_svg.x = vectNode[n]->GetX();
+    struct_node_svg.y = vectNode[n]->GetY();
+    struct_node_svg.radius = vectNode[n]->get_radius();
+    struct_node_svg.label = vectNode[n]->Get_lbl();
+    struct_node_svg.red = vectNode[n]->get_node_colour().Red();
+    struct_node_svg.green = vectNode[n]->get_node_colour().Green();
+    struct_node_svg.blue = vectNode[n]->get_node_colour().Blue();
+    vect_node_svg.push_back(struct_node_svg);
+  }
+
+  // Export curve data
+  for (size_t n = 0; n < vectEdge.size(); n++) {
+    struct_edge_svg.start_x = vectEdge[n]->get_x_pos1();
+    struct_edge_svg.start_y = vectEdge[n]->get_y_pos1();
+    struct_edge_svg.end_x = vectEdge[n]->get_x_pos2();
+    struct_edge_svg.end_y = vectEdge[n]->get_y_pos2();
+    struct_edge_svg.control_x = vectEdge[n]->get_x_control();
+    struct_edge_svg.control_y = vectEdge[n]->get_y_control();
+    struct_edge_svg.lbl = vectEdge[n]->get_lbl();
+    struct_edge_svg.lbl_x = vectEdge[n]->get_label_lower_x();
+    struct_edge_svg.lbl_y = vectEdge[n]->get_label_lower_y();
+    struct_edge_svg.red = vectEdge[n]->get_label_colour().Red();
+    struct_edge_svg.green = vectEdge[n]->get_label_colour().Green();
+    struct_edge_svg.blue = vectEdge[n]->get_label_colour().Blue();
+
+    vect_edge_svg.push_back(struct_edge_svg);
+  }
+    
+  // Create the exporter object and generate the svg file
+  string export_file_name = inputFileName + ".svg";
+  export_to_svg * svg = new export_to_svg((char*)export_file_name.c_str(), vect_node_svg, vect_edge_svg);
+
+  if (svg->generate()) {
+    wxMessageBox(wxT("Export succesful"), wxT("Information"), wxOK | wxICON_INFORMATION);
+  }
+  else {
+    wxMessageBox(wxT("Export unsuccesful"), wxT("Error"), wxOK | wxICON_ERROR);
+  }
+  delete svg;
 }
 
 void GraphFrame::CreateBackup(wxCommandEvent& event) {
@@ -796,6 +901,8 @@ void GraphFrame::Resize(wxSize sz2) {
 }
 
 void GraphFrame::FindNode(wxPoint pt) {
+  bool show_labels = ckEdgeLabels->IsChecked();
+
   leftPanel->selection = none_t;
 
   for (size_t n = 0; n < vectNode.size(); n++) {
@@ -807,15 +914,21 @@ void GraphFrame::FindNode(wxPoint pt) {
     }
   }
   
-  if (leftPanel->selection == none_t && curve_edges) { 
+  if (leftPanel->selection == none_t && (curve_edges || show_labels) ) { 
     for (size_t n = 0; n < vectEdge.size(); n++) {
-      if (vectEdge[n]->get_x_control() > pt.x-ctrl_radius && vectEdge[n]->get_x_control() < pt.x+ctrl_radius &&
+      if (curve_edges && vectEdge[n]->get_x_control() > pt.x-ctrl_radius && vectEdge[n]->get_x_control() < pt.x+ctrl_radius &&
           vectEdge[n]->get_y_control() > pt.y-ctrl_radius && vectEdge[n]->get_y_control() < pt.y+ctrl_radius) {
         leftPanel->selection = edge_t;
         leftPanel->selected_edge = vectEdge[n];
       }
+      else if (show_labels && vectEdge[n]->get_label_lower_x() < pt.x && pt.x < vectEdge[n]->get_label_higher_x() &&
+                              vectEdge[n]->get_label_lower_y() < pt.y && pt.y < vectEdge[n]->get_label_higher_y()) {
+        leftPanel->selection = edge_label_t;
+        leftPanel->selected_edge = vectEdge[n];
+      }
     }
   }
+
 }
 
 void GraphFrame::ReplaceAfterDrag(wxPoint pt) {
@@ -827,6 +940,9 @@ void GraphFrame::ReplaceAfterDrag(wxPoint pt) {
        leftPanel->selected_edge->set_x_control(pt.x);
        leftPanel->selected_edge->set_y_control(pt.y);
        break;
+     case (edge_label_t):
+       leftPanel->selected_edge->set_label_x(pt.x);
+       leftPanel->selected_edge->set_label_y(pt.y);
      default: 
        break;
    }
@@ -844,29 +960,26 @@ void GraphFrame::FixNode() {
 }
 
 void GraphFrame::FillStatusBar(const wxString text, unsigned int no) {
-	statusBar->SetStatusText(text,no);
+  statusBar->SetStatusText(text,no);
 }
 
 wxString GraphFrame::GetInfoCurrentNode(Node* info_node) const {
 
-	wxString text;
+  wxString text;
+  text.Printf(wxT("Current node: %u  ( %u , %u )"), 
+              info_node->Get_num(),
+	      (unsigned int) round(info_node->GetX()),
+	      (unsigned int) round(info_node->GetY()));
 
-	text.Printf(wxT("Current node: %u  ( %u , %u )"), 
-							info_node->Get_num(),
-							(unsigned int) round(info_node->GetX()),
-							(unsigned int) round(info_node->GetY()));
-	
-	return  text;
+  return  text;
 
 }
 
 wxString GraphFrame::GetInfoWinSize(wxSize sz2) const {
-
-	wxString text;
-
-	text.Printf(wxT("Window size: %d * %d"), sz2.GetWidth(), sz2.GetHeight());
+  wxString text;
+  text.Printf(wxT("Window size: %d * %d"), sz2.GetWidth(), sz2.GetHeight());
 	
-	return  text;
+  return  text;
 
 }
 
@@ -876,6 +989,22 @@ void GraphFrame::enable_btn_colour_picker() {
 
 void GraphFrame::disable_btn_colour_picker() {
   btn_pick_colour->Enable(false);
+}
+
+void GraphFrame::enable_btn_label_colour() {
+  btn_label_colour->Enable(true);
+}
+
+void GraphFrame::disable_btn_label_colour() {
+  btn_label_colour->Enable(false);
+}
+
+void GraphFrame::enable_btn_label_text() {
+  btn_label_text->Enable(true);
+}
+
+void GraphFrame::disable_btn_label_text() {
+  btn_label_text->Enable(false);
 }
 
 ////////////////////////////////VIEWPORT CLASS IMPLEMENTATION////////////////////////////////
@@ -892,6 +1021,10 @@ ViewPort::ViewPort(wxWindow * parent, const wxPoint& pos, const wxSize& size, lo
 
 Node * ViewPort::get_selected_node() {
   return selected_node;
+}
+
+edge * ViewPort::get_selected_edge() {
+  return selected_edge;
 }
 
 void ViewPort::OnPaint(wxPaintEvent& /* event */) {
@@ -922,18 +1055,24 @@ void ViewPort::PressLeft(wxMouseEvent& event) {
   //Reset all colours and selections
   if (selected_node) {
     selected_node->reset_border_colour();
+    selected_node = NULL;
   }
   if (selected_edge) {
     selected_edge->set_control_selected(false);
+    selected_edge->set_label_selected(false);
+    selected_edge = NULL;
   }
+  
  
   // Find the node that is clicked (if any)
   GF->FindNode(pt_start);
   
   switch (selection) {
     case none_t:
-      // Disable button for colour picking
+      // Disable buttons for colour picking
       GF->disable_btn_colour_picker();
+      GF->disable_btn_label_colour();
+      GF->disable_btn_label_text();
       break;
 
     case node_t:
@@ -941,14 +1080,23 @@ void ViewPort::PressLeft(wxMouseEvent& event) {
       selected_node->set_border_colour(border_colour_selected);
       // Activate button for colour picking
       GF->enable_btn_colour_picker();
+      GF->disable_btn_label_colour();
+      GF->disable_btn_label_text();
       break;
 
     case edge_t:
       // Toggle the edge as selected
       selected_edge->set_control_selected(true);
+      GF->disable_btn_label_colour();
+      GF->disable_btn_label_text();
+      GF->disable_btn_colour_picker();
       break;
 
     case edge_label_t:
+      selected_edge->set_label_selected(true);
+      GF->enable_btn_label_colour();      
+      GF->enable_btn_label_text();
+      GF->disable_btn_colour_picker();
       break;
   }
  
@@ -973,6 +1121,17 @@ void ViewPort::Drag(wxMouseEvent& event) {
         Refresh();
       }
     } 
+    else if (selection == edge_label_t) {
+      wxPoint pt_end = event.GetPosition(); //Find the destination
+      /* Calculate height and width of the label */
+      double label_width =  selected_edge->get_label_higher_x() - selected_edge->get_label_lower_x();
+      double label_height = selected_edge->get_label_higher_y() - selected_edge->get_label_lower_y();
+      
+      if (pt_end.x > label_width && pt_end.x < sz.GetWidth() - label_width && pt_end.y > label_height && pt_end.y < sz.GetHeight() - label_height) {
+        GF->ReplaceAfterDrag(pt_end);
+        Refresh();
+      }
+   }
   }
 }
 
