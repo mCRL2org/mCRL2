@@ -14,6 +14,7 @@ BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
 	EVT_CHECKBOX(ID_CHECK_NODE, GraphFrame::OnCheckNode)
 	EVT_CHECKBOX(ID_CHECK_EDGE, GraphFrame::OnCheckEdge)
         EVT_CHECKBOX(ID_CHECK_CURVES, GraphFrame::on_check_curves)
+        EVT_SPINCTRL(ID_SPIN_RADIUS, GraphFrame::on_spin_radius)
 	EVT_BUTTON(ID_BUTTON_OPTI, GraphFrame::OnBtnOpti)
 	EVT_BUTTON(ID_BUTTON_COLOUR, GraphFrame::on_btn_pick_colour)
         EVT_BUTTON(ID_BUTTON_LABEL_COLOUR, GraphFrame::on_btn_label_colour)
@@ -151,7 +152,7 @@ void GraphFrame::BuildLayout() {
   othersSettingsSizer->Add(ck_curve_edges, 0, lflags, 4 );
 
   wxFlexGridSizer* bottomRightSizer = new wxFlexGridSizer( 1, 2, 0, 0 );
-  spinNodeRadius = new wxSpinCtrl(rightPanel, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 2, 50, 10);
+  spinNodeRadius = new wxSpinCtrl(rightPanel, ID_SPIN_RADIUS, wxT(""), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 2, 50, 10);
   bottomRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("State radius") ), 0, lflags, 4 );
   bottomRightSizer->Add(spinNodeRadius, 0, rflags, 3 );
   othersSettingsSizer->Add(bottomRightSizer, 1, wxEXPAND | wxALL, 0 );
@@ -700,6 +701,9 @@ void GraphFrame::Draw(wxPaintDC * myDC) {
   }
       
   for (size_t n = 0; n < vectNode.size(); n++) {
+    // Set the radius of the nodes
+    int radius = spinNodeRadius->GetValue();
+    vectNode[n]->SetRadius(radius);
     vectNode[n]->OnPaint(myDC);
   }
 }
@@ -788,6 +792,21 @@ void GraphFrame::export_svg(wxCommandEvent& event) {
     struct_node_svg.red = vectNode[n]->get_node_colour().Red();
     struct_node_svg.green = vectNode[n]->get_node_colour().Green();
     struct_node_svg.blue = vectNode[n]->get_node_colour().Blue();
+
+    double label_x;
+    //Adjust label x position according to the length
+    wxString lbl(vectNode[n]->Get_lbl().c_str(), wxConvLocal);
+    switch (lbl.Length()) {
+      case 1:  label_x = vectNode[n]->GetX()-POS_NODE_LBL_X;  break;
+      case 2:  label_x = vectNode[n]->GetX()-POS_NODE_LBL_X-3;break;
+      case 3:  label_x = vectNode[n]->GetX()-POS_NODE_LBL_X-6;break;
+      default: label_x = vectNode[n]->GetX()-POS_NODE_LBL_X;  break;
+    }
+	
+    double label_y=vectNode[n]->GetY()+POS_NODE_LBL_Y;
+
+    struct_node_svg.label_x = label_x;
+    struct_node_svg.label_y = label_y;
     vect_node_svg.push_back(struct_node_svg);
   }
 
@@ -797,6 +816,7 @@ void GraphFrame::export_svg(wxCommandEvent& event) {
     struct_edge_svg.start_y = vectEdge[n]->get_y_pos1();
     struct_edge_svg.end_x = vectEdge[n]->get_x_pos2();
     struct_edge_svg.end_y = vectEdge[n]->get_y_pos2();
+    struct_edge_svg.end_radius = vectEdge[n]->get_n2()->get_radius();
     struct_edge_svg.control_x = vectEdge[n]->get_x_control();
     struct_edge_svg.control_y = vectEdge[n]->get_y_control();
     struct_edge_svg.lbl = vectEdge[n]->get_lbl();
@@ -811,7 +831,7 @@ void GraphFrame::export_svg(wxCommandEvent& event) {
     
   // Create the exporter object and generate the svg file
   string export_file_name = inputFileName + ".svg";
-  export_to_svg * svg = new export_to_svg((char*)export_file_name.c_str(), vect_node_svg, vect_edge_svg);
+  export_to_svg * svg = new export_to_svg((char*)export_file_name.c_str(), vect_node_svg, vect_edge_svg, leftPanel->Get_Height(), leftPanel->Get_Width());
 
   if (svg->generate()) {
     wxMessageBox(wxT("Export succesful"), wxT("Information"), wxOK | wxICON_INFORMATION);
@@ -869,8 +889,12 @@ void GraphFrame::RestoreBackup() {
 		vectNode.clear();
 		vectEdge = bckp.GetVectEdge();
 		vectNode = bckp.GetVectNode();
-		
-		
+	        
+                exportLatexItem->Enable(true);
+		exportPsItem->Enable(true);
+                export_svg_item->Enable(true);
+		backupCreate->Enable(true);
+			
 		optimizeGraph->Enable(true);
 		stopOptimize->Enable(false);
 		btnOptiStop->Enable(true);
@@ -1005,6 +1029,10 @@ void GraphFrame::enable_btn_label_text() {
 
 void GraphFrame::disable_btn_label_text() {
   btn_label_text->Enable(false);
+}
+
+void GraphFrame::on_spin_radius(wxSpinEvent& /*event */) {
+  Refresh(); 
 }
 
 ////////////////////////////////VIEWPORT CLASS IMPLEMENTATION////////////////////////////////
@@ -1169,3 +1197,5 @@ int ViewPort::Get_Width() {
 int ViewPort::Get_Height() {
 	return sz.GetHeight();
 }
+
+

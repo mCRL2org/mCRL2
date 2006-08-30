@@ -62,6 +62,7 @@ const int ID_CHECK_CURVES        = wxID_HIGHEST + 10;
 const int ID_BUTTON_LABEL_COLOUR = wxID_HIGHEST + 11;
 const int ID_BUTTON_LABEL_TEXT   = wxID_HIGHEST + 12;
 const int ID_EXPORT_SVG		 = wxID_HIGHEST + 13;
+const int ID_SPIN_RADIUS	 = wxID_HIGHEST + 14;
 
 /* To show what is the selected item */
 enum selected_type {
@@ -99,7 +100,7 @@ public:
   void OnCheckNode( wxCommandEvent &event ); //when the user clicks on the node checkbox
   void OnCheckEdge( wxCommandEvent &event ); //when the user clicks on the edge checkbox
   void on_check_curves (wxCommandEvent &event); // when the user clicks on the curves checkbox.
-
+  void on_spin_radius( wxSpinEvent &event); // when the user changes the value of the node radisu spinbox
   void OnBtnOpti( wxCommandEvent &event );
   void on_btn_pick_colour( wxCommandEvent &event ); // when the user wants to pick a colour for a node.
   void on_btn_label_colour( wxCommandEvent &event ); // when the user wants to pick a colour for a label.

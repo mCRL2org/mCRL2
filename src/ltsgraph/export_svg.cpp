@@ -2,13 +2,18 @@
 
 #include <fstream>
 #include <iostream>
-
+#include <wx/dc.h>
+#include <math.h>
 #include <boost/format.hpp>
+
+#define PI 3.14159265
 const std::string default_border_colour = "black";
 const std::string init_border_colour = "red";
+const double triangle_height = 10;
+const double triangle_width = 5;
 
-export_to_svg::export_to_svg(const char* _filename, vector<node_svg> _nodes, vector<edge_svg> _edges) :
-  filename(_filename) , nodes(_nodes), edges(_edges) {
+export_to_svg::export_to_svg(const char* _filename, vector<node_svg> _nodes, vector<edge_svg> _edges, double _height, double _width) :
+  filename(_filename) , nodes(_nodes), edges(_edges), height(_height), width(_width) {
 }
 
 bool export_to_svg::generate() {
@@ -16,7 +21,12 @@ bool export_to_svg::generate() {
   //Create the svg header
   svg_code  = "<?xml version=\"1.0\" standalone=\"no\"?>\n\n";
   svg_code += "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n\n";
-  svg_code += "<svg width=\"100%\" height=\"100%\" version=\"1.1\" \n";
+
+  boost::format header("<svg viewBox=\"0 0 %1% %2%\" width=\"100%%\" height=\"100%%\" version=\"1.1.\" \n");;
+  header%width
+        %height;
+
+  svg_code += boost::str(header);
   svg_code += "xmlns=\"http://www.w3.org/2000/svg\">\n\n";
 
   // Draw edges first (body and arrow heads)
@@ -36,6 +46,46 @@ bool export_to_svg::generate() {
      %edges[i].end_x
      %edges[i].end_y;
     svg_code += boost::str(f);
+
+    /* Draw the arrowheads of the edges */
+    /* Calculate angle that the arrow needs to make (in radians) */
+    double alpha = 0;
+    double end_y = edges[i].end_y;
+    double end_x = edges[i].end_x;
+    if (spline_control_x != end_x) {
+      alpha = atan( (spline_control_y - end_y) / (spline_control_x - end_x));
+    }
+    else {
+      alpha = .5 * PI;
+    }
+    if (spline_control_x >= end_x) {
+      alpha = alpha + PI;
+    }
+    /* Draw the arrowhead, rotated over alpha */
+    boost::format arrow_f("<polygon points=\"%1% %2% %3% %4% %3% %5%\" fill=\"black\" stroke=\"black\" transform=\"rotate(%6% %7% %8%)\"/>\n");
+    arrow_f%(end_x - edges[i].end_radius)
+           %end_y
+           %(end_x - edges[i].end_radius - triangle_height)
+           %(end_y - triangle_width / 2)
+           %(end_y + triangle_width / 2)
+           %(alpha * (180 / PI)) 
+           %end_x
+           %end_y;
+
+    svg_code += boost::str(arrow_f);
+    
+ 
+    /* Draw the edge labels */
+    boost::format label_f("<text x =\"%1%\" y=\"%2%\" fill=\"rgb(%3%, %4%, %5%)\" font-size=\"12\">\n");
+    label_f%edges[i].lbl_x
+           %edges[i].lbl_y
+           %edges[i].red
+           %edges[i].green
+           %edges[i].blue;
+    
+    svg_code += boost::str(label_f);
+    svg_code += edges[i].lbl + "\n";
+    svg_code += "</text>\n";
   }
   
   // Draw nodes
@@ -69,6 +119,15 @@ bool export_to_svg::generate() {
      %node_green
      %node_blue;
     svg_code += boost::str(f);
+
+    /* Draw node label onto node */
+    string label = nodes[i].label;
+
+    boost::format label_f("<text x=\"%1%\" y=\"%2%\" fill=\"black\" font-size=\"12\">\n");
+    label_f%nodes[i].label_x%nodes[i].label_y;
+    svg_code += boost::str(label_f);
+    svg_code += label + "\n";
+    svg_code += "</text> \n";
   }
   // End svg file
   svg_code += "</svg>";
