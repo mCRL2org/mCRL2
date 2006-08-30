@@ -1,4 +1,4 @@
-project xsim
+project toolset/xsim
        : source-location .
        : requirements
           <include>$(BOOST)
@@ -42,5 +42,5 @@ install_with_libraries install
           <dependency>install-plugins
         ;
 
-on_mac_install_bundle  $(TOP)/xsim : xsim xsim.plist xsim.icns ;
+install_bundle_on_mac $(TOP)/xsim : xsim xsim.plist xsim.icns ;
 

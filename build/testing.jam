@@ -1,0 +1,40 @@
+# Finds all files that have a certain extension
+# 
+# Operates to a maximum of three levels deep recursively, starting from directory $root
+#
+rule examples_by_extension ( root : extensions + ) {
+  return [ glob $(root)/*.$(extensions) $(root)/*/*.$(extensions) $(root)/*/*/*.$(extensions) ] ;
+}
+
+# Runs a tool on a set of input files with command line arguments
+#
+# tool        the executable to run (target of an exe rule)
+# prefix      a prefix used for possible output files
+# suffix      suffix of possible output files (extension part)
+# options     positional options to the tool (excluding names of input/output files)
+# path        the path relative to which input files are searched
+# extensions  the extensions of files that are considered input
+#
+rule run_tool_on_examples ( tool prefix suffix ? : options * : path extensions + ) {
+  import testing ;
+  import path ;
+
+  for file in [ examples_by_extension $(path) : $(extensions) ] {
+    local target = [ MATCH "^(.+)[.][^.]+$" : [ path.basename $(file) ] ] ;
+
+    run $(tool)
+           : $(options) $(file) [ path.native $(BUILD_TOP)/$(target).$(suffix) ]
+           : # input files
+           : # requirements
+           : $(prefix)-$(target)
+           ;
+  }
+}
+
+IMPORT $(__name__)
+       : run_tool_on_examples
+         examples_by_extension
+       : $(caller)
+       : run_tool_on_examples
+         examples_by_extension
+       ;

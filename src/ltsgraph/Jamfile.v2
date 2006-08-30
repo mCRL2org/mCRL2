@@ -1,4 +1,4 @@
-project ltsgraph
+project toolset/ltsgraph
        : source-location .
        : build-dir $(BUILD_TOP)
        : requirements
@@ -18,5 +18,5 @@ exe ltsgraph
 
 install_with_libraries install : ltsgraph : <wx>availability <os>MACOSX:<dependency>ltsgraph-bundle ;
 
-on_mac_install_bundle $(TOP)/ltsgraph : ltsgraph ltsgraph.plist ltsgraph.icns ;
+install_bundle_on_mac $(TOP)/ltsgraph : ltsgraph ltsgraph.plist ltsgraph.icns ;
 

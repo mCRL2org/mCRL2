@@ -1,4 +1,4 @@
-project squadt
+project toolset/squadt
   : source-location .
   : build-dir $(BUILD_TOP) 
   : requirements
@@ -17,14 +17,14 @@ exe squadt
 
 install_with_libraries install
 	: squadt
-        : <dependency>install-images
-          <dependency>install-schemas
+        : <dependency>install-image-data
+          <dependency>install-schema-data
           <wx>availability
           <os>MACOSX:<dependency>squadt-bundle
         ;
 
-on_mac_install_bundle $(TOP)/squadt : squadt squadt.plist squadt.icns ;
+install_bundle_on_mac $(TOP)/squadt : squadt squadt.plist squadt.icns ;
 
-install_data install-images : [ glob pixmaps/logo.jpg ] : images ;
-install_data install-schemas : [ glob schemas/*.xsd ] : schemas ;
+install_data image : [ glob pixmaps/logo.jpg ] : images ;
+install_data schema : [ glob schemas/*.xsd ] : schemas ;
 

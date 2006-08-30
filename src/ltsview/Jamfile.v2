@@ -1,4 +1,4 @@
-project ltsview
+project toolset/ltsview
   : build-dir $(BUILD_TOP)
   : requirements
     <include>.
@@ -42,5 +42,5 @@ exe ltsview
 
 install_with_libraries install : ltsview : <wx>availability <os>MACOSX:<dependency>ltsview-bundle ;
 
-on_mac_install_bundle $(TOP)/ltsview : ltsview ltsview.plist ltsview.icns ;
+install_bundle_on_mac $(TOP)/ltsview : ltsview ltsview.plist ltsview.icns ;
 

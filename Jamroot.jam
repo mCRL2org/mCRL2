@@ -8,6 +8,8 @@ path-constant REVISION_HEADER : ./src/mcrl2_revision.h ;
 #modules.poke : HCACHEFILE : .jamdeps ;
 
 include $(TOP)/build/config.jam ;
+include $(TOP)/build/installing.jam ;
+include $(TOP)/build/testing.jam ;
 
 project toolset
        : build-dir $(BUILD_TOP)
@@ -116,110 +118,27 @@ else {
   feature.compose <wx>gl           : <build>no ;
 }
 
-rule on_mac_install_bundle ( target : executable info icon : requirements * ) {
-  import os ;
-
-  if [ os.name ] = MACOSX {
-    include $(TOP)/build/macosx/bundle.jam ;
-
-    make_bundle $(target) : $(executable) $(info) $(icon) : $(requirements) ;
-  }
-}
-
-# Custom rule to install a tool executable with the libraries it depends on
-rule install_with_libraries ( name : tools * : requirements * ) {
-  if install in [ MATCH "^--(install)" "^(install)" : [ modules.peek : ARGV ] ] {
-    import os ;
-
-    alias $(name)
-          : $(name)-libraries
-            $(name)-binaries
-          : $(requirements)
-            <os>MACOSX:<dependency>$(BIN_DIR)/prepare_$(tools)
-          ;
-   
-    stage $(name)-binaries
-          : $(tools)
-          : <dll-path>$(LIB_DIR)
-            <location>$(BIN_DIR)
-            $(requirements)
-          ;
-   
-    stage $(name)-libraries
-          : $(tools)
-          : <install-dependencies>on <install-type>SHARED_LIB
-            <location>$(LIB_DIR)
-            <os>NT:<location>$(BIN_DIR)
-          ;
-
-    if [ os.name ] = MACOSX {
-      include $(TOP)/build/macosx/bundle.jam ;
-
-      for tool in $(tools) {
-
-        notfile $(BIN_DIR)/prepare_$(tool)
-             : @prepare_executable
-             : $(tool)
-             ;
-      }
-    }
-   
-    explicit $(tools) $(name)-binaries $(name)-libraries ;
-  }
-}
-
-rule install_data ( name : files * : directories ? ) {
-  if install in [ MATCH "^--(install)" "^(install)" : [ modules.peek : ARGV ] ] {
-
-    target = [ path.join $(DATA_DIR) $(directories) ] ;
-   
-    install $(name)
-          : $(files)
-          : <location>$(target)
-          ;
-  }
-}
-
-rule install_plugins ( targets + ) {
-  if install in [ MATCH "^--(install)" "^(install)" : [ modules.peek : ARGV ] ] {
-
-    stage install-plugins
-         : $(targets)
-         : <location>$(LIB_DIR)/plugins
-         ;
-  }
-}
-
-local extensions = mcrl2 pnml fsm ;
-
-# Install examples
-install install_examples
-     : [ glob ./examples/*.$(extensions) ./examples/*/*.$(extensions) ./examples/*/*/*.$(extensions) ]
-     : <location>$(DATA_DIR)
-       <install-source-root>.
-     ;
-
-# Aterm header files for compiling rewriter
-install install_headers
-     : /libraries/aterm//headers 
-     : <location>$(INCLUDE_DIR)/aterm
-     ;
-
-alias install
-     : /tools/$(tools)//install
-       install_examples
-       install_headers
-     ;
-
 # Install when requested
 if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
+
   for tool in $(tools) {
     build-project src/$(tool) ;
   }
 
   explicit install install_examples install_headers ;
 }
+else {
+  # General examples
+  install_examples_by_extension general $(TOP)/examples : mcrl2 pnml fsm ;
 
+  # Aterm header files for compiling rewriter
+  install_headers aterm /libraries/aterm//headers ;
+
+  # Main install target
+  alias install : /tools/$(tools)//install install-general-examples install-aterm-headers ;
+}
+
+# Updating the revision number that is used to tag tools
 if [ path.exists $(TOP)/build/utility/revision.jam ] {
   include $(TOP)/build/utility/revision.jam ;
 

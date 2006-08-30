@@ -175,7 +175,7 @@ namespace sip {
        * @param[in] b whether or not to unselect connected radio buttons
        **/
       void radio_button::set_selected(bool b) {
-        for (radio_button* r = connection; r->connection != this; r = r->connection) {
+        for (radio_button* r = connection; r != this; r = r->connection) {
           if (r->selected) {
             r->selected = false;
 
