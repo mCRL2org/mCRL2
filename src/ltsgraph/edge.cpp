@@ -19,9 +19,7 @@ edge::edge(Node* _N1, Node* _N2, wxString _lbl) : N1(_N1), N2(_N2), lbl(_lbl)
   labelsVisible = true;
   label_colour = default_label_colour;
 
-  // Initial position of control points is exactly between the nodes.
-  control_point_x = (N1->GetX()+N2->GetX()) / 2;
-  control_point_y = (N1->GetY()+N2->GetY()) / 2;
+
 
   control_point_visible = false;
   control_selected = false;		
@@ -30,7 +28,18 @@ edge::edge(Node* _N1, Node* _N2, wxString _lbl) : N1(_N1), N2(_N2), lbl(_lbl)
   double x1 = N1->GetX();
   double x2 = N2->GetX();
   double y1 = N1->GetY();
-  double y2 = N2->GetY();
+  double y2 = N2->GetY();  
+  double radius = N1->get_radius();
+  // Initial position of control points is exactly between the nodes, if the nodes are not in the same place.
+  // If they are in the same place, we put it diagonally above the node
+  if (x1 == x2 && y1 == y2) {
+    control_point_x = x1 + radius * 2;
+    control_point_y = y1 + radius * 2;  
+  }
+  else {
+    control_point_x = (x1 + x2) / 2;
+    control_point_y = (y1 + y2) / 2;
+  }
   label_x= (x1 + x2) / 2 + POS_EDGE_LBL_X;
   label_y= (y1 + y2) / 2 + POS_EDGE_LBL_Y;
 }
@@ -48,6 +57,11 @@ void edge::on_paint(wxDC * ptrDC)
     double end_x = get_x_pos2();
     double end_y = get_y_pos2();
 
+    /* Adjust the start and end point of the arrow to allow self-referring loops */
+    if (start_x == end_x && start_y == end_y) {
+      start_x += N1->get_radius();
+      end_y += N1->get_radius();
+    }
     double control_x = get_x_control();
     double control_y = get_y_control();
 

@@ -9,6 +9,7 @@ Node::Node(unsigned int _num, double _posX, double _posY, wxString _lbl, bool _i
   locked = false;
   labelsVisible = true;
   node_colour = wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE);
+  radius = CIRCLE_RADIUS;
 
   if (initState) {
     border_colour = border_color_init;
