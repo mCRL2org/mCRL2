@@ -31,7 +31,6 @@
 #include <iostream>
 #include "garagecanvas.h"
 #include "xsimbase.h"
-#include "utils.h"
 #include "aterm2.h"
 #include "libprint_types.h"
 #include "libprint.h"

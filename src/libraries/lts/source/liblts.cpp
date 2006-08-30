@@ -7,7 +7,7 @@
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "libprint.h"
-#include "liblts.h"
+#include "lts/liblts.h"
 #include "lpe/specification.h"
 #include "libparse.h"
 #include "typecheck.h"

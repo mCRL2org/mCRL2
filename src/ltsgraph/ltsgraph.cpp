@@ -13,7 +13,7 @@ enum identifiers {
 
 #endif
 
-#include "liblts.h"
+#include "lts/liblts.h"
 
 // Graphical shell
 #include "graph_frame.h"

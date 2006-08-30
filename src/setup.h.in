@@ -2,26 +2,27 @@
 #define SETTINGS_H
 
 // Locations
-#define DATA_DIRECTORY "@DATA_DIR@"
-#define TOOL_DIRECTORY "@BIN_DIR@"
+#define PLUGIN_DIRECTORY "@LIB_DIR@/plugins"
+#define DATA_DIRECTORY   "@DATA_DIR@"
+#define TOOL_DIRECTORY   "@BIN_DIR@"
 
 // Build options
-#define CC             "@CC@"
-#define CXX            "@CXX@"
-#define CFLAGS         "@R_CFLAGS@"
-#define CXXFLAGS       "@R_CXXFLAGS@"
-#define CPPFLAGS       "@R_CPPFLAGS@"
-#define LDFLAGS        "@R_LDFLAGS@"
+#define CC               "@CC@"
+#define CXX              "@CXX@"
+#define CFLAGS           "@R_CFLAGS@"
+#define CXXFLAGS         "@R_CXXFLAGS@"
+#define CPPFLAGS         "@R_CPPFLAGS@"
+#define LDFLAGS          "@R_LDFLAGS@"
 
 // Shared object compilation
-#define SCFLAGS        "@R_SCFLAGS@"
-#define SCXXFLAGS      "@R_SCXXFLAGS@"
+#define SCFLAGS          "@R_SCFLAGS@"
+#define SCXXFLAGS        "@R_SCXXFLAGS@"
 
 // Linking to shared library
-#define SLDFLAGS       "@R_SLDFLAGS@"
+#define SLDFLAGS         "@R_SLDFLAGS@"
 
 // Preprocessor and linker options for the ATerm library
-#define ATERM_CPPFLAGS "@IATERM_CPPFLAGS@"
-#define ATERM_LDFLAGS  "@IATERM_LDFLAGS@"   // Linker options for the ATerm library
+#define ATERM_CPPFLAGS   "@IATERM_CPPFLAGS@"
+#define ATERM_LDFLAGS    "@IATERM_LDFLAGS@"   // Linker options for the ATerm library
 
 #endif

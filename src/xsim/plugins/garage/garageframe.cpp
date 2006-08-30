@@ -14,11 +14,21 @@
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 #include "garageframe.h"
+#include <sstream>
 
 BEGIN_EVENT_TABLE(GarageFrame,wxFrame)
     EVT_CLOSE(GarageFrame::OnCloseWindow)
     EVT_MOVE(GarageFrame::OnMoveWindow)
 END_EVENT_TABLE()
+
+// -------------------------------
+inline std::string intToString( int i )
+// -------------------------------
+{
+	std::ostringstream oss;
+	oss << i;
+	return oss.str();
+}
 
 // --------------------------------------------
 GarageFrame::GarageFrame( wxChar* title,
@@ -213,8 +223,8 @@ ATermAppl GarageFrame::MakeFloorPos( int row,
   } else {
     fpSort = gsMakeSortArrow(sCol, MakeSortId("FloorPos"));
   }
-  ATermAppl oPos = MakeOpId("pos_r" + Utils::intToString(row), fpSort);
-  ATermAppl tCol = MakeOpId("c" + Utils::intToString(col), sCol);
+  ATermAppl oPos = MakeOpId("pos_r" + intToString(row), fpSort);
+  ATermAppl tCol = MakeOpId("c" + intToString(col), sCol);
   if (has_part) {
     ATermAppl tPart = MakeOpId((part == 0)?"pa":"pb", sPart);
     return gsMakeDataAppl2(oPos, tCol, tPart);
@@ -230,7 +240,7 @@ ATermAppl GarageFrame::MakeShuttlePos( int row,
 {
   assert(part >= 0 && part <= 1);
   assert(row >= 1 && row <= 3);
-  return MakeOpId("r" + Utils::intToString(row) + ((part == 0)?"a":"b"),
+  return MakeOpId("r" + intToString(row) + ((part == 0)?"a":"b"),
     MakeSortId("ShuttlePos"));
 }
 

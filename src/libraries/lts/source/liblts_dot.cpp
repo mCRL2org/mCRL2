@@ -5,8 +5,8 @@
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "libprint.h"
-#include "liblts.h"
-#include "liblts_dot.h"
+#include "lts/liblts.h"
+#include "lts/liblts_dot.h"
 
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)
 #define ATisList(x) (ATgetType(x) == AT_LIST)

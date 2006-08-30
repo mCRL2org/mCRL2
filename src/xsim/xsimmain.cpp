@@ -26,6 +26,9 @@
 #include "libprint.h"
 #include "libtrace.h"
 
+// For PLUGIN_DIRECTORY
+#include <setup.h>
+
 using namespace std;
 
 //------------------------------------------------------------------------------
@@ -189,7 +192,7 @@ void XSimMain::CreateMenu()
     wxMenu *views = new wxMenu;
     views->Append( ID_TRACE, wxT("&Trace	CTRL-t"), wxT("") );
     views->Append( ID_MENU, wxT("&Graph"), wxT("") )->Enable(false);
-    views->Append( ID_LOADVIEW, wxT("&Load Dynamic..."), wxT("") );
+    views->Append( ID_LOADVIEW, wxT("&Load Plugin..."), wxT("") );
     menu->Append( views, wxT("&Views") );
     
     wxMenu *help = new wxMenu;
@@ -894,7 +897,10 @@ void XSimMain::OnTrace( wxCommandEvent& /* event */ )
 
 void XSimMain::OnLoadView( wxCommandEvent& /* event */ )
 {
-    wxFileDialog dialog( this, wxT("Select a View DLL..."), wxT(""), wxT(""), wxT("Dynamic Libraries (*.so,*.dll)|*.so;*.dll|All Files|*.*"));
+    wxFileDialog dialog( this, wxT("Select a View Plugin..."), wxT(""), wxT(""), wxT("Dynamic Libraries (*.so,*.dll)|*.so;*.dll|All Files|*.*"));
+
+    dialog.SetDirectory(wxString(wxT(PLUGIN_DIRECTORY), wxConvLocal));
+
     if ( dialog.ShowModal() == wxID_OK )
     {
 	    LoadDLL(dialog.GetPath());

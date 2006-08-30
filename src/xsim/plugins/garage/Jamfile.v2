@@ -1,25 +1,10 @@
 project toolset/xsim/plugins/garage
-       : source-location .
-       : build-dir $(BUILD_TOP)/garage
+       : build-dir $(BUILD_TOP)
        ;
 
-exe garageframe
-       : xmain.cpp
-         garageframe.cpp
-         garagecanvas.cpp
-         utils.cpp
-         visutils.cpp
-         ../../xsimbase.cpp
-       : <include>../..
-         <wx>gl
-       ;
-
-explicit garageframe ;
-
-lib garageframedll
+lib xsim_garage_view
        : garageframe.cpp
          garagecanvas.cpp
-         utils.cpp
          visutils.cpp
          ../../xsimbase.cpp
        : <include>../..
@@ -30,4 +15,16 @@ lib garageframedll
          <link>shared
          <wx>gl
        ;
+
+exe garageframe
+       : xmain.cpp
+         garageframe.cpp
+         garagecanvas.cpp
+         visutils.cpp
+         ../../xsimbase.cpp
+       : <include>../..
+         <wx>gl
+       ;
+
+explicit garageframe ;
 

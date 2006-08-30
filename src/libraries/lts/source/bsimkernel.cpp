@@ -20,7 +20,7 @@
 
  $Id: bsimkernel.c,v 1.1.1.1 2004/09/07 15:06:33 uid523 Exp $ */
 
-#include "detail/bsim.h"
+#include "lts/detail/bsim.h"
 
 static ATbool RefineBranching(int action, int splitter);
 

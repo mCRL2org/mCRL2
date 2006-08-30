@@ -1,6 +1,6 @@
 #ifndef _LIBLTS_BISIM_H
 #define _LIBLTS_BISIM_H
-#include "liblts.h"
+#include "lts/liblts.h"
 
 namespace mcrl2
 {

@@ -30,7 +30,7 @@
 #include <ctime> 
 
 //LTS
-#include "liblts.h"
+#include "lts/liblts.h"
 #include "libstruct.h"
 
 #include "spinctrlfloat.h"

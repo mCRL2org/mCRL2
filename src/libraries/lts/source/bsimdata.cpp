@@ -25,7 +25,7 @@
 #include "libprint_c.h"
 #include "libprint.h"
 #include "libstruct.h"
-#include "detail/bsim.h"
+#include "lts/detail/bsim.h"
 
 #define ATisAppl(t) (ATgetType(t) == AT_APPL)
 

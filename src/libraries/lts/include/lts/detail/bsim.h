@@ -29,7 +29,7 @@
 #include "aterm1.h"
 #include <assert.h>
 #include <sys/times.h>
-#include "liblts.h"
+#include "lts/liblts.h"
 
 /* extern declarations data structures */
 #define INITSIZE 50

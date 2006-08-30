@@ -24,8 +24,8 @@
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
-#include "liblts.h"
-#include "detail/bsim.h"
+#include "lts/liblts.h"
+#include "lts/detail/bsim.h"
 
 using namespace std;
 

@@ -4,9 +4,9 @@
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
-#include "liblts.h"
-#include "liblts_fsm.h"
-#include "liblts_dot.h"
+#include "lts/liblts.h"
+#include "lts/liblts_fsm.h"
+#include "lts/liblts_dot.h"
 #include "setup.h"
 
 #ifdef MCRL2_BCG

@@ -5,8 +5,6 @@ project xsim
        : build-dir $(BUILD_TOP)
        ;
 
-use-project /toolset/xsim/plugins : plugins ;
-
 exe xsim
        : xsim.cpp
          xsimbase.cpp
@@ -19,7 +17,6 @@ exe xsim
          <squadt_support>enable
          <wx>basic
          <toolset>gcc:<linkflags>-Wl,-export-dynamic
-         <dependency>/toolset/xsim/plugins
        ;
 
 exe sim
@@ -29,7 +26,21 @@ exe sim
          <source>/site-config//mcrl2_revision.h
        ;
 
-install_with_libraries install : xsim sim : <wx>availability <os>MACOSX:<dependency>xsim-bundle ;
+# Gather names of view plugins
+for plugin in [ MATCH plugins/(.*)/Jamfile.v2 : [ glob plugins/*/Jamfile.v2 ] ] {
+  view_plugins += plugins/$(plugin)//xsim_$(plugin)_view ;
+}
+
+alias view_plugins : $(view_plugins) ;
+
+install_plugins view_plugins ;
+
+install_with_libraries install
+        : xsim sim
+        : <wx>availability
+          <os>MACOSX:<dependency>xsim-bundle
+          <dependency>install-plugins
+        ;
 
 on_mac_install_bundle  $(TOP)/xsim : xsim xsim.plist xsim.icns ;
 

@@ -6,8 +6,8 @@
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "libprint.h"
-#include "liblts.h"
-#include "liblts_fsm.h"
+#include "lts/liblts.h"
+#include "lts/liblts_fsm.h"
 #include "lpe/lpe.h"
 
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)

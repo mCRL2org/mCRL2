@@ -3,8 +3,8 @@
 #include <stack>
 #include <string>
 #include "libprint_c.h"
-#include "liblts.h"
-#include "detail/liblts_bisim.h"
+#include "lts/liblts.h"
+#include "lts/detail/liblts_bisim.h"
 
 using namespace std;
 

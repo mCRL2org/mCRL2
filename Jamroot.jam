@@ -180,6 +180,16 @@ rule install_data ( name : files * : directories ? ) {
   }
 }
 
+rule install_plugins ( targets + ) {
+  if install in [ MATCH "^--(install)" "^(install)" : [ modules.peek : ARGV ] ] {
+
+    stage install-plugins
+         : $(targets)
+         : <location>$(LIB_DIR)/plugins
+         ;
+  }
+}
+
 local extensions = mcrl2 pnml fsm ;
 
 # Install examples
