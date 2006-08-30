@@ -12,7 +12,10 @@ lib lts
        : liblts.cpp
          liblts_fsm.cpp
          liblts_dot.cpp
-         liblts_red.cpp
+         liblts_eq.cpp
+	 bsimdata.cpp
+	 bsimkernel.cpp
+	 liblts_bisim.cpp
          /libraries/mcrl2_basic//mcrl2_basic
          /libraries/parser//parser
          /libraries/svc//svc

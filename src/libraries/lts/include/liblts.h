@@ -20,12 +20,20 @@ namespace lts
 #endif
                 };
 
-  enum lts_reduction { lts_red_none, lts_red_trace, lts_red_strong, lts_red_obs_trace, lts_red_branch };
+  enum lts_equivalence { lts_eq_none, lts_eq_trace, lts_eq_strong, lts_eq_obs_trace, lts_eq_branch };
+  typedef struct
+  {
+    struct {
+      bool add_class_to_state;
+    } reduce;
+  } lts_eq_options;
+
+  void set_eq_options_defaults(lts_eq_options &opts);
 
   bool is_timed_pair(ATermAppl t);
   ATermAppl make_timed_pair(ATermAppl action, ATermAppl time = NULL);
 
-  #include "liblts_private.h"
+  #include "detail/liblts_private.h"
 
   class lts;
 
@@ -90,10 +98,12 @@ namespace lts
       static char const* extension_for_type(const lts_type type);
 
     public:
-      lts();
+      lts(lts_type type = lts_mcrl2, bool state_info = true, bool label_info = true);
       lts(std::string &filename, lts_type type = lts_none);
       lts(std::istream &is, lts_type type = lts_none);
       ~lts();
+
+      void reset(lts_type type = lts_mcrl2, bool state_info = true, bool label_info = true);
 
       bool read_from(std::string const& filename, lts_type type = lts_none);
       bool read_from(std::istream &is, lts_type type = lts_none);
@@ -139,7 +149,8 @@ namespace lts
       bool has_state_info();
       bool has_label_info();
 
-      bool reduce(lts_reduction red);
+      bool reduce(lts_equivalence eq, lts_eq_options &opts);
+      bool compare(lts &l, lts_equivalence eq, lts_eq_options &opts);
 
       friend class state_iterator;
       friend class label_iterator;

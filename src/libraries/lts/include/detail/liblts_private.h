@@ -55,8 +55,8 @@
       lts_type detect_type(std::string const& filename);
       lts_type detect_type(std::istream &is);
 
-      void init();
-      void clear();
+      void init(lts_type type = lts_mcrl2, bool state_info = true, bool label_info = true);
+      void clear(lts_type type = lts_mcrl2, bool state_info = true, bool label_info = true);
 
       unsigned int p_add_state(ATerm value = NULL);
       unsigned int p_add_label(ATerm value = NULL, bool is_tau = false);

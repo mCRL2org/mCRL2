@@ -118,8 +118,9 @@ static void print_help(FILE *f, char *Name)
   fprintf(f,
     "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
     "Convert the labelled transition system (LTS) from INFILE to OUTFILE in the\n"
-    "requested format. If OUTFILE is not supplied, stdout is used. If INFILE is not\n"
-    "supplied, stdin is used.\n"
+    "requested format after applying the selected minimisation method (default is\n"
+    "none). If OUTFILE is not supplied, stdout is used. If INFILE is not supplied,\n"
+    "stdin is used.\n"
     "\n"
     "The output format is determined by the extension of OUTFILE, whereas the input\n"
     "format is determined by the content of INFILE. Options --in and --out can be\n"
@@ -134,9 +135,20 @@ static void print_help(FILE *f, char *Name)
     "  -i, --in=FORMAT       use FORMAT as the input format\n"
     "  -o, --out=FORMAT      use FORMAT as the output format\n"
     "  -l, --lpe=FILE        use FILE as the LPE from which the input LTS was\n"
-    "                        generated; this is needed to store the correct parameter\n"
-    "                        names of states when saving in fsm format\n"
-    "  -n, --no-state        leave out state information when saving in dot format\n",
+    "                        generated; this is needed to store the correct\n"
+    "                        parameter names of states when saving in fsm format\n"
+    "  -n, --no-state        leave out state information when saving in dot format\n"
+    "\n"
+    "Minimisation options:\n"
+    "      --none            do not minimise (default)\n"
+    "  -s, --strong          minimise using strong bisimulation\n"
+    "  -b, --branching       minimise using branching bisimulation\n"
+//    "      --tau=ACTNAME     consider action with name ACTNAME to be an internal\n"
+//    "                        (tau) action (in addition to those defined as such by\n"
+//    "                        the input)\n"
+    "  -a, --add             do not minimise but save a copy of the original LTS\n"
+    "                        extended with a state parameter indicating the\n"
+    "                        bisimulation class a state belongs to (only for mCRL2)\n",
     Name);
 }
 
@@ -155,8 +167,10 @@ int main(int argc, char **argv)
   BCG_INIT();
 #endif
 
-  #define ShortOptions      "hqvi:o:fl:nsbtu"
+  #define ShortOptions      "hqvi:o:fl:nsbtua"
   #define VersionOption     0x1
+  #define NoneOption        0x2
+  #define TauOption         0x3
   struct option LongOptions[] = { 
     {"help"      , no_argument,         NULL, 'h'},
     {"version"   , no_argument,         NULL, VersionOption},
@@ -168,9 +182,12 @@ int main(int argc, char **argv)
     {"lpe"       , required_argument,   NULL, 'l'},
     {"no-state"  , no_argument,         NULL, 'n'},
     {"strong"    , no_argument,         NULL, 's'},
+    {"none"      , no_argument,         NULL, NoneOption},
     {"branching" , no_argument,         NULL, 'b'},
     {"trace"     , no_argument,         NULL, 't'},
     {"obs-trace" , no_argument,         NULL, 'u'},
+    {"tau"       , no_argument,         NULL, TauOption},
+    {"add"       , no_argument,         NULL, 'a'},
     {0, 0, 0, 0}
   };
 
@@ -183,7 +200,8 @@ int main(int argc, char **argv)
   bool use_alt_outtype = false;
   alt_lts_type alt_outtype = alt_lts_none;
   bool print_dot_state = true;
-  lts_reduction reduction = lts_red_none;
+  lts_equivalence equivalence = lts_eq_none;
+  lts_eq_options eq_opts; set_eq_options_defaults(eq_opts);
   while ( (opt = getopt_long(argc, argv, ShortOptions, LongOptions, NULL)) != -1 )
   {
     switch ( opt )
@@ -243,18 +261,26 @@ int main(int argc, char **argv)
       case 'n':
         print_dot_state = false;
         break;
+      case NoneOption:
+        equivalence = lts_eq_none;
+        break;
       case 's':
-	reduction = lts_red_strong;
-	break;
+        equivalence = lts_eq_strong;
+        break;
       case 'b':
-	reduction = lts_red_branch;
-	break;
+        equivalence = lts_eq_branch;
+        break;
       case 't':
-	reduction = lts_red_trace;
-	break;
+        equivalence = lts_eq_trace;
+        break;
       case 'u':
-	reduction = lts_red_obs_trace;
-	break;
+        equivalence = lts_eq_obs_trace;
+        break;
+      case TauOption:
+        break;
+      case 'a':
+        eq_opts.reduce.add_class_to_state = true;
+        break;
       default:
         break;
     }
@@ -360,10 +386,10 @@ int main(int argc, char **argv)
     }
   }
 
-  if ( reduction != lts_red_none )
+  if ( equivalence != lts_eq_none )
   {
     gsVerboseMsg("reducing LTS...\n");
-    l.reduce(reduction);
+    l.reduce(equivalence,eq_opts);
   }
 
   if ( use_stdout )

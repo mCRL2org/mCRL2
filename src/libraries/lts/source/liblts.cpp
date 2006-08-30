@@ -54,9 +54,9 @@ ATermAppl make_timed_pair(ATermAppl action, ATermAppl time)
   return ATmakeAppl2(timed_pair,(ATerm) action,(ATerm) time);
 }
 
-lts::lts()
+lts::lts(lts_type type, bool state_info, bool label_info)
 {
-  init();
+  init(type,state_info,label_info);
 }
 
 lts::lts(string &filename, lts_type type)
@@ -90,7 +90,12 @@ lts::~lts()
   free(transitions);
 }
 
-void p_lts::init()
+void lts::reset(lts_type type, bool state_info, bool label_info)
+{
+  clear(type,state_info,label_info);
+}
+
+void p_lts::init(lts_type type, bool state_info, bool label_info)
 {
   states_size = 0;
   nstates = 0;
@@ -107,12 +112,12 @@ void p_lts::init()
   ntransitions = 0;
   transitions = NULL;
   
-  type = lts_mcrl2;
-  state_info = true;
-  label_info = true;
+  this->type = type;
+  this->state_info = state_info;
+  this->label_info = label_info;
 }
 
-void p_lts::clear()
+void p_lts::clear(lts_type type, bool state_info, bool label_info)
 {
   free(states);
   free(state_values);
@@ -121,7 +126,7 @@ void p_lts::clear()
   free(label_values);
   free(transitions);
 
-  init();
+  init(type,state_info,label_info);
 }
 
 lts_type p_lts::detect_type(string const& filename)
@@ -857,6 +862,8 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lpe::specificati
   {
     gsWarningMsg("state information will be lost due to conversion\n");
     state_info = false;
+    free(state_values);
+    state_values = NULL;
   }
 
   SVCfile f;
@@ -929,11 +936,29 @@ bool p_lts::write_to_aut(string const& filename)
 
 bool p_lts::write_to_aut(ostream &os)
 {
-  os << "des (" << init_state << "," << ntransitions << "," << nstates << ")" << endl;
+  os << "des (0," << ntransitions << "," << nstates << ")" << endl;
 
   for (unsigned int i=0; i<ntransitions; i++)
   {
-    os << "(" << transitions[i].from << ",";
+    unsigned int from = transitions[i].from;
+    unsigned int to = transitions[i].to;
+    // AUT files need the initial state to be 0, so we will swap state 0 and
+    // the initial state
+    if ( from == 0 )
+    {
+      from = init_state;
+    } else if ( from == init_state )
+    {
+      from = 0;
+    }
+    if ( to == 0 )
+    {
+      to = init_state;
+    } else if ( to == init_state )
+    {
+      to = 0;
+    }
+    os << "(" << from << ",";
     if ( label_info )
     {
       ATerm label = label_values[transitions[i].label];
@@ -953,7 +978,7 @@ bool p_lts::write_to_aut(ostream &os)
     } else {
       os << transitions[i].label;
     }
-    os << "," << transitions[i].to << ")" << endl;
+    os << "," << to << ")" << endl;
   }
 
   return true;
