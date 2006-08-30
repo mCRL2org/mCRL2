@@ -20,12 +20,15 @@
 
  $Id: bsimdata.c,v 1.1.1.1 2004/09/07 15:06:33 uid523 Exp $ */
 
+#include <algorithm>
+#include <string>
 #include "libprint_c.h"
 #include "libstruct.h"
 #include "detail/bsim.h"
 
 #define ATisAppl(t) (ATgetType(t) == AT_APPL)
 
+using namespace std;
 using namespace mcrl2::lts;
 
 /* Data definition */
@@ -254,6 +257,46 @@ static void UpdateLabArray(int state, int label) {
      lab[state] = newval;
 }
 
+static vector<string> *tau_actions = NULL;
+void set_tau_actions(vector<string> *actions)
+{
+	tau_actions = actions;
+}
+
+static ATerm apply_hiding(ATerm act)
+{
+  if ( (tau_actions != NULL) && ATisAppl(act) )
+  {
+    if ( gsIsMultAct((ATermAppl) act) )
+    {
+      ATermList l = ATLgetArgument((ATermAppl) act,0);
+      ATermList m = ATmakeList0();
+      for (; !ATisEmpty(l); l=ATgetNext(l))
+      {
+        if ( find(tau_actions->begin(),tau_actions->end(),ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(ATAgetFirst(l),0),0)))) == tau_actions->end() )
+        {
+          m = ATinsert(m,ATgetFirst(l));
+        }
+      }
+      act = (ATerm) gsMakeMultAct(m);
+    } else if ( ATgetArity(ATgetAFun((ATermAppl) act)) == 0 )
+    {
+      string s(ATgetName(ATgetAFun((ATermAppl) act)));
+      string::size_type pos = s.find("(");
+      if ( pos != string::npos )
+      {
+        s = s.substr(0,pos);
+      }
+      if ( find(tau_actions->begin(),tau_actions->end(),s) != tau_actions->end() )
+      {
+        act = (ATerm) ATmakeAppl0(ATmakeAFun("tau",0,ATtrue));
+      }
+    }
+  }
+
+  return act;
+}
+
 int get_label_index(lts &l, unsigned int idx, int tau_idx)
 {
   ATerm label_term = l.label_value(idx);
@@ -267,6 +310,7 @@ int get_label_index(lts &l, unsigned int idx, int tau_idx)
     label = tau_idx;
   }
   if (!label_name[label]) {
+    label_term = apply_hiding(label_term);
     if ( ATisAppl(label_term) && gsIsMultAct((ATermAppl) label_term) )
     {
       label_term = (ATerm) gsSortMultAct((ATermAppl) label_term);

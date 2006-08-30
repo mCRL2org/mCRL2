@@ -20,6 +20,8 @@
 
  $Id: bsim.h,v 1.1.1.1 2004/09/07 15:06:33 uid523 Exp $ */
 
+#include <vector>
+#include <string>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -86,6 +88,7 @@ int  doReduce(void);
 int  doBranchReduce(void);
 int  doCompare(void);
 int  doBranchCompare(void);
+void set_tau_actions(std::vector<std::string> *actions);
 int ReadData(mcrl2::lts::lts &l);
 ATerm Term(Symbol s, int d);
 void ReadCompareData(mcrl2::lts::lts &l, int *init1, mcrl2::lts::lts &l2, int *init2);

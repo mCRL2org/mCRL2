@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include <atermpp/aterm_allocator.h>
 #include <iostream>
 #include <aterm2.h>
 #include "lpe/specification.h"
@@ -25,10 +24,12 @@ namespace lts
   {
     struct {
       bool add_class_to_state;
+      std::vector<std::string> tau_actions;
     } reduce;
   } lts_eq_options;
 
   void set_eq_options_defaults(lts_eq_options &opts);
+  void lts_reduce_add_tau_actions(lts_eq_options &opts, std::string act_names);
 
   bool is_timed_pair(ATermAppl t);
   ATermAppl make_timed_pair(ATermAppl action, ATermAppl time = NULL);

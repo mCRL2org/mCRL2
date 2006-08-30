@@ -27,6 +27,7 @@
 #include <getopt.h>
 #include "liblowlevel.h"
 #include "libstruct.h"
+#include "libprint_c.h"
 #include "ltsmin.h"
 
 #include "mcrl2_revision.h"
@@ -52,6 +53,8 @@ int main(int argc, char *argv[]) {
    ATerm bottom;
    ATinit(argc, argv, &bottom);
    gsEnableConstructorFunctions();
+
+   gsWarningMsg("the use of this tool is deprecated; use ltsconvert instead\n");
 
    switch(parseArgs(argc, argv, &traceLevel, &optimal, &classes)) {
       case ERR_ARGS:

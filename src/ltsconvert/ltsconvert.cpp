@@ -143,12 +143,12 @@ static void print_help(FILE *f, char *Name)
     "      --none            do not minimise (default)\n"
     "  -s, --strong          minimise using strong bisimulation\n"
     "  -b, --branching       minimise using branching bisimulation\n"
-//    "      --tau=ACTNAME     consider action with name ACTNAME to be an internal\n"
-//    "                        (tau) action (in addition to those defined as such by\n"
-//    "                        the input)\n"
     "  -a, --add             do not minimise but save a copy of the original LTS\n"
     "                        extended with a state parameter indicating the\n"
-    "                        bisimulation class a state belongs to (only for mCRL2)\n",
+    "                        bisimulation class a state belongs to (only for mCRL2)\n"
+    "      --tau=ACTNAMES    consider actions with a name in the comma separated\n"
+    "                        list ACTNAMES to be a internal (tau) actions in\n"
+    "                        addition to those defined as such by the input\n",
     Name);
 }
 
@@ -186,7 +186,7 @@ int main(int argc, char **argv)
     {"branching" , no_argument,         NULL, 'b'},
     {"trace"     , no_argument,         NULL, 't'},
     {"obs-trace" , no_argument,         NULL, 'u'},
-    {"tau"       , no_argument,         NULL, TauOption},
+    {"tau"       , required_argument,   NULL, TauOption},
     {"add"       , no_argument,         NULL, 'a'},
     {0, 0, 0, 0}
   };
@@ -277,6 +277,7 @@ int main(int argc, char **argv)
         equivalence = lts_eq_obs_trace;
         break;
       case TauOption:
+	lts_reduce_add_tau_actions(eq_opts,optarg);
         break;
       case 'a':
         eq_opts.reduce.add_class_to_state = true;

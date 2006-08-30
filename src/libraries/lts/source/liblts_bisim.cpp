@@ -27,6 +27,8 @@
 #include "liblts.h"
 #include "detail/bsim.h"
 
+using namespace std;
+
 int traceLevel = 0, optimal = 0, classes = 0; 
 
 namespace mcrl2
@@ -34,7 +36,7 @@ namespace mcrl2
 namespace lts
 {
 
-bool bisimulation_reduce(lts &l, bool branching, bool add_class_to_state)
+bool bisimulation_reduce(lts &l, bool branching, bool add_class_to_state, vector<string> *tau_actions)
 {
   if ( add_class_to_state )
   {
@@ -48,6 +50,8 @@ bool bisimulation_reduce(lts &l, bool branching, bool add_class_to_state)
       return false;
     }
   }
+
+  set_tau_actions(tau_actions);
   int initState = ReadData(l); 
   
   if ( branching )
@@ -68,9 +72,10 @@ bool bisimulation_reduce(lts &l, bool branching, bool add_class_to_state)
   return true;
 }
 
-bool bisimulation_compare(lts &l1, lts &l2, bool branching)
+bool bisimulation_compare(lts &l1, lts &l2, bool branching, vector<string> *tau_actions)
 {
   int init1, init2;
+  set_tau_actions(tau_actions);
   ReadCompareData(l1, &init1, l2, &init2);
   
   bool equal = false;
