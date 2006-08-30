@@ -1,0 +1,6 @@
+project toolset/xsim/plugins
+       : build-dir $(BUILD_TOP)
+       ;
+
+build-project garage ;
+build-project trace ;

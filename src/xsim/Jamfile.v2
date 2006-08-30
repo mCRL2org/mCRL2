@@ -5,12 +5,7 @@ project xsim
        : build-dir $(BUILD_TOP)
        ;
 
-lib xsimtrace
-       : xsimtracedll.cpp
-       : <library>/libraries/temporary//nextstate
-         <wx>interface
-         <link>shared
-       ;
+use-project /toolset/xsim/plugins : plugins ;
 
 exe xsim
        : xsim.cpp
@@ -24,7 +19,7 @@ exe xsim
          <squadt_support>enable
          <wx>basic
          <toolset>gcc:<linkflags>-Wl,-export-dynamic
-         <dependency>xsimtrace
+         <dependency>/toolset/xsim/plugins
        ;
 
 exe sim

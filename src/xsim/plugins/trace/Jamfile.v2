@@ -1,0 +1,23 @@
+project toolset/xsim/plugins/trace
+       : source-location .
+       : build-dir $(BUILD_TOP)
+       ;
+
+lib xsimtrace
+       : xsimtracedll.cpp
+       : <include>../..
+         <library>/libraries/temporary//nextstate
+         <wx>interface
+         <link>shared
+       ;
+
+#import path ;
+
+# include $(TOP)/build/config.jam ;
+
+#plugin_location = [ path.native $(LIB_DIR)/plugins ] ;
+
+#stage install-xsimtrace
+#       : xsimtrace
+#       : <location>$(plugin_location)
+#       ;

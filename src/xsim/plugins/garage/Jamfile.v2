@@ -1,0 +1,33 @@
+project toolset/xsim/plugins/garage
+       : source-location .
+       : build-dir $(BUILD_TOP)/garage
+       ;
+
+exe garageframe
+       : xmain.cpp
+         garageframe.cpp
+         garagecanvas.cpp
+         utils.cpp
+         visutils.cpp
+         ../../xsimbase.cpp
+       : <include>../..
+         <wx>gl
+       ;
+
+explicit garageframe ;
+
+lib garageframedll
+       : garageframe.cpp
+         garagecanvas.cpp
+         utils.cpp
+         visutils.cpp
+         ../../xsimbase.cpp
+       : <include>../..
+         <define>GARAGEFRAMEDLL
+         <library>/libraries/temporary//nextstate
+         <library>/libraries/mcrl2_basic//mcrl2_basic
+         <source>/site-config//mcrl2_revision.h
+         <link>shared
+         <wx>gl
+       ;
+
