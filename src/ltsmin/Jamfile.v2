@@ -3,6 +3,7 @@ project toolset/ltsmin
        : build-dir $(BUILD_TOP)
        : requirements
           <include>$(BOOST)
+          <status>deprecated
        ;
 
 exe ltsmin
@@ -13,7 +14,6 @@ exe ltsmin
          /libraries/svc//svc
        : <source>/site-config//mcrl2_revision.h
          <include>.
-         <status>deprecated
        ;
 
 install_with_libraries install : ltsmin ;

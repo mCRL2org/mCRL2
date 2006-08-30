@@ -53,7 +53,7 @@ for library in $(libraries) {
 import feature : feature ;
 
 # Feature to mark tools as basic experimental or deprecated
-feature status : basic experimental deprecated : composite optional incidental propagated ;
+feature status : basic experimental deprecated : composite incidental optional ;
 
 if ! experimental in [ MATCH "^--enable-(experimental)" : [ modules.peek : ARGV ] ] {
   feature.compose <status>experimental : <build>no ;
