@@ -1,0 +1,23 @@
+project cvclite
+       :
+       : build-dir $(BUILD_TOP)
+       : requirements
+          <include>..
+       : usage-requirements
+          <include>..
+       ;
+
+lib gmp
+    :
+    : <name>gmp
+    ;
+
+lib cvclite
+    :
+    : <name>cvclite <search>../
+      <link>static
+    :
+    : <define>HAVE___GNU_CXX__EXT_HASH_MAP
+      <define>HAVE___GNU_CXX__EXT_HASH_SET
+      <library>gmp
+    ;

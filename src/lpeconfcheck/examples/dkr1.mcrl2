@@ -12,7 +12,7 @@
 % "rtail(d |> q) = if(q == [], [], d |> rtail(q))" and
 % "rhead(d |> q) = if(q == [], d, rhead(q))".
 % Without these equations, the prover is unable to prove a number of confluence
-% conditions.
+% conditions, unless induction on lists is applied.
 %
 %
 % To compare confcheck (the tool for mCRL) and lpeconfcheck (the tool for mCRL2),

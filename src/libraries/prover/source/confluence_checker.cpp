@@ -340,11 +340,11 @@
 
     Confluence_Checker::Confluence_Checker(
       ATermAppl a_lpe, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
-      bool a_no_marking, bool a_check_all, bool a_counter_example, bool a_generate_invariants, char* a_dot_file_name
+      bool a_apply_induction, bool a_no_marking, bool a_check_all, bool a_counter_example, bool a_generate_invariants, char* a_dot_file_name
     ):
       f_disjointness_checker(ATAgetArgument(a_lpe, 5)),
       f_invariant_checker(a_lpe, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, false, false, 0),
-      f_bdd_prover(ATAgetArgument(a_lpe, 3), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type)
+      f_bdd_prover(a_lpe, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {
       if (has_ctau_action(a_lpe)) {
         gsErrorMsg("An action named \'ctau\' already exists.\n");

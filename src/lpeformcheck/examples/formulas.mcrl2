@@ -9,7 +9,7 @@
 % lpeformcheck:
 %
 % mcrl22lpe formulas.mcrl2 formulas.lpe
-% lpeformcheck -l formulas.lpe -f formulas
+% lpeformcheck formulas.lpe -f formulas
 
 map
   f: Bool -> Bool;

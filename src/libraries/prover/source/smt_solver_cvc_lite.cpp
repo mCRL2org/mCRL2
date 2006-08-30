@@ -39,6 +39,7 @@ using namespace redi;
 
       string v_string_out;
       getline(v_pstream.out(), v_string_out);
+      v_pstream.close();
       if (v_string_out == "Unsatisfiable.") {
         gsVerboseMsg("The formula is unsatisfiable\n");
         return false;
@@ -50,6 +51,13 @@ using namespace redi;
         return true;
       } else {
         gsErrorMsg("CVC Lite reported an error while solving the formula.\n");
+        pstream v_pstream("cvcl -lang smt-lib", pstreams::pstdin | pstreams::pstdout | pstreams::pstderr);
+        v_pstream << f_benchmark << endl << peof;
+        while (getline(v_pstream.err(), v_string_out)) {
+          v_string_out = "CVC Lite: " + v_string_out + "\n";
+          gsErrorMsg((char*) v_string_out.c_str());
+        }
+        v_pstream.close();
         exit(1);
       }
     }

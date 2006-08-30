@@ -21,11 +21,12 @@ class Formula_Checker {
     void save_dot_file(int a_formula_number);
   public:
     Formula_Checker(
-      ATermAppl a_data_equations,
+      ATermAppl a_lpe,
       RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
       SMT_Solver_Type a_solver_type = solver_type_ario,
+      bool a_apply_induction = false,
       bool a_counter_example = false,
       bool a_witness = false,
       char* a_dot_file_name = 0

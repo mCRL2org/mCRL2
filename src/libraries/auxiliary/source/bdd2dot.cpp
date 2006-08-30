@@ -9,6 +9,9 @@
 // Class BDD2Dot --------------------------------------------------------------------------------
   // Class BDD2Dot - Functions declared private -------------------------------------------------
 
+    /// Writes the bdd it receives to BDD2Dot::f_dot_file.
+    /// \param a_bdd A binary decision diagram.
+
     void BDD2Dot::aux_output_bdd(ATermAppl a_bdd) {
       ATermAppl v_true_branch, v_false_branch, v_guard;
       int v_true_number, v_false_number;
@@ -39,6 +42,11 @@
     }
 
   // Class BDD2Dot - Functions declared public --------------------------------------------------
+
+    /// Initializes the fields of the class and writes the received BDD to a file with the name
+    /// a_file_name.
+    /// \param a_bdd A binary decision diagram.
+    /// \param a_file_name A file name.
 
     void BDD2Dot::output_bdd(ATermAppl a_bdd, char* a_file_name) {
       f_visited = ATtableCreate(200, 75);

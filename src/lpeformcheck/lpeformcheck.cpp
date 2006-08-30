@@ -11,27 +11,77 @@
 #include "bdd_path_eliminator.h"
 #include <string>
 
+  /// \mainpage lpeformcheck
+  /// \section section_introduction Introduction
+  /// This document provides information on the internals of the tool.
+  /// \section section_additional_info Additional information
+  /// More information about the tool and the classes used can be found in the corresponding man files.
+
 // Class LPE_Form_Check ---------------------------------------------------------------------------
+
+  /// \brief The class LPE_Form_Check uses an instance of the class Formula_Checker to check whether
+  /// \brief or not the formulas in the list specified by LPE_Form_Check::f_formulas_file_name are
+  /// \brief tautologies or contradictions.
 
   class LPE_Form_Check {
     private:
+      /// \brief The command entered to invoke the tool lpeformcheck.
       char* f_tool_command;
+
+      /// \brief The name of the file containing the list of formulas that is checked.
       char* f_formulas_file_name;
+
+      /// \brief The name of the file containing the LPE.
+      /// \brief If this string is 0, the input is read from stdin.
       char* f_lpe_file_name;
+
+      /// \brief The flag indicating whether or not counter examples are printed each time a formula is encountered
+      /// \brief that is neither a contradiction nor a tautology.
       bool f_counter_example;
+
+      /// \brief The flag indicating whether or not witnesses are printed each time a formula is encountered
+      /// \brief that is neither a contradiction nor a tautology.
       bool f_witness;
+
+      /// \brief The prefix of the files in dot format that are written each time a condition is encountered that is neither
+      /// \brief a contradiction nor a tautology. If the string is 0, no files are written.
       char* f_dot_file_name;
+
+      /// \brief The rewrite strategy used by the rewriter.
       RewriteStrategy f_strategy;
+
+      /// \brief The maximal number of seconds spent on proving a single confluence condition.
       int f_time_limit;
+
+      /// \brief The flag indicating whether or not a path eliminator is used.
       bool f_path_eliminator;
+
+      /// \brief The type of SMT solver used by the path eliminator.
       SMT_Solver_Type f_solver_type;
+
+      /// \brief The flag indicating whether or not induction should be applied.
+      bool f_apply_induction;
+
+      /// \brief Prints the help message.
       void print_help();
+
+      /// \brief Prints a message indicating how to display the help message.
       void print_more_info();
+
+      /// \brief Prints the version of the tool.
       void print_version();
     public:
+      /// \brief Constructor setting all flags to their default values.
       LPE_Form_Check();
+
+      /// \brief Destructor with no particular functionality.
       ~LPE_Form_Check();
+
+      /// \brief Uses the library getopt to determine which command line options are used.
       void get_options(int a_argc, char* a_argv[]);
+
+      /// \brief Checks and indicates whether or not the formulas in the list specified by
+      /// \brief LPE_Form_Check::f_formulas_file_name are tautologies or contradictions.
       void check_formulas();
   };
 
@@ -82,7 +132,12 @@
         "                                  inconsistent paths from BDDs:\n"
         "                                  - 'ario' for the SMT solver Ario\n"
         "                                  - 'cvc-lite' for the SMT solver CVC Lite.\n"
-        "                                  By default, no path elimination is applied.\n",
+#ifdef CVC_LITE_LIB
+        "                                  - 'cvc-lite-fast' for the fast implementation\n"
+        "                                    of the SMT solver CVC Lite.\n"
+#endif
+        "                                  By default, no path elimination is applied.\n"
+        " -o, --induction                  Apply induction on lists.\n",
         f_tool_command
       );
     }
@@ -112,6 +167,7 @@
       f_time_limit = 0;
       f_path_eliminator = false;
       f_solver_type = solver_type_ario;
+      f_apply_induction = false;
     }
 
     // --------------------------------------------------------------------------------------------
@@ -122,8 +178,12 @@
 
     // --------------------------------------------------------------------------------------------
 
+    /// Sets the flags of the class according to the command line options passed.
+    /// \param a_argc is the number of arguments passed on the command line
+    /// \param a_argv is an array of all arguments passed on the command line
+
     void LPE_Form_Check::get_options(int a_argc, char* a_argv[]) {
-      char* v_short_options = "f:cwp:hqvdr:t:z:";
+      char* v_short_options = "f:cwp:hqvdr:t:z:o";
 
       struct option v_long_options[] = {
         {"formulas",         required_argument, 0, 'f'},
@@ -138,6 +198,7 @@
         {"rewrite-strategy", required_argument, 0, 'r'},
         {"time-limit",       required_argument, 0, 't'},
         {"smt-solver",       required_argument, 0, 'z'},
+        {"induction",        no_argument,       0, 'o'},
         {0, 0, 0, 0}
       };
 
@@ -201,10 +262,18 @@
             } else if (strcmp(optarg, "cvc-lite") == 0) {
               f_path_eliminator = true;
               f_solver_type = solver_type_cvc_lite;
+#ifdef CVC_LITE_LIB
+            } else if (strcmp(optarg, "cvc-lite-fast") == 0) {
+              f_path_eliminator = true;
+              f_solver_type = solver_type_cvc_lite_fast;
+#endif
             } else {
               gsErrorMsg("option -z has illegal argument '%s'\n", optarg);
               exit(1);
             }
+            break;
+          case 'o':
+            f_apply_induction = true;
             break;
           default:
             print_more_info();
@@ -232,6 +301,10 @@
 
     // --------------------------------------------------------------------------------------------
 
+    /// Reads the list of formulas specified by LPE_Form_Check::f_formulas_file_name and the LPE
+    /// specified by LPE_Form_Check::f_file_name. The method determines and indicates whether or not the
+    /// formulas in the list are tautologies or contradictions using the data equations of the LPE.
+
     void LPE_Form_Check::check_formulas() {
       ATermList v_formulas = (ATermList) read_ATerm_from_file(f_formulas_file_name, "formulas");
       ATermAppl v_lpe = (ATermAppl) read_ATerm_from_file(f_lpe_file_name, "LPE");
@@ -241,9 +314,8 @@
         gsErrorMsg("The file '%s' does not contain an mCRL2 LPE.\n", f_lpe_file_name);
         exit(1);
       } else {
-        ATermAppl v_data_equations = ATAgetArgument(v_lpe, 3);
         Formula_Checker v_formula_checker(
-          v_data_equations, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_counter_example, f_witness, f_dot_file_name
+          v_lpe, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_witness, f_dot_file_name
         );
 
         v_formula_checker.check_formulas(v_formulas);

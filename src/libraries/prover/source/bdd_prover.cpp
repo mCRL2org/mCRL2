@@ -11,6 +11,7 @@
 #include "libstruct.h"
 #include "time.h"
 #include "stdlib.h"
+#include "induction.h"
 
 // Class BDD_Prover -------------------------------------------------------------------------------
   // Class BDD_Prover - Functions declared private ------------------------------------------------
@@ -128,7 +129,8 @@
         v_small = smallest(f_info->get_argument(a_formula, i));
         if (v_small) {
           if (v_result) {
-            if (f_info->compare_guard(v_small, v_result) == compare_result_smaller) {
+//            if (f_info->compare_guard(v_small, v_result) == compare_result_smaller) {
+            if (f_info->lpo1(v_result, v_small)) {
               v_result = v_small;
             }
           } else {
@@ -148,28 +150,72 @@
 
     // --------------------------------------------------------------------------------------------
 
-    void BDD_Prover::update_answers() {
+    void BDD_Prover::eliminate_paths() {
       int v_new_time_limit;
+
+      v_new_time_limit = f_deadline - time(0);
+      if (v_new_time_limit > 0 || f_time_limit == 0) {
+        f_bdd = f_rewriter->fromRewriteFormat(f_internal_bdd);
+        gsVerboseMsg("Simplifying the BDD:\n");
+        f_bdd_simplifier->set_time_limit(std::max(v_new_time_limit, 0));
+        f_bdd = f_bdd_simplifier->simplify(f_bdd);
+        gsVerboseMsg("Resulting BDD: %P\n", f_bdd);
+      }
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    void BDD_Prover::update_answers() {
+      ATermAppl v_original_formula;
+      ATermAppl v_original_bdd;
 
       if (!f_processed) {
         build_bdd();
-        v_new_time_limit = f_deadline - time(0);
-        if (v_new_time_limit > 0 || f_time_limit == 0) {
-          f_bdd = f_rewriter->fromRewriteFormat(f_internal_bdd);
-          gsVerboseMsg("Simplifying the BDD:\n");
-          f_bdd_simplifier->set_time_limit(std::max(v_new_time_limit, 0));
-          f_bdd = f_bdd_simplifier->simplify(f_bdd);
-          gsVerboseMsg("Resulting BDD: %P\n", f_bdd);
-        }
-        if (f_bdd_info.is_true(f_bdd)) {
-          f_tautology = answer_yes;
-          f_contradiction = answer_no;
-        } else if (f_bdd_info.is_false(f_bdd)) {
-          f_tautology = answer_no;
-          f_contradiction = answer_yes;
+        eliminate_paths();
+        v_original_formula = f_formula;
+        v_original_bdd = f_bdd;
+        if (f_apply_induction && !(f_bdd_info.is_true(f_bdd) || f_bdd_info.is_false(f_bdd))) {
+          f_induction.initialize(v_original_formula);
+          while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd)) {
+            gsVerboseMsg("Applying induction.\n");
+            f_formula = f_induction.apply_induction();
+            build_bdd();
+            eliminate_paths();
+          }
+          if (f_bdd_info.is_true(f_bdd)) {
+            f_tautology = answer_yes;
+            f_contradiction = answer_no;
+          } else {
+            v_original_formula = gsMakeDataExprNot(v_original_formula);
+            f_bdd = v_original_bdd;
+            f_induction.initialize(v_original_formula);
+            while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd)) {
+              gsVerboseMsg("Applying induction on the negated formula.\n");
+              f_formula = f_induction.apply_induction();
+              build_bdd();
+              eliminate_paths();
+            }
+            if (f_bdd_info.is_true(f_bdd)) {
+              f_bdd = gsMakeDataExprFalse();
+              f_tautology = answer_no;
+              f_contradiction = answer_yes;
+            } else {
+              f_bdd = v_original_bdd;
+              f_tautology = answer_undefined;
+              f_contradiction = answer_undefined;
+            }
+          }
         } else {
-          f_tautology = answer_undefined;
-          f_contradiction = answer_undefined;
+          if (f_bdd_info.is_true(f_bdd)) {
+            f_tautology = answer_yes;
+            f_contradiction = answer_no;
+          } else if (f_bdd_info.is_false(f_bdd)) {
+            f_tautology = answer_no;
+            f_contradiction = answer_yes;
+          } else {
+            f_tautology = answer_undefined;
+            f_contradiction = answer_undefined;
+          }
         }
         f_processed = true;
       }
@@ -209,10 +255,14 @@
   // Class BDD_Prover - Functions declared public -------------------------------------------------
 
     BDD_Prover::BDD_Prover(
-      ATermAppl a_equations, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type
+      ATermAppl a_lpe, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, bool a_apply_induction
     ):
-      Prover(a_equations, a_rewrite_strategy, a_time_limit)
+      Prover(ATAgetArgument(a_lpe, 3), a_rewrite_strategy, a_time_limit),
+      f_induction(a_lpe)
     {
+      f_reverse = true;
+      f_full = true;
+      f_apply_induction = a_apply_induction;
       f_info->set_reverse(f_reverse);
       f_info->set_full(f_full);
       gsDebugMsg(
@@ -222,13 +272,12 @@
         bool_to_char_string(f_reverse),
         bool_to_char_string(f_full)
       );
+      f_lpe = a_lpe;
       if (a_path_eliminator) {
         f_bdd_simplifier = new BDD_Path_Eliminator(a_solver_type);
       } else {
         f_bdd_simplifier = new BDD_Simplifier();
       }
-      f_reverse = true;
-      f_full = true;
     }
 
     // --------------------------------------------------------------------------------------------

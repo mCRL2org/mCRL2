@@ -8,6 +8,7 @@ exe lpeinvelm
          /libraries/prover//prover
        : <source>/site-config//mcrl2_revision.h
          <include>.
+#         <toolset>gcc:<define>CVC_LITE_LIB
        ;
 
 install_with_libraries install : lpeinvelm ;

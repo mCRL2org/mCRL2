@@ -1,0 +1,3 @@
+[
+DataAppl(DataAppl(OpId("==",SortArrow(SortId("List@0"),SortArrow(SortId("List@0"),SortId("Bool")))),DataAppl(DataAppl(OpId("++",SortArrow(SortId("List@0"),SortArrow(SortId("List@0"),SortId("List@0")))),DataAppl(OpId("reverse",SortArrow(SortId("List@0"),SortId("List@0"))),DataVarId("y",SortId("List@0")))),DataAppl(OpId("reverse",SortArrow(SortId("List@0"),SortId("List@0"))),DataVarId("x",SortId("List@0"))))),DataAppl(OpId("reverse",SortArrow(SortId("List@0"),SortId("List@0"))),DataAppl(DataAppl(OpId("++",SortArrow(SortId("List@0"),SortArrow(SortId("List@0"),SortId("List@0")))),DataVarId("x",SortId("List@0"))),DataVarId("y",SortId("List@0")))))
+]

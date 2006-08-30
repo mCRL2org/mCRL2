@@ -41,10 +41,10 @@
   // Class Formula_Checker - Functions declared public --------------------------------------------
 
     Formula_Checker::Formula_Checker(
-      ATermAppl a_data_equations, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
-      bool a_counter_example, bool a_witness, char* a_dot_file_name
+      ATermAppl a_lpe, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
+      bool a_apply_induction, bool a_counter_example, bool a_witness, char* a_dot_file_name
     ):
-      f_bdd_prover(a_data_equations, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type)
+      f_bdd_prover(a_lpe, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {
       f_counter_example = a_counter_example;
       f_witness = a_witness;

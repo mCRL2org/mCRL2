@@ -50,6 +50,15 @@
         f_smt_solver = new SMT_Solver_Ario();
       } else if (a_solver_type == solver_type_cvc_lite) {
         f_smt_solver = new SMT_Solver_CVC_Lite();
+      } else if (a_solver_type == solver_type_cvc_lite_fast) {
+#ifdef CVC_LITE_LIB
+        f_smt_solver = new SMT_Solver_CVC_Lite_Fast();
+#else
+        gsErrorMsg("The fast implementation of CVC Lite is not available.\n");
+        exit(1);
+#endif
+      } else {
+        gsErrorMsg("An unknown SMT solver type was passed as argument.\n");
       }
     }
 

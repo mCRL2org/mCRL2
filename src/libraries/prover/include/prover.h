@@ -30,7 +30,7 @@ class Prover {
     time_t f_deadline;
   public:
     Prover(
-      ATermAppl a_equations,
+      ATermAppl a_data_equations,
       RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
       int a_time_limit = 0
     );

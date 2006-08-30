@@ -1,6 +1,6 @@
 % This specification serves as an example of the use of lpeinvelm. It
 % specifies a component called Q that has two process parameters, q1
-% and q2 of type Queue. q1 == q2 holds as an invariant for this
+% and q2 of sort List(D). q1 == q2 holds as an invariant for this
 % specification.
 %
 %
@@ -9,10 +9,10 @@
 %
 % DataAppl(
 %   DataAppl(
-%     OpId("==",SortArrow(SortId("Queue"),SortArrow(SortId("Queue"),SortId("Bool")))),
-%     DataVarId("q1",SortId("Queue"))
+%     OpId("==",SortArrow(SortId("List@0"),SortArrow(SortId("List@0"),SortId("Bool")))),
+%     DataVarId("q1",SortId("List@0"))
 %   ),
-%   DataVarId("q2",SortId("Queue")))
+%   DataVarId("q2",SortId("List@0")))
 % )
 % 
 %
@@ -20,53 +20,23 @@
 % simplify an lpe as follows:
 %
 % mcrl22lpe -n double-queue.mcrl2 double-queue.lpe
-% lpeinvelm -i inv -l double-queue.lpe -o double-queue-elm.lpe
-
+% lpeinvelm -i inv double-queue.lpe double-queue-elm.lpe
 
 
 sort
   D = struct D1 | D2;
 
-sort
-  Queue;
-
-cons
-  empty: Queue;
-  queue: D # Queue -> Queue;
-
-map
-  not_empty: Queue -> Bool;
-  toe: Queue -> D;
-  untoe: Queue -> Queue;
-
-var
-  d, e: D;
-  p, q: Queue;
-
-eqn
-  empty == empty = true;
-  empty == queue(d, q) = false;
-  queue(d, q) == empty = false;
-  p != q = !(p == q);
-  untoe(p) == untoe(q) = p == q;
-  toe(p) == toe(q) = p == q;
-  queue(d, p) == queue(e, q) = (d == e) && (p == q);
-  toe(queue(d, empty)) = d;
-  toe(queue(d, queue(e, q))) = toe(queue(e, q));
-  untoe(queue(d, empty)) = empty;
-  untoe(queue(d, queue(e, q))) = queue(d, untoe(queue(e, q)));
-
 act
   r, s, r', s', c: D;
 
 proc
-  Q(q1: Queue, q2: Queue) = sum d: D. r(d) . Q(queue(d, q1), queue(d, q2)) +
-                            ((q1 != empty) && (q2 != empty)) -> s(toe(q1)) . Q(untoe(q1), untoe(q2)) +
+  Q(q1: List(D), q2: List(D)) = sum d: D. r(d) . Q(d |>  q1, d |> q2) +
+                            ((q1 != []) && (q2 != [])) -> s(head(q1)) . Q(tail(q1), tail(q2)) +
                             (q1 != q2) -> s(D1) . delta;
 
-  Q1 = rename({s -> s'}, Q(empty, empty));
+  Q1 = rename({s -> s'}, Q([], []));
 
-  Q2 = rename({r -> r'}, Q(empty, empty));
+  Q2 = rename({r -> r'}, Q([], []));
 
   Q = hide({c}, allow({s, r, c}, comm({s' | r' -> c}, Q1 || Q2)));
 

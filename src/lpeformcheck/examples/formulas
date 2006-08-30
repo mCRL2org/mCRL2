@@ -99,31 +99,31 @@ SortArrow(SortId("Int"),SortArrow(SortId("Int"),SortId("Bool")))),DataAppl(OpId(
 SortId("Pos"),SortId("Nat"))),DataAppl(DataAppl(OpId("@cDub",SortArrow(SortId(
 "Bool"),SortArrow(SortId("Pos"),SortId("Pos")))),OpId("true",SortId("Bool"))),
 DataAppl(DataAppl(OpId("@cDub",SortArrow(SortId("Bool"),SortArrow(SortId("Pos"),
-SortId("Pos")))),OpId("false",SortId("Bool"))),OpId("@1",SortId("Pos"))))))),
+SortId("Pos")))),OpId("false",SortId("Bool"))),OpId("@c1",SortId("Pos"))))))),
 DataVarId("a",SortId("Int")))),DataAppl(DataAppl(OpId("==",SortArrow(SortId(
 "Int"),SortArrow(SortId("Int"),SortId("Bool")))),DataAppl(OpId("@cNeg",SortArrow
 (SortId("Pos"),SortId("Int"))),DataAppl(DataAppl(OpId("@cDub",SortArrow(SortId(
 "Bool"),SortArrow(SortId("Pos"),SortId("Pos")))),OpId("true",SortId("Bool"))),
 DataAppl(DataAppl(OpId("@cDub",SortArrow(SortId("Bool"),SortArrow(SortId("Pos"),
-SortId("Pos")))),OpId("false",SortId("Bool"))),OpId("@1",SortId("Pos")))))),
+SortId("Pos")))),OpId("false",SortId("Bool"))),OpId("@c1",SortId("Pos")))))),
 DataVarId("b",SortId("Int"))))),DataAppl(DataAppl(OpId("==",SortArrow(SortId(
 "Int"),SortArrow(SortId("Int"),SortId("Bool")))),DataVarId("c",SortId("Int"))),
 DataAppl(DataAppl(OpId("+",SortArrow(SortId("Int"),SortArrow(SortId("Int"),
 SortId("Int")))),DataVarId("b",SortId("Int"))),DataVarId("a",SortId("Int")))))),
 DataAppl(DataAppl(OpId("==",SortArrow(SortId("Int"),SortArrow(SortId("Int"),
 SortId("Bool")))),DataVarId("c",SortId("Int"))),DataAppl(OpId("@cInt",SortArrow(
-SortId("Nat"),SortId("Int"))),OpId("@0",SortId("Nat"))))),
+SortId("Nat"),SortId("Int"))),OpId("@c0",SortId("Nat"))))),
 
 DataAppl(DataAppl(OpId("&&",SortArrow(SortId("Bool"),SortArrow(SortId("Bool"),
 SortId("Bool")))),DataAppl(DataAppl(OpId("==",SortArrow(SortId("Int"),SortArrow(
 SortId("Int"),SortId("Bool")))),DataVarId("a",SortId("Int"))),DataAppl(OpId(
 "@cInt",SortArrow(SortId("Nat"),SortId("Int"))),DataAppl(OpId("@cNat",SortArrow(
-SortId("Pos"),SortId("Nat"))),OpId("@1",SortId("Pos")))))),DataAppl(DataAppl(
+SortId("Pos"),SortId("Nat"))),OpId("@c1",SortId("Pos")))))),DataAppl(DataAppl(
 OpId("==",SortArrow(SortId("Int"),SortArrow(SortId("Int"),SortId("Bool")))),
 DataVarId("a",SortId("Int"))),DataAppl(OpId("@cInt",SortArrow(SortId("Nat"),
 SortId("Int"))),DataAppl(OpId("@cNat",SortArrow(SortId("Pos"),SortId("Nat"))),
 DataAppl(DataAppl(OpId("@cDub",SortArrow(SortId("Bool"),SortArrow(SortId("Pos"),
-SortId("Pos")))),OpId("false",SortId("Bool"))),OpId("@1",SortId("Pos"))))))),
+SortId("Pos")))),OpId("false",SortId("Bool"))),OpId("@c1",SortId("Pos"))))))),
 
 DataAppl(DataAppl(OpId("=>",SortArrow(SortId("Bool"),SortArrow(SortId("Bool"),
 SortId("Bool")))),DataAppl(DataAppl(OpId("==",SortArrow(SortId("Bool"),SortArrow

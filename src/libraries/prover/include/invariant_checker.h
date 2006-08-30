@@ -30,6 +30,7 @@ class Invariant_Checker {
       int a_time_limit = 0,
       bool a_path_eliminator = false,
       SMT_Solver_Type a_solver_type = solver_type_ario,
+      bool a_apply_induction = false,
       bool a_counter_example = false,
       bool a_all_violations = false,
       char* a_dot_file_name = 0

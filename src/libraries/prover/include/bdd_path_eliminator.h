@@ -8,12 +8,14 @@
 #include "bdd_simplifier.h"
 #include "smt_solver_ario.h"
 #include "smt_solver_cvc_lite.h"
+#include "smt_solver_cvc_lite_fast.h"
 #include "bdd_manipulator.h"
 #include "bdd_info.h"
 
 enum SMT_Solver_Type {
   solver_type_ario,
-  solver_type_cvc_lite
+  solver_type_cvc_lite,
+  solver_type_cvc_lite_fast
 };
 
 class BDD_Path_Eliminator: public BDD_Simplifier {

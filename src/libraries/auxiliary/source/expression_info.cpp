@@ -10,6 +10,9 @@
   // Class Expression_Info - Functions declared public --------------------------------------------
 
     Expression_Info::Expression_Info() {
+      f_not = gsMakeOpIdNot();
+      f_equality = gsMakeOpIdNameEq();
+      f_inequality = gsMakeOpIdNameNeq();
       f_greater_than = gsMakeOpIdNameGT();
       f_greater_than_or_equal = gsMakeOpIdNameGTE();
       f_less_than = gsMakeOpIdNameLT();
@@ -38,7 +41,7 @@
 
       if (gsIsDataAppl(a_expression)) {
         v_term = ATAgetArgument(a_expression, 0);
-        return v_term == gsMakeOpIdNot();
+        return v_term == f_not;
       }
       return false;
     }
@@ -54,7 +57,7 @@
           v_term = ATAgetArgument(v_term, 0);
           if (gsIsOpId(v_term)) {
             v_term = ATAgetArgument(v_term, 0);
-            return v_term == gsMakeOpIdNameEq();
+            return v_term == f_equality;
           }
         }
       }
@@ -72,7 +75,7 @@
           v_term = ATAgetArgument(v_term, 0);
           if (gsIsOpId(v_term)) {
             v_term = ATAgetArgument(v_term, 0);
-            return v_term == gsMakeOpIdNameNeq();
+            return v_term == f_inequality;
           }
         }
       }
@@ -432,6 +435,24 @@
 
     // --------------------------------------------------------------------------------------------
 
+    char* Expression_Info::get_name_of_variable(ATermAppl a_expression) {
+      return gsATermAppl2String(ATAgetArgument(a_expression, 0));
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    char* Expression_Info::get_name_of_constant(ATermAppl a_expression) {
+      return gsATermAppl2String(ATAgetArgument(a_expression, 0));
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    char* Expression_Info::get_name_of_operator(ATermAppl a_expression) {
+      return gsATermAppl2String(ATAgetArgument(a_expression, 0));
+    }
+
+    // --------------------------------------------------------------------------------------------
+
     int Expression_Info::get_number_of_arguments(ATermAppl a_expression) {
       int v_result = 0;
 
@@ -449,6 +470,7 @@
       return a_expression;
     }
 
+
     // --------------------------------------------------------------------------------------------
 
     ATermAppl Expression_Info::get_sort_of_operator(ATermAppl a_expression) {
@@ -460,6 +482,12 @@
       }
       a_expression = ATAgetArgument(a_expression, 1);
       return a_expression;
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    ATermAppl Expression_Info::get_sort_of_constant(ATermAppl a_expression) {
+      return ATAgetArgument(a_expression, 1);
     }
 
     // --------------------------------------------------------------------------------------------

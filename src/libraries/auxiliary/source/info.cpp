@@ -35,7 +35,6 @@
       f_full = a_full;
     }
 
-
     // --------------------------------------------------------------------------------------------
 
     Compare_Result ATerm_Info::compare_guard(ATerm a_guard1, ATerm a_guard2) {
@@ -60,7 +59,91 @@
              );
     }
 
+    // --------------------------------------------------------------------------------------------
+
+    bool ATerm_Info::lpo1(ATerm a_term1, ATerm a_term2) {
+      if (is_variable(a_term1) && is_variable(a_term2)) {
+        return compare_address(a_term1, a_term2) == compare_result_bigger;
+      } else if (is_variable(a_term1)) {
+        return false;
+      } else if (is_variable(a_term2)) {
+        return delta1(a_term1, a_term2);
+      } else {
+        return alpha1(a_term1, a_term2, 0) || beta1(a_term1, a_term2) || gamma1(a_term1, a_term2);
+      }
+    }
+
   // Class ATerm_Info - Functions declared protected ----------------------------------------------
+
+    bool ATerm_Info::alpha1(ATerm a_term1, ATerm a_term2, int a_number) {
+      ATerm v_term;
+
+      if (get_number_of_arguments(a_term1) == a_number) {
+        return false;
+      } else {
+        v_term = get_argument(a_term1, a_number);
+        return ( v_term == a_term2) || lpo1(v_term, a_term2) || alpha1(a_term1, a_term2, ++a_number);
+      }
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    bool ATerm_Info::beta1(ATerm a_term1, ATerm a_term2) {
+      ATerm v_operator_1, v_operator_2;
+
+      v_operator_1 = get_operator(a_term1);
+      v_operator_2 = get_operator(a_term2);
+      return (compare_address(v_operator_1, v_operator_2) == compare_result_bigger) && majo1(a_term1, a_term2, 0);
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    bool ATerm_Info::gamma1(ATerm a_term1, ATerm a_term2) {
+      ATerm v_operator_1, v_operator_2;
+
+      v_operator_1 = get_operator(a_term1);
+      v_operator_2 = get_operator(a_term2);
+      return (v_operator_1 == v_operator_2) && lex1(a_term1, a_term2, 0) && majo1(a_term1, a_term2, 0);
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    bool ATerm_Info::delta1(ATerm a_term1, ATerm a_term2) {
+      return gsOccurs(a_term2, a_term1);
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    bool ATerm_Info::majo1(ATerm a_term1, ATerm a_term2, int a_number) {
+      ATerm v_term;
+
+      if (get_number_of_arguments(a_term2) == a_number) {
+        return true;
+      } else {
+        v_term = get_argument(a_term2, a_number);
+        return lpo1(a_term1, v_term) && majo1(a_term1, a_term2, ++a_number);
+      }
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    bool ATerm_Info::lex1(ATerm a_term1, ATerm a_term2, int a_number) {
+      ATerm v_term1, v_term2;
+
+      if (get_number_of_arguments(a_term1) == a_number) {
+        return false;
+      } else {
+        v_term1 = get_argument(a_term1, a_number);
+        v_term2 = get_argument(a_term2, a_number);
+        if (v_term1 == v_term2) {
+          return lex1(a_term1, a_term2, ++a_number);
+        } else {
+          return lpo1(v_term1, v_term2);
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------------------------
 
     int ATerm_Info::get_guard_structure(ATerm a_guard) {
       if (is_variable(a_guard)) {
@@ -138,8 +221,6 @@
   // Class AI_Jitty - Functions declared public ---------------------------------------------------
 
     AI_Jitty::AI_Jitty(Rewriter* a_rewriter): ATerm_Info(a_rewriter) {
-      // pre: true
-      // post: f_true, f_false, f_if_then_else_bool and f_eq are initialized
       f_true = (ATerm) ATgetArgument((ATermAppl) f_rewriter->toRewriteFormat(gsMakeOpIdTrue()), 0);
       f_false = (ATerm) ATgetArgument((ATermAppl) f_rewriter->toRewriteFormat(gsMakeOpIdFalse()), 0);
       f_if_then_else_bool = (ATerm) ATgetArgument((ATermAppl) f_rewriter->toRewriteFormat(gsMakeOpIdIf(gsMakeSortExprBool())), 0);
@@ -154,18 +235,23 @@
 
     // --------------------------------------------------------------------------------------------
 
+    ATerm AI_Jitty::get_operator(ATerm a_term) {
+      return ATgetArgument(a_term, 0);
+    }
+
+    // --------------------------------------------------------------------------------------------
+
     ATerm AI_Jitty::get_argument(ATerm a_term, int a_number) {
-      // pre: get_number_of_arguments(a_term) > a_number
-      // ret: argument with number a_number of a_term
       return ATgetArgument(a_term, a_number + 1);
     }
 
     // --------------------------------------------------------------------------------------------
 
+    /// \param a_term An expression in the internal format of the rewriter with the jitty strategy.
+    /// \return 0, if \c aterm is a constant or a variable.
+    ///         The number of arguments of the main operator, otherwise.
+
     int AI_Jitty::get_number_of_arguments(ATerm a_term) {
-      // pre: true
-      // ret: 0,                             if a_term is true, false or a variable
-      //      number of arguments of a_term, otherwise
       if (!is_true(a_term) && !is_false(a_term) && !is_variable(a_term)) {
         Symbol v_symbol;
 
@@ -179,9 +265,6 @@
     // --------------------------------------------------------------------------------------------
 
     bool AI_Jitty::has_type_bool(ATerm a_term) {
-      // pre: true
-      // ret: true,  if a_term is of type bool
-      //      false, otherwise
       if (gsIsDataVarId((ATermAppl) a_term) || gsIsOpId((ATermAppl) a_term)) {
         ATerm v_term;
 
@@ -290,11 +373,21 @@
 
     // --------------------------------------------------------------------------------------------
 
+    ATerm AI_Inner::get_operator(ATerm a_term) {
+      return ATelementAt((ATermList) a_term, 0);
+    }
+
+    // --------------------------------------------------------------------------------------------
+
     ATerm AI_Inner::get_argument(ATerm a_term, int a_number) {
       return ATelementAt((ATermList) a_term, a_number + 1);
     }
 
     // --------------------------------------------------------------------------------------------
+
+    /// \param a_term An expression in the internal format of the rewriter with the innermost strategy.
+    /// \return 0, if \c aterm is a constant or a variable.
+    ///         The number of arguments of the main operator, otherwise.
 
     int AI_Inner::get_number_of_arguments(ATerm a_term) {
       if (!is_true(a_term) && !is_false(a_term) && !is_variable(a_term) && ATgetType(a_term) == AT_LIST) {
@@ -307,9 +400,6 @@
     // --------------------------------------------------------------------------------------------
 
     bool AI_Inner::has_type_bool(ATerm a_term) {
-      // pre: true
-      // ret: true,  if a_term is of type bool
-      //      false, otherwise
       if (gsIsDataVarId((ATermAppl) a_term) || gsIsOpId((ATermAppl) a_term)) {
         ATerm v_term;
 

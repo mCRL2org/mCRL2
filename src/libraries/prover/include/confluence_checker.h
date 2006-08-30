@@ -35,6 +35,7 @@ class Confluence_Checker {
       int a_time_limit = 0,
       bool a_path_eliminator = false,
       SMT_Solver_Type a_solver_type = solver_type_ario,
+      bool a_apply_induction = false,
       bool a_no_marking = false,
       bool a_check_all = false,
       bool a_counter_example = false,

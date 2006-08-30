@@ -74,7 +74,7 @@ class SMT_LIB_Solver: public SMT_Solver {
     void translate(ATermList a_formula);
   public:
     SMT_LIB_Solver();
-    ~SMT_LIB_Solver();
+    virtual ~SMT_LIB_Solver();
 };
 
 #endif

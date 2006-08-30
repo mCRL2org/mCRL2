@@ -127,9 +127,9 @@
 
     Invariant_Checker::Invariant_Checker(
       ATermAppl a_lpe, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
-      bool a_counter_example, bool a_all_violations, char* a_dot_file_name
+      bool a_apply_induction, bool a_counter_example, bool a_all_violations, char* a_dot_file_name
     ):
-      f_bdd_prover(ATAgetArgument(a_lpe, 3), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type)
+      f_bdd_prover(a_lpe, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {
       f_init = ATAgetArgument(a_lpe, 6);
       f_summands = ATLgetArgument(ATAgetArgument(a_lpe, 5), 2);

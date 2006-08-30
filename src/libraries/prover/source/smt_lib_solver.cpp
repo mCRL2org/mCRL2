@@ -26,7 +26,7 @@ using namespace std;
         while (!ATisEmpty(v_variables)) {
           v_variable = ATAgetFirst(v_variables);
           v_variables = ATgetNext(v_variables);
-          v_variable_string = gsATermAppl2String(ATAgetArgument(v_variable, 0));
+          v_variable_string = f_expression_info.get_name_of_variable(v_variable);
           if (f_sort_info.is_sort_real(f_expression_info.get_sort_of_variable(v_variable))) {
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Real)";
           } else if (f_sort_info.is_sort_int(f_expression_info.get_sort_of_variable(v_variable))) {
@@ -177,7 +177,7 @@ using namespace std;
           v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) v_sort);
           v_sort_string = (char*) malloc((number_of_digits(v_sort_number) + 5) * sizeof(char));
           sprintf(v_sort_string, "sort%d", v_sort_number);
-          v_sort_original_id = gsATermAppl2String(ATAgetArgument(v_sort, 0));
+          v_sort_original_id = f_sort_info.get_sort_id(v_sort);
           f_sorts_notes = f_sorts_notes + "(" + v_sort_string + " = " + v_sort_original_id + ")";
           free(v_sort_string);
           v_sort_string = 0;
@@ -205,7 +205,7 @@ using namespace std;
           v_operator_number = ATindexedSetGetIndex(f_operators, (ATerm) v_operator);
           v_operator_string = (char*) malloc((number_of_digits(v_operator_number) + 3) * sizeof(char));
           sprintf(v_operator_string, "op%d", v_operator_number);
-          v_operator_original_id = gsATermAppl2String(ATAgetArgument(v_operator, 0));
+          v_operator_original_id = f_expression_info.get_name_of_operator(v_operator);
           f_operators_notes = f_operators_notes + "(" + v_operator_string + " = " + v_operator_original_id + ")";
           free(v_operator_string);
           v_operator_string = 0;
@@ -525,7 +525,7 @@ using namespace std;
     void SMT_LIB_Solver::translate_variable(ATermAppl a_clause) {
       char* v_string;
 
-      v_string = gsATermAppl2String(ATAgetArgument(a_clause, 0));
+      v_string = f_expression_info.get_name_of_variable(a_clause);
       f_formula = f_formula + v_string;
 
       ATindexedSetPut(f_variables, (ATerm) a_clause, 0);
@@ -536,7 +536,7 @@ using namespace std;
     void SMT_LIB_Solver::translate_nat_variable(ATermAppl a_clause) {
       char* v_string;
 
-      v_string = gsATermAppl2String(ATAgetArgument(a_clause, 0));
+      v_string = f_expression_info.get_name_of_variable(a_clause);
       f_formula = f_formula + v_string;
 
       ATindexedSetPut(f_variables, (ATerm) a_clause, 0);
@@ -548,7 +548,7 @@ using namespace std;
     void SMT_LIB_Solver::translate_pos_variable(ATermAppl a_clause) {
       char* v_string;
 
-      v_string = gsATermAppl2String(ATAgetArgument(a_clause, 0));
+      v_string = f_expression_info.get_name_of_variable(a_clause);
       f_formula = f_formula + v_string;
 
       ATindexedSetPut(f_variables, (ATerm) a_clause, 0);
@@ -607,11 +607,9 @@ using namespace std;
     // --------------------------------------------------------------------------------------------
 
     void SMT_LIB_Solver::translate_constant(ATermAppl a_clause) {
-      int v_number_of_arguments;
       int v_operator_number;
       ATermAppl v_operator;
       char* v_operator_string;
-      ATermAppl v_clause;
 
       v_operator = f_expression_info.get_operator(a_clause);
       v_operator_number = ATindexedSetPut(f_operators, (ATerm) v_operator, 0);
@@ -621,12 +619,6 @@ using namespace std;
       f_formula = f_formula + v_operator_string;
       free(v_operator_string);
       v_operator_string = 0;
-      v_number_of_arguments = f_expression_info.get_number_of_arguments(a_clause);
-      for (int i = 0; i < v_number_of_arguments; i++) {
-        v_clause = f_expression_info.get_argument(a_clause, i);
-        f_formula = f_formula + " ";
-        translate_clause(v_clause, false);
-      }
     }
 
     // --------------------------------------------------------------------------------------------
@@ -727,7 +719,7 @@ using namespace std;
         while (!ATisEmpty(v_variables)) {
           v_variable = ATAgetFirst(v_variables);
           v_variables = ATgetNext(v_variables);
-          v_variable_string = gsATermAppl2String(ATAgetArgument(v_variable, 0));
+          v_variable_string = f_expression_info.get_name_of_variable(v_variable);
           f_formula = f_formula + " (>= " + v_variable_string + " 0)";
         }
       }
@@ -745,7 +737,7 @@ using namespace std;
         while (!ATisEmpty(v_variables)) {
           v_variable = ATAgetFirst(v_variables);
           v_variables = ATgetNext(v_variables);
-          v_variable_string = gsATermAppl2String(ATAgetArgument(v_variable, 0));
+          v_variable_string = f_expression_info.get_name_of_variable(v_variable);
           f_formula = f_formula + " (>= " + v_variable_string + " 1)";
         }
       }

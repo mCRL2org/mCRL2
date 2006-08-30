@@ -16,13 +16,20 @@ lib prover
          smt_lib_solver.cpp
          smt_solver_ario.cpp
          smt_solver_cvc_lite.cpp
+#         smt_solver_cvc_lite_fast.cpp
          confluence_checker.cpp
          disjointness_checker.cpp
          formula_checker.cpp
          invariant_checker.cpp
          invariant_eliminator.cpp
-         /libraries/auxiliary//auxiliary
-       : <dependency>/libraries/pstream//pstream
+         induction.cpp
+       : <dependency>/libraries/auxiliary//auxiliary
+         <dependency>/libraries/pstream//pstream
+#         <dependency>/libraries/cvc_lite//cvclite
+#         <toolset>gcc:<define>HAVE___GNU_CXX__EXT_HASH_MAP
+#         <toolset>gcc:<define>HAVE___GNU_CXX__EXT_HASH_SET
+#         <toolset>gcc:<define>CVC_LITE_LIB
        :
        : <library>/libraries/auxiliary//auxiliary
+#         <library>/libraries/cvc_lite//cvclite
        ;
