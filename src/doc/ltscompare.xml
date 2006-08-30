@@ -1,0 +1,183 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
+<!ENTITY ltscompare "<function>ltsconvert</function>">
+<!ENTITY option "<parameter>OPTION</parameter>">
+<!ENTITY infile1 "<parameter>INFILE1</parameter>">
+<!ENTITY infile2 "<parameter>INFILE2</parameter>">
+<!ENTITY format "<parameter>FORMAT</parameter>">
+<!ENTITY actnames "<parameter>ACTNAMES</parameter>">
+<!ENTITY opt_h "<option>-h</option>">
+<!ENTITY opt_q "<option>-q</option>">
+<!ENTITY opt_v "<option>-v</option>">
+<!ENTITY opt_i "<option>-i</option>">
+<!ENTITY opt_j "<option>-j</option>">
+<!ENTITY opt_f "<option>-f</option>">
+<!ENTITY opt_s "<option>-n</option>">
+<!ENTITY opt_b "<option>-n</option>">
+<!ENTITY opt_help "<option>--help</option>">
+<!ENTITY opt_version "<option>--version</option>">
+<!ENTITY opt_quiet "<option>--quiet</option>">
+<!ENTITY opt_verbose "<option>--verbose</option>">
+<!ENTITY opt_in1 "<option>--in1</option>">
+<!ENTITY opt_in2 "<option>--in2</option>">
+<!ENTITY opt_formats "<option>--formats</option>">
+<!ENTITY opt_strong "<option>--strong</option>">
+<!ENTITY opt_branching "<option>--branching</option>">
+<!ENTITY opt_tau "<option>--tau</option>">
+<!ENTITY stdin "<constant>stdin</constant>">
+<!ENTITY fsm "<constant>fsm</constant>">
+<!ENTITY dot "<constant>dot</constant>">
+]>
+
+<refentry id="ltscompare">
+
+<refmeta>
+  <refentrytitle>ltscompare</refentrytitle>
+  <manvolnum>1</manvolnum>
+</refmeta>
+
+<refnamediv>
+  <refname>ltscompare</refname>
+  <refpurpose>compare LTSs</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>&ltscompare;</command>
+    <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
+    <arg choice="opt">&infile1;</arg>
+    <arg choice="plain">&infile2;</arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  <para>
+    The ltscompare tool determines whether or not the labelled transition
+    systems (LTSs) in &infile1; and &infile2; are the same modulo some
+    equivalence. If &infile1; is not supplied, &stdin; is used.
+  </para>
+
+  <para>
+    The  input formats are determined by the content of &infile1; and
+    &infile2;. The options &opt_in1; and &opt_in2; can be used to force the
+    format of &infile1; and &infile2;, respectively.  A list of supported
+    formats can be requested by using the option &opt_formats;.
+  </para>
+</refsect1>
+
+<refsect1>
+<title>Options</title>
+<para>
+  Mandatory arguments to long options are mandatory for short options too.
+  <variablelist>
+  <varlistentry>
+    <term>&opt_h;</term>
+    <term>&opt_help;</term>
+    <listitem>
+      <para>
+        display help message and terminate
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_version;</term>
+    <listitem>
+      <para>
+        display version information and terminate
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_q;</term>
+    <term>&opt_quiet;</term>
+    <listitem>
+      <para>
+        do not display warning messages
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_v;</term>
+    <term>&opt_verbose;</term>
+    <listitem>
+      <para>
+        display concise intermediate messages
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_f;</term>
+    <term>&opt_formats;</term>
+    <listitem>
+      <para>
+       list accepted formats
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_i;</term>
+    <term>&opt_in1;=&format;</term>
+    <listitem>
+      <para>use &format; format as the format for &infile1; (or &stdin; if
+      &infile1; is not supplied)
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_j;</term>
+    <term>&opt_in2;=&format;</term>
+    <listitem>
+      <para>use &format; format as the format for &infile2;</para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_s;</term>
+    <term>&opt_strong;</term>
+    <listitem>
+      <para>use strong bisimulation as equivalence
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_b;</term>
+    <term>&opt_branching;</term>
+    <listitem>
+      <para>use branching bisimulation as equivalence
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_tau;=&actnames;</term>
+    <listitem>
+      <para>consider actions with a name in the comma separated list &actnames;
+      to be a internal (tau) actions in addition to those defined as such by
+      the input. This means that before comparing the LTSs all specified
+      actions are first replaced by tau actions.
+    </para>
+    </listitem>
+  </varlistentry>
+  </variablelist>
+
+</para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+  Written by Muck van Weerdenburg. Please send all complaints, comments and bug
+  reports to <email>bug@mcrl2.org</email>.
+</para>
+</refsect1>
+
+</refentry>

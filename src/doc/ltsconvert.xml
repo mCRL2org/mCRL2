@@ -7,6 +7,7 @@
 <!ENTITY outfile "<parameter>OUTFILE</parameter>">
 <!ENTITY format "<parameter>FORMAT</parameter>">
 <!ENTITY file "<parameter>FILE</parameter>">
+<!ENTITY actnames "<parameter>ACTNAMES</parameter>">
 <!ENTITY opt_h "<option>-h</option>">
 <!ENTITY opt_q "<option>-q</option>">
 <!ENTITY opt_v "<option>-v</option>">
@@ -15,6 +16,9 @@
 <!ENTITY opt_f "<option>-f</option>">
 <!ENTITY opt_l "<option>-l</option>">
 <!ENTITY opt_n "<option>-n</option>">
+<!ENTITY opt_s "<option>-n</option>">
+<!ENTITY opt_b "<option>-n</option>">
+<!ENTITY opt_a "<option>-n</option>">
 <!ENTITY opt_help "<option>--help</option>">
 <!ENTITY opt_version "<option>--version</option>">
 <!ENTITY opt_quiet "<option>--quiet</option>">
@@ -24,6 +28,11 @@
 <!ENTITY opt_formats "<option>--formats</option>">
 <!ENTITY opt_lpe "<option>--lpe</option>">
 <!ENTITY opt_no_state "<option>--no-state</option>">
+<!ENTITY opt_none "<option>--none</option>">
+<!ENTITY opt_strong "<option>--strong</option>">
+<!ENTITY opt_branching "<option>--branching</option>">
+<!ENTITY opt_add "<option>--add</option>">
+<!ENTITY opt_tau "<option>--tau</option>">
 <!ENTITY stdin "<constant>stdin</constant>">
 <!ENTITY stdout "<constant>stdout</constant>">
 <!ENTITY fsm "<constant>fsm</constant>">
@@ -56,8 +65,10 @@
   <title>Description</title>
   <para>
     The ltsconvert tool converts the labelled transition system (LTS) in
-    &infile; to &outfile; in the requested format. If &outfile; is not
-    supplied, &stdout; is used. If &infile; is not supplied, &stdin; is used.
+    &infile; to &outfile; in the requested format after applying the selected
+    minimisation method to &infile; (default is no minimisation). If &outfile;
+    is not supplied, &stdout; is used. If &infile; is not supplied, &stdin; is
+    used.
   </para>
 
   <para>
@@ -66,7 +77,14 @@
     and &opt_out; can be used to force the input and output formats.  A list of
     supported formats can be requested by using the option &opt_formats;.
   </para>
-  
+ 
+  <para>
+    In order to convert a non-mCRL2 LTS to a mCRL2 LTS one needs to supply the
+    original LPE with &opt_lpe;. This is because actions need to be stored in
+    the internal mCRL2 format in mCRL2 and in non-mCRL2 LTSs are represented by
+    strings (lacking essential information such as data types). 
+  </para>
+
   <para>
     Note that tools that use the &fsm; format may depend on state information and
     parameter names. The former requires that the state information is in the
@@ -151,7 +169,8 @@
     <listitem>
       <para>use &file; as the LPE from which the input LTS was
         generated; this is needed to store the correct parameter
-        names of states when saving in &fsm; format
+	names of states when saving in &fsm; format and to convert non-mCRL2
+	LTSs to a mCRL2 LTS
       </para>
     </listitem>
   </varlistentry>
@@ -165,6 +184,63 @@
     </listitem>
   </varlistentry>
   </variablelist>
+
+  The following options are relevant for LTS minimisation only.
+
+  <variablelist>
+  <varlistentry>
+    <term>&opt_none;</term>
+    <listitem>
+      <para>do not minimise the LTS (this is the default)
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_s;</term>
+    <term>&opt_strong;</term>
+    <listitem>
+      <para>minimise using strong bisimulation
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_b;</term>
+    <term>&opt_branching;</term>
+    <listitem>
+      <para>minimise using branching bisimulation
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_a;</term>
+    <term>&opt_add;</term>
+    <listitem>
+      <para>do not minimise but save a copy of the original LTS extended with a
+      state parameter indicating the bisimulation class a state belongs to.
+      This means that every state is extended with a number in such a way that
+      (only) equivalent states have the same number. (This option only works
+      for mCRL2 LTSs)
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_tau;=&actnames;</term>
+    <listitem>
+      <para>consider actions with a name in the comma separated list &actnames;
+      to be a internal (tau) actions in addition to those defined as such by
+      the input. This means that before minimisation all specified actions are
+      first replaced by tau actions. In the case &opt_add; is used, these tau
+      actions will only used internally to compute the equivalence classes; the
+      output will have the original actions.
+      </para>
+    </listitem>
+  </varlistentry>
+  </variablelist>
+
 </para>
 </refsect1>
 
