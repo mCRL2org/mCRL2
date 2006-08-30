@@ -1,4 +1,4 @@
-project ltsmin
+project toolset/ltsmin
        : source-location .
        : build-dir $(BUILD_TOP)
        : requirements
@@ -13,6 +13,7 @@ exe ltsmin
          /libraries/svc//svc
        : <source>/site-config//mcrl2_revision.h
          <include>.
+         <status>deprecated
        ;
 
 install_with_libraries install : ltsmin ;

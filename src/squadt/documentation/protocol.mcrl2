@@ -79,29 +79,29 @@ proc
   % l: for whether or not a layout was delivered previously for a tool in r
   % s: for whether or not a tool has been sent the start signal for an operation
   C(n:Nat,r:Set(Nat),c:Set(Nat),l:Set(Nat),s:Set(Nat)) =
-    (tool_start(n).C(n + 1,r + {n},c,l,s)) +                                       % starts a new tool instance
+    (tool_start(n).C(n + 1,r + {n},c,l,s)) +                                    % starts a new tool instance
     (sum a:Nat.(a < n) -> (
-      receive(tmsg(a, instance_id)).C(n,r,c,l,s) +                             % received instance identifier
-      receive(tmsg(a, request_controller_capabilities)).                       % request for capabilities
+      receive(tmsg(a, instance_id)).C(n,r,c,l,s) +                              % received instance identifier
+      receive(tmsg(a, request_controller_capabilities)).                        % request for capabilities
         send(cmsg(a, controller_capabilities)).C(n,r,c,l,s) +
       receive(tmsg(a, configuration)).
-        ((a in c) -> C(n,r,c + {a},l,s) <> error) +                            % last configuration was accepted
-      receive(tmsg(a, report)).C(n,r,c,l,s) +                                  % report delivered
-      receive(tmsg(a, display_layout)).C(n,r,c,l + {a},s) +                    % display layout delivered
+        ((a in c) -> C(n,r,c + {a},l,s) <> error.C(n,r,c,l,s)) +                % last configuration was accepted
+      receive(tmsg(a, report)).C(n,r,c,l,s) +                                   % report delivered
+      receive(tmsg(a, display_layout)).C(n,r,c,l + {a},s) +                     % display layout delivered
       receive(tmsg(a, display_data)).
-        ((a in l) -> C(n,r,c,l,s) <> error) +                                  % display data delivered
+        ((a in l) -> C(n,r,c,l,s) <> error.C(n,r,c,l,s)) +                      % display data delivered
       receive(tmsg(a, signal_done)).
-        ((a in s) -> C(n,r,c - {a},l,s - {a}) <> error) +                      % last operation completed
+        ((a in s) -> C(n,r,c - {a},l,s - {a}) <> error.C(n,r,c,l,s)) +          % last operation completed
       receive(tmsg(a, signal_termination)).
         C(n,r - {a},c - {a},l - {a},s - {a}) +
       send(cmsg(a, request_tool_capabilities)).
-        (receive(tmsg(a,tool_capabilities))) +
+        (receive(tmsg(a,tool_capabilities)).C(n,r,c,l,s)) +
       send(cmsg(a, offer_configuration)).C(n,r,c,l,s) +
       (a in l) ->
         send(cmsg(a, interaction_data)).C(n,r,c,l,s) +
       (a in c) ->
         send(cmsg(a, signal_start)).C(n,r,c,l,s + {a}) +
-      send(cmsg(a, request_termination))));
+      send(cmsg(a, request_termination))).C(n,r,c,l,s));
 
   % Execution component (starts tools)
   E = (sum n:Nat. start_tool(n).(E || T(n,false,false)));
