@@ -1,0 +1,17 @@
+project ltscompare
+       : source-location .
+       : build-dir $(BUILD_TOP)
+       : requirements
+          <include>$(BOOST)
+       ;
+
+exe ltscompare
+       : ltscompare.cpp
+         /libraries/mcrl2_basic//mcrl2_basic
+         /libraries/lts//lts
+         /libraries/svc//svc
+       : <source>/site-config//mcrl2_revision.h
+         <include>.
+       ;
+
+install_with_libraries install : ltscompare ;

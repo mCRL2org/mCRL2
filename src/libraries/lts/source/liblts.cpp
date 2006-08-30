@@ -1488,9 +1488,9 @@ lts_type lts::parse_format(char const* s) {
   return lts_none;
 }
 
-char const* lts::type_strings[]      = { "unknown", "AUT", "mCRL", "mCRL2", "SVC", "BCG" };
-
-char const* lts::extension_strings[] = { "", "aut", "svc", "svc", "svc", "bcg" };
+char const* lts::type_strings[]      = { "unknown", "mCRL2", "AUT", "mCRL", "SVC", "BCG" };
+                                                             
+char const* lts::extension_strings[] = { "",        "svc",   "aut", "svc",  "svc", "bcg" };
 
 char const* lts::string_for_type(const lts_type type) {
   return (type_strings[type]);

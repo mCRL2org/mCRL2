@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <string>
 #include "libprint_c.h"
+#include "libprint.h"
 #include "libstruct.h"
 #include "detail/bsim.h"
 
@@ -297,14 +298,14 @@ static ATerm apply_hiding(ATerm act)
   return act;
 }
 
-int get_label_index(lts &l, unsigned int idx, int tau_idx)
+static int get_label_index(lts &l, unsigned int idx, int tau_idx, int offset = 0)
 {
   ATerm label_term = l.label_value(idx);
   if ( ATisAppl(label_term) && is_timed_pair((ATermAppl) label_term) )
   {
     label_term = ATgetArgument((ATermAppl) label_term, 0);
   }
-  int label = idx;
+  int label = idx+offset;
   if ( l.is_tau(idx) )
   {
     label = tau_idx;
@@ -372,16 +373,35 @@ static void Recode(int lts_label, int label) {
 
         newlabel[lts_label] = label;
      } 
-   
+
+static void pp_lts(lts &l)
+{
+  for (unsigned int i=0; i<l.num_labels(); i++)
+  {
+    l.set_label(i,(ATerm) ATmakeAppl0(ATmakeAFun(PrintPart_CXX(l.label_value(i),ppDefault).c_str(),0,ATtrue)),l.is_tau(i));
+  }
+}
+
 void ReadCompareData(lts &l1, int *init1, lts &l2, int *init2) 
    {
+     if ( l1.get_type() != l2.get_type() )
+     {
+       if ( l1.get_type() == lts_mcrl2 )
+       {
+         pp_lts(l1);
+       } else if ( l2.get_type() == lts_mcrl2 )
+       {
+         pp_lts(l2);
+       }
+     }
+
    recode_num_lab2 = l2.num_labels();
 
    second_lts_states_offset = l1.num_states();
    int offset = second_lts_states_offset;
    
    nstate = l1.num_states()+l1.num_states(); 
-   nlabel = l1.num_labels()+l2.num_labels(); 
+   nlabel = l1.num_labels()+l2.num_labels()+1; 
    AllocData();
    label_tau = nlabel-1;
    if ( l1.get_type() == lts_mcrl2 )
@@ -408,7 +428,7 @@ void ReadCompareData(lts &l1, int *init1, lts &l2, int *init2)
    /* Second file */
    for (transition_iterator i(&l2); i.more(); ++i)
       {
-      int label = get_label_index(l2,i.label(),label_tau);
+      int label = get_label_index(l2,i.label(),label_tau,l1.num_labels());
       Recode(i.label(),label); 
       UpdateLabArray(i.to() + offset, label);
       UpdateTable(lab_src_tgt[label], i.from() +offset, i.to() + offset);
