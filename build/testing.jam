@@ -21,9 +21,16 @@ rule run_tool_on_examples ( tool prefix suffix ? : options * : path extensions +
 
   for file in [ examples_by_extension $(path) : $(extensions) ] {
     local target = [ MATCH "^(.+)[.][^.]+$" : [ path.basename $(file) ] ] ;
+    local output ;
+
+    if ($(suffix)) {
+      output = [ path.native $(BUILD_TOP)/$(target).$(suffix) ] ;
+    }
 
     run $(tool)
-           : $(options) $(file) [ path.native $(BUILD_TOP)/$(target).$(suffix) ]
+           : $(options)
+             $(file)
+             $(output)
            : # input files
            : # requirements
            : $(prefix)-$(target)
