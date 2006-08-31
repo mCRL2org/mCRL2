@@ -1436,9 +1436,6 @@ void set_basic_configuration_display(sip::tool::communicator& tc, bool make_lts)
   if ( rb_expl_strat_breadth->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::integer::standard, (long int) es_breadth);
   if ( rb_expl_strat_depth->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::integer::standard, (long int) es_depth);
   if ( rb_expl_strat_random->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::integer::standard, (long int) es_random);
-  if ( rb_expl_strat_breadth->is_selected() ) printf("breadth selected\n");
-  if ( rb_expl_strat_depth->is_selected() ) printf("depth selected\n");
-  if ( rb_expl_strat_random->is_selected() ) printf("random selected\n");
 
   c.add_option(option_detect_deadlock).append_argument(sip::datatype::boolean::standard, cb_deadlock->get_status());
   c.add_option(option_detect_actions).append_argument(sip::datatype::string::standard, cb_actions->get_status()?tf_actions->get_text():"");
