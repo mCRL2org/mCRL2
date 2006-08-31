@@ -34,10 +34,13 @@ var  i,j,k: Nat; d: D; q: Buf;
 eqn  emptyBuf = lambda j:Nat.empty;
      insert(d,i,q) = lambda j:Nat.if(i==j,data(d),q(j)); 
      remove(i,q) = lambda j:Nat.if(i==j,empty,q(j));
-     release(i,j,q) = 
-        if((i mod 2*n)==(j mod 2*n),
-           q,
-           release((i+1) mod 2*n,j,remove(i,q)));
+%     release(i,j,q) = 
+%        if((i mod 2*n)==(j mod 2*n),
+%           q,
+%           release((i+1) mod 2*n,j,remove(i,q)));
+     i mod 2*n==j mod 2*n -> release(i,j,q) = q;
+     i mod 2*n!=j mod 2*n -> 
+          release(i,j,q) = release((i+1) mod 2*n,j,remove(i,q));
      k<n -> nextempty_rec(i,q,k) = 
                if(q(i)==empty,i,nextempty_rec((i+1) mod n,q,k+1));
      k==n -> nextempty_rec(i,q,k)=i;
