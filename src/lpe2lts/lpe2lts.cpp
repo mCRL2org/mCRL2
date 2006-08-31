@@ -28,7 +28,7 @@
 
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <sip/tool.h>
+#include <squadt_utility.h>
 #endif
 
 #include "mcrl2_revision.h"
@@ -420,15 +420,15 @@ static void check_action_trace(ATerm OldState, ATermAppl Transition, ATerm NewSt
         {
           if ( saved_ok )
           {
-            gsfprintf(stderr,"detect: action '%P' found and saved to '%s_act_%lu_%P.trc'.\n",trace_actions[j],basefilename,tracecnt,trace_actions[j]);
+            gsVerboseMsg("detect: action '%P' found and saved to '%s_act_%lu_%P.trc'.\n",trace_actions[j],basefilename,tracecnt,trace_actions[j]);
           } else {
-            gsfprintf(stderr,"detect: action '%P' found, but could not be saved to '%s_act_%lu_%P.trc'.\n",trace_actions[j],basefilename,tracecnt,trace_actions[j]);
+            gsVerboseMsg("detect: action '%P' found, but could not be saved to '%s_act_%lu_%P.trc'.\n",trace_actions[j],basefilename,tracecnt,trace_actions[j]);
           }
           fflush(stderr);
         }
         tracecnt++;
       } else {
-        gsfprintf(stderr,"detect: action '%P' found.\n",trace_actions[j]);
+        gsVerboseMsg("detect: action '%P' found.\n",trace_actions[j]);
         fflush(stderr);
       }
     }
@@ -450,15 +450,15 @@ static void check_deadlock_trace(ATerm state)
       {
         if ( saved_ok )
         {
-          fprintf(stderr,"deadlock-detect: deadlock found and saved to '%s_dlk_%lu.trc'.\n",basefilename,tracecnt);
+          gsVerboseMsg("deadlock-detect: deadlock found and saved to '%s_dlk_%lu.trc'.\n",basefilename,tracecnt);
         } else {
-          fprintf(stderr,"deadlock-detect: deadlock found, but could not be saved to '%s_dlk_%lu.trc'.\n",basefilename,tracecnt);
+          gsVerboseMsg("deadlock-detect: deadlock found, but could not be saved to '%s_dlk_%lu.trc'.\n",basefilename,tracecnt);
         }
         fflush(stderr);
       }
       tracecnt++;
     } else  {
-      fprintf(stderr,"deadlock-detect: deadlock found.\n");
+      gsVerboseMsg("deadlock-detect: deadlock found.\n");
       fflush(stderr);
     }
   }
@@ -648,7 +648,6 @@ static void create_status_display(sip::tool::communicator &tc)
 
 static void update_status_display(unsigned long level, unsigned long long explored, unsigned long long seen, unsigned long long num_found_same, unsigned long long transitions)
 {
-  fprintf(stderr,"sending new status...\n");
   char buf[21];
   sprintf(buf,"%lu",level);
   lb_level->set_text(buf,&tc);
@@ -658,9 +657,17 @@ static void update_status_display(unsigned long level, unsigned long long explor
   lb_seen->set_text(buf,&tc);
   sprintf(buf,"%llu",transitions);
   lb_transitions->set_text(buf,&tc);
+  if ( seen > 1000000ULL )
+  {
+    explored = explored/(seen/1000000);
+    seen = 1000000ULL;
+  }
+  if ( explored > seen )
+  {
+    seen = explored;
+  }
   progbar->set_maximum(seen,&tc);
   progbar->set_value(explored,&tc);
-  fprintf(stderr,"done\n");
 }
 #endif
 
@@ -994,7 +1001,7 @@ static bool generate_lts()
 #endif
         if ( gsVerbose && ((current_state%1000) == 0) )
         {
-          fprintf(stderr,
+          gsVerboseMsg(
             "monitor: currently explored %llu transition%s and encountered %llu unique state%s.\n",
             trans,
             (trans==1)?"":"s",
@@ -1055,7 +1062,7 @@ static bool generate_lts()
 #endif
         if ( gsVerbose && ((current_state%1000) == 0) )
         {
-          fprintf(stderr,
+          gsVerboseMsg(
             "monitor: currently at level %lu with %llu state%s and %llu transition%s explored and %llu state%s seen.\n",
             level,
             current_state-statesskipped,
@@ -1079,7 +1086,7 @@ static bool generate_lts()
 #endif
           if ( gsVerbose )
           {
-            fprintf(stderr,
+            gsVerboseMsg(
               "monitor: level %lu done. (%llu state%s, %llu transition%s)\n",
               level,current_state-prevcurrent,
               ((current_state-prevcurrent)==1)?"":"s",
@@ -1188,7 +1195,7 @@ static bool generate_lts()
 #endif
           if ( gsVerbose && ((current_state%1000) == 0) )
           {
-            fprintf(stderr,
+            gsVerboseMsg(
               "monitor: currently explored %llu state%s and %llu transition%s.\n",
               current_state,
               (current_state==1)?"":"s",
@@ -1266,13 +1273,13 @@ void set_basic_configuration_display(sip::tool::communicator& tc, bool make_lts)
 
   //status_display = sip::layout::tool_display::sptr(new layout::tool_display);
   //layout::tool_display::sptr display(status_display);
-  layout::tool_display::sptr display(new layout::tool_display);
+  tool_display::sptr display(new tool_display);
 
   /* Create and add the top layout manager */
-  layout::manager::aptr layout_manager = layout::horizontal_box::create();
+  manager::aptr layout_manager = horizontal_box::create();
 
   /* First column */
-  layout::vertical_box* column = new layout::vertical_box();
+  vertical_box* column = new vertical_box();
 
   
   char buf[21];
@@ -1296,68 +1303,100 @@ void set_basic_configuration_display(sip::tool::communicator& tc, bool make_lts)
   radio_button* rb_expl_strat_random = new radio_button("random",rb_expl_strat_breadth,false);
   
   checkbox* cb_deadlock = new checkbox("detect deadlocks", false);
-  label* lb_actions = new label("detect actions:");
+  checkbox* cb_actions = new checkbox("detect actions:",false);
   text_field* tf_actions = new text_field("", sip::datatype::string::standard);
-  checkbox* cb_trace = new checkbox("save action/deadlock traces", false);
-  label* lb_max_traces = new label("at most:");
+  checkbox* cb_trace = new checkbox("save action/deadlock traces, but at most:", false);
   sprintf(buf,"%lu",DEFAULT_MAX_TRACES);
   text_field* tf_max_traces = new text_field(buf, sip::datatype::integer::standard);
   
-  checkbox* cb_confluence = new checkbox("confluence reduction", false);
-  text_field* tf_conf_tau = new text_field("tau", sip::datatype::string::standard);
+  checkbox* cb_confluence = new checkbox("confluence reduction with confluent tau:", false);
+  text_field* tf_conf_tau = new text_field("ctau", sip::datatype::string::standard);
   
   
-  label* lb_max_states = new label("maximum number of states:");
-  sprintf(buf,"%llu",DEFAULT_MAX_STATES);
+  checkbox* cb_max_states = new checkbox("maximum number of states:",false);
+  sprintf(buf,"%llu",1000ULL);
   text_field* tf_max_states = new text_field(buf, sip::datatype::integer::standard);
 
-  checkbox* cb_bithashing = new checkbox("bit hashing", false);
-  label* lb_bithashsize = new label("states:");
+  checkbox* cb_bithashing = new checkbox("bit hashing; number of states:", false);
   sprintf(buf,"%llu",DEFAULT_BITHASHSIZE);
   text_field* tf_bithashsize = new text_field(buf, sip::datatype::integer::standard);
 
-  label* lb_init_tsize = new label("initial table size:");
+  label* lb_init_tsize = new label("initial hash tables size:");
   sprintf(buf,"%lu",DEFAULT_INIT_TSIZE);
   text_field* tf_init_tsize = new text_field(buf, sip::datatype::integer::standard);
 
+  horizontal_box* cbsbox = new horizontal_box();
+  vertical_box* cbslbox = new vertical_box();
   if ( make_lts )
-    column->add(cb_aut, layout::left);
-  column->add(cb_out_info, layout::left);
+  cbslbox->add(cb_aut, layout::left);
+  cbslbox->add(cb_out_info, layout::left);
+  cbslbox->add(cb_usedummies, layout::left);
+  cbsbox->add(cbslbox, top);
+  vertical_box* cbsrbox = new vertical_box();
+  cbsrbox->add(cb_state_format_tree, layout::left);
+  cbsrbox->add(cb_removeunused, layout::left);
+  cbsbox->add(cbsrbox, top);
+  column->add(cbsbox, center);
 
-  column->add(cb_usedummies, layout::left);
-  column->add(cb_state_format_tree, layout::left);
-  column->add(cb_removeunused, layout::left);
+  column->add(new label(" "),layout::left);
 
-  column->add(lb_rewr_strat, layout::left);
-  column->add(rb_rewr_strat_inner, layout::left);
-  column->add(rb_rewr_strat_jitty, layout::left);
-  column->add(rb_rewr_strat_innerc, layout::left);
-  column->add(rb_rewr_strat_jittyc, layout::left);
+  horizontal_box* rewrbox = new horizontal_box();
+  rewrbox->add(lb_rewr_strat, top);
+  rewrbox->add(rb_rewr_strat_inner, top);
+  rewrbox->add(rb_rewr_strat_jitty, top);
+  rewrbox->add(rb_rewr_strat_innerc, top);
+  rewrbox->add(rb_rewr_strat_jittyc, top);
+  column->add(rewrbox,layout::left);
 
-  column->add(lb_expl_strat, layout::left);
-  column->add(rb_expl_strat_breadth, layout::left);
-  column->add(rb_expl_strat_depth, layout::left);
-  column->add(rb_expl_strat_random, layout::left);
+  column->add(new label(" "),layout::left);
+
+  horizontal_box* explbox = new horizontal_box();
+  explbox->add(lb_expl_strat, top);
+  explbox->add(new label("  "),top);
+  explbox->add(rb_expl_strat_breadth, middle);
+  explbox->add(rb_expl_strat_depth, middle);
+  explbox->add(rb_expl_strat_random, middle);
+  column->add(explbox,layout::left);
+
+  column->add(new label(" "),layout::left);
 
   column->add(cb_deadlock, layout::left);
-  column->add(lb_actions, layout::left);
-  column->add(tf_actions, layout::left);
-  column->add(cb_trace, layout::left);
-  column->add(lb_max_traces, layout::left);
-  column->add(tf_max_traces, layout::left);
+  horizontal_box* actionsbox = new horizontal_box();
+  actionsbox->add(cb_actions, top);
+  actionsbox->add(tf_actions, top);
+  column->add(actionsbox, layout::left);
+  horizontal_box* maxtracesbox = new horizontal_box();
+  maxtracesbox->add(cb_trace,      top);
+  maxtracesbox->add(tf_max_traces, top);
+  column->add(maxtracesbox,layout::left);
 
-  column->add(cb_confluence, layout::left);
-  column->add(tf_conf_tau, layout::left);
+  column->add(new label(" "),layout::left);
 
-  column->add(lb_max_states, layout::left);
-  column->add(tf_max_states, layout::left);
+  horizontal_box* confbox = new horizontal_box();
+  confbox->add(cb_confluence, middle);
+  confbox->add(tf_conf_tau,   middle);
+  column->add(confbox, layout::left);
 
-  column->add(cb_bithashing, layout::left);
-  column->add(lb_bithashsize, layout::left);
-  column->add(tf_bithashsize, layout::left);
+  column->add(new label(" "),layout::left);
 
-  column->add(lb_init_tsize, layout::left);
-  column->add(tf_init_tsize, layout::left);
+  horizontal_box* maxstatesbox = new horizontal_box();
+  maxstatesbox->add(cb_max_states, middle);
+  maxstatesbox->add(tf_max_states, middle);
+  column->add(maxstatesbox, layout::left);
+
+  column->add(new label(" "),layout::left);
+
+  horizontal_box* bithashbox = new horizontal_box();
+  bithashbox->add(cb_bithashing,  middle);
+  bithashbox->add(tf_bithashsize, middle);
+  column->add(bithashbox, layout::left);
+  
+  column->add(new label(" "),layout::left);
+
+  horizontal_box* tsizebox = new horizontal_box();
+  tsizebox->add(lb_init_tsize, bottom);
+  tsizebox->add(tf_init_tsize, bottom);
+  column->add(tsizebox, layout::left);
 
   button* okay_button = new button("Ok");
 
@@ -1402,14 +1441,14 @@ void set_basic_configuration_display(sip::tool::communicator& tc, bool make_lts)
   if ( rb_expl_strat_random->is_selected() ) printf("random selected\n");
 
   c.add_option(option_detect_deadlock).append_argument(sip::datatype::boolean::standard, cb_deadlock->get_status());
-  c.add_option(option_detect_actions).append_argument(sip::datatype::string::standard, tf_actions->get_text());
+  c.add_option(option_detect_actions).append_argument(sip::datatype::string::standard, cb_actions->get_status()?tf_actions->get_text():"");
   c.add_option(option_trace).append_argument(sip::datatype::boolean::standard, cb_trace->get_status());
   c.add_option(option_max_traces).append_argument(sip::datatype::string::standard, tf_max_traces->get_text());
   
   c.add_option(option_confluence_reduction).append_argument(sip::datatype::boolean::standard, cb_confluence->get_status());
   c.add_option(option_confluent_tau).append_argument(sip::datatype::string::standard, tf_conf_tau->get_text());
   
-  c.add_option(option_max_states).append_argument(sip::datatype::string::standard, tf_max_states->get_text());
+  c.add_option(option_max_states).append_argument(sip::datatype::string::standard, cb_max_states->get_status()?tf_max_states->get_text():"");
   
   c.add_option(option_bithashing).append_argument(sip::datatype::boolean::standard, cb_bithashing->get_status());
   c.add_option(option_bithashsize).append_argument(sip::datatype::string::standard, tf_bithashsize->get_text());
@@ -1509,6 +1548,9 @@ int main(int argc, char **argv)
     bool valid = false;
     bool make_lts = false;
 
+    /* Initialise squadt utility pseudo-library */
+    squadt_utility::initialise(tc);
+
     /* Static configuration cycle */
     while (!valid) {
       /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
@@ -1574,11 +1616,11 @@ int main(int argc, char **argv)
     expl_strat = (exploration_strategy) boost::any_cast <long int> (*(c.get_option(option_expl_strat)->get_value_iterator()));
     
     detect_deadlock = boost::any_cast <bool> (*(c.get_option(option_detect_deadlock)->get_value_iterator()));
-    string s = boost::any_cast <string> (*(c.get_option(option_detect_actions)->get_value_iterator()));
-    if ( s != "" )
+    string actions_str = boost::any_cast <string> (*(c.get_option(option_detect_actions)->get_value_iterator()));
+    if ( actions_str != "" )
     {
       detect_action = true;
-      trace_actions = parse_action_list(s.c_str(),&num_trace_actions);
+      trace_actions = parse_action_list(actions_str.c_str(),&num_trace_actions);
     }
     trace = boost::any_cast <bool> (*(c.get_option(option_trace)->get_value_iterator()));
     max_traces = strtoul((boost::any_cast <string> (*(c.get_option(option_max_traces)->get_value_iterator()))).c_str(),NULL,0);
@@ -1588,8 +1630,13 @@ int main(int argc, char **argv)
       priority_action = strdup((boost::any_cast <string> (*(c.get_option(option_confluent_tau)->get_value_iterator()))).c_str());
     }
     
-    max_states = boost::lexical_cast < unsigned long long > ((
-        boost::any_cast <string> (*(c.get_option(option_max_states)->get_value_iterator()))));
+    string max_states_str(boost::any_cast <string> (*(c.get_option(option_max_states)->get_value_iterator())));
+    if ( max_states_str != "" )
+    {
+      max_states = boost::lexical_cast < unsigned long long > (max_states_str);
+    } else {
+      max_states = DEFAULT_MAX_STATES;
+    }
     
     bithashing = boost::any_cast <bool> (*(c.get_option(option_bithashing)->get_value_iterator()));
     bithashsize = boost::lexical_cast < unsigned long long > (
@@ -1898,7 +1945,7 @@ int main(int argc, char **argv)
 #endif
     if ( expl_strat == es_random )
     {
-      fprintf(stderr,
+      gsVerboseMsg(
         "done with random walk of %llu transition%s (visited %llu unique state%s).\n",
         trans,
         (trans==1)?"":"s",
@@ -1907,7 +1954,7 @@ int main(int argc, char **argv)
       );
     } else if ( expl_strat == es_breadth )
     {
-      fprintf(stderr,
+      gsVerboseMsg(
         "done with state space generation (%lu level%s, %llu state%s and %llu transition%s).\n",
         level-1,
         (level==2)?"":"s",
@@ -1918,7 +1965,7 @@ int main(int argc, char **argv)
       );
     } else if ( expl_strat == es_depth )
     {
-      fprintf(stderr,
+      gsVerboseMsg(
         "done with state space generation (%llu state%s and %llu transition%s).\n",
         num_states,
         (num_states==1)?"":"s",
