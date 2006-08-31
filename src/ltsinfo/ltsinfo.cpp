@@ -313,7 +313,7 @@ int main(int argc, char **argv)
              
               c = boost::format("Input read from `%s' (in %s format)");
 
-              top->add(new label(boost::str(c % lts::string_for_type(t) % boost::filesystem::path(input_object->get_location()).leaf())), margins(5,0,5,0));
+              top->add(new label(boost::str(c % boost::filesystem::path(input_object->get_location()).leaf() % lts::string_for_type(t))), margins(5,0,5,0));
               top->add(columns);
 
               display->set_top_manager(top);
