@@ -397,6 +397,10 @@ void GraphFrame::on_btn_label_text( wxCommandEvent& /* event */) {
 void GraphFrame::Init(wxString LTSfile) {
 
   	//leftPanel->sz = leftPanel->GetSize();
+        // Set the title of the frame to ltsgraph - LTSfile
+        wxString title = wxT("ltsgraph - ");
+        title.append(LTSfile);
+        SetTitle(title);
 
   	string st_LTSfile = string(LTSfile.fn_str());
 
