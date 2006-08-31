@@ -20,10 +20,13 @@ enum SMT_Solver_Type {
 
 class BDD_Path_Eliminator: public BDD_Simplifier {
   private:
+    ATermList create_condition(ATermList a_path, ATermAppl a_guard);
     ATermAppl aux_simplify(ATermAppl a_bdd, ATermList a_path);
+    bool variables_overlap(ATermAppl a_expression_1, ATermAppl a_expression_2);
     SMT_Solver* f_smt_solver;
     BDD_Info f_bdd_info;
     BDD_Manipulator f_bdd_manipulator;
+    Expression_Info f_expression_info;
   public:
     BDD_Path_Eliminator(SMT_Solver_Type a_solver_type);
     virtual ATermAppl simplify(ATermAppl a_bdd);
