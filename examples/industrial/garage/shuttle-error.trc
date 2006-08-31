@@ -1,0 +1,8 @@
+occur(add_car)
+exec(move_lift(rotate))
+exec(move_lift(basement))
+exec(move_belts([b_r1lift, b_r1b], col_inc, full))
+exec(move_lift(street))
+exec(move_belts([b_r1b], col_inc, full))
+exec(move_belts([b_r1b, b_r1b_sh], col_inc, full))
+exec(move_shuttles([r1b, r2b], lowered, row_inc))

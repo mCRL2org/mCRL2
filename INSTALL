@@ -27,20 +27,21 @@ The required packages enable the following tools:
 + lpeconstelm: remove constant process parameters from an LPE
 + lpeparelm:   remove unused process parameters from an LPE
 + lpe2lts:     generate a labelled transition system (LTS) from an LPE
-+ ltspp:       pretty print an LTS      
-+ ltsmin:      minimise an LTS using bisimulation reduction
++ ltsinfo:     print basic information of an LTS
++ ltsconvert:  convert an LTS, possibly using minimisation
++ ltscompare:  compare two LTS's
 + tracepp:     pretty print a trace
 + tbf2lpe:     convert an mCRL LPE to an mCRL2 LPE
-+ svc2fsm:     convert an LTS in SVC format to FSM format
 + lpe2torx:    provide TorX with an explorer interface using an LPE
 
 The recommended packages libwxgtk2.6-dev [1] and libxml2-dev [2] enable the
 following tools:
 + pnml2mcrl2:  convert classic Petri nets in the PNML format to mCRL2 [2]
 + xsim:        graphical simulator for LPEs [1]
++ ltsgraph:    visualise an LTS in 2D using spring model techniques [1]
 + ltsview:     visualise an LTS in FSM format in 3D using clustering techniques
                [1]
-+ squadt:      systems quality analysis and design tool [1,2]
++ squadt:      systems quality analysis and design toolset [1,2]
 
 Any of the default icon location packages ensures that xsim doesn't generate
 warnings on missing icons.

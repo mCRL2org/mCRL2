@@ -129,7 +129,7 @@ if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
 }
 else {
   # General examples
-  install_examples_by_extension general $(TOP)/examples : mcrl2 pnml fsm ;
+  install_examples_by_extension general $(TOP)/examples : txt mcrl2 pnml fsm trc ;
 
   # Aterm header files for compiling rewriter
   install_headers aterm /libraries/aterm//headers ;
