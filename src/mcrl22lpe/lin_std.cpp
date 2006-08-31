@@ -433,13 +433,17 @@ static int existsort(ATermAppl sortterm)
   return 0;
 }
 
+#ifndef NDEBUG
+/* this function is only used in an assert */
+
 static int existsorts(ATermList sorts)
-{ for( ; (!ATisEmpty(sorts)) ; sorts=ATgetNext(sorts))
-  { if (!existsort(ATAgetFirst(sorts)))
-    return 0;
-  }
-  return 1;
-}
+   { for( ; (!ATisEmpty(sorts)) ; sorts=ATgetNext(sorts))
+     { if (!existsort(ATAgetFirst(sorts)))
+       return 0;
+     }
+     return 1;
+   }
+#endif
 
 static void insertsort(ATermAppl sortterm, specificationbasictype *spec)
 { 
