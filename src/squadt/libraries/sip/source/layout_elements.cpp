@@ -250,7 +250,6 @@ namespace sip {
        *
        * \pre reader should point to a radio-button element
        * \post reader points to after the associated end tag of the box
-       * \todo connect to associated radio buttons
        **/
       void radio_button::read_structure(read_context& r) {
         element::identifier connected_to = 0;
@@ -261,15 +260,22 @@ namespace sip {
         first    = r.reader.get_attribute("first");
         selected = r.reader.get_attribute("selected");
 
-        connection = static_cast < radio_button* > (r.element_for_id(connected_to));
-
-        if (connection != 0) {
-          for (radio_button* i = connection; i != this; i = i->connection) {
-            i->connection = static_cast < radio_button* > (r.element_for_id(reinterpret_cast < element::identifier > (i->connection)));
+        if (connection == 0) {
+          connection = static_cast < radio_button* > (r.element_for_id(connected_to));
+         
+          if (connection != 0) {
+            for (radio_button* i = connection; i != this; i = i->connection) {
+              i->connection = static_cast < radio_button* > (r.element_for_id(reinterpret_cast < element::identifier > (i->connection)));
+            }
+          }
+          else {
+            connection = reinterpret_cast < radio_button* > (connected_to);
           }
         }
-        else {
-          connection = reinterpret_cast < radio_button* > (connected_to);
+         
+        if (selected) {
+          /* Make sure all related radio buttons are not unselected */
+          set_selected(true);
         }
 
         r.reader.next_element();

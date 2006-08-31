@@ -93,7 +93,7 @@ namespace squadt {
   void project_manager::write(std::ostream& s) const {
     /* Write header */
     s << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-      << "<project xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
+      << "<squadt-project xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
       << " xsi:noNamespaceSchemaLocation=\"project.xsd\" version=\"1.0\" count=\""
       << count << "\">\n";
 
@@ -105,7 +105,7 @@ namespace squadt {
       p->write(s);
     }
  
-    s << "</project>\n";
+    s << "</squadt-project>\n";
   }
 
   /**
@@ -164,6 +164,10 @@ namespace squadt {
    * @param[in] r an xml2pp text reader that has been constructed with a project file
    **/
   void project_manager::read(xml2pp::text_reader& r) {
+
+    if (!r.is_element("squadt-project")) {
+      throw (exception::exception(exception::failed_loading_object, "SQuADT project", "expected squadt-project element"));
+    }
 
     r.get_attribute(&count, "count");
 

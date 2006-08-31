@@ -52,7 +52,7 @@
   <xs:attribute name="uptodate" type="xs:boolean" use="optional"/>
  </xs:complexType>
  <!-- Root element of the project -->
- <xs:element name="project">
+ <xs:element name="squadt-project">
   <xs:complexType>
    <xs:sequence>
     <xs:element name="description" type="xs:token" minOccurs="0"/>

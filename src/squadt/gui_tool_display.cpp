@@ -707,7 +707,7 @@ namespace squadt {
         if (new_layout.get() != 0) {
           content = static_cast < tool_display_mediator::wrapper* > (new_layout.get())->release_sizer();
 
-          GetSizer()->Insert(1, content, 1, wxALL|wxALIGN_CENTER, 2);
+          GetSizer()->Insert(1, content, 1, wxALL|wxALIGN_LEFT, 2);
 
           content->RecalcSizes();
           content->Layout();

@@ -24,4 +24,5 @@ lib lts
        :
        :
        : <library>/libraries/svc//svc
+         <library>/libraries/parser//parser
        ;

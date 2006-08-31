@@ -204,14 +204,18 @@ namespace sip {
     using namespace std;
     using namespace boost;
 
-    assert(r || find_if(options.begin(), options.end(), bind(equal_to < option::identifier >(),
-                    bind(&option::get_id,
-                            bind(&option::sptr::get,
-                                    bind(&option_list::value_type::first, _1))),id)) == options.end());
+    assert(r || !option_exists(id));
 
-    option::sptr o(new option(id));
+    option::sptr o;
+    
+    if (option_exists(id)) {
+      o = get_option(id);
+    }
+    else {
+      o.reset(new option(id));
 
-    options[o] = constrain_optional;
+      options[o] = constrain_optional;
+    }
 
     return (*o);
   }

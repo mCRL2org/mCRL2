@@ -26,10 +26,18 @@ namespace squadt {
        * @param[in] p should be a valid path that identifies a project store
        **/
       bool project::is_project_directory(wxString p) {
-        wxString f(settings_manager::path_concatenate(std::string(p.fn_str()),
-                                settings_manager::project_definition_base_name).c_str(), wxConvLocal);
+        bool r = true;
 
-        return (wxFileName::FileExists(f));
+        try {
+          project_manager::ptr l = project_manager::read(std::string(p.fn_str()));
+
+          r = l.get() != 0;
+
+        } catch (...) {
+          r = false;
+        }
+
+        return (r);
       }
 
       /**
