@@ -3,22 +3,26 @@ const wxColour border_colour_selected = wxT("BLUE");
 
 BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
   EVT_MENU(wxID_OPEN, GraphFrame::OnOpen)
-	EVT_MENU(ID_EXPORT_PS, GraphFrame::ExportPostScript)
-	EVT_MENU(ID_EXPORT_LATEX, GraphFrame::ExportLatex)
-        EVT_MENU(ID_EXPORT_SVG, GraphFrame::export_svg)
-	EVT_MENU(ID_BACKUP_CREATE, GraphFrame::CreateBackup)
+  EVT_MENU(ID_EXPORT_PS, GraphFrame::ExportPostScript)
+  EVT_MENU(ID_EXPORT_LATEX, GraphFrame::ExportLatex)
+  EVT_MENU(ID_EXPORT_SVG, GraphFrame::export_svg)
+  EVT_MENU(ID_BACKUP_CREATE, GraphFrame::CreateBackup)
   EVT_MENU(wxID_EXIT, GraphFrame::OnQuit)
   EVT_MENU(ID_OPTIMIZE, GraphFrame::OnOptimize)
   EVT_MENU(ID_STOP_OPTIMIZE, GraphFrame::OnStopOptimize)
-	EVT_CLOSE(GraphFrame::OnClose)
-	EVT_CHECKBOX(ID_CHECK_NODE, GraphFrame::OnCheckNode)
-	EVT_CHECKBOX(ID_CHECK_EDGE, GraphFrame::OnCheckEdge)
-        EVT_CHECKBOX(ID_CHECK_CURVES, GraphFrame::on_check_curves)
-        EVT_SPINCTRL(ID_SPIN_RADIUS, GraphFrame::on_spin_radius)
-	EVT_BUTTON(ID_BUTTON_OPTI, GraphFrame::OnBtnOpti)
-	EVT_BUTTON(ID_BUTTON_COLOUR, GraphFrame::on_btn_pick_colour)
-        EVT_BUTTON(ID_BUTTON_LABEL_COLOUR, GraphFrame::on_btn_label_colour)
-        EVT_BUTTON(ID_BUTTON_LABEL_TEXT, GraphFrame::on_btn_label_text)
+
+  EVT_CLOSE(GraphFrame::OnClose)
+
+  EVT_CHECKBOX(ID_CHECK_NODE, GraphFrame::OnCheckNode)
+  EVT_CHECKBOX(ID_CHECK_EDGE, GraphFrame::OnCheckEdge)
+  EVT_CHECKBOX(ID_CHECK_CURVES, GraphFrame::on_check_curves)
+
+  EVT_SPINCTRL(ID_SPIN_RADIUS, GraphFrame::on_spin_radius)
+  
+  EVT_BUTTON(ID_BUTTON_OPTI, GraphFrame::OnBtnOpti)
+  EVT_BUTTON(ID_BUTTON_COLOUR, GraphFrame::on_btn_pick_colour)
+  EVT_BUTTON(ID_BUTTON_LABEL_COLOUR, GraphFrame::on_btn_label_colour)
+  EVT_BUTTON(ID_BUTTON_LABEL_TEXT, GraphFrame::on_btn_label_text)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(ViewPort, wxPanel)
@@ -52,6 +56,7 @@ GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& 
   StopOpti = true;
   StoppedOpti = true;
   curve_edges = false;
+  steps_taken = 0;
 
 
   // values below are reset later when the right panel is setuped
@@ -127,12 +132,16 @@ void GraphFrame::BuildLayout() {
   spinEdgeStiffness = new wxSpinCtrlFloat(rightPanel, wxID_ANY, 0.0, 15.0, 0.1, 1.0,wxDefaultPosition,spinSize);
   spinNaturalLength = new wxSpinCtrlFloat(rightPanel, wxID_ANY, 2.0, 900.0, 1.0, 20.0,wxDefaultPosition,spinSize);
 
+  slider_speedup = new wxSlider(rightPanel, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+  
   middleRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("State repulsion") ), 0, lflags, 4 );
   middleRightSizer->Add(spinNodeStrength, 0, rflags, 3 );
   middleRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("Transition attracting force") ), 0, lflags, 4 );
   middleRightSizer->Add(spinEdgeStiffness, 0, rflags, 3 );
   middleRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("Natural transition length") ), 0, lflags, 4 );
   middleRightSizer->Add(spinNaturalLength, 0, rflags, 3 );
+  middleRightSizer->Add (new wxStaticText( rightPanel, wxID_ANY, wxT("Speedup") ), 0, lflags, 4);
+  middleRightSizer->Add(slider_speedup, 0, rflags, 3);
 
   algoSettingsSizer->Add(middleRightSizer, 1, wxEXPAND | wxALL, 0 );
   rightSizer->Add(algoSettingsSizer, 0, wxEXPAND | wxALL, 0 );
@@ -205,7 +214,7 @@ void GraphFrame::CreateMenu() {
   exportLatexItem = exports->Append( ID_EXPORT_LATEX, wxT("Export to &Latex\tCTRL-l"), wxT("") );
   export_svg_item = exports->Append( ID_EXPORT_SVG, wxT("Export to &SVG \tCTRL-v"), wxT("") );
 
-  backupCreate    = file->Append( ID_BACKUP_CREATE, wxT("&Create a backup\tCTRL-c"), wxT("") );
+  backupCreate    = file->Append( ID_BACKUP_CREATE, wxT("&Store layout\tCTRL-s"), wxT("") );
   
   quitItem        = file->Append( wxID_EXIT, wxT("&Quit\tCTRL-q"), wxT("") );
   menu->Append( file, wxT("&File") );
@@ -512,11 +521,13 @@ bool GraphFrame::OptimizeDrawing(double precision) {
    * function should return wether the required precision was achieved. which
    * it doesn't if it stops before calculation.
    */
+  int skip_steps = 0;
   if ( !StopOpti) {
     EdgeStiffness = spinEdgeStiffness->GetValue();
     NodeStrength  = spinNodeStrength->GetValue();
     NaturalLength = spinNaturalLength->GetValue();
     CircleRadius  = spinNodeRadius->GetValue();
+    skip_steps = slider_speedup->GetValue();
   }
   else {
     return false;
@@ -689,8 +700,13 @@ bool GraphFrame::OptimizeDrawing(double precision) {
   
   // compensate for the number of nodes
   achieved_precision=achieved_precision / vectNode.size();
+  if (skip_steps == 0 || steps_taken == 0) {
+    Refresh();
+  }
 
-  Refresh();
+  if (skip_steps != 0) {
+    steps_taken = (steps_taken + 1) % skip_steps;
+  }
 
   return achieved_precision<precision;
 }
@@ -719,27 +735,38 @@ void GraphFrame::ExportPostScript( wxCommandEvent& /* event */ ) {
   string str(inputFileName);
   str.append(".ps");
   wxString wx_str(str.c_str(), wxConvLocal);
-  wxPrintData pd;
-  pd.SetFilename(wx_str);
-  pd.SetPrintMode(wxPRINT_MODE_FILE);
-  wxPostScriptDC myDC(pd);
-  myDC.StartDoc(wx_str);
+  
+  wxString caption = wxT("Export PostScript file as...");
+  wxString wildcard = wxT("PostScript files (*.ps)");
+  wxString default_dir = wxEmptyString;
+  wxString default_file_name = wx_str;
 
-  //fix a bug (the size status text disappeared)
-  wxSize size = wxSize(leftPanel->Get_Width(), leftPanel->Get_Height());
-  FillStatusBar(GetInfoWinSize(size),0);
+  wxFileDialog export_ps_dialog(this, caption, default_dir, default_file_name, wildcard, wxSAVE);
 
-  //Call Edge and Node OnPaint() method (Edge 1st)
-  for (size_t n = 0; n < vectEdge.size(); n++) {
-    vectEdge[n]->on_paint(&myDC);
-  }
+  if (export_ps_dialog.ShowModal() == wxID_OK) {
+    wxString file_name = export_ps_dialog.GetPath();
+    wxPrintData pd;
+    pd.SetFilename(file_name);
+    pd.SetPrintMode(wxPRINT_MODE_FILE);
+    wxPostScriptDC myDC(pd);
+    myDC.StartDoc(wx_str);
+
+    //fix a bug (the size status text disappeared)
+    wxSize size = wxSize(leftPanel->Get_Width(), leftPanel->Get_Height());
+    FillStatusBar(GetInfoWinSize(size),0);
+
+    //Call Edge and Node OnPaint() method (Edge 1st)
+    for (size_t n = 0; n < vectEdge.size(); n++) {
+      vectEdge[n]->on_paint(&myDC);
+    }
       
-  for (size_t n = 0; n < vectNode.size(); n++) {
-    vectNode[n]->OnPaint(&myDC);
-  }
+    for (size_t n = 0; n < vectNode.size(); n++) {
+      vectNode[n]->OnPaint(&myDC);
+    }
 
-  myDC.EndDoc();
-  wxMessageBox(wxT("Export finished"),wxT("Information"),wxOK| wxICON_INFORMATION);
+    myDC.EndDoc();
+    wxMessageBox(wxT("Export finished"),wxT("Information"),wxOK| wxICON_INFORMATION);
+  }
 
 }
 
@@ -768,17 +795,29 @@ void GraphFrame::ExportLatex( wxCommandEvent& /* event */ ) {
 
 			vectEdgeLatex.push_back(StructEdgeLatex);
 	}
-        string export_file_name = inputFileName+ ".tex";
- 	ExportToLatex * ltx = new ExportToLatex((char*)export_file_name.c_str(), vectNodeLatex,vectEdgeLatex,leftPanel->Get_Height());
- 	if (ltx->Generate()) {
-		wxMessageBox(wxT("Export successful"),wxT("Information"),wxOK| wxICON_INFORMATION);
-	}
-	else {
-		wxMessageBox(wxT("Export unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR);
-	}
 
-  delete ltx;
+       wxString caption = wxT("Export latex file as...");
+       wxString wildcard = wxT("TeX documents (*.tex)");
+       wxString default_dir = wxEmptyString;
+       wxString default_filename((inputFileName + ".tex").c_str(), wxConvLocal);
 
+       wxFileDialog export_ltx(this, caption, default_dir, default_filename, wildcard, wxSAVE);
+
+       wxString export_file_name = wxEmptyString;
+
+       if (export_ltx.ShowModal() == wxID_OK) {
+         export_file_name = export_ltx.GetPath();  
+        
+         ExportToLatex * ltx = new ExportToLatex(export_file_name.c_str(), vectNodeLatex,vectEdgeLatex,leftPanel->Get_Height());
+ 	 if (ltx->Generate()) {
+	   wxMessageBox(wxT("Export successful"),wxT("Information"),wxOK| wxICON_INFORMATION);
+       }
+       else {
+   	 wxMessageBox(wxT("Export unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR);
+       }
+
+    delete ltx;
+  }
 }
 
 void GraphFrame::export_svg(wxCommandEvent& event) {
@@ -834,47 +873,72 @@ void GraphFrame::export_svg(wxCommandEvent& event) {
 
     vect_edge_svg.push_back(struct_edge_svg);
   }
-    
-  // Create the exporter object and generate the svg file
-  string export_file_name = inputFileName + ".svg";
-  export_to_svg * svg = new export_to_svg((char*)export_file_name.c_str(), vect_node_svg, vect_edge_svg, leftPanel->Get_Height(), leftPanel->Get_Width());
+  
+  // Present a dialog to the user so they can pick a store location
+  wxString caption = wxT("Export SVG file as...");
+  wxString wildcard = wxT("SVG files (*.svg)");
+  wxString default_dir = wxEmptyString;
+  wxString default_file_name(inputFileName.c_str(), wxConvLocal);
 
-  if (svg->generate()) {
-    wxMessageBox(wxT("Export succesful"), wxT("Information"), wxOK | wxICON_INFORMATION);
+  default_file_name.Append(wxT(".svg"));
+
+  wxFileDialog export_dialog(this, caption, default_dir, default_file_name, wildcard, wxSAVE);
+
+  if (export_dialog.ShowModal() == wxID_OK) {
+    // Create the exporter object and generate the svg file
+    wxString export_file_name = export_dialog.GetPath();
+    export_to_svg * svg = new export_to_svg(export_file_name, vect_node_svg, vect_edge_svg, leftPanel->Get_Height(), leftPanel->Get_Width());
+
+    if (svg->generate()) {
+      wxMessageBox(wxT("Export succesful"), wxT("Information"), wxOK | wxICON_INFORMATION);
+    }
+    else {
+      wxMessageBox(wxT("Export unsuccesful"), wxT("Error"), wxOK | wxICON_ERROR);
+    }
+    delete svg;
   }
-  else {
-    wxMessageBox(wxT("Export unsuccesful"), wxT("Error"), wxOK | wxICON_ERROR);
-  }
-  delete svg;
 }
 
 void GraphFrame::CreateBackup(wxCommandEvent& event) {
 
-	LtsgraphBackup bckp(leftPanel->GetSize());
+  LtsgraphBackup bckp(leftPanel->GetSize());
+  bckp.SetLayout(vectNode, vectEdge);
+  bckp.SetInformation(initialStateLabel->GetLabel(), 
+    numberOfStatesLabel->GetLabel(), 
+    numberOfTransitionsLabel->GetLabel(), 
+    numberOfLabelsLabel->GetLabel()  );
 
-	bckp.SetLayout(vectNode, vectEdge);
-	bckp.SetInformation(initialStateLabel->GetLabel(), 
-											numberOfStatesLabel->GetLabel(), 
-											numberOfTransitionsLabel->GetLabel(), 
-											numberOfLabelsLabel->GetLabel()
-											);
-	bckp.SetAlgoSettings(spinEdgeStiffness->GetValue(), spinNodeStrength->GetValue(), spinNaturalLength->GetValue());
-	bckp.SetOtherSettings(spinNodeRadius->GetValue(), ckNodeLabels->IsChecked(), ckEdgeLabels->IsChecked());
+  bckp.SetAlgoSettings(spinEdgeStiffness->GetValue(), spinNodeStrength->GetValue(), spinNaturalLength->GetValue());
+  bckp.SetOtherSettings(spinNodeRadius->GetValue(), ckNodeLabels->IsChecked(), ckEdgeLabels->IsChecked());
 
-	if (bckp.Backup(inputFileName)) {
-		wxMessageBox(wxT("Backup successful"),wxT("Information"),wxOK| wxICON_INFORMATION);
-	}
-	else {
-		wxMessageBox(wxT("Backup unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR);
-	}
-		
+  // Create a file dialog to show to the user
+  wxString caption = wxT("Save layout as...");
+  wxString wildcard = wxT("LTSgraph layout data (*.ltsgraph)");
+  wxString default_dir = wxEmptyString;
+  wxString default_file_name(inputFileName.c_str(), wxConvLocal);
+  default_file_name.append(wxT(".ltsgraph"));
+
+  wxFileDialog bckup_dialog(this, caption, default_dir, default_file_name, wildcard, wxSAVE);
+  
+  if (bckup_dialog.ShowModal() == wxID_OK) {
+    wxString backup_filename = bckup_dialog.GetPath();
+    // Get last part of the filename (backup expects a local file path
+    
+    if (bckp.Backup(backup_filename)) {
+      wxMessageBox(wxT("Save successful"),wxT("Information"),wxOK| wxICON_INFORMATION);
+    }
+    else {
+      wxMessageBox(wxT("Save unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR);
+    }
+  }
 				
 }
 
 void GraphFrame::RestoreBackup() {
 
 	LtsgraphBackup bckp(leftPanel->GetSize());
-	if (bckp.Restore(inputFileName)) {
+        wxString input_string(inputFileName.c_str(), wxConvLocal);
+	if (bckp.Restore(input_string)) {
 
 		FillStatusBar(wxT(""),2);		
 

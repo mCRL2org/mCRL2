@@ -38,20 +38,18 @@ void LtsgraphBackup::SetOtherSettings(int _StateRadius, bool _StateLabel, bool _
 
 }
 
-bool LtsgraphBackup::Backup(string Bfilename) {
+bool LtsgraphBackup::Backup(wxString Bfilename) {
 
-	Bfilename.append(".ltsgraph");
-	wxString wx_str(Bfilename.c_str(), wxConvLocal);
-	wxTextFile BckpFile(wx_str);
+	wxTextFile BckpFile(Bfilename);
 
 	if (BckpFile.Exists()) {
-		if (!BckpFile.Open(wx_str))
+		if (!BckpFile.Open(Bfilename))
 			return false;
 		else
 			BckpFile.Clear();
 	}
 	else {
-		if (!BckpFile.Create(wx_str))
+		if (!BckpFile.Create(Bfilename))
 			return false;
 	}
 		
@@ -110,9 +108,9 @@ bool LtsgraphBackup::Backup(string Bfilename) {
 	return true;
 }
 
-bool LtsgraphBackup::Restore(string Rfilename) {
+bool LtsgraphBackup::Restore(wxString Rfilename) {
 	
-	Rfilename.append(".ltsgraph");
+	Rfilename.Append(wxT(".ltsgraph"));
 	wxString wx_str(Rfilename.c_str(), wxConvLocal);
 	wxTextFile RtrFile(wx_str);
 	if (RtrFile.Exists()) {

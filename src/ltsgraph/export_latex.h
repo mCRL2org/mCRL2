@@ -1,8 +1,9 @@
 #ifndef ltx_h
 #define ltx_h
 
-#include <string>
+#include <wx/string.h>
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -22,7 +23,7 @@ typedef struct {
 class ExportToLatex
 {
 public:
-	ExportToLatex(const char * _filename, vector<nodeLatex> _node, vector<edgeLatex> _edge, int _height);
+	ExportToLatex(wxString _filename, vector<nodeLatex> _node, vector<edgeLatex> _edge, int _height);
 	bool Generate();
 	
 
@@ -31,7 +32,7 @@ private:
 	string EscSpecChar(string);//To escape special characters
 	string str_replace(string to_replace, string replace_by, string replace_in);
 
-	const char * filename;
+	wxString filename;
 	string LatexCode;
 
 	vector<nodeLatex> node;

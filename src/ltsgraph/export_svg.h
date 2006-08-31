@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-
+#include <wx/string.h>
 using namespace std;
 
 typedef struct {
@@ -33,12 +33,12 @@ typedef struct {
 
 class export_to_svg {
   public:
-    export_to_svg(const char* _filename, vector<node_svg> _nodes, 
+    export_to_svg(wxString _filename, vector<node_svg> _nodes, 
                 vector<edge_svg> _edges, double _height, double _width);
     bool generate();
 
   private:
-    const char * filename;
+    wxString filename;
     string svg_code;
 
     vector<node_svg> nodes;

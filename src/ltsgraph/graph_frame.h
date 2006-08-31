@@ -127,6 +127,7 @@ private:
   double EdgeStiffness;   //stiffness of the edge
   double NodeStrength;   //Strength of the electrical repulsion
   double NaturalLength;
+  int steps_taken;
 
   string inputFileName;
 
@@ -159,7 +160,8 @@ private:
   wxSpinCtrlFloat * spinEdgeStiffness;
   wxSpinCtrlFloat * spinNaturalLength;
   wxSpinCtrl * spinNodeRadius;
-
+  
+  wxSlider * slider_speedup;
 
   wxCheckBox * ckNodeLabels;
   wxCheckBox * ckEdgeLabels;

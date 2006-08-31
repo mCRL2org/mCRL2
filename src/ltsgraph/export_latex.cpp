@@ -1,11 +1,10 @@
 #include "export_latex.h"
 
-#include <fstream>
-#include <iostream>
+#include <wx/textfile.h>
 
 #include <boost/format.hpp>
 
-ExportToLatex::ExportToLatex(const char * _filename, vector<nodeLatex> _node, vector<edgeLatex> _edge, int _height) : 
+ExportToLatex::ExportToLatex(wxString _filename, vector<nodeLatex> _node, vector<edgeLatex> _edge, int _height) : 
 		filename(_filename) , node(_node), edge(_edge), height(_height)
 {}
 
@@ -36,17 +35,34 @@ bool ExportToLatex::Generate() {
 	LatexCode += "\\end{document} \n";
 
 	//Create a file
-	ofstream file(filename);
+	wxTextFile latex_file(filename);
 
-	if (!file)
-		return false;
- 
-	file << LatexCode;
+	if (latex_file.Exists()) {
+          if (!latex_file.Open(filename)) {
+            return false;
+          }
+          else {
+            latex_file.Clear();
+          }
+        }
+        else {
+          if (!latex_file.Create(filename)) {
+            return false;
+          }
+        }
 
-	if (!file)
-		return false;
+        // Write the code to the file.
+        wxString latex_code_wx(LatexCode.c_str(), wxConvLocal);
+	latex_file.AddLine(latex_code_wx);
+        latex_file.AddLine(wxEmptyString);
 
+	if (!latex_file.Write()) {
+          return false;
+        }
 
+        if (!latex_file.Close()) {
+          return false;
+        }
   return true;
 
 }

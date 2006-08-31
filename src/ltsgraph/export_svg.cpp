@@ -1,7 +1,7 @@
 #include "export_svg.h"
 
 #include <fstream>
-#include <iostream>
+#include <wx/textfile.h> 
 #include <wx/dc.h>
 #include <math.h>
 #include <boost/format.hpp>
@@ -12,7 +12,7 @@ const std::string init_border_colour = "red";
 const double triangle_height = 10;
 const double triangle_width = 5;
 
-export_to_svg::export_to_svg(const char* _filename, vector<node_svg> _nodes, vector<edge_svg> _edges, double _height, double _width) :
+export_to_svg::export_to_svg(wxString _filename, vector<node_svg> _nodes, vector<edge_svg> _edges, double _height, double _width) :
   filename(_filename) , nodes(_nodes), edges(_edges), height(_height), width(_width) {
 }
 
@@ -133,19 +133,36 @@ bool export_to_svg::generate() {
   svg_code += "</svg>";
   
   //Create the file
-  ofstream file(filename);
+  wxTextFile svg_export(filename);
 
-  if (!file) {
-    return false;
+  if (svg_export.Exists()) {
+    if (!svg_export.Open(filename)) {
+      return false;
+    }
+    else {
+      svg_export.Clear();
+    }
   }
- 
+  else {
+    if (!svg_export.Create(filename)) {
+      return false;
+    }
+  }
+
   // Write code to file
-  file << svg_code;
+  wxString svg_code_wx(svg_code.c_str(), wxConvLocal);
+  svg_export.AddLine(svg_code_wx);
+  
+  svg_export.AddLine(wxEmptyString);
 
-  if (!file) {
+  if (!svg_export.Write()) {
+    return false;
+  }
+  
+  if (!svg_export.Close()) {
     return false;
   }
 
-  return true;
+  return true; 
 } 
   

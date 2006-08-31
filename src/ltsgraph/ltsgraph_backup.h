@@ -21,9 +21,9 @@ public:
 	void SetAlgoSettings(double _EdgeStiffness, double _NodeStrength, double _NaturalLength);
 	void SetOtherSettings(int _StateRadius = 10, bool _StateLabel = true, bool _TransitionLabel = true);
 
-	bool Backup(string filename = "backup.ltsgraph");
+	bool Backup(wxString filename = wxT("backup.ltsgraph"));
 
-	bool Restore(string filename = "backup.ltsgraph");
+	bool Restore(wxString filename = wxT("backup.ltsgraph"));
 
 	vector<Node*> GetVectNode();
 	vector<edge*> GetVectEdge();
