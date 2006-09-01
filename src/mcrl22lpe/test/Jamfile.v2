@@ -6,7 +6,8 @@ project toolset/mcrl22lpe/test ;
 #
 test-suite mcrl22lpe
     : [ run_tool_on_examples /tools/mcrl22lpe//mcrl22lpe mcrl22lpe lpe : : $(TOP)/examples mcrl2 ]
-      [ run_tool_on_examples /tools/mcrl22lpe//mcrl22lpe mcrl22lpe lpe : : $(TOP)/tests mcrl2 ]
+      [ run_tool_expect_success LR2par /tools/mcrl22lpe//mcrl22lpe : LR2par.mcrl2 $(BUILD_TOP)/LR2par.lpe ]
+      [ run_tool_expect_success LR2sum /tools/mcrl22lpe//mcrl22lpe : LR2plus.mcrl2 $(BUILD_TOP)/LR2plus.lpe ]
     ;
 
 

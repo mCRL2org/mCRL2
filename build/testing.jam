@@ -1,3 +1,5 @@
+import testing ;
+
 # Finds all files that have a certain extension
 # 
 # Operates to a maximum of three levels deep recursively, starting from directory $root
@@ -16,7 +18,6 @@ rule examples_by_extension ( root : extensions + ) {
 # extensions  the extensions of files that are considered input
 #
 rule run_tool_on_examples ( tool prefix suffix ? : options * : path extensions + ) {
-  import testing ;
   import path ;
 
   for file in [ examples_by_extension $(path) : $(extensions) ] {
@@ -27,21 +28,55 @@ rule run_tool_on_examples ( tool prefix suffix ? : options * : path extensions +
       output = [ path.native $(BUILD_TOP)/$(target).$(suffix) ] ;
     }
 
+    results += [
+
+      run $(tool)
+             : $(options)
+               $(file)
+               $(output)
+             : # input files
+             : # requirements
+             : $(prefix)-$(target)
+    ] ;
+  }
+
+  return $(results) ;
+}
+
+rule run_tool_expect_success ( name tool : options * : requirements * ) {
+  results += [
+
     run $(tool)
            : $(options)
-             $(file)
-             $(output)
            : # input files
-           : # requirements
-           : $(prefix)-$(target)
-           ;
-  }
+           : $(requirements)
+           : $(name)
+  ] ;
+
+  return $(results) ;
+}
+
+rule run_tool_expect_failure ( name tool : options * : requirements * ) {
+  results += [
+
+    run-fail $(tool)
+           : $(options)
+           : # input files
+           : $(requirements)
+           : $(name)
+  ] ;
+
+  return $(results) ;
 }
 
 IMPORT $(__name__)
        : run_tool_on_examples
          examples_by_extension
+         run_tool_expect_success
+         run_tool_expect_failure
        : $(caller)
        : run_tool_on_examples
          examples_by_extension
+         run_tool_expect_success
+         run_tool_expect_failure
        ;
