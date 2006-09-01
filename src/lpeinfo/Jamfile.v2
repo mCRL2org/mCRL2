@@ -1,4 +1,4 @@
-project lpeinfo
+project toolset/lpeinfo
        : source-location .
        : requirements
           <include>$(BOOST)
