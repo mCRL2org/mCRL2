@@ -1,4 +1,5 @@
 #include <string>
+#include <sstream>
 #include <iostream>
 #include <fstream>
 #include <assert.h>
@@ -759,8 +760,9 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lpe::specificati
       {
         if ( !ATisList(state_values[i]) )
         {
-          gsVerboseMsg("cannot save LTS in mCRL format; state values are incompatible\n");
-          return false;
+          gsWarningMsg("state values are not saved as they are not the in mCRL format\n");
+	  state_info = false;
+          break;
         }
       }
     }
@@ -777,12 +779,7 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lpe::specificati
         if ( ATisAppl(label_values[i]) && (gsIsMultAct((ATermAppl) label_values[i]) || is_timed_pair((ATermAppl) label_values[i])) )
         {
           no_convert = false;
-          if ( is_timed_pair((ATermAppl) label_values[i]) )
-          {
-            label_values[i] = ATgetArgument((ATermAppl) label_values[i],0);
-          }
-          string s = PrintPart_CXX(label_values[i],ppDefault);
-          label_values[i] = (ATerm) ATmakeAppl0(ATmakeAFun(s.c_str(),0,ATtrue));
+          label_values[i] = (ATerm) ATmakeAppl0(ATmakeAFun(p_label_value_str(i).c_str(),0,ATtrue));
           applied_conversion = true;
         }
         if ( no_convert )
@@ -800,8 +797,9 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lpe::specificati
       {
         if ( !ATisAppl(state_values[i]) ) // XXX check validity of data terms
         {
-          gsVerboseMsg("cannot save LTS in mCRL2 format; state values are incompatible\n");
-          return false;
+          gsWarningMsg("state values are not saved as they are not the in mCRL2 format\n");
+	  state_info = false;
+          break;
         }
       }
     }
@@ -817,10 +815,7 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lpe::specificati
         bool no_convert = true;
         if ( (spec != NULL) )
         {
-          char *s = ATwriteToString(label_values[i]);
-          s++;
-          s[strlen(s)-1] = '\0';
-          stringstream ss(s);
+          stringstream ss(p_label_value_str(i));
           ATermAppl t = parse_mult_act(ss);
           if ( t == NULL )
           {
@@ -958,27 +953,9 @@ bool p_lts::write_to_aut(ostream &os)
     {
       to = 0;
     }
-    os << "(" << from << ",";
-    if ( label_info )
-    {
-      ATerm label = label_values[transitions[i].label];
-      if ( ATisAppl(label) && gsIsMultAct((ATermAppl) label) )
-      {
-        os << "\"";
-        PrintPart_CXX(os,label,ppDefault);
-        os << "\"";
-      } else if ( ATisAppl(label) && is_timed_pair((ATermAppl) label) )
-      {
-        os << "\"";
-        PrintPart_CXX(os,ATgetArgument((ATermAppl) label,0),ppDefault);
-        os << "\"";
-      } else {
-        os << ATwriteToString(label);
-      }
-    } else {
-      os << transitions[i].label;
-    }
-    os << "," << to << ")" << endl;
+    os << "(" << from << ",\""
+       << p_label_value_str(transitions[i].label)
+       << "\"," << to << ")" << endl;
   }
 
   return true;
@@ -1011,23 +988,7 @@ bool p_lts::write_to_bcg(string const& filename)
   unsigned int buf_size = 0;
   for (unsigned int i=0; i<ntransitions; i++)
   {
-    string label_str;
-    if ( label_info )
-    {
-      ATerm label = label_values[transitions[i].label];
-      if ( ATisAppl(label) && (gsIsMultAct((ATermAppl) label) || is_timed_pair((ATermAppl) label)) )
-      {
-        if ( !gsIsMultAct((ATermAppl) label) )
-        {
-          label = ATgetArgument((ATermAppl) label,0);
-        }
-        label_str = PrintPart_CXX(label,ppDefault);
-      } else {
-        label_str = ATwriteToString(label);
-      }
-    } else {
-      label_str = transitions[i].label;
-    }
+    string label_str = p_label_string(transitions[i].label);
     if ( label_str.size() > buf_size )
     {
       if ( buf_size == 0 )
@@ -1270,10 +1231,85 @@ ATerm lts::state_value(unsigned int state)
   return state_values[state];
 }
 
+string p_lts::p_state_value_str(unsigned int state)
+{
+  assert(state < nstates);
+  string s;
+  if ( state_info )
+  {
+    ATerm value = state_values[state];
+    if ( ATisAppl(value) ) // XXX better check for mCRL2
+    {
+      s = "(";
+      ATermList args = ATgetArguments((ATermAppl) value);
+      for (; !ATisEmpty(args); args=ATgetNext(args))
+      {
+        s += PrintPart_CXX(ATgetFirst(args),ppDefault);
+        if ( !ATisEmpty(ATgetNext(args)) )
+          s += ",";
+      }
+      s += ")";
+    } else if ( ATisList(value) )
+    {
+      s = "[";
+      ATermList args = (ATermList) value;
+      for (; !ATisEmpty(args); args=ATgetNext(args))
+      {
+        s += ATwriteToString(ATgetFirst(args));
+        if ( !ATisEmpty(ATgetNext(args)) )
+          s += ",";
+      }
+      s += "]";
+    } else {
+      s = ATwriteToString(value);
+    }
+  } else {
+    stringstream ss;
+    ss << state;
+    s = ss.str();
+  }
+  return s;
+}
+
+string lts::state_value_str(unsigned int state)
+{
+  return p_state_value_str(state);
+}
+
 ATerm lts::label_value(unsigned int label)
 {
   assert(label_info && (label < nlabels));
   return label_values[label];
+}
+
+string p_lts::p_label_value_str(unsigned int label)
+{
+  assert(label < nlabels);
+  string s;
+  if ( label_info )
+  {
+    ATerm value = label_values[label];
+    if ( ATisAppl(value) && gsIsMultAct((ATermAppl) value) )
+    {
+      s = PrintPart_CXX(value,ppDefault);
+    } else if ( ATisAppl(value) && is_timed_pair((ATermAppl) value) )
+    {
+      s = PrintPart_CXX(ATgetArgument((ATermAppl) value,0),ppDefault);
+    } else {
+      s = ATwriteToString(value);
+      s = s.substr(1,s.length()-2);
+    }
+  } else {
+    stringstream ss;
+    ss << label;
+    s = ss.str();
+  }
+  return s;
+}
+
+string lts::label_value_str(unsigned int label)
+{
+  return p_label_value_str(label);
 }
 
 unsigned int lts::transition_from(unsigned int transition)

@@ -469,7 +469,7 @@ void GraphFrame::Init(wxString LTSfile) {
 				for(unsigned int i=0; (ti.more()); i++) 
 				{
 				
-                                        std::string node_label = PrintPart_CXX(mylts.label_value(ti.label()), ppDefault);
+                                        std::string node_label = mylts.label_value_str(ti.label());
                                        	wxString * Slbl_Edge = new wxString(node_label.c_str(), wxConvLocal);
 	
 					for (size_t n = 0; n < vectNode.size(); n++) { 

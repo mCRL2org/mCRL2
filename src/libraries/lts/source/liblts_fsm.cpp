@@ -201,25 +201,9 @@ static bool write_lts_to_fsm(lts &l, std::ostream &os, lts_type type, ATermList 
   os << "---" << std::endl;
   for (unsigned int i=0; i<l.num_transitions(); i++)
   {
-    if ( type == lts_mcrl )
-    {
-      os << l.transition_from(i)+1 << " " << l.transition_to(i)+1 << " ";
-      os << ATwriteToString(l.label_value(l.transition_label(i)));
-      os << std::endl;
-    } else if ( type == lts_mcrl2 )
-    {
-      os << l.transition_from(i)+1 << " " << l.transition_to(i)+1 << " \"";
-      ATermAppl label = (ATermAppl) l.label_value(l.transition_label(i));
-      if ( gsIsMultAct(label) )
-      {
-        PrintPart_CXX(os,(ATerm) label,ppDefault);
-      } else {
-        PrintPart_CXX(os,ATgetArgument(label,0),ppDefault);
-      }
-      os << "\"" << std::endl;
-    } else { // type == lts_none
-      os << l.transition_from(i)+1 << " " << l.transition_to(i)+1 << " \"" << l.transition_label(i) << "\"" << std::endl;
-    }
+    os << l.transition_from(i)+1 << " " << l.transition_to(i)+1 << " \"";
+    os << l.label_value_str(l.transition_label(i));
+    os << "\"" << std::endl;
   }
 
   // clean up

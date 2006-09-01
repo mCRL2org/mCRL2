@@ -343,14 +343,17 @@ int main(int argc, char **argv)
         }
     }
   } else {
-      if ( lpefile != "" )
+      if ( (outtype == lts_none) && !use_alt_outtype )
       {
-        gsWarningMsg("no output format set; using fsm because --lpe was used\n");
-        alt_outtype = alt_lts_fsm;
-        use_alt_outtype = true;
-      } else {
-        gsWarningMsg("no output format set; using default (aut)\n");
-        outtype = lts_aut;
+        if ( lpefile != "" )
+        {
+          gsWarningMsg("no output format set; using fsm because --lpe was used\n");
+          alt_outtype = alt_lts_fsm;
+          use_alt_outtype = true;
+        } else {
+          gsWarningMsg("no output format set; using default (aut)\n");
+          outtype = lts_aut;
+        }
       }
   }
 

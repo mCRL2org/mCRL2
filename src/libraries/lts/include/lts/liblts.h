@@ -130,6 +130,8 @@ namespace lts
 
       ATerm state_value(unsigned int state);
       ATerm label_value(unsigned int label);
+      std::string state_value_str(unsigned int state);
+      std::string label_value_str(unsigned int label);
       unsigned int transition_from(unsigned int transition);
       unsigned int transition_label(unsigned int transition);
       unsigned int transition_to(unsigned int transition);

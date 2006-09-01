@@ -63,6 +63,9 @@
       unsigned int p_add_transition(unsigned int from,
                                     unsigned int label,
                                     unsigned int to);
+      
+      std::string p_state_value_str(unsigned int state);
+      std::string p_label_value_str(unsigned int label);
 
       bool read_from_aut(std::string const& filename);
       bool read_from_aut(std::istream &is);

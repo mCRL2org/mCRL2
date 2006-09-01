@@ -48,69 +48,13 @@ bool write_lts_to_dot(lts &l, ostream &os, string &name, bool print_states)
     {
       for (unsigned int i=0; i<l.num_states(); i++)
       {
-        ATerm state = l.state_value(i);
-        if ( ATisAppl(state) ) // XXX better check for mCRL2
-        {
-          os << i << "[label=\"(";
-          ATermList args = ATgetArguments((ATermAppl) state);
-          for (; !ATisEmpty(args); args=ATgetNext(args))
-          {
-            PrintPart_CXX(os,ATgetFirst(args),ppDefault);
-            if ( !ATisEmpty(ATgetNext(args)) )
-              os << ",";
-          }
-          os << ")\"];" << endl;
-        } else if ( ATisList(state) )
-        {
-          os << i << "[label=\"[";
-          ATermList args = (ATermList) state;
-          for (; !ATisEmpty(args); args=ATgetNext(args))
-          {
-            os << ATwriteToString(ATgetFirst(args));
-            if ( !ATisEmpty(ATgetNext(args)) )
-              os << ",";
-          }
-          os << "]\"];" << endl;
-        } else {
-          os << ATwriteToString(state);
-        }
+        os << i << "[label=\"" << l.state_value_str(i) << "\"];" << endl;
       }
     }
   }
   for (unsigned int i=0; i<l.num_transitions(); i++)
   {
-    os << l.transition_from(i) << "->" << l.transition_to(i) << "[label=\"";
-    if ( l.has_label_info() )
-    {
-      ATerm label = l.label_value(l.transition_label(i));
-      if ( ATisAppl(label) )
-      {
-        ATermAppl t = (ATermAppl) label;
-        if ( ATgetArity(ATgetAFun(t)) == 0 )
-        {
-          os << ATgetName(ATgetAFun(t));
-        } else if ( gsIsMultAct(t) || is_timed_pair(t) )
-        {
-          if ( !gsIsMultAct(t) ) // for backwards compatibility with untimed svc version
-          {
-            t = ATAgetArgument(t,0);
-          }
-          if ( ATisEmpty(ATLgetArgument(t,0)) )
-          {
-            os << "tau";
-          } else {
-            PrintPart_CXX(os,(ATerm) t,ppDefault);
-          }
-        } else {
-          os << ATwriteToString(label);
-        }
-      } else {
-        os << ATwriteToString(label);
-      }
-    } else {
-      os << l.transition_label(i);
-    }
-    os << "\"];" << endl;
+    os << l.transition_from(i) << "->" << l.transition_to(i) << "[label=\"" << l.label_value_str(l.transition_label(i)) << "\"];" << endl;
   }
 
   os << "}" << endl;
