@@ -5,7 +5,8 @@ project toolset/mcrl22lpe/test ;
 #  the output files get the extension lpe and are located in $(BUILD_TOP)
 #
 test-suite mcrl22lpe
-    : [ run_tool_on_examples /tools/mcrl22lpe//mcrl22lpe mcrl22lpe lpe : : ../../../examples mcrl2 ]
+    : [ run_tool_on_examples /tools/mcrl22lpe//mcrl22lpe mcrl22lpe lpe : : $(TOP)/examples mcrl2 ]
+      [ run_tool_on_examples /tools/mcrl22lpe//mcrl22lpe mcrl22lpe lpe : : $(TOP)/tests mcrl2 ]
     ;
 
 

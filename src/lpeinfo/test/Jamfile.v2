@@ -1,0 +1,5 @@
+project toolset/lpeinfo/test ;
+
+test-suite lpeinfo
+    : [ run_tool_on_examples /tools/lpeinfo//lpeinfo lpeinfo : : $(BUILD_TOP) lpe ]
+    ; 
