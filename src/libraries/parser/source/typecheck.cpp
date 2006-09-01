@@ -269,8 +269,44 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lpe::specification &lpe_spec)
 {
   //check correctness of the multi-action in mult_act using
   //the LPE specification in lpe_spec
-  gsWarningMsg("type checking of multiactions is not yet implemented\n");
-  return mult_act;
+  gsWarningMsg("type checking of multiactions is partially implemented\n");
+  ATermAppl Result=NULL;
+
+  gsDebugMsg ("type checking phase started\n");
+  gstcDataInit();
+
+  gsDebugMsg ("type checking of multiactions read-in phase started\n");
+
+  //XXX read-in from LPE (not finished)
+  if(/* gstcReadInSorts((ATermList) lpe_spec.sorts())  && */ gstcReadInActs((ATermList) lpe_spec.actions())){
+    gsDebugMsg ("type checking of multiactions read-in phase finished\n");
+
+    if(gsIsMultAct(mult_act)){
+      ATermTable Vars=ATtableCreate(63,50);
+      ATermList r=ATmakeList0();
+
+      for(ATermList l=ATLgetArgument(mult_act,0);!ATisEmpty(l);l=ATgetNext(l)){
+        ATermAppl o=ATAgetFirst(l);
+        assert(gsIsParamId(o));
+        o=gstcTraverseActProcVarConstP(Vars,o);
+        if(!o) goto done;
+        r=ATinsert(r,(ATerm)o);
+      }
+      Result=ATsetArgument(mult_act,(ATerm)ATreverse(r),0);
+
+    done:
+      ATtableDestroy(Vars);
+    }
+    else {
+      gsErrorMsg("type checking of multiactions failed (%T is not a multiaction)\n\n",mult_act);
+    }
+  }
+  else {
+      gsErrorMsg("Reading Sorts from LPE failed.\n\n");
+  }
+    
+  gstcDataDestroy();
+  return Result;
 }
 
 ATermAppl type_check_proc_expr(ATermAppl proc_expr, lpe::specification &lpe_spec)
@@ -302,8 +338,7 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, lpe::specification &lpe_spec
   gsDebugMsg ("type checking of state formulas read-in phase started\n");
 
   //XXX read-in from LPE (not finished)
-  (ATermList) lpe_spec.sorts();
-  if(gstcReadInActs((ATermList) lpe_spec.actions())){
+  if(/* gstcReadInSorts((ATermList) lpe_spec.sorts()) && */ gstcReadInActs((ATermList) lpe_spec.actions())){
     gsDebugMsg ("type checking of state formulas read-in phase finished\n");
 
     ATermTable Vars=ATtableCreate(63,50);
