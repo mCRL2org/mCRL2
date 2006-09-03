@@ -41,13 +41,21 @@ namespace squadt {
     }
     
     void project::builder::process(wxTimerEvent&) {
-      while (0 < tasks.size()) {
-        boost::function < void () > task = tasks.front();
+      static volatile bool r = false;
+      
+      if (!r) {
+        r = true;
 
-        tasks.pop_front();
+        while (0 < tasks.size()) {
+          boost::function < void () > task = tasks.front();
+       
+          tasks.pop_front();
+       
+          /* Execute task */
+          task();
+        }
 
-        /* Execute task */
-        task();
+        r = false;
       }
     }
     

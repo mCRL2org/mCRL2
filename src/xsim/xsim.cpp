@@ -74,15 +74,16 @@ bool XSim::OnInit()
     /* Static configuration cycle */
     while (!valid) {
       /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
-      sip::configuration::sptr configuration = tc.await_configuration();
+      tc.await_configuration();
+
+      sip::configuration& configuration = tc.get_configuration();
 
       /* Validate configuration specification, should contain a file name of an LPD that is to be read as input */
-      valid  = configuration.get() != 0;
-      valid &= configuration->object_exists(lpd_file_for_input);
+      valid = configuration.object_exists(lpd_file_for_input);
 
       if (valid) {
         /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
-        lpd_file_argument = configuration->get_object(lpd_file_for_input)->get_location();
+        lpd_file_argument = configuration.get_object(lpd_file_for_input)->get_location();
       }
       else {
         tc.send_status_report(sip::report::error, "Invalid input combination!");

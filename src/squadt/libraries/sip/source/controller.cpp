@@ -3,25 +3,29 @@
 
 #include <boost/bind.hpp>
 
-#include <sip/controller.h>
-#include <sip/detail/message.h>
-#include <sip/detail/common.h>
-#include <sip/detail/basic_messenger.tcc>
+#include <sip/detail/controller.tcc>
 
 namespace sip {
   namespace controller {
 
-    using namespace sip::messaging;
-
     controller::capabilities communicator::current_controller_capabilities;
  
-    /**
-     * @param[in] m a reference to the message
-     **/
-    void communicator::store_configuration(const messenger::message_ptr& m) {
-      current_configuration = sip::configuration::read(m->to_string());
+    communicator::communicator(communicator_impl* c) : impl(c) {
+    }
 
-      set_status(status_configured);
+    communicator::communicator() : impl(new communicator_impl) {
+    }
+
+    /**
+     * @param[in] c the current configuration
+     **/
+    void communicator::set_configuration(boost::shared_ptr < configuration > c) {
+      impl->current_configuration = c;
+    }
+ 
+    /** \attention use get_configuration().swap() to set the configuration */
+    configuration::sptr communicator::get_configuration() const {
+      return (impl->current_configuration);
     }
  
     /**
@@ -33,61 +37,38 @@ namespace sip {
       return (nc);
     }
  
-    communicator::communicator() : current_status(status_initialising) {
-      using namespace boost;
- 
-      /* set default handlers for delivery events */
-      add_handler(sip::message_request_controller_capabilities, bind(&communicator::reply_controller_capabilities, this));
-      add_handler(sip::message_accept_configuration, bind(&communicator::store_configuration, this, _1));
-    }
-
-    communicator::~communicator() {
-    }
- 
-    /* Reply details about the amount of reserved display space */
-    void communicator::reply_controller_capabilities() {
-      message m(current_controller_capabilities.write(), sip::message_reply_controller_capabilities);
- 
-      send_message(m);
-    }
- 
     /* Request a tool what input configurations it has available */
     void communicator::request_tool_capabilities() {
       message m(sip::message_request_tool_capabilities);
- 
-      send_message(m);
+
+      impl->send_message(m);
     }
  
     /* Send the selected input configuration */
     void communicator::send_configuration() {
-      message m(current_configuration->write(), sip::message_offer_configuration);
- 
-      send_message(m);
+      sip::message m(impl->current_configuration->write(), sip::message_offer_configuration);
+
+      impl->send_message(m);
     }
  
     /* Request a tool to terminate */
     void communicator::request_termination() {
-      message m(sip::message_request_termination);
- 
-      send_message(m);
+      sip::message m(sip::message_request_termination);
+
+      impl->send_message(m);
     }
  
     void communicator::send_start_signal() {
-      message m(sip::message_signal_start);
- 
-      send_message(m);
+      sip::message m(sip::message_signal_start);
+
+      impl->send_message(m);
     }
 
     /**
      * @param h the function that is called when a new layout for the display has been received
      **/
     void communicator::activate_display_layout_handler(display_layout_handler_function h) {
-      /* Remove any previous handlers */
-      clear_handlers(sip::message_display_layout);
-
-      add_handler(sip::message_display_layout, boost::bind(&communicator::display_layout_handler, this, _1, h));
-
-      current_layout_handler = h;
+      impl->activate_display_layout_handler(h);
     }
 
     /**
@@ -97,61 +78,53 @@ namespace sip {
      * \pre d.get() != 0
      **/
     void communicator::activate_display_data_handler(sip::layout::tool_display::sptr d, display_data_handler_function h) {
-      /* Remove any previous handlers */
-      clear_handlers(sip::message_display_data);
-
-      add_handler(sip::message_display_data, boost::bind(&communicator::display_data_handler, this, _1, d, h));
-
-      current_data_handler = h;
+      impl->activate_display_data_handler(d, h);
     }
 
     /**
      * @param h the function that is called when a new layout for the display has been received
      **/
     void communicator::activate_status_message_handler(status_message_handler_function h) {
-      /* Remove any previous handlers */
-      clear_handlers(sip::message_report);
+      impl->activate_status_message_handler(h);
+    }
+    /**
+     * @param[in] e a sip layout element of which the data is to be sent
+     **/
+    void communicator::send_display_data(sip::layout::element const* e) {
+      message m(e->get_state(), sip::message_display_data);
 
-      add_handler(sip::message_report, boost::bind(&communicator::status_message_handler, this, _1, h));
+      impl->send_message(m);
     }
 
     /**
-     * @param m pointer to the message
-     * @param h the function that is called when a new layout for the display has been received
+     * @param[in] t the type of the message
      **/
-    void communicator::display_layout_handler(const messenger::message_ptr& m, display_layout_handler_function h) {
-      xml2pp::text_reader reader(m->to_string().c_str());
-
-      sip::layout::tool_display::sptr d = layout::tool_display::read(reader);
-
-      h(d);
+    const sip::message_ptr communicator::await_message(sip::message::type_identifier_t t) {
+      return (impl->await_message(t));
     }
 
     /**
-     * @param m pointer to the message
-     * @param h the function that is called when data for the display has been received
-     * @param d a shared pointer to a tool display
+     * @param h the handler function that is to be executed
+     * @param t the message type on which delivery h is to be executed
      **/
-    void communicator::display_data_handler(const messenger::message_ptr& m, sip::layout::tool_display::sptr d, display_data_handler_function h) {
-      std::vector < sip::layout::element const* > elements;
-
-      xml2pp::text_reader reader(m->to_string().c_str());
-
-      d->update(reader, elements);
-
-      h(elements);
+    void communicator::add_handler(const sip::message::type_identifier_t t, sip::message_handler_type h) {
+      impl->add_handler(t, h);
     }
 
     /**
-     * @param m pointer to the message
-     * @param h the function that is called when a new rport has been received
+     * @param t the message type for which to clear the event handler
+     * @param h the handler to remove
      **/
-    void communicator::status_message_handler(const messenger::message_ptr& m, status_message_handler_function h) {
-      xml2pp::text_reader reader(m->to_string().c_str());
+    void communicator::remove_handler(const sip::message::type_identifier_t t, sip::message_handler_type h) {
+      impl->remove_handler(t, h);
+    }
 
-      sip::report::sptr r = report::read(reader);
+    utility::logger* communicator::get_logger() const {
+      return (impl->get_logger());
+    }
 
-      h(r);
+    utility::logger* communicator::get_standard_error_logger() {
+      return (sip::messenger::get_standard_error_logger());
     }
   }
 }

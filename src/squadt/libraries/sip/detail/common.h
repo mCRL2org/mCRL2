@@ -3,18 +3,11 @@
 
 #include <list>
 
-#include <boost/bind.hpp>
-
-#include <sip/detail/basic_messenger.h>
+#include <boost/function.hpp>
+#include <sip/detail/message.h>
 
 /* Interface classes for both the tool and the controller side of the Squadt Interaction Protocol */
 namespace sip {
-
-  /** \brief Category name that describes a tools function */
-  typedef std::string tool_category;
-
-  /** \brief Storage format for tool input/output configuration specification */
-  typedef std::string storage_format;
 
   /** \brief Type for sip protocol message identification */
   enum message_identifier_t {
@@ -42,8 +35,14 @@ namespace sip {
   /** \brief A convenience type to share the boost shared pointer implementation */
   typedef boost::shared_ptr < message >                                             message_ptr;
 
-  /** \brief A messenger type for communication of sip protocol messages */
-  typedef messaging::basic_messenger < sip::message >                               messenger;
+  /** \brief Convenience type for message delivery handlers */
+  typedef boost::function < void (boost::shared_ptr < message > const&) >           message_handler_type;
+
+  /** \brief Category name that describes a tools function */
+  typedef std::string tool_category;
+
+  /** \brief Storage format for tool input/output configuration specification */
+  typedef std::string storage_format;
 
   /** \brief Type for protocol version */
   struct version {
@@ -54,9 +53,22 @@ namespace sip {
   /** \brief Protocol version {major,minor} */
   static const version default_protocol_version = {1,0};
 
+}
+
+#endif
+
+#ifdef BASIC_MESSENGER_H
+#ifndef SIP_COMMON_MESSENGER_H
+#define SIP_COMMON_MESSENGER_H
+
+namespace sip {
+
+  /** \brief A messenger type for communication of sip protocol messages */
+  typedef messaging::basic_messenger < sip::message >      messenger;
+
   /** \brief Convenience type for connection end points (primarily used by delivery handler functions) */
   typedef const transport::transceiver::basic_transceiver* end_point;
 }
 
 #endif
-
+#endif

@@ -65,9 +65,6 @@ namespace squadt {
         /** \brief A reference to a monitor for this process */
         boost::weak_ptr < task_monitor >     monitor;
 
-        /** \brief Thread in which actual execution and waiting is performed */
-        boost::shared_ptr < boost::thread >  execution_thread;
-
         /** \brief The command that is currently being exected (or 0) */
         std::auto_ptr < command >            last_command;
 
@@ -89,6 +86,9 @@ namespace squadt {
      
         /** \brief Returns the process status */
         inline status get_status() const;
+
+        /** Signals the current state to the monitor */
+        void signal_status() const;
 
         /** \brief Returns the process id */
         inline pid_t get_identifier() const;

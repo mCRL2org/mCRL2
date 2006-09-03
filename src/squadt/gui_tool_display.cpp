@@ -694,9 +694,6 @@ namespace squadt {
 
       current_layout = l;
 
-      event_handler.clear();
-      event_handler.get_monitor()->set_display_data_handler(current_layout, boost::bind(&GUI::tool_display::schedule_layout_update, this, _1));
-
       std::auto_ptr < wxSizer > root(new wxBoxSizer(wxVERTICAL));
 
       tool_display_mediator m(this, mediator::wrapper_aptr(new tool_display_mediator::wrapper(root.get())), &event_handler);
@@ -780,6 +777,10 @@ namespace squadt {
      * @param[in] l the layout specification
      **/
     void tool_display::schedule_layout_change(sip::layout::tool_display::sptr l) {
+      /** Register handler for updates */
+      event_handler.clear();
+      event_handler.get_monitor()->set_display_data_handler(l, boost::bind(&GUI::tool_display::schedule_layout_update, this, _1));
+
       context->gui_builder.schedule_update(boost::bind(&tool_display::instantiate, this, l));
     }
 

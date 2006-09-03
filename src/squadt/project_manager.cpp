@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include <boost/bind.hpp>
+#include <boost/foreach.hpp>
 #include <boost/ref.hpp>
 #include <boost/filesystem/operations.hpp>
 

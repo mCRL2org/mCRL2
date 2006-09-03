@@ -184,16 +184,13 @@ void parse_command_line(int argc, char** argv) {
 }
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-/* Extracts a configuration from a message, and validates its content */
-bool try_to_accept_configuration(sip::tool::communicator& tc, sip::messenger::message_ptr const& m) {
-  sip::configuration::sptr configuration = tc << m;
+/* Validates a configuration */
+bool try_to_accept_configuration(sip::tool::communicator& tc) {
+  sip::configuration& configuration = tc.get_configuration();
 
-  if (configuration.get() == 0) {
-    return (false);
-  }
-  if (configuration->object_exists(lts_file_for_input)) {
+  if (configuration.object_exists(lts_file_for_input)) {
     /* The input object is present, verify whether the specified format is supported */
-    sip::object::sptr input_object = configuration->get_object(lts_file_for_input);
+    sip::object::sptr input_object = configuration.get_object(lts_file_for_input);
 
     lts_type t = lts::parse_format(input_object->get_format().c_str());
 
@@ -250,14 +247,16 @@ int main(int argc, char **argv)
     squadt_utility::initialise(tc);
 
     /* Main event loop for incoming messages from squadt */
-    for (sip::message_ptr m = tc.await_message(sip::message_any); !termination_requested; m = tc.await_message(sip::message_any)) {
+    while (!termination_requested) {
+      sip::message_ptr m = tc.await_message(sip::message_any);
+
       assert(m.get() != 0);
 
       switch (m->get_type()) {
         case sip::message_offer_configuration:
 
           /* Insert configuration in tool communicator object */
-          valid_configuration_present = try_to_accept_configuration(tc, m);
+          valid_configuration_present = try_to_accept_configuration(tc);
 
           break;
         case sip::message_signal_start:
@@ -334,6 +333,8 @@ int main(int argc, char **argv)
           break;
         case sip::message_request_termination:
           termination_requested = true;
+
+          tc.send_signal_termination();
           break;
         default:
           /* Messages with a type that do not need to be handled */

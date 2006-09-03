@@ -1,25 +1,14 @@
-#include <xml2pp/text_reader.h>
-
-#include <sip/tool.h>
-#include <sip/detail/message.h>
-#include <sip/detail/layout_base.h>
-#include <sip/detail/basic_messenger.tcc>
-#include <sip/detail/command_line_interface.tcc>
+#include <sip/detail/tool.tcc>
 
 namespace sip {
   namespace tool {
-    using namespace sip::messaging;
 
-    /**
-     * \attention please use connect() to manually establish a connection with a controller
-     **/
-    communicator::communicator() : current_status(status_inactive),
-                                             current_tool_capabilities() {
- 
-      /* Register event handlers for some message types */
-      add_handler(sip::message_request_tool_capabilities, boost::bind(&communicator::reply_tool_capabilities, this));
+    communicator::communicator(communicator_impl* c) : impl(c) {
     }
- 
+
+    communicator::communicator() : impl(new communicator_impl) {
+    }
+
     /**
      * The following connection options are recognised and extracted from the command line arguments:
      *
@@ -33,42 +22,46 @@ namespace sip {
      * \return whether options were found and whether a connection is being opened with a controller
      **/
     bool communicator::activate(int& argc, char** argv) {
-      command_line_interface::argument_extractor e(argc, argv);
- 
-      command_line_interface::scheme_ptr scheme = e.get_scheme();
- 
-      if (scheme.get() != 0) {
-        current_status = status_initialising;
- 
-        scheme->connect(this);
- 
-        instance_identifier = e.get_identifier();
- 
-        /* Identify the tool instance to the controller */
-        sip::message m(sip::message_instance_identifier);
- 
-        std::ostringstream s;
- 
-        s << instance_identifier;
- 
-        m.set_content(s.str());
+      return (impl->activate(argc, argv));
+    }
 
-        send_message(m);
- 
-        current_status = status_clean;
-      }
- 
-      return (scheme.get() != 0);
+    /**
+     * \return a pointer to the tool capabilities object that is sent to the controller on request
+     **/
+    tool::capabilities& communicator::get_tool_capabilities() {
+      return (impl->current_tool_capabilities);
     }
  
-    communicator::~communicator() {
+    /**
+     * This object can be stored by the controller and subsequently be used to
+     * restore this exact configuration state at the side of the tool.
+     *
+     * \return a reference to the current tool configuration object
+     **/
+    configuration& communicator::get_configuration() {
+      return (*impl->current_configuration);
+    }
+ 
+    void communicator::set_configuration(configuration::sptr c) {
+      impl->current_configuration = c;
+    }
+ 
+    /**
+     * \return p which is a pointer to the most recently retrieved controller capabilities object or 0
+     **/
+    const controller::capabilities::ptr communicator::get_controller_capabilities() const {
+      if (impl->current_controller_capabilities.get() == 0) {
+        throw (sip::exception(sip::controller_capabilities_unknown));
+      }
+ 
+      return (impl->current_controller_capabilities);
     }
  
     /* Request details about the amount of space that the controller currently has reserved for this tool */
     void communicator::request_controller_capabilities() {
       message m(sip::message_request_controller_capabilities);
  
-      send_message(m);
+      impl->send_message(m);
  
       /* Await the reply */
       do {
@@ -77,27 +70,20 @@ namespace sip {
         if (p.get() != 0) {
           xml2pp::text_reader reader(p->to_string().c_str());
        
-          current_controller_capabilities = controller::capabilities::read(reader);
+          impl->current_controller_capabilities = controller::capabilities::read(reader);
 
           break;
         }
       } while (1);
     }
  
-    /* Send a specification of the tools capabilities */
-    void communicator::reply_tool_capabilities() {
-      message m(current_tool_capabilities.write(), sip::message_reply_tool_capabilities);
- 
-      send_message(m);
-    }
- 
     /* Send a specification of the current configuration (it may change during tool execution) */
     void communicator::send_accept_configuration() {
-      current_configuration->fresh = false;
+      impl->current_configuration->fresh = false;
 
-      message m(current_configuration->write(), sip::message_accept_configuration);
+      message m(impl->current_configuration->write(), sip::message_accept_configuration);
  
-      send_message(m);
+      impl->send_message(m);
     }
  
     /**
@@ -108,7 +94,7 @@ namespace sip {
 
       message m(c.write(), sip::message_accept_configuration);
  
-      send_message(m);
+      impl->send_message(m);
     }
  
     /**
@@ -120,44 +106,32 @@ namespace sip {
      * accordingly when data is received.
      **/
     void communicator::send_display_layout(layout::tool_display::sptr d) {
-      message m(d->write(), sip::message_display_layout);
-
-      send_message(m);
-
-      clear_handlers(sip::message_display_data);
-
-      add_handler(sip::message_display_data, boost::bind(&communicator::accept_display_data, this, _1, d));
+      impl->send_display_layout(d);
     }
 
-    void communicator::clear_display() {
-      layout::tool_display display;
-
-      clear_handlers(sip::message_display_data);
-
-      message m(display.write(), sip::message_display_layout);
-
-      send_message(m);
+    void communicator::send_clear_display() {
+      impl->send_clear_display();
     }
 
     /* Send a signal that the tool is about to terminate */
     void communicator::send_signal_done() {
       message m(sip::message_signal_done);
  
-      send_message(m);
+      impl->send_message(m);
     }
 
     /* Send a signal that the tool is about to terminate */
     void communicator::send_signal_termination() {
       message m(sip::message_signal_termination);
  
-      send_message(m);
+      impl->send_message(m);
     }
  
     /* Send a status report to the controller */
     void communicator::send_report(sip::report const& r) {
       message m(r.write(), sip::message_report);
  
-      send_message(m);
+      impl->send_message(m);
     }
 
     /**
@@ -180,25 +154,42 @@ namespace sip {
 
       message m(c.str(), sip::message_display_data);
 
-      send_message(m);
+      impl->send_message(m);
     }
- 
+
+    void communicator::await_configuration() const {
+      impl->await_message(sip::message_offer_configuration);
+    }
+
     /**
-     * @param[in] m shared pointer to the message
-     * @param[out] d tool display on which to execute changes
+     * @param[in] t the type of the message
      **/
-    void communicator::accept_display_data(const sip::messenger::message_ptr& m, layout::tool_display::sptr d) {
-      std::vector < sip::layout::element const* > elements;
-      
-      xml2pp::text_reader reader(m->to_string().c_str());
-
-      d->update(reader, elements);
+    const sip::message_ptr communicator::await_message(sip::message::type_identifier_t t) {
+      return (impl->await_message(t));
     }
 
-    const configuration::sptr communicator::await_configuration() {
-      const sip::messenger::message_ptr m = await_message(sip::message_offer_configuration);
+    /**
+     * @param h the handler function that is to be executed
+     * @param t the message type on which delivery h is to be executed
+     **/
+    void communicator::add_handler(const sip::message::type_identifier_t t, sip::message_handler_type h) {
+      impl->add_handler(t, h);
+    }
 
-      return (*this << m);
+    /**
+     * @param t the message type for which to clear the event handler
+     * @param h the handler to remove
+     **/
+    void communicator::remove_handler(const sip::message::type_identifier_t t, sip::message_handler_type h) {
+      impl->remove_handler(t, h);
+    }
+
+    utility::logger* communicator::get_logger() const {
+      return (impl->get_logger());
+    }
+
+    utility::logger* communicator::get_standard_error_logger() {
+      return (sip::messenger::get_standard_error_logger());
     }
   }
 }

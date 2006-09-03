@@ -1,9 +1,11 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/thread.hpp>
 #include <boost/format.hpp>
+#include <boost/foreach.hpp>
 
 #include <xml2pp/text_reader.h>
 #include <sip/controller.h>
+#include <utility/logger.h>
 
 #include "task_monitor.h"
 #include "processor.tcc"
@@ -15,19 +17,19 @@ namespace squadt {
   using namespace boost::filesystem;
 
   void processor::monitor::status_change_dummy(output_status) {
-    logger->log(1, "No custom status change event handler connected!\n");
+    get_logger()->log(1, "No custom status change event handler connected!\n");
   }
 
   void processor::monitor::display_layout_change_dummy(sip::layout::tool_display::sptr) {
-    logger->log(1, "No custom display change event handler connected!\n");
+    get_logger()->log(1, "No custom display change event handler connected!\n");
   }
 
   void processor::monitor::display_data_change_dummy(sip::layout::tool_display::constant_elements const&) {
-    logger->log(1, "No custom display state change event handler connected!");
+    get_logger()->log(1, "No custom display state change event handler connected!");
   }
 
   void processor::monitor::status_message_change_dummy(sip::report::sptr) {
-    logger->log(1, "Incoming report lost!");
+    get_logger()->log(1, "Incoming report lost!");
   }
 
   /**
@@ -77,7 +79,7 @@ namespace squadt {
 
     if (is_connected()) {
       /* Make sure that the task_monitor state is not cleaned up if the tool quits unexpectedly */
-      boost::shared_ptr < execution::task_monitor_impl > p = m_state;
+      boost::shared_ptr < void > const p = impl;
 
       send_configuration();
 
@@ -87,7 +89,7 @@ namespace squadt {
 
         await_message(sip::message_signal_done);
 
-        send_message(sip::message_request_termination);
+        request_termination();
       }
       else {
         /* End tool execution */
@@ -96,14 +98,53 @@ namespace squadt {
     }
   }
 
-  inline processor::processor(project_manager& p) : current_monitor(new monitor(*this)), manager(&p), selected_input_combination(0) {
+  /**
+   * @param[in] h the function or functor that is invoked at layout change
+   **/
+  void processor::monitor::set_display_layout_handler(display_layout_callback_function h) {
+    /* Set the handler for incoming layout messages */
+    activate_display_layout_handler(h);
+  }
+
+  /**
+   * @param[in] d the tool display associated with this monitor
+   * @param[in] h the function or functor that is invoked at layout change
+   **/
+  void processor::monitor::set_display_data_handler(sip::layout::tool_display::sptr d, display_data_callback_function h) {
+    /* Set the handler for incoming layout messages */
+    activate_display_data_handler(d, h);
+  }
+
+  /**
+   * @param[in] h the function or functor that is invoked at layout change
+   **/
+  void processor::monitor::set_status_message_handler(status_message_callback_function h) {
+    /* Set the handler for incoming layout messages */
+    activate_status_message_handler(h);
+  }
+
+  /**
+   * @param[in] h the function or functor that is invoked at status change
+   **/
+  void processor::monitor::set_status_handler(status_callback_function h) {
+    on_status_change = h;
+  }
+
+  /**
+   * @param b whether or not to send the start signal after the configuration is accepted
+   **/
+  void processor::monitor::start_pilot(bool b) {
+    boost::thread thread(boost::bind(&processor::monitor::pilot, this, b));
+  }
+
+  processor::processor(project_manager& p) : current_monitor(new monitor(*this)), manager(&p), selected_input_combination(0) {
   }
 
   /**
    * @param[in] p the associated project manager
    * @param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
    **/
-  inline processor::processor(project_manager& p, tool::sptr t) :
+  processor::processor(project_manager& p, tool::sptr t) :
     tool_descriptor(t), current_monitor(new monitor(*this)), manager(&p), selected_input_combination(0) {
   }
 
@@ -570,6 +611,24 @@ namespace squadt {
     }
 
     return (true);
+  }
+
+  /**
+   * \attention This function is non-blocking
+   *
+   * \pre the configure member must have been called
+   **/
+  void processor::process() {
+    if (0 < inputs.size()) {
+      global_tool_manager->execute(*tool_descriptor, output_directory, boost::dynamic_pointer_cast < execution::task_monitor, monitor > (current_monitor), true);
+
+      current_monitor->once_on_completion(boost::bind(&processor::process_configuration, this));
+      current_monitor->start_pilot();
+    }
+    else {
+      /* Signal completion to environment via monitor */
+      current_monitor->signal_change(execution::process::aborted);
+    }
   }
 }
 

@@ -6,7 +6,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <sip/controller.h>
-#include <sip/detail/basic_messenger.tcc>
+#include <sip/detail/common.h>
 
 #include "process.h"
 
@@ -24,7 +24,7 @@ namespace squadt {
     class task_monitor : public sip::controller::communicator {
       friend class processor;
       friend class process;
-      friend class executor;
+      friend class executor_impl;
       friend class squadt::tool_manager;
 
       public:
@@ -32,11 +32,6 @@ namespace squadt {
         /** \brief Convenience type for hiding shared pointer implementation */
         typedef boost::shared_ptr < task_monitor > sptr;
 
-      protected:
-
-        /** \brief The state of this object */
-        boost::shared_ptr < task_monitor_impl > m_state;
- 
       protected:
  
         /** \brief Waits until a connection has been established with the running process */
@@ -46,7 +41,7 @@ namespace squadt {
         void await_completion();
 
         /** \brief Signals that a new connection has been established */
-        void signal_connection(const sip::end_point&);
+        void signal_connection(sip::message::end_point);
 
         /** \brief Checks the process status and removes */
         void signal_change(const execution::process::status);

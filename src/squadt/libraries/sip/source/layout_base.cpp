@@ -5,8 +5,13 @@
 #include <sstream>
 #include <memory>
 
+#if defined(TOOL_SIDE)
 #include <sip/tool.h>
+#endif
+
 #include <sip/detail/layout_base.h>
+#include <sip/detail/layout_elements.h>
+#include <sip/detail/layout_manager.h>
 #include <sip/detail/layout_mediator.h>
 #include <sip/detail/object.h>
 

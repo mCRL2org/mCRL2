@@ -490,31 +490,28 @@ void parse_command_line(int ac, char** av, ParElmObj& parelm) {
 const unsigned int lpd_file_for_input  = 0;
 const unsigned int lpd_file_for_output = 1;
 
-void realise_configuration(sip::tool::communicator& tc, ParElmObj& constelm, sip::configuration& c) {
+void realise_configuration(sip::tool::communicator& tc, ParElmObj& parelm, sip::configuration& c) {
   std::string input_file_name  = c.get_object(lpd_file_for_input)->get_location();
   std::string output_file_name = c.get_object(lpd_file_for_output)->get_location();
 
-  if (!constelm.loadFile(input_file_name)) {
+  if (!parelm.loadFile(input_file_name)) {
     tc.send_status_report(sip::report::error, "Invalid input, incorrect format?");
 
     exit(1);
   }
 
-  constelm.setSaveFile(output_file_name);
+  parelm.setSaveFile(output_file_name);
 
-  constelm.setVerbose(true);
+  parelm.setVerbose(true);
 }
 
-/* Extracts a configuration from a message, and validates its content */
-bool try_to_accept_configuration(sip::tool::communicator& tc, sip::messenger::message_ptr const& m) {
-  sip::configuration::sptr configuration = tc << m;
+/* Validates a configuration */
+bool try_to_accept_configuration(sip::tool::communicator& tc) {
+  sip::configuration& configuration = tc.get_configuration();
 
-  if (configuration.get() == 0) {
-    return (false);
-  }
-  if (configuration->object_exists(lpd_file_for_input)) {
+  if (configuration.object_exists(lpd_file_for_input)) {
     /* The input object is present */
-    sip::object::sptr input_object = configuration->get_object(lpd_file_for_input);
+    sip::object::sptr input_object = configuration.get_object(lpd_file_for_input);
 
     if (!boost::filesystem::exists(boost::filesystem::path(input_object->get_location()))) {
       tc.send_status_report(sip::report::error, std::string("Invalid configuration: input object does not exist"));
@@ -522,15 +519,15 @@ bool try_to_accept_configuration(sip::tool::communicator& tc, sip::messenger::me
       return (false);
     }
   }
-  if (tc.get_configuration().is_fresh()) {
-    sip::configuration& c = tc.get_configuration();
-
-    /* Add output file to the configuration */
-    c.add_output(lpd_file_for_output, "lpe", c.get_output_name(".lpe"));
+  if (configuration.is_fresh()) {
+    if (!configuration.object_exists(lpd_file_for_output)) {
+      /* Add output file to the configuration */
+      configuration.add_output(lpd_file_for_output, "lpe", configuration.get_output_name(".lpe"));
+    }
   }
   else {
     /* The output object is present */
-    if (!configuration->object_exists(lpd_file_for_output)) {
+    if (!configuration.object_exists(lpd_file_for_output)) {
       return (false);
     }
   }
@@ -566,15 +563,16 @@ int main(int ac, char** av) {
     /* Initialise squadt utility pseudo-library */
     squadt_utility::initialise(tc);
 
-    /* Static configuration cycle (phase 1: obtain input combination) */
-    for (sip::message_ptr m = tc.await_message(sip::message_any); !termination_requested; m = tc.await_message(sip::message_any)) {
+    while (!termination_requested) {
+      sip::message_ptr m = tc.await_message(sip::message_any);
+
       assert(m.get() != 0);
 
       switch (m->get_type()) {
         case sip::message_offer_configuration:
 
           /* Insert configuration in tool communicator object */
-          valid_configuration_present = try_to_accept_configuration(tc, m);
+          valid_configuration_present = try_to_accept_configuration(tc);
 
           break;
         case sip::message_signal_start:
@@ -596,6 +594,8 @@ int main(int ac, char** av) {
         case sip::message_request_termination:
 
           termination_requested = true;
+
+          tc.send_signal_termination();
 
           break;
         default:

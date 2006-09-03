@@ -304,7 +304,8 @@ private:
       for(sort_list::iterator i = p_spec.sorts().begin(); i != p_spec.sorts().end() ; i++){
         int b = 1;
         //if p_countSort[*i] == 0 then there are sorts declared which are never used!!!!
-        assert(p_countSort[*i] != 0);
+//        assert(p_countSort[*i] != 0);
+
         if (p_countSort[*i] == 1){
           for(function_list::iterator j = p_spec.constructors().begin() ; j != p_spec.constructors().end() ;j++){
             if (j->result_type() == *i){
@@ -1010,34 +1011,46 @@ void set_basic_configuration_display(sip::tool::communicator& tc) {
 
   std::string input_file_name  = c.get_object(lpd_file_for_input)->get_location();
 
-  /* Add output file to the configuration */
-  c.add_output(lpd_file_for_output, "lpe", c.get_output_name(".lpe"));
+  if (c.is_fresh()) {
+    if (!c.object_exists(lpd_file_for_output)) {
+      /* Add output file to the configuration */
+      c.add_output(lpd_file_for_output, "lpe", c.get_output_name(".lpe"));
+    }
 
-  /* Values for the options */
-  c.add_option(option_remove_single_element_sorts).
-        append_argument(sip::datatype::boolean::standard, remove_single_element_sorts->get_status());
-  c.add_option(option_remove_unvisited_summands).
-        append_argument(sip::datatype::boolean::standard, remove_unvisited_summands->get_status());
-  c.add_option(option_ignore_summand_conditions).
-        append_argument(sip::datatype::boolean::standard, ignore_summand_conditions->get_status());
+    /* Values for the options */
+    c.add_option(option_remove_single_element_sorts).
+          append_argument(sip::datatype::boolean::standard, remove_single_element_sorts->get_status());
+    c.add_option(option_remove_unvisited_summands).
+          append_argument(sip::datatype::boolean::standard, remove_unvisited_summands->get_status());
+    c.add_option(option_ignore_summand_conditions).
+          append_argument(sip::datatype::boolean::standard, ignore_summand_conditions->get_status());
+  }
 }
 
 /* Checks whether the configuration is complete and valid */
-bool validate_configuration(sip::configuration& c) {
-  bool valid  = true;
+bool try_to_accept_configuration(sip::tool::communicator& tc) {
+  sip::configuration& configuration = tc.get_configuration();
 
-  /* Should contain a file name of an LPD that is to be read as input */
-  valid &= c.object_exists(lpd_file_for_input);
-  valid &= c.object_exists(lpd_file_for_output);
+  if (configuration.object_exists(lpd_file_for_input)) {
+    /* The input object is present */
+    sip::object::sptr input_object = configuration.get_object(lpd_file_for_input);
 
-  if (valid) {
-    std::string input_file_name  = c.get_object(lpd_file_for_input)->get_location();
-    std::string output_file_name = c.get_object(lpd_file_for_output)->get_location();
+    if (!boost::filesystem::exists(boost::filesystem::path(input_object->get_location()))) {
+      tc.send_status_report(sip::report::error, std::string("Invalid configuration: input object does not exist"));
 
-    valid = input_file_name != output_file_name;
+      return (false);
+    }
+  }
+  else {
+    /* The output object is present */
+    if (!configuration.object_exists(lpd_file_for_output)) {
+      return (false);
+    }
   }
 
-  return (valid);
+  tc.send_accept_configuration();
+
+  return (true);
 }
 
 /*
@@ -1105,81 +1118,72 @@ int main(int ac, char** av) {
 
   /* On purpose we do not catch exceptions */
   if (tc.activate(ac,av)) {
-    bool valid = false;
-
-    std::string input_file_name;
-    std::string output_file_name;
+    bool valid_configuration_present = false;
+    bool termination_requested       = false;
 
     /* Initialise squadt utility pseudo-library */
     squadt_utility::initialise(tc);
 
-    /* Static configuration cycle (phase 1: obtain input combination) */
-    while (!valid) {
-      /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
-      sip::configuration::sptr configuration = tc.await_configuration();
+    while (!termination_requested) {
+      sip::message_ptr m = tc.await_message(sip::message_any);
 
-      /* Validate configuration specification, should contain a file name of an LPD that is to be read as input */
-      valid  = configuration.get() != 0;
-      valid &= configuration->object_exists(lpd_file_for_input);
+      assert(m.get() != 0);
 
-      if (!valid) {
-        tc.send_status_report(sip::report::error, "Invalid input combination!");
+      switch (m->get_type()) {
+        case sip::message_offer_configuration:
 
-        exit(1);
+          if (tc.get_configuration().is_fresh()) {
+            /* Draw a configuration layout in the tool display */
+            set_basic_configuration_display(tc);
+
+            /* Clean the display */
+            tc.send_clear_display();
+          }
+     
+          /* Insert configuration in tool communicator object */
+          valid_configuration_present = try_to_accept_configuration(tc);
+
+          break;
+        case sip::message_signal_start:
+          if (valid_configuration_present) {
+            using namespace sip;
+
+            realise_configuration(tc, constelm, tc.get_configuration());
+
+            constelm.filter();
+            constelm.output(); 
+
+            /* Signal that the job is finished */
+            tc.send_signal_done();
+          }
+          else {
+            tc.send_status_report(sip::report::error, "Failure reading input from file.");
+          }
+          break;
+        case sip::message_request_termination:
+
+          termination_requested = true;
+
+          tc.send_signal_termination();
+
+          break;
+        default:
+          /* Messages with a type that do not need to be handled */
+          break;
       }
     }
-
-    if (!validate_configuration(tc.get_configuration())) {
-      /* Configuration is incomplete or incorrect; prompt the user */
-
-      /* Draw a configuration layout in the tool display */
-      set_basic_configuration_display(tc);
-     
-      /* Clean the display */
-      tc.clear_display();
-     
-      /* Static configuration cycle (phase 2: gather user input) */
-      if (!validate_configuration(tc.get_configuration())) {
-        /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
-        tc.send_status_report(sip::report::error, "The configuration is invalid");
-     
-        exit(1);
-      }
-    }
-
-    realise_configuration(tc, constelm, tc.get_configuration());
-
-    /* Send the controller the signal that we're ready to rumble (no further configuration necessary) */
-    tc.send_accept_configuration();
-
-    /* Wait for start message */
-    tc.await_message(sip::message_signal_start);
   }
   else {
+#endif
     parse_command_line(ac,av,constelm);
-  }
-#else
-  parse_command_line(ac,av,constelm);
-#endif
 
-  constelm.filter();
-  constelm.output(); 
-
+    constelm.filter();
+    constelm.output(); 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (tc.is_active()) {
-    tc.send_signal_done();
-
-    gsRewriteFinalise();
-
-    tc.await_message(sip::message_request_termination);
-
   }
-  else {
-    gsRewriteFinalise();
-  } 
-#else
-  gsRewriteFinalise();
 #endif
+
+  gsRewriteFinalise();
 
   return 0;
 }

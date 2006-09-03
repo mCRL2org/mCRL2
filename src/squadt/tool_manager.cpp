@@ -1,4 +1,3 @@
-#include <iostream>
 #include <fstream>
 
 #include <boost/bind.hpp>
@@ -10,6 +9,7 @@
 
 #include <xml2pp/text_reader.h>
 
+#include "sip/detail/controller.tcc"
 #include "executor.h"
 #include "tool_manager.h"
 #include "processor.tcc"
@@ -34,14 +34,14 @@ namespace squadt {
 
   const sip::tool::capabilities::ptr tool::no_capabilities(new sip::tool::capabilities());
 
-  char const* tool_manager::default_tools[] = {"lpeconstelm", "lpeinfo", "lpeparelm", "lpe2lts", "ltsconvert", "ltsinfo", "ltsgraph", "ltsmin", "mcrl22lpe", "xsim", 0};
+  char const* tool_manager::default_tools[] = {"lpeconstelm", "lpeinfo", "lpeparelm", "lpe2lts", "ltsconvert", "ltsinfo", "ltsgraph", "mcrl22lpe", "xsim", 0};
 
   tool_manager::tool_manager() : sip::controller::communicator(), free_identifier(0) {
     /* Listen for incoming socket connections on the loopback interface with the default port */
-    add_listener();
+    impl->add_listener();
 
     /* Set handler for incoming instance identification messages */
-    add_handler(sip::message_instance_identifier, boost::bind(&tool_manager::handle_relay_connection, this, _1, _2));
+    add_handler(sip::message_instance_identifier, boost::bind(&tool_manager::handle_relay_connection, this, _1));
   }
 
   void tool_manager::write(std::ostream& stream) const {
@@ -140,7 +140,7 @@ namespace squadt {
     execution::command c(t.get_location(), w);
 
     c.append_argument(boost::str(boost::format(socket_connect_pattern)
-                            % get_local_host() % default_tcp_port));
+                            % impl->get_local_host() % default_tcp_port));
     c.append_argument(boost::str(boost::format(identifier_pattern)
                             % id));
 
@@ -198,7 +198,7 @@ namespace squadt {
     boost::shared_ptr < extractor > e(new extractor(t));
 
     execute(t, boost::filesystem::current_path().native_file_string(),
-               boost::dynamic_pointer_cast < execution::task_monitor, extractor > (e), false);
+               boost::dynamic_pointer_cast < execution::task_monitor > (e), false);
 
     execution::process::ptr p(e->get_process(true));
 
@@ -207,11 +207,7 @@ namespace squadt {
       /* Start extracting */
       e->start();
 
-      /* Wait for extraction process to complete */
-      e->await_completion();
-
-      /* Disconnect any connection to the process */
-      e->disconnect(p.get());
+      e->request_termination();
 
       local_executor.terminate(p);
 
@@ -234,7 +230,7 @@ namespace squadt {
    * @param m the message that was just delivered
    * @param o the local end point through which the message was received
    **/
-  void tool_manager::handle_relay_connection(const sip::message_ptr& m, const sip::end_point o) {
+  void tool_manager::handle_relay_connection(sip::message_ptr const& m) {
     instance_identifier id = atol(m->to_string().c_str());
 
     if (instances.find(id) == instances.end()) {
@@ -243,10 +239,10 @@ namespace squadt {
 
     execution::task_monitor::sptr p = instances[id];
 
-    relay_connection(p.get(), const_cast < transport::transceiver::basic_transceiver* > (o));
+    impl->relay_connection(p->impl.get(), const_cast < transport::transceiver::basic_transceiver* > (m->get_originator()));
 
     /* Signal the listener that a connection has been established */
-    p->signal_connection(o);
+    p->signal_connection(m->get_originator());
 
     instances.erase(id);
   }

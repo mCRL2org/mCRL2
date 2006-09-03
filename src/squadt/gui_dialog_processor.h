@@ -10,8 +10,6 @@
 #include <wx/listctrl.h>
 #include <wx/notebook.h>
 
-#include <sip/tool.h>
-
 #include "gui_dialog_base.h"
 
 namespace squadt {

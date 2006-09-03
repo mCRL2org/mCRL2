@@ -93,6 +93,30 @@ void parse_command_line(int ac, char** av) {
   file_name = (0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-";
 }
         
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+/* Constants for identifiers of options and objects */
+const unsigned int lpd_file_for_input = 0;
+
+bool try_to_accept_configuration(sip::tool::communicator& tc) {
+  sip::configuration& configuration = tc.get_configuration();
+
+  if (configuration.object_exists(lpd_file_for_input)) {
+    /* The input object is present */
+    sip::object::sptr input_object = configuration.get_object(lpd_file_for_input);
+
+    if (!boost::filesystem::exists(boost::filesystem::path(input_object->get_location()))) {
+      tc.send_status_report(sip::report::error, std::string("Invalid configuration: input object does not exist"));
+
+      return (false);
+    }
+  }
+
+  tc.send_accept_configuration();
+
+  return (true);
+}
+#endif
+
 int main(int ac, char** av) {
   ATerm bot;
   ATinit(0,0,&bot);
@@ -100,9 +124,6 @@ int main(int ac, char** av) {
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   sip::tool::communicator tc;
-
-  /* Constants for identifiers of options and objects */
-  const unsigned int lpd_file_for_input = 0;
 
   /* Get tool capabilities in order to modify settings */
   sip::tool::capabilities& cp = tc.get_tool_capabilities();
@@ -112,126 +133,116 @@ int main(int ac, char** av) {
 
   /* On purpose we do not catch exceptions */
   if (tc.activate(ac,av)) {
-    bool valid = false;
+    bool valid_configuration_present = false;
+    bool termination_requested       = false;
 
     /* Initialise utility pseudo-library */
     squadt_utility::initialise(tc);
 
-    /* Static configuration cycle */
-    while (!valid) {
-      /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
-      sip::configuration::sptr configuration = tc.await_configuration();
+    while (!termination_requested) {
+      sip::message_ptr m = tc.await_message(sip::message_any);
 
-      /* Validate configuration specification, should contain a file name of an LPD that is to be read as input */
-      valid  = configuration.get() != 0;
-      valid &= configuration->object_exists(lpd_file_for_input);
+      assert(m.get() != 0);
 
-      if (valid) {
-        /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
-        file_name = configuration->get_object(lpd_file_for_input)->get_location();
-      }
-      else {
-        tc.send_status_report(sip::report::error, "Invalid input combination!");
+      switch (m->get_type()) {
+        case sip::message_offer_configuration:
+
+          /* Insert configuration in tool communicator object */
+          valid_configuration_present = try_to_accept_configuration(tc);
+
+          break;
+        case sip::message_signal_start:
+          if (valid_configuration_present) {
+            lpe::specification lpe_specification;
+
+            if (lpe_specification.load(tc.get_configuration().get_object(lpd_file_for_input)->get_location())) {
+              using namespace sip;
+              using namespace sip::layout;
+              using namespace sip::layout::elements;
+             
+              lpe::LPE lpe = lpe_specification.lpe();
+    
+              layout::tool_display::sptr display(new layout::tool_display);
+            
+              /* Create and add the top layout manager */
+              layout::manager::aptr layout_manager = layout::horizontal_box::create();
+            
+              /* First column */
+              layout::vertical_box* left_column = new layout::vertical_box();
+            
+              layout::vertical_box::alignment a = layout::left;
+            
+              left_column->add(new label("Input read from:"), a);
+              left_column->add(new label("Summands (#):"), a);
+              left_column->add(new label("Free variables (#):"), a);
+              left_column->add(new label("Process parameters (#):"), a);
+              left_column->add(new label("Actions (#):"), a);
+            
+              /* Second column */
+              layout::vertical_box* right_column = new layout::vertical_box();
+            
+              boost::format c("%u");
+            
+              right_column->add(new label(boost::filesystem::path(file_name).leaf()), a);
+              right_column->add(new label(boost::str(c % lpe.summands().size())), a);
+              right_column->add(new label(boost::str(c % (lpe_specification.initial_free_variables().size() + lpe.free_variables().size()))), a);
+              right_column->add(new label(boost::str(c % lpe.process_parameters().size())), a);
+              right_column->add(new label(boost::str(c % lpe.actions().size())), a);
+            
+              /* Attach columns*/
+              layout_manager->add(left_column, margins(0,5,0,5));
+              layout_manager->add(right_column, margins(0,5,0,20));
+            
+              display->set_top_manager(layout_manager);
+            
+              tc.send_display_layout(display);
+            
+              /* Signal that the job is finished */
+              tc.send_signal_done();
+            }
+            else {
+              tc.send_status_report(sip::report::error, "Failure reading input from file: `" + file_name + "'\n");
+            }
+          }
+          else {
+            tc.send_status_report(sip::report::error, "Invalid configuration cannot proceed.");
+          }
+          break;
+        case sip::message_request_termination:
+
+          termination_requested = true;
+
+          tc.send_signal_termination();
+
+          break;
+        default:
+          /* Messages with a type that do not need to be handled */
+          break;
       }
     }
-
-    /* Send the controller the signal that we're ready to rumble (no further configuration necessary) */
-    tc.send_accept_configuration();
-
-    /* Wait for start message */
-    tc.await_message(sip::message_signal_start);
   }
   else {
 #endif
     parse_command_line(ac,av);
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-  }
-#endif
 
-  lpe::specification lpe_specification;
-
-  if (lpe_specification.load(file_name)) {
-    lpe::LPE lpe = lpe_specification.lpe();
+    lpe::specification lpe_specification;
+ 
+    if (lpe_specification.load(file_name)) {
+      lpe::LPE lpe = lpe_specification.lpe();
     
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    if (tc.is_active()) {
-      using namespace sip;
-      using namespace sip::layout;
-      using namespace sip::layout::elements;
-
-      layout::tool_display::sptr display(new layout::tool_display);
-
-      /* Create and add the top layout manager */
-      layout::manager::aptr layout_manager = layout::horizontal_box::create();
-
-      /* First column */
-      layout::vertical_box* left_column = new layout::vertical_box();
-
-      layout::vertical_box::alignment a = layout::left;
-
-      left_column->add(new label("Input read from:"), a);
-      left_column->add(new label("Summands (#):"), a);
-      left_column->add(new label("Free variables (#):"), a);
-      left_column->add(new label("Process parameters (#):"), a);
-      left_column->add(new label("Actions (#):"), a);
-
-      /* Second column */
-      layout::vertical_box* right_column = new layout::vertical_box();
-
-      boost::format c("%u");
-
-      right_column->add(new label(boost::filesystem::path(file_name).leaf()), a);
-      right_column->add(new label(boost::str(c % lpe.summands().size())), a);
-      right_column->add(new label(boost::str(c % (lpe_specification.initial_free_variables().size() + lpe.free_variables().size()))), a);
-      right_column->add(new label(boost::str(c % lpe.process_parameters().size())), a);
-      right_column->add(new label(boost::str(c % lpe.actions().size())), a);
-
-      /* Attach columns*/
-      layout_manager->add(left_column, margins(0,5,0,5));
-      layout_manager->add(right_column, margins(0,5,0,20));
-
-      display->set_top_manager(layout_manager);
-
-      tc.send_display_layout(display);
-
-      /* Termination sequence */
-      tc.send_signal_done();
-
-      tc.await_message(sip::message_request_termination);
-    }
-    else {
-#endif
       cout << "Input read from " << ((file_name == "-") ? "standard input" : file_name) << endl << endl;
      
       cout << "Number of summands          : " << lpe.summands().size() << endl;
       cout << "Number of free variables    : " << lpe_specification.initial_free_variables().size() + lpe.free_variables().size() << endl;
       cout << "Number of process parameters: " << lpe.process_parameters().size() << endl; 
       cout << "Number of actions           : " << lpe.actions().size() << endl;
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    }
-#endif
-  }
-  else {
-    std::string error("Unable to load LPE from `" + file_name + "'\n");
-
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    if (tc.is_active()) {
-      /* Something went wrong, send an error report */
-      tc.send_status_report(sip::report::error, error);
-
-      tc.send_signal_done();
-
-      tc.await_message(sip::message_request_termination);
     }
     else {
-      std::cerr << "Error: " + error;
+      std::cerr << "Error: Unable to load LPE from `" + file_name + "'\n";
     }
-#else
-    std::cerr << "Error: " + error;
-#endif
-
-    return (1);
+#ifdef ENABLE_SQUADT_CONNECTIVITY
   }
+#endif
 
   return 0;
 }

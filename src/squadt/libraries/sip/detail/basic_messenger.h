@@ -1,5 +1,5 @@
-#ifndef COMMUNICATOR_H
-#define COMMUNICATOR_H
+#ifndef BASIC_MESSENGER_H
+#define BASIC_MESSENGER_H
 
 #include <deque>
 #include <iosfwd>
@@ -20,12 +20,14 @@
 
 #include <sip/detail/message.h>
 
+namespace transport {
+  class transporter;
+}
+
 namespace sip {
 
   namespace messaging {
     template < class M > class basic_messenger;
-
-    using transport::transceiver::basic_transceiver;
 
     /**
      * \brief Abstract communicator class that divides an incoming data stream in messages
@@ -38,7 +40,7 @@ namespace sip {
       private:
 
         /** \brief Convenience type for handlers */
-        typedef boost::function < void (boost::shared_ptr < M > const&, const basic_transceiver*) > handler_type;
+        typedef boost::function < void (boost::shared_ptr < M > const&) > handler_type;
 
         /** \brief Strict weak order on handler_type (for use with std::set) */
         class compare_handlers {
@@ -86,6 +88,9 @@ namespace sip {
             void wait(boost::function < void () >);
 
             /** \brief Wake up all treads that are blocked via wait(), and delivers a message */
+            void wait(boost::function < void () >, long const&);
+
+            /** \brief Wake up all treads that are blocked via wait(), and delivers a message */
             void wake(boost::shared_ptr < M > const&);
 
             /** \brief Wake up all treads that are blocked via wait() */
@@ -124,6 +129,9 @@ namespace sip {
         /** \brief Used to ensure any element t (in M::type_identifier_t) in waiters is assigned to at most once */
         boost::recursive_mutex     waiter_lock;
 
+        /** \brief The current task queue (messages to be delivered) */
+        message_queue_t            task_queue;
+
         /** \brief The current message queue (unhandled messages end up here) */
         message_queue_t            message_queue;
 
@@ -144,24 +152,30 @@ namespace sip {
       private:
 
         /** \brief Helper function that services the handlers */
-        inline void   service_handlers(const boost::shared_ptr < message > m, const basic_transceiver* o);
+        inline void   service_handlers();
 
       public:
 
         /** \brief Default constructor */
         basic_messenger(utility::logger* = &standard_error_logger);
+
+        /** \brief Destroys all connections */
+        void disconnect();
  
         /** \brief Queues incoming messages */
-        virtual void deliver(std::istream&, basic_transceiver*);
+        virtual void deliver(std::istream&, typename M::end_point);
  
         /** \brief Queues incoming messages */
-        virtual void deliver(const std::string&, basic_transceiver*);
+        virtual void deliver(const std::string&, typename M::end_point);
  
         /* \brief Wait until the next message of a certain type arrives */
         const boost::shared_ptr < M > await_message(typename M::type_identifier_t);
  
+        /* \brief Wait until the next message of a certain type arrives */
+        const boost::shared_ptr < M > await_message(typename M::type_identifier_t, long const&);
+ 
         /** \brief Send a message */
-        inline void send_message(const message&);
+        void send_message(const message&);
  
         /** \brief Pops the first message of the queue */
         inline boost::shared_ptr < M > pop_message();
@@ -179,16 +193,16 @@ namespace sip {
         inline size_t number_of_messages();
  
         /** \brief Set the handler for a type */
-        inline void add_handler(const typename M::type_identifier_t, handler_type);
+        void add_handler(const typename M::type_identifier_t, handler_type);
 
         /** \brief Clears the handlers for a message type */
-        inline void clear_handlers(const typename M::type_identifier_t);
+        void clear_handlers(const typename M::type_identifier_t);
 
         /** \brief Remove a specific handlers for a message type */
-        inline void remove_handler(const typename M::type_identifier_t, handler_type);
+        void remove_handler(const typename M::type_identifier_t, handler_type);
 
         /** \brief Gets the associated logger object */
-        inline utility::logger* get_logger();
+        utility::logger* get_logger();
 
         /** \brief Gets the associated logger object */
         static utility::logger* get_standard_error_logger();

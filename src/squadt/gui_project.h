@@ -1,6 +1,8 @@
 #ifndef SQUADT_PROJECT_H
 #define SQUADT_PROJECT_H
 
+#include <deque>
+
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 #include <boost/filesystem/path.hpp>

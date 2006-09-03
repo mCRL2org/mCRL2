@@ -591,6 +591,8 @@ static ATerm get_repr(ATerm state)
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 sip::tool::communicator tc;
 
+bool communicator_is_active = false;
+
 static sip::layout::tool_display::sptr status_display;
 static sip::layout::manager::aptr layout_manager;
 static sip::layout::manager::aptr labels;
@@ -940,7 +942,7 @@ static bool generate_lts()
   num_states++;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (tc.is_active()) {
+  if (communicator_is_active) {
     update_status_display(level,current_state,num_states,0,trans);
   }
 #endif
@@ -995,7 +997,7 @@ static bool generate_lts()
 
         current_state++;
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-        if ( tc.is_active() && ((current_state%200) == 0) ) {
+        if ( communicator_is_active && ((current_state%200) == 0) ) {
           update_status_display(level,current_state,num_states,num_found_same,trans);
         }
 #endif
@@ -1056,7 +1058,7 @@ static bool generate_lts()
   
         current_state++;
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-        if ( tc.is_active() && ((current_state%200) == 0) ) {
+        if ( communicator_is_active && ((current_state%200) == 0) ) {
           update_status_display(level,current_state,num_states,num_found_same,trans);
         }
 #endif
@@ -1080,7 +1082,7 @@ static bool generate_lts()
             swap_queues();
           }
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-          if (tc.is_active()) {
+          if (communicator_is_active) {
             update_status_display(level,current_state,num_states,num_found_same,trans);
           }
 #endif
@@ -1189,7 +1191,7 @@ static bool generate_lts()
         {
           current_state++;
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-          if ( tc.is_active() && ((current_state%200) == 0) ) {
+          if ( communicator_is_active && ((current_state%200) == 0) ) {
             update_status_display(level,current_state,num_states,num_found_same,trans);
           }
 #endif
@@ -1206,7 +1208,7 @@ static bool generate_lts()
         }
       }
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-      if ( tc.is_active() ) {
+      if ( communicator_is_active ) {
         update_status_display(level,current_state,num_states,num_found_same,trans);
       }
 #endif
@@ -1452,7 +1454,7 @@ void set_basic_configuration_display(sip::tool::communicator& tc, bool make_lts)
   
   c.add_option(option_init_tsize).append_argument(sip::datatype::string::standard, tf_init_tsize->get_text());
   
-  tc.clear_display();
+  tc.send_clear_display();
 }
 #endif
 
@@ -1542,6 +1544,8 @@ int main(int argc, char **argv)
   if (tc.activate(argc,argv)) {
     gsSetVerboseMsg();
 
+    communicator_is_active = true;
+
     bool valid = false;
     bool make_lts = false;
 
@@ -1551,18 +1555,19 @@ int main(int argc, char **argv)
     /* Static configuration cycle */
     while (!valid) {
       /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
-      sip::configuration::sptr configuration = tc.await_configuration();
+      tc.await_configuration();
+
+      sip::configuration& configuration = tc.get_configuration();
 
       /* Validate configuration specification, should contain a file name of an LPD that is to be read as input */
-      valid  = configuration.get() != 0;
-      bool valid_0 = configuration->object_exists(lpd_file_for_input_no_lts);
-      bool valid_1 = configuration->object_exists(lpd_file_for_input_lts);
-      valid &= valid_0 | valid_1;
+      bool valid_0 = configuration.object_exists(lpd_file_for_input_no_lts);
+      bool valid_1 = configuration.object_exists(lpd_file_for_input_lts);
+      valid = valid_0 | valid_1;
       make_lts = valid_1;
 
       if (valid) {
         /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
-        spec_fn = configuration->get_object(valid_0?lpd_file_for_input_no_lts:lpd_file_for_input_lts)->get_location();
+        spec_fn = configuration.get_object(valid_0?lpd_file_for_input_no_lts:lpd_file_for_input_lts)->get_location();
       } else {
         tc.send_status_report(sip::report::error, "Invalid input combination!");
       }
@@ -1914,7 +1919,7 @@ int main(int argc, char **argv)
   level = 1;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (tc.is_active()) {
+  if (communicator_is_active) {
     gsVerboseMsg("creating status display...\n");
     create_status_display(tc);
     gsVerboseMsg("done\n");
@@ -1931,7 +1936,7 @@ int main(int argc, char **argv)
   if ( !err && gsVerbose )
   {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-    if (tc.is_active()) {
+    if (communicator_is_active) {
       tc.send_status_report(sip::report::notice, "done with state space generation");
 
       tc.send_signal_done();

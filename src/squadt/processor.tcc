@@ -14,45 +14,6 @@
 namespace squadt {
 
   /**
-   * @param[in] h the function or functor that is invoked at layout change
-   **/
-  inline void processor::monitor::set_display_layout_handler(display_layout_callback_function h) {
-    /* Set the handler for incoming layout messages */
-    activate_display_layout_handler(h);
-  }
-
-  /**
-   * @param[in] d the tool display associated with this monitor
-   * @param[in] h the function or functor that is invoked at layout change
-   **/
-  inline void processor::monitor::set_display_data_handler(sip::layout::tool_display::sptr d, display_data_callback_function h) {
-    /* Set the handler for incoming layout messages */
-    activate_display_data_handler(d, h);
-  }
-
-  /**
-   * @param[in] h the function or functor that is invoked at layout change
-   **/
-  inline void processor::monitor::set_status_message_handler(status_message_callback_function h) {
-    /* Set the handler for incoming layout messages */
-    activate_status_message_handler(h);
-  }
-
-  /**
-   * @param[in] h the function or functor that is invoked at status change
-   **/
-  inline void processor::monitor::set_status_handler(status_callback_function h) {
-    on_status_change = h;
-  }
-
-  /**
-   * @param b whether or not to send the start signal after the configuration is accepted
-   **/
-  inline void processor::monitor::start_pilot(bool b) {
-    boost::thread thread(boost::bind(&processor::monitor::pilot, this, b));
-  }
-
-  /**
    * \brief Operator for writing to stream
    *
    * @param[in] s stream to write to
@@ -288,24 +249,6 @@ namespace squadt {
     current_monitor->once_on_completion(h);
 
     process();
-  }
-
-  /**
-   * \attention This function is non-blocking
-   *
-   * \pre the configure member must have been called
-   **/
-  inline void processor::process() {
-    if (0 < inputs.size()) {
-      global_tool_manager->execute(*tool_descriptor, output_directory, boost::dynamic_pointer_cast < execution::task_monitor, monitor > (current_monitor), true);
-
-      current_monitor->once_on_completion(boost::bind(&processor::process_configuration, this));
-      current_monitor->start_pilot();
-    }
-    else {
-      /* Signal completion to environment via monitor */
-      current_monitor->signal_change(execution::process::aborted);
-    }
   }
 
   inline const size_t processor::number_of_inputs() const {

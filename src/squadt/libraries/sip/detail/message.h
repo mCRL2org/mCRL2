@@ -9,6 +9,12 @@
 
 #include <xml2pp/text_reader.h>
 
+namespace transport {
+  namespace transceiver {
+    class basic_transceiver;
+  }
+}
+
 namespace sip {
   namespace messaging {
 
@@ -30,21 +36,27 @@ namespace sip {
       public:
 
         /** \brief Type for message identification */
-        typedef M                  type_identifier_t;
+        typedef M                                                type_identifier_t;
+
+        /** \brief Type for message originator identification */
+        typedef const transport::transceiver::basic_transceiver* end_point;
 
         /** \brief The type identifier for messages of which the type is not known */
-        static const M             message_unknown;
+        static const M                                           message_unknown;
 
         /** \brief The type identifier for messages of any type */
-        static const M             message_any;
+        static const M                                           message_any;
 
       private:
 
+        /** \brief Identifier for the origin of this message */
+        end_point         originator;
+
         /** \brief The message type */
-        type_identifier_t          type;
+        type_identifier_t type;
 
         /** \brief The content of a message */
-        std::string                content;
+        std::string       content;
 
       private:
 
@@ -54,17 +66,20 @@ namespace sip {
       public:
 
         /** \brief Generates an XML text string for the message */
-        inline message(type_identifier_t t);
+        inline message(type_identifier_t t, end_point o = 0);
+
+        /** \brief Generates an XML text string for the message */
+        template < typename T >
+        inline message(T, type_identifier_t t, end_point o = 0);
 
         /** \brief Copy constructor */
         inline message(message&);
 
-        /** \brief Generates an XML text string for the message */
-        template < typename T >
-        inline message(T, type_identifier_t t);
-
         /** \brief Returns the message type */
         inline type_identifier_t get_type() const;
+ 
+        /** \brief Returns the message originator information */
+        inline end_point get_originator() const;
  
         /** \brief Generates an XML text string for the message */
         inline std::string to_xml() const;
@@ -94,10 +109,11 @@ namespace sip {
 //    const M message< M, D, A >::message_any     = A;
 
     /**
+     * @param o message originator identifier
      * @param t a message type identifier
      **/
     template < class M, M D, M A >
-    inline message< M, D, A >::message(type_identifier_t t) : type(t) {
+    inline message< M, D, A >::message(type_identifier_t t, end_point o) : originator(o), type(t) {
     }
 
     template < class M, M D, M A >
@@ -110,13 +126,19 @@ namespace sip {
      **/
     template < class M, M D, M A >
     template < typename T >
-    inline message< M, D, A >::message(T c, type_identifier_t t) : type(t) {
+    inline message< M, D, A >::message(T c, type_identifier_t t, end_point o) : originator(o), type(t) {
       set_content(c);
     }
 
     template < class M, M D, M A >
     inline M message< M, D, A >::get_type() const {
       return (type);
+    }
+
+    /** Returns the remote end point, or 0 if the message contains no originator information */
+    template < class M, M D, M A >
+    inline typename message< M, D, A >::end_point message< M, D, A >::get_originator() const {
+      return (originator);
     }
 
     template < class M, M D, M A >

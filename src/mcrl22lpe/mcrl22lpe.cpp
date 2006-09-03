@@ -254,6 +254,8 @@ static int parse_command_line(int argc, char *argv[],t_lin_options &lin_options)
 
 sip::tool::communicator tc;
 
+bool communicator_is_active = false;
+
 enum mcrl22lpe_options {
        option_input_mcrl2_file_name,
        option_output_lpe_file_name,
@@ -465,7 +467,7 @@ static void get_configuration_parameters_via_squadt_display()
 
     /* Send the controller the signal that we're ready to rumble 
      * (no further configuration necessary) */
-    tc.clear_display();
+    tc.send_clear_display();
     tc.send_accept_configuration();
 }
 
@@ -482,6 +484,8 @@ static bool get_squadt_parameters(int argc,
   if (tc.activate(argc,argv)) 
   { bool valid = false;
 
+    communicator_is_active = true;
+
     /* Initialise squadt utility pseudo-library */
     squadt_utility::initialise(tc);
 
@@ -490,11 +494,14 @@ static bool get_squadt_parameters(int argc,
     {
       /* Wait for configuration data to be sent 
        * (either a previous configuration, or only an input combination) */
-      sip::configuration::sptr configuration = tc.await_configuration();
+      tc.await_configuration();
+
+      sip::configuration& configuration = tc.get_configuration();
+
       /* Validate configuration specification, 
        * should contain a file name of an LPD that is to be read as input */
-      valid  = configuration.get() != 0;
-      valid &= configuration->object_exists(option_input_mcrl2_file_name);
+      valid = configuration.object_exists(option_input_mcrl2_file_name);
+
       if (!valid) 
       { 
         gsErrorMsg("Bad configuration data received from SQUADT\n");
@@ -503,6 +510,7 @@ static bool get_squadt_parameters(int argc,
     }
 
     sip::configuration& configuration=tc.get_configuration();
+
     if (configuration.is_fresh())
     { get_configuration_parameters_via_squadt_display();
     }
@@ -640,7 +648,7 @@ int main(int argc, char *argv[])
   }
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (tc.is_active())
+  if (communicator_is_active)
   {
     tc.send_signal_done();
 

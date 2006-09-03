@@ -142,7 +142,7 @@ namespace squadt {
           void status_message_change_dummy(sip::report::sptr);
 
           /** \brief Helper function for communication with a tool, starts a new thread with pilot() */
-          inline void start_pilot(bool = true);
+          void start_pilot(bool = true);
 
           /** \brief Helper function for communication with a tool */
           void pilot(bool = true);
@@ -153,16 +153,16 @@ namespace squadt {
           monitor(processor&);
 
           /** \brief Set the callback handler for status changes */
-          inline void set_status_handler(status_callback_function);
+          void set_status_handler(status_callback_function);
 
           /** \brief Set the callback handler for display layout changes */
-          inline void set_display_layout_handler(display_layout_callback_function);
+          void set_display_layout_handler(display_layout_callback_function);
 
           /** \brief Set the callback handler for display data changes */
-          inline void set_display_data_handler(sip::layout::tool_display::sptr, display_data_callback_function);
+          void set_display_data_handler(sip::layout::tool_display::sptr, display_data_callback_function);
 
           /** \brief Set the callback handler for incoming status messages */
-          inline void set_status_message_handler(status_message_callback_function);
+          void set_status_message_handler(status_message_callback_function);
       };
 
       /** \brief Convenience type for hiding the implementation of a list with input information */

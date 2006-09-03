@@ -122,7 +122,7 @@ namespace transport {
         /** \brief Wrapper for connect() that ensures establishes that the object is not freed yet */
         inline void connect(const address& = boost::asio::ip::address_v4::any(), const short = default_port);
 
-        /** \brief Terminate the connection with the peer */
+        /** \brief Terminate connection with peer */
         inline void disconnect(basic_transceiver::ptr);
 
         /** \brief Start listening for new data */

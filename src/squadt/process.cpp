@@ -47,31 +47,33 @@ namespace squadt {
 
       current_status = (identifier < 0) ? aborted : running;
 
-      /* Inform monitor */
-      boost::shared_ptr < task_monitor > l = monitor.lock();
-
       if (0 < identifier) {
+        /* Wait for the process to terminate */
         int exit_code;
 
         last_command = std::auto_ptr < command > (new command(c));
 
-        l->signal_change(current_status);
+        signal_status();
 
         waitpid(identifier, &exit_code, 0);
 
         current_status = (WIFEXITED(exit_code)) ? completed : aborted;
 
-        /* Inform monitor */
-        if (l.get() != 0) {
-          l->signal_change(current_status);
-        }
+        signal_status();
 
         signal_termination(this);
       }
       else {
-        if (l.get() != 0) {
-          l->signal_change(current_status);
-        }
+        signal_status();
+      }
+    }
+
+    /** Signals the current state to the monitor */
+    void process::signal_status() const {
+      boost::shared_ptr < task_monitor > l = monitor.lock();
+
+      if (l.get() != 0) {
+        l->signal_change(current_status);
       }
     }
 
@@ -79,7 +81,7 @@ namespace squadt {
      * @param c the command to execute
      **/
     void process::execute(const command& c) {
-      execution_thread = boost::shared_ptr < boost::thread >(new boost::thread(
+      boost::shared_ptr < boost::thread >(new boost::thread(
                               boost::bind(&process::operator(), this, c)));
     }
 

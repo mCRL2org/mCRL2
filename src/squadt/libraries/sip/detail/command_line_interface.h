@@ -8,6 +8,11 @@
 
 namespace sip {
 
+  namespace messaging {
+    template < typename M >
+    class scheme;
+  }
+
   namespace command_line_interface {
 
     /** \brief Convenience type for hiding boost shared pointers */
