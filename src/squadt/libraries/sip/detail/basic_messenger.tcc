@@ -123,8 +123,11 @@ namespace sip {
         /** \brief Buffer that holds content until a message is complete */
         std::string                buffer;
  
-        /** \brief Whether a message start tag has been matched after the most recent message end tag */
+        /** \brief Whether or not a message start tag has been matched after the most recent message end tag */
         bool                       message_open;
+
+        /** \brief Whether or not a delivery thread is active */
+        volatile bool              delivery_thread_active;
 
         /** \brief The number of tag elements (of message::tag) that have been matched at the last delivery */
         unsigned char              partially_matched;
@@ -373,8 +376,14 @@ namespace sip {
             task_queue.push_back(boost::shared_ptr< M >(new M(new_string, t, o)));
 
             if (task_queue.size() == 1) {
-              /* Start delivery thread */
-              boost::thread thread(boost::bind(&basic_messenger_impl< M >::service_handlers, this));
+              boost::recursive_mutex::scoped_lock w(waiter_lock);
+
+              if (!delivery_thread_active) {
+                delivery_thread_active = true;
+
+                /* Start delivery thread */
+                boost::thread thread(boost::bind(&basic_messenger_impl< M >::service_handlers, this));
+              }
             }
           }
         }
@@ -482,53 +491,48 @@ namespace sip {
      **/
     template < class M >
     inline void basic_messenger_impl< M >::service_handlers() {
-      static volatile bool r = false;
 
-      if (!r) {
-        r = true;
+      boost::recursive_mutex::scoped_lock w(waiter_lock);
 
-        while (0 < task_queue.size()) {
-          boost::recursive_mutex::scoped_lock w(waiter_lock);
-       
-          boost::shared_ptr < M > m(task_queue.front());
-       
-          task_queue.pop_front();
-       
-          typename M::type_identifier_t id = m->get_type();
-       
-          if (handlers.count(id)) {
-            BOOST_FOREACH(handler_type h, handlers[id]) {
-              h(m);
-            }
-          }
-          if (id != M::message_any && handlers.count(M::message_any)) {
-            BOOST_FOREACH(handler_type h, handlers[M::message_any]) {
-              h(m);
-            }
-          }
-         
-          if (0 < waiters.count(id)) {
-            waiters[id]->wake(m);
-         
-            waiters.erase(id);
-          }
-          if (id != M::message_any && 0 < waiters.count(M::message_any)) {
-            waiters[M::message_any]->wake(m);
-         
-            waiters.erase(M::message_any);
-          }
-          if (waiters.count(id) + waiters.count(M::message_any) == 0) {
-            /* Put message into queue */
-            message_queue.push_back(m);
-         
-            if (16 < message_queue.size()) {
-              message_queue.pop_front();
-            }
+      while (0 < task_queue.size()) {
+        boost::shared_ptr < M > m(task_queue.front());
+     
+        task_queue.pop_front();
+     
+        typename M::type_identifier_t id = m->get_type();
+     
+        if (handlers.count(id)) {
+          BOOST_FOREACH(handler_type h, handlers[id]) {
+            h(m);
           }
         }
-
-        r = false;
+        if (id != M::message_any && handlers.count(M::message_any)) {
+          BOOST_FOREACH(handler_type h, handlers[M::message_any]) {
+            h(m);
+          }
+        }
+       
+        if (0 < waiters.count(id)) {
+          waiters[id]->wake(m);
+       
+          waiters.erase(id);
+        }
+        if (id != M::message_any && 0 < waiters.count(M::message_any)) {
+          waiters[M::message_any]->wake(m);
+       
+          waiters.erase(M::message_any);
+        }
+        else if (waiters.count(id) == 0) {
+          /* Put message into queue */
+          message_queue.push_back(m);
+       
+          if (16 < message_queue.size()) {
+            message_queue.pop_front();
+          }
+        }
       }
+
+      delivery_thread_active = false;
     }
 
     /**

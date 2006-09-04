@@ -717,6 +717,13 @@ namespace squadt {
 
         GetParent()->GetSizer()->RecalcSizes();
         GetParent()->Layout();
+
+        /* Toggle scrollbar availability on demand */
+        wxSizeEvent size_event(GetParent()->GetSize(), GetParent()->GetId());
+
+        size_event.SetEventObject(GetParent());
+
+        GetParent()->ProcessEvent(size_event);
       }
       catch (...) {
         /* Consider every exception a failure to correctly read the layout, and bail */
