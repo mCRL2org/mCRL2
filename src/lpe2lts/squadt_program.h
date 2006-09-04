@@ -10,10 +10,11 @@ class squadt_program
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   // Methods to be implemented
   protected:
+    virtual void set_capabilities();
     virtual void initialise();
-    virtual void configure(sip::configuration::sptr configuration);
-    virtual bool check_configuration(sip::configuration::sptr configuration);
-    virtual void execute(sip::configuration::sptr configuration);
+    virtual void configure(sip::configuration &configuration);
+    virtual bool check_configuration(sip::configuration &configuration);
+    virtual void execute(sip::configuration &configuration);
     virtual void finalise();
 #endif // _ENABLE_SQUADT_CONNECTIVITY
 

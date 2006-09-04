@@ -208,6 +208,8 @@ bool initialise_lts_generation(lts_generation_options *opts)
     gsVerboseMsg("not saving state space.\n");
   }
 
+  lgopts->squadt->create_status_display();
+
   return true;
 }
   

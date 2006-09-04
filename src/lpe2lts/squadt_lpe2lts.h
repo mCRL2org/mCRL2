@@ -23,10 +23,11 @@ class squadt_lpe2lts: public squadt_program
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   protected:
+    void set_capabilities();
     void initialise();
-    void configure(sip::configuration::sptr configuration);
-    bool check_configuration(sip::configuration::sptr configuration);
-    void execute(sip::configuration::sptr configuration);
+    void configure(sip::configuration &configuration);
+    bool check_configuration(sip::configuration &configuration);
+    void execute(sip::configuration &configuration);
     void finalise();
 
   protected:

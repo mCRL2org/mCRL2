@@ -38,7 +38,7 @@ const unsigned int lpd_file_for_input_no_lts = 0;
 const unsigned int lpd_file_for_input_lts = 1;
 const unsigned int lts_file_for_output = 2;
 
-void squadt_lpe2lts::initialise()
+void squadt_lpe2lts::set_capabilities()
 {
   /* Get tool capabilities in order to modify settings */
   sip::tool::capabilities& cp = tc.get_tool_capabilities();
@@ -48,13 +48,17 @@ void squadt_lpe2lts::initialise()
   cp.add_input_combination(lpd_file_for_input_lts, "Transformation", "lpe");
 }
 
-void squadt_lpe2lts::configure(sip::configuration::sptr configuration)
+void squadt_lpe2lts::initialise()
+{
+}
+
+void squadt_lpe2lts::configure(sip::configuration &configuration)
 {
   using namespace sip;
   using namespace sip::layout;
   using namespace sip::layout::elements;
   
-  bool make_lts = configuration->object_exists(lpd_file_for_input_lts);
+  bool make_lts = configuration.object_exists(lpd_file_for_input_lts);
 
   //status_display = sip::layout::tool_display::sptr(new layout::tool_display);
   //layout::tool_display::sptr display(status_display);
@@ -198,94 +202,99 @@ void squadt_lpe2lts::configure(sip::configuration::sptr configuration)
   okay_button->await_change();
 
   /* Update the current configuration */
-  sip::configuration::sptr c = configuration;
+  sip::configuration &c = configuration;
 
   /* Values for the options */
   if ( make_lts )
   {
-    std::string input_file_name = c->get_object(lpd_file_for_input_lts)->get_location();
+    std::string input_file_name = c.get_object(lpd_file_for_input_lts)->get_location();
     /* Add output file to the configuration */
-    c->add_output(lts_file_for_output, (cb_aut->get_status()?"aut":"svc"), c->get_output_name(cb_aut->get_status()?".aut":".svc"));
+    c.add_output(lts_file_for_output, (cb_aut->get_status()?"aut":"svc"), c.get_output_name(cb_aut->get_status()?".aut":".svc"));
   }
-  c->add_option(option_out_info).append_argument(sip::datatype::boolean::standard, cb_out_info->get_status());
+  c.add_option(option_out_info).append_argument(sip::datatype::boolean::standard, cb_out_info->get_status());
 
-  c->add_option(option_usedummies).append_argument(sip::datatype::boolean::standard, cb_usedummies->get_status());
-  c->add_option(option_state_format_tree).append_argument(sip::datatype::boolean::standard, cb_state_format_tree->get_status());
-  c->add_option(option_removeunused).append_argument(sip::datatype::boolean::standard, cb_removeunused->get_status());
+  c.add_option(option_usedummies).append_argument(sip::datatype::boolean::standard, cb_usedummies->get_status());
+  c.add_option(option_state_format_tree).append_argument(sip::datatype::boolean::standard, cb_state_format_tree->get_status());
+  c.add_option(option_removeunused).append_argument(sip::datatype::boolean::standard, cb_removeunused->get_status());
   
-  if ( rb_rewr_strat_inner->is_selected() ) c->add_option(option_rewr_strat).append_argument(sip::datatype::integer::standard, (long int) GS_REWR_INNER);
-  if ( rb_rewr_strat_jitty->is_selected() ) c->add_option(option_rewr_strat).append_argument(sip::datatype::integer::standard, (long int) GS_REWR_JITTY);
-  if ( rb_rewr_strat_innerc->is_selected() ) c->add_option(option_rewr_strat).append_argument(sip::datatype::integer::standard, (long int) GS_REWR_INNERC);
-  if ( rb_rewr_strat_jittyc->is_selected() ) c->add_option(option_rewr_strat).append_argument(sip::datatype::integer::standard, (long int) GS_REWR_JITTYC);
+  if ( rb_rewr_strat_inner->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::integer::standard, (long int) GS_REWR_INNER);
+  if ( rb_rewr_strat_jitty->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::integer::standard, (long int) GS_REWR_JITTY);
+  if ( rb_rewr_strat_innerc->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::integer::standard, (long int) GS_REWR_INNERC);
+  if ( rb_rewr_strat_jittyc->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::integer::standard, (long int) GS_REWR_JITTYC);
   
-  if ( rb_expl_strat_breadth->is_selected() ) c->add_option(option_expl_strat).append_argument(sip::datatype::integer::standard, (long int) es_breadth);
-  if ( rb_expl_strat_depth->is_selected() ) c->add_option(option_expl_strat).append_argument(sip::datatype::integer::standard, (long int) es_depth);
-  if ( rb_expl_strat_random->is_selected() ) c->add_option(option_expl_strat).append_argument(sip::datatype::integer::standard, (long int) es_random);
+  if ( rb_expl_strat_breadth->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::integer::standard, (long int) es_breadth);
+  if ( rb_expl_strat_depth->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::integer::standard, (long int) es_depth);
+  if ( rb_expl_strat_random->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::integer::standard, (long int) es_random);
 
-  c->add_option(option_detect_deadlock).append_argument(sip::datatype::boolean::standard, cb_deadlock->get_status());
-  c->add_option(option_detect_actions).append_argument(sip::datatype::string::standard, cb_actions->get_status()?tf_actions->get_text():"");
-  c->add_option(option_trace).append_argument(sip::datatype::boolean::standard, cb_trace->get_status());
-  c->add_option(option_max_traces).append_argument(sip::datatype::string::standard, tf_max_traces->get_text());
+  c.add_option(option_detect_deadlock).append_argument(sip::datatype::boolean::standard, cb_deadlock->get_status());
+  c.add_option(option_detect_actions).append_argument(sip::datatype::string::standard, cb_actions->get_status()?tf_actions->get_text():"");
+  c.add_option(option_trace).append_argument(sip::datatype::boolean::standard, cb_trace->get_status());
+  c.add_option(option_max_traces).append_argument(sip::datatype::string::standard, tf_max_traces->get_text());
   
-  c->add_option(option_confluence_reduction).append_argument(sip::datatype::boolean::standard, cb_confluence->get_status());
-  c->add_option(option_confluent_tau).append_argument(sip::datatype::string::standard, tf_conf_tau->get_text());
+  c.add_option(option_confluence_reduction).append_argument(sip::datatype::boolean::standard, cb_confluence->get_status());
+  c.add_option(option_confluent_tau).append_argument(sip::datatype::string::standard, tf_conf_tau->get_text());
   
-  c->add_option(option_max_states).append_argument(sip::datatype::string::standard, cb_max_states->get_status()?tf_max_states->get_text():"");
+  c.add_option(option_max_states).append_argument(sip::datatype::string::standard, cb_max_states->get_status()?tf_max_states->get_text():"");
   
-  c->add_option(option_bithashing).append_argument(sip::datatype::boolean::standard, cb_bithashing->get_status());
-  c->add_option(option_bithashsize).append_argument(sip::datatype::string::standard, tf_bithashsize->get_text());
+  c.add_option(option_bithashing).append_argument(sip::datatype::boolean::standard, cb_bithashing->get_status());
+  c.add_option(option_bithashsize).append_argument(sip::datatype::string::standard, tf_bithashsize->get_text());
   
-  c->add_option(option_init_tsize).append_argument(sip::datatype::string::standard, tf_init_tsize->get_text());
+  c.add_option(option_init_tsize).append_argument(sip::datatype::string::standard, tf_init_tsize->get_text());
   
   tc.send_clear_display();
 }
 
-bool squadt_lpe2lts::check_configuration(sip::configuration::sptr configuration)
+bool squadt_lpe2lts::check_configuration(sip::configuration &configuration)
 {
   return (
-      configuration->object_exists(lpd_file_for_input_no_lts) ||
-      (configuration->object_exists(lpd_file_for_input_lts) &&
-       configuration->object_exists(lts_file_for_output))
+      configuration.object_exists(lpd_file_for_input_no_lts) ||
+      (configuration.object_exists(lpd_file_for_input_lts) &&
+       configuration.object_exists(lts_file_for_output))
       );
 }
 
-void squadt_lpe2lts::execute(sip::configuration::sptr configuration)
+void squadt_lpe2lts::execute(sip::configuration &configuration)
 {
   lts_generation_options lgopts; initialise_lts_generation_options(lgopts);
 
-  if ( configuration->object_exists(lts_file_for_output) )
+  lgopts.squadt = this;
+
+  if ( configuration.object_exists(lpd_file_for_input_lts) )
   {
-    lgopts.lts = configuration->get_object(lts_file_for_output)->get_location();
+    lgopts.specification = configuration.get_object(lpd_file_for_input_lts)->get_location();
+    lgopts.lts = configuration.get_object(lts_file_for_output)->get_location();
+  } else {
+    lgopts.specification = configuration.get_object(lpd_file_for_input_no_lts)->get_location();
   }
 
-  lgopts.outinfo = boost::any_cast <bool> (*(configuration->get_option(option_out_info)->get_value_iterator()));
+  lgopts.outinfo = boost::any_cast <bool> (*(configuration.get_option(option_out_info)->get_value_iterator()));
 
-  lgopts.usedummies = boost::any_cast <bool> (*(configuration->get_option(option_usedummies)->get_value_iterator()));
-  lgopts.stateformat = (boost::any_cast <bool> (*(configuration->get_option(option_state_format_tree)->get_value_iterator())))?GS_STATE_TREE:GS_STATE_VECTOR;
-  lgopts.removeunused = boost::any_cast <bool> (*(configuration->get_option(option_removeunused)->get_value_iterator()));
+  lgopts.usedummies = boost::any_cast <bool> (*(configuration.get_option(option_usedummies)->get_value_iterator()));
+  lgopts.stateformat = (boost::any_cast <bool> (*(configuration.get_option(option_state_format_tree)->get_value_iterator())))?GS_STATE_TREE:GS_STATE_VECTOR;
+  lgopts.removeunused = boost::any_cast <bool> (*(configuration.get_option(option_removeunused)->get_value_iterator()));
   
-  lgopts.max_traces = strtoul((boost::any_cast <string> (*(configuration->get_option(option_max_traces)->get_value_iterator()))).c_str(),NULL,0);
+  lgopts.max_traces = strtoul((boost::any_cast <string> (*(configuration.get_option(option_max_traces)->get_value_iterator()))).c_str(),NULL,0);
 
-  lgopts.strat = (RewriteStrategy) boost::any_cast <long int> (*(configuration->get_option(option_rewr_strat)->get_value_iterator()));
+  lgopts.strat = (RewriteStrategy) boost::any_cast <long int> (*(configuration.get_option(option_rewr_strat)->get_value_iterator()));
   
-  lgopts.expl_strat = (exploration_strategy) boost::any_cast <long int> (*(configuration->get_option(option_expl_strat)->get_value_iterator()));
+  lgopts.expl_strat = (exploration_strategy) boost::any_cast <long int> (*(configuration.get_option(option_expl_strat)->get_value_iterator()));
   
-  lgopts.detect_deadlock = boost::any_cast <bool> (*(configuration->get_option(option_detect_deadlock)->get_value_iterator()));
-  string actions_str = boost::any_cast <string> (*(configuration->get_option(option_detect_actions)->get_value_iterator()));
+  lgopts.detect_deadlock = boost::any_cast <bool> (*(configuration.get_option(option_detect_deadlock)->get_value_iterator()));
+  string actions_str = boost::any_cast <string> (*(configuration.get_option(option_detect_actions)->get_value_iterator()));
   if ( actions_str != "" )
   {
     lgopts.detect_action = true;
     lgopts.trace_actions = parse_action_list(actions_str.c_str(),&lgopts.num_trace_actions);
   }
-  lgopts.trace = boost::any_cast <bool> (*(configuration->get_option(option_trace)->get_value_iterator()));
-  lgopts.max_traces = strtoul((boost::any_cast <string> (*(configuration->get_option(option_max_traces)->get_value_iterator()))).c_str(),NULL,0);
+  lgopts.trace = boost::any_cast <bool> (*(configuration.get_option(option_trace)->get_value_iterator()));
+  lgopts.max_traces = strtoul((boost::any_cast <string> (*(configuration.get_option(option_max_traces)->get_value_iterator()))).c_str(),NULL,0);
   
-  if ( boost::any_cast <bool> (*(configuration->get_option(option_confluence_reduction)->get_value_iterator())) )
+  if ( boost::any_cast <bool> (*(configuration.get_option(option_confluence_reduction)->get_value_iterator())) )
   {
-    lgopts.priority_action = strdup((boost::any_cast <string> (*(configuration->get_option(option_confluent_tau)->get_value_iterator()))).c_str());
+    lgopts.priority_action = strdup((boost::any_cast <string> (*(configuration.get_option(option_confluent_tau)->get_value_iterator()))).c_str());
   }
   
-  string max_states_str(boost::any_cast <string> (*(configuration->get_option(option_max_states)->get_value_iterator())));
+  string max_states_str(boost::any_cast <string> (*(configuration.get_option(option_max_states)->get_value_iterator())));
   if ( max_states_str != "" )
   {
     lgopts.max_states = boost::lexical_cast < unsigned long long > (max_states_str);
@@ -293,13 +302,13 @@ void squadt_lpe2lts::execute(sip::configuration::sptr configuration)
     lgopts.max_states = DEFAULT_MAX_STATES;
   }
   
-  lgopts.bithashing = boost::any_cast <bool> (*(configuration->get_option(option_bithashing)->get_value_iterator()));
+  lgopts.bithashing = boost::any_cast <bool> (*(configuration.get_option(option_bithashing)->get_value_iterator()));
   lgopts.bithashsize = boost::lexical_cast < unsigned long long > (
-      (boost::any_cast <string> (*(configuration->get_option(option_bithashsize)->get_value_iterator()))));
+      (boost::any_cast <string> (*(configuration.get_option(option_bithashsize)->get_value_iterator()))));
   
-  lgopts.initial_table_size = strtoul((boost::any_cast <string> (*(configuration->get_option(option_init_tsize)->get_value_iterator()))).c_str(),NULL,0);
+  lgopts.initial_table_size = strtoul((boost::any_cast <string> (*(configuration.get_option(option_init_tsize)->get_value_iterator()))).c_str(),NULL,0);
 
-  if ( !initialise_lts_generation(&lgopts) )
+  if ( initialise_lts_generation(&lgopts) )
   {
     generate_lts();
 

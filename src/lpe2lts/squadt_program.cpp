@@ -35,20 +35,24 @@ squadt_program::~squadt_program()
 {
 }
 
+void squadt_program::set_capabilities()
+{
+}
+
 void squadt_program::initialise()
 {
 }
 
-void squadt_program::configure(sip::configuration::sptr configuration)
+void squadt_program::configure(sip::configuration &configuration)
 {
 }
 
-bool squadt_program::check_configuration(sip::configuration::sptr configuration)
+bool squadt_program::check_configuration(sip::configuration &configuration)
 {
   return true;
 }
 
-void squadt_program::execute(sip::configuration::sptr configuration)
+void squadt_program::execute(sip::configuration &configuration)
 {
 }
 
@@ -58,12 +62,16 @@ void squadt_program::finalise()
 
 bool squadt_program::run(int argc, char **argv)
 {
+  //sip::tool::communicator::get_standard_error_logger()->set_filter_level(3);
+
+  set_capabilities();
+
   if ( tc.activate(argc,argv) )
   {
     active = true;
 
     squadt_utility::initialise(tc);
-
+  
     initialise();
 
     bool notdone = true;
@@ -75,8 +83,8 @@ bool squadt_program::run(int argc, char **argv)
       {
         case sip::message_offer_configuration:
           {
-            sip::configuration::sptr conf(&tc.get_configuration());
-            if ( conf->is_fresh() )
+            sip::configuration &conf = tc.get_configuration();
+            if ( conf.is_fresh() )
             {
               configure(conf);
             }
@@ -88,7 +96,7 @@ bool squadt_program::run(int argc, char **argv)
           break;
         case sip::message_signal_start:
           {
-            sip::configuration::sptr conf(&tc.get_configuration());
+            sip::configuration &conf = tc.get_configuration();
             execute(conf);
             tc.send_signal_done();
             break;

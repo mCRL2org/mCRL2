@@ -133,7 +133,7 @@ void close_lts(unsigned long long num_states, unsigned long long num_trans)
         int e = SVCclose(svc);
         if ( e )
         {
-  	     printf("svcerror: %s\n",SVCerror(e)); 
+          printf("svcerror: %s\n",SVCerror(e)); 
         }
       }
       break;
