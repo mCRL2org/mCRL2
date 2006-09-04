@@ -129,10 +129,12 @@ void close_lts(unsigned long long num_states, unsigned long long num_trans)
       fclose(aut);
       break;
     case OF_SVC:
-      int e = SVCclose(svc);
-      if ( e )
       {
-	     printf("svcerror: %s\n",SVCerror(e)); 
+        int e = SVCclose(svc);
+        if ( e )
+        {
+  	     printf("svcerror: %s\n",SVCerror(e)); 
+        }
       }
       break;
     default:
