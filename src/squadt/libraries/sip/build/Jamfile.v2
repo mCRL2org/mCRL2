@@ -14,6 +14,11 @@ project sip
 
 alias messenger
     : # no sources
+      layout.cpp
+      common.cpp
+      report.cpp
+      layout_elements.cpp
+      basic_messenger.cpp
     : # no build requirements
     : # no default build
     : <library>/libraries/transport//transport
@@ -28,22 +33,14 @@ feature.compose <sip_side>tool       : <define>TOOL_SIDE ;
 
 lib sip_controller
     : controller.cpp
-      common.cpp
-      report.cpp
-      layout.cpp
       layout_base.cpp
-      layout_elements.cpp
     : <sip_side>controller
       <library>messenger
     ;
 
 lib sip_tool
     : tool.cpp
-      common.cpp
-      report.cpp
-      layout.cpp
       layout_base.cpp
-      layout_elements.cpp
     : <sip_side>tool
       <library>messenger
     ;

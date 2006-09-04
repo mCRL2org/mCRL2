@@ -17,9 +17,6 @@ namespace sip {
     /** \brief The type identifier for messages of any type */
     template < >
     const sip::message_identifier_t message< sip::message_identifier_t, sip::message_unknown, sip::message_any >::message_any     = sip::message_any;
-
-    template < >
-    utility::print_logger basic_messenger< sip::message >::standard_error_logger(std::clog);
   }
 
   static bool initialised = datatype::basic_datatype::initialise();

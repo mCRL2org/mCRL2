@@ -273,7 +273,7 @@ namespace squadt {
 
         associated_process->terminate();
 
-        get_logger()->log(1, boost::str(boost::format("process terminated (tool %s pid(%u))\n")
+        logger->log(1, boost::str(boost::format("process terminated (tool %s pid(%u))\n")
                   % associated_process->get_executable_name() % associated_process->get_identifier()));
       }
     }

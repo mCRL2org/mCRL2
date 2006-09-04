@@ -4,10 +4,14 @@
 #include <algorithm>
 #include <functional>
 #include <sstream>
+#include <set>
+#include <deque>
+#include <map>
 #include <iostream>
 
 #include <boost/ref.hpp>
 #include <boost/bind.hpp>
+#include <boost/foreach.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/condition.hpp>
 #include <boost/thread/xtime.hpp>
@@ -18,16 +22,177 @@
 #include <sip/detail/exception.h>
 
 namespace sip {
+
   namespace messaging {
 
+    /**
+     * \brief Abstract communicator class that divides an incoming data stream in messages
+     *
+     * M is the type of a messenger::message or derived type
+     */
     template < class M >
-    const std::string basic_messenger< M >::tag_open("<message>");
+    class basic_messenger_impl : public transport::transporter {
+      friend class basic_messenger< M >;
+
+      private:
+
+        /** \brief Type for callback functions to handle events */
+        typedef typename basic_messenger< M >::handler_type  handler_type;
+
+        /** \brief Strict weak order on handler_type (for use with std::set) */
+        class compare_handlers {
+          public:
+  
+            inline bool operator()(handler_type const&, handler_type const&);
+        };
+
+        /** \brief Monitor synchronisation construct */
+        class waiter_data {
+       
+          private:
+       
+            /** boost::mutex synchronisation primitive */
+            boost::mutex                               mutex;
+       
+            /** boost::condition synchronisation primitive */
+            boost::condition                           condition;
+       
+            /** pointers to local message variables */
+            std::vector < boost::shared_ptr < M >* >   pointers;
+       
+          public:
+       
+            /** \brief Constructor */
+            waiter_data(boost::shared_ptr < M >&);
+       
+            /** \brief Block until the next message has been delivered, or the object is destroyed */
+            void wait(boost::function < void () >);
+       
+            /** \brief Wake up all treads that are blocked via wait(), and delivers a message */
+            void wait(boost::function < void () >, long const&);
+       
+            /** \brief Wake up all treads that are blocked via wait(), and delivers a message */
+            void wake(boost::shared_ptr < M > const&);
+       
+            /** \brief Wake up all treads that are blocked via wait() */
+            void wake();
+       
+            /** \brief Destructor */
+            ~waiter_data();
+        };
+      private:
+
+        /** \brief Set of handlers */
+        typedef std::set < handler_type, compare_handlers >                                    handler_set;
+
+        /** \brief Type for the map used to associate a handler to a message type */
+        typedef std::map < typename M::type_identifier_t, handler_set >                        handler_map;
+
+        /** \brief Type for the map used to associate a handler to a lock primitive */
+        typedef std::map < typename M::type_identifier_t, boost::shared_ptr < waiter_data > >  waiter_map;
+
+        /** \brief Type for the message queue */
+        typedef std::deque < boost::shared_ptr < M > >                                         message_queue_t;
+
+        /** \brief The XML-like tag used for wrapping the content */
+        static const std::string                                                               tag_open;
+
+        /** \brief The XML-like tag used for wrapping the content */
+        static const std::string                                                               tag_close;
+
+        /** \brief Standard (clog) logging component */
+        static utility::print_logger                                                           standard_error_logger;
+
+      private:
+
+        /** \brief Handlers based on message types */
+        handler_map                handlers;
+ 
+        /** \brief For blocking until delivery (used with function await_message) */
+        waiter_map                 waiters;
+ 
+        /** \brief Used to ensure any element t (in M::type_identifier_t) in waiters is assigned to at most once */
+        boost::recursive_mutex     waiter_lock;
+
+        /** \brief The current task queue (messages to be delivered) */
+        message_queue_t            task_queue;
+
+        /** \brief The current message queue (unhandled messages end up here) */
+        message_queue_t            message_queue;
+
+        /** \brief Buffer that holds content until a message is complete */
+        std::string                buffer;
+ 
+        /** \brief Whether a message start tag has been matched after the most recent message end tag */
+        bool                       message_open;
+
+        /** \brief The number of tag elements (of message::tag) that have been matched at the last delivery */
+        unsigned char              partially_matched;
+
+      protected:
+
+        /** \brief The component used for logging */
+        utility::logger*           logger;
+
+      private:
+
+        /** \brief Helper function that services the handlers */
+        void service_handlers();
+
+        /** \brief Remove a message from the queue */
+        void remove_message(boost::shared_ptr < M >& p);
+
+      public:
+
+        /** \brief Default constructor */
+        basic_messenger_impl(utility::logger* = &standard_error_logger);
+
+        /** \brief Destroys all connections */
+        void disconnect();
+ 
+        /** \brief Queues incoming messages */
+        virtual void deliver(std::istream&, typename M::end_point);
+ 
+        /** \brief Queues incoming messages */
+        virtual void deliver(const std::string&, typename M::end_point);
+ 
+        /* \brief Wait until the next message of a certain type arrives */
+        const boost::shared_ptr < M > await_message(typename M::type_identifier_t);
+ 
+        /* \brief Wait until the next message of a certain type arrives */
+        const boost::shared_ptr < M > await_message(typename M::type_identifier_t, long const&);
+ 
+        /** \brief Send a message */
+        void send_message(const M&);
+ 
+        /** \brief Wait until the first message of type t has arrived */
+        boost::shared_ptr < M > find_message(const typename M::type_identifier_t);
+ 
+        /** \brief Set the handler for a type */
+        void add_handler(const typename M::type_identifier_t, handler_type);
+
+        /** \brief Clears the handlers for a message type */
+        void clear_handlers(const typename M::type_identifier_t);
+
+        /** \brief Remove a specific handlers for a message type */
+        void remove_handler(const typename M::type_identifier_t, handler_type);
+
+        /** \brief Destructor */
+        ~basic_messenger_impl();
+    };
+
+    /**
+     * @param[in] l a logger object used to write logging messages to
+     *
+     * \pre l != 0
+     **/
+    template < class M >
+    inline basic_messenger_impl< M >::basic_messenger_impl(utility::logger* l) :
+       message_open(false), partially_matched(0), logger(l) {
+    }
 
     template < class M >
-    const std::string basic_messenger< M >::tag_close("</message>");
-
-    template < class M >
-    basic_messenger< M >::~basic_messenger() {
+    basic_messenger_impl< M >::~basic_messenger_impl() {
       boost::recursive_mutex::scoped_lock w(waiter_lock);
 
       // Unblock all waiters
@@ -37,7 +202,7 @@ namespace sip {
     }
 
     template < class M >
-    void basic_messenger< M >::disconnect() {
+    inline void basic_messenger_impl< M >::disconnect() {
 
       // Unblock all waiters;
       BOOST_FOREACH(typename waiter_map::value_type w, waiters) {
@@ -52,7 +217,7 @@ namespace sip {
      * @param o a pointer to the transceiver on which the data was received
      **/
     template < class M >
-    void basic_messenger< M >::deliver(std::istream& d, typename M::end_point o) {
+    void basic_messenger_impl< M >::deliver(std::istream& d, typename M::end_point o) {
       std::ostringstream s;
  
       s << d.rdbuf() << std::flush;
@@ -66,39 +231,14 @@ namespace sip {
      * @param m the message that is to be sent
      **/
     template < class M >
-    inline void basic_messenger< M >::send_message(const message& m) {
+    inline void basic_messenger_impl< M >::send_message(const M& m) {
       logger->log(1, boost::format("sent     id : %u, type : %u, data : \"%s\"\n") % getpid() % m.get_type() % m.to_xml());
 
       send(tag_open + m.to_xml() + tag_close);
     }
  
-    /** \pre the message queue is not empty */
     template < class M >
-    inline boost::shared_ptr< M > basic_messenger< M >::pop_message() {
-      message_ptr m = message_queue.front();
- 
-      message_queue.pop_front();
- 
-      return (m);
-    }
- 
-    /** \pre the message queue is not empty  */
-    template < class M >
-    inline M& basic_messenger< M >::peek_message() {
-      message_ptr m = message_queue.front();
- 
-      message_queue.front();
- 
-      return (*m);
-    }
- 
-    template < class M >
-    inline size_t basic_messenger< M >::number_of_messages() {
-      return (message_queue.size());
-    }
-
-    template < class M >
-    inline bool basic_messenger< M >::compare_handlers::operator()(handler_type const& l, handler_type const& r) {
+    inline bool basic_messenger_impl< M >::compare_handlers::operator()(handler_type const& l, handler_type const& r) {
       return (&l < &r);
     }
 
@@ -107,7 +247,7 @@ namespace sip {
      * @param t the message type on which delivery h is to be executed
      **/
     template < class M >
-    inline void basic_messenger< M >::add_handler(const typename M::type_identifier_t t, handler_type h) {
+    inline void basic_messenger_impl< M >::add_handler(const typename M::type_identifier_t t, handler_type h) {
       boost::recursive_mutex::scoped_lock w(waiter_lock);
       
       if (handlers.count(t) == 0) {
@@ -121,7 +261,7 @@ namespace sip {
      * @param t the message type for which to clear the event handler
      **/
     template < class M >
-    inline void basic_messenger< M >::clear_handlers(const typename M::type_identifier_t t) {
+    inline void basic_messenger_impl< M >::clear_handlers(const typename M::type_identifier_t t) {
       boost::recursive_mutex::scoped_lock w(waiter_lock);
 
       if (handlers.count(t) != 0) {
@@ -134,22 +274,12 @@ namespace sip {
      * @param h the handler to remove
      **/
     template < class M >
-    inline void basic_messenger< M >::remove_handler(const typename M::type_identifier_t t, handler_type h) {
+    inline void basic_messenger_impl< M >::remove_handler(const typename M::type_identifier_t t, handler_type h) {
       boost::recursive_mutex::scoped_lock w(waiter_lock);
 
       if (handlers.count(t) != 0) {
         handlers[t].erase(h);
       }
-    }
- 
-    template < class M >
-    inline utility::logger* basic_messenger< M >::get_logger() {
-      return (logger);
-    }
-
-    template < class M >
-    inline utility::logger* basic_messenger< M >::get_standard_error_logger() {
-      return (&standard_error_logger);
     }
 
     /**
@@ -162,7 +292,7 @@ namespace sip {
      * \attention Works under the assumption that tag_close.size() < data.size()
      **/
     template < class M >
-    void basic_messenger< M >::deliver(const std::string& data, typename M::end_point o) {
+    void basic_messenger_impl< M >::deliver(const std::string& data, typename M::end_point o) {
       std::string::const_iterator i = data.begin();
 
       while (i != data.end()) {
@@ -240,11 +370,11 @@ namespace sip {
 
             logger->log(1, boost::format("received id : %u, type : %u, data : \"%s\"\n") % getpid() % t % new_string);
 
-            task_queue.push_back(boost::shared_ptr< M >(new message(new_string, t, o)));
+            task_queue.push_back(boost::shared_ptr< M >(new M(new_string, t, o)));
 
             if (task_queue.size() == 1) {
               /* Start delivery thread */
-              boost::thread thread(boost::bind(&basic_messenger< M >::service_handlers, this));
+              boost::thread thread(boost::bind(&basic_messenger_impl< M >::service_handlers, this));
             }
           }
         }
@@ -303,12 +433,12 @@ namespace sip {
      * @param t the type of the message
      **/
     template < class M >
-    boost::shared_ptr< M > basic_messenger< M >::find_message(typename M::type_identifier_t t) {
+    boost::shared_ptr< M > basic_messenger_impl< M >::find_message(typename M::type_identifier_t t) {
       using namespace boost;
 
       boost::recursive_mutex::scoped_lock w(waiter_lock);
 
-      message_ptr p;
+      boost::shared_ptr < M > p;
 
       if (t == M::message_any) {
         if (0 < message_queue.size()) {
@@ -319,7 +449,7 @@ namespace sip {
         typename message_queue_t::iterator i = std::find_if(message_queue.begin(),
                         message_queue.end(),
                         bind(std::equal_to<typename M::type_identifier_t>(), t,
-                                bind(&M::get_type, bind(&message_ptr::get, _1))));
+                                bind(&M::get_type, bind(&boost::shared_ptr < M >::get, _1))));
 
         if (i != message_queue.end()) {
           p = *i;
@@ -334,14 +464,14 @@ namespace sip {
      * \pre the message must be in the queue
      **/
     template < class M >
-    inline void basic_messenger< M >::remove_message(message_ptr& p) {
+    inline void basic_messenger_impl< M >::remove_message(boost::shared_ptr < M >& p) {
       using namespace boost;
 
       message_queue.erase(std::find_if(message_queue.begin(),
                       message_queue.end(),
                       bind(std::equal_to< M* >(),
-                              bind(&message_ptr::get, p),
-                              bind(&message_ptr::get, _1))));
+                              bind(&boost::shared_ptr< M >::get, p),
+                              bind(&boost::shared_ptr< M >::get, _1))));
     }
 
     /**
@@ -351,7 +481,7 @@ namespace sip {
      * @param o the transceiver that delivered the message
      **/
     template < class M >
-    inline void basic_messenger< M >::service_handlers() {
+    inline void basic_messenger_impl< M >::service_handlers() {
       static volatile bool r = false;
 
       if (!r) {
@@ -360,7 +490,7 @@ namespace sip {
         while (0 < task_queue.size()) {
           boost::recursive_mutex::scoped_lock w(waiter_lock);
        
-          message_ptr m(task_queue.front());
+          boost::shared_ptr < M > m(task_queue.front());
        
           task_queue.pop_front();
        
@@ -405,7 +535,7 @@ namespace sip {
      * @param[in] m reference to the pointer to a message to deliver
      **/
     template < class M >
-    basic_messenger< M >::waiter_data::waiter_data(boost::shared_ptr < M >& m) {
+    basic_messenger_impl< M >::waiter_data::waiter_data(boost::shared_ptr < M >& m) {
       pointers.push_back(&m);
     }
 
@@ -413,7 +543,7 @@ namespace sip {
      * @param[in] m reference to the pointer to a message to deliver
      **/
     template < class M >
-    void basic_messenger< M >::waiter_data::wake(boost::shared_ptr < M > const& m) {
+    void basic_messenger_impl< M >::waiter_data::wake(boost::shared_ptr < M > const& m) {
       boost::mutex::scoped_lock l(mutex);
 
       BOOST_FOREACH(boost::shared_ptr < M >* i, pointers) {
@@ -427,7 +557,7 @@ namespace sip {
      * @param[in] m reference to the pointer to a message to deliver
      **/
     template < class M >
-    void basic_messenger< M >::waiter_data::wake() {
+    void basic_messenger_impl< M >::waiter_data::wake() {
       boost::mutex::scoped_lock l(mutex);
 
       condition.notify_all();
@@ -437,7 +567,7 @@ namespace sip {
      * @param[in] h a function, called after lock on mutex is obtained and before notification
      **/
     template < class M >
-    void basic_messenger< M >::waiter_data::wait(boost::function < void () > h) {
+    void basic_messenger_impl< M >::waiter_data::wait(boost::function < void () > h) {
       boost::mutex::scoped_lock l(mutex);
 
       h();
@@ -450,7 +580,7 @@ namespace sip {
      * @param[in] ts the maximum time to wait in seconds
      **/
     template < class M >
-    void basic_messenger< M >::waiter_data::wait(boost::function < void () > h, long const& ts) {
+    void basic_messenger_impl< M >::waiter_data::wait(boost::function < void () > h, long const& ts) {
       using namespace boost;
 
       mutex::scoped_lock l(mutex);
@@ -463,14 +593,14 @@ namespace sip {
 
       time.sec += ts;
 
-      condition.wait(l, time);
+      condition.timed_wait(l, time);
     }
 
     /**
      * @param[in] m reference to the pointer to a message to deliver
      **/
     template < class M >
-    basic_messenger< M >::waiter_data::~waiter_data() {
+    basic_messenger_impl< M >::waiter_data::~waiter_data() {
     }
 
     /**
@@ -478,12 +608,12 @@ namespace sip {
      * @param[in] ts the maximum time to wait in seconds
      **/
     template < class M >
-    const boost::shared_ptr< M > basic_messenger< M >::await_message(typename M::type_identifier_t t, long const& ts) {
+    const boost::shared_ptr< M > basic_messenger_impl< M >::await_message(typename M::type_identifier_t t, long const& ts) {
       using namespace boost;
 
       boost::recursive_mutex::scoped_lock w(waiter_lock);
 
-      message_ptr p(find_message(t));
+      boost::shared_ptr < M > p(find_message(t));
 
       if (p.get() == 0) {
         if (waiters.count(t) == 0) {
@@ -505,12 +635,12 @@ namespace sip {
      * @param[in] t the type of the message
      **/
     template < class M >
-    const boost::shared_ptr< M > basic_messenger< M >::await_message(typename M::type_identifier_t t) {
+    const boost::shared_ptr< M > basic_messenger_impl< M >::await_message(typename M::type_identifier_t t) {
       using namespace boost;
 
       boost::recursive_mutex::scoped_lock w(waiter_lock);
 
-      message_ptr p(find_message(t));
+      boost::shared_ptr < M > p(find_message(t));
 
       if (p.get() == 0) {
         if (waiters.count(t) == 0) {

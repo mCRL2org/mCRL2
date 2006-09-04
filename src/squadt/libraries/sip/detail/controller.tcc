@@ -8,7 +8,7 @@
 namespace sip {
   namespace controller {
 
-    class communicator_impl : public sip::messenger {
+    class communicator_impl : public sip::messaging::basic_messenger_impl< sip:: message > {
       friend class communicator;
       
       private:

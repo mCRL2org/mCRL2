@@ -3,10 +3,10 @@
 namespace sip {
   namespace tool {
 
-    communicator::communicator(communicator_impl* c) : impl(c) {
+    communicator::communicator(communicator_impl* c) : sip::messenger(c) {
     }
 
-    communicator::communicator() : impl(new communicator_impl) {
+    communicator::communicator() : sip::messenger(new communicator_impl) {
     }
 
     /**
@@ -22,14 +22,14 @@ namespace sip {
      * \return whether options were found and whether a connection is being opened with a controller
      **/
     bool communicator::activate(int& argc, char** argv) {
-      return (impl->activate(argc, argv));
+      return (boost::dynamic_pointer_cast < communicator_impl > (impl)->activate(argc, argv));
     }
 
     /**
      * \return a pointer to the tool capabilities object that is sent to the controller on request
      **/
     tool::capabilities& communicator::get_tool_capabilities() {
-      return (impl->current_tool_capabilities);
+      return (boost::dynamic_pointer_cast < communicator_impl > (impl)->current_tool_capabilities);
     }
  
     /**
@@ -39,22 +39,22 @@ namespace sip {
      * \return a reference to the current tool configuration object
      **/
     configuration& communicator::get_configuration() {
-      return (*impl->current_configuration);
+      return (*boost::dynamic_pointer_cast < communicator_impl > (impl)->current_configuration);
     }
  
     void communicator::set_configuration(configuration::sptr c) {
-      impl->current_configuration = c;
+      boost::dynamic_pointer_cast < communicator_impl > (impl)->current_configuration = c;
     }
  
     /**
      * \return p which is a pointer to the most recently retrieved controller capabilities object or 0
      **/
     const controller::capabilities::ptr communicator::get_controller_capabilities() const {
-      if (impl->current_controller_capabilities.get() == 0) {
+      if (boost::dynamic_pointer_cast < communicator_impl > (impl)->current_controller_capabilities.get() == 0) {
         throw (sip::exception(sip::controller_capabilities_unknown));
       }
  
-      return (impl->current_controller_capabilities);
+      return (boost::dynamic_pointer_cast < communicator_impl > (impl)->current_controller_capabilities);
     }
  
     /* Request details about the amount of space that the controller currently has reserved for this tool */
@@ -70,7 +70,8 @@ namespace sip {
         if (p.get() != 0) {
           xml2pp::text_reader reader(p->to_string().c_str());
        
-          impl->current_controller_capabilities = controller::capabilities::read(reader);
+          boost::dynamic_pointer_cast < communicator_impl > (impl)->
+                      current_controller_capabilities = controller::capabilities::read(reader);
 
           break;
         }
@@ -79,9 +80,10 @@ namespace sip {
  
     /* Send a specification of the current configuration (it may change during tool execution) */
     void communicator::send_accept_configuration() {
-      impl->current_configuration->fresh = false;
+      boost::dynamic_pointer_cast < communicator_impl > (impl)->current_configuration->fresh = false;
 
-      message m(impl->current_configuration->write(), sip::message_accept_configuration);
+      message m(boost::dynamic_pointer_cast < communicator_impl > (impl)->current_configuration->write(),
+                                                                          sip::message_accept_configuration);
  
       impl->send_message(m);
     }
@@ -106,11 +108,11 @@ namespace sip {
      * accordingly when data is received.
      **/
     void communicator::send_display_layout(layout::tool_display::sptr d) {
-      impl->send_display_layout(d);
+      boost::dynamic_pointer_cast < communicator_impl > (impl)->send_display_layout(d);
     }
 
     void communicator::send_clear_display() {
-      impl->send_clear_display();
+      boost::dynamic_pointer_cast < communicator_impl > (impl)->send_clear_display();
     }
 
     /* Send a signal that the tool is about to terminate */
@@ -159,37 +161,6 @@ namespace sip {
 
     void communicator::await_configuration() const {
       impl->await_message(sip::message_offer_configuration);
-    }
-
-    /**
-     * @param[in] t the type of the message
-     **/
-    const sip::message_ptr communicator::await_message(sip::message::type_identifier_t t) {
-      return (impl->await_message(t));
-    }
-
-    /**
-     * @param h the handler function that is to be executed
-     * @param t the message type on which delivery h is to be executed
-     **/
-    void communicator::add_handler(const sip::message::type_identifier_t t, sip::message_handler_type h) {
-      impl->add_handler(t, h);
-    }
-
-    /**
-     * @param t the message type for which to clear the event handler
-     * @param h the handler to remove
-     **/
-    void communicator::remove_handler(const sip::message::type_identifier_t t, sip::message_handler_type h) {
-      impl->remove_handler(t, h);
-    }
-
-    utility::logger* communicator::get_logger() const {
-      return (impl->get_logger());
-    }
-
-    utility::logger* communicator::get_standard_error_logger() {
-      return (sip::messenger::get_standard_error_logger());
     }
   }
 }

@@ -10,6 +10,7 @@
 #include <sip/detail/layout_tool_display.h>
 #include <sip/detail/layout_elements.h>
 #include <utility/logger.h>
+#include <sip/detail/basic_messenger.h>
 
 /* Interface classes for the tool side of the Squadt Interaction Protocol */
 namespace sip {
@@ -21,13 +22,10 @@ namespace sip {
      * \class communicator controller.h
      * \brief The main interface to the protocol (controller-side)
      **/
-    class communicator {
+    class communicator : public messaging::basic_messenger< sip::message > {
       friend class communicator_impl;
 
       protected:
- 
-        /** \brief Implementation object, that contains the real functionality */
-        boost::shared_ptr < communicator_impl > impl;
  
         /** \brief The capabilities object of the controller as it is send, when requested */
         static controller::capabilities         current_controller_capabilities;
@@ -88,21 +86,6 @@ namespace sip {
 
         /** \brief Sets a handler for layout messages using a handler function */
         void activate_status_message_handler(status_message_handler_function);
-
-        /** \brief Waits for the first message with a specific type to arrive */
-        const sip::message_ptr await_message(sip::message::type_identifier_t);
-
-        /** \brief Set the handler for a type */
-        void add_handler(const sip::message::type_identifier_t, sip::message_handler_type);
-
-        /** \brief Remove a specific handlers for a message type */
-        void remove_handler(const sip::message::type_identifier_t, sip::message_handler_type);
-
-        /** \brief Get the logger instance used for this communicator */
-        utility::logger* get_logger() const;
-
-        /** \brief Gets the associated logger object */
-        static utility::logger* get_standard_error_logger();
     };
  
     inline const controller::capabilities& communicator::get_controller_capabilities() {

@@ -17,15 +17,10 @@ namespace sip {
     class communicator_impl;
 
     /** \brief The main interface to the protocol implementation (tool-side) */
-    class communicator {
+    class communicator : public sip::messenger {
       friend class layout::element;
       friend class communicator_impl;
 
-      protected:
- 
-        /** \brief Implementation object, that contains the real functionality */
-        boost::shared_ptr < communicator_impl > impl;
- 
       private:
 
         /** \brief Send data to update the state of the last communicated display layout */
@@ -85,21 +80,6 @@ namespace sip {
 
         /** \brief Waits until a configuration is delivered and returns a pointer to it */
         void await_configuration() const;
- 
-        /** \brief Waits for the first message with a specific type to arrive */
-        const sip::message_ptr await_message(sip::message::type_identifier_t);
-
-        /** \brief Set the handler for a type */
-        void add_handler(const sip::message::type_identifier_t, sip::message_handler_type);
-
-        /** \brief Remove a specific handlers for a message type */
-        void remove_handler(const sip::message::type_identifier_t, sip::message_handler_type);
-
-        /** \brief Get the logger instance used for this communicator */
-        utility::logger* get_logger() const;
-
-        /** \brief Gets the associated logger object */
-        static utility::logger* get_standard_error_logger();
     };
   }
 }

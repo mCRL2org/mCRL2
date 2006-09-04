@@ -20,7 +20,7 @@ namespace sip {
 
     template < class M, M D, M A > class message;
 
-    template < class M > class basic_messenger;
+    template < class M > class basic_messenger_impl;
 
     /**
      * \brief Base class for messages M is a type for message characterisation
@@ -31,7 +31,7 @@ namespace sip {
      */
     template < class M, M D, M A >
     class message {
-      friend class basic_messenger < message < M, D, A > >;
+      friend class basic_messenger_impl < message < M, D, A > >;
 
       public:
 

@@ -5,6 +5,7 @@
 
 #include <boost/function.hpp>
 #include <sip/detail/message.h>
+#include <sip/detail/basic_messenger.h>
 
 /* Interface classes for both the tool and the controller side of the Squadt Interaction Protocol */
 namespace sip {
@@ -35,6 +36,9 @@ namespace sip {
   /** \brief A convenience type to share the boost shared pointer implementation */
   typedef boost::shared_ptr < message >                                             message_ptr;
 
+  /** \brief A messenger type for communication of sip protocol messages */
+  typedef messaging::basic_messenger < sip::message >                               messenger;
+
   /** \brief Convenience type for message delivery handlers */
   typedef boost::function < void (boost::shared_ptr < message > const&) >           message_handler_type;
 
@@ -62,9 +66,6 @@ namespace sip {
 #define SIP_COMMON_MESSENGER_H
 
 namespace sip {
-
-  /** \brief A messenger type for communication of sip protocol messages */
-  typedef messaging::basic_messenger < sip::message >      messenger;
 
   /** \brief Convenience type for connection end points (primarily used by delivery handler functions) */
   typedef const transport::transceiver::basic_transceiver* end_point;

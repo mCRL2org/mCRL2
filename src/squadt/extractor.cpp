@@ -23,11 +23,11 @@ namespace squadt {
     boost::asio::deadline_timer timer(timing_service);
 
     // Set an expiry time relative to now.
-    timer.expires_from_now(boost::posix_time::milliseconds(500));
+    timer.expires_from_now(boost::posix_time::milliseconds(1000));
 
     // Wait for the timer to expire.
     timer.wait();
-std::cerr << "alarm\n";
+
     boost::shared_ptr < void > g = p.lock();
 
     if (g.get() != 0) {
@@ -48,7 +48,7 @@ std::cerr << "alarm\n";
     if (is_connected()) {
       request_tool_capabilities();
 
-      await_message(sip::message_reply_tool_capabilities);
+      await_message(sip::message_reply_tool_capabilities, 1);
     }
   }
 

@@ -21,7 +21,7 @@ namespace sip {
         virtual ~scheme() = 0;
  
         /** \brief Builds a connection between a tool communicator and a controller communicator */
-        virtual void connect(basic_messenger< M >*) const = 0;
+        virtual void connect(basic_messenger_impl< M >*) const = 0;
     };
  
     /** \brief Derived class for the traditional scheme */
@@ -33,7 +33,7 @@ namespace sip {
         inline traditional_scheme();
  
         /** Builds a connection between a tool communicator and a controller communicator, using the traditional scheme */
-        inline void connect(basic_messenger< M >*) const;
+        inline void connect(basic_messenger_impl< M >*) const;
     };
  
     /** \brief Derived class for the socket scheme */
@@ -52,7 +52,7 @@ namespace sip {
         inline socket_scheme();
  
         /** Builds a connection between a tool communicator and a controller communicator, using the socket scheme */
-        inline void connect(basic_messenger< M >*) const;
+        inline void connect(basic_messenger_impl< M >*) const;
     };
 
     /** \brief Destructor */
@@ -67,7 +67,7 @@ namespace sip {
  
     /* Builds a connection between a tool communicator and a controller communicator */
     template < typename M >
-    inline void traditional_scheme< M >::connect(basic_messenger< M >* t) const {
+    inline void traditional_scheme< M >::connect(basic_messenger_impl< M >* t) const {
       /** Not yet implemented */
       throw (sip::exception(sip::not_yet_implemented));
     }
@@ -79,7 +79,7 @@ namespace sip {
  
     /* Builds a connection between a tool communicator and a controller communicator */
     template < typename M >
-    inline void socket_scheme< M >::connect(basic_messenger< M >* t) const {
+    inline void socket_scheme< M >::connect(basic_messenger_impl< M >* t) const {
       t->connect(host_name, port);
     }
   }
