@@ -269,7 +269,7 @@ namespace squadt {
       if (associated_process.get() != 0) {
         disconnect();
 
-        send_message(sip::message_signal_termination);
+        send_message(sip::message_request_termination);
 
         associated_process->terminate();
 

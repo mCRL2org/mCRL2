@@ -114,6 +114,9 @@ namespace sip {
         /** \brief Used to ensure any element t (in M::type_identifier_t) in waiters is assigned to at most once */
         boost::recursive_mutex     waiter_lock;
 
+        /** \brief Used to ensure any element t (in M::type_identifier_t) in waiters is assigned to at most once */
+        boost::mutex               delivery_lock;
+
         /** \brief The current task queue (messages to be delivered) */
         message_queue_t            task_queue;
 
@@ -191,12 +194,13 @@ namespace sip {
      **/
     template < class M >
     inline basic_messenger_impl< M >::basic_messenger_impl(utility::logger* l) :
-       message_open(false), partially_matched(0), logger(l) {
+       message_open(false), delivery_thread_active(false), partially_matched(0), logger(l) {
     }
 
     template < class M >
     basic_messenger_impl< M >::~basic_messenger_impl() {
       boost::recursive_mutex::scoped_lock w(waiter_lock);
+      boost::mutex::scoped_lock           ww(delivery_lock);
 
       // Unblock all waiters
       BOOST_FOREACH(typename waiter_map::value_type w, waiters) {
@@ -376,7 +380,7 @@ namespace sip {
             task_queue.push_back(boost::shared_ptr< M >(new M(new_string, t, o)));
 
             if (task_queue.size() == 1) {
-              boost::recursive_mutex::scoped_lock w(waiter_lock);
+              boost::mutex::scoped_lock w(delivery_lock);
 
               if (!delivery_thread_active) {
                 delivery_thread_active = true;
@@ -492,47 +496,52 @@ namespace sip {
     template < class M >
     inline void basic_messenger_impl< M >::service_handlers() {
 
-      boost::recursive_mutex::scoped_lock w(waiter_lock);
+      boost::recursive_mutex::scoped_lock ww(waiter_lock);
 
-      while (0 < task_queue.size()) {
-        boost::shared_ptr < M > m(task_queue.front());
-     
-        task_queue.pop_front();
-     
-        typename M::type_identifier_t id = m->get_type();
-     
-        if (handlers.count(id)) {
-          BOOST_FOREACH(handler_type h, handlers[id]) {
-            h(m);
+      while (delivery_thread_active) {
+        while (0 < task_queue.size()) {
+       
+          boost::shared_ptr < M > m(task_queue.front());
+      
+          task_queue.pop_front();
+      
+          typename M::type_identifier_t id = m->get_type();
+      
+          if (handlers.count(id)) {
+            BOOST_FOREACH(handler_type h, handlers[id]) {
+              h(m);
+            }
+          }
+          if (id != M::message_any && handlers.count(M::message_any)) {
+            BOOST_FOREACH(handler_type h, handlers[M::message_any]) {
+              h(m);
+            }
+          }
+         
+          if (0 < waiters.count(id)) {
+            waiters[id]->wake(m);
+         
+            waiters.erase(id);
+          }
+          if (id != M::message_any && 0 < waiters.count(M::message_any)) {
+            waiters[M::message_any]->wake(m);
+         
+            waiters.erase(M::message_any);
+          }
+          else if (waiters.count(id) == 0) {
+            /* Put message into queue */
+            message_queue.push_back(m);
+         
+            if (16 < message_queue.size()) {
+              message_queue.pop_front();
+            }
           }
         }
-        if (id != M::message_any && handlers.count(M::message_any)) {
-          BOOST_FOREACH(handler_type h, handlers[M::message_any]) {
-            h(m);
-          }
-        }
-       
-        if (0 < waiters.count(id)) {
-          waiters[id]->wake(m);
-       
-          waiters.erase(id);
-        }
-        if (id != M::message_any && 0 < waiters.count(M::message_any)) {
-          waiters[M::message_any]->wake(m);
-       
-          waiters.erase(M::message_any);
-        }
-        else if (waiters.count(id) == 0) {
-          /* Put message into queue */
-          message_queue.push_back(m);
-       
-          if (16 < message_queue.size()) {
-            message_queue.pop_front();
-          }
-        }
+
+        boost::mutex::scoped_lock w(delivery_lock);
+
+        delivery_thread_active = (task_queue.size() != 0);
       }
-
-      delivery_thread_active = false;
     }
 
     /**

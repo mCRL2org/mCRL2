@@ -8,6 +8,7 @@
 #include <boost/bind.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/foreach.hpp>
+#include <boost/thread/thread.hpp>
 
 #include "executor.h"
 
@@ -78,6 +79,10 @@ namespace squadt {
      * @param[in] p the process to remove
      **/
     inline void executor_impl::remove(process* p) {
+      static boost::mutex lock;
+
+      boost::mutex::scoped_lock w(lock);
+
       std::list < process::ptr >::iterator i = std::find_if(processes.begin(), processes.end(),
                               boost::bind(std::equal_to < process* >(), p,
                                       boost::bind(&process::ptr::get, _1)));

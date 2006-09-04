@@ -723,7 +723,7 @@ namespace squadt {
 
         size_event.SetEventObject(GetParent());
 
-        GetParent()->ProcessEvent(size_event);
+        GetParent()->GetParent()->ProcessEvent(size_event);
       }
       catch (...) {
         /* Consider every exception a failure to correctly read the layout, and bail */
