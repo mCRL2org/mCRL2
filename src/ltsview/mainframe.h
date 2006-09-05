@@ -99,7 +99,7 @@ class MainFrame : public wxFrame
     wxStaticText*     numberOfStatesLabel;
     wxStaticText*     numberOfTransitionsLabel;
     wxSpinCtrl*	      outerbranchtiltSpinCtrl;
-    wxSpinCtrl*	      qualitySpinCtrl;
+    wxSpinCtrl*	qualitySpinCtrl;
     wxProgressDialog* progDialog;
     wxToolBar*	      toolBar;
     wxSpinCtrl*	      transparencySpinCtrl;

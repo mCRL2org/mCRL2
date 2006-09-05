@@ -39,16 +39,13 @@ bool LTSViewApp::OnInit()
 }
 
 #ifdef __WINDOWS__
-extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
-                                  HINSTANCE hPrevInstance,                
-                                  wxCmdLineArgType lpCmdLine,             
-                                  int nCmdShow) {                                                                     
+extern "C" int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,                                                                  wxCmdLineArgType lpCmdLine,int nCmdShow) {
   ATerm stackbot;
 
   // initialise the ATerm library
   ATinit(NULL,NULL,&stackbot); // XXX args?
 
-  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
+  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
 #else
 int main(int argc, char **argv) {

@@ -10,36 +10,41 @@ bool Utils::operator!=( RGB_Color c1, RGB_Color c2 )
   return !( c1 == c2 );
 }
 
-Utils::Point3D Utils::operator+( Point3D p1, Point3D p2 )
-{
-  Point3D result = { p1.x + p2.x, p1.y + p2.y, p1.z + p2.z };
+Utils::Point3D Utils::operator+(Point3D p1,Point3D p2) {
+  Point3D result = { p1.x+p2.x, p1.y+p2.y, p1.z+p2.z };
   return result;
 }
 
-Utils::Point3D Utils::operator-( Point3D p1, Point3D p2 )
-{
-  Point3D result = { p1.x - p2.x, p1.y - p2.y, p1.z - p2.z };
+Utils::Point3D Utils::operator-(Point3D p1,Point3D p2) {
+  Point3D result = { p1.x-p2.x, p1.y-p2.y, p1.z-p2.z };
   return result;
 }
 
-Utils::Point3D Utils::operator*( float s, Point3D p )
-{
+Utils::Point3D Utils::operator*(float s,Point3D p) {
   Point3D result = { s*p.x, s*p.y, s*p.z };
   return result;
 }
 
-float Utils::length( Point3D p )
-{
-  return sqrt( p.x*p.x + p.y*p.y + p.z*p.z );
+float Utils::length(Point3D p) {
+  return sqrt(p.x*p.x + p.y*p.y + p.z*p.z);
 }
 
-void Utils::normalize( Point3D &p )
-{
+void Utils::normalize(Point3D &p) {
   float len = length( p );
-  if ( len != 0.0f )
-  {
+  if (len != 0.0f) {
     p = (1.0f / len) * p;
   }
+}
+
+float Utils::dot_product(Point3D p1,Point3D p2) {
+  return (p1.x*p2.x + p1.y*p2.y + p1.z*p2.z);
+}
+
+Utils::Point3D Utils::cross_product(Point3D p1,Point3D p2) {
+  Point3D result = { p1.y*p2.z - p1.z*p2.y,
+                     p1.z*p2.x - p1.x*p2.z,
+                     p1.x*p2.y - p1.y*p2.x };
+  return result;
 }
 
 Utils::HSV_Color Utils::operator+( HSV_Color c1, HSV_Color c2 )

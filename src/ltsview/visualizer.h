@@ -65,38 +65,29 @@ class Visualizer
     VisSettings		  visSettings;
     VisStyle		  visStyle;
 
-    void computeSubtreeBounds( Cluster* root, float &boundWidth, float
-	&boundHeight );
-    void drawCylinder( float baserad, float toprad, float height );
-    void drawCylinder( float baserad, float toprad, float height, RGB_Color
-	basecol, RGB_Color topcol, bool baseclosed, bool topclosed );
-    void drawCylinderSplit( float baserad, float toprad, float height, RGB_Color
-	basecol, RGB_Color topcol );
-    void drawEllipsoid( float d, float h );
-    void drawHemisphere( float rad );
-    void drawSphere( float rad );
+    void computeDeltaCol(HSV_Color &hsv1);
+    void computeSubtreeBounds(Cluster* root,float &boundWidth,
+                              float &boundHeight);
+    void drawCylinder(float baserad,float toprad,float height,RGB_Color basecol,
+                      RGB_Color topcol,bool interpolate,bool baseclosed,
+                      bool topclosed);
+    void drawEllipsoid(float d,float h);
+    void drawHemisphere(float rad);
+    void drawSphere(float rad);
     void drawSphereState();
-    void drawStates( Cluster* root, int rot );
-    void drawStatesMarkStates( Cluster* root, int rot );
-    void drawStatesMarkDeadlocks( Cluster* root, int rot );
-    void drawSubtreeA( Cluster* root, int rot );
-    void drawSubtreeAMarkDeadlocks( Cluster* root, int rot );
-    void drawSubtreeAMarkStates( Cluster* root, int rot );
-    void drawSubtreeAMarkTransitions( Cluster* root, int rot );
-    void drawSubtreeC( Cluster* root, bool topClosed, HSV_Color col, int rot );
-    void drawSubtreeCMarkDeadlocks( Cluster* root, bool topClosed, int rot );
-    void drawSubtreeCMarkStates( Cluster* root, bool topClosed, int rot );
-    void drawSubtreeCMarkTransitions( Cluster* root, bool topClosed, int rot );
-    void drawSubtreeO( Cluster* root, HSV_Color col, int rot );
-    void drawSubtreeOMarkDeadlocks( Cluster* root, int rot );
-    void drawSubtreeOMarkStates( Cluster* root, int rot );
-    void drawSubtreeOMarkTransitions( Cluster* root, int rot );
-    void drawTubeInterpolate( float baserad, float toprad, RGB_Color basecol,
-	RGB_Color topcol, Point3D b1, Point3D b2, Point3D b3, Point3D &center );
-    void drawTubeSplit( float baserad, float toprad, RGB_Color basecol,
-	RGB_Color topcol, Point3D b1, Point3D b2, Point3D b3, Point3D &center );
-    void myRotatef( float theta, float ax, float ay, float az, float M[] );
-    void myTranslatef( float tx, float ty, float tz, float M[] );
+    void drawStates(Cluster* root,int rot);
+    void drawStatesMark(Cluster* root,int rot);
+    void drawSubtreeA(Cluster* root,int rot);
+    void drawSubtreeAMark(Cluster* root,int rot);
+    void drawSubtreeC(Cluster* root,bool topClosed,HSV_Color col,int rot);
+    void drawSubtreeCMark(Cluster* root,bool topClosed,int rot);
+    void drawSubtreeO(Cluster* root,HSV_Color col,int rot);
+    void drawSubtreeOMark(Cluster* root,int rot);
+    void drawTube(float baserad,float toprad,RGB_Color basecol,RGB_Color topcol,
+    							bool interpolate,Point3D b1,Point3D b2,Point3D b3,
+    							Point3D &center);
+    bool isMarked(Cluster* c);
+    bool isMarked(State* s);
     void updateGeometryTables();
   
   public:

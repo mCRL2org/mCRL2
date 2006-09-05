@@ -303,11 +303,11 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   
   qualitySpinCtrl = new wxSpinCtrl( panel, myID_SETTINGS_CONTROL, wxEmptyString,
       wxDefaultPosition );
-  qualitySpinCtrl->SetRange( 4, 100 );
+  qualitySpinCtrl->SetRange(2,50);
   qualitySpinCtrl->SetMinSize( spinctrlSize );
   qualitySpinCtrl->SetMaxSize( spinctrlSize );
-  parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
-	wxT("Rendering quality:") ), 0, lflags, border );
+  parsubSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Accuracy:")),0,lflags,
+                   border);
   parsubSizer->Add( qualitySpinCtrl, 0, rflags, border );
   
   ellipsoidSpinCtrl = new wxSpinCtrlFloat( panel, myID_SETTINGS_CONTROL,
@@ -657,7 +657,7 @@ VisSettings MainFrame::getVisSettings() const
     markC,
     nodesizeSpinCtrl->GetValue(),
     outerbranchtiltSpinCtrl->GetValue(),
-    qualitySpinCtrl->GetValue(),
+    qualitySpinCtrl->GetValue()*2,
     stateC,
     //0,
     upC
@@ -692,7 +692,7 @@ void MainFrame::setVisSettings( VisSettings ss )
 //  clusterheightSpinCtrl->SetValue( ss.clusterHeight );
 //  branchspreadSpinCtrl->SetValue( ss.branchSpread );
   outerbranchtiltSpinCtrl->SetValue( ss.outerBranchTilt );
-  qualitySpinCtrl->SetValue( ss.quality );
+  qualitySpinCtrl->SetValue( ss.quality/2 );
 //  levelDivCheckBox->SetValue( ss.levelDividers );
   //branchscaleSpinCtrl->SetValue( ss.branchScale );
   branchrotationSpinCtrl->SetValue( ss.branchRotation );

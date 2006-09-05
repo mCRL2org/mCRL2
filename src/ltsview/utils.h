@@ -13,8 +13,7 @@ namespace Utils
   enum MarkStyle { NO_MARKS, MARK_DEADLOCKS, MARK_STATES, MARK_TRANSITIONS };
   enum VisStyle	 { CONES, ORGANIC, ATOMIUM };
 
-  struct RGB_Color
-  {
+  struct RGB_Color {
     float r;
     float g;
     float b;
@@ -77,6 +76,8 @@ namespace Utils
   Point3D operator*( float s, Point3D p );
   float length( Point3D p );
   void  normalize( Point3D &p );
+  float dot_product(Point3D p1,Point3D p2);
+  Point3D cross_product(Point3D p1,Point3D p2);
   HSV_Color operator+( HSV_Color c1, HSV_Color c2 );
   HSV_Color RGB_to_HSV( RGB_Color c );
   RGB_Color HSV_to_RGB( HSV_Color c );
