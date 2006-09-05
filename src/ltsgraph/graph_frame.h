@@ -53,16 +53,14 @@ const int ID_STOP_OPTIMIZE       = wxID_HIGHEST +  1;
 const int ID_CHECK_NODE          = wxID_HIGHEST +  2;
 const int ID_CHECK_EDGE          = wxID_HIGHEST +  3;
 const int ID_BUTTON_OPTI         = wxID_HIGHEST +  4;
-const int ID_EXPORT_PS           = wxID_HIGHEST +  5;
-const int ID_EXPORT_LATEX        = wxID_HIGHEST +  6;
-const int ID_BACKUP_CREATE       = wxID_HIGHEST +  7;
-const int ID_BACKUP_RESTORE      = wxID_HIGHEST +  8;
-const int ID_BUTTON_COLOUR       = wxID_HIGHEST +  9;
-const int ID_CHECK_CURVES        = wxID_HIGHEST + 10;
-const int ID_BUTTON_LABEL_COLOUR = wxID_HIGHEST + 11;
-const int ID_BUTTON_LABEL_TEXT   = wxID_HIGHEST + 12;
-const int ID_EXPORT_SVG		 = wxID_HIGHEST + 13;
-const int ID_SPIN_RADIUS	 = wxID_HIGHEST + 14;
+const int ID_BACKUP_CREATE       = wxID_HIGHEST +  5;
+const int ID_BACKUP_RESTORE      = wxID_HIGHEST +  6;
+const int ID_BUTTON_COLOUR       = wxID_HIGHEST +  7;
+const int ID_CHECK_CURVES        = wxID_HIGHEST +  8;
+const int ID_BUTTON_LABEL_COLOUR = wxID_HIGHEST +  9;
+const int ID_BUTTON_LABEL_TEXT   = wxID_HIGHEST + 10;
+const int ID_SPIN_RADIUS	 = wxID_HIGHEST + 11;
+const int ID_MENU_EXPORT	 = wxID_HIGHEST + 12;
 
 /* To show what is the selected item */
 enum selected_type {
@@ -82,9 +80,10 @@ public:
   void BuildLayout();
   void Init(wxString LTSfile);
   void Draw(wxPaintDC * myDC);
-  void ExportPostScript(wxCommandEvent& event);
-  void ExportLatex(wxCommandEvent& event);
-  void export_svg(wxCommandEvent& event);
+  void on_export (wxCommandEvent& event);
+  void export_to_ps(wxString filename);
+  void export_to_latex(wxString filename);
+  void export_svg(wxString filename);
   void CreateBackup(wxCommandEvent& event);
   void Resize(wxSize);
   void ReplaceAfterDrag(wxPoint);
@@ -141,9 +140,7 @@ private:
   wxMenu * draw;
   wxMenu * exports;
   wxMenuItem * openItem;
-  wxMenuItem * exportPsItem;
-  wxMenuItem * exportLatexItem;
-  wxMenuItem * export_svg_item;
+  wxMenuItem * export_to;
   wxMenuItem * backupCreate;
   wxMenuItem * quitItem;
   wxMenuItem * optimizeGraph;

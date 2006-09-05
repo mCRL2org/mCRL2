@@ -3,9 +3,7 @@ const wxColour border_colour_selected = wxT("BLUE");
 
 BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
   EVT_MENU(wxID_OPEN, GraphFrame::OnOpen)
-  EVT_MENU(ID_EXPORT_PS, GraphFrame::ExportPostScript)
-  EVT_MENU(ID_EXPORT_LATEX, GraphFrame::ExportLatex)
-  EVT_MENU(ID_EXPORT_SVG, GraphFrame::export_svg)
+  EVT_MENU(ID_MENU_EXPORT, GraphFrame::on_export)
   EVT_MENU(ID_BACKUP_CREATE, GraphFrame::CreateBackup)
   EVT_MENU(wxID_EXIT, GraphFrame::OnQuit)
   EVT_MENU(ID_OPTIMIZE, GraphFrame::OnOptimize)
@@ -207,12 +205,8 @@ void GraphFrame::CreateMenu() {
   file = new wxMenu;
   openItem        = file->Append( wxID_OPEN, wxT("&Open...\tCTRL-o"), wxT("") );
 
-  exports = new wxMenu;
-  file->Append(wxID_ANY,wxT("&Export"),exports);
 
-  exportPsItem    = exports->Append( ID_EXPORT_PS, wxT("Export to &PostScript\tCTRL-p"), wxT("") );
-  exportLatexItem = exports->Append( ID_EXPORT_LATEX, wxT("Export to &Latex\tCTRL-l"), wxT("") );
-  export_svg_item = exports->Append( ID_EXPORT_SVG, wxT("Export to &SVG \tCTRL-v"), wxT("") );
+  export_to    = file->Append( ID_MENU_EXPORT, wxT("E&xport to... \tCTRL-x"), wxT("") );
 
   backupCreate    = file->Append( ID_BACKUP_CREATE, wxT("&Store layout\tCTRL-s"), wxT("") );
   
@@ -230,9 +224,7 @@ void GraphFrame::CreateMenu() {
 
 	optimizeGraph->Enable(false);
 	stopOptimize->Enable(false);
-	exportLatexItem->Enable(false);
-	exportPsItem->Enable(false);
-        export_svg_item->Enable(false);
+	export_to->Enable(false);
 	backupCreate->Enable(false);
 }
 
@@ -253,7 +245,7 @@ void GraphFrame::OnOpen( wxCommandEvent& /* event */ ) {
 	StoppedOpti = true;
 	btnOptiStop->SetLabel(wxT("&Optimize"));
 	wxFileDialog dialog( this, wxT("Select a LTS file (.aut .svc) or a backup file (.ltsgraph)..."), wxT(""), wxT(""), 
-											wxT("*.aut |*.aut|*.svc|*.svc|*.ltsgraph|*.ltsgraph|All files|*"));
+											wxT("All supported formats (*.ltsgraph; *.aut;*.svc)|*.ltsgraph;*.aut;*.svc|Saved position data (*.ltsgraph)|*.ltsgraph|MCRL2 graph format (*.aut; *.svc)|*.aut;*.svc|All files (*.*)|*.*"));
 	if ( dialog.ShowModal() == wxID_OK ) {
 		vectEdge.clear();
 		vectNode.clear();
@@ -489,9 +481,7 @@ void GraphFrame::Init(wxString LTSfile) {
 				optimizeGraph->Enable(true);
 				stopOptimize->Enable(false);
 				btnOptiStop->Enable(true);
-				exportLatexItem->Enable(true);
-				exportPsItem->Enable(true);
-                                export_svg_item->Enable(true);
+				export_to->Enable(true);
 				backupCreate->Enable(true);
 				Refresh();
 			}
@@ -726,47 +716,67 @@ void GraphFrame::Draw(wxPaintDC * myDC) {
   }
 }
 
-void GraphFrame::ExportPostScript( wxCommandEvent& /* event */ ) {
-	
+void GraphFrame::on_export(wxCommandEvent& /* event */) {
   string str(inputFileName);
-  str.append(".ps");
   wxString wx_str(str.c_str(), wxConvLocal);
   
-  wxString caption = wxT("Export PostScript file as...");
-  wxString wildcard = wxT("PostScript files (*.ps)");
+  wxString caption = wxT("Export layout as");
+  wxString wildcard = wxT("Scalable Vector Graphics (*.svg)|*.svg|PostScript files (*.ps)|*.ps|LaTeX source (*.tex)|*.tex");
   wxString default_dir = wxEmptyString;
-  wxString default_file_name = wx_str;
+  wxString default_file_name = wx_str + wxT(".svg");
 
-  wxFileDialog export_ps_dialog(this, caption, default_dir, default_file_name, wildcard, wxSAVE);
+  wxFileDialog export_dialog(this, caption, default_dir, default_file_name, wildcard, wxSAVE);
 
-  if (export_ps_dialog.ShowModal() == wxID_OK) {
-    wxString file_name = export_ps_dialog.GetPath();
-    wxPrintData pd;
-    pd.SetFilename(file_name);
-    pd.SetPrintMode(wxPRINT_MODE_FILE);
-    wxPostScriptDC myDC(pd);
-    myDC.StartDoc(wx_str);
+  if (export_dialog.ShowModal() == wxID_OK) {
+    wxString file_name = export_dialog.GetPath();
+    wxString extension = file_name.AfterLast('.');
+    wxString wc = export_dialog.GetWildcard();
 
-    //fix a bug (the size status text disappeared)
-    wxSize size = wxSize(leftPanel->Get_Width(), leftPanel->Get_Height());
-    FillStatusBar(GetInfoWinSize(size),0);
-
-    //Call Edge and Node OnPaint() method (Edge 1st)
-    for (size_t n = 0; n < vectEdge.size(); n++) {
-      vectEdge[n]->on_paint(&myDC);
+    if (extension == wxT("svg")) {
+        export_svg(file_name);
     }
-      
-    for (size_t n = 0; n < vectNode.size(); n++) {
-      vectNode[n]->OnPaint(&myDC);
+    else if (extension == wxT("ps")) {
+        export_to_ps(file_name);
     }
-
-    myDC.EndDoc();
-    wxMessageBox(wxT("Export finished"),wxT("Information"),wxOK| wxICON_INFORMATION);
+    else if (extension == wxT("tex")) {
+      export_to_latex(file_name);
+    }
+    else { 
+      /* Not a recognised format, assume svg */
+      file_name.Append(wxT(".svg"));
+      export_svg(file_name);
+    }
   }
+}
+void GraphFrame::export_to_ps( wxString file_name ) {
+
+  wxPrintData pd;
+  pd.SetFilename(file_name);
+  pd.SetPrintMode(wxPRINT_MODE_FILE);
+  wxPostScriptDC myDC(pd);
+  myDC.StartDoc(file_name);
+
+  //fix a bug (the size status text disappeared)
+  wxSize size = wxSize(leftPanel->Get_Width(), leftPanel->Get_Height());
+  FillStatusBar(GetInfoWinSize(size),0);
+
+  //Call Edge and Node OnPaint() method (Edge 1st)
+  for (size_t n = 0; n < vectEdge.size(); n++) {
+    vectEdge[n]->on_paint(&myDC);
+  }
+      
+  for (size_t n = 0; n < vectNode.size(); n++) {
+    vectNode[n]->OnPaint(&myDC);
+  }
+
+  myDC.EndDoc();
+  int message_x = wxDefaultPosition.x;
+  int message_y = wxDefaultPosition.y;
+  wxMessageBox(wxT("Export finished"),wxT("Information"),wxOK| wxICON_INFORMATION, this, message_x, message_y);
 
 }
 
-void GraphFrame::ExportLatex( wxCommandEvent& /* event */ ) {
+void GraphFrame::export_to_latex( wxString export_file_name) {
 
 	vector<nodeLatex> vectNodeLatex;
 	vector<edgeLatex> vectEdgeLatex;
@@ -799,24 +809,23 @@ void GraphFrame::ExportLatex( wxCommandEvent& /* event */ ) {
 
        wxFileDialog export_ltx(this, caption, default_dir, default_filename, wildcard, wxSAVE);
 
-       wxString export_file_name = wxEmptyString;
-
-       if (export_ltx.ShowModal() == wxID_OK) {
-         export_file_name = export_ltx.GetPath();  
         
-         ExportToLatex * ltx = new ExportToLatex(export_file_name.c_str(), vectNodeLatex,vectEdgeLatex,leftPanel->Get_Height());
- 	 if (ltx->Generate()) {
-	   wxMessageBox(wxT("Export successful"),wxT("Information"),wxOK| wxICON_INFORMATION);
+       ExportToLatex * ltx = new ExportToLatex(export_file_name.c_str(), vectNodeLatex,vectEdgeLatex,leftPanel->Get_Height());
+ 
+      if (ltx->Generate()) {
+        int message_x = wxDefaultPosition.x;
+        int message_y = wxDefaultPosition.y;
+        wxMessageBox(wxT("Export finished"),wxT("Information"),wxOK| wxICON_INFORMATION, this, message_x, message_y);
        }
        else {
    	 wxMessageBox(wxT("Export unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR);
        }
 
     delete ltx;
-  }
+
 }
 
-void GraphFrame::export_svg(wxCommandEvent& event) {
+void GraphFrame::export_svg(wxString export_file_name) {
   vector<node_svg> vect_node_svg;
   vector<edge_svg> vect_edge_svg;
 
@@ -870,29 +879,20 @@ void GraphFrame::export_svg(wxCommandEvent& event) {
     vect_edge_svg.push_back(struct_edge_svg);
   }
   
-  // Present a dialog to the user so they can pick a store location
-  wxString caption = wxT("Export SVG file as...");
-  wxString wildcard = wxT("SVG files (*.svg)");
-  wxString default_dir = wxEmptyString;
-  wxString default_file_name(inputFileName.c_str(), wxConvLocal);
 
-  default_file_name.Append(wxT(".svg"));
-
-  wxFileDialog export_dialog(this, caption, default_dir, default_file_name, wildcard, wxSAVE);
-
-  if (export_dialog.ShowModal() == wxID_OK) {
     // Create the exporter object and generate the svg file
-    wxString export_file_name = export_dialog.GetPath();
-    export_to_svg * svg = new export_to_svg(export_file_name, vect_node_svg, vect_edge_svg, leftPanel->Get_Height(), leftPanel->Get_Width());
+  export_to_svg * svg = new export_to_svg(export_file_name, vect_node_svg, vect_edge_svg, leftPanel->Get_Height(), leftPanel->Get_Width());
 
-    if (svg->generate()) {
-      wxMessageBox(wxT("Export succesful"), wxT("Information"), wxOK | wxICON_INFORMATION);
-    }
-    else {
-      wxMessageBox(wxT("Export unsuccesful"), wxT("Error"), wxOK | wxICON_ERROR);
-    }
-    delete svg;
+  if (svg->generate()) {
+    int message_x = wxDefaultPosition.x;
+    int message_y = wxDefaultPosition.y;
+    wxMessageBox(wxT("Export finished"),wxT("Information"),wxOK| wxICON_INFORMATION, this, message_x, message_y);
   }
+  else {
+    wxMessageBox(wxT("Export unsuccesful"), wxT("Error"), wxOK | wxICON_ERROR);
+  }
+  delete svg;
+  
 }
 
 void GraphFrame::CreateBackup(wxCommandEvent& event) {
@@ -956,9 +956,7 @@ void GraphFrame::RestoreBackup() {
 		vectEdge = bckp.GetVectEdge();
 		vectNode = bckp.GetVectNode();
 	        
-                exportLatexItem->Enable(true);
-		exportPsItem->Enable(true);
-                export_svg_item->Enable(true);
+                export_to->Enable(true);
 		backupCreate->Enable(true);
 			
 		optimizeGraph->Enable(true);
