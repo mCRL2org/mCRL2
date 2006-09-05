@@ -544,20 +544,17 @@ bool GraphFrame::OptimizeDrawing(double precision) {
   for (size_t i = 0; i<vectNode.size(); i++) {
     arraySumForceX[i]=0.0;
     arraySumForceY[i]=0.0;
-		vectNode[i]->SetRadius(CircleRadius);
-  }
+    vectNode[i]->SetRadius(CircleRadius);  
   
-  //Calculate forces
-  for (size_t i = 0; i<vectNode.size(); i++) 
-  { double x1 = vectNode[i]->GetX();
+    //Calculate forces
+    double x1 = vectNode[i]->GetX();
     double y1 = vectNode[i]->GetY();
 
     // First calculate the repulsing force for node i with respect to
     // the other nodes, and cumulate it in <arraySumForceX[i],arraySumForceY[i];
-    for (size_t j = 0; j<vectNode.size(); j++) 
-    {
-      if (i != j) 
-      { double x2 = vectNode[j]->GetX();
+    for (size_t j = 0; j<vectNode.size(); j++) {
+      if (i != j) {
+        double x2 = vectNode[j]->GetX();
         double y2 = vectNode[j]->GetY();
         double x2Minx1 = x1 - x2;
         double y2Miny1 = y1 - y2;
@@ -565,8 +562,7 @@ bool GraphFrame::OptimizeDrawing(double precision) {
         //Euclidean distance
         double distance = sqrt( (x2Minx1*x2Minx1) + (y2Miny1*y2Miny1) );
 
-        if (distance > 1) 
-        {
+        if (distance > 1) {
           // below the force is divided by the vectNode.size()^2 to
           // compensate for the fact that for all nodes a force
           // is summed. Otherwise the forces would be extremely big.
@@ -575,18 +571,17 @@ bool GraphFrame::OptimizeDrawing(double precision) {
           arraySumForceX[i] += s * x2Minx1;
           arraySumForceY[i] += s * y2Miny1;
         }
-        else 
-        { // If the nodes are on top of each other, they must have
+        else {
+          // If the nodes are on top of each other, they must have
           // a repulsing force, away from each other. The direction
           // is determined by the node number. We arbitrarily take
           // 1 as a repulsing force.
 
-          if (i>j)
-          { arraySumForceX[i] += CircleRadius / 2;
+          if (i>j) { 
+            arraySumForceX[i] += CircleRadius / 2;
             arraySumForceY[i] += CircleRadius / 2;
           }
-          else
-          { arraySumForceX[i] += -CircleRadius / 2;
+          else { arraySumForceX[i] += -CircleRadius / 2;
             arraySumForceY[i] += -CircleRadius / 2;
           }
         }
@@ -594,37 +589,33 @@ bool GraphFrame::OptimizeDrawing(double precision) {
     }
 
     // Subsequently calculate the attracting forces of the edges.
-    for (size_t n = 0; n < vectEdge.size(); n++) 
-    { 
+    for (size_t n = 0; n < vectEdge.size(); n++) { 
       bool calculate=false;
       double x2=0.0,y2=0.0;
       if (vectEdge[n]->get_n1() == vectNode[i] &&
-          vectEdge[n]->get_n1()!=vectEdge[n]->get_n2())
-      { 
+          vectEdge[n]->get_n1()!=vectEdge[n]->get_n2()) { 
         x2 = (vectEdge[n]->get_n2())->GetX();
         y2 = (vectEdge[n]->get_n2())->GetY();
         calculate=true;
       }
-      else
-      if (vectEdge[n]->get_n2() == vectNode[i] &&
-          vectEdge[n]->get_n1()!=vectEdge[n]->get_n2())
-      { 
-        x2 = (vectEdge[n]->get_n1())->GetX();
-        y2 = (vectEdge[n]->get_n1())->GetY();
-        calculate=true;
+      else {
+        if (vectEdge[n]->get_n2() == vectNode[i] &&
+            vectEdge[n]->get_n1()!=vectEdge[n]->get_n2()) { 
+          x2 = (vectEdge[n]->get_n1())->GetX();
+          y2 = (vectEdge[n]->get_n1())->GetY();
+          calculate=true;
+        }
       }
-        
-      if (calculate)
-      {
+
+      if (calculate) {
         double x2Minx1 = x2 - x1;
         double y2Miny1 = y2 - y1;
         double distance = sqrt( (x2Minx1*x2Minx1) + (y2Miny1*y2Miny1) );
   
-        if (distance>0.1)
-        { 
-					// Linear approach : 
+        if (distance>0.1) { 
+	  // Linear approach : 
           // double s = (EdgeStiffness * (distance - NaturalLength)) / distance;
-					// Logarithmic approach : 
+	  // Logarithmic approach : 
           double s = (EdgeStiffness * log(distance / NaturalLength)) / distance;
 
           arraySumForceX[i] += s * x2Minx1;
@@ -637,11 +628,11 @@ bool GraphFrame::OptimizeDrawing(double precision) {
     
     arraySumForceX[i]+=(WindowWidth-2*x1) / (1 * WindowWidth); 
     arraySumForceY[i]+=(WindowHeight-2*y1) /(1 * WindowHeight); 
-  }
+  } 
 
   //Replace the nodes & edges according to their new position
-  for (size_t i = 0; i<vectNode.size(); i++) 
-  { double newX = 0;
+  for (size_t i = 0; i<vectNode.size(); i++) {
+    double newX = 0;
     double newY = 0;
 
     newX = vectNode[i]->GetX() + arraySumForceX[i];
@@ -680,13 +671,7 @@ bool GraphFrame::OptimizeDrawing(double precision) {
     }    
   }
 
-    // Reset the spline control points for each edge
-    for (size_t i = 0; i < vectEdge.size(); i++) {
-      if (!curve_edges ) {
-        vectEdge[i]->reset_control();
-      }
-      vectEdge[i]->reset_label();
-    }
+
   
     
 
@@ -700,6 +685,15 @@ bool GraphFrame::OptimizeDrawing(double precision) {
   
   // compensate for the number of nodes
   achieved_precision=achieved_precision / vectNode.size();
+
+  // Reset the spline control points for each edge
+  for (size_t i = 0; i < vectEdge.size(); i++) {
+    if (!curve_edges ) {
+      vectEdge[i]->reset_control();
+    }
+    vectEdge[i]->reset_label();
+  }
+
   if (skip_steps == 0 || steps_taken == 0) {
     Refresh();
   }
@@ -707,6 +701,8 @@ bool GraphFrame::OptimizeDrawing(double precision) {
   if (skip_steps != 0) {
     steps_taken = (steps_taken + 1) % skip_steps;
   }
+
+
 
   return achieved_precision<precision;
 }

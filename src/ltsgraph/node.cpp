@@ -113,8 +113,6 @@ void Node::SetXY(double _x, double _y) {
     posX = _x;
     posY = _y;
   }
-  else 
-    wxBell();
 }
 
 void Node::ForceSetXY(double _x, double _y) {
