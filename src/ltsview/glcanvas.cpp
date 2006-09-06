@@ -23,11 +23,10 @@ BEGIN_EVENT_TABLE( GLCanvas, wxGLCanvas )
     EVT_ERASE_BACKGROUND( GLCanvas::OnEraseBackground )
 END_EVENT_TABLE()
 
-GLCanvas::GLCanvas( Mediator* owner, wxWindow* parent, const wxSize &size, int*
-    attribList )
-	: wxGLCanvas( parent, wxID_ANY, wxDefaultPosition, size,
-	    wxSUNKEN_BORDER, wxT(""), attribList )
-{
+GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,const wxSize &size,
+		   int* attribList)
+	: wxGLCanvas(parent,wxID_ANY,wxDefaultPosition,size,wxSUNKEN_BORDER,
+		     wxT(""),attribList) {
   mediator = owner;
   displayAllowed = true;
   angleX = 0.0f;
@@ -37,51 +36,50 @@ GLCanvas::GLCanvas( Mediator* owner, wxWindow* parent, const wxSize &size, int*
   moveVector.z = 0.0f;
   startPosZ = 0.0f;
   startPosZDefault = 0.0f;
-  farClippingPlane = 0.0f;
+  farPlane = 0.0f;
+  nearPlane = 1.0f;
   defaultBGColor.r = 0.4f; 
   defaultBGColor.g = 0.4f; 
   defaultBGColor.b = 0.4f; 
 
-  setActiveTool( myID_SELECT );
+  setActiveTool(myID_SELECT);
 }
 
-GLCanvas::~GLCanvas()
-{
+GLCanvas::~GLCanvas() {
 }
 
-void GLCanvas::initialize()
-{
+void GLCanvas::initialize() {
   SetCurrent();
 
-  glDepthFunc( GL_LEQUAL );
-  glShadeModel( GL_SMOOTH );
+  glDepthFunc(GL_LEQUAL);
+  glShadeModel(GL_SMOOTH);
 
   GLfloat gray[] = { 0.35f, 0.35f, 0.35f, 1.0f };
   GLfloat light_pos[] = { 50.0f, 50.0f, 50.0f, 1.0f };
-  glEnable( GL_NORMALIZE );
-  glLightfv( GL_LIGHT0, GL_AMBIENT, gray );
-  glLightfv( GL_LIGHT0, GL_DIFFUSE, gray );
-  glLightfv( GL_LIGHT0, GL_POSITION, light_pos );
+  glEnable(GL_NORMALIZE);
+  glLightfv(GL_LIGHT0,GL_AMBIENT,gray);
+  glLightfv(GL_LIGHT0,GL_DIFFUSE,gray);
+  glLightfv(GL_LIGHT0,GL_POSITION,light_pos);
   
-  glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+  glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
   
-  glEnable( GL_LIGHTING );
-  glEnable( GL_LIGHT0 );
-  glEnable( GL_DEPTH_TEST );
-  glEnable( GL_BLEND );
+  glEnable(GL_LIGHTING);
+  glEnable(GL_LIGHT0);
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_BLEND);
   
-  GLfloat light_gray[] = { 0.2f, 0.2f, 0.2f };
-  glMaterialfv( GL_FRONT, GL_SPECULAR, light_gray );
-  glMaterialf( GL_FRONT, GL_SHININESS, 8.0f );
-  glEnable( GL_COLOR_MATERIAL );
-  glColorMaterial( GL_FRONT, GL_AMBIENT_AND_DIFFUSE );
+  GLfloat light_col[] = { 0.2f, 0.2f, 0.2f };
+  glMaterialfv(GL_FRONT,GL_SPECULAR,light_col);
+  glMaterialf(GL_FRONT,GL_SHININESS,8.0f);
+  glEnable(GL_COLOR_MATERIAL);
+  glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
 
-  glEnable( GL_CULL_FACE );
-  glCullFace( GL_BACK );
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
   
-  glClearColor( defaultBGColor.r, defaultBGColor.g, defaultBGColor.b, 1 );
-  glClearDepth( 1.0 );
-  glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+  glClearColor(defaultBGColor.r,defaultBGColor.g,defaultBGColor.b,1);
+  glClearDepth(1.0);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   SwapBuffers();
 }
 
@@ -95,12 +93,12 @@ void GLCanvas::enableDisplay()
   displayAllowed = true;
 }
 
-void GLCanvas::setDefaultPosition( float structWidth, float structHeight )
-{
+void GLCanvas::setDefaultPosition(float structWidth,float structHeight) {
   // structWidth is the radius of the smallest cylinder that contains the entire
   // structure; structHeight is the height of that cylinder
-  startPosZDefault = 0.5f * structHeight / float( tan( PI / 6.0 ) ) + structWidth;
-  farClippingPlane = startPosZDefault + structWidth;
+  // 0.5 / tan(60) = 0.866
+  startPosZDefault = 0.866f*structHeight + structWidth + nearPlane;
+  farPlane = startPosZDefault + 2*structWidth;
   reshape();
 }
 
@@ -182,17 +180,14 @@ void GLCanvas::display()
   }
 }
 
-void GLCanvas::reshape()
-{
-  int width, height;
-  GetSize( &width, &height );
-  
-  glViewport( 0, 0, width, height );
-  glMatrixMode( GL_PROJECTION );
+void GLCanvas::reshape() {
+  int width,height;
+  GetSize(&width,&height);
+  glViewport(0,0,width,height);
+  glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective( 60.0f, (GLfloat)(width) / (GLfloat)(height), 1.0f,
-	farClippingPlane );
-  glMatrixMode( GL_MODELVIEW );
+    gluPerspective(60.0f,(GLfloat)(width)/(GLfloat)(height),nearPlane,farPlane);
+  glMatrixMode(GL_MODELVIEW);
 }
 
 void GLCanvas::onPaint( wxPaintEvent& /*event*/ )

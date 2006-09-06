@@ -234,7 +234,7 @@ void Visualizer::drawLTS(Point3D viewpoint) {
           }
 	        break;
           
-        case ORGANIC:
+        case TUBES:
 	        if (markStyle == NO_MARKS) {
             // coloring based on interpolation settings
             HSV_Color hsv;
@@ -597,7 +597,7 @@ void Visualizer::drawSubtreeAMark(Cluster* root,int rot) {
   primitives.push_back(p);
 }
 
-// ------------- ORGANIC -------------------------------------------------------
+// ------------- TUBES -------------------------------------------------------
 
 void Visualizer::drawSubtreeO(Cluster* root,HSV_Color col,int rot) {
   if (root == lts->getInitialState()->getCluster()) {
@@ -666,18 +666,14 @@ void Visualizer::drawSubtreeO(Cluster* root,HSV_Color col,int rot) {
                      (root->getNumberOfDescendants()>1)?desc_rot:rot);
       	glTranslatef(0.0f,0.0f,-clusterHeight);
       	
-      	Point3D b1 = {0.0f,0.0f,0.5f*clusterHeight};
-      	Point3D b2 = {0.0f,0.0f,0.5f*clusterHeight};
-      	Point3D b3 = {0.0f,0.0f,clusterHeight};
-      	Point3D center;
       	GLfloat M[16];
       	glGetFloatv(GL_MODELVIEW_MATRIX,M);
       	GLuint displist = glGenLists(1);
       	glNewList(displist,GL_COMPILE);
       	  glPushMatrix();
       	  glMultMatrixf(M);
-      	  drawTube(root->getTopRadius(),desc->getTopRadius(),HSV_to_RGB(col),
-                   HSV_to_RGB(desccol),true,b1,b2,b3,center);
+	  drawCylinder(root->getTopRadius(),desc->getTopRadius(),clusterHeight,
+	               HSV_to_RGB(col),HSV_to_RGB(desccol),true,false,false);
       	  glPopMatrix();
       	glEndList();
       
@@ -797,19 +793,15 @@ void Visualizer::drawSubtreeOMark(Cluster* root,int rot) {
       	drawSubtreeOMark(desc,(root->getNumberOfDescendants()>1)?desc_rot:rot);
       	glTranslatef(0.0f,0.0f,-clusterHeight);
       
-      	Point3D b1 = {0.0f,0.0f,0.5f*clusterHeight};
-      	Point3D b2 = {0.0f,0.0f,0.5f*clusterHeight};
-      	Point3D b3 = {0.0f,0.0f,clusterHeight};
-      	Point3D center;
       	GLfloat M[16];
       	glGetFloatv(GL_MODELVIEW_MATRIX,M);
       	GLuint displist = glGenLists(1);
       	glNewList(displist,GL_COMPILE);
       	  glPushMatrix();
       	  glMultMatrixf(M);
-      	  drawTube(root->getTopRadius(),desc->getTopRadius(),color,
-                   (isMarked(desc))?visSettings.markedColor:RGB_WHITE,false,b1,
-                   b2,b3,center);
+	  drawCylinder(root->getTopRadius(),desc->getTopRadius(),clusterHeight,
+	               color,(isMarked(desc))?visSettings.markedColor:RGB_WHITE,
+		       false,false,false);
       	  glPopMatrix();
       	glEndList();
       
@@ -1121,7 +1113,7 @@ void Visualizer::drawStatesMark(Cluster* root,int rot) {
 void Visualizer::drawCylinder(float baserad,float toprad,float height,
                               RGB_Color basecol,RGB_Color topcol,
                               bool interpolate,bool baseclosed,bool topclosed) {
-  int slices = visSettings.quality;
+  int M = visSettings.quality;
   float nxg = height;
   float nzg = baserad - toprad;
   float r = sqrt(nxg*nxg + nzg*nzg);
@@ -1133,7 +1125,7 @@ void Visualizer::drawCylinder(float baserad,float toprad,float height,
     glNormal3f(0.0,0.0,-1.0);
     glColor4f(basecol.r,basecol.g,basecol.b,visSettings.alpha);
     glVertex3f(0.0,0.0,0.0);
-    for (int j=slices; j>=0; --j) {
+    for (int j=M; j>=0; --j) {
       glVertex3f(baserad*cos_theta1[j],baserad*sin_theta1[j],0.0f);
     }
     glEnd();
@@ -1141,7 +1133,7 @@ void Visualizer::drawCylinder(float baserad,float toprad,float height,
   
   if (interpolate) {
     glBegin(GL_QUAD_STRIP);
-    for (int j=0; j<=slices; ++j) {
+    for (int j=0; j<=M; ++j) {
       glNormal3f(cos_theta1[j]*nxg,sin_theta1[j]*nxg,nzg);
       glColor4f(topcol.r,topcol.g,topcol.b,visSettings.alpha);
       glVertex3f(toprad*cos_theta1[j],toprad*sin_theta1[j],height);
@@ -1155,7 +1147,7 @@ void Visualizer::drawCylinder(float baserad,float toprad,float height,
     float demiheight = 0.5f*height;
     glColor4f(basecol.r,basecol.g,basecol.b,visSettings.alpha);
     glBegin(GL_QUAD_STRIP);
-    for (int j=0; j<=slices; ++j) {
+    for (int j=0; j<=M; ++j) {
       glNormal3f(nxg*cos_theta1[j],nxg*sin_theta1[j],nzg);
       glVertex3f(demirad*cos_theta1[j],demirad*sin_theta1[j],demiheight);
       glVertex3f(baserad*cos_theta1[j],baserad*sin_theta1[j],0.0f);
@@ -1164,7 +1156,7 @@ void Visualizer::drawCylinder(float baserad,float toprad,float height,
   
     glColor4f(topcol.r,topcol.g,topcol.b,visSettings.alpha);
     glBegin(GL_QUAD_STRIP);
-    for (int j=0; j<=slices; ++j) {
+    for (int j=0; j<=M; ++j) {
       glNormal3f(nxg*cos_theta1[j],nxg*sin_theta1[j],nzg);
       glVertex3f(toprad*cos_theta1[j],toprad*sin_theta1[j],height);
       glVertex3f(demirad*cos_theta1[j],demirad*sin_theta1[j],demiheight);
@@ -1177,7 +1169,7 @@ void Visualizer::drawCylinder(float baserad,float toprad,float height,
     glNormal3f(0.0,0.0,1.0);
     glColor4f(topcol.r,topcol.g,topcol.b,visSettings.alpha);
     glVertex3f(0.0,0.0,height);
-    for (int j=0; j<=slices; ++j) {
+    for (int j=0; j<=M; ++j) {
       glVertex3f(toprad*cos_theta1[j],toprad*sin_theta1[j],height);
     }
     glEnd();
@@ -1309,6 +1301,7 @@ void Visualizer::drawTube(float baserad,float toprad,RGB_Color basecol,
   // B(i) is the binormal vector and equals (0,1,0) for all i
   // Because the contour of the tube always lies in the local (N,B)-plane, we 
   // won't be needing the tangent vectors T(i) and only have to compute the N(i) 
+
   vector< Point3D > N(M+1); // Frenet frame principal normals
   
   float t,it;
@@ -1325,7 +1318,6 @@ void Visualizer::drawTube(float baserad,float toprad,RGB_Color basecol,
   }
   
   Point3D mesh_vs[M+1][M+1]; // vertices of the mesh
-  Point3D mesh_ns[M+1][M+1]; // normals of the mesh
   
   float f1,f2,f3;
   for (int i=0; i<=M; ++i) {
@@ -1334,62 +1326,66 @@ void Visualizer::drawTube(float baserad,float toprad,RGB_Color basecol,
     f1 = 3*t*it*it;
     f2 = 3*t*t*it;
     f3 = t*t*t;
-    Point3D F0 = { it*baserad*N[i].x, it*baserad, it*baserad*N[i].z };
-    Point3D F1 = { t*toprad*N[i].x, t*toprad, t*toprad*N[i].z };
+    Point3D F0 = { it*baserad*N[i].x, -it*baserad, it*baserad*N[i].z };
+    Point3D F1 = { t*toprad*N[i].x, -t*toprad, t*toprad*N[i].z };
     
     for (int j=0; j<=M; ++j) {
       mesh_vs[i][j].x = f1*b1.x + f2*b2.x + f3*b3.x
-                      + F0.x*sin_theta1[j] + F1.x*sin_theta1[j];
+                      + F0.x*cos_theta1[j] + F1.x*cos_theta1[j];
       mesh_vs[i][j].y = f1*b1.y + f2*b2.y + f3*b3.y
-                      + F0.y*cos_theta1[j] + F1.y*cos_theta1[j];
+                      + F0.y*sin_theta1[j] + F1.y*sin_theta1[j];
       mesh_vs[i][j].z = f1*b1.z + f2*b2.z + f3*b3.z
-                      + F0.z*sin_theta1[j] + F1.z*sin_theta1[j];
-    }
-    if (i > 0) {
-      if (i > 1) {
-        for (int j=0; j<M; ++j) {
-          Point3D v1 = mesh_vs[i][j] - mesh_vs[i-1][j];
-          Point3D v2 = mesh_vs[i-1][(j==0)?M-1:j-1] - mesh_vs[i-1][j];
-          Point3D v3 = mesh_vs[i-2][j] - mesh_vs[i-1][j];
-          Point3D v4 = mesh_vs[i-1][j+1] - mesh_vs[i-1][j];
-          Point3D n1 = cross_product(v1,v2);
-          Point3D n2 = cross_product(v2,v3);
-          Point3D n3 = cross_product(v3,v4);
-          Point3D n4 = cross_product(v4,v1);
-          mesh_ns[i-1][j].x = n1.x + n2.x + n3.x + n4.x;
-          mesh_ns[i-1][j].y = n1.y + n2.y + n3.y + n4.y;
-          mesh_ns[i-1][j].z = n1.z + n2.z + n3.z + n4.z;
-          normalize(mesh_ns[i-1][j]);
-        }
-      }
-      else {
-        for (int j=0; j<M; ++j) {
-          Point3D v1 = mesh_vs[i][j] - mesh_vs[i-1][j];
-          Point3D v2 = mesh_vs[i-1][(j==0)?M-1:j-1] - mesh_vs[i-1][j];
-          Point3D v4 = mesh_vs[i-1][j+1] - mesh_vs[i-1][j];
-          Point3D n1 = cross_product(v1,v2);
-          Point3D n4 = cross_product(v4,v1);
-          mesh_ns[i-1][j].x = n1.x + n4.x;
-          mesh_ns[i-1][j].y = n1.y + n4.y;
-          mesh_ns[i-1][j].z = n1.z + n4.z;
-          normalize(mesh_ns[i-1][j]);
-        }
-      }
-      mesh_ns[i-1][M] = mesh_ns[i-1][0];
+                      + F0.z*cos_theta1[j] + F1.z*cos_theta1[j];
     }
   }
-  for (int j=0; j<M; ++j) {
-    Point3D v2 = mesh_vs[M][(j==0)?M-1:j-1] - mesh_vs[M][j];
-    Point3D v3 = mesh_vs[M-1][j] - mesh_vs[M][j];
-    Point3D v4 = mesh_vs[M][j+1] - mesh_vs[M][j];
-    Point3D n2 = cross_product(v2,v3);
-    Point3D n3 = cross_product(v3,v4);
-    mesh_ns[M][j].x = n2.x + n3.x;
-    mesh_ns[M][j].y = n2.y + n3.y;
-    mesh_ns[M][j].z = n2.z + n3.z;
-    normalize(mesh_ns[M][j]);
+
+  Point3D mesh_ns[M+1][M+1]; // normals of the mesh vertices
+
+  for (int i=1; i<=M+1; ++i) {
+    if (i == 1) {
+      for (int j=0; j<M; ++j) {
+	Point3D v1 = mesh_vs[i][j] - mesh_vs[i-1][j];
+	Point3D v2 = mesh_vs[i-1][(j==0)?M-1:j-1] - mesh_vs[i-1][j];
+	Point3D v4 = mesh_vs[i-1][j+1] - mesh_vs[i-1][j];
+	Point3D n1 = cross_product(v1,v2);
+	Point3D n4 = cross_product(v4,v1);
+	mesh_ns[i-1][j].x = n1.x + n4.x;
+	mesh_ns[i-1][j].y = n1.y + n4.y;
+	mesh_ns[i-1][j].z = n1.z + n4.z;
+	normalize(mesh_ns[i-1][j]);
+      }
+    }
+    else if (i == M+1) {
+      for (int j=0; j<M; ++j) {
+	Point3D v2 = mesh_vs[i-1][(j==0)?M-1:j-1] - mesh_vs[i-1][j];
+	Point3D v3 = mesh_vs[i-2][j] - mesh_vs[i-1][j];
+	Point3D v4 = mesh_vs[i-1][j+1] - mesh_vs[i-1][j];
+	Point3D n2 = cross_product(v2,v3);
+	Point3D n3 = cross_product(v3,v4);
+	mesh_ns[i-1][j].x = n2.x + n3.x;
+	mesh_ns[i-1][j].y = n2.y + n3.y;
+	mesh_ns[i-1][j].z = n2.z + n3.z;
+	normalize(mesh_ns[i-1][j]);
+      }
+    }
+    else {
+      for (int j=0; j<M; ++j) {
+	Point3D v1 = mesh_vs[i][j] - mesh_vs[i-1][j];
+	Point3D v2 = mesh_vs[i-1][(j==0)?M-1:j-1] - mesh_vs[i-1][j];
+	Point3D v3 = mesh_vs[i-2][j] - mesh_vs[i-1][j];
+	Point3D v4 = mesh_vs[i-1][j+1] - mesh_vs[i-1][j];
+	Point3D n1 = cross_product(v1,v2);
+	Point3D n2 = cross_product(v2,v3);
+	Point3D n3 = cross_product(v3,v4);
+	Point3D n4 = cross_product(v4,v1);
+	mesh_ns[i-1][j].x = n1.x + n2.x + n3.x + n4.x;
+	mesh_ns[i-1][j].y = n1.y + n2.y + n3.y + n4.y;
+	mesh_ns[i-1][j].z = n1.z + n2.z + n3.z + n4.z;
+	normalize(mesh_ns[i-1][j]);
+      }
+    }
+    mesh_ns[i-1][M] = mesh_ns[i-1][0];
   }
-  mesh_ns[M][M] = mesh_ns[M][0];
   
   float t1,it1;
   if (interpolate) {

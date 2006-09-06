@@ -123,11 +123,11 @@ void MainFrame::setupMainArea()
       wxDefaultSize, wxRAISED_BORDER );
   setupRightPanel( rightPanel );
 
-  int w; int h;
-  rightPanel->GetSize( &w, &h );
+  int w,h;
+  rightPanel->GetSize(&w,&h);
   int attribList[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER };
-  glCanvas = new GLCanvas( mediator, this, wxSize( h, h ), attribList );
-  glCanvas->SetSizeHints( h, h );
+  glCanvas = new GLCanvas(mediator,this,wxSize(h,h),attribList);
+  glCanvas->SetSizeHints(h,h);
   
   mainSizer->Add( glCanvas, 1, wxALIGN_CENTER | wxEXPAND | wxALL, 0 );
   mainSizer->Add( rightPanel, 1, wxALIGN_CENTER | wxEXPAND | wxALL, 0 );
@@ -219,7 +219,7 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   styleSizer->Add( rankstyleChoice, 1, lflags, border );
   styleSizer->Add( new wxStaticText( panel, wxID_ANY,
 	wxT("Visualisation style:") ), 1, lflags, border );
-  wxString vs_choices[3] = { wxT("Cones"), wxT("Organic"), wxT("Atomium") };
+  wxString vs_choices[3] = { wxT("Cones"), wxT("Tubes"), wxT("Atomium") };
   wxChoice* visstyleChoice = new wxChoice( panel, myID_VIS_STYLE,
       wxDefaultPosition, wxDefaultSize, 3, vs_choices );
   visstyleChoice->SetSelection( 0 );
@@ -531,7 +531,7 @@ void MainFrame::onVisStyle( wxCommandEvent& event )
   if ( event.GetSelection() == 0 )
     mediator->setVisStyle( CONES );
   else if ( event.GetSelection() == 1 )
-    mediator->setVisStyle( ORGANIC );
+    mediator->setVisStyle( TUBES );
   else
     mediator->setVisStyle( ATOMIUM );
 }

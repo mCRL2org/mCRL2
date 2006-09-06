@@ -55,10 +55,11 @@ class GLCanvas: public wxGLCanvas
     float     startPosZ;
     float     startPosZDefault;
     bool      displayAllowed;
-    float     farClippingPlane;
-    float     farClippingPlaneDefault;
+    float     farPlane;
+    float     farPlaneDefault;
     Mediator* mediator;
     Point3D   moveVector;
+    float     nearPlane;
     int	      oldMouseX;
     int	      oldMouseY;
     

@@ -11,7 +11,7 @@ namespace Utils
 
   enum RankStyle { ITERATIVE, CYCLIC };
   enum MarkStyle { NO_MARKS, MARK_DEADLOCKS, MARK_STATES, MARK_TRANSITIONS };
-  enum VisStyle	 { CONES, ORGANIC, ATOMIUM };
+  enum VisStyle	 { CONES, TUBES, ATOMIUM };
 
   struct RGB_Color {
     float r;
