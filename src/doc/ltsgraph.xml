@@ -19,7 +19,7 @@
 
 <refnamediv>
   <refname>&ltsgraph;</refname>
-  <refpurpose>draw graphs</refpurpose>
+  <refpurpose>Visualise graphs and optimise their layout</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -34,35 +34,77 @@
 <refsect1>
   <title>Description</title>
   <para>
-    The &ltsgraph; tool draw a graph in &infile; using
+    The &ltsgraph; tool draws the graph described by &infile; using
     a graphical user interface. If &infile; is not supplied the tool starts
-    without a drawing. The interface consists of two parts. In the left part
-    the drawing area and in the right part the options panel. Information
-    about the current draw are available in the upper right part. Information
-    about the drawing area size, the node currently selected and the file
-    currently opened are available on the status bar. 
+    without a drawing. The interface consists of two parts, a drawing area to the left and an options panel to the right.
+    Information about the currently drawn graph is available in the upper right part. 
+    Information about the drawing area size, the node currently selected and the file
+    currently opened are available in the status bar. 
   </para>
   <para>
-    Apart from basic draw, &ltsgraph; provides the following additional
+    &infile; can have any one of the following extensions:
+    <itemizedlist>
+      <listitem>
+        <para>.aut: Aldebarran format (CADP)</para>
+      </listitem>
+      
+      <listitem>
+        <para>.svc: mCRL or mCRL2 format</para>
+      </listitem>
+      
+      <listitem>
+        <para>.ltsgraph: &ltsgraph; layout format</para>
+      </listitem>
+
+    </itemizedlist>
+  </para>
+  <para>
+    Apart from basic drawing, &ltsgraph; provides the following additional
     functionalities:
     <itemizedlist>
       <listitem>
 	<para>Nodes can be dragged and dropped by the left click.</para>
       </listitem>
-
+      
       <listitem>
-	<para>Graphs layout can be optimize thanks to an algorithm. This is accessible
+        <para>Node, and edge label colour can be changed with the corresponding buttons.</para>
+      </listitem>
+ 
+      <listitem>
+	<para>Graph layout can be optimized. This is accessible
 	 from the Draw menu or the button on the right panel. Algorithm parameters can
-	 be modified on the right panel. </para>
+	 be modified on the right panel. 
+         These options are as follows:
+         <itemizedlist>
+           <listitem>
+             <para>State repulsion is the strength with which nodes repulse each other. A higher setting results in more space between nodes.</para>
+           </listitem>
+
+           <listitem>
+             <para>Transition attracting force is the force with which transitions pull nodes together. A lower setting results in more space between nodes.</para>
+           </listitem>
+ 
+           <listitem>
+             <para>Natural transition length is the length of transitions. A higher setting results in more space between nodes.</para>
+           </listitem>
+
+           <listitem>
+             <para>Speedup controls the smoothness of algorithm rendering; a lower setting results in smoother rendering, a higher setting results in faster rendering.</para>
+           </listitem>
+         </itemizedlist></para>
       </listitem>
 
       <listitem>
 	<para>Nodes can be fixed by the right click. Nodes fixed can still be dragged 
-	and dropped but the optimize algorithm can not move such nodes.</para>
+	and dropped but the optimize algorithm will not move such nodes.</para>
       </listitem>
 
       <listitem>
-	<para>A layout can be export to a PostScript or a LaTeX file.
+        <para>Edges can be curved by clicking the corresponding checkbox and dragging the edge control points.</para>
+      </listitem>
+
+      <listitem>
+	<para>A layout can be exported to PostScript, LaTeX or SVG files.
 	</para>
       </listitem>
 
@@ -92,8 +134,8 @@
 <refsect1>
 <title>Author</title>
 <para>
-  Written by Didier Le Lann and Jeroen van der Wulp. Please send all
-  complaints, comments and bug reports to <email>bug@mcrl2.org</email>.
+  Written by Didier Le Lann, Jeroen van der Wulp and Carst Tankink. Please send all
+  complaints, comments and bug reports to <email>bug@mcrl2.org</email>, or file them at the bugtracker found through <address>www.mcrl2.org</address>.
 </para>
 </refsect1>
 
