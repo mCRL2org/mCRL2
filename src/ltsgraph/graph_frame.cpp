@@ -97,7 +97,7 @@ void GraphFrame::BuildLayout() {
   int lflags = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
   int rflags = wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL;
   
-  wxFlexGridSizer* topRightSizer = new wxFlexGridSizer( 4, 2, 0, 0 );
+  wxFlexGridSizer* topRightSizer = new wxFlexGridSizer( 0, 2, 0, 0 );
   initialStateLabel = new wxStaticText( rightPanel, wxID_ANY, wxEmptyString,
     wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
   numberOfStatesLabel = new wxStaticText( rightPanel, wxID_ANY, wxEmptyString,
@@ -123,23 +123,23 @@ void GraphFrame::BuildLayout() {
 
   // setup the middle part (algorithm settings box)
   wxStaticBoxSizer* algoSettingsSizer = new wxStaticBoxSizer( wxVERTICAL, rightPanel, wxT("Algorithm settings") );
-  wxFlexGridSizer* middleRightSizer = new wxFlexGridSizer( 3, 2, 0, 0 );
+  wxFlexGridSizer* middleRightSizer = new wxFlexGridSizer( 0, 1, 0, 0 );
 	
-  wxSize spinSize(1,1);
-  spinNodeStrength  = new wxSpinCtrlFloat(rightPanel, wxID_ANY, 100.0, 90000.0, 200.0, 1000.0,wxDefaultPosition,spinSize);
-  spinEdgeStiffness = new wxSpinCtrlFloat(rightPanel, wxID_ANY, 0.0, 15.0, 0.1, 1.0,wxDefaultPosition,spinSize);
-  spinNaturalLength = new wxSpinCtrlFloat(rightPanel, wxID_ANY, 2.0, 900.0, 1.0, 20.0,wxDefaultPosition,spinSize);
-
-  slider_speedup = new wxSlider(rightPanel, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+  sliderNodeStrength  = new wxSlider(rightPanel, wxID_ANY, 1000, 100, 90000, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+  sliderEdgeStiffness = new wxSlider(rightPanel, wxID_ANY, 1, 0, 15, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+  sliderNaturalLength = new wxSlider(rightPanel, wxID_ANY, 2, 1, 900, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+  slider_speedup = new wxSlider(rightPanel, wxID_ANY, 0, 0, 250, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
   
+
   middleRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("State repulsion") ), 0, lflags, 4 );
-  middleRightSizer->Add(spinNodeStrength, 0, rflags, 3 );
+  middleRightSizer->Add(sliderNodeStrength, 0, rflags, 3 );
   middleRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("Transition attracting force") ), 0, lflags, 4 );
-  middleRightSizer->Add(spinEdgeStiffness, 0, rflags, 3 );
+  middleRightSizer->Add(sliderEdgeStiffness, 0, rflags, 3 );
   middleRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("Natural transition length") ), 0, lflags, 4 );
-  middleRightSizer->Add(spinNaturalLength, 0, rflags, 3 );
+  middleRightSizer->Add(sliderNaturalLength, 0, rflags, 3 );
   middleRightSizer->Add (new wxStaticText( rightPanel, wxID_ANY, wxT("Speedup") ), 0, lflags, 4);
   middleRightSizer->Add(slider_speedup, 0, rflags, 3);
+
 
   algoSettingsSizer->Add(middleRightSizer, 1, wxEXPAND | wxALL, 0 );
   rightSizer->Add(algoSettingsSizer, 0, wxEXPAND | wxALL, 0 );
@@ -158,7 +158,7 @@ void GraphFrame::BuildLayout() {
   othersSettingsSizer->Add(ckEdgeLabels,   0, lflags, 4 );
   othersSettingsSizer->Add(ck_curve_edges, 0, lflags, 4 );
 
-  wxFlexGridSizer* bottomRightSizer = new wxFlexGridSizer( 1, 2, 0, 0 );
+  wxFlexGridSizer* bottomRightSizer = new wxFlexGridSizer( 0, 2, 0, 0 );
   spinNodeRadius = new wxSpinCtrl(rightPanel, ID_SPIN_RADIUS, wxT(""), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 2, 50, 10);
   bottomRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("State radius") ), 0, lflags, 4 );
   bottomRightSizer->Add(spinNodeRadius, 0, rflags, 3 );
@@ -513,9 +513,9 @@ bool GraphFrame::OptimizeDrawing(double precision) {
    */
   int skip_steps = 0;
   if ( !StopOpti) {
-    EdgeStiffness = spinEdgeStiffness->GetValue();
-    NodeStrength  = spinNodeStrength->GetValue();
-    NaturalLength = spinNaturalLength->GetValue();
+    EdgeStiffness = sliderEdgeStiffness->GetValue();
+    NodeStrength  = sliderNodeStrength->GetValue();
+    NaturalLength = sliderNaturalLength->GetValue();
     CircleRadius  = spinNodeRadius->GetValue();
     skip_steps = slider_speedup->GetValue();
   }
@@ -723,28 +723,46 @@ void GraphFrame::on_export(wxCommandEvent& /* event */) {
   wxString caption = wxT("Export layout as");
   wxString wildcard = wxT("Scalable Vector Graphics (*.svg)|*.svg|PostScript files (*.ps)|*.ps|LaTeX source (*.tex)|*.tex");
   wxString default_dir = wxEmptyString;
-  wxString default_file_name = wx_str + wxT(".svg");
+  wxString default_file_name = wx_str;
 
-  wxFileDialog export_dialog(this, caption, default_dir, default_file_name, wildcard, wxSAVE);
+  wxFileDialog export_dialog(this, caption, default_dir, default_file_name, wildcard, wxSAVE | wxOVERWRITE_PROMPT);
 
   if (export_dialog.ShowModal() == wxID_OK) {
     wxString file_name = export_dialog.GetPath();
     wxString extension = file_name.AfterLast('.');
-    wxString wc = export_dialog.GetWildcard();
 
-    if (extension == wxT("svg")) {
+    if (extension == file_name) {
+      /* No extension given, get it from filter index */
+      switch (export_dialog.GetFilterIndex()) {
+        case 0: //SVG item
+          file_name.Append(wxT(".svg"));
+          export_svg(file_name);
+          break;
+        case 1: //PS item
+          file_name.Append(wxT(".ps"));
+          export_to_ps(file_name);
+          break;
+        case 2: //Latex item
+          file_name.Append(wxT(".tex"));
+          export_to_latex(file_name);
+          break;
+      }
+    }
+    else {
+      if (extension == wxT("svg")) {
         export_svg(file_name);
-    }
-    else if (extension == wxT("ps")) {
+      }
+      else if (extension == wxT("ps")) {
         export_to_ps(file_name);
-    }
-    else if (extension == wxT("tex")) {
-      export_to_latex(file_name);
-    }
-    else { 
-      /* Not a recognised format, assume svg */
-      file_name.Append(wxT(".svg"));
-      export_svg(file_name);
+      }
+      else if (extension == wxT("tex")) {
+        export_to_latex(file_name);
+      }
+      else { 
+        /* Not a recognised format, assume svg */
+        file_name.Append(wxT(".svg"));
+        export_svg(file_name);
+      }
     }
   }
 }
@@ -807,7 +825,7 @@ void GraphFrame::export_to_latex( wxString export_file_name) {
        wxString default_dir = wxEmptyString;
        wxString default_filename((inputFileName + ".tex").c_str(), wxConvLocal);
 
-       wxFileDialog export_ltx(this, caption, default_dir, default_filename, wildcard, wxSAVE);
+       wxFileDialog export_ltx(this, caption, default_dir, default_filename, wildcard, wxSAVE | wxOVERWRITE_PROMPT);
 
         
        ExportToLatex * ltx = new ExportToLatex(export_file_name.c_str(), vectNodeLatex,vectEdgeLatex,leftPanel->Get_Height());
@@ -818,7 +836,7 @@ void GraphFrame::export_to_latex( wxString export_file_name) {
         wxMessageBox(wxT("Export finished"),wxT("Information"),wxOK| wxICON_INFORMATION, this, message_x, message_y);
        }
        else {
-   	 wxMessageBox(wxT("Export unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR);
+   	 wxMessageBox(wxT("Export unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR, this, wxDefaultPosition.x, wxDefaultPosition.y);
        }
 
     delete ltx;
@@ -883,13 +901,13 @@ void GraphFrame::export_svg(wxString export_file_name) {
     // Create the exporter object and generate the svg file
   export_to_svg * svg = new export_to_svg(export_file_name, vect_node_svg, vect_edge_svg, leftPanel->Get_Height(), leftPanel->Get_Width());
 
-  if (svg->generate()) {
     int message_x = wxDefaultPosition.x;
     int message_y = wxDefaultPosition.y;
+  if (svg->generate()) {
     wxMessageBox(wxT("Export finished"),wxT("Information"),wxOK| wxICON_INFORMATION, this, message_x, message_y);
   }
   else {
-    wxMessageBox(wxT("Export unsuccesful"), wxT("Error"), wxOK | wxICON_ERROR);
+    wxMessageBox(wxT("Export unsuccesful"), wxT("Error"), wxOK | wxICON_ERROR, this, message_x, message_y);
   }
   delete svg;
   
@@ -904,7 +922,7 @@ void GraphFrame::CreateBackup(wxCommandEvent& event) {
     numberOfTransitionsLabel->GetLabel(), 
     numberOfLabelsLabel->GetLabel()  );
 
-  bckp.SetAlgoSettings(spinEdgeStiffness->GetValue(), spinNodeStrength->GetValue(), spinNaturalLength->GetValue());
+  bckp.SetAlgoSettings(sliderEdgeStiffness->GetValue(), sliderNodeStrength->GetValue(), sliderNaturalLength->GetValue());
   bckp.SetOtherSettings(spinNodeRadius->GetValue(), ckNodeLabels->IsChecked(), ckEdgeLabels->IsChecked());
 
   // Create a file dialog to show to the user
@@ -914,17 +932,16 @@ void GraphFrame::CreateBackup(wxCommandEvent& event) {
   wxString default_file_name(inputFileName.c_str(), wxConvLocal);
   default_file_name.append(wxT(".ltsgraph"));
 
-  wxFileDialog bckup_dialog(this, caption, default_dir, default_file_name, wildcard, wxSAVE);
+  wxFileDialog bckup_dialog(this, caption, default_dir, default_file_name, wildcard, wxSAVE | wxOVERWRITE_PROMPT);
   
   if (bckup_dialog.ShowModal() == wxID_OK) {
     wxString backup_filename = bckup_dialog.GetPath();
     // Get last part of the filename (backup expects a local file path
-    
     if (bckp.Backup(backup_filename)) {
-      wxMessageBox(wxT("Save successful"),wxT("Information"),wxOK| wxICON_INFORMATION);
+      wxMessageBox(wxT("Save successful"),wxT("Information"),wxOK| wxICON_INFORMATION, this, wxDefaultPosition.x, wxDefaultPosition.y);
     }
     else {
-      wxMessageBox(wxT("Save unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR);
+      wxMessageBox(wxT("Save unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR, this, wxDefaultPosition.x, wxDefaultPosition.y);
     }
   }
 				
@@ -943,9 +960,9 @@ void GraphFrame::RestoreBackup() {
 		numberOfTransitionsLabel->SetLabel(bckp.GetNumTransitions()); 
 		numberOfLabelsLabel->SetLabel(bckp.GetNumLabels()); 
 
-		spinEdgeStiffness->SetValue(bckp.GetEdgeStiffness());
-		spinNodeStrength->SetValue(bckp.GetNodeStrength());
-		spinNaturalLength->SetValue(bckp.GetNaturalLength());
+		sliderEdgeStiffness->SetValue((int)bckp.GetEdgeStiffness());
+		sliderNodeStrength->SetValue((int)bckp.GetNodeStrength());
+		sliderNaturalLength->SetValue((int)bckp.GetNaturalLength());
 	
 		spinNodeRadius->SetValue(bckp.GetStateRadius());
 		ckNodeLabels->SetValue(bckp.GetStateLabel());
@@ -965,7 +982,7 @@ void GraphFrame::RestoreBackup() {
 
 	}
 	else
-		wxMessageBox(wxT("Restore unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR);
+		wxMessageBox(wxT("Restore unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR, this, wxDefaultPosition.x, wxDefaultPosition.y);
 	
 	
 	Refresh();

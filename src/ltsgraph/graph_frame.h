@@ -153,9 +153,9 @@ private:
   wxStaticText * initialStateLabel;
   wxStaticText * numberOfLabelsLabel;
 
-  wxSpinCtrlFloat * spinNodeStrength;
-  wxSpinCtrlFloat * spinEdgeStiffness;
-  wxSpinCtrlFloat * spinNaturalLength;
+  wxSlider * sliderNodeStrength;
+  wxSlider * sliderEdgeStiffness;
+  wxSlider * sliderNaturalLength;
   wxSpinCtrl * spinNodeRadius;
   
   wxSlider * slider_speedup;
