@@ -61,6 +61,7 @@ const int ID_BUTTON_LABEL_COLOUR = wxID_HIGHEST +  9;
 const int ID_BUTTON_LABEL_TEXT   = wxID_HIGHEST + 10;
 const int ID_SPIN_RADIUS	 = wxID_HIGHEST + 11;
 const int ID_MENU_EXPORT	 = wxID_HIGHEST + 12;
+const int ID_MENU_ABOUT		 = wxID_HIGHEST + 13;
 
 /* To show what is the selected item */
 enum selected_type {
@@ -81,6 +82,7 @@ public:
   void Init(wxString LTSfile);
   void Draw(wxPaintDC * myDC);
   void on_export (wxCommandEvent& event);
+  void on_about (wxCommandEvent& event);
   void export_to_ps(wxString filename);
   void export_to_latex(wxString filename);
   void export_svg(wxString filename);
@@ -145,6 +147,7 @@ private:
   wxMenuItem * quitItem;
   wxMenuItem * optimizeGraph;
   wxMenuItem * stopOptimize;
+  wxMenuItem * about;
 
   wxStatusBar * statusBar;
 

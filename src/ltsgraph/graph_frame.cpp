@@ -8,6 +8,7 @@ BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
   EVT_MENU(wxID_EXIT, GraphFrame::OnQuit)
   EVT_MENU(ID_OPTIMIZE, GraphFrame::OnOptimize)
   EVT_MENU(ID_STOP_OPTIMIZE, GraphFrame::OnStopOptimize)
+  EVT_MENU(ID_MENU_ABOUT, GraphFrame::on_about)
 
   EVT_CLOSE(GraphFrame::OnClose)
 
@@ -218,6 +219,10 @@ void GraphFrame::CreateMenu() {
   optimizeGraph = draw->Append(ID_OPTIMIZE, wxT("&Optimize Graph\tCTRL-g"), wxT("") );
   stopOptimize = draw->Append(ID_STOP_OPTIMIZE, wxT("&Stop Optimize Graph\tCTRL-s"), wxT("") );
   menu->Append(draw, wxT("&Draw") );
+
+  wxMenu *help = new wxMenu;
+  about = help->Append(ID_MENU_ABOUT, wxT("&About..."), wxEmptyString);
+  menu->Append(help, wxT("Help"));
 
 
   SetMenuBar( menu );
@@ -715,7 +720,16 @@ void GraphFrame::Draw(wxPaintDC * myDC) {
     vectNode[n]->OnPaint(myDC);
   }
 }
+void GraphFrame::on_about(wxCommandEvent& /* event */) {
+  wxString caption = wxT("About");
+  wxString content = wxT("ltsgraph - tool for visualising graphs and optimizing layout \n");
+  content += wxT("Part of the mCRL2 toolset \n \n");
+  content += wxT("Info: http://www.mcrl2.org \n");
+  content += wxT("Bug reports: bug@mcrl2.org");
+  wxMessageBox(content, caption,wxOK| wxICON_INFORMATION, this, wxDefaultPosition.x, wxDefaultPosition.y);
+}
 
+ 
 void GraphFrame::on_export(wxCommandEvent& /* event */) {
   string str(inputFileName);
   wxString wx_str(str.c_str(), wxConvLocal);
