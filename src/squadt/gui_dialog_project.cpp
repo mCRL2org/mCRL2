@@ -196,8 +196,8 @@ namespace squadt {
             break;
           default: /* wxID_OK */
             if (wxFileName(directory_selector->GetPath(), name->GetValue()).DirExists()) {
-              if (wxMessageDialog(0, wxT("The directory already exists; any files it contains will be imported into the project."),
-                                    wxT("Warning"), wxOK|wxCANCEL).ShowModal() == wxID_OK) {
+              if (wxMessageDialog(0, wxT("Convert the directory to project store and import any other files it contains."),
+                                    wxT("Warning: directory already exists"), wxOK|wxCANCEL).ShowModal() == wxID_OK) {
                 EndModal(1);
               }
             }

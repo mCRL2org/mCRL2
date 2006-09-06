@@ -674,6 +674,13 @@ namespace squadt {
       s->Detach(this);
       s->Layout();
 
+      /* Toggle scrollbar availability on demand */
+      wxSizeEvent size_event(GetParent()->GetSize(), GetParent()->GetId());
+
+      size_event.SetEventObject(GetParent());
+
+      GetParent()->GetParent()->ProcessEvent(size_event);
+
       Destroy();
     }
 
@@ -706,7 +713,6 @@ namespace squadt {
 
           GetSizer()->Insert(1, content, 1, wxALL|wxALIGN_LEFT, 2);
 
-          content->RecalcSizes();
           content->Layout();
 
           Show(true);
@@ -715,7 +721,6 @@ namespace squadt {
           content = 0;
         }
 
-        GetParent()->GetSizer()->RecalcSizes();
         GetParent()->Layout();
 
         /* Toggle scrollbar availability on demand */
@@ -745,7 +750,6 @@ namespace squadt {
         event_handler.update(&m, i);
       }
 
-      GetParent()->GetSizer()->RecalcSizes();
       GetParent()->Layout();
     }
 
@@ -763,8 +767,14 @@ namespace squadt {
 
         sizer->Add(log, 0, wxALL|wxEXPAND|wxALIGN_CENTER, 2);
 
-        GetParent()->GetSizer()->RecalcSizes();
         GetParent()->Layout();
+
+        /* Toggle scrollbar availability on demand */
+        wxSizeEvent size_event(GetParent()->GetSize(), GetParent()->GetId());
+
+        size_event.SetEventObject(GetParent());
+
+        GetParent()->GetParent()->ProcessEvent(size_event);
       }
       else {
         log->AppendText(stamp + wxString(l->get_description().c_str(), wxConvLocal));

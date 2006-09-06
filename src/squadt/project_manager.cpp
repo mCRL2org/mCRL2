@@ -46,7 +46,16 @@ namespace squadt {
         write();
       }
       else {
-        read();
+        try {
+          read();
+        }
+        catch (...) {
+          /* Project description file is probably broken */
+          import_directory(l);
+
+          /* Create initial project description file */
+          write();
+        }
       }
     }
     else {
@@ -72,7 +81,9 @@ namespace squadt {
         import_directory(*i);
       }
       else {
-        import_file(*i);
+        if ((*i).leaf() != settings_manager::project_definition_base_name) {
+          import_file(*i);
+        }
       }
 
       ++i;
@@ -339,7 +350,7 @@ namespace squadt {
     path           destination_path = store / path(d.empty() ? s.leaf() : d);
     processor::ptr p                = processor::create(*this);
 
-    if (s != destination_path) {
+    if (s != destination_path && exists(destination_path)) {
       copy_file(s, destination_path);
     }
 
