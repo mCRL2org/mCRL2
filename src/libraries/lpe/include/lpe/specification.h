@@ -59,7 +59,6 @@ class specification: public aterm_wrapper
     LPE                  m_lpe;
     data_variable_list   m_initial_free_variables;
     data_assignment_list m_initial_assignments;
-    data_expression_list m_initial_state;
 
     /// Create a list containing the left hand sides of the initial assignments.
     ///
@@ -119,7 +118,6 @@ class specification: public aterm_wrapper
       m_lpe = LPE(lpe, m_actions);
 
       // unpack LPEInit(.,.) term
-      // compute m_initial_state from lpe_init
       aterm_list::iterator k         = lpe_init.argument_list().begin();
       m_initial_free_variables            = data_variable_list(*k++);
       m_initial_assignments          = data_assignment_list(*k);

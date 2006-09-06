@@ -216,7 +216,7 @@ class LPE: public aterm_wrapper
     data_variable_list m_free_variables;
     data_variable_list m_process_parameters;
     summand_list       m_summands;
-    action_list        m_actions;
+    action_list        m_actions; //Can m_actions be removed?
 
     typedef std::vector<std::pair<summand_list::iterator, std::set<std::string> > > name_clash_list;
 
