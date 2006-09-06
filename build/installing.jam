@@ -77,7 +77,9 @@ rule install_plugins ( targets + ) {
 # Install examples
 rule install_examples_by_extension ( name root : extensions + ) {
   install install-$(name)-examples
-       : [ glob $(root)/*.$(extensions) $(root)/*/*.$(extensions) $(root)/*/*/*.$(extensions) ]
+       : [ glob $(root)/*.$(extensions)
+                $(root)/[^.]*/*.$(extensions)
+                $(root)/[^.]*/[^.]*/*.$(extensions) ]
        : <location>$(DATA_DIR)
          <install-source-root>.
        ;
