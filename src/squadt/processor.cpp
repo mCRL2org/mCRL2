@@ -332,9 +332,13 @@ namespace squadt {
       s << "<output id=\"" << std::dec << reinterpret_cast < unsigned long > ((*i).get())
         << "\" format=\"" << (*i)->format
         << "\" location=\"" << (*i)->location
-        << "\" identifier=\"" << std::dec << (*i)->identifier
-        << "\" digest=\"" << (*i)->checksum
-        << "\" timestamp=\"" << std::dec << (*i)->timestamp << "\"/>\n";
+        << "\" identifier=\"" << std::dec << (*i)->identifier;
+
+      if (!(*i)->checksum.is_zero()) {
+        s << "\" digest=\"" << (*i)->checksum;
+      }
+
+      s << "\" timestamp=\"" << std::dec << (*i)->timestamp << "\"/>\n";
     }
 
     s << "</processor>\n";
@@ -412,14 +416,19 @@ namespace squadt {
       if (!(b && r.get_attribute(&n->format, "format")
               && r.get_attribute(&n->location, "location")
               && r.get_attribute(&n->identifier, "identifier")
-              && r.get_attribute(&temporary, "digest")
               && r.get_attribute(&n->timestamp, "timestamp"))) {
 
         throw (exception::exception(exception::required_attributes_missing, "processor->output"));
       }
 
+      if (r.get_attribute(&temporary, "digest")) {
+        n->checksum.read(temporary.c_str());
+      }
+      else {
+        n->checksum = md5pp::zero_digest;
+      }
+
       n->generator = c;
-      n->checksum.read(temporary.c_str());
 
       r.next_element();
 

@@ -317,7 +317,9 @@ namespace sip {
       out << " fresh=\"true\"";
     }
 
-    out << " output-prefix=\"" << output_prefix << "\"";
+    if (!output_prefix.empty()) {
+      out << " output-prefix=\"" << output_prefix << "\"";
+    }
 
     /* Add input combination */
     out << " category=\"" << category << "\">";

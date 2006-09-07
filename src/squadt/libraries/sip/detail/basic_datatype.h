@@ -7,6 +7,7 @@
 #include <string>
 #include <ostream>
 #include <utility>
+#include <iostream>
 
 #include <boost/any.hpp>
 
@@ -590,7 +591,7 @@ namespace sip {
      * @param[in] d the default value in the domain
      **/
     inline basic_datatype::sptr integer::create(long int d, long int min, long int max) {
-      return (basic_datatype::sptr(new integer(min, max, d)));
+      return (basic_datatype::sptr(new integer(d, min, max)));
     }
 
     /**
@@ -617,7 +618,7 @@ namespace sip {
       r.next_element();
       r.skip_end_element("integer");
 
-      return (make_pair(integer::create(minimum, maximum, default_value), p));
+      return (make_pair(integer::create(default_value, minimum, maximum), p));
     }
 
     /**
@@ -625,17 +626,17 @@ namespace sip {
      * @param[in] v an optional (valid) instance
      **/
     inline void integer::private_write(std::ostream& o, std::string const& v) const {
-      o << "<real";
+      o << "<integer";
 
       if (!v.empty()) {
         o << " value=\"" << std::dec << v << "\"";
       }
 
-      if (minimum != LONG_MIN) {
+      if (minimum != implementation_minimum) {
         o << " minimum=\"" << minimum << "\"";
       }
         
-      if (maximum != LONG_MAX) {
+      if (maximum != implementation_maximum) {
         o << " maximum=\"" << maximum << "\"";
       }
 
@@ -731,7 +732,7 @@ namespace sip {
      * @param[in] d the default value in the domain
      **/
     inline basic_datatype::sptr real::create(double d, double min, double max) {
-      return (basic_datatype::sptr(new real(min, max, d)));
+      return (basic_datatype::sptr(new real(d, min, max)));
     }
 
     /**
@@ -747,7 +748,7 @@ namespace sip {
       assert(r.is_element("real"));
 
       r.get_attribute(&minimum, "minimum");
-      r.get_attribute(&minimum, "maximum");
+      r.get_attribute(&maximum, "maximum");
 
       double default_value = minimum;
 
@@ -758,7 +759,7 @@ namespace sip {
       r.next_element();
       r.skip_end_element("real");
 
-      return (make_pair(real::create(minimum, maximum), p));
+      return (make_pair(real::create(default_value, minimum, maximum), p));
     }
 
     /**
@@ -772,11 +773,11 @@ namespace sip {
         o << " value=\"" << std::dec << v << "\"";
       }
 
-      if (minimum != DBL_MIN) {
+      if (minimum != implementation_minimum) {
         o << " minimum=\"" << minimum << "\"";
       }
         
-      if (maximum != DBL_MAX) {
+      if (maximum != implementation_maximum) {
         o << " maximum=\"" << maximum << "\"";
       }
 
