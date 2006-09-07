@@ -188,6 +188,18 @@ static bool checkVars(ATermAppl Expr, ATermList Vars, ATermList *UsedVars = NULL
 	}
 }
 
+static bool checkPattern(ATermAppl p)
+{
+	if ( gsIsDataVarId(p) || gsIsOpId(p) )
+	{
+		return true;
+	} else { // gsIsDataAppl(p)
+		return !gsIsDataVarId(ATAgetArgument(p,0)) &&
+		       checkPattern(ATAgetArgument(p,0))   &&
+		       checkPattern(ATAgetArgument(p,1));
+	}
+}
+
 bool isValidRewriteRule(ATermAppl DataEqn)
 {
 	assert(gsIsDataEqn(DataEqn));
@@ -204,5 +216,5 @@ bool isValidRewriteRule(ATermAppl DataEqn)
 		return false;
 	}
 
-	return checkVars(ATAgetArgument(DataEqn,3),lhs_vars);
+	return checkVars(ATAgetArgument(DataEqn,3),lhs_vars) && checkPattern(ATAgetArgument(DataEqn,2));
 }

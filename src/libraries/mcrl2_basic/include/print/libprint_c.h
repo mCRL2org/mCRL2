@@ -1,3 +1,6 @@
+#ifndef _LIBPRINT_C_H
+#define _LIBPRINT_C_H
+
 #include <stdio.h>
 #include <aterm2.h>
 #include <ctype.h>
@@ -156,4 +159,6 @@ inline static void gsDebugMsgFunc(const char *FuncName, char *Format, ...)
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

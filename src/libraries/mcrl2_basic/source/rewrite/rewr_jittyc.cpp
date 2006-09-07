@@ -1373,7 +1373,7 @@ void RewriterCompilingJitty::calcTerm(FILE *f, ATerm t, int startarg, ATermList 
     }
 
     bool b2 = false;
-    if ( ATisInt(ATgetFirst((ATermList) t)) && (jittyc_eqns[ATgetInt((ATermInt) ATgetFirst((ATermList) t))] != NULL) )
+    if ( ATisInt(ATgetFirst((ATermList) t)) )//&& (jittyc_eqns[ATgetInt((ATermInt) ATgetFirst((ATermList) t))] != NULL) )
     {
 //      if ( ATgetInt((ATermInt) ATgetLast(l)) > arity )
 //      {
@@ -1433,8 +1433,8 @@ void RewriterCompilingJitty::calcTerm(FILE *f, ATerm t, int startarg, ATermList 
 	    } else {
               fprintf(f,"(ATerm) int2ATerm%i",ATgetInt((ATermInt) ATgetFirst((ATermList) t))+((1 << arity)-arity-1)+nfs);
 	    }
-	  } else {
-            fprintf(f,"(ATerm) int2ATerm%i",ATgetInt((ATermInt) ATgetFirst((ATermList) t)));
+//	  } else {
+//            fprintf(f,"(ATerm) int2ATerm%i",ATgetInt((ATermInt) ATgetFirst((ATermList) t)));
 	  }
         } else {
           fprintf(f,"(ATerm) ");
@@ -1939,6 +1939,12 @@ void RewriterCompilingJitty::CompileRewriteSystem(ATermAppl DataEqnSpec)
   l = ATLgetArgument(DataEqnSpec,0);
   for (; !ATisEmpty(l); l=ATgetNext(l))
   {
+    if ( !isValidRewriteRule(ATAgetFirst(l)) )
+    {
+      gsErrorMsg("data equation %P is not suitable for rewriting; ignoring\n",ATAgetFirst(l));
+      continue;
+    }
+
     ATermAppl u = (ATermAppl) toInnerc(toInner(ATAgetArgument(ATAgetFirst(l),2),true));
     
     if ( (n = (ATermList) ATtableGet(tmp_eqns,ATgetArgument(u,0))) == NULL )

@@ -379,6 +379,12 @@ RewriterJitty::RewriterJitty(ATermAppl DataEqnSpec)
 	l = ATLgetArgument(DataEqnSpec,0);
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
+		if ( !isValidRewriteRule(ATAgetFirst(l)) )
+		{
+			gsErrorMsg("data equation %P is not suitable for rewriting; ignoring\n",ATAgetFirst(l));
+			continue;
+		}
+
 		ATermAppl u = toInner(ATAgetArgument(ATAgetFirst(l),2),true);
 
 		if ( (n = (ATermList) ATtableGet(tmp_eqns,ATgetArgument(u,0))) == NULL )

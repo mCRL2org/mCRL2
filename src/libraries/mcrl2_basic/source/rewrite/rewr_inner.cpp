@@ -1093,6 +1093,12 @@ RewriterInnermost::RewriterInnermost(ATermAppl DataEqnSpec)
 	l = ATLgetArgument(DataEqnSpec,0);
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
+		if ( !isValidRewriteRule(ATAgetFirst(l)) )
+		{
+			gsErrorMsg("data equation %P is not suitable for rewriting; ignoring\n",ATAgetFirst(l));
+			continue;
+		}
+
 		ATerm u = toInner(ATAgetArgument(ATAgetFirst(l),2),true);
 		ATerm head;
 		ATermList args;
@@ -1171,7 +1177,11 @@ bool RewriterInnermost::addRewriteRule(ATermAppl Rule)
 	ATermInt i,j;
 	int old_num;
 
-	assert(isValidRewriteRule(Rule));
+	if ( !isValidRewriteRule(Rule) )
+	{
+		gsErrorMsg("data equation %P is not suitable for rewriting\n",Rule);
+		return false;
+	}
 
 	old_num = num_opids;
 
