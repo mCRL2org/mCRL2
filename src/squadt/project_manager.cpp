@@ -350,7 +350,7 @@ namespace squadt {
     path           destination_path = store / path(d.empty() ? s.leaf() : d);
     processor::ptr p                = processor::create(*this);
 
-    if (s != destination_path && exists(destination_path)) {
+    if (s != destination_path && !exists(destination_path)) {
       copy_file(s, destination_path);
     }
 
