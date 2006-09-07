@@ -1,4 +1,6 @@
-#include "graph_frame.h" 
+#include "graph_frame.h"
+#include <mcrl2_revision.h>
+#include "ltsgraph_version.h"
 const wxColour border_colour_selected = wxT("BLUE");
 
 BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
@@ -635,35 +637,23 @@ bool GraphFrame::OptimizeDrawing(double precision) {
     
     
     //Check whether positions are outside of the window
-    //Use outsideWindow to monitor this result.
-    bool outsideWindow = false;
 
     if (newX + CircleRadius  > leftPanel->Get_Width()) {
         newX = leftPanel->Get_Width() - CircleRadius ;
-        outsideWindow = true;
     }
     if (newX < CircleRadius) {
         newX = 0 + CircleRadius ;
-        outsideWindow = true;
     }
 
     if (newY + CircleRadius > leftPanel->Get_Height()) {
         newY = leftPanel->Get_Height() - CircleRadius ;
-        outsideWindow = true;
     }
 
     if (newY < CircleRadius) {
         newY = 0 + CircleRadius;
-        outsideWindow = true;
     }
     
-    if (outsideWindow) {
-      vectNode[i]->ForceSetXY( newX , newY);
-      // Force the position of the node, a pin can go off-screen. 
-    }
-    else {
-      vectNode[i]->SetXY( newX , newY );
-    }    
+    vectNode[i]->SetXY( newX , newY );
   }
 
 
@@ -722,8 +712,13 @@ void GraphFrame::Draw(wxPaintDC * myDC) {
 }
 void GraphFrame::on_about(wxCommandEvent& /* event */) {
   wxString caption = wxT("About");
-  wxString content = wxT("ltsgraph - tool for visualising graphs and optimizing layout \n");
-  content += wxT("Part of the mCRL2 toolset \n \n");
+  wxString content = wxT("ltsgraph - Tool for visualising labeled transition systems. \n");
+  content += wxT("Version ");
+  wxString ltsg_version(LTSG_VERSION, wxConvLocal);
+  content.Printf(wxT("%s%s\n"), content.c_str(), ltsg_version.c_str());
+  content += wxT("Part of the mCRL2 toolset, revision ");
+  content.Printf(wxT("%s%d. \n\n"), content.c_str(), REVISION);
+
   content += wxT("Info: http://www.mcrl2.org \n");
   content += wxT("Bug reports: bug@mcrl2.org");
   wxMessageBox(content, caption,wxOK| wxICON_INFORMATION, this, wxDefaultPosition.x, wxDefaultPosition.y);

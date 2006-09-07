@@ -1,0 +1,4 @@
+#ifndef LTSGRAPH_VERSION_H
+#define LTSGRAPH_VERSION_H
+#define LTSG_VERSION "0.9.0"
+#endif

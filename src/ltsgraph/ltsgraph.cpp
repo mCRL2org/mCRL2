@@ -1,3 +1,5 @@
+#include <mcrl2_revision.h>
+#include "ltsgraph_version.h"
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <squadt_utility.h>
 /* The communicator, for communication with SQuADT */
@@ -20,15 +22,20 @@ enum identifiers {
 
 void print_help() {
   cout << "Usage: ltsgraph [INFILE]\n"
-       << "Draw graphs in a graphical environment. If INFILE (LTS file : *.aut or *.svc) is supplied \n"
+       << "Draw graphs and optimize their layout in a graphical environment. If INFILE (LTS file : *.aut or *.svc) is supplied \n"
        << "the tool will use this file as input for drawing.\n"
        << "\n"
 	   	 << "Use left click to drag the nodes and right click to fix the nodes. \n"
 	   	 << "\n"
        << "Mandatory arguments to long options are mandatory for short options too.\n"
-       << "  -h, --help            display this help message\n";
+       << "  -h, --help            display this help message\n"
+       << "  -v, --version         displays version information and exits \n";
 }
-   
+
+void print_version() {
+  cout << "ltsgraph version " << LTSG_VERSION << "\n"
+       << "Part of mCRL2 toolset revision " << REVISION << "\n";
+}
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 /* Extracts a configuration from a message, and validates its content */
 bool try_to_accept_configuration(sip::tool::communicator& tc) {
@@ -124,6 +131,7 @@ class GraphApp : public wxApp
     sip::configuration::sptr configuration;
 	   
     cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("displays this message"));
+    cmdln.AddSwitch(wxT("v"),wxT("version"), wxT("displays version information and exits"));
     cmdln.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
     cmdln.SetLogo(wxT("Graphical tool for visualizing graph."));
 
@@ -133,6 +141,11 @@ class GraphApp : public wxApp
 
     if ( cmdln.Found(wxT("h")) ) {
       print_help();
+      return false;
+    }
+
+    if (cmdln.Found(wxT("v")) ) {
+      print_version();
       return false;
     }
 
