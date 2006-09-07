@@ -29,7 +29,7 @@ void print_help() {
 	   	 << "\n"
        << "Mandatory arguments to long options are mandatory for short options too.\n"
        << "  -h, --help            display this help message\n"
-       << "  -v, --version         displays version information and exits \n";
+       << "  --version             displays version information and exits \n";
 }
 
 void print_version() {
@@ -131,7 +131,7 @@ class GraphApp : public wxApp
     sip::configuration::sptr configuration;
 	   
     cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("displays this message"));
-    cmdln.AddSwitch(wxT("v"),wxT("version"), wxT("displays version information and exits"));
+    cmdln.AddSwitch(wxEmptyString,wxT("version"), wxT("displays version information and exits"));
     cmdln.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
     cmdln.SetLogo(wxT("Graphical tool for visualizing graph."));
 
@@ -144,7 +144,7 @@ class GraphApp : public wxApp
       return false;
     }
 
-    if (cmdln.Found(wxT("v")) ) {
+    if (cmdln.Found(wxT("version")) ) {
       print_version();
       return false;
     }
