@@ -239,17 +239,18 @@ int main(int ac, char** av) {
       untime_process_parameters = ATappend(lpe.process_parameters(), ATerm(ATermAppl(last_action_time)));
       
       // Transpose the original summand list, and see if there are summands with time
-      // If a summand has time, remove it and add it to the new summand list (untime_summand_list)
+      // If a summand has time, remove it, create new conditions for time, and add it to the new summand list (untime_summand_list)
       // NOTE: For efficiency reasons we use ATinsert instead of ATappend; ATappend is implemented by using
       // ATinsert followed by ATreverse. Therefore it is more efficient to ATinsert everything, then reverse
       // all at once when we are done.
-      // In my opinion ATinsert and ATreverse should really have an equivalent in the LPE library
+      // ATinsert and ATreverse should really have an equivalent in the LPE library.
       for (lpe::summand_list::iterator i = lpe.summands().begin(); i != lpe.summands().end(); ++i)
       { 
         if (i->has_time()) 
         {
           // The summand includes time. Now we need to do a couple of things to realise the untime operation
-          // First of all add a new summation variable
+
+          // Add a new summation variable
           lpe::data_variable_list untime_summation_variables;
           untime_summation_variables = ATappend(i->summation_variables(), ATerm(ATermAppl(data_variable("t", lpe::sort("Real"))))); //TODO: Make code cleaner, and see if we can auto-name the variable (in order to prevent name collisions!)
 
@@ -263,7 +264,9 @@ int main(int ac, char** av) {
 
           // Extend original assignments to include t.i(d,e.i)
           lpe::data_assignment_list untime_assignments;
-          untime_assignments = ATappend(i->assignments(),ATerm(ATermAppl(data_assignment(last_action_time,i->time()))));
+          untime_assignments = ATappend(i->assignments(),
+                                        ATerm(ATermAppl(data_assignment(last_action_time,i->time())))
+                                        );
 
           // Create new summand with the changed parameters
           lpe::LPE_summand untime_summand;           
@@ -280,6 +283,7 @@ int main(int ac, char** av) {
         }
         else
         {
+          // TODO: Add the extra last_action_time to the list
           // No time, add the original summand to the list
           untime_summand_list = ATinsert(untime_summand_list, ATerm(ATermAppl(*i)));
         }
@@ -291,6 +295,18 @@ int main(int ac, char** av) {
       // Create new LPE, this equals lpe, except for the new summand list and the additional process parameter.
       untime_lpe = lpe::LPE(lpe.free_variables(), untime_process_parameters, untime_summand_list, lpe.actions());
 
+      // Create new initial_variables and initial_state in order to correctly initialize.
+      // NOTE: This is done assuming that the initial assignments are calculated at creation 
+      // time by "zipping" the initial_variables and the initial_state
+      lpe::data_variable_list untime_initial_variables;
+      lpe::data_expression_list untime_initial_state;
+
+      //FIXME: The commented out changes here segfaultm they are needed to update the initialization.
+      //untime_initial_variables = ATappend(lpe_specification.initial_variables(), ATerm(ATermAppl(last_action_time)));
+      untime_initial_variables = lpe_specification.initial_variables();
+      //untime_initial_state = ATappend(lpe_specification.initial_state(),ATerm(gsMakeDataExprInt2Real(gsMakeDataExprInt(0)))); 
+      untime_initial_state = lpe_specification.initial_state();
+
       // Create new specification, this equals original specification, except for the new LPE.
       untime_specification = lpe::specification(lpe_specification.sorts(), 
 						lpe_specification.constructors(),
@@ -299,8 +315,8 @@ int main(int ac, char** av) {
 						lpe_specification.actions(),
 						untime_lpe, //new LPE
 						lpe_specification.initial_free_variables(),
-						lpe_specification.initial_variables(),
-						lpe_specification.initial_state()
+						untime_initial_variables, //new initial variables
+						untime_initial_state // new initial state
 						);
 
       untime_specification.save(output_file, true); // Save as binary file
