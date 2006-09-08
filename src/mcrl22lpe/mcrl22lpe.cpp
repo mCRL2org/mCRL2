@@ -467,7 +467,11 @@ static void get_configuration_parameters_via_squadt_display()
 
     /* Send the controller the signal that we're ready to rumble 
      * (no further configuration necessary) */
-    tc.send_clear_display();
+    layout_manager = layout::vertical_box::create();
+    layout_manager->add(new label("Linearisation in progress"),layout::left);
+
+    display->set_top_manager(layout_manager);
+
     tc.send_accept_configuration();
 }
 
@@ -476,14 +480,13 @@ static bool get_squadt_parameters(int argc,
                                   t_lin_options &lin_options)
 {
   std::string infilename;
-  /* Maak dit een enumerated type */
 
   sip::tool::capabilities& cp = tc.get_tool_capabilities();
 
   cp.add_input_combination(option_input_mcrl2_file_name, "Transformation", "mcrl2");
   if (tc.activate(argc,argv)) 
   { bool valid = false;
-
+    
     communicator_is_active = true;
 
     /* Initialise squadt utility pseudo-library */
@@ -497,11 +500,9 @@ static bool get_squadt_parameters(int argc,
       tc.await_configuration();
 
       sip::configuration& configuration = tc.get_configuration();
-
       /* Validate configuration specification, 
        * should contain a file name of an LPD that is to be read as input */
       valid = configuration.object_exists(option_input_mcrl2_file_name);
-
       if (!valid) 
       { 
         gsErrorMsg("Bad configuration data received from SQUADT\n");
@@ -510,7 +511,6 @@ static bool get_squadt_parameters(int argc,
     }
 
     sip::configuration& configuration=tc.get_configuration();
-
     if (configuration.is_fresh())
     { get_configuration_parameters_via_squadt_display();
     }
@@ -650,9 +650,19 @@ int main(int argc, char *argv[])
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if (communicator_is_active)
   {
-    tc.send_signal_done();
+    using namespace sip;
+    using namespace sip::layout;
+    using namespace sip::layout::elements;
 
+    tool_display::sptr display(new layout::tool_display);
+    layout::manager::aptr layout_manager = layout::vertical_box::create();
+
+    layout_manager->add(new label("Linearisation is finished"),layout::left);
+    tc.send_signal_done();
+    display->set_top_manager(layout_manager);
+    tc.send_display_layout(display);
     tc.await_message(sip::message_request_termination);
+
   }
 #endif
 
