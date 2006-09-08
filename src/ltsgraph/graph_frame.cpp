@@ -585,47 +585,39 @@ bool GraphFrame::OptimizeDrawing(double precision) {
       }
     }
 
-    // Subsequently calculate the attracting forces of the edges.
-    for (size_t n = 0; n < vectEdge.size(); n++) { 
-      bool calculate=false;
-      double x2=0.0,y2=0.0;
-      if (vectEdge[n]->get_n1() == vectNode[i] &&
-          vectEdge[n]->get_n1()!=vectEdge[n]->get_n2()) { 
-        x2 = (vectEdge[n]->get_n2())->GetX();
-        y2 = (vectEdge[n]->get_n2())->GetY();
-        calculate=true;
-      }
-      else {
-        if (vectEdge[n]->get_n2() == vectNode[i] &&
-            vectEdge[n]->get_n1()!=vectEdge[n]->get_n2()) { 
-          x2 = (vectEdge[n]->get_n1())->GetX();
-          y2 = (vectEdge[n]->get_n1())->GetY();
-          calculate=true;
-        }
-      }
-
-      if (calculate) {
-        double x2Minx1 = x2 - x1;
-        double y2Miny1 = y2 - y1;
-        double distance = sqrt( (x2Minx1*x2Minx1) + (y2Miny1*y2Miny1) );
-  
-        if (distance>0.1) { 
-	  // Linear approach : 
-          // double s = (EdgeStiffness * (distance - NaturalLength)) / distance;
-	  // Logarithmic approach : 
-          double s = (EdgeStiffness * log(distance / NaturalLength)) / distance;
-
-          arraySumForceX[i] += s * x2Minx1;
-          arraySumForceY[i] += s * y2Miny1;
-        }
-      }
-    }
-    // Finally add a tiny center petal force to center the whole
+    // Add a tiny center petal force to center the whole
     // graph on the screen
     
     arraySumForceX[i]+=(WindowWidth-2*x1) / (1 * WindowWidth); 
     arraySumForceY[i]+=(WindowHeight-2*y1) /(1 * WindowHeight); 
   } 
+
+  // Finally calculate the attracting forces of the edges.  
+  for (size_t n = 0; n < vectEdge.size(); n++) { 
+    Node* n1=vectEdge[n]->get_n1();
+    Node* n2=vectEdge[n]->get_n2();
+
+    double x1=n1->GetX();
+    double x2=n2->GetX();
+    double y1=n1->GetY();
+    double y2=n2->GetY();
+
+    double x2Minx1 = x2 - x1;
+    double y2Miny1 = y2 - y1;
+    double distance = sqrt( (x2Minx1*x2Minx1) + (y2Miny1*y2Miny1) );
+
+    if (distance>0.1) { 
+      // Linear approach : 
+      // double s = (EdgeStiffness * (distance - NaturalLength)) / distance;
+      // Logarithmic approach : 
+      double s = (EdgeStiffness * log(distance / NaturalLength)) / distance;
+
+      arraySumForceX[n1->Get_num()] += s * x2Minx1;
+      arraySumForceY[n1->Get_num()] += s * y2Miny1;
+      arraySumForceX[n2->Get_num()] -= s * x2Minx1;
+      arraySumForceY[n2->Get_num()] -= s * y2Miny1;
+    }
+  }
 
   //Replace the nodes & edges according to their new position
   for (size_t i = 0; i<vectNode.size(); i++) {
