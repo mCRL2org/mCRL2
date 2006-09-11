@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!ENTITY lpeuntime "<function>lpeuntime</function>">
+<!ENTITY option "<parameter>OPTION</parameter>">
+<!ENTITY infile "<parameter>INFILE</parameter>">
+<!ENTITY outfile "<parameter>OUTFILE</parameter>">
+<!ENTITY opt_h "<option>-h</option>">
+<!ENTITY opt_help "<option>--help</option>">
+<!ENTITY opt_version "<option>--version</option>">
+<!ENTITY opt_d "<option>-d</option>">
+<!ENTITY opt_debug "<option>--debug</option>">
+<!ENTITY opt_v "<option>-v</option>">
+<!ENTITY opt_verbose "<option>--verbose</option>">
+<!ENTITY stdin "<option>stdin</option>">
+<!ENTITY stdout "<option>stdout</option>">
+]>
+
+<refentry id="lpeuntime">
+
+<refmeta>
+  <refentrytitle>lpeuntime</refentrytitle>
+  <manvolnum>1</manvolnum>
+</refmeta>
+
+<refnamediv>
+  <refname>lpeuntime</refname>
+  <refpurpose>transform an LPE so that timed arguments are removed</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>&lpeuntime;</command>
+    <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
+    <arg choice="opt">&infile;</arg>
+    <arg choice="opt">&outfile;</arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  <para>
+    Transform a (timed) linear process equation (LPE) in &infile; by rewriting
+    it, and in the process removing the timed argument. Write the resulting LPE
+    to &outfile;. If &outfile; is not supplied the resulting LPE is
+    written to &stdout;.
+  </para>
+  
+  <para>
+    This tool takes an LPE from &infile; which is of the form:
+    proc P(d:D) = sum e0:E0 c0(d,e0) -> a0(f0(d,e0))@t0(d,e0) . P(g0(d,e0))
+                + sum e1:E1 c1(d,e1) -> a1(f1(d,e1))@t1(d,e1) . P(g1(d,e1))
+                + ...(etc)
+    This is transformed to the equivalent, but untimed version:
+    proc P(d:D, last_action_time:Real) = sum e0:E0 c0(d,e0)^t0(d,e0)>last_action_time -> a0(f0(d,e0)) . P(g0(d,e0),t0(d,e0))
+                                       + sum e1:E1 c1(d,e1)^t1(d,e1)>last_action_time -> a1(f1(d,e1)) . P(g1(d,e1),t1(d,e1))
+                                       + ...(etc)
+    An LPE of the last form is written to &outfile; (or &stdout; if not specified).
+  </para>
+</refsect1>
+
+<refsect1>
+  <title>Options</title>
+  <para>
+    <variablelist>
+
+      <varlistentry>
+        <term>&opt_h;</term>
+        <term>&opt_help;</term>
+          <listitem>
+            <para>display help information and exit</para>
+          </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_version;</term>
+        <listitem>
+          <para>display version information and exit</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_v;</term>
+        <term>&opt_verbose;</term>
+        <listitem>
+          <para>
+          Displays short intermediate information during the run of the program.
+          </para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_d;</term>
+        <term>&opt_debug;</term>
+        <listitem>
+          <para>
+          Displays detailed intermediate information during the run of the program.
+          </para>
+        </listitem>
+      </varlistentry>
+
+    </variablelist>
+  </para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>Written by Jeroen Keiren. Please send all complaints, comments and bug
+reports to <email>bug@mcrl2.org</email>.</para>
+</refsect1>
+
+</refentry>
