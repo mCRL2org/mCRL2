@@ -648,10 +648,6 @@ bool GraphFrame::OptimizeDrawing(double precision) {
     vectNode[i]->SetXY( newX , newY );
   }
 
-
-  
-    
-
   //Calculate the just achieved precision of the drawing
   double achieved_precision = 0.0;
 
@@ -665,9 +661,6 @@ bool GraphFrame::OptimizeDrawing(double precision) {
 
   // Reset the spline control points for each edge
   for (size_t i = 0; i < vectEdge.size(); i++) {
-    if (!curve_edges ) {
-      vectEdge[i]->reset_control();
-    }
     vectEdge[i]->reset_label();
   }
 
@@ -689,7 +682,7 @@ void GraphFrame::Draw(wxPaintDC * myDC) {
   //fix a bug (the size status text disappeared)
   wxSize size = wxSize(leftPanel->Get_Width(), leftPanel->Get_Height());
   FillStatusBar(GetInfoWinSize(size),0);
-
+  
   //Call Edge and Node OnPaint() method (Edge 1st)
   for (size_t n = 0; n < vectEdge.size(); n++) {
     vectEdge[n]->on_paint(myDC);
@@ -1012,8 +1005,12 @@ void GraphFrame::FindNode(wxPoint pt) {
   leftPanel->selection = none_t;
 
   for (size_t n = 0; n < vectNode.size(); n++) {
-    if (vectNode[n]->GetX() > pt.x-CircleRadius && vectNode[n]->GetX() < pt.x+CircleRadius) {
-      if (vectNode[n]->GetY() > pt.y-CircleRadius && vectNode[n]->GetY() < pt.y+CircleRadius) {
+    double radius = vectNode[n]->get_radius();
+    double node_x = vectNode[n]->GetX();
+    double node_y = vectNode[n]->GetY();
+
+    if (node_x > pt.x-radius && node_x < pt.x + radius) {
+      if (node_y > pt.y- radius && node_y < pt.y+ radius) {
         leftPanel->selection = node_t;
         leftPanel->selected_node = vectNode[n];
       }
@@ -1043,8 +1040,7 @@ void GraphFrame::ReplaceAfterDrag(wxPoint pt) {
        leftPanel->selected_node->ForceSetXY(pt.x,pt.y);//redefine node coord
        break;
      case (edge_t):
-       leftPanel->selected_edge->set_x_control(pt.x);
-       leftPanel->selected_edge->set_y_control(pt.y);
+       leftPanel->selected_edge->set_control(pt.x, pt.y);
        break;
      case (edge_label_t):
        leftPanel->selected_edge->set_label_x(pt.x);

@@ -33,12 +33,10 @@ edge::edge(Node* _N1, Node* _N2, wxString _lbl) : N1(_N1), N2(_N2), lbl(_lbl)
   // Initial position of control points is exactly between the nodes, if the nodes are not in the same place.
   // If they are in the same place, we put it diagonally above the node
   if (x1 == x2 && y1 == y2) {
-    control_point_x = x1 + radius * 2;
-    control_point_y = y1 + radius * 2;  
+    set_control(x1 + radius * 2, y1 + radius * 2);
   }
   else {
-    control_point_x = (x1 + x2) / 2;
-    control_point_y = (y1 + y2) / 2;
+    set_control((x1 + x2) / 2, (y1 + y2) / 2);
   }
   label_x= (x1 + x2) / 2 + POS_EDGE_LBL_X;
   label_y= (y1 + y2) / 2 + POS_EDGE_LBL_Y;
@@ -58,9 +56,11 @@ void edge::on_paint(wxDC * ptrDC)
     double end_y = get_y_pos2();
 
     /* Adjust the start and end point of the arrow to allow self-referring loops */
+    double node_radius = N1->get_radius();
+
     if (start_x == end_x && start_y == end_y) {
-      start_x += N1->get_radius();
-      end_y += N1->get_radius();
+      start_x += node_radius;
+      end_y += node_radius;
     }
     double control_x = get_x_control();
     double control_y = get_y_control();
@@ -76,11 +76,11 @@ void edge::on_paint(wxDC * ptrDC)
     double alpha = atan((end_y - spline_control_y) / (end_x - spline_control_x));
 
     wxCoord newX = (int) round((end_x + (end_x - spline_control_x >0?
-                             -CIRCLE_RADIUS * cos(alpha):
-                              CIRCLE_RADIUS * cos(alpha)) ));
+                             -node_radius * cos(alpha):
+                              node_radius * cos(alpha)) ));
     wxCoord newY =  (int) round(( end_y - (end_x - spline_control_x >=0?
-                              CIRCLE_RADIUS * sin(alpha):
-                             -CIRCLE_RADIUS * sin(alpha))));
+                              node_radius * sin(alpha):
+                             - node_radius * sin(alpha))));
     
     
     //Calculate triangle points coord
@@ -195,11 +195,46 @@ double edge::get_y_pos2() {
 }
 
 double edge::get_x_control() {
-  return control_point_x;
+  double x_1 = N1 -> GetX();
+  double y_1 = N1 -> GetY();
+  double x_2 = N2 -> GetX();
+  double y_2 = N2 -> GetY();
+
+  double beta = 0.0;
+
+  if (x_1 == x_2) {
+    beta = PI / 2;
+  }
+  else {
+    beta = atan ( (y_2 - y_1) / (x_2 - x_1) );
+  }
+
+  double gamma = beta + control_point_alpha;
+
+  return x_1 + control_point_dist * cos(gamma);
+
 }
 
 double edge::get_y_control() {
-  return control_point_y;
+  double x_1 = N1 -> GetX();
+  double y_1 = N1 -> GetY();
+  double x_2 = N2 -> GetX();
+  double y_2 = N2 -> GetY();
+
+  double beta = 0.0;
+
+  if (x_1 == x_2) {
+    beta = PI / 2;
+  }
+  else {
+    beta = atan ( (y_2 - y_1) / (x_2 - x_1) );
+  }
+
+  double gamma = beta + control_point_alpha;
+
+  return y_1 + control_point_dist * sin(gamma);
+
+
 }
 
 bool edge::LabelVisible() {
@@ -214,18 +249,79 @@ void edge::HideLabels() {
   labelsVisible = false;
 }
 
-void edge::set_x_control(double new_x) {
-  control_point_x = new_x;
+void edge::set_control(double new_x, double new_y) {
+  // Calculate polar coordinates alpha, dist from new_x, new_y
+  
+  // Calculate the angle beta, that the line N1, N2 makes with the basis of the 
+  // DC (in radians). We do this in a procedural fashion, to avoid large if statements.
+  double x_1 = N1->GetX();
+  double y_1 = N1->GetY();
+  double x_2 = N2->GetX();
+  double y_2 = N2->GetY();
+
+  double beta = 0.0;
+
+
+  if (x_2 == x_1) {
+    beta = PI / 2;
+  }
+  else {
+    beta = atan ( (y_2 - y_1) / (x_2 - x_1) );
+  }
+
+
+/* 
+  // Correct beta according to the coordinates 
+  if ( x_2 < x_1 ) {
+    beta += PI / 2;
+  }
+
+  if ( y_2 < y_1 ) {
+    beta = -beta;
+  }
+*/
+
+  // Calculate angle of point new_x, new_y w.r.t x-axis. This is always correct, ctrl point 
+  double gamma = 0.0;
+
+  if (new_x == x_1) {
+    gamma = PI / 2;
+  }
+  else {
+    gamma = atan ( (new_y - y_1) / (new_x - x_1));
+  }
+
+
+  control_point_alpha = gamma - beta;
+
+
+  // Calculate d(N1, (new_x, new_y))
+  if (x_1 < new_x) {
+    if ( y_1 < new_y) {
+      control_point_dist = sqrt( (x_1 - new_x) * (x_1 - new_x) + (y_1 - new_y) * (y_1 - new_y) );
+    }
+    else {
+            control_point_dist = sqrt( (x_1 - new_x) * (x_1 - new_x) + (new_y - y_1) * (new_y - y_1));
+    }
+  }
+  else {
+    if ( y_1 < new_y) {
+      control_point_dist = sqrt( (new_x - x_1) * (new_x - x_1) + (y_1 - new_y) * (y_1 - new_y) );
+    }
+    else {
+      control_point_dist = sqrt(  (new_x - x_1) * (new_x - x_1)  + (new_y - y_1) * (new_y - y_1));
+    }
+  }
+  
+  std::cerr << "x_1 = " << x_1 << "\n";
+  std::cerr << "y_1 = " << y_1 << "\n";
+  std::cerr << "new_x = " << new_x << "\n";
+  std::cerr << "new_y = " << new_y << "\n";
+  std::cerr << "control_point_dist = " << control_point_dist << "\n";
+  std::cerr << "=====================\n";
+  
 }
 
-void edge::set_y_control(double new_y) {
-  control_point_y = new_y;
-}
-
-void edge:: reset_control() {
-  control_point_x = (N1->GetX() + N2->GetX()) / 2;
-  control_point_y = (N1->GetY() + N2->GetY()) / 2;
-}
   
 void edge::set_control_selected(bool selection_value) {
   control_selected = selection_value;

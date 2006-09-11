@@ -42,7 +42,7 @@ public:
   double get_x_pos2();
   double get_y_pos2();
 
-  double get_x_control();
+  double get_x_control(); // Returns absolute (DC) coordinates of control point.
   double get_y_control();
 
   // Returns wether or not the edge label is visible
@@ -57,8 +57,7 @@ public:
   void set_label_selected(bool selection_value);
 
   // Allows setting and resetting of control point
-  void set_x_control(double new_x);
-  void set_y_control(double new_y);
+  void set_control(double new_x, double new_y);
   void reset_control();
 
   void set_control_selected(bool selection_value);
@@ -86,8 +85,8 @@ private:
   wxString lbl;
 
   // Control point for edge spline
-  double control_point_x;
-  double control_point_y;
+  double control_point_alpha; // Relative angle to line N1, N2
+  double control_point_dist; // Distance to N1
 
   // Status of label visibility
   // TODO (CT): Coding standard
