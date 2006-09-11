@@ -312,14 +312,14 @@ void edge::set_control(double new_x, double new_y) {
       control_point_dist = sqrt(  (new_x - x_1) * (new_x - x_1)  + (new_y - y_1) * (new_y - y_1));
     }
   }
-  
+/*  
   std::cerr << "x_1 = " << x_1 << "\n";
   std::cerr << "y_1 = " << y_1 << "\n";
   std::cerr << "new_x = " << new_x << "\n";
   std::cerr << "new_y = " << new_y << "\n";
   std::cerr << "control_point_dist = " << control_point_dist << "\n";
   std::cerr << "=====================\n";
-  
+*/  
 }
 
   
