@@ -1078,10 +1078,12 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     V = optimize_allow_list(V,ul);
     
     // here we create (in case pn is not recursive) a new process equation to replace gsMakeAllow(V,a);
-    // we call it pn_allow_i, where is is such that pn_allow_i is a fresh process name.
+    // we call it pn_allow_i, where i is such that pn_allow_i is a fresh process name.
     // the parameters are the same as in pn.
+    // ADDITION 2006-09-11: if this is a pCRL process we don't do this (not to break the current linearizer) 
 
-    if(ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),1),nrec_aterm)){
+    if(ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),1),nrec_aterm) && 
+       !ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),0),pCRL_aterm) ){
       ATermAppl new_pn=ATAtableGet(subs_alpha,(ATerm)Pair_allow((ATerm)V,(ATerm)pn));
       if(!new_pn){
 	//create a new 
@@ -1109,6 +1111,11 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
       ATtablePut(alphas,(ATerm) a,(ATerm) l);
     }
     else{
+      if(ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),1),nrec_aterm) &&
+         ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),0),pCRL_aterm) ){
+        gsWarningMsg("could have pushed a non-trivial allow operation with the argument %P\ninside non-recursive pCRL process %P.\nNot doing this to prevent possible linearization problems. This could also indicate a forgotten action in this allow operation\n\n",V,pn);
+      }
+
       a = gsMakeAllow(V,a);
       ATtablePut(alphas,(ATerm) a,(ATerm) filter_allow_list(l,V));
     }
