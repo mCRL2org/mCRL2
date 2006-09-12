@@ -221,6 +221,18 @@ namespace atermpp {
   }
 
   ///
+  /// Returns the list obtained by inserting a new element at the end. Note
+  /// that the complexity of this function is O(n), with n the number of
+  /// elements in the list!!!
+  ///
+  template <typename Term>
+  inline
+  term_list<Term> push_back(term_list<Term> l, Term elem)
+  {
+    return term_list<Term>(ATappend(l, aterm(elem)));
+  }
+
+  ///
   /// Returns the list obtained by removing the first element.
   ///
   template <typename Term>
