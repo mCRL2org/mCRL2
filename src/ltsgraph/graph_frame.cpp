@@ -10,7 +10,7 @@ BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
   EVT_MENU(wxID_EXIT, GraphFrame::OnQuit)
   EVT_MENU(ID_OPTIMIZE, GraphFrame::OnOptimize)
   EVT_MENU(ID_STOP_OPTIMIZE, GraphFrame::OnStopOptimize)
-  EVT_MENU(ID_MENU_ABOUT, GraphFrame::on_about)
+  EVT_MENU(wxID_ABOUT, GraphFrame::on_about)
 
   EVT_CLOSE(GraphFrame::OnClose)
 
@@ -75,9 +75,6 @@ void GraphFrame::BuildLayout() {
   //Menu
   CreateMenu();
 
-  //Status bar
-  CreateStatusBar();
-  
   int rightPanelWidth = INITIAL_WIN_WIDTH - (INITIAL_WIN_WIDTH / 4 + 15);
  
   wxSplitterWindow * sw = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE & !wxSP_PERMIT_UNSPLIT);
@@ -128,9 +125,9 @@ void GraphFrame::BuildLayout() {
   wxStaticBoxSizer* algoSettingsSizer = new wxStaticBoxSizer( wxVERTICAL, rightPanel, wxT("Algorithm settings") );
   wxFlexGridSizer* middleRightSizer = new wxFlexGridSizer( 0, 1, 0, 0 );
 	
-  sliderNodeStrength  = new wxSlider(rightPanel, wxID_ANY, 1000, 100, 90000, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-  sliderEdgeStiffness = new wxSlider(rightPanel, wxID_ANY, 1, 0, 15, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-  sliderNaturalLength = new wxSlider(rightPanel, wxID_ANY, 2, 1, 900, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+  sliderNodeStrength  = new wxSlider(rightPanel, wxID_ANY, 1000, 100, 10000, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+  sliderEdgeStiffness = new wxSlider(rightPanel, wxID_ANY, 1, 0, 15, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+  sliderNaturalLength = new wxSlider(rightPanel, wxID_ANY, 10, 1, 500, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
   slider_speedup = new wxSlider(rightPanel, wxID_ANY, 0, 0, 250, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
   
 
@@ -150,11 +147,11 @@ void GraphFrame::BuildLayout() {
   
   // setup the bottom part (others settings box)
   wxStaticBoxSizer* othersSettingsSizer = new wxStaticBoxSizer( wxVERTICAL, rightPanel, wxT("Other settings") );
-  ckNodeLabels = new wxCheckBox(rightPanel, ID_CHECK_NODE, wxT("Display state's labels"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
+  ckNodeLabels = new wxCheckBox(rightPanel, ID_CHECK_NODE, wxT("Display state labels"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
   ckNodeLabels->SetValue(true);
-  ckEdgeLabels = new wxCheckBox(rightPanel, ID_CHECK_EDGE, wxT("Display transition's labels"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
+  ckEdgeLabels = new wxCheckBox(rightPanel, ID_CHECK_EDGE, wxT("Display transition labels"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
   ckEdgeLabels->SetValue(true);
-  ck_curve_edges = new wxCheckBox(rightPanel, ID_CHECK_CURVES, wxT("Edit edges' curves"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
+  ck_curve_edges = new wxCheckBox(rightPanel, ID_CHECK_CURVES, wxT("Modify transition curves"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
   ck_curve_edges->SetValue(false);
 
   othersSettingsSizer->Add(ckNodeLabels,   0, lflags, 4 );
@@ -188,7 +185,7 @@ void GraphFrame::BuildLayout() {
 
   rightSizer->AddSpacer(20);
 
-  btnOptiStop = new wxButton(rightPanel, ID_BUTTON_OPTI, wxT("&Optimize"), wxDefaultPosition, wxDefaultSize);
+  btnOptiStop = new wxButton(rightPanel, ID_BUTTON_OPTI, wxT("&Neaten"), wxDefaultPosition, wxDefaultSize);
   btnOptiStop->Enable(false);
 
   rightSizer->Add(btnOptiStop, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL, 4 );
@@ -218,12 +215,12 @@ void GraphFrame::CreateMenu() {
 
   //draw
   draw = new wxMenu;
-  optimizeGraph = draw->Append(ID_OPTIMIZE, wxT("&Optimize Graph\tCTRL-g"), wxT("") );
-  stopOptimize = draw->Append(ID_STOP_OPTIMIZE, wxT("&Stop Optimize Graph\tCTRL-s"), wxT("") );
+  optimizeGraph = draw->Append(ID_OPTIMIZE, wxT("&Neaten layout \tCTRL-g"), wxT("") );
+  stopOptimize = draw->Append(ID_STOP_OPTIMIZE, wxT("&Stop neatening layout\tCTRL-s"), wxT("") );
   menu->Append(draw, wxT("&Draw") );
 
   wxMenu *help = new wxMenu;
-  about = help->Append(ID_MENU_ABOUT, wxT("&About..."), wxEmptyString);
+  about = help->Append(wxID_ABOUT, wxT("&About..."), wxEmptyString);
   menu->Append(help, wxT("Help"));
 
 
@@ -235,24 +232,12 @@ void GraphFrame::CreateMenu() {
 	backupCreate->Enable(false);
 }
 
-void GraphFrame::CreateStatusBar() {
-
-	statusBar = new wxStatusBar(this, wxID_ANY, wxST_SIZEGRIP);
-	statusBar->SetFieldsCount(3);
- 	int StatusBar_Widths[3];
- 	StatusBar_Widths[0] = 200;
-	StatusBar_Widths[1] = 200;
-	StatusBar_Widths[2] = -1;
-	statusBar->SetStatusWidths(3,StatusBar_Widths);
-	this->SetStatusBar(statusBar);
-}
-
 void GraphFrame::OnOpen( wxCommandEvent& /* event */ ) {
 	StopOpti    = true;
 	StoppedOpti = true;
 	btnOptiStop->SetLabel(wxT("&Optimize"));
 	wxFileDialog dialog( this, wxT("Select a LTS file (.aut .svc) or a backup file (.ltsgraph)..."), wxT(""), wxT(""), 
-											wxT("All supported formats (*.ltsgraph; *.aut;*.svc)|*.ltsgraph;*.aut;*.svc|Saved position data (*.ltsgraph)|*.ltsgraph|MCRL2 graph format (*.aut; *.svc)|*.aut;*.svc|All files (*.*)|*.*"));
+											wxT("All supported formats (*.ltsgraph; *.aut;*.svc)|*.ltsgraph;*.aut;*.svc|Position data (*.ltsgraph)|*.ltsgraph|LTS format (*.aut; *.svc)|*.aut;*.svc|All files (*.*)|*.*"));
 	if ( dialog.ShowModal() == wxID_OK ) {
 		vectEdge.clear();
 		vectNode.clear();
@@ -391,7 +376,7 @@ void GraphFrame::on_btn_label_text( wxCommandEvent& /* event */) {
   wxString current_label= wxString(leftPanel->get_selected_edge()->get_lbl().c_str(), wxConvLocal);
   wxTextEntryDialog label_text_dialog(this, 
                                       wxT("Please enter the new label text"),
-                                      wxT("Edit edge label"),
+                                      wxT("Edit state label"),
                                       current_label,
                                       wxOK | wxCANCEL);
 
@@ -437,8 +422,6 @@ void GraphFrame::Init(wxString LTSfile) {
 				text.Printf(wxT("%u"),mylts.num_labels());
 				numberOfLabelsLabel->SetLabel(text);
 	
-				//Fill status bar
-				FillStatusBar(LTSfile,2);	
 	
 				//initialize vectNode
 	
@@ -679,17 +662,26 @@ bool GraphFrame::OptimizeDrawing(double precision) {
 
 void GraphFrame::Draw(wxPaintDC * myDC) {
 
-  //fix a bug (the size status text disappeared)
-  wxSize size = wxSize(leftPanel->Get_Width(), leftPanel->Get_Height());
-  FillStatusBar(GetInfoWinSize(size),0);
   
   //Call Edge and Node OnPaint() method (Edge 1st)
   for (size_t n = 0; n < vectEdge.size(); n++) {
+    if (ckEdgeLabels->GetValue() ) {
+      vectEdge[n]->ShowLabels();
+    }
+    else {
+      vectEdge[n]->HideLabels();
+    }
     vectEdge[n]->on_paint(myDC);
   }
       
   for (size_t n = 0; n < vectNode.size(); n++) {
     // Set the radius of the nodes
+    if (ckNodeLabels->GetValue() ) {
+      vectNode[n]->ShowLabels();
+    }
+    else {
+      vectNode[n]->HideLabels();
+    }
     int radius = spinNodeRadius->GetValue();
     vectNode[n]->SetRadius(radius);
     vectNode[n]->OnPaint(myDC);
@@ -698,6 +690,7 @@ void GraphFrame::Draw(wxPaintDC * myDC) {
 void GraphFrame::on_about(wxCommandEvent& /* event */) {
   wxString caption = wxT("About");
   wxString content = wxT("ltsgraph - Tool for visualising labeled transition systems. \n");
+  content += wxT("Developed by Didier Le Lann and Carst Tankink.\n\n");
   content += wxT("Version ");
   wxString ltsg_version(LTSG_VERSION, wxConvLocal);
   content.Printf(wxT("%s%s\n"), content.c_str(), ltsg_version.c_str());
@@ -715,7 +708,7 @@ void GraphFrame::on_export(wxCommandEvent& /* event */) {
   wxString wx_str(str.c_str(), wxConvLocal);
   
   wxString caption = wxT("Export layout as");
-  wxString wildcard = wxT("Scalable Vector Graphics (*.svg)|*.svg|PostScript files (*.ps)|*.ps|LaTeX source (*.tex)|*.tex");
+  wxString wildcard = wxT("Scalable Vector Graphics (*.svg)|*.svg|LaTeX source (*.tex)|*.tex");
   wxString default_dir = wxEmptyString;
   wxString default_file_name = wx_str;
 
@@ -732,10 +725,6 @@ void GraphFrame::on_export(wxCommandEvent& /* event */) {
           file_name.Append(wxT(".svg"));
           export_svg(file_name);
           break;
-        case 1: //PS item
-          file_name.Append(wxT(".ps"));
-          export_to_ps(file_name);
-          break;
         case 2: //Latex item
           file_name.Append(wxT(".tex"));
           export_to_latex(file_name);
@@ -745,9 +734,6 @@ void GraphFrame::on_export(wxCommandEvent& /* event */) {
     else {
       if (extension == wxT("svg")) {
         export_svg(file_name);
-      }
-      else if (extension == wxT("ps")) {
-        export_to_ps(file_name);
       }
       else if (extension == wxT("tex")) {
         export_to_latex(file_name);
@@ -759,33 +745,6 @@ void GraphFrame::on_export(wxCommandEvent& /* event */) {
       }
     }
   }
-}
-void GraphFrame::export_to_ps( wxString file_name ) {
-
-  wxPrintData pd;
-  pd.SetFilename(file_name);
-  pd.SetPrintMode(wxPRINT_MODE_FILE);
-  wxPostScriptDC myDC(pd);
-  myDC.StartDoc(file_name);
-
-  //fix a bug (the size status text disappeared)
-  wxSize size = wxSize(leftPanel->Get_Width(), leftPanel->Get_Height());
-  FillStatusBar(GetInfoWinSize(size),0);
-
-  //Call Edge and Node OnPaint() method (Edge 1st)
-  for (size_t n = 0; n < vectEdge.size(); n++) {
-    vectEdge[n]->on_paint(&myDC);
-  }
-      
-  for (size_t n = 0; n < vectNode.size(); n++) {
-    vectNode[n]->OnPaint(&myDC);
-  }
-
-  myDC.EndDoc();
-  int message_x = wxDefaultPosition.x;
-  int message_y = wxDefaultPosition.y;
-  wxMessageBox(wxT("Export finished"),wxT("Information"),wxOK| wxICON_INFORMATION, this, message_x, message_y);
-
 }
 
 void GraphFrame::export_to_latex( wxString export_file_name) {
@@ -825,9 +784,6 @@ void GraphFrame::export_to_latex( wxString export_file_name) {
        ExportToLatex * ltx = new ExportToLatex(export_file_name.c_str(), vectNodeLatex,vectEdgeLatex,leftPanel->Get_Height());
  
       if (ltx->Generate()) {
-        int message_x = wxDefaultPosition.x;
-        int message_y = wxDefaultPosition.y;
-        wxMessageBox(wxT("Export finished"),wxT("Information"),wxOK| wxICON_INFORMATION, this, message_x, message_y);
        }
        else {
    	 wxMessageBox(wxT("Export unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR, this, wxDefaultPosition.x, wxDefaultPosition.y);
@@ -898,10 +854,9 @@ void GraphFrame::export_svg(wxString export_file_name) {
     int message_x = wxDefaultPosition.x;
     int message_y = wxDefaultPosition.y;
   if (svg->generate()) {
-    wxMessageBox(wxT("Export finished"),wxT("Information"),wxOK| wxICON_INFORMATION, this, message_x, message_y);
   }
   else {
-    wxMessageBox(wxT("Export unsuccesful"), wxT("Error"), wxOK | wxICON_ERROR, this, message_x, message_y);
+    wxMessageBox(wxT("Export unsuccessful"), wxT("Error"), wxOK | wxICON_ERROR, this, message_x, message_y);
   }
   delete svg;
   
@@ -932,7 +887,6 @@ void GraphFrame::CreateBackup(wxCommandEvent& event) {
     wxString backup_filename = bckup_dialog.GetPath();
     // Get last part of the filename (backup expects a local file path
     if (bckp.Backup(backup_filename)) {
-      wxMessageBox(wxT("Save successful"),wxT("Information"),wxOK| wxICON_INFORMATION, this, wxDefaultPosition.x, wxDefaultPosition.y);
     }
     else {
       wxMessageBox(wxT("Save unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR, this, wxDefaultPosition.x, wxDefaultPosition.y);
@@ -946,8 +900,6 @@ void GraphFrame::RestoreBackup() {
 	LtsgraphBackup bckp(leftPanel->GetSize());
         wxString input_string(inputFileName.c_str(), wxConvLocal);
 	if (bckp.Restore(input_string)) {
-
-		FillStatusBar(wxT(""),2);		
 
 		initialStateLabel->SetLabel(bckp.GetInitialState());  
 		numberOfStatesLabel->SetLabel(bckp.GetNumStates()); 
@@ -994,8 +946,6 @@ void GraphFrame::Resize(wxSize sz2) {
                        vectNode[m]->GetY() * diff_y);
     // We use ForceSetXY here, otherwise the pin can fall out of the window.
   }
-
-	FillStatusBar(GetInfoWinSize(sz2),0);
 
 }
 
@@ -1061,9 +1011,6 @@ void GraphFrame::FixNode() {
     }
 }
 
-void GraphFrame::FillStatusBar(const wxString text, unsigned int no) {
-  statusBar->SetStatusText(text,no);
-}
 
 wxString GraphFrame::GetInfoCurrentNode(Node* info_node) const {
 
@@ -1206,7 +1153,6 @@ void ViewPort::PressLeft(wxMouseEvent& event) {
       break;
   }
  
-  FillStatusBar();
   Refresh();
 }
 
@@ -1256,16 +1202,6 @@ void ViewPort::PressRight(wxMouseEvent& event) {
     Refresh();
   }
 
-}
-
-void ViewPort::FillStatusBar() {
-	//Fill current node status bar
-	if (selection==node_t) {
-		GF->FillStatusBar(GF->GetInfoCurrentNode(selected_node),1);
-	}
-	else {
-		GF->FillStatusBar(wxT(""),1);
-  }
 }
 
 int ViewPort::Get_Width() {
