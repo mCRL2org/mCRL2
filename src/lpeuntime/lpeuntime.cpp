@@ -5,7 +5,7 @@
 // ----------------------------------------------------------------------
 //
 // file          : lpeuntime 
-// date          : 11-09-2006
+// date          : 12-09-2006
 // version       : 0.2
 //
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
@@ -44,9 +44,6 @@ using namespace lpe;
 namespace po = boost::program_options;
 
 #define VERSION "0.2"
-
-/* Verbosity switch */
-bool        verbose = false;
 
 std::string input_file; // Name of the file to read input from
 std::string output_file; // Name of the file to write output to (or stdout)
@@ -97,7 +94,14 @@ void parse_command_line(int ac, char** av) {
     exit (0);
   }
 
-  verbose  = 0 < vm.count("verbose");
+  if (vm.count("debug")) {
+    gsSetDebugMsg();
+  }
+
+  if (vm.count("verbose")) {
+    gsSetVerboseMsg();
+  }
+
   input_file = (0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-";
   output_file = (0 < vm.count("OUTFILE")) ? vm["OUTFILE"].as< string >() : "-";
 }
@@ -106,15 +110,16 @@ void parse_command_line(int ac, char** av) {
 lpe::specification untime(const lpe::specification specification) {
   // TODO: Strip use of gs functions as much as possible; everything that's possible through these
   // should also be available through the LPE library!
-  // TODO: Check with Wieger if the Append and Insert style functions can be made available through
-  // the LPE library. This would make the code much more readable, and less complex
-  // declarations
+  // NOTE: The gs functions will be made available in the LPE library by Wieger.
   lpe::specification untime_specification; // Updated specification
   lpe::LPE lpe; // Original lpe
   lpe::LPE untime_lpe; // Updated lpe
   lpe::summand_list untime_summand_list; // Updated summand list
   lpe::data_variable_list untime_process_parameters; // Updated process parameters
   lpe::data_variable last_action_time; // Extra parameter to display the last action time
+  lpe::data_variable_list untime_initial_variables; // Updated initial variables
+  lpe::data_expression_list untime_initial_state; // Updated initial state
+  // Note: initial variables and initial state together form initial assignment
  
   // init
   untime_summand_list = lpe::summand_list();
@@ -123,25 +128,19 @@ lpe::specification untime(const lpe::specification specification) {
   // Create extra parameter last_action_time and add it to the list of process parameters,
   // last_action_time is used later on in the code
   last_action_time = data_variable("last_action_time", lpe::sort("Real"));
-  untime_process_parameters = ATappend(lpe.process_parameters(), ATerm(ATermAppl(last_action_time)));
+  untime_process_parameters = push_back(lpe.process_parameters(), last_action_time);
       
   // Transpose the original summand list, and see if there are summands with time
   // If a summand has time, remove it, create new conditions for time, and add it to the new summand list (untime_summand_list)
   // If a summand does not contain time, first introduce time, and then untime it.
-
-  // NOTE: For efficiency reasons we use ATinsert instead of ATappend; ATappend is implemented by using
-  // ATinsert followed by ATreverse. Therefore it is more efficient to ATinsert everything, then reverse
-  // all at once when we are done.
-  // ATinsert and ATreverse should really have an equivalent in the LPE library.
   for (lpe::summand_list::iterator i = lpe.summands().begin(); i != lpe.summands().end(); ++i)
   { 
     // Declarations within scope of for-loop
-    lpe::data_variable time_var;
-    lpe::data_variable_list untime_summation_variables;
-    lpe::data_expression untime_condition;
-    lpe::data_assignment_list untime_assignments;
-    lpe::LPE_summand untime_summand;
- 
+    lpe::data_variable_list untime_summation_variables; //Updated set of summation variables
+    lpe::data_expression untime_condition; //Updated condition
+    lpe::data_assignment_list untime_assignments; //Updated assignments (or next state)
+    lpe::LPE_summand untime_summand; //Updated summand
+
     if (i->has_time()) 
     { 
       // The summand is already timed, therefor there is no need to add an extra summation variable for time
@@ -155,17 +154,16 @@ lpe::specification untime(const lpe::specification specification) {
                                            );
 
       // Extend original assignments to include t.i(d,e.i)
-      untime_assignments = ATappend(i->assignments(),
-                                    ATerm(ATermAppl(data_assignment(last_action_time,i->time())))
-                                    );
+      untime_assignments = push_back(i->assignments(),data_assignment(last_action_time,i->time()));
     }
     else
     {
           
       // Add a new summation variable (this is allowed because according to an axiom the following equality holds):
       // c -> a . X == sum t:Real . c -> a@t . X
+      lpe::data_variable time_var;
       time_var = data_variable("t", lpe::sort("Real")); // TODO: See if we can auto-name the variable (in order to prevent name collisions)
-      untime_summation_variables = ATappend(i->summation_variables(), ATerm(ATermAppl(time_var)));
+      untime_summation_variables = push_back(i->summation_variables(), time_var);
  
       // Extend the original condition with an additional argument
       untime_condition = gsMakeDataExprAnd(i->condition(),
@@ -176,8 +174,8 @@ lpe::specification untime(const lpe::specification specification) {
 
 
       // Extend original assignments to include t.i(d,e.i)
-      untime_assignments = ATappend(i->assignments(),
-                                    ATerm(ATermAppl(data_assignment(last_action_time, time_var.to_expr())))
+      untime_assignments = push_back(i->assignments(),
+                                    data_assignment(last_action_time, time_var.to_expr())
                                    );
     } // i->has_time()
 
@@ -191,30 +189,22 @@ lpe::specification untime(const lpe::specification specification) {
 					);
 
     // Add the new summand to the list
-    untime_summand_list = ATinsert(untime_summand_list, ATerm(ATermAppl(untime_summand)));
+    untime_summand_list = push_front(untime_summand_list, untime_summand);
 
   }
  
   // Revert summand list, because it is the wrong way round now.
-  untime_summand_list = ATreverse(untime_summand_list);
+  untime_summand_list = reverse(untime_summand_list);
       
   // Create new LPE, this equals lpe, except for the new summand list and the additional process parameter.
   untime_lpe = lpe::LPE(lpe.free_variables(), untime_process_parameters, untime_summand_list, lpe.actions());
 
 
-  // FIXME:
   // Create new initial_variables and initial_state in order to correctly initialize.
-  // NOTE: This is done assuming that the initial assignments are calculated at creation 
+  // NOTE: The initial assignments are calculated at creation 
   // time by "zipping" the initial_variables and the initial_state
-  // TODO: Move to decs section once functioning!
-  lpe::data_variable_list untime_initial_variables;
-  lpe::data_expression_list untime_initial_state;
-
-  //FIXME: The commented out changes here segfaultm they are needed to update the initialization.
-  //untime_initial_variables = ATappend(specification.initial_variables(), ATerm(ATermAppl(last_action_time)));
-  untime_initial_variables = specification.initial_variables();
-  //untime_initial_state = ATappend(specification.initial_state(),ATerm(gsMakeDataExprInt2Real(gsMakeDataExprInt(0)))); 
-  untime_initial_state = specification.initial_state();
+  untime_initial_variables = push_back(specification.initial_variables(), last_action_time);
+  untime_initial_state = push_back(specification.initial_state(), data_expression(gsMakeDataExprInt2Real(gsMakeDataExprInt("0"))));
 
   // Create new specification, this equals original specification, except for the new LPE.
   untime_specification = lpe::specification(specification.sorts(), 
