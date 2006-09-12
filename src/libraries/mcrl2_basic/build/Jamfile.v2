@@ -4,7 +4,7 @@ project mcrl2_basic
        : requirements
           <include>../include
           <include>../../../
-          <dependency>/libraries/auxiliary//nt_portability
+          <toolset>msvc:<dependency>/libraries/auxiliary//nt_portability
           <toolset>msvc:<define>NO_DYNLOAD
        : usage-requirements
           <include>../include
