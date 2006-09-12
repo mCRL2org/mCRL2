@@ -200,19 +200,16 @@ double edge::get_x_control() {
   double x_2 = N2 -> GetX();
   double y_2 = N2 -> GetY();
 
-  double beta = 0.0;
-
-  if (x_1 == x_2) {
-    beta = PI / 2;
+  double beta = atan2( y_2 - y_1 , x_2 - x_1 );
+  double gamma = beta + control_point_alpha;
+  double node_dist = sqrt( (x_1 - x_2) * (x_1 - x_2) + (y_1 - y_2) * (y_1 - y_2) );
+  
+  if (node_dist != 0) {
+    return x_1 + node_dist * control_point_dist * cos(gamma);
   }
   else {
-    beta = atan ( (y_2 - y_1) / (x_2 - x_1) );
+    return x_1 + control_point_dist * cos(gamma);
   }
-
-  double gamma = beta + control_point_alpha;
-
-  return x_1 + control_point_dist * cos(gamma);
-
 }
 
 double edge::get_y_control() {
@@ -220,21 +217,20 @@ double edge::get_y_control() {
   double y_1 = N1 -> GetY();
   double x_2 = N2 -> GetX();
   double y_2 = N2 -> GetY();
-
   double beta = 0.0;
 
-  if (x_1 == x_2) {
-    beta = PI / 2;
+  beta = atan2 ( y_2 - y_1 , x_2 - x_1 );
+
+  double gamma = beta + control_point_alpha;  
+  
+  double node_dist = sqrt( (x_1 - x_2) * (x_1 - x_2) + (y_1 - y_2) * (y_1 - y_2) );
+  
+  if (node_dist != 0) {
+    return y_1 + node_dist * control_point_dist * sin(gamma);
   }
   else {
-    beta = atan ( (y_2 - y_1) / (x_2 - x_1) );
+    return y_1 + control_point_dist * sin(gamma);
   }
-
-  double gamma = beta + control_point_alpha;
-
-  return y_1 + control_point_dist * sin(gamma);
-
-
 }
 
 bool edge::LabelVisible() {
@@ -262,64 +258,38 @@ void edge::set_control(double new_x, double new_y) {
   double beta = 0.0;
 
 
-  if (x_2 == x_1) {
+  /*if (x_2 == x_1) {
     beta = PI / 2;
   }
-  else {
-    beta = atan ( (y_2 - y_1) / (x_2 - x_1) );
-  }
-
-
-/* 
-  // Correct beta according to the coordinates 
-  if ( x_2 < x_1 ) {
-    beta += PI / 2;
-  }
-
-  if ( y_2 < y_1 ) {
-    beta = -beta;
-  }
-*/
+  else {*/
+    beta = atan2 ( y_2 - y_1 , x_2 - x_1 );
+  /*}*/
 
   // Calculate angle of point new_x, new_y w.r.t x-axis. This is always correct, ctrl point 
   double gamma = 0.0;
 
-  if (new_x == x_1) {
+  /*if (new_x == x_1) {
     gamma = PI / 2;
   }
-  else {
-    gamma = atan ( (new_y - y_1) / (new_x - x_1));
-  }
+  else {*/
+    gamma = atan2 ( new_y - y_1 , new_x - x_1);
+  /*}*/
 
 
   control_point_alpha = gamma - beta;
 
 
   // Calculate d(N1, (new_x, new_y))
-  if (x_1 < new_x) {
-    if ( y_1 < new_y) {
-      control_point_dist = sqrt( (x_1 - new_x) * (x_1 - new_x) + (y_1 - new_y) * (y_1 - new_y) );
-    }
-    else {
-            control_point_dist = sqrt( (x_1 - new_x) * (x_1 - new_x) + (new_y - y_1) * (new_y - y_1));
-    }
+  control_point_dist = sqrt( (x_1 - new_x) * (x_1 - new_x) + (y_1 - new_y) * (y_1 - new_y) );
+  double node_dist = sqrt( ( x_1 - x_2) * (x_1 - x_2) + (y_1 - y_2) * (y_1 - y_2) );
+  
+  if (node_dist == 0) {
+    control_point_dist = N1->get_radius() * 2;
   }
   else {
-    if ( y_1 < new_y) {
-      control_point_dist = sqrt( (new_x - x_1) * (new_x - x_1) + (y_1 - new_y) * (y_1 - new_y) );
-    }
-    else {
-      control_point_dist = sqrt(  (new_x - x_1) * (new_x - x_1)  + (new_y - y_1) * (new_y - y_1));
-    }
+    control_point_dist = control_point_dist / node_dist;
   }
-/*  
-  std::cerr << "x_1 = " << x_1 << "\n";
-  std::cerr << "y_1 = " << y_1 << "\n";
-  std::cerr << "new_x = " << new_x << "\n";
-  std::cerr << "new_y = " << new_y << "\n";
-  std::cerr << "control_point_dist = " << control_point_dist << "\n";
-  std::cerr << "=====================\n";
-*/  
+
 }
 
   
