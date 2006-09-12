@@ -1,3 +1,6 @@
+#ifndef MCRL_LIBSTRUCT_H
+#define MCRL_LIBSTRUCT_H
+
 //This file describes the functions that can be used for the internal ATerm
 //structure.
 
@@ -1393,6 +1396,56 @@ bool gsIsActFrm(ATermAppl Term);
 //Pre: Term is not NULL
 //Ret: Term is a action formula
 
+//---------------------------------------------------------
+// pbes functions
+//---------------------------------------------------------
+ATermAppl gsMakeMu();
+ATermAppl gsMakeNu();
+ATermAppl gsMakePBES(ATermList PBEqn_0, ATermAppl PropVarInst_1);
+ATermAppl gsMakePBESAnd(ATermAppl PBExpr_0, ATermAppl PBExpr_1);
+ATermAppl gsMakePBESExists(ATermList DataVarId_0, ATermAppl PBExpr_1);
+ATermAppl gsMakePBESFalse();
+ATermAppl gsMakePBESForall(ATermList DataVarId_0, ATermAppl PBExpr_1);
+ATermAppl gsMakePBESImp(ATermAppl PBExpr_0, ATermAppl PBExpr_1);
+ATermAppl gsMakePBESNot(ATermAppl PBExpr_0);
+ATermAppl gsMakePBESOr(ATermAppl PBExpr_0, ATermAppl PBExpr_1);
+ATermAppl gsMakePBESTrue();
+ATermAppl gsMakePBEqn(ATermAppl FixPoint_0, ATermAppl PropVarDecl_1, ATermAppl PBExpr_2);
+ATermAppl gsMakePropVarDecl(ATermAppl String_0, ATermList DataExpr_1);
+ATermAppl gsMakePropVarInst(ATermAppl String_0, ATermList DataExpr_1);
+bool gsIsMu(ATermAppl term);
+bool gsIsNu(ATermAppl term);
+bool gsIsPBES(ATermAppl term);
+bool gsIsPBESAnd(ATermAppl term);
+bool gsIsPBESExists(ATermAppl term);
+bool gsIsPBESFalse(ATermAppl term);
+bool gsIsPBESForall(ATermAppl term);
+bool gsIsPBESImp(ATermAppl term);
+bool gsIsPBESNot(ATermAppl term);
+bool gsIsPBESOr(ATermAppl term);
+bool gsIsPBESTrue(ATermAppl term);
+bool gsIsPBEqn(ATermAppl term);
+bool gsIsPropVarDecl(ATermAppl term);
+bool gsIsPropVarInst(ATermAppl term);
+
+inline
+bool gsIsPBExpr(ATermAppl term)
+{
+  return gsIsDataExpr(term)
+      || gsIsPBESTrue(term)  
+      || gsIsPBESFalse(term) 
+      || gsIsPBESNot(term)   
+      || gsIsPBESAnd(term)   
+      || gsIsPBESOr(term)    
+      || gsIsPBESImp(term)   
+      || gsIsPBESForall(term)
+      || gsIsPBESExists(term)
+      || gsIsPropVarInst(term)
+  ;
+}
+
 #ifdef __cplusplus
 }
 #endif
+
+#endif // MCRL_LIBSTRUCT_H

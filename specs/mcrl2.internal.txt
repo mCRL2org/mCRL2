@@ -255,3 +255,33 @@
                  | ActForall(<DataVarId>+, <ActFrm>)
                  | ActExists(<DataVarId>+, <ActFrm>)
                  | ActAt(<ActFrm>, <DataExpr>)
+
+//PBES
+//--------------------
+// fixpoint symbol
+<FixPoint>     ::= Mu
+                 | Nu
+
+// propositional variable instantiation
+<PropVarInst>      ::= PropVarInst(<String>, <DataExpr>*)
+
+// propositional variable declaration
+<PropVarDecl>      ::= PropVarDecl(<String>, <DataExpr>*)
+
+// parameterized boolean expression
+<PBExpr>       ::= <DataExpr>
+                 | PBESTrue
+                 | PBESFalse
+                 | PBESNot(<PBExpr>)
+                 | PBESAnd(<PBExpr>, <PBExpr>)
+                 | PBESOr(<PBExpr>, <PBExpr>)
+                 | PBESImp(<PBExpr>, <PBExpr>)
+                 | PBESForall(<DataVarId>+, <PBExpr>)
+                 | PBESExists(<DataVarId>+, <PBExpr>)
+                 | <PropVarInst>
+
+// parameterized boolean equation
+<PBEqn>        ::= PBEqn(<FixPoint>, <PropVarDecl>, <PBExpr>)
+
+// PBES equation system
+<PBES>         ::= PBES(<PBEqn>*, <PropVarInst>)
