@@ -18,7 +18,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-   $Id: svc.h,v 1.1.1.1 2004/09/07 15:06:33 uid523 Exp $ */
+   $Id: svc.h,v 1.2 2006/09/13 11:17:08 bertl Exp $ */
 
 /* Interface for the SVC level 2 interface */
 
@@ -41,6 +41,7 @@ typedef SVCint SVCparameterIndex;
 typedef struct {
    ltsFile file;
    struct ltsHeader header;
+   long transitionNumber;
 } SVCfile;
 
 

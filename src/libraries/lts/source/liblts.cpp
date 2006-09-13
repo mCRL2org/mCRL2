@@ -512,6 +512,12 @@ bool p_lts::read_from_svc(string const& filename, lts_type type)
   label_info = true;
 
   init_state = (unsigned int) SVCgetInitialState(&f);
+  if ( state_info )
+  {
+    p_add_state(SVCstate2ATerm(&f,(SVCstateIndex) init_state));
+  } else {
+    p_add_state();
+  }
 
   SVCstateIndex from, to;
   SVClabelIndex label;

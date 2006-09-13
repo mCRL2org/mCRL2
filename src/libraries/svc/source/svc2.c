@@ -18,7 +18,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-   $Id: svc2.c,v 1.1.1.1 2004/09/07 15:06:33 uid523 Exp $ */
+   $Id: svc2.c,v 1.2 2006/09/13 11:17:08 bertl Exp $ */
 
 #include <string.h>
 #include <time.h>
@@ -202,10 +202,10 @@ int SVCgetNextTransition(SVCfile *file,
         SVCstateIndex *fromStateIndex, SVClabelIndex *labelIndex, 
         SVCstateIndex *toStateIndex, SVCparameterIndex *paramIndex){
    struct ltsTransition transition;
-
+   if (file->transitionNumber>=file->header.numTransitions) return 0;
 
    if(svcReadNextTransition(&file->file, &transition)==0){
-
+      file->transitionNumber++;
       HTmember(&file->file.stateTable,transition.fromState,fromStateIndex);
       HTmember(&file->file.stateTable,transition.toState,toStateIndex);
       HTmember(&file->file.parameterTable,transition.parameters,paramIndex);
@@ -223,7 +223,7 @@ int SVCopen(SVCfile *file, char *filename, SVCfileMode mode, SVCbool *indexed){
    time_t now;
    SVCbool _new;
 
-
+   file->transitionNumber = 0L;
    switch(mode){
       case SVCwrite:
 
@@ -245,7 +245,6 @@ int SVCopen(SVCfile *file, char *filename, SVCfileMode mode, SVCbool *indexed){
             file->header.numParameters=0L;
             file->file.indexFlag=*indexed;
             file->file.formatVersion=strdup(SVC_VERSION);
-
             return 0;
 
          } else {
