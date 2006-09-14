@@ -6,8 +6,8 @@
 #define ARROW_WIDTH 1
 #define PI 3.14159265
 #define CONTROL_RADIUS 2
-const double triangle_base = 4.0;
-const double triangle_height = 8.0;
+const double triangle_base = 2.0;
+const double triangle_height = 7.0;
 
 const wxString color = wxT("BLACK");
 const wxString selected_colour = wxT("BLUE");
@@ -38,8 +38,8 @@ edge::edge(Node* _N1, Node* _N2, wxString _lbl) : N1(_N1), N2(_N2), lbl(_lbl)
   else {
     set_control((x1 + x2) / 2, (y1 + y2) / 2);
   }
-  label_x= (x1 + x2) / 2 + POS_EDGE_LBL_X;
-  label_y= (y1 + y2) / 2 + POS_EDGE_LBL_Y;
+  set_label_x((x1 + x2) / 2 + POS_EDGE_LBL_X);
+  set_label_y( (y1 + y2) / 2 + POS_EDGE_LBL_Y);
 }
 
 
@@ -55,8 +55,8 @@ void edge::on_paint(wxDC * ptrDC)
     double end_x = get_x_pos2();
     double end_y = get_y_pos2();
 
-    /* Adjust the start and end point of the arrow to allow self-referring loops */
     double node_radius = N1->get_radius();
+    /* Adjust the start and end point of the arrow to allow self-referring loops */
 
     if (start_x == end_x && start_y == end_y) {
       start_x += node_radius;
@@ -68,49 +68,64 @@ void edge::on_paint(wxDC * ptrDC)
     double spline_control_x = (8 * control_x - (start_x + end_x)) / 6;
     double spline_control_y = (8 * control_y - (start_y + end_y)) / 6;
 
-    // To make sure division by zero does not occur
-    if ( end_x == spline_control_x ) {
-      spline_control_x += 0.001;
+    // We calculate the distance from control point until the end of the 
+    // edge. 
+    double dist_cp_ed = sqrt( (spline_control_x - end_x) * (spline_control_x - end_x) + (spline_control_y - end_y) * (spline_control_y - end_y));
+
+    // Calculate the ratio between the radius and dist_cp_ed
+    double arrow_ratio = 0.0;
+
+    if ( dist_cp_ed != 0) {
+      arrow_ratio = node_radius / dist_cp_ed;
+    }
+    else {
+      arrow_ratio = 0;
     }
 
-    double alpha = atan((end_y - spline_control_y) / (end_x - spline_control_x));
+    // Calculate the x and y the arrow starts on through the ratio
+    double triangle_x = end_x - (end_x - spline_control_x) * arrow_ratio;
+    double triangle_y = end_y - (end_y - spline_control_y) * arrow_ratio;
 
-    wxCoord newX = (int) round((end_x + (end_x - spline_control_x >0?
-                             -node_radius * cos(alpha):
-                              node_radius * cos(alpha)) ));
-    wxCoord newY =  (int) round(( end_y - (end_x - spline_control_x >=0?
-                              node_radius * sin(alpha):
-                             - node_radius * sin(alpha))));
+    // Also, we calculate the ratio for triangle A -- defined  by the center of the triangle base, the center of the node, and the point 
+    // (base.x, node.y)--, with respect to triangle B -- defined by the spline control point, the center of the node and the point 
+    // (spline_control.x, node.y)
+    double base_ratio = 0.0;
     
-    
-    //Calculate triangle points coord
-    //angles expressed in radians
-    double beta = atan(triangle_base/(triangle_height*2));
-    
-    double ArrowSideLength = sqrt( (triangle_height*triangle_height) + 
-                    (triangle_base*triangle_base)/4 );
-    
-    double gamma_p1 = alpha - beta;
-    double lenX1 = cos(gamma_p1) * ArrowSideLength;
-    double lenY1 = sin(gamma_p1) * ArrowSideLength;
-    
-    double gamma_p3 = alpha + beta;
-    double lenX3 = cos(gamma_p3) * ArrowSideLength; 
-    double lenY3 = sin(gamma_p3) * ArrowSideLength;
-    
-    // coord correcting depend on position 
-    if (get_x_pos2() >= get_x_control()) 
-    {
-      lenX1 = -lenX1;
-      lenY1 = -lenY1;
-      lenX3 = -lenX3;
-      lenY3 = -lenY3;
+    if ( dist_cp_ed != 0) {
+      base_ratio = (node_radius + triangle_height) / dist_cp_ed;
     }
+    else {
+      base_ratio = 0;
+    }
+
+    // We calculate the location of the center of the triangle base
+    double base_x = end_x - base_ratio * (end_x - spline_control_x);
+    double base_y = end_y - base_ratio * (end_y - spline_control_y);
+
+    // Now, we can calculate the cosinus and the sinus of the angle the arrow's center line makes with the basis of our grid.
+    double sinus_alpha = end_y;
+    double cosinus_alpha = end_x;
+
+    if (triangle_height != 0) {
+      sinus_alpha = (base_y - end_y) / triangle_height;
+      cosinus_alpha = (base_x - end_x) / triangle_height;
+    }
+    
+    // with sinus of alpha and cosinus of alpha, we can calculate the rest of the points as follows:
+    // 1) Rotate the point (triangle_height, 1/2 * triangle_base) through angle alpha, w.r.t. to the origin.
+    // 2) Translate the point gained through 1) over the vector (end_x, end_y)
+    // Together, this can be summarised in the calculation shown in the assignment below. 
+    // For the other point, substitue 1/2 * triangle_base with - 1/2 * triangle_base in calculation).
+    int arrow_base_high_x = (int) round(end_x + (cosinus_alpha * triangle_height -  .5 * triangle_base * sinus_alpha));
+    int arrow_base_high_y = (int) round(end_y + (sinus_alpha * triangle_height + .5 * triangle_base * cosinus_alpha));
+    int arrow_base_low_x  = (int) round(end_x + (cosinus_alpha * triangle_height +  .5 * triangle_base * sinus_alpha));
+    int arrow_base_low_y  = (int) round(end_y + (sinus_alpha * triangle_height - .5 * triangle_base * cosinus_alpha));
+    
    
     //Edge head (polygone)
-    wxPoint * p1 = new wxPoint((int) round(lenX1), (int) round(lenY1));
-    wxPoint * p2 = new wxPoint(0, 0);
-    wxPoint * p3 = new wxPoint((int) round(lenX3), (int) round(lenY3));
+    wxPoint * p1 = new wxPoint((int)triangle_x, (int)triangle_y);
+    wxPoint * p2 = new wxPoint(arrow_base_high_x, arrow_base_high_y);
+    wxPoint * p3 = new wxPoint(arrow_base_low_x, arrow_base_low_y);
 
     wxPoint points[3] = {*p1,*p2,*p3};
 
@@ -119,7 +134,7 @@ void edge::on_paint(wxDC * ptrDC)
     ptrDC->SetBrush(myBrush);
     
     //Draw the triangle
-    ptrDC->DrawPolygon(3,points, newX, newY, wxWINDING_RULE);
+    ptrDC->DrawPolygon(3,points, 0, 0, wxWINDING_RULE);
 
     //Edge body (spline)
     wxPen myPen(color,ARROW_WIDTH,wxSOLID);
@@ -143,7 +158,7 @@ void edge::on_paint(wxDC * ptrDC)
                           ptrDC->SetTextForeground(label_colour);
                         }
 
-			ptrDC->DrawRotatedText(lbl,static_cast<int>(label_x),static_cast<int>(label_y),0);
+			ptrDC->DrawRotatedText(lbl,static_cast<int>(get_label_lower_x()),static_cast<int>(get_label_lower_y()),0);
 		}
   // Store label higher coordinates, now that we have a Device Context
   wxCoord w, h;
@@ -310,19 +325,20 @@ void edge::set_label_colour(wxColour new_colour) {
 }
 
 double edge::get_label_lower_x() {
-  return label_x;
+  return label_x + get_x_control();
 }
 
 double edge::get_label_lower_y() {
-  return label_y;
+  return label_y + get_y_control();
 }
 
 void edge::set_label_x(double new_value) {
-  label_x = new_value;
+  // Set the label value relative to the control point.
+  label_x = new_value - get_x_control();
 }
 
 void edge::set_label_y(double new_value) {
-  label_y = new_value;
+  label_y = new_value - get_y_control();
 }
 
 void edge::set_label_selected(bool selection_value) {
@@ -330,20 +346,11 @@ void edge::set_label_selected(bool selection_value) {
 }
 
 double edge::get_label_higher_x() {
-  return label_higher_x;
+  return label_higher_x + get_x_control();
 }
 
 double edge::get_label_higher_y() {
-  return label_higher_y;
-}
-
-void edge::reset_label() {
-  double x1 = N1->GetX();
-  double x2 = N2->GetX();
-  double y1 = N1->GetY();
-  double y2 = N2->GetY();
-  label_x= (x1 + x2) / 2 + POS_EDGE_LBL_X;
-  label_y= (y1 + y2) / 2 + POS_EDGE_LBL_Y;
+  return label_higher_y + get_y_control();
 }
 
 void edge::set_label_text(wxString new_value) {

@@ -125,7 +125,7 @@ void GraphFrame::BuildLayout() {
   wxStaticBoxSizer* algoSettingsSizer = new wxStaticBoxSizer( wxVERTICAL, rightPanel, wxT("Algorithm settings") );
   wxFlexGridSizer* middleRightSizer = new wxFlexGridSizer( 0, 1, 0, 0 );
 	
-  sliderNodeStrength  = new wxSlider(rightPanel, wxID_ANY, 1000, 100, 10000, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+  sliderNodeStrength  = new wxSlider(rightPanel, wxID_ANY, 2000, 100, 10000, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
   sliderEdgeStiffness = new wxSlider(rightPanel, wxID_ANY, 1, 0, 15, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
   sliderNaturalLength = new wxSlider(rightPanel, wxID_ANY, 10, 1, 500, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
   slider_speedup = new wxSlider(rightPanel, wxID_ANY, 0, 0, 250, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -642,11 +642,6 @@ bool GraphFrame::OptimizeDrawing(double precision) {
   // compensate for the number of nodes
   achieved_precision=achieved_precision / vectNode.size();
 
-  // Reset the spline control points for each edge
-  for (size_t i = 0; i < vectEdge.size(); i++) {
-    vectEdge[i]->reset_label();
-  }
-
   if (skip_steps == 0 || steps_taken == 0) {
     Refresh();
   }
@@ -689,7 +684,7 @@ void GraphFrame::Draw(wxPaintDC * myDC) {
 }
 void GraphFrame::on_about(wxCommandEvent& /* event */) {
   wxString caption = wxT("About");
-  wxString content = wxT("ltsgraph - Tool for visualising labeled transition systems. \n");
+  wxString content = wxT("ltsgraph - Tool for visualising labelled transition systems. \n");
   content += wxT("Developed by Didier Le Lann and Carst Tankink.\n\n");
   content += wxT("Version ");
   wxString ltsg_version(LTSG_VERSION, wxConvLocal);

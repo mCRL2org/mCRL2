@@ -74,7 +74,6 @@ public:
 
   void set_label_x(double new_value);
   void set_label_y(double new_value);
-  void reset_label();
 private:
   // Start and end nodes.
   // TODO (CT): Coding standard

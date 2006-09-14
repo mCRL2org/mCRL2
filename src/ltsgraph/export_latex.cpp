@@ -17,7 +17,8 @@ bool ExportToLatex::Generate() {
 	LatexCode += "\\begin{pspicture}(0.0,12.0) \n";
 	LatexCode += "\\psset{arrows=->,shortput=nab} \n";
 
-	for (unsigned int i=0; i<node.size(); i++) {
+
+        for (unsigned int i=0; i<node.size(); i++) {
 		boost::format f("\\rput(%1%,%2%){\\circlenode{%3%}{%4%}} \n");
 		double nodeX = (node[i].x)/50;
 		double nodeY = (height - node[i].y)/50;
@@ -26,8 +27,25 @@ bool ExportToLatex::Generate() {
 	}
 
 	for (unsigned int i=0; i<edge.size(); i++) {
-		boost::format f("\\ncline{%1%}{%2%}^{%3%} \n");
-		f%edge[i].numNode1%edge[i].numNode2%EscSpecChar(edge[i].lbl);
+          if (edge[i].numNode1 == edge[i].numNode2) {
+            //Draw self-loop
+            boost::format f("\\nccircle{%1%}{.5}^{%2%} \n");
+            f%edge[i].numNode1%EscSpecChar(edge[i].lbl);
+            LatexCode += boost::str(f);
+          }
+          else {
+            boost::format f("\\ncline{%1%}{%2%}^{%3%} \n");
+	    f%edge[i].numNode1%edge[i].numNode2%EscSpecChar(edge[i].lbl);
+	    LatexCode += boost::str(f);
+          }
+	}
+
+        // Redraw nodes, to overlap the edges.
+	for (unsigned int i=0; i<node.size(); i++) {
+		boost::format f("\\rput(%1%,%2%){\\circlenode{%3%}{%4%}} \n");
+		double nodeX = (node[i].x)/50;
+		double nodeY = (height - node[i].y)/50;
+		f%nodeX%nodeY%node[i].num%node[i].num;
 		LatexCode += boost::str(f);
 	}
 

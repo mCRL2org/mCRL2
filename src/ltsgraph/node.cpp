@@ -1,4 +1,5 @@
 #include "node.h"
+#include "images/lock.xpm"
 
 const wxColour border_color      = wxT("BLACK");
 const wxColour border_color_init = wxT("RED");
@@ -23,10 +24,7 @@ Node::Node(unsigned int _num, double _posX, double _posY, wxString _lbl, bool _i
 void Node::OnPaint(wxDC * ptrDC) 
 {
   wxColour color;
-  if (!locked)
-    color = node_colour;
-  else 
-    color = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
+  color = node_colour;
 
   //Circle
   int pen_size;
@@ -36,6 +34,7 @@ void Node::OnPaint(wxDC * ptrDC)
   else {
     pen_size = 1;
   }
+
 		
   wxPen pen = wxPen(border_colour, pen_size, wxSOLID);
   ptrDC->SetPen(pen);
@@ -61,6 +60,11 @@ void Node::OnPaint(wxDC * ptrDC)
 	
 			ptrDC->DrawRotatedText(lbl,(int) round(x),(int) round(y),0.0);
 		}
+
+  if (locked) {
+    static const wxBitmap lock(lock_xpm);
+    ptrDC->DrawBitmap(lock, (int)posX, (int)posY, true);
+  }
 }
 
 unsigned int Node::Get_num() {
