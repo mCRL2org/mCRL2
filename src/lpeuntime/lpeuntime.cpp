@@ -5,7 +5,7 @@
 // ----------------------------------------------------------------------
 //
 // file          : lpeuntime 
-// date          : 12-09-2006
+// date          : 13-09-2006
 // version       : 0.2
 //
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
@@ -14,10 +14,7 @@
 //
 // ======================================================================
 
-// Squadt protocol interface
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <squadt_utility.h>
-#endif
+#include "squadt_lpeuntime.h"
 
 #include "mcrl2_revision.h"
 
@@ -28,11 +25,6 @@
 //Boost
 #include <boost/program_options.hpp>
 #include <boost/filesystem/convenience.hpp>
-
-//mCRL2
-#include <atermpp/aterm.h>
-#include <lpe/lpe.h>
-#include <lpe/specification.h>
 
 //Lowlevel library for gsErrorMsg
 #include <libprint_c.h>
@@ -48,66 +40,47 @@ namespace po = boost::program_options;
 std::string input_file; // Name of the file to read input from
 std::string output_file; // Name of the file to write output to (or stdout)
 
-void parse_command_line(int ac, char** av) {
-  po::options_description desc;
+const unsigned int lpd_file_for_input = 0;
+const unsigned int lpd_file_for_output = 1;
 
-  desc.add_options()
-      ("help,h",      "display this help")
-      ("verbose,v",   "turn on the display of short intermediate messages")
-      ("debug,d",    "turn on the display of detailed intermediate messages")
-      ("version",     "display version information")
-  ;
-      
-  po::options_description hidden("Hidden options");
-  hidden.add_options()
-      ("INFILE", po::value< string >(), "input file")
-      ("OUTFILE", po::value< string >(), "output file")
-  ;
-      
-  po::options_description cmdline_options;
-  cmdline_options.add(desc).add(hidden);
-      
-  po::options_description visible("Allowed options");
-  visible.add(desc);
-      
-  po::positional_options_description p;
-  p.add("INFILE", 1);
-  p.add("OUTFILE", -1);
-      
-  po::variables_map vm;
-  po::store(po::command_line_parser(ac, av).
-    options(cmdline_options).positional(p).run(), vm);
-  po::notify(vm);
-      
-  if (vm.count("help")) {
-    cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE] [OUTFILE]" << endl;
-    cerr << "Untime the LPE in INFILE and store the result to OUTFILE" << endl;
-    cerr << endl;
-    cerr << desc;
+void squadt_lpeuntime::set_capabilities()
+{
+  // Get tool capabilities in order to modify settings
+  sip::tool::capabilities& cp = tc.get_tool_capabilities();
 
-    exit (0);
-  }
-      
-  if (vm.count("version")) {
-    cerr << "lpeuntime " << VERSION << " (revision " << REVISION << ")" << endl;
+  // The tool has only one main input combination
+  cp.add_input_combination(lpd_file_for_input, "Transformation", "lpe");
+}
 
-    exit (0);
-  }
+void squadt_lpeuntime::initialise()
+{
+}
 
-  if (vm.count("debug")) {
-    gsSetDebugMsg();
-  }
+void squadt_lpeuntime::configure(sip::configuration& configuration)
+{
+}
 
-  if (vm.count("verbose")) {
-    gsSetVerboseMsg();
-  }
+bool squadt_lpeuntime::check_configuration(sip::configuration& configuration)
+{
+// Check if everything present (see lpe2lts)
+  return (configuration.object_exists(lpd_file_for_input) &&
+          configuration.object_exists(lpd_file_for_output)
+         );
+}
 
-  input_file = (0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-";
-  output_file = (0 < vm.count("OUTFILE")) ? vm["OUTFILE"].as< string >() : "-";
+void squadt_lpeuntime::execute(sip::configuration& configuration)
+{
+  input_file = configuration.get_object(lpd_file_for_input)->get_location();
+  output_file = configuration.get_object(lpd_file_for_output)->get_location();
+  do_untime();
+}
+
+void squadt_lpeuntime::finalise()
+{
 }
 
 ///Returns an LPE specification in which the timed arguments have been rewritten
-lpe::specification untime(const lpe::specification specification) {
+lpe::specification squadt_lpeuntime::untime(const lpe::specification specification) {
   // TODO: Strip use of gs functions as much as possible; everything that's possible through these
   // should also be available through the LPE library!
   // NOTE: The gs functions will be made available in the LPE library by Wieger.
@@ -220,158 +193,96 @@ lpe::specification untime(const lpe::specification specification) {
 
   return untime_specification;
 }
-        
+
+int squadt_lpeuntime::do_untime()
+{
+  lpe::specification lpe_specification;
+
+  if (lpe_specification.load(input_file)) {
+    // Untime lpe_specification and save the output to a binary file
+    if (!untime(lpe_specification).save(output_file, true)) 
+    {
+      // An error occurred when saving
+      gsErrorMsg("Could not save to '%s'\n", output_file.c_str());
+      return (1);
+    }
+  }
+  else {
+    gsErrorMsg("lpeuntime: Unable to load LPE from `%s'\n", input_file.c_str());
+    return (1);
+  }
+
+  return 0;
+}
+
+void parse_command_line(int ac, char** av) {
+  po::options_description desc;
+
+  desc.add_options()
+      ("help,h",      "display this help")
+      ("verbose,v",   "turn on the display of short intermediate messages")
+      ("debug,d",    "turn on the display of detailed intermediate messages")
+      ("version",     "display version information")
+  ;
+      
+  po::options_description hidden("Hidden options");
+  hidden.add_options()
+      ("INFILE", po::value< string >(), "input file")
+      ("OUTFILE", po::value< string >(), "output file")
+  ;
+      
+  po::options_description cmdline_options;
+  cmdline_options.add(desc).add(hidden);
+      
+  po::options_description visible("Allowed options");
+  visible.add(desc);
+      
+  po::positional_options_description p;
+  p.add("INFILE", 1);
+  p.add("OUTFILE", -1);
+      
+  po::variables_map vm;
+  po::store(po::command_line_parser(ac, av).
+    options(cmdline_options).positional(p).run(), vm);
+  po::notify(vm);
+      
+  if (vm.count("help")) {
+    cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE] [OUTFILE]" << endl;
+    cerr << "Untime the LPE in INFILE and store the result to OUTFILE" << endl;
+    cerr << endl;
+    cerr << desc;
+
+    exit (0);
+  }
+      
+  if (vm.count("version")) {
+    cerr << "lpeuntime " << VERSION << " (revision " << REVISION << ")" << endl;
+
+    exit (0);
+  }
+
+  if (vm.count("debug")) {
+    gsSetDebugMsg();
+  }
+
+  if (vm.count("verbose")) {
+    gsSetVerboseMsg();
+  }
+
+  input_file = (0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-";
+  output_file = (0 < vm.count("OUTFILE")) ? vm["OUTFILE"].as< string >() : "-";
+}
+
 int main(int ac, char** av) {
   ATerm bot;
   ATinit(0,0,&bot);
   gsEnableConstructorFunctions();
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-/*
-  sip::tool::communicator tc;
-
-  // Constants for identifiers of options and objects
-  const unsigned int lpd_file_for_input = 0;
-
-  // Get tool capabilities in order to modify settings
-  sip::tool::capabilities& cp = tc.get_tool_capabilities();
-
-  // The tool has only one main input combination it takes an LPD and then behaves as a reporter
-  cp.add_input_combination(lpd_file_for_input, "Reporting", "lpe");
-
-  // On purpose we do not catch exceptions 
-  if (tc.activate(ac,av)) {
-    bool valid = false;
-
-    // Initialise utility pseudo-library 
-    squadt_utility::initialise(tc);
-
-    // Static configuration cycle
-    while (!valid) {
-      // Wait for configuration data to be send (either a previous configuration, or only an input combination)
-      sip::configuration::sptr configuration = tc.await_configuration();
-
-      // Validate configuration specification, should contain a file name of an LPD that is to be read as input
-      valid  = configuration.get() != 0;
-      valid &= configuration->object_exists(lpd_file_for_input);
-
-      if (valid) {
-        // An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system)
-        input_file = configuration->get_object(lpd_file_for_input)->get_location();
-      }
-      else {
-        tc.send_status_report(sip::report::error, "Invalid input combination!");
-      }
-    }
-
-    // Send the controller the signal that we're ready to rumble (no further configuration necessary)
-    tc.send_accept_configuration();
-
-    // Wait for start message
-    tc.await_message(sip::message_signal_start);
-  }
-  else {
-*/
-#endif
-    parse_command_line(ac,av);
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-/*
-  }
-*/
-#endif
-
-  lpe::specification lpe_specification;
-
-  if (lpe_specification.load(input_file)) {
-
-// TODO: Change the following to follow lpeuntime output instead of lpeinfo    
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-/*
-    if (tc.is_active()) {
-      using namespace sip;
-      using namespace sip::layout;
-      using namespace sip::layout::elements;
-
-      layout::tool_display::sptr display(new layout::tool_display);
-
-      // Create and add the top layout manager 
-      layout::manager::aptr layout_manager = layout::horizontal_box::create();
-
-      // First column 
-      layout::vertical_box* left_column = new layout::vertical_box();
-
-      layout::vertical_box::alignment a = layout::left;
-
-      left_column->add(new label("Input read from:"), a);
-      left_column->add(new label("Summands (#):"), a);
-      left_column->add(new label("Free variables (#):"), a);
-      left_column->add(new label("Process parameters (#):"), a);
-      left_column->add(new label("Actions (#):"), a);
-
-      // Second column
-      layout::vertical_box* right_column = new layout::vertical_box();
-
-      boost::format c("%u");
-
-      right_column->add(new label(boost::filesystem::path(input_file).leaf()), a);
-      right_column->add(new label(boost::str(c % lpe.summands().size())), a);
-      right_column->add(new label(boost::str(c % (lpe_specification.initial_free_variables().size() + lpe.free_variables().size()))), a);
-      right_column->add(new label(boost::str(c % lpe.process_parameters().size())), a);
-      right_column->add(new label(boost::str(c % lpe.actions().size())), a);
-
-      // Attach columns
-      layout_manager->add(left_column, margins(0,5,0,5));
-      layout_manager->add(right_column, margins(0,5,0,20));
-
-      display->set_top_manager(layout_manager);
-
-      tc.send_display_layout(display);
-
-      // Termination sequence
-      tc.send_signal_done();
-
-      tc.await_message(sip::message_request_termination);
-    }
-    else {
-*/
-#endif
-
-      // Untime lpe_specification and save the output to a binary file
-      if (!untime(lpe_specification).save(output_file, true)) 
-      {
-        // An error occurred when saving
-        gsErrorMsg("Could not save to '%s'\n", output_file.c_str());
-      }
-
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-/*
-    }
-*/
-#endif
-  }
-  else {
-    std::string error("Unable to load LPE from `" + input_file + "'\n");
-
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-/*
-    if (tc.is_active()) {
-      // Something went wrong, send an error report
-      tc.send_status_report(sip::report::error, error);
-
-      tc.send_signal_done();
-
-      tc.await_message(sip::message_request_termination);
-    }
-    else {
-      std::cerr << "Error: " + error;
-    }
-*/
-#else
-    std::cerr << "Error: " + error;
-#endif
-
-    return (1);
+  squadt_lpeuntime sl;
+  if (sl.run(ac, av)) {
+    return 0;
   }
 
-  return 0;
+  parse_command_line(ac,av);
+  return sl.do_untime();
 }
