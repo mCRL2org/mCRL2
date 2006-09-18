@@ -10,6 +10,31 @@
 namespace iterator_wrapper {
 
   /**
+   * Template parameter S represents the type of the smart pointer, and
+   * parameter T is the type of the objects pointed to.
+   **/
+  template < typename S, typename T >
+  class basic_indirect_iterator {
+
+    public:
+
+      /** \brief Whether the iterator has moved past the end of the sequence */
+      virtual bool valid() const = 0;
+
+      /** \brief Advances to the next element */
+      virtual void operator++() = 0;
+
+      /** \brief Get the element that is currently referenced */
+      virtual T* operator*() const = 0;
+
+      /** \brief Get an actual pointer instance */
+      virtual S pointer() const = 0;
+
+      /** \brief Destructor */
+      virtual ~basic_indirect_iterator() = 0;
+  };
+
+  /**
    * \brief Interface class for allowing limited external iteration over
    * private members that support STL compatible iterators that hold smart pointers
    *
@@ -35,7 +60,7 @@ namespace iterator_wrapper {
    * changed during iteration.
    **/
   template < typename T, typename S, typename I = typename T::const_iterator >
-  class constant_indirect_iterator {
+  class constant_indirect_iterator : private basic_indirect_iterator < typename T::value_type, S > {
 
     private:
 
@@ -65,7 +90,7 @@ namespace iterator_wrapper {
       constant_indirect_iterator(const T&);
 
       /** \brief Constructor */
-      constant_indirect_iterator(I& begin, I&end);
+      constant_indirect_iterator(I& begin, I& end);
 
       /** \brief Whether the iterator has moved past the end of the sequence */
       inline bool valid() const;
@@ -106,7 +131,7 @@ namespace iterator_wrapper {
    * changed during iteration.
    **/
   template < typename T, typename S, typename I = typename T::iterator >
-  class indirect_iterator {
+  class indirect_iterator : private basic_indirect_iterator < typename T::value_type, S > {
 
     private:
 
@@ -136,7 +161,7 @@ namespace iterator_wrapper {
       indirect_iterator(T&);
 
       /** \brief Constructor */
-      indirect_iterator(I& begin, I&end);
+      indirect_iterator(I& begin, I& end);
 
       /** \brief Whether the iterator has moved past the end of the sequence */
       inline bool valid() const;
@@ -150,6 +175,10 @@ namespace iterator_wrapper {
       /** \brief Get an actual pointer instance */
       inline typename T::value_type pointer(); 
   };
+
+  template < typename S, typename T >
+  basic_indirect_iterator< S, T >::~basic_indirect_iterator() {
+  }
 
   /**
    * @param c the container with the elements over which to iterate

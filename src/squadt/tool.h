@@ -8,7 +8,7 @@
 #include <sip/detail/tool_capabilities.h>
 
 #include "exception.h"
-#include "core.h"
+#include "build_system.h"
 
 namespace squadt {
 

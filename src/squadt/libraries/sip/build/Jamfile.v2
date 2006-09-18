@@ -1,6 +1,6 @@
 import feature : feature ;
 
-project sip
+project squadt/libraries/sip
     : source-location
        ../source
     : build-dir $(BUILD_TOP)
@@ -26,7 +26,7 @@ alias messenger
       <library>/libraries/xml2pp//xml2pp
     ;
 
-feature sip_side : controller tool : composite ;
+feature sip_side : controller tool : composite optional ;
 
 feature.compose <sip_side>controller : <define>CONTROLLER_SIDE ;
 feature.compose <sip_side>tool       : <define>TOOL_SIDE ;

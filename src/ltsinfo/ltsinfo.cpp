@@ -320,7 +320,7 @@ int main(int argc, char **argv)
               tc.send_display_layout(display);
              
               /* Signal that the job is finished */
-              tc.send_signal_done();
+              tc.send_signal_done(true);
             }
             else {
               tc.send_status_report(sip::report::error, "Failure reading input from file.");

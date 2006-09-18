@@ -101,7 +101,7 @@ static void print_help(FILE *f, const char *Name)
 /*    "  -p, --priority=NAME   give priority to action NAME (i.e. if it is\n"
     "                        possible to execute an action NAME in some state,\n"
     "                        than make it the only executable action from that\n"
-    "                        state)\n"*/
+    "                        state)\n" */
     "  -s, --strategy=NAME      use strategy NAME to explore the state space with;\n"
     "                           the following strategies are available:\n"
     "                             b, breadth   breadth-first search (default)\n"

@@ -48,22 +48,18 @@ namespace squadt {
     }
 
     void task_monitor::finish() {
-      /* Let the tool know that it should prepare for termination */
-      request_termination();
-
-      get_logger()->log(1, boost::str(boost::format("sent termination request to %s pid(%u)\n")
-                % boost::dynamic_pointer_cast < task_monitor_impl > (impl)->associated_process->get_executable_name()
-                % boost::dynamic_pointer_cast < task_monitor_impl > (impl)->associated_process->get_identifier()));
-   
       boost::dynamic_pointer_cast < task_monitor_impl > (impl)->finish();
+    }
+
+    /**
+     * \param[in] ts the maximum number of seconds to block
+     **/
+    void task_monitor::await_connection(unsigned int const& ts) {
+      boost::dynamic_pointer_cast < task_monitor_impl > (impl)->await_connection(ts);
     }
 
     void task_monitor::await_connection() {
       boost::dynamic_pointer_cast < task_monitor_impl > (impl)->await_connection();
-    }
-
-    void task_monitor::await_completion() {
-      boost::dynamic_pointer_cast < task_monitor_impl > (impl)->await_completion();
     }
 
     /**
@@ -87,6 +83,13 @@ namespace squadt {
       boost::shared_ptr < task_monitor_impl > m = boost::dynamic_pointer_cast < task_monitor_impl > (impl);
 
       m->signal_change(m, s);
+    }
+
+    /**
+     * @param[in] h the function object that is executed after the process status has changed
+     **/
+    void task_monitor::on_status_change(boost::function < void () > h) {
+      boost::dynamic_pointer_cast < task_monitor_impl > (impl)->on_status_change(h);
     }
 
     /**

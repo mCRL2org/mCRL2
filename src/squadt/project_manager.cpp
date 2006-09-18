@@ -1,7 +1,9 @@
 #include <algorithm>
 #include <fstream>
 #include <map>
-#include <algorithm>
+#include <stack>
+#include <set>
+#include <memory>
 
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
@@ -12,8 +14,6 @@
 
 #include "project_manager.h"
 #include "settings_manager.tcc"
-#include "processor.tcc"
-#include "core.h"
 
 namespace squadt {
 
@@ -31,25 +31,36 @@ namespace squadt {
    * project description file in it, then such a file is created and all files
    * in the directory are imported into the project.
    **/
-  project_manager::project_manager(const boost::filesystem::path& l) : store(l), count(0) {
+  project_manager::project_manager(const boost::filesystem::path& l, bool b) : store(l), count(0) {
     using namespace boost;
 
     assert(!l.empty());
 
+    filesystem::path project_file = l / filesystem::path(settings_manager::project_definition_base_name);
+
     if (filesystem::exists(l)) {
       assert(filesystem::is_directory(l));
 
-      if (!filesystem::exists(l / filesystem::path(settings_manager::project_definition_base_name))) {
+      if (!filesystem::exists(project_file)) {
         import_directory(l);
 
         /* Create initial project description file */
         write();
       }
       else {
-        try {
-          read();
+        if (b) {
+          filesystem::remove(project_file);
         }
-        catch (...) {
+        else {
+          try {
+            read();
+          }
+          catch (...) {
+            b = true;
+          }
+        }
+
+        if (b) {
           /* Project description file is probably broken */
           import_directory(l);
 
@@ -62,6 +73,39 @@ namespace squadt {
       filesystem::create_directories(l);
 
       /* Create initial project description file */
+      write();
+    }
+
+    /* Compute reverse dependencies */
+    for (processor_list::const_iterator i = processors.begin(); i != processors.end(); ++i) {
+      for (processor::input_object_iterator j = (*i)->get_input_iterator(); j.valid(); ++j) {
+        processor::sptr g((*j)->generator.lock());
+
+        if (g.get() != 0) {
+          reverse_depends.insert(std::make_pair(g.get(), (*i).get()));
+        }
+      }
+    }
+  }
+
+  /**
+   * @param p a reference to the processor to add
+   **/
+  void project_manager::add(processor::ptr const& p) {
+    boost::mutex::scoped_lock l(list_lock);
+
+    if (processors.end() == std::find(processors.begin(), processors.end(), p)) {
+      processors.push_back(p);
+
+      /* Register reverse dependencies */
+      for (processor::input_object_iterator i = p->get_input_iterator(); i.valid(); ++i) {
+        processor::sptr g((*i)->generator.lock());
+
+        if (g.get() != 0) {
+          reverse_depends.insert(std::make_pair(g.get(), p.get()));
+        }
+      }
+
       write();
     }
   }
@@ -198,12 +242,11 @@ namespace squadt {
 
     /* Read processors */
     while (r.is_element("processor")) {
-      processors.push_back(processor::read(*this, c, r));
+      processor::sptr p = processor::read(*this, c, r);
 
-      if (processors.back()->output_directory.empty()) {
-        /* Set to default (the project store) */
-        processors.back()->output_directory = store.native_file_string();
-      }
+      p->check_status(true);
+
+      processors.push_back(p);
     }
 
     sort_processors();
@@ -286,30 +329,72 @@ namespace squadt {
                                 boost::bind(&processor::ptr::get, _2))));
   }
 
-  void project_manager::update_single(processor* p) {
-    processor_list::iterator i = processors.begin();
+  /**
+   * \param[in] p the processor that selects the targets
+   **/
+  void project_manager::update_status(processor* p) {
+    if (0 < reverse_depends.count(p)) {
 
-    while ((*i).get() != p && i != processors.end()) {
-      ++i;
-    }
-    
-    if (i != processors.end()) {
-      /* Present in list */
-      if (p->check_input_consistency()) {
-        if (!p->check_output_consistency()) {
-          p->process(boost::bind(&project_manager::update_single, this, p));
+      std::stack < processor* > p_stack;
+
+      p_stack.push(p);
+
+      while (0 < p_stack.size()) {
+        std::pair < dependency_map::iterator, dependency_map::iterator > range = reverse_depends.equal_range(p_stack.top());
+
+        p_stack.pop();
+
+        BOOST_FOREACH(dependency_map::value_type i, range) {
+          i.second->check_status(false);
+
+          p_stack.push(i.second);
         }
       }
-      else {
-        /* Recursively update inputs */
-        for (processor::input_object_iterator j = (*i)->get_input_iterator(); j.valid(); ++j) {
-          processor::sptr depend((*j)->generator.lock());
+    }
+  }
 
-          if (depend.get() != 0 && !depend->check_input_consistency()) {
-            update_single(depend.get());
+  std::auto_ptr < project_manager::conflict_list > project_manager::get_conflict_list(processor::sptr p) const {
+    std::set < std::string > locations; // Names of files produced by p
+
+    for (processor::output_object_iterator j = p->get_output_iterator(); j.valid(); ++j) {
+      locations.insert((*j)->location);
+    }
+
+    boost::mutex::scoped_lock l(list_lock);
+
+    std::auto_ptr < conflict_list > conflicts(new conflict_list);
+
+    /* Check all processors for conflicts */
+    for (processor_list::const_iterator i = processors.begin(); i != processors.end(); ++i) {
+      if (*i != p) {
+        for (processor::output_object_iterator j = (*i)->get_output_iterator(); j.valid(); ++j) {
+          if (locations.find((*j)->location) != locations.end()) {
+            /* Conflict */
+            conflicts->push_back(j.pointer());
           }
         }
       }
+    }
+
+    return (conflicts);
+  }
+
+  /**
+   * \param[in] p the processor that selects the targets
+   **/
+  void project_manager::update_single(processor::sptr p) {
+
+    /* Recursively update inputs */
+    for (processor::input_object_iterator j = p->get_input_iterator(); j.valid(); ++j) {
+      processor::sptr dependency((*j)->generator.lock());
+
+      if (dependency.get() != 0) {
+        update_single(dependency);
+      }
+    }
+
+    if (p->check_status(true)) {
+      p->update(boost::bind(&project_manager::update_single, this, p));
     }
   }
 
@@ -317,20 +402,20 @@ namespace squadt {
    * @param[in] h a function that is called that is called just before a processor is updated
    **/
   void project_manager::update(boost::function < void (processor*) > h) {
-    static bool active = false;
+    bool update_active = false;
 
-    if (!active) {
-      active = true;
+    if (!update_active) {
+      update_active = true;
 
       BOOST_FOREACH(processor_list::value_type i, processors) {
         if (i->get_tool()) {
           h(i.get());
 
-          update_single(i.get());
+          update_single(i);
         }
       }
 
-      active = false;
+      update_active = false;
     }
   }
 
@@ -364,34 +449,85 @@ namespace squadt {
       f.erase(f.begin());
     }
 
-    p->append_output(f, destination_path.leaf());
+    p->append_output(f, destination_path.leaf(), processor::object_descriptor::original);
 
     processors.push_back(p);
 
     return (p);
   }
 
-  /**
+/**
    * @param[in] p pointer to the processor that is to be removed
    * @param[in] b whether or not to remove the associated files
    *
-   * \attention all processors with inconsistent inputs are also removed
+   * \attention also removes processors with inputs that are not longer available
+   * \pre input should be sorted as can be obtained by doing sort_processors()
    **/
   void project_manager::remove(processor* p, bool b) {
-    processor_list::iterator i = processors.begin();
+    std::set < processor* > obsolete;
 
-    while (i != processors.end()) {
-      if ((*i).get() == p || !((*i)->check_input_consistency())) {
-        if (((*i).get() == p) && b) {
-          (*i)->flush_outputs();
+    obsolete.insert(p);
+
+    if (0 < reverse_depends.count(p)) {
+
+      std::stack < processor* > p_stack;
+
+      p_stack.push(p);
+
+      while (0 < p_stack.size()) {
+        std::pair < dependency_map::iterator, dependency_map::iterator > range = reverse_depends.equal_range(p_stack.top());
+
+        p_stack.pop();
+
+        BOOST_FOREACH(dependency_map::value_type i, range) {
+          obsolete.insert(i.second);
+
+          p_stack.push(i.second);
         }
-
-        i = processors.erase(i);
-      }
-      else {
-        ++i;
       }
     }
+
+    boost::mutex::scoped_lock l(list_lock);
+
+    /* Update reverse dependencies, remove files and processors */
+    BOOST_FOREACH(processor* i, obsolete) {
+      for (processor::input_object_iterator j = i->get_input_iterator(); j.valid(); ++j) {
+        processor::sptr g((*j)->generator.lock());
+
+        if (g.get() != 0) {
+          std::pair < dependency_map::iterator, dependency_map::iterator > range(reverse_depends.equal_range(g.get()));
+
+          while (range.first != range.second) {
+            if ((*range.first).second == i) {
+              dependency_map::iterator temporary = range.first++;
+
+              reverse_depends.erase(temporary);
+            }
+            else {
+              ++range.first;
+            }
+          }
+        }
+      }
+
+      if (b) {
+        i->flush_outputs();
+      }
+    }
+
+    processor_list::iterator j = processors.begin();
+
+    /** Actually remove the processor */
+    while (j != processors.end()) {
+      if (obsolete.find((*j).get()) != obsolete.end()) {
+        j = processors.erase(j);
+      }
+      else {
+        ++j;
+      }
+    }
+
+    write();
   }
 
   void project_manager::clean_store(processor* p, bool b) {

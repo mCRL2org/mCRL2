@@ -10,7 +10,6 @@
 #include "gui_project.h"
 #include "gui_miscellaneous.h"
 #include "tool.h"
-#include "core.h"
 
 namespace squadt {
   namespace GUI {
@@ -66,8 +65,14 @@ namespace squadt {
         /** \brief Shows a project creation dialog and switches the active view to the new project */
         void project_new();
 
-        /** \brief Closes the active project view */
+        /** \brief Creates a new project view */
+        void project_new(std::string const&, std::string const& = "");
+
+        /** \brief Open a new project view */
         void project_open();
+
+        /** \brief Open a new project view from a path */
+        void project_open(std::string const&);
 
         /** \brief Updates the active project */
         void project_update();

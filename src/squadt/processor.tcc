@@ -10,8 +10,189 @@
 #include "task_monitor.h"
 #include "processor.h"
 #include "project_manager.h"
+#include "executor.h"
+#include "tool_manager.h"
 
 namespace squadt {
+
+  class processor_impl {
+    friend class processor;
+    friend class processor::object_descriptor;
+    friend class processor::monitor;
+
+    private:
+
+      typedef boost::shared_ptr < processor_impl >    impl_ptr;
+
+      typedef boost::shared_ptr < processor >         interface_ptr;
+
+      typedef processor::object_descriptor            object_descriptor;
+
+      typedef processor::object_descriptor::t_status  object_status;
+
+      typedef processor::monitor                      monitor;
+
+      typedef processor::input_list                   input_list;
+
+      typedef processor::output_list                  output_list;
+
+    private:
+
+      /** \brief Helper type for read() members */
+      typedef std::map < unsigned long, object_descriptor::sptr >           id_conversion_map;
+
+    private:
+
+      /** \brief Weak pointer to this object for passing */
+      boost::weak_ptr < processor >  interface_object;
+ 
+      /** \brief Identifies the tool that is required to run the command */
+      tool::sptr                     tool_descriptor;
+
+      /** \brief The information about inputs of this processor */
+      input_list                     inputs;
+
+      /** \brief The information about outputs of this processor */
+      output_list                    outputs;
+ 
+      /** \brief The current task that is running or about to run */
+      monitor::sptr                  current_monitor;
+
+      /** \brief The associated project manager */
+      project_manager*               manager;
+ 
+      /** \brief The selected input combination of the tool */
+      tool::input_combination const* selected_input_combination;
+
+      /** \brief The directory from which tools should be run on behalf of this object */
+      std::string                    output_directory;
+
+    private:
+
+      /** \brief Helper function for adjusting status */
+      static bool try_change_status(processor::object_descriptor&, object_status);
+
+    private:
+
+      /** \brief Basic constructor */
+      inline processor_impl(boost::shared_ptr < processor > const&, project_manager&);
+
+      /** \brief Constructor with tool selection */
+      inline processor_impl(boost::shared_ptr < processor > const&, project_manager&, tool::sptr);
+
+      /** \brief Extracts useful information from a configuration object */
+      void process_configuration(sip::configuration::sptr const& c);
+
+      /** \brief Find an object descriptor for a given pointer to an object */
+      const object_descriptor::sptr find_output(object_descriptor*) const;
+ 
+      /** \brief Find an object descriptor for a given pointer to an object */
+      const object_descriptor::sptr find_input(object_descriptor*) const;
+ 
+      /** \brief Find an object descriptor for a given pointer to an object (by id) */
+      const object_descriptor::sptr find_output(const unsigned int) const;
+ 
+      /** \brief Find an object descriptor for a given pointer to an object (by id) */
+      const object_descriptor::sptr find_input(const unsigned int) const;
+ 
+      /** \brief Find an object descriptor for a given pointer to an object */
+      const object_descriptor::sptr find_output(std::string const&) const;
+ 
+      /** \brief Find an object descriptor for a given pointer to an object */
+      const object_descriptor::sptr find_input(std::string const&) const;
+ 
+      /** \brief Get the most original (main) input */
+      const object_descriptor::sptr find_initial_object() const;
+ 
+      /** \brief Find an object descriptor for a given name and rename if it exists */
+      void rename_object(object_descriptor::sptr const&, std::string const&);
+
+      /** \brief Prepends the absolute path to the project store */
+      std::string make_output_path(std::string const&) const;
+
+      /** \brief Check the inputs with respect to the outputs and adjust status accordingly */
+      bool check_status(bool);
+
+      /** \brief Start tool configuration */
+      void configure(interface_ptr const&, const tool::input_combination*, const boost::filesystem::path&, std::string const& = empty_string);
+ 
+      /** \brief Start tool configuration */
+      void configure(interface_ptr const&, std::string const& = empty_string);
+
+      /** \brief Start tool reconfiguration */
+      void reconfigure(interface_ptr const&, std::string const& = empty_string);
+ 
+      /** \brief Start processing: generate outputs from inputs */
+      void run(interface_ptr const&, bool b = false);
+
+      /** \brief Start running and afterward execute a function */
+      void run(interface_ptr const&, boost::function < void () > h, bool b = false);
+
+      /** \brief Start processing if not all outputs are up to date */
+      void update(interface_ptr const&, bool b = false);
+ 
+      /** \brief Start updating and afterward execute a function */
+      void update(interface_ptr const&, boost::function < void () > h, bool b = false);
+
+      /** \brief Add an output object */
+      void append_output(object_descriptor::sptr&);
+
+      /** \brief Add an output object */
+      void append_output(sip::object const&,
+                object_descriptor::t_status const& = object_descriptor::reproducible_nonexistent);
+
+      /** \brief Replace an existing output object */
+      void replace_output(object_descriptor::sptr, sip::object const&,
+                object_descriptor::t_status const& = object_descriptor::reproducible_up_to_date);
+
+      /** \brief Read from XML using a libXML2 reader */
+      static processor::sptr read(project_manager&, id_conversion_map&, xml2pp::text_reader&);
+
+      /** \brief Write as XML to stream */
+      void write(std::ostream& stream = std::cout) const;
+      
+      /** \brief Removes the outputs of this processor from storage */
+      void flush_outputs();
+  };
+
+  /**
+   * \param[in] h the function to execute when the process terminates
+   * \param[in] b whether or not to run when there are no input objects defined
+   *
+   * \pre t.get() == this
+   **/
+  inline void processor_impl::update(interface_ptr const& t, boost::function < void () > h, bool b) {
+    current_monitor->once_on_completion(h);
+
+    run(t, b);
+  }
+
+  /**
+   * \param[in] h the function to execute when the process terminates
+   * \param[in] b whether or not to run when there are no input objects defined
+   *
+   * \pre t.get() == this
+   **/
+  inline void processor_impl::run(interface_ptr const& t, boost::function < void () > h, bool b) {
+    current_monitor->once_on_completion(h);
+
+    run(t, b);
+  }
+
+  /**
+   * @param p shared pointer to an object descriptor
+   **/
+  inline void processor_impl::append_output(object_descriptor::sptr& p) {
+    p->generator = interface_object;
+
+    if (std::find_if(outputs.begin(), outputs.end(),
+                boost::bind(std::equal_to < std::string >(), p->location,
+                        boost::bind(&object_descriptor::location,
+                               boost::bind(&object_descriptor::sptr::get, _1)))) == outputs.end()) {
+
+      outputs.push_back(p);
+    }
+  }
 
   /**
    * \brief Operator for writing to stream
@@ -25,25 +206,248 @@ namespace squadt {
     return (s);
   }
 
-  inline processor::~processor() {
+  inline processor_impl::processor_impl(boost::shared_ptr < processor > const& tp, project_manager& p) :
+                interface_object(tp), current_monitor(new monitor(*tp)), manager(&p), selected_input_combination(0) {
   }
 
   /**
+   * @param[in] p the associated project manager
    * @param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
    **/
-  inline void processor::set_tool(tool::sptr& t) {
-    tool_descriptor = t;
+  inline processor_impl::processor_impl(boost::shared_ptr < processor > const& tp, project_manager& p, tool::sptr t) :
+    interface_object(tp), tool_descriptor(t), current_monitor(new monitor(*tp)), manager(&p), selected_input_combination(0) {
   }
 
   /**
-   * @param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
+   * @param[in] r whether to check recursively or not
+   *
+   * \return whether or not the outputs this processor can produce exist and are up to date
    **/
-  inline void processor::set_tool(tool::sptr t) {
-    tool_descriptor = t;
+  inline bool processor_impl::check_status(const bool r) {
+    bool   result                   = false;
+    time_t maximum_input_timestamp  = 0;
+
+    /* Find the maximum timestamp of the inputs */
+    BOOST_FOREACH(object_descriptor::wptr i, inputs) {
+      object_descriptor::sptr d = i.lock();
+    
+      if (d.get() == 0) {
+        throw (exception::exception(exception::missing_object_descriptor));
+      }
+    
+      d->self_check(*manager);
+
+      result |= (d->status != object_descriptor::original) && (d->status != object_descriptor::reproducible_up_to_date);
+    
+      maximum_input_timestamp = std::max(maximum_input_timestamp, d->timestamp);
+    }
+
+    /* Check whether outputs all exist and find the minimum timestamp of the inputs */
+    BOOST_FOREACH(object_descriptor::sptr i, outputs) {
+      i->self_check(*manager, maximum_input_timestamp);
+
+      result |= (i->status != object_descriptor::original) && (i->status != object_descriptor::reproducible_up_to_date);
+    }
+ 
+    if (!result && r) {
+      /* Status can still be okay, check recursively */
+      BOOST_FOREACH(object_descriptor::wptr i, inputs) {
+        object_descriptor::sptr d = i.lock();
+    
+        if (d.get() == 0) {
+          throw (exception::exception(exception::missing_object_descriptor));
+        }
+
+        processor::sptr p(d->generator);
+
+        if (p.get() != 0) {
+          result |= p->check_status(true);
+        }
+      }
+    }
+
+    if (result) {
+      BOOST_FOREACH(object_descriptor::sptr i, outputs) {
+        if (i->status == object_descriptor::reproducible_up_to_date) {
+          try_change_status(*i, object_descriptor::reproducible_out_of_date);
+        }
+      }
+    }
+    
+    return (result);
   }
 
-  inline const processor::object_descriptor::sptr processor::find_initial_object() const {
-    if (number_of_inputs() != 0) {
+  /**
+   * @param s the stream to write to
+   **/
+  inline void processor_impl::write(std::ostream& s) const {
+    s << "<processor";
+
+    if (tool_descriptor.get() != 0) {
+      s << " tool-name=\"" << tool_descriptor->get_name() << "\"";
+
+      if (selected_input_combination != 0) {
+        s << " format=\"" << selected_input_combination->format << "\"";
+        s << " category=\"" << selected_input_combination->category << "\"";
+      }
+    }
+
+    if (!output_directory.empty()) {
+      s << " output-directory=\"" << output_directory << "\">";
+    }
+    else {
+      s << ">";
+    }
+
+    /* The last received configuration from the tool */
+    sip::configuration::sptr c = current_monitor->get_configuration();
+
+    if (c.get() != 0) {
+      c->write(s);
+    }
+
+    /* The inputs */
+    for (input_list::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
+      s << "<input id=\"" << std::dec << reinterpret_cast < unsigned long > ((*i).get()) << "\"/>\n";
+    }
+
+    /* The outputs */
+    for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
+      s << "<output id=\"" << std::dec << reinterpret_cast < unsigned long > ((*i).get())
+        << "\" format=\"" << (*i)->format
+        << "\" location=\"" << (*i)->location
+        << "\" identifier=\"" << std::dec << (*i)->identifier
+        << "\" status=\"" << (*i)->status;
+
+      if (!(*i)->checksum.is_zero()) {
+        s << "\" digest=\"" << (*i)->checksum;
+      }
+
+      s << "\" timestamp=\"" << std::dec << (*i)->timestamp << "\"/>\n";
+    }
+
+    s << "</processor>\n";
+  }
+
+  /**
+   * @param[in] p reference to the associated project_manager object
+   * @param[in] r an XML text reader object to read from
+   * @param[in] m a map that is used to associate shared pointers to processors with identifiers
+   *
+   * \pre must point to a processor element
+   * \attention the same map m must be used to read back all processor instances that were written with write()
+   **/
+  inline processor::sptr processor_impl::read(project_manager& p, id_conversion_map& m, xml2pp::text_reader& r) {
+    processor::sptr c = processor::create(p);
+    std::string     temporary;
+
+    if (r.get_attribute(&temporary, "tool-name")) {
+      c->impl->tool_descriptor = global_tool_manager->find(temporary);
+
+      /* Check tool existence */
+      if (!global_tool_manager->exists(temporary)) {
+        throw (exception::exception(exception::requested_tool_unavailable, temporary));
+      }
+
+      storage_format format;
+      tool_category  category;
+
+      if (r.get_attribute(&category, "category") && r.get_attribute(&format, "format")) {
+        c->impl->selected_input_combination = c->impl->tool_descriptor->find_input_combination(category, format);
+      }
+    }
+
+    c->impl->output_directory = r.get_attribute_as_string("output-directory");
+
+    r.next_element();
+
+    if (r.is_element("configuration")) {
+      c->impl->current_monitor->set_configuration(sip::configuration::read(r));
+    }
+
+    /* Read inputs */
+    while (r.is_element("input")) {
+      unsigned long id;
+
+      if (!r.get_attribute(&id, "id")) {
+        throw (exception::exception(exception::required_attributes_missing, "processor->input"));
+      }
+      else {
+        assert(m.find(id) != m.end());
+
+        c->impl->inputs.push_back(object_descriptor::sptr(m[id]));
+      }
+
+      r.next_element();
+
+      r.skip_end_element("input");
+    }
+
+    /* Read outputs */
+    while (r.is_element("output")) {
+      unsigned long id;
+      bool          b = r.get_attribute(&id, "id");
+
+      if (b) {
+        assert(m.find(id) == m.end());
+
+        m[id] = object_descriptor::sptr(new object_descriptor);
+
+        c->impl->outputs.push_back(m[id]);
+      }
+
+      object_descriptor* n = m[id].get();
+
+      if (!(b && r.get_attribute(&n->format, "format")
+              && r.get_attribute(&n->location, "location")
+              && r.get_attribute(&n->identifier, "identifier")
+              && r.get_attribute(&n->timestamp, "timestamp")
+              && r.get_attribute(&id, "status"))) {
+
+        throw (exception::exception(exception::required_attributes_missing, "processor->output"));
+      }
+
+      n->status = static_cast < object_status > ((id == object_descriptor::generation_in_progress) ?
+                                                      object_descriptor::reproducible_nonexistent : id);
+
+      if (r.get_attribute(&temporary, "digest")) {
+        n->checksum.read(temporary.c_str());
+      }
+      else {
+        n->checksum = md5pp::zero_digest;
+      }
+
+      n->generator = c;
+
+      r.next_element();
+
+      r.skip_end_element("output");
+    }
+
+    r.skip_end_element("processor");
+
+    return (c);
+  }
+
+  inline void processor_impl::flush_outputs() {
+    using namespace boost::filesystem;
+
+    /* Make sure any output objects are removed from storage */
+    for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
+      path p(manager->get_path_for_name((*i)->location));
+
+      if (exists(p)) {
+        remove(p);
+      }
+      
+      if ((*i)->status != object_descriptor::original) {
+        (*i)->status = object_descriptor::reproducible_nonexistent;
+      }
+    }
+  }
+
+  inline const processor::object_descriptor::sptr processor_impl::find_initial_object() const {
+    if (inputs.size() != 0) {
       object_descriptor::sptr o(inputs[0]);
 
       assert(o.get() != 0);
@@ -52,229 +456,337 @@ namespace squadt {
 
       assert(a.get() != 0);
 
-      return (a->find_initial_object());
+      return (a->impl->find_initial_object());
     }
     else {
-      assert(0 < number_of_outputs());
+      assert(0 < outputs.size());
 
       return (outputs[0]);
     }
   }
 
   /**
-   * @param[in] i the input combination to set
+   * @param o a pointer to the object to find
    **/
-  inline void processor::set_input_combination(tool::input_combination* i) {
-    selected_input_combination = i;
-  }
+  inline const processor::object_descriptor::sptr processor_impl::find_output(object_descriptor* o) const {
+    output_list::const_iterator i = std::find_if(outputs.begin(), outputs.end(),
+                boost::bind(std::equal_to < object_descriptor* >(), o, 
+                               boost::bind(&object_descriptor::sptr::get, _1)));
+                               
+    if (i != outputs.end()) {
+      return (*i);
+    }
 
-  inline tool::input_combination const* processor::get_input_combination() const {
-    return(selected_input_combination);
-  }
+    object_descriptor::sptr s;
 
-  inline const tool::sptr processor::get_tool() {
-    return (tool_descriptor);
-  }
-
-  inline const processor::monitor::sptr processor::get_monitor() {
-    return (current_monitor);
-  }
-
-  inline processor::input_object_iterator processor::get_input_iterator() const {
-    return (input_object_iterator(inputs));
+    return (s);
   }
 
   /**
-   * @param p weak pointer to an object descriptor
+   * @param o a pointer to the object to find
    **/
-  inline void processor::append_input(object_descriptor::wptr& p) {
-    inputs.push_back(p);
+  inline const processor::object_descriptor::sptr processor_impl::find_input(object_descriptor* o) const {
+    for (input_list::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
+      object_descriptor::sptr s = (*i);
+
+      if (s.get() == o) {
+        return (s);
+      }
+    }
+                               
+    object_descriptor::sptr s;
+
+    return (s);
   }
 
   /**
-   * @param p weak pointer to an object descriptor
+   * @param[in] id a pointer to the object to find
    **/
-  inline void processor::append_input(object_descriptor::wptr p) {
-    inputs.push_back(p);
+  inline const processor::object_descriptor::sptr processor_impl::find_output(const unsigned int id) const {
+    for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
+      if ((*i)->identifier == id) {
+
+        return (*i);
+      }
+    }
+
+    object_descriptor::sptr s;
+
+    return (s);
   }
 
   /**
-   * @param o the name (location) of the object to change
-   * @param n the new name (location) of the object
+   * @param[in] id the id of the object to find
    **/
-  inline void processor::rename_input(std::string const& o, std::string const& n) {
-    rename_object(find_output(o), n);
+  inline const processor::object_descriptor::sptr processor_impl::find_input(const unsigned int id) const {
+    for (input_list::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
+      object_descriptor::sptr s = (*i);
+
+      if (s.get() != 0 && s->identifier == id) {
+        return (s);
+      }
+    }
+                               
+    object_descriptor::sptr s;
+
+    return (s);
   }
 
   /**
-   * @param o the name (location) of the object to change
-   * @param n the new name (location) of the object
+   * @param o the name of the input object to find
    **/
-  inline void processor::rename_output(std::string const& o, std::string const& n) {
-    rename_object(find_output(o), n);
-  }
+  inline const processor::object_descriptor::sptr processor_impl::find_output(std::string const& o) const {
+    for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
+      if ((*i)->location == o) {
 
-  inline processor::output_object_iterator processor::get_output_iterator() const {
-    return (output_object_iterator(outputs));
+        return (*i);
+      }
+    }
+
+    object_descriptor::sptr s;
+
+    return (s);
   }
 
   /**
-   * @param p shared pointer to an object descriptor
+   * @param o the name of the input object to find
    **/
-  inline void processor::append_output(object_descriptor::sptr& p) {
-    p->generator = this_object;
+  inline const processor::object_descriptor::sptr processor_impl::find_input(std::string const& o) const {
+    for (input_list::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
+      object_descriptor::sptr s = (*i);
 
-    if (std::find_if(outputs.begin(), outputs.end(),
-                boost::bind(std::equal_to < std::string >(), p->location,
-                        boost::bind(&object_descriptor::location,
-                               boost::bind(&object_descriptor::sptr::get, _1)))) == outputs.end()) {
+      if (s.get() != 0 && s->location == o) {
+        return (s);
+      }
+    }
+                               
+    object_descriptor::sptr s;
 
-      outputs.push_back(p);
+    return (s);
+  }
+
+  /**
+   * @param[in] o the name (location) of the object to change
+   * @param[in] n the new name (location) of the object
+   **/
+  inline void processor_impl::rename_object(object_descriptor::sptr const& o, std::string const& n) {
+    using namespace boost::filesystem;
+
+    if (o.get() != 0) {
+      path source(manager->get_path_for_name(o->location));
+      path target(manager->get_path_for_name(n));
+
+      if (exists(source) && source != target) {
+        if (exists(target)) {
+          remove(target);
+        }
+
+        rename(source, target);
+      }
+
+      o->location = n;
+
+      /* Update configuration */
+      sip::configuration::sptr c = current_monitor->get_configuration();
+
+      if (c.get() != 0) {
+        sip::object::sptr object(c->get_output(o->identifier));
+
+        if (object.get() != 0) {
+          object->set_location(n);
+        }
+      }
     }
   }
 
   /**
-   * @param[in] f the storage format that l uses
-   * @param[in] l a URI (local path) to where the file is stored
+   * @param[in] c a reference to a configuration object
    **/
-  inline void processor::append_output(const storage_format& f, const std::string& l) {
-    object_descriptor::sptr p = object_descriptor::sptr(new object_descriptor);
+  inline void processor_impl::process_configuration(sip::configuration::sptr const& c) {
+    /* Extract information about output objects from the configuration */
+    for (sip::configuration::object_iterator i = c->get_object_iterator(); i.valid(); ++i) {
+      if ((*i)->get_type() == sip::object::output) {
+        object_descriptor::sptr o = find_output((*i)->get_id());
+    
+        if (o.get() == 0) {
+          /* Output not registered yet */
+          append_output(*(*i), object_descriptor::reproducible_up_to_date);
+        }
+        else {
+          if ((*i)->get_location() != o->location) {
+            /* Output already known, but filenames do not match */
+            remove(manager->get_path_for_name(o->location));
+          }
+    
+          replace_output(o, *(*i));
+        }
+    
+        if (!boost::filesystem::exists(manager->get_path_for_name((*i)->get_location()))) {
+          /* TODO Signal error with exception */
+          std::cerr << "Critical error, output file with name: " << (*i)->get_location() << " does not exist!" << std::endl;
+        }
+      }
+    }
 
-    p->generator  = this_object;
-    p->format     = f;
-    p->location   = l;
-    p->identifier = 0;
-    p->timestamp  = time(0);
-    p->checksum.zero_out();
+    manager->add(interface_object.lock());
+    /* TODO Adjust status for outputs that are not produced using the new configuration */
+  }
 
-    append_output(p);
+  /*
+   * Prepends the project store to the argument and returns a native filesystem path
+   *
+   * @param[in] w a directory relative to the project store
+   */
+  inline std::string processor_impl::make_output_path(std::string const& w) const {
+    using namespace boost::filesystem;
+
+    path output_path(manager->get_project_store());
+
+    if (!output_directory.empty()) {
+      output_path /= path(output_directory);
+    }
+
+    return (output_path.native_file_string());
   }
 
   /**
-   * @param[in] o a sip::object object that describes an output object
-   **/
-  inline void processor::append_output(sip::object const& o) {
-    object_descriptor::sptr p = object_descriptor::sptr(new object_descriptor);
-
-    p->generator  = this_object;
-    p->format     = o.get_format();
-    p->location   = o.get_location();
-    p->identifier = o.get_id();
-    p->timestamp  = time(0);
-    p->checksum.zero_out();
-
-    append_output(p);
-  }
-
-  /**
-   * @param[in] p the object descriptor that should be replaced
-   * @param[in] o a sip::object object that describes an output object
-   **/
-  inline void processor::replace_output(object_descriptor::sptr p, sip::object const& o) {
-    p->format     = o.get_format();
-    p->location   = o.get_location();
-    p->identifier = o.get_id();
-    p->timestamp  = time(0);
-    p->checksum.zero_out();
-  }
-
-  inline void processor::process_configuration() {
-    process_configuration(current_monitor->get_configuration());
-  }
-
-  /**
-   * @param[in] ic the input combination that is to be used
-   * @param[in] w the path to the directory in which to run the tool
-   * @param[in] l absolute path to the file that serves as main input
-   * @param[in] h a function object that is invoked when configuration has completed
+   * \param[in] ic the input combination that is to be used
+   * \param[in] l absolute path to the file that serves as main input
+   * \param[in] w the path to the directory in which to run the tool
    *
    * \attention This function is non-blocking
+   * \pre t.get() == this
    **/
-  inline void processor::configure(const tool::input_combination* ic, std::string const& w, const boost::filesystem::path& l, boost::function < void() > h) {
-    configure(ic, w, l);
+  inline void processor_impl::configure(interface_ptr const& t, const tool::input_combination* ic, const boost::filesystem::path& l, std::string const& w) {
+    using namespace boost;
+    using namespace boost::filesystem;
 
-    current_monitor->once_on_completion(h);
-  }
+    assert(ic != 0);
 
-  /**
-   * @param[in] w the path to the directory in which to run the tool
-   *
-   * \pre The existing configuration must contain the input object matching the selected input combination
-   *
-   * \attention This function is non-blocking
-   **/
-  inline void processor::configure(std::string const& w) {
-    global_tool_manager->execute(*tool_descriptor, w, boost::dynamic_pointer_cast < execution::task_monitor, monitor > (current_monitor), true);
-
-    current_monitor->once_on_completion(boost::bind(&processor::process_configuration, this));
-    current_monitor->start_pilot();
-  }
-
-  /**
-   * @param[in] w the path to the directory in which to run the tool
-   * @param[in] h a function object that is invoked when configuration has completed
-   *
-   * \attention This function is non-blocking
-   **/
-  inline void processor::reconfigure(std::string const& w, boost::function < void() > h) {
-    current_monitor->once_on_completion(h);
-
-    output_directory = w;
-
-    reconfigure(w);
-  }
-
-  /**
-   * @param[in] w the path to the directory in which to run the tool
-   *
-   * \pre The existing configuration must contain the input object matching the selected input combination
-   *
-   * \attention This function is non-blocking
-   **/
-  inline void processor::reconfigure(std::string const& w) {
-    assert(selected_input_combination != 0);
-
-    output_directory = w;
+    selected_input_combination = const_cast < tool::input_combination* > (ic);
 
     sip::configuration::sptr c(sip::controller::communicator::new_configuration(*selected_input_combination));
 
+    c->set_output_prefix(str(format("%s%04X") % (basename(find_initial_object()->location)) % manager->get_unique_count()));
+
+    c->add_input(ic->identifier, ic->format, l.string());
+
+    current_monitor->set_configuration(c);
+
+    configure(t, w);
+  }
+
+  /**
+   * \param[in] w the path to the directory relative to the project directory in which to run the tool
+   *
+   * \pre The existing configuration must contain the input object matching the selected input combination
+   * \pre t.get() == this
+   *
+   * \attention This function is non-blocking
+   **/
+  inline void processor_impl::configure(interface_ptr const& t, std::string const& w) {
+    output_directory = w;
+
+    global_tool_manager->execute(*tool_descriptor, make_output_path(w),
+         boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
+
+    current_monitor->start_tool_configuration(t);
+  }
+
+  /**
+   * \param[in] w the path to the directory in which to run the tool
+   *
+   * \pre The existing configuration must contain the input object matching the selected input combination
+   * \pre t.get() == this
+   *
+   * \attention This function is non-blocking
+   **/
+  inline void processor_impl::reconfigure(interface_ptr const& t, std::string const& w) {
+    assert(selected_input_combination != 0);
+
+    sip::configuration::sptr c(sip::controller::communicator::new_configuration(*selected_input_combination));
+
+    c->set_output_prefix(current_monitor->get_configuration()->get_output_prefix());
     c->add_object(current_monitor->get_configuration()->get_object(selected_input_combination->identifier));
 
     current_monitor->set_configuration(c);
 
-    configure(w);
-  }
-
-  inline void processor::process(boost::function < void () > h) {
-    current_monitor->once_on_completion(h);
-
-    process();
-  }
-
-  inline const size_t processor::number_of_inputs() const {
-    return (inputs.size());
-  }
-
-  inline const size_t processor::number_of_outputs() const {
-    return (outputs.size());
+    configure(t, w);
   }
 
   /**
-   * @param[in] b whether or not to check the status first
+   * \param[in] b whether or not to run when there are no input objects defined
+   *
+   * \attention This function is non-blocking
+   *
+   * \pre !is_active() and t.get() == this
    **/
-  inline bool processor::check_output_consistency(bool b) {
-    if (b) {
-      check_status(true);
-    }
+  inline void processor_impl::run(interface_ptr const& t, bool b) {
+    if (b || 0 < inputs.size()) {
+      /* Check that dependent files exist and rebuild if this is not the case */
+      BOOST_FOREACH(input_list::value_type i, inputs) {
+        if (!i->present_in_store(*manager)) {
+          processor::sptr p(i->generator.lock());
 
-    return(current_output_status);
+          if (p.get() != 0) {
+            /* Reschedule process operation after process p has completed */
+            p->run(boost::bind(&processor_impl::run, this, t, false));
+
+            return;
+          }
+          else {
+            /* Should signal an error via the monitor ... */
+            throw (exception::exception(exception::cannot_build, i->location));
+          }
+        }
+      }
+
+      global_tool_manager->execute(*tool_descriptor, make_output_path(output_directory),
+         boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
+    
+      current_monitor->start_tool_operation(t);
+    }
+    else {
+      /* Signal completion to environment via monitor */
+      current_monitor->signal_change(execution::process::aborted);
+    }
   }
 
-  inline void processor::set_output_status(const processor::output_status s) {
-    if (current_output_status != s) {
-      current_output_status = s;
- 
-      current_monitor->on_status_change(current_output_status);
+  /**
+   * \param[in] b whether or not to run when there are no input objects defined
+   *
+   * \attention This function is non-blocking
+   *
+   * \pre !is_active() and t.get() == this
+   **/
+  inline void processor_impl::update(interface_ptr const& t, bool b) {
+    if (b || 0 < inputs.size()) {
+      /* Check that dependent files exist and rebuild if this is not the case */
+      BOOST_FOREACH(input_list::value_type i, inputs) {
+        processor::sptr p(i->generator.lock());
+         
+        if (p.get() != 0) {
+          if (p->check_status(true)) {
+            /* Reschedule process operation after process p has completed */
+            p->update(boost::bind(&processor_impl::update, this, t, false));
+     
+            return;
+          }
+        }
+        else {
+          /* Should signal an error via the monitor ... */
+          throw (exception::exception(exception::cannot_build, i->location));
+        }
+      }
+
+      global_tool_manager->execute(*tool_descriptor, make_output_path(output_directory),
+         boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
+    
+      current_monitor->start_tool_operation(t);
+    }
+    else {
+      /* Signal completion to environment via monitor */
+      current_monitor->signal_change(execution::process::aborted);
     }
   }
 }

@@ -89,6 +89,14 @@ void parse_command_line(int ac, char** av) {
     exit (0);
   }
 
+  if (vm.count("debug")) {
+    gsSetDebugMsg();
+  }
+
+  if (vm.count("verbose")) {
+    gsSetVerboseMsg();
+  }
+
   verbose  = 0 < vm.count("verbose");
   file_name = (0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-";
 }
@@ -198,7 +206,12 @@ int main(int ac, char** av) {
               tc.send_display_layout(display);
             
               /* Signal that the job is finished */
-              tc.send_signal_done();
+              tc.send_signal_done(true);
+
+              /* End execution */
+              tc.send_signal_termination();
+
+              break;
             }
             else {
               tc.send_status_report(sip::report::error, "Failure reading input from file: `" + file_name + "'\n");

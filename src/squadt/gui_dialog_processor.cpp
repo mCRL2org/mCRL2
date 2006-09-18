@@ -8,7 +8,6 @@
 
 #include "gui_main.h"
 #include "gui_dialog_processor.h"
-#include "processor.tcc"
 
 namespace squadt {
   namespace GUI {
@@ -154,9 +153,15 @@ namespace squadt {
       }
 
       void processor_details::on_tool_selector_item_select(wxTreeEvent& e) {
-        if (tool_selector->GetItemParent(e.GetItem()) == tool_selector->GetRootItem() || !tools_selectable) {
+        if (tool_selector->GetItemParent(e.GetItem()) == tool_selector->GetRootItem() || (!tools_selectable && (e.GetItem() != selected_tool))) {
           e.Veto();
         }
+      }
+
+      void processor_details::on_tool_selector_item_collapsed(wxTreeEvent& e) {
+        tool_selector->EnsureVisible(selected_tool);
+        tool_selector->SelectItem(selected_tool);
+        tool_selector->ScrollTo(selected_tool);
       }
 
       void processor_details::select_tool(sip::tool::capabilities::input_combination const* combination, std::string const& name) {
@@ -187,6 +192,11 @@ namespace squadt {
                   /* Found tool */
                   tool_selector->SelectItem(k);
                   tool_selector->EnsureVisible(k);
+                  tool_selector->ScrollTo(k);
+
+                  selected_tool = k;
+
+                  Connect(wxEVT_COMMAND_TREE_ITEM_COLLAPSED, wxTreeEventHandler(processor_details::on_tool_selector_item_collapsed), 0, this);
 
                   break;
                 }

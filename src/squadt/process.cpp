@@ -58,14 +58,11 @@ namespace squadt {
         waitpid(identifier, &exit_code, 0);
 
         current_status = (WIFEXITED(exit_code)) ? completed : aborted;
-
-        signal_status();
-
-        signal_termination(this);
       }
-      else {
-        signal_status();
-      }
+
+      signal_status();
+
+      signal_termination(this);
     }
 
     /** Signals the current state to the monitor */
@@ -81,8 +78,7 @@ namespace squadt {
      * @param c the command to execute
      **/
     void process::execute(const command& c) {
-      boost::shared_ptr < boost::thread >(new boost::thread(
-                              boost::bind(&process::operator(), this, c)));
+      boost::thread t(boost::bind(&process::operator(), this, c));
     }
 
     void process::wait() const {

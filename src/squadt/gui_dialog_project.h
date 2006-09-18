@@ -49,23 +49,14 @@ namespace squadt {
 
         private:
 
-          /** \brief Control to select a directory that contains the new project store */
-          wxGenericDirCtrl* directory_selector;
-
           /** \brief Text field that contains the name of the new project */
-          wxTextCtrl*       name;
+          wxTextCtrl*       location;
 
           /** \brief Text field that contains a description for the project */
           wxTextCtrl*       description;
 
           /** \brief Shows the first screen of widgets (before okay is clicked) */
           wxBoxSizer*       screen0;
-
-          /** \brief Shows the second screen of widgets (after okay is first clicked) */
-          wxBoxSizer*       screen1;
-
-          /** \brief Shows a warning that the currently selected directory is a project store */
-          wxBoxSizer*       already_project_directory;
 
           /** \brief Shows a message that a project with the same name was found and a button to open it */
           wxBoxSizer*       open_project_instead;
@@ -77,12 +68,6 @@ namespace squadt {
 
           /** \brief Handler for the event that one of the buttons is clicked */
           void on_button_clicked(wxCommandEvent&);
-
-          /** \brief Handler for the event that one of the buttons is clicked (alternative) */
-          void on_button_clicked1(wxCommandEvent&);
-
-          /** \brief Handler for the event that a directory is selected */
-          void on_selection_changed(wxTreeEvent&);
 
           /** \brief Handler for the event that the name or description are updated */
           void on_text_updated(wxCommandEvent&);

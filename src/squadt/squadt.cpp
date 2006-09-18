@@ -5,13 +5,18 @@
 
 #define SQUADT_IMPORT_STATIC_DEFINITIONS
 
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
+
 #include "exception.h"
 #include "tool_manager.h"
 #include "settings_manager.tcc"
-#include "core.h"
+#include "build_system.h"
 
 #include "gui_splash.h"
 #include "gui_main.h"
+
+#include <mcrl2_revision.h>
 
 #include <wx/wx.h>
 #include <wx/filename.h>
@@ -57,21 +62,36 @@ class initialisation : public wxThread {
     }
 };
 
-bool parse_command_line(int argc, wxChar** argv) {
+bool parse_command_line(int argc, wxChar** argv, boost::function < void (squadt::GUI::main*) >& action) {
   bool c = 0 < argc;
 
   if (c) {
     wxCmdLineParser parser(argc, argv); 
  
+    parser.AddSwitch(wxT("c"),wxT("create"),wxT(""));
     parser.AddSwitch(wxT("d"),wxT("debug"),wxT(""));
     parser.AddSwitch(wxT("h"),wxT("help"),wxT(""));
     parser.AddSwitch(wxT("q"),wxT("quiet"),wxT(""));
     parser.AddSwitch(wxT("v"),wxT("verbose"),wxT(""));
     parser.AddSwitch(wxT(""),wxT("version"),wxT(""));
+    parser.AddParam(wxEmptyString,wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
  
     c = parser.Parse(false) == 0;
  
     if (c) {
+      if (parser.Found(wxT("c"))) {
+        if (0 < parser.GetParamCount()) {
+          action = boost::bind(&squadt::GUI::main::project_new, _1, std::string(parser.GetParam(0).fn_str()), std::string());
+        }
+        else {
+          std::cerr << "Fatal: found -c, or --create option so expected path argument\n" << parser.GetParam(0).fn_str();
+
+          return (false);
+        }
+      }
+      else if (0 < parser.GetParamCount()) {
+        action = boost::bind(&squadt::GUI::main::project_open, _1, std::string(parser.GetParam(0).fn_str()));
+      }
       if (parser.Found(wxT("d"))) {
         sip::controller::communicator::get_standard_error_logger()->set_filter_level(3);
       }
@@ -84,11 +104,13 @@ bool parse_command_line(int argc, wxChar** argv) {
                   << "of other connected tools.\n"
                   << "\n"
                   << "Mandatory arguments to long options are mandatory for short options too.\n"
+                  << "  -c, --create          create new project in PATH\n"
                   << "  -d, --debug           produce lots of debug output\n"
                   << "  -h, --help            display this help message\n"
                   << "  -q, --quiet           represses unnecessary output\n"
                   << "  -v, --verbose         display additional information during operation\n"
-                  << "      --version         display version information\n";
+                  << "      --version         display version information\n"
+                  << "\n";
  
         return (false);
       }
@@ -96,7 +118,7 @@ bool parse_command_line(int argc, wxChar** argv) {
         sip::controller::communicator::get_standard_error_logger()->set_filter_level(1);
       }
       if (parser.Found(wxT("version"))) {
-        std::cerr << program_name << " " << program_version << std::endl;
+        std::cerr << program_name << " " << program_version << " (revision " << REVISION << ")" << std::endl;
  
         return (false);
       }
@@ -125,7 +147,9 @@ bool Squadt::OnInit() {
   using namespace squadt;
   using namespace squadt::GUI;
 
-  bool c = parse_command_line(argc, argv);
+  boost::function < void (squadt::GUI::main*) > action;
+
+  bool c = parse_command_line(argc, argv, action);
 
   if (c) {
     global_settings_manager = settings_manager::ptr(new settings_manager(wxFileName::GetHomeDir().fn_str()));
@@ -159,6 +183,10 @@ bool Squadt::OnInit() {
  
     /* Initialise main application window */
     SetTopWindow(new squadt::GUI::main());
+
+    if (action) {
+      action(static_cast < squadt::GUI::main* > (GetTopWindow()));
+    }
   }
 
   SetUseBestVisual(true);

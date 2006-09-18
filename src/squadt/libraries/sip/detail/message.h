@@ -90,6 +90,9 @@ namespace sip {
         /** \brief Returns the content without formatting */
         inline std::string to_string() const;
 
+        /** \brief Whether the message has content or not */
+        inline bool is_empty() const;
+
         /** \brief Generates an XML text string for the message */
         inline void set_content(const std::string&);
 
@@ -183,6 +186,11 @@ namespace sip {
     template < class M, M D, M A >
     inline std::string message< M, D, A >::to_string() const {
       return (content);
+    }
+
+    template < class M, M D, M A >
+    inline bool message< M, D, A >::is_empty() const {
+      return (content.empty());
     }
 
     /**

@@ -88,8 +88,6 @@ bool XSim::OnInit()
       else {
         tc.send_status_report(sip::report::error, "Invalid input combination!");
 
-        tc.send_signal_done();
-
         tc.await_message(sip::message_request_termination);
       }
     }

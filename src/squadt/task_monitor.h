@@ -35,20 +35,17 @@ namespace squadt {
       protected:
  
         /** \brief Waits until a connection has been established with the running process */
-        void await_connection();
+        void await_connection(unsigned int const&);
 
         /** \brief Waits until a connection has been established with the running process */
-        void await_completion();
+        void await_connection();
 
         /** \brief Signals that a new connection has been established */
         void signal_connection(sip::message::end_point);
 
         /** \brief Checks the process status and removes */
-        void signal_change(const execution::process::status);
+        virtual void signal_change(const execution::process::status);
 
-        /** \brief Unblocks waiters and requests a tool to prepare termination */
-        void finish();
- 
       private:
  
         /** \brief Associates a process with this listener */
@@ -80,14 +77,20 @@ namespace squadt {
         /** \brief Executes a handler function once on tool completion */
         void once_on_completion(boost::function < void () >);
 
+        /** \brief Executes a handler function once status change */
+        void on_status_change(boost::function < void () >);
+
         /** \brief Whether there still exists a connection with the tool */
         bool is_connected() const;
 
         /** \brief Whether the tool is still busy performing its task */
         bool is_busy() const;
 
-        /** \brief Disconnects from a running process (or make sure not connection exists) */
+        /** \brief Disconnects from a running process (or make sure no connection exists) */
         void disconnect(execution::process*);
+
+        /** \brief Unblocks waiters and requests a tool to prepare termination */
+        void finish();
 
         /** \brief Destructor */
         virtual ~task_monitor();

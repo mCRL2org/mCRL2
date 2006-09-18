@@ -39,9 +39,6 @@ namespace squadt {
         /** \brief handler that is invoked when a process is terminated */
         inline void handle_process_termination(process* p, boost::weak_ptr < executor_impl >);
   
-        /** \brief handler that is invoked when a process is terminated */
-        inline void handle_process_termination(process* p, task_monitor::sptr& s, boost::weak_ptr < executor_impl >);
-
         /** \brief Start a new process */
         inline void start_process(const command&, boost::shared_ptr < executor_impl >&);
     
@@ -108,7 +105,7 @@ namespace squadt {
      * @param[in] l reference to a process listener
      **/
     inline void executor_impl::start_process(const command& c, task_monitor::sptr& l, boost::shared_ptr < executor_impl >& w) {
-      process::ptr p(new process(boost::bind(&executor_impl::handle_process_termination, this, _1, l, w), l));
+      process::ptr p(new process(boost::bind(&executor_impl::handle_process_termination, this, _1, w), l));
 
       if (l.get() != 0) {
         l->attach_process(p);
@@ -161,21 +158,7 @@ namespace squadt {
      * @param p a pointer to a process object
      **/
     inline void executor_impl::handle_process_termination(process* p, boost::weak_ptr < executor_impl > w) {
-      boost::shared_ptr < executor_impl > g = w.lock();
-
-      if (g.get() != 0) {
-        remove(p);
- 
-        start_delayed(g);
-      }
-    }
-
-    /**
-     * @param p a pointer to a process object
-     * @param l a pointer to a listener for process state changes
-     **/
-    inline void executor_impl::handle_process_termination(process* p, task_monitor::sptr& l, boost::weak_ptr < executor_impl > w) {
-      boost::shared_ptr < executor_impl > g = w.lock();
+      boost::shared_ptr < executor_impl > g(w.lock());
 
       if (g.get() != 0) {
         remove(p);

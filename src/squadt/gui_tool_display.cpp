@@ -1,7 +1,6 @@
 #include <deque>
 #include <utility>
 
-#include "processor.tcc"
 #include "gui_project.h"
 #include "gui_tool_display.h"
 
@@ -595,7 +594,7 @@ namespace squadt {
      **/
     tool_display::tool_display(wxWindow* p, GUI::project* c, processor::monitor::sptr& s) :
                                 wxPanel(p, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER),
-                                context(c), event_handler(s), content(0), log(0) {
+                                context(c), event_handler(s), current_layout(new sip::layout::tool_display), content(0), log(0) {
 
       build();
 
@@ -661,18 +660,21 @@ namespace squadt {
         }
       }
       else {
-        /* End tool execution, if it was still running */
-        event_handler.get_monitor()->terminate_process();
-
         remove();
       }
     }
 
     void tool_display::remove() {
+      /* Ignore all scheduled updates to the tool display */
+      current_layout.reset();
+
       wxSizer* s = GetParent()->GetSizer();
       
       s->Detach(this);
       s->Layout();
+
+      event_handler.get_monitor()->reset_display_layout_handler();
+      event_handler.get_monitor()->reset_status_message_handler();
 
       /* Toggle scrollbar availability on demand */
       wxSizeEvent size_event(GetParent()->GetSize(), GetParent()->GetId());
@@ -681,105 +683,120 @@ namespace squadt {
 
       GetParent()->GetParent()->ProcessEvent(size_event);
 
+      /* End tool execution, if it was still running */
+      event_handler.get_monitor()->finish();
+
       Destroy();
     }
 
     /**
      * @param[in] l the new layout specification
      **/
-    void tool_display::instantiate(sip::layout::tool_display::sptr l) {
+    void tool_display::instantiate(boost::weak_ptr < sip::layout::tool_display > w, sip::layout::tool_display::sptr l) {
       using namespace detail;
 
-      if (content != 0) {
-        /* Delete controls */
-        content->Clear(true);
+      boost::shared_ptr < sip::layout::tool_display > g(w.lock());
 
-        GetSizer()->Detach(content);
+      if (g.get() != 0) {
+        if (content != 0) {
+          /* Delete controls */
+          content->Clear(true);
 
-        delete content;
+          GetSizer()->Detach(content);
+
+          delete content;
+        }
+
+        current_layout = l;
+
+        std::auto_ptr < wxSizer > root(new wxBoxSizer(wxVERTICAL));
+
+        tool_display_mediator m(this, mediator::wrapper_aptr(new tool_display_mediator::wrapper(root.get())), &event_handler);
+
+        try {
+          mediator::wrapper_aptr new_layout(current_layout->instantiate(&m));
+
+          if (new_layout.get() != 0) {
+            content = static_cast < tool_display_mediator::wrapper* > (new_layout.get())->release_sizer();
+
+            GetSizer()->Insert(1, content, 1, wxALL|wxALIGN_LEFT, 2);
+
+            content->Layout();
+
+            Show(true);
+          }
+          else {
+            content = 0;
+          }
+
+          GetParent()->Layout();
+
+          /* Toggle scrollbar availability on demand */
+          wxSizeEvent size_event(GetParent()->GetSize(), GetParent()->GetId());
+
+          size_event.SetEventObject(GetParent());
+
+          GetParent()->GetParent()->ProcessEvent(size_event);
+        }
+        catch (...) {
+          /* Consider every exception a failure to correctly read the layout, and bail */
+          std::cerr << "fatal: layout translation of layout specification failed!";
+
+          remove();
+        }
       }
+    }
 
-      current_layout = l;
+    /**
+     * @param[in] l the layout elements that have changed
+     **/
+    void tool_display::update(boost::weak_ptr < sip::layout::tool_display > w, std::vector < sip::layout::element const* > l) {
+      using namespace detail;
 
-      std::auto_ptr < wxSizer > root(new wxBoxSizer(wxVERTICAL));
+      boost::shared_ptr < sip::layout::tool_display > g(w.lock());
 
-      tool_display_mediator m(this, mediator::wrapper_aptr(new tool_display_mediator::wrapper(root.get())), &event_handler);
-      
-      try {
-        mediator::wrapper_aptr new_layout(current_layout->instantiate(&m));
-                                
-        if (new_layout.get() != 0) {
-          content = static_cast < tool_display_mediator::wrapper* > (new_layout.get())->release_sizer();
+      if (g.get() != 0) {
+        tool_display_mediator m(this, &event_handler);
 
-          GetSizer()->Insert(1, content, 1, wxALL|wxALIGN_LEFT, 2);
+        BOOST_FOREACH(sip::layout::element const* i, l) {
+          event_handler.update(&m, i);
+        }
 
-          content->Layout();
+        GetParent()->Layout();
+      }
+    }
 
-          Show(true);
+    /**
+     * @param[in] l the layout elements that have changed
+     **/
+    void tool_display::update_log(boost::weak_ptr < sip::layout::tool_display > w, sip::report::sptr l) {
+      boost::shared_ptr < sip::layout::tool_display > g(w.lock());
+
+      if (g.get() != 0) {
+        wxString stamp = wxDateTime::Now().Format(wxT("%b %e %H:%M:%S "));
+
+        if (log == 0) {
+          wxSizer* sizer = GetSizer();
+
+          log = new wxTextCtrl(this, wxID_ANY, stamp + wxString(l->get_description().c_str(), wxConvLocal), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY);
+          log->SetSize(-1, 40);
+
+          sizer->Add(log, 0, wxALL|wxEXPAND|wxALIGN_CENTER, 2);
+
+          GetParent()->Layout();
+
+          /* Toggle scrollbar availability on demand */
+          wxSizeEvent size_event(GetParent()->GetSize(), GetParent()->GetId());
+
+          size_event.SetEventObject(GetParent());
+
+          GetParent()->GetParent()->ProcessEvent(size_event);
         }
         else {
-          content = 0;
+          log->AppendText(stamp + wxString(l->get_description().c_str(), wxConvLocal));
+
+          log->ShowPosition(log->GetLastPosition());
         }
-
-        GetParent()->Layout();
-
-        /* Toggle scrollbar availability on demand */
-        wxSizeEvent size_event(GetParent()->GetSize(), GetParent()->GetId());
-
-        size_event.SetEventObject(GetParent());
-
-        GetParent()->GetParent()->ProcessEvent(size_event);
-      }
-      catch (...) {
-        /* Consider every exception a failure to correctly read the layout, and bail */
-        std::cerr << "fatal: layout translation of layout specification failed!";
-
-        remove();
-      }
-    }
-
-    /**
-     * @param[in] l the layout elements that have changed
-     **/
-    void tool_display::update(std::vector < sip::layout::element const* > l) {
-      using namespace detail;
-
-      tool_display_mediator m(this, &event_handler);
-
-      BOOST_FOREACH(sip::layout::element const* i, l) {
-        event_handler.update(&m, i);
-      }
-
-      GetParent()->Layout();
-    }
-
-    /**
-     * @param[in] l the layout elements that have changed
-     **/
-    void tool_display::update_log(sip::report::sptr l) {
-      wxString stamp = wxDateTime::Now().Format(wxT("%b %e %H:%M:%S "));
-
-      if (log == 0) {
-        wxSizer* sizer = GetSizer();
-
-        log = new wxTextCtrl(this, wxID_ANY, stamp + wxString(l->get_description().c_str(), wxConvLocal), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY);
-        log->SetSize(-1, 40);
-
-        sizer->Add(log, 0, wxALL|wxEXPAND|wxALIGN_CENTER, 2);
-
-        GetParent()->Layout();
-
-        /* Toggle scrollbar availability on demand */
-        wxSizeEvent size_event(GetParent()->GetSize(), GetParent()->GetId());
-
-        size_event.SetEventObject(GetParent());
-
-        GetParent()->GetParent()->ProcessEvent(size_event);
-      }
-      else {
-        log->AppendText(stamp + wxString(l->get_description().c_str(), wxConvLocal));
-
-        log->ShowPosition(log->GetLastPosition());
       }
     }
 
@@ -787,7 +804,7 @@ namespace squadt {
      * @param[in] l the layout specification
      **/
     void tool_display::schedule_log_update(sip::report::sptr l) {
-      context->gui_builder.schedule_update(boost::bind(&tool_display::update_log, this, l));
+      context->gui_builder.schedule_update(boost::bind(&tool_display::update_log, this, current_layout, l));
     }
 
     /**
@@ -798,11 +815,11 @@ namespace squadt {
       event_handler.clear();
       event_handler.get_monitor()->set_display_data_handler(l, boost::bind(&GUI::tool_display::schedule_layout_update, this, _1));
 
-      context->gui_builder.schedule_update(boost::bind(&tool_display::instantiate, this, l));
+      context->gui_builder.schedule_update(boost::bind(&tool_display::instantiate, this, current_layout, l));
     }
 
     void tool_display::schedule_layout_update(std::vector < sip::layout::element const* > const& l) {
-      context->gui_builder.schedule_update(boost::bind(&tool_display::update, this, l));
+      context->gui_builder.schedule_update(boost::bind(&tool_display::update, this, current_layout, l));
     }
   }
 }

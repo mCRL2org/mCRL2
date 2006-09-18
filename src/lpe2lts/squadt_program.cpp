@@ -98,10 +98,11 @@ bool squadt_program::run(int argc, char **argv)
           {
             sip::configuration &conf = tc.get_configuration();
             execute(conf);
-            tc.send_signal_done();
+            tc.send_signal_done(true);
             break;
           }
         case sip::message_request_termination:
+          tc.send_signal_termination();
           notdone = false;
           break;
         default:

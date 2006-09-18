@@ -12,16 +12,11 @@ namespace squadt {
     wxIcon* gui_icon;
 
     /* Images */
-    #include "pixmaps/stock_new.xpm"
-    #include "pixmaps/stock_new_red.xpm"
-    #include "pixmaps/stock_new_green.xpm"
-    #include "pixmaps/stock_new_blue.xpm"
-    #include "pixmaps/stock_open.xpm"
-    #include "pixmaps/stock_save.xpm"
-    #include "pixmaps/stock_delete.xpm"
-    #include "pixmaps/stock_refresh.xpm"
-    #include "pixmaps/stock_ok.xpm"
-    #include "pixmaps/stock_cancel.xpm"
+    #include "pixmaps/file_original.xpm"
+    #include "pixmaps/file_derived_nonexistent.xpm"
+    #include "pixmaps/file_derived_up_to_date.xpm"
+    #include "pixmaps/file_derived_out_of_date.xpm"
+    #include "pixmaps/file_generation_in_progress.xpm"
     #include "pixmaps/stock_new_small.xpm"
 
     #include "pixmaps/logo_icon.xpm"
@@ -30,13 +25,11 @@ namespace squadt {
     wxImageList* load_main_icons() {
       wxImageList* list = new wxImageList(24, 24, false, 7);
 
-      list->Add(wxIcon(stock_new_xpm));
-      list->Add(wxIcon(stock_open_xpm));
-      list->Add(wxIcon(stock_save_xpm));
-      list->Add(wxIcon(stock_delete_xpm));
-      list->Add(wxIcon(stock_refresh_xpm));
-      list->Add(wxIcon(stock_ok_xpm));
-      list->Add(wxIcon(stock_cancel_xpm));
+      list->Add(wxIcon(file_original_xpm));
+      list->Add(wxIcon(file_derived_nonexistent_xpm));
+      list->Add(wxIcon(file_derived_out_of_date_xpm));
+      list->Add(wxIcon(file_derived_up_to_date_xpm));
+      list->Add(wxIcon(file_generation_in_progress_xpm));
 
       gui_icon = new wxIcon(logo_icon_xpm);
 
@@ -47,10 +40,11 @@ namespace squadt {
     wxImageList* load_format_icons() {
       wxImageList* list = new wxImageList(24, 24, false, 4);
 
-      list->Add(wxIcon(stock_new_green_xpm));
-      list->Add(wxIcon(stock_new_blue_xpm));
-      list->Add(wxIcon(stock_new_red_xpm));
-      list->Add(wxIcon(stock_new_xpm));
+      list->Add(wxIcon(file_original_xpm));
+      list->Add(wxIcon(file_derived_nonexistent_xpm));
+      list->Add(wxIcon(file_derived_out_of_date_xpm));
+      list->Add(wxIcon(file_derived_up_to_date_xpm));
+      list->Add(wxIcon(file_generation_in_progress_xpm));
 
       return(list);
     }

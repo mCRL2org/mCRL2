@@ -37,7 +37,7 @@ namespace squadt {
       extractor(tool&);
 
       /** \brief Starts the extraction */
-      void start();
+      void extract();
   };
 }
 

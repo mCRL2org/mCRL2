@@ -12,11 +12,9 @@
 #include "sip/detail/controller.tcc"
 #include "executor.h"
 #include "tool_manager.h"
-#include "processor.tcc"
 #include "task_monitor.h"
 #include "extractor.h"
 #include "settings_manager.tcc"
-#include "core.h"
 
 #include "setup.h"
 
@@ -34,7 +32,7 @@ namespace squadt {
 
   const sip::tool::capabilities::ptr tool::no_capabilities(new sip::tool::capabilities());
 
-  char const* tool_manager::default_tools[] = {"lpeconstelm", "lpeinfo", "lpeparelm", "lpe2lts", "ltsconvert", "ltsinfo", "ltsgraph", "mcrl22lpe", "xsim", 0};
+  char const* tool_manager::default_tools[] = {"lpeconstelm", "lpeinfo", "lpeparelm", "lpeuntime", "lpe2lts", "ltsconvert", "ltsinfo", "ltsgraph", "mcrl22lpe", "xsim", 0};
 
   tool_manager::tool_manager() : sip::controller::communicator(), free_identifier(0) {
     /* Listen for incoming socket connections on the loopback interface with the default port */
@@ -200,14 +198,12 @@ namespace squadt {
     execute(t, boost::filesystem::current_path().native_file_string(),
                boost::dynamic_pointer_cast < execution::task_monitor > (e), false);
 
+    /* Wait until the process has been identified */
     execution::process::ptr p(e->get_process(true));
 
-    /* Wait until the process has been identified */
     if (p.get() != 0) {
       /* Start extracting */
-      e->start();
-
-      e->request_termination();
+      e->extract();
 
       local_executor.terminate(p);
 

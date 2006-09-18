@@ -7,7 +7,10 @@
 #include <wx/sizer.h>
 #include <wx/statline.h>
 #include <wx/msgdlg.h>
+#include <wx/dirdlg.h>
 #include <wx/textctrl.h>
+
+#define cmID_BROWSE (wxID_HIGHEST + 1)
 
 namespace squadt {
   namespace GUI {
@@ -57,7 +60,7 @@ namespace squadt {
       /**
        * @param p the parent window
        **/
-      new_project::new_project(wxWindow* p) : dialog::project(p, wxT("Project name and description")) {
+      new_project::new_project(wxWindow* p) : dialog::project(p, wxT("Specify project store location")) {
         build();
 
         Connect(wxEVT_COMMAND_TEXT_UPDATED, wxTextEventHandler(dialog::new_project::on_text_updated));
@@ -70,144 +73,76 @@ namespace squadt {
 
         /* Prepare sizers */
         screen0                   = new wxBoxSizer(wxVERTICAL);
-        screen1                   = new wxBoxSizer(wxVERTICAL);
-        already_project_directory = new wxBoxSizer(wxVERTICAL);
         open_project_instead      = new wxBoxSizer(wxVERTICAL);
 
-        /* Create widgets for screen0 */
-        wxStaticText* name_text = new wxStaticText(main_panel, wxID_ANY,
-                        wxT("Select a name for this project, the name will be used to name "
-                            "the directory under which all project related files will be stored."));
-
-        name_text->Wrap(GetSize().GetWidth() - 40);
-
-        wxStaticText* description_text = new wxStaticText(main_panel, wxID_ANY,
-                        wxT("An optional description:"));
-
-        description_text->Wrap(GetSize().GetWidth() - 40);
-
-        name               = new wxTextCtrl(main_panel, wxID_ANY, wxT(""));
-        description        = new wxTextCtrl(main_panel, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
-
-        /* Add widgets to screen0 */
-        screen0->Add(name_text);
-        screen0->AddSpacer(10);
-        screen0->Add(name, 0, wxEXPAND);
-        screen0->AddSpacer(20);
-        screen0->Add(description_text);
-        screen0->AddSpacer(10);
-        screen0->Add(description, 0, wxEXPAND);
-
-        /* Add widgets for warning on screen1 */
-        wxStaticText* already_project_directory_text = new wxStaticText(main_panel, wxID_ANY,
-                        wxT("The selected directory is recognised as another project store; we "
-                        "strongly recommend against nesting project directories."));
-
-        already_project_directory_text->Wrap(GetSize().GetWidth() - 40);
-        already_project_directory->Add(already_project_directory_text);
-
-        /* Add widgets for warning on screen1 */
+        /* Add widgets for warning on screen0 */
         wxStaticText* open_project_instead_text = new wxStaticText(main_panel, wxID_ANY,
-                        wxT("The selected directory already contains a project store for a "
-                        "project with the same name. "));
+                        wxT("The selected directory seems to already contain a project store press button to open"));
 
         open_project_instead_text->Wrap(GetSize().GetWidth() - 40);
 
         wxButton*     open_instead_button = new wxButton(main_panel, wxID_OPEN);
+        wxButton*     browse_button       = new wxButton(main_panel, cmID_BROWSE, wxT("Browse"));
 
         open_project_instead->Add(open_project_instead_text);
         open_project_instead->Add(open_instead_button, 0, wxALIGN_RIGHT);
 
-        /* Create widgets for screen1 */
+        /* Create widgets for screen0 */
         wxStaticText* directory_text = new wxStaticText(main_panel, wxID_ANY,
-                        wxT("Select the directory in which a new directory for the project files"
-                        " is to be created."));
+                        wxT("Select a directory where the files for the new project can be stored."));
+
+        location = new wxTextCtrl(main_panel, wxID_ANY, default_directory);
 
         directory_text->Wrap(GetSize().GetWidth() - 40);
 
-        directory_selector = new wxGenericDirCtrl(main_panel, wxID_ANY, default_directory,
-                        wxDefaultPosition, wxDefaultSize, wxDIRCTRL_3D_INTERNAL|wxSUNKEN_BORDER|wxDIRCTRL_DIR_ONLY);
+        /* Add widgets to screen0 */
+        screen0->Add(directory_text);
+        screen0->AddSpacer(10);
+        screen0->Add(location, 0, wxEXPAND);
+        screen0->AddSpacer(10);
+        screen0->Add(browse_button, 0, wxALIGN_RIGHT);
+        screen0->AddSpacer(20);
+        screen0->Add(open_project_instead);
 
-        /* Add widgets to screen1 */
-        screen1->Add(directory_text);
-        screen1->AddSpacer(10);
-        screen1->Add(directory_selector, 1, wxEXPAND|wxALIGN_CENTER);
-        screen1->AddSpacer(10);
-        screen1->Add(already_project_directory);
-        screen1->Add(open_project_instead);
+        screen0->Show(open_project_instead, false);
          
         /* Add sizers to the main sizer */
         s->AddSpacer(10);
         s->Add(screen0, 0, wxEXPAND|wxLEFT|wxRIGHT, 20);
-        s->Add(screen1, 0, wxEXPAND|wxLEFT|wxRIGHT, 20);
-
-        /* Hide everything in screen1 */
-        s->Show(screen1, false, true);
 
         main_panel->SetSizer(s);
 
         Layout();
-
-        /* Trigger event to set the buttons right */
-        on_text_updated(e);
       }
 
       /**
        * @param[in] e the event object passed by wxWidgets
        **/
       void new_project::on_button_clicked(wxCommandEvent& e) {
-        if (e.GetId() == wxID_CANCEL) {
-          EndModal(0);
-        }
-        else {
-          wxTreeEvent e;
-          wxSizer*    s = main_panel->GetSizer();
-         
-          s->Show(screen0, false, true);
-          s->Show(screen1, true, true);
-
-          SetTitle(wxT("Project storage"));
-
-          Connect(wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler(dialog::new_project::on_selection_changed));
-          Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(dialog::new_project::on_button_clicked1));
-
-          s->Layout();
-
-          Refresh();
-
-          /* Trigger event to set the widget enabledness/visibility right */
-          on_selection_changed(e);
-        }
-      }
-
-      /**
-       * @param[in] e the event object passed by wxWidgets
-       **/
-      void new_project::on_button_clicked1(wxCommandEvent& e) {
         switch (e.GetId()) {
           case wxID_CANCEL:
             EndModal(0);
             break;
+          case cmID_BROWSE: {
+            wxDirDialog dialog(0, wxT("Select a directory"), default_directory);
+           
+            if (dialog.ShowModal() == wxID_OK) {
+              location->SetValue(dialog.GetPath());
+            }
+            break;
+          }
           case wxID_OPEN:
-            directory_selector->SetPath(
-                            wxFileName(directory_selector->GetPath(), name->GetValue()).GetFullPath());
-
             EndModal(2);
             break;
           default: /* wxID_OK */
-            if (wxFileName(directory_selector->GetPath(), name->GetValue()).DirExists()) {
+            if (wxFileName(location->GetValue()).DirExists()) {
               if (wxMessageDialog(0, wxT("Convert the directory to project store and import any other files it contains."),
-                                    wxT("Warning: directory already exists"), wxOK|wxCANCEL).ShowModal() == wxID_OK) {
+                                    wxT("Warning: directory exists"), wxOK|wxCANCEL).ShowModal() == wxID_OK) {
                 EndModal(1);
               }
             }
-            else if (wxFileName(directory_selector->GetPath(), name->GetValue()).FileExists()) {
-              wxString message = wxT("Unable to create project store, a file `");
-
-              message.Append(name->GetValue());
-              message.Append(wxT("' already exists in the selected directory."));
-
-              wxMessageDialog(0, message,wxT("Error"), wxOK).ShowModal();
+            else if (wxFileName(location->GetValue()).FileExists()) {
+              wxMessageDialog(0, wxT("Unable to create project store, a file is in the way.`"),wxT("Error"), wxOK).ShowModal();
             }
             else {
               EndModal(1);
@@ -217,47 +152,38 @@ namespace squadt {
       }
 
       void new_project::on_text_updated(wxCommandEvent&) {
-        button_accept->Enable(!name->GetValue().IsEmpty());
-      }
-
-      void new_project::on_selection_changed(wxTreeEvent&) {
-        screen1->Show(open_project_instead, false);
-        screen1->Show(already_project_directory, false);
+        screen0->Show(open_project_instead, false);
 
         button_accept->Enable(false);
 
-        if (dialog::project::is_project_directory(directory_selector->GetPath())) {
-          /* Directory seems to be a project store */
-          screen1->Show(already_project_directory, true);
-        }
-        else {
-          wxFileName f(directory_selector->GetPath(), name->GetValue());
-
-          if (dialog::project::is_project_directory(f.GetFullPath())) {
-            /* Directory contains a directory with the name of this project */
-            screen1->Show(open_project_instead, true);
+        if (!location->GetValue().IsEmpty()) {
+          if (wxFileName(location->GetValue()).FileExists()) {
+            wxMessageDialog(0, wxT("Unable to create project store, a file is in the way.`"),wxT("Error"), wxOK).ShowModal();
           }
-          else {
+          else if (wxFileName(location->GetValue()).DirExists() && dialog::project::is_project_directory(location->GetValue())) {
+            /* Directory contains a directory with the name of this project */
+            screen0->Show(open_project_instead, true);
+          } else {
             button_accept->Enable(true);
           }
         }
-
-        screen1->Layout();
+         
+        screen0->Layout();
       }
 
       /** \brief Gets the name of the project */
       std::string new_project::get_name() const {
-        return (static_cast < const char* > (name->GetValue().fn_str()));
+        return (static_cast < const char* > (wxFileName(location->GetValue()).GetDirs().Last().fn_str()));
       }
 
       /** \brief Gets the directory reserved from project files */
       std::string new_project::get_location() const {
-        return (static_cast < const char* > (wxFileName(directory_selector->GetPath(), name->GetValue()).GetFullPath().fn_str()));
+        return (static_cast < const char* > (wxFileName(location->GetValue()).GetFullPath().fn_str()));
       }
 
       /** \brief Gets the name of the project */
       std::string new_project::get_description() const {
-        return (static_cast < const char* > (description->GetValue().fn_str()));
+        return ("");
       }
 
       new_project::~new_project() {

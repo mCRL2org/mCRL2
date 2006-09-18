@@ -1,5 +1,5 @@
 /* XPM */
-static char * stock_new_green_xpm[] = {
+static char * file_derived_up_to_date_xpm[] = {
 "24 24 104 2",
 "  	c None",
 ". 	c #008000",

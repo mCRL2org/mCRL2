@@ -56,7 +56,7 @@ namespace squadt {
           private:
 
             /** \brief Updates the GUI to reflect the change in state */
-            inline void update_state(processor::output_status);
+            inline void update_state(processor::object_descriptor::t_status);
 
           public:
 
@@ -145,17 +145,14 @@ namespace squadt {
         /** \brief Add new processor outputs to the object view */
         void process_configuration(wxTreeItemId, processor::sptr);
 
-        /** \brief Add new processor outputs to the object view */
-        void process_reconfiguration(wxTreeItemId, processor::sptr);
-
         /** \brief Adds the outputs produced by a processor as objects to the object view */
-        void add_outputs_as_objects(wxTreeItemId, processor::sptr);
+        bool add_outputs_as_objects(wxTreeItemId, processor::sptr);
 
         /** \brief Adds a single object to the object view */
         void add_to_object_view(wxTreeItemId& s, processor::object_descriptor::sptr);
 
         /** \brief Add a new tool display to the process_display_view */
-        GUI::tool_display* add_tool_display(processor::monitor::sptr, std::string const&);
+        GUI::tool_display* add_tool_display(boost::shared_ptr < processor::monitor >, std::string const&);
 
         /** \brief Helper function that extracts the information out of a processor and calls add_tool_display() */
         void prepare_tool_display(processor* p);
@@ -164,21 +161,24 @@ namespace squadt {
         void resolve_conflict(wxTreeItemId s, processor::object_descriptor::sptr e, processor::object_descriptor::sptr n);
 
         /** \brief Reports a conflict by presenting a non-interactive dialog window with details */
-        void report_conflict(wxString s);
+        void report_conflict(wxString const& s);
+
+        /** \brief Updates the status of files in the object view */
+        void set_object_status(processor::wptr const&, const wxTreeItemId);
 
       public:
 
         /** \brief Constructor, with project description */
-        project(wxWindow* p, const boost::filesystem::path&, const std::string& = "");
-
-        /** \brief Destructor */
-        ~project();
+        project(wxWindow* p, const boost::filesystem::path&, const std::string& = "", bool = false);
 
         /** \brief Store project specification */
         void store();
 
         /** \brief Returns the name of the project */
         wxString get_name() const;
+
+        /** \brief Destructor */
+        ~project();
     };
 
     /**
@@ -191,7 +191,7 @@ namespace squadt {
     /**
      * @param[in] o the state of the output objects for this processor
      **/
-    inline void project::tool_data::update_state(processor::output_status o) {
+    inline void project::tool_data::update_state(processor::object_descriptor::t_status o) {
     }
 
     /**

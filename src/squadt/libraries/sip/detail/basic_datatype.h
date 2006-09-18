@@ -1024,7 +1024,7 @@ namespace sip {
 
       std::string value = default_value;
 
-      r.get_attribute(&value, "default");
+      r.get_attribute(&value, "value");
 
       r.next_element();
       r.skip_end_element("string");
@@ -1050,7 +1050,7 @@ namespace sip {
       if (minimum_length != 0) {
         o << " minimum-length=\"" << minimum_length << "\"";
       }
-      if (maximum_length != 0) {
+      if (maximum_length != implementation_maximum_length) {
         o << " maximum-length=\"" << maximum_length << "\"";
       }
 

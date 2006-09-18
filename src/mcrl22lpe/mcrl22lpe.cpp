@@ -388,6 +388,8 @@ static void get_configuration_parameters_via_squadt_display()
     /* Wait for the OK button to be pressed */
     okay_button->await_change();
 
+    tc.send_clear_display();
+
     /* set the squadt configuration to be sent back, such
      * that mcrl22lpe can be restarted later with exactly
      * the same parameters
@@ -514,6 +516,9 @@ static bool get_squadt_parameters(int argc,
     if (configuration.is_fresh())
     { get_configuration_parameters_via_squadt_display();
     }
+    else {
+      tc.send_accept_configuration();
+    }
     
     /* put the configuration data from squadt
      * into the lin_options structure to be used
@@ -582,9 +587,7 @@ static bool get_squadt_parameters(int argc,
     }
 
     /* Wait for start message */
-    
-    // tc.await_message(sip::message_signal_start);
-
+    tc.await_message(sip::message_signal_start);
 
     return 0;
   }
@@ -658,7 +661,7 @@ int main(int argc, char *argv[])
     layout::manager::aptr layout_manager = layout::vertical_box::create();
 
     layout_manager->add(new label("Linearisation is finished"),layout::left);
-    tc.send_signal_done();
+    tc.send_signal_done(true);
     display->set_top_manager(layout_manager);
     tc.send_display_layout(display);
     tc.await_message(sip::message_request_termination);

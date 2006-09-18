@@ -7,7 +7,6 @@
 #include <boost/shared_ptr.hpp>
 
 #include "tool.h"
-#include "core.h"
 
 namespace squadt {
   namespace miscellaneous {

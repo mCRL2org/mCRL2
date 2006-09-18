@@ -12,6 +12,7 @@ namespace squadt {
  
         /** \brief Type for event distinction */
         enum event_type {
+          change,     ///< Status of the associated process has changed
           connection, ///< A new connection has been established
           completion  ///< A tool completed its operation
         };
@@ -56,10 +57,10 @@ namespace squadt {
         inline void await_process() const;
 
         /** \brief Waits until a connection has been established with the running process */
-        inline void await_connection();
+        inline void await_connection(unsigned int const&);
 
-        /** \brief Blocks until private member done is true */
-        inline void await_completion();
+        /** \brief Waits until a connection has been established with the running process */
+        inline void await_connection();
 
         /** \brief Signals that a new connection has been established */
         inline void signal_connection(boost::shared_ptr < task_monitor_impl >&, sip::message::end_point);
@@ -82,8 +83,14 @@ namespace squadt {
         /** \brief Executes a handler function once on tool completion */
         inline void once_on_completion(boost::function < void () >);
 
+        /** \brief Executes a handler function once status change */
+        inline void on_status_change(boost::function < void () >);
+
         /** \brief Associates a process with this listener */
         void attach_process(const process::ptr& p);
+
+        /** \brief Terminate communication and reset internal state */
+        inline void disconnect();
 
         /** \brief Unblocks waiters and requests a tool to prepare termination */
         inline void finish();
@@ -120,27 +127,37 @@ namespace squadt {
     }
 
     /**
+     * Waits until a connection has been established a timeout has occurred, or the process has terminated
+     **/
+    inline void task_monitor_impl::await_connection(unsigned int const& ts) {
+      boost::mutex::scoped_lock l(register_lock);
+ 
+      if (!connected) {
+        boost::xtime time;
+
+        while (associated_process.get() == 0 || !connected) {
+          /* Other side has not connected and the process has not been registered as terminated */
+          xtime_get(&time, boost::TIME_UTC);
+
+          time.sec += ts;
+
+          if (!register_condition.timed_wait(l, time)) {
+            /* Timeout occurred */
+            break;
+          }
+        }
+      }
+    }
+
+    /**
      * Waits until a connection has been established, or the process has terminated
      **/
     inline void task_monitor_impl::await_connection() {
       boost::mutex::scoped_lock l(register_lock);
  
-      while (!connected && !done) {
-        /* Other side has not connected and the process has not been registered as terminated */
-        register_condition.wait(l);
-      }
-    }
-
-    /**
-     * Waits until done is set or the process has terminated
-     *
-     * \pre associated_process.lock().get() must be unequal 0
-     **/
-    inline void task_monitor_impl::await_completion() {
-      boost::mutex::scoped_lock l(register_lock);
- 
-      if (!done) {
-        while (!done && associated_process.get() != 0) {
+      if (!connected) {
+        while (associated_process.get() == 0 || !connected) {
+          /* Other side has not connected and the process has not been registered as terminated */
           register_condition.wait(l);
         }
       }
@@ -154,6 +171,7 @@ namespace squadt {
       boost::mutex::scoped_lock l(register_lock);
  
       connected = true;
+      done      = false;
  
       register_condition.notify_all();
 
@@ -168,27 +186,27 @@ namespace squadt {
      * @param[in] s the current status of the process
      **/
     inline void task_monitor_impl::signal_change(boost::shared_ptr < task_monitor_impl >& m, const execution::process::status s) {
+      boost::mutex::scoped_lock l(register_lock);
+
+      /* Service change handlers */
+      if (0 < handlers.count(change)) {
+        task_monitor_impl::service_handlers(m, change);
+      }
+
       if ((s == execution::process::completed || s == execution::process::aborted)) {
         /* Unblock any remaining waiters */
-        boost::mutex::scoped_lock l(register_lock);
- 
         done = true;
  
-        /* Signal completion to waiters */
-        register_condition.notify_all();
-
         /* Service connection handlers */
         if (0 < handlers.count(completion)) {
           task_monitor_impl::service_handlers(m, completion);
         }
-      }
-      else {
-        boost::mutex::scoped_lock l(register_lock);
-       
+
         /* Signal completion to waiters */
         register_condition.notify_all();
       }
     }
+
     /**
      * @param[in] m a shared pointer to this object
      * @param[in] e the event type of which to execute the handler
@@ -226,6 +244,13 @@ namespace squadt {
     }
 
     /**
+     * @param[in] h the function object that is executed after the process status has changed
+     **/
+    inline void task_monitor_impl::on_status_change(boost::function < void () > h) {
+      handlers.insert(std::make_pair(change, boost::bind(&task_monitor_impl::perpetual_handler_wrapper, h)));
+    }
+
+    /**
      * @param[in] h the function object that is executed once a connection is established
      **/
     inline void task_monitor_impl::on_completion(boost::function < void () > h) {
@@ -249,33 +274,50 @@ namespace squadt {
     inline void task_monitor_impl::attach_process(const process::ptr& p) {
       boost::mutex::scoped_lock l(register_lock);
 
-      associated_process = p;
-
       /* Wake up waiting threads */
       register_condition.notify_all();
+
+      associated_process = p;
     }
 
     inline void task_monitor_impl::finish() {
-      boost::mutex::scoped_lock l(register_lock);
-   
-      done = true;
-   
-      /* Signal completion to waiters */
-      register_condition.notify_all();
+      /* Let the tool know that it should prepare for termination */
+      disconnect();
+
+      terminate_process();
+    }
+
+    inline void task_monitor_impl::disconnect() {
+      if (connected) {
+        send_message(sip::message_request_termination);
+
+        logger->log(1, boost::str(boost::format("termination request sent to %s pid(%u)\n")
+                  % associated_process->get_executable_name() % associated_process->get_identifier()));
+
+        await_message(sip::message_signal_termination, 1);
+
+        sip::controller::communicator_impl::disconnect();
+      }
     }
 
     /** \brief Terminates a running process */
     inline void task_monitor_impl::terminate_process() {
-      if (associated_process.get() != 0) {
-        disconnect();
-
-        send_message(sip::message_request_termination);
-
+      if (connected) {
         associated_process->terminate();
 
         logger->log(1, boost::str(boost::format("process terminated (tool %s pid(%u))\n")
                   % associated_process->get_executable_name() % associated_process->get_identifier()));
       }
+
+      boost::mutex::scoped_lock l(register_lock);
+
+      connected = false;
+      done      = true;
+
+      /* Signal completion to waiters */
+      register_condition.notify_all();
+
+      associated_process.reset();
     }
   }
 }

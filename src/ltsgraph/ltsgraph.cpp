@@ -105,7 +105,7 @@ class GraphApp : public wxApp
 
 	    //TODO (CT): Adapt this in such a way that a file kan be read by wxEntry.
            lts_file_argument = input_object->get_location(); 
-           tc.send_signal_done();
+           tc.send_signal_done(true);
             
           }
           else {

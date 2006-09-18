@@ -14,7 +14,8 @@ namespace squadt {
       requested_tool_unavailable,               ///< \brief requested tool is not available
       program_execution_failed,                 ///< \brief program execution failed
       unexpected_instance_identifier,           ///< \brief a connection was accepted of which the peer provided an unexpected instance identifier
-      missing_object_descriptor                 ///< \brief processor dependency graph has dangling edges
+      missing_object_descriptor,                ///< \brief processor dependency graph has dangling edges
+      cannot_build                              ///< \brief for some reason a file cannot be (re)build
     };
 
     /** \brief A basic type for exceptions derived from that provided by the standard library */
@@ -31,9 +32,10 @@ namespace utility {
     "Failed to load %s from `%s'.",
     "Values for required attributes are missing in element `%s'.",
     "Requested tool `%s' is not available!",
-    "Execution of program `%s' failed miserably.",
+    "Execution of program `%s' failed.",
     "Peer provided invalid or unexpected identifier!",
-    "Dependency on object that no longer exists."
+    "Dependency on object that no longer exists.",
+    "Cannot not (re)build %s"
   };
 }
 #endif

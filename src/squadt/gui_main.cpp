@@ -3,7 +3,6 @@
 #include "gui_resources.h"
 #include "gui_dialog_project.h"
 #include "tool_manager.h"
-#include "core.h"
 
 #include <wx/menu.h>
 
@@ -87,27 +86,48 @@ namespace squadt {
     }
 
     void main::project_new() {
-      using namespace boost::filesystem;
 
       dialog::new_project dialog(this);
 
-      if (dialog.ShowModal()) {
-        /* Create the new project */
-        project* p = new GUI::project(this, path(dialog.get_location()), dialog.get_description());
-
-        add_project_view(p);
+      switch (dialog.ShowModal()) {
+        case 1:
+          /* Create the new project */
+          project_new(dialog.get_location(), dialog.get_description());
+          break;
+        case 2:
+          project_open(dialog.get_location());
+          break;
+        default: /* Cancelled by user */
+          break;
       }
     }
 
-    void main::project_open() {
-      using namespace boost::filesystem;
+    /**
+     * @param[in] p a path to a project store
+     * @param[in] d an optional description
+     **/
+    void main::project_new(std::string const& s, std::string const& d) {
+      add_project_view(new GUI::project(this, boost::filesystem::path(s), d, true));
+    }
 
+    void main::project_open() {
       dialog::open_project dialog(this);
 
       if (dialog.ShowModal()) {
-        project* p = new GUI::project(this, path(dialog.get_location()));
+          project_open(dialog.get_location());
+      }
+    }
 
-        add_project_view(p);
+    /**
+     * @param[in] p a path to a project store
+     **/
+    inline void main::project_open(std::string const& s) {
+      try {
+        add_project_view(new GUI::project(this, boost::filesystem::path(s)));
+      }
+      catch (...) {
+        wxMessageDialog(0, wxT("Unable to load project possible reasons are corruption or an incompatible description file."),
+                                  wxT("Fatal: project file corrupt"), wxOK).ShowModal();
       }
     }
 

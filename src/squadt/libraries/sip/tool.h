@@ -58,7 +58,7 @@ namespace sip {
         void send_clear_display();
  
         /** \brief Send a signal that the tool has finished its last operation */
-        void send_signal_done();
+        void send_signal_done(bool);
  
         /** \brief Send a signal that the tool is about to terminate */
         void send_signal_termination();

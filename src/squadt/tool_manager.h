@@ -14,9 +14,9 @@
 #include <sip/controller.h>
 
 #include "tool.h"
-#include "core.h"
 #include "task_monitor.h"
 #include "processor.h"
+#include "executor.h"
 
 namespace squadt {
 
@@ -45,7 +45,7 @@ namespace squadt {
    *    executors that may run on different machines
    **/
   class tool_manager : public sip::controller::communicator {
-    friend class processor;
+    friend class processor_impl;
  
     public:
  

@@ -8,6 +8,7 @@
 #include <wx/event.h>
 #include <wx/textctrl.h>
 
+#include <sip/detail/report.h>
 #include <sip/detail/layout_tool_display.h>
 
 #include "processor.h"
@@ -35,10 +36,10 @@ namespace squadt {
         private:
      
           /** \brief Associated processor */
-          processor::monitor::sptr  monitor;
+          boost::shared_ptr < processor::monitor >  monitor;
 
           /** \brief Associates a sip layout element with a wxWidgets control */
-          element_for_window_map     element_for_window;
+          element_for_window_map                    element_for_window;
      
         private:
      
@@ -57,7 +58,7 @@ namespace squadt {
         public:
 
           /** \brief Constructor */
-          state_change_handler(processor::monitor::sptr&);
+          state_change_handler(boost::shared_ptr < processor::monitor >&);
 
           /** \brief Clears the element_for_window map */
           inline void clear();
@@ -69,13 +70,13 @@ namespace squadt {
           void update(sip::layout::mediator* m, sip::layout::element const*);
 
           /** \brief Gets the monitor for the associated process */
-          processor::monitor::sptr& get_monitor();
+          boost::shared_ptr < processor::monitor >& get_monitor();
       };
 
       /**
        * @param[in] s the processor associated with this display
        **/
-      inline state_change_handler::state_change_handler(processor::monitor::sptr& s) : monitor(s) {
+      inline state_change_handler::state_change_handler(boost::shared_ptr < processor::monitor >& s) : monitor(s) {
       }
 
       inline void state_change_handler::clear() {
@@ -86,7 +87,7 @@ namespace squadt {
         element_for_window[o] = e;
       }
 
-      inline processor::monitor::sptr& state_change_handler::get_monitor() {
+      inline boost::shared_ptr < processor::monitor >& state_change_handler::get_monitor() {
         return (monitor);
       }
     }
@@ -124,13 +125,13 @@ namespace squadt {
         void build();
 
         /** \brief Builds the specified layout within this window */
-        void instantiate(sip::layout::tool_display::sptr l);
+        void instantiate(boost::weak_ptr < sip::layout::tool_display >, sip::layout::tool_display::sptr l);
 
         /** \brief Update the (G)UI state for a list of elements */
-        void update(std::vector < sip::layout::element const* >);
+        void update(boost::weak_ptr < sip::layout::tool_display >, std::vector < sip::layout::element const* >);
 
         /** \brief Update the log with incoming status messages */
-        void update_log(sip::report::sptr l);
+        void update_log(boost::weak_ptr < sip::layout::tool_display >, sip::report::sptr l);
 
         /** \brief Set a new layout description */
         void schedule_layout_change(sip::layout::tool_display::sptr);
@@ -147,7 +148,7 @@ namespace squadt {
       public:
 
         /** \brief Constructor */
-        tool_display(wxWindow*, project*, processor::monitor::sptr& s);
+        tool_display(wxWindow*, project*, boost::shared_ptr < processor::monitor >& s);
 
         /** \brief Sets the title of the display window */
         void set_title(wxString);

@@ -53,6 +53,9 @@ namespace squadt {
           /** \brief Whether tools are selectable or not */
           bool                    tools_selectable;
 
+          /** \brief Selected tool id, because selections are lost when a part containing it is collapsed */
+          wxTreeItemId            selected_tool;
+
         private:
         
           /** \brief Helper function that places the widgets */
@@ -69,6 +72,9 @@ namespace squadt {
 
           /** \brief Event handler for when something is about to be selected in the tool_selector control */
           void on_tool_selector_item_select(wxTreeEvent& e);
+
+          /** \brief Event handler for when something is about to be collapsed in the tool_selector control */
+          void on_tool_selector_item_collapsed(wxTreeEvent& e);
 
           /** \brief Select a tool by its name */
           void select_tool(sip::tool::capabilities::input_combination const*, std::string const&);

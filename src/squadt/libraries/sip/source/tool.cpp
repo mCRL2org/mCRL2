@@ -116,8 +116,8 @@ namespace sip {
     }
 
     /* Send a signal that the tool is about to terminate */
-    void communicator::send_signal_done() {
-      message m(sip::message_signal_done);
+    void communicator::send_signal_done(bool b) {
+      message m((b) ? "success" : "", sip::message_signal_done);
  
       impl->send_message(m);
     }
