@@ -81,7 +81,7 @@ void squadt_lpeuntime::finalise()
 }
 
 ///Returns an LPE specification in which the timed arguments have been rewritten
-lpe::specification squadt_lpeuntime::untime(const lpe::specification specification) {
+lpe::specification squadt_lpeuntime::untime(const lpe::specification& specification) {
   // TODO: Strip use of gs functions as much as possible; everything that's possible through these
   // should also be available through the LPE library!
   // NOTE: The gs functions will be made available in the LPE library by Wieger.
@@ -136,7 +136,7 @@ lpe::specification squadt_lpeuntime::untime(const lpe::specification specificati
       // Add a new summation variable (this is allowed because according to an axiom the following equality holds):
       // c -> a . X == sum t:Real . c -> a@t . X
       lpe::data_variable time_var;
-      time_var = data_variable("t", lpe::sort("Real")); // TODO: See if we can auto-name the variable (in order to prevent name collisions)
+      time_var = data_variable("time_var", lpe::sort("Real")); // TODO: See if we can auto-name the variable (in order to prevent name collisions)
       untime_summation_variables = push_back(i->summation_variables(), time_var);
  
       // Extend the original condition with an additional argument

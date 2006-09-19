@@ -28,7 +28,7 @@ class squadt_lpeuntime: public squadt_program
     void execute(sip::configuration &configuration);
     void finalise();
 #endif
-    lpe::specification untime(const lpe::specification specification);
+    lpe::specification untime(const lpe::specification& specification);
 };
 
 #endif //_SQUADT_LPEUNTIME_H
