@@ -104,7 +104,7 @@ public:
   void on_btn_pick_colour( wxCommandEvent &event ); // when the user wants to pick a colour for a node.
   void on_btn_label_colour( wxCommandEvent &event ); // when the user wants to pick a colour for a label.
   void on_btn_label_text( wxCommandEvent &event ); // when the user wants to change a label caption.
-
+  
   bool OptimizeDrawing(double precision);
   void RestoreBackup();
   void FindNode(wxPoint);
@@ -117,7 +117,7 @@ public:
   void disable_btn_label_colour();
   void enable_btn_label_text();
   void disable_btn_label_text();
-
+  int get_node_radius();
 private:
   bool StopOpti;
   bool StoppedOpti;
@@ -125,7 +125,7 @@ private:
   double NodeStrength;   //Strength of the electrical repulsion
   double NaturalLength;
   int steps_taken;
-
+  int node_radius;
   string inputFileName;
 
   bool curve_edges;

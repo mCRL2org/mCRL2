@@ -1,6 +1,5 @@
 #include "graph_frame.h"
 #include <mcrl2_revision.h>
-#include "ltsgraph_version.h"
 const wxColour border_colour_selected = wxT("BLUE");
 
 BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
@@ -39,9 +38,9 @@ const int ctrl_radius = 3;
 
 static vector<Node*> vectNode;
 static vector<edge*> vectEdge;
-static int CircleRadius;
 
 double GenRandom(const int &max) {
+    int CircleRadius = 0;
     return static_cast <double> (rand()%max+CircleRadius);
 }
 
@@ -64,7 +63,7 @@ GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& 
   EdgeStiffness = 1.0; 
   NodeStrength = 1000.0; 
   NaturalLength = 20.0;
-  CircleRadius = 10;
+  node_radius = 10;
 
   BuildLayout();
 
@@ -208,7 +207,7 @@ void GraphFrame::CreateMenu() {
 
   export_to    = file->Append( ID_MENU_EXPORT, wxT("E&xport to... \tCTRL-x"), wxT("") );
 
-  backupCreate    = file->Append( ID_BACKUP_CREATE, wxT("&Store layout\tCTRL-s"), wxT("") );
+  backupCreate    = file->Append( ID_BACKUP_CREATE, wxT("&Save layout\tCTRL-s"), wxT("") );
   
   quitItem        = file->Append( wxID_EXIT, wxT("&Quit\tCTRL-q"), wxT("") );
   menu->Append( file, wxT("&File") );
@@ -235,9 +234,12 @@ void GraphFrame::CreateMenu() {
 void GraphFrame::OnOpen( wxCommandEvent& /* event */ ) {
 	StopOpti    = true;
 	StoppedOpti = true;
-	btnOptiStop->SetLabel(wxT("&Optimize"));
-	wxFileDialog dialog( this, wxT("Select a LTS file (.aut .svc) or a backup file (.ltsgraph)..."), wxT(""), wxT(""), 
+	btnOptiStop->SetLabel(wxT("&Neaten"));
+	wxFileDialog dialog( this, wxT("Select a LTS file (.aut .svc) or a position file (.ltsgraph)..."), wxT(""), wxT(""), 
 											wxT("All supported formats (*.ltsgraph; *.aut;*.svc)|*.ltsgraph;*.aut;*.svc|Position data (*.ltsgraph)|*.ltsgraph|LTS format (*.aut; *.svc)|*.aut;*.svc|All files (*.*)|*.*"));
+
+        dialog.SetDefaultItem(NULL);
+
 	if ( dialog.ShowModal() == wxID_OK ) {
 		vectEdge.clear();
 		vectNode.clear();
@@ -263,7 +265,7 @@ void GraphFrame::OnOptimize( wxCommandEvent& /* event */ ) {
 
 	optimizeGraph->Enable(false);
 	stopOptimize->Enable(true);
-	btnOptiStop->SetLabel(wxT("&Stop    "));
+	btnOptiStop->SetLabel(wxT("&Stop"));
 	StopOpti = false;
 	StoppedOpti = false;
 	while (!OptimizeDrawing(0.0) && !StopOpti) {
@@ -276,7 +278,7 @@ void GraphFrame::OnOptimize( wxCommandEvent& /* event */ ) {
 void GraphFrame::OnStopOptimize( wxCommandEvent& /* event */ ) {
 	stopOptimize->Enable(false);
 	optimizeGraph->Enable(true);
-	btnOptiStop->SetLabel(wxT("&Optimize"));
+	btnOptiStop->SetLabel(wxT("&Neaten"));
 	StopOpti = true;
 }
 
@@ -397,51 +399,50 @@ void GraphFrame::Init(wxString LTSfile) {
 
   	string st_LTSfile = string(LTSfile.fn_str());
 
-		//Find extension
-		string ext = st_LTSfile.substr(st_LTSfile.find_last_of( '.' )+1);
+	//Find extension
+	string ext = st_LTSfile.substr(st_LTSfile.find_last_of( '.' )+1);
 
-		//initialize file name
-		inputFileName = st_LTSfile.substr( st_LTSfile.find_last_of( '/' ) + 1 ); //without path
-		inputFileName = inputFileName.substr( 0, inputFileName.find_last_of( '.' ) ); //without extension
+	//initialize file name
+	inputFileName = st_LTSfile.substr( st_LTSfile.find_last_of( '/' ) + 1 ); //without path
+	inputFileName = inputFileName.substr( 0, inputFileName.find_last_of( '.' ) ); //without extension
 
-		if (ext != "ltsgraph") {
+	if (ext != "ltsgraph") {
 
-			//read lts file
-			lts mylts;
-			if (mylts.read_from(st_LTSfile)) 
-			{
+          //read lts file
+          lts mylts;
+
+	  if (mylts.read_from(st_LTSfile)) {
 	
-				//Information about graph
-				wxString text;
-				text.Printf(wxT("%u"),mylts.initial_state());
-				initialStateLabel->SetLabel(text);
-				text.Printf(wxT("%u"),mylts.num_states());
-				numberOfStatesLabel->SetLabel(text);
-				text.Printf(wxT("%u"),mylts.num_transitions());
-				numberOfTransitionsLabel->SetLabel(text);
-				text.Printf(wxT("%u"),mylts.num_labels());
-				numberOfLabelsLabel->SetLabel(text);
+	    //Information about graph
+	    wxString text;
+	    text.Printf(wxT("%u"),mylts.initial_state());
+	    initialStateLabel->SetLabel(text);
+	    text.Printf(wxT("%u"),mylts.num_states());
+	    numberOfStatesLabel->SetLabel(text);
+	    text.Printf(wxT("%u"),mylts.num_transitions());
+	    numberOfTransitionsLabel->SetLabel(text);
+	    text.Printf(wxT("%u"),mylts.num_labels());
+	    numberOfLabelsLabel->SetLabel(text);
+		
+	    //initialize vectNode
 	
-	
-				//initialize vectNode
-	
-				state_iterator si = mylts.get_states();
+	    state_iterator si = mylts.get_states();
 					
-				wxString tmp;
-				int randX = leftPanel->Get_Width()  - 2*CircleRadius;
-				int randY = leftPanel->Get_Height() - 4*CircleRadius;
+	    wxString tmp;
+	    
+            int randX = leftPanel->Get_Width()  - 2*node_radius;
+	    int randY = leftPanel->Get_Height() - 4*node_radius;
 	
 	
-				for(unsigned int i=0; si.more(); i++) 
-				{
-						tmp.sprintf(wxT("%d"), *si);
-						wxString * Slbl_Node = new wxString(tmp);
+	    for(unsigned int i=0; si.more(); i++) {
+	      tmp.sprintf(wxT("%d"), *si);
+	      wxString * Slbl_Node = new wxString(tmp);
 
-						vectNode.push_back( new Node(*si, GenRandom(randX), GenRandom(randY), *Slbl_Node, (mylts.initial_state() == *si) ));
+	      vectNode.push_back( new Node(*si, GenRandom(randX), GenRandom(randY), *Slbl_Node, (mylts.initial_state() == *si) ));
 
-						delete Slbl_Node;
-					++ si;
-				}   
+	      delete Slbl_Node;
+	      ++si;
+	    }   
 				//NaturalLength = (400 / vectNode.size())+8;
 			
 				//initialize vectEdge
@@ -462,7 +463,7 @@ void GraphFrame::Init(wxString LTSfile) {
 							}
 						}
 						//Init circle radius
-						vectNode[n]->SetRadius(CircleRadius);
+						vectNode[n]->SetRadius(node_radius);
 					}
 			
 					delete Slbl_Edge;       
@@ -506,7 +507,7 @@ bool GraphFrame::OptimizeDrawing(double precision) {
     EdgeStiffness = sliderEdgeStiffness->GetValue();
     NodeStrength  = sliderNodeStrength->GetValue();
     NaturalLength = sliderNaturalLength->GetValue();
-    CircleRadius  = spinNodeRadius->GetValue();
+    node_radius  = spinNodeRadius->GetValue();
     skip_steps = slider_speedup->GetValue();
   }
   else {
@@ -524,7 +525,7 @@ bool GraphFrame::OptimizeDrawing(double precision) {
   for (size_t i = 0; i<vectNode.size(); i++) {
     arraySumForceX[i]=0.0;
     arraySumForceY[i]=0.0;
-    vectNode[i]->SetRadius(CircleRadius);  
+    vectNode[i]->SetRadius(node_radius);  
   
     //Calculate forces
     double x1 = vectNode[i]->GetX();
@@ -558,11 +559,11 @@ bool GraphFrame::OptimizeDrawing(double precision) {
           // 1 as a repulsing force.
 
           if (i>j) { 
-            arraySumForceX[i] += CircleRadius / 2;
-            arraySumForceY[i] += CircleRadius / 2;
+            arraySumForceX[i] += node_radius / 2;
+            arraySumForceY[i] += node_radius / 2;
           }
-          else { arraySumForceX[i] += -CircleRadius / 2;
-            arraySumForceY[i] += -CircleRadius / 2;
+          else { arraySumForceX[i] += - node_radius / 2;
+            arraySumForceY[i] += - node_radius / 2;
           }
         }
       }
@@ -613,19 +614,19 @@ bool GraphFrame::OptimizeDrawing(double precision) {
     
     //Check whether positions are outside of the window
 
-    if (newX + CircleRadius  > leftPanel->Get_Width()) {
-        newX = leftPanel->Get_Width() - CircleRadius ;
+    if (newX + node_radius  > leftPanel->Get_Width()) {
+        newX = leftPanel->Get_Width() - node_radius ;
     }
-    if (newX < CircleRadius) {
-        newX = 0 + CircleRadius ;
-    }
-
-    if (newY + CircleRadius > leftPanel->Get_Height()) {
-        newY = leftPanel->Get_Height() - CircleRadius ;
+    if (newX < node_radius) {
+        newX = node_radius ;
     }
 
-    if (newY < CircleRadius) {
-        newY = 0 + CircleRadius;
+    if (newY + node_radius > leftPanel->Get_Height()) {
+        newY = leftPanel->Get_Height() - node_radius ;
+    }
+
+    if (newY < node_radius) {
+        newY = node_radius;
     }
     
     vectNode[i]->SetXY( newX , newY );
@@ -686,10 +687,7 @@ void GraphFrame::on_about(wxCommandEvent& /* event */) {
   wxString caption = wxT("About");
   wxString content = wxT("ltsgraph - Tool for visualising labelled transition systems. \n");
   content += wxT("Developed by Didier Le Lann and Carst Tankink.\n\n");
-  content += wxT("Version ");
-  wxString ltsg_version(LTSG_VERSION, wxConvLocal);
-  content.Printf(wxT("%s%s\n"), content.c_str(), ltsg_version.c_str());
-  content += wxT("Part of the mCRL2 toolset, revision ");
+  content += wxT("Part of the mCRL2 toolset, revision: ");
   content.Printf(wxT("%s%d. \n\n"), content.c_str(), REVISION);
 
   content += wxT("Info: http://www.mcrl2.org \n");
@@ -705,14 +703,13 @@ void GraphFrame::on_export(wxCommandEvent& /* event */) {
   wxString caption = wxT("Export layout as");
   wxString wildcard = wxT("Scalable Vector Graphics (*.svg)|*.svg|LaTeX source (*.tex)|*.tex");
   wxString default_dir = wxEmptyString;
-  wxString default_file_name = wx_str;
+  wxString default_file_name = wx_str + wxT(".svg");
 
   wxFileDialog export_dialog(this, caption, default_dir, default_file_name, wildcard, wxSAVE | wxOVERWRITE_PROMPT);
 
   if (export_dialog.ShowModal() == wxID_OK) {
     wxString file_name = export_dialog.GetPath();
     wxString extension = file_name.AfterLast('.');
-
     if (extension == file_name) {
       /* No extension given, get it from filter index */
       switch (export_dialog.GetFilterIndex()) {
@@ -720,7 +717,7 @@ void GraphFrame::on_export(wxCommandEvent& /* event */) {
           file_name.Append(wxT(".svg"));
           export_svg(file_name);
           break;
-        case 2: //Latex item
+        case 1: //Latex item
           file_name.Append(wxT(".tex"));
           export_to_latex(file_name);
           break;
@@ -922,10 +919,11 @@ void GraphFrame::RestoreBackup() {
 		btnOptiStop->Enable(true);
 
 	}
-	else
-		wxMessageBox(wxT("Restore unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR, this, wxDefaultPosition.x, wxDefaultPosition.y);
+	else {
+	  wxMessageBox(wxT("Restore unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR, this, wxDefaultPosition.x, wxDefaultPosition.y);
+        }
 	
-	
+        	
 	Refresh();
 
 
@@ -948,22 +946,8 @@ void GraphFrame::FindNode(wxPoint pt) {
   bool show_labels = ckEdgeLabels->IsChecked();
 
   leftPanel->selection = none_t;
-
-  for (size_t n = 0; n < vectNode.size(); n++) {
-    double radius = vectNode[n]->get_radius();
-    double node_x = vectNode[n]->GetX();
-    double node_y = vectNode[n]->GetY();
-
-    if (node_x > pt.x-radius && node_x < pt.x + radius) {
-      if (node_y > pt.y- radius && node_y < pt.y+ radius) {
-        leftPanel->selection = node_t;
-        leftPanel->selected_node = vectNode[n];
-      }
-    }
-  }
   
-  if (leftPanel->selection == none_t && (curve_edges || show_labels) ) { 
-    for (size_t n = 0; n < vectEdge.size(); n++) {
+  for (size_t n = 0; n < vectEdge.size(); n++) {
       if (curve_edges && vectEdge[n]->get_x_control() > pt.x-ctrl_radius && vectEdge[n]->get_x_control() < pt.x+ctrl_radius &&
           vectEdge[n]->get_y_control() > pt.y-ctrl_radius && vectEdge[n]->get_y_control() < pt.y+ctrl_radius) {
         leftPanel->selection = edge_t;
@@ -973,6 +957,20 @@ void GraphFrame::FindNode(wxPoint pt) {
                               vectEdge[n]->get_label_lower_y() < pt.y && pt.y < vectEdge[n]->get_label_higher_y()) {
         leftPanel->selection = edge_label_t;
         leftPanel->selected_edge = vectEdge[n];
+      }
+  }
+
+  if (leftPanel->selection == none_t && (curve_edges || show_labels) ) { 
+    for (size_t n = 0; n < vectNode.size(); n++) {
+      double radius = vectNode[n]->get_radius();
+      double node_x = vectNode[n]->GetX();
+      double node_y = vectNode[n]->GetY();
+
+      if (node_x > pt.x-radius && node_x < pt.x + radius) {
+        if (node_y > pt.y- radius && node_y < pt.y+ radius) {
+          leftPanel->selection = node_t;
+          leftPanel->selected_node = vectNode[n];
+        }
       }
     }
   }
@@ -1051,7 +1049,12 @@ void GraphFrame::disable_btn_label_text() {
   btn_label_text->Enable(false);
 }
 
+int GraphFrame::get_node_radius() {
+  return node_radius;
+}
+
 void GraphFrame::on_spin_radius(wxSpinEvent& /*event */) {
+  node_radius = spinNodeRadius->GetValue();
   Refresh(); 
 }
 
@@ -1152,11 +1155,12 @@ void ViewPort::PressLeft(wxMouseEvent& event) {
 }
 
 void ViewPort::Drag(wxMouseEvent& event) {
+  int node_radius = GF->get_node_radius();
 
   if(event.Dragging() && !event.Moving() && !event.Entering() && !event.Leaving()) {
     if (selection == node_t) {
       wxPoint pt_end = event.GetPosition();//Find the destination 
-      if (pt_end.x > CircleRadius && pt_end.x < sz.GetWidth()-CircleRadius  && pt_end.y > CircleRadius && pt_end.y < sz.GetHeight()-CircleRadius) {
+      if (pt_end.x > node_radius && pt_end.x < sz.GetWidth()-node_radius  && pt_end.y > node_radius && pt_end.y < sz.GetHeight()-node_radius) {
         GF->ReplaceAfterDrag(pt_end);
         Refresh();
       }
@@ -1189,11 +1193,28 @@ void ViewPort::PressRight(wxMouseEvent& event) {
 
   wxPoint pt_fix = event.GetPosition();
 
+  //Reset all colours and selections
+  if (selected_node) {
+    selected_node->reset_border_colour();
+    selected_node = NULL;
+  }
+  if (selected_edge) {
+    selected_edge->set_control_selected(false);
+    selected_edge->set_label_selected(false);
+    selected_edge = NULL;
+  }
+
   //Find the node concerned by the fixing
   GF->FindNode(pt_fix);
 
   if (selection == node_t) {
     GF->FixNode();
+    // Give the node a colour to identify it on-screen.
+    selected_node->set_border_colour(border_colour_selected);
+    // Activate button for colour picking
+    GF->enable_btn_colour_picker();
+    GF->disable_btn_label_colour();
+    GF->disable_btn_label_text();
     Refresh();
   }
 
