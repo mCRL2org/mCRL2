@@ -121,7 +121,7 @@ namespace squadt {
     /**
      * @param[in] p a path to a project store
      **/
-    inline void main::project_open(std::string const& s) {
+    void main::project_open(std::string const& s) {
       try {
         add_project_view(new GUI::project(this, boost::filesystem::path(s)));
       }

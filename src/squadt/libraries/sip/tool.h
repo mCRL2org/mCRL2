@@ -43,7 +43,7 @@ namespace sip {
         communicator();
  
         /** \brief Constructor that takes controller connection arguments from the command line */
-        bool activate(int&, char**);
+        bool activate(int&, char** const);
  
         /** \brief Request details about the amount of space that the controller currently has reserved for this tool */
         void request_controller_capabilities();

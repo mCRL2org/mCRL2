@@ -45,7 +45,7 @@ namespace sip {
         communicator_impl();
 
         /** \brief Constructor that takes controller connection arguments from the command line */
-        bool activate(int&, char**);
+        bool activate(int&, char** const);
 
         /** \brief Send a layout specification for the display space reserved for this tool */
         void send_display_layout(layout::tool_display::sptr);
@@ -68,7 +68,7 @@ namespace sip {
      * @param argc the number of command line arguments
      * @param argv a pointer to the list of command line arguments
      **/
-    inline bool communicator_impl::activate(int& argc, char** argv) {
+    inline bool communicator_impl::activate(int& argc, char** const argv) {
       command_line_interface::argument_extractor e(argc, argv);
  
       command_line_interface::scheme_ptr scheme = e.get_scheme();

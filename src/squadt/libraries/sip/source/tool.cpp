@@ -21,7 +21,7 @@ namespace sip {
      * \attention the specific command line options are removed, so and argc and argv are modified
      * \return whether options were found and whether a connection is being opened with a controller
      **/
-    bool communicator::activate(int& argc, char** argv) {
+    bool communicator::activate(int& argc, char** const argv) {
       return (boost::dynamic_pointer_cast < communicator_impl > (impl)->activate(argc, argv));
     }
 

@@ -43,7 +43,7 @@ namespace sip {
         size_t              last_matched;
 
         /** \brief the scheme that was last parsed succesfully */
-        scheme_ptr         selected_scheme;
+        scheme_ptr          selected_scheme;
 
         /** \brief A unique number that identifies this instance */
         long int            identifier;
