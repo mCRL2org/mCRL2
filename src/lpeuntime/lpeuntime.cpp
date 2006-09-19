@@ -58,6 +58,7 @@ void squadt_lpeuntime::initialise()
 
 void squadt_lpeuntime::configure(sip::configuration& configuration)
 {
+  configuration.add_output(lpd_file_for_output, "lpe", configuration.get_output_name(".lpe"));
 }
 
 bool squadt_lpeuntime::check_configuration(sip::configuration& configuration)
