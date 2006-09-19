@@ -17,6 +17,7 @@
 #include "atermpp/atermpp.h"
 #include "atermpp/aterm_int.h"
 #include "atermpp/aterm_real.h"
+#include "atermpp/aterm_string.h"
 
 using namespace std;
 using namespace atermpp;
@@ -29,6 +30,9 @@ int test_main(int, char*[])
   aterm_real r(2.5);
   aterm_appl f(function_symbol("f", 2), aterm("x"), aterm("y"));
   BOOST_CHECK(f.to_string() == "f(x,y)");
+
+  aterm_string s("s");
+  // aterm_string s1("s1(x)"); will generate an error!
 
   return 0;
 }

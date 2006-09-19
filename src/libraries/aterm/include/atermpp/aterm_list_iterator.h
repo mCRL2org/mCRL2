@@ -24,12 +24,19 @@
 
 namespace atermpp {
 
+  // needed for conversion of the return type of ATgetFirst
+  template <class T>
+  struct term_list_iterator_traits
+  {
+    typedef ATerm value_type;
+  };
+
 //---------------------------------------------------------//
 //                     term_list_iterator
 //---------------------------------------------------------//
 template <typename Value>
 class term_list_iterator: public boost::iterator_facade<
-        term_list_iterator<Value>,        // Derived
+        term_list_iterator<Value>,         // Derived
         const Value,                       // Value
         boost::forward_traversal_tag,      // CategoryOrTraversal
         const Value                        // Reference
@@ -59,7 +66,7 @@ class term_list_iterator: public boost::iterator_facade<
     /// INTERNAL ONLY
     const Value dereference() const
     {
-      return Value(ATgetFirst(m_list));
+      return Value(typename term_list_iterator_traits<Value>::value_type(ATgetFirst(m_list)));
     }
 
     /// INTERNAL ONLY

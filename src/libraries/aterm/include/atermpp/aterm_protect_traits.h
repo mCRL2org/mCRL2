@@ -5,7 +5,7 @@
 #include <iostream>
 #endif // ATERM_DEBUG_PROTECTION
 
-#include "aterm1.h"
+#include "aterm2.h"
 
 namespace atermpp {
 

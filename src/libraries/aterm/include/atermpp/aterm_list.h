@@ -215,6 +215,16 @@ namespace atermpp {
   ///
   template <typename Term>
   inline
+  Term front(term_list<Term> l)
+  {
+    return *l.begin();
+  }
+
+  ///
+  /// Returns the list obtained by inserting a new element at the beginning.
+  ///
+  template <typename Term>
+  inline
   term_list<Term> push_front(term_list<Term> l, Term elem)
   {
     return term_list<Term>(ATinsert(l, aterm(elem)));
@@ -266,6 +276,30 @@ namespace atermpp {
     }
     return reverse(result);
   }
+
+  ///
+  /// Return the concatenation of the lists l and m.
+  ///
+  template <typename Term>
+  inline
+  term_list<Term> operator+(term_list<Term> l, term_list<Term> m)
+  { return term_list<Term>(ATconcat(l, m)); }
+
+  ///
+  /// Return the concatenation of the list l and the element t.
+  ///
+  template <typename Term>
+  inline
+  term_list<Term> operator+(term_list<Term> l, Term t)
+  { return term_list<Term>(ATappend(l, aterm(t))); }
+
+  ///
+  /// Return the concatenation of the element t and the list l.
+  ///
+  template <typename Term>
+  inline
+  term_list<Term> operator+(Term t, term_list<Term> l)
+  { return term_list<Term>(ATappend(l, aterm(t))); }
 
 /*
   ///
