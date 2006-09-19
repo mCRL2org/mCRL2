@@ -47,16 +47,9 @@ source_files="mcrl2/articles \
               mcrl2/configure \
               mcrl2/config.guess \
               mcrl2/config.sub \
-              mcrl2/config.jam.in \
               mcrl2/install-sh \
               mcrl2/Jamroot.jam \
-              mcrl2/build/config.mk.in \
-              mcrl2/build/config.jam.in \
-              mcrl2/build/Jamfile.v2 \
-              mcrl2/build/bjam.mk \
-              mcrl2/build/macosx/* \
-              mcrl2/build/test.l \
-              mcrl2/build/test.y \
+              mcrl2/build \
               mcrl2/Makefile \
               mcrl2/examples \
               mcrl2/tests \
@@ -76,7 +69,7 @@ sh -c "cd ${SOURCE_BASE}; make revision" &> /dev/null
 #  | tr -d "r \n"
 
 # Obtain revision number from checked out source tree
-revision="$(${SOURCE_BASE}/utility/maximum_revision ${SOURCE_BASE})"
+revision=$(expr "$(/usr/bin/svnversion ${SOURCE_BASE})" : "\([0-9]*\)")
 
 # Determine archive name
 archive_name="${TARGET_BASE}/mcrl2-${revision}.tar"
@@ -117,9 +110,6 @@ if (! test -e "${archive_name}.bz2"); then
            --exclude '*.a' \
            --exclude '*.so' \
            --exclude-from excludes ${source_files}
-
-  # Exceptions
-  tar rf ${archive_name} src/squadt/core.h mcrl2/utility/revision.mk
 
   unlink mcrl2
 
