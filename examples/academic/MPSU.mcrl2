@@ -1,0 +1,41 @@
+% This file describes a controller for a simplified Movable Patient
+% Support Unit. It is described in Fokkink, Groote and Reniers,
+% Modelling reactive systems. 
+%
+% Jan Friso Groote, September, 2006.
+
+sort Mode = struct Normal | Emergency ;
+     MotorStatus = struct turnleft | turnright | stopped ;
+
+act pressStop, pressResume,
+    pressUndock, pressLeft,
+    pressRight, motorLeft,
+    motorRight, motorOff,
+    applyBrake, releaseBrake,
+    isDocked, unlockDock,
+    atInnermost, atOutermost;
+
+proc Controller(m:Mode,docked,rightmost,leftmost:Bool,ms:MotorStatus)=
+       pressStop.Controller(Emergency,docked,rightmost,leftmost,ms)+
+       pressResume.Controller(Normal,docked,rightmost,leftmost,ms)+
+       pressUndock.
+         (docked && rightmost) 
+                -> applyBrake.unlockDock.Controller(m,false,rightmost,leftmost,ms)
+                <> Controller(m,docked,rightmost,leftmost,ms)+
+       pressLeft.
+          (docked && ms!=turnleft && !leftmost && m==Normal)
+                -> releaseBrake.motorLeft.
+                     Controller(m,docked,false,leftmost,turnleft)
+                <> Controller(m,docked,rightmost,leftmost,ms)+
+       pressRight.
+          (docked && ms!=turnright && !rightmost && m==Normal)
+                -> releaseBrake.motorRight.
+                     Controller(m,docked,rightmost,false,turnright)
+                <> Controller(m,docked,rightmost,leftmost,ms)+
+       isDocked.Controller(m,true,rightmost,leftmost,ms)+
+       atInnermost.motorOff.applyBrake.Controller(m,docked,true,false,stopped)+
+       atOutermost.motorOff.applyBrake.Controller(m,docked,false,true,stopped);
+
+
+
+init Controller(Normal,true,false,false,stopped);

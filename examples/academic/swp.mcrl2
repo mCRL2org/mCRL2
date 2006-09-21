@@ -1,76 +1,58 @@
 % This file contains an mCRL2 version of the sliding window protocol
-% as used in Fokkink, Groote, Pang, Badban and van de Pol,
-% Verifying a sliding window protocol in mCRL, Report SENR0308, CWI,
-% Amsterdam, 2003. 
-% The `constant' n is the size of the buffers in the protocol. The purpose
-% of this specification is to exercise with the syntax. At the time it
-% was written type checkers and other tools were not yet ready. So, 
-% typing problems may still exist.
-%
-% The major difference with the mCRL specification is that standard
-% datatypes did not have to be formulated, and the sort Buf containing
-% the buffers in the sender and the receiver has now become a function
-% instead of a list. This seems to make the specification more
-% compact and insightful. 
-%
-% This specification contains a NON TERMINATING rewrite rule.
-% That means it can only be linearised with the flag
-% --no-rewrite. Also the generation of a state space will not
-% work for this reason.
+% as it occurs in the book "Modelling Reactive Systems" by Fokkink, Groote
+% and Reniers.
+% The `constant' n is the size of the buffers in the protocol, set to 2. 
+% There is a domain D of data elements. In this specification it made
+% finite. It has two data elements d1 and d2. It also contains two
+% unspecified functions q1 and q2, which represent initial buffers with
+% garbage content.
 
 map  n: Pos;
 eqn  n=2;
 
 sort D = struct d1 | d2;
-     Buf = Nat -> struct data(getdata:D) | empty;
-map  emptyBuf: Buf;
-     insert: D#Nat#Buf -> Buf;
-     remove: Nat#Buf -> Buf;
-     release: Nat#Nat#Buf -> Buf;
-     nextempty: Nat#Buf -> Nat;
-     nextempty_rec: Nat#Buf#Nat -> Nat;
-     inWindow: Nat#Nat#Nat -> Bool;
-var  i,j,k: Nat; d: D; q: Buf;
-eqn  emptyBuf = lambda j:Nat.empty;
-     insert(d,i,q) = lambda j:Nat.if(i==j,data(d),q(j)); 
-     remove(i,q) = lambda j:Nat.if(i==j,empty,q(j));
-%     release(i,j,q) = 
-%        if((i mod 2*n)==(j mod 2*n),
-%           q,
-%           release((i+1) mod 2*n,j,remove(i,q)));
-     i mod 2*n==j mod 2*n -> release(i,j,q) = q;
-     i mod 2*n!=j mod 2*n -> 
-          release(i,j,q) = release((i+1) mod 2*n,j,remove(i,q));
-     k<n -> nextempty_rec(i,q,k) = 
-               if(q(i)==empty,i,nextempty_rec((i+1) mod n,q,k+1));
-     k==n -> nextempty_rec(i,q,k)=i;
-     nextempty(i,q) = nextempty_rec(i,q,0);
-     inWindow(i,j,k) = (i<=j && j<k) || (k<i && i<=j) || (j<k && k<i);
+     DBuf = Nat -> D;
+     BBuf = Nat -> Bool;
+map  empty: BBuf;
+     insert: D#Nat#DBuf -> DBuf;
+     insert: Bool#Nat#BBuf -> BBuf;
+     nextempty_mod: Nat#BBuf -> Nat;
+     q1,q2:DBuf;
+var  d:D; i,j,m: Nat; q: DBuf; c:Bool; n':Pos;
+eqn  empty = lambda j:Nat.false;
+     insert(d,i,q) = lambda j:Nat.if(i==j,d,q(j)); 
+     insert(c,i,b) = lambda j:Nat.if(i==j,c,b(j)); 
+     nextempty_mod(i,b,m,n') = if(b(i mod n') && m>0,
+               nextempty_mod((i+1) mod 2*n', b,m-1,n'),i mod 2*n');
 
-act  sA,rA,sD,rD: D;
-     sB,rB,cB,sC,rC,cC: D#Nat;
-     sE,rE,cE,sF,rF,cF: Nat;
-     j;
+act  r1,s4: D;
+     s2,r2,c2,s3,r3,c3: D#Nat;
+     s5,r5,c5,s6,r6,c6: Nat;
+     i;
 
-proc S(l,m:Nat,q:Buf) =
-        sum d:D. inWindow(l,m,(l+n) mod 2*n) -> 
-                rA(d).S(l,(m+1) mod 2*n,insert(d,m,q))+
-        sum k:Nat. (q(k)!=empty && k<2*n) -> sB(getdata(q(k)),k).S(l,m,q)+
-        sum k:Nat. rF(k).S(k,m,release(l,k,q));
+proc S(l,m:Nat,q:DBuf) =
+        sum d:D. (m<n) ->
+                r1(d).S(l,m+1,insert(d,(l+m) mod n,q))+
+        sum k:Nat. (k<m) -> s2(q((l+k) mod n),(l+k) mod 2*n).S(l,m,q)+
+        sum k:Nat. r6(k).S(k,(m-k+l) mod 2*n,q);
 
-     R(l:Nat,q:Buf) =
-        sum d:D,k:Nat. rC(d,k).
-                (inWindow(l,k,(l+n) mod 2*n) -> R(l,insert(d,k,q)) <> R(l,q))+
-        (q(l)!=empty) -> sD(getdata(q(l))).R((l+1) mod 2*n,remove(l,q))+
-        sE(nextempty(l,q)).R(l,q);
+     R(l':Nat,q':DBuf,b:BBuf) =
+        sum d:D,k:Nat. r3(d,k).(((k-l') mod (2*n) < n) 
+                  -> R(l',insert(d,k mod n,q'),insert(true,k mod n,b)) 
+                  <> R(l',q',b))+
+        b(l' mod n) -> s4(q'(l' mod n)).
+                          R((l'+1) mod 2*n,q',insert(false,l' mod n,b))+
+        s5(nextempty_mod(l',b,n,n)).R(l',q',b);
 
-     K = sum d:D,k:Nat. rB(d,k).(j.sC(d,k)+j).K;
+     K = sum d:D,k:Nat. r2(d,k).(i.s3(d,k)+i).K;
+     L = sum k:Nat. r5(k).(i.s6(k)+i).L;
 
-     L = sum k:Nat. rE(k).(j.sF(k)+j).L;
+     SWP(q,q':DBuf)=
+        allow({c2,c3,c5,c6,i,r1,s4},
+           comm({r2|s2->c2, r3|s3->c3, r5|s5->c5, r6|s6->c6},
+              S(0,0,q,empty) || 
+              K || 
+              L || 
+              R(0,q',empty)));
 
-init allow({cB,cC,cE,cF,j,rA,sD},
-        comm({rB|sB->cB, rC|sC->cC, rE|sE->cE, rF|sF->cF},
-           S(0,0,emptyBuf) || 
-           K || 
-           L || 
-           R(0,emptyBuf)));
+init SWP(q1,q2);
