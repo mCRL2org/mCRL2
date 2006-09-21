@@ -57,6 +57,7 @@ namespace sip {
         friend class layout::element;
      
         private:
+
           /** \brief The caption */
           std::string label;
      
@@ -203,7 +204,7 @@ namespace sip {
           void write_structure(std::ostream&) const;
       };
      
-      /** \brief A basic button widget */
+      /** \brief A basic progress bar widget */
       class progress_bar : public layout::element {
         friend class layout::element;
      
@@ -228,7 +229,7 @@ namespace sip {
      
         public:
      
-          /** \brief Constructor for a button */
+          /** \brief Constructor for a progress bar */
           progress_bar(const unsigned int, const unsigned int, const unsigned int);
 
           /** \brief Sets the current value of the progess bar */

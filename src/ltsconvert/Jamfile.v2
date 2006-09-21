@@ -11,6 +11,7 @@ exe ltsconvert
          /libraries/lts//lts
          /libraries/svc//svc
        : <source>/site-config//mcrl2_revision.h
+         <squadt_support>enable
          <include>.
        ;
 

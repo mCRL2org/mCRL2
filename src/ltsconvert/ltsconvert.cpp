@@ -17,10 +17,138 @@
 #define VERSION "0.1"
 #include "mcrl2_revision.h"
 
-using namespace std;
 using namespace mcrl2::lts;
 
 enum alt_lts_type { alt_lts_none, alt_lts_fsm, alt_lts_dot };
+
+// SQuADT protocol interface
+#include <squadt_utility.h>
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+class squadt_interactor : public squadt_tool_interface {
+
+  private:
+
+    enum input_files {
+      lts_file_for_input,  ///< file containing an LTS that can be imported using the LTS library
+      lts_file_for_output, ///< file used to write the output to
+      lpd_file_auxiliary   ///< LPD file needed for some conversion operations
+    };
+
+    enum lts_output_format {
+      aldebaran,   ///< Aldebaran format (AUT)
+      svc_mcrl,    ///< SVC file (mCRL specific)
+      svc_mcrl2,   ///< SVC file (mCRL2 specific)
+      bcg,         ///< BCG
+      fsm,         ///< FSM
+      dot          ///< dot
+    };
+
+    enum options {
+      selected_output_format,              ///< the selected output format
+      tau_actions,                         ///< the actions that should be recognised as tau
+      strong_bisimulation_minimisation,    ///< minimisation modulo strong bisimulation
+      branching_bisimulation_minimisation, ///< minimisation modulo branching bisimulation
+      add_bisimulation_equivalence_class,  ///< mCRL2 SVC output specific option
+      no_state_information                 ///< dot format output specific option to not save state information
+    };
+
+  public:
+
+    /** \brief configures tool capabilities */
+    void set_capabilities(sip::tool::capabilities&) const;
+
+    /** \brief queries the user via SQuADT if needed to obtain configuration information */
+    void user_interactive_configuration(sip::configuration&);
+
+    /** \brief check an existing configuration object to see if it is usable */
+    bool check_configuration(sip::configuration const&) const;
+
+    /** \brief performs the task specified by a configuration */
+    bool perform_task(sip::configuration&);
+};
+
+void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
+  c.add_input_combination(lts_file_for_input, "Transformation", "aut");
+  c.add_input_combination(lts_file_for_input, "Transformation", "svc");
+#ifdef MCRL2_BCG
+  c.add_input_combination(lts_file_for_input, "Transformation", "bcg");
+#endif
+}
+
+void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
+  using namespace sip;
+  using namespace sip::layout;
+  using namespace sip::layout::elements;
+
+  layout::tool_display::sptr display(new layout::tool_display);
+
+  /* Create and add the top layout manager */
+  layout::vertical_box::aptr top(new layout::vertical_box());
+
+  /* First column */
+  layout::manager* h = new layout::horizontal_box();
+
+  h->add(new label("Output format : "));
+  
+  squadt_utility::radio_button_helper < lts_output_format >
+        format_selector(h, new radio_button("Aldebaran"), aldebaran);
+
+  format_selector.associate(h, new radio_button("SVC/mCRL", format_selector.first), svc_mcrl);
+  format_selector.associate(h, new radio_button("SVC/mCRL2", format_selector.first), svc_mcrl2);
+#ifdef MCRL2_BCG
+  format_selector.associate(h, new radio_button("BCG", format_selector.first), bcg);
+#endif
+  format_selector.associate(h, new radio_button("FSM", format_selector.first), fsm);
+  format_selector.associate(h, new radio_button("dot", format_selector.first), dot);
+
+  button* okay_button = new button("OK");
+
+  /* Attach columns*/
+  top->add(h, margins(0,5,0,5));
+
+  top->add(okay_button, layout::top);
+
+  display->set_top_manager(top);
+
+  m_communicator.send_display_layout(display);
+
+  /* Wait until the ok button was pressed */
+  okay_button->await_change();
+
+  std::string lts_input_file_name = c.get_object(lts_file_for_input)->get_location();
+
+  if (c.is_fresh()) {
+    if (!c.object_exists(lts_file_for_output)) {
+      static char const* extensions[6] = {
+        lts::extension_for_type(lts_aut),
+        lts::extension_for_type(lts_mcrl),
+        lts::extension_for_type(lts_mcrl2),
+#ifdef MCRL2_BCG
+        lts::extension_for_type(lts_bcg),
+#endif
+        "fsm",
+        "dot"
+      };
+
+      /* Add output file to the configuration */
+      std::string extension = extensions[format_selector.get_selection()];
+
+      c.add_output(lts_file_for_output, extension, c.get_output_name("." + extension));
+    }
+  }
+}
+
+bool squadt_interactor::check_configuration(sip::configuration const& c) const {
+  return (true);
+}
+
+bool squadt_interactor::perform_task(sip::configuration&) {
+  return (false);
+}
+#endif
+
+using namespace std;
 
 static ATerm get_lpe(string &filename)
 {
@@ -203,109 +331,117 @@ int main(int argc, char **argv)
   bool print_dot_state = true;
   lts_equivalence equivalence = lts_eq_none;
   lts_eq_options eq_opts; set_eq_options_defaults(eq_opts);
-  while ( (opt = getopt_long(argc, argv, ShortOptions, LongOptions, NULL)) != -1 )
-  {
-    switch ( opt )
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  squadt_interactor c;
+
+  if (!c.try_interaction(argc, argv)) {
+#endif
+    while ( (opt = getopt_long(argc, argv, ShortOptions, LongOptions, NULL)) != -1 )
     {
-      case 'h':
-        print_help(stderr,argv[0]);
-        return 0;
-      case VersionOption:
-        print_version(stderr);
-        return 0;
-      case 'v':
-        verbose = true;
-        break;
-      case 'q':
-        quiet = true;
-        break;
-      case 'i':
-        if ( intype != lts_none )
-        {
-          fprintf(stderr,"warning: input format has already been specified; extra option ignored\n");
-        } else {
-          intype = lts::parse_format(optarg);
-          if ( intype == lts_none )
+      switch ( opt )
+      {
+        case 'h':
+          print_help(stderr,argv[0]);
+          return 0;
+        case VersionOption:
+          print_version(stderr);
+          return 0;
+        case 'v':
+          verbose = true;
+          break;
+        case 'q':
+          quiet = true;
+          break;
+        case 'i':
+          if ( intype != lts_none )
           {
-            fprintf(stderr,"warning: format '%s' is not recognised; option ignored\n",optarg);
-          }
-        }
-        break;
-      case 'o':
-        if ( (outtype != lts_none) || use_alt_outtype )
-        {
-          fprintf(stderr,"warning: output format has already been specified; extra option ignored\n");
-        } else {
-          outtype = lts::parse_format(optarg);
-          if ( outtype == lts_none )
-          {
-            alt_outtype = get_alt_format(optarg);
-            if ( alt_outtype == alt_lts_none )
+            fprintf(stderr,"warning: input format has already been specified; extra option ignored\n");
+          } else {
+            intype = lts::parse_format(optarg);
+            if ( intype == lts_none )
             {
               fprintf(stderr,"warning: format '%s' is not recognised; option ignored\n",optarg);
-            } else {
-              use_alt_outtype = true;
             }
           }
-        }
-        break;
-      case 'f':
-        print_formats(stderr);
-        return 0;
-      case 'l':
-        if ( lpefile != "" )
-        {
-          fprintf(stderr,"warning: LPE file has already been specified; extra option ignored\n");
-        }
-        lpefile = optarg;
-        break;
-      case 'n':
-        print_dot_state = false;
-        break;
-      case NoneOption:
-        equivalence = lts_eq_none;
-        break;
-      case 's':
-        equivalence = lts_eq_strong;
-        break;
-      case 'b':
-        equivalence = lts_eq_branch;
-        break;
-      case 't':
-        equivalence = lts_eq_trace;
-        break;
-      case 'u':
-        equivalence = lts_eq_obs_trace;
-        break;
-      case TauOption:
-	lts_reduce_add_tau_actions(eq_opts,optarg);
-        break;
-      case 'a':
-        eq_opts.reduce.add_class_to_state = true;
-        break;
-      default:
-        break;
+          break;
+        case 'o':
+          if ( (outtype != lts_none) || use_alt_outtype )
+          {
+            fprintf(stderr,"warning: output format has already been specified; extra option ignored\n");
+          } else {
+            outtype = lts::parse_format(optarg);
+            if ( outtype == lts_none )
+            {
+              alt_outtype = get_alt_format(optarg);
+              if ( alt_outtype == alt_lts_none )
+              {
+                fprintf(stderr,"warning: format '%s' is not recognised; option ignored\n",optarg);
+              } else {
+                use_alt_outtype = true;
+              }
+            }
+          }
+          break;
+        case 'f':
+          print_formats(stderr);
+          return 0;
+        case 'l':
+          if ( lpefile != "" )
+          {
+            fprintf(stderr,"warning: LPE file has already been specified; extra option ignored\n");
+          }
+          lpefile = optarg;
+          break;
+        case 'n':
+          print_dot_state = false;
+          break;
+        case NoneOption:
+          equivalence = lts_eq_none;
+          break;
+        case 's':
+          equivalence = lts_eq_strong;
+          break;
+        case 'b':
+          equivalence = lts_eq_branch;
+          break;
+        case 't':
+          equivalence = lts_eq_trace;
+          break;
+        case 'u':
+          equivalence = lts_eq_obs_trace;
+          break;
+        case TauOption:
+          lts_reduce_add_tau_actions(eq_opts,optarg);
+          break;
+        case 'a':
+          eq_opts.reduce.add_class_to_state = true;
+          break;
+        default:
+          break;
+      }
     }
+ 
+    if ( quiet && verbose )
+    {
+      gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
+      return 1;
+    }
+    if ( quiet )
+    {
+      gsSetQuietMsg();
+    }
+    if ( verbose )
+    {
+      gsSetVerboseMsg();
+    }
+#ifdef ENABLE_SQUADT_CONNECTIVITY
   }
-
-  if ( quiet && verbose )
-  {
-    gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
-    return 1;
-  }
-  if ( quiet )
-  {
-    gsSetQuietMsg();
-  }
-  if ( verbose )
-  {
-    gsSetVerboseMsg();
-  }
-
-
+#endif
+ 
   bool use_stdin = (optind >= argc);
   bool use_stdout = (optind+1 >= argc);
-
+ 
   string infile;
   string outfile;
   if ( !use_stdin )

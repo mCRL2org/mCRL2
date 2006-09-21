@@ -963,12 +963,16 @@ void parse_command_line(int ac, char** av, ConstelmObj& constelm) {
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 /* Constants for identifiers of options and objects */
-const unsigned int lpd_file_for_input  = 0;
-const unsigned int lpd_file_for_output = 1;
+enum input_files {
+  lpd_file_for_input,
+  lpd_file_for_output
+};
 
-const unsigned int option_remove_single_element_sorts = 0;
-const unsigned int option_remove_unvisited_summands   = 1;
-const unsigned int option_ignore_summand_conditions   = 2;
+enum options {
+  option_remove_single_element_sorts,
+  option_remove_unvisited_summands,
+  option_ignore_summand_conditions
+};
 
 /* Communicate the basic configuration display, and wait until the ok button was pressed */
 void set_basic_configuration_display(sip::tool::communicator& tc) {

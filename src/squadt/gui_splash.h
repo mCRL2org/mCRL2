@@ -147,7 +147,7 @@ namespace squadt {
 
       Show(true);
 
-      Centre();
+      CentreOnScreen();
     }
 
     /**

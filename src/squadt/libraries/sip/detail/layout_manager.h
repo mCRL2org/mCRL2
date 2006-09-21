@@ -14,9 +14,9 @@ namespace sip {
 
     /** \brief Type for element visibility */
     enum visibility {
-      visible,       ///< the element is visible
-      hidden,        ///< the element is not visible but still has effect on the layout
-      none           ///< the element is invisible and has no effect on the layout
+      visible = 10,  ///< the element is visible
+      hidden = 11,   ///< the element is not visible but still has effect on the layout
+      none = 12      ///< the element is invisible and has no effect on the layout
     };
 
     /** \brief The directional alignment of layout elements perpendicular to the orientation of the box */
