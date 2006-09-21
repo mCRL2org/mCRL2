@@ -58,6 +58,7 @@ namespace sip {
         margins              margin;               ///< the margins that should be observed around the element
         visibility           visible;              ///< whether or not the element affects layout and is visible
         bool                 grow;                 ///< whether or not to expand the control to fill available space
+        bool                 enabled;              ///< whether or not the control is enabled
        
         /** \brief Constructor */
         inline constraints(vertical_alignment const&, horizontal_alignment const&, margins const&, visibility const&);
@@ -71,7 +72,10 @@ namespace sip {
         /** \brief Write out the layout constraint in XML format */
         void write(std::ostream&) const;
 
-        /** \brief Read back a layout constraint, in XML format */
+        /** \brief Write out the layout constraint in XML format (differences only) */
+        void write(constraints const&, std::ostream&) const;
+
+        /** \brief Read back a layout constraint, in XML format (differences only) */
         void read(xml2pp::text_reader&);
 
         /** \brief Whether the control is allowed to grow */
@@ -324,7 +328,7 @@ namespace sip {
       return (alignment_horizontal == c.alignment_horizontal &&
               alignment_vertical == c.alignment_vertical &&
               margin == c.margin && visible == c.visible &&
-              grow == c.grow);
+              grow == c.grow && enabled == c.enabled);
     }
 
     /**
@@ -334,7 +338,7 @@ namespace sip {
       return (alignment_horizontal != c.alignment_horizontal ||
               alignment_vertical != c.alignment_vertical ||
               margin != c.margin || visible != c.visible ||
-              grow != c.grow);
+              grow != c.grow || enabled != c.enabled);
     }
 
     inline box::box() {

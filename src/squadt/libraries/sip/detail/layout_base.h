@@ -81,7 +81,7 @@ namespace sip {
         bool                        grow;
 
         /** \brief Whether or not the element is active */
-        bool                        interaction_enabled;
+        bool                        enabled;
 
       protected:
 
@@ -112,10 +112,10 @@ namespace sip {
         bool get_grow();
 
         /** \brief Enables user interaction */
-        void enable();
+        void set_enabled(bool b);
 
         /** \brief Disables user interaction */
-        void disable();
+        bool get_enabled();
 
         /** \brief Reads element specific data */
         virtual void read(read_context&); 
@@ -150,6 +150,14 @@ namespace sip {
         /** \brief Abstract destructor */
         virtual ~element() = 0;
     };
+
+    inline void element::set_enabled(bool b) {
+      enabled = b;
+    }
+
+    inline bool element::get_enabled() {
+      return (enabled);
+    }
 
     inline void element::set_grow(bool b) {
       grow = b;

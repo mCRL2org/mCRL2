@@ -129,32 +129,86 @@ namespace sip {
      * @param[out] o the stream to which to write
      **/
     void constraints::write(std::ostream& o) const {
-      o << "<layout-constraints "
+      o << "<constraints "
         << "horizontal-alignment=\"" << alignment_to_text[alignment_horizontal]
         << "\" vertical-alignment=\"" << alignment_to_text[alignment_vertical]
         << "\" margin-top=\"" << margin.top
         << "\" margin-left=\"" << margin.left
         << "\" margin-bottom=\"" << margin.bottom
-        << "\" margin-right=\"" << margin.right
-        << "\" visibility=\"" << visibility_to_text[visible]
-        << "\" grow=\"" << grow << "\"/>";
+        << "\" margin-right=\"" << margin.right;
+
+        if (grow) {
+          o << "\" grow=\"" << grow;
+        }
+
+        if (enabled) {
+          o << "\" enabled=\"" << enabled;
+        }
+
+        o << "\" visibility=\"" << visibility_to_text[visible] << "\"/>";
     }
 
     /**
-     * @param[in] r a xml2pp text reader
+     * \param[in] c the constraints object to take as reference
+     * \param[in] r a xml2pp text reader
+     **/
+    void constraints::write(constraints const& c, std::ostream& o) const {
+      o << "<constraints";
+
+      if (alignment_horizontal != c.alignment_horizontal) {
+        o << " horizontal-alignment=\"" << alignment_to_text[alignment_horizontal] << "\"";
+      }
+      if (alignment_vertical != c.alignment_vertical) {
+        o << " vertical-alignment=\"" << alignment_to_text[alignment_vertical] << "\"";
+      }
+      if (margin.top != c.margin.top) {
+        o << " margin-top=\"" << margin.top << "\"";
+      }
+      if (margin.left != c.margin.left) {
+        o << " margin-left=\"" << margin.left << "\"";
+      }
+      if (margin.bottom != c.margin.bottom) {
+        o << " margin-bottom=\"" << margin.bottom << "\"";
+      }
+      if (margin.right != c.margin.right) {
+        o << " margin-right=\"" << margin.right << "\"";
+      }
+      if (grow) {
+        o << " grow=\"" << grow << "\"";
+      }
+      if (enabled) {
+        o << " enabled=\"" << enabled << "\"";
+      }
+      if (visible != c.visible) {
+        o << " visibility=\"" << visibility_to_text[visible] << "\"";
+      }
+
+      o << "/>";
+    }
+
+    /**
+     * \param[in] c the constraints object to take as reference
+     * \param[in] r a xml2pp text reader
      **/
     void constraints::read(xml2pp::text_reader& r) {
-      alignment_horizontal = text_to_horizontal_alignment(r.get_attribute_as_string("horizontal-alignment"));
-      alignment_vertical   = text_to_vertical_alignment(r.get_attribute_as_string("vertical-alignment"));
+      if (r.get_attribute("horizontal-alignment")) {
+        alignment_horizontal = text_to_horizontal_alignment(r.get_attribute_as_string("horizontal-alignment"));
+      }
+      if (r.get_attribute("vertical-alignment")) {
+        alignment_vertical = text_to_vertical_alignment(r.get_attribute_as_string("vertical-alignment"));
+      }
 
       r.get_attribute(&margin.top, "margin-top");
       r.get_attribute(&margin.left, "margin-left");
       r.get_attribute(&margin.bottom, "margin-bottom");
       r.get_attribute(&margin.right, "margin-right");
 
-      visible = text_to_visibility(r.get_attribute_as_string("visibility"));
+      if (r.get_attribute("visibility")) { 
+        visible = text_to_visibility(r.get_attribute_as_string("visibility"));
+      }
 
-      grow = r.get_attribute("grow");
+      grow    = r.get_attribute("grow");
+      enabled = r.get_attribute("enabled");
 
       r.next_element();
     }
@@ -173,9 +227,9 @@ namespace sip {
 
       for (children_list::const_iterator i = children.begin(); i != children.end(); ++i) {
         if ((*i).second != *current_constraints) {
-          current_constraints = &((*i).second);
+          (*i).second.write(*current_constraints, o);
 
-          current_constraints->write(o);
+          current_constraints = &((*i).second);
         }
 
         (*i).first->write_structure(o);
@@ -198,9 +252,9 @@ namespace sip {
 
       for (children_list::const_iterator i = children.begin(); i != children.end(); ++i) {
         if ((*i).second != *current_constraints) {
-          current_constraints = &((*i).second);
+          current_constraints->write(*current_constraints, o);
 
-          current_constraints->write(o);
+          current_constraints = &((*i).second);
         }
 
         (*i).first->write_structure(o);
@@ -224,7 +278,7 @@ namespace sip {
         r.reader.next_element();
 
         while (!r.reader.is_end_element("box-layout-manager")) {
-          if (r.reader.is_element("layout-constraints")) {
+          if (r.reader.is_element("constraints")) {
             current_constraints.read(r.reader);
           }
 
