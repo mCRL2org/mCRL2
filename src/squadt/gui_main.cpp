@@ -1,4 +1,5 @@
 #include "gui_main.h"
+#include "gui_about.h"
 #include "gui_project.h"
 #include "gui_resources.h"
 #include "gui_dialog_project.h"
@@ -17,6 +18,9 @@ namespace squadt {
     miscellaneous::tool_selection_helper::sptr  main::tool_registry;
 
     void main::about() {
+      squadt::GUI::about about_dialog(this);
+      
+      about_dialog.ShowModal();
     }
 
     void main::build() {

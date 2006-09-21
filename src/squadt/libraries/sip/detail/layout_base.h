@@ -80,6 +80,9 @@ namespace sip {
         /** \brief Whether or not the element should grow */
         bool                        grow;
 
+        /** \brief Whether or not the element is active */
+        bool                        interaction_enabled;
+
       protected:
 
         /** \brief writes the element level attributes to stream */
@@ -107,6 +110,12 @@ namespace sip {
 
         /** \brief Get whether the element is allowed to grow or not */
         bool get_grow();
+
+        /** \brief Enables user interaction */
+        void enable();
+
+        /** \brief Disables user interaction */
+        void disable();
 
         /** \brief Reads element specific data */
         virtual void read(read_context&); 

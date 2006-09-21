@@ -369,7 +369,7 @@ namespace squadt {
             break;
           default: /* wxID_OK */
             if (wxFileName(project_store, name->GetValue()).DirExists() || wxFileName(project_store, name->GetValue()).DirExists()) {
-              wxMessageDialog(0, wxT("A file with this name is already part of the project!"), wxT("Error"), wxOK).ShowModal();
+              wxMessageDialog(0, wxT("A file with this name already exists in the project directory!"), wxT("Error"), wxOK).ShowModal();
 
               button_accept->Enable(false);
             }
