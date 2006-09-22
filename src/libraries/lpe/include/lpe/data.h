@@ -37,7 +37,7 @@ class data_expression: public aterm_wrapper
     data_expression(ATermAppl term)
       : aterm_wrapper(aterm_appl(term))
     {
-      assert(gsIsDataVarId(term) || gsIsOpId(term) || gsIsDataAppl(term));
+      assert(gsIsNil(term) || gsIsDataVarId(term) || gsIsOpId(term) || gsIsDataAppl(term));
     }
 
     data_expression(aterm_appl term)
