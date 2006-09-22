@@ -30,14 +30,13 @@
 
       v_guard = f_bdd_info.get_guard(a_bdd);
       v_negated_guard = gsMakeDataExprNot(v_guard);
-      v_true_condition = create_condition(a_path, v_guard);
+      v_true_condition = create_condition(a_path, v_guard, true);
       v_true_branch_enabled = f_smt_solver->is_satisfiable(v_true_condition);
-
       if (!v_true_branch_enabled) {
         v_false_path = ATinsert(a_path, (ATerm) v_negated_guard);
         return aux_simplify(f_bdd_info.get_false_branch(a_bdd), v_false_path);
       } else {
-        v_false_condition = create_condition(a_path, v_negated_guard);
+        v_false_condition = create_condition(a_path, v_negated_guard, true);
         v_false_branch_enabled = f_smt_solver->is_satisfiable(v_false_condition);
         if (!v_false_branch_enabled) {
           v_true_path = ATinsert(a_path, (ATerm) v_guard);
@@ -56,8 +55,8 @@
 
     // --------------------------------------------------------------------------------------------
 
-    ATermList BDD_Path_Eliminator::create_condition(ATermList a_path, ATermAppl a_guard) {
-      if (false) {
+    ATermList BDD_Path_Eliminator::create_condition(ATermList a_path, ATermAppl a_guard, bool a_minimal) {
+      if (!a_minimal) {
         return ATinsert(a_path, (ATerm) a_guard);
       } else {
         ATermList v_set;

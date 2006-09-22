@@ -15,6 +15,8 @@
 <!ENTITY type_atermlist "<type>ATermList</type>">
 <!ENTITY type_smt_solver_type "<type>SMT_Solver_Type</type>">
 
+<!ENTITY sort_bool "<type>Bool</type>">
+
 <!ENTITY smt_solver_is_satisfiable "<function>SMT_Solver::is_satisfiable</function>">
 
 <!ENTITY solver_ario "<constant>ario</constant>">
@@ -37,7 +39,7 @@
 
 <refnamediv>
 <refname>smt_solver</refname>
-<refpurpose>a base class for SMT solvers that solve propositional formulas</refpurpose>
+<refpurpose>a base class for SMT solvers that solve formulas in conjunctive normal form</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -54,7 +56,7 @@
 <para>
   The class &class_smt_solver; is a base class for SMT solvers. SMT stands for satisfiability modulo theories. The advantage of an SMT solver over
   an ordinary SAT solver is that an SMT solver can interpret the functions that are part of the theories it handles. An SMT solver can thus use
-  properties of these theories to prove or disprove the satisfiability of propositional formulas.
+  properties of these theories to prove or disprove the satisfiability of formulas.
 </para>
 <para>
   The method &smt_solver_is_satisfiable; receives a formula in conjunctive normal form as parameter &par_formula; and indicates whether or not this
@@ -69,8 +71,8 @@
   <itemizedlist>
     <listitem>
       <para>
-        The argument passed as parameter &par_formula; is a list of propositional formulas in internal mCRL2 format. The argument represents a
-        formula in conjunctive normal form, where the elements of the list represent the clauses
+        The argument passed as parameter &par_formula; is a list of expressions of sort &sort_bool; in internal mCRL2 format. The argument
+        represents a formula in conjunctive normal form, where the elements of the list represent the clauses
       </para>
     </listitem>
   </itemizedlist>

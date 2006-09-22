@@ -26,6 +26,7 @@
 <!ENTITY opt_r "<option>-r</option>">
 <!ENTITY opt_t "<option>-t</option>">
 <!ENTITY opt_z "<option>-z</option>">
+<!ENTITY opt_o "<option>-o</option>">
 <!ENTITY opt_invariant "<option>--invariant</option>">
 <!ENTITY opt_generate_invariants "<option>--generate-invariants</option>">
 <!ENTITY opt_summand "<option>--summand</option>">
@@ -42,6 +43,7 @@
 <!ENTITY opt_rewrite_strategy "<option>--rewrite-strategy</option>">
 <!ENTITY opt_time_limit "<option>--time-limit</option>">
 <!ENTITY opt_smt_solver "<option>--smt-solver</option>">
+<!ENTITY opt_induction "<option>--induction</option>">
 <!ENTITY strat_inner_string "<constant>inner</constant>">
 <!ENTITY strat_innerc_string "<constant>innerc</constant>">
 <!ENTITY strat_jitty_string "<constant>jitty</constant>">
@@ -137,7 +139,7 @@
     can be chosen using the option &opt_smt_solver;=&solver;. Either the SMT solver &solver_ario; or
     &solver_cvc_lite; can be used. To use one of these solvers, the directory containing the
     corresponding executable must be in the path.
-    On June the 20th of 2006, Ario was available on &link_ario; and CVC Lite was available on &link_cvc;.
+    On June the 20th of 2006, Ario 1.1 was available on &link_ario; and CVC Lite was available on &link_cvc;.
   </para>
 
   <para>
@@ -407,6 +409,16 @@
           </listitem>
         </itemizedlist>
         By default, no path elimination is applied
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_o;</term>
+    <term>&opt_induction;</term>
+    <listitem>
+      <para>
+        Apply induction on lists
       </para>
     </listitem>
   </varlistentry>

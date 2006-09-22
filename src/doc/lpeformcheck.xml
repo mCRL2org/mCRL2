@@ -9,6 +9,7 @@
 <!ENTITY strategy "<parameter>STRATEGY</parameter>">
 <!ENTITY seconds "<parameter>SECONDS</parameter>">
 <!ENTITY solver "<parameter>SOLVER</parameter>">
+<!ENTITY sort_bool "<type>Bool</type>">
 <!ENTITY opt_f "<option>-f</option>">
 <!ENTITY opt_l "<option>-l</option>">
 <!ENTITY opt_c "<option>-c</option>">
@@ -21,6 +22,7 @@
 <!ENTITY opt_r "<option>-r</option>">
 <!ENTITY opt_t "<option>-t</option>">
 <!ENTITY opt_z "<option>-z</option>">
+<!ENTITY opt_o "<option>-o</option>">
 <!ENTITY opt_formulas "<option>--formulas</option>">
 <!ENTITY opt_counter_example "<option>--counter-example</option>">
 <!ENTITY opt_witness "<option>--witness</option>">
@@ -33,6 +35,7 @@
 <!ENTITY opt_rewrite_strategy "<option>--rewrite-strategy</option>">
 <!ENTITY opt_time_limit "<option>--time-limit</option>">
 <!ENTITY opt_smt_solver "<option>--smt-solver</option>">
+<!ENTITY opt_induction "<option>--induction</option>">
 <!ENTITY strat_inner_string "<constant>'inner'</constant>">
 <!ENTITY strat_innerc_string "<constant>'innerc'</constant>">
 <!ENTITY strat_jitty_string "<constant>'jitty'</constant>">
@@ -70,6 +73,9 @@
 <refsect1>
   <title>Description</title>
   <para>
+    The term "formula" in the following text denotes arbitrary expressions of sort &sort_bool; in the mCRL2 format.
+</para>
+  <para>
     All formulas in the list of formulas in internal mCRL2 format as found in
     &formulas; are checked using the data specification of the mCRL2 LPE as found in
     &infile;. The &lpeformcheck; tool indicates whether each formula is a tautology or a
@@ -96,7 +102,7 @@
     the option &opt_smt_solver;=&solver;. Either the SMT solver &solver_ario; or
     &solver_cvc_lite; can be used. To use one of these solvers, the directory containing the
     corresponding executable must be in the path.
-    On June the 20th of 2006, Ario was available on &link_ario; and CVC Lite was available on &link_cvc;.
+    On June the 20th of 2006, Ario 1.1 was available on &link_ario; and CVC Lite was available on &link_cvc;.
   </para>
 
 </refsect1>
@@ -267,6 +273,16 @@
           </listitem>
         </itemizedlist>
         By default, no path elimination is applied
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_o;</term>
+    <term>&opt_induction;</term>
+    <listitem>
+      <para>
+        Apply induction on lists
       </para>
     </listitem>
   </varlistentry>

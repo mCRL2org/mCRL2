@@ -42,13 +42,13 @@ eqn
   submod(0, n) = Int2Nat(n - 1);
   n > 0 -> submod(n, m) = Int2Nat(n - 1);
 
-var
-  d: Nat;
-  q: List(Nat);
+%var
+%  d: Nat;
+%  q: List(Nat);
 
-eqn
-  rtail(d |> q) = if(q == [], [], d |> rtail(q));
-  rhead(d |> q) = if(q == [], d, rhead(q));
+%eqn
+%  rtail(d |> q) = if(q == [], [], d |> rtail(q));
+%  rhead(d |> q) = if(q == [], d, rhead(q));
 
 act
   rq, rp, sp, sq, c: Nat # Nat;

@@ -15,6 +15,8 @@
 <!ENTITY type_atermlist "<type>ATermList</type>">
 <!ENTITY type_smt_solver_type "<type>SMT_Solver_Type</type>">
 
+<!ENTITY sort_bool "<type>Bool</type>">
+
 <!ENTITY bdd_simplifier_simplify "<function>BDD_Simplifier::simplify</function>">
 
 <!ENTITY solver_ario "<constant>ario</constant>">
@@ -69,7 +71,7 @@
     <listitem>
       <para>
         The argument passed as parameter &par_bdd; is a data expression in internal mCRL2 format with the following restrictions: It either
-        represents the constant &const_true; or the constant &const_false;, or it is an &if_then_else; expression with a propositional formula
+        represents the constant &const_true; or the constant &const_false;, or it is an &if_then_else; expression with an expression of sort &sort_bool;
         as guard, and a then-branch and an else-branch that again follow these restrictions
       </para>
     </listitem>

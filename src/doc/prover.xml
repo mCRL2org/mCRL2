@@ -13,6 +13,8 @@
 <!ENTITY type_atermappl "<type>ATermAppl</type>">
 <!ENTITY type_rewrite_strategy "<type>RewriteStrategy</type>">
 
+<!ENTITY sort_bool "<type>Bool</type>">
+
 <!ENTITY prover_constructor "<function>Prover::Prover</function>">
 <!ENTITY prover_set_formula "<function>Prover::set_formula</function>">
 <!ENTITY prover_set_time_limit "<function>Prover::set_time_limit</function>">
@@ -45,7 +47,7 @@
 
 <refnamediv>
 <refname>prover</refname>
-<refpurpose>a base class for mCRL2 provers that determine if propositional formulas are contradictions or tautologies</refpurpose>
+<refpurpose>a base class for mCRL2 provers that determine if formulas are contradictions or tautologies</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -86,7 +88,10 @@
 <refsect1>
 <title>Description</title>
 <para>
-  The &class_prover; class is a base class for provers. Provers take propositional formulas as input and indicate if these formulas are
+  The term "formula" in the following text denotes arbitrary expressions of sort &sort_bool; in the mCRL2 format.
+</para>
+<para>
+  The &class_prover; class is a base class for provers. Provers take formulas as input and indicate if these formulas are
   tautologies or contradictions. Since provers are not necessarily complete, a prover can be unable to determine if a formula is a
   tautology or a contradiction for some formulas. If this is the case, the prover will indicate this fact. A prover uses a rewriter to rewrite
   parts of the
@@ -143,7 +148,7 @@
   The following precondition has to be satisfied for &prover_set_formula;:
   <itemizedlist>
     <listitem>
-      <para>the argument passed as parameter &par_formula; is a propositional formula in internal mCRL2 format</para>
+      <para>the argument passed as parameter &par_formula; is an expression of sort &sort_bool; in internal mCRL2 format</para>
     </listitem>
   </itemizedlist>
 </para>

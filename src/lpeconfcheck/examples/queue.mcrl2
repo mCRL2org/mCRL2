@@ -60,7 +60,7 @@ act
   r, s, r1, s1, r2, s2, r3, s3, s4, c1, c2, c3: Two;
 
 proc
-  Q(q: List(Two)) = 
+  Q(q: List(Two)) =
     sum d: Two. r(d) . Q(d |> q) +
     (q != []) -> s(rhead(q)) . Q(rtail(q));
 

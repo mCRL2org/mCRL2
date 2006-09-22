@@ -16,6 +16,8 @@
 <!ENTITY type_atermlist "<type>ATermList</type>">
 <!ENTITY type_smt_solver_type "<type>SMT_Solver_Type</type>">
 
+<!ENTITY sort_bool "<type>Bool</type>">
+
 <!ENTITY smt_lib_solver_translate "<function>SMT_LIB_Solver::translate</function>">
 
 <!ENTITY solver_ario "<constant>ario</constant>">
@@ -40,7 +42,7 @@
 
 <refnamediv>
 <refname>smt_lib_solver</refname>
-<refpurpose>a class that translates formulas in internal mCRL2 format to benchmarks in the SMT-LIB format</refpurpose>
+<refpurpose>a class that translates expressions in internal mCRL2 format to benchmarks in the SMT-LIB format</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -60,8 +62,8 @@
   goedel.cs.uiowa.edu/smtlib)]. It inherits from the class &class_smt_solver;.
 </para>
 <para>
-  The method &smt_lib_solver_translate; receives a propositional formula in conjunctive normal form as parameter &par_formula; and translates it to
-  a benchmark in SMT-LIB format. The result is saved as field &type_string; &var_benchmark;.
+  The method &smt_lib_solver_translate; receives an expression of sort &sort_bool; in conjunctive normal form as parameter &par_formula; and
+  translates it to a benchmark in SMT-LIB format. The result is saved as field &type_string; &var_benchmark;.
 </para>
 </refsect1>
 
@@ -72,8 +74,8 @@
   <itemizedlist>
     <listitem>
       <para>
-        The argument passed as parameter &par_formula; is a list of propositional formulas in internal mCRL2 format. The argument represents a
-        formula in conjunctive normal form, where the elements of the list represent the clauses
+        The argument passed as parameter &par_formula; is a list of expressions of sort &sort_bool; in internal mCRL2 format. The argument 
+        represents a formula in conjunctive normal form, where the elements of the list represent the clauses
       </para>
     </listitem>
   </itemizedlist>

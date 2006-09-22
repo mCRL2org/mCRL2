@@ -13,6 +13,7 @@
 <!ENTITY strategy "<parameter>STRATEGY</parameter>">
 <!ENTITY seconds "<parameter>SECONDS</parameter>">
 <!ENTITY solver "<parameter>SOLVER</parameter>">
+<!ENTITY sort_bool "<type>Bool</type>">
 <!ENTITY opt_i "<option>-i</option>">
 <!ENTITY opt_l "<option>-l</option>">
 <!ENTITY opt_s "<option>-s</option>">
@@ -29,6 +30,7 @@
 <!ENTITY opt_r "<option>-r</option>">
 <!ENTITY opt_t "<option>-t</option>">
 <!ENTITY opt_z "<option>-z</option>">
+<!ENTITY opt_o "<option>-o</option>">
 <!ENTITY opt_invariant "<option>--invariant</option>">
 <!ENTITY opt_summand "<option>--summand</option>">
 <!ENTITY opt_no_check "<option>--no-check</option>">
@@ -45,6 +47,7 @@
 <!ENTITY opt_rewrite_strategy "<option>--rewrite-strategy</option>">
 <!ENTITY opt_time_limit "<option>--time-limit</option>">
 <!ENTITY opt_smt_solver "<option>--smt-solver</option>">
+<!ENTITY opt_induction "<option>--induction</option>">
 <!ENTITY strat_inner_string "<constant>inner</constant>">
 <!ENTITY strat_innerc_string "<constant>innerc</constant>">
 <!ENTITY strat_jitty_string "<constant>jitty</constant>">
@@ -106,8 +109,8 @@
     <literallayout>
       inv(d) /\ ci(d, ei) => inv(gi(d, ei))
     </literallayout>
-    is generated for each of the summands, where <literal>inv()</literal> is the formula passed using the option &opt_invariant;.
-    This formula is an invariant of the LPE if it holds in the initial state and all the generated formulas are tautologies.
+    is generated for each of the summands, where <literal>inv()</literal> is the expression passed using the option &opt_invariant;.
+    This expression is an invariant of the LPE if it holds in the initial state and all the generated formulas are tautologies.
   </para>
   <para>
     The invariant is used to eliminate summands as follows. A formula of the form
@@ -115,7 +118,8 @@
       inv(d) /\ ci(d, ei)
     </literallayout>
     is generated for each of the summands or for the summand indicated using the option &opt_summand; only. The tool uses a BDD based prover for
-    propositional formulas to see if the generated formula is a contradiction. If the formula is a contradiction for some summand, this summand
+    expressions of sort &sort_bool; to see if the generated formula is a contradiction. If the formula is a contradiction for some summand, this
+    summand
     will be eliminated from the LPE. If the formula is not a contradiction, the summand remains unchanged unless the option &opt_simplify_all;
     is used.
   </para>
@@ -133,24 +137,24 @@
     can be chosen using the option &opt_smt_solver;=&solver;. Either the SMT solver &solver_ario; or
     &solver_cvc_lite; can be used. To use one of these solvers, the directory containing the
     corresponding executable must be in the path.
-    On June the 20th of 2006, Ario was available on &link_ario; and CVC Lite was available on &link_cvc;.
+    On June the 20th of 2006, Ario 1.1 was available on &link_ario; and CVC Lite was available on &link_cvc;.
   </para>
 
   <para>
-    Without using the option &opt_no_check;, &lpeinvelm; will first check if the given formula
+    Without using the option &opt_no_check;, &lpeinvelm; will first check if the given expression
     is an invariant of the LPE. If this is not the case, no elimination or simplification will
     be done. In some cases the invariant may hold even though the prover is unable to determine
     this fact. In cases where
-    a formula is an invariant of the LPE, but the prover is unable to determine this, the option
+    an expression is an invariant of the LPE, but the prover is unable to determine this, the option
     &opt_no_check; can be used to eliminate or simplify summands anyway. Note that this also makes
-    it possible to eliminate or simplify summands using a formula that is not an invariant of the
+    it possible to eliminate or simplify summands using an expression that is not an invariant of the
     LPE.
   </para>
 
   <para>
     The option &opt_verbose; gives insight into what the prover is doing and can be used to see
     if rewrite rules have to be added to the specification, in order to enable the prover to
-    determine the invariance of a formula.
+    determine the invariance of an expression.
   </para>
 </refsect1>
 
@@ -164,7 +168,7 @@
     <term>&opt_invariant;=&invariant;</term>
     <listitem>
       <para>
-        Use the formula in internal mCRL2 format as
+        Use the expression of sort &sort_bool; in internal mCRL2 format as
         found in &invariant; as invariant
       </para>
     </listitem>
@@ -336,7 +340,7 @@
     <listitem>
       <para>
         Spend at most the specified number of &seconds; on proving
-        a single formula
+        a single expression
       </para>
     </listitem>
   </varlistentry>
@@ -360,6 +364,16 @@
           </listitem>
         </itemizedlist>
         By default, no path elimination is applied
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_o;</term>
+    <term>&opt_induction;</term>
+    <listitem>
+      <para>
+        Apply induction on lists
       </para>
     </listitem>
   </varlistentry>

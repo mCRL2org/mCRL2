@@ -16,6 +16,8 @@
 <!ENTITY type_atermlist "<type>ATermList</type>">
 <!ENTITY type_smt_solver_type "<type>SMT_Solver_Type</type>">
 
+<!ENTITY sort_bool "<type>Bool</type>">
+
 <!ENTITY smt_solver_cvc_lite_constructor "<function>SMT_Solver_CVC_Lite::SMT_Solver_CVC_Lite</function>">
 <!ENTITY smt_solver_cvc_lite_is_satisfiable "<function>SMT_Solver_CVC_Lite::is_satisfiable</function>">
 
@@ -39,7 +41,7 @@
 
 <refnamediv>
 <refname>smt_solver_cvc_lite</refname>
-<refpurpose>a class that uses the SMT solver CVC Lite to solve propositional formulas</refpurpose>
+<refpurpose>a class that uses the SMT solver CVC Lite to solve formulas in conjunctive normal form</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -58,15 +60,15 @@
 <refsect1>
 <title>Description</title>
 <para>
-  The class &class_smt_solver_cvc_lite; inherits from the class &class_smt_lib_solver;. It uses the SMT solver &solver_cvc_lite; to determine
-  the satisfiability of propositional formulas. To use the solver &solver_cvc_lite;, the directory containing the corresponding
-  executable must be in the path. On June the 20th of 2006, &solver_cvc_lite; was available on &link_cvc;.
+  The class &class_smt_solver_cvc_lite; inherits from the class &class_smt_lib_solver;. It uses the SMT solver CVC Lite to determine
+  the satisfiability of propositional formulas. To use the solver CVC Lite, the directory containing the corresponding
+  executable must be in the path. On June the 20th of 2006, CVC Lite was available on &link_cvc;.
 </para>
 <para>
-  The constructor &smt_solver_cvc_lite_constructor; checks if &solver_cvc_lite;'s executable is indeed available and reports an error if it is not.
+  The constructor &smt_solver_cvc_lite_constructor; checks if CVC Lite's executable is indeed available and reports an error if it is not.
 </para>
 <para>
-  The method &smt_solver_cvc_lite_is_satisfiable; receives a propositional formula in conjunctive normal form as parameter &par_formula; and
+  The method &smt_solver_cvc_lite_is_satisfiable; receives a formula in conjunctive normal form as parameter &par_formula; and
   indicates whether or not this formula is satisfiable.
 </para>
 </refsect1>
@@ -78,8 +80,8 @@
   <itemizedlist>
     <listitem>
       <para>
-        The argument passed as parameter &par_formula; is a list of propositional formulas in internal mCRL2 format. The argument represents a
-        formula in conjunctive normal form, where the elements of the list represent the clauses
+        The argument passed as parameter &par_formula; is a list of expressions of sort &sort_bool; in internal mCRL2 format. The argument
+        represents a formula in conjunctive normal form, where the elements of the list represent the clauses
       </para>
     </listitem>
   </itemizedlist>
