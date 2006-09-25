@@ -5,12 +5,10 @@
 // ----------------------------------------------------------------------
 //
 // file          : lpeuntime 
-// date          : 13-09-2006
-// version       : 0.2
+// date          : 25-09-2006
+// version       : 0.21
 //
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
-//
-// Based on the framework in lpeinfo by Frank Stappers
 //
 // ======================================================================
 
@@ -35,7 +33,7 @@ using namespace lpe;
 
 namespace po = boost::program_options;
 
-#define VERSION "0.2"
+#define VERSION "0.21"
 
 std::string input_file; // Name of the file to read input from
 std::string output_file; // Name of the file to write output to (or stdout)
@@ -115,59 +113,75 @@ lpe::specification squadt_lpeuntime::untime(const lpe::specification& specificat
     lpe::data_assignment_list untime_assignments; //Updated assignments (or next state)
     lpe::LPE_summand untime_summand; //Updated summand
 
-    if (i->has_time()) 
-    { 
-      // The summand is already timed, therefor there is no need to add an extra summation variable for time
-      untime_summation_variables = i->summation_variables();   
+    if (!(i->is_delta())){
 
-      // Extend the original condition with an additional argument t.i(d,e.i)>last_action_time
-      untime_condition = gsMakeDataExprAnd(i->condition(), 
-                                           gsMakeDataExprGT(i->time(), 
-                                                            last_action_time.to_expr()
-                                                           )
-                                           );
+      if (i->has_time()) 
+      { 
+	// The summand is already timed, therefor there is no need to add an extra summation variable for time
+	untime_summation_variables = i->summation_variables();   
 
-      // Extend original assignments to include t.i(d,e.i)
-      untime_assignments = push_back(i->assignments(),data_assignment(last_action_time,i->time()));
-    }
-    else
-    {
-          
-      // Add a new summation variable (this is allowed because according to an axiom the following equality holds):
-      // c -> a . X == sum t:Real . c -> a@t . X
-      lpe::data_variable time_var;
-      time_var = data_variable("time_var", lpe::sort("Real")); // TODO: See if we can auto-name the variable (in order to prevent name collisions)
-      untime_summation_variables = push_back(i->summation_variables(), time_var);
- 
-      // Extend the original condition with an additional argument
-      untime_condition = gsMakeDataExprAnd(i->condition(),
-                                           gsMakeDataExprGT(time_var,
-                                                            last_action_time.to_expr()
-                                                           )
-                                           );
+	// Extend the original condition with an additional argument t.i(d,e.i)>last_action_time
+	untime_condition = gsMakeDataExprAnd(i->condition(), 
+                                             gsMakeDataExprGT(i->time(), 
+                                                              last_action_time.to_expr()
+                                                             )
+                                             );
+
+	// Extend original assignments to include t.i(d,e.i)
+	untime_assignments = push_back(i->assignments(),data_assignment(last_action_time,i->time()));
+      }
+      else
+      {
+
+	// Add a new summation variable (this is allowed because according to an axiom the following equality holds):
+	// c -> a . X == sum t:Real . c -> a@t . X
+	lpe::data_variable time_var;
+	time_var = data_variable("time_var", lpe::sort("Real")); // TODO: See if we can auto-name the variable (in order to prevent name collisions)
+	untime_summation_variables = push_back(i->summation_variables(), time_var);
+
+	// Extend the original condition with an additional argument
+	untime_condition = gsMakeDataExprAnd(i->condition(),
+                                             gsMakeDataExprGT(time_var,
+                                                              last_action_time.to_expr()
+                                                             )
+                                             );
 
 
-      // Extend original assignments to include t.i(d,e.i)
-      untime_assignments = push_back(i->assignments(),
-                                    data_assignment(last_action_time, time_var.to_expr())
-                                   );
-    } // i->has_time()
+	// Extend original assignments to include t.i(d,e.i)
+	untime_assignments = push_back(i->assignments(),
+                                      data_assignment(last_action_time, time_var.to_expr())
+                                     );
+      } // i->has_time()
 
-    // Create a new summand with the changed parameters
-    untime_summand = lpe::LPE_summand(untime_summation_variables,
-					untime_condition,
-					i->is_delta(),
-					i->actions(),
-					gsMakeNil(), // new time
-					untime_assignments
-					);
+      // Create a new summand with the changed parameters
+      untime_summand = lpe::LPE_summand(untime_summation_variables,
+					  untime_condition,
+					  i->is_delta(),
+					  i->actions(),
+					  gsMakeNil(), // new time
+					  untime_assignments
+					  );
 
-    // Add the new summand to the list
-    untime_summand_list = push_front(untime_summand_list, untime_summand);
+      // Add the new summand to the list
+      untime_summand_list = push_front(untime_summand_list, untime_summand);
+
+    } // !(i->is_delta())
 
   }
- 
-  // Revert summand list, because it is the wrong way round now.
+
+  // Add delta summand
+  lpe::LPE_summand untime_summand;
+  untime_summand = lpe::LPE_summand(data_variable_list(),
+                                    data_expression(gsMakeDataExprTrue()),
+                                    true,
+                                    action_list(),
+                                    gsMakeNil(),
+                                    data_assignment_list()
+                                   );
+
+  push_front(untime_summand_list, untime_summand);
+
+  // Reverse summand list, because it is the wrong way round now.
   untime_summand_list = reverse(untime_summand_list);
       
   // Create new LPE, this equals lpe, except for the new summand list and the additional process parameter.
