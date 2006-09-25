@@ -228,10 +228,10 @@ AC_ARG_WITH(
   )
 )
 if test $enable_static; then
-  BUILD_OPTIONS="\"<link>static\" \"<runtime-link>static\""
+  BUILD_OPTIONS="\"<link>static\""
 fi
 
-# Check whether dymbol table stripping from binaries is requested
+# Check whether symbol table stripping from binaries is requested
 AC_ARG_ENABLE(
   [experimental],
   AC_HELP_STRING(
@@ -244,7 +244,7 @@ if test $enable_experimental; then
 fi
 AC_SUBST([BUILD_EXPERIMENTAL])
 
-# Check whether dymbol table stripping from binaries is requested
+# Check whether symbol table stripping from binaries is requested
 AC_ARG_ENABLE(
   [deprecated],
   AC_HELP_STRING(

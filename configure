@@ -4765,10 +4765,10 @@ if test "${with_static+set}" = set; then
 fi
 
 if test $enable_static; then
-  BUILD_OPTIONS="\"<link>static\" \"<runtime-link>static\""
+  BUILD_OPTIONS="\"<link>static\""
 fi
 
-# Check whether dymbol table stripping from binaries is requested
+# Check whether symbol table stripping from binaries is requested
 # Check whether --enable-experimental was given.
 if test "${enable_experimental+set}" = set; then
   enableval=$enable_experimental;
@@ -4779,7 +4779,7 @@ if test $enable_experimental; then
 fi
 
 
-# Check whether dymbol table stripping from binaries is requested
+# Check whether symbol table stripping from binaries is requested
 # Check whether --enable-deprecated was given.
 if test "${enable_deprecated+set}" = set; then
   enableval=$enable_deprecated;
