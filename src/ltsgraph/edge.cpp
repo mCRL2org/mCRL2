@@ -60,7 +60,7 @@ void edge::on_paint(wxDC * ptrDC)
 
     if (start_x == end_x && start_y == end_y) {
       start_x += node_radius;
-      end_y += node_radius;
+      start_y += node_radius;
     }
     double control_x = get_x_control();
     double control_y = get_y_control();
