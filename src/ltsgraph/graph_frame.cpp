@@ -98,13 +98,13 @@ void GraphFrame::BuildLayout() {
   
   wxFlexGridSizer* topRightSizer = new wxFlexGridSizer( 0, 2, 0, 0 );
   initialStateLabel = new wxStaticText( rightPanel, wxID_ANY, wxEmptyString,
-    wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
+    wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT );
   numberOfStatesLabel = new wxStaticText( rightPanel, wxID_ANY, wxEmptyString,
-    wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
+    wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT );
   numberOfTransitionsLabel = new wxStaticText( rightPanel, wxID_ANY, wxEmptyString,
-    wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
+    wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT );
   numberOfLabelsLabel = new wxStaticText( rightPanel, wxID_ANY, wxEmptyString,
-    wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
+    wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT );
 
   topRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("Initial state:         ") ), 0, lflags, 4 );
   topRightSizer->Add( initialStateLabel, 0, rflags, 3 );
