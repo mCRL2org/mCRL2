@@ -960,7 +960,7 @@ void GraphFrame::FindNode(wxPoint pt) {
       }
   }
 
-  if (leftPanel->selection == none_t && (curve_edges || show_labels) ) { 
+  if (leftPanel->selection == none_t) { 
     for (size_t n = 0; n < vectNode.size(); n++) {
       double radius = vectNode[n]->get_radius();
       double node_x = vectNode[n]->GetX();
