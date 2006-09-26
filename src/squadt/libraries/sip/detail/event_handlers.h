@@ -26,7 +26,7 @@ namespace sip {
       public:
    
         /** \brief Basic type of event handler functions */
-        typedef boost::function < void () >                  handler_function;
+        typedef boost::function < void () > handler_function;
    
       private:
    

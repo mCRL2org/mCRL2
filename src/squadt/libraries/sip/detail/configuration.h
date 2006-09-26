@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include <boost/bind.hpp>
+#include <boost/foreach.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
 
@@ -124,13 +125,13 @@ namespace sip {
       inline void add_object(object::sptr);
 
       /** \brief Establishes whether an object exists (by identifier) */
-      inline bool object_exists(const object::identifier);
+      inline bool object_exists(const object::identifier) const;
 
       /** \brief Remove an input/output object from the configuration */
       inline void remove_object(const object::identifier);
 
       /** \brief Get an input/output object from the configuration */
-      inline object::sptr get_object(const object::identifier);
+      inline object::sptr const get_object(const object::identifier) const;
 
       /** \brief Add an input object to the configuration */
       inline void add_input(const object::identifier, object::storage_format, object::uri = "");
@@ -413,7 +414,7 @@ namespace sip {
   /**
    * @param id a unique identifier for the object
    **/
-  inline bool configuration::object_exists(const object::identifier id) {
+  inline bool configuration::object_exists(const object::identifier id) const {
     using namespace std;
     using namespace boost;
 
@@ -434,18 +435,21 @@ namespace sip {
   /**
    * @param id an identifier for the object
    **/
-  inline object::sptr configuration::get_object(const object::identifier id) {
+  inline object::sptr const configuration::get_object(const object::identifier id) const {
     using namespace std;
     using namespace boost;
 
-    object_list::iterator i = find_if(objects.begin(), objects.end(),
-                    bind(equal_to < object::identifier >(),
-                            bind(&object::get_id,
-                                    bind(&object::sptr::get,_1)), id));
+    object::sptr o;
 
-    assert(i != objects.end());
+    BOOST_FOREACH(object::sptr const i, objects) {
+      if (i->get_id() == id) {
+        o = i;
 
-    return (*i);
+        break;
+      }
+    }
+
+    return (o);
   }
 
   /**
