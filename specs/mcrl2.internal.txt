@@ -1,4 +1,4 @@
-// Date: 30-06-2006
+// Date: 26-09-2006
 // This document describes the internal format of the mCRL2 language and the
 // corresponding mu-calculus formulas. Here:
 // - the following phases of implementation are distinguised:
@@ -32,22 +32,6 @@
 //   + the lhs's of A should obey the order in which they are declared 
 // - the DataVarId's of the Assignment's of an LPEInit should be identical to the
 //   DataVarId's of the corresponding LPE
-// This description uses the theory of higher-order abstract data types, i.e.
-// we have a higher-order signature Sigma = (B, O), where B is set of basic
-// sorts and O is a set of operations. From the set B, we can generate the set
-// of higher-order sorts as follows:
-// - the set of basic sorts B is in B->;
-// - for all s, s' in B->, (s -> s') is in B->.
-// The set O is a B->-sorted set of operations, where each O_s contains
-// constants of sort s, for all s in B->.
-// The higher-order signature Sigma determines a first-order signature
-// Sigma-> = (B->, O extended with Appl), where Appl is the set of operation
-// applications.  This set contains the operation apply: (s -> s') # s -> s'
-// for every s,s' in B->.
-// Because we modelled the set Appl by the data expression DataAppl, the
-// description of the data types below is essentially first-order. Also, we
-// only use finite subsets of the infinite set of sorts B-> and the infinite
-// set of operations O.
 
 
 //Sort expressions
@@ -158,7 +142,7 @@
 <ProcVarId>    ::= ProcVarId(<String>, <SortExpr>*)
 
 //multiaction name
-<MultActName>  ::= MultActName(<String>+) 
+<MultActName>  ::= MultActName(<String>+)
 
 //renaming expression
 <RenameExpr>   ::= RenameExpr(<String>, <String>) 
@@ -226,6 +210,8 @@
                  | StateExists(<DataVarId>+, <StateFrm>)
                  | StateMust(<RegFrm>, <StateFrm>)
                  | StateMay(<RegFrm>, <StateFrm>)
+                 | StateYaled
+                 | StateYaledTimed(<DataExpr>)
                  | StateDelay
                  | StateDelayTimed(<DataExpr>)
                  | StateVar(<String>, <DataExpr>*)
@@ -256,32 +242,35 @@
                  | ActExists(<DataVarId>+, <ActFrm>)
                  | ActAt(<ActFrm>, <DataExpr>)
 
-//PBES
-//--------------------
+//PBES's
+//------
+
+// PBES equation system
+<PBES>         ::= PBES(<DataSpec>, <PBEqn>*, <PropVarInst>)
+
+// propositional variable instantiation
+<PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*)
+
+// parameterized boolean equation
+<PBEqn>        ::= PBEqn(<FixPoint>, <PropVarDecl>, <PBExpr>)
+
 // fixpoint symbol
 <FixPoint>     ::= Mu
                  | Nu
 
-// propositional variable instantiation
-<PropVarInst>      ::= PropVarInst(<String>, <DataExpr>*)
-
 // propositional variable declaration
-<PropVarDecl>      ::= PropVarDecl(<String>, <DataExpr>*)
+<PropVarDecl>  ::= PropVarDecl(<String>, <DataExpr>*)
 
 // parameterized boolean expression
 <PBExpr>       ::= <DataExpr>
                  | PBESTrue
                  | PBESFalse
-                 | PBESNot(<PBExpr>)
                  | PBESAnd(<PBExpr>, <PBExpr>)
                  | PBESOr(<PBExpr>, <PBExpr>)
-                 | PBESImp(<PBExpr>, <PBExpr>)
                  | PBESForall(<DataVarId>+, <PBExpr>)
                  | PBESExists(<DataVarId>+, <PBExpr>)
                  | <PropVarInst>
 
-// parameterized boolean equation
-<PBEqn>        ::= PBEqn(<FixPoint>, <PropVarDecl>, <PBExpr>)
-
-// PBES equation system
-<PBES>         ::= PBES(<PBEqn>*, <PropVarInst>)
+//data specification
+<DataSpec>     ::= DataSpec(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
+                     MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*))

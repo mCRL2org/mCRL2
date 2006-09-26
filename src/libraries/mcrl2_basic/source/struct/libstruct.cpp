@@ -97,38 +97,19 @@ ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term, bool TryNoSuffix)
 //------------------------------
 
 //Constant AFun's for each constructor element of the internal ATerm structure.
-static AFun gsAFunSpecV1;
-static AFun gsAFunSortSpec;
-static AFun gsAFunConsSpec;
-static AFun gsAFunMapSpec;
-static AFun gsAFunDataEqnSpec;
-static AFun gsAFunActSpec;
-static AFun gsAFunSortId;
-static AFun gsAFunSortRef;
-static AFun gsAFunOpId;
-static AFun gsAFunDataEqn;
-static AFun gsAFunDataVarId;
-static AFun gsAFunNil;
-static AFun gsAFunActId;
-static AFun gsAFunProcEqnSpec;
-static AFun gsAFunLPE;
-static AFun gsAFunProcEqn;
-static AFun gsAFunProcVarId;
-static AFun gsAFunLPESummand;
-static AFun gsAFunMultAct;
-static AFun gsAFunDelta;
-static AFun gsAFunAction;
-static AFun gsAFunAssignment;
-static AFun gsAFunInit;
-static AFun gsAFunLPEInit;
+//sort expressions
 static AFun gsAFunSortList;
 static AFun gsAFunSortSet;
 static AFun gsAFunSortBag;
 static AFun gsAFunSortStruct;
 static AFun gsAFunSortArrowProd;
 static AFun gsAFunSortArrow;
+static AFun gsAFunSortId;
 static AFun gsAFunStructCons;
 static AFun gsAFunStructProj;
+static AFun gsAFunNil;
+static AFun gsAFunUnknown;
+//data expressions
 static AFun gsAFunId;
 static AFun gsAFunDataApplProd;
 static AFun gsAFunDataAppl;
@@ -141,18 +122,25 @@ static AFun gsAFunForall;
 static AFun gsAFunExists;
 static AFun gsAFunLambda;
 static AFun gsAFunWhr;
-static AFun gsAFunUnknown;
+static AFun gsAFunDataVarId;
+static AFun gsAFunOpId;
 static AFun gsAFunBagEnumElt;
 static AFun gsAFunWhrDecl;
+//multi-actions
+static AFun gsAFunMultAct;
 static AFun gsAFunParamId;
+static AFun gsAFunAction;
+static AFun gsAFunActId;
+//process expressions
 static AFun gsAFunProcess;
+static AFun gsAFunDelta;
 static AFun gsAFunTau;
 static AFun gsAFunSum;
 static AFun gsAFunBlock;
-static AFun gsAFunAllow;
 static AFun gsAFunHide;
 static AFun gsAFunRename;
 static AFun gsAFunComm;
+static AFun gsAFunAllow;
 static AFun gsAFunSync;
 static AFun gsAFunAtTime;
 static AFun gsAFunSeq;
@@ -161,9 +149,27 @@ static AFun gsAFunBInit;
 static AFun gsAFunMerge;
 static AFun gsAFunLMerge;
 static AFun gsAFunChoice;
+static AFun gsAFunProcVarId;
 static AFun gsAFunMultActName;
 static AFun gsAFunRenameExpr;
 static AFun gsAFunCommExpr;
+//mCRL2 specifications
+static AFun gsAFunSpecV1;
+static AFun gsAFunSortSpec;
+static AFun gsAFunConsSpec;
+static AFun gsAFunMapSpec;
+static AFun gsAFunDataEqnSpec;
+static AFun gsAFunActSpec;
+static AFun gsAFunSortRef;
+static AFun gsAFunDataEqn;
+static AFun gsAFunProcEqnSpec;
+static AFun gsAFunLPE;
+static AFun gsAFunProcEqn;
+static AFun gsAFunLPESummand;
+static AFun gsAFunAssignment;
+static AFun gsAFunInit;
+static AFun gsAFunLPEInit;
+//mu-calculus formulas
 static AFun gsAFunStateTrue;
 static AFun gsAFunStateFalse;
 static AFun gsAFunStateNot;
@@ -174,6 +180,8 @@ static AFun gsAFunStateForall;
 static AFun gsAFunStateExists;
 static AFun gsAFunStateMust;
 static AFun gsAFunStateMay;
+static AFun gsAFunStateYaled;
+static AFun gsAFunStateYaledTimed;
 static AFun gsAFunStateDelay;
 static AFun gsAFunStateDelayTimed;
 static AFun gsAFunStateVar;
@@ -194,22 +202,20 @@ static AFun gsAFunActImp;
 static AFun gsAFunActForall;
 static AFun gsAFunActExists;
 static AFun gsAFunActAt;
-
-// pbes symbols
+//PBES's
+static AFun gsAFunPBES;
+static AFun gsAFunPropVarInst;
+static AFun gsAFunPBEqn;
 static AFun gsAFunMu;
 static AFun gsAFunNu;
-static AFun gsAFunPBES;
-static AFun gsAFunPBESAnd;
-static AFun gsAFunPBESExists;
-static AFun gsAFunPBESFalse;
-static AFun gsAFunPBESForall;
-static AFun gsAFunPBESImp;
-static AFun gsAFunPBESNot;
-static AFun gsAFunPBESOr;
-static AFun gsAFunPBESTrue;
-static AFun gsAFunPBEqn;
 static AFun gsAFunPropVarDecl;
-static AFun gsAFunPropVarInst;
+static AFun gsAFunPBESTrue;
+static AFun gsAFunPBESFalse;
+static AFun gsAFunPBESAnd;
+static AFun gsAFunPBESOr;
+static AFun gsAFunPBESForall;
+static AFun gsAFunPBESExists;
+static AFun gsAFunDataSpec;
 
 //Constant ATermAppl's for each sort system identifier name
 static ATermAppl gsSortIdNameBool;
@@ -320,38 +326,19 @@ void gsEnableConstructorFunctions(void)
 {
   if (!ConstructorFunctionsEnabled) {
     //create constructor AFun's
-    gsAFunSpecV1           = ATmakeAFun("SpecV1", 7, ATfalse);
-    gsAFunSortSpec         = ATmakeAFun("SortSpec", 1, ATfalse);
-    gsAFunConsSpec         = ATmakeAFun("ConsSpec", 1, ATfalse);
-    gsAFunMapSpec          = ATmakeAFun("MapSpec", 1, ATfalse);
-    gsAFunDataEqnSpec      = ATmakeAFun("DataEqnSpec", 1, ATfalse);
-    gsAFunActSpec          = ATmakeAFun("ActSpec", 1, ATfalse);
-    gsAFunSortId           = ATmakeAFun("SortId", 1, ATfalse);
-    gsAFunSortRef          = ATmakeAFun("SortRef", 2, ATfalse);
-    gsAFunOpId             = ATmakeAFun("OpId", 2, ATfalse);
-    gsAFunDataEqn          = ATmakeAFun("DataEqn", 4, ATfalse);
-    gsAFunDataVarId        = ATmakeAFun("DataVarId", 2, ATfalse);
-    gsAFunNil              = ATmakeAFun("Nil", 0, ATfalse);
-    gsAFunActId            = ATmakeAFun("ActId", 2, ATfalse);
-    gsAFunProcEqnSpec      = ATmakeAFun("ProcEqnSpec", 1, ATfalse);
-    gsAFunLPE              = ATmakeAFun("LPE", 3, ATfalse);
-    gsAFunProcEqn          = ATmakeAFun("ProcEqn", 4, ATfalse);
-    gsAFunProcVarId        = ATmakeAFun("ProcVarId", 2, ATfalse);
-    gsAFunLPESummand       = ATmakeAFun("LPESummand", 5, ATfalse);
-    gsAFunMultAct          = ATmakeAFun("MultAct", 1, ATfalse);
-    gsAFunDelta            = ATmakeAFun("Delta", 0, ATfalse);
-    gsAFunAction           = ATmakeAFun("Action", 2, ATfalse);
-    gsAFunAssignment       = ATmakeAFun("Assignment", 2, ATfalse);
-    gsAFunInit             = ATmakeAFun("Init", 2, ATfalse);
-    gsAFunLPEInit          = ATmakeAFun("LPEInit", 2, ATfalse);
+    //sort expressions
     gsAFunSortList         = ATmakeAFun("SortList", 1, ATfalse);
     gsAFunSortSet          = ATmakeAFun("SortSet", 1, ATfalse);
     gsAFunSortBag          = ATmakeAFun("SortBag", 1, ATfalse);
     gsAFunSortStruct       = ATmakeAFun("SortStruct", 1, ATfalse);
     gsAFunSortArrowProd    = ATmakeAFun("SortArrowProd", 2, ATfalse);
     gsAFunSortArrow        = ATmakeAFun("SortArrow", 2, ATfalse);
+    gsAFunSortId           = ATmakeAFun("SortId", 1, ATfalse);
     gsAFunStructCons       = ATmakeAFun("StructCons", 3, ATfalse);
     gsAFunStructProj       = ATmakeAFun("StructProj", 2, ATfalse);
+    gsAFunUnknown          = ATmakeAFun("Unknown", 0, ATfalse);
+    gsAFunNil              = ATmakeAFun("Nil", 0, ATfalse);
+    //data expressions
     gsAFunId               = ATmakeAFun("Id", 1, ATfalse);
     gsAFunDataApplProd     = ATmakeAFun("DataApplProd", 2, ATfalse);
     gsAFunDataAppl         = ATmakeAFun("DataAppl", 2, ATfalse);
@@ -364,18 +351,25 @@ void gsEnableConstructorFunctions(void)
     gsAFunExists           = ATmakeAFun("Exists", 2, ATfalse);
     gsAFunLambda           = ATmakeAFun("Lambda", 2, ATfalse);
     gsAFunWhr              = ATmakeAFun("Whr", 2, ATfalse);
-    gsAFunUnknown          = ATmakeAFun("Unknown", 0, ATfalse);
+    gsAFunDataVarId        = ATmakeAFun("DataVarId", 2, ATfalse);
+    gsAFunOpId             = ATmakeAFun("OpId", 2, ATfalse);
     gsAFunBagEnumElt       = ATmakeAFun("BagEnumElt", 2, ATfalse);
     gsAFunWhrDecl          = ATmakeAFun("WhrDecl", 2, ATfalse);
+    //multi-actions
+    gsAFunMultAct          = ATmakeAFun("MultAct", 1, ATfalse);
     gsAFunParamId          = ATmakeAFun("ParamId", 2, ATfalse);
+    gsAFunAction           = ATmakeAFun("Action", 2, ATfalse);
+    gsAFunActId            = ATmakeAFun("ActId", 2, ATfalse);
+    //process expressions
     gsAFunProcess          = ATmakeAFun("Process", 2, ATfalse);
+    gsAFunDelta            = ATmakeAFun("Delta", 0, ATfalse);
     gsAFunTau              = ATmakeAFun("Tau", 0, ATfalse);
     gsAFunSum              = ATmakeAFun("Sum", 2, ATfalse);
     gsAFunBlock            = ATmakeAFun("Block", 2, ATfalse);
-    gsAFunAllow            = ATmakeAFun("Allow", 2, ATfalse);
     gsAFunHide             = ATmakeAFun("Hide", 2, ATfalse);
     gsAFunRename           = ATmakeAFun("Rename", 2, ATfalse);
     gsAFunComm             = ATmakeAFun("Comm", 2, ATfalse);
+    gsAFunAllow            = ATmakeAFun("Allow", 2, ATfalse);
     gsAFunSync             = ATmakeAFun("Sync", 2, ATfalse);
     gsAFunAtTime           = ATmakeAFun("AtTime", 2, ATfalse);
     gsAFunSeq              = ATmakeAFun("Seq", 2, ATfalse);
@@ -384,9 +378,27 @@ void gsEnableConstructorFunctions(void)
     gsAFunMerge            = ATmakeAFun("Merge", 2, ATfalse);
     gsAFunLMerge           = ATmakeAFun("LMerge", 2, ATfalse);
     gsAFunChoice           = ATmakeAFun("Choice", 2, ATfalse);
+    gsAFunProcVarId        = ATmakeAFun("ProcVarId", 2, ATfalse);
     gsAFunMultActName      = ATmakeAFun("MultActName", 1, ATfalse);
     gsAFunRenameExpr       = ATmakeAFun("RenameExpr", 2, ATfalse);
     gsAFunCommExpr         = ATmakeAFun("CommExpr", 2, ATfalse);
+    //mCRL2 specifications
+    gsAFunSpecV1           = ATmakeAFun("SpecV1", 7, ATfalse);
+    gsAFunSortSpec         = ATmakeAFun("SortSpec", 1, ATfalse);
+    gsAFunConsSpec         = ATmakeAFun("ConsSpec", 1, ATfalse);
+    gsAFunMapSpec          = ATmakeAFun("MapSpec", 1, ATfalse);
+    gsAFunDataEqnSpec      = ATmakeAFun("DataEqnSpec", 1, ATfalse);
+    gsAFunActSpec          = ATmakeAFun("ActSpec", 1, ATfalse);
+    gsAFunSortRef          = ATmakeAFun("SortRef", 2, ATfalse);
+    gsAFunDataEqn          = ATmakeAFun("DataEqn", 4, ATfalse);
+    gsAFunProcEqnSpec      = ATmakeAFun("ProcEqnSpec", 1, ATfalse);
+    gsAFunLPE              = ATmakeAFun("LPE", 3, ATfalse);
+    gsAFunProcEqn          = ATmakeAFun("ProcEqn", 4, ATfalse);
+    gsAFunLPESummand       = ATmakeAFun("LPESummand", 5, ATfalse);
+    gsAFunAssignment       = ATmakeAFun("Assignment", 2, ATfalse);
+    gsAFunInit             = ATmakeAFun("Init", 2, ATfalse);
+    gsAFunLPEInit          = ATmakeAFun("LPEInit", 2, ATfalse);
+    //mu-calculus formulas
     gsAFunStateTrue        = ATmakeAFun("StateTrue", 0, ATfalse);
     gsAFunStateFalse       = ATmakeAFun("StateFalse", 0, ATfalse);
     gsAFunStateNot         = ATmakeAFun("StateNot", 1, ATfalse);
@@ -397,6 +409,8 @@ void gsEnableConstructorFunctions(void)
     gsAFunStateExists      = ATmakeAFun("StateExists", 2, ATfalse);
     gsAFunStateMust        = ATmakeAFun("StateMust", 2, ATfalse);
     gsAFunStateMay         = ATmakeAFun("StateMay", 2, ATfalse);
+    gsAFunStateYaled       = ATmakeAFun("StateYaled", 0, ATfalse);
+    gsAFunStateYaledTimed  = ATmakeAFun("StateYaledTimed", 1, ATfalse);
     gsAFunStateDelay       = ATmakeAFun("StateDelay", 0, ATfalse);
     gsAFunStateDelayTimed  = ATmakeAFun("StateDelayTimed", 1, ATfalse);
     gsAFunStateVar         = ATmakeAFun("StateVar", 2, ATfalse);
@@ -417,6 +431,20 @@ void gsEnableConstructorFunctions(void)
     gsAFunActForall        = ATmakeAFun("ActForall", 2, ATfalse);
     gsAFunActExists        = ATmakeAFun("ActExists", 2, ATfalse);
     gsAFunActAt            = ATmakeAFun("ActAt", 2, ATfalse);
+    // pbes
+    gsAFunPBES             = ATmakeAFun("PBES", 3, ATfalse);
+    gsAFunPropVarInst      = ATmakeAFun("PropVarInst", 2, ATfalse);
+    gsAFunPBEqn            = ATmakeAFun("PBEqn", 3, ATfalse);
+    gsAFunMu               = ATmakeAFun("Mu", 0, ATfalse);
+    gsAFunNu               = ATmakeAFun("Nu", 0, ATfalse);
+    gsAFunPropVarDecl      = ATmakeAFun("PropVarDecl", 2, ATfalse);
+    gsAFunPBESTrue         = ATmakeAFun("PBESTrue", 0, ATfalse);
+    gsAFunPBESFalse        = ATmakeAFun("PBESFalse", 0, ATfalse);
+    gsAFunPBESAnd          = ATmakeAFun("PBESAnd", 2, ATfalse);
+    gsAFunPBESOr           = ATmakeAFun("PBESOr", 2, ATfalse);
+    gsAFunPBESForall       = ATmakeAFun("PBESForall", 2, ATfalse);
+    gsAFunPBESExists       = ATmakeAFun("PBESExists", 2, ATfalse);
+    gsAFunDataSpec         = ATmakeAFun("DataSpec", 4, ATfalse);
 
     //create sort system identifier names
     gsSortIdNameBool       = gsString2ATermAppl("Bool");
@@ -516,38 +544,19 @@ void gsEnableConstructorFunctions(void)
     gsOpIdNameBagIntersect = gsString2ATermAppl("*");
 
     //protect constructor AFun's
-    ATprotectAFun(gsAFunSpecV1);
-    ATprotectAFun(gsAFunSortSpec);
-    ATprotectAFun(gsAFunConsSpec);
-    ATprotectAFun(gsAFunMapSpec);
-    ATprotectAFun(gsAFunDataEqnSpec);
-    ATprotectAFun(gsAFunActSpec);
-    ATprotectAFun(gsAFunSortId);
-    ATprotectAFun(gsAFunSortRef);
-    ATprotectAFun(gsAFunOpId);
-    ATprotectAFun(gsAFunDataEqn);
-    ATprotectAFun(gsAFunDataVarId);
-    ATprotectAFun(gsAFunNil);
-    ATprotectAFun(gsAFunActId);
-    ATprotectAFun(gsAFunProcEqnSpec);
-    ATprotectAFun(gsAFunLPE);
-    ATprotectAFun(gsAFunProcEqn);
-    ATprotectAFun(gsAFunProcVarId);
-    ATprotectAFun(gsAFunLPESummand);
-    ATprotectAFun(gsAFunMultAct);
-    ATprotectAFun(gsAFunDelta);
-    ATprotectAFun(gsAFunAction);
-    ATprotectAFun(gsAFunAssignment);
-    ATprotectAFun(gsAFunInit);
-    ATprotectAFun(gsAFunLPEInit);
+    //sort expressions
     ATprotectAFun(gsAFunSortList);
     ATprotectAFun(gsAFunSortSet);
     ATprotectAFun(gsAFunSortBag);
     ATprotectAFun(gsAFunSortStruct);
     ATprotectAFun(gsAFunSortArrowProd);
     ATprotectAFun(gsAFunSortArrow);
+    ATprotectAFun(gsAFunSortId);
     ATprotectAFun(gsAFunStructCons);
     ATprotectAFun(gsAFunStructProj);
+    ATprotectAFun(gsAFunNil);
+    ATprotectAFun(gsAFunUnknown);
+    //data expressions
     ATprotectAFun(gsAFunId);
     ATprotectAFun(gsAFunDataApplProd);
     ATprotectAFun(gsAFunDataAppl);
@@ -560,18 +569,25 @@ void gsEnableConstructorFunctions(void)
     ATprotectAFun(gsAFunExists);
     ATprotectAFun(gsAFunLambda);
     ATprotectAFun(gsAFunWhr);
-    ATprotectAFun(gsAFunUnknown);
+    ATprotectAFun(gsAFunDataVarId);
+    ATprotectAFun(gsAFunOpId);
     ATprotectAFun(gsAFunBagEnumElt);
     ATprotectAFun(gsAFunWhrDecl);
+    //multi-actions
+    ATprotectAFun(gsAFunMultAct);
     ATprotectAFun(gsAFunParamId);
+    ATprotectAFun(gsAFunAction);
+    ATprotectAFun(gsAFunActId);
+    //process expressions
     ATprotectAFun(gsAFunProcess);
+    ATprotectAFun(gsAFunDelta);
     ATprotectAFun(gsAFunTau);
     ATprotectAFun(gsAFunSum);
     ATprotectAFun(gsAFunBlock);
-    ATprotectAFun(gsAFunAllow);
     ATprotectAFun(gsAFunHide);
     ATprotectAFun(gsAFunRename);
     ATprotectAFun(gsAFunComm);
+    ATprotectAFun(gsAFunAllow);
     ATprotectAFun(gsAFunSync);
     ATprotectAFun(gsAFunAtTime);
     ATprotectAFun(gsAFunSeq);
@@ -580,9 +596,27 @@ void gsEnableConstructorFunctions(void)
     ATprotectAFun(gsAFunMerge);
     ATprotectAFun(gsAFunLMerge);
     ATprotectAFun(gsAFunChoice);
+    ATprotectAFun(gsAFunProcVarId);
     ATprotectAFun(gsAFunMultActName);
     ATprotectAFun(gsAFunRenameExpr);
     ATprotectAFun(gsAFunCommExpr);
+    //mCRL2 specifications
+    ATprotectAFun(gsAFunSpecV1);
+    ATprotectAFun(gsAFunSortSpec);
+    ATprotectAFun(gsAFunConsSpec);
+    ATprotectAFun(gsAFunMapSpec);
+    ATprotectAFun(gsAFunDataEqnSpec);
+    ATprotectAFun(gsAFunActSpec);
+    ATprotectAFun(gsAFunSortRef);
+    ATprotectAFun(gsAFunDataEqn);
+    ATprotectAFun(gsAFunProcEqnSpec);
+    ATprotectAFun(gsAFunLPE);
+    ATprotectAFun(gsAFunProcEqn);
+    ATprotectAFun(gsAFunLPESummand);
+    ATprotectAFun(gsAFunAssignment);
+    ATprotectAFun(gsAFunInit);
+    ATprotectAFun(gsAFunLPEInit);
+    //mu-calculus formulas
     ATprotectAFun(gsAFunStateTrue);
     ATprotectAFun(gsAFunStateFalse);
     ATprotectAFun(gsAFunStateNot);
@@ -593,6 +627,8 @@ void gsEnableConstructorFunctions(void)
     ATprotectAFun(gsAFunStateExists);
     ATprotectAFun(gsAFunStateMust);
     ATprotectAFun(gsAFunStateMay);
+    ATprotectAFun(gsAFunStateYaled);
+    ATprotectAFun(gsAFunStateYaledTimed);
     ATprotectAFun(gsAFunStateDelay);
     ATprotectAFun(gsAFunStateDelayTimed);
     ATprotectAFun(gsAFunStateVar);
@@ -613,6 +649,21 @@ void gsEnableConstructorFunctions(void)
     ATprotectAFun(gsAFunActForall);
     ATprotectAFun(gsAFunActExists);
     ATprotectAFun(gsAFunActAt);
+    //PBES's
+    ATprotectAFun(gsAFunPBES);
+    ATprotectAFun(gsAFunPropVarInst);
+    ATprotectAFun(gsAFunPBEqn);
+    ATprotectAFun(gsAFunMu);
+    ATprotectAFun(gsAFunNu);
+    ATprotectAFun(gsAFunPropVarDecl);
+    ATprotectAFun(gsAFunPBESTrue);
+    ATprotectAFun(gsAFunPBESFalse);
+    ATprotectAFun(gsAFunPBESAnd);
+    ATprotectAFun(gsAFunPBESOr);
+    ATprotectAFun(gsAFunPBESForall);
+    ATprotectAFun(gsAFunPBESExists);
+    ATprotectAFun(gsAFunDataSpec);
+
     //protect sort system identifier names
     ATprotectAppl(&gsSortIdNameBool);
     ATprotectAppl(&gsSortIdNamePos);
@@ -709,36 +760,6 @@ void gsEnableConstructorFunctions(void)
     ATprotectAppl(&gsOpIdNameBagDiff);
     ATprotectAppl(&gsOpIdNameBagIntersect);
 
-    // pbes
-    gsAFunMu = ATmakeAFun("Mu", 0, ATfalse);
-    gsAFunNu = ATmakeAFun("Nu", 0, ATfalse);
-    gsAFunPBES = ATmakeAFun("PBES", 2, ATfalse);
-    gsAFunPBESAnd = ATmakeAFun("PBESAnd", 2, ATfalse);
-    gsAFunPBESExists = ATmakeAFun("PBESExists", 2, ATfalse);
-    gsAFunPBESFalse = ATmakeAFun("PBESFalse", 0, ATfalse);
-    gsAFunPBESForall = ATmakeAFun("PBESForall", 2, ATfalse);
-    gsAFunPBESImp = ATmakeAFun("PBESImp", 2, ATfalse);
-    gsAFunPBESNot = ATmakeAFun("PBESNot", 1, ATfalse);
-    gsAFunPBESOr = ATmakeAFun("PBESOr", 2, ATfalse);
-    gsAFunPBESTrue = ATmakeAFun("PBESTrue", 0, ATfalse);
-    gsAFunPBEqn = ATmakeAFun("PBEqn", 3, ATfalse);
-    gsAFunPropVarDecl = ATmakeAFun("PropVarDecl", 2, ATfalse);
-    gsAFunPropVarInst = ATmakeAFun("PropVarInst", 2, ATfalse);
-    ATprotectAFun(gsAFunMu);
-    ATprotectAFun(gsAFunNu);
-    ATprotectAFun(gsAFunPBES);
-    ATprotectAFun(gsAFunPBESAnd);
-    ATprotectAFun(gsAFunPBESExists);
-    ATprotectAFun(gsAFunPBESFalse);
-    ATprotectAFun(gsAFunPBESForall);
-    ATprotectAFun(gsAFunPBESImp);
-    ATprotectAFun(gsAFunPBESNot);
-    ATprotectAFun(gsAFunPBESOr);
-    ATprotectAFun(gsAFunPBESTrue);
-    ATprotectAFun(gsAFunPBEqn);
-    ATprotectAFun(gsAFunPropVarDecl);
-    ATprotectAFun(gsAFunPropVarInst);
-
     ConstructorFunctionsEnabled = true;
   }
 }
@@ -746,162 +767,7 @@ void gsEnableConstructorFunctions(void)
 //Creation of all constructor elements of the internal structure
 //--------------------------------------------------------------
 
-ATermAppl gsMakeSpecV1(
-  ATermAppl SortSpec, ATermAppl ConsSpec, ATermAppl MapSpec,
-  ATermAppl DataEqnSpec, ATermAppl ActSpec, ATermAppl ProcEqnSpec,
-  ATermAppl Init)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl(gsAFunSpecV1, (ATerm) SortSpec, (ATerm) ConsSpec,
-    (ATerm) MapSpec, (ATerm) DataEqnSpec, (ATerm) ActSpec, (ATerm) ProcEqnSpec,
-    (ATerm) Init);
-}
-
-ATermAppl gsMakeSortSpec(ATermList SortDecls)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl1(gsAFunSortSpec, (ATerm) SortDecls);
-}
-
-ATermAppl gsMakeConsSpec(ATermList OpIds)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl1(gsAFunConsSpec, (ATerm) OpIds);
-}
-
-ATermAppl gsMakeMapSpec(ATermList OpIds)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl1(gsAFunMapSpec, (ATerm) OpIds);
-}
-
-ATermAppl gsMakeDataEqnSpec(ATermList DataEqns)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl1(gsAFunDataEqnSpec, (ATerm) DataEqns);
-}
-
-ATermAppl gsMakeActSpec(ATermList ActIds)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl1(gsAFunActSpec, (ATerm) ActIds);
-}
-
-ATermAppl gsMakeSortId(ATermAppl Name)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl1(gsAFunSortId, (ATerm) Name);
-}
-
-ATermAppl gsMakeSortRef(ATermAppl Name, ATermAppl SortExpr)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunSortRef, (ATerm) Name, (ATerm) SortExpr);
-}
-
-ATermAppl gsMakeOpId(ATermAppl Name, ATermAppl SortExpr)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunOpId, (ATerm) Name, (ATerm) SortExpr);
-}
-
-ATermAppl gsMakeDataEqn(ATermList DataVarIds, ATermAppl BoolExprOrNil,
-  ATermAppl DataExprLHS, ATermAppl DataExprRHS)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl4(gsAFunDataEqn, (ATerm) DataVarIds, (ATerm) BoolExprOrNil,
-    (ATerm) DataExprLHS, (ATerm) DataExprRHS);
-}
-
-ATermAppl gsMakeDataVarId(ATermAppl Name, ATermAppl SortExpr)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunDataVarId, (ATerm) Name, (ATerm) SortExpr);
-}
-
-ATermAppl gsMakeNil()
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl0(gsAFunNil);
-}
-
-ATermAppl gsMakeActId(ATermAppl Name, ATermList SortExprs)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunActId, (ATerm) Name, (ATerm) SortExprs);
-}
-
-ATermAppl gsMakeProcEqnSpec(ATermList ProcEqns)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl1(gsAFunProcEqnSpec, (ATerm) ProcEqns);
-}
-
-ATermAppl gsMakeLPE(ATermList GlobDataVarIds, ATermList ProcDataVarIds,
-  ATermList LPESummands)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl3(gsAFunLPE, (ATerm) GlobDataVarIds, (ATerm) ProcDataVarIds,
-    (ATerm) LPESummands);
-}
-
-ATermAppl gsMakeProcEqn(ATermList GlobDataVarIds, ATermAppl ProcVarId,
-  ATermList ProcDataVarIds, ATermAppl ProcExpr)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl4(gsAFunProcEqn, (ATerm) GlobDataVarIds, (ATerm) ProcVarId,
-    (ATerm) ProcDataVarIds, (ATerm) ProcExpr);
-}
-
-ATermAppl gsMakeProcVarId(ATermAppl Name, ATermList SortExprs)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunProcVarId, (ATerm) Name, (ATerm) SortExprs);
-}
-
-ATermAppl gsMakeLPESummand(ATermList DataVarIds, ATermAppl BoolExpr,
-  ATermAppl MultiAction, ATermAppl TimeExprOrNil, ATermList Assignments)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl5(gsAFunLPESummand, (ATerm) DataVarIds, (ATerm) BoolExpr,
-    (ATerm) MultiAction, (ATerm) TimeExprOrNil, (ATerm) Assignments);
-}
-
-ATermAppl gsMakeMultAct(ATermList Actions)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl1(gsAFunMultAct, (ATerm) Actions);
-}
-
-ATermAppl gsMakeDelta()
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl0(gsAFunDelta);
-}
-
-ATermAppl gsMakeAction(ATermAppl ActId, ATermList DataExprs)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunAction, (ATerm) ActId, (ATerm) DataExprs);
-}
-
-ATermAppl gsMakeAssignment(ATermAppl DataVarId, ATermAppl DataExpr)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunAssignment, (ATerm) DataVarId, (ATerm) DataExpr);
-}
-
-ATermAppl gsMakeInit(ATermList GlobDataVarIds, ATermAppl ProcExpr)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunInit, (ATerm) GlobDataVarIds, (ATerm) ProcExpr);
-}
-
-ATermAppl gsMakeLPEInit(ATermList GlobDataVarIds, ATermList DataExprs)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunLPEInit, (ATerm) GlobDataVarIds, (ATerm) DataExprs);
-}
+//sort expressions
 
 ATermAppl gsMakeSortList(ATermAppl SortExpr)
 {
@@ -942,6 +808,12 @@ ATermAppl gsMakeSortArrow(ATermAppl SortExprDomain, ATermAppl SortExprResult)
     (ATerm) SortExprResult);
 }
 
+ATermAppl gsMakeSortId(ATermAppl Name)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunSortId, (ATerm) Name);
+}
+
 ATermAppl gsMakeStructCons(ATermAppl ConsName, ATermList StructProjs,
   ATermAppl RecNameOrNil)
 {
@@ -956,6 +828,20 @@ ATermAppl gsMakeStructProj(ATermAppl ProjNameOrNil, ATermAppl SortExpr)
   return ATmakeAppl2(gsAFunStructProj, (ATerm) ProjNameOrNil,
     (ATerm) SortExpr);
 }
+
+ATermAppl gsMakeNil()
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl0(gsAFunNil);
+}
+
+ATermAppl gsMakeUnknown()
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl0(gsAFunUnknown);
+}
+
+//data expressions
 
 ATermAppl gsMakeId(ATermAppl Name)
 {
@@ -1032,10 +918,16 @@ ATermAppl gsMakeWhr(ATermAppl DataExpr, ATermList WhrDecls)
   return ATmakeAppl2(gsAFunWhr, (ATerm) DataExpr, (ATerm) WhrDecls);
 }
 
-ATermAppl gsMakeUnknown()
+ATermAppl gsMakeDataVarId(ATermAppl Name, ATermAppl SortExpr)
 {
   assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl0(gsAFunUnknown);
+  return ATmakeAppl2(gsAFunDataVarId, (ATerm) Name, (ATerm) SortExpr);
+}
+
+ATermAppl gsMakeOpId(ATermAppl Name, ATermAppl SortExpr)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunOpId, (ATerm) Name, (ATerm) SortExpr);
 }
 
 ATermAppl gsMakeBagEnumElt(ATermAppl DataExpr, ATermAppl Multiplicity)
@@ -1050,16 +942,44 @@ ATermAppl gsMakeWhrDecl(ATermAppl Name, ATermAppl DataExpr)
   return ATmakeAppl2(gsAFunWhrDecl, (ATerm) Name, (ATerm) DataExpr);
 }
 
+//multi-actions
+
+ATermAppl gsMakeMultAct(ATermList Actions)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunMultAct, (ATerm) Actions);
+}
+
 ATermAppl gsMakeParamId(ATermAppl Name, ATermList DataExprs)
 {
   assert(ConstructorFunctionsEnabled);
   return ATmakeAppl2(gsAFunParamId, (ATerm) Name, (ATerm) DataExprs);
 }
 
+ATermAppl gsMakeAction(ATermAppl ActId, ATermList DataExprs)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunAction, (ATerm) ActId, (ATerm) DataExprs);
+}
+
+ATermAppl gsMakeActId(ATermAppl Name, ATermList SortExprs)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunActId, (ATerm) Name, (ATerm) SortExprs);
+}
+
+//process expressions
+
 ATermAppl gsMakeProcess(ATermAppl ProcId, ATermList DataExprs)
 {
   assert(ConstructorFunctionsEnabled);
   return ATmakeAppl2(gsAFunProcess, (ATerm) ProcId, (ATerm) DataExprs);
+}
+
+ATermAppl gsMakeDelta()
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl0(gsAFunDelta);
 }
 
 ATermAppl gsMakeTau()
@@ -1154,6 +1074,12 @@ ATermAppl gsMakeChoice(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS)
   return ATmakeAppl2(gsAFunChoice, (ATerm) ProcExprLHS, (ATerm) ProcExprRHS);
 }
 
+ATermAppl gsMakeProcVarId(ATermAppl Name, ATermList SortExprs)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunProcVarId, (ATerm) Name, (ATerm) SortExprs);
+}
+
 ATermAppl gsMakeMultActName(ATermList ActNames)
 {
   assert(ConstructorFunctionsEnabled);
@@ -1171,6 +1097,113 @@ ATermAppl gsMakeCommExpr(ATermAppl MultActName, ATermAppl ActNameOrNil)
   assert(ConstructorFunctionsEnabled);
   return ATmakeAppl2(gsAFunCommExpr, (ATerm) MultActName, (ATerm) ActNameOrNil);
 }
+
+//mCRL2 specifications
+
+ATermAppl gsMakeSpecV1(
+  ATermAppl SortSpec, ATermAppl ConsSpec, ATermAppl MapSpec,
+  ATermAppl DataEqnSpec, ATermAppl ActSpec, ATermAppl ProcEqnSpec,
+  ATermAppl Init)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl(gsAFunSpecV1, (ATerm) SortSpec, (ATerm) ConsSpec,
+    (ATerm) MapSpec, (ATerm) DataEqnSpec, (ATerm) ActSpec, (ATerm) ProcEqnSpec,
+    (ATerm) Init);
+}
+
+ATermAppl gsMakeSortSpec(ATermList SortDecls)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunSortSpec, (ATerm) SortDecls);
+}
+
+ATermAppl gsMakeConsSpec(ATermList OpIds)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunConsSpec, (ATerm) OpIds);
+}
+
+ATermAppl gsMakeMapSpec(ATermList OpIds)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunMapSpec, (ATerm) OpIds);
+}
+
+ATermAppl gsMakeDataEqnSpec(ATermList DataEqns)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunDataEqnSpec, (ATerm) DataEqns);
+}
+
+ATermAppl gsMakeActSpec(ATermList ActIds)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunActSpec, (ATerm) ActIds);
+}
+
+ATermAppl gsMakeSortRef(ATermAppl Name, ATermAppl SortExpr)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunSortRef, (ATerm) Name, (ATerm) SortExpr);
+}
+
+ATermAppl gsMakeDataEqn(ATermList DataVarIds, ATermAppl BoolExprOrNil,
+  ATermAppl DataExprLHS, ATermAppl DataExprRHS)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl4(gsAFunDataEqn, (ATerm) DataVarIds, (ATerm) BoolExprOrNil,
+    (ATerm) DataExprLHS, (ATerm) DataExprRHS);
+}
+
+ATermAppl gsMakeProcEqnSpec(ATermList ProcEqns)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunProcEqnSpec, (ATerm) ProcEqns);
+}
+
+ATermAppl gsMakeLPE(ATermList GlobDataVarIds, ATermList ProcDataVarIds,
+  ATermList LPESummands)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl3(gsAFunLPE, (ATerm) GlobDataVarIds, (ATerm) ProcDataVarIds,
+    (ATerm) LPESummands);
+}
+
+ATermAppl gsMakeProcEqn(ATermList GlobDataVarIds, ATermAppl ProcVarId,
+  ATermList ProcDataVarIds, ATermAppl ProcExpr)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl4(gsAFunProcEqn, (ATerm) GlobDataVarIds, (ATerm) ProcVarId,
+    (ATerm) ProcDataVarIds, (ATerm) ProcExpr);
+}
+
+ATermAppl gsMakeLPESummand(ATermList DataVarIds, ATermAppl BoolExpr,
+  ATermAppl MultiAction, ATermAppl TimeExprOrNil, ATermList Assignments)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl5(gsAFunLPESummand, (ATerm) DataVarIds, (ATerm) BoolExpr,
+    (ATerm) MultiAction, (ATerm) TimeExprOrNil, (ATerm) Assignments);
+}
+
+ATermAppl gsMakeAssignment(ATermAppl DataVarId, ATermAppl DataExpr)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunAssignment, (ATerm) DataVarId, (ATerm) DataExpr);
+}
+
+ATermAppl gsMakeInit(ATermList GlobDataVarIds, ATermAppl ProcExpr)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunInit, (ATerm) GlobDataVarIds, (ATerm) ProcExpr);
+}
+
+ATermAppl gsMakeLPEInit(ATermList GlobDataVarIds, ATermList DataExprs)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunLPEInit, (ATerm) GlobDataVarIds, (ATerm) DataExprs);
+}
+
+//mu-calculus formulas
 
 ATermAppl gsMakeStateTrue()
 {
@@ -1230,6 +1263,18 @@ ATermAppl gsMakeStateMay(ATermAppl RegFrm, ATermAppl StateFrm)
 {
   assert(ConstructorFunctionsEnabled);
   return ATmakeAppl2(gsAFunStateMay, (ATerm) RegFrm, (ATerm) StateFrm);
+}
+
+ATermAppl gsMakeStateYaled()
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl0(gsAFunStateYaled);
+}
+
+ATermAppl gsMakeStateYaledTimed(ATermAppl DataExpr)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunStateYaledTimed, (ATerm) DataExpr);
 }
 
 ATermAppl gsMakeStateDelay()
@@ -1352,129 +1397,92 @@ ATermAppl gsMakeActAt(ATermAppl ActFrm, ATermAppl DataExpr)
   return ATmakeAppl2(gsAFunActAt, (ATerm) ActFrm, (ATerm) DataExpr);
 }
 
+//PBES's
+
+ATermAppl gsMakePBES(ATermAppl DataSpec, ATermList PBEqn, ATermAppl PropVarInst)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl3(gsAFunPBES, (ATerm) DataSpec, (ATerm) PBEqn, (ATerm) PropVarInst);
+}
+
+ATermAppl gsMakePropVarInst(ATermAppl Name, ATermList DataExprs)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunPropVarInst, (ATerm) Name, (ATerm) DataExprs);
+}
+
+ATermAppl gsMakePBEqn(ATermAppl FixPoint, ATermAppl PropVarDecl, ATermAppl PBExpr)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl3(gsAFunPBEqn, (ATerm) FixPoint, (ATerm) PropVarDecl, (ATerm) PBExpr);
+}
+
+ATermAppl gsMakePropVarDecl(ATermAppl Name, ATermList DataVarIds)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunPropVarDecl, (ATerm) Name, (ATerm) DataVarIds);
+}
+
+ATermAppl gsMakeMu()
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl0(gsAFunMu);
+}
+
+ATermAppl gsMakeNu()
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl0(gsAFunNu);
+}
+
+ATermAppl gsMakePBESTrue()
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl0(gsAFunPBESTrue);
+}
+
+ATermAppl gsMakePBESFalse()
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl0(gsAFunPBESFalse);
+}
+
+ATermAppl gsMakePBESAnd(ATermAppl PBExprLHS, ATermAppl PBExprRHS)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunPBESAnd, (ATerm) PBExprLHS, (ATerm) PBExprRHS);
+}
+
+ATermAppl gsMakePBESOr(ATermAppl PBExprLHS, ATermAppl PBExprRHS)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunPBESOr, (ATerm) PBExprLHS, (ATerm) PBExprRHS);
+}
+
+ATermAppl gsMakePBESForall(ATermList DataVarId, ATermAppl PBExpr)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunPBESForall, (ATerm) DataVarId, (ATerm) PBExpr);
+}
+
+ATermAppl gsMakePBESExists(ATermList DataVarId, ATermAppl PBExpr)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunPBESExists, (ATerm) DataVarId, (ATerm) PBExpr);
+}
+
+ATermAppl gsMakeDataSpec(ATermAppl SortSpec, ATermAppl ConsSpec,
+  ATermAppl MapSpec, ATermAppl DataEqnSpec)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl4(gsAFunDataSpec, (ATerm) SortSpec, (ATerm) ConsSpec,
+    (ATerm) MapSpec, (ATerm) DataEqnSpec);
+}
+
 //Recognisers of all constructor elements of the internal structure
 //-----------------------------------------------------------------
 
-bool gsIsSpecV1(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunSpecV1;
-}
-
-bool gsIsSortSpec(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunSortSpec;
-}
-
-bool gsIsConsSpec(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunConsSpec;
-}
-
-bool gsIsMapSpec(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunMapSpec;
-}
-
-bool gsIsDataEqnSpec(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunDataEqnSpec;
-}
-
-bool gsIsActSpec(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunActSpec;
-}
-
-bool gsIsSortId(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunSortId;
-}
-
-bool gsIsSortRef(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunSortRef;
-}
-
-bool gsIsOpId(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunOpId;
-}
-
-bool gsIsDataEqn(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunDataEqn;
-}
-
-bool gsIsDataVarId(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunDataVarId;
-}
-
-bool gsIsNil(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunNil;
-}
-
-bool gsIsActId(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunActId;
-}
-
-bool gsIsProcEqnSpec(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunProcEqnSpec;
-}
-
-bool gsIsLPE(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunLPE;
-}
-
-bool gsIsProcEqn(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunProcEqn;
-}
-
-bool gsIsProcVarId(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunProcVarId;
-}
-
-bool gsIsLPESummand(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunLPESummand;
-}
-
-bool gsIsMultAct(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunMultAct;
-}
-
-bool gsIsDelta(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunDelta;
-}
-
-bool gsIsAction(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunAction;
-}
-
-bool gsIsAssignment(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunAssignment;
-}
-
-bool gsIsInit(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunInit;
-}
-
-bool gsIsLPEInit(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunLPEInit;
-}
-
+//sort expressions
 bool gsIsSortList(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunSortList;
@@ -1505,6 +1513,11 @@ bool gsIsSortArrow(ATermAppl Term) {
   return ATgetAFun(Term) == gsAFunSortArrow;
 }
 
+bool gsIsSortId(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunSortId;
+}
+
 bool gsIsStructCons(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunStructCons;
@@ -1515,6 +1528,17 @@ bool gsIsStructProj(ATermAppl Term) {
   return ATgetAFun(Term) == gsAFunStructProj;
 }
 
+bool gsIsNil(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunNil;
+}
+
+bool gsIsUnknown(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunUnknown;
+}
+
+//data expressions
 bool gsIsId(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunId;
@@ -1575,9 +1599,14 @@ bool gsIsWhr(ATermAppl Term) {
   return ATgetAFun(Term) == gsAFunWhr;
 }
 
-bool gsIsUnknown(ATermAppl Term) {
+bool gsIsDataVarId(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunUnknown;
+  return ATgetAFun(Term) == gsAFunDataVarId;
+}
+
+bool gsIsOpId(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunOpId;
 }
 
 bool gsIsBagEnumElt(ATermAppl Term) {
@@ -1590,14 +1619,36 @@ bool gsIsWhrDecl(ATermAppl Term) {
   return ATgetAFun(Term) == gsAFunWhrDecl;
 }
 
+//multi-actions
+bool gsIsMultAct(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunMultAct;
+}
+
 bool gsIsParamId(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunParamId;
 }
 
+bool gsIsAction(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunAction;
+}
+
+bool gsIsActId(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunActId;
+}
+
+//process expressions
 bool gsIsProcess(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunProcess;
+}
+
+bool gsIsDelta(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunDelta;
 }
 
 bool gsIsTau(ATermAppl Term) {
@@ -1675,6 +1726,11 @@ bool gsIsChoice(ATermAppl Term) {
   return ATgetAFun(Term) == gsAFunChoice;
 }
 
+bool gsIsProcVarId(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunProcVarId;
+}
+
 bool gsIsMultActName(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunMultActName;
@@ -1690,185 +1746,309 @@ bool gsIsCommExpr(ATermAppl Term) {
   return ATgetAFun(Term) == gsAFunCommExpr;
 }
 
-bool gsIsStateTrue(ATermAppl Term)
-{
+//mCRL2 specifications
+bool gsIsSpecV1(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunSpecV1;
+}
+
+bool gsIsSortSpec(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunSortSpec;
+}
+
+bool gsIsConsSpec(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunConsSpec;
+}
+
+bool gsIsMapSpec(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunMapSpec;
+}
+
+bool gsIsDataEqnSpec(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunDataEqnSpec;
+}
+
+bool gsIsActSpec(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunActSpec;
+}
+
+bool gsIsSortRef(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunSortRef;
+}
+
+bool gsIsDataEqn(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunDataEqn;
+}
+
+bool gsIsProcEqnSpec(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunProcEqnSpec;
+}
+
+bool gsIsLPE(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunLPE;
+}
+
+bool gsIsProcEqn(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunProcEqn;
+}
+
+bool gsIsLPESummand(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunLPESummand;
+}
+
+bool gsIsAssignment(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunAssignment;
+}
+
+bool gsIsInit(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunInit;
+}
+
+bool gsIsLPEInit(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunLPEInit;
+}
+
+//mu-calculus formulas
+bool gsIsStateTrue(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunStateTrue;
 }
 
-bool gsIsStateFalse(ATermAppl Term)
-{
+bool gsIsStateFalse(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunStateFalse;
 }
 
-bool gsIsStateNot(ATermAppl Term)
-{
+bool gsIsStateNot(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunStateNot;
 }
 
-bool gsIsStateAnd(ATermAppl Term)
-{
+bool gsIsStateAnd(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunStateAnd;
 }
 
-bool gsIsStateOr(ATermAppl Term)
-{
+bool gsIsStateOr(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunStateOr;
 }
 
-bool gsIsStateImp(ATermAppl Term)
-{
+bool gsIsStateImp(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunStateImp;
 }
 
-bool gsIsStateForall(ATermAppl Term)
-{
+bool gsIsStateForall(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunStateForall;
 }
 
-bool gsIsStateExists(ATermAppl Term)
-{
+bool gsIsStateExists(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunStateExists;
 }
 
-bool gsIsStateMust(ATermAppl Term)
-{
+bool gsIsStateMust(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunStateMust;
 }
 
-bool gsIsStateMay(ATermAppl Term)
-{
+bool gsIsStateMay(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunStateMay;
 }
 
-bool gsIsStateDelay(ATermAppl Term)
-{
+bool gsIsStateYaled(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunStateYaled;
+}
+
+bool gsIsStateYaledTimed(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunStateYaledTimed;
+}
+
+bool gsIsStateDelay(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunStateDelay;
 }
 
-bool gsIsStateDelayTimed(ATermAppl Term)
-{
+bool gsIsStateDelayTimed(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunStateDelayTimed;
 }
 
-bool gsIsStateVar(ATermAppl Term)
-{
+bool gsIsStateVar(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunStateVar;
 }
 
-bool gsIsStateNu(ATermAppl Term)
-{
+bool gsIsStateNu(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunStateNu;
 }
 
-bool gsIsStateMu(ATermAppl Term)
-{
+bool gsIsStateMu(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunStateMu;
 }
 
-bool gsIsDataVarIdInit(ATermAppl Term)
-{
+bool gsIsDataVarIdInit(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunDataVarIdInit;
 }
 
-bool gsIsRegNil(ATermAppl Term)
-{
+bool gsIsRegNil(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunRegNil;
 }
 
-bool gsIsRegSeq(ATermAppl Term)
-{
+bool gsIsRegSeq(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunRegSeq;
 }
 
-bool gsIsRegAlt(ATermAppl Term)
-{
+bool gsIsRegAlt(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunRegAlt;
 }
 
-bool gsIsRegTrans(ATermAppl Term)
-{
+bool gsIsRegTrans(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunRegTrans;
 }
 
-bool gsIsRegTransOrNil(ATermAppl Term)
-{
+bool gsIsRegTransOrNil(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunRegTransOrNil;
 }
 
-bool gsIsActTrue(ATermAppl Term)
-{
+bool gsIsActTrue(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunActTrue;
 }
 
-bool gsIsActFalse(ATermAppl Term)
-{
+bool gsIsActFalse(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunActFalse;
 }
 
-bool gsIsActNot(ATermAppl Term)
-{
+bool gsIsActNot(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunActNot;
 }
 
-bool gsIsActAnd(ATermAppl Term)
-{
+bool gsIsActAnd(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunActAnd;
 }
 
-bool gsIsActOr(ATermAppl Term)
-{
+bool gsIsActOr(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunActOr;
 }
 
-bool gsIsActImp(ATermAppl Term)
-{
+bool gsIsActImp(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunActImp;
 }
 
-bool gsIsActForall(ATermAppl Term)
-{
+bool gsIsActForall(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunActForall;
 }
 
-bool gsIsActExists(ATermAppl Term)
-{
+bool gsIsActExists(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunActExists;
 }
 
-bool gsIsActAt(ATermAppl Term)
-{
+bool gsIsActAt(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunActAt;
 }
+
+//PBES's
+bool gsIsPBES(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunPBES;
+}
+
+bool gsIsPropVarInst(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunPropVarInst;
+}
+
+bool gsIsPBEqn(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunPBEqn;
+}
+
+bool gsIsMu(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunMu;
+}
+
+bool gsIsNu(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunNu;
+}
+
+bool gsIsPropVarDecl(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunPropVarDecl;
+}
+
+bool gsIsPBESTrue(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunPBESTrue;
+}
+
+bool gsIsPBESFalse(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunPBESFalse;
+}
+
+bool gsIsPBESAnd(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunPBESAnd;
+}
+
+bool gsIsPBESOr(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunPBESOr;
+}
+
+bool gsIsPBESForall(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunPBESForall;
+}
+
+bool gsIsPBESExists(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunPBESExists;
+}
+
+bool gsIsDataSpec(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunDataSpec;
+}
+
 
 //Sort expressions
 //----------------
@@ -4173,6 +4353,18 @@ bool gsIsActFrm(ATermAppl Term)
     gsIsActExists(Term) || gsIsActAt(Term);
 }
 
+bool gsIsPBExpr(ATermAppl term)
+{
+  return gsIsDataExpr(term)
+      || gsIsPBESTrue(term)  
+      || gsIsPBESFalse(term) 
+      || gsIsPBESAnd(term)   
+      || gsIsPBESOr(term)    
+      || gsIsPBESForall(term)
+      || gsIsPBESExists(term)
+      || gsIsPropVarInst(term)
+  ;
+}
 
 //Local declarations
 //------------------
@@ -4289,161 +4481,6 @@ ATermAppl UnitePNIRSorts(ATermAppl SortExpr1, ATermAppl SortExpr2)
     //SortExpr1 and SortExpr2 are both PNI sorts
     return UnitePNISorts(SortExpr1, SortExpr2);
   }
-}
-
-// pbes functions
-ATermAppl gsMakeMu()
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl0(gsAFunMu);
-}
-
-ATermAppl gsMakeNu()
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl0(gsAFunNu);
-}
-
-ATermAppl gsMakePBES(ATermList PBEqn_0, ATermAppl PropVarInst_1)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunPBES, (ATerm) PBEqn_0, (ATerm) PropVarInst_1);
-}
-
-ATermAppl gsMakePBESAnd(ATermAppl PBExpr_0, ATermAppl PBExpr_1)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunPBESAnd, (ATerm) PBExpr_0, (ATerm) PBExpr_1);
-}
-
-ATermAppl gsMakePBESExists(ATermList DataVarId_0, ATermAppl PBExpr_1)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunPBESExists, (ATerm) DataVarId_0, (ATerm) PBExpr_1);
-}
-
-ATermAppl gsMakePBESFalse()
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl0(gsAFunPBESFalse);
-}
-
-ATermAppl gsMakePBESForall(ATermList DataVarId_0, ATermAppl PBExpr_1)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunPBESForall, (ATerm) DataVarId_0, (ATerm) PBExpr_1);
-}
-
-ATermAppl gsMakePBESImp(ATermAppl PBExpr_0, ATermAppl PBExpr_1)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunPBESImp, (ATerm) PBExpr_0, (ATerm) PBExpr_1);
-}
-
-ATermAppl gsMakePBESNot(ATermAppl PBExpr_0)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl1(gsAFunPBESNot, (ATerm) PBExpr_0);
-}
-
-ATermAppl gsMakePBESOr(ATermAppl PBExpr_0, ATermAppl PBExpr_1)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunPBESOr, (ATerm) PBExpr_0, (ATerm) PBExpr_1);
-}
-
-ATermAppl gsMakePBESTrue()
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl0(gsAFunPBESTrue);
-}
-
-ATermAppl gsMakePBEqn(ATermAppl FixPoint_0, ATermAppl PropVarDecl_1, ATermAppl PBExpr_2)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl3(gsAFunPBEqn, (ATerm) FixPoint_0, (ATerm) PropVarDecl_1, (ATerm) PBExpr_2);
-}
-
-ATermAppl gsMakePropVarDecl(ATermAppl String_0, ATermList DataExpr_1)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunPropVarDecl, (ATerm) String_0, (ATerm) DataExpr_1);
-}
-
-ATermAppl gsMakePropVarInst(ATermAppl String_0, ATermList DataExpr_1)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunPropVarInst, (ATerm) String_0, (ATerm) DataExpr_1);
-}
-
-bool gsIsMu(ATermAppl term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunMu;
-}
-
-bool gsIsNu(ATermAppl term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunNu;
-}
-
-bool gsIsPBES(ATermAppl term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunPBES;
-}
-
-bool gsIsPBESAnd(ATermAppl term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunPBESAnd;
-}
-
-bool gsIsPBESExists(ATermAppl term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunPBESExists;
-}
-
-bool gsIsPBESFalse(ATermAppl term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunPBESFalse;
-}
-
-bool gsIsPBESForall(ATermAppl term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunPBESForall;
-}
-
-bool gsIsPBESImp(ATermAppl term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunPBESImp;
-}
-
-bool gsIsPBESNot(ATermAppl term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunPBESNot;
-}
-
-bool gsIsPBESOr(ATermAppl term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunPBESOr;
-}
-
-bool gsIsPBESTrue(ATermAppl term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunPBESTrue;
-}
-
-bool gsIsPBEqn(ATermAppl term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunPBEqn;
-}
-
-bool gsIsPropVarDecl(ATermAppl term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunPropVarDecl;
-}
-
-bool gsIsPropVarInst(ATermAppl term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunPropVarInst;
 }
 
 } // extern "C"
