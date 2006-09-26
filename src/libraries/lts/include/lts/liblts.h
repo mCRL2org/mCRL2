@@ -8,6 +8,10 @@
 #include "lpe/specification.h"
 #include "setup.h"
 
+#ifdef MCRL2_BCG
+#include "bcg_user.h"
+#endif
+
 namespace mcrl2
 {
 namespace lts

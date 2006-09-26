@@ -7,10 +7,6 @@
 #include "lts/liblts.h"
 #include "setup.h"
 
-#ifdef MCRL2_BCG
-#include <bcg_user.h>
-#endif
-
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <squadt_utility.h>

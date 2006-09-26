@@ -9,10 +9,6 @@
 #include "lts/liblts_dot.h"
 #include "setup.h"
 
-#ifdef MCRL2_BCG
-#include "bcg_user.h"
-#endif
-
 #define NAME "ltscompare"
 #define VERSION "0.1"
 #include "mcrl2_revision.h"
