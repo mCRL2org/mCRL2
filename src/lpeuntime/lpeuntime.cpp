@@ -5,8 +5,8 @@
 // ----------------------------------------------------------------------
 //
 // file          : lpeuntime 
-// date          : 25-09-2006
-// version       : 0.21
+// date          : 26-09-2006
+// version       : 0.22
 //
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
 //
@@ -33,7 +33,7 @@ using namespace lpe;
 
 namespace po = boost::program_options;
 
-#define VERSION "0.21"
+#define VERSION "0.22"
 
 std::string input_file; // Name of the file to read input from
 std::string output_file; // Name of the file to write output to (or stdout)
@@ -179,8 +179,8 @@ lpe::specification squadt_lpeuntime::untime(const lpe::specification& specificat
                                     data_assignment_list()
                                    );
 
-  push_front(untime_summand_list, untime_summand);
-
+  untime_summand_list = push_front(untime_summand_list, untime_summand);
+  
   // Reverse summand list, because it is the wrong way round now.
   untime_summand_list = reverse(untime_summand_list);
       
