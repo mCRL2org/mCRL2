@@ -1,7 +1,8 @@
 project toolset/ltsview
   : build-dir $(BUILD_TOP)
   : requirements
-    <include>.
+      <include>.
+      <include>$(BOOST)
   ;
 
 import lex : lex ;
@@ -37,6 +38,7 @@ exe ltsview
         <library>/libraries/mcrl2_basic//mcrl2_basic
         <library>/libraries/aterm//aterm
         <implicit-dependency>fsm
+        <squadt_support>enable
         <wx>gl
       ;
 

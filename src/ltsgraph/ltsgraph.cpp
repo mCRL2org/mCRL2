@@ -10,7 +10,7 @@
 #include <squadt_utility.h>
 
 std::string lts_file_argument;
-
+bool command_line = false;
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 
 class squadt_interactor: public squadt_tool_interface {
@@ -113,38 +113,38 @@ class GraphApp : public wxApp
     bool OnInit() {
 
       gsEnableConstructorFunctions();
-
-#ifndef ENABLE_SQUADT_CONNECTIVITY
-      // Not SQuADT-connected, parse commandline
-      wxCmdLineParser cmdln(argc,argv);
-      sip::configuration::sptr configuration;
+      if(command_line) {
+        // Not SQuADT-connected, parse commandline
+        wxCmdLineParser cmdln(argc,argv);
+        sip::configuration::sptr configuration;
 	   
-      cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("displays this message"));
-      cmdln.AddSwitch(wxEmptyString,wxT("version"), wxT("displays version information and exits"));
-      cmdln.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
-      cmdln.SetLogo(wxT("Graphical tool for visualizing graph."));
+        cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("displays this message"));
+        cmdln.AddSwitch(wxEmptyString,wxT("version"), wxT("displays version information and exits"));
+        cmdln.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
+        cmdln.SetLogo(wxT("Graphical tool for visualizing graph."));
 
-      if ( cmdln.Parse() ) {
-        return false;
-      }
+        if ( cmdln.Parse() ) {
+          return false;
+        }
 
-      if ( cmdln.Found(wxT("h")) ) {
-        print_help();
-        return false;
-      }
+        if ( cmdln.Found(wxT("h")) ) {
+          print_help();
+          return false;
+        }
 
-      if (cmdln.Found(wxT("version")) ) {
-        print_version();
-        return false;
-      }
+        if (cmdln.Found(wxT("version")) ) {
+          print_version();
+          return false;
+        }
 
-      if ( cmdln.GetParamCount() > 0 ) {
-        lts_file_argument = std::string(cmdln.GetParam(0).fn_str());
-      }
-#endif
+        if ( cmdln.GetParamCount() > 0 ) {
+          lts_file_argument = std::string(cmdln.GetParam(0).fn_str());
+        }
+      }    
+
       init_frame(lts_file_argument);
       return true;
-  }
+    }
 
     int OnExit() {
       return (wxApp::OnExit());
@@ -210,10 +210,11 @@ int main(int argc, char **argv)
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   squadt_interactor c(boost::bind(wx_entry_proxy, argc, argv));
   if(!c.try_interaction(argc, argv)) {
+    command_line = true;
 #endif
-  /* On purpose we do not catch exceptions */
+    /* On purpose we do not catch exceptions */
 
-  return wxEntry(argc, argv);
+    return wxEntry(argc, argv);
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }
   return 0;

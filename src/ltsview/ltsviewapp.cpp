@@ -1,4 +1,86 @@
+
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
+
+//SQuADT protocol interface
+#include <squadt_utility.h>
+
 #include "ltsviewapp.h"
+
+bool command_line = false;
+std::string lts_file_argument;
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+class squadt_interactor: public squadt_tool_interface {
+  
+  private:
+    /* Constants for identifiers of options and objects */
+    enum identifiers {
+      fsm_file_for_input // Main input file that contains an lts
+    };
+ 
+    boost::function<int()> startup_function;
+
+  public:
+    // Constructor
+    squadt_interactor(boost::function<bool()>);
+
+    // Configures tool capabilities.
+    void set_capabilities(sip::tool::capabilities&) const;
+
+    // Queries the user via SQuADt if needed to obtain configuration information
+    void user_interactive_configuration(sip::configuration&);
+
+    // Check an existing configuration object to see if it is usable
+    bool check_configuration(sip::configuration const&) const;
+
+    // Performs the task specified by a configuration
+    bool perform_task(sip::configuration&);
+};
+
+squadt_interactor::squadt_interactor(boost::function<bool()> startup): startup_function(startup) {
+  // skip 
+}
+
+void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
+  c.add_input_combination(fsm_file_for_input, "Visualisation", "fsm");
+}
+
+void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
+  //skip
+}
+
+
+bool squadt_interactor::check_configuration(sip::configuration const& c) const {
+  if (c.object_exists(fsm_file_for_input)) {
+    /* The input object is present, verify whether the specified format is supported */
+    sip::object::sptr input_object = c.get_object(fsm_file_for_input);
+    lts_file_argument = input_object->get_location();
+
+
+    /* lts_type t = lts::parse_format(input_object->get_format().c_str());
+
+    if (t == lts_none) {
+      send_error(boost::str(boost::format("Invalid configuration: unsupported type `%s' for main input") % lts::string_for_type(t)));
+      return false;
+    }*/
+  }
+
+  else {
+    return false;
+  }
+
+  
+  return true;
+  
+}
+
+bool squadt_interactor::perform_task(sip::configuration&) {
+
+  return startup_function() == 0;
+}
+
+#endif
 
 IMPLEMENT_APP_NO_MAIN( LTSViewApp )
 
@@ -15,46 +97,83 @@ bool LTSViewApp::OnInit()
   mainFrame->setVisSettings( visualizer->getVisSettings() );
   mainFrame->setBackgroundColor( glCanvas->getBackgroundColor() );
 
-  // parse command line and check for specified input file
-  wxCmdLineEntryDesc cmdLineDesc[] = 
-  {
-    { wxCMD_LINE_PARAM, NULL, NULL, wxT("INFILE"), wxCMD_LINE_VAL_STRING,
-      wxCMD_LINE_PARAM_OPTIONAL },
-    { wxCMD_LINE_NONE, NULL, NULL, NULL, wxCMD_LINE_VAL_NONE, 0 }
-  };
-  wxCmdLineParser cmdParser( cmdLineDesc, argc, argv );
-  if ( cmdParser.Parse() == 0 )
-  {
-    if ( cmdParser.GetParamCount() > 0 )
+  if (command_line) {
+    // parse command line and check for specified input file
+    wxCmdLineEntryDesc cmdLineDesc[] = 
     {
-      wxFileName fileName( cmdParser.GetParam(0) );
-      fileName.Normalize( wxPATH_NORM_LONG | wxPATH_NORM_DOTS |
-	  wxPATH_NORM_TILDE | wxPATH_NORM_ABSOLUTE );
-      mainFrame->setFileInfo( fileName );
-      openFile( static_cast< string > ( fileName.GetFullPath().fn_str() ) );
+      { wxCMD_LINE_PARAM, NULL, NULL, wxT("INFILE"), wxCMD_LINE_VAL_STRING,
+        wxCMD_LINE_PARAM_OPTIONAL },
+      { wxCMD_LINE_NONE, NULL, NULL, NULL, wxCMD_LINE_VAL_NONE, 0 }
+    };
+    wxCmdLineParser cmdParser( cmdLineDesc, argc, argv );
+    if ( cmdParser.Parse() == 0 )
+    {
+      if ( cmdParser.GetParamCount() > 0 )
+      {
+        lts_file_argument = std::string(cmdParser.GetParam(0).fn_str());
+      }
     }
   }
 
+  wxString wx_file_string(lts_file_argument.c_str(), wxConvLocal);
+  wxFileName fileName(wx_file_string);
+  fileName.Normalize( wxPATH_NORM_LONG | wxPATH_NORM_DOTS |
+	  wxPATH_NORM_TILDE | wxPATH_NORM_ABSOLUTE );
+  mainFrame->setFileInfo( fileName );
+  openFile( static_cast< string > ( fileName.GetFullPath().fn_str() ) );
   return true;
 }
 
 #ifdef __WINDOWS__
+int wx_entry_proxy(HINSTANCE hInstance, 
+                   HINSTACE hPrevInstance, 
+                   wxCmdLineArgType lpCmdLine,
+                   int nCmdShow) {
+
+  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
+}
+
 extern "C" int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,                                                                  wxCmdLineArgType lpCmdLine,int nCmdShow) {
   ATerm stackbot;
 
   // initialise the ATerm library
   ATinit(NULL,NULL,&stackbot); // XXX args?
 
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+        squadt_interactor c(boost::bind (wx_entry_proxy, hInstance, hPrevInstance, lpCmdLine, nCmdShow));
+        if (!c.try_interaction(0, NULL)) {
+#endif
+          return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+        }
+        return 0;
+#endif
   return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
 #else
+int wx_entry_proxy(int argc, char** argv) {
+ return wxEntry(argc, argv);
+}
+
 int main(int argc, char **argv) {
   ATerm stackbot;
 
   // initialise the ATerm library
   ATinit(argc,argv,&stackbot);
 
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  squadt_interactor c(boost::bind(wx_entry_proxy, argc, argv));
+  if(!c.try_interaction(argc, argv)) {
+  command_line = true;
+#endif
   return wxEntry(argc, argv);
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  }
+  return 0;
+#endif
+
 }
 #endif
 
