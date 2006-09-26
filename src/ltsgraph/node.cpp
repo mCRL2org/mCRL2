@@ -63,7 +63,7 @@ void Node::OnPaint(wxDC * ptrDC)
 
   if (locked) {
     static const wxBitmap lock(lock_xpm);
-    ptrDC->DrawBitmap(lock, (int)posX, (int)posY, true);
+    ptrDC->DrawBitmap(lock, (int)posX - radius, (int)posY - radius, true);
   }
 }
 
