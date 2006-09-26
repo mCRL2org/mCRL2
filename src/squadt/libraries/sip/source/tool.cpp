@@ -130,7 +130,7 @@ namespace sip {
     }
  
     /* Send a status report to the controller */
-    void communicator::send_report(sip::report const& r) {
+    void communicator::send_report(sip::report const& r) const {
       message m(r.write(), sip::message_report);
  
       impl->send_message(m);
@@ -140,7 +140,7 @@ namespace sip {
      * @param[in] t the report type
      * @param[in] e a description
      **/
-    void communicator::send_status_report(sip::report::type t, std::string const& e) {
+    void communicator::send_status_report(sip::report::type t, std::string const& e) const {
       sip::report report(t, e);
 
       send_report(report);

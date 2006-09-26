@@ -64,10 +64,10 @@ namespace sip {
         void send_signal_termination();
  
         /** \brief Send a status report to the controller */
-        void send_report(sip::report const&);
+        void send_report(sip::report const&) const;
 
         /** \brief Sends an error report to the controller */
-        void send_status_report(sip::report::type, std::string const&);
+        void send_status_report(sip::report::type, std::string const&) const;
  
         /** \brief Get the tool capabilities object that will be sent when a request is received */
         tool::capabilities& get_tool_capabilities();

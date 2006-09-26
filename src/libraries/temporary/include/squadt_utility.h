@@ -135,13 +135,13 @@ class squadt_tool_interface {
   protected:
 
     /** \brief send notification message */
-    void send_notification(std::string const&);
+    void send_notification(std::string const&) const;
 
     /** \brief send warning message */
-    void send_warning(std::string const&);
+    void send_warning(std::string const&) const;
 
     /** \brief send error message */
-    void send_error(std::string const&);
+    void send_error(std::string const&) const;
 
   protected:
 
@@ -267,15 +267,15 @@ inline bool squadt_tool_interface::is_active() const {
   return (active);
 }
 
-inline void squadt_tool_interface::send_notification(std::string const& m) {
+inline void squadt_tool_interface::send_notification(std::string const& m) const {
   m_communicator.send_status_report(sip::report::notice, m);
 }
 
-inline void squadt_tool_interface::send_warning(std::string const& m) {
+inline void squadt_tool_interface::send_warning(std::string const& m) const {
   m_communicator.send_status_report(sip::report::warning, m);
 }
 
-inline void squadt_tool_interface::send_error(std::string const& m) {
+inline void squadt_tool_interface::send_error(std::string const& m) const {
   m_communicator.send_status_report(sip::report::error, m);
 }
 
