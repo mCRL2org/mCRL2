@@ -117,6 +117,7 @@ public:
   void disable_btn_label_colour();
   void enable_btn_label_text();
   void disable_btn_label_text();
+  void update_coordinates();
   int get_node_radius();
 private:
   bool StopOpti;
@@ -165,6 +166,8 @@ private:
   wxButton * btn_pick_colour;
   wxButton * btn_label_colour;
   wxButton * btn_label_text;
+
+  wxStatusBar* stb_coordinates;
 
 DECLARE_EVENT_TABLE()
 };

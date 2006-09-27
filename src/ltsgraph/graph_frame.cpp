@@ -74,6 +74,10 @@ void GraphFrame::BuildLayout() {
   //Menu
   CreateMenu();
 
+  // Statusbar
+  stb_coordinates = new wxStatusBar(this, wxID_ANY);
+  this->SetStatusBar(stb_coordinates);
+
   int rightPanelWidth = INITIAL_WIN_WIDTH - (INITIAL_WIN_WIDTH / 4 + 15);
  
   wxSplitterWindow * sw = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE & !wxSP_PERMIT_UNSPLIT);
@@ -194,6 +198,7 @@ void GraphFrame::BuildLayout() {
   Layout();
   sw->UpdateSize();
 
+
 }
 
 void GraphFrame::CreateMenu() {
@@ -244,6 +249,7 @@ void GraphFrame::OnOpen( wxCommandEvent& /* event */ ) {
 		vectEdge.clear();
 		vectNode.clear();
 		Init(dialog.GetPath());
+                update_coordinates();
 		Refresh();
 	}
 }
@@ -292,6 +298,7 @@ void GraphFrame::OnCheckNode( wxCommandEvent& /* event */ ) {
 		for (size_t i = 0; i < vectNode.size(); i++)  
 			vectNode[i]->HideLabels();
 	}
+        update_coordinates();
 	Refresh();
 
 }
@@ -306,6 +313,7 @@ void GraphFrame::OnCheckEdge( wxCommandEvent& /* event */ ) {
 		for (size_t i = 0; i < vectEdge.size(); i++)  
 			vectEdge[i]->HideLabels();
 	}
+        update_coordinates();
 	Refresh();
 }
 
@@ -315,6 +323,7 @@ void GraphFrame::on_check_curves(wxCommandEvent & /* event */ ) {
   for (size_t i = 0; i < vectEdge.size(); i++) {
     vectEdge[i]->set_control_visible(curve_edges);
   }
+  update_coordinates();
   Refresh();
 }
 
@@ -384,6 +393,7 @@ void GraphFrame::on_btn_label_text( wxCommandEvent& /* event */) {
 
   if (label_text_dialog.ShowModal() == wxID_OK) {
     leftPanel->get_selected_edge()->set_label_text(label_text_dialog.GetValue());
+    update_coordinates();
     Refresh();
   }
 }
@@ -474,6 +484,7 @@ void GraphFrame::Init(wxString LTSfile) {
 				btnOptiStop->Enable(true);
 				export_to->Enable(true);
 				backupCreate->Enable(true);
+                                update_coordinates();
 				Refresh();
 			}
 			else 
@@ -644,6 +655,7 @@ bool GraphFrame::OptimizeDrawing(double precision) {
   achieved_precision=achieved_precision / vectNode.size();
 
   if (skip_steps == 0 || steps_taken == 0) {
+    update_coordinates();
     Refresh();
   }
 
@@ -923,7 +935,7 @@ void GraphFrame::RestoreBackup() {
 	  wxMessageBox(wxT("Restore unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR, this, wxDefaultPosition.x, wxDefaultPosition.y);
         }
 	
-        	
+        update_coordinates();	
 	Refresh();
 
 
@@ -1058,6 +1070,13 @@ void GraphFrame::on_spin_radius(wxSpinEvent& /*event */) {
   Refresh(); 
 }
 
+void GraphFrame::update_coordinates() {
+  wxString status_text = wxT("");
+  if (leftPanel->selection == node_t) {
+      status_text.Printf(wxT("Position of selected node: (%g, %g)"), leftPanel->get_selected_node()->GetX(), leftPanel->get_selected_node()->GetY());
+      stb_coordinates -> SetStatusText(status_text);
+  }
+}
 ////////////////////////////////VIEWPORT CLASS IMPLEMENTATION////////////////////////////////
 
 ViewPort::ViewPort(wxWindow * parent, const wxPoint& pos, const wxSize& size, long style) 
@@ -1092,6 +1111,7 @@ void ViewPort::OnResize(wxSizeEvent& event) {
   wxSize sz2 = GetClientSize();
 
 	GF->Resize(sz2); 
+        GF->update_coordinates();
 	
 	sz = sz2;
 
@@ -1150,8 +1170,10 @@ void ViewPort::PressLeft(wxMouseEvent& event) {
       GF->disable_btn_colour_picker();
       break;
   }
- 
+
+  GF->update_coordinates();
   Refresh();
+  
 }
 
 void ViewPort::Drag(wxMouseEvent& event) {
@@ -1162,6 +1184,7 @@ void ViewPort::Drag(wxMouseEvent& event) {
       wxPoint pt_end = event.GetPosition();//Find the destination 
       if (pt_end.x > node_radius && pt_end.x < sz.GetWidth()-node_radius  && pt_end.y > node_radius && pt_end.y < sz.GetHeight()-node_radius) {
         GF->ReplaceAfterDrag(pt_end);
+        GF->update_coordinates();
         Refresh();
       }
     }
@@ -1169,6 +1192,7 @@ void ViewPort::Drag(wxMouseEvent& event) {
       wxPoint pt_end = event.GetPosition(); //Find the destination
       if (pt_end.x > ctrl_radius && pt_end.x < sz.GetWidth() - ctrl_radius && pt_end.y > ctrl_radius && pt_end.y < sz.GetHeight() - ctrl_radius) {
         GF->ReplaceAfterDrag(pt_end);
+        GF->update_coordinates();
         Refresh();
       }
     } 
@@ -1180,6 +1204,7 @@ void ViewPort::Drag(wxMouseEvent& event) {
       
       if (pt_end.x > label_width && pt_end.x < sz.GetWidth() - label_width && pt_end.y > label_height && pt_end.y < sz.GetHeight() - label_height) {
         GF->ReplaceAfterDrag(pt_end);
+        GF->update_coordinates();
         Refresh();
       }
    }
@@ -1215,6 +1240,7 @@ void ViewPort::PressRight(wxMouseEvent& event) {
     GF->enable_btn_colour_picker();
     GF->disable_btn_label_colour();
     GF->disable_btn_label_text();
+    GF->update_coordinates();
     Refresh();
   }
 
