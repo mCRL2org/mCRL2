@@ -5,14 +5,12 @@
 // ----------------------------------------------------------------------
 //
 // file          : lpeuntime 
-// date          : 26-09-2006
-// version       : 0.22
+// date          : 27-09-2006
+// version       : 0.23
 //
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
 //
 // ======================================================================
-
-#include "squadt_lpeuntime.h"
 
 #include "mcrl2_revision.h"
 
@@ -27,59 +25,87 @@
 //Lowlevel library for gsErrorMsg
 #include <libprint_c.h>
 
+//Aterm
+#include <atermpp/aterm.h>
+
+//LPE framework
+#include <lpe/lpe.h>
+#include <lpe/specification.h>
+
+//Squadt connectivity
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+#include <sip/tool.h>
+#include <squadt_utility.h>
+#endif
+
+
 using namespace std;
 using namespace atermpp;
 using namespace lpe;
 
 namespace po = boost::program_options;
 
-#define VERSION "0.22"
+#define VERSION "0.23"
 
 std::string input_file; // Name of the file to read input from
 std::string output_file; // Name of the file to write output to (or stdout)
 
-const unsigned int lpd_file_for_input = 0;
-const unsigned int lpd_file_for_output = 1;
+//Forward declaration needed for use within squadt_lpeuntime class
+int do_untime();
 
-void squadt_lpeuntime::set_capabilities()
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+class squadt_lpeuntime: public squadt_tool_interface
 {
-  // Get tool capabilities in order to modify settings
-  sip::tool::capabilities& cp = tc.get_tool_capabilities();
+  private:
+    enum input_files {
+      lpd_file_for_input, ///< file containing an lpd that can be imported
+      lpd_file_for_output ///< file used to write output to
+    };
 
+  public:
+    /** \brief configures tool capabilities */
+    void set_capabilities(sip::tool::capabilities&) const;
+
+    /** \brief queries the user via SQuADT if needed to obtain configuration information */
+    void user_interactive_configuration(sip::configuration&);
+
+    /** \brief check an existing configuration object to see if it is usable */
+    bool check_configuration(sip::configuration const&) const;
+
+    /** \brief performs the task specified by a configuration */
+    bool perform_task(sip::configuration&);
+};
+
+void squadt_lpeuntime::set_capabilities(sip::tool::capabilities& capabilities) const
+{
   // The tool has only one main input combination
-  cp.add_input_combination(lpd_file_for_input, "Transformation", "lpe");
+  capabilities.add_input_combination(lpd_file_for_input, "Transformation", "lpe");
 }
 
-void squadt_lpeuntime::initialise()
-{
-}
-
-void squadt_lpeuntime::configure(sip::configuration& configuration)
+void squadt_lpeuntime::user_interactive_configuration(sip::configuration& configuration)
 {
   configuration.add_output(lpd_file_for_output, "lpe", configuration.get_output_name(".lpe"));
 }
 
-bool squadt_lpeuntime::check_configuration(sip::configuration& configuration)
+bool squadt_lpeuntime::check_configuration(sip::configuration const& configuration) const
 {
-// Check if everything present (see lpe2lts)
+// Check if everything present
   return (configuration.object_exists(lpd_file_for_input) &&
           configuration.object_exists(lpd_file_for_output)
          );
 }
 
-void squadt_lpeuntime::execute(sip::configuration& configuration)
+bool squadt_lpeuntime::perform_task(sip::configuration& configuration)
 {
   input_file = configuration.get_object(lpd_file_for_input)->get_location();
   output_file = configuration.get_object(lpd_file_for_output)->get_location();
-  do_untime();
+  return (do_untime()==0);
 }
 
-void squadt_lpeuntime::finalise()
-{
-}
+#endif //ENABLE_SQUADT_CONNECTIVITY
 
 ///Returns an LPE specification in which the timed arguments have been rewritten
-lpe::specification squadt_lpeuntime::untime(const lpe::specification& specification) {
+lpe::specification untime(const lpe::specification& specification) {
   // TODO: Strip use of gs functions as much as possible; everything that's possible through these
   // should also be available through the LPE library!
   // NOTE: The gs functions will be made available in the LPE library by Wieger.
@@ -209,7 +235,7 @@ lpe::specification squadt_lpeuntime::untime(const lpe::specification& specificat
   return untime_specification;
 }
 
-int squadt_lpeuntime::do_untime()
+int do_untime()
 {
   lpe::specification lpe_specification;
 
@@ -293,11 +319,13 @@ int main(int ac, char** av) {
   ATinit(0,0,&bot);
   gsEnableConstructorFunctions();
 
+#ifdef ENABLE_SQUADT_CONNECTIVITY
   squadt_lpeuntime sl;
-  if (sl.run(ac, av)) {
+  if (sl.try_interaction(ac, av)) {
     return 0;
   }
+#endif
 
   parse_command_line(ac,av);
-  return sl.do_untime();
+  return do_untime();
 }

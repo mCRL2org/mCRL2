@@ -7,7 +7,6 @@ project lpeuntime
 
 exe lpeuntime
        : lpeuntime.cpp
-         squadt_lpeprogram.cpp
        : <source>/libraries/mcrl2_basic//mcrl2_basic
          <source>/libraries/lpe//lpe
          <source>/boost/program_options//boost_program_options
