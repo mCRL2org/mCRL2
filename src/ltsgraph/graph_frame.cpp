@@ -49,10 +49,6 @@ GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& 
 
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
  
-    #ifdef MCRL2_BCG
-        BCG_INIT();
-    #endif
-
   StopOpti = true;
   StoppedOpti = true;
   curve_edges = false;

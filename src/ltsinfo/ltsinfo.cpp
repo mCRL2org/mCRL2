@@ -217,10 +217,6 @@ int main(int argc, char **argv)
   ATinit(argc,argv,&bot);
   gsEnableConstructorFunctions();
 
-#ifdef MCRL2_BCG
-  BCG_INIT();
-#endif
-
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   sip::tool::communicator tc;
 

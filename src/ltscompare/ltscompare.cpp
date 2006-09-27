@@ -72,10 +72,6 @@ int main(int argc, char **argv)
   ATinit(argc,argv,&bot);
   gsEnableConstructorFunctions();
 
-#ifdef MCRL2_BCG
-  BCG_INIT();
-#endif
-
   #define ShortOptions      "hqvi:j:fsbtu"
   #define VersionOption     0x1
   #define TauOption         0x2

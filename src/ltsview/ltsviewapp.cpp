@@ -8,6 +8,9 @@
 //SQuADT protocol interface
 # include <squadt_utility.h>
 
+bool command_line = false;
+std::string lts_file_argument;
+
 # include "ltsviewapp.h"
 
 class squadt_interactor: public squadt_tool_interface {
@@ -80,9 +83,6 @@ bool squadt_interactor::perform_task(sip::configuration&) {
 }
 
 #endif
-
-bool command_line = false;
-std::string lts_file_argument;
 
 IMPLEMENT_APP_NO_MAIN( LTSViewApp )
 

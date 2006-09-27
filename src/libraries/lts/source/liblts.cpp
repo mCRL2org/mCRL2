@@ -22,6 +22,15 @@
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)
 #define ATisList(x) (ATgetType(x) == AT_LIST)
 
+// BCG library initialisation
+#ifdef MCRL2_BCG
+bool initialise() {
+  BCG_INIT();
+}
+
+static bool initialised = initialise();
+#endif
+
 using namespace std;
 
 namespace mcrl2

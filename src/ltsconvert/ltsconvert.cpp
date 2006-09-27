@@ -288,10 +288,6 @@ int main(int argc, char **argv)
   ATinit(argc,argv,&bot);
   gsEnableConstructorFunctions();
 
-#ifdef MCRL2_BCG
-  BCG_INIT();
-#endif
-
   #define ShortOptions      "hqvi:o:fl:nsbtua"
   #define VersionOption     0x1
   #define NoneOption        0x2
