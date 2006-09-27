@@ -54,7 +54,8 @@ MainFrame::MainFrame( Mediator* owner )
   setupToolBar();
   setupMainArea();
   
-  SetSizeHints( GetSize() );
+  //SetSizeHints( GetSize() );
+  SetSize(800,600);
   CentreOnScreen();
 }
 
@@ -116,8 +117,9 @@ void MainFrame::setupToolBar()
 void MainFrame::setupMainArea()
 {
   wxFlexGridSizer* mainSizer = new wxFlexGridSizer( 1, 2, 0, 0 );
-  mainSizer->AddGrowableCol( 0 );
-  mainSizer->AddGrowableRow( 0 );
+  mainSizer->AddGrowableCol(0);
+  //mainSizer->AddGrowableCol(1);
+  mainSizer->AddGrowableRow(0);
 
   wxPanel* rightPanel = new wxPanel( this, wxID_ANY, wxDefaultPosition,
       wxDefaultSize, wxRAISED_BORDER );
@@ -126,21 +128,21 @@ void MainFrame::setupMainArea()
   int w,h;
   rightPanel->GetSize(&w,&h);
   int attribList[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER };
-  glCanvas = new GLCanvas(mediator,this,wxSize(h,h),attribList);
-  glCanvas->SetSizeHints(h,h);
+  glCanvas = new GLCanvas(mediator,this,wxDefaultSize,attribList);
+  //glCanvas->SetSizeHints(h,h);
   
-  mainSizer->Add( glCanvas, 1, wxALIGN_CENTER | wxEXPAND | wxALL, 0 );
-  mainSizer->Add( rightPanel, 1, wxALIGN_CENTER | wxEXPAND | wxALL, 0 );
+  mainSizer->Add(glCanvas,1,wxALIGN_CENTER|wxEXPAND|wxALL,0);
+  mainSizer->Add(rightPanel,1,wxALIGN_CENTER|wxEXPAND|wxALL,0);
   
-  mainSizer->Fit( this );
-  SetSizer( mainSizer );
+  mainSizer->Fit(this);
+  SetSizer(mainSizer);
   Layout();
 }
 
-void MainFrame::setupRightPanel( wxPanel* panel )
-{
-  wxFlexGridSizer* sizer = new wxFlexGridSizer( 2, 1, 0, 0 );
-  sizer->AddGrowableRow( 1 );
+void MainFrame::setupRightPanel(wxPanel* panel) {
+  wxFlexGridSizer* sizer = new wxFlexGridSizer(2,1,0,0);
+  sizer->AddGrowableCol(0);
+  sizer->AddGrowableRow(1);
 
   int lflags = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
   int rflags = wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL;
@@ -182,11 +184,15 @@ void MainFrame::setupRightPanel( wxPanel* panel )
 
   // setup the bottom part (notebook)
   wxNotebook* bottomNotebook = new wxNotebook( panel, wxID_ANY );
-  wxPanel* settingsPanel = new wxPanel( bottomNotebook, wxID_ANY );
-  wxPanel* markPanel = new wxPanel( bottomNotebook, wxID_ANY );
+  wxScrolledWindow* settingsPanel = new wxScrolledWindow(bottomNotebook,
+      wxID_ANY);
+  wxScrolledWindow* markPanel = new wxScrolledWindow(bottomNotebook,wxID_ANY);
   
-  setupSettingsPanel( settingsPanel );
-  setupMarkPanel( markPanel );
+  setupSettingsPanel(settingsPanel);
+  setupMarkPanel(markPanel);
+  
+  settingsPanel->SetScrollRate(10,10);
+  markPanel->SetScrollRate(10,10);
   
   bottomNotebook->AddPage( settingsPanel, wxT("Settings"), true );
   bottomNotebook->AddPage( markPanel, wxT("Mark"), false );
