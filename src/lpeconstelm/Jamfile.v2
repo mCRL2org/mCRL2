@@ -2,7 +2,7 @@ project lpeconstelm
        : source-location .
        : requirements
           <include>$(BOOST)
-       : build-dir $(BUILD_TOP)
+       : build-dir $(BUILD_TOP)/lpeconstelm
        ;
 
 exe lpeconstelm

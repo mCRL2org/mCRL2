@@ -1,6 +1,6 @@
 project toolset/ltsmin
        : source-location .
-       : build-dir $(BUILD_TOP)
+       : build-dir $(BUILD_TOP)/ltsmin
        : requirements
           <include>$(BOOST)
           <status>deprecated

@@ -3,15 +3,16 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include "lts/liblts.h"
+
 // Graphical shell
 #include "graph_frame.h"
 
-// SQuADT protocol interface
-#include <squadt_utility.h>
-
 std::string lts_file_argument;
 bool command_line = false;
+
 #ifdef ENABLE_SQUADT_CONNECTIVITY
+// SQuADT protocol interface
+# include <squadt_utility.h>
 
 class squadt_interactor: public squadt_tool_interface {
   
@@ -116,7 +117,6 @@ class GraphApp : public wxApp
       if(command_line) {
         // Not SQuADT-connected, parse commandline
         wxCmdLineParser cmdln(argc,argv);
-        sip::configuration::sptr configuration;
 	   
         cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("displays this message"));
         cmdln.AddSwitch(wxEmptyString,wxT("version"), wxT("displays version information and exits"));

@@ -1,6 +1,6 @@
 project pnml2mcrl2
        : source-location .
-       : build-dir $(BUILD_TOP)
+       : build-dir $(BUILD_TOP)/pnml2mcrl2
        : requirements
           <include>$(BOOST)
        ;

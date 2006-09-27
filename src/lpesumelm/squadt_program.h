@@ -22,7 +22,7 @@ class squadt_program
     // Main function that enters event loop and calls above functions
     squadt_program();
     virtual ~squadt_program();
-    bool run(int argc = 0, char **argv = NULL);
+    bool run(int argc = 0, char **argv = 0);
   
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   protected:

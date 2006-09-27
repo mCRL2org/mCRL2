@@ -1,6 +1,6 @@
 project lpeformcheck
   : source-location .
-  : build-dir $(BUILD_TOP)
+  : build-dir $(BUILD_TOP)/lpeformcheck
   ;
 
 exe lpeformcheck

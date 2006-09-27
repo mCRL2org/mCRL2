@@ -1,6 +1,6 @@
 project lpe2pbes
        : source-location .
-       : build-dir $(BUILD_TOP)
+       : build-dir $(BUILD_TOP)/lpe2pbes
        : requirements
           <include>$(BOOST)
        ;

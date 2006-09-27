@@ -2,7 +2,7 @@ project lpeparelm
        : source-location .
        : requirements
           <include>$(BOOST)
-       : build-dir $(BUILD_TOP)
+       : build-dir $(BUILD_TOP)/lpeparelm
        ;
 
 exe lpeparelm

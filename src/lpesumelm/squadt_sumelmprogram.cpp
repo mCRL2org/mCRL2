@@ -1,11 +1,9 @@
 #ifndef ENABLE_SQUADT_CONNECTIVITY
 
-#include "squadt_utility.h"
 #include "squadt_program.h"
 
 squadt_program::squadt_program()
 {
-  active = false;
 }
 
 squadt_program::~squadt_program()
@@ -14,7 +12,6 @@ squadt_program::~squadt_program()
 
 bool squadt_program::run(int argc, char **argv)
 {
-  active = false;
   return false;
 }
 

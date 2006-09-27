@@ -62,10 +62,10 @@ namespace sip {
 
         /** \brief Moves registered event handlers that match the id to another object */
         void transfer(basic_event_handler&, const void* = 0);
-   
+
         /** \brief Remove the handlers for a specific object */
         void remove(const void*);
-   
+
         /** \brief Process an event for a specific object */
         void process(const void*);
    

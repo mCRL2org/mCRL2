@@ -2,7 +2,7 @@ project ltsinfo
        : source-location .
        : requirements
           <include>$(BOOST)
-       : build-dir $(BUILD_TOP)
+       : build-dir $(BUILD_TOP)/ltsinfo
        ;
 
 exe ltsinfo

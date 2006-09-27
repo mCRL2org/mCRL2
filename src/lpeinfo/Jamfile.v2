@@ -2,7 +2,7 @@ project toolset/lpeinfo
        : source-location .
        : requirements
           <include>$(BOOST)
-       : build-dir $(BUILD_TOP)
+       : build-dir $(BUILD_TOP)/lpeinfo
        ;
 
 exe lpeinfo

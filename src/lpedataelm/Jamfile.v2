@@ -1,6 +1,6 @@
 project lpedataelm
        : source-location .
-       : build-dir $(BUILD_TOP)
+       : build-dir $(BUILD_TOP)/lpedataelm
        : requirements
           <include>$(BOOST)
        ;

@@ -1,6 +1,6 @@
 project toolset/ltsgraph
        : source-location .
-       : build-dir $(BUILD_TOP)
+       : build-dir $(BUILD_TOP)/ltsgraph
        : requirements
           <include>$(BOOST)
        ;

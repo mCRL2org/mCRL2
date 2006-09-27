@@ -1,6 +1,6 @@
 project ltscompare
        : source-location .
-       : build-dir $(BUILD_TOP)
+       : build-dir $(BUILD_TOP)/ltscompare
        : requirements
           <include>$(BOOST)
        ;

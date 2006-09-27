@@ -1,6 +1,6 @@
 project lpe2lts
        : source-location .
-       : build-dir $(BUILD_TOP)
+       : build-dir $(BUILD_TOP)/lpe2lts
        : requirements
           <include>$(BOOST)
        ;

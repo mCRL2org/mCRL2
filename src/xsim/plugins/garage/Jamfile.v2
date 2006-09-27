@@ -1,5 +1,5 @@
 project toolset/xsim/plugins/garage
-       : build-dir $(BUILD_TOP)
+       : build-dir $(BUILD_TOP)/xsim/garage
        ;
 
 lib xsim_garage_view

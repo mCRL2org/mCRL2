@@ -1,6 +1,6 @@
 project tbf2lpe
        : source-location .
-       : build-dir $(BUILD_TOP)
+       : build-dir $(BUILD_TOP)/tbf2lpe
        : requirements
           <include>$(BOOST)
        ;

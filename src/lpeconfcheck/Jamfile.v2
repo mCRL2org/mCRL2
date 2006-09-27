@@ -1,6 +1,6 @@
 project lpeconfcheck
   : source-location .
-  : build-dir $(BUILD_TOP)
+  : build-dir $(BUILD_TOP)/lpeconfcheck
   ;
 
 exe lpeconfcheck

@@ -2,15 +2,14 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
+#ifndef ENABLE_SQUADT_CONNECTIVITY
+# include "ltsviewapp.h"
+#else
 //SQuADT protocol interface
-#include <squadt_utility.h>
+# include <squadt_utility.h>
 
-#include "ltsviewapp.h"
+# include "ltsviewapp.h"
 
-bool command_line = false;
-std::string lts_file_argument;
-
-#ifdef ENABLE_SQUADT_CONNECTIVITY
 class squadt_interactor: public squadt_tool_interface {
   
   private:
@@ -81,6 +80,9 @@ bool squadt_interactor::perform_task(sip::configuration&) {
 }
 
 #endif
+
+bool command_line = false;
+std::string lts_file_argument;
 
 IMPLEMENT_APP_NO_MAIN( LTSViewApp )
 

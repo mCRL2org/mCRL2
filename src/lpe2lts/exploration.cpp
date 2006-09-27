@@ -1,5 +1,6 @@
 #include <aterm2.h>
 #include <assert.h>
+#include <sstream>
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
@@ -314,7 +315,7 @@ static void check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewSta
         if ( basefilename == NULL )
         {
         }
-        stringstream ss;
+        std::ostringstream ss;
         ss << basefilename << "_act_" << tracecnt << "_" << ATgetName(ATgetAFun(lgopts->trace_actions[j])) << ".trc";
         string sss(ss.str());
         bool saved_ok = savetrace(sss,OldState,backpointers,nstate,NewState,Transition);
@@ -344,7 +345,7 @@ static void check_deadlocktrace(ATerm state)
   {
     if ( lgopts->trace && (tracecnt < lgopts->max_traces) )
     {
-      stringstream ss;
+      std::ostringstream ss;
       ss << basefilename << "_dlk_" << tracecnt << ".trc";
       string sss(ss.str());
       bool saved_ok = savetrace(sss,state,backpointers,nstate);

@@ -240,9 +240,8 @@ AC_ARG_ENABLE(
   )
 )
 if test $enable_experimental; then
-  BUILD_EXPERIMENTAL="--enable-experimental"
+  BUILD_EXTRA="--enable-experimental $BUILD_EXTRA"
 fi
-AC_SUBST([BUILD_EXPERIMENTAL])
 
 # Check whether symbol table stripping from binaries is requested
 AC_ARG_ENABLE(
@@ -253,9 +252,8 @@ AC_ARG_ENABLE(
   )
 )
 if test $enable_experimental; then
-  BUILD_DEPRECATED="--enable-deprecated"
+  BUILD_EXTRA="--enable-deprecated $BUILD_EXTRA"
 fi
-AC_SUBST([BUILD_DEPRECATED])
 
 # Check whether optimization must be suppressed
 AC_ARG_ENABLE(
@@ -266,7 +264,7 @@ AC_ARG_ENABLE(
   )
 )
 if test $enable_squadt_support; then
-  BUILD_OPTIONS="--disable-squadt-support"
+  BUILD_EXTRA="--disable-squadt-support $BUILD_EXTRA"
 fi
 
 # Check for ATerm library and header files
@@ -473,6 +471,7 @@ fi
 
 AC_SUBST([BUILD_VARIANT],[])
 AC_SUBST([BUILD_OPTIONS],[])
+AC_SUBST([BUILD_EXTRA])
 
 includedir="$includedir/mcrl2"
 datadir="$datadir/mcrl2"

@@ -144,36 +144,26 @@ namespace squadt {
 
     task_monitor::signal_change(s);
 
-    processor::object_descriptor::t_status os;
-
     switch (s) {
       case process::stopped:
         break;
       case process::running:
-        os = object_descriptor::generation_in_progress;
         break;
       case process::completed:
-        os = object_descriptor::reproducible_up_to_date;
+        for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
+          (*i)->status = object_descriptor::reproducible_up_to_date;
+        }
         break;
       default: /* aborted... */
-        os = object_descriptor::reproducible_nonexistent;
+        for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
+          if ((*i)->status == object_descriptor::generation_in_progress) {
+            (*i)->status = object_descriptor::reproducible_nonexistent;
+          }
+        }
         break;
     }
 
     /* Update status for known processor outputs */
-    if (s == process::aborted) {
-      for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
-        if ((*i)->status == object_descriptor::generation_in_progress) {
-          (*i)->status = os;
-        }
-      }
-    }
-    else if (s != process::completed) {
-      for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
-        (*i)->status = os;
-      }
-    }
-
     status_change_handler();
   }
 

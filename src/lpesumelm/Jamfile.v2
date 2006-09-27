@@ -2,7 +2,7 @@ project lpesumelm
        : source-location .
        : requirements
           <include>$(BOOST)
-       : build-dir $(BUILD_TOP)
+       : build-dir $(BUILD_TOP)/lpesumelm
        ;
 
 exe lpesumelm

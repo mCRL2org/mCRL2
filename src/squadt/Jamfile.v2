@@ -1,6 +1,6 @@
 project toolset/squadt
   : source-location .
-  : build-dir $(BUILD_TOP) 
+  : build-dir $(BUILD_TOP)/squadt
   : requirements
     <threading>multi
     <include>./libraries

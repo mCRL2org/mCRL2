@@ -663,8 +663,6 @@ ac_ct_CXX
 FLEX
 BISON
 BFLAGS
-BUILD_EXPERIMENTAL
-BUILD_DEPRECATED
 GREP
 EGREP
 ATERM_CPPFLAGS
@@ -688,6 +686,7 @@ WX_GL_LDFLAGS
 LIBOBJS
 BUILD_VARIANT
 BUILD_OPTIONS
+BUILD_EXTRA
 PREFIX_DIR
 EXEC_PREFIX_DIR
 DATA_DIR
@@ -4775,9 +4774,8 @@ if test "${enable_experimental+set}" = set; then
 fi
 
 if test $enable_experimental; then
-  BUILD_EXPERIMENTAL="--enable-experimental"
+  BUILD_EXTRA="--enable-experimental $BUILD_EXTRA"
 fi
-
 
 # Check whether symbol table stripping from binaries is requested
 # Check whether --enable-deprecated was given.
@@ -4786,9 +4784,8 @@ if test "${enable_deprecated+set}" = set; then
 fi
 
 if test $enable_experimental; then
-  BUILD_DEPRECATED="--enable-deprecated"
+  BUILD_EXTRA="--enable-deprecated $BUILD_EXTRA"
 fi
-
 
 # Check whether optimization must be suppressed
 # Check whether --enable-squadt_support was given.
@@ -4797,7 +4794,7 @@ if test "${enable_squadt_support+set}" = set; then
 fi
 
 if test $enable_squadt_support; then
-  BUILD_OPTIONS="--disable-squadt-support"
+  BUILD_EXTRA="--disable-squadt-support $BUILD_EXTRA"
 fi
 
 # Check for ATerm library and header files
@@ -7315,6 +7312,7 @@ fi
 
 
 
+
 includedir="$includedir/mcrl2"
 datadir="$datadir/mcrl2"
 libdir="$libdir/mcrl2"
@@ -8053,8 +8051,6 @@ ac_ct_CXX!$ac_ct_CXX$ac_delim
 FLEX!$FLEX$ac_delim
 BISON!$BISON$ac_delim
 BFLAGS!$BFLAGS$ac_delim
-BUILD_EXPERIMENTAL!$BUILD_EXPERIMENTAL$ac_delim
-BUILD_DEPRECATED!$BUILD_DEPRECATED$ac_delim
 GREP!$GREP$ac_delim
 EGREP!$EGREP$ac_delim
 ATERM_CPPFLAGS!$ATERM_CPPFLAGS$ac_delim
@@ -8078,6 +8074,7 @@ WX_GL_LDFLAGS!$WX_GL_LDFLAGS$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim
 BUILD_VARIANT!$BUILD_VARIANT$ac_delim
 BUILD_OPTIONS!$BUILD_OPTIONS$ac_delim
+BUILD_EXTRA!$BUILD_EXTRA$ac_delim
 PREFIX_DIR!$PREFIX_DIR$ac_delim
 EXEC_PREFIX_DIR!$EXEC_PREFIX_DIR$ac_delim
 DATA_DIR!$DATA_DIR$ac_delim
@@ -8088,6 +8085,7 @@ MAN_DIR!$MAN_DIR$ac_delim
 R_CFLAGS!$R_CFLAGS$ac_delim
 R_SCFLAGS!$R_SCFLAGS$ac_delim
 R_CXXFLAGS!$R_CXXFLAGS$ac_delim
+R_SCXXFLAGS!$R_SCXXFLAGS$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -8129,7 +8127,6 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
-R_SCXXFLAGS!$R_SCXXFLAGS$ac_delim
 R_CPPFLAGS!$R_CPPFLAGS$ac_delim
 R_LDFLAGS!$R_LDFLAGS$ac_delim
 R_SLDFLAGS!$R_SLDFLAGS$ac_delim
@@ -8138,7 +8135,7 @@ IATERM_LDFLAGS!$IATERM_LDFLAGS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 7; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 6; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

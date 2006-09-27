@@ -1,6 +1,6 @@
 project lperewr
        : source-location .
-       : build-dir $(BUILD_TOP)
+       : build-dir $(BUILD_TOP)/lperewr
        : requirements
           <include>$(BOOST)
        ;

@@ -41,6 +41,7 @@ namespace po = boost::program_options;
 std::string input_file; // Name of the file to read input from
 std::string output_file; // Name of the file to write output to (or stdout)
 
+#ifdef ENABLE_SQUADT_CONNECTIVITY
 const unsigned int lpd_file_for_input = 0;
 const unsigned int lpd_file_for_output = 1;
 
@@ -80,6 +81,7 @@ void squadt_lpesumelm::execute(sip::configuration& configuration)
 void squadt_lpesumelm::finalise()
 {
 }
+#endif
 
 ////////////////////////////////////////////////////////////////
 // Auxiliary functions used to support untime operation

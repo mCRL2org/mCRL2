@@ -1,7 +1,7 @@
 project toolset/mcrl22lpe
        : requirements
           <include>$(BOOST)
-       : build-dir $(BUILD_TOP)
+       : build-dir $(BUILD_TOP)/mcrl22lpe
        ;
 
 exe mcrl22lpe

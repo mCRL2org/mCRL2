@@ -18,9 +18,9 @@ using namespace mcrl2::lts;
 enum alt_lts_type { alt_lts_none, alt_lts_fsm, alt_lts_dot };
 
 // SQuADT protocol interface
+#ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <squadt_utility.h>
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
 class squadt_interactor : public squadt_tool_interface {
 
   private:
