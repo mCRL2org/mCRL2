@@ -114,13 +114,17 @@ bool LTSViewApp::OnInit()
       }
     }
   }
-
+  
   wxString wx_file_string(lts_file_argument.c_str(), wxConvLocal);
-  wxFileName fileName(wx_file_string);
-  fileName.Normalize( wxPATH_NORM_LONG | wxPATH_NORM_DOTS |
+  
+  if (!wx_file_string.IsEmpty()) {
+    wxFileName fileName(wx_file_string);
+    fileName.Normalize( wxPATH_NORM_LONG | wxPATH_NORM_DOTS |
 	  wxPATH_NORM_TILDE | wxPATH_NORM_ABSOLUTE );
-  mainFrame->setFileInfo( fileName );
-  openFile( static_cast< string > ( fileName.GetFullPath().fn_str() ) );
+    mainFrame->setFileInfo( fileName );
+    openFile( static_cast< string > ( fileName.GetFullPath().fn_str() ) );
+  }
+
   return true;
 }
 
