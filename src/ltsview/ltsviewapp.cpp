@@ -132,7 +132,7 @@ bool LTSViewApp::OnInit()
 
 #ifdef __WINDOWS__
 int wx_entry_proxy(HINSTANCE hInstance, 
-                   HINSTACE hPrevInstance, 
+                   HINSTANCE hPrevInstance, 
                    wxCmdLineArgType lpCmdLine,
                    int nCmdShow) {
 
@@ -141,13 +141,14 @@ int wx_entry_proxy(HINSTANCE hInstance,
 
 extern "C" int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,                                                                  wxCmdLineArgType lpCmdLine,int nCmdShow) {
   ATerm stackbot;
+  int i = 0;
 
   // initialise the ATerm library
-  ATinit(NULL,NULL,&stackbot); // XXX args?
+  ATinit(0,0,&stackbot); // XXX args?
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
         squadt_interactor c(boost::bind (wx_entry_proxy, hInstance, hPrevInstance, lpCmdLine, nCmdShow));
-        if (!c.try_interaction(0, NULL)) {
+        if (!c.try_interaction(i, NULL)) {
 #endif
           return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
 

@@ -170,7 +170,7 @@ IMPLEMENT_WX_THEME_SUPPORT
 
 #ifdef __WINDOWS__
 int wx_entry_proxy(HINSTANCE hInstance, 
-                   HINSTACE hPrevInstance, 
+                   HINSTANCE hPrevInstance, 
                    wxCmdLineArgType lpCmdLine,
                    int nCmdShow) {
 
@@ -183,11 +183,12 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   int nCmdShow)                           
     {                                                                     
         ATerm bot;
+        int i = 0;
 
-        ATinit(0,NULL,&bot); // XXX args?
+        ATinit(0,0,&bot); // XXX args?
 #ifdef ENABLE_SQUADT_CONNECTIVITY
         squadt_interactor c(boost::bind (wx_entry_proxy, hInstance, hPrevInstance, lpCmdLine, nCmdShow));
-        if (!c.try_interaction(0, NULL)) {
+        if (!c.try_interaction(i, NULL)) {
 #endif
           return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
 
