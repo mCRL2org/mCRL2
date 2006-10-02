@@ -9,6 +9,9 @@
 // Class BDD_Path_Eliminator ----------------------------------------------------------------------
   // Class BDD_Path_Eliminator - functions declared private ---------------------------------------
 
+    /// \param a_bdd A binary decision diagram.
+    /// \param a_path A list of guards and negated guards, representing a path in a BDD.
+
     ATermAppl BDD_Path_Eliminator::aux_simplify(ATermAppl a_bdd, ATermList a_path) {
       ATermList v_true_path;
       ATermList v_false_path;
@@ -55,6 +58,10 @@
 
     // --------------------------------------------------------------------------------------------
 
+    /// \param a_path A list of guards and negated guards, representing a path in a BDD.
+    /// \param a_guard A guard or a negated guard.
+    /// \param a_minimal A boolean value indicating whether or not minimal sets of possibly inconsistent guards are constructed.
+
     ATermList BDD_Path_Eliminator::create_condition(ATermList a_path, ATermAppl a_guard, bool a_minimal) {
       if (!a_minimal) {
         return ATinsert(a_path, (ATerm) a_guard);
@@ -91,6 +98,9 @@
 
     // --------------------------------------------------------------------------------------------
 
+    /// \param a_expression_1 An arbitrary expression.
+    /// \param a_expression_2 An arbitrary expression.
+
     bool BDD_Path_Eliminator::variables_overlap(ATermAppl a_expression_1, ATermAppl a_expression_2) {
       int v_number_of_arguments;
       ATermAppl v_subexpression;
@@ -113,6 +123,8 @@
 
   // Class BDD_Path_Eliminator - functions declared public ----------------------------------------
 
+    /// \param a_solver_type An value of an enumerated type, representing an SMT solver.
+
     BDD_Path_Eliminator::BDD_Path_Eliminator(SMT_Solver_Type a_solver_type) {
       if (a_solver_type == solver_type_ario) {
         f_smt_solver = new SMT_Solver_Ario();
@@ -131,6 +143,8 @@
     }
 
     // --------------------------------------------------------------------------------------------
+
+    /// \param a_bdd A binary decision diagram.
 
     ATermAppl BDD_Path_Eliminator::simplify(ATermAppl a_bdd) {
       return aux_simplify(a_bdd, ATmakeList0());
