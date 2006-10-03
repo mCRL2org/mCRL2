@@ -1,0 +1,115 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!ENTITY lpesumelm "<function>lpesumelm</function>">
+<!ENTITY option "<parameter>OPTION</parameter>">
+<!ENTITY infile "<parameter>INFILE</parameter>">
+<!ENTITY outfile "<parameter>OUTFILE</parameter>">
+<!ENTITY opt_h "<option>-h</option>">
+<!ENTITY opt_help "<option>--help</option>">
+<!ENTITY opt_version "<option>--version</option>">
+<!ENTITY opt_d "<option>-d</option>">
+<!ENTITY opt_debug "<option>--debug</option>">
+<!ENTITY opt_v "<option>-v</option>">
+<!ENTITY opt_verbose "<option>--verbose</option>">
+<!ENTITY stdin "<option>stdin</option>">
+<!ENTITY stdout "<option>stdout</option>">
+]>
+
+<refentry id="lpesumelm">
+
+<refmeta>
+  <refentrytitle>lpesumelm</refentrytitle>
+  <manvolnum>1</manvolnum>
+</refmeta>
+
+<refnamediv>
+  <refname>lpesumelm</refname>
+  <refpurpose>transform an LPE so that superfluous summations are removed</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>&lpesumelm;</command>
+    <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
+    <arg choice="opt">&infile;</arg>
+    <arg choice="opt">&outfile;</arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  <para>
+    Transform a linear process equation (LPE) in &infile; by rewriting it,
+    and in the process removing superfluous summations. Write the resulting LPE
+    to &outfile;. If &outfile; is not supplied the resulting LPE is written to
+    &stdout;.
+  </para>
+  
+  <para>
+    This tool takes an LPE from &infile; which is of the form:
+    proc P(d:D) = sum e0:E0,a:A c0(d,e0) -> a0(f0(d,e0))@t0(d,e0) . P(g0(d,e0))
+                + sum e1:E1,a:A c1(d,e1) -> a1(f1(d,e1))@t1(d,e1) . P(g1(d,e1))
+                + ...(etc)
+    The simplest case this tool handles is that, whenever a summation variable 
+    does not occur in the other terms of the summand,
+    this summation variable is plainly removed. There is however also a more
+    complex situation where the summation variable occurs in an equality within
+    the condition. There is an axiom that says that we may then substitute the
+    other term of the equality for the summation variable. We can then remove
+    both the summation variable and the condition in which it occurred.
+    The resulting LPE to &outfile; (or &stdout; if not specified).
+  </para>
+</refsect1>
+
+<refsect1>
+  <title>Options</title>
+  <para>
+    <variablelist>
+
+      <varlistentry>
+        <term>&opt_h;</term>
+        <term>&opt_help;</term>
+          <listitem>
+            <para>display help information and exit</para>
+          </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_version;</term>
+        <listitem>
+          <para>display version information and exit</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_v;</term>
+        <term>&opt_verbose;</term>
+        <listitem>
+          <para>
+          Displays short intermediate information during the run of the program.
+          </para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_d;</term>
+        <term>&opt_debug;</term>
+        <listitem>
+          <para>
+          Displays detailed intermediate information during the run of the program.
+          </para>
+        </listitem>
+      </varlistentry>
+
+    </variablelist>
+  </para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>Written by Jeroen Keiren. Please send all complaints, comments and bug
+reports to <email>bug@mcrl2.org</email>.</para>
+</refsect1>
+
+</refentry>
