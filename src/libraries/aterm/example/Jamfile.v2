@@ -7,10 +7,12 @@ project libraries/aterm/example
 
 exe allocator : allocator.cpp : ;
 exe std_container : std_container.cpp : ;
+exe algorithm : algorithm.cpp : ;
 
 install dist
    :
      allocator
      std_container
+     algorithm
    :
    ;

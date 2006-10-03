@@ -56,6 +56,13 @@ namespace atermpp
         assert(type() == AT_REAL);
       }
 
+      /// Conversion to ATermReal.
+      ///
+      operator ATermReal() const
+      {
+        return reinterpret_cast<ATermReal>(m_term);
+      }
+
       /// Get the real value of the aterm_real.
       ///
       double value() const
@@ -63,6 +70,12 @@ namespace atermpp
         return ATgetReal(reinterpret_cast<ATermReal>(m_term));
       }
   }; 
+
+  inline
+  bool operator<(aterm_real x, aterm_real y)
+  {
+    return ATermReal(x) < ATermReal(y);
+  }
 
   /// INTERNAL ONLY
   inline

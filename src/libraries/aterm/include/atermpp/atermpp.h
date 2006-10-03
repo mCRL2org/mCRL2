@@ -25,7 +25,6 @@
 #include "atermpp/aterm_real.h"
 #include "atermpp/aterm_int.h"
 #include "atermpp/aterm_blob.h"
-#include "atermpp/replace.h"
 #include "atermpp/transform.h"
 
 #endif // ATERM_ATERMPP_H

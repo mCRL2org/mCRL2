@@ -47,7 +47,14 @@ namespace atermpp
       aterm_int(int value)
         : aterm(ATmakeInt(value))
       {}
-      
+
+      /// Conversion to ATermInt.
+      ///
+      operator ATermInt() const
+      {
+        return reinterpret_cast<ATermInt>(m_term);
+      }
+
       /// Get the integer value of the aterm_int.
       ///
       int value() const
@@ -55,6 +62,12 @@ namespace atermpp
         return ATgetInt(reinterpret_cast<ATermInt>(m_term));
       }
   };
+
+  inline
+  bool operator<(aterm_int x, aterm_int y)
+  {
+    return ATermInt(x) < ATermInt(y);
+  }
 
   /// INTERNAL ONLY
   inline

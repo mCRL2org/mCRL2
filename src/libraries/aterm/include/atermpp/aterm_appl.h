@@ -93,23 +93,11 @@ namespace atermpp
       }
   };
 
-////  /// Set the i-th argument of an application to term.
-//  /// This function returns a copy of appl with argument i replaced by term.
-//  ///
-//  inline
-//  aterm_appl set_appl_argument(aterm_appl appl, unsigned int i, aterm term)
-//  {
-//    return ATsetArgument(appl, term, i);
-//  }   
-//
-////  /// Returns a quoted string.
-//  ///
-//  inline
-//  aterm_appl quoted_string(std::string s)
-//  {
-//    // TODO: this should be done more efficiently!
-//    return aterm_appl("\"" + s + "\"");
-//  }
+  inline
+  bool operator<(aterm_appl x, aterm_appl y)
+  {
+    return ATermAppl(x) < ATermAppl(y);
+  }
 
   /// INTERNAL ONLY
   inline

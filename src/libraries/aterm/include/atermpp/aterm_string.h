@@ -46,7 +46,7 @@ namespace atermpp
       aterm_string(aterm t)
         : aterm(t)
       {
-        assert(type() == AT_APPL);
+        assert(t.type() == AT_APPL);
         assert(aterm_appl(t).argument_list().size() == 0);
       }
 
@@ -66,9 +66,15 @@ namespace atermpp
 
       operator ATermAppl() const
       {
-        return ATermAppl(m_term);
+        return reinterpret_cast<ATermAppl>(m_term);
       }
   };
+
+  inline
+  bool operator<(aterm_string x, aterm_string y)
+  {
+    return ATermAppl(x) < ATermAppl(y);
+  }
 
   /// INTERNAL ONLY
   inline

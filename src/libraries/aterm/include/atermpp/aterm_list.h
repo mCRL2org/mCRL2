@@ -301,6 +301,12 @@ namespace atermpp {
   term_list<Term> operator+(Term t, term_list<Term> l)
   { return term_list<Term>(ATappend(l, aterm(t))); }
 
+  inline
+  bool operator<(aterm_list x, aterm_list y)
+  {
+    return ATermList(x) < ATermList(y);
+  }
+
 /*
   ///
   /// Returns the next part (the tail) of list l.
@@ -502,5 +508,7 @@ std::cout << "aterm_protect_traits<aterm_list>::mark() " << t << std::endl;
    };
 
 } // namespace atermpp
+
+#include "atermpp/make_list.h"
 
 #endif // ATERM_TERM_LIST_H
