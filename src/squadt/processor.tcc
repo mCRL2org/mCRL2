@@ -6,6 +6,7 @@
 
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
+#include <boost/filesystem/convenience.hpp>
 
 #include "task_monitor.h"
 #include "processor.h"
@@ -44,28 +45,28 @@ namespace squadt {
     private:
 
       /** \brief Weak pointer to this object for passing */
-      boost::weak_ptr < processor >  interface_object;
+      boost::weak_ptr < processor >        interface_object;
  
       /** \brief Identifies the tool that is required to run the command */
-      tool::sptr                     tool_descriptor;
+      tool::sptr                           tool_descriptor;
 
       /** \brief The information about inputs of this processor */
-      input_list                     inputs;
+      input_list                           inputs;
 
       /** \brief The information about outputs of this processor */
-      output_list                    outputs;
+      output_list                          outputs;
  
       /** \brief The current task that is running or about to run */
-      monitor::sptr                  current_monitor;
+      monitor::sptr                        current_monitor;
 
       /** \brief The associated project manager */
-      project_manager*               manager;
+      boost::weak_ptr < project_manager >  manager;
  
       /** \brief The selected input combination of the tool */
-      tool::input_combination const* selected_input_combination;
+      tool::input_combination const*       selected_input_combination;
 
       /** \brief The directory from which tools should be run on behalf of this object */
-      std::string                    output_directory;
+      std::string                          output_directory;
 
     private:
 
@@ -75,10 +76,10 @@ namespace squadt {
     private:
 
       /** \brief Basic constructor */
-      inline processor_impl(boost::shared_ptr < processor > const&, project_manager&);
+      inline processor_impl(boost::shared_ptr < processor > const&, boost::weak_ptr < project_manager >);
 
       /** \brief Constructor with tool selection */
-      inline processor_impl(boost::shared_ptr < processor > const&, project_manager&, tool::sptr);
+      inline processor_impl(boost::shared_ptr < processor > const&, boost::weak_ptr < project_manager >, tool::sptr);
 
       /** \brief Extracts useful information from a configuration object */
       void process_configuration(sip::configuration::sptr const& c);
@@ -113,6 +114,9 @@ namespace squadt {
       /** \brief Check the inputs with respect to the outputs and adjust status accordingly */
       bool check_status(bool);
 
+      /** \brief Sets the status of the inputs to out-of-date if the processor is inactive */
+      bool demote_status();
+
       /** \brief Start tool configuration */
       void configure(interface_ptr const&, const tool::input_combination*, const boost::filesystem::path&, std::string const& = empty_string);
  
@@ -146,13 +150,19 @@ namespace squadt {
                 object_descriptor::t_status const& = object_descriptor::reproducible_up_to_date);
 
       /** \brief Read from XML using a libXML2 reader */
-      static processor::sptr read(project_manager&, id_conversion_map&, xml2pp::text_reader&);
+      static processor::sptr read(boost::weak_ptr < project_manager > const&, id_conversion_map&, xml2pp::text_reader&);
 
       /** \brief Write as XML to stream */
       void write(std::ostream& stream = std::cout) const;
       
       /** \brief Removes the outputs of this processor from storage */
       void flush_outputs();
+
+      /** \brief Whether or not a process is running on behalf of this processor */
+      bool is_active() const;
+
+      /** \brief Terminates running processes and deactivates monitor */
+      void shutdown();
   };
 
   /**
@@ -206,16 +216,16 @@ namespace squadt {
     return (s);
   }
 
-  inline processor_impl::processor_impl(boost::shared_ptr < processor > const& tp, project_manager& p) :
-                interface_object(tp), current_monitor(new monitor(*tp)), manager(&p), selected_input_combination(0) {
+  inline processor_impl::processor_impl(boost::shared_ptr < processor > const& tp, boost::weak_ptr < project_manager > p) :
+                interface_object(tp), current_monitor(new monitor(*tp)), manager(p), selected_input_combination(0) {
   }
 
   /**
    * @param[in] p the associated project manager
    * @param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
    **/
-  inline processor_impl::processor_impl(boost::shared_ptr < processor > const& tp, project_manager& p, tool::sptr t) :
-    interface_object(tp), tool_descriptor(t), current_monitor(new monitor(*tp)), manager(&p), selected_input_combination(0) {
+  inline processor_impl::processor_impl(boost::shared_ptr < processor > const& tp, boost::weak_ptr < project_manager > p, tool::sptr t) :
+    interface_object(tp), tool_descriptor(t), current_monitor(new monitor(*tp)), manager(p), selected_input_combination(0) {
   }
 
   /**
@@ -227,53 +237,77 @@ namespace squadt {
     bool   result                   = false;
     time_t maximum_input_timestamp  = 0;
 
-    /* Find the maximum timestamp of the inputs */
-    BOOST_FOREACH(object_descriptor::wptr i, inputs) {
-      object_descriptor::sptr d = i.lock();
-    
-      if (d.get() == 0) {
-        throw (exception::exception(exception::missing_object_descriptor));
-      }
-    
-      d->self_check(*manager);
+    boost::shared_ptr < project_manager > g(manager.lock());
 
-      result |= (d->status != object_descriptor::original) && (d->status != object_descriptor::reproducible_up_to_date);
-    
-      maximum_input_timestamp = std::max(maximum_input_timestamp, d->timestamp);
-    }
-
-    /* Check whether outputs all exist and find the minimum timestamp of the inputs */
-    BOOST_FOREACH(object_descriptor::sptr i, outputs) {
-      i->self_check(*manager, maximum_input_timestamp);
-
-      result |= (i->status != object_descriptor::original) && (i->status != object_descriptor::reproducible_up_to_date);
-    }
- 
-    if (!result && r) {
-      /* Status can still be okay, check recursively */
+    if (g.get()) {
+      /* Find the maximum timestamp of the inputs */
       BOOST_FOREACH(object_descriptor::wptr i, inputs) {
         object_descriptor::sptr d = i.lock();
-    
+      
         if (d.get() == 0) {
           throw (exception::exception(exception::missing_object_descriptor));
         }
-
-        processor::sptr p(d->generator);
-
-        if (p.get() != 0) {
-          result |= p->check_status(true);
-        }
+      
+        d->self_check(*g);
+     
+        result |= (d->status != object_descriptor::original) && (d->status != object_descriptor::reproducible_up_to_date);
+      
+        maximum_input_timestamp = std::max(maximum_input_timestamp, d->timestamp);
       }
-    }
-
-    if (result) {
+     
+      /* Check whether outputs all exist and find the minimum timestamp of the inputs */
       BOOST_FOREACH(object_descriptor::sptr i, outputs) {
-        if (i->status == object_descriptor::reproducible_up_to_date) {
-          try_change_status(*i, object_descriptor::reproducible_out_of_date);
+        i->self_check(*g, maximum_input_timestamp);
+     
+        result |= (i->status != object_descriptor::original) && (i->status != object_descriptor::reproducible_up_to_date);
+      }
+     
+      if (!result && r) {
+        /* Status can still be okay, check recursively */
+        BOOST_FOREACH(object_descriptor::wptr i, inputs) {
+          object_descriptor::sptr d = i.lock();
+      
+          if (d.get() == 0) {
+            throw (exception::exception(exception::missing_object_descriptor));
+          }
+     
+          processor::sptr p(d->generator);
+     
+          if (p.get() != 0) {
+            result |= p->check_status(true);
+          }
         }
       }
+     
+      if (result) {
+        if (0 < inputs.size()) {
+          BOOST_FOREACH(object_descriptor::sptr i, outputs) {
+            if (i->status == object_descriptor::reproducible_up_to_date) {
+              try_change_status(*i, object_descriptor::reproducible_out_of_date);
+            }
+          }
+        }
+        else {
+          /* User added files are always up to date */
+          g->demote_status(interface_object.lock().get());
+        }
+      }
+
+      return (result);
     }
-    
+
+    return (false);
+  }
+
+  bool processor_impl::demote_status() {
+    bool result = false;
+
+    if (!is_active()) {
+      BOOST_FOREACH(object_descriptor::sptr i, outputs) {
+        result |= try_change_status(*i, object_descriptor::reproducible_out_of_date);
+      }
+    }
+
     return (result);
   }
 
@@ -337,7 +371,7 @@ namespace squadt {
    * \pre must point to a processor element
    * \attention the same map m must be used to read back all processor instances that were written with write()
    **/
-  inline processor::sptr processor_impl::read(project_manager& p, id_conversion_map& m, xml2pp::text_reader& r) {
+  inline processor::sptr processor_impl::read(boost::weak_ptr < project_manager > const& p, id_conversion_map& m, xml2pp::text_reader& r) {
     processor::sptr c = processor::create(p);
     std::string     temporary;
 
@@ -429,20 +463,33 @@ namespace squadt {
     return (c);
   }
 
+  inline bool processor_impl::is_active() const {
+    return (current_monitor->get_status() == execution::process::running);
+  }
+
+  inline void processor_impl::shutdown() {
+    current_monitor->shutdown();
+    current_monitor->finish();
+  }
+
   inline void processor_impl::flush_outputs() {
     using namespace boost::filesystem;
 
-    /* Make sure any output objects are removed from storage */
-    for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
-      path p(manager->get_path_for_name((*i)->location));
+    boost::shared_ptr < project_manager > g(manager.lock());
 
-      if (exists(p)) {
-        remove(p);
+    if (g.get() && !is_active()) {
+      /* Make sure any output objects are removed from storage */
+      for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
+        path p(g->get_path_for_name((*i)->location));
+
+        if (exists(p)) {
+          remove(p);
+
+          try_change_status(*(*i), object_descriptor::reproducible_nonexistent);
+        }
       }
       
-      if ((*i)->status != object_descriptor::original) {
-        (*i)->status = object_descriptor::reproducible_nonexistent;
-      }
+      g->update_status(interface_object.lock().get());
     }
   }
 
@@ -572,9 +619,11 @@ namespace squadt {
   inline void processor_impl::rename_object(object_descriptor::sptr const& o, std::string const& n) {
     using namespace boost::filesystem;
 
-    if (o.get() != 0) {
-      path source(manager->get_path_for_name(o->location));
-      path target(manager->get_path_for_name(n));
+    boost::shared_ptr < project_manager > g(manager.lock());
+
+    if (g.get() != 0 && o.get() != 0) {
+      path source(g->get_path_for_name(o->location));
+      path target(g->get_path_for_name(n));
 
       if (exists(source) && source != target) {
         if (exists(target)) {
@@ -603,32 +652,36 @@ namespace squadt {
    * @param[in] c a reference to a configuration object
    **/
   inline void processor_impl::process_configuration(sip::configuration::sptr const& c) {
-    /* Extract information about output objects from the configuration */
-    for (sip::configuration::object_iterator i = c->get_object_iterator(); i.valid(); ++i) {
-      if ((*i)->get_type() == sip::object::output) {
-        object_descriptor::sptr o = find_output((*i)->get_id());
-    
-        if (o.get() == 0) {
-          /* Output not registered yet */
-          append_output(*(*i), object_descriptor::reproducible_up_to_date);
-        }
-        else {
-          if ((*i)->get_location() != o->location) {
-            /* Output already known, but filenames do not match */
-            remove(manager->get_path_for_name(o->location));
+    boost::shared_ptr < project_manager > g(manager.lock());
+
+    if (g.get()) {
+      /* Extract information about output objects from the configuration */
+      for (sip::configuration::object_iterator i = c->get_object_iterator(); i.valid(); ++i) {
+        if ((*i)->get_type() == sip::object::output) {
+          object_descriptor::sptr o = find_output((*i)->get_id());
+      
+          if (o.get() == 0) {
+            /* Output not registered yet */
+            append_output(*(*i), object_descriptor::reproducible_up_to_date);
           }
-    
-          replace_output(o, *(*i));
-        }
-    
-        if (!boost::filesystem::exists(manager->get_path_for_name((*i)->get_location()))) {
-          /* TODO Signal error with exception */
-          std::cerr << "Critical error, output file with name: " << (*i)->get_location() << " does not exist!" << std::endl;
+          else {
+            if ((*i)->get_location() != o->location) {
+              /* Output already known, but filenames do not match */
+              remove(g->get_path_for_name(o->location));
+            }
+      
+            replace_output(o, *(*i));
+          }
+      
+          if (!boost::filesystem::exists(g->get_path_for_name((*i)->get_location()))) {
+            /* TODO Signal error with exception */
+            std::cerr << "Critical error, output file with name: " << (*i)->get_location() << " does not exist!" << std::endl;
+          }
         }
       }
+     
+      g->add(interface_object.lock());
     }
-
-    manager->add(interface_object.lock());
     /* TODO Adjust status for outputs that are not produced using the new configuration */
   }
 
@@ -640,13 +693,19 @@ namespace squadt {
   inline std::string processor_impl::make_output_path(std::string const& w) const {
     using namespace boost::filesystem;
 
-    path output_path(manager->get_project_store());
+    boost::shared_ptr < project_manager > g(manager.lock());
 
-    if (!output_directory.empty()) {
-      output_path /= path(output_directory);
+    if (g.get()) {
+      path output_path(g->get_project_store());
+    
+      if (!output_directory.empty()) {
+        output_path /= path(output_directory);
+      }
+
+      return (output_path.native_file_string());
     }
 
-    return (output_path.native_file_string());
+    return (w);
   }
 
   /**
@@ -663,17 +722,21 @@ namespace squadt {
 
     assert(ic != 0);
 
-    selected_input_combination = const_cast < tool::input_combination* > (ic);
+    boost::shared_ptr < project_manager > g(manager.lock());
 
-    sip::configuration::sptr c(sip::controller::communicator::new_configuration(*selected_input_combination));
-
-    c->set_output_prefix(str(format("%s%04X") % (basename(find_initial_object()->location)) % manager->get_unique_count()));
-
-    c->add_input(ic->identifier, ic->format, l.string());
-
-    current_monitor->set_configuration(c);
-
-    configure(t, w);
+    if (g.get()) {
+      selected_input_combination = const_cast < tool::input_combination* > (ic);
+     
+      sip::configuration::sptr c(sip::controller::communicator::new_configuration(*selected_input_combination));
+     
+      c->set_output_prefix(str(format("%s%04X") % (basename(find_initial_object()->location)) % g->get_unique_count()));
+     
+      c->add_input(ic->identifier, ic->format, l.string());
+     
+      current_monitor->set_configuration(c);
+     
+      configure(t, w);
+    }
   }
 
   /**
@@ -723,9 +786,11 @@ namespace squadt {
    **/
   inline void processor_impl::run(interface_ptr const& t, bool b) {
     if (b || 0 < inputs.size()) {
+      boost::shared_ptr < project_manager > g(manager);
+
       /* Check that dependent files exist and rebuild if this is not the case */
       BOOST_FOREACH(input_list::value_type i, inputs) {
-        if (!i->present_in_store(*manager)) {
+        if (!i->present_in_store(*g)) {
           processor::sptr p(i->generator.lock());
 
           if (p.get() != 0) {

@@ -23,7 +23,7 @@ namespace squadt {
   using namespace boost::filesystem;
 
   bool processor_impl::try_change_status(processor::object_descriptor& o, processor::object_descriptor::t_status s) {
-    if (o.status != s) {
+    if (s < o.status) {
       o.status = s;
 
       o.generator.lock()->get_monitor()->status_change_handler();
@@ -221,7 +221,9 @@ namespace squadt {
       if (await_message(sip::message_accept_configuration).get() != 0) {
         send_start_signal();
 
-        if (!await_message(sip::message_signal_done)->is_empty()) {
+        sip::message_ptr m(await_message(sip::message_signal_done));
+
+        if (m.get() && !m->is_empty()) {
           /* Operation completed successfully */
           t->impl->process_configuration(get_configuration());
         }
@@ -232,7 +234,11 @@ namespace squadt {
     finish();
 
     /* Force the project manager to do a status update */
-    t->impl->manager->update_status(t.get());
+    boost::shared_ptr < project_manager > g(t->impl->manager);
+
+    if (g.get() != 0) {
+      g->update_status(t.get());
+    }
   }
 
   /**
@@ -312,7 +318,7 @@ namespace squadt {
   /**
    * @param[in] p the associated project manager
    **/
-  processor::sptr processor::create(project_manager& p) {
+  processor::sptr processor::create(boost::weak_ptr < project_manager > const& p) {
     processor::sptr n(new processor());
 
     n->impl.reset(new processor_impl(n, p));
@@ -324,7 +330,7 @@ namespace squadt {
    * @param[in] p the associated project manager
    * @param[in] t the tool to use
    **/
-  processor::sptr processor::create(project_manager& p, tool::sptr t) {
+  processor::sptr processor::create(boost::weak_ptr < project_manager > const& p, tool::sptr t) {
     processor::sptr n(new processor());
 
     n->impl.reset(new processor_impl(n, p, t));
@@ -337,6 +343,10 @@ namespace squadt {
    **/
   bool processor::check_status(bool r) {
     return (impl->check_status(r));
+  }
+
+  bool processor::demote_status() {
+    return (impl->demote_status());
   }
 
   /**
@@ -411,8 +421,12 @@ namespace squadt {
    * \pre must point to a processor element
    * \attention the same map m must be used to read back all processor instances that were written with write()
    **/
-  processor::sptr processor::read(project_manager& p, id_conversion_map& m, xml2pp::text_reader& r) {
+  processor::sptr processor::read(boost::weak_ptr < project_manager > const& p, id_conversion_map& m, xml2pp::text_reader& r) {
     return (processor_impl::read(p, m, r));
+  }
+
+  void processor::shutdown() {
+    impl->shutdown();
   }
 
   void processor::flush_outputs() {
@@ -532,8 +546,7 @@ namespace squadt {
   }
 
   bool processor::is_active() const {
-    return (impl->current_monitor->get_status() == execution::process::running);
+    return (impl->is_active());
   }
-
 }
 

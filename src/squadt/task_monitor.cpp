@@ -51,6 +51,10 @@ namespace squadt {
       boost::dynamic_pointer_cast < task_monitor_impl > (impl)->finish();
     }
 
+    void task_monitor::shutdown() {
+      boost::dynamic_pointer_cast < task_monitor_impl > (impl)->shutdown();
+    }
+
     /**
      * \param[in] ts the maximum number of seconds to block
      **/

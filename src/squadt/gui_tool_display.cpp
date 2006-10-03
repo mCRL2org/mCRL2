@@ -670,6 +670,7 @@ namespace squadt {
 
       wxSizer* s = GetParent()->GetSizer();
       
+      s->Show(this, false, true);
       s->Detach(this);
       s->Layout();
 

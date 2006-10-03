@@ -92,6 +92,9 @@ namespace squadt {
         /** \brief Unblocks waiters and requests a tool to prepare termination */
         void finish();
 
+        /** \brief Terminates running processes and deactivates monitor */
+        void shutdown();
+
         /** \brief Destructor */
         virtual ~task_monitor();
     };

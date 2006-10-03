@@ -121,13 +121,16 @@ namespace squadt {
     public:
 
       /** \brief Factory method for creating instances of this object */
-      static processor::sptr create(project_manager&);
+      static processor::sptr create(boost::weak_ptr < project_manager > const&);
  
       /** \brief Factory method for creating instances of this object */
-      static processor::sptr create(project_manager&, tool::sptr);
+      static processor::sptr create(boost::weak_ptr < project_manager > const&, tool::sptr);
  
       /** \brief Check the inputs with respect to the outputs and adjust status accordingly */
       bool check_status(bool);
+
+      /** \brief Sets the status of the inputs to out-of-date if the processor is inactive */
+      bool demote_status();
 
       /** \brief Start tool configuration */
       void configure(const tool::input_combination*, const boost::filesystem::path&, std::string const& = empty_string);
@@ -166,7 +169,7 @@ namespace squadt {
       boost::shared_ptr < monitor > get_monitor();
 
       /** \brief Read from XML using a libXML2 reader */
-      static processor::sptr read(project_manager&, id_conversion_map&, xml2pp::text_reader&);
+      static processor::sptr read(boost::weak_ptr < project_manager > const&, id_conversion_map&, xml2pp::text_reader&);
 
       /** \brief Write as XML to stream */
       void write(std::ostream& stream = std::cout) const;
@@ -220,6 +223,9 @@ namespace squadt {
  
       /** \brief Removes the outputs of this processor from storage */
       void flush_outputs();
+
+      /** \brief Stops running processes and deactivates monitor */
+      void shutdown();
   };
 
   /**

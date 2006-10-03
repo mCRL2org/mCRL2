@@ -94,6 +94,9 @@ namespace squadt {
 
         /** \brief Unblocks waiters and requests a tool to prepare termination */
         inline void finish();
+
+        /** \brief Clears handlers and terminates processes */
+        inline void shutdown();
     };
 
     task_monitor_impl::task_monitor_impl() : connected(false), done(false) {
@@ -179,6 +182,12 @@ namespace squadt {
       if (0 < handlers.count(completion)) {
         task_monitor_impl::service_handlers(m, connection);
       }
+    }
+
+    inline void task_monitor_impl::shutdown() {
+      boost::mutex::scoped_lock l(register_lock);
+
+      handlers.clear();
     }
 
     /**
@@ -288,7 +297,7 @@ namespace squadt {
     }
 
     inline void task_monitor_impl::disconnect() {
-      if (connected) {
+      if (associated_process.get() && associated_process->get_status() == process::running && connected) {
         send_message(sip::message_request_termination);
 
         logger->log(1, boost::str(boost::format("termination request sent to %s pid(%u)\n")
@@ -298,6 +307,8 @@ namespace squadt {
 
         sip::controller::communicator_impl::disconnect();
       }
+
+      connected = false;
     }
 
     /** \brief Terminates a running process */

@@ -32,7 +32,7 @@ namespace squadt {
         bool r = true;
 
         try {
-          project_manager::ptr l = project_manager::read(std::string(p.fn_str()));
+          project_manager::ptr l = project_manager::create(std::string(p.fn_str()), false);
 
           r = l.get() != 0;
 
@@ -49,7 +49,7 @@ namespace squadt {
       wxString project::get_project_description(wxString p) {
         std::string f(p.fn_str());
 
-        project_manager::ptr m = project_manager::read(f);
+        project_manager::ptr m = project_manager::create(f, false);
 
         return (wxString(m->get_description().c_str(), wxConvLocal));
       }
