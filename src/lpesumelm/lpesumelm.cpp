@@ -6,7 +6,7 @@
 //
 // file          : lpesumelm 
 // date          : 03-10-2006
-// version       : 0.2
+// version       : 0.21
 //
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
 //
@@ -45,7 +45,9 @@ using namespace lpe;
 
 namespace po = boost::program_options;
 
-#define VERSION "0.2"
+//TODO: Add configuration parameter for substitution sumelimination (enable/disable)
+
+#define VERSION "0.21"
 
 std::string input_file; ///< Name of the file to read input from
 std::string output_file; ///< Name of the file to write output to (or stdout)
@@ -100,9 +102,7 @@ bool squadt_lpesumelm::perform_task(sip::configuration& configuration)
   std::string in_file, out_file;
   in_file = configuration.get_object(lpd_file_for_input)->get_location();
   out_file = configuration.get_object(lpd_file_for_output)->get_location();
-//  input_file = configuration.get_object(lpd_file_for_input)->get_location();
-//  output_file = configuration.get_object(lpd_file_for_output)->get_location();
-  cerr << in_file << endl << out_file << endl;
+
   return (do_sumelm(in_file, out_file)==0);
 }
 
@@ -127,6 +127,7 @@ struct is_data_variable
   }
 };
 
+///pre: true
 ///ret: data_variable v occurs in d.
 template <typename data_type>
 bool occurs_in(data_type d, data_variable v)
@@ -134,6 +135,7 @@ bool occurs_in(data_type d, data_variable v)
   return find_if(aterm_appl(d), is_data_variable(v)) != aterm();
 }
 
+///pre: true
 ///ret: 1 if t is a DataExprEquality, 0 otherwise
 static int gsIsDataExprEquality(ATermAppl t)
 {
@@ -239,18 +241,23 @@ data_expression swap(data_expression t)
 data_expression eliminate_unit_and(data_expression t)
 {
   assert(is_and(t));
+
+  data_expression result;
+
   if (lhs(t).is_true())
   {
-    return rhs(t);
+    result = rhs(t);
   }
   else if (rhs(t).is_true())
   {
-    return lhs(t);
+    result = lhs(t);
   }
   else
   {
-    return t;
+    result = t;
   }
+
+  return result;
 }
 
 ////////////////////////////////////////////////////////////
@@ -371,20 +378,7 @@ data_expression recursive_apply_eq_sumelm(data_variable_list* summation_variable
                               time,
                               assignments,
                               rhs(working_condition));
-/*
-    if (a.is_true())
-    {
-      result = b;
-    }
-    else if (b.is_true())
-    {
-      result = a;
-    }
-    else // a!=true && b!=true
-    {
-      result = gsMakeDataExprAnd(a, b);
-    }
-*/
+
     result = eliminate_unit_and(gsMakeDataExprAnd(a, b));
   }
 
@@ -404,7 +398,6 @@ data_expression recursive_apply_eq_sumelm(data_variable_list* summation_variable
     
     if (is_var(lhs(equality)))
     {
-      //if (occurs_in(*summation_variables, data_variable(ATgetArgument(ATermAppl(lhs(equality)),0)))) //TODO: remove AT functions, ugly
       if (occurs_in(*summation_variables, get_var(lhs(equality))))
       {
         //Substitute all occurrences of lhs for rhs in the lpe
@@ -418,7 +411,7 @@ data_expression recursive_apply_eq_sumelm(data_variable_list* summation_variable
         *actions = substitute(*actions, assignment_list_substitution(al));
         *time = time->substitute(a);
         *assignments = substitute(*assignments, assignment_list_substitution(al));
-
+        
         result = gsMakeDataExprTrue(); // Substitution applied, equality condition can be removed
       }
       else //!occurs_in(..)
@@ -428,7 +421,6 @@ data_expression recursive_apply_eq_sumelm(data_variable_list* summation_variable
     }
     else //!is_var(lhs(equality))
     {
-      gsDebugMsg("lhs is not a data_variable, this case is not handled yet!\n");
       result = working_condition; // No substitution, keep old condition
     }
   }
@@ -475,6 +467,7 @@ lpe::LPE_summand apply_eq_sumelm(lpe::LPE_summand& summand)
   //Take the summand with substitution, and remove the summation variables that are now not needed
   //TODO: move the no_occurrence_sumelm into the recursive function above, that would make the separation more perfect.
   return apply_no_occurrence_sumelm(new_summand);
+  //return new_summand;
 }
 
 
@@ -520,8 +513,8 @@ lpe::specification eq_sumelm(const lpe::specification& specification)
 ///Returns an LPE specification in which the timed arguments have been rewritten
 lpe::specification sumelm(const lpe::specification& specification) 
 {
-  lpe::specification new_specification;
-  new_specification = eq_sumelm(specification); 
+  lpe::specification new_specification = specification;
+  new_specification = eq_sumelm(new_specification); // new_specification used for future concerns, possibly disabling eq_sumelm
   new_specification = no_occurrence_sumelm(new_specification);
 
   return new_specification;
@@ -532,7 +525,6 @@ lpe::specification sumelm(const lpe::specification& specification)
 int do_sumelm(const std::string input_file_name, const std::string output_file_name)
 {
   lpe::specification lpe_specification;
-  gsDebugMsg("do_sumelm\n");
   if (lpe_specification.load(input_file_name)) {
     // Untime lpe_specification and save the output to a binary file
     gsDebugMsg("loaded spec\n");
@@ -547,8 +539,6 @@ int do_sumelm(const std::string input_file_name, const std::string output_file_n
     gsErrorMsg("lpesumelm: Unable to load LPE from `%s'\n", input_file_name.c_str());
     return (1);
   }
-
-  gsDebugMsg("return from do_sumelm\n");
 
   return 0;
 }
