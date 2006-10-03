@@ -20,11 +20,15 @@
 #include "dataimpl.h"
 #include "regfrmtrans.h"
 #include "lpe/specification.h"
+#include "lpe/mucalculus.h"
+#include "lpe/pbes_translate.h"
+#include "lpe/pbes.h"
 #include "libpbes.h"
 
 #include "mcrl2_revision.h"
 
 using namespace std;
+using namespace lpe;
 
 //Type definitions
 //----------------
@@ -283,7 +287,9 @@ ATermAppl create_pbes(t_tool_options tool_options)
 
   //generate PBES from state formula and LPE
   gsVerboseMsg("generating PBES from state formula and LPE...\n");
-  result = create_pbes(result, lpe_spec);
+  // result = create_pbes(result, lpe_spec);
+  pbes p = lpe::pbes_translate(state_formula(result), lpe_spec.lpe());
+  result = ATermAppl(p);
   if (result == NULL) {
     return NULL;
   }
