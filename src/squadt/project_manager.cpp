@@ -86,9 +86,6 @@ namespace squadt {
       /** \brief Read project information from project_store */
       void read();
  
-      /** \brief Read project information from project_store */
-      static project_manager::ptr read(const std::string&);
- 
       /** \brief Writes project configuration to the project file */
       void write() const;
 
@@ -696,40 +693,30 @@ namespace squadt {
     }
   }
 
-  /**
-   * @param[in] l a path to a project file
-   **/
-  inline project_manager::ptr project_manager_impl::read(const std::string& l) {
-    bf::path p(settings_manager::path_concatenate(l, settings_manager::project_definition_base_name));
-
-    if (!bf::exists(p)) {
-      throw (exception::exception(exception::failed_loading_object, "SQuADT project", p.native_file_string()));
-    }
-
-    project_manager::ptr m(new project_manager());
-
-    try {
-      xml2pp::text_reader reader(p);
-
-      reader.set_schema(bf::path(global_settings_manager->path_to_schemas(
-                                      settings_manager::append_schema_suffix(
-                                              settings_manager::project_definition_base_name)).c_str()));
-     
-      m->impl->read(reader);
-
-      m->impl->store = l;
-    }
-    catch (...) {
-      throw;
-    }
-
-    return (m);
-  }
-
   inline void project_manager_impl::shutdown() {
     BOOST_FOREACH(processor_list::value_type p, processors) {
       p->shutdown();
     }
+  }
+
+  /**
+   * @param[in] s a path to a project file
+   **/
+  bool project_manager::is_project_store(const std::string& s) {
+    bf::path p(settings_manager::path_concatenate(s, settings_manager::project_definition_base_name));
+
+    if (bf::exists(p)) {
+      try {
+        xml2pp::text_reader reader(p);
+     
+        return (reader.is_element("squadt-project"));
+      }
+      catch (...) {
+        throw;
+      }
+    }
+
+    return (false);
   }
 
   /**

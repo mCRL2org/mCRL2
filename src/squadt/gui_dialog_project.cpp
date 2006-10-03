@@ -29,29 +29,14 @@ namespace squadt {
        * @param[in] p should be a valid path that identifies a project store
        **/
       bool project::is_project_directory(wxString p) {
-        bool r = true;
-
-        try {
-          project_manager::ptr l = project_manager::create(std::string(p.fn_str()), false);
-
-          r = l.get() != 0;
-
-        } catch (...) {
-          r = false;
-        }
-
-        return (r);
+        return (project_manager::is_project_store(std::string(p.fn_str())));
       }
 
       /**
        * @param[in] p should be a valid path that identifies a project store
        **/
       wxString project::get_project_description(wxString p) {
-        std::string f(p.fn_str());
-
-        project_manager::ptr m = project_manager::create(f, false);
-
-        return (wxString(m->get_description().c_str(), wxConvLocal));
+        return (wxEmptyString);
       }
 
       project::~project() {
@@ -135,13 +120,13 @@ namespace squadt {
             EndModal(2);
             break;
           default: /* wxID_OK */
-            if (wxFileName(location->GetValue()).DirExists()) {
+            if (wxFileName::DirExists(location->GetValue())) {
               if (wxMessageDialog(0, wxT("Convert the directory to project store and import any other files it contains."),
                                     wxT("Warning: directory exists"), wxOK|wxCANCEL).ShowModal() == wxID_OK) {
                 EndModal(1);
               }
             }
-            else if (wxFileName(location->GetValue()).FileExists()) {
+            else if (wxFileName::FileExists(location->GetValue())) {
               wxMessageDialog(0, wxT("Unable to create project store, a file is in the way.`"),wxT("Error"), wxOK).ShowModal();
             }
             else {
