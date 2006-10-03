@@ -51,7 +51,7 @@ using atermpp::read_from_named_file;
 //                ActSpec(list<action> actions),
 //                LPE(list<data_variable> free_variables, list<data_variable> process_parameters, list<LPESummand> lpe_summands),
 //         )
-class specification: public aterm_wrapper
+class specification: public aterm_appl_wrapper
 {
   protected:
     data_declaration     m_data;
@@ -105,7 +105,7 @@ class specification: public aterm_wrapper
     void init_term(aterm_appl t)
     {
       m_term = t;
-      aterm_list::iterator i = m_term.argument_list().begin();
+      aterm_list::iterator i = arguments().begin();
       sort_list          sorts        = sort_list(aterm_appl(*i++).argument(0));
       function_list      constructors = function_list(aterm_appl(*i++).argument(0));
       function_list      mappings     = function_list(aterm_appl(*i++).argument(0));
@@ -119,7 +119,7 @@ class specification: public aterm_wrapper
 
       // unpack LPEInit(.,.) term
       aterm_list::iterator k         = lpe_init.argument_list().begin();
-      m_initial_free_variables            = data_variable_list(*k++);
+      m_initial_free_variables       = data_variable_list(*k++);
       m_initial_assignments          = data_assignment_list(*k);
       data_expression_list d0(m_initial_free_variables);
     }
@@ -129,7 +129,7 @@ class specification: public aterm_wrapper
     {}
 
     specification(aterm_appl t)
-      : aterm_wrapper(t)
+      : aterm_appl_wrapper(t)
     {
       assert(gsIsSpecV1(t));
       init_term(t);

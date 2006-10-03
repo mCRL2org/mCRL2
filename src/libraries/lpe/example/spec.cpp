@@ -84,7 +84,7 @@ int main()
   cout << "v  = " << v.pp() << " " << v.to_string() << endl;
 
   data_variable w("YES", D);
-  data_assignment a(v, w.to_expr());
+  data_assignment a(v, w);
   cout << "a = " << a.pp() << " " << a.to_string() << endl;
 
   // test substitution

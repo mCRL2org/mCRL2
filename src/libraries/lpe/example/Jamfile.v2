@@ -11,6 +11,7 @@ exe constructors    : constructors.cpp : ;
 exe spec            : spec.cpp  : ;
 exe substitute      : substitute.cpp : ;
 exe filter_template : filter_template.cpp : ;
+exe find            : find.cpp : ;
 
 install dist
    :
@@ -18,5 +19,6 @@ install dist
      spec
      substitute
      filter_template
+     find
    :
    ;

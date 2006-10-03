@@ -24,14 +24,14 @@ using atermpp::make_term;
 // function
 /// \brief Represents mappings and constructors of a mCRL2 specification.
 ///
-class function: public aterm_wrapper
+class function: public aterm_appl_wrapper
 {
   public:
     function()
     {}
 
     function(aterm_appl t)
-      : aterm_wrapper(t)
+      : aterm_appl_wrapper(t)
     {
       assert(gsIsOpId(t));
     }
@@ -42,9 +42,9 @@ class function: public aterm_wrapper
     {
       sort_list result;
       aterm_appl t = aterm_appl(*this);
-      while (gsIsSortArrow(lpe::sort(t.argument(1)))) {
+      while (gsIsSortArrow(lpe::sort(aterm_appl(t.argument(1))))) {
         t = ATAgetArgument(t , 1);
-        result = push_front(result, lpe::sort(t.argument(0)));
+        result = push_front(result, lpe::sort(aterm_appl(t.argument(0))));
       }
       return reverse(result);
     }
@@ -54,10 +54,10 @@ class function: public aterm_wrapper
     sort result_type() const
     {
       aterm_appl t = aterm_appl(*this);
-      while (gsIsSortArrow(lpe::sort(t.argument(1)))) {
+      while (gsIsSortArrow(lpe::sort(aterm_appl(t.argument(1))))) {
         t = ATAgetArgument(t , 1);
       }
-      return lpe::sort(t.argument(1));
+      return lpe::sort(aterm_appl(t.argument(1)));
     }
 };
 

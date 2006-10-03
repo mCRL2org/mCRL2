@@ -15,13 +15,13 @@ namespace lpe {
 using atermpp::aterm_appl;
 using atermpp::term_list;
 
-    /// Applies a substitution to this aterm_wrapper and returns the result.
+    /// Applies a substitution to this aterm_appl_wrapper and returns the result.
     /// The Substitution object must supply the method aterm operator()(aterm).
     ///
     template <typename Substitution>
-    aterm_wrapper substitute(aterm_wrapper t, Substitution f)
+    aterm_appl_wrapper substitute(aterm_appl_wrapper t, Substitution f)
     {
-      return aterm_wrapper(f(t));
+      return aterm_appl_wrapper(f(t));
     }     
 
     /// Applies a substitution to this term_list and returns the result.

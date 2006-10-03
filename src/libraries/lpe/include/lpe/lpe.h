@@ -58,7 +58,9 @@ using atermpp::read_from_named_file;
 // LPE_summand
 /// \brief LPE summand.
 ///
-class LPE_summand: public aterm_wrapper
+// <LPESummand>   ::= LPESummand(<DataVarId>*, <DataExpr>, <MultActOrDelta>,
+//                    <DataExprOrNil>, <Assignment>*)
+class LPE_summand: public aterm_appl_wrapper
 {
   protected:
     data_variable_list   m_summation_variables;
@@ -73,10 +75,10 @@ class LPE_summand: public aterm_wrapper
     {}
 
     LPE_summand(aterm_appl t)
-     : aterm_wrapper(t)
+     : aterm_appl_wrapper(t)
     {
       assert(gsIsLPESummand(t));
-      aterm_list::iterator i = m_term.argument_list().begin();
+      aterm_list::iterator i = arguments().begin();
 
       m_summation_variables = data_variable_list(*i++);
       m_condition           = data_expression(*i++);
@@ -100,7 +102,7 @@ class LPE_summand: public aterm_wrapper
                 data_expression      time,
                 data_assignment_list assignments
                )
-      : aterm_wrapper(gsMakeLPESummand(summation_variables,
+      : aterm_appl_wrapper(gsMakeLPESummand(summation_variables,
                condition,
                (delta ? gsMakeDelta() : gsMakeMultAct(actions)),
                time,
@@ -210,7 +212,7 @@ typedef term_list<LPE_summand> summand_list;
 // LPE
 /// \brief linear process equation.
 ///
-class LPE: public aterm_wrapper
+class LPE: public aterm_appl_wrapper
 {
   protected:
     data_variable_list m_free_variables;
@@ -274,7 +276,7 @@ class LPE: public aterm_wrapper
         summand_list       summands,
         action_list        actions
        )
-     : aterm_wrapper(gsMakeLPE(free_variables, process_parameters, summands)),
+     : aterm_appl_wrapper(gsMakeLPE(free_variables, process_parameters, summands)),
        m_free_variables    (free_variables    ),
        m_process_parameters(process_parameters),
        m_summands          (summands          ),
@@ -285,7 +287,7 @@ class LPE: public aterm_wrapper
     }
 
     LPE(aterm_appl lpe, action_list actions)
-      : aterm_wrapper(lpe)
+      : aterm_appl_wrapper(lpe)
     {
       assert(gsIsLPE(lpe));
       assert(is_well_typed());
@@ -363,6 +365,6 @@ class LPE: public aterm_wrapper
     }
   };
 
-} // namespace mcrl
+} // namespace lpe
 
 #endif // LPE_LPE_H

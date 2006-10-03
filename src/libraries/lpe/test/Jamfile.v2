@@ -12,4 +12,5 @@ project libraries/lpe/test
 test-suite lpe
     :
       [ run data_expression.cpp ]
+      [ run time.cpp ]
     ;

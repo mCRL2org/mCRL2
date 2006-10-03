@@ -23,7 +23,7 @@ using atermpp::term_list;
 /// Models sorts of shape <tt>A -\> B</tt>, where A is the domain and B the range. A constant sort
 /// has an empty domain, for example <tt>-\> S</tt>, or simply <tt>S</tt>.
 /// 
-class sort: public aterm_wrapper
+class sort: public aterm_appl_wrapper
 {
   public:
     sort()
@@ -32,15 +32,21 @@ class sort: public aterm_wrapper
     /// Constructs a sort with internal representation t.
     ///
     sort(aterm_appl t)
-      : aterm_wrapper(t)
+      : aterm_appl_wrapper(t)
     {
       assert(gsIsSortId(t) || gsIsSortArrow(t));
     }
 
     /// Constructs a sort from a string.
     sort(std::string s)
-      : aterm_wrapper(gsMakeSortId(gsString2ATermAppl(s.c_str())))
+      : aterm_appl_wrapper(gsMakeSortId(gsString2ATermAppl(s.c_str())))
     {}
+    
+    /// Returns the predefined sort real.
+    static sort real()
+    {
+      return sort(gsMakeSortExprReal());
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

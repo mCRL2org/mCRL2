@@ -22,8 +22,8 @@ int main()
   data_variable x0("x0", D);
   data_variable x1("x1", D);
   data_assignment_list a;
-  a = push_front(a, data_assignment(d0, x0.to_expr()));
-  a = push_front(a, data_assignment(d1, x1.to_expr()));
+  a = push_front(a, data_assignment(d0, x0));
+  a = push_front(a, data_assignment(d1, x1));
 
   cout << "a = " << pp(a) << endl;
 
