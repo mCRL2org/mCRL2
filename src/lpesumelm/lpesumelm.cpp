@@ -6,7 +6,7 @@
 //
 // file          : lpesumelm 
 // date          : 03-10-2006
-// version       : 0.21
+// version       : 0.22
 //
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
 //
@@ -46,8 +46,9 @@ using namespace lpe;
 namespace po = boost::program_options;
 
 //TODO: Add configuration parameter for substitution sumelimination (enable/disable)
+//TODO: Get rid of gsMakeDataExpr...() functions
 
-#define VERSION "0.21"
+#define VERSION "0.22"
 
 std::string input_file; ///< Name of the file to read input from
 std::string output_file; ///< Name of the file to write output to (or stdout)
@@ -152,11 +153,6 @@ static int gsIsDataExprEquality(ATermAppl t)
       { return 0;
       }
       ATermAppl sort=ATAgetArgument(functionsort,0);
-/*
-      if (!existsort(sort))
-      { return 0;
-      }
-*/
       if (ATAgetArgument(t1,0)==gsMakeOpIdEq(sort))
       {
         return 1;
@@ -184,6 +180,7 @@ static int gsIsDataExprAnd(ATermAppl t)
 
 ///pre: true
 ///ret: 1 if t is an equality, 0 otherwise
+inline
 int is_equality(data_expression t)
 {
   return gsIsDataExprEquality(ATermAppl(t));
@@ -191,6 +188,7 @@ int is_equality(data_expression t)
 
 ///pre: true
 ///ret: 1 if t is a conjunction, 0 otherwise
+inline
 int is_and(data_expression t)
 {
   return gsIsDataExprAnd(ATermAppl(t));
@@ -198,6 +196,7 @@ int is_and(data_expression t)
 
 ///pre: true
 ///ret: 1 if t as a data_variable, 0 otherwise
+inline
 int is_var(data_expression t)
 {
   return gsIsDataVarId(ATermAppl(t));
@@ -205,6 +204,7 @@ int is_var(data_expression t)
 
 ///pre: is_var(t)
 ///ret: The data_variable embedded in t
+inline
 data_variable get_var(data_expression t)
 {
   assert(is_var(t));
@@ -213,6 +213,7 @@ data_variable get_var(data_expression t)
 
 ///pre: is_and(t) || is_equality(t)
 ///ret: lefthandside of t
+inline
 data_expression lhs(data_expression t)
 {
   assert(is_and(t) || is_equality(t));
@@ -221,6 +222,7 @@ data_expression lhs(data_expression t)
 
 ///pre: is_and(t) || is_equality(t)
 ///ret: righthandside of t
+inline
 data_expression rhs(data_expression t)
 {
   assert(is_and(t) || is_equality(t));
@@ -229,7 +231,8 @@ data_expression rhs(data_expression t)
 
 ///pre: is_equality(t); t is of form a == b
 ///ret: b == a
-data_expression swap(data_expression t)
+inline
+data_expression swap_equality(data_expression t)
 {
   assert(is_equality(t));
   return data_expression(gsMakeDataExprEq(ATermAppl(rhs(t)), ATermAppl(lhs(t))));
@@ -270,7 +273,7 @@ LPE_summand apply_no_occurrence_sumelm(const lpe::LPE_summand& summand)
 {
   LPE_summand new_summand;
   // New summation variable list, all variables in this list occur in other terms in the summand.
-  data_variable_list new_summation_variables = data_variable_list();
+  data_variable_list new_summation_variables;
 
   for(data_variable_list::iterator i = summand.summation_variables().begin(); i != summand.summation_variables().end(); ++i)
   { 
@@ -301,21 +304,14 @@ LPE_summand apply_no_occurrence_sumelm(const lpe::LPE_summand& summand)
 ///Take a specification and apply sum elimination to its summands
 lpe::specification no_occurrence_sumelm(const lpe::specification& specification)
 {
+  lpe::LPE lpe = specification.lpe();
   lpe::specification new_specification;
   lpe::LPE new_lpe;
-  summand_list new_summand_list = data_variable_list();
-
-  lpe::LPE lpe = specification.lpe();
+  summand_list new_summand_list = lpe.summands();
 
   // Traverse the summand list, and apply sum elimination to its summands,
   // whilst constructing a new summand list in the process.
-  for(lpe::summand_list::iterator i = lpe.summands().begin(); i != lpe.summands().end(); ++i)
-  {
-    LPE_summand s = apply_no_occurrence_sumelm(*i);
-    new_summand_list = push_front(new_summand_list, s);
-  }
-
-  new_summand_list = reverse(new_summand_list);
+  new_summand_list = apply(new_summand_list, apply_no_occurrence_sumelm);
 
   new_lpe = LPE(lpe.free_variables(),
                 lpe.process_parameters(),
@@ -393,7 +389,7 @@ data_expression recursive_apply_eq_sumelm(data_variable_list* summation_variable
     //If rhs is a variable then swap, so that the rest of the code can be used
     if (is_var(rhs(equality)))
     {
-      equality = swap(equality);
+      equality = swap_equality(equality);
     }
     
     if (is_var(lhs(equality)))
@@ -440,7 +436,7 @@ data_expression recursive_apply_eq_sumelm(data_variable_list* summation_variable
 ///This checks the following:
 ///X(..) = sum d. d=e -> a(..) . X(..)
 ///and returns X(..) = e -> a(..) . X(..)
-lpe::LPE_summand apply_eq_sumelm(lpe::LPE_summand& summand)
+lpe::LPE_summand apply_eq_sumelm(const lpe::LPE_summand& summand)
 {
   LPE_summand new_summand;
   data_variable_list new_summation_variables = summand.summation_variables();
@@ -475,21 +471,13 @@ lpe::LPE_summand apply_eq_sumelm(lpe::LPE_summand& summand)
 ///and return an lpe specification
 lpe::specification eq_sumelm(const lpe::specification& specification)
 {
+  lpe::LPE lpe = specification.lpe();
   lpe::specification new_specification;
   lpe::LPE new_lpe;
-  summand_list new_summand_list = data_variable_list();
+  summand_list new_summand_list = lpe.summands();
 
-  lpe::LPE lpe = specification.lpe();
-
-  // Traverse the summand list, and apply sum elimination to its summands,
-  // whilst constructing a new summand list in the process.
-  for(lpe::summand_list::iterator i = lpe.summands().begin(); i != lpe.summands().end(); ++i)
-  {
-    LPE_summand s = *i;
-    new_summand_list = push_front(new_summand_list, apply_eq_sumelm(s));
-  }
-
-  new_summand_list = reverse(new_summand_list);
+  // Apply sum elimination on each of the summands in the summand list.
+  new_summand_list = apply(new_summand_list, apply_eq_sumelm);
 
   new_lpe = LPE(lpe.free_variables(),
                 lpe.process_parameters(),
