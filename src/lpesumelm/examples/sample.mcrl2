@@ -1,0 +1,3 @@
+act a,b;
+proc X = sum y:Int . a . b . X;
+init X;

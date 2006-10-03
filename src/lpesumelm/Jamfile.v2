@@ -2,12 +2,12 @@ project lpesumelm
        : source-location .
        : requirements
           <include>$(BOOST)
+          <status>experimental
        : build-dir $(BUILD_TOP)/lpesumelm
        ;
 
 exe lpesumelm
        : lpesumelm.cpp
-         squadt_sumelmprogram.cpp
        : <source>/libraries/mcrl2_basic//mcrl2_basic
          <source>/libraries/lpe//lpe
          <source>/boost/program_options//boost_program_options
