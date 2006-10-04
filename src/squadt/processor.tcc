@@ -662,7 +662,7 @@ namespace squadt {
       
           if (o.get() == 0) {
             /* Output not registered yet */
-            append_output(*(*i), object_descriptor::reproducible_up_to_date);
+            append_output(*(*i), object_descriptor::reproducible_nonexistent);
           }
           else {
             if ((*i)->get_location() != o->location) {

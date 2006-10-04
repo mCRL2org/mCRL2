@@ -10,6 +10,7 @@
 #include <iostream>
 
 #include <boost/any.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <sip/detail/exception.h>
 
@@ -92,7 +93,7 @@ namespace sip {
         void add_value(std::string const&, bool = false);
 
         /** \brief Convenience function for shared pointer instances */
-        static basic_datatype::sptr create(std::string s);
+        static boost::shared_ptr < enumeration > create(std::string const& s);
 
         /** \brief Reconstruct a type from XML stream */
         static std::pair < basic_datatype::sptr, std::string > read(xml2pp::text_reader&);
@@ -104,7 +105,7 @@ namespace sip {
         inline void write(std::ostream&, std::string) const;
 
         /** \brief Converts a long int to a string representation */
-        static std::string convert(std::string const&);
+        static std::string convert(size_t const&);
 
         /** \brief Converts a string to a long int representation */
         boost::any evaluate(std::string const&);
@@ -434,8 +435,8 @@ namespace sip {
     }
 
     /** \brief Converts a long int */
-    template <>
-    inline std::string basic_datatype::convert(long int const& s) {
+    template < typename T >
+    inline std::string basic_datatype::convert(T const& s) {
       return (integer::convert(s));
     }
 
@@ -869,8 +870,8 @@ namespace sip {
     /**
      * @param[in] s the first (default) element
      **/
-    inline basic_datatype::sptr enumeration::create(std::string s) {
-      return (basic_datatype::sptr(new enumeration(s)));
+    inline boost::shared_ptr < enumeration > enumeration::create(std::string const& s) {
+      return (boost::shared_ptr < enumeration >(new enumeration(s)));
     }
 
     /**
@@ -946,8 +947,8 @@ namespace sip {
     /**
      * @param[in] s the string to convert (value must be in the domain)
      **/
-    inline std::string enumeration::convert(std::string const& s) {
-      return (s);
+    inline std::string enumeration::convert(size_t const& s) {
+      return (boost::lexical_cast < std::string > (s));
     }
 
     /**
@@ -956,7 +957,7 @@ namespace sip {
      * \pre the string should be parsable as one of the values
      **/
     inline boost::any enumeration::evaluate(std::string const& s) {
-      return (s);
+      return (boost::lexical_cast < size_t > (s));
     }
 
     /**

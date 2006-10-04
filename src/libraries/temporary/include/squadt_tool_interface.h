@@ -110,17 +110,18 @@ inline bool squadt_tool_interface::try_interaction(int& ac, char** const av) {
         case sip::message_offer_configuration: {
             sip::configuration& configuration = m_communicator.get_configuration();
 
-            if (configuration.is_fresh()) {
-              user_interactive_configuration(configuration);
-            }
-     
-            /* Insert configuration in tool communicator object */
-            valid_configuration_present = check_configuration(configuration);
+            do {
+              if (configuration.is_fresh()) {
+                user_interactive_configuration(configuration);
+              }
+             
+              /* Insert configuration in tool communicator object */
+              valid_configuration_present = check_configuration(configuration);
 
-            if (valid_configuration_present) {
-              /* Signal that the configuration is acceptable */
-              m_communicator.send_accept_configuration();
-            }
+            } while (!valid_configuration_present);
+
+            /* Signal that the configuration is acceptable */
+            m_communicator.send_accept_configuration();
           }
           break;
         case sip::message_signal_start:

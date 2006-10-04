@@ -189,10 +189,7 @@ namespace squadt {
 
       /* Wait until configuration is accepted, or the tool has terminated */
       if (await_message(sip::message_accept_configuration).get()) {
-        /* Successful, set new status */
-        for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
-          (*i)->status = object_descriptor::reproducible_up_to_date;
-        }
+        t->impl->process_configuration(get_configuration());
       }
 
       /* End tool execution */
@@ -224,8 +221,19 @@ namespace squadt {
         sip::message_ptr m(await_message(sip::message_signal_done));
 
         if (m.get() && !m->is_empty()) {
+          /* Successful, set new status */
+          for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
+            (*i)->status = object_descriptor::reproducible_up_to_date;
+          }
+
           /* Operation completed successfully */
           t->impl->process_configuration(get_configuration());
+        }
+        else {
+          /* Successful, set new status */
+          for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
+            (*i)->status = object_descriptor::reproducible_out_of_date;
+          }
         }
       }
     }

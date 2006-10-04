@@ -14,13 +14,13 @@ namespace sip {
       /**
        * @param[in] c the text of the label
        **/
-      label::label(std::string c) : text(c) {
+      label::label(std::string const& c) : text(c) {
       }
 
       /**
        * @param[in] t the text of the label
        **/
-      void label::set_text(std::string t) {
+      void label::set_text(std::string const& t) {
         text = t;
       }
      
@@ -28,7 +28,7 @@ namespace sip {
        * @param[in] t the text of the label
        * @param[in] c the tool communicator to use for sending the update
        **/
-      void label::set_text(std::string t, tool::communicator* c) {
+      void label::set_text(std::string const& t, tool::communicator* c) {
         set_text(t);
 
         element::update(c, this);
@@ -83,14 +83,14 @@ namespace sip {
       /**
        * @param[in] c the label for the button
        **/
-      button::button(std::string c) : label(c) {
+      button::button(std::string const& c) : label(c) {
         set_grow(false);
       }
      
       /**
        * @param[in] l the label for the button
        **/
-      void button::set_label(std::string l) {
+      void button::set_label(std::string const& l) {
         label = l;
       }
 
@@ -98,7 +98,7 @@ namespace sip {
        * @param[in] l the label for the button
        * @param[in] t the tool communicator to use for sending the update
        **/
-      void button::set_label(std::string l, tool::communicator* t) {
+      void button::set_label(std::string const& l, tool::communicator* t) {
         set_label(l);
 
         element::update(t, this);
@@ -146,7 +146,7 @@ namespace sip {
       /**
        * @param[in] c the label for the button
        **/
-      radio_button::radio_button(std::string c) : label(c), connection(this), selected(true), first(true) {
+      radio_button::radio_button(std::string const& c) : label(c), connection(this), selected(true), first(true) {
       }
 
       /**
@@ -154,7 +154,7 @@ namespace sip {
        * @param[in] r pointer to a connected radio button (may not be 0)
        * @param[in] s whether the button is selected or not
        **/
-      radio_button::radio_button(std::string c, radio_button* r, bool s) :
+      radio_button::radio_button(std::string const& c, radio_button* r, bool s) :
                         label(c), selected(s), first(false) {
 
         radio_button* n = r;
@@ -290,7 +290,7 @@ namespace sip {
        * @param[in] c the label for the button
        * @param[in] s the status of the checkbox
        **/
-      checkbox::checkbox(std::string c, bool s) : label(c), status(s) {
+      checkbox::checkbox(std::string const& c, bool s) : label(c), status(s) {
       }
 
       /**
@@ -478,7 +478,7 @@ namespace sip {
       /**
        * @param[in] s the new text
        **/
-      void text_field::set_text(std::string s) {
+      void text_field::set_text(std::string const& s) {
         text = s;
       }
 
@@ -486,7 +486,7 @@ namespace sip {
        * @param[in] s the new text
        * @param[in] t the tool communicator to use for sending the update
        **/
-      void text_field::set_text(std::string s, tool::communicator* t) {
+      void text_field::set_text(std::string const& s, tool::communicator* t) {
         set_text(s);
 
         element::update(t, this);

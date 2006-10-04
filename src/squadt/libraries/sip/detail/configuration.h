@@ -10,6 +10,7 @@
 #include <boost/foreach.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/filesystem/convenience.hpp>
 
 #include <utility/indirect_iterator.h>
 
@@ -95,7 +96,7 @@ namespace sip {
       inline option& add_option(const option::identifier, bool = true);
 
       /** \brief Establishes whether an option exists (by identifier) */
-      inline bool option_exists(const option::identifier);
+      inline bool option_exists(const option::identifier) const;
 
       /** \brief Remove an option from the configuration */
       inline void remove_option(const option::identifier);
@@ -110,10 +111,16 @@ namespace sip {
       inline std::string get_output_prefix();
 
       /** \brief Prepends the output prefix to the argument to form a valid file name */
+      inline std::string get_input_name(std::string const&);
+
+      /** \brief Prepends the output prefix to the argument to form a valid file name */
       inline std::string get_output_name(std::string const&);
 
       /** \brief The category in which the tool operates */
       inline tool_category get_category() const;
+
+      /** \brief Get the value of an option argument */
+      inline boost::any get_option_value(const option::identifier id) const;
 
       /** \brief Get an option by its id */
       inline option::sptr get_option(const option::identifier) const;
@@ -222,9 +229,16 @@ namespace sip {
   }
 
   /**
+   * \pre the option with the matching id must exist in the configuration and have exactly one argument
+   **/
+  inline boost::any configuration::get_option_value(const option::identifier id) const {
+    return(get_option(id)->get_value());
+  }
+
+  /**
    * @param id an identifier for the option
    **/
-  inline bool configuration::option_exists(const option::identifier id) {
+  inline bool configuration::option_exists(const option::identifier id) const {
     using namespace std;
     using namespace boost;
 
@@ -269,6 +283,21 @@ namespace sip {
 
   inline std::string configuration::get_output_prefix() {
     return (output_prefix);
+  }
+
+  /**
+   * @param[in] n suffix of the name
+   **/
+  inline std::string configuration::get_input_name(std::string const& n) {
+    for (object_list::iterator i = objects.begin(); i != objects.end(); ++i) {
+      if ((*i)->get_type() == object::input) {
+        using namespace boost::filesystem;
+
+        return(boost::filesystem::basename(path((*i)->get_location())) + n);
+      }
+    }
+
+    return (output_prefix + n);
   }
 
   /**

@@ -10,8 +10,8 @@ namespace mcrl2
 namespace lts
 {
 
-bool write_lts_to_dot(lts &l, std::ostream &os, std::string &name, bool print_states);
-bool write_lts_to_dot(lts &l, std::string &filename, std::string &name, bool print_states);
+bool write_lts_to_dot(lts &l, std::ostream& os, std::string const& name, bool print_states);
+bool write_lts_to_dot(lts &l, std::string const& filename, std::string const& name, bool print_states);
 
 }
 }

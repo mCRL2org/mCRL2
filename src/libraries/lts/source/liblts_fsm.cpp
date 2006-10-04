@@ -221,7 +221,7 @@ static bool write_lts_to_fsm(lts &l, std::ostream &os, lts_type type, ATermList 
   return true;
 }
 
-static bool write_lts_to_fsm(lts &l, std::string &filename, lts_type type, ATermList params)
+static bool write_lts_to_fsm(lts &l, std::string const& filename, lts_type type, ATermList params)
 {
   std::ofstream os(filename.c_str());
 
@@ -406,13 +406,13 @@ static bool check_types(lts &l, lpe::LPE &/*lpe*/, lts_type *type)
   return (get_lts_type(l) == lts_mcrl2);
 }
 
-bool write_lts_to_fsm(lts &l, std::string &filename, ATerm lpe)
+bool write_lts_to_fsm(lts &l, std::string const& filename, ATerm lpe)
 {
   lts_type type;
   return check_types(l,lpe,&type) && write_lts_to_fsm(l,filename,type,get_lpe_params(lpe));
 }
 
-bool write_lts_to_fsm(lts &l, std::string &filename, lpe::LPE &lpe)
+bool write_lts_to_fsm(lts &l, std::string const& filename, lpe::LPE &lpe)
 {
   lts_type type;
   return check_types(l,lpe,&type) && write_lts_to_fsm(l,filename,type,get_lpe_params(lpe));

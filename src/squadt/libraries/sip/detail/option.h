@@ -81,6 +81,9 @@ namespace sip {
       /** \brief Returns the option's identifier */
       inline const identifier get_id() const;
 
+      /** \brief Returns the value of the first argument */
+      inline boost::any get_value() const;
+
       /** \brief Gets an iterator that in order of appearance returns the values for each argument */
       inline argument_iterator get_value_iterator() const;
 
@@ -102,6 +105,9 @@ namespace sip {
 
       /** \brief Generate XML representation */
       inline static option::sptr read(xml2pp::text_reader&);
+
+      /** \brief Clears the list of arguments */
+      inline void clear();
   };
 
   /**
@@ -131,6 +137,15 @@ namespace sip {
 
   inline bool option::takes_arguments() const {
     return (arguments.size() != 0);
+  }
+
+  /**
+   * \pre the option must have exactly one argument
+   **/
+  inline boost::any option::get_value() const {
+    assert(arguments.size() == 1);
+
+    return (arguments[0].first->evaluate(arguments[0].second));
   }
 
   inline const option::identifier option::get_id() const {
@@ -240,6 +255,10 @@ namespace sip {
 
       return (o);
     }
+  }
+
+  inline void option::clear() {
+    arguments.clear();
   }
 }
 

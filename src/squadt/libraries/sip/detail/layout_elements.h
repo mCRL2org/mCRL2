@@ -34,13 +34,13 @@ namespace sip {
         public:
      
           /** \brief Constructor for a label */
-          label(std::string);
+          label(std::string const&);
      
           /** \brief Change the text */
-          void set_text(std::string);
+          void set_text(std::string const&);
      
           /** \brief Change the text, and send update */
-          void set_text(std::string, tool::communicator* t);
+          void set_text(std::string const&, tool::communicator* t);
      
           /** \brief Instantiate a layout element, through a mediator */
           layout::mediator::wrapper_aptr instantiate(layout::mediator*);
@@ -72,13 +72,13 @@ namespace sip {
         public:
      
           /** \brief Constructor for a button */
-          button(std::string);
+          button(std::string const&);
 
           /** \brief Change the label */
-          void set_label(std::string);
+          void set_label(std::string const&);
      
           /** \brief Change the label, and send update */
-          void set_label(std::string, tool::communicator* t);
+          void set_label(std::string const&, tool::communicator* t);
      
           /** \brief Instantiate a layout element, through a mediator */
           layout::mediator::wrapper_aptr instantiate(layout::mediator*);
@@ -127,11 +127,11 @@ namespace sip {
      
         public:
      
-          /** \brief Alternative constructor for a button */
-          radio_button(std::string);
+          /** \brief Alternative constructor for a radio button */
+          radio_button(std::string const&);
 
-          /** \brief Alternative constructor for a button */
-          radio_button(std::string, radio_button*, bool = false);
+          /** \brief Alternative constructor for a radio button */
+          radio_button(std::string const&, radio_button*, bool = false);
 
           /** \brief Set state of the radio button */
           void set_selected(bool);
@@ -183,7 +183,7 @@ namespace sip {
         public:
      
           /** \brief Alternative constructor for a checkbox */
-          checkbox(std::string, bool);
+          checkbox(std::string const&, bool = false);
      
           /** \brief Set the status */
           void set_status(bool);
@@ -294,10 +294,10 @@ namespace sip {
           text_field(const std::string& i, basic_datatype::sptr& = string::standard);
 
           /** \brief Set the text */
-          void set_text(std::string);
+          void set_text(std::string const&);
      
           /** \brief Set the text, and sends an update */
-          void set_text(std::string, tool::communicator*);
+          void set_text(std::string const&, tool::communicator*);
      
           /** \brief Get the text */
           std::string get_text() const;
