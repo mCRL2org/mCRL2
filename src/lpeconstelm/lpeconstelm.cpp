@@ -89,7 +89,7 @@ public:
 private:
 
   void getDatVarRec(aterm_appl t) {
-    if(gsIsDataVarId(t) && (p_freeVarSet.find(data_variable(t).to_expr()) != p_freeVarSet.end())){
+    if(gsIsDataVarId(t) && (p_freeVarSet.find(data_variable(t)) != p_freeVarSet.end())){
       p_foundFreeVars.insert(t);
     };
     for(aterm_list::iterator i = t.argument_list().begin(); i!= t.argument_list().end();i++) {
@@ -133,7 +133,7 @@ private:
     for(vector< data_assignment >::iterator i = p_currentState.begin(); i != p_currentState.end(); i++ ){
       int index = p_lookupIndex[i->lhs()];
       if (p_V.find(index) == p_V.end()){
-        data_expression tmp = i->lhs().to_expr(); 
+        data_expression tmp = i->lhs(); 
         for (data_assignment_list::iterator j = assignments.begin(); j != assignments.end() ; j++){
           if (j->lhs() == i->lhs()){
             tmp = j->rhs();
@@ -161,7 +161,7 @@ private:
     char buffer [99];
     sprintf(buffer, "%s^%d", ass.lhs().name().c_str(), p_newVarCounter++);
     data_variable w(buffer, ass.lhs().type() );
-    data_assignment a(ass.lhs() , w.to_expr());
+    data_assignment a(ass.lhs() , w);
     return a;
   }
   
@@ -718,10 +718,10 @@ public:
     p_initAssignments = p_currentState;
 
     for (data_variable_list::iterator di = p_spec.initial_free_variables().begin(); di != p_spec.initial_free_variables().end(); di++){
-      p_freeVarSet.insert(di->to_expr());
+      p_freeVarSet.insert(*di);
     }
     for (data_variable_list::iterator di = p_lpe.free_variables().begin(); di != p_lpe.free_variables().end(); di++){
-      p_freeVarSet.insert(di->to_expr());
+      p_freeVarSet.insert(*di);
     } 
     
     // Make a set containing all summation variables (for detectVar)
@@ -733,7 +733,7 @@ public:
 //      sum_vars.insert(i->summation_variables().begin(),i->summation_variables().end());
       for (data_variable_list::iterator j = i->summation_variables().begin(); j != i->summation_variables().end(); j++)
       {
-        sum_vars.insert(data_expression(*j));
+        sum_vars.insert(*j);
       }
     }
 

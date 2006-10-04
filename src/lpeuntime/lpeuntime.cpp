@@ -149,7 +149,7 @@ lpe::specification untime(const lpe::specification& specification) {
 	// Extend the original condition with an additional argument t.i(d,e.i)>last_action_time
 	untime_condition = gsMakeDataExprAnd(i->condition(), 
                                              gsMakeDataExprGT(i->time(), 
-                                                              last_action_time.to_expr()
+                                                              last_action_time
                                                              )
                                              );
 
@@ -168,14 +168,14 @@ lpe::specification untime(const lpe::specification& specification) {
 	// Extend the original condition with an additional argument
 	untime_condition = gsMakeDataExprAnd(i->condition(),
                                              gsMakeDataExprGT(time_var,
-                                                              last_action_time.to_expr()
+                                                              last_action_time
                                                              )
                                              );
 
 
 	// Extend original assignments to include t.i(d,e.i)
 	untime_assignments = push_back(i->assignments(),
-                                      data_assignment(last_action_time, time_var.to_expr())
+                                      data_assignment(last_action_time, time_var)
                                      );
       } // i->has_time()
 
