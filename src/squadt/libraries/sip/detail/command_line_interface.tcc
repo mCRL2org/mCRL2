@@ -3,6 +3,7 @@
 
 #include <cstring>
 #include <cstdlib>
+#include <cstdio>
 
 #include <sip/detail/exception.h>
 
@@ -22,16 +23,97 @@ namespace sip {
     const char*  argument_extractor::known_schemes[known_scheme_number] = { "traditional", "socket" };
 
     /**
+     * \param[in] cl the unparsed command line
+     **/
+    argument_extractor::argument_extractor(char* cl) {
+      if (cl != 0) {
+        char*  argv_store = new char[std::strlen(cl) + 1];
+        int    argc       = 0;
+       
+        std::vector < char* > arguments;
+       
+        char* current = cl;
+       
+        arguments.push_back(argv_store);
+
+        while (*current != '\0') {
+          // skip initial white space
+          while (*current == '\0' || *current == ' ') {
+            ++current;
+          }
+       
+          if (*current != '\0') {
+            char* current_argument = current;
+           
+            while (*current != '\0' && *current != ' ') {
+              if (*current == '\'') {
+                while (*current != '\0' && *current != '\'') {
+                  ++current;
+                }
+
+                ++current;
+              }
+              else if (*current == '\"') {
+                while (*current != '\0' && *current != '\"') {
+                  ++current;
+                }
+
+                ++current;
+              }
+              else {
+                ++current;
+              }
+            }
+
+            std::strncpy(arguments[argc], current_argument, current - current_argument);
+
+            arguments[argc][current - current_argument] = '\0';
+
+            arguments.push_back(arguments[argc++] + (current - current_argument + 1));
+          }
+        }
+
+        char*  argv[argc];
+
+        // compile argv
+        for (int i = 0; i < argc; ++i) {
+          argv[i] = arguments[i];
+        }
+
+        process(argc, argv);
+
+        current = cl;
+
+        // convert back to the input string
+        for (int i = 0; i < argc; ++i) {
+          char* c = argv[i];
+       
+          while (c[0] != '\0') {
+            *(current++) = *(c++);
+          }
+       
+          if (1 < argc - i) {
+            *(current++) = ' ';
+          }
+        }
+
+        *current = '\0';
+
+        delete argv_store;
+      }
+    }
+
+    /**
      * \return The arguments for a selected scheme (e.g. hostname and port for the socket scheme), or 0
      **/
-    inline scheme_ptr argument_extractor::get_scheme() const {
+    scheme_ptr argument_extractor::get_scheme() const {
       return (selected_scheme);
     }
 
     /**
      * \return The identifier extracted from one of the command line arguments, or the default identifier
      **/
-    inline long argument_extractor::get_identifier() const {
+    long argument_extractor::get_identifier() const {
       return (identifier);
     }
 
@@ -127,11 +209,11 @@ namespace sip {
      * \attention the specific command line options are removed, so and argc and argv are modified
      * \return whether options were found and whether a connection is being opened with a controller
      **/
-    inline void argument_extractor::process(int& argc, char** const argv) {
+    void argument_extractor::process(int& argc, char** const argv) {
       size_t i = 0;
       size_t j = 0;
 
-      while (static_cast < int> (i) < argc) {
+      while (static_cast < int > (i) < argc) {
         char* s = parse_option(argv[i]);
 
         if (s != argv[i]) {

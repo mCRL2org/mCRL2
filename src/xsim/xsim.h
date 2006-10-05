@@ -12,8 +12,6 @@
 class XSim: public wxApp
 {
 public:
-    XSim();
-    
     virtual bool OnInit();
     virtual int OnExit();
 };

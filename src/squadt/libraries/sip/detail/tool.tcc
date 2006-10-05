@@ -47,6 +47,12 @@ namespace sip {
         /** \brief Constructor that takes controller connection arguments from the command line */
         bool activate(int&, char** const);
 
+        /** \brief Constructor that takes controller connection arguments from the command line */
+        bool activate(char*&);
+
+        /** \brief Attempts to build a connection using a scheme object */
+        bool activate(command_line_interface::scheme_ptr const&, long const&);
+
         /** \brief Send a layout specification for the display space reserved for this tool */
         void send_display_layout(layout::tool_display::sptr);
  
@@ -65,26 +71,41 @@ namespace sip {
     }
  
     /**
-     * @param argc the number of command line arguments
-     * @param argv a pointer to the list of command line arguments
+     * \param[in,out] argv a pointer to the list of command line arguments
+     **/
+    inline bool communicator_impl::activate(char*& argv) {
+      command_line_interface::argument_extractor e(argv);
+ 
+      return (activate(e.get_scheme(), e.get_identifier())); 
+    }
+
+    /**
+     * \param[in,out] argc the number of command line arguments
+     * \param[in,out] argv a pointer to the list of command line arguments
      **/
     inline bool communicator_impl::activate(int& argc, char** const argv) {
       command_line_interface::argument_extractor e(argc, argv);
  
-      command_line_interface::scheme_ptr scheme = e.get_scheme();
+      return (activate(e.get_scheme(), e.get_identifier())); 
+    }
+
+    /**
+     * \param[in] s a scheme object that represents the method of connecting
+     * \param[in] id an identifier used in the connection
+     **/
+    inline bool communicator_impl::activate(command_line_interface::scheme_ptr const& s, long const& id) {
+      if (s.get() != 0) {
+        s->connect(this);
  
-      if (scheme.get() != 0) {
-        scheme->connect(this);
- 
-        instance_identifier = e.get_identifier();
+        instance_identifier = id;
  
         /* Identify the tool instance to the controller */
-        sip::message m(boost::str(boost::format("%u") % instance_identifier), sip::message_instance_identifier);
+        sip::message m(boost::str(boost::format("%u") % id), sip::message_instance_identifier);
  
         send_message(m);
       }
  
-      return (scheme.get() != 0);
+      return (s.get() != 0);
     }
 
     inline void communicator_impl::send_display_layout(layout::tool_display::sptr d) {

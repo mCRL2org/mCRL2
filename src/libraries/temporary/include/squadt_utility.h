@@ -68,6 +68,49 @@ namespace squadt_utility {
     gsSetCustomMessageHandler(relay_message);
   }
 
+#ifdef __WXWINDOWS__
+  /** 
+   * \brief Convenience class for connecting wxWidgets applications to the environment (platform dependent wrapper around wxEntry)
+   **/
+  class entry_wrapper {
+#ifdef __WINDOWS__
+    private:
+
+      HINSTANCE        hInstance;
+      HINSTANCE        hPrevInstance;
+      wxCmdLineArgType lpCmdLine;
+      int              nCmdShow;
+
+    public:
+
+      entry_wrapper(HINSTANCE hc, HINSTANCE hp, wxCmdLineArgType lp, int ns) {
+        hInstance     = hc;
+        hPrevInstance = hp;
+        lpCmdLine     = lp;
+        nCmdShow      = ns;
+      }
+
+      bool perform_entry() {
+        return (wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow) == 0);
+      }
+#else
+    private:
+
+      int&    argc;
+      char**& argv;
+
+    public:
+
+      entry_wrapper(int& ac, char**& av) : argc(ac), argv(av) {
+      }
+
+      bool perform_entry() {
+        return (wxEntry(argc, argv) == 0);
+      }
+#endif
+  };
+#endif
+
   /** Helper class to project the selected radio button in a group to instances of a type T */
   template < typename T >
   class radio_button_helper {

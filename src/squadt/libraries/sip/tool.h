@@ -42,8 +42,14 @@ namespace sip {
         /** \brief Default constructor */
         communicator();
  
-        /** \brief Constructor that takes controller connection arguments from the command line */
+        /** \brief Activate the communicator via connection arguments from the command line */
         bool activate(int&, char** const);
+
+        /** \brief Activate the communicator via connection arguments from a vector of arguments */
+        bool activate(char*&);
+
+        /** \brief Activate the communicator via connection arguments from a vector of arguments */
+        bool activate(std::vector < std::string> const&);
  
         /** \brief Request details about the amount of space that the controller currently has reserved for this tool */
         void request_controller_capabilities();

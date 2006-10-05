@@ -11,14 +11,75 @@
 #include <iostream>
 #include <wx/cmdline.h>
 #include <aterm2.h>
-#include "xsim.h"
 #include "xsimmain.h"
 #include "libstruct.h"
 #include "librewrite_c.h"
 
+/* The optional input file that should contain an LPD */
+std::string lpd_file_argument;
+ 
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <sip/tool.h>
+#include <squadt_utility.h>
+
+class squadt_interactor: public squadt_tool_interface {
+  
+  private:
+
+    /* Constants for identifiers of options and objects */
+    enum identifiers {
+      lpd_file_for_input // Main input file that contains an lts
+    };
+ 
+    // Wrapper for wxEntry invocation
+    squadt_utility::entry_wrapper& starter;
+
+  public:
+
+    // Constructor
+    squadt_interactor(squadt_utility::entry_wrapper&);
+
+    // Configures tool capabilities.
+    void set_capabilities(sip::tool::capabilities&) const;
+
+    // Queries the user via SQuADt if needed to obtain configuration information
+    void user_interactive_configuration(sip::configuration&);
+
+    // Check an existing configuration object to see if it is usable
+    bool check_configuration(sip::configuration const&) const;
+
+    // Performs the task specified by a configuration
+    bool perform_task(sip::configuration&);
+};
+
+squadt_interactor::squadt_interactor(squadt_utility::entry_wrapper& w): starter(w) {
+}
+
+void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
+  /* The tool has only one main input combination it takes an LPE and then behaves as a reporter */
+  c.add_input_combination(lpd_file_for_input, "Simulation", "lpe");
+}
+
+void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
+}
+
+bool squadt_interactor::check_configuration(sip::configuration const& c) const {
+  bool valid = c.object_exists(lpd_file_for_input);
+
+  if (!valid) {
+    send_error("Invalid input combination!");
+  }
+
+  return valid;
+}
+
+bool squadt_interactor::perform_task(sip::configuration& c) {
+  lpd_file_argument = c.get_object(lpd_file_for_input)->get_location();
+
+  return starter.perform_entry();
+}
+
+squadt_interactor* interactor;
 #endif
 
 #define PROGRAM_NAME "xsim"
@@ -26,129 +87,96 @@
 //------------------------------------------------------------------------------
 // XSim
 //------------------------------------------------------------------------------
-
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-/* Constants for identifiers of options and objects */
-const unsigned int      lpd_file_for_input = 0;
-
-/* The communicator, for communicating with Squadt */
-sip::tool::communicator tc;
-
-/* Used to communicate whether a connection with squadt was established */
-bool                    connection_established = false;
-
-#endif
-
-void print_help() {
-  std::cout << "Usage: " << PROGRAM_NAME << " [OPTION]... [INFILE]\n"
-            << "Simulate LPEs in a graphical environment. If INFILE is supplied it will be\n"
-            << "loaded into the simulator.\n"
-            << "\n"
-            << "Mandatory arguments to long options are mandatory for short options too.\n"
-            << "  -h, --help            display this help message\n"
-            << "  -y, --dummy           replace free variables in the LPE with dummy values\n"
-            << "  -R, --rewriter=NAME   use rewriter NAME (default 'inner')\n";
-}
-
-XSim::XSim()
+class XSim: public wxApp
 {
+public:
+    virtual bool OnInit();
+    virtual int OnExit();
+};
+
+bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strategy,
+                        bool& dummies, std::string& lpd_file_argument) {
+  wxCmdLineParser cmdln(argc,argv);
+
+  cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("displays this message"));
+  cmdln.AddSwitch(wxT("y"),wxT("dummy"),wxT("replace free variables in the LPE with dummy values"));
+  cmdln.AddOption(wxT("R"),wxT("rewriter"),wxT("use specified rewriter (default 'inner')"));
+  cmdln.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
+  cmdln.SetLogo(wxT("Graphical simulator for mCRL2 LPEs."));
+
+  if (cmdln.Parse()) {
+    return false;
+  }
+
+  if (cmdln.Found(wxT("h"))) {
+    std::cout << "Usage: " << PROGRAM_NAME << " [OPTION]... [INFILE]\n"
+              << "Simulate LPEs in a graphical environment. If INFILE is supplied it will be\n"
+              << "loaded into the simulator.\n"
+              << "\n"
+              << "Mandatory arguments to long options are mandatory for short options too.\n"
+              << "  -h, --help            display this help message\n"
+              << "  -y, --dummy           replace free variables in the LPE with dummy values\n"
+              << "  -R, --rewriter=NAME   use rewriter NAME (default 'inner')\n";
+
+    return false;
+  }
+
+  if (cmdln.Found(wxT("y"))) {
+    dummies = true;
+  }
+
+  wxString strategy;
+
+  if ( cmdln.Found(wxT("R"), &strategy) ) {
+    rewrite_strategy = RewriteStrategyFromString(strategy.fn_str());
+
+    if ( rewrite_strategy == GS_REWR_INVALID ) {
+      std::cerr << "error: invalid rewrite strategy '" << strategy << "'" << std::endl;;
+
+      return false;
+    }
+  }
+
+  if ( cmdln.GetParamCount() > 0 ) {
+    lpd_file_argument = std::string(cmdln.GetParam(0).fn_str());
+  }
+
+  return (true);
 }
 
 bool XSim::OnInit()
 {
-  /* Whether to replace free variables in the LPE with dummies */
-  bool dummies = false;
-
-  /* The rewrite strategy that will be used */
-  RewriteStrategy rewrite_strategy = GS_REWR_INNER;
-
-  /* The optional input file that should contain an LPD */
-  std::string lpd_file_argument;
-
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (connection_established) {
-    bool valid = false;
-
-    /* Static configuration cycle */
-    while (!valid) {
-      /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
-      tc.await_configuration();
-
-      sip::configuration& configuration = tc.get_configuration();
-
-      /* Validate configuration specification, should contain a file name of an LPD that is to be read as input */
-      valid = configuration.object_exists(lpd_file_for_input);
-
-      if (valid) {
-        /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
-        lpd_file_argument = configuration.get_object(lpd_file_for_input)->get_location();
-      }
-      else {
-        tc.send_status_report(sip::report::error, "Invalid input combination!");
-
-        tc.await_message(sip::message_request_termination);
-      }
-    }
-
-    /* Send the controller the signal that we're ready to rumble (no further configuration necessary) */
-    tc.send_accept_configuration();
-
-    /* Wait for start message */
-    tc.await_message(sip::message_signal_start);
+  if (interactor->is_active()) {
+    XSimMain *frame = new XSimMain( 0, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
+    frame->Show(true);
+    frame->LoadFile(wxString(lpd_file_argument.c_str(), wxConvLocal));
   }
   else {
 #endif
-    wxCmdLineParser cmdln(argc,argv);
-    cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("displays this message"));
-    cmdln.AddSwitch(wxT("y"),wxT("dummy"),wxT("replace free variables in the LPE with dummy values"));
-    cmdln.AddOption(wxT("R"),wxT("rewriter"),wxT("use specified rewriter (default 'inner')"));
-    cmdln.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
-    cmdln.SetLogo(wxT("Graphical simulator for mCRL2 LPEs."));
-
-    if (cmdln.Parse()) {
-      return false;
+    /* Whether to replace free variables in the LPE with dummies */
+    bool dummies = false;
+ 
+    /* The rewrite strategy that will be used */
+    RewriteStrategy rewrite_strategy = GS_REWR_INNER;
+ 
+    if (!parse_command_line(argc, argv, rewrite_strategy, dummies, lpd_file_argument)) {
+      return (false);
     }
-
-    if (cmdln.Found(wxT("h"))) {
-      print_help();
-
-      return false;
-    }
-
-    if (cmdln.Found(wxT("y"))) {
-      dummies = true;
-    }
-
-    wxString strategy;
-
-    if ( cmdln.Found(wxT("R"), &strategy) ) {
-      rewrite_strategy = RewriteStrategyFromString(strategy.fn_str());
-
-      if ( rewrite_strategy == GS_REWR_INVALID ) {
-        std::cerr << "error: invalid rewrite strategy '" << strategy << "'" << std::endl;;
-
-        return false;
-      }
-    }
-
-    if ( cmdln.GetParamCount() > 0 ) {
-      lpd_file_argument = std::string(cmdln.GetParam(0).fn_str());
+ 
+    XSimMain *frame = new XSimMain( 0, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
+    frame->use_dummies = dummies;
+    frame->rewr_strat  = rewrite_strategy;
+    frame->Show(true);
+     
+    if (!lpd_file_argument.empty()) {
+      frame->LoadFile(wxString(lpd_file_argument.c_str(), wxConvLocal));
     }
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }
 #endif
-
-  XSimMain *frame = new XSimMain( NULL, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
-
-  frame->use_dummies = dummies;
-  frame->rewr_strat  = rewrite_strategy;
-  frame->Show(true);
-   
-  if (!lpd_file_argument.empty()) {
-    frame->LoadFile(wxString(lpd_file_argument.c_str(), wxConvLocal));
-  }
 
   return true;
 }
@@ -165,32 +193,44 @@ IMPLEMENT_WX_THEME_SUPPORT
 extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
                                   HINSTANCE hPrevInstance,                
                                   wxCmdLineArgType lpCmdLine,             
-                                  int nCmdShow)                           
-    {                                                                     
-        ATerm bot;
-
-        ATinit(NULL,NULL,&bot); // XXX args?
-
-        return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
-    }
-#else
-int main(int argc, char **argv)
-{
+                                  int nCmdShow) {                                                                     
   ATerm bot;
 
+  ATinit(0,0,&bot); // XXX args?
+
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  /* Get tool capabilities in order to modify settings */
-  sip::tool::capabilities& cp = tc.get_tool_capabilities();
+  squadt_utility::entry_wrapper starter(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 
-  /* The tool has only one main input combination it takes an LPE and then behaves as a reporter */
-  cp.add_input_combination(lpd_file_for_input, "Simulation", "lpe");
+  interactor = new squadt_interactor(starter);
 
-  connection_established = tc.activate(argc,argv);
+  if (!interactor->try_interaction(lpCmdLine)) {
 #endif
+    return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  }
+#endif
+
+  return (0);
+}
+#else
+int main(int argc, char **argv) {
+  ATerm bot;
 
   /* Initialise aterm library */
   ATinit(argc,argv,&bot);
 
-  return wxEntry(argc, argv);
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  squadt_utility::entry_wrapper starter(argc, argv);
+
+  interactor = new squadt_interactor(starter);
+
+  if(!interactor->try_interaction(argc, argv)) {
+#endif
+    return wxEntry(argc, argv);
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  }
+#endif
+
+  return 0;
 }
 #endif

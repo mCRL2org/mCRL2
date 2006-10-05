@@ -58,6 +58,11 @@ class squadt_tool_interface {
     /** \void pure virtual destructor */
     virtual ~squadt_tool_interface() = 0;
 
+  private:
+
+    /** \brief checks for a connection and if so starts the event loop */
+    bool try_run();
+
   public: 
 
     /** \brief default constructor */
@@ -65,6 +70,9 @@ class squadt_tool_interface {
 
     /** \brief builds a connection with SQuADT */
     bool try_interaction(int&, char** const);
+
+    /** \brief builds a connection with SQuADT */
+    bool try_interaction(char*);
 
     /**  \brief whether or not the communicator is active (connected to SQuADT) */
     bool is_active() const;
@@ -79,23 +87,7 @@ inline void squadt_tool_interface::initialise() {
 inline void squadt_tool_interface::finalise() {
 }
 
-/**
- * The connection is built using information such as a socket identifier when
- * found among the command line arguments. The command line arguments that
- * are SQuADT specific are filtered out.
- *
- * \param[in] ac the number of command line arguments
- * \param[in] av a pointer to an array of the actual command line arguments
- *
- * \return whether or not SQuADT interaction was successful
- **/
-inline bool squadt_tool_interface::try_interaction(int& ac, char** const av) {
-
-  set_capabilities(m_communicator.get_tool_capabilities());
-
-  active = m_communicator.activate(ac,av);
-
-  /* On purpose we do not catch exceptions */
+inline bool squadt_tool_interface::try_run() {
   if (active) {
     bool valid_configuration_present = false;
     bool termination_requested       = false;
@@ -154,6 +146,33 @@ inline bool squadt_tool_interface::try_interaction(int& ac, char** const av) {
   }
 
   return (false);
+}
+
+inline bool squadt_tool_interface::try_interaction(char* av) {
+  set_capabilities(m_communicator.get_tool_capabilities());
+
+  active = m_communicator.activate(av);
+
+  return (try_run());
+}
+
+/**
+ * The connection is built using information such as a socket identifier when
+ * found among the command line arguments. The command line arguments that
+ * are SQuADT specific are filtered out.
+ *
+ * \param[in] ac the number of command line arguments
+ * \param[in] av a pointer to an array of the actual command line arguments
+ *
+ * \return whether or not SQuADT interaction was successful
+ **/
+inline bool squadt_tool_interface::try_interaction(int& ac, char** const av) {
+
+  set_capabilities(m_communicator.get_tool_capabilities());
+
+  active = m_communicator.activate(ac,av);
+
+  return (try_run());
 }
 
 inline bool squadt_tool_interface::is_active() const {

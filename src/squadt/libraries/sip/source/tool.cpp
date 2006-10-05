@@ -25,6 +25,21 @@ namespace sip {
       return (boost::dynamic_pointer_cast < communicator_impl > (impl)->activate(argc, argv));
     }
 
+    bool communicator::activate(char*& argv) {
+      return (boost::dynamic_pointer_cast < communicator_impl > (impl)->activate(argv));
+    }
+
+    bool communicator::activate(std::vector < std::string > const& arguments) {
+      int    argc = arguments.size();
+      char*  argv[argc];
+
+      for (int i = 0; i != argc; ++i) {
+        argv[i] = const_cast < char* > (arguments[i].c_str());
+      }
+      
+      return (activate(argc, argv));
+    }
+
     /**
      * \return a pointer to the tool capabilities object that is sent to the controller on request
      **/

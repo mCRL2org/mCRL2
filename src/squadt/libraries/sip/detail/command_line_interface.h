@@ -42,7 +42,7 @@ namespace sip {
         /** \brief The number of the last matched known_option or known_scheme. */
         size_t              last_matched;
 
-        /** \brief the scheme that was last parsed succesfully */
+        /** \brief the scheme that was last parsed successfully */
         scheme_ptr          selected_scheme;
 
         /** \brief A unique number that identifies this instance */
@@ -51,24 +51,27 @@ namespace sip {
       private:
 
         /** \brief Parses a minimum prefix of argument to search for a known option */
-        inline char* parse_option(char* const);
+        char* parse_option(char* const);
 
         /** \brief Parses a minimum prefix of argument to search for a known scheme */
-        inline char* parse_scheme(char* const);
+        char* parse_scheme(char* const);
 
       public:
 
         /** \brief Constructor that performs extraction */
-        inline argument_extractor(int&, char** const);
+        argument_extractor(int&, char** const);
+
+        /** \brief Constructor that performs extraction (unparsed command line) */
+        argument_extractor(char*);
 
         /** \brief Removes protocol specific options and adjusts the argument count */
-        inline void process(int&, char** const);
+        void process(int&, char** const);
 
         /** \brief Get the arguments for the selected scheme */
-        inline scheme_ptr get_scheme() const;
+        scheme_ptr get_scheme() const;
 
         /** \brief Get the identifier */
-        inline long get_identifier() const;
+        long get_identifier() const;
     };
 
     /** Constructor */

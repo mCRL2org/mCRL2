@@ -22,11 +22,12 @@ class squadt_interactor: public squadt_tool_interface {
       lts_file_for_input // Main input file that contains an lts
     };
  
-    boost::function<int()> startup_function;
+    // Wrapper for wxEntry invocation
+    squadt_utility::entry_wrapper& starter;
 
   public:
     // Constructor
-    squadt_interactor(boost::function<bool()>);
+    squadt_interactor(squadt_utility::entry_wrapper&);
 
     // Configures tool capabilities.
     void set_capabilities(sip::tool::capabilities&) const;
@@ -41,9 +42,9 @@ class squadt_interactor: public squadt_tool_interface {
     bool perform_task(sip::configuration&);
 };
 
-squadt_interactor::squadt_interactor(boost::function<bool()> startup): startup_function(startup) {
-  // skip 
+squadt_interactor::squadt_interactor(squadt_utility::entry_wrapper& w): starter(w) {
 }
+
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
   c.add_input_combination(lts_file_for_input, "Visualisation", "aut");
@@ -84,8 +85,7 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
 }
 
 bool squadt_interactor::perform_task(sip::configuration&) {
-
-  return startup_function() == 0;
+  return starter.perform_entry();
 }
 
 #endif
@@ -169,14 +169,6 @@ IMPLEMENT_APP_NO_MAIN(GraphApp)
 IMPLEMENT_WX_THEME_SUPPORT
 
 #ifdef __WINDOWS__
-int wx_entry_proxy(HINSTANCE hInstance, 
-                   HINSTANCE hPrevInstance, 
-                   wxCmdLineArgType lpCmdLine,
-                   int nCmdShow) {
-
-  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
-}
-
 extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
                                   HINSTANCE hPrevInstance,                
                                   wxCmdLineArgType lpCmdLine,             
@@ -187,11 +179,13 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 
         ATinit(0,0,&bot); // XXX args?
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-        squadt_interactor c(boost::bind (wx_entry_proxy, hInstance, hPrevInstance, lpCmdLine, nCmdShow));
-        if (!c.try_interaction(i, NULL)) {
+        squadt_utility::entry_wrapper starter(argc, argv);
+
+        squadt_interactor c(starter);
+
+        if (!c.try_interaction(lpCmdLine)) {
 #endif
           return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
-
 #ifdef ENABLE_SQUADT_CONNECTIVITY
         }
         return 0;
@@ -199,17 +193,15 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 
     }
 #else
-
-int wx_entry_proxy(int argc, char** argv) {
- return wxEntry(argc, argv);
-}
-
 int main(int argc, char **argv)
 {
   ATerm bot;
   ATinit(argc,argv,&bot);
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  squadt_interactor c(boost::bind(wx_entry_proxy, argc, argv));
+  squadt_utility::entry_wrapper starter(argc, argv);
+
+  squadt_interactor c(starter);
+
   if(!c.try_interaction(argc, argv)) {
     command_line = true;
 #endif
@@ -218,13 +210,8 @@ int main(int argc, char **argv)
     return wxEntry(argc, argv);
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }
-  return 0;
 #endif
 
+  return 0;
 }
 #endif
-
-
-
-
-
