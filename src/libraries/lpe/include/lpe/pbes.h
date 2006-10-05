@@ -94,6 +94,15 @@ class pbes_expression: public aterm_appl_wrapper
     {
       return *this == gsMakePBESFalse();
     }
+
+    /// Applies a substitution to this pbes expression and returns the result.
+    /// The Substitution object must supply the method aterm operator()(aterm).
+    ///
+    template <typename Substitution>
+    pbes_expression substitute(Substitution f)
+    {
+      return pbes_expression(f(aterm_appl(*this)));
+    }     
 };
 
 ///////////////////////////////////////////////////////////////////////////////

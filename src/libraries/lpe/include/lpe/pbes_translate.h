@@ -295,12 +295,12 @@ pbes_expression RHS(state_formula f, LPE lpe, data_variable T)
       data_assignment_list g(i->assignments());
       data_variable_list xp(lpe.process_parameters());
       data_variable_list e(i->summation_variables());
-      f1 = f1.substitute(make_substitution(T, t));
-      f1 = f1.substitute(make_substitution(xp, g));
       pbes_expression p1 = sat_bot(a, alpha);
       pbes_expression p2 = val(negate(c));
       pbes_expression p3 = val(less_equal(t, T));
       pbes_expression p4 = RHS(f1, lpe, T);
+      p4 = p4.substitute(make_substitution(T, t));
+      p4 = p4.substitute(make_substitution(xp, g));
       pbes_expression p = forall(e, or_(or_(or_(p1, p2), p3), p4));
       v.push_back(p);
     }
@@ -319,12 +319,12 @@ pbes_expression RHS(state_formula f, LPE lpe, data_variable T)
       data_assignment_list g(i->assignments());
       data_variable_list xp(lpe.process_parameters());
       data_variable_list e(i->summation_variables());
-      f1 = f1.substitute(make_substitution(T, t));
-      f1 = f1.substitute(make_substitution(xp, g));
       pbes_expression p1 = sat_top(a, alpha);
       pbes_expression p2 = val(c);
       pbes_expression p3 = val(greater(t, T));
       pbes_expression p4 = RHS(f1, lpe, T);
+      p4 = p4.substitute(make_substitution(T, t));
+      p4 = p4.substitute(make_substitution(xp, g));
       pbes_expression p = exists(e, and_(and_(and_(p1, p2), p3), p4));
       v.push_back(p);
     }
@@ -403,11 +403,28 @@ equation_system E(state_formula f, LPE lpe, data_variable T)
 // translate a state_formula and an LPE to a pbes
 pbes pbes_translate(state_formula f, specification spec)
 {
+  using namespace state_init;
+
   LPE lpe = spec.lpe();
   data_variable T = fresh_variable("T", make_list(aterm_appl(f), aterm_appl(lpe)));
   equation_system e = E(f, lpe, T);
+std::cout << "<RESULT>" << e << std::endl;
+
   data_specification dataspec(spec.sorts(), spec.constructors(), spec.mappings(), spec.equations());
-  return pbes(dataspec, e, propositional_variable_instantiation());
+
+  // create initial state
+  assert(e.equations().size() > 0);
+  pbes_equation e1 = e.equations().front();
+  aterm_string Xe(arg1(e1));
+
+  assert(is_mu(f) || is_nu(f));
+  aterm_string Xf(arg1(f));
+  data_expression_list xf = state_formula_variable_expressions(f);
+  data_variable_list xp = lpe.process_parameters();
+  data_variable v(gsMakeDataVarId(aterm_string("0"), gsMakeSortIdReal()));
+  propositional_variable_instantiation init(Xe, v + xf + xp + Par(Xf, f));
+  
+  return pbes(dataspec, e, init);
 }
 
 } // namespace lpe

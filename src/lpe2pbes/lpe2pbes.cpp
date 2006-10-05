@@ -87,6 +87,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
+/* not yet implemented
   //store the result
   string outfilename = tool_options.outfilename;
   bool opt_pretty = tool_options.pretty;
@@ -104,6 +105,7 @@ int main(int argc, char **argv)
     PrintPart_CXX(outstream, (ATerm) result, opt_pretty?ppDefault:ppInternal);
     outstream.close();
   }
+*/
   return 0;
 }
 
@@ -287,9 +289,7 @@ ATermAppl create_pbes(t_tool_options tool_options)
 
   //generate PBES from state formula and LPE
   gsVerboseMsg("generating PBES from state formula and LPE...\n");
-  // result = create_pbes(result, lpe_spec);
   pbes p = lpe::pbes_translate(state_formula(result), lpe_spec);
-std::cout << "<RESULT> = " << atermpp::aterm(ATermAppl(p)) << std::endl;
   result = ATermAppl(p);
   if (result == NULL) {
     return NULL;
