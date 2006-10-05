@@ -20,6 +20,9 @@ int test_main(int, char*[])
 
   BOOST_CHECK(d.is_true());
   BOOST_CHECK(!d.is_false());
+  
+  data_variable v("d:D");
+  data_expression e(v);
 
   return 0;
 }

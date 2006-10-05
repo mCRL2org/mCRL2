@@ -8,6 +8,7 @@
 #include <string>
 #include <iostream>
 
+#include "atermpp/aterm_access.h"
 #include "atermpp/vector.h"
 #include "atermpp/algorithm.h"
 #include "atermpp/substitute.h"
@@ -24,43 +25,12 @@ namespace lpe {
 
 using atermpp::aterm_appl;
 using atermpp::make_substitution;
-
-// ATermAppl access functions
-inline
-aterm_appl arg1(ATermAppl t)
-{
-  return aterm_appl(t).argument(0);
-}
-
-inline
-aterm_appl arg2(ATermAppl t)
-{
-  return aterm_appl(t).argument(1);
-}
-
-inline
-aterm_appl arg3(ATermAppl t)
-{
-  return aterm_appl(t).argument(2);
-}
-
-inline
-aterm_list list_arg1(ATermAppl t)
-{
-  return aterm_list(aterm_appl(t).argument(0));
-}
-
-inline
-aterm_list list_arg2(ATermAppl t)
-{
-  return aterm_list(aterm_appl(t).argument(1));
-}
-
-inline
-aterm_list list_arg3(ATermAppl t)
-{
-  return aterm_list(aterm_appl(t).argument(2));
-}
+using atermpp::arg1;
+using atermpp::arg2;
+using atermpp::arg3;
+using atermpp::list_arg1;
+using atermpp::list_arg2;
+using atermpp::list_arg3;
 
 inline
 action_formula act_arg1(ATermAppl t)
@@ -431,11 +401,13 @@ equation_system E(state_formula f, LPE lpe, data_variable T)
 }
 
 // translate a state_formula and an LPE to a pbes
-pbes pbes_translate(state_formula f, LPE lpe)
+pbes pbes_translate(state_formula f, specification spec)
 {
+  LPE lpe = spec.lpe();
   data_variable T = fresh_variable("T", make_list(aterm_appl(f), aterm_appl(lpe)));
   equation_system e = E(f, lpe, T);
-  return pbes();
+  data_specification dataspec(spec.sorts(), spec.constructors(), spec.mappings(), spec.equations());
+  return pbes(dataspec, e, propositional_variable_instantiation());
 }
 
 } // namespace lpe

@@ -52,8 +52,8 @@ namespace atermpp
 
       /// Allow construction from a string.
       ///
-      aterm_string(std::string s)
-        : aterm(make_term(s.c_str()))
+      aterm_string(std::string s, bool quoted = true)
+        : aterm(quoted ? gsString2ATermAppl(s.c_str()) : make_term(s))
       {
         assert(type() == AT_APPL);
         assert(aterm_appl(m_term).argument_list().size() == 0);

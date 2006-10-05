@@ -11,6 +11,8 @@
 #include <cassert>
 #include "atermpp/atermpp.h"
 #include "atermpp/algorithm.h"
+#include "atermpp/aterm_access.h"
+#include "atermpp/aterm_string.h"
 #include "lpe/aterm_wrapper.h"
 #include "lpe/substitute.h"
 #include "lpe/sort.h"
@@ -22,8 +24,15 @@ namespace lpe {
 
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
+using atermpp::aterm_string;
 using atermpp::term_list;
 using atermpp::aterm;
+using atermpp::arg1;
+using atermpp::arg2;
+using atermpp::arg3;
+
+// prototype
+class data_variable;
 
 ///////////////////////////////////////////////////////////////////////////////
 // data_expression
@@ -46,6 +55,8 @@ class data_expression: public aterm_appl_wrapper
     {
       assert(gsIsNil(term) || gsIsDataVarId(term) || gsIsOpId(term) || gsIsDataAppl(term));
     }
+
+    explicit data_expression(const data_variable& v);
 
     /// Returns the sort of the data expression.
     ///
@@ -127,6 +138,11 @@ class data_variable: public aterm_appl_wrapper
       assert(gsIsDataVarId(t));
     }
 
+    operator data_expression() const
+    {
+      return data_expression(m_term);
+    }
+
     /// Very incomplete implementation for initialization using strings like "d:D".
     data_variable(const std::string& s)
     {
@@ -141,23 +157,13 @@ class data_variable: public aterm_appl_wrapper
      : aterm_appl_wrapper(gsMakeDataVarId(gsString2ATermAppl(name.c_str()), s))
     {}
 
-    operator data_expression() const
-    {
-      return data_expression(m_term);
-    }
-
-/*
-    data_expression to_expr() const
-    {
-      return data_expression(aterm_appl(*this));
-    }
-*/
-
     /// Returns the name of the data_variable.
     ///
     std::string name() const
     {
-      return unquote(aterm_appl(*this).argument(0).to_string());
+      aterm_string s = arg1(*this);
+      return s;
+      // return unquote(aterm_appl(*this).argument(0).to_string());
     }
 
     /// Returns the sort of the data_variable.
@@ -173,6 +179,12 @@ class data_variable: public aterm_appl_wrapper
 /// \brief singly linked list of data variables
 ///
 typedef term_list<data_variable> data_variable_list;
+
+inline
+data_expression::data_expression(const data_variable& v)
+  : aterm_appl_wrapper(aterm_appl(v))
+{
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // data_variable_init
@@ -382,10 +394,7 @@ struct assignment_list_substitution
   {
     for (data_assignment_list::iterator i = m_assignments.begin(); i != m_assignments.end(); ++i)
     {
-//std::cout << "i = " << i->pp() << std::endl;
-//std::cout << "t0 = " << t.to_string() << std::endl;
       t = (*i)(t);
-//std::cout << "t1 = " << t.to_string() << std::endl;
     }
     return t;
   }

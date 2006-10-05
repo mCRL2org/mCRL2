@@ -539,6 +539,15 @@ class pbes
     pbes()
     {}
 
+    pbes(data_specification data,
+         equation_system equations, 
+         propositional_variable_instantiation initial_state)
+      :
+        m_data(data),
+        m_equations(equations),
+        m_initial_state(initial_state)
+    {}
+
     /// Returns the equations.
     ///
     const equation_system& equations() const

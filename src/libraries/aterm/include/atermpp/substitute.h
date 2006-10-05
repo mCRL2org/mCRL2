@@ -38,7 +38,7 @@ struct substitution
   
   aterm operator()(aterm t) const
   {
-    return atermpp::replace(m_src, m_dest, t);
+    return atermpp::replace(t, m_src, m_dest);
   }
 };
 
