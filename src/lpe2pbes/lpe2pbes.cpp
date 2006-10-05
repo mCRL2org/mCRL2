@@ -288,7 +288,8 @@ ATermAppl create_pbes(t_tool_options tool_options)
   //generate PBES from state formula and LPE
   gsVerboseMsg("generating PBES from state formula and LPE...\n");
   // result = create_pbes(result, lpe_spec);
-  pbes p = lpe::pbes_translate(state_formula(result), lpe_spec.lpe());
+  pbes p = lpe::pbes_translate(state_formula(result), lpe_spec);
+std::cout << "<RESULT> = " << atermpp::aterm(ATermAppl(p)) << std::endl;
   result = ATermAppl(p);
   if (result == NULL) {
     return NULL;
