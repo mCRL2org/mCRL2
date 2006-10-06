@@ -1,0 +1,15 @@
+project pbespp
+       : source-location .
+       : build-dir $(BUILD_TOP)/pbespp
+       : requirements
+          <include>$(BOOST)
+       ;
+
+exe pbespp
+       : pbespp.cpp
+       : <library>/libraries/mcrl2_basic//mcrl2_basic
+         <source>/site-config//mcrl2_revision.h
+         <include>.
+       ;
+
+install_with_libraries install : pbespp ;
