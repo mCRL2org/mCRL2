@@ -1445,9 +1445,13 @@ bool gsIsActFrm(ATermAppl Term);
 //PBES's
 //------
 
-bool gsIsPBExpr(ATermAppl term);
+bool gsIsPBExpr(ATermAppl Term);
 //Pre: Term is not NULL
 //Ret: Term is a Parameterised Boolean Expression
+
+bool gsIsFixpoint(ATermAppl Term);
+//Pre: Term is not NULL
+//Ret: Term is a fixpoint
 
 #ifdef __cplusplus
 }

@@ -68,7 +68,7 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %token <appl> BOOL POS NAT INT REAL LIST SET BAG
 %token <appl> CTRUE CFALSE DIV MOD IN LAMBDA FORALL EXISTS WHR END 
 %token <appl> DELTA TAU SUM BLOCK ALLOW HIDE RENAME COMM
-%token <appl> VAL MU NU DELAY NIL
+%token <appl> VAL MU NU DELAY YALED NIL
 %token <appl> ID NUMBER
 
 //non-terminals
@@ -1973,6 +1973,11 @@ state_frm_prefix:
       $$ = gsMakeStateMay($2, $4);
       gsDebugMsg("parsed prefix state formula\n  %T\n", $$);
     }
+  | YALED AT data_expr_prefix
+    {
+      $$ = gsMakeStateYaledTimed($3);
+      gsDebugMsg("parsed prefix state formula\n  %T\n", $$);
+    }
   | DELAY AT data_expr_prefix
     {
       $$ = gsMakeStateDelayTimed($3);
@@ -2028,6 +2033,11 @@ state_frm_primary:
   | CFALSE
     {
       $$ = gsMakeStateFalse();
+      gsDebugMsg("parsed primary state formula\n  %T\n", $$);
+    }
+  | YALED
+    {
+      $$ = gsMakeStateYaled();
       gsDebugMsg("parsed primary state formula\n  %T\n", $$);
     }
   | DELAY

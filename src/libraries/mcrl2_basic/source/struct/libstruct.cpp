@@ -4328,13 +4328,24 @@ bool gsIsProcExpr(ATermAppl Term)
 
 bool gsIsStateFrm(ATermAppl Term)
 {
-  return
-    gsIsDataExpr(Term) || gsIsStateTrue(Term) || gsIsStateFalse(Term) ||
-    gsIsStateNot(Term) || gsIsStateAnd(Term) || gsIsStateOr(Term) ||
-    gsIsStateImp(Term) || gsIsStateForall(Term) || gsIsStateExists(Term) ||
-    gsIsStateMust(Term) || gsIsStateMay(Term) || gsIsStateDelay(Term) ||
-    gsIsStateDelayTimed(Term) || gsIsStateVar(Term) || gsIsStateNu(Term) ||
-    gsIsStateMu(Term);
+  return gsIsDataExpr(Term)
+      || gsIsStateTrue(Term)
+      || gsIsStateFalse(Term)
+      || gsIsStateNot(Term)
+      || gsIsStateAnd(Term)
+      || gsIsStateOr(Term)
+      || gsIsStateImp(Term)
+      || gsIsStateForall(Term)
+      || gsIsStateExists(Term)
+      || gsIsStateMust(Term)
+      || gsIsStateMay(Term)
+      || gsIsStateYaled(Term)
+      || gsIsStateYaledTimed(Term)
+      || gsIsStateDelay(Term)
+      || gsIsStateDelayTimed(Term)
+      || gsIsStateVar(Term)
+      || gsIsStateNu(Term)
+      || gsIsStateMu(Term);
 }
 
 bool gsIsRegFrm(ATermAppl Term)
@@ -4353,17 +4364,22 @@ bool gsIsActFrm(ATermAppl Term)
     gsIsActExists(Term) || gsIsActAt(Term);
 }
 
-bool gsIsPBExpr(ATermAppl term)
+bool gsIsPBExpr(ATermAppl Term)
 {
-  return gsIsDataExpr(term)
-      || gsIsPBESTrue(term)  
-      || gsIsPBESFalse(term) 
-      || gsIsPBESAnd(term)   
-      || gsIsPBESOr(term)    
-      || gsIsPBESForall(term)
-      || gsIsPBESExists(term)
-      || gsIsPropVarInst(term)
+  return gsIsDataExpr(Term)
+      || gsIsPBESTrue(Term)  
+      || gsIsPBESFalse(Term) 
+      || gsIsPBESAnd(Term)   
+      || gsIsPBESOr(Term)    
+      || gsIsPBESForall(Term)
+      || gsIsPBESExists(Term)
+      || gsIsPropVarInst(Term)
   ;
+}
+
+bool gsIsFixpoint(ATermAppl Term)
+{
+  return gsIsMu(Term) || gsIsNu(Term);
 }
 
 //Local declarations

@@ -210,6 +210,22 @@ static void PRINT_FUNC(PrintActFrm)(PRINT_OUTTYPE OutStream,
          otherwise, sorts are only shown when necessary
 */
 
+static void PRINT_FUNC(PrintPBExpr)(PRINT_OUTTYPE OutStream,
+  const ATermAppl StateFrm, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
+/*Pre: OutStream points to a stream to which can be written
+       PBExpr is a parameterised boolean expression
+       pp_format != ppInternal
+       ShowSorts indicates if sorts should be shown for the part
+       PrecLevel indicates the precedence level of the context of the part
+       0 <= PrecLevel
+  Post:A textual representation of Part is written to OutStream, using method
+       pp_format. In this textual representation:
+       - the top level symbol is parenthesized if PrecLevel is greater than its
+         precedence level
+       - sorts are shown for all elements, if ShowSorts is true;
+         otherwise, sorts are only shown when necessary
+*/
+
 static void PRINT_FUNC(PrintListEnumElts)(PRINT_OUTTYPE OutStream,
   const ATermAppl DataExpr, t_pp_format pp_format, bool ShowSorts);
 /*Pre: OutStream points to a stream to which can be written
@@ -713,6 +729,63 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     //print regular formula
     PRINT_FUNC(dbg_prints)("printing regular formula\n");
     PRINT_FUNC(PrintRegFrm)(OutStream, Part, pp_format, ShowSorts, PrecLevel);
+  } else if (gsIsPBES(Part)) {
+    //print PBES
+    PRINT_FUNC(dbg_prints)("printing PBES\n");
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0),
+      pp_format, ShowSorts, PrecLevel);
+    ATermList PBEqns = ATLgetArgument(Part, 1);
+    if (ATgetLength(PBEqns) > 0) {
+      PRINT_FUNC(fprints)(OutStream, "beqn ");
+      PRINT_FUNC(PrintPart_List)(OutStream, PBEqns,
+        pp_format, ShowSorts, PrecLevel, ";\n", "     ");
+      PRINT_FUNC(fprints)(OutStream, "\n");
+    }
+    PRINT_FUNC(fprints)(OutStream, "init ");
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 2),
+      pp_format, ShowSorts, PrecLevel);
+    PRINT_FUNC(fprints)(OutStream, ";\n");
+  } else if (gsIsPBEqn(Part)) {
+    //print parameterised boolean equation
+    PRINT_FUNC(dbg_prints)("printing parameterised boolean equation\n");
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0),
+      pp_format, ShowSorts, PrecLevel);
+    PRINT_FUNC(fprints)(OutStream, " ");
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1),
+      pp_format, ShowSorts, PrecLevel);
+    PRINT_FUNC(fprints)(OutStream, " = ");
+    PRINT_FUNC(PrintPBExpr)(OutStream, ATAgetArgument(Part, 2),
+      pp_format, ShowSorts, PrecLevel);
+  } else if (gsIsFixpoint(Part)) {
+    //print fixpoint
+    PRINT_FUNC(dbg_prints)("printing fixpoint\n");
+    if (gsIsNu(Part)) {
+      PRINT_FUNC(fprints)(OutStream, "nu");
+    } else {
+      PRINT_FUNC(fprints)(OutStream, "mu");
+    }
+  } else if (gsIsPropVarDecl(Part)) {
+    //print propositional variable declaration
+    PRINT_FUNC(dbg_prints)("printing propositional variable declaration\n");
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0),
+      pp_format, ShowSorts, PrecLevel);
+    ATermList DataVarIds = ATLgetArgument(Part, 1);
+    if (ATgetLength(DataVarIds) > 0) {
+      PRINT_FUNC(fprints)(OutStream, "(");
+      PRINT_FUNC(PrintDecls)(OutStream, DataVarIds, pp_format, NULL, ", ");
+      PRINT_FUNC(fprints)(OutStream, ")");
+    }
+  } else if (gsIsPBExpr(Part)) {
+    //print parameterised boolean expression
+    PRINT_FUNC(dbg_prints)("printing parameterised boolean expression\n");
+    PRINT_FUNC(PrintPBExpr)(OutStream, Part, pp_format, ShowSorts, PrecLevel);
+  } else if (gsIsDataSpec(Part)) {
+    //print data specification
+    PRINT_FUNC(dbg_prints)("printing data specification\n");
+    for (int i = 0; i < 4; i++) {
+      PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, i),
+        pp_format, ShowSorts, PrecLevel);
+    }
   } else {
 #if defined(PRINT_C)
     gsErrorMsg("the term %T is not part of the internal format\n", Part);
@@ -1298,10 +1371,20 @@ static void PRINT_FUNC(PrintStateFrm)(PRINT_OUTTYPE OutStream,
     //print false
     PRINT_FUNC(dbg_prints)("printing false\n");
     PRINT_FUNC(fprints)(OutStream, "false");
+  } else if (gsIsStateYaled(StateFrm)) {
+    //print yaled
+    PRINT_FUNC(dbg_prints)("printing yaled\n");
+    PRINT_FUNC(fprints)(OutStream, "yaled");
   } else if (gsIsStateDelay(StateFrm)) {
     //print delay
     PRINT_FUNC(dbg_prints)("printing delay\n");
     PRINT_FUNC(fprints)(OutStream, "delay");
+  } else if (gsIsStateYaledTimed(StateFrm)) {
+    //print timed yaled
+    PRINT_FUNC(dbg_prints)("printing timed yaled\n");
+    PRINT_FUNC(fprints)(OutStream, "yaled @ ");
+    PRINT_FUNC(PrintDataExpr)(OutStream, ATAgetArgument(StateFrm, 0),
+      pp_format, ShowSorts, 11);
   } else if (gsIsStateDelayTimed(StateFrm)) {
     //print timed delay
     PRINT_FUNC(dbg_prints)("printing timed delay\n");
@@ -1367,7 +1450,7 @@ static void PRINT_FUNC(PrintStateFrm)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(PrintStateFrm)(OutStream, ATAgetArgument(StateFrm, 1),
       pp_format, ShowSorts, 1);
     if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, ")");
-  } else if (gsIsStateAnd(StateFrm) || gsIsStateAnd(StateFrm)) {
+  } else if (gsIsStateAnd(StateFrm) || gsIsStateOr(StateFrm)) {
     //print conjunction or disjunction
     PRINT_FUNC(dbg_prints)("printing conjunction or disjunction\n");
     if (PrecLevel > 2) PRINT_FUNC(fprints)(OutStream, "(");
@@ -1504,7 +1587,7 @@ static void PRINT_FUNC(PrintActFrm)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(PrintActFrm)(OutStream, ATAgetArgument(ActFrm, 1),
       pp_format, ShowSorts, 1);
     if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, ")");
-  } else if (gsIsActAnd(ActFrm) || gsIsActAnd(ActFrm)) {
+  } else if (gsIsActAnd(ActFrm) || gsIsActOr(ActFrm)) {
     //print conjunction or disjunction
     PRINT_FUNC(dbg_prints)("printing conjunction or disjunction\n");
     if (PrecLevel > 2) PRINT_FUNC(fprints)(OutStream, "(");
@@ -1536,6 +1619,68 @@ static void PRINT_FUNC(PrintActFrm)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(PrintActFrm)(OutStream, ATAgetArgument(ActFrm, 0),
       pp_format, ShowSorts, 4);
     if (PrecLevel > 4) PRINT_FUNC(fprints)(OutStream, ")");
+  }
+}
+
+static void PRINT_FUNC(PrintPBExpr)(PRINT_OUTTYPE OutStream,
+  const ATermAppl PBExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
+{
+  assert(gsIsPBExpr(PBExpr));
+  if (gsIsDataExpr(PBExpr)) {
+    //print data expression
+    PRINT_FUNC(dbg_prints)("printing data expression\n");
+    PRINT_FUNC(fprints)(OutStream, "val(");
+    PRINT_FUNC(PrintDataExpr)(OutStream, PBExpr, pp_format, ShowSorts, 0);
+    PRINT_FUNC(fprints)(OutStream, ")");
+  } else if (gsIsPBESTrue(PBExpr)) {
+    //print true
+    PRINT_FUNC(dbg_prints)("printing true\n");
+    PRINT_FUNC(fprints)(OutStream, "true");
+  } else if (gsIsPBESFalse(PBExpr)) {
+    //print false
+    PRINT_FUNC(dbg_prints)("printing false\n");
+    PRINT_FUNC(fprints)(OutStream, "false");
+  } else if (gsIsPropVarInst(PBExpr)) {
+    //print propositional variable instance
+    PRINT_FUNC(dbg_prints)("printing propositional variable instance\n");
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(PBExpr, 0),
+      pp_format, ShowSorts, PrecLevel);
+    ATermList Args = ATLgetArgument(PBExpr, 1);
+    if (ATgetLength(Args) > 0) {
+      PRINT_FUNC(fprints)(OutStream, "(");
+      PRINT_FUNC(PrintPart_List)(OutStream, Args,
+        pp_format, ShowSorts, 0, NULL, ", ");
+      PRINT_FUNC(fprints)(OutStream, ")");
+    }
+  } else if (gsIsPBESForall(PBExpr) || gsIsPBESExists(PBExpr)) {
+    //print quantification
+    PRINT_FUNC(dbg_prints)("printing quantification\n");
+    if (PrecLevel > 0) PRINT_FUNC(fprints)(OutStream, "(");
+    if (gsIsPBESForall(PBExpr)) {
+      PRINT_FUNC(fprints)(OutStream, "forall ");
+    } else {
+      PRINT_FUNC(fprints)(OutStream, "exists ");
+    }
+    PRINT_FUNC(PrintDecls)(OutStream, ATLgetArgument(PBExpr, 0),
+      pp_format, NULL, ", ");
+    PRINT_FUNC(fprints)(OutStream, ". ");
+    PRINT_FUNC(PrintPBExpr)(OutStream, ATAgetArgument(PBExpr, 1),
+      pp_format, ShowSorts, 0);
+    if (PrecLevel > 0) PRINT_FUNC(fprints)(OutStream, ")");
+  } else if (gsIsPBESAnd(PBExpr) || gsIsPBESOr(PBExpr)) {
+    //print conjunction or disjunction
+    PRINT_FUNC(dbg_prints)("printing conjunction or disjunction\n");
+    if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, "(");
+    PRINT_FUNC(PrintPBExpr)(OutStream, ATAgetArgument(PBExpr, 0),
+      pp_format, ShowSorts, 2);
+    if (gsIsPBESAnd(PBExpr)) {
+      PRINT_FUNC(fprints)(OutStream, " && ");
+    } else {
+      PRINT_FUNC(fprints)(OutStream, " || ");
+    }
+    PRINT_FUNC(PrintPBExpr)(OutStream, ATAgetArgument(PBExpr, 1),
+      pp_format, ShowSorts, 1);
+    if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, ")");
   }
 }
 

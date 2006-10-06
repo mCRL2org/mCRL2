@@ -161,6 +161,7 @@ val        { process_string(); return VAL; }
 mu         { process_string(); return MU; }
 nu         { process_string(); return NU; }
 delay      { process_string(); return DELAY; }
+yaled      { process_string(); return YALED; }
 nil        { process_string(); return NIL; }
 
 {Id}       { process_string(); return ID; }

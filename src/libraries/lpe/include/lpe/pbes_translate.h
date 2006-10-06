@@ -408,14 +408,13 @@ pbes pbes_translate(state_formula f, specification spec)
   LPE lpe = spec.lpe();
   data_variable T = fresh_variable("T", make_list(aterm_appl(f), aterm_appl(lpe)));
   equation_system e = E(f, lpe, T);
-std::cout << "<RESULT>" << e << std::endl;
 
   data_specification dataspec(spec.sorts(), spec.constructors(), spec.mappings(), spec.equations());
 
   // create initial state
   assert(e.equations().size() > 0);
   pbes_equation e1 = e.equations().front();
-  aterm_string Xe(arg1(e1));
+  aterm_string Xe(e1.variable().name());
 
   assert(is_mu(f) || is_nu(f));
   aterm_string Xf(arg1(f));

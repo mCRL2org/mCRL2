@@ -87,7 +87,6 @@ int main(int argc, char **argv)
     return 1;
   }
 
-/* not yet implemented
   //store the result
   string outfilename = tool_options.outfilename;
   bool opt_pretty = tool_options.pretty;
@@ -105,7 +104,6 @@ int main(int argc, char **argv)
     PrintPart_CXX(outstream, (ATerm) result, opt_pretty?ppDefault:ppInternal);
     outstream.close();
   }
-*/
   return 0;
 }
 
@@ -120,7 +118,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
   #define VERSION_OPTION CHAR_MAX + 1
   struct option long_options[] = {
     { "formula",   required_argument,  NULL,  'f' },
-    { "end-phase", required_argument, NULL, 'p' },
+    { "end-phase", required_argument,  NULL,  'p' },
     { "external",  no_argument,        NULL,  'e' },
     { "help",      no_argument,        NULL,  'h' },
     { "version",   no_argument,        NULL,  VERSION_OPTION },
