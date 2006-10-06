@@ -379,6 +379,19 @@ class data_assignment: public aterm_appl_wrapper
 typedef term_list<data_assignment> data_assignment_list;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// \brief Returns the right hand sides of the assignments.
+inline
+data_expression_list data_assignment_expressions(data_assignment_list l)
+{
+  data_expression_list result;
+  for (data_assignment_list::iterator i = l.begin(); i != l.end(); ++i)
+  {
+    result = push_front(result, i->rhs());
+  }
+  return atermpp::reverse(result);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // assignment_list_substitution
 /// Utility class for applying a sequence of data assignments.
 ///

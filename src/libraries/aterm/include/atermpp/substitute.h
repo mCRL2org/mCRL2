@@ -50,6 +50,37 @@ substitution make_substitution(Src src, Dest dest)
   return substitution(aterm(src), aterm(dest));
 }
 
+/// Utility class for applying a substitution to a term.
+struct list_substitution
+{
+  aterm_list m_src;
+  aterm_list m_dest;
+  
+  list_substitution(aterm_list src, aterm_list dest)
+    : m_src(src), m_dest(dest)
+  {
+    assert(src.size() == dest.size());
+  }
+  
+  aterm operator()(aterm t) const
+  {
+    aterm_list::iterator i, j;
+    for (i = m_src.begin(), j = m_dest.begin(); i != m_src.end(); ++i, ++j)
+    {
+      t = atermpp::replace(t, *i, *j);
+    }
+    return t;
+  }
+};
+
+/// Creation function for a list of substitutions.
+template <typename Src, typename Dest>
+inline
+list_substitution make_list_substitution(Src src, Dest dest)
+{
+  return list_substitution(aterm_list(src), aterm_list(dest));
+}
+
 } // namespace atermpp
 
 #endif // ATERM_SUBSTITUTE_H

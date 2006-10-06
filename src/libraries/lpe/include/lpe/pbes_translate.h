@@ -292,7 +292,7 @@ pbes_expression RHS(state_formula f, LPE lpe, data_variable T)
       data_expression c(i->condition());
       data_expression t(i->time());
       timed_action a(i->actions(), t);
-      data_assignment_list g(i->assignments());
+      data_expression_list g(data_assignment_expressions(i->assignments()));
       data_variable_list xp(lpe.process_parameters());
       data_variable_list e(i->summation_variables());
       pbes_expression p1 = sat_bot(a, alpha);
@@ -300,7 +300,7 @@ pbes_expression RHS(state_formula f, LPE lpe, data_variable T)
       pbes_expression p3 = val(less_equal(t, T));
       pbes_expression p4 = RHS(f1, lpe, T);
       p4 = p4.substitute(make_substitution(T, t));
-      p4 = p4.substitute(make_substitution(xp, g));
+      p4 = p4.substitute(make_list_substitution(xp, g));
       pbes_expression p = forall(e, or_(or_(or_(p1, p2), p3), p4));
       v.push_back(p);
     }
@@ -316,7 +316,7 @@ pbes_expression RHS(state_formula f, LPE lpe, data_variable T)
       data_expression c(i->condition());
       data_expression t(i->time());
       timed_action a(i->actions(), t);
-      data_assignment_list g(i->assignments());
+      data_expression_list g(data_assignment_expressions(i->assignments()));
       data_variable_list xp(lpe.process_parameters());
       data_variable_list e(i->summation_variables());
       pbes_expression p1 = sat_top(a, alpha);
@@ -324,7 +324,7 @@ pbes_expression RHS(state_formula f, LPE lpe, data_variable T)
       pbes_expression p3 = val(greater(t, T));
       pbes_expression p4 = RHS(f1, lpe, T);
       p4 = p4.substitute(make_substitution(T, t));
-      p4 = p4.substitute(make_substitution(xp, g));
+      p4 = p4.substitute(make_list_substitution(xp, g));
       pbes_expression p = exists(e, and_(and_(and_(p1, p2), p3), p4));
       v.push_back(p);
     }
@@ -415,14 +415,14 @@ pbes pbes_translate(state_formula f, specification spec)
   assert(e.equations().size() > 0);
   pbes_equation e1 = e.equations().front();
   aterm_string Xe(e1.variable().name());
-
   assert(is_mu(f) || is_nu(f));
   aterm_string Xf(arg1(f));
-  data_expression_list xf = state_formula_variable_expressions(f);
-  data_variable_list xp = lpe.process_parameters();
-  data_variable v(gsMakeDataVarId(aterm_string("0"), gsMakeSortIdReal()));
-  propositional_variable_instantiation init(Xe, v + xf + xp + Par(Xf, f));
-  
+  data_expression_list fi = state_formula_variable_expressions(f);
+  data_expression_list pi = spec.initial_state();
+  // TODO: a function gsMakaDataExprReal_int will be added by Aad
+  data_expression v(gsMakeDataExprCReal(gsMakeDataExprInt_int(0)));
+  propositional_variable_instantiation init(Xe, v + fi + pi + Par(Xf, f));
+
   return pbes(dataspec, e, init);
 }
 
