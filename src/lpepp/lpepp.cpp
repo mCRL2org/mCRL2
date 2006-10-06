@@ -217,9 +217,16 @@ bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName,
     PrintPPFormat(stderr, pp_format);
     fprintf(stderr, " format\n");
   }
-  gsRewriteInit(ATAgetArgument(Spec,3),GS_REWR_INNER);
+  //initialise rewriter, if needed
+  if (pp_format == ppDefault) {
+    gsRewriteInit(ATAgetArgument(Spec,3),GS_REWR_INNER);
+  }
+  //pretty print Spec to OutputStream
   PrintPart_C(OutputStream, (ATerm) Spec, pp_format);
-  gsRewriteFinalise();
+  //finalise rewriter, if needed
+  if (pp_format == ppDefault) {
+    gsRewriteFinalise();
+  }
   if (SpecStream != stdin) {
     fclose(SpecStream);
   }
