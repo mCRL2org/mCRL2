@@ -1,6 +1,8 @@
 #ifndef SQUADT_TOOL_INTERFACE_H_
 #define SQUADT_TOOL_INTERFACE_H_
 
+#include <sip/tool.h>
+
 namespace squadt_utility {
   void initialise(sip::tool::communicator&);
 }

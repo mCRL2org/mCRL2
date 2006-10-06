@@ -2,12 +2,10 @@
 #define _SQUADT_LPE2LTS_H
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <sip/tool.h>
+#include "squadt_tool_interface.h"
 #endif
 
-#include "squadt_program.h"
-
-class squadt_lpe2lts: public squadt_program
+class squadt_lpe2lts: public squadt_tool_interface
 {
   public:
     squadt_lpe2lts() {};
@@ -23,11 +21,11 @@ class squadt_lpe2lts: public squadt_program
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   protected:
-    void set_capabilities();
     void initialise();
-    void configure(sip::configuration &configuration);
-    bool check_configuration(sip::configuration &configuration);
-    void execute(sip::configuration &configuration);
+    void set_capabilities(sip::tool::capabilities &capabilities) const;
+    void user_interactive_configuration(sip::configuration &configuration);
+    bool check_configuration(sip::configuration const &configuration) const;
+    bool perform_task(sip::configuration &configuration);
     void finalise();
 
   protected:

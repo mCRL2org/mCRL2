@@ -3,6 +3,7 @@
 #include "librewrite.h"
 #include "lpe2lts.h"
 #include "exploration.h"
+#include <squadt_utility.h>
 
 using namespace std;
     
@@ -38,21 +39,18 @@ const unsigned int lpd_file_for_input_no_lts = 0;
 const unsigned int lpd_file_for_input_lts = 1;
 const unsigned int lts_file_for_output = 2;
 
-void squadt_lpe2lts::set_capabilities()
+void squadt_lpe2lts::initialise()
 {
-  /* Get tool capabilities in order to modify settings */
-  sip::tool::capabilities& cp = tc.get_tool_capabilities();
+}
 
+void squadt_lpe2lts::set_capabilities(sip::tool::capabilities &cp) const
+{
   /* The tool has only one main input combination it takes an LPE and then behaves as a reporter */
   cp.add_input_combination(lpd_file_for_input_no_lts, "Reporting", "lpe");
   cp.add_input_combination(lpd_file_for_input_lts, "Transformation", "lpe");
 }
 
-void squadt_lpe2lts::initialise()
-{
-}
-
-void squadt_lpe2lts::configure(sip::configuration &configuration)
+void squadt_lpe2lts::user_interactive_configuration(sip::configuration &configuration)
 {
   using namespace sip;
   using namespace sip::layout;
@@ -81,15 +79,8 @@ void squadt_lpe2lts::configure(sip::configuration &configuration)
   checkbox* cb_removeunused = new checkbox("remove unused data", true);
   
   label* lb_rewr_strat = new label("Rewriter:");
-  radio_button* rb_rewr_strat_inner = new radio_button("innermost");
-  radio_button* rb_rewr_strat_jitty = new radio_button("JITty",rb_rewr_strat_inner,false);
-  radio_button* rb_rewr_strat_innerc = new radio_button("compiling innermost",rb_rewr_strat_inner,false);
-  radio_button* rb_rewr_strat_jittyc = new radio_button("compiling JITty",rb_rewr_strat_inner,false);
   
   label* lb_expl_strat = new label("Strategy:");
-  radio_button* rb_expl_strat_breadth = new radio_button("breadth-first");
-  radio_button* rb_expl_strat_depth = new radio_button("depth-first",rb_expl_strat_breadth,false);
-  radio_button* rb_expl_strat_random = new radio_button("random",rb_expl_strat_breadth,false);
   
   checkbox* cb_deadlock = new checkbox("detect deadlocks", false);
   checkbox* cb_actions = new checkbox("detect actions:",false);
@@ -129,22 +120,23 @@ void squadt_lpe2lts::configure(sip::configuration &configuration)
 
   column->add(new label(" "),layout::left);
 
-  horizontal_box* rewrbox = new horizontal_box();
-  rewrbox->add(lb_rewr_strat, top);
-  rewrbox->add(rb_rewr_strat_inner, top);
-  rewrbox->add(rb_rewr_strat_jitty, top);
-  rewrbox->add(rb_rewr_strat_innerc, top);
-  rewrbox->add(rb_rewr_strat_jittyc, top);
+  manager* rewrbox = new horizontal_box();
+  rewrbox->add(lb_rewr_strat);
+  squadt_utility::radio_button_helper<RewriteStrategy>
+    rewr_selector(rewrbox,GS_REWR_INNER,"innermost");
+  rewr_selector.associate(rewrbox,GS_REWR_JITTY,"JITty");
+  rewr_selector.associate(rewrbox,GS_REWR_INNERC,"compiling innermost");
+  rewr_selector.associate(rewrbox,GS_REWR_JITTYC,"compiling JITty");
   column->add(rewrbox,layout::left);
 
   column->add(new label(" "),layout::left);
 
-  horizontal_box* explbox = new horizontal_box();
-  explbox->add(lb_expl_strat, top);
-  explbox->add(new label("  "),top);
-  explbox->add(rb_expl_strat_breadth, middle);
-  explbox->add(rb_expl_strat_depth, middle);
-  explbox->add(rb_expl_strat_random, middle);
+  manager* explbox = new horizontal_box();
+  explbox->add(lb_expl_strat);
+  squadt_utility::radio_button_helper<exploration_strategy>
+    expl_selector(explbox,es_breadth, "breadth-first");
+  expl_selector.associate(explbox,es_depth, "depth-first");
+  expl_selector.associate(explbox,es_random, "random-first");
   column->add(explbox,layout::left);
 
   column->add(new label(" "),layout::left);
@@ -196,7 +188,7 @@ void squadt_lpe2lts::configure(sip::configuration &configuration)
 
   display->set_top_manager(layout_manager);
 
-  tc.send_display_layout(display);
+  m_communicator.send_display_layout(display);
 
   /* Wait until the ok button was pressed */
   okay_button->await_change();
@@ -217,14 +209,9 @@ void squadt_lpe2lts::configure(sip::configuration &configuration)
   c.add_option(option_state_format_tree).append_argument(sip::datatype::boolean::standard, cb_state_format_tree->get_status());
   c.add_option(option_removeunused).append_argument(sip::datatype::boolean::standard, cb_removeunused->get_status());
   
-  if ( rb_rewr_strat_inner->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::integer::standard, (long int) GS_REWR_INNER);
-  if ( rb_rewr_strat_jitty->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::integer::standard, (long int) GS_REWR_JITTY);
-  if ( rb_rewr_strat_innerc->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::integer::standard, (long int) GS_REWR_INNERC);
-  if ( rb_rewr_strat_jittyc->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::integer::standard, (long int) GS_REWR_JITTYC);
+  c.add_option(option_rewr_strat).append_argument(sip::datatype::integer::standard,rewr_selector.get_selection());
   
-  if ( rb_expl_strat_breadth->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::integer::standard, (long int) es_breadth);
-  if ( rb_expl_strat_depth->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::integer::standard, (long int) es_depth);
-  if ( rb_expl_strat_random->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::integer::standard, (long int) es_random);
+  c.add_option(option_expl_strat).append_argument(sip::datatype::integer::standard,expl_selector.get_selection());
 
   c.add_option(option_detect_deadlock).append_argument(sip::datatype::boolean::standard, cb_deadlock->get_status());
   c.add_option(option_detect_actions).append_argument(sip::datatype::string::standard, cb_actions->get_status()?tf_actions->get_text():"");
@@ -241,10 +228,10 @@ void squadt_lpe2lts::configure(sip::configuration &configuration)
   
   c.add_option(option_init_tsize).append_argument(sip::datatype::string::standard, tf_init_tsize->get_text());
   
-  tc.send_clear_display();
+  m_communicator.send_clear_display();
 }
 
-bool squadt_lpe2lts::check_configuration(sip::configuration &configuration)
+bool squadt_lpe2lts::check_configuration(sip::configuration const &configuration) const
 {
   return (
       configuration.object_exists(lpd_file_for_input_no_lts) ||
@@ -253,7 +240,7 @@ bool squadt_lpe2lts::check_configuration(sip::configuration &configuration)
       );
 }
 
-void squadt_lpe2lts::execute(sip::configuration &configuration)
+bool squadt_lpe2lts::perform_task(sip::configuration &configuration)
 {
   lts_generation_options lgopts; initialise_lts_generation_options(lgopts);
 
@@ -308,12 +295,15 @@ void squadt_lpe2lts::execute(sip::configuration &configuration)
   
   lgopts.initial_table_size = strtoul((boost::any_cast <string> (*(configuration.get_option(option_init_tsize)->get_value_iterator()))).c_str(),NULL,0);
 
+  bool ok = false;
   if ( initialise_lts_generation(&lgopts) )
   {
-    generate_lts();
+    ok = generate_lts();
 
     finalise_lts_generation();
   }
+
+  return ok;
 }
 
 void squadt_lpe2lts::finalise()
@@ -368,7 +358,7 @@ void squadt_lpe2lts::create_status_display()
   
     status_display->set_top_manager(layout_manager);
   
-    tc.send_display_layout(status_display);
+    m_communicator.send_display_layout(status_display);
   }
 #endif
 }
@@ -380,13 +370,13 @@ void squadt_lpe2lts::update_status_display(unsigned long level, unsigned long lo
   {
     char buf[21];
     sprintf(buf,"%lu",level);
-    lb_level->set_text(buf,&tc);
+    lb_level->set_text(buf,&m_communicator);
     sprintf(buf,"%llu",explored);
-    lb_explored->set_text(buf,&tc);
+    lb_explored->set_text(buf,&m_communicator);
     sprintf(buf,"%llu",seen);
-    lb_seen->set_text(buf,&tc);
+    lb_seen->set_text(buf,&m_communicator);
     sprintf(buf,"%llu",transitions);
-    lb_transitions->set_text(buf,&tc);
+    lb_transitions->set_text(buf,&m_communicator);
     if ( seen > 1000000ULL )
     {
       explored = explored/(seen/1000000);
@@ -396,8 +386,8 @@ void squadt_lpe2lts::update_status_display(unsigned long level, unsigned long lo
     {
       seen = explored;
     }
-    progbar->set_maximum(seen,&tc);
-    progbar->set_value(explored,&tc);
+    progbar->set_maximum(seen,&m_communicator);
+    progbar->set_value(explored,&m_communicator);
   }
 #endif
 }

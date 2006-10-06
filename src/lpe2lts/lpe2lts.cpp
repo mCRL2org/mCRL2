@@ -155,7 +155,7 @@ int main(int argc, char **argv)
 
   // Start 
   squadt_lpe2lts sl;
-  if ( sl.run(argc, argv) )
+  if ( sl.try_interaction(argc, argv) )
   {
 	  return 0;
   }

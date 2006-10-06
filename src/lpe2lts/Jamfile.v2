@@ -7,7 +7,6 @@ project lpe2lts
 
 exe lpe2lts
        : lpe2lts.cpp
-         squadt_program.cpp
          squadt_lpe2lts.cpp
          exploration.cpp
 	 lts.cpp
