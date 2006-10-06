@@ -1,7 +1,9 @@
-#  Copyright (C) Vladimir Prus 2002. Permission to copy, use, modify, sell and
-#  distribute this software is granted provided this copyright notice appears in
-#  all copies. This software is provided "as is" without express or implied
-#  warranty, and with no claim as to its suitability for any purpose.
+# Copyright Vladimir Prus 2002.
+# Copyright Rene Rivera 2006.
+#
+# Distributed under the Boost Software License, Version 1.0.
+#    (See accompanying file LICENSE_1_0.txt or copy at
+#          http://www.boost.org/LICENSE_1_0.txt)
 
 #  Manages 'generators' --- objects which can do transformation between different
 #  target types and contain algorithm for finding transformation from sources
@@ -219,7 +221,7 @@ class generator
             return ;
         }
     }
-        
+    
     # Returns another generator which differers from $(self) in
     # - id
     # - value to <toolset> feature in properties
@@ -264,6 +266,8 @@ class generator
     
     # Tries to invoke this generator on the given sources. Returns a
     # list of generated targets (instances of 'virtual-target').
+    # Returning nothing from run indicates that the generator was
+    # unable to create the target.
     rule run ( project  # Project for which the targets are generated
                name ?   # Determines the name of 'name' attribute for 
                         # all generated targets. See 'generated-targets' method.
@@ -981,13 +985,13 @@ local rule find-viable-generators-aux ( target-type : property-set )
     for local g in $(generators)
     {
         generators.dout [ indent ] "trying generator" [ $(g).id ] "(" [ $(g).source-types ] -> [ $(g).target-types ] ")" ;
-            
+        
         local m = [ $(g).match-rank $(property-set) ] ;
-        if $(m) 
+        if $(m)
         {
             generators.dout [ indent ] "  is viable" ;
             viable-generators += $(g) ;
-        }                                    
+        }
     }
                             
     return $(viable-generators) ;

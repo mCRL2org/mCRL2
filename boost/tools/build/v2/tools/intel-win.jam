@@ -7,6 +7,7 @@ import toolset ;
 import feature ;
 import toolset : flags ;
 import os ;
+import errors ;
 
 # This is needed because the rule we import here depend on 'common'
 # That's nasty.
@@ -63,7 +64,8 @@ rule init ( version ? :     # the compiler version
     
     flags intel-win.compile .CC $(condition) : $(setup)icl ; 
     flags intel-win.link .LD $(condition) : $(setup)xilink ; 
-    flags intel-win.archive .LD $(condition) : $(setup)xilink ;       
+    flags intel-win.archive .LD $(condition) : $(setup)xilink /lib ;       
+    flags intel-win.link .MT $(condition) : mt -nologo ;
     
     local m = [ MATCH (.).* : $(version) ] ;
     local major = $(m[1]) ;
@@ -109,6 +111,8 @@ rule init ( version ? :     # the compiler version
               ;
         }
     }        
+    
+    
     if $(compatibility) && $(compatibility) != native
     {        
         C++FLAGS += /Q$(base-vc) ;
@@ -131,6 +135,22 @@ rule init ( version ? :     # the compiler version
     
     flags intel-win CFLAGS $(condition) : $(C++FLAGS) ;
     
+    if ! $(compatibility)
+    {
+        # If there's no backend version, assume 7.1.
+        compatibility = vc7.1 ;
+    }
+    
+    local extract-version = [ MATCH ^vc(.*) : $(compatibility) ] ;
+    if ! $(extract-version)
+    {
+        errors.user-error "Invalid value for compatibility option:"
+          $(compatibility) ;
+    }
+    
+    msvc.configure-version-specific intel-win : $(extract-version[1]) : $(condition) ;
 }
 
 flags intel-win.link LIBRARY_OPTION <toolset>intel : "" ;
+
+

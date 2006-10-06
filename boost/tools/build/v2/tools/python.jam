@@ -21,9 +21,6 @@
 #   SHARED_LIB, not PYTHON_EXTENSION. That's because we reuse 
 #   'lib-target-class', which creates SHARED_LIB explicitly.
 
-
-
-
 import type ;
 import testing ;
 import generators ;
@@ -44,6 +41,8 @@ project python ;
 # times we define new targets in the python project,
 # not in whatever project we were called by.
 .project = [ project.current ] ;
+
+.alias-defined = ;
 
 # Dynamic linker lib. Necessary to specify it explicitly 
 # on some platforms.
@@ -95,34 +94,137 @@ rule init ( version ? : root ? : includes ? : libraries ?
         init-unix $(version) : $(root) : $(includes) : $(libraries) : $(cygwin-condition) ;
     }
     
+    if [ os.on-windows ] && ! $(.alias-defined)
+    {
+        .alias-defined = true ;
+        alias python_for_extensions : python ;
+    }
+    
+    
     project.pop-current ;
 }
 
-rule init-unix ( version ? : root ? : includes ? : libraries ? : condition * )
+local rule python-version ( cmd )
 {
-    root ?= /usr ;
-    includes ?= $(root)/include/python$(version) ;
-    libraries ?= $(root)/lib/python$(version)/config ;
+    cmd ?= python ;
+    local version = [ SHELL $(cmd)" -c 'import sys; print sys.version'" : exit-status ] ;
     
-    # Find the 'python' binary, which is used for testing.
-    # Look first in $(root)/bin, then in PATH.    
-    local interpreter = [ common.get-invocation-command 
-        python : python : : $(root)/bin : path-last ] ;
-    
-    if $(interpreter:D) != $(root)/bin
-    {            
-        ECHO "warning: was expecting Python interpreter in " $(root)/bin ;
-        ECHO "warning: found only in PATH:" $(interpreter) ;
-    }        
-                
+    if $(version[2]) = 0
+    {
+        return [ MATCH ^([0-9]+.[0-9]+) : $(version[1]) : 1 ] ;
+    }
+    else
+    {
+        return ;
+    }
+}
+
+local rule python-interpreter ( cmd )
+{
+    local which = [ SHELL "which "$(cmd) : exit-status ] ;
+    if $(which[2]) = 0
+    {
+        return $(which[1]) ;
+    }
+    else
+    {
+        return ;
+    }
+}
+
+local rule python-root ( cmd )
+{
+    return [ MATCH (.*)/bin/[^/]* : [ SHELL "which "$(cmd) ] : 1 ] ;
+}
+
+
+local rule debug-message ( message * )
+{
     if --debug-configuration in [ modules.peek : ARGV ]
     {
-        ECHO "notice: Python include path is" $(includes) ;
-        ECHO "notice: Python library path is" $(libraries) ;
-        ECHO "notice: Python interpreter is" $(interpreter) ;                
+        ECHO notice: $(message) ;
+    }
+}
+
+# condition is a list of properties for which this python initialization applies.
+rule init-unix ( version ? : root ? : includes ? : libraries ? : condition * )
+{
+    #
+    # Autoconfiguration sequence
+    #
+    if $(version)
+    {
+        local v = [ MATCH ^([0-9]+\.[0-9]+)(.*)$ : $(version) : 1 2 ] ;
+        if ! $(v) || $(v[2])
+        {
+            ECHO "Warning: \"using python\" expects a two part (major, minor) version number; got" $(version) instead ;
+            if $(v)
+            {
+                version = $(v[1]) ;
+            }
+        }
+        debug-message looking for python $(version) ;
     }
     
-    # If not specific condition is specified, set global value
+    # if root is explicitly specified, look in its bin subdirectory
+    local bin = bin/ ;
+    bin = $(bin:R=$(root)) ; # will null out $(bin) if $(root) is empty.
+    
+    if $(bin)
+    {
+        debug-message searching for python binaries in $(bin) ;
+    }
+    
+    # Form the python commands to try in order.  First look for python
+    # with the explicit version number, then without it
+    local python = python ;
+    local cmds = $(python:D=$(bin:E=""))$(version:E="") $(python:D=$(bin:E="")) ;
+
+    local interpreter ;
+    while $(cmds)
+    {
+        # pop a command
+        interpreter = $(cmds[0]) ; cmds = $(cmds[2-]) ;
+        debug-message trying Python interpreter command $(interpreter) ;
+          
+        # Check to see what version that command actually runs, if any
+        local true-version = [ python-version $(interpreter) ] ;
+        
+        if ! $(true-version)
+        {
+            debug-message $(interpreter) does not invoke a working Python interpreter ;
+        }
+        else
+        {
+            debug-message $(interpreter) invokes actual Python (major,minor) version $(true-version) ;
+            
+            # if no version was specified, assume that's OK
+            version ?= $(true-version) ;
+            
+            # if the version is a match, stop searching
+            if $(version) = $(true-version)
+            {
+                debug-message qualifying Python interpreter found ;
+                root ?= [ python-root $(interpreter) ] ;
+                cmds = ; # break
+            }
+        }
+    }
+    debug-message "Python interpreter command is" $(interpreter) ;
+    
+    includes ?= $(root)/include/python$(version) ;
+    debug-message "Python include path is" $(includes) ;
+    
+    libraries ?= $(root)/lib/python$(version)/config ;
+    debug-message "Python library path is" $(libraries) ;
+    
+    #
+    # End autoconfiguration sequence
+    #
+    
+    
+    # Set up the PYTHON variable to point at the interpreter.
+    # If no specific condition is specified, set global value
     # If condition is specified, set PYTHON on target. It will
     # override the global value.
     if ! $(condition)
@@ -134,60 +236,76 @@ rule init-unix ( version ? : root ? : includes ? : libraries ? : condition * )
         flags python.capture-output PYTHON $(condition:J=/) : $(interpreter) ;
     }   
 
+    # Provide system library dependencies for targets linking with
+    # static Python libraries.
+    #
+    # On many systems, Python uses libraries such as pthreads or
+    # libdl.  Since static libraries carry no library dependency
+    # information of their own that the linker can extract, these
+    # extra dependencies have to be given explicitly on the link line
+    # of the client.  The information about these dependencies is
+    # packaged into the "python" target below.
 
-    local extra-libs ;
+    # Even where Python itself uses pthreads, it never allows
+    # extension modules to be entered concurrently (unless they
+    # explicitly give up the interpreter lock).  Therefore, extension
+    # modules don't need the efficiency overhead of threadsafe code as
+    # produced by <threading>multi, and we handle libpthread along
+    # with other libraries here.  Note: this optimization is based on
+    # an assumption that the compiler generates link-compatible code
+    # in both the single- and multi-threaded cases, and that system
+    # libraries don't change their ABIs either.  
+
+    # Most libraries are added to 'extra-libs'. Those that depend on
+    # the toolset are added to 'extra-libs-conditional', which will be
+    # used to form more specific target alternatives.
     
+    local extra-libs extra-libs-conditional ;
+
     switch [ os.name ]
     {
-        case SOLARIS : extra-libs = dl      ;
-        case OSF :     extra-libs =         ;
-        case QNX* :    extra-libs = util    ;
-        case * :       extra-libs = dl util ;
+        case SOLARIS :
+        {
+            extra-libs = pthread dl ;
+            
+            # Add a librt dependency for the gcc toolset on SunOS (the
+            # sun toolset adds -lrt unconditionally). While this
+            # appears to duplicate the logic already in gcc.jam, it
+            # doesn't as long as we're not forcing <threading>multi.
+            extra-libs-conditional = <toolset>gcc:<source>rt ;
+        }
+        
+        case OSF :     
+        {
+            extra-libs = pthread ;
+            extra-libs-conditional = <toolset>gcc:<source>rt ;
+        }
+        
+        case QNX* :    
+        {
+            extra-libs =                 ;
+        }
+        
+        case * :       extra-libs = pthread dl util ;
     }
     
-    # Depending on system, Python library is either static
-    # or shared. When it's static, we need to add 'pthread'
-    # to link line of all clients, otherwise we'll get
-    # unresolved symbols. Same effect can be accomplished
-    # by using <threading>multi on the client, but
-    # that can have performance overhead, and is not really
-    # necessary, as Python interface has nothing that's
-    # affected by threading mode.
-    extra-libs += pthread ;
-    
-    extra-libs-conditional = ;
-    # Add 'rt' option on Sun. While we duplicate the
-    # logic already in sun.jam and gcc.jam, I see no easy
-    # way to refactor it.
-    # Note that for 'sun' toolset, rt is already unconditionally
-    # added.
-
-    # (MS) Question: Why not [ os.name ] in the next statement?
-    switch [ modules.peek : JAMUNAME ]
+    if ! [ os.on-windows ]
     {
-        case SunOS* :
-        {
-            extra-libs-conditional += <toolset>gcc:<source>rt ;
-        }
-        case OSF* :
-        {
-            extra-libs-conditional += <toolset>gcc:<source>rt ;
-        }
+        # On *nix, we don't want to link either Boost.Python or Python
+        # extensions to libpython, because the Python interpreter itself
+        # provides all those symbols. If we linked to libpython, we'd get
+        # duplicate symbols. So declare two targets -- one for building
+        # extensions and another for embedding
+        alias python_for_extensions
+                     :  
+                     : $(condition)
+                     :
+                     : <include>$(includes) 
+                     ;
     }
-             
-    # On Linux, we don't want to link either Boost.Python or
-    # Python extensions to libpython, so that when extensions
-    # loaded in the interpreter, the symbols in the interpreter
-    # are used. If we linked to libpython, we'd get duplicate
-    # symbols. So declare two targets -- one for headers and another
-    # for library.   
-    alias python_for_extensions
-                 :  
-                 : $(condition)
-                 :
-                 : <include>$(includes) 
-                 ;
     
+    
+    # This should really be called python_for_embedding
     alias python
                  : $(extra-libs) 
                  : $(condition) $(extra-libs-conditional)
@@ -196,28 +314,6 @@ rule init-unix ( version ? : root ? : includes ? : libraries ? : condition * )
                    <library-path>$(libraries)
                    <find-shared-library>python$(version)
                  ;
-    
-    # NOTES:
-    # - V1 had logic to force intel to use gcc's runtime.
-    #   Note sure why that was needed, with icc 8.0 extensions
-    #   built with intel are loaded by python without problems.
-    # - There was 'python-static-multithread' logic. Don't know
-    #   what it affected, so can't test.
-    
-    # TODO: need to figure out when the following code is needed:
-    # for builtin extensions only or in some other cases too.
-
-    
-    #    if [ modules.peek $(OS) ] = OSF
-    #    {
-    #        PYTHON_PROPERTIES += <*><*><linkflags>"-expect_unresolved 'Py*' -expect_unresolved '_Py*'" ;
-    #    }
-    #    else if [ modules.peek $(OS) ] = AIX
-    #    {
-    #        PYTHON_PROPERTIES 
-    #          += <*><*><linkflags>"-Wl,-bI:$(PYTHON_LIB_PATH)/python.exp"
-    #            <*><*><find-library>pthreads ;
-    #    }
 }
 
 rule init-mac ( version : root ? : includes ? : libraries ? )
@@ -260,32 +356,24 @@ rule init-mac ( version : root ? : includes ? : libraries ? )
     }
     PYTHON_FRAMEWORK = $(PYTHON_FRAMEWORK:D)/Python ;
 
-    alias python_for_extensions
-      : 
-      :
-      : 
-      : <include>$(includes)
-      ;  
-    
     alias python
       :
       : <os>MACOSX <toolset>darwin
       :
       : <include>$(includes) <framework>$(PYTHON_FRAMEWORK)
       ;  
+
+    # Unlike most *nix systems, Mac OS X's linker does not permit undefined
+    # symbols when linking a shared library. So, we still need to link
+    # against the Python framework, even when building extensions. 
+    # Note that framework builds of Python always use shared libraries,
+    # so we do not need to worry about duplicate Python symbols.
+    .alias-defined = true ;
+    alias python_for_extensions : python ;
 }
 
-.alias-defined = ;
 rule init-nt ( version : root ? : includes ? : libraries ? : cygwin-condition ? )
 {
-#    PYTHON_PROPERTIES =
-#      boost-python-disable-borland
-#      select-nt-python-includes
-#      <runtime-link>dynamic
-#      <sysinclude>@boost
-#      <$(gcc-compilers)><*><define>USE_DL_IMPORT
-#      ;
-
     if ! $(cygwin-condition)
     {        
         root ?= c:/tools/python ;
@@ -297,7 +385,11 @@ rule init-nt ( version : root ? : includes ? : libraries ? : cygwin-condition ? 
         
         PYTHON_INCLUDES ?= $(root)/include [ GLOB $(root) : PC ] ;
         
-        local PYTHON_VERSION_NODOT = [ regex.match ([0-9]+[.][0-9]+).* : $(version) : 1 ] ;
+        # The name of Python library file does not have a dot between
+        # major and minor version. 
+        local PYTHON_VERSION_NODOT = [ regex.match ([0-9]+)[.]([0-9]+).* : $(version) : 1 2 ] ;
+        PYTHON_VERSION_NODOT = $(PYTHON_VERSION_NODOT:J="") ;
+        
         PYTHON_DLL ?= [ GLOB $(PATH) $(Path) : python$(PYTHON_VERSION_NODOT).dll ] ;
         PYTHON_DEBUG_DLL ?= [ GLOB $(PATH) $(Path) : python$(PYTHON_VERSION_NODOT)_d.dll ] ;
         PYTHON_IMPORT_LIB ?= [ GLOB $(PYTHON_LIB_PATH) : libpython$(PYTHON_VERSION_NODOT).* ] ;
@@ -315,26 +407,12 @@ rule init-nt ( version : root ? : includes ? : libraries ? : cygwin-condition ? 
             ECHO "notice: Python include path is" $(includes) ;
             ECHO "notice: Python library path is" $(libraries) ;
             ECHO "notice: Python interpreter is" $(interpreter) ;        
+            ECHO "notice: Python library name is" python$(PYTHON_VERSION_NODOT) ;
         }
         
         flags python.capture-output PYTHON : $(interpreter) ;
 
                 
-        # This is mingw-specific V1 code. I don't yet understand
-        # why mingw must be specially-cased.
-        #local lib = $(PYTHON_IMPORT_LIB) ;
-        #if <define>BOOST_DEBUG_PYTHON in $(properties)
-        #{
-        #    lib = $(PYTHON_DEBUG_IMPORT_LIB) ;
-        #}
-        #lib ?= $(PYTHON_DLL) ;
-        #if <define>BOOST_DEBUG_PYTHON in $(properties)
-        #{
-        #    lib ?= $(PYTHON_DEBUG_DLL) ;
-        #}
-        #properties += <library-file>$(lib) ;
-        #}
-        
         properties += <library-path>$(PYTHON_LIB_PATH) ;
             
         # msvc compilers auto-find the python library
@@ -349,11 +427,6 @@ rule init-nt ( version : root ? : includes ? : libraries ? : cygwin-condition ? 
           ;
                        
         local lib = python$(PYTHON_VERSION_NODOT) ;
-        # TODO: don't support BOOST_DEBUG_PYTHON yet.        
-        #    if <define>BOOST_DEBUG_PYTHON in $(properties)
-        #    {
-        #            lib = python$(PYTHON_VERSION_NODOT)_d ;
-        #    }
         
         alias python
           :
@@ -361,7 +434,7 @@ rule init-nt ( version : root ? : includes ? : libraries ? : cygwin-condition ? 
           :
           : <library-path>$(PYTHON_LIB_PATH)    
             <include>$(PYTHON_INCLUDES)
-            <find-library>$(lib) ;                
+            <find-shared-library>$(lib) ;                
     }
     else
     {        
@@ -382,31 +455,18 @@ rule init-nt ( version : root ? : includes ? : libraries ? : cygwin-condition ? 
         CYGWIN_PYTHON_DEBUG_LIB_PATH ?= $(CYGWIN_PYTHON_DEBUG_ROOT)/lib/python$(CYGWIN_PYTHON_DEBUG_VERSION)/config ;        
         
         local properties ;
-        # TODO: don't support BOOST_DEBUG_PYTHON yet.                
-        #if <define>BOOST_DEBUG_PYTHON in $(properties)
-        #{
-        #    properties += <library-path>$(CYGWIN_PYTHON_DEBUG_LIB_PATH) <find-library>python$(CYGWIN_PYTHON_DEBUG_VERSION).dll ;
-        #}
-        #else
-        #{
+
         properties += <library-path>$(CYGWIN_PYTHON_LIB_PATH) 
-                      <find-library>python$(CYGWIN_PYTHON_VERSION).dll ;
+                      <find-shared-library>python$(CYGWIN_PYTHON_VERSION).dll ;
         
         properties += <include>$(root)/include/python$(version) ;          
           
-        #}
         alias python
           :
           : $(cygwin-condition)
           :
           : $(properties)
           ;        
-    }    
-    
-    if ! $(.alias-defined)
-    {
-        .alias-defined = true ;
-        alias python_for_extensions : python ;
     }    
 }
 
@@ -417,13 +477,14 @@ rule configured ( )
 }
         
 type.register PYTHON_EXTENSION : : SHARED_LIB ;
+
 # We can't give "dll" suffix to PYTHON_EXTENSION, because
 # we would not know what "a.dll" is: python extenstion or
 # ordinary library. Therefore, we specify only suffixes
 # used for generation of targets.
 type.set-generated-target-suffix PYTHON_EXTENSION : : so ;
-type.set-generated-target-suffix PYTHON_EXTENSION : <os>NT : dll ;
-type.set-generated-target-suffix PYTHON_EXTENSION : <os>CYGWIN : so ;
+type.set-generated-target-suffix PYTHON_EXTENSION : <os>NT : pyd ;
+type.set-generated-target-suffix PYTHON_EXTENSION : <os>CYGWIN : dll ;
 
 # Unset 'lib' prefix for PYTHON_EXTENSION
 type.set-generated-target-prefix PYTHON_EXTENSION : : "" ;
@@ -432,35 +493,7 @@ rule python-extension ( name : sources * : requirements * : default-build * :
                         usage-requirements * )
 {
     requirements += <use>/python//python_for_extensions ;
-        
-    # TODO: handle the following V1 code
-    #if $(OS) = MACOSX && $(toolset) = darwin
-    #{
-    #    if <target-type>PYD in $(properties)
-    #    {
-    #        properties += <link-format>bundle ;
-    #    }
-    #    properties += <framework>$(PYTHON_FRAMEWORK) ;
-    #}    
-               
-#        <metrowerks><*><cxxflags>"-inline deferred" 
-#      <cwpro8><*><cxxflags>"-inline deferred"  # added for internal testing purposes
-#        <cxx><*><sysinclude>@boost/boost/compatibility/cpp_c_headers
-#         <define>BOOST_PYTHON_DYNAMIC_LIB
-    
-    
-#    PYTHON_PROPERTIES += 
-#        <sysinclude>@boost
-#          <stlport-iostream>on
-#            select-python-library
-    
-#      boost-python-disable-borland
-#      select-nt-python-includes
-#      <runtime-link>dynamic
-#      <sysinclude>@boost
-#      <$(gcc-compilers)><*><define>USE_DL_IMPORT
-#          <sysinclude>$(PYTHON_INCLUDES)
-            
+                    
     local project = [ project.current ] ;
 
     

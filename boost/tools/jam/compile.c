@@ -11,7 +11,6 @@
  */
 
 # include "jam.h"
-# include "debug.h"
 
 # include "lists.h"
 # include "parse.h"
@@ -267,7 +266,7 @@ compile_foreach(
         
         if ( parse->num )
         {
-            s = addsettings( s, 0, parse->string, L0 );
+            s = addsettings( s, VAR_SET, parse->string, L0 );
             pushsettings( s );
         }
 
@@ -493,7 +492,7 @@ compile_local(
     /* Initial value is ns */
 
     for( l = nt; l; l = list_next( l ) )
-        s = addsettings( s, 0, l->string, list_copy( (LIST*)0, ns ) );
+        s = addsettings( s, VAR_SET, l->string, list_copy( (LIST*)0, ns ) );
 
     list_free( ns );
     list_free( nt );
@@ -784,7 +783,7 @@ collect_arguments( RULE* rule, FRAME* frame )
                         }
                     }
                 
-                    locals = addsettings( locals, 0, name, value );
+                    locals = addsettings( locals, VAR_SET, name, value );
                     type_check( type_name, value, frame, rule, arg_name );
                     type_name = 0;
                 }
@@ -1007,11 +1006,8 @@ evaluate_rule(
 
         /* The action is associated with this instance of this rule */
 
-        action = (ACTION *)malloc( sizeof( ACTION ) );
+        action = (ACTION *)BJAM_MALLOC( sizeof( ACTION ) );
         memset( (char *)action, '\0', sizeof( *action ) );
-
-        if ( DEBUG_PROFILE )
-            profile_memory( sizeof( ACTION ) );
 
         action->rule = rule;
         action->targets = targetlist( (TARGETS *)0, lol_get( frame->args, 0 ) );
@@ -1116,6 +1112,26 @@ compile_rules(
 }
 
 /*
+ * assign_var_mode() - convert ASSIGN_XXX compilation flag into
+ *                     corresponding VAR_XXX variable set flag.
+ */
+static int assign_var_mode(int parsenum, const char **tracetext)
+{
+    const char *trace;
+    int setflag;
+    switch( parsenum )
+    {
+        case ASSIGN_SET:     setflag = VAR_SET; trace = "="; break;
+        case ASSIGN_APPEND:  setflag = VAR_APPEND; trace = "+="; break;
+        case ASSIGN_DEFAULT: setflag = VAR_DEFAULT; trace = "?="; break;
+        default:             setflag = VAR_SET; trace = ""; break;
+    }
+    if (tracetext)
+        *tracetext = trace ;
+    return setflag;
+}
+
+/*
  * compile_set() - compile the "set variable" statement
  *
  *  parse->left variable names
@@ -1125,22 +1141,14 @@ compile_rules(
 
 LIST *
 compile_set(
-    PARSE   *parse,
+    PARSE *parse,
     FRAME *frame )
 {
     LIST    *nt = parse_evaluate( parse->left, frame );
     LIST    *ns = parse_evaluate( parse->right, frame );
     LIST    *l;
-    int     setflag;
     char    *trace;
-
-    switch( parse->num )
-    {
-    case ASSIGN_SET:    setflag = VAR_SET; trace = "="; break;
-    case ASSIGN_APPEND: setflag = VAR_APPEND; trace = "+="; break;
-    case ASSIGN_DEFAULT:    setflag = VAR_DEFAULT; trace = "?="; break;
-    default:        setflag = VAR_SET; trace = ""; break;
-    }
+    int     setflag = assign_var_mode( parse->num, (const char**) &trace );
 
     if( DEBUG_COMPILE )
     {
@@ -1232,7 +1240,8 @@ compile_settings(
     LIST    *ns = parse_evaluate( parse->third, frame );
     LIST    *targets = parse_evaluate( parse->right, frame );
     LIST    *ts;
-    int append = parse->num == ASSIGN_APPEND;
+    char    *trace;
+    int     setflag = assign_var_mode( parse->num, (const char**) &trace );
 
     if( DEBUG_COMPILE )
     {
@@ -1240,7 +1249,7 @@ compile_settings(
         list_print( nt );
         printf( " on " );
         list_print( targets );
-        printf( " %s ", append ? "+=" : "=" );
+        printf( " %s ", trace );
         list_print( ns );
         printf( "\n" );
     }
@@ -1255,7 +1264,7 @@ compile_settings(
         LIST    *l;
 
         for( l = nt; l; l = list_next( l ) )
-        t->settings = addsettings( t->settings, append, 
+        t->settings = addsettings( t->settings, setflag, 
                 l->string, list_copy( (LIST*)0, ns ) );
     }
 

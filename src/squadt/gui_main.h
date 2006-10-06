@@ -59,6 +59,9 @@ namespace squadt {
         /** \brief Cleans up and closes the window */
         inline void on_menu_quit(wxCommandEvent&);
 
+        /** \brief Shows the preferences dialog */
+        inline void on_menu_preferences(wxCommandEvent&);
+
         /** \brief Cleans up and closes the window */
         inline void on_window_close(wxCloseEvent&);
 
@@ -88,6 +91,9 @@ namespace squadt {
 
         /** \brief Removes a project view and sets widget properties to disable access to project level functionality */
         void remove_project_view(project*);
+
+        /** \brief Creates and shows the preferences window */
+        void show_preferences();
 
         /** \brief Creates, shows and eventually removes the about window */
         void about();
@@ -156,6 +162,10 @@ namespace squadt {
 
     inline void main::on_menu_quit(wxCommandEvent&) {
       quit();
+    }
+
+    inline void main::on_menu_preferences(wxCommandEvent&) {
+      show_preferences();
     }
 
     inline void main::on_window_close(wxCloseEvent&) {

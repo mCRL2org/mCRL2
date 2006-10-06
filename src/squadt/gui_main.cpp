@@ -2,6 +2,7 @@
 #include "gui_about.h"
 #include "gui_project.h"
 #include "gui_resources.h"
+#include "gui_preferences.h"
 #include "gui_dialog_project.h"
 #include "tool_manager.h"
 
@@ -30,6 +31,7 @@ namespace squadt {
       Connect(cmID_UPDATE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_update));
       Connect(wxID_ADD, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_add_file));
       Connect(wxID_CLOSE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_close));
+      Connect(wxID_PREFERENCES, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_preferences));
       Connect(wxID_ABOUT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_about));
       Connect(wxID_EXIT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_quit));
       Connect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(main::on_window_close));
@@ -208,6 +210,12 @@ namespace squadt {
       menu_bar.Enable(cmID_UPDATE, false);
       menu_bar.Enable(wxID_CLOSE, false);
       menu_bar.Enable(wxID_ADD, false);
+    }
+
+    void main::show_preferences() {
+      GUI::preferences dialog(this);
+
+      dialog.ShowModal();
     }
   }
 }

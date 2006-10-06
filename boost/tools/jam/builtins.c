@@ -5,7 +5,6 @@
  */
 
 # include "jam.h"
-# include "debug.h"
 
 # include "lists.h"
 # include "parse.h"
@@ -54,6 +53,7 @@
 
 # if defined( OS_NT ) || defined( OS_CYGWIN )
 LIST* builtin_system_registry( PARSE *parse, FRAME *frame );
+LIST* builtin_system_registry_names( PARSE *parse, FRAME *frame );
 # endif
 
 int glob( char *s, char *c );
@@ -327,6 +327,12 @@ load_builtins()
           char * args[] = { "key_path", ":", "data", "?", 0 };
           bind_builtin( "W32_GETREG",
               builtin_system_registry, 0, args );
+      }
+
+      {
+          char * args[] = { "key_path", ":", "result-type", 0 };
+          bind_builtin( "W32_GETREGNAMES",
+              builtin_system_registry_names, 0, args );
       }
 # endif
 
@@ -937,6 +943,17 @@ static void add_hash_key( void* np, void* result_ )
     *result = list_new( *result, copystr( *(char**)np ) );
 }
 
+static struct hash *get_running_module_vars()
+{
+    struct hash *dummy, *vars = NULL;
+    /* Get the global variables pointer (that of the currently running module) */
+    var_hash_swap(&vars);
+    dummy = vars;
+    /* Put the global variables pointer in its right place */
+    var_hash_swap(&dummy);
+    return vars;
+}
+
 LIST *
 builtin_varnames(
     PARSE   *parse,
@@ -946,8 +963,14 @@ builtin_varnames(
     LIST *result = L0;
     module_t* source_module = bindmodule( arg0 ? arg0->string : 0 );
 
-    if ( source_module->variables )
-        hashenumerate( source_module->variables, add_hash_key, &result );
+    /* The running module _always_ has its 'variables' member set to NULL
+     * due to the way enter_module and var_hash_swap work */
+    struct hash *vars = 
+        source_module == frame->module ? 
+            get_running_module_vars() : source_module->variables;
+
+    if ( vars )
+        hashenumerate( vars, add_hash_key, &result );
     return result;
 }
 
