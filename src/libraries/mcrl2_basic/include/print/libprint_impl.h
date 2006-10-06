@@ -736,7 +736,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
       pp_format, ShowSorts, PrecLevel);
     ATermList PBEqns = ATLgetArgument(Part, 1);
     if (ATgetLength(PBEqns) > 0) {
-      PRINT_FUNC(fprints)(OutStream, "beqn ");
+      PRINT_FUNC(fprints)(OutStream, "pbes ");
       PRINT_FUNC(PrintPart_List)(OutStream, PBEqns,
         pp_format, ShowSorts, PrecLevel, ";\n", "     ");
       PRINT_FUNC(fprints)(OutStream, "\n");
