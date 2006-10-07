@@ -7,9 +7,10 @@ project squadt/libraries/sip
     : requirements
        <threading>multi
        <include>$(BOOST)
-       <include>../..
+       <include>../include
     : usage-requirements
        <include>../..
+       <include>../include
     ;
 
 alias messenger

@@ -69,7 +69,6 @@ namespace squadt {
 
   /**
    * \param[in] m a reference to a project manager, used to obtain complete paths files in the project
-   * \param[in] o a shared pointer to the object on which to operate
    * \param[in] t objects older than this time stamp are considered obsolete
    **/
   bool processor::object_descriptor::self_check(project_manager const& m, long int const& t) {
@@ -121,7 +120,7 @@ namespace squadt {
   }
 
   /**
-   * @param[in] o the processor that owns of this object
+   * \param[in] o the processor that owns of this object
    **/
   processor::monitor::monitor(processor& o) : owner(o) {
     status_change_handler  = boost::bind(&processor::monitor::status_change_dummy, this);
@@ -137,7 +136,7 @@ namespace squadt {
   }
 
   /**
-   * @param[in] s the new status
+   * \param[in] s the new status
    **/
   void processor::monitor::signal_change(const execution::process::status s) {
     using namespace execution;
@@ -188,9 +187,7 @@ namespace squadt {
       send_configuration();
 
       /* Wait until configuration is accepted, or the tool has terminated */
-      if (await_message(sip::message_accept_configuration).get()) {
-        t->impl->process_configuration(get_configuration());
-      }
+      await_message(sip::message_accept_configuration).get();
 
       /* End tool execution */
       finish();
@@ -250,7 +247,7 @@ namespace squadt {
   }
 
   /**
-   * @param[in] h the function or functor that is invoked at layout change
+   * \param[in] h the function or functor that is invoked at layout change
    **/
   void processor::monitor::set_display_layout_handler(display_layout_callback_function h) {
     /* Set the handler for incoming layout messages */
@@ -258,8 +255,8 @@ namespace squadt {
   }
 
   /**
-   * @param[in] d the tool display associated with this monitor
-   * @param[in] h the function or functor that is invoked at layout change
+   * \param[in] d the tool display associated with this monitor
+   * \param[in] h the function or functor that is invoked at layout change
    **/
   void processor::monitor::set_display_data_handler(sip::layout::tool_display::sptr d, display_data_callback_function h) {
     /* Set the handler for incoming layout messages */
@@ -267,16 +264,13 @@ namespace squadt {
   }
 
   /**
-   * @param[in] h the function or functor that is invoked at layout change
+   * \param[in] h the function or functor that is invoked at layout change
    **/
   void processor::monitor::set_status_message_handler(status_message_callback_function h) {
     /* Set the handler for incoming layout messages */
     activate_status_message_handler(h);
   }
 
-  /**
-   * @param[in] h the function or functor that is invoked at layout change
-   **/
   void processor::monitor::reset_display_layout_handler() {
     layout_change_handler  = boost::bind(&processor::monitor::display_layout_change_dummy, this, _1);
 
@@ -284,10 +278,6 @@ namespace squadt {
     activate_display_layout_handler(layout_change_handler);
   }
 
-  /**
-   * @param[in] d the tool display associated with this monitor
-   * @param[in] h the function or functor that is invoked at layout change
-   **/
   void processor::monitor::reset_display_data_handler() {
     /* Set the handler for incoming layout messages */
     state_change_handler = boost::bind(&processor::monitor::display_data_change_dummy, this, _1);
@@ -295,9 +285,6 @@ namespace squadt {
     activate_display_data_handler(sip::layout::tool_display::sptr(), state_change_handler);
   }
 
-  /**
-   * @param[in] h the function or functor that is invoked at layout change
-   **/
   void processor::monitor::reset_status_message_handler() {
     /* Set the handler for incoming layout messages */
     message_change_handler = boost::bind(&processor::monitor::status_message_change_dummy, this, _1);
@@ -305,9 +292,6 @@ namespace squadt {
     activate_status_message_handler(message_change_handler);
   }
 
-  /**
-   * @param[in] h the function or functor that is invoked at status change
-   **/
   void processor::monitor::set_status_handler(status_callback_function h) {
     status_change_handler = h;
   }
@@ -324,7 +308,7 @@ namespace squadt {
   }
 
   /**
-   * @param[in] p the associated project manager
+   * \param[in] p the associated project manager
    **/
   processor::sptr processor::create(boost::weak_ptr < project_manager > const& p) {
     processor::sptr n(new processor());
@@ -335,8 +319,8 @@ namespace squadt {
   }
 
   /**
-   * @param[in] p the associated project manager
-   * @param[in] t the tool to use
+   * \param[in] p the associated project manager
+   * \param[in] t the tool to use
    **/
   processor::sptr processor::create(boost::weak_ptr < project_manager > const& p, tool::sptr t) {
     processor::sptr n(new processor());
@@ -347,7 +331,7 @@ namespace squadt {
   }
 
   /**
-   * @param[in] r whether to check recursively or not
+   * \param[in] r whether to check recursively or not
    **/
   bool processor::check_status(bool r) {
     return (impl->check_status(r));
@@ -358,14 +342,14 @@ namespace squadt {
   }
 
   /**
-   * @param s the stream to write to
+   * \param s the stream to write to
    **/
   void processor::write(std::ostream& s) const {
     impl->write(s);
   }
 
   /**
-   * @param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
+   * \param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
    **/
   void processor::set_tool(tool::sptr const& t) {
     impl->tool_descriptor = t;
@@ -376,7 +360,7 @@ namespace squadt {
   }
 
   /**
-   * @param[in] i the input combination to set
+   * \param[in] i the input combination to set
    **/
   void processor::set_input_combination(tool::input_combination* i) {
     impl->selected_input_combination = i;
@@ -395,23 +379,23 @@ namespace squadt {
   }
 
   /**
-   * @param p weak pointer to an object descriptor
+   * \param p weak pointer to an object descriptor
    **/
   void processor::append_input(object_descriptor::sptr const& p) {
     impl->inputs.push_back(p);
   }
 
   /**
-   * @param o the name (location) of the object to change
-   * @param n the new name (location) of the object
+   * \param o the name (location) of the object to change
+   * \param n the new name (location) of the object
    **/
   void processor::rename_input(std::string const& o, std::string const& n) {
     impl->rename_object(impl->find_input(o), n);
   }
 
   /**
-   * @param o the name (location) of the object to change
-   * @param n the new name (location) of the object
+   * \param o the name (location) of the object to change
+   * \param n the new name (location) of the object
    **/
   void processor::rename_output(std::string const& o, std::string const& n) {
     impl->rename_object(impl->find_output(o), n);
@@ -422,9 +406,9 @@ namespace squadt {
   }
 
   /**
-   * @param[in] p reference to the associated project_manager object
-   * @param[in] r an XML text reader object to read from
-   * @param[in] m a map that is used to associate shared pointers to processors with identifiers
+   * \param[in] p reference to the associated project_manager object
+   * \param[in] r an XML text reader object to read from
+   * \param[in] m a map that is used to associate shared pointers to processors with identifiers
    *
    * \pre must point to a processor element
    * \attention the same map m must be used to read back all processor instances that were written with write()
@@ -442,9 +426,9 @@ namespace squadt {
   }
 
   /**
-   * @param[in] f the storage format that l uses
-   * @param[in] l a URI (local path) to where the file is stored
-   * @param[in] s the status of the new object
+   * \param[in] f the storage format that l uses
+   * \param[in] l a URI (local path) to where the file is stored
+   * \param[in] s the status of the new object
    **/
   void processor::append_output(const storage_format& f, const std::string& l, object_descriptor::t_status const& s) {
     object_descriptor::sptr p = object_descriptor::sptr(new object_descriptor);
@@ -461,8 +445,8 @@ namespace squadt {
   }
 
   /**
-   * @param[in] o a sip::object object that describes an output object
-   * @param[in] s the status of the new object
+   * \param[in] o a sip::object object that describes an output object
+   * \param[in] s the status of the new object
    **/
   void processor_impl::append_output(sip::object const& o, object_descriptor::t_status const& s) {
     object_descriptor::sptr p = object_descriptor::sptr(new object_descriptor);
@@ -479,8 +463,9 @@ namespace squadt {
   }
 
   /**
-   * @param[in] p the object descriptor that should be replaced
-   * @param[in] o a sip::object object that describes an output object
+   * \param[in] p the object descriptor that should be replaced
+   * \param[in] o a sip::object object that describes an output object
+   * \param[in] s the new status of the object
    **/
   void processor_impl::replace_output(object_descriptor::sptr p, sip::object const& o, object_descriptor::t_status const& s) {
     p->format     = o.get_format();

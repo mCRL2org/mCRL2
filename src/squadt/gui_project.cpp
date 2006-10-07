@@ -70,10 +70,10 @@ namespace squadt {
     }
 
     /**
-     * @param p the parent window
-     * @param l is the path
-     * @param d is a description for this project
-     * @param b whether or not the project should be created anew
+     * \param p the parent window
+     * \param l is the path
+     * \param d is a description for this project
+     * \param b whether or not the project should be created anew
      *
      * Creates a project_manager object that is either:
      *  - read from l, if l is a project store
@@ -104,6 +104,8 @@ namespace squadt {
             object_view->SetItemImage(j, instance_data->get_object()->status);
           }
         }
+
+        gui_builder.schedule_update(boost::bind(&wxTreeCtrl::Update, object_view));
       }
     }
 
@@ -201,10 +203,10 @@ namespace squadt {
     }
 
     /**
-     * @param[in] p the processor::monitor that is connected to the associated tool process
-     * @param[in] t the title for the tool display
+     * \param[in] p the processor::monitor that is connected to the associated tool process
+     * \param[in] t the title for the tool display
      **/
-    GUI::tool_display* project::add_tool_display(processor::monitor::sptr p, std::string const& t) {
+    GUI::tool_display* project::add_tool_display(boost::shared_ptr < processor::monitor > p, std::string const& t) {
       wxSizer* s = process_display_view->GetSizer();
 
       GUI::tool_display* display = new GUI::tool_display(process_display_view, this, p);
@@ -218,7 +220,7 @@ namespace squadt {
     }
             
     /**
-     * @param e a reference to a tree event object
+     * \param e a reference to a tree event object
      **/
     void project::on_tree_item_activate(wxTreeEvent& e) {
       if (object_view->GetRootItem() != e.GetItem()) {
@@ -230,7 +232,7 @@ namespace squadt {
     }
 
     /**
-     * @param e a reference to a tree event object
+     * \param e a reference to a tree event object
      **/
     void project::on_object_name_edited(wxTreeEvent& e) {
       wxTreeItemId                       s = e.GetItem();
@@ -276,7 +278,7 @@ namespace squadt {
     }
 
     /**
-     * @param n an tool_data object used to establish which tools to add to the menu
+     * \param n an tool_data object used to establish which tools to add to the menu
      **/
     void project::spawn_context_menu(tool_data& n) {
       using namespace boost;
@@ -328,10 +330,10 @@ namespace squadt {
     };
 
     /**
-     * @param[in] f the storage format of the selected output
-     * @param[in] p the main tool_selection_helper object that indexes the global tool manager
-     * @param[in] c a reference to the context menu to which to add
-     * @param[in,out] id a reference to the next free identifier
+     * \param[in] f the storage format of the selected output
+     * \param[in] p the main tool_selection_helper object that indexes the global tool manager
+     * \param[in] c a reference to the context menu to which to add
+     * \param[in,out] id a reference to the next free identifier
      **/
     void project::add_to_context_menu(const storage_format f, const miscellaneous::tool_selection_helper::tools_by_category::value_type& p, wxMenu* c, int* id) {
       wxString    category_name = wxString(p.first.c_str(), wxConvLocal);
@@ -357,7 +359,7 @@ namespace squadt {
     }
 
     /**
-     * @param e a reference to a menu event object
+     * \param e a reference to a menu event object
      **/
     void project::on_context_menu_select(wxCommandEvent& e) {
       wxTreeItemId                       s = object_view->GetSelection();
@@ -440,8 +442,8 @@ namespace squadt {
     }
 
     /**
-     * @param[in] s the id of the tree item to which the objects should be attached
-     * @param[in] tp the processor of which to read objects
+     * \param[in] s the id of the tree item to which the objects should be attached
+     * \param[in] tp the processor of which to read objects
      **/
     void project::process_configuration(wxTreeItemId s, processor::sptr tp) {
       if (0 < tp->number_of_outputs()) {
@@ -455,8 +457,8 @@ namespace squadt {
     }
 
     /**
-     * @param[in] s the id of the tree item to which the objects should be attached
-     * @param[in] tp the processor of which to read objects
+     * \param[in] s the id of the tree item to which the objects should be attached
+     * \param[in] tp the processor of which to read objects
      *
      * \return whether or not there were no conflicts
      **/
@@ -518,8 +520,8 @@ namespace squadt {
     }
 
     /**
-     * @param[in] s the tree item to connect to
-     * @param[in] t the object to associate the new item with
+     * \param[in] s the tree item to connect to
+     * \param[in] t the object to associate the new item with
      **/
     void project::add_to_object_view(wxTreeItemId& s, processor::object_descriptor::sptr t) {
       wxTreeItemId item = object_view->AppendItem(s, wxString(boost::filesystem::path(t->location).leaf().c_str(), wxConvLocal), t->status);

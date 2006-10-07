@@ -17,7 +17,7 @@ namespace squadt {
           completion  ///< A tool completed its operation
         };
        
-        /** The type for a map that contains the event handlers */
+        /** \brief The type for a map that contains the event handlers */
         typedef std::multimap < const event_type, boost::function < bool () > >  handler_map;
 
       private:
@@ -42,6 +42,7 @@ namespace squadt {
 
       private:
 
+        /** \brief Constructor */
         inline task_monitor_impl();
  
         /** \brief Executes a handler a specified number of times and then */
@@ -167,8 +168,7 @@ namespace squadt {
     }
 
     /**
-     * @param[in] m a shared pointer to the current object
-     * @param[in] e the other end point of the connection
+     * \param[in] m a shared pointer to the current object
      **/
     inline void task_monitor_impl::signal_connection(boost::shared_ptr < task_monitor_impl >& m, sip::message::end_point) {
       boost::mutex::scoped_lock l(register_lock);

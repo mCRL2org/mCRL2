@@ -7,10 +7,15 @@
 
 namespace squadt {
   namespace GUI {
+
+    /**
+     * \brief A window that shows some basic information about deskSQuADT
+     **/
     class about : public wxMessageDialog {
 
       public:
 
+        /** \brief Constructor */
         about(wxWindow*);
     };
 
@@ -18,7 +23,7 @@ namespace squadt {
      * \param[in] p the parent window
      * \param[in] p the message to print
      **/
-    about::about(wxWindow* p) : wxMessageDialog(p,
+    inline about::about(wxWindow* p) : wxMessageDialog(p,
        wxT("deskSQuADT (revision " STRINGIFY(REVISION) ")\n\n")
        wxT("A controlled environment that provides a graphical user interface that helps users to "
            "interact with all kinds of connected tools. The goal is to simplify the use of these "

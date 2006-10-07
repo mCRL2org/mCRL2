@@ -133,10 +133,10 @@ namespace squadt {
           void update_radio_button(mediator::wrapper*, std::string const&, bool);
 
           /** \brief Instantiates a single checkbox */
-          inline mediator::wrapper_aptr build_checkbox(layout::element const*, std::string const&, const bool);
+          inline mediator::wrapper_aptr build_checkbox(layout::element const*, std::string const&, bool);
      
           /** \brief Updates a checkbox, (G)UI part */
-          void update_checkbox(mediator::wrapper*, std::string const&, const bool status);
+          void update_checkbox(mediator::wrapper*, std::string const&, bool status);
 
           /** \brief Instantiates a progress bar */
           inline mediator::wrapper_aptr build_progress_bar(layout::element const*, unsigned int const&, unsigned int const&, unsigned int const&);
@@ -155,30 +155,30 @@ namespace squadt {
       };
 
       /**
-       * @param w the window to which to attach elements
-       * @param s the event handler that deals with change events
+       * \param w the window to which to attach elements
+       * \param s the event handler that deals with change events
        **/
       tool_display_mediator::tool_display_mediator(wxWindow* w, state_change_handler* s) :
                                                         current_window(w), change_event_handler(s) {
       }
      
       /**
-       * @param w the window to which to attach elements
-       * @param d the sizer to which elements should be attached
-       * @param s the event handler that deals with change events
+       * \param w the window to which to attach elements
+       * \param d the sizer to which elements should be attached
+       * \param s the event handler that deals with change events
        **/
       tool_display_mediator::tool_display_mediator(wxWindow* w, wrapper_aptr d, state_change_handler* s) :
                                                         mediator(d), current_window(w), change_event_handler(s) {
       }
      
       /**
-       * @param w the window or sizer to which to attach elements
+       * \param w the window or sizer to which to attach elements
        **/
       inline tool_display_mediator::wrapper::wrapper(wxWindow* w) : target(w), is_window(true), clean_up(true) {
       }
      
       /**
-       * @param w the window or sizer to which to attach elements
+       * \param s the window or sizer to which to attach elements
        **/
       inline tool_display_mediator::wrapper::wrapper(wxSizer* s) : target(s), is_window(false), clean_up(true) {
       }
@@ -225,8 +225,8 @@ namespace squadt {
       }
      
       /**
-       * @param p pointer to the data that represent the window to be attached
-       * @param c layout constraints
+       * \param p pointer to the data that represent the window to be attached
+       * \param c layout constraints
        **/
       void tool_display_mediator::attach_to_vertical_box(mediator::wrapper_aptr d, sip::layout::constraints const* c) {
         wrapper* sd     = static_cast < wrapper* > (d.get());
@@ -275,8 +275,8 @@ namespace squadt {
       }
      
       /**
-       * @param p pointer to the data that represent the window to be attached
-       * @param c layout constraints
+       * \param p pointer to the data that represent the window to be attached
+       * \param c layout constraints
        **/
       void tool_display_mediator::attach_to_horizontal_box(mediator::wrapper_aptr d, sip::layout::constraints const* c) {
         wrapper* sd     = static_cast < wrapper* > (d.get());
@@ -353,8 +353,8 @@ namespace squadt {
       }
      
       /**
-       * @param[in] e the element that is associated with the new control
-       * @param[in] s the text of the label
+       * \param[in] e the element that is associated with the new control
+       * \param[in] s the text of the label
        **/
       mediator::wrapper_aptr tool_display_mediator::build_label(layout::element const* e, std::string const& s) {
         wxStaticText* t = new wxStaticText(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal));
@@ -366,8 +366,8 @@ namespace squadt {
       }
      
       /**
-       * @param[in] w the element that is associated with the control to update
-       * @param[in] s the text of the label
+       * \param[in] w the element that is associated with the control to update
+       * \param[in] s the text of the label
        **/
       void tool_display_mediator::update_label(mediator::wrapper* w, std::string const& s) {
         wxStaticText* t = static_cast < wxStaticText* > (static_cast < wrapper* > (w)->release_window());
@@ -376,8 +376,8 @@ namespace squadt {
       }
 
       /**
-       * @param[in] e the element that is associated with the new control
-       * @param[in] s the text of the label
+       * \param[in] e the element that is associated with the new control
+       * \param[in] s the text of the label
        **/
       mediator::wrapper_aptr tool_display_mediator::build_button(layout::element const* e, std::string const& s) {
         wxButton* t;
@@ -402,8 +402,8 @@ namespace squadt {
       }
 
       /**
-       * @param[in] w the element that is associated with the control to update
-       * @param[in] s the text of the label
+       * \param[in] w the element that is associated with the control to update
+       * \param[in] s the text of the label
        **/
       void tool_display_mediator::update_button(mediator::wrapper* w, std::string const& s) {
         wxButton* t = static_cast < wxButton* > (static_cast < wrapper* > (w)->release_window());
@@ -412,9 +412,9 @@ namespace squadt {
       }
 
       /**
-       * @param[in] e the element that is associated with the new control
-       * @param[in] s the text of the label
-       * @param[in] b whether the button is selected or not
+       * \param[in] e the element that is associated with the new control
+       * \param[in] s the text of the label
+       * \param[in] b whether the button is selected or not
        **/
       mediator::wrapper_aptr tool_display_mediator::build_radio_button(layout::element const* e, std::string const& s, bool b) {
         wxRadioButton* t = new wxRadioButton(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal), wxDefaultPosition, 
@@ -434,9 +434,9 @@ namespace squadt {
       }
      
       /**
-       * @param[in] w the element that is associated with the control to update
-       * @param[in] s the text of the label
-       * @param[in] b whether the button is selected or not
+       * \param[in] w the element that is associated with the control to update
+       * \param[in] s the text of the label
+       * \param[in] b whether the button is selected or not
        **/
       void tool_display_mediator::update_radio_button(mediator::wrapper* w, std::string const& s, bool b) {
         wxRadioButton* t = static_cast < wxRadioButton* > (static_cast < wrapper* > (w)->release_window());
@@ -446,11 +446,11 @@ namespace squadt {
       }
 
       /**
-       * @param[in] e the element that is associated with the new control
-       * @param[in] s the text of the label
-       * @param[in] b the status of the checkbox
+       * \param[in] e the element that is associated with the new control
+       * \param[in] s the text of the label
+       * \param[in] b the status of the checkbox
        **/
-      mediator::wrapper_aptr tool_display_mediator::build_checkbox(layout::element const* e, std::string const& s, const bool b) {
+      mediator::wrapper_aptr tool_display_mediator::build_checkbox(layout::element const* e, std::string const& s, bool b) {
         wxCheckBox* t = new wxCheckBox(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal));
      
         t->SetValue(b);
@@ -465,9 +465,9 @@ namespace squadt {
       }
      
       /**
-       * @param[in] w the element that is associated with the control to update
-       * @param[in] s the text of the label
-       * @param[in] b whether the button is selected or not
+       * \param[in] w the element that is associated with the control to update
+       * \param[in] s the text of the label
+       * \param[in] b whether the button is selected or not
        **/
       void tool_display_mediator::update_checkbox(mediator::wrapper* w, std::string const& s, bool b) {
         wxCheckBox* t = static_cast < wxCheckBox* > (static_cast < wrapper* > (w)->release_window());
@@ -477,10 +477,10 @@ namespace squadt {
       }
 
       /**
-       * @param[in] e the element that is associated with the new control
-       * @param[in] min the minimum value (if supported)
-       * @param[in] max the maximum value (if supported)
-       * @param[in] max the current value
+       * \param[in] e the element that is associated with the new control
+       * \param[in] min the minimum value (if supported)
+       * \param[in] max the maximum value (if supported)
+       * \param[in] c the current value
        **/
       mediator::wrapper_aptr tool_display_mediator::build_progress_bar(layout::element const* e, unsigned int const& min, unsigned int const& max, unsigned int const& c) {
         wxGauge* t = new wxGauge(current_window, wxID_ANY, max - min, wxDefaultPosition, wxDefaultSize, wxGA_HORIZONTAL);
@@ -494,10 +494,10 @@ namespace squadt {
       }
      
       /**
-       * @param[in] w the element that is associated with the control to update
-       * @param[in] min the minimum value (if supported)
-       * @param[in] max the maximum value (if supported)
-       * @param[in] max the current value
+       * \param[in] w the element that is associated with the control to update
+       * \param[in] min the minimum value (if supported)
+       * \param[in] max the maximum value (if supported)
+       * \param[in] c the current value
        **/
       void tool_display_mediator::update_progress_bar(mediator::wrapper* w, unsigned int const& min, unsigned int const& max, unsigned int const& c) {
         wxGauge* t = static_cast < wxGauge* > (static_cast < wrapper* > (w)->release_window());
@@ -507,8 +507,8 @@ namespace squadt {
       }
 
       /**
-       * @param[in] e the element that is associated with the new control
-       * @param[in] s the text of the label
+       * \param[in] e the element that is associated with the new control
+       * \param[in] s the text of the label
        **/
       mediator::wrapper_aptr tool_display_mediator::build_text_field(layout::element const* e, std::string const& s) {
         wxTextCtrl* t = new wxTextCtrl(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal), wxDefaultPosition, wxSize(200,-1));
@@ -523,8 +523,8 @@ namespace squadt {
       }
      
       /**
-       * @param[in] w the element that is associated with the control to update
-       * @param[in] s the text of the label
+       * \param[in] w the element that is associated with the control to update
+       * \param[in] s the text of the label
        **/
       void tool_display_mediator::update_text_field(mediator::wrapper* w, std::string const& s) {
         wxStaticText* t = static_cast < wxStaticText* > (static_cast < wrapper* > (w)->release_window());
@@ -572,8 +572,8 @@ namespace squadt {
       }
 
       /**
-       * @param[in] m pointer to a mediator for translation to wxWidgets controls
-       * @param[in] e pointer to the element of which the status was changed
+       * \param[in] m pointer to a mediator for translation to wxWidgets controls
+       * \param[in] e pointer to the element of which the status was changed
        **/
       void state_change_handler::update(sip::layout::mediator* m, sip::layout::element const* e) {
         element_for_window_map::const_iterator i = std::find_if(element_for_window.begin(), element_for_window.end(), 
@@ -588,11 +588,11 @@ namespace squadt {
     }
 
     /**
-     * @param[in] p the parent window
-     * @param[in] c the project that owns tool display
-     * @param[in] s the processor associated with this display
+     * \param[in] p the parent window
+     * \param[in] c the project that owns tool display
+     * \param[in] s the processor associated with this display
      **/
-    tool_display::tool_display(wxWindow* p, GUI::project* c, processor::monitor::sptr& s) :
+    tool_display::tool_display(wxWindow* p, GUI::project* c, boost::shared_ptr < processor::monitor >& s) :
                                 wxPanel(p, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER),
                                 context(c), event_handler(s), current_layout(new sip::layout::tool_display), content(0), log(0) {
 
@@ -691,7 +691,8 @@ namespace squadt {
     }
 
     /**
-     * @param[in] l the new layout specification
+     * \param[in] w weak pointer to the interface object
+     * \param[in] l the new tool_display object
      **/
     void tool_display::instantiate(boost::weak_ptr < sip::layout::tool_display > w, sip::layout::tool_display::sptr l) {
       using namespace detail;
@@ -749,7 +750,8 @@ namespace squadt {
     }
 
     /**
-     * @param[in] l the layout elements that have changed
+     * \param[in] w weak pointer to this object
+     * \param[in] l the layout elements that have changed
      **/
     void tool_display::update(boost::weak_ptr < sip::layout::tool_display > w, std::vector < sip::layout::element const* > l) {
       using namespace detail;
@@ -768,7 +770,8 @@ namespace squadt {
     }
 
     /**
-     * @param[in] l the layout elements that have changed
+     * \param[in] w weak pointer to this object
+     * \param[in] l the layout elements that have changed
      **/
     void tool_display::update_log(boost::weak_ptr < sip::layout::tool_display > w, sip::report::sptr l) {
       boost::shared_ptr < sip::layout::tool_display > g(w.lock());
@@ -802,14 +805,14 @@ namespace squadt {
     }
 
     /**
-     * @param[in] l the layout specification
+     * \param[in] l the layout specification
      **/
     void tool_display::schedule_log_update(sip::report::sptr l) {
       context->gui_builder.schedule_update(boost::bind(&tool_display::update_log, this, current_layout, l));
     }
 
     /**
-     * @param[in] l the layout specification
+     * \param[in] l the layout specification
      **/
     void tool_display::schedule_layout_change(sip::layout::tool_display::sptr l) {
       /** Register handler for updates */

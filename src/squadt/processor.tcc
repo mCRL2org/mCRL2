@@ -23,18 +23,25 @@ namespace squadt {
 
     private:
 
+      /** \brief Pointer type for implementation object (handle-body idiom) */
       typedef boost::shared_ptr < processor_impl >    impl_ptr;
 
+      /** \brief Pointer type for interface object (handle-body idiom) */
       typedef boost::shared_ptr < processor >         interface_ptr;
 
+      /** \brief Type for object specification */
       typedef processor::object_descriptor            object_descriptor;
 
+      /** \brief Type for object status specification */
       typedef processor::object_descriptor::t_status  object_status;
 
+      /** \brief Type alias for monitor class */
       typedef processor::monitor                      monitor;
 
+      /** \brief Type alias for list of inputs */
       typedef processor::input_list                   input_list;
 
+      /** \brief Type alias for list of inputs */
       typedef processor::output_list                  output_list;
 
     private:
@@ -118,13 +125,13 @@ namespace squadt {
       bool demote_status();
 
       /** \brief Start tool configuration */
-      void configure(interface_ptr const&, const tool::input_combination*, const boost::filesystem::path&, std::string const& = empty_string);
+      void configure(interface_ptr const&, const tool::input_combination*, const boost::filesystem::path&, std::string const& = "");
  
       /** \brief Start tool configuration */
-      void configure(interface_ptr const&, std::string const& = empty_string);
+      void configure(interface_ptr const&, std::string const& = "");
 
       /** \brief Start tool reconfiguration */
-      void reconfigure(interface_ptr const&, std::string const& = empty_string);
+      void reconfigure(interface_ptr const&, std::string const& = "");
  
       /** \brief Start processing: generate outputs from inputs */
       void run(interface_ptr const&, bool b = false);
@@ -166,6 +173,7 @@ namespace squadt {
   };
 
   /**
+   * \param[in] t shared pointer to the interface object
    * \param[in] h the function to execute when the process terminates
    * \param[in] b whether or not to run when there are no input objects defined
    *
@@ -178,6 +186,7 @@ namespace squadt {
   }
 
   /**
+   * \param[in] t shared pointer to the interface object
    * \param[in] h the function to execute when the process terminates
    * \param[in] b whether or not to run when there are no input objects defined
    *
@@ -190,7 +199,7 @@ namespace squadt {
   }
 
   /**
-   * @param p shared pointer to an object descriptor
+   * \param p shared pointer to an object descriptor
    **/
   inline void processor_impl::append_output(object_descriptor::sptr& p) {
     p->generator = interface_object;
@@ -207,8 +216,8 @@ namespace squadt {
   /**
    * \brief Operator for writing to stream
    *
-   * @param[in] s stream to write to
-   * @param[out] p the processor to write out
+   * \param[in] s stream to write to
+   * \param[out] p the processor to write out
    **/
   inline std::ostream& operator << (std::ostream& s, const processor& p) {
     p.write(s);
@@ -221,15 +230,16 @@ namespace squadt {
   }
 
   /**
-   * @param[in] p the associated project manager
-   * @param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
+   * \param[in] tp shared pointer to the interface object (tp->impl.get() = this)
+   * \param[in] p the associated project manager
+   * \param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
    **/
   inline processor_impl::processor_impl(boost::shared_ptr < processor > const& tp, boost::weak_ptr < project_manager > p, tool::sptr t) :
     interface_object(tp), tool_descriptor(t), current_monitor(new monitor(*tp)), manager(p), selected_input_combination(0) {
   }
 
   /**
-   * @param[in] r whether to check recursively or not
+   * \param[in] r whether to check recursively or not
    *
    * \return whether or not the outputs this processor can produce exist and are up to date
    **/
@@ -312,7 +322,7 @@ namespace squadt {
   }
 
   /**
-   * @param s the stream to write to
+   * \param s the stream to write to
    **/
   inline void processor_impl::write(std::ostream& s) const {
     s << "<processor";
@@ -364,9 +374,9 @@ namespace squadt {
   }
 
   /**
-   * @param[in] p reference to the associated project_manager object
-   * @param[in] r an XML text reader object to read from
-   * @param[in] m a map that is used to associate shared pointers to processors with identifiers
+   * \param[in] p reference to the associated project_manager object
+   * \param[in] r an XML text reader object to read from
+   * \param[in] m a map that is used to associate shared pointers to processors with identifiers
    *
    * \pre must point to a processor element
    * \attention the same map m must be used to read back all processor instances that were written with write()
@@ -513,7 +523,7 @@ namespace squadt {
   }
 
   /**
-   * @param o a pointer to the object to find
+   * \param o a pointer to the object to find
    **/
   inline const processor::object_descriptor::sptr processor_impl::find_output(object_descriptor* o) const {
     output_list::const_iterator i = std::find_if(outputs.begin(), outputs.end(),
@@ -530,7 +540,7 @@ namespace squadt {
   }
 
   /**
-   * @param o a pointer to the object to find
+   * \param o a pointer to the object to find
    **/
   inline const processor::object_descriptor::sptr processor_impl::find_input(object_descriptor* o) const {
     for (input_list::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
@@ -547,7 +557,7 @@ namespace squadt {
   }
 
   /**
-   * @param[in] id a pointer to the object to find
+   * \param[in] id a pointer to the object to find
    **/
   inline const processor::object_descriptor::sptr processor_impl::find_output(const unsigned int id) const {
     for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
@@ -563,7 +573,7 @@ namespace squadt {
   }
 
   /**
-   * @param[in] id the id of the object to find
+   * \param[in] id the id of the object to find
    **/
   inline const processor::object_descriptor::sptr processor_impl::find_input(const unsigned int id) const {
     for (input_list::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
@@ -580,7 +590,7 @@ namespace squadt {
   }
 
   /**
-   * @param o the name of the input object to find
+   * \param o the name of the input object to find
    **/
   inline const processor::object_descriptor::sptr processor_impl::find_output(std::string const& o) const {
     for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
@@ -596,7 +606,7 @@ namespace squadt {
   }
 
   /**
-   * @param o the name of the input object to find
+   * \param o the name of the input object to find
    **/
   inline const processor::object_descriptor::sptr processor_impl::find_input(std::string const& o) const {
     for (input_list::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
@@ -613,8 +623,8 @@ namespace squadt {
   }
 
   /**
-   * @param[in] o the name (location) of the object to change
-   * @param[in] n the new name (location) of the object
+   * \param[in] o the name (location) of the object to change
+   * \param[in] n the new name (location) of the object
    **/
   inline void processor_impl::rename_object(object_descriptor::sptr const& o, std::string const& n) {
     using namespace boost::filesystem;
@@ -649,7 +659,7 @@ namespace squadt {
   }
 
   /**
-   * @param[in] c a reference to a configuration object
+   * \param[in] c a reference to a configuration object
    **/
   inline void processor_impl::process_configuration(sip::configuration::sptr const& c) {
     boost::shared_ptr < project_manager > g(manager.lock());
@@ -680,7 +690,9 @@ namespace squadt {
         }
       }
      
-      g->add(interface_object.lock());
+      if (0 < outputs.size()) {
+        g->add(interface_object.lock());
+      }
     }
     /* TODO Adjust status for outputs that are not produced using the new configuration */
   }
@@ -688,7 +700,7 @@ namespace squadt {
   /*
    * Prepends the project store to the argument and returns a native filesystem path
    *
-   * @param[in] w a directory relative to the project store
+   * \param[in] w a directory relative to the project store
    */
   inline std::string processor_impl::make_output_path(std::string const& w) const {
     using namespace boost::filesystem;
@@ -709,6 +721,7 @@ namespace squadt {
   }
 
   /**
+   * \param[in] t shared pointer to the interface object
    * \param[in] ic the input combination that is to be used
    * \param[in] l absolute path to the file that serves as main input
    * \param[in] w the path to the directory in which to run the tool
@@ -740,10 +753,11 @@ namespace squadt {
   }
 
   /**
+   * \param[in] t shared pointer to the interface object
    * \param[in] w the path to the directory relative to the project directory in which to run the tool
    *
    * \pre The existing configuration must contain the input object matching the selected input combination
-   * \pre t.get() == this
+   * \pre t->impl.get() == this
    *
    * \attention This function is non-blocking
    **/
@@ -757,6 +771,7 @@ namespace squadt {
   }
 
   /**
+   * \param[in] t shared pointer to the interface object
    * \param[in] w the path to the directory in which to run the tool
    *
    * \pre The existing configuration must contain the input object matching the selected input combination
@@ -778,6 +793,7 @@ namespace squadt {
   }
 
   /**
+   * \param[in] t shared pointer to the interface object
    * \param[in] b whether or not to run when there are no input objects defined
    *
    * \attention This function is non-blocking
@@ -805,11 +821,11 @@ namespace squadt {
           }
         }
       }
+    
+      current_monitor->start_tool_operation(t);
 
       global_tool_manager->execute(*tool_descriptor, make_output_path(output_directory),
          boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
-    
-      current_monitor->start_tool_operation(t);
     }
     else {
       /* Signal completion to environment via monitor */
@@ -818,7 +834,8 @@ namespace squadt {
   }
 
   /**
-   * \param[in] b whether or not to run when there are no input objects defined
+   * \param[in] t shared pointer to the interface object
+   * \param[in] b whether or not to run when there are no input objects are specified
    *
    * \attention This function is non-blocking
    *
@@ -833,6 +850,7 @@ namespace squadt {
         if (p.get() != 0) {
           if (p->check_status(true)) {
             /* Reschedule process operation after process p has completed */
+
             p->update(boost::bind(&processor_impl::update, this, t, false));
      
             return;
@@ -843,11 +861,11 @@ namespace squadt {
           throw (exception::exception(exception::cannot_build, i->location));
         }
       }
+    
+      current_monitor->start_tool_operation(t);
 
       global_tool_manager->execute(*tool_descriptor, make_output_path(output_directory),
          boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
-    
-      current_monitor->start_tool_operation(t);
     }
     else {
       /* Signal completion to environment via monitor */

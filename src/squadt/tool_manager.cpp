@@ -89,7 +89,7 @@ namespace squadt {
   }
 
   /**
-   * @param n the name of the file to read from
+   * \param[in] n the name of the file to read from
    **/
   tool_manager::ptr tool_manager::read(const std::string& n) {
     bf::path p(n);
@@ -109,7 +109,7 @@ namespace squadt {
   }
 
   /**
-   * @param r an XML text reader to use to read data from
+   * \param[in] r an XML text reader to use to read data from
    **/
   tool_manager::ptr tool_manager::read(xml2pp::text_reader& r) {
 
@@ -127,10 +127,10 @@ namespace squadt {
   }
 
   /**
-   * @param t the tool that is to be run
-   * @param p the monitor that should be passed the feedback of execution
-   * @param b whether or not to circumvent the executor restriction mechanism
-   * @param w the directory in which execution should take place
+   * \param[in] t the tool that is to be run
+   * \param[in] p the monitor that should be passed the feedback of execution
+   * \param[in] b whether or not to circumvent the executor restriction mechanism
+   * \param[in] w the directory in which execution should take place
    **/
   template < typename T >
   void tool_manager::execute(tool& t, std::string const& w, T p, bool b) {
@@ -157,7 +157,7 @@ namespace squadt {
   }
 
   /**
-   * @param h a function that is called with the name of a tool before it is queried
+   * \param[in] h a function that is called with the name of a tool before it is queried
    **/
   void tool_manager::query_tools(boost::function < void (const std::string&) > h) {
     using namespace boost;
@@ -183,7 +183,7 @@ namespace squadt {
   }
 
   /**
-   * @param t the tool that is to be run
+   * \param[in] t the tool that is to be run
    *
    * \attention This function blocks.
    **/
@@ -224,8 +224,7 @@ namespace squadt {
   }
 
   /**
-   * @param m the message that was just delivered
-   * @param o the local end point through which the message was received
+   * \param[in] m the message that was just delivered
    **/
   void tool_manager::handle_relay_connection(sip::message_ptr const& m) {
     instance_identifier id = atol(m->to_string().c_str());

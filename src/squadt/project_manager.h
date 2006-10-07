@@ -51,6 +51,7 @@ namespace squadt {
 
     private:
 
+      /** \brief Pointer to the implementation object (handle-body idiom) */
       boost::shared_ptr < project_manager_impl > impl;
 
     private:

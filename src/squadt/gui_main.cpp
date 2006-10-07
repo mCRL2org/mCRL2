@@ -2,8 +2,8 @@
 #include "gui_about.h"
 #include "gui_project.h"
 #include "gui_resources.h"
-#include "gui_preferences.h"
 #include "gui_dialog_project.h"
+#include "gui_dialog_preferences.h"
 #include "tool_manager.h"
 
 #include <wx/menu.h>
@@ -109,7 +109,7 @@ namespace squadt {
     }
 
     /**
-     * @param[in] p a path to a project store
+     * @param[in] s a path to a project store
      * @param[in] d an optional description
      **/
     void main::project_new(std::string const& s, std::string const& d) {
@@ -125,7 +125,7 @@ namespace squadt {
     }
 
     /**
-     * @param[in] p a path to a project store
+     * @param[in] s a path to a project store
      **/
     void main::project_open(std::string const& s) {
       try {

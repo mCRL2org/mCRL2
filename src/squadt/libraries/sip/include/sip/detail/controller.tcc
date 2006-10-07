@@ -123,13 +123,15 @@ namespace sip {
      * @param d a shared pointer to a tool display
      **/
     inline void communicator_impl::display_data_handler(const messenger::message_ptr& m, sip::layout::tool_display::sptr d, display_data_handler_function h) {
-      std::vector < sip::layout::element const* > elements;
+      if (d.get() != 0) {
+        std::vector < sip::layout::element const* > elements;
 
-      xml2pp::text_reader reader(m->to_string().c_str());
+        xml2pp::text_reader reader(m->to_string().c_str());
 
-      d->update(reader, elements);
+        d->update(reader, elements);
 
-      h(elements);
+        h(elements);
+      }
     }
 
     /**

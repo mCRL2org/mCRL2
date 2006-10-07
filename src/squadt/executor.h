@@ -26,35 +26,36 @@ namespace squadt {
 
       private:
 
+        /** \brief Smart pointer instance that references the associated implementation object */
         boost::shared_ptr < executor_impl > impl;
     
       private:
     
         /** \brief Start a new process */
-        inline void start_process(const command&);
+        void start_process(const command&);
     
         /** \brief Start a new process with a listener */
-        inline void start_process(const command&, task_monitor::sptr&);
+        void start_process(const command&, task_monitor::sptr&);
 
         /** \brief Start processing commands if the queue contains any waiters */
-        inline void start_delayed();
+        void start_delayed();
  
         /** \brief Remove a process from the list */
-        inline void remove(process*);
+        void remove(process*);
     
       public:
     
         /** \brief Constructor */
-        executor(unsigned int = 3);
+        executor(unsigned int const& = 3);
  
         /** \brief Execute a tool */
         void execute(const command&, boost::shared_ptr < task_monitor >& = process::default_monitor, bool = false);
     
         /** \brief Terminate a specific process */
-        inline void terminate(process*);
+        void terminate(process*);
     
         /** \brief Terminate a specific process */
-        inline void terminate(process::wptr);
+        void terminate(process::wptr);
     
         /** \brief Terminate all processes */
         void terminate_all();

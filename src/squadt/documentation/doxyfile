@@ -54,7 +54,7 @@ HIDE_FRIEND_COMPOUNDS  = NO
 HIDE_IN_BODY_DOCS      = YES
 INTERNAL_DOCS          = NO
 CASE_SENSE_NAMES       = YES
-HIDE_SCOPE_NAMES       = NO
+HIDE_SCOPE_NAMES       = YES
 SHOW_INCLUDE_FILES     = YES
 INLINE_INFO            = YES
 SORT_MEMBER_DOCS       = YES
@@ -196,8 +196,8 @@ PERLMOD_MAKEVAR_PREFIX =
 #---------------------------------------------------------------------------
 # Configuration options related to the preprocessor   
 #---------------------------------------------------------------------------
-ENABLE_PREPROCESSING   = YES
-MACRO_EXPANSION        = YES
+ENABLE_PREPROCESSING   = NO
+MACRO_EXPANSION        = NO
 EXPAND_ONLY_PREDEF     = NO
 SEARCH_INCLUDES        = YES
 INCLUDE_PATH           = 

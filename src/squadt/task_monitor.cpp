@@ -67,7 +67,6 @@ namespace squadt {
     }
 
     /**
-     * @param[in] m a shared pointer to the current object
      * @param[in] e the other end point of the connection
      **/
     void task_monitor::signal_connection(sip::message::end_point e) {
@@ -80,7 +79,6 @@ namespace squadt {
     }
 
     /**
-     * @param[in] m a shared pointer to the current object
      * @param[in] s the current status of the process
      **/
     void task_monitor::signal_change(const execution::process::status s) {

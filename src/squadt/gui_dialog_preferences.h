@@ -10,10 +10,6 @@ namespace squadt {
 
     class preferences : public wxDialog {
 
-      private:
-
-        wxButton* okay_button;
-
       public:
 
         /** \brief Constructor */
@@ -29,7 +25,6 @@ namespace squadt {
       wxPanel* execution_tab = new wxPanel(tab_manager, wxID_ANY);
 
       wxSizer* current_sizer = new wxBoxSizer(wxVERTICAL);
-      current_sizer->Add(new wxStaticText(execution_tab, wxID_ANY, wxT("bla execution")));
 
       execution_tab->SetSizer(current_sizer);
 
@@ -38,7 +33,6 @@ namespace squadt {
       wxPanel* editing_tab = new wxPanel(tab_manager, wxID_ANY);
 
       current_sizer = new wxBoxSizer(wxVERTICAL);
-      current_sizer->Add(new wxStaticText(editing_tab, wxID_ANY, wxT("bla editting")));
 
       execution_tab->SetSizer(current_sizer);
 
@@ -47,13 +41,12 @@ namespace squadt {
       wxPanel* debug_tab = new wxPanel(tab_manager, wxID_ANY);
 
       current_sizer = new wxBoxSizer(wxVERTICAL);
-      current_sizer->Add(new wxStaticText(debug_tab, wxID_ANY, wxT("bla debug")));
 
       execution_tab->SetSizer(current_sizer);
 
       tab_manager->AddPage(debug_tab, wxT("Debug"));
 
-      okay_button = new wxButton(this, wxID_OK);
+      wxButton* okay_button = new wxButton(this, wxID_OK);
 
       current_sizer = new wxBoxSizer(wxVERTICAL);
       current_sizer->Add(tab_manager, 1, wxEXPAND|wxALL, 3);

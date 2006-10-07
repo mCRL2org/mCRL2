@@ -73,7 +73,7 @@ namespace squadt {
     }
     
     /**
-     * @param[in] p the process to remove
+     * \param[in] p the process to remove
      **/
     inline void executor_impl::remove(process* p) {
       static boost::mutex lock;
@@ -90,7 +90,8 @@ namespace squadt {
     }
  
     /**
-     * @param[in] c the command to execute
+     * \param[in] c the command to execute
+     * \param[in] w a pointer to the associated implementation object
      **/
     inline void executor_impl::start_process(const command& c, boost::shared_ptr < executor_impl >& w) {
       process::ptr p(new process(boost::bind(&executor_impl::handle_process_termination, this, _1, w)));
@@ -101,8 +102,9 @@ namespace squadt {
     }
 
     /**
-     * @param[in] c the command to execute
-     * @param[in] l reference to a process listener
+     * \param[in] c the command to execute
+     * \param[in] l reference to a process listener
+     * \param[in] w a pointer to the associated implementation object
      **/
     inline void executor_impl::start_process(const command& c, task_monitor::sptr& l, boost::shared_ptr < executor_impl >& w) {
       process::ptr p(new process(boost::bind(&executor_impl::handle_process_termination, this, _1, w), l));
@@ -117,11 +119,11 @@ namespace squadt {
     }
 
     /**
-     * @param c the command that is to be executed
-     * @param l a shared pointer a listener (or reference to) for process state changes
-     * @param b whether or not to circumvent the number of running processes limit
+     * \param c the command that is to be executed
+     * \param l a shared pointer a listener (or reference to) for process state changes
+     * \param b whether or not to circumvent the number of running processes limit
      **/
-    inline void executor_impl::execute(const command& c, task_monitor::sptr& l, bool b, boost::shared_ptr < executor_impl >& w) {
+    inline void executor_impl::execute(const command& c, boost::shared_ptr < task_monitor >& l, bool b, boost::shared_ptr < executor_impl >& w) {
       if (b || processes.size() < maximum_concurrent_processes) {
         start_process(c, l, w);
       }
@@ -143,7 +145,11 @@ namespace squadt {
       }
     }
 
-    /* Start processing commands if the queue contains any waiters */
+    /**
+     * Start processing commands if the queue contains any waiters
+     *
+     * \param[in] w a pointer to the associated implementation object
+     **/
     inline void executor_impl::start_delayed(boost::shared_ptr < executor_impl >& w) {
       if (0 < delayed_commands.size()) {
         command_pair c = delayed_commands.front();
@@ -155,7 +161,7 @@ namespace squadt {
     }
     
     /**
-     * @param p a pointer to a process object
+     * \param p a pointer to a process object
      **/
     inline void executor_impl::handle_process_termination(process* p, boost::weak_ptr < executor_impl > w) {
       boost::shared_ptr < executor_impl > g(w.lock());
@@ -167,7 +173,7 @@ namespace squadt {
       }
     }
 
-    executor::executor(unsigned int m) : impl(new executor_impl(m)) {
+    executor::executor(unsigned int const& m) : impl(new executor_impl(m)) {
     }
     
     executor::~executor() {
@@ -175,22 +181,22 @@ namespace squadt {
     }
  
     /**
-     * @param[in] p the process to remove
+     * \param[in] p the process to remove
      **/
     void executor::remove(process* p) {
       impl->remove(p);
     }
 
     /**
-     * @param[in] c the command to execute
+     * \param[in] c the command to execute
      **/
     void executor::start_process(const command& c) {
       impl->start_process(c, impl);
     }
  
     /**
-     * @param[in] c the command to execute
-     * @param[in] l reference to a process listener
+     * \param[in] c the command to execute
+     * \param[in] l reference to a process listener
      **/
     void executor::start_process(const command& c, task_monitor::sptr& l) {
       impl->start_process(c, l, impl);
@@ -209,11 +215,11 @@ namespace squadt {
     }
  
     /**
-     * @param c the command that is to be executed
-     * @param l a shared pointer a listener (or reference to) for process state changes
-     * @param b whether or not to circumvent the number of running processes limit
+     * \param[in] c the command that is to be executed
+     * \param[in] l a shared pointer a listener (or reference to) for process state changes
+     * \param[in] b whether or not to circumvent the number of running processes limit
      **/
-    void executor::execute(const command& c, task_monitor::sptr& l, bool b) {
+    void executor::execute(const command& c, boost::shared_ptr < task_monitor >& l, bool b) {
       impl->execute(c, l, b, impl);
     }
   }

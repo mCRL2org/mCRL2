@@ -22,8 +22,6 @@ namespace squadt {
 
   class processor_impl;
 
-  static const std::string empty_string;
-
   /**
    * \brief A processor represents a tool configuration.
    *
@@ -133,13 +131,13 @@ namespace squadt {
       bool demote_status();
 
       /** \brief Start tool configuration */
-      void configure(const tool::input_combination*, const boost::filesystem::path&, std::string const& = empty_string);
+      void configure(const tool::input_combination*, const boost::filesystem::path&, std::string const& = "");
  
       /** \brief Start tool configuration */
-      void configure(std::string const& = empty_string);
+      void configure(std::string const& = "");
 
       /** \brief Start tool reconfiguration */
-      void reconfigure(std::string const& = empty_string);
+      void reconfigure(std::string const& = "");
  
       /** \brief Start processing: generate outputs from inputs */
       void run(bool b = false);

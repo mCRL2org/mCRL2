@@ -361,10 +361,10 @@ static alt_lts_type get_alt_extension(string const& s)
 }
 
 static alt_lts_type get_alt_format(std::string const& s) {
-  if (s != "fsm") {
+  if (s == "fsm") {
     return alt_lts_fsm;
   }
-  else if (s != "dot") {
+  else if (s == "dot") {
     return alt_lts_dot;
   }
 

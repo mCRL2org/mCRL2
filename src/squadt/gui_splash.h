@@ -93,8 +93,8 @@ namespace squadt {
     namespace detail {
 
       /**
-       * @param p a pointer to a wxWindow that will serve as parent
-       * @param i a reference to the image to be displayed
+       * \param[in] p a pointer to a wxWindow that will serve as parent
+       * \param[in] i a reference to the image to be displayed
        **/
       inline picture::picture(wxWindow* p, wxImage* i) :
                 wxPanel(p, wxID_ANY, wxDefaultPosition, wxSize(i->GetWidth(),i->GetHeight()), wxRAISED_BORDER), image(*i) {
@@ -125,8 +125,8 @@ namespace squadt {
     }
 
     /**
-     * @param[in] i the image to display
-     * @param[in] n the number of categories
+     * \param[in] i the image to display
+     * \param[in] n the number of categories
      **/
     inline splash::splash(wxImage* i, unsigned char n) :
             wxFrame(0, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxSTAY_ON_TOP|wxFRAME_NO_TASKBAR),
@@ -151,8 +151,8 @@ namespace squadt {
     }
 
     /**
-     * @param c a string that represents the category
-     * @param m the maximum number of operations in this category (0 < m)
+     * \param[in] c a string that represents the category
+     * \param[in] m the maximum number of operations in this category (0 < m)
      **/
     inline void splash::set_category(const std::string& c, unsigned int m) {
       progress_indicator->SetRange(number_of_categories * (m + 1));
@@ -164,8 +164,8 @@ namespace squadt {
     }
 
     /**
-     * @param o a string that represents an operation description
-     * @param s a string that represents the operand
+     * \param[in] o a string that represents an operation description
+     * \param[in] s a string that represents the operand
      **/
     inline void splash::set_operation(const std::string& o, const std::string& s) {
       ++new_amount;
