@@ -50,7 +50,7 @@ namespace squadt {
     public:
  
       /** \brief Convenience type alias for hiding shared pointer implementation */
-      typedef boost::shared_ptr < tool_manager >                             ptr;
+      typedef boost::shared_ptr < tool_manager >                              ptr;
 
       /** \brief Convenience type alias the list of tools */
       typedef std::list < tool::sptr >                                        tool_list;

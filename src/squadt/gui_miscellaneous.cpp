@@ -49,5 +49,15 @@ namespace squadt {
         }
       }
     }
+
+    std::set < storage_format > tool_selection_helper::get_storage_formats() {
+      std::set < storage_format > formats;
+
+      BOOST_FOREACH(categories_by_format::value_type c, categories_for_format) {
+        formats.insert(c.first);
+      }
+
+      return (formats);
+    }
   }
 }

@@ -2,6 +2,7 @@
 #define SQUADT_MISCELLANEOUS_H
 
 #include <map>
+#include <set>
 #include <utility>
 
 #include <boost/shared_ptr.hpp>
@@ -46,8 +47,11 @@ namespace squadt {
         /** \brief Constructor */
         inline tool_selection_helper();
 
-        /** \brief Constructor */
+        /** \brief Rebuilds the tool indices (currently only by formats) */
         inline void rebuild_index();
+
+        /** \brief Returns a set of known formats */
+        std::set < storage_format > get_storage_formats();
 
         /** \brief A pair of iterators (begin,end) for iterating the set of tools that operate on a given format */
         void by_format(const storage_format f, const category_tool_action a) const;

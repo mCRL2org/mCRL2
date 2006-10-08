@@ -45,6 +45,9 @@ namespace utility {
       /** \brief Sets filter level below which messages are logged */
       inline void set_filter_level(log_level l);
 
+      /** \brief Returns filter level below which messages are logged */
+      inline log_level get_filter_level();
+
       /** \brief Destructor */
       virtual ~logger() = 0;
   };
@@ -54,6 +57,10 @@ namespace utility {
 
   inline void logger::set_filter_level(log_level l) {
     filter_level = l;
+  }
+
+  inline logger::log_level logger::get_filter_level() {
+    return (filter_level);
   }
 
   /**

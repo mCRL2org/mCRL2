@@ -21,13 +21,14 @@
 #include <wx/choicdlg.h>
 #include <wx/filedlg.h>
 
-#define cmID_REMOVE    (wxID_HIGHEST + 1)
-#define cmID_REFRESH   (wxID_HIGHEST + 2)
-#define cmID_RENAME    (wxID_HIGHEST + 3)
-#define cmID_CLEAN     (wxID_HIGHEST + 4)
-#define cmID_CONFIGURE (wxID_HIGHEST + 5)
-#define cmID_DETAILS   (wxID_HIGHEST + 6)
-#define cmID_TOOLS     (wxID_HIGHEST + 7)
+#define cmID_EDIT      (wxID_HIGHEST + 1)
+#define cmID_REMOVE    (wxID_HIGHEST + 2)
+#define cmID_REFRESH   (wxID_HIGHEST + 3)
+#define cmID_RENAME    (wxID_HIGHEST + 4)
+#define cmID_CLEAN     (wxID_HIGHEST + 5)
+#define cmID_CONFIGURE (wxID_HIGHEST + 6)
+#define cmID_DETAILS   (wxID_HIGHEST + 7)
+#define cmID_TOOLS     (wxID_HIGHEST + 8)
 
 namespace squadt {
   namespace GUI {
@@ -288,6 +289,7 @@ namespace squadt {
 
       wxMenu  context_menu;
 
+      context_menu.Append(cmID_EDIT, wxT("Edit"))->Enable(show_update_operations);
       context_menu.Append(cmID_RENAME, wxT("Rename"))->Enable(show_update_operations);
       context_menu.Append(cmID_REMOVE, wxT("Remove"))->Enable(show_update_operations);
 
@@ -367,6 +369,8 @@ namespace squadt {
       processor::object_descriptor::sptr t = reinterpret_cast < tool_data* > (object_view->GetItemData(s))->get_object();
 
       switch (e.GetId()) {
+        case cmID_EDIT:
+          break;
         case cmID_REMOVE:
           manager->remove(p.get());
 

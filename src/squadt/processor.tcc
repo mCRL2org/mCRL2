@@ -850,7 +850,6 @@ namespace squadt {
         if (p.get() != 0) {
           if (p->check_status(true)) {
             /* Reschedule process operation after process p has completed */
-
             p->update(boost::bind(&processor_impl::update, this, t, false));
      
             return;
