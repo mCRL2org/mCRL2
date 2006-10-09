@@ -208,7 +208,7 @@ inline
 data_variable get_var(data_expression t)
 {
   assert(is_var(t));
-  return data_variable(ATgetArgument(ATermAppl(t),0));
+  return data_variable(ATermAppl(t));
 }
 
 ///pre: is_and(t) || is_equality(t)
@@ -414,7 +414,6 @@ lpe::specification eq_sumelm(const lpe::specification& specification)
   new_specification = set_lpe(specification, set_summands(lpe, new_summand_list));
 
   return new_specification;
-
 }
 
 ///Returns an LPE specification in which the timed arguments have been rewritten
