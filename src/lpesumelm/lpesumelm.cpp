@@ -308,15 +308,7 @@ lpe::specification no_occurrence_sumelm(const lpe::specification& specification)
   // whilst constructing a new summand list in the process.
   new_summand_list = apply(new_summand_list, apply_no_occurrence_sumelm);
 
-  new_specification = lpe::specification(specification.sorts(),
-                                         specification.constructors(),
-                                         specification.mappings(),
-                                         specification.equations(),
-                                         specification.actions(),
-                                         set_summands(lpe, new_summand_list),
-                                         specification.initial_free_variables(),
-                                         specification.initial_variables(),
-                                         specification.initial_state());
+  new_specification = set_lpe(specification, set_summands(lpe, new_summand_list));
 
   return new_specification;
 }
@@ -419,15 +411,7 @@ lpe::specification eq_sumelm(const lpe::specification& specification)
   // Apply sum elimination on each of the summands in the summand list.
   new_summand_list = apply(new_summand_list, apply_eq_sumelm);
 
-  new_specification = lpe::specification(specification.sorts(),
-                                         specification.constructors(),
-                                         specification.mappings(),
-                                         specification.equations(),
-                                         specification.actions(),
-                                         set_summands(lpe, new_summand_list),
-                                         specification.initial_free_variables(),
-                                         specification.initial_variables(),
-                                         specification.initial_state());
+  new_specification = set_lpe(specification, set_summands(lpe, new_summand_list));
 
   return new_specification;
 
