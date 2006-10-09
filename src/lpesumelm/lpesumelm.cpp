@@ -236,6 +236,7 @@ data_expression swap_equality(data_expression t)
 {
   assert(is_equality(t));
   return data_expression(gsMakeDataExprEq(ATermAppl(rhs(t)), ATermAppl(lhs(t))));
+//  return equal_to(rhs(t), lhs(t));
 }
 
 ///pre: is_and(t)
@@ -331,103 +332,69 @@ lpe::specification no_occurrence_sumelm(const lpe::specification& specification)
   return new_specification;
 }
 
-//Recursive function for sum elimination on a summand, uses dirty tricks
-//that we want to shield from the caller of the sumelm functions
-//it is therefor called by the apply_eq_sumelm function,
-//and should only be called by that one.
-//Initially (that is, on first call): *condition==working_condition
+//Recursively apply sum elimination on a summand. Note that summand is
+//passed as a pointer argument because we apply substitution to the
+//parameters of the substitution at the deepest level of recursion.
+//working_condition is a parameter that we use to split up the problem,
+//at the first call of this function working_condition == summand->condition()
+//should hold
 //
-// working_condition is a term that is at first call equal to *condition
-// in the process, each time working_condition is a conjunct it is split up
-// in a lefthandside (lhs) and a righthandside (rhs). lhs and rhs are then
-// used as a parameter in a recursive call of this function.
-// once the working_condition is small enough, and it is an equality we check if
-// one of the sides is a variable that occurs in the summation_variables, and substitute
-// that with the other side of the equality in the summand, and remove it from the
-// summation variables.
-///!!!INTERNAL USE ONLY!!!
-///ret: working condition of the respective subset of the LPE, with transformations
-///     necesary because of substitution applied to it.
-///     return value of the first call of this function resembles the new condition.
-data_expression recursive_apply_eq_sumelm(data_variable_list* summation_variables,
-                               data_expression* condition,
-                               action_list* actions,
-                               data_expression* time,
-                               data_assignment_list* assignments,
-                               data_expression working_condition)
+//Note that filtering the summation variables should (for now) be done in the calling
+//function, by applying no_occurrence_sumelm on the result, because that is a little
+//more efficient.
+//The new condition is built up on the return path of the recursion, so
+//the last exit of the recursion is the new condition of the summand.
+//
+//!!!INTERNAL USE ONLY!!!
+data_expression recursive_apply_eq_sumelm(LPE_summand* summand,
+                                          data_expression working_condition)
 {
-  data_expression result; // Return value, consisting of working_condition with transformation needed because of elimination
-  if (is_and(ATermAppl(working_condition)))
+  // In all cases not explicitly handled we return the original working_condition
+  data_expression result = working_condition;
+
+  if (is_and(working_condition))
   {
     //Recursively apply sum elimination on lhs and rhs
     //Note that recursive application provides for progress because lhs and rhs split the working condition.
-    data_expression a,b; // Temporarily store results from recursive calls to make result
-    a = recursive_apply_eq_sumelm(summation_variables,
-                              condition,
-                              actions,
-                              time,
-                              assignments,
-                              lhs(working_condition));
-    b = recursive_apply_eq_sumelm(summation_variables,
-                              condition,
-                              actions,
-                              time,
-                              assignments,
-                              rhs(working_condition));
-
-    result = eliminate_unit_and(gsMakeDataExprAnd(a, b));
+    data_expression a,b;
+    a = recursive_apply_eq_sumelm(summand, lhs(working_condition));
+    b = recursive_apply_eq_sumelm(summand, rhs(working_condition));
+    result = eliminate_unit_and(gsMakeDataExprAnd(a,b));
   }
-
-  else if (is_equality(ATermAppl(working_condition)))
-  { 
-    //See if lhs or rhs occurs in summation_variables, and if so,
-    //remove the variable and apply substitution
-
-    //Preserve the original working condition because we might need that later.
-    data_expression equality = working_condition;
-
-    //If rhs is a variable then swap, so that the rest of the code can be used
-    if (is_var(rhs(equality)))
-    {
-      equality = swap_equality(equality);
-    }
-    
-    if (is_var(lhs(equality)))
-    {
-      if (occurs_in(*summation_variables, get_var(lhs(equality))))
-      {
-        //Substitute all occurrences of lhs for rhs in the lpe
-        
-        data_assignment a = data_assignment(get_var(lhs(equality)), rhs(equality));
-        data_assignment_list al = data_assignment_list();
-        al = push_front(al, a);
-
-        //TODO: Try to update summation variables here as well;
-        //condition is updated through the return value of this function!
-        *actions = substitute(*actions, assignment_list_substitution(al));
-        *time = time->substitute(a);
-        *assignments = substitute(*assignments, assignment_list_substitution(al));
-        
-        result = gsMakeDataExprTrue(); // Substitution applied, equality condition can be removed
-      }
-      else //!occurs_in(..)
-      {
-        result = working_condition; // No substitution, keep old condition
-      }
-    }
-    else //!is_var(lhs(equality))
-    {
-      result = working_condition; // No substitution, keep old condition
-    }
-  }
-
-  else
+  
+  else if (is_equality(working_condition))
   {
-    gsDebugMsg("A non-handled condition type occurred!\n");
-    // The condition is not a conjunct or an equality, we can't easily eliminate.
-    result = working_condition; // No substitution, keep old condition
-  }
+    //Check if rhs is a variable, if so, swap lhs and rhs, so that the following code
+    //is always the same.
+    if (is_var(rhs(working_condition)))
+    {
+      working_condition = swap_equality(working_condition);
+    }
 
+    //If lhs is a variable, check if it occurs in the summation variables, if so
+    //apply substitution lhs := rhs in actions, time and assignments.
+    //substitution in condition is accounted for on returnpath of recursion,
+    //substitution in summation_variables is done in calling function.
+    if (is_var(lhs(working_condition)))
+    {
+      if (occurs_in(summand->summation_variables(), get_var(lhs(working_condition))))
+      {
+        data_assignment substitution = data_assignment(get_var(lhs(working_condition)), rhs(working_condition));
+
+        *summand = LPE_summand(summand->summation_variables(),
+                               summand->condition(),
+                               summand->is_delta(),
+                               substitute(summand->actions(), substitution),
+                               summand->time().substitute(substitution),
+                               substitute(summand->assignments(), substitution)
+		      );
+
+        result = gsMakeDataExprTrue();
+      }
+    }
+
+  }
+  
   return result;
 }
 
@@ -438,32 +405,23 @@ data_expression recursive_apply_eq_sumelm(data_variable_list* summation_variable
 ///and returns X(..) = e -> a(..) . X(..)
 lpe::LPE_summand apply_eq_sumelm(const lpe::LPE_summand& summand)
 {
-  LPE_summand new_summand;
-  data_variable_list new_summation_variables = summand.summation_variables();
-  data_expression new_condition = summand.condition();
-  action_list new_actions = summand.actions();
-  data_expression new_time = summand.time();
-  data_assignment_list new_assignments = summand.assignments();
+  LPE_summand new_summand = summand;
 
-  // Apply elimination
-  new_condition = recursive_apply_eq_sumelm(&new_summation_variables,
-                                            &new_condition,
-                                            &new_actions,
-                                            &new_time,
-                                            &new_assignments,
-                                            new_condition);
- 
-  new_summand = LPE_summand(new_summation_variables,
+  //Apply elimination and store result
+  data_expression new_condition = recursive_apply_eq_sumelm(&new_summand, new_summand.condition());
+
+  //Incorporate the new condition in the summand
+  new_summand = LPE_summand(new_summand.summation_variables(),
                             new_condition,
-                            summand.is_delta(),
-                            new_actions,
-                            new_time,
-                            new_assignments);
+                            new_summand.is_delta(),
+                            new_summand.actions(),
+                            new_summand.time(),
+                            new_summand.assignments());
+                            
  
   //Take the summand with substitution, and remove the summation variables that are now not needed
   //TODO: move the no_occurrence_sumelm into the recursive function above, that would make the separation more perfect.
   return apply_no_occurrence_sumelm(new_summand);
-  //return new_summand;
 }
 
 
@@ -515,7 +473,6 @@ int do_sumelm(const std::string input_file_name, const std::string output_file_n
   lpe::specification lpe_specification;
   if (lpe_specification.load(input_file_name)) {
     // Untime lpe_specification and save the output to a binary file
-    gsDebugMsg("loaded spec\n");
     if (!sumelm(lpe_specification).save(output_file_name, true)) 
     {
       // An error occurred when saving
