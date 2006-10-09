@@ -6,7 +6,7 @@
 //
 // file          : lpesumelm 
 // date          : 03-10-2006
-// version       : 0.22
+// version       : 0.23
 //
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
 //
@@ -48,7 +48,7 @@ namespace po = boost::program_options;
 //TODO: Add configuration parameter for substitution sumelimination (enable/disable)
 //TODO: Get rid of gsMakeDataExpr...() functions
 
-#define VERSION "0.22"
+#define VERSION "0.23"
 
 std::string input_file; ///< Name of the file to read input from
 std::string output_file; ///< Name of the file to write output to (or stdout)
@@ -292,12 +292,7 @@ LPE_summand apply_no_occurrence_sumelm(const lpe::LPE_summand& summand)
 
   new_summation_variables = reverse(new_summation_variables);
 
-  new_summand = LPE_summand(new_summation_variables,
-                            summand.condition(),
-                            summand.is_delta(),
-                            summand.actions(),
-                            summand.time(),
-                            summand.assignments());
+  new_summand = set_summation_variables(summand, new_summation_variables);
 
   return new_summand;
 }
@@ -307,24 +302,18 @@ lpe::specification no_occurrence_sumelm(const lpe::specification& specification)
 {
   lpe::LPE lpe = specification.lpe();
   lpe::specification new_specification;
-  lpe::LPE new_lpe;
   summand_list new_summand_list = lpe.summands();
 
   // Traverse the summand list, and apply sum elimination to its summands,
   // whilst constructing a new summand list in the process.
   new_summand_list = apply(new_summand_list, apply_no_occurrence_sumelm);
 
-  new_lpe = LPE(lpe.free_variables(),
-                lpe.process_parameters(),
-                new_summand_list,
-                lpe.actions());
-
   new_specification = lpe::specification(specification.sorts(),
                                          specification.constructors(),
                                          specification.mappings(),
                                          specification.equations(),
                                          specification.actions(),
-                                         new_lpe,
+                                         set_summands(lpe, new_summand_list),
                                          specification.initial_free_variables(),
                                          specification.initial_variables(),
                                          specification.initial_state());
@@ -411,13 +400,7 @@ lpe::LPE_summand apply_eq_sumelm(const lpe::LPE_summand& summand)
   data_expression new_condition = recursive_apply_eq_sumelm(&new_summand, new_summand.condition());
 
   //Incorporate the new condition in the summand
-  new_summand = LPE_summand(new_summand.summation_variables(),
-                            new_condition,
-                            new_summand.is_delta(),
-                            new_summand.actions(),
-                            new_summand.time(),
-                            new_summand.assignments());
-                            
+  new_summand = set_condition(new_summand, new_condition);
  
   //Take the summand with substitution, and remove the summation variables that are now not needed
   //TODO: move the no_occurrence_sumelm into the recursive function above, that would make the separation more perfect.
@@ -431,23 +414,17 @@ lpe::specification eq_sumelm(const lpe::specification& specification)
 {
   lpe::LPE lpe = specification.lpe();
   lpe::specification new_specification;
-  lpe::LPE new_lpe;
   summand_list new_summand_list = lpe.summands();
 
   // Apply sum elimination on each of the summands in the summand list.
   new_summand_list = apply(new_summand_list, apply_eq_sumelm);
-
-  new_lpe = LPE(lpe.free_variables(),
-                lpe.process_parameters(),
-                new_summand_list,
-                lpe.actions());
 
   new_specification = lpe::specification(specification.sorts(),
                                          specification.constructors(),
                                          specification.mappings(),
                                          specification.equations(),
                                          specification.actions(),
-                                         new_lpe,
+                                         set_summands(lpe, new_summand_list),
                                          specification.initial_free_variables(),
                                          specification.initial_variables(),
                                          specification.initial_state());

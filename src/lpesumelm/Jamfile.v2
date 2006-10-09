@@ -2,7 +2,6 @@ project lpesumelm
        : source-location .
        : requirements
           <include>$(BOOST)
-          <status>experimental
        : build-dir $(BUILD_TOP)/lpesumelm
        ;
 
