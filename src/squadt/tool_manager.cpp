@@ -32,6 +32,17 @@ namespace squadt {
 
   const sip::tool::capabilities::ptr tool::no_capabilities(new sip::tool::capabilities());
 
+  /**
+   * \param[in] m the maximum number of instances
+   **/
+  void tool_manager::set_maximum_instance_count(size_t m) {
+    local_executor.set_maximum_instance_count(m);
+  }
+
+  size_t tool_manager::get_maximum_instance_count() const {
+    return (local_executor.get_maximum_instance_count());
+  }
+
   char const* tool_manager::default_tools[] = {"lpeconstelm", "lpeinfo", "lpeparelm", "lpeuntime", "lpe2lts", "lpesumelm",
                                                "ltsconvert", "ltsinfo", "ltsgraph", "ltsview", "mcrl22lpe", "xsim", 0};
 

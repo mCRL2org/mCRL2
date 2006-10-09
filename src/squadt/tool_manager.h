@@ -152,6 +152,12 @@ namespace squadt {
  
       /** \brief Get the number of known tools */
       inline const unsigned int number_of_tools() const;
+
+      /** \brief Gets the maximum number of tool instances */
+      size_t get_maximum_instance_count() const;
+
+      /** \brief Sets the maximum number of tool instances */
+      void set_maximum_instance_count(size_t);
  
       /** \brief Have the tool executor terminate all running tools */
       void terminate();

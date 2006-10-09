@@ -826,7 +826,7 @@ namespace squadt {
       current_monitor->start_tool_operation(t);
 
       global_tool_manager->execute(*tool_descriptor, make_output_path(output_directory),
-         boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
+         boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), false);
     }
     else {
       /* Signal completion to environment via monitor */
@@ -865,7 +865,7 @@ namespace squadt {
       current_monitor->start_tool_operation(t);
 
       global_tool_manager->execute(*tool_descriptor, make_output_path(output_directory),
-         boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
+         boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), false);
     }
     else {
       /* Signal completion to environment via monitor */

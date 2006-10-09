@@ -181,6 +181,7 @@ namespace squadt {
         build();
 
         Connect(wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler(dialog::open_project::on_selection_changed));
+        Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(dialog::open_project::on_button_clicked));
       }
 
       void open_project::build() {
@@ -231,7 +232,7 @@ namespace squadt {
       void open_project::on_button_clicked(wxCommandEvent& e) {
         switch (e.GetId()) {
           case wxID_CANCEL:
-            EndModal(0);
+            EndModal(wxCANCEL);
             break;
           default: /* wxID_OK */
             if (!selection_is_valid) {
@@ -241,7 +242,7 @@ namespace squadt {
               button_accept->Enable(false);
             }
             else {
-              EndModal(1);
+              EndModal(wxOK);
             }
             break;
         }
@@ -314,6 +315,7 @@ namespace squadt {
 
         Connect(wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler(dialog::add_to_project::on_selection_changed));
         Connect(wxEVT_COMMAND_TEXT_UPDATED, wxTextEventHandler(dialog::add_to_project::on_name_updated));
+        Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(dialog::add_to_project::on_button_clicked));
       }
 
       void add_to_project::build() {

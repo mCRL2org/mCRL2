@@ -1,5 +1,6 @@
 #include "gui_dialog_preferences.h"
 #include "gui_miscellaneous.h"
+#include "tool_manager.h"
 
 #include <wx/button.h>
 #include <wx/checkbox.h>
@@ -23,6 +24,11 @@ namespace squadt {
 
         /* The maximum number of tool instances that are not active for a configuration operation */
         wxSlider* maximum_concurrent;
+
+      private:
+
+        /* Event handler for changes to the maximum */
+        void maximum_changed(wxCommandEvent&);
 
       public:
 
@@ -73,17 +79,26 @@ namespace squadt {
         debug_preferences(wxWindow*);
     };
 
+    void execution_preferences::maximum_changed(wxCommandEvent&) {
+      global_tool_manager->set_maximum_instance_count(maximum_concurrent->GetValue());
+    }
+
     execution_preferences::execution_preferences(wxWindow* w) : wxPanel(w, wxID_ANY) {
       wxSizer* current_sizer = new wxBoxSizer(wxVERTICAL);
 
       SetSizer(current_sizer);
 
       current_sizer->AddSpacer(30);
-      current_sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Maximum number of concurrent tool instances that are not running for configuration purposes.")), 0, wxEXPAND|wxLEFT|wxRIGHT, 10);
+      current_sizer->Add(new wxStaticText(this, wxID_ANY,
+              wxT("Maximum number of concurrent tool instances that are not running for configuration purposes.")),
+                  0, wxEXPAND|wxLEFT|wxRIGHT, 10);
 
-      maximum_concurrent = new wxSlider(this, wxID_ANY, 1, 1, 25, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS|wxSL_BOTTOM);
+      maximum_concurrent = new wxSlider(this, wxID_ANY, global_tool_manager->get_maximum_instance_count(),
+                                    1, 25, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS|wxSL_BOTTOM);
 
       current_sizer->Add(maximum_concurrent, 0, wxEXPAND|wxLEFT|wxRIGHT, 14);
+
+      Connect(wxEVT_SCROLL_CHANGED, wxCommandEventHandler(execution_preferences::maximum_changed));
     }
 
     void edit_preferences::activate() {
@@ -120,12 +135,11 @@ namespace squadt {
       known_formats->Add(formats_and_actions, 1, wxEXPAND|wxLEFT|wxRIGHT, 3);
 
       current_sizer->Add(new wxButton(this, cmID_EDIT, wxT("Edit")), 0, wxALL|wxALIGN_LEFT, 3);
-
-      current_sizer->RecalcSizes();
     }
 
     void debug_preferences::filter_level_changed(wxCommandEvent&) {
-      sip::controller::communicator::get_standard_error_logger()->set_filter_level(static_cast < utility::logger::log_level > (filter_level->GetValue()));
+      sip::controller::communicator::get_standard_error_logger()->
+                     set_filter_level(static_cast < utility::logger::log_level > (filter_level->GetValue()));
     }
 
     debug_preferences::debug_preferences(wxWindow* w) : wxPanel(w, wxID_ANY) {
@@ -136,8 +150,8 @@ namespace squadt {
       current_sizer->AddSpacer(30);
       current_sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Filter level for diagnostic messages and warnings")), 0, wxEXPAND|wxLEFT|wxRIGHT, 4);
 
-      filter_level = new wxSlider(this, wxID_ANY, std::max(sip::controller::communicator::get_standard_error_logger()->get_filter_level(), static_cast < utility::logger::log_level > (1)),
-                                                                        1, 5, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS|wxSL_BOTTOM);
+      filter_level = new wxSlider(this, wxID_ANY, std::max(sip::controller::communicator::get_standard_error_logger()->get_filter_level(),
+                                  static_cast < utility::logger::log_level > (1)), 1, 5, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS|wxSL_BOTTOM);
 
       Connect(wxEVT_SCROLL_CHANGED, wxCommandEventHandler(debug_preferences::filter_level_changed));
 

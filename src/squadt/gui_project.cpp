@@ -284,12 +284,19 @@ namespace squadt {
     void project::spawn_context_menu(tool_data& n) {
       using namespace boost;
 
-      bool generated              = (0 < n.get_processor()->number_of_inputs());
-      bool show_update_operations = !n.get_processor()->is_active();
+      size_t separator_position     = 2;
+      bool   editable               = false;
+      bool   generated              = (0 < n.get_processor()->number_of_inputs());
+      bool   show_update_operations = !n.get_processor()->is_active();
 
       wxMenu  context_menu;
 
-      context_menu.Append(cmID_EDIT, wxT("Edit"))->Enable(show_update_operations);
+      if (editable) {
+        context_menu.Append(cmID_EDIT, wxT("Edit"))->Enable(show_update_operations);
+
+        ++separator_position;
+      }
+
       context_menu.Append(cmID_RENAME, wxT("Rename"))->Enable(show_update_operations);
       context_menu.Append(cmID_REMOVE, wxT("Remove"))->Enable(show_update_operations);
 
@@ -297,6 +304,8 @@ namespace squadt {
         context_menu.Append(cmID_REFRESH, wxT("Refresh"))->Enable(show_update_operations);
         context_menu.Append(cmID_CONFIGURE, wxT("Configure"))->Enable(show_update_operations);
         context_menu.Append(cmID_CLEAN, wxT("Clean"))->Enable(show_update_operations);
+
+        separator_position += 3;
       }
 
       /* wxWidgets identifier for menu items */
@@ -308,8 +317,8 @@ namespace squadt {
 
       context_menu.AppendSeparator();
 
-      if (!context_menu.FindItemByPosition(generated ? 5 : 2)->IsSeparator()) {
-        context_menu.InsertSeparator(generated ? 5 : 2);
+      if (!context_menu.FindItemByPosition(separator_position)->IsSeparator()) {
+        context_menu.InsertSeparator(separator_position);
       }
 
       context_menu.Append(cmID_DETAILS, wxT("Details"));

@@ -115,6 +115,9 @@ namespace sip {
 
         /** \brief Initialises static members */
         static void initialise();
+
+        /** \brief Convenience method for adding values */
+        enumeration& operator% (std::string const&);
     };
 
     /**
@@ -865,6 +868,15 @@ namespace sip {
           default_value = values.size() - 1;
         }
       }
+    }
+
+    /**
+     * @param[in] s any string
+     **/
+    inline enumeration& enumeration::operator% (std::string const& s) {
+      add_value(s);
+
+      return (*this);
     }
 
     /**

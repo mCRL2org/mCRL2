@@ -26,7 +26,7 @@ namespace squadt {
       private:
 
         /** \brief The maximum number of processes that is allowed to run concurrently */
-        unsigned int                   maximum_concurrent_processes;
+        unsigned int                   maximum_instance_count;
  
         /** \brief List of active processes */
         std::list < process::ptr >     processes;
@@ -69,7 +69,7 @@ namespace squadt {
         void terminate_all();
     };
 
-    inline executor_impl::executor_impl(unsigned int m) : maximum_concurrent_processes(m) {
+    inline executor_impl::executor_impl(unsigned int m) : maximum_instance_count(m) {
     }
     
     /**
@@ -124,7 +124,7 @@ namespace squadt {
      * \param b whether or not to circumvent the number of running processes limit
      **/
     inline void executor_impl::execute(const command& c, boost::shared_ptr < task_monitor >& l, bool b, boost::shared_ptr < executor_impl >& w) {
-      if (b || processes.size() < maximum_concurrent_processes) {
+      if (b || processes.size() < maximum_instance_count) {
         start_process(c, l, w);
       }
       else {
@@ -178,6 +178,14 @@ namespace squadt {
     
     executor::~executor() {
       impl->terminate_all();
+    }
+
+    size_t executor::get_maximum_instance_count() const {
+      return (impl->maximum_instance_count);
+    }
+ 
+    void executor::set_maximum_instance_count(size_t m) {
+      impl->maximum_instance_count = m;
     }
  
     /**

@@ -23,6 +23,7 @@ namespace squadt {
      *    task_monitor object
      **/
     class executor {
+      friend class tool_manager;
 
       private:
 
@@ -47,6 +48,12 @@ namespace squadt {
     
         /** \brief Constructor */
         executor(unsigned int const& = 3);
+
+        /** \brief Maximum number of tool instances */
+        size_t get_maximum_instance_count() const;
+ 
+        /** \brief Maximum number of tool instances */
+        void set_maximum_instance_count(size_t);
  
         /** \brief Execute a tool */
         void execute(const command&, boost::shared_ptr < task_monitor >& = process::default_monitor, bool = false);

@@ -37,6 +37,9 @@ class squadt_tool_interface {
     /** \brief send error message */
     void send_error(std::string const&) const;
 
+    /** \brief sends a layout for the tool display */
+    void send_display_layout(std::auto_ptr < sip::layout::manager >&);
+
   protected:
 
     /** \brief initialisation after connection to SQuADt */
@@ -191,6 +194,10 @@ inline void squadt_tool_interface::send_warning(std::string const& m) const {
 
 inline void squadt_tool_interface::send_error(std::string const& m) const {
   m_communicator.send_status_report(sip::report::error, m);
+}
+
+inline void squadt_tool_interface::send_display_layout(std::auto_ptr < sip::layout::manager >& p) {
+  m_communicator.send_display_layout(sip::layout::tool_display::create(p));
 }
 
 inline squadt_tool_interface::~squadt_tool_interface() {

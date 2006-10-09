@@ -33,6 +33,12 @@ namespace sip {
         /** \brief Constructor */
         inline tool_display();
 
+        /** \brief Constructor */
+        inline tool_display(layout::manager::aptr);
+
+        /** \brief Factory function */
+        inline static boost::shared_ptr < layout::tool_display > create(layout::manager::aptr);
+
         /** \brief Whether or not the tool display is shown */
         inline void show(bool);
 
@@ -59,6 +65,15 @@ namespace sip {
     };
 
     inline tool_display::tool_display() : visible(true) {
+    }
+
+    inline tool_display::tool_display(layout::manager::aptr m) : top_manager(m), visible(true) {
+    }
+
+    inline boost::shared_ptr < layout::tool_display > tool_display::create(layout::manager::aptr m) {
+      boost::shared_ptr < layout::tool_display > p(new tool_display(m));
+
+      return (p);
     }
 
     inline layout::manager const* tool_display::get_top_manager() const {

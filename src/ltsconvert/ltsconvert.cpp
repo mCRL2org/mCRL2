@@ -9,15 +9,21 @@
 #include "lts/liblts_dot.h"
 #include "setup.h"
 
+#include "mcrl2_revision.h"
+
 #define NAME "ltsconvert"
 #define VERSION "0.1"
-#include "mcrl2_revision.h"
 
 using namespace mcrl2::lts;
 
-enum alt_lts_type { alt_lts_none, alt_lts_fsm, alt_lts_dot };
+enum alt_lts_type {
+  alt_lts_none,
+  alt_lts_fsm,
+  alt_lts_dot
+};
 
 static alt_lts_type get_alt_format(std::string const& s);
+
 bool read_lts_from_file(lts&, std::string const&, lts_type);
 bool write_lts_to_file(lts&, std::string const&, alt_lts_type outtype, std::string const&, bool);
 bool write_lts_to_file(lts&, std::string const&, lts_type outtype, std::string const&);
@@ -179,13 +185,17 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
       c.add_output(lts_file_for_output, extension, c.get_output_name("." + extension));
 
       /* The input type should be SVC/mcrl2 instead of just svc */
-      if (format_selector.get_selection() == fsm || (format_selector.get_selection() == svc_mcrl2 && c.get_object(lts_file_for_input)->get_format() != "svc")) {
+      if (format_selector.get_selection() == fsm ||
+            (format_selector.get_selection() == svc_mcrl2 && c.get_object(lts_file_for_input)->get_format() != "svc")) {
+
         c.add_input(lpd_file_auxiliary, "lpe", lpd_file_field->get_text());
       }
 
-      c.add_option(selected_transformation).append_argument(transformation_method_enumeration, static_cast < transformation_options > (transformation_selector.get_selection()));
+      c.add_option(selected_transformation).append_argument(transformation_method_enumeration,
+                 static_cast < transformation_options > (transformation_selector.get_selection()));
 
-      c.add_option(selected_output_format).append_argument(sip::datatype::integer::naturals, static_cast < unsigned int > (format_selector.get_selection()));
+      c.add_option(selected_output_format).append_argument(sip::datatype::integer::naturals,
+                 static_cast < unsigned int > (format_selector.get_selection()));
 
       if (format_selector.get_selection() == dot && for_dot_omit_state_information->get_status()) {
         c.add_option(no_state_information);
@@ -200,7 +210,9 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   result &= c.object_exists(lts_file_for_input);
   result &= c.object_exists(lts_file_for_output);
 
-  if (c.get_object(lts_file_for_output)->get_format() == "fsm" || (c.get_object(lts_file_for_output)->get_format() == "svc" && c.get_object(lts_file_for_input)->get_format() != "svc")) {
+  if (c.get_object(lts_file_for_output)->get_format() == "fsm" ||
+      (c.get_object(lts_file_for_output)->get_format() == "svc" && c.get_object(lts_file_for_input)->get_format() != "svc")) {
+
     result &= c.object_exists(lpd_file_auxiliary);
   }
 
@@ -222,7 +234,9 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 
   c.get_object(lts_file_for_input)->get_location();
 
-  if (!read_lts_from_file(l, c.get_object(lts_file_for_input)->get_location(), lts::parse_format(c.get_object(lts_file_for_input)->get_format().c_str()))) {
+  if (!read_lts_from_file(l, c.get_object(lts_file_for_input)->get_location(),
+               lts::parse_format(c.get_object(lts_file_for_input)->get_format().c_str()))) {
+
     send_error(boost::str(boost::format("Fatal: error reading input from `%s'!") % c.get_object(lts_file_for_input)->get_location()));
 
     return (false);
