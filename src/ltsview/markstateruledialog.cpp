@@ -1,4 +1,6 @@
 #include "markstateruledialog.h"
+using namespace IDs;
+using namespace Utils;
 
 BEGIN_EVENT_TABLE( MarkStateRuleDialog, wxDialog )
   EVT_LISTBOX( myID_PARAMETER_CHOICE, MarkStateRuleDialog::onParameterChoice )

@@ -1,17 +1,11 @@
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-
-#ifndef ENABLE_SQUADT_CONNECTIVITY
-# include "ltsviewapp.h"
-#else
+#ifdef ENABLE_SQUADT_CONNECTIVITY
 //SQuADT protocol interface
-# include <squadt_utility.h>
-
+#include <wx/wx.h>
+#include <squadt_utility.h>
 bool command_line = false;
 std::string lts_file_argument;
 
-# include "ltsviewapp.h"
 
 class squadt_interactor: public squadt_tool_interface {
   
@@ -21,11 +15,12 @@ class squadt_interactor: public squadt_tool_interface {
       fsm_file_for_input // Main input file that contains an lts
     };
  
-    boost::function<int()> startup_function;
+    // Wrapper for wxEntry invocation
+    squadt_utility::entry_wrapper& starter;
 
   public:
     // Constructor
-    squadt_interactor(boost::function<bool()>);
+    squadt_interactor(squadt_utility::entry_wrapper&);
 
     // Configures tool capabilities.
     void set_capabilities(sip::tool::capabilities&) const;
@@ -40,7 +35,7 @@ class squadt_interactor: public squadt_tool_interface {
     bool perform_task(sip::configuration&);
 };
 
-squadt_interactor::squadt_interactor(boost::function<bool()> startup): startup_function(startup) {
+squadt_interactor::squadt_interactor(squadt_utility::entry_wrapper& w): starter(w) {
   // skip 
 }
 
@@ -79,11 +74,15 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
 
 bool squadt_interactor::perform_task(sip::configuration&) {
 
-  return startup_function() == 0;
+  return starter.perform_entry();
+
 }
 
 #endif
+#include "ltsviewapp.h"
 
+using namespace std;
+using namespace Utils;
 IMPLEMENT_APP_NO_MAIN( LTSViewApp )
 
 bool LTSViewApp::OnInit()
@@ -133,24 +132,20 @@ bool LTSViewApp::OnInit()
 }
 
 #ifdef __WINDOWS__
-int wx_entry_proxy(HINSTANCE hInstance, 
-                   HINSTANCE hPrevInstance, 
-                   wxCmdLineArgType lpCmdLine,
-                   int nCmdShow) {
 
-  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
-}
-
-extern "C" int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,                                                                  wxCmdLineArgType lpCmdLine,int nCmdShow) {
+extern "C" int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,
+                              wxCmdLineArgType lpCmdLine,int nCmdShow) {
   ATerm stackbot;
-  int i = 0;
 
   // initialise the ATerm library
   ATinit(0,0,&stackbot); // XXX args?
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-        squadt_interactor c(boost::bind (wx_entry_proxy, hInstance, hPrevInstance, lpCmdLine, nCmdShow));
-        if (!c.try_interaction(i, NULL)) {
+        squadt_utility::entry_wrapper starter(argc, argv);
+
+        squadt_interactor c(starter);
+
+        if (!c.try_interaction(lpCmdLine)) {
 #endif
           return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
 
@@ -161,10 +156,6 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,      
   return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
 #else
-int wx_entry_proxy(int argc, char** argv) {
- return wxEntry(argc, argv);
-}
-
 int main(int argc, char **argv) {
   ATerm stackbot;
 
@@ -172,7 +163,8 @@ int main(int argc, char **argv) {
   ATinit(argc,argv,&stackbot);
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  squadt_interactor c(boost::bind(wx_entry_proxy, argc, argv));
+  squadt_utility::entry_wrapper starter(argc, argv);
+  squadt_interactor c(starter);
   if(!c.try_interaction(argc, argv)) {
   command_line = true;
 #endif
@@ -180,9 +172,9 @@ int main(int argc, char **argv) {
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }
-  return 0;
 #endif
 
+  return 0;
 }
 #endif
 

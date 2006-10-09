@@ -1,5 +1,6 @@
 #include "lts.h"
-
+using namespace Utils;
+using namespace std; 
 LTS::LTS( Mediator* owner)
 {
   mediator = owner;

@@ -1,4 +1,6 @@
 #include "fileloader.h"
+using namespace std;
+using namespace Utils;
 
 void FileLoader::loadFile( const string fileName, LTS* const lts )
 // pre: lts points to an empty LTS object

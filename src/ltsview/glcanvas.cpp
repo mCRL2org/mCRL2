@@ -8,6 +8,8 @@
 #include "icons/rotate_cursor.xpm"
 #include "icons/rotate_cursor_mask.xpm"
 
+using namespace Utils;
+using namespace IDs;
 BEGIN_EVENT_TABLE( GLCanvas, wxGLCanvas )
     EVT_MOTION( GLCanvas::onMouseMove )
     EVT_ENTER_WINDOW( GLCanvas::onMouseEnter )

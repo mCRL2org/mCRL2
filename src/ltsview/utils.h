@@ -3,7 +3,7 @@
 #include <math.h>
 #include <vector>
 #include <algorithm>
-using namespace std;
+//using namespace std;
 
 namespace Utils
 {
@@ -66,7 +66,7 @@ namespace Utils
     int		    paramIndex;
     bool	    isActivated;
     bool	    isNegated;
-    vector< bool >  valueSet;
+    std::vector< bool >  valueSet;
   };
   
   bool operator==( RGB_Color c1, RGB_Color c2 );

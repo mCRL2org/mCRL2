@@ -1,4 +1,6 @@
 #include "cluster.h"
+using namespace std;
+using namespace Utils;
 
 bool Comp_ClusterVolume::operator()(const Cluster* c1, const Cluster* c2) const
 {

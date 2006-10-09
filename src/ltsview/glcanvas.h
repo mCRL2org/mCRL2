@@ -16,8 +16,8 @@
 #include "utils.h"
 #include "ids.h"
 
-using namespace IDs;
-using namespace Utils;
+//using namespace IDs;
+//using namespace Utils;
 
 class GLCanvas: public wxGLCanvas
 {
@@ -29,8 +29,8 @@ class GLCanvas: public wxGLCanvas
     void      display();
     void      enableDisplay();
     void      disableDisplay();
-    RGB_Color getBackgroundColor() const;
-    RGB_Color getDefaultBackgroundColor() const { return defaultBGColor; }
+    Utils::RGB_Color getBackgroundColor() const;
+    Utils::RGB_Color getDefaultBackgroundColor() const { return defaultBGColor; }
     void      getMaxViewportDims(int *w,int *h);
     unsigned char* getPictureData(int res_x,int res_y);
     void      initialize();
@@ -45,7 +45,7 @@ class GLCanvas: public wxGLCanvas
     void      resetView();
     void      reshape();
     void      setActiveTool( int t );
-    void      setBackgroundColor( RGB_Color c ) { glClearColor(c.r,c.g,c.b,1); }
+    void      setBackgroundColor( Utils::RGB_Color c ) { glClearColor(c.r,c.g,c.b,1); }
     void      setDefaultPosition( float structWidth, float structHeight );
 
   private:
@@ -53,14 +53,14 @@ class GLCanvas: public wxGLCanvas
     float     angleX;
     float     angleY;
     int	      currentTool;
-    RGB_Color defaultBGColor;
+    Utils::RGB_Color defaultBGColor;
     float     startPosZ;
     float     startPosZDefault;
     bool      displayAllowed;
     float     farPlane;
     float     farPlaneDefault;
     Mediator* mediator;
-    Point3D   moveVector;
+    Utils::Point3D   moveVector;
     float     nearPlane;
     int	      oldMouseX;
     int	      oldMouseY;

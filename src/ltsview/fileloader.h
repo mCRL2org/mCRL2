@@ -9,14 +9,14 @@
 #include "lts.h"
 #include "fsmparser.h"
 
-using namespace std;
+//using namespace std;
 
 class FileLoader
 {
   public:
-    static void loadFile( const string fileName, LTS* const lts );
+    static void loadFile( const std::string fileName, LTS* const lts );
   private:
-    static void loadFSMFile( const string fileName, LTS* const lts );
+    static void loadFSMFile( const std::string fileName, LTS* const lts );
 };
 
 #endif // LOADER_H

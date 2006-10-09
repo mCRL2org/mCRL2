@@ -8,7 +8,7 @@
 #include <wx/filename.h>
 #include <vector>
 
-using namespace std;
+//using namespace std;
 
 const int myID_F_BUTTON = wxID_HIGHEST + 1;
 const int myID_R_SLIDER = myID_F_BUTTON + 1;
@@ -35,7 +35,7 @@ class SavePicDialog : public wxDialog {
     wxButton*	  f_button;
     wxFileName	  f_name;
     wxArrayString f_exts;
-    vector<long>  f_types;
+    std::vector<long>  f_types;
 
     DECLARE_EVENT_TABLE()
 };

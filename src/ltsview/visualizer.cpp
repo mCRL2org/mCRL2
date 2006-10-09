@@ -1,4 +1,6 @@
 #include "visualizer.h"
+using namespace std;
+using namespace Utils;
 
 bool Distance_desc::operator()(const Primitive* p1, const Primitive* p2) const {
   return ( p1->distance > p2->distance );

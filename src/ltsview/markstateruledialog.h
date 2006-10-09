@@ -10,8 +10,8 @@
 #include "aterm2.h"
 #include "utils.h"
 
-using namespace IDs;
-using namespace Utils;
+//using namespace IDs;
+//using namespace Utils;
 
 class MarkStateRuleDialog : public wxDialog
 {
@@ -19,16 +19,16 @@ class MarkStateRuleDialog : public wxDialog
     MarkStateRuleDialog( wxWindow* parent, Mediator* owner, ATermList svspec );
     ~MarkStateRuleDialog();
     void      onParameterChoice( wxCommandEvent& event );
-    MarkRule* getMarkRule();
+    Utils::MarkRule* getMarkRule();
     wxString  getMarkRuleString();
-    void      setMarkRule( MarkRule* mr, ATermList svspec );
+    void      setMarkRule( Utils::MarkRule* mr, ATermList svspec );
   private:
     Mediator*			mediator;
-    map< wxString, int >	parameterIndices;
+    std::map< wxString, int >	parameterIndices;
     wxListBox*			parameterListBox;
-    map< wxString, ATermAppl >	parameterTypes;
+    std::map< wxString, ATermAppl >	parameterTypes;
     wxListBox*			relationListBox;
-    map< wxString, int >	valueIndices;
+    std::map< wxString, int >	valueIndices;
     wxCheckListBox*		valuesListBox;
 
     void loadValues( wxString paramName );

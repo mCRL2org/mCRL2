@@ -12,7 +12,7 @@ ATermList stateId;
 ATermList typeValues;
 ATermAppl typeId;
 
-vector< State* > states;
+std::vector< State* > states;
 
 AFun const_ATtypeid;
 AFun const_ATparmid;
@@ -101,8 +101,8 @@ type_name :
 	| 
 	type_name ARROW type_name1
 	  {
-	    string result = static_cast<string> ( ATwriteToString( (ATerm)$1 ) )
-	      + "->" + static_cast<string> ( ATwriteToString( (ATerm)$3 ) );
+	    std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
+	      + "->" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
 	    $$ = ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) )
 	  }
 	;
@@ -113,7 +113,7 @@ type_name1 :
 	|
 	LPAR type_name RPAR
 	  {
-	    string result = "(" + static_cast<string> ( ATwriteToString(
+	    std::string result = "(" + static_cast<std::string> ( ATwriteToString(
 	      (ATerm)$2) ) + ")";
 	    $$ = ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) )
 	  }
@@ -235,12 +235,12 @@ int fsmwrap()
 
 void fsmerror(const char *str)
 {
-  throw string( "Parse error: " + string(str) + " token \"" + string(fsmtext) +
-    "\" at line " + string(intToCString( lineNo )) + " position " +
-    string(intToCString( posNo )) );
+  throw std::string( "Parse error: " + std::string(str) + " token \"" + std::string(fsmtext) +
+    "\" at line " + std::string(intToCString( lineNo )) + " position " +
+    std::string(intToCString( posNo )) );
 }
  
-void parseFSMfile( string fileName, LTS* const lts )
+void parseFSMfile( std::string fileName, LTS* const lts )
 {
   // reset the lexer position variables
   lineNo=1;
@@ -248,7 +248,7 @@ void parseFSMfile( string fileName, LTS* const lts )
   
   FILE* infile = fopen(fileName.c_str(),"r");
   if ( infile == NULL )
-    throw string( "Cannot open file for reading:\n" + fileName );
+    throw std::string( "Cannot open file for reading:\n" + fileName );
   else
   {
     // INITIALISE
@@ -297,7 +297,7 @@ void parseFSMfile( string fileName, LTS* const lts )
 
 char* intToCString( int i )
 {
-    ostringstream oss;
+    std::ostringstream oss;
     oss << i;
     return (char*)oss.str().c_str();
 }

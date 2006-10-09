@@ -18,7 +18,7 @@
   class Cluster;
 #endif
 
-using namespace std;
+//using namespace std;
 
 class State
 {
@@ -34,13 +34,13 @@ class State
     void      clearHierarchyInfo();
     //void      deselect();
     Cluster*  getCluster() const;
-    void      getComrades( set< State* > &ss ) const;
-    void      getInTransitions( vector< Transition* > &ts ) const;
-    void      getOutTransitions( vector< Transition* > &ts ) const;
+    void      getComrades( std::set< State* > &ss ) const;
+    void      getInTransitions( std::vector< Transition* > &ts ) const;
+    void      getOutTransitions( std::vector< Transition* > &ts ) const;
     float     getPosition() const;
     int	      getRank() const;
-    void      getSubordinates( set< State* > &ss ) const;
-    void      getSuperiors( set< State* > &ss ) const;
+    void      getSubordinates( std::set< State* > &ss ) const;
+    void      getSuperiors( std::set< State* > &ss ) const;
     int	      getValueIndexOfParam( int paramIndex );
     bool      isDeadlock() const;
     bool      isMarked() const;
@@ -54,20 +54,20 @@ class State
 
   private:
     Cluster*		  cluster;
-    set< State* >	  comrades;
+    std::set< State* >	  comrades;
     //float		  currentProbability;
-    vector< Transition* > inTransitions;
-    vector< Transition* > loops;
+    std::vector< Transition* > inTransitions;
+    std::vector< Transition* > loops;
     bool		  marked;
     //float		  probability;
-    vector< Transition* > outTransitions;
+    std::vector< Transition* > outTransitions;
     float		  position;
     int			  rank;
     //bool		  selected;
-    vector< ATerm >	  stateVector;
+    std::vector< ATerm >	  stateVector;
     ATermList		  stateVectorAT;
-    set< State* >	  subordinates;
-    set< State* >	  superiors;
+    std::set< State* >	  subordinates;
+    std::set< State* >	  superiors;
 };
 
 #endif //STATE_H

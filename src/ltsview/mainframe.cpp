@@ -12,6 +12,9 @@
 #include "icons/rotate_tool.xpm"
 #include "icons/rotate_cursor_mask.xpm"
 
+using namespace std;
+using namespace Utils;
+using namespace IDs;
 // Event table
 BEGIN_EVENT_TABLE( MainFrame, wxFrame )
   EVT_TOOL  ( wxID_OPEN, MainFrame::onOpen )

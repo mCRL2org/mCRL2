@@ -82,8 +82,8 @@ Utils::HSV_Color Utils::RGB_to_HSV( RGB_Color c )
   
   HSV_Color result;
   float diff = *maxval - *minval;
-  float min_uc = min( c.r, min( c.g, c.b ) );
-  float max_uc = max( c.r, max( c.g, c.b ) );
+  float min_uc = std::min( c.r, std::min( c.g, c.b ) );
+  float max_uc = std::max( c.r, std::max( c.g, c.b ) );
   if ( max_uc == min_uc )
     result.h = 0.0f;
   else if ( maxval == &c.r )

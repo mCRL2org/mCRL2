@@ -13,8 +13,8 @@
   class State;
 #endif
 
-using namespace Utils;
-using namespace std;
+//using namespace Utils;
+//using namespace std;
 
 // forward declaration
 class Cluster;
@@ -30,16 +30,16 @@ class Cluster
 {
   
   private:
-    map< ATerm, int >	actionLabelCounts;
+    std::map< ATerm, int >	actionLabelCounts;
     Cluster*		ancestor;
     float		baseRadius;
     bool		deadlock;
-    vector< Cluster* >	descendants;
+    std::vector< Cluster* >	descendants;
     int			markedState;
     int			markedTransitionCount;
     float		position;
     float		size;
-    vector< State* >	states;
+    std::vector< State* >	states;
     float		topRadius;
     float		volume; 
 
@@ -53,12 +53,12 @@ class Cluster
     Cluster*  getAncestor() const;
     float     getBaseRadius() const;
     Cluster*  getDescendant( int i ) const;
-    void      getDescendants( vector< Cluster* > &cs ) const;
+    void      getDescendants( std::vector< Cluster* > &cs ) const;
     int	      getNumberOfDescendants() const;
     float     getPosition() const;
     float     getTopRadius() const;
     float     getSize() const;
-    void      getStates( vector< State* > &ss ) const;
+    void      getStates( std::vector< State* > &ss ) const;
     float     getVolume() const;
     bool      hasDescendants() const;
     bool      hasDeadlock() const;

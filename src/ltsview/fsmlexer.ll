@@ -3,7 +3,7 @@
 #include <string>
 #include "aterm2.h"
 #include "fsmparser.hpp"
-using namespace std;
+//using namespace std;
 
 int lineNo=1, posNo=1;
 extern void fsmerror(const char* s);
@@ -43,7 +43,7 @@ void processId()
 void processQuoted()
 {
   posNo += fsmleng;
-  string value = static_cast<string>( fsmtext );
+  std::string value = static_cast<std::string>( fsmtext );
   value = value.substr( 1, value.length() - 2 );
   fsmlval.aterm = ATmakeAppl0( ATmakeAFun( value.c_str(), 0, ATfalse ) );
 } 

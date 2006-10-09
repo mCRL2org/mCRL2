@@ -22,18 +22,18 @@
 #include "ids.h"
 #include "savepicdialog.h"
 
-using namespace std;
-using namespace IDs;
+//using namespace std;
+//using namespace IDs;
 
 class MainFrame : public wxFrame
 {
   public:
     MainFrame( Mediator* owner );
     void	addMarkRule( wxString str );
-    void	createProgressDialog( const string title, const string text );
-    RGB_Color   getBackgroundColor() const;
+    void	createProgressDialog( const std::string title, const std::string text );
+    Utils::RGB_Color   getBackgroundColor() const;
     GLCanvas*	getGLCanvas() const;
-    VisSettings	getVisSettings() const;
+    Utils::VisSettings	getVisSettings() const;
     void	loadTitle();
     void	onActivateTool( wxCommandEvent& event );
     void	onAddMarkRuleButton( wxCommandEvent& event );
@@ -57,17 +57,17 @@ class MainFrame : public wxFrame
     void	onSpinSettingChanged( wxSpinEvent& event );
     void	replaceMarkRule( int index, wxString str );
     void	resetMarkRules();
-    void	setActionLabels( vector< ATerm > &labels );
-    void	setBackgroundColor( RGB_Color c );
+    void	setActionLabels( std::vector< ATerm > &labels );
+    void	setBackgroundColor( Utils::RGB_Color c );
     void	setFileInfo( wxFileName fn );
     void	setMarkedStatesInfo( int number );
     void	setMarkedTransitionsInfo( int number );
     void	setNumberInfo( int nstates, int ntransitions, int nclusters, int nranks );
-    void	setVisSettings( VisSettings ss );
-    void	showMessage( string title, string text );
+    void	setVisSettings( Utils::VisSettings ss );
+    void	showMessage( std::string title, std::string text );
     void	startRendering();
     void	stopRendering();
-    void	updateProgressDialog( int val, string msg );
+    void	updateProgressDialog( int val, std::string msg );
   private:
     wxColorButton*    backgroundButton;
     wxSpinCtrl*	      branchrotationSpinCtrl;
@@ -113,8 +113,8 @@ class MainFrame : public wxFrame
     void setupMarkPanel( wxPanel* panel );
     void setupSettingsPanel( wxPanel* panel );
     void setupToolBar();
-    wxColour  RGB_to_wxC( RGB_Color c ) const;
-    RGB_Color wxC_to_RGB( wxColour c ) const;
+    wxColour  RGB_to_wxC( Utils::RGB_Color c ) const;
+    Utils::RGB_Color wxC_to_RGB( wxColour c ) const;
 
     DECLARE_EVENT_TABLE()
 };

@@ -14,44 +14,44 @@
 #include "markstateruledialog.h"
 #include "utils.h"
 
-using namespace std;
-using namespace Utils;
+//using namespace std;
+//using namespace Utils;
 
 class LTSViewApp : public wxApp, public Mediator
 {
   private:
     int		      currentJobNr;
     GLCanvas*	      glCanvas;
-    vector< string >  jobNames;
+    std::vector< std::string >  jobNames;
     LTS*	      lts;
     MainFrame*	      mainFrame;
     int		      numberOfJobs;
     Visualizer*	      visualizer;
 
-    void applyRanking( RankStyle rs );
+    void applyRanking( Utils::RankStyle rs );
 
   public:
     void	  activateMarkRule( const int index, const bool activate );
     void	  addMarkRule();
     void	  applyDefaultSettings();
-    void	  applyMarkStyle( MarkStyle ms );
+    void	  applyMarkStyle( Utils::MarkStyle ms );
     void	  applySettings();
-    void	  drawLTS( Point3D viewpoint );
+    void	  drawLTS( Utils::Point3D viewpoint );
     void	  editMarkRule( const int index );
     float	  getHalfStructureHeight() const;
-    void	  markAction( string label );
+    void	  markAction( std::string label );
     void	  notifyRenderingFinished();
     void	  notifyRenderingStarted();
     virtual int   OnExit();
     virtual bool  OnInit();
-    void	  openFile( string fileName );
+    void	  openFile( std::string fileName );
     void	  removeMarkRule( const int index );
     void	  setMatchAnyMarkRule( bool b );
-    void	  setRankStyle( RankStyle rs );
-    void	  setVisStyle( VisStyle vs );
+    void	  setRankStyle( Utils::RankStyle rs );
+    void	  setVisStyle( Utils::VisStyle vs );
     void	  toggleDisplayStates();
     void	  toggleDisplayWireframe();
-    void	  unmarkAction( string label );
+    void	  unmarkAction( std::string label );
 };
 
 DECLARE_APP( LTSViewApp )
