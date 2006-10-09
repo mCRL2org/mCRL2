@@ -10,6 +10,9 @@
 namespace squadt {
   namespace GUI {
 
+    /**
+     * \brief Displays a dialog where users can adjust settings
+     **/
     class preferences : public wxDialog {
 
       private:

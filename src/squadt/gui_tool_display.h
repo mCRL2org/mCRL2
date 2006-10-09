@@ -18,6 +18,7 @@ namespace squadt {
 
     class project;
 
+    /// \cond PRIVATE_PART
     namespace detail {
 
       class tool_display;
@@ -91,6 +92,7 @@ namespace squadt {
         return (monitor);
       }
     }
+    /// \endcond
 
     /**
      * @brief Display window associated with a tool

@@ -1,3 +1,5 @@
+#include <boost/format.hpp>
+
 #include <transport/transporter.h>
 #include <transport/detail/socket_listener.h>
 #include <transport/detail/socket_transceiver.h>
@@ -15,6 +17,7 @@ namespace transport {
      **/
     socket_listener::socket_listener(transporter& m, const address& a, const short int p) :
       basic_listener(m), acceptor(socket_transceiver::scheduler.io_service), dispatcher(socket_transceiver::scheduler.io_service)  {
+      using namespace boost;
       using namespace boost::asio;
 
       ip::address address(a);
@@ -28,9 +31,7 @@ namespace transport {
       }
       catch (boost::asio::error e) {
         /* This should probably be logged somewhere someday */
-        std::cerr << " socket layer : " << e << " (" << endpoint.address().to_string() << ":" << endpoint.port() << ")" << std::endl;
-
-        throw;
+        throw (basic_listener::exception(str(format("Socket setup on %s:%u failed with error `%s'") % endpoint.address().to_string() % endpoint.port() % e.what())));
       }
 
       acceptor.listen();
@@ -73,8 +74,10 @@ namespace transport {
         return;
       }
       else {
+        using namespace boost;
+
         /* Some other error occurred, abort... */
-        throw (transport::exception(transport::listener_failure));
+        throw (basic_listener::exception(str(format("Connection failure with error `%s'\n") % e.what())));
       }
 
       /* Make sure the scheduler is running */

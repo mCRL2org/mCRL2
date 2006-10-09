@@ -23,6 +23,7 @@
 #include <wx/image.h>
 #include <wx/thread.h>
 #include <wx/cmdline.h>
+#include <wx/msgdlg.h>
 
 const char* program_name    = "squadt";
 const char* program_version = "0.2.1";
@@ -44,7 +45,9 @@ namespace squadt {
 using namespace squadt::GUI;
 
 class initialisation : public wxThread {
+
   private:
+
     splash* splash_window;
 
   public:
@@ -158,38 +161,50 @@ bool Squadt::OnInit() {
  
     wxImage logo(wxString(global_settings_manager->path_to_images("logo.jpg").c_str(), wxConvLocal));
  
-    splash* splash_window = new splash(&logo, 3);
+    splash* splash_window = new splash(&logo, 2);
  
     splash_window->set_category("Loading components");
  
-    global_tool_manager = tool_manager::read();
- 
-    splash_window->set_category("Querying tools", global_tool_manager->number_of_tools());
- 
-    /* Perform initialisation */
-    initialisation ti(splash_window);
- 
-    /* Cannot just wait because the splash would not be updated */
-    while (ti.IsAlive()) {
-      splash_window->update();
- 
-      wxYield();
-    }
- 
-    splash_window->set_category("Initialising components");
- 
-    /* Disable splash */
-    splash_window->set_done();
- 
-    /* Initialise main application window */
-    SetTopWindow(new squadt::GUI::main());
+    try {
+      global_tool_manager = tool_manager::read();
 
-    if (action) {
-      action(static_cast < squadt::GUI::main* > (GetTopWindow()));
+      splash_window->set_category("Querying tools", global_tool_manager->number_of_tools());
+     
+      /* Perform initialisation */
+      initialisation ti(splash_window);
+     
+      /* Cannot just wait because the splash would not be updated */
+      while (ti.IsAlive()) {
+        splash_window->update();
+     
+        wxYield();
+      }
+     
+      splash_window->set_category("Initialising components");
+     
+      /* Initialise main application window */
+      SetTopWindow(new squadt::GUI::main());
+     
+      if (action) {
+        action(static_cast < squadt::GUI::main* > (GetTopWindow()));
+      }
+
+      /* Disable splash */
+      splash_window->set_done();
+
+      SetUseBestVisual(true);
+    }
+    catch (sip::listening_exception& e) {
+      /* Disable splash */
+      splash_window->set_done();
+
+      wxMessageDialog error_dialog(0, wxString(e.what(), wxConvLocal), wxT("Fatal"), wxOK|wxICON_ERROR);
+      
+      error_dialog.ShowModal();
+
+      return (false);
     }
   }
-
-  SetUseBestVisual(true);
 
   return (c);
 }

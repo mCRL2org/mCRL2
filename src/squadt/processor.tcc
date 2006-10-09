@@ -15,6 +15,7 @@
 #include "tool_manager.h"
 
 namespace squadt {
+  /// \cond PRIVATE_PART
 
   class processor_impl {
     friend class processor;
@@ -871,6 +872,8 @@ namespace squadt {
       current_monitor->signal_change(execution::process::aborted);
     }
   }
+
+  /// \endcond
 }
 
 #endif

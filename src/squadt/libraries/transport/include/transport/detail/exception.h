@@ -5,26 +5,36 @@
 
 namespace transport {
 
-  /** \brief Type for exception identification */
-  enum values {
-    listener_failure,    ///< \brief a listener failed
-    transceiver_failure  ///< \brief a transceiver failed
-  };
-
   /** \brief The common exception type */
-  typedef ::utility::exception < values > exception;
-}
+  class exception : public std::exception {
 
-#ifdef IMPORT_STATIC_DEFINITIONS
-namespace utility {
-  /** \brief Descriptions for error messages */
-  template < >
-  const char* const exception< transport::values >::descriptions[] = {
-    "Listener failed connection attempt!",
-    "Transceiver failed send or receive!"
+    private:
+
+      /** \brief The message to display */
+      std::string  message;
+
+    public:
+
+      /** \brief Constructor */
+      exception(std::string const&);
+
+      /** \brief A description for the exception */
+      const char* what() const throw ();
+
+      /** \brief Destructor */
+      ~exception() throw ();
   };
+
+  inline exception::exception(std::string const& m) : message(m) {
+  }
+
+  inline const char* exception::what() const throw () {
+    return (message.c_str());
+  }
+
+  inline exception::~exception() throw () {
+  }
 }
-#endif
 
 #endif
 

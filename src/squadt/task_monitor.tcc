@@ -4,6 +4,7 @@
 
 namespace squadt {
   namespace execution {
+    /// \cond PRIVATE_PART
 
     class task_monitor_impl : public sip::controller::communicator_impl {
       friend class task_monitor;
@@ -330,5 +331,7 @@ namespace squadt {
 
       associated_process.reset();
     }
+
+    /// \endcond
   }
 }

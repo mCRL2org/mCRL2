@@ -1,5 +1,5 @@
-#ifndef LISTENER_H
-#define LISTENER_H
+#ifndef TRANSPORT_LISTENER_H_
+#define TRANSPORT_LISTENER_H_
 
 #include <boost/shared_ptr.hpp>
 
@@ -12,11 +12,18 @@ namespace transport {
 
   namespace listener {
 
-    /* Base class for listeners */
+    /**
+     * \brief Base class for listeners
+     **/
     class basic_listener {
+
       public:
+
         /** \brief Convenience type alias to hide the shared pointer implementation */
         typedef boost::shared_ptr < basic_listener > ptr;
+
+        /** \brief Type for listener exceptions */
+        typedef transport::exception exception;
 
       protected:
         /** \brief The communicator that will take over the accepted connections */

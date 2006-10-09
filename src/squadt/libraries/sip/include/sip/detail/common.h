@@ -63,12 +63,17 @@ namespace sip {
 
 #ifdef BASIC_MESSENGER_H
 #ifndef SIP_COMMON_MESSENGER_H
-#define SIP_COMMON_MESSENGER_H
+#define SIP_COMMON_MESSENGER_Hr
+
+#include <transport/detail/exception.h>
 
 namespace sip {
 
-  /** \brief Convenience type for connection end points (primarily used by delivery handler functions) */
+  /** \brief Convenience type alias for connection end points (primarily used by delivery handler functions) */
   typedef const transport::transceiver::basic_transceiver* end_point;
+
+  /** \brief Convenience type alias for listening exceptions in the transport layer */
+  typedef transport::exception                             listening_exception;
 }
 
 #endif

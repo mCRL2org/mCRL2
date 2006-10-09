@@ -15,6 +15,7 @@
 
 namespace squadt {
   namespace GUI {
+    /// \cond PRIVATE_PART
     namespace detail {
 
       /**
@@ -34,6 +35,7 @@ namespace squadt {
           picture(wxWindow*, wxImage*);
       };
     }
+    /// \endcond
 
     /**
      * \brief Basic splash screen that shows initialisation progress
@@ -90,6 +92,7 @@ namespace squadt {
         inline void update();
     };
  
+    /// \cond PRIVATE_PART
     namespace detail {
 
       /**
@@ -123,6 +126,7 @@ namespace squadt {
         }
       }
     }
+    /// \endcond
 
     /**
      * \param[in] i the image to display
