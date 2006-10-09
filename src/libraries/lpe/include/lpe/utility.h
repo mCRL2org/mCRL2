@@ -50,9 +50,9 @@ std::set<aterm_string> identifiers(aterm t)
   return result;
 }
 
-/// Returns a variable that doesn't appear in context.
+/// Returns an identifier that doesn't appear in context.
 inline
-data_variable fresh_variable(std::string hint, aterm context)
+aterm_string fresh_identifier(std::string hint, aterm context)
 {
   std::set<aterm_string> ids = identifiers(context);
   aterm_string s(hint);
@@ -62,6 +62,14 @@ data_variable fresh_variable(std::string hint, aterm context)
     std::string name = str(boost::format(hint + "%02d") % index++);
     s = aterm_string(name);
   }
+  return s;
+}
+
+/// Returns a variable that doesn't appear in context.
+inline
+data_variable fresh_variable(std::string hint, aterm context)
+{
+  aterm_string s = fresh_identifier(hint, context);
   return data_variable(gsMakeDataVarId(aterm_appl(s), gsMakeSortIdReal()));
 }
 
