@@ -6,7 +6,7 @@
 //
 // file          : lpeuntime 
 // date          : 27-09-2006
-// version       : 0.23
+// version       : 0.24
 //
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
 //
@@ -31,6 +31,7 @@
 //LPE framework
 #include <lpe/lpe.h>
 #include <lpe/specification.h>
+#include <lpe/utility.h>
 
 //Squadt connectivity
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -45,7 +46,7 @@ using namespace lpe;
 
 namespace po = boost::program_options;
 
-#define VERSION "0.23"
+#define VERSION "0.24"
 
 std::string input_file; // Name of the file to read input from
 std::string output_file; // Name of the file to write output to (or stdout)
@@ -125,7 +126,7 @@ lpe::specification untime(const lpe::specification& specification) {
 
   // Create extra parameter last_action_time and add it to the list of process parameters,
   // last_action_time is used later on in the code
-  last_action_time = data_variable("last_action_time", lpe::sort("Real"));
+  last_action_time = fresh_variable("last_action_time", aterm_appl(specification));
   untime_process_parameters = push_back(lpe.process_parameters(), last_action_time);
       
   // Transpose the original summand list, and see if there are summands with time
@@ -161,8 +162,7 @@ lpe::specification untime(const lpe::specification& specification) {
 
 	// Add a new summation variable (this is allowed because according to an axiom the following equality holds):
 	// c -> a . X == sum t:Real . c -> a@t . X
-	lpe::data_variable time_var;
-	time_var = data_variable("time_var", lpe::sort("Real")); // TODO: See if we can auto-name the variable (in order to prevent name collisions)
+	lpe::data_variable time_var = fresh_variable("time_var", aterm_appl(specification));
 	untime_summation_variables = push_back(i->summation_variables(), time_var);
 
 	// Extend the original condition with an additional argument
