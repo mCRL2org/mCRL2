@@ -18,6 +18,7 @@ SavePicDialog::SavePicDialog(wxWindow* parent,int w,int h,int w_max,int h_max,
   wxArrayString fts;
   wxList handlers = wxImage::GetHandlers();
   wxNode* node = handlers.GetFirst();
+  int png_id = 0;
   while (node != NULL) {
     wxImageHandler* h = (wxImageHandler*)node->GetData();
     // ignore useless file types
@@ -32,6 +33,9 @@ SavePicDialog::SavePicDialog(wxWindow* parent,int w,int h,int w_max,int h_max,
       else {
 	      fts.Add(h->GetName()+wxT(" (.")+h->GetExtension()+wxT(")"));
       }
+      if (h->GetExtension() == wxT("png")) {
+	png_id = f_exts.Count();
+      }
       f_exts.Add(h->GetExtension());
       f_types.push_back(h->GetType());
     }
@@ -39,7 +43,7 @@ SavePicDialog::SavePicDialog(wxWindow* parent,int w,int h,int w_max,int h_max,
   }
   ft_choice = new wxChoice(this,myID_FT_CHOICE,wxDefaultPosition,wxDefaultSize,
     fts);
-  ft_choice->SetSelection(0);
+  ft_choice->SetSelection(png_id);
   
   if (dir == wxEmptyString) {
     f_name.AssignHomeDir();
