@@ -31,6 +31,8 @@ class GLCanvas: public wxGLCanvas
     void      disableDisplay();
     RGB_Color getBackgroundColor() const;
     RGB_Color getDefaultBackgroundColor() const { return defaultBGColor; }
+    void      getMaxViewportDims(int *w,int *h);
+    unsigned char* getPictureData(int res_x,int res_y);
     void      initialize();
     void      onMouseDown( wxMouseEvent& event );
     void      onMouseEnter( wxMouseEvent& event );

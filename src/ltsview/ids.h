@@ -4,8 +4,8 @@
 
 namespace IDs
 {
-  // define ID's for the toolbar buttons
-  const int myID_SELECT = wxID_HIGHEST + 1;
+  const int myID_SAVEPIC = wxID_HIGHEST + 1;
+  const int myID_SELECT = myID_SAVEPIC + 1;
   const int myID_ZOOM   = myID_SELECT + 1;
   const int myID_PAN    = myID_ZOOM + 1;
   const int myID_ROTATE = myID_PAN + 1;

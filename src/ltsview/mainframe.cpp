@@ -16,6 +16,7 @@
 BEGIN_EVENT_TABLE( MainFrame, wxFrame )
   EVT_TOOL  ( wxID_OPEN, MainFrame::onOpen )
   EVT_MENU  ( wxID_OPEN, MainFrame::onOpen )
+  EVT_MENU  ( myID_SAVEPIC, MainFrame::onSavePic )
   EVT_MENU  ( wxID_EXIT, MainFrame::onExit )
   EVT_MENU  ( wxID_RESET, MainFrame::onResetView )
   EVT_MENU  ( myID_DISPLAY_STATES, MainFrame::onDisplayStates )
@@ -66,8 +67,10 @@ void MainFrame::setupMenuBar()
   wxMenu* fileMenu = new wxMenu;
   wxMenu* viewMenu = new wxMenu;
   
-  fileMenu->Append( wxID_OPEN, wxT("&Open...\tCtrl+O"),
-      wxT("Load an LTS from file") );
+  fileMenu->Append(wxID_OPEN,wxT("&Open...\tCtrl+O"),
+    wxT("Load an LTS from file"));
+  fileMenu->Append(myID_SAVEPIC,wxT("Save &Picture...\tCtrl+P"),
+      wxT("Save current picture to file"));
   fileMenu->AppendSeparator();
   fileMenu->Append( wxID_EXIT, wxT("E&xit\tCtrl+Q"), wxT("Exit application") );
     
@@ -77,7 +80,7 @@ void MainFrame::setupMenuBar()
   viewMenu->AppendCheckItem( myID_DISPLAY_STATES, wxT("Display &states"),
       wxT("Show/hide individual states") );
   viewMenu->AppendCheckItem( myID_DISPLAY_WIREFRAME, wxT("Display &wireframe"),
-      wxT("Show as wireframe") );
+      wxT("Toggle wireframe/surface") );
   
   menuBar->Append( fileMenu, wxT("&File") );
   menuBar->Append( viewMenu, wxT("&View") );
@@ -510,12 +513,32 @@ void MainFrame::onOpen( wxCommandEvent& /*event*/ )
     filename  = dialog->GetFilename();
     mediator->openFile( string(dialog->GetPath().fn_str()) );
   }
-  dialog->Close();
   dialog->Destroy();
 }
 
-void MainFrame::onExit( wxCommandEvent& /*event*/ )
-{
+void MainFrame::onSavePic(wxCommandEvent& /*event*/) {
+  int w,h,max_w,max_h;
+  glCanvas->GetClientSize(&w,&h);
+  glCanvas->getMaxViewportDims(&max_w,&max_h);
+  SavePicDialog* sp_dlg = new SavePicDialog(this,w,h,max_w,max_h,filename,
+    directory);
+  if (sp_dlg->ShowModal() == wxID_OK) {
+    w = sp_dlg->getImageWidth();
+    h = sp_dlg->getImageHeight();
+    wxString fname = sp_dlg->getFileName();
+    long ftype = sp_dlg->getFileType();
+    sp_dlg->Destroy();
+
+    unsigned char* data = glCanvas->getPictureData(w,h);
+    wxImage img(w,h,data);
+    // order of image pixels is row major from bottom to top, but wxWidgets
+    // assumes it to be from top to bottom, so we mirror the image vertically
+    img = img.Mirror(false);
+    img.SaveFile(fname,ftype);
+  }
+}
+
+void MainFrame::onExit(wxCommandEvent& /*event*/) {
   Close();
 }
 

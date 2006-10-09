@@ -110,6 +110,13 @@ RGB_Color GLCanvas::getBackgroundColor() const
   return result;
 }
 
+void GLCanvas::getMaxViewportDims(int *w,int* h) {
+  int dims[2];
+  glGetIntegerv(GL_MAX_VIEWPORT_DIMS,dims);
+  *w = dims[0];
+  *h = dims[1];
+}
+
 void GLCanvas::resetView()
 {
   angleX = 0.0f;
@@ -182,7 +189,7 @@ void GLCanvas::display()
 
 void GLCanvas::reshape() {
   int width,height;
-  GetSize(&width,&height);
+  GetClientSize(&width,&height);
   glViewport(0,0,width,height);
   glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -321,8 +328,93 @@ void GLCanvas::onMouseMove( wxMouseEvent& event )
   }
 }
 
-void GLCanvas::onMouseWheel( wxMouseEvent& event )
-{
-  moveVector.z += 0.001f * (startPosZ - moveVector.z) * event.GetWheelRotation();
+void GLCanvas::onMouseWheel(wxMouseEvent& event) {
+  moveVector.z += 0.001f*(startPosZ-moveVector.z)*event.GetWheelRotation();
   display();
+}
+
+unsigned char* GLCanvas::getPictureData(int w_res,int h_res) {
+  /* collect the contents of the GLCanvas in an array of bytes; every byte is
+   * the R-, G-, or B-value of a pixel; order of returned data is from
+   * bottomleft to topright corner of canvas, row major.
+   *
+   * The user wants a picture of w_res * h_res pixels, but the canvas is w_block
+   * * h_block pixels and we can only read the contents of the canvas. So, we
+   * resize the viewport to w_res * h_res and read the viewport data in blocks
+   * of size w_block * h_block. Because in general (w_res MOD w_block) and
+   * (h_res MOD h_block) need not be 0, we also have to read a few remaining strips
+   * of viewport data. Afterwards, we "stitch" all these blocks of data together
+   * to obtain one big picture.
+   */
+  int w_block,h_block;
+  GetClientSize(&w_block,&h_block);
+
+  int W = w_res / w_block;     /* number of blocks in X direction */
+  int H = h_res / h_block;     /* number of blocks in Y direction */
+  int w_rem = w_res % w_block; /* number of pixels remaining in X direction */
+  int h_rem = h_res % h_block; /* number of pixels remaining in Y direction */
+
+  int M = W;		       /* number of blocks in X incl.remaining strip */
+  if (w_rem > 0) ++M;
+  int N = H;		       /* number of blocks in Y incl.remaining strip */
+  if (h_rem > 0) ++N;
+  unsigned char* pixel_ptrs[M][N]; /* pointers to the blocks of data */
+
+  glReadBuffer(GL_BACK);
+  glPixelStorei(GL_PACK_ALIGNMENT,1);
+
+  /* COLLECT ALL DATA */
+
+  int bx,by; /* x and y coordinate of lower left corner of current block */
+  int bw,bh; /* width and height of current block */
+  by = 0;
+  bh = h_block;
+  for (int j=0; j<N; ++j) {
+    if (j==H) bh = h_rem;
+    bx = 0;
+    bw = w_block;
+    for (int i=0; i<M; ++i) {
+      if (i==W) bw = w_rem;
+      glViewport(-bx,-by,w_res,h_res);
+      display();
+      pixel_ptrs[i][j] = (unsigned char*)malloc(3*bw*bh*sizeof(unsigned char));
+      glReadPixels(0,0,bw,bh,GL_RGB,GL_UNSIGNED_BYTE,pixel_ptrs[i][j]);
+      bx += w_block;
+    }
+    by += h_block;
+  }
+
+  /* RESET VIEW */
+
+  glViewport(0,0,w_block,h_block);
+  display();
+
+  /* STITCH COLLECTED DATA TOGETHER */
+  
+  unsigned char* pixels = 
+    (unsigned char*)malloc(3*w_res*h_res*sizeof(unsigned char));
+  
+  int offset = 0;
+  bh = h_block;
+  for (int j=0; j<N; ++j) {
+    if (j==H) bh = h_rem;
+    for (int r=0; r<bh; ++r) {
+      bw = w_block;
+      for (int i=0; i<M; ++i) {
+	if (i==W) bw = w_rem;
+	memcpy(pixels+offset,pixel_ptrs[i][j]+3*r*bw,3*bw);
+	offset += 3*bw;
+      }
+    }
+  }
+  
+  /* CLEAN UP */
+
+  for (int j=0; j<N; ++j) {
+    for (int i=0; i<M; ++i) {
+      free(pixel_ptrs[i][j]);
+    }
+  }
+
+  return pixels;
 }

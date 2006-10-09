@@ -99,6 +99,8 @@ bool LTSViewApp::OnInit()
   mainFrame->setVisSettings( visualizer->getVisSettings() );
   mainFrame->setBackgroundColor( glCanvas->getBackgroundColor() );
 
+  wxInitAllImageHandlers();
+
   if (command_line) {
     // parse command line and check for specified input file
     wxCmdLineEntryDesc cmdLineDesc[] = 

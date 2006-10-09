@@ -20,6 +20,7 @@
 #include "mediator.h"
 #include "glcanvas.h"
 #include "ids.h"
+#include "savepicdialog.h"
 
 using namespace std;
 using namespace IDs;
@@ -41,6 +42,7 @@ class MainFrame : public wxFrame
     void	onDisplayWireframe( wxCommandEvent& event );
     void	onExit( wxCommandEvent& event );
     void	onOpen( wxCommandEvent& event );
+    void  onSavePic(wxCommandEvent& event);
     void	onRankStyle( wxCommandEvent& event );
     void	onVisStyle( wxCommandEvent& event );
     void	onRemoveMarkRuleButton( wxCommandEvent& event );

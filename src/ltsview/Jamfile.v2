@@ -25,6 +25,7 @@ exe ltsview
         mainframe.cpp
         glcanvas.cpp
         markstateruledialog.cpp
+	savepicdialog.cpp
         lts.cpp
         state.cpp
         transition.cpp
