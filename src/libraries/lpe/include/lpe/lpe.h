@@ -206,6 +206,78 @@ class LPE_summand: public aterm_appl_wrapper
     }
 };
 
+inline
+LPE_summand set_summation_variables(LPE_summand s, data_variable_list summation_variables)
+{
+  return LPE_summand(summation_variables,
+                     s.condition          (),
+                     s.is_delta           (),
+                     s.actions            (),
+                     s.time               (),
+                     s.assignments        () 
+                    );
+}
+
+inline
+LPE_summand set_condition(LPE_summand s, data_expression condition)
+{
+  return LPE_summand(s.summation_variables(),
+                     condition,
+                     s.is_delta           (),
+                     s.actions            (),
+                     s.time               (),
+                     s.assignments        () 
+                    );
+}
+
+inline
+LPE_summand set_delta(LPE_summand s, bool delta)
+{
+  return LPE_summand(s.summation_variables(),
+                     s.condition          (),
+                     delta,
+                     s.actions            (),
+                     s.time               (),
+                     s.assignments        () 
+                    );
+}
+
+inline
+LPE_summand set_actions(LPE_summand s, action_list actions)
+{
+  return LPE_summand(s.summation_variables(),
+                     s.condition          (),
+                     s.is_delta           (),
+                     actions,
+                     s.time               (),
+                     s.assignments        () 
+                    );
+}
+
+inline
+LPE_summand set_time(LPE_summand s, data_expression time)
+{
+  return LPE_summand(s.summation_variables(),
+                     s.condition          (),
+                     s.is_delta           (),
+                     s.actions            (),
+                     time,
+                     s.assignments        () 
+                    );
+}
+
+inline
+LPE_summand set_assignments(LPE_summand s, data_assignment_list assignments)
+{
+  return LPE_summand(s.summation_variables(),
+                     s.condition          (),
+                     s.is_delta           (),
+                     s.actions            (),
+                     s.time               (),
+                     assignments 
+                    );
+}
+
 typedef term_list<LPE_summand> summand_list;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -364,6 +436,46 @@ class LPE: public aterm_appl_wrapper
       return s1 + "\n" + s2 + "\n" + s3 + "\n" + s4;
     }
   };
+
+inline
+LPE set_free_variables(LPE l, data_variable_list free_variables)
+{
+  return LPE(free_variables,
+             l.process_parameters(),
+             l.summands          (),
+             l.actions           ()
+            );
+}
+
+inline
+LPE set_process_parameters(LPE l, data_variable_list process_parameters)
+{
+  return LPE(l.free_variables    (),
+             process_parameters,
+             l.summands          (),
+             l.actions           ()
+            );
+}
+
+inline
+LPE set_summands(LPE l, summand_list summands)
+{
+  return LPE(l.free_variables    (),
+             l.process_parameters(),
+             summands,
+             l.actions           ()
+            );
+}
+
+inline
+LPE set_actions(LPE l, action_list actions)
+{
+  return LPE(l.free_variables    (),
+             l.process_parameters(),
+             l.summands          (),
+             actions
+            );
+}
 
 } // namespace lpe
 

@@ -50,11 +50,11 @@ std::set<aterm_string> identifiers(aterm t)
   return result;
 }
 
-/// Returns a variable that doesn't appear in l.
+/// Returns a variable that doesn't appear in context.
 inline
-data_variable fresh_variable(std::string hint, aterm_list l)
+data_variable fresh_variable(std::string hint, aterm context)
 {
-  std::set<aterm_string> ids = identifiers(l);
+  std::set<aterm_string> ids = identifiers(context);
   aterm_string s(hint);
   int index = 0;
   while (ids.find(s) != ids.end())
@@ -65,11 +65,11 @@ data_variable fresh_variable(std::string hint, aterm_list l)
   return data_variable(gsMakeDataVarId(aterm_appl(s), gsMakeSortIdReal()));
 }
 
-/// Returns a variable list that doesn't contain terms that appear in l.
-data_variable_list fresh_variable_list(std::string hint, unsigned int size, aterm_list l)
+/// Returns a variable list that doesn't contain terms that appear in context.
+data_variable_list fresh_variable_list(std::string hint, unsigned int size, aterm context)
 {
   data_variable_list result;
-  std::set<aterm_string> ids = identifiers(l);
+  std::set<aterm_string> ids = identifiers(context);
   int index = 0;
   for (unsigned int i = 0; i < size; i++)
   {
@@ -77,7 +77,7 @@ data_variable_list fresh_variable_list(std::string hint, unsigned int size, ater
     {
       std::string name = str(boost::format(hint + "%02d") % index++);
       aterm_string s = aterm_string(name);
-      if (ids.find(s) != ids.end()) // s does not exist in l
+      if (ids.find(s) != ids.end()) // s does not exist in context
       {
         result = push_front(result, data_variable(gsMakeDataVarId(aterm_appl(s), gsMakeSortIdReal())));
         break;

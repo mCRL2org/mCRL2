@@ -41,6 +41,12 @@ namespace atermpp
     return aterm_list(ATmakeList3(t0, t1, t2));
   }
 
+  inline
+  aterm_list make_list(aterm t0, aterm t1, aterm t2, aterm t3)
+  {
+    return aterm_list(ATmakeList4(t0, t1, t2, t3));
+  }
+
 } // namespace atermpp
 
 #endif // ATERM_MAKE_LIST_H

@@ -114,12 +114,12 @@ typedef term_list<pbes_expression> pbes_expression_list;
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief A propositional variable declaration
 ///
-// <PropVarDecl>  ::= PropVarDecl(<String>, <DataExpr>*)
+// <PropVarDecl>  ::= PropVarDecl(<String>, <DataVarId>*)
 class propositional_variable: public aterm_appl_wrapper
 {
   protected:
     aterm_string m_name;
-    data_expression_list m_expressions;
+    data_variable_list m_variables;
 
   public:
     propositional_variable()
@@ -128,10 +128,10 @@ class propositional_variable: public aterm_appl_wrapper
     // example: "X(d:D,e:E)"
     propositional_variable(std::string s)
     {
-      std::pair<std::string, data_expression_list> p = parse_variable(s);
-      m_name        = aterm_string(p.first);
-      m_expressions = p.second;
-      m_term        = gsMakePropVarDecl(m_name, m_expressions);
+      std::pair<std::string, data_variable_list> p = parse_variable(s);
+      m_name      = aterm_string(p.first);
+      m_variables = p.second;
+      m_term      = gsMakePropVarDecl(m_name, m_variables);
     }
 
     propositional_variable(aterm_appl t)
@@ -140,13 +140,13 @@ class propositional_variable: public aterm_appl_wrapper
       assert(gsIsPropVarDecl(t));
       aterm_list::iterator i = arguments().begin();
       m_name = *i++;
-      m_expressions = *i;
+      m_variables = *i;
     }
 
-    propositional_variable(aterm_string name, data_expression_list expressions)
-      : aterm_appl_wrapper(gsMakePropVarDecl(name, expressions)),
+    propositional_variable(aterm_string name, data_variable_list variables)
+      : aterm_appl_wrapper(gsMakePropVarDecl(name, variables)),
         m_name(name),
-        m_expressions(expressions)
+        m_variables(variables)
     {
     }
 
@@ -162,9 +162,9 @@ class propositional_variable: public aterm_appl_wrapper
     }
 
     /// Returns the parameters of the propositional variable.
-    data_expression_list parameters() const
+    data_variable_list parameters() const
     {
-      return m_expressions;
+      return m_variables;
     }
 };
 

@@ -20,6 +20,7 @@
 #include "lpe/pbes_init.h"
 #include "lpe/specification.h"
 #include "lpe/utility.h"
+#include "lpe/lpe_algorithm.h"
 
 namespace lpe {
 
@@ -407,6 +408,8 @@ pbes pbes_translate(state_formula f, specification spec)
 
   LPE lpe = spec.lpe();
   data_variable T = fresh_variable("T", make_list(aterm_appl(f), aterm_appl(lpe)));
+  aterm_list context = make_list(aterm(T), aterm_list(spec.initial_state()), aterm_appl(lpe), aterm_appl(f));
+  lpe = make_timed_lpe(lpe, context);
   equation_system e = E(f, lpe, T);
 
   data_specification dataspec(spec.sorts(), spec.constructors(), spec.mappings(), spec.equations());
