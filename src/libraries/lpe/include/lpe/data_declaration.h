@@ -90,6 +90,16 @@ class data_declaration
     ///
     void set_equations(data_equation_list equations)
     { m_equations = equations; }
+
+    std::string to_string() const
+    {
+      std::string s1 = m_sorts.to_string();
+      std::string s2 = m_constructors.to_string();
+      std::string s3 = m_mappings.to_string();
+      std::string s4 = m_equations.to_string();
+      return s1 + "\n" + s2 + "\n" + s3 + "\n" + s4;
+    }
+
 };
 
 } // namespace mcrl
