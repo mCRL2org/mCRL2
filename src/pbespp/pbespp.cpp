@@ -219,7 +219,7 @@ bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName,
   }
   //initialise rewriter, if needed
   if (pp_format == ppDefault) {
-    gsRewriteInit(ATAgetArgument(Spec,3),GS_REWR_INNER);
+    gsRewriteInit(ATAgetArgument(ATAgetArgument(Spec,0),3),GS_REWR_INNER);
   }
   //pretty print Spec to OutputStream
   PrintPart_C(OutputStream, (ATerm) Spec, pp_format);
