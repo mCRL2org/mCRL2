@@ -239,21 +239,21 @@ namespace state_init {
   }
 
   inline
-  state_formula var(std::string name, data_expression_list l)
+  state_formula var(aterm_string name, data_expression_list l)
   {
-    return state_formula(gsMakeStateVar(aterm_string(name), l));
+    return state_formula(gsMakeStateVar(name, l));
   }
 
   inline
-  state_formula mu(std::string name, data_variable_init_list l, state_formula p)
+  state_formula mu(aterm_string name, data_variable_init_list l, state_formula p)
   {
-    return state_formula(gsMakeStateMu(aterm_string(name), l, p));
+    return state_formula(gsMakeStateMu(name, l, p));
   }
 
   inline
-  state_formula nu(std::string name, data_variable_init_list l, state_formula p)
+  state_formula nu(aterm_string name, data_variable_init_list l, state_formula p)
   {
-    return state_formula(gsMakeStateNu(aterm_string(name), l, p));
+    return state_formula(gsMakeStateNu(name, l, p));
   }
 
   inline bool is_data       (state_formula t) { return gsIsDataExpr       (t); }
