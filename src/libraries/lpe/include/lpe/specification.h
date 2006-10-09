@@ -164,6 +164,32 @@ class specification: public aterm_appl_wrapper
       );        
     }
 
+    specification(
+        data_declaration     data             ,
+        action_list          actions          ,
+        LPE                  lpe              ,
+        data_variable_list   initial_free_variables,
+        data_variable_list   initial_variables,
+        data_expression_list initial_state)
+      :
+        m_data(data),
+        m_actions(actions),
+        m_lpe(lpe),
+        m_initial_free_variables(initial_free_variables),        
+        m_initial_assignments(compute_initial_assignments(initial_variables, initial_state))
+    {
+      assert(initial_variables.size() == initial_state.size());
+      m_term = gsMakeSpecV1(
+          gsMakeSortSpec(data.sorts()),
+          gsMakeConsSpec(data.constructors()),
+          gsMakeMapSpec(data.mappings()),
+          gsMakeDataEqnSpec(data.equations()),
+          gsMakeActSpec(actions),
+          lpe,
+          gsMakeLPEInit(initial_free_variables, m_initial_assignments)
+      );        
+    }
+
     /// Reads the LPE from file. Returns true if the operation succeeded.
     ///
     bool load(const std::string& filename)
@@ -280,6 +306,79 @@ class specification: public aterm_appl_wrapper
     }
 };
 
-} // namespace mcrl
+
+inline
+specification set_data_declaration(specification spec, data_declaration data)
+{
+  return specification(data,
+                       spec.actions(),
+                       spec.lpe(),
+                       spec.initial_free_variables(),
+                       spec.initial_variables(),
+                       spec.initial_state()
+                      );
+}
+
+inline
+specification set_actions(specification spec, action_list actions)
+{
+  return specification(spec.data(),
+                       actions,
+                       spec.lpe(),
+                       spec.initial_free_variables(),
+                       spec.initial_variables(),
+                       spec.initial_state()
+                      );
+}
+
+inline
+specification set_lpe(specification spec, LPE lpe)
+{
+  return specification(spec.data(),
+                       spec.actions(),
+                       lpe,
+                       spec.initial_free_variables(),
+                       spec.initial_variables(),
+                       spec.initial_state()
+                      );
+}
+
+inline
+specification set_initial_free_variables(specification spec, data_variable_list initial_free_variables)
+{
+  return specification(spec.data(),
+                       spec.actions(),
+                       spec.lpe(),
+                       initial_free_variables,
+                       spec.initial_variables(),
+                       spec.initial_state()
+                      );
+}
+
+inline
+specification set_initial_variables(specification spec, data_variable_list initial_variables)
+{
+  return specification(spec.data(),
+                       spec.actions(),
+                       spec.lpe(),
+                       spec.initial_free_variables(),
+                       initial_variables,
+                       spec.initial_state()
+                      );
+}
+
+inline
+specification set_initial_state(specification spec, data_expression_list initial_state)
+{
+  return specification(spec.data(),
+                       spec.actions(),
+                       spec.lpe(),
+                       spec.initial_free_variables(),
+                       spec.initial_variables(),
+                       initial_state
+                      );
+}
+
+} // namespace lpe
 
 #endif // LPE_SPECIFICATION_H
