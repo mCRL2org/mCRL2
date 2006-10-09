@@ -119,7 +119,7 @@ namespace squadt {
     void main::project_open() {
       dialog::open_project dialog(this);
 
-      if (dialog.ShowModal()) {
+      if (dialog.ShowModal() == wxID_OK) {
           project_open(dialog.get_location());
       }
     }
