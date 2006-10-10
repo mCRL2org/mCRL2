@@ -410,7 +410,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 
 using namespace std;
 
-static int parse_command_line(int argc, char *argv[],t_lin_options &lin_options)
+static bool parse_command_line(int argc, char *argv[],t_lin_options &lin_options)
 { 
   //declarations for getopt
   bool lm_chosen = false;
@@ -461,7 +461,7 @@ static int parse_command_line(int argc, char *argv[],t_lin_options &lin_options)
       case '0': /* stack */
         if (lm_chosen && opt_lin_method != lmStack) {
           gsErrorMsg("only one method of linearisation is allowed\n");
-          return 1;
+          return false;
         }
         lm_chosen = true;
         opt_lin_method = lmStack;
@@ -469,7 +469,7 @@ static int parse_command_line(int argc, char *argv[],t_lin_options &lin_options)
       case '1': /* regular */
         if (lm_chosen && opt_lin_method != lmRegular) {
           gsErrorMsg("only one method of linearisation is allowed\n");
-          return 1;
+          return false;
         }
         lm_chosen = true;
         opt_lin_method = lmRegular;
@@ -477,7 +477,7 @@ static int parse_command_line(int argc, char *argv[],t_lin_options &lin_options)
       case '2': /* regular2 */
         if (lm_chosen && opt_lin_method != lmRegular2) {
           gsErrorMsg("only one method of linearisation is allowed\n");
-          return 1;
+          return false;
         }
         lm_chosen = true;
         opt_lin_method = lmRegular2;
@@ -485,7 +485,7 @@ static int parse_command_line(int argc, char *argv[],t_lin_options &lin_options)
       case '3': /* alternative */
         if (lm_chosen && opt_lin_method != lmAlternative) {
           gsErrorMsg("only one method of linearisation is allowed\n");
-          return 1;
+          return false;
         }
         lm_chosen = true;
         opt_lin_method = lmAlternative;
@@ -534,15 +534,15 @@ static int parse_command_line(int argc, char *argv[],t_lin_options &lin_options)
           opt_end_phase = phDataImpl;
         } else {
           gsErrorMsg("option -p has illegal argument '%s'\n", optarg);
-          return 1;
+          return false;
         }
         break;
       case 'h': /* help */
         PrintHelp(argv[0]);
-        return 1;
+        return false;
       case VersionOption: /* version */
         PrintVersion();
-        return 1;
+        return false;
       case 'q': /* quiet */
         gsSetQuietMsg();
         break;
@@ -555,22 +555,22 @@ static int parse_command_line(int argc, char *argv[],t_lin_options &lin_options)
       case '?':
       default:
         PrintMoreInfo(argv[0]); 
-        return 1;
+        return false;
     } 
     Option = getopt_long(argc, argv, ShortOptions, LongOptions, NULL);
   }
   //check for dangerous and illegal option combinations
   if (opt_newstate && opt_lin_method == lmStack) {
     gsErrorMsg("option -w can only be used with -1 or -2\n");
-    return 1;
+    return false;
   }
   if (opt_check_only && (opt_end_phase != phNone)) {
     gsErrorMsg("options -e and -p may not be used in conjunction\n");
-    return 1;
+    return false;
   }
   if (opt_noalpha && (opt_end_phase == phAlphaRed)) {
     gsErrorMsg("options -r and -p ar may not be used in conjunction\n");
-    return 1;
+    return false;
   }
   if (opt_lin_method == lmAlternative) {
     if (opt_final_cluster)           AltIllegalOptWarning('c');
@@ -589,7 +589,7 @@ static int parse_command_line(int argc, char *argv[],t_lin_options &lin_options)
   if (noargc > 2) {
     fprintf(stderr, "%s: too many arguments\n", NAME);
     PrintMoreInfo(argv[0]);
-    return 1;
+    return false;
   } else {
     //noargc >= 0 && noargc <= 2
     if (noargc > 0) {
@@ -617,7 +617,7 @@ static int parse_command_line(int argc, char *argv[],t_lin_options &lin_options)
   lin_options.infilename = infilename;
   lin_options.outfilename = outfilename;
 
-  return 0;  // main can continue
+  return true;  // main can continue
 }
 
 ATermAppl linearise_file(t_lin_options &lin_options)
@@ -789,38 +789,38 @@ int main(int argc, char *argv[])
 
   if (!c.try_interaction(argc, argv)) {
 #endif
-    parse_command_line(argc,argv,lin_options);
+    if (parse_command_line(argc,argv,lin_options)) {
+      //linearise infilename with options lin_options
+      ATermAppl result = linearise_file(lin_options);
 
-    //linearise infilename with options lin_options
-    ATermAppl result = linearise_file(lin_options);
- 
-    if (result == NULL) {
-      return 1;
-    }
-    if (lin_options.opt_check_only) {
-      if (lin_options.infilename == "") {
-        fprintf(stdout, "stdin");
-      } else {
-        fprintf(stdout, "The file '%s'", lin_options.infilename.c_str());
+      if (result == NULL) {
+        return 1;
       }
-      fprintf(stdout, " contains a well-formed mCRL2 specification.\n");
-      return 0;
-    } else {
-      //store the result
-      if (lin_options.outfilename == "") {
-        gsVerboseMsg("saving result to stdout...\n");
-        ATwriteToBinaryFile((ATerm) result, stdout);
-        fprintf(stdout, "\n");
-      } else { //outfilename != NULL
-        //open output filename
-        FILE *outstream = fopen(lin_options.outfilename.c_str(), "wb");
-        if (outstream == NULL) {
-          gsErrorMsg("cannot open output file '%s'\n", lin_options.outfilename.c_str());
-          return 1;
+      if (lin_options.opt_check_only) {
+        if (lin_options.infilename == "") {
+          fprintf(stdout, "stdin");
+        } else {
+          fprintf(stdout, "The file '%s'", lin_options.infilename.c_str());
         }
-        gsVerboseMsg("saving result to '%s'...\n", lin_options.outfilename.c_str());
-        ATwriteToBinaryFile((ATerm) result, outstream);
-        fclose(outstream);
+        fprintf(stdout, " contains a well-formed mCRL2 specification.\n");
+        return 0;
+      } else {
+        //store the result
+        if (lin_options.outfilename == "") {
+          gsVerboseMsg("saving result to stdout...\n");
+          ATwriteToBinaryFile((ATerm) result, stdout);
+          fprintf(stdout, "\n");
+        } else { //outfilename != NULL
+          //open output filename
+          FILE *outstream = fopen(lin_options.outfilename.c_str(), "wb");
+          if (outstream == NULL) {
+            gsErrorMsg("cannot open output file '%s'\n", lin_options.outfilename.c_str());
+            return 1;
+          }
+          gsVerboseMsg("saving result to '%s'...\n", lin_options.outfilename.c_str());
+          ATwriteToBinaryFile((ATerm) result, outstream);
+          fclose(outstream);
+        }
       }
     }
 #ifdef ENABLE_SQUADT_CONNECTIVITY
