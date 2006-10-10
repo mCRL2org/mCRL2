@@ -1021,5 +1021,5 @@ bool generate_lts()
     }
   }
   
-  return lg_error;
+  return !lg_error;
 }
