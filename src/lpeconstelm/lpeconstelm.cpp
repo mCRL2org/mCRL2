@@ -564,7 +564,7 @@ void lpeConstElm::removeSingleton(int n)
   if(p_verbose){
   std::cerr <<
     "lpeconstelm: Constant process parameters which are not substituted and " << std::endl <<
-    "lpeconstelm: removed [--nosingleton]:" << std::endl;
+    "lpeconstelm: removed [--no-singleton]:" << std::endl;
   }
   for(int i = 0; i < n; i++)
   {
@@ -579,7 +579,7 @@ void lpeConstElm::removeSingleton(int n)
       }
     }
   }
-  if (empty){
+  if (p_verbose && empty){
     std::cerr << "lpeconstelm:   []" << std::endl;
   }
 }
@@ -872,7 +872,7 @@ void lpeConstElm::filter() {
 
   for(lpe::data_assignment_list::iterator i = p_spec.initial_assignments().begin(); i != p_spec.initial_assignments().end() ; i++ ){
     p_lookupIndex[i->lhs()] = counter;
-      p_currentState.push_back(data_assignment(i->lhs(), data_expression(rewrite(i->rhs()))));
+//      p_currentState.push_back(data_assignment(i->lhs(), data_expression(rewrite(i->rhs()))));
     data_assignment da(i->lhs(),data_expression(rewrite(i->rhs())));
     ATtablePut(safeguard,aterm(da),aterm(da));
     p_currentState.push_back(da);
@@ -896,7 +896,7 @@ void lpeConstElm::filter() {
   summand_list::iterator sums_e = sums.end();
   for (summand_list::iterator i = sums_b; i != sums_e; i++)
   {
-      sum_vars.insert(i->summation_variables().begin(),i->summation_variables().end());
+//      sum_vars.insert(i->summation_variables().begin(),i->summation_variables().end());
     for (data_variable_list::iterator j = i->summation_variables().begin(); j != i->summation_variables().end(); j++)
     {
       sum_vars.insert(*j);
