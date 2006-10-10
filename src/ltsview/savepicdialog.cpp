@@ -12,8 +12,7 @@ SavePicDialog::SavePicDialog(wxWindow* parent,GLCanvas* glc,wxString filename,
   wxString dir)
 :wxDialog(parent,-1,wxT("Save Picture"),wxDefaultPosition) {
   glcanvas = glc;
-  int w,h;
-  GLint w_max,h_max;
+  int w,h,w_max,h_max;
   glcanvas->GetClientSize(&w,&h);
   glcanvas->getMaxViewportDims(&w_max,&h_max);
   ar = float(w)/float(h);

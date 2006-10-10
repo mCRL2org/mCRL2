@@ -112,10 +112,10 @@ RGB_Color GLCanvas::getBackgroundColor() const
 }
 
 void GLCanvas::getMaxViewportDims(int *w,int* h) {
-  int dims[2];
+  GLint dims[2];
   glGetIntegerv(GL_MAX_VIEWPORT_DIMS,dims);
-  *w = dims[0];
-  *h = dims[1];
+  *w = int(dims[0]);
+  *h = int(dims[1]);
 }
 
 void GLCanvas::resetView() {
