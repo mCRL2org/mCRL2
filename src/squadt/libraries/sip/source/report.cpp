@@ -15,14 +15,14 @@ namespace sip {
 
     /* Include description */
     if (!description.empty()) {
-      const std::string pattern("</description>");
+      const std::string pattern("]]>");
 
       /* Sanity check... (todo better would be to use Base-64 or some other encoding) */
       if (std::search(description.begin(), description.end(), pattern.begin(), pattern.end()) != description.end()) {
         throw (new exception(sip::message_forbidden_content, pattern));
       }
 
-      output << "<description>" << description << "</description>";
+      output << "<description><![CDATA[" << description << "]]></description>";
     }
 
     output << "</report>";
