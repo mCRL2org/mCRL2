@@ -262,7 +262,7 @@ namespace squadt {
           new_sizer_item = sizer->Add(sd->release_window(), 0, flags, (cr.margin.left + cr.margin.right) >> 1);
         }
         else {
-          new_sizer_item = sizer->Add(sd->release_sizer(), 0, flags, (cr.margin.left + cr.margin.right) >> 1);
+          new_sizer_item = sizer->Add(sd->release_sizer(), 0, flags|wxEXPAND, (cr.margin.left + cr.margin.right) >> 1);
         }
      
         if (0 < cr.margin.bottom) {
@@ -312,7 +312,7 @@ namespace squadt {
           new_sizer_item = sizer->Add(sd->release_window(), 0, flags, (cr.margin.top + cr.margin.bottom) >> 1);
         }
         else {
-          new_sizer_item = sizer->Add(sd->release_sizer(), 0, flags, (cr.margin.top + cr.margin.bottom) >> 1);
+          new_sizer_item = sizer->Add(sd->release_sizer(), 0, flags|wxEXPAND, (cr.margin.top + cr.margin.bottom) >> 1);
         }
 
         if (0 < cr.margin.right) {
@@ -725,10 +725,12 @@ namespace squadt {
 
             content->Layout();
 
-            Show(true);
+            Show(current_layout->get_visibility());
           }
           else {
             content = 0;
+
+            Show(log != 0);
           }
 
           GetParent()->Layout();

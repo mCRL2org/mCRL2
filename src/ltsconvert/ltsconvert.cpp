@@ -245,7 +245,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   transformation_options method = static_cast < transformation_options > (boost::any_cast < size_t > (c.get_option_value(selected_transformation)));
 
   if (method != no_transformation) {
-    lts_equivalence equivalence;
+    lts_equivalence equivalence = lts_eq_none;
 
     lts_eq_options  eq_opts;
 
@@ -266,7 +266,6 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
         eq_opts.reduce.add_class_to_state = true;
         break;
       default:
-        equivalence = lts_eq_none;
         break;
     }
 

@@ -222,13 +222,10 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   top->add(current_box);
 
   // Add okay button
-  current_box = new vertical_box();
-
   button* okay_button = new button("OK");
-  current_box->add(okay_button, layout::right);
 
-  top->add(current_box);
-  top->add(new label(" "),layout::left);
+  top->add(new label(" "));
+  top->add(okay_button, layout::right);
 
   send_display_layout(top);
 

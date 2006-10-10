@@ -75,8 +75,8 @@ class squadt_interactor : public squadt_tool_interface {
   private:
 
     enum input_files {
-      lpd_file_for_input = 0,  ///< file containing an LPE that can be imported
-      lpd_file_for_output = 1, ///< file used to write the output to
+      lpd_file_for_input,  ///< file containing an LPE that can be imported
+      lpd_file_for_output, ///< file used to write the output to
     };
 
   public:
@@ -120,14 +120,15 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   std::string output_file_name = c.get_object(lpd_file_for_output)->get_location();
 
   if (parelm.loadFile(input_file_name)) {
-    send_error("Invalid input, incorrect format?");
-
     parelm.setSaveFile(output_file_name);
 
     parelm.filter();
     parelm.output(); 
 
     return (true);
+  }
+  else {
+    send_error("Invalid input, incorrect format?");
   }
 
   return (false);

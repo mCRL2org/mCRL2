@@ -40,6 +40,12 @@ class squadt_tool_interface {
     /** \brief sends a layout for the tool display */
     void send_display_layout(std::auto_ptr < sip::layout::manager >&);
 
+    /** \brief sends a clear display layout signal */
+    void send_clear_display();
+
+    /** \brief sends a hide display layout signal */
+    void send_hide_display();
+
   protected:
 
     /** \brief initialisation after connection to SQuADt */
@@ -198,6 +204,18 @@ inline void squadt_tool_interface::send_error(std::string const& m) const {
 
 inline void squadt_tool_interface::send_display_layout(std::auto_ptr < sip::layout::manager >& p) {
   m_communicator.send_display_layout(sip::layout::tool_display::create(p));
+}
+
+inline void squadt_tool_interface::send_clear_display() {
+  m_communicator.send_clear_display();
+}
+
+inline void squadt_tool_interface::send_hide_display() {
+  boost::shared_ptr < sip::layout::tool_display > p(new sip::layout::tool_display());
+
+  p->show(false);
+
+  m_communicator.send_display_layout(p);
 }
 
 inline squadt_tool_interface::~squadt_tool_interface() {

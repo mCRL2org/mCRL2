@@ -161,9 +161,7 @@ bool Squadt::OnInit() {
  
     wxImage logo(wxString(global_settings_manager->path_to_images("logo.jpg").c_str(), wxConvLocal));
  
-    splash* splash_window = new splash(&logo, 2);
- 
-    splash_window->set_category("Loading components");
+    splash* splash_window = new splash(&logo, 1);
  
     try {
       global_tool_manager = tool_manager::read();
@@ -182,15 +180,15 @@ bool Squadt::OnInit() {
      
       splash_window->set_category("Initialising components");
      
+      /* Disable splash */
+      splash_window->set_done();
+
       /* Initialise main application window */
       SetTopWindow(new squadt::GUI::main());
      
       if (action) {
         action(static_cast < squadt::GUI::main* > (GetTopWindow()));
       }
-
-      /* Disable splash */
-      splash_window->set_done();
 
       SetUseBestVisual(true);
     }

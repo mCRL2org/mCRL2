@@ -146,6 +146,9 @@ namespace squadt_utility {
 
       /** \brief get the value for the selected radio button */
       T get_selection();
+
+      /** \brief gets the label of the selected radio button */
+      std::string get_selection_label() const;
   };
 
   /**
@@ -206,13 +209,13 @@ namespace squadt_utility {
   inline T radio_button_helper< T >::get_selection() {
     return (selector[first->get_selected()]);
   }
+
+  template < typename T >
+  std::string radio_button_helper< T >::get_selection_label() const {
+    return (first->get_selected()->get_label());
+  }
 }
  
 #endif
    
 #endif
-   
-   
-   
-   
-   
