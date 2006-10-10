@@ -38,7 +38,7 @@ class action: public aterm_appl_wrapper
     action(aterm_appl t)
      : aterm_appl_wrapper(t)
     {
-      assert(gsIsNil(t) || gsIsAction(t));
+      assert(gsIsAction(t));
       aterm_list::iterator i = t.argument_list().begin();
       aterm_appl act_id = *i++;
       m_arguments = data_expression_list(*i);

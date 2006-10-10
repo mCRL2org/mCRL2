@@ -529,7 +529,7 @@ public:
     rebuild_lpe = lpe::LPE(
       setToList(usedFreeVars),
       vectorToList(variablePPvar), 
-      rebuild_summandlist_no_cp,
+      atermpp::reverse(rebuild_summandlist_no_cp),
       p_lpe.actions()
     );
      
