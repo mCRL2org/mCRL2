@@ -22,12 +22,12 @@ namespace squadt {
 
       private:
 
-        /* The maximum number of tool instances that are not active for a configuration operation */
+        /* \brief The maximum number of tool instances that are not active for a configuration operation */
         wxSlider* maximum_concurrent;
 
       private:
 
-        /* Event handler for changes to the maximum */
+        /* \brief Event handler for changes to the maximum */
         void maximum_changed(wxCommandEvent&);
 
       public:
@@ -42,12 +42,21 @@ namespace squadt {
 
         miscellaneous::tool_selection_helper::sptr tool_registry;
 
-        wxListCtrl*                                formats_and_actions;
+        wxListView*                                formats_and_actions;
+
+        wxTextCtrl*                                command_text;
+
+      private:
+
+        static wxString no_action;
 
       private:
 
         /* \brief Function that is used for getting columns with decent widths */
         void activate();
+
+        /* \brief Event handler for changes to the maximum */
+        void apply_button_activated(wxCommandEvent&);
 
       public:
 
@@ -79,6 +88,8 @@ namespace squadt {
         debug_preferences(wxWindow*);
     };
 
+    wxString edit_preferences::no_action = wxT("No action");
+
     void execution_preferences::maximum_changed(wxCommandEvent&) {
       global_tool_manager->set_maximum_instance_count(maximum_concurrent->GetValue());
     }
@@ -108,6 +119,30 @@ namespace squadt {
       formats_and_actions->SetColumnWidth(1, (width * 2 + 2) / 3);
     }
 
+    void edit_preferences::apply_button_activated(wxCommandEvent&) {
+      long selected = formats_and_actions->GetFirstSelected();
+
+      if (0 <= selected) {
+        wxListItem s;
+
+        s.SetId(selected);
+        s.SetColumn(1);
+
+        formats_and_actions->GetItem(s);
+
+        wxString new_command = command_text->GetValue();
+
+        if (new_command.IsEmpty()) {
+          s.SetText(no_action);
+        }
+        else if (new_command != no_action) {
+          s.SetText(new_command);
+        }
+
+        formats_and_actions->SetItem(s);
+      }
+    }
+
     edit_preferences::edit_preferences(miscellaneous::tool_selection_helper::sptr const& h, wxWindow* w) : wxPanel(w, wxID_ANY), tool_registry(h) {
       wxSizer* current_sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -119,7 +154,8 @@ namespace squadt {
       current_sizer->Add(known_formats, 1, wxEXPAND|wxLEFT|wxRIGHT, 3);
       current_sizer->AddSpacer(5);
 
-      formats_and_actions = new wxListCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT|wxLC_VRULES|wxLC_HRULES);
+      formats_and_actions = new wxListView(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+                            wxLC_REPORT|wxLC_SINGLE_SEL|wxLC_VRULES|wxLC_HRULES);
 
       formats_and_actions->InsertColumn(0, wxT("Format"), wxLIST_FORMAT_CENTRE);
       formats_and_actions->InsertColumn(1, wxT("Edit action"), wxLIST_FORMAT_LEFT);
@@ -128,13 +164,22 @@ namespace squadt {
 
       BOOST_FOREACH(storage_format f, tool_registry->get_storage_formats()) {
         formats_and_actions->InsertItem(row, wxString(f.c_str(), wxConvLocal));
-        formats_and_actions->SetItem(row++, 1, wxT("No action"));
+        formats_and_actions->SetItem(row++, 1, no_action);
       }
 
       known_formats->AddSpacer(5);
       known_formats->Add(formats_and_actions, 1, wxEXPAND|wxLEFT|wxRIGHT, 3);
 
-      current_sizer->Add(new wxButton(this, cmID_EDIT, wxT("Edit")), 0, wxALL|wxALIGN_LEFT, 3);
+      command_text = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+
+      current_sizer = new wxBoxSizer(wxHORIZONTAL);
+      current_sizer->Add(new wxButton(this, wxID_APPLY), 0, wxRIGHT, 5);
+      current_sizer->Add(command_text, 1, wxEXPAND);
+
+      GetSizer()->Add(current_sizer, 0, wxALL|wxALIGN_LEFT|wxEXPAND, 3);
+
+      Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(edit_preferences::apply_button_activated));
+      Connect(wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(edit_preferences::apply_button_activated));
     }
 
     void debug_preferences::filter_level_changed(wxCommandEvent&) {
