@@ -25,13 +25,115 @@
 #include "lpe/specification.h"
 #include "lpe/lpe_error.h"
 
+class lpeParElm {
+
+  private:
+
+    std::string                         p_inputfile;
+    std::string                         p_outputfile;
+    std::vector< lpe::data_assignment > p_initAssignments;
+    std::set< lpe::data_variable >      p_S;                // <-inhert process parameters
+    std::set< lpe::data_variable >      p_usedVars;
+    bool                                p_verbose;
+    bool                                p_debug;
+    lpe::specification                  p_spec;
+ 
+    //Only used by getDataVarIDs  
+    std::set< lpe::data_variable >   p_foundVariables;       
+
+  private:
+
+    void getDatVarRec(atermpp::aterm_appl t);
+
+    std::set< lpe::data_variable > getDataVarIDs(atermpp::aterm_appl input);
+
+    template <typename Term>
+    inline atermpp::term_list<Term> vectorToList(std::vector<Term> y);
+
+    template <typename Term>
+    inline atermpp::term_list<Term> setToList(std::set<Term> y);
+
+  public:
+
+    void setVerbose(bool b);
+    void setDebug(bool b);
+    void setSaveFile(std::string const& x);
+    bool loadFile(std::string const& filename);
+    bool readStream();
+    void writeStream(lpe::specification newSpec);
+    void filter();
+    void output();
+    std::string getVersion();
+};
+
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <squadt_utility.h>
+
+class squadt_interactor : public squadt_tool_interface {
+
+  private:
+
+    enum input_files {
+      lpd_file_for_input = 0,  ///< file containing an LPE that can be imported
+      lpd_file_for_output = 1, ///< file used to write the output to
+    };
+
+  public:
+
+    /** \brief configures tool capabilities */
+    void set_capabilities(sip::tool::capabilities&) const;
+
+    /** \brief queries the user via SQuADT if needed to obtain configuration information */
+    void user_interactive_configuration(sip::configuration&);
+
+    /** \brief check an existing configuration object to see if it is usable */
+    bool check_configuration(sip::configuration const&) const;
+
+    /** \brief performs the task specified by a configuration */
+    bool perform_task(sip::configuration&);
+};
+
+void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
+  c.add_input_combination(lpd_file_for_input, "Transformation", "lpe");
+}
+
+void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
+  if (c.is_fresh()) {
+    c.add_output(lpd_file_for_output, "lpe", c.get_output_name(".lpe"));
+  }
+}
+
+bool squadt_interactor::check_configuration(sip::configuration const& c) const {
+  bool result = true;
+
+  result &= c.object_exists(lpd_file_for_input);
+  result &= c.object_exists(lpd_file_for_output);
+
+  return (result);
+}
+
+bool squadt_interactor::perform_task(sip::configuration& c) {
+  lpeParElm parelm;
+
+  std::string input_file_name  = c.get_object(lpd_file_for_input)->get_location();
+  std::string output_file_name = c.get_object(lpd_file_for_output)->get_location();
+
+  if (parelm.loadFile(input_file_name)) {
+    send_error("Invalid input, incorrect format?");
+
+    parelm.setSaveFile(output_file_name);
+
+    parelm.filter();
+    parelm.output(); 
+
+    return (true);
+  }
+
+  return (false);
+}
 #endif
 
-using namespace std;
-using namespace lpe;
 using namespace atermpp;
 
 using atermpp::aterm;
@@ -40,374 +142,352 @@ using atermpp::aterm_list;
 
 const char* version = "0.5.1";
 
-class ParElmObj {
-private:
-  string                      p_inputfile;
-  string                      p_outputfile;
-  vector< data_assignment >   p_initAssignments;
-  set< data_variable >        p_S;                // <-inhert process parameters
-  set< data_variable >        p_usedVars;
-  bool                        p_verbose;
-  bool                        p_debug;
-  specification               p_spec;
+void lpeParElm::getDatVarRec(aterm_appl t) {
+  if(gsIsDataVarId(t)){
+    p_foundVariables.insert(t);
+  };
 
-  //Only used by getDataVarIDs  
-  set< data_variable >        p_foundVariables;       
-  
-  void getDatVarRec(aterm_appl t)
-  {
-    if(gsIsDataVarId(t)){
-      p_foundVariables.insert(t);
-    };
-    for(aterm_list::iterator i = t.argument_list().begin(); i!= t.argument_list().end();i++) {
-      getDatVarRec((aterm_appl) *i);
-    } 
+  for(aterm_list::iterator i = t.argument_list().begin(); i!= t.argument_list().end();i++) {
+    getDatVarRec((aterm_appl) *i);
   } 
+} 
   
-  // Returns a vector in which each element is a AtermsAppl (DataVarID)  
-  //
-  inline set< data_variable > getDataVarIDs(aterm_appl input)
-  {
-    p_foundVariables.clear();
-    getDatVarRec(input);
-    return p_foundVariables;
-  }
+// Returns a vector in which each element is a AtermsAppl (DataVarID)  
+//
+inline std::set< lpe::data_variable > lpeParElm::getDataVarIDs(aterm_appl input) {
+  p_foundVariables.clear();
+  getDatVarRec(input);
+
+  return p_foundVariables;
+}
   
-  // template for changing a vector into a list
-  //  
-  template <typename Term>
-  inline
-  term_list<Term> vectorToList(vector<Term> y)
-  { 
-    term_list<Term> result;
-    for(typename vector<Term>::iterator i = y.begin(); i != y.end() ; i++)
-      { 
-        result = push_front(result,*i); 
-      }
-    return atermpp::reverse(result); 
-  } 
+// template for changing a vector into a list
+//  
+template <typename Term>
+inline term_list<Term> lpeParElm::vectorToList(std::vector<Term> y) { 
+  term_list<Term> result;
 
-  // template for changing a set into a list
-  //  
-  template <typename Term>
-  inline
-  term_list<Term> setToList(set<Term> y)
-  { 
-    term_list<Term> result;
-    for(typename set<Term>::iterator i = y.begin(); i != y.end() ; i++)
-      { 
-        result = push_front(result,*i); 
-      }
-    return atermpp::reverse(result); 
-  } 
+  for(typename std::vector<Term>::iterator i = y.begin(); i != y.end() ; i++) { 
+      result = push_front(result,*i); 
+  }
+
+  return atermpp::reverse(result); 
+} 
+
+// template for changing a set into a list
+//  
+template <typename Term>
+inline term_list<Term> lpeParElm::setToList(std::set<Term> y) { 
+  term_list<Term> result;
+
+  for(typename std::set<Term>::iterator i = y.begin(); i != y.end() ; i++) { 
+    result = push_front(result,*i); 
+  }
+
+  return atermpp::reverse(result); 
+} 
   
-public:
+// Sets verbose option
+// Note: Has to be set
+//
+inline void lpeParElm::setVerbose(bool b) {
+  p_verbose = b;
+}
 
-  // Sets verbose option
-  // Note: Has to be set
+// Sets verbose option
+// Note: Has to be set
+//  
+inline void lpeParElm::setDebug(bool b) {
+  p_debug = b;
+}
+
+// Set output file
+//  
+inline void lpeParElm::setSaveFile(std::string const& x) {
+  p_outputfile = x;
+}
+
+// Loads an LPE from file
+// returns true if succeeds
+//  
+inline bool lpeParElm::loadFile(std::string const& filename) {
+  p_inputfile = filename;
+  if (!p_spec.load(p_inputfile)){
+    std::cerr << "lpeparelm: error: could not read input file '" << filename << "'" << std::endl;
+    return false;      
+  };
+  return true;   
+}
+
+// Reads an LPE from stdin
+// returns true if succeeds
+//  
+inline bool lpeParElm::readStream() {
+  ATermAppl z = (ATermAppl) ATreadFromFile(stdin);
+  if (z == NULL){
+    std::cerr << "lpeparelm: Could not read LPE from stdin"<< std::endl;
+    return false;
+  };
+  if (!gsIsSpecV1(z)){
+    std::cerr << "lpeparelm: Stdin does not contain an LPE" << std::endl;
+    return false;
+  }
+
+  p_spec = lpe::specification(z);
+  return true;
+}
+
+// Writes file to stdout
+//
+void lpeParElm::writeStream(lpe::specification newSpec)  {
+  assert(gsIsSpecV1((ATermAppl) newSpec));
+  ATwriteToBinaryFile(aterm(newSpec) , stdout);
+}
+
+// The lpeparelm filter
+//  
+void lpeParElm::filter() {
+  using namespace lpe;
+
+  LPE                      lpe       = p_spec.lpe();
+
+  std::vector< aterm_appl >          foundParameters;
+  std::set< data_variable >     T;
+  std::set< data_variable >     foundVariables;
+  
+
+  // Searching for process parameters:
+  // In a condition:     c_i(d,e_i) for some i \in I
+  // In an argument:     f_i(d,e_i) for some i \in I
+  // In a timecondition: t_i(d,e_i) for some i \in I
   //
-  inline void setVerbose(bool b)
-  {
-    p_verbose = b;
+  if(p_verbose){
+    std::cerr << "lpeparelm: Searching for used process parameters: ";
   }
-
-  // Sets verbose option
-  // Note: Has to be set
-  //  
-  inline void setDebug(bool b)
-  {
-    p_debug = b;
-  }
-
-  // Set output file
-  //  
-  inline void setSaveFile(string x)
-  {
-    p_outputfile = x;
-  }
-
-  // Loads an LPE from file
-  // returns true if succeeds
-  //  
-  inline bool loadFile(string filename)
-  {
-    p_inputfile = filename;
-    if (!p_spec.load(p_inputfile)){
-      cerr << "lpeparelm: error: could not read input file '" << filename << "'" << endl;
-      return false;      
-    };
-    return true;   
-  }
-
-  // Reads an LPE from stdin
-  // returns true if succeeds
-  //  
-  inline bool readStream()
-  {
-    ATermAppl z = (ATermAppl) ATreadFromFile(stdin);
-    if (z == NULL){
-      cerr << "lpeparelm: Could not read LPE from stdin"<< endl;
-      return false;
-    };
-    if (!gsIsSpecV1(z)){
-      cerr << "lpeparelm: Stdin does not contain an LPE" << endl;
-      return false;
-    }
-    p_spec = specification(z);
-    return true;
-  }
-
-  // Writes file to stdout
-  //
-  void writeStream(specification newSpec)
-  {
-    assert(gsIsSpecV1((ATermAppl) newSpec));
-    ATwriteToBinaryFile(aterm(newSpec) , stdout);
-  }
-
-  // The lpeparelm filter
-  //  
-  void filter()
-  {
-    LPE                      lpe             = p_spec.lpe();
-
-    vector< aterm_appl >     foundParameters;
-    set< data_variable >     T;
-    set< data_variable >     foundVariables;
+  //int counter = 0;
+  //int n = lpe.summands().size();
+  for(lpe::summand_list::iterator currentSummand = lpe.summands().begin(); currentSummand != lpe.summands().end(); currentSummand++){ 
     
-
-    // Searching for process parameters:
-    // In a condition:     c_i(d,e_i) for some i \in I
-    // In an argument:     f_i(d,e_i) for some i \in I
-    // In a timecondition: t_i(d,e_i) for some i \in I
-    //
-    if(p_verbose){
-      cerr << "lpeparelm: Searching for used process parameters: ";
+    if (p_verbose){
+      //std::cerr << "    Summand :" << ++counter << "/" << n << std::endl;    
+      std::cerr << ".";
     }
-    //int counter = 0;
-    //int n = lpe.summands().size();
-    for(summand_list::iterator currentSummand = lpe.summands().begin(); currentSummand != lpe.summands().end(); currentSummand++){ 
-      
-      if (p_verbose){
-        //cerr << "    Summand :" << ++counter << "/" << n << endl;    
-        cerr << ".";
-      }
-      //Condition
-      //
-      foundVariables = getDataVarIDs(aterm_appl(currentSummand->condition()));
-      //      cerr << currentSummand->condition().pp()<< endl;
-      //      cerr << "\033[36m" << setToList(foundVariables).to_string() << "\033[0m" <<endl;
-      for(set< data_variable>::iterator i = foundVariables.begin(); i != foundVariables.end(); i++){
+    //Condition
+    //
+    foundVariables = getDataVarIDs(aterm_appl(currentSummand->condition()));
+    //      std::cerr << currentSummand->condition().pp()<< std::endl;
+    //      std::cerr << "\033[36m" << setToList(foundVariables).to_string() << "\033[0m" <<std::endl;
+    for(std::set< lpe::data_variable>::iterator i = foundVariables.begin(); i != foundVariables.end(); i++){
+       p_usedVars.insert(data_variable(*i));
+    }
+
+    //Time
+    //
+    if (currentSummand->has_time()){
+      foundVariables = getDataVarIDs(aterm_appl(currentSummand->time()));
+      //        std::cerr << currentSummand->time().pp() << std::endl;        
+      //        std::cerr << "\033[39m" << setToList(foundVariables).to_string() << "\033[0m" <<std::endl; 
+      for(std::set< lpe::data_variable >::iterator i = foundVariables.begin(); i != foundVariables.end(); i++){
          p_usedVars.insert(data_variable(*i));
-      }
-
-      //Time
-      //
-      if (currentSummand->has_time()){
-        foundVariables = getDataVarIDs(aterm_appl(currentSummand->time()));
-        //        cerr << currentSummand->time().pp() << endl;        
-        //        cerr << "\033[39m" << setToList(foundVariables).to_string() << "\033[0m" <<endl; 
-        for(set< data_variable >::iterator i = foundVariables.begin(); i != foundVariables.end(); i++){
-           p_usedVars.insert(data_variable(*i));
-        };
-      }
-     
-      
-      //Actions
-      //
-      for(action_list::iterator i = currentSummand->actions().begin(); i != currentSummand->actions().end(); i++){
-        for(data_expression_list::iterator j = i->arguments().begin(); j != i->arguments().end(); j++){
-          foundVariables = getDataVarIDs(aterm_appl(*j));
-          //          cerr << i->to_string() << endl;
-          //          cerr << "\033[31m" << setToList(foundVariables).to_string() << "\033[0m" <<endl;  
-          for(set< data_variable >::iterator k = foundVariables.begin(); k != foundVariables.end(); k++){
-  	         p_usedVars.insert(*k);
-  	      };
-        };  
       };
-      //      cerr << "\033[32m" << setToList(p_usedVars).to_string() << "\033[0m" <<endl;     
     }
-    if (p_verbose) cerr << endl;
-    
-    // Needed all process parameters which are not marked have to be eliminated
-    //
-    int cycle = 0;
-    if(p_verbose){
-      cerr << "lpeparelm: Searching for dependent process parameters" << endl;
-    } 
-    bool reset = true;
-    while (reset){
-      if (p_verbose){
-        cerr << "lpeparelm:   Cycle "<< ++cycle << ": ";
-      }
-      reset = false;
-      //counter = 0; 
-      for(summand_list::iterator currentSummand = lpe.summands().begin(); currentSummand != lpe.summands().end(); currentSummand++){
-        if (p_verbose){
-          //cerr << "    Summand :" << ++counter << "/" << n << endl;    
-          cerr << ".";
-        }
-        for(data_assignment_list::iterator i = currentSummand->assignments().begin(); i !=  currentSummand->assignments().end() ;i++){
-          if (p_usedVars.find(i->lhs()) != p_usedVars.end()){
-            foundVariables = getDataVarIDs(aterm_appl(i->rhs()));
-            //cerr << i->rhs().pp() << endl;
-            unsigned int  z = p_usedVars.size();
-            for(set< data_variable >::iterator k = foundVariables.begin(); k != foundVariables.end(); k++){
-  	          p_usedVars.insert(*k);
-  	          //cerr << k->pp() << endl;
-  	        }
-  	        //cerr << z << "----" << p_usedVars.size() << endl;
-            if (p_usedVars.size() != z){
-              reset = true;
-              //          cerr << "\033[39m Match added: " << i->lhs().to_string() << "\033[0m" << endl; 
-            };  
-          }
-        }
-      }
-      if (p_verbose) cerr << endl;
-      //cerr << setToList(p_usedVars).to_string() << endl;
-    }
-  
-    for(data_variable_list::iterator di = lpe.process_parameters().begin(); di != lpe.process_parameters().end() ; di++){
-      T.insert(*di);	  
-    };
-    set_difference(T.begin(), T.end(),  p_usedVars.begin(),  p_usedVars.end(), inserter(p_S, p_S.begin()));
-  
-    //if (p_S.size() ==0){
-    //  assert(test());
-    //}
-
-    if (p_verbose) {
-      cerr << "lpeparelm: Number of removed process parameters: " << p_S.size() << endl;
-      if (p_S.size() !=0){
-	cerr << "lpeparelm:   [ ";
-        for(set< data_variable >::iterator i = p_S.begin(); i != (--p_S.end()); i++){
-          cerr << i->name() << ", ";
-        }
-        cerr << (*(--p_S.end())).name() << " ]" << endl;
-      }
-    }// else {  
-     // cerr << " Number of removed process parameters : " << p_S.size() << endl;
-    //}
-  }
-  
-  inline void output()
-  {
-    LPE lpe = p_spec.lpe();
-    summand_list rebuild_summandlist;
-    data_variable_list rebuild_process_parameters;
-    data_expression_list rebuild_data_expression_pars;
-    
-    for(data_variable_list::iterator i = lpe.process_parameters().begin() ; i != lpe.process_parameters().end() ; i++){
-      if (p_usedVars.find(*i) != p_usedVars.end()){
-        rebuild_process_parameters = push_front(rebuild_process_parameters, *i);
-      }
-    }
-  
-    //Remove process parameters in summands which are not used
-    //
-    summand_list summands = lpe.summands();
-    for(summand_list::iterator i = summands.begin(); i != summands.end(); i++){
-      data_assignment_list rebuild_assignments;
-      for(data_assignment_list::iterator j = i->assignments().begin(); j != i->assignments().end();  j++){
-        bool b = false;
-        for(set<data_variable>::iterator k = p_S.begin(); k != p_S.end() ;k++){
-          b = b || (*k == j->lhs());        
-        }
-        if (!b) {
-          rebuild_assignments = push_front(rebuild_assignments , *j);
-        } 
-      }  
-      //Construct the new summation_variable_list
-      //
-      data_variable_list rebuild_summation_variables;
-      for(data_variable_list::iterator j = i->summation_variables().begin(); j != i->summation_variables().end(); j++ ){
-        bool b = false;
-        for(set<data_variable>::iterator k = p_S.begin(); k != p_S.end(); k++){
-          b = b || (*k == *j);
-        }
-        if (!b){
-          rebuild_summation_variables = push_front(rebuild_summation_variables, *j);
-        }    
-      }
-      //LPE_summand(data_variable_list summation_variables, data_expression condition, 
-      //          bool delta, action_list actions, data_expression time, 
-      //          data_assignment_list assignments);
-      LPE_summand rebuild_summand; 
-     
-      rebuild_summand = LPE_summand(atermpp::reverse(rebuild_summation_variables), i->condition(),
-        i->is_delta(), i->actions(), i-> time(), atermpp::reverse(rebuild_assignments));  
-      rebuild_summandlist = push_front(rebuild_summandlist, rebuild_summand);
-    }
-    
-    //construct new specfication
-    //
-    //LPE(data_variable_list free_variables, data_variable_list process_parameters, 
-    //  summand_list summands, action_list actions);
-    LPE rebuild_lpe;
-    rebuild_lpe = LPE(
-      lpe.free_variables(), 
-      atermpp::reverse(rebuild_process_parameters), 
-      atermpp::reverse(rebuild_summandlist),
-      lpe.actions()
-    );
-  
-    data_variable_list               rebuild_initial_variables;
-    data_expression_list             rebuild_initial_state;
-    data_expression_list::iterator   j = p_spec.initial_state().begin();
-  
-    
-    for(data_variable_list::iterator i = p_spec.initial_variables().begin() ; i != p_spec.initial_variables().end() ; i++){
-      if (p_usedVars.find(*i) != p_usedVars.end()){
-        rebuild_initial_variables = push_front(rebuild_initial_variables, *i);
-        rebuild_initial_state = push_front(rebuild_initial_state, *j);
-      }
-      j++;
-    }
-    
-    // Rebuild spec
-    //
-    //specification(sort_list sorts, function_list constructors, 
-    //            function_list mappings, data_equation_list equations, 
-    //            action_list actions, LPE lpe, 
-    //            data_variable_list initial_free_variables, 
-    //            data_variable_list initial_variables, 
-    //            data_expression_list initial_state);
-    //
-    specification rebuild_spec;
-    rebuild_spec = specification(
-      p_spec.sorts(), 
-      p_spec.constructors(),
-      p_spec.mappings(), 
-      p_spec.equations(), 
-      p_spec.actions(), 
-      rebuild_lpe,
-      p_spec.initial_free_variables(), 
-      atermpp::reverse(rebuild_initial_variables),
-      atermpp::reverse(rebuild_initial_state)
-    );
-    
-    assert(gsIsSpecV1((ATermAppl) rebuild_spec));
    
-    if (p_outputfile.size() == 0){
-      //if(!p_verbose){
-      //  assert(!p_verbose);
-        writeStream(rebuild_spec);
-      //};
-    } else {
-      if(!rebuild_spec.save(p_outputfile)){
-         cerr << "lpeparelm: Unsuccessfully written outputfile: " << p_outputfile << endl;
-      };
-    } 
-  }
     
-  inline string getVersion()
-  {
-    return (version);
+    //Actions
+    //
+    for(lpe::action_list::iterator i = currentSummand->actions().begin(); i != currentSummand->actions().end(); i++){
+      for(lpe::data_expression_list::iterator j = i->arguments().begin(); j != i->arguments().end(); j++){
+        foundVariables = getDataVarIDs(aterm_appl(*j));
+        //          std::cerr << i->to_string() << std::endl;
+        //          std::cerr << "\033[31m" << setToList(foundVariables).to_string() << "\033[0m" <<std::endl;  
+        for(std::set< lpe::data_variable >::iterator k = foundVariables.begin(); k != foundVariables.end(); k++){
+	         p_usedVars.insert(*k);
+	      };
+      };  
+    };
+    //      std::cerr << "\033[32m" << setToList(p_usedVars).to_string() << "\033[0m" <<std::endl;     
   }
-};
+  if (p_verbose) std::cerr << std::endl;
+  
+  // Needed all process parameters which are not marked have to be eliminated
+  //
+  int cycle = 0;
+  if(p_verbose){
+    std::cerr << "lpeparelm: Searching for dependent process parameters" << std::endl;
+  } 
+  bool reset = true;
+  while (reset){
+    if (p_verbose){
+      std::cerr << "lpeparelm:   Cycle "<< ++cycle << ": ";
+    }
+    reset = false;
+    //counter = 0; 
+    for(summand_list::iterator currentSummand = lpe.summands().begin(); currentSummand != lpe.summands().end(); currentSummand++){
+      if (p_verbose){
+        //std::cerr << "    Summand :" << ++counter << "/" << n << std::endl;    
+        std::cerr << ".";
+      }
+      for(data_assignment_list::iterator i = currentSummand->assignments().begin(); i !=  currentSummand->assignments().end() ;i++){
+        if (p_usedVars.find(i->lhs()) != p_usedVars.end()){
+          foundVariables = getDataVarIDs(aterm_appl(i->rhs()));
+          //std::cerr << i->rhs().pp() << std::endl;
+          unsigned int  z = p_usedVars.size();
+          for(std::set< lpe::data_variable >::iterator k = foundVariables.begin(); k != foundVariables.end(); k++){
+	          p_usedVars.insert(*k);
+	          //std::cerr << k->pp() << std::endl;
+	        }
+	        //std::cerr << z << "----" << p_usedVars.size() << std::endl;
+          if (p_usedVars.size() != z){
+            reset = true;
+            //          std::cerr << "\033[39m Match added: " << i->lhs().to_string() << "\033[0m" << std::endl; 
+          };  
+        }
+      }
+    }
+    if (p_verbose) std::cerr << std::endl;
+    //std::cerr << setToList(p_usedVars).to_string() << std::endl;
+  }
 
-void parse_command_line(int ac, char** av, ParElmObj& parelm) {
+  for(data_variable_list::iterator di = lpe.process_parameters().begin(); di != lpe.process_parameters().end() ; di++){
+    T.insert(*di);	  
+  };
+  set_difference(T.begin(), T.end(),  p_usedVars.begin(),  p_usedVars.end(), inserter(p_S, p_S.begin()));
+
+  //if (p_S.size() ==0){
+  //  assert(test());
+  //}
+
+  if (p_verbose) {
+    std::cerr << "lpeparelm: Number of removed process parameters: " << p_S.size() << std::endl;
+    if (p_S.size() !=0){
+      std::cerr << "lpeparelm:   [ ";
+      for(std::set< lpe::data_variable >::iterator i = p_S.begin(); i != (--p_S.end()); i++){
+        std::cerr << i->name() << ", ";
+      }
+      std::cerr << (*(--p_S.end())).name() << " ]" << std::endl;
+    }
+  }// else {  
+   // std::cerr << " Number of removed process parameters : " << p_S.size() << std::endl;
+  //}
+}
+
+inline void lpeParElm::output() {
+  using namespace lpe;
+
+  LPE lpe = p_spec.lpe();
+  summand_list rebuild_summandlist;
+  data_variable_list rebuild_process_parameters;
+  data_expression_list rebuild_data_expression_pars;
+  
+  for(data_variable_list::iterator i = lpe.process_parameters().begin() ; i != lpe.process_parameters().end() ; i++){
+    if (p_usedVars.find(*i) != p_usedVars.end()){
+      rebuild_process_parameters = push_front(rebuild_process_parameters, *i);
+    }
+  }
+
+  //Remove process parameters in summands which are not used
+  //
+  summand_list summands = lpe.summands();
+  for(lpe::summand_list::iterator i = summands.begin(); i != summands.end(); i++){
+    data_assignment_list rebuild_assignments;
+    for(lpe::data_assignment_list::iterator j = i->assignments().begin(); j != i->assignments().end();  j++){
+      bool b = false;
+      for(std::set< lpe::data_variable >::iterator k = p_S.begin(); k != p_S.end() ;k++){
+        b = b || (*k == j->lhs());        
+      }
+      if (!b) {
+        rebuild_assignments = push_front(rebuild_assignments , *j);
+      } 
+    }  
+    //Construct the new summation_variable_list
+    //
+    data_variable_list rebuild_summation_variables;
+    for(data_variable_list::iterator j = i->summation_variables().begin(); j != i->summation_variables().end(); j++ ){
+      bool b = false;
+      for(std::set<lpe::data_variable>::iterator k = p_S.begin(); k != p_S.end(); k++){
+        b = b || (*k == *j);
+      }
+      if (!b){
+        rebuild_summation_variables = push_front(rebuild_summation_variables, *j);
+      }    
+    }
+    //LPE_summand(data_variable_list summation_variables, data_expression condition, 
+    //          bool delta, action_list actions, data_expression time, 
+    //          data_assignment_list assignments);
+    LPE_summand rebuild_summand; 
+   
+    rebuild_summand = LPE_summand(atermpp::reverse(rebuild_summation_variables), i->condition(),
+      i->is_delta(), i->actions(), i-> time(), atermpp::reverse(rebuild_assignments));  
+    rebuild_summandlist = push_front(rebuild_summandlist, rebuild_summand);
+  }
+  
+  //construct new specfication
+  //
+  //LPE(data_variable_list free_variables, data_variable_list process_parameters, 
+  //  summand_list summands, action_list actions);
+  LPE rebuild_lpe;
+  rebuild_lpe = LPE(
+    lpe.free_variables(), 
+    atermpp::reverse(rebuild_process_parameters), 
+    atermpp::reverse(rebuild_summandlist),
+    lpe.actions()
+  );
+
+  data_variable_list               rebuild_initial_variables;
+  data_expression_list             rebuild_initial_state;
+  data_expression_list::iterator   j = p_spec.initial_state().begin();
+
+  
+  for(data_variable_list::iterator i = p_spec.initial_variables().begin() ; i != p_spec.initial_variables().end() ; i++){
+    if (p_usedVars.find(*i) != p_usedVars.end()){
+      rebuild_initial_variables = push_front(rebuild_initial_variables, *i);
+      rebuild_initial_state = push_front(rebuild_initial_state, *j);
+    }
+    j++;
+  }
+  
+  // Rebuild spec
+  //
+  //specification(sort_list sorts, function_list constructors, 
+  //            function_list mappings, data_equation_list equations, 
+  //            action_list actions, LPE lpe, 
+  //            data_variable_list initial_free_variables, 
+  //            data_variable_list initial_variables, 
+  //            data_expression_list initial_state);
+  //
+  specification rebuild_spec;
+  rebuild_spec = specification(
+    p_spec.sorts(), 
+    p_spec.constructors(),
+    p_spec.mappings(), 
+    p_spec.equations(), 
+    p_spec.actions(), 
+    rebuild_lpe,
+    p_spec.initial_free_variables(), 
+    atermpp::reverse(rebuild_initial_variables),
+    atermpp::reverse(rebuild_initial_state)
+  );
+  
+  assert(gsIsSpecV1((ATermAppl) rebuild_spec));
+ 
+  if (p_outputfile.size() == 0){
+    //if(!p_verbose){
+    //  assert(!p_verbose);
+      writeStream(rebuild_spec);
+    //};
+  } else {
+    if(!rebuild_spec.save(p_outputfile)){
+       std::cerr << "lpeparelm: Unsuccessfully written outputfile: " << p_outputfile << std::endl;
+    };
+  } 
+}
+  
+inline std::string lpeParElm::getVersion() {
+  return (version);
+}
+
+
+void parse_command_line(int ac, char** av, lpeParElm& parelm) {
   namespace po = boost::program_options;
 
   po::options_description description;
@@ -425,7 +505,7 @@ void parse_command_line(int ac, char** av, ParElmObj& parelm) {
   po::options_description hidden("Hidden options");
 
   hidden.add_options()
-     ("file_names", po::value< vector<string> >(), "input/output files")
+     ("file_names", po::value< std::vector< std::string> >(), "input/output files")
   ;
         
   po::options_description cmdline_options;
@@ -451,7 +531,7 @@ void parse_command_line(int ac, char** av, ParElmObj& parelm) {
   }
         
   if (vm.count("version")) {
-    std::cerr << version << " (revision " << REVISION << ")" << endl;
+    std::cerr << version << " (revision " << REVISION << ")" << std::endl;
 
     exit (0);
   }
@@ -470,7 +550,7 @@ void parse_command_line(int ac, char** av, ParElmObj& parelm) {
     }
   }
   else if (2 < file_names.size()) {
-    cerr << "lpeparelm: Specify only INPUT and/or OUTPUT file (too many arguments)."<< endl;
+    std::cerr << "lpeparelm: Specify only INPUT and/or OUTPUT file (too many arguments)."<< std::endl;
 
     exit (0);
   }
@@ -485,128 +565,21 @@ void parse_command_line(int ac, char** av, ParElmObj& parelm) {
   }
 }
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-/* Constants for identifiers of options and objects */
-const unsigned int lpd_file_for_input  = 0;
-const unsigned int lpd_file_for_output = 1;
-
-void realise_configuration(sip::tool::communicator& tc, ParElmObj& parelm, sip::configuration& c) {
-  std::string input_file_name  = c.get_object(lpd_file_for_input)->get_location();
-  std::string output_file_name = c.get_object(lpd_file_for_output)->get_location();
-
-  if (!parelm.loadFile(input_file_name)) {
-    tc.send_status_report(sip::report::error, "Invalid input, incorrect format?");
-
-    exit(1);
-  }
-
-  parelm.setSaveFile(output_file_name);
-
-  parelm.setVerbose(true);
-}
-
-/* Validates a configuration */
-bool try_to_accept_configuration(sip::tool::communicator& tc) {
-  sip::configuration& configuration = tc.get_configuration();
-
-  if (configuration.object_exists(lpd_file_for_input)) {
-    /* The input object is present */
-    sip::object::sptr input_object = configuration.get_object(lpd_file_for_input);
-
-    if (!boost::filesystem::exists(boost::filesystem::path(input_object->get_location()))) {
-      tc.send_status_report(sip::report::error, std::string("Invalid configuration: input object does not exist"));
-
-      return (false);
-    }
-  }
-  if (configuration.is_fresh()) {
-    if (!configuration.object_exists(lpd_file_for_output)) {
-      /* Add output file to the configuration */
-      configuration.add_output(lpd_file_for_output, "lpe", configuration.get_output_name(".lpe"));
-    }
-  }
-  else {
-    /* The output object is present */
-    if (!configuration.object_exists(lpd_file_for_output)) {
-      return (false);
-    }
-  }
-
-  tc.send_accept_configuration();
-
-  return (true);
-}
-#endif
-
-int main(int ac, char** av) {
+int main(int argc, char** argv) {
   ATerm     bottom;
-  ParElmObj parelm;
 
-  ATinit(ac,av,&bottom);
+  ATinit(argc,argv,&bottom);
 
   gsEnableConstructorFunctions();
   
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  sip::tool::communicator tc;
+  squadt_interactor c;
 
-  /* Get tool capabilities in order to modify settings */
-  sip::tool::capabilities& cp = tc.get_tool_capabilities();
-
-  /* The tool has only one main input combination it takes an LPE and then behaves as a reporter */
-  cp.add_input_combination(lpd_file_for_input, "Transformation", "lpe");
-
-  /* On purpose we do not catch exceptions */
-  if (tc.activate(ac,av)) {
-    bool valid_configuration_present = false;
-    bool termination_requested       = false;
-
-    /* Initialise squadt utility pseudo-library */
-    squadt_utility::initialise(tc);
-
-    while (!termination_requested) {
-      sip::message_ptr m = tc.await_message(sip::message_any);
-
-      assert(m.get() != 0);
-
-      switch (m->get_type()) {
-        case sip::message_offer_configuration:
-
-          /* Insert configuration in tool communicator object */
-          valid_configuration_present = try_to_accept_configuration(tc);
-
-          break;
-        case sip::message_signal_start:
-          if (valid_configuration_present) {
-            using namespace sip;
-
-            realise_configuration(tc, parelm, tc.get_configuration());
-
-            parelm.filter();
-            parelm.output(); 
-
-            /* Signal that the job is finished */
-            tc.send_signal_done(true);
-          }
-          else {
-            tc.send_status_report(sip::report::error, "Failure reading input from file.");
-          }
-          break;
-        case sip::message_request_termination:
-
-          termination_requested = true;
-
-          tc.send_signal_termination();
-
-          break;
-        default:
-          /* Messages with a type that do not need to be handled */
-          break;
-      }
-    }
-  }
-  else {
+  if (!c.try_interaction(argc, argv)) {
 #endif
-    parse_command_line(ac,av,parelm);
+    lpeParElm parelm;
+
+    parse_command_line(argc,argv,parelm);
 
     parelm.filter();
     parelm.output(); 
