@@ -422,7 +422,7 @@ NextStateStandard::NextStateStandard(ATermAppl spec, bool allow_free_vars, int s
 	{
 		if ( b && !gsIsNil(ATAgetArgument(ATAgetFirst(sums),3)) )
 		{
-			fprintf(stderr,"warning: specification uses time, which is (currently) not supported; ignoring timing\n");
+			gsWarningMsg("specification uses time, which is (currently) not supported; ignoring timing\n");
 			b = false;
 		}
 		if ( !gsIsDelta(ATAgetArgument(ATAgetFirst(sums),2)) )

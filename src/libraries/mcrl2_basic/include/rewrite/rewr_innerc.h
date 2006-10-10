@@ -4,7 +4,7 @@
 #include <aterm2.h>
 #include "librewrite.h"
 
-#define _INNERC_STORE_TREES
+//#define _INNERC_STORE_TREES
 
 class RewriterCompilingInnermost: public Rewriter
 {
