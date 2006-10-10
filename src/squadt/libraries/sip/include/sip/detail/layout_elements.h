@@ -139,6 +139,9 @@ namespace sip {
           /** \brief Set state of the radio button, and send update */
           void set_selected(tool::communicator*);
 
+          /** \brief Returns the current label */
+          std::string get_label() const;
+
           /** \brief Gets a pointer to the radio button in the group that is selected */
           radio_button const* get_selected() const;
 

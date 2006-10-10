@@ -170,6 +170,10 @@ namespace sip {
           set_selected(true);
         }
       }
+
+      std::string radio_button::get_label() const {
+        return (label);
+      }
      
       /**
        * @param[in] b whether or not to unselect connected radio buttons
