@@ -138,50 +138,38 @@ bool occurs_in(data_type d, data_variable v)
 
 ///pre: true
 ///ret: 1 if t is a DataExprEquality, 0 otherwise
-static int gsIsDataExprEquality(ATermAppl t)
+static bool gsIsDataExprEquality(ATermAppl t)
 {
-  if (gsIsDataAppl(t))
-  { ATermAppl t1=ATAgetArgument(t,0);
-    if (gsIsDataAppl(t1))
-    { ATermAppl f=ATAgetArgument(t1,0);
-      if (!gsIsOpId(f))
-      { // This is not a functionsymbol
-        return 0;
-      }
-      ATermAppl functionsort=ATAgetArgument(f,1);
-      if (!gsIsSortArrow(functionsort))
-      { return 0;
-      }
-      ATermAppl sort=ATAgetArgument(functionsort,0);
-      if (ATAgetArgument(t1,0)==gsMakeOpIdEq(sort))
-      {
-        return 1;
-      };
-    }
+  if (!gsIsDataAppl(t)) {
+    return false;
   }
-  return 0;
+  ATermAppl arg0 = ATAgetArgument(t, 0);
+  if (!gsIsDataAppl(arg0)) {
+    return false;
+  }
+  ATermAppl arg1 = ATAgetArgument(t, 1);  
+  ATermAppl eq_id = ATAgetArgument(arg0, 0);
+  return ATisEqual(eq_id, gsMakeOpIdEq(gsGetSort(arg1)));
 }
 
 ///pre: true
 ///ret: 1 if t is a DataExprAnd, 0 otherwise
-static int gsIsDataExprAnd(ATermAppl t)
+static bool gsIsDataExprAnd(ATermAppl t)
 {
-  if (gsIsDataAppl(t))
-  { ATermAppl t1=ATAgetArgument(t,0);
-    if (gsIsDataAppl(t1))
-    { if (ATAgetArgument(t1,0)==gsMakeOpIdAnd())
-      {
-       return 1;
-      };
-    }
+  if (!gsIsDataAppl(t)) {
+    return false;
   }
-  return 0;
+  ATermAppl arg0 = ATAgetArgument(t,0);
+  if (!gsIsDataAppl(arg0)) {
+    return false;
+  }
+  return ATisEqual(ATAgetArgument(arg0,0), gsMakeOpIdAnd());
 }
 
 ///pre: true
 ///ret: 1 if t is an equality, 0 otherwise
 inline
-int is_equality(data_expression t)
+bool is_equality(data_expression t)
 {
   return gsIsDataExprEquality(ATermAppl(t));
 }
@@ -189,7 +177,7 @@ int is_equality(data_expression t)
 ///pre: true
 ///ret: 1 if t is a conjunction, 0 otherwise
 inline
-int is_and(data_expression t)
+bool is_and(data_expression t)
 {
   return gsIsDataExprAnd(ATermAppl(t));
 }
@@ -197,7 +185,7 @@ int is_and(data_expression t)
 ///pre: true
 ///ret: 1 if t as a data_variable, 0 otherwise
 inline
-int is_var(data_expression t)
+bool is_var(data_expression t)
 {
   return gsIsDataVarId(ATermAppl(t));
 }
