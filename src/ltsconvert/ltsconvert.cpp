@@ -793,7 +793,8 @@ int main(int argc, char **argv)
 
     lts l;
  
-    if (!(use_stdin ? read_lts_from_stdin(l, intype) : read_lts_from_file(l, infile, intype))) {
+    if (!(use_stdin ? read_lts_from_stdin(l, intype) : read_lts_from_file(l, infile, intype)))
+    {
       return (1);
     }
  
@@ -803,12 +804,17 @@ int main(int argc, char **argv)
       l.reduce(equivalence,eq_opts);
     }
  
-    if (!(use_alt_outtype ? write_lts_to_stdout(l, alt_outtype, lpefile, print_dot_state): write_lts_to_stdout(l, outtype, lpefile, print_dot_state))) {
-      return (1);
-    }
- 
-    if (!(use_alt_outtype ? write_lts_to_file(l, outfile, alt_outtype, lpefile, print_dot_state) : write_lts_to_file(l, outfile, outtype, lpefile))) {
-      return (1);
+    if ( use_stdout )
+    {
+      if (!(use_alt_outtype ? write_lts_to_stdout(l, alt_outtype, lpefile, print_dot_state): write_lts_to_stdout(l, outtype, lpefile, print_dot_state)))
+      {
+        return (1);
+      }
+    } else {
+      if (!(use_alt_outtype ? write_lts_to_file(l, outfile, alt_outtype, lpefile, print_dot_state) : write_lts_to_file(l, outfile, outtype, lpefile)))
+      {
+        return (1);
+      }
     }
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }
