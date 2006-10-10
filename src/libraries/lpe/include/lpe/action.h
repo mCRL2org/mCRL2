@@ -49,7 +49,7 @@ class action: public aterm_appl_wrapper
     }
 
     action(const aterm_string& name, const data_expression_list& arguments)
-     : aterm_appl_wrapper(gsMakeAction(gsMakeActId(m_name, get_sorts(arguments)), arguments)),
+     : aterm_appl_wrapper(gsMakeAction(gsMakeActId(name, get_sorts(arguments)), arguments)),
        m_name(name),
        m_arguments(arguments)
     {}
