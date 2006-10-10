@@ -42,6 +42,15 @@ namespace pbes_init {
 // <DataSpec>     ::= DataSpec(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
 //                      MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*))
 
+  inline bool is_data       (pbes_expression t) { return gsIsDataExpr      (t); }
+  inline bool is_true       (pbes_expression t) { return gsIsPBESTrue      (t); }
+  inline bool is_false      (pbes_expression t) { return gsIsPBESFalse     (t); }
+  inline bool is_and        (pbes_expression t) { return gsIsPBESAnd       (t); }
+  inline bool is_or         (pbes_expression t) { return gsIsPBESOr        (t); }
+  inline bool is_forall     (pbes_expression t) { return gsIsPBESForall    (t); }
+  inline bool is_exists     (pbes_expression t) { return gsIsPBESExists    (t); }
+  inline bool is_prop_var   (pbes_expression t) { return gsIsPropVarInst   (t); }
+
   /// Conversion of a data expression to a pbes expression.
   inline
   pbes_expression val(data_expression d)
@@ -64,13 +73,31 @@ namespace pbes_init {
   inline
   pbes_expression and_(pbes_expression p, pbes_expression q)
   {
-    return pbes_expression(gsMakePBESAnd(p,q));
+    if (is_true(p))
+      return q;
+    else if (is_false(p))
+      return false_();
+    if (is_true(q))
+      return p;
+    else if (is_false(q))
+      return false_();
+    else
+      return pbes_expression(gsMakePBESAnd(p,q));
   }
   
   inline
   pbes_expression or_(pbes_expression p, pbes_expression q)
   {
-    return pbes_expression(gsMakePBESOr(p,q));
+    if (is_true(p))
+      return true_();
+    else if (is_false(p))
+      return q;
+    if (is_true(q))
+      return true_();
+    else if (is_false(q))
+      return p;
+    else
+      return pbes_expression(gsMakePBESOr(p,q));
   }
   
   inline
