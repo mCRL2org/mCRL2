@@ -63,12 +63,18 @@ namespace Utils
 
   struct MarkRule
   {
-    int		    paramIndex;
-    bool	    isActivated;
-    bool	    isNegated;
-    std::vector< bool >  valueSet;
+    int		            paramIndex;
+    bool	            isActivated;
+    bool        	    isNegated;
+    std::vector< bool >     valueSet;
   };
   
+  struct Slot
+  {
+    float position;  //INV: 0 <= position < 2 * PI
+    bool  free;    
+  };
+
   bool operator==( RGB_Color c1, RGB_Color c2 );
   bool operator!=( RGB_Color c1, RGB_Color c2 );
   Point3D operator+( Point3D p1, Point3D p2 );

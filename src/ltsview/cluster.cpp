@@ -99,6 +99,20 @@ float Cluster::getPosition() const
   return position;
 }
 
+int Cluster::getNumberOfSlots()
+{
+  return slots.size();
+}
+
+void Cluster::getSlots( vector< Slot > &ss ) const 
+{
+  ss = slots;
+}
+
+void Cluster::occupySlot( int slot ) 
+{
+  slots[slot].free = false;
+}
 void Cluster::computeSizeAndDescendantPositions()
 // pre: size of every descendant is known (and assumed to be correct)
 {

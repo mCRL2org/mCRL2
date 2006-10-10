@@ -30,47 +30,63 @@ class Cluster
 {
   
   private:
+
     std::map< ATerm, int >	actionLabelCounts;
-    Cluster*		ancestor;
-    float		baseRadius;
-    bool		deadlock;
+    Cluster*			ancestor;
+    float			baseRadius;
+    bool			deadlock;
     std::vector< Cluster* >	descendants;
-    int			markedState;
-    int			markedTransitionCount;
-    float		position;
-    float		size;
+    int				markedState;
+    int				markedTransitionCount;
+    float			position;
+    float			size;
     std::vector< State* >	states;
-    float		topRadius;
-    float		volume; 
+    float			topRadius;
+    float			volume;
+
+    std::vector< Utils::Slot > 	slots;
 
   public:
+    // Constructor & destructor.
     Cluster();
     ~Cluster();
+
+    // Functions on descendants and ancestors.
     void      addDescendant( Cluster* c );
-    void      addState( State* s );
-    void      addActionLabel( ATerm l );
-    void      computeSizeAndDescendantPositions();
-    Cluster*  getAncestor() const;
-    float     getBaseRadius() const;
     Cluster*  getDescendant( int i ) const;
     void      getDescendants( std::vector< Cluster* > &cs ) const;
     int	      getNumberOfDescendants() const;
+    bool      hasDescendants() const;
+
+    void      setAncestor( Cluster* c );
+    Cluster*  getAncestor() const;
+
+    // Functions on states
+    void      addState( State* s );
+    void      getStates( std::vector< State* > &ss ) const;
+    bool      hasDeadlock() const;
+    bool      hasMarkedState() const;
+    void      markState();
+    void      setDeadlock( bool b );
+    void      unmarkState();
+    int       getNumberOfSlots();
+    void      getSlots( std::vector< Utils::Slot > &ss) const;
+    void      occupySlot( int slot );
+
+    // Functions on transitions
+    void      addActionLabel( ATerm l );
+    bool      hasMarkedTransition() const;
+    int	      markActionLabel( ATerm l );
+    int       unmarkActionLabel( ATerm l );
+    
+    // General cluster information
+    void      computeSizeAndDescendantPositions();
+    float     getBaseRadius() const;
     float     getPosition() const;
     float     getTopRadius() const;
     float     getSize() const;
-    void      getStates( std::vector< State* > &ss ) const;
     float     getVolume() const;
-    bool      hasDescendants() const;
-    bool      hasDeadlock() const;
-    bool      hasMarkedState() const;
-    bool      hasMarkedTransition() const;
-    void      markState();
-    int	      markActionLabel( ATerm l );
-    void      setAncestor( Cluster* c );
-    void      setDeadlock( bool b );
     void      setPosition( float p );
-    void      unmarkState();
-    int       unmarkActionLabel( ATerm l );
 };
 
 #endif
