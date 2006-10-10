@@ -26,7 +26,7 @@ class GLCanvas: public wxGLCanvas
 	wxDefaultSize, int* attribList = NULL );
     ~GLCanvas();
 
-    void      display();
+    void      display(bool coll_caller=false);
     void      enableDisplay();
     void      disableDisplay();
     Utils::RGB_Color getBackgroundColor() const;
@@ -56,6 +56,7 @@ class GLCanvas: public wxGLCanvas
     Utils::RGB_Color defaultBGColor;
     float     startPosZ;
     float     startPosZDefault;
+    bool      collectingData;
     bool      displayAllowed;
     float     farPlane;
     float     farPlaneDefault;

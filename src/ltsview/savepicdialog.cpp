@@ -5,11 +5,17 @@ BEGIN_EVENT_TABLE(SavePicDialog,wxDialog)
   EVT_COMMAND_SCROLL_CHANGED(myID_R_SLIDER,SavePicDialog::onSlider)
   EVT_BUTTON(myID_F_BUTTON,SavePicDialog::onChangeFile)
   EVT_CHOICE(myID_FT_CHOICE,SavePicDialog::onChoice)
+  EVT_BUTTON(wxID_OK,SavePicDialog::OnOK)
 END_EVENT_TABLE()
 
-SavePicDialog::SavePicDialog(wxWindow* parent,int w,int h,int w_max,int h_max,
-  wxString filename,wxString dir)
+SavePicDialog::SavePicDialog(wxWindow* parent,GLCanvas* glc,wxString filename,
+  wxString dir)
 :wxDialog(parent,-1,wxT("Save Picture"),wxDefaultPosition) {
+  glcanvas = glc;
+  int w,h;
+  GLint w_max,h_max;
+  glcanvas->GetClientSize(&w,&h);
+  glcanvas->getMaxViewportDims(&w_max,&h_max);
   ar = float(w)/float(h);
   r_slider = new wxSlider(this,myID_R_SLIDER,w,1,(w_max<=h_max)?w_max:
     int(ar*h_max));
@@ -34,7 +40,7 @@ SavePicDialog::SavePicDialog(wxWindow* parent,int w,int h,int w_max,int h_max,
 	      fts.Add(h->GetName()+wxT(" (.")+h->GetExtension()+wxT(")"));
       }
       if (h->GetExtension() == wxT("png")) {
-	png_id = f_exts.Count();
+	      png_id = f_exts.Count();
       }
       f_exts.Add(h->GetExtension());
       f_types.push_back(h->GetType());
@@ -152,4 +158,17 @@ wxString SavePicDialog::getFileName() {
 
 long SavePicDialog::getFileType() {
   return f_types[ft_choice->GetSelection()];
+}
+
+void SavePicDialog::OnOK(wxCommandEvent& /*event*/) {
+  int w = r_slider->GetValue();
+  int h = int(w/ar);
+  
+  unsigned char* data = glcanvas->getPictureData(w,h);
+  wxImage img(w,h,data);
+  // order of image pixels is row major from bottom to top, but wxWidgets
+  // assumes it to be from top to bottom, so we mirror the image vertically
+  img = img.Mirror(false);
+  img.SaveFile(f_name.GetFullPath(),f_types[ft_choice->GetSelection()]);
+  EndModal(wxID_OK);
 }

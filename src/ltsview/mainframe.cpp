@@ -520,25 +520,8 @@ void MainFrame::onOpen( wxCommandEvent& /*event*/ )
 }
 
 void MainFrame::onSavePic(wxCommandEvent& /*event*/) {
-  int w,h,max_w,max_h;
-  glCanvas->GetClientSize(&w,&h);
-  glCanvas->getMaxViewportDims(&max_w,&max_h);
-  SavePicDialog* sp_dlg = new SavePicDialog(this,w,h,max_w,max_h,filename,
-    directory);
-  if (sp_dlg->ShowModal() == wxID_OK) {
-    w = sp_dlg->getImageWidth();
-    h = sp_dlg->getImageHeight();
-    wxString fname = sp_dlg->getFileName();
-    long ftype = sp_dlg->getFileType();
-    sp_dlg->Destroy();
-
-    unsigned char* data = glCanvas->getPictureData(w,h);
-    wxImage img(w,h,data);
-    // order of image pixels is row major from bottom to top, but wxWidgets
-    // assumes it to be from top to bottom, so we mirror the image vertically
-    img = img.Mirror(false);
-    img.SaveFile(fname,ftype);
-  }
+  SavePicDialog sp_dlg(this,glCanvas,filename,directory);
+  sp_dlg.ShowModal();
 }
 
 void MainFrame::onExit(wxCommandEvent& /*event*/) {

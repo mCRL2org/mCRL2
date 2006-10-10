@@ -31,6 +31,7 @@ GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,const wxSize &size,
 		     wxT(""),attribList) {
   mediator = owner;
   displayAllowed = true;
+  collectingData = false;
   angleX = 0.0f;
   angleY = 0.0f;
   moveVector.x = 0.0f;
@@ -85,13 +86,11 @@ void GLCanvas::initialize() {
   SwapBuffers();
 }
 
-void GLCanvas::disableDisplay()
-{
+void GLCanvas::disableDisplay() {
   displayAllowed = false;
 }
 
-void GLCanvas::enableDisplay()
-{
+void GLCanvas::enableDisplay() {
   displayAllowed = true;
 }
 
@@ -119,8 +118,7 @@ void GLCanvas::getMaxViewportDims(int *w,int* h) {
   *h = dims[1];
 }
 
-void GLCanvas::resetView()
-{
+void GLCanvas::resetView() {
   angleX = 0.0f;
   angleY = 0.0f;
   moveVector.x = 0.0f;
@@ -131,17 +129,23 @@ void GLCanvas::resetView()
   display();
 }
 
-void GLCanvas::setActiveTool( int t )
-{
+void GLCanvas::setActiveTool(int t) {
   activeTool = t;
   currentTool = t;
   setMouseCursor();
 }
 
-void GLCanvas::display()
-{
-  if ( displayAllowed )
-  {
+void GLCanvas::display(bool coll_caller) {
+  // coll_caller indicates whether the caller of display() is the 
+  // getPictureData() method. While collecting data, only this method is allowed
+  // to call display(); else the collected data may be corrupted.
+  if (collectingData && !coll_caller) {
+    return;
+  }
+  
+  // next check is for preventing infinite recursive calls to display(), which 
+  // happened on the Mac during startup of the application
+  if (displayAllowed) {
     displayAllowed = false;
     mediator->notifyRenderingStarted();
     SetCurrent();
@@ -168,21 +172,24 @@ void GLCanvas::display()
       
       // determine current viewpoint in world coordinates
       glPushMatrix();
-	glLoadIdentity();
-	glTranslatef( 0.0f, 0.0f, halfHeight );
-	glRotatef( -90.0f , 1.0f, 0.0f, 0.0f );
-	glRotatef( -angleX, 0.0f, 1.0f, 0.0f );
-	glRotatef( -angleY, 1.0f, 0.0f, 0.0f );
-	glTranslatef( -moveVector.x, -moveVector.y, -moveVector.z + startPosZ );
-	GLfloat M[16];
-	glGetFloatv( GL_MODELVIEW_MATRIX, M );
-	Point3D viewpoint = { M[12], M[13], M[14] };
+	      glLoadIdentity();
+	      glTranslatef( 0.0f, 0.0f, halfHeight );
+	      glRotatef( -90.0f , 1.0f, 0.0f, 0.0f );
+	      glRotatef( -angleX, 0.0f, 1.0f, 0.0f );
+	      glRotatef( -angleY, 1.0f, 0.0f, 0.0f );
+	      glTranslatef( -moveVector.x, -moveVector.y, -moveVector.z + startPosZ );
+	      GLfloat M[16];
+	      glGetFloatv( GL_MODELVIEW_MATRIX, M );
+	      Point3D viewpoint = { M[12], M[13], M[14] };
       glPopMatrix();
       
       // draw the structure
       mediator->drawLTS( viewpoint );
       
-      SwapBuffers();
+      // do not show the picture in the canvas if we are collecting data
+      if (!collectingData) {
+        SwapBuffers();
+      }
     glPopMatrix();
     mediator->notifyRenderingFinished();
     displayAllowed = true;
@@ -194,51 +201,42 @@ void GLCanvas::reshape() {
   GetClientSize(&width,&height);
   glViewport(0,0,width,height);
   glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(60.0f,(GLfloat)(width)/(GLfloat)(height),nearPlane,farPlane);
+  glLoadIdentity();
+  gluPerspective(60.0f,(GLfloat)(width)/(GLfloat)(height),nearPlane,farPlane);
   glMatrixMode(GL_MODELVIEW);
 }
 
-void GLCanvas::onPaint( wxPaintEvent& /*event*/ )
-{
-  wxPaintDC dc( this );
+void GLCanvas::onPaint(wxPaintEvent& /*event*/) {
+  wxPaintDC dc(this);
   display();
 }
 
-void GLCanvas::onSize( wxSizeEvent& /*event*/ )
-{
+void GLCanvas::onSize(wxSizeEvent& /*event*/) {
   reshape();
 }
 
-void GLCanvas::OnEraseBackground( wxEraseEvent& /*event*/ )
-{
+void GLCanvas::OnEraseBackground(wxEraseEvent& /*event*/) {
 }
 
 // Mouse event handlers
 
-void GLCanvas::determineCurrentTool( wxMouseEvent& event )
-{
-  if ( event.MiddleIsDown() || ( event.LeftIsDown() && event.RightIsDown() ) )
-  {
+void GLCanvas::determineCurrentTool( wxMouseEvent& event ) {
+  if (event.MiddleIsDown() || (event.LeftIsDown() && event.RightIsDown())) {
     currentTool = myID_ZOOM;
   }
-  else if ( event.RightIsDown() )
-  {
+  else if (event.RightIsDown()) {
     currentTool = myID_ROTATE;
   }
-  else
-  {
+  else {
     currentTool = activeTool;
   }
   setMouseCursor();
 }
 
-void GLCanvas::setMouseCursor()
-{
+void GLCanvas::setMouseCursor() {
   wxImage img;
   bool ok = true;
-  switch ( currentTool )
-  {
+  switch (currentTool) {
     case myID_SELECT:
       img = wxImage( select_cursor );
       img.SetMaskFromImage( wxImage( select_cursor_mask ), 255, 0, 0 );
@@ -260,72 +258,64 @@ void GLCanvas::setMouseCursor()
       break;
   }
 
-  if ( ok )
-  {
+  if (ok) {
     SetCursor( img );
   }
 }
 
-void GLCanvas::onMouseEnter( wxMouseEvent& /*event*/ )
-{
+void GLCanvas::onMouseEnter(wxMouseEvent& /*event*/) {
   this->SetFocus();
 }
 
-void GLCanvas::onMouseDown( wxMouseEvent& event )
-{
+void GLCanvas::onMouseDown(wxMouseEvent& event) {
   determineCurrentTool( event );
-  if ( currentTool == myID_ZOOM || currentTool == myID_PAN || currentTool == myID_ROTATE )
-  {
+  if (currentTool==myID_ZOOM || currentTool==myID_PAN ||
+      currentTool==myID_ROTATE) {
     oldMouseX = event.GetX();
     oldMouseY = event.GetY();
   }
 }
 
-void GLCanvas::onMouseUp( wxMouseEvent& event )
-{
+void GLCanvas::onMouseUp(wxMouseEvent& event) {
   determineCurrentTool( event );
 }
 
-void GLCanvas::onMouseMove( wxMouseEvent& event )
-{
-  if ( event.Dragging() )
-  {
+void GLCanvas::onMouseMove(wxMouseEvent& event) {
+  if (event.Dragging()) {
     // mouse is moving with some button(s) pressed
     int newMouseX = (int)event.GetX();
     int newMouseY = (int)event.GetY();
-    switch ( currentTool )
-    {
+    switch (currentTool) {
       case myID_ZOOM :
-	moveVector.z += 0.01f * (startPosZ - moveVector.z) * (oldMouseY - newMouseY);
-	oldMouseY = newMouseY;
-	display();
-	break;
+	      moveVector.z += 0.01f*(startPosZ-moveVector.z)*(oldMouseY-newMouseY);
+	      oldMouseY = newMouseY;
+        display();
+	      break;
 	
       case myID_PAN :
-	moveVector.x -= 0.0015f * (startPosZ - moveVector.z) * (oldMouseX - newMouseX);
-	moveVector.y += 0.0015f * (startPosZ - moveVector.z) * (oldMouseY - newMouseY);
-	oldMouseX = newMouseX;
-	oldMouseY = newMouseY;
-	display();
-	break;
+	      moveVector.x -= 0.0015f*(startPosZ-moveVector.z)*(oldMouseX-newMouseX);
+	      moveVector.y += 0.0015f*(startPosZ-moveVector.z)*(oldMouseY-newMouseY);
+	      oldMouseX = newMouseX;
+	      oldMouseY = newMouseY;
+	      display();
+	      break;
 	
       case myID_ROTATE :
-	angleX -= 0.5f * (oldMouseX - newMouseX);
-	angleY -= 0.5f * (oldMouseY - newMouseY);
-	if ( angleX >= 360.0f ) angleX -= 360.0f;
-	if ( angleY >= 360.0f ) angleY -= 360.0f;
-	if ( angleX < 0.0f ) angleX += 360.0f;
-	if ( angleY < 0.0f ) angleY += 360.0f;
-	oldMouseX = newMouseX;
-	oldMouseY = newMouseY;
-	display();
-	break;
+	      angleX -= 0.5f*(oldMouseX-newMouseX);
+	      angleY -= 0.5f*(oldMouseY-newMouseY);
+	      if (angleX >= 360.0f) angleX -= 360.0f;
+	      if (angleY >= 360.0f) angleY -= 360.0f;
+      	if (angleX < 0.0f) angleX += 360.0f;
+      	if (angleY < 0.0f) angleY += 360.0f;
+	      oldMouseX = newMouseX;
+	      oldMouseY = newMouseY;
+	      display();
+	      break;
 	
       default : break;
     }
   }
-  else
-  {
+  else {
     event.Skip();
   }
 }
@@ -366,7 +356,14 @@ unsigned char* GLCanvas::getPictureData(int w_res,int h_res) {
   glPixelStorei(GL_PACK_ALIGNMENT,1);
 
   /* COLLECT ALL DATA */
-
+  
+  // calling display() first seems to solve the problem that sometimes the
+  // collected data gets corrupted because of a pending repaint of the part of 
+  // the canvas that was underneath the Save Picture dialog window...
+  //display();
+  
+  // ... still, just to be sure, it's wise to apply mutual exclusion here
+  collectingData = true;
   int bx,by; /* x and y coordinate of lower left corner of current block */
   int bw,bh; /* width and height of current block */
   by = 0;
@@ -377,15 +374,19 @@ unsigned char* GLCanvas::getPictureData(int w_res,int h_res) {
     bw = w_block;
     for (int i=0; i<M; ++i) {
       if (i==W) bw = w_rem;
-      glViewport(-bx,-by,w_res,h_res);
-      display();
       pixel_ptrs[i][j] = (unsigned char*)malloc(3*bw*bh*sizeof(unsigned char));
+      glViewport(-bx,-by,w_res,h_res);
+      // we do not want other methods to call display() while collecting data, 
+      // so we call display(true): 'true' indicates that we are the method that 
+      // is collecting data and are thus allowed to call display() 
+      display(true);
       glReadPixels(0,0,bw,bh,GL_RGB,GL_UNSIGNED_BYTE,pixel_ptrs[i][j]);
       bx += w_block;
     }
     by += h_block;
   }
-
+  collectingData = false;
+  
   /* RESET VIEW */
 
   glViewport(0,0,w_block,h_block);
@@ -403,9 +404,9 @@ unsigned char* GLCanvas::getPictureData(int w_res,int h_res) {
     for (int r=0; r<bh; ++r) {
       bw = w_block;
       for (int i=0; i<M; ++i) {
-	if (i==W) bw = w_rem;
-	memcpy(pixels+offset,pixel_ptrs[i][j]+3*r*bw,3*bw);
-	offset += 3*bw;
+	      if (i==W) bw = w_rem;
+        memcpy(pixels+offset,pixel_ptrs[i][j]+3*r*bw,3*bw);
+        offset += 3*bw;
       }
     }
   }
