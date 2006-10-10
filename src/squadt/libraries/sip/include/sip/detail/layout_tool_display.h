@@ -39,6 +39,9 @@ namespace sip {
         /** \brief Factory function */
         inline static boost::shared_ptr < layout::tool_display > create(layout::manager::aptr);
 
+        /** \brief Returns whether or not the contents should be visible */
+        inline bool get_visibility() const;
+
         /** \brief Whether or not the tool display is shown */
         inline void show(bool);
 
@@ -82,6 +85,10 @@ namespace sip {
 
     inline void tool_display::set_top_manager(layout::manager::aptr m) {
       top_manager = m;
+    }
+
+    inline bool tool_display::get_visibility() const {
+      return (visible);
     }
 
     /**
