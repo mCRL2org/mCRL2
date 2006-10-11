@@ -51,10 +51,9 @@ namespace po = boost::program_options;
 std::string input_file; // Name of the file to read input from
 std::string output_file; // Name of the file to write output to (or stdout)
 
+#ifdef ENABLE_SQUADT_CONNECTIVITY
 //Forward declaration needed for use within squadt_lpeuntime class
 int do_untime();
-
-#ifdef ENABLE_SQUADT_CONNECTIVITY
 class squadt_lpeuntime: public squadt_tool_interface
 {
   private:
@@ -105,13 +104,24 @@ bool squadt_lpeuntime::perform_task(sip::configuration& configuration)
 
 #endif //ENABLE_SQUADT_CONNECTIVITY
 
+bool has_time(lpe::LPE& lpe)
+{
+  bool result = true;
+  for (lpe::summand_list::iterator i = lpe.summands().begin(); i != lpe.summands().end(); ++i)
+  {
+    result = result && i->has_time();
+  }
+  return result;
+}
+
 ///Returns an LPE specification in which the timed arguments have been rewritten
 lpe::specification untime(const lpe::specification& specification) {
   // TODO: Strip use of gs functions as much as possible; everything that's possible through these
   // should also be available through the LPE library!
   // NOTE: The gs functions will be made available in the LPE library by Wieger.
+
   lpe::specification untime_specification; // Updated specification
-  lpe::LPE lpe; // Original lpe
+  lpe::LPE lpe = specification.lpe(); // Original lpe
   lpe::LPE untime_lpe; // Updated lpe
   lpe::summand_list untime_summand_list; // Updated summand list
   lpe::data_variable_list untime_process_parameters; // Updated process parameters
@@ -119,10 +129,12 @@ lpe::specification untime(const lpe::specification& specification) {
   lpe::data_variable_list untime_initial_variables; // Updated initial variables
   lpe::data_expression_list untime_initial_state; // Updated initial state
   // Note: initial variables and initial state together form initial assignment
- 
-  // init
-  untime_summand_list = lpe::summand_list();
-  lpe = specification.lpe();
+
+  //If an lpe has got no time at the initialization, just return the original lpe
+  if (!has_time(lpe))
+  {
+    return specification;
+  }
 
   // Create extra parameter last_action_time and add it to the list of process parameters,
   // last_action_time is used later on in the code
@@ -149,9 +161,7 @@ lpe::specification untime(const lpe::specification& specification) {
 
 	// Extend the original condition with an additional argument t.i(d,e.i)>last_action_time
 	untime_condition = gsMakeDataExprAnd(i->condition(), 
-                                             gsMakeDataExprGT(i->time(), 
-                                                              last_action_time
-                                                             )
+                                             lpe::greater(i->time(),data_expression(last_action_time))
                                              );
 
 	// Extend original assignments to include t.i(d,e.i)
@@ -167,9 +177,7 @@ lpe::specification untime(const lpe::specification& specification) {
 
 	// Extend the original condition with an additional argument
 	untime_condition = gsMakeDataExprAnd(i->condition(),
-                                             gsMakeDataExprGT(time_var,
-                                                              last_action_time
-                                                             )
+                                             lpe::greater(time_var, data_expression(last_action_time))
                                              );
 
 
