@@ -75,11 +75,18 @@ namespace Utils
     bool  free;    
   };
 
+  struct Vect
+  {
+    float x;
+    float y;
+  };
+
   bool operator==( RGB_Color c1, RGB_Color c2 );
   bool operator!=( RGB_Color c1, RGB_Color c2 );
   Point3D operator+( Point3D p1, Point3D p2 );
   Point3D operator-( Point3D p1, Point3D p2 );
   Point3D operator*( float s, Point3D p );
+  Vect operator+( Vect v1, Vect v2 );
   float length( Point3D p );
   void  normalize( Point3D &p );
   float dot_product(Point3D p1,Point3D p2);
@@ -90,5 +97,15 @@ namespace Utils
   int round_to_int( double f );
   float deg_to_rad( float deg );
   float rad_to_deg( float rad );
+  
+  float vec_to_ang( Vect v);
+  //RET: atan2f(Vect.y, Vect.x)
+  
+  Vect ang_to_vec( float phi);
+  //RET: V, such that V.x =  cos(phi) /\ V.y = sin(phi)
+  
+  float vec_length( Vect v);
+  //RET: || v ||
+
 }
 #endif

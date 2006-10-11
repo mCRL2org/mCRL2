@@ -64,6 +64,7 @@ class Cluster
     // Functions on states
     void      addState( State* s );
     void      getStates( std::vector< State* > &ss ) const;
+    int       getNumberOfStates() const;
     bool      hasDeadlock() const;
     bool      hasMarkedState() const;
     void      markState();

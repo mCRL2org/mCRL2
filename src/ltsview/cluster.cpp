@@ -59,6 +59,11 @@ void Cluster::getStates( vector< State* > &ss ) const
   ss = states;
 }
 
+int Cluster::getNumberOfStates() const
+{
+  return states.size();
+}
+
 Cluster* Cluster::getAncestor() const
 {
   return ancestor;

@@ -25,6 +25,12 @@ Utils::Point3D Utils::operator*(float s,Point3D p) {
   return result;
 }
 
+Utils::Vect Utils::operator+(Vect v1, Vect v2) {
+  Vect result;
+  result.x = v1.x + v2.x;
+  result.y = v1.y + v2.y;
+  return result;
+}
 float Utils::length(Point3D p) {
   return sqrt(p.x*p.x + p.y*p.y + p.z*p.z);
 }
@@ -152,4 +158,19 @@ int Utils::round_to_int( double f )
   double intpart;
   modf( f + 0.5, &intpart );
   return static_cast< int > (intpart);
+}
+
+float Utils::vec_to_ang( Utils::Vect v) {
+  return atan2(v.y, v.x);
+}
+
+Utils::Vect Utils::ang_to_vec( float phi) {
+  Vect v;
+  v.x = cos(phi);
+  v.y = sin(phi);
+  return v;
+}
+
+float Utils::vec_length( Vect v) {
+  return sqrt(v.x*v.x + v.y *  v.y);
 }

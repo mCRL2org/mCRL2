@@ -9,6 +9,7 @@ LTS::LTS( Mediator* owner)
   deadlockCount = -1;
   markedTransitionCount = 0;
   stateVectorSpec = NULL;
+  tau = 1.0;
 }
 
 LTS::~LTS()
@@ -479,6 +480,9 @@ void LTS::positionClusters()
 
 void LTS::positionStates()
 {
+  vector< State* > undecided = edgeLengthBottomUp();
+  //TODO: Change to call of correct positioning functions.
+ /* 
   for ( vector< vector< Cluster* > >::iterator r_it = clustersInRank.begin() ;
 	r_it != clustersInRank.end() ; ++r_it )
   {
@@ -501,9 +505,133 @@ void LTS::positionStates()
 	}
       }
     }
-  }
+  }*/
 }
 
+vector< State* > LTS::edgeLengthBottomUp()
+{
+  //Phase 1: Processes states bottom-up, keeping edges as short as possible.
+  //Pre:  statesInRank is correctly sorted by rank. 
+  //Post: states in statesInRank are positioned bottom up, keeping edges as 
+  //      short as possible, if enough information is available.
+  //Ret:  states that could not be placed in this phase, sorted bottom-up
+  //
+  // The details of this algorithm can be found in  Frank van Ham's master's
+  // thesis, pp. 21-29
+ 
+  //To keep the states that could not be placed in this pass.
+  vector< State * > undecided; 
+
+  // Iterate over the ranks in reverse order (bottom-up)
+  vector< vector< State* > >::reverse_iterator rank_it;
+  for( rank_it = statesInRank.rbegin();
+       rank_it != statesInRank.rend(); ++rank_it) {
+    // Iterate over the clusters in this rank
+    for( vector< State* >::iterator state_it = rank_it->begin();
+         state_it != rank_it->end(); ++state_it) {
+      // Get the cluster belonging to this state
+      Cluster* currCluster = (*state_it)->getCluster();
+
+      // Compute the position of the states, based on number and position of 
+      // descendants of their cluster.
+      switch (currCluster->getNumberOfDescendants()) {
+        case 0:
+        {
+          // Case three: No descendant clusters.
+          // Center the state.
+          (*state_it)->setPosition(-1.0f);
+
+          // If this cluster is not centered and there is only one node in this 
+          // cluster, the centering is permanent, otherwise, it's temporary.
+          if (currCluster->getPosition() < -.9 &&
+              currCluster->getNumberOfStates() != 1) {
+            undecided.push_back(*state_it);
+          } 
+          break;
+        }
+        case 1:
+        {
+          // Case one: One descendant cluster.
+          // We know the states in this cluster have a pseudo-correct position
+          // (as determined in this pass), since we process the system bottom-up
+
+          // Get the subordinate states. These are all in one cluster, and we 
+          // can calculate the position of the current state directly from them.
+          set< State* > subordinates;
+          (*state_it)->getSubordinates( subordinates );
+
+          // Calculate the sum of the vectors gained from all subordinate angles
+          Vect vecSum;
+          vecSum.x = 0;
+          vecSum.y = 0;
+
+          for(set< State* >::iterator sub_it = subordinates.begin();
+              sub_it != subordinates.end(); ++sub_it) {
+            float position_rad = deg_to_rad((*sub_it)->getPosition());
+            Vect subVec = ang_to_vec(position_rad);
+            vecSum = vecSum + subVec;
+          }
+
+          if (vec_length(vecSum) < tau) {
+            // vecSum is sufficiently small, center the state.
+            (*state_it)->setPosition(-1.0f);
+            
+            // Check if there is only one subordinate. If so, the centering is
+            // temporary, to prevent chains of centered nodes.
+            if (subordinates.size() == 1) {
+              undecided.push_back(*state_it);
+            }
+          }
+          else {
+            // Transform vecSum into an angle, assign it to state position.
+            (*state_it)->setPosition(rad_to_deg(vec_to_ang(vecSum)));
+          }
+          
+          break;
+        }
+        default:
+        {
+          // Case two: More than one descendant cluster.
+          // Iterate over subordinates, calculating sum of vectors.
+          Vect vecSum;
+          vecSum.x = 0;
+          vecSum.y = 0;
+          set< State* > subordinates;
+          (*state_it)->getSubordinates( subordinates );
+
+          for (set< State* >::iterator sub_it = subordinates.begin();
+               sub_it != subordinates.end(); ++sub_it) {
+            float clusterPos = (*sub_it)->getCluster()->getPosition();
+            
+            if (clusterPos < -0.9f) {
+              // Cluster is centered
+              float position_rad = deg_to_rad((*sub_it)->getPosition());
+              vecSum = vecSum + ang_to_vec(position_rad);
+            }
+            else
+            {
+              float clusterPos_rad = deg_to_rad(clusterPos);
+              float statePos = deg_to_rad((*sub_it)->getPosition());
+              // Convert angles to Vectors, add
+              Vect relPos = ang_to_vec(statePos) + ang_to_vec(clusterPos_rad);
+              vecSum = vecSum + relPos;
+            }
+          }
+          
+          // Convert sum to angle, assign it to position.
+          if (vec_length(vecSum) < tau) {
+            // vecSum is sufficiently small, center node.
+            (*state_it)->setPosition(-1.0f);
+          }
+          else {
+            (*state_it)->setPosition(rad_to_deg(vec_to_ang(vecSum)));
+          }
+        }
+      }      
+    }
+  }
+  return undecided;
+}
 void LTS::addMarkRule( MarkRule* r, int index )
 {
   if ( index == -1 ) 
