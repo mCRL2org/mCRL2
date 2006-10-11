@@ -32,6 +32,7 @@
 //LPE Framework
 #include <lpe/lpe.h>
 #include <lpe/specification.h>
+#include <lpe/data_functional.h>
 
 //Squadt connectivity
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -82,16 +83,19 @@ class squadt_lpesumelm: public squadt_tool_interface
 void squadt_lpesumelm::set_capabilities(sip::tool::capabilities& capabilities) const
 {
   // The tool has only one main input combination
+  gsDebugMsg("squadt_lpesumelm: Setting capabilities\n");
   capabilities.add_input_combination(lpd_file_for_input, "Transformation", "lpe");
 }
 
 void squadt_lpesumelm::user_interactive_configuration(sip::configuration& configuration)
 {
+  gsDebugMsg("squadt_lpesumelm: User interactive configuration\n");
   configuration.add_output(lpd_file_for_output, "lpe", configuration.get_output_name(".lpe"));
 }
 
 bool squadt_lpesumelm::check_configuration(sip::configuration const& configuration) const
 {
+  gsDebugMsg("squadt_lpesumelm: Checking configuration\n");
 // Check if everything present (see lpe2lts)
   return (configuration.object_exists(lpd_file_for_input) &&
           configuration.object_exists(lpd_file_for_output)
@@ -100,10 +104,12 @@ bool squadt_lpesumelm::check_configuration(sip::configuration const& configurati
 
 bool squadt_lpesumelm::perform_task(sip::configuration& configuration)
 {
+  gsDebugMsg("squadt_lpesumelm: Performing task\n");
   std::string in_file, out_file;
   in_file = configuration.get_object(lpd_file_for_input)->get_location();
   out_file = configuration.get_object(lpd_file_for_output)->get_location();
 
+  gsDebugMsg("Calling do_sumelm through SQuADT, with input: %s and output: %s\n", in_file.c_str(), out_file.c_str());
   return (do_sumelm(in_file, out_file)==0);
 }
 
@@ -137,7 +143,7 @@ bool occurs_in(data_type d, data_variable v)
 }
 
 ///pre: true
-///ret: 1 if t is a DataExprEquality, 0 otherwise
+///ret: true if t is a DataExprEquality, false otherwise
 static bool gsIsDataExprEquality(ATermAppl t)
 {
   if (!gsIsDataAppl(t)) {
@@ -153,7 +159,7 @@ static bool gsIsDataExprEquality(ATermAppl t)
 }
 
 ///pre: true
-///ret: 1 if t is a DataExprAnd, 0 otherwise
+///ret: true if t is a DataExprAnd, false otherwise
 static bool gsIsDataExprAnd(ATermAppl t)
 {
   if (!gsIsDataAppl(t)) {
@@ -167,7 +173,7 @@ static bool gsIsDataExprAnd(ATermAppl t)
 }
 
 ///pre: true
-///ret: 1 if t is an equality, 0 otherwise
+///ret: true if t is an equality, false otherwise
 inline
 bool is_equality(data_expression t)
 {
@@ -175,7 +181,7 @@ bool is_equality(data_expression t)
 }
 
 ///pre: true
-///ret: 1 if t is a conjunction, 0 otherwise
+///ret: true if t is a conjunction, false otherwise
 inline
 bool is_and(data_expression t)
 {
@@ -183,7 +189,7 @@ bool is_and(data_expression t)
 }
 
 ///pre: true
-///ret: 1 if t as a data_variable, 0 otherwise
+///ret: true if t as a data_variable, false otherwise
 inline
 bool is_var(data_expression t)
 {
@@ -223,8 +229,7 @@ inline
 data_expression swap_equality(data_expression t)
 {
   assert(is_equality(t));
-  return data_expression(gsMakeDataExprEq(ATermAppl(rhs(t)), ATermAppl(lhs(t))));
-//  return equal_to(rhs(t), lhs(t));
+  return lpe::equal_to(rhs(t), lhs(t));
 }
 
 ///pre: is_and(t)
@@ -407,6 +412,8 @@ lpe::specification eq_sumelm(const lpe::specification& specification)
 ///Returns an LPE specification in which the timed arguments have been rewritten
 lpe::specification sumelm(const lpe::specification& specification) 
 {
+  gsVerboseMsg("Applying sum elimination...\n");
+
   lpe::specification new_specification = specification;
   new_specification = eq_sumelm(new_specification); // new_specification used for future concerns, possibly disabling eq_sumelm
   new_specification = no_occurrence_sumelm(new_specification);
@@ -500,6 +507,7 @@ int main(int ac, char** av) {
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
+  gsDebugMsg("Squadt connectivity enabled\n");
   squadt_lpesumelm sl;
   if (sl.try_interaction(ac, av)) {
     return 0;
