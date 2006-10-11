@@ -22,6 +22,7 @@ project toolset
           <os>LINUX,<toolset>gcc:<cxxflags>"-std=c++98 -ansi"
           <toolset>msvc:<define>WIN32
           <toolset>msvc:<include>src/libraries/auxiliary/include/nt_portability
+          <define>BOOST_ALL_NO_LIB
        : default-build
           <address-model>$(ADDRESS_MODEL)
           <variant>$(BUILD_VARIANT)
@@ -32,11 +33,7 @@ project toolset
 use-project /site-config               : build ;
 use-project /libraries/transport       : src/squadt/libraries/transport/build ;
 use-project /libraries/sip             : src/squadt/libraries/sip/build ;
-
-# Register boost libraries
-for library in [ MATCH boost/libs/(.*)/build/Jamfile.v2 : [ glob boost/libs/*/build/Jamfile.v2 ] ] {
-  use-project /boost/$(library) : boost/libs/$(library)/build ;
-}
+use-project /boost                     : boost ;
 
 tools = [ MATCH src/(.*)/.* : [ glob src/*/Jamfile.v2 ] ] ;
 
