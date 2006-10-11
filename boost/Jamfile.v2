@@ -1,7 +1,17 @@
+project boost
+       : requirements
+         <include>$(TOP)/boost
+       ;
+
 libraries = [ MATCH .*libs/(.*)/build/.* : [ glob libs/*/build/Jamfile.v2 ] ] ;
 
 # Make project ids of all libraries known.
 for local l in $(libraries) {
-  alias $(l) : libs/$(l)/build//boost_$(l) : : : <include>$(TOP)/boost ;
+  alias $(l)
+       : libs/$(l)/build//boost_$(l)
+       :
+       :
+       : <include>$(TOP)/boost
+       ;
 }
-    
+

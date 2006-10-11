@@ -334,7 +334,7 @@ namespace squadt {
       type_registry::tool_sequence range = static_cast < main* > (GetParent())->registry->tools_by_mime_type(format);
 
       std::string last_seen_category;
-      wxMenu*     target_menu;
+      wxMenu*     target_menu = 0;
 
       BOOST_FOREACH(type_registry::tool_sequence::value_type i, range) {
 
