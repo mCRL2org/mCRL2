@@ -20,7 +20,6 @@
 
 //Boost
 #include <boost/program_options.hpp>
-#include <boost/filesystem/convenience.hpp>
 
 //Lowlevel library for gsErrorMsg
 #include <libprint_c.h>

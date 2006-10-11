@@ -1,7 +1,5 @@
 project lpeconstelm
        : source-location .
-       : requirements
-          <include>$(BOOST)
        : build-dir $(BUILD_TOP)/lpeconstelm
        ;
 
@@ -9,8 +7,7 @@ exe lpeconstelm
        : lpeconstelm.cpp
          /libraries/mcrl2_basic//mcrl2_basic
          /libraries/lpe//lpe
-       : <source>/boost/program_options//boost_program_options
-         <source>/boost/filesystem//boost_filesystem
+       : <source>/boost//program_options
          <source>/site-config//mcrl2_revision.h
          <squadt_support>enable
          <include>.

@@ -37,14 +37,14 @@ namespace sip {
     }
 
     /**
-     * @param[in] e event handler object that will dispatch events for this object
+     * \param[in] e event handler object that will dispatch events for this object
      **/
     void element::set_event_handler(basic_event_handler* e) {
       current_event_handler->transfer(*e, this);
     }
 
     /**
-     * @param[in] identifier the identifier of the wanted element
+     * \param[in] identifier the identifier of the wanted element
      **/
     element* box::find(layout::element::identifier identifier) {
       element* r = (identifier == id) ? this : 0;
@@ -126,7 +126,7 @@ namespace sip {
     }
 
     /**
-     * @param[out] o the stream to which to write
+     * \param[out] o the stream to which to write
      **/
     void constraints::write(std::ostream& o) const {
       o << "<constraints "
@@ -214,7 +214,7 @@ namespace sip {
     }
 
     /**
-     * @param[out] o the stream to which to write the result
+     * \param[out] o the stream to which to write the result
      **/
     void vertical_box::write_structure(std::ostream& o) const {
       constraints const* current_constraints = &manager::default_constraints;
@@ -239,7 +239,7 @@ namespace sip {
     }
 
     /**
-     * @param[out] o the stream to which to write the result
+     * \param[out] o the stream to which to write the result
      **/
     void horizontal_box::write_structure(std::ostream& o) const {
       constraints const* current_constraints = &manager::default_constraints;
@@ -264,7 +264,7 @@ namespace sip {
     }
 
     /**
-     * @param[in] r the xml2pp text reader from which to read
+     * \param[in] r the xml2pp text reader from which to read
      *
      * \pre reader should point to a box-layout-manager element (of type horizontal)
      * \post reader points to after the associated end tag of the box
@@ -290,7 +290,7 @@ namespace sip {
     }
 
     /**
-     * @param[out] o the stream to which to write the result
+     * \param[out] o the stream to which to write the result
      **/
     void tool_display::write(std::ostream& o) const {
       o << "<display-layout visible=\"" << visible << "\">";
@@ -303,7 +303,7 @@ namespace sip {
     }
 
     /**
-     * @param[in] r the xml2pp text reader from which to read
+     * \param[in] r the xml2pp text reader from which to read
      *
      * \pre reader should point to a display-layout element
      * \post reader points to after the associated end tag of the box
@@ -325,7 +325,7 @@ namespace sip {
     }
 
     /**
-     * @param[in] m a mediator to synchronise an element with the associated element in a (G)UI
+     * \param[in] m a mediator to synchronise an element with the associated element in a (G)UI
      **/
     mediator::wrapper_aptr tool_display::instantiate(mediator* m) const {
       if (top_manager.get() != 0) {
@@ -336,8 +336,8 @@ namespace sip {
     }
 
     /**
-     * @param[in] r an xml2pp text reader that should point to state descriptions
-     * @param[in] elements a vector with the elements that should be updated
+     * \param[in] r an xml2pp text reader that should point to state descriptions
+     * \param[in] elements a vector with the elements that should be updated
      *
      * Looks up an element by its id and calls the read_structure on this
      * member to read its new state from the text reader.

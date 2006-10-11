@@ -40,11 +40,11 @@ namespace squadt {
 
       private:
 
-        miscellaneous::tool_selection_helper::sptr tool_registry;
+        miscellaneous::type_registry::sptr tool_registry;
 
-        wxListView*                                formats_and_actions;
+        wxListView*                        formats_and_actions;
 
-        wxTextCtrl*                                command_text;
+        wxTextCtrl*                        command_text;
 
       private:
 
@@ -60,7 +60,7 @@ namespace squadt {
 
       public:
 
-        edit_preferences(miscellaneous::tool_selection_helper::sptr const&, wxWindow*);
+        edit_preferences(miscellaneous::type_registry::sptr const&, wxWindow*);
     };
 
     class debug_preferences : public wxPanel {
@@ -143,7 +143,7 @@ namespace squadt {
       }
     }
 
-    edit_preferences::edit_preferences(miscellaneous::tool_selection_helper::sptr const& h, wxWindow* w) : wxPanel(w, wxID_ANY), tool_registry(h) {
+    edit_preferences::edit_preferences(miscellaneous::type_registry::sptr const& h, wxWindow* w) : wxPanel(w, wxID_ANY), tool_registry(h) {
       wxSizer* current_sizer = new wxBoxSizer(wxVERTICAL);
 
       SetSizer(current_sizer);
@@ -229,7 +229,7 @@ namespace squadt {
       tab_manager->AddPage(new execution_preferences(tab_manager), wxT("Execution"));
 
       /* Edit settings */
-      tab_manager->AddPage(new edit_preferences(p->tool_registry, tab_manager), wxT("Editing"));
+      tab_manager->AddPage(new edit_preferences(p->registry, tab_manager), wxT("Editing"));
 
       /* Debug settings */
       tab_manager->AddPage(new debug_preferences(tab_manager), wxT("Debug"));

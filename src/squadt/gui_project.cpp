@@ -12,6 +12,7 @@
 #include "gui_main.h"
 #include "gui_project.h"
 #include "gui_resources.h"
+#include "gui_miscellaneous.h"
 #include "project_manager.h"
 #include "gui_dialog_base.h"
 #include "gui_tool_display.h"
@@ -278,11 +279,28 @@ namespace squadt {
       manager->update(boost::bind(&project::prepare_tool_display, this, _1));
     }
 
+    /* Helper class for associating a tool input combination with a menu item */
+    class cmMenuItem : public wxMenuItem {
+
+      public:
+
+        const tool::sptr               the_tool;
+
+        const tool::input_combination* input_combination;
+
+      public:
+
+        cmMenuItem(wxMenu* m, int id, const wxString& t, const tool::sptr& tp, const tool::input_combination* ic) :
+                                        wxMenuItem(m, id, t), the_tool(tp), input_combination(ic) {
+        }
+    };
+
     /**
      * \param n an tool_data object used to establish which tools to add to the menu
      **/
     void project::spawn_context_menu(tool_data& n) {
       using namespace boost;
+      using namespace squadt::miscellaneous;
 
       size_t separator_position     = 2;
       bool   editable               = false;
@@ -313,7 +331,27 @@ namespace squadt {
 
       std::string format = n.get_object()->format;
 
-      main::tool_registry->by_format(format, bind(&project::add_to_context_menu, this, format, _1, &context_menu, &identifier));
+      type_registry::tool_sequence range = static_cast < main* > (GetParent())->registry->tools_by_mime_type(format);
+
+      std::string last_seen_category;
+      wxMenu*     target_menu;
+
+      BOOST_FOREACH(type_registry::tool_sequence::value_type i, range) {
+
+        if (last_seen_category != i.first) {
+          target_menu = new wxMenu();
+
+          last_seen_category = i.first;
+
+          context_menu.Append(identifier++, wxString(i.first.c_str(), wxConvLocal), target_menu);
+        }
+
+        cmMenuItem* new_menu_item = new cmMenuItem(target_menu, identifier++, 
+                                  wxString(i.second->get_name().c_str(), wxConvLocal),
+                                  i.second, i.second->find_input_combination(i.first, format));
+
+        target_menu->Append(new_menu_item);
+      }
 
       context_menu.AppendSeparator();
 
@@ -324,49 +362,6 @@ namespace squadt {
       context_menu.Append(cmID_DETAILS, wxT("Details"));
 
       PopupMenu(&context_menu);
-    }
-
-    /* Helper class for associating a tool input combination with a menu item */
-    class cmMenuItem : public wxMenuItem {
-
-      public:
-
-        const tool::sptr               the_tool;
-
-        const tool::input_combination* input_combination;
-
-        cmMenuItem(wxMenu* m, int id, const wxString& t, const tool::sptr& tp, const tool::input_combination* ic) :
-                                        wxMenuItem(m, wxID_ANY, t), the_tool(tp), input_combination(ic) {
-        }
-    };
-
-    /**
-     * \param[in] f the storage format of the selected output
-     * \param[in] p the main tool_selection_helper object that indexes the global tool manager
-     * \param[in] c a reference to the context menu to which to add
-     * \param[in,out] id a reference to the next free identifier
-     **/
-    void project::add_to_context_menu(const storage_format f, const miscellaneous::tool_selection_helper::tools_by_category::value_type& p, wxMenu* c, int* id) {
-      wxString    category_name = wxString(p.first.c_str(), wxConvLocal);
-      int         item_id       = c->FindItem(category_name); 
-      wxMenu*     target_menu;
-
-      if (item_id == wxNOT_FOUND) {
-        target_menu = new wxMenu();
-
-        c->Append(*id++, category_name, target_menu);
-      }
-      else {
-        /* According to the documentation the following does what c->FindItem(item_id)->GetSubMenu() should have done */
-        target_menu = c->GetMenuItems().GetLast()->GetData()->GetSubMenu();
-      }
-
-      cmMenuItem* new_menu_item = new cmMenuItem(target_menu, *id++, 
-                                wxString(p.second->get_name().c_str(), wxConvLocal),
-                                p.second,
-                                p.second->find_input_combination(p.first, f));
-
-      target_menu->Append(new_menu_item);
     }
 
     /**
@@ -410,7 +405,8 @@ namespace squadt {
             }
             else {
               /* Add the main input (must exist) */
-              dialog.populate_tool_list(p->get_input_combination()->format);
+              dialog.populate_tool_list(static_cast < main* > (GetParent())->registry->
+                                        tools_by_mime_type(p->get_input_combination()->format));
 
               if (p->get_tool().get() != 0) {
                 dialog.select_tool(p->get_input_combination(), p->get_tool()->get_name());

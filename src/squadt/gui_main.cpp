@@ -16,8 +16,6 @@ namespace squadt {
 
     wxString main::default_title = wxT("deskSQuADT");
 
-    miscellaneous::tool_selection_helper::sptr  main::tool_registry;
-
     void main::about() {
       squadt::GUI::about about_dialog(this);
       

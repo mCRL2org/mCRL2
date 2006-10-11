@@ -1,15 +1,13 @@
 project lpedataelm
        : source-location .
        : build-dir $(BUILD_TOP)/lpedataelm
-       : requirements
-          <include>$(BOOST)
        ;
 
 exe lpedataelm
        : lpedataelm.cpp
          /libraries/temporary//dataelm
          /libraries/mcrl2_basic//mcrl2_basic
-       : <source>/boost/program_options//boost_program_options
+       : <source>/boost//program_options
          <source>/site-config//mcrl2_revision.h
          <include>.
        ;

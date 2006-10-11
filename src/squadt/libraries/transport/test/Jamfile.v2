@@ -9,6 +9,6 @@ import testing ;
 unit-test connection_test
       : connection_test.cpp
         /libraries/transport//transport
-        /boost/test//boost_unit_test_framework
+        /boost//test
       ;
 

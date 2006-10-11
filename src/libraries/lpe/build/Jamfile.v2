@@ -6,10 +6,9 @@ project lpe
 
 alias lpe
        :
-       : <source>/libraries/aterm//atermpp
-         <dependency>/libraries/mcrl2_basic//mcrl2_basic
+       : <library>/libraries/aterm//atermpp
+         <library>/libraries/mcrl2_basic//mcrl2_basic
        :
        : <include>$(BOOST)
          <include>../include
-         <library>/libraries/mcrl2_basic//mcrl2_basic
        ;

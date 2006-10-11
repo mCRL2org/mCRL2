@@ -95,10 +95,14 @@ namespace sip {
 
       /** \brief Append type and instance ... */
       template < typename T >
-      inline void append_argument(datatype::basic_datatype::sptr, T);
+      inline void append_argument(datatype::basic_datatype::sptr, T const&);
+
+      /** \brief Replace an argument (type and instance) ... */
+      template < typename T >
+      inline void replace_argument(const size_t i, datatype::basic_datatype::sptr, T const&);
 
       /** \brief Assigns a value to the n-th argument of the option */
-      inline void bind_argument(const size_t n, std::string);
+      inline void bind_argument(const size_t n, std::string const&);
 
       /** \brief Generate XML representation */
       inline void write(std::ostream&) const;
@@ -111,8 +115,8 @@ namespace sip {
   };
 
   /**
-   * @param b the iterator from which to start
-   * @param e the iterator with which to end
+   * \param b the iterator from which to start
+   * \param e the iterator with which to end
    **/
   inline option::argument_iterator::argument_iterator
           (type_value_list::const_iterator b, type_value_list::const_iterator e) : iterator(b), end(e) {
@@ -168,33 +172,66 @@ namespace sip {
     arguments.push_back(std::make_pair(t, ""));
   }
 
+  /**
+   * \param[in] t pointer to the data type definition
+   * \param[in] d data that is valid w.r.t. the data type
+   **/
   template < typename T >
-  inline void option::append_argument(datatype::basic_datatype::sptr t, T d) {
+  inline void option::append_argument(datatype::basic_datatype::sptr t, T const& d) {
     assert(t.get() != 0);
 
-    arguments.push_back(std::make_pair(t, t.get()->convert(d)));
+std::cerr << "converting " << d << std::endl;
+    append_argument(t, t->convert(d));
   }
 
   /**
-   * @param[in] t pointer to the data type definition
-   * @param[in] d data that is valid w.r.t. the data type
+   * \param[in] t pointer to the data type definition
+   * \param[in] d data that is valid w.r.t. the data type
    **/
   template < >
-  inline void option::append_argument(datatype::basic_datatype::sptr t, std::string d) {
+  inline void option::append_argument(datatype::basic_datatype::sptr t, std::string const& d) {
     assert(t.get() != 0);
+std::cerr << d << std::endl;
+    assert(t->validate(d));
 
     arguments.push_back(std::make_pair(t, d));
   }
 
-  inline void option::bind_argument(const size_t n, std::string s) {
-    // TODO validate whether string can be interpreted as type: types[instances.size()]
-    type_value_list::iterator i = arguments.begin();
+  /**
+   * \param[in] i the index of the element to replace
+   * \param[in] t pointer to the data type definition
+   * \param[in] d data that is valid w.r.t. the data type
+   **/
+  template < typename T >
+  inline void option::replace_argument(const size_t i, datatype::basic_datatype::sptr t, T const& d) {
+    assert(t.get() != 0);
 
-    boost::next(i, n);
+    replace_argument(i, t, t.get()->convert(d));
+  }
 
-    assert(i != arguments.end());
+  /**
+   * \param[in] i the index of the element to replace
+   * \param[in] t pointer to the data type definition
+   * \param[in] d data that is valid w.r.t. the data type
+   **/
+  template < >
+  inline void option::replace_argument(const size_t i, datatype::basic_datatype::sptr t, std::string const& d) {
+    assert(t.get() != 0);
+    assert(0 <= i && i < arguments.size());
+    assert(t->validate(d));
 
-    (*i).second = s;
+    arguments[i] = std::make_pair(t, d);
+  }
+
+  /**
+   * \param[in] i the index of the element to replace
+   * \param[in] d data that is valid w.r.t. the data type
+   **/
+  inline void option::bind_argument(const size_t i, std::string const& d) {
+    assert(0 <= i && i < arguments.size());
+    assert(arguments[i].first->validate(d));
+
+    arguments[i].second = d;
   }
 
   inline void option::write(std::ostream& output) const {

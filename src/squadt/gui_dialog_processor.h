@@ -11,10 +11,13 @@
 #include <wx/notebook.h>
 
 #include "gui_dialog_base.h"
+#include "gui_miscellaneous.h"
 
 namespace squadt {
   namespace GUI {
     namespace dialog {
+
+      using squadt::miscellaneous::type_registry;
       
       /** \brief Base class for processor level dialogs */
       class processor : public dialog::basic {
@@ -62,10 +65,7 @@ namespace squadt {
           void build();
 
           /** \brief Helper function for filling the tool list with tools */
-          void populate_tool_list(storage_format);
-
-          /** \brief Helper function that actually adds a tool to the list of tools */
-          void add_to_tool_list(const miscellaneous::tool_selection_helper::tools_by_category::value_type&);
+          void populate_tool_list(type_registry::tool_sequence const&);
 
           /** \brief Event handler for when something is selected in the tool_selector control */
           void on_tool_selector_item_selected(wxTreeEvent& e);

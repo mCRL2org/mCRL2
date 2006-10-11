@@ -3,7 +3,7 @@ project libraries/lpe/example
        <include>$(BOOST)
        <source>/libraries/mcrl2_basic//mcrl2_basic
        <source>/libraries/lpe//lpe
-       <source>/boost/program_options//boost_program_options
+       <source>/boost//program_options
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
    ;
 

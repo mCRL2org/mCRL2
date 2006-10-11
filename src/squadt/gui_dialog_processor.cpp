@@ -13,6 +13,8 @@ namespace squadt {
   namespace GUI {
     namespace dialog {
 
+      using squadt::miscellaneous::type_registry;
+
       /** \brief SI prefixes for binary multiples */
       const char* prefixes_for_binary_multiples[7] = { "", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei" };
 
@@ -212,36 +214,37 @@ namespace squadt {
         }
       }
 
-      void processor_details::populate_tool_list(storage_format f) {
+      /**
+       * \param[in] range the pairs of categories and tool types to display
+       **/
+      void processor_details::populate_tool_list(type_registry::tool_sequence const& range) {
         using namespace squadt::miscellaneous;
 
         tool_selector->DeleteChildren(tool_selector->GetRootItem());
 
-        main::tool_registry->by_format(f, boost::bind(&processor_details::add_to_tool_list, this, _1));
+        BOOST_FOREACH(type_registry::tool_sequence::value_type i, range) {
+          wxString     current_category_name = wxString(i.first.c_str(), wxConvLocal);
+          wxTreeItemId root                  = tool_selector->GetRootItem();
+         
+          /* Use of GetLastChild() because ItemHasChildren can return true when there are no children */
+          if (tool_selector->GetLastChild(root).IsOk()) {
+            wxTreeItemId last_category = tool_selector->GetLastChild(root);
+           
+            if (tool_selector->GetItemText(last_category) != current_category_name) {
+              /* Add category */
+              last_category = tool_selector->AppendItem(root, current_category_name);
+            }
+           
+            tool_selector->AppendItem(last_category, wxString(i.second->get_name().c_str(), wxConvLocal));
+          }
+          else {
+            wxTreeItemId last_category = tool_selector->AppendItem(root, current_category_name);
+         
+            tool_selector->AppendItem(last_category, wxString(i.second->get_name().c_str(), wxConvLocal));
+          }
+        }
 
         Refresh();
-      }
-
-      void processor_details::add_to_tool_list(const miscellaneous::tool_selection_helper::tools_by_category::value_type& p) {
-        wxString     current_category_name = wxString(p.first.c_str(), wxConvLocal);
-        wxTreeItemId root = tool_selector->GetRootItem();
-
-        /* Use of GetLastChild() because ItemHasChildren can return true when there are no children */
-        if (tool_selector->GetLastChild(root).IsOk()) {
-          wxTreeItemId last_category = tool_selector->GetLastChild(root);
-         
-          if (tool_selector->GetItemText(last_category) != current_category_name) {
-            /* Add category */
-            last_category = tool_selector->AppendItem(root, current_category_name);
-          }
-         
-          tool_selector->AppendItem(last_category, wxString(p.second->get_name().c_str(), wxConvLocal));
-        }
-        else {
-          wxTreeItemId last_category = tool_selector->AppendItem(root, current_category_name);
-
-          tool_selector->AppendItem(last_category, wxString(p.second->get_name().c_str(), wxConvLocal));
-        }
       }
     }
   }

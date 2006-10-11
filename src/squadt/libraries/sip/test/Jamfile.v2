@@ -9,12 +9,11 @@ unit-test basic_messenger_test :
         basic_messenger_test.cpp
         /libraries/transport//transport
         /libraries/xml2pp//text_reader
-        /boost/thread//boost_thread
-        /boost/test//boost_unit_test_framework ;
+        /boost//test ;
 
 unit-test interface_test :
         interface_test.cpp
         /libraries/sip//sipc
         /libraries/sip//sipt
         /libraries/sip//sip_common
-        /boost/test//boost_unit_test_framework ;
+        /boost//test ;

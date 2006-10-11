@@ -15,7 +15,6 @@
 #include <wx/timer.h>
 
 #include "processor.h"
-#include "gui_miscellaneous.h"
 
 namespace squadt {
 
@@ -138,9 +137,6 @@ namespace squadt {
 
         /** \brief Creates a context menu for the selected processor */
         void spawn_context_menu(tool_data&);
-
-        /** \brief Helper function to add tools by category to a context menu */
-        void add_to_context_menu(const storage_format f, const miscellaneous::tool_selection_helper::tools_by_category::value_type&, wxMenu*, int*);
 
         /** \brief Add new processor outputs to the object view */
         void process_configuration(wxTreeItemId, processor::sptr);

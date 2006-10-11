@@ -1,7 +1,5 @@
 project lpeuntime
        : source-location .
-       : requirements
-          <include>$(BOOST)
        : build-dir $(BUILD_TOP)/lpeuntime
        ;
 
@@ -9,8 +7,7 @@ exe lpeuntime
        : lpeuntime.cpp
        : <source>/libraries/mcrl2_basic//mcrl2_basic
          <source>/libraries/lpe//lpe
-         <source>/boost/program_options//boost_program_options
-         <source>/boost/filesystem//boost_filesystem
+         <source>/boost//program_options
          <source>/site-config//mcrl2_revision.h
          <squadt_support>enable
          <include>.

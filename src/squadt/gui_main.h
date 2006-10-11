@@ -107,7 +107,7 @@ namespace squadt {
       public:
 
         /** \brief Tool selection helper that indexes the tools known by the global tool manager */
-        static miscellaneous::tool_selection_helper::sptr tool_registry;
+        miscellaneous::type_registry::sptr registry;
 
       public:
 
@@ -115,14 +115,13 @@ namespace squadt {
         main();
     };
 
-    inline main::main() : wxFrame(0, wxID_ANY, default_title, wxDefaultPosition, wxDefaultSize), project_view(0) {
+    inline main::main() : wxFrame(0, wxID_ANY, default_title, wxDefaultPosition, wxDefaultSize),
+                                       project_view(0), registry(miscellaneous::type_registry::create()) {
+
       /* Add widgets */
       build();
 
       /* Build the index (on the tool database) that is used to populate the context menus */
-      if (tool_registry.get() == 0) {
-        tool_registry = miscellaneous::tool_selection_helper::sptr(new miscellaneous::tool_selection_helper());
-      }
 
       /* Default size is the minimum size */
       SetMinSize(wxDefaultSize);

@@ -3,7 +3,7 @@ import notfile ;
 # The SVN revision number with which tools will be tagged
 exe maximum_revision
       : $(TOP)/build/utility/maximum_revision.cpp
-        /boost/filesystem//boost_filesystem
+        /boost//filesystem
       : <optimization>speed
         <threading>single
         <link>static
