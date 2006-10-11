@@ -116,14 +116,14 @@ namespace sip {
       public:
 
         /** \brief Adds a new element to the box */
-        virtual void add(element*) = 0;
+        virtual element* add(element*) = 0;
 
         /** Adds a new element to the box */
-        virtual void add(element*, margins const&,
+        virtual element* add(element*, margins const&,
                                   visibility const& = manager::default_visibility) = 0;
 
         /** Adds a new element to the box */
-        virtual void add(element*, visibility const&) = 0;
+        virtual element* add(element*, visibility const&) = 0;
 
         /** \brief Recursively builds the state of the object */
         static aptr static_read_structure(read_context&); 
@@ -169,17 +169,17 @@ namespace sip {
         inline box();
 
         /** Adds a new element to the box */
-        inline void add(element*);
+        inline element* add(element*);
 
         /** Adds a new element to the box */
-        inline void add(element*, constraints const&);
+        inline element* add(element*, constraints const&);
 
         /** Adds a new element to the box */
-        inline void add(element*, margins const&,
+        inline element* add(element*, margins const&,
                                   visibility const& = manager::default_visibility);
 
         /** Adds a new element to the box */
-        inline void add(element*, visibility const&);
+        inline element* add(element*, visibility const&);
 
         /** \brief Instantiate a layout element, through a mediator */
         virtual mediator::wrapper_aptr instantiate(layout::mediator*) = 0;
@@ -219,7 +219,7 @@ namespace sip {
         inline static manager::aptr create();
 
         /** Adds a new element to the box */
-        inline void add(element*, alignment const&,
+        inline element* add(element*, alignment const&,
                                   margins const& = manager::default_margins,
                                   visibility const& = manager::default_visibility);
 
@@ -258,7 +258,7 @@ namespace sip {
         inline static manager::aptr create();
 
         /** Adds a new element to the box */
-        inline void add(element*, alignment const&,
+        inline element* add(element*, alignment const&,
                                   margins const& = manager::default_margins,
                                   visibility const& = manager::default_visibility);
 
@@ -365,20 +365,22 @@ namespace sip {
     /**
      * @param[in] e a pointer to a layout element
      **/
-    inline void box::add(element* e) {
-      add(e, default_constraints);
+    inline element* box::add(element* e) {
+      return (add(e, default_constraints));
     }
 
     /**
      * @param[in] e a pointer to a layout element
      * @param[in] c the layout constraints to observe
      **/
-    inline void box::add(element* e, constraints const& c) {
+    inline element* box::add(element* e, constraints const& c) {
       constraints cn = c;
       
       cn.set_growth(e->get_grow());
 
       children.push_back(children_list::value_type(e, cn));
+
+      return (e);
     }
 
     /**
@@ -387,8 +389,8 @@ namespace sip {
      * @param[in] m the margins of the element relative to other elements that occupy the box
      * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
      **/
-    inline void vertical_box::add(element* e, alignment const& a, margins const& m, visibility const& v) {
-      box::add(e, constraints(middle, a, m, v));
+    inline element* vertical_box::add(element* e, alignment const& a, margins const& m, visibility const& v) {
+      return (box::add(e, constraints(middle, a, m, v)));
     }
 
     /**
@@ -397,8 +399,8 @@ namespace sip {
      * @param[in] m the margins of the element relative to other elements that occupy the box
      * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
      **/
-    inline void horizontal_box::add(element* e, alignment const& a, margins const& m, visibility const& v) {
-      box::add(e, constraints(a, left, m, v));
+    inline element* horizontal_box::add(element* e, alignment const& a, margins const& m, visibility const& v) {
+      return (box::add(e, constraints(a, left, m, v)));
     }
 
     /**
@@ -406,16 +408,16 @@ namespace sip {
      * @param[in] m the margins of the element relative to other elements that occupy the box
      * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
      **/
-    inline void box::add(element* e, margins const& m, visibility const& v) {
-      box::add(e, constraints(middle, left, m, v));
+    inline element* box::add(element* e, margins const& m, visibility const& v) {
+      return (box::add(e, constraints(middle, left, m, v)));
     }
 
     /**
      * @param[in] e a pointer to a layout element
      * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
      **/
-    inline void box::add(element* e, visibility const& v) {
-      box::add(e, constraints(middle, left, manager::default_margins, v));
+    inline element* box::add(element* e, visibility const& v) {
+      return (box::add(e, constraints(middle, left, manager::default_margins, v)));
     }
 
     /**

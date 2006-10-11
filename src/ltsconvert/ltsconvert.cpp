@@ -61,10 +61,10 @@ class squadt_interactor : public squadt_tool_interface {
     };
 
     enum further_options {
-      selected_transformation = 3,                ///< the selected transformation method
-      selected_output_format = 4,                 ///< the selected output format
-      no_state_information = 5,                   ///< dot format output specific option to not save state information
-      tau_actions = 6                             ///< the actions that should be recognised as tau
+      option_selected_transformation = 3,                ///< the selected transformation method
+      option_selected_output_format = 4,                 ///< the selected output format
+      option_no_state_information = 5,                   ///< dot format output specific option to not save state information
+      option_tau_actions = 6                             ///< the actions that should be recognised as tau
     };
 
   private:
@@ -134,11 +134,12 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   /* Attach row */
   top->add(h, margins(0,5,0,5));
 
-  top->add(new label("LPD file name"));
-  text_field* lpd_file_field = new text_field(c.get_input_name(".lpe"));
-  top->add(lpd_file_field);
+  h = new layout::horizontal_box();
 
-  top->add(new label("Omit state information (dot only)"));
+  h->add(new label("LPD file name : "));
+  text_field* lpd_file_field = static_cast < text_field* > (h->add(new text_field(c.get_input_name(".lpe"))));
+  top->add(h);
+
   checkbox* for_dot_omit_state_information = new checkbox("Omit state information (dot only)");
   top->add(for_dot_omit_state_information);
 
@@ -149,9 +150,10 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   transformation_selector.associate(top, minimisation_modulo_branching_bisimulation, "minimisation modulo branching bisimulation");
   transformation_selector.associate(top, add_bisimulation_equivalence_class, "add bisimulation equivalence class");
 
-  top->add(new label("Symbols to interpret as tau"));
-  text_field* tau_field = new text_field("tau");
-  top->add(tau_field);
+  h = new layout::horizontal_box();
+  h->add(new label("Internal (tau) actions : "));
+  text_field* tau_field = static_cast < text_field* > (h->add(new text_field("tau")));
+  top->add(h);
 
   button* okay_button = new button("OK");
 
@@ -191,15 +193,17 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
         c.add_input(lpd_file_auxiliary, "lpe", lpd_file_field->get_text());
       }
 
-      c.add_option(selected_transformation).append_argument(transformation_method_enumeration,
+      c.add_option(option_selected_transformation).append_argument(transformation_method_enumeration,
                  static_cast < transformation_options > (transformation_selector.get_selection()));
 
-      c.add_option(selected_output_format).append_argument(sip::datatype::integer::naturals,
+      c.add_option(option_selected_output_format).append_argument(sip::datatype::integer::naturals,
                  static_cast < unsigned int > (format_selector.get_selection()));
 
       if (format_selector.get_selection() == dot && for_dot_omit_state_information->get_status()) {
-        c.add_option(no_state_information);
+        c.add_option(option_no_state_information);
       }
+
+      c.add_option(option_tau_actions).append_argument(datatype::string::standard, tau_field->get_text());
     }
   }
 }
@@ -216,14 +220,14 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
     result &= c.object_exists(lpd_file_auxiliary);
   }
 
-  result &= c.option_exists(selected_output_format);
-  result &= c.option_exists(selected_transformation);
+  result &= c.option_exists(option_selected_output_format);
+  result &= c.option_exists(option_selected_transformation);
 
-  if (c.option_exists(tau_actions)) {
+  if (c.option_exists(option_tau_actions)) {
     lts_eq_options eq_opts;
 
     /* Need to detect whether the next operation completes successfully or not, exceptions anyone? */
-    lts_reduce_add_tau_actions(eq_opts,(boost::any_cast < std::string > (c.get_option_value(tau_actions)).c_str()));
+    lts_reduce_add_tau_actions(eq_opts,(boost::any_cast < std::string > (c.get_option_value(option_tau_actions)).c_str()));
   }
 
   return (result);
@@ -242,7 +246,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     return (false);
   }
  
-  transformation_options method = static_cast < transformation_options > (boost::any_cast < size_t > (c.get_option_value(selected_transformation)));
+  transformation_options method = static_cast < transformation_options > (boost::any_cast < size_t > (c.get_option_value(option_selected_transformation)));
 
   if (method != no_transformation) {
     lts_equivalence equivalence = lts_eq_none;
@@ -269,12 +273,15 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
         break;
     }
 
-    if (c.option_exists(tau_actions)) {
-      lts_reduce_add_tau_actions(eq_opts, (boost::any_cast < std::string > (c.get_option_value(tau_actions)).c_str()));
+    if (c.option_exists(option_tau_actions)) {
+      lts_reduce_add_tau_actions(eq_opts, (boost::any_cast < std::string > (c.get_option_value(option_tau_actions)).c_str()));
     }
 
     gsVerboseMsg("reducing LTS...\n");
-    l.reduce(equivalence,eq_opts);
+
+    if (!l.reduce(equivalence,eq_opts)) {
+      return (false);
+    }
   }
  
   bool result = true;
@@ -285,11 +292,11 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     lpe_path = c.get_object(lpd_file_auxiliary)->get_location();
   }
 
-  switch (static_cast < lts_output_format > (boost::any_cast < long int > (c.get_option_value(selected_output_format)))) {
+  switch (static_cast < lts_output_format > (boost::any_cast < long int > (c.get_option_value(option_selected_output_format)))) {
       case fsm:
       case dot:
         result = write_lts_to_file(l, c.get_object(lts_file_for_output)->get_location(),
-                 get_alt_format(c.get_object(lts_file_for_output)->get_format()), lpe_path, c.option_exists(no_state_information));
+                 get_alt_format(c.get_object(lts_file_for_output)->get_format()), lpe_path, c.option_exists(option_no_state_information));
         break;
       case aldebaran:
         result = write_lts_to_file(l, c.get_object(lts_file_for_output)->get_location(), lts_aut, lpe_path);
@@ -307,6 +314,8 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
         result = write_lts_to_file(l, c.get_object(lts_file_for_output)->get_location(), lts_mcrl2, lpe_path);
         break;
   }
+
+  send_hide_display();
 
   return (result);
 }

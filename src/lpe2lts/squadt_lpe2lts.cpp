@@ -179,7 +179,7 @@ void squadt_lpe2lts::user_interactive_configuration(sip::configuration &configur
   tsizebox->add(tf_init_tsize, bottom);
   column->add(tsizebox, layout::left);
 
-  button* okay_button = new button("Ok");
+  button* okay_button = new button("OK");
 
   column->add(okay_button, layout::right);
 
