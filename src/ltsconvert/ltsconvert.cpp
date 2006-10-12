@@ -241,7 +241,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   if (!read_lts_from_file(l, c.get_object(lts_file_for_input)->get_location(),
                lts::parse_format(c.get_object(lts_file_for_input)->get_format().c_str()))) {
 
-    send_error(boost::str(boost::format("Fatal: error reading input from `%s'!") % c.get_object(lts_file_for_input)->get_location()));
+    send_error("Fatal: error reading input from `" + c.get_object(lts_file_for_input)->get_location() + "'!");
 
     return (false);
   }

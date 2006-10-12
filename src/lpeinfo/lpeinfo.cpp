@@ -24,6 +24,7 @@
 #include <cstdio>
 
 //Boost
+#include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 
 //mCRL2
@@ -171,13 +172,11 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     /* Second column */
     layout::vertical_box* right_column = new layout::vertical_box();
   
-    boost::format c("%u");
-  
-    right_column->add(new label(boost::filesystem::path(file_name).leaf()), a);
-    right_column->add(new label(boost::str(c % lpe.summands().size())), a);
-    right_column->add(new label(boost::str(c % (lpe_specification.initial_free_variables().size() + lpe.free_variables().size()))), a);
-    right_column->add(new label(boost::str(c % lpe.process_parameters().size())), a);
-    right_column->add(new label(boost::str(c % lpe.actions().size())), a);
+    right_column->add(new label(file_name), a);
+    right_column->add(new label(boost::lexical_cast < std::string > (lpe.summands().size())), a);
+    right_column->add(new label(boost::lexical_cast < std::string > ((lpe_specification.initial_free_variables().size() + lpe.free_variables().size()))), a);
+    right_column->add(new label(boost::lexical_cast < std::string > (lpe.process_parameters().size())), a);
+    right_column->add(new label(boost::lexical_cast < std::string > (lpe.actions().size())), a);
   
     /* Attach columns*/
     top->add(left_column, margins(0,5,0,5));
