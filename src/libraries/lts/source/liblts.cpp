@@ -4,6 +4,8 @@
 #include <fstream>
 #include <assert.h>
 #include <svc/svc.h>
+#include <boost/lexical_cast.hpp>
+#include <boost/regex.hpp>
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
@@ -594,11 +596,27 @@ bool p_lts::read_from_aut(string const& filename)
 
 bool p_lts::read_from_aut(istream &is)
 {
+  boost::regex regex_aut_header("^[[:space:]]*des[[:space:]]*\\([[:space:]]*([[:digit:]]+)[[:space:]]*,[[:space:]]*([[:digit:]]+)[[:space:]]*,[[:space:]]*([[:digit:]]+)[[:space:]]*\\)[[:space:]]*$");
+  boost::regex regex_aut_transition("^[[:space:]]*\\([[:space:]]*([[:digit:]]+)[[:space:]]*,[[:space:]]*\"?([^\"]+)\"?[[:space:]]*,[[:space:]]*([[:digit:]]+)[[:space:]]*\\)[[:space:]]*$");
+
   unsigned int ntrans,nstate;
-  char buf[1024];
+  #define READ_FROM_AUT_BUF_SIZE 8196
+  char buf[READ_FROM_AUT_BUF_SIZE];
+  boost::match_results<const char *> what;
   
-  is.getline(buf,1024);
-  sscanf(buf," des (%u,%u,%u)",&init_state,&ntrans,&nstate);
+  is.getline(buf,READ_FROM_AUT_BUF_SIZE);
+  if ( regex_search((char *)buf,what,regex_aut_header) )
+  {
+    *(const_cast<char *>(what[1].second)) = '\0';
+    *(const_cast<char *>(what[2].second)) = '\0';
+    *(const_cast<char *>(what[3].second)) = '\0';
+    init_state = boost::lexical_cast<unsigned int>(what[1].first);
+    ntrans = boost::lexical_cast<unsigned int>(what[2]);
+    nstate = boost::lexical_cast<unsigned int>(what[3]);
+  } else { 
+    gsErrorMsg("cannot parse AUT input! (invalid header)\n");
+    return false;
+  }
 
   for (unsigned int i=0; i<nstate; i++)
   {
@@ -610,14 +628,25 @@ bool p_lts::read_from_aut(istream &is)
   while ( !is.eof() )
   {
     unsigned int from,to;
-    char s[1024];
+    const char *s;
 
-    is.getline(buf,1024);
+    is.getline(buf,READ_FROM_AUT_BUF_SIZE);
     if ( is.gcount() == 0 )
     {
       break;
     }
-    sscanf(buf,"(%u,\"%[^\"]\",%u)",&from,s,&to);
+    if ( regex_search((char *)buf,what,regex_aut_transition) )
+    {
+      *(const_cast<char *>(what[1].second)) = '\0';
+      *(const_cast<char *>(what[2].second)) = '\0';
+      *(const_cast<char *>(what[3].second)) = '\0';
+      from = boost::lexical_cast<unsigned int>(what[1].first);
+      s = what[2].first;
+      to = boost::lexical_cast<unsigned int>(what[3].first);
+    } else {
+      gsErrorMsg("cannot parse AUT input! (invalid transition)\n");
+      return false;
+    }
 
     int label;
     ATerm t = (ATerm) ATmakeAppl(ATmakeAFun(s,0,ATtrue));
@@ -638,7 +667,7 @@ bool p_lts::read_from_aut(istream &is)
 }
 
 #ifdef MCRL2_BCG
-bool p_lts::read_from_bcg(string &filename)
+bool p_lts::read_from_bcg(string const& filename)
 {
   string::size_type pos = filename.rfind('.');
   if ( (pos == string::npos) || (filename.substr(pos+1) != "bcg") )
@@ -1003,7 +1032,7 @@ bool p_lts::write_to_bcg(string const& filename)
   unsigned int buf_size = 0;
   for (unsigned int i=0; i<ntransitions; i++)
   {
-    string label_str = p_label_string(transitions[i].label);
+    string label_str = p_label_value_str(transitions[i].label);
     if ( label_str.size() > buf_size )
     {
       if ( buf_size == 0 )
@@ -1015,6 +1044,11 @@ bool p_lts::write_to_bcg(string const& filename)
         buf_size = 2 * buf_size;
       }
       buf = (char *) realloc(buf,buf_size);
+      if ( buf == NULL )
+      {
+        gsErrorMsg("insufficient memory to write LTS to BCG\n");
+        exit(1);
+      }
     }
     strcpy(buf,label_str.c_str());
     BCG_IO_WRITE_BCG_EDGE(transitions[i].from,buf,transitions[i].to);
@@ -1117,10 +1151,19 @@ unsigned int p_lts::p_add_state(ATerm value)
       state_info = (value != NULL);
       new_states_size = 128;
     }
+    if ( states_size > (50*1025*1025)/sizeof(unsigned int) )
+    {
+      new_states_size = states_size + (50*1025*1025)/sizeof(unsigned int);
+    }
 
     assert(state_info == (value != NULL));
 
     states = (unsigned int *) realloc(states,new_states_size*sizeof(unsigned int));
+    if ( states == NULL )
+    {
+      gsErrorMsg("insufficient memory to store LTS\n");
+      exit(1);
+    }
     if ( state_info )
     {
       if ( state_values != NULL )
@@ -1128,6 +1171,11 @@ unsigned int p_lts::p_add_state(ATerm value)
         ATunprotectArray(state_values);
       }
       state_values = (ATerm *) realloc(state_values,new_states_size*sizeof(ATerm));
+      if ( state_values == NULL )
+      {
+        gsErrorMsg("insufficient memory to store LTS\n");
+        exit(1);
+      }
       for (unsigned int i=states_size; i<new_states_size; i++)
       {
         state_values[i] = NULL;
@@ -1166,11 +1214,25 @@ unsigned int p_lts::p_add_label(ATerm value, bool is_tau)
       label_info = (value != NULL);
       new_labels_size = 128;
     }
+    if ( labels_size > (50*1025*1025)/sizeof(unsigned int) )
+    {
+      new_labels_size = labels_size + (50*1025*1025)/sizeof(unsigned int);
+    }
 
     assert(label_info == (value != NULL));
 
     labels = (unsigned int *) realloc(labels,new_labels_size*sizeof(unsigned int));
+    if ( labels == NULL )
+    {
+      gsErrorMsg("insufficient memory to store LTS\n");
+      exit(1);
+    }
     taus = (bool *) realloc(taus,new_labels_size*sizeof(bool));
+    if ( taus == NULL )
+    {
+      gsErrorMsg("insufficient memory to store LTS\n");
+      exit(1);
+    }
     if ( label_info )
     {
       if ( label_values != NULL )
@@ -1178,6 +1240,11 @@ unsigned int p_lts::p_add_label(ATerm value, bool is_tau)
         ATunprotectArray(label_values);
       }
       label_values = (ATerm *) realloc(label_values,new_labels_size*sizeof(ATerm));
+      if ( label_values == NULL )
+      {
+        gsErrorMsg("insufficient memory to store LTS\n");
+        exit(1);
+      }
       for (unsigned int i=labels_size; i<new_labels_size; i++)
       {
         label_values[i] = NULL;
@@ -1215,8 +1282,17 @@ unsigned int p_lts::p_add_transition(unsigned int from,
     {
       new_transitions_size = 128;
     }
+    if ( transitions_size > (50*1025*1025)/sizeof(transition) )
+    {
+      new_transitions_size = transitions_size + (50*1025*1025)/sizeof(transition);
+    }
 
     transitions = (transition *) realloc(transitions,new_transitions_size*sizeof(transition));
+    if ( transitions == NULL )
+    {
+      gsErrorMsg("insufficient memory to store LTS\n");
+      exit(1);
+    }
     transitions_size = new_transitions_size;
   }
 

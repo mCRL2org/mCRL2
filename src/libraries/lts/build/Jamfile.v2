@@ -4,8 +4,10 @@ project lts
        : requirements
           <include>../include
           <include>../../..
+	  <include>$(BOOST)
        : usage-requirements
           <include>../include
+	  <library>/boost//regex
        ;
 
 lib lts
