@@ -4,7 +4,7 @@
 #include "icons/file_open.xpm"
 #include "icons/file_open_mask.xpm"
 #include "icons/select_tool.xpm"
-#include "icons/select_cursor_mask.xpm"
+#include "icons/select_tool_mask.xpm"
 #include "icons/zoom_tool.xpm"
 #include "icons/zoom_cursor_mask.xpm"
 #include "icons/pan_tool.xpm"
