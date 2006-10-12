@@ -1,0 +1,3 @@
+#!/bin/sh
+flex -Pfsm -ofsmlexer.cpp fsmlexer.ll
+bison -p fsm -d -o fsmparser.cpp fsmparser.yy

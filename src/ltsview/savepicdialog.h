@@ -6,13 +6,6 @@
 #include <wx/statline.h>
 #include <wx/filename.h>
 #include <wx/image.h>
-#ifdef __APPLE__
-    #include <OpenGL/gl.h>
-    #include <OpenGL/glu.h>
-#else
-    #include <GL/gl.h>
-    #include <GL/glu.h>
-#endif
 #include <vector>
 #include "glcanvas.h"
 

@@ -5,27 +5,29 @@ project toolset/ltsview
       <include>$(BOOST)
   ;
 
-import lex : lex ;
-import bison : bison ;
+#import lex : lex ;
+#import bison : bison ;
 
-cpp fsmlexer.cpp
-      : fsmlexer.ll
-      : <flex.prefix>"fsm"
-      ;
+#cpp fsmlexer.cpp
+#      : fsmlexer.ll
+#      : <flex.prefix>"fsm"
+#      ;
 
-lib fsm
-      : fsmparser.yy
-        /libraries/mcrl2_basic//mcrl2_basic
-      : <bison.prefix>"fsm"
-        <implicit-dependency>fsmlexer.cpp
-      ;
+#lib fsm
+#      : fsmparser.yy
+#        /libraries/mcrl2_basic//mcrl2_basic
+#      : <bison.prefix>"fsm"
+#        <implicit-dependency>fsmlexer.cpp
+#      ;
 
 exe ltsview
-      : ltsviewapp.cpp
+      : fsmlexer.cpp
+        fsmparser.cpp
+        ltsviewapp.cpp
         mainframe.cpp
         glcanvas.cpp
         markstateruledialog.cpp
-	savepicdialog.cpp
+        savepicdialog.cpp
         lts.cpp
         state.cpp
         transition.cpp
@@ -33,12 +35,13 @@ exe ltsview
         fileloader.cpp
         visualizer.cpp
         utils.cpp
-      : <library>fsm
+      :
+#       <library>fsm
         <library>/site-config//OpenGL
         <library>/libraries/wx_extension//wx_extension
         <library>/libraries/mcrl2_basic//mcrl2_basic
         <library>/libraries/aterm//aterm
-        <implicit-dependency>fsm
+#        <implicit-dependency>fsm
         <squadt_support>enable
         <wx>gl
       ;

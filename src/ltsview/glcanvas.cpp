@@ -1,6 +1,4 @@
 #include "glcanvas.h"
-#include "icons/select_cursor.xpm"
-#include "icons/select_cursor_mask.xpm"
 #include "icons/zoom_cursor.xpm"
 #include "icons/zoom_cursor_mask.xpm"
 #include "icons/pan_cursor.xpm"
@@ -235,23 +233,26 @@ void GLCanvas::determineCurrentTool( wxMouseEvent& event ) {
 
 void GLCanvas::setMouseCursor() {
   wxImage img;
+  wxCursor cursor;
   bool ok = true;
   switch (currentTool) {
     case myID_SELECT:
-      img = wxImage( select_cursor );
-      img.SetMaskFromImage( wxImage( select_cursor_mask ), 255, 0, 0 );
+      cursor = wxNullCursor;
       break;
     case myID_ZOOM:
-      img = wxImage( zoom_cursor );
-      img.SetMaskFromImage( wxImage( zoom_cursor_mask ), 255, 0, 0 );
+      img = wxImage(zoom_cursor);
+      img.SetMaskFromImage(wxImage(zoom_cursor_mask),255,0,0);
+      cursor = wxCursor(img);
       break;
     case myID_PAN:
-      img = wxImage( pan_cursor );
-      img.SetMaskFromImage( wxImage( pan_cursor_mask ), 255, 0, 0 );
+      img = wxImage(pan_cursor);
+      img.SetMaskFromImage(wxImage(pan_cursor_mask),255,0,0);
+      cursor = wxCursor(img);
       break;
     case myID_ROTATE:
-      img = wxImage( rotate_cursor );
-      img.SetMaskFromImage( wxImage( rotate_cursor_mask ), 255, 0, 0 );
+      img = wxImage(rotate_cursor);
+      img.SetMaskFromImage(wxImage(rotate_cursor_mask),255,0,0);
+      cursor = wxCursor(img);
       break;
     default:
       ok = false;
@@ -259,7 +260,7 @@ void GLCanvas::setMouseCursor() {
   }
 
   if (ok) {
-    SetCursor( img );
+    SetCursor(cursor);
   }
 }
 

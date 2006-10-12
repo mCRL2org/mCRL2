@@ -160,6 +160,7 @@ long SavePicDialog::getFileType() {
 }
 
 void SavePicDialog::OnOK(wxCommandEvent& /*event*/) {
+  Hide();
   int w = r_slider->GetValue();
   int h = int(w/ar);
   
