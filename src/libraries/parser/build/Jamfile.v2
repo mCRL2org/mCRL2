@@ -7,12 +7,12 @@ project parser
           <include>../include
        ;
 
-import lex : lex ;
-import bison : bison ;
+#import lex : lex ;
+#import bison : bison ;
 
 lib parser
-       : mcrl2parser.yy
-         mcrl2lexer.ll
+       : mcrl2parser.cpp
+         mcrl2lexer.cpp
          libparse.cpp
          typecheck.cpp
          dataimpl.cpp
@@ -20,8 +20,9 @@ lib parser
          /libraries/aterm//aterm
          /libraries/lpe//lpe
          /libraries/mcrl2_basic//mcrl2_basic
-       : <bison.prefix>"mcrl2"
-         <flex.prefix>"mcrl2"
+       :
+#         <bison.prefix>"mcrl2"
+#         <flex.prefix>"mcrl2"
        :
        : <library>/libraries/aterm//aterm
          <library>/libraries/lpe//lpe

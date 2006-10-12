@@ -1,0 +1,4 @@
+#!/bin/sh
+flex -Pmcrl2 -o../source/mcrl2lexer.cpp ../source/mcrl2lexer.ll
+bison -p mcrl2 -d -o ../source/mcrl2parser.cpp ../source/mcrl2parser.yy
+mv ../source/mcrl2parser.hpp ../include/mcrl2parser.hpp
