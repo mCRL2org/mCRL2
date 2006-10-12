@@ -482,8 +482,8 @@ void LTS::positionStates()
 {
   vector< State* > undecided = edgeLengthBottomUp();
   //TODO: Change to call of correct positioning functions.
- /* 
-  for ( vector< vector< Cluster* > >::iterator r_it = clustersInRank.begin() ;
+  
+  /*for ( vector< vector< Cluster* > >::iterator r_it = clustersInRank.begin() ;
 	r_it != clustersInRank.end() ; ++r_it )
   {
     for ( vector< Cluster* >::iterator c_it = r_it->begin() ;

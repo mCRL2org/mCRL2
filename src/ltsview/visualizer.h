@@ -47,6 +47,10 @@ class Visualizer
     Utils::HSV_Color		  delta_col;
     bool		  displayStates;
     bool		  displayWireframe;
+    void                  drawBackPointer(State* startState, 
+                                          State* endState, int rot);
+    void                  drawForwardPointer(State* startState, 
+                                             State* endState, int rot);
     LTS*		  lts;
     Utils::MarkStyle		  markStyle;
     Mediator*		  mediator;
@@ -60,7 +64,8 @@ class Visualizer
     std::vector< float >	  sin_theta2;
     std::vector< float >	  sin_theta1_s;
     std::vector< float >	  sin_theta2_s;
-    GLuint		  statesDisplayList;
+    GLuint		          statesDisplayList;
+    GLuint                        transDisplayList;
     Utils::Point3D		  viewpoint;
     Utils::VisSettings		  visSettings;
     Utils::VisStyle		  visStyle;
@@ -83,6 +88,7 @@ class Visualizer
     void drawSubtreeCMark(Cluster* root,bool topClosed,int rot);
     void drawSubtreeO(Cluster* root, Utils::HSV_Color col,int rot);
     void drawSubtreeOMark(Cluster* root,int rot);
+    void drawTransitions(State* root, int rot);
     void drawTube(float baserad,float toprad, Utils::RGB_Color basecol, Utils::RGB_Color topcol,
     							bool interpolate,
                                                         Utils::Point3D b1, Utils::Point3D b2,Utils::Point3D b3,

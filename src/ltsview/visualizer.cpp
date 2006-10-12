@@ -32,6 +32,7 @@ Visualizer::Visualizer( Mediator* owner ) {
   displayStates = false;
   displayWireframe = false;
   statesDisplayList = 0;
+  transDisplayList = 0;
   
   cos_theta1_s.assign( 5, 0.0f );
   sin_theta1_s.assign( 5, 0.0f );
@@ -61,6 +62,7 @@ Visualizer::~Visualizer() {
   }
   primitives.clear();
   glDeleteLists( statesDisplayList, 1 );
+  glDeleteLists( transDisplayList, 1);
 }
 
 RankStyle Visualizer::getRankStyle() const {
@@ -209,11 +211,17 @@ void Visualizer::drawLTS(Point3D viewpoint) {
       }
       else {
         drawStatesMark(lts->getInitialState()->getCluster(),0);
-	    }
+      }
+    glEndList();
+
+    glDeleteLists(transDisplayList, 1);
+    transDisplayList = glGenLists(1);
+    glNewList(transDisplayList, GL_COMPILE);
+    drawTransitions(lts->getInitialState(), 0);
     glEndList();
     refreshStates = false;
   }
-  
+
   if (refreshPrimitives) {
     // refresh necessary
     // delete all primitives
@@ -267,6 +275,7 @@ void Visualizer::drawLTS(Point3D viewpoint) {
 
   // first draw the opaque objects in the scene (if required)
   if (displayStates) {
+    glCallList(transDisplayList);
     glCallList(statesDisplayList);
   }
   
@@ -1105,7 +1114,126 @@ void Visualizer::drawStatesMark(Cluster* root,int rot) {
     }
   }
 }
+// ------------- TRANSITIONS ---------------------------------------------------
+void Visualizer::drawTransitions(State* root, int rot)
+{
+  // Get outgoing transitions
+  vector< Transition* > s_tt;
+  root->getOutTransitions( s_tt );
+  Cluster* startCluster = root->getCluster();
 
+  for( vector< Transition*>::iterator t_it = s_tt.begin(); 
+       t_it != s_tt.end(); ++t_it) 
+  {
+    State* endState = (**t_it).getEndState();
+
+    //Draw a line between the two states, start state is centered in model
+    if ((**t_it).isBackpointer()) {
+      drawBackPointer(root, endState, rot);
+    }
+    else {
+      drawForwardPointer(root, endState, rot);
+      Cluster* endCluster = endState->getCluster();
+      //Move to end position
+      int desc_rot = rot + visSettings.branchRotation;
+      if (desc_rot < 0) {
+        desc_rot += 360;
+      }
+      else if (desc_rot >= 360) {
+        desc_rot -= 360;
+      }
+      if(endCluster->getPosition() < -0.9f) {
+        //Cluster is centered
+        glTranslatef(0.0f, 0.0f, clusterHeight);
+        drawTransitions(endState, 
+         (startCluster->getNumberOfDescendants() > 1)?desc_rot:rot);
+          glTranslatef(0.0f, 0.0f, -clusterHeight);
+        }
+      else {
+        glRotatef(-endCluster->getPosition() - rot, 0.0f, 0.0f, 1.0f);
+        glTranslatef(startCluster->getBaseRadius(), 0.0f, clusterHeight);
+        glRotatef(visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f);
+        drawTransitions(endState, desc_rot);
+        glRotatef(-visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f);
+        glTranslatef(-startCluster->getBaseRadius(), 0.0f, -clusterHeight);
+        glRotatef(endCluster->getPosition() + rot, 0.0f, 0.0f, 1.0f);
+      }
+      
+    }  
+  } 
+}
+
+void Visualizer::drawForwardPointer(State* startState, State* endState, int rot)
+{
+  Cluster* startCluster = startState->getCluster();
+  Cluster* endCluster = endState->getCluster();
+  glLineWidth(2.0f);
+  glColor3f(1.0, 0.0, 0.0);
+  glBegin(GL_LINES);
+
+  if (startState->getPosition() < -0.9f) {
+    // startState is centered
+    glVertex3f(0.0, 0.0, 0.0);
+  }
+
+  else {
+    glRotatef(-startState->getPosition(), 0.0f, 0.0f, 1.0f);
+    glTranslatef(startCluster->getTopRadius(), 0.0f, 0.0f);
+    glVertex3f(0.0, 0.0, 0.0);
+    glTranslatef(-startCluster->getTopRadius(), 0.0f, 0.0f);
+    glRotatef(startState->getPosition(), 0.0f, 0.0f, 1.0f);
+  }
+
+  int desc_rot = rot + visSettings.branchRotation;
+
+  if (desc_rot < 0) {
+    desc_rot += 360;
+  }
+  else if (desc_rot >= 360) {
+    desc_rot -= 360;
+  }
+
+  // Move to cluster
+  if (endCluster->getPosition() < -0.9f) {
+    glTranslatef(0.0f, 0.0f, clusterHeight);
+  }
+  else {
+    glRotatef(-endCluster->getPosition() - rot, 0.0, 0.0, 1.0);
+    glTranslatef(startCluster->getBaseRadius(), 0.0f, clusterHeight);
+    glRotatef(visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f);
+  } 
+  
+  // Move to state inside cluster.
+  if (endState->getPosition() < -0.9f) {
+    //endState is centered
+    glVertex3f(0.0, 0.0, 0.0);
+  }
+  else {
+    glRotatef(-endState->getPosition(), 0.0f, 0.0f, 1.0f);
+    glTranslatef(endCluster->getTopRadius(), 0.0f, 0.0f);
+    glVertex3f(0.0, 0.0, 0.0);
+    glTranslatef(-endCluster->getTopRadius(), 0.0f, 0.0f);
+    glRotatef(endState->getPosition(), 0.0f, 0.0f, 1.0f);
+  }
+
+  // Move away from cluster.
+  if (endCluster->getPosition() < -0.9f) {
+    glTranslatef(0.0f, 0.0f, -clusterHeight);
+  }
+  else {
+    glRotatef(-visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f);
+    glTranslatef(-startCluster->getBaseRadius(), 0.0f, -clusterHeight);
+    glRotatef(endCluster->getPosition() + rot, 0.0, 0.0, 1.0);
+  }
+  glEnd();
+  glLineWidth(1.0f);
+  
+}
+
+void Visualizer::drawBackPointer(State* startState, State* endState, int rot)
+{
+  //skip
+}
 // ------------- PRIMITIVES ----------------------------------------------------
 
 // draws a cylinder around z-axis with given base radius, top radius, height,

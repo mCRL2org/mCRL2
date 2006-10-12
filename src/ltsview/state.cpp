@@ -14,6 +14,8 @@ State::State( ATermList sv )
   rank = 0;
   position = -1.0f;
   marked = false;
+
+  outTransitions = vector<Transition*> ();
 }
 
 State::~State()
