@@ -243,7 +243,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     return (true);
   }
   else {
-    send_error("Invalid input, incorrect format?");
+    send_error("Could not read `" + c.get_object(lpd_file_for_input)->get_location() + "', corruption or incorrect format?\n");
   }
 
   return (false);

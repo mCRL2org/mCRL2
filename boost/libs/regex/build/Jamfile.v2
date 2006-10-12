@@ -64,12 +64,12 @@ rule check-icu-config ( )
       }
       else
       {
-         ECHO Building Boost.Regex with the optional Unicode/ICU support disabled. ;
-         ECHO Please refer to the Boost.Regex documentation for more information ;
-         ECHO (and if you don't know what ICU is then you probably don't need it). ;
+         #ECHO Building Boost.Regex with the optional Unicode/ICU support disabled. ;
+         #ECHO Please refer to the Boost.Regex documentation for more information ;
+         #ECHO (and if you don't know what ICU is then you probably don't need it). ;
          if $(ICU_PATH)
          {
-            ECHO Couldn't find utypes.h in $(ICU_PATH:J=" ")$(SLASH)include$(SLASH)unicode ;
+            #ECHO Couldn't find utypes.h in $(ICU_PATH:J=" ")$(SLASH)include$(SLASH)unicode ;
          }
       }
       gICU_CONFIG_CHECKED = true ;

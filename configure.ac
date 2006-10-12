@@ -74,51 +74,55 @@ AC_PROG_CXX
 # Check for compatible flex
 AC_CHECK_PROG([FLEX], [flex], [flex], [])
 if test -z $FLEX; then
-  AC_MSG_ERROR([cannot find flex])
-fi
-AC_MSG_CHECKING([whether flex option c++ is available])
-if $FLEX -I -o/dev/null build/test.l &> /dev/null; then
-  AC_MSG_RESULT([yes]);
-else
   AC_MSG_RESULT([no])
-  AC_MSG_ERROR([flex option c++ not available; please upgrade to flex 2.5.4a-12 or later]);
-fi
-AC_MSG_CHECKING([whether flex C++ scanner can be used])
-$FLEX -I -otest.cpp build/test.l
-if $CXX -c test.cpp -o /dev/null &> /dev/null; then
-  flex_usable="yes"
-fi
-rm -f test.cpp
-if test $flex_usable; then
-  AC_MSG_RESULT([yes]);
+#  AC_MSG_ERROR([cannot find flex])
 else
-  AC_MSG_RESULT([no])
-  AC_MSG_ERROR([flex C++ scanner cannot be used with the $CXX compiler; please upgrade to flex 2.5.4a-12 or later]);
+  AC_MSG_CHECKING([whether flex option c++ is available])
+  if $FLEX -I -o/dev/null build/test.l &> /dev/null; then
+    AC_MSG_RESULT([yes]);
+    AC_MSG_CHECKING([whether flex C++ scanner can be used])
+    $FLEX -I -otest.cpp build/test.l
+    if $CXX -c test.cpp -o /dev/null &> /dev/null; then
+      flex_usable="yes"
+    fi
+    rm -f test.cpp
+    if test $flex_usable; then
+      AC_MSG_RESULT([yes]);
+    else
+      AC_MSG_RESULT([no])
+    #  AC_MSG_ERROR([flex C++ scanner cannot be used with the $CXX compiler; please upgrade to flex 2.5.4a-12 or later]);
+    fi
+  else
+    AC_MSG_RESULT([no])
+  #  AC_MSG_ERROR([flex option c++ not available; please upgrade to flex 2.5.4a-12 or later]);
+  fi
 fi
 
 # Check for compatible bison
 AC_CHECK_PROG([BISON], [bison], [bison], [])
 if test -z $BISON; then
-  AC_MSG_ERROR([cannot find bison])
-fi
-AC_MSG_CHECKING([whether bison option %glr-parser is available])
-if $BISON build/test.y -o/dev/null &> /dev/null; then
-  AC_MSG_RESULT([yes]);
-else
   AC_MSG_RESULT([no])
-  AC_MSG_ERROR([bison option %glr-parser not available; please upgrade to bison 2.0 or later]);
-fi
-AC_MSG_CHECKING([whether bison GLR parser can be used])
-$BISON build/test.y -o test.cpp
-if $CXX -c test.cpp -o /dev/null &> /dev/null; then
-  glr_usable="yes"
-fi
-rm -f test.cpp
-if test $glr_usable; then
-  AC_MSG_RESULT([yes]);
+#  AC_MSG_ERROR([cannot find bison])
 else
-  AC_MSG_RESULT([no])
-  AC_MSG_ERROR([bison GLR parser cannot be used with the $CXX compiler; please upgrade to bison 2.0 or later]);
+  AC_MSG_CHECKING([whether bison option %glr-parser is available])
+  if $BISON build/test.y -o/dev/null &> /dev/null; then
+    AC_MSG_RESULT([yes]);
+    AC_MSG_CHECKING([whether bison GLR parser can be used])
+    $BISON build/test.y -o test.cpp
+    if $CXX -c test.cpp -o /dev/null &> /dev/null; then
+      glr_usable="yes"
+    fi
+    rm -f test.cpp
+    if test $glr_usable; then
+      AC_MSG_RESULT([yes]);
+    else
+      AC_MSG_RESULT([no])
+    #  AC_MSG_ERROR([bison GLR parser cannot be used with the $CXX compiler; please upgrade to bison 2.0 or later]);
+    fi
+  else
+    AC_MSG_RESULT([no])
+#  AC_MSG_ERROR([bison option %glr-parser not available; please upgrade to bison 2.0 or later]);
+  fi
 fi
 
 # Set flags
