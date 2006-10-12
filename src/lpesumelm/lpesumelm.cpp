@@ -299,7 +299,7 @@ lpe::specification no_occurrence_sumelm(const lpe::specification& specification)
 
   // Traverse the summand list, and apply sum elimination to its summands,
   // whilst constructing a new summand list in the process.
-  new_summand_list = apply(new_summand_list, apply_no_occurrence_sumelm);
+  new_summand_list = atermpp::apply(new_summand_list, apply_no_occurrence_sumelm);
 
   new_specification = set_lpe(specification, set_summands(lpe, new_summand_list));
 
@@ -402,7 +402,7 @@ lpe::specification eq_sumelm(const lpe::specification& specification)
   lpe::summand_list new_summand_list = lpe.summands();
 
   // Apply sum elimination on each of the summands in the summand list.
-  new_summand_list = apply(new_summand_list, apply_eq_sumelm);
+  new_summand_list = atermpp::apply(new_summand_list, apply_eq_sumelm);
 
   new_specification = set_lpe(specification, set_summands(lpe, new_summand_list));
 
