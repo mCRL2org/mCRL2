@@ -1,5 +1,5 @@
 /* XPM */
-static char *select_cursor_mask[]={
+static char *select_tool_mask[]={
 "16 16 2 1",
 "# c #000000",
 ". c #ff0000",

@@ -91,32 +91,31 @@ void MainFrame::setupMenuBar()
   SetMenuBar( menuBar );
 }
 
-void MainFrame::setupToolBar()
-{
+void MainFrame::setupToolBar() {
   // Set up the toolbar
   wxSystemOptions::SetOption(wxT("msw.remap"), 0);
   toolBar = CreateToolBar();
-  wxBitmap fileopenbmp( file_open );
-  wxBitmap selectbmp( select_tool );
-  wxBitmap panbmp( pan_tool );
-  wxBitmap zoombmp( zoom_tool );
-  wxBitmap rotatebmp( rotate_tool );
-  fileopenbmp.SetMask( new wxMask( wxBitmap( file_open_mask ), wxColour( 255, 0, 0 ) ) );
-  selectbmp.SetMask( new wxMask( wxBitmap( select_cursor_mask ), wxColour( 255, 0, 0 ) ) );
-  panbmp.SetMask( new wxMask( wxBitmap( pan_cursor_mask ), wxColour( 255, 0, 0 ) ) );
-  zoombmp.SetMask( new wxMask( wxBitmap( zoom_cursor_mask ), wxColour( 255, 0, 0 ) ) );
-  rotatebmp.SetMask( new wxMask( wxBitmap( rotate_cursor_mask ), wxColour( 255, 0, 0 ) ) );
+  wxBitmap fileopenbmp(file_open);
+  wxBitmap selectbmp(select_tool);
+  wxBitmap panbmp(pan_tool);
+  wxBitmap zoombmp(zoom_tool);
+  wxBitmap rotatebmp(rotate_tool);
+  fileopenbmp.SetMask(new wxMask(wxBitmap(file_open_mask),wxColour(255,0,0)));
+  selectbmp.SetMask(new wxMask(wxBitmap(select_tool_mask),wxColour(255,0,0)));
+  panbmp.SetMask(new wxMask(wxBitmap(pan_cursor_mask),wxColour(255,0,0)));
+  zoombmp.SetMask(new wxMask(wxBitmap(zoom_cursor_mask),wxColour(255,0,0)));
+  rotatebmp.SetMask(new wxMask(wxBitmap(rotate_cursor_mask),wxColour(255,0,0)));
   
-  toolBar->AddTool( wxID_OPEN, wxT("Open"), fileopenbmp, wxT("Open file") );
+  toolBar->AddTool(wxID_OPEN,wxT("Open"),fileopenbmp,wxT("Open file"));
   toolBar->AddSeparator();
-  toolBar->AddRadioTool( myID_SELECT, wxT("Select"), selectbmp, wxNullBitmap,
-      wxT("Select tool") );
-  toolBar->AddRadioTool( myID_PAN, wxT("Pan"), panbmp, wxNullBitmap,
-      wxT("Pan tool") );
-  toolBar->AddRadioTool( myID_ZOOM, wxT("Zoom"), zoombmp, wxNullBitmap,
-      wxT("Zoom tool") );
-  toolBar->AddRadioTool( myID_ROTATE, wxT("Rotate"), rotatebmp, wxNullBitmap,
-      wxT("Rotate tool") );
+  toolBar->AddRadioTool(myID_SELECT,wxT("Select"),selectbmp,wxNullBitmap,
+      wxT("Select tool"));
+  toolBar->AddRadioTool(myID_PAN,wxT("Pan"),panbmp,wxNullBitmap,
+      wxT("Pan tool"));
+  toolBar->AddRadioTool(myID_ZOOM,wxT("Zoom"),zoombmp,wxNullBitmap,
+      wxT("Zoom tool"));
+  toolBar->AddRadioTool(myID_ROTATE,wxT("Rotate"),rotatebmp,wxNullBitmap,
+      wxT("Rotate tool"));
   toolBar->Realize();
 }
 
