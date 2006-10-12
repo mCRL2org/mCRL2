@@ -21,8 +21,7 @@ project toolset/ltsview
 #      ;
 
 exe ltsview
-      : fsmlexer.cpp
-        fsmparser.cpp
+      : fsmparser.cpp
         ltsviewapp.cpp
         mainframe.cpp
         glcanvas.cpp
