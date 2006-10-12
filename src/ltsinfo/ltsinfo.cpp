@@ -7,26 +7,124 @@
 #include "lts/liblts.h"
 #include "setup.h"
 
-// Squadt protocol interface
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <squadt_utility.h>
-
-/* Constants for identifiers of options and objects */
-enum identifiers {
-    lts_file_for_input // Main input file that contains an lts
-};
-
-#endif
+#include <boost/lexical_cast.hpp>
 
 #define NAME "ltsinfo"
 #define VERSION "0.1"
 #include "mcrl2_revision.h"
 
-using namespace std;
-using namespace mcrl2::lts;
+// Squadt protocol interface and utility pseudo-library
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+#include <squadt_utility.h>
 
-/* An lts structure that stores the LTS that was last loaded */
-lts l;
+class squadt_interactor : public squadt_tool_interface {
+
+  private:
+
+    enum input_files {
+      lts_file_for_input // Main input file that contains an LTS
+    };
+
+  public:
+
+    /** \brief configures tool capabilities */
+    void set_capabilities(sip::tool::capabilities&) const;
+
+    /** \brief queries the user via SQuADT if needed to obtain configuration information */
+    void user_interactive_configuration(sip::configuration&);
+
+    /** \brief check an existing configuration object to see if it is usable */
+    bool check_configuration(sip::configuration const&) const;
+
+    /** \brief performs the task specified by a configuration */
+    bool perform_task(sip::configuration&);
+};
+
+void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
+  c.add_input_combination(lts_file_for_input, "Reporting", "aut");
+#ifdef MCRL2_BCG
+  c.add_input_combination(lts_file_for_input, "Reporting", "bcg");
+#endif
+  c.add_input_combination(lts_file_for_input, "Reporting", "svc");
+}
+
+void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
+}
+
+bool squadt_interactor::check_configuration(sip::configuration const& c) const {
+  bool result = true;
+
+  result &= c.object_exists(lts_file_for_input);
+
+  return (result);
+}
+
+bool squadt_interactor::perform_task(sip::configuration& c) {
+  using namespace mcrl2::lts;
+  using namespace sip;
+  using namespace sip::layout;
+  using namespace sip::layout::elements;
+
+  sip::object::sptr input_object = c.get_object(lts_file_for_input);
+
+  /* Create and add the top layout manager */
+  layout::manager::aptr top = layout::vertical_box::create();
+
+  /* First column */
+  layout::vertical_box* left_column = new layout::vertical_box();
+
+  layout::vertical_box::alignment a = layout::left;
+
+  lts l;
+  lts_type t = lts::parse_format(input_object->get_format().c_str());
+
+  if (l.read_from(input_object->get_location(), t)) {
+    left_column->add(new label("States (#):"), a);
+    left_column->add(new label("Labels (#):"), a);
+    left_column->add(new label("Transitions (#):"), a);
+    left_column->add(new label(""), a);
+    left_column->add(new label("State information:"), a);
+    left_column->add(new label("Label information:"), a);
+    left_column->add(new label(""), a);
+    left_column->add(new label("Created by:"), a);
+   
+    a = layout::right;
+
+    /* Second column */
+    layout::vertical_box* right_column = new layout::vertical_box();
+   
+    right_column->add(new label(boost::lexical_cast < std::string > (l.num_states())), a);
+    right_column->add(new label(boost::lexical_cast < std::string > (l.num_labels())), a);
+    right_column->add(new label(boost::lexical_cast < std::string > (l.num_transitions())), a);
+    right_column->add(new label(""), a);
+    right_column->add(new label(l.has_state_info() ? "present" : "not present"), a);
+    right_column->add(new label(l.has_label_info() ? "present" : "not present"), a);
+    right_column->add(new label(""), a);
+    right_column->add(new label(l.get_creator()), a);
+   
+    /* Create and add a layout manager for the columns */
+    layout::manager* columns = new layout::horizontal_box();
+
+    /* Attach columns */
+    columns->add(left_column, margins(0,5,0,5));
+    columns->add(right_column, margins(0,5,0,20));
+   
+    boost::format c = boost::format("Input read from `%s' (in %s format)");
+
+    top->add(new label("Input read from " + input_object->get_location() + " (" + lts::string_for_type(t) + " format)"), margins(5,0,5,0));
+    top->add(columns);
+
+    send_display_layout(top);
+  }
+  else {
+    send_error("Could not read `" + c.get_object(lts_file_for_input)->get_location() + "', corruption or incorrect format?\n");
+
+    return (false);
+  }
+
+  return (true);
+}
+#endif
 
 static void print_formats(FILE *f)
 {
@@ -70,7 +168,9 @@ static void print_version(FILE *f)
   fprintf(f,NAME " " VERSION " (revision %i)\n", REVISION);
 }
 
-void parse_command_line(int argc, char** argv) {
+bool parse_command_line(int argc, char** argv, mcrl2::lts::lts& l) {
+  using namespace mcrl2::lts;
+
   #define ShortOptions      "hqvi:f"
   #define VersionOption     0x1
   struct option LongOptions[] = { 
@@ -93,10 +193,10 @@ void parse_command_line(int argc, char** argv) {
     {
       case 'h':
         print_help(stderr,argv[0]);
-        exit (0);
+        return (false);
       case VersionOption:
         print_version(stderr);
-        exit (0);
+        return (false);
       case 'v':
         verbose = true;
         break;
@@ -117,7 +217,7 @@ void parse_command_line(int argc, char** argv) {
         break;
       case 'f':
         print_formats(stderr);
-        exit (0);
+        return (false);
       default:
         break;
     }
@@ -127,7 +227,7 @@ void parse_command_line(int argc, char** argv) {
   {
     gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
 
-    exit (1);
+    return (false);
   }
   if ( quiet )
   {
@@ -140,7 +240,8 @@ void parse_command_line(int argc, char** argv) {
 
   bool use_stdin = (optind >= argc);
 
-  string infile;
+  std::string infile;
+
   if ( !use_stdin )
   {
     infile = argv[optind];
@@ -149,17 +250,18 @@ void parse_command_line(int argc, char** argv) {
   if ( use_stdin )
   {
     gsVerboseMsg("reading LTS from stdin...\n");
-    if ( !l.read_from(cin,intype) )
+    if ( !l.read_from(std::cin,intype) )
     {
       gsErrorMsg("cannot read LTS from stdin\n");
 
-      exit (1);
+      return (false);
     }
   } else {
     gsVerboseMsg("reading LTS from '%s'...\n",infile.c_str());
     if ( !l.read_from(infile,intype) )
     {
       bool b = true;
+
       if ( intype == lts_none ) // XXX really do this?
       {
         gsVerboseMsg("reading failed; trying to force format by extension...\n");
@@ -173,194 +275,60 @@ void parse_command_line(int argc, char** argv) {
       {
         gsErrorMsg("cannot read LTS from file '%s'\n",infile.c_str());
 
-        exit (1);
+        return (false);
       }
     }
   }
-}
-
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-/* Validates a configuration */
-bool try_to_accept_configuration(sip::tool::communicator& tc) {
-  sip::configuration& configuration = tc.get_configuration();
-
-  if (configuration.object_exists(lts_file_for_input)) {
-    /* The input object is present, verify whether the specified format is supported */
-    sip::object::sptr input_object = configuration.get_object(lts_file_for_input);
-
-    lts_type t = lts::parse_format(input_object->get_format().c_str());
-
-    if (t == lts_none) {
-      tc.send_status_report(sip::report::error, boost::str(boost::format("Invalid configuration: unsupported type `%s' for main input") % lts::string_for_type(t)));
-
-      return (false);
-    }
-    if (!boost::filesystem::exists(boost::filesystem::path(input_object->get_location()))) {
-      tc.send_status_report(sip::report::error, std::string("Invalid configuration: input object does not exist"));
-
-      return (false);
-    }
-  }
-  else {
-    return (false);
-  }
-
-  tc.send_accept_configuration();
 
   return (true);
 }
-#endif
 
-int main(int argc, char **argv)
-{
-  ATerm bot;
-  ATinit(argc,argv,&bot);
+int main(int argc, char **argv) {
+  ATerm       bottom;
+
+  ATinit(argc,argv,&bottom);
+  
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  sip::tool::communicator tc;
+  squadt_interactor c;
 
-  /* Get tool capabilities object associated to the communicator in order to modify settings */
-  sip::tool::capabilities& cp = tc.get_tool_capabilities();
-
-  /* The tool operates on LTSes (stored in some different formats) and its function can be characterised as reporting */
-  cp.add_input_combination(lts_file_for_input, "Reporting", "aut");
-#ifdef MCRL2_BCG
-  cp.add_input_combination(lts_file_for_input, "Reporting", "bcg");
+  if (!c.try_interaction(argc, argv)) {
 #endif
-  cp.add_input_combination(lts_file_for_input, "Reporting", "svc");
+    using namespace std;
+    using namespace mcrl2::lts;
 
-  /* On purpose we do not catch exceptions */
-  if (tc.activate(argc,argv)) {
-    bool valid_configuration_present = false;
-    bool termination_requested       = false;
+    lts l;
 
-    /* Initialise utility pseudo-library */
-    squadt_utility::initialise(tc);
+    if (parse_command_line(argc, argv, l)) {
 
-    /* Main event loop for incoming messages from squadt */
-    while (!termination_requested) {
-      sip::message_ptr m = tc.await_message(sip::message_any);
-
-      assert(m.get() != 0);
-
-      switch (m->get_type()) {
-        case sip::message_offer_configuration:
-
-          /* Insert configuration in tool communicator object */
-          valid_configuration_present = try_to_accept_configuration(tc);
-
-          break;
-        case sip::message_signal_start:
-          if (valid_configuration_present) {
-            using namespace sip;
-            using namespace sip::layout;
-            using namespace sip::layout::elements;
-
-            sip::object::sptr input_object = tc.get_configuration().get_object(lts_file_for_input);
-
-            lts_type t = lts::parse_format(input_object->get_format().c_str());
-
-            layout::tool_display::sptr display(new layout::tool_display);
-
-            /* Create and add the top layout manager */
-            layout::manager::aptr top = layout::vertical_box::create();
-
-            /* First column */
-            layout::vertical_box* left_column = new layout::vertical_box();
-
-            layout::vertical_box::alignment a = layout::left;
-
-            if (l.read_from(input_object->get_location(), t)) {
-              left_column->add(new label("States (#):"), a);
-              left_column->add(new label("Labels (#):"), a);
-              left_column->add(new label("Transitions (#):"), a);
-              left_column->add(new label(""), a);
-              left_column->add(new label("State information:"), a);
-              left_column->add(new label("Label information:"), a);
-              left_column->add(new label(""), a);
-              left_column->add(new label("Created by:"), a);
-             
-              /* Second column */
-              layout::vertical_box* right_column = new layout::vertical_box();
-             
-              boost::format c("%u");
-             
-              right_column->add(new label(boost::str(c % l.num_states())), a);
-              right_column->add(new label(boost::str(c % l.num_labels())), a);
-              right_column->add(new label(boost::str(c % l.num_transitions())), a);
-              right_column->add(new label(""), a);
-              right_column->add(new label(l.has_state_info() ? "present" : "not present"), a);
-              right_column->add(new label(l.has_label_info() ? "present" : "not present"), a);
-              right_column->add(new label(""), a);
-              right_column->add(new label(l.get_creator()), a);
-             
-              /* Create and add a layout manager for the columns */
-              layout::manager* columns = new layout::horizontal_box();
-
-              /* Attach columns */
-              columns->add(left_column, margins(0,5,0,5));
-              columns->add(right_column, margins(0,5,0,20));
-             
-              c = boost::format("Input read from `%s' (in %s format)");
-
-              top->add(new label(boost::str(c % boost::filesystem::path(input_object->get_location()).leaf() % lts::string_for_type(t))), margins(5,0,5,0));
-              top->add(columns);
-
-              display->set_top_manager(top);
-             
-              tc.send_display_layout(display);
-             
-              /* Signal that the job is finished */
-              tc.send_signal_done(true);
-            }
-            else {
-              tc.send_status_report(sip::report::error, "Failure reading input from file.");
-            }
-          }
-          else {
-            /* Send error report */
-            tc.send_status_report(sip::report::error, "Start signal received without valid configuration.");
-          }
-          break;
-        case sip::message_request_termination:
-          termination_requested = true;
-
-          tc.send_signal_termination();
-          break;
-        default:
-          /* Messages with a type that do not need to be handled */
-          break;
+      cout << "LTS format: " << lts::string_for_type(l.get_type()) << endl
+           << "Number of states: " << l.num_states() << endl
+           << "Number of labels: " << l.num_labels() << endl
+           << "Number of transitions: " << l.num_transitions() << endl;
+     
+      if ( l.has_state_info() )
+      {
+        cout << "Has state information." << endl;
+      } else {
+        cout << "Does not have state information." << endl;
       }
-    }
-  }
-  else {
-#endif
-    parse_command_line(argc, argv);
-
-    cout << "LTS format: " << lts::string_for_type(l.get_type()) << endl
-         << "Number of states: " << l.num_states() << endl
-         << "Number of labels: " << l.num_labels() << endl
-         << "Number of transitions: " << l.num_transitions() << endl;
-    if ( l.has_state_info() )
-    {
-      cout << "Has state information." << endl;
-    } else {
-      cout << "Does not have state information." << endl;
-    }
-    if ( l.has_label_info() )
-    {
-      cout << "Has label information." << endl;
-    } else {
-      cout << "Does not have label information." << endl;
-    }
-    if ( l.has_creator() )
-    {
-      cout << "Created by: " << l.get_creator() << endl;
+      if ( l.has_label_info() )
+      {
+        cout << "Has label information." << endl;
+      } else {
+        cout << "Does not have label information." << endl;
+      }
+      if ( l.has_creator() )
+      {
+        cout << "Created by: " << l.get_creator() << endl;
+      }
     }
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }
 #endif
+
+  gsRewriteFinalise();
 
   return 0;
 }
