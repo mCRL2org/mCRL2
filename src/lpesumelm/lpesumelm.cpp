@@ -26,6 +26,7 @@
 
 //Aterms
 #include <atermpp/aterm.h>
+#include <atermpp/aterm_list.h>
 #include <atermpp/algorithm.h>
 
 //LPE Framework
@@ -262,13 +263,13 @@ data_expression eliminate_unit_and(data_expression t)
 
 ///Apply a simple form of sum elimination in the case a summation
 ///variable does not occur within the summand at all
-LPE_summand apply_no_occurrence_sumelm(const lpe::LPE_summand& summand)
+lpe::LPE_summand apply_no_occurrence_sumelm(const lpe::LPE_summand& summand)
 {
-  LPE_summand new_summand;
+  lpe::LPE_summand new_summand;
   // New summation variable list, all variables in this list occur in other terms in the summand.
-  data_variable_list new_summation_variables;
+  lpe::data_variable_list new_summation_variables;
 
-  for(data_variable_list::iterator i = summand.summation_variables().begin(); i != summand.summation_variables().end(); ++i)
+  for(lpe::data_variable_list::iterator i = summand.summation_variables().begin(); i != summand.summation_variables().end(); ++i)
   { 
     data_variable v = *i;
     
@@ -294,7 +295,7 @@ lpe::specification no_occurrence_sumelm(const lpe::specification& specification)
 {
   lpe::LPE lpe = specification.lpe();
   lpe::specification new_specification;
-  summand_list new_summand_list = lpe.summands();
+  lpe::summand_list new_summand_list = lpe.summands();
 
   // Traverse the summand list, and apply sum elimination to its summands,
   // whilst constructing a new summand list in the process.
@@ -378,10 +379,10 @@ data_expression recursive_apply_eq_sumelm(LPE_summand* summand,
 ///and returns X(..) = e -> a(..) . X(..)
 lpe::LPE_summand apply_eq_sumelm(const lpe::LPE_summand& summand)
 {
-  LPE_summand new_summand = summand;
+  lpe::LPE_summand new_summand = summand;
 
   //Apply elimination and store result
-  data_expression new_condition = recursive_apply_eq_sumelm(&new_summand, new_summand.condition());
+  lpe::data_expression new_condition = recursive_apply_eq_sumelm(&new_summand, new_summand.condition());
 
   //Incorporate the new condition in the summand
   new_summand = set_condition(new_summand, new_condition);
@@ -398,7 +399,7 @@ lpe::specification eq_sumelm(const lpe::specification& specification)
 {
   lpe::LPE lpe = specification.lpe();
   lpe::specification new_specification;
-  summand_list new_summand_list = lpe.summands();
+  lpe::summand_list new_summand_list = lpe.summands();
 
   // Apply sum elimination on each of the summands in the summand list.
   new_summand_list = apply(new_summand_list, apply_eq_sumelm);
