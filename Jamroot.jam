@@ -12,7 +12,7 @@ include $(TOP)/build/installing.jam ;
 include $(TOP)/build/testing.jam ;
 
 if ! $(REVISION) {
-  REVISION = [ MATCH ([0-9]*) : [ SHELL "svnversion -n" ] ] ;
+  REVISION = [ MATCH ([0-9]*) : [ SHELL "svnversion -n $(TOP)" ] ] ;
 }
 
 project toolset
