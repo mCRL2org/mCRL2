@@ -11,7 +11,7 @@ exe squadt
       : <source>/site-config//mcrl2_revision.h
         <library>/libraries/md5pp//md5pp
         <library>/libraries/sip//sip_controller
-        <library>/boost//filesystem
+        <library>/boost//regex
         <wx>basic
       ;
 
