@@ -24,6 +24,7 @@ alias messenger
     : # no default build
     : <library>/libraries/transport//transport
       <library>/boost//thread
+      <library>/boost//filesystem
       <library>/libraries/xml2pp//xml2pp
     ;
 
