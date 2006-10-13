@@ -90,7 +90,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "../../src/ltsview/fsmparser.yy"
+#line 1 "fsmparser.yy"
 
 #include "fsmparser.h"
 #include "fsmlexer.cpp"
@@ -133,13 +133,13 @@ char* intToCString(int i);
 #endif
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 29 "../../src/ltsview/fsmparser.yy"
+#line 29 "fsmparser.yy"
 typedef union YYSTYPE {
   ATermAppl aterm;
   int number;
 } YYSTYPE;
 /* Line 190 of yacc.c.  */
-#line 143 "/scratch/mcrl2/bin/src/ltsview/gcc/debug/address-model-32/fsmparser.cpp"
+#line 143 "fsmparser.cpp"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
@@ -151,7 +151,7 @@ typedef union YYSTYPE {
 
 
 /* Line 213 of yacc.c.  */
-#line 155 "/scratch/mcrl2/bin/src/ltsview/gcc/debug/address-model-32/fsmparser.cpp"
+#line 155 "fsmparser.cpp"
 
 #if ! defined (yyoverflow) || YYERROR_VERBOSE
 
@@ -1101,7 +1101,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 45 "../../src/ltsview/fsmparser.yy"
+#line 45 "fsmparser.yy"
     { 
 	    valueTable = ATreverse( valueTable );
 	    stateId = ATreverse( stateId );
@@ -1110,7 +1110,7 @@ yyreduce:
     break;
 
   case 6:
-#line 66 "../../src/ltsview/fsmparser.yy"
+#line 66 "fsmparser.yy"
     {
 	    stateId = ATinsert( stateId, (ATerm)ATmakeAppl2( const_ATparmid,
 	      (ATerm)(yyvsp[-2].aterm), (ATerm)typeId ) )
@@ -1118,14 +1118,14 @@ yyreduce:
     break;
 
   case 11:
-#line 84 "../../src/ltsview/fsmparser.yy"
+#line 84 "fsmparser.yy"
     { 
 	    typeValues = ATempty
 	  ;}
     break;
 
   case 12:
-#line 88 "../../src/ltsview/fsmparser.yy"
+#line 88 "fsmparser.yy"
     { 
 	    typeValues = ATreverse( typeValues );
 	    typeId = ATmakeAppl2( const_ATtypeid, (ATerm)(yyvsp[-2].aterm), (ATerm)typeValues );
@@ -1134,17 +1134,17 @@ yyreduce:
     break;
 
   case 13:
-#line 97 "../../src/ltsview/fsmparser.yy"
+#line 97 "fsmparser.yy"
     { (yyval.aterm) = ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) ) ;}
     break;
 
   case 14:
-#line 100 "../../src/ltsview/fsmparser.yy"
+#line 100 "fsmparser.yy"
     { (yyval.aterm) = (yyvsp[0].aterm) ;}
     break;
 
   case 15:
-#line 103 "../../src/ltsview/fsmparser.yy"
+#line 103 "fsmparser.yy"
     {
 	    std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[-2].aterm) ) )
 	      + "->" + static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[0].aterm) ) );
@@ -1153,12 +1153,12 @@ yyreduce:
     break;
 
   case 16:
-#line 112 "../../src/ltsview/fsmparser.yy"
+#line 112 "fsmparser.yy"
     { (yyval.aterm) = (yyvsp[0].aterm) ;}
     break;
 
   case 17:
-#line 115 "../../src/ltsview/fsmparser.yy"
+#line 115 "fsmparser.yy"
     {
 	    std::string result = "(" + static_cast<std::string> ( ATwriteToString(
 	      (ATerm)(yyvsp[-1].aterm)) ) + ")";
@@ -1167,13 +1167,13 @@ yyreduce:
     break;
 
   case 20:
-#line 131 "../../src/ltsview/fsmparser.yy"
+#line 131 "fsmparser.yy"
     { typeValues = ATinsert( typeValues, (ATerm)ATmakeAppl2(
 	      const_ATvalue, (ATerm)(yyvsp[0].aterm), (ATerm)ATmakeInt( ATgetLength( typeValues ) ) ) ) ;}
     break;
 
   case 31:
-#line 167 "../../src/ltsview/fsmparser.yy"
+#line 167 "fsmparser.yy"
     {
 	    stateVector = ATreverse( stateVector ); 
 	    State* s = new State( stateVector );
@@ -1186,7 +1186,7 @@ yyreduce:
     break;
 
   case 34:
-#line 183 "../../src/ltsview/fsmparser.yy"
+#line 183 "fsmparser.yy"
     { 
 	    int paramNo = ATgetLength( stateVector );
 	    if ( paramNo < ATgetLength( valueTable ) )
@@ -1198,7 +1198,7 @@ yyreduce:
     break;
 
   case 37:
-#line 204 "../../src/ltsview/fsmparser.yy"
+#line 204 "fsmparser.yy"
     {
 	    State* frState = states[(yyvsp[-2].number)-1];
 	    State* toState = states[(yyvsp[-1].number)-1];
@@ -1217,12 +1217,12 @@ yyreduce:
     break;
 
   case 38:
-#line 223 "../../src/ltsview/fsmparser.yy"
+#line 223 "fsmparser.yy"
     { (yyval.aterm) = ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) ) ;}
     break;
 
   case 39:
-#line 226 "../../src/ltsview/fsmparser.yy"
+#line 226 "fsmparser.yy"
     { (yyval.aterm) = (yyvsp[0].aterm) ;}
     break;
 
@@ -1230,7 +1230,7 @@ yyreduce:
     }
 
 /* Line 1037 of yacc.c.  */
-#line 1234 "/scratch/mcrl2/bin/src/ltsview/gcc/debug/address-model-32/fsmparser.cpp"
+#line 1234 "fsmparser.cpp"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -1458,7 +1458,7 @@ yyreturn:
 }
 
 
-#line 229 "../../src/ltsview/fsmparser.yy"
+#line 229 "fsmparser.yy"
 
 
 int fsmwrap()

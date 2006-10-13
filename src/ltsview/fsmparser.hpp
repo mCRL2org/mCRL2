@@ -58,13 +58,13 @@
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 29 "../../src/ltsview/fsmparser.yy"
+#line 29 "fsmparser.yy"
 typedef union YYSTYPE {
   ATermAppl aterm;
   int number;
 } YYSTYPE;
 /* Line 1318 of yacc.c.  */
-#line 68 "/scratch/mcrl2/bin/src/ltsview/gcc/debug/address-model-32/fsmparser.hpp"
+#line 68 "fsmparser.hpp"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
