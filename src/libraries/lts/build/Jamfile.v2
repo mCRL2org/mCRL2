@@ -23,6 +23,7 @@ lib lts
          /libraries/svc//svc
          /libraries/aterm//atermpp
          /libraries/lpe//lpe
+         /site-config//BCG
        :
        :
        : <library>/libraries/svc//svc

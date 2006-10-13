@@ -59,3 +59,12 @@ lib xml2
         <linkflags>"$(XML2_LDFLAGS)"
       ;
 
+if $(CADP_HEADERS) {
+  lib bcg : : <name>BCG <search>$(CADP_LIBRARIES) ;
+  lib bcg_io : : <name>BCG_IO <search>$(CADP_LIBRARIES) ;
+
+  alias BCG : bcg bcg_io : : : <include>$(CADP_HEADERS) ;
+}
+else {
+  alias BCG : : : : ;
+}

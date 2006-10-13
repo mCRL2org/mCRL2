@@ -669,6 +669,9 @@ ATERM_CPPFLAGS
 ATERM_LDFLAGS
 ATERM_NAME
 BUILD_ATERM
+CADP_HEADERS
+CADP_LIBRARIES
+USE_BCG
 LIBXML2_CPPFLAGS
 XML2_CONFIG
 LIBXML2_CONFIG
@@ -1311,6 +1314,8 @@ Optional Packages:
 
   --with-aterm=dir[,suf]  use ATerm headers from dir/include[/suf] and the
                           ATerm library from dir/lib[/suf]
+
+  --with-cadp=prefix      try this for the CADP prefix directory
 
   --with-libxml2=prefix   try this for the libxml2 prefix install directory
 
@@ -4799,6 +4804,8 @@ if test "${with_aterm+set}" = set; then
 fi
 
 if test $with_aterm; then
+  { echo "$as_me:$LINENO: checking for ATerm library in $with_aterm" >&5
+echo $ECHO_N "checking for ATerm library in $with_aterm... $ECHO_C" >&6; }
   ATERM_ROOT=$(echo $with_aterm, | cut -d, -f1)
   ATERM_SUFFIX=/$(echo $with_aterm, | cut -d, -f2 -s)
   if test $ATERM_ROOT; then
@@ -5717,6 +5724,78 @@ fi
 
 
 
+
+# Check whether --with-cadp was given.
+if test "${with_cadp+set}" = set; then
+  withval=$with_cadp;
+fi
+
+USE_BCG=0
+if test ${with_cadp}; then
+  { echo "$as_me:$LINENO: checking for CADP in $with_cadp" >&5
+echo $ECHO_N "checking for CADP in $with_cadp... $ECHO_C" >&6; }
+  cat >conftest.$ac_ext <<_ACEOF
+
+      #include <$with_cadp/incl/bcg_user.h>
+
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag" || test ! -s conftest.err'
+  { (case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+
+       { echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+       CADP_HEADERS="$with_cadp/incl"
+
+       CADP_LIBRARIES="${with_cadp}/bin.`${with_cadp}/com/arch`"
+
+       USE_BCG=1
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+       { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+
+
 # Check for xml2 library and header files
 
 # Check whether --with-xml2 was given.
@@ -5729,7 +5808,7 @@ if test $with_libxml2; then
 echo $ECHO_N "checking for libXML2 in $with_libxml2... $ECHO_C" >&6; }
   cat >conftest.$ac_ext <<_ACEOF
 
-      #include "$with_xml2/include/libxml2/libxml/xmlversion.h"
+      #include <$with_xml2/include/libxml2/libxml/xmlversion.h>
 
 _ACEOF
 rm -f conftest.$ac_objext
@@ -8051,6 +8130,9 @@ ATERM_CPPFLAGS!$ATERM_CPPFLAGS$ac_delim
 ATERM_LDFLAGS!$ATERM_LDFLAGS$ac_delim
 ATERM_NAME!$ATERM_NAME$ac_delim
 BUILD_ATERM!$BUILD_ATERM$ac_delim
+CADP_HEADERS!$CADP_HEADERS$ac_delim
+CADP_LIBRARIES!$CADP_LIBRARIES$ac_delim
+USE_BCG!$USE_BCG$ac_delim
 LIBXML2_CPPFLAGS!$LIBXML2_CPPFLAGS$ac_delim
 XML2_CONFIG!$XML2_CONFIG$ac_delim
 LIBXML2_CONFIG!$LIBXML2_CONFIG$ac_delim
@@ -8077,9 +8159,6 @@ BIN_DIR!$BIN_DIR$ac_delim
 INCLUDE_DIR!$INCLUDE_DIR$ac_delim
 MAN_DIR!$MAN_DIR$ac_delim
 R_CFLAGS!$R_CFLAGS$ac_delim
-R_SCFLAGS!$R_SCFLAGS$ac_delim
-R_CXXFLAGS!$R_CXXFLAGS$ac_delim
-R_SCXXFLAGS!$R_SCXXFLAGS$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -8121,6 +8200,9 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+R_SCFLAGS!$R_SCFLAGS$ac_delim
+R_CXXFLAGS!$R_CXXFLAGS$ac_delim
+R_SCXXFLAGS!$R_SCXXFLAGS$ac_delim
 R_CPPFLAGS!$R_CPPFLAGS$ac_delim
 R_LDFLAGS!$R_LDFLAGS$ac_delim
 R_SLDFLAGS!$R_SLDFLAGS$ac_delim
@@ -8129,7 +8211,7 @@ IATERM_LDFLAGS!$IATERM_LDFLAGS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 6; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 9; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

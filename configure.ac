@@ -282,6 +282,7 @@ AC_ARG_WITH(
   )
 )
 if test $with_aterm; then
+  AC_MSG_CHECKING([for ATerm library in $with_aterm])
   ATERM_ROOT=$(echo $with_aterm, | cut -d, -f1)
   ATERM_SUFFIX=/$(echo $with_aterm, | cut -d, -f2 -s)
   if test $ATERM_ROOT; then
@@ -317,6 +318,32 @@ AC_SUBST([ATERM_LDFLAGS],[])
 AC_SUBST([ATERM_NAME],[])
 AC_SUBST([BUILD_ATERM],[])
 
+AC_ARG_WITH(
+  [cadp],
+  AC_HELP_STRING(
+    [--with-cadp=prefix],
+    [try this for the CADP prefix directory]
+  )  
+)
+USE_BCG=0
+if test ${with_cadp}; then
+  AC_MSG_CHECKING([for CADP in $with_cadp])
+  AC_COMPILE_IFELSE(
+     [
+      #include <$with_cadp/incl/bcg_user.h>
+     ],
+     [
+       AC_MSG_RESULT(yes)
+       AC_SUBST([CADP_HEADERS],["$with_cadp/incl"])
+       AC_SUBST([CADP_LIBRARIES],["${with_cadp}/bin.`${with_cadp}/com/arch`"])
+       USE_BCG=1
+     ],
+     [
+       AC_MSG_RESULT(no)
+     ])
+fi
+AC_SUBST([USE_BCG])
+
 # Check for xml2 library and header files
 AC_ARG_WITH(
   [xml2],
@@ -329,7 +356,7 @@ if test $with_libxml2; then
   AC_MSG_CHECKING([for libXML2 in $with_libxml2])
   AC_COMPILE_IFELSE(
      [
-      #include "$with_xml2/include/libxml2/libxml/xmlversion.h"
+      #include <$with_xml2/include/libxml2/libxml/xmlversion.h>
      ],
      [
        AC_MSG_RESULT(yes)

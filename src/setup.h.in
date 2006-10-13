@@ -25,4 +25,8 @@
 #define ATERM_CPPFLAGS   "@IATERM_CPPFLAGS@"
 #define ATERM_LDFLAGS    "@IATERM_LDFLAGS@"   // Linker options for the ATerm library
 
+#if @USE_BCG@
+# define MCRL2_BCG
+#endif
+
 #endif
