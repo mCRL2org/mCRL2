@@ -2,16 +2,15 @@ project toolset/squadt
   : source-location .
   : build-dir $(BUILD_TOP)/squadt
   : requirements
-    <threading>multi
     <include>./libraries
   ;
 
 exe squadt
       : [ glob *.cpp ]
-      : <source>/site-config//mcrl2_revision.h
-        <library>/libraries/md5pp//md5pp
-        <library>/libraries/sip//sip_controller
-        <library>/boost//regex
+        /libraries/md5pp//md5pp
+        /libraries/sip//sip_controller
+        /boost//regex
+      : <include>$(SETUP)
         <wx>basic
       ;
 

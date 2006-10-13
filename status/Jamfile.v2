@@ -20,4 +20,3 @@ build-project ../src/libraries/prover/test ;     # test-suite prover
 build-project ../src/libraries/svc/test ;        # test-suite svc
 build-project ../src/libraries/temporary/test ;  # test-suite temporary
 build-project ../src/mcrl22lpe/test ;
-build-project ../src/lpeinfo/test ;

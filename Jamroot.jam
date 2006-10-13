@@ -2,7 +2,7 @@ path-constant TOP             : . ;
 path-constant BUILD_TOP       : ./bin ;                  # Common build directory
 path-constant BOOST_ROOT      : ./boost ;                # Boost prefix (packaged sources)
 path-constant BOOST           : ./boost ;                # Boost prefix (possibly system)
-path-constant REVISION_HEADER : ./src/mcrl2_revision.h ;
+path-constant SETUP           : ./src ;                  # Header file for run-time configuration
 
 # Activate header cache
 #modules.poke : HCACHEFILE : .jamdeps ;
@@ -10,6 +10,10 @@ path-constant REVISION_HEADER : ./src/mcrl2_revision.h ;
 include $(TOP)/build/config.jam ;
 include $(TOP)/build/installing.jam ;
 include $(TOP)/build/testing.jam ;
+
+if ! $(REVISION) {
+  REVISION = [ MATCH ([0-9]*) : [ SHELL "svnversion -n" ] ] ;
+}
 
 project toolset
        : build-dir $(BUILD_TOP)
@@ -22,6 +26,7 @@ project toolset
           <os>LINUX,<toolset>gcc:<cxxflags>"-std=c++98 -ansi"
           <toolset>msvc:<define>WIN32
           <toolset>msvc:<include>src/libraries/auxiliary/include/nt_portability
+          <define>REVISION=$(REVISION)
           <define>BOOST_ALL_NO_LIB
        : default-build
           <address-model>$(ADDRESS_MODEL)
@@ -133,11 +138,4 @@ else {
 
   # Main install target
   alias install : /tools/$(tools)//install install-general-examples install-aterm-headers ;
-}
-
-# Updating the revision number that is used to tag tools
-if [ path.exists $(TOP)/build/utility/revision.jam ] {
-  include $(TOP)/build/utility/revision.jam ;
-
-  import_revision ;
 }

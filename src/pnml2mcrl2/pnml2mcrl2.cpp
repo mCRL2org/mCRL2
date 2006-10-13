@@ -15,8 +15,6 @@
 #include "libprint_c.h"
 #include "typecheck.h"
 
-#include "mcrl2_revision.h"
-  
   typedef struct {
     ATbool Abort;                 // if an element has no ID, this boolean is used to grant abortion of the conversion
 

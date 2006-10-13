@@ -8,7 +8,6 @@ project pbespp
 exe pbespp
        : pbespp.cpp
        : <library>/libraries/mcrl2_basic//mcrl2_basic
-         <source>/site-config//mcrl2_revision.h
          <include>.
        ;
 

@@ -12,8 +12,7 @@ exe ltsmin
          ltsminkernel.cpp
          /libraries/mcrl2_basic//mcrl2_basic
          /libraries/svc//svc
-       : <source>/site-config//mcrl2_revision.h
-         <include>.
+       : <include>.
        ;
 
 install_with_libraries install : ltsmin ;

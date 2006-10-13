@@ -19,8 +19,6 @@
 #include <boost/program_options.hpp>
 
 //mCRL2
-#include "mcrl2_revision.h"
-
 #include "atermpp/aterm.h"
 #include "lpe/specification.h"
 #include "lpe/lpe_error.h"

@@ -1,5 +1,5 @@
 #include "graph_frame.h"
-#include <mcrl2_revision.h>
+
 const wxColour border_colour_selected = wxT("BLUE");
 
 BEGIN_EVENT_TABLE(GraphFrame, wxFrame)

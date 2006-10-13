@@ -1,16 +1,16 @@
 #define NAME "lpe2pbes"
 #define VERSION "0.3"
 
-#include <stdio.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <string.h>
-#include <getopt.h>
-#include <aterm2.h>
-#include <assert.h>
-#include <limits.h>
+#include <cstdio>
+#include <cerrno>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+#include <climits>
 #include <iostream>
 #include <fstream>
+#include <getopt.h>
+#include <aterm2.h>
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint.h"
@@ -24,8 +24,6 @@
 #include "lpe/pbes_translate.h"
 #include "lpe/pbes.h"
 #include "libpbes.h"
-
-#include "mcrl2_revision.h"
 
 using namespace std;
 using namespace lpe;

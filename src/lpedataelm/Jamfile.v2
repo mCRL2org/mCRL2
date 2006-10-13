@@ -8,7 +8,6 @@ exe lpedataelm
          /libraries/temporary//dataelm
          /libraries/mcrl2_basic//mcrl2_basic
        : <source>/boost//program_options
-         <source>/site-config//mcrl2_revision.h
          <include>.
        ;
 

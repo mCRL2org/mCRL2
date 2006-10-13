@@ -1,4 +1,3 @@
-#include <mcrl2_revision.h>
 #include "ltsgraph_version.h"
 #include <boost/function.hpp>
 #include <boost/bind.hpp>

@@ -10,7 +10,6 @@ exe ltsgraph
        : <source>/libraries/wx_extension//wx_extension
          <source>/libraries/mcrl2_basic//mcrl2_basic
          <source>/libraries/lts//lts
-         <source>/site-config//mcrl2_revision.h
 	 <squadt_support>enable
          <include>.
          <wx>basic

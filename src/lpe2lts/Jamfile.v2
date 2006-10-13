@@ -15,8 +15,7 @@ exe lpe2lts
          /libraries/mcrl2_basic//mcrl2_basic
          /libraries/temporary//trace
          /libraries/lts//lts
-       : <source>/site-config//mcrl2_revision.h
-         <squadt_support>enable
+       : <squadt_support>enable
        ;
 
 install_with_libraries install : lpe2lts ;

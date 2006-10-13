@@ -20,8 +20,6 @@
 #include "librewrite.h"
 #include "libdataelm.h"
 
-#include "mcrl2_revision.h"
-
 using namespace std;
 
 #define is_tau(x) ATisEmpty((ATermList) ATgetArgument(x,0))

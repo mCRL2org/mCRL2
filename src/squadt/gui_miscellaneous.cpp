@@ -4,11 +4,54 @@
 #include "tool_manager.h"
 
 #include <boost/foreach.hpp>
+#include <boost/regex.hpp>
+
+#include <wx/mimetype.h>
+
+wxMimeTypesManager global_mime_types_manager;
 
 namespace squadt {
   namespace miscellaneous {
 
-    char* const mime_type::main_type_as_string[] = { "application", "text" };
+    char* const mime_type::main_type_as_string[] = { "application", "audio", "image", "message", "multipart", "text", "video", 0 };
+
+    static const boost::regex match_type_and_subtype("([^ \\n()<>@,;:\\\\\"/\\[\\]?.=]+)/?([^ \\n()<>@,;:\\\\\"/\\[\\]?.=]+)?");
+
+    /**
+     * \param[in] s a string that represents a mime type
+     **/
+    mime_type::mime_type(std::string const& s) : m_main(unknown) {
+      boost::smatch  matches;
+
+      if (boost::regex_match(s, matches, match_type_and_subtype)) {
+        if (matches.size() == 3) {
+          m_sub = matches[2];
+
+          char* const* x = &main_type_as_string[0];
+
+          while (*x != 0) {
+            if (*x == matches[1]) {
+              m_main = static_cast < main_type > (x - &main_type_as_string[0]);
+
+              break;
+            }
+
+            ++x;
+          }
+        }
+        else if (matches.size() == 2) {
+          m_sub = matches[1];
+        }
+      }
+    }
+
+    /**
+     * \param[in] s the subtype string (must not contain white space characters)
+     * \param[in] m the main type
+     **/
+    mime_type::mime_type(std::string const& s, main_type m) : m_main(m), m_sub(s) {
+      assert(!s.empty() && !s.find(' ') && !(s.find('\t')));
+    }
 
     /**
      * Contacts the local tool manager to ask for the current list of tools,
@@ -42,7 +85,7 @@ namespace squadt {
      * @param f the format for which to execute the action a
      * @param a the function to execute for each category/tool pair
      **/
-    type_registry::tool_sequence type_registry::tools_by_mime_type(const storage_format f) const {
+    type_registry::tool_sequence type_registry::tools_by_mime_type(storage_format const& f) const {
 
       type_registry::tool_sequence range;
 
@@ -61,7 +104,7 @@ namespace squadt {
      * @param f the format for which to execute the action a
      * @param a the function to execute for each category/tool pair
      **/
-    std::set < type_registry::tool_category > type_registry::categories_by_mime_type(const storage_format f) const {
+    std::set < type_registry::tool_category > type_registry::categories_by_mime_type(storage_format const& f) const {
       std::set < tool_category > categories;
       
       categories_for_mime_type::const_iterator i = categories_for_format.find(f);
@@ -91,7 +134,7 @@ namespace squadt {
       return (categories);
     }
 
-    std::set < storage_format > type_registry::get_storage_formats() {
+    std::set < storage_format > type_registry::get_storage_formats() const {
       std::set < storage_format > formats;
 
       BOOST_FOREACH(categories_for_mime_type::value_type c, categories_for_format) {
@@ -99,6 +142,31 @@ namespace squadt {
       }
 
       return (formats);
+    }
+
+    /**
+     * \param[in] t mime type for which to get the associated command
+     * \param[in] c the command to be associated with the type ($ is replaced by a valid filename)
+     **/
+    void associate_command_with_mime_type(mime_type const& t, std::string const& c) {
+    }
+
+    /**
+     * \param[in] e extension for which to get the mime type
+     **/
+    std::auto_ptr < mime_type > type_registry::mime_type_for_extension(std::string const& e) const {
+      std::auto_ptr < mime_type > p;
+
+      return (p);
+    }
+
+    /**
+     * \param[in] t mime type for which to get the associated command
+     **/
+    std::auto_ptr < command > type_registry::command_for_mime_type(mime_type const& t) const {
+      std::auto_ptr < command > p;
+
+      return (p);
     }
   }
 }

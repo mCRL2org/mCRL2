@@ -8,10 +8,10 @@ exe xsim
          xsimbase.cpp
          xsimmain.cpp
          xsimtrace.cpp
-       : <library>/libraries/temporary//trace
-         <library>/libraries/temporary//nextstate
-         <library>/libraries/mcrl2_basic//mcrl2_basic
-         <source>/site-config//mcrl2_revision.h
+         /libraries/temporary//trace
+         /libraries/temporary//nextstate
+         /libraries/mcrl2_basic//mcrl2_basic
+       : <include>$(SETUP)
          <squadt_support>enable
          <wx>basic
          <toolset>gcc:<linkflags>-Wl,-export-dynamic
@@ -21,7 +21,6 @@ exe sim
        : sim.cpp
        : <library>/libraries/temporary//nextstate
          <library>/libraries/mcrl2_basic//mcrl2_basic
-         <source>/site-config//mcrl2_revision.h
        ;
 
 # Gather names of view plugins

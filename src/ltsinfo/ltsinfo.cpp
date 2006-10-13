@@ -11,7 +11,6 @@
 
 #define NAME "ltsinfo"
 #define VERSION "0.1"
-#include "mcrl2_revision.h"
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY

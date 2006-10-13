@@ -1,6 +1,5 @@
 #include <wx/wx.h>
 #include <wx/msgdlg.h>
-#include <mcrl2_revision.h>
 
 #define STRINGIFY(x) EXPAND(x)
 #define EXPAND(x) #x

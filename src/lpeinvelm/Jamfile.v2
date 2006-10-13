@@ -6,8 +6,7 @@ project lpeinvelm
 exe lpeinvelm
        : lpeinvelm.cpp
          /libraries/prover//prover
-       : <source>/site-config//mcrl2_revision.h
-         <include>.
+       : <include>.
 #         <toolset>gcc:<define>CVC_LITE_LIB
        ;
 

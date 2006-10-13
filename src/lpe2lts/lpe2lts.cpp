@@ -10,8 +10,6 @@
 #include "exploration.h"
 #include "lts.h"
 
-#include "mcrl2_revision.h"
-
 using namespace std;
 
 ATermAppl *parse_action_list(const char *s, int *len)

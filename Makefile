@@ -4,7 +4,7 @@ BJAM   = bin/bjam
 CONFIG = build/config.mk
 
 # Creates an application bundle on Mac OS X
-.PHONY: all bjam install clean distclean reposclean distribution
+.PHONY: all bjam install clean distclean distribution
 
 all: $(CONFIG) $(BJAM)
 	@$(BOOST_BUILD)
@@ -24,9 +24,6 @@ distclean:
 	$(RM) -r autom4te.cache *.o *.app *~ core core.*
 	$(RM) -r config.log config.status build/config.mk build/config.jam src/setup.h
 	$(RM) -rf bin
-
-reposclean: distclean
-	$(RM) src/mcrl2_revision.h
 
 revision: $(BJAM)
 	@$(BOOST_BUILD) mcrl2_revision

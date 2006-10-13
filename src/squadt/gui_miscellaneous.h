@@ -31,9 +31,14 @@ namespace squadt {
 
         /** \brief Recognised main types */
         enum main_type {
-          unknown,
           application,
-          text
+          audio,
+          image,
+          message,
+          multipart,
+          text,
+          video,
+          unknown
         };
 
       private:
@@ -52,22 +57,25 @@ namespace squadt {
       public:
 
         /** \brief Constructor */
-        mime_type(std::string const&, main_type s = unknown);
+        mime_type(std::string const&);
+
+        /** \brief Constructor */
+        mime_type(std::string const&, main_type s);
 
         /** \brief Gets the main type */
-        std::string get_main_type();
+        std::string get_main_type() const;
 
         /** \brief Gets the sub type */
-        std::string get_sub_type();
+        std::string get_sub_type() const;
 
         /** \brief Converts to string */
-        std::string to_string();
+        std::string to_string() const;
 
         /** \brief Compare for equality */
-        bool operator== (mime_type const&);
+        bool operator== (mime_type const&) const;
 
         /** \brief Compare for inequality */
-        bool operator!= (mime_type const&);
+        bool operator!= (mime_type const&) const;
     };
 
     /**
@@ -136,18 +144,22 @@ namespace squadt {
         void rebuild_indices();
 
         /** \brief Returns a set of known formats */
-        std::set < storage_format > get_storage_formats();
+        std::set < storage_format > get_storage_formats() const;
 
         /** \brief Returns a set of known formats */
         std::set < tool_category > get_categories() const;
 
         /** \brief Returns the list of tool categories with tools that operate on input a given type */
-        std::set < tool_category > categories_by_mime_type(const storage_format f) const;
+        std::set < tool_category > categories_by_mime_type(storage_format const&) const;
 
         /** \brief Returns a sequence containing tool category pairs that operate on input a given type */
-        tool_sequence tools_by_mime_type(const storage_format f) const;
+        tool_sequence tools_by_mime_type(storage_format const&) const;
 
-        std::auto_ptr < command > command_for_mime_type(mime_type const&);
+        /** \brief Returns a mime_type for a specified extension */
+        std::auto_ptr < mime_type > mime_type_for_extension(std::string const&) const;
+
+        /** \brief Returns a pointer to a command that performs a configured action on a file */
+        std::auto_ptr < command > command_for_mime_type(mime_type const&) const;
     };
 
     inline type_registry::type_registry() {
@@ -164,31 +176,23 @@ namespace squadt {
       build_index();
     }
 
-    /**
-     * \param[in] s the subtype string (must not contain white space characters)
-     * \param[in] m the main type
-     **/
-    inline mime_type::mime_type(std::string const& s, main_type m) : m_main(m), m_sub(s) {
-      assert(!s.empty() && !s.find(' ') && !(s.find('\t')));
-    }
-
-    inline std::string mime_type::get_main_type() {
+    inline std::string mime_type::get_main_type() const {
       return (main_type_as_string[m_main]);
     }
 
-    inline std::string mime_type::get_sub_type() {
+    inline std::string mime_type::get_sub_type() const {
       return (main_type_as_string[m_main]);
     }
 
-    inline std::string mime_type::to_string() {
+    inline std::string mime_type::to_string() const {
       return (std::string(main_type_as_string[m_main]) + "/" + m_sub);
     }
 
-    inline bool mime_type::operator==(mime_type const& r) {
+    inline bool mime_type::operator==(mime_type const& r) const {
       return (m_main == r.m_main && m_sub == r.m_sub);
     }
 
-    inline bool mime_type::operator!=(mime_type const& r) {
+    inline bool mime_type::operator!=(mime_type const& r) const {
       return (m_main != r.m_main && m_sub != r.m_sub);
     }
   }

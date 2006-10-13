@@ -11,8 +11,7 @@ exe mcrl22lpe
          /libraries/parser//parser
          /libraries/parser//alpha
          /libraries/mcrl2_basic//mcrl2_basic
-       : <source>/site-config//mcrl2_revision.h
-         <squadt_support>enable
+       : <squadt_support>enable
        ;
 
 exe lin
@@ -21,8 +20,7 @@ exe lin
          /libraries/parser//parser
          /libraries/parser//alpha
          /libraries/mcrl2_basic//mcrl2_basic
-       : <source>/site-config//mcrl2_revision.h
-         <status>experimental
+       : <status>experimental
        ;
 
 exe alpha
@@ -30,8 +28,7 @@ exe alpha
          /libraries/parser//parser
          /libraries/parser//alpha
          /libraries/mcrl2_basic//mcrl2_basic
-       : <source>/site-config//mcrl2_revision.h
-         <status>experimental
+       : <status>experimental
        ;
 
 install_with_libraries install : mcrl22lpe : <status>experimental:<dependency>install-experimental ;

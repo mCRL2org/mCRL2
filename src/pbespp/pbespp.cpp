@@ -18,8 +18,6 @@
 #include "libprint_c.h"
 #include "librewrite_c.h"
 
-#include "mcrl2_revision.h"
-
 //local declarations
 
 int main(int argc, char *argv[]);

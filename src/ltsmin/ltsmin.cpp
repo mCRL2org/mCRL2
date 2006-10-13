@@ -30,8 +30,6 @@
 #include "libprint_c.h"
 #include "ltsmin.h"
 
-#include "mcrl2_revision.h"
-
 int traceLevel = 0, optimal = 0, classes = 0, add_state_parameter = 0; 
 
 #ifndef NO_TIMES_H

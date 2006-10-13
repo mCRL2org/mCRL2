@@ -7,7 +7,6 @@
 #include "getopt.h"
 #include "libprint_c.h"
 #include "libstruct.h"
-#include "mcrl2_revision.h"
 #include <string>
 
   /// \mainpage lpeconfcheck

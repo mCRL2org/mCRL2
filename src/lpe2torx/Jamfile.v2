@@ -7,8 +7,7 @@ project lpe2torx
 
 exe lpe2torx
        : lpe2torx.cpp
-       : <source>/site-config//mcrl2_revision.h
-         <source>/libraries/mcrl2_basic//mcrl2_basic
+       : <source>/libraries/mcrl2_basic//mcrl2_basic
          <source>/libraries/temporary//dataelm
          <source>/libraries/temporary//nextstate
          <include>.

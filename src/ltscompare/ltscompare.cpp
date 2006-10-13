@@ -11,7 +11,6 @@
 
 #define NAME "ltscompare"
 #define VERSION "0.1"
-#include "mcrl2_revision.h"
 
 using namespace std;
 using namespace mcrl2::lts;

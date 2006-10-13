@@ -16,8 +16,6 @@
 #include "gui_splash.h"
 #include "gui_main.h"
 
-#include <mcrl2_revision.h>
-
 #include <wx/wx.h>
 #include <wx/filename.h>
 #include <wx/image.h>

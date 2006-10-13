@@ -9,8 +9,6 @@
 #include "lts/liblts_dot.h"
 #include "setup.h"
 
-#include "mcrl2_revision.h"
-
 #define NAME "ltsconvert"
 #define VERSION "0.1"
 

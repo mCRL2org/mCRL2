@@ -59,15 +59,6 @@ source_files="mcrl2/articles \
 
 svn_update="$(svn update --non-interactive ${SOURCE_BASE} 2>&1 | tail -n 1)"
 
-# Make sure that the maximum revision tool exists
-sh -c "cd ${SOURCE_BASE}; make revision" &> /dev/null
-
-# Alternative method of obtaining the last revision that does not require
-# ${SOURCE_BASE}/utility/maximum_revision (but has a potential for not being accurate)
-# svn log -q -r HEAD https://svn.win.tue.nl/repos/MCRL2/ \
-#  | grep --only-matching -e "^r[[:digit:]]*\ " \
-#  | tr -d "r \n"
-
 # Obtain revision number from checked out source tree
 revision=$(expr "$(/usr/bin/svnversion ${SOURCE_BASE})" : "\([0-9]*\)")
 
@@ -97,6 +88,9 @@ if (! test -e "${archive_name}.bz2"); then
        -or -wholename '*boost/stage' \
        -or -wholename '*boost/lib' >> excludes
 
+  # Append revision number to template configuration file
+  echo "REVISION        = \"${revision}\" ;" >> ${SOURCE_BASE}/build/config.jam.in
+
   tar cf ${archive_name} \
            --exclude '.svn' \
            --exclude '*.ps' \
@@ -110,6 +104,8 @@ if (! test -e "${archive_name}.bz2"); then
            --exclude '*.a' \
            --exclude '*.so' \
            --exclude-from excludes ${source_files}
+
+  svn revert ${SOURCE_BASE}/build/config.jam.in
 
   unlink mcrl2
 

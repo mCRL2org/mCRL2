@@ -5,8 +5,7 @@ project lpeformcheck
 
 exe lpeformcheck
        : lpeformcheck.cpp
-       : <source>/site-config//mcrl2_revision.h
-         <source>/libraries/prover//prover
+       : <source>/libraries/prover//prover
          <include>.
 #         <toolset>gcc:<define>CVC_LITE_LIB
        ;

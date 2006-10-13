@@ -9,8 +9,7 @@ exe ltsinfo
        : ltsinfo.cpp
          /libraries/mcrl2_basic//mcrl2_basic
          /libraries/lts//lts
-       : <source>/site-config//mcrl2_revision.h
-         <squadt_support>enable
+       : <squadt_support>enable
          <include>.
        ;
 

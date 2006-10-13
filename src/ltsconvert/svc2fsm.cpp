@@ -3,15 +3,13 @@
  * de Wetering for the FSMView tool of Frank van Ham.
  */
 
-#include <string.h>
+#include <cstring>
 #include <getopt.h>
 #include "aterm2.h"
 #include "svc/svc.h"
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "libprint.h"
-
-#include "mcrl2_revision.h"
 
 #define NAME "svc2fsm"
 #define VERSION "0.1m2"

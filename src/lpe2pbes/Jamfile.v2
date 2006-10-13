@@ -11,8 +11,7 @@ exe lpe2pbes
          /libraries/lpe//lpe
          /libraries/parser//parser
          /libraries/mcrl2_basic//mcrl2_basic
-       : <source>/site-config//mcrl2_revision.h
-         <include>.
+       : <include>.
 #         <status>experimental
        ;
 

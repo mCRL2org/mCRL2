@@ -3,11 +3,11 @@ project lts
        : build-dir $(BUILD_TOP)
        : requirements
           <include>../include
-          <include>../../..
+          <include>$(SETUP)
 	  <include>$(BOOST)
        : usage-requirements
           <include>../include
-	  <library>/boost//regex
+          <include>$(SETUP)
        ;
 
 lib lts
@@ -23,6 +23,7 @@ lib lts
          /libraries/svc//svc
          /libraries/aterm//atermpp
          /libraries/lpe//lpe
+	 /boost//regex
          /site-config//BCG
        :
        :

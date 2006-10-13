@@ -8,8 +8,7 @@ exe ltsconvert
          /libraries/mcrl2_basic//mcrl2_basic
          /libraries/lts//lts
          /libraries/svc//svc
-       : <source>/site-config//mcrl2_revision.h
-         <squadt_support>enable
+       : <squadt_support>enable
          <include>.
        ;
 
@@ -18,8 +17,7 @@ exe svc2fsm
          /libraries/mcrl2_basic//mcrl2_basic
          /libraries/aterm//aterm
          /libraries/svc//svc
-       : <source>/site-config//mcrl2_revision.h
-         <status>deprecated
+       : <status>deprecated
        ;
 
 install_with_libraries install : ltsconvert : <status>deprecated:<use>install-deprecated ;

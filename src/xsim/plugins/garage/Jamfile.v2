@@ -9,10 +9,9 @@ lib xsim_garage_view
          ../../xsimbase.cpp
        : <include>../..
          <define>GARAGEFRAMEDLL
-        <library>/site-config//OpenGL
+         <library>/site-config//OpenGL
          <library>/libraries/temporary//nextstate
          <library>/libraries/mcrl2_basic//mcrl2_basic
-         <source>/site-config//mcrl2_revision.h
          <link>shared
          <wx>gl
        ;

@@ -7,7 +7,6 @@
 #include "libprint_c.h"
 #include "liblowlevel.h"
 #include "libstruct.h"
-#include "mcrl2_revision.h"
 #include "bdd_path_eliminator.h"
 #include <string>
 

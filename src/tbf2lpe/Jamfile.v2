@@ -9,8 +9,7 @@ exe tbf2lpe
        : tbf2lpe.cpp
          lpetrans.cpp
          /libraries/mcrl2_basic//mcrl2_basic
-       : <source>/site-config//mcrl2_revision.h
-         <include>.
+       : <include>.
        ;
 
 install_with_libraries install : tbf2lpe ;

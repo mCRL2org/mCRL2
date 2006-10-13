@@ -1,10 +1,10 @@
-#include <assert.h>
+#include <cassert>
 #include <stdbool.h>
 #include <getopt.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <climits>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <cstdio>
 #include <fstream>
 #include "aterm2.h"
@@ -18,8 +18,6 @@
 #include "typecheck.h"
 #include "libalpha.h"
 #include "dataimpl.h"
-
-#include "mcrl2_revision.h"
 
 #define NAME "mcrl22lpe"
 #define VERSION "0.2.1"

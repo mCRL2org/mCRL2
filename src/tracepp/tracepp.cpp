@@ -12,8 +12,6 @@
 #include "libprint.h"
 #include "libtrace.h"
 
-#include "mcrl2_revision.h"
-
 using namespace std;
 
 enum output_type { otPlain, otMcrl2, otDot, otAut, /*otSvc,*/ otNone };

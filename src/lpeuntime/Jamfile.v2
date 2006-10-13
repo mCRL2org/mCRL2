@@ -8,7 +8,6 @@ exe lpeuntime
        : <source>/libraries/mcrl2_basic//mcrl2_basic
          <source>/libraries/lpe//lpe
          <source>/boost//program_options
-         <source>/site-config//mcrl2_revision.h
          <squadt_support>enable
          <include>.
        ;

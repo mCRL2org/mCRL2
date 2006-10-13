@@ -27,8 +27,6 @@
 #include "libdataelm.h"
 #include "lpe/specification.h"
 
-#include "mcrl2_revision.h"
-
 using namespace std;
 using namespace lpe;
 

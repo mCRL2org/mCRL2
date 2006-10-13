@@ -9,8 +9,7 @@ exe tracepp
        : tracepp.cpp
          /libraries/mcrl2_basic//mcrl2_basic
          /libraries/temporary//trace
-       : <source>/site-config//mcrl2_revision.h
-         <include>.
+       : <include>.
        ;
 
 install_with_libraries install : tracepp ;
