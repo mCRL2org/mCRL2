@@ -1,0 +1,13 @@
+import testing ;
+
+project libraries/temporary/test
+   : requirements
+       <include>$(BOOST)
+       <source>/libraries//enum
+       <source>/libraries//nextstate
+   ;
+
+test-suite temporary
+    :
+      [ run test_lib.cpp ]
+    ;

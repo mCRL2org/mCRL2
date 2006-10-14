@@ -1,14 +1,13 @@
 project lpesumelm
-       : source-location .
        : build-dir $(BUILD_TOP)/lpesumelm
        ;
 
 exe lpesumelm
        : lpesumelm.cpp
-       : <source>/libraries/mcrl2_basic//mcrl2_basic
-         <source>/libraries/lpe//lpe
-         <source>/boost//program_options
-         <squadt_support>enable
+         /libraries//mcrl2_basic
+         /libraries//lpe
+         /boost//program_options
+       : <squadt_support>enable
          <include>.
        ;
 

@@ -2,6 +2,8 @@
 #include "gui_miscellaneous.h"
 #include "tool_manager.h"
 
+#include <boost/foreach.hpp>
+
 #include <wx/button.h>
 #include <wx/checkbox.h>
 #include <wx/listctrl.h>

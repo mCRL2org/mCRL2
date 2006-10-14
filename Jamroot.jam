@@ -36,22 +36,15 @@ project toolset
 
 # The known sub projects
 use-project /site-config               : build ;
-use-project /libraries/transport       : src/squadt/libraries/transport/build ;
 use-project /libraries/sip             : src/squadt/libraries/sip/build ;
 use-project /boost                     : boost ;
+use-project /libraries                 : src/libraries ;
 
 tools = [ MATCH src/(.*)/.* : [ glob src/*/Jamfile.v2 ] ] ;
 
 # Register tool projects
 for tool in $(tools) {
   use-project /tools/$(tool) : src/$(tool) ;
-}
-
-libraries = [ MATCH src/libraries/(.*)/build/.* : [ glob src/libraries/*/build/Jamfile.v2 ] ] ;
-
-# Register library projects
-for library in $(libraries) {
-  use-project /libraries/$(library) : src/libraries/$(library)/build ;
 }
 
 import feature : feature ;
@@ -73,7 +66,7 @@ feature squadt_support : disable enable : composite optional incidental ;
 if ! squadt in [ MATCH "^--disable-(squadt)-support" : [ modules.peek : ARGV ] ] {
   feature.compose <squadt_support>enable
         : <define>ENABLE_SQUADT_CONNECTIVITY
-          <include>src/squadt/libraries/utility
+          <include>$(TOP)/src/squadt/libraries/utility
           <library>/libraries/sip//sip_tool
           <xml2>interface
         ;

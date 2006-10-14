@@ -113,15 +113,18 @@ inline bool squadt_tool_interface::try_run() {
         case sip::message_offer_configuration: {
             sip::configuration& configuration = m_communicator.get_configuration();
 
-            do {
-              if (configuration.is_fresh()) {
-                user_interactive_configuration(configuration);
-              }
+            /* Insert configuration in tool communicator object */
+            valid_configuration_present = check_configuration(configuration);
              
-              /* Insert configuration in tool communicator object */
-              valid_configuration_present = check_configuration(configuration);
+            if (configuration.is_fresh()) {
+              do {
+                user_interactive_configuration(configuration);
 
-            } while (!valid_configuration_present);
+                /* Insert configuration in tool communicator object */
+                valid_configuration_present = check_configuration(configuration);
+             
+              } while (!valid_configuration_present);
+            }
 
             /* Signal that the configuration is acceptable */
             m_communicator.send_accept_configuration();

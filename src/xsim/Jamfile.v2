@@ -8,9 +8,9 @@ exe xsim
          xsimbase.cpp
          xsimmain.cpp
          xsimtrace.cpp
-         /libraries/temporary//trace
-         /libraries/temporary//nextstate
-         /libraries/mcrl2_basic//mcrl2_basic
+         /libraries//trace
+         /libraries//nextstate
+         /libraries//mcrl2_basic
        : <include>$(SETUP)
          <squadt_support>enable
          <wx>basic
@@ -19,8 +19,8 @@ exe xsim
 
 exe sim
        : sim.cpp
-       : <library>/libraries/temporary//nextstate
-         <library>/libraries/mcrl2_basic//mcrl2_basic
+         /libraries//nextstate
+         /libraries//mcrl2_basic
        ;
 
 # Gather names of view plugins

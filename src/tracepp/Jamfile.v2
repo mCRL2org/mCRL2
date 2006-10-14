@@ -1,14 +1,11 @@
 project tracepp
-       : source-location .
        : build-dir $(BUILD_TOP)/tracepp
-       : requirements
-          <include>$(BOOST)
        ;
 
 exe tracepp
        : tracepp.cpp
-         /libraries/mcrl2_basic//mcrl2_basic
-         /libraries/temporary//trace
+         /libraries//mcrl2_basic
+         /libraries//trace
        : <include>.
        ;
 

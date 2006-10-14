@@ -1,11 +1,10 @@
 project lpeconfcheck
-  : source-location .
   : build-dir $(BUILD_TOP)/lpeconfcheck
   ;
 
 exe lpeconfcheck
        : lpeconfcheck.cpp
-       : <source>/libraries/prover//prover
+       : <source>/libraries//prover
          <include>.
 #         <toolset>gcc:<define>CVC_LITE_LIB
        ;

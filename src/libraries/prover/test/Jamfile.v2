@@ -3,7 +3,7 @@ import testing ;
 project libraries/prover/test
    : requirements
        <include>$(BOOST)
-       <source>/libraries/prover//prover
+       <source>/libraries//prover
    ;
 
 test-suite prover

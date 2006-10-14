@@ -7,8 +7,17 @@ project lpe
 alias lpe
        :
        : <library>/libraries/aterm//atermpp
-         <library>/libraries/mcrl2_basic//mcrl2_basic
+         <library>/libraries//mcrl2_basic
        :
        : <include>$(BOOST)
          <include>../include
        ;
+
+lib dataelm
+       : ../source/libdataelm.cpp
+         /libraries//lpe
+       :
+       :
+       :
+       ;
+

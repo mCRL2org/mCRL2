@@ -1,0 +1,25 @@
+project libraries/nextstate
+       : source-location ../source
+       : build-dir $(BUILD_TOP)
+       : requirements
+          <include>../include
+       ;
+
+lib enum
+       : libenum.cpp
+         enum_standard.cpp
+         /libraries//mcrl2_basic
+       :
+       :
+       :
+       ;
+
+lib nextstate
+       : libnextstate.cpp
+         nextstate_standard.cpp
+         enum
+       :
+       :
+       : <library>enum
+       ;
+

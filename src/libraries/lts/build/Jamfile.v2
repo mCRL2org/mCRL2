@@ -6,7 +6,6 @@ project lts
           <include>$(SETUP)
 	  <include>$(BOOST)
        : usage-requirements
-          <include>../include
           <include>$(SETUP)
        ;
 
@@ -18,15 +17,14 @@ lib lts
 	 bsimdata.cpp
 	 bsimkernel.cpp
 	 liblts_bisim.cpp
-         /libraries/mcrl2_basic//mcrl2_basic
-         /libraries/parser//parser
-         /libraries/svc//svc
+         /libraries//mcrl2_basic
+         /libraries//parser
+         /libraries//svc
          /libraries/aterm//atermpp
-         /libraries/lpe//lpe
+         /libraries//lpe
 	 /boost//regex
          /site-config//BCG
        :
        :
-       : <library>/libraries/svc//svc
-         <library>/libraries/parser//parser
+       : <libraries>/libraries//parser
        ;

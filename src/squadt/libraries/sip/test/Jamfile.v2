@@ -1,14 +1,14 @@
 project test_sip
     : requirements
-       <include>../../../../boost/
+       <include>$(BOOST)
        <include>../../ ;
 
 import testing ;
 
 unit-test basic_messenger_test :
         basic_messenger_test.cpp
-        /libraries/transport//transport
-        /libraries/xml2pp//text_reader
+        /libraries//transport
+        /libraries//xml2pp
         /boost//test ;
 
 unit-test interface_test :

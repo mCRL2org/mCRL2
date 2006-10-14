@@ -149,6 +149,10 @@ namespace squadt {
      * \param[in] c the command to be associated with the type ($ is replaced by a valid filename)
      **/
     void associate_command_with_mime_type(mime_type const& t, std::string const& c) {
+      static const boost::regex command_parse_expression("(executable)()*");
+
+      boost::smatch  matches;
+
     }
 
     /**
@@ -156,6 +160,8 @@ namespace squadt {
      **/
     std::auto_ptr < mime_type > type_registry::mime_type_for_extension(std::string const& e) const {
       std::auto_ptr < mime_type > p;
+
+//      global_mime_types_manager.GetFileTypeFromExtension(wxString(e.c_str(), wxConvLocal))->GetOpenCommand();
 
       return (p);
     }
@@ -165,6 +171,13 @@ namespace squadt {
      **/
     std::auto_ptr < command > type_registry::command_for_mime_type(mime_type const& t) const {
       std::auto_ptr < command > p;
+
+//      std::string c(global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal)).fn_str());
+
+      // substitute values for %s, %t and %{}
+//      if (c) {
+//        static const boost::regex("\\%s");
+//      }
 
       return (p);
     }

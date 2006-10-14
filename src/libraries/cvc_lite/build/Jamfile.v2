@@ -1,10 +1,5 @@
-project cvclite
-       :
+project libraries/cvc_lite
        : build-dir $(BUILD_TOP)
-       : requirements
-          <include>..
-       : usage-requirements
-          <include>..
        ;
 
 lib gmp
@@ -12,7 +7,7 @@ lib gmp
     : <name>gmp
     ;
 
-lib cvclite
+lib cvc_lite
     :
     : <name>cvclite <search>../
       <link>static

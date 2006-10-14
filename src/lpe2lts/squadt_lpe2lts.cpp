@@ -228,11 +228,12 @@ void squadt_lpe2lts::user_interactive_configuration(sip::configuration &configur
   
   c.add_option(option_init_tsize).append_argument(sip::datatype::string::standard, tf_init_tsize->get_text());
   
-  m_communicator.send_clear_display();
+  send_clear_display();
 }
 
 bool squadt_lpe2lts::check_configuration(sip::configuration const &configuration) const
 {
+std::cerr << "1st :" <<configuration.object_exists(lpd_file_for_input_no_lts) << "||" << configuration.object_exists(lpd_file_for_input_lts) << "&&" << configuration.object_exists(lts_file_for_output) << std::endl;
   return (
       configuration.object_exists(lpd_file_for_input_no_lts) ||
       (configuration.object_exists(lpd_file_for_input_lts) &&
@@ -254,53 +255,53 @@ bool squadt_lpe2lts::perform_task(sip::configuration &configuration)
     lgopts.specification = configuration.get_object(lpd_file_for_input_no_lts)->get_location();
   }
 
-  lgopts.outinfo = boost::any_cast <bool> (*(configuration.get_option(option_out_info)->get_value_iterator()));
+  lgopts.outinfo = boost::any_cast <bool> (configuration.get_option_value(option_out_info));
 
-  lgopts.usedummies = boost::any_cast <bool> (*(configuration.get_option(option_usedummies)->get_value_iterator()));
-  lgopts.stateformat = (boost::any_cast <bool> (*(configuration.get_option(option_state_format_tree)->get_value_iterator())))?GS_STATE_TREE:GS_STATE_VECTOR;
-  lgopts.removeunused = boost::any_cast <bool> (*(configuration.get_option(option_removeunused)->get_value_iterator()));
+  lgopts.usedummies = boost::any_cast <bool> (configuration.get_option_value(option_usedummies));
+  lgopts.stateformat = (boost::any_cast <bool> (configuration.get_option_value(option_state_format_tree)))?GS_STATE_TREE:GS_STATE_VECTOR;
+  lgopts.removeunused = boost::any_cast <bool> (configuration.get_option_value(option_removeunused));
   
-  lgopts.max_traces = strtoul((boost::any_cast <string> (*(configuration.get_option(option_max_traces)->get_value_iterator()))).c_str(),NULL,0);
+  lgopts.max_traces = strtoul((boost::any_cast <string> (configuration.get_option_value(option_max_traces))).c_str(),NULL,0);
 
-  lgopts.strat = (RewriteStrategy) boost::any_cast <long int> (*(configuration.get_option(option_rewr_strat)->get_value_iterator()));
+  lgopts.strat = (RewriteStrategy) boost::any_cast <long int> (configuration.get_option_value(option_rewr_strat));
   
-  lgopts.expl_strat = (exploration_strategy) boost::any_cast <long int> (*(configuration.get_option(option_expl_strat)->get_value_iterator()));
+  lgopts.expl_strat = (exploration_strategy) boost::any_cast <long int> (configuration.get_option_value(option_expl_strat));
   
-  lgopts.detect_deadlock = boost::any_cast <bool> (*(configuration.get_option(option_detect_deadlock)->get_value_iterator()));
-  string actions_str = boost::any_cast <string> (*(configuration.get_option(option_detect_actions)->get_value_iterator()));
+  lgopts.detect_deadlock = boost::any_cast <bool> (configuration.get_option_value(option_detect_deadlock));
+  string actions_str = boost::any_cast <string> (configuration.get_option_value(option_detect_actions));
   if ( actions_str != "" )
   {
     lgopts.detect_action = true;
     lgopts.trace_actions = parse_action_list(actions_str.c_str(),&lgopts.num_trace_actions);
   }
-  lgopts.trace = boost::any_cast <bool> (*(configuration.get_option(option_trace)->get_value_iterator()));
-  lgopts.max_traces = strtoul((boost::any_cast <string> (*(configuration.get_option(option_max_traces)->get_value_iterator()))).c_str(),NULL,0);
+  lgopts.trace = boost::any_cast <bool> (configuration.get_option_value(option_trace));
+  lgopts.max_traces = strtoul((boost::any_cast <string> (configuration.get_option_value(option_max_traces))).c_str(),NULL,0);
   
-  if ( boost::any_cast <bool> (*(configuration.get_option(option_confluence_reduction)->get_value_iterator())) )
+  if ( boost::any_cast <bool> (configuration.get_option_value(option_confluence_reduction)) )
   {
-    lgopts.priority_action = strdup((boost::any_cast <string> (*(configuration.get_option(option_confluent_tau)->get_value_iterator()))).c_str());
+    lgopts.priority_action = strdup((boost::any_cast <string> (configuration.get_option_value(option_confluent_tau))).c_str());
   }
   
-  string max_states_str(boost::any_cast <string> (*(configuration.get_option(option_max_states)->get_value_iterator())));
+  string max_states_str(boost::any_cast <string> (configuration.get_option_value(option_max_states)));
   if ( max_states_str != "" )
   {
     lgopts.max_states = boost::lexical_cast < unsigned long long > (max_states_str);
   } else {
     lgopts.max_states = DEFAULT_MAX_STATES;
   }
-  
-  lgopts.bithashing = boost::any_cast <bool> (*(configuration.get_option(option_bithashing)->get_value_iterator()));
+
+  lgopts.bithashing = boost::any_cast <bool> (configuration.get_option_value(option_bithashing));
   lgopts.bithashsize = boost::lexical_cast < unsigned long long > (
-      (boost::any_cast <string> (*(configuration.get_option(option_bithashsize)->get_value_iterator()))));
+      (boost::any_cast <string> (configuration.get_option_value(option_bithashsize))));
   
-  lgopts.initial_table_size = strtoul((boost::any_cast <string> (*(configuration.get_option(option_init_tsize)->get_value_iterator()))).c_str(),NULL,0);
+  lgopts.initial_table_size = strtoul((boost::any_cast <string> (configuration.get_option_value(option_init_tsize))).c_str(),NULL,0);
 
   bool ok = false;
   if ( initialise_lts_generation(&lgopts) )
   {
     ok = generate_lts();
 
-    finalise_lts_generation();
+    ok &= finalise_lts_generation();
   }
 
   return ok;

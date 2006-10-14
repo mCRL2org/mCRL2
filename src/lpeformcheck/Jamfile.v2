@@ -1,11 +1,10 @@
 project lpeformcheck
-  : source-location .
   : build-dir $(BUILD_TOP)/lpeformcheck
   ;
 
 exe lpeformcheck
        : lpeformcheck.cpp
-       : <source>/libraries/prover//prover
+       : <source>/libraries//prover
          <include>.
 #         <toolset>gcc:<define>CVC_LITE_LIB
        ;

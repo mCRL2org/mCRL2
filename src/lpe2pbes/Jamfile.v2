@@ -1,16 +1,13 @@
 project lpe2pbes
-       : source-location .
        : build-dir $(BUILD_TOP)/lpe2pbes
-       : requirements
-          <include>$(BOOST)
        ;
 
 exe lpe2pbes
        : lpe2pbes.cpp
          libpbes.cpp
-         /libraries/lpe//lpe
-         /libraries/parser//parser
-         /libraries/mcrl2_basic//mcrl2_basic
+         /libraries//lpe
+         /libraries//parser
+         /libraries//mcrl2_basic
        : <include>.
 #         <status>experimental
        ;

@@ -1,14 +1,12 @@
 project lpepp
        : source-location .
        : build-dir $(BUILD_TOP)/lpepp
-       : requirements
-          <include>$(BOOST)
        ;
 
 exe lpepp
        : lpepp.cpp
-       : <library>/libraries/mcrl2_basic//mcrl2_basic
-         <include>.
+         /libraries//mcrl2_basic
+       : <include>.
        ;
 
 install_with_libraries install : lpepp ;

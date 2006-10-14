@@ -1,13 +1,10 @@
 project lperewr
-       : source-location .
        : build-dir $(BUILD_TOP)/lperewr
-       : requirements
-          <include>$(BOOST)
        ;
 
 exe lperewr
        : lperewr.cpp
-         /libraries/mcrl2_basic//mcrl2_basic
+         /libraries//mcrl2_basic
        : <include>.
        ;
 

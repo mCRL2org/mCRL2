@@ -1,15 +1,12 @@
 project lpe2torx
-       : source-location .
        : build-dir $(BUILD_TOP)/lpe2torx
-       : requirements
-          <include>$(BOOST)
        ;
 
 exe lpe2torx
        : lpe2torx.cpp
-       : <source>/libraries/mcrl2_basic//mcrl2_basic
-         <source>/libraries/temporary//dataelm
-         <source>/libraries/temporary//nextstate
+       : <source>/libraries//mcrl2_basic
+         <source>/libraries/lpe//dataelm
+         <source>/libraries//nextstate
          <include>.
        ;
 

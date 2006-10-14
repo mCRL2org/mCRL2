@@ -1,8 +1,6 @@
 project toolset/ltsmin
-       : source-location .
        : build-dir $(BUILD_TOP)/ltsmin
        : requirements
-          <include>$(BOOST)
           <status>deprecated
        ;
 
@@ -10,8 +8,8 @@ exe ltsmin
        : ltsmin.cpp
          ltsmindata.cpp
          ltsminkernel.cpp
-         /libraries/mcrl2_basic//mcrl2_basic
-         /libraries/svc//svc
+         /libraries//mcrl2_basic
+         /libraries//svc
        : <include>.
        ;
 

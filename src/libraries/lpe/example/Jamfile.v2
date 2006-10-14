@@ -1,8 +1,8 @@
 project libraries/lpe/example
    : requirements
        <include>$(BOOST)
-       <source>/libraries/mcrl2_basic//mcrl2_basic
-       <source>/libraries/lpe//lpe
+       <source>/libraries//mcrl2_basic
+       <source>/libraries//lpe
        <source>/boost//program_options
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
    ;

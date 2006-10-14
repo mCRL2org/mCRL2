@@ -1,15 +1,12 @@
 project toolset/ltsgraph
-       : source-location .
        : build-dir $(BUILD_TOP)/ltsgraph
-       : requirements
-          <include>$(BOOST)
        ;
 
 exe ltsgraph
        : [ glob *.cpp ]
-       : <source>/libraries/wx_extension//wx_extension
-         <source>/libraries/mcrl2_basic//mcrl2_basic
-         <source>/libraries/lts//lts
+       : <source>/libraries//wx_extension
+         <source>/libraries//mcrl2_basic
+         <source>/libraries//lts
 	 <squadt_support>enable
          <include>.
          <wx>basic

@@ -1,7 +1,57 @@
+import modules ;
+import stage ;
+import set ;
+import package ;
+
+constant BOOST_VERSION : 1.33.1 ;
+
 project boost
+       : build-dir $(TOP)/bin 
        : requirements
-         <include>$(TOP)/boost
+          <include>.
+          <define>BOOST_ALL_NO_LIB=1
+          <tag>@$(__name__).tag
+       : usage-requirements
+          <include>. 
        ;
+
+# This rule is called by Boost.Build to determine the name of  
+# target. We use it to encode build variant, compiler name and 
+# boost version in the target name  
+rule tag ( name : type ? : property-set ) 
+{ 
+    if $(type) in STATIC_LIB SHARED_LIB IMPORT_LIB 
+    {         
+        if $(layout) = versioned 
+        { 
+            name = [ stage.add-variant $(name)  
+              : $(type) : $(property-set) ] ; 
+             
+            local version-tag = [ MATCH "^([^.]+)[.]([^.]+)" : $(BOOST_VERSION[1]) ] ; 
+            version-tag = $(version-tag:J="_") ; 
+             
+            # On NT, library with version suffix won't be recognized 
+            # by linkers. On CYGWIN, we get strage duplicate symbol 
+            # errors when library is generated with version suffix. 
+            # On OSX, version suffix is not needed -- the linker expets 
+            # libFoo.1.2.3.dylib format. 
+            # AIX linkers don't accept version suffixes either. 
+            if [ $(property-set).get <os> ] in NT CYGWIN MACOSX AIX 
+            { 
+                return $(name:B)$(name:S) ; 
+            } 
+            else 
+            { 
+                return $(name:B)$(name:S).$(BOOST_VERSION)  ; 
+            } 
+        } 
+        else 
+        { 
+            return [ stage.add-variant $(name)  
+              : $(type) : $(property-set) ] ; 
+        } 
+    } 
+}
 
 libraries = [ MATCH .*libs/(.*)/build/.* : [ glob libs/*/build/Jamfile.v2 ] ] ;
 

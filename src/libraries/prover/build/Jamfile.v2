@@ -23,13 +23,13 @@ lib prover
          invariant_checker.cpp
          invariant_eliminator.cpp
          induction.cpp
-       : <dependency>/libraries/auxiliary//auxiliary
-         <dependency>/libraries/pstream//pstream
-#         <dependency>/libraries/cvc_lite//cvclite
+       : <dependency>/libraries//auxiliary
+         <dependency>/libraries//pstream
+#         <dependency>/libraries//cvclite
 #         <toolset>gcc:<define>HAVE___GNU_CXX__EXT_HASH_MAP
 #         <toolset>gcc:<define>HAVE___GNU_CXX__EXT_HASH_SET
 #         <toolset>gcc:<define>CVC_LITE_LIB
        :
-       : <library>/libraries/auxiliary//auxiliary
-#         <library>/libraries/cvc_lite//cvclite
+       : <library>/libraries//auxiliary
+#         <library>/libraries//cvclite
        ;

@@ -1,12 +1,11 @@
 project lpeparelm
-       : source-location .
        : build-dir $(BUILD_TOP)/lpeparelm
        ;
 
 exe lpeparelm
        : lpeparelm.cpp
-       : <source>/libraries/mcrl2_basic//mcrl2_basic
-         <source>/libraries/lpe//lpe
+       : <source>/libraries//mcrl2_basic
+         <source>/libraries//lpe
          <source>/boost//program_options
          <squadt_support>enable
          <include>.

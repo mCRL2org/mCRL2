@@ -34,7 +34,6 @@
 
 //Squadt connectivity
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <sip/tool.h>
 #include <squadt_utility.h>
 #endif
 

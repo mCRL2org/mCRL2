@@ -174,24 +174,23 @@ namespace sip {
 
   /**
    * \param[in] t pointer to the data type definition
-   * \param[in] d data that is valid w.r.t. the data type
+   * \param[in] d data that must be an instance of the chosen data type
    **/
   template < typename T >
   inline void option::append_argument(datatype::basic_datatype::sptr t, T const& d) {
     assert(t.get() != 0);
 
-std::cerr << "converting " << d << std::endl;
     append_argument(t, t->convert(d));
   }
 
   /**
    * \param[in] t pointer to the data type definition
-   * \param[in] d data that is valid w.r.t. the data type
+   * \param[in] d data that must be an instance of the chosen data type
    **/
   template < >
   inline void option::append_argument(datatype::basic_datatype::sptr t, std::string const& d) {
     assert(t.get() != 0);
-std::cerr << d << std::endl;
+
     assert(t->validate(d));
 
     arguments.push_back(std::make_pair(t, d));
@@ -280,9 +279,9 @@ std::cerr << d << std::endl;
       if (!r.is_empty_element()) {
         r.next_element();
      
-        while (!r.is_end_element()) {
+        while (!r.is_end_element("option")) {
           using namespace sip::datatype;
-       
+
           /* The current element must be a datatype specification */
           o->arguments.push_back(basic_datatype::read(r));
         }

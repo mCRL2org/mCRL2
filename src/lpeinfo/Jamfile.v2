@@ -1,12 +1,11 @@
 project toolset/lpeinfo
-       : source-location .
        : build-dir $(BUILD_TOP)/lpeinfo
        ;
 
 exe lpeinfo
        : lpeinfo.cpp
-         /libraries/mcrl2_basic//mcrl2_basic
-         /libraries/lpe//lpe
+         /libraries//mcrl2_basic
+         /libraries//lpe
          /boost//program_options
        : <squadt_support>enable
          <include>.

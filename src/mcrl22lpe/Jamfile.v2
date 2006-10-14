@@ -1,33 +1,36 @@
 project toolset/mcrl22lpe
-       : requirements
-          <include>$(BOOST)
        : build-dir $(BUILD_TOP)/mcrl22lpe
+       ;
+
+obj lin_alt.o
+       : lin_alt.cpp
+         /libraries//mcrl2_basic
        ;
 
 exe mcrl22lpe
        : mcrl22lpe.cpp
+         lin_alt.o
          lin_std.cpp
-         lin_alt.cpp
-         /libraries/parser//parser
+         /libraries//parser
          /libraries/parser//alpha
-         /libraries/mcrl2_basic//mcrl2_basic
+         /libraries//mcrl2_basic
        : <squadt_support>enable
        ;
 
 exe lin
        : lin.cpp
-         lin_alt.cpp
-         /libraries/parser//parser
+         lin_alt.o
+         /libraries//parser
          /libraries/parser//alpha
-         /libraries/mcrl2_basic//mcrl2_basic
+         /libraries//mcrl2_basic
        : <status>experimental
        ;
 
 exe alpha
        : alpha.cpp
-         /libraries/parser//parser
+         /libraries//parser
          /libraries/parser//alpha
-         /libraries/mcrl2_basic//mcrl2_basic
+         /libraries//mcrl2_basic
        : <status>experimental
        ;
 

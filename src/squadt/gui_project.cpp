@@ -5,6 +5,7 @@
 
 #include <boost/bind.hpp>
 #include <boost/format.hpp>
+#include <boost/foreach.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/ref.hpp>

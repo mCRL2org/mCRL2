@@ -1,0 +1,16 @@
+project libraries ;
+
+libraries = [ MATCH $(TOP)/src/libraries/(.*)/build/.* : [ glob */build/Jamfile.v2 ] ] ;
+
+# Register library projects
+for library in $(libraries) {
+  use-project /libraries/$(library) : $(TOP)/src/libraries/$(library)/build ;
+
+  alias $(library)
+        : $(library)/build//$(library)
+        : <include>$(library)/include
+        :
+        : <include>$(library)/include
+        ;
+}
+

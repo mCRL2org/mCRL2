@@ -1,11 +1,10 @@
 project lpeinvelm
-  : source-location .
   : build-dir $(BUILD_TOP)/lpeinvelm
   ;
 
 exe lpeinvelm
        : lpeinvelm.cpp
-         /libraries/prover//prover
+         /libraries//prover
        : <include>.
 #         <toolset>gcc:<define>CVC_LITE_LIB
        ;

@@ -6,11 +6,8 @@
 #include <ostream>
 #include <sstream>
 
-#include <boost/bind.hpp>
-#include <boost/foreach.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/filesystem/convenience.hpp>
 
 #include <utility/indirect_iterator.h>
 
@@ -90,109 +87,89 @@ namespace sip {
     public:
 
       /** \brief Returns whether the configuration is empty or not */
-      inline bool is_empty() const;
+      bool is_empty() const;
 
       /** \brief Add an option to the configuration */
-      inline option& add_option(const option::identifier, bool = true);
+      option& add_option(const option::identifier, bool = true);
 
       /** \brief Establishes whether an option exists (by identifier) */
-      inline bool option_exists(const option::identifier) const;
+      bool option_exists(const option::identifier) const;
 
       /** \brief Remove an option from the configuration */
-      inline void remove_option(const option::identifier);
+      void remove_option(const option::identifier);
 
       /** \brief Get the state of the configuration */
-      inline bool is_fresh();
+      bool is_fresh();
 
       /** \brief Set the prefix for output files */
-      inline void set_output_prefix(std::string const&);
+      void set_output_prefix(std::string const&);
 
       /** \brief Get the prefix for output files */
-      inline std::string get_output_prefix();
+      std::string get_output_prefix();
 
       /** \brief Prepends the output prefix to the argument to form a valid file name */
-      inline std::string get_input_name(std::string const&);
+      std::string get_input_name(std::string const&);
 
       /** \brief Prepends the output prefix to the argument to form a valid file name */
-      inline std::string get_output_name(std::string const&);
+      std::string get_output_name(std::string const&);
 
       /** \brief The category in which the tool operates */
-      inline tool_category get_category() const;
+      tool_category get_category() const;
 
       /** \brief Get the value of an option argument */
-      inline boost::any get_option_value(const option::identifier id) const;
+      boost::any get_option_value(const option::identifier id) const;
 
       /** \brief Get an option by its id */
-      inline option::sptr get_option(const option::identifier) const;
+      option::sptr get_option(const option::identifier) const;
 
       /** \brief Add an input/output object to the configuration */
-      inline void add_object(const object::identifier, object::storage_format, object::type, object::uri = "");
+      void add_object(const object::identifier, object::storage_format, object::type, object::uri = "");
 
       /** \brief Add an input/output object to the configuration */
-      inline void add_object(object::sptr);
+      void add_object(object::sptr);
 
       /** \brief Establishes whether an object exists (by identifier) */
-      inline bool object_exists(const object::identifier) const;
+      bool object_exists(const object::identifier) const;
 
       /** \brief Remove an input/output object from the configuration */
-      inline void remove_object(const object::identifier);
+      void remove_object(const object::identifier);
 
       /** \brief Get an input/output object from the configuration */
-      inline object::sptr const get_object(const object::identifier) const;
+      object::sptr const get_object(const object::identifier) const;
 
       /** \brief Add an input object to the configuration */
-      inline void add_input(const object::identifier, object::storage_format, object::uri = "");
+      void add_input(const object::identifier, object::storage_format, object::uri = "");
 
       /** \brief Remove an input object from the configuration */
-      inline void remove_input(const object::identifier);
+      void remove_input(const object::identifier);
 
       /** \brief Get an input object by its id */
-      inline object::sptr get_input(const object::identifier);
+      object::sptr get_input(const object::identifier);
 
       /** \brief Add an output object to the configuration */
-      inline void add_output(const object::identifier, object::storage_format, object::uri = "");
+      void add_output(const object::identifier, object::storage_format, object::uri = "");
 
       /** \brief Remove an output object from the configuration */
-      inline void remove_output(const object::identifier);
+      void remove_output(const object::identifier);
 
       /** \brief Get an output object by its id */
-      inline object::sptr get_output(const object::identifier);
+      object::sptr get_output(const object::identifier);
 
       /** \brief Get an iterator for the objects */
-      inline object_iterator get_object_iterator();
+      object_iterator get_object_iterator();
 
       /** \brief Output XML representation to string */
-      inline std::string write() const;
+      std::string write() const;
 
       /** \brief Output XML representation to stream */
-      inline void write(std::ostream&) const;
+      void write(std::ostream&) const;
 
       /** \brief Read a configuration class from XML */
-      inline static configuration::sptr read(const std::string&);
+      static configuration::sptr read(const std::string&);
 
       /** \brief Read a configuration class from XML */
-      inline static configuration::sptr read(xml2pp::text_reader&) throw ();
+      static configuration::sptr read(xml2pp::text_reader&);
   };
-
-#ifdef SIP_IMPORT_STATIC_DEFINITIONS
-  /** The optional constraint, option is either not present or only present once */
-  const configuration::option_constraint configuration::constrain_optional = {0,1};
-
-  /** The required constraint, option (with possible arguments) must be present */
-  const configuration::option_constraint configuration::constrain_required = {1,1};
-#endif
-
-  /**
-   * \brief Operator for writing to stream
-   *
-   * @param s stream to write to
-   * @param c the configuration object to write out
-   **/
-  inline std::ostream& operator << (std::ostream& s, const configuration& c) {
-    c.write(s);
-
-    return (s);
-  }
 
   inline configuration::configuration() : fresh(true) {
   }
@@ -205,65 +182,10 @@ namespace sip {
   }
 
   /**
-   * @param id an identifier for the option
-   * @param r whether or not to replace an existing option with the same id
-   **/
-  inline option& configuration::add_option(const option::identifier id, bool r) {
-    using namespace std;
-    using namespace boost;
-
-    assert(r || !option_exists(id));
-
-    option::sptr o;
-    
-    if (option_exists(id)) {
-      o = get_option(id);
-    }
-    else {
-      o.reset(new option(id));
-
-      options[o] = constrain_optional;
-    }
-
-    return (*o);
-  }
-
-  /**
    * \pre the option with the matching id must exist in the configuration and have exactly one argument
    **/
   inline boost::any configuration::get_option_value(const option::identifier id) const {
     return(get_option(id)->get_value());
-  }
-
-  /**
-   * @param id an identifier for the option
-   **/
-  inline bool configuration::option_exists(const option::identifier id) const {
-    using namespace std;
-    using namespace boost;
-
-    return (find_if(options.begin(), options.end(), bind(equal_to < option::identifier >(),
-                    bind(&option::get_id,
-                            bind(&option::sptr::get,
-                                    bind(&option_list::value_type::first, _1))),id)) != options.end());
-  }
-
-  /**
-   * @param id an identifier for the option
-   **/
-  inline void configuration::remove_option(const option::identifier id) {
-    using namespace std;
-    using namespace boost;
-
-    option_list::iterator i = find_if(options.begin(), options.end(),
-                    bind(equal_to < option::identifier >(),
-                            bind(&option::get_id,
-                                    bind(&option::sptr::get,
-                                            bind(&option_list::value_type::first, _1))), id));
-
-    assert(i != options.end());
-
-    options.erase(i);
   }
 
   inline configuration::tool_category configuration::get_category() const {
@@ -288,41 +210,8 @@ namespace sip {
   /**
    * @param[in] n suffix of the name
    **/
-  inline std::string configuration::get_input_name(std::string const& n) {
-    for (object_list::iterator i = objects.begin(); i != objects.end(); ++i) {
-      if ((*i)->get_type() == object::input) {
-        using namespace boost::filesystem;
-
-        return(boost::filesystem::basename(path((*i)->get_location())) + n);
-      }
-    }
-
-    return (output_prefix + n);
-  }
-
-  /**
-   * @param[in] n suffix of the name
-   **/
   inline std::string configuration::get_output_name(std::string const& n) {
     return (output_prefix + n);
-  }
-
-  /**
-   * @param id an identifier for the option
-   **/
-  inline option::sptr configuration::get_option(const option::identifier id) const {
-    using namespace std;
-    using namespace boost;
-
-    option_list::const_iterator i = find_if(options.begin(), options.end(),
-                    bind(equal_to < option::identifier >(),
-                            bind(&option::get_id,
-                                    bind(&option::sptr::get,
-                                            bind(&option_list::value_type::first, _1))), id));
-
-    assert(i != options.end());
-
-    return ((*i).first);
   }
 
   inline configuration::object_iterator configuration::get_object_iterator() {
@@ -335,65 +224,6 @@ namespace sip {
     write(output);
 
     return (output.str());
-  }
-
-  /**
-   * @param out the stream to which the output is written
-   **/
-  inline void configuration::write(std::ostream& out) const {
-    out << "<configuration";
-
-    if (fresh) {
-      out << " fresh=\"true\"";
-    }
-
-    if (!output_prefix.empty()) {
-      out << " output-prefix=\"" << output_prefix << "\"";
-    }
-
-    /* Add input combination */
-    out << " category=\"" << category << "\">";
-
-    for (option_list::const_iterator i = options.begin(); i != options.end(); ++i) {
-        (*i).first->write(out);
-    }
-
-    for (object_list::const_iterator i = objects.begin(); i != objects.end(); ++i) {
-        (*i)->write(out);
-    }
-
-    out << "</configuration>";
-  }
-
-  /**
-   * @param id a unique identifier for the object
-   * @param f the storage format the object uses
-   * @param l the location for the object (optional)
-   * @param t the object type
-   **/
-  inline void configuration::add_object(const object::identifier id, object::storage_format f, object::type t, object::uri l) {
-    using namespace std;
-    using namespace boost;
-
-    assert(find_if(objects.begin(), objects.end(), bind(equal_to < object::identifier >(),
-                    bind(&object::get_id,
-                            bind(&object::sptr::get,_1)),id)) == objects.end());
-
-    objects.push_back(object::sptr(new object(id, f, l, t)));
-  }
-
-  /**
-   * @param o a pointer to an existing object
-   **/
-  inline void configuration::add_object(object::sptr o) {
-    using namespace std;
-    using namespace boost;
-
-    assert(find_if(objects.begin(), objects.end(), bind(equal_to < object::identifier >(),
-                    bind(&object::get_id,
-                            bind(&object::sptr::get,_1)),o->get_id())) == objects.end());
-
-    objects.push_back(o);
   }
 
   /**
@@ -415,23 +245,6 @@ namespace sip {
   }
 
   /**
-   * @param id an identifier for the object
-   **/
-  inline void configuration::remove_object(const object::identifier id) {
-    using namespace std;
-    using namespace boost;
-
-    object_list::iterator i = find_if(objects.begin(), objects.end(),
-                    bind(equal_to < object::identifier >(),
-                            bind(&object::get_id,
-                                    bind(&object::sptr::get,_1)), id));
-
-    assert(i != objects.end());
-
-    objects.erase(i);
-  }
-
-  /**
    * @param id a unique identifier for the object
    **/
   inline void configuration::remove_input(const object::identifier id) {
@@ -443,42 +256,10 @@ namespace sip {
   /**
    * @param id a unique identifier for the object
    **/
-  inline bool configuration::object_exists(const object::identifier id) const {
-    using namespace std;
-    using namespace boost;
-
-    return (find_if(objects.begin(), objects.end(), bind(equal_to < object::identifier >(),
-                    bind(&object::get_id,
-                            bind(&object::sptr::get,_1)),id)) != objects.end());
-  }
-
-  /**
-   * @param id a unique identifier for the object
-   **/
   inline void configuration::remove_output(const object::identifier id) {
     assert(get_object(id)->get_type() == object::output);
 
     remove_object(id);
-  }
-
-  /**
-   * @param id an identifier for the object
-   **/
-  inline object::sptr const configuration::get_object(const object::identifier id) const {
-    using namespace std;
-    using namespace boost;
-
-    object::sptr o;
-
-    BOOST_FOREACH(object::sptr const i, objects) {
-      if (i->get_id() == id) {
-        o = i;
-
-        break;
-      }
-    }
-
-    return (o);
   }
 
   /**
@@ -508,37 +289,6 @@ namespace sip {
     return (read(reader));
   }
 
-  /**
-   * @param reader is a reference to a libXML 2 text reader instance
-   * /pre the reader points to a \<configuration\> instance
-   * /post the readers position is just past the configuration block
-   **/
-  inline configuration::sptr configuration::read(xml2pp::text_reader& reader) throw () {
-    configuration::sptr c(new configuration);
-
-    assert(reader.is_element("configuration"));
-
-    c->fresh         = reader.get_attribute("fresh");
-    c->output_prefix = reader.get_attribute_as_string("output-prefix");
-
-    reader.get_attribute(&c->category, "category");
-
-    reader.next_element();
-
-    while (!(reader.is_end_element() && reader.is_element("configuration"))) {
-      /* Current element must be <option> */
-      if (reader.is_element("option")) {
-        c->options[option::read(reader)] = constrain_optional;
-      }
-      else if (reader.is_element("object")) {
-        c->objects.push_back(object::read(reader));
-      }
-    }
-
-    reader.skip_end_element("configuration");
-
-    return (c);
-  }
 }
 
 #endif

@@ -1,14 +1,11 @@
 project tbf2lpe
-       : source-location .
        : build-dir $(BUILD_TOP)/tbf2lpe
-       : requirements
-          <include>$(BOOST)
        ;
 
 exe tbf2lpe
        : tbf2lpe.cpp
          lpetrans.cpp
-         /libraries/mcrl2_basic//mcrl2_basic
+         /libraries//mcrl2_basic
        : <include>.
        ;
 

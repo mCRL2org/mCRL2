@@ -1,8 +1,5 @@
 project lpe2lts
-       : source-location .
        : build-dir $(BUILD_TOP)/lpe2lts
-       : requirements
-          <include>$(BOOST)
        ;
 
 exe lpe2lts
@@ -10,11 +7,11 @@ exe lpe2lts
          squadt_lpe2lts.cpp
          exploration.cpp
 	 lts.cpp
-         /libraries/temporary//dataelm
-         /libraries/temporary//nextstate
-         /libraries/mcrl2_basic//mcrl2_basic
-         /libraries/temporary//trace
-         /libraries/lts//lts
+         /libraries/lpe//dataelm
+         /libraries//nextstate
+         /libraries//mcrl2_basic
+         /libraries//trace
+         /libraries//lts
        : <squadt_support>enable
        ;
 

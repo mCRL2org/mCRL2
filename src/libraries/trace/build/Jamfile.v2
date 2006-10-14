@@ -1,0 +1,14 @@
+project libraries/trace
+       : source-location ../source
+       : build-dir $(BUILD_TOP)
+       : requirements <include>../include
+       ;
+
+lib trace
+       : libtrace.cpp
+         /libraries//mcrl2_basic
+       :
+       :
+       :
+       ;
+

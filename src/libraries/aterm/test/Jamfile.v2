@@ -3,7 +3,7 @@ import testing ;
 project libraries/aterm/test
    : requirements
        <include>$(BOOST)
-       <source>/libraries/lpe//lpe
+       <source>/libraries//lpe
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
    ;
 

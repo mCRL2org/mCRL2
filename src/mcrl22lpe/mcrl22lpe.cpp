@@ -105,7 +105,7 @@ squadt_interactor::squadt_interactor() {
 
   linearisation_phase_enumeration = sip::datatype::enumeration::create("all");
 
-  *linearisation_phase_enumeration % "parsing" % "type-checking" % "alphabet reduction" % "data implementation";
+  *linearisation_phase_enumeration % "parsing" % "type-checking" % "alphabet_reduction" % "data_implementation";
 
   report_mode_enumeration = sip::datatype::enumeration::create("normal");
 

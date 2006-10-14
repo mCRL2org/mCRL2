@@ -1,14 +1,11 @@
 project ltsinfo
-       : source-location .
-       : requirements
-          <include>$(BOOST)
        : build-dir $(BUILD_TOP)/ltsinfo
        ;
 
 exe ltsinfo
        : ltsinfo.cpp
-         /libraries/mcrl2_basic//mcrl2_basic
-         /libraries/lts//lts
+         /libraries//mcrl2_basic
+         /libraries//lts
        : <squadt_support>enable
          <include>.
        ;

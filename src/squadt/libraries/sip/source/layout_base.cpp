@@ -5,10 +5,6 @@
 #include <sstream>
 #include <memory>
 
-#if defined(TOOL_SIDE)
-#include <sip/tool.h>
-#endif
-
 #include <sip/detail/layout_base.h>
 #include <sip/detail/layout_elements.h>
 #include <sip/detail/layout_manager.h>
@@ -75,16 +71,6 @@ namespace sip {
      **/
     void element::update(layout::mediator* m, layout::mediator::wrapper* t) const {
       std::cerr << "No specific update method implemented!\n";
-    }
-
-    /**
-     * @param[in] t the tool communicator object to use
-     * @param[in] e the layout element of which to send the state
-     **/
-    void element::update(tool::communicator* t, layout::element const* e) {
-#if defined(TOOL_SIDE)
-      t->send_display_data(e);
-#endif
     }
 
     element::aptr element::static_read_structure(std::string& input) {

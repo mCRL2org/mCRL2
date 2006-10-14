@@ -1,11 +1,8 @@
-import feature : feature ;
-
 project squadt/libraries/sip
     : source-location
        ../source
     : build-dir $(BUILD_TOP)
     : requirements
-       <threading>multi
        <include>$(BOOST)
        <include>../include
     : usage-requirements
@@ -13,36 +10,46 @@ project squadt/libraries/sip
        <include>../include
     ;
 
+transport_sources = [ glob ../source/transport/*.cpp ] ;
+
+alias transport
+    : $(transport_sources)
+      /boost//thread
+    : <toolset>darwin,<link>shared:<undefined>dynamic_lookup
+      <os>CYGWIN:<define>__USE_W32_SOCKETS
+      <os>CYGWIN:<define>_WIN32_WINNT=0x0500
+      <threading>multi
+    :
+    : <os>CYGWIN:<library>/site-config//winsock
+    ;
+
 alias messenger
     : # no sources
+      layout_base.cpp
       layout.cpp
       common.cpp
       report.cpp
+      basic_datatype.cpp
+      configuration.cpp
       layout_elements.cpp
       basic_messenger.cpp
+      transport
     : # no build requirements
     : # no default build
-    : <library>/libraries/transport//transport
+    :
       <library>/boost//thread
       <library>/boost//filesystem
-      <library>/libraries/xml2pp//xml2pp
+      <library>/boost//regex
+      <library>/libraries//xml2pp
     ;
-
-feature sip_side : controller tool : composite optional ;
-
-feature.compose <sip_side>controller : <define>CONTROLLER_SIDE ;
-feature.compose <sip_side>tool       : <define>TOOL_SIDE ;
 
 lib sip_controller
     : controller.cpp
-      layout_base.cpp
-    : <sip_side>controller
-      <library>messenger
+      messenger
     ;
 
 lib sip_tool
     : tool.cpp
-      layout_base.cpp
-    : <sip_side>tool
-      <library>messenger
+      messenger
+    : <threading>multi
     ;

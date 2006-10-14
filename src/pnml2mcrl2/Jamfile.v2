@@ -1,14 +1,11 @@
 project pnml2mcrl2
-       : source-location .
        : build-dir $(BUILD_TOP)/pnml2mcrl2
-       : requirements
-          <include>$(BOOST)
        ;
 
 exe pnml2mcrl2
        : pnml2mcrl2.cpp
-       : <source>/libraries/mcrl2_basic//mcrl2_basic
-         <source>/libraries/parser//parser
+       : <source>/libraries//mcrl2_basic
+         <source>/libraries//parser
          <include>.
          <xml2>library
        ;

@@ -3,7 +3,7 @@ import testing ;
 project libraries/lts/test
    : requirements
        <include>$(BOOST)
-       <source>/libraries/lts//lts
+       <source>/libraries//lts
    ;
 
 test-suite lts

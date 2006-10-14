@@ -18,8 +18,8 @@ lib svc
          ptable.c
          svc1.c
          svc2.c
-       : <use>/libraries/aterm//aterm
-         <toolset>darwin:<cflags>"-fno-common"
+         /libraries//aterm
+       : <toolset>darwin:<cflags>"-fno-common"
        :
-       : <library>/libraries/aterm//aterm
+       :
        ;

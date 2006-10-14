@@ -30,6 +30,7 @@ rule install_with_libraries ( name : tools * : requirements * ) {
     stage $(name)-libraries
           : $(tools)
           : <install-dependencies>on <install-type>SHARED_LIB
+            <dll-path>$(LIB_DIR)
             <location>$(LIB_DIR)
             <os>NT:<location>$(BIN_DIR)
           ;

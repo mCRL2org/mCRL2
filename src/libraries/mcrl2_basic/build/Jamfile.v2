@@ -2,12 +2,9 @@ project mcrl2_basic
        : source-location ../source
        : build-dir $(BUILD_TOP)
        : requirements
-          <include>../include
           <include>../../../
           <toolset>msvc:<use>/libraries/auxiliary//nt_portability
           <toolset>msvc:<define>NO_DYNLOAD
-       : usage-requirements
-          <include>../include
        ;
 
 rule prepend ( prefix : elements * ) {
@@ -18,33 +15,30 @@ local STRUCT_SOURCES = [ prepend struct/ : libstruct ] ;
 
 lib struct
        : $(STRUCT_SOURCES).o
-       : <dependency>/libraries/aterm//aterm
-         <include>../include/struct
+         /libraries//aterm
+       : <include>../include/struct
        :
-       : <library>/libraries/aterm//aterm
-         <include>../include/struct
+       : <include>../include/struct
        ;
 
 local LOWLEVEL_SOURCES = [ prepend lowlevel/ : liblowlevel ] ; 
 
 lib lowlevel
        : $(LOWLEVEL_SOURCES).o
-       : <dependency>/libraries/aterm//aterm
-         <include>../include/lowlevel
+         /libraries//aterm
+       : <include>../include/lowlevel
        :
-       : <library>/libraries/aterm//aterm
-         <include>../include/lowlevel
+       : <include>../include/lowlevel
        ;
 
 local REWRITE_SOURCES = [ prepend rewrite/ : librewrite librewrite_c rewr_inner rewr_jitty rewr_innerc rewr_jittyc ] ;
 
 lib rewrite
        : $(REWRITE_SOURCES).o
-       : <dependency>/libraries/aterm//aterm
-         <include>../include/rewrite
+         /libraries//aterm
+       : <include>../include/rewrite
        :
-       : <library>/libraries/aterm//aterm 
-         <os>LINUX:<library>/site-config//m
+       : <os>LINUX:<library>/site-config//m
          <os>CYGWIN:<library>/site-config//m
          <include>../include/rewrite
          <os>LINUX:<library>/site-config//dl
@@ -75,16 +69,16 @@ for object in $(MCRL2_BASIC_SOURCES) {
         <include>../include/rewrite
         <include>../include/lowlevel
         <include>../include/struct
-        <dependency>/libraries/aterm//aterm
+        <dependency>/libraries//aterm
       ;
 }
 
 lib mcrl2_basic
        : $(MCRL2_BASIC_SOURCES).o
-       : <dependency>/libraries/aterm//aterm
+         /libraries//aterm
        :
-       : <library>/libraries/aterm//aterm
-         <os>LINUX:<library>/site-config//m
+       :
+       : <os>LINUX:<library>/site-config//m
          <os>CYGWIN:<library>/site-config//m
          <include>../include/print
          <include>../include/rewrite

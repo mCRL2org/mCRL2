@@ -3,7 +3,7 @@ import testing ;
 project libraries/svc/test
    : requirements
        <include>$(BOOST)
-       <source>/libraries/svc//svc
+       <source>/libraries//svc
    ;
 
 test-suite parser

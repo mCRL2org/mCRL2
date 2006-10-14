@@ -1,17 +1,14 @@
-project text_reader
+project libraries/xml2pp
     : source-location ../source
     : build-dir $(BUILD_TOP)
-    : requirements
-       <include>../..
-    : usage-requirements
-       <include>../..
+    : requirements <include>../include
     ;
 
 lib xml2pp 
     : text_reader.cpp
       xml2pp_exception.cpp
-    : <library>/boost//filesystem
-      <toolset>darwin,<link>shared:<undefined>dynamic_lookup
+      /boost//filesystem
+    : <toolset>darwin,<link>shared:<undefined>dynamic_lookup
       <xml2>library
     :
     : <link>static:<library>/site-config//xml2
