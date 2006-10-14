@@ -4,8 +4,8 @@ project lpeconfcheck
 
 exe lpeconfcheck
        : lpeconfcheck.cpp
-       : <source>/libraries//prover
-         <include>.
+         /libraries//prover
+       : <include>.
 #         <toolset>gcc:<define>CVC_LITE_LIB
        ;
 

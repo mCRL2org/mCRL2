@@ -78,7 +78,8 @@ lib mcrl2_basic
          /libraries//aterm
        :
        :
-       : <os>LINUX:<library>/site-config//m
+       : <library>/libraries//aterm
+         <os>LINUX:<library>/site-config//m
          <os>CYGWIN:<library>/site-config//m
          <include>../include/print
          <include>../include/rewrite

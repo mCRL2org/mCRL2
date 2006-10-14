@@ -26,5 +26,6 @@ lib lts
          /site-config//BCG
        :
        :
-       : <libraries>/libraries//parser
+       : <library>/libraries//parser
+         <library>/libraries//svc
        ;
