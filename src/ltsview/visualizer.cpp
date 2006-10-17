@@ -29,7 +29,9 @@ Visualizer::Visualizer( Mediator* owner ) {
   visStyle = CONES;
   refreshPrimitives = false;
   refreshStates = false;
+  refreshTransitions = false;
   displayStates = false;
+  displayTransitions = false;
   displayWireframe = false;
   statesDisplayList = 0;
   transDisplayList = 0;
@@ -98,24 +100,28 @@ void Visualizer::setMarkStyle( MarkStyle ms ) {
   markStyle = ms;
   refreshPrimitives = true;
   refreshStates = true;
+  refreshTransitions = true;
 }
 
 void Visualizer::setVisStyle( VisStyle vs ) {
   visStyle = vs;
   refreshPrimitives = true;
   refreshStates = true;
+  refreshTransitions = true;
 }
 
 void Visualizer::setRankStyle( RankStyle rs ) {
   rankStyle = rs;
   refreshPrimitives = true;
   refreshStates = true;
+  refreshTransitions = true;
 }
 
 void Visualizer::setLTS( LTS* l ) {
   lts = l;
   refreshPrimitives = true;
   refreshStates = true;
+  refreshTransitions = true;
 }
 
 // returns whether the bounding cylinder needs to be recalculated
@@ -126,6 +132,11 @@ bool Visualizer::setVisSettings( VisSettings vs ) {
   if ( oldSettings.stateColor != vs.stateColor ||
        fabs( oldSettings.nodeSize - vs.nodeSize ) > 0.01f ) {
     refreshStates = true;
+  }
+
+  if ( oldSettings.upEdgeColor != vs.upEdgeColor ||
+       oldSettings.downEdgeColor != vs.downEdgeColor ) {
+    refreshTransitions = true;
   }
   
   if ( fabs( oldSettings.alpha - vs.alpha ) > 0.01f ||
@@ -148,6 +159,7 @@ bool Visualizer::setVisSettings( VisSettings vs ) {
   if ( markStyle != NO_MARKS && oldSettings.markedColor != vs.markedColor ) {
     refreshStates = true;
     refreshPrimitives = true;
+    refreshTransitions = true;
   }
 
   if ( oldSettings.innerBranchTilt != vs.innerBranchTilt ) {
@@ -159,6 +171,7 @@ bool Visualizer::setVisSettings( VisSettings vs ) {
   if ( oldSettings.branchRotation != vs.branchRotation ) {
     refreshStates = true;
     refreshPrimitives = true;
+    refreshTransitions = true;
   }
 
   if ( oldSettings.outerBranchTilt != vs.outerBranchTilt ) {
@@ -166,6 +179,7 @@ bool Visualizer::setVisSettings( VisSettings vs ) {
     cos_obt = float( cos( deg_to_rad( vs.outerBranchTilt ) ) );
     refreshStates = true;
     refreshPrimitives = true;
+    refreshTransitions = true;
     return true;
   }
   return false;
@@ -173,6 +187,10 @@ bool Visualizer::setVisSettings( VisSettings vs ) {
 
 void Visualizer::toggleDisplayStates() {
   displayStates = !displayStates;
+}
+
+void Visualizer::toggleDisplayTransitions() {
+  displayTransitions = !displayTransitions;
 }
 
 void Visualizer::toggleDisplayWireframe() {
@@ -188,6 +206,7 @@ void Visualizer::computeClusterHeight() {
   
   refreshPrimitives = true;
   refreshStates = true;
+  refreshTransitions = true;
 }
 
 void Visualizer::drawLTS(Point3D viewpoint) {
@@ -214,12 +233,17 @@ void Visualizer::drawLTS(Point3D viewpoint) {
       }
     glEndList();
 
+    refreshStates = false;
+  }
+
+  if (displayTransitions && refreshTransitions) {
     glDeleteLists(transDisplayList, 1);
     transDisplayList = glGenLists(1);
     glNewList(transDisplayList, GL_COMPILE);
-    drawTransitions(lts->getInitialState(), 0);
+      drawTransitions(lts->getInitialState(), 0);
     glEndList();
-    refreshStates = false;
+
+    refreshTransitions = false;
   }
 
   if (refreshPrimitives) {
@@ -275,8 +299,11 @@ void Visualizer::drawLTS(Point3D viewpoint) {
 
   // first draw the opaque objects in the scene (if required)
   if (displayStates) {
-    glCallList(transDisplayList);
     glCallList(statesDisplayList);
+  }
+
+  if (displayTransitions) {
+    glCallList(transDisplayList);
   }
   
   // compute distance of every primitive to viewpoint
@@ -1031,9 +1058,11 @@ void Visualizer::drawSubtreeCMark(Cluster* root,bool topClosed,int rot) {
 // ------------- STATES --------------------------------------------------------
 
 void Visualizer::drawStates(Cluster* root,int rot) {
+  //For efficiency reasons, we also clear the DFS state of the nodes here
   vector< State* > c_ss;
   root->getStates(c_ss);
   for (vector< State* >::iterator s_it=c_ss.begin(); s_it!=c_ss.end(); ++s_it) {
+    (*s_it)->DFSclear();
     if ((**s_it).getPosition() < -0.9f) {
       drawSphereState();
     }
@@ -1070,9 +1099,11 @@ void Visualizer::drawStates(Cluster* root,int rot) {
 }
 
 void Visualizer::drawStatesMark(Cluster* root,int rot) {
+  //For efficiency reasons, we also clear the DFS state of the nodes here.
   vector< State* > c_ss;
   root->getStates(c_ss);
   for (vector< State* >::iterator s_it=c_ss.begin(); s_it!=c_ss.end(); ++s_it) {
+    (*s_it)->DFSclear();
     if (isMarked(*s_it)) {
       glColor4f(visSettings.markedColor.r,visSettings.markedColor.g,
                 visSettings.markedColor.b,1.0f);
@@ -1117,122 +1148,190 @@ void Visualizer::drawStatesMark(Cluster* root,int rot) {
 // ------------- TRANSITIONS ---------------------------------------------------
 void Visualizer::drawTransitions(State* root, int rot)
 {
-  // Get outgoing transitions
-  vector< Transition* > s_tt;
-  root->getOutTransitions( s_tt );
+  root->DFSvisit();
   Cluster* startCluster = root->getCluster();
 
-  for( vector< Transition*>::iterator t_it = s_tt.begin(); 
-       t_it != s_tt.end(); ++t_it) 
+  for( int i = 0; i != root->getNumberOfOutTransitions(); ++i)
   {
-    State* endState = (**t_it).getEndState();
+    Transition* outTransition = root->getOutTransitioni(i);
 
-    //Draw a line between the two states, start state is centered in model
-    if ((**t_it).isBackpointer()) {
+    State* endState = outTransition->getEndState();
+
+    // Draw transition from root to endState
+    if (outTransition->isBackpointer()) {
+      glColor4f(visSettings.upEdgeColor.r, visSettings.upEdgeColor.g,
+                visSettings.upEdgeColor.b, 1.0f);
       drawBackPointer(root, endState, rot);
     }
     else {
+      glColor4f(visSettings.downEdgeColor.r, visSettings.downEdgeColor.g,
+                visSettings.downEdgeColor.b, 1.0f);
       drawForwardPointer(root, endState, rot);
+    }
+    
+    // If we haven't visited endState before, do so now.
+    if (endState->getVisitState() == DFSWHITE && 
+        !outTransition->isBackpointer()) {
+
+      int desc_rot = rot  + visSettings.branchRotation;
+      if (desc_rot < 0) { desc_rot += 360; }
+      else if (desc_rot >= 360) {desc_rot -= 360;}
+
       Cluster* endCluster = endState->getCluster();
-      //Move to end position
-      int desc_rot = rot + visSettings.branchRotation;
-      if (desc_rot < 0) {
-        desc_rot += 360;
+      // Move to the next cluster. We choose to do it in this place, since 
+      // that way, we can use information about the current state (necessary
+      // for cluster descension)
+      if (endState->getRank() == root->getRank()) {
+        // States lie in the same cluster, so we do not need to move between 
+        // clusters
+        drawTransitions(endState, rot);
       }
-      else if (desc_rot >= 360) {
-        desc_rot -= 360;
-      }
-      if(endCluster->getPosition() < -0.9f) {
-        //Cluster is centered
-        glTranslatef(0.0f, 0.0f, clusterHeight);
-        drawTransitions(endState, 
-         (startCluster->getNumberOfDescendants() > 1)?desc_rot:rot);
+      else {
+        // The states do not lie in the same cluster, descend (we know we have
+        // to descend since we do not follow backpointers)
+        
+        if (endCluster->getPosition() < -0.9f) {
+          //endCluster is centered, only descend
+          glTranslatef(0.0f, 0.0f, clusterHeight);
+          drawTransitions(endState, 
+            (startCluster->getNumberOfDescendants()>1)?desc_rot:rot);
           glTranslatef(0.0f, 0.0f, -clusterHeight);
         }
-      else {
-        glRotatef(-endCluster->getPosition() - rot, 0.0f, 0.0f, 1.0f);
-        glTranslatef(startCluster->getBaseRadius(), 0.0f, clusterHeight);
-        glRotatef(visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f);
-        drawTransitions(endState, desc_rot);
-        glRotatef(-visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f);
-        glTranslatef(-startCluster->getBaseRadius(), 0.0f, -clusterHeight);
-        glRotatef(endCluster->getPosition() + rot, 0.0f, 0.0f, 1.0f);
+
+        else {
+          //endCluster is not centered, rotate, tilt, translate.
+          glRotatef(-endCluster->getPosition() - rot, 0.0f, 0.0f, 1.0f);
+          glTranslatef(startCluster->getBaseRadius(), 0.0f, clusterHeight);
+          glRotatef(visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f);
+          // Draw transitions of endState
+          drawTransitions(endState, desc_rot);
+          glRotatef(-visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f);
+          glTranslatef(-startCluster->getBaseRadius(), 0.0f, -clusterHeight);
+          glRotatef(endCluster->getPosition() + rot, 0.0f, 0.0f, 1.0f);
+        }
       }
-      
-    }  
-  } 
+    }
+  }
+
+  // Finalize this node
+  root->DFSfinish();
 }
 
 void Visualizer::drawForwardPointer(State* startState, State* endState, int rot)
 {
   Cluster* startCluster = startState->getCluster();
   Cluster* endCluster = endState->getCluster();
-  glLineWidth(2.0f);
-  glColor3f(1.0, 0.0, 0.0);
-  glBegin(GL_LINES);
 
+  Point3D startPoint;
+  startPoint.x = 0.0f;
+  startPoint.y = 0.0f;
+  startPoint.z = 0.0f;
+
+  Point3D endPoint;
+  endPoint.x = 0.0f;
+  endPoint.y = 0.0f;
+  endPoint.z = 0.0f;
+
+  float cos_alpha = 0.0f;
+  float sin_alpha = 0.0f;
+  float new_x = 0.0f;
+  float new_y = 0.0f;
+  float new_z = 0.0f;
+
+  bool sameRank = startState->getRank() == endState->getRank();
+
+  // First, calculate position of start state
   if (startState->getPosition() < -0.9f) {
-    // startState is centered
-    glVertex3f(0.0, 0.0, 0.0);
-  }
-
-  else {
-    glRotatef(-startState->getPosition(), 0.0f, 0.0f, 1.0f);
-    glTranslatef(startCluster->getTopRadius(), 0.0f, 0.0f);
-    glVertex3f(0.0, 0.0, 0.0);
-    glTranslatef(-startCluster->getTopRadius(), 0.0f, 0.0f);
-    glRotatef(startState->getPosition(), 0.0f, 0.0f, 1.0f);
-  }
-
-  int desc_rot = rot + visSettings.branchRotation;
-
-  if (desc_rot < 0) {
-    desc_rot += 360;
-  }
-  else if (desc_rot >= 360) {
-    desc_rot -= 360;
-  }
-
-  // Move to cluster
-  if (endCluster->getPosition() < -0.9f) {
-    glTranslatef(0.0f, 0.0f, clusterHeight);
+    //startState is centered, do nothing
   }
   else {
-    glRotatef(-endCluster->getPosition() - rot, 0.0, 0.0, 1.0);
-    glTranslatef(startCluster->getBaseRadius(), 0.0f, clusterHeight);
-    glRotatef(visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f);
-  } 
-  
-  // Move to state inside cluster.
+    startPoint.x += startCluster->getTopRadius();
+
+    cos_alpha = cos(deg_to_rad(-startState->getPosition()));
+    sin_alpha = sin(deg_to_rad(-startState->getPosition()));
+    
+    new_x = startPoint.x * cos_alpha - startPoint.y * sin_alpha;
+    new_y = startPoint.x * sin_alpha + startPoint.y * cos_alpha;
+
+    startPoint.x = new_x;
+    startPoint.y = new_y;
+  }
+
+
+  // Then, calculate position of end state
   if (endState->getPosition() < -0.9f) {
-    //endState is centered
-    glVertex3f(0.0, 0.0, 0.0);
+    // endState is centered, do nothing
   }
   else {
-    glRotatef(-endState->getPosition(), 0.0f, 0.0f, 1.0f);
-    glTranslatef(endCluster->getTopRadius(), 0.0f, 0.0f);
-    glVertex3f(0.0, 0.0, 0.0);
-    glTranslatef(-endCluster->getTopRadius(), 0.0f, 0.0f);
-    glRotatef(endState->getPosition(), 0.0f, 0.0f, 1.0f);
+    // endState is not centered
+    endPoint.x += endCluster->getTopRadius();
+
+    // Calculate rotation endPoint makes.
+    sin_alpha = sin(deg_to_rad(-endState->getPosition()));
+    cos_alpha = cos(deg_to_rad(-endState->getPosition()));
+
+    new_x = endPoint.x * cos_alpha - endPoint.y * sin_alpha;
+    new_y = endPoint.x * sin_alpha + endPoint.y * cos_alpha;
+
+    endPoint.x = new_x;
+    endPoint.y = new_y;
   }
 
-  // Move away from cluster.
-  if (endCluster->getPosition() < -0.9f) {
-    glTranslatef(0.0f, 0.0f, -clusterHeight);
+  //Rotate and translate to the correct vector.
+  if (sameRank) {
+    //skip
   }
   else {
-    glRotatef(-visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f);
-    glTranslatef(-startCluster->getBaseRadius(), 0.0f, -clusterHeight);
-    glRotatef(endCluster->getPosition() + rot, 0.0, 0.0, 1.0);
+    //States lie in different clusters, descend
+    
+    if (endCluster->getPosition() < -0.9f) {
+      endPoint.z += clusterHeight;
+    }
+    else {   
+      // Tilt
+      sin_alpha = sin(deg_to_rad(visSettings.outerBranchTilt));
+      cos_alpha = cos(deg_to_rad(visSettings.outerBranchTilt));
+
+      new_z = endPoint.z * cos_alpha - endPoint.x * sin_alpha;
+      new_x = endPoint.z * sin_alpha + endPoint.x * cos_alpha;
+
+      endPoint.z = new_z;
+      endPoint.x = new_x;
+
+      // Descend
+      endPoint.z += clusterHeight;
+
+      //Rotate to the correct cluster
+      endPoint.x += startCluster->getBaseRadius();
+
+      sin_alpha = sin(deg_to_rad(-endCluster->getPosition() - rot));
+      cos_alpha = cos(deg_to_rad(-endCluster->getPosition() - rot));
+
+      new_x = endPoint.x * cos_alpha - endPoint.y * sin_alpha;
+      new_y = endPoint.x * sin_alpha + endPoint.y * cos_alpha;
+
+      endPoint.x = new_x;
+      endPoint.y = new_y;
+    }
+
+
   }
+
+  glBegin(GL_LINES);
+    glVertex3f(startPoint.x, startPoint.y, startPoint.z);
+    glVertex3f(endPoint.x, endPoint.y, endPoint.z);
   glEnd();
-  glLineWidth(1.0f);
-  
 }
 
 void Visualizer::drawBackPointer(State* startState, State* endState, int rot)
 {
-  //skip
+  /*// Calculate the vector of the start state (== state with highest rank) 
+  Point3D startVector;
+
+  startVector.z = 0;
+  //
+  */ 
+
 }
 // ------------- PRIMITIVES ----------------------------------------------------
 

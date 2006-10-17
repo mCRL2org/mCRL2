@@ -46,6 +46,7 @@ class Visualizer
     static Utils::VisSettings	  defaultVisSettings;
     Utils::HSV_Color		  delta_col;
     bool		  displayStates;
+    bool                  displayTransitions;
     bool		  displayWireframe;
     void                  drawBackPointer(State* startState, 
                                           State* endState, int rot);
@@ -58,6 +59,7 @@ class Visualizer
     Utils::RankStyle		  rankStyle;
     bool		  refreshPrimitives;
     bool		  refreshStates;
+    bool                  refreshTransitions;
     float		  sin_ibt;
     float		  sin_obt;
     std::vector< float >	  sin_theta1;
@@ -117,6 +119,7 @@ class Visualizer
     bool	setVisSettings( Utils::VisSettings vs );
     void	setVisStyle( Utils::VisStyle vs );
     void	toggleDisplayStates();
+    void        toggleDisplayTransitions();
     void	toggleDisplayWireframe();
 };
 #endif

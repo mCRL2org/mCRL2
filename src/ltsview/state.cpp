@@ -1,5 +1,6 @@
 #include "state.h"
 using namespace std;
+using namespace Utils;
 
 State::State( ATermList sv )
 {
@@ -14,8 +15,8 @@ State::State( ATermList sv )
   rank = 0;
   position = -1.0f;
   marked = false;
-
   outTransitions = vector<Transition*> ();
+  visitState = DFSWHITE;
 }
 
 State::~State()
@@ -143,14 +144,41 @@ void State::getOutTransitions( vector< Transition* > &ts ) const
   ts = outTransitions;
 }
 
+Transition* State::getOutTransitioni( int i ) const
+{
+  return outTransitions[i];
+}
+
+int State::getNumberOfOutTransitions( ) const 
+{
+  return outTransitions.size();
+}
+
 void State::clearHierarchyInfo()
 {
   superiors.clear();
   subordinates.clear();
   comrades.clear();
 }
+void State::DFSfinish() {
+  visitState = DFSBLACK;
+}
+
+void State::DFSclear() {
+  visitState = DFSWHITE;
+}
+
+void State::DFSvisit() {
+  visitState = DFSGREY;
+}
+
+
+DFSState State::getVisitState() const {
+  return visitState;
+}
 
 int State::getValueIndexOfParam( int paramIndex )
 {
   return ATgetInt((ATermInt)ATgetArgument((ATermAppl)stateVector[paramIndex],1));
 }
+

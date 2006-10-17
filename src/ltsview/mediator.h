@@ -29,6 +29,7 @@ class Mediator
     virtual void      setRankStyle( Utils::RankStyle rs ) = 0;
     virtual void      setVisStyle( Utils::VisStyle vs ) = 0;
     virtual void      toggleDisplayStates() = 0;
+    virtual void      toggleDisplayTransitions() = 0;
     virtual void      toggleDisplayWireframe() = 0;
     virtual void      unmarkAction( std::string label ) = 0;
 };

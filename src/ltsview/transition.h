@@ -22,7 +22,6 @@ class Transition
     bool    isMarked() const;
     void    setBackpointer( bool b );
     void    setMarkedPointer( bool* bp );
-      
   private:
     bool    backpointer;
     State*  beginState;

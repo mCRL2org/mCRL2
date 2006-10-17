@@ -483,6 +483,12 @@ void LTSViewApp::toggleDisplayStates()
   glCanvas->display();
 }
 
+void LTSViewApp::toggleDisplayTransitions()
+{
+  visualizer->toggleDisplayTransitions();
+  glCanvas->display();
+}
+
 void LTSViewApp::toggleDisplayWireframe()
 {
   visualizer->toggleDisplayWireframe();

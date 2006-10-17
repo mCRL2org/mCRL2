@@ -9,7 +9,7 @@ LTS::LTS( Mediator* owner)
   deadlockCount = -1;
   markedTransitionCount = 0;
   stateVectorSpec = NULL;
-  tau = 1.0;
+  tau = 1.;
 }
 
 LTS::~LTS()
@@ -554,7 +554,7 @@ vector< State* > LTS::edgeLengthBottomUp()
           // Case one: One descendant cluster.
           // We know the states in this cluster have a pseudo-correct position
           // (as determined in this pass), since we process the system bottom-up
-
+          
           // Get the subordinate states. These are all in one cluster, and we 
           // can calculate the position of the current state directly from them.
           set< State* > subordinates;

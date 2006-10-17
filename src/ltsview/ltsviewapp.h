@@ -50,6 +50,7 @@ class LTSViewApp : public wxApp, public Mediator
     void	  setRankStyle( Utils::RankStyle rs );
     void	  setVisStyle( Utils::VisStyle vs );
     void	  toggleDisplayStates();
+    void          toggleDisplayTransitions();
     void	  toggleDisplayWireframe();
     void	  unmarkAction( std::string label );
 };

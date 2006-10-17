@@ -5,6 +5,7 @@
 #include <set>
 #include "aterm2.h"
 #include "liblowlevel.h"
+#include "utils.h"
 
 #ifndef TRANSITION_H
   #include "transition.h"
@@ -33,10 +34,17 @@ class State
     void      addSuperior( State* s );
     void      clearHierarchyInfo();
     //void      deselect();
+    void      DFSfinish();
+    void      DFSclear();
+    void      DFSvisit();
+    
+    Utils::DFSState  getVisitState() const;
     Cluster*  getCluster() const;
     void      getComrades( std::set< State* > &ss ) const;
     void      getInTransitions( std::vector< Transition* > &ts ) const;
     void      getOutTransitions( std::vector< Transition* > &ts ) const;
+    Transition* getOutTransitioni( int i) const;
+    int       getNumberOfOutTransitions() const;
     float     getPosition() const;
     int	      getRank() const;
     void      getSubordinates( std::set< State* > &ss ) const;
@@ -51,6 +59,7 @@ class State
     void      setPosition( float p );
     void      setRank( int r );
     void      unmark();
+   
 
   private:
     Cluster*		  cluster;
@@ -64,10 +73,11 @@ class State
     float		  position;
     int			  rank;
     //bool		  selected;
-    std::vector< ATerm >	  stateVector;
+    std::vector< ATerm >  stateVector;
     ATermList		  stateVectorAT;
     std::set< State* >	  subordinates;
     std::set< State* >	  superiors;
+    Utils::DFSState       visitState;
 };
 
 #endif //STATE_H

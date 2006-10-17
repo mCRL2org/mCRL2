@@ -23,6 +23,7 @@ BEGIN_EVENT_TABLE( MainFrame, wxFrame )
   EVT_MENU  ( wxID_EXIT, MainFrame::onExit )
   EVT_MENU  ( wxID_RESET, MainFrame::onResetView )
   EVT_MENU  ( myID_DISPLAY_STATES, MainFrame::onDisplayStates )
+  EVT_MENU  ( myID_DISPLAY_TRANSITIONS, MainFrame::onDisplayTransitions )
   EVT_MENU  ( myID_DISPLAY_WIREFRAME, MainFrame::onDisplayWireframe )
   EVT_TOOL  ( myID_PAN, MainFrame::onActivateTool )
   EVT_TOOL  ( myID_ROTATE, MainFrame::onActivateTool )
@@ -82,6 +83,8 @@ void MainFrame::setupMenuBar()
   viewMenu->AppendSeparator();
   viewMenu->AppendCheckItem( myID_DISPLAY_STATES, wxT("Display &states"),
       wxT("Show/hide individual states") );
+  viewMenu->AppendCheckItem( myID_DISPLAY_TRANSITIONS, 
+    wxT("Display &transitions"), wxT("Show/hide individual transitions"));
   viewMenu->AppendCheckItem( myID_DISPLAY_WIREFRAME, wxT("Display &wireframe"),
       wxT("Toggle wireframe/surface") );
   
@@ -89,6 +92,7 @@ void MainFrame::setupMenuBar()
   menuBar->Append( viewMenu, wxT("&View") );
   
   SetMenuBar( menuBar );
+  
 }
 
 void MainFrame::setupToolBar() {
@@ -558,6 +562,11 @@ void MainFrame::onResetView( wxCommandEvent& /*event*/ )
 void MainFrame::onDisplayStates( wxCommandEvent& /*event*/ )
 {
   mediator->toggleDisplayStates();
+}
+
+void MainFrame::onDisplayTransitions( wxCommandEvent& /*event*/ )
+{
+  mediator->toggleDisplayTransitions();
 }
 
 void MainFrame::onDisplayWireframe( wxCommandEvent& /*event*/ )
