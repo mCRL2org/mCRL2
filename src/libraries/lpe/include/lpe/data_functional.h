@@ -4,9 +4,28 @@
 #ifndef LPE_DATA_FUNCTIONAL_H
 #define LPE_DATA_FUNCTIONAL_H
 
+#include <boost/config.hpp>
 #include "lpe/data.h"
 
 namespace lpe {
+
+/*
+inline bool is_negate       (aterm_appl t) { return ; }
+inline bool is_plus         (aterm_appl t) { return ; }
+inline bool is_minus        (aterm_appl t) { return ; }
+inline bool is_multiplies   (aterm_appl t) { return ; }
+inline bool is_divides      (aterm_appl t) { return ; }
+inline bool is_modulus      (aterm_appl t) { return ; }
+inline bool is_equal_to     (aterm_appl t) { return ; }
+inline bool is_not_equal_to (aterm_appl t) { return ; }
+inline bool is_less         (aterm_appl t) { return ; }
+inline bool is_greater      (aterm_appl t) { return ; }
+inline bool is_less_equal   (aterm_appl t) { return ; }
+inline bool is_greater_equal(aterm_appl t) { return ; }
+inline bool is_min          (aterm_appl t) { return ; }
+inline bool is_max          (aterm_appl t) { return ; }
+inline bool is_abs          (aterm_appl t) { return ; }
+*/
 
 inline
 data_expression negate(data_expression d)
@@ -59,7 +78,6 @@ data_expression not_equal_to(data_expression d, data_expression e)
 inline
 data_expression less(data_expression d, data_expression e)
 {
-std::cout << "<less>" << d << " <-> " << e << std::endl;
   return gsMakeDataExprLT(d, e);
 }
 
@@ -82,13 +100,13 @@ data_expression greater_equal(data_expression d, data_expression e)
 }
 
 inline
-data_expression min(data_expression d, data_expression e)
+data_expression min BOOST_PREVENT_MACRO_SUBSTITUTION (data_expression d, data_expression e)
 {
   return gsMakeDataExprMin(d, e);
 }
 
 inline
-data_expression max(data_expression d, data_expression e)
+data_expression max BOOST_PREVENT_MACRO_SUBSTITUTION (data_expression d, data_expression e)
 {
   return gsMakeDataExprMax(d, e);
 }

@@ -267,7 +267,7 @@ namespace atermpp {
   ///
   template <typename Term, typename Function>
   inline
-  term_list<Term> apply(term_list<Term> l, const Function& f)
+  term_list<Term> apply(term_list<Term> l, const Function f)
   {
     term_list<Term> result;
     for (typename term_list<Term>::iterator i = l.begin(); i != l.end(); ++i)

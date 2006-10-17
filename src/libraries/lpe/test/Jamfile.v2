@@ -13,4 +13,5 @@ test-suite lpe
     :
       [ run data_expression.cpp ]
       [ run time.cpp ]
+      [ run apply_test.cpp ]
     ;
