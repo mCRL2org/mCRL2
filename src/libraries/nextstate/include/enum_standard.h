@@ -36,6 +36,7 @@ class EnumeratorStandard : public Enumerator
 
 		ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f = NULL);
 
+		EnumeratorSolutions *findSolutions(ATermList vars, ATerm expr, bool true_only, EnumeratorSolutions *old = NULL);
 		EnumeratorSolutions *findSolutions(ATermList vars, ATerm expr, EnumeratorSolutions *old = NULL);
 
 		Rewriter *getRewriter();
@@ -53,13 +54,13 @@ class EnumeratorStandard : public Enumerator
 class EnumeratorSolutionsStandard : public EnumeratorSolutions
 {
 	public:
-		EnumeratorSolutionsStandard(ATermList Vars, ATerm Expr, enumstd_info &Info);
+		EnumeratorSolutionsStandard(ATermList Vars, ATerm Expr, bool true_only, enumstd_info &Info);
 		~EnumeratorSolutionsStandard();
 
 		bool next(ATermList *solution);
 		bool errorOccurred();
 
-		void reset(ATermList Vars, ATerm Expr);
+		void reset(ATermList Vars, ATerm Expr, bool true_only);
 
 		bool FindInner3Equality(ATerm t, ATermList vars, ATerm *v, ATerm *e);
 		bool FindInnerCEquality(ATerm t, ATermList vars, ATerm *v, ATerm *e);
@@ -67,6 +68,7 @@ class EnumeratorSolutionsStandard : public EnumeratorSolutions
 		ATerm build_solution_aux_inner3(ATerm t, ATermList substs);
 	private:
 		enumstd_info info;
+		bool check_true;
 		
 		ATermList enum_vars;
 		ATerm enum_expr;

@@ -24,6 +24,7 @@ class Enumerator
 
 		virtual ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f = NULL) = 0;
 
+		virtual EnumeratorSolutions *findSolutions(ATermList Vars, ATerm Expr, bool true_only, EnumeratorSolutions *old = NULL) = 0;
 		virtual EnumeratorSolutions *findSolutions(ATermList Vars, ATerm Expr, EnumeratorSolutions *old = NULL) = 0;
 		
 		virtual Rewriter *getRewriter() = 0;

@@ -458,17 +458,17 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
 					fs_push(ATgetNext(ATreverse(uvars)),ATinsert(e.vals,(ATerm) ATmakeAppl2(info.tupAFun,(ATerm) var,(ATerm) term_rf)),new_expr);
 					if ( ATisEmpty(fs_top().vars) || (EliminateVars(&fs_top()), ATisEmpty(fs_top().vars) || ATisEqual(fs_top().expr,info.rewr_false)) )
 					{
-						if ( ATisEqual(fs_top().expr,info.rewr_true) )
+						if ( !ATisEqual(fs_top().expr,info.rewr_false) )
 						{
-							ss_push(build_solution(enum_vars,fs_top().vals));
-						} else {
-							if ( !ATisEqual(fs_top().expr,info.rewr_false) )
+							if ( check_true && !ATisEqual(fs_top().expr,info.rewr_true) )
 							{
 								gsfprintf(stderr,"Term does not evaluate to true or false: %P\n",info.rewr_obj->fromRewriteFormat(fs_top().expr));
 								error = true;
 								fs_reset();
 								info.rewr_obj->clearSubstitution(var);
 								break;
+							} else {
+								ss_push(build_solution(enum_vars,fs_top().vals));
 							}
 						}
 						fs_pop(NULL);
@@ -494,10 +494,11 @@ bool EnumeratorSolutionsStandard::errorOccurred()
 	return error;
 }
 
-void EnumeratorSolutionsStandard::reset(ATermList Vars, ATerm Expr)
+void EnumeratorSolutionsStandard::reset(ATermList Vars, ATerm Expr, bool true_only)
 {
 	enum_vars = Vars;
 	enum_expr = Expr;
+	check_true = true_only;
 
 	fs_reset();
 	ss_reset();
@@ -517,21 +518,21 @@ void EnumeratorSolutionsStandard::reset(ATermList Vars, ATerm Expr)
 		fs_pop();
 	} else if ( ATisEmpty(fs_bottom().vars) )
 	{
-		if ( ATisEqual(fs_bottom().expr,info.rewr_true) )
+		if ( !ATisEqual(fs_bottom().expr,info.rewr_false) )
 		{
-			ss_push(build_solution(enum_vars,fs_bottom().vals));
-		} else {
-			if ( !ATisEqual(fs_bottom().expr,info.rewr_false) )
+			if ( check_true && !ATisEqual(fs_bottom().expr,info.rewr_true) )
 			{
 				gsfprintf(stderr,"Term does not evaluate to true or false: %P\n",info.rewr_obj->fromRewriteFormat(fs_bottom().expr));
 				error = true;
+			} else {
+				ss_push(build_solution(enum_vars,fs_bottom().vals));
 			}
 		}
 		fs_pop();
 	}
 }
 
-EnumeratorSolutionsStandard::EnumeratorSolutionsStandard(ATermList Vars, ATerm Expr, enumstd_info &Info)
+EnumeratorSolutionsStandard::EnumeratorSolutionsStandard(ATermList Vars, ATerm Expr, bool true_only, enumstd_info &Info)
 {
 	info = Info; // ATerms inside need not to be protected as they should already
 	             // be protected by the Enumerator and this object should not live
@@ -549,7 +550,7 @@ EnumeratorSolutionsStandard::EnumeratorSolutionsStandard(ATermList Vars, ATerm E
 	ATprotectList(&enum_vars);
 	ATprotect(&enum_expr);
 
-	reset(Vars,Expr);
+	reset(Vars,Expr,true_only);
 }
 
 EnumeratorSolutionsStandard::~EnumeratorSolutionsStandard()
@@ -628,15 +629,20 @@ EnumeratorStandard::~EnumeratorStandard()
 	}
 }
 
-EnumeratorSolutions *EnumeratorStandard::findSolutions(ATermList vars, ATerm expr, EnumeratorSolutions *old)
+EnumeratorSolutions *EnumeratorStandard::findSolutions(ATermList vars, ATerm expr, bool true_only, EnumeratorSolutions *old)
 {
 	if ( old == NULL )
 	{
-		return new EnumeratorSolutionsStandard(vars,expr,info);
+		return new EnumeratorSolutionsStandard(vars,expr,true_only,info);
 	} else {
-		((EnumeratorSolutionsStandard *) old)->reset(vars,expr);
+		((EnumeratorSolutionsStandard *) old)->reset(vars,expr,true_only);
 		return old;
 	}
+}
+
+EnumeratorSolutions *EnumeratorStandard::findSolutions(ATermList vars, ATerm expr, EnumeratorSolutions *old)
+{
+	return findSolutions(vars,expr,true,old);
 }
 
 ATermList EnumeratorStandard::FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
