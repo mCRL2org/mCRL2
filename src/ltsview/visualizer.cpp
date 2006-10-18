@@ -237,6 +237,7 @@ void Visualizer::drawLTS(Point3D viewpoint) {
   }
 
   if (displayTransitions && refreshTransitions) {
+    clearDFSStates(lts->getInitialState());
     glDeleteLists(transDisplayList, 1);
     transDisplayList = glGenLists(1);
     glNewList(transDisplayList, GL_COMPILE);
@@ -1058,11 +1059,9 @@ void Visualizer::drawSubtreeCMark(Cluster* root,bool topClosed,int rot) {
 // ------------- STATES --------------------------------------------------------
 
 void Visualizer::drawStates(Cluster* root,int rot) {
-  //For efficiency reasons, we also clear the DFS state of the nodes here
   vector< State* > c_ss;
   root->getStates(c_ss);
   for (vector< State* >::iterator s_it=c_ss.begin(); s_it!=c_ss.end(); ++s_it) {
-    (*s_it)->DFSclear();
     if ((**s_it).getPosition() < -0.9f) {
       drawSphereState();
     }
@@ -1099,11 +1098,9 @@ void Visualizer::drawStates(Cluster* root,int rot) {
 }
 
 void Visualizer::drawStatesMark(Cluster* root,int rot) {
-  //For efficiency reasons, we also clear the DFS state of the nodes here.
   vector< State* > c_ss;
   root->getStates(c_ss);
   for (vector< State* >::iterator s_it=c_ss.begin(); s_it!=c_ss.end(); ++s_it) {
-    (*s_it)->DFSclear();
     if (isMarked(*s_it)) {
       glColor4f(visSettings.markedColor.r,visSettings.markedColor.g,
                 visSettings.markedColor.b,1.0f);
@@ -1146,6 +1143,20 @@ void Visualizer::drawStatesMark(Cluster* root,int rot) {
   }
 }
 // ------------- TRANSITIONS ---------------------------------------------------
+void Visualizer::clearDFSStates(State* root)
+{
+  root->DFSclear();
+  for( int i = 0; i != root->getNumberOfOutTransitions(); ++i)
+  {
+    Transition* outTransition = root->getOutTransitioni(i);
+    
+    if (!outTransition->isBackpointer()) {
+      State* endState = outTransition->getEndState();
+      clearDFSStates(endState);
+    }
+  }
+}
+
 void Visualizer::drawTransitions(State* root, int rot)
 {
   root->DFSvisit();
@@ -1170,7 +1181,7 @@ void Visualizer::drawTransitions(State* root, int rot)
     }
     
     // If we haven't visited endState before, do so now.
-    if (endState->getVisitState() == DFSWHITE && 
+    if (endState->getVisitState() == DFS_WHITE && 
         !outTransition->isBackpointer()) {
 
       int desc_rot = rot  + visSettings.branchRotation;

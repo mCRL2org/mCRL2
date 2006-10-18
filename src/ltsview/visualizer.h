@@ -71,7 +71,8 @@ class Visualizer
     Utils::Point3D		  viewpoint;
     Utils::VisSettings		  visSettings;
     Utils::VisStyle		  visStyle;
-
+    
+    void clearDFSStates(State* root);
     void computeDeltaCol(Utils::HSV_Color &hsv1);
     void computeSubtreeBounds(Cluster* root,float &boundWidth,
                               float &boundHeight);

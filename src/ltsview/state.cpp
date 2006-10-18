@@ -16,7 +16,7 @@ State::State( ATermList sv )
   position = -1.0f;
   marked = false;
   outTransitions = vector<Transition*> ();
-  visitState = DFSWHITE;
+  visitState = DFS_WHITE;
 }
 
 State::~State()
@@ -161,15 +161,15 @@ void State::clearHierarchyInfo()
   comrades.clear();
 }
 void State::DFSfinish() {
-  visitState = DFSBLACK;
+  visitState = DFS_BLACK;
 }
 
 void State::DFSclear() {
-  visitState = DFSWHITE;
+  visitState = DFS_WHITE;
 }
 
 void State::DFSvisit() {
-  visitState = DFSGREY;
+  visitState = DFS_GREY;
 }
 
 

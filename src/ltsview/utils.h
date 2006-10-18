@@ -12,7 +12,7 @@ namespace Utils
   enum RankStyle { ITERATIVE, CYCLIC };
   enum MarkStyle { NO_MARKS, MARK_DEADLOCKS, MARK_STATES, MARK_TRANSITIONS };
   enum VisStyle	 { CONES, TUBES, ATOMIUM };
-  enum DFSState  { DFSWHITE, DFSGREY, DFSBLACK };
+  enum DFSState  { DFS_WHITE, DFS_GREY, DFS_BLACK };
 
   struct RGB_Color {
     float r;
