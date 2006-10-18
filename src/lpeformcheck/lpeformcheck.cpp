@@ -2,12 +2,12 @@
 #define  VERSION   "0.0.1"
 #define  AUTHOR    "Luc Engelen"
 
-#include "formula_checker.h"
+#include "prover/formula_checker.h"
 #include "getopt.h"
 #include "libprint_c.h"
 #include "liblowlevel.h"
 #include "libstruct.h"
-#include "bdd_path_eliminator.h"
+#include "prover/bdd_path_eliminator.h"
 #include <string>
 
   /// \mainpage lpeformcheck
