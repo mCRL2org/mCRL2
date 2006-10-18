@@ -5742,7 +5742,7 @@ yyparse (void)
 }
 
 /* DEBUGGING ONLY */
-#ifdef YYDEBUG
+#if YYDEBUG
 static void yypstack (yyGLRStack* yystack, int yyk) ATTRIBUTE_UNUSED;
 static void yypdumpstack (yyGLRStack* yystack) ATTRIBUTE_UNUSED;
 

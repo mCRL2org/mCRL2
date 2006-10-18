@@ -1,13 +1,13 @@
 // Implementation of class Prover
 // file: prover.cpp
 
-#include "prover.h"
-#include "manipulator.h"
-#include "info.h"
+#include "prover/prover.h"
+#include "auxiliary/manipulator.h"
+#include "auxiliary/info.h"
 #include "libstruct.h"
 #include "librewrite.h"
-#include "stdlib.h"
-#include "utilities.h"
+#include "cstdlib"
+#include "auxiliary/utilities.h"
 #include "liblowlevel.h"
 #include "libprint_c.h"
 

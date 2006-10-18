@@ -6,9 +6,9 @@
 
 #include "aterm2.h"
 #include "librewrite.h"
-#include "manipulator.h"
-#include "info.h"
-#include "utilities.h"
+#include "auxiliary/manipulator.h"
+#include "auxiliary/info.h"
+#include "auxiliary/utilities.h"
 #include "time.h"
 
   /// \brief An enumerated type respresenting the answers "yes", "no" and "undefined".

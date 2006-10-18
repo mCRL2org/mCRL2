@@ -1,7 +1,7 @@
 // Implementation of class BDD2Dot
 // file: bdd2dot.cpp
 
-#include "bdd2dot.h"
+#include "auxiliary/bdd2dot.h"
 #include "libstruct.h"
 #include "liblowlevel.h"
 #include "libprint_c.h"

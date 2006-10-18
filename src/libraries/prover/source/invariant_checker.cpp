@@ -5,7 +5,7 @@
 #include "liblowlevel.h"
 #include "libprint_c.h"
 #include "libstruct.h"
-#include "bdd_prover.h"
+#include "prover/bdd_prover.h"
 
 // Class Invariant_Checker ------------------------------------------------------------------------
   // Class Invariant_Checker - Functions declared private -----------------------------------------

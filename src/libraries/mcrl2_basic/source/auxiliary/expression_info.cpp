@@ -1,7 +1,7 @@
 // Implementation of class Expression_Info
 // file: expression_info.cpp
 
-#include "expression_info.h"
+#include "auxiliary/expression_info.h"
 #include "libstruct.h"
 #include "liblowlevel.h"
 #include "libprint_c.h"

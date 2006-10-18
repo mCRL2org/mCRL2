@@ -3,15 +3,15 @@
 
 #include "aterm2.h"
 #include "librewrite.h"
-#include "prover.h"
-#include "bdd_prover.h"
-#include "utilities.h"
+#include "prover/prover.h"
+#include "prover/bdd_prover.h"
+#include "auxiliary/utilities.h"
 #include "liblowlevel.h"
 #include "libprint_c.h"
 #include "libstruct.h"
 #include "time.h"
-#include "stdlib.h"
-#include "induction.h"
+#include "cstdlib"
+#include "prover/induction.h"
 
 // Class BDD_Prover -------------------------------------------------------------------------------
   // Class BDD_Prover - Functions declared private ------------------------------------------------

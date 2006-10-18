@@ -1,7 +1,7 @@
 // Implementation of class BDD_Path_Eliminator
 // file: bdd_path_eliminator.cpp
 
-#include "bdd_path_eliminator.h"
+#include "prover/bdd_path_eliminator.h"
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "time.h"

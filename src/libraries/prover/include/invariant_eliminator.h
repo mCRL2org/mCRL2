@@ -6,7 +6,7 @@
 
 #include "aterm2.h"
 #include "librewrite.h"
-#include "bdd_prover.h"
+#include "prover/bdd_prover.h"
 
 class Invariant_Eliminator {
   private:

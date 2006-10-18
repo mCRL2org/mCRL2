@@ -6,8 +6,8 @@
 
 #include "aterm2.h"
 #include "librewrite.h"
-#include "bdd_prover.h"
-#include "bdd2dot.h"
+#include "prover/bdd_prover.h"
+#include "auxiliary/bdd2dot.h"
 
 class Invariant_Checker {
   private:

@@ -6,10 +6,10 @@
 
 #include "aterm2.h"
 #include "librewrite.h"
-#include "bdd_prover.h"
+#include "prover/bdd_prover.h"
 #include "disjointness_checker.h"
 #include "invariant_checker.h"
-#include "bdd2dot.h"
+#include "auxiliary/bdd2dot.h"
 
     /// \brief A class that takes a linear process equation and checks all tau-summands of that LPE for confluence.
     /// \brief The tau actions of all confluent tau-summands are renamed to ctau.

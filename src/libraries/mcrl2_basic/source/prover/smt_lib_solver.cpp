@@ -1,10 +1,10 @@
 // Implementation of class SMT_LIB_Solver
 // file: smt_lib_solver.cpp
 
-#include "smt_lib_solver.h"
+#include "prover/smt_lib_solver.h"
 #include "libprint_c.h"
 #include "libstruct.h"
-#include "utilities.h"
+#include "auxiliary/utilities.h"
 
 using namespace std;
 

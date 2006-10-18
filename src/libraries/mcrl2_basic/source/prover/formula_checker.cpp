@@ -1,7 +1,7 @@
 // Implementation of class Formula_Checker
 // file: formula_checker.cpp
 
-#include "formula_checker.h"
+#include "prover/formula_checker.h"
 #include "liblowlevel.h"
 #include "libprint_c.h"
 

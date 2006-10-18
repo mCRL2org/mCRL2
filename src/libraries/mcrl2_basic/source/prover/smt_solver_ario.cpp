@@ -1,7 +1,7 @@
 // Implementation of class SMT_Solver_Ario
 // file: smt_solver_ario.cpp
 
-#include "smt_solver_ario.h"
+#include "prover/smt_solver_ario.h"
 #include "pstream.h"
 #include "libprint_c.h"
 #include <iostream>

@@ -2,7 +2,7 @@
 // file: utilities.cpp
 
 #include "stdlib.h"
-#include "utilities.h"
+#include "auxiliary/utilities.h"
 #include "libprint_c.h"
 #include "libstruct.h"
 #include <string>

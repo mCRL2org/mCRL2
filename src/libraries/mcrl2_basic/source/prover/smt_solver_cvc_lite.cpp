@@ -1,7 +1,7 @@
 // Implementation of class SMT_Solver_CVC_Lite
 // file: smt_solver_cvc_lite.cpp
 
-#include "smt_solver_cvc_lite.h"
+#include "prover/smt_solver_cvc_lite.h"
 #include "pstream.h"
 #include "libprint_c.h"
 #include <iostream>

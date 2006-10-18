@@ -1,4 +1,4 @@
-project prover
+project libraries/prover
        : source-location ../source
        : build-dir $(BUILD_TOP)
        : requirements
@@ -8,28 +8,16 @@ project prover
        ;
 
 lib prover
-       : prover.cpp
-         bdd_prover.cpp
-         bdd_simplifier.cpp
-         bdd_path_eliminator.cpp
-         smt_solver.cpp
-         smt_lib_solver.cpp
-         smt_solver_ario.cpp
-         smt_solver_cvc_lite.cpp
-#         smt_solver_cvc_lite_fast.cpp
-         confluence_checker.cpp
+       : confluence_checker.cpp
          disjointness_checker.cpp
-         formula_checker.cpp
          invariant_checker.cpp
          invariant_eliminator.cpp
-         induction.cpp
-         /libraries//auxiliary
-       : <dependency>/libraries//pstream
+       : <library>/libraries//mcrl2_basic
 #         <dependency>/libraries//cvclite
 #         <toolset>gcc:<define>HAVE___GNU_CXX__EXT_HASH_MAP
 #         <toolset>gcc:<define>HAVE___GNU_CXX__EXT_HASH_SET
 #         <toolset>gcc:<define>CVC_LITE_LIB
        :
-       : <library>/libraries//auxiliary
+       :
 #         <library>/libraries//cvclite
        ;

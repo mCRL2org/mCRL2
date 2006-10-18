@@ -5,7 +5,7 @@
 #include "liblowlevel.h"
 #include "libprint_c.h"
 #include "libstruct.h"
-#include "bdd_prover.h"
+#include "prover/bdd_prover.h"
 
 // Class Invariant_Eliminator ---------------------------------------------------------------------
   // Class Invariant_Eliminator - Functions declared private --------------------------------------

@@ -5,8 +5,8 @@
 #include "librewrite.h"
 #include "libstruct.h"
 #include "liblowlevel.h"
-#include "info.h"
-#include "utilities.h"
+#include "auxiliary/info.h"
+#include "auxiliary/utilities.h"
 
 // Class ATerm_Info -------------------------------------------------------------------------------
   // Class ATerm_Info - Functions declared public -------------------------------------------------

@@ -8,6 +8,7 @@
 #include "rewr_jitty.h"
 #include "rewr_innerc.h"
 #include "rewr_jittyc.h"
+#include "prover/prover.h"
 
 Rewriter::Rewriter()
 {

@@ -5,8 +5,8 @@
 #include "liblowlevel.h"
 #include "libprint_c.h"
 #include "libstruct.h"
-#include "bdd_prover.h"
-#include "stdlib.h"
+#include "prover/bdd_prover.h"
+#include "cstdlib"
 #include <string>
 
 // Auxiliary functions ----------------------------------------------------------------------------

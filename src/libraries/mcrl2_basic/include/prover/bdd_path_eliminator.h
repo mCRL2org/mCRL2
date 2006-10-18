@@ -5,12 +5,12 @@
 #define BDD_PATH_ELIMINATOR_H
 
 #include "aterm2.h"
-#include "bdd_simplifier.h"
-#include "smt_solver_ario.h"
-#include "smt_solver_cvc_lite.h"
-#include "smt_solver_cvc_lite_fast.h"
-#include "bdd_manipulator.h"
-#include "bdd_info.h"
+#include "prover/bdd_simplifier.h"
+#include "prover/smt_solver_ario.h"
+#include "prover/smt_solver_cvc_lite.h"
+#include "prover/smt_solver_cvc_lite_fast.h"
+#include "auxiliary/bdd_manipulator.h"
+#include "auxiliary/bdd_info.h"
 
   /// \brief The enumaration type SMT_Solver_Type enumerates all available SMT solvers. 
 enum SMT_Solver_Type {

@@ -5,9 +5,9 @@
 #define SMT_LIB_SOLVER_H
 
 #include "aterm2.h"
-#include "smt_solver.h"
-#include "expression_info.h"
-#include "sort_info.h"
+#include "prover/smt_solver.h"
+#include "auxiliary/expression_info.h"
+#include "auxiliary/sort_info.h"
 #include <string>
 
 class SMT_LIB_Solver: public SMT_Solver {

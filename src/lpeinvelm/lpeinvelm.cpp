@@ -8,7 +8,7 @@
 #include "libprint_c.h"
 #include "liblowlevel.h"
 #include "libstruct.h"
-#include "bdd_path_eliminator.h"
+#include "prover/bdd_path_eliminator.h"
 #include <string>
 
   /// \mainpage lpeinvelm

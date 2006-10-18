@@ -1,7 +1,7 @@
 // Implementation of class BDD_Simplifier
 // file: bdd_simplifier.cpp
 
-#include "bdd_simplifier.h"
+#include "prover/bdd_simplifier.h"
 #include "aterm2.h"
 #include "time.h"
 

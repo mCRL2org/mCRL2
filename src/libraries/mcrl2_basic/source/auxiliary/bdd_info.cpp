@@ -1,7 +1,7 @@
 // Implementation of class BDD_Info
 // file: bdd_info.cpp
 
-#include "bdd_info.h"
+#include "auxiliary/bdd_info.h"
 #include "libstruct.h"
 #include "liblowlevel.h"
 #include "libprint_c.h"

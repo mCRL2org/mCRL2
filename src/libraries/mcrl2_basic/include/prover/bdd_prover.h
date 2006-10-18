@@ -6,10 +6,10 @@
 
 #include "aterm2.h"
 #include "librewrite.h"
-#include "prover.h"
-#include "bdd_simplifier.h"
-#include "bdd_path_eliminator.h"
-#include "induction.h"
+#include "prover/prover.h"
+#include "prover/bdd_simplifier.h"
+#include "prover/bdd_path_eliminator.h"
+#include "prover/induction.h"
 
   /// \brief A class based on the Prover class that takes an expression of sort Bool in internal mCRL2 format
   /// \brief and creates the corresponding EQ-BDD. Using this EQ-BDD, the class can determine if the original

@@ -9,21 +9,6 @@ project auxiliary
          <include>../include
        ;
 
-lib auxiliary
-       : info.cpp
-         manipulator.cpp
-         bdd_info.cpp
-         bdd_manipulator.cpp
-         bdd2dot.cpp
-         utilities.cpp
-         expression_info.cpp
-         sort_info.cpp
-         /libraries//mcrl2_basic
-       : <include>../include
-       :
-       : <library>/libraries//mcrl2_basic
-       ;
-
 lib nt_portability
        : nt_portability/getopt.c nt_portability/getopt1.c
        ;

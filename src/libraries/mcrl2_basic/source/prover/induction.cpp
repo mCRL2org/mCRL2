@@ -1,11 +1,11 @@
 // Implementation of class Induction
 // file: induction.cpp
 
-#include "induction.h"
+#include "prover/induction.h"
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
-#include "utilities.h"
+#include "auxiliary/utilities.h"
 
 // Class Induction --------------------------------------------------------------------------------
 

@@ -1,7 +1,7 @@
 // Implementation of class Sort_Info
 // file: sort_info.cpp
 
-#include "sort_info.h"
+#include "auxiliary/sort_info.h"
 #include "libstruct.h"
 #include "liblowlevel.h"
 #include "libprint_c.h"

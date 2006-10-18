@@ -2,24 +2,16 @@ project mcrl2_basic
        : source-location ../source
        : build-dir $(BUILD_TOP)
        : requirements
-          <include>../../../
+          <include>../include
           <toolset>msvc:<use>/libraries/auxiliary//nt_portability
           <toolset>msvc:<define>NO_DYNLOAD
+       : usage-requirements
+          <include>../include
        ;
 
 rule prepend ( prefix : elements * ) {
   return $(prefix)$(elements) ;
 }
-
-local STRUCT_SOURCES = [ prepend struct/ : libstruct ] ; 
-
-lib struct
-       : $(STRUCT_SOURCES).o
-         /libraries//aterm
-       : <include>../include/struct
-       :
-       : <include>../include/struct
-       ;
 
 local LOWLEVEL_SOURCES = [ prepend lowlevel/ : liblowlevel ] ; 
 
@@ -31,14 +23,27 @@ lib lowlevel
        : <include>../include/lowlevel
        ;
 
+local STRUCT_SOURCES = [ prepend struct/ : libstruct ] ; 
+
+lib struct
+       : $(STRUCT_SOURCES).o
+         /libraries//aterm
+       : <include>../include/struct
+       :
+       : <include>../include/struct
+         <library>lowlevel
+       ;
+
 local REWRITE_SOURCES = [ prepend rewrite/ : librewrite librewrite_c rewr_inner rewr_jitty rewr_innerc rewr_jittyc ] ;
 
 lib rewrite
        : $(REWRITE_SOURCES).o
          /libraries//aterm
        : <include>../include/rewrite
+         <include>../include/print
        :
-       : <os>LINUX:<library>/site-config//m
+       : <library>struct
+         <os>LINUX:<library>/site-config//m
          <os>CYGWIN:<library>/site-config//m
          <include>../include/rewrite
          <os>LINUX:<library>/site-config//dl
@@ -50,13 +55,12 @@ local PRINT_SOURCES = [ prepend print/ : libprint libprint_c ] ;
 
 lib print
        : $(PRINT_SOURCES).o
-       : <dependency>lowlevel
+       : <use>/libraries//prover
+         <dependency>lowlevel
          <dependency>rewrite
          <dependency>struct
        :
-       : <library>lowlevel
-         <library>rewrite
-         <library>struct
+       : <library>rewrite
          <include>../include/print
        ;
 
@@ -65,7 +69,8 @@ local MCRL2_BASIC_SOURCES = $(LOWLEVEL_SOURCES) $(PRINT_SOURCES) $(REWRITE_SOURC
 for object in $(MCRL2_BASIC_SOURCES) {
   obj $(object).o
       : $(object).cpp
-      : <include>../include/print
+      : <include>$(SETUP)
+        <include>../include/print
         <include>../include/rewrite
         <include>../include/lowlevel
         <include>../include/struct
@@ -75,9 +80,14 @@ for object in $(MCRL2_BASIC_SOURCES) {
 
 lib mcrl2_basic
        : $(MCRL2_BASIC_SOURCES).o
-         /libraries//aterm
-       :
-       :
+         [ glob ../source/prover/*.cpp ]
+         [ glob ../source/auxiliary/*.cpp ]
+       : <include>../include/rewrite
+         <include>../include/print
+         <include>../include/struct
+         <include>../include/lowlevel
+         <library>/libraries//pstream
+       : <include>$(SETUP)
        : <library>/libraries//aterm
          <os>LINUX:<library>/site-config//m
          <os>CYGWIN:<library>/site-config//m
