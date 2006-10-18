@@ -18,6 +18,6 @@ lib prover
 #         <toolset>gcc:<define>HAVE___GNU_CXX__EXT_HASH_SET
 #         <toolset>gcc:<define>CVC_LITE_LIB
        :
-       :
+       : <library>/libraries//mcrl2_basic
 #         <library>/libraries//cvclite
        ;
