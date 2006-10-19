@@ -1,6 +1,6 @@
 project libraries ;
 
-libraries = [ MATCH $(TOP)/src/libraries/(.*)/build/.* : [ glob */build/Jamfile.v2 ] ] ;
+libraries = [ MATCH .*/src/libraries/(.*)/build/.* : [ glob */build/Jamfile.v2 ] ] ;
 
 # Register library projects
 for library in $(libraries) {
