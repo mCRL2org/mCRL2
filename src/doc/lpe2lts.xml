@@ -44,6 +44,7 @@
 <!ENTITY opt_detect "<option>--detect</option>">
 <!ENTITY opt_trace "<option>--trace</option>">
 <!ENTITY opt_max-traces "<option>--max-traces</option>">
+<!ENTITY opt_error-trace "<option>--error-trace</option>">
 <!ENTITY opt_priority "<option>--priority</option>">
 <!ENTITY opt_monitor "<option>--monitor</option>">
 <!ENTITY opt_rewriter "<option>--rewriter</option>">
@@ -259,6 +260,16 @@ Mandatory arguments to long options are also mandatory to short options.
       <para>
 	Save no more than NUM trace files when using the options
 	&opt_e;/&opt_deadlock-trace; or &opt_t;/&opt_trace;.
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_error-trace;</term>
+    <listitem>
+      <para>
+	If an error occurs during exploration, a trace to the state that could
+	not be explored is saved to a trace file.
       </para>
     </listitem>
   </varlistentry>

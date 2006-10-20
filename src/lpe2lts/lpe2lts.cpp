@@ -94,6 +94,8 @@ static void print_help(FILE *f, const char *Name)
     "  -t, --trace[=NUM]        write at most NUM traces to states detected with the\n"
     "                           --deadlock or --action options\n"
     "                           (NUM is 10 by default)\n"
+    "      --error-trace        if an error occurs during exploration, save a trace\n"
+    "                           to the state that could not be explored"
     "  -C, --confluence[=NAME]  apply on-the-fly confluence reduction with NAME the\n"
     "                           confluent tau action\n"
 /*    "  -p, --priority=NAME   give priority to action NAME (i.e. if it is\n"
@@ -186,6 +188,7 @@ int main(int argc, char **argv)
     { "no-info",         no_argument,       NULL, 3   },
     { "init-tsize",      required_argument, NULL, 4   },
     { "todo-max",        required_argument, NULL, 5   },
+    { "error-trace",     no_argument,       NULL, 6   },
 // aterm lib options
     { "at-help",          no_argument,       NULL, 10  },
     { "at-verbose",       no_argument,       NULL, 11  },
@@ -324,6 +327,10 @@ int main(int argc, char **argv)
           gsErrorMsg("invalid argument to --todo-max\n",optarg);
           return 1;
         }
+        break;
+      case 6:
+        lgopts.trace = true;
+        lgopts.save_error_trace = true;
         break;
       default:
         break;

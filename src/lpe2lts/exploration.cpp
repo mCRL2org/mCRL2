@@ -64,6 +64,7 @@ void initialise_lts_generation_options(lts_generation_options &lgopts)
   lgopts.max_traces = DEFAULT_MAX_TRACES;
   lgopts.detect_deadlock = false;
   lgopts.detect_action = false;
+  lgopts.save_error_trace = false;
   lgopts.expl_strat = es_breadth;
   lgopts.bithashing = false;
   lgopts.bithashsize = DEFAULT_BITHASHSIZE;
@@ -336,6 +337,25 @@ static void check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewSta
         fflush(stderr);
       }
     }
+  }
+}
+
+static void save_error_trace(ATerm state)
+{
+  if ( lgopts->save_error_trace )
+  {
+    std::ostringstream ss;
+    ss << basefilename << "_error.trc";
+    string sss(ss.str());
+    bool saved_ok = savetrace(sss,state,backpointers,nstate);
+
+    if ( saved_ok )
+    {
+      gsVerboseMsg("saved trace to error in '%s_trace.trc'.\n",basefilename);
+    } else {
+      gsVerboseMsg("trace to error could not be saved in '%s_trace.trc'.\n",basefilename);
+    }
+    fflush(stderr);
   }
 }
 
@@ -791,6 +811,13 @@ bool generate_lts()
           tmp_states = ATinsert(tmp_states,NewState);
         }
 
+        if ( nsgen->errorOccurred() )
+        {
+          lg_error = true;
+          save_error_trace(state);
+          break;
+        }
+
         int len = ATgetLength(tmp_trans);
         if ( len > 0 )
         {
@@ -860,6 +887,7 @@ bool generate_lts()
         if ( nsgen->errorOccurred() )
         {
           lg_error = true;
+          save_error_trace(state);
           break;
         }
         if ( deadlockstate )
@@ -984,6 +1012,7 @@ bool generate_lts()
         if ( nsgen->errorOccurred() )
         {
           lg_error = true;
+          save_error_trace(state);
           break;
         }
         if ( !top_trans_seen )
