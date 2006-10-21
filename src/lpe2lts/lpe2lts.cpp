@@ -95,7 +95,7 @@ static void print_help(FILE *f, const char *Name)
     "                           --deadlock or --action options\n"
     "                           (NUM is 10 by default)\n"
     "      --error-trace        if an error occurs during exploration, save a trace\n"
-    "                           to the state that could not be explored"
+    "                           to the state that could not be explored\n"
     "  -C, --confluence[=NAME]  apply on-the-fly confluence reduction with NAME the\n"
     "                           confluent tau action\n"
 /*    "  -p, --priority=NAME   give priority to action NAME (i.e. if it is\n"

@@ -23,6 +23,7 @@ enum lpe2lts_options {
   option_detect_actions,
   option_trace,
   option_max_traces,
+  option_error_trace,
   
   option_confluence_reduction,
   option_confluent_tau,
@@ -88,6 +89,7 @@ void squadt_lpe2lts::user_interactive_configuration(sip::configuration &configur
   checkbox* cb_trace = new checkbox("save action/deadlock traces, but at most:", false);
   sprintf(buf,"%lu",DEFAULT_MAX_TRACES);
   text_field* tf_max_traces = new text_field(buf, sip::datatype::integer::standard);
+  checkbox* cb_error_trace = new checkbox("save trace on error", false);
   
   checkbox* cb_confluence = new checkbox("confluence reduction with confluent tau:", false);
   text_field* tf_conf_tau = new text_field("ctau", sip::datatype::string::standard);
@@ -150,6 +152,7 @@ void squadt_lpe2lts::user_interactive_configuration(sip::configuration &configur
   maxtracesbox->add(cb_trace,      top);
   maxtracesbox->add(tf_max_traces, top);
   column->add(maxtracesbox,layout::left);
+  column->add(cb_error_trace, layout::left);
 
   column->add(new label(" "),layout::left);
 
@@ -217,6 +220,7 @@ void squadt_lpe2lts::user_interactive_configuration(sip::configuration &configur
   c.add_option(option_detect_actions).append_argument(sip::datatype::string::standard, cb_actions->get_status()?tf_actions->get_text():"");
   c.add_option(option_trace).append_argument(sip::datatype::boolean::standard, cb_trace->get_status());
   c.add_option(option_max_traces).append_argument(sip::datatype::string::standard, tf_max_traces->get_text());
+  c.add_option(option_error_trace).append_argument(sip::datatype::boolean::standard, cb_error_trace->get_status());
   
   c.add_option(option_confluence_reduction).append_argument(sip::datatype::boolean::standard, cb_confluence->get_status());
   c.add_option(option_confluent_tau).append_argument(sip::datatype::string::standard, tf_conf_tau->get_text());
@@ -276,6 +280,8 @@ bool squadt_lpe2lts::perform_task(sip::configuration &configuration)
   }
   lgopts.trace = boost::any_cast <bool> (configuration.get_option_value(option_trace));
   lgopts.max_traces = strtoul((boost::any_cast <string> (configuration.get_option_value(option_max_traces))).c_str(),NULL,0);
+  lgopts.save_error_trace = boost::any_cast <bool> (configuration.get_option_value(option_error_trace));
+  lgopts.trace = lgopts.trace || lgopts.save_error_trace;
   
   if ( boost::any_cast <bool> (configuration.get_option_value(option_confluence_reduction)) )
   {

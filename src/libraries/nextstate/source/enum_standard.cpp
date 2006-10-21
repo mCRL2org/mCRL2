@@ -1,8 +1,10 @@
 #include <stdlib.h>
+#include <sstream>
 #include <aterm2.h>
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
+#include "libprint.h"
 #include "librewrite.h"
 #include "enum_standard.h"
 
@@ -17,6 +19,8 @@
 
 #define MAX_VARS_INIT	1000
 #define MAX_VARS_FACTOR	5
+
+using namespace std;
 
 void EnumeratorSolutionsStandard::fs_reset()
 {
@@ -436,16 +440,22 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
 					used_vars++;
 					if ( used_vars > *info.max_vars )
 					{
-						gsfprintf(stderr,"warning: Need more than %i variables to find all valuations of ",*info.max_vars);
+						stringstream msg;
+						msg << "need more than " << *info.max_vars << " variables to find all valuations of ";
 						for (ATermList k=enum_vars; !ATisEmpty(k); k=ATgetNext(k))
 						{
 							if ( k != enum_vars )
 							{
-								gsfprintf(stderr,", ");
+								msg << ", ";
 							}
-							gsfprintf(stderr,"%P: %P",ATgetFirst(k),ATgetArgument((ATermAppl) ATgetFirst(k),1));
+							PrintPart_CXX(msg,ATgetFirst(k),ppDefault);
+							msg << ": ";
+							PrintPart_CXX(msg,ATgetArgument((ATermAppl) ATgetFirst(k),1),ppDefault);
 						}
-						gsfprintf(stderr," that satisfy %P\n",info.rewr_obj->fromRewriteFormat(info.rewr_obj->rewriteInternal(enum_expr)));
+						msg << " that satisfy ";
+						PrintPart_CXX(msg,(ATerm) info.rewr_obj->fromRewriteFormat(info.rewr_obj->rewriteInternal(enum_expr)),ppDefault);
+						msg << endl;
+						gsWarningMsg("%s",msg.str().c_str());
 						*info.max_vars *= MAX_VARS_FACTOR;
 					}
 				}
@@ -462,7 +472,7 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
 						{
 							if ( check_true && !ATisEqual(fs_top().expr,info.rewr_true) )
 							{
-								gsfprintf(stderr,"Term does not evaluate to true or false: %P\n",info.rewr_obj->fromRewriteFormat(fs_top().expr));
+								gsErrorMsg("term does not evaluate to true or false: %P\n",info.rewr_obj->fromRewriteFormat(fs_top().expr));
 								error = true;
 								fs_reset();
 								info.rewr_obj->clearSubstitution(var);
@@ -522,7 +532,7 @@ void EnumeratorSolutionsStandard::reset(ATermList Vars, ATerm Expr, bool true_on
 		{
 			if ( check_true && !ATisEqual(fs_bottom().expr,info.rewr_true) )
 			{
-				gsfprintf(stderr,"Term does not evaluate to true or false: %P\n",info.rewr_obj->fromRewriteFormat(fs_bottom().expr));
+				gsErrorMsg("term does not evaluate to true or false: %P\n",info.rewr_obj->fromRewriteFormat(fs_bottom().expr));
 				error = true;
 			} else {
 				ss_push(build_solution(enum_vars,fs_bottom().vals));
