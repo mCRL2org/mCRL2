@@ -43,7 +43,7 @@ along with PStreams; if not, write to the Free Software Foundation, Inc.,
 #include <cstddef>      // for size_t
 #include <cstdlib>      // for exit()
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32))
-#include <nt_portability/substitutes.h>
+#include <substitutes.h>
 #else
 #include <sys/types.h>  // for pid_t
 #include <sys/wait.h>   // for waitpid()

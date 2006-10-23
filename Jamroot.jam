@@ -12,6 +12,10 @@ include $(TOP)/build/testing.jam ;
 
 if ! $(REVISION) {
   REVISION = [ MATCH ([0-9]*) : [ SHELL "svnversion -n $(TOP)" ] ] ;
+
+  if ! $(REVISION) {
+    REVISION = "0" ;
+  }
 }
 
 project toolset
@@ -24,7 +28,7 @@ project toolset
           <os>CYGWIN,<toolset>gcc:<link>static
           <os>LINUX,<toolset>gcc:<cxxflags>"-std=c++98 -ansi"
           <toolset>msvc:<define>WIN32
-          <toolset>msvc:<include>src/libraries/auxiliary/include/nt_portability
+          <toolset>msvc:<include>build/workarounds
           <define>REVISION=$(REVISION)
        : default-build
           <address-model>$(ADDRESS_MODEL)
@@ -37,6 +41,7 @@ use-project /site-config               : build ;
 use-project /libraries/sip             : src/squadt/libraries/sip/build ;
 use-project /boost                     : boost ;
 use-project /libraries                 : src/libraries ;
+use-project /workarounds/msvc          : build/workarounds/msvc ;
 
 tools = [ MATCH src/(.*)/.* : [ glob src/*/Jamfile.v2 ] ] ;
 

@@ -10,7 +10,6 @@
 #include <iostream>
 
 #include <boost/any.hpp>
-#include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <xml2pp/text_reader.h>
@@ -621,15 +620,6 @@ namespace sip {
     inline void enumeration::initialise() {
     }
 
-    /**
-     * @param[in] s any string
-     **/
-    inline enumeration::enumeration(std::string const& s) : default_value(0) {
-      assert(boost::regex_search(s, boost::regex("\\`[A-Za-z0-9_\\-]+\\'")));
-
-      values.push_back(s);
-    }
-
     inline enumeration::enumeration() : default_value(0) {
     }
 
@@ -693,7 +683,7 @@ namespace sip {
      ************************************************************************/
 
     inline void string::initialise() {
-      standard = basic_datatype::sptr(new string);
+      standard = basic_datatype::sptr(new datatype::string);
     }
 
     inline string::string() : minimum_length(0), maximum_length(UINT_MAX), default_value(empty) {

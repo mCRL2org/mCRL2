@@ -1,0 +1,9 @@
+project workarounds/msvc
+       : build-dir $(BUILD_TOP)
+       : usage-requirements
+         <include>.
+       ;
+
+lib getopt 
+       : getopt.c getopt1.c
+       ;

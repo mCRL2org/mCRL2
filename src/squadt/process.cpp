@@ -5,7 +5,7 @@
 #include <csignal>
 
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32))
-# include <nt_portability/substitutes.h>
+# include <substitutes.h>
 #else
 # include <unistd.h>
 # include <sys/wait.h>

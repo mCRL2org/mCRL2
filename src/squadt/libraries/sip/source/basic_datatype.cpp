@@ -1,5 +1,7 @@
 #include <sip/detail/basic_datatype.h>
 
+#include <boost/regex.hpp>
+
 namespace sip {
 
   namespace datatype {
@@ -240,6 +242,15 @@ namespace sip {
     /************************************************************************
      * Implementation of Enumeration
      ************************************************************************/
+
+    /**
+     * @param[in] s any string
+     **/
+    enumeration::enumeration(std::string const& s) : default_value(0) {
+      assert(boost::regex_search(s, boost::regex("\\`[A-Za-z0-9_\\-]+\\'")));
+
+      values.push_back(s);
+    }
 
     /**
      * @param[in] s any string

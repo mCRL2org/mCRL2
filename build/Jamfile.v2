@@ -43,13 +43,15 @@ alias winsock : winsock32 ws2_32 ;
 lib winsock32 : : <name>"wsock32" ;
 lib ws2_32 : : <name>"ws2_32" ;
 
-lib xml2
-      :
-      : <name>"xml2"
-      :
-      : <cxxflags>"$(XML2_CPPFLAGS)"
-        <linkflags>"$(XML2_LDFLAGS)"
-      ;
+if $(XML2_CPPFLAGS) {
+  lib xml2
+        :
+        : <name>"xml2"
+        :
+        : <cxxflags>"$(XML2_CPPFLAGS)"
+          <linkflags>"$(XML2_LDFLAGS)"
+        ;
+}
 
 if $(CADP_HEADERS) {
   lib bcg : : <name>BCG <search>$(CADP_LIBRARIES) ;

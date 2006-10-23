@@ -38,8 +38,8 @@ alias messenger
     : # no default build
     :
       <library>/boost//thread
-      <library>/boost//filesystem
       <library>/boost//regex
+      <library>/boost//filesystem
       <library>/libraries//xml2pp
     ;
 
@@ -51,5 +51,5 @@ lib sip_controller
 lib sip_tool
     : tool.cpp
       messenger
-    : <threading>multi
+    :
     ;
