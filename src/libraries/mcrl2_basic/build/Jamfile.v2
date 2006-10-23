@@ -86,7 +86,8 @@ lib mcrl2_basic
          <include>../include/print
          <include>../include/struct
          <include>../include/lowlevel
-         <library>/libraries//pstream
+         <toolset>gcc:<library>/libraries//pstream
+         <toolset>darwin:<library>/libraries//pstream
        : <include>$(SETUP)
        : <library>/libraries//aterm
          <os>LINUX:<library>/site-config//m

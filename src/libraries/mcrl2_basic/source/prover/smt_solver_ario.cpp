@@ -1,3 +1,4 @@
+#ifndef _MSC_VER
 // Implementation of class SMT_Solver_Ario
 // file: smt_solver_ario.cpp
 
@@ -59,3 +60,5 @@ using namespace redi;
         exit(1);
       }
     }
+
+#endif // _MSC_VER

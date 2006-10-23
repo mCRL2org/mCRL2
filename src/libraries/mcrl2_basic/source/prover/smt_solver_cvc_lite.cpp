@@ -1,3 +1,5 @@
+#ifndef _MSC_VER
+
 // Implementation of class SMT_Solver_CVC_Lite
 // file: smt_solver_cvc_lite.cpp
 
@@ -61,3 +63,5 @@ using namespace redi;
         exit(1);
       }
     }
+
+#endif // _MSC_VER
