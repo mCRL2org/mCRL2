@@ -21,6 +21,7 @@ if ! $(REVISION) {
 project toolset
        : build-dir $(BUILD_TOP)
        : requirements
+          <include>build/workarounds
           <define>_FILE_OFFSET_BITS=64
           <toolset>darwin:<define>__darwin__
           <toolset>darwin:<cxxflags>"-std=c++98 -ansi"
@@ -29,8 +30,7 @@ project toolset
           <os>LINUX,<toolset>gcc:<cxxflags>"-std=c++98 -ansi"
           <toolset>darwin:<threading>multi
           <toolset>msvc:<define>WIN32
-          <toolset>msvc:<include>build/workarounds
-          <toolset>msvc:<include>build
+          <toolset>msvc:<include>build/workarounds/msvc
           <define>REVISION=$(REVISION)
        : default-build
           <address-model>$(ADDRESS_MODEL)
