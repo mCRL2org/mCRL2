@@ -15,10 +15,12 @@ exe squadt
         <wx>basic
       ;
 
+# dummy for non-msvc builds
+alias process_wrapper ;
+
 exe process_wrapper
       : process_wrapper.cpp
-      : <os>LINUX:<build>no
-        <os>MACOSX:<build>no
+      : <toolset>msvc
       ;
 
 install_with_libraries install

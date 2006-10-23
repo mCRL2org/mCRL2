@@ -1,13 +1,14 @@
-project lpe2torx
+project toolset/lpe2torx
        : build-dir $(BUILD_TOP)/lpe2torx
        ;
 
 exe lpe2torx
        : lpe2torx.cpp
-       : <source>/libraries//mcrl2_basic
-         <source>/libraries/lpe//dataelm
-         <source>/libraries//nextstate
-         <include>.
+         /libraries//mcrl2_basic
+         /libraries/lpe//dataelm
+         /libraries//nextstate
+       : <include>.
+         <toolset>msvc:<library>/workarounds/msvc//getopt
        ;
 
 install_with_libraries install : lpe2torx ;

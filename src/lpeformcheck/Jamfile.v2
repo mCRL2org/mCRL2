@@ -1,4 +1,4 @@
-project lpeformcheck
+project toolset/lpeformcheck
   : build-dir $(BUILD_TOP)/lpeformcheck
   ;
 
@@ -7,6 +7,7 @@ exe lpeformcheck
        : <source>/libraries//prover
          <include>.
 #         <toolset>gcc:<define>CVC_LITE_LIB
+         <toolset>msvc:<library>/workarounds/msvc//getopt
        ;
 
 install_with_libraries install : lpeformcheck ;

@@ -1,4 +1,4 @@
-project ltsinfo
+project toolset/ltsinfo
        : build-dir $(BUILD_TOP)/ltsinfo
        ;
 
@@ -6,8 +6,9 @@ exe ltsinfo
        : ltsinfo.cpp
          /libraries//mcrl2_basic
          /libraries//lts
-       : <squadt_support>enable
-         <include>.
+       : <include>.
+         <toolset>msvc:<library>/workarounds/msvc//getopt
+         <squadt_support>enable
        ;
 
 install_with_libraries install : ltsinfo ;

@@ -21,6 +21,7 @@ exe sim
        : sim.cpp
          /libraries//nextstate
          /libraries//mcrl2_basic
+       : <toolset>msvc:<library>/workarounds/msvc//getopt
        ;
 
 # Gather names of view plugins

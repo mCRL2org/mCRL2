@@ -7,8 +7,9 @@ exe ltsconvert
          /libraries//mcrl2_basic
          /libraries//lts
          /libraries//svc
-       : <squadt_support>enable
-         <include>.
+       : <include>.
+         <toolset>msvc:<library>/workarounds/msvc//getopt
+         <squadt_support>enable
        ;
 
 exe svc2fsm
@@ -16,7 +17,8 @@ exe svc2fsm
          /libraries//mcrl2_basic
          /libraries//aterm
          /libraries//svc
-       : <status>deprecated
+       : <toolset>msvc:<library>/workarounds/msvc//getopt
+         <status>deprecated
        ;
 
 install_with_libraries install : ltsconvert : <status>deprecated:<use>install-deprecated ;

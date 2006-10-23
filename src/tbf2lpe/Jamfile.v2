@@ -1,4 +1,4 @@
-project tbf2lpe
+project toolset/tbf2lpe
        : build-dir $(BUILD_TOP)/tbf2lpe
        ;
 
@@ -7,6 +7,7 @@ exe tbf2lpe
          lpetrans.cpp
          /libraries//mcrl2_basic
        : <include>.
+         <toolset>msvc:<library>/workarounds/msvc//getopt
        ;
 
 install_with_libraries install : tbf2lpe ;

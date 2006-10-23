@@ -14,7 +14,8 @@ exe mcrl22lpe
          /libraries//parser
          /libraries/parser//alpha
          /libraries//mcrl2_basic
-       : <squadt_support>enable
+       : <toolset>msvc:<library>/workarounds/msvc//getopt
+         <squadt_support>enable
        ;
 
 exe lin
@@ -23,7 +24,8 @@ exe lin
          /libraries//parser
          /libraries/parser//alpha
          /libraries//mcrl2_basic
-       : <status>experimental
+       : <toolset>msvc:<library>/workarounds/msvc//getopt
+         <status>experimental
        ;
 
 exe alpha
@@ -31,7 +33,8 @@ exe alpha
          /libraries//parser
          /libraries/parser//alpha
          /libraries//mcrl2_basic
-       : <status>experimental
+       : <toolset>msvc:<library>/workarounds/msvc//getopt
+         <status>experimental
        ;
 
 install_with_libraries install : mcrl22lpe : <status>experimental:<dependency>install-experimental ;

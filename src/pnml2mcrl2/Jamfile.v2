@@ -1,12 +1,13 @@
-project pnml2mcrl2
+project toolset/pnml2mcrl2
        : build-dir $(BUILD_TOP)/pnml2mcrl2
        ;
 
 exe pnml2mcrl2
        : pnml2mcrl2.cpp
-       : <source>/libraries//mcrl2_basic
-         <source>/libraries//parser
-         <include>.
+         /libraries//mcrl2_basic
+         /libraries//parser
+       : <include>.
+         <toolset>msvc:<library>/workarounds/msvc//getopt
          <xml2>library
        ;
 

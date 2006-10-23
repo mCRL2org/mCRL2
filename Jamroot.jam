@@ -27,8 +27,10 @@ project toolset
           <os>CYGWIN,<toolset>gcc:<runtime-link>static
           <os>CYGWIN,<toolset>gcc:<link>static
           <os>LINUX,<toolset>gcc:<cxxflags>"-std=c++98 -ansi"
+          <toolset>darwin:<threading>multi
           <toolset>msvc:<define>WIN32
           <toolset>msvc:<include>build/workarounds
+          <toolset>msvc:<include>build
           <define>REVISION=$(REVISION)
        : default-build
           <address-model>$(ADDRESS_MODEL)

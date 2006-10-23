@@ -11,6 +11,7 @@ exe ltsmin
          /libraries//mcrl2_basic
          /libraries//svc
        : <include>.
+         <toolset>msvc:<library>/workarounds/msvc//getopt
        ;
 
 install_with_libraries install : ltsmin ;

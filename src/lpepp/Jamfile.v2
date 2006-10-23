@@ -1,4 +1,4 @@
-project lpepp
+project toolset/lpepp
        : source-location .
        : build-dir $(BUILD_TOP)/lpepp
        ;
@@ -7,6 +7,7 @@ exe lpepp
        : lpepp.cpp
          /libraries//mcrl2_basic
        : <include>.
+         <toolset>msvc:<library>/workarounds/msvc//getopt
        ;
 
 install_with_libraries install : lpepp ;

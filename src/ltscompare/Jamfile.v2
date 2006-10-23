@@ -1,4 +1,4 @@
-project ltscompare
+project toolset/ltscompare
        : build-dir $(BUILD_TOP)/ltscompare
        ;
 
@@ -8,6 +8,7 @@ exe ltscompare
          /libraries//lts
          /libraries//svc
        : <include>.
+         <toolset>msvc:<library>/workarounds/msvc//getopt
        ;
 
 install_with_libraries install : ltscompare ;

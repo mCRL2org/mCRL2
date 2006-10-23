@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <getopt.h>
 #include <aterm2.h>
 #include "liblowlevel.h"
 #include "libstruct.h"

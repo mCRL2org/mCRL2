@@ -3,7 +3,6 @@ project parser
        : build-dir $(BUILD_TOP)
        : requirements
           <include>../include
-          <include>../../auxiliary/include
        : usage-requirements
           <include>../include
        ;
