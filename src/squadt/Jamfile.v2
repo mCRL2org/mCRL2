@@ -4,8 +4,10 @@ project toolset/squadt
     <include>./libraries
   ;
 
+import set ;
+
 exe squadt
-      : [ glob *.cpp ]
+      : [ set.difference [ glob *.cpp ] : process_wrapper.cpp ]
         /libraries//md5pp
         /libraries/sip//sip_controller
       : <include>$(SETUP)
@@ -13,8 +15,15 @@ exe squadt
         <wx>basic
       ;
 
+exe process_wrapper
+      : process_wrapper.cpp
+      : <os>LINUX:<build>no
+        <os>MACOSX:<build>no
+      ;
+
 install_with_libraries install
 	: squadt
+          process_wrapper
         : <dependency>install-image-data
           <dependency>install-schema-data
           <wx>availability
