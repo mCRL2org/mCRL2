@@ -42,9 +42,13 @@ along with PStreams; if not, write to the Free Software Foundation, Inc.,
 #include <cerrno>       // for errno
 #include <cstddef>      // for size_t
 #include <cstdlib>      // for exit()
+#if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32))
+#include <nt_portability/substitutes.h>
+#else
 #include <sys/types.h>  // for pid_t
 #include <sys/wait.h>   // for waitpid()
 #include <sys/ioctl.h>  // for ioctl() and FIONREAD
+#endif
 #if defined(__sun)
 # include <sys/filio.h> // for FIONREAD on Solaris 2.5
 #endif
