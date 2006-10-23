@@ -212,10 +212,12 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   result &= c.object_exists(lts_file_for_input);
   result &= c.object_exists(lts_file_for_output);
 
-  if (c.get_object(lts_file_for_output)->get_format() == "fsm" ||
-      (c.get_object(lts_file_for_output)->get_format() == "svc" && c.get_object(lts_file_for_input)->get_format() != "svc")) {
-
-    result &= c.object_exists(lpd_file_auxiliary);
+  if (result) {
+    if (c.get_object(lts_file_for_output)->get_format() == "fsm" ||
+        (c.get_object(lts_file_for_output)->get_format() == "svc" && c.get_object(lts_file_for_input)->get_format() != "svc")) {
+ 
+      result &= c.object_exists(lpd_file_auxiliary);
+    }
   }
 
   result &= c.option_exists(option_selected_output_format);

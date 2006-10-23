@@ -1,7 +1,6 @@
 path-constant TOP             : . ;
 path-constant BUILD_TOP       : ./bin ;                  # Common build directory
 path-constant BOOST_ROOT      : ./boost ;                # Boost prefix (packaged sources)
-path-constant BOOST           : ./boost ;                # Boost prefix (possibly system)
 path-constant SETUP           : ./src ;                  # Header file for run-time configuration
 
 # Activate header cache
@@ -27,7 +26,6 @@ project toolset
           <toolset>msvc:<define>WIN32
           <toolset>msvc:<include>src/libraries/auxiliary/include/nt_portability
           <define>REVISION=$(REVISION)
-          <define>BOOST_ALL_NO_LIB
        : default-build
           <address-model>$(ADDRESS_MODEL)
           <variant>$(BUILD_VARIANT)

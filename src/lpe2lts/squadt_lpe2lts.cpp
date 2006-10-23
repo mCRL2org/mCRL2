@@ -237,7 +237,6 @@ void squadt_lpe2lts::user_interactive_configuration(sip::configuration &configur
 
 bool squadt_lpe2lts::check_configuration(sip::configuration const &configuration) const
 {
-std::cerr << "1st :" <<configuration.object_exists(lpd_file_for_input_no_lts) << "||" << configuration.object_exists(lpd_file_for_input_lts) << "&&" << configuration.object_exists(lts_file_for_output) << std::endl;
   return (
       configuration.object_exists(lpd_file_for_input_no_lts) ||
       (configuration.object_exists(lpd_file_for_input_lts) &&
@@ -327,8 +326,6 @@ void squadt_lpe2lts::create_status_display()
     using namespace sip::layout;
     using namespace sip::layout::elements;
   
-    status_display = sip::layout::tool_display::sptr(new layout::tool_display);
-  
     /* Create and add the top layout manager */
     layout_manager = layout::vertical_box::create();
     labels = layout::horizontal_box::create();
@@ -363,9 +360,7 @@ void squadt_lpe2lts::create_status_display()
     layout_manager->add(labels.get(), margins(0,5,0,5));
     layout_manager->add(progbar, margins(0,5,0,5));
   
-    status_display->set_top_manager(layout_manager);
-  
-    m_communicator.send_display_layout(status_display);
+    send_display_layout(layout_manager);
   }
 #endif
 }

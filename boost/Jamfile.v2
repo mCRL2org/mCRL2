@@ -10,9 +10,10 @@ project boost
        : requirements
           <include>.
           <define>BOOST_ALL_NO_LIB=1
+          <include>$(BOOST_ROOT)
           <tag>@$(__name__).tag
        : usage-requirements
-          <include>. 
+          <include>$(BOOST_ROOT)
        ;
 
 # This rule is called by Boost.Build to determine the name of  
@@ -57,11 +58,7 @@ libraries = [ MATCH .*libs/(.*)/build/.* : [ glob libs/*/build/Jamfile.v2 ] ] ;
 
 # Make project ids of all libraries known.
 for local l in $(libraries) {
-  alias $(l)
-       : libs/$(l)/build//boost_$(l)
-       :
-       :
-       : <include>$(TOP)/boost
-       ;
+  alias $(l) : libs/$(l)/build//boost_$(l) : : : ;
 }
 
+alias headers : : : : ;

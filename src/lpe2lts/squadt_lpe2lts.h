@@ -9,7 +9,6 @@ class squadt_lpe2lts: public squadt_tool_interface
 {
   public:
     squadt_lpe2lts() {};
-    virtual ~squadt_lpe2lts() {};
   
   public:
     void create_status_display();
