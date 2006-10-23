@@ -3,8 +3,13 @@
 
 #include <cstdlib>
 #include <csignal>
-#include <unistd.h>
-#include <sys/wait.h>
+
+#if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32))
+# include <nt_portability/substitutes.h>
+#else
+# include <unistd.h>
+# include <sys/wait.h>
+#endif
 
 #undef barrier
 
@@ -34,7 +39,7 @@ namespace squadt {
      * @param[in] c the command to execute
      **/
     void process::operator() (const command& c) {
-      boost::shared_array < char const* > arguments(c.argument_array());
+      boost::shared_array < char const* > arguments(c.get_argument_array());
 
       identifier = fork();
 
