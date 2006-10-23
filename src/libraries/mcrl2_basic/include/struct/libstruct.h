@@ -947,11 +947,11 @@ ATermAppl gsMakeDataExprNeq(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //Ret: Data expression for the inequality of DataExprLHS and DataExprRHS
 
 ATermAppl gsMakeDataExprIf(ATermAppl DataExprCond, ATermAppl DataExprThen,
-  ATermAppl DataExprIf);
+  ATermAppl DataExprElse);
 //Pre: DataExprCond is a data expression of sort Bool
-//     DataExprThen and DataExprIf are data expressions of the same sort, and
+//     DataExprThen and DataExprElse are data expressions of the same sort, and
 //     must be different from Unknown
-//Ret: Data expression for `if(DataExprCond, DataExprThen, DataExprIf)'
+//Ret: Data expression for `if(DataExprCond, DataExprThen, DataExprElse)'
 
 ATermAppl gsMakeDataExprC1(void);
 //Ret: Data expression for `1' of sort Pos
