@@ -204,8 +204,6 @@ namespace sip {
 
       transporter::disconnect();
 
-      task_queue.clear();
-
       // Unblock all waiters;
       BOOST_FOREACH(typename waiter_map::value_type w, waiters) {
         w.second->wake();
@@ -216,6 +214,8 @@ namespace sip {
     inline void basic_messenger_impl< M >::disconnect() {
 
       transporter::disconnect();
+
+      task_queue.clear();
 
       // Unblock all waiters;
       BOOST_FOREACH(typename waiter_map::value_type w, waiters) {

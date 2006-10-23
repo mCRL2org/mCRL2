@@ -8,7 +8,6 @@
 #include <boost/bind.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/foreach.hpp>
-#include <boost/thread/thread.hpp>
 
 #include "executor.h"
 
@@ -58,6 +57,9 @@ namespace squadt {
  
         /** \brief Execute a tool */
         void execute(const command&, boost::shared_ptr < task_monitor >&, bool, boost::shared_ptr < executor_impl >&);
+    
+        /** \brief Execute a command */
+        void execute(const command&, bool, boost::shared_ptr < executor_impl >&);
     
         /** \brief Terminate a specific process */
         inline void terminate(process*);
@@ -130,6 +132,22 @@ namespace squadt {
       else {
         /* queue command for later execution */
         delayed_commands.push_back(command_pair(c, l));
+      }
+    }
+
+    /**
+     * \param c the command that is to be executed
+     * \param b whether or not to circumvent the number of running processes limit
+     **/
+    inline void executor_impl::execute(command const& c, bool b, boost::shared_ptr < executor_impl >& w) {
+      boost::shared_ptr < task_monitor > p;
+
+      if (b || processes.size() < maximum_instance_count) {
+        start_process(c, p, w);
+      }
+      else {
+        /* queue command for later execution */
+        delayed_commands.push_back(std::make_pair(c, p));
       }
     }
 
@@ -227,8 +245,16 @@ namespace squadt {
      * \param[in] l a shared pointer a listener (or reference to) for process state changes
      * \param[in] b whether or not to circumvent the number of running processes limit
      **/
-    void executor::execute(const command& c, boost::shared_ptr < task_monitor >& l, bool b) {
+    void executor::execute(command const& c, boost::shared_ptr < task_monitor >& l, bool b) {
       impl->execute(c, l, b, impl);
+    }
+
+    /**
+     * \param[in] c the command that is to be executed
+     * \param[in] b whether or not to circumvent the number of running processes limit
+     **/
+    void executor::execute(command const& c, bool b) {
+      impl->execute(c, b, impl);
     }
   }
 }

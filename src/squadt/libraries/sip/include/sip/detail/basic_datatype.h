@@ -685,7 +685,7 @@ namespace sip {
      * @param[in] s any string
      **/
     inline bool enumeration::validate(std::string const& s) const {
-      return (std::find(values.begin(), values.end(), s) != values.end());
+      return (boost::lexical_cast < size_t > (s) < values.size());
     }
 
     /************************************************************************

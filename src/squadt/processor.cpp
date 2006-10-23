@@ -111,7 +111,7 @@ namespace squadt {
     get_logger()->log(2, "No custom display change event handler connected!\n");
   }
 
-  void processor::monitor::display_data_change_dummy(sip::layout::tool_display::constant_elements const&) {
+  void processor::monitor::display_update_change_dummy(sip::layout::tool_display::constant_elements const&) {
     get_logger()->log(2, "No custom display state change event handler connected!");
   }
 
@@ -125,14 +125,14 @@ namespace squadt {
   processor::monitor::monitor(processor& o) : owner(o) {
     status_change_handler  = boost::bind(&processor::monitor::status_change_dummy, this);
     layout_change_handler  = boost::bind(&processor::monitor::display_layout_change_dummy, this, _1);
-    state_change_handler   = boost::bind(&processor::monitor::display_data_change_dummy, this, _1);
+    state_change_handler   = boost::bind(&processor::monitor::display_update_change_dummy, this, _1);
     message_change_handler = boost::bind(&processor::monitor::status_message_change_dummy, this, _1);
 
     /* Set the handler for incoming layout messages */
     activate_display_layout_handler(layout_change_handler);
 
     /* Set the handler for incoming layout messages */
-    activate_display_data_handler(sip::layout::tool_display::sptr(), state_change_handler);
+    activate_display_update_handler(sip::layout::tool_display::sptr(), state_change_handler);
   }
 
   /**
@@ -258,9 +258,9 @@ namespace squadt {
    * \param[in] d the tool display associated with this monitor
    * \param[in] h the function or functor that is invoked at layout change
    **/
-  void processor::monitor::set_display_data_handler(sip::layout::tool_display::sptr d, display_data_callback_function h) {
+  void processor::monitor::set_display_update_handler(sip::layout::tool_display::sptr d, display_update_callback_function h) {
     /* Set the handler for incoming layout messages */
-    activate_display_data_handler(d, h);
+    activate_display_update_handler(d, h);
   }
 
   /**
@@ -278,11 +278,11 @@ namespace squadt {
     activate_display_layout_handler(layout_change_handler);
   }
 
-  void processor::monitor::reset_display_data_handler() {
+  void processor::monitor::reset_display_update_handler() {
     /* Set the handler for incoming layout messages */
-    state_change_handler = boost::bind(&processor::monitor::display_data_change_dummy, this, _1);
+    state_change_handler = boost::bind(&processor::monitor::display_update_change_dummy, this, _1);
 
-    activate_display_data_handler(sip::layout::tool_display::sptr(), state_change_handler);
+    activate_display_update_handler(sip::layout::tool_display::sptr(), state_change_handler);
   }
 
   void processor::monitor::reset_status_message_handler() {

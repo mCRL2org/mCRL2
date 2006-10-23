@@ -42,7 +42,7 @@ namespace squadt {
 
       private:
 
-        miscellaneous::type_registry::sptr tool_registry;
+        miscellaneous::type_registry::sptr registry;
 
         wxListView*                        formats_and_actions;
 
@@ -121,31 +121,60 @@ namespace squadt {
       formats_and_actions->SetColumnWidth(1, (width * 2 + 2) / 3);
     }
 
+    /* Convenience function */
+    inline wxListItem get_wxlist_value(wxListCtrl* l, size_t r, size_t c) {
+       wxListItem s;
+
+       s.SetId(r);
+       s.SetColumn(c);
+
+       l->GetItem(s);
+
+       return (s);
+    }
+
     void edit_preferences::apply_button_activated(wxCommandEvent&) {
+      using namespace squadt::miscellaneous;
+
       long selected = formats_and_actions->GetFirstSelected();
 
       if (0 <= selected) {
-        wxListItem s;
+        wxListItem s(get_wxlist_value(formats_and_actions, selected, 1));
 
-        s.SetId(selected);
-        s.SetColumn(1);
-
-        formats_and_actions->GetItem(s);
-
-        wxString new_command = command_text->GetValue();
+        mime_type   type(std::string(get_wxlist_value(formats_and_actions, selected, 0).GetText().fn_str()));
+        wxString    new_command = command_text->GetValue();
 
         if (new_command.IsEmpty()) {
           s.SetText(no_action);
+
+          registry->register_command(type, type_registry::command_none);
+        }
+        else if (new_command.Lower() == wxT("system")) {
+
+          registry->register_command(type, type_registry::command_system);
+
+          if (registry->has_registered_command(type)) {
+            std::auto_ptr < command > command_line = registry->get_registered_command(type, "$");
+
+            s.SetText(wxString(command_line->argument_string().c_str(), wxConvLocal));
+          }
+          else {
+            s.SetText(no_action);
+          }
         }
         else if (new_command != no_action) {
           s.SetText(new_command);
+
+          registry->register_command(type, std::string(new_command.fn_str()));
         }
 
         formats_and_actions->SetItem(s);
       }
     }
 
-    edit_preferences::edit_preferences(miscellaneous::type_registry::sptr const& h, wxWindow* w) : wxPanel(w, wxID_ANY), tool_registry(h) {
+    edit_preferences::edit_preferences(miscellaneous::type_registry::sptr const& h, wxWindow* w) : wxPanel(w, wxID_ANY), registry(h) {
+      using namespace squadt::miscellaneous;
+
       wxSizer* current_sizer = new wxBoxSizer(wxVERTICAL);
 
       SetSizer(current_sizer);
@@ -164,9 +193,12 @@ namespace squadt {
 
       long row = 0;
 
-      BOOST_FOREACH(storage_format f, tool_registry->get_storage_formats()) {
+      BOOST_FOREACH(storage_format f, registry->get_storage_formats()) {
+        std::auto_ptr < command > command_line = registry->get_registered_command(f, "$");
+
         formats_and_actions->InsertItem(row, wxString(f.c_str(), wxConvLocal));
-        formats_and_actions->SetItem(row++, 1, no_action);
+
+        formats_and_actions->SetItem(row++, 1, command_line.get() ? wxString(command_line->argument_string().c_str(), wxConvLocal) : no_action);
       }
 
       known_formats->AddSpacer(5);

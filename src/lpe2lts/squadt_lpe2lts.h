@@ -30,7 +30,6 @@ class squadt_lpe2lts: public squadt_tool_interface
   protected:
     sip::layout::tool_display::sptr status_display;
     sip::layout::manager::aptr layout_manager;
-    sip::layout::manager::aptr labels;
     sip::layout::elements::label *lb_level;
     sip::layout::elements::label *lb_explored;
     sip::layout::elements::label *lb_seen;

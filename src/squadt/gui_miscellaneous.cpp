@@ -13,18 +13,21 @@ wxMimeTypesManager global_mime_types_manager;
 namespace squadt {
   namespace miscellaneous {
 
-    char* const mime_type::main_type_as_string[] = { "application", "audio", "image", "message", "multipart", "text", "video", 0 };
+    char* const       mime_type::main_type_as_string[] = { "application", "audio", "image", "message", "multipart", "text", "video", "" };
 
-    static const boost::regex match_type_and_subtype("([^ \\n()<>@,;:\\\\\"/\\[\\]?.=]+)/?([^ \\n()<>@,;:\\\\\"/\\[\\]?.=]+)?");
+    const std::string type_registry::command_system;
+    const std::string type_registry::command_none;
 
     /**
      * \param[in] s a string that represents a mime type
      **/
     mime_type::mime_type(std::string const& s) : m_main(unknown) {
+      static const boost::regex match_type_and_subtype("([^ \\n\\(\\)<>@,;:\\\\\"/\\[\\]?.=]+)(?:/([^ \\n\\(\\)<>@,;:\\\\\"/\\[\\]?.=]+))?");
+
       boost::smatch  matches;
 
       if (boost::regex_match(s, matches, match_type_and_subtype)) {
-        if (matches.size() == 3) {
+        if (matches.size() == 3 && !matches[2].str().empty()) {
           m_sub = matches[2];
 
           char* const* x = &main_type_as_string[0];
@@ -39,9 +42,12 @@ namespace squadt {
             ++x;
           }
         }
-        else if (matches.size() == 2) {
+        else {
           m_sub = matches[1];
         }
+      }
+      else {
+        m_sub = "unknown";
       }
     }
 
@@ -70,7 +76,7 @@ namespace squadt {
 
         for (sip::tool::capabilities::input_combination_list::const_iterator j = c.begin(); j != c.end(); ++j) {
           if (categories_for_format.find((*j).format) == categories_for_format.end()) {
-            /* Format is not known, create new map */
+            /* Format unknown, create new map */
             tools_for_category temporary;
 
             categories_for_format[(*j).format] = temporary;
@@ -144,40 +150,99 @@ namespace squadt {
       return (formats);
     }
 
+    /** \brief Whether or not a command is associated with this type */
+    bool type_registry::has_registered_command(mime_type const& t) const {
+      bool result = true;
+
+      if (command_for_type.find(t) == command_for_type.end()) {
+        result = (global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal)) != 0);
+      }
+      else {
+        result = ((*command_for_type.find(t)).second != command_none);
+      }
+
+      return (result);
+    }
+
     /**
      * \param[in] t mime type for which to get the associated command
      * \param[in] c the command to be associated with the type ($ is replaced by a valid filename)
+     *
+     * command_for_type[t] -> command_none    if c == command_none and command_for_type[t] == command_system
+     * command_for_type[t] -> command_none    if c == command_system and command_for_type[t] != command_system
      **/
-    void associate_command_with_mime_type(mime_type const& t, std::string const& c) {
-      static const boost::regex command_parse_expression("(executable)()*");
+    void type_registry::register_command(mime_type const& t, std::string const& c) {
+      assert(boost::regex_search(c, boost::regex("\\`[^[:word:]]*([[:word:][:punct:]]+)(?:[^[:word:]]+([[:word:][:punct:]]*))*\\'")));
 
-      boost::smatch  matches;
-
+      if (&c == &command_system) {
+        if (global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal)) != 0) {
+          command_for_type[t] = c;
+        }
+        else {
+          command_for_type[t] = global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal))->GetOpenCommand(wxT("$")).fn_str();
+        }
+      }
+      else if (c.empty()) {
+        command_for_type[t] = command_none;
+      }
+      else {
+        command_for_type[t] = c;
+      }
     }
 
     /**
      * \param[in] e extension for which to get the mime type
      **/
     std::auto_ptr < mime_type > type_registry::mime_type_for_extension(std::string const& e) const {
-      std::auto_ptr < mime_type > p;
+      std::auto_ptr < mime_type > result;
 
-//      global_mime_types_manager.GetFileTypeFromExtension(wxString(e.c_str(), wxConvLocal))->GetOpenCommand();
+      wxString file_mime_type;
 
-      return (p);
+      if (global_mime_types_manager.GetFileTypeFromExtension(wxString(e.c_str(), wxConvLocal))->GetMimeType(&file_mime_type)) {
+        result.reset(new mime_type(std::string(file_mime_type.fn_str())));
+      }
+
+      return (result);
     }
 
     /**
      * \param[in] t mime type for which to get the associated command
+     * \param[in] f name of the file to operate on
      **/
-    std::auto_ptr < command > type_registry::command_for_mime_type(mime_type const& t) const {
+    std::auto_ptr < command > type_registry::get_registered_command(mime_type const& t, std::string const& f) const {
       std::auto_ptr < command > p;
 
-//      std::string c(global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal)).fn_str());
+      std::map < mime_type, std::string >::const_iterator i = command_for_type.find(t);
 
-      // substitute values for %s, %t and %{}
-//      if (c) {
-//        static const boost::regex("\\%s");
-//      }
+      if (i != command_for_type.end()) {
+        std::string const& command_string = boost::regex_replace((*i).second, boost::regex("\\b\\$\\b"), f);
+
+        if (command_string == command_system) {
+          wxFileType* wxt = global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal));
+
+          if (wxt != 0) {
+            p = command::from_command_line(std::string(wxt->GetOpenCommand(wxString(f.c_str(), wxConvLocal)).fn_str()));
+          }
+        }
+        else if (command_string != command_none) {
+          p = command::from_command_line(command_string);
+        }
+      }
+      else {
+        wxFileType* wxt = global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal));
+
+        if (wxt != 0) {
+          p = command::from_command_line(std::string(wxt->GetOpenCommand(wxString(f.c_str(), wxConvLocal)).fn_str()));
+        }
+      }
+
+      if (p.get()) {
+        command::argument_sequence s = p->get_arguments();
+
+        for (command::argument_sequence::iterator i = s.begin(); i != s.end(); ++i) {
+          *i = boost::regex_replace(*i, boost::regex("\\`\\$\\'"), f);
+        }
+      }
 
       return (p);
     }

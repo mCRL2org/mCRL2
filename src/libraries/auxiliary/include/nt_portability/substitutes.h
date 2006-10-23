@@ -13,11 +13,12 @@
 #include <io.h>
 #include <unistd.h>
 
-#define snprintf _snprintf
-#define getpid   _getpid
-#define pipe     _pipe
+#define chdir    _chdir
 #define dup      _dup
 #define dup2     _dup2
+#define getpid   _getpid
+#define pipe     _pipe
+#define snprintf _snprintf
 
 typedef int pid_t;
 

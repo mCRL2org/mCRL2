@@ -51,17 +51,13 @@ void squadt_lpe2lts::set_capabilities(sip::tool::capabilities &cp) const
   cp.add_input_combination(lpd_file_for_input_lts, "Transformation", "lpe");
 }
 
-void squadt_lpe2lts::user_interactive_configuration(sip::configuration &configuration)
+void squadt_lpe2lts::user_interactive_configuration(sip::configuration& c)
 {
   using namespace sip;
   using namespace sip::layout;
   using namespace sip::layout::elements;
   
-  bool make_lts = configuration.object_exists(lpd_file_for_input_lts);
-
-  //status_display = sip::layout::tool_display::sptr(new layout::tool_display);
-  //layout::tool_display::sptr display(status_display);
-  tool_display::sptr display(new tool_display);
+  bool make_lts = c.object_exists(lpd_file_for_input_lts);
 
   /* Create and add the top layout manager */
   manager::aptr layout_manager = horizontal_box::create();
@@ -189,15 +185,10 @@ void squadt_lpe2lts::user_interactive_configuration(sip::configuration &configur
   /* Attach columns*/
   layout_manager->add(column, margins(0,5,0,5));
 
-  display->set_top_manager(layout_manager);
-
-  m_communicator.send_display_layout(display);
+  send_display_layout(layout_manager);
 
   /* Wait until the ok button was pressed */
   okay_button->await_change();
-
-  /* Update the current configuration */
-  sip::configuration &c = configuration;
 
   /* Values for the options */
   if ( make_lts )
@@ -247,6 +238,8 @@ bool squadt_lpe2lts::check_configuration(sip::configuration const &configuration
 bool squadt_lpe2lts::perform_task(sip::configuration &configuration)
 {
   lts_generation_options lgopts; initialise_lts_generation_options(lgopts);
+
+  create_status_display();
 
   lgopts.squadt = this;
 
@@ -328,7 +321,6 @@ void squadt_lpe2lts::create_status_display()
   
     /* Create and add the top layout manager */
     layout_manager = layout::vertical_box::create();
-    labels = layout::horizontal_box::create();
   
     /* First column */
     layout::vertical_box* column1 = new layout::vertical_box();
@@ -355,9 +347,10 @@ void squadt_lpe2lts::create_status_display()
     progbar = new progress_bar(0,0,0);
   
     /* Attach columns*/
+    layout::box* labels = new layout::horizontal_box();
     labels->add(column1, margins(0,5,0,5));
     labels->add(column2, margins(0,5,0,5));
-    layout_manager->add(labels.get(), margins(0,5,0,5));
+    layout_manager->add(labels, margins(0,5,0,5));
     layout_manager->add(progbar, margins(0,5,0,5));
   
     send_display_layout(layout_manager);

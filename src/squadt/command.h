@@ -1,7 +1,10 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
+#include <deque>
+
 #include <boost/shared_array.hpp>
+#include <boost/range/iterator_range.hpp>
 #include <boost/filesystem/operations.hpp>
 
 namespace squadt {
@@ -12,7 +15,7 @@ namespace squadt {
      *
      * The class serves as a helper for platform independent process execution.
      * Sadly the most portable standard available popen() and pclose() give not
-     * enough controll over a process. We need the ability to kill it. And on
+     * enough control over a process. We need the ability to kill it. And on
      * the other hand system() is not thread safe, so it is unusable.
      **/
     class command {
@@ -20,40 +23,66 @@ namespace squadt {
   
       private:
   
-        /** \brief path to the program that is to be executed */
+        /** \brief Path to the program that is to be executed */
         const std::string            executable;
 
-        /** \brief path to the working directory of the tool */
-        const std::string            working_directory;
+        /** \brief Path to the working directory of the tool */
+        std::string                  working_directory;
   
-        /** \brief the arguments to the command */
-        std::vector < std::string >  arguments;
+        /** \brief The arguments to the command */
+        std::deque < std::string >  arguments;
+
+      private:
+       
+        boost::shared_array < char const* > get_argument_array(bool = true) const;
+
+      public:
+
+        /** \brief A sequence of arguments that are part of a command */
+        typedef boost::iterator_range < std::deque < std::string >::const_iterator > const_argument_sequence;
   
+        /** \brief A sequence of arguments that are part of a command */
+        typedef boost::iterator_range < std::deque < std::string >::iterator >       argument_sequence;
+  
+      public:
+
+        /** \brief Parse command as if passed from the command line */
+        static std::auto_ptr < command > from_command_line(std::string const&);
+
       public:
   
         /** \brief Constructor */
-        inline command(const std::string&);
+        command(const std::string&);
 
         /** \brief Constructor with working directory */
-        inline command(const std::string&, std::string const&);
+        command(const std::string&, std::string const&);
 
         /** \brief Copy constructor */
-        inline command(command const&);
+        command(command const&);
 
         /** \brief Gets the working directory */
-        inline std::string get_working_directory() const;
+        std::string get_working_directory() const;
+  
+        /** \brief Sets the working directory */
+        void set_working_directory(std::string const&);
   
         /** \brief Adds an argument */
-        inline void append_argument(const std::string&);
+        void prepend_argument(std::string const&);
+
+        /** \brief Adds an argument */
+        void append_argument(std::string const&);
 
         /** \brief Get arguments as a traditional C string */
-        inline std::string argument_string(bool b = true) const;
+        std::string argument_string(bool = true) const;
 
         /** \brief Get arguments as an array of constant C strings */
-        inline boost::shared_array < char const* > argument_array(bool b = true) const;
+        const_argument_sequence get_arguments() const;
+
+        /** \brief Get arguments as an array of constant C strings */
+        argument_sequence get_arguments();
 
         /** \brief Returns the basename of the executable */
-        inline std::string get_executable_name() const;
+        std::string get_executable() const;
     };
   
     /**
@@ -81,54 +110,25 @@ namespace squadt {
       return (working_directory);
     }
 
+    inline void command::set_working_directory(std::string const& w) {
+      working_directory = w;
+    }
+
     /**
      * @param a a single argument
      **/
-    inline void command::append_argument(const std::string& a) {
-      arguments.push_back(a);
-    }
-  
-    inline std::string command::argument_string(bool b) const {
-      std::string s;
-
-      if (b) {
-        s.append(executable).append(" ");
-      }
-  
-      for (std::vector < std::string >::const_iterator i = arguments.begin(); i != arguments.end(); ++i) {
-        s.append(*i).append(" ");
-      }
-  
-      return (s);
+    inline void command::prepend_argument(std::string const& a) {
+      arguments.push_front(a);
     }
   
     /**
-     * @param[in] b whether the first argument must be the executable or not
-     *
-     * \attention the array of arguments that is returned consists of 
-     *   - the name of the executable, then
-     *   - the arguments in the order in which they were added
-     *   - a NULL pointer
+     * @param a a single argument
      **/
-    inline boost::shared_array < char const* > command::argument_array(bool b) const {
-      boost::shared_array < char const* > p(new char const*[arguments.size() + 2]);
-
-      char const** d = p.get();
-
-      if (b) {
-        *(d++) = executable.c_str();
-      }
-
-      for (std::vector < std::string >::const_iterator i = arguments.begin(); i != arguments.end(); ++i) {
-        *(d++) = (*i).c_str();
-      }
-
-      *d = 0;
-
-      return (p);
+    inline void command::append_argument(std::string const& a) {
+      arguments.push_back(a);
     }
-
-    inline std::string command::get_executable_name() const {
+  
+    inline std::string command::get_executable() const {
       return (boost::filesystem::path(executable).leaf());
     }
   }

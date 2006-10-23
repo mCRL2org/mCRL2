@@ -14,6 +14,7 @@
 #include <wx/treectrl.h>
 #include <wx/timer.h>
 
+#include "gui_miscellaneous.h"
 #include "processor.h"
 
 namespace squadt {
@@ -112,6 +113,9 @@ namespace squadt {
         /** \brief Instantiation of a builder for this project */
         builder                               gui_builder;
 
+        /** \brief Register instance */
+        miscellaneous::type_registry&         registry;
+
       private:
 
         /** \brief Initially places the widgets */
@@ -165,7 +169,7 @@ namespace squadt {
       public:
 
         /** \brief Constructor, with project description */
-        project(wxWindow* p, const boost::filesystem::path&, const std::string& = "", bool = false);
+        project(main* p, const boost::filesystem::path&, const std::string& = "", bool = false);
 
         /** \brief Store project specification */
         void store();

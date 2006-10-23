@@ -36,7 +36,7 @@ namespace sip {
         typedef boost::function < void (sip::layout::tool_display::sptr) >                     display_layout_handler_function;
 
         /** \brief Function type that for communicating display layouts */
-        typedef boost::function < void (std::vector < sip::layout::element const* > const&) >  display_data_handler_function;
+        typedef boost::function < void (std::vector < sip::layout::element const* > const&) >  display_update_handler_function;
 
         /** \brief Function type that for communicating display layouts */
         typedef boost::function < void (sip::report::sptr) >                                   status_message_handler_function;
@@ -61,7 +61,7 @@ namespace sip {
         void send_configuration();
  
         /** \brief Send data to update the state of the last communicated display layout */
-        void send_display_data(sip::layout::element const*);
+        void send_display_update(sip::layout::element const*);
  
         /** \brief Sends a message to a tool that it may start processing */
         void send_start_signal();
@@ -82,7 +82,7 @@ namespace sip {
         void activate_display_layout_handler(display_layout_handler_function);
 
         /** \brief Sets a handler for layout messages using a handler function */
-        void activate_display_data_handler(sip::layout::tool_display::sptr, display_data_handler_function);
+        void activate_display_update_handler(sip::layout::tool_display::sptr, display_update_handler_function);
 
         /** \brief Sets a handler for layout messages using a handler function */
         void activate_status_message_handler(status_message_handler_function);

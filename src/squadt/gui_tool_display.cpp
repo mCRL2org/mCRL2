@@ -538,7 +538,7 @@ namespace squadt {
       void state_change_handler::button_clicked(wxCommandEvent& e) {
         layout::elements::button const* b = static_cast < layout::elements::button const* > (element_for_window[e.GetEventObject()]);
 
-        monitor->send_display_data(b);
+        monitor->send_display_update(b);
       }
      
       void state_change_handler::radio_button_selected(wxCommandEvent& e) {
@@ -548,7 +548,7 @@ namespace squadt {
 
         r->set_selected(wxr->GetValue());
 
-        monitor->send_display_data(r);
+        monitor->send_display_update(r);
       }
      
       void state_change_handler::checkbox_clicked(wxCommandEvent& e) {
@@ -558,7 +558,7 @@ namespace squadt {
 
         c->set_status(wxc->GetValue());
 
-        monitor->send_display_data(c);
+        monitor->send_display_update(c);
       }
      
       void state_change_handler::text_field_changed(wxCommandEvent& e) {
@@ -568,7 +568,7 @@ namespace squadt {
 
         t->set_text(std::string(wxt->GetValue().fn_str()));
 
-        monitor->send_display_data(t);
+        monitor->send_display_update(t);
       }
 
       /**
@@ -819,7 +819,7 @@ namespace squadt {
     void tool_display::schedule_layout_change(sip::layout::tool_display::sptr l) {
       /** Register handler for updates */
       event_handler.clear();
-      event_handler.get_monitor()->set_display_data_handler(l, boost::bind(&GUI::tool_display::schedule_layout_update, this, _1));
+      event_handler.get_monitor()->set_display_update_handler(l, boost::bind(&GUI::tool_display::schedule_layout_update, this, _1));
 
       context->gui_builder.schedule_update(boost::bind(&tool_display::instantiate, this, current_layout, l));
     }

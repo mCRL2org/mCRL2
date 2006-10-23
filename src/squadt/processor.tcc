@@ -89,6 +89,9 @@ namespace squadt {
       /** \brief Constructor with tool selection */
       inline processor_impl(boost::shared_ptr < processor > const&, boost::weak_ptr < project_manager >, tool::sptr);
 
+      /** \brief Execute an edit command on one of the outputs */
+      void edit(execution::command const*);
+
       /** \brief Extracts useful information from a configuration object */
       void process_configuration(sip::configuration::sptr const& c);
 
@@ -870,6 +873,26 @@ namespace squadt {
     else {
       /* Signal completion to environment via monitor */
       current_monitor->signal_change(execution::process::aborted);
+    }
+  }
+
+  /**
+   * \param[in] c the edit command to execute
+   **/
+  inline void processor_impl::edit(execution::command const* c) {
+    assert(c != 0);
+
+    current_monitor->get_logger()->log(1, "executing command `" + c->argument_string() + "'\n");
+
+    global_tool_manager->execute(c, boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
+  }
+
+  /**
+   * \param[in] c the edit command to execute
+   **/
+  void processor::edit(execution::command const* c) {
+    if (c != 0) {
+      impl->edit(c);
     }
   }
 

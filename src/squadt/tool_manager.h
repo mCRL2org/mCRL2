@@ -20,6 +20,10 @@
 
 namespace squadt {
 
+  namespace execution {
+    class command;
+  }
+
   /**
    * \brief Basic component that provides information about a set of tools
    *
@@ -106,6 +110,10 @@ namespace squadt {
       template < typename T >
       void execute(tool&, std::string const&, T, bool);
 
+      /** \brief Execute a command */
+      template < typename T >
+      void execute(execution::command const*, T, bool);
+
       /** \brief This is the event handler for incoming identification messages */
       void handle_relay_connection(sip::message_ptr const&);
 
@@ -173,6 +181,15 @@ namespace squadt {
 
   inline const unsigned int tool_manager::number_of_tools() const {
     return (tools.size());
+  }
+
+  /**
+   * \param[in] c the command to run
+   * \param[in] b whether or not to circumvent the executor restriction mechanism
+   **/
+  template < typename T >
+  inline void tool_manager::execute(execution::command const* c, T p, bool b) {
+    local_executor.execute(*c, p, b);
   }
 
   /**

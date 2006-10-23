@@ -13,7 +13,7 @@ namespace sip {
       
       private:
 
-        typedef communicator::display_data_handler_function   display_data_handler_function;
+        typedef communicator::display_update_handler_function display_update_handler_function;
         typedef communicator::display_layout_handler_function display_layout_handler_function;
         typedef communicator::status_message_handler_function status_message_handler_function;
 
@@ -23,7 +23,7 @@ namespace sip {
         void display_layout_handler(messenger::message_ptr const&, display_layout_handler_function);
  
         /** \brief Handler function to replace the current display layout with a new one */
-        void display_data_handler(messenger::message_ptr const&, sip::layout::tool_display::sptr, display_data_handler_function);
+        void display_update_handler(messenger::message_ptr const&, sip::layout::tool_display::sptr, display_update_handler_function);
 
         /** \brief Handler function to replace the current display layout with a new one */
         void status_message_handler(messenger::message_ptr const&, status_message_handler_function);
@@ -43,7 +43,7 @@ namespace sip {
         display_layout_handler_function current_layout_handler;
 
         /** \brief The current handler for layout state change events */
-        display_data_handler_function   current_data_handler;
+        display_update_handler_function   current_data_handler;
  
       public:
 
@@ -54,7 +54,7 @@ namespace sip {
         void activate_display_layout_handler(display_layout_handler_function);
 
         /** \brief Sets a handler for layout messages using a handler function */
-        void activate_display_data_handler(sip::layout::tool_display::sptr, display_data_handler_function);
+        void activate_display_update_handler(sip::layout::tool_display::sptr, display_update_handler_function);
 
         /** \brief Sets a handler for layout messages using a handler function */
         void activate_status_message_handler(status_message_handler_function);
@@ -86,11 +86,11 @@ namespace sip {
      *
      * \pre d.get() != 0
      **/
-    inline void communicator_impl::activate_display_data_handler(sip::layout::tool_display::sptr d, display_data_handler_function h) {
+    inline void communicator_impl::activate_display_update_handler(sip::layout::tool_display::sptr d, display_update_handler_function h) {
       /* Remove any previous handlers */
-      clear_handlers(sip::message_display_data);
+      clear_handlers(sip::message_display_update);
 
-      add_handler(sip::message_display_data, boost::bind(&communicator_impl::display_data_handler, this, _1, d, h));
+      add_handler(sip::message_display_update, boost::bind(&communicator_impl::display_update_handler, this, _1, d, h));
 
       current_data_handler = h;
     }
@@ -122,7 +122,7 @@ namespace sip {
      * @param h the function that is called when data for the display has been received
      * @param d a shared pointer to a tool display
      **/
-    inline void communicator_impl::display_data_handler(const messenger::message_ptr& m, sip::layout::tool_display::sptr d, display_data_handler_function h) {
+    inline void communicator_impl::display_update_handler(const messenger::message_ptr& m, sip::layout::tool_display::sptr d, display_update_handler_function h) {
       if (d.get() != 0) {
         std::vector < sip::layout::element const* > elements;
 
@@ -148,7 +148,7 @@ namespace sip {
 
     /* Reply details about the amount of reserved display space */
     inline void communicator_impl::request_controller_capabilities_handler() {
-      message m(communicator::current_controller_capabilities.write(), sip::message_reply_controller_capabilities);
+      message m(communicator::current_controller_capabilities.write(), sip::message_response_controller_capabilities);
 
       send_message(m);
     }

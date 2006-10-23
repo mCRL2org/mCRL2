@@ -76,6 +76,9 @@ namespace squadt {
 
         /** \brief Compare for inequality */
         bool operator!= (mime_type const&) const;
+
+        /** \brief Compare for inequality */
+        bool operator< (mime_type const&) const;
     };
 
     /**
@@ -111,13 +114,13 @@ namespace squadt {
         /** \brief Iterator range type on tools_for_category */
         typedef boost::iterator_range < tools_for_category::const_iterator >  tool_sequence;
 
-      private:
+      public:
 
-        /** \brief Special value that indicates that the system command is linked (see command_for_type) */
-        static std::string   command_system_defined;
+        /** \brief Special value that indicates that the system specified command may be used (see command_for_type) */
+        static const std::string   command_system;
 
-        /** \brief Special value that indicates that no command is linked (see command_for_type) */
-        static std::string   command_none;
+        /** \brief Special value that indicates that no command is available (see command_for_type) */
+        static const std::string   command_none;
 
       private:
 
@@ -159,7 +162,13 @@ namespace squadt {
         std::auto_ptr < mime_type > mime_type_for_extension(std::string const&) const;
 
         /** \brief Returns a pointer to a command that performs a configured action on a file */
-        std::auto_ptr < command > command_for_mime_type(mime_type const&) const;
+        std::auto_ptr < command > get_registered_command(mime_type const&, std::string const& = "$") const;
+
+        /** \brief Associates a type with a command */
+        void register_command(mime_type const&, std::string const&);
+
+        /** \brief Whether or not a command is associated with this type */
+        bool has_registered_command(mime_type const&) const;
     };
 
     inline type_registry::type_registry() {
@@ -194,6 +203,10 @@ namespace squadt {
 
     inline bool mime_type::operator!=(mime_type const& r) const {
       return (m_main != r.m_main && m_sub != r.m_sub);
+    }
+
+    inline bool mime_type::operator<(mime_type const& r) const {
+      return (m_main < r.m_main || (m_main == r.m_main && m_sub < r.m_sub));
     }
   }
 }

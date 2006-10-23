@@ -138,7 +138,7 @@ namespace squadt {
     }
 
     inline std::string process::get_executable_name() const {
-      return (last_command->get_executable_name());
+      return (last_command->get_executable());
     }
 
     inline command const& process::get_command() const {

@@ -127,6 +127,9 @@ namespace squadt {
       /** \brief Check the inputs with respect to the outputs and adjust status accordingly */
       bool check_status(bool);
 
+      /** \brief Execute an edit command on one of the outputs */
+      void edit(execution::command const*);
+
       /** \brief Sets the status of the inputs to out-of-date if the processor is inactive */
       bool demote_status();
 
@@ -244,7 +247,7 @@ namespace squadt {
       typedef boost::function < void (sip::layout::tool_display::sptr) >                     display_layout_callback_function;
 
       /** \brief Type for functions that is used to handle incoming (G)UI state changes */
-      typedef boost::function < void (sip::layout::tool_display::constant_elements const&) > display_data_callback_function;
+      typedef boost::function < void (sip::layout::tool_display::constant_elements const&) > display_update_callback_function;
 
       /** \brief Type for functions that is used to handle incoming layout state changes */
       typedef boost::function < void (sip::report::sptr) >                                   status_message_callback_function;
@@ -263,7 +266,7 @@ namespace squadt {
       display_layout_callback_function layout_change_handler;
  
       /** \brief Actualisation function for user interface state changes */
-      display_data_callback_function   state_change_handler;
+      display_update_callback_function   state_change_handler;
  
       /** \brief Actualisation function for incoming change messages */
       status_message_callback_function message_change_handler;
@@ -283,7 +286,7 @@ namespace squadt {
       void display_layout_change_dummy(sip::layout::tool_display::sptr);
 
       /** \brief The default callback function that does nothing */
-      void display_data_change_dummy(sip::layout::tool_display::constant_elements const&);
+      void display_update_change_dummy(sip::layout::tool_display::constant_elements const&);
 
       /** \brief The default callback function that does nothing */
       void status_message_change_dummy(sip::report::sptr);
@@ -312,7 +315,7 @@ namespace squadt {
       void set_display_layout_handler(display_layout_callback_function);
 
       /** \brief Set the callback handler for display data changes */
-      void set_display_data_handler(sip::layout::tool_display::sptr, display_data_callback_function);
+      void set_display_update_handler(sip::layout::tool_display::sptr, display_update_callback_function);
 
       /** \brief Set the callback handler for incoming status messages */
       void set_status_message_handler(status_message_callback_function);
@@ -321,7 +324,7 @@ namespace squadt {
       void reset_display_layout_handler();
 
       /** \brief Set the callback handler for display data changes to default */
-      void reset_display_data_handler();
+      void reset_display_update_handler();
 
       /** \brief Set the callback handler for incoming status messages */
       void reset_status_message_handler();

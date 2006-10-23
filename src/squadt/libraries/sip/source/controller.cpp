@@ -86,8 +86,8 @@ namespace sip {
      *
      * \pre d.get() != 0
      **/
-    void communicator::activate_display_data_handler(sip::layout::tool_display::sptr d, display_data_handler_function h) {
-      boost::dynamic_pointer_cast < communicator_impl > (impl)->activate_display_data_handler(d, h);
+    void communicator::activate_display_update_handler(sip::layout::tool_display::sptr d, display_update_handler_function h) {
+      boost::dynamic_pointer_cast < communicator_impl > (impl)->activate_display_update_handler(d, h);
     }
 
     /**
@@ -99,8 +99,8 @@ namespace sip {
     /**
      * @param[in] e a sip layout element of which the data is to be sent
      **/
-    void communicator::send_display_data(sip::layout::element const* e) {
-      message m(e->get_state(), sip::message_display_data);
+    void communicator::send_display_update(sip::layout::element const* e) {
+      message m(e->get_state(), sip::message_display_update);
 
       impl->send_message(m);
     }

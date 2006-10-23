@@ -100,7 +100,7 @@ namespace sip {
         instance_identifier = id;
  
         /* Identify the tool instance to the controller */
-        sip::message m(boost::str(boost::format("%u") % id), sip::message_instance_identifier);
+        sip::message m(boost::str(boost::format("%u") % id), sip::message_instance_identification);
  
         send_message(m);
       }
@@ -113,15 +113,15 @@ namespace sip {
 
       send_message(m);
 
-      clear_handlers(sip::message_display_data);
+      clear_handlers(sip::message_display_update);
 
-      add_handler(sip::message_display_data, boost::bind(&communicator_impl::receive_display_data_handler, this, _1, d));
+      add_handler(sip::message_display_update, boost::bind(&communicator_impl::receive_display_data_handler, this, _1, d));
     }
 
     inline void communicator_impl::send_clear_display() {
       layout::tool_display display;
 
-      clear_handlers(sip::message_display_data);
+      clear_handlers(sip::message_display_update);
 
       message m(display.write(), sip::message_display_layout);
 
@@ -130,7 +130,7 @@ namespace sip {
 
     /* Send a specification of the tools capabilities */
     inline void communicator_impl::request_tool_capabilities_handler() {
-      message m(current_tool_capabilities.write(), sip::message_reply_tool_capabilities);
+      message m(current_tool_capabilities.write(), sip::message_response_tool_capabilities);
  
       send_message(m);
     }

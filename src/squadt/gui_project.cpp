@@ -15,6 +15,7 @@
 #include "gui_resources.h"
 #include "gui_miscellaneous.h"
 #include "project_manager.h"
+#include "tool_manager.h"
 #include "gui_dialog_base.h"
 #include "gui_tool_display.h"
 #include "gui_dialog_project.h"
@@ -82,8 +83,8 @@ namespace squadt {
      *  - read from l, if l is a project store
      *  - the default project_manager, and l is the new project store
      **/
-    project::project(wxWindow* p, const boost::filesystem::path& l, const std::string& d, bool b) :
-                                wxSplitterWindow(p, wxID_ANY), manager(project_manager::create(l, b)) {
+    project::project(main* p, const boost::filesystem::path& l, const std::string& d, bool b) :
+                                wxSplitterWindow(p, wxID_ANY), manager(project_manager::create(l, b)), registry(*p->registry) {
 
       if (!d.empty()) {
         manager->set_description(d);
@@ -303,19 +304,14 @@ namespace squadt {
       using namespace boost;
       using namespace squadt::miscellaneous;
 
-      size_t separator_position     = 2;
-      bool   editable               = false;
+      size_t separator_position     = 3;
+      bool   editable               = registry.has_registered_command(n.get_object()->format);
       bool   generated              = (0 < n.get_processor()->number_of_inputs());
       bool   show_update_operations = !n.get_processor()->is_active();
 
       wxMenu  context_menu;
 
-      if (editable) {
-        context_menu.Append(cmID_EDIT, wxT("Edit"))->Enable(show_update_operations);
-
-        ++separator_position;
-      }
-
+      context_menu.Append(cmID_EDIT, wxT("Edit"))->Enable(show_update_operations && editable);
       context_menu.Append(cmID_RENAME, wxT("Rename"))->Enable(show_update_operations);
       context_menu.Append(cmID_REMOVE, wxT("Remove"))->Enable(show_update_operations);
 
@@ -375,6 +371,7 @@ namespace squadt {
 
       switch (e.GetId()) {
         case cmID_EDIT:
+          p->edit(registry.get_registered_command(t->format, t->location).get());
           break;
         case cmID_REMOVE:
           manager->remove(p.get());

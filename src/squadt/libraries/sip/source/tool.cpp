@@ -7,9 +7,7 @@ namespace sip {
      * @param[in] e the layout element of which to send the state
      **/
     void element::update(tool::communicator* t, layout::element const* e) {
-#if defined(TOOL_SIDE)
       t->send_display_data(e);
-#endif
     }
   }
   namespace tool {
@@ -91,7 +89,7 @@ namespace sip {
  
       /* Await the reply */
       do {
-        message_ptr p = await_message(sip::message_reply_controller_capabilities);
+        message_ptr p = await_message(sip::message_response_controller_capabilities);
  
         if (p.get() != 0) {
           xml2pp::text_reader reader(p->to_string().c_str());
@@ -180,7 +178,7 @@ namespace sip {
 
       e->write_structure(c);
 
-      message m(c.str(), sip::message_display_data);
+      message m(c.str(), sip::message_display_update);
 
       impl->send_message(m);
     }

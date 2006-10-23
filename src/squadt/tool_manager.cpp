@@ -13,12 +13,15 @@
 #include "executor.h"
 #include "tool_manager.h"
 #include "task_monitor.h"
+#include "command.h"
 #include "extractor.h"
 #include "settings_manager.tcc"
 
 #include "setup.h"
 
 namespace squadt {
+
+  using execution::command;
 
   namespace bf = boost::filesystem;
 
@@ -51,7 +54,7 @@ namespace squadt {
     impl->add_listener();
 
     /* Set handler for incoming instance identification messages */
-    add_handler(sip::message_instance_identifier, boost::bind(&tool_manager::handle_relay_connection, this, _1));
+    add_handler(sip::message_instance_identification, boost::bind(&tool_manager::handle_relay_connection, this, _1));
   }
 
   void tool_manager::write(std::ostream& stream) const {
