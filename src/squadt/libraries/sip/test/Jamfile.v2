@@ -1,6 +1,6 @@
 project test_sip
     : requirements
-       <include>$(BOOST)
+       <include>$(BOOST_ROOT)
        <include>../../ ;
 
 import testing ;

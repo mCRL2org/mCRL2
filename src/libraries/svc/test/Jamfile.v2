@@ -2,7 +2,7 @@ import testing ;
 
 project libraries/svc/test
    : requirements
-       <include>$(BOOST)
+       <include>$(BOOST_ROOT)
        <source>/libraries//svc
    ;
 

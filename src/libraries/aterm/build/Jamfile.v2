@@ -34,9 +34,9 @@ lib aterm
 
 alias atermpp
        :
+       : <include>$(BOOST_ROOT)
        :
-       :
-       : <include>$(BOOST)
+       : <include>$(BOOST_ROOT)
          <library>aterm
        ;
 

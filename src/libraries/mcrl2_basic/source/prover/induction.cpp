@@ -73,6 +73,7 @@
           }
         }
       }
+
       return v_result;
     }
 

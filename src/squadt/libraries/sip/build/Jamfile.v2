@@ -3,7 +3,7 @@ project squadt/libraries/sip
        ../source
     : build-dir $(BUILD_TOP)
     : requirements
-       <include>$(BOOST)
+       <include>$(BOOST_ROOT)
        <include>../include
     : usage-requirements
        <include>../..

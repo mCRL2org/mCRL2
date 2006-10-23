@@ -4,7 +4,7 @@ project lts
        : requirements
           <include>../include
           <include>$(SETUP)
-	  <include>$(BOOST)
+	  <include>$(BOOST_ROOT)
        : usage-requirements
           <include>$(SETUP)
        ;

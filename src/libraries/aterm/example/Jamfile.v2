@@ -1,6 +1,6 @@
 project libraries/aterm/example
    : requirements
-       <include>$(BOOST)
+       <include>$(BOOST_ROOT)
        <source>/libraries//mcrl2_basic
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
    ;

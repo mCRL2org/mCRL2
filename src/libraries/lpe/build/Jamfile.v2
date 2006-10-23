@@ -9,7 +9,7 @@ alias lpe
        : <library>/libraries/aterm//atermpp
          <library>/libraries//mcrl2_basic
        :
-       : <include>$(BOOST)
+       : <include>$(BOOST_ROOT)
          <include>../include
        ;
 
