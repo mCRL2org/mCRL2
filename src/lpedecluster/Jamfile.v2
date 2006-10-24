@@ -8,6 +8,7 @@ exe lpedecluster
        : lpedecluster.cpp
        : <source>/libraries//mcrl2_basic
          <source>/libraries//lpe
+         <source>/libraries//nextstate
          <source>/boost//program_options
          <squadt_support>enable
          <include>.

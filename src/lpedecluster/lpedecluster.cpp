@@ -5,8 +5,8 @@
 // ----------------------------------------------------------------------
 //
 // file          : lpedecluster 
-// date          : 10-10-2006
-// version       : 0.1
+// date          : 24-10-2006
+// version       : 0.2
 //
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
 //
@@ -31,6 +31,10 @@
 #include <lpe/lpe.h>
 #include <lpe/specification.h>
 
+//Enumerator
+#include <libnextstate.h>
+#include <enum_standard.h>
+
 //Squadt connectivity
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <sip/tool.h>
@@ -43,7 +47,7 @@ using namespace lpe;
 
 namespace po = boost::program_options;
 
-#define VERSION "0.1"
+#define VERSION "0.2"
 
 std::string input_file; ///< Name of the file to read input from
 std::string output_file; ///< Name of the file to write output to (or stdout)
@@ -107,7 +111,24 @@ bool squadt_interactor::perform_task(sip::configuration& configuration)
 /////////////////////////////////////////////////////////////////
 // Helper functions
 /////
-/*
+
+
+
+///Used to assist in occurs_in function.
+struct is_data_variable
+{
+  aterm v;
+
+  is_data_variable(data_variable v_)
+    : v(aterm_appl(v_))
+  {}
+  
+  bool operator()(aterm t) const
+  {
+    return v == t;
+  }
+};
+
 struct is_sort
 {
   aterm s;
@@ -122,16 +143,25 @@ struct is_sort
   }
 };
 
-///\ret true if there exists a data_variable of sort s in sl
-bool occurs_in(data_variable_list sl, lpe::sort s)
+///pre: true
+///ret: sort s occurs in l.
+template <typename data_type>
+bool occurs_in(data_type l, lpe::sort s)
 {
-  return find_if(aterm_list(sl), is_sort(s)) != aterm();
+  return find_if(aterm_list(l), is_sort(s)) != aterm();
 }
-*/
+
+///\ret variable v occurs in l.
+template <typename data_type>
+bool occurs_in(data_type l, lpe::data_variable v)
+{
+  return find_if(aterm_list(l), is_data_variable(v)) != aterm();
+}
+
 
 //TODO: Make sure type() is renamed to sort()
 ///\ret a list of all data_variables of sort s in vl
-lpe::data_variable_list get_occurrences(data_variable_list vl, lpe::sort s)
+lpe::data_variable_list get_occurrences(const data_variable_list vl, const lpe::sort s)
 {
   data_variable_list result;
   for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
@@ -146,11 +176,12 @@ lpe::data_variable_list get_occurrences(data_variable_list vl, lpe::sort s)
 }
 
 ///\ret the list of all data_variables in vl, which are unequal to v
-lpe::data_variable_list filter(data_variable_list vl, data_variable v)
+//TODO: Check if this could be done with find_all_if
+lpe::data_variable_list filter(const data_variable_list vl, const data_variable v)
 {
   gsDebugMsg("filter:vl = %s, v = %s\n", vl.to_string().c_str(), v.to_string().c_str());
   data_variable_list result;
-  for (data_variable_list::iterator i = vl.begin(); i != vl.end(); i++)
+  for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
   {
     if (!(*i == v))
     {
@@ -161,14 +192,29 @@ lpe::data_variable_list filter(data_variable_list vl, data_variable v)
   return result;
 }
 
-///\ret the domain of function f
-lpe::sort result_sort(function f)
+///\ret the list of all date_variables in vl, that are not in rl
+lpe::data_variable_list filter(const data_variable_list vl, const data_variable_list rl)
+{
+  data_variable_list result;
+  for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
+  {
+    if (!occurs_in(rl, *i))
+    {
+      result = push_front(result, *i);
+    }
+  }
+
+  return result;
+}
+
+///\ret the result sort of function f
+lpe::sort result_sort(const function f)
 {
   return f.result_type();
 }
 
 ///\ret the list of all functions f of sort s in fl
-function_list get_constructors(function_list fl, lpe::sort s)
+function_list get_constructors(const function_list fl, const lpe::sort s)
 {
   function_list result;
   for(function_list::iterator i = fl.begin(); i != fl.end(); ++i)
@@ -183,13 +229,35 @@ function_list get_constructors(function_list fl, lpe::sort s)
 }
 
 ///\ret true if f has 1 or more arguments, false otherwise
-bool has_arguments(function f, lpe::sort s)
+bool has_arguments(const function f)
 {
   return !gsIsSortId(aterm_appl(f.argument(1)));
 }
 
+//prototype
+bool is_finite(const function_list fl, const lpe::sort s, lpe::sort_list visited);
+
+///\ret true if all sorts in sl are finite, false otherwise
+///Note that when a constructor sort is in visited we hold the sort as infinite because loops are created!
+bool is_finite(const function_list fl, const lpe::sort_list sl, lpe::sort_list visited = lpe::sort_list())
+{
+  bool result = true;
+  for (sort_list::iterator i = sl.begin(); i != sl.end(); ++i)
+  {
+    if (!occurs_in(visited, *i))
+    {
+      result = result && is_finite(fl, *i, visited);
+    }
+    else
+    {
+      result = false;
+    }
+  }
+  return result;
+}
+
 ///\ret sort s is finite
-bool is_finite(function_list fl, lpe::sort s)
+bool is_finite(const function_list fl, const lpe::sort s, lpe::sort_list visited = lpe::sort_list())
 {
   function_list cl = get_constructors(fl, s);
   bool result = true;
@@ -202,7 +270,7 @@ bool is_finite(function_list fl, lpe::sort s)
 
   for (function_list::iterator i = cl.begin(); i != cl.end(); ++i)
   {
-    result = result && !(has_arguments(*i, s));
+    result = result && (!(has_arguments(*i)) || is_finite(fl, i->input_types(), push_front(visited, s)));
   }
 
   return result;
@@ -210,10 +278,14 @@ bool is_finite(function_list fl, lpe::sort s)
 
 ///\ret sort s can be declustered
 //Note: call is_finite, because in the future we might want to do some tricks on infinite sorts
-bool is_declusterable(function_list fl, lpe::sort s)
+bool is_declusterable(const function_list fl, const lpe::sort s)
 {
   return is_finite(fl, s);
 }
+
+////////////////////////////////////////////////////////////////
+// Declustering
+/////
 
 ///\ret a list of declusterable sorts in sl
 sort_list get_declusterable(function_list fl, sort_list sl)
@@ -230,101 +302,93 @@ sort_list get_declusterable(function_list fl, sort_list sl)
   return result;
 }
 
-////////////////////////////////////////////////////////////////
-// Declustering
-/////
-
-//prototype
-lpe::summand_list decluster_summand_list(const lpe::summand_list& sl, sort_list declusterable_sorts, function_list constructors);
-
-///Decluster a summand
-lpe::summand_list decluster_summand(const lpe::LPE_summand& summand, sort_list declusterable_sorts, function_list constructors)
+///\pre specification is the specification belonging to summand
+///\ret the declustered summand list of summand
+lpe::summand_list decluster_through_enum(const lpe::specification& specification, const lpe::LPE_summand& summand)
 {
-  summand_list result;
+  lpe::summand_list result;
 
-  if (declusterable_sorts.empty())
+  // Some use of internal format because we need it for the rewriter
+  Rewriter* rewriter = createRewriter(gsMakeDataEqnSpec(specification.data().equations()));
+  EnumeratorStandard enumerator = EnumeratorStandard(specification, rewriter);
+  
+  data_variable_list variables = summand.summation_variables(); //TODO: Implement finite / infinite choise, depends only on assignment to variables
+
+  ATermList vars = (ATermList(variables));
+  ATerm expr = ATerm(aterm_appl(summand.condition()));
+  
+  // Solutions
+  EnumeratorSolutions* sols = enumerator.findSolutions(vars, expr, false, NULL);
+
+  // sol is a solution in internal rewriter format
+  ATermList sol;
+  while (sols->next(&sol))
   {
-    result = push_front(result, summand); //Point of exit for recursion
-  }
+    data_assignment_list substitutions; 
+    aterm_list solution = aterm_list(sol); //convenience cast to atermpp library
+    gsDebugMsg("solution: %s\n", solution.to_string().c_str());
 
-  else
-  {
-    //Take the first argument of sort_list, look if it occurs in summand.summation_variables,
-    //if so, decluster to the first argument, create a new list, apply declustering on this list
-    lpe::sort working_sort = declusterable_sorts.front(); //The sort we are declustering
-    summand_list temp_result; //Temporary result, recursion is performed on this
-
-    //A list of summation variables in summand.summation_variables which have sort working_sort
-    data_variable_list occurrence_list = get_occurrences(summand.summation_variables(), working_sort);
-
-    if (!occurrence_list.empty())
+    // Translate internal rewriter solution to lpe data_assignment_list
+    for (aterm_list::iterator i = solution.begin(); i != solution.end(); ++i)
     {
-      function_list constructor_list = get_constructors(constructors, working_sort); //Constructors for working_sort
+      // lefthandside of substitution
+      data_variable var = data_variable(aterm(ATgetArgument(ATerm(aterm_list(sol).front()),0)));
 
-      data_variable occurrence = occurrence_list.front(); //The occurrence we are declustering
-      gsDebugMsg("declustering occurrence %s with relation to sort %s\n", occurrence.to_string().c_str(), working_sort.to_string().c_str());
-      for (function_list::iterator i = constructor_list.begin(); i != constructor_list.end(); ++i)
-      {
-        //for every constructor of sort s in cl create a new summand
-        //which is equal to the original summand, with the summation variable
-        //removed, and the dummy of the summation variable instantiated
-        //with the constructor
-        data_assignment substitution = data_assignment(occurrence, data_expression(i->argument(0)));
-        LPE_summand s = LPE_summand(filter(summand.summation_variables(), occurrence),
-                                summand.condition().substitute(substitution),
+      // righthandside of substitution in internal rewriter format
+      aterm arg = aterm(ATgetArgument(ATerm(aterm_list(sol).front()),1));
+
+      // righthandside of substitution in lpe format
+      data_expression res = data_expression(aterm_appl(rewriter->fromRewriteFormat(arg)).argument(0));
+
+      // Substitution to be performed
+      data_assignment substitution = data_assignment(var, res);
+      substitutions = push_front(substitutions, substitution);
+    }
+
+    gsDebugMsg("substitutions: %s\n", substitutions.to_string().c_str());
+
+    LPE_summand s = LPE_summand(filter(summand.summation_variables(), variables),
+                                summand.condition().substitute(assignment_list_substitution(substitutions)),
                                 summand.is_delta(),
-                                substitute(summand.actions(), substitution),
-                                summand.time().substitute(substitution),
-                                substitute(summand.assignments(), substitution)
-                               );
-      
-        temp_result = push_front(temp_result, s);
-      }
+                                substitute(summand.actions(), assignment_list_substitution(substitutions)),
+                                summand.time().substitute(assignment_list_substitution(substitutions)),
+                                substitute(summand.assignments(), assignment_list_substitution(substitutions))
+                                );
 
-      if (occurrence_list.size() == 1)
-      {
-        result = decluster_summand_list(temp_result, pop_front(declusterable_sorts), constructors);
-      }
-      else
-      {
-        //occurrence_list.size() > 1
-        result = decluster_summand_list(temp_result, declusterable_sorts, constructors);
-      }
-    }
-
-    else
-    {
-      //No summation variable of sort s occurs in the summand, no need to change
-      //create a singleton summand_list with the unchanged summand, needed for recursion.
-      temp_result = push_front(temp_result, summand);
-      result = decluster_summand_list(temp_result, pop_front(declusterable_sorts), constructors);
-    }
+    result = push_front(result, s);
   }
+
+  result = reverse(result);
+
+  gsDebugMsg("orig summand: %s\n", summand.to_string().c_str());
+  gsDebugMsg("result: %s\n", result.to_string().c_str());
 
   return result;
 }
 
-///Decluster a summand_list
-lpe::summand_list decluster_summand_list(const lpe::summand_list& sl, sort_list declusterable_sorts, function_list constructors)
+lpe::summand_list decluster_summands(const lpe::specification& specification, const lpe::summand_list& sl)
 {
-  summand_list result;
+  lpe::summand_list result;
+
   for (summand_list::iterator i = sl.begin(); i != sl.end(); ++i)
   {
-    result = result + decluster_summand(*i, declusterable_sorts, constructors);
+    lpe::LPE_summand s = *i;
+    result = result + decluster_through_enum(specification, s);
   }
+
   return result;
 }
 
-///Decluster specification
 lpe::specification decluster(const lpe::specification& specification)
 {
   gsVerboseMsg("Declustering...\n");
   lpe::LPE lpe = specification.lpe();
 
-  sort_list declusterable_sorts = get_declusterable(specification.data().constructors(), specification.data().sorts());
-
   gsVerboseMsg("Input: %d summands.\n", lpe.summands().size());
-  lpe = set_summands(lpe, decluster_summand_list(lpe.summands(), declusterable_sorts, specification.data().constructors())); 
+
+  lpe::summand_list sl = decluster_summands(specification, lpe.summands());
+  lpe = set_summands(lpe, sl);
+
   gsVerboseMsg("Output: %d summands.\n", lpe.summands().size());
 
   return set_lpe(specification, lpe);
