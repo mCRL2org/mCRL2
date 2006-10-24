@@ -1784,7 +1784,7 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataEqnSpec)
       "  }\n"
       "  if ( old_num < num_apples )\n"
       "  {\n"
-      "    apples = realloc(apples,num_apples*sizeof(AFun));\n"
+      "    apples = (AFun *) realloc(apples,num_apples*sizeof(AFun));\n"
       "    for (int i=old_num; i<num_apples; i++)\n"
       "    {\n"
       "      char c[10];\n"

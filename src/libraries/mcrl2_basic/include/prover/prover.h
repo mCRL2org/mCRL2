@@ -78,6 +78,9 @@ class Prover {
 
     /// \brief Returns a counterexample corresponding to a situation for which the formula Prover::f_formula does not hold.
     virtual ATermAppl get_counter_example() = 0;
+
+    /// \brief Returns the rewriter used by this prover (i.e. it returns Prover::f_rewriter).
+    Rewriter *get_rewriter();
 };
 
 #endif

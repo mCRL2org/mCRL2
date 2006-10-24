@@ -55,7 +55,7 @@
           exit(1);
           break;
         }
-        case (GS_REWR_INVALID): {
+        default: {
           gsErrorMsg("Unknown type of rewriter.\n");
           exit(1);
           break;
@@ -87,4 +87,10 @@
 
     void Prover::set_time_limit(int a_time_limit) {
       f_time_limit = a_time_limit;
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    Rewriter *Prover::get_rewriter() {
+      return f_rewriter;
     }

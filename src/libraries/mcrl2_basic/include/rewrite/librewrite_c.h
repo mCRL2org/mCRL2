@@ -11,6 +11,10 @@ typedef enum { GS_REWR_INNER
 	     , GS_REWR_INNERC
 	     , GS_REWR_JITTY
 	     , GS_REWR_JITTYC
+	     , GS_REWR_INNER_P
+	     , GS_REWR_INNERC_P
+	     , GS_REWR_JITTY_P
+	     , GS_REWR_JITTYC_P
 	     , GS_REWR_INVALID
 	     } RewriteStrategy;
 

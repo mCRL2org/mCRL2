@@ -8,7 +8,7 @@
 #include "rewr_jitty.h"
 #include "rewr_innerc.h"
 #include "rewr_jittyc.h"
-#include "prover/prover.h"
+#include "rewr_prover.h"
 
 Rewriter::Rewriter()
 {
@@ -162,6 +162,14 @@ Rewriter *createRewriter(ATermAppl DataEqnSpec, RewriteStrategy Strategy)
 			return new RewriterCompilingInnermost(DataEqnSpec);
 		case GS_REWR_JITTYC:
 			return new RewriterCompilingJitty(DataEqnSpec);
+		case GS_REWR_INNER_P:
+			return new RewriterProver(DataEqnSpec,GS_REWR_INNER);
+		case GS_REWR_JITTY_P:
+			return new RewriterProver(DataEqnSpec,GS_REWR_JITTY);
+		case GS_REWR_INNERC_P:
+			return new RewriterProver(DataEqnSpec,GS_REWR_INNERC);
+		case GS_REWR_JITTYC_P:
+			return new RewriterProver(DataEqnSpec,GS_REWR_JITTYC);
 		default:
 			return NULL;
 	}
