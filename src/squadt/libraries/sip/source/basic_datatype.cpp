@@ -326,8 +326,6 @@ namespace sip {
      * Implementation of String
      ************************************************************************/
 
-    const std::string  string::empty;
-
     const unsigned int string::implementation_maximum_length = UINT_MAX;
 
     basic_datatype::sptr string::standard;

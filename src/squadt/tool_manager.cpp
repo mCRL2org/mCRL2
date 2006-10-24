@@ -46,7 +46,7 @@ namespace squadt {
     return (local_executor.get_maximum_instance_count());
   }
 
-  char const* tool_manager::default_tools[] = {"lpeconstelm", "lpeinfo", "lpeparelm", "lpeuntime", "lpe2lts", "lpesumelm",
+  char const* tool_manager::default_tools[] = {"lpeconstelm", "lpedecluster", "lpeinfo", "lpeparelm", "lpeuntime", "lpe2lts", "lpesumelm",
                                                "ltsconvert", "ltsinfo", "ltsgraph", "ltsview", "mcrl22lpe", "xsim", 0};
 
   tool_manager::tool_manager() : sip::controller::communicator(), free_identifier(0) {

@@ -341,9 +341,6 @@ namespace sip {
         /** \brief Instance of a string (without limitations except the implementation limits) */
         static basic_datatype::sptr standard;
 
-        /** \brief The empty string */
-        static const std::string empty;
-
         /** \brief The maximum length a string may have */
         static const unsigned int implementation_maximum_length;
 
@@ -364,7 +361,7 @@ namespace sip {
         static void initialise();
 
         /** \brief Convenience function for shared pointer instances */
-        static basic_datatype::sptr create(std::string const& = empty, unsigned int = 0, unsigned int = implementation_maximum_length);
+        static basic_datatype::sptr create(std::string const& = "", unsigned int = 0, unsigned int = implementation_maximum_length);
 
         /** \brief Reconstruct a type from XML stream */
         static std::pair < basic_datatype::sptr, std::string > read(xml2pp::text_reader&);
@@ -686,7 +683,7 @@ namespace sip {
       standard = basic_datatype::sptr(new datatype::string);
     }
 
-    inline string::string() : minimum_length(0), maximum_length(UINT_MAX), default_value(empty) {
+    inline string::string() : minimum_length(0), maximum_length(UINT_MAX), default_value("") {
     }
 
     /**
