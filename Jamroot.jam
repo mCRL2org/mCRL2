@@ -22,13 +22,13 @@ project toolset
        : build-dir $(BUILD_TOP)
        : requirements
           <include>build/workarounds
+          <threading>multi
           <define>_FILE_OFFSET_BITS=64
           <toolset>darwin:<define>__darwin__
           <toolset>darwin:<cxxflags>"-std=c++98 -ansi"
           <os>CYGWIN,<toolset>gcc:<runtime-link>static
           <os>CYGWIN,<toolset>gcc:<link>static
           <os>LINUX,<toolset>gcc:<cxxflags>"-std=c++98 -ansi"
-          <toolset>darwin:<threading>multi
           <toolset>msvc:<define>WIN32
           <toolset>msvc:<include>build/workarounds/msvc
           <define>REVISION=$(REVISION)
