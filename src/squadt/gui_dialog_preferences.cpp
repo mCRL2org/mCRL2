@@ -122,15 +122,11 @@ namespace squadt {
     }
 
     /* Convenience function */
-    inline wxListItem get_wxlist_value(wxListCtrl* l, size_t r, size_t c) {
-       wxListItem s;
-
+    inline void get_wxlist_value(wxListItem& s, wxListCtrl* l, size_t r, size_t c) {
        s.SetId(r);
        s.SetColumn(c);
 
        l->GetItem(s);
-
-       return (s);
     }
 
     void edit_preferences::apply_button_activated(wxCommandEvent&) {
@@ -139,10 +135,14 @@ namespace squadt {
       long selected = formats_and_actions->GetFirstSelected();
 
       if (0 <= selected) {
-        wxListItem s(get_wxlist_value(formats_and_actions, selected, 1));
+        wxListItem s;
+        
+        get_wxlist_value(s, formats_and_actions, selected, 0);
 
-        mime_type   type(std::string(get_wxlist_value(formats_and_actions, selected, 0).GetText().fn_str()));
+        mime_type   type(std::string(s.GetText().fn_str()));
         wxString    new_command = command_text->GetValue();
+
+        get_wxlist_value(s, formats_and_actions, selected, 1);
 
         if (new_command.IsEmpty()) {
           s.SetText(no_action);
