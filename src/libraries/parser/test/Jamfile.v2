@@ -4,7 +4,7 @@ project libraries/parser/test
    : requirements
        <include>$(BOOST_ROOT)
        <source>/libraries//parser
-       <source>/libraries//alpha
+       <source>/libraries/parser//alpha
    ;
 
 test-suite parser

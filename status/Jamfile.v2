@@ -18,5 +18,4 @@ build-project ../src/libraries/lts/test ;        # test-suite lts
 build-project ../src/libraries/parser/test ;     # test-suite parser
 build-project ../src/libraries/prover/test ;     # test-suite prover
 build-project ../src/libraries/svc/test ;        # test-suite svc
-build-project ../src/libraries/temporary/test ;  # test-suite temporary
 build-project ../src/mcrl22lpe/test ;
