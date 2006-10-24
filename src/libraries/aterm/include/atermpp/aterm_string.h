@@ -22,10 +22,12 @@
 #include <string>
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_appl.h"
-#include "libstruct.h"
+#include "atermpp/detail/utility.h"
 
 namespace atermpp
 {
+  using detail::str2appl;
+  
   //---------------------------------------------------------//
   //                    aterm_string
   //---------------------------------------------------------//
@@ -53,7 +55,7 @@ namespace atermpp
       /// Allow construction from a string.
       ///
       aterm_string(std::string s, bool quoted = true)
-        : aterm(quoted ? gsString2ATermAppl(s.c_str()) : make_term(s))
+        : aterm(quoted ? str2appl(s) : make_term(s))
       {
         assert(type() == AT_APPL);
         assert(aterm_appl(m_term).argument_list().size() == 0);

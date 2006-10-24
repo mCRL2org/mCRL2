@@ -6,31 +6,33 @@
 
 #include <boost/config.hpp>
 #include "lpe/data.h"
+#include "lpe/detail/utility.h"
 
 namespace lpe {
 
-/*
-inline bool is_negate       (aterm_appl t) { return ; }
-inline bool is_plus         (aterm_appl t) { return ; }
-inline bool is_minus        (aterm_appl t) { return ; }
-inline bool is_multiplies   (aterm_appl t) { return ; }
-inline bool is_divides      (aterm_appl t) { return ; }
-inline bool is_modulus      (aterm_appl t) { return ; }
-inline bool is_equal_to     (aterm_appl t) { return ; }
-inline bool is_not_equal_to (aterm_appl t) { return ; }
-inline bool is_less         (aterm_appl t) { return ; }
-inline bool is_greater      (aterm_appl t) { return ; }
-inline bool is_less_equal   (aterm_appl t) { return ; }
-inline bool is_greater_equal(aterm_appl t) { return ; }
-inline bool is_min          (aterm_appl t) { return ; }
-inline bool is_max          (aterm_appl t) { return ; }
-inline bool is_abs          (aterm_appl t) { return ; }
-*/
+using detail::has_expression_type_level_1;
+using detail::has_expression_type_level_2;
+
+inline bool is_negate       (data_expression t) { return has_expression_type_level_1(t, gsMakeOpIdNameNeg); }
+inline bool is_plus         (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameAdd); }
+inline bool is_minus        (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameSubt); }
+inline bool is_multiplies   (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameMult); }
+inline bool is_divides      (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameDiv); }
+inline bool is_modulus      (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameMod); }
+inline bool is_equal_to     (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameEq); }
+inline bool is_not_equal_to (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameNeq); }
+inline bool is_less         (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameLT); }
+inline bool is_greater      (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameGT); }
+inline bool is_less_equal   (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameLTE); }
+inline bool is_greater_equal(data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameGTE); }
+inline bool is_min          (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameMin); }
+inline bool is_max          (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameMax); }
+inline bool is_abs          (data_expression t) { return has_expression_type_level_1(t, gsMakeOpIdNameAbs); }
 
 inline
 data_expression negate(data_expression d)
 {
-  return gsMakeDataExprNot(d);
+  return gsMakeDataExprNeg(d);
 }
 
 inline
@@ -99,14 +101,16 @@ data_expression greater_equal(data_expression d, data_expression e)
   return gsMakeDataExprGTE(d, e);
 }
 
+// MSVC is broken with respect to using 'min' and 'max' as identifiers.
 inline
-data_expression min BOOST_PREVENT_MACRO_SUBSTITUTION (data_expression d, data_expression e)
+data_expression min_(data_expression d, data_expression e)
 {
   return gsMakeDataExprMin(d, e);
 }
 
+// MSVC is broken with respect to using 'min' and 'max' as identifiers.
 inline
-data_expression max BOOST_PREVENT_MACRO_SUBSTITUTION (data_expression d, data_expression e)
+data_expression max_(data_expression d, data_expression e)
 {
   return gsMakeDataExprMax(d, e);
 }

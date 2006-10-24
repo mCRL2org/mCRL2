@@ -46,6 +46,38 @@ std::pair<std::string, data_expression_list> parse_variable(std::string s)
   return std::make_pair(name, variables);
 }
 
+// OpId(f())
+template <typename Function>
+inline
+bool has_expression_type_level_0(data_expression t, const Function f)
+{
+  return gsIsOpId(t) && (arg1(t) == aterm_appl(f()));
+}
+
+// DataAppl(OpId(f()))
+template <typename Function>
+inline
+bool has_expression_type_level_1(data_expression t, const Function f)
+{
+  if (!gsIsDataAppl(t))
+    return false;   
+  aterm_appl t1 = arg1(t);
+  return gsIsOpId(t1) && (arg1(t1) == aterm_appl(f()));
+}
+
+// DataAppl(DataAppl(OpId(f())))
+template <typename Function>
+inline
+bool has_expression_type_level_2(data_expression t, const Function f)
+{
+  if (!gsIsDataAppl(t))
+    return false;   
+  aterm_appl t1 = arg1(t);
+  if (!gsIsDataAppl(t1))
+    return false;
+  aterm_appl t11 = arg1(t1);
+  return gsIsOpId(t11) && (arg1(t11) == aterm_appl(f()));
+}
 
 } // namespace detail
 
