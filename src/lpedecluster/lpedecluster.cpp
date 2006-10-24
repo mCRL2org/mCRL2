@@ -6,7 +6,7 @@
 //
 // file          : lpedecluster 
 // date          : 24-10-2006
-// version       : 0.2
+// version       : 0.3
 //
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
 //
@@ -47,7 +47,7 @@ using namespace lpe;
 
 namespace po = boost::program_options;
 
-#define VERSION "0.2"
+#define VERSION "0.3"
 
 std::string input_file; ///< Name of the file to read input from
 std::string output_file; ///< Name of the file to write output to (or stdout)
@@ -112,8 +112,6 @@ bool squadt_interactor::perform_task(sip::configuration& configuration)
 // Helper functions
 /////
 
-
-
 ///Used to assist in occurs_in function.
 struct is_data_variable
 {
@@ -161,7 +159,7 @@ bool occurs_in(data_type l, lpe::data_variable v)
 
 //TODO: Make sure type() is renamed to sort()
 ///\ret a list of all data_variables of sort s in vl
-lpe::data_variable_list get_occurrences(const data_variable_list vl, const lpe::sort s)
+lpe::data_variable_list get_occurrences(const data_variable_list& vl, const lpe::sort& s)
 {
   data_variable_list result;
   for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
@@ -177,7 +175,7 @@ lpe::data_variable_list get_occurrences(const data_variable_list vl, const lpe::
 
 ///\ret the list of all data_variables in vl, which are unequal to v
 //TODO: Check if this could be done with find_all_if
-lpe::data_variable_list filter(const data_variable_list vl, const data_variable v)
+lpe::data_variable_list filter(const data_variable_list& vl, const data_variable& v)
 {
   gsDebugMsg("filter:vl = %s, v = %s\n", vl.to_string().c_str(), v.to_string().c_str());
   data_variable_list result;
@@ -193,7 +191,7 @@ lpe::data_variable_list filter(const data_variable_list vl, const data_variable 
 }
 
 ///\ret the list of all date_variables in vl, that are not in rl
-lpe::data_variable_list filter(const data_variable_list vl, const data_variable_list rl)
+lpe::data_variable_list filter(const data_variable_list& vl, const data_variable_list& rl)
 {
   data_variable_list result;
   for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
@@ -208,13 +206,13 @@ lpe::data_variable_list filter(const data_variable_list vl, const data_variable_
 }
 
 ///\ret the result sort of function f
-lpe::sort result_sort(const function f)
+lpe::sort result_sort(const function& f)
 {
   return f.result_type();
 }
 
 ///\ret the list of all functions f of sort s in fl
-function_list get_constructors(const function_list fl, const lpe::sort s)
+function_list get_constructors(const function_list& fl, const lpe::sort& s)
 {
   function_list result;
   for(function_list::iterator i = fl.begin(); i != fl.end(); ++i)
@@ -229,19 +227,25 @@ function_list get_constructors(const function_list fl, const lpe::sort s)
 }
 
 ///\ret true if f has 1 or more arguments, false otherwise
-bool has_arguments(const function f)
+bool has_arguments(const function& f)
 {
   return !gsIsSortId(aterm_appl(f.argument(1)));
 }
 
 //prototype
-bool is_finite(const function_list fl, const lpe::sort s, lpe::sort_list visited);
+bool is_finite(const function_list& fl, const lpe::sort& s, const lpe::sort_list visited);
 
 ///\ret true if all sorts in sl are finite, false otherwise
 ///Note that when a constructor sort is in visited we hold the sort as infinite because loops are created!
-bool is_finite(const function_list fl, const lpe::sort_list sl, lpe::sort_list visited = lpe::sort_list())
+//TODO Check if visited can be passed by reference
+bool is_finite(const function_list& fl, const lpe::sort_list& sl, const lpe::sort_list visited = lpe::sort_list())
 {
   bool result = true;
+  
+  // A list of sorts is finite if all sorts in the list are finite
+  // If a sort is in "visited" that means that we have already seen the sort
+  // during our calculation. We now get loops of the sort D = d1(E), sort E=e1(D),
+  // this makes our sort infinite.
   for (sort_list::iterator i = sl.begin(); i != sl.end(); ++i)
   {
     if (!occurs_in(visited, *i))
@@ -257,17 +261,22 @@ bool is_finite(const function_list fl, const lpe::sort_list sl, lpe::sort_list v
 }
 
 ///\ret sort s is finite
-bool is_finite(const function_list fl, const lpe::sort s, lpe::sort_list visited = lpe::sort_list())
+//TODO Check if visited can be passed by reference
+bool is_finite(const function_list& fl, const lpe::sort& s, const lpe::sort_list visited = lpe::sort_list())
 {
-  function_list cl = get_constructors(fl, s);
   bool result = true;
+  function_list cl = get_constructors(fl, s);
 
-  //Make sure that false is returned when there are no constructor, needed for some internal formats
+  //If a sort has not got any constructors it is infinite
   if (cl.size() == 0)
   {
     result = false;
   }
 
+  //Otherwise a sort is finite if all its constructors are finite;
+  //i.e. the constructors have no arguments, of their arguments are finite.
+  //In the recursive call pass s add s to the visited sorts, so that we know
+  //it may not occur in a constructor anymore.
   for (function_list::iterator i = cl.begin(); i != cl.end(); ++i)
   {
     result = result && (!(has_arguments(*i)) || is_finite(fl, i->input_types(), push_front(visited, s)));
@@ -276,24 +285,14 @@ bool is_finite(const function_list fl, const lpe::sort s, lpe::sort_list visited
   return result;
 }
 
-///\ret sort s can be declustered
-//Note: call is_finite, because in the future we might want to do some tricks on infinite sorts
-bool is_declusterable(const function_list fl, const lpe::sort s)
-{
-  return is_finite(fl, s);
-}
-
-////////////////////////////////////////////////////////////////
-// Declustering
-/////
-
+///\pre fl is a list of constructors
 ///\ret a list of declusterable sorts in sl
-sort_list get_declusterable(function_list fl, sort_list sl)
+sort_list get_finite_sorts(const function_list& fl, const sort_list& sl)
 {
   sort_list result;
   for(sort_list::iterator i = sl.begin(); i != sl.end(); ++i)
   {
-    if (is_declusterable(fl, *i))
+    if (is_finite(fl, *i))
     {
       result = push_front(result, *i);
     }
@@ -301,6 +300,26 @@ sort_list get_declusterable(function_list fl, sort_list sl)
   reverse(result);
   return result;
 }
+
+///\ret a list of all variables of a sort that occurs in sl
+data_variable_list get_variables(const data_variable_list& vl, const sort_list& sl)
+{
+  data_variable_list result;
+  for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
+  {
+    if (occurs_in(sl, i->type())) // TODO have type renamed to sort()
+    {
+      result = push_front(result, *i);
+    }
+  }
+  result = reverse(result);
+  return result;
+}
+
+
+////////////////////////////////////////////////////////////////
+// Declustering
+/////
 
 ///\pre specification is the specification belonging to summand
 ///\ret the declustered summand list of summand
@@ -312,7 +331,9 @@ lpe::summand_list decluster_through_enum(const lpe::specification& specification
   Rewriter* rewriter = createRewriter(gsMakeDataEqnSpec(specification.data().equations()));
   EnumeratorStandard enumerator = EnumeratorStandard(specification, rewriter);
   
-  data_variable_list variables = summand.summation_variables(); //TODO: Implement finite / infinite choise, depends only on assignment to variables
+  //data_variable_list variables = summand.summation_variables(); //TODO: Implement finite / infinite choise, depends only on assignment to variables
+  // A list with all finite variables from the summation variables
+  data_variable_list variables = get_variables(summand.summation_variables(), get_finite_sorts(specification.data().constructors(), specification.data().sorts()));
 
   ATermList vars = (ATermList(variables));
   ATerm expr = ATerm(aterm_appl(summand.condition()));
