@@ -65,6 +65,7 @@ void initialise_lts_generation_options(lts_generation_options &lgopts)
   lgopts.detect_deadlock = false;
   lgopts.detect_action = false;
   lgopts.save_error_trace = false;
+  lgopts.error_trace_saved = false;
   lgopts.expl_strat = es_breadth;
   lgopts.bithashing = false;
   lgopts.bithashsize = DEFAULT_BITHASHSIZE;
@@ -273,7 +274,7 @@ static bool occurs_in(ATermAppl name, ATermList ma)
   return false;
 }
 
-static bool savetrace(string &filename, ATerm state, ATermTable backpointers, NextState *nstate, ATerm extra_state = NULL, ATermAppl extra_transition = NULL)
+static bool savetrace(string const &info, ATerm state, ATermTable backpointers, NextState *nstate, ATerm extra_state = NULL, ATermAppl extra_transition = NULL)
 {
   ATerm s = state;
   ATerm ns;
@@ -298,7 +299,15 @@ static bool savetrace(string &filename, ATerm state, ATermTable backpointers, Ne
     e = ATgetNext(e);
     trace.setState(nstate->makeStateVector(ATgetFirst(e)));
   }
-  
+
+  string filename;
+  if ( lgopts->squadt->is_active() )
+  {
+    filename = lgopts->squadt->add_output_file(info,"trc");
+  } else {
+    filename = basefilename;
+    filename += "_"+info+".trc";
+  }
   return trace.save(filename);
 }
 
@@ -315,7 +324,7 @@ static void check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewSta
         {
         }
         std::ostringstream ss;
-        ss << basefilename << "_act_" << tracecnt << "_" << ATgetName(ATgetAFun(lgopts->trace_actions[j])) << ".trc";
+        ss << "act_" << tracecnt << "_" << ATgetName(ATgetAFun(lgopts->trace_actions[j]));
         string sss(ss.str());
         bool saved_ok = savetrace(sss,OldState,backpointers,nstate,NewState,Transition);
 
@@ -342,13 +351,11 @@ static void save_error_trace(ATerm state)
 {
   if ( lgopts->save_error_trace )
   {
-    std::ostringstream ss;
-    ss << basefilename << "_error.trc";
-    string sss(ss.str());
-    bool saved_ok = savetrace(sss,state,backpointers,nstate);
+    bool saved_ok = savetrace("error",state,backpointers,nstate);
 
     if ( saved_ok )
     {
+      lgopts->error_trace_saved = true;
       gsVerboseMsg("saved trace to error in '%s_trace.trc'.\n",basefilename);
     } else {
       gsVerboseMsg("trace to error could not be saved in '%s_trace.trc'.\n",basefilename);
@@ -364,7 +371,7 @@ static void check_deadlocktrace(ATerm state)
     if ( lgopts->trace && (tracecnt < lgopts->max_traces) )
     {
       std::ostringstream ss;
-      ss << basefilename << "_dlk_" << tracecnt << ".trc";
+      ss << "dlk_" << tracecnt;
       string sss(ss.str());
       bool saved_ok = savetrace(sss,state,backpointers,nstate);
 

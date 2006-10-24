@@ -1,3 +1,4 @@
+#include <string>
 #include <boost/lexical_cast.hpp>
 #include "libnextstate.h"
 #include "librewrite.h"
@@ -294,12 +295,19 @@ bool squadt_lpe2lts::perform_task(sip::configuration &configuration)
   
   lgopts.initial_table_size = strtoul((boost::any_cast <string> (configuration.get_option_value(option_init_tsize))).c_str(),NULL,0);
 
+  config = &configuration;
+  config_changed = false;
+  output_count = lts_file_for_output+1;
+
   bool ok = false;
   if ( initialise_lts_generation(&lgopts) )
   {
     ok = generate_lts();
+    ok = ok || lgopts.error_trace_saved;
 
     ok &= finalise_lts_generation();
+
+    m_communicator.send_accept_configuration();
   }
 
   return ok;
@@ -384,5 +392,20 @@ void squadt_lpe2lts::update_status_display(unsigned long level, unsigned long lo
     progbar->set_maximum(seen,&m_communicator);
     progbar->set_value(explored,&m_communicator);
   }
+#endif
+}
+
+string squadt_lpe2lts::add_output_file(string info, string ext)
+{
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  string s(config->get_output_name("_"+info+"."+ext));
+
+  config->add_output(output_count++,ext,s);
+
+  config_changed = true;
+
+  return s;
+#else
+  return "";
 #endif
 }

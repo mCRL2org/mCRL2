@@ -36,6 +36,7 @@ typedef struct {
   bool detect_deadlock;
   bool detect_action;
   bool save_error_trace;
+  bool error_trace_saved;
   exploration_strategy expl_strat;
   bool bithashing;
   unsigned long long bithashsize;

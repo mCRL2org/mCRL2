@@ -1,11 +1,17 @@
 #ifndef _SQUADT_LPE2LTS_H
 #define _SQUADT_LPE2LTS_H
 
+#include <string>
+
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include "squadt_tool_interface.h"
 #endif
 
+#ifdef ENABLE_SQUADT_CONNECTIVITY
 class squadt_lpe2lts: public squadt_tool_interface
+#else
+class squadt_lpe2lts
+#endif
 {
   public:
     squadt_lpe2lts() {};
@@ -17,6 +23,7 @@ class squadt_lpe2lts: public squadt_tool_interface
                                unsigned long long seen,
                                unsigned long long num_found_same,
                                unsigned long long transitions);
+    std::string add_output_file(std::string info, std::string ext);
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   protected:
@@ -35,6 +42,12 @@ class squadt_lpe2lts: public squadt_tool_interface
     sip::layout::elements::label *lb_seen;
     sip::layout::elements::label *lb_transitions;
     sip::layout::elements::progress_bar *progbar;
+    sip::configuration *config;
+    bool config_changed;
+    unsigned int output_count;
+#else
+  public:
+    inline bool is_active() { return false; }
 #endif
 };
 
