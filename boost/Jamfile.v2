@@ -59,6 +59,8 @@ libraries = [ MATCH .*libs/(.*)/build/.* : [ glob libs/*/build/Jamfile.v2 ] ] ;
 
 # Make project ids of all libraries known.
 for local l in $(libraries) {
+  use-project /boost/$(l) : libs/$(l)/build ;
+
   alias $(l) : libs/$(l)/build//boost_$(l) : : : ;
 }
 

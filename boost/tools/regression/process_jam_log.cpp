@@ -156,21 +156,35 @@ namespace
 
   // Take a path to a target directory of test, and
   // returns library name corresponding to that path.
+  // In the mCRL2 toolset there are two different formats allowed:
+  // format 1) .../src/<library-name>/test
+  // format 2) .../src/libraries/<library-name>/test
   string test_path_to_library_name( string const& path )
   {
-    // The path format is ...libraries/functional/...
-    string::size_type start_pos( path.find( "libraries/" ) );
-    if ( start_pos == string::npos )
+    string::size_type start_pos;
+    string::size_type end_pos;
+
+    // check for format 1
+    start_pos = path.find("libraries/");
+    if (start_pos != string::npos)
     {
-      return "unknown";
+      start_pos += 10;
+      end_pos = path.find("/", start_pos);
+      if (end_pos != string::npos)
+        return path.substr( start_pos, end_pos - start_pos );
     }
-    start_pos += 10;
-    string::size_type end_pos( path.find( "/", start_pos ) );
-    if (end_pos == string::npos)
+
+    // check for format 2
+    start_pos = path.find("src/");
+    if (start_pos != string::npos)
     {
-      return "unknown";
+      start_pos += 4;
+      end_pos = path.find("/", start_pos);
+      if (end_pos != string::npos)
+        return path.substr( start_pos, end_pos - start_pos );
     }
-    return path.substr( start_pos, end_pos - start_pos );
+
+    return "unknown";
   }
 
   // Tries to find target name in the string 'msg', starting from 
@@ -211,7 +225,17 @@ namespace
         // old style build path, integrated build tree
         start_pos = dir.rfind( '!' );
         convert_path_separators( dir );
-        dir.insert( dir.find( '/', start_pos + 1), "/bin" );
+        string::size_type path_sep_pos = dir.find( '/', start_pos + 1 );
+        if ( path_sep_pos != string::npos )
+           dir.insert( path_sep_pos, "/bin" );
+        else
+        {
+          // see http://article.gmane.org/gmane.comp.lib.boost.devel/146688;
+          // the following code assumes that: a) 'dir' is not empty,
+          // b) 'end_pos != string::npos' and c) 'msg' always ends with '...'
+          if ( dir[dir.size() - 1] == '@' )
+            dir += "/" + msg.substr( end_pos + 1, msg.size() - end_pos - 1 - 3 );
+        }
       }
     }
     return end_pos;
@@ -590,6 +614,8 @@ int cpp_main( int argc, char ** argv )
       || line.find( "Archive-action " ) != string::npos
       || line.find( "vc-Link " ) != string::npos 
       || line.find( ".compile.") != string::npos
+      || line.find( "compile-") != string::npos
+      || line.find( "-compile") != string::npos
       || ( line.find( ".link") != string::npos &&
            // .linkonce is present in gcc linker messages about
            // unresolved symbols. We don't have to parse those
