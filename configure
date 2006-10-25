@@ -563,8 +563,8 @@ PACKAGE_VERSION='0.2'
 PACKAGE_STRING='mCRL2 toolset 0.2'
 PACKAGE_BUGREPORT='bug@mcrl2.org'
 
-ac_default_prefix=$HOME
 ac_unique_file="src/setup.h.in"
+ac_default_prefix=$HOME
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>
@@ -668,21 +668,19 @@ EGREP
 ATERM_CPPFLAGS
 ATERM_LDFLAGS
 ATERM_NAME
-BUILD_ATERM
 CADP_HEADERS
 CADP_LIBRARIES
 USE_BCG
-LIBXML2_CPPFLAGS
+BOOST_PREFIX
+OPENGL_NAME
+OPENGL_IPATH
+OPENGL_LPATH
 XML2_CONFIG
-LIBXML2_CONFIG
-LIBXML2_LDFLAGS
-USE_LIBXML2
+XML2_CPPFLAGS
+XML2_LDFLAGS
 XMLTO
 USE_XMLTO
-BOOST_PREFIX
-USE_BOOST
 WX_CONFIG
-USE_WX
 WX_CPPFLAGS
 WX_BASE_LDFLAGS
 WX_GL_LDFLAGS
@@ -1293,11 +1291,12 @@ if test -n "$ac_init_help"; then
 Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --disable-optimisation  compile without compile-time optimisations
+  --disable-optimisation  disables compile-time optimisations
 
-  --enable-debug          compile with debugging information
+  --enable-debug          adds debugging information to libraries and
+                          executables
 
-  --enable-profile        compile with profiling support
+  --enable-profile        adds profiling support to libraries and executables
 
   --enable-experimental   also build experimental tools
 
@@ -1317,13 +1316,14 @@ Optional Packages:
 
   --with-cadp=prefix      try this for the CADP prefix directory
 
+  --with-boost=prefix     try this for the boost prefix install directory
+
+  --with-opengl=DIR       OpenGL/Mesa installation directory
   --with-libxml2=prefix   try this for the libxml2 prefix install directory
 
   --with-xmlto=prefix     try this for the xmlto prefix install directory
 
-  --with-boost=prefix     try this for the boost prefix install directory
-
-  --with-wx=dir           use wxWidgets configuration program wx-config in dir
+  --with-wx=DIR           use wxWidgets configuration program wx-config in DIR
 
 
 Some influential environment variables:
@@ -1769,7 +1769,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 ac_aux_dir=
-for ac_dir in "$srcdir" "$srcdir/.." "$srcdir/../.."; do
+for ac_dir in build/autoconf "$srcdir"/build/autoconf; do
   if test -f "$ac_dir/install-sh"; then
     ac_aux_dir=$ac_dir
     ac_install_sh="$ac_aux_dir/install-sh -c"
@@ -1785,8 +1785,8 @@ for ac_dir in "$srcdir" "$srcdir/.." "$srcdir/../.."; do
   fi
 done
 if test -z "$ac_aux_dir"; then
-  { { echo "$as_me:$LINENO: error: cannot find install-sh or install.sh in \"$srcdir\" \"$srcdir/..\" \"$srcdir/../..\"" >&5
-echo "$as_me: error: cannot find install-sh or install.sh in \"$srcdir\" \"$srcdir/..\" \"$srcdir/../..\"" >&2;}
+  { { echo "$as_me:$LINENO: error: cannot find install-sh or install.sh in build/autoconf \"$srcdir\"/build/autoconf" >&5
+echo "$as_me: error: cannot find install-sh or install.sh in build/autoconf \"$srcdir\"/build/autoconf" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -1797,6 +1797,7 @@ fi
 ac_config_guess="$SHELL $ac_aux_dir/config.guess"  # Please don't use this var.
 ac_config_sub="$SHELL $ac_aux_dir/config.sub"  # Please don't use this var.
 ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
+
 
 
 # Make sure we can run config.sub.
@@ -1880,7 +1881,6 @@ shift; shift
 host_os=$*
 IFS=$ac_save_IFS
 case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
-
 
 
 
@@ -3207,767 +3207,6 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-if test -n "$ac_tool_prefix"; then
-  # Extract the first word of "${ac_tool_prefix}gcc", so it can be a program name with args.
-set dummy ${ac_tool_prefix}gcc; ac_word=$2
-{ echo "$as_me:$LINENO: checking for $ac_word" >&5
-echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
-if test "${ac_cv_prog_CC+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  if test -n "$CC"; then
-  ac_cv_prog_CC="$CC" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_CC="${ac_tool_prefix}gcc"
-    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-done
-IFS=$as_save_IFS
-
-fi
-fi
-CC=$ac_cv_prog_CC
-if test -n "$CC"; then
-  { echo "$as_me:$LINENO: result: $CC" >&5
-echo "${ECHO_T}$CC" >&6; }
-else
-  { echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6; }
-fi
-
-
-fi
-if test -z "$ac_cv_prog_CC"; then
-  ac_ct_CC=$CC
-  # Extract the first word of "gcc", so it can be a program name with args.
-set dummy gcc; ac_word=$2
-{ echo "$as_me:$LINENO: checking for $ac_word" >&5
-echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
-if test "${ac_cv_prog_ac_ct_CC+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  if test -n "$ac_ct_CC"; then
-  ac_cv_prog_ac_ct_CC="$ac_ct_CC" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_ac_ct_CC="gcc"
-    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-done
-IFS=$as_save_IFS
-
-fi
-fi
-ac_ct_CC=$ac_cv_prog_ac_ct_CC
-if test -n "$ac_ct_CC"; then
-  { echo "$as_me:$LINENO: result: $ac_ct_CC" >&5
-echo "${ECHO_T}$ac_ct_CC" >&6; }
-else
-  { echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6; }
-fi
-
-  if test "x$ac_ct_CC" = x; then
-    CC=""
-  else
-    case $cross_compiling:$ac_tool_warned in
-yes:)
-{ echo "$as_me:$LINENO: WARNING: In the future, Autoconf will not detect cross-tools
-whose name does not start with the host triplet.  If you think this
-configuration is useful to you, please write to autoconf@gnu.org." >&5
-echo "$as_me: WARNING: In the future, Autoconf will not detect cross-tools
-whose name does not start with the host triplet.  If you think this
-configuration is useful to you, please write to autoconf@gnu.org." >&2;}
-ac_tool_warned=yes ;;
-esac
-    CC=$ac_ct_CC
-  fi
-else
-  CC="$ac_cv_prog_CC"
-fi
-
-if test -z "$CC"; then
-          if test -n "$ac_tool_prefix"; then
-    # Extract the first word of "${ac_tool_prefix}cc", so it can be a program name with args.
-set dummy ${ac_tool_prefix}cc; ac_word=$2
-{ echo "$as_me:$LINENO: checking for $ac_word" >&5
-echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
-if test "${ac_cv_prog_CC+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  if test -n "$CC"; then
-  ac_cv_prog_CC="$CC" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_CC="${ac_tool_prefix}cc"
-    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-done
-IFS=$as_save_IFS
-
-fi
-fi
-CC=$ac_cv_prog_CC
-if test -n "$CC"; then
-  { echo "$as_me:$LINENO: result: $CC" >&5
-echo "${ECHO_T}$CC" >&6; }
-else
-  { echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6; }
-fi
-
-
-  fi
-fi
-if test -z "$CC"; then
-  # Extract the first word of "cc", so it can be a program name with args.
-set dummy cc; ac_word=$2
-{ echo "$as_me:$LINENO: checking for $ac_word" >&5
-echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
-if test "${ac_cv_prog_CC+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  if test -n "$CC"; then
-  ac_cv_prog_CC="$CC" # Let the user override the test.
-else
-  ac_prog_rejected=no
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; }; then
-    if test "$as_dir/$ac_word$ac_exec_ext" = "/usr/ucb/cc"; then
-       ac_prog_rejected=yes
-       continue
-     fi
-    ac_cv_prog_CC="cc"
-    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-done
-IFS=$as_save_IFS
-
-if test $ac_prog_rejected = yes; then
-  # We found a bogon in the path, so make sure we never use it.
-  set dummy $ac_cv_prog_CC
-  shift
-  if test $# != 0; then
-    # We chose a different compiler from the bogus one.
-    # However, it has the same basename, so the bogon will be chosen
-    # first if we set CC to just the basename; use the full file name.
-    shift
-    ac_cv_prog_CC="$as_dir/$ac_word${1+' '}$@"
-  fi
-fi
-fi
-fi
-CC=$ac_cv_prog_CC
-if test -n "$CC"; then
-  { echo "$as_me:$LINENO: result: $CC" >&5
-echo "${ECHO_T}$CC" >&6; }
-else
-  { echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6; }
-fi
-
-
-fi
-if test -z "$CC"; then
-  if test -n "$ac_tool_prefix"; then
-  for ac_prog in cl.exe
-  do
-    # Extract the first word of "$ac_tool_prefix$ac_prog", so it can be a program name with args.
-set dummy $ac_tool_prefix$ac_prog; ac_word=$2
-{ echo "$as_me:$LINENO: checking for $ac_word" >&5
-echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
-if test "${ac_cv_prog_CC+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  if test -n "$CC"; then
-  ac_cv_prog_CC="$CC" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_CC="$ac_tool_prefix$ac_prog"
-    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-done
-IFS=$as_save_IFS
-
-fi
-fi
-CC=$ac_cv_prog_CC
-if test -n "$CC"; then
-  { echo "$as_me:$LINENO: result: $CC" >&5
-echo "${ECHO_T}$CC" >&6; }
-else
-  { echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6; }
-fi
-
-
-    test -n "$CC" && break
-  done
-fi
-if test -z "$CC"; then
-  ac_ct_CC=$CC
-  for ac_prog in cl.exe
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ echo "$as_me:$LINENO: checking for $ac_word" >&5
-echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
-if test "${ac_cv_prog_ac_ct_CC+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  if test -n "$ac_ct_CC"; then
-  ac_cv_prog_ac_ct_CC="$ac_ct_CC" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_ac_ct_CC="$ac_prog"
-    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-done
-IFS=$as_save_IFS
-
-fi
-fi
-ac_ct_CC=$ac_cv_prog_ac_ct_CC
-if test -n "$ac_ct_CC"; then
-  { echo "$as_me:$LINENO: result: $ac_ct_CC" >&5
-echo "${ECHO_T}$ac_ct_CC" >&6; }
-else
-  { echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6; }
-fi
-
-
-  test -n "$ac_ct_CC" && break
-done
-
-  if test "x$ac_ct_CC" = x; then
-    CC=""
-  else
-    case $cross_compiling:$ac_tool_warned in
-yes:)
-{ echo "$as_me:$LINENO: WARNING: In the future, Autoconf will not detect cross-tools
-whose name does not start with the host triplet.  If you think this
-configuration is useful to you, please write to autoconf@gnu.org." >&5
-echo "$as_me: WARNING: In the future, Autoconf will not detect cross-tools
-whose name does not start with the host triplet.  If you think this
-configuration is useful to you, please write to autoconf@gnu.org." >&2;}
-ac_tool_warned=yes ;;
-esac
-    CC=$ac_ct_CC
-  fi
-fi
-
-fi
-
-
-test -z "$CC" && { { echo "$as_me:$LINENO: error: no acceptable C compiler found in \$PATH
-See \`config.log' for more details." >&5
-echo "$as_me: error: no acceptable C compiler found in \$PATH
-See \`config.log' for more details." >&2;}
-   { (exit 1); exit 1; }; }
-
-# Provide some information about the compiler.
-echo "$as_me:$LINENO: checking for C compiler version" >&5
-ac_compiler=`set X $ac_compile; echo $2`
-{ (ac_try="$ac_compiler --version >&5"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_compiler --version >&5") 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }
-{ (ac_try="$ac_compiler -v >&5"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_compiler -v >&5") 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }
-{ (ac_try="$ac_compiler -V >&5"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_compiler -V >&5") 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }
-
-{ echo "$as_me:$LINENO: checking whether we are using the GNU C compiler" >&5
-echo $ECHO_N "checking whether we are using the GNU C compiler... $ECHO_C" >&6; }
-if test "${ac_cv_c_compiler_gnu+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-int
-main ()
-{
-#ifndef __GNUC__
-       choke me
-#endif
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag" || test ! -s conftest.err'
-  { (case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_try") 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_try") 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_compiler_gnu=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_compiler_gnu=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-ac_cv_c_compiler_gnu=$ac_compiler_gnu
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_c_compiler_gnu" >&5
-echo "${ECHO_T}$ac_cv_c_compiler_gnu" >&6; }
-GCC=`test $ac_compiler_gnu = yes && echo yes`
-ac_test_CFLAGS=${CFLAGS+set}
-ac_save_CFLAGS=$CFLAGS
-{ echo "$as_me:$LINENO: checking whether $CC accepts -g" >&5
-echo $ECHO_N "checking whether $CC accepts -g... $ECHO_C" >&6; }
-if test "${ac_cv_prog_cc_g+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_save_c_werror_flag=$ac_c_werror_flag
-   ac_c_werror_flag=yes
-   ac_cv_prog_cc_g=no
-   CFLAGS="-g"
-   cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag" || test ! -s conftest.err'
-  { (case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_try") 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_try") 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_prog_cc_g=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	CFLAGS=""
-      cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag" || test ! -s conftest.err'
-  { (case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_try") 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_try") 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  :
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_c_werror_flag=$ac_save_c_werror_flag
-	 CFLAGS="-g"
-	 cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag" || test ! -s conftest.err'
-  { (case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_try") 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_try") 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_prog_cc_g=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-   ac_c_werror_flag=$ac_save_c_werror_flag
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_prog_cc_g" >&5
-echo "${ECHO_T}$ac_cv_prog_cc_g" >&6; }
-if test "$ac_test_CFLAGS" = set; then
-  CFLAGS=$ac_save_CFLAGS
-elif test $ac_cv_prog_cc_g = yes; then
-  if test "$GCC" = yes; then
-    CFLAGS="-g -O2"
-  else
-    CFLAGS="-g"
-  fi
-else
-  if test "$GCC" = yes; then
-    CFLAGS="-O2"
-  else
-    CFLAGS=
-  fi
-fi
-{ echo "$as_me:$LINENO: checking for $CC option to accept ISO C89" >&5
-echo $ECHO_N "checking for $CC option to accept ISO C89... $ECHO_C" >&6; }
-if test "${ac_cv_prog_cc_c89+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_cv_prog_cc_c89=no
-ac_save_CC=$CC
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <stdarg.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-/* Most of the following tests are stolen from RCS 5.7's src/conf.sh.  */
-struct buf { int x; };
-FILE * (*rcsopen) (struct buf *, struct stat *, int);
-static char *e (p, i)
-     char **p;
-     int i;
-{
-  return p[i];
-}
-static char *f (char * (*g) (char **, int), char **p, ...)
-{
-  char *s;
-  va_list v;
-  va_start (v,p);
-  s = g (p, va_arg (v,int));
-  va_end (v);
-  return s;
-}
-
-/* OSF 4.0 Compaq cc is some sort of almost-ANSI by default.  It has
-   function prototypes and stuff, but not '\xHH' hex character constants.
-   These don't provoke an error unfortunately, instead are silently treated
-   as 'x'.  The following induces an error, until -std is added to get
-   proper ANSI mode.  Curiously '\x00'!='x' always comes out true, for an
-   array size at least.  It's necessary to write '\x00'==0 to get something
-   that's true only with -std.  */
-int osf4_cc_array ['\x00' == 0 ? 1 : -1];
-
-/* IBM C 6 for AIX is almost-ANSI by default, but it replaces macro parameters
-   inside strings and character constants.  */
-#define FOO(x) 'x'
-int xlc6_cc_array[FOO(a) == 'x' ? 1 : -1];
-
-int test (int i, double x);
-struct s1 {int (*f) (int a);};
-struct s2 {int (*f) (double a);};
-int pairnames (int, char **, FILE *(*)(struct buf *, struct stat *, int), int, int);
-int argc;
-char **argv;
-int
-main ()
-{
-return f (e, argv, 0) != argv[0]  ||  f (e, argv, 1) != argv[1];
-  ;
-  return 0;
-}
-_ACEOF
-for ac_arg in '' -qlanglvl=extc89 -qlanglvl=ansi -std \
-	-Ae "-Aa -D_HPUX_SOURCE" "-Xc -D__EXTENSIONS__"
-do
-  CC="$ac_save_CC $ac_arg"
-  rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag" || test ! -s conftest.err'
-  { (case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_try") 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_try") 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_prog_cc_c89=$ac_arg
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-fi
-
-rm -f core conftest.err conftest.$ac_objext
-  test "x$ac_cv_prog_cc_c89" != "xno" && break
-done
-rm -f conftest.$ac_ext
-CC=$ac_save_CC
-
-fi
-# AC_CACHE_VAL
-case "x$ac_cv_prog_cc_c89" in
-  x)
-    { echo "$as_me:$LINENO: result: none needed" >&5
-echo "${ECHO_T}none needed" >&6; } ;;
-  xno)
-    { echo "$as_me:$LINENO: result: unsupported" >&5
-echo "${ECHO_T}unsupported" >&6; } ;;
-  *)
-    CC="$CC $ac_cv_prog_cc_c89"
-    { echo "$as_me:$LINENO: result: $ac_cv_prog_cc_c89" >&5
-echo "${ECHO_T}$ac_cv_prog_cc_c89" >&6; } ;;
-esac
-
-
-ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -4553,11 +3792,10 @@ BFLAGS=""
 echo $ECHO_N "checking for C99 standard... $ECHO_C" >&6; }
 
 if test "$cross_compiling" = yes; then
-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling
-See \`config.log' for more details." >&5
-echo "$as_me: error: cannot run test program while cross compiling
-See \`config.log' for more details." >&2;}
+  { { echo "$as_me:$LINENO: error: C99 standard not supported" >&5
+echo "$as_me: error: C99 standard not supported" >&2;}
    { (exit 1); exit 1; }; }
+
 else
   cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
@@ -4610,10 +3848,6 @@ sed 's/^/| /' conftest.$ac_ext >&5
 ( exit $ac_status )
 { echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
-  { { echo "$as_me:$LINENO: error: C99 standard not supported" >&5
-echo "$as_me: error: C99 standard not supported" >&2;}
-   { (exit 1); exit 1; }; }
-
 fi
 rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
@@ -4630,11 +3864,10 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 if test "$cross_compiling" = yes; then
-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling
-See \`config.log' for more details." >&5
-echo "$as_me: error: cannot run test program while cross compiling
-See \`config.log' for more details." >&2;}
+  { { echo "$as_me:$LINENO: error: C++ 98 standard not supported" >&5
+echo "$as_me: error: C++ 98 standard not supported" >&2;}
    { (exit 1); exit 1; }; }
+
 else
   cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
@@ -4677,22 +3910,16 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-
-    { echo "$as_me:$LINENO: result: yes" >&5
+  { echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6; }
-
 else
   echo "$as_me: program exited with status $ac_status" >&5
 echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
 ( exit $ac_status )
-
-    { echo "$as_me:$LINENO: result: no" >&5
+{ echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
-    CXXFLAGS=""
-
-
 fi
 rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
@@ -4728,8 +3955,6 @@ if test "${enable_debug+set}" = set; then
 fi
 
 if test $enable_debug; then
-  { echo "$as_me:$LINENO: compiling with debugging information" >&5
-echo "$as_me: compiling with debugging information" >&6;}
   CFLAGS="$CFLAGS -g -Wall $OFLAGS -W -pedantic"
   CXXFLAGS="$CXXFLAGS -g -Wall $OFLAGS -W"
   BFLAGS="-t $BFLAGS"
@@ -4748,8 +3973,6 @@ if test "${enable_profile+set}" = set; then
 fi
 
 if test $enable_profile; then
-  { echo "$as_me:$LINENO: compiling with profiling support" >&5
-echo "$as_me: compiling with profiling support" >&6;}
   BUILD_VARIANT="profile"
   CPPFLAGS="-pg $CPPFLAGS"
   LDFLAGS="-pg $LDFLAGS"
@@ -4803,6 +4026,7 @@ if test "${with_aterm+set}" = set; then
   withval=$with_aterm;
 fi
 
+BUILD_ATERM="yes ($with_aterm)"
 if test $with_aterm; then
   { echo "$as_me:$LINENO: checking for ATerm library in $with_aterm" >&5
 echo $ECHO_N "checking for ATerm library in $with_aterm... $ECHO_C" >&6; }
@@ -5708,12 +4932,10 @@ fi
 done
 
 else
-  { echo "$as_me:$LINENO: using local ATerm library" >&5
-echo "$as_me: using local ATerm library" >&6;}
   ATERM_CPPFLAGS="-I$PWD/src/aterm"
   ATERM_LDFLAGS="-L$PWD/src/aterm"
   ATERM_NAME="ATerm"
-  BUILD_ATERM=1
+  BUILD_ATERM="builtin"
 
   if test "$ADDRESS_MODEL" = "64"; then
     ATERM_CPPFLAGS="-DAT_64BIT $ATERM_CPPFLAGS"
@@ -5724,13 +4946,12 @@ fi
 
 
 
-
 # Check whether --with-cadp was given.
 if test "${with_cadp+set}" = set; then
   withval=$with_cadp;
 fi
 
-USE_BCG=0
+USE_BCG=no
 if test ${with_cadp}; then
   { echo "$as_me:$LINENO: checking for CADP in $with_cadp" >&5
 echo $ECHO_N "checking for CADP in $with_cadp... $ECHO_C" >&6; }
@@ -5774,13 +4995,79 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
 
-       { echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; }
        CADP_HEADERS="$with_cadp/incl"
 
        CADP_LIBRARIES="${with_cadp}/bin.`${with_cadp}/com/arch`"
 
-       USE_BCG=1
+       USE_BCG=yes
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  { echo "$as_me:$LINENO: result: $USE_BCG" >&5
+echo "${ECHO_T}$USE_BCG" >&6; }
+fi
+
+
+# Check for Boost C++ library
+
+# Check whether --with-boost was given.
+if test "${with_boost+set}" = set; then
+  withval=$with_boost;
+fi
+
+{ echo "$as_me:$LINENO: checking for the Boost C++ libraries" >&5
+echo $ECHO_N "checking for the Boost C++ libraries... $ECHO_C" >&6; }
+USE_BOOST="yes $with_boost"
+if test $with_boost; then
+  cat >conftest.$ac_ext <<_ACEOF
+
+      #include "$with_boost/include/boost/version.hpp"
+
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag" || test ! -s conftest.err'
+  { (case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+
+       BOOST_PREFIX=$with_boost
+       { echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
 
 else
   echo "$as_me: failed program was:" >&5
@@ -5789,12 +5076,130 @@ sed 's/^/| /' conftest.$ac_ext >&5
 
        { echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
+       { { echo "$as_me:$LINENO: error: the Boost C++ libraries are required for a number of tools in the toolset.
+                    they can be obtained from http://www.boost.org." >&5
+echo "$as_me: error: the Boost C++ libraries are required for a number of tools in the toolset.
+                    they can be obtained from http://www.boost.org." >&2;}
+   { (exit 1); exit 1; }; }
 
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+else
+  USE_BOOST=builtin
+  { echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+  BOOST_PREFIX=boost
+fi
+BOOST_PREFIX=$with_boost
+
+
+# Check for OpenGL
+
+# Check whether --with-OpenGL was given.
+if test "${with_OpenGL+set}" = set; then
+  withval=$with_OpenGL;
 fi
 
+{ echo "$as_me:$LINENO: checking for OpenGL" >&5
+echo $ECHO_N "checking for OpenGL... $ECHO_C" >&6; }
+if test $with_opengl; then
+  CFLAGS="-I$with_opengl/include"
+  LDFLAGS="-L$with_opengl/lib"
+fi
+
+case $host in
+  *-*-mingw32*)
+    LIBS="opengl32"
+    ;;
+  *-*-cygwin*)
+    LIBS="opengl32"
+    ;;
+  *-*-darwin*)
+    LIBS="OpenGL"
+    ;;
+  *)
+    LIBS="GL"
+    ;;
+esac
+
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+                   #include <GL/gl.h>
+                   #include <GL/glu.h>
+int
+main ()
+{
+glPointSize(1.0f);
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag" || test ! -s conftest.err'
+  { (case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  USE_OPENGL=1
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+if test $USE_OPENGL; then
+  { echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+  OPENGL_NAME=$LIBS
+
+
+  if test $with_opengl; then
+    OPENGL_IPATH=$with_opengl/include
+
+    OPENGL_LPATH=$with_opengl/lib
+
+  fi
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
 
 # Check for xml2 library and header files
 
@@ -5803,9 +5208,10 @@ if test "${with_xml2+set}" = set; then
   withval=$with_xml2;
 fi
 
+USE_XML2=no
 if test $with_libxml2; then
-  { echo "$as_me:$LINENO: checking for libXML2 in $with_libxml2" >&5
-echo $ECHO_N "checking for libXML2 in $with_libxml2... $ECHO_C" >&6; }
+  { echo "$as_me:$LINENO: checking for libxml2 in $with_libxml2" >&5
+echo $ECHO_N "checking for libxml2 in $with_libxml2... $ECHO_C" >&6; }
   cat >conftest.$ac_ext <<_ACEOF
 
       #include <$with_xml2/include/libxml2/libxml/xmlversion.h>
@@ -5846,23 +5252,22 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
 
-       { echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; }
-       USE_LIBXML2=1
-       LIBXML2_CPPFLAGS=-I$with_libxml2/include/libxml2
-
+       USE_XML2=yes
+       XML2_CPPFLAGS="-I$with_libxml2/include/libxml2"
+       XML2_LDFLAGS="-I$with_libxml2/lib"
 
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
 
-       { echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6; }
-
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+  { echo "$as_me:$LINENO: result: $USE_XML2" >&5
+echo "${ECHO_T}$USE_XML2" >&6; }
+  USE_XML2="yes ($with_libxml2)"
 else
   #Headers may be in a standard location, ask xml2-config
   # Extract the first word of "xml2-config", so it can be a program name with args.
@@ -5904,17 +5309,10 @@ fi
 
 
   if test $XML2_CONFIG; then
-    USE_LIBXML2=1
-    LIBXML2_CPPFLAGS="$($XML2_CONFIG --cflags)"
-    LIBXML2_LDFLAGS="$($XML2_CONFIG --libs)"
+    USE_XML2="yes ($($XML2_CONFIG --prefix))"
+    XML2_CPPFLAGS="$($XML2_CONFIG --cflags)"
+    XML2_LDFLAGS="$($XML2_CONFIG --libs)"
   fi
-fi
-
-if test -z $USE_LIBXML2; then
-  { echo "$as_me:$LINENO: libXML2 is required for some tools in the toolset." >&5
-echo "$as_me: libXML2 is required for some tools in the toolset." >&6;}
-  { echo "$as_me:$LINENO: it can be obtained from http://www.xmlsoft.org." >&5
-echo "$as_me: it can be obtained from http://www.xmlsoft.org." >&6;}
 fi
 
 
@@ -6015,88 +5413,6 @@ echo "$as_me: xmlto can be obtained from http://cyberelk.net/tim/xmlto/." >&6;}
 fi
 
 
-# Check for Boost C++ library
-
-# Check whether --with-boost was given.
-if test "${with_boost+set}" = set; then
-  withval=$with_boost;
-fi
-
-{ echo "$as_me:$LINENO: checking for the Boost C++ libraries" >&5
-echo $ECHO_N "checking for the Boost C++ libraries... $ECHO_C" >&6; }
-if test $with_boost; then
-  cat >conftest.$ac_ext <<_ACEOF
-
-      #include "$with_boost/include/boost/version.hpp"
-
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag" || test ! -s conftest.err'
-  { (case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_try") 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_try") 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-
-       BOOST_PREFIX=$with_boost
-
-       { echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; }
-       USE_BOOST=1
-
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-       { echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6; }
-       { echo "$as_me:$LINENO: the Boost C++ libraries are required for certain tools in the toolset." >&5
-echo "$as_me: the Boost C++ libraries are required for certain tools in the toolset." >&6;}
-       { echo "$as_me:$LINENO: they can be obtained from http://www.boost.org." >&5
-echo "$as_me: they can be obtained from http://www.boost.org." >&6;}
-
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-else
-  USE_BOOST=1
-  { echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; }
-  BOOST_PREFIX=boost
-
-  { echo "$as_me:$LINENO: using local Boost libraries." >&5
-echo "$as_me: using local Boost libraries." >&6;}
-fi
-
-
 # Check for wxWidgets
 
 # Check whether --with-wx was given.
@@ -6182,12 +5498,13 @@ fi
 
 fi
 if test $WX_CONFIG; then
-  USE_WX=1
+  USE_WX="yes ($($WX_CONFIG --prefix))"
   WX_CPPFLAGS="$($WX_CONFIG --cppflags)"
   WX_BASE_LDFLAGS="$($WX_CONFIG --libs core,base)"
   WX_GL_LDFLAGS="$($WX_CONFIG --libs core,base,gl)"
+else
+  USE_WX=no
 fi
-
 
 
 
@@ -7353,25 +6670,6 @@ fi
 done
 
 
-{ echo "$as_me:$LINENO: " >&5
-echo "$as_me: " >&6;}
-{ echo "$as_me:$LINENO: " >&5
-echo "$as_me: " >&6;}
-if test $USE_WX; then
-  { echo "$as_me:$LINENO: wxWidgets     :  FOUND" >&5
-echo "$as_me: wxWidgets     :  FOUND" >&6;}
-else
-  { echo "$as_me:$LINENO: wxWidgets     :  MISSING" >&5
-echo "$as_me: wxWidgets     :  MISSING" >&6;}
-fi
-if test $USE_LIBXML2; then
-  { echo "$as_me:$LINENO: libXML2       :  FOUND" >&5
-echo "$as_me: libXML2       :  FOUND" >&6;}
-else
-  { echo "$as_me:$LINENO: libXML2       :  MISSING" >&5
-echo "$as_me: libXML2       :  MISSING" >&6;}
-fi
-
 #evaluate some location variables for use with Boost Build
 if test "x$prefix" = xNONE
 then
@@ -7386,23 +6684,26 @@ fi
 
 
 
+eval "eval PREFIX_DIR=${prefix}"
+eval "eval EXEC_PREFIX_DIR=${exec_prefix}"
+
+prefix="\$(prefix)"
 includedir="$includedir/mcrl2"
 datadir="$datadir/mcrl2"
 libdir="$libdir/mcrl2"
 
-eval "eval PREFIX_DIR=${prefix}"
-
-eval "eval EXEC_PREFIX_DIR=${exec_prefix}"
-
 eval "eval DATA_DIR=${datadir}"
-
 eval "eval BIN_DIR=${bindir}"
-
 eval "eval LIB_DIR=${libdir}"
-
-eval "eval INCLUDE_DIR=${includedir}"
-
+eval INCLUDE_DIR=${includedir}
 eval "eval MAN_DIR=${mandir}"
+
+
+
+
+
+
+
 
 
 # Runtime compilation flags
@@ -7414,12 +6715,12 @@ R_SCXXFLAGS="$R_SCXXFLAGS"
 
 R_CPPFLAGS="$CPPFLAGS"
 
-R_LDFLAGS=$R_LDFLAGS
+R_LDFLAGS="$R_LDFLAGS"
 
-R_SLDFLAGS=$R_SLDFLAGS
+R_SLDFLAGS="$R_SLDFLAGS"
 
 
-if test $BUILD_ATERM; then
+if test "$BUILD_ATERM" = "builtin"; then
   if test "$ADDRESS_MODEL" = "64"; then
     IATERM_CPPFLAGS="-DAT_64BIT -I$INCLUDE_DIR/aterm"
 
@@ -7436,12 +6737,28 @@ else
 
 fi
 
-{ echo "$as_me:$LINENO: " >&5
-echo "$as_me: " >&6;}
-{ echo "$as_me:$LINENO: Some tools will not be built if any of these libraries are missing." >&5
-echo "$as_me: Some tools will not be built if any of these libraries are missing." >&6;}
-{ echo "$as_me:$LINENO: " >&5
-echo "$as_me: " >&6;}
+{ echo "$as_me:$LINENO: result:
+   Configured $BUILD_VARIANT variant-build using libraries:
+
+     ATerm         :  $BUILD_ATERM
+     Boost         :  $USE_BOOST
+     CADP          :  $USE_BCG
+     libxml2       :  $USE_XML2
+     wxWidgets     :  $USE_WX
+
+   Some tools will not be built if any of these libraries are missing.
+" >&5
+echo "${ECHO_T}
+   Configured $BUILD_VARIANT variant-build using libraries:
+
+     ATerm         :  $BUILD_ATERM
+     Boost         :  $USE_BOOST
+     CADP          :  $USE_BCG
+     libxml2       :  $USE_XML2
+     wxWidgets     :  $USE_WX
+
+   Some tools will not be built if any of these libraries are missing.
+" >&6; }
 
 ac_config_files="$ac_config_files build/config.mk build/config.jam src/setup.h"
 
@@ -8129,21 +7446,19 @@ EGREP!$EGREP$ac_delim
 ATERM_CPPFLAGS!$ATERM_CPPFLAGS$ac_delim
 ATERM_LDFLAGS!$ATERM_LDFLAGS$ac_delim
 ATERM_NAME!$ATERM_NAME$ac_delim
-BUILD_ATERM!$BUILD_ATERM$ac_delim
 CADP_HEADERS!$CADP_HEADERS$ac_delim
 CADP_LIBRARIES!$CADP_LIBRARIES$ac_delim
 USE_BCG!$USE_BCG$ac_delim
-LIBXML2_CPPFLAGS!$LIBXML2_CPPFLAGS$ac_delim
+BOOST_PREFIX!$BOOST_PREFIX$ac_delim
+OPENGL_NAME!$OPENGL_NAME$ac_delim
+OPENGL_IPATH!$OPENGL_IPATH$ac_delim
+OPENGL_LPATH!$OPENGL_LPATH$ac_delim
 XML2_CONFIG!$XML2_CONFIG$ac_delim
-LIBXML2_CONFIG!$LIBXML2_CONFIG$ac_delim
-LIBXML2_LDFLAGS!$LIBXML2_LDFLAGS$ac_delim
-USE_LIBXML2!$USE_LIBXML2$ac_delim
+XML2_CPPFLAGS!$XML2_CPPFLAGS$ac_delim
+XML2_LDFLAGS!$XML2_LDFLAGS$ac_delim
 XMLTO!$XMLTO$ac_delim
 USE_XMLTO!$USE_XMLTO$ac_delim
-BOOST_PREFIX!$BOOST_PREFIX$ac_delim
-USE_BOOST!$USE_BOOST$ac_delim
 WX_CONFIG!$WX_CONFIG$ac_delim
-USE_WX!$USE_WX$ac_delim
 WX_CPPFLAGS!$WX_CPPFLAGS$ac_delim
 WX_BASE_LDFLAGS!$WX_BASE_LDFLAGS$ac_delim
 WX_GL_LDFLAGS!$WX_GL_LDFLAGS$ac_delim
@@ -8159,6 +7474,8 @@ BIN_DIR!$BIN_DIR$ac_delim
 INCLUDE_DIR!$INCLUDE_DIR$ac_delim
 MAN_DIR!$MAN_DIR$ac_delim
 R_CFLAGS!$R_CFLAGS$ac_delim
+R_SCFLAGS!$R_SCFLAGS$ac_delim
+R_CXXFLAGS!$R_CXXFLAGS$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -8200,8 +7517,6 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
-R_SCFLAGS!$R_SCFLAGS$ac_delim
-R_CXXFLAGS!$R_CXXFLAGS$ac_delim
 R_SCXXFLAGS!$R_SCXXFLAGS$ac_delim
 R_CPPFLAGS!$R_CPPFLAGS$ac_delim
 R_LDFLAGS!$R_LDFLAGS$ac_delim
@@ -8211,7 +7526,7 @@ IATERM_LDFLAGS!$IATERM_LDFLAGS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 9; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 7; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

@@ -68,6 +68,10 @@ namespace squadt_utility {
     gsSetCustomMessageHandler(relay_message);
   }
 
+  void finalise() {
+    gsSetCustomMessageHandler(0);
+  }
+
 #ifdef __WXWINDOWS__
   /** 
    * \brief Convenience class for connecting wxWidgets applications to the environment (platform dependent wrapper around wxEntry)

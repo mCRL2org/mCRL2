@@ -1,7 +1,8 @@
-AC_INIT([mCRL2 toolset], [0.2], [bug@mcrl2.org])
+AC_INIT([mCRL2 toolset],[0.2],[bug@mcrl2.org])
+AC_CONFIG_AUX_DIR(build/autoconf)
+AC_CONFIG_SRCDIR([src/setup.h.in])
 AC_CANONICAL_HOST
 AC_PREFIX_DEFAULT([$HOME])
-AC_CONFIG_SRCDIR([src/setup.h.in])
 
 # Default toolset to use with Boost.Build
 BJAM_CXX="gcc"
@@ -68,7 +69,6 @@ AC_SUBST([ADDRESS_MODEL],[])
 
 # Checks for programs.
 AC_PROG_CPP
-AC_PROG_CC
 AC_PROG_CXX
 
 # Check for compatible flex
@@ -144,7 +144,7 @@ AC_RUN_IFELSE(
     ]
   ),
   AC_MSG_RESULT([yes]),
-  AC_MSG_RESULT([no])
+  AC_MSG_RESULT([no]),
   AC_MSG_ERROR([C99 standard not supported])
 )
 
@@ -159,13 +159,9 @@ AC_RUN_IFELSE(
      #endif
     ]
   ),
-  [
-    AC_MSG_RESULT([yes])
-  ],
-  [
-    AC_MSG_RESULT([no])
-    CXXFLAGS=""
-  ]
+  [AC_MSG_RESULT([yes])],
+  [AC_MSG_RESULT([no])],
+  [AC_MSG_ERROR([C++ 98 standard not supported])]
 )
 AC_LANG_POP(C++)
 
@@ -176,10 +172,8 @@ R_CXXFLAGS="$R_CXXFLAGS $CXXFLAGS"
 # Check whether optimization must be suppressed
 AC_ARG_ENABLE(
   [optimisation],
-  AC_HELP_STRING(
-    [--disable-optimisation],
-    [compile without compile-time optimisations]
-  )
+  AS_HELP_STRING([--disable-optimisation],
+                 [disables compile-time optimisations])
 )
 if test $enable_optimisation; then
  OFLAGS=""
@@ -190,13 +184,10 @@ fi
 # Check for debug/profile options
 AC_ARG_ENABLE(
   [debug],
-  AC_HELP_STRING(
-    [--enable-debug],
-    [compile with debugging information]
-  )
+  AS_HELP_STRING([--enable-debug],
+                 [adds debugging information to libraries and executables])
 )
 if test $enable_debug; then
-  AC_MSG_NOTICE([compiling with debugging information])
   CFLAGS="$CFLAGS -g -Wall $OFLAGS -W -pedantic"
   CXXFLAGS="$CXXFLAGS -g -Wall $OFLAGS -W"
   BFLAGS="-t $BFLAGS"
@@ -211,13 +202,9 @@ AC_SUBST([BFLAGS],[])
 
 AC_ARG_ENABLE(
   [profile],
-  AC_HELP_STRING(
-    [--enable-profile],
-    [compile with profiling support]
-  )
+  AS_HELP_STRING([--enable-profile],[adds profiling support to libraries and executables])
 )
 if test $enable_profile; then
-  AC_MSG_NOTICE([compiling with profiling support])
   BUILD_VARIANT="profile"
   CPPFLAGS="-pg $CPPFLAGS"
   LDFLAGS="-pg $LDFLAGS"
@@ -226,10 +213,7 @@ fi
 # Check for debug/profile options
 AC_ARG_WITH(
   [static],
-  AC_HELP_STRING(
-    [--enable-static],
-    [produce and link to static libraries]
-  )
+  AS_HELP_STRING([--enable-static],[produce and link to static libraries])
 )
 if test $enable_static; then
   BUILD_OPTIONS="\"<link>static\""
@@ -238,10 +222,8 @@ fi
 # Check whether symbol table stripping from binaries is requested
 AC_ARG_ENABLE(
   [experimental],
-  AC_HELP_STRING(
-    [--enable-experimental],
-    [also build experimental tools]
-  )
+  AS_HELP_STRING([--enable-experimental],[also build experimental tools
+  ])
 )
 if test $enable_experimental; then
   BUILD_EXTRA="--enable-experimental $BUILD_EXTRA"
@@ -250,10 +232,8 @@ fi
 # Check whether symbol table stripping from binaries is requested
 AC_ARG_ENABLE(
   [deprecated],
-  AC_HELP_STRING(
-    [--enable-deprecated],
-    [also build deprecated tools]
-  )
+  AS_HELP_STRING([--enable-deprecated],[also build deprecated tools
+  ])
 )
 if test $enable_experimental; then
   BUILD_EXTRA="--enable-deprecated $BUILD_EXTRA"
@@ -262,10 +242,8 @@ fi
 # Check whether optimization must be suppressed
 AC_ARG_ENABLE(
   [squadt_support],
-  AC_HELP_STRING(
-    [--disable-squadt-support],
-    [do not compile squadt support in tools]
-  )
+  AS_HELP_STRING([--disable-squadt-support],[do not compile squadt support in tools
+  ])
 )
 if test $enable_squadt_support; then
   BUILD_EXTRA="--disable-squadt-support $BUILD_EXTRA"
@@ -274,13 +252,10 @@ fi
 # Check for ATerm library and header files
 AC_ARG_WITH(
   [aterm],
-  AC_HELP_STRING(
-    [[[[--with-aterm=dir@<:@,suf@:>@]]]],
-    [use ATerm headers from dir/include@<:@/suf@:>@ and the ATerm library from
-     dir/lib@<:@/suf@:>@
-    ]
-  )
+  AS_HELP_STRING([[[[--with-aterm=dir@<:@,suf@:>@]]]],
+     [use ATerm headers from dir/include@<:@/suf@:>@ and the ATerm library from dir/lib@<:@/suf@:>@])
 )
+BUILD_ATERM="yes ($with_aterm)"
 if test $with_aterm; then
   AC_MSG_CHECKING([for ATerm library in $with_aterm])
   ATERM_ROOT=$(echo $with_aterm, | cut -d, -f1)
@@ -303,11 +278,10 @@ if test $with_aterm; then
   fi;
   AC_CHECK_HEADERS([aterm2.h], , [AC_MSG_ERROR([cannot find ATerm headers])])
 else
-  AC_MSG_NOTICE([using local ATerm library])
   ATERM_CPPFLAGS="-I$PWD/src/aterm"
   ATERM_LDFLAGS="-L$PWD/src/aterm"
   ATERM_NAME="ATerm"
-  BUILD_ATERM=1
+  BUILD_ATERM="builtin"
 
   if test "$ADDRESS_MODEL" = "64"; then
     ATERM_CPPFLAGS="-DAT_64BIT $ATERM_CPPFLAGS"
@@ -316,16 +290,12 @@ fi
 AC_SUBST([ATERM_CPPFLAGS],[])
 AC_SUBST([ATERM_LDFLAGS],[])
 AC_SUBST([ATERM_NAME],[])
-AC_SUBST([BUILD_ATERM],[])
 
 AC_ARG_WITH(
   [cadp],
-  AC_HELP_STRING(
-    [--with-cadp=prefix],
-    [try this for the CADP prefix directory]
-  )  
+  AS_HELP_STRING([--with-cadp=prefix],[try this for the CADP prefix directory])  
 )
-USE_BCG=0
+USE_BCG=no
 if test ${with_cadp}; then
   AC_MSG_CHECKING([for CADP in $with_cadp])
   AC_COMPILE_IFELSE(
@@ -333,66 +303,123 @@ if test ${with_cadp}; then
       #include <$with_cadp/incl/bcg_user.h>
      ],
      [
-       AC_MSG_RESULT(yes)
        AC_SUBST([CADP_HEADERS],["$with_cadp/incl"])
        AC_SUBST([CADP_LIBRARIES],["${with_cadp}/bin.`${with_cadp}/com/arch`"])
-       USE_BCG=1
+       USE_BCG=yes
+     ])
+  AC_MSG_RESULT($USE_BCG)
+fi
+AC_SUBST([USE_BCG])
+
+# Check for Boost C++ library
+AC_ARG_WITH(
+  [boost],
+  AS_HELP_STRING([--with-boost=prefix],[try this for the boost prefix install directory])
+)
+AC_MSG_CHECKING([for the Boost C++ libraries])
+USE_BOOST="yes $with_boost"
+if test $with_boost; then
+  AC_COMPILE_IFELSE(
+     [
+      #include "$with_boost/include/boost/version.hpp"
+     ],
+     [
+       BOOST_PREFIX=$with_boost
+       AC_MSG_RESULT(yes)
      ],
      [
        AC_MSG_RESULT(no)
+       AC_MSG_ERROR([the Boost C++ libraries are required for a number of tools in the toolset.]
+                    [they can be obtained from http://www.boost.org.])
      ])
+else 
+  USE_BOOST=builtin
+  AC_MSG_RESULT(yes)
+  BOOST_PREFIX=boost
 fi
-AC_SUBST([USE_BCG])
+AC_SUBST([BOOST_PREFIX],[$with_boost])
+
+# Check for OpenGL
+AC_ARG_WITH([OpenGL],
+            AS_HELP_STRING([--with-opengl=DIR], [OpenGL/Mesa installation directory]))
+AC_MSG_CHECKING([for OpenGL])
+if test $with_opengl; then
+  CFLAGS="-I$with_opengl/include"
+  LDFLAGS="-L$with_opengl/lib"
+fi
+
+case $host in
+  *-*-mingw32*)
+    LIBS="opengl32"
+    ;;
+  *-*-cygwin*)
+    LIBS="opengl32"
+    ;;
+  *-*-darwin*)
+    LIBS="OpenGL"
+    ;;
+  *)
+    LIBS="GL"
+    ;;
+esac
+
+AC_COMPILE_IFELSE(AC_LANG_PROGRAM([
+                   #include <GL/gl.h>
+                   #include <GL/glu.h>],
+                  [glPointSize(1.0f);]),
+                  USE_OPENGL=1,)
+
+if test $USE_OPENGL; then
+  AC_MSG_RESULT([yes])
+  AC_SUBST([OPENGL_NAME],[$LIBS])
+
+  if test $with_opengl; then
+    AC_SUBST([OPENGL_IPATH],[$with_opengl/include])
+    AC_SUBST([OPENGL_LPATH],[$with_opengl/lib])
+  fi
+else
+  AC_MSG_RESULT([no])
+fi
 
 # Check for xml2 library and header files
 AC_ARG_WITH(
   [xml2],
-  AC_HELP_STRING(
-    [--with-libxml2=prefix],
-    [try this for the libxml2 prefix install directory]
-  )  
+  AS_HELP_STRING([--with-libxml2=prefix],[try this for the libxml2 prefix install directory])  
 )
+USE_XML2=no
 if test $with_libxml2; then
-  AC_MSG_CHECKING([for libXML2 in $with_libxml2])
+  AC_MSG_CHECKING([for libxml2 in $with_libxml2])
   AC_COMPILE_IFELSE(
      [
       #include <$with_xml2/include/libxml2/libxml/xmlversion.h>
      ],
      [
-       AC_MSG_RESULT(yes)
-       USE_LIBXML2=1
-       AC_SUBST([LIBXML2_CPPFLAGS],[-I$with_libxml2/include/libxml2])
-     ],
-     [
-       AC_MSG_RESULT(no)
-     ])
+       USE_XML2=yes
+       XML2_CPPFLAGS="-I$with_libxml2/include/libxml2"
+       XML2_LDFLAGS="-I$with_libxml2/lib"
+     ],)
+
+  AC_MSG_RESULT($USE_XML2)
+  USE_XML2="yes ($with_libxml2)"
 else
   #Headers may be in a standard location, ask xml2-config
   AC_CHECK_PROG([XML2_CONFIG],[xml2-config],[xml2-config])
 
   if test $XML2_CONFIG; then
-    USE_LIBXML2=1
-    LIBXML2_CPPFLAGS="$($XML2_CONFIG --cflags)"
-    LIBXML2_LDFLAGS="$($XML2_CONFIG --libs)"
+    USE_XML2="yes ($($XML2_CONFIG --prefix))"
+    XML2_CPPFLAGS="$($XML2_CONFIG --cflags)"
+    XML2_LDFLAGS="$($XML2_CONFIG --libs)"
   fi
 fi
 
-if test -z $USE_LIBXML2; then
-  AC_MSG_NOTICE(libXML2 is required for some tools in the toolset.)
-  AC_MSG_NOTICE(it can be obtained from http://www.xmlsoft.org.)
-fi
-AC_SUBST([LIBXML2_CONFIG],[])
-AC_SUBST([LIBXML2_CPPFLAGS],[])
-AC_SUBST([LIBXML2_LDFLAGS],[])
-AC_SUBST([USE_LIBXML2],[])
+AC_SUBST([XML2_CONFIG],[])
+AC_SUBST([XML2_CPPFLAGS],[])
+AC_SUBST([XML2_LDFLAGS],[])
 
 # Check for xmlto
 AC_ARG_WITH(
   [xmlto],
-  AC_HELP_STRING(
-    [--with-xmlto=prefix],
-    [try this for the xmlto prefix install directory]
-  )
+  AS_HELP_STRING([--with-xmlto=prefix],[try this for the xmlto prefix install directory])
 )
 if test $with_xmlto; then
   AC_CHECK_PROG([XMLTO],[xmlto],[$with_xmlto/xmlto],[],[$with_xmlto])
@@ -407,45 +434,10 @@ else
 fi
 AC_SUBST([USE_XMLTO],[])
 
-# Check for Boost C++ library
-AC_ARG_WITH(
-  [boost],
-  AC_HELP_STRING(
-    [--with-boost=prefix],
-    [try this for the boost prefix install directory]
-  )
-)
-AC_MSG_CHECKING([for the Boost C++ libraries])
-if test $with_boost; then
-  AC_COMPILE_IFELSE(
-     [
-      #include "$with_boost/include/boost/version.hpp"
-     ],
-     [
-       AC_SUBST([BOOST_PREFIX],[$with_boost])
-       AC_MSG_RESULT(yes)
-       USE_BOOST=1
-     ],
-     [
-       AC_MSG_RESULT(no)
-       AC_MSG_NOTICE(the Boost C++ libraries are required for certain tools in the toolset.)
-       AC_MSG_NOTICE(they can be obtained from http://www.boost.org.)
-     ])
-else 
-  USE_BOOST=1
-  AC_MSG_RESULT(yes)
-  AC_SUBST([BOOST_PREFIX],[boost])
-  AC_MSG_NOTICE(using local Boost libraries.)
-fi
-AC_SUBST([USE_BOOST],[])
-
 # Check for wxWidgets
 AC_ARG_WITH(
   [wx],
-  AC_HELP_STRING(
-    [--with-wx=dir],
-    [use wxWidgets configuration program wx-config in dir]
-  )
+  AS_HELP_STRING([--with-wx=DIR],[use wxWidgets configuration program wx-config in DIR])
 )
 if test $with_wx; then
   AC_CHECK_PROG([WX_CONFIG],[wx-config],[$with_wx/wx-config],[],[$with_wx])
@@ -453,12 +445,13 @@ else
   AC_CHECK_PROG([WX_CONFIG],[wx-config],[wx-config])
 fi
 if test $WX_CONFIG; then
-  USE_WX=1
+  USE_WX="yes ($($WX_CONFIG --prefix))"
   WX_CPPFLAGS="$($WX_CONFIG --cppflags)"
   WX_BASE_LDFLAGS="$($WX_CONFIG --libs core,base)"
   WX_GL_LDFLAGS="$($WX_CONFIG --libs core,base,gl)"
+else
+  USE_WX=no
 fi
-AC_SUBST([USE_WX],[])
 AC_SUBST([WX_CONFIG],[])
 AC_SUBST([WX_CPPFLAGS],[])
 AC_SUBST([WX_BASE_LDFLAGS],[])
@@ -477,19 +470,6 @@ AC_TYPE_SIZE_T
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([strdup])
 
-AC_MSG_NOTICE()
-AC_MSG_NOTICE()
-if test $USE_WX; then
-  AC_MSG_NOTICE(wxWidgets     :  FOUND)
-else
-  AC_MSG_NOTICE(wxWidgets     :  MISSING)
-fi
-if test $USE_LIBXML2; then
-  AC_MSG_NOTICE(libXML2       :  FOUND)
-else
-  AC_MSG_NOTICE(libXML2       :  MISSING)
-fi
-
 #evaluate some location variables for use with Boost Build
 if test "x$prefix" = xNONE
 then
@@ -504,23 +484,26 @@ AC_SUBST([BUILD_VARIANT],[])
 AC_SUBST([BUILD_OPTIONS],[])
 AC_SUBST([BUILD_EXTRA])
 
+eval "eval PREFIX_DIR=${prefix}"
+eval "eval EXEC_PREFIX_DIR=${exec_prefix}"
+
+prefix="\$(prefix)"
 includedir="$includedir/mcrl2"
 datadir="$datadir/mcrl2"
 libdir="$libdir/mcrl2"
 
-eval "eval PREFIX_DIR=${prefix}"
-AC_SUBST([PREFIX_DIR],[])
-eval "eval EXEC_PREFIX_DIR=${exec_prefix}"
-AC_SUBST([EXEC_PREFIX_DIR],[])
 eval "eval DATA_DIR=${datadir}"
-AC_SUBST([DATA_DIR],[])
 eval "eval BIN_DIR=${bindir}"
-AC_SUBST([LIB_DIR],[])
 eval "eval LIB_DIR=${libdir}"
-AC_SUBST([BIN_DIR],[])
-eval "eval INCLUDE_DIR=${includedir}"
-AC_SUBST([INCLUDE_DIR],[])
+eval INCLUDE_DIR=${includedir}
 eval "eval MAN_DIR=${mandir}"
+
+AC_SUBST([PREFIX_DIR],[])
+AC_SUBST([EXEC_PREFIX_DIR],[])
+AC_SUBST([DATA_DIR],[])
+AC_SUBST([LIB_DIR],[])
+AC_SUBST([BIN_DIR],[])
+AC_SUBST([INCLUDE_DIR],[])
 AC_SUBST([MAN_DIR],[])
 
 # Runtime compilation flags
@@ -529,10 +512,10 @@ AC_SUBST([R_SCFLAGS],["$R_SCFLAGS"])
 AC_SUBST([R_CXXFLAGS],[])
 AC_SUBST([R_SCXXFLAGS],["$R_SCXXFLAGS"])
 AC_SUBST([R_CPPFLAGS],["$CPPFLAGS"])
-AC_SUBST([R_LDFLAGS],[$R_LDFLAGS])
-AC_SUBST([R_SLDFLAGS],[$R_SLDFLAGS])
+AC_SUBST([R_LDFLAGS],["$R_LDFLAGS"])
+AC_SUBST([R_SLDFLAGS],["$R_SLDFLAGS"])
 
-if test $BUILD_ATERM; then
+if test "$BUILD_ATERM" = "builtin"; then
   if test "$ADDRESS_MODEL" = "64"; then
     AC_SUBST([IATERM_CPPFLAGS],["-DAT_64BIT -I$INCLUDE_DIR/aterm"])
   else
@@ -544,9 +527,17 @@ else
   AC_SUBST([IATERM_LDFLAGS],["$ATERM_LDFLAGS -lATerm"])
 fi
 
-AC_MSG_NOTICE()
-AC_MSG_NOTICE(Some tools will not be built if any of these libraries are missing.)
-AC_MSG_NOTICE()
+AC_MSG_RESULT([
+   Configured $BUILD_VARIANT variant-build using libraries:
+
+     ATerm         :  $BUILD_ATERM
+     Boost         :  $USE_BOOST
+     CADP          :  $USE_BCG
+     libxml2       :  $USE_XML2
+     wxWidgets     :  $USE_WX
+     
+   Some tools will not be built if any of these libraries are missing.
+])
 
 AC_CONFIG_FILES([build/config.mk build/config.jam src/setup.h])
 AC_OUTPUT

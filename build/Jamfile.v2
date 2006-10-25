@@ -7,30 +7,21 @@ project site-config
 
 include $(TOP)/build/config.jam ;
 
-# OpenGL, GLU and GLUT libraries names
-switch [ os.name ] {
-  case "NT" :
-    lib OpenGL : : <name>"opengl32" ;
-    lib GLU    : OpenGL : <name>"glu32" ;
-    lib GLUT   : OpenGL : <name>"glut32" ;
-  case "CYGWIN" :
-    lib OpenGL : : <name>"opengl32" ;
-    lib GLU    : OpenGL : <name>"glu32" ;
-    lib GLUT   : OpenGL : <name>"glut32" ;
-  case "MACOSX" :
-    alias OpenGL : : : : <framework>"OpenGL" ;
-    alias GLUT   : OpenGL : : : <framework>"GLUT" ;
-    alias GLU    : OpenGL : : : ;
-  case * :
-    lib OpenGL : : <name>"GL" ;
-    lib GLU    : OpenGL : <name>"GLU" ;
-    lib GLUT   : OpenGL : <name>"glut" ;
+# OpenGL library
+if $(OPENGL_NAME) {
+  if $(OPENGL_LPATH) {
+    alias OpenGL : [ lib OpenGL : : <name>$(OPENGL_NAME) <search>$(OPENGL_LPATH) ] : : : <include>$(OPENGL_IPATH) ;
+  }
+  else {
+    alias OpenGL : [ lib OpenGL : : <name>$(OPENGL_NAME) ] : : : <toolset>darwin:<framework>"OpenGL" ;
+  }
+}
+else {
+  alias OpenGL : : : : <build>no ;
 }
 
 lib z  : : <name>"z" ;
-
 lib m  : : <name>"m" ;
-
 lib dl : : <name>"dl" ;
 
 alias winsock : winsock32 ws2_32 ;

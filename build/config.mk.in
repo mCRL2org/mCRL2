@@ -1,15 +1,6 @@
-#Redefine default definitions using autoconf
-HOST_OS            = @HOST_OS@
-
-BJAM               = @abs_top_srcdir@/bin/bjam
-BOOST_BUILD       := $(BJAM) @BUILD_EXTRA@ @BUILD_VARIANT@
-
-USE_XMLTO          = @USE_XMLTO@
-XMLTO              = @XMLTO@
-
 # Installation directories
-prefix             = @prefix@
-exec_prefix        = @exec_prefix@
+prefix             = @PREFIX_DIR@
+exec_prefix        = @EXEC_PREFIX_DIR@
 bindir             = @bindir@
 libdir             = @libdir@
 datadir            = @datarootdir@
@@ -17,4 +8,12 @@ datarootdir        = @datarootdir@
 includedir         = @includedir@
 infodir            = @infodir@
 mandir             = @mandir@
+
+# Boost Build configuration
+BJAM               = @abs_top_srcdir@/bin/bjam
+BOOST_BUILD       := $(BJAM) @BUILD_EXTRA@ @BUILD_VARIANT@ --prefix=${prefix} --exec-prefix=${exec_prefix}
+
+# xmlto
+USE_XMLTO          = @USE_XMLTO@
+XMLTO              = @XMLTO@
 

@@ -10,7 +10,7 @@ all: $(CONFIG) $(BJAM)
 	@$(BOOST_BUILD)
 	@$(MAKE) -C src/doc
 
-install:  $(CONFIG) $(BJAM)
+install: $(CONFIG) $(BJAM)
 	@$(BOOST_BUILD) --install
 	@$(MAKE) -C src/doc install
 
@@ -24,6 +24,9 @@ distclean:
 	$(RM) -r autom4te.cache *.o *.app *~ core core.*
 	$(RM) -r config.log config.status build/config.mk build/config.jam src/setup.h
 	$(RM) -rf bin
+
+configure: build/autoconf/configure.ac
+	autoconf -o $@ -W all $<
 
 revision: $(BJAM)
 	@$(BOOST_BUILD) mcrl2_revision

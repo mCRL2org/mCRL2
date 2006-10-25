@@ -5,6 +5,7 @@
 
 namespace squadt_utility {
   void initialise(sip::tool::communicator&);
+  void finalise();
 }
 
 /**
@@ -67,7 +68,7 @@ class squadt_tool_interface {
     virtual void finalise();
 
     /** \void pure virtual destructor */
-    virtual ~squadt_tool_interface() = 0;
+    virtual ~squadt_tool_interface();
 
   private:
 
@@ -151,6 +152,9 @@ inline bool squadt_tool_interface::try_run() {
     }
 
     finalise();
+
+    /* Unregister message relay */
+    squadt_utility::finalise();
 
     m_communicator.send_signal_termination();
 

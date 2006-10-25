@@ -14,16 +14,29 @@ ADDRESS_MODEL   = "@ADDRESS_MODEL@" ;
 # Library specific variables
 XML2_CPPFLAGS   = "@LIBXML2_CPPFLAGS@" ;
 XML2_LDFLAGS    = "@LIBXML2_LDFLAGS@" ;
+
 WX_CPPFLAGS     = "@WX_CPPFLAGS@" ;
 WX_BASE_LDFLAGS = "@WX_BASE_LDFLAGS@" ;
 WX_GL_LDFLAGS   = "@WX_GL_LDFLAGS@" ;
 
+OPENGL_NAME     = "@OPENGL_NAME@" ;
+OPENGL_IPATH    = "@OPENGL_IPATH@" ;
+OPENGL_LPATH    = "@OPENGL_LPATH@" ;
+
 CADP_HEADERS    = "@CADP_HEADERS@" ;
 CADP_LIBRARIES  = "@CADP_LIBRARIES@" ;
 
+prefix      = [ MATCH "^--prefix=([^ ]+)" : [ modules.peek : ARGV ] ] ;
+exec_prefix = [ MATCH "^--exec-prefix=([^ ]+)" : [ modules.peek : ARGV ] ] ;
+
 # Installation related variables
-PREFIX_DIR      = "@PREFIX_DIR@" ;
-EXEC_PREFIX_DIR = "@EXEC_PREFIX_DIR@" ;
+if ! $(prefix) {
+  prefix = @PREFIX_DIR@ ;
+}
+if ! $(exec_prefix) {
+  exec_prefix = @EXEC_PREFIX_DIR@ ;
+}
+
 BIN_DIR         = "@BIN_DIR@" ;
 LIB_DIR         = "@LIB_DIR@" ;
 DATA_DIR        = "@DATA_DIR@" ;
