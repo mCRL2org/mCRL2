@@ -799,14 +799,6 @@ int main(int argc, char **argv)
           }
         }
     }
-    if ( (lpefile != "") && !(
-               ((outtype == lts_mcrl2) && (intype != lts_mcrl2)) ||
-               (use_alt_outtype && (alt_outtype == alt_lts_fsm) && (intype == lts_mcrl2))
-               ) )
-    {
-      gsWarningMsg("ignoring --lpe option as it is not usable with this input/output combination\n");
-      lpefile = "";
-    }
 
     lts l;
  
@@ -814,6 +806,15 @@ int main(int argc, char **argv)
     {
       return (1);
     }
+    if ( (lpefile != "") && !(
+               ((outtype == lts_mcrl2) && (l.get_type() != lts_mcrl2)) ||
+               (use_alt_outtype && (alt_outtype == alt_lts_fsm) && (l.get_type() == lts_mcrl2))
+               ) )
+    {
+      gsWarningMsg("ignoring --lpe option as it is not usable with this input/output combination\n");
+      lpefile = "";
+    }
+
  
     if ( equivalence != lts_eq_none )
     {

@@ -174,6 +174,15 @@ static bool write_lts_to_fsm(lts &l, std::ostream &os, lts_type type, ATermList 
   os << "---" << std::endl;
   for(unsigned int i=0; i<l.num_states(); i++)
   {
+    unsigned int idx = i;
+    // make sure initial state is first
+    if ( i == 0 )
+    {
+      idx = l.initial_state();
+    } else if ( i == l.initial_state() )
+    {
+      idx = 0;
+    }
     ATermList state_pars;
     if ( (type == lts_none) || !l.has_state_info() )
     {
@@ -181,9 +190,9 @@ static bool write_lts_to_fsm(lts &l, std::ostream &os, lts_type type, ATermList 
     } else {
       if ( type == lts_mcrl )
       {
-        state_pars = (ATermList) l.state_value(i);
+        state_pars = (ATermList) l.state_value(idx);
       } else { // type == lts_mcrl2
-        state_pars = ATgetArguments((ATermAppl) l.state_value(i));
+        state_pars = ATgetArguments((ATermAppl) l.state_value(idx));
       }
     }
 
@@ -192,7 +201,7 @@ static bool write_lts_to_fsm(lts &l, std::ostream &os, lts_type type, ATermList 
       ATerm val = ATgetFirst(state_pars);
       os << ATindexedSetGetIndex(set[j],val) << " ";
     }
-    os << in[i] << " " << out[i] << " " << i+1 << std::endl;
+    os << in[idx] << " " << out[idx] << " " << i+1 << std::endl;
   }
   
 
@@ -201,7 +210,25 @@ static bool write_lts_to_fsm(lts &l, std::ostream &os, lts_type type, ATermList 
   os << "---" << std::endl;
   for (unsigned int i=0; i<l.num_transitions(); i++)
   {
-    os << l.transition_from(i)+1 << " " << l.transition_to(i)+1 << " \"";
+    unsigned int from = l.transition_from(i);
+    // correct state numbering
+    if ( from == 0 )
+    {
+      from = l.initial_state();
+    } else if ( from == l.initial_state() )
+    {
+      from = 0;
+    }
+    unsigned int to = l.transition_to(i);
+    if ( to == 0 )
+    {
+      to = l.initial_state();
+    } else if ( to == l.initial_state() )
+    {
+      to = 0;
+    }
+    // correct state numbering
+    os << from+1 << " " << to+1 << " \"";
     os << l.label_value_str(l.transition_label(i));
     os << "\"" << std::endl;
   }
