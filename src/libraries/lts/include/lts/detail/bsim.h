@@ -23,12 +23,10 @@
 #include <vector>
 #include <string>
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include "aterm1.h"
 #include <assert.h>
-#include <sys/times.h>
 #include "lts/liblts.h"
 
 /* extern declarations data structures */
