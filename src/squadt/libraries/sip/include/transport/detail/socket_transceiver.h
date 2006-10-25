@@ -34,6 +34,9 @@ namespace transport {
         typedef boost::shared_ptr < socket_transceiver >  ptr;
 
         /** \brief Convenience type to hide the boost shared pointer implementation */
+        typedef boost::shared_ptr < socket_transceiver >  sptr;
+
+        /** \brief Convenience type to hide the boost shared pointer implementation */
         typedef boost::weak_ptr < socket_transceiver >    wptr;
 
       private:
@@ -79,22 +82,22 @@ namespace transport {
         inline socket_transceiver(transporter* o);
 
         /** \brief Wrapper for connect() that ensures establishes that the object is not freed yet */
-        void connect(const std::string&, const short, ptr);
+        void connect(const std::string&, const short, wptr);
 
         /** \brief Wrapper for connect() that ensures establishes that the object is not freed yet */
-        void connect(const address&, const short, ptr);
+        void connect(const address&, const short, wptr);
 
         /** \brief Send a string input stream to the peer */
-        void send(const std::string&, ptr);
+        void send(const std::string&, wptr);
   
         /** \brief Send the contents of an input stream to the peer */
-        void send(std::istream&, ptr);
+        void send(std::istream&, wptr);
 
         /** \brief Terminate the connection with the peer */
-        void disconnect(basic_transceiver::ptr, ptr);
+        void disconnect(basic_transceiver::ptr, wptr);
 
         /** \brief Start listening for new data */
-        void activate(ptr);
+        void activate(wptr);
 
         /** \brief Read from the socket */
         void handle_receive(wptr, const boost::asio::error&);

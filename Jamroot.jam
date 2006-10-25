@@ -79,7 +79,7 @@ if ! squadt in [ MATCH "^--disable-(squadt)-support" : [ modules.peek : ARGV ] ]
 feature xml2 : availability interface library : composite incidental optional link-incompatible ;
 
 if $(XML2_CPPFLAGS) {
-  feature.compose <xml2>availability : <build>yes ;
+  feature.compose <xml2>availability : ;
   feature.compose <xml2>interface    : <cxxflags>"$(XML2_CPPFLAGS)" ;
   feature.compose <xml2>library
         : <linkflags>"$(XML2_LDFLAGS)"
@@ -96,7 +96,7 @@ else {
 feature wx : availability interface basic gl : composite incidental optional link-incompatible ;
 
 if $(WX_CPPFLAGS) {
-  feature.compose <wx>availability : <build>yes ;
+  feature.compose <wx>availability : ;
   feature.compose <wx>interface
         : <cxxflags>"$(WX_CPPFLAGS)"
         ;

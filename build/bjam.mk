@@ -23,6 +23,8 @@ ifeq ($(HOST_OS),MINGW)
  BJAM_BUILD   = ./build.sh mingw runtime-link=static link=static
 endif
 
+bjam: $(BJAM)
+
 $(BJAM):
 	@cd boost/tools/jam; $(BJAM_BUILD)
 	@rm -rf boost/tools/jam/bootstrap

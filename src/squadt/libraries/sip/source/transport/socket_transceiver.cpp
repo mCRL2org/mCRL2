@@ -18,8 +18,10 @@ namespace transport {
     boost::asio::socket_base::linger     option_linger(false, 0);
 
     /* Start listening */
-    void socket_transceiver::activate(socket_transceiver::ptr w) {
-      if (w.get() != 0) {
+    void socket_transceiver::activate(socket_transceiver::wptr w) {
+      socket_transceiver::sptr l(w.lock());
+
+      if (l.get() != 0) {
         using namespace boost;
         using namespace boost::asio;
 
@@ -38,8 +40,10 @@ namespace transport {
      *
      * \pre w.lock.get() must be `this'
      **/
-    void socket_transceiver::connect(const address& a, const short p, socket_transceiver::ptr w) {
-      if (w.get() != 0) {
+    void socket_transceiver::connect(const address& a, const short p, socket_transceiver::wptr w) {
+      socket_transceiver::sptr l(w.lock());
+
+      if (l.get() != 0) {
         using namespace boost;
         using namespace boost::asio;
 
@@ -85,25 +89,32 @@ namespace transport {
      * @param h the host name to use
      * @param p the port to use
      **/
-    void socket_transceiver::connect(const std::string& h, const short p, socket_transceiver::ptr w) {
+    void socket_transceiver::connect(const std::string& h, const short p, socket_transceiver::wptr w) {
       using namespace boost::asio;
 
-      if (w.get() != 0) {
+      socket_transceiver::sptr l(w.lock());
+
+      if (l.get() != 0) {
         connect((*resolver.resolve(ip::tcp::resolver::query(h, "",
                         ip::resolver_query_base::numeric_service|
                         ip::resolver_query_base::address_configured))).endpoint().address(), p, w);
       }
     }
 
-    void socket_transceiver::disconnect(basic_transceiver::ptr, socket_transceiver::ptr w) {
-      boost::mutex::scoped_lock s(send_lock);
+    /**
+     * @param w a reference to a weak pointer for this object (w.lock().get() == this (or 0)
+     **/
+    void socket_transceiver::disconnect(basic_transceiver::ptr, socket_transceiver::wptr w) {
+      socket_transceiver::sptr l(w.lock());
 
-      /* Wait until send operations complete */
-      if (0 < send_count) {
-        send_monitor.wait(s);
-      }
+      if (l.get() != 0) {
+        boost::mutex::scoped_lock s(send_lock);
 
-      if (w.get() != 0) {
+        /* Wait until send operations complete */
+        if (0 < send_count) {
+          send_monitor.wait(s);
+        }
+      
         boost::mutex::scoped_lock l(operation_lock);
 
         socket.close();
@@ -186,8 +197,10 @@ namespace transport {
     /**
      * @param d the data that is to be sent
      **/
-    void socket_transceiver::send(const std::string& d, socket_transceiver::ptr w) {
-      if (w.get() != 0) {
+    void socket_transceiver::send(const std::string& d, socket_transceiver::wptr w) {
+      socket_transceiver::sptr l(w.lock());
+
+      if (l.get() != 0) {
         boost::mutex::scoped_lock k(send_lock);
 
         ++send_count;
@@ -207,11 +220,13 @@ namespace transport {
     /**
      * @param d the stream that contains the data that is to be sent
      **/
-    void socket_transceiver::send(std::istream& d, socket_transceiver::ptr w) {
+    void socket_transceiver::send(std::istream& d, socket_transceiver::wptr w) {
       using namespace boost;
       using namespace boost::asio;
 
-      if (w.get() != 0) {
+      socket_transceiver::sptr l(w.lock());
+
+      if (l.get() != 0) {
         mutex::scoped_lock k(send_lock);
 
         ++send_count;
