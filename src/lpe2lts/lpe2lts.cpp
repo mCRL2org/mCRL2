@@ -154,14 +154,20 @@ int main(int argc, char **argv)
   gsEnableConstructorFunctions();
 
   // Start 
+  lts_generation_options lgopts;
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
   squadt_lpe2lts sl;
+
   if ( sl.try_interaction(argc, argv) )
   {
-	  return 0;
+    return 0;
   }
 
-  lts_generation_options lgopts; initialise_lts_generation_options(lgopts);
   lgopts.squadt = &sl;
+#endif
+
+  initialise_lts_generation_options(lgopts);
   #define sopts "hqvfyucrb::l:da:t::C::R:s:"
   struct option lopts[] = {
     { "help",            no_argument,       NULL, 'h' },

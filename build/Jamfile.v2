@@ -27,11 +27,6 @@ switch [ os.name ] {
     lib GLUT   : OpenGL : <name>"glut" ;
 }
 
-# Helper rules to extract library names from strings delivered by pkgconfig or wx-config and friends
-rule extract_library_names ( string ) {
-  return [ MATCH "^-l(.*)" : $($(string)) ] ;
-}
-
 lib z  : : <name>"z" ;
 
 lib m  : : <name>"m" ;
@@ -42,16 +37,6 @@ alias winsock : winsock32 ws2_32 ;
 
 lib winsock32 : : <name>"wsock32" ;
 lib ws2_32 : : <name>"ws2_32" ;
-
-if $(XML2_CPPFLAGS) {
-  lib xml2
-        :
-        : <name>"xml2"
-        :
-        : <cxxflags>"$(XML2_CPPFLAGS)"
-          <linkflags>"$(XML2_LDFLAGS)"
-        ;
-}
 
 if $(CADP_HEADERS) {
   lib bcg : : <name>BCG <search>$(CADP_LIBRARIES) ;

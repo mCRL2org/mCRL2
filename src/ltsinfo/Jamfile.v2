@@ -8,7 +8,7 @@ exe ltsinfo
          /libraries//lts
        : <include>.
          <toolset>msvc:<library>/workarounds/msvc//getopt
-         <squadt_support>enable
+       : <squadt_support>enable
        ;
 
 install_with_libraries install : ltsinfo ;

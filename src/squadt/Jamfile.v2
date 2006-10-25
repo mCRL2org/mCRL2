@@ -13,6 +13,7 @@ exe squadt
       : <include>$(SETUP)
         <threading>multi
         <wx>basic
+        <xml2>availability
       ;
 
 # dummy for non-msvc builds
@@ -28,7 +29,6 @@ install_with_libraries install
           process_wrapper
         : <dependency>install-image-data
           <dependency>install-schema-data
-          <wx>availability
           <os>MACOSX:<dependency>squadt-bundle
         ;
 

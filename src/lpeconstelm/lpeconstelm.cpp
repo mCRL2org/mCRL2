@@ -1125,7 +1125,6 @@ void parse_command_line(int ac, char** av, lpeConstElm& constelm) {
 
 int main(int argc, char** argv) {
   ATerm       bottom;
-  lpeConstElm constelm;
 
   ATinit(argc,argv,&bottom);
   

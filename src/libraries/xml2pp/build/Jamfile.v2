@@ -11,6 +11,6 @@ lib xml2pp
     : <toolset>darwin,<link>shared:<undefined>dynamic_lookup
       <xml2>library
     :
-    : <link>static:<library>/site-config//xml2
+    : <xml2>library
     ;
 

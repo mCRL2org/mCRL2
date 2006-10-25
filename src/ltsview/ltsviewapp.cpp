@@ -100,7 +100,11 @@ bool LTSViewApp::OnInit()
 
   wxInitAllImageHandlers();
 
+#ifdef ENABLE_SQUADT_CONNECTIVITY
   if (command_line) {
+#else
+    std::string lts_file_argument;
+#endif
     // parse command line and check for specified input file
     wxCmdLineEntryDesc cmdLineDesc[] = 
     {
@@ -116,7 +120,9 @@ bool LTSViewApp::OnInit()
         lts_file_argument = std::string(cmdParser.GetParam(0).fn_str());
       }
     }
+#ifdef ENABLE_SQUADT_CONNECTIVITY
   }
+#endif
   
   wxString wx_file_string(lts_file_argument.c_str(), wxConvLocal);
   

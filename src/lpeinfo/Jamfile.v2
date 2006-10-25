@@ -7,8 +7,8 @@ exe lpeinfo
          /libraries//mcrl2_basic
          /libraries//lpe
          /boost//program_options
+       : <include>.
        : <squadt_support>enable
-         <include>.
        ;
 
 install_with_libraries install : lpeinfo ;

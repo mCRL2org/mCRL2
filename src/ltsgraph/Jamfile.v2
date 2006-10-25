@@ -4,12 +4,12 @@ project toolset/ltsgraph
 
 exe ltsgraph
        : [ glob *.cpp ]
-       : <source>/libraries//wx_extension
-         <source>/libraries//mcrl2_basic
-         <source>/libraries//lts
-	 <squadt_support>enable
-         <include>.
+         /libraries//wx_extension
+         /libraries//mcrl2_basic
+         /libraries//lts
+       : <include>.
          <wx>basic
+       : <squadt_support>enable
        ;
 
 install_with_libraries install : ltsgraph : <wx>availability <os>MACOSX:<dependency>ltsgraph-bundle ;

@@ -15,7 +15,7 @@ exe mcrl22lpe
          /libraries/parser//alpha
          /libraries//mcrl2_basic
        : <toolset>msvc:<library>/workarounds/msvc//getopt
-         <squadt_support>enable
+       : <squadt_support>enable
        ;
 
 exe lin

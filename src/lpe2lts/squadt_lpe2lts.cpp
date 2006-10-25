@@ -4,11 +4,12 @@
 #include "librewrite.h"
 #include "lpe2lts.h"
 #include "exploration.h"
-#include <squadt_utility.h>
 
 using namespace std;
     
 #ifdef ENABLE_SQUADT_CONNECTIVITY
+#include <squadt_utility.h>
+
 enum lpe2lts_options {
   option_out_info,
 

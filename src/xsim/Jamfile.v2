@@ -12,9 +12,9 @@ exe xsim
          /libraries//nextstate
          /libraries//mcrl2_basic
        : <include>$(SETUP)
-         <squadt_support>enable
          <wx>basic
          <toolset>gcc:<linkflags>-Wl,-export-dynamic
+       : <squadt_support>enable
        ;
 
 exe sim

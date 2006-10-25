@@ -1,4 +1,13 @@
-project libraries ;
+project libraries
+       : requirements
+          <tag>@$(__name__).tag
+       ;
+
+rule tag ( name : type ? : property-set ) {
+  import stage ;
+
+  return [ stage.add-variant $(name) : $(type) : $(property-set) ] ;
+}
 
 libraries = [ MATCH .*/src/libraries/(.*)/build/.* : [ glob */build/Jamfile.v2 ] ] ;
 

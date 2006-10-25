@@ -4,10 +4,10 @@ project lpeparelm
 
 exe lpeparelm
        : lpeparelm.cpp
-       : <source>/libraries//mcrl2_basic
-         <source>/libraries//lpe
-         <source>/boost//program_options
-         <squadt_support>enable
+         /libraries//mcrl2_basic
+         /libraries//lpe
+         /boost//program_options
+       : <squadt_support>enable
          <include>.
        ;
 

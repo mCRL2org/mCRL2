@@ -22,8 +22,8 @@ project toolset
        : build-dir $(BUILD_TOP)
        : requirements
           <include>build/workarounds
-          <threading>multi
           <define>_FILE_OFFSET_BITS=64
+          <define>REVISION=$(REVISION)
           <toolset>darwin:<define>__darwin__
           <toolset>darwin:<cxxflags>"-std=c++98 -ansi"
           <os>CYGWIN,<toolset>gcc:<runtime-link>static
@@ -31,7 +31,6 @@ project toolset
           <os>LINUX,<toolset>gcc:<cxxflags>"-std=c++98 -ansi"
           <toolset>msvc:<define>WIN32
           <toolset>msvc:<include>build/workarounds/msvc
-          <define>REVISION=$(REVISION)
        : default-build
           <address-model>$(ADDRESS_MODEL)
           <variant>$(BUILD_VARIANT)
@@ -68,12 +67,11 @@ if ! deprecated in [ MATCH "^--enable-(deprecated)" : [ modules.peek : ARGV ] ] 
 feature squadt_support : disable enable : composite optional incidental ;
 
 # Disable squadt support in tools
-if ! squadt in [ MATCH "^--disable-(squadt)-support" : [ modules.peek : ARGV ] ] {
+if ! squadt in [ MATCH "^--disable-(squadt)-support" : [ modules.peek : ARGV ] ] && "$(XML2_CPPFLAGS)" != "" {
   feature.compose <squadt_support>enable
         : <define>ENABLE_SQUADT_CONNECTIVITY
           <include>$(TOP)/src/squadt/libraries/utility
           <library>/libraries/sip//sip_tool
-          <xml2>interface
         ;
 }
 
