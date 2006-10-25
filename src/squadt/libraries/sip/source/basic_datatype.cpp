@@ -8,9 +8,9 @@ namespace sip {
 
     basic_datatype::sptr boolean::standard;
 
-    const std::string boolean::true_string;
+    const std::string boolean::true_string("true");
 
-    const std::string boolean::false_string;
+    const std::string boolean::false_string("false");
 
     std::pair < basic_datatype::sptr, std::string > basic_datatype::read(xml2pp::text_reader& r) {
       if (r.is_element("enumeration")) {
@@ -52,12 +52,6 @@ namespace sip {
 
     void boolean::initialise() {
       standard   = basic_datatype::sptr(new boolean);
-
-      std::string* m = const_cast < std::string* > (&true_string);
-
-      m->assign("true");
-      m = const_cast < std::string* > (&false_string);
-      m->assign("false");
     }
 
     /**
