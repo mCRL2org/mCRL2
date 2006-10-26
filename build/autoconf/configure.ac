@@ -362,28 +362,38 @@ case $host in
     ;;
   *-*-darwin*)
     LIBS="OpenGL"
+    USE_OPENGL="yes (framework OpenGL)"
     ;;
   *)
     LIBS="GL"
     ;;
 esac
 
-AC_COMPILE_IFELSE(AC_LANG_PROGRAM([
+if test $USE_OPENGL; then
+  AC_SUBST([OPENGL_NAME],[$LIBS])
+
+  AC_MSG_RESULT([yes])
+else
+  USE_OPENGL=$with_opengl
+  AC_COMPILE_IFELSE(AC_LANG_PROGRAM([
                    #include <GL/gl.h>
                    #include <GL/glu.h>],
                   [glPointSize(1.0f);]),
-                  USE_OPENGL=1,)
+                  USE_OPENGL="yes",USE_OPENGL=no)
 
-if test $USE_OPENGL; then
-  AC_MSG_RESULT([yes])
-  AC_SUBST([OPENGL_NAME],[$LIBS])
+  if test $USE_OPENGL; then
+    AC_MSG_RESULT([yes])
 
-  if test $with_opengl; then
-    AC_SUBST([OPENGL_IPATH],[$with_opengl/include])
-    AC_SUBST([OPENGL_LPATH],[$with_opengl/lib])
+    if test $with_opengl; then
+      USE_OPENGL="yes ($with_opengl)"
+      AC_SUBST([OPENGL_IPATH],[$with_opengl/include])
+      AC_SUBST([OPENGL_LPATH],[$with_opengl/lib])
+    fi
+
+    AC_SUBST([OPENGL_NAME],[$LIBS])
+  else
+    AC_MSG_RESULT([no])
   fi
-else
-  AC_MSG_RESULT([no])
 fi
 
 # Check for xml2 library and header files
@@ -539,6 +549,7 @@ AC_MSG_RESULT([
      Boost         :  $USE_BOOST
      CADP          :  $USE_BCG
      libxml2       :  $USE_XML2
+     OpenGL        :  $USE_OPENGL
      wxWidgets     :  $USE_WX
      
    Some tools will not be built if any of these libraries are missing.

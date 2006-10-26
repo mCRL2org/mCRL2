@@ -5123,13 +5123,22 @@ case $host in
     ;;
   *-*-darwin*)
     LIBS="OpenGL"
+    USE_OPENGL="yes (framework OpenGL)"
     ;;
   *)
     LIBS="GL"
     ;;
 esac
 
-cat >conftest.$ac_ext <<_ACEOF
+if test $USE_OPENGL; then
+  OPENGL_NAME=$LIBS
+
+
+  { echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+else
+  USE_OPENGL=$with_opengl
+  cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
@@ -5180,31 +5189,34 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  USE_OPENGL=1
+  USE_OPENGL="yes"
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-
+	USE_OPENGL=no
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
-if test $USE_OPENGL; then
-  { echo "$as_me:$LINENO: result: yes" >&5
+  if test $USE_OPENGL; then
+    { echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6; }
-  OPENGL_NAME=$LIBS
 
+    if test $with_opengl; then
+      USE_OPENGL="yes ($with_opengl)"
+      OPENGL_IPATH=$with_opengl/include
 
-  if test $with_opengl; then
-    OPENGL_IPATH=$with_opengl/include
+      OPENGL_LPATH=$with_opengl/lib
 
-    OPENGL_LPATH=$with_opengl/lib
+    fi
 
-  fi
-else
-  { echo "$as_me:$LINENO: result: no" >&5
+    OPENGL_NAME=$LIBS
+
+  else
+    { echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
+  fi
 fi
 
 # Check for xml2 library and header files
@@ -6750,6 +6762,7 @@ fi
      Boost         :  $USE_BOOST
      CADP          :  $USE_BCG
      libxml2       :  $USE_XML2
+     OpenGL        :  $USE_OPENGL
      wxWidgets     :  $USE_WX
 
    Some tools will not be built if any of these libraries are missing.
@@ -6761,6 +6774,7 @@ echo "${ECHO_T}
      Boost         :  $USE_BOOST
      CADP          :  $USE_BCG
      libxml2       :  $USE_XML2
+     OpenGL        :  $USE_OPENGL
      wxWidgets     :  $USE_WX
 
    Some tools will not be built if any of these libraries are missing.
