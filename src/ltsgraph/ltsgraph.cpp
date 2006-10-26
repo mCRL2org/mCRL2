@@ -178,7 +178,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 
         ATinit(0,0,&bot); // XXX args?
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-        squadt_utility::entry_wrapper starter(argc, argv);
+        squadt_utility::entry_wrapper starter(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 
         squadt_interactor c(starter);
 

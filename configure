@@ -646,6 +646,7 @@ host
 host_cpu
 host_vendor
 host_os
+BJAM
 BJAM_CXX
 HOST_OS
 ADDRESS_MODEL
@@ -1885,9 +1886,6 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
 
-# Default toolset to use with Boost.Build
-BJAM_CXX="gcc"
-
 # Flags for runtime compilation and linking
 R_CFLAGS="-Wno-unused -O3 -rdynamic"
 R_SCFLAGS="-fPIC"
@@ -1897,16 +1895,23 @@ R_CPPFLAGS=""
 R_LDFLAGS=""
 R_SLDFLAGS="-shared"
 
+# Default toolset to use with Boost.Build
+BJAM_CXX="gcc"
+BJAM=bin/bjam
+
 # Setting host OS
 case $host in
   *-*-mingw32*)
     HOST_OS="MINGW"
+    BJAM="$BJAM.exe"
     ;;
   *-*-cygwin*)
     HOST_OS="CYGWIN"
+    BJAM="$BJAM.exe"
     ;;
   *-*-msdos* | *-*-go32* | *-*-windows*)
     HOST_OS="WINDOWS"
+    BJAM="$BJAM.exe"
     BJAM_CXX="vc-7_1"
     ;;
   *-*-linux*)
@@ -1927,6 +1932,7 @@ case $host in
     HOST_OS="UNKNOWN"
     ;;
 esac
+
 
 
 
@@ -7424,6 +7430,7 @@ host!$host$ac_delim
 host_cpu!$host_cpu$ac_delim
 host_vendor!$host_vendor$ac_delim
 host_os!$host_os$ac_delim
+BJAM!$BJAM$ac_delim
 BJAM_CXX!$BJAM_CXX$ac_delim
 HOST_OS!$HOST_OS$ac_delim
 ADDRESS_MODEL!$ADDRESS_MODEL$ac_delim
@@ -7475,7 +7482,6 @@ INCLUDE_DIR!$INCLUDE_DIR$ac_delim
 MAN_DIR!$MAN_DIR$ac_delim
 R_CFLAGS!$R_CFLAGS$ac_delim
 R_SCFLAGS!$R_SCFLAGS$ac_delim
-R_CXXFLAGS!$R_CXXFLAGS$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -7517,6 +7523,7 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+R_CXXFLAGS!$R_CXXFLAGS$ac_delim
 R_SCXXFLAGS!$R_SCXXFLAGS$ac_delim
 R_CPPFLAGS!$R_CPPFLAGS$ac_delim
 R_LDFLAGS!$R_LDFLAGS$ac_delim
@@ -7526,7 +7533,7 @@ IATERM_LDFLAGS!$IATERM_LDFLAGS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 7; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 8; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

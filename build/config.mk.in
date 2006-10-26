@@ -12,7 +12,7 @@ infodir            = @infodir@
 mandir             = @mandir@
 
 # Boost Build configuration
-BJAM               = @abs_top_srcdir@/bin/bjam
+BJAM               = @BJAM@
 BOOST_BUILD       := $(BJAM) @BUILD_EXTRA@ @BUILD_VARIANT@ --prefix=${prefix} --exec-prefix=${exec_prefix}
 
 # xmlto

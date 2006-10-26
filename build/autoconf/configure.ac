@@ -4,9 +4,6 @@ AC_CONFIG_SRCDIR([src/setup.h.in])
 AC_CANONICAL_HOST
 AC_PREFIX_DEFAULT([$HOME])
 
-# Default toolset to use with Boost.Build
-BJAM_CXX="gcc"
-
 # Flags for runtime compilation and linking
 R_CFLAGS="-Wno-unused -O3 -rdynamic"
 R_SCFLAGS="-fPIC"
@@ -16,16 +13,23 @@ R_CPPFLAGS=""
 R_LDFLAGS=""
 R_SLDFLAGS="-shared"
 
+# Default toolset to use with Boost.Build
+BJAM_CXX="gcc"
+BJAM=bin/bjam
+
 # Setting host OS
 case $host in
   *-*-mingw32*)
     HOST_OS="MINGW"
+    BJAM="$BJAM.exe"
     ;;
   *-*-cygwin*)
     HOST_OS="CYGWIN"
+    BJAM="$BJAM.exe"
     ;;
   *-*-msdos* | *-*-go32* | *-*-windows*)
     HOST_OS="WINDOWS"
+    BJAM="$BJAM.exe"
     BJAM_CXX="vc-7_1"
     ;;
   *-*-linux*)
@@ -46,6 +50,7 @@ case $host in
     HOST_OS="UNKNOWN"
     ;;
 esac
+AC_SUBST([BJAM])
 AC_SUBST([BJAM_CXX])
 AC_SUBST([HOST_OS])
 

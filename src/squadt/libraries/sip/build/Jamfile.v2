@@ -16,11 +16,13 @@ alias transport
     : $(transport_sources)
       /boost//thread
     : <toolset>darwin,<link>shared:<undefined>dynamic_lookup
-      <os>CYGWIN:<define>__USE_W32_SOCKETS
-      <os>CYGWIN:<define>_WIN32_WINNT=0x0500
+      <host-os>windows:<define>__USE_W32_SOCKETS
+      <host-os>windows:<define>_WIN32_WINNT=0x0500
       <threading>multi
     :
-    : <os>CYGWIN:<library>/site-config//winsock
+    : <host-os>windows:<library>/site-config//winsock
+      <host-os>windows:<define>__USE_W32_SOCKETS
+      <host-os>windows:<define>_WIN32_WINNT=0x0500
     ;
 
 alias messenger
