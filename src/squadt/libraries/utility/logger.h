@@ -5,7 +5,7 @@
 
 #include <boost/format.hpp>
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__MINGW32__)
 # include <substitutes.h>
 #endif // _MSC_VER
 

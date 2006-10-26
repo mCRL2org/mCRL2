@@ -95,6 +95,7 @@ lib mcrl2_basic
          <include>../include/rewrite
          <include>../include/lowlevel
          <include>../include/struct
+         <host-os>windows:<define>NO_DYNLOAD
          <os>LINUX:<library>/site-config//dl
          <link>static,<toolset>gcc:<linkflags>-Wl,-export-dynamic
          <link>static,<toolset>darwin:<linkflags>-Wl,-export-dynamic

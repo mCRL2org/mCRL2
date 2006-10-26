@@ -126,7 +126,7 @@
     /// \param a_solver_type An value of an enumerated type, representing an SMT solver.
 
     BDD_Path_Eliminator::BDD_Path_Eliminator(SMT_Solver_Type a_solver_type) {
-#ifndef _MSC_VER
+#if !(defined(_MSC_VER) || defined(__MINGW32__))
       if (a_solver_type == solver_type_ario) {
         f_smt_solver = new SMT_Solver_Ario();
       } else if (a_solver_type == solver_type_cvc_lite) {
