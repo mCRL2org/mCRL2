@@ -371,12 +371,12 @@ else if $(MAC)
 }
 else if $(OSPLAT)
 {
-    locate-target ?= [ .path ../../../bin ] ;
+    locate-target ?= ../../../bin ;
     platform = $(OS:L)$(OSPLAT:L) ;
 }
 else
 {
-    locate-target ?= [ .path ../../../bin ] ;
+    locate-target ?= ../../../bin ;
     platform = $(OS:L) ;
 }
 if $(debug)

@@ -11,21 +11,19 @@
 #
 # Then create boost/include and move the boost/boost directory to /boost/include/boost.
 
-BJAM_BUILD     = ./build.sh 
+BJAM_BUILD    = ./build.sh
 
 # Build boost build tool
 ifeq ($(HOST_OS),WINDOWS)
- BJAM         = bin/bjam.exe
  BJAM_BUILD   = build.bat runtime-link=static link=static
-endif
-ifeq ($(HOST_OS),MINGW)
- BJAM         = bin/bjam.exe
- BJAM_BUILD   = ./build.sh mingw runtime-link=static link=static
 endif
 
 bjam: $(BJAM)
 
-$(BJAM):
+bin:
+	@mkdir bin
+
+$(BJAM): bin
 	@cd boost/tools/jam; $(BJAM_BUILD)
 	@rm -rf boost/tools/jam/bootstrap
 

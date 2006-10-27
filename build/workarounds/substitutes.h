@@ -22,9 +22,11 @@
 
 typedef int pid_t;
 
-#define STDIN_FILENO  _fileno(stdin)
-#define STDOUT_FILENO _fileno(stdout)
-#define STDERR_FILENO _fileno(stderr)
+#ifndef STDIN_FILENO
+# define STDIN_FILENO  _fileno(stdin)
+# define STDOUT_FILENO _fileno(stdout)
+# define STDERR_FILENO _fileno(stderr)
+#endif
 
 #define WNOHANG 0x00000001
 
