@@ -3,9 +3,10 @@ project mcrl2_basic
        : build-dir $(BUILD_TOP)
        : requirements
           <include>../include
-          <toolset>msvc:<define>NO_DYNLOAD
+          <os>NT:<define>NO_DYNLOAD
        : usage-requirements
           <include>../include
+          <os>NT:<define>NO_DYNLOAD
        ;
 
 rule prepend ( prefix : elements * ) {
@@ -95,7 +96,6 @@ lib mcrl2_basic
          <include>../include/rewrite
          <include>../include/lowlevel
          <include>../include/struct
-         <host-os>windows:<define>NO_DYNLOAD
          <os>LINUX:<library>/site-config//dl
          <link>static,<toolset>gcc:<linkflags>-Wl,-export-dynamic
          <link>static,<toolset>darwin:<linkflags>-Wl,-export-dynamic

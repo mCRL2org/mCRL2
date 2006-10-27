@@ -11,6 +11,7 @@ exe ltsmin
          /libraries//mcrl2_basic
          /libraries//svc
        : <include>.
+         <os>NT:<define>NO_TIMES_H
          <toolset>msvc:<library>/workarounds/msvc//getopt
        ;
 

@@ -1,7 +1,6 @@
--include build/config.mk
-
-BJAM   = bin/bjam
 CONFIG = build/config.mk
+
+-include $(CONFIG)
 
 # Creates an application bundle on Mac OS X
 .PHONY: all bjam install clean distclean distribution
@@ -28,10 +27,10 @@ distclean:
 configure: build/autoconf/configure.ac
 	autoconf -o $@ -W all $<
 
+include build/bjam.mk
+
 revision: $(BJAM)
 	@$(BOOST_BUILD) mcrl2_revision
 
-include build/bjam.mk
-
-build/config.mk:
+$(CONFIG):
 	$(error Please run configure first.)
