@@ -369,7 +369,7 @@ case $host in
     ;;
 esac
 
-if test $USE_OPENGL; then
+if test "$USE_OPENGL"; then
   AC_SUBST([OPENGL_NAME],[$LIBS])
 
   AC_MSG_RESULT([yes])

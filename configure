@@ -5127,10 +5127,11 @@ case $host in
     ;;
   *)
     LIBS="GL"
+    USE_OPENGL="yes (framework OpenGL)"
     ;;
 esac
 
-if test $USE_OPENGL; then
+if test "$USE_OPENGL"; then
   OPENGL_NAME=$LIBS
 
 
