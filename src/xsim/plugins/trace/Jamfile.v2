@@ -5,8 +5,9 @@ project toolset/xsim/plugins/trace
 lib xsim_trace_view
        : xsimtracedll.cpp
          /libraries//nextstate
+         /site-config//wx_base
        : <include>../..
-         <wx>interface
+         <wx>no:<build>no
          <link>shared
        ;
 

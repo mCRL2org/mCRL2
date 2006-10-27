@@ -6,17 +6,14 @@ path-constant SETUP           : ./src ;                  # Header file for run-t
 # Activate header cache
 #modules.poke : HCACHEFILE : .jamdeps ;
 
-include $(TOP)/build/config.jam ;
-include $(TOP)/build/installing.jam ;
-include $(TOP)/build/testing.jam ;
+include $(TOP)/build/building.jam ;
 
-if ! $(REVISION) {
-  REVISION = [ MATCH ([0-9]*) : [ SHELL "svnversion -n $(TOP)" ] ] ;
-
-  if ! $(REVISION) {
-    REVISION = "0" ;
-  }
-}
+# The known sub projects
+use-project /site-config               : build ;
+use-project /boost                     : boost ;
+use-project /libraries                 : src/libraries ;
+use-project /libraries/sip             : src/squadt/libraries/sip/build ;
+use-project /workarounds/msvc          : build/workarounds/msvc ;
 
 project toolset
        : build-dir $(BUILD_TOP)
@@ -40,13 +37,6 @@ project toolset
           $(BUILD_OPTIONS)
        ;
 
-# The known sub projects
-use-project /site-config               : build ;
-use-project /libraries/sip             : src/squadt/libraries/sip/build ;
-use-project /boost                     : boost ;
-use-project /libraries                 : src/libraries ;
-use-project /workarounds/msvc          : build/workarounds/msvc ;
-
 tools = [ MATCH src/(.*)/.* : [ glob src/*/Jamfile.v2 ] ] ;
 
 # Register tool projects
@@ -54,87 +44,61 @@ for tool in $(tools) {
   use-project /tools/$(tool) : src/$(tool) ;
 }
 
-import feature : feature ;
-
-# Feature to mark tools as basic experimental or deprecated
-feature status : basic experimental deprecated : composite incidental optional ;
-
-if ! experimental in [ MATCH "^--enable-(experimental)" : [ modules.peek : ARGV ] ] {
-  feature.compose <status>experimental : <build>no ;
-}
-
-if ! deprecated in [ MATCH "^--enable-(deprecated)" : [ modules.peek : ARGV ] ] {
-  feature.compose <status>deprecated   : <build>no ;
-}
-
-feature squadt_support : disable enable : composite optional incidental ;
-
-# Disable squadt support in tools
-if ! squadt in [ MATCH "^--disable-(squadt)-support" : [ modules.peek : ARGV ] ] && "$(XML2_CPPFLAGS)" != "" {
-  feature.compose <squadt_support>enable
-        : <define>ENABLE_SQUADT_CONNECTIVITY
-          <include>$(TOP)/src/squadt/libraries/utility
-          <library>/libraries/sip//sip_tool
-        ;
-}
-
-# Feature for linking to the xml2 library
-feature xml2 : availability interface library : composite incidental optional link-incompatible ;
-
-if $(XML2_CPPFLAGS) {
-  feature.compose <xml2>availability : ;
-  feature.compose <xml2>interface    : <cxxflags>"$(XML2_CPPFLAGS)" ;
-  feature.compose <xml2>library
-        : <linkflags>"$(XML2_LDFLAGS)"
-          <cxxflags>"$(XML2_CPPFLAGS)"
-        ;
-}
-else {
-  feature.compose <xml2>availability : <build>no ;
-  feature.compose <xml2>interface    : <build>no ;
-  feature.compose <xml2>library      : <build>no ;
-}
-
-# Feature for linking to wx widget libraries
-feature wx : availability interface basic gl : composite incidental optional link-incompatible ;
-
-if $(WX_CPPFLAGS) {
-  feature.compose <wx>availability : ;
-  feature.compose <wx>interface
-        : <cxxflags>"$(WX_CPPFLAGS)"
-        ;
-  feature.compose <wx>basic
-        : <linkflags>"$(WX_BASE_LDFLAGS)"
-          <cxxflags>"$(WX_CPPFLAGS)"
-        ;
-  feature.compose <wx>gl
-        : <linkflags>"$(WX_GL_LDFLAGS)"
-          <cxxflags>"$(WX_CPPFLAGS)"
-        ;
-}
-else {
-  feature.compose <wx>availability : <build>no ;
-  feature.compose <wx>interface    : <build>no ;
-  feature.compose <wx>basic        : <build>no ;
-  feature.compose <wx>gl           : <build>no ;
-}
-
 # Install when requested
 if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
 
-  for tool in $(tools) {
-    build-project src/$(tool) ;
-  }
-
-  explicit install install_examples install_headers ;
+  stage build
+          : /tools/$(tools)
+          : <location>$(BUILD_TOP)/tools
+          ;
 }
 else {
+  feature.set-default install : yes ;
+
   # General examples
-  install_examples_by_extension general $(TOP)/examples : txt mcrl2 pnml fsm trc ;
+  stage install-examples
+          : [ path.glob-tree $(TOP)/examples : *.txt *.mcrl2 *.pnml *.fsm *.trc : .svn ]
+          : <location>$(DATA_DIR)
+            <install-source-root>.
+          ;
 
-  # Aterm header files for compiling rewriter
-  install_headers aterm /libraries/aterm//headers ;
 
-  # Main install target
-  alias install : /tools/$(tools)//install install-general-examples install-aterm-headers ;
+  stage aterm-headers
+          : [ path.glob-tree src/libraries/aterm : *.h : .svn ]
+          : <location>$(INCLUDE_DIR)/aterm
+            <install-source-root>src/libraries/aterm/include
+          ;
+
+  stage install-binaries
+          : /tools/$(tools)
+          : <location>$(BIN_DIR)
+          ;
+
+  stage install-static-libraries
+          : /tools/$(tools) 
+          : <location>$(LIB_DIR)
+            <install-dependencies>on <install-type>STATIC_LIB
+          ;
+
+  tools_with_plugins = [ MATCH (src/.*/plugins/.*)/Jamfile.v2 : [ glob src/*/plugins/*/Jamfile.v2 ] ] ;
+
+  stage install-plugins
+          : $(tools_with_plugins)
+          : <location>$(LIB_DIR)/plugins
+          ;
+
+  stage install-shared-libraries
+          : /tools/$(tools)
+            $(tools_with_plugins)
+          : <location>$(LIB_DIR)
+            <os>NT:<location>$(BIN_DIR)
+            <install-dependencies>on <install-type>SHARED_LIB
+          ;
+
+  # Complete install
+  alias install
+          : install-binaries
+            install-shared-libraries
+            install-static-libraries
+          ;
 }

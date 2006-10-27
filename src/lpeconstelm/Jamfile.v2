@@ -11,5 +11,3 @@ exe lpeconstelm
          <include>.
        ;
 
-install_with_libraries install : lpeconstelm ;
-

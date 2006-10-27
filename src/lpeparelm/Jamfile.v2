@@ -10,5 +10,3 @@ exe lpeparelm
        : <squadt_support>enable
          <include>.
        ;
-
-install_with_libraries install : lpeparelm ;

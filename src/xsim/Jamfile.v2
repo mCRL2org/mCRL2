@@ -11,9 +11,10 @@ exe xsim
          /libraries//trace
          /libraries//nextstate
          /libraries//mcrl2_basic
+         /site-config//wx_base
        : <include>$(SETUP)
-         <wx>basic
          <toolset>gcc:<linkflags>-Wl,-export-dynamic
+         <wx>no:<build>no
        : <squadt_support>enable
        ;
 
@@ -29,16 +30,6 @@ for plugin in [ MATCH plugins/(.*)/Jamfile.v2 : [ glob plugins/*/Jamfile.v2 ] ] 
   view_plugins += plugins/$(plugin)//xsim_$(plugin)_view ;
 }
 
-alias view_plugins : $(view_plugins) ;
+install_bundle_on_mac xsim-bundle $(TOP)/xsim : xsim xsim.plist xsim.icns ;
 
-install_plugins view_plugins ;
-
-install_with_libraries install
-        : xsim sim
-        : <wx>availability
-          <os>MACOSX:<dependency>xsim-bundle
-          <dependency>install-plugins
-        ;
-
-install_bundle_on_mac $(TOP)/xsim : xsim xsim.plist xsim.icns ;
-
+explicit $(view_plugins) xsim-bundle ;

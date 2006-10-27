@@ -10,10 +10,11 @@ exe squadt
       : [ set.difference [ glob *.cpp ] : process_wrapper.cpp ]
         /libraries//md5pp
         /libraries/sip//sip_controller
+        /site-config//wx_base
       : <include>$(SETUP)
         <threading>multi
-        <wx>basic
-        <xml2>availability
+        <wx>no:<build>no
+        <xml2>no:<build>no
       ;
 
 # dummy for non-msvc builds
@@ -24,16 +25,6 @@ exe process_wrapper
       : <toolset>msvc
       ;
 
-install_with_libraries install
-	: squadt
-          process_wrapper
-        : <dependency>install-image-data
-          <dependency>install-schema-data
-          <os>MACOSX:<dependency>squadt-bundle
-        ;
+install_bundle_on_mac squadt-bundle $(TOP)/squadt : squadt squadt.plist squadt.icns ;
 
-install_bundle_on_mac $(TOP)/squadt : squadt squadt.plist squadt.icns ;
-
-install_data image : [ glob pixmaps/logo.jpg ] : images ;
-install_data schema : [ glob schemas/*.xsd ] : schemas ;
-
+install-data squadt-image-data : [ glob pixmaps/logo.jpg ] : images ;

@@ -10,6 +10,3 @@ exe lpeinfo
        : <include>.
        : <squadt_support>enable
        ;
-
-install_with_libraries install : lpeinfo ;
-

@@ -37,5 +37,5 @@ exe alpha
          <status>experimental
        ;
 
-install_with_libraries install : mcrl22lpe : <status>experimental:<dependency>install-experimental ;
-install_with_libraries install-experimental : lin alpha : <status>experimental ;
+explicit lin_alt.o ;
+

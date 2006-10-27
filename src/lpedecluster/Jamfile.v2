@@ -13,6 +13,3 @@ exe lpedecluster
        : <squadt_support>enable
          <include>.
        ;
-
-install_with_libraries install : lpedecluster ;
-

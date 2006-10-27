@@ -4,9 +4,9 @@ project libraries
        ;
 
 rule tag ( name : type ? : property-set ) {
-  import stage ;
+  import common : format-name ;
 
-  return [ stage.add-variant $(name) : $(type) : $(property-set) ] ;
+  return [ format-name <base> <threading> <runtime> : $(name) : $(type) : $(property-set) ] ;
 }
 
 libraries = [ MATCH .*/src/libraries/(.*)/build/.* : [ glob */build/Jamfile.v2 ] ] ;

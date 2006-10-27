@@ -1,0 +1,58 @@
+import feature ;
+
+include $(TOP)/build/config.jam ;
+include $(TOP)/build/installing.jam ;
+include $(TOP)/build/testing.jam ;
+
+# Make sure the revision variable is defined
+if ! $(REVISION) {
+  REVISION = [ MATCH ([0-9]*) : [ SHELL "svnversion -n $(TOP)" ] ] ;
+
+  if ! $(REVISION) {
+    REVISION = "0" ;
+  }
+}
+
+# Feature to mark tools as basic experimental or deprecated
+feature.feature status : basic experimental deprecated : composite incidental optional ;
+
+if ! experimental in [ MATCH "^--enable-(experimental)" : [ modules.peek : ARGV ] ] {
+  feature.compose <status>experimental : <build>no ;
+}
+
+if ! deprecated in [ MATCH "^--enable-(deprecated)" : [ modules.peek : ARGV ] ] {
+  feature.compose <status>deprecated   : <build>no ;
+}
+
+feature.feature squadt_support : disable enable : composite optional incidental ;
+
+# Disable squadt support in tools
+if ! squadt in [ MATCH "^--disable-(squadt)-support" : [ modules.peek : ARGV ] ] && "$(XML2_CPPFLAGS)" != "" {
+  feature.compose <squadt_support>enable
+        : <define>ENABLE_SQUADT_CONNECTIVITY
+          <include>$(TOP)/src/squadt/libraries/utility
+          <library>/libraries/sip//sip_tool
+        ;
+}
+
+# Feature for linking to the opengl library
+feature.feature opengl : no yes ;
+
+if $(OPENGL_NAME) {
+  feature.set-default opengl : yes ;
+}
+
+# Feature for linking to the xml2 library
+feature.feature xml2 : no yes ;
+
+if $(XML2_CPPFLAGS) {
+  feature.set-default xml2 : yes ;
+}
+
+# Feature for linking to wx widget libraries
+feature.feature wx : no yes ;
+
+if $(WX_CPPFLAGS) {
+  feature.set-default wx : yes ;
+}
+

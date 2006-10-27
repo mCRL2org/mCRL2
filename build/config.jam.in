@@ -37,9 +37,9 @@ if ! $(exec_prefix) {
   exec_prefix = @EXEC_PREFIX_DIR@ ;
 }
 
-BIN_DIR         = "@BIN_DIR@" ;
-LIB_DIR         = "@LIB_DIR@" ;
-DATA_DIR        = "@DATA_DIR@" ;
-INCLUDE_DIR     = "@INCLUDE_DIR@" ;
-MAN_DIR         = "@MAN_DIR@" ;
+BIN_DIR         = @BIN_DIR@ ;
+LIB_DIR         = @LIB_DIR@ ;
+DATA_DIR        = @DATA_DIR@ ;
+INCLUDE_DIR     = @INCLUDE_DIR@ ;
+MAN_DIR         = @MAN_DIR@ ;
 

@@ -10,5 +10,3 @@ exe ltscompare
        : <include>.
          <toolset>msvc:<library>/workarounds/msvc//getopt
        ;
-
-install_with_libraries install : ltscompare ;

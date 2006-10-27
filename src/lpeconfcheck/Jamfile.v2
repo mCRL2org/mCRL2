@@ -9,5 +9,3 @@ exe lpeconfcheck
          <toolset>msvc:<library>/workarounds/msvc//getopt
 #         <toolset>gcc:<define>CVC_LITE_LIB
        ;
-
-install_with_libraries install : lpeconfcheck ;

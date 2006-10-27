@@ -20,6 +20,3 @@ exe svc2fsm
        : <toolset>msvc:<library>/workarounds/msvc//getopt
          <status>deprecated
        ;
-
-install_with_libraries install : ltsconvert : <status>deprecated:<use>install-deprecated ;
-install_with_libraries install-deprecated : svc2fsm : <status>deprecated ;

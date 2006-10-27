@@ -10,10 +10,12 @@ lib xsim_garage_view
          /site-config//OpenGL
          /libraries//nextstate
          /libraries//mcrl2_basic
+         /site-config//wx_gl
        : <include>../..
          <define>GARAGEFRAMEDLL
          <link>shared
-         <wx>gl
+         <wx>no:<build>no
+       :
        ;
 
 exe garageframe

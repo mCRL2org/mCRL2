@@ -1,111 +1,40 @@
-rule install_bundle_on_mac ( target : executable info icon : requirements * ) {
+import feature ;
+
+# Feature for linking to the opengl library
+feature.feature install : no yes ;
+
+rule install_bundle_on_mac ( name target : executable info icon : requirements * ) {
   import os ;
 
   if [ os.name ] = MACOSX {
     include $(TOP)/build/macosx/bundle.jam ;
 
+    alias install-$(name)-data : ;
+
     make_bundle $(target) : $(executable) $(info) $(icon) : $(requirements) ;
   }
 }
 
-# Custom rule to install a tool executable with the libraries it depends on
-rule install_with_libraries ( name : tools * : requirements * ) {
-  if install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
-    import os ;
-
-    alias $(name)
-          : $(name)-libraries
-            $(name)-binaries
-          : $(requirements)
-            <os>MACOSX:<dependency>$(BIN_DIR)/prepare_$(tools)
-          ;
-   
-    stage $(name)-binaries
-          : $(tools)
-          : <dll-path>$(LIB_DIR)
-            <location>$(BIN_DIR)
-            $(requirements)
-          ;
-   
-    stage $(name)-libraries
-          : $(tools)
-          : <install-dependencies>on <install-type>SHARED_LIB
-            <dll-path>$(LIB_DIR)
-            <location>$(LIB_DIR)
-            <os>NT:<location>$(BIN_DIR)
-          ;
-
-    if [ os.name ] = MACOSX {
-      include $(TOP)/build/macosx/bundle.jam ;
-
-      for tool in $(tools) {
-
-        notfile $(BIN_DIR)/prepare_$(tool)
-             : @prepare_executable
-             : $(tool)
-             ;
-      }
-    }
-   
-    explicit $(tools) $(name)-binaries $(name)-libraries ;
-  }
-}
-
 # For installing data (non-source code, executable or library)
-rule install_data ( name : files * : directories ? ) {
+rule install-data ( name : files * : directories ? ) {
   if install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
 
     target = [ path.join $(DATA_DIR) $(directories) ] ;
+
+    alias install-$(name)-data : : <install>yes ;
    
-    install install-$(name)-data
+    stage install-$(name)-data
           : $(files)
           : <location>$(target)
+            <install>no:<build>no
           ;
   }
 }
 
-# For installing plugins (like the xsim plugins)
-rule install_plugins ( targets + ) {
-  if install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
-
-    stage install-plugins
-         : $(targets)
-         : <location>$(LIB_DIR)/plugins
-         ;
-  }
-}
-
-# Install examples
-rule install_examples_by_extension ( name root : extensions + ) {
-  install install-$(name)-examples
-       : [ glob $(root)/*.$(extensions)
-                $(root)/[^.]*/*.$(extensions)
-                $(root)/[^.]*/[^.]*/*.$(extensions) ]
-       : <location>$(DATA_DIR)
-         <install-source-root>.
-       ;
-}
-
-# Aterm header files for compiling rewriter
-rule install_headers ( name targets + ) {
-  install install-$(name)-headers
-       : $(targets)
-       : <location>$(INCLUDE_DIR)/$(name)
-       ;
-}
-
 IMPORT $(__name__)
-       : install_with_libraries
-         install_bundle_on_mac
-         install_data
-         install_plugins
-         install_headers
-         install_examples_by_extension
+       : install_bundle_on_mac
+         install-data
        : $(caller)
-       : install_with_libraries
-         install_bundle_on_mac
-         install_data
-         install_plugins
-         install_headers
-         install_examples_by_extension
+       : install_bundle_on_mac
+         install-data
        ;

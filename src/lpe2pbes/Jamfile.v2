@@ -12,5 +12,3 @@ exe lpe2pbes
          <toolset>msvc:<library>/workarounds/msvc//getopt
 #         <status>experimental
        ;
-
-install_with_libraries install : lpe2pbes : <status>experimental ;

@@ -20,10 +20,8 @@ endif
 
 bjam: $(BJAM)
 
-bin:
-	@mkdir bin
-
-$(BJAM): bin
+$(BJAM):
+	@mkdir -p bin
 	@cd boost/tools/jam; $(BJAM_BUILD)
 	@rm -rf boost/tools/jam/bootstrap
 

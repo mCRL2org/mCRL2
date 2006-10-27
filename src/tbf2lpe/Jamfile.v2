@@ -9,5 +9,3 @@ exe tbf2lpe
        : <include>.
          <toolset>msvc:<library>/workarounds/msvc//getopt
        ;
-
-install_with_libraries install : tbf2lpe ;

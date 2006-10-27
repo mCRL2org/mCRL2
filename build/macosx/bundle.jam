@@ -47,6 +47,12 @@ rule make_bundle ( target : executable info icon : requirements * ) {
          :
          ;
  
+    notfile $(BIN_DIR)/dummy
+         : @prepare_executable
+         : $(base_executable)
+         :
+         ;
+ 
     make $(target).app/Contents/Info.plist
          : $(info)
          : common.copy

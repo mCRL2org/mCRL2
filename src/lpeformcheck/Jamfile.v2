@@ -9,5 +9,3 @@ exe lpeformcheck
 #         <toolset>gcc:<define>CVC_LITE_LIB
          <toolset>msvc:<library>/workarounds/msvc//getopt
        ;
-
-install_with_libraries install : lpeformcheck ;

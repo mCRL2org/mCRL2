@@ -9,5 +9,3 @@ exe lpedataelm
        : <source>/boost//program_options
          <include>.
        ;
-
-install_with_libraries install : lpedataelm ;

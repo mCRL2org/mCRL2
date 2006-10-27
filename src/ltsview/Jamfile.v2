@@ -40,11 +40,11 @@ exe ltsview
         <library>/libraries//wx_extension
         <library>/libraries//mcrl2_basic
         <library>/libraries//aterm
+        <library>/site-config//wx_gl
         <squadt_support>enable
-        <wx>gl
+        <wx>no:<build>no
+        <opengl>no:<build>no
       ;
 
-install_with_libraries install : ltsview : <wx>availability <os>MACOSX:<dependency>ltsview-bundle ;
-
-install_bundle_on_mac $(TOP)/ltsview : ltsview ltsview.plist ltsview.icns ;
+install_bundle_on_mac ltsview-bundle $(TOP)/ltsview : ltsview ltsview.plist ltsview.icns ;
 

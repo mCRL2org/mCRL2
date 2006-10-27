@@ -45,7 +45,7 @@ rule install ( name : requirements * : binaries * : libraries * : headers * )
     local install-source-root
         = [ property.select <install-source-root> : $(requirements) ] ;
     requirements = [ property.change $(requirements) : <install-source-root> ] ;
-    
+
     #
     local install-header-subdir
         = [ property.select <install-header-subdir> : $(requirements) ] ;

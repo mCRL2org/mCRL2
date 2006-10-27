@@ -1,6 +1,3 @@
-import os : name ;
-import modules ;
-
 project site-config
        : build-dir $(BUILD_TOP)
        ;
@@ -10,15 +7,42 @@ include $(TOP)/build/config.jam ;
 # OpenGL library
 if $(OPENGL_NAME) {
   if $(OPENGL_LPATH) {
-    alias OpenGL : [ lib OpenGL : : <name>$(OPENGL_NAME) <search>$(OPENGL_LPATH) ] : : : <include>$(OPENGL_IPATH) ;
+    lib OpenGL : : <name>$(OPENGL_NAME) <search>$(OPENGL_LPATH) : : <include>$(OPENGL_IPATH) ;
+  }
+  else if $(OPENGL_IPATH) {
+    lib OpenGL : : <name>$(OPENGL_NAME) : : <include>$(OPENGL_IPATH) ;
   }
   else {
-    alias OpenGL : [ lib OpenGL : : <name>$(OPENGL_NAME) ] : : : <toolset>darwin:<framework>"OpenGL" ;
+    lib OpenGL : : <name>$(OPENGL_NAME) : : <toolset>darwin:<framework>"OpenGL" ;
   }
 }
 else {
   alias OpenGL : : : : <build>no ;
 }
+
+alias xml2
+       :
+       : <cxxflags>"$(XML2_CPPFLAGS)"
+       :
+       : <cxxflags>"$(XML2_CPPFLAGS)"
+         <linkflags>"$(XML2_LDFLAGS)"
+       ;
+
+alias wx_base
+       :
+       : <cxxflags>"$(WX_CPPFLAGS)"
+       :
+       : <linkflags>"$(WX_BASE_LDFLAGS)"
+         <cxxflags>"$(WX_CPPFLAGS)"
+       ;
+
+alias wx_gl
+       :
+       : <cxxflags>"$(WX_CPPFLAGS)"
+       :
+       : <linkflags>"$(WX_GL_LDFLAGS)"
+         <cxxflags>"$(WX_CPPFLAGS)"
+       ;
 
 lib z  : : <name>"z" ;
 lib m  : : <name>"m" ;
