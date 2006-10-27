@@ -481,6 +481,8 @@ bool read_lts_from_file(lts& l, std::string const& infile, lts_type intype) {
       if ( (intype != lts_none) && l.read_from(infile,intype) )
       {
         b = false;
+      } else {
+        gsErrorMsg("unsupported input format extension\n");
       }
     }
     if ( b )
