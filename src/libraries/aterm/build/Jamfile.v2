@@ -29,7 +29,7 @@ lib aterm
          <toolset>gcc,<os>LINUX,<link>shared:<cflags>-fPIC
        :
        : <address-model>64:<define>AT_64BIT
-         <toolset>darwin,<link>shared:<undefined>dynamic_lookup
+         <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
        ;
 
 alias atermpp

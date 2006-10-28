@@ -15,7 +15,7 @@ transport_sources = [ glob ../source/transport/*.cpp ] ;
 alias transport
     : $(transport_sources)
       /boost//thread
-    : <toolset>darwin,<link>shared:<undefined>dynamic_lookup
+    : <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
       <os>CYGWIN:<define>__USE_W32_SOCKETS
       <os>CYGWIN:<define>_WIN32_WINNT=0x0500
       <os>NT:<define>__USE_W32_SOCKETS

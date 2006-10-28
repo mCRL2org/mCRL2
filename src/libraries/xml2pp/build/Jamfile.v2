@@ -8,7 +8,7 @@ lib xml2pp
     : text_reader.cpp
       xml2pp_exception.cpp
       /boost//filesystem
-    : <toolset>darwin,<link>shared:<undefined>dynamic_lookup
+    : <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
       <xml2>yes:<use>/site-config//xml2
       <xml2>no:<build>no
     :
