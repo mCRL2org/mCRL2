@@ -265,6 +265,7 @@ local rule .glob-tree ( roots * : patterns * : exclude-patterns * )
     }
     local result = [ set.difference
         [ GLOB $(roots) : $(patterns) ] : $(excluded) ] ;
+
     local subdirs ;
     for local d in [ set.difference
         [ GLOB $(roots) : * ] : $(excluded) ]
@@ -273,7 +274,7 @@ local rule .glob-tree ( roots * : patterns * : exclude-patterns * )
     }
     if $(subdirs)
     {
-        result += [ .glob-tree $(subdirs) : $(patterns) ] ;
+        result += [ .glob-tree $(subdirs) : $(patterns) : $(exclude-patterns) ] ;
     }
     return $(result) ;
 }
