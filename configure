@@ -5127,7 +5127,6 @@ case $host in
     ;;
   *)
     LIBS="GL"
-    USE_OPENGL="yes (framework OpenGL)"
     ;;
 esac
 
