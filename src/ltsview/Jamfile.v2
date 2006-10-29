@@ -46,5 +46,5 @@ exe ltsview
         <opengl>no:<build>no
       ;
 
-install_bundle_on_mac ltsview-bundle $(TOP)/ltsview : ltsview ltsview.plist ltsview.icns ;
+#install_bundle_on_mac ltsview-bundle $(TOP)/ltsview : ltsview ltsview.plist ltsview.icns ;
 

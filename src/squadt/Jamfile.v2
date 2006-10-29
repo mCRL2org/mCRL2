@@ -25,6 +25,6 @@ exe process_wrapper
       : <toolset>msvc
       ;
 
-install_bundle_on_mac squadt-bundle $(TOP)/squadt : squadt squadt.plist squadt.icns ;
+#install_bundle_on_mac squadt-bundle $(TOP)/squadt : squadt squadt.plist squadt.icns ;
 
 install-data squadt-image-data : [ glob pixmaps/logo.jpg ] : images ;

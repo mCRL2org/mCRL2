@@ -30,6 +30,6 @@ for plugin in [ MATCH plugins/(.*)/Jamfile.v2 : [ glob plugins/*/Jamfile.v2 ] ] 
   view_plugins += plugins/$(plugin)//xsim_$(plugin)_view ;
 }
 
-install_bundle_on_mac xsim-bundle $(TOP)/xsim : xsim xsim.plist xsim.icns ;
+#install_bundle_on_mac xsim-bundle $(TOP)/xsim : xsim xsim.plist xsim.icns ;
 
 explicit $(view_plugins) xsim-bundle ;

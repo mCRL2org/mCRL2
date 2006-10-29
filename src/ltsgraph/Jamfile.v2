@@ -13,5 +13,5 @@ exe ltsgraph
        : <squadt_support>enable
        ;
 
-install_bundle_on_mac ltsgraph-bundle $(TOP)/ltsgraph : ltsgraph ltsgraph.plist ltsgraph.icns ;
+#install_bundle_on_mac ltsgraph-bundle $(TOP)/ltsgraph : ltsgraph ltsgraph.plist ltsgraph.icns ;
 
