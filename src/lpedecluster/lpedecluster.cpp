@@ -51,6 +51,7 @@ namespace po = boost::program_options;
 
 std::string input_file; ///< Name of the file to read input from
 std::string output_file; ///< Name of the file to write output to (or stdout)
+bool finite_only = false; ///< Only decluster finite sorts
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 //Forward declaration because do_decluster() is called within squadt_interactor class
@@ -323,7 +324,7 @@ data_variable_list get_variables(const data_variable_list& vl, const sort_list& 
 
 ///\pre specification is the specification belonging to summand
 ///\ret the declustered summand list of summand
-lpe::summand_list decluster_through_enum(const lpe::specification& specification, const lpe::LPE_summand& summand)
+lpe::summand_list decluster_summand(const lpe::specification& specification, const lpe::LPE_summand& summand)
 {
   lpe::summand_list result;
 
@@ -333,7 +334,15 @@ lpe::summand_list decluster_through_enum(const lpe::specification& specification
   
   //data_variable_list variables = summand.summation_variables(); //TODO: Implement finite / infinite choise, depends only on assignment to variables
   // A list with all finite variables from the summation variables
-  data_variable_list variables = get_variables(summand.summation_variables(), get_finite_sorts(specification.data().constructors(), specification.data().sorts()));
+  data_variable_list variables;
+  if (finite_only)
+  {
+    variables = get_variables(summand.summation_variables(), get_finite_sorts(specification.data().constructors(), specification.data().sorts()));
+  }
+  else
+  {
+    variables = summand.summation_variables();
+  }
 
   ATermList vars = (ATermList(variables));
   ATerm expr = ATerm(aterm_appl(summand.condition()));
@@ -387,6 +396,8 @@ lpe::summand_list decluster_through_enum(const lpe::specification& specification
   return result;
 }
 
+///Takes the summand list sl, declusters it,
+///and returns the declustered summand list
 lpe::summand_list decluster_summands(const lpe::specification& specification, const lpe::summand_list& sl)
 {
   lpe::summand_list result;
@@ -394,12 +405,14 @@ lpe::summand_list decluster_summands(const lpe::specification& specification, co
   for (summand_list::iterator i = sl.begin(); i != sl.end(); ++i)
   {
     lpe::LPE_summand s = *i;
-    result = result + decluster_through_enum(specification, s);
+    result = result + decluster_summand(specification, s);
   }
 
   return result;
 }
 
+///Takes the specification in specification, declusters it,
+///and returns the declustered specification.
 lpe::specification decluster(const lpe::specification& specification)
 {
   gsVerboseMsg("Declustering...\n");
@@ -444,7 +457,8 @@ void parse_command_line(int ac, char** av) {
   desc.add_options()
       ("help,h",      "display this help")
       ("verbose,v",   "turn on the display of short intermediate messages")
-      ("debug,d",    "turn on the display of detailed intermediate messages")
+      ("debug,d",     "turn on the display of detailed intermediate messages")
+      ("finite,f",    "only decluster finite sorts")
       ("version",     "display version information")
   ;
   po::options_description hidden("Hidden options");
@@ -489,6 +503,10 @@ void parse_command_line(int ac, char** av) {
 
   if (vm.count("verbose")) {
     gsSetVerboseMsg();
+  }
+
+  if (vm.count("finite")) {
+    finite_only = true;
   }
 
   input_file = (0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-";
