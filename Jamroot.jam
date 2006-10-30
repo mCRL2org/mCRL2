@@ -50,19 +50,7 @@ if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
   stage build-binaries
           : /tools/$(tools)
           : <location>$(BUILD_TOP)/tools
-            <dll-path>$(BUILD_TOP)/lib
-          ;
-
-  stage build-libraries
-          : /tools/$(tools) 
-          : <location>$(BUILD_TOP)/lib
-            <dll-path>$(BUILD_TOP)/lib
-            <install-dependencies>on
-          ;
-
-  alias build
-          : build-binaries
-            build-libraries
+            <hardcode-dll-paths>true
           ;
 }
 else {
