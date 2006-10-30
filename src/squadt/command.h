@@ -24,10 +24,10 @@ namespace squadt {
       private:
   
         /** \brief Path to the program that is to be executed */
-        const std::string            executable;
+        const std::string           executable;
 
         /** \brief Path to the working directory of the tool */
-        std::string                  working_directory;
+        std::string                 working_directory;
   
         /** \brief The arguments to the command */
         std::deque < std::string >  arguments;
@@ -82,6 +82,9 @@ namespace squadt {
         argument_sequence get_arguments();
 
         /** \brief Returns the basename of the executable */
+        void set_executable(std::string const&);
+
+        /** \brief Returns the basename of the executable */
         std::string get_executable() const;
     };
   
@@ -128,6 +131,13 @@ namespace squadt {
       arguments.push_back(a);
     }
   
+    /**
+     * @param e name of an executable or its full path
+     **/
+    inline void command::get_executable(std::string const& e) {
+      executable = e;
+    }
+
     inline std::string command::get_executable() const {
       return (boost::filesystem::path(executable).leaf());
     }
