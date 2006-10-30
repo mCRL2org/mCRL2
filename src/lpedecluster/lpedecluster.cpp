@@ -359,7 +359,7 @@ lpe::summand_list decluster_through_enum(const lpe::specification& specification
       aterm arg = aterm(ATgetArgument(ATerm(aterm_list(sol).front()),1));
 
       // righthandside of substitution in lpe format
-      data_expression res = data_expression(aterm_appl(rewriter->fromRewriteFormat(arg)).argument(0));
+      data_expression res = data_expression(aterm_appl(rewriter->fromRewriteFormat(arg)));
 
       // Substitution to be performed
       data_assignment substitution = data_assignment(var, res);
@@ -497,7 +497,7 @@ void parse_command_line(int ac, char** av) {
 
 int main(int ac, char** av) {
   ATerm bot;
-  ATinit(0,0,&bot);
+  ATinit(ac, av, &bot);
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
