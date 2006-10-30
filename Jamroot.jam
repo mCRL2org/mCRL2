@@ -47,9 +47,22 @@ for tool in $(tools) {
 # Install when requested
 if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
 
-  stage build
+  stage build-binaries
           : /tools/$(tools)
           : <location>$(BUILD_TOP)/tools
+            <dll-path>$(BUILD_TOP)/lib
+          ;
+
+  stage build-libraries
+          : /tools/$(tools) 
+          : <location>$(BUILD_TOP)/lib
+            <dll-path>$(BUILD_TOP)/lib
+            <install-dependencies>on
+          ;
+
+  alias build
+          : build-binaries
+            build-libraries
           ;
 }
 else {
@@ -72,6 +85,7 @@ else {
   stage install-binaries
           : /tools/$(tools)
           : <location>$(BIN_DIR)
+            <dll-path>$(LIB_DIR)
           ;
 
   stage install-static-libraries
@@ -91,6 +105,7 @@ else {
           : /tools/$(tools)
             $(tools_with_plugins)
           : <location>$(LIB_DIR)
+            <dll-path>$(LIB_DIR)
             <os>NT:<location>$(BIN_DIR)
             <install-dependencies>on <install-type>SHARED_LIB
           ;

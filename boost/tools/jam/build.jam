@@ -374,6 +374,11 @@ else if $(OSPLAT)
     locate-target ?= ../../../bin ;
     platform = $(OS:L)$(OSPLAT:L) ;
 }
+else if $(NT)
+{
+    locate-target ?= ..\..\..\bin ;
+    platform = $(OS:L) ;
+}
 else
 {
     locate-target ?= ../../../bin ;
