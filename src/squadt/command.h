@@ -24,7 +24,7 @@ namespace squadt {
       private:
   
         /** \brief Path to the program that is to be executed */
-        const std::string           executable;
+        std::string                 executable;
 
         /** \brief Path to the working directory of the tool */
         std::string                 working_directory;
@@ -134,7 +134,7 @@ namespace squadt {
     /**
      * @param e name of an executable or its full path
      **/
-    inline void command::get_executable(std::string const& e) {
+    inline void command::set_executable(std::string const& e) {
       executable = e;
     }
 
