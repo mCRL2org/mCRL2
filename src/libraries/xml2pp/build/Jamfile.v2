@@ -13,5 +13,6 @@ lib xml2pp
       <xml2>no:<build>no
     :
     : <xml2>no:<build>no
+      <xml2>yes:<library>/site-config//xml2
     ;
 

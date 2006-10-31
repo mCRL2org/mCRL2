@@ -174,7 +174,6 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   int nCmdShow)                           
     {                                                                     
         ATerm bot;
-        int i = 0;
 
         ATinit(0,0,&bot); // XXX args?
 #ifdef ENABLE_SQUADT_CONNECTIVITY

@@ -6,6 +6,7 @@
 #include <memory>
 
 #include <boost/bind.hpp>
+#include <boost/weak_ptr.hpp>
 #include <boost/foreach.hpp>
 #include <boost/ref.hpp>
 #include <boost/filesystem/convenience.hpp>
@@ -55,7 +56,7 @@ namespace squadt {
       processor_list                      processors;
 
       /** \brief Pointer to the associated interface object */
-      boost::weak_ptr < project_manager > interface;
+      boost::weak_ptr < project_manager > m_interface;
 
       /** \brief Count of the number of processors added to the project */
       processor_count                     count;
@@ -291,7 +292,7 @@ namespace squadt {
 
     /* Read processors */
     while (r.is_element("processor")) {
-      processor::sptr p(processor::read(interface.lock(), c, r));
+      processor::sptr p(processor::read(m_interface.lock(), c, r));
 
       p->check_status(true);
 
@@ -509,7 +510,7 @@ namespace squadt {
     assert(exists(s) && !is_directory(s) && native(d));
 
     path           destination_path = store / path(d.empty() ? s.leaf() : d);
-    processor::ptr p                = processor::create(interface.lock());
+    processor::ptr p                = processor::create(m_interface.lock());
 
     if (s != destination_path && !exists(destination_path)) {
       copy_file(s, destination_path);
@@ -642,7 +643,7 @@ namespace squadt {
   project_manager::ptr project_manager::create(const boost::filesystem::path& l, bool b) {
     project_manager::ptr p(new project_manager());
 
-    p->impl->interface = p;
+    p->impl->m_interface = p;
 
     p->load(l, b);
 

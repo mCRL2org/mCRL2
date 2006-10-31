@@ -33,7 +33,11 @@ namespace squadt {
         l->disconnect(this);
       }
 
+#if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32))
+      TerminateProcess(reinterpret_cast < void* > (identifier), 1);
+#else
       kill(identifier, SIGKILL);
+#endif
     }
  
     /**
