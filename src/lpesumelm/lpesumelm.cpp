@@ -31,6 +31,7 @@
 #include <lpe/lpe.h>
 #include <lpe/specification.h>
 #include <lpe/data_functional.h>
+#include <lpe/data_init.h>
 
 //Squadt connectivity
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -40,6 +41,7 @@
 using namespace std;
 using namespace atermpp;
 using namespace lpe;
+using namespace lpe::data_init;
 
 namespace po = boost::program_options;
 
@@ -140,52 +142,6 @@ bool occurs_in(data_type d, data_variable v)
 }
 
 ///pre: true
-///ret: true if t is a DataExprEquality, false otherwise
-static bool gsIsDataExprEquality(ATermAppl t)
-{
-  if (!gsIsDataAppl(t)) {
-    return false;
-  }
-  ATermAppl arg0 = ATAgetArgument(t, 0);
-  if (!gsIsDataAppl(arg0)) {
-    return false;
-  }
-  ATermAppl arg1 = ATAgetArgument(t, 1);  
-  ATermAppl eq_id = ATAgetArgument(arg0, 0);
-  return ATisEqual(eq_id, gsMakeOpIdEq(gsGetSort(arg1)));
-}
-
-///pre: true
-///ret: true if t is a DataExprAnd, false otherwise
-static bool gsIsDataExprAnd(ATermAppl t)
-{
-  if (!gsIsDataAppl(t)) {
-    return false;
-  }
-  ATermAppl arg0 = ATAgetArgument(t,0);
-  if (!gsIsDataAppl(arg0)) {
-    return false;
-  }
-  return ATisEqual(ATAgetArgument(arg0,0), gsMakeOpIdAnd());
-}
-
-///pre: true
-///ret: true if t is an equality, false otherwise
-inline
-bool is_equality(data_expression t)
-{
-  return gsIsDataExprEquality(ATermAppl(t));
-}
-
-///pre: true
-///ret: true if t is a conjunction, false otherwise
-inline
-bool is_and(data_expression t)
-{
-  return gsIsDataExprAnd(ATermAppl(t));
-}
-
-///pre: true
 ///ret: true if t as a data_variable, false otherwise
 inline
 bool is_var(data_expression t)
@@ -202,30 +158,30 @@ data_variable get_var(data_expression t)
   return data_variable(ATermAppl(t));
 }
 
-///pre: is_and(t) || is_equality(t)
+///pre: is_and(t) || is_equal_to(t)
 ///ret: lefthandside of t
 inline
 data_expression lhs(data_expression t)
 {
-  assert(is_and(t) || is_equality(t));
+  assert(is_and(t) || is_equal_to(t));
   return data_expression(ATAgetArgument(ATAgetArgument(t, 0), 1));  
 }
 
-///pre: is_and(t) || is_equality(t)
+///pre: is_and(t) || is_equal_to(t)
 ///ret: righthandside of t
 inline
 data_expression rhs(data_expression t)
 {
-  assert(is_and(t) || is_equality(t));
+  assert(is_and(t) || is_equal_to(t));
   return data_expression(ATAgetArgument(t, 1));
 }
 
-///pre: is_equality(t); t is of form a == b
+///pre: is_equal_to(t); t is of form a == b
 ///ret: b == a
 inline
 data_expression swap_equality(data_expression t)
 {
-  assert(is_equality(t));
+  assert(is_equal_to(t));
   return lpe::equal_to(rhs(t), lhs(t));
 }
 
@@ -320,8 +276,9 @@ lpe::specification remove_unused_variables_(const lpe::specification& specificat
 //the last exit of the recursion is the new condition of the summand.
 //
 //!!!INTERNAL USE ONLY!!!
-data_expression recursive_substitute_equalities(LPE_summand& summand,
-                                          data_expression working_condition)
+data_expression recursive_substitute_equalities(const LPE_summand& summand,
+                                                data_expression working_condition,
+                                                data_assignment_list& substitutions)
 {
   // In all cases not explicitly handled we return the original working_condition
   data_expression result = working_condition;
@@ -331,16 +288,17 @@ data_expression recursive_substitute_equalities(LPE_summand& summand,
     //Recursively apply sum elimination on lhs and rhs
     //Note that recursive application provides for progress because lhs and rhs split the working condition.
     data_expression a,b;
-    a = recursive_substitute_equalities(summand, lhs(working_condition));
-    b = recursive_substitute_equalities(summand, rhs(working_condition));
-    result = eliminate_unit_and(gsMakeDataExprAnd(a,b));
+    a = recursive_substitute_equalities(summand, lhs(working_condition), substitutions);
+    b = recursive_substitute_equalities(summand, rhs(working_condition), substitutions);
+    //result = eliminate_unit_and(gsMakeDataExprAnd(a,b));
+    result = and_(a,b);
   }
   
-  else if (is_equality(working_condition))
+  else if (is_equal_to(working_condition))
   {
     //Check if rhs is a variable, if so, swap lhs and rhs, so that the following code
     //is always the same.
-    if (is_var(rhs(working_condition)))
+    if (!is_var(lhs(working_condition)) && is_var(rhs(working_condition)))
     {
       working_condition = swap_equality(working_condition);
     }
@@ -355,16 +313,14 @@ data_expression recursive_substitute_equalities(LPE_summand& summand,
       if (occurs_in(summand.summation_variables(), get_var(lhs(working_condition))) && !occurs_in(rhs(working_condition), get_var(lhs(working_condition))))
       {
         data_assignment substitution = data_assignment(get_var(lhs(working_condition)), rhs(working_condition));
+        gsDebugMsg("substitution: %s\n", substitution.to_string().c_str());
+ 
+        // First apply substitution to righthandside of other substitutions,
+        // then add new substitution.
+        substitutions = substitute(substitutions, substitution);
+        substitutions = push_front(substitutions, substitution);
 
-        summand = LPE_summand(summand.summation_variables(),
-                               summand.condition(),
-                               summand.is_delta(),
-                               substitute(summand.actions(), substitution),
-                               summand.time().substitute(substitution),
-                               substitute(summand.assignments(), substitution)
-		      );
-
-        result = gsMakeDataExprTrue();
+        result = true_();
       }
     }
 
@@ -383,14 +339,20 @@ lpe::LPE_summand substitute_equalities(const lpe::LPE_summand& summand)
   lpe::LPE_summand new_summand = summand;
 
   //Apply elimination and store result
-  lpe::data_expression new_condition = recursive_substitute_equalities(new_summand, new_summand.condition());
+  lpe::data_assignment_list substitutions;
+  lpe::data_expression new_condition = recursive_substitute_equalities(new_summand, new_summand.condition(), substitutions);
 
-  //Incorporate the new condition in the summand
-  new_summand = set_condition(new_summand, new_condition);
- 
+  //Apply the substitutions that were returned from the recursive call
+  new_summand = LPE_summand(new_summand.summation_variables(),
+                            new_condition.substitute(assignment_list_substitution(substitutions)),
+                            new_summand.is_delta(),
+                            substitute(new_summand.actions(),assignment_list_substitution(substitutions)),
+                            new_summand.time().substitute(assignment_list_substitution(substitutions)),
+                            substitute(new_summand.assignments(),assignment_list_substitution(substitutions)));
+
   //Take the summand with substitution, and remove the summation variables that are now not needed
-  //TODO: move the remove_unused_variables into the recursive function above, that would make the separation more perfect.
-  return remove_unused_variables(new_summand);
+  new_summand = remove_unused_variables(new_summand);
+  return new_summand;
 }
 
 
@@ -404,9 +366,7 @@ lpe::specification substitute_equalities_(const lpe::specification& specificatio
 
   // Apply sum elimination on each of the summands in the summand list.
   new_summand_list = atermpp::apply(new_summand_list, substitute_equalities);
-
   new_specification = set_lpe(specification, set_summands(lpe, new_summand_list));
-
   return new_specification;
 }
 
@@ -418,7 +378,6 @@ lpe::specification sumelm(const lpe::specification& specification)
   lpe::specification new_specification = specification;
   new_specification = substitute_equalities_(new_specification); // new_specification used for future concerns, possibly disabling substitute_equalities_
   new_specification = remove_unused_variables_(new_specification);
-
   return new_specification;
 }
 
@@ -429,7 +388,12 @@ int do_sumelm(const std::string input_file_name, const std::string output_file_n
   lpe::specification lpe_specification;
   if (lpe_specification.load(input_file_name)) {
     // Untime lpe_specification and save the output to a binary file
-    if (!sumelm(lpe_specification).save(output_file_name, true)) 
+    lpe::specification new_spec = sumelm(lpe_specification);
+
+    gsDebugMsg("Sum elimination completed, saving to %s\n", output_file_name.c_str());
+    bool success = new_spec.save(output_file_name, true);
+
+    if (!success) 
     {
       // An error occurred when saving
       gsErrorMsg("Could not save to '%s'\n", output_file_name.c_str());
@@ -504,7 +468,7 @@ void parse_command_line(int ac, char** av) {
 
 int main(int ac, char** av) {
   ATerm bot;
-  ATinit(0,0,&bot);
+  ATinit(ac, av, &bot);
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
