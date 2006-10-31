@@ -67,7 +67,7 @@ class squadt_tool_interface {
     /** \brief finalisation after termination signal has been received */
     virtual void finalise();
 
-    /** \void pure virtual destructor */
+    /** \void virtual destructor */
     virtual ~squadt_tool_interface();
 
   private:
@@ -88,6 +88,14 @@ class squadt_tool_interface {
 
     /**  \brief whether or not the communicator is active (connected to SQuADT) */
     bool is_active() const;
+
+    /** \brief builds a connection with SQuADT */
+    template < typename T >
+    static bool free_activation(int&, char** const);
+
+    /** \brief builds a connection with SQuADT */
+    template < typename T >
+    static bool free_activation(char*);
 };
 
 inline squadt_tool_interface::squadt_tool_interface() {
@@ -164,6 +172,20 @@ inline bool squadt_tool_interface::try_run() {
   }
 
   return (false);
+}
+
+template < typename T >
+inline bool squadt_tool_interface::free_activation(char* av) {
+  T c;
+
+  return (c.try_interaction(av));
+}
+
+template < typename T >
+inline bool squadt_tool_interface::free_activation(int& ac, char** const av) {
+  T c;
+
+  return (c.try_interaction(ac, av));
 }
 
 inline bool squadt_tool_interface::try_interaction(char* av) {

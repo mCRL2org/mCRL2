@@ -54,6 +54,98 @@
     return gsMakeDataApplProd(Op,ATmakeList2((ATerm)Left,(ATerm)Right));
   }
 
+  bool perform_task(char const* InFileName, FILE* OutStream);
+
+  bool perform_task(char const* InFileName, char const* OutFileName) {
+    FILE* OutStream = fopen(OutFileName,"wb");
+
+    if (OutStream == 0) {
+      gsErrorMsg("cannot open file '%s' for writing\n", OutFileName);
+      return false;
+    }
+    
+    bool result = perform_task(InFileName, OutStream);
+
+    fclose(OutStream);
+
+    return (result);
+  }
+
+// Squadt protocol interface and utility pseudo-library
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+#include <squadt_utility.h>
+
+class squadt_interactor : public squadt_tool_interface {
+
+  private:
+
+    enum input_files {
+      pnml_file_for_input   = 0,  ///< file containing an LTS that can be imported using the LTS library
+      mcrl2_file_for_output = 1,  ///< file used to write the output to
+    };
+
+  public:
+
+    /** \brief constructor */
+    squadt_interactor();
+
+    /** \brief configures tool capabilities */
+    void set_capabilities(sip::tool::capabilities&) const;
+
+    /** \brief queries the user via SQuADT if needed to obtain configuration information */
+    void user_interactive_configuration(sip::configuration&);
+
+    /** \brief check an existing configuration object to see if it is usable */
+    bool check_configuration(sip::configuration const&) const;
+
+    /** \brief performs the task specified by a configuration */
+    bool perform_task(sip::configuration&);
+};
+
+squadt_interactor::squadt_interactor() {
+}
+
+void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
+  c.add_input_combination(pnml_file_for_input, "Transformation", "pnml");
+}
+
+void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
+  /* set the squadt configuration to be sent back, such
+   * that mcrl22lpe can be restarted later with exactly
+   * the same parameters
+   */
+  if (c.is_fresh()) {
+    c.add_output(mcrl2_file_for_output, "mcrl2", c.get_output_name(".mcrl2"));
+  }
+}
+
+bool squadt_interactor::check_configuration(sip::configuration const& c) const {
+  bool result = true;
+
+  result |= c.object_exists(pnml_file_for_input);
+  result |= c.object_exists(mcrl2_file_for_output);
+
+  return (result);
+}
+
+bool squadt_interactor::perform_task(sip::configuration& c) {
+  using namespace boost;
+  using namespace sip;
+  using namespace sip::layout;
+  using namespace sip::datatype;
+  using namespace sip::layout::elements;
+
+  bool result = true;
+
+  rec_par=ATfalse;
+
+  result = ::perform_task(c.get_object(pnml_file_for_input)->get_location().c_str(),
+                          c.get_object(mcrl2_file_for_output)->get_location().c_str());
+
+  return (result);
+}
+
+#endif
 
   //====================================
   //ADDED BY YARICK: AFun extensions.
@@ -1792,69 +1884,17 @@
 	    Name);
   }
 
-
   //==================================================
-  // main
+  // PrintHelp performs actual conversion by calling more specialised functions
   //==================================================
-  int main(int argc, char **argv){
-    FILE *OutStream;
-    ATerm stackbot;
-    ATinit(0,NULL,&stackbot);
-    
-  #define sopts "adhpqv"
-    struct option lopts[] = {
-      {"read-aterm"  , no_argument,      NULL, 'a'},
-      {"debug"       , no_argument,      NULL, 'd'},
-      {"help"        , no_argument,      NULL, 'h'},
-      {"no_rec_par"  , no_argument,      NULL, 'p'},
-      {"quiet"       , no_argument,      NULL, 'q'},
-      {"verbose"     , no_argument,      NULL, 'v'},
-      {"version"     , no_argument,      NULL, 0},
-      {0, 0, 0, 0}
-    };
-    int opt;
-    
-    while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 ){
-      switch ( opt ){
-      case 'd': /* debug */
-	gsSetDebugMsg();
-	break;
-      case 'h': /* help */
-	PrintHelp(argv[0]);
-	return 0;
-      case 'p': /* no_rec_par */
-	rec_par=ATfalse;
-	break;
-      case 'q': /* quiet */
-        gsSetQuietMsg();
-        break;
-      case 'v': /* verbose */
-        gsSetVerboseMsg();
-        break;
-      case 0: /* version */
-	fprintf(stderr, "%s %s (revision %d)\n", NAME, VERSION, REVISION);
-	return 0;
-      default:
-	break;
-      }
-    }
-    
-    char *InFileName;
-    if ( argc-optind < 1 ){
-      InFileName = "-";
-    } else {
-      if ( (InFileName = argv[optind]) == NULL ){ 
-	perror(NAME);
-	return 1;
-      }
-    }
+  bool perform_task(char const* InFileName, FILE* OutStream) {
     xmlDocPtr doc = xmlParseFile(InFileName);
-
+   
     if(!doc) {
       gsErrorMsg("Document not parsed succesfully. \n");
-      return 1;
+      return false;
     }
-
+   
     gsEnableConstructorFunctions();
     
     ATermAppl Spec=pn2gsAterm(doc);
@@ -1862,7 +1902,7 @@
     
     if(!Spec){	
       gsErrorMsg("Error while converting PNML to ATerm, conversion stopped!  \n");
-      return 1;
+      return false;
     }
     
     context.place_name=ATtableCreate(63,50);
@@ -1879,7 +1919,7 @@
     context.trans_out=ATtableCreate(63,50);  
     context.place_inhibit=ATtableCreate(63,50);   
     context.place_reset=ATtableCreate(63,50);   
-
+   
     context.transitions=ATmakeList0();
     context.places=ATmakeList0();
     context.place_process_name=ATtableCreate(63,50);  
@@ -1904,29 +1944,88 @@
     
     if(!Spec) {
       gsErrorMsg("Error while converting PNML ATerm to mCRL2 ATerm, conversion stopped!  \n");
-      return 1;
+      return false;
     }
     
     gsDebugMsg("The result of conversion is: %T\n",Spec);
-
+   
     Spec = type_check_spec(Spec);
-
+   
     if(Spec){
-      OutStream = stdout;
-      if ( optind+1 < argc )
-	{
-	  if ( (OutStream = fopen(argv[optind+1],"wb")) == NULL )
-	    {
-	      gsErrorMsg("cannot open file '%s' for writing\n",argv[optind+1]);
-	      return 1;
-	    }
-	}
-      
       PrintPart_C(OutStream, (ATerm) Spec, ppDefault);
-      fclose(OutStream);
     }
-    return 0;
 
+    return (true);
+  }
+
+  //==================================================
+  // main
+  //==================================================
+  int main(int argc, char **argv){
+    ATerm stackbot;
+    ATinit(0,NULL,&stackbot);
+    
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+    if (!squadt_tool_interface::free_activation< squadt_interactor >(argc, argv)) {
+#endif
+
+      #define sopts "adhpqv"
+      struct option lopts[] = {
+        {"read-aterm"  , no_argument,      NULL, 'a'},
+        {"debug"       , no_argument,      NULL, 'd'},
+        {"help"        , no_argument,      NULL, 'h'},
+        {"no_rec_par"  , no_argument,      NULL, 'p'},
+        {"quiet"       , no_argument,      NULL, 'q'},
+        {"verbose"     , no_argument,      NULL, 'v'},
+        {"version"     , no_argument,      NULL, 0},
+        {0, 0, 0, 0}
+      };
+      int opt;
+      
+      while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 ){
+        switch ( opt ){
+        case 'd': /* debug */
+          gsSetDebugMsg();
+          break;
+        case 'h': /* help */
+          PrintHelp(argv[0]);
+          return 0;
+        case 'p': /* no_rec_par */
+          rec_par=ATfalse;
+          break;
+        case 'q': /* quiet */
+          gsSetQuietMsg();
+          break;
+        case 'v': /* verbose */
+          gsSetVerboseMsg();
+          break;
+        case 0: /* version */
+          fprintf(stderr, "%s %s (revision %d)\n", NAME, VERSION, REVISION);
+          return 0;
+        default:
+          break;
+        }
+      }
+      
+      char *InFileName;
+      if ( argc-optind < 1 ){
+        InFileName = "-";
+      } else {
+        if ( (InFileName = argv[optind]) == NULL ){ 
+          perror(NAME);
+          return 1;
+        }
+      }
+
+      if ( optind+1 < argc ) {
+        return (perform_task(InFileName, argv[optind+1]));
+      }
+      else {
+        return (perform_task(InFileName, stdout));
+      }
+    }
+
+    return 0;
   }
 
   // Added by Yarick: alternative generation of Places:

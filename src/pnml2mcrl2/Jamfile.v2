@@ -9,5 +9,6 @@ exe pnml2mcrl2
          /site-config//xml2
        : <include>.
          <toolset>msvc:<library>/workarounds/msvc//getopt
+         <squadt_support>enable
          <xml2>no:<build>no
        ;
