@@ -30,6 +30,7 @@
 #include <lpe/function.h>
 #include <lpe/lpe.h>
 #include <lpe/specification.h>
+#include <lpe/sort_utility.h>
 
 //Enumerator
 #include <libnextstate.h>
@@ -128,28 +129,6 @@ struct is_data_variable
   }
 };
 
-struct is_sort
-{
-  aterm s;
-
-  is_sort(lpe::sort s_)
-    : s(aterm_appl(s_))
-  {}
-
-  bool operator()(aterm t) const
-  {
-    return s == t;
-  }
-};
-
-///pre: true
-///ret: sort s occurs in l.
-template <typename data_type>
-bool occurs_in(data_type l, lpe::sort s)
-{
-  return find_if(aterm_list(l), is_sort(s)) != aterm();
-}
-
 ///\ret variable v occurs in l.
 template <typename data_type>
 bool occurs_in(data_type l, lpe::data_variable v)
@@ -206,86 +185,6 @@ lpe::data_variable_list filter(const data_variable_list& vl, const data_variable
   return result;
 }
 
-///\ret the result sort of function f
-lpe::sort result_sort(const function& f)
-{
-  return f.result_type();
-}
-
-///\ret the list of all functions f of sort s in fl
-function_list get_constructors(const function_list& fl, const lpe::sort& s)
-{
-  function_list result;
-  for(function_list::iterator i = fl.begin(); i != fl.end(); ++i)
-  {
-    if (result_sort(*i) == s)
-    {
-      result = push_front(result, *i);
-    }
-  }
-  reverse(result);
-  return result;
-}
-
-///\ret true if f has 1 or more arguments, false otherwise
-bool has_arguments(const function& f)
-{
-  return !gsIsSortId(aterm_appl(f.argument(1)));
-}
-
-//prototype
-bool is_finite(const function_list& fl, const lpe::sort& s, const lpe::sort_list visited);
-
-///\ret true if all sorts in sl are finite, false otherwise
-///Note that when a constructor sort is in visited we hold the sort as infinite because loops are created!
-//TODO Check if visited can be passed by reference
-bool is_finite(const function_list& fl, const lpe::sort_list& sl, const lpe::sort_list visited = lpe::sort_list())
-{
-  bool result = true;
-  
-  // A list of sorts is finite if all sorts in the list are finite
-  // If a sort is in "visited" that means that we have already seen the sort
-  // during our calculation. We now get loops of the sort D = d1(E), sort E=e1(D),
-  // this makes our sort infinite.
-  for (sort_list::iterator i = sl.begin(); i != sl.end(); ++i)
-  {
-    if (!occurs_in(visited, *i))
-    {
-      result = result && is_finite(fl, *i, visited);
-    }
-    else
-    {
-      result = false;
-    }
-  }
-  return result;
-}
-
-///\ret sort s is finite
-//TODO Check if visited can be passed by reference
-bool is_finite(const function_list& fl, const lpe::sort& s, const lpe::sort_list visited = lpe::sort_list())
-{
-  bool result = true;
-  function_list cl = get_constructors(fl, s);
-
-  //If a sort has not got any constructors it is infinite
-  if (cl.size() == 0)
-  {
-    result = false;
-  }
-
-  //Otherwise a sort is finite if all its constructors are finite;
-  //i.e. the constructors have no arguments, of their arguments are finite.
-  //In the recursive call pass s add s to the visited sorts, so that we know
-  //it may not occur in a constructor anymore.
-  for (function_list::iterator i = cl.begin(); i != cl.end(); ++i)
-  {
-    result = result && (!(has_arguments(*i)) || is_finite(fl, i->input_types(), push_front(visited, s)));
-  }
-
-  return result;
-}
-
 ///\pre fl is a list of constructors
 ///\ret a list of declusterable sorts in sl
 sort_list get_finite_sorts(const function_list& fl, const sort_list& sl)
@@ -332,11 +231,10 @@ lpe::summand_list decluster_summand(const lpe::specification& specification, con
   Rewriter* rewriter = createRewriter(gsMakeDataEqnSpec(specification.data().equations()));
   EnumeratorStandard enumerator = EnumeratorStandard(specification, rewriter);
   
-  //data_variable_list variables = summand.summation_variables(); //TODO: Implement finite / infinite choise, depends only on assignment to variables
-  // A list with all finite variables from the summation variables
-  data_variable_list variables;
+  data_variable_list variables; // The variables we need to consider in declustering
   if (finite_only)
   {
+    // Only consider finite variables
     variables = get_variables(summand.summation_variables(), get_finite_sorts(specification.data().constructors(), specification.data().sorts()));
   }
   else
