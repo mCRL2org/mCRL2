@@ -282,9 +282,13 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 }
 
 bool squadt_interactor::check_configuration(sip::configuration const& c) const {
-  t_lin_options task_options;
+  bool result = true;
 
-  return (extract_task_options(c, task_options));
+  result |= c.object_exists(mcrl2_file_for_input);
+  result |= c.object_exists(lpd_file_for_output);
+  result |= c.option_exists(option_linearisation_method);
+
+  return (result);
 }
 
 bool squadt_interactor::extract_task_options(sip::configuration const& c, t_lin_options& task_options) const {
