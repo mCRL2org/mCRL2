@@ -27,4 +27,4 @@ exe process_wrapper
 
 #install_bundle_on_mac squadt-bundle $(TOP)/squadt : squadt squadt.plist squadt.icns ;
 
-install-data squadt-image-data : [ glob pixmaps/logo.jpg ] : images ;
+install-data squadt-image : [ glob pixmaps/logo.jpg ] : images ;

@@ -74,6 +74,7 @@ else {
           : /tools/$(tools)
           : <location>$(BIN_DIR)
             <dll-path>$(LIB_DIR)
+            <install-dependencies>on <install-type>EXE
           ;
 
   stage install-static-libraries
@@ -103,5 +104,6 @@ else {
           : install-binaries
             install-shared-libraries
             install-static-libraries
+            src/squadt//install-squadt-image-data
           ;
 }

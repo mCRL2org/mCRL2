@@ -21,12 +21,11 @@ rule install-data ( name : files * : directories ? ) {
 
     target = [ path.join $(DATA_DIR) $(directories) ] ;
 
-    alias install-$(name)-data : : <install>yes ;
+    alias install-$(name)-data : : <install>no ;
    
     stage install-$(name)-data
           : $(files)
           : <location>$(target)
-            <install>no:<build>no
           ;
   }
 }
