@@ -1,0 +1,13 @@
+sort D = struct d1|d2|d3;
+
+map
+  g: D -> D;
+
+act a;
+
+proc
+  X(c:D) =
+  sum d:D . sum e:D . sum f:D . (d == e && e == g(e) && e == f) -> a . X(d);
+
+init
+  X(d1);
