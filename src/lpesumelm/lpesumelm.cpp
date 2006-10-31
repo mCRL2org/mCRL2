@@ -5,8 +5,8 @@
 // ----------------------------------------------------------------------
 //
 // file          : lpesumelm 
-// date          : 03-10-2006
-// version       : 0.23
+// date          : 31-10-2006
+// version       : 0.3
 //
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
 //
@@ -48,7 +48,7 @@ namespace po = boost::program_options;
 //TODO: Add configuration parameter for substitution sumelimination (enable/disable)
 //TODO: Get rid of gsMakeDataExpr...() functions
 
-#define VERSION "0.23"
+#define VERSION "0.3"
 
 std::string input_file; ///< Name of the file to read input from
 std::string output_file; ///< Name of the file to write output to (or stdout)
@@ -158,6 +158,7 @@ data_variable get_var(data_expression t)
   return data_variable(ATermAppl(t));
 }
 
+
 ///pre: is_and(t) || is_equal_to(t)
 ///ret: lefthandside of t
 inline
@@ -183,31 +184,6 @@ data_expression swap_equality(data_expression t)
 {
   assert(is_equal_to(t));
   return lpe::equal_to(rhs(t), lhs(t));
-}
-
-///pre: is_and(t)
-///ret: if t is of the form b && true or of the form true && b return b,
-///     if t is of the form a && b return t,
-data_expression eliminate_unit_and(data_expression t)
-{
-  assert(is_and(t));
-
-  data_expression result;
-
-  if (lhs(t).is_true())
-  {
-    result = rhs(t);
-  }
-  else if (rhs(t).is_true())
-  {
-    result = lhs(t);
-  }
-  else
-  {
-    result = t;
-  }
-
-  return result;
 }
 
 ////////////////////////////////////////////////////////////
@@ -262,19 +238,19 @@ lpe::specification remove_unused_variables_(const lpe::specification& specificat
   return new_specification;
 }
 
-//Recursively apply sum elimination on a summand. Note that summand is
-//passed as a pointer argument because we apply substitution to the
-//parameters of the substitution at the deepest level of recursion.
+//Recursively apply sum elimination on a summand. 
+//We build up a list of substitutions that need to be made in substitutions
+//the caller of this function needs to apply sumstitutions to the summand
+//once we exit recursion
 //working_condition is a parameter that we use to split up the problem,
 //at the first call of this function working_condition == summand->condition()
-//should hold
+//should hold.
+//The new condition is built up on the return path of the recursion, so
+//the last exit of the recursion is the new condition of the summand.
 //
 //Note that filtering the summation variables should (for now) be done in the calling
 //function, by applying remove_unused_variables_ on the result, because that is a little
 //more efficient.
-//The new condition is built up on the return path of the recursion, so
-//the last exit of the recursion is the new condition of the summand.
-//
 //!!!INTERNAL USE ONLY!!!
 data_expression recursive_substitute_equalities(const LPE_summand& summand,
                                                 data_expression working_condition,
@@ -290,7 +266,6 @@ data_expression recursive_substitute_equalities(const LPE_summand& summand,
     data_expression a,b;
     a = recursive_substitute_equalities(summand, lhs(working_condition), substitutions);
     b = recursive_substitute_equalities(summand, rhs(working_condition), substitutions);
-    //result = eliminate_unit_and(gsMakeDataExprAnd(a,b));
     result = and_(a,b);
   }
   
@@ -310,9 +285,10 @@ data_expression recursive_substitute_equalities(const LPE_summand& summand,
     if (is_var(lhs(working_condition)))
     {
       //According to sum elimination lemma the variable that is being substituted can not occur in its replacement.
-      if (occurs_in(summand.summation_variables(), get_var(lhs(working_condition))) && !occurs_in(rhs(working_condition), get_var(lhs(working_condition))))
+      data_variable var = get_var(lhs(working_condition));
+      if (occurs_in(summand.summation_variables(), var) && !occurs_in(rhs(working_condition), var))
       {
-        data_assignment substitution = data_assignment(get_var(lhs(working_condition)), rhs(working_condition));
+        data_assignment substitution = data_assignment(var, rhs(working_condition));
         gsDebugMsg("substitution: %s\n", substitution.to_string().c_str());
  
         // First apply substitution to righthandside of other substitutions,
