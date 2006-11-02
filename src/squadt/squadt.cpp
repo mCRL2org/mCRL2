@@ -157,7 +157,9 @@ bool Squadt::OnInit() {
  
     wxInitAllImageHandlers();
  
-    wxImage logo(wxString(global_settings_manager->path_to_images("logo.jpg").c_str(), wxConvLocal));
+    #include "pixmaps/logo.xpm"
+
+    wxImage logo(logo_xpm);
  
     splash* splash_window = new splash(&logo, 1);
  

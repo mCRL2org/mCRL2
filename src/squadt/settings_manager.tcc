@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cstdio>
 
-#include "setup.h"
+#include "config.h"
 
 #include "exception.h"
 #include "settings_manager.h"

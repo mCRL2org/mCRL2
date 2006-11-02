@@ -89,7 +89,6 @@ namespace squadt {
 
     /**
      * @param f the format for which to execute the action a
-     * @param a the function to execute for each category/tool pair
      **/
     type_registry::tool_sequence type_registry::tools_by_mime_type(storage_format const& f) const {
 
@@ -108,7 +107,6 @@ namespace squadt {
 
     /**
      * @param f the format for which to execute the action a
-     * @param a the function to execute for each category/tool pair
      **/
     std::set < type_registry::tool_category > type_registry::categories_by_mime_type(storage_format const& f) const {
       std::set < tool_category > categories;

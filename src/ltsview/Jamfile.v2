@@ -36,7 +36,7 @@ exe ltsview
       :
 #       <library>fsm
 #        <implicit-dependency>fsm
-        <library>/site-config//OpenGL
+        <dependency>/site-config//OpenGL
         <library>/libraries//wx_extension
         <library>/libraries//mcrl2_basic
         <library>/libraries//aterm

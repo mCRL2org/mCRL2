@@ -34,6 +34,7 @@ namespace squadt {
 
       private:
        
+        /** \brief Get the command line arguments as an array */
         boost::shared_array < char const* > get_argument_array(bool = true) const;
 
       public:

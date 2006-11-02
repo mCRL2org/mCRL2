@@ -186,6 +186,7 @@ namespace squadt {
   /**
    * \param[in] c the command to run
    * \param[in] b whether or not to circumvent the executor restriction mechanism
+   * \param[in] p pointer to the associated monitor
    **/
   template < typename T >
   inline void tool_manager::execute(execution::command const* c, T p, bool b) {
