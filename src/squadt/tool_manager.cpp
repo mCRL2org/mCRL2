@@ -17,7 +17,7 @@
 #include "extractor.h"
 #include "settings_manager.tcc"
 
-#include "config.h"
+#include "setup.h"
 
 namespace squadt {
 

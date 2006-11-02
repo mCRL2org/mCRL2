@@ -18,7 +18,7 @@
 
 #include "task_monitor.h"
 #include "command.h"
-#include "config.h"
+#include "setup.h"
 
 namespace squadt {
   namespace execution {
