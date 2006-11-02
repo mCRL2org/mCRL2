@@ -40,6 +40,7 @@ class MainFrame : public wxFrame
     void	onColorButton( wxCommandEvent& event );
     void	onDisplayStates( wxCommandEvent& event );
     void        onDisplayTransitions ( wxCommandEvent& event);
+    void        onDisplayBackpointers( wxCommandEvent& event);
     void	onDisplayWireframe( wxCommandEvent& event );
     void	onExit( wxCommandEvent& event );
     void	onOpen( wxCommandEvent& event );

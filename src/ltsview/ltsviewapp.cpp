@@ -495,6 +495,12 @@ void LTSViewApp::toggleDisplayTransitions()
   glCanvas->display();
 }
 
+void LTSViewApp::toggleDisplayBackpointers()
+{
+  visualizer->toggleDisplayBackpointers();
+  glCanvas->display();
+}
+
 void LTSViewApp::toggleDisplayWireframe()
 {
   visualizer->toggleDisplayWireframe();

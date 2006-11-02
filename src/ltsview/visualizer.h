@@ -47,11 +47,12 @@ class Visualizer
     Utils::HSV_Color		  delta_col;
     bool		  displayStates;
     bool                  displayTransitions;
+    bool                  displayBackpointers;
     bool		  displayWireframe;
     void                  drawBackPointer(State* startState, 
-                                          State* endState, int rot);
+                                          State* endState);
     void                  drawForwardPointer(State* startState, 
-                                             State* endState, int rot);
+                                             State* endState);
     LTS*		  lts;
     Utils::MarkStyle		  markStyle;
     Mediator*		  mediator;
@@ -73,6 +74,7 @@ class Visualizer
     Utils::VisStyle		  visStyle;
     
     void clearDFSStates(State* root);
+    void computeStateAbsPos(State* root, int rot,  Utils::Point3D init);
     void computeDeltaCol(Utils::HSV_Color &hsv1);
     void computeSubtreeBounds(Cluster* root,float &boundWidth,
                               float &boundHeight);
@@ -91,7 +93,7 @@ class Visualizer
     void drawSubtreeCMark(Cluster* root,bool topClosed,int rot);
     void drawSubtreeO(Cluster* root, Utils::HSV_Color col,int rot);
     void drawSubtreeOMark(Cluster* root,int rot);
-    void drawTransitions(State* root, int rot);
+    void drawTransitions(State* root);
     void drawTube(float baserad,float toprad, Utils::RGB_Color basecol, Utils::RGB_Color topcol,
     							bool interpolate,
                                                         Utils::Point3D b1, Utils::Point3D b2,Utils::Point3D b3,
@@ -121,6 +123,7 @@ class Visualizer
     void	setVisStyle( Utils::VisStyle vs );
     void	toggleDisplayStates();
     void        toggleDisplayTransitions();
+    void        toggleDisplayBackpointers();
     void	toggleDisplayWireframe();
 };
 #endif

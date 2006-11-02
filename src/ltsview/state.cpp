@@ -104,11 +104,21 @@ float State::getPosition() const
   return position;
 }
 
+Point3D State::getPositionAbs() const
+{
+  return positionAbs;
+}
+
+
 void State::setPosition( float p )
 {
   position = p;
 }
 
+void State::setPositionAbs(Point3D p)
+{
+  positionAbs = p;
+}
 Cluster* State::getCluster() const
 {
   return cluster;

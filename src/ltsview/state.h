@@ -46,6 +46,7 @@ class State
     Transition* getOutTransitioni( int i) const;
     int       getNumberOfOutTransitions() const;
     float     getPosition() const;
+    Utils::Point3D getPositionAbs() const;
     int	      getRank() const;
     void      getSubordinates( std::set< State* > &ss ) const;
     void      getSuperiors( std::set< State* > &ss ) const;
@@ -57,6 +58,7 @@ class State
     //void      select();
     void      setCluster( Cluster* c );
     void      setPosition( float p );
+    void      setPositionAbs( Utils::Point3D p );
     void      setRank( int r );
     void      unmark();
    
@@ -71,6 +73,7 @@ class State
     //float		  probability;
     std::vector< Transition* > outTransitions;
     float		  position;
+    Utils::Point3D	  positionAbs;
     int			  rank;
     //bool		  selected;
     std::vector< ATerm >  stateVector;

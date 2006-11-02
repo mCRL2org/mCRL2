@@ -24,6 +24,7 @@ BEGIN_EVENT_TABLE( MainFrame, wxFrame )
   EVT_MENU  ( wxID_RESET, MainFrame::onResetView )
   EVT_MENU  ( myID_DISPLAY_STATES, MainFrame::onDisplayStates )
   EVT_MENU  ( myID_DISPLAY_TRANSITIONS, MainFrame::onDisplayTransitions )
+  EVT_MENU  ( myID_DISPLAY_BACKPOINTERS, MainFrame::onDisplayBackpointers )
   EVT_MENU  ( myID_DISPLAY_WIREFRAME, MainFrame::onDisplayWireframe )
   EVT_TOOL  ( myID_PAN, MainFrame::onActivateTool )
   EVT_TOOL  ( myID_ROTATE, MainFrame::onActivateTool )
@@ -85,6 +86,8 @@ void MainFrame::setupMenuBar()
       wxT("Show/hide individual states") );
   viewMenu->AppendCheckItem( myID_DISPLAY_TRANSITIONS, 
     wxT("Display &transitions"), wxT("Show/hide individual transitions"));
+  viewMenu->AppendCheckItem( myID_DISPLAY_BACKPOINTERS,
+    wxT("Display &backpointers"), wxT("Show/hide backpointers"));
   viewMenu->AppendCheckItem( myID_DISPLAY_WIREFRAME, wxT("Display &wireframe"),
       wxT("Toggle wireframe/surface") );
   
@@ -567,6 +570,11 @@ void MainFrame::onDisplayStates( wxCommandEvent& /*event*/ )
 void MainFrame::onDisplayTransitions( wxCommandEvent& /*event*/ )
 {
   mediator->toggleDisplayTransitions();
+}
+
+void MainFrame::onDisplayBackpointers( wxCommandEvent& /*event*/ )
+{
+  mediator->toggleDisplayBackpointers();
 }
 
 void MainFrame::onDisplayWireframe( wxCommandEvent& /*event*/ )
