@@ -13,7 +13,8 @@ if $(OPENGL_NAME) {
     lib OpenGL : : <name>$(OPENGL_NAME) : : <include>$(OPENGL_IPATH) ;
   }
   else {
-    lib OpenGL : : <name>$(OPENGL_NAME) : : <toolset>darwin:<framework>"OpenGL" ;
+    lib OpenGL : : <name>$(OPENGL_NAME) : : ;
+    lib OpenGL : : <toolset>darwin : : <framework>"OpenGL" ;
   }
 }
 else {
