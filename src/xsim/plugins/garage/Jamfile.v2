@@ -15,6 +15,7 @@ lib xsim_garage_view
          <define>GARAGEFRAMEDLL
          <link>shared
          <wx>no:<build>no
+         <toolset>darwin:<linkflags>"-bundle -undefined dynamic_lookup"
        :
        ;
 
