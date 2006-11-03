@@ -155,7 +155,8 @@ inline
 data_variable get_var(data_expression t)
 {
   assert(is_var(t));
-  return data_variable(ATermAppl(t));
+  data_variable result = data_variable(ATermAppl(t));
+  return result;
 }
 
 
@@ -186,6 +187,21 @@ data_expression swap_equality(data_expression t)
   return lpe::equal_to(rhs(t), lhs(t));
 }
 
+///Apply substitution to the righthand sides of the assignments in dl
+data_assignment_list substitute_rhs(const data_assignment_list& dl, const data_assignment& substitution)
+{
+  data_assignment_list result;
+
+  for(data_assignment_list::iterator i = dl.begin(); i != dl.end(); ++i)
+  {
+    data_expression rhs = i->rhs();
+    rhs = rhs.substitute(substitution);
+    result = push_front(result, data_assignment(i->lhs(), rhs));
+  }
+
+  return result;
+}
+
 ////////////////////////////////////////////////////////////
 // Functions for sumelm operations
 //
@@ -199,7 +215,7 @@ lpe::LPE_summand remove_unused_variables(const lpe::LPE_summand& summand)
   lpe::data_variable_list new_summation_variables;
 
   for(lpe::data_variable_list::iterator i = summand.summation_variables().begin(); i != summand.summation_variables().end(); ++i)
-  { 
+  {
     data_variable v = *i;
    
     if (!summand.is_delta())
@@ -285,17 +301,14 @@ data_expression recursive_substitute_equalities(const LPE_summand& summand,
     if (is_var(lhs(working_condition)))
     {
       //According to sum elimination lemma the variable that is being substituted can not occur in its replacement.
-      data_variable var = get_var(lhs(working_condition));
-      if (occurs_in(summand.summation_variables(), var) && !occurs_in(rhs(working_condition), var))
+      if (occurs_in(summand.summation_variables(), get_var(lhs(working_condition))) && !occurs_in(rhs(working_condition), get_var(lhs(working_condition))))
       {
-        data_assignment substitution = data_assignment(var, rhs(working_condition));
-        gsDebugMsg("substitution: %s\n", substitution.to_string().c_str());
+        data_assignment substitution = data_assignment(get_var(lhs(working_condition)), rhs(working_condition));
  
         // First apply substitution to righthandside of other substitutions,
         // then add new substitution.
-        substitutions = substitute(substitutions, substitution);
+        substitutions = substitute_rhs(substitutions, substitution);
         substitutions = push_front(substitutions, substitution);
-
         result = true_();
       }
     }
@@ -319,13 +332,13 @@ lpe::LPE_summand substitute_equalities(const lpe::LPE_summand& summand)
   lpe::data_expression new_condition = recursive_substitute_equalities(new_summand, new_summand.condition(), substitutions);
 
   //Apply the substitutions that were returned from the recursive call
+  new_condition = new_condition.substitute(assignment_list_substitution(substitutions));
   new_summand = LPE_summand(new_summand.summation_variables(),
                             new_condition.substitute(assignment_list_substitution(substitutions)),
                             new_summand.is_delta(),
                             substitute(new_summand.actions(),assignment_list_substitution(substitutions)),
                             new_summand.time().substitute(assignment_list_substitution(substitutions)),
                             substitute(new_summand.assignments(),assignment_list_substitution(substitutions)));
-
   //Take the summand with substitution, and remove the summation variables that are now not needed
   new_summand = remove_unused_variables(new_summand);
   return new_summand;
