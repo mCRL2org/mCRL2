@@ -4,7 +4,7 @@ path-constant BOOST_ROOT      : ./boost ;                # Boost prefix (package
 path-constant SETUP           : ./src ;                  # Header file for run-time configuration
 
 # Activate header cache
-#modules.poke : HCACHEFILE : .jamdeps ;
+modules.poke : HCACHEFILE : .jamdeps ;
 
 include $(TOP)/build/building.jam ;
 
@@ -85,18 +85,18 @@ else {
 
   tools_with_plugins = [ MATCH (src/.*/plugins/.*)/Jamfile.v2 : [ glob src/*/plugins/*/Jamfile.v2 ] ] ;
 
-  stage install-plugins
-          : $(tools_with_plugins)
-          : <location>$(LIB_DIR)/plugins
-          ;
-
   stage install-shared-libraries
           : /tools/$(tools)
-            $(tools_with_plugins)
           : <location>$(LIB_DIR)
             <dll-path>$(LIB_DIR)
             <os>NT:<location>$(BIN_DIR)
+            <dll-path>$(LIB_DIR)
             <install-dependencies>on <install-type>SHARED_LIB
+          ;
+
+  stage install-plugins
+          : $(tools_with_plugins)
+          : <location>$(LIB_DIR)/plugins
           ;
 
   # Complete install
@@ -104,6 +104,5 @@ else {
           : install-binaries
             install-shared-libraries
             install-static-libraries
-            src/squadt//install-squadt-image-data
           ;
 }
