@@ -300,8 +300,14 @@ data_expression recursive_substitute_equalities(const LPE_summand& summand,
     //substitution in summation_variables is done in calling function.
     if (is_var(lhs(working_condition)))
     {
+      data_variable_list lhs_subst;
+      for (data_assignment_list::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
+      {
+        lhs_subst = push_front(lhs_subst, i->lhs());
+      }
+
       //According to sum elimination lemma the variable that is being substituted can not occur in its replacement.
-      if (occurs_in(summand.summation_variables(), get_var(lhs(working_condition))) && !occurs_in(rhs(working_condition), get_var(lhs(working_condition))))
+      if (!occurs_in(lhs_subst, get_var(lhs(working_condition))) && occurs_in(summand.summation_variables(), get_var(lhs(working_condition))) && !occurs_in(rhs(working_condition), get_var(lhs(working_condition))))
       {
         data_assignment substitution = data_assignment(get_var(lhs(working_condition)), rhs(working_condition));
  
