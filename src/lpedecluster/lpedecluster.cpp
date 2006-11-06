@@ -53,6 +53,7 @@ namespace po = boost::program_options;
 std::string input_file; ///< Name of the file to read input from
 std::string output_file; ///< Name of the file to write output to (or stdout)
 bool finite_only = false; ///< Only decluster finite sorts
+RewriteStrategy strategy = GS_REWR_INNER; ///< Rewrite strategy to use, default inner
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 //Forward declaration because do_decluster() is called within squadt_interactor class
@@ -223,14 +224,10 @@ data_variable_list get_variables(const data_variable_list& vl, const sort_list& 
 
 ///\pre specification is the specification belonging to summand
 ///\ret the declustered summand list of summand
-lpe::summand_list decluster_summand(const lpe::specification& specification, const lpe::LPE_summand& summand)
+lpe::summand_list decluster_summand(const lpe::specification& specification, const lpe::LPE_summand& summand, EnumeratorStandard& enumerator)
 {
   lpe::summand_list result;
 
-  // Some use of internal format because we need it for the rewriter
-  Rewriter* rewriter = createRewriter(gsMakeDataEqnSpec(specification.data().equations()));
-  EnumeratorStandard enumerator = EnumeratorStandard(specification, rewriter);
-  
   data_variable_list variables; // The variables we need to consider in declustering
   if (finite_only)
   {
@@ -242,8 +239,8 @@ lpe::summand_list decluster_summand(const lpe::specification& specification, con
     variables = summand.summation_variables();
   }
 
-  ATermList vars = (ATermList(variables));
-  ATerm expr = ATerm(aterm_appl(summand.condition()));
+  ATermList vars = ATermList(variables);
+  ATerm expr = enumerator.getRewriter()->toRewriteFormat(aterm_appl(summand.condition()));
   
   // Solutions
   EnumeratorSolutions* sols = enumerator.findSolutions(vars, expr, false, NULL);
@@ -266,7 +263,7 @@ lpe::summand_list decluster_summand(const lpe::specification& specification, con
       aterm arg = aterm(ATgetArgument(ATerm(aterm_list(sol).front()),1));
 
       // righthandside of substitution in lpe format
-      data_expression res = data_expression(aterm_appl(rewriter->fromRewriteFormat(arg)));
+      data_expression res = data_expression(aterm_appl(enumerator.getRewriter()->fromRewriteFormat(arg)));
 
       // Substitution to be performed
       data_assignment substitution = data_assignment(var, res);
@@ -296,14 +293,14 @@ lpe::summand_list decluster_summand(const lpe::specification& specification, con
 
 ///Takes the summand list sl, declusters it,
 ///and returns the declustered summand list
-lpe::summand_list decluster_summands(const lpe::specification& specification, const lpe::summand_list& sl)
+lpe::summand_list decluster_summands(const lpe::specification& specification, const lpe::summand_list& sl, EnumeratorStandard& enumerator)
 {
   lpe::summand_list result;
 
   for (summand_list::iterator i = sl.begin(); i != sl.end(); ++i)
   {
     lpe::LPE_summand s = *i;
-    result = result + decluster_summand(specification, s);
+    result = result + decluster_summand(specification, s, enumerator);
   }
 
   return result;
@@ -318,7 +315,11 @@ lpe::specification decluster(const lpe::specification& specification)
 
   gsVerboseMsg("Input: %d summands.\n", lpe.summands().size());
 
-  lpe::summand_list sl = decluster_summands(specification, lpe.summands());
+  // Some use of internal format because we need it for the rewriter
+  Rewriter* rewriter = createRewriter(gsMakeDataEqnSpec(specification.data().equations()), strategy);
+  EnumeratorStandard enumerator = EnumeratorStandard(specification, rewriter);
+
+  lpe::summand_list sl = decluster_summands(specification, lpe.summands(), enumerator);
   lpe = set_summands(lpe, sl);
 
   gsVerboseMsg("Output: %d summands.\n", lpe.summands().size());
@@ -351,12 +352,15 @@ int do_decluster(const std::string input_file_name, const std::string output_fil
 ///Parses command line and sets settings from command line switches
 void parse_command_line(int ac, char** av) {
   po::options_description desc;
+  std::string rewriter;
 
   desc.add_options()
       ("help,h",      "display this help")
       ("verbose,v",   "turn on the display of short intermediate messages")
       ("debug,d",     "turn on the display of detailed intermediate messages")
       ("finite,f",    "only decluster finite sorts")
+      ("rewriter,R",   po::value<std::string>(&rewriter)->default_value("inner"), "use rewriter arg (default 'inner');"
+                      "available rewriters are inner, jitty, innerc and jittyc")
       ("version",     "display version information")
   ;
   po::options_description hidden("Hidden options");
@@ -405,6 +409,18 @@ void parse_command_line(int ac, char** av) {
 
   if (vm.count("finite")) {
     finite_only = true;
+  }
+
+  if (vm.count("rewriter")) {
+    cout << "rewrite strategy: " << rewriter << endl;
+    if      (rewriter == "inner")  { strategy = GS_REWR_INNER; }
+    else if (rewriter == "innerc") { strategy = GS_REWR_INNERC; }
+    else if (rewriter == "jitty")  { strategy = GS_REWR_JITTY; }
+    else if (rewriter == "jittyc") { strategy = GS_REWR_JITTYC; }
+    else { //TODO: Fix error path 
+      cerr << rewriter << " is not a valid rewriter strategy" << endl;
+      exit(1);
+    }
   }
 
   input_file = (0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-";
