@@ -1,7 +1,5 @@
 project toolset/ltsmin
        : build-dir $(BUILD_TOP)/ltsmin
-       : requirements
-          <status>deprecated
        ;
 
 exe ltsmin
@@ -13,4 +11,5 @@ exe ltsmin
        : <include>.
          <os>NT:<define>NO_TIMES_H
          <toolset>msvc:<library>/workarounds/msvc//getopt
+         <status>deprecated
        ;

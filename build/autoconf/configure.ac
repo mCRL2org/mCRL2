@@ -240,7 +240,7 @@ AC_ARG_ENABLE(
   AS_HELP_STRING([--enable-deprecated],[also build deprecated tools
   ])
 )
-if test $enable_experimental; then
+if test $enable_deprecated; then
   BUILD_EXTRA="--enable-deprecated $BUILD_EXTRA"
 fi
 

@@ -4011,7 +4011,7 @@ if test "${enable_deprecated+set}" = set; then
   enableval=$enable_deprecated;
 fi
 
-if test $enable_experimental; then
+if test $enable_deprecated; then
   BUILD_EXTRA="--enable-deprecated $BUILD_EXTRA"
 fi
 

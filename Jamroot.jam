@@ -4,7 +4,7 @@ path-constant BOOST_ROOT      : ./boost ;                # Boost prefix (package
 path-constant SETUP           : ./src ;                  # Header file for run-time configuration
 
 # Activate header cache
-modules.poke : HCACHEFILE : .jamdeps ;
+# modules.poke : HCACHEFILE : .jamdeps ;
 
 include $(TOP)/build/building.jam ;
 
@@ -54,6 +54,8 @@ if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
           ;
 }
 else {
+  include $(TOP)/build/installing.jam ;
+
   feature.set-default install : yes ;
 
   # General examples
@@ -64,7 +66,7 @@ else {
           ;
 
 
-  stage aterm-headers
+  stage install-headers
           : [ path.glob-tree src/libraries/aterm : *.h : .svn ]
           : <location>$(INCLUDE_DIR)/aterm
             <install-source-root>src/libraries/aterm/include
@@ -98,10 +100,15 @@ else {
           : <location>$(LIB_DIR)/plugins
           ;
 
+  explicit install-examples install-headers install-binaries install-plugins install-static-libraries install-shared-libraries ;
+
   # Complete install
   alias install
-          : install-binaries
-            install-shared-libraries
+          : install-shared-libraries
             install-static-libraries
+            install-binaries
+            install-plugins
+            install-examples
+            install-headers
           ;
 }
