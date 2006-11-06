@@ -251,6 +251,9 @@ lpe::summand_list decluster_summand(const lpe::specification& specification, con
   {
     data_assignment_list substitutions; 
 
+    // Convenience cast, so that the iterator, and the modifications from the atermpp library can be used
+    aterm_list solution = aterm_list(sol);
+
     // Translate internal rewriter solution to lpe data_assignment_list
     for (aterm_list::iterator i = solution.begin(); i != solution.end(); ++i)
     {
