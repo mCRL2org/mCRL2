@@ -250,8 +250,6 @@ lpe::summand_list decluster_summand(const lpe::specification& specification, con
   while (sols->next(&sol))
   {
     data_assignment_list substitutions; 
-    aterm_list solution = aterm_list(sol); //convenience cast to atermpp library
-    gsDebugMsg("solution: %s\n", solution.to_string().c_str());
 
     // Translate internal rewriter solution to lpe data_assignment_list
     for (aterm_list::iterator i = solution.begin(); i != solution.end(); ++i)
@@ -270,8 +268,6 @@ lpe::summand_list decluster_summand(const lpe::specification& specification, con
       substitutions = push_front(substitutions, substitution);
     }
 
-    gsDebugMsg("substitutions: %s\n", substitutions.to_string().c_str());
-
     LPE_summand s = LPE_summand(filter(summand.summation_variables(), variables),
                                 summand.condition().substitute(assignment_list_substitution(substitutions)),
                                 summand.is_delta(),
@@ -285,8 +281,8 @@ lpe::summand_list decluster_summand(const lpe::specification& specification, con
 
   result = reverse(result);
 
-  gsDebugMsg("orig summand: %s\n", summand.to_string().c_str());
-  gsDebugMsg("result: %s\n", result.to_string().c_str());
+  gsDebugMsg("Original summand: %s\n", summand.to_string().c_str());
+  gsDebugMsg("Resulting summands: %s\n", result.to_string().c_str());
 
   return result;
 }
@@ -417,9 +413,9 @@ void parse_command_line(int ac, char** av) {
     else if (rewriter == "innerc") { strategy = GS_REWR_INNERC; }
     else if (rewriter == "jitty")  { strategy = GS_REWR_JITTY; }
     else if (rewriter == "jittyc") { strategy = GS_REWR_JITTYC; }
-    else { //TODO: Fix error path 
+    else { 
       cerr << rewriter << " is not a valid rewriter strategy" << endl;
-      exit(1);
+      exit(EXIT_FAILURE);
     }
   }
 
