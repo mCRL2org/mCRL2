@@ -499,6 +499,20 @@ AC_SUBST([BUILD_VARIANT],[])
 AC_SUBST([BUILD_OPTIONS],[])
 AC_SUBST([BUILD_EXTRA])
 
+if test "$BUILD_ATERM" = "builtin"; then
+  eval "eval IATERM_CPPFLAGS=${includedir}"
+  if test "$ADDRESS_MODEL" = "64"; then
+    IATERM_CPPFLAGS="-DAT_64BIT $(IATERM_CPPFLAGS)"
+  fi
+  AC_SUBST([IATERM_CPPFLAGS],["-I$IATERM_CPPFLAGS/aterm"])
+
+  eval "eval IATERM_LDFLAGS=${libdir}"
+  AC_SUBST([IATERM_LDFLAGS],["-L${IATERM_LDFLAGS} -lATerm"])
+else
+  AC_SUBST([IATERM_CPPFLAGS],["$ATERM_CPPFLAGS"])
+  AC_SUBST([IATERM_LDFLAGS],["$ATERM_LDFLAGS -lATerm"])
+fi
+
 eval "eval PREFIX_DIR=${prefix}"
 eval "eval EXEC_PREFIX_DIR=${exec_prefix}"
 
@@ -529,18 +543,6 @@ AC_SUBST([R_SCXXFLAGS],["$R_SCXXFLAGS"])
 AC_SUBST([R_CPPFLAGS],["$CPPFLAGS"])
 AC_SUBST([R_LDFLAGS],["$R_LDFLAGS"])
 AC_SUBST([R_SLDFLAGS],["$R_SLDFLAGS"])
-
-if test "$BUILD_ATERM" = "builtin"; then
-  if test "$ADDRESS_MODEL" = "64"; then
-    AC_SUBST([IATERM_CPPFLAGS],["-DAT_64BIT -I$INCLUDE_DIR/aterm"])
-  else
-    AC_SUBST([IATERM_CPPFLAGS],["-I$INCLUDE_DIR/aterm"])
-  fi
-  AC_SUBST([IATERM_LDFLAGS],["-L$LIB_DIR -lATerm"])
-else
-  AC_SUBST([IATERM_CPPFLAGS],["$ATERM_CPPFLAGS"])
-  AC_SUBST([IATERM_LDFLAGS],["$ATERM_LDFLAGS -lATerm"])
-fi
 
 AC_MSG_RESULT([
    Configured $BUILD_VARIANT variant-build using libraries:

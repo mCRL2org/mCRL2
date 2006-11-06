@@ -689,6 +689,8 @@ LIBOBJS
 BUILD_VARIANT
 BUILD_OPTIONS
 BUILD_EXTRA
+IATERM_CPPFLAGS
+IATERM_LDFLAGS
 PREFIX_DIR
 EXEC_PREFIX_DIR
 DATA_DIR
@@ -703,8 +705,6 @@ R_SCXXFLAGS
 R_CPPFLAGS
 R_LDFLAGS
 R_SLDFLAGS
-IATERM_CPPFLAGS
-IATERM_LDFLAGS
 LTLIBOBJS'
 ac_subst_files=''
       ac_precious_vars='build_alias
@@ -6702,6 +6702,24 @@ fi
 
 
 
+if test "$BUILD_ATERM" = "builtin"; then
+  eval "eval IATERM_CPPFLAGS=${includedir}"
+  if test "$ADDRESS_MODEL" = "64"; then
+    IATERM_CPPFLAGS="-DAT_64BIT $(IATERM_CPPFLAGS)"
+  fi
+  IATERM_CPPFLAGS="-I$IATERM_CPPFLAGS/aterm"
+
+
+  eval "eval IATERM_LDFLAGS=${libdir}"
+  IATERM_LDFLAGS="-L${IATERM_LDFLAGS} -lATerm"
+
+else
+  IATERM_CPPFLAGS="$ATERM_CPPFLAGS"
+
+  IATERM_LDFLAGS="$ATERM_LDFLAGS -lATerm"
+
+fi
+
 eval "eval PREFIX_DIR=${prefix}"
 eval "eval EXEC_PREFIX_DIR=${exec_prefix}"
 
@@ -6737,23 +6755,6 @@ R_LDFLAGS="$R_LDFLAGS"
 
 R_SLDFLAGS="$R_SLDFLAGS"
 
-
-if test "$BUILD_ATERM" = "builtin"; then
-  if test "$ADDRESS_MODEL" = "64"; then
-    IATERM_CPPFLAGS="-DAT_64BIT -I$INCLUDE_DIR/aterm"
-
-  else
-    IATERM_CPPFLAGS="-I$INCLUDE_DIR/aterm"
-
-  fi
-  IATERM_LDFLAGS="-L$LIB_DIR -lATerm"
-
-else
-  IATERM_CPPFLAGS="$ATERM_CPPFLAGS"
-
-  IATERM_LDFLAGS="$ATERM_LDFLAGS -lATerm"
-
-fi
 
 { echo "$as_me:$LINENO: result:
    Configured $BUILD_VARIANT variant-build using libraries:
@@ -7487,6 +7488,8 @@ LIBOBJS!$LIBOBJS$ac_delim
 BUILD_VARIANT!$BUILD_VARIANT$ac_delim
 BUILD_OPTIONS!$BUILD_OPTIONS$ac_delim
 BUILD_EXTRA!$BUILD_EXTRA$ac_delim
+IATERM_CPPFLAGS!$IATERM_CPPFLAGS$ac_delim
+IATERM_LDFLAGS!$IATERM_LDFLAGS$ac_delim
 PREFIX_DIR!$PREFIX_DIR$ac_delim
 EXEC_PREFIX_DIR!$EXEC_PREFIX_DIR$ac_delim
 DATA_DIR!$DATA_DIR$ac_delim
@@ -7494,8 +7497,6 @@ LIB_DIR!$LIB_DIR$ac_delim
 BIN_DIR!$BIN_DIR$ac_delim
 INCLUDE_DIR!$INCLUDE_DIR$ac_delim
 MAN_DIR!$MAN_DIR$ac_delim
-R_CFLAGS!$R_CFLAGS$ac_delim
-R_SCFLAGS!$R_SCFLAGS$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -7537,13 +7538,13 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+R_CFLAGS!$R_CFLAGS$ac_delim
+R_SCFLAGS!$R_SCFLAGS$ac_delim
 R_CXXFLAGS!$R_CXXFLAGS$ac_delim
 R_SCXXFLAGS!$R_SCXXFLAGS$ac_delim
 R_CPPFLAGS!$R_CPPFLAGS$ac_delim
 R_LDFLAGS!$R_LDFLAGS$ac_delim
 R_SLDFLAGS!$R_SLDFLAGS$ac_delim
-IATERM_CPPFLAGS!$IATERM_CPPFLAGS$ac_delim
-IATERM_LDFLAGS!$IATERM_LDFLAGS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
