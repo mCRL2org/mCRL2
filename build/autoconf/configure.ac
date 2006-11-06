@@ -500,13 +500,13 @@ AC_SUBST([BUILD_OPTIONS],[])
 AC_SUBST([BUILD_EXTRA])
 
 if test "$BUILD_ATERM" = "builtin"; then
-  eval "eval IATERM_CPPFLAGS=${includedir}"
+  eval "eval IATERM_CPPFLAGS=${includedir}/mcrl2"
   if test "$ADDRESS_MODEL" = "64"; then
     IATERM_CPPFLAGS="-DAT_64BIT $(IATERM_CPPFLAGS)"
   fi
   AC_SUBST([IATERM_CPPFLAGS],["-I$IATERM_CPPFLAGS/aterm"])
 
-  eval "eval IATERM_LDFLAGS=${libdir}"
+  eval "eval IATERM_LDFLAGS=${libdir}/mcrl2"
   AC_SUBST([IATERM_LDFLAGS],["-L${IATERM_LDFLAGS} -lATerm"])
 else
   AC_SUBST([IATERM_CPPFLAGS],["$ATERM_CPPFLAGS"])
