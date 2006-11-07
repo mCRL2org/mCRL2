@@ -5,8 +5,8 @@
 // ----------------------------------------------------------------------
 //
 // file          : lpeuntime 
-// date          : 27-09-2006
-// version       : 0.24
+// date          : 07-11-2006
+// version       : 0.3
 //
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
 //
@@ -43,7 +43,7 @@ using namespace lpe;
 
 namespace po = boost::program_options;
 
-#define VERSION "0.24"
+#define VERSION "0.3"
 
 std::string input_file; // Name of the file to read input from
 std::string output_file; // Name of the file to write output to (or stdout)
@@ -111,6 +111,34 @@ bool has_time(lpe::LPE& lpe)
   return result;
 }
 
+///\ret specification, in which all delta summands have been removed, and replaced with a single true->delta
+lpe::specification remove_deltas(const lpe::specification& specification) {
+  lpe::specification result;
+  lpe::summand_list summands;
+  for (summand_list::iterator i = specification.lpe().summands().begin(); i != specification.lpe().summands().end(); ++i)
+  {
+    if (!(i->is_delta()))
+    {
+      summands = push_front(summands, *i);
+    }
+  }
+
+  lpe::LPE_summand delta_summand = LPE_summand(data_variable_list(),
+                                               data_expression(gsMakeDataExprTrue()),
+                                               true,
+                                               action_list(),
+                                               gsMakeNil(),
+                                               data_assignment_list()
+                                              );
+
+  summands = push_front(summands, delta_summand);
+  summands = reverse(summands);
+
+  result = set_lpe(specification, set_summands(specification.lpe(), summands));
+
+  return result;
+}
+
 ///Returns an LPE specification in which the timed arguments have been rewritten
 lpe::specification untime(const lpe::specification& specification) {
   // TODO: Strip use of gs functions as much as possible; everything that's possible through these
@@ -127,10 +155,10 @@ lpe::specification untime(const lpe::specification& specification) {
   lpe::data_expression_list untime_initial_state; // Updated initial state
   // Note: initial variables and initial state together form initial assignment
 
-  //If an lpe has got no time at the initialization, just return the original lpe
+  //If an lpe has got no time at the initialization, return the original lpe with all present delta's removed, and replaced with one true->delta.
   if (!has_time(lpe))
   {
-    return specification;
+    return remove_deltas(specification);
   }
 
   // Create extra parameter last_action_time and add it to the list of process parameters,
