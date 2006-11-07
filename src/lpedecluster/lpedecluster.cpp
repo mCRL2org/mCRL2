@@ -226,6 +226,8 @@ data_variable_list get_variables(const data_variable_list& vl, const sort_list& 
 ///\ret the declustered summand list of summand
 lpe::summand_list decluster_summand(const lpe::specification& specification, const lpe::LPE_summand& summand, EnumeratorStandard& enumerator)
 {
+  gsDebugMsg("Declustering summand: %s\n", summand.to_string().c_str());
+
   lpe::summand_list result;
 
   data_variable_list variables; // The variables we need to consider in declustering
@@ -284,7 +286,6 @@ lpe::summand_list decluster_summand(const lpe::specification& specification, con
 
   result = reverse(result);
 
-  gsDebugMsg("Original summand: %s\n", summand.to_string().c_str());
   gsDebugMsg("Resulting summands: %s\n", result.to_string().c_str());
 
   return result;
@@ -296,8 +297,11 @@ lpe::summand_list decluster_summands(const lpe::specification& specification, co
 {
   lpe::summand_list result;
 
-  for (summand_list::iterator i = sl.begin(); i != sl.end(); ++i)
+  // decluster_summand(..) is called only in this function, therefore, it is safe to count the summands here for verbose output.
+  int j = 1;
+  for (summand_list::iterator i = sl.begin(); i != sl.end(); ++i, ++j)
   {
+    gsVerboseMsg("Summand %d\n", j);
     lpe::LPE_summand s = *i;
     result = result + decluster_summand(specification, s, enumerator);
   }
