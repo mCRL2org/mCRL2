@@ -52,7 +52,7 @@ if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
   if $(targets) {
     import set ;
 
-    targets = [ set.difference $(targets) : install clean clean-all ] ;
+    targets = [ set.difference $(targets) : install clean clean-all release debug profile ] ;
 
     for tool in $(targets) {
       alias $(tool)
@@ -82,7 +82,7 @@ else {
   if $(targets) {
     import set ;
 
-    targets = [ set.difference $(targets) : install clean clean-all ] ;
+    targets = [ set.difference $(targets) : install clean clean-all release debug profile ] ;
 
     for tool in $(targets) {
       alias $(tool)
