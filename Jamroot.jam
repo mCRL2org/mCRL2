@@ -47,8 +47,27 @@ for tool in $(tools) {
 # Install when requested
 if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
 
-  stage build-binaries
-          : /tools/$(tools)
+  local targets = [ MATCH "^([0-9a-zA-Z]+)$" : [ modules.peek : ARGV ] ] ;
+
+  if $(targets) {
+    import set ;
+
+    targets = [ set.difference $(targets) : install clean clean-all ] ;
+
+    for tool in $(targets) {
+      alias $(tool)
+            : build
+            ;
+    }
+   
+    targets = /tools/$(targets) ;
+  }
+  else {
+    targets = /tools/$(tools) ;
+  }
+
+  stage build
+          : $(targets)
           : <location>$(BUILD_TOP)/tools
             <hardcode-dll-paths>true
           ;
@@ -58,13 +77,46 @@ else {
 
   feature.set-default install : yes ;
 
+  local targets = [ MATCH "^([0-9a-zA-Z]+)$" : [ modules.peek : ARGV ] ] ;
+
+  if $(targets) {
+    import set ;
+
+    targets = [ set.difference $(targets) : install clean clean-all ] ;
+
+    for tool in $(targets) {
+      alias $(tool)
+            : install
+            ;
+    }
+   
+    alias install
+            : install-shared-libraries
+              install-binaries
+            ;
+
+    targets = /tools/$(targets) ;
+  }
+  else {
+    # Complete install
+    alias install
+            : install-shared-libraries
+              install-static-libraries
+              install-binaries
+              install-plugins
+              install-examples
+              install-headers
+            ;
+
+    targets = /tools/$(tools) ;
+  }
+
   # General examples
   stage install-examples
           : [ path.glob-tree $(TOP)/examples : *.txt *.mcrl2 *.pnml *.fsm *.trc : .svn ]
           : <location>$(DATA_DIR)
             <install-source-root>.
           ;
-
 
   stage install-headers
           : [ path.glob-tree src/libraries/aterm : *.h : .svn ]
@@ -73,14 +125,14 @@ else {
           ;
 
   stage install-binaries
-          : /tools/$(tools)
+          : $(targets)
           : <location>$(BIN_DIR)
             <dll-path>$(LIB_DIR)
             <install-dependencies>on <install-type>EXE
           ;
 
   stage install-static-libraries
-          : /tools/$(tools) 
+          : $(targets)
           : <location>$(LIB_DIR)
             <install-dependencies>on <install-type>STATIC_LIB
           ;
@@ -88,7 +140,7 @@ else {
   tools_with_plugins = [ MATCH (src/.*/plugins/.*)/Jamfile.v2 : [ glob src/*/plugins/*/Jamfile.v2 ] ] ;
 
   stage install-shared-libraries
-          : /tools/$(tools)
+          : $(targets)
           : <location>$(LIB_DIR)
             <os>NT:<location>$(BIN_DIR)
             <dll-path>$(LIB_DIR)
@@ -101,14 +153,4 @@ else {
           ;
 
   explicit install-examples install-headers install-binaries install-plugins install-static-libraries install-shared-libraries ;
-
-  # Complete install
-  alias install
-          : install-shared-libraries
-            install-static-libraries
-            install-binaries
-            install-plugins
-            install-examples
-            install-headers
-          ;
 }
