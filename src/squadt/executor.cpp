@@ -99,7 +99,7 @@ namespace squadt {
       process::ptr p(new process(boost::bind(&executor_impl::handle_process_termination, this, _1, w)));
 
       processes.push_back(p);
-
+std::cerr << "executing process\n";
       p->execute(c);
     }
 

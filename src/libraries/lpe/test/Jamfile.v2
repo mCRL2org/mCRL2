@@ -5,7 +5,7 @@ project libraries/lpe/test
        <include>$(BOOST_ROOT)
        <source>/libraries//mcrl2_basic
        <source>/libraries//lpe
-       <source>/boost//program_options
+       <source>/site-config//boost_program_options
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
    ;
 

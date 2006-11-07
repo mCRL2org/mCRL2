@@ -14,7 +14,7 @@ transport_sources = [ glob ../source/transport/*.cpp ] ;
 
 alias transport
     : $(transport_sources)
-      /boost//thread
+      /site-config//boost_thread
     : <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
       <os>CYGWIN:<define>__USE_W32_SOCKETS
       <os>CYGWIN:<define>_WIN32_WINNT=0x0500
@@ -43,9 +43,9 @@ alias messenger
     : # no build requirements
     : # no default build
     :
-      <library>/boost//thread
-      <library>/boost//regex
-      <library>/boost//filesystem
+      <library>/site-config//boost_thread
+      <library>/site-config//boost_regex
+      <library>/site-config//boost_filesystem
       <library>/libraries//xml2pp
     ;
 

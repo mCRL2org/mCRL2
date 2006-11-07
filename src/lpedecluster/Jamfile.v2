@@ -9,7 +9,7 @@ exe lpedecluster
          /libraries//mcrl2_basic
          /libraries//lpe
          /libraries//nextstate
-         /boost//program_options
+         /site-config//boost_program_options
        : <squadt_support>enable
          <include>.
        ;

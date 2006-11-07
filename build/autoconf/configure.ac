@@ -321,28 +321,32 @@ AC_ARG_WITH(
   [boost],
   AS_HELP_STRING([--with-boost=prefix],[try this for the boost prefix install directory])
 )
-AC_MSG_CHECKING([for the Boost C++ libraries])
-USE_BOOST="yes $with_boost"
+USE_BOOST="yes ($with_boost)"
 if test $with_boost; then
+  AC_MSG_CHECKING([for the Boost C++ libraries])
   AC_COMPILE_IFELSE(
      [
       #include "$with_boost/include/boost/version.hpp"
      ],
      [
-       BOOST_PREFIX=$with_boost
+       BOOST_INCLUDE_PATH=$with_boost/include
+       BOOST_LIBRARY_PATH=$with_boost/lib
        AC_MSG_RESULT(yes)
      ],
      [
        AC_MSG_RESULT(no)
-       AC_MSG_ERROR([the Boost C++ libraries are required for a number of tools in the toolset.]
-                    [they can be obtained from http://www.boost.org.])
+       USE_BOOST=builtin
      ])
 else 
+  AC_CHECK_HEADER(boost/version.hpp,
+           [BOOST_INCLUDE_PATH=default
+            BOOST_LIBRARY_PATH=], [], [])
+  
   USE_BOOST=builtin
-  AC_MSG_RESULT(yes)
-  BOOST_PREFIX=boost
 fi
-AC_SUBST([BOOST_PREFIX],[$with_boost])
+
+AC_SUBST([BOOST_INCLUDE_PATH],[])
+AC_SUBST([BOOST_LIBRARY_PATH],[])
 
 # Check for OpenGL
 AC_ARG_WITH([OpenGL],

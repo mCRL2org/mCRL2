@@ -22,7 +22,7 @@ lib lts
          /libraries//svc
          /libraries/aterm//atermpp
          /libraries//lpe
-	 /boost//regex
+	 /site-config//boost_regex
          /site-config//BCG
        :
        :

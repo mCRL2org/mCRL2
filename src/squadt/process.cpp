@@ -40,10 +40,31 @@ namespace squadt {
 #endif
     }
  
+    void process::termination_handler(pid_t identifier) {
+      int exit_code;
+
+      waitpid(identifier, &exit_code, 0);
+
+      current_status = (WIFEXITED(exit_code)) ? completed : aborted;
+
+      signal_status();
+
+      signal_termination(this);
+    }
+
+    /** Signals the current state to the monitor */
+    void process::signal_status() const {
+      boost::shared_ptr < task_monitor > l = monitor.lock();
+
+      if (l.get() != 0) {
+        l->signal_change(current_status);
+      }
+    }
+
     /**
-     * @param[in] c the command to execute
+     * @param c the command to execute
      **/
-    void process::operator() (const command& c) {
+    void process::execute(const command& c) {
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32))
       command cc(c);
 
@@ -68,43 +89,18 @@ namespace squadt {
       current_status = (identifier < 0) ? aborted : running;
 
       if (0 < identifier) {
-        /* Wait for the process to terminate */
-        int exit_code;
-
         last_command = std::auto_ptr < command > (new command(c));
 
         signal_status();
 
-        waitpid(identifier, &exit_code, 0);
-
-        current_status = (WIFEXITED(exit_code)) ? completed : aborted;
+        /* Wait for the process to terminate */
+        boost::thread t(boost::bind(&process::termination_handler, this, identifier));
       }
+      else {
+        signal_status();
 
-      signal_status();
-
-      signal_termination(this);
-    }
-
-    /** Signals the current state to the monitor */
-    void process::signal_status() const {
-      boost::shared_ptr < task_monitor > l = monitor.lock();
-
-      if (l.get() != 0) {
-        l->signal_change(current_status);
+        signal_termination(this);
       }
-    }
-
-    /**
-     * @param c the command to execute
-     **/
-    void process::execute(const command& c) {
-      boost::thread t(boost::bind(&process::operator(), this, c));
-    }
-
-    void process::wait() const {
-      int exit_code;
-
-      waitpid(identifier, &exit_code, 0);
     }
   }
 }

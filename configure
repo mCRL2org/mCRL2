@@ -672,7 +672,8 @@ ATERM_NAME
 CADP_HEADERS
 CADP_LIBRARIES
 USE_BCG
-BOOST_PREFIX
+BOOST_INCLUDE_PATH
+BOOST_LIBRARY_PATH
 OPENGL_NAME
 OPENGL_IPATH
 OPENGL_LPATH
@@ -5027,10 +5028,10 @@ if test "${with_boost+set}" = set; then
   withval=$with_boost;
 fi
 
-{ echo "$as_me:$LINENO: checking for the Boost C++ libraries" >&5
-echo $ECHO_N "checking for the Boost C++ libraries... $ECHO_C" >&6; }
-USE_BOOST="yes $with_boost"
+USE_BOOST="yes ($with_boost)"
 if test $with_boost; then
+  { echo "$as_me:$LINENO: checking for the Boost C++ libraries" >&5
+echo $ECHO_N "checking for the Boost C++ libraries... $ECHO_C" >&6; }
   cat >conftest.$ac_ext <<_ACEOF
 
       #include "$with_boost/include/boost/version.hpp"
@@ -5071,7 +5072,8 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
 
-       BOOST_PREFIX=$with_boost
+       BOOST_INCLUDE_PATH=$with_boost/include
+       BOOST_LIBRARY_PATH=$with_boost/lib
        { echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6; }
 
@@ -5082,22 +5084,177 @@ sed 's/^/| /' conftest.$ac_ext >&5
 
        { echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
-       { { echo "$as_me:$LINENO: error: the Boost C++ libraries are required for a number of tools in the toolset.
-                    they can be obtained from http://www.boost.org." >&5
-echo "$as_me: error: the Boost C++ libraries are required for a number of tools in the toolset.
-                    they can be obtained from http://www.boost.org." >&2;}
-   { (exit 1); exit 1; }; }
+       USE_BOOST=builtin
 
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 else
-  USE_BOOST=builtin
-  { echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; }
-  BOOST_PREFIX=boost
+  if test "${ac_cv_header_boost_version_hpp+set}" = set; then
+  { echo "$as_me:$LINENO: checking for boost/version.hpp" >&5
+echo $ECHO_N "checking for boost/version.hpp... $ECHO_C" >&6; }
+if test "${ac_cv_header_boost_version_hpp+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
 fi
-BOOST_PREFIX=$with_boost
+{ echo "$as_me:$LINENO: result: $ac_cv_header_boost_version_hpp" >&5
+echo "${ECHO_T}$ac_cv_header_boost_version_hpp" >&6; }
+else
+  # Is the header compilable?
+{ echo "$as_me:$LINENO: checking boost/version.hpp usability" >&5
+echo $ECHO_N "checking boost/version.hpp usability... $ECHO_C" >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <boost/version.hpp>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag" || test ! -s conftest.err'
+  { (case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_header_compiler=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+{ echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6; }
+
+# Is the header present?
+{ echo "$as_me:$LINENO: checking boost/version.hpp presence" >&5
+echo $ECHO_N "checking boost/version.hpp presence... $ECHO_C" >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <boost/version.hpp>
+_ACEOF
+if { (ac_try="$ac_cpp conftest.$ac_ext"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_c_preproc_warn_flag
+    ac_cpp_err=$ac_cpp_err$ac_c_werror_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+
+rm -f conftest.err conftest.$ac_ext
+{ echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6; }
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { echo "$as_me:$LINENO: WARNING: boost/version.hpp: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: boost/version.hpp: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: boost/version.hpp: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: boost/version.hpp: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { echo "$as_me:$LINENO: WARNING: boost/version.hpp: present but cannot be compiled" >&5
+echo "$as_me: WARNING: boost/version.hpp: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: boost/version.hpp:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: boost/version.hpp:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: boost/version.hpp: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: boost/version.hpp: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: boost/version.hpp:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: boost/version.hpp:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: boost/version.hpp: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: boost/version.hpp: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: boost/version.hpp: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: boost/version.hpp: in the future, the compiler will take precedence" >&2;}
+    ( cat <<\_ASBOX
+## ---------------------------- ##
+## Report this to bug@mcrl2.org ##
+## ---------------------------- ##
+_ASBOX
+     ) | sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+{ echo "$as_me:$LINENO: checking for boost/version.hpp" >&5
+echo $ECHO_N "checking for boost/version.hpp... $ECHO_C" >&6; }
+if test "${ac_cv_header_boost_version_hpp+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_header_boost_version_hpp=$ac_header_preproc
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_header_boost_version_hpp" >&5
+echo "${ECHO_T}$ac_cv_header_boost_version_hpp" >&6; }
+
+fi
+if test $ac_cv_header_boost_version_hpp = yes; then
+  BOOST_INCLUDE_PATH=default
+            BOOST_LIBRARY_PATH=
+fi
+
+
+
+  USE_BOOST=builtin
+fi
+
+
 
 
 # Check for OpenGL
@@ -7471,7 +7628,8 @@ ATERM_NAME!$ATERM_NAME$ac_delim
 CADP_HEADERS!$CADP_HEADERS$ac_delim
 CADP_LIBRARIES!$CADP_LIBRARIES$ac_delim
 USE_BCG!$USE_BCG$ac_delim
-BOOST_PREFIX!$BOOST_PREFIX$ac_delim
+BOOST_INCLUDE_PATH!$BOOST_INCLUDE_PATH$ac_delim
+BOOST_LIBRARY_PATH!$BOOST_LIBRARY_PATH$ac_delim
 OPENGL_NAME!$OPENGL_NAME$ac_delim
 OPENGL_IPATH!$OPENGL_IPATH$ac_delim
 OPENGL_LPATH!$OPENGL_LPATH$ac_delim
@@ -7496,7 +7654,6 @@ DATA_DIR!$DATA_DIR$ac_delim
 LIB_DIR!$LIB_DIR$ac_delim
 BIN_DIR!$BIN_DIR$ac_delim
 INCLUDE_DIR!$INCLUDE_DIR$ac_delim
-MAN_DIR!$MAN_DIR$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -7538,6 +7695,7 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+MAN_DIR!$MAN_DIR$ac_delim
 R_CFLAGS!$R_CFLAGS$ac_delim
 R_SCFLAGS!$R_SCFLAGS$ac_delim
 R_CXXFLAGS!$R_CXXFLAGS$ac_delim
@@ -7548,7 +7706,7 @@ R_SLDFLAGS!$R_SLDFLAGS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 8; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 9; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

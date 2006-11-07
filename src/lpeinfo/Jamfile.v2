@@ -6,7 +6,7 @@ exe lpeinfo
        : lpeinfo.cpp
          /libraries//mcrl2_basic
          /libraries//lpe
-         /boost//program_options
+         /site-config//boost_program_options
        : <include>.
        : <squadt_support>enable
        ;

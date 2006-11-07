@@ -6,7 +6,7 @@ exe lpeuntime
        : lpeuntime.cpp
          /libraries//mcrl2_basic
          /libraries//lpe
-         /boost//program_options
+         /site-config//boost_program_options
        : <squadt_support>enable
          <include>.
        ;

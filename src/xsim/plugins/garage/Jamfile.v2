@@ -7,11 +7,11 @@ lib xsim_garage_view
          garagecanvas.cpp
          visutils.cpp
          ../../xsimbase.cpp
-         /site-config//OpenGL
          /libraries//nextstate
          /libraries//mcrl2_basic
-         /site-config//wx_gl
        : <include>../..
+         <dependency>/site-config//OpenGL
+         <dependency>/site-config//wx_gl
          <define>GARAGEFRAMEDLL
          <link>shared
          <wx>no:<build>no

@@ -5,7 +5,7 @@ project site-config
 include $(TOP)/build/config.jam ;
 
 # OpenGL library
-if $(OPENGL_NAME) {
+if $(OPENGL_NAME) && $(WX_CPPFLAGS) {
   lib GLU : : <os>NT <name>glu32 ;
   
   if $(OPENGL_LPATH) {
@@ -23,29 +23,76 @@ else {
   alias OpenGL : : : : <build>no ;
 }
 
-alias xml2
-       :
-       : <cxxflags>"$(XML2_CPPFLAGS)"
-       :
-       : <cxxflags>"$(XML2_CPPFLAGS)"
-         <linkflags>"$(XML2_LDFLAGS)"
-       ;
+if $(XML2_CPPFLAGS) {
+  alias xml2
+         :
+         : <cxxflags>"$(XML2_CPPFLAGS)"
+         :
+         : <cxxflags>"$(XML2_CPPFLAGS)"
+           <linkflags>"$(XML2_LDFLAGS)"
+         ;
+}
+else {
+  alias xml2 : : : : <build>no ;
+}
 
-alias wx_base
-       :
-       : <cxxflags>"$(WX_CPPFLAGS)"
-       :
-       : <linkflags>"$(WX_BASE_LDFLAGS)"
-         <cxxflags>"$(WX_CPPFLAGS)"
-       ;
+if $(WX_CPPFLAGS) {
+  alias wx_base
+         :
+         : <cxxflags>"$(WX_CPPFLAGS)"
+         :
+         : <linkflags>"$(WX_BASE_LDFLAGS)"
+           <cxxflags>"$(WX_CPPFLAGS)"
+         ;
 
-alias wx_gl
-       :
-       : <cxxflags>"$(WX_CPPFLAGS)"
-       :
-       : <linkflags>"$(WX_GL_LDFLAGS)"
-         <cxxflags>"$(WX_CPPFLAGS)"
-       ;
+  if $(OPENGL_NAME) {
+    alias wx_gl
+           :
+           : <cxxflags>"$(WX_CPPFLAGS)"
+           :
+           : <linkflags>"$(WX_GL_LDFLAGS)"
+             <cxxflags>"$(WX_CPPFLAGS)"
+           ;
+  }
+  else {
+    alias wx_gl : : : : <build>no ;
+  }
+}
+else {
+  alias wx_base : : : : <build>no ;
+  alias wx_gl   : : : : <build>no ;
+}
+
+if $(BOOST_LIBRARY_PATH) {
+  boost-library-path = <library-path>$(BOOST_LIBRARY_PATH) ;
+}
+
+rule boost_library ( name : use-system-boost ? ) {
+  if ( $(BOOST_INCLUDE_PATH) && ( "default" != "$(BOOST_INCLUDE_PATH)" ) ) || $(use-system-boost) {
+    if $(BOOST_INCLUDE_PATH) {
+      lib boost_$(name)
+             :
+             : $(boost-library-path)
+               <name>"boost_$(name)"
+               <include>$(BOOST_ROOT) # currently needed for ASIO
+             :
+             : <define>BOOST_ALL_NO_LIB=1
+             ;
+    }
+    else {
+      alias boost_$(name) : : <build>no ;
+    }
+  }
+  else {
+    alias boost_$(name) : /boost//$(name) : <threading>multi ;
+  }
+}
+
+boost_library filesystem ;
+boost_library program_options ;
+boost_library regex ;
+boost_library thread ;
+boost_library test : system ;
 
 lib z  : : <name>"z" ;
 lib m  : : <name>"m" ;

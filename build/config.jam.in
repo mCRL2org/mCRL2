@@ -3,28 +3,31 @@ rule import_user_config {
   import toolset ;
 
   # For C/C++ programs
-  toolset.using @BJAM_CXX@ ;
+  toolset.using @BJAM_CXX@ : : @CC@ ;
 }
 
 # Build specific settings
-BUILD_VARIANT   = "@BUILD_VARIANT@" ;
-BUILD_OPTIONS   = @BUILD_OPTIONS@ ;
-ADDRESS_MODEL   = "@ADDRESS_MODEL@" ;
+BUILD_VARIANT      = "@BUILD_VARIANT@" ;
+BUILD_OPTIONS      = @BUILD_OPTIONS@ ;
+ADDRESS_MODEL      = "@ADDRESS_MODEL@" ;
 
 # Library specific variables
-XML2_CPPFLAGS   = "@XML2_CPPFLAGS@" ;
-XML2_LDFLAGS    = "@XML2_LDFLAGS@" ;
+XML2_CPPFLAGS      = "@XML2_CPPFLAGS@" ;
+XML2_LDFLAGS       = "@XML2_LDFLAGS@" ;
 
-WX_CPPFLAGS     = "@WX_CPPFLAGS@" ;
-WX_BASE_LDFLAGS = "@WX_BASE_LDFLAGS@" ;
-WX_GL_LDFLAGS   = "@WX_GL_LDFLAGS@" ;
+WX_CPPFLAGS        = "@WX_CPPFLAGS@" ;
+WX_BASE_LDFLAGS    = "@WX_BASE_LDFLAGS@" ;
+WX_GL_LDFLAGS      = "@WX_GL_LDFLAGS@" ;
 
-OPENGL_NAME     = "@OPENGL_NAME@" ;
-OPENGL_IPATH    = "@OPENGL_IPATH@" ;
-OPENGL_LPATH    = "@OPENGL_LPATH@" ;
+OPENGL_NAME        = "@OPENGL_NAME@" ;
+OPENGL_IPATH       = "@OPENGL_IPATH@" ;
+OPENGL_LPATH       = "@OPENGL_LPATH@" ;
 
-CADP_HEADERS    = "@CADP_HEADERS@" ;
-CADP_LIBRARIES  = "@CADP_LIBRARIES@" ;
+CADP_HEADERS       = "@CADP_HEADERS@" ;
+CADP_LIBRARIES     = "@CADP_LIBRARIES@" ;
+
+BOOST_INCLUDE_PATH = "@BOOST_INCLUDE_PATH@" ;
+BOOST_LIBRARY_PATH = "@BOOST_LIBRARY_PATH@" ;
 
 prefix      = [ MATCH "^--prefix=([^ ]+)" : [ modules.peek : ARGV ] ] ;
 exec_prefix = [ MATCH "^--exec-prefix=([^ ]+)" : [ modules.peek : ARGV ] ] ;

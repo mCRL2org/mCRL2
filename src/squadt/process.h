@@ -70,8 +70,8 @@ namespace squadt {
 
       private:
 
-        /** \brief This method does the actual execution and waiting */
-        void operator() (const command&);
+        /** \brief Executed at process termination */
+        void termination_handler(pid_t);
 
       public:
     
@@ -101,9 +101,6 @@ namespace squadt {
  
         /** \brief Terminates the process */
         void terminate();
- 
-        /** \brief Wait for the process to terminate */
-        void wait() const;
  
         /** \brief Destructor */
         inline ~process();
