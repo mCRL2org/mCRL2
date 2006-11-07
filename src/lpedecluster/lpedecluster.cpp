@@ -5,8 +5,8 @@
 // ----------------------------------------------------------------------
 //
 // file          : lpedecluster 
-// date          : 24-10-2006
-// version       : 0.3
+// date          : 07-11-2006
+// version       : 0.4
 //
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
 //
@@ -48,7 +48,7 @@ using namespace lpe;
 
 namespace po = boost::program_options;
 
-#define VERSION "0.3"
+#define VERSION "0.4"
 
 std::string input_file; ///< Name of the file to read input from
 std::string output_file; ///< Name of the file to write output to (or stdout)
@@ -226,11 +226,10 @@ data_variable_list get_variables(const data_variable_list& vl, const sort_list& 
 ///\ret the declustered summand list of summand
 lpe::summand_list decluster_summand(const lpe::specification& specification, const lpe::LPE_summand& summand, EnumeratorStandard& enumerator)
 {
-//  gsDebugMsg("Declustering summand: %s\n", summand.to_string().c_str());
-
   lpe::summand_list result;
+  int nr_summands = 0; // Counter for the nummer of new summands, used for verbose output
 
-  gsVerboseMsg("init...");
+  gsVerboseMsg("initialization...");
 
   data_variable_list variables; // The variables we need to consider in declustering
   if (finite_only)
@@ -249,11 +248,8 @@ lpe::summand_list decluster_summand(const lpe::specification& specification, con
 
   ATermList vars = ATermList(variables);
 
-  gsVerboseMsg("toRewriteFormat...");
-
   ATerm expr = enumerator.getRewriter()->toRewriteFormat(aterm_appl(summand.condition()));
 
-  gsVerboseMsg("findSolutions...");
   // Solutions
   EnumeratorSolutions* sols = enumerator.findSolutions(vars, expr, false, NULL);
 
@@ -296,11 +292,11 @@ lpe::summand_list decluster_summand(const lpe::specification& specification, con
 //    LPE_summand s = set_summation_variables(summand, new_vars);
 //    s.substitute(assignment_list_substitution(substitutions));
     result = push_front(result, s);
+    ++nr_summands;
   }
 
   gsVerboseMsg("done...\n");
-
-//  gsDebugMsg("Resulting summands: %s\n", result.to_string().c_str());
+  gsVerboseMsg("Replaced with %d summands\n", nr_summands);
 
   return result;
 }
