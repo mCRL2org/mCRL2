@@ -85,8 +85,8 @@ class LTS
     //      short as possible, if information is available.
     //Ret:  states that could not be placed in this phase, bottom-up.
     
-    std::vector< std::vector< State* > > edgeLengthTopDown( 
-      std::vector< std::vector< State* > > ss );
+    std::vector< State* >  edgeLengthTopDown( 
+      std::vector< State* >  ss );
     //Phase 2: Process states top-down, keeping edges as short as possible.
     //Pre:  ss is correctly sorted by rank, bottom-up.
     //Post: states in ss are positioned top-down, keeping edges as short as 

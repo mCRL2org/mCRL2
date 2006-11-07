@@ -194,20 +194,14 @@ void Visualizer::toggleDisplayTransitions() {
   displayTransitions = !displayTransitions;
 
   // Set refreshTransitions to true, just in case.
-  if ( displayTransitions) 
-  {
-    refreshTransitions = true;
-  }
+  refreshTransitions = true;
 }
 
 void Visualizer::toggleDisplayBackpointers() {
   displayBackpointers = !displayBackpointers;
 
   // Set refreshTransitions to true, just in case.
-  if ( displayBackpointers ) 
-  {
-    refreshTransitions = true;
-  }
+  refreshTransitions = true;
 }
 
 void Visualizer::toggleDisplayWireframe() {
@@ -1091,7 +1085,9 @@ void Visualizer::clearDFSStates(State* root)
     
     if (!outTransition->isBackpointer()) {
       State* endState = outTransition->getEndState();
-      clearDFSStates(endState);
+      if (endState->getVisitState() != DFS_WHITE) {
+        clearDFSStates(endState);
+      }
     }
   }
 }
@@ -1328,8 +1324,8 @@ void Visualizer::drawBackPointer(State* startState, State* endState)
   Point3D startPoint = startState->getPositionAbs();
 
   Point3D startControl;
-  startControl.x = startPoint.x * rankDiff * clusterHeight / 2;
-  startControl.y = startPoint.y * rankDiff * clusterHeight / 2;
+  startControl.x = startPoint.x * rankDiff * clusterHeight / 8;
+  startControl.y = startPoint.y * rankDiff * clusterHeight / 8;
   startControl.z = startPoint.z;
 
   Point3D endPoint   = endState->getPositionAbs();

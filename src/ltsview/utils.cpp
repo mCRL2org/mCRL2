@@ -166,8 +166,15 @@ float Utils::vec_to_ang( Utils::Vect v) {
 
 Utils::Vect Utils::ang_to_vec( float phi) {
   Vect v;
-  v.x = cos(phi);
-  v.y = sin(phi);
+  if (rad_to_deg(phi) < -0.9f) {
+    v.x = 0;
+    v.y = 0;
+  }
+  else {
+    v.x = cos(phi);
+    v.y = sin(phi);
+  }
+
   return v;
 }
 
