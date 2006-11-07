@@ -44,11 +44,9 @@ for tool in $(tools) {
   use-project /tools/$(tool) : src/$(tool) ;
 }
 
-local targets = [ MATCH "^([0-9a-zA-Z]+)$" : [ modules.peek : ARGV ] ] ;
-
 import set ;
 
-targets = [ set.difference $(targets) : install clean clean-all release debug profile ] ;
+local targets = [ set.intersection [ MATCH "^([0-9a-zA-Z]+)$" : [ modules.peek : ARGV ] ] : $(tools) ] ;
 
 # Install when requested
 if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
