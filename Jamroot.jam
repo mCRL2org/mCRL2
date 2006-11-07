@@ -44,16 +44,16 @@ for tool in $(tools) {
   use-project /tools/$(tool) : src/$(tool) ;
 }
 
+local targets = [ MATCH "^([0-9a-zA-Z]+)$" : [ modules.peek : ARGV ] ] ;
+
+import set ;
+
+targets = [ set.difference $(targets) : install clean clean-all release debug profile ] ;
+
 # Install when requested
 if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
 
-  local targets = [ MATCH "^([0-9a-zA-Z]+)$" : [ modules.peek : ARGV ] ] ;
-
   if $(targets) {
-    import set ;
-
-    targets = [ set.difference $(targets) : install clean clean-all release debug profile ] ;
-
     for tool in $(targets) {
       alias $(tool)
             : build
@@ -77,13 +77,7 @@ else {
 
   feature.set-default install : yes ;
 
-  local targets = [ MATCH "^([0-9a-zA-Z]+)$" : [ modules.peek : ARGV ] ] ;
-
   if $(targets) {
-    import set ;
-
-    targets = [ set.difference $(targets) : install clean clean-all release debug profile ] ;
-
     for tool in $(targets) {
       alias $(tool)
             : install
