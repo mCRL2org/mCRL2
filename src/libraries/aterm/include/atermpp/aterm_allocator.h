@@ -30,9 +30,7 @@ namespace atermpp {
    void on_allocate(T* p, std::size_t num)
    {
      assert(num >= 1);
-#ifndef NDEBUG // circumvent ATerm Library safety check in debug mode
      std::fill(p, p + num, static_cast<ATerm>(0));
-#endif
      ATprotectArray(p, num);
    }
 
