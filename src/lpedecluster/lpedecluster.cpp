@@ -226,9 +226,11 @@ data_variable_list get_variables(const data_variable_list& vl, const sort_list& 
 ///\ret the declustered summand list of summand
 lpe::summand_list decluster_summand(const lpe::specification& specification, const lpe::LPE_summand& summand, EnumeratorStandard& enumerator)
 {
-  gsDebugMsg("Declustering summand: %s\n", summand.to_string().c_str());
+//  gsDebugMsg("Declustering summand: %s\n", summand.to_string().c_str());
 
   lpe::summand_list result;
+
+  gsVerboseMsg("init...");
 
   data_variable_list variables; // The variables we need to consider in declustering
   if (finite_only)
@@ -241,12 +243,21 @@ lpe::summand_list decluster_summand(const lpe::specification& specification, con
     variables = summand.summation_variables();
   }
 
+  // List of variables with the declustered variables removed (can be done upfront, which is more efficient,
+  // because we only need to calculate it once.
+  data_variable_list new_vars = filter(summand.summation_variables(), variables);
+
   ATermList vars = ATermList(variables);
+
+  gsVerboseMsg("toRewriteFormat...");
+
   ATerm expr = enumerator.getRewriter()->toRewriteFormat(aterm_appl(summand.condition()));
-  
+
+  gsVerboseMsg("findSolutions...");
   // Solutions
   EnumeratorSolutions* sols = enumerator.findSolutions(vars, expr, false, NULL);
 
+  gsVerboseMsg("processing...");
   // sol is a solution in internal rewriter format
   ATermList sol;
   while (sols->next(&sol))
@@ -260,10 +271,10 @@ lpe::summand_list decluster_summand(const lpe::specification& specification, con
     for (aterm_list::iterator i = solution.begin(); i != solution.end(); ++i)
     {
       // lefthandside of substitution
-      data_variable var = data_variable(aterm(ATgetArgument(ATerm(aterm_list(sol).front()),0)));
+      data_variable var = data_variable(ATgetArgument(ATerm(*i), 0));
 
       // righthandside of substitution in internal rewriter format
-      aterm arg = aterm(ATgetArgument(ATerm(aterm_list(sol).front()),1));
+      ATerm arg = ATgetArgument(ATerm(*i),1);
 
       // righthandside of substitution in lpe format
       data_expression res = data_expression(aterm_appl(enumerator.getRewriter()->fromRewriteFormat(arg)));
@@ -272,8 +283,9 @@ lpe::summand_list decluster_summand(const lpe::specification& specification, con
       data_assignment substitution = data_assignment(var, res);
       substitutions = push_front(substitutions, substitution);
     }
+    gsDebugMsg("substitutions: %s\n", substitutions.to_string().c_str());
 
-    LPE_summand s = LPE_summand(filter(summand.summation_variables(), variables),
+    LPE_summand s = LPE_summand(new_vars,
                                 summand.condition().substitute(assignment_list_substitution(substitutions)),
                                 summand.is_delta(),
                                 substitute(summand.actions(), assignment_list_substitution(substitutions)),
@@ -281,12 +293,14 @@ lpe::summand_list decluster_summand(const lpe::specification& specification, con
                                 substitute(summand.assignments(), assignment_list_substitution(substitutions))
                                 );
 
+//    LPE_summand s = set_summation_variables(summand, new_vars);
+//    s.substitute(assignment_list_substitution(substitutions));
     result = push_front(result, s);
   }
 
-  result = reverse(result);
+  gsVerboseMsg("done...\n");
 
-  gsDebugMsg("Resulting summands: %s\n", result.to_string().c_str());
+//  gsDebugMsg("Resulting summands: %s\n", result.to_string().c_str());
 
   return result;
 }
