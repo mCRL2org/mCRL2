@@ -223,10 +223,10 @@ data_variable_list get_variables(const data_variable_list& vl, const sort_list& 
 /////
 
 ///\pre specification is the specification belonging to summand
-///\ret the declustered summand list of summand
-lpe::summand_list decluster_summand(const lpe::specification& specification, const lpe::LPE_summand& summand, EnumeratorStandard& enumerator)
+///\post the declustered version of summand has been appended to result
+///\ret none
+void decluster_summand(const lpe::specification& specification, const lpe::LPE_summand& summand, lpe::summand_list& result, EnumeratorStandard& enumerator)
 {
-  lpe::summand_list result;
   int nr_summands = 0; // Counter for the nummer of new summands, used for verbose output
 
   gsVerboseMsg("initialization...");
@@ -297,8 +297,6 @@ lpe::summand_list decluster_summand(const lpe::specification& specification, con
 
   gsVerboseMsg("done...\n");
   gsVerboseMsg("Replaced with %d summands\n", nr_summands);
-
-  return result;
 }
 
 ///Takes the summand list sl, declusters it,
@@ -308,12 +306,13 @@ lpe::summand_list decluster_summands(const lpe::specification& specification, co
   lpe::summand_list result;
 
   // decluster_summand(..) is called only in this function, therefore, it is safe to count the summands here for verbose output.
+  lpe::summand_list summands = reverse(sl); // This is not absolutely necessary, but it helps in comparing input and output of the decluster algorithm (that is, the relative order is preserved (because decluster_summand plainly appends to result)
   int j = 1;
-  for (summand_list::iterator i = sl.begin(); i != sl.end(); ++i, ++j)
+  for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i, ++j)
   {
     gsVerboseMsg("Summand %d\n", j);
     lpe::LPE_summand s = *i;
-    result = result + decluster_summand(specification, s, enumerator);
+    decluster_summand(specification, s, result, enumerator);
   }
 
   return result;
