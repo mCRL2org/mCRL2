@@ -33,7 +33,7 @@ namespace squadt {
 
   const long tool_manager::default_tcp_port = 10946;
 
-  const sip::tool::capabilities::ptr tool::no_capabilities(new sip::tool::capabilities());
+  const sip::tool::capabilities::sptr tool::no_capabilities(new sip::tool::capabilities());
 
   /**
    * \param[in] m the maximum number of instances

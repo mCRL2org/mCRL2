@@ -49,8 +49,8 @@ void squadt_lpe2lts::initialise()
 void squadt_lpe2lts::set_capabilities(sip::tool::capabilities &cp) const
 {
   /* The tool has only one main input combination it takes an LPE and then behaves as a reporter */
-  cp.add_input_combination(lpd_file_for_input_no_lts, "Reporting", "lpe");
-  cp.add_input_combination(lpd_file_for_input_lts, "Transformation", "lpe");
+  cp.add_input_combination(lpd_file_for_input_no_lts, "lpe", "Reporting");
+  cp.add_input_combination(lpd_file_for_input_lts, "lpe", "Transformation");
 }
 
 void squadt_lpe2lts::user_interactive_configuration(sip::configuration& c)

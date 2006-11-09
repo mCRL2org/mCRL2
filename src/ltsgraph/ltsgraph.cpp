@@ -46,10 +46,10 @@ squadt_interactor::squadt_interactor(squadt_utility::entry_wrapper& w): starter(
 
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(lts_file_for_input, "Visualisation", "aut");
-  c.add_input_combination(lts_file_for_input, "Visualisation", "svc");
+  c.add_input_combination(lts_file_for_input, "aut", "Visualisation");
+  c.add_input_combination(lts_file_for_input, "svc", "Visualisation");
 #ifdef MCRL2_BCG
-  c.add_input_combination(lts_file_for_input, "Visualisation", "bcg");
+  c.add_input_combination(lts_file_for_input, "bcg", "Visualisation");
   //Untestable
 #endif  
 }

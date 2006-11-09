@@ -96,10 +96,10 @@ squadt_interactor::squadt_interactor() {
 }
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(lts_file_for_input, "Transformation", "aut");
-  c.add_input_combination(lts_file_for_input, "Transformation", "svc");
+  c.add_input_combination(lts_file_for_input, "aut", "Transformation");
+  c.add_input_combination(lts_file_for_input, "svc", "Transformation");
 #ifdef MCRL2_BCG
-  c.add_input_combination(lts_file_for_input, "Transformation", "bcg");
+  c.add_input_combination(lts_file_for_input, "bcg", "Transformation");
 #endif
 }
 

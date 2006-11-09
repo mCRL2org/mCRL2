@@ -66,23 +66,20 @@ namespace squadt {
      * \attention Not thread safe
      **/
     void type_registry::build_index() {
-      const tool_manager::tool_list& tools = global_tool_manager->get_tools();
 
       /* Make sure the map is empty */
       categories_for_format.clear();
 
-      for (tool_manager::tool_list::const_iterator i = tools.begin(); i != tools.end(); ++i) {
-        sip::tool::capabilities::input_combination_list c = (*i)->get_capabilities()->get_input_combinations();
-
-        for (sip::tool::capabilities::input_combination_list::const_iterator j = c.begin(); j != c.end(); ++j) {
-          if (categories_for_format.find((*j).format) == categories_for_format.end()) {
+      BOOST_FOREACH(tool::sptr t, global_tool_manager->get_tools()) {
+        BOOST_FOREACH(sip::tool::capabilities::input_combination j, t->get_capabilities()->get_input_combinations()) {
+          if (categories_for_format.find(j.format) == categories_for_format.end()) {
             /* Format unknown, create new map */
             tools_for_category temporary;
 
-            categories_for_format[(*j).format] = temporary;
+            categories_for_format[j.format] = temporary;
           }
 
-          categories_for_format[(*j).format].insert(tools_for_category::value_type((*j).category, (*i)));
+          categories_for_format[j.format].insert(std::make_pair(j.category, t));
         }
       }
     }
@@ -114,24 +111,20 @@ namespace squadt {
       categories_for_mime_type::const_iterator i = categories_for_format.find(f);
 
       if (i != categories_for_format.end()) {
-        tools_for_category const& p((*i).second);
-
-        for (tools_for_category::const_iterator j = p.begin(); j != p.end(); ++j) {
-          categories.insert((*j).first);
+        BOOST_FOREACH(tools_for_category::value_type j, (*i).second) {
+          categories.insert(j.first);
         }
       }
 
       return (categories);
     }
 
-    std::set < storage_format > type_registry::get_categories() const {
+    std::set < tool_category > type_registry::get_categories() const {
       std::set < tool_category > categories;
       
       BOOST_FOREACH(categories_for_mime_type::value_type i, categories_for_format) {
-        tools_for_category const& p(i.second);
-
-        for (tools_for_category::const_iterator j = p.begin(); j != p.end(); ++j) {
-          categories.insert((*j).first);
+        BOOST_FOREACH(tools_for_category::value_type j, i.second) {
+          categories.insert(j.first);
         }
       }
 
@@ -143,6 +136,12 @@ namespace squadt {
 
       BOOST_FOREACH(categories_for_mime_type::value_type c, categories_for_format) {
         formats.insert(c.first);
+      }
+
+      BOOST_FOREACH(tool::sptr t, global_tool_manager->get_tools()) {
+        BOOST_FOREACH(sip::tool::capabilities::output_combination j, t->get_capabilities()->get_output_combinations()) {
+          formats.insert(j.format);
+        }
       }
 
       return (formats);

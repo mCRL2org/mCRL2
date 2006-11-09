@@ -32,21 +32,21 @@ namespace squadt {
     private:
 
       /** \brief A name for the tool */
-      std::string                               name;
+      std::string                                name;
 
       /** \brief The location where the tool can be found */
-      std::string                               location;
+      std::string                                location;
 
       /** \brief Stores the tool capabilities object obtained through protocol implementation */
-      sip::tool::capabilities::ptr              capabilities;
+      sip::tool::capabilities::sptr              capabilities;
 
       /** \brief The default capabilities descriptor; one that is empty */
-      static const sip::tool::capabilities::ptr no_capabilities;
+      static const sip::tool::capabilities::sptr no_capabilities;
 
     private:
 
       /** \brief Constructor */
-      inline tool(std::string, std::string, sip::tool::capabilities::ptr = tool::no_capabilities);
+      inline tool(std::string, std::string, sip::tool::capabilities::sptr = tool::no_capabilities);
 
     public:
 
@@ -57,7 +57,7 @@ namespace squadt {
       inline static tool::sptr read(xml2pp::text_reader&) throw ();
 
       /** \brief Get the last received capabilities object for this tool */
-      inline const sip::tool::capabilities::ptr get_capabilities() const;
+      inline const sip::tool::capabilities::sptr get_capabilities() const;
 
       /** \brief Get the location to for this tool */
       inline std::string const& get_location();
@@ -74,7 +74,7 @@ namespace squadt {
    * @param n a name for the tool
    * @param c a tool::capabilities object for the tool
    **/
-  inline tool::tool(std::string n, std::string l, sip::tool::capabilities::ptr c) : name(n), location(l), capabilities(c) {
+  inline tool::tool(std::string n, std::string l, sip::tool::capabilities::sptr c) : name(n), location(l), capabilities(c) {
   }
 
   /**
@@ -108,7 +108,7 @@ namespace squadt {
     if (!r.is_end_element()) {
       r.next_element();
 
-      sip::tool::capabilities::ptr c = sip::tool::capabilities::read(r);
+      sip::tool::capabilities::sptr c = sip::tool::capabilities::read(r);
       
       if (c.get() != 0) {
         return (tool::sptr(new tool(name, location, c)));
@@ -120,7 +120,7 @@ namespace squadt {
     return (tool::sptr(new tool(name, location)));
   }
 
-  inline const sip::tool::capabilities::ptr tool::get_capabilities() const {
+  inline const sip::tool::capabilities::sptr tool::get_capabilities() const {
     return (capabilities);
   }
 

@@ -57,7 +57,7 @@ squadt_interactor::squadt_interactor(squadt_utility::entry_wrapper& w): starter(
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
   /* The tool has only one main input combination it takes an LPE and then behaves as a reporter */
-  c.add_input_combination(lpd_file_for_input, "Simulation", "lpe");
+  c.add_input_combination(lpd_file_for_input, "lpe", "Simulation");
 }
 
 void squadt_interactor::user_interactive_configuration(sip::configuration& c) {

@@ -106,7 +106,7 @@ squadt_interactor::squadt_interactor() {
 }
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(pnml_file_for_input, "Transformation", "pnml");
+  c.add_input_combination(pnml_file_for_input, "pnml", "Transformation");
 }
 
 void squadt_interactor::user_interactive_configuration(sip::configuration& c) {

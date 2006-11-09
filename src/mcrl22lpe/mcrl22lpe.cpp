@@ -113,7 +113,7 @@ squadt_interactor::squadt_interactor() {
 }
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(mcrl2_file_for_input, "Transformation", "mcrl2");
+  c.add_input_combination(mcrl2_file_for_input, "mcrl2", "Transformation");
 }
 
 void squadt_interactor::user_interactive_configuration(sip::configuration& c) {

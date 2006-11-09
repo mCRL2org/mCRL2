@@ -39,8 +39,9 @@ alias messenger
       configuration.cpp
       layout_elements.cpp
       basic_messenger.cpp
+      tool_capabilities.cpp
       transport
-    : # no build requirements
+    : <threading>multi
     : # no default build
     :
       <library>/site-config//boost_thread

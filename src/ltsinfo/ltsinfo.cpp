@@ -40,11 +40,11 @@ class squadt_interactor : public squadt_tool_interface {
 };
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(lts_file_for_input, "Reporting", "aut");
+  c.add_input_combination(lts_file_for_input, "aut", "Reporting");
 #ifdef MCRL2_BCG
-  c.add_input_combination(lts_file_for_input, "Reporting", "bcg");
+  c.add_input_combination(lts_file_for_input, "bcg", "Reporting");
 #endif
-  c.add_input_combination(lts_file_for_input, "Reporting", "svc");
+  c.add_input_combination(lts_file_for_input, "svc", "Reporting");
 }
 
 void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
