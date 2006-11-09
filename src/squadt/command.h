@@ -92,7 +92,7 @@ namespace squadt {
     /**
      * @param[in] e a complete path to an executable of the program that is to be executed
      **/
-    inline command::command(const std::string& e) : executable(e),
+    inline command::command(std::string const& e) : executable(e),
                 working_directory(boost::filesystem::current_path().native_file_string()) {
     }
 
@@ -100,14 +100,15 @@ namespace squadt {
      * @param[in] e a complete path to an executable of the program that is to be executed
      * @param[in] w path to the working directory for this tool
      **/
-    inline command::command(const std::string& e, std::string const& w) : executable(e), working_directory(w) {
+    inline command::command(std::string const& e, std::string const& w) : executable(e), working_directory(w) {
     }
 
     /**
      * @param[in] o the object to copy
      **/
     inline command::command(command const& o) : executable(o.executable),
-                working_directory(o.working_directory), arguments(o.arguments) {
+                working_directory(o.working_directory),
+                arguments(o.arguments) {
     }
 
     inline std::string command::get_working_directory() const {

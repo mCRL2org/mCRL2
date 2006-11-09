@@ -128,7 +128,7 @@ namespace squadt {
       bool check_status(bool);
 
       /** \brief Execute an edit command on one of the outputs */
-      void edit(execution::command const*);
+      void edit(execution::command*);
 
       /** \brief Sets the status of the inputs to out-of-date if the processor is inactive */
       bool demote_status();

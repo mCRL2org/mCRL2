@@ -60,6 +60,9 @@ namespace squadt {
         /* \brief Event handler for changes to the maximum */
         void apply_button_activated(wxCommandEvent&);
 
+        /* \brief Event handler for selection changes in the list control */
+        void list_item_selected(wxListEvent&);
+
       public:
 
         edit_preferences(miscellaneous::type_registry::sptr const&, wxWindow*);
@@ -172,6 +175,19 @@ namespace squadt {
       }
     }
 
+    void edit_preferences::list_item_selected(wxListEvent&) {
+      wxListItem s;
+
+      get_wxlist_value(s, formats_and_actions, formats_and_actions->GetFirstSelected(), 1);
+
+      if (s.GetText() == no_action) {
+        command_text->SetValue(wxEmptyString);
+      }
+      else {
+        command_text->SetValue(s.GetText());
+      }
+    }
+
     edit_preferences::edit_preferences(miscellaneous::type_registry::sptr const& h, wxWindow* w) : wxPanel(w, wxID_ANY), registry(h) {
       using namespace squadt::miscellaneous;
 
@@ -214,6 +230,7 @@ namespace squadt {
 
       Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(edit_preferences::apply_button_activated));
       Connect(wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(edit_preferences::apply_button_activated));
+      Connect(wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler(edit_preferences::list_item_selected));
     }
 
     void debug_preferences::filter_level_changed(wxCommandEvent&) {

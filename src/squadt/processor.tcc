@@ -90,7 +90,7 @@ namespace squadt {
       inline processor_impl(boost::shared_ptr < processor > const&, boost::weak_ptr < project_manager >, tool::sptr);
 
       /** \brief Execute an edit command on one of the outputs */
-      void edit(execution::command const*);
+      void edit(execution::command*);
 
       /** \brief Extracts useful information from a configuration object */
       void process_configuration(sip::configuration::sptr const& c);
@@ -879,8 +879,10 @@ namespace squadt {
   /**
    * \param[in] c the edit command to execute
    **/
-  inline void processor_impl::edit(execution::command const* c) {
+  inline void processor_impl::edit(execution::command* c) {
     assert(c != 0);
+
+    c->set_working_directory(make_output_path(output_directory));
 
     current_monitor->get_logger()->log(1, "executing command `" + c->argument_string() + "'\n");
 
@@ -890,7 +892,7 @@ namespace squadt {
   /**
    * \param[in] c the edit command to execute
    **/
-  void processor::edit(execution::command const* c) {
+  void processor::edit(execution::command* c) {
     if (c != 0) {
       impl->edit(c);
     }

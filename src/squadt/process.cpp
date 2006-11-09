@@ -3,6 +3,8 @@
 
 #include <cstdlib>
 #include <csignal>
+#include <cstring>
+#include <cerrno>
 
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
 # include <substitutes.h>
@@ -14,6 +16,7 @@
 #undef barrier
 
 #include <boost/bind.hpp>
+#include <boost/format.hpp>
 #include <boost/thread/thread.hpp>
 
 #include "task_monitor.h"
@@ -76,25 +79,34 @@ namespace squadt {
 #else
       boost::shared_array < char const* > arguments(c.get_argument_array());
 
-      identifier = vfork();
+      pid_t new_identifier = fork();
 
-      if (identifier == 0) {
+      if (new_identifier == 0) {
         /* Change working directory to the project directory */
         chdir(c.working_directory.c_str());
 
-        execv(c.executable.c_str(), const_cast < char* const* > (arguments.get()));
+        execvp(c.executable.c_str(), const_cast < char* const* > (arguments.get()));
+
+        std::cerr << boost::str(boost::format("Execution failed : `%s' %s\n") % c.executable % strerror(errno));
+
+        _exit(1);
+      }
+      else {
+        identifier = new_identifier;
       }
 #endif
 
       current_status = (identifier < 0) ? aborted : running;
 
       if (0 < identifier) {
-        last_command = std::auto_ptr < command > (new command(c));
+        using namespace boost;
+
+        last_command.reset(new command(c));
 
         signal_status();
 
         /* Wait for the process to terminate */
-        boost::thread t(boost::bind(&process::termination_handler, this, identifier));
+        thread t(bind(&process::termination_handler, this, identifier));
       }
       else {
         signal_status();
