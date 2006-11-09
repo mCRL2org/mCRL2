@@ -7,11 +7,7 @@ exe ltsgraph
          /libraries//wx_extension
          /libraries//mcrl2_basic
          /libraries//lts
-         /site-config//wx_base
-       : <include>.
+       : <dependency>/site-config//wx_base
          <wx>no:<build>no
        : <squadt_support>enable
        ;
-
-#install_bundle_on_mac ltsgraph-bundle $(TOP)/ltsgraph : ltsgraph ltsgraph.plist ltsgraph.icns ;
-

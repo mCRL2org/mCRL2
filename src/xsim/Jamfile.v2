@@ -1,21 +1,28 @@
 project toolset/xsim
-       : source-location .
        : build-dir $(BUILD_TOP)/xsim
+       ;
+
+obj xsimbase.o
+       : xsimbase.cpp
+       : <dependency>/site-config//wx_base
+         <dependency>/libraries//nextstate
+         <dependency>/libraries//mcrl2_basic
        ;
 
 exe xsim
        : xsim.cpp
-         xsimbase.cpp
+         xsimbase.o
          xsimmain.cpp
          xsimtrace.cpp
          /libraries//trace
          /libraries//nextstate
          /libraries//mcrl2_basic
-         /site-config//wx_base
-       : <include>$(SETUP)
-         <toolset>gcc:<linkflags>-Wl,-export-dynamic
+       : <dependency>/site-config//wx_base
+         <include>$(SETUP)
+         <toolset>gcc:<linkflags>"-Wl,-export-dynamic"
          <wx>no:<build>no
        : <squadt_support>enable
+       :
        ;
 
 exe sim
@@ -30,6 +37,8 @@ for plugin in [ MATCH plugins/(.*)/Jamfile.v2 : [ glob plugins/*/Jamfile.v2 ] ] 
   view_plugins += plugins/$(plugin)//xsim_$(plugin)_view ;
 }
 
-#install_bundle_on_mac xsim-bundle $(TOP)/xsim : xsim xsim.plist xsim.icns ;
+explicit $(view_plugins) ;
 
-explicit $(view_plugins) xsim-bundle ;
+alias plugins
+       : $(view_plugins)
+       ;

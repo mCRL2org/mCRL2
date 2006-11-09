@@ -6,7 +6,6 @@ lib xsim_garage_view
        : garageframe.cpp
          garagecanvas.cpp
          visutils.cpp
-         ../../xsimbase.cpp
          /libraries//nextstate
          /libraries//mcrl2_basic
        : <include>../..
@@ -15,7 +14,7 @@ lib xsim_garage_view
          <define>GARAGEFRAMEDLL
          <link>shared
          <wx>no:<build>no
-         <toolset>darwin:<linkflags>"-bundle -undefined dynamic_lookup"
+         <toolset>darwin:<bundle>yes
        :
        ;
 
@@ -24,7 +23,6 @@ exe garageframe
          garageframe.cpp
          garagecanvas.cpp
          visutils.cpp
-         ../../xsimbase.cpp
        : <include>../..
          <wx>gl
        ;

@@ -6,11 +6,11 @@ CONFIG = build/config.mk
 .PHONY: all bjam install clean distclean distribution
 
 all: $(CONFIG) $(BJAM)
-	@$(BOOST_BUILD)
+	$(BOOST_BUILD)
 	@$(MAKE) -C src/doc
 
 install: $(CONFIG) $(BJAM)
-	@$(BOOST_BUILD) --install
+	$(BOOST_BUILD) --install
 	@$(MAKE) -C src/doc install
 
 clean:
@@ -28,9 +28,6 @@ configure: build/autoconf/configure.ac
 	autoconf -o $@ -W all $<
 
 include build/bjam.mk
-
-revision: $(BJAM)
-	@$(BOOST_BUILD) mcrl2_revision
 
 $(CONFIG):
 	$(error Please run configure first.)

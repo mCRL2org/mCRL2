@@ -46,4 +46,3 @@ feature.feature wx : no yes ;
 if $(WX_CPPFLAGS) {
   feature.set-default wx : yes ;
 }
-

@@ -67,6 +67,7 @@ if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
   stage build
           : $(targets)
           : <location>$(BUILD_TOP)/tools
+            <install-type>EXE
             <hardcode-dll-paths>true
           ;
 }
@@ -129,8 +130,6 @@ else {
             <install-dependencies>on <install-type>STATIC_LIB
           ;
 
-  tools_with_plugins = [ MATCH (src/.*/plugins/.*)/Jamfile.v2 : [ glob src/*/plugins/*/Jamfile.v2 ] ] ;
-
   stage install-shared-libraries
           : $(targets)
           : <location>$(LIB_DIR)
@@ -139,9 +138,12 @@ else {
             <install-dependencies>on <install-type>SHARED_LIB
           ;
 
+  local tools_with_plugins = [ MATCH (src/.*/plugins/.*)/Jamfile.v2 : [ glob src/*/plugins/*/Jamfile.v2 ] ] ;
+
   stage install-plugins
           : $(tools_with_plugins)
           : <location>$(LIB_DIR)/plugins
+            <install-type>SHARED_LIB
           ;
 
   explicit install-examples install-headers install-binaries install-plugins install-static-libraries install-shared-libraries ;

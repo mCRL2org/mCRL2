@@ -4,21 +4,6 @@ project toolset/ltsview
       <include>.
   ;
 
-#import lex : lex ;
-#import bison : bison ;
-
-#cpp fsmlexer.cpp
-#      : fsmlexer.ll
-#      : <flex.prefix>"fsm"
-#      ;
-
-#lib fsm
-#      : fsmparser.yy
-#        /libraries/mcrl2_basic//mcrl2_basic
-#      : <bison.prefix>"fsm"
-#        <implicit-dependency>fsmlexer.cpp
-#      ;
-
 exe ltsview
       : fsmparser.cpp
         ltsviewapp.cpp
@@ -34,17 +19,12 @@ exe ltsview
         visualizer.cpp
         utils.cpp
       :
-#       <library>fsm
-#        <implicit-dependency>fsm
         <dependency>/site-config//OpenGL
+        <dependency>/site-config//wx_gl
         <library>/libraries//wx_extension
         <library>/libraries//mcrl2_basic
         <library>/libraries//aterm
-        <library>/site-config//wx_gl
         <squadt_support>enable
         <wx>no:<build>no
         <opengl>no:<build>no
       ;
-
-#install_bundle_on_mac ltsview-bundle $(TOP)/ltsview : ltsview ltsview.plist ltsview.icns ;
-

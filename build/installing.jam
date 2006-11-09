@@ -3,18 +3,6 @@ import feature ;
 # Feature for linking to the opengl library
 feature.feature install : no yes ;
 
-rule install_bundle_on_mac ( name target : executable info icon : requirements * ) {
-  import os ;
-
-  if [ os.name ] = MACOSX {
-    include $(TOP)/build/macosx/bundle.jam ;
-
-    alias install-$(name)-data : ;
-
-    make_bundle $(target) : $(executable) $(info) $(icon) : $(requirements) ;
-  }
-}
-
 # For installing data (non-source code, executable or library)
 rule install-data ( name : files * : directories ? ) {
   if install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
@@ -31,9 +19,7 @@ rule install-data ( name : files * : directories ? ) {
 }
 
 IMPORT $(__name__)
-       : install_bundle_on_mac
-         install-data
+       : install-data
        : $(caller)
-       : install_bundle_on_mac
-         install-data
+       : install-data
        ;

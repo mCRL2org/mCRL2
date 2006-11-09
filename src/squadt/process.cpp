@@ -76,7 +76,7 @@ namespace squadt {
 #else
       boost::shared_array < char const* > arguments(c.get_argument_array());
 
-      identifier = fork();
+      identifier = vfork();
 
       if (identifier == 0) {
         /* Change working directory to the project directory */

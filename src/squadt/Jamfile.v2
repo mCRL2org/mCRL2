@@ -10,8 +10,8 @@ exe squadt
       : [ set.difference [ glob *.cpp ] : process_wrapper.cpp ]
         /libraries//md5pp
         /libraries/sip//sip_controller
-        /site-config//wx_base
-      : <include>$(SETUP)
+      : <dependency>/site-config//wx_base
+        <include>$(SETUP)
         <threading>multi
         <wx>no:<build>no
         <xml2>no:<build>no
@@ -24,5 +24,3 @@ exe process_wrapper
       : process_wrapper.cpp
       : <toolset>msvc
       ;
-
-#install_bundle_on_mac squadt-bundle $(TOP)/squadt : squadt squadt.plist squadt.icns ;

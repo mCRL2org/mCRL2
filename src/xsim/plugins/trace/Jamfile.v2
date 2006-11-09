@@ -9,6 +9,6 @@ lib xsim_trace_view
        : <include>../..
          <wx>no:<build>no
          <link>shared
-         <toolset>darwin:<linkflags>"-bundle -undefined dynamic_lookup"
+         <toolset>darwin:<bundle>yes
        ;
 
