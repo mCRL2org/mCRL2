@@ -5,7 +5,7 @@
 #include <iosfwd>
 
 #include <boost/shared_ptr.hpp>
-#include <boost/iterator_range.hpp>
+#include <boost/range/iterator_range.hpp>
 
 #include <sip/detail/object.h>
 #include <sip/detail/configuration.h>
