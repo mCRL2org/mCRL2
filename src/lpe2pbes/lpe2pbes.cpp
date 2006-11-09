@@ -109,7 +109,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
 {
   t_tool_options tool_options;
   //declarations for getopt
-  t_phase opt_end_phase;
+  t_phase opt_end_phase = PH_NONE;
   bool opt_pretty = false;
   string formfilename = "";
   #define SHORT_OPTIONS "f:p:ehqvd"
