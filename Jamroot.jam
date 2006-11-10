@@ -99,6 +99,7 @@ else {
               install-plugins
               install-examples
               install-headers
+            : <os>MACOSX:<source>install-mac-bundles
             ;
 
     targets = /tools/$(tools) ;

@@ -1,41 +1,83 @@
 import type ;
+import errors : error ;
 import generators ;
 import targets ;
 import project ;
+import path ;
+import feature : feature ;
+import toolset : flags ;
 import "class" : new ;
-
-include $(TOP)/build/config.jam ;
 
 type.register MAC_APPLICATION_BUNDLE : app ;
 
-generators.register-standard mac-application-bundle : EXE : MAC_APPLICATION_BUNDLE ;
-actions make-bundle bind TOP BIN_DIR {
-  echo $(<) $(>)
-  mkdir -p $(<:BS).app/Contents/MacOS
-  mkdir -p $(<:BS).app/Contents/Resources
-  echo -n 'APPL????' > $(<:BS).app/Contents/PkgInfo
-  cp $(TOP)/src/$(<:BS)/$(<:BS).plist $(<:BS).app/Contents
-  cp $(TOP)/src/$(<:BS)/$(<:BS).icns $(<:BS).app/Contents/Resources
-  cp $(<) $(<:BS).app/Contents/MacOS
+feature icon : : free path ;
+feature info : : free path ;
 
-  /Developer/Tools/SetFile -a C $(<:BS).app/Contents/MacOS/$(<:BS)
-  /Developer/Tools/Rez -t APPL -o $(<:BS).app/Contents/MacOS/$(<:BS) $(TOP)/build/macosx/sample.r
+generators.register-standard $(__name__).make-bundle : EXE : MAC_APPLICATION_BUNDLE ;
 
-  cp $(<:BS).app/Contents/MacOS/$(<:BS) $(<)
-  cp $(<:BS).app/Contents/MacOS/$(<:BS) $(BIN_DIR)
+flags $(__name__).make-bundle INFO <info> ;
+flags $(__name__).make-bundle ICON <icon> ;
+flags $(__name__).make-bundle LOCATION <location> ;
+
+SAMPLE_R = $(__name__:P)/sample.r ;
+
+actions make-bundle {
+  mkdir -p $(LOCATION)/$(<:BS)/Contents/MacOS
+  mkdir -p $(LOCATION)/$(<:BS)/Contents/Resources
+  echo -n 'APPL????' > $(LOCATION)/$(<:BS)/Contents/PkgInfo
+  cp $(INFO) $(LOCATION)/$(<:BS)/Contents
+  cp $(ICON) $(LOCATION)/$(<:BS)/Contents/Resources
+
+  /Developer/Tools/SetFile -a C $(LOCATION)/$(<:BS)/Contents/MacOS/$(>:BS)
+  /Developer/Tools/Rez -t APPL -o $(>) $(SAMPLE_R)
+
+  cp $(>) $(LOCATION)/$(<:BS)/Contents/MacOS
 }
 
-rule application-bundle ( target : source : requirements * : default-build * ) {
+actions rez {
+  /Developer/Tools/Rez -t APPL -o $(>) $(SAMPLE_R)
+}
+
+rule mac-bundle ( target : executable info icon : requirements * : default-build * ) {
   local project = [ project.current ] ;
 
   requirements += <action>make-bundle ;
 
+  if [ MATCH "\.(icns)" : $(icon) ] {
+    requirements += <icon>$(icon) ;
+  }
+  else {
+    error "missing icon file (.icns)" ;
+  }
+
+  if [ MATCH "\.(plist)$" : $(info) ] {
+    requirements += <info>$(info) ;
+  }
+  else {
+    error "missing info file (.plist)" ;
+  }
+
   targets.main-target-alternative
      [ new typed-target $(target) : $(project) : MAC_APPLICATION_BUNDLE
-     : [ targets.main-target-sources $(source) : $(target) ]
+     : [ targets.main-target-sources $(executable) : $(target) ]
      : [ targets.main-target-requirements $(requirements) : $(project) ]
      : [ targets.main-target-default-build $(default-build) : $(project) ]
      ] ;
+
+  return $(target) ;
 }
 
-IMPORT $(__name__) : application-bundle : : application-bundle ;
+rule mac-rez ( sources + ) {
+  if $(MAC) {
+    import notfile ;
+
+    for s in $(sources) {
+      notfile rez-$(s) : @$(__name__).rez : $(s) ;
+    }
+  }
+
+  return $(sources) ;
+}
+
+IMPORT $(__name__) : mac-bundle : : mac-bundle ;
+IMPORT $(__name__) : mac-rez : : mac-rez ;

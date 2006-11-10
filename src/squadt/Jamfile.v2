@@ -5,6 +5,7 @@ project toolset/squadt
   ;
 
 import set ;
+import $(TOP)/build/macosx/mac-bundle ;
 
 exe squadt
       : [ set.difference [ glob *.cpp ] : process_wrapper.cpp ]
@@ -17,7 +18,7 @@ exe squadt
         <xml2>no:<build>no
       ;
 
-# dummy for non-msvc builds
+# Alternative for non-msvc builds (dummy)
 alias process_wrapper ;
 
 exe process_wrapper

@@ -18,6 +18,30 @@ rule install-data ( name : files * : directories ? ) {
   }
 }
 
+if $(MAC) {
+  import path ;
+  import $(TOP)/build/macosx/mac-bundle ;
+
+  local mac_application_bundles = [ MATCH $(TOP)/src/(.*/.*).plist : [ glob $(TOP)/src/*/*.plist ] ] ;
+
+  for bundle in $(mac_application_bundles) {
+    mac-bundle $(bundle:B).app
+         : /tools/$(bundle:P)//$(bundle:B)
+           $(TOP)/src/$(bundle).plist
+           $(TOP)/src/$(bundle).icns
+         : <location>$(prefix)
+         ;
+
+    explicit $(bundle:B).app ;
+  }
+
+  mac_application_bundles = [ MATCH .*/(.*) : $(mac_application_bundles) ] ;
+
+  alias install-mac-bundles
+          : $(mac_application_bundles).app
+          ;
+}
+
 IMPORT $(__name__)
        : install-data
        : $(caller)
