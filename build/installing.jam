@@ -18,7 +18,7 @@ rule install-data ( name : files * : directories ? ) {
   }
 }
 
-if $(MAC) {
+if [ modules.peek : OS ] = MACOSX {
   import path ;
   import $(TOP)/build/macosx/mac-bundle ;
 
