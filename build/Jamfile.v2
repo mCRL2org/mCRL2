@@ -16,7 +16,7 @@ if $(OPENGL_NAME) && $(WX_CPPFLAGS) {
   }
   else {
     if [ modules.peek : OS ] = MACOSX {
-      lib OpenGL : : <linkflags>"-framework OpenGL" <toolset>darwin : : ;
+      alias OpenGL : : <toolset>darwin : : <linkflags>"-framework OpenGL" ;
     }
     else {
       lib OpenGL : : <name>$(OPENGL_NAME) : : <os>NT:<library>GLU ;

@@ -9,10 +9,9 @@ lib xml2pp
       xml2pp_exception.cpp
       /site-config//boost_filesystem
     : <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
-      <xml2>yes:<use>/site-config//xml2
+      <xml2>yes:<library>/site-config//xml2
       <xml2>no:<build>no
     :
     : <xml2>no:<build>no
-      <xml2>yes:<library>/site-config//xml2
     ;
 

@@ -43,8 +43,7 @@ alias messenger
       transport
     : <threading>multi
     : # no default build
-    :
-      <library>/site-config//boost_thread
+    : <library>/site-config//boost_thread
       <library>/site-config//boost_regex
       <library>/site-config//boost_filesystem
       <library>/libraries//xml2pp
@@ -58,5 +57,4 @@ lib sip_controller
 lib sip_tool
     : tool.cpp
       messenger
-    :
     ;

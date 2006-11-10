@@ -16,12 +16,11 @@ exe ltsview
         fileloader.cpp
         visualizer.cpp
         utils.cpp
-        /site-config//OpenGL
-        /site-config//wx_gl
-      :
-        <library>/libraries//wx_extension
-        <library>/libraries//mcrl2_basic
-        <squadt_support>enable
+        /libraries//wx_extension
+        /libraries//mcrl2_basic
+      : <dependency>/site-config//OpenGL
+        <dependency>/site-config//wx_gl
         <wx>no:<build>no
         <opengl>no:<build>no
+      : <squadt_support>enable
       ;
