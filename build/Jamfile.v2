@@ -15,8 +15,12 @@ if $(OPENGL_NAME) && $(WX_CPPFLAGS) {
     lib OpenGL : : <name>$(OPENGL_NAME) : : <include>$(OPENGL_IPATH) <os>NT:<library>GLU ;
   }
   else {
-    lib OpenGL : : <name>$(OPENGL_NAME) : : <os>NT:<library>GLU ;
-    lib OpenGL : : <toolset>darwin : : <linkflags>"-framework OpenGL" ;
+    if [ modules.peek : OS ] MACOSX {
+      lib OpenGL : : <linkflags>"-framework OpenGL" <toolset>darwin : : ;
+    }
+    else {
+      lib OpenGL : : <name>$(OPENGL_NAME) : : <os>NT:<library>GLU ;
+    }
   }
 }
 else {
@@ -30,7 +34,6 @@ if $(XML2_CPPFLAGS) {
          :
          : <cxxflags>"$(XML2_CPPFLAGS)"
            <linkflags>"$(XML2_LDFLAGS)"
-           <toolset>darwin:<linkflags>-bind_at_load
          ;
 }
 else {
