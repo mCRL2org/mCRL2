@@ -507,6 +507,7 @@ static ATerm get_repr(ATerm state)
     ATtablePut(representation,ATindexedSetGetElem(visited,i),v);
   }
 
+  delete nsgen;
   ATtableDestroy(back);
   ATtableDestroy(next);
   ATtableDestroy(low);
