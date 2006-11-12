@@ -12,7 +12,18 @@
 
     void Invariant_Checker::print_counter_example() {
       if (f_counter_example) {
-        gsfprintf(stderr, "  Counter-example: %P\n", f_bdd_prover.get_counter_example());
+        ATermAppl v_counter_example;
+
+        v_counter_example = f_bdd_prover.get_counter_example();
+        if (v_counter_example == 0) {
+          gsErrorMsg(
+            "Cannot print counter example. This is probably caused by an abrupt stop of the\n"
+            "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.\n"
+          );
+          exit(1);
+        } else {
+          gsfprintf(stderr, "  Counter example: %P\n", v_counter_example);
+        }
       }
     }
 

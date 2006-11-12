@@ -242,7 +242,18 @@
 
     void Confluence_Checker::print_counter_example() {
       if (f_counter_example) {
-        gsfprintf(stderr, "\n  Counter-example: %P\n", f_bdd_prover.get_counter_example());
+        ATermAppl v_counter_example;
+
+        v_counter_example = f_bdd_prover.get_counter_example();
+        if (v_counter_example == 0) {
+          gsErrorMsg(
+            "Cannot print counter example. This is probably caused by an abrupt stop of the\n"
+            "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.\n"
+          );
+          exit(1);
+        } else {
+          gsfprintf(stderr, "  Counter example: %P\n", v_counter_example);
+        }
       }
     }
 
@@ -267,7 +278,7 @@
           if (f_check_all) {
             gsfprintf(stderr, "-");
           } else {
-            gsfprintf(stderr, "Not confluent with summand %d.", v_summand_number);
+            gsfprintf(stderr, "Not confluent with summand %d.\n", v_summand_number);
           }
           v_summand_number++;
           v_is_confluent = false;
@@ -303,7 +314,7 @@
                 if (f_check_all) {
                   gsfprintf(stderr, "-");
                 } else {
-                  gsfprintf(stderr, "Not confluent with summand %d.", v_summand_number);
+                  gsfprintf(stderr, "Not confluent with summand %d.\n", v_summand_number);
                 }
                 print_counter_example();
                 save_dot_file(a_summand_number, v_summand_number);
@@ -314,7 +325,7 @@
               if (f_check_all) {
                 gsfprintf(stderr, "-");
               } else {
-                gsfprintf(stderr, "Not confluent with summand %d.", v_summand_number);
+                gsfprintf(stderr, "Not confluent with summand %d.\n", v_summand_number);
               }
               print_counter_example();
               save_dot_file(a_summand_number, v_summand_number);
@@ -395,7 +406,9 @@
             if (ATisEmpty(v_multi_actions)) {
               gsfprintf(stderr, "tau-summand %2d: ", v_summand_number);
               v_marked_summand = check_confluence_and_mark_summand(a_invariant, v_summand, v_summand_number, v_is_marked);
-              gsfprintf(stderr, "\n");
+              if (f_check_all) {
+                gsfprintf(stderr, "\n");
+              }
             }
           }
         }
