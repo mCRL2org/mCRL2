@@ -4,9 +4,9 @@
 #include <vector>
 
 #include <sip/detail/common.h>
-#include <sip/detail/report.h>
-#include <sip/detail/controller_capabilities.h>
-#include <sip/detail/tool_capabilities.h>
+#include <sip/report.h>
+#include <sip/controller_capabilities.h>
+#include <sip/tool_capabilities.h>
 #include <sip/detail/layout_tool_display.h>
 #include <sip/detail/layout_elements.h>
 #include <utility/logger.h>

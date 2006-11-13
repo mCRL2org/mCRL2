@@ -7,9 +7,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/range/iterator_range.hpp>
 
-#include <sip/detail/object.h>
-#include <sip/detail/configuration.h>
-#include <sip/detail/common.h>
+#include <sip/configuration.h>
 
 namespace sip {
   namespace tool {

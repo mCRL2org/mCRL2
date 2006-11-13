@@ -10,7 +10,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <sip/detail/basic_datatype.h>
-#include <sip/detail/exception.h>
+#include <sip/exception.h>
 
 namespace sip {
 

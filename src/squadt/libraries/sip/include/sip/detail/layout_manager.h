@@ -6,7 +6,7 @@
 #include <map>
 #include <memory>
 
-#include <sip/detail/layout_base.h>
+#include <sip/layout_base.h>
 #include <sip/detail/layout_mediator.h>
 
 namespace sip {
@@ -126,7 +126,7 @@ namespace sip {
         virtual element* add(element*, visibility const&) = 0;
 
         /** \brief Recursively builds the state of the object */
-        static aptr static_read_structure(read_context&); 
+        static aptr static_read_structure(element::read_context&); 
 
         /** \brief Instantiate a layout element, through a mediator */
         virtual mediator::wrapper_aptr instantiate(layout::mediator*) = 0;
@@ -161,7 +161,7 @@ namespace sip {
       private:
 
         /** \brief Read back a layout structure in XML format */
-        void read_structure(read_context& r);
+        void read_structure(element::read_context& r);
 
       public:
 

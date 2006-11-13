@@ -8,8 +8,8 @@
 namespace sip {
   namespace layout {
     /**
-     * @param[in] t the tool communicator object to use
-     * @param[in] e the layout element of which to send the state
+     * \param[in] t the tool communicator object to use
+     * \param[in] e the layout element of which to send the state
      **/
     void element::update(tool::communicator* t, layout::element const* e) {
     }
@@ -25,9 +25,9 @@ namespace sip {
     }
 
     /**
-     * @param[in] c the current configuration
+     * \param[in] c the current configuration
      **/
-    void communicator::set_configuration(boost::shared_ptr < configuration > c) {
+    void communicator::set_configuration(boost::shared_ptr < sip::configuration > c) {
       boost::dynamic_pointer_cast < communicator_impl > (impl)->current_configuration = c;
     }
  
@@ -37,7 +37,7 @@ namespace sip {
     }
  
     /**
-     * @param[in] c the input combination on which to base the new configuration
+     * \param[in] c the input combination on which to base the new configuration
      **/
     configuration::sptr communicator::new_configuration(sip::tool::capabilities::input_combination const& c) {
       sip::configuration::sptr nc(new sip::configuration(c.category));
@@ -74,15 +74,15 @@ namespace sip {
     }
 
     /**
-     * @param h the function that is called when a new layout for the display has been received
+     * \param h the function that is called when a new layout for the display has been received
      **/
     void communicator::activate_display_layout_handler(display_layout_handler_function h) {
       boost::dynamic_pointer_cast < communicator_impl > (impl)->activate_display_layout_handler(h);
     }
 
     /**
-     * @param d pointer to a tool display
-     * @param h the function that is called when a new layout for the display has been received
+     * \param d pointer to a tool display
+     * \param h the function that is called when a new layout for the display has been received
      *
      * \pre d.get() != 0
      **/
@@ -91,13 +91,13 @@ namespace sip {
     }
 
     /**
-     * @param h the function that is called when a new layout for the display has been received
+     * \param h the function that is called when a new layout for the display has been received
      **/
     void communicator::activate_status_message_handler(status_message_handler_function h) {
       boost::dynamic_pointer_cast < communicator_impl > (impl)->activate_status_message_handler(h);
     }
     /**
-     * @param[in] e a sip layout element of which the data is to be sent
+     * \param[in] e a sip layout element of which the data is to be sent
      **/
     void communicator::send_display_update(sip::layout::element const* e) {
       message m(e->get_state(), sip::message_display_update);

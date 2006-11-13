@@ -5,7 +5,7 @@
 #include <iostream>
 
 #include <xml2pp/text_reader.h>
-#include <sip/detail/tool_capabilities.h>
+#include <sip/tool_capabilities.h>
 
 #include "exception.h"
 #include "build_system.h"

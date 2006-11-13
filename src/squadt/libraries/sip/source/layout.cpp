@@ -150,7 +150,7 @@ namespace sip {
 
     /**
      * \param[in] c the constraints object to take as reference
-     * \param[in] r a xml2pp text reader
+     * \param[in] o the stream to which to write the result
      **/
     void constraints::write(constraints const& c, std::ostream& o) const {
       o << "<constraints";
@@ -187,7 +187,6 @@ namespace sip {
     }
 
     /**
-     * \param[in] c the constraints object to take as reference
      * \param[in] r a xml2pp text reader
      **/
     void constraints::read(xml2pp::text_reader& r) {

@@ -1,5 +1,5 @@
-#ifndef SOCKET_TRANSCEIVER_H
-#define SOCKET_TRANSCEIVER_H
+#ifndef SOCKET_TRANSCEIVER_H__
+#define SOCKET_TRANSCEIVER_H__
 
 #include <memory>
 
@@ -13,6 +13,7 @@
 #include <boost/thread/condition.hpp>
 
 #include <transport/transporter.h>
+#include <transport/detail/basics.h>
 #include <transport/detail/transceiver.tcc>
 #include <transport/detail/socket_scheduler.h>
 
@@ -24,11 +25,6 @@ namespace transport {
       friend class transport::listener::socket_listener;
   
       public:
-        /** \brief IP version 4 address verifier (refer to the asio documentation) */
-        typedef boost::asio::ip::address                  address;
-
-        /** \brief IP version 4 host class (refer to the asio documentation) */
-        typedef std::string                               host_name;
 
         /** \brief Convenience type to hide the boost shared pointer implementation */
         typedef boost::shared_ptr < socket_transceiver >  ptr;
@@ -48,7 +44,7 @@ namespace transport {
         static socket_scheduler                 scheduler;
 
         /** \brief Default port for socket connections */
-        static short                            default_port;
+        static port_t                           default_port;
 
         /** \brief Size of the input buffer */
         static unsigned int                     input_buffer_size;
@@ -82,19 +78,19 @@ namespace transport {
         inline socket_transceiver(transporter* o);
 
         /** \brief Wrapper for connect() that ensures establishes that the object is not freed yet */
-        void connect(const std::string&, const short, wptr);
+        void connect(wptr, const std::string&, port_t const&);
 
         /** \brief Wrapper for connect() that ensures establishes that the object is not freed yet */
-        void connect(const address&, const short, wptr);
+        void connect(wptr, const ip_address_t&, port_t const&);
 
         /** \brief Send a string input stream to the peer */
-        void send(const std::string&, wptr);
+        void send(wptr, const std::string&);
   
         /** \brief Send the contents of an input stream to the peer */
-        void send(std::istream&, wptr);
+        void send(wptr, std::istream&);
 
         /** \brief Terminate the connection with the peer */
-        void disconnect(basic_transceiver::ptr, wptr);
+        void disconnect(wptr, basic_transceiver::ptr);
 
         /** \brief Start listening for new data */
         void activate(wptr);
@@ -111,7 +107,7 @@ namespace transport {
         static inline socket_transceiver::ptr create(transporter*);
 
         /** \brief Returns an object with the local hosts name and addresses */
-        static host_name get_local_host();
+        static host_name_t get_local_host();
 
         /** \brief Send a string input stream to the peer */
         void send(const std::string&);
@@ -120,10 +116,10 @@ namespace transport {
         void send(std::istream&);
 
         /** \brief Wrapper for connect() that ensures establishes that the object is not freed yet */
-        inline void connect(const std::string&, const short = default_port);
+        inline void connect(const std::string&, port_t const& = default_port);
 
         /** \brief Wrapper for connect() that ensures establishes that the object is not freed yet */
-        inline void connect(const address& = boost::asio::ip::address_v4::any(), const short = default_port);
+        inline void connect(const ip_address_t& = transport::ip_any, port_t const& = default_port);
 
         /** \brief Terminate connection with peer */
         inline void disconnect(basic_transceiver::ptr);
@@ -158,29 +154,29 @@ namespace transport {
     /**
      * \attention Wrapper for the similar looking private function
      **/
-    inline void socket_transceiver::connect(const address& a, const short p) {
-      connect(a, p, this_ptr.lock());
+    inline void socket_transceiver::connect(const ip_address_t& a, port_t const& p) {
+      connect(this_ptr.lock(), a, p);
     }
 
     /**
      * \attention Wrapper for the similar looking private function
      **/
-    inline void socket_transceiver::connect(const std::string& a, const short p) {
-      connect(a, p, this_ptr.lock());
+    inline void socket_transceiver::connect(const std::string& a, port_t const& p) {
+      connect(this_ptr.lock(), a, p);
     }
 
     /**
      * \attention Wrapper for the similar looking private function
      **/
     inline void socket_transceiver::send(const std::string& d) {
-      send(d, this_ptr.lock());
+      send(this_ptr.lock(), d);
     }
 
     /**
      * \attention Wrapper for the similar looking private function
      **/
     inline void socket_transceiver::send(std::istream& d) {
-      send(d, this_ptr.lock());
+      send(this_ptr.lock(), d);
     }
 
     /**
@@ -194,7 +190,7 @@ namespace transport {
      * \attention Wrapper for the similar looking private function
      **/
     inline void socket_transceiver::disconnect(basic_transceiver::ptr p) {
-      disconnect(p, this_ptr.lock());
+      disconnect(this_ptr.lock(), p);
     }
 
     inline socket_transceiver::~socket_transceiver() {

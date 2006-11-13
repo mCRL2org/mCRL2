@@ -25,6 +25,7 @@ namespace sip {
 }
 
 #ifdef SIP_IMPORT_STATIC_DEFINITIONS
+/// \cond PRE_DECLARE
 namespace utility {
   /** \brief Messages for exceptions */
   template < >
@@ -42,6 +43,7 @@ namespace utility {
     "Encountered an unknown layout element: `%1%'"
   };
 }
+/// \endcond
 #endif
 
 #endif

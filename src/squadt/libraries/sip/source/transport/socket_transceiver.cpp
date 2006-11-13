@@ -12,7 +12,7 @@ namespace transport {
 
     boost::asio::ip::tcp::resolver socket_transceiver::resolver(scheduler.io_service);
 
-    short int socket_transceiver::default_port = 10946;
+    transport::port_t socket_transceiver::default_port = 10946;
 
     boost::asio::socket_base::keep_alive option_keep_alive(true);
     boost::asio::socket_base::linger     option_linger(false, 0);
@@ -34,13 +34,13 @@ namespace transport {
     }
 
     /**
-     * @param a the addess to connect to
-     * @param p the port to use
-     * @param w a shared pointer for this object
+     * \param[in] a the address to connect to
+     * \param[in] p the port to use
+     * \param[in] w a shared pointer for this object
      *
      * \pre w.lock.get() must be `this'
      **/
-    void socket_transceiver::connect(const address& a, const short p, socket_transceiver::wptr w) {
+    void socket_transceiver::connect(socket_transceiver::wptr w, ip_address_t const& a, port_t const& p) {
       socket_transceiver::sptr l(w.lock());
 
       if (l.get() != 0) {
@@ -85,26 +85,26 @@ namespace transport {
     }
 
     /**
-     * @param w a reference to a weak pointer for this object
-     * @param h the host name to use
-     * @param p the port to use
+     * \param[in] w a reference to a weak pointer for this object
+     * \param[in] h the host name to use
+     * \param[in] p the port to use
      **/
-    void socket_transceiver::connect(const std::string& h, const short p, socket_transceiver::wptr w) {
+    void socket_transceiver::connect(socket_transceiver::wptr w, const std::string& h, port_t const& p) {
       using namespace boost::asio;
 
       socket_transceiver::sptr l(w.lock());
 
       if (l.get() != 0) {
-        connect((*resolver.resolve(ip::tcp::resolver::query(h, "",
+        connect(w, (*resolver.resolve(ip::tcp::resolver::query(h, "",
                         ip::resolver_query_base::numeric_service|
-                        ip::resolver_query_base::address_configured))).endpoint().address(), p, w);
+                        ip::resolver_query_base::address_configured))).endpoint().address(), p);
       }
     }
 
     /**
      * @param w a reference to a weak pointer for this object (w.lock().get() == this (or 0)
      **/
-    void socket_transceiver::disconnect(basic_transceiver::ptr, socket_transceiver::wptr w) {
+    void socket_transceiver::disconnect(socket_transceiver::wptr w, basic_transceiver::ptr) {
       socket_transceiver::sptr l(w.lock());
 
       if (l.get() != 0) {
@@ -123,7 +123,7 @@ namespace transport {
       }
     }
 
-    socket_transceiver::host_name socket_transceiver::get_local_host() {
+    transport::host_name_t socket_transceiver::get_local_host() {
       using namespace boost::asio;
 
       return ((*resolver.resolve(ip::tcp::resolver::query("0.0.0.0", "",
@@ -132,6 +132,7 @@ namespace transport {
     }
 
     /**
+     * @param w a reference to a weak pointer for this object (w.lock().get() == this (or 0)
      * @param e reference to an asio error object
      **/
     void socket_transceiver::handle_receive(socket_transceiver::wptr w, const boost::asio::error& e) {
@@ -171,6 +172,7 @@ namespace transport {
     }
 
     /**
+     * @param w a reference to a weak pointer for this object (w.lock().get() == this (or 0)
      * @param e reference to an asio error object
      **/
     void socket_transceiver::handle_write(socket_transceiver::wptr w, boost::shared_array < char >, const boost::asio::error& e) {
@@ -195,9 +197,10 @@ namespace transport {
     }
 
     /**
+     * @param w a reference to a weak pointer for this object (w.lock().get() == this (or 0)
      * @param d the data that is to be sent
      **/
-    void socket_transceiver::send(const std::string& d, socket_transceiver::wptr w) {
+    void socket_transceiver::send(socket_transceiver::wptr w ,const std::string& d) {
       socket_transceiver::sptr l(w.lock());
 
       if (l.get() != 0) {
@@ -218,9 +221,10 @@ namespace transport {
     }
 
     /**
+     * @param w a reference to a weak pointer for this object (w.lock().get() == this (or 0)
      * @param d the stream that contains the data that is to be sent
      **/
-    void socket_transceiver::send(std::istream& d, socket_transceiver::wptr w) {
+    void socket_transceiver::send(socket_transceiver::wptr w, std::istream& d) {
       using namespace boost;
       using namespace boost::asio;
 

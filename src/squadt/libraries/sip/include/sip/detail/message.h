@@ -124,8 +124,9 @@ namespace sip {
     }
 
     /**
-     * @param t a message type identifier
      * @param c the initial content of the message
+     * @param t a message type identifier
+     * @param o the local endpoint
      **/
     template < class M, M D, M A >
     template < typename T >

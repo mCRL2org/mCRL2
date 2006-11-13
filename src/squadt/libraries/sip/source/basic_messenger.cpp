@@ -18,10 +18,16 @@ namespace sip {
     basic_messenger< sip::message >::basic_messenger() : impl(new basic_messenger_impl< sip::message >) {
     }
 
+    /**
+     * \param[in] l pointer to a logger object
+     **/
     template < >
     basic_messenger< sip::message >::basic_messenger(utility::logger* l) : impl(new basic_messenger_impl< sip::message >(l)) {
     }
 
+    /**
+     * \param[in] i pointer to an implementation object
+     **/
     template < >
     basic_messenger< sip::message >::basic_messenger(basic_messenger_impl< sip::message >* i) : impl(i) {
     }

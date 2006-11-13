@@ -2,7 +2,7 @@
 #include <boost/foreach.hpp>
 #include <boost/filesystem/convenience.hpp>
 
-#include <sip/detail/configuration.h>
+#include <sip/configuration.h>
 
 namespace sip {
 

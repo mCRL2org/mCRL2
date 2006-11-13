@@ -19,7 +19,7 @@
 #include <transport/transporter.h>
 
 #include <sip/detail/basic_messenger.h>
-#include <sip/detail/exception.h>
+#include <sip/exception.h>
 
 namespace sip {
 
@@ -43,6 +43,7 @@ namespace sip {
         class compare_handlers {
           public:
   
+            /** \brief Comparison method */
             inline bool operator()(handler_type const&, handler_type const&);
         };
 
@@ -51,13 +52,13 @@ namespace sip {
        
           private:
        
-            /** boost::mutex synchronisation primitive */
+            /** \brief boost::mutex synchronisation primitive */
             boost::mutex                               mutex;
        
-            /** boost::condition synchronisation primitive */
+            /** \brief boost::condition synchronisation primitive */
             boost::condition                           condition;
        
-            /** pointers to local message variables */
+            /** \brief pointers to local message variables */
             std::vector < boost::shared_ptr < M >* >   pointers;
        
           public:
@@ -162,10 +163,10 @@ namespace sip {
         /** \brief Queues incoming messages */
         virtual void deliver(const std::string&, typename M::end_point);
  
-        /* \brief Wait until the next message of a certain type arrives */
+        /** \brief Wait until the next message of a certain type arrives */
         const boost::shared_ptr < M > await_message(typename M::type_identifier_t);
  
-        /* \brief Wait until the next message of a certain type arrives */
+        /** \brief Wait until the next message of a certain type arrives */
         const boost::shared_ptr < M > await_message(typename M::type_identifier_t, long const&);
  
         /** \brief Send a message */
@@ -493,9 +494,6 @@ namespace sip {
 
     /**
      * \attention Meant to be called from a separate thread
-     *
-     * @param m reference to the pointer to a message to deliver
-     * @param o the transceiver that delivered the message
      **/
     template < class M >
     inline void basic_messenger_impl< M >::service_handlers() {
@@ -572,9 +570,6 @@ namespace sip {
       condition.notify_all();
     }
 
-    /**
-     * @param[in] m reference to the pointer to a message to deliver
-     **/
     template < class M >
     void basic_messenger_impl< M >::waiter_data::wake() {
       boost::mutex::scoped_lock l(mutex);
@@ -617,9 +612,6 @@ namespace sip {
       condition.timed_wait(l, time);
     }
 
-    /**
-     * @param[in] m reference to the pointer to a message to deliver
-     **/
     template < class M >
     basic_messenger_impl< M >::waiter_data::~waiter_data() {
     }

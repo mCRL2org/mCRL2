@@ -5,7 +5,7 @@
 #include <sstream>
 #include <memory>
 
-#include <sip/detail/layout_base.h>
+#include <sip/layout_base.h>
 #include <sip/detail/layout_elements.h>
 #include <sip/detail/layout_manager.h>
 #include <sip/detail/layout_mediator.h>

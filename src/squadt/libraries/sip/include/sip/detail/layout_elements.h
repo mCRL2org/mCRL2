@@ -3,7 +3,7 @@
 
 #include <iosfwd>
 
-#include <sip/detail/layout_base.h>
+#include <sip/layout_base.h>
 #include <sip/detail/layout_mediator.h>
 #include <sip/detail/basic_datatype.h>
 #include <sip/detail/common.h>

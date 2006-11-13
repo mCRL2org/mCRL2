@@ -35,6 +35,7 @@ alias messenger
       layout.cpp
       common.cpp
       report.cpp
+      mime_type.cpp
       basic_datatype.cpp
       configuration.cpp
       layout_elements.cpp

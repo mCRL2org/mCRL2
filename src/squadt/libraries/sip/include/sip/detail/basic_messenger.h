@@ -30,6 +30,7 @@ namespace sip {
 
       protected:
 
+        /** \brief Shared pointer to an implementation object */
         boost::shared_ptr < basic_messenger_impl < M > > impl;
 
       protected:
@@ -59,10 +60,10 @@ namespace sip {
         /** \brief Destroys all connections */
         void disconnect();
  
-        /* \brief Wait until the next message of a certain type arrives */
+        /** \brief Wait until the next message of a certain type arrives */
         const boost::shared_ptr < M > await_message(typename M::type_identifier_t);
  
-        /* \brief Wait until the next message of a certain type arrives */
+        /** \brief Wait until the next message of a certain type arrives */
         const boost::shared_ptr < M > await_message(typename M::type_identifier_t, long const&);
  
         /** \brief Send a message */

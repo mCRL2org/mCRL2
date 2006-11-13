@@ -8,7 +8,7 @@
 #include <wx/event.h>
 #include <wx/textctrl.h>
 
-#include <sip/detail/report.h>
+#include <sip/report.h>
 #include <sip/detail/layout_tool_display.h>
 
 #include "processor.h"

@@ -1,7 +1,7 @@
 #include <iostream>
 
+#include <sip/layout_base.h>
 #include <sip/detail/layout_elements.h>
-#include <sip/detail/layout_base.h>
 #include <sip/detail/event_handlers.h>
 
 namespace sip {
@@ -62,7 +62,7 @@ namespace sip {
        * \pre reader should point to a button element
        * \post reader points to after the associated end tag of the box
        **/
-      void label::read_structure(read_context& r) {
+      void label::read_structure(element::read_context& r) {
         r.reader.next_element();
 
         if (!r.reader.is_empty_element() && !r.reader.is_element("label")) {
@@ -132,7 +132,7 @@ namespace sip {
        * \pre reader should point to a button element
        * \post reader points to after the associated end tag of the box
        **/
-      void button::read_structure(read_context& r) {
+      void button::read_structure(element::read_context& r) {
         r.reader.get_attribute(&label, "label");
 
         r.reader.next_element();
@@ -255,7 +255,7 @@ namespace sip {
        * \pre reader should point to a radio-button element
        * \post reader points to after the associated end tag of the box
        **/
-      void radio_button::read_structure(read_context& r) {
+      void radio_button::read_structure(element::read_context& r) {
         element::identifier connected_to = 0;
 
         r.reader.get_attribute(&label, "label");
@@ -347,7 +347,7 @@ namespace sip {
        * \pre reader should point to a radio-button element
        * \post reader points to after the associated end tag of the box
        **/
-      void checkbox::read_structure(read_context& r) {
+      void checkbox::read_structure(element::read_context& r) {
         r.reader.get_attribute(&label, "label");
 
         status = r.reader.get_attribute("status");
@@ -458,7 +458,7 @@ namespace sip {
        * \pre reader should point to a progress-bar element
        * \post reader points to after the associated end tag of the box
        **/
-      void progress_bar::read_structure(read_context& r) {
+      void progress_bar::read_structure(element::read_context& r) {
         r.reader.get_attribute(&minimum, "minimum");
         r.reader.get_attribute(&maximum, "maximum");
         r.reader.get_attribute(&current, "current");
@@ -528,12 +528,12 @@ namespace sip {
       }
 
       /**
-       * @param[in] r the read context with which to read
+       * \param[in] r the read context with which to read
        *
        * \pre reader should point to a text-field element
        * \post reader points to after the associated end tag of the box
        **/
-      void text_field::read_structure(read_context& r) {
+      void text_field::read_structure(element::read_context& r) {
         r.reader.next_element();
 
         if (r.reader.is_element("text")) {

@@ -11,7 +11,7 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <sip/detail/configuration.h>
+#include <sip/configuration.h>
 
 namespace sip {
 

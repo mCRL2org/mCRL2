@@ -9,18 +9,10 @@
 #include <boost/noncopyable.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 
+#include <transport/detail/basics.h>
 #include <transport/detail/exception.h>
 #include <transport/detail/transceiver.h>
 #include <transport/detail/listener.h>
-
-/* Predeclare boost::asio::ip::address */
-namespace boost {
-  namespace asio {
-    namespace ip {
-      class address;
-    }
-  }
-}
 
 /*
  * Socket/Direct communication abstraction
@@ -55,18 +47,6 @@ namespace transport {
 
       /** \brief Convenience type to hide the shared pointer */
       typedef std::list < basic_listener::ptr >       listener_list;
-
-      /** \brief IP version 4 address verifier (refer to the asio documentation) */
-      typedef boost::asio::ip::address                address;
-
-      /** \brief Type for host names */
-      typedef std::string                             host_name;
-
-      /** \brief Address of the loopback interface */
-      static const address                            loopback;
-
-      /** \brief Address of any interface */
-      static const address                            any;
 
     private:
 
@@ -105,10 +85,10 @@ namespace transport {
       void connect(transporter&);
 
       /** \brief Creates socket connection to another transporter object (using a loopback connection by default) */
-      void connect(address const& = loopback, const long port = 0);
+      void connect(ip_address_t const& = ip_loopback, port_t const& = 0);
 
       /** \brief Creates socket connection to another transporter object (using a loopback connection by default) */
-      void connect(std::string const&, const long port = 0);
+      void connect(std::string const&, port_t const& = 0);
 
       /** \brief Disconnect all */
       void disconnect();
@@ -123,7 +103,7 @@ namespace transport {
       inline void relay_connection(transporter*, basic_transceiver*);
 
       /** \brief Activate a socket listener */
-      void add_listener(address const& = any, const long port = 0);
+      void add_listener(ip_address_t const& = ip_any, port_t const& port = 0);
 
       /** \brief Activate a socket listener by its number */
       void remove_listener(size_t number = 0);
@@ -135,7 +115,7 @@ namespace transport {
       inline void send(std::istream&);
 
       /** \brief Returns an object with the local hosts name and addresses */
-      static host_name get_local_host();
+      static host_name_t get_local_host();
 
       /** \brief The number of active listeners */
       inline size_t number_of_listeners() const;

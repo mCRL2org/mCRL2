@@ -13,8 +13,11 @@ namespace sip {
       
       private:
 
-        typedef communicator::display_update_handler_function display_update_handler_function;
+        /** \brief call-back function type for layout changes of the display */
         typedef communicator::display_layout_handler_function display_layout_handler_function;
+        /** \brief call-back function type for updates to the display */
+        typedef communicator::display_update_handler_function display_update_handler_function;
+        /** \brief call-back function type for diagnostic messages */
         typedef communicator::status_message_handler_function status_message_handler_function;
 
       private:

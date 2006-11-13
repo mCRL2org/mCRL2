@@ -8,7 +8,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <xml2pp/text_reader.h>
-#include <sip/detail/exception.h>
+#include <sip/exception.h>
 #include <sip/detail/option.h>
 
 namespace sip {

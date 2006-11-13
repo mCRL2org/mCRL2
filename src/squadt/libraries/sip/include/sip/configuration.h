@@ -13,6 +13,7 @@
 
 #include <sip/detail/option.h>
 #include <sip/detail/object.h>
+#include <sip/detail/common.h>
 
 namespace sip {
 

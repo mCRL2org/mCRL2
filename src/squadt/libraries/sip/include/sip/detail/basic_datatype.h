@@ -14,7 +14,7 @@
 
 #include <xml2pp/text_reader.h>
 
-#include <sip/detail/exception.h>
+#include <sip/exception.h>
 
 namespace sip {
 

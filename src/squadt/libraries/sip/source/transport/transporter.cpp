@@ -7,6 +7,7 @@
 #include <boost/foreach.hpp>
 
 #define IMPORT_STATIC_DEFINITIONS
+#include <transport/detail/basics.h>
 #include <transport/detail/transceiver.tcc>
 #include <transport/detail/socket_listener.h>
 #include <transport/detail/direct_transceiver.h>
@@ -16,10 +17,6 @@ namespace transport {
 
   using namespace transceiver;
   using namespace listener;
-
-  const transporter::address transporter::loopback = boost::asio::ip::address_v4::loopback();
-
-  const transporter::address transporter::any      = boost::asio::ip::address_v4::any();
 
   transporter::~transporter() {
     using namespace boost;
@@ -52,7 +49,7 @@ namespace transport {
    * @param a an address
    * @param p a port
    **/
-  void transporter::connect(const address& a, const long p) {
+  void transporter::connect(const ip_address_t& a, port_t const& p) {
     basic_transceiver::ptr c = socket_transceiver::create(this);
 
     boost::recursive_mutex::scoped_lock l(lock);
@@ -66,7 +63,7 @@ namespace transport {
    * @param h a hostname
    * @param p a port
    **/
-  void transporter::connect(const std::string& h, const long p) {
+  void transporter::connect(const std::string& h, port_t const& p) {
     basic_transceiver::ptr c = socket_transceiver::create(this);
 
     boost::recursive_mutex::scoped_lock l(lock);
@@ -173,7 +170,7 @@ namespace transport {
    * @param a an address
    * @param p a port
    **/
-  void transporter::add_listener(const address& a, const long p) {
+  void transporter::add_listener(const ip_address_t& a, port_t const& p) {
     basic_listener::ptr new_listener(new socket_listener(*this, a, p));
 
     listeners.push_back(new_listener);
@@ -202,7 +199,7 @@ namespace transport {
     }
   }
 
-  transporter::host_name transporter::get_local_host() {
+  host_name_t transporter::get_local_host() {
     return (socket_transceiver::get_local_host());
   }
 }
