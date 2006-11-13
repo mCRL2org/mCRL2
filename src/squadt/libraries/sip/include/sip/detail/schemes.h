@@ -1,8 +1,8 @@
 #ifndef SIP_SCHEMES_H
 #define SIP_SCHEMES_H
 
+#include <sip/exception.h>
 #include <sip/detail/basic_messenger.h>
-#include <sip/detail/exception.h>
 
 namespace sip {
 

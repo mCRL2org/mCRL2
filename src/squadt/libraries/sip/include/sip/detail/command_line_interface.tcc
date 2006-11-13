@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include <sip/detail/exception.h>
+#include <sip/exception.h>
 
 #include <sip/detail/command_line_interface.h>
 #include <sip/detail/schemes.h>

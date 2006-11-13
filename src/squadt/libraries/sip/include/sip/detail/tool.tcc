@@ -3,8 +3,8 @@
 #include <sip/detail/common.h>
 #include <sip/detail/basic_messenger.tcc>
 #include <sip/tool.h>
+#include <sip/layout_base.h>
 #include <sip/detail/message.h>
-#include <sip/detail/layout_base.h>
 #include <sip/detail/command_line_interface.tcc>
 
 namespace sip {
