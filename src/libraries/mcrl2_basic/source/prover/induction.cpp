@@ -55,7 +55,7 @@
       ATermAppl v_constructor_sort;
       ATermAppl v_constructor_element_sort;
       ATermAppl v_list_sort;
-      ATermAppl v_result;
+      ATermAppl v_result = 0;
 
       v_constructors = ATLgetArgument(f_constructors, 0);
       v_list_sort = f_expression_info.get_sort_of_variable(a_list_variable);

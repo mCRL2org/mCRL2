@@ -12,6 +12,7 @@ lib prover
          disjointness_checker.cpp
          invariant_checker.cpp
          invariant_eliminator.cpp
+         formula_checker.cpp
        : <library>/libraries//mcrl2_basic
 #         <dependency>/libraries//cvclite
 #         <toolset>gcc:<define>HAVE___GNU_CXX__EXT_HASH_MAP

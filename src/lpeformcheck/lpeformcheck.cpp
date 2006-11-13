@@ -2,7 +2,7 @@
 #define  VERSION   "0.0.1"
 #define  AUTHOR    "Luc Engelen"
 
-#include "prover/formula_checker.h"
+#include "formula_checker.h"
 #include "getopt.h"
 #include "libprint_c.h"
 #include "liblowlevel.h"
