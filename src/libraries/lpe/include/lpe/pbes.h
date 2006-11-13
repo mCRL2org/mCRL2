@@ -557,6 +557,36 @@ class pbes
         m_initial_state(initial_state)
     {}
 
+    /// Reads the pbes from file. Returns true if the operation succeeded.
+    ///
+    bool load(const std::string& filename)
+    {
+      aterm_appl t = atermpp::read_from_named_file(filename);
+      assert(gsIsPBES(t));
+      if (!t)
+        return false;
+      aterm_list::iterator i = t.argument_list().begin();
+      m_data          = data_specification(*i++);
+      m_equations     = equation_system(pbes_equation_list(*i++));
+      m_initial_state = propositional_variable_instantiation(*i);
+      return true;
+    }
+
+    /// Writes the pbes to file. Returns true if the operation succeeded.
+    ///
+    bool save(const std::string& filename, bool binary = true)
+    {
+      aterm t = ATermAppl(*this);
+      if (binary)
+      {
+        return atermpp::write_to_named_binary_file(t, filename);
+      }
+      else
+      {
+        return atermpp::write_to_named_text_file(t, filename);
+      }
+    }
+
     /// Returns the equations.
     ///
     const equation_system& equations() const

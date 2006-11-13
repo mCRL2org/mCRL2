@@ -9,7 +9,7 @@ project libraries/lpe/example
 
 exe constructors    : constructors.cpp : ;
 exe spec            : spec.cpp  : ;
-exe substitute      : substitute.cpp : ;
+exe pbes            : pbes.cpp : ;
 exe filter_template : filter_template.cpp : ;
 exe find            : find.cpp : ;
 
@@ -17,7 +17,7 @@ install dist
    :
      constructors
      spec
-     substitute
+     pbes
      filter_template
      find
    :
