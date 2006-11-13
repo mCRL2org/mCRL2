@@ -40,7 +40,8 @@
         gsVerboseMsg("Intermediate BDD: %P\n", f_rewriter->fromRewriteFormat(f_internal_bdd));
       }
 
-      gsVerboseMsg("Resulting BDD: %P\n", f_rewriter->fromRewriteFormat(f_internal_bdd));
+      f_bdd = f_rewriter->fromRewriteFormat(f_internal_bdd);
+      gsVerboseMsg("Resulting BDD: %P\n", f_bdd);
 
       ATtableDestroy(f_formula_to_bdd);
       ATtableDestroy(f_smallest);
@@ -155,7 +156,6 @@
 
       v_new_time_limit = f_deadline - time(0);
       if (v_new_time_limit > 0 || f_time_limit == 0) {
-        f_bdd = f_rewriter->fromRewriteFormat(f_internal_bdd);
         gsVerboseMsg("Simplifying the BDD:\n");
         f_bdd_simplifier->set_time_limit(std::max(v_new_time_limit, 0));
         f_bdd = f_bdd_simplifier->simplify(f_bdd);

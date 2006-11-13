@@ -54,6 +54,9 @@ class Confluence_Checker {
     /// \brief A boolean matrix, indicating which summands commute with one another.
     int* f_commutes;
 
+    /// \brief Enables the storage of obtained results.
+    bool f_enable_commutes;
+
     /// \brief Writes a dot file of the BDD created when checking the confluence of summands a_summand_number_1 and a_summand_number_2.
     void save_dot_file(int a_summand_number_1, int a_summand_number_2);
 
@@ -76,7 +79,8 @@ class Confluence_Checker {
       bool a_check_all = false,
       bool a_counter_example = false,
       bool a_generate_invariants = false,
-      char* a_dot_file_name = 0
+      char* a_dot_file_name = 0,
+      bool a_enable_commutes = true
     );
 
     /// \brief Destructor that frees the memory used by Confluence_Checker::f_dot_file_name.

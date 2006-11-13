@@ -270,24 +270,28 @@
         v_summand = ATAgetFirst(v_summands);
         v_summands = ATgetNext(v_summands);
 
-        if(f_commutes[(f_number_of_summands * v_summand_number) + a_summand_number] == 1) {
-          gsfprintf(stderr, ".");
-          v_summand_number++;
-          continue;
-        } else if (f_commutes[(f_number_of_summands * v_summand_number) + a_summand_number] == -1) {
-          if (f_check_all) {
-            gsfprintf(stderr, "-");
-          } else {
-            gsfprintf(stderr, "Not confluent with summand %d.\n", v_summand_number);
+        if (f_enable_commutes) {
+          if(f_commutes[(f_number_of_summands * v_summand_number) + a_summand_number] == 1) {
+            gsfprintf(stderr, ".");
+            v_summand_number++;
+            continue;
+          } else if (f_commutes[(f_number_of_summands * v_summand_number) + a_summand_number] == -1) {
+            if (f_check_all) {
+              gsfprintf(stderr, "-");
+            } else {
+              gsfprintf(stderr, "Not confluent with summand %d.", v_summand_number);
+            }
+            v_summand_number++;
+            v_is_confluent = false;
+            continue;
           }
-          v_summand_number++;
-          v_is_confluent = false;
-          continue;
         }
 
         if (f_disjointness_checker.disjoint(v_summand_number, a_summand_number)) {
           gsfprintf(stderr, ":");
-          f_commutes[(f_number_of_summands * a_summand_number) + v_summand_number] = 1;
+          if (f_enable_commutes) {
+            f_commutes[(f_number_of_summands * a_summand_number) + v_summand_number] = 1;
+          }
           v_summand_number++;
           continue;
         }
@@ -298,34 +302,42 @@
           f_bdd_prover.set_formula(v_condition);
           if (f_bdd_prover.is_tautology() == answer_yes) {
             gsfprintf(stderr, "+");
-            f_commutes[(f_number_of_summands * a_summand_number) + v_summand_number] = 1;
+            if (f_enable_commutes) {
+              f_commutes[(f_number_of_summands * a_summand_number) + v_summand_number] = 1;
+            }
           } else {
             if (f_generate_invariants) {
               v_new_invariant = f_bdd_prover.get_bdd();
-              gsVerboseMsg("Checking invariant: %P\n", v_new_invariant);
+              gsVerboseMsg("\nChecking invariant: %P\n", v_new_invariant);
               if (f_invariant_checker.check_invariant(v_new_invariant)) {
                 gsVerboseMsg("Invariant holds\n");
                 gsfprintf(stderr, "i");
-                f_commutes[(f_number_of_summands * a_summand_number) + v_summand_number] = 1;
+                if (f_enable_commutes) {
+                  f_commutes[(f_number_of_summands * a_summand_number) + v_summand_number] = 1;
+                }
               } else {
                 gsVerboseMsg("Invariant doesn't hold\n");
                 v_is_confluent = false;
-                f_commutes[(f_number_of_summands * a_summand_number) + v_summand_number] = -1;
+                if (f_enable_commutes) {
+                  f_commutes[(f_number_of_summands * a_summand_number) + v_summand_number] = -1;
+                }
                 if (f_check_all) {
                   gsfprintf(stderr, "-");
                 } else {
-                  gsfprintf(stderr, "Not confluent with summand %d.\n", v_summand_number);
+                  gsfprintf(stderr, "Not confluent with summand %d.", v_summand_number);
                 }
                 print_counter_example();
                 save_dot_file(a_summand_number, v_summand_number);
               }
             } else {
               v_is_confluent = false;
-              f_commutes[(f_number_of_summands * a_summand_number) + v_summand_number] = -1;
+              if (f_enable_commutes) {
+                f_commutes[(f_number_of_summands * a_summand_number) + v_summand_number] = -1;
+              }
               if (f_check_all) {
                 gsfprintf(stderr, "-");
               } else {
-                gsfprintf(stderr, "Not confluent with summand %d.\n", v_summand_number);
+                gsfprintf(stderr, "Not confluent with summand %d.", v_summand_number);
               }
               print_counter_example();
               save_dot_file(a_summand_number, v_summand_number);
@@ -351,7 +363,8 @@
 
     Confluence_Checker::Confluence_Checker(
       ATermAppl a_lpe, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
-      bool a_apply_induction, bool a_no_marking, bool a_check_all, bool a_counter_example, bool a_generate_invariants, char* a_dot_file_name
+      bool a_apply_induction, bool a_no_marking, bool a_check_all, bool a_counter_example, bool a_generate_invariants, char* a_dot_file_name,
+      bool a_enable_commutes
     ):
       f_disjointness_checker(ATAgetArgument(a_lpe, 5)),
       f_invariant_checker(a_lpe, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, false, false, 0),
@@ -372,6 +385,7 @@
         f_dot_file_name = strdup(a_dot_file_name);
       }
       f_generate_invariants = a_generate_invariants;
+      f_enable_commutes = a_enable_commutes;
     }
 
     // --------------------------------------------------------------------------------------------
@@ -394,7 +408,12 @@
       int v_summand_number = 1;
 
       f_number_of_summands = ATgetLength(v_summands);
-      f_commutes = (int*) calloc((f_number_of_summands + 1) * (f_number_of_summands + 1), sizeof(int));
+      if (f_enable_commutes) {
+        f_commutes = (int*) calloc((f_number_of_summands + 1) * (f_number_of_summands + 1), sizeof(int));
+        if (f_commutes == 0) {
+          gsErrorMsg("Insufficient memory. Try disabling the storage of previously obtained results.\n");
+        }
+      }
 
       while (!ATisEmpty(v_summands)) {
         v_summand = ATAgetFirst(v_summands);
@@ -406,9 +425,7 @@
             if (ATisEmpty(v_multi_actions)) {
               gsfprintf(stderr, "tau-summand %2d: ", v_summand_number);
               v_marked_summand = check_confluence_and_mark_summand(a_invariant, v_summand, v_summand_number, v_is_marked);
-              if (f_check_all) {
-                gsfprintf(stderr, "\n");
-              }
+              gsfprintf(stderr, "\n");
             }
           }
         }
@@ -423,8 +440,11 @@
       if (v_is_marked && !has_ctau_action(f_lpe)) {
         v_lpe = add_ctau_action(v_lpe);
       }
-      free(f_commutes);
-      f_commutes = 0;
+
+      if (f_enable_commutes) {
+        free(f_commutes);
+        f_commutes = 0;
+      }
 
       return v_lpe;
     }
