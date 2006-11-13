@@ -457,7 +457,10 @@ static ATerm get_repr(ATerm state)
           break;
         }
         nextl = ATinsert(nextl,NewState);
-        ATtablePut(number,NewState,(ATerm) ATmakeInt(0));
+        if ( ATtableGet(number,NewState) == NULL ) // This condition was missing in the report
+        {
+          ATtablePut(number,NewState,(ATerm) ATmakeInt(0));
+        }
       }
       if ( !notdone )
       {
@@ -811,10 +814,14 @@ bool generate_lts()
         ATerm NewState;
 
         nsgen = nstate->getNextStates(state,nsgen);
-        while ( nsgen->next(&Transition,&NewState) )
+        bool priority;
+        while ( nsgen->next(&Transition,&NewState,&priority) )
         {
-          tmp_trans = ATinsert(tmp_trans,(ATerm) Transition);
-          tmp_states = ATinsert(tmp_states,NewState);
+          if ( !priority ) // don't store confluent self loops
+          {
+            tmp_trans = ATinsert(tmp_trans,(ATerm) Transition);
+            tmp_states = ATinsert(tmp_states,NewState);
+          }
         }
 
         if ( nsgen->errorOccurred() )
@@ -880,13 +887,17 @@ bool generate_lts()
         nsgen = nstate->getNextStates(state,nsgen);
         ATermAppl Transition;
         ATerm NewState;
-        while ( nsgen->next(&Transition,&NewState) )
+        bool priority;
+        while ( nsgen->next(&Transition,&NewState,&priority) )
         {
-          deadlockstate = false;
-          bool b = add_transition(state,Transition,NewState);
-          if ( lgopts->bithashing && b )
+          if ( !priority ) // don't store confluent self loops
           {
-            add_to_queue(NewState);
+            deadlockstate = false;
+            bool b = add_transition(state,Transition,NewState);
+            if ( lgopts->bithashing && b )
+            {
+              add_to_queue(NewState);
+            }
           }
         }
         
@@ -980,35 +991,39 @@ bool generate_lts()
         ATerm NewState;
         bool new_state = false;
         bool trans_seen_new = false;
-        if ( nsgen->next(&Transition,&NewState) )
+        bool priority;
+        if ( nsgen->next(&Transition,&NewState,&priority) )
         {
-          top_trans_seen = true;
-          if ( add_transition(state,Transition,NewState) )
+          if ( !priority ) // don't store confluent self loops
           {
-            new_state = true;
-            if ( (nsgens_num == nsgens_size) && (nsgens_size < lgopts->todo_max) )
+            top_trans_seen = true;
+            if ( add_transition(state,Transition,NewState) )
             {
-              nsgens_size = nsgens_size*2;
-              if ( nsgens_size > lgopts->todo_max )
+              new_state = true;
+              if ( (nsgens_num == nsgens_size) && (nsgens_size < lgopts->todo_max) )
               {
-                nsgens_size = lgopts->todo_max;
+                nsgens_size = nsgens_size*2;
+                if ( nsgens_size > lgopts->todo_max )
+                {
+                  nsgens_size = lgopts->todo_max;
+                }
+                nsgens = (NextStateGenerator **) realloc(nsgens,nsgens_size*sizeof(NextStateGenerator *));
+                if ( nsgens == NULL )
+                {
+                  gsErrorMsg("cannot enlarge state stack\n");
+                  exit(1);
+                }
+                for (unsigned long i=nsgens_num; i<nsgens_size; i++)
+                {
+                  nsgens[i] = NULL;
+                }
               }
-              nsgens = (NextStateGenerator **) realloc(nsgens,nsgens_size*sizeof(NextStateGenerator *));
-              if ( nsgens == NULL )
+              if ( nsgens_num < nsgens_size )
               {
-                gsErrorMsg("cannot enlarge state stack\n");
-                exit(1);
+                nsgens[nsgens_num] = nstate->getNextStates(NewState,nsgens[nsgens_num]);
+                nsgens_num++;
+                trans_seen_new = false;
               }
-              for (unsigned long i=nsgens_num; i<nsgens_size; i++)
-              {
-                nsgens[i] = NULL;
-              }
-            }
-            if ( nsgens_num < nsgens_size )
-            {
-              nsgens[nsgens_num] = nstate->getNextStates(NewState,nsgens[nsgens_num]);
-              nsgens_num++;
-              trans_seen_new = false;
             }
           }
         } else {
