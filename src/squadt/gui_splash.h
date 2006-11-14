@@ -163,8 +163,13 @@ namespace squadt {
       progress_indicator->SetValue((current_category++ * progress_indicator->GetRange()) / number_of_categories);
 
       category = c;
+      operation.clear();
+      operand.clear();
 
       changed = true;
+
+      display->Refresh();
+      display->Update();
     }
 
     /**
@@ -193,6 +198,8 @@ namespace squadt {
         progress_indicator->SetValue(new_amount);
 
         display->Refresh();
+
+        wxTheApp->Yield();
       }
     }
 
@@ -203,9 +210,10 @@ namespace squadt {
 
       progress_indicator->SetValue(progress_indicator->GetRange());
 
+      display->Refresh();
       display->Update();
 
-      wxYield();
+      wxTheApp->Yield();
       wxSleep(1);
 
       Show(false);

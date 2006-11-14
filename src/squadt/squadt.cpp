@@ -175,13 +175,10 @@ bool Squadt::OnInit() {
       while (ti.IsAlive()) {
         splash_window->update();
      
-        wxYield();
+        wxApp::Yield();
       }
-     
+
       splash_window->set_category("Initialising components");
-     
-      /* Disable splash */
-      splash_window->set_done();
 
       /* Initialise main application window */
       SetTopWindow(new squadt::GUI::main());
@@ -191,6 +188,9 @@ bool Squadt::OnInit() {
       }
 
       SetUseBestVisual(true);
+
+      /* Disable splash */
+      splash_window->set_done();
     }
     catch (sip::listening_exception& e) {
       /* Disable splash */

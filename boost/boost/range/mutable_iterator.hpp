@@ -8,8 +8,8 @@
 // For more information, see http://www.boost.org/libs/range/
 //
 
-#ifndef BOOST_RANGE_CONST_ITERATOR_HPP
-#define BOOST_RANGE_CONST_ITERATOR_HPP
+#ifndef BOOST_RANGE_MUTABLE_ITERATOR_HPP
+#define BOOST_RANGE_MUTABLE_ITERATOR_HPP
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1200)
 # pragma once
@@ -18,10 +18,10 @@
 #include <boost/range/config.hpp>
 
 #ifdef BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
-#include <boost/range/detail/const_iterator.hpp>
+#include <boost/range/detail/iterator.hpp>
 #else
 
-#include <boost/type_traits/remove_const.hpp>
+#include <boost/iterator/iterator_traits.hpp>
 #include <cstddef>
 #include <utility>
 
@@ -32,9 +32,9 @@ namespace boost
     //////////////////////////////////////////////////////////////////////////
     
     template< typename C >
-    struct range_const_iterator
+    struct range_mutable_iterator
     {
-        typedef BOOST_DEDUCED_TYPENAME C::const_iterator type;
+        typedef BOOST_DEDUCED_TYPENAME C::iterator type;
     };
     
     //////////////////////////////////////////////////////////////////////////
@@ -42,19 +42,19 @@ namespace boost
     //////////////////////////////////////////////////////////////////////////
 
     template< typename Iterator >
-    struct range_const_iterator< std::pair<Iterator,Iterator> >
+    struct range_mutable_iterator< std::pair<Iterator,Iterator> >
     {
         typedef Iterator type;
     };
-    
+
     //////////////////////////////////////////////////////////////////////////
     // array
     //////////////////////////////////////////////////////////////////////////
 
     template< typename T, std::size_t sz >
-    struct range_const_iterator< T[sz] >
+    struct range_mutable_iterator< T[sz] >
     {
-        typedef const T* type;
+        typedef T* type;
     };
 
 } // namespace boost

@@ -1,5 +1,5 @@
-#ifndef BOOST_DETAIL_SP_COUNTED_BASE_GCC_PPC_HPP_INCLUDED
-#define BOOST_DETAIL_SP_COUNTED_BASE_GCC_PPC_HPP_INCLUDED
+#ifndef BOOST_DETAIL_SP_COUNTED_BASE_CW_X86_HPP_INCLUDED
+#define BOOST_DETAIL_SP_COUNTED_BASE_CW_X86_HPP_INCLUDED
 
 // MS compatible compilers support #pragma once
 
@@ -8,10 +8,11 @@
 #endif
 
 //
-//  detail/sp_counted_base_gcc_ppc.hpp - g++ on PowerPC
+//  detail/sp_counted_base_cw_x86.hpp - CodeWarrion on 486+
 //
 //  Copyright (c) 2001, 2002, 2003 Peter Dimov and Multi Media Ltd.
 //  Copyright 2004-2005 Peter Dimov
+//  Copyright 2005 Rene Rivera
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -32,74 +33,50 @@ namespace boost
 namespace detail
 {
 
-inline void atomic_increment( int * pw )
+inline int atomic_exchange_and_add( int * pw, int dv )
 {
-    // ++*pw;
+    // int r = *pw;
+    // *pw += dv;
+    // return r;
 
-    int tmp;
-
-    __asm__
-    (
-        "0:\n\t"
-        "lwarx %1, 0, %2\n\t"
-        "addi %1, %1, 1\n\t"
-        "stwcx. %1, 0, %2\n\t"
-        "bne- 0b":
-
-        "=m"( *pw ), "=&b"( tmp ):
-        "r"( pw ), "m"( *pw ):
-        "cc"
-    );
+    asm
+    {
+        mov esi, [pw]
+        mov eax, dv
+        lock xadd dword ptr [esi], eax
+    }
 }
 
-inline int atomic_decrement( int * pw )
+inline void atomic_increment( int * pw )
 {
-    // return --*pw;
+    //atomic_exchange_and_add( pw, 1 );
 
-    int rv;
-
-    __asm__ __volatile__
-    (
-        "sync\n\t"
-        "0:\n\t"
-        "lwarx %1, 0, %2\n\t"
-        "addi %1, %1, -1\n\t"
-        "stwcx. %1, 0, %2\n\t"
-        "bne- 0b\n\t"
-        "isync":
-
-        "=m"( *pw ), "=&b"( rv ):
-        "r"( pw ), "m"( *pw ):
-        "memory", "cc"
-    );
-
-    return rv;
+    asm
+    {
+        mov esi, [pw]
+        lock inc dword ptr [esi]
+    }
 }
 
 inline int atomic_conditional_increment( int * pw )
 {
-    // if( *pw != 0 ) ++*pw;
-    // return *pw;
+    // int rv = *pw;
+    // if( rv != 0 ) ++*pw;
+    // return rv;
 
-    int rv;
-
-    __asm__
-    (
-        "0:\n\t"
-        "lwarx %1, 0, %2\n\t"
-        "cmpwi %1, 0\n\t"
-        "beq 1f\n\t"
-        "addi %1, %1, 1\n\t"
-        "1:\n\t"
-        "stwcx. %1, 0, %2\n\t"
-        "bne- 0b":
-
-        "=m"( *pw ), "=&b"( rv ):
-        "r"( pw ), "m"( *pw ):
-        "cc"
-    );
-
-    return rv;
+    asm
+    {
+        mov esi, [pw]
+        mov eax, dword ptr [esi]
+    L0:
+        test eax, eax
+        je L1
+        mov ebx, eax
+        inc ebx
+        lock cmpxchg dword ptr [esi], ebx
+        jne L0
+    L1:
+    }
 }
 
 class sp_counted_base
@@ -148,7 +125,7 @@ public:
 
     void release() // nothrow
     {
-        if( atomic_decrement( &use_count_ ) == 0 )
+        if( atomic_exchange_and_add( &use_count_, -1 ) == 1 )
         {
             dispose();
             weak_release();
@@ -162,7 +139,7 @@ public:
 
     void weak_release() // nothrow
     {
-        if( atomic_decrement( &weak_count_ ) == 0 )
+        if( atomic_exchange_and_add( &weak_count_, -1 ) == 1 )
         {
             destroy();
         }
@@ -178,4 +155,4 @@ public:
 
 } // namespace boost
 
-#endif  // #ifndef BOOST_DETAIL_SP_COUNTED_BASE_GCC_PPC_HPP_INCLUDED
+#endif  // #ifndef BOOST_DETAIL_SP_COUNTED_BASE_GCC_X86_HPP_INCLUDED

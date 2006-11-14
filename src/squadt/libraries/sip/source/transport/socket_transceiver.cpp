@@ -12,7 +12,7 @@ namespace transport {
 
     boost::asio::ip::tcp::resolver socket_transceiver::resolver(scheduler.io_service);
 
-    transport::port_t socket_transceiver::default_port = 10946;
+    transport::port_t socket_transceiver::default_port = 10947;
 
     boost::asio::socket_base::keep_alive option_keep_alive(true);
     boost::asio::socket_base::linger     option_linger(false, 0);

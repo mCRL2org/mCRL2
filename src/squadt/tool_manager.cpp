@@ -31,7 +31,7 @@ namespace squadt {
   /** \brief Identifier option scheme for easy command generation */
   const char* identifier_pattern     = "--si-identifier=%s";
 
-  const long tool_manager::default_tcp_port = 10946;
+  const long tool_manager::default_tcp_port = 10947;
 
   const sip::tool::capabilities::sptr tool::no_capabilities(new sip::tool::capabilities());
 
@@ -176,21 +176,21 @@ namespace squadt {
   void tool_manager::query_tools(boost::function < void (const std::string&) > h) {
     using namespace boost;
 
-    tool_list failed_tools;
+    tool_list retry_list;
 
-    for (tool_list::const_iterator i = tools.begin(); i != tools.end(); ++i) {
-      h((*i)->get_name());
+    BOOST_FOREACH(tool_list::value_type t, tools) {
+      h(t->get_name());
 
-      if (!query_tool(*(*i))) {
-        failed_tools.push_back(*i);
+      if (!query_tool(*t)) {
+        retry_list.push_back(t);
       }
     }
 
     /* Retry initialisation of failed tools */
-    for (tool_list::const_iterator i = failed_tools.begin(); i != failed_tools.end(); ++i) {
-      h((*i)->get_name());
+    BOOST_FOREACH(tool_list::value_type t, retry_list) {
+      h(t->get_name());
 
-      if (!query_tool(*(*i))) {
+      if (!query_tool(*t)) {
         /* TODO log failure */
       }
     }

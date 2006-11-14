@@ -1,17 +1,13 @@
-#ifndef BOOST_DETAIL_SP_COUNTED_BASE_W32_HPP_INCLUDED
-#define BOOST_DETAIL_SP_COUNTED_BASE_W32_HPP_INCLUDED
-
-// MS compatible compilers support #pragma once
-
-#if defined(_MSC_VER) && (_MSC_VER >= 1020)
-# pragma once
-#endif
+#ifndef BOOST_DETAIL_SP_COUNTED_BASE_SOLARIS_HPP_INCLUDED
+#define BOOST_DETAIL_SP_COUNTED_BASE_SOLARIS_HPP_INCLUDED
 
 //
-//  detail/sp_counted_base_w32.hpp
+//  detail/sp_counted_base_solaris.hpp
+//   based on: detail/sp_counted_base_w32.hpp
 //
 //  Copyright (c) 2001, 2002, 2003 Peter Dimov and Multi Media Ltd.
 //  Copyright 2004-2005 Peter Dimov
+//  Copyright 2006 Michael van der Westhuizen
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -24,9 +20,8 @@
 //  formulation
 //
 
-#include <boost/detail/interlocked.hpp>
-#include <boost/detail/workaround.hpp>
 #include <typeinfo>
+#include <atomic.h>
 
 namespace boost
 {
@@ -41,8 +36,8 @@ private:
     sp_counted_base( sp_counted_base const & );
     sp_counted_base & operator= ( sp_counted_base const & );
 
-    long use_count_;        // #shared
-    long weak_count_;       // #weak + (#shared != 0)
+    uint32_t use_count_;        // #shared
+    uint32_t weak_count_;       // #weak + (#shared != 0)
 
 public:
 
@@ -70,34 +65,22 @@ public:
 
     void add_ref_copy()
     {
-        BOOST_INTERLOCKED_INCREMENT( &use_count_ );
+        atomic_inc_32( &use_count_ );
     }
 
     bool add_ref_lock() // true on success
     {
         for( ;; )
         {
-            long tmp = static_cast< long const volatile& >( use_count_ );
+            uint32_t tmp = static_cast< uint32_t const volatile& >( use_count_ );
             if( tmp == 0 ) return false;
-
-#if defined( BOOST_MSVC ) && BOOST_WORKAROUND( BOOST_MSVC, == 1200 )
-
-            // work around a code generation bug
-
-            long tmp2 = tmp + 1;
-            if( BOOST_INTERLOCKED_COMPARE_EXCHANGE( &use_count_, tmp2, tmp ) == tmp2 - 1 ) return true;
-
-#else
-
-            if( BOOST_INTERLOCKED_COMPARE_EXCHANGE( &use_count_, tmp + 1, tmp ) == tmp ) return true;
-
-#endif
+            if( atomic_cas_32( &use_count_, tmp, tmp + 1 ) == tmp ) return true;
         }
     }
 
     void release() // nothrow
     {
-        if( BOOST_INTERLOCKED_DECREMENT( &use_count_ ) == 0 )
+        if( atomic_dec_32_nv( &use_count_ ) == 0 )
         {
             dispose();
             weak_release();
@@ -106,12 +89,12 @@ public:
 
     void weak_add_ref() // nothrow
     {
-        BOOST_INTERLOCKED_INCREMENT( &weak_count_ );
+        atomic_inc_32( &weak_count_ );
     }
 
     void weak_release() // nothrow
     {
-        if( BOOST_INTERLOCKED_DECREMENT( &weak_count_ ) == 0 )
+        if( atomic_dec_32_nv( &weak_count_ ) == 0 )
         {
             destroy();
         }
@@ -127,4 +110,4 @@ public:
 
 } // namespace boost
 
-#endif  // #ifndef BOOST_DETAIL_SP_COUNTED_BASE_W32_HPP_INCLUDED
+#endif  // #ifndef BOOST_DETAIL_SP_COUNTED_BASE_SOLARIS_HPP_INCLUDED

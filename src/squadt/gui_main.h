@@ -121,8 +121,6 @@ namespace squadt {
       /* Add widgets */
       build();
 
-      /* Build the index (on the tool database) that is used to populate the context menus */
-
       /* Default size is the minimum size */
       SetMinSize(wxDefaultSize);
 

@@ -25,17 +25,20 @@ namespace squadt {
      * \attention Not thread safe
      **/
     void type_registry::build_index() {
+      tool_manager::tool_list const& tools = global_tool_manager->get_tools(); 
 
       /* Make sure the map is empty */
       categories_for_format.clear();
 
-      BOOST_FOREACH(tool::sptr t, global_tool_manager->get_tools()) {
+      for (tool_manager::tool_list::const_iterator i = tools.begin(); i != tools.end(); ++i) { 
+        tool::sptr t = *i;
+
         BOOST_FOREACH(sip::tool::capabilities::input_combination j, t->get_capabilities()->get_input_combinations()) {
           if (categories_for_format.find(j.format) == categories_for_format.end()) {
             /* Format unknown, create new map */
             tools_for_category temporary;
 
-            categories_for_format[j.format] = temporary;
+            categories_for_format.insert(std::make_pair(j.format,temporary));
           }
 
           categories_for_format[j.format].insert(std::make_pair(j.category, t));
