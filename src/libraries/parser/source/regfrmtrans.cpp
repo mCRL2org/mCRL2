@@ -186,7 +186,7 @@ ATermAppl create_new_var_name(bool cap, int index)
     case 1:
       base = cap?'Y':'y';
       break;
-    case 2:
+    default:
       base = cap?'Z':'z';
       break;
   }
