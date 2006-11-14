@@ -81,6 +81,7 @@ rule boost_library ( name : use-system-boost ? ) {
                <include>$(BOOST_ROOT) # currently needed for ASIO
              :
              : <define>BOOST_ALL_NO_LIB=1
+               <include>$(BOOST_ROOT) # currently needed for ASIO and foreach
              ;
     }
     else {
