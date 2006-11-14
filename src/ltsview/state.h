@@ -48,6 +48,7 @@ class State
     float     getPosition() const;
     Utils::Point3D getPositionAbs() const;
     int	      getRank() const;
+    int       getSlot() const;
     void      getSubordinates( std::set< State* > &ss ) const;
     void      getSuperiors( std::set< State* > &ss ) const;
     int	      getValueIndexOfParam( int paramIndex );
@@ -60,6 +61,7 @@ class State
     void      setPosition( float p );
     void      setPositionAbs( Utils::Point3D p );
     void      setRank( int r );
+    void      setSlot( int s );
     void      unmark();
    
 
@@ -76,6 +78,7 @@ class State
     Utils::Point3D	  positionAbs;
     int			  rank;
     //bool		  selected;
+    int                   slot; // The slot this state occupies
     std::vector< ATerm >  stateVector;
     ATermList		  stateVectorAT;
     std::set< State* >	  subordinates;

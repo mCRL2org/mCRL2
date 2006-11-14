@@ -471,7 +471,20 @@ void LTS::positionClusters()
 	  c_it != r_it->end() ; ++c_it )
     {
       // compute the size of this cluster and the positions of its descendants
+      //std::cerr << "Computing..." << endl;
       (**c_it).computeSizeAndDescendantPositions();
+      //std::cerr << "Done!" << endl;
+      //std::cerr << "Rank: " << clustersInRank.rend() - r_it  << endl
+                << "Slots: " << (**c_it).getNumberOfSlots() << endl
+                << "Slot positions: " << endl;
+      for (int i = 0; i < (**c_it).getNumberOfSlots(); ++i)
+      {
+        Slot slot = (**c_it).getSlot(i);
+        //std::cerr << "  Slot " << i << ": " << slot.position << endl;
+      }
+
+      //std::cerr << endl;
+      
     }
   }
   // position the initial state's cluster
@@ -481,9 +494,7 @@ void LTS::positionClusters()
 void LTS::positionStates()
 {
   vector< State* > undecided = edgeLengthBottomUp();
-  std::cerr << undecided.size() << endl;
   undecided = edgeLengthTopDown( undecided );
-  std::cerr << undecided.size() <<endl;
   //TODO: Change to call of correct positioning functions.
   
   /*for ( vector< vector< Cluster* > >::iterator r_it = clustersInRank.begin() ;
@@ -546,11 +557,16 @@ vector< State* > LTS::edgeLengthBottomUp()
           (*state_it)->setPosition(-1.0f);
 
           // If this cluster is not centered and there is only one node in this 
-          // cluster, the centering is permanent, otherwise, it's temporary.
+          // cluster, the centering is permanent and we can put it in a slot, 
+          // otherwise, it's temporary.
           if (currCluster->getPosition() < -.9 &&
               currCluster->getNumberOfStates() != 1) {
             undecided.push_back(*state_it);
-          } 
+          }
+          else {
+            int slot = currCluster->occupySlot(-1.0f);
+            (*state_it)->setSlot(slot);
+          }
           break;
         }
         case 1:
@@ -586,13 +602,26 @@ vector< State* > LTS::edgeLengthBottomUp()
             
             // Check if there is only one subordinate. If so, the centering is
             // temporary, to prevent chains of centered nodes.
+            // Else, it is pernament and we can put it in a slot.
             if (subordinates.size() == 1) {
               undecided.push_back(*state_it);
+            }
+            else {
+              int slot = currCluster->occupySlot(-1.0f);
+              (*state_it)->setSlot(slot);
             }
           }
           else {
             // Transform vecSum into an angle, assign it to state position.
-            (*state_it)->setPosition(rad_to_deg(vec_to_ang(vecSum)));
+            float pos = rad_to_deg(vec_to_ang(vecSum));
+
+            if (pos < 0) {
+              pos = 360 + pos;
+            }
+            
+            (*state_it)->setPosition(pos);
+            int slot = currCluster->occupySlot(pos);
+            (*state_it)->setSlot(slot);
           }
           
           break;
@@ -635,15 +664,20 @@ vector< State* > LTS::edgeLengthBottomUp()
           if (vec_length(vecSum) < tau) {
             // vecSum is sufficiently small, center node.
             (*state_it)->setPosition(-1.0f);
+            int slot = currCluster->occupySlot(-1.0f);
+            (*state_it)->setSlot(slot);
           }
           else {
-            float position = vec_to_ang(vecSum);
+            float position = rad_to_deg(vec_to_ang(vecSum));
 
             if (position < 0) {
-              position = -position;
+              position = 360 + position;
             }
 
-            (*state_it)->setPosition(rad_to_deg(position));
+            (*state_it)->setPosition(position);
+            int slot = currCluster->occupySlot(position);
+            (*state_it)->setSlot(slot);
+            
           }
         }
       }
@@ -672,13 +706,16 @@ vector<State*> LTS::edgeLengthTopDown( vector< State* >  ss)
 
   // A cluster can have at most one ancestor, meaning we check the 
   // hasAncestor() function.
-    if (currCluster->getAncestor() != NULL ) {
+    if (currCluster->getAncestor() == NULL ) {
       // No ancestor cluster. This is the initial cluster.
       // Center the state.
       (*state_it)->setPosition(-1.0f);
 
       // There is only one node in this cluster, the centering is 
       // permanent.
+      int slot = currCluster->occupySlot(-1.0f);
+      (*state_it)->setSlot(slot);
+      
     }
     else  {
       // One ancestor cluster.
@@ -715,16 +752,22 @@ vector<State*> LTS::edgeLengthTopDown( vector< State* >  ss)
         if (superiors.size() == 1) {
           undecided.push_back(*state_it);
         }
+        else {
+          int slot = currCluster->occupySlot(-1.0f);
+          (*state_it)->setSlot(slot);
+        }
       }
       else {
         // Transform vecSum into an angle, assign it to state position.
         float position = rad_to_deg(vec_to_ang(vecSum));
         
         if (position < 0) {
-          position = -position;
+          position = 360 + position;
         }
 
         (*state_it)->setPosition(position);
+        int slot = currCluster->occupySlot(position);
+        (*state_it)->setSlot(slot);
       }
     }
   }      

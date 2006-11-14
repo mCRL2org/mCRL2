@@ -99,6 +99,17 @@ void State::setRank( int r )
   rank = r;
 }
 
+int State::getSlot() const
+{
+  return slot;
+}
+
+void State::setSlot( int s )
+{
+  slot = s;
+}
+
+
 float State::getPosition() const
 {
   return position;

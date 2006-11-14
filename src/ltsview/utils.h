@@ -72,8 +72,8 @@ namespace Utils
   
   struct Slot
   {
-    float position;  //INV: 0 <= position < 2 * PI
-    bool  free;    
+    float position;  //INV: 0 <= position < 360
+    int  occupying;  //INV: 0 <= occupying 
   };
 
   struct Vect

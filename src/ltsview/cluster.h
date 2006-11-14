@@ -62,17 +62,17 @@ class Cluster
     Cluster*  getAncestor() const;
 
     // Functions on states
-    void      addState( State* s );
-    void      getStates( std::vector< State* > &ss ) const;
-    int       getNumberOfStates() const;
-    bool      hasDeadlock() const;
-    bool      hasMarkedState() const;
-    void      markState();
-    void      setDeadlock( bool b );
-    void      unmarkState();
-    int       getNumberOfSlots();
-    void      getSlots( std::vector< Utils::Slot > &ss) const;
-    void      occupySlot( int slot );
+    void         addState( State* s );
+    void         getStates( std::vector< State* > &ss ) const;
+    int          getNumberOfStates() const;
+    bool         hasDeadlock() const;
+    bool         hasMarkedState() const;
+    void         markState();
+    void         setDeadlock( bool b );
+    void         unmarkState();
+    int          getNumberOfSlots();
+    Utils::Slot  getSlot( int index) const;
+    int          occupySlot( float pos );
 
     // Functions on transitions
     void      addActionLabel( ATerm l );
