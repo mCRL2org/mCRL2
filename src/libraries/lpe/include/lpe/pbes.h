@@ -403,11 +403,8 @@ void tmp(ATermAppl t, UnaryPredicate pred, atermpp::set<propositional_variable>&
 // equation_system
 /// \brief equation_system.
 ///
-class equation_system
+class equation_system: public atermpp::vector<pbes_equation>
 {
-  protected:
-    atermpp::vector<pbes_equation> m_equations;
-
   public:
     equation_system()
     {}
@@ -415,27 +412,13 @@ class equation_system
     /// Returns a equation_system containing equation e.
     equation_system(pbes_equation e)
     {
-      m_equations.push_back(e);
+      push_back(e);
     }
 
     equation_system(pbes_equation_list l)
-      : m_equations(l.begin(), l.end())
+      : atermpp::vector<pbes_equation>(l.begin(), l.end())
     {}
   
-    /// Returns the equations.
-    ///
-    const atermpp::vector<pbes_equation>& equations() const
-    {
-      return m_equations;
-    }
-
-    /// Returns the equations.
-    ///
-    atermpp::vector<pbes_equation>& equations()
-    {
-      return m_equations;
-    }
-
     /// Applies a substitution to this LPE and returns the result.
     /// The Substitution object must supply the method aterm operator()(aterm).
     ///
@@ -452,7 +435,7 @@ class equation_system
     equation_system operator+(equation_system other) const
     {
       equation_system result(*this);
-      result.m_equations.insert(result.m_equations.end(), other.m_equations.begin(), other.m_equations.end());
+      result.insert(result.end(), other.begin(), other.end());
       return result;
     }
 
@@ -461,7 +444,7 @@ class equation_system
     equation_system operator+(pbes_equation e) const
     {
       equation_system result(*this);
-      result.m_equations.push_back(e);
+      result.push_back(e);
       return result;
     }
 
@@ -470,7 +453,7 @@ class equation_system
     atermpp::set<propositional_variable> binding_variables() const
     {
       atermpp::set<propositional_variable> result;
-      for (atermpp::vector<pbes_equation>::const_iterator i = m_equations.begin(); i != m_equations.end(); ++i)
+      for (const_iterator i = begin(); i != end(); ++i)
       {
         result.insert(i->variable());
       }
@@ -482,7 +465,7 @@ class equation_system
     atermpp::set<propositional_variable> occurring_variables() const
     {
       atermpp::set<propositional_variable> result;
-      for (atermpp::vector<pbes_equation>::const_iterator i = m_equations.begin(); i != m_equations.end(); ++i)
+      for (const_iterator i = begin(); i != end(); ++i)
       {
         // TODO: replace tmp by an aterm algorithm
         tmp(i->formula(), is_state_variable(), result);
@@ -504,7 +487,7 @@ class equation_system
     bool is_well_formed() const
     {
       atermpp::set<propositional_variable> variables;
-      for (atermpp::vector<pbes_equation>::const_iterator i = m_equations.begin(); i != m_equations.end(); ++i)
+      for (const_iterator i = begin(); i != end(); ++i)
       {
         propositional_variable p = i->variable();
         atermpp::set<propositional_variable>::iterator j = variables.find(p);
@@ -527,7 +510,7 @@ class equation_system
     ///
     std::string to_string() const
     {
-      pbes_equation_list eqn(m_equations.begin(), m_equations.end());
+      pbes_equation_list eqn(begin(), end());
       return "jammer!";
     }
 };
@@ -603,7 +586,7 @@ class pbes
 
     operator ATermAppl() const
     {
-      pbes_equation_list l(m_equations.equations().begin(), m_equations.equations().end());
+      pbes_equation_list l(m_equations.begin(), m_equations.end());
       return gsMakePBES(m_data, l, m_initial_state);
     }
 
@@ -680,8 +663,8 @@ inline
 std::ostream& operator<<(std::ostream& to, const equation_system& p)
 {
   // return to << p.to_string();
-  to << "# equations: " << p.equations().size() << std::endl;
-  for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+  to << "# equations: " << p.size() << std::endl;
+  for (atermpp::vector<pbes_equation>::const_iterator i = p.begin(); i != p.end(); ++i)
   {
     to << "(" << *i << ")" << std::endl;
   }

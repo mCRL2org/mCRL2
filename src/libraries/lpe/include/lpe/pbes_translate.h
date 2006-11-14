@@ -423,8 +423,8 @@ pbes pbes_translate(state_formula f, specification spec)
   data_specification dataspec(spec.sorts(), spec.constructors(), spec.mappings(), spec.equations());
 
   // create initial state
-  assert(e.equations().size() > 0);
-  pbes_equation e1 = e.equations().front();
+  assert(e.size() > 0);
+  pbes_equation e1 = e.front();
   aterm_string Xe(e1.variable().name());
   assert(is_mu(f) || is_nu(f));
   aterm_string Xf(arg1(f));
