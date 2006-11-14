@@ -475,8 +475,8 @@ void LTS::positionClusters()
       (**c_it).computeSizeAndDescendantPositions();
       //std::cerr << "Done!" << endl;
       //std::cerr << "Rank: " << clustersInRank.rend() - r_it  << endl
-                << "Slots: " << (**c_it).getNumberOfSlots() << endl
-                << "Slot positions: " << endl;
+                //<< "Slots: " << (**c_it).getNumberOfSlots() << endl
+                //<< "Slot positions: " << endl;
       for (int i = 0; i < (**c_it).getNumberOfSlots(); ++i)
       {
         Slot slot = (**c_it).getSlot(i);
