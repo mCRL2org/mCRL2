@@ -568,7 +568,11 @@ EnumeratorSolutionsStandard::~EnumeratorSolutionsStandard()
 	ATunprotectList(&enum_vars);
 	ATunprotect(&enum_expr);
 
+	if ( ss_stack_size != 0 )
+		ATunprotectArray((ATerm *) ss_stack);
 	free(ss_stack);
+	if ( fs_stack_size != 0 )
+		ATunprotectArray((ATerm *) fs_stack);
 	free(fs_stack);
 }
 
