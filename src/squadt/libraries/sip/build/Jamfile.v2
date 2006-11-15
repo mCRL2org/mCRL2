@@ -53,9 +53,11 @@ alias messenger
 lib sip_controller
     : controller.cpp
       messenger
+    : <threading>multi
     ;
 
 lib sip_tool
     : tool.cpp
       messenger
+    : <threading>multi
     ;
