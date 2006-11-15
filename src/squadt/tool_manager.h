@@ -10,6 +10,7 @@
 #include <string>
 
 #include <boost/bind.hpp>
+#include <boost/range/iterator_range.hpp>
 
 #include <sip/controller.h>
 
@@ -61,6 +62,9 @@ namespace squadt {
  
       /** \brief Convenience type alias the list of tools, indexed by main input format */
       typedef std::multimap < storage_format, tool::sptr >                    tool_map;
+
+      /** \brief Constant tool sequence type */
+      typedef boost::iterator_range < tool_list::const_iterator >             tool_const_sequence;
 
     private:
  
@@ -123,7 +127,7 @@ namespace squadt {
       tool_manager();
  
       /** \brief Destructor */
-      inline ~tool_manager();
+      ~tool_manager();
  
       /** \brief Write configuration to stream */
       void write(std::ostream& = std::cout) const;
@@ -138,13 +142,13 @@ namespace squadt {
       static tool_manager::ptr read(xml2pp::text_reader&);
  
       /** \brief Establishes whether the named tool is among the known tools or not */
-      inline bool exists(const std::string&) const;
+      bool exists(const std::string&) const;
 
       /** \brief Returns a tool by its name */
-      inline tool::sptr find(const std::string&) const;
+      tool::sptr find(const std::string&) const;
 
       /** \brief Add a new tool to the catalog */
-      inline bool add(const std::string&, const std::string&);
+      bool add(const std::string&, const std::string&);
  
       /** \brief Get the tool_capabilities object for all known tools */
       void query_tools();
@@ -156,10 +160,10 @@ namespace squadt {
       bool query_tool(tool&);
 
       /** \brief Get the list of known tools */
-      inline const tool_list& get_tools();
+      tool_const_sequence get_tools();
  
       /** \brief Get the number of known tools */
-      inline const unsigned int number_of_tools() const;
+      const unsigned int number_of_tools() const;
 
       /** \brief Gets the maximum number of tool instances */
       size_t get_maximum_instance_count() const;
@@ -175,8 +179,8 @@ namespace squadt {
     terminate();
   }
 
-  inline const tool_manager::tool_list& tool_manager::get_tools() {
-    return (tools);
+  inline tool_manager::tool_const_sequence tool_manager::get_tools() {
+    return (boost::make_iterator_range(tools));
   }
 
   inline const unsigned int tool_manager::number_of_tools() const {

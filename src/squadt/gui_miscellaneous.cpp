@@ -25,15 +25,14 @@ namespace squadt {
      * \attention Not thread safe
      **/
     void type_registry::build_index() {
-      tool_manager::tool_list const& tools = global_tool_manager->get_tools(); 
+      tool_manager::tool_const_sequence tools = global_tool_manager->get_tools();
 
       /* Make sure the map is empty */
       categories_for_format.clear();
 
-      for (tool_manager::tool_list::const_iterator i = tools.begin(); i != tools.end(); ++i) { 
-        tool::sptr t = *i;
+      for (tool_manager::tool_const_sequence::const_iterator t = tools.begin(); t != tools.end(); ++t) {
 
-        BOOST_FOREACH(sip::tool::capabilities::input_combination j, t->get_capabilities()->get_input_combinations()) {
+        BOOST_FOREACH(sip::tool::capabilities::input_combination j, (*t)->get_capabilities()->get_input_combinations()) {
           if (categories_for_format.find(j.format) == categories_for_format.end()) {
             /* Format unknown, create new map */
             tools_for_category temporary;
@@ -41,7 +40,7 @@ namespace squadt {
             categories_for_format.insert(std::make_pair(j.format,temporary));
           }
 
-          categories_for_format[j.format].insert(std::make_pair(j.category, t));
+          categories_for_format[j.format].insert(std::make_pair(j.category, *t));
         }
       }
     }
@@ -59,6 +58,11 @@ namespace squadt {
         tools_for_category const& p((*i).second);
 
         range = boost::make_iterator_range(p.begin(), p.end());
+      }
+      else { // return an empty sequence
+        type_registry::tool_sequence::iterator i;
+
+        range = boost::make_iterator_range(i, i);
       }
 
       return (range);
