@@ -136,7 +136,7 @@ void squadt_lpe2lts::user_interactive_configuration(sip::configuration& c)
   squadt_utility::radio_button_helper<exploration_strategy>
     expl_selector(explbox,es_breadth, "breadth-first");
   expl_selector.associate(explbox,es_depth, "depth-first");
-  expl_selector.associate(explbox,es_random, "random-first");
+  expl_selector.associate(explbox,es_random, "random");
   column->add(explbox,layout::left);
 
   column->add(new label(" "),layout::left);
