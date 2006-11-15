@@ -135,7 +135,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   h = new layout::horizontal_box();
 
   h->add(new label("LPD file name : "));
-  text_field* lpd_file_field = static_cast < text_field* > (h->add(new text_field(c.get_input_name(".lpe"))));
+  text_field* lpd_file_field = static_cast < text_field* > (h->add(new text_field("")));
   top->add(h);
 
   checkbox* for_dot_omit_state_information = new checkbox("Omit state information (dot only)");

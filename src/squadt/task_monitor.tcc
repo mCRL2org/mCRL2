@@ -314,7 +314,7 @@ namespace squadt {
 
     /** \brief Terminates a running process */
     inline void task_monitor_impl::terminate_process() {
-      if (connected) {
+      if (associated_process.get() != 0) {
         associated_process->terminate();
 
         logger->log(1, boost::str(boost::format("process terminated (tool %s pid(%u))\n")
