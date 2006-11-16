@@ -28,6 +28,8 @@
 #ifdef MCRL2_BCG
 bool initialise() {
   BCG_INIT();
+
+  return true;
 }
 
 static bool initialised = initialise();
