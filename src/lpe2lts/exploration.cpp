@@ -57,7 +57,7 @@ void initialise_lts_generation_options(lts_generation_options &lgopts)
   lgopts.outformat = OF_UNKNOWN;
   lgopts.outinfo = true;
   lgopts.max_states = DEFAULT_MAX_STATES;
-  lgopts.priority_action = NULL;
+  lgopts.priority_action = "";
   lgopts.trace = false;
   lgopts.num_trace_actions = 0;
   lgopts.trace_actions = NULL;
@@ -166,10 +166,10 @@ bool initialise_lts_generation(lts_generation_options *opts)
   
   nstate = createNextState((ATermAppl) Spec,!lgopts->usedummies,lgopts->stateformat,createEnumerator((ATermAppl) Spec,createRewriter(ATAgetArgument((ATermAppl) Spec,3),lgopts->strat),true),true);
   
-  if ( lgopts->priority_action != NULL )
+  if ( lgopts->priority_action != "" )
   {
-    gsVerboseMsg("applying confluence reduction with tau action '%s'...\n",lgopts->priority_action);
-    nstate->prioritise(lgopts->priority_action);
+    gsVerboseMsg("applying confluence reduction with tau action '%s'...\n",lgopts->priority_action.c_str());
+    nstate->prioritise(lgopts->priority_action.c_str());
     representation = ATtableCreate(lgopts->initial_table_size,50);
   }
 

@@ -69,7 +69,7 @@ class NextStateStandard : public NextState
 		NextStateStandard(ATermAppl spec, bool allow_free_vars, int state_format, Enumerator *e, bool clean_up_enumerator);
 		~NextStateStandard();
 
-		void prioritise(char *action);
+		void prioritise(const char *action);
 
 		ATerm getInitialState();
 		NextStateGenerator *getNextStates(ATerm state, NextStateGenerator *old = NULL);

@@ -1479,7 +1479,6 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataEqnSpec)
 
 
   tmp_eqns = ATtableCreate(100,75); // XXX would be nice to know the number op OpIds
-  term2int = ATtableCreate(100,75);
 
   num_opids = 0;
 
@@ -2181,6 +2180,7 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataEqnSpec)
 
 RewriterCompilingInnermost::RewriterCompilingInnermost(ATermAppl DataEqnSpec)
 {
+  term2int = ATtableCreate(100,75);
   initialise_common();
   CompileRewriteSystem(DataEqnSpec);
 }
@@ -2197,6 +2197,7 @@ static void cleanup_file(char *f)
 RewriterCompilingInnermost::~RewriterCompilingInnermost()
 {
   finalise_common();
+  ATtableDestroy(term2int);
   cleanup_file(file_c);
   cleanup_file(file_o);
   cleanup_file(file_so);

@@ -660,6 +660,7 @@ bool p_lts::read_from_aut(istream &is)
     p_add_transition(from,(unsigned int) label,to);
   }
   assert(ntrans == ntransitions);
+  ATtableDestroy(labs);
 
   this->type = lts_aut;
 

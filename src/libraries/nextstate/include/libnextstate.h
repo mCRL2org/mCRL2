@@ -96,7 +96,7 @@ class NextState
 		 * will first give all "b" actions, then all "a" actions and
 		 * then the remaining actions.
 		 **/
-		virtual void prioritise(char *action) = 0;
+		virtual void prioritise(const char *action) = 0;
 
 		/**
 		 * \brief Get the initial state.

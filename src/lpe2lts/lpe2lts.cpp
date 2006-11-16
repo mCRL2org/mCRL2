@@ -284,9 +284,9 @@ int main(int argc, char **argv)
       case 'C':
         if ( optarg != NULL )
         {
-          lgopts.priority_action = strdup(optarg);
+          lgopts.priority_action = optarg;
         } else {
-          lgopts.priority_action = strdup("tau");
+          lgopts.priority_action = "tau";
         }
         break;
       case 's':

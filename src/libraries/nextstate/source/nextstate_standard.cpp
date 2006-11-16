@@ -516,7 +516,7 @@ NextStateStandard::~NextStateStandard()
 	free(tree_init);
 }
 
-static bool only_action(ATermList ma, char *action)
+static bool only_action(ATermList ma, const char *action)
 {
 	if ( ATisEmpty(ma) )
 	{
@@ -532,7 +532,7 @@ static bool only_action(ATermList ma, char *action)
 	}
 	return true;
 }
-void NextStateStandard::prioritise(char *action)
+void NextStateStandard::prioritise(const char *action)
 {
 	// XXX this function invalidates currently used generators!
 	// perhaps

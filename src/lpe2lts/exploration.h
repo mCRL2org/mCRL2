@@ -28,7 +28,7 @@ typedef struct {
   int outformat;
   bool outinfo;
   unsigned long long max_states;
-  char *priority_action;
+  std::string priority_action;
   bool trace;
   int num_trace_actions;
   ATermAppl *trace_actions;

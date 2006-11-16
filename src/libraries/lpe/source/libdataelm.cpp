@@ -254,5 +254,8 @@ ATermAppl removeUnusedData(ATermAppl ATSpec)
 	
 	specification new_spec(new_sort,new_cons,new_maps,new_eqns,spec.actions(),spec.lpe(),spec.initial_free_variables(),spec.initial_variables(),spec.initial_state());
 
+	ATtableDestroy(used_sorts);
+	ATtableDestroy(used_data);
+
 	return (ATermAppl) new_spec;
 }
