@@ -314,7 +314,6 @@ if test ${with_cadp}; then
      ])
   AC_MSG_RESULT($USE_BCG)
 fi
-AC_SUBST([USE_BCG])
 
 # Check for Boost C++ library
 AC_ARG_WITH(
@@ -560,6 +559,12 @@ AC_MSG_RESULT([
      
    Some tools will not be built if any of these libraries are missing.
 ])
+
+if test "$USE_BCG" = "no"; then
+  AC_SUBST([USE_BCG],["//"])
+else
+  AC_SUBST([USE_BCG],[""])
+fi
 
 AC_CONFIG_FILES([build/config.mk build/config.jam src/setup.h])
 AC_OUTPUT

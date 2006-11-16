@@ -671,7 +671,6 @@ ATERM_LDFLAGS
 ATERM_NAME
 CADP_HEADERS
 CADP_LIBRARIES
-USE_BCG
 BOOST_INCLUDE_PATH
 BOOST_LIBRARY_PATH
 OPENGL_NAME
@@ -706,6 +705,7 @@ R_SCXXFLAGS
 R_CPPFLAGS
 R_LDFLAGS
 R_SLDFLAGS
+USE_BCG
 LTLIBOBJS'
 ac_subst_files=''
       ac_precious_vars='build_alias
@@ -5020,7 +5020,6 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 echo "${ECHO_T}$USE_BCG" >&6; }
 fi
 
-
 # Check for Boost C++ library
 
 # Check whether --with-boost was given.
@@ -6938,6 +6937,14 @@ echo "${ECHO_T}
    Some tools will not be built if any of these libraries are missing.
 " >&6; }
 
+if test "$USE_BCG" = "no"; then
+  USE_BCG="//"
+
+else
+  USE_BCG=""
+
+fi
+
 ac_config_files="$ac_config_files build/config.mk build/config.jam src/setup.h"
 
 cat >confcache <<\_ACEOF
@@ -7627,7 +7634,6 @@ ATERM_LDFLAGS!$ATERM_LDFLAGS$ac_delim
 ATERM_NAME!$ATERM_NAME$ac_delim
 CADP_HEADERS!$CADP_HEADERS$ac_delim
 CADP_LIBRARIES!$CADP_LIBRARIES$ac_delim
-USE_BCG!$USE_BCG$ac_delim
 BOOST_INCLUDE_PATH!$BOOST_INCLUDE_PATH$ac_delim
 BOOST_LIBRARY_PATH!$BOOST_LIBRARY_PATH$ac_delim
 OPENGL_NAME!$OPENGL_NAME$ac_delim
@@ -7654,6 +7660,7 @@ DATA_DIR!$DATA_DIR$ac_delim
 LIB_DIR!$LIB_DIR$ac_delim
 BIN_DIR!$BIN_DIR$ac_delim
 INCLUDE_DIR!$INCLUDE_DIR$ac_delim
+MAN_DIR!$MAN_DIR$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -7695,7 +7702,6 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
-MAN_DIR!$MAN_DIR$ac_delim
 R_CFLAGS!$R_CFLAGS$ac_delim
 R_SCFLAGS!$R_SCFLAGS$ac_delim
 R_CXXFLAGS!$R_CXXFLAGS$ac_delim
@@ -7703,6 +7709,7 @@ R_SCXXFLAGS!$R_SCXXFLAGS$ac_delim
 R_CPPFLAGS!$R_CPPFLAGS$ac_delim
 R_LDFLAGS!$R_LDFLAGS$ac_delim
 R_SLDFLAGS!$R_SLDFLAGS$ac_delim
+USE_BCG!$USE_BCG$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
