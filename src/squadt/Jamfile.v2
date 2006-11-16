@@ -12,6 +12,7 @@ exe squadt
         /libraries//md5pp
         /libraries/sip//sip_controller
       : <dependency>/site-config//wx_base
+        <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
         <include>$(SETUP)
         <threading>multi
         <wx>no:<build>no

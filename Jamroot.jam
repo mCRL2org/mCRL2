@@ -23,6 +23,7 @@ project toolset
           <define>REVISION=$(REVISION)
           <toolset>darwin:<define>__darwin__
           <toolset>darwin:<cxxflags>"-std=c++98 -ansi"
+          <toolset>darwin:<arch>native
           <os>CYGWIN,<toolset>gcc:<runtime-link>static
           <os>CYGWIN,<toolset>gcc:<link>static
           <os>NT:<runtime-link>static

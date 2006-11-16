@@ -881,7 +881,7 @@ void XSimMain::OnSaveTrace( wxCommandEvent& /* event */ )
 
 void XSimMain::OnFitCurrentState( wxCommandEvent& /* event */ )
 {
-#ifndef __WINDOWS__
+#if !defined(__WINDOWS__) && !defined(__WXMAC__)
     int w,h,n;
 
     n = stateview->GetViewRect().GetHeight()+stateview->m_headerHeight;

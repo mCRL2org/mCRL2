@@ -50,8 +50,32 @@ rule init ( version ? : command * : options * )
 feature framework : : free ;
 feature bundle : no yes : incidental ;
 
+# Start changes from Adobe ASL for universal binaries
+feature sdkroot : 10.4 10.3.9 10.2.8 : propagated link-incompatible ;
+flags darwin.compile OPTIONS <sdkroot>10.4 : -isysroot /Developer/SDKs/MacOSX10.4u.sdk -mmacosx-version-min=10.4 ;
+flags darwin.link OPTIONS <sdkroot>10.4 : -isysroot /Developer/SDKs/MacOSX10.4u.sdk -mmacosx-version-min=10.4 ;
+flags darwin.compile OPTIONS <sdkroot>10.3.9 : -isysroot /Developer/SDKs/MacOSX10.3.9.sdk -mmacosx-version-min=10.3.9 ;
+flags darwin.link OPTIONS <sdkroot>10.3.9 : -isysroot /Developer/SDKs/MacOSX10.3.9.sdk -mmacosx-version-min=10.3.9 ;
+flags darwin.compile OPTIONS <sdkroot>10.2.8 : -isysroot /Developer/SDKs/MacOSX10.2.8.sdk -mmacosx-version-min=10.2.8 ;
+flags darwin.link OPTIONS <sdkroot>10.2.8 : -isysroot /Developer/SDKs/MacOSX10.2.8.sdk -mmacosx-version-min=10.2.8 ;
+
+feature arch : native ppc i386 fat : composite propagated ;
+flags darwin.compile OPTIONS <arch>fat : -arch i386 -arch ppc ;
+flags darwin.link OPTIONS <arch>fat : -arch i386 -arch ppc ;
+flags darwin.compile OPTIONS <arch>i386 : -arch i386 ;
+flags darwin.link OPTIONS <arch>i386 : -arch i386 ;
+flags darwin.compile OPTIONS <arch>ppc : -arch ppc ;
+flags darwin.link OPTIONS <arch>ppc : -arch ppc ;
+
+feature c++-lib : dynamic static : link-incompatible composite propagated ;
+flags darwin.compile OPTIONS <c++-lib>static : -fvisibility=hidden -fvisibility-inlines-hidden ;
+flags darwin.link OPTIONS <c++-lib>static : -nodefaultlibs -shared-libgcc -lstdc++-static -lgcc_eh -lgcc ;
+
+flags darwin.link OPTIONS <variant>release : -Wl,-dead_strip -no_dead_strip_inits_and_terms ;
+# End changes from Adobe ASL for universal binaries
+
 flags darwin.compile OPTIONS <link>shared : -dynamic ;
-flags darwin.compile OPTIONS : -Wno-long-double -no-cpp-precomp  ;
+flags darwin.compile OPTIONS : -Wno-long-double -no-cpp-precomp -gdwarf-2 ;
 
 flags darwin.link FRAMEWORK <framework> ;
 
@@ -86,17 +110,17 @@ rule link
 
 actions link bind LIBRARIES
 {
-    MACOSX_DEPLOYMENT_TARGET=10.3 $(CONFIG_COMMAND) -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(FRAMEWORK_PATH) -framework$(_)$(FRAMEWORK:D=) $(OPTIONS) $(USER_OPTIONS)
+   $(CONFIG_COMMAND) -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(FRAMEWORK_PATH) -framework$(_)$(FRAMEWORK:D=) $(OPTIONS) $(USER_OPTIONS)
     $(NEED_STRIP)strip $(NEED_STRIP)"$(<)"
 }
 
 actions link.dll bind LIBRARIES
 {
-   MACOSX_DEPLOYMENT_TARGET=10.3 $(CONFIG_COMMAND) -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(FRAMEWORK_PATH) -framework$(_)$(FRAMEWORK:D=) $(OPTIONS) $(USER_OPTIONS)
+   $(CONFIG_COMMAND) -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(FRAMEWORK_PATH) -framework$(_)$(FRAMEWORK:D=) $(OPTIONS) $(USER_OPTIONS)
 }
 
 actions piecemeal archive
 {
-    ar -c -r -s $(ARFLAGS) "$(<:T)" "$(>:T)"
+    libtool -static -o "$(<:T)" $(ARFLAGS) "$(>:T)"
 }
 

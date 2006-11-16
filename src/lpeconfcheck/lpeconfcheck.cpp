@@ -412,18 +412,21 @@
     ///         false, if the invariant does not hold.
 
     bool LPE_Conf_Check::check_invariant() {
+      bool result = true;
+
       if (!f_no_check && f_invariant_file_name != 0) {
         Invariant_Checker v_invariant_checker(
           f_lpe, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, false, false, f_dot_file_name
         );
 
-        return v_invariant_checker.check_invariant(f_invariant);
+        result = v_invariant_checker.check_invariant(f_invariant);
       } else {
         if (f_invariant_file_name != 0) {
           gsWarningMsg("The invariant is not checked; it may not hold for this LPE.\n");
         }
-        return true;
       }
+
+      return result;
     }
 
     // --------------------------------------------------------------------------------------------

@@ -28,4 +28,5 @@ lib lts
        :
        : <library>/libraries//parser
          <library>/libraries//svc
+	 <toolset>darwin:<library>/site-config//boost_regex
        ;
