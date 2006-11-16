@@ -9,6 +9,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/range/iterator_range.hpp>
 
+//#include <utility/visitor.h>
+
 #include <sip/configuration.h>
 #include <sip/mime_type.h>
 
@@ -113,6 +115,13 @@ namespace squadt {
         /** \brief Whether or not a command is associated with this type */
         bool has_registered_command(mime_type const&) const;
     };
+
+//    class ostream_visitor : basic_visitor< ostream_visitor > {
+
+//      public:
+
+//        void visit();
+//    };
 
     inline type_registry::type_registry() {
       build_index();

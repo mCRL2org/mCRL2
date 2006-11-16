@@ -666,6 +666,10 @@ namespace squadt {
 
     void tool_display::remove() {
       /* Ignore all scheduled updates to the tool display */
+      event_handler.get_monitor()->reset_display_update_handler();
+      event_handler.get_monitor()->reset_display_layout_handler();
+      event_handler.get_monitor()->reset_status_message_handler();
+
       current_layout.reset();
 
       wxSizer* s = GetParent()->GetSizer();
@@ -674,20 +678,21 @@ namespace squadt {
       s->Detach(this);
       s->Layout();
 
-      event_handler.get_monitor()->reset_display_layout_handler();
-      event_handler.get_monitor()->reset_status_message_handler();
-
-      /* Toggle scrollbar availability on demand */
-      wxSizeEvent size_event(GetParent()->GetSize(), GetParent()->GetId());
-
-      size_event.SetEventObject(GetParent());
-
-      GetParent()->GetParent()->ProcessEvent(size_event);
+      toggle_scrollbar_helper();
 
       /* End tool execution, if it was still running */
       event_handler.get_monitor()->finish();
 
       Destroy();
+    }
+
+      /* Toggle scrollbar availability on demand */
+    void tool_display::toggle_scrollbar_helper() {
+      wxSizeEvent size_event(GetParent()->GetSize(), GetParent()->GetId());
+
+      size_event.SetEventObject(GetParent());
+
+      GetParent()->GetParent()->ProcessEvent(size_event);
     }
 
     /**

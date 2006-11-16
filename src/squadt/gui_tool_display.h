@@ -147,6 +147,9 @@ namespace squadt {
         /** \brief Handler for panel control button events */
         void on_panel_button_clicked(wxCommandEvent&);
 
+        /** \brief Helper function to ensure a scrollbar is (in)visible when necessary */
+        void toggle_scrollbar_helper();
+
       public:
 
         /** \brief Constructor */
