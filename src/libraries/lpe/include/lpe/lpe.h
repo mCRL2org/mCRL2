@@ -60,6 +60,11 @@ using atermpp::read_from_named_file;
 ///
 // <LPESummand>   ::= LPESummand(<DataVarId>*, <DataExpr>, <MultActOrDelta>,
 //                    <DataExprOrNil>, <Assignment>*)
+//<MultActOrDelta>
+//               ::= <MultAct>
+//                 | Delta
+// <MultAct>      ::= MultAct(<ParamId>*)                                   (- tc)
+//                  | MultAct(<Action>*)                                    (+ tc)
 class LPE_summand: public aterm_appl_wrapper
 {
   protected:
@@ -176,7 +181,7 @@ class LPE_summand: public aterm_appl_wrapper
       data_expression condition = m_condition.substitute(f);
       if (!m_delta)
       {
-        actions = substitute(m_actions, f);
+        actions = m_actions.substitute(f);
       }
       data_expression time = m_time.substitute(f);
 

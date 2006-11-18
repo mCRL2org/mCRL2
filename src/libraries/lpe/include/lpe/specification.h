@@ -51,11 +51,14 @@ using atermpp::read_from_named_file;
 //                ActSpec(list<action> actions),
 //                LPE(list<data_variable> free_variables, list<data_variable> process_parameters, list<LPESummand> lpe_summands),
 //         )
+// <Spec>         ::= SpecV1(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
+//                      MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*),
+//                      ActSpec(<ActId>*), <ProcEqnSpec>, <Init>)
 class specification: public aterm_appl_wrapper
 {
   protected:
     data_declaration     m_data;
-    action_list          m_actions;
+    aterm_list           m_actions;
     LPE                  m_lpe;
     data_variable_list   m_initial_free_variables;
     data_assignment_list m_initial_assignments;
@@ -111,7 +114,7 @@ class specification: public aterm_appl_wrapper
       function_list      mappings     = function_list(aterm_appl(*i++).argument(0));
       data_equation_list equations    = data_equation_list(aterm_appl(*i++).argument(0));
       m_data = data_declaration(sorts, constructors, mappings, equations);
-      m_actions                       = action_list(aterm_appl(*i++).argument(0));
+      m_actions                       = aterm_list(aterm_appl(*i++).argument(0));
       aterm_appl lpe                  = *i++;
       aterm_appl lpe_init             = *i;
 
@@ -140,7 +143,7 @@ class specification: public aterm_appl_wrapper
         function_list        constructors     ,
         function_list        mappings         ,
         data_equation_list   equations        ,
-        action_list          actions          ,
+        aterm_list           actions          ,
         LPE                  lpe              ,
         data_variable_list   initial_free_variables,
         data_variable_list   initial_variables,
@@ -166,7 +169,7 @@ class specification: public aterm_appl_wrapper
 
     specification(
         data_declaration     data             ,
-        action_list          actions          ,
+        aterm_list           actions          ,
         LPE                  lpe              ,
         data_variable_list   initial_free_variables,
         data_variable_list   initial_variables,
@@ -274,7 +277,7 @@ class specification: public aterm_appl_wrapper
 
     /// Returns the sequence of actions.
     ///
-    action_list actions() const
+    aterm_list actions() const
     { return m_actions; }
 
     /// Returns the initial state of the LPE.
@@ -320,7 +323,7 @@ specification set_data_declaration(specification spec, data_declaration data)
 }
 
 inline
-specification set_actions(specification spec, action_list actions)
+specification set_actions(specification spec, aterm_list actions)
 {
   return specification(spec.data(),
                        actions,

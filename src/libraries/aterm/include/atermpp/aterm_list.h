@@ -203,6 +203,15 @@ namespace atermpp {
       ///
       operator ATermList() const
       { return void2list(m_term); }
+
+      /// Applies a substitution to this list and returns the result.
+      /// The Substitution object must supply the method aterm operator()(aterm).
+      ///
+      template <typename Substitution>
+      term_list<Term> substitute(Substitution f) const
+      {
+        return term_list<Term>(f(*this));
+      }     
   };
 
   ///

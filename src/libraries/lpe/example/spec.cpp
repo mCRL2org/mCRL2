@@ -59,10 +59,10 @@ int main()
   cout << endl;
 
   cout << "--- act ------------" << endl;
-  for (action_list::iterator i = spec.actions().begin(); i != spec.actions().end(); ++i)
+  for (aterm_list::iterator i = spec.actions().begin(); i != spec.actions().end(); ++i)
   {
-    action a = *i;
-    cout << str(format("%5s        %s") % i->pp() % i->to_string()) << endl;
+    aterm a = *i;
+    cout << str(format("%5s") % i->to_string()) << endl;
   }
   cout << endl;
 
@@ -91,8 +91,15 @@ int main()
   data_expression_list d0 = spec.initial_state();
   cout << "d0 = " << pp(d0) << " " << d0.to_string() << endl;
 
-  data_expression_list d1 = substitute(d0, a);
+  data_expression_list d1 = d0.substitute(a);
   cout << "d1 = " << pp(d1) << " " << d1.to_string() << endl;
+
+  data_assignment_list aa;
+  aa = push_front(aa, a);
+  aa = push_front(aa, a);
+  data_expression_list d2 = d0.substitute(assignment_list_substitution(aa));
+  cout << "d2 = " << pp(d2) << " " << d2.to_string() << endl;
+  cin.get();
 
   // test comparison (using rewrite)
   //cout << endl;
