@@ -1,0 +1,12 @@
+project toolset/pbesinfo
+       : build-dir $(BUILD_TOP)/pbesinfo
+       ;
+
+exe pbesinfo
+       : pbesinfo.cpp
+         /libraries//mcrl2_basic
+		 /libraries//lpe
+         /site-config//boost_program_options
+       : <include>.
+       : <squadt_support>disable
+       ;
