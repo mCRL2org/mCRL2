@@ -68,13 +68,13 @@ namespace squadt {
           generation_in_progress    /* outputs are being generated */
         };
 
-        processor::wptr         generator;      ///< The process responsible for generating this object
-        storage_format          format;         ///< The used storage format
-        std::string             location;       ///< The location of the object
-        unsigned int            identifier;     ///< The identifier of the associated output object in a configuration
-        md5pp::compact_digest   checksum;       ///< The digest for the completed object
-        std::time_t             timestamp;      ///< The last time the file was modified just before the last checksum was computed
-        t_status                status;         ///< The status of this object
+        processor::wptr               generator;      ///< The process responsible for generating this object
+        build_system::storage_format  format;         ///< The used storage format
+        std::string                   location;       ///< The location of the object
+        unsigned int                  identifier;     ///< The identifier of the associated output object in a configuration
+        md5pp::compact_digest         checksum;       ///< The digest for the completed object
+        std::time_t                   timestamp;      ///< The last time the file was modified just before the last checksum was computed
+        t_status                      status;         ///< The status of this object
 
         /** \brief Whether or not the generator points to an existing object */
         bool generator_exists();
@@ -206,7 +206,7 @@ namespace squadt {
       void rename_input(std::string const&, std::string const&);
  
       /** \brief Add an output object */
-      void append_output(const storage_format&, const std::string&,
+      void append_output(const build_system::storage_format&, const std::string&,
                 object_descriptor::t_status const& = object_descriptor::reproducible_nonexistent);
  
       /** \brief Add an output object */

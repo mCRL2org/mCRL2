@@ -11,14 +11,12 @@
 #include <wx/notebook.h>
 
 #include "gui_dialog_base.h"
-#include "gui_miscellaneous.h"
+#include "type_registry.h"
 
 namespace squadt {
   namespace GUI {
     namespace dialog {
 
-      using squadt::miscellaneous::type_registry;
-      
       /** \brief Base class for processor level dialogs */
       class processor : public dialog::basic {
         public:

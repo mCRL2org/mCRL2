@@ -8,10 +8,10 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
-#include "exception.h"
+#include "settings_manager.h"
 #include "tool_manager.h"
-#include "settings_manager.tcc"
 #include "build_system.h"
+#include "exception.h"
 
 #include "gui_splash.h"
 #include "gui_main.h"
@@ -24,7 +24,7 @@
 #include <wx/msgdlg.h>
 
 const char* program_name    = "squadt";
-const char* program_version = "0.2.1";
+const char* program_version = "0.2.3";
 
 /**
  * \namespace squadt
@@ -32,12 +32,7 @@ const char* program_version = "0.2.1";
  * The global namespace for all squadt components.
  **/
 namespace squadt {
-
-  /** \brief Global Settings Manager component */
-  boost::shared_ptr < settings_manager > global_settings_manager;
-
-  /** \brief Global Tool Manager component */
-  boost::shared_ptr < tool_manager >     global_tool_manager;
+  build_system global_build_system;
 }
 
 using namespace squadt::GUI;
@@ -56,7 +51,7 @@ class initialisation : public wxThread {
     }
 
     void* Entry() {
-      squadt::global_tool_manager->query_tools(
+      squadt::global_build_system.get_tool_manager()->query_tools(
                     boost::bind(&splash::set_operation, splash_window, std::string("processing"), _1));
 
       return (0);
@@ -153,8 +148,12 @@ bool Squadt::OnInit() {
   bool c = parse_command_line(argc, argv, action);
 
   if (c) {
-    global_settings_manager = settings_manager::ptr(new settings_manager(wxFileName::GetHomeDir().fn_str()));
- 
+    global_build_system.initialise(
+        std::auto_ptr < settings_manager > (new settings_manager(std::string(wxFileName::GetHomeDir().fn_str()))),
+        std::auto_ptr < tool_manager > (new tool_manager()),
+        std::auto_ptr < executor > (new executor()),
+        std::auto_ptr < type_registry > (new type_registry()));
+
     wxInitAllImageHandlers();
  
     #include "pixmaps/logo.xpm"
@@ -164,9 +163,7 @@ bool Squadt::OnInit() {
     splash* splash_window = new splash(&logo, 1);
  
     try {
-      global_tool_manager = tool_manager::read();
-
-      splash_window->set_category("Querying tools", global_tool_manager->number_of_tools());
+      splash_window->set_category("Querying tools", global_build_system.get_tool_manager()->number_of_tools());
      
       /* Perform initialisation */
       initialisation ti(splash_window);
@@ -178,7 +175,12 @@ bool Squadt::OnInit() {
         wxApp::Yield();
       }
 
+      global_build_system.get_type_registry()->rebuild_indices();
+
       splash_window->set_category("Initialising components");
+
+      /* Disable splash */
+      splash_window->set_done();
 
       /* Initialise main application window */
       SetTopWindow(new squadt::GUI::main());
@@ -188,9 +190,6 @@ bool Squadt::OnInit() {
       }
 
       SetUseBestVisual(true);
-
-      /* Disable splash */
-      splash_window->set_done();
     }
     catch (sip::listening_exception& e) {
       /* Disable splash */

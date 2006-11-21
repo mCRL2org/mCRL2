@@ -22,6 +22,22 @@ namespace squadt {
       about_dialog.ShowModal();
     }
 
+    main::main() : wxFrame(0, wxID_ANY, default_title, wxDefaultPosition, wxDefaultSize),
+                                       project_view(0) {
+
+      /* Add widgets */
+      build();
+
+      /* Default size is the minimum size */
+      SetMinSize(wxDefaultSize);
+
+      /* Reposition the window */
+      CentreOnScreen();
+
+      /* Now show the window in all its marvel */
+      Show(true);
+    }
+
     void main::build() {
       /* Connect event handlers */
       Connect(wxID_NEW, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_new));
@@ -214,6 +230,16 @@ namespace squadt {
       GUI::preferences dialog(this);
 
       dialog.ShowModal();
+    }
+
+    void main::quit() {
+      if (project_view != 0) {
+        project_view->store();
+      }
+
+      global_build_system.shutdown();
+
+      Destroy();
     }
   }
 }

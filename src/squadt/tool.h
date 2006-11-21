@@ -66,7 +66,7 @@ namespace squadt {
       inline std::string const& get_name();
 
       /** \brief Find a specific input combination of this tool, if it exists */
-      inline input_combination const* find_input_combination(const tool_category&, const storage_format&) const;
+      inline input_combination const* find_input_combination(build_system::tool_category const&, build_system::storage_format const&) const;
   };
 
   /**
@@ -84,12 +84,16 @@ namespace squadt {
     s << "<tool name=\"" << name
       << "\" location=\"" << location << "\"";
 
-    if (capabilities.get() != 0) {
-      s << capabilities << "</tool>";
-    }
-    else {
+//    if (capabilities.get() != 0) {
+//      s << ">";
+
+//      capabilities->write(s);
+
+//      s << "</tool>";
+//    }
+//    else {
       s << "/>";
-    }
+//    }
   }
 
   /**
@@ -111,6 +115,8 @@ namespace squadt {
       sip::tool::capabilities::sptr c = sip::tool::capabilities::read(r);
       
       if (c.get() != 0) {
+        r.skip_end_element("tool");
+
         return (tool::sptr(new tool(name, location, c)));
       }
     }
@@ -136,7 +142,7 @@ namespace squadt {
    * @param f the storage format
    * @param t the category in which the tool operates
    **/
-  inline tool::input_combination const* tool::find_input_combination(const tool_category& t, const storage_format& f) const {
+  inline tool::input_combination const* tool::find_input_combination(build_system::tool_category const& t, build_system::storage_format const& f) const {
     return (capabilities->find_input_combination(f, t));
   }
 }

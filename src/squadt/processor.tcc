@@ -390,15 +390,10 @@ namespace squadt {
     std::string     temporary;
 
     if (r.get_attribute(&temporary, "tool-name")) {
-      c->impl->tool_descriptor = global_tool_manager->find(temporary);
+      c->impl->tool_descriptor = global_build_system.get_tool_manager()->get_tool_by_name(temporary);
 
-      /* Check tool existence */
-      if (!global_tool_manager->exists(temporary)) {
-        throw (exception::exception(exception::requested_tool_unavailable, temporary));
-      }
-
-      storage_format format;
-      tool_category  category;
+      build_system::storage_format format;
+      build_system::tool_category  category;
 
       if (r.get_attribute(&category, "category") && r.get_attribute(&format, "format")) {
         c->impl->selected_input_combination = c->impl->tool_descriptor->find_input_combination(category, format);
@@ -768,7 +763,7 @@ namespace squadt {
   inline void processor_impl::configure(interface_ptr const& t, std::string const& w) {
     output_directory = w;
 
-    global_tool_manager->execute(*tool_descriptor, make_output_path(w),
+    global_build_system.get_tool_manager()->execute(*tool_descriptor, make_output_path(w),
          boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
 
     current_monitor->start_tool_configuration(t);
@@ -828,7 +823,7 @@ namespace squadt {
     
       current_monitor->start_tool_operation(t);
 
-      global_tool_manager->execute(*tool_descriptor, make_output_path(output_directory),
+      global_build_system.get_tool_manager()->execute(*tool_descriptor, make_output_path(output_directory),
          boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), false);
     }
     else {
@@ -867,7 +862,7 @@ namespace squadt {
     
       current_monitor->start_tool_operation(t);
 
-      global_tool_manager->execute(*tool_descriptor, make_output_path(output_directory),
+      global_build_system.get_tool_manager()->execute(*tool_descriptor, make_output_path(output_directory),
          boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), false);
     }
     else {
@@ -886,7 +881,7 @@ namespace squadt {
 
     current_monitor->get_logger()->log(1, "executing command `" + c->argument_string() + "'\n");
 
-    global_tool_manager->execute(c, boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
+    global_build_system.get_tool_manager()->execute(c, boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
   }
 
   /**

@@ -1,5 +1,5 @@
 #include "gui_dialog_project.h"
-#include "settings_manager.tcc"
+#include "settings_manager.h"
 #include "project_manager.h"
 
 #include <wx/panel.h>

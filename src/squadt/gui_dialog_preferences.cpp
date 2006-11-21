@@ -1,5 +1,5 @@
 #include "gui_dialog_preferences.h"
-#include "gui_miscellaneous.h"
+#include "build_system.h"
 #include "tool_manager.h"
 
 #include <boost/foreach.hpp>
@@ -42,8 +42,6 @@ namespace squadt {
 
       private:
 
-        miscellaneous::type_registry::sptr registry;
-
         wxListView*                        formats_and_actions;
 
         wxTextCtrl*                        command_text;
@@ -65,7 +63,7 @@ namespace squadt {
 
       public:
 
-        edit_preferences(miscellaneous::type_registry::sptr const&, wxWindow*);
+        edit_preferences(wxWindow*);
     };
 
     class debug_preferences : public wxPanel {
@@ -96,7 +94,7 @@ namespace squadt {
     wxString edit_preferences::no_action = wxT("No action");
 
     void execution_preferences::maximum_changed(wxCommandEvent&) {
-      global_tool_manager->set_maximum_instance_count(maximum_concurrent->GetValue());
+      global_build_system.get_executor()->set_maximum_instance_count(maximum_concurrent->GetValue());
     }
 
     execution_preferences::execution_preferences(wxWindow* w) : wxPanel(w, wxID_ANY) {
@@ -109,7 +107,7 @@ namespace squadt {
               wxT("Maximum number of concurrent tool instances that are not running for configuration purposes.")),
                   0, wxEXPAND|wxLEFT|wxRIGHT, 10);
 
-      maximum_concurrent = new wxSlider(this, wxID_ANY, global_tool_manager->get_maximum_instance_count(),
+      maximum_concurrent = new wxSlider(this, wxID_ANY, global_build_system.get_executor()->get_maximum_instance_count(),
                                     1, 25, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS|wxSL_BOTTOM);
 
       current_sizer->Add(maximum_concurrent, 0, wxEXPAND|wxLEFT|wxRIGHT, 14);
@@ -124,17 +122,18 @@ namespace squadt {
       formats_and_actions->SetColumnWidth(1, (width * 2 + 2) / 3);
     }
 
-    /* Convenience function */
+    /** \cond HELPER_FUNCTIONS
+     * Convenience function
+     **/
     inline void get_wxlist_value(wxListItem& s, wxListCtrl* l, size_t r, size_t c) {
        s.SetId(r);
        s.SetColumn(c);
 
        l->GetItem(s);
     }
+    /// \endcond
 
     void edit_preferences::apply_button_activated(wxCommandEvent&) {
-      using namespace squadt::miscellaneous;
-
       long selected = formats_and_actions->GetFirstSelected();
 
       if (0 <= selected) {
@@ -146,6 +145,8 @@ namespace squadt {
         wxString    new_command = command_text->GetValue();
 
         get_wxlist_value(s, formats_and_actions, selected, 1);
+
+        type_registry* registry = global_build_system.get_type_registry();
 
         if (new_command.IsEmpty()) {
           s.SetText(no_action);
@@ -188,9 +189,7 @@ namespace squadt {
       }
     }
 
-    edit_preferences::edit_preferences(miscellaneous::type_registry::sptr const& h, wxWindow* w) : wxPanel(w, wxID_ANY), registry(h) {
-      using namespace squadt::miscellaneous;
-
+    edit_preferences::edit_preferences(wxWindow* w) : wxPanel(w, wxID_ANY) {
       wxSizer* current_sizer = new wxBoxSizer(wxVERTICAL);
 
       SetSizer(current_sizer);
@@ -209,7 +208,9 @@ namespace squadt {
 
       long row = 0;
 
-      BOOST_FOREACH(storage_format f, registry->get_storage_formats()) {
+      type_registry* registry = global_build_system.get_type_registry();
+
+      BOOST_FOREACH(build_system::storage_format f, registry->get_storage_formats()) {
         std::auto_ptr < command > command_line = registry->get_registered_command(f, "$");
 
         formats_and_actions->InsertItem(row, wxString(f.c_str(), wxConvLocal));
@@ -280,7 +281,7 @@ namespace squadt {
       tab_manager->AddPage(new execution_preferences(tab_manager), wxT("Execution"));
 
       /* Edit settings */
-      tab_manager->AddPage(new edit_preferences(p->registry, tab_manager), wxT("Editing"));
+      tab_manager->AddPage(new edit_preferences(tab_manager), wxT("Editing"));
 
       /* Debug settings */
       tab_manager->AddPage(new debug_preferences(tab_manager), wxT("Debug"));

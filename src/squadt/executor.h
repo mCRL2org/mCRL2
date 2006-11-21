@@ -1,5 +1,5 @@
-#ifndef TOOL_EXECUTOR_H
-#define TOOL_EXECUTOR_H
+#ifndef EXECUTOR_H__
+#define EXECUTOR_H__
 
 #include <boost/shared_ptr.hpp>
 

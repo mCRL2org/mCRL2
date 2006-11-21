@@ -8,7 +8,7 @@
 #include <wx/frame.h>
 
 #include "gui_project.h"
-#include "gui_miscellaneous.h"
+#include "type_registry.h"
 #include "tool.h"
 
 namespace squadt {
@@ -102,34 +102,13 @@ namespace squadt {
         void set_menu_bar();
 
         /** \brief Cleans up and closes the window */
-        inline void quit();
-
-      public:
-
-        /** \brief Tool selection helper that indexes the tools known by the global tool manager */
-        miscellaneous::type_registry::sptr registry;
+        void quit();
 
       public:
 
         /** \brief Constructor */
         main();
     };
-
-    inline main::main() : wxFrame(0, wxID_ANY, default_title, wxDefaultPosition, wxDefaultSize),
-                                       project_view(0), registry(miscellaneous::type_registry::create()) {
-
-      /* Add widgets */
-      build();
-
-      /* Default size is the minimum size */
-      SetMinSize(wxDefaultSize);
-
-      /* Reposition the window */
-      CentreOnScreen();
-
-      /* Now show the window in all its marvel */
-      Show(true);
-    }
 
     inline void main::on_menu_new(wxCommandEvent&) {
       project_new();
@@ -167,17 +146,6 @@ namespace squadt {
 
     inline void main::on_window_close(wxCloseEvent&) {
       quit();
-    }
-
-    inline void main::quit() {
-      if (project_view != 0) {
-        project_view->store();
-      }
-
-      global_tool_manager.reset();
-
-      /* Destroy the tool manager first; it will terminate all tools */
-      Destroy();
     }
   }
 }

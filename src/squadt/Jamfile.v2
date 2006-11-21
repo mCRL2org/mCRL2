@@ -5,10 +5,10 @@ project toolset/squadt
   ;
 
 import set ;
-import $(TOP)/build/macosx/mac-bundle ;
+import sequence ;
 
 exe squadt
-      : [ set.difference [ glob *.cpp ] : process_wrapper.cpp ]
+      : [ sequence.insertion-sort [ set.difference [ glob *.cpp ] : process_wrapper.cpp ] ]
         /libraries//md5pp
         /libraries/sip//sip_controller
       : <dependency>/site-config//wx_base

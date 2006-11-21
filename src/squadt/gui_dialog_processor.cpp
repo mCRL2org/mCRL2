@@ -14,8 +14,6 @@ namespace squadt {
   namespace GUI {
     namespace dialog {
 
-      using squadt::miscellaneous::type_registry;
-
       /** \brief SI prefixes for binary multiples */
       const char* prefixes_for_binary_multiples[7] = { "", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei" };
 
@@ -219,7 +217,6 @@ namespace squadt {
        * \param[in] range the pairs of categories and tool types to display
        **/
       void processor_details::populate_tool_list(type_registry::tool_sequence const& range) {
-        using namespace squadt::miscellaneous;
 
         tool_selector->DeleteChildren(tool_selector->GetRootItem());
 

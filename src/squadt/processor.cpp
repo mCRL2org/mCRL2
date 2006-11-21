@@ -430,7 +430,7 @@ namespace squadt {
    * \param[in] l a URI (local path) to where the file is stored
    * \param[in] s the status of the new object
    **/
-  void processor::append_output(const storage_format& f, const std::string& l, object_descriptor::t_status const& s) {
+  void processor::append_output(build_system::storage_format const& f, const std::string& l, object_descriptor::t_status const& s) {
     object_descriptor::sptr p = object_descriptor::sptr(new object_descriptor);
 
     p->generator  = impl->interface_object;

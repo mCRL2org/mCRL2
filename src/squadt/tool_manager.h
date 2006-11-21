@@ -1,12 +1,8 @@
 #ifndef TOOL_MANAGER_H_
 #define TOOL_MANAGER_H_
 
-#include <algorithm>
-#include <functional>
 #include <list>
-#include <iosfwd>
 #include <map>
-#include <ostream>
 #include <string>
 
 #include <boost/bind.hpp>
@@ -51,6 +47,8 @@ namespace squadt {
    **/
   class tool_manager : public sip::controller::communicator {
     friend class processor_impl;
+    friend class read_preferences_visitor_impl;
+    friend class write_preferences_visitor_impl;
  
     public:
  
@@ -61,7 +59,7 @@ namespace squadt {
       typedef std::list < tool::sptr >                                        tool_list;
  
       /** \brief Convenience type alias the list of tools, indexed by main input format */
-      typedef std::multimap < storage_format, tool::sptr >                    tool_map;
+      typedef std::multimap < build_system::storage_format, tool::sptr >      tool_map;
 
       /** \brief Constant tool sequence type */
       typedef boost::iterator_range < tool_list::const_iterator >             tool_const_sequence;
@@ -102,9 +100,6 @@ namespace squadt {
       /** \brief Maps an instance identifier to its associated processor */
       validated_instance_list     validated_instances;
 
-      /** \brief Local executor for executing tools on the current machine */
-      execution::executor         local_executor;
-
       /** \brief Used to obtain unused instance identifiers */
       mutable instance_identifier free_identifier;
 
@@ -129,23 +124,14 @@ namespace squadt {
       /** \brief Destructor */
       ~tool_manager();
  
-      /** \brief Write configuration to stream */
-      void write(std::ostream& = std::cout) const;
- 
-      /** \brief Read configuration from the default location */
-      static tool_manager::ptr read();
-
-      /** \brief Read configuration from file */
-      static tool_manager::ptr read(const std::string&);
-
-      /** \brief Read configuration with an XML text reader */
-      static tool_manager::ptr read(xml2pp::text_reader&);
- 
       /** \brief Establishes whether the named tool is among the known tools or not */
       bool exists(const std::string&) const;
 
       /** \brief Returns a tool by its name */
       tool::sptr find(const std::string&) const;
+
+      /** \brief Returns a tool by its name */
+      tool::sptr get_tool_by_name(const std::string&) const;
 
       /** \brief Add a new tool to the catalog */
       bool add(const std::string&, const std::string&);
@@ -165,12 +151,6 @@ namespace squadt {
       /** \brief Get the number of known tools */
       const unsigned int number_of_tools() const;
 
-      /** \brief Gets the maximum number of tool instances */
-      size_t get_maximum_instance_count() const;
-
-      /** \brief Sets the maximum number of tool instances */
-      void set_maximum_instance_count(size_t);
- 
       /** \brief Have the tool executor terminate all running tools */
       void terminate();
   };
@@ -194,49 +174,7 @@ namespace squadt {
    **/
   template < typename T >
   inline void tool_manager::execute(execution::command const* c, T p, bool b) {
-    local_executor.execute(*c, p, b);
-  }
-
-  /**
-   * @param n the name of the tool
-   *
-   * \pre a tool with this name must be among the known tools
-   **/
-  inline tool::sptr tool_manager::find(const std::string& n) const {
-    using namespace boost;
-
-    return (*std::find_if(tools.begin(), tools.end(), 
-               bind(std::equal_to< std::string >(), n, 
-                       bind(&tool::get_name,
-                               bind(&tool::sptr::get, _1)))));
-  }
-
-  /**
-   * @param n the name of the tool
-   **/
-  inline bool tool_manager::exists(const std::string& n) const {
-    using namespace boost;
-
-    return (tools.end() != std::find_if(tools.begin(), tools.end(), 
-               bind(std::equal_to< std::string >(), n, 
-                       bind(&tool::get_name,
-                               bind(&tool::sptr::get, _1)))));
-  }
-
-  /**
-   * @param n the name of the tool
-   * @param l the location of the tool
-   *
-   * \return whether the tool was added or not
-   **/
-  inline bool tool_manager::add(const std::string& n, const std::string& l) {
-    bool b = exists(n);
-
-    if (!b) {
-      tools.push_back(tool::sptr(new tool(n, l)));
-    }
-
-    return (b);
+    global_build_system.get_executor()->execute(*c, p, b);
   }
 }
 

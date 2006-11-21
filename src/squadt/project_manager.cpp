@@ -18,7 +18,7 @@
 #include <xml2pp/text_reader.h>
 
 #include "project_manager.h"
-#include "settings_manager.tcc"
+#include "settings_manager.h"
 
 namespace squadt {
 
@@ -517,7 +517,7 @@ namespace squadt {
     }
 
     /* Add the file to the project */
-    storage_format f = storage_format_unknown;
+    build_system::storage_format f = build_system::storage_format_unknown;
 
     /* TODO more intelligent file format check */
     if (!extension(s).empty()) {
@@ -683,7 +683,7 @@ namespace squadt {
     try {
       xml2pp::text_reader reader(p);
 
-      reader.set_schema(bf::path(global_settings_manager->path_to_schemas(
+      reader.set_schema(bf::path(global_build_system.get_settings_manager()->path_to_schemas(
                                     settings_manager::append_schema_suffix(
                                             settings_manager::project_definition_base_name)).c_str()));
 

@@ -14,7 +14,6 @@
 #include <wx/treectrl.h>
 #include <wx/timer.h>
 
-#include "gui_miscellaneous.h"
 #include "processor.h"
 
 namespace squadt {
@@ -112,9 +111,6 @@ namespace squadt {
 
         /** \brief Instantiation of a builder for this project */
         builder                               gui_builder;
-
-        /** \brief Register instance */
-        miscellaneous::type_registry&         registry;
 
       private:
 

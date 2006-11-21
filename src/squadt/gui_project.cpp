@@ -13,13 +13,14 @@
 #include "gui_main.h"
 #include "gui_project.h"
 #include "gui_resources.h"
-#include "gui_miscellaneous.h"
-#include "project_manager.h"
-#include "tool_manager.h"
 #include "gui_dialog_base.h"
 #include "gui_tool_display.h"
 #include "gui_dialog_project.h"
 #include "gui_dialog_processor.h"
+#include "project_manager.h"
+#include "tool_manager.h"
+#include "type_registry.h"
+#include "build_system.h"
 
 #include <wx/choicdlg.h>
 #include <wx/filedlg.h>
@@ -84,7 +85,7 @@ namespace squadt {
      *  - the default project_manager, and l is the new project store
      **/
     project::project(main* p, const boost::filesystem::path& l, const std::string& d, bool b) :
-                                wxSplitterWindow(p, wxID_ANY), manager(project_manager::create(l, b)), registry(*p->registry) {
+                                wxSplitterWindow(p, wxID_ANY), manager(project_manager::create(l, b)) {
 
       if (!d.empty()) {
         manager->set_description(d);
@@ -302,10 +303,11 @@ namespace squadt {
      **/
     void project::spawn_context_menu(tool_data& n) {
       using namespace boost;
-      using namespace squadt::miscellaneous;
+
+      type_registry* registry = global_build_system.get_type_registry();
 
       size_t separator_position     = 3;
-      bool   editable               = registry.has_registered_command(n.get_object()->format);
+      bool   editable               = registry->has_registered_command(n.get_object()->format);
       bool   generated              = (0 < n.get_processor()->number_of_inputs());
       bool   show_update_operations = !n.get_processor()->is_active();
 
@@ -325,7 +327,7 @@ namespace squadt {
 
       std::string format = n.get_object()->format;
 
-      type_registry::tool_sequence range = static_cast < main* > (GetParent())->registry->tools_by_mime_type(format);
+      type_registry::tool_sequence range = registry->tools_by_mime_type(format);
 
       if (!range.empty()) {
         int         identifier  = cmID_TOOLS; /// wxWidgets identifier for menu items
@@ -369,9 +371,11 @@ namespace squadt {
       processor::sptr                    p = reinterpret_cast < tool_data* > (object_view->GetItemData(s))->get_processor();
       processor::object_descriptor::sptr t = reinterpret_cast < tool_data* > (object_view->GetItemData(s))->get_object();
 
+      type_registry* registry = global_build_system.get_type_registry();
+
       switch (e.GetId()) {
         case cmID_EDIT:
-          p->edit(registry.get_registered_command(t->format, t->location).get());
+          p->edit(registry->get_registered_command(t->format, t->location).get());
           break;
         case cmID_REMOVE:
           manager->remove(p.get());
@@ -403,8 +407,7 @@ namespace squadt {
             }
             else {
               /* Add the main input (must exist) */
-              dialog.populate_tool_list(static_cast < main* > (GetParent())->registry->
-                                        tools_by_mime_type(p->get_input_combination()->format));
+              dialog.populate_tool_list(registry->tools_by_mime_type(p->get_input_combination()->format));
 
               if (p->get_tool().get() != 0) {
                 dialog.select_tool(p->get_input_combination(), p->get_tool()->get_name());

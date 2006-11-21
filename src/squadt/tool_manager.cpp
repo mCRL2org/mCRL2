@@ -1,4 +1,5 @@
-#include <fstream>
+#include <algorithm>
+#include <functional>
 
 #include <boost/bind.hpp>
 #include <boost/format.hpp>
@@ -7,15 +8,13 @@
 #include <boost/ref.hpp>
 #include <boost/foreach.hpp>
 
-#include <xml2pp/text_reader.h>
-
 #include "sip/detail/controller.tcc"
-#include "executor.h"
+#include "settings_manager.h"
 #include "tool_manager.h"
 #include "task_monitor.h"
+#include "executor.h"
 #include "command.h"
 #include "extractor.h"
-#include "settings_manager.tcc"
 
 #include "setup.h"
 
@@ -35,17 +34,6 @@ namespace squadt {
 
   const sip::tool::capabilities::sptr tool::no_capabilities(new sip::tool::capabilities());
 
-  /**
-   * \param[in] m the maximum number of instances
-   **/
-  void tool_manager::set_maximum_instance_count(size_t m) {
-    local_executor.set_maximum_instance_count(m);
-  }
-
-  size_t tool_manager::get_maximum_instance_count() const {
-    return (local_executor.get_maximum_instance_count());
-  }
-
   char const* tool_manager::default_tools[] = {"lpeconstelm", "lpedecluster", "lpeinfo", "lpeparelm", "lpeuntime", "lpe2lts", "lpesumelm",
                                                "ltsconvert", "ltsinfo", "ltsgraph", "ltsview", "mcrl22lpe", "pnml2mcrl2", "xsim", 0};
 
@@ -55,89 +43,6 @@ namespace squadt {
 
     /* Set handler for incoming instance identification messages */
     add_handler(sip::message_instance_identification, boost::bind(&tool_manager::handle_relay_connection, this, _1));
-  }
-
-  void tool_manager::write(std::ostream& stream) const {
-    const tool_list::const_iterator b = tools.end();
-          tool_list::const_iterator i = tools.begin();
- 
-    /* Write header */
-    stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-           << "<tool-catalog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
-           << " xsi:noNamespaceSchemaLocation=\"tool_catalog.xsd\" version=\"1.0\">\n";
- 
-    while (i != b) {
-      (*i)->write(stream);
- 
-      ++i;
-    }
- 
-    /* Write footer */
-    stream << "</tool-catalog>\n";
-  }
-
-  tool_manager::ptr tool_manager::read() {
-    boost::filesystem::path p(global_settings_manager->path_to_user_settings(settings_manager::tool_catalog_base_name));
-
-    if (!boost::filesystem::exists(p)) {
-      /* Write the default configuration */;
-      boost::format f(" <tool name=\"%s\" location=\"%s\"/>\n");
-
-      std::ofstream o(p.native_file_string().c_str());
-
-      o << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-        << "<tool-catalog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"tool_catalog.xsd\" version=\"1.0\">\n";
-
-      bf::path default_path(global_settings_manager->path_to_default_binaries());
-
-      for (char const** tool = default_tools; *tool != 0; ++tool) {
-        o << (f % *tool % (default_path / bf::path(*tool)).native_file_string());
-      }
-
-      o << "</tool-catalog>\n";
-
-      o.close();
-    }
-
-    return (read(p.native_file_string()));
-  }
-
-  /**
-   * \param[in] n the name of the file to read from
-   **/
-  tool_manager::ptr tool_manager::read(const std::string& n) {
-    bf::path p(n);
-
-    if (!bf::exists(p)) {
-      throw (exception::exception(exception::failed_loading_object, "squadt tool catalog", p.native_file_string()));
-    }
-
-    xml2pp::text_reader reader(p);
-
-    reader.set_schema(bf::path(
-                            global_settings_manager->path_to_schemas(
-                                    settings_manager::append_schema_suffix(
-                                            settings_manager::tool_catalog_base_name))));
-
-    return (read(reader));
-  }
-
-  /**
-   * \param[in] r an XML text reader to use to read data from
-   **/
-  tool_manager::ptr tool_manager::read(xml2pp::text_reader& r) {
-
-    tool_manager::ptr new_tool_manager(new tool_manager());
- 
-    /* Read root element (tool-catalog) */
-    r.next_element();
-
-    while (!r.is_end_element("tool-catalog")) {
-      /* Add a new tool to the list of tools */
-      new_tool_manager->tools.push_back(tool::read(r));
-    }
-
-    return (new_tool_manager);
   }
 
   /**
@@ -159,7 +64,7 @@ namespace squadt {
 
     instances[id] = p;
 
-    local_executor.execute(c, p, b);
+    global_build_system.get_executor()->execute(c, p, b);
   }
 
   void tool_manager::query_tools() {
@@ -220,7 +125,7 @@ namespace squadt {
       /* Start extracting */
       e->extract();
 
-      local_executor.terminate(p);
+      global_build_system.get_executor()->terminate(p);
 
       return (true);
     }
@@ -233,8 +138,56 @@ namespace squadt {
 
     /* Request the local tool executor to terminate the running processes known to this tool manager */
     for (validated_instance_list::const_iterator i = validated_instances.begin(); i != validated_instances.end(); ++i) {
-      local_executor.terminate((*i)->get_process());
+      global_build_system.get_executor()->terminate((*i)->get_process());
     }
+  }
+
+  /**
+   * \param[in] n the name of the tool
+   **/
+  tool::sptr tool_manager::find(const std::string& n) const {
+    using namespace boost;
+
+    tool::sptr t;
+
+    tool_list::const_iterator i = std::find_if(tools.begin(), tools.end(), 
+               bind(std::equal_to< std::string >(), n, 
+                       bind(&tool::get_name,
+                               bind(&tool::sptr::get, _1))));
+
+    if (i != tools.end()) {
+      t = *i;
+    }
+
+    return (t);
+  }
+
+  /**
+   * \param[in] n the name of the tool
+   **/
+  bool tool_manager::exists(std::string const& n) const {
+    using namespace boost;
+
+    return (tools.end() != std::find_if(tools.begin(), tools.end(), 
+               bind(std::equal_to< std::string >(), n, 
+                       bind(&tool::get_name,
+                               bind(&tool::sptr::get, _1)))));
+  }
+
+  /**
+   * \param[in] n the name of the tool
+   * \param[in] l the location of the tool
+   *
+   * \return whether the tool was added or not
+   **/
+  bool tool_manager::add(const std::string& n, const std::string& l) {
+    bool b = exists(n);
+
+    if (!b) {
+      tools.push_back(tool::sptr(new tool(n, l)));
+    }
+
+    return (b);
   }
 
   /**
@@ -255,6 +208,22 @@ namespace squadt {
     p->signal_connection(m->get_originator());
 
     instances.erase(id);
+  }
+
+  /**
+   * @param n the name of the tool
+   *
+   * \pre a tool with this name must be among the known tools
+   **/
+  boost::shared_ptr < tool > tool_manager::get_tool_by_name(std::string const& n) const {
+    tool::sptr t = find(n);
+
+    /* Check tool existence */
+    if (!t) {
+      throw (exception::exception(exception::requested_tool_unavailable, n));
+    }
+
+    return (t);
   }
 }
 
