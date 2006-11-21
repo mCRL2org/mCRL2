@@ -1,14 +1,14 @@
 // ======================================================================
 //
 // file          : pbesinfo 
-// date          : 07-11-2005
-// version       : 0.0.1
+// date          : 21-11-2005
+// version       : 0.0.2
 //
 // author(s)     : Alexander van Dam <avandam@damdonk.nl>
 //
 // ======================================================================
 #define NAME "pbesinfo"
-#define VERSION "0.0.1"
+#define VERSION "0.0.2"
 #define AUTHOR "Alexander van Dam"
 
 //C++
@@ -96,19 +96,47 @@ int main(int argc, char** argv)
 	ATerm bottom;
 	ATinit(argc, argv, &bottom);
 	
+	gsEnableConstructorFunctions();
+	
 	parse_command_line(argc, argv);
 	
 	lpe::pbes pbes_specification;
 	
 	/// If PBES can be loaded from file_name, then
 	///	- Show number of equations
+	/// - Show number of mu's / nu's.
 	/// else 
 	/// - Give error
 	if (pbes_specification.load(file_name))
 	{
+		// Get PBES equations. Makes a lot of function calls more readable.
+		lpe::equation_system eqsys;
+		eqsys = pbes_specification.equations();
+		
+		// Get number of mu's / nu's
+		int mu = 0;
+		int nu = 0;
+		int fp_errors = 0;
+		for (lpe::equation_system::iterator i = eqsys.begin(); i != eqsys.end(); i++)
+		{
+			if (i->symbol().is_mu())
+				mu++;						// The fixpoint is a mu
+			else if (i->symbol().is_nu())
+				nu++;						// The fixpoint is a nu
+			else
+				fp_errors++;					// The fixpoint is not a mu and not a nu. Probably an error has occurred.
+		}
+		// Show an error-message if there were some errors when reading the fixpoints.
+		if (fp_errors != 0)
+		{
+			cerr << "Reading number of mu's and nu's had errors. Results may be incorrect" << endl;
+		}
+		
 		cout << "Input read from '" << ((file_name == "-") ? "standard input" : file_name) << "'" << endl << endl;
 		
-		cout << "Number of equations: " << pbes_specification.equations().size() << endl;
+		cout << "Number of equations: " << eqsys.size() << endl;
+		cout << "Number of mu's: " << mu << endl;
+		cout << "Number of nu's: " << nu << endl;
 	}
 	else
 	{
