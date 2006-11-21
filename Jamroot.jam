@@ -38,7 +38,7 @@ project toolset
           $(BUILD_OPTIONS)
        ;
 
-tools = [ MATCH src/(.*)/.* : [ glob src/*/Jamfile.v2 ] ] ;
+tools = [ MATCH $(TOP)/src/(.*)/.* : [ glob $(TOP)/src/*/Jamfile.v2 ] ] ;
 
 # Register tool projects
 for tool in $(tools) {
@@ -140,7 +140,7 @@ else {
             <install-dependencies>on <install-type>SHARED_LIB
           ;
 
-  local tools_with_plugins = [ MATCH (src/.*/plugins/.*)/Jamfile.v2 : [ glob src/*/plugins/*/Jamfile.v2 ] ] ;
+  local tools_with_plugins = [ MATCH $(TOP)/(src/.*/plugins/.*)/Jamfile.v2 : [ glob $(TOP)/src/*/plugins/*/Jamfile.v2 ] ] ;
 
   stage install-plugins
           : $(tools_with_plugins)

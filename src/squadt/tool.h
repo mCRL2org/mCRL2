@@ -4,8 +4,9 @@
 #include <string>
 #include <iostream>
 
-#include <xml2pp/text_reader.h>
 #include <sip/tool_capabilities.h>
+
+#include <utility/visitor.h>
 
 #include "exception.h"
 #include "build_system.h"
@@ -17,9 +18,10 @@ namespace squadt {
   /**
    * \brief Container for information about a single tool
    **/
-  class tool {
+  class tool : public utility::visitable< tool > {
     friend class extractor;
     friend class tool_manager;
+    friend class read_preferences_visitor_impl;
 
     public:
 
@@ -48,99 +50,62 @@ namespace squadt {
       /** \brief Constructor */
       inline tool(std::string, std::string, sip::tool::capabilities::sptr = tool::no_capabilities);
 
+      /** \brief Default constructor */
+      inline tool();
+
     public:
 
-      /** \brief Write configuration to stream */
-      void write(std::ostream& = std::cout) const;
+      /** \brief Set capabilities object for this tool */
+      inline void set_capabilities(sip::tool::capabilities::sptr);
 
-      /** \brief Read configuration from file */
-      inline static tool::sptr read(xml2pp::text_reader&) throw ();
-
-      /** \brief Get the last received capabilities object for this tool */
+      /** \brief Get capabilities object for this tool */
       inline const sip::tool::capabilities::sptr get_capabilities() const;
 
       /** \brief Get the location to for this tool */
-      inline std::string const& get_location();
+      inline std::string get_location() const;
 
       /** \brief Get the name of this tool */
-      inline std::string const& get_name();
+      inline std::string get_name() const;
 
       /** \brief Find a specific input combination of this tool, if it exists */
       inline input_combination const* find_input_combination(build_system::tool_category const&, build_system::storage_format const&) const;
   };
 
   /**
-   * @param l a full path to the executable
-   * @param n a name for the tool
-   * @param c a tool::capabilities object for the tool
+   * \param[in] l a full path to the executable
+   * \param[in] n a name for the tool
+   * \param[in] c a tool::capabilities object for the tool
    **/
   inline tool::tool(std::string n, std::string l, sip::tool::capabilities::sptr c) : name(n), location(l), capabilities(c) {
   }
 
-  /**
-   * @param s the stream to write to
-   **/
-  inline void tool::write(std::ostream& s) const {
-    s << "<tool name=\"" << name
-      << "\" location=\"" << location << "\"";
-
-//    if (capabilities.get() != 0) {
-//      s << ">";
-
-//      capabilities->write(s);
-
-//      s << "</tool>";
-//    }
-//    else {
-      s << "/>";
-//    }
+  inline tool::tool() : capabilities(tool::no_capabilities) {
   }
 
   /**
-   * \pre the reader points to a tool element
-   *
-   * @param r the XML text reader to read the data from
+   * \param[in] c a shared pointer to a capabilities object
    **/
-  inline tool::sptr tool::read(xml2pp::text_reader& r) throw () {
-    std::string name;
-    std::string location;
-
-    if (!(r.get_attribute(&name, "name") && r.get_attribute(&location, "location"))) {
-      throw (exception::exception(exception::required_attributes_missing, "tool"));
+  inline void tool::set_capabilities(sip::tool::capabilities::sptr c) {
+    if (c.get() != 0) {
+      capabilities = c;
     }
-
-    if (!r.is_end_element()) {
-      r.next_element();
-
-      sip::tool::capabilities::sptr c = sip::tool::capabilities::read(r);
-      
-      if (c.get() != 0) {
-        r.skip_end_element("tool");
-
-        return (tool::sptr(new tool(name, location, c)));
-      }
-    }
-
-    r.skip_end_element("tool");
-      
-    return (tool::sptr(new tool(name, location)));
   }
 
   inline const sip::tool::capabilities::sptr tool::get_capabilities() const {
     return (capabilities);
   }
 
-  inline std::string const& tool::get_location() {
+  inline std::string tool::get_location() const {
     return (location);
   }
 
-  inline std::string const& tool::get_name() {
+  inline std::string tool::get_name() const {
     return (name);
   }
 
   /**
-   * @param f the storage format
-   * @param t the category in which the tool operates
+   * \param[in] f the storage format
+   * \param[in] t the category in which the tool operates
    **/
   inline tool::input_combination const* tool::find_input_combination(build_system::tool_category const& t, build_system::storage_format const& f) const {
     return (capabilities->find_input_combination(f, t));

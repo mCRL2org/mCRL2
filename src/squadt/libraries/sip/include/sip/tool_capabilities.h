@@ -106,7 +106,7 @@ namespace sip {
         static capabilities::sptr read(const std::string&);
  
         /** \brief Read from XML stream */
-        static capabilities::sptr read(xml2pp::text_reader& reader) throw ();
+        static capabilities::sptr read(xml2pp::text_reader& reader);
  
         /** \brief Write to XML string */
         std::string write() const;

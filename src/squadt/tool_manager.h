@@ -15,6 +15,8 @@
 #include "processor.h"
 #include "executor.h"
 
+#include <utility/visitor.h>
+
 namespace squadt {
 
   namespace execution {
@@ -45,7 +47,7 @@ namespace squadt {
    *    act as a proxy, and in the future do load balancing for a number
    *    executors that may run on different machines
    **/
-  class tool_manager : public sip::controller::communicator {
+  class tool_manager : public utility::visitable< tool_manager >, public sip::controller::communicator {
     friend class processor_impl;
     friend class read_preferences_visitor_impl;
     friend class write_preferences_visitor_impl;

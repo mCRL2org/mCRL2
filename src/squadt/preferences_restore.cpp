@@ -17,7 +17,7 @@
 
 namespace squadt {
 
-  class read_preferences_visitor_impl : utility::visitor< read_preferences_visitor, void > {
+  class read_preferences_visitor_impl : public utility::visitor< read_preferences_visitor, void, true > {
 
     private:
 
@@ -45,6 +45,21 @@ namespace squadt {
    * \param[in] p a path to the file from which to read
    **/
   read_preferences_visitor_impl::read_preferences_visitor_impl(boost::filesystem::path const& p) {
+  }
+
+  template <>
+  void read_preferences_visitor_impl::visit(tool& t) {
+    if (!(m_reader->get_attribute(&t.name, "name") && m_reader->get_attribute(&t.location, "location"))) {
+      throw (exception::exception(exception::required_attributes_missing, "tool"));
+    }
+
+    if (!m_reader->is_end_element()) {
+      m_reader->next_element();
+
+      t.set_capabilities(sip::tool::capabilities::read(*m_reader));
+    }
+
+    m_reader->skip_end_element("tool");
   }
 
   template <>
@@ -90,7 +105,11 @@ namespace squadt {
 
     while (!m_reader->is_end_element("tool-catalog")) {
       /* Add a new tool to the list of tools */
-      tm.tools.push_back(tool::read(*m_reader));
+      boost::shared_ptr < tool > new_tool(new tool);
+
+      new_tool->accept(*this);
+
+      tm.tools.push_back(new_tool);
     }
   }
 
@@ -104,8 +123,9 @@ namespace squadt {
 
   template <>
   void read_preferences_visitor_impl::visit(build_system& b) {
-    visit(*b.get_tool_manager());
-    visit(*b.get_type_registry());
+    b.get_tool_manager()->accept(*this);
+    b.get_executor()->accept(*this);
+    b.get_type_registry()->accept(*this);
   }
 
   void read_preferences_visitor::restore(build_system& b, boost::filesystem::path const& p) {

@@ -108,7 +108,9 @@ namespace sip {
      *
      * \attention if the reader does not point at a capabilities element nothing is read
      **/
-    capabilities::sptr capabilities::read(xml2pp::text_reader& r) throw () {
+    capabilities::sptr capabilities::read(xml2pp::text_reader& r) {
+      capabilities::sptr c;
+
       if (r.is_element("capabilities")) {
         version v = {0,0};
  
@@ -119,7 +121,7 @@ namespace sip {
         r.get_attribute(&v.major, "major");
         r.get_attribute(&v.minor, "minor");
  
-        capabilities::sptr c(new capabilities(v));
+        c = capabilities::sptr(new capabilities(v));
  
         r.next_element();
         r.skip_end_element("protocol-version");
@@ -157,11 +159,9 @@ namespace sip {
           r.next_element();
           r.skip_end_element("output-configuration");
         }
- 
-        return (c);
       }
  
-      return capabilities::sptr();
+      return (c);
     }
 
     /**

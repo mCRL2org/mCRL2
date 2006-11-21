@@ -7,6 +7,8 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include <utility/visitor.h>
+
 #include <sip/tool_capabilities.h>
 
 namespace squadt {
@@ -21,7 +23,10 @@ namespace squadt {
 
   using execution::executor;
 
-  class build_system : private boost::noncopyable {
+  /**
+   * \brief Container class for main components
+   **/
+  class build_system : public utility::visitable< build_system >, private boost::noncopyable {
     friend class read_preferences_visitor_impl;
     friend class write_preferences_visitor_impl;
 

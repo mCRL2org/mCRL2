@@ -3,6 +3,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <utility/visitor.h>
+
 #include "task_monitor.h"
 
 namespace squadt {
@@ -22,7 +24,7 @@ namespace squadt {
      *    concluded about the execution of the command except through a
      *    task_monitor object
      **/
-    class executor {
+    class executor : public utility::visitable< executor > {
       friend class tool_manager;
 
       private:
