@@ -9,21 +9,21 @@ namespace squadt {
   class executor;
   class type_registry;
 
-  class write_preferences_visitor_impl;
+  class preferences_write_visitor_impl;
 
   /**
    * \brief Writes the current state of components to file
    **/
-  class write_preferences_visitor {
+  class preferences_write_visitor {
 
     protected:
 
-      std::auto_ptr < write_preferences_visitor_impl > impl;
+      std::auto_ptr < preferences_write_visitor_impl > impl;
 
     private:
 
       /** \brief Constructor */
-      write_preferences_visitor(boost::filesystem::path const&);
+      preferences_write_visitor(boost::filesystem::path const&);
 
     public:
 
@@ -31,21 +31,21 @@ namespace squadt {
       static void store(build_system&, boost::filesystem::path const&);
   };
 
-  class read_preferences_visitor_impl;
+  class preferences_read_visitor_impl;
 
   /**
    * \brief Reads preferences from file and updates the state of components accordingly
    **/
-  class read_preferences_visitor {
+  class preferences_read_visitor {
 
     protected:
       
-      std::auto_ptr < read_preferences_visitor_impl > impl;
+      std::auto_ptr < preferences_read_visitor_impl > impl;
 
     private:
 
       /** \brief Constructor */
-      read_preferences_visitor(boost::filesystem::path const&);
+      preferences_read_visitor(boost::filesystem::path const&);
       
     public:
 

@@ -99,12 +99,12 @@ namespace squadt {
   void build_system::restore() {
     static boost::filesystem::path path_to_file(m_settings_manager->path_to_user_settings("preferences"));
 
-    read_preferences_visitor::restore(*this, path_to_file);
+    preferences_read_visitor::restore(*this, path_to_file);
   }
 
   void build_system::store() {
     static boost::filesystem::path path_to_file(m_settings_manager->path_to_user_settings("preferences"));
 
-    write_preferences_visitor::store(*this, path_to_file);
+    preferences_write_visitor::store(*this, path_to_file);
   }
 }

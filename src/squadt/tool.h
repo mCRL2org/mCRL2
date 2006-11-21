@@ -21,7 +21,7 @@ namespace squadt {
   class tool : public utility::visitable< tool > {
     friend class extractor;
     friend class tool_manager;
-    friend class read_preferences_visitor_impl;
+    friend class preferences_read_visitor_impl;
 
     public:
 

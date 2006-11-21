@@ -49,8 +49,7 @@ namespace squadt {
    **/
   class tool_manager : public utility::visitable< tool_manager >, public sip::controller::communicator {
     friend class processor_impl;
-    friend class read_preferences_visitor_impl;
-    friend class write_preferences_visitor_impl;
+    friend class preferences_read_visitor_impl;
  
     public:
  
@@ -148,7 +147,7 @@ namespace squadt {
       bool query_tool(tool&);
 
       /** \brief Get the list of known tools */
-      tool_const_sequence get_tools();
+      tool_const_sequence get_tools() const;
  
       /** \brief Get the number of known tools */
       const unsigned int number_of_tools() const;
@@ -161,7 +160,7 @@ namespace squadt {
     terminate();
   }
 
-  inline tool_manager::tool_const_sequence tool_manager::get_tools() {
+  inline tool_manager::tool_const_sequence tool_manager::get_tools() const {
     return (boost::make_iterator_range(tools));
   }
 

@@ -17,7 +17,7 @@
 
 namespace squadt {
 
-  class read_preferences_visitor_impl : public utility::visitor< read_preferences_visitor, void, true > {
+  class preferences_read_visitor_impl : public utility::visitor< preferences_read_visitor, void, true > {
 
     private:
 
@@ -25,7 +25,7 @@ namespace squadt {
 
     public:
 
-      read_preferences_visitor_impl(boost::filesystem::path const&);
+      preferences_read_visitor_impl(boost::filesystem::path const&);
 
       /** \brief Reads state for objects of type T */
       template < typename T >
@@ -36,19 +36,19 @@ namespace squadt {
    * \param[in] b reference to a build_system instance
    * \param[in] p a path to the file from which to read
    **/
-  read_preferences_visitor::read_preferences_visitor(boost::filesystem::path const& p) :
-                        impl(new read_preferences_visitor_impl(p)) {
+  preferences_read_visitor::preferences_read_visitor(boost::filesystem::path const& p) :
+                        impl(new preferences_read_visitor_impl(p)) {
   }
 
   /**
    * \param[in] b reference to a build_system instance
    * \param[in] p a path to the file from which to read
    **/
-  read_preferences_visitor_impl::read_preferences_visitor_impl(boost::filesystem::path const& p) {
+  preferences_read_visitor_impl::preferences_read_visitor_impl(boost::filesystem::path const& p) {
   }
 
   template <>
-  void read_preferences_visitor_impl::visit(tool& t) {
+  void preferences_read_visitor_impl::visit(tool& t) {
     if (!(m_reader->get_attribute(&t.name, "name") && m_reader->get_attribute(&t.location, "location"))) {
       throw (exception::exception(exception::required_attributes_missing, "tool"));
     }
@@ -63,17 +63,52 @@ namespace squadt {
   }
 
   template <>
-  void read_preferences_visitor_impl::visit(tool_manager& tm) {
+  void preferences_read_visitor_impl::visit(tool_manager& tm) {
     using namespace boost::filesystem;
 
-    const path file_name(global_build_system.get_settings_manager()->path_to_user_settings(settings_manager::tool_catalog_base_name));
+    assert(m_reader->is_element("tool-catalog"));
 
-    if (!exists(file_name)) {
+    m_reader->next_element();
+
+    while (!m_reader->is_end_element("tool-catalog")) {
+      /* Add a new tool to the list of tools */
+      boost::shared_ptr < tool > new_tool(new tool);
+
+      new_tool->accept(*this);
+
+      tm.tools.push_back(new_tool);
+    }
+  }
+
+  template <>
+  void preferences_read_visitor_impl::visit(executor& e) {
+    assert(m_reader->is_element("execution"));
+
+    unsigned int maximum_instance_count = 3;
+    
+    if (m_reader->get_attribute(&maximum_instance_count, "maximum-process-instances")) {
+      e.set_maximum_instance_count(maximum_instance_count);
+    }
+
+    m_reader->skip_end_element("execution");
+  }
+
+  template <>
+  void preferences_read_visitor_impl::visit(type_registry& r) {
+  }
+
+  template <>
+  void preferences_read_visitor_impl::visit(build_system& b) {
+    using namespace boost::filesystem;
+
+    const path tool_manager_file_name(global_build_system.get_settings_manager()->path_to_user_settings(settings_manager::tool_catalog_base_name));
+
+    if (!exists(tool_manager_file_name)) {
       /* Write the default configuration */;
       boost::format f(" <tool name=\"%s\" location=\"%s\"/>\n");
 
       try {
-        std::ofstream o(file_name.native_file_string().c_str());
+        std::ofstream o(tool_manager_file_name.native_file_string().c_str());
        
         o << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
           << "<tool-catalog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"tool_catalog.xsd\" version=\"1.0\">\n";
@@ -89,47 +124,34 @@ namespace squadt {
         o.close();
       }
       catch (...) {
-        throw (exception::exception(exception::failed_loading_object, "tool catalog", file_name.native_file_string()));
+        throw (exception::exception(exception::failed_loading_object, "tool catalog", tool_manager_file_name.native_file_string()));
       }
     }
 
-    m_reader.reset(new xml2pp::text_reader(file_name));
+    m_reader.reset(new xml2pp::text_reader(tool_manager_file_name));
 
+    /* Read root element (tool-catalog) */
     m_reader->set_schema(boost::filesystem::path(
               global_build_system.get_settings_manager()->path_to_schemas(
                                   settings_manager::append_schema_suffix(
                                           settings_manager::tool_catalog_base_name))));
 
-    /* Read root element (tool-catalog) */
-    m_reader->next_element();
+    b.get_tool_manager()->accept(*this);
 
-    while (!m_reader->is_end_element("tool-catalog")) {
-      /* Add a new tool to the list of tools */
-      boost::shared_ptr < tool > new_tool(new tool);
+    const path miscellaneous_file_name(global_build_system.get_settings_manager()->path_to_user_settings("preferences"));
 
-      new_tool->accept(*this);
+    if (exists(miscellaneous_file_name)) {
+      m_reader.reset(new xml2pp::text_reader(miscellaneous_file_name));
 
-      tm.tools.push_back(new_tool);
+      m_reader->next_element();
+
+      b.get_executor()->accept(*this);
+      b.get_type_registry()->accept(*this);
     }
   }
 
-  template <>
-  void read_preferences_visitor_impl::visit(executor& e) {
-  }
-
-  template <>
-  void read_preferences_visitor_impl::visit(type_registry& r) {
-  }
-
-  template <>
-  void read_preferences_visitor_impl::visit(build_system& b) {
-    b.get_tool_manager()->accept(*this);
-    b.get_executor()->accept(*this);
-    b.get_type_registry()->accept(*this);
-  }
-
-  void read_preferences_visitor::restore(build_system& b, boost::filesystem::path const& p) {
-    read_preferences_visitor v(p);
+  void preferences_read_visitor::restore(build_system& b, boost::filesystem::path const& p) {
+    preferences_read_visitor v(p);
     
     v.impl->visit(b);
   }

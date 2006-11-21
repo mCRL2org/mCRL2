@@ -15,14 +15,14 @@
 
 namespace squadt {
 
-  class write_preferences_visitor_impl : public utility::visitor< write_preferences_visitor, void > {
+  class preferences_write_visitor_impl : public utility::visitor< preferences_write_visitor, void > {
     private:
 
       std::ofstream m_output_stream;
 
     public:
 
-      write_preferences_visitor_impl(boost::filesystem::path const&);
+      preferences_write_visitor_impl(boost::filesystem::path const&);
 
       /** \brief Writes state for objects of type T */
       template < typename T >
@@ -33,35 +33,31 @@ namespace squadt {
    * \param[in] b reference to a build_system instance
    * \param[in] p a path to the file to write to
    **/
-  write_preferences_visitor::write_preferences_visitor(boost::filesystem::path const& p) :
-                        impl(new write_preferences_visitor_impl(p)) {
+  preferences_write_visitor::preferences_write_visitor(boost::filesystem::path const& p) :
+                        impl(new preferences_write_visitor_impl(p)) {
   }
 
   /**
    * \param[in] b reference to a build_system instance
    * \param[in] p a path to the file from which to read
    **/
-  write_preferences_visitor_impl::write_preferences_visitor_impl(boost::filesystem::path const& p) {
+  preferences_write_visitor_impl::preferences_write_visitor_impl(boost::filesystem::path const& p) {
   }
 
   template <>
-  void write_preferences_visitor_impl::visit(tool const& t) {
+  void preferences_write_visitor_impl::visit(tool const& t) {
     m_output_stream << "<tool name=\"" << t.get_name()
                     << "\" location=\"" << t.get_location() << "\"/>\n";
   }
 
   template <>
-  void write_preferences_visitor_impl::visit(tool_manager const& tm) {
-    const boost::filesystem::path file_name(global_build_system.get_settings_manager()->path_to_user_settings(settings_manager::tool_catalog_base_name));
-
-    m_output_stream.open(file_name.native_file_string().c_str(), std::ofstream::out|std::ofstream::trunc);
-
+  void preferences_write_visitor_impl::visit(tool_manager const& tm) {
     /* Write header */
     m_output_stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
                     << "<tool-catalog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
                     << " xsi:noNamespaceSchemaLocation=\"tool_catalog.xsd\" version=\"1.0\">\n";
  
-    BOOST_FOREACH(tool_manager::tool_list::value_type t, tm.tools) {
+    BOOST_FOREACH(tool_manager::tool_list::value_type t, tm.get_tools()) {
       t->accept(*this);
     }
  
@@ -70,25 +66,48 @@ namespace squadt {
   }
 
   template <>
-  void write_preferences_visitor_impl::visit(executor const&) {
+  void preferences_write_visitor_impl::visit(executor const& e) {
+    m_output_stream << "<execution maximum-process-instances=\""
+                    << e.get_maximum_instance_count()
+                    << "\"/>";
   }
 
   template <>
-  void write_preferences_visitor_impl::visit(type_registry const&) {
+  void preferences_write_visitor_impl::visit(type_registry const&) {
   }
 
   template <>
-  void write_preferences_visitor_impl::visit(build_system const& b) {
+  void preferences_write_visitor_impl::visit(build_system const& b) {
+    const boost::filesystem::path tool_catalog_file_name(global_build_system.get_settings_manager()->path_to_user_settings(settings_manager::tool_catalog_base_name));
+
+    m_output_stream.open(tool_catalog_file_name.native_file_string().c_str(), std::ofstream::out|std::ofstream::trunc);
+
     b.get_tool_manager()->accept(*this);
+
+    m_output_stream.close();
+
+    const boost::filesystem::path miscellaneous_file_name(global_build_system.get_settings_manager()->path_to_user_settings("preferences"));
+
+    m_output_stream.open(miscellaneous_file_name.native_file_string().c_str(), std::ofstream::out|std::ofstream::trunc);
+
+    m_output_stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+                    << "<squadt-preferences xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
+                    << " xsi:noNamespaceSchemaLocation=\"tool_catalog.xsd\" version=\"1.0\">\n";
+
     b.get_executor()->accept(*this);
+
     b.get_type_registry()->accept(*this);
+
+    m_output_stream << "</squadt-preferences>";
+
+    m_output_stream.close();
   }
 
   /**
    * \param[in] p a path to the file from which to read
    **/
-  void write_preferences_visitor::store(build_system& b, boost::filesystem::path const& p) {
-    write_preferences_visitor v(p);
+  void preferences_write_visitor::store(build_system& b, boost::filesystem::path const& p) {
+    preferences_write_visitor v(p);
     
     v.impl->visit(b);
   }
