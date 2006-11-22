@@ -51,14 +51,6 @@ feature framework : : free ;
 feature bundle : no yes : incidental ;
 
 # Start changes from Adobe ASL for universal binaries
-feature sdkroot : 10.4 10.3.9 10.2.8 : propagated link-incompatible ;
-flags darwin.compile OPTIONS <sdkroot>10.4 : -isysroot /Developer/SDKs/MacOSX10.4u.sdk -mmacosx-version-min=10.4 ;
-flags darwin.link OPTIONS <sdkroot>10.4 : -isysroot /Developer/SDKs/MacOSX10.4u.sdk -mmacosx-version-min=10.4 ;
-flags darwin.compile OPTIONS <sdkroot>10.3.9 : -isysroot /Developer/SDKs/MacOSX10.3.9.sdk -mmacosx-version-min=10.3.9 ;
-flags darwin.link OPTIONS <sdkroot>10.3.9 : -isysroot /Developer/SDKs/MacOSX10.3.9.sdk -mmacosx-version-min=10.3.9 ;
-flags darwin.compile OPTIONS <sdkroot>10.2.8 : -isysroot /Developer/SDKs/MacOSX10.2.8.sdk -mmacosx-version-min=10.2.8 ;
-flags darwin.link OPTIONS <sdkroot>10.2.8 : -isysroot /Developer/SDKs/MacOSX10.2.8.sdk -mmacosx-version-min=10.2.8 ;
-
 feature arch : native ppc i386 fat : composite propagated ;
 flags darwin.compile OPTIONS <arch>fat : -arch i386 -arch ppc ;
 flags darwin.link OPTIONS <arch>fat : -arch i386 -arch ppc ;
