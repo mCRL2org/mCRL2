@@ -1,3 +1,5 @@
+#include <boost/filesystem/operations.hpp>
+
 #include "gui_dialog_project.h"
 #include "settings_manager.h"
 #include "project_manager.h"
@@ -355,9 +357,11 @@ namespace squadt {
             EndModal(0);
             break;
           default: /* wxID_OK */
-            wxFileName file = wxFileName(project_store, name->GetValue());
+            using namespace boost::filesystem;
 
-            if (file.DirExists() || file.DirExists()) {
+            path target(path(project_store.fn_str()) / path(name->GetValue().fn_str()));
+
+            if (exists(target)) {
               wxMessageDialog(0, wxT("A file with this name already exists in the project directory!"), wxT("Error"), wxOK).ShowModal();
 
               button_accept->Enable(false);
@@ -373,9 +377,11 @@ namespace squadt {
         button_accept->Enable(false);
 
         if (!name->GetValue().IsEmpty()) {
-          wxFileName n(project_store, name->GetValue());
+          using namespace boost::filesystem;
 
-          if (n.FileExists()) {
+          path target(path(project_store.fn_str()) / path(name->GetValue().fn_str()));
+
+          if (exists(target)) {
             wxMessageDialog(0, wxT("A file with this name is already part of the project!"), wxT("Error"), wxOK).ShowModal();
           }
           else {
@@ -410,7 +416,11 @@ namespace squadt {
 
       /** \brief Gets the selected file that is to be added the the project */
       std::string add_to_project::get_destination() const {
-        return (std::string(wxFileName(project_store, name->GetValue()).GetFullPath().fn_str()));
+        using namespace boost::filesystem;
+
+        path target(path(project_store.fn_str()) / path(name->GetValue().fn_str()));
+
+        return (target.native_file_string());
       }
 
       add_to_project::~add_to_project() {

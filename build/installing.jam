@@ -29,6 +29,7 @@ if [ modules.peek : OS ] = MACOSX {
            $(TOP)/src/$(bundle).plist
            $(TOP)/src/$(bundle).icns
          : <location>$(prefix)
+           <dependency>install-binaries
          ;
 
     explicit $(bundle:B).app ;

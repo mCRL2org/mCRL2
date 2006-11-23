@@ -21,14 +21,14 @@ flags $(__name__).make-bundle LOCATION <location> ;
 
 SAMPLE_R = $(__name__:P)/sample.r ;
 
-actions quietly existing make-bundle {
+actions quietly make-bundle {
   mkdir -p $(LOCATION)/$(<:BS)/Contents/MacOS
   mkdir -p $(LOCATION)/$(<:BS)/Contents/Resources
   echo -n 'APPL????' > $(LOCATION)/$(<:BS)/Contents/PkgInfo
   cp $(INFO) $(LOCATION)/$(<:BS)/Contents/Info.plist
   cp $(ICON) $(LOCATION)/$(<:BS)/Contents/Resources
 
-  /Developer/Tools/Rez -t APPL $(SAMPLE_R) -o $(LOCATION)/bin/$(>:BS)
+  /Developer/Tools/Rez -t APPL -d __DARWIN__ -d __WXMAC__ Carbon.r $(SAMPLE_R) -o $(LOCATION)/bin/$(>:BS)
 
   ln -f $(LOCATION)/bin/$(>:BS) $(LOCATION)/$(<:BS)/Contents/MacOS/$(>:BS)
   /Developer/Tools/SetFile -a C $(LOCATION)/$(<:BS)/Contents/MacOS/$(>:BS)
