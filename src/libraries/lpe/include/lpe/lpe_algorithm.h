@@ -55,6 +55,7 @@ struct make_timed_lpe_summand
     {
       data_variable v = m_generator();
       summand = set_time(summand, data_expression(v));
+      summand = set_summation_variables(summand, summand.summation_variables() + v);
     }
     return summand;
   }
