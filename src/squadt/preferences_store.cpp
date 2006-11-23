@@ -107,6 +107,7 @@ namespace squadt {
 
     m_output_stream.open(tool_catalog_file_name.native_file_string().c_str(), std::ofstream::out|std::ofstream::trunc);
 
+    /// write list of known tools
     b.get_tool_manager()->accept(*this);
 
     m_output_stream.close();
@@ -118,9 +119,16 @@ namespace squadt {
     m_output_stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
                     << "<squadt-preferences xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" version=\"1.0\">\n";
 
+    /// write execution preferences
     b.get_executor()->accept(*this);
 
+    /// write default actions
     b.get_type_registry()->accept(*this);
+
+    /// write log settings
+    m_output_stream << "<logging filter-level=\""
+                    << std::ios::dec << sip::controller::communicator::get_standard_error_logger()->get_filter_level()
+                    << "\"/>\n";
 
     m_output_stream << "</squadt-preferences>";
 
