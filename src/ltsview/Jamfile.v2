@@ -18,9 +18,6 @@ exe ltsview
         utils.cpp
         /libraries//wx_extension
         /libraries//mcrl2_basic
-      : <dependency>/site-config//OpenGL
-        <dependency>/site-config//wx_gl
-        <wx>no:<build>no
-        <opengl>no:<build>no
+      : <site-library>wx_gl
       : <squadt_support>enable
       ;

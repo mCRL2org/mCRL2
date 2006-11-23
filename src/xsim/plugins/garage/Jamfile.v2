@@ -1,5 +1,7 @@
 project toolset/xsim/plugins/garage
        : build-dir $(BUILD_TOP)/xsim/garage
+       : requirements
+          <include>../..
        ;
 
 lib xsim_garage_view
@@ -8,12 +10,9 @@ lib xsim_garage_view
          visutils.cpp
          /libraries//nextstate
          /libraries//mcrl2_basic
-       : <include>../..
-         <dependency>/site-config//OpenGL
-         <dependency>/site-config//wx_gl
+       : <site-library>wx_gl
          <define>GARAGEFRAMEDLL
          <link>shared
-         <wx>no:<build>no
          <toolset>darwin:<bundle>yes
        :
        ;
@@ -23,8 +22,7 @@ exe garageframe
          garageframe.cpp
          garagecanvas.cpp
          visutils.cpp
-       : <include>../..
-         <wx>gl
+       : <site-library>wx_gl
        ;
 
 explicit garageframe ;

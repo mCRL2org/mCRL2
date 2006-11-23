@@ -21,26 +21,25 @@ flags $(__name__).make-bundle LOCATION <location> ;
 
 SAMPLE_R = $(__name__:P)/sample.r ;
 
-actions make-bundle {
+actions quietly existing make-bundle {
   mkdir -p $(LOCATION)/$(<:BS)/Contents/MacOS
   mkdir -p $(LOCATION)/$(<:BS)/Contents/Resources
   echo -n 'APPL????' > $(LOCATION)/$(<:BS)/Contents/PkgInfo
-  cp $(INFO) $(LOCATION)/$(<:BS)/Contents
+  cp $(INFO) $(LOCATION)/$(<:BS)/Contents/Info.plist
   cp $(ICON) $(LOCATION)/$(<:BS)/Contents/Resources
 
   /Developer/Tools/Rez -t APPL $(SAMPLE_R) -o $(LOCATION)/bin/$(>:BS)
 
-  cp $(LOCATION)/bin/$(>:BS) $(LOCATION)/$(<:BS)/Contents/MacOS
-
+  ln -f $(LOCATION)/bin/$(>:BS) $(LOCATION)/$(<:BS)/Contents/MacOS/$(>:BS)
   /Developer/Tools/SetFile -a C $(LOCATION)/$(<:BS)/Contents/MacOS/$(>:BS)
 }
 
-actions rez {
+actions quietly existing rez {
   /Developer/Tools/Rez -t APPL -o $(>) $(SAMPLE_R)
 }
 
 rule mac-bundle ( target : executable info icon : requirements * : default-build * ) {
-  local project = [ project.current ] ;
+  local project  = [ project.current ] ;
 
   requirements += <action>make-bundle ;
 
