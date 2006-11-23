@@ -313,13 +313,15 @@ namespace squadt {
     /** \brief Terminates a running process */
     inline void task_monitor_impl::terminate_process() {
       if (connected) {
-        disconnect();
+        if (associated_process && associated_process->get_status() == process::running) {
+          disconnect();
 
-        boost::xtime timeout;
-        boost::xtime_get(&timeout, boost::TIME_UTC);
-        timeout.nsec += 500000000;
+          boost::xtime timeout;
+          boost::xtime_get(&timeout, boost::TIME_UTC);
+          timeout.nsec += 500000000;
 
-        boost::thread::sleep(timeout);
+          boost::thread::sleep(timeout);
+        }
       }
       if (associated_process.get() != 0) {
         associated_process->terminate();

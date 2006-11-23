@@ -27,8 +27,6 @@ namespace squadt {
 
       await_message(sip::message_response_tool_capabilities, 1);
     }
-
-    finish();
   }
 
   /**

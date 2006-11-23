@@ -4,7 +4,7 @@
 #include <boost/regex.hpp>
 
 namespace sip {
-  char* const       mime_type::main_type_as_string[] = { "application", "audio", "image", "message", "multipart", "text", "video", "" };
+  char* const       mime_type::main_type_as_string[] = { "application", "audio", "image", "message", "multipart", "text", "video", "unknown", "" };
 
   /**
    * \param[in] s a string that represents a mime type

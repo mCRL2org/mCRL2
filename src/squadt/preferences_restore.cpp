@@ -82,19 +82,58 @@ namespace squadt {
 
   template <>
   void preferences_read_visitor_impl::visit(executor& e) {
-    assert(m_reader->is_element("execution"));
+    assert(m_reader->is_element("execution-settings"));
 
     unsigned int maximum_instance_count = 3;
+
+    while (!m_reader->is_end_element("execution-settings")) {
+      m_reader->next_element();
     
-    if (m_reader->get_attribute(&maximum_instance_count, "maximum-process-instances")) {
-      e.set_maximum_instance_count(maximum_instance_count);
+      if (m_reader->is_element("concurrency-constraints")) {
+        if (m_reader->get_attribute(&maximum_instance_count, "maximum-process-total")) {
+          e.set_maximum_instance_count(maximum_instance_count);
+        }
+      }
     }
 
-    m_reader->skip_end_element("execution");
+    m_reader->skip_end_element("execution-settings");
   }
 
   template <>
   void preferences_read_visitor_impl::visit(type_registry& r) {
+    assert(m_reader->is_element("default-actions"));
+
+    while (!m_reader->is_end_element("default-actions")) {
+      m_reader->next_element();
+
+      if (m_reader->is_element("associate-commands")) {
+        while (!m_reader->is_end_element("associate-commands")) {
+          mime_type t(m_reader->get_attribute_as_string("mime-type"));
+
+          m_reader->next_element();
+
+          if (m_reader->is_element("command")) {
+            if (m_reader->get_attribute("system")) {
+              r.register_command(t, type_registry::command_system);
+            }
+            else if (m_reader->get_attribute("none")) {
+              r.register_command(t, type_registry::command_none);
+            }
+            else {
+              m_reader->next_element();
+
+              r.register_command(t, m_reader->get_value_as_string());
+
+              m_reader->next_element();
+            }
+
+            m_reader->skip_end_element("command");
+          }
+
+          m_reader->skip_end_element("associate_commands");
+        }
+      }
+    }
   }
 
   template <>

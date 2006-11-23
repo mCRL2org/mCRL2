@@ -67,13 +67,38 @@ namespace squadt {
 
   template <>
   void preferences_write_visitor_impl::visit(executor const& e) {
-    m_output_stream << "<execution maximum-process-instances=\""
-                    << e.get_maximum_instance_count()
-                    << "\"/>";
+    m_output_stream << "<execution-settings>\n"
+                    << " <concurrency-constraints maximum-process-total=\""
+                    << e.get_maximum_instance_count() << "\"/>\n"
+                    << "</execution-settings>\n";
   }
 
   template <>
-  void preferences_write_visitor_impl::visit(type_registry const&) {
+  void preferences_write_visitor_impl::visit(type_registry const& r) {
+
+    m_output_stream << "<default-actions>\n";
+
+    BOOST_FOREACH(type_registry::actions_for_type::value_type c, r.command_for_type) {
+      m_output_stream << " <associate-commands mime-type=\"" << c.first << "\">\n"
+                      << "  <command";
+
+      if (c.second == type_registry::command_system) {
+        /// Associated command is specified by the system
+        m_output_stream << " system /";
+      }
+      else if (c.second == type_registry::command_none) {
+        /// No command is to be associated with this type
+        m_output_stream << " none /";
+      }
+      else {
+        /// A custom command is associated with this type
+        m_output_stream << "><![CDATA[" << c.second << "]]></command";
+      }
+
+      m_output_stream << ">\n </associate-commands>\n";
+    }
+
+    m_output_stream << "</default-actions>\n";
   }
 
   template <>
@@ -91,8 +116,7 @@ namespace squadt {
     m_output_stream.open(miscellaneous_file_name.native_file_string().c_str(), std::ofstream::out|std::ofstream::trunc);
 
     m_output_stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-                    << "<squadt-preferences xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
-                    << " xsi:noNamespaceSchemaLocation=\"tool_catalog.xsd\" version=\"1.0\">\n";
+                    << "<squadt-preferences xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" version=\"1.0\">\n";
 
     b.get_executor()->accept(*this);
 

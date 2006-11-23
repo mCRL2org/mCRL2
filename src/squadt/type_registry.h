@@ -32,6 +32,8 @@ namespace squadt {
    * and tool categories when given a format.
    **/
   class type_registry : public utility::visitable< type_registry > {
+    friend class preferences_read_visitor_impl;
+    friend class preferences_write_visitor_impl;
 
     public:
 
@@ -58,6 +60,9 @@ namespace squadt {
       /** \brief Iterator range type on tools_for_category */
       typedef boost::iterator_range < tools_for_category::const_iterator >   tool_sequence;
 
+      /** \brief Map that associates commands to mime-types */
+      typedef std::map < mime_type, std::string >                            actions_for_type;
+
     public:
 
       /** \brief Special value that indicates that the system specified command may be used (see command_for_type) */
@@ -72,7 +77,7 @@ namespace squadt {
       categories_for_mime_type             categories_for_format;
 
       /** \brief Maps a mime type to a command string */
-      std::map < mime_type, std::string >  command_for_type;
+      actions_for_type                     command_for_type;
 
     private:
 

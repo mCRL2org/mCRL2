@@ -52,6 +52,9 @@ namespace sip {
       std::string get_sub_type() const;
 
       /** \brief Converts to string */
+      std::string as_string() const;
+
+      /** \brief Converts to string */
       std::string to_string() const;
 
       /** \brief Compare for equality */
@@ -64,12 +67,23 @@ namespace sip {
       bool operator< (mime_type const&) const;
   };
 
+  /** \brief Output to stream as string */
+  inline std::ostream& operator<<(std::ostream& o, mime_type const& t) {
+    o << t.as_string();
+
+    return (o);
+  }
+
   inline std::string mime_type::get_main_type() const {
     return (main_type_as_string[m_main]);
   }
 
   inline std::string mime_type::get_sub_type() const {
     return (main_type_as_string[m_main]);
+  }
+
+  inline std::string mime_type::as_string() const {
+    return (std::string(main_type_as_string[m_main]) + "/" + m_sub);
   }
 
   inline std::string mime_type::to_string() const {
