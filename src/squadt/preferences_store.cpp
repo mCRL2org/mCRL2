@@ -6,10 +6,10 @@
 #include <boost/foreach.hpp>
 
 #include "build_system.h"
-#include "tool_manager.h"
 #include "settings_manager.h"
+#include "tool_manager.tcc"
 #include "type_registry.h"
-#include "executor.h"
+#include "executor.tcc"
 
 #include <utility/visitor.h>
 
@@ -51,7 +51,7 @@ namespace squadt {
   }
 
   template <>
-  void preferences_write_visitor_impl::visit(tool_manager const& tm) {
+  void preferences_write_visitor_impl::visit(tool_manager_impl const& tm) {
     /* Write header */
     m_output_stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
                     << "<tool-catalog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
@@ -66,7 +66,7 @@ namespace squadt {
   }
 
   template <>
-  void preferences_write_visitor_impl::visit(executor const& e) {
+  void preferences_write_visitor_impl::visit(executor_impl const& e) {
     m_output_stream << "<execution-settings>\n"
                     << " <concurrency-constraints maximum-process-total=\""
                     << e.get_maximum_instance_count() << "\"/>\n"
@@ -108,7 +108,7 @@ namespace squadt {
     m_output_stream.open(tool_catalog_file_name.native_file_string().c_str(), std::ofstream::out|std::ofstream::trunc);
 
     /// write list of known tools
-    b.get_tool_manager()->accept(*this);
+    b.get_tool_manager_impl()->accept(*this);
 
     m_output_stream.close();
 
@@ -120,7 +120,7 @@ namespace squadt {
                     << "<squadt-preferences xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" version=\"1.0\">\n";
 
     /// write execution preferences
-    b.get_executor()->accept(*this);
+    b.get_executor_impl()->accept(*this);
 
     /// write default actions
     b.get_type_registry()->accept(*this);

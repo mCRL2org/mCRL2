@@ -12,7 +12,7 @@
 #include "processor.h"
 #include "project_manager.h"
 #include "executor.h"
-#include "tool_manager.h"
+#include "tool_manager.tcc"
 
 namespace squadt {
   /// \cond PRIVATE_PART
@@ -763,7 +763,7 @@ namespace squadt {
   inline void processor_impl::configure(interface_ptr const& t, std::string const& w) {
     output_directory = w;
 
-    global_build_system.get_tool_manager()->execute(*tool_descriptor, make_output_path(w),
+    global_build_system.get_tool_manager()->impl->execute(*tool_descriptor, make_output_path(w),
          boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
 
     current_monitor->start_tool_configuration(t);
@@ -823,7 +823,7 @@ namespace squadt {
     
       current_monitor->start_tool_operation(t);
 
-      global_build_system.get_tool_manager()->execute(*tool_descriptor, make_output_path(output_directory),
+      global_build_system.get_tool_manager()->impl->execute(*tool_descriptor, make_output_path(output_directory),
          boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), false);
     }
     else {
@@ -862,7 +862,7 @@ namespace squadt {
     
       current_monitor->start_tool_operation(t);
 
-      global_build_system.get_tool_manager()->execute(*tool_descriptor, make_output_path(output_directory),
+      global_build_system.get_tool_manager()->impl->execute(*tool_descriptor, make_output_path(output_directory),
          boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), false);
     }
     else {
@@ -881,7 +881,7 @@ namespace squadt {
 
     current_monitor->get_logger()->log(1, "executing command `" + c->argument_string() + "'\n");
 
-    global_build_system.get_tool_manager()->execute(c, boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
+    global_build_system.get_tool_manager()->impl->execute(c, boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
   }
 
   /**

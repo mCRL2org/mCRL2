@@ -36,7 +36,7 @@ namespace squadt {
         mutable boost::condition                        register_condition;
         
         /** \brief A pointer to the process associated to this listener or 0 */
-        process::ptr                                    associated_process;
+        process::sptr                                   associated_process;
 
         /** \brief The event handler that have been registered */
         handler_map                                     handlers;
@@ -89,7 +89,7 @@ namespace squadt {
         inline void on_status_change(boost::function < void () >);
 
         /** \brief Associates a process with this listener */
-        void attach_process(const process::ptr& p);
+        void attach_process(const process::sptr& p);
 
         /** \brief Terminate communication and reset internal state */
         inline void disconnect();
@@ -281,7 +281,7 @@ namespace squadt {
     /**
      * @param[in] p shared pointer to the process
      **/
-    inline void task_monitor_impl::attach_process(const process::ptr& p) {
+    inline void task_monitor_impl::attach_process(const process::sptr& p) {
       boost::mutex::scoped_lock l(register_lock);
 
       /* Wake up waiting threads */

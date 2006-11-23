@@ -19,7 +19,7 @@ namespace squadt {
     /**
      * @param[in] p shared pointer to the process
      **/
-    void task_monitor::attach_process(const process::ptr& p) {
+    void task_monitor::attach_process(const process::sptr& p) {
       assert(p.get() != 0);
 
       boost::dynamic_pointer_cast < task_monitor_impl > (impl)->attach_process(p);
@@ -35,7 +35,7 @@ namespace squadt {
      *
      * \return A pointer to the associated process, or 0 on program failure
      **/
-    process::ptr task_monitor::get_process(const bool b) const {
+    process::sptr task_monitor::get_process(const bool b) const {
       if (b) {
         boost::dynamic_pointer_cast < task_monitor_impl > (impl)->await_process();
       }

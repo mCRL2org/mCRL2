@@ -9,67 +9,12 @@
 #include <boost/weak_ptr.hpp>
 #include <boost/foreach.hpp>
 
-#include "executor.h"
+#include <utility/visitor.h>
+
+#include "executor.tcc"
 
 namespace squadt {
   namespace execution {
-
-    class executor_impl {
-      friend class executor;
-
-      private:
-
-        /** Convenient short-hand type */
-        typedef std::pair < command, task_monitor::sptr > command_pair;
-
-      private:
-
-        /** \brief The maximum number of processes that is allowed to run concurrently */
-        unsigned int                   maximum_instance_count;
- 
-        /** \brief List of active processes */
-        std::list < process::ptr >     processes;
- 
-        /** \brief Data of processes that will be started */
-        std::deque < command_pair >    delayed_commands;
-
-      private:
-
-        /** \brief handler that is invoked when a process is terminated */
-        inline void handle_process_termination(process* p, boost::weak_ptr < executor_impl >);
-  
-        /** \brief Start a new process */
-        inline void start_process(const command&, boost::shared_ptr < executor_impl >&);
-    
-        /** \brief Start a new process with a listener */
-        inline void start_process(const command&, task_monitor::sptr&, boost::shared_ptr < executor_impl >&);
-
-        /** \brief Start processing commands if the queue contains any waiters */
-        inline void start_delayed(boost::shared_ptr < executor_impl >&);
- 
-        /** \brief Remove a process from the list */
-        inline void remove(process*);
-  
-      public:
-
-        /** \brief Constructor */
-        inline executor_impl(unsigned int);
- 
-        /** \brief Execute a tool */
-        void execute(const command&, boost::shared_ptr < task_monitor >&, bool, boost::shared_ptr < executor_impl >&);
-    
-        /** \brief Execute a command */
-        void execute(const command&, bool, boost::shared_ptr < executor_impl >&);
-    
-        /** \brief Terminate a specific process */
-        inline void terminate(process*);
-    
-        /** \brief Terminate a specific process */
-        inline void terminate(process::wptr);
-    
-        /** \brief Terminate all processes */
-        void terminate_all();
-    };
 
     inline executor_impl::executor_impl(unsigned int m) : maximum_instance_count(m) {
     }
@@ -82,9 +27,9 @@ namespace squadt {
 
       boost::mutex::scoped_lock w(lock);
 
-      std::list < process::ptr >::iterator i = std::find_if(processes.begin(), processes.end(),
+      std::list < process::sptr >::iterator i = std::find_if(processes.begin(), processes.end(),
                               boost::bind(std::equal_to < process* >(), p,
-                                      boost::bind(&process::ptr::get, _1)));
+                                      boost::bind(&process::sptr::get, _1)));
 
       if (i != processes.end()) {
         processes.erase(i);
@@ -96,7 +41,7 @@ namespace squadt {
      * \param[in] w a pointer to the associated implementation object
      **/
     inline void executor_impl::start_process(const command& c, boost::shared_ptr < executor_impl >& w) {
-      process::ptr p(new process(boost::bind(&executor_impl::handle_process_termination, this, _1, w)));
+      process::sptr p(new process(boost::bind(&executor_impl::handle_process_termination, this, _1, w)));
 
       processes.push_back(p);
 
@@ -109,7 +54,7 @@ namespace squadt {
      * \param[in] w a pointer to the associated implementation object
      **/
     inline void executor_impl::start_process(const command& c, task_monitor::sptr& l, boost::shared_ptr < executor_impl >& w) {
-      process::ptr p(new process(boost::bind(&executor_impl::handle_process_termination, this, _1, w), l));
+      process::sptr p(new process(boost::bind(&executor_impl::handle_process_termination, this, _1, w), l));
 
       if (l.get() != 0) {
         l->attach_process(p);
@@ -158,7 +103,7 @@ namespace squadt {
     
       delayed_commands.clear();
 
-      BOOST_FOREACH(process::ptr p, processes) {
+      BOOST_FOREACH(process::sptr p, processes) {
         p->terminate();
       }
     }
@@ -178,6 +123,14 @@ namespace squadt {
       }
     }
     
+    size_t executor_impl::get_maximum_instance_count() const {
+      return (maximum_instance_count);
+    }
+ 
+    void executor_impl::set_maximum_instance_count(size_t m) {
+      maximum_instance_count = m;
+    }
+ 
     /**
      * \param p a pointer to a process object
      **/

@@ -81,6 +81,7 @@ namespace sip {
             /** \brief Destructor */
             ~waiter_data();
         };
+
       private:
 
         /** \brief Set of handlers */

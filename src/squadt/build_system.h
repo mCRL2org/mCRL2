@@ -14,21 +14,24 @@
 namespace squadt {
   class settings_manager;
   class tool_manager;
+  class tool_manager_impl;
   class type_registry;
   class tool;
 
   namespace execution {
     class executor;
+    class executor_impl;
   }
 
   using execution::executor;
+  using execution::executor_impl;
 
   /**
    * \brief Container class for main components
    **/
   class build_system : public utility::visitable< build_system >, private boost::noncopyable {
-    friend class read_preferences_visitor_impl;
-    friend class write_preferences_visitor_impl;
+    friend class preferences_read_visitor_impl;
+    friend class preferences_write_visitor_impl;
 
     private:
 
@@ -47,6 +50,18 @@ namespace squadt {
                    std::auto_ptr < tool_manager >,
                    std::auto_ptr < executor >,
                    std::auto_ptr < type_registry >);
+
+      /** \brief Gets tool manager implementation object */
+      tool_manager_impl const* get_tool_manager_impl() const;
+
+      /** \brief Gets tool manager implementation object */
+      tool_manager_impl* get_tool_manager_impl();
+
+      /** \brief Gets executor implementation object */
+      executor_impl const* get_executor_impl() const;
+
+      /** \brief Gets executor implementation object */
+      executor_impl* get_executor_impl();
 
     public:
 

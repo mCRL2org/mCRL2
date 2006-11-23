@@ -12,7 +12,7 @@
 
 namespace squadt {
 
-  class tool_manager;
+  class tool_manager_impl;
  
   namespace execution {
 
@@ -25,7 +25,7 @@ namespace squadt {
       friend class processor;
       friend class process;
       friend class executor_impl;
-      friend class squadt::tool_manager;
+      friend class squadt::tool_manager_impl;
 
       public:
  
@@ -49,7 +49,7 @@ namespace squadt {
       private:
  
         /** \brief Associates a process with this listener */
-        void attach_process(const process::ptr& p);
+        void attach_process(const process::sptr& p);
 
         /** \brief Blocks until the process has registered */
         void await_process() const;
@@ -60,7 +60,7 @@ namespace squadt {
         task_monitor();
  
         /** \brief Gets a pointer to the associated process */
-        process::ptr get_process(const bool b = false) const;
+        process::sptr get_process(const bool b = false) const;
 
         /** \brief Terminate an associated process */
         void terminate_process();

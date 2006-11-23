@@ -1,14 +1,15 @@
 #include "type_registry.h"
 
-#include "tool.h"
-#include "tool_manager.h"
-
 #include <boost/foreach.hpp>
 #include <boost/regex.hpp>
 
 #include <sip/mime_type.h>
 
 #include <wx/mimetype.h>
+
+#include "tool_manager.h"
+#include "command.h"
+#include "tool.h"
 
 wxMimeTypesManager global_mime_types_manager;
 

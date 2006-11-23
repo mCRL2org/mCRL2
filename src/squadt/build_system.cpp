@@ -64,6 +64,14 @@ namespace squadt {
     return (m_tool_manager.get());
   }
 
+  tool_manager_impl const* build_system::get_tool_manager_impl() const {
+    return (m_tool_manager->impl.get());
+  }
+
+  tool_manager_impl* build_system::get_tool_manager_impl() {
+    return (m_tool_manager->impl.get());
+  }
+
   void build_system::set_tool_manager(std::auto_ptr< tool_manager > t) {
     m_tool_manager = t;
   }
@@ -74,6 +82,14 @@ namespace squadt {
 
   executor* build_system::get_executor() {
     return (m_executor.get());
+  }
+
+  executor_impl const* build_system::get_executor_impl() const {
+    return (m_executor->impl.get());
+  }
+
+  executor_impl* build_system::get_executor_impl() {
+    return (m_executor->impl.get());
   }
 
   void build_system::set_executor(std::auto_ptr< executor > t) {

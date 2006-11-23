@@ -38,9 +38,6 @@ namespace squadt {
         typedef boost::shared_ptr < process >          sptr;
 
         /** \brief Convenience type to hide shared pointer implementation */
-        typedef boost::shared_ptr < process >          ptr;
-
-        /** \brief Convenience type to hide shared pointer implementation */
         typedef boost::shared_ptr < task_monitor >     task_monitor_ptr;
 
         /** \brief Convenience type for handlers */

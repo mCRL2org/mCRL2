@@ -6,10 +6,10 @@
 #include <boost/foreach.hpp>
 
 #include "build_system.h"
-#include "tool_manager.h"
 #include "settings_manager.h"
+#include "tool_manager.tcc"
 #include "type_registry.h"
-#include "executor.h"
+#include "executor.tcc"
 
 #include <xml2pp/text_reader.h>
 
@@ -63,7 +63,7 @@ namespace squadt {
   }
 
   template <>
-  void preferences_read_visitor_impl::visit(tool_manager& tm) {
+  void preferences_read_visitor_impl::visit(tool_manager_impl& tm) {
     using namespace boost::filesystem;
 
     assert(m_reader->is_element("tool-catalog"));
@@ -72,16 +72,16 @@ namespace squadt {
 
     while (!m_reader->is_end_element("tool-catalog")) {
       /* Add a new tool to the list of tools */
-      boost::shared_ptr < tool > new_tool(new tool);
+      tool new_tool;
 
-      new_tool->accept(*this);
+      new_tool.accept(*this);
 
-      tm.tools.push_back(new_tool);
+      tm.add_tool(new_tool);
     }
   }
 
   template <>
-  void preferences_read_visitor_impl::visit(executor& e) {
+  void preferences_read_visitor_impl::visit(executor_impl& e) {
     assert(m_reader->is_element("execution-settings"));
 
     unsigned int maximum_instance_count = 3;
@@ -156,7 +156,7 @@ namespace squadt {
        
         path default_path(global_build_system.get_settings_manager()->path_to_default_binaries());
        
-        for (char const** t = tool_manager::default_tools; *t != 0; ++t) {
+        for (char const** t = tool_manager_impl::default_tools; *t != 0; ++t) {
           o << (f % *t % (default_path / path(*t)).native_file_string());
         }
        
@@ -177,7 +177,7 @@ namespace squadt {
                                   settings_manager::append_schema_suffix(
                                           settings_manager::tool_catalog_base_name))));
 
-    b.get_tool_manager()->accept(*this);
+    b.get_tool_manager_impl()->accept(*this);
 
     const path miscellaneous_file_name(global_build_system.get_settings_manager()->path_to_user_settings("preferences"));
 
@@ -187,7 +187,7 @@ namespace squadt {
       m_reader->next_element();
 
       /// read execution preferences
-      b.get_executor()->accept(*this);
+      b.get_executor_impl()->accept(*this);
 
       /// read default actions
       b.get_type_registry()->accept(*this);

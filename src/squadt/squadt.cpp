@@ -11,6 +11,7 @@
 #include "settings_manager.h"
 #include "tool_manager.h"
 #include "build_system.h"
+#include "executor.h"
 #include "exception.h"
 
 #include "gui_splash.h"
@@ -24,7 +25,7 @@
 #include <wx/msgdlg.h>
 
 const char* program_name    = "squadt";
-const char* program_version = "0.2.3";
+const char* program_version = "0.2.4";
 
 /**
  * \namespace squadt

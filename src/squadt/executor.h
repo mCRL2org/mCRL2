@@ -3,11 +3,12 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <utility/visitor.h>
-
 #include "task_monitor.h"
 
 namespace squadt {
+  class tool_manager;
+  class build_system;
+
   namespace execution {
 
     class command;
@@ -24,8 +25,9 @@ namespace squadt {
      *    concluded about the execution of the command except through a
      *    task_monitor object
      **/
-    class executor : public utility::visitable< executor > {
-      friend class tool_manager;
+    class executor {
+      friend class squadt::build_system;
+      friend class squadt::tool_manager;
 
       private:
 
@@ -87,7 +89,7 @@ namespace squadt {
      * @param[in] p a shared pointer (or reference to) to the process that should be terminated
      **/
     inline void executor::terminate(process::wptr p) {
-      process::ptr w = p.lock();
+      process::sptr w = p.lock();
 
       if (w.get() != 0) {
         w->terminate();

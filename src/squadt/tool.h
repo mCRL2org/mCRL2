@@ -20,7 +20,7 @@ namespace squadt {
    **/
   class tool : public utility::visitable< tool > {
     friend class extractor;
-    friend class tool_manager;
+    friend class tool_manager_impl;
     friend class preferences_read_visitor_impl;
 
     public:
@@ -50,6 +50,9 @@ namespace squadt {
       /** \brief Constructor */
       inline tool(std::string, std::string, sip::tool::capabilities::sptr = tool::no_capabilities);
 
+      /** \brief Copy constructor */
+      inline tool(tool const&);
+
       /** \brief Default constructor */
       inline tool();
 
@@ -77,6 +80,9 @@ namespace squadt {
    * \param[in] c a tool::capabilities object for the tool
    **/
   inline tool::tool(std::string n, std::string l, sip::tool::capabilities::sptr c) : name(n), location(l), capabilities(c) {
+  }
+
+  inline tool::tool(tool const& t) : name(t.name), location(t.location), capabilities(t.capabilities) {
   }
 
   inline tool::tool() : capabilities(tool::no_capabilities) {
