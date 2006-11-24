@@ -750,7 +750,6 @@ static bool add_transition(ATerm from, ATermAppl action, ATerm to)
   bool new_state;
   unsigned long long i;
 
-  to = get_repr(to);
   i = add_state(to, &new_state);
 
   if ( new_state )
@@ -817,6 +816,7 @@ bool generate_lts()
         bool priority;
         while ( nsgen->next(&Transition,&NewState,&priority) )
         {
+          NewState = get_repr(NewState);
           if ( !priority ) // don't store confluent self loops
           {
             tmp_trans = ATinsert(tmp_trans,(ATerm) Transition);
@@ -890,6 +890,7 @@ bool generate_lts()
         bool priority;
         while ( nsgen->next(&Transition,&NewState,&priority) )
         {
+          NewState = get_repr(NewState);
           if ( !priority ) // don't store confluent self loops
           {
             deadlockstate = false;
@@ -983,7 +984,7 @@ bool generate_lts()
       // trans_seen(s) := we have seen a transition from state s
       // inv:  forall i : 0 <= i < nsgens_num-1 : trans_seen(nsgens[i]->get_state())
       //       nsgens_num > 0  ->  top_trans_seen == trans_seen(nsgens[nsgens_num-1])
-      while ( nsgens_num > 0 )
+      while ( (nsgens_num > 0) && (current_state < lgopts->max_states) )
       {
         NextStateGenerator *nsgen = nsgens[nsgens_num-1];
         state = nsgen->get_state();
@@ -994,6 +995,7 @@ bool generate_lts()
         bool priority;
         if ( nsgen->next(&Transition,&NewState,&priority) )
         {
+          NewState = get_repr(NewState);
           if ( !priority ) // don't store confluent self loops
           {
             top_trans_seen = true;

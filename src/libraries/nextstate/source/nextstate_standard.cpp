@@ -586,6 +586,11 @@ Rewriter *NextStateStandard::getRewriter()
 ATerm NextStateGeneratorStandard::makeNewState(ATerm old, ATermList assigns)
 {
 	ATermList l;
+		
+	if ( *info.current_id != id )
+	{
+		set_substitutions();
+	}
 
 	l = info.procvars;
 	for (int i=0; i<info.statelen; i++)
@@ -603,6 +608,11 @@ ATerm NextStateGeneratorStandard::makeNewState(ATerm old, ATermList assigns)
 				case GS_STATE_TREE:
 //					stateargs[i] = getTreeElement(old,i);
 					stateargs[i] = info.rewr_obj->getSubstitution((ATermAppl) ATgetFirst(l));
+					if ( ATisEqual(stateargs[i], ATgetFirst(l)) ) // Make sure substitutions where not reset by enumerator
+					{
+						set_substitutions();
+						stateargs[i] = info.rewr_obj->getSubstitution((ATermAppl) ATgetFirst(l));
+					}
 					break;
 			}
 		} else {
