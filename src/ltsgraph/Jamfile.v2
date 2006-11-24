@@ -7,7 +7,6 @@ exe ltsgraph
          /libraries//wx_extension
          /libraries//mcrl2_basic
          /libraries//lts
-       : <dependency>/site-config//wx_base
-         <wx>no:<build>no
+       : <site-library>wx_base
        : <squadt_support>enable
        ;

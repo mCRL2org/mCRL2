@@ -6,7 +6,7 @@ include $(TOP)/build/config.jam ;
 
 import feature : feature compose ;
 
-feature site-library : opengl wx_base wx_gl xml2 : incidental optional composite ;
+feature site-library : opengl wx_base wx_gl xml2 : free incidental optional composite ;
 
 # OpenGL library
 if $(OPENGL_NAME) {
@@ -42,10 +42,10 @@ if $(XML2_CPPFLAGS) {
            <linkflags>"$(XML2_LDFLAGS)"
          ;
 
-  feature.compose <site-library>xml2 : <dependency>xml2 ;
+  feature.compose <site-library>xml2 : <dependency>/site-config//xml2 ;
 }
 else {
-  feature.compose <site-library>xml2 : <build>no ;
+  feature.compose <site-library>xml2 : <build>no <squadt-support>disable ;
 }
 
 if $(WX_CPPFLAGS) {
@@ -72,7 +72,7 @@ if $(WX_CPPFLAGS) {
     feature.compose <site-library>wx_gl : <build>no ;
   }
 
-  feature.compose <site-library>wx_base : <dependency>wx_base ;
+  feature.compose <site-library>wx_base : <dependency>/site-config//wx_base ;
 }
 else {
   feature.compose <site-library>wx_base : <build>no ;

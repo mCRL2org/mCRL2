@@ -11,12 +11,10 @@ exe squadt
       : [ sequence.insertion-sort [ set.difference [ glob *.cpp ] : process_wrapper.cpp ] ]
         /libraries//md5pp
         /libraries/sip//sip_controller
-      : <dependency>/site-config//wx_base
+      : <site-library>wx_base
         <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
         <include>$(SETUP)
         <threading>multi
-        <wx>no:<build>no
-        <xml2>no:<build>no
       ;
 
 # Alternative for non-msvc builds (dummy)

@@ -2,25 +2,17 @@ project toolset/xsim
        : build-dir $(BUILD_TOP)/xsim
        ;
 
-obj xsimbase.o
-       : xsimbase.cpp
-       : <dependency>/site-config//wx_base
-         <dependency>/libraries//nextstate
-         <dependency>/libraries//mcrl2_basic
-       ;
-
 exe xsim
        : xsim.cpp
-         xsimbase.o
+         xsimbase.cpp
          xsimmain.cpp
          xsimtrace.cpp
          /libraries//trace
          /libraries//nextstate
          /libraries//mcrl2_basic
-       : <dependency>/site-config//wx_base
+       : <site-library>wx_base
          <include>$(SETUP)
          <toolset>gcc:<linkflags>"-Wl,-export-dynamic"
-         <wx>no:<build>no
        : <squadt_support>enable
        :
        ;

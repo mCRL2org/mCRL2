@@ -2,7 +2,7 @@
 #define SETTINGS_H
 
 // Locations
-#define PLUGIN_DIRECTORY "@PREFIX_DIR@/lib/plugins"
+#define PLUGIN_DIRECTORY "@PREFIX_DIR@/lib/mcrl2/plugins"
 #define DATA_DIRECTORY   "@PREFIX_DIR@/share/mcrl2"
 #define TOOL_DIRECTORY   "@PREFIX_DIR@/bin"
 

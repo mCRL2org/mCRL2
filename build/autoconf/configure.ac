@@ -1,6 +1,6 @@
 AC_INIT([mCRL2 toolset],[0.2],[bug@mcrl2.org])
 AC_CONFIG_AUX_DIR(build/autoconf)
-AC_CONFIG_SRCDIR([src/setup.h.in])
+AC_CONFIG_SRCDIR([boost-build.jam])
 AC_CANONICAL_HOST
 AC_PREFIX_DEFAULT([$HOME])
 
@@ -566,6 +566,6 @@ else
   AC_SUBST([USE_BCG],[""])
 fi
 
-AC_CONFIG_FILES([build/config.mk build/config.jam src/setup.h])
+AC_CONFIG_FILES([build/config.mk build/config.jam src/setup.h:build/setup.h.in])
 AC_OUTPUT
 
