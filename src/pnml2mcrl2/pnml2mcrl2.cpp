@@ -2023,7 +2023,9 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
       else {
         return (perform_task(InFileName, stdout));
       }
+#ifdef ENABLE_SQUADT_CONNECTIVITY
     }
+#endif
 
     return 0;
   }
