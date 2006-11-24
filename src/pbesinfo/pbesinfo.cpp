@@ -1,21 +1,20 @@
 // ======================================================================
 //
 // file          : pbesinfo 
-// date          : 21-11-2005
-// version       : 0.0.3
+// date          : 24-11-2006
+// version       : 0.0.4
 //
 // author(s)     : Alexander van Dam <avandam@damdonk.nl>
 //
 // ======================================================================
 #define NAME "pbesinfo"
-#define VERSION "0.0.2"
+#define VERSION "0.0.4"
 #define AUTHOR "Alexander van Dam"
 
 //C++
 #include <cstdio>
 #include <exception>
 #include <iostream>
-//#include <vector>
 #include <string>
 
 //Boost
@@ -95,13 +94,13 @@ int main(int argc, char** argv)
 {
 	ATerm bottom;
 	ATinit(argc, argv, &bottom);
-	
+
 	gsEnableConstructorFunctions();
-	
+
 	parse_command_line(argc, argv);
-	
+
 	lpe::pbes pbes_specification;
-	
+
 	/// If PBES can be loaded from file_name, then
 	///	- Show number of equations
 	/// - Show number of mu's / nu's.
@@ -113,54 +112,108 @@ int main(int argc, char** argv)
 		// Get PBES equations. Makes a lot of function calls more readable.
 		lpe::equation_system eqsys;
 		eqsys = pbes_specification.equations();
-		
-		// Get number of mu's / nu's
+
+		// Vectors for storing intermediate results
+		vector<aterm_string> predvar_mu;
+		vector<aterm_string> predvar_nu;
+		vector<propositional_variable> predvar_data;
+				
+		// Integers for showing totals
 		int mu = 0;
 		int nu = 0;
 		int fp_errors = 0;
+		
 		for (lpe::equation_system::iterator fp_i = eqsys.begin(); fp_i != eqsys.end(); fp_i++)
 		{
+			 // - Store data_variables
+			predvar_data.push_back(fp_i->variable());
+			
+			// Check on mu or nu
 			if (fp_i->symbol().is_mu())
 			{
-				mu++;						// The fixpoint is a mu
+				// If fp is mu:
+				// - Increase #mu's
+				// - Store predicate variable in mu-list and common list
+				// - Store data_variables
+				mu++;
+				predvar_mu.push_back(fp_i->variable().name());
+				
 			}
 			else if (fp_i->symbol().is_nu())
 			{
-				nu++;						// The fixpoint is a nu
+				// If fp is nu:
+				// - Increase #nu's
+				// - Store predicate variable in nu-list and common list
+				nu++;
+				predvar_nu.push_back(fp_i->variable().name());
 			}
 			else
-				fp_errors++;				// The fixpoint is not a mu and not a nu. Probably an error has occurred.
+			{
+				fp_errors++;
+			}
 		}
-		// Show an error-message if there were some errors when reading the fixpoints.
+				
+		// Show file from which PBES was read
+		cout << "Input read from '" << ((file_name == "-") ? "standard input" : file_name) << "'" << endl << endl;
+		
+		// Check if errors occurred in reading PBEs
 		if (fp_errors != 0)
 		{
-			cerr << "Reading number of mu's and nu's had errors. Results may be incorrect" << endl;
+			cerr << "WARNING: Reading number of mu's and nu's had errors. Results may be incorrect" << endl;
 		}
-		
-		cout << "Input read from '" << ((file_name == "-") ? "standard input" : file_name) << "'" << endl << endl;
 		
 		// Show number of equations
 		cout << "Number of equations: " << eqsys.size() << endl;
 		
-		// Show number of mu's, nu's
-		cout << "Number of mu's:      " << mu << endl;
-		cout << "Number of nu's:      " << nu << endl;
+		// Show number of mu's with the predicate variables from the mu's
+		cout << "Number of mu's:      " << mu;
+		int size_mu = predvar_mu.size();	
+		int mu_done = 1;
+		if (size_mu > 0)
+			cout << "   (";
+		for (vector<aterm_string>::iterator i = predvar_mu.begin(); i != predvar_mu.end(); i++)
+		{
+			cout << *i;
+			if (mu_done == size_mu)
+				cout << ")";
+			else
+				cout << ", ";
+			mu_done++;
+		}
+		cout << endl;
+				
+		// Show number of nu's with the predicate variables from the nu's
+		cout << "Number of nu's:      " << nu;
+		int size_nu = predvar_nu.size();	
+		int nu_done = 1;
+		if (size_nu > 0)
+			cout << "   (";
+		for (vector<aterm_string>::iterator i = predvar_nu.begin(); i != predvar_nu.end(); i++)
+		{
+			cout << *i;
+			if (nu_done == size_nu)
+				cout << ")";
+			else
+				cout << ", ";
+			nu_done++;
+		}
+		cout << endl;
 		
-		// Show Binding variables with their type
+		// Show binding variables with their signature
 		int nr_predvar = 1;
 		string sort_bool = "Bool";
-		for (atermpp::set<propositional_variable>::iterator bv_i = eqsys.binding_variables().begin(); bv_i != eqsys.binding_variables().end(); bv_i++)
+		for (vector<propositional_variable>::iterator pv_i = predvar_data.begin(); pv_i != predvar_data.end(); pv_i++)
 		{
-			int size = bv_i->parameters().size();
+			int bv_size = pv_i->parameters().size();
 			int nr_sorts = 1;
 			if (nr_predvar == 1)
-				cout << "Binding variables:   " << bv_i->name() << " :: ";
+				cout << "Binding variables:   " << pv_i->name() << " :: ";
 			else
-				cout << "                     " << bv_i->name() << " :: ";
-			for (atermpp::term_list_iterator<lpe::data_variable> dv_i = bv_i->parameters().begin(); dv_i != bv_i->parameters().end(); dv_i++)
+				cout << "                     " << pv_i->name() << " :: ";
+			for (term_list<data_variable>::iterator dv_i = pv_i->parameters().begin(); dv_i != pv_i->parameters().end(); dv_i++)
 			{
 				cout << dv_i->type();
-				if (nr_sorts < size)
+				if (nr_sorts < bv_size)
 				{
 					cout << " x ";
 					nr_sorts++;
@@ -172,10 +225,5 @@ int main(int argc, char** argv)
 			nr_predvar++;
 		}
 	}
-	else
-	{
-		cerr << "Unable to load PBES from '" << file_name << "'" << endl;
-	}
-
 	return 0;
 }
