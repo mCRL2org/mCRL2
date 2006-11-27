@@ -5,8 +5,6 @@
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "lts/liblts.h"
-#include "lts/liblts_fsm.h"
-#include "lts/liblts_dot.h"
 #include "setup.h"
 
 #define NAME "ltscompare"

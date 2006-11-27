@@ -5,8 +5,6 @@
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "lts/liblts.h"
-#include "lts/liblts_fsm.h"
-#include "lts/liblts_dot.h"
 #include "setup.h"
 
 #define NAME "ltsconvert"
@@ -14,17 +12,9 @@
 
 using namespace mcrl2::lts;
 
-enum alt_lts_type {
-  alt_lts_none,
-  alt_lts_fsm,
-  alt_lts_dot
-};
-
-static alt_lts_type get_alt_format(std::string const& s);
-
 bool read_lts_from_file(lts&, std::string const&, lts_type);
-bool write_lts_to_file(lts&, std::string const&, alt_lts_type outtype, std::string const&, bool);
-bool write_lts_to_file(lts&, std::string const&, lts_type outtype, std::string const&);
+bool write_lts_to_stdout(lts&, lts_type outtype, std::string const&, bool);
+bool write_lts_to_file(lts&, std::string const&, lts_type outtype, std::string const&, bool);
 
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -175,8 +165,8 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 #ifdef MCRL2_BCG
         lts::extension_for_type(lts_bcg),
 #endif
-        "fsm",
-        "dot"
+        lts::extension_for_type(lts_fsm),
+        lts::extension_for_type(lts_dot)
       };
 
       /* Add output file to the configuration */
@@ -236,10 +226,7 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
 bool squadt_interactor::perform_task(sip::configuration& c) {
   lts l;
 
-  c.get_object(lts_file_for_input)->get_location();
-
-  if (!read_lts_from_file(l, c.get_object(lts_file_for_input)->get_location(),
-               lts::parse_format(c.get_object(lts_file_for_input)->get_format().c_str()))) {
+  if ( !read_lts_from_file(l, c.get_object(lts_file_for_input)->get_location(),lts_none) ) {
 
     send_error("Fatal: error reading input from `" + c.get_object(lts_file_for_input)->get_location() + "'!");
 
@@ -292,28 +279,8 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     lpe_path = c.get_object(lpd_file_auxiliary)->get_location();
   }
 
-  switch (static_cast < lts_output_format > (boost::any_cast < long int > (c.get_option_value(option_selected_output_format)))) {
-      case fsm:
-      case dot:
-        result = write_lts_to_file(l, c.get_object(lts_file_for_output)->get_location(),
-                 get_alt_format(c.get_object(lts_file_for_output)->get_format()), lpe_path, c.option_exists(option_no_state_information));
-        break;
-      case aldebaran:
-        result = write_lts_to_file(l, c.get_object(lts_file_for_output)->get_location(), lts_aut, lpe_path);
-        break;
-#ifdef MCRL2_BCG
-      case bcg:
-        result = write_lts_to_file(l, c.get_object(lts_file_for_output)->get_location(), lts_bcg, lpe_path);
-        break;
-#endif
-      case svc_mcrl:
-        result = write_lts_to_file(l, c.get_object(lts_file_for_output)->get_location(), lts_mcrl, lpe_path);
-        break;
-      case svc_mcrl2:
-      default: 
-        result = write_lts_to_file(l, c.get_object(lts_file_for_output)->get_location(), lts_mcrl2, lpe_path);
-        break;
-  }
+  result = write_lts_to_file(l, c.get_object(lts_file_for_output)->get_location(),
+                 lts::parse_format(c.get_object(lts_file_for_output)->get_format().c_str()), lpe_path, c.option_exists(option_no_state_information));
 
   send_hide_display();
 
@@ -323,7 +290,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 
 using namespace std;
 
-static ATerm get_lpe(string const& filename)
+static ATermAppl get_lpe(string const& filename)
 {
   if ( filename == "" )
   {
@@ -346,7 +313,33 @@ static ATerm get_lpe(string const& filename)
     return NULL;
   }
 
-  return t;
+  return (ATermAppl) t;
+}
+
+static lts_extra get_extra(lts_type type, string const &lpe_file, bool print_dot_states, string const &base_name)
+{
+  if ( type == lts_dot )
+  {
+    lts_dot_options opts;
+    opts.name = new string(base_name); // XXX Ugh!
+    opts.print_states = print_dot_states;
+    return lts_extra(opts);
+  } else {
+    if ( lpe_file != "" )
+    {
+      ATermAppl spec = get_lpe(lpe_file);
+      if ( spec != NULL )
+      {
+        if ( gsIsSpecV1(spec) )
+        {
+          return lts_extra(new lpe::specification(spec)); // XXX Ugh!
+        } else {
+          return lts_extra((ATerm) spec);
+        }
+      }
+    }
+    return lts_extra();
+  }
 }
 
 static string get_base(string const& s)
@@ -359,38 +352,6 @@ static string get_base(string const& s)
   } else {
     return s.substr(0,pos);
   }
-}
-
-static alt_lts_type get_alt_extension(string const& s)
-{
-  string::size_type pos = s.find_last_of('.');
-  
-  if ( pos != string::npos )
-  {
-    string ext = s.substr(pos+1);
-
-    if ( ext == "fsm" )
-    {
-      gsVerboseMsg("detected FSM extension\n");
-      return alt_lts_fsm;
-    } else if ( ext == "dot" )
-    {
-      return alt_lts_dot;
-    }
-  }
-
-  return alt_lts_none;
-}
-
-static alt_lts_type get_alt_format(std::string const& s) {
-  if (s == "fsm") {
-    return alt_lts_fsm;
-  }
-  else if (s == "dot") {
-    return alt_lts_dot;
-  }
-
-  return alt_lts_none;
 }
 
 static void print_formats(FILE *f)
@@ -496,109 +457,34 @@ bool read_lts_from_file(lts& l, std::string const& infile, lts_type intype) {
   return (true);
 }
 
-bool write_lts_to_stdout(lts& l, alt_lts_type outtype, std::string const& lpefile, bool print_dot_state) {
-  switch ( outtype )
-  {
-    case alt_lts_fsm:
-      if ( !write_lts_to_fsm(l,cout,get_lpe(lpefile)) )
-      {
-        gsErrorMsg("cannot write LTS to stdout\n");
-        gsErrorMsg("use -v/--verbose for more information\n");
-        return false;
-      }
-      break;
-    case alt_lts_dot:
-      {
-        string str_stdout = "stdout";
-        if ( !write_lts_to_dot(l,cout,str_stdout,print_dot_state) )
-        {
-          gsErrorMsg("cannot write LTS to stdout\n");
-          gsErrorMsg("use -v/--verbose for more information\n");
-          return false;
-        }
-        break;
-      }
-    default:
-      assert(0);
-      gsErrorMsg("do not know how to handle output format\n");
-      return false;
-  }
-
-  return (true);
-}
-
-bool write_lts_to_stdout(lts& l, lts_type outtype, std::string const& lpefile, bool print_dot_state) {
+bool write_lts_to_stdout(lts& l, lts_type outtype, std::string const& lpefile, bool print_dot_states) {
   gsVerboseMsg("writing LTS to stdout...\n");
 
-  if ( !l.write_to(cout,outtype) )
+  lts_extra extra = get_extra(outtype, lpefile, print_dot_states, "stdout");
+
+  if ( !l.write_to(cout,outtype,extra) )
   {
     gsErrorMsg("cannot write LTS to stdout\n");
     gsErrorMsg("use -v/--verbose for more information\n");
     return false;
   }
 
-  return (true);
+  return true;
 }
 
-bool write_lts_to_file(lts& l, std::string const& outfile, alt_lts_type outtype, std::string const& lpefile, bool print_dot_state) {
+bool write_lts_to_file(lts& l, std::string const& outfile, lts_type outtype, std::string const& lpefile, bool print_dot_states) {
   gsVerboseMsg("writing LTS to '%s'...\n",outfile.c_str());
-
-  switch ( outtype )
+  
+  lts_extra extra = get_extra(outtype, lpefile, print_dot_states, get_base(outfile));
+  
+  if ( !l.write_to(outfile,outtype,extra) )
   {
-    case alt_lts_fsm:
-      if ( !write_lts_to_fsm(l,outfile,get_lpe(lpefile)) )
-      {
-        gsErrorMsg("cannot write LTS to file '%s'\n",outfile.c_str());
-        gsErrorMsg("use -v/--verbose for more information\n");
-        return (false);
-      }
-      break;
-    case alt_lts_dot:
-      {
-        if ( !write_lts_to_dot(l,outfile,get_base(outfile),print_dot_state) )
-        {
-          gsErrorMsg("cannot write LTS to file '%s'\n",outfile.c_str());
-          gsErrorMsg("use -v/--verbose for more information\n");
-          return (false);
-        }
-        break;
-      }
-    default:
-      assert(0);
-      gsErrorMsg("do not know how to handle output format\n");
-      return (false);
+    gsErrorMsg("cannot write LTS to file '%s'\n",outfile.c_str());
+    gsErrorMsg("use -v/--verbose for more information\n");
+    return false;
   }
 
-  return (true);
-}
-
-bool write_lts_to_file(lts& l, std::string const& outfile, lts_type outtype, std::string const& lpefile) {
-  gsVerboseMsg("writing LTS to '%s'...\n",outfile.c_str());
-  if ( lpefile == "" )
-  {
-    if ( !l.write_to(outfile,outtype) )
-    {
-      gsErrorMsg("cannot write LTS to file '%s'\n",outfile.c_str());
-      gsErrorMsg("use -v/--verbose for more information\n");
-      return (false);
-    }
-  } else {
-    lpe::specification spec;
-    if ( !spec.load(lpefile) )
-    {
-      gsErrorMsg("cannot read LPE file '%s'\n",lpefile.c_str());
-      gsErrorMsg("use -v/--verbose for more information\n");
-      return (false);
-    }
-    if ( !l.write_to(outfile,outtype,&spec) )
-    {
-      gsErrorMsg("cannot write LTS to file '%s'\n",outfile.c_str());
-      gsErrorMsg("use -v/--verbose for more information\n");
-      return (false);
-    }
-  }
-
-  return (true);
+  return true;
 }
 
 int main(int argc, char **argv)
@@ -637,8 +523,6 @@ int main(int argc, char **argv)
   lts_type outtype = lts_none;
   int opt;
   string lpefile;
-  bool use_alt_outtype = false;
-  alt_lts_type alt_outtype = alt_lts_none;
   bool print_dot_state = true;
   lts_equivalence equivalence = lts_eq_none;
   lts_eq_options eq_opts; set_eq_options_defaults(eq_opts);
@@ -677,20 +561,14 @@ int main(int argc, char **argv)
           }
           break;
         case 'o':
-          if ( (outtype != lts_none) || use_alt_outtype )
+          if ( outtype != lts_none )
           {
             fprintf(stderr,"warning: output format has already been specified; extra option ignored\n");
           } else {
             outtype = lts::parse_format(optarg);
             if ( outtype == lts_none )
             {
-              alt_outtype = get_alt_format(optarg);
-              if ( alt_outtype == alt_lts_none )
-              {
-                fprintf(stderr,"warning: format '%s' is not recognised; option ignored\n",optarg);
-              } else {
-                use_alt_outtype = true;
-              }
+              fprintf(stderr,"warning: format '%s' is not recognised; option ignored\n",optarg);
             }
           }
           break;
@@ -760,46 +638,37 @@ int main(int argc, char **argv)
     if ( !use_stdout )
     {
       outfile = argv[optind+1];
-      if ( (outtype == lts_none) && !use_alt_outtype )
+      if ( outtype == lts_none )
       {
           gsVerboseMsg("trying to detect output format by extension...\n");
           outtype = lts::guess_format(outfile);
           if ( outtype == lts_none )
           {
-            alt_outtype = get_alt_extension(outfile);
-            if ( alt_outtype == alt_lts_none )
+            if ( lpefile != "" )
             {
-              if ( lpefile != "" )
-              {
-                gsWarningMsg("no output format set; using fsm because --lpe was used\n");
-                alt_outtype = alt_lts_fsm;
-                use_alt_outtype = true;
-              } else {
-                gsWarningMsg("no output format set or detected; using default (mcrl2)\n");
-                outtype = lts_mcrl2;
-              }
+              gsWarningMsg("no output format set; using fsm because --lpe was used\n");
+              outtype = lts_fsm;
             } else {
-              use_alt_outtype = true;
-              if ( (alt_outtype == alt_lts_fsm) && (lpefile == "") )
-              {
-                gsWarningMsg("parameter names are unknown (use -l/--lpe option)\n");
-              }
+              gsWarningMsg("no output format set or detected; using default (mcrl2)\n");
+              outtype = lts_mcrl2;
             }
+          } else if ( (outtype == lts_fsm) && (lpefile == "") )
+          {
+            gsWarningMsg("parameter names are unknown (use -l/--lpe option)\n");
           }
       }
     } else {
-        if ( (outtype == lts_none) && !use_alt_outtype )
+      if ( outtype == lts_none )
+      {
+        if ( lpefile != "" )
         {
-          if ( lpefile != "" )
-          {
-            gsWarningMsg("no output format set; using fsm because --lpe was used\n");
-            alt_outtype = alt_lts_fsm;
-            use_alt_outtype = true;
-          } else {
-            gsWarningMsg("no output format set; using default (aut)\n");
-            outtype = lts_aut;
-          }
+          gsWarningMsg("no output format set; using fsm because --lpe was used\n");
+          outtype = lts_fsm;
+        } else {
+          gsWarningMsg("no output format set; using default (aut)\n");
+          outtype = lts_aut;
         }
+      }
     }
 
     lts l;
@@ -810,7 +679,7 @@ int main(int argc, char **argv)
     }
     if ( (lpefile != "") && !(
                ((outtype == lts_mcrl2) && (l.get_type() != lts_mcrl2)) ||
-               (use_alt_outtype && (alt_outtype == alt_lts_fsm) && (l.get_type() == lts_mcrl2))
+               ((outtype == lts_fsm) && (l.get_type() == lts_mcrl2))
                ) )
     {
       gsWarningMsg("ignoring --lpe option as it is not usable with this input/output combination\n");
@@ -826,12 +695,12 @@ int main(int argc, char **argv)
  
     if ( use_stdout )
     {
-      if (!(use_alt_outtype ? write_lts_to_stdout(l, alt_outtype, lpefile, print_dot_state): write_lts_to_stdout(l, outtype, lpefile, print_dot_state)))
+      if (!write_lts_to_stdout(l, outtype, lpefile, print_dot_state))
       {
         return (1);
       }
     } else {
-      if (!(use_alt_outtype ? write_lts_to_file(l, outfile, alt_outtype, lpefile, print_dot_state) : write_lts_to_file(l, outfile, outtype, lpefile)))
+      if (!write_lts_to_file(l, outfile, outtype, lpefile, print_dot_state))
       {
         return (1);
       }

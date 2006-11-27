@@ -11,8 +11,11 @@ project lts
 
 lib lts
        : liblts.cpp
+         liblts_svc.cpp
+         liblts_aut.cpp
          liblts_fsm.cpp
          liblts_dot.cpp
+         liblts_bcg.cpp
          liblts_eq.cpp
 	 bsimdata.cpp
 	 bsimkernel.cpp
