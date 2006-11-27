@@ -17,7 +17,7 @@ namespace mcrl2
 namespace lts
 {
 
-  enum lts_type { lts_none, lts_mcrl2, lts_aut, lts_mcrl, lts_svc
+  enum lts_type { lts_none, lts_mcrl2, lts_aut, lts_mcrl, lts_svc, lts_fsm, lts_dot
 #ifdef MCRL2_BCG
                 , lts_bcg
 #endif
@@ -32,6 +32,13 @@ namespace lts
     } reduce;
   } lts_eq_options;
 
+  enum lts_extra_type { le_nothing, le_mcrl1, le_mcrl2, le_dot };
+  typedef struct
+  {
+    std::string const *name;
+    bool print_states;
+  } lts_dot_options;
+
   void set_eq_options_defaults(lts_eq_options &opts);
   void lts_reduce_add_tau_actions(lts_eq_options &opts, std::string act_names);
 
@@ -39,6 +46,21 @@ namespace lts
   ATermAppl make_timed_pair(ATermAppl action, ATermAppl time = NULL);
 
   #include "detail/liblts_private.h"
+  
+  class lts_extra : p_lts_extra
+  {
+    public:
+      lts_extra();
+      lts_extra(ATerm t);
+      lts_extra(lpe::specification *spec);
+      lts_extra(lts_dot_options opts);
+
+      lts_extra_type get_type();
+      ATerm get_mcrl1_spec();
+      lpe::specification *get_mcrl2_spec();
+      lts_dot_options get_dot_options();
+  };
+  extern lts_extra lts_no_extra;
 
   class lts;
 
@@ -110,14 +132,18 @@ namespace lts
 
       void reset(lts_type type = lts_mcrl2, bool state_info = true, bool label_info = true);
 
-      bool read_from(std::string const& filename, lts_type type = lts_none);
-      bool read_from(std::istream &is, lts_type type = lts_none);
-      bool write_to(std::string const& filename, lts_type type = lts_mcrl2, lpe::specification *spec = NULL);
-      bool write_to(std::ostream &os, lts_type type = lts_mcrl2, lpe::specification *spec = NULL);
+      bool read_from(std::string const& filename, lts_type type = lts_none, lts_extra extra = lts_no_extra);
+      bool read_from(std::istream &is, lts_type type = lts_none, lts_extra extra = lts_no_extra);
+      bool write_to(std::string const& filename, lts_type type = lts_mcrl2, lts_extra extra = lts_no_extra);
+      bool write_to(std::ostream &os, lts_type type = lts_mcrl2, lts_extra extra = lts_no_extra);
 
       unsigned int num_states();
       unsigned int num_transitions();
       unsigned int num_labels();
+      
+      void set_num_states(unsigned int num_states);
+      void set_num_transitions(unsigned int num_transitions);
+      void set_num_labels(unsigned int num_labels);
 
       unsigned int initial_state();
       void set_initial_state(unsigned int state);

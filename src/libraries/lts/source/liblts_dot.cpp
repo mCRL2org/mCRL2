@@ -11,50 +11,51 @@
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)
 #define ATisList(x) (ATgetType(x) == AT_LIST)
 
+using namespace std;
+
 namespace mcrl2
 {
 namespace lts
 {
-  
-bool write_lts_to_dot(lts &l, std::string const& filename, std::string const& name, bool print_states)
+
+bool p_lts::write_to_dot(string const& filename, lts_dot_options opts)
 {
-  std::ofstream os(filename.c_str());
+  ofstream os(filename.c_str());
   if ( !os.is_open() )
   {
     gsVerboseMsg("cannot open DOT file '%s' for writing\n",filename.c_str());
     return false;
   }
 
-  bool r = write_lts_to_dot(l,os,name,print_states);
+  bool r = write_to_dot(os,opts);
 
   os.close();
 
   return r;
 }
 
-using namespace std;
-bool write_lts_to_dot(lts &l, ostream &os, string const& name, bool print_states)
+bool p_lts::write_to_dot(ostream &os, lts_dot_options opts)
 {
-  os << "digraph \"" << name << "\" {" << endl;
+  os << "digraph \"" << *opts.name << "\" {" << endl;
   // os << "size=\"7,10.5\";" << endl;
   os << "center=TRUE;" << endl;
   os << "mclimit=10.0;" << endl;
   os << "nodesep=0.05;" << endl;
   os << "node[width=0.25,height=0.25,label=\"\"];" << endl;
-  if ( l.num_states() > 0 )
+  if ( nstates > 0 )
   {
-    os << l.initial_state() << "[peripheries=2];" << endl;
-    if ( print_states && l.has_state_info() )
+    os << init_state << "[peripheries=2];" << endl;
+    if ( opts.print_states && state_info )
     {
-      for (unsigned int i=0; i<l.num_states(); i++)
+      for (unsigned int i=0; i<nstates; i++)
       {
-        os << i << "[label=\"" << l.state_value_str(i) << "\"];" << endl;
+        os << i << "[label=\"" << p_state_value_str(i) << "\"];" << endl;
       }
     }
   }
-  for (unsigned int i=0; i<l.num_transitions(); i++)
+  for (unsigned int i=0; i<ntransitions; i++)
   {
-    os << l.transition_from(i) << "->" << l.transition_to(i) << "[label=\"" << l.label_value_str(l.transition_label(i)) << "\"];" << endl;
+    os << transitions[i].from << "->" << transitions[i].to << "[label=\"" << p_label_value_str(transitions[i].label) << "\"];" << endl;
   }
 
   os << "}" << endl;

@@ -68,6 +68,58 @@ ATermAppl make_timed_pair(ATermAppl action, ATermAppl time)
   return ATmakeAppl2(timed_pair,(ATerm) action,(ATerm) time);
 }
 
+
+
+lts_extra::lts_extra()
+{
+  type = le_nothing;
+}
+
+lts_extra::lts_extra(ATerm t)
+{
+  type = le_mcrl1;
+  content.mcrl1_spec = t;
+}
+
+lts_extra::lts_extra(lpe::specification *spec)
+{
+  type = le_mcrl2;
+  content.mcrl2_spec = spec;
+}
+
+lts_extra::lts_extra(lts_dot_options opts)
+{
+  type = le_dot;
+  content.dot_options = opts;
+}
+
+lts_extra_type lts_extra::get_type()
+{
+  return type;
+}
+
+ATerm lts_extra::get_mcrl1_spec()
+{
+  assert( type == le_mcrl1 );
+  return content.mcrl1_spec;
+}
+
+lpe::specification *lts_extra::get_mcrl2_spec()
+{
+  assert( type == le_mcrl2 );
+  return content.mcrl2_spec;
+}
+
+lts_dot_options lts_extra::get_dot_options()
+{
+  assert( type == le_dot );
+  return content.dot_options;
+}
+
+lts_extra lts_no_extra = lts_extra();
+
+
+
 lts::lts(lts_type type, bool state_info, bool label_info)
 {
   init(type,state_info,label_info);
@@ -726,7 +778,7 @@ bool p_lts::read_from_bcg(string const& filename)
 }
 #endif
 
-bool lts::read_from(string const& filename, lts_type type)
+bool lts::read_from(string const& filename, lts_type type, lts_extra extra)
 {
   clear();
   if ( type == lts_none )
@@ -750,6 +802,12 @@ bool lts::read_from(string const& filename, lts_type type)
       return read_from_svc(filename,lts_mcrl2);
     case lts_svc:
       return read_from_svc(filename,lts_svc);
+    case lts_fsm:
+      gsVerboseMsg("cannot read FSM files\n");
+      return false;
+    case lts_dot:
+      gsVerboseMsg("cannot read dot files\n");
+      return false;
 #ifdef MCRL2_BCG
     case lts_bcg:
       return read_from_bcg(filename);
@@ -761,7 +819,7 @@ bool lts::read_from(string const& filename, lts_type type)
   }
 }
 
-bool lts::read_from(istream &is, lts_type type)
+bool lts::read_from(istream &is, lts_type type, lts_extra extra)
 {
   clear();
   if ( type == lts_none )
@@ -782,6 +840,12 @@ bool lts::read_from(istream &is, lts_type type)
     case lts_mcrl2:
     case lts_svc:
       gsVerboseMsg("cannot read SVC based files from streams\n");
+      return false;
+    case lts_fsm:
+      gsVerboseMsg("cannot read FSM files\n");
+      return false;
+    case lts_dot:
+      gsVerboseMsg("cannot read dot files\n");
       return false;
 #ifdef MCRL2_BCG
     case lts_bcg:
@@ -1063,7 +1127,7 @@ bool p_lts::write_to_bcg(string const& filename)
 }
 #endif
 
-bool lts::write_to(string const& filename, lts_type type, lpe::specification *spec)
+bool lts::write_to(string const& filename, lts_type type, lts_extra extra)
 {
   switch ( type )
   {
@@ -1073,9 +1137,35 @@ bool lts::write_to(string const& filename, lts_type type, lpe::specification *sp
       return write_to_svc(filename,lts_mcrl);
       break;
     case lts_mcrl2:
-      return write_to_svc(filename,lts_mcrl2,spec);
+      if ( extra.get_type() == le_mcrl2 )
+      {
+        return write_to_svc(filename,lts_mcrl2,extra.get_mcrl2_spec());
+      } else {
+        return write_to_svc(filename,lts_mcrl2);
+      }
     case lts_svc:
       return write_to_svc(filename,lts_svc);
+    case lts_fsm:
+      switch ( extra.get_type() )
+      {
+        case le_mcrl1:
+          return write_to_fsm(filename,extra.get_mcrl1_spec());
+        case le_mcrl2:
+          return write_to_fsm(filename,*extra.get_mcrl2_spec());
+        default:
+          return write_to_fsm(filename);
+      }
+    case lts_dot:
+      if ( extra.get_type() == le_dot )
+      {
+        return write_to_dot(filename,extra.get_dot_options());
+      } else {
+        lts_dot_options opts;
+        string s("unknown");
+        opts.name = &s;
+        opts.print_states = false;
+        return write_to_dot(filename,opts);
+      }
 #ifdef MCRL2_BCG
     case lts_bcg:
       return write_to_bcg(filename);
@@ -1087,7 +1177,7 @@ bool lts::write_to(string const& filename, lts_type type, lpe::specification *sp
   }
 }
 
-bool lts::write_to(ostream &os, lts_type type, lpe::specification*)
+bool lts::write_to(ostream &os, lts_type type, lts_extra extra)
 {
   switch ( type )
   {
@@ -1098,6 +1188,27 @@ bool lts::write_to(ostream &os, lts_type type, lpe::specification*)
     case lts_svc:
       gsVerboseMsg("cannot write SVC based files to streams\n");
       return false;
+    case lts_fsm:
+      switch ( extra.get_type() )
+      {
+        case le_mcrl1:
+          return write_to_fsm(os,extra.get_mcrl1_spec());
+        case le_mcrl2:
+          return write_to_fsm(os,*extra.get_mcrl2_spec());
+        default:
+          return write_to_fsm(os);
+      }
+    case lts_dot:
+      if ( extra.get_type() == le_dot )
+      {
+        return write_to_dot(os,extra.get_dot_options());
+      } else {
+        lts_dot_options opts;
+        string s("unknown");
+        opts.name = &s;
+        opts.print_states = false;
+        return write_to_dot(os,opts);
+      }
 #ifdef MCRL2_BCG
     case lts_bcg:
       gsVerboseMsg("cannot write BCG files to streams\n");
@@ -1580,6 +1691,14 @@ lts_type lts::guess_format(string const& s) {
     {
       gsVerboseMsg("detected SVC extension; assuming mCRL2 format\n");
       return lts_mcrl2;
+    } else if ( ext == "fsm" )
+    {
+      gsVerboseMsg("detected FSM extension\n");
+      return lts_fsm;
+    } else if ( ext == "dot" )
+    {
+      gsVerboseMsg("detected dot extension\n");
+      return lts_dot;
 #ifdef MCRL2_BCG
     } else if ( ext == "bcg" )
     {
@@ -1593,7 +1712,7 @@ lts_type lts::guess_format(string const& s) {
 }
 
 /**
- * @param[in] s the file extension
+ * @param[in] s the string representation of the file format
  **/
 lts_type lts::parse_format(char const* s) {
   if ( !strcmp(s,"aut") )
@@ -1607,7 +1726,13 @@ lts_type lts::parse_format(char const* s) {
     return lts_mcrl2;
   } else if ( !strcmp(s,"svc") )
   {
-    return lts_mcrl2;
+    return lts_svc;
+  } else if ( !strcmp(s,"fsm") )
+  {
+    return lts_fsm;
+  } else if ( !strcmp(s,"dot") )
+  {
+    return lts_dot;
 #ifdef MCRL2_BCG
   } else if ( !strcmp(s,"bcg") )
   {
@@ -1618,9 +1743,9 @@ lts_type lts::parse_format(char const* s) {
   return lts_none;
 }
 
-char const* lts::type_strings[]      = { "unknown", "mCRL2", "AUT", "mCRL", "SVC", "BCG" };
-                                                             
-char const* lts::extension_strings[] = { "",        "svc",   "aut", "svc",  "svc", "bcg" };
+char const* lts::type_strings[]      = { "unknown", "mCRL2", "AUT", "mCRL", "SVC", "FSM", "dot", "BCG" };
+                                                                                                      
+char const* lts::extension_strings[] = { "",        "svc",   "aut", "svc",  "svc", "fsm", "dot", "bcg" };
 
 char const* lts::string_for_type(const lts_type type) {
   return (type_strings[type]);

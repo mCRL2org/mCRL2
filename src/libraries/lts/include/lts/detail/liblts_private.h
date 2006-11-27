@@ -1,3 +1,14 @@
+  class p_lts_extra
+  {
+    protected:
+      lts_extra_type type;
+      union {
+        ATerm mcrl1_spec;
+        lpe::specification *mcrl2_spec;
+	lts_dot_options dot_options;
+      } content;
+  };
+
   class lts;
 
   typedef struct
@@ -74,6 +85,17 @@
 
       bool read_from_svc(std::string const& filename, lts_type type);
       bool write_to_svc(std::string const& filename, lts_type type, lpe::specification *spec = NULL);
+
+      lts_type fsm_get_lts_type();
+      bool write_to_fsm(std::string const& filename, lts_type type, ATermList params);
+      bool write_to_fsm(std::string const& filename, ATerm lpe = NULL);
+      bool write_to_fsm(std::string const& filename, lpe::specification &spec);
+      bool write_to_fsm(std::ostream& os, lts_type type, ATermList params);
+      bool write_to_fsm(std::ostream& os, ATerm lpe = NULL);
+      bool write_to_fsm(std::ostream& os, lpe::specification &spec);
+
+      bool write_to_dot(std::ostream& os, lts_dot_options opts);
+      bool write_to_dot(std::string const& filename, lts_dot_options opts);
 
 #ifdef MCRL2_BCG
       bool read_from_bcg(std::string const& filename);
