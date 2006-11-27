@@ -4,7 +4,7 @@ path-constant BOOST_ROOT      : ./boost ;                # Boost prefix (package
 path-constant SETUP           : ./src ;                  # Header file for run-time configuration
 
 # Activate header cache
-# modules.poke : HCACHEFILE : .jamdeps ;
+modules.poke : HCACHEFILE : $(TOP)/bin/.jamdeps ;
 
 include $(TOP)/build/building.jam ;
 

@@ -1,4 +1,4 @@
-/* A Bison parser, made by GNU Bison 2.2.  */
+/* A Bison parser, made by GNU Bison 2.3.  */
 
 /* Skeleton interface for Bison GLR parsers in C
 
@@ -170,7 +170,7 @@ typedef union YYSTYPE
   ATermAppl appl;
   ATermList list;
 }
-/* Line 2609 of glr.c.  */
+/* Line 2604 of glr.c.  */
 #line 175 "../source/mcrl2parser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1

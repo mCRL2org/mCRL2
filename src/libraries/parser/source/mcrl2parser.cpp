@@ -1,4 +1,4 @@
-/* A Bison parser, made by GNU Bison 2.2.  */
+/* A Bison parser, made by GNU Bison 2.3.  */
 
 /* Skeleton implementation for Bison GLR parsers in C
 
@@ -38,7 +38,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "2.2"
+#define YYBISON_VERSION "2.3"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "glr.c"
@@ -1453,7 +1453,7 @@ do {						\
 
 /*ARGSUSED*/
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, const YYSTYPE * const yyvaluep)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep)
 {
   if (!yyvaluep)
     return;
@@ -1476,7 +1476,7 @@ yy_symbol_value_print (FILE *yyoutput, int yytype, const YYSTYPE * const yyvalue
 `--------------------------------*/
 
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, const YYSTYPE * const yyvaluep)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep)
 {
   if (yytype < YYNTOKENS)
     YYFPRINTF (yyoutput, "token %s (", yytname[yytype]);
@@ -1810,7 +1810,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 # undef YYERROR
 # define YYERROR return yyerrok, yyerr
 # undef YYRECOVERING
-# define YYRECOVERING (yystackp->yyerrState != 0)
+# define YYRECOVERING() (yystackp->yyerrState != 0)
 # undef yyclearin
 # define yyclearin (yychar = YYEMPTY)
 # undef YYFILL
@@ -5392,8 +5392,14 @@ yyresolveLocations (yyGLRState* yys1, int yyn1,
 	    }
 	  else
 	    {
+	      /* Both yyresolveAction and yyresolveLocations traverse the GSS
+		 in reverse rightmost order.  It is only necessary to invoke
+		 yyresolveLocations on a subforest for which yyresolveAction
+		 would have been invoked next had an ambiguity not been
+		 detected.  Thus the location of the previous state (but not
+		 necessarily the previous state itself) is guaranteed to be
+		 resolved already.  */
 	      yyGLRState *yyprevious = yyoption->yystate;
-	      YYASSERT (yyprevious->yyresolved);
 	      yyrhsloc[0].yystate.yyloc = yyprevious->yyloc;
 	    }
 	  yychar_current = yychar;
@@ -6050,7 +6056,8 @@ yyparse (void)
       yyfreeGLRStack (&yystack);
     }
 
-  return yyresult;
+  /* Make sure YYID is used.  */
+  return YYID (yyresult);
 }
 
 /* DEBUGGING ONLY */
