@@ -46,9 +46,9 @@ alias messenger
       tool_capabilities.cpp
       transport
     : <threading>multi
-      <library>/site-config//boost_regex
-      <library>/site-config//boost_filesystem
-      <library>/libraries//xml2pp
+      <dependency>/site-config//boost_regex
+      <dependency>/site-config//boost_filesystem
+      <dependency>/libraries//xml2pp
     : # no default build
     : <library>/site-config//boost_regex
       <library>/site-config//boost_filesystem

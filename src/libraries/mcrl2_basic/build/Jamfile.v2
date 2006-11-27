@@ -88,6 +88,8 @@ lib mcrl2_basic
          <include>../include/lowlevel
          <toolset>gcc:<library>/libraries//pstream
          <toolset>darwin:<library>/libraries//pstream
+         <os>NT,<link>shared:<library>/libraries//aterm
+         <os>CYGWIN,<link>shared:<library>/libraries//aterm
        : <include>$(SETUP)
        : <library>/libraries//aterm
          <os>LINUX:<library>/site-config//m
