@@ -1,6 +1,7 @@
 #define NAME "pnml2mcrl2"
 #define VERSION "1.1"
 
+#include <sstream>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,63 +14,76 @@
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
+#include "libparse.h"
 #include "typecheck.h"
 
-  typedef struct {
-    ATbool Abort;                 // if an element has no ID, this boolean is used to grant abortion of the conversion
+typedef struct {
+  ATbool Abort;                 // if an element has no ID, this boolean is used to grant abortion of the conversion
+  
+  // read-in
+  ATermTable place_name;	// place_id -> name
+  ATermTable place_mark;	// place_id -> Nat
+  ATermTable place_sort;	// place_id -> SortExpr
+  ATermTable trans_name;	// trans_id -> name
+  ATermTable trans_predicate;	// trans_id -> DataExpr
+  ATermTable arc_in;	        // arc_id -> trans_id x place_id
+  ATermTable arc_out;	        // arc_id -> place_id x trans_id
+  ATermTable arc_inhibit;	// arc_id -> place_id x trans_id (always this way)
+  ATermTable arc_reset;	// arc_id -> trans_id x place_id (always this way)
+  ATermTable arc_name;        // arc_id -> name
+  
+  // generate
+  ATermTable place_in;	        // place_id -> List(arc_id) (arc_in)
+  ATermTable trans_in;	        // trans_id -> List(arc_id) (arc_out+arc_inhibit)
+  ATermTable place_out;	        // place_id -> List(arc_id) (arc_out)
+  ATermTable trans_out;	        // trans_id -> List(arc_id) (arc_in+arc_reset)
+  ATermTable place_inhibit;	        // place_inhibit -> List(arc_id) (arc_inhibit)
+  ATermTable place_reset;	        // place_reset -> List(arc_id) (arc_reset)
+  // not needed as thay are the same as arc_out 
+  //ATermTable transition_inhibit;	// transition_inhibit -> List(arc_id) (arc_inhibit)
+  // not needed as thay are the same as arc_in 
+  //ATermTable transition_reset;	// transition_reset -> List(arc_id) (arc_reset)
+  
+  // needed for the creation of general mCRL2 processes
+  ATermList transitions;      // store all the mCRL2 processes (involving transitions) needed for the Trans-process
+  ATermList places;           // store all the mCRL2 processes (involving places) needed for the PetriNet-process
+  ATermTable place_process_name; // place_id -> name of the corresponding process
+} Context;
+static Context context;
 
-    // read-in
-    ATermTable place_name;	// place_id -> name
-    ATermTable place_mark;	// place_id -> Nat
-    ATermTable trans_name;	// trans_id -> name
-    ATermTable arc_in;	        // arc_id -> trans_id x place_id
-    ATermTable arc_out;	        // arc_id -> place_id x trans_id
-    ATermTable arc_inhibit;	// arc_id -> place_id x trans_id (always this way)
-    ATermTable arc_reset;	// arc_id -> trans_id x place_id (always this way)
+static ATbool rec_par=ATtrue;
+static ATbool colored=ATfalse;
+static ATbool with_colors=ATtrue;
+static ATbool reset_arcs=ATfalse;
+static ATbool inhibitor_arcs=ATfalse;
+static ATermAppl Appl0;
 
-    // generate
-    ATermTable place_in;	        // place_id -> List(arc_id) (arc_in)
-    ATermTable trans_in;	        // trans_id -> List(arc_id) (arc_out+arc_inhibit)
-    ATermTable place_out;	        // place_id -> List(arc_id) (arc_out)
-    ATermTable trans_out;	        // trans_id -> List(arc_id) (arc_in+arc_reset)
-    ATermTable place_inhibit;	        // place_inhibit -> List(arc_id) (arc_inhibit)
-    ATermTable place_reset;	        // place_reset -> List(arc_id) (arc_reset)
-    // not needed as thay are the same as arc_out 
-    //ATermTable transition_inhibit;	// transition_inhibit -> List(arc_id) (arc_inhibit)
-    // not needed as thay are the same as arc_in 
-    //ATermTable transition_reset;	// transition_reset -> List(arc_id) (arc_reset)
-    
-    // needed for the creation of general mCRL2 processes
-    ATermList transitions;      // store all the mCRL2 processes (involving transitions) needed for the Trans-process
-    ATermList places;           // store all the mCRL2 processes (involving places) needed for the PetriNet-process
-    ATermTable place_process_name; // place_id -> name of the corresponding process
-  } Context;
-  static Context context;
 
-  static ATbool rec_par=ATtrue;
-  static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID);
-  static ATermList pn2gsGenerateTransitionAlternative(ATerm TransID);
-  static ATermList pn2gsListNNats(int n);
-  static inline ATermAppl pn2gsMakeDataApplProd2(ATermAppl Op, ATermAppl Left, ATermAppl Right){
-    return gsMakeDataApplProd(Op,ATmakeList2((ATerm)Left,(ATerm)Right));
+static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID);
+static ATermList pn2gsGenerateTransitionAlternative(ATerm TransID);
+static ATermList pn2gsListNNats(int n);
+static inline ATermAppl pn2gsMakeDataApplProd2(ATermAppl Op, ATermAppl Left, ATermAppl Right){
+  return gsMakeDataApplProd(Op,ATmakeList2((ATerm)Left,(ATerm)Right));
+}
+static char *pn2gsGetText(xmlNodePtr cur);
+
+
+bool perform_task(char const* InFileName, FILE* OutStream);
+
+bool perform_task(char const* InFileName, char const* OutFileName) {
+  FILE* OutStream = fopen(OutFileName,"wb");
+  
+  if (OutStream == 0) {
+    gsErrorMsg("cannot open file '%s' for writing\n", OutFileName);
+    return false;
   }
-
-  bool perform_task(char const* InFileName, FILE* OutStream);
-
-  bool perform_task(char const* InFileName, char const* OutFileName) {
-    FILE* OutStream = fopen(OutFileName,"wb");
-
-    if (OutStream == 0) {
-      gsErrorMsg("cannot open file '%s' for writing\n", OutFileName);
-      return false;
-    }
-    
-    bool result = perform_task(InFileName, OutStream);
-
-    fclose(OutStream);
-
-    return (result);
-  }
+  
+  bool result = perform_task(InFileName, OutStream);
+  
+  fclose(OutStream);
+  
+  return (result);
+}
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -289,26 +303,56 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   //==================================================
   // pn2gsRetrieveText gets the contents of a child <text> element of cur
   //==================================================
-  static ATerm pn2gsRetrieveText(xmlNodePtr cur) {
+  static ATermAppl pn2gsRetrieveText(xmlNodePtr cur) {
     // input: a pointer to the current element
     // output: the contents of the first child <text> attribute 
     //         of the current element
 
     // this function is used for the retrieval of types, initial markings, etc.
-    
-    char * RV;
-    cur=cur->xmlChildrenNode;
+    char *s=pn2gsGetText(cur->xmlChildrenNode);
+
+    if(!s) return NULL;
+    return gsString2ATermAppl(s);
+  }
+  //==================================================
+  // pn2gsGetText gets the contents of a child <text> element of cur
+  //==================================================
+  static char *pn2gsGetText(xmlNodePtr cur) {
+    // input: a pointer to the current element
+    // output: the contents of the first <text> attribute 
+    //         of the current element
+
+    // this function is used for the retrieval of types, initial markings, etc.
     while (cur != NULL) {
       if (!xmlNodeIsText(cur)) {
 	if (!xmlStrcmp(cur->name, (const xmlChar *)"text")) {
-	  RV = (char *)xmlNodeGetContent(cur);
-	  return ATparse(RV);
+	  return (char *)xmlNodeGetContent(cur);
 	}
       }
       cur=cur->next;
     }
     return NULL;
   }
+
+//==================================================
+// pn2gsGetElement gets the contents of a child name element of cur
+//==================================================
+static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
+  // input: a pointer to the current element
+  // output: the contents of the first child <name> attribute 
+  //         of the current element
+  
+  // this function is used for the retrieval of types, initial markings, etc.
+    
+  cur=cur->xmlChildrenNode;
+  while (cur != NULL) {
+    if (!xmlStrcmp(cur->name, (const xmlChar *)name)) {
+      return pn2gsGetText(cur->xmlChildrenNode);
+    }
+    cur=cur->next;
+  }
+  return NULL;
+}
   
   //==================================================
   // pn2gsAterm_place converts a pnml-place to a usable ATerm
@@ -338,9 +382,12 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     
     // temporary variables that contain data of the current place so this data can be returned
     // default values are assigned here
-    ATerm Aname = ATparse("default_name");
-    ATerm AinitialMarking = ATparse("0");
-    ATerm Atype = ATparse("channel");
+    ATermAppl Aname = gsString2ATermAppl("default_name");
+    ATermAppl AinitialMarking = gsMakeNumber(gsString2ATermAppl("0"),gsMakeSortIdNat());
+    ATermAppl Atype = gsString2ATermAppl("channel");
+
+    ATermAppl Place_type=Appl0; //gsMakeSortId(gsString2ATermAppl("Unit"));
+    ATermAppl Place_mcrl2initialMarking=Appl0;
     
     // this loop goes through all the children of the <place>element
     // these children will be translated or ignored, this depends on the element name
@@ -353,48 +400,94 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 	// the place contains a <name> element
 	// a <name> element contains a childelement <text> which contains the name of the place
 	// the name is retrieved below and assigned to Aname
-	if (!(Aname=(ATerm)pn2gsRetrieveTextWithCheck(cur))) {
-	  Aname = ATparse("default_name");
+	if (!(Aname=pn2gsRetrieveTextWithCheck(cur))) {
+	  Aname = gsString2ATermAppl("default_name");
 	}
 	gsDebugMsg("    name: '%T'\n", Aname);
-      } else if (!xmlStrcmp(cur->name, (const xmlChar *)"initialMarking")) {
+      } 
+      else if (!xmlStrcmp(cur->name, (const xmlChar *)"initialMarking")) {
 	// the place contains an <initialMarking> element
 	// this element contains a childelement <text> which contains the initial marking of the place
 	// this marking is retrieved below and assigned to AinitialMarking
-	
-	if (!(AinitialMarking=pn2gsRetrieveText(cur))) {
-	  AinitialMarking = ATparse("0");
-	}
-	if (atoi(ATwriteToString(AinitialMarking)) < 0) {
-	  // if the initial marking is less than zero, it is resetted to zero
-	  AinitialMarking = ATparse("0");
-	  
-	  gsWarningMsg("Place with id '%T' has initial marking is less than 0, resetting initial marking to 0! \n", Aid);
+        //for coloured petri nets initialMarking can also contain a toolspecific element
+	for(xmlNodePtr cur1=cur->children; cur1!=NULL; cur1=cur1->next){
+          if (!xmlNodeIsText(cur1) && !xmlStrcmp(cur1->name, (const xmlChar *)"text")) {
+	    char *im=pn2gsGetText(cur1);
+            if(im){
+              std::istringstream iss(im);
+              ATermAppl Marking=parse_data_expr(iss);
+              if(!Marking) return NULL;
+	      AinitialMarking=Marking;
+            }
+            //if (!im) im="0";
+	    //if (atoi(im) < 0) {
+	    //  // if the initial marking is less than zero, it is resetted to zero
+	    //  im="0";
+	    //  gsWarningMsg("Place with id '%T' has initial marking is less than 0, resetting initial marking to 0! \n", Aid);
+            //}
+            //AinitialMarking=im;
+          }
+          else if(with_colors && !xmlStrcmp(cur1->name, (const xmlChar *)"toolspecific")) {
+            const char *mcrl2marking=pn2gsGetElement(cur1,"mcrl2marking");
+            if(mcrl2marking){
+              colored=ATtrue;
+              std::istringstream iss(mcrl2marking);
+              ATermAppl A=parse_data_expr(iss);
+              if(A) Place_mcrl2initialMarking=A;
+            } else {
+              gsWarningMsg("Ignore an element named 'toolspecific'\n");
+            }
+          }
+          else if (xmlNodeIsText(cur1)) {
+          }
+	  else {
+            gsWarningMsg("Ignore an element named '%s'.\n", (const char *)cur1->name);
+          }
 	}
 	gsDebugMsg("    initialMarking: '%T'\n", AinitialMarking);
-      } else if (!xmlStrcmp(cur->name, (const xmlChar *)"type")) {
+      } 
+      else if (!xmlStrcmp(cur->name, (const xmlChar *)"type")) {
 	// the place contains an <type> element
 	// this element contains a childelement <text> which contains the type of the place
 	
 	if (!(Atype=pn2gsRetrieveText(cur))) {
-	  Atype = ATparse("channel");
+	  Atype = gsString2ATermAppl("channel");
 	}
-	if (!ATisEqual(Atype, ATparse("channel"))) {
+	if (!ATisEqual(Atype, gsString2ATermAppl("channel"))) {
 	  // the type should either be omitted or have the value "channel"
 	  // otherwise the place does not need to be translated!
 	  gsWarningMsg("Place with id '%T' has type '%T' and will not be translated.\n", Aid, Atype);
 	  return NULL;
 	}
 	gsDebugMsg("    type: '%T'\n", Atype);
-      } else if (xmlNodeIsText(cur)) {
-      } else {
+      } 
+      else if (with_colors && !xmlStrcmp(cur->name, (const xmlChar *)"toolspecific")) {
+	// the place contains an <toolspecific> element
+	// this element contains a childelement <mcrl2sort> which contains
+	// a childelement <text> which contains the type of the place
+	
+	const char *sort=pn2gsGetElement(cur,"mcrl2sort");
+
+	if(sort){
+	  colored=ATtrue;
+	  std::istringstream iss(sort);
+	  ATermAppl Type=parse_sort_expr(iss);
+	  if(Type) Place_type=Type;
+	}
+	else {
+	  gsWarningMsg("Ignore an element named 'toolspecific'\n");
+	}
+      } 
+      else if (xmlNodeIsText(cur)) {
+      } 
+      else {
 	gsWarningMsg("Ignore an element named '%s'.\n", (const char *)cur->name);
       }
       cur = cur->next;
     }
     
-    // argument order of returnvalue is id - name - initialMarking 
-    return ATmakeAppl3(ATmakeAFun("place", 3, ATfalse), (ATerm)Aid, Aname, AinitialMarking);
+    // argument order of returnvalue is id - name - initialMarking - Type
+    return ATmakeAppl5(ATmakeAFun("place", 5, ATfalse), (ATerm)Aid, (ATerm)Aname, (ATerm)AinitialMarking, (ATerm)Place_type, (ATerm)Place_mcrl2initialMarking);
   }
   
   //==================================================
@@ -425,8 +518,10 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     
     // temporary variables that contain data of the current transition so this data can be returned
     // default values are assigned here
-    ATerm Aname = ATparse("default_name");
-    ATerm Atype = ATparse("AND");
+    ATermAppl Aname = gsString2ATermAppl("default_name");
+    ATermAppl Atype = gsString2ATermAppl("AND");
+
+    ATermAppl Trans_predicate=Appl0;
     
     // this loop goes through all the children of the <transition>element
     // these children will be translated or ignored, this depends on the element name
@@ -439,32 +534,52 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 	// the transition contains a <name> element
 	// a <name> element contains a childelement <text> which contains the name of the transition
 	// the name is retrieved below and assigned to Aname
-	if (!(Aname=(ATerm)pn2gsRetrieveTextWithCheck(cur))) {
-	  Aname = ATparse("default_name");
+	if (!(Aname=pn2gsRetrieveTextWithCheck(cur))) {
+	  Aname = gsString2ATermAppl("default_name");
 	}
 	gsDebugMsg("    name: '%T'\n", Aname);
-      } else if (!xmlStrcmp(cur->name, (const xmlChar *)"type")) {
+      }
+      else if (with_colors && !xmlStrcmp(cur->name, (const xmlChar *)"toolspecific")) {
+	// the transition contains a <toolspecific> element
+	// this element contains a childelement <mcrl2sort> which contains
+	// a childelement <text> which contains the type of the place
+	
+	const char *predicate=pn2gsGetElement(cur,"mcrl2predicate");
+
+	if(predicate){
+	  colored=ATtrue;
+	  std::istringstream iss(predicate);
+	  ATermAppl Predicate=parse_data_expr(iss);
+	  if(Predicate) Trans_predicate=Predicate;
+	}
+	else {
+	  gsWarningMsg("Ignore an element named 'toolspecific'\n");
+	}
+      }  
+      else if (!xmlStrcmp(cur->name, (const xmlChar *)"type")) {
 	// the transition contains an <type> element
 	// this element contains a childelement <text> which contains the type of the transition
 	if (!(Atype=pn2gsRetrieveText(cur))) {
-	  Atype = ATparse("AND");
+	  Atype = gsString2ATermAppl("AND");
 	}
-	if (!ATisEqual(Atype, ATparse("AND"))) {
+	if (!ATisEqual(Atype, gsString2ATermAppl("AND"))) {
 	  // the type should either be omitted or have the value "AND"
 	  // otherwise the place does not need to be translated!
 	  gsWarningMsg("Transition with id '%T' has type '%T' and will not be translated.\n", Aid, Atype);
 	  return NULL;
 	}
 	gsDebugMsg("    type: '%T'\n", Atype);
-      } else if (xmlNodeIsText(cur)) {
-      } else {
+      }
+      else if (xmlNodeIsText(cur)) {
+      } 
+      else {
 	gsWarningMsg("Ignore an element named '%s'.\n", (const char *)cur->name);
       }
       cur = cur->next;
     }
     
     // argument order of returnvalue is id - name  
-    return ATmakeAppl2(ATmakeAFun("transition", 2, ATfalse), (ATerm)Aid, Aname);
+    return ATmakeAppl3(ATmakeAFun("transition", 3, ATfalse), (ATerm)Aid, (ATerm)Aname, (ATerm)Trans_predicate);
   }
   
   //==================================================
@@ -515,8 +630,10 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     // cur now points to the first child of the arc
     
     // temporary variables that contain data of the current arctype
-    ATerm Atype = ATparse("some_strange`type=that n0b0dy u5e5...");
+    ATermAppl Atype = gsString2ATermAppl("some_strange`type=that n0b0dy u5e5...");
     
+    ATermAppl Arc_name=Appl0;
+
     // this loop goes through all the children of the <arc>element
     // these children will be examined or ignored, this depends on the element name
     while (cur != NULL) {
@@ -527,38 +644,57 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
       if (!xmlStrcmp(cur->name, (const xmlChar *)"type")) {
 	// the arc contains a <type> element
 	// this element contains a childelement <text> which contains the type of the transition
-	
 	if (!(Atype=pn2gsRetrieveText(cur))) {
-	  Atype = ATparse("some_strange`type=that n0b0dy u5e5...");
+	  Atype = gsString2ATermAppl("some_strange`type=that n0b0dy u5e5...");
 	}
-	if (ATisEqual(Atype, ATparse("inhibitor"))) {
+	if (ATisEqual(Atype, gsString2ATermAppl("inhibitor"))) {
 	  // the type should be omitted
 	  // otherwise the arc does not need to be translated!
 	  // gsWarningMsg("Arc with id '%T' has type '%T' and will not be translated.\n", Aid, Atype);
-	  return ATmakeAppl4(ATmakeAFun("arc", 4, ATfalse), (ATerm)Aid, (ATerm)Asource, (ATerm)Atarget, (ATerm)gsString2ATermAppl("inhibitor"));
+	  inhibitor_arcs=ATtrue;
 	}
-	else if (ATisEqual(Atype, ATparse("reset"))) {
+	else if (ATisEqual(Atype, gsString2ATermAppl("reset"))) {
 	  // the type should be omitted
 	  // otherwise the arc does not need to be translated!
 	  // gsWarningMsg("Arc with id '%T' has type '%T' and will not be translated.\n", Aid, Atype);
-	  return ATmakeAppl4(ATmakeAFun("arc", 4, ATfalse), (ATerm)Aid, (ATerm)Asource, (ATerm)Atarget, (ATerm)gsString2ATermAppl("reset"));
+          reset_arcs=ATtrue;
 	}	
-	else if (!ATisEqual(Atype, ATparse("some_strange`type=that n0b0dy u5e5..."))) {
+	else if (!ATisEqual(Atype, gsString2ATermAppl("some_strange`type=that n0b0dy u5e5..."))) {
 	  // the type should be omitted
 	  // otherwise the arc does not need to be translated!
 	  gsWarningMsg("Arc with id '%T' has type '%T' and will not be translated.\n", Aid, Atype);
 	  return NULL;
 	}
 	gsDebugMsg("    type: '%T'\n", Atype);
-      } else if (xmlNodeIsText(cur)) {
-      } else {
+      } 
+      if (!xmlStrcmp(cur->name, (const xmlChar *)"name")) {
+	// the arc contains a <name> element
+	// this element contains a childelement <text> which contains the type of the transition
+        const char *name=pn2gsGetText(cur->xmlChildrenNode);
+        if(name){
+          colored=ATtrue;
+          std::istringstream iss(name);
+          ATermAppl Name=parse_data_expr(iss);
+          if(Name) Arc_name=Name; 
+        }
+        else {
+	  // the name should be omitted
+	  // otherwise the arc does not need to be translated!
+	  gsErrorMsg("Arc with id '%T' has unparseable name and will not be translated.\n", Aid);
+	}
+	if (Arc_name)
+	  gsDebugMsg("    name: '%T'\n", Arc_name);
+      } 
+      else if (xmlNodeIsText(cur)) {
+      } 
+      else {
 	gsWarningMsg("Ignore an element named '%s'.\n", (const char *)cur->name);
       }
       cur = cur->next;
     }
     
     // argument order of returnvalue is id - source - target
-    return ATmakeAppl4(ATmakeAFun("arc", 4, ATfalse), (ATerm)Aid, (ATerm)Asource, (ATerm)Atarget, (ATerm)gsString2ATermAppl("default"));
+    return ATmakeAppl5(ATmakeAFun("arc", 5, ATfalse), (ATerm)Aid, (ATerm)Asource, (ATerm)Atarget, (ATerm)gsString2ATermAppl("default"), (ATerm)Arc_name);
   }
   
   /*                        */
@@ -630,6 +766,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     ATermList APlaces=ATmakeList0();
     ATermList ATransitions=ATmakeList0();
     ATermList AArcs=ATmakeList0();
+    ATermAppl Net_prelude=Appl0;
     
     // temporary variables that contain data of the current place
     // so this data can be inserted in APlaces
@@ -665,7 +802,8 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 	  APlaces = ATinsert(APlaces, (ATerm)ACurrentPlace);
 	  gsDebugMsg("  Translate this place: %T\n", (ATerm)ACurrentPlace);
 	}
-      } else if (!xmlStrcmp(cur->name, (const xmlChar *)"transition")) {
+      } 
+      else if (!xmlStrcmp(cur->name, (const xmlChar *)"transition")) {
 	if(!(ACurrentTransition=pn2gsAterm_trans(cur))) {
 	  // pn2gsAterm_trans returns NULL, so the transition will not be translated.
 	  if (context.Abort == ATtrue) {
@@ -678,7 +816,8 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 	  ATransitions = ATinsert(ATransitions, (ATerm)ACurrentTransition);
 	  gsDebugMsg("  Translate this transition: %T\n", (ATerm)ACurrentTransition);
 	}
-      } else if (!xmlStrcmp(cur->name, (const xmlChar *)"arc")) {
+      } 
+      else if (!xmlStrcmp(cur->name, (const xmlChar *)"arc")) {
 	if(!(ACurrentArc=pn2gsAterm_arc(cur))) {
 	  // pn2gsAterm_arc returns NULL, so the arc will not be translated.
 	  if (context.Abort == ATtrue) {
@@ -691,8 +830,24 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 	  AArcs = ATinsert(AArcs, (ATerm)ACurrentArc);
 	  gsDebugMsg("  Translate this arc: %T\n", (ATerm)ACurrentArc);
 	}
-      } else if (xmlNodeIsText(cur)) {
-      } else {
+      }
+      else if (with_colors && !xmlStrcmp(cur->name, (const xmlChar *)"toolspecific")){
+	const char *prelude=pn2gsGetElement(cur,"mcrl2prelude");
+
+	if(prelude){
+	  colored=ATtrue;
+	  std::string s(prelude);
+          std::istringstream iss(s+"init delta;");
+	  ATermAppl Prelude=parse_spec(iss);
+          if(Prelude) Net_prelude=Prelude;
+	}
+	else {
+	  gsWarningMsg("Ignore an element named 'toolspecific'\n");
+	}
+      }	
+      else if (xmlNodeIsText(cur)) {
+      } 
+      else {
 	gsWarningMsg("An element named '%s' will be ignored in the translation (including it's sub-elements).\n",(const char *)cur->name);
       };
       cur = cur->next;
@@ -701,7 +856,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     gsDebugMsg("\nConversion of PNML to ATerm succesfully completed. \n");
     
     // argument order of returnvalue is places - transitions - arcs - NetID
-    return ATmakeAppl4(ATmakeAFun("PetriNet", 4, ATtrue), (ATerm)ATreverse(APlaces), (ATerm)ATreverse(ATransitions), (ATerm)ATreverse(AArcs), (ATerm)ANetID);
+    return ATmakeAppl5(ATmakeAFun("PetriNet", 5, ATtrue), (ATerm)ATreverse(APlaces), (ATerm)ATreverse(ATransitions), (ATerm)ATreverse(AArcs), (ATerm)ANetID, (ATerm)Net_prelude);
   }
 
   /*                                    */
@@ -1282,11 +1437,9 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 
     ATermList ReturnList = ATmakeList0();
     while (ATisEmpty(Places) == ATfalse) {
-      ATerm MarkingUnQuoted = ATtableGet(Markings, ATgetFirst(Places));
-      gsDebugMsg("Initial Marking unquoted = %T\n", MarkingUnQuoted);
-      ATermAppl MarkingQuoted = ATmakeAppl0(ATmakeAFun(ATwriteToString(MarkingUnQuoted), 0, ATtrue));
-      gsDebugMsg("Initial Marking quoted= %T\n", MarkingQuoted);
-      ReturnList = ATinsert(ReturnList, (ATerm)gsMakeNumber(MarkingQuoted, gsMakeUnknown()));
+      ATermAppl Marking = ATAtableGet(Markings, ATgetFirst(Places));
+      gsDebugMsg("Initial Marking = %T\n", Marking);
+      ReturnList = ATinsert(ReturnList,(ATerm)Marking);
       Places = ATgetNext(Places);
     }
     return ATreverse(ReturnList);
@@ -1888,6 +2041,10 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   // PrintHelp performs actual conversion by calling more specialised functions
   //==================================================
   bool perform_task(char const* InFileName, FILE* OutStream) {
+    ATprotect((ATerm*)&Appl0);
+    Appl0=gsString2ATermAppl("_");
+
+
     xmlDocPtr doc = xmlParseFile(InFileName);
    
     if(!doc) {
@@ -1907,11 +2064,14 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     
     context.place_name=ATtableCreate(63,50);
     context.place_mark=ATtableCreate(63,50); 
+    context.place_sort=ATtableCreate(63,50); 
     context.trans_name=ATtableCreate(63,50); 
+    context.trans_predicate=ATtableCreate(63,50); 
     context.arc_in=ATtableCreate(63,50);  
     context.arc_out=ATtableCreate(63,50);    
     context.arc_inhibit=ATtableCreate(63,50);    
     context.arc_reset=ATtableCreate(63,50);    
+    context.arc_name=ATtableCreate(63,50);    
     
     context.place_in=ATtableCreate(63,50);   
     context.trans_in=ATtableCreate(63,50);   
@@ -1923,16 +2083,22 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     context.transitions=ATmakeList0();
     context.places=ATmakeList0();
     context.place_process_name=ATtableCreate(63,50);  
-    
+   
+    //ATprintf("Spec %t\n\n", Spec);
     Spec=pn2gsTranslate(Spec);
     
+
+    ATunprotect((ATerm*)&Appl0);
     ATtableDestroy(context.place_name);
     ATtableDestroy(context.place_mark); 
+    ATtableDestroy(context.place_sort); 
     ATtableDestroy(context.trans_name); 
+    ATtableDestroy(context.trans_predicate); 
     ATtableDestroy(context.arc_in);  
     ATtableDestroy(context.arc_out);    
     ATtableDestroy(context.arc_inhibit);    
     ATtableDestroy(context.arc_reset);    
+    ATtableDestroy(context.arc_name);    
     
     ATtableDestroy(context.place_in);   
     ATtableDestroy(context.trans_in);   
