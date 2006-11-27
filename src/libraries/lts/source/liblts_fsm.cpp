@@ -7,7 +7,6 @@
 #include "libprint_c.h"
 #include "libprint.h"
 #include "lts/liblts.h"
-#include "lts/liblts_fsm.h"
 #include "lpe/specification.h"
 
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)
