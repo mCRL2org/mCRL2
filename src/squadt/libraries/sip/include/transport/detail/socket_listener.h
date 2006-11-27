@@ -25,7 +25,7 @@ namespace transport {
       private:
 
         /** \brief Handler for incoming socket connections */
-        void handle_accept(const boost::asio::error&, transceiver::socket_transceiver::ptr, basic_listener::ptr);
+        void handle_accept(const boost::system::error_code&, transceiver::socket_transceiver::ptr, basic_listener::ptr);
 
       public:
 

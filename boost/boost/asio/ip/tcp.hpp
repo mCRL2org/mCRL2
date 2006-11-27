@@ -17,11 +17,11 @@
 
 #include <boost/asio/detail/push_options.hpp>
 
-#include <boost/asio/basic_resolver.hpp>
 #include <boost/asio/basic_socket_acceptor.hpp>
 #include <boost/asio/basic_socket_iostream.hpp>
 #include <boost/asio/basic_stream_socket.hpp>
 #include <boost/asio/ip/basic_endpoint.hpp>
+#include <boost/asio/ip/basic_resolver.hpp>
 #include <boost/asio/ip/basic_resolver_iterator.hpp>
 #include <boost/asio/ip/basic_resolver_query.hpp>
 #include <boost/asio/detail/socket_option.hpp>
@@ -128,6 +128,18 @@ public:
   typedef boost::asio::detail::socket_option::boolean<
     IPPROTO_TCP, TCP_NODELAY> no_delay;
 #endif
+
+  /// Compare two protocols for equality.
+  friend bool operator==(const tcp& p1, const tcp& p2)
+  {
+    return p1.family_ == p2.family_;
+  }
+
+  /// Compare two protocols for inequality.
+  friend bool operator!=(const tcp& p1, const tcp& p2)
+  {
+    return p1.family_ != p2.family_;
+  }
 
 private:
   // Construct with a specific family.

@@ -53,10 +53,10 @@ namespace boost { namespace program_options {
     {
     }
 
-    bool 
+    option_description::match_result
     option_description::match(const std::string& option, bool approx) const
     {
-        bool result = false;
+        match_result result = no_match;
         if (!m_long_name.empty()) {
 
             if (*m_long_name.rbegin() == '*')
@@ -65,23 +65,26 @@ namespace boost { namespace program_options {
                 // prefix is OK.
                 if (option.find(m_long_name.substr(0, m_long_name.length()-1))
                     == 0)
-                    result = true;
+                    result = approximate_match;
             }
 
             if (approx)
             {
                 if (m_long_name.find(option) == 0)
-                    result = true;
+                    if (m_long_name == option)
+                        result = full_match;
+                    else
+                        result = approximate_match;
             }
             else
             {
                 if (m_long_name == option)
-                    result = true;
+                    result = full_match;
             }
         }
          
         if (m_short_name == option)
-            result = true;
+            result = full_match;
 
         return result;        
     }
@@ -258,21 +261,38 @@ namespace boost { namespace program_options {
         // case sensitivity and trailing '*' and so we can't use simple map.
         for(unsigned i = 0; i < m_options.size(); ++i)
         {
-            if (m_options[i]->match(name, approx))
+            option_description::match_result r = 
+                m_options[i]->match(name, approx);
+
+            if (r == option_description::no_match)
+                continue;
+
+            // If we have a full patch, and an approximate match,
+            // ignore approximate match instead of reporting error.
+            // Say, if we have options "all" and "all-chroots", then
+            // "--all" on the command line should select the first one,
+            // without ambiguity.
+            //
+            // For now, we don't check the situation when there are 
+            // two full matches. 
+                            
+            if (r == option_description::full_match)
             {
-                if (found != -1)
-                {
-                    vector<string> alts;
-                    // FIXME: the use of 'key' here might not
-                    // be the best approach.
-                    alts.push_back(m_options[found]->key(name));
-                    alts.push_back(m_options[i]->key(name));
-                    boost::throw_exception(ambiguous_option(name, alts));
-                }
-                else
-                {
-                    found = i;
-                }
+                return m_options[i].get();                
+            }
+
+            if (found != -1)
+            {
+                vector<string> alts;
+                // FIXME: the use of 'key' here might not
+                // be the best approach.
+                alts.push_back(m_options[found]->key(name));
+                alts.push_back(m_options[i]->key(name));
+                boost::throw_exception(ambiguous_option(name, alts));
+            }
+            else
+            {
+                found = i;
             }
         }
         if (found != -1) {
@@ -291,11 +311,26 @@ namespace boost { namespace program_options {
 
     namespace {
 
+        /* Given a string 'par', that contains no newline characters
+           outputs it to 'os' with wordwrapping, that is, as several
+           line.
+
+           Each output line starts with 'indent' space characters, 
+           following by characters from 'par'. The total length of
+           line is no longer than 'line_length'.
+                                      
+        */
         void format_paragraph(std::ostream& os,
                               std::string par,
-                              unsigned first_column_width,
+                              unsigned indent,
                               unsigned line_length)
         {                    
+            // Through reminder of this function, 'line_length' will
+            // be the length available for characters, not including
+            // indent.
+            assert(indent < line_length);
+            line_length -= indent;
+
             // index of tab (if present) is used as additional indent relative
             // to first_column_width if paragrapth is spanned over multiple
             // lines if tab is not on first line it is ignored
@@ -319,16 +354,16 @@ namespace boost { namespace program_options {
 
                 // this assert may fail due to user error or 
                 // environment conditions!
-                assert(par_indent < (line_length - first_column_width));
+                assert(par_indent < line_length);
 
                 // ignore tab if not on first line
-                if (par_indent >= (line_length - first_column_width))
+                if (par_indent >= line_length)
                 {
                     par_indent = 0;
                 }            
             }
           
-            if (par.size() < (line_length - first_column_width))
+            if (par.size() < line_length)
             {
                 os << par;
             }
@@ -337,17 +372,16 @@ namespace boost { namespace program_options {
                 string::const_iterator       line_begin = par.begin();
                 const string::const_iterator par_end = par.end();
 
-                bool first_line = true; // of current paragraph!
-            
-                unsigned indent = first_column_width;
+                bool first_line = true; // of current paragraph!        
             
                 while (line_begin < par_end)  // paragraph lines
                 {
                     if (!first_line)
                     {
-                        // trimm leading single spaces
-                        // if (firstchar == ' ') &&
-                        //    ((exists(firstchar + 1) && (firstchar + 1 != ' '))
+                        // If line starts with space, but second character
+                        // is not space, remove the leading space.
+                        // We don't remove double spaces because those
+                        // might be intentianal.
                         if ((*line_begin == ' ') &&
                             ((line_begin + 1 < par_end) &&
                              (*(line_begin + 1) != ' ')))
@@ -356,31 +390,26 @@ namespace boost { namespace program_options {
                         }
                     }
 
-                    string::const_iterator line_end;
-                
-                    if (line_begin + (line_length - indent) > par_end)
-                    {
-                        line_end = par_end;
-                    }
-                    else
-                    {
-                        line_end = line_begin + (line_length - indent);
-                    }
+                    // Take care to never increment the iterator past
+                    // the end, since MSVC 8.0 (brokenly), assumes that
+                    // doing that, even if no access happens, is a bug.
+                    unsigned remaining = distance(line_begin, par_end);
+                    string::const_iterator line_end = line_begin + 
+                        ((remaining < line_length) ? remaining : line_length);
             
                     // prevent chopped words
-                    // if (lastchar != ' ') &&
-                    //    ((exists(lastchar + 1) && (lastchar + 1 != ' '))
+                    // Is line_end between two non-space characters?
                     if ((*(line_end - 1) != ' ') &&
                         ((line_end < par_end) && (*line_end != ' ')))
                     {
                         // find last ' ' in the second half of the current paragraph line
                         string::const_iterator last_space =
-                            find(reverse_iterator<string::const_iterator>(line_end - 1),
-                                 reverse_iterator<string::const_iterator>(line_begin - 1),
+                            find(reverse_iterator<string::const_iterator>(line_end),
+                                 reverse_iterator<string::const_iterator>(line_begin),
                                  ' ')
                             .base();
                 
-                        if (last_space != line_begin - 1)
+                        if (last_space != line_begin)
                         {                 
                             // is last_space within the second half ot the 
                             // current line
@@ -397,7 +426,7 @@ namespace boost { namespace program_options {
               
                     if (first_line)
                     {
-                        indent = first_column_width + par_indent;
+                        indent += par_indent;
                         first_line = false;
                     }
 
@@ -436,7 +465,7 @@ namespace boost { namespace program_options {
             assert(line_length > first_column_width);
 
             // Note: can't use 'tokenizer' as name of typedef -- borland
-            // will consider subsequence uses of 'tokenizer' as uses of
+            // will consider uses of 'tokenizer' below as uses of
             // boost::tokenizer, not typedef.
             typedef boost::tokenizer<boost::char_separator<char> > tok;
           

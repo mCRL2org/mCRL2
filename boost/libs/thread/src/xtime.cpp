@@ -1,13 +1,8 @@
 // Copyright (C) 2001-2003
 // William E. Kempf
 //
-// Permission to use, copy, modify, distribute and sell this software
-// and its documentation for any purpose is hereby granted without fee,
-// provided that the above copyright notice appear in all copies and
-// that both that copyright notice and this permission notice appear
-// in supporting documentation.  William E. Kempf makes no representations
-// about the suitability of this software for any purpose.
-// It is provided "as is" without express or implied warranty.
+//  Distributed under the Boost Software License, Version 1.0. (See accompanying 
+//  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/thread/detail/config.hpp>
 
@@ -26,6 +21,8 @@
 #   include <DriverServices.h>
 #   include <boost/thread/detail/force_cast.hpp>
 #endif
+
+#include <cassert>
 
 namespace boost {
 
@@ -111,13 +108,23 @@ int xtime_get(struct xtime* xtp, int clock_type)
         return clock_type;
 #elif defined(BOOST_HAS_GETTIMEOFDAY)
         struct timeval tv;
+#       ifndef NDEBUG
+        int res =
+#endif            
         gettimeofday(&tv, 0);
+        assert(0 == res);
+        assert(tv.tv_sec >= 0);
+        assert(tv.tv_usec >= 0);
         xtp->sec = tv.tv_sec;
         xtp->nsec = tv.tv_usec * 1000;
         return clock_type;
 #elif defined(BOOST_HAS_CLOCK_GETTIME)
         timespec ts;
+#       ifndef NDEBUG
+        int res =
+#       endif            
         clock_gettime(CLOCK_REALTIME, &ts);
+        assert(0 == res);
         xtp->sec = ts.tv_sec;
         xtp->nsec = ts.tv_nsec;
         return clock_type;

@@ -1,19 +1,15 @@
 // Copyright (C) 2001-2003
 // William E. Kempf
 //
-// Permission to use, copy, modify, distribute and sell this software
-// and its documentation for any purpose is hereby granted without fee,
-// provided that the above copyright notice appear in all copies and
-// that both that copyright notice and this permission notice appear
-// in supporting documentation.  William E. Kempf makes no representations
-// about the suitability of this software for any purpose.
-// It is provided "as is" without express or implied warranty.
+//  Distributed under the Boost Software License, Version 1.0. (See accompanying 
+//  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/thread/detail/config.hpp>
 
 #include <boost/detail/workaround.hpp>
 
 #include <boost/thread/once.hpp>
+#include <boost/thread/exceptions.hpp>
 #include <cstdio>
 #include <cassert>
 
@@ -23,6 +19,7 @@
       using std::size_t;
 #   endif
 #   include <windows.h>
+#   include "mutex.inl"
 #   if defined(BOOST_NO_STRINGSTREAM)
 #       include <strstream>
 
@@ -118,7 +115,11 @@ inline LONG ice_wrapper(LPVOID (__stdcall *ice)(LPVOID*, LPVOID, LPVOID),
 // according to the above function type wrappers.
 inline LONG compare_exchange(volatile LPLONG dest, LONG exch, LONG cmp)
 {
+#ifdef _WIN64
+    return InterlockedCompareExchange(dest, exch, cmp);
+#else
     return ice_wrapper(&InterlockedCompareExchange, dest, exch, cmp);
+#endif
 }
 }
 #endif
@@ -138,12 +139,7 @@ void call_once(void (*func)(), once_flag& flag)
              << &flag 
              << std::ends;
         unfreezer unfreeze(strm);
-#   if defined (BOOST_NO_ANSI_APIS)
-        USES_CONVERSION;
-        HANDLE mutex = CreateMutexW(NULL, FALSE, A2CW(strm.str()));
-#   else
-        HANDLE mutex = CreateMutexA(NULL, FALSE, strm.str());
-#   endif
+        HANDLE mutex=new_mutex(strm.str());
 #else
 #   if defined (BOOST_NO_ANSI_APIS)
         std::wostringstream strm;

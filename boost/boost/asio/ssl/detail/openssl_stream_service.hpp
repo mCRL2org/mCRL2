@@ -26,6 +26,7 @@
 #include <boost/bind.hpp>
 #include <boost/asio/detail/pop_options.hpp>
 
+#include <boost/asio/error.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ssl/basic_context.hpp>
 #include <boost/asio/ssl/stream_base.hpp>
@@ -46,7 +47,8 @@ private:
   class base_handler
   {
   public:
-    typedef boost::function<void (const boost::asio::error&, size_t)> func_t;
+    typedef boost::function<
+      void (const boost::system::error_code&, size_t)> func_t;
 
     base_handler(boost::asio::io_service& io_service)
       : op_(NULL)
@@ -54,7 +56,7 @@ private:
       , work_(io_service)
     {}
     
-    void do_func(const boost::asio::error& error, size_t size)
+    void do_func(const boost::system::error_code& error, size_t size)
     {
       func_(error, size);
     }
@@ -91,7 +93,7 @@ private:
 
   private:
     Handler handler_;
-    void handler_impl(const boost::asio::error& error, size_t size)
+    void handler_impl(const boost::system::error_code& error, size_t size)
     {
       handler_(error, size);
       delete this;
@@ -115,7 +117,7 @@ private:
 
   private:
     Handler handler_;
-    void handler_impl(const boost::asio::error& error, size_t)
+    void handler_impl(const boost::system::error_code& error, size_t)
     {
       handler_(error);
       delete this;
@@ -140,7 +142,7 @@ private:
 
   private:
     Handler handler_;
-    void handler_impl(const boost::asio::error& error, size_t)
+    void handler_impl(const boost::system::error_code& error, size_t)
     {
       handler_(error);
       delete this;
@@ -153,6 +155,7 @@ public:
   {
     ::SSL* ssl;
     ::BIO* ext_bio;
+    net_buffer recv_buf;
   } * impl_type;
 
   // Construct a new stream socket service for the specified io_service.
@@ -180,6 +183,7 @@ public:
     impl = new impl_struct;
     impl->ssl = ::SSL_new(context.impl());
     ::SSL_set_mode(impl->ssl, SSL_MODE_ENABLE_PARTIAL_WRITE);
+    ::SSL_set_mode(impl->ssl, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
     ::BIO* int_bio = 0;
     impl->ext_bio = 0;
     ::BIO_new_bio_pair(&int_bio, 8192, &impl->ext_bio, 8192);
@@ -200,9 +204,9 @@ public:
   }
 
   // Perform SSL handshaking.
-  template <typename Stream, typename Error_Handler>
-  void handshake(impl_type& impl, Stream& next_layer,
-      stream_base::handshake_type type, Error_Handler error_handler)
+  template <typename Stream>
+  boost::system::error_code handshake(impl_type& impl, Stream& next_layer,
+      stream_base::handshake_type type, boost::system::error_code& ec)
   {
     try
     {
@@ -211,18 +215,19 @@ public:
           &ssl_wrap<mutex_type>::SSL_connect:
           &ssl_wrap<mutex_type>::SSL_accept,
         next_layer,
+        impl->recv_buf,
         impl->ssl,
         impl->ext_bio);
       op.start();
     }
-    catch (boost::asio::error& e)
+    catch (boost::system::system_error& e)
     {
-      error_handler(e);
-      return;
+      ec = e.code();
+      return ec;
     }
 
-    boost::asio::error e;
-    error_handler(e);
+    ec = boost::system::error_code();
+    return ec;
   }
 
   // Start an asynchronous SSL handshake.
@@ -233,7 +238,7 @@ public:
     typedef handshake_handler<Stream, Handler> connect_handler;
 
     connect_handler* local_handler = 
-      new connect_handler(handler, owner());
+      new connect_handler(handler, io_service());
 
     openssl_operation<Stream>* op = new openssl_operation<Stream>
     (
@@ -241,6 +246,7 @@ public:
         &ssl_wrap<mutex_type>::SSL_connect:
         &ssl_wrap<mutex_type>::SSL_accept,
       next_layer,
+      impl->recv_buf,
       impl->ssl,
       impl->ext_bio,
       boost::bind
@@ -253,31 +259,32 @@ public:
     );
     local_handler->set_operation(op);
 
-    owner().post(boost::bind(&openssl_operation<Stream>::start, op));
+    io_service().post(boost::bind(&openssl_operation<Stream>::start, op));
   }
 
   // Shut down SSL on the stream.
-  template <typename Stream, typename Error_Handler>
-  void shutdown(impl_type& impl, Stream& next_layer,
-      Error_Handler error_handler)
+  template <typename Stream>
+  boost::system::error_code shutdown(impl_type& impl, Stream& next_layer,
+      boost::system::error_code& ec)
   {
     try
     {
       openssl_operation<Stream> op(
         &ssl_wrap<mutex_type>::SSL_shutdown,
         next_layer,
+        impl->recv_buf,
         impl->ssl,
         impl->ext_bio);
       op.start();
     }
-    catch (boost::asio::error& e)
+    catch (boost::system::system_error& e)
     {
-      error_handler(e);
-      return;
+      ec = e.code();
+      return ec;
     }
 
-    boost::asio::error e;
-    error_handler(e);
+    ec = boost::system::error_code();
+    return ec;
   }
 
   // Asynchronously shut down SSL on the stream.
@@ -287,12 +294,13 @@ public:
     typedef shutdown_handler<Stream, Handler> disconnect_handler;
 
     disconnect_handler* local_handler = 
-      new disconnect_handler(handler, owner());
+      new disconnect_handler(handler, io_service());
 
     openssl_operation<Stream>* op = new openssl_operation<Stream>
     (
       &ssl_wrap<mutex_type>::SSL_shutdown,
       next_layer,
+      impl->recv_buf,
       impl->ssl,
       impl->ext_bio,
       boost::bind
@@ -305,13 +313,13 @@ public:
     );
     local_handler->set_operation(op);
 
-    owner().post(boost::bind(&openssl_operation<Stream>::start, op));        
+    io_service().post(boost::bind(&openssl_operation<Stream>::start, op));        
   }
 
   // Write some data to the stream.
-  template <typename Stream, typename Const_Buffers, typename Error_Handler>
+  template <typename Stream, typename Const_Buffers>
   std::size_t write_some(impl_type& impl, Stream& next_layer,
-      const Const_Buffers& buffers, Error_Handler error_handler)
+      const Const_Buffers& buffers, boost::system::error_code& ec)
   {
     size_t bytes_transferred = 0;
     try
@@ -323,19 +331,19 @@ public:
       openssl_operation<Stream> op(
         send_func,
         next_layer,
+        impl->recv_buf,
         impl->ssl,
         impl->ext_bio
       );
       bytes_transferred = static_cast<size_t>(op.start());
     }
-    catch (boost::asio::error& e)
+    catch (boost::system::system_error& e)
     {
-      error_handler(e);
+      ec = e.code();
       return 0;
     }
 
-    boost::asio::error e;
-    error_handler(e);
+    ec = boost::system::error_code();
     return bytes_transferred;
   }
 
@@ -346,7 +354,7 @@ public:
   {
     typedef io_handler<Stream, Handler> send_handler;
 
-    send_handler* local_handler = new send_handler(handler, owner());
+    send_handler* local_handler = new send_handler(handler, io_service());
 
     boost::function<int (SSL*)> send_func =
       boost::bind(&::SSL_write, boost::arg<1>(),
@@ -357,6 +365,7 @@ public:
     (
       send_func,
       next_layer,
+      impl->recv_buf,
       impl->ssl,
       impl->ext_bio,
       boost::bind
@@ -369,13 +378,13 @@ public:
     );
     local_handler->set_operation(op);
 
-    owner().post(boost::bind(&openssl_operation<Stream>::start, op));        
+    io_service().post(boost::bind(&openssl_operation<Stream>::start, op));        
   }
 
   // Read some data from the stream.
-  template <typename Stream, typename Mutable_Buffers, typename Error_Handler>
+  template <typename Stream, typename Mutable_Buffers>
   std::size_t read_some(impl_type& impl, Stream& next_layer,
-      const Mutable_Buffers& buffers, Error_Handler error_handler)
+      const Mutable_Buffers& buffers, boost::system::error_code& ec)
   {
     size_t bytes_transferred = 0;
     try
@@ -386,20 +395,20 @@ public:
             boost::asio::buffer_size(*buffers.begin()));
       openssl_operation<Stream> op(recv_func,
         next_layer,
+        impl->recv_buf,
         impl->ssl,
         impl->ext_bio
       );
 
       bytes_transferred = static_cast<size_t>(op.start());
     }
-    catch (boost::asio::error& e)
+    catch (boost::system::system_error& e)
     {
-      error_handler(e);
+      ec = e.code();
       return 0;
     }
 
-    boost::asio::error e;
-    error_handler(e);
+    ec = boost::system::error_code();
     return bytes_transferred;
   }
 
@@ -410,7 +419,7 @@ public:
   {
     typedef io_handler<Stream, Handler> recv_handler;
 
-    recv_handler* local_handler = new recv_handler(handler, owner());
+    recv_handler* local_handler = new recv_handler(handler, io_service());
 
     boost::function<int (SSL*)> recv_func =
       boost::bind(&::SSL_read, boost::arg<1>(),
@@ -421,6 +430,7 @@ public:
     (
       recv_func,
       next_layer,
+      impl->recv_buf,
       impl->ssl,
       impl->ext_bio,
       boost::bind
@@ -433,26 +443,24 @@ public:
     );
     local_handler->set_operation(op);
 
-    owner().post(boost::bind(&openssl_operation<Stream>::start, op));        
+    io_service().post(boost::bind(&openssl_operation<Stream>::start, op));        
   }
 
   // Peek at the incoming data on the stream.
-  template <typename Stream, typename Mutable_Buffers, typename Error_Handler>
+  template <typename Stream, typename Mutable_Buffers>
   std::size_t peek(impl_type& impl, Stream& next_layer,
-      const Mutable_Buffers& buffers, Error_Handler error_handler)
+      const Mutable_Buffers& buffers, boost::system::error_code& ec)
   {
-    boost::asio::error e;
-    error_handler(e);
+    ec = boost::system::error_code();
     return 0;
   }
 
   // Determine the amount of data that may be read without blocking.
-  template <typename Stream, typename Error_Handler>
+  template <typename Stream>
   std::size_t in_avail(impl_type& impl, Stream& next_layer,
-      Error_Handler error_handler)
+      boost::system::error_code& ec)
   {
-    boost::asio::error e;
-    error_handler(e);
+    ec = boost::system::error_code();
     return 0;
   }
 

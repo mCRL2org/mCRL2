@@ -83,8 +83,11 @@ if $(BOOST_LIBRARY_PATH) {
   boost-library-path = <library-path>$(BOOST_LIBRARY_PATH) ;
 }
 
-rule boost_library ( name : use-system-boost ? ) {
-  if ( $(BOOST_INCLUDE_PATH) && ( "default" != "$(BOOST_INCLUDE_PATH)" ) ) || $(use-system-boost) {
+rule boost_library ( name : use-local-boost ? : use-system-boost ? ) {
+  if $(use-local-boost) {
+    alias boost_$(name) : /boost//$(name) : <threading>multi ;
+  }
+  else if ( $(BOOST_INCLUDE_PATH) && ( "default" != "$(BOOST_INCLUDE_PATH)" ) ) || $(use-system-boost) {
     if $(BOOST_INCLUDE_PATH) {
       lib boost_$(name)
              :
@@ -109,7 +112,8 @@ boost_library filesystem ;
 boost_library program_options ;
 boost_library regex ;
 boost_library thread ;
-boost_library test : system ;
+boost_library test : : system ;
+boost_library system : local ;
 
 lib z  : : <name>"z" ;
 lib m  : : <name>"m" ;

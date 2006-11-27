@@ -96,10 +96,10 @@ namespace transport {
         void activate(wptr);
 
         /** \brief Read from the socket */
-        void handle_receive(wptr, const boost::asio::error&);
+        void handle_receive(wptr, const boost::system::error_code&);
 
         /** \brief Process results from a write operation on the socket */
-        void handle_write(wptr, boost::shared_array < char >, const boost::asio::error&);
+        void handle_write(wptr, boost::shared_array < char >, const boost::system::error_code&);
 
       public:
 

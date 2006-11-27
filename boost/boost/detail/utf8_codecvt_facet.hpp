@@ -92,7 +92,7 @@
 namespace std {
     #if defined(__LIBCOMO__)
         using ::mbstate_t;
-    #elif defined(BOOST_DINKUMWARE_STDLIB)
+    #elif defined(BOOST_DINKUMWARE_STDLIB) && !defined(__BORLANDC__)
         using ::mbstate_t;
     #elif defined(__SGI_STL_PORT)
     #elif defined(BOOST_NO_STDC_NAMESPACE)
@@ -162,7 +162,7 @@ protected:
     virtual std::codecvt_base::result do_unshift(
         std::mbstate_t&,
         char * from,
-        char * to,
+        char * /*to*/,
         char * & next
     ) const 
     {

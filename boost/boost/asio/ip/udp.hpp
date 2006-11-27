@@ -18,8 +18,8 @@
 #include <boost/asio/detail/push_options.hpp>
 
 #include <boost/asio/basic_datagram_socket.hpp>
-#include <boost/asio/basic_resolver.hpp>
 #include <boost/asio/ip/basic_endpoint.hpp>
+#include <boost/asio/ip/basic_resolver.hpp>
 #include <boost/asio/ip/basic_resolver_iterator.hpp>
 #include <boost/asio/ip/basic_resolver_query.hpp>
 #include <boost/asio/detail/socket_types.hpp>
@@ -86,6 +86,18 @@ public:
 
   /// The UDP resolver type.
   typedef basic_resolver<udp> resolver;
+
+  /// Compare two protocols for equality.
+  friend bool operator==(const udp& p1, const udp& p2)
+  {
+    return p1.family_ == p2.family_;
+  }
+
+  /// Compare two protocols for inequality.
+  friend bool operator!=(const udp& p1, const udp& p2)
+  {
+    return p1.family_ != p2.family_;
+  }
 
 private:
   // Construct with a specific family.

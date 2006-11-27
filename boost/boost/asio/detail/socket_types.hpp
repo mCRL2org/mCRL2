@@ -23,6 +23,9 @@
 
 #include <boost/asio/detail/push_options.hpp>
 #if defined(BOOST_WINDOWS) || defined(__CYGWIN__)
+# if defined(_WINSOCKAPI_) && !defined(_WINSOCK2API_)
+#  error WinSock.h has already been included
+# endif // defined(_WINSOCKAPI_) && !defined(_WINSOCK2API_)
 # if !defined(_WIN32_WINNT) && !defined(_WIN32_WINDOWS)
 #  if defined(_MSC_VER) || defined(__BORLANDC__)
 #   pragma message("Please define _WIN32_WINNT or _WIN32_WINDOWS appropriately")
@@ -33,15 +36,29 @@
 #  endif // defined(_MSC_VER) || defined(__BORLANDC__)
 #  define _WIN32_WINNT 0x0500
 # endif // !defined(_WIN32_WINNT) && !defined(_WIN32_WINDOWS)
-# if defined(__BORLANDC__) && !defined(_WSPIAPI_H_)
+# if defined(_MSC_VER)
+#  if defined(_WIN32) && !defined(WIN32)
+#   if !defined(_WINSOCK2API_)
+#    define WIN32 // Needed for correct types in winsock2.h
+#   else // !defined(_WINSOCK2API_)
+#    error Please define the macro WIN32 in your compiler options
+#   endif // !defined(_WINSOCK2API_)
+#  endif // defined(_WIN32) && !defined(WIN32)
+# endif // defined(_MSC_VER)
+# if defined(__BORLANDC__)
 #  include <stdlib.h> // Needed for __errno
 #  if defined(__WIN32__) && !defined(WIN32)
-#   define WIN32 // Needed for correct types in winsock2.h
+#   if !defined(_WINSOCK2API_)
+#    define WIN32 // Needed for correct types in winsock2.h
+#   else // !defined(_WINSOCK2API_)
+#    error Please define the macro WIN32 in your compiler options
+#   endif // !defined(_WINSOCK2API_)
 #  endif // defined(__WIN32__) && !defined(WIN32)
-#  define _WSPIAPI_H_
-#  define BOOST_ASIO_WSPIAPI_H_DEFINED
-# endif // defined(__BORLANDC__) && !defined(_WSPIAPI_H_)
-# define FD_SETSIZE 1024
+#  if !defined(_WSPIAPI_H_)
+#   define _WSPIAPI_H_
+#   define BOOST_ASIO_WSPIAPI_H_DEFINED
+#  endif // !defined(_WSPIAPI_H_)
+# endif // defined(__BORLANDC__)
 # if !defined(BOOST_ASIO_NO_WIN32_LEAN_AND_MEAN)
 #  if !defined(WIN32_LEAN_AND_MEAN)
 #   define WIN32_LEAN_AND_MEAN
@@ -152,6 +169,13 @@ const int message_do_not_route = MSG_DONTROUTE;
 #endif
 const int custom_socket_option_level = 0xA5100000;
 const int enable_connection_aborted_option = 1;
+
+#if defined(_WIN64)
+inline std::size_t hash_value(SOCKET s)
+{
+  return static_cast<std::size_t>(s);
+}
+#endif // defined(_WIN64)
 
 } // namespace detail
 } // namespace asio

@@ -29,6 +29,8 @@
 #include "boost/none_t.hpp"
 #include "boost/utility/compare_pointees.hpp"
 
+#include "boost/optional/optional_fwd.hpp"
+
 #if BOOST_WORKAROUND(BOOST_MSVC, == 1200)
 // VC6.0 has the following bug:
 //   When a templated assignment operator exist, an implicit conversion
@@ -64,7 +66,7 @@
 #endif
 
 #if !defined(BOOST_OPTIONAL_NO_INPLACE_FACTORY_SUPPORT) \
-    && BOOST_WORKAROUND(__BORLANDC__, <= 0x564)
+    && BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x581) )
 // BCB (up to 5.64) has the following bug:
 //   If there is a member function/operator template of the form
 //     template<class Expr> mfunc( Expr expr ) ;
@@ -131,7 +133,11 @@ class optional_base : public optional_tag
 {
   private :
 
-    typedef BOOST_DEDUCED_TYPENAME detail::make_reference_content<T>::type internal_type ;
+    typedef
+#if !BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x564))
+    BOOST_DEDUCED_TYPENAME
+#endif 
+    ::boost::detail::make_reference_content<T>::type internal_type ;
 
     typedef aligned_storage<internal_type> storage_type ;
 
@@ -179,6 +185,16 @@ class optional_base : public optional_tag
     {
       construct(val);
     }
+    
+    // Creates an optional<T> initialized with 'val' IFF cond is true, otherwise creates an uninitialzed optional<T>.
+    // Can throw if T::T(T const&) does
+    optional_base ( bool cond, argument_type val )
+      :
+      m_initialized(false)
+    {
+      if ( cond )
+        construct(val);
+    }
 
     // Creates a deep copy of another optional<T>
     // Can throw if T::T(T const&) does
@@ -220,6 +236,23 @@ class optional_base : public optional_tag
       {
         if ( rhs.is_initialized() )
           construct(rhs.get_impl());
+      }
+    }
+
+    // Assigns from another _convertible_ optional<U> (deep-copies the rhs value)
+    template<class U>
+    void assign ( optional<U> const& rhs )
+    {
+      if (is_initialized())
+      {
+        if ( rhs.is_initialized() )
+             assign_value(static_cast<value_type>(rhs.get()), is_reference_predicate() );
+        else destroy();
+      }
+      else
+      {
+        if ( rhs.is_initialized() )
+          construct(static_cast<value_type>(rhs.get()));
       }
     }
 
@@ -382,7 +415,7 @@ class optional_base : public optional_tag
     reference_const_type dereference( internal_type const* p, is_reference_tag     ) const { return p->get() ; }
     reference_type       dereference( internal_type*       p, is_reference_tag     )       { return p->get() ; }
 
-#if BOOST_WORKAROUND(__BORLANDC__, <= 0x564)
+#if BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x581))
     void destroy_impl ( is_not_reference_tag ) { get_ptr_impl()->internal_type::~internal_type() ; m_initialized = false ; }
 #else
     void destroy_impl ( is_not_reference_tag ) { get_ptr_impl()->T::~T() ; m_initialized = false ; }
@@ -432,6 +465,9 @@ class optional : public optional_detail::optional_base<T>
     // Can throw if T::T(T const&) does
     optional ( argument_type val ) : base(val) {}
 
+    // Creates an optional<T> initialized with 'val' IFF cond is true, otherwise creates an uninitialized optional.
+    // Can throw if T::T(T const&) does
+    optional ( bool cond, argument_type val ) : base(cond,val) {}
 
 #ifndef BOOST_OPTIONAL_NO_CONVERTING_COPY_CTOR
     // NOTE: MSVC needs templated versions first
@@ -481,6 +517,7 @@ class optional : public optional_detail::optional_base<T>
       }
 #endif
 
+
 #ifndef BOOST_OPTIONAL_NO_CONVERTING_ASSIGNMENT
     // Assigns from another convertible optional<U> (converts && deep-copies the rhs value)
     // Requires a valid conversion from U to T.
@@ -488,7 +525,7 @@ class optional : public optional_detail::optional_base<T>
     template<class U>
     optional& operator= ( optional<U> const& rhs )
       {
-        this->assign(rhs.get());
+        this->assign(rhs);
         return *this ;
       }
 #endif
@@ -525,6 +562,10 @@ class optional : public optional_detail::optional_base<T>
     reference_const_type get() const { BOOST_ASSERT(this->is_initialized()) ; return this->get_impl(); }
     reference_type       get()       { BOOST_ASSERT(this->is_initialized()) ; return this->get_impl(); }
 
+    // Returns a copy of the value if this is initialized, 'v' otherwise
+    reference_const_type get_value_or ( reference_const_type v ) const { return this->is_initialized() ? get() : v ; }
+    reference_type       get_value_or ( reference_type       v )       { return this->is_initialized() ? get() : v ; }
+    
     // Returns a pointer to the value if this is initialized, otherwise,
     // the behaviour is UNDEFINED
     // No-throw
@@ -545,6 +586,22 @@ class optional : public optional_detail::optional_base<T>
        // on some contexts.
        bool operator!() const { return !this->is_initialized() ; }
 } ;
+
+// Returns optional<T>(v)
+template<class T> 
+inline 
+optional<T> make_optional ( T const& v  )
+{
+  return optional<T>(v);
+}
+
+// Returns optional<T>(cond,v)
+template<class T> 
+inline 
+optional<T> make_optional ( bool cond, T const& v )
+{
+  return optional<T>(cond,v);
+}
 
 // Returns a reference to the value if this is initialized, otherwise, the behaviour is UNDEFINED.
 // No-throw
@@ -580,6 +637,24 @@ BOOST_DEDUCED_TYPENAME optional<T>::pointer_type
 get ( optional<T>* opt )
 {
   return opt->get_ptr() ;
+}
+
+// Returns a reference to the value if this is initialized, otherwise, the behaviour is UNDEFINED.
+// No-throw
+template<class T>
+inline
+BOOST_DEDUCED_TYPENAME optional<T>::reference_const_type
+get_optional_value_or ( optional<T> const& opt, BOOST_DEDUCED_TYPENAME optional<T>::reference_const_type v )
+{
+  return opt.get_value_or(v) ;
+}
+
+template<class T>
+inline
+BOOST_DEDUCED_TYPENAME optional<T>::reference_type
+get_optional_value_or ( optional<T>& opt, BOOST_DEDUCED_TYPENAME optional<T>::reference_type v )
+{
+  return opt.get_value_or(v) ;
 }
 
 // Returns a pointer to the value if this is initialized, otherwise, returns NULL.
@@ -742,6 +817,7 @@ template<class T> inline void swap ( optional<T>& x, optional<T>& y )
 {
   optional_detail::optional_swap(x,y);
 }
+
 
 } // namespace boost
 

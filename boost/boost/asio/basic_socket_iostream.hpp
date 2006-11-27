@@ -25,7 +25,7 @@
 #include <boost/utility/base_from_member.hpp>
 #include <boost/asio/detail/pop_options.hpp>
 
-#include <boost/asio/basic_socketbuf.hpp>
+#include <boost/asio/basic_socket_streambuf.hpp>
 #include <boost/asio/stream_socket_service.hpp>
 
 #if !defined(BOOST_ASIO_SOCKET_IOSTREAM_MAX_ARITY)
@@ -36,13 +36,13 @@
 //   template < typename T1, ..., typename Tn >
 //   explicit basic_socket_iostream( T1 x1, ..., Tn xn )
 //     : basic_iostream<char>(&this->boost::base_from_member<
-//         basic_socketbuf<Protocol, Service> >::member)
+//         basic_socket_streambuf<Protocol, Service> >::member)
 //   {
 //     try
 //     {
 //       rdbuf()->connect ( x1, ..., xn );
 //     }
-//     catch (boost::asio::error&)
+//     catch (boost::system::system_error&)
 //     {
 //       this->setstate(std::ios_base::failbit);
 //       if (this->exceptions() & std::ios_base::failbit)
@@ -55,13 +55,13 @@
   template < BOOST_PP_ENUM_PARAMS(n, typename T) > \
   explicit basic_socket_iostream( BOOST_PP_ENUM_BINARY_PARAMS(n, T, x) ) \
     : std::basic_iostream<char>(&this->boost::base_from_member< \
-        basic_socketbuf<Protocol, Service> >::member) \
+        basic_socket_streambuf<Protocol, Service> >::member) \
   { \
     try \
     { \
       rdbuf()->connect( BOOST_PP_ENUM_PARAMS(n, x) ); \
     } \
-    catch (boost::asio::error&) \
+    catch (boost::system::system_error&) \
     { \
       this->setstate(std::ios_base::failbit); \
       if (this->exceptions() & std::ios_base::failbit) \
@@ -78,7 +78,7 @@
 //     {
 //       rdbuf()->connect ( x1, ..., xn );
 //     }
-//     catch (boost::asio::error&)
+//     catch (boost::system::system_error&)
 //     {
 //       this->setstate(std::ios_base::failbit);
 //       if (this->exceptions() & std::ios_base::failbit)
@@ -95,7 +95,7 @@
     { \
       rdbuf()->connect( BOOST_PP_ENUM_PARAMS(n, x) ); \
     } \
-    catch (boost::asio::error&) \
+    catch (boost::system::system_error&) \
     { \
       this->setstate(std::ios_base::failbit); \
       if (this->exceptions() & std::ios_base::failbit) \
@@ -111,14 +111,14 @@ namespace asio {
 template <typename Protocol,
     typename Service = stream_socket_service<Protocol> >
 class basic_socket_iostream
-  : public boost::base_from_member<basic_socketbuf<Protocol, Service> >,
+  : public boost::base_from_member<basic_socket_streambuf<Protocol, Service> >,
     public std::basic_iostream<char>
 {
 public:
   /// Construct a basic_socket_iostream without establishing a connection.
   basic_socket_iostream()
     : std::basic_iostream<char>(&this->boost::base_from_member<
-        basic_socketbuf<Protocol, Service> >::member)
+        basic_socket_streambuf<Protocol, Service> >::member)
   {
   }
 
@@ -159,11 +159,11 @@ public:
   }
 
   /// Return a pointer to the underlying streambuf.
-  basic_socketbuf<Protocol, Service>* rdbuf() const
+  basic_socket_streambuf<Protocol, Service>* rdbuf() const
   {
-    return const_cast<basic_socketbuf<Protocol, Service>*>(
+    return const_cast<basic_socket_streambuf<Protocol, Service>*>(
         &this->boost::base_from_member<
-          basic_socketbuf<Protocol, Service> >::member);
+          basic_socket_streambuf<Protocol, Service> >::member);
   }
 };
 

@@ -47,14 +47,14 @@ namespace transport {
         using namespace boost;
         using namespace boost::asio;
 
-        error e;
+        boost::system::error_code e;
 
         boost::mutex::scoped_lock l(operation_lock);
 
         /* Build socket connection */
         ip::tcp::endpoint endpoint(a, (p == 0) ? default_port : p);
 
-        socket.connect(endpoint, assign_error(e));
+        socket.connect(endpoint, e);
 
         /* Set socket options */
         socket.set_option(socket_base::keep_alive(true));
@@ -135,7 +135,7 @@ namespace transport {
      * @param w a reference to a weak pointer for this object (w.lock().get() == this (or 0)
      * @param e reference to an asio error object
      **/
-    void socket_transceiver::handle_receive(socket_transceiver::wptr w, const boost::asio::error& e) {
+    void socket_transceiver::handle_receive(socket_transceiver::wptr w, const boost::system::error_code& e) {
       /* Object still exists, so do the receiving and delivery */
       using namespace boost;
       using namespace boost::asio;
@@ -175,7 +175,7 @@ namespace transport {
      * @param w a reference to a weak pointer for this object (w.lock().get() == this (or 0)
      * @param e reference to an asio error object
      **/
-    void socket_transceiver::handle_write(socket_transceiver::wptr w, boost::shared_array < char >, const boost::asio::error& e) {
+    void socket_transceiver::handle_write(socket_transceiver::wptr w, boost::shared_array < char >, const boost::system::error_code& e) {
       socket_transceiver::ptr s = w.lock();
 
       if (!w.expired()) {
@@ -186,12 +186,14 @@ namespace transport {
         }
 
         /* Object still exists, so continue processing the write operation */
-        if (e == boost::asio::error::eof) {
-          /* Connection was closed by peer */
-          handle_disconnect(this);
-        }
-        else if (e != boost::asio::error::success && e != boost::asio::error::operation_aborted) {
-          throw (e);
+        if (e) {
+          if (e == boost::asio::error::eof) {
+            /* Connection was closed by peer */
+            handle_disconnect(this);
+          }
+          else if (e != boost::asio::error::operation_aborted) {
+            throw (e);
+          }
         }
       }
     }

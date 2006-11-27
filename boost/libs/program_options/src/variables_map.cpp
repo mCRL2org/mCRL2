@@ -35,12 +35,23 @@ namespace boost { namespace program_options {
 
         std::set<std::string> new_final;
 
+        // Declared once, to please Intel in VC++ mode;
+        unsigned i;
+
         // First, convert/store all given options
-        for (size_t i = 0; i < options.options.size(); ++i) {
+        for (i = 0; i < options.options.size(); ++i) {
 
             const string& name = options.options[i].string_key;
             // Skip positional options without name
             if (name.empty())
+                continue;
+
+            // Ignore unregistered option. The 'unregistered'
+            // field can be true only if user has explicitly asked
+            // to allow unregistered options. We can't store them
+            // to variables map (lacking any information about paring), 
+            // so just ignore them.
+            if (options.options[i].unregistered)
                 continue;
 
             // If option has final value, skip this assignment
@@ -84,7 +95,7 @@ namespace boost { namespace program_options {
         
         // Second, apply default values.
         const vector<shared_ptr<option_description> >& all = desc.options();
-        for(unsigned i = 0; i < all.size(); ++i)
+        for(i = 0; i < all.size(); ++i)
         {
             const option_description& d = *all[i];
             string key = d.key("");

@@ -1,11 +1,12 @@
 //  Boost string_algo library erase.hpp header file  ---------------------------//
 
-//  Copyright Pavol Droba 2002-2003. Use, modification and
-//  distribution is subject to the Boost Software License, Version
-//  1.0. (See accompanying file LICENSE_1_0.txt or copy at
-//  http://www.boost.org/LICENSE_1_0.txt)
+//  Copyright Pavol Droba 2002-2006.
+//
+// Distributed under the Boost Software License, Version 1.0.
+//    (See accompanying file LICENSE_1_0.txt or copy at
+//          http://www.boost.org/LICENSE_1_0.txt)
 
-//  See http://www.boost.org for updates, documentation, and revision history.
+//  See http://www.boost.org/ for updates, documentation, and revision history.
 
 #ifndef BOOST_STRING_ERASE_HPP
 #define BOOST_STRING_ERASE_HPP
@@ -387,6 +388,7 @@ namespace boost {
             \param Input An input string
             \param Search A substring to be searched for
             \param Nth An index of the match to be replaced. The index is 0-based.
+                For negative N, matches are counted from the end of string.
             \return An output iterator pointing just after the last inserted character or
                 a modified copy of the input
 
@@ -400,7 +402,7 @@ namespace boost {
             OutputIteratorT Output,
             const Range1T& Input,
             const Range2T& Search,
-            unsigned int Nth )
+            int Nth )
         {
             return find_format_copy(
                 Output,
@@ -417,7 +419,7 @@ namespace boost {
         inline SequenceT erase_nth_copy( 
             const SequenceT& Input,
             const RangeT& Search,
-            unsigned int Nth )
+            int Nth )
         {
             return find_format_copy( 
                 Input, 
@@ -433,12 +435,13 @@ namespace boost {
             \param Input An input string
             \param Search A substring to be searched for. 
             \param Nth An index of the match to be replaced. The index is 0-based.
+                For negative N, matches are counted from the end of string.
         */
         template<typename SequenceT, typename RangeT>
         inline void erase_nth( 
             SequenceT& Input,
             const RangeT& Search,
-            unsigned int Nth )
+            int Nth )
         {
             find_format( 
                 Input, 
@@ -459,6 +462,7 @@ namespace boost {
             \param Input An input string
             \param Search A substring to be searched for.
             \param Nth An index of the match to be replaced. The index is 0-based.
+                For negative N, matches are counted from the end of string.
             \param Loc A locale used for case insensitive comparison
             \return An output iterator pointing just after the last inserted character or
                 a modified copy of the input
@@ -473,7 +477,7 @@ namespace boost {
             OutputIteratorT Output,
             const Range1T& Input,
             const Range2T& Search,
-            unsigned int Nth,
+            int Nth,
             const std::locale& Loc=std::locale() )
         {
             return find_format_copy(
@@ -491,7 +495,7 @@ namespace boost {
         inline SequenceT ierase_nth_copy( 
             const SequenceT& Input,
             const RangeT& Search,
-            unsigned int Nth,
+            int Nth,
             const std::locale& Loc=std::locale() )
         {
             return find_format_copy( 
@@ -508,13 +512,14 @@ namespace boost {
             \param Input An input string
             \param Search A substring to be searched for. 
             \param Nth An index of the match to be replaced. The index is 0-based.
+                For negative N, matches are counted from the end of string.
             \param Loc A locale used for case insensitive comparison
         */
         template<typename SequenceT, typename RangeT>
         inline void ierase_nth( 
             SequenceT& Input,
             const RangeT& Search,
-            unsigned int Nth,
+            int Nth,
             const std::locale& Loc=std::locale() )
         {
             find_format( 
@@ -675,7 +680,9 @@ namespace boost {
 
             \param Output An output iterator to which the result will be copied
             \param Input An input string
-            \param N Length of the head
+            \param N Length of the head.
+                For N>=0, at most N characters are extracted.
+                For N<0, size(Input)-|N| characters are extracted.
             \return An output iterator pointing just after the last inserted character or
                 a modified copy of the input
 
@@ -687,7 +694,7 @@ namespace boost {
         inline OutputIteratorT erase_head_copy(
             OutputIteratorT Output,
             const RangeT& Input,
-            unsigned int N )
+            int N )
         {
             return find_format_copy(
                 Output,
@@ -703,7 +710,7 @@ namespace boost {
         template<typename SequenceT>
         inline SequenceT erase_head_copy( 
             const SequenceT& Input,
-            unsigned int N )
+            int N )
         {
             return find_format_copy( 
                 Input,
@@ -719,11 +726,13 @@ namespace boost {
 
             \param Input An input string
             \param N Length of the head
+                For N>=0, at most N characters are extracted.
+                For N<0, size(Input)-|N| characters are extracted.
         */
         template<typename SequenceT>
         inline void erase_head( 
             SequenceT& Input,
-            unsigned int N )
+            int N )
         {
             find_format( 
                 Input, 
@@ -743,7 +752,9 @@ namespace boost {
 
             \param Output An output iterator to which the result will be copied
             \param Input An input string
-            \param N Length of the head
+            \param N Length of the head.                 
+                For N>=0, at most N characters are extracted.
+                For N<0, size(Input)-|N| characters are extracted.
             \return An output iterator pointing just after the last inserted character or
                 a modified copy of the input
             
@@ -755,7 +766,7 @@ namespace boost {
         inline OutputIteratorT erase_tail_copy(
             OutputIteratorT Output,
             const RangeT& Input,
-            unsigned int N )
+            int N )
         {
             return find_format_copy(
                 Output,
@@ -771,7 +782,7 @@ namespace boost {
         template<typename SequenceT>
         inline SequenceT erase_tail_copy( 
             const SequenceT& Input,
-            unsigned int N )
+            int N )
         {
             return find_format_copy( 
                 Input,
@@ -787,11 +798,13 @@ namespace boost {
 
             \param Input An input string
             \param N Length of the head
+                For N>=0, at most N characters are extracted.
+                For N<0, size(Input)-|N| characters are extracted.
         */
         template<typename SequenceT>
         inline void erase_tail( 
             SequenceT& Input,
-            unsigned int N )
+            int N )
         {
             find_format( 
                 Input, 

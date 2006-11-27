@@ -14,15 +14,18 @@ transport_sources = [ glob ../source/transport/*.cpp ] ;
 
 alias transport
     : $(transport_sources)
-      /site-config//boost_thread
-    : <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
+    : <library>/site-config//boost_thread
+      <library>/site-config//boost_system
+      <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
       <os>CYGWIN:<define>__USE_W32_SOCKETS
       <os>CYGWIN:<define>_WIN32_WINNT=0x0500
       <os>NT:<define>__USE_W32_SOCKETS
       <os>NT:<define>_WIN32_WINNT=0x0500
       <threading>multi
     :
-    : <os>NT:<library>/site-config//winsock
+    : <library>/site-config//boost_thread
+      <library>/site-config//boost_system
+      <os>NT:<library>/site-config//winsock
       <os>CYGWIN:<define>__USE_W32_SOCKETS
       <os>CYGWIN:<define>_WIN32_WINNT=0x0500
       <os>NT:<define>__USE_W32_SOCKETS
@@ -43,12 +46,13 @@ alias messenger
       tool_capabilities.cpp
       transport
     : <threading>multi
-      <source>/site-config//boost_thread
-      <source>/site-config//boost_regex
-      <source>/site-config//boost_filesystem
-      <source>/libraries//xml2pp
+      <library>/site-config//boost_regex
+      <library>/site-config//boost_filesystem
+      <library>/libraries//xml2pp
     : # no default build
-    :
+    : <library>/site-config//boost_regex
+      <library>/site-config//boost_filesystem
+      <library>/libraries//xml2pp
     ;
 
 lib sip_controller

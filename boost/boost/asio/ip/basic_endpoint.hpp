@@ -22,7 +22,7 @@
 #include <boost/detail/workaround.hpp>
 #include <cstring>
 #if BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x564))
-# include <iostream>
+# include <ostream>
 #endif // BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x564))
 #include <boost/asio/detail/pop_options.hpp>
 
@@ -72,6 +72,7 @@ public:
 
   /// Default constructor.
   basic_endpoint()
+    : data_()
   {
     boost::asio::detail::sockaddr_in4_type& data
       = reinterpret_cast<boost::asio::detail::sockaddr_in4_type&>(data_);
@@ -97,6 +98,7 @@ public:
    * @endcode
    */
   basic_endpoint(const Protocol& protocol, unsigned short port_num)
+    : data_()
   {
     using namespace std; // For memcpy.
     if (protocol.family() == PF_INET)
@@ -126,6 +128,7 @@ public:
   /// constructor may be used for accepting connections on a specific interface
   /// or for making a connection to a remote endpoint.
   basic_endpoint(const boost::asio::ip::address& addr, unsigned short port_num)
+    : data_()
   {
     using namespace std; // For memcpy.
     if (addr.is_v4())
@@ -201,7 +204,7 @@ public:
   {
     if (size > size_type(sizeof(data_)))
     {
-      boost::asio::error e(boost::asio::error::invalid_argument);
+      boost::system::system_error e(boost::asio::error::invalid_argument);
       boost::throw_exception(e);
     }
   }

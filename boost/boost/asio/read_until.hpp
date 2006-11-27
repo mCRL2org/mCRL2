@@ -21,9 +21,11 @@
 #include <cstddef>
 #include <boost/config.hpp>
 #include <boost/regex.hpp>
+#include <string>
 #include <boost/asio/detail/pop_options.hpp>
 
 #include <boost/asio/basic_streambuf.hpp>
+#include <boost/asio/error.hpp>
 
 namespace boost {
 namespace asio {
@@ -57,7 +59,7 @@ namespace asio {
  * @returns The number of bytes in the streambuf's get area up to and including
  * the delimiter.
  *
- * @throws Sync_Read_Stream::error_type Thrown on failure.
+ * @throws boost::system::system_error Thrown on failure.
  *
  * @par Example:
  * To read data into a streambuf until a newline is encountered:
@@ -66,11 +68,6 @@ namespace asio {
  * std::istream is(&b);
  * std::string line;
  * std::getline(is, line); @endcode
- *
- * @note This overload is equivalent to calling:
- * @code boost::asio::read_until(
- *     s, b, delim,
- *     boost::asio::throw_error()); @endcode
  */
 template <typename Sync_Read_Stream, typename Allocator>
 std::size_t read_until(Sync_Read_Stream& s,
@@ -97,23 +94,84 @@ std::size_t read_until(Sync_Read_Stream& s,
  *
  * @param delim The delimiter character.
  *
- * @param error_handler A handler to be called when the operation completes,
- * to indicate whether or not an error has occurred. Copies will be made of
- * the handler as required. The function signature of the handler must be:
- * @code void error_handler(
- *   const Sync_Read_Stream::error_type& error // Result of operation.
- * ); @endcode
- * The error handler is only called if the completion_condition indicates that
- * the operation is complete.
+ * @param ec Set to indicate what error occurred, if any.
  *
  * @returns The number of bytes in the streambuf's get area up to and including
- * the delimiter. Returns 0 if an error occurred and the error handler did not
- * throw an exception.
+ * the delimiter. Returns 0 if an error occurred.
  */
-template <typename Sync_Read_Stream, typename Allocator, typename Error_Handler>
+template <typename Sync_Read_Stream, typename Allocator>
 std::size_t read_until(Sync_Read_Stream& s,
     boost::asio::basic_streambuf<Allocator>& b, char delim,
-    Error_Handler error_handler);
+    boost::system::error_code& ec);
+
+/// Read data into a streambuf until a delimiter is encountered.
+/**
+ * This function is used to read data into the specified streambuf until the
+ * streambuf's get area contains the specified delimiter. The call will block
+ * until one of the following conditions is true:
+ *
+ * @li The get area of the streambuf contains the specified delimiter.
+ *
+ * @li An error occurred.
+ *
+ * This operation is implemented in terms of zero or more calls to the stream's
+ * read_some function. If the streambuf's get area already contains the
+ * delimiter, the function returns immediately.
+ *
+ * @param s The stream from which the data is to be read. The type must support
+ * the Sync_Read_Stream concept.
+ *
+ * @param b A streambuf object into which the data will be read.
+ *
+ * @param delim The delimiter string.
+ *
+ * @returns The number of bytes in the streambuf's get area up to and including
+ * the delimiter.
+ *
+ * @throws boost::system::system_error Thrown on failure.
+ *
+ * @par Example:
+ * To read data into a streambuf until a newline is encountered:
+ * @code boost::asio::streambuf b;
+ * boost::asio::read_until(s, b, "\r\n");
+ * std::istream is(&b);
+ * std::string line;
+ * std::getline(is, line); @endcode
+ */
+template <typename Sync_Read_Stream, typename Allocator>
+std::size_t read_until(Sync_Read_Stream& s,
+    boost::asio::basic_streambuf<Allocator>& b, const std::string& delim);
+
+/// Read data into a streambuf until a delimiter is encountered.
+/**
+ * This function is used to read data into the specified streambuf until the
+ * streambuf's get area contains the specified delimiter. The call will block
+ * until one of the following conditions is true:
+ *
+ * @li The get area of the streambuf contains the specified delimiter.
+ *
+ * @li An error occurred.
+ *
+ * This operation is implemented in terms of zero or more calls to the stream's
+ * read_some function. If the streambuf's get area already contains the
+ * delimiter, the function returns immediately.
+ *
+ * @param s The stream from which the data is to be read. The type must support
+ * the Sync_Read_Stream concept.
+ *
+ * @param b A streambuf object into which the data will be read.
+ *
+ * @param delim The delimiter string.
+ *
+ * @param ec Set to indicate what error occurred, if any.
+ *
+ * @returns The number of bytes in the streambuf's get area up to and including
+ * the delimiter. Returns 0 if an error occurred.
+ */
+template <typename Sync_Read_Stream, typename Allocator>
+std::size_t read_until(Sync_Read_Stream& s,
+    boost::asio::basic_streambuf<Allocator>& b, const std::string& delim,
+    boost::system::error_code& ec);
 
 /// Read data into a streambuf until a regular expression is located.
 /**
@@ -139,7 +197,7 @@ std::size_t read_until(Sync_Read_Stream& s,
  * @returns The number of bytes in the streambuf's get area up to and including
  * the substring that matches the regular expression.
  *
- * @throws Sync_Read_Stream::error_type Thrown on failure.
+ * @throws boost::system::system_error Thrown on failure.
  *
  * @par Example:
  * To read data into a streambuf until a CR-LF sequence is encountered:
@@ -148,11 +206,6 @@ std::size_t read_until(Sync_Read_Stream& s,
  * std::istream is(&b);
  * std::string line;
  * std::getline(is, line); @endcode
- *
- * @note This overload is equivalent to calling:
- * @code boost::asio::read_until(
- *     s, b, expr,
- *     boost::asio::throw_error()); @endcode
  */
 template <typename Sync_Read_Stream, typename Allocator>
 std::size_t read_until(Sync_Read_Stream& s,
@@ -179,22 +232,16 @@ std::size_t read_until(Sync_Read_Stream& s,
  *
  * @param expr The regular expression.
  *
- * @param error_handler A handler to be called when the operation completes,
- * to indicate whether or not an error has occurred. Copies will be made of
- * the handler as required. The function signature of the handler must be:
- * @code void error_handler(
- *   const Sync_Read_Stream::error_type& error // Result of operation.
- * ); @endcode
- * The error handler is only called if the completion_condition indicates that
- * the operation is complete.
+ * @param ec Set to indicate what error occurred, if any.
  *
  * @returns The number of bytes in the streambuf's get area up to and including
-* the substring that matches the regular expression.
-*/
-template <typename Sync_Read_Stream, typename Allocator, typename Error_Handler>
+ * the substring that matches the regular expression. Returns 0 if an error
+ * occurred.
+ */
+template <typename Sync_Read_Stream, typename Allocator>
 std::size_t read_until(Sync_Read_Stream& s,
   boost::asio::basic_streambuf<Allocator>& b, const boost::regex& expr,
-  Error_Handler error_handler);
+  boost::system::error_code& ec);
 
 /*@}*/
 /**
@@ -231,12 +278,12 @@ std::size_t read_until(Sync_Read_Stream& s,
  * Copies will be made of the handler as required. The function signature of the
  * handler must be:
  * @code void handler(
- *   const Async_Read_Stream::error_type& error, // Result of operation.
+ *   const boost::system::error_code& error,         // Result of operation.
  *
- *   std::size_t bytes_transferred               // The number of bytes in the
- *                                               // streambuf's get area up to
- *                                               // and including the delimiter.
- *                                               // 0 if an error occurred.
+ *   std::size_t bytes_transferred          // The number of bytes in the
+ *                                          // streambuf's get area up to
+ *                                          // and including the delimiter.
+ *                                          // 0 if an error occurred.
  * ); @endcode
  * Regardless of whether the asynchronous operation completes immediately or
  * not, the handler will not be invoked from within this function. Invocation of
@@ -247,7 +294,7 @@ std::size_t read_until(Sync_Read_Stream& s,
  * To asynchronously read data into a streambuf until a newline is encountered:
  * @code boost::asio::streambuf b;
  * ...
- * void handler(const boost::asio::error& e, std::size_t size)
+ * void handler(const boost::system::error_code& e, std::size_t size)
  * {
  *   if (!e)
  *   {
@@ -263,6 +310,69 @@ std::size_t read_until(Sync_Read_Stream& s,
 template <typename Async_Read_Stream, typename Allocator, typename Handler>
 void async_read_until(Async_Read_Stream& s,
   boost::asio::basic_streambuf<Allocator>& b, char delim, Handler handler);
+
+/// Start an asynchronous operation to read data into a streambuf until a
+/// delimiter is encountered.
+/**
+ * This function is used to asynchronously read data into the specified
+ * streambuf until the streambuf's get area contains the specified delimiter.
+ * The function call always returns immediately. The asynchronous operation
+ * will continue until one of the following conditions is true:
+ *
+ * @li The get area of the streambuf contains the specified delimiter.
+ *
+ * @li An error occurred.
+ *
+ * This operation is implemented in terms of zero or more calls to the stream's
+ * async_read_some function. If the streambuf's get area already contains the
+ * delimiter, the asynchronous operation completes immediately.
+ *
+ * @param s The stream from which the data is to be read. The type must support
+ * the Async_Read_Stream concept.
+ *
+ * @param b A streambuf object into which the data will be read. Ownership of
+ * the streambuf is retained by the caller, which must guarantee that it remains
+ * valid until the handler is called.
+ *
+ * @param delim The delimiter string.
+ *
+ * @param handler The handler to be called when the read operation completes.
+ * Copies will be made of the handler as required. The function signature of the
+ * handler must be:
+ * @code void handler(
+ *   const boost::system::error_code& error,         // Result of operation.
+ *
+ *   std::size_t bytes_transferred          // The number of bytes in the
+ *                                          // streambuf's get area up to
+ *                                          // and including the delimiter.
+ *                                          // 0 if an error occurred.
+ * ); @endcode
+ * Regardless of whether the asynchronous operation completes immediately or
+ * not, the handler will not be invoked from within this function. Invocation of
+ * the handler will be performed in a manner equivalent to using
+ * boost::asio::io_service::post().
+ *
+ * @par Example:
+ * To asynchronously read data into a streambuf until a newline is encountered:
+ * @code boost::asio::streambuf b;
+ * ...
+ * void handler(const boost::system::error_code& e, std::size_t size)
+ * {
+ *   if (!e)
+ *   {
+ *     std::istream is(&b);
+ *     std::string line;
+ *     std::getline(is, line);
+ *     ...
+ *   }
+ * }
+ * ...
+ * boost::asio::async_read_until(s, b, "\r\n", handler); @endcode
+ */
+template <typename Async_Read_Stream, typename Allocator, typename Handler>
+void async_read_until(Async_Read_Stream& s,
+  boost::asio::basic_streambuf<Allocator>& b, const std::string& delim,
+  Handler handler);
 
 /// Start an asynchronous operation to read data into a streambuf until a
 /// regular expression is located.
@@ -294,14 +404,14 @@ void async_read_until(Async_Read_Stream& s,
  * Copies will be made of the handler as required. The function signature of the
  * handler must be:
  * @code void handler(
- *   const Async_Read_Stream::error_type& error, // Result of operation.
+ *   const boost::system::error_code& error,         // Result of operation.
  *
- *   std::size_t bytes_transferred               // The number of bytes in the
- *                                               // streambuf's get area up to
- *                                               // and including the substring
- *                                               // that matches the regular
- *                                               // expression. 0 if an error
- *                                               // occurred.
+ *   std::size_t bytes_transferred          // The number of bytes in the
+ *                                          // streambuf's get area up to
+ *                                          // and including the substring
+ *                                          // that matches the regular.
+ *                                          // expression. 0 if an error
+ *                                          // occurred.
  * ); @endcode
  * Regardless of whether the asynchronous operation completes immediately or
  * not, the handler will not be invoked from within this function. Invocation of
@@ -313,7 +423,7 @@ void async_read_until(Async_Read_Stream& s,
  * encountered:
  * @code boost::asio::streambuf b;
  * ...
- * void handler(const boost::asio::error& e, std::size_t size)
+ * void handler(const boost::system::error_code& e, std::size_t size)
  * {
  *   if (!e)
  *   {

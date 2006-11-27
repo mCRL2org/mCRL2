@@ -1,13 +1,8 @@
-// Copyright (C) 2001-2003
-// William E. Kempf
+// Copyright (C) 2001-2003 William E. Kempf
+// Copyright (C) 2006 Roland Schwarz
 //
-// Permission to use, copy, modify, distribute and sell this software
-// and its documentation for any purpose is hereby granted without fee,
-// provided that the above copyright notice appear in all copies and
-// that both that copyright notice and this permission notice appear
-// in supporting documentation.  William E. Kempf makes no representations
-// about the suitability of this software for any purpose.
-// It is provided "as is" without express or implied warranty.
+//  Distributed under the Boost Software License, Version 1.0. (See accompanying 
+//  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef BOOST_TSS_WEK070601_HPP
 #define BOOST_TSS_WEK070601_HPP
@@ -26,6 +21,13 @@
 
 namespace boost {
 
+// disable warnings about non dll import
+// see: http://www.boost.org/more/separate_compilation.html#dlls
+#ifdef BOOST_MSVC
+#   pragma warning(push)
+#   pragma warning(disable: 4251 4231 4660 4275)
+#endif
+
 namespace detail {
 
 class BOOST_THREAD_DECL tss : private noncopyable
@@ -43,7 +45,7 @@ public:
             throw boost::thread_resource_error();
         }
     }
-
+    ~tss();
     void* get() const;
     void set(void* value);
     void cleanup(void* p);
@@ -102,6 +104,10 @@ private:
     static void cleanup(T* p) { delete p; }
     detail::tss m_tss;
 };
+
+#ifdef BOOST_MSVC
+#   pragma warning(pop)
+#endif
 
 } // namespace boost
 

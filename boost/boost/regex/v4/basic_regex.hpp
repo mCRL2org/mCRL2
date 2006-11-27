@@ -3,14 +3,14 @@
  * Copyright (c) 1998-2004
  * John Maddock
  *
- * Use, modification and distribution are subject to the 
- * Boost Software License, Version 1.0. (See accompanying file 
- * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+ * Distributed under the Boost Software License, Version 1.0.
+ * (See accompanying file LICENSE_1_0.txt or copy at
+ * http://www.boost.org/LICENSE_1_0.txt)
  *
  */
 
  /*
-  *   LOCATION:    see http://www.boost.org for most recent version.
+  *   LOCATION:    see http://www.boost.org/ for most recent version.
   *   FILE         basic_regex.cpp
   *   VERSION      see <boost/version.hpp>
   *   DESCRIPTION: Declares template class basic_regex.
@@ -66,6 +66,7 @@ struct regex_data
    unsigned char               m_startmap[1 << CHAR_BIT]; // which characters can start a match
    unsigned int                m_can_be_null;             // whether we can match a null string
    re_detail::raw_storage      m_data;                    // the buffer in which our states are constructed
+   typename traits::char_class_type    m_word_mask;       // mask used to determine if a character is a word character
 };
 //
 // class basic_regex_implementation
@@ -342,7 +343,7 @@ public:
    //
    // getflags:
    // retained for backwards compatibility only, "flags"
-   // is now the prefered name:
+   // is now the preferred name:
    flag_type BOOST_REGEX_CALL getflags()const
    { 
       return flags();

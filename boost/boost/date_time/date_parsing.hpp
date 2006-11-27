@@ -6,7 +6,7 @@
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE-1.0 or http://www.boost.org/LICENSE-1.0)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2005/07/13 03:59:54 $
+ * $Date: 2006/03/21 02:26:30 $
  */
 
 #include "boost/tokenizer.hpp"
@@ -41,7 +41,7 @@ namespace date_time {
     while(i < inp.length()) {
       tmp += static_cast<char>(std::tolower(inp.at(i++)));
 #else
-      std::locale loc("");
+      static const std::locale loc(std::locale::classic());
       while(i < inp.length()) {
         // tolower and others were brought in to std for borland >= v564
         // in compiler_config.hpp
@@ -116,16 +116,17 @@ namespace date_time {
       typedef typename date_type::month_type month_type;
       unsigned pos = 0;
       unsigned short year(0), month(0), day(0);
-      
-      typedef boost::tokenizer<boost::char_separator<char>,
+      typedef typename std::basic_string<char>::traits_type traits_type;
+      typedef boost::char_separator<char, traits_type> char_separator_type;
+      typedef boost::tokenizer<char_separator_type,
                                std::basic_string<char>::const_iterator,
                                std::basic_string<char> > tokenizer;
-      typedef boost::tokenizer<boost::char_separator<char>,
+      typedef boost::tokenizer<char_separator_type,
                                std::basic_string<char>::const_iterator,
                                std::basic_string<char> >::iterator tokenizer_iterator;
       // may need more delimiters, these work for the regression tests
       const char sep_char[] = {',','-','.',' ','/','\0'};
-      boost::char_separator<char> sep(sep_char);
+      char_separator_type sep(sep_char);
       tokenizer tok(s,sep);
       for(tokenizer_iterator beg=tok.begin(); 
           beg!=tok.end() && pos < spec_str.size(); 
@@ -158,19 +159,30 @@ namespace date_time {
       int offsets[] = {4,2,2};
       int pos = 0;
       typedef typename date_type::year_type year_type;
-      typename date_type::ymd_type ymd((year_type::min)(),1,1);
-      boost::offset_separator osf(offsets, offsets+3);
-      boost::tokenizer<boost::offset_separator> tok(s, osf);
-      for(boost::tokenizer<boost::offset_separator>::iterator ti=tok.begin(); ti!=tok.end();++ti) {
+      //typename date_type::ymd_type ymd((year_type::min)(),1,1);
+      unsigned short y = 0, m = 0, d = 0;
+      
+      /* The two bool arguments state that parsing will not wrap 
+       * (only the first 8 characters will be parsed) and partial 
+       * strings will not be parsed. 
+       * Ex:
+       * "2005121" will parse 2005 & 12, but not the "1" */
+      boost::offset_separator osf(offsets, offsets+3, false, false);
+      
+      typedef typename boost::tokenizer<boost::offset_separator, 
+                                        std::basic_string<char>::const_iterator, 
+                                        std::basic_string<char> > tokenizer_type;
+      tokenizer_type tok(s, osf);
+      for(typename tokenizer_type::iterator ti=tok.begin(); ti!=tok.end();++ti) {
         unsigned short i = boost::lexical_cast<unsigned short>(*ti);
         switch(pos) {
-        case 0: ymd.year = i; break;
-        case 1: ymd.month = i; break;
-        case 2: ymd.day = i; break;
+        case 0: y = i; break;
+        case 1: m = i; break;
+        case 2: d = i; break;
         }
         pos++;
       }
-      return date_type(ymd);
+      return date_type(y,m,d);
     }
     
     //! Helper function for 'date gregorian::from_stream()'
@@ -249,16 +261,18 @@ namespace date_time {
       return parse_date<date_type>(ss.str());
     }
 #endif // BOOST_NO_STD_WSTRING
-#if (defined(BOOST_MSVC) && (_MSC_VER <= 1200))
+#if (defined(BOOST_MSVC) && (_MSC_VER < 1300))
     // This function cannot be compiled with MSVC 6.0 due to internal compiler shorcomings
 #else
     //! function called by wrapper functions: date_period_from_(w)string()
     template<class date_type, class charT>
     period<date_type, typename date_type::duration_type> 
     from_simple_string_type(const std::basic_string<charT>& s){
-      typedef typename boost::char_separator<charT> char_separator;
-      typedef typename boost::tokenizer<char_separator, typename std::basic_string<charT>::const_iterator, 
-                                          std::basic_string<charT> > tokenizer;
+      typedef typename std::basic_string<charT>::traits_type traits_type;
+      typedef typename boost::char_separator<charT, traits_type> char_separator;
+      typedef typename boost::tokenizer<char_separator, 
+                                        typename std::basic_string<charT>::const_iterator, 
+                                        std::basic_string<charT> > tokenizer;
       const charT sep_list[4] = {'[','/',']','\0'};
       char_separator sep(sep_list);
       tokenizer tokens(s, sep);
@@ -274,7 +288,7 @@ namespace date_time {
       date_type d2 = from_stream_type<date_type>(date_string_start, date_string_end, value_type());
       return period<date_type, typename date_type::duration_type>(d1, d2); 
     }
-#endif // _MSC_VER <= 1200
+#endif
     
 } } //namespace date_time
 

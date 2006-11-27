@@ -24,9 +24,9 @@
 #include <boost/asio/detail/pop_options.hpp>
 
 #include <boost/asio/error.hpp>
-#include <boost/asio/error_handler.hpp>
 #include <boost/asio/detail/socket_ops.hpp>
 #include <boost/asio/detail/socket_types.hpp>
+#include <boost/asio/detail/throw_error.hpp>
 
 namespace boost {
 namespace asio {
@@ -79,13 +79,6 @@ public:
     return *this;
   }
 
-  /// Assign from an unsigned long.
-  address_v4& operator=(unsigned long addr)
-  {
-    addr_.s_addr = boost::asio::detail::socket_ops::host_to_network_long(addr);
-    return *this;
-  }
-
   /// Get the address in bytes.
   bytes_type to_bytes() const
   {
@@ -104,87 +97,72 @@ public:
   /// Get the address as a string in dotted decimal format.
   std::string to_string() const
   {
-    return to_string(boost::asio::throw_error());
+    boost::system::error_code ec;
+    std::string addr = to_string(ec);
+    boost::asio::detail::throw_error(ec);
+    return addr;
   }
 
   /// Get the address as a string in dotted decimal format.
-  template <typename Error_Handler>
-  std::string to_string(Error_Handler error_handler) const
+  std::string to_string(boost::system::error_code& ec) const
   {
     char addr_str[boost::asio::detail::max_addr_v4_str_len];
     const char* addr =
       boost::asio::detail::socket_ops::inet_ntop(AF_INET, &addr_, addr_str,
-          boost::asio::detail::max_addr_v4_str_len);
+          boost::asio::detail::max_addr_v4_str_len, 0, ec);
     if (addr == 0)
-    {
-      boost::asio::error e(boost::asio::detail::socket_ops::get_error());
-      error_handler(e);
       return std::string();
-    }
-    boost::asio::error e;
-    error_handler(e);
     return addr;
   }
 
   /// Create an address from an IP address string in dotted decimal form.
   static address_v4 from_string(const char* str)
   {
-    return from_string(str, boost::asio::throw_error());
+    boost::system::error_code ec;
+    address_v4 addr = from_string(str, ec);
+    boost::asio::detail::throw_error(ec);
+    return addr;
   }
 
   /// Create an address from an IP address string in dotted decimal form.
-  template <typename Error_Handler>
-  static address_v4 from_string(const char* str, Error_Handler error_handler)
+  static address_v4 from_string(const char* str, boost::system::error_code& ec)
   {
     address_v4 tmp;
     if (boost::asio::detail::socket_ops::inet_pton(
-          AF_INET, str, &tmp.addr_) <= 0)
-    {
-      boost::asio::error e(boost::asio::detail::socket_ops::get_error());
-      error_handler(e);
+          AF_INET, str, &tmp.addr_, 0, ec) <= 0)
       return address_v4();
-    }
-    boost::asio::error e;
-    error_handler(e);
     return tmp;
   }
 
   /// Create an address from an IP address string in dotted decimal form.
   static address_v4 from_string(const std::string& str)
   {
-    return from_string(str.c_str(), boost::asio::throw_error());
+    return from_string(str.c_str());
   }
 
   /// Create an address from an IP address string in dotted decimal form.
-  template <typename Error_Handler>
   static address_v4 from_string(const std::string& str,
-      Error_Handler error_handler)
+      boost::system::error_code& ec)
   {
-    return from_string(str.c_str(), error_handler);
+    return from_string(str.c_str(), ec);
   }
 
   /// Determine whether the address is a class A address.
-  bool is_class_A() const
+  bool is_class_a() const
   {
     return IN_CLASSA(to_ulong());
   }
 
   /// Determine whether the address is a class B address.
-  bool is_class_B() const
+  bool is_class_b() const
   {
     return IN_CLASSB(to_ulong());
   }
 
   /// Determine whether the address is a class C address.
-  bool is_class_C() const
+  bool is_class_c() const
   {
     return IN_CLASSC(to_ulong());
-  }
-
-  /// Determine whether the address is a class D address.
-  bool is_class_D() const
-  {
-    return IN_CLASSD(to_ulong());
   }
 
   /// Determine whether the address is a multicast address.
@@ -211,6 +189,24 @@ public:
     return a1.to_ulong() < a2.to_ulong();
   }
 
+  /// Compare addresses for ordering.
+  friend bool operator>(const address_v4& a1, const address_v4& a2)
+  {
+    return a1.to_ulong() > a2.to_ulong();
+  }
+
+  /// Compare addresses for ordering.
+  friend bool operator<=(const address_v4& a1, const address_v4& a2)
+  {
+    return a1.to_ulong() <= a2.to_ulong();
+  }
+
+  /// Compare addresses for ordering.
+  friend bool operator>=(const address_v4& a1, const address_v4& a2)
+  {
+    return a1.to_ulong() >= a2.to_ulong();
+  }
+
   /// Obtain an address object that represents any address.
   static address_v4 any()
   {
@@ -227,6 +223,26 @@ public:
   static address_v4 broadcast()
   {
     return address_v4(static_cast<unsigned long>(INADDR_BROADCAST));
+  }
+
+  /// Obtain an address object that represents the broadcast address that
+  /// corresponds to the specified address and netmask.
+  static address_v4 broadcast(const address_v4& addr, const address_v4& mask)
+  {
+    return address_v4(addr.to_ulong() | ~mask.to_ulong());
+  }
+
+  /// Obtain the netmask that corresponds to the address, based on its address
+  /// class.
+  static address_v4 netmask(const address_v4& addr)
+  {
+    if (addr.is_class_a())
+      return address_v4(0xFF000000);
+    if (addr.is_class_b())
+      return address_v4(0xFFFF0000);
+    if (addr.is_class_c())
+      return address_v4(0xFFFFFF00);
+    return address_v4(0xFFFFFFFF);
   }
 
 private:
@@ -250,7 +266,13 @@ template <typename Elem, typename Traits>
 std::basic_ostream<Elem, Traits>& operator<<(
     std::basic_ostream<Elem, Traits>& os, const address_v4& addr)
 {
-  os << addr.to_string();
+  boost::system::error_code ec;
+  std::string s = addr.to_string(ec);
+  if (ec)
+    os.setstate(std::ios_base::failbit);
+  else
+    for (std::string::iterator i = s.begin(); i != s.end(); ++i)
+      os << os.widen(*i);
   return os;
 }
 

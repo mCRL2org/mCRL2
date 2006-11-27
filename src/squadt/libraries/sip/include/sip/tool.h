@@ -8,6 +8,7 @@
 #include <sip/detail/layout_tool_display.h>
 #include <sip/detail/layout_elements.h>
 #include <sip/report.h>
+
 #include <utility/logger.h>
 
 /* Interface classes for the tool side of the SQuADt Interaction Protocol */

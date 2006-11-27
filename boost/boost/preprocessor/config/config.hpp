@@ -24,7 +24,11 @@
 # define BOOST_PP_CONFIG_DMC() 0x0040
 #
 # ifndef BOOST_PP_CONFIG_FLAGS
-#    if defined(__SPIRIT_PP__) || defined(__MWERKS__) && __MWERKS__ >= 0x3200
+#    if defined(__GCCXML__)
+#        define BOOST_PP_CONFIG_FLAGS() (BOOST_PP_CONFIG_STRICT())
+#    elif defined(__WAVE__)
+#        define BOOST_PP_CONFIG_FLAGS() (BOOST_PP_CONFIG_STRICT())
+#    elif defined(__MWERKS__) && __MWERKS__ >= 0x3200
 #        define BOOST_PP_CONFIG_FLAGS() (BOOST_PP_CONFIG_STRICT())
 #    elif defined(__EDG__) || defined(__EDG_VERSION__)
 #        define BOOST_PP_CONFIG_FLAGS() (BOOST_PP_CONFIG_EDG() | BOOST_PP_CONFIG_STRICT())
@@ -32,6 +36,8 @@
 #        define BOOST_PP_CONFIG_FLAGS() (BOOST_PP_CONFIG_MWCC())
 #    elif defined(__DMC__)
 #        define BOOST_PP_CONFIG_FLAGS() (BOOST_PP_CONFIG_DMC())
+#    elif defined(__BORLANDC__) && __BORLANDC__ >= 0x581
+#        define BOOST_PP_CONFIG_FLAGS() (BOOST_PP_CONFIG_STRICT())
 #    elif defined(__BORLANDC__) || defined(__IBMC__) || defined(__IBMCPP__) || defined(__SUNPRO_CC)
 #        define BOOST_PP_CONFIG_FLAGS() (BOOST_PP_CONFIG_BCC())
 #    elif defined(_MSC_VER)

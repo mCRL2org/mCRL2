@@ -1,11 +1,12 @@
 //  Boost string_algo library string_funct.hpp header file  ---------------------------//
 
-//  Copyright Pavol Droba 2002-2003. Use, modification and
-//  distribution is subject to the Boost Software License, Version
-//  1.0. (See accompanying file LICENSE_1_0.txt or copy at
-//  http://www.boost.org/LICENSE_1_0.txt)
+//  Copyright Pavol Droba 2002-2003.
+//
+// Distributed under the Boost Software License, Version 1.0.
+//    (See accompanying file LICENSE_1_0.txt or copy at
+//          http://www.boost.org/LICENSE_1_0.txt)
 
-//  See http://www.boost.org for updates, documentation, and revision history.
+//  See http://www.boost.org/ for updates, documentation, and revision history.
 
 #ifndef BOOST_STRING_CASE_CONV_DETAIL_HPP
 #define BOOST_STRING_CASE_CONV_DETAIL_HPP
@@ -33,7 +34,7 @@ namespace boost {
                     #if defined(__BORLANDC__) && (__BORLANDC__ >= 0x560) && (__BORLANDC__ <= 0x564) && !defined(_USE_OLD_RW_STL)
                         return std::tolower( Ch);
                     #else
-                        return std::tolower( Ch, m_Loc );
+                        return std::tolower<CharT>( Ch, m_Loc );
                     #endif
                 }
             private:
@@ -53,7 +54,7 @@ namespace boost {
                     #if defined(__BORLANDC__) && (__BORLANDC__ >= 0x560) && (__BORLANDC__ <= 0x564) && !defined(_USE_OLD_RW_STL)
                         return std::toupper( Ch);
                     #else
-                        return std::toupper( Ch, m_Loc );
+                        return std::toupper<CharT>( Ch, m_Loc );
                     #endif
                 }
             private:

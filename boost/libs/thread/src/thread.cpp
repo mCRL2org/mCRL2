@@ -1,13 +1,8 @@
 // Copyright (C) 2001-2003
 // William E. Kempf
 //
-// Permission to use, copy, modify, distribute and sell this software
-// and its documentation for any purpose is hereby granted without fee,
-// provided that the above copyright notice appear in all copies and
-// that both that copyright notice and this permission notice appear
-// in supporting documentation.  William E. Kempf makes no representations
-// about the suitability of this software for any purpose.
-// It is provided "as is" without express or implied warranty.
+//  Distributed under the Boost Software License, Version 1.0. (See accompanying 
+//  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/thread/detail/config.hpp>
 
@@ -94,6 +89,18 @@ public:
     bool m_started;
 };
 
+#if defined(BOOST_HAS_WINTHREADS)
+
+struct on_thread_exit_guard
+{
+    ~on_thread_exit_guard()
+    {
+        on_thread_exit();
+    }
+};
+
+#endif
+
 } // unnamed namespace
 
 extern "C" {
@@ -105,22 +112,25 @@ extern "C" {
         static OSStatus thread_proxy(void* param)
 #endif
     {
-        try
+//        try
         {
+#if defined(BOOST_HAS_WINTHREADS)
+
+            on_thread_exit_guard guard;
+
+#endif
+
             thread_param* p = static_cast<thread_param*>(param);
             boost::function0<void> threadfunc = p->m_threadfunc;
             p->started();
             threadfunc();
-#if defined(BOOST_HAS_WINTHREADS)
-            on_thread_exit();
-#endif
         }
-        catch (...)
-        {
-#if defined(BOOST_HAS_WINTHREADS)
-            on_thread_exit();
-#endif
-        }
+//        catch (...)
+//        {
+//#if defined(BOOST_HAS_WINTHREADS)
+//            on_thread_exit();
+//#endif
+//        }
 #if defined(BOOST_HAS_MPTASKS)
         ::boost::detail::thread_cleanup();
 #endif
@@ -368,7 +378,7 @@ void thread_group::join_all()
     }
 }
 
-int thread_group::size()
+int thread_group::size() const
 {
         return m_threads.size();
 }

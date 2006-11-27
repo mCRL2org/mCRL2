@@ -8,8 +8,6 @@
 
 namespace squadt {
 
-  class boost::filesystem::path;
-
   /**
    * \brief Central storage component for paths to common resources
    *

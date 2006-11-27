@@ -29,7 +29,7 @@ namespace transport {
       try {
         acceptor.bind(endpoint);
       }
-      catch (boost::asio::error e) {
+      catch (std::exception& e) {
         /* This should probably be logged somewhere someday */
         throw (basic_listener::exception(str(format("Socket setup on %s:%u failed with error `%s'") % endpoint.address().to_string() % endpoint.port() % e.what())));
       }
@@ -55,7 +55,7 @@ namespace transport {
      * @param t the transceiver that will be the end point of this side of a new connection
      * @param l a shared pointer to the listerner
      **/
-    void socket_listener::handle_accept(const boost::asio::error& e, transceiver::socket_transceiver::ptr t, basic_listener::ptr l) {
+    void socket_listener::handle_accept(const boost::system::error_code& e, transceiver::socket_transceiver::ptr t, basic_listener::ptr l) {
       if (!e) {
         socket_listener::associate(t);
 
@@ -77,7 +77,7 @@ namespace transport {
         using namespace boost;
 
         /* Some other error occurred, abort... */
-        throw (basic_listener::exception(str(format("Connection failure with error `%s'\n") % e.what())));
+        throw (basic_listener::exception(str(format("Connection failure with error `%s'\n") % e)));
       }
 
       /* Make sure the scheduler is running */

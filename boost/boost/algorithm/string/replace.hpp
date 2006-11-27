@@ -1,11 +1,12 @@
 //  Boost string_algo library replace.hpp header file  ---------------------------//
 
-//  Copyright Pavol Droba 2002-2003. Use, modification and
-//  distribution is subject to the Boost Software License, Version
-//  1.0. (See accompanying file LICENSE_1_0.txt or copy at
-//  http://www.boost.org/LICENSE_1_0.txt)
+//  Copyright Pavol Droba 2002-2006.
+//
+// Distributed under the Boost Software License, Version 1.0.
+//    (See accompanying file LICENSE_1_0.txt or copy at
+//          http://www.boost.org/LICENSE_1_0.txt)
 
-//  See http://www.boost.org for updates, documentation, and revision history.
+//  See http://www.boost.org/ for updates, documentation, and revision history.
 
 #ifndef BOOST_STRING_REPLACE_HPP
 #define BOOST_STRING_REPLACE_HPP
@@ -428,6 +429,7 @@ namespace boost {
             \param Input An input string
             \param Search A substring to be searched for 
             \param Nth An index of the match to be replaced. The index is 0-based.
+                For negative N, matches are counted from the end of string.
             \param Format A substitute string
             \return An output iterator pointing just after the last inserted character or
                 a modified copy of the input
@@ -443,7 +445,7 @@ namespace boost {
             OutputIteratorT Output,
             const Range1T& Input,
             const Range2T& Search,
-            unsigned int Nth,
+            int Nth,
             const Range3T& Format )
         {
             return find_format_copy(
@@ -461,7 +463,7 @@ namespace boost {
         inline SequenceT replace_nth_copy( 
             const SequenceT& Input,
             const Range1T& Search,
-            unsigned int Nth,
+            int Nth,
             const Range2T& Format )
         {
             return find_format_copy( 
@@ -478,13 +480,14 @@ namespace boost {
             \param Input An input string
             \param Search A substring to be searched for 
             \param Nth An index of the match to be replaced. The index is 0-based.
+                For negative N, matches are counted from the end of string.
             \param Format A substitute string
         */
         template<typename SequenceT, typename Range1T, typename Range2T>
         inline void replace_nth( 
             SequenceT& Input,
             const Range1T& Search,
-            unsigned int Nth,
+            int Nth,
             const Range2T& Format )
         {
             find_format( 
@@ -507,6 +510,7 @@ namespace boost {
             \param Input An input string
             \param Search A substring to be searched for 
             \param Nth An index of the match to be replaced. The index is 0-based.
+                For negative N, matches are counted from the end of string.
             \param Format A substitute string
             \param Loc A locale used for case insensitive comparison
             \return An output iterator pointing just after the last inserted character or
@@ -523,7 +527,7 @@ namespace boost {
             OutputIteratorT Output,
             const Range1T& Input,
             const Range2T& Search,
-            unsigned int Nth,
+            int Nth,
             const Range3T& Format,
             const std::locale& Loc=std::locale() )
         {
@@ -542,7 +546,7 @@ namespace boost {
         inline SequenceT ireplace_nth_copy( 
             const SequenceT& Input,
             const Range1T& Search,
-            unsigned int Nth,
+            int Nth,
             const Range2T& Format,
             const std::locale& Loc=std::locale() )
         {
@@ -561,6 +565,7 @@ namespace boost {
             \param Input An input string
             \param Search A substring to be searched for 
             \param Nth An index of the match to be replaced. The index is 0-based.
+                For negative N, matches are counted from the end of string.
             \param Format A substitute string
             \param Loc A locale used for case insensitive comparison
         */
@@ -568,7 +573,7 @@ namespace boost {
         inline void ireplace_nth( 
             SequenceT& Input,
             const Range1T& Search,
-            unsigned int Nth,
+            int Nth,
             const Range2T& Format,
             const std::locale& Loc=std::locale() )
         {
@@ -745,7 +750,9 @@ namespace boost {
             
             \param Output An output iterator to which the result will be copied
             \param Input An input string
-            \param N Length of the head
+            \param N Length of the head.
+                For N>=0, at most N characters are extracted.
+                For N<0, size(Input)-|N| characters are extracted.
             \param Format A substitute string
             \return An output iterator pointing just after the last inserted character or
                 a modified copy of the input  
@@ -759,7 +766,7 @@ namespace boost {
         inline OutputIteratorT replace_head_copy(
             OutputIteratorT Output,
             const Range1T& Input,
-            unsigned int N,
+            int N,
             const Range2T& Format )
         {
             return find_format_copy(
@@ -776,7 +783,7 @@ namespace boost {
         template<typename SequenceT, typename RangeT>
         inline SequenceT replace_head_copy( 
             const SequenceT& Input,
-            unsigned int N,
+            int N,
             const RangeT& Format )
         {
             return find_format_copy( 
@@ -793,13 +800,15 @@ namespace boost {
             considered to be the head. The input sequence is modified in-place.
 
             \param Input An input string
-            \param N Length of the head
+            \param N Length of the head.
+                For N>=0, at most N characters are extracted.
+                For N<0, size(Input)-|N| characters are extracted.
             \param Format A substitute string
         */
         template<typename SequenceT, typename RangeT>
         inline void replace_head( 
             SequenceT& Input,
-            unsigned int N,
+            int N,
             const RangeT& Format )
         {
             find_format( 
@@ -821,7 +830,9 @@ namespace boost {
 
             \param Output An output iterator to which the result will be copied
             \param Input An input string
-            \param N Length of the tail
+            \param N Length of the tail.
+                For N>=0, at most N characters are extracted.
+                For N<0, size(Input)-|N| characters are extracted.
             \param Format A substitute string
             \return An output iterator pointing just after the last inserted character or
                     a modified copy of the input   
@@ -835,7 +846,7 @@ namespace boost {
         inline OutputIteratorT replace_tail_copy(
             OutputIteratorT Output,
             const Range1T& Input,
-            unsigned int N,
+            int N,
             const Range2T& Format )
         {
             return find_format_copy(
@@ -852,7 +863,7 @@ namespace boost {
         template<typename SequenceT, typename RangeT>
         inline SequenceT replace_tail_copy( 
             const SequenceT& Input,
-            unsigned int N,
+            int N,
             const RangeT& Format )
         {
             return find_format_copy( 
@@ -869,13 +880,15 @@ namespace boost {
             considered to be the tail. The input sequence is modified in-place.
 
             \param Input An input string
-            \param N Length of the tail
+            \param N Length of the tail.
+                For N>=0, at most N characters are extracted.
+                For N<0, size(Input)-|N| characters are extracted.
             \param Format A substitute string
         */
         template<typename SequenceT, typename RangeT>
         inline void replace_tail( 
             SequenceT& Input,
-            unsigned int N,
+            int N,
             const RangeT& Format )
         {
             find_format( 

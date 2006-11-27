@@ -12,4 +12,7 @@ project md5pp
 lib md5pp
     : md5.cpp
       md5pp.cpp
+    : <use>/site-config//boost_filesystem
+    :
+    : <library>/site-config//boost_filesystem
     ;

@@ -1,11 +1,12 @@
 //  Boost string_algo library predicate.hpp header file  ---------------------------//
 
-//  Copyright Pavol Droba 2002-2003. Use, modification and
-//  distribution is subject to the Boost Software License, Version
-//  1.0. (See accompanying file LICENSE_1_0.txt or copy at
-//  http://www.boost.org/LICENSE_1_0.txt)
+//  Copyright Pavol Droba 2002-2003.
+//
+// Distributed under the Boost Software License, Version 1.0.
+//    (See accompanying file LICENSE_1_0.txt or copy at
+//          http://www.boost.org/LICENSE_1_0.txt)
 
-//  See http://www.boost.org for updates, documentation, and revision history.
+//  See http://www.boost.org/ for updates, documentation, and revision history.
 
 #ifndef BOOST_STRING_PREDICATE_HPP
 #define BOOST_STRING_PREDICATE_HPP
@@ -307,7 +308,7 @@ namespace boost {
             return equals(Input, Test, is_equal());
         }
 
-        //! 'Equals' predicate ( casa insensitive )
+        //! 'Equals' predicate ( case insensitive )
         /*!
             This predicate holds when the test container is equal to the
             input container i.e. all elements in both containers are same.
@@ -330,6 +331,86 @@ namespace boost {
         {
             return equals(Input, Test, is_iequal(Loc));
         }
+
+// lexicographical_compare predicate -----------------------------//
+
+        //! Lexicographical compare predicate
+        /*!
+             This predicate is an overload of std::lexicographical_compare
+             for range arguments
+
+             It check whether the first argument is lexicographically less
+             then the second one.
+
+             If the optional predicate is specified, it is used for character-wise
+             comparison
+
+             \param Arg1 First argument 
+             \param Arg2 Second argument
+             \param Pred Comparison predicate
+             \return The result of the test
+
+             \note This function provides the strong exception-safety guarantee
+         */
+        template<typename Range1T, typename Range2T, typename PredicateT>
+        inline bool lexicographical_compare(
+            const Range1T& Arg1,
+            const Range2T& Arg2,
+            PredicateT Pred)
+        {
+            return std::lexicographical_compare(
+                begin(Arg1),
+                end(Arg1),
+                begin(Arg2),
+                end(Arg2),
+                Pred);
+        }
+
+        //! Lexicographical compare predicate
+        /*!
+            \overload
+         */
+        template<typename Range1T, typename Range2T>
+            inline bool lexicographical_compare(
+            const Range1T& Arg1,
+            const Range2T& Arg2)
+        {
+            return std::lexicographical_compare(
+                begin(Arg1),
+                end(Arg1),
+                begin(Arg2),
+                end(Arg2),
+                is_less());
+        }
+
+        //! Lexicographical compare predicate (case-insensitive)
+        /*!
+            This predicate is an overload of std::lexicographical_compare
+            for range arguments.
+            It check whether the first argument is lexicographically less
+            then the second one.
+            Elements are compared case insensitively
+
+
+             \param Arg1 First argument 
+             \param Arg2 Second argument
+             \return The result of the test
+
+             \note This function provides the strong exception-safety guarantee
+         */
+        template<typename Range1T, typename Range2T>
+        inline bool ilexicographical_compare(
+            const Range1T& Arg1,
+            const Range2T& Arg2)
+        {
+            return std::lexicographical_compare(
+                begin(Arg1),
+                end(Arg1),
+                begin(Arg2),
+                end(Arg2),
+                is_iless());
+        }
+        
 
 //  all predicate  -----------------------------------------------//
 
@@ -374,6 +455,8 @@ namespace boost {
     using algorithm::equals;
     using algorithm::iequals;
     using algorithm::all;
+    using algorithm::lexicographical_compare;
+    using algorithm::ilexicographical_compare;
 
 } // namespace boost
 
