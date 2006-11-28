@@ -5788,10 +5788,11 @@ static ATermAppl generateLPEpCRL(ATermAppl procId, int canterminate,
   }
   
   /* a process with a stack is returned */
-
+  ATermAppl stackvar=stack->stackvar;
+  free(stack);
   return linMakeInitProcSpec(
                  initial,
-                 ATinsertA(ATempty,stack->stackvar),
+                 ATinsertA(ATempty,stackvar),
                  sums); 
 }
 
