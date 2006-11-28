@@ -13,21 +13,21 @@ if $(OPENGL_NAME) {
   lib GLU : : <os>NT <name>glu32 ;
   
   if $(OPENGL_LPATH) {
-    lib OpenGL : : <name>$(OPENGL_NAME) <search>$(OPENGL_LPATH) : : <include>$(OPENGL_IPATH) <os>NT:<library>GLU ;
+    lib opengl : : <name>$(OPENGL_NAME) <search>$(OPENGL_LPATH) : : <include>$(OPENGL_IPATH) <os>NT:<library>GLU ;
   }
   else if $(OPENGL_IPATH) {
-    lib OpenGL : : <name>$(OPENGL_NAME) : : <include>$(OPENGL_IPATH) <os>NT:<library>GLU ;
+    lib opengl : : <name>$(OPENGL_NAME) : : <include>$(OPENGL_IPATH) <os>NT:<library>GLU ;
   }
   else {
     if [ modules.peek : OS ] = MACOSX {
-      alias OpenGL : : <toolset>darwin : : <linkflags>"-framework OpenGL" ;
+      alias opengl : : <toolset>darwin : : <linkflags>"-framework OpenGL" ;
     }
     else {
-      lib OpenGL : : <name>$(OPENGL_NAME) : : <os>NT:<library>GLU ;
+      lib opengl : : <name>$(OPENGL_NAME) : : <os>NT:<library>GLU ;
     }
   }
 
-  feature.compose <site-library>opengl : <dependency>OpenGL ;
+  feature.compose <site-library>opengl : <dependency>opengl ;
 }
 else {
   feature.compose <site-library>opengl : <build>no ;
@@ -64,6 +64,7 @@ if $(WX_CPPFLAGS) {
            :
            : <linkflags>"$(WX_GL_LDFLAGS)"
              <cxxflags>"$(WX_CPPFLAGS)"
+             <library>/site-config//opengl
            ;
 
     feature.compose <site-library>wx_gl : <dependency>/site-config//wx_gl ;
