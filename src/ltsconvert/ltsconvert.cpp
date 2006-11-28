@@ -12,7 +12,7 @@
 
 using namespace mcrl2::lts;
 
-bool read_lts_from_file(lts&, std::string const&, lts_type);
+bool read_lts_from_file(lts&, std::string const&, lts_type, std::string const&);
 bool write_lts_to_stdout(lts&, lts_type outtype, std::string const&, bool);
 bool write_lts_to_file(lts&, std::string const&, lts_type outtype, std::string const&, bool);
 
@@ -202,14 +202,6 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   result &= c.object_exists(lts_file_for_input);
   result &= c.object_exists(lts_file_for_output);
 
-  if (result) {
-    if (c.get_object(lts_file_for_output)->get_format() == "fsm" ||
-        (c.get_object(lts_file_for_output)->get_format() == "svc" && c.get_object(lts_file_for_input)->get_format() != "svc")) {
- 
-      result &= c.object_exists(lpd_file_auxiliary);
-    }
-  }
-
   result &= c.option_exists(option_selected_output_format);
   result &= c.option_exists(option_selected_transformation);
 
@@ -226,7 +218,13 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
 bool squadt_interactor::perform_task(sip::configuration& c) {
   lts l;
 
-  if ( !read_lts_from_file(l, c.get_object(lts_file_for_input)->get_location(),lts_none) ) {
+  std::string lpe_path;
+
+  if (c.object_exists(lpd_file_auxiliary)) {
+    lpe_path = c.get_object(lpd_file_auxiliary)->get_location();
+  }
+
+  if ( !read_lts_from_file(l, c.get_object(lts_file_for_input)->get_location(),lts_none,lpe_path) ) {
 
     send_error("Fatal: error reading input from `" + c.get_object(lts_file_for_input)->get_location() + "'!");
 
@@ -272,12 +270,6 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   }
  
   bool result = true;
-
-  std::string lpe_path;
-
-  if (c.object_exists(lpd_file_auxiliary)) {
-    lpe_path = c.get_object(lpd_file_auxiliary)->get_location();
-  }
 
   result = write_lts_to_file(l, c.get_object(lts_file_for_output)->get_location(),
                  lts::parse_format(c.get_object(lts_file_for_output)->get_format().c_str()), lpe_path, c.option_exists(option_no_state_information));
@@ -366,7 +358,7 @@ static void print_formats(FILE *f)
     "  bcg     .bcg  Binary Coded Graph format (CADP)\n"
 #endif
     "  dot     .dot  GraphViz format                   output only\n"
-    "  fsm     .fsm  Finite State Machine format       output only\n"
+    "  fsm     .fsm  Finite State Machine format\n"
     "  mcrl    .svc  mCRL SVC format\n"
     "  mcrl2   .svc  mCRL2 SVC format                  default\n"
     "\n"
@@ -418,9 +410,12 @@ static void print_version(FILE *f)
   fprintf(f,NAME " " VERSION " (revision %i)\n", REVISION);
 }
 
-bool read_lts_from_stdin(lts& l, lts_type intype) {
+bool read_lts_from_stdin(lts& l, lts_type intype, std::string const& lpefile) {
   gsVerboseMsg("reading LTS from stdin...\n");
-  if ( !l.read_from(cin,intype) )
+  
+  lts_extra extra = get_extra(intype, lpefile, false, "");
+  
+  if ( !l.read_from(cin,intype,extra) )
   {
     gsErrorMsg("cannot read LTS from stdin\n");
     gsErrorMsg("use -v/--verbose for more information\n");
@@ -430,16 +425,20 @@ bool read_lts_from_stdin(lts& l, lts_type intype) {
   return (true);
 }
 
-bool read_lts_from_file(lts& l, std::string const& infile, lts_type intype) {
+bool read_lts_from_file(lts& l, std::string const& infile, lts_type intype, std::string const& lpefile) {
   gsVerboseMsg("reading LTS from '%s'...\n",infile.c_str());
-  if ( !l.read_from(infile,intype) )
+  
+  lts_extra extra = get_extra(intype, lpefile, false, "");
+ 
+  if ( !l.read_from(infile,intype,extra) )
   {
     bool b = true;
     if ( intype == lts_none ) // XXX really do this?
     {
       gsVerboseMsg("reading failed; trying to force format by extension...\n");
       intype = lts::guess_format(infile);
-      if ( (intype != lts_none) && l.read_from(infile,intype) )
+      extra = get_extra(intype, lpefile, false, "");
+      if ( (intype != lts_none) && l.read_from(infile,intype,extra) )
       {
         b = false;
       } else {
@@ -673,18 +672,19 @@ int main(int argc, char **argv)
 
     lts l;
  
-    if (!(use_stdin ? read_lts_from_stdin(l, intype) : read_lts_from_file(l, infile, intype)))
+    if (!(use_stdin ? read_lts_from_stdin(l, intype, lpefile) : read_lts_from_file(l, infile, intype, lpefile)))
     {
       return (1);
     }
-    if ( (lpefile != "") && !(
+/*    if ( (lpefile != "") && !(
                ((outtype == lts_mcrl2) && (l.get_type() != lts_mcrl2)) ||
-               ((outtype == lts_fsm) && (l.get_type() == lts_mcrl2))
+               ((outtype == lts_mcrl) && (l.get_type() != lts_fsm)) ||
+               ((outtype == lts_fsm) && ((l.get_type() == lts_mcrl2) || (l.get_type() == lts_mcrl)))
                ) )
     {
       gsWarningMsg("ignoring --lpe option as it is not usable with this input/output combination\n");
       lpefile = "";
-    }
+    }*/
 
  
     if ( equivalence != lts_eq_none )

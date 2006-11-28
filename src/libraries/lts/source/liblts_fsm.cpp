@@ -1,13 +1,18 @@
 #include <string>
+#include <sstream>
 #include <iostream>
 #include <fstream>
 #include <aterm2.h>
 #include "liblowlevel.h"
 #include "libstruct.h"
+#include "libparse.h"
+#include "typecheck.h"
+#include "dataimpl.h"
 #include "libprint_c.h"
 #include "libprint.h"
 #include "lts/liblts.h"
 #include "lpe/specification.h"
+#include "fsmparser.h"
 
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)
 #define ATisList(x) (ATgetType(x) == AT_LIST)
@@ -16,6 +21,135 @@ namespace mcrl2
 {
 namespace lts
 {
+
+static ATerm parse_mcrl2_action(ATerm label, lpe::specification &spec)
+{
+  std::stringstream ss(ATgetName(ATgetAFun((ATermAppl) label)));
+
+  ATermAppl t = parse_mult_act(ss);
+  if ( t == NULL )
+  {
+    gsVerboseMsg("cannot parse action as mCRL2\n");
+  } else {
+    t = type_check_mult_act(t,spec);
+    if ( t == NULL )
+    {
+      gsVerboseMsg("error type checking action\n");
+    } else {
+      t = implement_data_mult_act(t,spec);
+      if ( t == NULL )
+      {
+        gsVerboseMsg("error implementing data of action\n");
+      }
+    }
+  }
+
+  return (ATerm) t;
+}
+
+static ATerm parse_mcrl2_state(ATerm state, lpe::specification &spec)
+{
+  unsigned int len = ATgetLength((ATermList) state);
+  ATerm state_args[len];
+
+  for (unsigned int i=0; !ATisEmpty((ATermList) state); state=(ATerm) ATgetNext((ATermList) state))
+  {
+    ATermAppl val = ATAgetFirst((ATermList) state);
+    ATermAppl expr = ATAgetArgument(val,0);
+    ATermAppl sort = ATAgetArgument(val,1);
+
+    std::stringstream sort_ss(ATgetName(ATgetAFun(sort)));
+    sort = parse_sort_expr(sort_ss);
+    if ( sort == NULL )
+    {
+      gsVerboseMsg("error parsing state argument sort\n");
+      return NULL;
+    }
+    sort = type_check_sort_expr(sort,spec);
+    if ( sort == NULL )
+    {
+      gsVerboseMsg("error type checking state argument sort\n");
+      return NULL;
+    }
+
+    std::stringstream expr_ss(ATgetName(ATgetAFun(expr)));
+    expr = parse_data_expr(expr_ss);
+    if ( expr == NULL )
+    {
+      gsVerboseMsg("error parsing state argument\n");
+      return NULL;
+    }
+    expr = type_check_data_expr(expr,sort,spec);
+    if ( expr == NULL )
+    {
+      gsVerboseMsg("error type checking state argument\n");
+      return NULL;
+    }
+    expr = implement_data_data_expr(expr,spec);
+    if ( expr == NULL )
+    {
+      gsVerboseMsg("error implementing data of state argument\n");
+      return NULL;
+    }
+
+    state_args[i] = (ATerm) expr; 
+  }
+
+  return (ATerm) ATmakeApplArray(ATmakeAFun("STATE",len,ATfalse),state_args);
+}
+
+bool p_lts::read_from_fsm(std::istream &is, lts_type type, lpe::specification *spec)
+{
+  if ( parse_fsm(is,*lts_object) )
+  {
+    if ( type == lts_mcrl2 )
+    {
+      for (unsigned int i=0; i<nlabels; i++)
+      {
+        label_values[i] = parse_mcrl2_action(label_values[i],*spec);
+        if ( label_values[i] == NULL )
+        {
+          return false;
+        }
+      }
+      for (unsigned int i=0; i<nstates; i++)
+      {
+        state_values[i] = parse_mcrl2_state(state_values[i],*spec);
+        if ( label_values[i] == NULL )
+        {
+          return false;
+        }
+      }
+    } else if ( type == lts_mcrl ) {
+      for (unsigned int i=0; i<nstates; i++)
+      {
+	ATermList m = ATmakeList0();
+        for (ATermList l=ATreverse((ATermList) state_values[i]); !ATisEmpty(l); l=ATgetNext(l))
+        {
+          ATerm a = ATmake(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))));
+	  m = ATinsert(m,a);
+        }
+	state_values[i] = (ATerm) m;
+      }
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool p_lts::read_from_fsm(std::string const &filename, lts_type type, lpe::specification *spec)
+{
+  std::ifstream is(filename.c_str());
+
+  if ( !is.is_open() )
+  {
+    gsVerboseMsg("cannot open FSM file '%s' for reading\n",filename.c_str());
+    return false;
+  }
+
+  return read_from_fsm(is,type,spec);
+}
 
 bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
 {
@@ -393,7 +527,10 @@ lts_type p_lts::fsm_get_lts_type()
 
 static lts_type get_lpe_type(ATerm lpe)
 {
-  if ( ATisAppl(lpe) && gsIsSpecV1((ATermAppl) lpe) )
+  if ( lpe == NULL )
+  {
+    return lts_none;
+  } else if ( ATisAppl(lpe) && gsIsSpecV1((ATermAppl) lpe) )
   {
     gsVerboseMsg("detected mCRL2 LPE\n");
     return lts_mcrl2;
@@ -428,6 +565,40 @@ static bool check_type(lts_type type, ATerm lpe)
 static bool check_type(lts_type type, lpe::LPE &/*lpe*/)
 {
   return (type == lts_mcrl2);
+}
+
+bool p_lts::read_from_fsm(std::string const& filename, ATerm lpe)
+{
+  lts_type tmp = get_lpe_type(lpe);
+  if ( tmp == lts_mcrl2 )
+  {
+    lpe::specification spec(lpe);
+    return read_from_fsm(filename,tmp,&spec);
+  } else {
+    return read_from_fsm(filename,tmp);
+  }
+}
+
+bool p_lts::read_from_fsm(std::string const& filename, lpe::specification &spec)
+{
+  return read_from_fsm(filename,lts_mcrl2,&spec);
+}
+
+bool p_lts::read_from_fsm(std::istream &is, ATerm lpe)
+{
+  lts_type tmp = get_lpe_type(lpe);
+  if ( tmp == lts_mcrl2 )
+  {
+    lpe::specification spec(lpe);
+    return read_from_fsm(is,tmp,&spec);
+  } else {
+    return read_from_fsm(is,tmp);
+  }
+}
+
+bool p_lts::read_from_fsm(std::istream &is, lpe::specification &spec)
+{
+  return read_from_fsm(is,lts_mcrl2,&spec);
 }
 
 bool p_lts::write_to_fsm(std::string const& filename, ATerm lpe)

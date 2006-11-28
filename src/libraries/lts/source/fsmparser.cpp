@@ -59,13 +59,13 @@
 #define YYLSP_NEEDED 0
 
 /* Substitute the variable and function names.  */
-#define yyparse fsmparse
-#define yylex   fsmlex
-#define yyerror fsmerror
-#define yylval  fsmlval
-#define yychar  fsmchar
-#define yydebug fsmdebug
-#define yynerrs fsmnerrs
+#define yyparse fsmyyparse
+#define yylex   fsmyylex
+#define yyerror fsmyyerror
+#define yylval  fsmyylval
+#define yychar  fsmyychar
+#define yydebug fsmyydebug
+#define yynerrs fsmyynerrs
 
 
 /* Tokens.  */
@@ -106,30 +106,16 @@
 /* Copy the first part of user declarations.  */
 #line 1 "fsmparser.yy"
 
+#include "lts/liblts.h"
 #include "fsmparser.h"
-#include "fsmlexer.cpp"
-
-// Global variables
-
-LTS* fsmparserlts = NULL;
-
-ATermList stateVector;
-ATermList valueTable;
-ATermList stateId;
-ATermList typeValues;
-ATermAppl typeId;
-
-std::vector< State* > states;
-
-AFun const_ATtypeid;
-AFun const_ATparmid;
-AFun const_ATvalue;
-AFun const_ATstate;
-AFun const_ATparam;
+#include "fsmlexer.h"
 
 // Function declarations
 
-void fsmerror(const char* c);
+//external declarations from mcrl2lexer.l
+void fsmyyerror(const char *s);
+int fsmyylex(void);
+
 char* intToCString(int i);
 
 
@@ -153,13 +139,13 @@ char* intToCString(int i);
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 29 "fsmparser.yy"
+#line 15 "fsmparser.yy"
 {
   ATermAppl aterm;
   int number;
 }
 /* Line 193 of yacc.c.  */
-#line 163 "fsmparser.cpp"
+#line 149 "fsmparser.cpp"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -172,7 +158,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 176 "fsmparser.cpp"
+#line 162 "fsmparser.cpp"
 
 #ifdef short
 # undef short
@@ -467,10 +453,10 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    45,    45,    44,    57,    60,    64,    71,    73,    75,
-      79,    84,    83,    97,    99,   102,   111,   114,   123,   126,
-     130,   136,   140,   142,   143,   147,   148,   151,   153,   157,
-     162,   167,   165,   179,   182,   195,   198,   203,   223,   225
+       0,    34,    34,    33,    44,    47,    51,    54,    56,    58,
+      62,    67,    66,    81,    83,    86,    95,    98,   107,   110,
+     114,   120,   124,   126,   127,   131,   132,   135,   137,   141,
+     146,   151,   149,   161,   164,   177,   180,   185,   202,   204
 };
 #endif
 
@@ -1409,50 +1395,41 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 45 "fsmparser.yy"
+#line 34 "fsmparser.yy"
     { 
-	    valueTable = ATreverse( valueTable );
-	    stateId = ATreverse( stateId );
-	    fsmparserlts->setStateVectorSpec( stateId )
-	  ;}
-    break;
-
-  case 6:
-#line 66 "fsmparser.yy"
-    {
-	    stateId = ATinsert( stateId, (ATerm)ATmakeAppl2( const_ATparmid,
-	      (ATerm)(yyvsp[(1) - (3)].aterm), (ATerm)typeId ) )
+	    fsm_lexer_obj->valueTable = ATreverse( fsm_lexer_obj->valueTable );
 	  ;}
     break;
 
   case 11:
-#line 84 "fsmparser.yy"
+#line 67 "fsmparser.yy"
     { 
-	    typeValues = ATempty
+	    fsm_lexer_obj->typeValues = ATempty;
+	    fsm_lexer_obj->typeId = (yyvsp[(1) - (1)].aterm);
+	    
 	  ;}
     break;
 
   case 12:
-#line 88 "fsmparser.yy"
+#line 73 "fsmparser.yy"
     { 
-	    typeValues = ATreverse( typeValues );
-	    typeId = ATmakeAppl2( const_ATtypeid, (ATerm)(yyvsp[(1) - (3)].aterm), (ATerm)typeValues );
-	    valueTable = ATinsert( valueTable, (ATerm)typeValues )
+	    fsm_lexer_obj->typeValues = ATreverse( fsm_lexer_obj->typeValues );
+	    fsm_lexer_obj->valueTable = ATinsert( fsm_lexer_obj->valueTable, (ATerm)fsm_lexer_obj->typeValues )
 	  ;}
     break;
 
   case 13:
-#line 97 "fsmparser.yy"
+#line 81 "fsmparser.yy"
     { (yyval.aterm) = ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) ) ;}
     break;
 
   case 14:
-#line 100 "fsmparser.yy"
+#line 84 "fsmparser.yy"
     { (yyval.aterm) = (yyvsp[(1) - (1)].aterm) ;}
     break;
 
   case 15:
-#line 103 "fsmparser.yy"
+#line 87 "fsmparser.yy"
     {
 	    std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(1) - (3)].aterm) ) )
 	      + "->" + static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(3) - (3)].aterm) ) );
@@ -1461,12 +1438,12 @@ yyreduce:
     break;
 
   case 16:
-#line 112 "fsmparser.yy"
+#line 96 "fsmparser.yy"
     { (yyval.aterm) = (yyvsp[(1) - (1)].aterm) ;}
     break;
 
   case 17:
-#line 115 "fsmparser.yy"
+#line 99 "fsmparser.yy"
     {
 	    std::string result = "(" + static_cast<std::string> ( ATwriteToString(
 	      (ATerm)(yyvsp[(2) - (3)].aterm)) ) + ")";
@@ -1475,68 +1452,63 @@ yyreduce:
     break;
 
   case 20:
-#line 131 "fsmparser.yy"
-    { typeValues = ATinsert( typeValues, (ATerm)ATmakeAppl2(
-	      const_ATvalue, (ATerm)(yyvsp[(1) - (1)].aterm), (ATerm)ATmakeInt( ATgetLength( typeValues ) ) ) ) ;}
+#line 115 "fsmparser.yy"
+    { fsm_lexer_obj->typeValues = ATinsert( fsm_lexer_obj->typeValues, (ATerm)ATmakeAppl2(
+	      fsm_lexer_obj->const_ATvalue, (ATerm)(yyvsp[(1) - (1)].aterm), (ATerm)fsm_lexer_obj->typeId ) ) ;}
     break;
 
   case 31:
-#line 167 "fsmparser.yy"
+#line 151 "fsmparser.yy"
     {
-	    stateVector = ATreverse( stateVector ); 
-	    State* s = new State( stateVector );
-	    fsmparserlts->addState( s );
-	    states.push_back( s );
-	    if ( states.size() == 1 ) 
-	      fsmparserlts->setInitialState( s );
-	    stateVector = ATempty
+	    fsm_lexer_obj->stateVector = ATreverse( fsm_lexer_obj->stateVector ); 
+	    unsigned int i = fsm_lexer_obj->fsm_lts->add_state( (ATerm) fsm_lexer_obj->stateVector );
+	    if ( i == 0 ) 
+	      fsm_lexer_obj->fsm_lts->set_initial_state( i );
+	    fsm_lexer_obj->stateVector = ATempty
 	  ;}
     break;
 
   case 34:
-#line 183 "fsmparser.yy"
+#line 165 "fsmparser.yy"
     { 
-	    int paramNo = ATgetLength( stateVector );
-	    if ( paramNo < ATgetLength( valueTable ) )
+	    int paramNo = ATgetLength( fsm_lexer_obj->stateVector );
+	    if ( paramNo < ATgetLength( fsm_lexer_obj->valueTable ) )
 	    {
-	      stateVector = ATinsert( stateVector, ATelementAt(
-		(ATermList)ATelementAt( valueTable, paramNo ), (yyvsp[(2) - (2)].number) ) );
+	      fsm_lexer_obj->stateVector = ATinsert( fsm_lexer_obj->stateVector, ATelementAt(
+		(ATermList)ATelementAt( fsm_lexer_obj->valueTable, paramNo ), (yyvsp[(2) - (2)].number) ) );
 	    }
 	  ;}
     break;
 
   case 37:
-#line 204 "fsmparser.yy"
+#line 186 "fsmparser.yy"
     {
-	    State* frState = states[(yyvsp[(1) - (3)].number)-1];
-	    State* toState = states[(yyvsp[(2) - (3)].number)-1];
-	    Transition* t = new Transition( frState, toState, (ATerm)(yyvsp[(3) - (3)].aterm) );
-	    fsmparserlts->addTransition( t );
-	    if ( (yyvsp[(1) - (3)].number) != (yyvsp[(2) - (3)].number) )
+	    unsigned int frState = (yyvsp[(1) - (3)].number)-1;
+	    unsigned int toState = (yyvsp[(2) - (3)].number)-1;
+	    ATerm label = ATtableGet(fsm_lexer_obj->labelTable,(ATerm)(yyvsp[(3) - (3)].aterm));
+	    if ( label == NULL )
 	    {
-	      frState->addOutTransition( t );
-	      toState->addInTransition( t );
+	    	unsigned int i = fsm_lexer_obj->fsm_lts->add_label((ATerm)(yyvsp[(3) - (3)].aterm));
+		label = (ATerm) ATmakeInt(i);
+		ATtablePut(fsm_lexer_obj->labelTable,(ATerm)(yyvsp[(3) - (3)].aterm),label);
 	    }
-	    else
-	    {
-	      frState->addLoop( t );
-	    }
+	    fsm_lexer_obj->fsm_lts->add_transition( frState, ATgetInt((ATermInt)label), toState );
 	  ;}
     break;
 
   case 38:
-#line 223 "fsmparser.yy"
+#line 202 "fsmparser.yy"
     { (yyval.aterm) = ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) ) ;}
     break;
 
   case 39:
-#line 226 "fsmparser.yy"
+#line 205 "fsmparser.yy"
     { (yyval.aterm) = (yyvsp[(1) - (1)].aterm) ;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1540 "fsmparser.cpp"
+#line 1512 "fsmparser.cpp"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1750,77 +1722,8 @@ yyreturn:
 }
 
 
-#line 229 "fsmparser.yy"
+#line 208 "fsmparser.yy"
 
-
-int fsmwrap()
-{
-  return 1;
-}
-
-void fsmerror(const char *str)
-{
-  throw std::string( "Parse error: " + std::string(str) + " token \"" + std::string(fsmtext) +
-    "\" at line " + std::string(intToCString( lineNo )) + " position " +
-    std::string(intToCString( posNo )) );
-}
- 
-void parseFSMfile( std::string fileName, LTS* const lts )
-{
-  // reset the lexer position variables
-  lineNo=1;
-  posNo=1;
-  
-  FILE* infile = fopen(fileName.c_str(),"r");
-  if ( infile == NULL )
-    throw std::string( "Cannot open file for reading:\n" + fileName );
-  else
-  {
-    // INITIALISE
-    fsmparserlts = lts;
-    fsmrestart( infile );
-    
-    const_ATtypeid = ATmakeAFun( "TypeId", 2, ATfalse );
-    ATprotectAFun( const_ATtypeid );
-    const_ATparmid = ATmakeAFun( "ParamId", 2, ATfalse );
-    ATprotectAFun( const_ATparmid );
-    const_ATvalue = ATmakeAFun( "Value", 2, ATfalse );
-    ATprotectAFun( const_ATvalue );
-    const_ATstate = ATmakeAFun( "State", 2, ATfalse );
-    ATprotectAFun( const_ATstate );
-    const_ATparam = ATmakeAFun( "Param", 2, ATfalse );
-    ATprotectAFun( const_ATparam );
-    stateVector = ATempty;
-    ATprotectList( &stateVector );
-    valueTable = ATempty;
-    ATprotectList( &valueTable );
-    stateId = ATempty;
-    ATprotectList( &stateId );
-    typeValues = NULL;
-    ATprotectList( &typeValues );
-    typeId = NULL;
-    ATprotectAppl( &typeId );
-    
-
-    // PARSE
-    fsmparse();
-    
-    // CLEAN UP
-    ATunprotectAFun( const_ATtypeid );
-    ATunprotectAFun( const_ATparmid );
-    ATunprotectAFun( const_ATvalue );
-    ATunprotectAFun( const_ATstate );
-    ATunprotectAFun( const_ATparam );
-    ATunprotectList( &stateVector );
-    ATunprotectList( &valueTable );
-    ATunprotectList( &stateId );
-    ATunprotectList( &typeValues );
-    ATunprotectAppl( &typeId );
-    
-    states.clear();
-    fsmparserlts = NULL;
-  }
-} 
 
 char* intToCString( int i )
 {

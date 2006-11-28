@@ -45,6 +45,7 @@
   class p_lts
   {
     protected:
+      lts *lts_object;
       lts_type type;
       std::string creator;
       bool state_info;
@@ -62,6 +63,8 @@
       ATerm *label_values;
       transition *transitions;
       unsigned int init_state;
+
+      p_lts(lts *l);
 
       lts_type detect_type(std::string const& filename);
       lts_type detect_type(std::istream &is);
@@ -87,6 +90,12 @@
       bool write_to_svc(std::string const& filename, lts_type type, lpe::specification *spec = NULL);
 
       lts_type fsm_get_lts_type();
+      bool read_from_fsm(std::string const& filename, lts_type type, lpe::specification *spec = NULL);
+      bool read_from_fsm(std::string const& filename, ATerm lpe = NULL);
+      bool read_from_fsm(std::string const& filename, lpe::specification &spec);
+      bool read_from_fsm(std::istream& is, lts_type type, lpe::specification *spec = NULL);
+      bool read_from_fsm(std::istream& is, ATerm lpe = NULL);
+      bool read_from_fsm(std::istream& is, lpe::specification &spec);
       bool write_to_fsm(std::string const& filename, lts_type type, ATermList params);
       bool write_to_fsm(std::string const& filename, ATerm lpe = NULL);
       bool write_to_fsm(std::string const& filename, lpe::specification &spec);

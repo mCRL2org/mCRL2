@@ -25,11 +25,14 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, lpe::specification &lpe_spec
  *     NULL is returned.
  */
 
-ATermAppl type_check_data_expr(ATermAppl data_expr, lpe::specification &lpe_spec);
+ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lpe::specification &lpe_spec);
 /*Pre: data_expr represents an mCRL2 data expression that adheres to the
  *     initial internal ATerm structure.
+ *     sort_expr represents an mCRL2 sort expression that adheres to the
+ *     internal ATerm structure after type checking.
  *     lpe_spec represents an LPE specification
- *Post:data_expr is type checked using the declaration from lpe_spec
+ *Post:data_expr is type checked as being of type sort_expr using the
+       declaration from lpe_spec
  *Ret: if type checking went ok, an equivalent version of data_expr is returned
  *     that adheres to the internal ATerm structure after type checking.
  *     if something went wrong, an appropriate error message is printed and

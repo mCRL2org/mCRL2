@@ -14,6 +14,8 @@ lib lts
          liblts_svc.cpp
          liblts_aut.cpp
          liblts_fsm.cpp
+         fsmlexer.cpp
+         fsmparser.cpp
          liblts_dot.cpp
          liblts_bcg.cpp
          liblts_eq.cpp

@@ -255,25 +255,27 @@ void parseFSMfile( std::string fileName, LTS* const lts )
     fsmparserlts = lts;
     fsmrestart( infile );
     
+    const_ATtypeid = ATmakeAFun( "TypeId", 2, ATfalse );
     ATprotectAFun( const_ATtypeid );
+    const_ATparmid = ATmakeAFun( "ParamId", 2, ATfalse );
     ATprotectAFun( const_ATparmid );
+    const_ATvalue = ATmakeAFun( "Value", 2, ATfalse );
     ATprotectAFun( const_ATvalue );
+    const_ATstate = ATmakeAFun( "State", 2, ATfalse );
     ATprotectAFun( const_ATstate );
+    const_ATparam = ATmakeAFun( "Param", 2, ATfalse );
     ATprotectAFun( const_ATparam );
+    stateVector = ATempty;
     ATprotectList( &stateVector );
+    valueTable = ATempty;
     ATprotectList( &valueTable );
+    stateId = ATempty;
     ATprotectList( &stateId );
+    typeValues = NULL;
     ATprotectList( &typeValues );
+    typeId = NULL;
     ATprotectAppl( &typeId );
     
-    const_ATtypeid = ATmakeAFun( "TypeId", 2, ATfalse );
-    const_ATparmid = ATmakeAFun( "ParamId", 2, ATfalse );
-    const_ATvalue = ATmakeAFun( "Value", 2, ATfalse );
-    const_ATstate = ATmakeAFun( "State", 2, ATfalse );
-    const_ATparam = ATmakeAFun( "Param", 2, ATfalse );
-    stateVector = ATempty;
-    stateId = ATempty;
-    valueTable = ATempty;
 
     // PARSE
     fsmparse();

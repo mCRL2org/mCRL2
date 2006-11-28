@@ -98,20 +98,23 @@ lts_dot_options lts_extra::get_dot_options()
 
 lts_extra lts_no_extra = lts_extra();
 
+p_lts::p_lts(lts *l)
+{
+  lts_object = l;
+}
 
-
-lts::lts(lts_type type, bool state_info, bool label_info)
+lts::lts(lts_type type, bool state_info, bool label_info) : p_lts(this)
 {
   init(type,state_info,label_info);
 }
 
-lts::lts(string &filename, lts_type type)
+lts::lts(string &filename, lts_type type) : p_lts(this)
 {
   init();
   read_from(filename,type);
 }
 
-lts::lts(istream &is, lts_type type)
+lts::lts(istream &is, lts_type type) : p_lts(this)
 {
   init();
   read_from(is,type);
@@ -525,8 +528,15 @@ bool lts::read_from(string const& filename, lts_type type, lts_extra extra)
     case lts_svc:
       return read_from_svc(filename,lts_svc);
     case lts_fsm:
-      gsVerboseMsg("cannot read FSM files\n");
-      return false;
+      switch ( extra.get_type() )
+      {
+        case le_mcrl1:
+          return read_from_fsm(filename,extra.get_mcrl1_spec());
+        case le_mcrl2:
+          return read_from_fsm(filename,*extra.get_mcrl2_spec());
+        default:
+          return read_from_fsm(filename);
+      }
     case lts_dot:
       gsVerboseMsg("cannot read dot files\n");
       return false;
@@ -564,8 +574,15 @@ bool lts::read_from(istream &is, lts_type type, lts_extra extra)
       gsVerboseMsg("cannot read SVC based files from streams\n");
       return false;
     case lts_fsm:
-      gsVerboseMsg("cannot read FSM files\n");
-      return false;
+      switch ( extra.get_type() )
+      {
+        case le_mcrl1:
+          return read_from_fsm(is,extra.get_mcrl1_spec());
+        case le_mcrl2:
+          return read_from_fsm(is,*extra.get_mcrl2_spec());
+        default:
+          return read_from_fsm(is);
+      }
     case lts_dot:
       gsVerboseMsg("cannot read dot files\n");
       return false;

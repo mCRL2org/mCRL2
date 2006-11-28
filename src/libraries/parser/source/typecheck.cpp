@@ -257,7 +257,7 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, lpe::specification &lpe_spec
   return sort_expr;
 }
 
-ATermAppl type_check_data_expr(ATermAppl data_expr, lpe::specification &lpe_spec)
+ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lpe::specification &lpe_spec)
 {
   //check correctness of the data expression in data_expr using
   //the LPE specification in lpe_spec
