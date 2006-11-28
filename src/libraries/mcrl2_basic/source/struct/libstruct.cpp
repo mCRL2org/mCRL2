@@ -4090,12 +4090,14 @@ ATermAppl gsMakeDataExprPos(char *p)
     return gsMakeDataExprC1();
   } else {
     char *d = gsStringDiv2(p);
+    ATermAppl result = NULL;
     if (gsStringMod2(p) == 0) {
-      return gsMakeDataExprCDub(gsMakeDataExprFalse(), gsMakeDataExprPos(d));
+      result = gsMakeDataExprCDub(gsMakeDataExprFalse(), gsMakeDataExprPos(d));
     } else {
-      return gsMakeDataExprCDub(gsMakeDataExprTrue(), gsMakeDataExprPos(d));
+      result = gsMakeDataExprCDub(gsMakeDataExprTrue(), gsMakeDataExprPos(d));
     }
     free(d);
+    return result;
   }
 }
 
