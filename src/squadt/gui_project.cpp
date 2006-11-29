@@ -408,14 +408,30 @@ namespace squadt {
               dialog.show_input_objects(false);
             }
             else {
-              /* Add the main input (must exist) */
-              dialog.populate_tool_list(registry->tools_by_mime_type(p->get_input_combination()->format));
+              tool::sptr selected_tool = p->get_tool();
 
-              if (p->get_tool().get() != 0) {
-                dialog.select_tool(p->get_input_combination(), p->get_tool()->get_name());
+              if (p->has_input_combination()) {
+                /* Add the main input (must exist) */
+                dialog.populate_tool_list(registry->tools_by_mime_type(p->get_input_combination()->format));
+               
+                if (selected_tool) {
+                  dialog.select_tool(p->get_input_combination(), p->get_tool()->get_name());
+                }
+               
+                dialog.allow_tool_selection(false);
               }
-
-              dialog.allow_tool_selection(false);
+              else {
+                if (selected_tool) {
+                  wxMessageDialog(this, wxString(boost::str(
+                           boost::format("Tool %s is improperly initialised!") %
+                             selected_tool->get_name()).c_str(), wxConvLocal),
+                           wxT("Warning: tool problem"), wxOK).ShowModal();
+                }
+                else {
+                  wxMessageDialog(this, wxT("Tool is unknown!"),
+                           wxT("Warning: tool problem"), wxOK).ShowModal();
+                }
+              }
             }
 
             if (dialog.ShowModal()) {

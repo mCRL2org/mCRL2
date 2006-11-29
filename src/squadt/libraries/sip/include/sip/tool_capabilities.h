@@ -39,22 +39,38 @@ namespace sip {
         typedef configuration::tool_category                 tool_category;
  
         /** \brief Description for a tool's main input object */
-        struct input_combination {
-          tool_category      category;   ///< tool category
-          storage_format     format;     ///< storage format
-          object::identifier identifier; ///< identifier for the main input object
+        class input_combination {
 
-          /** \brief Compares two input combinations for equality */
-          inline static bool equal(const input_combination&, const input_combination&);
+          public:
+
+            tool_category      category;   ///< tool category
+            storage_format     format;     ///< storage format
+            object::identifier identifier; ///< identifier for the main input object
+
+          public:
+
+            /** \brief Constructor */
+            input_combination(tool_category const&, storage_format const&, object::identifier const&);
+
+            /** \brief Compares two input combinations for equality */
+            static bool equal(const input_combination&, const input_combination&);
         };
  
         /** \brief Description for a tool's output object */
-        struct output_combination {
-          storage_format     format;     ///< storage format
-          object::identifier identifier; ///< identifier for the output object
+        class output_combination {
 
-          /** \brief Compares two input combinations for equality */
-          inline static bool equal(const output_combination&, const output_combination&);
+          public:
+
+            storage_format     format;     ///< storage format
+            object::identifier identifier; ///< identifier for the output object
+
+          public:
+
+            /** \brief Constructor */
+            output_combination(storage_format const&, object::identifier const&);
+
+            /** \brief Compares two input combinations for equality */
+            static bool equal(const output_combination&, const output_combination&);
         };
  
         /** \brief Convenience type for a list of input configurations */
@@ -124,6 +140,14 @@ namespace sip {
         input_combination const* find_input_combination(const storage_format&, const tool_category&) const;
     };
  
+    inline capabilities::input_combination::input_combination(tool_category const& c,
+                        storage_format const& f, object::identifier const& id) : category(c), format(f), identifier(id) {
+    }
+
+    inline capabilities::output_combination::output_combination(storage_format const& f,
+                        object::identifier const& id) : format(f), identifier(id) {
+    }
+
     inline bool capabilities::input_combination::equal(const input_combination& p, const input_combination& q) {
       return (p.format == q.format && p.category == q.category);
     }

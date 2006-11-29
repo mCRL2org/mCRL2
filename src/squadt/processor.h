@@ -163,6 +163,9 @@ namespace squadt {
       /** \brief Get the input combination if one is already selected */
       void set_input_combination(tool::input_combination*);
 
+      /** \brief Whether or not an input combination has been set */
+      bool has_input_combination();
+
       /** \brief Get the input combination if one is already selected */
       tool::input_combination const* get_input_combination() const;
 

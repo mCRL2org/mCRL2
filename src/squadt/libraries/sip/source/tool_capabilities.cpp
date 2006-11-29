@@ -36,13 +36,13 @@ namespace sip {
     }
  
     void capabilities::add_input_combination(object::identifier id, storage_format f, tool_category c) {
-      input_combination ic = {c, f, id};
+      input_combination ic(c, f, id);
  
       input_combinations.insert(ic);
     }
  
     void capabilities::add_output_combination(object::identifier id, storage_format f) {
-      output_combination oc = {f, id};
+      output_combination oc(f, id);
  
       output_combinations.insert(oc);
     }
@@ -136,25 +136,28 @@ namespace sip {
         assert (r.is_element("input-configuration"));
  
         while (r.is_element("input-configuration")) {
-          input_combination ic;
+          tool_category      category;
+          storage_format     format;
+          object::identifier identifier;
  
-          r.get_attribute(&ic.category, "category");
-          r.get_attribute(&ic.format, "format");
-          r.get_attribute(&ic.identifier, "identifier");
+          r.get_attribute(&category, "category");
+          r.get_attribute(&format, "format");
+          r.get_attribute(&identifier, "identifier");
  
-          c->input_combinations.insert(ic);
+          c->input_combinations.insert(input_combination(category,format,identifier));
  
           r.next_element();
           r.skip_end_element("input-configuration");
         }
 
         while (r.is_element("output-configuration")) {
-          output_combination oc;
+          storage_format     format;
+          object::identifier identifier;
  
-          r.get_attribute(&oc.format, "format");
-          r.get_attribute(&oc.identifier, "identifier");
+          r.get_attribute(&format, "format");
+          r.get_attribute(&identifier, "identifier");
  
-          c->output_combinations.insert(oc);
+          c->output_combinations.insert(output_combination(format,identifier));
  
           r.next_element();
           r.skip_end_element("output-configuration");
@@ -171,7 +174,7 @@ namespace sip {
     capabilities::input_combination const*
               capabilities::find_input_combination(const storage_format& f, const tool_category& t) const {
  
-      input_combination p = {t, f, 0};
+      input_combination p(t, f, 0);
 
       input_combination_list::const_iterator i = std::find_if(input_combinations.begin(),
                       input_combinations.end(), boost::bind(&input_combination::equal, _1, p));

@@ -396,7 +396,7 @@ namespace squadt {
       build_system::tool_category  category;
 
       if (r.get_attribute(&category, "category") && r.get_attribute(&format, "format")) {
-        c->impl->selected_input_combination = c->impl->tool_descriptor->find_input_combination(category, format);
+        c->impl->selected_input_combination = c->impl->tool_descriptor->find_input_combination(format, category);
       }
     }
 

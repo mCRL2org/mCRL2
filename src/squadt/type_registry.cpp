@@ -52,7 +52,7 @@ namespace squadt {
 
     type_registry::tool_sequence range;
 
-    categories_for_mime_type::const_iterator i = categories_for_format.find(f);
+    categories_for_mime_type::const_iterator i(categories_for_format.find(f));
 
     if (i != categories_for_format.end()) {
       tools_for_category const& p((*i).second);

@@ -366,6 +366,10 @@ namespace squadt {
     impl->selected_input_combination = i;
   }
 
+  bool processor::has_input_combination() {
+    return (impl->selected_input_combination != 0);
+  }
+
   tool::input_combination const* processor::get_input_combination() const {
     return(impl->selected_input_combination);
   }
