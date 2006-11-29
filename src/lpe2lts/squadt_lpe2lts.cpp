@@ -83,27 +83,27 @@ void squadt_lpe2lts::user_interactive_configuration(sip::configuration& c)
   
   checkbox* cb_deadlock = new checkbox("detect deadlocks", false);
   checkbox* cb_actions = new checkbox("detect actions:",false);
-  text_field* tf_actions = new text_field("", sip::datatype::string::standard);
+  text_field* tf_actions = new text_field("");
   checkbox* cb_trace = new checkbox("save action/deadlock traces, but at most:", false);
   sprintf(buf,"%lu",DEFAULT_MAX_TRACES);
-  text_field* tf_max_traces = new text_field(buf, sip::datatype::integer::standard);
+  text_field* tf_max_traces = new text_field(buf);
   checkbox* cb_error_trace = new checkbox("save trace on error", false);
   
   checkbox* cb_confluence = new checkbox("confluence reduction with confluent tau:", false);
-  text_field* tf_conf_tau = new text_field("ctau", sip::datatype::string::standard);
+  text_field* tf_conf_tau = new text_field("ctau");
   
   
   checkbox* cb_max_states = new checkbox("maximum number of states:",false);
   sprintf(buf,"%llu",1000ULL);
-  text_field* tf_max_states = new text_field(buf, sip::datatype::integer::standard);
+  text_field* tf_max_states = new text_field(buf);
 
   checkbox* cb_bithashing = new checkbox("bit hashing; number of states:", false);
   sprintf(buf,"%llu",DEFAULT_BITHASHSIZE);
-  text_field* tf_bithashsize = new text_field(buf, sip::datatype::integer::standard);
+  text_field* tf_bithashsize = new text_field(buf);
 
   label* lb_init_tsize = new label("initial hash tables size:");
   sprintf(buf,"%lu",DEFAULT_INIT_TSIZE);
-  text_field* tf_init_tsize = new text_field(buf, sip::datatype::integer::standard);
+  text_field* tf_init_tsize = new text_field(buf);
 
   horizontal_box* cbsbox = new horizontal_box();
   vertical_box* cbslbox = new vertical_box();

@@ -313,7 +313,9 @@ namespace squadt {
 
       wxMenu  context_menu;
 
+#ifndef __WXMAC__
       context_menu.Append(cmID_EDIT, wxT("Edit"))->Enable(show_update_operations && editable);
+#endif
       context_menu.Append(cmID_RENAME, wxT("Rename"))->Enable(show_update_operations);
       context_menu.Append(cmID_REMOVE, wxT("Remove"))->Enable(show_update_operations);
 
@@ -361,6 +363,8 @@ namespace squadt {
       context_menu.Append(cmID_DETAILS, wxT("Details"));
 
       PopupMenu(&context_menu);
+
+      object_view->SelectItem(object_view->GetSelection());
     }
 
     /**
