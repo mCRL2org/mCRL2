@@ -10,6 +10,11 @@
 /* Interface classes for both the tool and the controller side of the Squadt Interaction Protocol */
 namespace sip {
 
+  /** Helper function to invoke the as_string method a type T */
+  template < typename T > std::string as_string(T const& t) {
+    return (as_string(t));
+  }
+
   /** \brief Type for sip protocol message identification */
   enum message_identifier_t {
      message_unknown,                          ///< \brief unspecified or unknown (or should be derived from content)
@@ -30,6 +35,8 @@ namespace sip {
      message_report                            ///< \brief send the controller a report of a tools operation
   };
 
+  template <> std::string as_string(message_identifier_t const&);
+
   /** \brief A message type for communication of sip protocol messages */
   typedef messaging::message < message_identifier_t, message_unknown, message_any > message;
 
@@ -48,30 +55,6 @@ namespace sip {
   /** \brief Storage format for tool input/output configuration specification */
   typedef std::string storage_format;
 
-  /** \brief Prints textual representation for message type */
-  inline std::string message_identifier_string(message_identifier_t type) {
-    static char const* message_identifier_strings[] = {
-      "unknown",
-      "any",
-      "instance_identification",
-      "request_controller_capabilities",
-      "response_controller_capabilities",
-      "request_tool_capabilities",
-      "response_tool_capabilities",
-      "offer_configuration",
-      "accept_configuration",
-      "signal_start",
-      "signal_done",
-      "display_layout",
-      "display_update",
-      "request_termination",
-      "signal_termination",
-      "report"
-    };
-
-    return (message_identifier_strings[type]);
-  }
-
   /** \brief Type for protocol version */
   struct version {
     unsigned char major; ///< the major number
@@ -80,7 +63,6 @@ namespace sip {
 
   /** \brief Protocol version {major,minor} */
   static const version default_protocol_version = {1,0};
-
 }
 
 #endif

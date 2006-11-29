@@ -19,6 +19,7 @@
 #include <transport/transporter.h>
 
 #include <sip/detail/basic_messenger.h>
+#include <sip/detail/common.h>
 #include <sip/exception.h>
 
 namespace sip {
@@ -245,7 +246,7 @@ namespace sip {
      **/
     template < class M >
     inline void basic_messenger_impl< M >::send_message(const M& m) {
-      logger->log(1, boost::format("sent     id : %u, type : %u\n") % getpid() % m.get_type());
+      logger->log(1, boost::format("sent     id : %u, type : %s\n") % getpid() % as_string(m.get_type()));
       logger->log(2, boost::format(" data : \"%s\"\n") % m.to_xml());
 
       send(tag_open + m.to_xml() + tag_close);
@@ -382,7 +383,7 @@ namespace sip {
 
             typename M::type_identifier_t t = M::extract_type(new_string);
 
-            logger->log(1, boost::format("received id : %u, type : %u\n") % getpid() % t);
+            logger->log(1, boost::format("received id : %u, type : %u\n") % getpid() % as_string(t));
             logger->log(2, boost::format(" data : \"%s\"\n") % new_string);
 
             task_queue.push_back(boost::shared_ptr< M >(new M(new_string, t, o)));
