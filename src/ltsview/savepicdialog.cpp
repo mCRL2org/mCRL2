@@ -170,5 +170,6 @@ void SavePicDialog::OnOK(wxCommandEvent& /*event*/) {
   // assumes it to be from top to bottom, so we mirror the image vertically
   img = img.Mirror(false);
   img.SaveFile(f_name.GetFullPath(),f_types[ft_choice->GetSelection()]);
-  EndModal(wxID_OK);
+  //AM removed to prevent EndModal from being called twice
+  //EndModal(wxID_OK);
 }
