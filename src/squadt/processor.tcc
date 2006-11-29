@@ -231,19 +231,15 @@ namespace squadt {
 
   inline processor_impl::processor_impl(boost::shared_ptr < processor > const& tp, boost::weak_ptr < project_manager > p) :
                 interface_object(tp), current_monitor(new monitor(*tp)), manager(p), selected_input_combination(0) {
-
-    assert(tp->impl.get() == this);
   }
 
   /**
-   * \param[in] tp shared pointer to the interface object (tp->impl.get() = this)
+   * \param[in] tp shared pointer to the interface object
    * \param[in] p the associated project manager
    * \param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
    **/
   inline processor_impl::processor_impl(boost::shared_ptr < processor > const& tp, boost::weak_ptr < project_manager > p, tool::sptr t) :
     interface_object(tp), tool_descriptor(t), current_monitor(new monitor(*tp)), manager(p), selected_input_combination(0) {
-
-    assert(tp->impl.get() == this);
   }
 
   /**

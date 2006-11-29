@@ -103,7 +103,7 @@ rule link
 actions link bind LIBRARIES
 {
    $(CONFIG_COMMAND) -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(FRAMEWORK_PATH) -framework$(_)$(FRAMEWORK:D=) $(OPTIONS) $(USER_OPTIONS)
-    $(NEED_STRIP)strip$(NEED_STRIP) "-S" "$(<)"
+    $(NEED_STRIP)"strip -S"$(NEED_STRIP)"$(<)"
 }
 
 actions link.dll bind LIBRARIES
