@@ -101,7 +101,7 @@ namespace squadt {
         inline void shutdown();
     };
 
-    task_monitor_impl::task_monitor_impl() : connected(false), done(false) {
+    task_monitor_impl::task_monitor_impl() : sip::controller::communicator_impl(), connected(false), done(false) {
     }
 
     /**

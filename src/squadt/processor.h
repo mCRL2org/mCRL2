@@ -266,7 +266,7 @@ namespace squadt {
       display_layout_callback_function layout_change_handler;
  
       /** \brief Actualisation function for user interface state changes */
-      display_update_callback_function   state_change_handler;
+      display_update_callback_function state_change_handler;
  
       /** \brief Actualisation function for incoming change messages */
       status_message_callback_function message_change_handler;

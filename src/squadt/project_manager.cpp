@@ -641,7 +641,7 @@ namespace squadt {
    * @param[in] b whether or not to create the project anew (ignore existing project file)
    **/
   project_manager::ptr project_manager::create(const boost::filesystem::path& l, bool b) {
-    project_manager::ptr p(new project_manager());
+    project_manager::ptr p(new project_manager);
 
     p->impl->m_interface = p;
 
