@@ -311,18 +311,18 @@ namespace squadt {
       bool   generated              = (0 < n.get_processor()->number_of_inputs());
       bool   show_update_operations = !n.get_processor()->is_active();
 
-      wxMenu  context_menu;
+      wxMenu*  context_menu = new wxMenu();
 
 #ifndef __WXMAC__
-      context_menu.Append(cmID_EDIT, wxT("Edit"))->Enable(show_update_operations && editable);
+      context_menu->Append(cmID_EDIT, wxT("Edit"))->Enable(show_update_operations && editable);
 #endif
-      context_menu.Append(cmID_RENAME, wxT("Rename"))->Enable(show_update_operations);
-      context_menu.Append(cmID_REMOVE, wxT("Remove"))->Enable(show_update_operations);
+      context_menu->Append(cmID_RENAME, wxT("Rename"))->Enable(show_update_operations);
+      context_menu->Append(cmID_REMOVE, wxT("Remove"))->Enable(show_update_operations);
 
       if (generated) {
-        context_menu.Append(cmID_REFRESH, wxT("Refresh"))->Enable(show_update_operations);
-        context_menu.Append(cmID_CONFIGURE, wxT("Configure"))->Enable(show_update_operations);
-        context_menu.Append(cmID_CLEAN, wxT("Clean"))->Enable(show_update_operations);
+        context_menu->Append(cmID_REFRESH, wxT("Refresh"))->Enable(show_update_operations);
+        context_menu->Append(cmID_CONFIGURE, wxT("Configure"))->Enable(show_update_operations);
+        context_menu->Append(cmID_CLEAN, wxT("Clean"))->Enable(show_update_operations);
 
         separator_position += 3;
       }
@@ -343,7 +343,7 @@ namespace squadt {
        
             last_seen_category = i.first;
        
-            context_menu.Append(identifier++, wxString(i.first.c_str(), wxConvLocal), target_menu);
+            context_menu->Append(identifier++, wxString(i.first.c_str(), wxConvLocal), target_menu);
           }
        
           cmMenuItem* new_menu_item = new cmMenuItem(target_menu, identifier++, 
@@ -354,17 +354,15 @@ namespace squadt {
         }
       }
 
-      context_menu.AppendSeparator();
+      context_menu->AppendSeparator();
 
-      if (!context_menu.FindItemByPosition(separator_position)->IsSeparator()) {
-        context_menu.InsertSeparator(separator_position);
+      if (!context_menu->FindItemByPosition(separator_position)->IsSeparator()) {
+        context_menu->InsertSeparator(separator_position);
       }
 
-      context_menu.Append(cmID_DETAILS, wxT("Details"));
+      context_menu->Append(cmID_DETAILS, wxT("Details"));
 
-      PopupMenu(&context_menu);
-
-      object_view->SelectItem(object_view->GetSelection());
+      PopupMenu(context_menu);
     }
 
     /**
