@@ -90,12 +90,12 @@ class squadt_interactor: public squadt_tool_interface
 void squadt_interactor::set_capabilities(sip::tool::capabilities& capabilities) const
 {
   // The tool has only one main input combination
-  capabilities.add_input_combination(lpd_file_for_input, "lpe", "Transformation");
+  capabilities.add_input_combination(lpd_file_for_input, sip::mime_type("lpe"), sip::tool::category::transformation);
 }
 
 void squadt_interactor::user_interactive_configuration(sip::configuration& configuration)
 {
-  configuration.add_output(lpd_file_for_output, "lpe", configuration.get_output_name(".lpe"));
+  configuration.add_output(lpd_file_for_output, sip::mime_type("lpe"), configuration.get_output_name(".lpe"));
 }
 
 bool squadt_interactor::check_configuration(sip::configuration const& configuration) const

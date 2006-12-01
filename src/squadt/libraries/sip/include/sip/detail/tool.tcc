@@ -3,6 +3,7 @@
 #include <sip/detail/common.h>
 #include <sip/detail/basic_messenger.tcc>
 #include <sip/tool.h>
+#include <sip/tool/capabilities.h>
 #include <sip/layout_base.h>
 #include <sip/detail/message.h>
 #include <sip/detail/command_line_interface.tcc>
@@ -17,16 +18,16 @@ namespace sip {
       private:
 
         /** \brief The last received set of controller capabilities */
-        controller::capabilities::ptr current_controller_capabilities;
+        boost::shared_ptr < controller::capabilities > current_controller_capabilities;
  
         /** \brief The object that descibed the capabilities of the current tool */
-        tool::capabilities            current_tool_capabilities;
+        tool::capabilities                             current_tool_capabilities;
  
         /** \brief This object reflects the current configuration */
-        configuration::sptr           current_configuration;
+        configuration::sptr                            current_configuration;
  
         /** \brief Unique identifier for the running tool, obtained via the command line */
-        long                          instance_identifier;
+        long                                           instance_identifier;
  
       private:
 

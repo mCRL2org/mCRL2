@@ -86,10 +86,10 @@ squadt_interactor::squadt_interactor() {
 }
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(lts_file_for_input, "aut", "Transformation");
-  c.add_input_combination(lts_file_for_input, "svc", "Transformation");
+  c.add_input_combination(lts_file_for_input, sip::mime_type("aut", sip::mime_type::text), sip::tool::category::conversion);
+  c.add_input_combination(lts_file_for_input, sip::mime_type("svc"), sip::tool::category::conversion);
 #ifdef MCRL2_BCG
-  c.add_input_combination(lts_file_for_input, "bcg", "Transformation");
+  c.add_input_combination(lts_file_for_input, sip::mime_type("bcg"), sip::tool::category::conversion);
 #endif
 }
 
@@ -176,9 +176,9 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
       /* The input type should be SVC/mcrl2 instead of just svc */
       if (format_selector.get_selection() == fsm ||
-            (format_selector.get_selection() == svc_mcrl2 && c.get_object(lts_file_for_input)->get_format() != "svc")) {
+            (format_selector.get_selection() == svc_mcrl2 && c.get_object(lts_file_for_input)->get_mime_type().get_sub_type() != "svc")) {
 
-        c.add_input(lpd_file_auxiliary, "lpe", lpd_file_field->get_text());
+        c.add_input(lpd_file_auxiliary, sip::mime_type("lpe"), lpd_file_field->get_text());
       }
 
       c.add_option(option_selected_transformation).append_argument(transformation_method_enumeration,
@@ -272,7 +272,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   bool result = true;
 
   result = write_lts_to_file(l, c.get_object(lts_file_for_output)->get_location(),
-                 lts::parse_format(c.get_object(lts_file_for_output)->get_format().c_str()), lpe_path, c.option_exists(option_no_state_information));
+                 lts::parse_format(c.get_object(lts_file_for_output)->get_mime_type().get_sub_type().c_str()), lpe_path, c.option_exists(option_no_state_information));
 
   send_hide_display();
 

@@ -159,7 +159,7 @@ class squadt_interactor : public squadt_tool_interface {
 };
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(lpd_file_for_input, "lpe", "Transformation");
+  c.add_input_combination(lpd_file_for_input, sip::mime_type("lpe"), sip::tool::category::transformation);
 }
 
 void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
@@ -196,7 +196,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   if (c.is_fresh()) {
     if (!c.object_exists(lpd_file_for_output)) {
       /* Add output file to the configuration */
-      c.add_output(lpd_file_for_output, "lpe", c.get_output_name(".lpe"));
+      c.add_output(lpd_file_for_output, sip::mime_type("lpe"), c.get_output_name(".lpe"));
     }
 
     /* Values for the options */

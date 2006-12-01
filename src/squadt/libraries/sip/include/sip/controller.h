@@ -3,13 +3,14 @@
 
 #include <vector>
 
+#include <utility/logger.h>
+
 #include <sip/detail/common.h>
+#include <sip/tool/capabilities.h>
+#include <sip/controller/capabilities.h>
 #include <sip/report.h>
-#include <sip/controller_capabilities.h>
-#include <sip/tool_capabilities.h>
 #include <sip/detail/layout_tool_display.h>
 #include <sip/detail/layout_elements.h>
-#include <utility/logger.h>
 #include <sip/detail/basic_messenger.h>
 
 /* Interface classes for the tool side of the Squadt Interaction Protocol */
@@ -17,6 +18,9 @@ namespace sip {
   namespace controller {
 
     class communicator_impl;
+
+    /** \brief Specifies controller capabilities */
+    class capabilities;
 
     /**
      * \class communicator controller.h

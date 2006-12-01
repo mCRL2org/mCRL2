@@ -9,8 +9,6 @@
 
 namespace squadt {
 
-  const build_system::storage_format build_system::storage_format_unknown = "";
-
   build_system::build_system() {
   }
 

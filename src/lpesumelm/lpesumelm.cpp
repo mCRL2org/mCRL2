@@ -83,13 +83,13 @@ void squadt_lpesumelm::set_capabilities(sip::tool::capabilities& capabilities) c
 {
   // The tool has only one main input combination
   gsDebugMsg("squadt_lpesumelm: Setting capabilities\n");
-  capabilities.add_input_combination(lpd_file_for_input, "lpe", "Transformation");
+  capabilities.add_input_combination(lpd_file_for_input, sip::mime_type("lpe"), sip::tool::category::transformation);
 }
 
 void squadt_lpesumelm::user_interactive_configuration(sip::configuration& configuration)
 {
   gsDebugMsg("squadt_lpesumelm: User interactive configuration\n");
-  configuration.add_output(lpd_file_for_output, "lpe", configuration.get_output_name(".lpe"));
+  configuration.add_output(lpd_file_for_output, sip::mime_type("lpe"), configuration.get_output_name(".lpe"));
 }
 
 bool squadt_lpesumelm::check_configuration(sip::configuration const& configuration) const

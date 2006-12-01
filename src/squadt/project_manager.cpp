@@ -517,16 +517,8 @@ namespace squadt {
     }
 
     /* Add the file to the project */
-    build_system::storage_format f = build_system::storage_format_unknown;
-
-    /* TODO more intelligent file format check */
-    if (!extension(s).empty()) {
-      f = extension(s);
-
-      f.erase(f.begin());
-    }
-
-    p->append_output(f, destination_path.leaf(), processor::object_descriptor::original);
+    p->append_output(build_system::mime_type(extension(s)),
+          destination_path.leaf(), processor::object_descriptor::original);
 
     processors.push_back(p);
 

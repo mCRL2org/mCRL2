@@ -6,7 +6,7 @@
 
 #include <xml2pp/text_reader.h>
 
-#include <sip/tool_capabilities.h>
+#include <sip/tool/capabilities.h>
 
 namespace sip {
   namespace tool {
@@ -24,24 +24,24 @@ namespace sip {
 
     /** \brief Smaller, performs simple lexicographic comparison (included for use with standard data structures) */
     inline bool operator < (const capabilities::input_combination& a, const capabilities::input_combination& b) {
-      return (a.format < b.format || ((a.format == b.format) && a.category < b.category));
+      return (a.m_mime_type < b.m_mime_type || ((a.m_mime_type == b.m_mime_type) && a.m_category < b.m_category));
     }
  
     /** \brief Smaller, performs simple lexicographic comparison (included for use with standard data structures) */
     inline bool operator < (const capabilities::output_combination& a, const capabilities::output_combination& b) {
-      return (a.format < b.format || a.format == b.format);
+      return (a.m_mime_type < b.m_mime_type || a.m_mime_type == b.m_mime_type);
     }
  
     capabilities::capabilities(const version v) : protocol_version(v), interactive(false) {
     }
  
-    void capabilities::add_input_combination(object::identifier id, storage_format f, tool_category c) {
+    void capabilities::add_input_combination(object::identifier const& id, mime_type const& f, tool::category const& c) {
       input_combination ic(c, f, id);
  
       input_combinations.insert(ic);
     }
  
-    void capabilities::add_output_combination(object::identifier id, storage_format f) {
+    void capabilities::add_output_combination(object::identifier const& id, mime_type const& f) {
       output_combination oc(f, id);
  
       output_combinations.insert(oc);
@@ -78,13 +78,13 @@ namespace sip {
       }
       
       for (input_combination_list::const_iterator i = input_combinations.begin(); i != input_combinations.end(); ++i) {
-        output << "<input-configuration category=\"" << (*i).category
-               << "\" format=\"" << (*i).format
-               << "\" identifier=\"" << (*i).identifier << "\"/>";
+        output << "<input-configuration category=\"" << (*i).m_category
+               << "\" format=\"" << (*i).m_mime_type
+               << "\" identifier=\"" << (*i).m_identifier << "\"/>";
       }
       for (output_combination_list::const_iterator i = output_combinations.begin(); i != output_combinations.end(); ++i) {
-        output << "<output-configuration format=\"" << (*i).format
-               << "\" identifier=\"" << (*i).identifier << "\"/>";
+        output << "<output-configuration format=\"" << (*i).m_mime_type
+               << "\" identifier=\"" << (*i).m_identifier << "\"/>";
       }
  
       output << "</capabilities>";
@@ -136,28 +136,29 @@ namespace sip {
         assert (r.is_element("input-configuration"));
  
         while (r.is_element("input-configuration")) {
-          tool_category      category;
-          storage_format     format;
+          std::string        category_name;
+          std::string        format;
           object::identifier identifier;
  
-          r.get_attribute(&category, "category");
+          r.get_attribute(&category_name, "category");
           r.get_attribute(&format, "format");
           r.get_attribute(&identifier, "identifier");
  
-          c->input_combinations.insert(input_combination(category,format,identifier));
+          c->input_combinations.insert(input_combination(
+                  tool::category::fit(category_name),mime_type(format),identifier));
  
           r.next_element();
           r.skip_end_element("input-configuration");
         }
 
         while (r.is_element("output-configuration")) {
-          storage_format     format;
+          std::string        format;
           object::identifier identifier;
  
           r.get_attribute(&format, "format");
           r.get_attribute(&identifier, "identifier");
  
-          c->output_combinations.insert(output_combination(format,identifier));
+          c->output_combinations.insert(output_combination(mime_type(format),identifier));
  
           r.next_element();
           r.skip_end_element("output-configuration");
@@ -172,7 +173,7 @@ namespace sip {
      * @param t the category in which the tool operates
      **/
     capabilities::input_combination const*
-              capabilities::find_input_combination(const storage_format& f, const tool_category& t) const {
+              capabilities::find_input_combination(const mime_type& f, const tool::category& t) const {
  
       input_combination p(t, f, 0);
 

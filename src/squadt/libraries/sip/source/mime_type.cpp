@@ -44,7 +44,7 @@ namespace sip {
    * \param[in] m the main type
    **/
   mime_type::mime_type(std::string const& s, main_type m) : m_main(m), m_sub(s) {
-    assert(!s.empty() && !s.find(' ') && !(s.find('\t')));
+    assert(!s.empty() && (s.find(' ') == std::string::npos) && (s.find('\t') == std::string::npos));
   }
 }
 

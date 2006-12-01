@@ -69,12 +69,14 @@ namespace squadt {
         };
 
         processor::wptr               generator;      ///< The process responsible for generating this object
-        build_system::storage_format  format;         ///< The used storage format
+        build_system::storage_format  mime_type;      ///< The used storage format
         std::string                   location;       ///< The location of the object
         unsigned int                  identifier;     ///< The identifier of the associated output object in a configuration
         md5pp::compact_digest         checksum;       ///< The digest for the completed object
         std::time_t                   timestamp;      ///< The last time the file was modified just before the last checksum was computed
         t_status                      status;         ///< The status of this object
+
+        object_descriptor(sip::mime_type const&);
 
         /** \brief Whether or not the generator points to an existing object */
         bool generator_exists();

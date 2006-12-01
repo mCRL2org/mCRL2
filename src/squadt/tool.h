@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 
-#include <sip/tool_capabilities.h>
+#include <sip/tool/capabilities.h>
 
 #include <utility/visitor.h>
 

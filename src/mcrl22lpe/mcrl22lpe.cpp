@@ -113,7 +113,8 @@ squadt_interactor::squadt_interactor() {
 }
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(mcrl2_file_for_input, "mcrl2", "Transformation");
+  c.add_input_combination(mcrl2_file_for_input, sip::mime_type("mcrl2", sip::mime_type::text),
+                                                            sip::tool::category::transformation);
 }
 
 void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
@@ -235,7 +236,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
    * the same parameters
    */
   if (c.is_fresh()) {
-    c.add_output(lpd_file_for_output, "lpe", c.get_output_name(".lpe"));
+    c.add_output(lpd_file_for_output, sip::mime_type("lpe", sip::mime_type::text), c.get_output_name(".lpe"));
 
     c.add_option(option_linearisation_method).
           append_argument(linearisation_method_enumeration, method_selector.get_selection());

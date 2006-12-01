@@ -310,25 +310,25 @@ namespace squadt {
       bool   generated              = (0 < n.get_processor()->number_of_inputs());
       bool   show_update_operations = !n.get_processor()->is_active();
 
-      wxMenu*  context_menu = new wxMenu();
+      wxMenu  context_menu;
 
 #ifndef __WXMAC__
-      bool   editable               = registry->has_registered_command(n.get_object()->format);
+      bool   editable               = registry->has_registered_command(n.get_object()->mime_type);
 
-      context_menu->Append(cmID_EDIT, wxT("Edit"))->Enable(show_update_operations && editable);
+      context_menu.Append(cmID_EDIT, wxT("Edit"))->Enable(show_update_operations && editable);
 #endif
-      context_menu->Append(cmID_RENAME, wxT("Rename"))->Enable(show_update_operations);
-      context_menu->Append(cmID_REMOVE, wxT("Remove"))->Enable(show_update_operations);
+      context_menu.Append(cmID_RENAME, wxT("Rename"))->Enable(show_update_operations);
+      context_menu.Append(cmID_REMOVE, wxT("Remove"))->Enable(show_update_operations);
 
       if (generated) {
-        context_menu->Append(cmID_REFRESH, wxT("Refresh"))->Enable(show_update_operations);
-        context_menu->Append(cmID_CONFIGURE, wxT("Configure"))->Enable(show_update_operations);
-        context_menu->Append(cmID_CLEAN, wxT("Clean"))->Enable(show_update_operations);
+        context_menu.Append(cmID_REFRESH, wxT("Refresh"))->Enable(show_update_operations);
+        context_menu.Append(cmID_CONFIGURE, wxT("Configure"))->Enable(show_update_operations);
+        context_menu.Append(cmID_CLEAN, wxT("Clean"))->Enable(show_update_operations);
 
         separator_position += 3;
       }
 
-      std::string format = n.get_object()->format;
+      std::string format = n.get_object()->mime_type.get_sub_type();
 
       type_registry::tool_sequence range = registry->tools_by_mime_type(format);
 
@@ -339,12 +339,12 @@ namespace squadt {
 
         BOOST_FOREACH(type_registry::tool_sequence::value_type i, range) {
        
-          if (last_seen_category != i.first) {
+          if (!last_seen_category.compare(i.first)) {
             target_menu = new wxMenu();
        
-            last_seen_category = i.first;
+            last_seen_category = i.first.get_name();
        
-            context_menu->Append(identifier++, wxString(i.first.c_str(), wxConvLocal), target_menu);
+            context_menu.Append(identifier++, wxString(i.first.get_name().c_str(), wxConvLocal), target_menu);
           }
        
           cmMenuItem* new_menu_item = new cmMenuItem(target_menu, identifier++, 
@@ -355,15 +355,15 @@ namespace squadt {
         }
       }
 
-      context_menu->AppendSeparator();
+      context_menu.AppendSeparator();
 
-      if (!context_menu->FindItemByPosition(separator_position)->IsSeparator()) {
-        context_menu->InsertSeparator(separator_position);
+      if (!context_menu.FindItemByPosition(separator_position)->IsSeparator()) {
+        context_menu.InsertSeparator(separator_position);
       }
 
-      context_menu->Append(cmID_DETAILS, wxT("Details"));
+      context_menu.Append(cmID_DETAILS, wxT("Details"));
 
-      PopupMenu(context_menu);
+      PopupMenu(&context_menu);
     }
 
     /**
@@ -378,7 +378,7 @@ namespace squadt {
 
       switch (e.GetId()) {
         case cmID_EDIT:
-          p->edit(registry->get_registered_command(t->format, t->location).get());
+          p->edit(registry->get_registered_command(t->mime_type, t->location).get());
           break;
         case cmID_REMOVE:
           manager->remove(p.get());
@@ -413,7 +413,7 @@ namespace squadt {
 
               if (p->has_input_combination()) {
                 /* Add the main input (must exist) */
-                dialog.populate_tool_list(registry->tools_by_mime_type(p->get_input_combination()->format));
+                dialog.populate_tool_list(registry->tools_by_mime_type(p->get_input_combination()->m_mime_type.get_sub_type()));
                
                 if (selected_tool) {
                   dialog.select_tool(p->get_input_combination(), p->get_tool()->get_name());

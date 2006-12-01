@@ -142,11 +142,11 @@ namespace sip {
 
   /**
    * @param id a unique identifier for the object
-   * @param f the storage format the object uses
+   * @param m the storage format the object uses
    * @param l the location for the object (optional)
    * @param t the object type
    **/
-  void configuration::add_object(const object::identifier id, object::storage_format f, object::type t, object::uri l) {
+  void configuration::add_object(object::identifier const& id, mime_type const& m, object::type t, object::uri l) {
     using namespace std;
     using namespace boost;
 
@@ -154,7 +154,7 @@ namespace sip {
                     bind(&object::get_id,
                             bind(&object::sptr::get,_1)),id)) == objects.end());
 
-    objects.push_back(object::sptr(new object(id, f, l, t)));
+    objects.push_back(object::sptr(new object(id, m, l, t)));
   }
 
   /**

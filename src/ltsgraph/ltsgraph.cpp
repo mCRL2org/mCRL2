@@ -46,11 +46,10 @@ squadt_interactor::squadt_interactor(squadt_utility::entry_wrapper& w): starter(
 
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(lts_file_for_input, "aut", "Visualisation");
-  c.add_input_combination(lts_file_for_input, "svc", "Visualisation");
+  c.add_input_combination(lts_file_for_input, sip::mime_type("aut", sip::mime_type::text), sip::tool::category::visualisation);
+  c.add_input_combination(lts_file_for_input, sip::mime_type("svc"), sip::tool::category::visualisation);
 #ifdef MCRL2_BCG
-  c.add_input_combination(lts_file_for_input, "bcg", "Visualisation");
-  //Untestable
+  c.add_input_combination(lts_file_for_input, sip::mime_type("bcg"), sip::tool::category::visualisation);
 #endif  
 }
 
@@ -66,7 +65,7 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
     lts_file_argument = input_object->get_location();
 
 
-    lts_type t = lts::parse_format(input_object->get_format().c_str());
+    lts_type t = lts::parse_format(input_object->get_mime_type().get_sub_type().c_str());
 
     if (t == lts_none) {
       send_error(boost::str(boost::format("Invalid configuration: unsupported type `%s' for main input") % lts::string_for_type(t)));

@@ -46,19 +46,19 @@ namespace squadt {
     public:
 
       /** \brief Tool category type */
-      typedef sip::configuration::tool_category                              tool_category;
+      typedef sip::tool::category                                           tool_category;
 
       /** \brief Alias for convenient reference of shared pointer implementation */
-      typedef boost::shared_ptr < type_registry >                            sptr;
+      typedef boost::shared_ptr < type_registry >                           sptr;
 
       /** \brief Maps a tool category to a number of tool objects that can accept input in that */
-      typedef std::multimap < tool_category, boost::shared_ptr < tool > >    tools_for_category;
+      typedef std::multimap < tool_category, boost::shared_ptr < tool > >   tools_for_category;
 
       /** \brief Maps a storage format to a number of tool categories */
-      typedef std::map < build_system::storage_format, tools_for_category >  categories_for_mime_type;
+      typedef std::map < build_system::mime_type, tools_for_category >      categories_for_mime_type;
 
       /** \brief Iterator range type on tools_for_category */
-      typedef boost::iterator_range < tools_for_category::const_iterator >   tool_sequence;
+      typedef boost::iterator_range < tools_for_category::const_iterator >  tool_sequence;
 
       /** \brief Map that associates commands to mime-types */
       typedef std::map < mime_type, std::string >                            actions_for_type;
@@ -96,16 +96,16 @@ namespace squadt {
       void rebuild_indices();
 
       /** \brief Returns a set of known formats */
-      std::set < build_system::storage_format > get_storage_formats() const;
+      std::set < build_system::mime_type > get_mime_types() const;
 
       /** \brief Returns a set of known formats */
       std::set < build_system::tool_category > get_categories() const;
 
       /** \brief Returns the list of tool categories with tools that operate on input a given type */
-      std::set < build_system::tool_category > categories_by_mime_type(build_system::storage_format const&) const;
+      std::set < build_system::tool_category > categories_by_mime_type(build_system::mime_type const&) const;
 
       /** \brief Returns a sequence containing tool category pairs that operate on input a given type */
-      tool_sequence tools_by_mime_type(build_system::storage_format const&) const;
+      tool_sequence tools_by_mime_type(build_system::mime_type const&) const;
 
       /** \brief Returns a mime_type for a specified extension */
       std::auto_ptr < mime_type > mime_type_for_extension(std::string const&) const;

@@ -34,6 +34,9 @@ namespace squadt {
     return (false);
   }
 
+  processor::object_descriptor::object_descriptor(sip::mime_type const& m) : mime_type(m) {
+  }
+
   bool processor::object_descriptor::present_in_store(project_manager const& m) {
     path l(m.get_path_for_name(location));
 
@@ -434,11 +437,10 @@ namespace squadt {
    * \param[in] l a URI (local path) to where the file is stored
    * \param[in] s the status of the new object
    **/
-  void processor::append_output(build_system::storage_format const& f, const std::string& l, object_descriptor::t_status const& s) {
-    object_descriptor::sptr p = object_descriptor::sptr(new object_descriptor);
+  void processor::append_output(build_system::mime_type const& m, const std::string& l, object_descriptor::t_status const& s) {
+    object_descriptor::sptr p = object_descriptor::sptr(new object_descriptor(m));
 
     p->generator  = impl->interface_object;
-    p->format     = f;
     p->location   = l;
     p->identifier = 0;
     p->status     = s;
@@ -453,10 +455,9 @@ namespace squadt {
    * \param[in] s the status of the new object
    **/
   void processor_impl::append_output(sip::object const& o, object_descriptor::t_status const& s) {
-    object_descriptor::sptr p = object_descriptor::sptr(new object_descriptor);
+    object_descriptor::sptr p = object_descriptor::sptr(new object_descriptor(o.get_mime_type()));
 
     p->generator  = interface_object;
-    p->format     = o.get_format();
     p->location   = o.get_location();
     p->identifier = o.get_id();
     p->status     = s;
@@ -472,7 +473,7 @@ namespace squadt {
    * \param[in] s the new status of the object
    **/
   void processor_impl::replace_output(object_descriptor::sptr p, sip::object const& o, object_descriptor::t_status const& s) {
-    p->format     = o.get_format();
+    p->mime_type  = o.get_mime_type();
     p->location   = o.get_location();
     p->identifier = o.get_id();
     p->status     = s;

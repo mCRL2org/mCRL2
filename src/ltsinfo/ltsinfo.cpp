@@ -40,11 +40,11 @@ class squadt_interactor : public squadt_tool_interface {
 };
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(lts_file_for_input, "aut", "Reporting");
+  c.add_input_combination(lts_file_for_input, sip::mime_type("aut", sip::mime_type::text), sip::tool::category::reporting);
 #ifdef MCRL2_BCG
-  c.add_input_combination(lts_file_for_input, "bcg", "Reporting");
+  c.add_input_combination(lts_file_for_input, sip::mime_type("bcg"), sip::tool::category::reporting);
 #endif
-  c.add_input_combination(lts_file_for_input, "svc", "Reporting");
+  c.add_input_combination(lts_file_for_input, sip::mime_type("svc"), sip::tool::category::reporting);
 }
 
 void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
@@ -75,7 +75,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   layout::vertical_box::alignment a = layout::left;
 
   lts l;
-  lts_type t = lts::parse_format(input_object->get_format().c_str());
+  lts_type t = lts::parse_format(input_object->get_mime_type().get_sub_type().c_str());
 
   if (l.read_from(input_object->get_location(), t)) {
     left_column->add(new label("States (#):"), a);

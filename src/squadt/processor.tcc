@@ -335,8 +335,8 @@ namespace squadt {
       s << " tool-name=\"" << tool_descriptor->get_name() << "\"";
 
       if (selected_input_combination != 0) {
-        s << " format=\"" << selected_input_combination->format << "\"";
-        s << " category=\"" << selected_input_combination->category << "\"";
+        s << " format=\"" << selected_input_combination->m_mime_type << "\"";
+        s << " category=\"" << selected_input_combination->m_category << "\"";
       }
     }
 
@@ -362,7 +362,7 @@ namespace squadt {
     /* The outputs */
     for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
       s << "<output id=\"" << std::dec << reinterpret_cast < unsigned long > ((*i).get())
-        << "\" format=\"" << (*i)->format
+        << "\" format=\"" << (*i)->mime_type
         << "\" location=\"" << (*i)->location
         << "\" identifier=\"" << std::dec << (*i)->identifier
         << "\" status=\"" << (*i)->status;
@@ -392,11 +392,12 @@ namespace squadt {
     if (r.get_attribute(&temporary, "tool-name")) {
       c->impl->tool_descriptor = global_build_system.get_tool_manager()->get_tool_by_name(temporary);
 
-      build_system::storage_format format;
-      build_system::tool_category  category;
+      std::string format;
+      std::string category;
 
       if (r.get_attribute(&category, "category") && r.get_attribute(&format, "format")) {
-        c->impl->selected_input_combination = c->impl->tool_descriptor->find_input_combination(format, category);
+        c->impl->selected_input_combination = c->impl->tool_descriptor->find_input_combination(
+                      sip::tool::category::fit(category), sip::mime_type(format));
       }
     }
 
@@ -432,35 +433,40 @@ namespace squadt {
       bool          b = r.get_attribute(&id, "id");
 
       if (b) {
-        assert(m.find(id) == m.end());
-
-        m[id] = object_descriptor::sptr(new object_descriptor);
-
-        c->impl->outputs.push_back(m[id]);
+        if (!r.get_attribute("format")) {
+          throw (exception::exception(exception::required_attributes_missing, "processor->output"));
+        }
+       
+        if (b) {
+          assert(m.find(id) == m.end());
+       
+          m[id] = object_descriptor::sptr(new object_descriptor(sip::mime_type(r.get_attribute_as_string("format"))));
+       
+          c->impl->outputs.push_back(m[id]);
+        }
       }
 
-      object_descriptor* n = m[id].get();
+      object_descriptor& new_descriptor = *m[id];
 
-      if (!(b && r.get_attribute(&n->format, "format")
-              && r.get_attribute(&n->location, "location")
-              && r.get_attribute(&n->identifier, "identifier")
-              && r.get_attribute(&n->timestamp, "timestamp")
+      if (!(b && r.get_attribute(&new_descriptor.location, "location")
+              && r.get_attribute(&new_descriptor.identifier, "identifier")
+              && r.get_attribute(&new_descriptor.timestamp, "timestamp")
               && r.get_attribute(&id, "status"))) {
 
         throw (exception::exception(exception::required_attributes_missing, "processor->output"));
       }
 
-      n->status = static_cast < object_status > ((id == object_descriptor::generation_in_progress) ?
+      new_descriptor.status = static_cast < object_status > ((id == object_descriptor::generation_in_progress) ?
                                                       object_descriptor::reproducible_nonexistent : id);
 
       if (r.get_attribute(&temporary, "digest")) {
-        n->checksum.read(temporary.c_str());
+        new_descriptor.checksum.read(temporary.c_str());
       }
       else {
-        n->checksum = md5pp::zero_digest;
+        new_descriptor.checksum = md5pp::zero_digest;
       }
 
-      n->generator = c;
+      new_descriptor.generator = c;
 
       r.next_element();
 
@@ -743,7 +749,7 @@ namespace squadt {
      
       c->set_output_prefix(str(format("%s%04X") % (basename(find_initial_object()->location)) % g->get_unique_count()));
      
-      c->add_input(ic->identifier, ic->format, l.string());
+      c->add_input(ic->m_identifier, ic->m_mime_type.as_string(), l.string());
      
       current_monitor->set_configuration(c);
      
@@ -784,7 +790,7 @@ namespace squadt {
     sip::configuration::sptr c(sip::controller::communicator::new_configuration(*selected_input_combination));
 
     c->set_output_prefix(current_monitor->get_configuration()->get_output_prefix());
-    c->add_object(current_monitor->get_configuration()->get_object(selected_input_combination->identifier));
+    c->add_object(current_monitor->get_configuration()->get_object(selected_input_combination->m_identifier));
 
     current_monitor->set_configuration(c);
 

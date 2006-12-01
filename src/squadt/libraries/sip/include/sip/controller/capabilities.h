@@ -7,6 +7,8 @@
 #include <xml2pp/text_reader.h>
 #include <sip/detail/common.h>
 
+#include <utility/visitor.h>
+
 namespace sip {
   namespace tool {
     class communicator;
@@ -28,7 +30,7 @@ namespace sip {
      * As well as any information about the controller that might be interesting
      * for a tool developer.
      **/
-    class capabilities {
+    class capabilities : public utility::visitable < controller::capabilities > {
       friend class tool::communicator;
       friend class controller::communicator;
  
@@ -41,7 +43,7 @@ namespace sip {
         };
  
         /** Convenience type to hide boost shared pointer implementation */
-        typedef boost::shared_ptr < capabilities > ptr;
+        typedef boost::shared_ptr < capabilities > sptr;
  
       private:
  
@@ -55,7 +57,7 @@ namespace sip {
         inline capabilities(const version = default_protocol_version);
  
         /** \brief Read from XML stream */
-        inline static capabilities::ptr read(xml2pp::text_reader& reader) throw ();
+        inline static capabilities::sptr read(xml2pp::text_reader& reader) throw ();
  
       public:
  
@@ -69,7 +71,7 @@ namespace sip {
         inline display_dimensions get_display_dimensions() const;
  
         /** \brief Read from XML string */
-        inline static capabilities::ptr read(const std::string&);
+        inline static capabilities::sptr read(const std::string&);
 
         /** \brief Write to XML string */
         inline std::string write() const;
@@ -90,27 +92,27 @@ namespace sip {
       return (s);
     }
  
-    inline capabilities::capabilities(const version v) : current_protocol_version(v) {
+    inline controller::capabilities::capabilities(const version v) : current_protocol_version(v) {
       current_dimensions.x = 0;
       current_dimensions.y = 0;
       current_dimensions.z = 0;
     }
  
-    inline version capabilities::get_version() const {
+    inline version controller::capabilities::get_version() const {
       return (current_protocol_version);
     }
  
-    inline void capabilities::set_display_dimensions(const unsigned short x, const unsigned short y, const unsigned short z) {
+    inline void controller::capabilities::set_display_dimensions(const unsigned short x, const unsigned short y, const unsigned short z) {
       current_dimensions.x = x;
       current_dimensions.y = y;
       current_dimensions.z = z;
     }
  
-    inline capabilities::display_dimensions capabilities::get_display_dimensions() const {
+    inline controller::capabilities::display_dimensions controller::capabilities::get_display_dimensions() const {
       return (current_dimensions);
     }
  
-    inline void capabilities::write(std::ostream& output) const {
+    inline void controller::capabilities::write(std::ostream& output) const {
       output << "<capabilities>"
              << "<protocol-version major=\"" << (unsigned short) current_protocol_version.major
              << "\" minor=\"" << (unsigned short) current_protocol_version.minor << "\"/>"
@@ -120,7 +122,7 @@ namespace sip {
              << "</capabilities>";
     }
  
-    inline std::string capabilities::write() const {
+    inline std::string controller::capabilities::write() const {
       std::ostringstream output;
  
       write(output);
@@ -131,7 +133,7 @@ namespace sip {
     /**
      * @param s the string to read from
      **/
-    inline capabilities::ptr capabilities::read(const std::string& s) {
+    inline controller::capabilities::sptr controller::capabilities::read(const std::string& s) {
       xml2pp::text_reader r(s);
 
       return (read(r));
@@ -142,7 +144,7 @@ namespace sip {
      *
      * \attention if the reader does not point at a capabilities element nothing is read
      **/
-    inline capabilities::ptr capabilities::read(xml2pp::text_reader& r) throw () {
+    inline controller::capabilities::sptr controller::capabilities::read(xml2pp::text_reader& r) throw () {
       if (r.is_element("capabilities")) {
         version v = {0,0};
  
@@ -153,7 +155,7 @@ namespace sip {
         r.get_attribute(&v.major, "major");
         r.get_attribute(&v.minor, "minor");
  
-        capabilities::ptr c(new capabilities(v));
+        boost::shared_ptr < capabilities > c(new capabilities(v));
  
         r.next_element();
         r.skip_end_element("protocol-version");
@@ -169,7 +171,7 @@ namespace sip {
         return (c);
       }
  
-      return capabilities::ptr();
+      return boost::shared_ptr < capabilities >();
     }
   }
 }

@@ -3,19 +3,27 @@
 
 #include <set>
 
-#include <sip/tool_capabilities.h>
-#include <sip/controller_capabilities.h>
+#include <utility/logger.h>
+
 #include <sip/detail/layout_tool_display.h>
 #include <sip/detail/layout_elements.h>
 #include <sip/report.h>
+#include <sip/tool/capabilities.h>
+#include <sip/tool/category.h>
 
-#include <utility/logger.h>
-
-/* Interface classes for the tool side of the SQuADt Interaction Protocol */
+/* Interface classes for the tool side */
 namespace sip {
+  namespace controller {
+    /** \brief Specifies capabilities */
+    class capabilities;
+  }
+
   namespace tool {
 
     class communicator_impl;
+
+    /** \brief Specifies capabilities */
+    class capabilities;
 
     /** \brief The main interface to the protocol implementation (tool-side) */
     class communicator : public sip::messenger {
@@ -83,7 +91,7 @@ namespace sip {
         configuration& get_configuration();
  
         /** \brief Get the last communicated set of controller capabilities */
-        const controller::capabilities::ptr get_controller_capabilities() const;
+        const boost::shared_ptr < controller::capabilities > get_controller_capabilities() const;
 
         /** \brief Waits until a configuration is delivered and returns a pointer to it */
         void await_configuration() const;

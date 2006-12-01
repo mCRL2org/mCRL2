@@ -94,12 +94,12 @@ class squadt_interactor : public squadt_tool_interface {
 };
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(lpd_file_for_input, "lpe", "Transformation");
+  c.add_input_combination(lpd_file_for_input, sip::mime_type("lpe"), sip::tool::category::conversion);
 }
 
 void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   if (c.is_fresh()) {
-    c.add_output(lpd_file_for_output, "lpe", c.get_output_name(".lpe"));
+    c.add_output(lpd_file_for_output, sip::mime_type("lpe"), c.get_output_name(".lpe"));
   }
 }
 

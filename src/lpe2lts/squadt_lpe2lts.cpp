@@ -49,8 +49,8 @@ void squadt_lpe2lts::initialise()
 void squadt_lpe2lts::set_capabilities(sip::tool::capabilities &cp) const
 {
   /* The tool has only one main input combination it takes an LPE and then behaves as a reporter */
-  cp.add_input_combination(lpd_file_for_input_no_lts, "lpe", "Reporting");
-  cp.add_input_combination(lpd_file_for_input_lts, "lpe", "Transformation");
+  cp.add_input_combination(lpd_file_for_input_no_lts, sip::mime_type("lpe"), sip::tool::category::reporting);
+  cp.add_input_combination(lpd_file_for_input_lts, sip::mime_type("lpe"), sip::tool::category::transformation);
 }
 
 void squadt_lpe2lts::user_interactive_configuration(sip::configuration& c)
@@ -197,7 +197,7 @@ void squadt_lpe2lts::user_interactive_configuration(sip::configuration& c)
   {
     std::string input_file_name = c.get_object(lpd_file_for_input_lts)->get_location();
     /* Add output file to the configuration */
-    c.add_output(lts_file_for_output, (cb_aut->get_status()?"aut":"svc"), c.get_output_name(cb_aut->get_status()?".aut":".svc"));
+    c.add_output(lts_file_for_output, sip::mime_type(cb_aut->get_status()?"aut":"svc"), c.get_output_name(cb_aut->get_status()?".aut":".svc"));
   }
   c.add_option(option_out_info).append_argument(sip::datatype::boolean::standard, cb_out_info->get_status());
 

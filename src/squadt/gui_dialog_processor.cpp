@@ -166,7 +166,7 @@ namespace squadt {
       }
 
       void processor_details::select_tool(sip::tool::capabilities::input_combination const* combination, std::string const& name) {
-        wxString category(combination->category.c_str(), wxConvLocal);
+        wxString category(combination->m_category.get_name().c_str(), wxConvLocal);
 
         std::stack < wxTreeItemId > id_stack;
 
@@ -221,7 +221,7 @@ namespace squadt {
         tool_selector->DeleteChildren(tool_selector->GetRootItem());
 
         BOOST_FOREACH(type_registry::tool_sequence::value_type i, range) {
-          wxString     current_category_name = wxString(i.first.c_str(), wxConvLocal);
+          wxString     current_category_name = wxString(i.first.get_name().c_str(), wxConvLocal);
           wxTreeItemId root                  = tool_selector->GetRootItem();
          
           /* Use of GetLastChild() because ItemHasChildren can return true when there are no children */

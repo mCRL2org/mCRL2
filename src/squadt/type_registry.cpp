@@ -33,14 +33,14 @@ namespace squadt {
     for (tool_manager::tool_const_sequence::const_iterator t = tools.begin(); t != tools.end(); ++t) {
 
       BOOST_FOREACH(sip::tool::capabilities::input_combination j, (*t)->get_capabilities()->get_input_combinations()) {
-        if (categories_for_format.find(j.format) == categories_for_format.end()) {
+        if (categories_for_format.find(j.m_mime_type) == categories_for_format.end()) {
           /* Format unknown, create new map */
           tools_for_category temporary;
 
-          categories_for_format.insert(std::make_pair(j.format,temporary));
+          categories_for_format.insert(std::make_pair(j.m_mime_type,temporary));
         }
 
-        categories_for_format[j.format].insert(std::make_pair(j.category, *t));
+        categories_for_format[j.m_mime_type].insert(std::make_pair(j.m_category, *t));
       }
     }
   }
@@ -71,7 +71,7 @@ namespace squadt {
   /**
    * @param f the format for which to execute the action a
    **/
-  std::set < type_registry::tool_category > type_registry::categories_by_mime_type(build_system::storage_format const& f) const {
+  std::set < type_registry::tool_category > type_registry::categories_by_mime_type(build_system::mime_type const& f) const {
     std::set < tool_category > categories;
     
     categories_for_mime_type::const_iterator i = categories_for_format.find(f);
@@ -97,7 +97,7 @@ namespace squadt {
     return (categories);
   }
 
-  std::set < build_system::storage_format > type_registry::get_storage_formats() const {
+  std::set < build_system::storage_format > type_registry::get_mime_types() const {
     std::set < build_system::storage_format > formats;
 
     BOOST_FOREACH(categories_for_mime_type::value_type c, categories_for_format) {
@@ -106,7 +106,7 @@ namespace squadt {
 
     BOOST_FOREACH(tool::sptr t, global_build_system.get_tool_manager()->get_tools()) {
       BOOST_FOREACH(sip::tool::capabilities::output_combination j, t->get_capabilities()->get_output_combinations()) {
-        formats.insert(j.format);
+        formats.insert(j.m_mime_type);
       }
     }
 

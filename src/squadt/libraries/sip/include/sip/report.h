@@ -11,12 +11,14 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include <utility/visitor.h>
+
 #include <sip/configuration.h>
 
 namespace sip {
 
   /** \brief Describes a report of tool operation */
-  class report {
+  class report : public utility::visitable < report > {
 
     public:
 

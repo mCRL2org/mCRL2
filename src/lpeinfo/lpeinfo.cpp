@@ -127,7 +127,7 @@ class squadt_interactor : public squadt_tool_interface {
 };
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(lpd_file_for_input, "lpe", "Reporting");
+  c.add_input_combination(lpd_file_for_input, sip::mime_type("lpe"), sip::tool::category::reporting);
 }
 
 void squadt_interactor::user_interactive_configuration(sip::configuration& c) {

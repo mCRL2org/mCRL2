@@ -7,7 +7,7 @@
 #include <sip/detail/message.h>
 #include <sip/detail/basic_messenger.h>
 
-/* Interface classes for both the tool and the controller side of the Squadt Interaction Protocol */
+/* Interface classes for both the tool and the controller side */
 namespace sip {
 
   /** Helper function to invoke the as_string method a type T */

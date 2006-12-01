@@ -7,12 +7,14 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/range/iterator_range.hpp>
 
+#include <utility/visitor.h>
+
 #include <sip/configuration.h>
+#include <sip/mime_type.h>
+#include <sip/tool/category.h>
 
 namespace sip {
   namespace tool {
-
-    class capabilities;
 
     /**
      * \brief Describes some tool capabilities (e.g. supported protocol version)
@@ -26,134 +28,128 @@ namespace sip {
      * As well as any information about the controller that might be interesting
      * for a tool developer.
      **/
-    class capabilities {
+    class capabilities : public utility::visitable < tool::capabilities > {
       friend class tool::communicator;
       friend class controller::communicator;
- 
+  
       public:
- 
-        /** \brief Until there is something better this is the type for a storage format */
-        typedef object::storage_format                       storage_format;
- 
-        /** \brief Until there is something better this is the type for a tool category */
-        typedef configuration::tool_category                 tool_category;
- 
+  
         /** \brief Description for a tool's main input object */
         class input_combination {
-
+ 
           public:
-
-            tool_category      category;   ///< tool category
-            storage_format     format;     ///< storage format
-            object::identifier identifier; ///< identifier for the main input object
-
+ 
+            tool::category const& m_category;   ///< tool category
+            mime_type const       m_mime_type;  ///< storage format
+            object::identifier    m_identifier; ///< identifier for the main input object
+ 
           public:
-
+ 
             /** \brief Constructor */
-            input_combination(tool_category const&, storage_format const&, object::identifier const&);
-
+            input_combination(tool::category const&, mime_type const&, object::identifier const&);
+ 
             /** \brief Compares two input combinations for equality */
             static bool equal(const input_combination&, const input_combination&);
         };
- 
+  
         /** \brief Description for a tool's output object */
         class output_combination {
-
+ 
           public:
-
-            storage_format     format;     ///< storage format
-            object::identifier identifier; ///< identifier for the output object
-
+ 
+            mime_type          m_mime_type;  ///< storage format
+            object::identifier m_identifier; ///< identifier for the output object
+ 
           public:
-
+ 
             /** \brief Constructor */
-            output_combination(storage_format const&, object::identifier const&);
-
+            output_combination(mime_type const&, object::identifier const&);
+ 
             /** \brief Compares two input combinations for equality */
             static bool equal(const output_combination&, const output_combination&);
         };
- 
+  
         /** \brief Convenience type for a list of input configurations */
         typedef std::set  < input_combination >                                   input_combination_list;
- 
+  
         /** \brief Convenience type for a list of input configurations */
         typedef std::set  < output_combination >                                  output_combination_list;
- 
+  
         /** \brief Convenience type for use in interface */
         typedef boost::iterator_range < input_combination_list::const_iterator >  input_combination_range;
-
+ 
         /** \brief Convenience type for use in interface */
         typedef boost::iterator_range < output_combination_list::const_iterator > output_combination_range;
-
+ 
         /** \brief Convenience type that hides the shared pointer implementation */
         typedef boost::shared_ptr < capabilities >                                sptr;
- 
+  
       private:
- 
+  
         /** \brief The protocol version */
         version                  protocol_version;
- 
+  
         /** \brief The available input configurations */
         input_combination_list   input_combinations;
-
+ 
         /** \brief The available input configurations */
         output_combination_list  output_combinations;
- 
+  
         /** \brief Whether the configuration can be changed through user interaction, after the start signal */
         bool                     interactive;
-
-      public:
  
+      public:
+  
         /** \brief Constructor */
         capabilities(const version = default_protocol_version);
- 
+  
         /** \brief Add an input configuration */
-        void add_input_combination(object::identifier, storage_format, tool_category);
- 
+        void add_input_combination(object::identifier const&, mime_type const&, tool::category const& = category::unknown);
+  
         /** \brief Add an output configuration */
-        void add_output_combination(object::identifier, storage_format);
- 
+        void add_output_combination(object::identifier const&, mime_type const&);
+  
         /** \brief Get the protocol version */
         version get_version() const;
- 
+  
         /** \brief Set or reset flag that the tool is interactive (configuration may change through user interaction) */
         void set_interactive(bool);
- 
-        static capabilities::sptr read(const std::string&);
- 
+  
+        static capabilities::sptr read(std::string const&);
+  
         /** \brief Read from XML stream */
         static capabilities::sptr read(xml2pp::text_reader& reader);
- 
+  
         /** \brief Write to XML string */
         std::string write() const;
- 
+  
         /** \brief Write to XML stream */
         void write(std::ostream&) const;
-
+ 
         /** \brief Returns a reference to the list of input combinations */
         input_combination_range get_input_combinations() const;
-
+ 
         /** \brief Returns a reference to the list of output combinations */
         output_combination_range get_output_combinations() const;
-
-        /** \brief Find a specific input combination of this tool, if it exists */
-        input_combination const* find_input_combination(const storage_format&, const tool_category&) const;
-    };
  
-    inline capabilities::input_combination::input_combination(tool_category const& c,
-                        storage_format const& f, object::identifier const& id) : category(c), format(f), identifier(id) {
+        /** \brief Find a specific input combination of this tool, if it exists */
+        input_combination const* find_input_combination(const mime_type&, const tool::category&) const;
+    };
+  
+    inline capabilities::input_combination::input_combination(tool::category const& c,
+                        mime_type const& m, object::identifier const& id) : m_category(c), m_mime_type(m), m_identifier(id) {
     }
-
-    inline capabilities::output_combination::output_combination(storage_format const& f,
-                        object::identifier const& id) : format(f), identifier(id) {
+ 
+    inline capabilities::output_combination::output_combination(mime_type const& f,
+                        object::identifier const& id) : m_mime_type(f), m_identifier(id) {
     }
-
-    inline bool capabilities::input_combination::equal(const input_combination& p, const input_combination& q) {
-      return (p.format == q.format && p.category == q.category);
+ 
+    inline bool capabilities::input_combination::equal(input_combination const& p, input_combination const& q) {
+      return (p.m_mime_type == q.m_mime_type && p.m_category == q.m_category);
     }
-
-    inline bool capabilities::output_combination::equal(const output_combination& p, const output_combination& q) {
-      return (p.format == q.format);
+ 
+    inline bool capabilities::output_combination::equal(output_combination const& p, output_combination const& q) {
+      return (p.m_mime_type == q.m_mime_type);
     }
   }
 }

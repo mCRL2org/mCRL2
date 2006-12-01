@@ -7,9 +7,12 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <utility/visitor.h>
+
 #include <xml2pp/text_reader.h>
 #include <sip/exception.h>
 #include <sip/detail/option.h>
+#include <sip/mime_type.h>
 
 namespace sip {
 
@@ -33,7 +36,7 @@ namespace sip {
    * As well as any information about the controller that might be interesting
    * for a tool developer.
    **/
-  class object {
+  class object : public utility::visitable < object > {
     friend class tool::communicator;
     friend class controller::communicator;
     friend class configuration;
@@ -53,9 +56,6 @@ namespace sip {
       /** \brief Until there is something better this is the type for a URI */
       typedef std::string                   uri;
 
-      /** \brief Until there is something better this is the type for a storage format */
-      typedef std::string                   storage_format;
-
       /** \brief convenience type to hide the shared pointer implementation */
       typedef boost::shared_ptr < object >  sptr;
 
@@ -64,16 +64,16 @@ namespace sip {
 
     private:
 
-      /** \brief The format used for storing this object */
-      storage_format       format;
+      /** \brief the type of the object */
+      mime_type            m_mime_type;
 
       /** \brief The format used for storing this object */
-      uri                  location;
+      uri                  m_location;
 
-      /** \brief The type of this object */
+      /** \brief The type of this object (TODO moved to configuration level) */
       type                 _type;
 
-      /** \brief Must uniquely identify the object in a configuration */
+      /** \brief Must uniquely identify the object in a configuration (TODO moved to configuration level) */
       identifier           id;
 
       /** \brief String representations for types, used for XML encoding */
@@ -85,23 +85,23 @@ namespace sip {
       inline static object::sptr read(xml2pp::text_reader& reader);
 
       /** \brief Constructor */
-      inline object(const identifier, const storage_format, const uri = "", const type = input);
+      inline object(identifier const&, mime_type const&, uri const& = "", const type = input);
 
     public:
       /** \brief Returns the objects identifier */
-      inline const identifier get_id() const;
+      inline identifier get_id() const;
 
       /** \brief Returns the objects type */
-      inline const type get_type() const;
+      inline type get_type() const;
 
       /** \brief Returns the object storage format */
-      inline const storage_format get_format() const;
+      inline mime_type get_mime_type() const;
 
       /** \brief Sets the object storage format */
-      inline void set_format(object::storage_format const&);
+      inline void set_mime_type(mime_type const&);
 
       /** \brief Returns the object location */
-      inline const uri get_location() const;
+      inline uri get_location() const;
 
       /** \brief Sets the object location */
       inline void set_location(object::uri const&);
@@ -118,40 +118,40 @@ namespace sip {
   };
 #endif
 
-  inline object::object(const identifier i, const storage_format f, const uri l, const type t) : format(f), location(l), _type(t), id(i) {
+  inline object::object(identifier const& i, mime_type const& m, uri const& l, const type t) : m_mime_type(m), m_location(l), _type(t), id(i) {
   }
 
-  inline const object::identifier object::get_id() const {
+  inline object::identifier object::get_id() const {
     return (id);
   }
 
-  inline const object::type object::get_type() const {
+  inline object::type object::get_type() const {
     return (_type);
   }
 
-  inline const object::storage_format object::get_format() const {
-    return (format);
+  inline mime_type object::get_mime_type() const {
+    return (m_mime_type);
   }
 
-  inline void object::set_format(object::storage_format const& f) {
-    format = f;
+  inline void object::set_mime_type(mime_type const& m) {
+    m_mime_type = m;
   }
 
-  inline const object::uri object::get_location() const {
-    return (location);
+  inline object::uri object::get_location() const {
+    return (m_location);
   }
 
   inline void object::set_location(object::uri const& l) {
-    location = l;
+    m_location = l;
   }
 
   inline void object::write(std::ostream& output) const {
     output << "<object id=\"" << id
            << "\" type=\"" << type_strings[_type]
-           << "\" storage-format=\"" << format << "\"";
+           << "\" storage-format=\"" << m_mime_type << "\"";
     
-    if (!location.empty()) {
-      output << " location=\"" << location << "\"";
+    if (!m_location.empty()) {
+      output << " location=\"" << m_location << "\"";
     }
 
     output << "/>";

@@ -40,7 +40,7 @@ namespace sip {
      * \param[in] c the input combination on which to base the new configuration
      **/
     configuration::sptr communicator::new_configuration(sip::tool::capabilities::input_combination const& c) {
-      sip::configuration::sptr nc(new sip::configuration(c.category));
+      sip::configuration::sptr nc(new sip::configuration(c.m_category));
 
       return (nc);
     }

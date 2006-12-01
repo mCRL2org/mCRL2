@@ -9,26 +9,28 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
 
+#include <utility/visitor.h>
 #include <utility/indirect_iterator.h>
 
 #include <sip/detail/option.h>
 #include <sip/detail/object.h>
 #include <sip/detail/common.h>
+#include <sip/mime_type.h>
 
 namespace sip {
 
   /** \brief This class models a tool configuration */
-  class configuration : public boost::noncopyable {
+  class configuration : public boost::noncopyable, public utility::visitable < configuration > {
     friend class report;
     friend class sip::tool::communicator;
     friend class sip::controller::communicator;
 
     public:
 
-      /** \brief Type used to contrain occurences of options within a configuration */
+      /** \brief Type used to constrain occurrences of options within a configuration */
       struct option_constraint {
-        unsigned short minimum; ///< \brief minimum occurences of this option in a single configuration
-        unsigned short maximum; ///< \brief maximum occurences of this option in a single configuration
+        unsigned short minimum; ///< \brief minimum occurrences of this option in a single configuration
+        unsigned short maximum; ///< \brief maximum occurrences of this option in a single configuration
       };
 
       /** \brief Until there is something better this is the type for a tool category */
@@ -124,7 +126,7 @@ namespace sip {
       option::sptr get_option(const option::identifier) const;
 
       /** \brief Add an input/output object to the configuration */
-      void add_object(const object::identifier, object::storage_format, object::type, object::uri = "");
+      void add_object(object::identifier const&, mime_type const&, object::type, object::uri = "");
 
       /** \brief Add an input/output object to the configuration */
       void add_object(object::sptr);
@@ -139,19 +141,19 @@ namespace sip {
       object::sptr const get_object(const object::identifier) const;
 
       /** \brief Add an input object to the configuration */
-      void add_input(const object::identifier, object::storage_format, object::uri = "");
+      void add_input(object::identifier const&, mime_type const&, object::uri = "");
 
       /** \brief Remove an input object from the configuration */
-      void remove_input(const object::identifier);
+      void remove_input(object::identifier const&);
 
       /** \brief Get an input object by its id */
       object::sptr get_input(const object::identifier);
 
       /** \brief Add an output object to the configuration */
-      void add_output(const object::identifier, object::storage_format, object::uri = "");
+      void add_output(object::identifier const&, mime_type const&, object::uri = "");
 
       /** \brief Remove an output object from the configuration */
-      void remove_output(const object::identifier);
+      void remove_output(object::identifier const&);
 
       /** \brief Get an output object by its id */
       object::sptr get_output(const object::identifier);
@@ -229,26 +231,26 @@ namespace sip {
 
   /**
    * @param id a unique identifier for the object
-   * @param f the storage format the object uses
+   * @param m the storage format the object uses
    * @param l the location for the object (optional)
    **/
-  inline void configuration::add_input(const object::identifier id, object::storage_format f, object::uri l) {
-    add_object(id, f, object::input, l);
+  inline void configuration::add_input(object::identifier const& id, mime_type const& m, object::uri l) {
+    add_object(id, m, object::input, l);
   }
 
   /**
    * @param id a unique identifier for the object
-   * @param f the storage format the object uses
+   * @param m the storage format the object uses
    * @param l the location for the object (optional)
    **/
-  inline void configuration::add_output(const object::identifier id, object::storage_format f, object::uri l) {
-    add_object(id, f, object::output, l);
+  inline void configuration::add_output(object::identifier const& id, mime_type const& m, object::uri l) {
+    add_object(id, m, object::output, l);
   }
 
   /**
    * @param id a unique identifier for the object
    **/
-  inline void configuration::remove_input(const object::identifier id) {
+  inline void configuration::remove_input(object::identifier const& id) {
     assert(get_object(id)->get_type() == object::input);
 
     remove_object(id);
@@ -257,7 +259,7 @@ namespace sip {
   /**
    * @param id a unique identifier for the object
    **/
-  inline void configuration::remove_output(const object::identifier id) {
+  inline void configuration::remove_output(object::identifier const& id) {
     assert(get_object(id)->get_type() == object::output);
 
     remove_object(id);

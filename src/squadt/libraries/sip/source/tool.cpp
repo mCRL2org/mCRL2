@@ -1,3 +1,5 @@
+#include <sip/tool/category.h>
+#include <sip/controller/capabilities.h>
 #include <sip/detail/tool.tcc>
 
 namespace sip {
@@ -73,7 +75,7 @@ namespace sip {
     /**
      * \return p which is a pointer to the most recently retrieved controller capabilities object or 0
      **/
-    const controller::capabilities::ptr communicator::get_controller_capabilities() const {
+    const boost::shared_ptr < controller::capabilities > communicator::get_controller_capabilities() const {
       if (boost::dynamic_pointer_cast < communicator_impl > (impl)->current_controller_capabilities.get() == 0) {
         throw (sip::exception(sip::controller_capabilities_unknown));
       }

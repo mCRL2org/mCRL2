@@ -9,7 +9,8 @@
 
 #include <utility/visitor.h>
 
-#include <sip/tool_capabilities.h>
+#include <sip/tool.h>
+#include <sip/mime_type.h>
 
 namespace squadt {
   class settings_manager;
@@ -65,16 +66,14 @@ namespace squadt {
 
     public:
 
-      /** \brief Convenience type alias */
-      typedef sip::tool::capabilities::storage_format storage_format;
+      /** Follows the syntax defined in RFC 2045 */
+      typedef sip::mime_type         mime_type;
 
       /** \brief Convenience type alias */
-      typedef sip::tool::capabilities::tool_category  tool_category;
+      typedef sip::mime_type         storage_format;
 
-    public:
-
-      /** \brief Special storage format constant for when the type is unknown */
-      static const storage_format storage_format_unknown;
+      /** \brief Convenience type alias */
+      typedef sip::tool::category    tool_category;
 
     public:
 
