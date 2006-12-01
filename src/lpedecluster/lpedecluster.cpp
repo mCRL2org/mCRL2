@@ -5,8 +5,8 @@
 // ----------------------------------------------------------------------
 //
 // file          : lpedecluster 
-// date          : 07-11-2006
-// version       : 0.4
+// date          : 01-12-2006
+// version       : 0.41
 //
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
 //
@@ -48,16 +48,22 @@ using namespace lpe;
 
 namespace po = boost::program_options;
 
-#define VERSION "0.4"
+#define VERSION "0.41"
 
-std::string input_file; ///< Name of the file to read input from
-std::string output_file; ///< Name of the file to write output to (or stdout)
-bool finite_only = false; ///< Only decluster finite sorts
-RewriteStrategy strategy = GS_REWR_INNER; ///< Rewrite strategy to use, default inner
+///////////////////////////////////////////////////////////////////////////////
+/// \brief structure that holds all options available for the tool.
+///
+typedef struct
+{
+  std::string input_file; ///< Name of the file to read input from
+  std::string output_file; ///< Name of the file to write output to (or stdout)
+  bool finite_only; ///< Only decluster finite sorts
+  RewriteStrategy strategy; ///< Rewrite strategy to use, default inner
+}tool_options;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 //Forward declaration because do_decluster() is called within squadt_interactor class
-int do_decluster(const std::string input_file_name, const std::string output_file_name);
+int do_decluster(const tool_options& options);
 
 class squadt_interactor: public squadt_tool_interface
 {
@@ -102,11 +108,13 @@ bool squadt_interactor::check_configuration(sip::configuration const& configurat
 
 bool squadt_interactor::perform_task(sip::configuration& configuration)
 {
-  std::string in_file, out_file;
-  in_file = configuration.get_object(lpd_file_for_input)->get_location();
-  out_file = configuration.get_object(lpd_file_for_output)->get_location();
+  tool_options options;
+  options.input_file = configuration.get_object(lpd_file_for_input)->get_location();
+  options.output_file = configuration.get_object(lpd_file_for_output)->get_location();
+  options.finite_only = false;
+  options.strategy = GS_REWR_INNER;
 
-  return (do_decluster(in_file, out_file)==0);
+  return (do_decluster(options)==0);
 }
 
 #endif //ENABLE_SQUADT_CONNECTIVITY
@@ -225,7 +233,7 @@ data_variable_list get_variables(const data_variable_list& vl, const sort_list& 
 ///\pre specification is the specification belonging to summand
 ///\post the declustered version of summand has been appended to result
 ///\ret none
-void decluster_summand(const lpe::specification& specification, const lpe::LPE_summand& summand, lpe::summand_list& result, EnumeratorStandard& enumerator)
+void decluster_summand(const lpe::specification& specification, const lpe::LPE_summand& summand, lpe::summand_list& result, EnumeratorStandard& enumerator, bool finite_only)
 {
   int nr_summands = 0; // Counter for the nummer of new summands, used for verbose output
 
@@ -301,7 +309,10 @@ void decluster_summand(const lpe::specification& specification, const lpe::LPE_s
 
 ///Takes the summand list sl, declusters it,
 ///and returns the declustered summand list
-lpe::summand_list decluster_summands(const lpe::specification& specification, const lpe::summand_list& sl, EnumeratorStandard& enumerator)
+lpe::summand_list decluster_summands(const lpe::specification& specification,
+                                     const lpe::summand_list& sl,
+                                     EnumeratorStandard& enumerator, 
+                                     const tool_options& options)
 {
   lpe::summand_list result;
 
@@ -312,7 +323,7 @@ lpe::summand_list decluster_summands(const lpe::specification& specification, co
   {
     gsVerboseMsg("Summand %d\n", j);
     lpe::LPE_summand s = *i;
-    decluster_summand(specification, s, result, enumerator);
+    decluster_summand(specification, s, result, enumerator, options.finite_only);
   }
 
   return result;
@@ -320,7 +331,7 @@ lpe::summand_list decluster_summands(const lpe::specification& specification, co
 
 ///Takes the specification in specification, declusters it,
 ///and returns the declustered specification.
-lpe::specification decluster(const lpe::specification& specification)
+lpe::specification decluster(const lpe::specification& specification, const tool_options& options)
 {
   gsVerboseMsg("Declustering...\n");
   lpe::LPE lpe = specification.lpe();
@@ -328,10 +339,10 @@ lpe::specification decluster(const lpe::specification& specification)
   gsVerboseMsg("Input: %d summands.\n", lpe.summands().size());
 
   // Some use of internal format because we need it for the rewriter
-  Rewriter* rewriter = createRewriter(gsMakeDataEqnSpec(specification.data().equations()), strategy);
+  Rewriter* rewriter = createRewriter(gsMakeDataEqnSpec(specification.data().equations()), options.strategy);
   EnumeratorStandard enumerator = EnumeratorStandard(specification, rewriter);
 
-  lpe::summand_list sl = decluster_summands(specification, lpe.summands(), enumerator);
+  lpe::summand_list sl = decluster_summands(specification, lpe.summands(), enumerator, options);
   lpe = set_summands(lpe, sl);
 
   gsVerboseMsg("Output: %d summands.\n", lpe.summands().size());
@@ -341,20 +352,20 @@ lpe::specification decluster(const lpe::specification& specification)
 
 ///Reads a specification from input_file, 
 ///applies declustering to it and writes the result to output_file.
-int do_decluster(const std::string input_file_name, const std::string output_file_name)
+int do_decluster(const tool_options& options)
 {
   lpe::specification lpe_specification;
-  if (lpe_specification.load(input_file_name)) {
+  if (lpe_specification.load(options.input_file)) {
     // decluster lpe_specification and save the output to a binary file
-    if (!decluster(lpe_specification).save(output_file_name, true)) 
+    if (!decluster(lpe_specification, options).save(options.output_file, true)) 
     {
       // An error occurred when saving
-      gsErrorMsg("Could not save to '%s'\n", output_file_name.c_str());
+      gsErrorMsg("Could not save to '%s'\n", options.output_file.c_str());
       return (1);
     }
   }
   else {
-    gsErrorMsg("lpedecluster: Unable to load LPE from `%s'\n", input_file_name.c_str());
+    gsErrorMsg("lpedecluster: Unable to load LPE from `%s'\n", options.input_file.c_str());
     return (1);
   }
 
@@ -362,7 +373,7 @@ int do_decluster(const std::string input_file_name, const std::string output_fil
 }
 
 ///Parses command line and sets settings from command line switches
-void parse_command_line(int ac, char** av) {
+void parse_command_line(int ac, char** av, tool_options& t_options) {
   po::options_description desc;
   std::string rewriter;
 
@@ -419,29 +430,28 @@ void parse_command_line(int ac, char** av) {
     gsSetVerboseMsg();
   }
 
-  if (vm.count("finite")) {
-    finite_only = true;
-  }
+  t_options.finite_only = vm.count("finite");
 
   if (vm.count("rewriter")) {
     cout << "rewrite strategy: " << rewriter << endl;
-    if      (rewriter == "inner")  { strategy = GS_REWR_INNER; }
-    else if (rewriter == "innerc") { strategy = GS_REWR_INNERC; }
-    else if (rewriter == "jitty")  { strategy = GS_REWR_JITTY; }
-    else if (rewriter == "jittyc") { strategy = GS_REWR_JITTYC; }
+    if      (rewriter == "inner")  { t_options.strategy = GS_REWR_INNER; }
+    else if (rewriter == "innerc") { t_options.strategy = GS_REWR_INNERC; }
+    else if (rewriter == "jitty")  { t_options.strategy = GS_REWR_JITTY; }
+    else if (rewriter == "jittyc") { t_options.strategy = GS_REWR_JITTYC; }
     else { 
       cerr << rewriter << " is not a valid rewriter strategy" << endl;
       exit(EXIT_FAILURE);
     }
   }
 
-  input_file = (0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-";
-  output_file = (0 < vm.count("OUTFILE")) ? vm["OUTFILE"].as< string >() : "-";
+  t_options.input_file = (0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-";
+  t_options.output_file = (0 < vm.count("OUTFILE")) ? vm["OUTFILE"].as< string >() : "-";
 }
 
 int main(int ac, char** av) {
   ATerm bot;
   ATinit(ac, av, &bot);
+  tool_options options;
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -451,6 +461,6 @@ int main(int ac, char** av) {
   }
 #endif
 
-  parse_command_line(ac,av);
-  return do_decluster(input_file, output_file);
+  parse_command_line(ac,av, options);
+  return do_decluster(options);
 }
