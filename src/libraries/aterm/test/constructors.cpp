@@ -31,7 +31,7 @@ int test_main(int, char*[])
   aterm_appl f(function_symbol("f", 2), aterm("x"), aterm("y"));
   BOOST_CHECK(f.to_string() == "f(x,y)");
 
-  aterm_string s("s");
+  atermpp::aterm_string s("s"); // g++ 3.4.4 complains if atermpp:: is removed :-(
   // aterm_string s1("s1(x)"); will generate an error!
 
   return 0;

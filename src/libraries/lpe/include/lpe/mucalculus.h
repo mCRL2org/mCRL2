@@ -9,11 +9,10 @@
 
 #include <string>
 #include <cassert>
+#include "atermpp/aterm_traits.h"
 #include "atermpp/atermpp.h"
 #include "atermpp/aterm_string.h"
 #include "lpe/detail/utility.h"
-#include "lpe/aterm_wrapper.h"
-#include "lpe/substitute.h"
 #include "lpe/sort.h"
 #include "lpe/action.h"
 #include "lpe/data.h"
@@ -32,20 +31,20 @@ using lpe::detail::parse_variable;
 // state_formula
 /// \brief state formula expression.
 ///
-class state_formula: public aterm_appl_wrapper
+class state_formula: public aterm_appl
 {
   public:
     state_formula()
     {}
 
     state_formula(ATermAppl t)
-      : aterm_appl_wrapper(aterm_appl(t))
+      : aterm_appl(aterm_appl(t))
     {
       assert(gsIsStateFrm(t));
     }
 
     state_formula(aterm_appl t)
-      : aterm_appl_wrapper(t)
+      : aterm_appl(t)
     {
       assert(gsIsStateFrm(t));
     }
@@ -54,7 +53,7 @@ class state_formula: public aterm_appl_wrapper
     state_formula(std::string s)
     {
       std::pair<std::string, data_expression_list> p = parse_variable(s);
-      m_term = gsMakeStateVar(aterm_string(p.first), p.second);
+      m_term = reinterpret_cast<ATerm>(gsMakeStateVar(aterm_string(p.first), p.second));
     }
 
     /// Returns true if every propositional variable occurring in the formula
@@ -73,7 +72,7 @@ class state_formula: public aterm_appl_wrapper
     ///
     bool is_true() const
     {
-      return gsIsStateTrue(m_term);
+      return gsIsStateTrue(*this);
     }     
 
     /// Returns true if the state formula equals 'false'.
@@ -81,7 +80,7 @@ class state_formula: public aterm_appl_wrapper
     ///
     bool is_false() const
     {
-      return gsIsStateFalse(m_term);
+      return gsIsStateFalse(*this);
     }
 
     /// Applies a substitution to this state_formula and returns the result.
@@ -90,7 +89,7 @@ class state_formula: public aterm_appl_wrapper
     template <typename Substitution>
     state_formula substitute(Substitution f) const
     {
-      return state_formula(f(aterm_appl(*this)));
+      return state_formula(f(aterm(*this)));
     }     
 };
 
@@ -104,20 +103,20 @@ typedef term_list<state_formula> state_formula_list;
 // action_formula
 /// \brief action formula expression.
 ///
-class action_formula: public aterm_appl_wrapper
+class action_formula: public aterm_appl
 {
   public:
     action_formula()
     {}
 
     action_formula(ATermAppl t)
-      : aterm_appl_wrapper(aterm_appl(t))
+      : aterm_appl(aterm_appl(t))
     {
       assert(gsIsActFrm(t));
     }
 
     action_formula(aterm_appl t)
-      : aterm_appl_wrapper(t)
+      : aterm_appl(t)
     {
       assert(gsIsActFrm(t));
     }
@@ -127,7 +126,7 @@ class action_formula: public aterm_appl_wrapper
     ///
     bool is_true() const
     {
-      return gsIsActTrue(m_term);
+      return gsIsActTrue(*this);
     }     
 
     /// Returns true if the action formula equals 'false'.
@@ -135,7 +134,7 @@ class action_formula: public aterm_appl_wrapper
     ///
     bool is_false() const
     {
-      return gsIsActFalse(m_term);
+      return gsIsActFalse(*this);
     }
 
     /// Applies a substitution to this action_formula and returns the result.
@@ -144,7 +143,7 @@ class action_formula: public aterm_appl_wrapper
     template <typename Substitution>
     action_formula substitute(Substitution f) const
     {
-      return action_formula(f(aterm_appl(*this)));
+      return action_formula(f(aterm(*this)));
     }     
 };
 
@@ -158,20 +157,20 @@ typedef term_list<action_formula> action_formula_list;
 // regular_formula
 /// \brief regular formula expression.
 ///
-class regular_formula: public aterm_appl_wrapper
+class regular_formula: public aterm_appl
 {
   public:
     regular_formula()
     {}
 
     regular_formula(ATermAppl t)
-      : aterm_appl_wrapper(aterm_appl(t))
+      : aterm_appl(aterm_appl(t))
     {
       assert(gsIsRegFrm(t));
     }
 
     regular_formula(aterm_appl t)
-      : aterm_appl_wrapper(t)
+      : aterm_appl(t)
     {
       assert(gsIsRegFrm(t));
     }
@@ -182,7 +181,7 @@ class regular_formula: public aterm_appl_wrapper
     template <typename Substitution>
     regular_formula substitute(Substitution f) const
     {
-      return regular_formula(f(aterm_appl(*this)));
+      return regular_formula(f(aterm(*this)));
     }     
 };
 
@@ -193,6 +192,47 @@ class regular_formula: public aterm_appl_wrapper
 typedef term_list<regular_formula> regular_formula_list;
 
 } // namespace lpe
+
+namespace atermpp
+{
+using lpe::state_formula;
+using lpe::action_formula;
+using lpe::regular_formula;
+
+template<>
+struct aterm_traits<state_formula>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(lpe::state_formula t)   { t.protect(); }
+  static void unprotect(lpe::state_formula t) { t.unprotect(); }
+  static void mark(lpe::state_formula t)      { t.mark(); }
+  static ATerm term(lpe::state_formula t)     { return t.term(); }
+  static ATerm* ptr(lpe::state_formula& t)    { return &t.term(); }
+};
+
+template<>
+struct aterm_traits<action_formula>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(action_formula t)   { t.protect(); }
+  static void unprotect(action_formula t) { t.unprotect(); }
+  static void mark(action_formula t)      { t.mark(); }
+  static ATerm term(action_formula t)     { return t.term(); }
+  static ATerm* ptr(action_formula& t)    { return &t.term(); }
+};
+
+template<>
+struct aterm_traits<regular_formula>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(regular_formula t)   { t.protect(); }
+  static void unprotect(regular_formula t) { t.unprotect(); }
+  static void mark(regular_formula t)      { t.mark(); }
+  static ATerm term(regular_formula t)     { return t.term(); }
+  static ATerm* ptr(regular_formula& t)    { return &t.term(); }
+};
+
+} // namespace atermpp
 
 #endif // LPE_CALCULUS_H
 

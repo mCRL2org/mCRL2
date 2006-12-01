@@ -5,7 +5,6 @@
 #define LPE_DATA_SPECIFICATION_H
 
 #include "atermpp/aterm.h"
-#include "lpe/aterm_wrapper.h"
 #include "lpe/sort.h"
 #include "lpe/function.h"
 #include "lpe/data.h"
@@ -21,7 +20,7 @@ using atermpp::aterm_list;
 ///
 // <DataSpec>     ::= DataSpec(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
 //                      MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*))
-class data_specification: public aterm_appl_wrapper
+class data_specification: public aterm_appl
 {
   // N.B. A data_specification is not explicitly represented in the specification.
 
@@ -40,10 +39,10 @@ class data_specification: public aterm_appl_wrapper
     {}
 
     data_specification(aterm_appl t)
-      : aterm_appl_wrapper(t)
+      : aterm_appl(t)
     {
       assert(gsIsDataSpec(t));
-      aterm_list::iterator i = t.argument_list().begin();
+      aterm_appl::iterator i = t.begin();
       m_sorts        = sort_list(aterm_appl(*i++).argument(0));
       m_constructors = function_list(aterm_appl(*i++).argument(0));
       m_mappings     = function_list(aterm_appl(*i++).argument(0));
@@ -51,13 +50,13 @@ class data_specification: public aterm_appl_wrapper
     }
 
     data_specification(sort_list sorts, function_list constructors, function_list mappings, data_equation_list equations)
-      : aterm_appl_wrapper(gsMakeDataSpec(
-                             gsMakeSortSpec(sorts),
-                             gsMakeConsSpec(constructors),
-                             gsMakeMapSpec(mappings),
-                             gsMakeDataEqnSpec(equations)
-                           )
-                          ),
+      : aterm_appl(gsMakeDataSpec(
+                      gsMakeSortSpec(sorts),
+                      gsMakeConsSpec(constructors),
+                      gsMakeMapSpec(mappings),
+                      gsMakeDataEqnSpec(equations)
+                     )
+                   ),
         m_sorts(sorts),
         m_constructors(constructors),
         m_mappings(mappings),

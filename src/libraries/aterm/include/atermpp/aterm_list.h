@@ -61,7 +61,7 @@ namespace atermpp {
   /// N.B. This is intended as a replacement for the term_list of the atermpp library.
   ///
   template <typename Term>
-  class term_list: public aterm
+  class term_list: public aterm_base
   {
     protected:
       const ATermList list() const
@@ -106,21 +106,24 @@ namespace atermpp {
       /// Default constructor.
       ///
       term_list()
-        : aterm(ATmakeList0())
+        : aterm_base(ATmakeList0())
       {}
 
       /// Construction from ATermList.
       ///
       term_list(ATermList l)
-        : aterm(l)
+        : aterm_base(l)
       {
-        assert(type() == AT_LIST);
       }
+
+      /// Construction from aterm_list.
+      ///
+      term_list(const term_list<aterm>& t);
 
       /// Allow construction from an aterm. The aterm must be of the right type.
       ///
       term_list(aterm t)
-        : aterm(t)
+        : aterm_base(t)
       {
         assert(type() == AT_LIST);
       }
@@ -130,10 +133,23 @@ namespace atermpp {
 
       template <class Iter>
       term_list(Iter first, Iter last)
-        : aterm(ATmakeList0())
+        : aterm_base(ATmakeList0())
       {
         while (first != last)
           m_term = void2term(list2void(ATinsert(list(), aterm(*(--last)))));
+      }
+
+      term_list<Term>& operator=(aterm_base t)
+      {
+        assert(t.type() == AT_LIST);
+        m_term = aterm_traits<aterm_base>::term(t);
+        return *this;
+      }
+
+      term_list<Term>& operator=(ATermList t)
+      {
+        m_term = reinterpret_cast<ATerm>(t);
+        return *this;
       }
 
       /// The destructor.
@@ -276,12 +292,12 @@ namespace atermpp {
   ///
   template <typename Term, typename Function>
   inline
-  term_list<Term> apply(term_list<Term> l, const Function f)
+  aterm_list apply(term_list<Term> l, const Function f)
   {
-    term_list<Term> result;
+    aterm_list result;
     for (typename term_list<Term>::iterator i = l.begin(); i != l.end(); ++i)
     {
-      result = push_front(result, f(*i));
+      result = push_front(result, aterm(f(*i)));
     }
     return reverse(result);
   }
@@ -310,211 +326,40 @@ namespace atermpp {
   term_list<Term> operator+(Term t, term_list<Term> l)
   { return term_list<Term>(ATappend(l, aterm(t))); }
 
-  inline
-  bool operator<(aterm_list x, aterm_list y)
+  template <typename Term>
+  struct aterm_traits<term_list<Term> >
   {
-    return ATermList(x) < ATermList(y);
-  }
+    typedef ATermList aterm_type;
+    static void protect(term_list<Term> t)   { t.protect(); }
+    static void unprotect(term_list<Term> t) { t.unprotect(); }
+    static void mark(term_list<Term> t)      { t.mark(); }
+    static ATerm term(term_list<Term> t)     { return t.term(); }
+    static ATerm* ptr(term_list<Term>& t)    { return &t.term(); }
+  };
 
-/*
-  ///
-  /// Returns the next part (the tail) of list l.
-  ///
   template <typename Term>
-  inline
-  term_list<Term> get_next(term_list<Term> l)
+  bool operator==(const term_list<Term>& x, const term_list<Term>& y)
   {
-    return term_list<Term>(aterm_get_next(l));
-  }
-
-  ///
-  /// Return the sublist from start to the end of list l.
-  ///
-  template <typename Term>
-  inline
-  term_list<Term> tail(term_list<Term> l, int start)
-  { return term_list<Term>(ATgetTail(l, start)); }
-  
-  ///
-  /// Replace the tail of list l from position start with new_tail.
-  ///
-  template <typename Term>
-  inline
-  term_list<Term> replace_tail(term_list<Term> l, term_list<Term> new_tail, int start)
-  { return term_list<Term>(ATreplaceTail(l, new_tail, start)); }
-  
-  ///
-  /// Return all but the last element of list l.
-  ///
-  template <typename Term>
-  inline
-  term_list<Term> prefix(term_list<Term> l)
-  { return term_list<Term>(ATgetPrefix(l)); }
-  
-  ///
-  /// Return the last element of list l.
-  ///
-  template <typename Term>
-  inline
-  Term get_last(term_list<Term> l)
-  { return Term(ATgetLast(l)); }
-  
-  ///
-  /// Get a portion (slice) of list l.
-  /// Return the portion of list that lies between start and end.  Thus start is
-  /// included, end is not.
-  ///
-  template <typename Term>
-  inline
-  term_list<Term> slice(term_list<Term> l, int start, int end)
-  { return term_list<Term>(ATgetSlice(l, start, end)); }
-  
-  ///
-  /// Return list l with el inserted.
-  /// The behaviour of insert is of constant complexity. That is, the behaviour of
-  /// insert does not degrade as the length of list increases.
-  ///
-  template <typename Term>
-  inline
-  term_list<Term> insert(term_list<Term> l, Term el)
-  { return term_list<Term>(ATinsert(l, el)); }
-  
-  ///
-  /// Return list l with el inserted at position index.
-  ///
-  template <typename Term>
-  inline
-  term_list<Term> insert_at(term_list<Term> l, Term el, int index)
-  { return term_list<Term>(ATinsertAt(l, el, index)); }
-  
-  ///
-  /// Return list l with el appended to it.
-  /// Note that append is implemented in terms of insert by making a new list
-  /// with el as the first element and then inserting all elements from list. As such, the complexity
-  /// of append is linear in the number of elements in list.
-  ///    When append is needed inside a loop that traverses a list behaviour
-  /// of the loop will demonstrate quadratic complexity.
-  ///
-  template <typename Term>
-  inline
-  term_list<Term> append(term_list<Term> l, Term el)
-  { return term_list<Term>(ATappend(l, el)); }
-  
-  ///
-  /// Return the concatenation of the list l and m.
-  ///
-  template <typename Term>
-  inline
-  term_list<Term> concat(term_list<Term> l, term_list<Term> m)
-  { return term_list<Term>(ATconcat(l, m)); }
-  
-  ///
-  /// Return the index of a Term in a list.
-  /// Return the index where el can be found in list. Start looking at position start.
-  /// Returns -1 if el is not in list.
-  ///
-  template <typename Term>
-  inline
-  int index_of(term_list<Term> l, Term el, int start)
-  { return ATindexOf(l, el, start); }
-  
-  ///
-  /// Return the index of an Term in a list (reverse).
-  /// Search backwards for el in list. Start searching at start. Return the index of
-  /// the first occurrence of l encountered, or -1 when el is not present before start.
-  ///
-  template <typename Term>
-  inline
-  int last_index_of(term_list<Term> l, Term el, int start)
-  { return ATlastIndexOf(l, el, start); }
-  
-  ///
-  /// Return a specific element of a list.
-  /// Return the element at position index in list. Returns `Term()` when index is not in
-  /// list.
-  ///
-  template <typename Term>
-  inline
-  Term element_at(term_list<Term> l, int index)
-  { return Term(ATelementAt(l, index)); }
-  
-  ///
-  /// Return list with one occurrence of el removed.
-  ///
-  template <typename Term>
-  inline
-  term_list<Term> remove_element(term_list<Term> l, Term elem)
-  { return term_list<Term>(ATremoveElement(l, elem)); }
-  
-  ///
-  /// Return list l with all occurrences of el removed.
-  ///
-  template <typename Term>
-  inline
-  term_list<Term> remove_all(term_list<Term> l, Term el)
-  {
-    return term_list<Term>(ATremoveAll(l, el));
-  }
-
-  ///
-  /// Return list l with the element at index removed.
-  ///
-  template <typename Term>
-  inline
-  term_list<Term> remove_element_at(term_list<Term> l, int index)
-  { return term_list<Term>(ATremoveElementAt(l, index)); }
-  
-  ///
-  /// Return list l with the element at index replaced by el.
-  ///
-  template <typename Term>
-  inline
-  term_list<Term> replace(term_list<Term> l, Term elem, int index)
-  { return term_list<Term>(ATreplace(l, elem, index)); } 
-*/
-
-  /// INTERNAL ONLY
-  template <typename T>
-  ATerm aterm_ptr(atermpp::term_list<T>& t)
-  {
-    return t;
+    return ATisEqual(aterm_traits<term_list<Term> >::term(x), aterm_traits<term_list<Term> >::term(y)) == ATtrue;
   }
   
-  /// INTERNAL ONLY
-  template <typename T>
-  ATerm aterm_ptr(const atermpp::term_list<T>& t)
+  template <typename Term>
+  bool operator==(const term_list<Term>& x, ATermList y)
   {
-    return t;
+    return ATisEqual(aterm_traits<term_list<Term> >::term(x), y) == ATtrue;
+  }
+  
+  template <typename Term>
+  bool operator==(ATermList x, const term_list<Term>& y)
+  {
+    return ATisEqual(x, aterm_traits<term_list<Term> >::term(y)) == ATtrue;
   }
 
-   template <>
-   class aterm_protect_traits<aterm_list>
-   {
-     public:
-       static void protect(aterm_list t)
-       {
-#ifdef ATERM_DEBUG_PROTECTION
-std::cout << "aterm_protect_traits<aterm_list>::protect() " << t << std::endl;
-#endif // ATERM_DEBUG_PROTECTION
-         t.protect();
-       }
-
-       static void unprotect(aterm_list t)
-       {
-#ifdef ATERM_DEBUG_PROTECTION
-std::cout << "aterm_protect_traits<aterm_list>::unprotect() " << t << std::endl;
-#endif // ATERM_DEBUG_PROTECTION
-         t.unprotect();
-       }
-
-       static void mark(aterm_list t)
-       {
-#ifdef ATERM_DEBUG_PROTECTION
-std::cout << "aterm_protect_traits<aterm_list>::mark() " << t << std::endl;
-#endif // ATERM_DEBUG_PROTECTION
-         t.mark();
-       }
-   };
+  // implementation
+  template <typename Term>
+  term_list<Term>::term_list(const term_list<aterm>& t)
+    : aterm_base(t)
+  {}
 
 } // namespace atermpp
 

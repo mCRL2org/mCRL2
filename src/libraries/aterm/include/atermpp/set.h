@@ -4,8 +4,8 @@
 #include <functional>
 #include <memory>
 #include <set>
+#include "atermpp/aterm_traits.h"
 #include "../atermpp.h"          // IProtectedATerm
-#include "atermpp/aterm_protect_traits.h"
 
 namespace atermpp {
 
@@ -69,7 +69,7 @@ std::cout << "atermpp::set.ATprotectTerms() : protecting " << set<T>::size() << 
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::set<T, Compare, Allocator>::iterator i = std::set<T, Compare, Allocator>::begin(); i != std::set<T, Compare, Allocator>::end(); ++i)
       {
-        aterm_protect_traits<T>::mark(*i);
+        aterm_traits<T>::mark(*i);
       }
     }
 };
@@ -134,7 +134,7 @@ std::cout << "atermpp::multiset.ATprotectTerms() : protecting " << multiset<T>::
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::multiset<T, Compare, Allocator>::iterator i = std::multiset<T, Compare, Allocator>::begin(); i != std::multiset<T, Compare, Allocator>::end(); ++i)
       {
-        aterm_protect_traits<T>::mark(*i);
+        aterm_traits<T>::mark(*i);
       }
     }
 };

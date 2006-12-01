@@ -3,8 +3,8 @@
 
 #include <memory>
 #include <vector>
+#include "atermpp/aterm_traits.h"
 #include "../atermpp.h"          // IProtectedATerm
-#include "atermpp/aterm_protect_traits.h"
 
 namespace atermpp {
 
@@ -73,7 +73,7 @@ std::cout << "atermpp::vector.ATprotectTerms() : protecting " << vector<T>::size
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::vector<T, Allocator>::iterator i = std::vector<T, Allocator>::begin(); i != std::vector<T, Allocator>::end(); ++i)
       {
-        aterm_protect_traits<T>::mark(*i);
+        aterm_traits<T>::mark(*i);
       }
     }
 };

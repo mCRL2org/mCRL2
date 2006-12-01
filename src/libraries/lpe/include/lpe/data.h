@@ -13,9 +13,8 @@
 #include "atermpp/algorithm.h"
 #include "atermpp/aterm_access.h"
 #include "atermpp/aterm_string.h"
-#include "lpe/aterm_wrapper.h"
-#include "lpe/substitute.h"
 #include "lpe/sort.h"
+#include "lpe/pretty_print.h"
 #include "lpe/predefined_symbols.h"
 #include "lpe/detail/string_utility.h"
 #include "libstruct.h"
@@ -38,20 +37,20 @@ class data_variable;
 // data_expression
 /// \brief data expression.
 ///
-class data_expression: public aterm_appl_wrapper
+class data_expression: public aterm_appl
 {
   public:
     data_expression()
     {}
 
     data_expression(aterm_appl term)
-      : aterm_appl_wrapper(term)
+      : aterm_appl(term)
     {
       assert(gsIsNil(term) || gsIsDataVarId(term) || gsIsOpId(term) || gsIsDataAppl(term));
     }
 
     data_expression(ATermAppl term)
-      : aterm_appl_wrapper(term)
+      : aterm_appl(term)
     {
       assert(gsIsNil(term) || gsIsDataVarId(term) || gsIsOpId(term) || gsIsDataAppl(term));
     }
@@ -97,7 +96,14 @@ class data_expression: public aterm_appl_wrapper
     ///
     lpe::sort type() const
     {
-      return lpe::sort(gsGetSort(m_term));
+      return lpe::sort(gsGetSort(*this));
+    }
+
+    /// Returns a pretty print representation of the term.
+    ///
+    std::string pp() const
+    {
+      return pretty_print(term());
     }
 
     /// Applies a substitution to this data_expression and returns the result.
@@ -106,7 +112,7 @@ class data_expression: public aterm_appl_wrapper
     template <typename Substitution>
     data_expression substitute(Substitution f) const
     {
-      return data_expression(f(aterm_appl(*this)));
+      return data_expression(f(aterm(*this)));
     }     
 };
 
@@ -116,24 +122,19 @@ class data_expression: public aterm_appl_wrapper
 ///
 typedef term_list<data_expression> data_expression_list;
 
-inline term_list<ATermAppl> get_sorts(term_list<ATermAppl> l)
-{
-  return apply(l,&gsGetSort);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // data_variable
 /// \brief data variable.
 ///
 // DataVarId(<String>, <SortExpr>)
-class data_variable: public aterm_appl_wrapper
+class data_variable: public aterm_appl
 {
   public:
     data_variable()
     {}
 
     data_variable(aterm_appl t)
-     : aterm_appl_wrapper(t)
+     : aterm_appl(t)
     {
       assert(gsIsDataVarId(t));
     }
@@ -150,11 +151,11 @@ class data_variable: public aterm_appl_wrapper
       assert (idx != std::string::npos);
       std::string name = s.substr(0, idx);
       std::string type = s.substr(idx+1);
-      m_term = gsMakeDataVarId(gsString2ATermAppl(name.c_str()), lpe::sort(type));
+      m_term = reinterpret_cast<ATerm>(gsMakeDataVarId(gsString2ATermAppl(name.c_str()), lpe::sort(type)));
     }
 
     data_variable(const std::string& name, const lpe::sort& s)
-     : aterm_appl_wrapper(gsMakeDataVarId(gsString2ATermAppl(name.c_str()), s))
+     : aterm_appl(gsMakeDataVarId(gsString2ATermAppl(name.c_str()), s))
     {}
 
     /// Returns the name of the data_variable.
@@ -172,8 +173,15 @@ class data_variable: public aterm_appl_wrapper
     {
       return lpe::sort(aterm_appl(*this).argument(1));
     }
-};
 
+    /// Returns a pretty print representation of the term.
+    ///                                                   
+    std::string pp() const                                
+    {                                                     
+      return pretty_print(term());
+    }
+  };
+                                                            
 ///////////////////////////////////////////////////////////////////////////////
 // data_variable_list
 /// \brief singly linked list of data variables
@@ -182,7 +190,7 @@ typedef term_list<data_variable> data_variable_list;
 
 inline
 data_expression::data_expression(const data_variable& v)
-  : aterm_appl_wrapper(aterm_appl(v))
+  : aterm_appl(aterm_appl(v))
 {
 }
 
@@ -191,22 +199,21 @@ data_expression::data_expression(const data_variable& v)
 /// \brief data variable with an initial value.
 ///
 // DataVarIdInit(<String>, <SortExpr>, <DataExpr>)
-class data_variable_init: public aterm_appl_wrapper
+class data_variable_init: public aterm_appl
 {
   public:
     data_variable_init()
     {}
 
     data_variable_init(aterm_appl t)
-     : aterm_appl_wrapper(t)
+     : aterm_appl(t)
     {
       assert(gsIsDataVarIdInit(t));
     }
     
     data_variable to_variable() const
     {
-      term_list<aterm_appl> l(arguments());
-      term_list<aterm_appl>::iterator i = l.begin();
+      iterator i = begin();
       aterm_appl x = *i++;
       aterm_appl y = *i;
       return data_variable(gsMakeDataVarId(x, y));
@@ -214,12 +221,18 @@ class data_variable_init: public aterm_appl_wrapper
 
     data_expression to_expression() const
     {
-      term_list<aterm_appl> l(arguments());
-      term_list<aterm_appl>::iterator i = l.begin();
+      iterator i = begin();
       aterm_appl x = *i++;
       aterm_appl y = *i++;
       aterm_appl z = *i;
       return data_expression(z);
+    }
+
+    /// Returns a pretty print representation of the term.
+    ///                                                   
+    std::string pp() const                                
+    {                                                     
+      return pretty_print(term());
     }
 };
 
@@ -233,7 +246,7 @@ typedef term_list<data_variable_init> data_variable_init_list;
 // data_equation
 /// \brief data equation.
 ///
-class data_equation: public aterm_appl_wrapper
+class data_equation: public aterm_appl
 {
   protected:
     data_variable_list m_variables;
@@ -248,10 +261,10 @@ class data_equation: public aterm_appl_wrapper
     {}
 
     data_equation(aterm_appl t)
-     : aterm_appl_wrapper(t)
+     : aterm_appl(t)
     {
       assert(gsIsDataEqn(t));
-      aterm_list::iterator i = t.argument_list().begin();
+      aterm_appl::iterator i = t.begin();
       m_variables = data_variable_list(*i++);
       m_condition = data_expression(*i++);
       m_lhs       = data_expression(*i++);
@@ -263,7 +276,7 @@ class data_equation: public aterm_appl_wrapper
                   data_expression    lhs,
                   data_expression    rhs
                  )
-     : aterm_appl_wrapper(gsMakeDataEqn(variables, condition, lhs, rhs)),
+     : aterm_appl(gsMakeDataEqn(variables, condition, lhs, rhs)),
        m_variables(variables),
        m_condition(condition),
        m_lhs(lhs),
@@ -298,13 +311,20 @@ class data_equation: public aterm_appl_wrapper
       return m_rhs;
     }
 
+    /// Returns a pretty print representation of the term.
+    ///                                                   
+    std::string pp() const                                
+    {                                                     
+      return pretty_print(term());                        
+    }
+
     /// Applies a substitution to this data_equation and returns the result.
     /// The Substitution object must supply the method aterm operator()(aterm).
     ///
     template <typename Substitution>
     data_equation substitute(Substitution f) const
     {
-      return data_equation(f(aterm_appl(*this)));
+      return data_equation(f(aterm(*this)));
     }     
 };
 
@@ -319,7 +339,7 @@ typedef term_list<data_equation> data_equation_list;
 /// \brief data_assignment is an assignment to a data variable.
 ///
 // syntax: data_assignment(data_variable lhs, data_expression rhs)
-class data_assignment: public aterm_appl_wrapper
+class data_assignment: public aterm_appl
 {
   protected:
     data_variable   m_lhs;         // left hand side of the assignment
@@ -333,10 +353,10 @@ class data_assignment: public aterm_appl_wrapper
     }
 
     data_assignment(aterm_appl t)
-     : aterm_appl_wrapper(t)
+     : aterm_appl(t)
     {
       assert(gsIsAssignment(t));
-      aterm_list::iterator i = t.argument_list().begin();
+      aterm_appl::iterator i = t.begin();
       m_lhs = data_variable(*i++);
       m_rhs = data_expression(*i);
       assert(is_well_typed());
@@ -344,7 +364,7 @@ class data_assignment: public aterm_appl_wrapper
 
     data_assignment(data_variable lhs, data_expression rhs)
      : 
-       aterm_appl_wrapper(gsMakeAssignment(lhs, rhs)),
+       aterm_appl(gsMakeAssignment(lhs, rhs)),
        m_lhs(lhs),
        m_rhs(rhs)
     {
@@ -354,7 +374,7 @@ class data_assignment: public aterm_appl_wrapper
     ///
     aterm operator()(aterm t) const
     {
-      return atermpp::replace(t, aterm_appl(m_lhs), aterm_appl(m_rhs));
+      return atermpp::replace(t, aterm(m_lhs), aterm(m_rhs));
     }
 
     /// Returns the left hand side of the data_assignment.
@@ -369,6 +389,13 @@ class data_assignment: public aterm_appl_wrapper
     data_expression rhs() const
     {
       return m_rhs;
+    }
+
+    /// Returns a pretty print representation of the term.
+    ///                                                   
+    std::string pp() const                                
+    {                                                     
+      return pretty_print(term());                        
     }
 };
 
@@ -433,7 +460,7 @@ struct data_expression_substitution
   
   aterm operator()(aterm t) const
   {
-    return atermpp::replace(t, aterm_appl(m_src), aterm_appl(m_dest));
+    return atermpp::replace(t, aterm(m_src), aterm(m_dest));
   }
 };
 
@@ -452,7 +479,7 @@ struct data_expression_list_substitution
   
   aterm operator()(aterm t) const
   {
-    return atermpp::replace(t, aterm_list(m_src), aterm_list(m_dest));
+    return atermpp::replace(t, aterm(m_src), aterm(m_dest));
   }
 };
 
@@ -474,6 +501,71 @@ bool is_bool(data_expression e)
 
 // todo: Pos/Nat/Int
 
-} // namespace mcrl
+} // namespace lpe
+
+namespace atermpp
+{
+using lpe::data_expression;
+using lpe::data_variable;
+using lpe::data_assignment;
+using lpe::data_variable_init;
+using lpe::data_equation;
+
+template<>
+struct aterm_traits<data_expression>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(lpe::data_expression t)   { t.protect(); }
+  static void unprotect(lpe::data_expression t) { t.unprotect(); }
+  static void mark(lpe::data_expression t)      { t.mark(); }
+  static ATerm term(lpe::data_expression t)     { return t.term(); }
+  static ATerm* ptr(lpe::data_expression& t)    { return &t.term(); }
+};
+
+template<>
+struct aterm_traits<data_variable>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(data_variable t)   { t.protect(); }
+  static void unprotect(data_variable t) { t.unprotect(); }
+  static void mark(data_variable t)      { t.mark(); }
+  static ATerm term(data_variable t)     { return t.term(); }
+  static ATerm* ptr(data_variable& t)    { return &t.term(); }
+};
+
+template<>
+struct aterm_traits<data_assignment>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(data_assignment t)   { t.protect(); }
+  static void unprotect(data_assignment t) { t.unprotect(); }
+  static void mark(data_assignment t)      { t.mark(); }
+  static ATerm term(data_assignment t)     { return t.term(); }
+  static ATerm* ptr(data_assignment& t)    { return &t.term(); }
+};
+
+template<>
+struct aterm_traits<data_variable_init>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(lpe::data_variable_init t)   { t.protect(); }
+  static void unprotect(lpe::data_variable_init t) { t.unprotect(); }
+  static void mark(lpe::data_variable_init t)      { t.mark(); }
+  static ATerm term(lpe::data_variable_init t)     { return t.term(); }
+  static ATerm* ptr(lpe::data_variable_init& t)    { return &t.term(); }
+};
+
+template<>
+struct aterm_traits<data_equation>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(data_equation t)   { t.protect(); }
+  static void unprotect(data_equation t) { t.unprotect(); }
+  static void mark(data_equation t)      { t.mark(); }
+  static ATerm term(data_equation t)     { return t.term(); }
+  static ATerm* ptr(data_equation& t)    { return &t.term(); }
+};
+
+} // namespace atermpp
 
 #endif // LPE_DATA_H

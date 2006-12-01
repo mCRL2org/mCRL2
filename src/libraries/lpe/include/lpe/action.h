@@ -9,8 +9,8 @@
 #include "atermpp/atermpp.h"
 #include "atermpp/aterm_list.h"
 #include "atermpp/aterm_string.h"
-#include "lpe/substitute.h"
 #include "lpe/data.h"
+#include "lpe/pretty_print.h"
 
 namespace lpe {
 
@@ -24,7 +24,7 @@ using atermpp::term_list;
 ///
 // <Action>       ::= Action(<ActId>, <DataExpr>*)
 // <ActId>        ::= ActId(<String>, <SortExpr>*)
-class action: public aterm_appl_wrapper
+class action: public aterm_appl
 {
   protected:
     aterm_string m_name;
@@ -36,20 +36,20 @@ class action: public aterm_appl_wrapper
     {}
 
     action(aterm_appl t)
-     : aterm_appl_wrapper(t)
+     : aterm_appl(t)
     {
       assert(gsIsAction(t));
-      aterm_list::iterator i = t.argument_list().begin();
+      aterm_appl::iterator i = t.begin();
       aterm_appl act_id = *i++;
       m_arguments = data_expression_list(*i);
       
-      aterm_list::iterator j = act_id.argument_list().begin();
+      aterm_appl::iterator j = act_id.begin();
       m_name = *j++;
       m_sorts = *j;
     }
 
     action(const aterm_string& name, const data_expression_list& arguments)
-     : aterm_appl_wrapper(gsMakeAction(gsMakeActId(name, get_sorts(arguments)), arguments)),
+     : aterm_appl(gsMakeAction(gsMakeActId(name, apply(arguments, gsGetSort)), arguments)),
        m_name(name),
        m_arguments(arguments)
     {}
@@ -81,6 +81,13 @@ class action: public aterm_appl_wrapper
     {
       return action(f(aterm_appl(*this)));
     }     
+
+    /// Returns a pretty print representation of the term.
+    ///                                                   
+    std::string pp() const                                
+    {                                                     
+      return pretty_print(term());                        
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

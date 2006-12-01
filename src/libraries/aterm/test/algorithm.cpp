@@ -46,11 +46,11 @@ void test_algorithm()
 {
   aterm_appl a = make_term("h(g(x),f(y),p(a(x,y),q(f(z))))");
 
-  aterm t = find_if(a, is_f());
+  aterm t = find_if(aterm(a), is_f());
   BOOST_CHECK(t == make_term("f(y)"));
   
   atermpp::vector<aterm> v;
-  find_all_if(a, is_f(), back_inserter(v));
+  find_all_if(aterm(a), is_f(), back_inserter(v));
   BOOST_CHECK(v.front() == make_term("f(y)"));
   BOOST_CHECK(v.back() == make_term("f(z)"));
 }
@@ -64,8 +64,8 @@ void test_operators()
   }
 
   {
-    aterm_string a1 = make_term("a1");
-    aterm_string a2 = make_term("a2");
+    atermpp::aterm_string a1 = make_term("a1");
+    atermpp::aterm_string a2 = make_term("a2");
     bool b = (a1 < a2);
   }
 

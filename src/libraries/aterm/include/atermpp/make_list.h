@@ -23,28 +23,28 @@
 
 namespace atermpp
 {
-  inline
-  aterm_list make_list(aterm t0)
+  template <typename T0>
+  aterm_list make_list(T0 t0)
   {
-    return aterm_list(ATmakeList1(t0));
+    return aterm_list(ATmakeList1(aterm_traits<T0>::term(t0)));
   }
   
-  inline
-  aterm_list make_list(aterm t0, aterm t1)
+  template <typename T0, typename T1>
+  aterm_list make_list(T0 t0, T1 t1)
   {
-    return aterm_list(ATmakeList2(t0, t1));
+    return aterm_list(ATmakeList2(aterm_traits<T0>::term(t0), aterm_traits<T1>::term(t1)));
   }
   
-  inline
-  aterm_list make_list(aterm t0, aterm t1, aterm t2)
+  template <typename T0, typename T1, typename T2>
+  aterm_list make_list(T0 t0, T1 t1, T2 t2)
   {
-    return aterm_list(ATmakeList3(t0, t1, t2));
+    return aterm_list(ATmakeList3(aterm_traits<T0>::term(t0), aterm_traits<T1>::term(t1), aterm_traits<T2>::term(t2)));
   }
 
-  inline
-  aterm_list make_list(aterm t0, aterm t1, aterm t2, aterm t3)
+  template <typename T0, typename T1, typename T2, typename T3>
+  aterm_list make_list(T0 t0, T1 t1, T2 t2, T3 t3)
   {
-    return aterm_list(ATmakeList4(t0, t1, t2, t3));
+    return aterm_list(ATmakeList4(aterm_traits<T0>::term(t0), aterm_traits<T1>::term(t1), aterm_traits<T2>::term(t2), aterm_traits<T3>::term(t3)));
   }
 
 } // namespace atermpp

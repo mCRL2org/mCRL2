@@ -32,7 +32,32 @@ namespace atermpp {
   aterm replace_if(aterm t, UnaryPredicate op, aterm new_value, bool recursive);
 
   namespace detail {
-  
+
+    // we need to use our own traits classes to extract the value type from insert iterators
+    template <class Iterator>
+    struct iterator_value
+    {
+      typedef typename std::iterator_traits<Iterator>::value_type type;
+    };
+    
+    template <class Container>
+    struct iterator_value<std::insert_iterator<Container> >
+    {
+      typedef typename Container::value_type type;
+    };
+    
+    template <class Container>
+    struct iterator_value<std::back_insert_iterator<Container> >
+    {
+      typedef typename Container::value_type type;
+    };
+    
+    template <class Container>
+    struct iterator_value<std::front_insert_iterator<Container> >
+    {
+      typedef typename Container::value_type type;
+    };
+
     /// INTERNAL ONLY
     // used to abort the recursive find
     struct found_term_exception
@@ -49,43 +74,47 @@ namespace atermpp {
     {
       if (op(t))
         throw found_term_exception(t);
-  
-      // determine child nodes
-      aterm_list children;
+
       if (t.type() == AT_LIST) {
-        children = t;
+        for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
+        {
+          find_if_impl(*i, op);
+        }
       }
       else if (t.type() == AT_APPL) {
-        children = aterm_appl(t).argument_list();
+        for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
+        {
+          find_if_impl(*i, op);
+        }
       }
       else {
         return;
-      }
-  
-      for (aterm_list::iterator i = children.begin(); i != children.end(); ++i)
-      {
-        find_if_impl(*i, op);
       }
     }
   
     template <typename UnaryPredicate, typename OutputIterator>
     void find_all_if_impl(aterm t, UnaryPredicate op, OutputIterator& destBegin)
     {
-      aterm_list arguments;
+      typedef typename iterator_value<OutputIterator>::type value_type;
+      
       if (t.type() == AT_LIST) {
-        arguments = t;
+        for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
+        {
+          find_all_if_impl(*i, op, destBegin);
+        }
       }
       else if (t.type() == AT_APPL) {
-        if (op(t))
-          destBegin++ = t;
-        arguments = aterm_appl(t).argument_list();
+        if (op(t)) {
+          value_type v(t);
+          *destBegin++ = v;
+        }
+        for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
+        {
+          find_all_if_impl(*i, op, destBegin);
+        }
       }
       else {
         return;
-      }
-      for (aterm_list::iterator i = arguments.begin(); i != arguments.end(); ++i)
-      {
-        find_all_if_impl(*i, op, destBegin);
       }
     }
   

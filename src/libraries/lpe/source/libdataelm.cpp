@@ -13,6 +13,7 @@
 // ======================================================================
 
 #include "lpe/specification.h"
+#include "liblowlevel.h"
 
 using namespace lpe;
 
@@ -184,7 +185,7 @@ ATermAppl removeUnusedData(ATermAppl ATSpec)
 	data_equation_list::iterator ee = eqns.end();
 	sort_list sorts = spec.sorts();
 	sort_list::iterator sse = sorts.end();
-	sort_list conss = spec.constructors();
+	function_list conss = spec.constructors();
 	bool not_done = true;
 	while ( not_done )
 	{

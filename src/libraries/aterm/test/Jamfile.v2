@@ -17,4 +17,5 @@ test-suite aterm
       [ run constructors.cpp ]
       [ run is_quoted.cpp ]
       [ run algorithm.cpp ]
+      [ run operators.cpp ]
     ;

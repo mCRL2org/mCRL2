@@ -4,8 +4,8 @@
 #include <functional>
 #include <memory>
 #include <map>
+#include "atermpp/aterm_traits.h"
 #include "../atermpp.h"          // IProtectedATerm
-#include "atermpp/aterm_protect_traits.h"
 
 namespace atermpp {
 
@@ -69,8 +69,8 @@ std::cout << "atermpp::map.ATprotectTerms() : protecting " << std::map<Key, T, C
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::map<Key, T, Compare, Allocator>::iterator i = std::map<Key, T, Compare, Allocator>::begin(); i != std::map<Key, T, Compare, Allocator>::end(); ++i)
       {
-        aterm_protect_traits<Key>::mark(i->first);
-        aterm_protect_traits<T>::mark(i->second);
+        aterm_traits<Key>::mark(i->first);
+        aterm_traits<T>::mark(i->second);
       }
     }
 };
@@ -135,8 +135,8 @@ std::cout << "atermpp::multimap.ATprotectTerms() : protecting " << multimap<Key,
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::multimap<Key, T, Compare, Allocator>::iterator i = std::multimap<Key, T, Compare, Allocator>::begin(); i != std::multimap<Key, T, Compare, Allocator>::end(); ++i)
       {
-        aterm_protect_traits<Key>::mark(i->first);
-        aterm_protect_traits<T>::mark(i->second);
+        aterm_traits<Key>::mark(i->first);
+        aterm_traits<T>::mark(i->second);
       }
     }
 };

@@ -29,7 +29,7 @@ struct is_sort
 template <typename list_type>
 bool occurs_in(list_type l, lpe::sort s)
 {
-  return find_if(aterm_list(l), is_sort(s)) != aterm();
+  return find_if(l, is_sort(s)) != aterm();
 }
 
 ///\ret the list of all functions f of sort s in fl

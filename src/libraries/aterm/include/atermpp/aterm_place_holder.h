@@ -26,30 +26,23 @@ namespace atermpp
   //---------------------------------------------------------//
   //                     aterm_place_holder
   //---------------------------------------------------------//
-  class aterm_place_holder: public aterm
+  class aterm_place_holder: public aterm_base
   {
    public:
       aterm_place_holder(ATermPlaceholder t)
-        : aterm(t)
+        : aterm_base(t)
       {}
   
       aterm_place_holder(ATerm t)
-        : aterm(t)
+        : aterm_base(ATmakePlaceholder(t))
       {}
   
       /// Build an aterm_place_holder of a specific type. The type is taken from the type
       /// parameter.
       ///
       aterm_place_holder(aterm type)
-        : aterm(ATmakePlaceholder(type.to_ATerm()))
+        : aterm_base(ATmakePlaceholder(type))
       {}
-      
-      /// Get the type of the aterm_place_holder.
-      ///
-      aterm type()
-      {
-        return aterm(ATgetPlaceholder(void2place_holder(m_term)));
-      }
   };
   
 } // namespace atermpp

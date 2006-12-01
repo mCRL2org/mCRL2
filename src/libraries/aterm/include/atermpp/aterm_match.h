@@ -38,13 +38,13 @@
 #  define n BOOST_PP_ITERATION()
 
 #  define TEXT1(z, n, _) T ## n& t ## n
-#  define TEXT2(z, n, _) aterm_ptr_ref(t ## n)
+#  define TEXT2(z, n, _) aterm_traits<T ## n>::ptr(t ## n)
 
 // specialization pattern
 template <BOOST_PP_ENUM_PARAMS(n, class T)>
 bool match(const aterm& t, const std::string& pattern, BOOST_PP_ENUM(n, TEXT1, nil))
 {
-  return ATmatch(t.term(), const_cast<char*>(pattern.c_str()), BOOST_PP_ENUM(n, TEXT2, nil)) == ATtrue;
+  return ATmatch(t, const_cast<char*>(pattern.c_str()), BOOST_PP_ENUM(n, TEXT2, nil)) == ATtrue;
 }
 
 #  undef TEXT1

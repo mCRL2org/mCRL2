@@ -20,14 +20,11 @@
 #include "atermpp/aterm_list.h"
 #include "atermpp/set.h"
 #include "atermpp/vector.h"
-#include "atermpp/aterm_protect_traits.h"
-#include "lpe/aterm_wrapper.h"
 #include "lpe/action.h"
 #include "lpe/data.h"
 #include "lpe/data_declaration.h"
 #include "lpe/data_specification.h"
 #include "lpe/pretty_print.h"
-#include "lpe/substitute.h"
 #include "lpe/mucalculus_init.h"
 #include "lpe/detail/utility.h"
 #include "libstruct.h"
@@ -60,14 +57,14 @@ using lpe::detail::parse_variable;
 //                  | PBESForall(<DataVarId>+, <PBExpr>)
 //                  | PBESExists(<DataVarId>+, <PBExpr>)
 //                  | <PropVarInst>
-class pbes_expression: public aterm_appl_wrapper
+class pbes_expression: public aterm_appl
 {
   public:
     pbes_expression()
     {}
 
     pbes_expression(aterm_appl term)
-      : aterm_appl_wrapper(term)
+      : aterm_appl(term)
     {
       assert(gsIsPBExpr(term));
     }
@@ -75,7 +72,7 @@ class pbes_expression: public aterm_appl_wrapper
     // allow assignment to aterms
     pbes_expression& operator=(aterm t)
     {
-      m_term = ATermAppl(t.term());
+      m_term = t;
       return *this;
     }
 
@@ -115,7 +112,7 @@ typedef term_list<pbes_expression> pbes_expression_list;
 /// \brief A propositional variable declaration
 ///
 // <PropVarDecl>  ::= PropVarDecl(<String>, <DataVarId>*)
-class propositional_variable: public aterm_appl_wrapper
+class propositional_variable: public aterm_appl
 {
   protected:
     aterm_string m_name;
@@ -128,23 +125,23 @@ class propositional_variable: public aterm_appl_wrapper
     // example: "X(d:D,e:E)"
     propositional_variable(std::string s)
     {
-      std::pair<std::string, data_variable_list> p = parse_variable(s);
+      std::pair<std::string, data_expression_list> p = parse_variable(s);
       m_name      = aterm_string(p.first);
       m_variables = p.second;
-      m_term      = gsMakePropVarDecl(m_name, m_variables);
+      m_term      = reinterpret_cast<ATerm>(gsMakePropVarDecl(m_name, m_variables));
     }
 
     propositional_variable(aterm_appl t)
-      : aterm_appl_wrapper(t)
+      : aterm_appl(t)
     {
       assert(gsIsPropVarDecl(t));
-      aterm_list::iterator i = arguments().begin();
+      iterator i = t.begin();
       m_name = *i++;
       m_variables = *i;
     }
 
     propositional_variable(aterm_string name, data_variable_list variables)
-      : aterm_appl_wrapper(gsMakePropVarDecl(name, variables)),
+      : aterm_appl(gsMakePropVarDecl(name, variables)),
         m_name(name),
         m_variables(variables)
     {
@@ -172,7 +169,7 @@ class propositional_variable: public aterm_appl_wrapper
 /// \brief A propositional variable instantiation
 ///
 // <PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*)
-class propositional_variable_instantiation: public aterm_appl_wrapper
+class propositional_variable_instantiation: public aterm_appl
 {
   protected:
     aterm_string m_name;
@@ -188,20 +185,20 @@ class propositional_variable_instantiation: public aterm_appl_wrapper
       std::pair<std::string, data_expression_list> p = parse_variable(s);
       m_name        = aterm_string(p.first);
       m_expressions = p.second;
-      m_term        = gsMakePropVarInst(m_name, m_expressions);
+      m_term        = reinterpret_cast<ATerm>(gsMakePropVarInst(m_name, m_expressions));
     }
 
     propositional_variable_instantiation(aterm_appl t)
-      : aterm_appl_wrapper(t)
+      : aterm_appl(t)
     {
       assert(gsIsPropVarInst(t));
-      aterm_list::iterator i = arguments().begin();
+      iterator i = t.begin();
       m_name = *i++;
       m_expressions = *i;
     }
 
     propositional_variable_instantiation(aterm_string name, data_expression_list expressions)
-      : aterm_appl_wrapper(gsMakePropVarInst(name, expressions)),
+      : aterm_appl(gsMakePropVarInst(name, expressions)),
         m_name(name),
         m_expressions(expressions)
     {
@@ -231,14 +228,14 @@ class propositional_variable_instantiation: public aterm_appl_wrapper
 ///
 // <FixPoint>     ::= Mu
 //                  | Nu
-class pbes_fixpoint_symbol: public aterm_appl_wrapper
+class pbes_fixpoint_symbol: public aterm_appl
 {
   public:
     pbes_fixpoint_symbol()
     {}
 
     pbes_fixpoint_symbol(aterm_appl t)
-      : aterm_appl_wrapper(t)
+      : aterm_appl(t)
     {
       assert(gsIsMu(t) || gsIsNu(t));
     }
@@ -246,20 +243,20 @@ class pbes_fixpoint_symbol: public aterm_appl_wrapper
     // allow assignment to aterms
     pbes_fixpoint_symbol& operator=(aterm t)
     {
-      m_term = ATermAppl(t.term());
+      m_term = t;
       return *this;
     }
 
     /// Returns true if the symbol is mu.
     bool is_mu() const
     {
-      return gsIsMu(m_term);
+      return gsIsMu(*this);
     }
 
     /// Returns true if the symbol is nu.
     bool is_nu() const
     {
-      return gsIsNu(m_term);
+      return gsIsNu(*this);
     }
 };
 
@@ -267,7 +264,7 @@ class pbes_fixpoint_symbol: public aterm_appl_wrapper
 // pbes_equation
 /// \brief pbes equation.
 ///
-class pbes_equation: public aterm_appl_wrapper
+class pbes_equation: public aterm_appl
 {
   protected:
     pbes_fixpoint_symbol   m_symbol;
@@ -289,17 +286,17 @@ class pbes_equation: public aterm_appl_wrapper
     {}
 
     pbes_equation(aterm_appl t)
-      : aterm_appl_wrapper(t)
+      : aterm_appl(t)
     {
       assert(gsIsPBEqn(t));
-      aterm_list::iterator i = arguments().begin();
+      iterator i = t.begin();
       m_symbol   = pbes_fixpoint_symbol(*i++);
       m_variable = propositional_variable(*i++);
       m_formula  = pbes_expression(*i);
     }
 
     pbes_equation(pbes_fixpoint_symbol symbol, propositional_variable variable, pbes_expression expr)
-      : aterm_appl_wrapper(gsMakePBEqn(symbol, variable, expr)),
+      : aterm_appl(gsMakePBEqn(symbol, variable, expr)),
         m_symbol(symbol),
         m_variable(variable),
         m_formula(expr)
@@ -309,7 +306,7 @@ class pbes_equation: public aterm_appl_wrapper
     // allow assignment to aterms
     pbes_equation& operator=(aterm t)
     {
-      m_term = ATermAppl(t.term());
+      m_term = t;
       return *this;
     }
 
@@ -368,7 +365,6 @@ struct container_inserter
     m_container.insert(t);
   }
 };
-*/
 
 template <typename UnaryPredicate>
 void tmp_impl(aterm t, UnaryPredicate pred, atermpp::set<propositional_variable>& s)
@@ -398,6 +394,7 @@ void tmp(ATermAppl t, UnaryPredicate pred, atermpp::set<propositional_variable>&
 {
   tmp_impl(t, pred, s);
 } 
+*/
 
 ///////////////////////////////////////////////////////////////////////////////
 // equation_system
@@ -467,8 +464,7 @@ class equation_system: public atermpp::vector<pbes_equation>
       atermpp::set<propositional_variable> result;
       for (const_iterator i = begin(); i != end(); ++i)
       {
-        // TODO: replace tmp by an aterm algorithm
-        tmp(i->formula(), is_state_variable(), result);
+//        atermpp::find_all_if(i->formula(), is_state_variable(), std::inserter(result, result.end()));
       }
       return result;
     }
@@ -548,7 +544,7 @@ class pbes
       assert(gsIsPBES(t));
       if (!t)
         return false;
-      aterm_list::iterator i = t.argument_list().begin();
+      aterm_appl::iterator i = t.begin();
       m_data          = data_specification(*i++);
       m_equations     = equation_system(pbes_equation_list(*i++));
       m_initial_state = propositional_variable_instantiation(*i);
@@ -588,6 +584,11 @@ class pbes
     {
       pbes_equation_list l(m_equations.begin(), m_equations.end());
       return gsMakePBES(m_data, l, m_initial_state);
+    }
+
+    ATerm term() const
+    {
+      return reinterpret_cast<ATerm>(ATermAppl(*this));
     }
 
     /// Returns the set of binding variables of the pbes, i.e. the variables that
@@ -675,9 +676,7 @@ std::ostream& operator<<(std::ostream& to, const equation_system& p)
 
 namespace atermpp {
 
-using lpe::pbes;
 using lpe::pbes_equation;
-using lpe::aterm_appl_wrapper;
 
 template <>
 struct term_list_iterator_traits<pbes_equation>
@@ -685,62 +684,82 @@ struct term_list_iterator_traits<pbes_equation>
   typedef ATermAppl value_type;
 };
 
-template <>
-class aterm_protect_traits<pbes>
+} // namespace atermpp
+
+namespace atermpp
 {
-  public:
-    static void protect(pbes t)
-    {
-#ifdef ATERM_DEBUG_PROTECTION
-std::cout << "aterm_protect_traits<pbes>::protect() " << t << std::endl;
-#endif // ATERM_DEBUG_PROTECTION
-      t.protect();
-    }
+using lpe::pbes_expression;
+using lpe::propositional_variable;
+using lpe::propositional_variable_instantiation;
+using lpe::pbes_fixpoint_symbol;
+using lpe::pbes_equation;
+using lpe::equation_system;
+using lpe::pbes;
 
-    static void unprotect(pbes t)
-    {
-#ifdef ATERM_DEBUG_PROTECTION
-std::cout << "aterm_protect_traits<pbes>::unprotect() " << t << std::endl;
-#endif // ATERM_DEBUG_PROTECTION
-      t.unprotect();
-    }
-
-    static void mark(pbes t)
-    {
-#ifdef ATERM_DEBUG_PROTECTION
-std::cout << "aterm_protect_traits<pbes>::mark() " << t << std::endl;
-#endif // ATERM_DEBUG_PROTECTION
-      t.mark();
-    }
+template<>
+struct aterm_traits<pbes_expression>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(lpe::pbes_expression t)   { t.protect(); }
+  static void unprotect(lpe::pbes_expression t) { t.unprotect(); }
+  static void mark(lpe::pbes_expression t)      { t.mark(); }
+  static ATerm term(lpe::pbes_expression t)     { return t.term(); }
+  static ATerm* ptr(lpe::pbes_expression& t)    { return &t.term(); }
 };
 
-template <>
-class aterm_protect_traits<pbes_equation>
+template<>
+struct aterm_traits<propositional_variable>
 {
-  public:
-    static void protect(pbes_equation t)
-    {
-#ifdef ATERM_DEBUG_PROTECTION
-std::cout << "aterm_protect_traits<pbes_equation>::protect() " << t << std::endl;
-#endif // ATERM_DEBUG_PROTECTION
-      t.protect();
-    }
+  typedef ATermAppl aterm_type;
+  static void protect(propositional_variable t)   { t.protect(); }
+  static void unprotect(propositional_variable t) { t.unprotect(); }
+  static void mark(propositional_variable t)      { t.mark(); }
+  static ATerm term(propositional_variable t)     { return t.term(); }
+  static ATerm* ptr(propositional_variable& t)    { return &t.term(); }
+};
 
-    static void unprotect(pbes_equation t)
-    {
-#ifdef ATERM_DEBUG_PROTECTION
-std::cout << "aterm_protect_traits<pbes_equation>::unprotect() " << t << std::endl;
-#endif // ATERM_DEBUG_PROTECTION
-      t.unprotect();
-    }
+template<>
+struct aterm_traits<propositional_variable_instantiation>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(propositional_variable_instantiation t)   { t.protect(); }
+  static void unprotect(propositional_variable_instantiation t) { t.unprotect(); }
+  static void mark(propositional_variable_instantiation t)      { t.mark(); }
+  static ATerm term(propositional_variable_instantiation t)     { return t.term(); }
+  static ATerm* ptr(propositional_variable_instantiation& t)    { return &t.term(); }
+};
 
-    static void mark(pbes_equation t)
-    {
-#ifdef ATERM_DEBUG_PROTECTION
-std::cout << "aterm_protect_traits<pbes_equation>::mark() " << t << std::endl;
-#endif // ATERM_DEBUG_PROTECTION
-      t.mark();
-    }
+template<>
+struct aterm_traits<pbes_fixpoint_symbol>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(lpe::pbes_fixpoint_symbol t)   { t.protect(); }
+  static void unprotect(lpe::pbes_fixpoint_symbol t) { t.unprotect(); }
+  static void mark(lpe::pbes_fixpoint_symbol t)      { t.mark(); }
+  static ATerm term(lpe::pbes_fixpoint_symbol t)     { return t.term(); }
+  static ATerm* ptr(lpe::pbes_fixpoint_symbol& t)    { return &t.term(); }
+};
+
+template<>
+struct aterm_traits<pbes_equation>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(pbes_equation t)   { t.protect(); }
+  static void unprotect(pbes_equation t) { t.unprotect(); }
+  static void mark(pbes_equation t)      { t.mark(); }
+  static ATerm term(pbes_equation t)     { return t.term(); }
+  static ATerm* ptr(pbes_equation& t)    { return &t.term(); }
+};
+
+template<>
+struct aterm_traits<pbes>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(pbes t)   { t.protect(); }
+  static void unprotect(pbes t) { t.unprotect(); }
+  static void mark(pbes t)      { t.mark(); }
+  static ATerm term(pbes t)     { return t.term(); }
+  // static ATerm* ptr(pbes& t) undefined for pbes!
 };
 
 } // namespace atermpp

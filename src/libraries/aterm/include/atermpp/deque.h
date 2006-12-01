@@ -3,8 +3,8 @@
 
 #include <memory>
 #include <deque>
+#include "atermpp/aterm_traits.h"
 #include "../atermpp.h"          // IProtectedATerm
-#include "atermpp/aterm_protect_traits.h"
 
 namespace atermpp {
 
@@ -73,7 +73,7 @@ std::cout << "atermpp::deque.ATprotectTerms() : protecting " << deque<T>::size()
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::deque<T, Allocator>::iterator i = std::deque<T, Allocator>::begin(); i != std::deque<T, Allocator>::end(); ++i)
       {
-        aterm_protect_traits<T>::mark(*i);
+        aterm_traits<T>::mark(*i);
       }
     }
 };

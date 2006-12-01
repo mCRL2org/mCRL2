@@ -33,6 +33,7 @@ void test_make_match()
   BOOST_CHECK(i == 16); 
 
   x = match(make_term("[1,2,3]"), "[<int>,<list>]", i, a);
+std::cout << "hieroooooooooooooooooooo " << i << " " << a << std::endl;
   BOOST_CHECK(x);
   BOOST_CHECK(i == 1); 
   BOOST_CHECK(aterm_list(a).size() == 2);

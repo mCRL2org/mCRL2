@@ -16,8 +16,8 @@
 /// \file aterm_blob.h
 /// Contains the definition of the aterm_blob class.
 
-#ifndef ATERM_BLOB_H
-#define ATERM_BLOB_H
+#ifndef aterm_blob_H
+#define aterm_blob_H
 
 #include "atermpp/aterm.h"
 
@@ -26,18 +26,18 @@ namespace atermpp
   //---------------------------------------------------------//
   //                     aterm_blob
   //---------------------------------------------------------//
-  class aterm_blob: public aterm
+  class aterm_blob: public aterm_base
   {
    public:
       aterm_blob()
       {}
 
       aterm_blob(ATermBlob t)
-        : aterm(t)
+        : aterm_base(t)
       {}
 
       aterm_blob(ATerm t)
-        : aterm(t)
+        : aterm_base(t)
       {
         assert(type() == AT_BLOB);
       }
@@ -45,7 +45,7 @@ namespace atermpp
       /// Allow construction from an aterm. The aterm must be of the right type.
       ///
       aterm_blob(aterm t)
-        : aterm(t)
+        : aterm_base(t)
       {
         assert(type() == AT_BLOB);
       }
@@ -57,8 +57,15 @@ namespace atermpp
       /// implementation. This limits the size of the data area to 16 Mb.
       ///
       aterm_blob(unsigned int size, void* data)
-        : aterm(ATmakeBlob(size, data))
+        : aterm_base(ATmakeBlob(size, data))
       {}
+
+      aterm_blob& operator=(aterm_base t)
+      {
+        assert(t.type() == AT_BLOB);
+        m_term = aterm_traits<aterm_base>::term(t);
+        return *this;
+      }
 
       /// Get the data section of the blob.
       ///
@@ -75,49 +82,17 @@ namespace atermpp
       }
   };
 
-  /// INTERNAL ONLY
-  inline
-  ATerm aterm_ptr(aterm_blob& t)
+  template <>
+  struct aterm_traits<aterm_blob>
   {
-    return t;
-  }
-  
-  /// INTERNAL ONLY
-  inline
-  ATerm aterm_ptr(const aterm_blob& t)
-  {
-    return t;
-  }
-
-   template <>
-   class aterm_protect_traits<aterm_blob>
-   {
-     public:
-       static void protect(aterm_blob t)
-       {
-#ifdef ATERM_DEBUG_PROTECTION
-std::cout << "aterm_protect_traits<aterm_blob>::protect() " << t << std::endl;
-#endif // ATERM_DEBUG_PROTECTION
-         t.protect();
-       }
-
-       static void unprotect(aterm_blob t)
-       {
-#ifdef ATERM_DEBUG_PROTECTION
-std::cout << "aterm_protect_traits<aterm_blob>::unprotect() " << t << std::endl;
-#endif // ATERM_DEBUG_PROTECTION
-         t.unprotect();
-       }
-
-       static void mark(aterm_blob t)
-       {
-#ifdef ATERM_DEBUG_PROTECTION
-std::cout << "aterm_protect_traits<aterm_blob>::mark() " << t << std::endl;
-#endif // ATERM_DEBUG_PROTECTION
-         t.mark();
-       }
-   };
+    typedef ATermBlob aterm_type;
+    static void protect(aterm_blob t)   { t.protect(); }
+    static void unprotect(aterm_blob t) { t.unprotect(); }
+    static void mark(aterm_blob t)      { t.mark(); }
+    static ATerm term(aterm_blob t)     { return t.term(); }
+    static ATerm* ptr(aterm_blob t)     { return &t.term(); }
+  };
 
 } // namespace atermpp
 
-#endif // ATERM_BLOB_H
+#endif // aterm_blob_H

@@ -15,13 +15,13 @@
 #include "lpe/function.h"
 #include "lpe/lpe.h"
 #include "lpe/pretty_print.h"
-#include "lpe/aterm_wrapper.h"
 #include "lpe/data_declaration.h"
 
 namespace lpe {
 
 using atermpp::aterm_appl;
 using atermpp::read_from_named_file;
+using atermpp::aterm_traits;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Specification
@@ -54,7 +54,7 @@ using atermpp::read_from_named_file;
 // <Spec>         ::= SpecV1(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
 //                      MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*),
 //                      ActSpec(<ActId>*), <ProcEqnSpec>, <Init>)
-class specification: public aterm_appl_wrapper
+class specification: public aterm_appl
 {
   protected:
     data_declaration     m_data;
@@ -107,8 +107,8 @@ class specification: public aterm_appl_wrapper
     ///
     void init_term(aterm_appl t)
     {
-      m_term = t;
-      aterm_list::iterator i = arguments().begin();
+      m_term = aterm_traits<aterm_appl>::term(t);
+      aterm_appl::iterator i = t.begin();
       sort_list          sorts        = sort_list(aterm_appl(*i++).argument(0));
       function_list      constructors = function_list(aterm_appl(*i++).argument(0));
       function_list      mappings     = function_list(aterm_appl(*i++).argument(0));
@@ -121,10 +121,10 @@ class specification: public aterm_appl_wrapper
       m_lpe = LPE(lpe, m_actions);
 
       // unpack LPEInit(.,.) term
-      aterm_list::iterator k         = lpe_init.argument_list().begin();
+      aterm_appl::iterator k         = lpe_init.begin();
       m_initial_free_variables       = data_variable_list(*k++);
       m_initial_assignments          = data_assignment_list(*k);
-      data_expression_list d0(m_initial_free_variables);
+      data_expression_list d0(static_cast<ATermList>(m_initial_free_variables));
     }
 
   public:
@@ -132,7 +132,7 @@ class specification: public aterm_appl_wrapper
     {}
 
     specification(aterm_appl t)
-      : aterm_appl_wrapper(t)
+      : aterm_appl(t)
     {
       assert(gsIsSpecV1(t));
       init_term(t);
@@ -156,7 +156,8 @@ class specification: public aterm_appl_wrapper
         m_initial_assignments(compute_initial_assignments(initial_variables, initial_state))
     {
       assert(initial_variables.size() == initial_state.size());
-      m_term = gsMakeSpecV1(
+      m_term = reinterpret_cast<ATerm>(
+        gsMakeSpecV1(
           gsMakeSortSpec(sorts),
           gsMakeConsSpec(constructors),
           gsMakeMapSpec(mappings),
@@ -164,6 +165,7 @@ class specification: public aterm_appl_wrapper
           gsMakeActSpec(actions),
           lpe,
           gsMakeLPEInit(initial_free_variables, m_initial_assignments)
+        )
       );        
     }
 
@@ -182,7 +184,8 @@ class specification: public aterm_appl_wrapper
         m_initial_assignments(compute_initial_assignments(initial_variables, initial_state))
     {
       assert(initial_variables.size() == initial_state.size());
-      m_term = gsMakeSpecV1(
+      m_term = reinterpret_cast<ATerm>(
+        gsMakeSpecV1(
           gsMakeSortSpec(data.sorts()),
           gsMakeConsSpec(data.constructors()),
           gsMakeMapSpec(data.mappings()),
@@ -190,6 +193,7 @@ class specification: public aterm_appl_wrapper
           gsMakeActSpec(actions),
           lpe,
           gsMakeLPEInit(initial_free_variables, m_initial_assignments)
+        )
       );        
     }
 
@@ -383,5 +387,22 @@ specification set_initial_state(specification spec, data_expression_list initial
 }
 
 } // namespace lpe
+
+namespace atermpp
+{
+using lpe::specification;
+
+template<>
+struct aterm_traits<specification>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(lpe::specification t)   { t.protect(); }
+  static void unprotect(lpe::specification t) { t.unprotect(); }
+  static void mark(lpe::specification t)      { t.mark(); }
+  static ATerm term(lpe::specification t)     { return t.term(); }
+  static ATerm* ptr(lpe::specification& t)    { return &t.term(); }
+};
+
+} // namespace atermpp
 
 #endif // LPE_SPECIFICATION_H

@@ -8,7 +8,6 @@
 #include <string>
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
-#include "lpe/aterm_wrapper.h"
 #include "lpe/lpe.h"
 #include "lpe/data.h"
 #include "lpe/utility.h"

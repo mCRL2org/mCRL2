@@ -23,72 +23,69 @@
 #include <iostream>
 #include <cassert>
 #include "aterm2.h"
-#include "atermpp/aterm_conversion.h"
-#include "atermpp/aterm_protect_traits.h"
+#include "atermpp/aterm_traits.h"
 
 namespace atermpp
 {
-  ///////////////////////////////////////////////////////////////////////////////
-  // aterm
-  /// \brief Represents a generic term.
-  ///
-  class aterm
+  /// INTERNAL ONLY
+  class aterm_base
   {
-    friend class aterm_appl;
-
+    template <typename T>
+    friend struct aterm_traits;
+    
     protected:
       ATerm m_term;
   
+      const ATerm& term() const
+      { return m_term; }
+      
+      ATerm& term()
+      { return m_term; }
+
     public:
-      aterm()
+      aterm_base()
         : m_term(0)
       {}
       
-      aterm(ATerm term)
+      aterm_base(ATerm term)
         : m_term(term)
       {
       }
 
-      aterm(ATermList term)
-        : m_term(void2term(list2void(term)))
+      aterm_base(ATermList term)
+        : m_term(reinterpret_cast<ATerm>(term))
       {}
   
-      aterm(ATermInt term)
-        : m_term(void2term(int2void(term)))
+      aterm_base(ATermInt term)
+        : m_term(reinterpret_cast<ATerm>(term))
       {
       }
   
-      aterm(ATermReal term)
-        : m_term(void2term(real2void(term)))
+      aterm_base(ATermReal term)
+        : m_term(reinterpret_cast<ATerm>(term))
       {
       }
   
-      aterm(ATermBlob term)
-        : m_term(void2term(blob2void(term)))
+      aterm_base(ATermBlob term)
+        : m_term(reinterpret_cast<ATerm>(term))
       {
       }
   
-      aterm(ATermAppl term)
-        : m_term(void2term(appl2void(term)))
+      aterm_base(ATermAppl term)
+        : m_term(reinterpret_cast<ATerm>(term))
       {
       }
 
-      aterm(const std::string& s)
+      aterm_base(const std::string& s)
         : m_term(ATmake(const_cast<char*>(s.c_str())))
       {}
-
-      const ATerm& term() const
-      { return m_term; }
-  
-      ATerm& term()
-      { return m_term; }
 
       /// Protect the aterm.
       /// Protects the aterm from being freed at garbage collection.
       ///
       void protect()
       {
-        ATprotect(&term());
+        ATprotect(&m_term);
       }
 
       /// Unprotect the aterm.
@@ -97,62 +94,112 @@ namespace atermpp
       ///
       void unprotect()
       {
-        ATunprotect(&term());
+        ATunprotect(&m_term);
       }
 
       /// Mark the aterm for not being garbage collected.
       ///
       void mark()
       {
-        ATmarkTerm(&term());
+        ATmarkTerm(&m_term);
       }
-
-      // allow conversion to ATerm
-      operator ATerm() const
-      { return term(); } 
 
       /// Return the type of term.
       /// Result is one of AT_APPL, AT_INT,
       /// AT_REAL, AT_LIST, AT_PLACEHOLDER, or AT_BLOB.
       ///
       int type() const
-      { return ATgetType(term()); }
+      { return ATgetType(m_term); }
       
       /// Writes the term to a string.
       ///
       std::string to_string() const
-      { return std::string(ATwriteToString(term())); }
+      { return std::string(ATwriteToString(m_term)); }
+  };
 
-      /// Retrieve the annotation with the given label.
-      ///
-      aterm annotation(aterm label) const
-      {
-        return ATgetAnnotation(term(), label.term());
-      }
-  }; 
+  template <>                           
+  struct aterm_traits<aterm_base>
+  {                                     
+    typedef ATerm aterm_type;           
+    static void protect(aterm_base t)        { t.protect(); }
+    static void unprotect(aterm_base t)      { t.unprotect(); }
+    static void mark(aterm_base t)           { t.mark(); }
+    static ATerm term(aterm_base t)          { return t.term(); }
+    static ATerm* ptr(aterm_base& t)         { return &t.term(); }
+  };
 
   /// Returns true if x has the default value of an aterm. In the ATerm Library
   /// this value is given by ATfalse.
   inline
-  bool operator!(const aterm& x)
+  bool operator!(const aterm_base& x)
   {
-    return ATisEqual(x, ATfalse);
+    return ATisEqual(aterm_traits<aterm_base>::term(x), ATfalse);
   }
 
-  /// Tests equality of aterms t1 and t2.
-  /// As aterms are created using maximal sharing (see Section 2.1), testing equality
-  /// is performed in constant time by comparing the addresses of t1 and t2.  Note however that
-  /// operator== only returns true when t1 and t2 are completely equal, including any annotations
-  /// they might have!
+  /// Writes a string representation of the aterm t to the stream out.
   ///
   inline
-  bool operator==(const aterm& x, const aterm& y)
+  std::ostream& operator<<(std::ostream& out, const aterm_base& t)
   {
-#ifdef ATERMPP_DEBUG
-    assert((x.to_string() == y.to_string()) == (ATisEqual(x, y) == ATtrue));
-#endif
-    return ATisEqual(x, y) == ATtrue;
+    return out << t.to_string();
   }
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // aterm
+  /// \brief Represents a generic term.
+  ///
+  class aterm: public aterm_base
+  {
+    public:
+      aterm() {}
+
+      aterm(aterm_base term)
+        : aterm_base(term)
+      { }
+
+      aterm(ATerm term)
+        : aterm_base(term)
+      { }
+
+      aterm(ATermList term)
+        : aterm_base(term)
+      { }
+  
+      aterm(ATermInt term)
+        : aterm_base(term)
+      { }
+  
+      aterm(ATermReal term)
+        : aterm_base(term)
+      { }
+  
+      aterm(ATermBlob term)
+        : aterm_base(term)
+      { }
+  
+      aterm(ATermAppl term)
+        : aterm_base(term)
+      { }
+
+      aterm(const std::string& s)
+        : aterm_base(s)
+      { }
+
+      // allow conversion to ATerm
+      operator ATerm() const
+      { return m_term; } 
+  }; 
+
+  template <>                           
+  struct aterm_traits<aterm>            
+  {                                     
+    typedef ATerm aterm_type;           
+    static void protect(aterm t)        { t.protect(); }
+    static void unprotect(aterm t)      { t.unprotect(); }
+    static void mark(aterm t)           { t.mark(); }
+    static ATerm term(aterm t)          { return t.term(); }
+    static ATerm* ptr(aterm& t)         { return &t.term(); }
+  };
 
   /// Read an aterm from string.
   /// This function parses a character string into an aterm.
@@ -240,14 +287,6 @@ namespace atermpp
     return ATremoveAnnotation(t, label);
   }
 
-  /// Writes a string representation of the aterm t to the stream out.
-  ///
-  inline
-  std::ostream& operator<<(std::ostream& out, const aterm& t)
-  {
-    return out << t.to_string();
-  }
-
   /// Initialize the ATerm++ Library. The specified argument t is used to mark the
   /// the bottom of the program stack. All aterms in the range [bottom_of_stack,...[
   /// will not be garbage collected.
@@ -259,34 +298,23 @@ namespace atermpp
     ATinit(0, 0, &a);
   }
 
-   template <>
-   class aterm_protect_traits<aterm>
-   {
-     public:
-       void protect(aterm t)
-       {
-#ifdef ATERM_DEBUG_PROTECTION
-std::cout << "aterm_protect_traits<aterm>::protect() " << t << std::endl;
-#endif // ATERM_DEBUG_PROTECTION
-         t.protect();
-       }
-
-       void unprotect(aterm t)
-       {
-#ifdef ATERM_DEBUG_PROTECTION
-std::cout << "aterm_protect_traits<aterm>::unprotect() " << t << std::endl;
-#endif // ATERM_DEBUG_PROTECTION
-         t.unprotect();
-       }
-
-       static void mark(aterm t)
-       {
-#ifdef ATERM_DEBUG_PROTECTION
-std::cout << "aterm_protect_traits<aterm>::mark() " << t << std::endl;
-#endif // ATERM_DEBUG_PROTECTION
-         t.mark();
-       }
-   };
+  inline
+  bool operator==(const aterm& x, const aterm& y)
+  {
+    return ATisEqual(x, y) == ATtrue;
+  }
+  
+  inline
+  bool operator==(const aterm& x, ATerm y)
+  {
+    return ATisEqual(x, y) == ATtrue;
+  }
+  
+  inline
+  bool operator==(const ATerm& x, aterm y)
+  {
+    return ATisEqual(x, y) == ATtrue;
+  }
 
 } // namespace atermpp
 

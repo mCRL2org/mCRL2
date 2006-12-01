@@ -41,8 +41,8 @@
 #  define TEXT2(z, n, _) a ## n
 #  define ATMAKEAPPL(i) BOOST_PP_CAT(ATmakeAppl,i)
 
-    aterm_appl(function_symbol sym, BOOST_PP_ENUM(n, TEXT1, nil))
-      : aterm(ATMAKEAPPL(n)(sym, BOOST_PP_ENUM(n, TEXT2, nil)))
+    term_appl(function_symbol sym, BOOST_PP_ENUM(n, TEXT1, nil))
+      : aterm_base(ATMAKEAPPL(n)(sym, BOOST_PP_ENUM(n, TEXT2, nil)))
     {
     }
 

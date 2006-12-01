@@ -7,31 +7,27 @@
 
 #include <iostream>
 #include <cassert>
-#include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
-#include "lpe/aterm_wrapper.h"
+#include "atermpp/aterm_appl.h"
 #include "lpe/sort.h"
-#include "libstruct.h"
-#include "liblowlevel.h"
 
 namespace lpe {
 
-using atermpp::aterm_appl;
+using atermpp::term_appl;
 using atermpp::term_list;
-using atermpp::make_term;
 
 ///////////////////////////////////////////////////////////////////////////////
 // function
 /// \brief Represents mappings and constructors of a mCRL2 specification.
 ///
-class function: public aterm_appl_wrapper
+class function: public term_appl<lpe::sort>
 {
   public:
     function()
     {}
 
-    function(aterm_appl t)
-      : aterm_appl_wrapper(t)
+    function(term_appl<lpe::sort> t)
+      : term_appl<lpe::sort>(t)
     {
       assert(gsIsOpId(t));
     }
@@ -41,10 +37,12 @@ class function: public aterm_appl_wrapper
     sort_list input_types() const
     {
       sort_list result;
-      aterm_appl t = aterm_appl(*this);
-      while (gsIsSortArrow(lpe::sort(aterm_appl(t.argument(1))))) {
-        t = ATAgetArgument(t , 1);
-        result = push_front(result, lpe::sort(aterm_appl(t.argument(0))));
+      term_appl<lpe::sort> t = *this;
+      assert(t.size() > 1);
+      while (t(1).is_arrow()) {
+        t = t(1);
+        assert(t.size() > 1);
+        result = push_front(result, t(0));
       }
       return reverse(result);
     }
@@ -53,11 +51,13 @@ class function: public aterm_appl_wrapper
     //     
     sort result_type() const
     {
-      aterm_appl t = aterm_appl(*this);
-      while (gsIsSortArrow(lpe::sort(aterm_appl(t.argument(1))))) {
-        t = ATAgetArgument(t , 1);
+      term_appl<lpe::sort> t = *this;
+      assert(t.size() > 1);
+      while (t(1).is_arrow()) {
+        t = t(1);
+        assert(t.size() > 1);
       }
-      return lpe::sort(aterm_appl(t.argument(1)));
+      return t(1);
     }
 };
 

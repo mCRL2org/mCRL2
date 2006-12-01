@@ -171,7 +171,7 @@ pbes_expression sat_bot(timed_action a, action_formula b)
   } else if (is_forall(b)) {
     data_expression_list x(list_arg1(b));
     action_formula alpha(act_arg2(b));
-    data_variable_list y = fresh_variable_list("y", x.size(), make_list(aterm_list(a.actions()), aterm_appl(a.time()), aterm_appl(b)));
+    data_variable_list y = fresh_variable_list("y", x.size(), make_list(a.actions(), a.time(), b));
     return p::exists(y, sat_bot(a, alpha.substitute(make_substitution(ATermList(x), ATermList(y)))));
   }
   assert(false);
@@ -208,7 +208,7 @@ pbes_expression sat_top(timed_action a, action_formula b)
   } else if (is_forall(b)) {
     data_expression_list x(list_arg1(b));
     action_formula alpha(act_arg2(b));
-    data_variable_list y = fresh_variable_list("y", x.size(), make_list(aterm_list(a.actions()), aterm_appl(a.time()), aterm_appl(b)));
+    data_variable_list y = fresh_variable_list("y", x.size(), make_list(a.actions(), a.time(), b));
     return p::forall(y, sat_top(a, alpha.substitute(make_substitution(ATermList(x), ATermList(y)))));
   }
   assert(false);
@@ -409,14 +409,14 @@ pbes pbes_translate(state_formula f, specification spec)
   // wrap the formula inside a 'nu' if needed
   if (!is_mu(f) && !is_nu(f))
   {
-    aterm_list context = make_list(aterm(f), aterm(spec));
+    aterm_list context = make_list(f, spec);
     aterm_string X = fresh_identifier("X", context);
     f = nu(X, data_variable_init_list(), f);
   }
 
   LPE lpe = spec.lpe();
-  data_variable T = fresh_variable("T", make_list(aterm_appl(f), aterm_appl(lpe)));
-  aterm_list context = make_list(aterm(T), aterm_list(spec.initial_state()), aterm_appl(lpe), aterm_appl(f));
+  data_variable T = fresh_variable("T", make_list(f, lpe));
+  aterm_list context = make_list(T, spec.initial_state(), lpe, f);
   lpe = make_timed_lpe(lpe, context);
   equation_system e = E(f, lpe, T);
 

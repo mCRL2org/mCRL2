@@ -32,42 +32,42 @@ namespace atermpp
   inline
   aterm_appl arg1(ATermAppl t)
   {
-    return aterm_appl(t).argument(0);
+    return aterm_appl(t)(0);
   }
   
   /// Returns the second child of t casted to an aterm_appl.
   inline
   aterm_appl arg2(ATermAppl t)
   {
-    return aterm_appl(t).argument(1);
+    return aterm_appl(t)(1);
   }
   
   /// Returns the third child of t casted to an aterm_appl.
   inline
   aterm_appl arg3(ATermAppl t)
   {
-    return aterm_appl(t).argument(2);
+    return aterm_appl(t)(2);
   }
   
   /// Returns the first child of t casted to an aterm_list.
   inline
-  aterm_list list_arg1(ATermAppl t)
+  ATermList list_arg1(ATermAppl t)
   {
-    return aterm_list(aterm_appl(t).argument(0));
+    return aterm_list(aterm_appl(t)(0));
   }
   
   /// Returns the second child of t casted to an aterm_list.
   inline
-  aterm_list list_arg2(ATermAppl t)
+  ATermList list_arg2(ATermAppl t)
   {
-    return aterm_list(aterm_appl(t).argument(1));
+    return aterm_list(aterm_appl(t)(1));
   }
   
   /// Returns the third child of t casted to an aterm_list.
   inline
-  aterm_list list_arg3(ATermAppl t)
+  ATermList list_arg3(ATermAppl t)
   {
-    return aterm_list(aterm_appl(t).argument(2));
+    return aterm_list(aterm_appl(t)(2));
   }
 
 } // namespace atermpp

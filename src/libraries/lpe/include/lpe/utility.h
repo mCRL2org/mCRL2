@@ -37,7 +37,7 @@ struct is_identifier
 {
   bool operator()(aterm t) const
   {
-    return t.type() == AT_APPL && aterm_appl(t).argument_list().size() == 0;
+    return t.type() == AT_APPL && aterm_appl(t).size() == 0;
   }
 };
 

@@ -18,12 +18,10 @@
 #include <sstream>
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
-#include "lpe/aterm_wrapper.h"
 #include "lpe/action.h"
 #include "lpe/data.h"
 #include "lpe/data_declaration.h"
 #include "lpe/pretty_print.h"
-#include "lpe/substitute.h"
 
 namespace {
   /// INTERNAL ONLY
@@ -65,7 +63,7 @@ using atermpp::read_from_named_file;
 //                 | Delta
 // <MultAct>      ::= MultAct(<ParamId>*)                                   (- tc)
 //                  | MultAct(<Action>*)                                    (+ tc)
-class LPE_summand: public aterm_appl_wrapper
+class LPE_summand: public aterm_appl
 {
   protected:
     data_variable_list   m_summation_variables;
@@ -80,10 +78,10 @@ class LPE_summand: public aterm_appl_wrapper
     {}
 
     LPE_summand(aterm_appl t)
-     : aterm_appl_wrapper(t)
+     : aterm_appl(t)
     {
       assert(gsIsLPESummand(t));
-      aterm_list::iterator i = arguments().begin();
+      aterm_appl::iterator i = t.begin();
 
       m_summation_variables = data_variable_list(*i++);
       m_condition           = data_expression(*i++);
@@ -107,7 +105,7 @@ class LPE_summand: public aterm_appl_wrapper
                 data_expression      time,
                 data_assignment_list assignments
                )
-      : aterm_appl_wrapper(gsMakeLPESummand(summation_variables,
+      : aterm_appl(gsMakeLPESummand(summation_variables,
                condition,
                (delta ? gsMakeDelta() : gsMakeMultAct(actions)),
                time,
@@ -209,6 +207,13 @@ class LPE_summand: public aterm_appl_wrapper
       }
       return true;
     }
+
+    /// Returns a pretty print representation of the term.
+    ///                                                   
+    std::string pp() const                                
+    {                                                     
+      return pretty_print(term());                        
+    }
 };
 
 inline
@@ -289,13 +294,13 @@ typedef term_list<LPE_summand> summand_list;
 // LPE
 /// \brief linear process equation.
 ///
-class LPE: public aterm_appl_wrapper
+class LPE: public aterm_appl
 {
   protected:
     data_variable_list m_free_variables;
     data_variable_list m_process_parameters;
     summand_list       m_summands;
-    action_list        m_actions; //Can m_actions be removed?
+    aterm_list         m_actions; //Can m_actions be removed?
 
     typedef std::vector<std::pair<summand_list::iterator, std::set<std::string> > > name_clash_list;
 
@@ -351,9 +356,9 @@ class LPE: public aterm_appl_wrapper
     LPE(data_variable_list free_variables,
         data_variable_list process_parameters,
         summand_list       summands,
-        action_list        actions
+        aterm_list         actions
        )
-     : aterm_appl_wrapper(gsMakeLPE(free_variables, process_parameters, summands)),
+     : aterm_appl(gsMakeLPE(free_variables, process_parameters, summands)),
        m_free_variables    (free_variables    ),
        m_process_parameters(process_parameters),
        m_summands          (summands          ),
@@ -363,15 +368,15 @@ class LPE: public aterm_appl_wrapper
       assert(is_name_clash_free(true));
     }
 
-    LPE(aterm_appl lpe, action_list actions)
-      : aterm_appl_wrapper(lpe)
+    LPE(aterm_appl lpe, aterm_list actions)
+      : aterm_appl(lpe)
     {
       assert(gsIsLPE(lpe));
       assert(is_well_typed());
       assert(is_name_clash_free(true));
 
       // unpack LPE(.,.,.) term     
-      aterm_list::iterator i = lpe.argument_list().begin();
+      aterm_appl::iterator i = lpe.begin();
       m_free_variables     = data_variable_list(*i++);
       m_process_parameters = data_variable_list(*i++);
       m_summands           = summand_list(*i);
@@ -380,7 +385,7 @@ class LPE: public aterm_appl_wrapper
 
     /// Returns the sequence of actions.
     ///
-    action_list actions() const
+    aterm_list actions() const
     {
       return m_actions;
     }
@@ -412,10 +417,10 @@ class LPE: public aterm_appl_wrapper
     template <typename Substitution>
     LPE substitute(Substitution f)
     {
-      data_variable_list d = lpe::substitute(m_free_variables    , f);
-      data_variable_list p = lpe::substitute(m_process_parameters, f);
-      summand_list       s = lpe::substitute(m_summands          , f);
-      action_list        a = lpe::substitute(m_actions           , f);
+      data_variable_list d = m_free_variables    .substitute(f);
+      data_variable_list p = m_process_parameters.substitute(f);
+      summand_list       s = m_summands          .substitute(f);
+      aterm_list         a = m_actions           .substitute(f);
       return LPE(d, p, s, a);
     }     
 
@@ -473,7 +478,7 @@ LPE set_summands(LPE l, summand_list summands)
 }
 
 inline
-LPE set_actions(LPE l, action_list actions)
+LPE set_actions(LPE l, aterm_list actions)
 {
   return LPE(l.free_variables    (),
              l.process_parameters(),
@@ -483,5 +488,34 @@ LPE set_actions(LPE l, action_list actions)
 }
 
 } // namespace lpe
+
+namespace atermpp
+{
+using lpe::LPE_summand;
+using lpe::LPE;
+
+template<>
+struct aterm_traits<LPE_summand>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(lpe::LPE_summand t)   { t.protect(); }
+  static void unprotect(lpe::LPE_summand t) { t.unprotect(); }
+  static void mark(lpe::LPE_summand t)      { t.mark(); }
+  static ATerm term(lpe::LPE_summand t)     { return t.term(); }
+  static ATerm* ptr(lpe::LPE_summand& t)    { return &t.term(); }
+};
+
+template<>
+struct aterm_traits<LPE>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(LPE t)   { t.protect(); }
+  static void unprotect(LPE t) { t.unprotect(); }
+  static void mark(LPE t)      { t.mark(); }
+  static ATerm term(LPE t)     { return t.term(); }
+  static ATerm* ptr(LPE& t)    { return &t.term(); }
+};
+
+} // namespace atermpp
 
 #endif // LPE_LPE_H

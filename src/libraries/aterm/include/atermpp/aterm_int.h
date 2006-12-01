@@ -26,26 +26,26 @@ namespace atermpp
   //---------------------------------------------------------//
   //                    aterm_int
   //---------------------------------------------------------//
-  class aterm_int: public aterm
+  class aterm_int: public aterm_base
   {
     public:
       aterm_int()
       {} 
 
       aterm_int(ATermInt t)
-        : aterm(t)
+        : aterm_base(t)
       {}
   
       /// Allow construction from an aterm. The aterm must be of the right type.
       ///
       aterm_int(aterm t)
-        : aterm(t)
+        : aterm_base(t)
       {
         assert(type() == AT_INT);
       }
 
       aterm_int(int value)
-        : aterm(ATmakeInt(value))
+        : aterm_base(ATmakeInt(value))
       {}
 
       /// Conversion to ATermInt.
@@ -53,6 +53,13 @@ namespace atermpp
       operator ATermInt() const
       {
         return reinterpret_cast<ATermInt>(m_term);
+      }
+
+      aterm_int& operator=(aterm_base t)
+      {
+        assert(t.type() == AT_INT);
+        m_term = aterm_traits<aterm_base>::term(t);
+        return *this;
       }
 
       /// Get the integer value of the aterm_int.
@@ -63,54 +70,16 @@ namespace atermpp
       }
   };
 
-  inline
-  bool operator<(aterm_int x, aterm_int y)
+  template <>
+  struct aterm_traits<aterm_int>
   {
-    return ATermInt(x) < ATermInt(y);
-  }
-
-  /// INTERNAL ONLY
-  inline
-  ATerm aterm_ptr(aterm_int& t)
-  {
-    return t;
-  }
-  
-  /// INTERNAL ONLY
-  inline
-  ATerm aterm_ptr(const aterm_int& t)
-  {
-    return t;
-  }
-
-   template <>
-   class aterm_protect_traits<aterm_int>
-   {
-     public:
-       static void protect(aterm_int t)
-       {
-#ifdef ATERM_DEBUG_PROTECTION
-std::cout << "aterm_protect_traits<aterm_int>::protect() " << t << std::endl;
-#endif // ATERM_DEBUG_PROTECTION
-         t.protect();
-       }
-
-       static void unprotect(aterm_int t)
-       {
-#ifdef ATERM_DEBUG_PROTECTION
-std::cout << "aterm_protect_traits<aterm_int>::unprotect() " << t << std::endl;
-#endif // ATERM_DEBUG_PROTECTION
-         t.unprotect();
-       }
-
-       static void mark(aterm_int t)
-       {
-#ifdef ATERM_DEBUG_PROTECTION
-std::cout << "aterm_protect_traits<aterm_int>::mark() " << t << std::endl;
-#endif // ATERM_DEBUG_PROTECTION
-         t.mark();
-       }
-   };
+    typedef ATermInt aterm_type;
+    static void protect(aterm_int t)   { t.protect(); }
+    static void unprotect(aterm_int t) { t.unprotect(); }
+    static void mark(aterm_int t)      { t.mark(); }
+    static ATerm term(aterm_int t)     { return t.term(); }
+    static ATerm* ptr(aterm_int& t)    { return &t.term(); }
+  };
 
 } // namespace atermpp
 

@@ -60,13 +60,16 @@ namespace atermpp
     }
     else if (t.type() == AT_APPL)
     {
-      aterm_appl a(t);
-      if (a.function().arity() != 0)
+      aterm_appl result(t);
+      unsigned int n = result.size();
+      if (n > 0)
       {
-        aterm_list args = apply(a.argument_list(), detail::replace_substitution(old_value, new_value, recursive));
-        if (recursive && args == old_value)
-          args = new_value;
-        result = aterm_appl(a.function(), args);
+        for (unsigned int i = 0; i < n; i++)
+        {
+          aterm a = atermpp::replace(result(i), old_value, new_value, recursive);
+          if (a != result(i))
+            result = result.set_argument(a, i);
+        }
       }
     }
     else if (t.type() == AT_LIST)
