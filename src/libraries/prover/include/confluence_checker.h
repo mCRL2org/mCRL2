@@ -51,11 +51,8 @@ class Confluence_Checker {
     /// \brief The number of summands of the current LPE.
     int f_number_of_summands;
 
-    /// \brief A boolean matrix, indicating which summands commute with one another.
-    int* f_commutes;
-
-    /// \brief Enables the storage of obtained results.
-    bool f_enable_commutes;
+    /// \brief An integer array, storing intermediate results per summand.
+    int* f_intermediate;
 
     /// \brief Writes a dot file of the BDD created when checking the confluence of summands a_summand_number_1 and a_summand_number_2.
     void save_dot_file(int a_summand_number_1, int a_summand_number_2);
@@ -63,7 +60,10 @@ class Confluence_Checker {
     /// \brief Outputs a path in the BDD corresponding to the condition at hand that leads to a node labelled false.
     void print_counter_example();
 
-    /// \brief Checks the confluence of summand a_summand.
+    /// \brief Checks the confluence of summand a_summand_1 and a_summand_2
+    bool check_summands(ATermAppl a_invariant, ATermAppl a_summand_1, int a_summand_number_1, ATermAppl a_summand_2, int a_summand_number_2);
+
+    /// \brief Checks the confluence of summand a_summand concerning all other tau-summands.
     ATermAppl check_confluence_and_mark_summand(ATermAppl a_invariant, ATermAppl a_summand, int a_summand_number, bool& a_is_marked);
   public:
     /// \brief Constructor that initializes Confluence_Checker::f_lpe, Confluence_Checker::f_bdd_prover,
@@ -79,8 +79,7 @@ class Confluence_Checker {
       bool a_check_all = false,
       bool a_counter_example = false,
       bool a_generate_invariants = false,
-      char* a_dot_file_name = 0,
-      bool a_enable_commutes = true
+      char* a_dot_file_name = 0
     );
 
     /// \brief Destructor that frees the memory used by Confluence_Checker::f_dot_file_name.

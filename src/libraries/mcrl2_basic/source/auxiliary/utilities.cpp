@@ -9,7 +9,7 @@
 
 using namespace std;
 
-// General functions ------------------------------------------------------------------------------
+// General functions and classes ------------------------------------------------------------------
 
   char* bool_to_char_string(bool a_bool) {
     if (a_bool) {
@@ -21,16 +21,42 @@ using namespace std;
 
   // ----------------------------------------------------------------------------------------------
 
-  char* blank_spaces(int a_number) {
-    char* v_spaces;
-    int i;
-
-    v_spaces = new char[a_number + 1];
-    for (i = 0; i < a_number; i++) {
-      v_spaces[i] = ' ';
+  void Indent::update_string() {
+    free(blank_spaces);
+    blank_spaces = (char*) malloc(((f_indentation_level * 2) + 1) * sizeof(char));
+    for (int i = 0; i < (f_indentation_level * 2); i++) {
+      blank_spaces[i] = ' ';
     }
-    v_spaces[a_number] = '\0';
-    return v_spaces;
+    blank_spaces[f_indentation_level * 2] = '\0';
+  }
+
+  // ----------------------------------------------------------------------------------------------
+
+  Indent::Indent() {
+    blank_spaces = 0;
+    f_indentation_level = 1;
+    update_string();    
+  }
+
+  // ----------------------------------------------------------------------------------------------
+
+  Indent::~Indent() {
+    free(blank_spaces);
+    blank_spaces = 0;
+  }
+
+  // ----------------------------------------------------------------------------------------------
+
+  void Indent::indent() {
+    f_indentation_level++;
+    update_string();
+  }
+
+  // ----------------------------------------------------------------------------------------------
+
+  void Indent::deindent() {
+    f_indentation_level--;
+    update_string();
   }
 
   // ----------------------------------------------------------------------------------------------
@@ -38,10 +64,15 @@ using namespace std;
   int number_of_digits(int a_integer) {
     int v_result = 0;
 
-    while (a_integer != 0) {
-      a_integer = a_integer / 10;
-      v_result++;
+    if (a_integer == 0) {
+      v_result = 1;
+    } else {
+      while (a_integer != 0) {
+        a_integer = a_integer / 10;
+        v_result++;
+      }
     }
+
     return v_result;
   }
 

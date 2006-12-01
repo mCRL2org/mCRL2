@@ -90,6 +90,7 @@
         v_dummy_name = gsString2ATermAppl(v_dummy_string);
         v_result = gsMakeDataVarId(v_dummy_name, a_sort);
         free(v_dummy_string);
+        v_dummy_string = 0;
         f_fresh_dummy_number++;
       } while (gsOccurs((ATerm) v_result, (ATerm) f_formula));
       return v_result;

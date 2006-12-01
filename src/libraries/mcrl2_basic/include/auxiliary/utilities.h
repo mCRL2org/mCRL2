@@ -14,7 +14,17 @@ enum Compare_Result {
 
 char* bool_to_char_string(bool a_bool);
 
-char* blank_spaces(int a_number);
+class Indent {
+  private:
+    int f_indentation_level;
+    void update_string();
+  public:
+    Indent();
+    ~Indent();
+    char* blank_spaces;
+    void indent();
+    void deindent();
+};
 
 int number_of_digits(int a_integer);
 

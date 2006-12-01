@@ -228,7 +228,14 @@
     // --------------------------------------------------------------------------------------------
 
     LPE_Inv_Elm::~LPE_Inv_Elm() {
-      // Nothing to free.
+      free(f_invariant_file_name);
+      f_invariant_file_name = 0;
+      free(f_lpe_file_name);
+      f_lpe_file_name = 0;
+      free(f_output_file_name);
+      f_output_file_name = 0;
+      free(f_dot_file_name);
+      f_dot_file_name = 0;
     }
 
     // --------------------------------------------------------------------------------------------

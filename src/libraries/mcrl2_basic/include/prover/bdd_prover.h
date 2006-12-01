@@ -10,6 +10,7 @@
 #include "prover/bdd_simplifier.h"
 #include "prover/bdd_path_eliminator.h"
 #include "prover/induction.h"
+#include "auxiliary/utilities.h"
 
   /// \brief A class based on the Prover class that takes an expression of sort Bool in internal mCRL2 format
   /// \brief and creates the corresponding EQ-BDD. Using this EQ-BDD, the class can determine if the original
@@ -50,11 +51,14 @@ class BDD_Prover: public Prover {
     /// \brief Class that creates all statements needed to prove a given property using induction.
     Induction f_induction;
 
+    /// \brief Class that produces a number of spaces corresponding to an indentation level.
+    Indent f_indent;
+
     /// \brief Constructs the EQ-BDD corresponding to the formula Prover::f_formula.
     void build_bdd();
 
     /// \brief Creates the EQ-BDD corresponding to the formula a_formula.
-    ATerm bdd_down(ATerm a_formula, int a_indent);
+    ATerm bdd_down(ATerm a_formula);
 
     /// \brief Removes all inconsistent paths from the BDD BDD_Prover::f_bdd.
     void eliminate_paths();

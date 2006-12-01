@@ -57,6 +57,10 @@
         strcpy(v_file_name, f_dot_file_name);
         strcat(v_file_name, v_file_name_suffix);
         f_bdd2dot.output_bdd(f_bdd_prover.get_bdd(), v_file_name);
+        free(v_file_name);
+        v_file_name = 0;
+        free(v_file_name_suffix);
+        v_file_name_suffix = 0;
       }
     }
 

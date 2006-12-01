@@ -172,7 +172,12 @@
     // --------------------------------------------------------------------------------------------
 
     LPE_Form_Check::~LPE_Form_Check() {
-      // Nothing to free.
+      free(f_formulas_file_name);
+      f_formulas_file_name = 0;
+      free(f_lpe_file_name);
+      f_lpe_file_name = 0;
+      free(f_dot_file_name);
+      f_dot_file_name = 0;
     }
 
     // --------------------------------------------------------------------------------------------

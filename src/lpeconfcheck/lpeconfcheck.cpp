@@ -79,9 +79,6 @@
       /// \brief The flag indicating whether or not induction should be applied.
       bool f_apply_induction;
 
-      /// \brief The flag indicating whether or not previously obtained results should be stored.
-      bool f_enable_commutes;
-
       /// \brief The LPE provided as input.
       ATermAppl f_lpe;
 
@@ -185,9 +182,7 @@
         "                                    of the SMT solver CVC Lite.\n"
 #endif
         "                                  By default, no path elimination is applied.\n"
-        "  -o, --induction                 Apply induction on lists.\n"
-        "  -b, --no-storage                Disable the storage of previously obtained\n"
-        "                                  results.\n",
+        "  -o, --induction                 Apply induction on lists.\n",
         f_tool_command
       );
     }
@@ -223,13 +218,19 @@
       f_path_eliminator = false;
       f_solver_type = solver_type_ario;
       f_apply_induction = false;
-      f_enable_commutes = true;
     }
 
     // --------------------------------------------------------------------------------------------
 
     LPE_Conf_Check::~LPE_Conf_Check() {
-      // Nothing to free.
+      free(f_invariant_file_name);
+      f_invariant_file_name = 0;
+      free(f_input_file_name);
+      f_input_file_name = 0;
+      free(f_output_file_name);
+      f_output_file_name = 0;
+      free(f_dot_file_name);
+      f_dot_file_name = 0;
     }
 
     // --------------------------------------------------------------------------------------------
@@ -239,7 +240,7 @@
     /// \param a_argv is an array of all arguments passed on the command line
 
     void LPE_Conf_Check::get_options(int a_argc, char* a_argv[]) {
-      char* v_short_options = "i:gs:nmacp:hqvdr:t:z:ob";
+      char* v_short_options = "i:gs:nmacp:hqvdr:t:z:o";
 
       f_tool_command = a_argv[0];
 
@@ -261,7 +262,6 @@
         {"time-limit",       required_argument, 0, 't'},
         {"smt-solver",       required_argument, 0, 'z'},
         {"induction",        no_argument,       0, 'o'},
-        {"no-storage",       no_argument,       0, 'b'},
         {0, 0, 0, 0}
       };
 
@@ -354,9 +354,6 @@
           case 'o':
             f_apply_induction = true;
             break;
-          case 'b':
-            f_enable_commutes = false;
-            break;
           default:
             print_more_info();
             exit(1);
@@ -438,7 +435,7 @@
     void LPE_Conf_Check::check_confluence_and_mark() {
       Confluence_Checker v_confluence_checker(
         f_lpe, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_no_marking, f_check_all, f_counter_example,
-        f_generate_invariants, f_dot_file_name, f_enable_commutes
+        f_generate_invariants, f_dot_file_name
       );
 
       f_lpe = v_confluence_checker.check_confluence_and_mark(f_invariant, f_summand_number);
