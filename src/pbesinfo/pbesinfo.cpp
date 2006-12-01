@@ -1,14 +1,14 @@
 // ======================================================================
 //
 // file          : pbesinfo 
-// date          : 24-11-2006
-// version       : 0.0.4
+// date          : 01-12-2006
+// version       : 0.0.5a
 //
 // author(s)     : Alexander van Dam <avandam@damdonk.nl>
 //
 // ======================================================================
 #define NAME "pbesinfo"
-#define VERSION "0.0.4"
+#define VERSION "0.0.5a"
 #define AUTHOR "Alexander van Dam"
 
 //C++
@@ -79,12 +79,12 @@ void parse_command_line(int argc, char** argv)
 	
 	if (vm.count("debug"))
 	{
-		gsSetDebugMsg();	
+		//gsSetDebugMsg();	
 	}
 	
 	if (vm.count("verbose"))
 	{
-		gsSetVerboseMsg();
+		//gsSetVerboseMsg();
 	}
 	
 	file_name = (0 < vm.count("INFILE")) ? vm["INFILE"].as<string>() : "-";	
@@ -102,9 +102,11 @@ int main(int argc, char** argv)
 	lpe::pbes pbes_specification;
 
 	/// If PBES can be loaded from file_name, then
+	/// - Show if PBES is closed and if it is well formed
 	///	- Show number of equations
 	/// - Show number of mu's / nu's.
-	/// - Show Binding variables and their type
+	/// - Show which predicate variables have mu's and which predicate variables have nu's
+	/// - Show predicate variables and their type
 	/// else 
 	/// - Give error
 	if (pbes_specification.load(file_name))
@@ -112,6 +114,9 @@ int main(int argc, char** argv)
 		// Get PBES equations. Makes a lot of function calls more readable.
 		lpe::equation_system eqsys;
 		eqsys = pbes_specification.equations();
+		
+		bool pbes_well_formed = pbes_specification.is_well_formed();
+		bool pbes_closed = pbes_specification.is_closed();
 
 		// Vectors for storing intermediate results
 		vector<aterm_string> predvar_mu;
@@ -162,6 +167,9 @@ int main(int argc, char** argv)
 			cerr << "WARNING: Reading number of mu's and nu's had errors. Results may be incorrect" << endl;
 		}
 		
+		// Show if PBES is closed and well formed
+		cout << "The PBES is " << (pbes_closed ? "" : "not ") << "closed and " << (pbes_well_formed ? "" : "not ") << "well formed" << endl;
+		
 		// Show number of equations
 		cout << "Number of equations: " << eqsys.size() << endl;
 		
@@ -207,7 +215,7 @@ int main(int argc, char** argv)
 			int bv_size = pv_i->parameters().size();
 			int nr_sorts = 1;
 			if (nr_predvar == 1)
-				cout << "Binding variables:   " << pv_i->name() << " :: ";
+				cout << "Predicate variables: " << pv_i->name() << " :: ";
 			else
 				cout << "                     " << pv_i->name() << " :: ";
 			for (term_list<data_variable>::iterator dv_i = pv_i->parameters().begin(); dv_i != pv_i->parameters().end(); dv_i++)
