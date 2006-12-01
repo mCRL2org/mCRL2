@@ -214,7 +214,7 @@ namespace squadt {
       BOOST_FOREACH(build_system::mime_type f, registry->get_mime_types()) {
         std::auto_ptr < command > command_line = registry->get_registered_command(f, "$");
 
-        formats_and_actions->InsertItem(row, wxString(f.get_sub_type().c_str(), wxConvLocal));
+        formats_and_actions->InsertItem(row, wxString(f.as_string().c_str(), wxConvLocal));
 
         formats_and_actions->SetItem(row++, 1, command_line.get() ? wxString(command_line->argument_string().c_str(), wxConvLocal) : no_action);
       }

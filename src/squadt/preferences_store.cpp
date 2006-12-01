@@ -3,6 +3,7 @@
 #include <fstream>
 
 #include <boost/filesystem/operations.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
 
 #include "build_system.h"
@@ -79,20 +80,18 @@ namespace squadt {
     m_output_stream << "<default-actions>\n";
 
     BOOST_FOREACH(type_registry::actions_for_type::value_type c, r.command_for_type) {
-      m_output_stream << " <associate-commands mime-type=\"" << c.first << "\">\n"
-                      << "  <command";
-
+      m_output_stream << " <associate-commands mime-type=\"" << c.first << "\">\n";
       if (c.second == type_registry::command_system) {
         /// Associated command is specified by the system
-        m_output_stream << " system /";
+        m_output_stream << "  <command />";
       }
       else if (c.second == type_registry::command_none) {
         /// No command is to be associated with this type
-        m_output_stream << " none /";
+        m_output_stream << "  <no-command />";
       }
       else {
         /// A custom command is associated with this type
-        m_output_stream << "><![CDATA[" << c.second << "]]></command";
+        m_output_stream << "  <command><![CDATA[" << c.second << "]]></command";
       }
 
       m_output_stream << ">\n </associate-commands>\n";
@@ -127,7 +126,7 @@ namespace squadt {
 
     /// write log settings
     m_output_stream << "<logging filter-level=\""
-                    << std::ios::dec << sip::controller::communicator::get_standard_error_logger()->get_filter_level()
+                    << static_cast < unsigned int > (sip::controller::communicator::get_standard_error_logger()->get_filter_level())
                     << "\"/>\n";
 
     m_output_stream << "</squadt-preferences>";

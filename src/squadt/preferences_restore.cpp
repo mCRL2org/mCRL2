@@ -113,11 +113,8 @@ namespace squadt {
           m_reader->next_element();
 
           if (m_reader->is_element("command")) {
-            if (m_reader->get_attribute("system")) {
+            if (m_reader->is_end_element() || m_reader->is_empty_element()) {
               r.register_command(t, type_registry::command_system);
-            }
-            else if (m_reader->get_attribute("none")) {
-              r.register_command(t, type_registry::command_none);
             }
             else {
               m_reader->next_element();
@@ -128,6 +125,9 @@ namespace squadt {
             }
 
             m_reader->skip_end_element("command");
+          }
+          else {
+            m_reader->skip_end_element("no-command");
           }
 
           m_reader->skip_end_element("associate_commands");

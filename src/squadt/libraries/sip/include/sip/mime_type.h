@@ -79,7 +79,7 @@ namespace sip {
   }
 
   inline std::string mime_type::get_sub_type() const {
-    return (main_type_as_string[m_main]);
+    return (m_sub);
   }
 
   inline std::string mime_type::as_string() const {
