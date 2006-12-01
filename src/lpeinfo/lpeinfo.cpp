@@ -225,7 +225,5 @@ int main(int argc, char** argv) {
   }
 #endif
 
-  gsRewriteFinalise();
-
   return 0;
 }

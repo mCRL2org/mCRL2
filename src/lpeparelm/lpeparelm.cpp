@@ -22,7 +22,6 @@
 #include "atermpp/aterm.h"
 #include "lpe/specification.h"
 #include "lpe/lpe_error.h"
-#include "librewrite_c.h"
 
 class lpeParElm {
 
@@ -586,8 +585,6 @@ int main(int argc, char** argv) {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }
 #endif
-
-  gsRewriteFinalise();
 
   return (0);
 }

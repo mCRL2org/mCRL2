@@ -1,7 +1,8 @@
 %{
 #include <string>
-#include "aterm2.h"
-#include "lts/liblts.h"
+#include <aterm2.h>
+#include <liblowlevel.h>
+#include <lts/liblts.h>
 #include "fsmlexer.h"
 #include "fsmparser.hpp"
 //using namespace std;

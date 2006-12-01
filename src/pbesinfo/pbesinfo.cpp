@@ -21,6 +21,7 @@
 #include <boost/program_options.hpp>
 
 //MCRL-specific
+#include "liblowlevel.h"
 #include "lpe/pbes.h"
 
 using namespace std;
@@ -79,12 +80,12 @@ void parse_command_line(int argc, char** argv)
 	
 	if (vm.count("debug"))
 	{
-		//gsSetDebugMsg();	
+		gsSetDebugMsg();	
 	}
 	
 	if (vm.count("verbose"))
 	{
-		//gsSetVerboseMsg();
+		gsSetVerboseMsg();
 	}
 	
 	file_name = (0 < vm.count("INFILE")) ? vm["INFILE"].as<string>() : "-";	

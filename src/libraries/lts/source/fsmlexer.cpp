@@ -433,8 +433,9 @@ static yyconst flex_int16_t yy_chk[78] =
 #line 1 "fsmlexer.ll"
 #line 2 "fsmlexer.ll"
 #include <string>
-#include "aterm2.h"
-#include "lts/liblts.h"
+#include <aterm2.h>
+#include <liblowlevel.h>
+#include <lts/liblts.h>
 #include "fsmlexer.h"
 #include "fsmparser.hpp"
 //using namespace std;
@@ -497,7 +498,7 @@ extern void fsmyyerror(const char* s);
 void processId();
 void processQuoted();
 void processNumber();
-#line 501 "fsmlexer.cpp"
+#line 502 "fsmlexer.cpp"
 
 #define INITIAL 0
 
@@ -597,10 +598,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 75 "fsmlexer.ll"
+#line 76 "fsmlexer.ll"
 
 
-#line 604 "fsmlexer.cpp"
+#line 605 "fsmlexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -685,77 +686,77 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 77 "fsmlexer.ll"
+#line 78 "fsmlexer.ll"
 { posNo += YYLeng(); }
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 78 "fsmlexer.ll"
+#line 79 "fsmlexer.ll"
 { lineNo++; posNo=1; return EOLN; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 79 "fsmlexer.ll"
+#line 80 "fsmlexer.ll"
 { posNo += YYLeng(); return SECSEP; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 80 "fsmlexer.ll"
+#line 81 "fsmlexer.ll"
 { posNo += YYLeng(); return LPAR; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 81 "fsmlexer.ll"
+#line 82 "fsmlexer.ll"
 { posNo += YYLeng(); return RPAR; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 82 "fsmlexer.ll"
+#line 83 "fsmlexer.ll"
 { posNo += YYLeng(); return ARROW; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 83 "fsmlexer.ll"
+#line 84 "fsmlexer.ll"
 { posNo += YYLeng(); return FANIN; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 84 "fsmlexer.ll"
+#line 85 "fsmlexer.ll"
 { posNo += YYLeng(); return FANOUT; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 85 "fsmlexer.ll"
+#line 86 "fsmlexer.ll"
 { posNo += YYLeng(); return NODENR; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 86 "fsmlexer.ll"
+#line 87 "fsmlexer.ll"
 { processId(); return ID; }
 	YY_BREAK
 case 11:
 /* rule 11 can match eol */
 YY_RULE_SETUP
-#line 87 "fsmlexer.ll"
+#line 88 "fsmlexer.ll"
 { processQuoted(); return QUOTED; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 88 "fsmlexer.ll"
+#line 89 "fsmlexer.ll"
 { processNumber(); return NUMBER; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 89 "fsmlexer.ll"
+#line 90 "fsmlexer.ll"
 { posNo += YYLeng(); fsmyyerror("unknown character"); }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 91 "fsmlexer.ll"
+#line 92 "fsmlexer.ll"
 ECHO;
 	YY_BREAK
-#line 759 "fsmlexer.cpp"
+#line 760 "fsmlexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1649,7 +1650,7 @@ void fsmyyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 91 "fsmlexer.ll"
+#line 92 "fsmlexer.ll"
 
 
 
