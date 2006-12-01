@@ -77,6 +77,7 @@ class NextStateStandard : public NextState
 		int getStateLength();
 		ATermAppl getStateArgument(ATerm state, int index);
 		ATermAppl makeStateVector(ATerm state);
+		ATerm parseStateVector(ATermAppl state, ATerm match = NULL);
 
 		Rewriter *getRewriter();
 

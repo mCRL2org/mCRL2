@@ -155,6 +155,18 @@ class NextState
 		 * \return The mCRL2 LTS state vector representation of state.
 		 **/
 		virtual ATermAppl makeStateVector(ATerm state) = 0;
+		/**
+		 * \brief Make a state from a mCRL2 LTS state vector.
+		 * \param state A mCRL2 LTS state.
+		 * \param match Optional state for matching.
+		 * \return The state represented by the mCRL2 LTS state
+		 *         parameter. NULL will be returned when state is not
+		 *         a valid state for this NextState object (i.e. it
+		 *         does not fit the specification) or is match is not
+		 *         NULL and there is not instantiation of the variables
+		 *         in match such that it corresponds with state.
+		 **/
+		virtual ATerm parseStateVector(ATermAppl state, ATerm match = NULL) = 0;
 
 		/**
 		 * \brief Get rewriter used by this object.

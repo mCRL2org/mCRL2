@@ -438,6 +438,12 @@ ATermList XSimMain::GetParameters()
 
 void XSimMain::Reset()
 {
+        Reset(nextstate->getInitialState());
+}
+
+void XSimMain::Reset(ATerm State)
+{
+	initial_state = State;
 	if ( initial_state != NULL )
 	{
 		traceReset(initial_state);
@@ -453,12 +459,6 @@ void XSimMain::Reset()
 		undo->Enable(false);
 		redo->Enable(false);
 	}
-}
-
-void XSimMain::Reset(ATerm State)
-{
-	initial_state = State;
-	Reset();
 }
 
 bool XSimMain::Undo()
@@ -761,16 +761,22 @@ void XSimMain::OnLoadTrace( wxCommandEvent& /* event */ )
 
 	    //SetInteractiveness(false);
 	    Stopper_Enter();
-	    Reset();
 
-	    ATerm state = current_state;
+	    ATerm state = (ATerm) tr.getState();
 	    ATermList newtrace = ATmakeList0();
 
-	    if ( (tr.getState() != NULL) && !ATisEqual(tr.getState(),nextstate->makeStateVector(state)) )
+	    if ( (state != NULL) && ((state = nextstate->parseStateVector((ATermAppl) state)) == NULL) )
 	    {
-		    wxMessageDialog dialog(this,wxT("Initial state of trace does not match initial state of state space.\n"),wxT("Error in trace"),wxOK|wxICON_ERROR);
+		    wxMessageDialog dialog(this,wxT("Initial state of trace is not a valid state for this specification.\n"),wxT("Error in trace"),wxOK|wxICON_ERROR);
 		    dialog.ShowModal();
 	    } else {
+		    if ( state == NULL )
+		    {
+			    Reset();
+		    } else {
+			    Reset(state);
+		    }
+
 		    ATermAppl act;
 		    while ( (act = tr.getAction()) != NULL )
 		    {
@@ -784,7 +790,7 @@ void XSimMain::OnLoadTrace( wxCommandEvent& /* event */ )
 				    {
 					    if ( ATisEqual(Transition,act) )
 					    {
-						    if ( (tr.getState() == NULL) || ATisEqual(tr.getState(),nextstate->makeStateVector(NewState)) )
+						    if ( (tr.getState() == NULL) || ((NewState = nextstate->parseStateVector(tr.getState(),NewState)) != NULL) )
 						    {
 							    newtrace = ATinsert(newtrace,(ATerm) ATmakeList2((ATerm) Transition,NewState));
 							    state = NewState;
@@ -812,7 +818,7 @@ void XSimMain::OnLoadTrace( wxCommandEvent& /* event */ )
 					    wxString t = wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) Transition, ppDefault).c_str());
 					    if ( s == t )
 					    {
-						    if ( (tr.getState() == NULL) || ATisEqual(tr.getState(),nextstate->makeStateVector(NewState)) )
+						    if ( (tr.getState() == NULL) || ((NewState = nextstate->parseStateVector(tr.getState(),NewState)) != NULL) )
 						    {
 							    newtrace = ATinsert(newtrace,(ATerm) ATmakeList2((ATerm) Transition,NewState));
 							    state = NewState;

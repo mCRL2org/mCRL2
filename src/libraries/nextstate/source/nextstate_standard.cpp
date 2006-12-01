@@ -166,6 +166,99 @@ ATermAppl NextStateStandard::makeStateVector(ATerm state)
 	return ATmakeApplArray(info.stateAFun,stateargs);
 }
 
+
+static bool statearg_match(ATermAppl arg, ATermAppl pat, ATermTable vars = NULL)
+{
+	ATermTable tmp_vars = vars;
+	if ( vars == NULL )
+	{
+		tmp_vars = ATtableCreate(20,50);
+	}
+
+
+	bool r;
+	if ( gsIsDataAppl(pat) )
+	{
+		if ( !gsIsDataAppl(arg) )
+		{
+			r = false;
+		} else {
+			r = statearg_match(ATAgetArgument(arg,0),ATAgetArgument(pat,0),tmp_vars)
+			 && statearg_match(ATAgetArgument(arg,1),ATAgetArgument(pat,1),tmp_vars);
+		}
+	} else if  ( gsIsDataVarId(pat) )
+	{
+		ATerm val = ATtableGet(tmp_vars,(ATerm) pat);
+		if ( val == NULL )
+		{
+			ATtablePut(tmp_vars,(ATerm) pat, (ATerm) arg);
+			r = true;
+		} else if ( ATisEqual(arg,val) )
+		{
+			r = true;
+		} else {
+			r = false;
+		}
+	} else {
+		r = ATisEqual(arg,pat);
+	}
+
+	if ( vars == NULL )
+	{
+		ATtableDestroy(tmp_vars);
+	}
+
+	return r;
+}
+
+ATerm NextStateStandard::parseStateVector(ATermAppl state, ATerm match)
+{
+	if ( !stateAFun_made )
+	{
+		stateAFun_made = true;
+		info.stateAFun = ATmakeAFun("STATE",info.statelen,ATfalse);
+		ATprotectAFun(info.stateAFun);
+	}
+
+	if ( ATisEqualAFun(info.stateAFun,ATgetAFun(state)) )
+	{
+		bool valid = true;
+		ATermList l = info.procvars;
+		for (int i=0; i<info.statelen; i++)
+		{
+			stateargs[i] = ATgetArgument(state,i);
+			if ( !ATisEqual(gsGetSort((ATermAppl) stateargs[i]),gsGetSort(ATAgetFirst(l))) )
+			{
+				valid = false;
+				break;
+			}
+			if ( (match != NULL) && !statearg_match((ATermAppl) stateargs[i],getStateArgument(match,i)) )
+			{
+				valid = false;
+				break;
+			}
+			stateargs[i] = info.rewr_obj->toRewriteFormat((ATermAppl) stateargs[i]);
+			l = ATgetNext(l);
+		}
+		if ( valid )
+		{
+			switch ( info.stateformat )
+			{
+				case GS_STATE_VECTOR:
+					return (ATerm) ATmakeApplArray(info.stateAFun,stateargs);
+					break;
+				case GS_STATE_TREE:
+					return (ATerm) buildTree(stateargs);
+					break;
+				default:
+					break;
+			}
+		}
+	}
+
+	return NULL;
+}
+
 ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
 {
 	ATermList l;
