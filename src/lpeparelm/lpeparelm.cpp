@@ -22,6 +22,7 @@
 #include "atermpp/aterm.h"
 #include "lpe/specification.h"
 #include "lpe/lpe_error.h"
+#include "librewrite_c.h"
 
 class lpeParElm {
 
@@ -146,8 +147,8 @@ void lpeParElm::getDatVarRec(aterm_appl t) {
     p_foundVariables.insert(t);
   };
 
-  for(aterm_list::iterator i = t.argument_list().begin(); i!= t.argument_list().end();i++) {
-    getDatVarRec((aterm_appl) *i);
+  for(aterm_appl::iterator i = t.begin(); i!= t.end();i++) {
+    getDatVarRec(aterm_appl(*i));
   } 
 } 
   

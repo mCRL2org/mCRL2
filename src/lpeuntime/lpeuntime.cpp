@@ -132,7 +132,7 @@ lpe::specification remove_deltas(const lpe::specification& specification) {
                                               );
 
   summands = push_front(summands, delta_summand);
-  summands = reverse(summands);
+  summands = atermpp::reverse(summands);
 
   result = set_lpe(specification, set_summands(specification.lpe(), summands));
 
@@ -241,7 +241,7 @@ lpe::specification untime(const lpe::specification& specification) {
   untime_summand_list = push_front(untime_summand_list, untime_summand);
   
   // Reverse summand list, because it is the wrong way round now.
-  untime_summand_list = reverse(untime_summand_list);
+  untime_summand_list = atermpp::reverse(untime_summand_list);
       
   // Create new LPE, this equals lpe, except for the new summand list and the additional process parameter.
   untime_lpe = lpe::LPE(lpe.free_variables(), untime_process_parameters, untime_summand_list, lpe.actions());

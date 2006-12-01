@@ -342,9 +342,9 @@ lpe::LPE_summand substitute_equalities(const lpe::LPE_summand& summand)
   new_summand = LPE_summand(new_summand.summation_variables(),
                             new_condition.substitute(assignment_list_substitution(substitutions)),
                             new_summand.is_delta(),
-                            substitute(new_summand.actions(),assignment_list_substitution(substitutions)),
+                            new_summand.actions().substitute(assignment_list_substitution(substitutions)),
                             new_summand.time().substitute(assignment_list_substitution(substitutions)),
-                            substitute(new_summand.assignments(),assignment_list_substitution(substitutions)));
+                            new_summand.assignments().substitute(assignment_list_substitution(substitutions)));
   //Take the summand with substitution, and remove the summation variables that are now not needed
   new_summand = remove_unused_variables(new_summand);
   return new_summand;

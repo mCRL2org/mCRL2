@@ -259,8 +259,8 @@ void lpeConstElm::getDatVarRec(aterm_appl t) {
     p_foundFreeVars.insert(t);
   };
 
-  for(aterm_list::iterator i = t.argument_list().begin(); i!= t.argument_list().end();i++) {
-    getDatVarRec((aterm_appl) *i);
+  for(aterm_appl::iterator i = t.begin(); i!= t.end();i++) {
+    getDatVarRec(aterm_appl(*i));
   } 
 } 
 
@@ -418,8 +418,8 @@ bool lpeConstElm::recDetectVar(lpe::data_expression t, std::set<data_expression>
      b = true;
    }
    if ( gsIsDataAppl(t) ) {
-     for(aterm_list::iterator i = ((aterm_appl) t).argument_list().begin(); i!= ((aterm_appl) t).argument_list().end();i++) {
-       b = b || recDetectVar((aterm_appl) *i, S);
+     for(aterm_appl::iterator i = aterm_appl(t).begin(); i!= aterm_appl(t).end();i++) {
+       b = b || recDetectVar(aterm_appl(*i), S);
      }
    }
    return b;
@@ -865,7 +865,7 @@ void lpeConstElm::filter() {
   p_newVarCounter  = 0;
   
   lpe::LPE p_lpe          = p_spec.lpe();
-  gsRewriteInit(gsMakeDataEqnSpec(aterm_list(p_spec.equations())), GS_REWR_INNER); 
+  gsRewriteInit(gsMakeDataEqnSpec(p_spec.equations()), GS_REWR_INNER); 
 
   for(lpe::data_assignment_list::iterator i = p_spec.initial_assignments().begin(); i != p_spec.initial_assignments().end() ; i++ ){
     p_lookupIndex[i->lhs()] = counter;

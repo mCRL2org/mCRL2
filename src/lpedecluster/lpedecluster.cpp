@@ -142,7 +142,7 @@ struct is_data_variable
 template <typename data_type>
 bool occurs_in(data_type l, lpe::data_variable v)
 {
-  return find_if(aterm_list(l), is_data_variable(v)) != aterm();
+  return find_if(l, is_data_variable(v)) != aterm();
 }
 
 
@@ -292,9 +292,9 @@ void decluster_summand(const lpe::specification& specification, const lpe::LPE_s
     LPE_summand s = LPE_summand(new_vars,
                                 summand.condition().substitute(assignment_list_substitution(substitutions)),
                                 summand.is_delta(),
-                                substitute(summand.actions(), assignment_list_substitution(substitutions)),
+                                summand.actions().substitute(assignment_list_substitution(substitutions)),
                                 summand.time().substitute(assignment_list_substitution(substitutions)),
-                                substitute(summand.assignments(), assignment_list_substitution(substitutions))
+                                summand.assignments().substitute(assignment_list_substitution(substitutions))
                                 );
 
 //    LPE_summand s = set_summation_variables(summand, new_vars);
