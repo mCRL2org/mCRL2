@@ -2,6 +2,12 @@
 
 const wxColour border_colour_selected = wxT("BLUE");
 
+// For compatibility with older wxWidgets versions (pre 2.8)
+#ifdef wxSAVE
+#define wxFD_SAVE wxSAVE 
+#define wxFD_OVERWRITE_PROMPT wxOVERWRITE_PROMPT
+#endif
+
 BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
   EVT_MENU(wxID_OPEN, GraphFrame::OnOpen)
   EVT_MENU(ID_MENU_EXPORT, GraphFrame::on_export)
@@ -713,7 +719,7 @@ void GraphFrame::on_export(wxCommandEvent& /* event */) {
   wxString default_dir = wxEmptyString;
   wxString default_file_name = wx_str + wxT(".svg");
 
-  wxFileDialog export_dialog(this, caption, default_dir, default_file_name, wildcard, wxSAVE | wxOVERWRITE_PROMPT);
+  wxFileDialog export_dialog(this, caption, default_dir, default_file_name, wildcard, wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (export_dialog.ShowModal() == wxID_OK) {
     wxString file_name = export_dialog.GetPath();
@@ -778,7 +784,7 @@ void GraphFrame::export_to_latex( wxString export_file_name) {
        wxString default_dir = wxEmptyString;
        wxString default_filename((inputFileName + ".tex").c_str(), wxConvLocal);
 
-       wxFileDialog export_ltx(this, caption, default_dir, default_filename, wildcard, wxSAVE | wxOVERWRITE_PROMPT);
+       wxFileDialog export_ltx(this, caption, default_dir, default_filename, wildcard, wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
         
        ExportToLatex * ltx = new ExportToLatex(export_file_name.c_str(), vectNodeLatex,vectEdgeLatex,leftPanel->Get_Height());
@@ -881,8 +887,8 @@ void GraphFrame::CreateBackup(wxCommandEvent& event) {
   wxString default_file_name(inputFileName.c_str(), wxConvLocal);
   default_file_name.append(wxT(".ltsgraph"));
 
-  wxFileDialog bckup_dialog(this, caption, default_dir, default_file_name, wildcard, wxSAVE | wxOVERWRITE_PROMPT);
-  
+  wxFileDialog bckup_dialog(this, caption, default_dir, default_file_name, wildcard, wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
   if (bckup_dialog.ShowModal() == wxID_OK) {
     wxString backup_filename = bckup_dialog.GetPath();
     // Get last part of the filename (backup expects a local file path

@@ -29,6 +29,11 @@
 // For PLUGIN_DIRECTORY
 #include <setup.h>
 
+// For compatibility with older wxWidgets versions (pre 2.8)
+#ifdef wxSAVE
+# define wxFD_SAVE wxSAVE
+#endif
+
 using namespace std;
 
 //------------------------------------------------------------------------------
@@ -854,7 +859,7 @@ void XSimMain::OnLoadTrace( wxCommandEvent& /* event */ )
 
 void XSimMain::OnSaveTrace( wxCommandEvent& /* event */ )
 {
-    wxFileDialog dialog( this, wxT("Save trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"),wxSAVE);
+    wxFileDialog dialog( this, wxT("Save trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"),wxFD_SAVE);
     if ( dialog.ShowModal() == wxID_OK )
     {
 	    ofstream f(dialog.GetPath().mb_str());

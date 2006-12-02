@@ -30,7 +30,6 @@ extern "C" {
 #include <string.h>
 #include "aterm1.h"
 #include <assert.h>
-#include <sys/times.h>
 #include "svc/svcerrno.h"
 #include "svc/svc.h"
 #define EXIT_OK 0

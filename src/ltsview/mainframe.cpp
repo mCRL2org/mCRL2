@@ -12,6 +12,11 @@
 #include "icons/rotate_tool.xpm"
 #include "icons/rotate_cursor_mask.xpm"
 
+// For compatibility with older wxWidgets versions (pre 2.8)
+#ifdef wxOPEN
+# define wxFD_OPEN wxOPEN
+#endif
+
 using namespace std;
 using namespace Utils;
 using namespace IDs;
@@ -514,7 +519,7 @@ void MainFrame::onOpen( wxCommandEvent& /*event*/ )
 {
   wxString filemask = wxT("FSM files (*.fsm)|*.fsm");
   wxFileDialog* dialog = new wxFileDialog( this, wxT("Open LTS"), directory,
-	filename, filemask, wxOPEN );
+	filename, filemask, wxFD_OPEN );
   dialog->CentreOnParent();
   if ( dialog->ShowModal() == wxID_OK )
   {

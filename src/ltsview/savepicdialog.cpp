@@ -1,5 +1,10 @@
 #include "savepicdialog.h"
 
+// For compatibility with older wxWidgets versions (pre 2.8)
+#ifdef wxSAVE
+# define wxFD_SAVE wxSAVE
+#endif
+
 BEGIN_EVENT_TABLE(SavePicDialog,wxDialog)
   EVT_COMMAND_SCROLL_THUMBTRACK(myID_R_SLIDER,SavePicDialog::onSlider)
   EVT_COMMAND_SCROLL_CHANGED(myID_R_SLIDER,SavePicDialog::onSlider)
@@ -103,7 +108,7 @@ void SavePicDialog::onSlider(wxScrollEvent& /*event*/) {
 
 void SavePicDialog::onChangeFile(wxCommandEvent& /*event*/) {
   wxString new_file = wxFileSelector(wxT("Select a file"),f_name.GetPath(),
-    f_name.GetFullName(),wxEmptyString,wxT("*.*"),wxSAVE,this);
+    f_name.GetFullName(),wxEmptyString,wxT("*.*"),wxFD_SAVE,this);
   if (new_file != wxEmptyString) {
     f_name.Assign(new_file);
     // if extension of new filename indicates a supported file type, set the
