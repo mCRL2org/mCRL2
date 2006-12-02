@@ -13,7 +13,7 @@
 #include "icons/rotate_cursor_mask.xpm"
 
 // For compatibility with older wxWidgets versions (pre 2.8)
-#ifdef wxOPEN
+#if (wxMINOR_VERSION < 8)
 # define wxFD_OPEN wxOPEN
 #endif
 

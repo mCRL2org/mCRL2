@@ -30,7 +30,7 @@
 #include <setup.h>
 
 // For compatibility with older wxWidgets versions (pre 2.8)
-#ifdef wxSAVE
+#if (wxMINOR_VERSION < 8)
 # define wxFD_SAVE wxSAVE
 #endif
 

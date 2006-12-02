@@ -3,7 +3,7 @@
 const wxColour border_colour_selected = wxT("BLUE");
 
 // For compatibility with older wxWidgets versions (pre 2.8)
-#ifdef wxSAVE
+#if (wxMINOR_VERSION < 8)
 #define wxFD_SAVE wxSAVE 
 #define wxFD_OVERWRITE_PROMPT wxOVERWRITE_PROMPT
 #endif

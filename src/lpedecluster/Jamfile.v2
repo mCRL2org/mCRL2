@@ -1,7 +1,5 @@
 project lpedecluster
        : build-dir $(BUILD_TOP)/lpedecluster
-       : requirements
-          <status>experimental
        ;
 
 exe lpedecluster
@@ -10,6 +8,7 @@ exe lpedecluster
          /libraries//lpe
          /libraries//nextstate
          /site-config//boost_program_options
+       : <include>.
+         <status>experimental
        : <squadt_support>enable
-         <include>.
        ;
