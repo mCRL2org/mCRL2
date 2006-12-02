@@ -687,13 +687,13 @@ inline void lpeConstElm::output() {
   //construct new specfication
   //
   //LPE(data_variable_list free_variables, data_variable_list process_parameters, 
-  //  summand_list summands, action_list actions);
+  //  summand_list summands, action_label_list action_labels);
   lpe::LPE rebuild_lpe;
   rebuild_lpe = lpe::LPE(
     setToList(usedFreeVars),
     vectorToList(variablePPvar), 
     atermpp::reverse(rebuild_summandlist_no_cp),
-    p_lpe.actions()
+    p_lpe.action_labels()
   );
    
    //std::cerr <<  p_spec.initial_free_variables() << std::endl;
@@ -711,7 +711,7 @@ inline void lpeConstElm::output() {
   //
   //specification(sort_list sorts, function_list constructors, 
   //            function_list mappings, data_equation_list equations, 
-  //            action_list actions, LPE lpe, 
+  //            action_label_list action_labels, LPE lpe, 
   //            data_variable_list initial_free_variables, 
   //            data_variable_list initial_variables, 
   //            data_expression_list initial_state);
@@ -722,7 +722,7 @@ inline void lpeConstElm::output() {
     p_spec.constructors(), 
     p_spec.mappings(), 
     p_spec.equations(), 
-    p_spec.actions(), 
+    p_spec.action_labels(), 
     rebuild_lpe, 
     setToList(initial_free_variables), 
     vectorToList(variablePPvar), 

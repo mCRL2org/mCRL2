@@ -18,6 +18,7 @@
 #include <sstream>
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
+#include "atermpp/algorithm.h"
 #include "lpe/action.h"
 #include "lpe/data.h"
 #include "lpe/data_declaration.h"
@@ -300,7 +301,7 @@ class LPE: public aterm_appl
     data_variable_list m_free_variables;
     data_variable_list m_process_parameters;
     summand_list       m_summands;
-    aterm_list         m_actions; //Can m_actions be removed?
+    action_label_list  m_action_labels;
 
     typedef std::vector<std::pair<summand_list::iterator, std::set<std::string> > > name_clash_list;
 
@@ -321,6 +322,23 @@ class LPE: public aterm_appl
         }
       }
       return result;
+    }
+
+    /// Returns true if the action labels in the LPE are included in m_action_labels.
+    bool has_proper_action_labels() const
+    {
+      // find all action labels that occur in the LPE
+      std::set<action_label> labels;
+      atermpp::find_all_if(*this, is_action_label, std::inserter(labels, labels.end()));
+      
+      // put the elements of m_action_labels in a set
+      std::set<action_label> cached_labels;
+      for (action_label_list::iterator i = m_action_labels.begin(); i != m_action_labels.end(); ++i)
+      {
+        cached_labels.insert(*i);
+      }
+      
+      return std::includes(cached_labels.begin(), cached_labels.end(), labels.begin(), labels.end());
     }
 
   public:
@@ -356,38 +374,41 @@ class LPE: public aterm_appl
     LPE(data_variable_list free_variables,
         data_variable_list process_parameters,
         summand_list       summands,
-        aterm_list         actions
+        action_label_list  action_labels
        )
      : aterm_appl(gsMakeLPE(free_variables, process_parameters, summands)),
        m_free_variables    (free_variables    ),
        m_process_parameters(process_parameters),
        m_summands          (summands          ),
-       m_actions           (actions           )
+       m_action_labels     (action_labels     )
     {
       assert(is_well_typed());
       assert(is_name_clash_free(true));
+      //assert(has_proper_action_labels());
     }
 
-    LPE(aterm_appl lpe, aterm_list actions)
+    LPE(aterm_appl lpe, action_label_list action_labels)
       : aterm_appl(lpe)
     {
       assert(gsIsLPE(lpe));
       assert(is_well_typed());
       assert(is_name_clash_free(true));
+      //assert(has_proper_action_labels());
 
       // unpack LPE(.,.,.) term     
       aterm_appl::iterator i = lpe.begin();
       m_free_variables     = data_variable_list(*i++);
       m_process_parameters = data_variable_list(*i++);
       m_summands           = summand_list(*i);
-      m_actions            = actions;
+      m_action_labels      = action_labels;
     }
 
-    /// Returns the sequence of actions.
+    /// Returns a sequence of action labels. This sequence includes all
+    /// action labels occurring in this LPE, but it can have more.
     ///
-    aterm_list actions() const
+    action_label_list action_labels() const
     {
-      return m_actions;
+      return m_action_labels;
     }
 
     /// Returns the sequence of LPE summands.
@@ -420,7 +441,7 @@ class LPE: public aterm_appl
       data_variable_list d = m_free_variables    .substitute(f);
       data_variable_list p = m_process_parameters.substitute(f);
       summand_list       s = m_summands          .substitute(f);
-      aterm_list         a = m_actions           .substitute(f);
+      action_label_list  a = m_action_labels     .substitute(f);
       return LPE(d, p, s, a);
     }     
 
@@ -431,7 +452,7 @@ class LPE: public aterm_appl
       std::string s1 = lpe::pp(m_free_variables    );
       std::string s2 = lpe::pp(m_process_parameters);
       std::string s3 = lpe::pp(m_summands          );
-      std::string s4 = lpe::pp(m_actions           );
+      std::string s4 = lpe::pp(m_action_labels     );
       return s1 + "\n" + s2 + "\n" + s3 + "\n" + s4;
     }
 
@@ -442,7 +463,7 @@ class LPE: public aterm_appl
       std::string s1 = m_free_variables    .to_string();
       std::string s2 = m_process_parameters.to_string();
       std::string s3 = m_summands          .to_string();
-      std::string s4 = m_actions           .to_string();
+      std::string s4 = m_action_labels     .to_string();
       return s1 + "\n" + s2 + "\n" + s3 + "\n" + s4;
     }
   };
@@ -453,7 +474,7 @@ LPE set_free_variables(LPE l, data_variable_list free_variables)
   return LPE(free_variables,
              l.process_parameters(),
              l.summands          (),
-             l.actions           ()
+             l.action_labels     ()
             );
 }
 
@@ -463,7 +484,7 @@ LPE set_process_parameters(LPE l, data_variable_list process_parameters)
   return LPE(l.free_variables    (),
              process_parameters,
              l.summands          (),
-             l.actions           ()
+             l.action_labels     ()
             );
 }
 
@@ -473,17 +494,17 @@ LPE set_summands(LPE l, summand_list summands)
   return LPE(l.free_variables    (),
              l.process_parameters(),
              summands,
-             l.actions           ()
+             l.action_labels     ()
             );
 }
 
 inline
-LPE set_actions(LPE l, aterm_list actions)
+LPE set_action_labels(LPE l, action_label_list action_labels)
 {
   return LPE(l.free_variables    (),
              l.process_parameters(),
              l.summands          (),
-             actions
+             action_labels
             );
 }
 
@@ -498,11 +519,11 @@ template<>
 struct aterm_traits<LPE_summand>
 {
   typedef ATermAppl aterm_type;
-  static void protect(lpe::LPE_summand t)   { t.protect(); }
-  static void unprotect(lpe::LPE_summand t) { t.unprotect(); }
-  static void mark(lpe::LPE_summand t)      { t.mark(); }
-  static ATerm term(lpe::LPE_summand t)     { return t.term(); }
-  static ATerm* ptr(lpe::LPE_summand& t)    { return &t.term(); }
+  static void protect(LPE_summand t)   { t.protect(); }
+  static void unprotect(LPE_summand t) { t.unprotect(); }
+  static void mark(LPE_summand t)      { t.mark(); }
+  static ATerm term(LPE_summand t)     { return t.term(); }
+  static ATerm* ptr(LPE_summand& t)    { return &t.term(); }
 };
 
 template<>

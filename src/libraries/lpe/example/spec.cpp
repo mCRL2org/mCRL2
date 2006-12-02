@@ -101,11 +101,6 @@ int main()
   cout << "d2 = " << pp(d2) << " " << d2.to_string() << endl;
   cin.get();
 
-  // test comparison (using rewrite)
-  //cout << endl;
-  //bool c = compare(d0.front(), d1.front(), spec.equations());
-  //cout << "compare(d0.front(), d1.front(), spec) == " << c << endl;
-
   for (summand_list::iterator i = spec.lpe().summands().begin(); i != spec.lpe().summands().end(); ++i)
   {
 //    cout << "summand " << i->pp() << endl;

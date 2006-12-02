@@ -1,9 +1,10 @@
 #include <iostream>
+#include <iterator>
 
+#include "atermpp/atermpp.h"
 #include "atermpp/algorithm.h"
 #include "lpe/data.h"
 #include "lpe/sort.h"
-#include "lpe/substitute.h"
 #include "lpe/specification.h"
 
 using namespace std;
@@ -75,6 +76,15 @@ int main()
     bool b = occurs_in(d, v);
     cout << "v = " << v << endl;
     cout << "occurs: " << b << endl;
+  }
+
+  // find all labels in an LPE
+  std::set<action_label> labels;
+  find_all_if(lpe, is_action_label, inserter(labels, labels.end()));
+  cout << "--- labels ---" << endl;
+  for (std::set<action_label>::iterator i = labels.begin(); i != labels.end(); ++i)
+  {
+    cout << i->name() << endl;
   }
   
   return 0;

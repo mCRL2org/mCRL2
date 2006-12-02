@@ -253,7 +253,7 @@ ATermAppl removeUnusedData(ATermAppl ATSpec)
 	}
 	new_eqns = reverse(new_eqns);
 	
-	specification new_spec(new_sort,new_cons,new_maps,new_eqns,spec.actions(),spec.lpe(),spec.initial_free_variables(),spec.initial_variables(),spec.initial_state());
+	specification new_spec(new_sort,new_cons,new_maps,new_eqns,spec.action_labels(),spec.lpe(),spec.initial_free_variables(),spec.initial_variables(),spec.initial_state());
 
 	ATtableDestroy(used_sorts);
 	ATtableDestroy(used_data);

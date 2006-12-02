@@ -165,7 +165,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     left_column->add(new label("Summands (#):"), a);
     left_column->add(new label("Free variables (#):"), a);
     left_column->add(new label("Process parameters (#):"), a);
-    left_column->add(new label("Actions (#):"), a);
+    left_column->add(new label("Action labels (#):"), a);
   
     /* Second column */
     layout::vertical_box* right_column = new layout::vertical_box();
@@ -174,7 +174,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     right_column->add(new label(boost::lexical_cast < std::string > (lpe.summands().size())), a);
     right_column->add(new label(boost::lexical_cast < std::string > ((lpe_specification.initial_free_variables().size() + lpe.free_variables().size()))), a);
     right_column->add(new label(boost::lexical_cast < std::string > (lpe.process_parameters().size())), a);
-    right_column->add(new label(boost::lexical_cast < std::string > (lpe.actions().size())), a);
+    right_column->add(new label(boost::lexical_cast < std::string > (lpe.action_labels().size())), a);
   
     /* Attach columns*/
     top->add(left_column, margins(0,5,0,5));
@@ -216,7 +216,7 @@ int main(int argc, char** argv) {
       cout << "Number of summands          : " << lpe.summands().size() << endl;
       cout << "Number of free variables    : " << lpe_specification.initial_free_variables().size() + lpe.free_variables().size() << endl;
       cout << "Number of process parameters: " << lpe.process_parameters().size() << endl; 
-      cout << "Number of actions           : " << lpe.actions().size() << endl;
+      cout << "Number of action labels     : " << lpe.action_labels().size() << endl;
     }
     else {
       std::cerr << "Error: Unable to load LPE from `" + file_name + "'\n";

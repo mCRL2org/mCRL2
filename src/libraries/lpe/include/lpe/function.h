@@ -38,10 +38,8 @@ class function: public term_appl<lpe::sort>
     {
       sort_list result;
       term_appl<lpe::sort> t = *this;
-      assert(t.size() > 1);
       while (t(1).is_arrow()) {
         t = t(1);
-        assert(t.size() > 1);
         result = push_front(result, t(0));
       }
       return reverse(result);
@@ -52,12 +50,26 @@ class function: public term_appl<lpe::sort>
     sort result_type() const
     {
       term_appl<lpe::sort> t = *this;
-      assert(t.size() > 1);
       while (t(1).is_arrow()) {
         t = t(1);
-        assert(t.size() > 1);
       }
       return t(1);
+    }
+
+    /// Applies a substitution to this function and returns the result.
+    /// The Substitution object must supply the method aterm operator()(aterm).
+    ///
+    template <typename Substitution>
+    function substitute(Substitution f)
+    {
+      return function(f(*this));
+    }     
+
+    /// Returns a pretty print representation of the term.
+    ///                                                   
+    std::string pp() const                                
+    {                                                     
+      return pretty_print(term());                        
     }
 };
 

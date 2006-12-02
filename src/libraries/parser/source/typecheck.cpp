@@ -278,7 +278,7 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lpe::specification &lpe_spec)
   gsDebugMsg ("type checking of multiactions read-in phase started\n");
 
   //XXX read-in from LPE (not finished)
-  if(/* gstcReadInSorts((ATermList) lpe_spec.sorts())  && */ gstcReadInActs((ATermList) lpe_spec.actions())){
+  if(/* gstcReadInSorts((ATermList) lpe_spec.sorts())  && */ gstcReadInActs((ATermList) lpe_spec.action_labels())){
     gsDebugMsg ("type checking of multiactions read-in phase finished\n");
 
     if(gsIsMultAct(mult_act)){
@@ -338,7 +338,7 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, lpe::specification &lpe_spec
   gsDebugMsg ("type checking of state formulas read-in phase started\n");
 
   //XXX read-in from LPE (not finished)
-  if(/* gstcReadInSorts((ATermList) lpe_spec.sorts()) && */ gstcReadInActs((ATermList) lpe_spec.actions())){
+  if(/* gstcReadInSorts((ATermList) lpe_spec.sorts()) && */ gstcReadInActs((ATermList) lpe_spec.action_labels())){
     gsDebugMsg ("type checking of state formulas read-in phase finished\n");
 
     ATermTable Vars=ATtableCreate(63,50);

@@ -423,13 +423,13 @@ inline void lpeParElm::output() {
   //construct new specfication
   //
   //LPE(data_variable_list free_variables, data_variable_list process_parameters, 
-  //  summand_list summands, action_list actions);
+  //  summand_list summands, action_label_list action_labels);
   LPE rebuild_lpe;
   rebuild_lpe = LPE(
     lpe.free_variables(), 
     atermpp::reverse(rebuild_process_parameters), 
     atermpp::reverse(rebuild_summandlist),
-    lpe.actions()
+    lpe.action_labels()
   );
 
   data_variable_list               rebuild_initial_variables;
@@ -449,7 +449,7 @@ inline void lpeParElm::output() {
   //
   //specification(sort_list sorts, function_list constructors, 
   //            function_list mappings, data_equation_list equations, 
-  //            action_list actions, LPE lpe, 
+  //            action_label_list action_labels, LPE lpe, 
   //            data_variable_list initial_free_variables, 
   //            data_variable_list initial_variables, 
   //            data_expression_list initial_state);
@@ -460,7 +460,7 @@ inline void lpeParElm::output() {
     p_spec.constructors(),
     p_spec.mappings(), 
     p_spec.equations(), 
-    p_spec.actions(), 
+    p_spec.action_labels(), 
     rebuild_lpe,
     p_spec.initial_free_variables(), 
     atermpp::reverse(rebuild_initial_variables),

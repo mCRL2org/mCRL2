@@ -78,21 +78,21 @@ namespace atermpp
       ///
       void put(aterm key, aterm value)
       {
-        ATtablePut(m_table, key.to_ATerm(), value.to_ATerm());
+        ATtablePut(m_table, key, value);
       }
       
       /// Get the value belonging to a given key in a table.
       ///
       aterm get(aterm key)
       {
-        return ATtableGet(m_table, key.to_ATerm());
+        return ATtableGet(m_table, key);
       }
       
       /// Remove the (key, value)-pair from table.
       ///
       void remove(aterm key)
       {
-        ATtableRemove(m_table, key.to_ATerm());
+        ATtableRemove(m_table, key);
       }
       
       /// Get an term_list of all the keys in a table.

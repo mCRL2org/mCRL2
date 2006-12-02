@@ -48,7 +48,7 @@ using atermpp::aterm_traits;
 //                ConsSpec(list<operation> constructors),
 //                MapSpec(list<operation> mappings),
 //                DataEqnSpec(list<data_equation> equations),
-//                ActSpec(list<action> actions),
+//                ActSpec(list<action_label> action_labels),
 //                LPE(list<data_variable> free_variables, list<data_variable> process_parameters, list<LPESummand> lpe_summands),
 //         )
 // <Spec>         ::= SpecV1(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
@@ -58,7 +58,7 @@ class specification: public aterm_appl
 {
   protected:
     data_declaration     m_data;
-    aterm_list           m_actions;
+    action_label_list    m_action_labels;
     LPE                  m_lpe;
     data_variable_list   m_initial_free_variables;
     data_assignment_list m_initial_assignments;
@@ -114,11 +114,11 @@ class specification: public aterm_appl
       function_list      mappings     = function_list(aterm_appl(*i++).argument(0));
       data_equation_list equations    = data_equation_list(aterm_appl(*i++).argument(0));
       m_data = data_declaration(sorts, constructors, mappings, equations);
-      m_actions                       = aterm_list(aterm_appl(*i++).argument(0));
+      m_action_labels                 = action_label_list(aterm_appl(*i++).argument(0));
       aterm_appl lpe                  = *i++;
       aterm_appl lpe_init             = *i;
 
-      m_lpe = LPE(lpe, m_actions);
+      m_lpe = LPE(lpe, m_action_labels);
 
       // unpack LPEInit(.,.) term
       aterm_appl::iterator k         = lpe_init.begin();
@@ -143,14 +143,14 @@ class specification: public aterm_appl
         function_list        constructors     ,
         function_list        mappings         ,
         data_equation_list   equations        ,
-        aterm_list           actions          ,
+        action_label_list    action_labels    ,
         LPE                  lpe              ,
         data_variable_list   initial_free_variables,
         data_variable_list   initial_variables,
         data_expression_list initial_state)
       :
         m_data(sorts, constructors, mappings, equations),
-        m_actions       (actions       ),
+        m_action_labels (action_labels ),
         m_lpe           (lpe           ),
         m_initial_free_variables(initial_free_variables),        
         m_initial_assignments(compute_initial_assignments(initial_variables, initial_state))
@@ -162,7 +162,7 @@ class specification: public aterm_appl
           gsMakeConsSpec(constructors),
           gsMakeMapSpec(mappings),
           gsMakeDataEqnSpec(equations),
-          gsMakeActSpec(actions),
+          gsMakeActSpec(action_labels),
           lpe,
           gsMakeLPEInit(initial_free_variables, m_initial_assignments)
         )
@@ -171,14 +171,14 @@ class specification: public aterm_appl
 
     specification(
         data_declaration     data             ,
-        aterm_list           actions          ,
+        action_label_list    action_labels    ,
         LPE                  lpe              ,
         data_variable_list   initial_free_variables,
         data_variable_list   initial_variables,
         data_expression_list initial_state)
       :
         m_data(data),
-        m_actions(actions),
+        m_action_labels(action_labels),
         m_lpe(lpe),
         m_initial_free_variables(initial_free_variables),        
         m_initial_assignments(compute_initial_assignments(initial_variables, initial_state))
@@ -190,7 +190,7 @@ class specification: public aterm_appl
           gsMakeConsSpec(data.constructors()),
           gsMakeMapSpec(data.mappings()),
           gsMakeDataEqnSpec(data.equations()),
-          gsMakeActSpec(actions),
+          gsMakeActSpec(action_labels),
           lpe,
           gsMakeLPEInit(initial_free_variables, m_initial_assignments)
         )
@@ -279,10 +279,10 @@ class specification: public aterm_appl
     void set_equations(data_equation_list equations)
     { m_data.set_equations(equations); }
 
-    /// Returns the sequence of actions.
+    /// Returns the sequence of action labels.
     ///
-    aterm_list actions() const
-    { return m_actions; }
+    action_label_list action_labels() const
+    { return m_action_labels; }
 
     /// Returns the initial state of the LPE.
     ///
@@ -318,7 +318,7 @@ inline
 specification set_data_declaration(specification spec, data_declaration data)
 {
   return specification(data,
-                       spec.actions(),
+                       spec.action_labels(),
                        spec.lpe(),
                        spec.initial_free_variables(),
                        spec.initial_variables(),
@@ -327,10 +327,10 @@ specification set_data_declaration(specification spec, data_declaration data)
 }
 
 inline
-specification set_actions(specification spec, aterm_list actions)
+specification set_action_labels(specification spec, action_label_list action_labels)
 {
   return specification(spec.data(),
-                       actions,
+                       action_labels,
                        spec.lpe(),
                        spec.initial_free_variables(),
                        spec.initial_variables(),
@@ -342,7 +342,7 @@ inline
 specification set_lpe(specification spec, LPE lpe)
 {
   return specification(spec.data(),
-                       spec.actions(),
+                       spec.action_labels(),
                        lpe,
                        spec.initial_free_variables(),
                        spec.initial_variables(),
@@ -354,7 +354,7 @@ inline
 specification set_initial_free_variables(specification spec, data_variable_list initial_free_variables)
 {
   return specification(spec.data(),
-                       spec.actions(),
+                       spec.action_labels(),
                        spec.lpe(),
                        initial_free_variables,
                        spec.initial_variables(),
@@ -366,7 +366,7 @@ inline
 specification set_initial_variables(specification spec, data_variable_list initial_variables)
 {
   return specification(spec.data(),
-                       spec.actions(),
+                       spec.action_labels(),
                        spec.lpe(),
                        spec.initial_free_variables(),
                        initial_variables,
@@ -378,7 +378,7 @@ inline
 specification set_initial_state(specification spec, data_expression_list initial_state)
 {
   return specification(spec.data(),
-                       spec.actions(),
+                       spec.action_labels(),
                        spec.lpe(),
                        spec.initial_free_variables(),
                        spec.initial_variables(),
