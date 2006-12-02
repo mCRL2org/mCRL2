@@ -56,11 +56,23 @@ namespace squadt {
         /* \brief Function that is used for getting columns with decent widths */
         void activate();
 
-        /* \brief Event handler for changes to the maximum */
-        void apply_button_activated(wxCommandEvent&);
+        /* \brief Event handler for when the new button is pressed */
+        void apply_changes(wxCommandEvent&);
+
+        /* \brief Event handler for when the new button is pressed */
+        void apply_changes_for_row(long const&);
+
+        /* \brief Event handler for when the new button is pressed */
+        void new_association(wxCommandEvent&);
+
+        /* \brief Event handler for changes after a new association operation */
+        void after_label_edit(wxListEvent&);
 
         /* \brief Event handler for selection changes in the list control */
         void list_item_selected(wxListEvent&);
+
+        /* \brief Event handler for command changes */
+        void command_changed(wxCommandEvent&);
 
       public:
 
@@ -92,7 +104,7 @@ namespace squadt {
         debug_preferences(wxWindow*);
     };
 
-    wxString edit_preferences::no_action = wxT("No action");
+    wxString edit_preferences::no_action = wxT("");
 
     void execution_preferences::maximum_changed(wxCommandEvent&) {
       global_build_system.get_executor()->set_maximum_instance_count(maximum_concurrent->GetValue());
@@ -116,13 +128,6 @@ namespace squadt {
       Connect(wxEVT_SCROLL_CHANGED, wxCommandEventHandler(execution_preferences::maximum_changed));
     }
 
-    void edit_preferences::activate() {
-      long width = formats_and_actions->GetClientSize().GetWidth();
-
-      formats_and_actions->SetColumnWidth(0, (width + 2) / 3);
-      formats_and_actions->SetColumnWidth(1, (width * 2 + 2) / 3);
-    }
-
     /** \cond HELPER_FUNCTIONS
      * Convenience function
      **/
@@ -134,46 +139,94 @@ namespace squadt {
     }
     /// \endcond
 
-    void edit_preferences::apply_button_activated(wxCommandEvent&) {
+    void edit_preferences::command_changed(wxCommandEvent&) {
       long selected = formats_and_actions->GetFirstSelected();
 
+      if (0 <= selected) {
+        wxListItem s;
+
+        get_wxlist_value(s, formats_and_actions, selected, 1);
+
+        s.SetText(command_text->GetValue());
+
+        formats_and_actions->SetItem(s);
+      }
+    }
+
+    void edit_preferences::new_association(wxCommandEvent&) {
+      long row = formats_and_actions->InsertItem(row, wxEmptyString);
+
+      formats_and_actions->EditLabel(row);
+      formats_and_actions->SetItem(row, 1, wxEmptyString);
+    }
+
+    void edit_preferences::after_label_edit(wxListEvent& e) {
+      // Assumes that the wxListCtrl only allows edit of items in the first
+      // columns, and deleting item i deletes all items on row i
+      long row = e.GetIndex();
+
+      if (e.GetText() == wxEmptyString) {
+        formats_and_actions->DeleteItem(row);
+      }
+      else {
+        apply_changes_for_row(row);
+      }
+    }
+
+    void edit_preferences::activate() {
+      long width = formats_and_actions->GetClientSize().GetWidth();
+
+      formats_and_actions->SetColumnWidth(0, (width + 2) / 3);
+      formats_and_actions->SetColumnWidth(1, (width * 2 + 2) / 3);
+    }
+
+    void edit_preferences::apply_changes(wxCommandEvent&) {
+      apply_changes_for_row(formats_and_actions->GetFirstSelected());
+    }
+
+    void edit_preferences::apply_changes_for_row(long const& selected) {
       if (0 <= selected) {
         wxListItem s;
         
         get_wxlist_value(s, formats_and_actions, selected, 0);
 
-        mime_type   type(std::string(s.GetText().fn_str()));
-        wxString    new_command = command_text->GetValue();
-
-        get_wxlist_value(s, formats_and_actions, selected, 1);
-
-        type_registry* registry = global_build_system.get_type_registry();
-
-        if (new_command.IsEmpty()) {
-          s.SetText(no_action);
-
-          registry->register_command(type, type_registry::command_none);
+        if (s.GetText() == wxEmptyString) {
+          formats_and_actions->DeleteItem(selected);
         }
-        else if (new_command.Lower() == wxT("system")) {
+        else {
+          mime_type   type(std::string(s.GetText().fn_str()));
+          wxString    new_command = command_text->GetValue();
+         
+          get_wxlist_value(s, formats_and_actions, selected, 1);
+         
+          type_registry* registry = global_build_system.get_type_registry();
+         
+          if (new_command.IsEmpty()) {
+            registry->register_command(type, type_registry::command_none);
 
-          registry->register_command(type, type_registry::command_system);
-
-          if (registry->has_registered_command(type)) {
-            std::auto_ptr < command > command_line = registry->get_registered_command(type, "$");
-
-            s.SetText(wxString(command_line->argument_string().c_str(), wxConvLocal));
-          }
-          else {
             s.SetText(no_action);
           }
+          else if (new_command.Lower() == wxT("system")) {
+         
+            registry->register_command(type, type_registry::command_system);
+         
+            if (registry->has_registered_command(type)) {
+              std::auto_ptr < command > command_line = registry->get_registered_command(type, "$");
+         
+              s.SetText(wxString(command_line->argument_string().c_str(), wxConvLocal));
+            }
+            else {
+              s.SetText(no_action);
+            }
+          }
+          else if (new_command != no_action) {
+            s.SetText(new_command);
+         
+            registry->register_command(type, std::string(new_command.fn_str()));
+          }
+         
+          formats_and_actions->SetItem(s);
         }
-        else if (new_command != no_action) {
-          s.SetText(new_command);
-
-          registry->register_command(type, std::string(new_command.fn_str()));
-        }
-
-        formats_and_actions->SetItem(s);
       }
     }
 
@@ -225,14 +278,17 @@ namespace squadt {
       command_text = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
 
       current_sizer = new wxBoxSizer(wxHORIZONTAL);
-      current_sizer->Add(new wxButton(this, wxID_APPLY), 0, wxRIGHT, 5);
+      current_sizer->Add(new wxButton(this, wxID_NEW), 0, wxRIGHT, 5);
       current_sizer->Add(command_text, 1, wxEXPAND);
 
       GetSizer()->Add(current_sizer, 0, wxALL|wxALIGN_LEFT|wxEXPAND, 3);
 
-      Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(edit_preferences::apply_button_activated));
-      Connect(wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(edit_preferences::apply_button_activated));
+      Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(edit_preferences::new_association));
+      Connect(wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(edit_preferences::apply_changes));
+      Connect(wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(edit_preferences::command_changed));
       Connect(wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler(edit_preferences::list_item_selected));
+      Connect(wxEVT_COMMAND_LIST_END_LABEL_EDIT, wxListEventHandler(edit_preferences::after_label_edit));
+      Connect(wxEVT_COMMAND_LIST_ITEM_DESELECTED, wxListEventHandler(edit_preferences::after_label_edit));
     }
 
     void debug_preferences::filter_level_changed(wxCommandEvent&) {

@@ -83,11 +83,11 @@ namespace squadt {
       m_output_stream << " <associate-commands mime-type=\"" << c.first << "\">\n";
       if (c.second == type_registry::command_system) {
         /// Associated command is specified by the system
-        m_output_stream << "  <command />";
+        m_output_stream << "  <command /";
       }
       else if (c.second == type_registry::command_none) {
         /// No command is to be associated with this type
-        m_output_stream << "  <no-command />";
+        m_output_stream << "  <no-command /";
       }
       else {
         /// A custom command is associated with this type

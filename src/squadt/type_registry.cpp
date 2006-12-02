@@ -15,7 +15,7 @@ wxMimeTypesManager global_mime_types_manager;
 
 namespace squadt {
 
-  const std::string type_registry::command_system;
+  const std::string type_registry::command_system = "system defined";
   const std::string type_registry::command_none;
 
   /**
@@ -135,7 +135,6 @@ namespace squadt {
    * command_for_type[t] -> command_none    if c == command_system and command_for_type[t] != command_system
    **/
   void type_registry::register_command(mime_type const& t, std::string const& c) {
-    assert(boost::regex_search(c, boost::regex("\\`[^[:word:]]*([[:word:][:punct:]]+)(?:[^[:word:]]+([[:word:][:punct:]]*))*\\'")));
 
     if (&c == &command_system) {
       if (global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal)) != 0) {
@@ -149,6 +148,8 @@ namespace squadt {
       command_for_type[t] = command_none;
     }
     else {
+      assert(boost::regex_search(c, boost::regex("\\`[^[:word:]]*([[:word:][:punct:]]+)(?:[^[:word:]]+([[:word:][:punct:]]*))*\\'")));
+
       command_for_type[t] = c;
     }
   }

@@ -172,7 +172,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
       /* Add output file to the configuration */
       std::string extension = extensions[format_selector.get_selection()];
 
-      c.add_output(lts_file_for_output, extension, c.get_output_name("." + extension));
+      c.add_output(lts_file_for_output, sip::mime_type(extension), c.get_output_name("." + extension));
 
       /* The input type should be SVC/mcrl2 instead of just svc */
       if (format_selector.get_selection() == fsm ||
