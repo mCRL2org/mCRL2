@@ -37,6 +37,7 @@ typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL, PH_REG_FRM_TRANS 
 //t_tool_options represents the options of the tool 
 typedef struct {
   bool pretty;
+  bool untimed;
   t_phase end_phase;
   string formfilename;
   string infilename;
@@ -111,12 +112,14 @@ static t_tool_options parse_command_line(int argc, char **argv)
   //declarations for getopt
   t_phase opt_end_phase = PH_NONE;
   bool opt_pretty = false;
+  bool opt_untimed = false;
   string formfilename = "";
   #define SHORT_OPTIONS "f:p:ehqvd"
   #define VERSION_OPTION CHAR_MAX + 1
   struct option long_options[] = {
     { "formula",   required_argument,  NULL,  'f' },
     { "end-phase", required_argument,  NULL,  'p' },
+    { "untimed",   no_argument,        NULL,  'u' },
     { "external",  no_argument,        NULL,  'e' },
     { "help",      no_argument,        NULL,  'h' },
     { "version",   no_argument,        NULL,  VERSION_OPTION },
@@ -145,6 +148,9 @@ static t_tool_options parse_command_line(int argc, char **argv)
           gsErrorMsg("option -p has illegal argument '%s'\n", optarg);
           exit(1);
         }
+        break;
+      case 'u': /* untimed */
+        opt_untimed = true;
         break;
       case 'e': /* pretty */
         opt_pretty = true;
@@ -203,6 +209,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
   }
   tool_options.end_phase    = opt_end_phase;
   tool_options.pretty       = opt_pretty;
+  tool_options.untimed      = opt_untimed;
   tool_options.formfilename = formfilename;
   tool_options.infilename   = infilename;
   tool_options.outfilename  = outfilename;
@@ -285,7 +292,7 @@ ATermAppl create_pbes(t_tool_options tool_options)
 
   //generate PBES from state formula and LPE
   gsVerboseMsg("generating PBES from state formula and LPE...\n");
-  pbes p = lpe::pbes_translate(state_formula(result), lpe_spec);
+  pbes p = lpe::pbes_translate(state_formula(result), lpe_spec, tool_options.untimed);
   result = ATermAppl(p);
   if (result == NULL) {
     return NULL;
@@ -310,6 +317,7 @@ static void print_help(char *name)
     "                        result; PHASE can be 'pa' (parse), 'tc' (type check),\n"
     "                        'di' (data implementation) or 'rft' (regular formula\n"
     "                        translation)\n"
+    "  -u, --untimed         apply special conversion for untimed LPE's\n"
     "  -e, --external        return the result in the external format\n"
     "  -h, --help            display this help message and terminate\n"
     "      --version         display version information and terminate\n"
