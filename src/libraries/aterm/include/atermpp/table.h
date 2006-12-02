@@ -100,9 +100,9 @@ namespace atermpp
       /// returns an term_list containing all the keys in the table. The corresponding values of each key
       /// you are interested in can then be retrieved through respective calls to table_get.
       ///
-      term_list table_keys()
+      aterm_list table_keys()
       {
-        return term_list(ATtableKeys(m_table));
+        return aterm_list(ATtableKeys(m_table));
       }
   };
 
