@@ -150,11 +150,14 @@ namespace squadt {
         s.SetText(command_text->GetValue());
 
         formats_and_actions->SetItem(s);
+
+        // On Mac OS X selection/focus is lost at this point
+        formats_and_actions->Select(selected);
       }
     }
 
     void edit_preferences::new_association(wxCommandEvent&) {
-      long row = formats_and_actions->InsertItem(row, wxEmptyString);
+      long row = formats_and_actions->InsertItem(formats_and_actions->GetItemCount(), wxEmptyString);
 
       formats_and_actions->EditLabel(row);
       formats_and_actions->SetItem(row, 1, wxEmptyString);

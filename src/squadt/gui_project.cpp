@@ -306,16 +306,18 @@ namespace squadt {
 
       type_registry* registry = global_build_system.get_type_registry();
 
-      size_t separator_position     = 3;
       bool   generated              = (0 < n.get_processor()->number_of_inputs());
       bool   show_update_operations = !n.get_processor()->is_active();
 
       wxMenu  context_menu;
 
-#ifndef __WXMAC__
+#if !defined(__WXMAC__)
       bool   editable               = registry->has_registered_command(n.get_object()->mime_type);
+      size_t separator_position     = 3;
 
       context_menu.Append(cmID_EDIT, wxT("Edit"))->Enable(show_update_operations && editable);
+#else
+      size_t separator_position     = 2;
 #endif
       context_menu.Append(cmID_RENAME, wxT("Rename"))->Enable(show_update_operations);
       context_menu.Append(cmID_REMOVE, wxT("Remove"))->Enable(show_update_operations);

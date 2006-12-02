@@ -129,14 +129,18 @@ namespace squadt {
        * @param b whether to show input_objects
        **/
       inline void processor_details::show_input_objects(bool b) {
-        input_objects->Show(b);
+        if (input_objects != 0) {
+          input_objects->Show(b);
+        }
       }
 
       /**
        * @param[in] b whether to show output_objects
        **/
       inline void processor_details::show_output_objects(bool b) {
-        output_objects->Show(b);
+        if (output_objects != 0) {
+          output_objects->Show(b);
+        }
       }
 
       /**

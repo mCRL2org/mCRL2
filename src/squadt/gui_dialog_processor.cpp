@@ -26,7 +26,8 @@ namespace squadt {
        **/
       processor_details::processor_details(wxWindow* o, wxString s, squadt::processor::sptr p) :
                                                 dialog::processor(o, wxT("View and change details")),
-                                                project_store(s), target_processor(p), tools_selectable(true) {
+                                                project_store(s), input_objects(0), output_objects(0),
+                                                target_processor(p), tools_selectable(true) {
         build();
 
         Connect(wxEVT_COMMAND_TREE_ITEM_ACTIVATED, wxTreeEventHandler(processor_details::on_tool_selector_item_selected), 0, this);
@@ -48,82 +49,87 @@ namespace squadt {
 
         wxNotebook* notebook = new wxNotebook(main_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNB_TOP);
 
-        input_objects = new wxListCtrl(notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-                        wxLC_REPORT|wxLC_ALIGN_LEFT|wxLC_SINGLE_SEL|wxLC_VRULES|wxLC_HRULES);
-        input_objects->InsertColumn(0, wxT("Name"));
-        input_objects->InsertColumn(1, wxT("Size"), wxLIST_FORMAT_RIGHT);
-        input_objects->InsertColumn(2, wxT("Date"));
-
-        long row = 0;
-
-        for (squadt::processor::input_object_iterator i = target_processor->get_input_iterator(); i.valid(); ++i) {
-          if (*i != 0) {
-            path p(project_store.fn_str());
-            
-            p = p / path((*i)->location);
-
-            input_objects->InsertItem(row, wxString(p.leaf().c_str(), wxConvLocal));
-
-            if (exists(p)) {
-              unsigned long size       = file_size(p);
-              time_t        write_time = last_write_time(p);
-              unsigned char magnitude  = static_cast < unsigned char > (floor(log(size) / log(1024)));
-
-              size = (unsigned long) (size / pow(1024, magnitude));
-
-              input_objects->SetItem(row, 1, wxString(str((time_format % size %
-                         prefixes_for_binary_multiples[magnitude])).c_str(), wxConvLocal));
-
-              input_objects->SetItem(row, 2, wxString(ctime(&write_time), wxConvLocal));
+        if (0 < target_processor->number_of_inputs()) {
+          input_objects = new wxListCtrl(notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+                          wxLC_REPORT|wxLC_ALIGN_LEFT|wxLC_SINGLE_SEL|wxLC_VRULES|wxLC_HRULES);
+          input_objects->InsertColumn(0, wxT("Name"));
+          input_objects->InsertColumn(1, wxT("Size"), wxLIST_FORMAT_RIGHT);
+          input_objects->InsertColumn(2, wxT("Date"));
+        
+          long row = 0;
+        
+          for (squadt::processor::input_object_iterator i = target_processor->get_input_iterator(); i.valid(); ++i) {
+            if (*i != 0) {
+              path p(project_store.fn_str());
+              
+              p = p / path((*i)->location);
+        
+              input_objects->InsertItem(row, wxString(p.leaf().c_str(), wxConvLocal));
+        
+              if (exists(p)) {
+                unsigned long size       = file_size(p);
+                time_t        write_time = last_write_time(p);
+                unsigned char magnitude  = static_cast < unsigned char > (floor(log(size) / log(1024)));
+        
+                size = (unsigned long) (size / pow(1024, magnitude));
+        
+                input_objects->SetItem(row, 1, wxString(str((time_format % size %
+                           prefixes_for_binary_multiples[magnitude])).c_str(), wxConvLocal));
+        
+                input_objects->SetItem(row, 2, wxString(ctime(&write_time), wxConvLocal));
+              }
+        
+              ++row;
             }
-
-            ++row;
           }
+        
+          input_objects->SetColumnWidth(0, wxLIST_AUTOSIZE);
+          input_objects->SetColumnWidth(1, wxLIST_AUTOSIZE);
+          input_objects->SetColumnWidth(2, wxLIST_AUTOSIZE);
+
+          notebook->AddPage(input_objects, wxT("Input"));
         }
 
-        input_objects->SetColumnWidth(0, wxLIST_AUTOSIZE);
-        input_objects->SetColumnWidth(1, wxLIST_AUTOSIZE);
-        input_objects->SetColumnWidth(2, wxLIST_AUTOSIZE);
-
-        output_objects = new wxListCtrl(notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-                        wxLC_REPORT|wxLC_ALIGN_LEFT|wxLC_SINGLE_SEL|wxLC_VRULES|wxLC_HRULES);
-        output_objects->InsertColumn(0, wxT("Name"));
-        output_objects->InsertColumn(1, wxT("Size"), wxLIST_FORMAT_RIGHT);
-        output_objects->InsertColumn(2, wxT("Date"));
-
-        row = 0;
-
-        for (squadt::processor::output_object_iterator i = target_processor->get_output_iterator(); i.valid(); ++i) {
-          if (*i != 0) {
-            path p(project_store.fn_str());
-            
-            p = p / path((*i)->location);
-
-            output_objects->InsertItem(row, wxString(p.leaf().c_str(), wxConvLocal));
-
-            if (exists(p)) {
-              unsigned long size       = file_size(p);
-              time_t        write_time = last_write_time(p);
-              unsigned char magnitude  = static_cast < unsigned char > (floor(log(size) / log(1024)));
-
-              size = (unsigned long) (size / pow(1024, magnitude));
-
-              output_objects->SetItem(row, 1, wxString(str((time_format % size %
-                        prefixes_for_binary_multiples[magnitude])).c_str(), wxConvLocal));
-
-              output_objects->SetItem(row, 2, wxString(ctime(&write_time), wxConvLocal));
+        if (0 < target_processor->number_of_outputs()) {
+          output_objects = new wxListCtrl(notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+                          wxLC_REPORT|wxLC_ALIGN_LEFT|wxLC_SINGLE_SEL|wxLC_VRULES|wxLC_HRULES);
+          output_objects->InsertColumn(0, wxT("Name"));
+          output_objects->InsertColumn(1, wxT("Size"), wxLIST_FORMAT_RIGHT);
+          output_objects->InsertColumn(2, wxT("Date"));
+         
+          long row = 0;
+         
+          for (squadt::processor::output_object_iterator i = target_processor->get_output_iterator(); i.valid(); ++i) {
+            if (*i != 0) {
+              path p(project_store.fn_str());
+              
+              p = p / path((*i)->location);
+         
+              output_objects->InsertItem(row, wxString(p.leaf().c_str(), wxConvLocal));
+         
+              if (exists(p)) {
+                unsigned long size       = file_size(p);
+                time_t        write_time = last_write_time(p);
+                unsigned char magnitude  = static_cast < unsigned char > (floor(log(size) / log(1024)));
+         
+                size = (unsigned long) (size / pow(1024, magnitude));
+         
+                output_objects->SetItem(row, 1, wxString(str((time_format % size %
+                          prefixes_for_binary_multiples[magnitude])).c_str(), wxConvLocal));
+         
+                output_objects->SetItem(row, 2, wxString(ctime(&write_time), wxConvLocal));
+              }
+         
+              ++row;
             }
-
-            ++row;
           }
+         
+          output_objects->SetColumnWidth(0, wxLIST_AUTOSIZE);
+          output_objects->SetColumnWidth(1, wxLIST_AUTOSIZE);
+          output_objects->SetColumnWidth(2, wxLIST_AUTOSIZE);
+
+          notebook->AddPage(output_objects, wxT("Output"));
         }
-
-        output_objects->SetColumnWidth(0, wxLIST_AUTOSIZE);
-        output_objects->SetColumnWidth(1, wxLIST_AUTOSIZE);
-        output_objects->SetColumnWidth(2, wxLIST_AUTOSIZE);
-
-        notebook->AddPage(input_objects, wxT("Input"));
-        notebook->AddPage(output_objects, wxT("Output"));
 
         t->Add(u, 0, wxEXPAND);
         t->AddSpacer(5);
