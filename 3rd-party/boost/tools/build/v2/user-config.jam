@@ -56,7 +56,7 @@ import toolset : using ;
 
 local CONFIG_JAM = [ build-system.location ] ;
 
-CONFIG_JAM = $(CONFIG_JAM)"/../../../../build/config.jam" ;
+CONFIG_JAM = $(CONFIG_JAM)"/../../../../../build/config.jam" ;
 
 if ! [ path.exists $(CONFIG_JAM) ] {
   import errors ;

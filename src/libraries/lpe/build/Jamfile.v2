@@ -6,7 +6,7 @@ project lpe
 
 alias lpe
        :
-       : <library>/libraries/aterm//atermpp
+       : <library>/libraries//atermpp
          <library>/libraries//mcrl2_basic
        :
        : <include>$(BOOST_ROOT)

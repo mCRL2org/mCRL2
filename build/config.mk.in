@@ -13,7 +13,7 @@ mandir             = @mandir@
 
 # Boost Build configuration
 BJAM               = @BJAM@
-BOOST_BUILD       := $(BJAM) @BUILD_EXTRA@ @BUILD_VARIANT@ --prefix=${prefix} --exec-prefix=${exec_prefix}
+BOOST_BUILD       := $(BJAM) @BUILD_EXTRA@ --prefix=${prefix} --exec-prefix=${exec_prefix} @BUILD_VARIANT@
 
 # xmlto
 USE_XMLTO          = @USE_XMLTO@

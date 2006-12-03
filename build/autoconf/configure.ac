@@ -15,7 +15,7 @@ R_SLDFLAGS="-shared"
 
 # Default toolset to use with Boost.Build
 BJAM_CXX="gcc"
-BJAM=bin/bjam
+BJAM=build/bin/bjam
 
 # Setting host OS
 case $host in

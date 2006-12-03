@@ -22,6 +22,6 @@ bjam: $(BJAM)
 
 $(BJAM):
 	@mkdir -p bin
-	@cd boost/tools/jam; $(BJAM_BUILD)
-	@rm -rf boost/tools/jam/bootstrap
+	@cd 3rd-party/boost/tools/jam; $(BJAM_BUILD)
+	@rm -rf 3rd-party/boost/tools/jam/bootstrap
 

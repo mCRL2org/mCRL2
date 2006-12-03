@@ -15,14 +15,14 @@ install: $(CONFIG) $(BJAM)
 
 clean:
 	@$(MAKE) -C src/doc clean
-	$(RM) -rf bin/*
+	$(RM) -rf build/bin/*
 	$(RM) -r autom4te.cache config.log *.o *~ core core.*
 
 distclean:
 	@${MAKE} -C src/doc distclean
 	$(RM) -r autom4te.cache *.o *.app *~ core core.*
 	$(RM) -r config.log config.status build/config.mk build/config.jam src/setup.h
-	$(RM) -rf bin
+	$(RM) -rf build/bin
 
 configure: build/autoconf/configure.ac
 	autoconf -o $@ -W all $<
@@ -30,4 +30,4 @@ configure: build/autoconf/configure.ac
 include build/bjam.mk
 
 $(CONFIG):
-	$(error Please run configure first.)
+	$(error Please run configure first)

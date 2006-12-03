@@ -5,8 +5,6 @@ project aterm
           <toolset>darwin:<cflags>-std=c99
           <toolset>gcc:<cflags>-std=c99
           <include>../include
-       : usage-requirements
-          <include>../include
        ;
 
 lib aterm
@@ -32,14 +30,6 @@ lib aterm
        :
        : <address-model>64:<define>AT_64BIT
          <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
-       ;
-
-alias atermpp
-       :
-       : <include>$(BOOST_ROOT)
-       :
-       : <include>$(BOOST_ROOT)
-         <library>aterm
        ;
 
 alias headers

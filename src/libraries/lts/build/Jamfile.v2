@@ -4,7 +4,6 @@ project lts
        : requirements
           <include>../include
           <include>$(SETUP)
-	  <include>$(BOOST_ROOT)
        : usage-requirements
           <include>$(SETUP)
        ;
@@ -19,19 +18,19 @@ lib lts
          liblts_dot.cpp
          liblts_bcg.cpp
          liblts_eq.cpp
-	 bsimdata.cpp
-	 bsimkernel.cpp
-	 liblts_bisim.cpp
+         bsimdata.cpp
+         bsimkernel.cpp
+         liblts_bisim.cpp
          /libraries//mcrl2_basic
          /libraries//parser
          /libraries//svc
-         /libraries/aterm//atermpp
+         /libraries/atermpp
          /libraries//lpe
-	 /site-config//boost_regex
+         /site-config//boost_regex
          /site-config//BCG
        :
        :
        : <library>/libraries//parser
          <library>/libraries//svc
-	 <toolset>darwin:<library>/site-config//boost_regex
+         <toolset>darwin:<library>/site-config//boost_regex
        ;

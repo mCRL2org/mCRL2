@@ -361,27 +361,27 @@ if $(tool.$(toolset).link.cc)
 locate-target = $(LOCATE_TARGET) ;
 if $(VMS)
 {
-    locate-target ?= ../../../bin ;
+    locate-target ?= ../../../../build/bin ;
     platform = vms ;
 }
 else if $(MAC)
 {
-    locate-target ?= ../../../bin ;
+    locate-target ?= ../../../../build/bin ;
     platform = $(OS:L)$(OSPLAT:L) ;
 }
 else if $(OSPLAT)
 {
-    locate-target ?= ../../../bin ;
+    locate-target ?= ../../../../build/bin ;
     platform = $(OS:L)$(OSPLAT:L) ;
 }
 else if $(NT)
 {
-    locate-target ?= ..\..\..\bin ;
+    locate-target ?= ..\..\..\..\build\bin ;
     platform = $(OS:L) ;
 }
 else
 {
-    locate-target ?= ../../../bin ;
+    locate-target ?= ../../../../build/bin ;
     platform = $(OS:L) ;
 }
 if $(debug)

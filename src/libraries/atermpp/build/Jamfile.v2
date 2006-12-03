@@ -1,0 +1,12 @@
+project aterm
+       : source-location ../source
+       : build-dir $(BUILD_TOP)
+       ;
+
+alias atermpp
+       :
+       : <include>$(BOOST_ROOT)
+       :
+       : <include>$(BOOST_ROOT)
+         <dependency>/libraries//aterm
+       ;

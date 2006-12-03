@@ -23,3 +23,15 @@ for library in $(libraries) {
         ;
 }
 
+# some 3rd-party libraries
+for library in aterm cvc_lite pstream svc {
+  use-project /libraries/$(library) : $(TOP)/3rd-party/$(library)/build ;
+
+  alias $(library)
+        : $(TOP)/3rd-party/$(library)/build//$(library)
+        : <include>../../3rd-party/$(library)/include
+        :
+        : <include>../../3rd-party/$(library)/include
+        ;
+}
+

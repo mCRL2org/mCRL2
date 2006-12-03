@@ -1,6 +1,6 @@
 path-constant TOP             : . ;
-path-constant BUILD_TOP       : ./bin ;                  # Common build directory
-path-constant BOOST_ROOT      : ./boost ;                # Boost prefix (packaged sources)
+path-constant BUILD_TOP       : ./build/bin ;            # Common build directory
+path-constant BOOST_ROOT      : ./3rd-party/boost ;      # Boost prefix (packaged sources)
 path-constant SETUP           : ./src ;                  # Header file for run-time configuration
 
 # Activate header cache
@@ -10,7 +10,7 @@ include $(TOP)/build/building.jam ;
 
 # The known sub projects
 use-project /site-config               : build ;
-use-project /boost                     : boost ;
+use-project /boost                     : 3rd-party/boost ;
 use-project /libraries                 : src/libraries ;
 use-project /libraries/sip             : src/squadt/libraries/sip/build ;
 use-project /workarounds/msvc          : build/workarounds/msvc ;
@@ -116,9 +116,9 @@ else {
           ;
 
   stage install-headers
-          : [ path.glob-tree src/libraries/aterm : *.h : .svn ]
+          : /libraries/aterm//headers
           : <location>$(INCLUDE_DIR)/aterm
-            <install-source-root>src/libraries/aterm/include
+            <install-source-root>3rd-party/aterm/include
           ;
 
   stage install-binaries
