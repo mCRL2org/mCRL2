@@ -330,29 +330,27 @@ namespace squadt {
         separator_position += 3;
       }
 
-      std::string format = n.get_object()->mime_type.get_sub_type();
-
-      type_registry::tool_sequence range = registry->tools_by_mime_type(format);
+      type_registry::tool_sequence range = registry->tools_by_mime_type(n.get_object()->mime_type);
 
       if (!range.empty()) {
-        int         identifier  = cmID_TOOLS; /// wxWidgets identifier for menu items
+        int         identifier  = cmID_TOOLS; // wxWidgets identifier for menu items
         std::string last_seen_category;
         wxMenu*     target_menu = 0;
 
         BOOST_FOREACH(type_registry::tool_sequence::value_type i, range) {
-       
-          if (!last_seen_category.compare(i.first)) {
-            target_menu = new wxMenu();
-       
+
+          if (last_seen_category != i.first.get_name()) {
+            target_menu = new wxMenu;
+
             last_seen_category = i.first.get_name();
-       
+
             context_menu.Append(identifier++, wxString(i.first.get_name().c_str(), wxConvLocal), target_menu);
           }
-       
+
           cmMenuItem* new_menu_item = new cmMenuItem(target_menu, identifier++, 
                                     wxString(i.second->get_name().c_str(), wxConvLocal),
-                                    i.second, i.second->find_input_combination(i.first, format));
-       
+                                    i.second, i.second->find_input_combination(i.first, n.get_object()->mime_type));
+
           target_menu->Append(new_menu_item);
         }
       }

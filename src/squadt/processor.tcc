@@ -744,15 +744,15 @@ namespace squadt {
 
     if (g.get()) {
       selected_input_combination = const_cast < tool::input_combination* > (ic);
-     
+
       sip::configuration::sptr c(sip::controller::communicator::new_configuration(*selected_input_combination));
-     
+
       c->set_output_prefix(str(format("%s%04X") % (basename(find_initial_object()->location)) % g->get_unique_count()));
-     
+
       c->add_input(ic->m_identifier, ic->m_mime_type.as_string(), l.string());
-     
+
       current_monitor->set_configuration(c);
-     
+
       configure(t, w);
     }
   }

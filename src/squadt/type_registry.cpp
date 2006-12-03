@@ -48,7 +48,7 @@ namespace squadt {
   /**
    * @param f the format for which to execute the action a
    **/
-  type_registry::tool_sequence type_registry::tools_by_mime_type(build_system::storage_format const& f) const {
+  type_registry::tool_sequence type_registry::tools_by_mime_type(sip::mime_type const& f) const {
 
     type_registry::tool_sequence range;
 
@@ -59,10 +59,28 @@ namespace squadt {
 
       range = boost::make_iterator_range(p.begin(), p.end());
     }
-    else { // return an empty sequence
-      type_registry::tool_sequence::iterator i;
+    else {
+      i = categories_for_format.find(sip::mime_type(f.get_sub_type(), sip::mime_type::text));
 
-      range = boost::make_iterator_range(i, i);
+      if (i != categories_for_format.end()) { // for unknown main type
+        tools_for_category const& p((*i).second);
+
+        range = boost::make_iterator_range(p.begin(), p.end());
+      }
+      else {
+        i = categories_for_format.find(sip::mime_type(f.get_sub_type(), sip::mime_type::application));
+
+        if (i != categories_for_format.end()) { // for unknown main type
+          tools_for_category const& p((*i).second);
+
+          range = boost::make_iterator_range(p.begin(), p.end());
+        }
+        else { // return an empty sequence
+          type_registry::tool_sequence::iterator i;
+
+          range = boost::make_iterator_range(i, i);
+        }
+      }
     }
 
     return (range);

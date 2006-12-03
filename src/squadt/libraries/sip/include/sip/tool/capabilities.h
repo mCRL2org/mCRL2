@@ -145,11 +145,11 @@ namespace sip {
     }
  
     inline bool capabilities::input_combination::equal(input_combination const& p, input_combination const& q) {
-      return (p.m_mime_type == q.m_mime_type && p.m_category == q.m_category);
+      return (p.m_mime_type.get_sub_type() == q.m_mime_type.get_sub_type() && p.m_category == q.m_category);
     }
  
     inline bool capabilities::output_combination::equal(output_combination const& p, output_combination const& q) {
-      return (p.m_mime_type == q.m_mime_type);
+      return (p.m_mime_type.get_sub_type() == q.m_mime_type.get_sub_type());
     }
   }
 }

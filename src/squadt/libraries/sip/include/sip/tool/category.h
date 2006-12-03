@@ -111,7 +111,7 @@ namespace sip {
     }
 
     inline bool category::operator ==(category const& c) const {
-      return (&c == this);
+      return (name == c.name);
     }
 
     inline category::operator std::string() const {

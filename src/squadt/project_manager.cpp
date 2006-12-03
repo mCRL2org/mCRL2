@@ -517,7 +517,7 @@ namespace squadt {
     }
 
     /* Add the file to the project */
-    p->append_output(build_system::mime_type(extension(s)),
+    p->append_output(build_system::mime_type(extension(s).substr(1)),
           destination_path.leaf(), processor::object_descriptor::original);
 
     processors.push_back(p);
