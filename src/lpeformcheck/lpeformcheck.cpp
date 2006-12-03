@@ -150,7 +150,7 @@
     // --------------------------------------------------------------------------------------------
 
     void LPE_Form_Check::print_version() {
-      fprintf(stderr,"%s %s (revision %d)\n", NAME, VERSION, REVISION);
+      fprintf(stderr,"%s %s (revision %s)\n", NAME, VERSION, REVISION);
     }
 
   // Class LPE_Form_Check - Functions declared public ---------------------------------------------

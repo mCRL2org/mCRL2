@@ -20,7 +20,7 @@ project toolset
        : requirements
           <include>build/workarounds
           <define>_FILE_OFFSET_BITS=64
-          <define>REVISION=$(REVISION)
+          <define>REVISION=\\\"$(REVISION)-$(BUILD_VARIANT)-$(LINK_VARIANT)\\\"
           <toolset>darwin:<define>__darwin__
           <toolset>darwin:<cxxflags>"-std=c++98 -ansi"
           <os>CYGWIN,<toolset>gcc:<runtime-link>static
@@ -34,6 +34,7 @@ project toolset
        : default-build
           <address-model>$(ADDRESS_MODEL)
           <variant>$(BUILD_VARIANT)
+          <link>$(LINK_VARIANT)
           $(BUILD_OPTIONS)
        ;
 

@@ -221,7 +221,7 @@ static void print_help(char *Name)
 
 void print_version(void)
 {
-  fprintf(stderr,"%s %s (revision %d)\n", NAME, VERSION, REVISION);
+  fprintf(stderr,"%s %s (revision %s)\n", NAME, VERSION, REVISION);
 }
 
 void print_more_info(char *Name)

@@ -407,7 +407,7 @@ static void print_help(FILE *f, char *Name)
 
 static void print_version(FILE *f)
 {
-  fprintf(f,NAME " " VERSION " (revision %i)\n", REVISION);
+  fprintf(f,NAME " " VERSION " (revision %s)\n", REVISION);
 }
 
 bool read_lts_from_stdin(lts& l, lts_type intype, std::string const& lpefile) {

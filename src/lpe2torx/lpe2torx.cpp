@@ -147,7 +147,7 @@ static void print_help(FILE *f, char *Name)
 
 static void print_version(FILE *f)
 {
-  fprintf(f,NAME " " VERSION " (revision %i)\n", REVISION);
+  fprintf(f,NAME " " VERSION " (revision %s)\n", REVISION);
 }
 
 int main(int argc, char **argv)

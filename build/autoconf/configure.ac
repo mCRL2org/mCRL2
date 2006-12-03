@@ -221,7 +221,9 @@ AC_ARG_WITH(
   AS_HELP_STRING([--enable-static],[produce and link to static libraries])
 )
 if test $enable_static; then
-  BUILD_OPTIONS="\"<link>static\""
+  LINK_VARIANT="static"
+else
+  LINK_VARIANT="shared"
 fi
 
 # Check whether symbol table stripping from binaries is requested
@@ -499,7 +501,7 @@ then
 fi
 
 AC_SUBST([BUILD_VARIANT],[])
-AC_SUBST([BUILD_OPTIONS],[])
+AC_SUBST([LINK_VARIANT],[])
 AC_SUBST([BUILD_EXTRA])
 
 if test "$BUILD_ATERM" = "builtin"; then

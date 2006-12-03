@@ -284,7 +284,7 @@ void doHelp(char *cmd) {
 
 void doVersion() {
 
-   fprintf(stderr, NAME " " VERSION " (revision %i)\n", REVISION);
+   fprintf(stderr, NAME " " VERSION " (revision %s)\n", REVISION);
 
 } /* doVersion */
 

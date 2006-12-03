@@ -8,7 +8,7 @@ rule import_user_config {
 
 # Build specific settings
 BUILD_VARIANT      = "@BUILD_VARIANT@" ;
-BUILD_OPTIONS      = @BUILD_OPTIONS@ ;
+LINK_VARIANT       = "@LINK_VARIANT@" ;
 ADDRESS_MODEL      = "@ADDRESS_MODEL@" ;
 
 # Library specific variables

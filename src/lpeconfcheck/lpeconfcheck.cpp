@@ -196,7 +196,7 @@
     // --------------------------------------------------------------------------------------------
 
     void LPE_Conf_Check::print_version() {
-      fprintf(stderr,"%s %s (revision %d)\n", NAME, VERSION, REVISION);
+      fprintf(stderr,"%s %s (revision %s)\n", NAME, VERSION, REVISION);
     }
 
   // Class LPE_Conf_Check - Functions declared public ---------------------------------------------

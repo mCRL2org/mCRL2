@@ -21,7 +21,7 @@ static bool is_mcrl2;
 
 static void print_version(FILE *f)
 {
-  fprintf(f, NAME " " VERSION " (revision %i)\n", REVISION);
+  fprintf(f, NAME " " VERSION " (revision %s)\n", REVISION);
 }
 
 static void print_help(FILE *f, char *Name)

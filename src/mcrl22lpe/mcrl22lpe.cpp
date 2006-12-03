@@ -723,7 +723,7 @@ void PrintMoreInfo(char *Name)
 
 void PrintVersion(void)
 {
-  fprintf(stderr,"%s %s (revision %d)\n", NAME, VERSION, REVISION);
+  fprintf(stderr,"%s %s (revision %s)\n", NAME, VERSION, REVISION);
 }
 
 void PrintHelp(char *Name)

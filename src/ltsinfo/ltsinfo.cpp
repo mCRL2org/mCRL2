@@ -164,7 +164,7 @@ static void print_help(FILE *f, char *Name)
 
 static void print_version(FILE *f)
 {
-  fprintf(f,NAME " " VERSION " (revision %i)\n", REVISION);
+  fprintf(f,NAME " " VERSION " (revision %s)\n", REVISION);
 }
 
 bool parse_command_line(int argc, char** argv, mcrl2::lts::lts& l) {

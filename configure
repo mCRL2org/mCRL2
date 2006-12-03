@@ -702,7 +702,7 @@ WX_BASE_LDFLAGS
 WX_GL_LDFLAGS
 LIBOBJS
 BUILD_VARIANT
-BUILD_OPTIONS
+LINK_VARIANT
 BUILD_EXTRA
 IATERM_CPPFLAGS
 IATERM_LDFLAGS
@@ -3833,7 +3833,9 @@ if test "${with_static+set}" = set; then
 fi
 
 if test $enable_static; then
-  BUILD_OPTIONS="\"<link>static\""
+  LINK_VARIANT="static"
+else
+  LINK_VARIANT="shared"
 fi
 
 # Check whether symbol table stripping from binaries is requested
@@ -7156,7 +7158,7 @@ WX_BASE_LDFLAGS!$WX_BASE_LDFLAGS$ac_delim
 WX_GL_LDFLAGS!$WX_GL_LDFLAGS$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim
 BUILD_VARIANT!$BUILD_VARIANT$ac_delim
-BUILD_OPTIONS!$BUILD_OPTIONS$ac_delim
+LINK_VARIANT!$LINK_VARIANT$ac_delim
 BUILD_EXTRA!$BUILD_EXTRA$ac_delim
 IATERM_CPPFLAGS!$IATERM_CPPFLAGS$ac_delim
 IATERM_LDFLAGS!$IATERM_LDFLAGS$ac_delim

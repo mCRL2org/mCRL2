@@ -2166,7 +2166,7 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
           gsSetVerboseMsg();
           break;
         case 0: /* version */
-          fprintf(stderr, "%s %s (revision %d)\n", NAME, VERSION, REVISION);
+          fprintf(stderr, "%s %s (revision %s)\n", NAME, VERSION, REVISION);
           return 0;
         default:
           break;
