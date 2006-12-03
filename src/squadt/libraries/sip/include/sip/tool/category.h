@@ -107,7 +107,7 @@ namespace sip {
     }
 
     inline bool category::operator <(category const& c) const {
-      return (c.name < name);
+      return (name < c.name);
     }
 
     inline bool category::operator ==(category const& c) const {

@@ -191,15 +191,6 @@ namespace squadt {
 
       /// read default actions
       b.get_type_registry()->accept(*this);
-
-      /// read log settings
-      if (m_reader->is_element("logging")) {
-        unsigned int filter_level = 1;
-      
-        if (m_reader->get_attribute(&filter_level, "filter-level")) {
-          sip::controller::communicator::get_standard_error_logger()->set_filter_level(static_cast< utility::logger::log_level > (filter_level));
-        }
-      }
     }
   }
 

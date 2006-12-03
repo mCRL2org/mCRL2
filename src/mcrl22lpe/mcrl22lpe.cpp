@@ -236,7 +236,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
    * the same parameters
    */
   if (c.is_fresh()) {
-    c.add_output(lpd_file_for_output, sip::mime_type("lpe", sip::mime_type::text), c.get_output_name(".lpe"));
+    c.add_output(lpd_file_for_output, sip::mime_type("lpe"), c.get_output_name(".lpe"));
 
     c.add_option(option_linearisation_method).
           append_argument(linearisation_method_enumeration, method_selector.get_selection());

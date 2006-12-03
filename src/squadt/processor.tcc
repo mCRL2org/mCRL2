@@ -433,16 +433,17 @@ namespace squadt {
       bool          b = r.get_attribute(&id, "id");
 
       if (b) {
-        if (!r.get_attribute("format")) {
-          throw (exception::exception(exception::required_attributes_missing, "processor->output"));
-        }
-       
-        if (b) {
+        std::string format = r.get_attribute_as_string("format");
+
+        if (!format.empty()) {
           assert(m.find(id) == m.end());
-       
-          m[id] = object_descriptor::sptr(new object_descriptor(sip::mime_type(r.get_attribute_as_string("format"))));
+
+          m[id] = object_descriptor::sptr(new object_descriptor(sip::mime_type(format)));
        
           c->impl->outputs.push_back(m[id]);
+        }
+        else {
+          throw (exception::exception(exception::required_attributes_missing, "processor->output"));
         }
       }
 
@@ -669,7 +670,7 @@ namespace squadt {
   inline void processor_impl::process_configuration(sip::configuration::sptr const& c) {
     boost::shared_ptr < project_manager > g(manager.lock());
 
-    if (g.get()) {
+    if (g.get() != 0) {
       /* Extract information about output objects from the configuration */
       for (sip::configuration::object_iterator i = c->get_object_iterator(); i.valid(); ++i) {
         if ((*i)->get_type() == sip::object::output) {
@@ -694,7 +695,7 @@ namespace squadt {
           }
         }
       }
-     
+
       if (0 < outputs.size()) {
         g->add(interface_object.lock());
       }

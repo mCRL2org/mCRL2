@@ -124,11 +124,6 @@ namespace squadt {
     /// write default actions
     b.get_type_registry()->accept(*this);
 
-    /// write log settings
-    m_output_stream << "<logging filter-level=\""
-                    << static_cast < unsigned int > (sip::controller::communicator::get_standard_error_logger()->get_filter_level())
-                    << "\"/>\n";
-
     m_output_stream << "</squadt-preferences>";
 
     m_output_stream.close();
