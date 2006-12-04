@@ -114,7 +114,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
   bool opt_pretty = false;
   bool opt_untimed = false;
   string formfilename = "";
-  #define SHORT_OPTIONS "f:p:ehqvd"
+  #define SHORT_OPTIONS "f:p:ehquvd"
   #define VERSION_OPTION CHAR_MAX + 1
   struct option long_options[] = {
     { "formula",   required_argument,  NULL,  'f' },
