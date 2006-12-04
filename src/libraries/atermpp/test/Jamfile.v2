@@ -2,7 +2,8 @@ import testing ;
 
 project libraries/aterm/test
    : requirements
-       <include>$(BOOST_ROOT)
+       <dependency>/boost//headers
+       <dependency>/libraries//atermpp
        <source>/libraries//aterm
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
    ;

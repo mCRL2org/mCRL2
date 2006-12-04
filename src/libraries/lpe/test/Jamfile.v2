@@ -2,7 +2,7 @@ import testing ;
 
 project libraries/lpe/test
    : requirements
-       <include>$(BOOST_ROOT)
+       <use>/boost//headers
        <source>/libraries//mcrl2_basic
        <source>/libraries//lpe
        <source>/site-config//boost_program_options
