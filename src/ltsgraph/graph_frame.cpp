@@ -702,7 +702,7 @@ void GraphFrame::on_about(wxCommandEvent& /* event */) {
   wxString content = wxT("ltsgraph - Tool for visualising labelled transition systems. \n");
   content += wxT("Developed by Didier Le Lann and Carst Tankink.\n\n");
   content += wxT("Part of the mCRL2 toolset, revision: ");
-  content.Printf(wxT("%s%d. \n\n"), content.c_str(), REVISION);
+  content.Printf(wxT("%s%s. \n\n"), content.c_str(), REVISION);
 
   content += wxT("Info: http://www.mcrl2.org \n");
   content += wxT("Bug reports: bug@mcrl2.org");
