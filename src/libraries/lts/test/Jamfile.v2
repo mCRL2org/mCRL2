@@ -2,7 +2,7 @@ import testing ;
 
 project libraries/lts/test
    : requirements
-       <include>$(BOOST_ROOT)
+       <dependency>/boost//headers
        <source>/libraries//lts
    ;
 

@@ -3,7 +3,7 @@
 project status
     : source-location ../test
     : requirements <hardcode-dll-paths>true  
-      <include>../boost
+      <dependency>/boost//headers
       <define>BOOST_ALL_NO_LIB
     ;
         
@@ -17,5 +17,5 @@ build-project ../src/libraries/lpe/test ;        # test-suite lpe
 build-project ../src/libraries/lts/test ;        # test-suite lts
 build-project ../src/libraries/parser/test ;     # test-suite parser
 build-project ../src/libraries/prover/test ;     # test-suite prover
-build-project ../src/3rd-party/svc/test ;        # test-suite svc
+build-project ../3rd-party/svc/test ;            # test-suite svc
 build-project ../src/mcrl22lpe/test ;

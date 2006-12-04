@@ -67,8 +67,9 @@ flags darwin.link OPTIONS <variant>release : -Wl,-dead_strip -no_dead_strip_init
 # End changes from Adobe ASL for universal binaries
 
 flags darwin.compile OPTIONS <link>shared : -dynamic ;
-flags darwin.compile OPTIONS : -Wno-long-double -no-cpp-precomp -gdwarf-2 ;
+flags darwin.compile OPTIONS : -Wno-long-double -no-cpp-precomp ;
 
+flags darwin.link FRAMEWORK <framework> ;
 flags darwin.link FRAMEWORK <framework> ;
 
 flags darwin.link.dll OPTIONS <bundle>no : -dynamiclib ;
@@ -102,13 +103,13 @@ rule link
 
 actions link bind LIBRARIES
 {
-   $(CONFIG_COMMAND) -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(FRAMEWORK_PATH) -framework$(_)$(FRAMEWORK:D=) $(OPTIONS) $(USER_OPTIONS)
+   MACOSX_DEPLOYMENT_TARGET=10.3 $(CONFIG_COMMAND) -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(FRAMEWORK_PATH) -framework$(_)$(FRAMEWORK:D=) $(OPTIONS) $(USER_OPTIONS)
    $(NEED_STRIP)strip$(NEED_STRIP)-S$(NEED_STRIP)"$(<)"
 }
 
 actions link.dll bind LIBRARIES
 {
-   $(CONFIG_COMMAND) -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(FRAMEWORK_PATH) -framework$(_)$(FRAMEWORK:D=) $(OPTIONS) $(USER_OPTIONS)
+   MACOSX_DEPLOYMENT_TARGET=10.3 $(CONFIG_COMMAND) -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(FRAMEWORK_PATH) -framework$(_)$(FRAMEWORK:D=) $(OPTIONS) $(USER_OPTIONS)
 }
 
 actions piecemeal archive
