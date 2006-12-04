@@ -1,7 +1,7 @@
 project lpe
        : build-dir $(BUILD_TOP)
        : usage-requirements
-         <include>../include
+          <include>../include
        ;
 
 alias lpe
@@ -9,10 +9,10 @@ alias lpe
        : <library>/libraries//atermpp
          <library>/libraries//mcrl2_basic
        :
-       : <include>$(BOOST_ROOT)
-         <include>../include
+       : <dependency>/boost//headers
        ;
 
+# The functionality provided by this library belongs in the LPE framework
 lib dataelm
        : ../source/libdataelm.cpp
          /libraries//lpe
