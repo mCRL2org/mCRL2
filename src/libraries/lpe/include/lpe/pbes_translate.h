@@ -594,7 +594,7 @@ namespace pbes_untimed
 } // namespace pbes_untimed
 
 // translate a state_formula and an LPE to a pbes
-pbes pbes_translate(state_formula f, specification spec, bool timed = true)
+pbes pbes_translate(state_formula f, specification spec, bool untimed = true)
 {
   using namespace state_init;
 
@@ -609,18 +609,18 @@ pbes pbes_translate(state_formula f, specification spec, bool timed = true)
   LPE lpe = spec.lpe();
   equation_system e;
 
-  if (timed)
+  if (untimed)
+  {
+    using namespace pbes_untimed;
+    e = E(f, lpe);   
+  }
+  else
   {
     using namespace pbes_timed;
     data_variable T = fresh_variable("T", make_list(f, lpe));
     aterm_list context = make_list(T, spec.initial_state(), lpe, f);
     lpe = make_timed_lpe(lpe, context);
     e = E(f, lpe, T);
-  }
-  else
-  {
-    using namespace pbes_untimed;
-    e = E(f, lpe);   
   }
 
   // create initial state
