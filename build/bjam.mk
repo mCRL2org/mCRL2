@@ -21,7 +21,7 @@ endif
 bjam: $(BJAM)
 
 $(BJAM):
-	@mkdir -p bin
+	@mkdir -p build/bin
 	@cd 3rd-party/boost/tools/jam; $(BJAM_BUILD)
 	@rm -rf 3rd-party/boost/tools/jam/bootstrap
 
