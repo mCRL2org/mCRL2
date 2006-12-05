@@ -10,11 +10,11 @@
 namespace lpe {
 
 /// Test is a term is a sort, and if it is equal to s
-struct is_sort
+struct compare_sort
 {
   aterm s;
 
-  is_sort(lpe::sort s_)
+  compare_sort(lpe::sort s_)
     : s(aterm_appl(s_))
   {}
 
@@ -29,7 +29,7 @@ struct is_sort
 template <typename list_type>
 bool occurs_in(list_type l, lpe::sort s)
 {
-  return find_if(l, is_sort(s)) != aterm();
+  return find_if(l, compare_sort(s)) != aterm();
 }
 
 ///\ret the list of all functions f of sort s in fl
@@ -38,7 +38,7 @@ function_list get_constructors(const function_list& fl, const lpe::sort& s)
   function_list result;
   for(function_list::iterator i = fl.begin(); i != fl.end(); ++i)
   {
-    if (i->result_type() == s)
+    if (i->range_sort() == s)
     {
       result = push_front(result, *i);
     }
@@ -99,7 +99,7 @@ bool is_finite(const function_list& fl, const lpe::sort& s, const lpe::sort_list
   //it may not occur in a constructor anymore.
   for (function_list::iterator i = cl.begin(); i != cl.end(); ++i)
   {
-    result = result && (!(has_arguments(*i)) || is_finite(fl, i->input_types(), push_front(visited, s)));
+    result = result && (!(has_arguments(*i)) || is_finite(fl, i->domain_sorts(), push_front(visited, s)));
   }
 
   return result;

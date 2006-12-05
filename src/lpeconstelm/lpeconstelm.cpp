@@ -461,7 +461,7 @@ void lpeConstElm::findSingleton() {
   }
   
   for(lpe::function_list::iterator i= p_spec.constructors().begin() ; i != p_spec.constructors().end() ; i++){
-    p_countSort[i->result_type()]++;
+    p_countSort[i->range_sort()]++;
   }
 
   unsigned int n = p_singletonSort.size()+1;
@@ -474,8 +474,9 @@ void lpeConstElm::findSingleton() {
 
       if (p_countSort[*i] == 1){
         for(function_list::iterator j = p_spec.constructors().begin() ; j != p_spec.constructors().end() ;j++){
-          if (j->result_type() == *i){
-            for(sort_list::iterator k = j->input_types().begin() ; k != j->input_types().end() ; k++ ){
+          if (j->range_sort() == *i){
+            sort_list sorts = j->domain_sorts();
+            for(sort_list::iterator k = sorts.begin() ; k != sorts.end() ; k++ ){
               b = std::max(p_countSort[*k], b);
             }
           }

@@ -22,7 +22,7 @@ int main()
                       spec1.constructors(),
                       spec1.mappings(),
                       spec1.equations(),
-                      spec1.actions(),
+                      spec1.action_labels(),
                       spec1.lpe(),
                       spec1.initial_free_variables(),
                       spec1.initial_variables(),

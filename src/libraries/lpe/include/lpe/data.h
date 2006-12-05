@@ -122,6 +122,12 @@ class data_expression: public aterm_appl
 ///
 typedef term_list<data_expression> data_expression_list;
 
+inline
+bool is_data_expression(aterm_appl t)
+{
+  return gsIsDataExpr(t);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // data_variable
 /// \brief data variable.
@@ -187,6 +193,12 @@ class data_variable: public aterm_appl
 /// \brief singly linked list of data variables
 ///
 typedef term_list<data_variable> data_variable_list;
+
+inline
+bool is_data_variable(aterm_appl t)
+{
+  return gsIsDataVarId(t);
+}
 
 inline
 data_expression::data_expression(const data_variable& v)
@@ -334,6 +346,12 @@ class data_equation: public aterm_appl
 ///
 typedef term_list<data_equation> data_equation_list;
 
+inline
+bool is_data_equation(aterm_appl t)
+{
+  return gsIsDataEqn(t);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // data_assignment
 /// \brief data_assignment is an assignment to a data variable.
@@ -405,6 +423,12 @@ class data_assignment: public aterm_appl
 ///
 typedef term_list<data_assignment> data_assignment_list;
 
+inline
+bool is_data_assignment(aterm_appl t)
+{
+  return gsIsAssignment(t);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief Returns the right hand sides of the assignments.
 inline
@@ -444,62 +468,6 @@ struct assignment_list_substitution
       return *this;
     }
 };
-
-///////////////////////////////////////////////////////////////////////////////
-// data_expression_substitution
-/// Utility class for applying a data expression substitution.
-///
-struct data_expression_substitution
-{
-  data_expression m_src;
-  data_expression m_dest;
-  
-  data_expression_substitution(data_expression src, data_expression dest)
-    : m_src(src), m_dest(dest)
-  {}
-  
-  aterm operator()(aterm t) const
-  {
-    return atermpp::replace(t, aterm(m_src), aterm(m_dest));
-  }
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// data_expression_list_substitution
-/// Utility class for applying a data expression list substitution.
-///
-struct data_expression_list_substitution
-{
-  data_expression_list m_src;
-  data_expression_list m_dest;
-  
-  data_expression_list_substitution(data_expression_list src, data_expression_list dest)
-    : m_src(src), m_dest(dest)
-  {}
-  
-  aterm operator()(aterm t) const
-  {
-    return atermpp::replace(t, aterm(m_src), aterm(m_dest));
-  }
-};
-
-/// Returns true if the data expression e is of sort Real.
-///
-inline
-bool is_real(data_expression e)
-{
-  return e.sort() == gsMakeSortIdReal();
-}
-
-/// Returns true if the data expression e is of sort Bool.
-///
-inline
-bool is_bool(data_expression e)
-{
-  return e.sort() == gsMakeSortIdBool();
-}
-
-// todo: Pos/Nat/Int
 
 } // namespace lpe
 

@@ -7,53 +7,56 @@
 #define LPE_DATA_INIT_H
 
 #include "lpe/data.h"
+#include "lpe/sort_init.h"
 #include "lpe/detail/utility.h"
 
 namespace lpe {
 
 namespace data_init {
+  using detail::has_expression_type_level_0;
+  using detail::has_expression_type_level_1;
+  using detail::has_expression_type_level_2;
 
-// //data expression
-// <DataExpr>     ::= Id(<String>)                                          (- tc)
-//                  | <DataVarId>                                           (+ tc)
-//                  | <OpId>                                                (+ tc)
-//                  | DataApplProd(<DataExpr>, <DataExpr>+)                 (- di)
-//                  | DataAppl(<DataExpr>, <DataExpr>)                      (+ di)
-//                  | Number(<NumberString>, <SortExprOrUnknown>)           (- di)
-//                  | ListEnum(<DataExpr>+, <SortExprOrUnknown>)            (- di)
-//                  | SetEnum(<DataExpr>+, <SortExprOrUnknown>)             (- di)
-//                  | BagEnum(<BagEnumElt>+, <SortExprOrUnknown>)           (- di)
-//                  | SetBagComp(<DataVarId>, <DataExpr>)                   (- di)
-//                  | Forall(<DataVarId>+, <DataExpr>)                      (- di)
-//                  | Exists(<DataVarId>+, <DataExpr>)                      (- di)
-//                  | Lambda(<DataVarId>+, <DataExpr>)                      (- di)
-//                  | Whr(<DataExpr>, <WhrDecl>+)                           (- di)
+  // //data expression
+  // <DataExpr>     ::= Id(<String>)                                          (- tc)
+  //                  | <DataVarId>                                           (+ tc)
+  //                  | <OpId>                                                (+ tc)
+  //                  | DataApplProd(<DataExpr>, <DataExpr>+)                 (- di)
+  //                  | DataAppl(<DataExpr>, <DataExpr>)                      (+ di)
+  //                  | Number(<NumberString>, <SortExprOrUnknown>)           (- di)
+  //                  | ListEnum(<DataExpr>+, <SortExprOrUnknown>)            (- di)
+  //                  | SetEnum(<DataExpr>+, <SortExprOrUnknown>)             (- di)
+  //                  | BagEnum(<BagEnumElt>+, <SortExprOrUnknown>)           (- di)
+  //                  | SetBagComp(<DataVarId>, <DataExpr>)                   (- di)
+  //                  | Forall(<DataVarId>+, <DataExpr>)                      (- di)
+  //                  | Exists(<DataVarId>+, <DataExpr>)                      (- di)
+  //                  | Lambda(<DataVarId>+, <DataExpr>)                      (- di)
+  //                  | Whr(<DataExpr>, <WhrDecl>+)                           (- di)
 
-using detail::has_expression_type_level_0;
-using detail::has_expression_type_level_1;
-using detail::has_expression_type_level_2;
+  inline bool is_true  (aterm_appl t) { return has_expression_type_level_0(t, gsMakeOpIdNameTrue ); }
+  inline bool is_false (aterm_appl t) { return has_expression_type_level_0(t, gsMakeOpIdNameFalse); }
+  inline bool is_not   (aterm_appl t) { return has_expression_type_level_1(t, gsMakeOpIdNameNot  ); }
+  inline bool is_and   (aterm_appl t) { return has_expression_type_level_2(t, gsMakeOpIdNameAnd  ); }
+  inline bool is_or    (aterm_appl t) { return has_expression_type_level_2(t, gsMakeOpIdNameOr   ); }
+  inline bool is_forall(aterm_appl t) { return gsIsForall       (t); }
+  inline bool is_exists(aterm_appl t) { return gsIsExists       (t); }
+  inline bool is_lambda(aterm_appl t) { return gsIsLambda       (t); }
+  inline bool is_where (aterm_appl t) { return gsIsWhr          (t); }                                 
+  inline bool is_real  (aterm_appl t) { return sort_init::is_real(data_expression(t).sort()); }
+  inline bool is_int   (aterm_appl t) { return sort_init::is_int (data_expression(t).sort()); }
+  inline bool is_pos   (aterm_appl t) { return sort_init::is_pos (data_expression(t).sort()); }
+  inline bool is_nat   (aterm_appl t) { return sort_init::is_nat (data_expression(t).sort()); }
+  inline bool is_bool  (aterm_appl t) { return sort_init::is_bool(data_expression(t).sort()); }
 
-// TODO: the names for these functions need to be improved.
-  inline bool is_id            (data_expression t) { return gsIsId           (t); }
-  inline bool is_data_var_id   (data_expression t) { return gsIsDataVarId    (t); }
-  inline bool is_op_id         (data_expression t) { return gsIsOpId         (t); }
-  inline bool is_data_appl_prod(data_expression t) { return gsIsDataApplProd (t); }
-  inline bool is_data_appl     (data_expression t) { return gsIsDataAppl     (t); }
-  inline bool is_number        (data_expression t) { return gsIsNumber       (t); }
-  inline bool is_list_enum     (data_expression t) { return gsIsListEnum     (t); }
-  inline bool is_set_enum      (data_expression t) { return gsIsSetEnum      (t); }
-  inline bool is_bag_enum      (data_expression t) { return gsIsBagEnum      (t); }
-  inline bool is_set_bag_comp  (data_expression t) { return gsIsSetBagComp   (t); }
-  inline bool is_forall        (data_expression t) { return gsIsForall       (t); }
-  inline bool is_exists        (data_expression t) { return gsIsExists       (t); }
-  inline bool is_lambda        (data_expression t) { return gsIsLambda       (t); }
-  inline bool is_where         (data_expression t) { return gsIsWhr          (t); }
-
-  inline bool is_true          (data_expression t) { return has_expression_type_level_0(t, gsMakeOpIdNameTrue ); }
-  inline bool is_false         (data_expression t) { return has_expression_type_level_0(t, gsMakeOpIdNameFalse); }
-  inline bool is_not           (data_expression t) { return has_expression_type_level_1(t, gsMakeOpIdNameNot  ); }
-  inline bool is_and           (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameAnd  ); }
-  inline bool is_or            (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameOr   ); }
+  // inline bool is_id            (data_expression t) { return gsIsId           (t); }
+  // inline bool is_op_id         (data_expression t) { return gsIsOpId         (t); }
+  // inline bool is_data_appl_prod(data_expression t) { return gsIsDataApplProd (t); }
+  // inline bool is_data_appl     (data_expression t) { return gsIsDataAppl     (t); }
+  // inline bool is_number        (data_expression t) { return gsIsNumber       (t); }
+  // inline bool is_list_enum     (data_expression t) { return gsIsListEnum     (t); }
+  // inline bool is_set_enum      (data_expression t) { return gsIsSetEnum      (t); }
+  // inline bool is_bag_enum      (data_expression t) { return gsIsBagEnum      (t); }
+  // inline bool is_set_bag_comp  (data_expression t) { return gsIsSetBagComp   (t); }
 
   inline
   data_expression true_()
@@ -107,10 +110,10 @@ using detail::has_expression_type_level_2;
     else
       return data_expression(gsMakeDataExprOr(p,q));
   }
-
+  
   /// Returns or_ applied to the sequence of data expressions [first, last[
   template <typename FwdIt>
-  inline data_expression multi_or(FwdIt first, FwdIt last)
+  data_expression multi_or(FwdIt first, FwdIt last)
   {
     using namespace data_init;
   
@@ -126,7 +129,7 @@ using detail::has_expression_type_level_2;
   
   /// Returns and_ applied to the sequence of data expressions [first, last[
   template <typename FwdIt>
-  inline data_expression multi_and(FwdIt first, FwdIt last)
+  data_expression multi_and(FwdIt first, FwdIt last)
   {
     using namespace data_init;
   

@@ -17,6 +17,14 @@ using atermpp::aterm;
 using atermpp::aterm_appl;
 using atermpp::term_list;
 
+class sort;
+
+///////////////////////////////////////////////////////////////////////////////
+// sort_list
+/// \brief singly linked list of sorts
+///
+typedef term_list<sort> sort_list;
+
 ///////////////////////////////////////////////////////////////////////////////
 // sort
 /// \brief sort expression.
@@ -24,6 +32,15 @@ using atermpp::term_list;
 /// Models sorts of shape <tt>A -\> B</tt>, where A is the domain and B the range. A constant sort
 /// has an empty domain, for example <tt>-\> S</tt>, or simply <tt>S</tt>.
 /// 
+//<SortExpr>    ::= <SortId>
+//                | SortList(<SortExpr>)                                   (- di)
+//                | SortSet(<SortExpr>)                                    (- di)
+//                | SortBag(<SortExpr>)                                    (- di)
+//                | SortStruct(<StructCons>+)                              (- di)
+//                | SortArrowProd(<SortExpr>+, <SortExpr>)                 (- di)
+//                | SortArrow(<SortExpr>, <SortExpr>)                      (+ di)
+//
+//<SortId>       ::= SortId(<String>)
 class sort: public aterm_appl
 {
   public:
@@ -38,10 +55,9 @@ class sort: public aterm_appl
       assert(gsIsSortId(t) || gsIsSortArrow(t));
     }
 
-    sort(aterm x)
-      : aterm_appl(x)
+    sort(aterm_appl t)
+      : aterm_appl(t)
     {
-      aterm_appl t(x);
       assert(gsIsSortId(t) || gsIsSortArrow(t));
     }
 
@@ -50,16 +66,32 @@ class sort: public aterm_appl
       : aterm_appl(gsMakeSortId(gsString2ATermAppl(s.c_str())))
     {}
     
-    /// Returns the predefined sort real.
-    static sort real()
-    {
-      return sort(gsMakeSortExprReal());
-    }
-
     /// Returns true if it is a sort of type A -> B
     bool is_arrow() const
     {
-      return gsIsSortArrow(appl());
+      return gsIsSortArrow(*this);
+    }
+
+    /// Returns the domain sorts of the sort.
+    ///
+    /// domain_sorts(A -> (B -> C)       ) = [A,B]
+    /// domain_sorts((A -> B) -> C       ) = [A->B]
+    /// domain_sorts((A -> B) -> (C -> D)) = [A->B,C]
+    lpe::sort_list domain_sorts() const
+    {
+      assert(is_arrow());
+      return gsGetSortExprDomain(*this);
+    }
+
+    /// Returns the range of the sort.
+    ///
+    /// range(A -> (B -> C)       ) = C
+    /// range((A -> B) -> C       ) = C
+    /// range((A -> B) -> (C -> D)) = D
+    lpe::sort range_sort() const
+    {
+      assert(is_arrow());
+      return gsGetSortExprResult(*this);
     }
 
     /// Returns a pretty print representation of the term.
@@ -70,11 +102,18 @@ class sort: public aterm_appl
     }
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// sort_list
-/// \brief singly linked list of sorts
-///
-typedef term_list<sort> sort_list;
+inline
+bool is_sort(aterm_appl t)
+{
+  return gsIsSortId(t) || gsIsSortArrow(t);
+}
+
+/// Returns the sort 'domain -> range'.
+inline
+sort arrow(sort domain, sort range)
+{
+  return gsMakeSortArrow(domain, range);
+}
 
 } // namespace lpe
 

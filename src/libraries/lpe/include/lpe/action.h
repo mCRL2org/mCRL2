@@ -163,6 +163,12 @@ class action: public aterm_appl
 ///
 typedef term_list<action> action_list;
 
+inline
+bool is_action(aterm_appl t)
+{
+  return gsIsAction(t);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // timed_action
 /// \brief multi action with time

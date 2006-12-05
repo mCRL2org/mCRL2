@@ -29,7 +29,7 @@ namespace atermpp
   /// Finds a subterm of t that matches the predicate op. If no matching subterm is found,
   /// aterm() is returned.
   template <typename UnaryPredicate>
-  aterm find_if(aterm t, UnaryPredicate op)
+  aterm find_if(aterm_appl t, UnaryPredicate op)
   {
     try {
       detail::find_if_impl(t, op);

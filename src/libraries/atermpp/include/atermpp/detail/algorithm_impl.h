@@ -104,11 +104,12 @@ namespace atermpp {
         }
       }
       else if (t.type() == AT_APPL) {
-        if (op(t)) {
-          value_type v(t);
-          *destBegin++ = v;
+        aterm_appl a(t);
+        if (op(a)) {
+//          value_type v(a);
+          *destBegin++ = a;
         }
-        for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
+        for (aterm_appl::iterator i = a.begin(); i != a.end(); ++i)
         {
           find_all_if_impl(*i, op, destBegin);
         }

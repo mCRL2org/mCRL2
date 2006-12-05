@@ -10,33 +10,12 @@
 #include "atermpp/aterm_list.h"
 #include "lpe/lpe.h"
 #include "lpe/data.h"
-#include "lpe/utility.h"
+#include "lpe/data_utility.h"
 
 namespace lpe {
 
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
-
-/// Fresh variable generator that manages it's own context and adds
-/// generated variables to it.
-struct fresh_variable_generator
-{
-  aterm_list m_context;
-  std::string m_hint;
-  
-  fresh_variable_generator(aterm context, std::string hint = "t")
-  {
-    m_context = push_front(m_context, context);
-    m_hint = hint;
-  }
-  
-  data_variable operator()()
-  {
-    data_variable result = fresh_variable(m_hint, m_context);
-    m_context = push_front(m_context, aterm(result));
-    return result;
-  }
-};
 
 /// Adds a time parameter t to s if needed and returns the result. The time t
 /// is chosen such that it doesn't appear in context.

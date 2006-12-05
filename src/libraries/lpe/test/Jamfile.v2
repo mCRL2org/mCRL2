@@ -15,4 +15,8 @@ test-suite lpe
       [ run data_test.cpp ]
       [ run time.cpp ]
       [ run apply_test.cpp ]
+      [ run data_utility_test.cpp ]
+      [ run aterm_algorithm_test.cpp ]
+      [ run operators.cpp ]
+      [ run sort_test.cpp ]
     ;

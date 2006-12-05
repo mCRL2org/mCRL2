@@ -18,6 +18,7 @@ namespace lpe {
 namespace detail {
 
 // example: "X(d:D,e:E)"
+inline
 std::pair<std::string, data_expression_list> parse_variable(std::string s)
 {
   using boost::algorithm::split;

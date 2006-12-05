@@ -4,27 +4,22 @@
 #include "atermpp/atermpp.h"
 #include "atermpp/algorithm.h"
 #include "lpe/data.h"
+#include "lpe/data_init.h"
+#include "lpe/data_utility.h"
 #include "lpe/sort.h"
 #include "lpe/specification.h"
 
 using namespace std;
 using namespace atermpp;
 using namespace lpe;
+using namespace lpe::data_init;
 
-struct is_identifier
-{
-  bool operator()(aterm t) const
-  {
-    return t.type() == AT_APPL && aterm_appl(t).size() == 0;
-  }
-};
-
-struct is_data_variable
+struct compare_variable
 {
   aterm d;
 
-  is_data_variable(data_variable d_)
-    : d(aterm_appl(d_))
+  compare_variable(data_variable d_)
+    : d(d_)
   {}
 
   bool operator()(aterm t) const
@@ -33,18 +28,9 @@ struct is_data_variable
   }
 };
 
-/// Returns the set of all identifiers occurring in the term t.
-inline
-std::set<aterm_string> identifiers(aterm t)
-{
-  std::set<aterm_string> result;
-  find_all_if(t, is_identifier(), std::inserter(result, result.end()));
-  return result;
-}
-
 bool occurs_in(data_expression d, data_variable v)
 {
-  return find_if(aterm_appl(d), is_data_variable(v)) != aterm();
+  return find_if(aterm_appl(d), compare_variable(v)) != aterm();
 }
 
 int main()
@@ -86,6 +72,17 @@ int main()
   {
     cout << i->name() << endl;
   }
-  
+
+/*
+  // find all "op id's" in an LPE
+  cout << "--- op id's ---" << endl;
+  std::set<aterm> s;
+  find_all_if(lpe, is_op_id, std::inserter(s, s.end()));
+  for (std::set<aterm>::iterator i = s.begin(); i != s.end(); ++i)
+  {
+    cout << *i << endl;
+  }
+*/
+
   return 0;
 }

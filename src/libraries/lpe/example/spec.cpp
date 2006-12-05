@@ -59,7 +59,7 @@ int main()
   cout << endl;
 
   cout << "--- act ------------" << endl;
-  for (aterm_list::iterator i = spec.actions().begin(); i != spec.actions().end(); ++i)
+  for (action_label_list::iterator i = spec.action_labels().begin(); i != spec.action_labels().end(); ++i)
   {
     aterm a = *i;
     cout << str(format("%5s") % i->to_string()) << endl;

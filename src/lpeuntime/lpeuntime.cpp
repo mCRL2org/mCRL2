@@ -26,9 +26,9 @@
 #include <atermpp/aterm.h>
 
 //LPE framework
+#include <lpe/data_utility.h>
 #include <lpe/lpe.h>
 #include <lpe/specification.h>
-#include <lpe/utility.h>
 
 //Squadt connectivity
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -349,7 +349,7 @@ void parse_command_line(int ac, char** av) {
 
 int main(int ac, char** av) {
   ATerm bot;
-  ATinit(0,0,&bot);
+  ATinit(ac, av, &bot);
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY

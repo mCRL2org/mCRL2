@@ -19,7 +19,7 @@
 #include "lpe/pbes.h"
 #include "lpe/pbes_init.h"
 #include "lpe/specification.h"
-#include "lpe/utility.h"
+#include "lpe/data_utility.h"
 #include "lpe/lpe_algorithm.h"
 
 namespace lpe {
@@ -219,7 +219,7 @@ namespace pbes_timed
     } else if (is_forall(b)) {
       data_expression_list x(list_arg1(b));
       action_formula alpha(act_arg2(b));
-      data_variable_list y = fresh_variable_list("y", x.size(), make_list(a.actions(), a.time(), b));
+      data_variable_list y = fresh_variable_list(x.size(), make_list(a.actions(), a.time(), b), "y");
       return p::exists(y, sat_bot(a, alpha.substitute(make_substitution(ATermList(x), ATermList(y)))));
     }
     assert(false);
@@ -256,7 +256,7 @@ namespace pbes_timed
     } else if (is_forall(b)) {
       data_expression_list x(list_arg1(b));
       action_formula alpha(act_arg2(b));
-      data_variable_list y = fresh_variable_list("y", x.size(), make_list(a.actions(), a.time(), b));
+      data_variable_list y = fresh_variable_list(x.size(), make_list(a.actions(), a.time(), b), "y");
       return p::forall(y, sat_top(a, alpha.substitute(make_substitution(ATermList(x), ATermList(y)))));
     }
     assert(false);
@@ -433,7 +433,7 @@ namespace pbes_untimed
     } else if (is_forall(b)) {
       data_expression_list x(list_arg1(b));
       action_formula alpha(act_arg2(b));
-      data_variable_list y = fresh_variable_list("y", x.size(), make_list(a, b));
+      data_variable_list y = fresh_variable_list(x.size(), make_list(a, b), "y");
       return p::exists(y, sat_bot(a, alpha.substitute(make_substitution(ATermList(x), ATermList(y)))));
     }
     assert(false);
@@ -463,7 +463,7 @@ namespace pbes_untimed
     } else if (is_forall(b)) {
       data_expression_list x(list_arg1(b));
       action_formula alpha(act_arg2(b));
-      data_variable_list y = fresh_variable_list("y", x.size(), make_list(a, b));
+      data_variable_list y = fresh_variable_list(x.size(), make_list(a, b), "y");
       return p::forall(y, sat_top(a, alpha.substitute(make_substitution(ATermList(x), ATermList(y)))));
     }
     assert(false);
@@ -632,7 +632,7 @@ pbes pbes_translate(state_formula f, specification spec, bool untimed = true)
   data_expression_list fi = state_formula_variable_expressions(f);
   data_expression_list pi = spec.initial_state();
   // TODO: a function gsMakaDataExprReal_int will be added by Aad
-  data_expression v(gsMakeDataExprCReal(gsMakeDataExprInt_int(0)));
+  data_expression v(gsMakeDataExprCReal(gsMakeDataExprInt_int(0))); // time = 0
   propositional_variable_instantiation init(Xe, v + fi + pi + Par(Xf, f));
   return pbes(dataspec, e, init);
 }

@@ -21,6 +21,7 @@
 #include "atermpp/algorithm.h"
 #include "lpe/action.h"
 #include "lpe/data.h"
+#include "lpe/data_init.h"
 #include "lpe/data_declaration.h"
 #include "lpe/pretty_print.h"
 
@@ -198,11 +199,11 @@ class LPE_summand: public aterm_appl
         if (!i->is_well_typed())
           return false;
       }
-      if (has_time() && !is_real(m_time))
+      if (has_time() && !data_init::is_real(m_time))
       {
         return false;
       }
-      if (!is_bool(m_condition))
+      if (!data_init::is_bool(m_condition))
       {
         return false;
       }
