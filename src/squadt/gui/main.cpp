@@ -1,10 +1,10 @@
-#include "gui_main.h"
-#include "gui_about.h"
-#include "gui_project.h"
-#include "gui_resources.h"
-#include "gui_dialog_project.h"
-#include "gui_dialog_preferences.h"
-#include "tool_manager.h"
+#include "main.h"
+#include "about.h"
+#include "project.h"
+#include "resources.h"
+#include "dialog/project_settings.h"
+#include "dialog/preferences.h"
+#include "../tool_manager.h"
 
 #include <wx/menu.h>
 

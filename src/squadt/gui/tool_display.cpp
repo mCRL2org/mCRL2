@@ -1,8 +1,8 @@
 #include <deque>
 #include <utility>
 
-#include "gui_project.h"
-#include "gui_tool_display.h"
+#include "project.h"
+#include "tool_display.h"
 
 #include <boost/foreach.hpp>
 

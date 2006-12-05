@@ -8,14 +8,14 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
-#include "settings_manager.h"
-#include "tool_manager.h"
-#include "build_system.h"
-#include "executor.h"
-#include "exception.h"
+#include "../settings_manager.h"
+#include "../tool_manager.h"
+#include "../build_system.h"
+#include "../executor.h"
+#include "../exception.h"
 
-#include "gui_splash.h"
-#include "gui_main.h"
+#include "splash.h"
+#include "main.h"
 
 #include <wx/wx.h>
 #include <wx/filename.h>

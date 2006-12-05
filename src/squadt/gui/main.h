@@ -7,9 +7,9 @@
 #include <wx/menu.h>
 #include <wx/frame.h>
 
-#include "gui_project.h"
-#include "type_registry.h"
-#include "tool.h"
+#include "project.h"
+#include "../type_registry.h"
+#include "../tool.h"
 
 namespace squadt {
   namespace GUI {

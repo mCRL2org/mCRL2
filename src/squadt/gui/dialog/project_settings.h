@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "gui_dialog_base.h"
+#include "base.h"
 
 namespace squadt {
   namespace GUI {

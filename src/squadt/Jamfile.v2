@@ -7,12 +7,16 @@ project toolset/squadt
 import set ;
 import sequence ;
 
+source_files = [ set.difference [ glob *.cpp ] : process_wrapper.cpp ]
+                    [ path.glob-tree gui : *.cpp ] ;
+
 exe squadt
-      : [ sequence.insertion-sort [ set.difference [ glob *.cpp ] : process_wrapper.cpp ] ]
+      : [ sequence.insertion-sort $(source_files) ]
         /libraries//md5pp
         /libraries/sip//sip_controller
       : <site-library>wx_base
         <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
+        <include>.
         <include>$(SETUP)
         <threading>multi
       ;

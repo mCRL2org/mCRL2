@@ -1,7 +1,7 @@
-#include "gui_dialog_preferences.h"
-#include "build_system.h"
-#include "tool_manager.h"
-#include "executor.h"
+#include "preferences.h"
+#include "../../build_system.h"
+#include "../../tool_manager.h"
+#include "../../executor.h"
 
 #include <boost/foreach.hpp>
 

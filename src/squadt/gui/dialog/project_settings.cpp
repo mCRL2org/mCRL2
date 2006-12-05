@@ -1,8 +1,8 @@
 #include <boost/filesystem/operations.hpp>
 
-#include "gui_dialog_project.h"
-#include "settings_manager.h"
-#include "project_manager.h"
+#include "project_settings.h"
+#include "../../settings_manager.h"
+#include "../../project_manager.h"
 
 #include <wx/panel.h>
 #include <wx/filename.h>

@@ -10,8 +10,8 @@
 #include <wx/listctrl.h>
 #include <wx/notebook.h>
 
-#include "gui_dialog_base.h"
-#include "type_registry.h"
+#include "base.h"
+#include "../../type_registry.h"
 
 namespace squadt {
   namespace GUI {

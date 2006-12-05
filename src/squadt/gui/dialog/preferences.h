@@ -1,7 +1,7 @@
 #ifndef SQUADT_PREFERENCES_H_
 #define SQUADT_PREFERENCES_H_
 
-#include "gui_main.h"
+#include "../main.h"
 
 #include <wx/wx.h>
 #include <wx/dialog.h>

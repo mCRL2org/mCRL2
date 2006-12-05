@@ -7,8 +7,8 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 
-#include "gui_main.h"
-#include "gui_dialog_processor.h"
+#include "../main.h"
+#include "processor_settings.h"
 
 namespace squadt {
   namespace GUI {

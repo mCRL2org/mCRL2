@@ -10,17 +10,17 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/ref.hpp>
 
-#include "gui_main.h"
-#include "gui_project.h"
-#include "gui_resources.h"
-#include "gui_dialog_base.h"
-#include "gui_tool_display.h"
-#include "gui_dialog_project.h"
-#include "gui_dialog_processor.h"
-#include "project_manager.h"
-#include "tool_manager.h"
-#include "type_registry.h"
-#include "build_system.h"
+#include "main.h"
+#include "project.h"
+#include "resources.h"
+#include "tool_display.h"
+#include "dialog/base.h"
+#include "dialog/project_settings.h"
+#include "dialog/processor_settings.h"
+#include "../project_manager.h"
+#include "../tool_manager.h"
+#include "../type_registry.h"
+#include "../build_system.h"
 
 #include <wx/choicdlg.h>
 #include <wx/filedlg.h>
