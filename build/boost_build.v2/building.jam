@@ -1,7 +1,7 @@
 import feature ;
 
 include $(TOP)/build/config.jam ;
-include $(TOP)/build/testing.jam ;
+include $(BUILD_TOOLS)/testing.jam ;
 
 # Make sure the revision variable is defined
 if ! $(REVISION) {

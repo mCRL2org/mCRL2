@@ -30,7 +30,7 @@ distclean:
 configure: build/autoconf/configure.ac
 	autoconf -o $@ -W all $<
 
-include build/bjam.mk
+include build/make/bjam.mk
 
 $(CONFIG):
 	$(error Please run configure first)

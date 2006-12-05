@@ -83,10 +83,10 @@ if test -z $FLEX; then
 #  AC_MSG_ERROR([cannot find flex])
 else
   AC_MSG_CHECKING([whether flex option c++ is available])
-  if $FLEX -I -o/dev/null build/test.l &> /dev/null; then
+  if $FLEX -I -o/dev/null build/autoconf/test.l &> /dev/null; then
     AC_MSG_RESULT([yes]);
     AC_MSG_CHECKING([whether flex C++ scanner can be used])
-    $FLEX -I -otest.cpp build/test.l
+    $FLEX -I -otest.cpp build/autoconf/test.l
     if $CXX -c test.cpp -o /dev/null &> /dev/null; then
       flex_usable="yes"
     fi
@@ -110,10 +110,10 @@ if test -z $BISON; then
 #  AC_MSG_ERROR([cannot find bison])
 else
   AC_MSG_CHECKING([whether bison option %glr-parser is available])
-  if $BISON build/test.y -o/dev/null &> /dev/null; then
+  if $BISON build/autoconf/test.y -o/dev/null &> /dev/null; then
     AC_MSG_RESULT([yes]);
     AC_MSG_CHECKING([whether bison GLR parser can be used])
-    $BISON build/test.y -o test.cpp
+    $BISON build/autoconf/test.y -o test.cpp
     if $CXX -c test.cpp -o /dev/null &> /dev/null; then
       glr_usable="yes"
     fi
@@ -568,6 +568,8 @@ else
   AC_SUBST([USE_BCG],[""])
 fi
 
-AC_CONFIG_FILES([build/config.mk build/config.jam src/setup.h:build/setup.h.in])
+AC_CONFIG_FILES([build/config.mk:build/autoconf/config.mk.in
+                 build/config.jam:build/autoconf/config.jam.in
+                 src/setup.h:build/autoconf/setup.h.in])
 AC_OUTPUT
 
