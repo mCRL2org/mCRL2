@@ -18,6 +18,9 @@ clean:
 	$(RM) -rf build/bin/*
 	$(RM) -r autom4te.cache config.log *.o *~ core core.*
 
+test:
+	$(BJAM) ./status
+
 distclean:
 	@${MAKE} -C src/doc distclean
 	$(RM) -r autom4te.cache *.o *.app *~ core core.*
