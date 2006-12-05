@@ -164,7 +164,7 @@ MarkRule* MarkStateRuleDialog::getMarkRule()
 
   if ( relationListBox->GetSelection() == 0 )
   {
-    for ( int i = 0 ; i < valuesListBox->GetCount() ; ++i )
+    for ( unsigned int i = 0 ; i < valuesListBox->GetCount() ; ++i )
     {
       result->valueSet[ valueIndices[ valuesListBox->GetString( i ) ] ] =
 	valuesListBox->IsChecked( i );
@@ -172,7 +172,7 @@ MarkRule* MarkStateRuleDialog::getMarkRule()
   }
   else
   {
-    for ( int i = 0 ; i < valuesListBox->GetCount() ; ++i )
+    for ( unsigned int i = 0 ; i < valuesListBox->GetCount() ; ++i )
     {
       result->valueSet[ valueIndices[ valuesListBox->GetString( i ) ] ] =
 	!valuesListBox->IsChecked( i );
@@ -190,7 +190,7 @@ wxString MarkStateRuleDialog::getMarkRuleString()
   result += ( relationListBox->GetSelection() == 0 ) ? wxT(" in { ") :
     wxT(" not in { ");
   bool isfirst = true;
-  for ( int i = 0 ; i < valuesListBox->GetCount() ; ++i )
+  for ( unsigned int i = 0 ; i < valuesListBox->GetCount() ; ++i )
   {
     if ( valuesListBox->IsChecked( i ) )
     {
