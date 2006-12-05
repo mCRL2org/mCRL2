@@ -25,6 +25,7 @@
 #define VERSION  "0.1"
 
 #include <getopt.h>
+#include <sys/times.h>
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
