@@ -9,19 +9,19 @@ exe process_jam_log
     release
     ;
 
-exe compiler_status
-    :
-    ../compiler_status.cpp ../detail/tiny_xml.cpp
-    /boost/filesystem//boost_filesystem
-    :
-    :
-    release
-    ;
+#exe compiler_status
+#    :
+#    ../compiler_status.cpp ../detail/tiny_xml.cpp
+#    /boost/filesystem//boost_filesystem
+#    :
+#    :
+#    release
+#    ;
 
 install dist-bin
     :
     process_jam_log
-    compiler_status
+#    compiler_status
     :
     <install-type>EXE
     <location>../../../dist/bin
@@ -32,7 +32,7 @@ install dist-bin
 install dist-lib
     :
     process_jam_log
-    compiler_status
+#    compiler_status
     :
     <install-type>LIB
     <location>../../../dist/lib
