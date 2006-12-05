@@ -25,28 +25,12 @@
 #define VERSION  "0.1"
 
 #include <getopt.h>
-#include <sys/times.h>
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "ltsmin.h"
 
 int traceLevel = 0, optimal = 0, classes = 0, add_state_parameter = 0; 
-
-#ifndef NO_TIMES_H
-static 	struct tms tms_begin,tms_end;
-static  long t_begin,t_end;
-
-static void printTimes(void){
-	long clk_tck=sysconf(_SC_CLK_TCK);
-	float t_real=((float)(t_end-t_begin))/((float)clk_tck);
-	float t_user=((float)(tms_end.tms_utime-tms_begin.tms_utime))/((float)clk_tck);
-	float t_sys=((float)(tms_end.tms_stime-tms_begin.tms_stime))/((float)clk_tck);
-	ATwarning("reduction took %5.3f real %5.3f user %5.3f sys\n",
-			t_real,t_user,t_sys);
-}
-#endif
-
 
 int main(int argc, char *argv[]) {
    ATerm bottom;
@@ -293,14 +277,7 @@ void doVersion() {
 int doReduce(void) 
   {
   SVCstateIndex initState = ReadData(); 
-#ifndef NO_TIMES_H
-  t_begin=times(&tms_begin);
-#endif
   Reduce();
-#ifndef NO_TIMES_H
-  t_end=times(&tms_end);
-  if (traceLevel) printTimes();
-#endif
   if ( add_state_parameter )
   {
     SVCbool b;
@@ -316,17 +293,10 @@ int doReduce(void)
 int doBranchReduce(void) 
   {
   SVCstateIndex initState = ReadData();
-#ifndef NO_TIMES_H
-  t_begin=times(&tms_begin);
-#endif
   SCC();
 //  initState = ReturnEquivalenceClasses(initState, DELETE_TAULOOPS);
   /* ATwarning("Number of states after deletion of tau loops: %d\n", nstate); */
   ReduceBranching();  
-#ifndef NO_TIMES_H
-  t_end=times(&tms_end);
-  if (traceLevel) printTimes();
-#endif
   if ( add_state_parameter )
   {
     SVCbool b;
