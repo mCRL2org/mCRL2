@@ -4,11 +4,9 @@ project toolset/squadt
     <include>./libraries
   ;
 
-import set ;
 import sequence ;
 
-source_files = [ set.difference [ glob *.cpp ] : process_wrapper.cpp ]
-                    [ path.glob-tree gui : *.cpp ] ;
+source_files = [ glob *.cpp gui/*.cpp gui/dialog/*.cpp : process_wrapper.cpp ] ;
 
 exe squadt
       : [ sequence.insertion-sort $(source_files) ]
