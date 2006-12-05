@@ -7,7 +7,7 @@ import common ;
 constant BOOST_VERSION : 1.33.1 ;
 
 project boost
-       : build-dir $(BUILD_TOP)/bin 
+       : build-dir $(BUILD_TOP)
        : requirements
           <include>.
           <include>$(BOOST_ROOT)
