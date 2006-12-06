@@ -17,27 +17,29 @@ rule examples_by_extension ( root : extensions + ) {
 # path        the path relative to which input files are searched
 # extensions  the extensions of files that are considered input
 #
-rule run_tool_on_examples ( tool prefix suffix ? : options * : path extensions + ) {
+rule run_tool_on_examples ( tool prefix suffix ? : options * : paths + : extensions + ) {
   import path ;
 
-  for file in [ examples_by_extension $(path) : $(extensions) ] {
-    local target = [ MATCH "^(.+)[.][^.]+$" : [ path.basename $(file) ] ] ;
-    local output ;
-
-    if ($(suffix)) {
-      output = [ path.native $(BUILD_TOP)/$(target).$(suffix) ] ;
+  for path in $(paths) {
+    for file in [ examples_by_extension $(path) : $(extensions) ] {
+      local target = [ MATCH "^(.+)[.][^.]+$" : [ path.basename $(file) ] ] ;
+      local output ;
+ 
+      if ($(suffix)) {
+        output = [ path.native $(BUILD_TOP)/$(target).$(suffix) ] ;
+      }
+ 
+      results += [
+ 
+        run $(tool)
+               : $(options)
+                 $(file)
+                 $(output)
+               : # input files
+               : # requirements
+               : $(prefix)-$(target)
+      ] ;
     }
-
-    results += [
-
-      run $(tool)
-             : $(options)
-               $(file)
-               $(output)
-             : # input files
-             : # requirements
-             : $(prefix)-$(target)
-    ] ;
   }
 
   return $(results) ;
