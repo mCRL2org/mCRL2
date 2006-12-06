@@ -38,16 +38,14 @@ if [[ ! -d ${TARGET_BASE} ]]; then
 fi
 
 source_files="mcrl2/articles \
-              mcrl2/boost \
+              mcrl2/3rd-party \
               mcrl2/boost-build.jam \
               mcrl2/conventions \
+              mcrl2/documentation \
               mcrl2/COPYING \
               mcrl2/INSTALL \
               mcrl2/README \
               mcrl2/configure \
-              mcrl2/config.guess \
-              mcrl2/config.sub \
-              mcrl2/install-sh \
               mcrl2/Jamroot.jam \
               mcrl2/build \
               mcrl2/Makefile \
@@ -75,18 +73,19 @@ if (! test -e "${archive_name}.bz2"); then
        -not -name '*.*' \
        -not -name 'PkgInfo' \
        -not -name 'Makefile' \
-       -not -name '*revision.h' \
-       -not -wholename '*boost*' > excludes
+       -not -name 'doxyfile' \
+       -not -name 'Jamfile' \
+       -not -wholename '*/examples/*' \
+       -not -wholename '*/build*' \
+       -not -wholename '*/3rd-party*' > excludes
 
   # Find directories to filter out
   find -L mcrl2 -type d \
        -name 'html' \
        -or -name 'latex' \
-       -or -name 'bin' \
+       -or -wholename '*build/bin' \
        -or -wholename '*mcrl2/build/utility' \
-       -or -wholename '*jam/bootstrap' \
-       -or -wholename '*boost/stage' \
-       -or -wholename '*boost/lib' >> excludes
+       -or -wholename '*3rd-party/boost/tools/jam/bootstrap' >> excludes
 
   # Append revision number to template configuration file
   echo "REVISION        = \"${revision}\" ;" >> ${SOURCE_BASE}/build/config.jam.in
@@ -95,7 +94,6 @@ if (! test -e "${archive_name}.bz2"); then
            --exclude '.svn' \
            --exclude '*.ps' \
            --exclude '*.dvi' \
-           --exclude '*.ps' \
            --exclude '*.log' \
            --exclude '*.pdf' \
            --exclude '*.d' \
