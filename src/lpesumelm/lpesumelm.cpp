@@ -45,9 +45,6 @@ using namespace lpe::data_init;
 
 namespace po = boost::program_options;
 
-//TODO: Add configuration parameter for substitution sumelimination (enable/disable)
-//TODO: Get rid of gsMakeDataExpr...() functions
-
 #define VERSION "0.3"
 
 std::string input_file; ///< Name of the file to read input from
@@ -141,20 +138,12 @@ bool occurs_in(data_type d, data_variable v)
   return find_if(aterm_appl(d), compare_data_variable(v)) != aterm();
 }
 
-///pre: true
-///ret: true if t as a data_variable, false otherwise
-inline
-bool is_var(data_expression t)
-{
-  return gsIsDataVarId(ATermAppl(t));
-}
-
 ///pre: is_var(t)
 ///ret: The data_variable embedded in t
 inline
 data_variable get_var(data_expression t)
 {
-  assert(is_var(t));
+  assert(is_data_variable(t));
   data_variable result = data_variable(ATermAppl(t));
   return result;
 }
@@ -289,7 +278,7 @@ data_expression recursive_substitute_equalities(const LPE_summand& summand,
   {
     //Check if rhs is a variable, if so, swap lhs and rhs, so that the following code
     //is always the same.
-    if (!is_var(lhs(working_condition)) && is_var(rhs(working_condition)))
+    if (!is_data_variable(lhs(working_condition)) && is_data_variable(rhs(working_condition)))
     {
       working_condition = swap_equality(working_condition);
     }
@@ -298,7 +287,7 @@ data_expression recursive_substitute_equalities(const LPE_summand& summand,
     //apply substitution lhs := rhs in actions, time and assignments.
     //substitution in condition is accounted for on returnpath of recursion,
     //substitution in summation_variables is done in calling function.
-    if (is_var(lhs(working_condition)))
+    if (is_data_variable(lhs(working_condition)))
     {
       data_variable_list lhs_subst;
       for (data_assignment_list::iterator i = substitutions.begin(); i != substitutions.end(); ++i)

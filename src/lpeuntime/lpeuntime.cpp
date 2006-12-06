@@ -26,10 +26,11 @@
 #include <atermpp/aterm.h>
 
 //LPE framework
+#include <lpe/specification.h>
+#include <lpe/lpe.h>
+#include <lpe/data_init.h>
 #include <lpe/data_functional.h>
 #include <lpe/data_utility.h>
-#include <lpe/lpe.h>
-#include <lpe/specification.h>
 
 //Squadt connectivity
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -41,6 +42,7 @@
 using namespace std;
 using namespace atermpp;
 using namespace lpe;
+using namespace lpe::data_init;
 
 namespace po = boost::program_options;
 
@@ -125,7 +127,7 @@ lpe::specification remove_deltas(const lpe::specification& specification) {
   }
 
   lpe::LPE_summand delta_summand = LPE_summand(data_variable_list(),
-                                               data_expression(gsMakeDataExprTrue()),
+                                               true_(),
                                                true,
                                                action_list(),
                                                gsMakeNil(),
@@ -186,9 +188,7 @@ lpe::specification untime(const lpe::specification& specification) {
 	untime_summation_variables = i->summation_variables();   
 
 	// Extend the original condition with an additional argument t.i(d,e.i)>last_action_time
-	untime_condition = gsMakeDataExprAnd(i->condition(), 
-                                             lpe::greater(i->time(),data_expression(last_action_time))
-                                             );
+	untime_condition = and_(i->condition(), lpe::greater(i->time(),data_expression(last_action_time)));
 
 	// Extend original assignments to include t.i(d,e.i)
 	untime_assignments = push_back(i->assignments(),data_assignment(last_action_time,i->time()));
@@ -202,9 +202,7 @@ lpe::specification untime(const lpe::specification& specification) {
 	untime_summation_variables = push_back(i->summation_variables(), time_var);
 
 	// Extend the original condition with an additional argument
-	untime_condition = gsMakeDataExprAnd(i->condition(),
-                                             lpe::greater(time_var, data_expression(last_action_time))
-                                             );
+	untime_condition = and_(i->condition(), lpe::greater(time_var, data_expression(last_action_time)));
 
 
 	// Extend original assignments to include t.i(d,e.i)
@@ -232,7 +230,7 @@ lpe::specification untime(const lpe::specification& specification) {
   // Add delta summand
   lpe::LPE_summand untime_summand;
   untime_summand = lpe::LPE_summand(data_variable_list(),
-                                    data_expression(gsMakeDataExprTrue()),
+                                    data_expression(true_()),
                                     true,
                                     action_list(),
                                     gsMakeNil(),
