@@ -26,6 +26,7 @@
 #include <atermpp/aterm.h>
 
 //LPE framework
+#include <lpe/data_functional.h>
 #include <lpe/data_utility.h>
 #include <lpe/lpe.h>
 #include <lpe/specification.h>
