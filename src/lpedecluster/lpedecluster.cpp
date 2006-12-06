@@ -124,11 +124,11 @@ bool squadt_interactor::perform_task(sip::configuration& configuration)
 /////
 
 ///Used to assist in occurs_in function.
-struct is_data_variable
+struct compare_data_variable
 {
   aterm v;
 
-  is_data_variable(data_variable v_)
+  compare_data_variable(data_variable v_)
     : v(aterm_appl(v_))
   {}
   
@@ -142,7 +142,7 @@ struct is_data_variable
 template <typename data_type>
 bool occurs_in(data_type l, lpe::data_variable v)
 {
-  return find_if(l, is_data_variable(v)) != aterm();
+  return find_if(l, compare_data_variable(v)) != aterm();
 }
 
 

@@ -12,13 +12,13 @@ namespace lpe {
 /// Test is a term is a sort, and if it is equal to s
 struct compare_sort
 {
-  aterm s;
+  lpe::sort s;
 
   compare_sort(lpe::sort s_)
-    : s(aterm_appl(s_))
+    : s(s_)
   {}
 
-  bool operator()(aterm t) const
+  bool operator()(aterm_appl t) const
   {
     return s == t;
   }

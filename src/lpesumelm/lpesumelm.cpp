@@ -119,11 +119,11 @@ bool squadt_lpesumelm::perform_task(sip::configuration& configuration)
 // Some of these might be interesting to get into the LPE library
 
 ///Used to assist in occurs_in function.
-struct is_data_variable
+struct compare_data_variable
 {
   aterm v;
 
-  is_data_variable(data_variable v_)
+  compare_data_variable(data_variable v_)
     : v(aterm_appl(v_))
   {}
   
@@ -138,7 +138,7 @@ struct is_data_variable
 template <typename data_type>
 bool occurs_in(data_type d, data_variable v)
 {
-  return find_if(aterm_appl(d), is_data_variable(v)) != aterm();
+  return find_if(aterm_appl(d), compare_data_variable(v)) != aterm();
 }
 
 ///pre: true

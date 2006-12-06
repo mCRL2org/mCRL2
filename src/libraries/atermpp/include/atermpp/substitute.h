@@ -47,7 +47,7 @@ template <typename Src, typename Dest>
 inline
 substitution make_substitution(Src src, Dest dest)
 {
-  return substitution(aterm(src), aterm(dest));
+  return substitution(aterm_traits<Src>::term(src), aterm_traits<Dest>::term(dest));
 }
 
 /// Utility class for applying a substitution to a term.
