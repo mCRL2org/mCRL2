@@ -12,26 +12,6 @@ using namespace lpe;
 using namespace atermpp;
 using namespace lpe::data_init;
 
-/// precondition: i > 0
-inline
-data_expression pos(unsigned int i)
-{
-  assert(i > 0);
-  return gsMakeDataExprPos_int(i);
-}
-
-inline
-data_expression nat(unsigned int i)
-{
-  return gsMakeDataExprNat_int(i);
-}
-
-inline
-data_expression int_(int i)
-{
-  return gsMakeDataExprInt_int(i);
-}
-
 int test_main(int, char*[])
 {
   ATerm bottom_of_stack;

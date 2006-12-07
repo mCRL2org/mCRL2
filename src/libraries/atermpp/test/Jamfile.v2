@@ -20,4 +20,5 @@ test-suite aterm
       [ run algorithm.cpp ]
       [ run operators.cpp ]
       [ run table_test.cpp ]
+      [ run replace_test.cpp ]
     ;

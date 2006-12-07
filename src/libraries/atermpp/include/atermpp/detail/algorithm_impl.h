@@ -26,10 +26,11 @@
 namespace atermpp {
 
   // prototypes
-  aterm replace(aterm t, aterm old_value, aterm new_value, bool recursive);
+  inline
+  aterm replace(aterm t, aterm old_value, aterm new_value, bool recursive = false);
 
   template <typename UnaryPredicate>
-  aterm replace_if(aterm t, UnaryPredicate op, aterm new_value, bool recursive);
+  aterm replace_if(aterm t, UnaryPredicate op, aterm new_value, bool recursive = false);
 
   namespace detail {
 

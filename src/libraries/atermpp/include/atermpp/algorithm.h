@@ -51,26 +51,27 @@ namespace atermpp
 
   /// Replaces each subterm in t that is equal to old_value with new_value.
   inline
-  aterm replace(aterm t, aterm old_value, aterm new_value, bool recursive = false)
+  aterm replace(aterm t, aterm old_value, aterm new_value, bool recursive)
   {
-    aterm result = t;
+    aterm result;
     if (t == old_value)
     {
       result = new_value;
     }
     else if (t.type() == AT_APPL)
     {
-      aterm_appl result(t);
-      unsigned int n = result.size();
+      aterm_appl a(t);
+      unsigned int n = a.size();
       if (n > 0)
       {
         for (unsigned int i = 0; i < n; i++)
         {
-          aterm a = atermpp::replace(result(i), old_value, new_value, recursive);
-          if (a != result(i))
-            result = result.set_argument(a, i);
+          aterm x = replace(a(i), old_value, new_value, recursive);
+          if (x != a(i))
+            a = a.set_argument(x, i);
         }
       }
+      result = a;
     }
     else if (t.type() == AT_LIST)
     {
@@ -88,7 +89,7 @@ namespace atermpp
   /// Replaces each subterm in the aterm_appl src for which the unary predicate
   /// op holds with new_value.
   template <typename UnaryPredicate>
-  aterm replace_if(aterm t, UnaryPredicate op, aterm new_value, bool recursive = false)
+  aterm replace_if(aterm t, UnaryPredicate op, aterm new_value, bool recursive)
   {
     aterm result = t;   
     if (op(t))
@@ -98,13 +99,17 @@ namespace atermpp
     else if (t.type() == AT_APPL)
     {
       aterm_appl a(t);
-      if (a.function().arity() != 0)
+      unsigned int n = a.size();
+      if (n > 0)
       {
-        aterm_list args = apply(a.argument_list(), detail::replace_if_substitution<UnaryPredicate>(op, new_value, recursive));
-        if (recursive && op(args))
-          args = new_value;
-        result = aterm_appl(a.function(), args);
+        for (unsigned int i = 0; i < n; i++)
+        {
+          aterm x = replace_if(a(i), op, new_value, recursive);
+          if (x != a(i))
+            a = a.set_argument(x, i);
+        }
       }
+      result = a;
     }
     else if (t.type() == AT_LIST)
     {

@@ -45,9 +45,9 @@ int main()
 
   vector<ATerm, aterm_allocator<ATerm> > v;
   for (int i = 0; i < 10; i++)
-    v.push_back(aterm_int(i));
-  v.push_back(t0);
-  v.push_back(t1);
+    v.push_back(aterm_traits<aterm_int>::term(aterm_int(i)));
+  v.push_back(aterm_traits<aterm_appl>::term(t0));
+  v.push_back(aterm_traits<aterm_appl>::term(t1));
   v.clear();
 
   // This demonstrates that aterm_allocator can be used as a custom allocator

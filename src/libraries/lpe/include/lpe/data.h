@@ -96,7 +96,7 @@ class data_expression: public aterm_appl
     ///
     lpe::sort type() const
     {
-      return lpe::sort(gsGetSort(*this));
+      return gsGetSort(*this);
     }
 
     /// Returns a pretty print representation of the term.
@@ -177,7 +177,7 @@ class data_variable: public aterm_appl
     ///
     sort type() const
     {
-      return lpe::sort(aterm_appl(*this).argument(1));
+      return gsGetSort(*this);
     }
 
     /// Returns a pretty print representation of the term.
@@ -458,6 +458,7 @@ struct assignment_list_substitution
   {
     for (data_assignment_list::iterator i = m_assignments.begin(); i != m_assignments.end(); ++i)
     {
+std::cout << "<assignment>" << *i << " " << t << " -> " << (*i)(t) << std::endl;
       t = (*i)(t);
     }
     return t;

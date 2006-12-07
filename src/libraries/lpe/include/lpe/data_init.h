@@ -33,20 +33,21 @@ namespace data_init {
   //                  | Lambda(<DataVarId>+, <DataExpr>)                      (- di)
   //                  | Whr(<DataExpr>, <WhrDecl>+)                           (- di)
 
-  inline bool is_true  (aterm_appl t) { return has_expression_type_level_0(t, gsMakeOpIdNameTrue ); }
-  inline bool is_false (aterm_appl t) { return has_expression_type_level_0(t, gsMakeOpIdNameFalse); }
-  inline bool is_not   (aterm_appl t) { return has_expression_type_level_1(t, gsMakeOpIdNameNot  ); }
-  inline bool is_and   (aterm_appl t) { return has_expression_type_level_2(t, gsMakeOpIdNameAnd  ); }
-  inline bool is_or    (aterm_appl t) { return has_expression_type_level_2(t, gsMakeOpIdNameOr   ); }
-  inline bool is_forall(aterm_appl t) { return gsIsForall       (t); }
-  inline bool is_exists(aterm_appl t) { return gsIsExists       (t); }
-  inline bool is_lambda(aterm_appl t) { return gsIsLambda       (t); }
-  inline bool is_where (aterm_appl t) { return gsIsWhr          (t); }                                 
-  inline bool is_real  (aterm_appl t) { return sort_init::is_real(data_expression(t).sort()); }
-  inline bool is_int   (aterm_appl t) { return sort_init::is_int (data_expression(t).sort()); }
-  inline bool is_pos   (aterm_appl t) { return sort_init::is_pos (data_expression(t).sort()); }
-  inline bool is_nat   (aterm_appl t) { return sort_init::is_nat (data_expression(t).sort()); }
-  inline bool is_bool  (aterm_appl t) { return sort_init::is_bool(data_expression(t).sort()); }
+  inline bool is_true   (aterm_appl t) { return has_expression_type_level_0(t, gsMakeOpIdNameTrue ); }
+  inline bool is_false  (aterm_appl t) { return has_expression_type_level_0(t, gsMakeOpIdNameFalse); }
+  inline bool is_not    (aterm_appl t) { return has_expression_type_level_1(t, gsMakeOpIdNameNot  ); }
+  inline bool is_and    (aterm_appl t) { return has_expression_type_level_2(t, gsMakeOpIdNameAnd  ); }
+  inline bool is_or     (aterm_appl t) { return has_expression_type_level_2(t, gsMakeOpIdNameOr   ); }
+  inline bool is_implies(aterm_appl t) { return has_expression_type_level_2(t, gsMakeOpIdNameImp  ); }
+  inline bool is_forall (aterm_appl t) { return gsIsForall       (t); }
+  inline bool is_exists (aterm_appl t) { return gsIsExists       (t); }
+  inline bool is_lambda (aterm_appl t) { return gsIsLambda       (t); }
+  inline bool is_where  (aterm_appl t) { return gsIsWhr          (t); }                                 
+  inline bool is_real   (aterm_appl t) { return sort_init::is_real(data_expression(t).sort()); }
+  inline bool is_int    (aterm_appl t) { return sort_init::is_int (data_expression(t).sort()); }
+  inline bool is_pos    (aterm_appl t) { return sort_init::is_pos (data_expression(t).sort()); }
+  inline bool is_nat    (aterm_appl t) { return sort_init::is_nat (data_expression(t).sort()); }
+  inline bool is_bool   (aterm_appl t) { return sort_init::is_bool(data_expression(t).sort()); }
 
   // inline bool is_id            (data_expression t) { return gsIsId           (t); }
   // inline bool is_op_id         (data_expression t) { return gsIsOpId         (t); }
@@ -57,6 +58,42 @@ namespace data_init {
   // inline bool is_set_enum      (data_expression t) { return gsIsSetEnum      (t); }
   // inline bool is_bag_enum      (data_expression t) { return gsIsBagEnum      (t); }
   // inline bool is_set_bag_comp  (data_expression t) { return gsIsSetBagComp   (t); }
+
+/*
+implies
+forall
+exists
+lambda
+where
+*/
+
+  // TODO: a function gsMakaDataExprReal_int will be added by Aad
+  // Perhaps even real(double d) will become possible?
+  inline
+  data_expression real(int i)
+  {
+    return gsMakeDataExprCReal(gsMakeDataExprInt_int(i));
+  }
+
+  /// Precondition: i > 0
+  inline
+  data_expression pos(unsigned int i)
+  {
+    assert(i > 0);
+    return gsMakeDataExprPos_int(i);
+  }
+
+  inline
+  data_expression nat(unsigned int i)
+  {
+    return gsMakeDataExprNat_int(i);
+  }
+
+  inline
+  data_expression int_(int i)
+  {
+    return gsMakeDataExprInt_int(i);
+  }
 
   inline
   data_expression true_()

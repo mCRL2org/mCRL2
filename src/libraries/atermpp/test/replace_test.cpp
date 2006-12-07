@@ -14,11 +14,10 @@
 
 #include <iostream>
 #include <iterator>
-#include <cassert>
 #include <vector>
+#include <boost/test/minimal.hpp>
 
 #include "atermpp/atermpp.h"
-#include "atermpp/aterm_list.h"
 #include "atermpp/algorithm.h"
 
 using namespace std;
@@ -48,28 +47,28 @@ void test_find()
   aterm_appl a = make_term("h(g(x),f(y),p(a(x,y),q(f(z))))");
 
   aterm t = find_if(a, is_f());
-  assert(t == make_term("f(y)"));
+  BOOST_CHECK(t == make_term("f(y)"));
   
   vector<aterm> v;
   find_all_if(a, is_f(), back_inserter(v));
-  assert(v.front() == make_term("f(y)"));
-  assert(v.back() == make_term("f(z)"));
+  BOOST_CHECK(v.front() == make_term("f(y)"));
+  BOOST_CHECK(v.back() == make_term("f(z)"));
 }
 
 void test_replace()
 {
   aterm_appl a = make_term("f(f(x))");
   aterm_appl b = replace(a, make_term("f(x)"), make_term("x"));
-  assert(b == make_term("f(x)"));
+  BOOST_CHECK(b == make_term("f(x)"));
   aterm_appl c = replace(a, make_term("f(x)"), make_term("x"), true);
-  assert(c == make_term("x"));
+  BOOST_CHECK(c == make_term("x"));
 
   aterm d = make_term("h(g(b),f(a),p(a(x,y),q(a(a))))");
   aterm_appl e = replace_if(d, is_a_or_b(), make_term("u"));
-  assert(e == make_term("h(g(u),f(u),p(u,q(u)))"));
+  BOOST_CHECK(e == make_term("h(g(u),f(u),p(u,q(u)))"));
 }
 
-int main()
+int test_main( int, char*[] )
 {
   ATerm bottom_of_stack;
   ATinit(0, 0, &bottom_of_stack);

@@ -98,7 +98,7 @@ class pbes_expression: public aterm_appl
     template <typename Substitution>
     pbes_expression substitute(Substitution f)
     {
-      return pbes_expression(f(aterm_appl(*this)));
+      return pbes_expression(f(*this));
     }     
 };
 

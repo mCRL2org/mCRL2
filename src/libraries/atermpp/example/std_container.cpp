@@ -17,18 +17,27 @@ using namespace atermpp;
 // user defined class containing ATerms
 class A
 {
+  template <typename T>
+  friend struct aterm_traits;
+
   protected:
     ATerm x;
+
+    const ATerm& term() const
+    { return x; }
+    
+    ATerm& term()
+    { return x; }
 
   public:
     A()
     {
-      x = aterm_int(10);
+      x = aterm_traits<aterm_int>::term(aterm_int(10));
     }
 
     A(int i)
     {
-      x = aterm_int(i);
+      x = aterm_traits<aterm_int>::term(aterm_int(i));
     }
 
     int value() const
@@ -64,27 +73,15 @@ std::ostream& operator<<(std::ostream& out, const A& t)
 
 // specify how the ATerms in A need to be protected using a traits class
 namespace atermpp {
-  template <>
-  class aterm_protect_traits<A>
+  template<>
+  struct aterm_traits<A>
   {
-    public:
-      static void protect(A t)
-      {
-        std::cout << "aterm_protect_traits<A>::protect() " << t << std::endl;
-        t.protect();
-      }
-  
-      static void unprotect(A t)
-      {
-        std::cout << "aterm_protect_traits<A>::unprotect() " << t << std::endl;
-        t.unprotect();
-      }
-  
-      static void mark(A t)
-      {
-        std::cout << "aterm_protect_traits<A>::mark() " << t << std::endl;
-        t.mark();
-      }
+    typedef ATermAppl aterm_type;
+    static void protect(A t)   { t.protect(); std::cout << "aterm_protect_traits<A>::protect() " << t << std::endl; }
+    static void unprotect(A t) { t.unprotect(); std::cout << "aterm_protect_traits<A>::unprotect() " << t << std::endl; }
+    static void mark(A t)      { t.mark(); std::cout << "aterm_protect_traits<A>::mark() " << t << std::endl; }
+    static ATerm term(A t)     { return t.term(); }
+    static ATerm* ptr(A& t)    { return &t.term(); }
   };
 } // namespace atermpp
 
