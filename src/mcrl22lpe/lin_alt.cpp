@@ -6,7 +6,7 @@
 #include "libstruct.h"
 #include "liblowlevel.h"
 #include "libprint_c.h"
-#include "librewrite_c.h"
+#include "librewrite.h"
 
 /* Global variables */
 
@@ -16,6 +16,8 @@ static ATerm debruijn;
 static bool generalise;
 static ATermAppl linTrue;
 static ATermAppl linFalse;
+
+static Rewriter *rewr;
 
 /* Needed forward declarations */
 
@@ -1064,7 +1066,7 @@ static ATermAppl list2synch(ATermList mal)
 					d = gsMakeDataExprAnd(d,gsMakeDataExprEq(ATAgetFirst(t),ATAgetFirst(u)));
 				}
 			}
-			c = gsRewriteTerm(gsMakeDataExprAndWithTrueCheck(c,d));
+			c = rewr->rewrite(gsMakeDataExprAndWithTrueCheck(c,d));
 		}
 		return c;
 	}
@@ -1125,7 +1127,7 @@ static ATermAppl param_eq(ATermList m, ATermList n)
 		}
 	}
 
-	return gsRewriteTerm(c);
+	return rewr->rewrite(c);
 }
 
 static ATermList calc_comm(ATermList m, ATermList d, ATermList w, ATermList n, ATermList C)
@@ -1161,7 +1163,7 @@ static ATermList calc_comm(ATermList m, ATermList d, ATermList w, ATermList n, A
 			c = param_eq(ATLgetArgument(ATAgetFirst(n),1),d);
 			if ( !ATisEqual(c,linFalse) )
 			{
-				ATermAppl a = gsRewriteTerm(gsMakeDataExprAndWithTrueCheck(c,ATAelementAt(ATLgetFirst(s),1)));
+				ATermAppl a = rewr->rewrite(gsMakeDataExprAndWithTrueCheck(c,ATAelementAt(ATLgetFirst(s),1)));
 				if ( !ATisEqual(a,linFalse) )
 				{
 					l = ATinsert(l,(ATerm) ATmakeList2(ATelementAt(ATLgetFirst(s),0),(ATerm) a));
@@ -1269,7 +1271,7 @@ static ATermList mactl_comm(ATermList mal, ATermList C)
 		{
 			b = gsMakeDataExprAndWithCheck(b,gsMakeDataExprNotWithCheck(ATAelementAt(ATLgetFirst(l),1)));
 		}
-		b = gsRewriteTerm(b);
+		b = rewr->rewrite(b);
 		if ( !ATisEqual(b,linFalse) )
 		{
 			t = mactl_comm(ATgetNext(mal),C);
@@ -1278,7 +1280,7 @@ static ATermList mactl_comm(ATermList mal, ATermList C)
 //XXX			s = ATreverse(s);
 			for (; !ATisEmpty(l); l=ATgetNext(l))
 			{
-				ATermAppl a = gsRewriteTerm(gsMakeDataExprAndWithCheck(b,ATAelementAt(ATLgetFirst(l),1)));
+				ATermAppl a = rewr->rewrite(gsMakeDataExprAndWithCheck(b,ATAelementAt(ATLgetFirst(l),1)));
 				if ( !ATisEqual(a,linFalse) )
 				{
 					s = ATinsert(s,(ATerm) ATmakeList2((ATerm) ATinsert(ATLelementAt(ATLgetFirst(l),0),ATgetFirst(mal)),(ATerm) a));
@@ -1794,7 +1796,7 @@ static ATermList get_firsts(ATermAppl t)
 			n = synch_comm(ATAelementAt(ATLgetFirst(l),1),ATLgetArgument(t,0));
 			for (; !ATisEmpty(n); n=ATgetNext(n))
 			{
-				ATermAppl a = gsRewriteTerm(gsMakeDataExprAndWithTrueCheck(ATAelementAt(ATLgetFirst(n),1),ATAelementAt(ATLgetFirst(l),3)));
+				ATermAppl a = rewr->rewrite(gsMakeDataExprAndWithTrueCheck(ATAelementAt(ATLgetFirst(n),1),ATAelementAt(ATLgetFirst(l),3)));
 				if ( !ATisEqual(a,linFalse) )
 				{
 					if ( gsIsNil(ATAelementAt(ATLgetFirst(l),2)) )
@@ -1855,7 +1857,7 @@ static ATermList get_firsts(ATermAppl t)
 					u = gsMakeMerge((ATermAppl) increase_index(ATelementAt(ATLgetFirst(l),2),ATgetLength(ATelementAt(ATLgetFirst(n),0))),ATAelementAt(ATLgetFirst(n),2));
 				}
 
-				ATermAppl a = gsRewriteTerm(gsMakeDataExprAndWithTrueCheck((ATermAppl) increase_index(ATelementAt(ATLgetFirst(l),3),ATgetLength(ATelementAt(ATLgetFirst(n),0))),ATAelementAt(ATLgetFirst(n),3)));
+				ATermAppl a = rewr->rewrite(gsMakeDataExprAndWithTrueCheck((ATermAppl) increase_index(ATelementAt(ATLgetFirst(l),3),ATgetLength(ATelementAt(ATLgetFirst(n),0))),ATAelementAt(ATLgetFirst(n),3)));
 				if ( !ATisEqual(a,linFalse) )
 				{
 					o = ATinsert(o,(ATerm) ATmakeList4(
@@ -1902,7 +1904,7 @@ static ATermList get_firsts(ATermAppl t)
 		m = ATmakeList0();
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
-			ATermAppl a = gsRewriteTerm(gsMakeDataExprAnd(ATAgetArgument(t,0),ATAelementAt(ATLgetFirst(l),3)));
+			ATermAppl a = rewr->rewrite(gsMakeDataExprAnd(ATAgetArgument(t,0),ATAelementAt(ATLgetFirst(l),3)));
 			if ( !ATisEqual(a,linFalse) )
 			{
 				m = ATinsert(m,(ATerm) ATreplace(ATLgetFirst(l),(ATerm) a,3));
@@ -1911,7 +1913,7 @@ static ATermList get_firsts(ATermAppl t)
 		l = get_firsts(ATAgetArgument(t,2));
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
-			ATermAppl a = gsRewriteTerm(gsMakeDataExprAnd(gsMakeDataExprNot(ATAgetArgument(t,0)),ATAelementAt(ATLgetFirst(l),3)));
+			ATermAppl a = rewr->rewrite(gsMakeDataExprAnd(gsMakeDataExprNot(ATAgetArgument(t,0)),ATAelementAt(ATLgetFirst(l),3)));
 			if ( !ATisEqual(a,linFalse) )
 			{
 				m = ATinsert(m,(ATerm) ATreplace(ATLgetFirst(l),(ATerm) a,3));
@@ -2624,7 +2626,7 @@ static int main_linearisation(ATermAppl Spec)
 	ATbool init_used;
 	int i, init_id;
 
-	gsRewriteInit(ATAgetArgument(Spec,3),GS_REWR_INNER);
+	rewr = createRewriter(ATAgetArgument(Spec,3));
 
 	linTrue = gsMakeDataExprTrue();
 	ATprotectAppl(&linTrue);
@@ -2675,6 +2677,8 @@ static int main_linearisation(ATermAppl Spec)
 		}
 		init_id = remove_unused(init_id, &init_used);
 	}
+
+	delete rewr;
 
 	return init_id;
 }

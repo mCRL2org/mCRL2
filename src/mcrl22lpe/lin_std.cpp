@@ -26,7 +26,7 @@
 #include "libstruct.h"
 #include "liblowlevel.h"
 #include "libprint_c.h"
-#include "librewrite_c.h"
+#include "librewrite.h"
 #include "libalpha.h"
 
 
@@ -45,6 +45,8 @@ static bool statenames;
 static bool mayrewrite;
 static bool allowFreeDataVariablesInProcesses;
 static bool nodeltaelimination;
+
+static Rewriter *rewr = NULL;
 
 static void stop(void)
 { /* in debug mode allow a debugger to trace the problem,
@@ -713,7 +715,7 @@ static int upperpowerof2(int i)
 
 static ATermAppl RewriteTerm(ATermAppl t)
 { 
-  if (mayrewrite) t=gsRewriteTerm(t);
+  if (mayrewrite) t=rewr->rewrite(t);
   return t;
 }
 
@@ -899,9 +901,6 @@ static specificationbasictype *create_spec(ATermAppl t)
     insertmapping(ATAgetFirst(maps),spec); 
   }
   /* Store the equations */
-  if (mayrewrite) {
-    gsRewriteInit(gsMakeDataEqnSpec(ATempty),GS_REWR_INNER);
-  }
   spec->eqns = ATempty;
   for(ATermList eqns = ATreverse(ATLgetArgument(ATAgetArgument(t,3),0));
     !ATisEmpty(eqns); eqns = ATgetNext(eqns) )
@@ -3366,7 +3365,7 @@ static void newequation(
                      ((condition==NULL)?gsMakeNil():condition),
                      t2,
                      t3);
-  if (mayrewrite) gsRewriteAddEqn(eqn);
+  if (mayrewrite) rewr->addRewriteRule(eqn);
   spec->eqns=ATinsertA(spec->eqns,eqn);
 }
 
@@ -8451,6 +8450,9 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   nodeltaelimination = lin_options.nodeltaelimination;
   //initialise local data structures
   initialize_data();
+  if (mayrewrite) {
+    rewr = createRewriter(gsMakeDataEqnSpec(ATempty));
+  }
   specificationbasictype *spec_int = create_spec(spec);
   if (spec_int == NULL) {
     return NULL;
@@ -8484,5 +8486,9 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
                    ATLgetArgument(result,1)),
       ATLgetArgument(result,0))
   );
+
+  //clean up
+  delete rewr;
+
   return result;
 }

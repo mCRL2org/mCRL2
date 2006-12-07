@@ -28,7 +28,7 @@
 #include "atermpp/aterm.h"
 #include "lpe/specification.h"
 
-#include "librewrite_c.h"
+#include "librewrite.h"
 #include "libstruct.h"
 #include "liblowlevel.h"
 
@@ -67,6 +67,7 @@ class lpeConstElm {
     std::string                           p_filenamein;
     lpe::specification                    p_spec;
     std::set< lpe::sort >                 p_singletonSort;
+    Rewriter*                             rewr;
     
     //Only used by getDataVarIDs  
     std::set< lpe::data_variable >        p_foundFreeVars;       
@@ -249,8 +250,10 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 
 lpeConstElm::lpeConstElm() {
   safeguard = ATtableCreate(10000,50);
+  rewr = NULL;
 }
 lpeConstElm::~lpeConstElm() {
+  delete rewr;
   ATtableDestroy(safeguard);
 }
 
@@ -277,18 +280,18 @@ inline std::set< lpe::data_variable > lpeConstElm::getUsedFreeVars(aterm_appl in
 // pre : input is an AtermAppl
 // post: result is an ATermAppl in normal form
 inline ATermAppl lpeConstElm::rewrite(ATermAppl t) { 
-  return gsRewriteTerm(t);
+  return rewr->rewrite(t);
 }
 
 // Subsitutes a vectorlist of data assignements to a ATermAppl 
 //
 inline ATermAppl lpeConstElm::p_substitute(ATermAppl t, std::vector< lpe::data_assignment > &y ) {
   for(std::vector< lpe::data_assignment >::iterator i = y.begin() ; i != y.end() ; i++){
-    RWsetVariable(aterm(i->lhs()) ,gsToRewriteFormat(i->rhs()));
+    rewr->setSubstitution(i->lhs() ,rewr->toRewriteFormat(i->rhs()));
   }
-  ATermAppl result = gsRewriteTerm(t);
+  ATermAppl result = rewr->rewrite(t);
   for(std::vector< lpe::data_assignment >::iterator i = y.begin() ; i != y.end() ; i++){
-    RWclearVariable(aterm(i->lhs()));
+    rewr->clearSubstitution(i->lhs());
   }
   return result;
 }
@@ -865,8 +868,8 @@ void lpeConstElm::filter() {
   int     cycle    = 0;
   p_newVarCounter  = 0;
   
-  lpe::LPE p_lpe          = p_spec.lpe();
-  gsRewriteInit(gsMakeDataEqnSpec(p_spec.equations()), GS_REWR_INNER); 
+  lpe::LPE p_lpe = p_spec.lpe();
+  rewr           = createRewriter(gsMakeDataEqnSpec(p_spec.equations())); 
 
   for(lpe::data_assignment_list::iterator i = p_spec.initial_assignments().begin(); i != p_spec.initial_assignments().end() ; i++ ){
     p_lookupIndex[i->lhs()] = counter;
@@ -1145,8 +1148,6 @@ int main(int argc, char** argv) {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }
 #endif
-
-  gsRewriteFinalise();
 
   return 0;
 }

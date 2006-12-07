@@ -12,7 +12,7 @@
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
-#include "librewrite_c.h"
+#include "librewrite.h"
 
 //Functions used by the main program
 static void print_help(char *Name);
@@ -20,6 +20,9 @@ static void print_version(void);
 static void print_more_info(char *Name);
 static bool is_valid_lpe(ATermAppl spec);
 static ATermAppl rewrite_lpe(ATermAppl Spec);
+
+//Globally used rewriter
+static Rewriter *rewr;
 
 //Main program
 
@@ -163,7 +166,7 @@ int main(int argc, char **argv)
     PrintRewriteStrategy(stderr, opt_strat);  
     fprintf(stderr, "...\n");
   }
-  gsRewriteInit(ATAgetArgument(result, 3), opt_strat);
+  rewr = createRewriter(ATAgetArgument(result, 3), opt_strat);
 
   //rewrite result
   if (opt_benchmark) {
@@ -194,6 +197,7 @@ int main(int argc, char **argv)
       fclose(outstream);
     }
   }
+  delete rewr;
   ATunprotectAppl(&result);
   free(infilename);
   free(outfilename);
@@ -251,12 +255,12 @@ static ATermAppl rewrite_lpe(ATermAppl Spec)
     //rewrite condition
     ATermAppl Cond = ATAgetArgument(DataEqn, 1);
     if (!gsIsNil(Cond)) {
-      Cond = gsRewriteTerm(Cond);
+      Cond = rewr->rewrite(Cond);
       DataEqn = ATsetArgument(DataEqn, (ATerm) Cond, 1);
     }
     //rewrite right hand side
     ATermAppl RHS = ATAgetArgument(DataEqn, 3);
-    RHS = gsRewriteTerm(RHS);
+    RHS = rewr->rewrite(RHS);
     DataEqn = ATsetArgument(DataEqn, (ATerm) RHS, 3);
     l = ATinsert(l, (ATerm) DataEqn);
   }
@@ -273,7 +277,7 @@ static ATermAppl rewrite_lpe(ATermAppl Spec)
     ATermAppl LPESummand = ATAgetFirst(LPESummands);
     ATermList LPEVars = ATLgetArgument(LPESummand, 0);
     ATermAppl Cond = ATAgetArgument(LPESummand, 1);
-    Cond = gsRewriteTerm(Cond);
+    Cond = rewr->rewrite(Cond);
     ATermAppl MultAct = ATAgetArgument(LPESummand, 2);
     if ( gsIsMultAct(MultAct) ) {
       ATermList Acts = ATLgetArgument(MultAct, 0);
@@ -282,7 +286,7 @@ static ATermAppl rewrite_lpe(ATermAppl Spec)
       {
         ATermAppl Act = ATAgetFirst(Acts);
         ATermList Pars = ATLgetArgument(Act, 1);
-        Pars = gsRewriteTerms(Pars);
+        Pars = rewr->rewriteList(Pars);
         Act = ATsetArgument(Act, (ATerm) Pars, 1);
         m = ATinsert(m, (ATerm) Act);
       }
@@ -290,14 +294,14 @@ static ATermAppl rewrite_lpe(ATermAppl Spec)
     }
     ATermAppl Time = ATAgetArgument(LPESummand, 3);
     if ( !gsIsNil(Time) ) {
-      Time = gsRewriteTerm(Time);
+      Time = rewr->rewrite(Time);
     }
     ATermList Assignments = ATLgetArgument(LPESummand, 4);
     ATermList m = ATmakeList0();
     for (; !ATisEmpty(Assignments); Assignments = ATgetNext(Assignments)) {
       ATermAppl Assignment = ATAgetFirst(Assignments);
       ATermAppl RHS = ATAgetArgument(Assignment, 1);
-      RHS = gsRewriteTerm(RHS);
+      RHS = rewr->rewrite(RHS);
       Assignment = ATsetArgument(Assignment, (ATerm) RHS, 1);
       m = ATinsert(m, (ATerm) Assignment);
     }
@@ -316,7 +320,7 @@ static ATermAppl rewrite_lpe(ATermAppl Spec)
   for (; !ATisEmpty(Assignments); Assignments = ATgetNext(Assignments)) {
     ATermAppl Assignment = ATAgetFirst(Assignments);
     ATermAppl RHS = ATAgetArgument(Assignment, 1);
-    RHS = gsRewriteTerm(RHS);
+    RHS = rewr->rewrite(RHS);
     Assignment = ATsetArgument(Assignment, (ATerm) RHS, 1);
     l = ATinsert(l, (ATerm) Assignment);
   }
@@ -334,16 +338,16 @@ ATermAppl rewrite_proc(ATermAppl p)
 
   if ( gsIsAction(p) || gsIsProcess(p) )
   {
-    return ATmakeAppl2(ATgetAFun(p),ATgetArgument(p,0),(ATerm) gsRewriteTerms(ATLgetArgument(p,1)));
+    return ATmakeAppl2(ATgetAFun(p),ATgetArgument(p,0),(ATerm) rewr->rewriteList(ATLgetArgument(p,1)));
   } else if ( gsIsAtTime(p) )
   {
-    return ATmakeAppl2(ATgetAFun(p),ATgetArgument(p,0),(ATerm) gsRewriteTerm(ATAgetArgument(p,1)));
+    return ATmakeAppl2(ATgetAFun(p),ATgetArgument(p,0),(ATerm) rewr->rewrite(ATAgetArgument(p,1)));
   } else if ( gsIsSum(p) || gsIsAllow(p) || gsIsBlock(p) || gsIsHide(p) || gsIsRename(p) || gsIsComm(p) )
   {
     return ATmakeAppl2(ATgetAFun(p),ATgetArgument(p,0),(ATerm) rewrite_proc(ATAgetArgument(p,1)));
   } else if ( gsIsCond(p) )
   {
-    return gsMakeCond(gsRewriteTerm(ATAgetArgument(p,0)),rewrite_proc(ATAgetArgument(p,1)),rewrite_proc(ATAgetArgument(p,2)));
+    return gsMakeCond(rewr->rewrite(ATAgetArgument(p,0)),rewrite_proc(ATAgetArgument(p,1)),rewrite_proc(ATAgetArgument(p,2)));
   } else {
     l = ATgetArguments(p);
     m = ATmakeList0();
