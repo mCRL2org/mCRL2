@@ -49,6 +49,7 @@ source_files="mcrl2/articles \
               mcrl2/Jamroot.jam \
               mcrl2/build \
               mcrl2/Makefile \
+              mcrl2/status \
               mcrl2/examples \
               mcrl2/tests \
               mcrl2/specs \
