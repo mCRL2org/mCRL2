@@ -74,23 +74,23 @@ class sort: public aterm_appl
 
     /// Returns the domain sorts of the sort.
     ///
+    /// domain_sorts(A)                    = []
     /// domain_sorts(A -> (B -> C)       ) = [A,B]
     /// domain_sorts((A -> B) -> C       ) = [A->B]
     /// domain_sorts((A -> B) -> (C -> D)) = [A->B,C]
     lpe::sort_list domain_sorts() const
     {
-      assert(is_arrow());
       return gsGetSortExprDomain(*this);
     }
 
     /// Returns the range of the sort.
     ///
+    /// range(A)                    = A
     /// range(A -> (B -> C)       ) = C
     /// range((A -> B) -> C       ) = C
     /// range((A -> B) -> (C -> D)) = D
     lpe::sort range_sort() const
     {
-      assert(is_arrow());
       return gsGetSortExprResult(*this);
     }
 

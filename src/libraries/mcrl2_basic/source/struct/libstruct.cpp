@@ -2216,6 +2216,7 @@ ATermAppl gsMakeSortArrowList(ATermList SortExprDomain,
 
 ATermAppl gsGetSortExprResult(ATermAppl SortExpr)
 {
+  assert(gsIsSortExpr(SortExpr));
   while (gsIsSortArrow(SortExpr)) {
     SortExpr = ATAgetArgument(SortExpr, 1);
   }
@@ -2227,6 +2228,7 @@ ATermAppl gsGetSortExprResult(ATermAppl SortExpr)
 
 ATermList gsGetSortExprDomain(ATermAppl SortExpr)
 {
+  assert(gsIsSortExpr(SortExpr));
   ATermList l = ATmakeList0();
   while (gsIsSortArrow(SortExpr)) {
     l = ATinsert(l, ATgetArgument(SortExpr, 0));

@@ -400,7 +400,7 @@ ATermAppl gsMakeSortArrowList(ATermList SortExprDomain,
 
 ATermAppl gsGetSortExprResult(ATermAppl SortExpr);
 //Pre: SortExpr is a sort expression
-//ret: the result of the sort expression
+//Ret: the result of the sort expression
 
 ATermList gsGetSortExprDomain(ATermAppl SortExpr);
 //Pre: SortExpr is a sort expression
