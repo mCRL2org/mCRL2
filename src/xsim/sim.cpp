@@ -16,7 +16,7 @@
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "libnextstate.h"
-#include "librewrite_c.h"
+#include "librewrite.h"
 
 using namespace std;
 

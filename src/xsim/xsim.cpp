@@ -13,7 +13,7 @@
 #include <aterm2.h>
 #include "xsimmain.h"
 #include "libstruct.h"
-#include "librewrite_c.h"
+#include "librewrite.h"
 
 /* The optional input file that should contain an LPD */
 std::string lpd_file_argument;

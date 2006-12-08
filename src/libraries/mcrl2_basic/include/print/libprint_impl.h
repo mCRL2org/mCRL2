@@ -21,7 +21,6 @@
 #include <assert.h>
 #include <aterm2.h>
 #include "libprint_types.h"
-#include "librewrite_c.h"
 #include "libstruct.h"
 #include "liblowlevel.h"
 
@@ -1069,9 +1068,6 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(PrintDecl)(OutStream, Var, pp_format, true);
         PRINT_FUNC(fprints)(OutStream, " | ");        
         Body = gsMakeDataAppl(Body, Var);
-        if (gsRewriteIsInitialised()) {
-          Body = gsRewriteTerm(Body);
-        }
         PRINT_FUNC(PrintDataExpr)(OutStream, Body, pp_format, ShowSorts, 0);
         PRINT_FUNC(fprints)(OutStream, " }");
       } else if (gsIsOpIdQuant(Head) && ArgsLength == 1) {
@@ -1088,9 +1084,6 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(PrintDecl)(OutStream, Var, pp_format, true);
         PRINT_FUNC(fprints)(OutStream, ". ");        
         Body = gsMakeDataAppl(Body, Var);
-        if (gsRewriteIsInitialised()) {
-          Body = gsRewriteTerm(Body);
-        }
         PRINT_FUNC(PrintDataExpr)(OutStream, Body, pp_format, ShowSorts, 1);
         if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, ")");
       } else if (gsIsOpIdPrefix(Head) && ArgsLength == 1) {

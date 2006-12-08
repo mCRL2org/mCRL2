@@ -34,7 +34,7 @@ lib struct
          <library>lowlevel
        ;
 
-local REWRITE_SOURCES = [ prepend rewrite/ : librewrite librewrite_c rewr_inner rewr_jitty rewr_innerc rewr_jittyc rewr_prover ] ;
+local REWRITE_SOURCES = [ prepend rewrite/ : librewrite rewr_inner rewr_jitty rewr_innerc rewr_jittyc rewr_prover ] ;
 
 lib rewrite
        : $(REWRITE_SOURCES).o

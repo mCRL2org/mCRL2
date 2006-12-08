@@ -2,7 +2,18 @@
 #define __LIBREWRITE_H
 
 #include <aterm2.h>
-#include "librewrite_c.h"
+
+/** \brief Rewrite strategies. */
+typedef enum { GS_REWR_INNER     /** \brief Innermost */
+	     , GS_REWR_INNERC    /** \brief Compiling innermost */
+	     , GS_REWR_JITTY     /** \brief JITty */
+	     , GS_REWR_JITTYC    /** \brief Compiling JITty */
+	     , GS_REWR_INNER_P   /** \brief Innermost + Prover */
+	     , GS_REWR_INNERC_P  /** \brief Compiling innermost + Prover*/
+	     , GS_REWR_JITTY_P   /** \brief JITty + Prover */
+	     , GS_REWR_JITTYC_P  /** \brief Compiling JITty + Prover*/
+	     , GS_REWR_INVALID   /** \brief Invalid strategy */
+	     } RewriteStrategy;
 
 /**
  * \brief Rewriter interface class.
@@ -178,5 +189,19 @@ Rewriter *createRewriter(ATermAppl DataEqnSpec, RewriteStrategy Strategy = GS_RE
  * \return Whether or not DataEqn is a valid rewrite rule.
  **/
 bool isValidRewriteRule(ATermAppl DataEqn);
+
+/**
+ * \brief Print a string representation of a rewrite strategy.
+ * \param stream File stream to print to.
+ * \param strat  Rewrite strategy to print.
+ **/
+void PrintRewriteStrategy(FILE *stream, RewriteStrategy strat);
+/**
+ * \brief Get rewrite strategy from its string representation.
+ * \param s String representation of strategy.
+ * \return Rewrite strategy represented by s. If s is not a valid rewrite
+ *         strategy, ::GS_REWR_INVALID is returned.
+ **/
+RewriteStrategy RewriteStrategyFromString(const char *s);
 
 #endif

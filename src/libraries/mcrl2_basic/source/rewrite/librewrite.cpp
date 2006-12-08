@@ -227,3 +227,57 @@ bool isValidRewriteRule(ATermAppl DataEqn)
 
 	return checkVars(ATAgetArgument(DataEqn,3),lhs_vars) && checkPattern(ATAgetArgument(DataEqn,2));
 }
+
+void PrintRewriteStrategy(FILE *stream, RewriteStrategy strat)
+{
+  if (strat == GS_REWR_INNER) {
+    fprintf(stream, "inner");
+  } else if (strat == GS_REWR_INNERC) {
+    fprintf(stream, "innerC");
+  } else if (strat == GS_REWR_JITTY) {
+    fprintf(stream, "jitty");
+  } else if (strat == GS_REWR_JITTYC) {
+    fprintf(stream, "jittyc");
+  } else if (strat == GS_REWR_INNER_P) {
+    fprintf(stream, "innerp");
+  } else if (strat == GS_REWR_INNERC_P) {
+    fprintf(stream, "innercp");
+  } else if (strat == GS_REWR_JITTY_P) {
+    fprintf(stream, "jittyp");
+  } else if (strat == GS_REWR_JITTYC_P) {
+    fprintf(stream, "jittycp");
+  } else {
+    fprintf(stream, "invalid");
+  }
+}
+
+RewriteStrategy RewriteStrategyFromString(const char *s)
+{
+	if ( !strcmp(s,"inner") )
+	{
+		return GS_REWR_INNER;
+	} else if ( !strcmp(s,"innerc") )
+	{
+		return GS_REWR_INNERC;
+	} else if ( !strcmp(s,"jitty") )
+	{
+		return GS_REWR_JITTY;
+	} else if ( !strcmp(s,"jittyc") )
+	{
+		return GS_REWR_JITTYC;
+	} else if ( !strcmp(s,"innerp") )
+	{
+		return GS_REWR_INNER_P;
+	} else if ( !strcmp(s,"innercp") )
+	{
+		return GS_REWR_INNERC_P;
+	} else if ( !strcmp(s,"jittyp") )
+	{
+		return GS_REWR_JITTY_P;
+	} else if ( !strcmp(s,"jittycp") )
+	{
+		return GS_REWR_JITTYC_P;
+	} else {
+		return GS_REWR_INVALID;
+	}
+}

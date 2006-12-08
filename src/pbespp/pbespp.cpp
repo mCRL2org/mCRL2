@@ -16,7 +16,6 @@
 #include "liblowlevel.h"
 #include "libprint_types.h"
 #include "libprint_c.h"
-#include "librewrite_c.h"
 
 //local declarations
 
@@ -215,16 +214,8 @@ bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName,
     PrintPPFormat(stderr, pp_format);
     fprintf(stderr, " format\n");
   }
-  //initialise rewriter, if needed
-  if (pp_format == ppDefault) {
-    gsRewriteInit(ATAgetArgument(ATAgetArgument(Spec,0),3),GS_REWR_INNER);
-  }
   //pretty print Spec to OutputStream
   PrintPart_C(OutputStream, (ATerm) Spec, pp_format);
-  //finalise rewriter, if needed
-  if (pp_format == ppDefault) {
-    gsRewriteFinalise();
-  }
   if (SpecStream != stdin) {
     fclose(SpecStream);
   }

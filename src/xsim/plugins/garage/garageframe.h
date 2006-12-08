@@ -35,7 +35,6 @@
 #include "libprint_types.h"
 #include "libprint.h"
 #include "libnextstate.h"
-#include "librewrite_c.h"
 #include "liblowlevel.h"
 #include "libstruct.h"
 
