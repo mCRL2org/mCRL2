@@ -2071,7 +2071,7 @@ static ATermAppl update_spec(ATermAppl spec, int /*init*/)
 		}
 	}
 	l = ATreverse(l);
-	spec = ATsetArgument(spec,(ATerm) gsMakeProcEqnSpec(l),5);
+	spec = ATsetArgument(spec,(ATerm) gsMakeProcEqnSpec(l),2);
 
 /*	if ( ATgetLength(ATLelementAt(ATLelementAt(processes,init),1)) > 0 )
 	{
@@ -2086,7 +2086,7 @@ static ATermAppl update_spec(ATermAppl spec, int /*init*/)
 	} else {
 		spec = ATsetArgument(spec,(ATerm) gsMakeInit(gsMakeProcess(gsMakeProcVarId(ATAelementAt(ATLelementAt(processes,init),0),ATmakeList0()),ATmakeList0())),6);
 	}*/
-	spec = ATsetArgument(spec,(ATerm) gsMakeInit(ATmakeList0(),initial_process),6);
+	spec = ATsetArgument(spec,(ATerm) gsMakeInit(ATmakeList0(),initial_process),3);
 
 	return spec;
 }
@@ -2200,9 +2200,9 @@ static ATermAppl update_spec_subst(ATermAppl spec, int init, int reuse)
 		}
 	}
 	l = ATreverse(l);
-	spec = ATsetArgument(spec,(ATerm) gsMakeProcEqnSpec(l),5);
+	spec = ATsetArgument(spec,(ATerm) gsMakeProcEqnSpec(l),2);
 
-	spec = ATsetArgument(spec,(ATerm) gsMakeInit(ATmakeList0(),initial_process),6);
+	spec = ATsetArgument(spec,(ATerm) gsMakeInit(ATmakeList0(),initial_process),3);
 
 	return spec;
 }
@@ -2408,7 +2408,7 @@ static ATermAppl make_lpe(ATermAppl Spec, int init_id)
 		i++;
 	}
 	
-	Spec = ATsetArgument(Spec,(ATerm) gsMakeLPE(vars,args,sums),5);
+	Spec = ATsetArgument(Spec,(ATerm) gsMakeLPE(vars,args,sums),2);
 
 	vars = ATmakeList0();
 	m = ATLelementAt(ATLelementAt(processes,proc_id(initial_process)),1);
@@ -2428,7 +2428,7 @@ static ATermAppl make_lpe(ATermAppl Spec, int init_id)
 	}
 	
 //	Spec = ATsetArgument(Spec,(ATerm) gsMakeMapSpec(maps),2);
-	Spec = ATsetArgument(Spec,(ATerm) gsMakeLPEInit(vars,l),6);
+	Spec = ATsetArgument(Spec,(ATerm) gsMakeLPEInit(vars,l),3);
 
 	return Spec;
 }
@@ -2554,8 +2554,8 @@ static ATerm uvSubstValues(ATermList substs, ATerm a)
 
 static ATermAppl unique_vars(ATermAppl spec)
 {
-	ATermAppl lpe = (ATermAppl) ATgetArgument(spec,5);
-	ATermAppl init = (ATermAppl) ATgetArgument(spec,6);
+	ATermAppl lpe = (ATermAppl) ATgetArgument(spec,2);
+	ATermAppl init = (ATermAppl) ATgetArgument(spec,3);
 
 	ATermList lpe_vars = (ATermList) ATgetArgument(lpe,0);
 	ATermList lpe_pars = (ATermList) ATgetArgument(lpe,1);
@@ -2567,10 +2567,11 @@ static ATermAppl unique_vars(ATermAppl spec)
 	ATermList init_vars_substs = ATmakeList0();
 
 	ATermList l,m,n;
+        ATermAppl data_spec = ATAgetArgument(spec, 0);
 
-	add_names(used_names, (ATermList) ATgetArgument((ATermAppl) ATgetArgument(spec,0),0));
-	add_names(used_names, (ATermList) ATgetArgument((ATermAppl) ATgetArgument(spec,1),0));
-	add_names(used_names, (ATermList) ATgetArgument((ATermAppl) ATgetArgument(spec,2),0));
+	add_names(used_names, (ATermList) ATgetArgument((ATermAppl) ATgetArgument(data_spec,0),0));
+	add_names(used_names, (ATermList) ATgetArgument((ATermAppl) ATgetArgument(data_spec,1),0));
+	add_names(used_names, (ATermList) ATgetArgument((ATermAppl) ATgetArgument(data_spec,2),0));
 
 	lpe_pars = make_unique(lpe_pars,used_names,&lpe_pars_substs);
 	lpe_vars = make_unique(lpe_vars,used_names,&lpe_vars_substs);
@@ -2608,8 +2609,8 @@ static ATermAppl unique_vars(ATermAppl spec)
 	l = ATreverse(l);
 	init = gsMakeLPEInit(init_vars,l);
 
-	spec = ATsetArgument(spec,(ATerm) lpe,5);
-	spec = ATsetArgument(spec,(ATerm) init,6);
+	spec = ATsetArgument(spec,(ATerm) lpe,2);
+	spec = ATsetArgument(spec,(ATerm) init,3);
 
 	ATtableDestroy(used_names);
 
@@ -2626,7 +2627,7 @@ static int main_linearisation(ATermAppl Spec)
 	ATbool init_used;
 	int i, init_id;
 
-	rewr = createRewriter(ATAgetArgument(Spec,3));
+	rewr = createRewriter(ATAgetArgument(ATAgetArgument(Spec,0),3));
 
 	linTrue = gsMakeDataExprTrue();
 	ATprotectAppl(&linTrue);
@@ -2642,13 +2643,12 @@ static int main_linearisation(ATermAppl Spec)
 	todo_stack = ATmakeList0();
 	debruijn = (ATerm) gsString2ATermAppl("debruijn");
 
-	l = ATLgetArgument(ATAgetArgument(Spec,5),0);
+	l = ATLgetArgument(ATAgetArgument(Spec,2),0);
 	for (; !ATisEmpty(l); l = ATgetNext(l))
 	{
 		add_process_eqn(ATAgetFirst(l));
 	}
-//	init = ATAgetArgument(ATAgetArgument(Spec,6),0);
-	init = ATAgetArgument(ATAgetArgument(Spec,6),1);
+	init = ATAgetArgument(ATAgetArgument(Spec,3),1);
 	init_id = add_init(init);
 	add_to_stack(init_id);
 

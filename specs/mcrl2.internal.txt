@@ -1,4 +1,4 @@
-// Date: 06-10-2006
+// Date: 07-12-2006
 // This document describes the internal format of the mCRL2 language and the
 // corresponding mu-calculus formulas. Here:
 // - the following phases of implementation are distinguised:
@@ -97,6 +97,26 @@
 <WhrDecl>      ::= WhrDecl(<String>, <DataExpr>)
 
 
+//Data specifications
+//-------------------
+
+//data specification
+<DataSpec>     ::= DataSpec(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
+                     MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*))
+
+//sort declaration
+<SortDecl>     ::= <SortId>
+                 | SortRef(<String>, <SortExpr>)                         (- di)
+
+//data equation
+<DataEqn>      ::= DataEqn(<DataVarId>*, <DataExprOrNil>,
+                     <DataExpr>, <DataExpr>)
+
+//data expression or nil
+<DataExprOrNil>::= <DataExpr>
+                 | Nil
+
+
 //Multi-actions
 //-------------
 
@@ -155,21 +175,7 @@
 //--------------------
 
 //specification
-<Spec>         ::= SpecV1(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
-                     MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*),
-                     ActSpec(<ActId>*), <ProcEqnSpec>, <Init>)
-
-//sort declaration
-<SortDecl>     ::= <SortId>
-                 | SortRef(<String>, <SortExpr>)                         (- di)
-
-//data equation
-<DataEqn>      ::= DataEqn(<DataVarId>*, <DataExprOrNil>,
-                     <DataExpr>, <DataExpr>)
-
-//data expression or nil
-<DataExprOrNil>::= <DataExpr>
-                 | Nil
+<Spec>         ::= SpecV1(<DataSpec>, ActSpec(<ActId>*), <ProcEqnSpec>, <Init>)
 
 //process equations or LPE
 <ProcEqnSpec>  ::= ProcEqnSpec(<ProcEqn>*)                               (-lin)
@@ -270,7 +276,3 @@
                  | PBESForall(<DataVarId>+, <PBExpr>)
                  | PBESExists(<DataVarId>+, <PBExpr>)
                  | <PropVarInst>
-
-//data specification
-<DataSpec>     ::= DataSpec(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
-                     MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*))

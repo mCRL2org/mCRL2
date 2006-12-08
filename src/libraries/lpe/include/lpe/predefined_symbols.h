@@ -202,6 +202,16 @@ using atermpp::function_symbol;
     }
 
     inline
+    function_symbol func_DataSpec()
+    {
+      static AFun f = ATmakeAFun("DataSpec", 4, ATfalse);
+      return function_symbol(f);
+      //ATprotectAFun(f);
+      //static ATermAppl a = gsMakeDataSpec(0,0,0,0);
+      //return function_symbol(ATgetAFun(a));
+    }
+
+    inline
     function_symbol func_DataVarId()
     {
       static AFun f = ATmakeAFun("DataVarId", 2, ATfalse);
@@ -594,10 +604,10 @@ using atermpp::function_symbol;
     inline
     function_symbol func_SpecV1()
     {
-      static AFun f = ATmakeAFun("SpecV1", 7, ATfalse);
+      static AFun f = ATmakeAFun("SpecV1", 4, ATfalse);
       return function_symbol(f);
       //ATprotectAFun(f);
-      //static ATermAppl a = gsMakeSpecV1(0,0,0,0,0,0,0);
+      //static ATermAppl a = gsMakeSpecV1(0,0,0,0);
       //return function_symbol(ATgetAFun(a));
     }
 

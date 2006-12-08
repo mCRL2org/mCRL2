@@ -581,6 +581,7 @@ EnumeratorSolutionsStandard::~EnumeratorSolutionsStandard()
 
 EnumeratorStandard::EnumeratorStandard(ATermAppl spec, Rewriter *r, bool clean_up_rewriter)
 {
+        ATermAppl data_spec = ATAgetArgument(spec, 0);
 	info.rewr_obj = r;
 	clean_up_rewr_obj = clean_up_rewriter;
 
@@ -612,12 +613,12 @@ EnumeratorStandard::EnumeratorStandard(ATermAppl spec, Rewriter *r, bool clean_u
 	info.tupAFun = ATmakeAFun("@tup@",2,ATfalse);
 	ATprotectAFun(info.tupAFun);
 
-	info.constructors = ATtableCreate(ATgetLength(ATLgetArgument(ATAgetArgument(spec,0),0)),50);
-	for (ATermList sorts=ATLgetArgument(ATAgetArgument(spec,0),0); !ATisEmpty(sorts); sorts=ATgetNext(sorts))
+	info.constructors = ATtableCreate(ATgetLength(ATLgetArgument(ATAgetArgument(data_spec,0),0)),50);
+	for (ATermList sorts=ATLgetArgument(ATAgetArgument(data_spec,0),0); !ATisEmpty(sorts); sorts=ATgetNext(sorts))
 	{
 		ATtablePut(info.constructors,ATgetFirst(sorts),(ATerm) ATmakeList0());
 	}
-	for (ATermList conss = ATLgetArgument(ATAgetArgument(spec,1),0); !ATisEmpty(conss); conss=ATgetNext(conss))
+	for (ATermList conss = ATLgetArgument(ATAgetArgument(data_spec,1),0); !ATisEmpty(conss); conss=ATgetNext(conss))
 	{
 		ATermAppl cons = ATAgetFirst(conss);
 		ATerm sort = (ATerm) gsGetSortExprResult(ATAgetArgument(cons,1));

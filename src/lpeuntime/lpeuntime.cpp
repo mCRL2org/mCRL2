@@ -253,10 +253,7 @@ lpe::specification untime(const lpe::specification& specification) {
   untime_initial_state = push_back(specification.initial_state(), data_expression(gsMakeDataExprInt2Real(gsMakeDataExprInt("0"))));
 
   // Create new specification, this equals original specification, except for the new LPE.
-  untime_specification = lpe::specification(specification.sorts(), 
-						specification.constructors(),
-						specification.mappings(),
-						specification.equations(),
+  untime_specification = lpe::specification(specification.data(), 
 						specification.action_labels(),
 						untime_lpe, //new LPE
 						specification.initial_free_variables(),

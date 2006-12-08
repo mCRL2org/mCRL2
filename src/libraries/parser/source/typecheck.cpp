@@ -212,16 +212,17 @@ ATermAppl type_check_spec(ATermAppl input)
 
   gsDebugMsg ("type checking read-in phase started\n");
   
-  if(gstcReadInSorts(ATLgetArgument(ATAgetArgument(input,0),0))) {
+  ATermAppl data_spec = ATAgetArgument(input, 0);
+  if(gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
   // Check sorts for loops
   // Unwind sorts to enable equiv and subtype relations
   if(gstcReadInConstructors()) {
-  if(gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(input,1),0),
-			       ATLgetArgument(ATAgetArgument(input,2),0)))) {
-  body.equations=ATLgetArgument(ATAgetArgument(input,3),0);
-  if(gstcReadInActs(ATLgetArgument(ATAgetArgument(input,4),0))) {
-  if(gstcReadInProcsAndInit(ATLgetArgument(ATAgetArgument(input,5),0),
-			     ATAgetArgument(ATAgetArgument(input,6),1))) {
+  if(gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(data_spec,1),0),
+			       ATLgetArgument(ATAgetArgument(data_spec,2),0)))) {
+  body.equations=ATLgetArgument(ATAgetArgument(data_spec,3),0);
+  if(gstcReadInActs(ATLgetArgument(ATAgetArgument(input,1),0))) {
+  if(gstcReadInProcsAndInit(ATLgetArgument(ATAgetArgument(input,2),0),
+			     ATAgetArgument(ATAgetArgument(input,3),1))) {
   gsDebugMsg ("type checking read-in phase finished\n");
   
   gsDebugMsg ("type checking transform ActProc+VarConst phase started\n");
@@ -229,10 +230,12 @@ ATermAppl type_check_spec(ATermAppl input)
   if(gstcTransformActProcVarConst()){
   gsDebugMsg ("type checking transform ActProc+VarConst phase finished\n");
 
-  Result=ATsetArgument(input,(ATerm)gsMakeDataEqnSpec(body.equations),3);
-  Result=ATsetArgument(Result,(ATerm)gsMakeProcEqnSpec(gstcWriteProcs(ATLgetArgument(ATAgetArgument(input,5),0))),5);
+  data_spec=ATAgetArgument(input,0);
+  data_spec=ATsetArgument(data_spec, (ATerm) gsMakeDataEqnSpec(body.equations),3);
+  Result=ATsetArgument(input,(ATerm)data_spec,0);
+  Result=ATsetArgument(Result,(ATerm)gsMakeProcEqnSpec(gstcWriteProcs(ATLgetArgument(ATAgetArgument(input,2),0))),2);
   Result=ATsetArgument(Result,(ATerm)gsMakeInit(ATmakeList0(),
-    ATAtableGet(body.proc_bodies,(ATerm)INIT_KEY())),6);
+    ATAtableGet(body.proc_bodies,(ATerm)INIT_KEY())),3);
 
   Result=gstcFoldSortRefs(Result);
 
@@ -384,7 +387,8 @@ ATermAppl gstcFoldSortRefs(ATermAppl Spec)
 {
   assert(gsIsSpecV1(Spec));
   //get sort declarations
-  ATermAppl SortSpec = ATAgetArgument(Spec, 0);
+  ATermAppl DataSpec = ATAgetArgument(Spec, 0);
+  ATermAppl SortSpec = ATAgetArgument(DataSpec, 0);
   ATermList SortDecls = ATLgetArgument(SortSpec, 0);
   //split sort declarations in sort id's and sort references
   ATermList SortIds = NULL;
@@ -425,7 +429,8 @@ ATermAppl gstcFoldSortRefs(ATermAppl Spec)
   //add the removed sort references back to Spec
   SortDecls = ATconcat(SortIds, SortRefs);
   SortSpec = ATsetArgument(SortSpec, (ATerm) SortDecls, 0);
-  Spec = ATsetArgument(Spec, (ATerm) SortSpec, 0);
+  DataSpec = ATsetArgument(DataSpec, (ATerm) SortSpec, 0);
+  Spec = ATsetArgument(Spec, (ATerm) DataSpec, 0);
   return Spec;
 }
 

@@ -126,6 +126,14 @@ static AFun gsAFunDataVarId;
 static AFun gsAFunOpId;
 static AFun gsAFunBagEnumElt;
 static AFun gsAFunWhrDecl;
+//data specifications
+static AFun gsAFunDataSpec;
+static AFun gsAFunSortSpec;
+static AFun gsAFunConsSpec;
+static AFun gsAFunMapSpec;
+static AFun gsAFunDataEqnSpec;
+static AFun gsAFunSortRef;
+static AFun gsAFunDataEqn;
 //multi-actions
 static AFun gsAFunMultAct;
 static AFun gsAFunParamId;
@@ -155,13 +163,7 @@ static AFun gsAFunRenameExpr;
 static AFun gsAFunCommExpr;
 //mCRL2 specifications
 static AFun gsAFunSpecV1;
-static AFun gsAFunSortSpec;
-static AFun gsAFunConsSpec;
-static AFun gsAFunMapSpec;
-static AFun gsAFunDataEqnSpec;
 static AFun gsAFunActSpec;
-static AFun gsAFunSortRef;
-static AFun gsAFunDataEqn;
 static AFun gsAFunProcEqnSpec;
 static AFun gsAFunLPE;
 static AFun gsAFunProcEqn;
@@ -215,7 +217,6 @@ static AFun gsAFunPBESAnd;
 static AFun gsAFunPBESOr;
 static AFun gsAFunPBESForall;
 static AFun gsAFunPBESExists;
-static AFun gsAFunDataSpec;
 
 //Constant ATermAppl's for each sort system identifier name
 static ATermAppl gsSortIdNameBool;
@@ -355,6 +356,13 @@ void gsEnableConstructorFunctions(void)
     gsAFunOpId             = ATmakeAFun("OpId", 2, ATfalse);
     gsAFunBagEnumElt       = ATmakeAFun("BagEnumElt", 2, ATfalse);
     gsAFunWhrDecl          = ATmakeAFun("WhrDecl", 2, ATfalse);
+    //data specifications
+    gsAFunDataSpec         = ATmakeAFun("DataSpec", 4, ATfalse);
+    gsAFunSortSpec         = ATmakeAFun("SortSpec", 1, ATfalse);
+    gsAFunConsSpec         = ATmakeAFun("ConsSpec", 1, ATfalse);
+    gsAFunMapSpec          = ATmakeAFun("MapSpec", 1, ATfalse);
+    gsAFunDataEqnSpec      = ATmakeAFun("DataEqnSpec", 1, ATfalse);
+    gsAFunSortRef          = ATmakeAFun("SortRef", 2, ATfalse);
     //multi-actions
     gsAFunMultAct          = ATmakeAFun("MultAct", 1, ATfalse);
     gsAFunParamId          = ATmakeAFun("ParamId", 2, ATfalse);
@@ -383,14 +391,9 @@ void gsEnableConstructorFunctions(void)
     gsAFunRenameExpr       = ATmakeAFun("RenameExpr", 2, ATfalse);
     gsAFunCommExpr         = ATmakeAFun("CommExpr", 2, ATfalse);
     //mCRL2 specifications
-    gsAFunSpecV1           = ATmakeAFun("SpecV1", 7, ATfalse);
-    gsAFunSortSpec         = ATmakeAFun("SortSpec", 1, ATfalse);
-    gsAFunConsSpec         = ATmakeAFun("ConsSpec", 1, ATfalse);
-    gsAFunMapSpec          = ATmakeAFun("MapSpec", 1, ATfalse);
-    gsAFunDataEqnSpec      = ATmakeAFun("DataEqnSpec", 1, ATfalse);
-    gsAFunActSpec          = ATmakeAFun("ActSpec", 1, ATfalse);
-    gsAFunSortRef          = ATmakeAFun("SortRef", 2, ATfalse);
+    gsAFunSpecV1           = ATmakeAFun("SpecV1", 4, ATfalse);
     gsAFunDataEqn          = ATmakeAFun("DataEqn", 4, ATfalse);
+    gsAFunActSpec          = ATmakeAFun("ActSpec", 1, ATfalse);
     gsAFunProcEqnSpec      = ATmakeAFun("ProcEqnSpec", 1, ATfalse);
     gsAFunLPE              = ATmakeAFun("LPE", 3, ATfalse);
     gsAFunProcEqn          = ATmakeAFun("ProcEqn", 4, ATfalse);
@@ -444,7 +447,6 @@ void gsEnableConstructorFunctions(void)
     gsAFunPBESOr           = ATmakeAFun("PBESOr", 2, ATfalse);
     gsAFunPBESForall       = ATmakeAFun("PBESForall", 2, ATfalse);
     gsAFunPBESExists       = ATmakeAFun("PBESExists", 2, ATfalse);
-    gsAFunDataSpec         = ATmakeAFun("DataSpec", 4, ATfalse);
 
     //create sort system identifier names
     gsSortIdNameBool       = gsString2ATermAppl("Bool");
@@ -573,6 +575,14 @@ void gsEnableConstructorFunctions(void)
     ATprotectAFun(gsAFunOpId);
     ATprotectAFun(gsAFunBagEnumElt);
     ATprotectAFun(gsAFunWhrDecl);
+    //data specifications
+    ATprotectAFun(gsAFunDataSpec);
+    ATprotectAFun(gsAFunSortSpec);
+    ATprotectAFun(gsAFunConsSpec);
+    ATprotectAFun(gsAFunMapSpec);
+    ATprotectAFun(gsAFunDataEqnSpec);
+    ATprotectAFun(gsAFunSortRef);
+    ATprotectAFun(gsAFunDataEqn);
     //multi-actions
     ATprotectAFun(gsAFunMultAct);
     ATprotectAFun(gsAFunParamId);
@@ -602,13 +612,7 @@ void gsEnableConstructorFunctions(void)
     ATprotectAFun(gsAFunCommExpr);
     //mCRL2 specifications
     ATprotectAFun(gsAFunSpecV1);
-    ATprotectAFun(gsAFunSortSpec);
-    ATprotectAFun(gsAFunConsSpec);
-    ATprotectAFun(gsAFunMapSpec);
-    ATprotectAFun(gsAFunDataEqnSpec);
     ATprotectAFun(gsAFunActSpec);
-    ATprotectAFun(gsAFunSortRef);
-    ATprotectAFun(gsAFunDataEqn);
     ATprotectAFun(gsAFunProcEqnSpec);
     ATprotectAFun(gsAFunLPE);
     ATprotectAFun(gsAFunProcEqn);
@@ -662,7 +666,6 @@ void gsEnableConstructorFunctions(void)
     ATprotectAFun(gsAFunPBESOr);
     ATprotectAFun(gsAFunPBESForall);
     ATprotectAFun(gsAFunPBESExists);
-    ATprotectAFun(gsAFunDataSpec);
 
     //protect sort system identifier names
     ATprotectAppl(&gsSortIdNameBool);
@@ -942,6 +945,60 @@ ATermAppl gsMakeWhrDecl(ATermAppl Name, ATermAppl DataExpr)
   return ATmakeAppl2(gsAFunWhrDecl, (ATerm) Name, (ATerm) DataExpr);
 }
 
+//data specifications
+
+ATermAppl gsMakeDataSpec(ATermAppl SortSpec, ATermAppl ConsSpec,
+  ATermAppl MapSpec, ATermAppl DataEqnSpec)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl4(gsAFunDataSpec, (ATerm) SortSpec, (ATerm) ConsSpec,
+    (ATerm) MapSpec, (ATerm) DataEqnSpec);
+}
+
+ATermAppl gsMakeSortSpec(ATermList SortDecls)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunSortSpec, (ATerm) SortDecls);
+}
+
+ATermAppl gsMakeConsSpec(ATermList OpIds)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunConsSpec, (ATerm) OpIds);
+}
+
+ATermAppl gsMakeMapSpec(ATermList OpIds)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunMapSpec, (ATerm) OpIds);
+}
+
+ATermAppl gsMakeDataEqnSpec(ATermList DataEqns)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunDataEqnSpec, (ATerm) DataEqns);
+}
+
+ATermAppl gsMakeActSpec(ATermList ActIds)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunActSpec, (ATerm) ActIds);
+}
+
+ATermAppl gsMakeSortRef(ATermAppl Name, ATermAppl SortExpr)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunSortRef, (ATerm) Name, (ATerm) SortExpr);
+}
+
+ATermAppl gsMakeDataEqn(ATermList DataVarIds, ATermAppl BoolExprOrNil,
+  ATermAppl DataExprLHS, ATermAppl DataExprRHS)
+{
+  assert(ConstructorFunctionsEnabled);
+  return ATmakeAppl4(gsAFunDataEqn, (ATerm) DataVarIds, (ATerm) BoolExprOrNil,
+    (ATerm) DataExprLHS, (ATerm) DataExprRHS);
+}
+
 //multi-actions
 
 ATermAppl gsMakeMultAct(ATermList Actions)
@@ -1100,59 +1157,12 @@ ATermAppl gsMakeCommExpr(ATermAppl MultActName, ATermAppl ActNameOrNil)
 
 //mCRL2 specifications
 
-ATermAppl gsMakeSpecV1(
-  ATermAppl SortSpec, ATermAppl ConsSpec, ATermAppl MapSpec,
-  ATermAppl DataEqnSpec, ATermAppl ActSpec, ATermAppl ProcEqnSpec,
-  ATermAppl Init)
+ATermAppl gsMakeSpecV1(ATermAppl DataSpec, ATermAppl ActSpec,
+  ATermAppl ProcEqnSpec, ATermAppl Init)
 {
   assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl(gsAFunSpecV1, (ATerm) SortSpec, (ATerm) ConsSpec,
-    (ATerm) MapSpec, (ATerm) DataEqnSpec, (ATerm) ActSpec, (ATerm) ProcEqnSpec,
-    (ATerm) Init);
-}
-
-ATermAppl gsMakeSortSpec(ATermList SortDecls)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl1(gsAFunSortSpec, (ATerm) SortDecls);
-}
-
-ATermAppl gsMakeConsSpec(ATermList OpIds)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl1(gsAFunConsSpec, (ATerm) OpIds);
-}
-
-ATermAppl gsMakeMapSpec(ATermList OpIds)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl1(gsAFunMapSpec, (ATerm) OpIds);
-}
-
-ATermAppl gsMakeDataEqnSpec(ATermList DataEqns)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl1(gsAFunDataEqnSpec, (ATerm) DataEqns);
-}
-
-ATermAppl gsMakeActSpec(ATermList ActIds)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl1(gsAFunActSpec, (ATerm) ActIds);
-}
-
-ATermAppl gsMakeSortRef(ATermAppl Name, ATermAppl SortExpr)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunSortRef, (ATerm) Name, (ATerm) SortExpr);
-}
-
-ATermAppl gsMakeDataEqn(ATermList DataVarIds, ATermAppl BoolExprOrNil,
-  ATermAppl DataExprLHS, ATermAppl DataExprRHS)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl4(gsAFunDataEqn, (ATerm) DataVarIds, (ATerm) BoolExprOrNil,
-    (ATerm) DataExprLHS, (ATerm) DataExprRHS);
+  return ATmakeAppl4(gsAFunSpecV1, (ATerm) DataSpec, (ATerm) ActSpec,
+    (ATerm) ProcEqnSpec, (ATerm) Init);
 }
 
 ATermAppl gsMakeProcEqnSpec(ATermList ProcEqns)
@@ -1471,14 +1481,6 @@ ATermAppl gsMakePBESExists(ATermList DataVarId, ATermAppl PBExpr)
   return ATmakeAppl2(gsAFunPBESExists, (ATerm) DataVarId, (ATerm) PBExpr);
 }
 
-ATermAppl gsMakeDataSpec(ATermAppl SortSpec, ATermAppl ConsSpec,
-  ATermAppl MapSpec, ATermAppl DataEqnSpec)
-{
-  assert(ConstructorFunctionsEnabled);
-  return ATmakeAppl4(gsAFunDataSpec, (ATerm) SortSpec, (ATerm) ConsSpec,
-    (ATerm) MapSpec, (ATerm) DataEqnSpec);
-}
-
 //Recognisers of all constructor elements of the internal structure
 //-----------------------------------------------------------------
 
@@ -1619,6 +1621,42 @@ bool gsIsWhrDecl(ATermAppl Term) {
   return ATgetAFun(Term) == gsAFunWhrDecl;
 }
 
+//data specifications
+bool gsIsDataSpec(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunDataSpec;
+}
+
+bool gsIsSortSpec(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunSortSpec;
+}
+
+bool gsIsConsSpec(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunConsSpec;
+}
+
+bool gsIsMapSpec(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunMapSpec;
+}
+
+bool gsIsDataEqnSpec(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunDataEqnSpec;
+}
+
+bool gsIsSortRef(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunSortRef;
+}
+
+bool gsIsDataEqn(ATermAppl Term) {
+  assert(ConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunDataEqn;
+}
+
 //multi-actions
 bool gsIsMultAct(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
@@ -1752,39 +1790,9 @@ bool gsIsSpecV1(ATermAppl Term) {
   return ATgetAFun(Term) == gsAFunSpecV1;
 }
 
-bool gsIsSortSpec(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunSortSpec;
-}
-
-bool gsIsConsSpec(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunConsSpec;
-}
-
-bool gsIsMapSpec(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunMapSpec;
-}
-
-bool gsIsDataEqnSpec(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunDataEqnSpec;
-}
-
 bool gsIsActSpec(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunActSpec;
-}
-
-bool gsIsSortRef(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunSortRef;
-}
-
-bool gsIsDataEqn(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunDataEqn;
 }
 
 bool gsIsProcEqnSpec(ATermAppl Term) {
@@ -2042,11 +2050,6 @@ bool gsIsPBESForall(ATermAppl Term) {
 bool gsIsPBESExists(ATermAppl Term) {
   assert(ConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunPBESExists;
-}
-
-bool gsIsDataSpec(ATermAppl Term) {
-  assert(ConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunDataSpec;
 }
 
 

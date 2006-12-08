@@ -78,6 +78,15 @@ ATermAppl gsMakeDataVarId(ATermAppl Name, ATermAppl SortExpr);
 ATermAppl gsMakeOpId(ATermAppl Name, ATermAppl SortExpr);
 ATermAppl gsMakeBagEnumElt(ATermAppl DataExpr, ATermAppl Multiplicity);
 ATermAppl gsMakeWhrDecl(ATermAppl Name, ATermAppl DataExpr);
+//data specifications
+ATermAppl gsMakeDataSpec(ATermAppl SortSpec, ATermAppl ConsSpec,
+            ATermAppl MapSpec, ATermAppl DataEqnSpec);
+ATermAppl gsMakeSortSpec(ATermList SortDecls);
+ATermAppl gsMakeConsSpec(ATermList OpIds);
+ATermAppl gsMakeMapSpec(ATermList OpIds);
+ATermAppl gsMakeDataEqnSpec(ATermList DataEqns);
+ATermAppl gsMakeDataEqn(ATermList DataVarIds, ATermAppl BoolExprOrNil,
+  ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //multi-actions
 ATermAppl gsMakeMultAct(ATermList Actions);
 ATermAppl gsMakeParamId(ATermAppl Name, ATermList DataExprs);
@@ -107,18 +116,10 @@ ATermAppl gsMakeMultActName(ATermList ActNames);
 ATermAppl gsMakeRenameExpr(ATermAppl FromName, ATermAppl ToName);
 ATermAppl gsMakeCommExpr(ATermAppl MultActName, ATermAppl ActNameOrNil);
 //mCRL2 specifications
-ATermAppl gsMakeSpecV1(
-  ATermAppl SortSpec, ATermAppl ConsSpec, ATermAppl MapSpec,
-  ATermAppl DataEqnSpec, ATermAppl ActSpec, ATermAppl ProcEqnSpec,
-  ATermAppl Init);
-ATermAppl gsMakeSortSpec(ATermList SortDecls);
-ATermAppl gsMakeConsSpec(ATermList OpIds);
-ATermAppl gsMakeMapSpec(ATermList OpIds);
-ATermAppl gsMakeDataEqnSpec(ATermList DataEqns);
+ATermAppl gsMakeSpecV1(ATermAppl DataSpec, ATermAppl ActSpec,
+            ATermAppl ProcEqnSpec, ATermAppl Init);
 ATermAppl gsMakeActSpec(ATermList ActIds);
 ATermAppl gsMakeSortRef(ATermAppl Name, ATermAppl SortExpr);
-ATermAppl gsMakeDataEqn(ATermList DataVarIds, ATermAppl BoolExprOrNil,
-  ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 ATermAppl gsMakeProcEqnSpec(ATermList ProcEqns);
 ATermAppl gsMakeLPE(ATermList GlobDataVarIds, ATermList ProcDataVarIds,
   ATermList LPESummands);
@@ -175,8 +176,6 @@ ATermAppl gsMakePBESAnd(ATermAppl PBExprLHS, ATermAppl PBExprRHS);
 ATermAppl gsMakePBESOr(ATermAppl PBExprLHS, ATermAppl PBExprRHS);
 ATermAppl gsMakePBESForall(ATermList DataVarId, ATermAppl PBExpr);
 ATermAppl gsMakePBESExists(ATermList DataVarId, ATermAppl PBExpr);
-ATermAppl gsMakeDataSpec(ATermAppl SortSpec, ATermAppl ConsSpec,
-            ATermAppl MapSpec, ATermAppl DataEqnSpec);
 
 
 //Recognisers of all constructor elements of the internal structure
@@ -211,6 +210,12 @@ bool gsIsDataVarId(ATermAppl Term);
 bool gsIsOpId(ATermAppl Term);
 bool gsIsBagEnumElt(ATermAppl Term);
 bool gsIsWhrDecl(ATermAppl Term);
+//data specifications
+bool gsIsDataSpec(ATermAppl Term);
+bool gsIsSortSpec(ATermAppl Term);
+bool gsIsConsSpec(ATermAppl Term);
+bool gsIsMapSpec(ATermAppl Term);
+bool gsIsDataEqnSpec(ATermAppl Term);
 //multi-actions
 bool gsIsMultAct(ATermAppl Term);
 bool gsIsParamId(ATermAppl Term);
@@ -240,10 +245,6 @@ bool gsIsRenameExpr(ATermAppl Term);
 bool gsIsCommExpr(ATermAppl Term);
 //mCRL2 specifications
 bool gsIsSpecV1(ATermAppl Term);
-bool gsIsSortSpec(ATermAppl Term);
-bool gsIsConsSpec(ATermAppl Term);
-bool gsIsMapSpec(ATermAppl Term);
-bool gsIsDataEqnSpec(ATermAppl Term);
 bool gsIsActSpec(ATermAppl Term);
 bool gsIsSortRef(ATermAppl Term);
 bool gsIsDataEqn(ATermAppl Term);
@@ -300,7 +301,6 @@ bool gsIsPBESAnd(ATermAppl Term);
 bool gsIsPBESOr(ATermAppl Term);
 bool gsIsPBESForall(ATermAppl Term);
 bool gsIsPBESExists(ATermAppl Term);
-bool gsIsDataSpec(ATermAppl Term);
 
 //Sort expressions
 //----------------

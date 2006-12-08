@@ -47,7 +47,7 @@
     // --------------------------------------------------------------------------------------------
 
     ATermAppl Invariant_Eliminator::simplify(ATermAppl a_invariant, int a_summand_number) {
-      ATermList v_summands = ATLgetArgument(ATAgetArgument(f_lpe, 5), 2);
+      ATermList v_summands = ATLgetArgument(ATAgetArgument(f_lpe, 2), 2);
       ATermAppl v_summand;
       ATermList v_simplified_summands = ATmakeList0();
       int v_summand_number = 1;
@@ -67,8 +67,8 @@
         v_summand_number++;
       }
       v_simplified_summands = ATreverse(v_simplified_summands);
-      ATermAppl v_process_equations = ATAgetArgument(f_lpe, 5);
+      ATermAppl v_process_equations = ATAgetArgument(f_lpe, 2);
       v_process_equations = ATsetArgument(v_process_equations, (ATerm) v_simplified_summands, 2);
-      ATermAppl v_lpe = ATsetArgument(f_lpe, (ATerm) v_process_equations, 5);
+      ATermAppl v_lpe = ATsetArgument(f_lpe, (ATerm) v_process_equations, 2);
       return v_lpe;
     }

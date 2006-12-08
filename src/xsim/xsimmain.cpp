@@ -356,7 +356,7 @@ void XSimMain::LoadFile(const wxString &filename)
 
     SetTitle(base_title+wxT(" - ")+filename);    
 
-    ATermList l = ATLgetArgument(ATAgetArgument(Spec,5),1);
+    ATermList l = ATLgetArgument(ATAgetArgument(Spec,2),1);
     ATermList m = ATmakeList0();
     ATermList n = ATmakeList0();
     stateview->DeleteAllItems();

@@ -44,16 +44,21 @@ using atermpp::aterm_traits;
 // data -\> ...
 // summands -\> [[],true,a(b),nil,[]], [[c],b,e,1,[b := c]]
 //
-// syntax: SpecV1(SortSpec(list<sort> sorts),
-//                ConsSpec(list<operation> constructors),
-//                MapSpec(list<operation> mappings),
-//                DataEqnSpec(list<data_equation> equations),
-//                ActSpec(list<action_label> action_labels),
-//                LPE(list<data_variable> free_variables, list<data_variable> process_parameters, list<LPESummand> lpe_summands),
+// syntax: SpecV1(
+//           DataSpec(
+//             SortSpec(list<sort> sorts),
+//             ConsSpec(list<operation> constructors),
+//             MapSpec(list<operation> mappings),
+//             DataEqnSpec(list<data_equation> equations)
+//           ),
+//           ActSpec(list<action_label> action_labels),
+//           LPE(list<data_variable> free_variables, list<data_variable> process_parameters, list<LPESummand> lpe_summands),
+//           Init
 //         )
-// <Spec>         ::= SpecV1(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
-//                      MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*),
-//                      ActSpec(<ActId>*), <ProcEqnSpec>, <Init>)
+//
+// <Spec>         ::= SpecV1(<DataSpec>, ActSpec(<ActId>*), <ProcEqnSpec>, <Init>)
+// <DataSpec>     ::= DataSpec(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
+//                      MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*)
 class specification: public aterm_appl
 {
   protected:
@@ -103,17 +108,18 @@ class specification: public aterm_appl
       return data_assignment_list(assignments.begin(), assignments.end());
     }
 
-    /// Initialize the LPE with an aterm_appl.
+    /// Initialize the specification with an aterm_appl.
     ///
     void init_term(aterm_appl t)
     {
       m_term = aterm_traits<aterm_appl>::term(t);
       aterm_appl::iterator i = t.begin();
-      sort_list          sorts        = sort_list(aterm_appl(*i++).argument(0));
-      function_list      constructors = function_list(aterm_appl(*i++).argument(0));
-      function_list      mappings     = function_list(aterm_appl(*i++).argument(0));
-      data_equation_list equations    = data_equation_list(aterm_appl(*i++).argument(0));
-      m_data = data_declaration(sorts, constructors, mappings, equations);
+      m_data = data_declaration(aterm_appl(*i++));
+      //sort_list          sorts        = sort_list(aterm_appl(*i++).argument(0));
+      //function_list      constructors = function_list(aterm_appl(*i++).argument(0));
+      //function_list      mappings     = function_list(aterm_appl(*i++).argument(0));
+      //data_equation_list equations    = data_equation_list(aterm_appl(*i++).argument(0));
+      //m_data = data_declaration(sorts, constructors, mappings, equations);
       m_action_labels                 = action_label_list(aterm_appl(*i++).argument(0));
       aterm_appl lpe                  = *i++;
       aterm_appl lpe_init             = *i;
@@ -139,37 +145,6 @@ class specification: public aterm_appl
     }
 
     specification(
-        sort_list            sorts            ,
-        function_list        constructors     ,
-        function_list        mappings         ,
-        data_equation_list   equations        ,
-        action_label_list    action_labels    ,
-        LPE                  lpe              ,
-        data_variable_list   initial_free_variables,
-        data_variable_list   initial_variables,
-        data_expression_list initial_state)
-      :
-        m_data(sorts, constructors, mappings, equations),
-        m_action_labels (action_labels ),
-        m_lpe           (lpe           ),
-        m_initial_free_variables(initial_free_variables),        
-        m_initial_assignments(compute_initial_assignments(initial_variables, initial_state))
-    {
-      assert(initial_variables.size() == initial_state.size());
-      m_term = reinterpret_cast<ATerm>(
-        gsMakeSpecV1(
-          gsMakeSortSpec(sorts),
-          gsMakeConsSpec(constructors),
-          gsMakeMapSpec(mappings),
-          gsMakeDataEqnSpec(equations),
-          gsMakeActSpec(action_labels),
-          lpe,
-          gsMakeLPEInit(initial_free_variables, m_initial_assignments)
-        )
-      );        
-    }
-
-    specification(
         data_declaration     data             ,
         action_label_list    action_labels    ,
         LPE                  lpe              ,
@@ -186,10 +161,7 @@ class specification: public aterm_appl
       assert(initial_variables.size() == initial_state.size());
       m_term = reinterpret_cast<ATerm>(
         gsMakeSpecV1(
-          gsMakeSortSpec(data.sorts()),
-          gsMakeConsSpec(data.constructors()),
-          gsMakeMapSpec(data.mappings()),
-          gsMakeDataEqnSpec(data.equations()),
+          data,
           gsMakeActSpec(action_labels),
           lpe,
           gsMakeLPEInit(initial_free_variables, m_initial_assignments)

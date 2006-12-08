@@ -42,6 +42,8 @@ class lpe_visitor
 //--- begin visitors
     virtual void visit_SpecV1(aterm_appl t) {}
     virtual void leave_SpecV1(aterm_appl t) {}
+    virtual void visit_DataSpec(aterm_appl t) {}
+    virtual void leave_DataSpec(aterm_appl t) {}
     virtual void visit_SortSpec(aterm_appl t) {}
     virtual void leave_SortSpec(aterm_appl t) {}
     virtual void visit_ConsSpec(aterm_appl t) {}
@@ -201,16 +203,12 @@ class lpe_visitor
       assert(t.type() == AT_APPL);
       assert(t.function().name() == "SpecV1");
       aterm_list l = t.argument_list();
-      assert(l.size() == 7);
+      assert(l.size() == 4);
       aterm_list::iterator i = l.begin();
       visit_SpecV1(t);
       if (!stop(t))
       {
-        walk_SortSpec<Stop>((*i++).to_aterm_appl(), stop);
-        walk_ConsSpec<Stop>((*i++).to_aterm_appl(), stop);
-        walk_MapSpec<Stop>((*i++).to_aterm_appl(), stop);
-        walk_DataEqnSpec<Stop>((*i++).to_aterm_appl(), stop);
-        walk_ActSpec<Stop>((*i++).to_aterm_appl(), stop);
+        walk_DataSpec<Stop>((*i++).to_aterm_appl(), stop);
         walk_ProcEqnSpec<Stop>((*i++).to_aterm_appl(), stop);
         walk_Init<Stop>((*i++).to_aterm_appl(), stop);
        }
@@ -222,17 +220,47 @@ class lpe_visitor
       assert(t.type() == AT_APPL);
       assert(t.function().name() == "SpecV1");
       aterm_list l = t.argument_list();
-      assert(l.size() == 7);
+      assert(l.size() == 4);
       aterm_list::iterator i = l.begin();
       visit_SpecV1(t);
+      walk_DataSpec((*i++).to_aterm_appl());
+      walk_ProcEqnSpec((*i++).to_aterm_appl());
+      walk_Init((*i++).to_aterm_appl());
+      leave_SpecV1(t);
+    }
+
+    template <typename Stop>
+    void walk_DataSpec(aterm_appl t, const Stop& stop)
+    {
+      assert(t.type() == AT_APPL);
+      assert(t.function().name() == "DataSpec");
+      aterm_list l = t.argument_list();
+      assert(l.size() == 4);
+      aterm_list::iterator i = l.begin();
+      visit_DataSpec(t);
+      if (!stop(t))
+      {
+        walk_SortSpec<Stop>((*i++).to_aterm_appl(), stop);
+        walk_ConsSpec<Stop>((*i++).to_aterm_appl(), stop);
+        walk_MapSpec<Stop>((*i++).to_aterm_appl(), stop);
+        walk_DataEqnSpec<Stop>((*i++).to_aterm_appl(), stop);
+       }
+      leave_DataSpec(t);
+    }
+
+    void walk_DataSpec(aterm_appl t)
+    {
+      assert(t.type() == AT_APPL);
+      assert(t.function().name() == "DataSpec");
+      aterm_list l = t.argument_list();
+      assert(l.size() == 4);
+      aterm_list::iterator i = l.begin();
+      visit_DataSpec(t);
       walk_SortSpec((*i++).to_aterm_appl());
       walk_ConsSpec((*i++).to_aterm_appl());
       walk_MapSpec((*i++).to_aterm_appl());
       walk_DataEqnSpec((*i++).to_aterm_appl());
-      walk_ActSpec((*i++).to_aterm_appl());
-      walk_ProcEqnSpec((*i++).to_aterm_appl());
-      walk_Init((*i++).to_aterm_appl());
-      leave_SpecV1(t);
+      leave_DataSpec(t);
     }
 
     template <typename Stop>

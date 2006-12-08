@@ -1999,7 +1999,18 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
     gsDebugMsg("Conversion Succesful!");
     gsDebugMsg("\n\n====================\n\n");
 
-    return gsMakeSpecV1(gsMakeSortSpec(ATmakeList0()), gsMakeConsSpec(ATmakeList0()), gsMakeMapSpec(ATmakeList0()), gsMakeDataEqnSpec(ATmakeList0()), gsMakeActSpec(Actions), gsMakeProcEqnSpec(ProcEqns), gsMakeInit(ATmakeList0(),gsMakeParamId(ATAgetArgument(Spec, 3), ATmakeList0())));
+    return
+      gsMakeSpecV1(
+        gsMakeDataSpec(
+          gsMakeSortSpec(ATmakeList0()),
+          gsMakeConsSpec(ATmakeList0()),
+          gsMakeMapSpec(ATmakeList0()),
+          gsMakeDataEqnSpec(ATmakeList0())
+        ),
+        gsMakeActSpec(Actions),
+        gsMakeProcEqnSpec(ProcEqns),
+        gsMakeInit(ATmakeList0(),gsMakeParamId(ATAgetArgument(Spec, 3), ATmakeList0()))
+      );
   }
 
   /*               */

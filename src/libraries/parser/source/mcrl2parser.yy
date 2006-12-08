@@ -2397,10 +2397,12 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts)
     return NULL;
   }
   Result = gsMakeSpecV1(
-    gsMakeSortSpec(SortDecls),
-    gsMakeConsSpec(ConsDecls),
-    gsMakeMapSpec(MapDecls),
-    gsMakeDataEqnSpec(DataEqnDecls),
+    gsMakeDataSpec(
+      gsMakeSortSpec(SortDecls),
+      gsMakeConsSpec(ConsDecls),
+      gsMakeMapSpec(MapDecls),
+      gsMakeDataEqnSpec(DataEqnDecls)
+    ),
     gsMakeActSpec(ActDecls),
     gsMakeProcEqnSpec(ProcEqnDecls),
     Init

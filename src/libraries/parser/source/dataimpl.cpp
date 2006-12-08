@@ -438,7 +438,8 @@ ATermAppl impl_sort_refs(ATermAppl spec)
 {
   assert(gsIsSpecV1(spec));
   //get sort declarations
-  ATermAppl sort_spec = ATAgetArgument(spec, 0);
+  ATermAppl data_spec = ATAgetArgument(spec, 0);
+  ATermAppl sort_spec = ATAgetArgument(data_spec, 0);
   ATermList sort_decls = ATLgetArgument(sort_spec, 0);
   //split sort declarations in sort id's and sort references
   ATermList sort_ids = NULL;
@@ -447,7 +448,8 @@ ATermAppl impl_sort_refs(ATermAppl spec)
   //replace the sort declarations in spec by the sort_ids, the list of
   //identifiers
   sort_spec = ATsetArgument(sort_spec, (ATerm) sort_ids, 0);  
-  spec = ATsetArgument(spec, (ATerm) sort_spec, 0);
+  data_spec = ATsetArgument(data_spec, (ATerm) sort_spec, 0);
+  spec = ATsetArgument(spec, (ATerm) data_spec, 0);
   //make list of substitutions from sort_refs, the list of sort references
   ATermList substs = ATmakeList0();
   while (!ATisEmpty(sort_refs))
@@ -481,7 +483,8 @@ ATermAppl impl_function_sorts_spec(ATermAppl spec)
   //get function sorts occurring in spec
   ATermList func_sorts = get_function_sorts((ATerm) spec);
   //get operation declarations
-  ATermAppl op_spec = ATAgetArgument(spec, 2);
+  ATermAppl data_spec = ATAgetArgument(spec, 0);
+  ATermAppl op_spec = ATAgetArgument(data_spec, 2);
   ATermList op_decls = ATLgetArgument(op_spec, 0);
   //initalise data declarations
   t_data_decls data_decls;
@@ -525,31 +528,33 @@ ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls)
 {
   assert(gsIsSpecV1(spec));
   assert(data_decls_is_initialised(data_decls));
+  ATermAppl data_spec = ATAgetArgument(spec, 0);
   //add sort declarations
-  ATermAppl sort_spec  = ATAgetArgument(spec, 0);
+  ATermAppl sort_spec  = ATAgetArgument(data_spec, 0);
   ATermList sort_decls = ATLgetArgument(sort_spec, 0);
   sort_decls = ATconcat(data_decls.sorts, sort_decls);
   sort_spec = ATsetArgument(sort_spec, (ATerm) sort_decls, 0);  
-  spec = ATsetArgument(spec, (ATerm) sort_spec, 0);
+  data_spec = ATsetArgument(data_spec, (ATerm) sort_spec, 0);
   //add constructor operation declarations
-  ATermAppl cons_spec  = ATAgetArgument(spec, 1);
+  ATermAppl cons_spec  = ATAgetArgument(data_spec, 1);
   ATermList cons_decls = ATLgetArgument(cons_spec, 0);
   cons_decls = ATconcat(data_decls.cons_ops, cons_decls);
   cons_spec = ATsetArgument(cons_spec, (ATerm) cons_decls, 0);  
-  spec = ATsetArgument(spec, (ATerm) cons_spec, 1);
+  data_spec = ATsetArgument(data_spec, (ATerm) cons_spec, 1);
   //add operation declarations
-  ATermAppl map_spec  = ATAgetArgument(spec, 2);
+  ATermAppl map_spec  = ATAgetArgument(data_spec, 2);
   ATermList map_decls = ATLgetArgument(map_spec, 0);
   map_decls = ATconcat(data_decls.ops, map_decls);
   map_spec = ATsetArgument(map_spec, (ATerm) map_decls, 0);  
-  spec = ATsetArgument(spec, (ATerm) map_spec, 2);
+  data_spec = ATsetArgument(data_spec, (ATerm) map_spec, 2);
   //add data equation declarations
-  ATermAppl data_eqn_spec  = ATAgetArgument(spec, 3);
+  ATermAppl data_eqn_spec  = ATAgetArgument(data_spec, 3);
   ATermList data_eqn_decls = ATLgetArgument(data_eqn_spec, 0);
   data_eqn_decls = ATconcat(data_decls.data_eqns, data_eqn_decls);
   data_eqn_spec = ATsetArgument(data_eqn_spec, (ATerm) data_eqn_decls, 0);  
-  spec = ATsetArgument(spec, (ATerm) data_eqn_spec, 3);
+  data_spec = ATsetArgument(data_spec, (ATerm) data_eqn_spec, 3);
   //return the new specification
+  spec = ATsetArgument(spec, (ATerm) data_spec, 0);
   return spec;
 }
 

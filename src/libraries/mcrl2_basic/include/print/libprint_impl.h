@@ -519,7 +519,14 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
   } else if (gsIsSpecV1(Part)) {
     //print specification
     PRINT_FUNC(dbg_prints)("printing specification\n");
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 4; i++) {
+      PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, i),
+        pp_format, ShowSorts, PrecLevel);
+    }
+  } else if (gsIsDataSpec(Part)) {
+    //print specification
+    PRINT_FUNC(dbg_prints)("printing data specification\n");
+    for (int i = 0; i < 4; i++) {
       PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, i),
         pp_format, ShowSorts, PrecLevel);
     }

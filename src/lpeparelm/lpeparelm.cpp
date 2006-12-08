@@ -456,10 +456,7 @@ inline void lpeParElm::output() {
   //
   specification rebuild_spec;
   rebuild_spec = specification(
-    p_spec.sorts(), 
-    p_spec.constructors(),
-    p_spec.mappings(), 
-    p_spec.equations(), 
+    p_spec.data(), 
     p_spec.action_labels(), 
     rebuild_lpe,
     p_spec.initial_free_variables(), 

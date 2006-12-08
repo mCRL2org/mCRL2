@@ -22,7 +22,6 @@ using atermpp::aterm_list;
 //                      MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*))
 class data_specification: public aterm_appl
 {
-  // N.B. A data_specification is not explicitly represented in the specification.
 
   protected:
     sort_list          m_sorts;       

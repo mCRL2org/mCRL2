@@ -339,24 +339,26 @@ static ATermList convert_init(ATermAppl spec, ATermList typelist, ATermList * /*
 ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 {
         assert(is_mCRL_spec(spec));
-	ATermAppl sorts,cons,maps,datas,acts,lpe,init;
+	ATermAppl sort_spec,cons_spec,map_spec,data_eqn_spec,data_spec,act_spec,lpe,init;
 	ATermList typelist, ids;
 
 	ids = ATmakeList0();
 
 	gsVerboseMsg("converting sort declarations...\n");
-	sorts = gsMakeSortSpec(convert_sorts(spec,&ids));
+	sort_spec = gsMakeSortSpec(convert_sorts(spec,&ids));
 
 	gsVerboseMsg("converting constructor function declarations...\n");
-	cons = gsMakeConsSpec(convert_cons(spec,&ids));
+	cons_spec = gsMakeConsSpec(convert_cons(spec,&ids));
 
 	gsVerboseMsg("converting mapping declarations...\n");
-	maps = gsMakeMapSpec(convert_maps(spec,&ids));
+	map_spec = gsMakeMapSpec(convert_maps(spec,&ids));
 
-	typelist = ATconcat(ATLgetArgument(cons,0),ATLgetArgument(maps,0));
+	typelist = ATconcat(ATLgetArgument(cons_spec,0),ATLgetArgument(map_spec,0));
 
 	gsVerboseMsg("converting data equations...\n");
-	datas = gsMakeDataEqnSpec(convert_datas(spec,typelist,&ids));
+	data_eqn_spec = gsMakeDataEqnSpec(convert_datas(spec,typelist,&ids));
+
+        data_spec = gsMakeDataSpec(sort_spec, cons_spec, map_spec, data_eqn_spec);
 
 	gsVerboseMsg("converting initial LPE state...\n");
 	init = gsMakeLPEInit(ATmakeList0(),convert_init(spec,typelist,&ids));
@@ -365,9 +367,9 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 	lpe = convert_lpe(spec,typelist,&ids);
 	
 	gsVerboseMsg("constructing action declarations...\n");
-	acts = gsMakeActSpec(get_lpe_acts(lpe,&ids));
+	act_spec = gsMakeActSpec(get_lpe_acts(lpe,&ids));
 
-	ATermAppl r = gsMakeSpecV1(sorts,cons,maps,datas,acts,lpe,init);
+	ATermAppl r = gsMakeSpecV1(data_spec, act_spec, lpe, init);
 
 	ATermList substs = get_substs(ids);
 
@@ -411,7 +413,7 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 		ATermAppl eq_str = gsString2ATermAppl("eq");
 		ATermAppl s_bool = gsMakeSortIdBool();
 
-		for (ATermList l=ATLgetArgument(sorts,0); !ATisEmpty(l); l=ATgetNext(l))
+		for (ATermList l=ATLgetArgument(sort_spec,0); !ATisEmpty(l); l=ATgetNext(l))
 		{
 			ATermAppl s = ATAgetFirst(l);
 			substs = ATinsert(substs,(ATerm) gsMakeSubst(

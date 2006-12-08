@@ -101,7 +101,7 @@
     Induction::Induction(ATermAppl a_lpe) {
       f_list_variables = ATindexedSetCreate(50, 75);
       f_lists_to_sorts = ATtableCreate(50, 75);
-      f_constructors = ATAgetArgument(a_lpe, 1);
+      f_constructors = ATAgetArgument(ATAgetArgument(a_lpe, 0), 1);
       f_cons_name = gsMakeOpIdNameCons();
     }
 

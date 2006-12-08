@@ -16,10 +16,12 @@ RewriterProver::RewriterProver(ATermAppl DataEqnSpec, RewriteStrategy strat)
 {
   prover_obj = new BDD_Prover(
                       gsMakeSpecV1(
-                        gsMakeSortSpec(ATmakeList0()),
-                        gsMakeConsSpec(ATmakeList0()),
-                        gsMakeMapSpec(ATmakeList0()),
-                        DataEqnSpec,
+                        gsMakeDataSpec(
+                          gsMakeSortSpec(ATmakeList0()),
+                          gsMakeConsSpec(ATmakeList0()),
+                          gsMakeMapSpec(ATmakeList0()),
+                          DataEqnSpec
+                        ),
                         gsMakeActSpec(ATmakeList0()),
 			gsMakeLPE(ATmakeList0(),ATmakeList0(),ATmakeList0()),
 			gsMakeLPEInit(ATmakeList0(),ATmakeList0())

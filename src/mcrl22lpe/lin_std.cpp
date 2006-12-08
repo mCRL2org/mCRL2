@@ -881,28 +881,29 @@ static specificationbasictype *create_spec(ATermAppl t)
   /* Store the sorts, but first reverse them, such that they appear
      in the same order in the output */
   spec->sorts = ATempty;
-  for(ATermList sorts = ATreverse(ATLgetArgument(ATAgetArgument(t,0),0)); 
+  ATermAppl data_spec = ATAgetArgument(t,0);
+  for(ATermList sorts = ATreverse(ATLgetArgument(ATAgetArgument(data_spec,0),0)); 
     !ATisEmpty(sorts); sorts = ATgetNext(sorts) )
   {
     insertsort(ATAgetFirst(sorts),spec); 
   }
   /* Store the constructors, but reverse them first; cf. the sorts above */
   spec->funcs = ATempty;
-  for(ATermList constr = ATreverse(ATLgetArgument(ATAgetArgument(t,1),0));
+  for(ATermList constr = ATreverse(ATLgetArgument(ATAgetArgument(data_spec,1),0));
     !ATisEmpty(constr); constr = ATgetNext(constr) )
   {
     insertconstructor(ATAgetFirst(constr),spec); 
   }
-  /* Store the functions, but reverse them also; cf. the orst above. */
+  /* Store the functions, but reverse them also; cf. the sorts above. */
   spec->maps = ATempty;
-  for(ATermList maps = ATreverse(ATLgetArgument(ATAgetArgument(t,2),0));
+  for(ATermList maps = ATreverse(ATLgetArgument(ATAgetArgument(data_spec,2),0));
     !ATisEmpty(maps); maps=ATgetNext(maps) )
   {
     insertmapping(ATAgetFirst(maps),spec); 
   }
   /* Store the equations */
   spec->eqns = ATempty;
-  for(ATermList eqns = ATreverse(ATLgetArgument(ATAgetArgument(t,3),0));
+  for(ATermList eqns = ATreverse(ATLgetArgument(ATAgetArgument(data_spec,3),0));
     !ATisEmpty(eqns); eqns = ATgetNext(eqns) )
   {
     ATermAppl eqn=ATAgetFirst(eqns);
@@ -916,14 +917,14 @@ static specificationbasictype *create_spec(ATermAppl t)
     end_equation_section();
   }
 
-  spec->eqns = ATLgetArgument(ATAgetArgument(t,3),0);
-  spec->acts = ATLgetArgument(ATAgetArgument(t,4),0);
+  spec->eqns = ATLgetArgument(ATAgetArgument(data_spec,3),0);
+  spec->acts = ATLgetArgument(ATAgetArgument(t,1),0);
   storeact(spec->acts);
   spec->procdatavars = ATempty;
-  spec->procs = ATLgetArgument(ATAgetArgument(t,5),0);
+  spec->procs = ATLgetArgument(ATAgetArgument(t,2),0);
   storeprocs(spec->procs);
-  spec->initdatavars = ATLgetArgument(ATAgetArgument(t,6),0);
-  spec->init = storeinit(ATAgetArgument(ATAgetArgument(t,6),1));
+  spec->initdatavars = ATLgetArgument(ATAgetArgument(t,3),0);
+  spec->init = storeinit(ATAgetArgument(ATAgetArgument(t,3),1));
   return spec;
 }
 
@@ -8466,10 +8467,12 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
     return NULL;
   }
   result = gsMakeSpecV1(
-    gsMakeSortSpec(spec_int->sorts),
-    gsMakeConsSpec(spec_int->funcs),
-    gsMakeMapSpec(spec_int->maps),
-    gsMakeDataEqnSpec(spec_int->eqns),
+    gsMakeDataSpec(
+      gsMakeSortSpec(spec_int->sorts),
+      gsMakeConsSpec(spec_int->funcs),
+      gsMakeMapSpec(spec_int->maps),
+      gsMakeDataEqnSpec(spec_int->eqns)
+    ),
     gsMakeActSpec(spec_int->acts),
     gsMakeLPE(SieveProcDataVarsSummands(
                    spec_int->procdatavars,

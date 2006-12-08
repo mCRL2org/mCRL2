@@ -261,7 +261,7 @@
     BDD_Prover::BDD_Prover(
       ATermAppl a_lpe, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, bool a_apply_induction
     ):
-      Prover(ATAgetArgument(a_lpe, 3), a_rewrite_strategy, a_time_limit),
+      Prover(ATAgetArgument(ATAgetArgument(a_lpe, 0), 3), a_rewrite_strategy, a_time_limit),
       f_induction(a_lpe)
     {
       f_reverse = true;

@@ -166,7 +166,7 @@ int main(int argc, char **argv)
     PrintRewriteStrategy(stderr, opt_strat);  
     fprintf(stderr, "...\n");
   }
-  rewr = createRewriter(ATAgetArgument(result, 3), opt_strat);
+  rewr = createRewriter(ATAgetArgument(ATAgetArgument(result, 0), 3), opt_strat);
 
   //rewrite result
   if (opt_benchmark) {
@@ -236,7 +236,7 @@ void print_more_info(char *Name)
 bool is_valid_lpe(ATermAppl spec)
 {
   if (gsIsSpecV1(spec)) {
-    return gsIsLPE(ATAgetArgument(spec,5));
+    return gsIsLPE(ATAgetArgument(spec,2));
   } else {
     return false;
   }
@@ -246,7 +246,8 @@ static ATermAppl rewrite_lpe(ATermAppl Spec)
 {
   ATermList l;
   //rewrite data equations
-  ATermAppl DataEqnSpec = ATAgetArgument(Spec, 3);
+  ATermAppl DataSpec = ATAgetArgument(Spec, 0);
+  ATermAppl DataEqnSpec = ATAgetArgument(DataSpec, 3);
   ATermList DataEqns = ATLgetArgument(DataEqnSpec, 0);
   l = ATmakeList0();
   for (; !ATisEmpty(DataEqns); DataEqns = ATgetNext(DataEqns)) {
@@ -266,10 +267,11 @@ static ATermAppl rewrite_lpe(ATermAppl Spec)
   }
   DataEqns = ATreverse(l);
   DataEqnSpec = ATsetArgument(DataEqnSpec, (ATerm) DataEqns, 0);
-  Spec = ATsetArgument(Spec, (ATerm) DataEqnSpec, 3);
+  DataSpec = ATsetArgument(DataSpec, (ATerm) DataEqnSpec, 3);
+  Spec = ATsetArgument(Spec, (ATerm) DataSpec, 0);
 
   //rewrite LPE summands
-  ATermAppl LPE = ATAgetArgument(Spec, 5);
+  ATermAppl LPE = ATAgetArgument(Spec, 2);
   ATermList LPESummands = ATLgetArgument(LPE, 2);
   l = ATmakeList0();
   for (; !ATisEmpty(LPESummands); LPESummands = ATgetNext(LPESummands)) {
@@ -311,10 +313,10 @@ static ATermAppl rewrite_lpe(ATermAppl Spec)
   }
   LPESummands = ATreverse(l);
   LPE = ATsetArgument(LPE, (ATerm) LPESummands, 2);
-  Spec = ATsetArgument(Spec, (ATerm) LPE, 5);
+  Spec = ATsetArgument(Spec, (ATerm) LPE, 2);
  
   //rewrite initial state
-  ATermAppl LPEInit = ATAgetArgument(Spec, 6);
+  ATermAppl LPEInit = ATAgetArgument(Spec, 3);
   ATermList Assignments = ATLgetArgument(LPEInit, 1);
   l = ATmakeList0();
   for (; !ATisEmpty(Assignments); Assignments = ATgetNext(Assignments)) {
@@ -326,7 +328,7 @@ static ATermAppl rewrite_lpe(ATermAppl Spec)
   }
   Assignments = ATreverse(l);
   LPEInit = ATsetArgument(LPEInit, (ATerm) Assignments, 1);
-  Spec = ATsetArgument(Spec, (ATerm) LPEInit, 6);
+  Spec = ATsetArgument(Spec, (ATerm) LPEInit, 3);
  
   return Spec;
 }

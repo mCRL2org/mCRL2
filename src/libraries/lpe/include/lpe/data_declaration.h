@@ -13,20 +13,41 @@ namespace lpe {
 
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
+using atermpp::aterm_traits;
 
 ///////////////////////////////////////////////////////////////////////////////
 // data_declaration
 /// \brief a data declaration of a mCRL specification.
 ///
-class data_declaration
+// syntax: DataSpec(
+//           SortSpec(list<sort> sorts),
+//           ConsSpec(list<operation> constructors),
+//           MapSpec(list<operation> mappings),
+//           DataEqnSpec(list<data_equation> equations)
+//         )
+//
+// <DataSpec>     ::= DataSpec(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
+//                      MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*)
+class data_declaration: public aterm_appl
 {
-  // N.B. A data_declaration is not explicitly represented in the specification.
 
   protected:
     sort_list          m_sorts;       
     function_list      m_constructors;
     function_list      m_mappings;    
     data_equation_list m_equations;   
+
+    /// Initialize the data_declaration with an aterm_appl.
+    ///
+    void init_term(aterm_appl t)
+    {
+      m_term = aterm_traits<aterm_appl>::term(t);
+      aterm_appl::iterator i = t.begin();      
+      m_sorts        = sort_list(aterm_appl(*i++).argument(0));
+      m_constructors = function_list(aterm_appl(*i++).argument(0));
+      m_mappings     = function_list(aterm_appl(*i++).argument(0));
+      m_equations    = data_equation_list(aterm_appl(*i).argument(0));
+    }
 
   public:
     typedef sort_list::iterator          sort_iterator;
@@ -36,12 +57,27 @@ class data_declaration
     data_declaration()
     {}
 
+    data_declaration(aterm_appl t)
+    {
+      assert(gsIsDataSpec(t));
+      init_term(t);
+    }
+
     data_declaration(sort_list sorts, function_list constructors, function_list mappings, data_equation_list equations)
       : m_sorts(sorts),
         m_constructors(constructors),
         m_mappings(mappings),
         m_equations(equations)
-    {}
+    {
+      m_term = reinterpret_cast<ATerm>(
+        gsMakeDataSpec(
+          gsMakeSortSpec(sorts),
+          gsMakeConsSpec(constructors),
+          gsMakeMapSpec(mappings),
+          gsMakeDataEqnSpec(equations)
+        )
+      );
+    }
 
     /// Returns the list of sorts.
     ///

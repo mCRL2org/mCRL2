@@ -267,7 +267,7 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
 
 	if ( gsIsSortArrow(sort) )
 	{
-		l = ATLgetArgument(ATAgetArgument(current_spec,1),0);
+		l = ATLgetArgument(ATAgetArgument(ATAgetArgument(current_spec,0),1),0);
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			ATermAppl conssort = ATAgetArgument(ATAgetFirst(l),1);
@@ -277,7 +277,7 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
 			}
 		}
 
-		l = ATLgetArgument(ATAgetArgument(current_spec,2),0);
+		l = ATLgetArgument(ATAgetArgument(ATAgetArgument(current_spec,0),2),0);
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			ATermAppl mapsort = ATAgetArgument(ATAgetFirst(l),1);
@@ -287,7 +287,7 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
 			}
 		}
 	} else {
-		l = ATLgetArgument(ATAgetArgument(current_spec,1),0);
+		l = ATLgetArgument(ATAgetArgument(ATAgetArgument(current_spec,0),1),0);
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			ATermAppl conssort = ATAgetArgument(ATAgetFirst(l),1);
@@ -314,7 +314,7 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
 			}
 		}
 	
-		l = ATLgetArgument(ATAgetArgument(current_spec,2),0);
+		l = ATLgetArgument(ATAgetArgument(ATAgetArgument(current_spec,0),2),0);
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			ATermAppl mapsort = ATAgetArgument(ATAgetFirst(l),1);
@@ -482,9 +482,9 @@ NextStateStandard::NextStateStandard(ATermAppl spec, bool allow_free_vars, int s
 	info.nil = gsMakeNil();
 	ATprotectAppl(&info.nil);
 
-	free_vars = ATLgetArgument(ATAgetArgument(current_spec,5),0);
+	free_vars = ATLgetArgument(ATAgetArgument(current_spec,2),0);
 
-	pars = ATLgetArgument(ATAgetArgument(current_spec,5),1);
+	pars = ATLgetArgument(ATAgetArgument(current_spec,2),1);
 	ATprotectList(&pars);
 
 	info.statelen = ATgetLength(pars);
@@ -497,7 +497,7 @@ NextStateStandard::NextStateStandard(ATermAppl spec, bool allow_free_vars, int s
 		stateAFun_made = false;
 	}
 
-	info.procvars = ATLgetArgument(ATAgetArgument(current_spec,5),1);
+	info.procvars = ATLgetArgument(ATAgetArgument(current_spec,2),1);
 	ATprotectList(&info.procvars);
 	
 	stateargs = (ATerm *) malloc(info.statelen*sizeof(ATerm));
@@ -509,7 +509,7 @@ NextStateStandard::NextStateStandard(ATermAppl spec, bool allow_free_vars, int s
 
 	smndAFun = ATmakeAFun("@SMND@",4,ATfalse);
 	ATprotectAFun(smndAFun);
-	ATermList sums = ATLgetArgument(ATAgetArgument(current_spec,5),2);
+	ATermList sums = ATLgetArgument(ATAgetArgument(current_spec,2),2);
 	l = ATmakeList0();
 	for (bool b=true; !ATisEmpty(sums); sums=ATgetNext(sums))
 	{
@@ -538,8 +538,8 @@ NextStateStandard::NextStateStandard(ATermAppl spec, bool allow_free_vars, int s
 	}
 
 	l = pars;
-	free_vars = ATLgetArgument(ATAgetArgument(current_spec,6),0);
-	m = ATLgetArgument(ATAgetArgument(current_spec,6),1);
+	free_vars = ATLgetArgument(ATAgetArgument(current_spec,3),0);
+	m = ATLgetArgument(ATAgetArgument(current_spec,3),1);
 
 	for (int i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
 	{

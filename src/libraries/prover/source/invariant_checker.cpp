@@ -146,8 +146,8 @@
     ):
       f_bdd_prover(a_lpe, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {
-      f_init = ATAgetArgument(a_lpe, 6);
-      f_summands = ATLgetArgument(ATAgetArgument(a_lpe, 5), 2);
+      f_init = ATAgetArgument(a_lpe, 3);
+      f_summands = ATLgetArgument(ATAgetArgument(a_lpe, 2), 2);
       f_counter_example = a_counter_example;
       f_all_violations = a_all_violations;
       if (a_dot_file_name == 0) {
