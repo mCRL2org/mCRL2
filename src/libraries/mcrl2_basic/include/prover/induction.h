@@ -76,7 +76,7 @@ class Induction {
     );
   public:
     /// \brief
-    Induction(ATermAppl a_lpe);
+    Induction(ATermAppl a_data_spec);
 
     /// \brief
     ~Induction();

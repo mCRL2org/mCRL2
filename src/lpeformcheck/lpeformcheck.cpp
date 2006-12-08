@@ -319,7 +319,7 @@
         exit(1);
       } else {
         Formula_Checker v_formula_checker(
-          v_lpe, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_witness, f_dot_file_name
+          ATAgetArgument(v_lpe,0), f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_witness, f_dot_file_name
         );
 
         v_formula_checker.check_formulas(v_formulas);

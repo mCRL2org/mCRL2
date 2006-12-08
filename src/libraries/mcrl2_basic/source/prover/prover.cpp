@@ -15,7 +15,7 @@
   // Class Prover - Functions declared public -----------------------------------------------------
 
     Prover::Prover(
-      ATermAppl a_data_equations,
+      ATermAppl a_data_spec,
       RewriteStrategy a_rewrite_strategy,
       int a_time_limit
     ) {
@@ -26,7 +26,7 @@
       gsEnableConstructorFunctions();
       switch (a_rewrite_strategy) {
         case (GS_REWR_INNER): {
-          f_rewriter = createRewriter(a_data_equations, GS_REWR_INNER);
+          f_rewriter = createRewriter(ATAgetArgument(a_data_spec,3), GS_REWR_INNER);
           f_info = new AI_Inner(f_rewriter);
           f_manipulator = new AM_Inner(f_rewriter, f_info);
           gsDebugMsg(
@@ -36,7 +36,7 @@
           break;
         }
         case (GS_REWR_JITTY): {
-          f_rewriter = createRewriter(a_data_equations, GS_REWR_JITTY);
+          f_rewriter = createRewriter(ATAgetArgument(a_data_spec,3), GS_REWR_JITTY);
           f_info = new AI_Jitty(f_rewriter);
           f_manipulator = new AM_Jitty(f_rewriter, f_info);
           gsDebugMsg(

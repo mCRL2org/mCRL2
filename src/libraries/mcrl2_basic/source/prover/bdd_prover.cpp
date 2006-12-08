@@ -259,10 +259,10 @@
   // Class BDD_Prover - Functions declared public -------------------------------------------------
 
     BDD_Prover::BDD_Prover(
-      ATermAppl a_lpe, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, bool a_apply_induction
+      ATermAppl a_data_spec, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, bool a_apply_induction
     ):
-      Prover(ATAgetArgument(ATAgetArgument(a_lpe, 0), 3), a_rewrite_strategy, a_time_limit),
-      f_induction(a_lpe)
+      Prover(a_data_spec, a_rewrite_strategy, a_time_limit),
+      f_induction(a_data_spec)
     {
       f_reverse = true;
       f_full = true;
@@ -276,7 +276,7 @@
         bool_to_char_string(f_reverse),
         bool_to_char_string(f_full)
       );
-      f_lpe = a_lpe;
+      f_data_spec = a_data_spec;
       if (a_path_eliminator) {
         f_bdd_simplifier = new BDD_Path_Eliminator(a_solver_type);
       } else {

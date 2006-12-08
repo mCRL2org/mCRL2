@@ -42,7 +42,7 @@ class Formula_Checker {
     /// \brief Constructor that initializes Formula_Checker::f_counter_example, Formula_Checker::f_witness,
     /// \brief Formula_Checker::f_bdd_prover and Formula_Checker::f_dot_file_name.
     Formula_Checker(
-      ATermAppl a_lpe,
+      ATermAppl a_data_spec,
       RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
       int a_time_limit = 0,
       bool a_path_eliminator = false,

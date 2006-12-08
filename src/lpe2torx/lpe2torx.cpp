@@ -285,7 +285,17 @@ int main(int argc, char **argv)
   gsVerboseMsg("initialising...\n");
   torx_data td(10000);
 
-  NextState *nstate = createNextState(Spec,!usedummies,stateformat,createEnumerator(Spec,createRewriter(ATAgetArgument(Spec,3),strat),true),true);
+  NextState *nstate = createNextState(
+    Spec,
+    !usedummies,
+    stateformat,
+    createEnumerator(
+      Spec,
+      createRewriter(ATAgetArgument(ATAgetArgument(Spec,0),3),strat),
+      true
+    ),
+    true
+  );
 
   ATerm initial_state = nstate->getInitialState();
 

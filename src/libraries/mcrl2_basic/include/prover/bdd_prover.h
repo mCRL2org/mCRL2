@@ -31,8 +31,8 @@ class BDD_Prover: public Prover {
     /// \brief A flag indicating whether or not induction on lists is applied.
     bool f_apply_induction;
 
-    /// \brief A linear process equation.
-    ATermAppl f_lpe;
+    /// \brief A data specification.
+    ATermAppl f_data_spec;
 
     /// \brief A hashtable that maps formulas to BDDs.
     /// \brief If the BDD of a formula is unknown, it maps this formula to 0.
@@ -80,10 +80,10 @@ class BDD_Prover: public Prover {
     ATermAppl f_bdd;
   public:
 
-    /// \brief Constructor that initializes the attributes BDD_Prover::f_lpe, Prover::f_time_limit and
+    /// \brief Constructor that initializes the attributes BDD_Prover::f_data_spec, Prover::f_time_limit and
     /// \brief BDD_Prover::f_bdd_simplifier.
     BDD_Prover(
-      ATermAppl a_lpe,
+      ATermAppl a_data_spec,
       RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
       int a_time_limit = 0,
       bool a_path_eliminator = false,

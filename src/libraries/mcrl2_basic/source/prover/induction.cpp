@@ -98,10 +98,10 @@
 
   // Class Induction - Functions declared public --------------------------------------------------
 
-    Induction::Induction(ATermAppl a_lpe) {
+    Induction::Induction(ATermAppl a_data_spec) {
       f_list_variables = ATindexedSetCreate(50, 75);
       f_lists_to_sorts = ATtableCreate(50, 75);
-      f_constructors = ATAgetArgument(ATAgetArgument(a_lpe, 0), 1);
+      f_constructors = ATAgetArgument(a_data_spec, 1);
       f_cons_name = gsMakeOpIdNameCons();
     }
 
