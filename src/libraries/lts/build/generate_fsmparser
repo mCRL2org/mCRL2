@@ -1,4 +1,0 @@
-#!/bin/sh
-flex -Pfsm -o../source/fsmlexer.cpp ../source/fsmlexer.ll
-bison -p fsm -d -o ../source/fsmparser.cpp ../source/fsmparser.yy
-mv ../source/fsmparser.hpp ../include/fsmparser.hpp
