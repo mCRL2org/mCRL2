@@ -6354,15 +6354,15 @@ fi
 
 
 if test "$BUILD_ATERM" = "builtin"; then
-  eval "eval IATERM_CPPFLAGS=${includedir}/mcrl2"
+  eval "eval IATERM_CPPFLAGS=-I${includedir}/mcrl2"
   if test "$ADDRESS_MODEL" = "64"; then
     IATERM_CPPFLAGS="-DAT_64BIT ${IATERM_CPPFLAGS}"
   fi
-  IATERM_CPPFLAGS="-I${IATERM_CPPFLAGS}/aterm"
+  IATERM_CPPFLAGS="${IATERM_CPPFLAGS}/aterm"
 
 
-  eval "eval IATERM_LDFLAGS=${libdir}/mcrl2"
-  IATERM_LDFLAGS="-L${IATERM_LDFLAGS} -lATerm"
+  eval "eval IATERM_LDFLAGS=-L${libdir}/mcrl2"
+  IATERM_LDFLAGS="${IATERM_LDFLAGS} -lATerm"
 
 else
   IATERM_CPPFLAGS="${ATERM_CPPFLAGS}"
