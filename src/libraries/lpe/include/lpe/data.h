@@ -458,7 +458,6 @@ struct assignment_list_substitution
   {
     for (data_assignment_list::iterator i = m_assignments.begin(); i != m_assignments.end(); ++i)
     {
-std::cout << "<assignment>" << *i << " " << t << " -> " << (*i)(t) << std::endl;
       t = (*i)(t);
     }
     return t;

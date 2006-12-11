@@ -515,8 +515,13 @@ namespace pbes_untimed
         pbes_expression p2 = val(data_init::not_(c));
         pbes_expression p4 = RHS(f1, lpe);
         p4 = p4.substitute(assignment_list_substitution(g));
-        pbes_expression p = forall(e, or_(or_(p1, p2), p4));
-        v.push_back(p);
+        if (e.size() > 0) {
+          pbes_expression p = forall(e, or_(or_(p1, p2), p4));
+          v.push_back(p);
+        } else {
+          pbes_expression p = or_(or_(p1, p2), p4);
+          v.push_back(p);
+        }
       }
       return multi_and(v.begin(), v.end());
     } else if (s::is_may(f)) {
@@ -536,8 +541,13 @@ namespace pbes_untimed
         pbes_expression p2 = val(c);
         pbes_expression p4 = RHS(f1, lpe);
         p4 = p4.substitute(assignment_list_substitution(g));
-        pbes_expression p = exists(e, and_(and_(p1, p2), p4));
-        v.push_back(p);
+        if (e.size() > 0) {
+          pbes_expression p = exists(e, and_(and_(p1, p2), p4));
+          v.push_back(p);
+        } else {
+          pbes_expression p = and_(and_(p1, p2), p4);
+          v.push_back(p);
+        }
       }
       return multi_or(v.begin(), v.end());
     } else if (s::is_var(f)) {
