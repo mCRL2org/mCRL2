@@ -70,7 +70,6 @@ flags darwin.compile OPTIONS <link>shared : -dynamic ;
 flags darwin.compile OPTIONS : -Wno-long-double -no-cpp-precomp ;
 
 flags darwin.link FRAMEWORK <framework> ;
-flags darwin.link FRAMEWORK <framework> ;
 
 flags darwin.link.dll OPTIONS <bundle>no : -dynamiclib ;
 flags darwin.link.dll OPTIONS <bundle>yes : -bundle -undefined dynamic_lookup ;

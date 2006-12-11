@@ -335,11 +335,23 @@ rule run-path-setup ( target : source : properties * )
     }            
 }
 
+local argv = [ modules.peek : ARGV ] ;
+if --preserve-test-targets in $(argv)
+{
+    preserve-test-targets = true ;
+}
 
 toolset.flags testing.capture-output ARGS <testing.arg> ;
 toolset.flags testing.capture-output INPUT_FILES <testing.input-file> ;
 toolset.flags testing.capture-output LAUNCHER <testing.launcher> ;
-rule capture-output ( target : source : properties * )
+
+# Runs executable 'sources' and stores stdout in file 'target'.
+# If --preserve-test-targets command line option, removes the executable.
+# The 'target-to-remove' parameter controls what should be removed:
+#   - if 'none', does not remove anything, ever
+#   - if empty, removes 'source'
+#   - if non-empty and not 'none', contains a list of sources to remove.
+rule capture-output ( target : source : properties * : targets-to-remove ? )
 {
     output-file on $(target) = $(target:S=.output) ;
     LOCATE on $(target:S=.output) = [ on $(target) return $(LOCATE) ] ;
@@ -356,7 +368,22 @@ rule capture-output ( target : source : properties * )
     # on them and not LOCATE setting of $(target), as in other case (due to jam bug).
     DEPENDS $(target) : [ on $(target) return $(INPUT_FILES) ] ;
     
+    if $(targets-to-remove) = none
+    {
+        targets-to-remove = ;
+    }
+    else if ! $(targets-to-remove)
+    {
+        targets-to-remove = $(source) ;
+    }
+            
     run-path-setup $(target) : $(source) : $(properties) ;
+    
+    if ! $(preserve-test-targets)
+    {
+        TEMPORARY $(targets-to-remove) ;
+        RmTemps $(target) : $(targets-to-remove) ;
+    }
 }
 
 
@@ -398,6 +425,9 @@ else
     VERBOSE_TEST = 0 ;
 }
 
+
+RM = [ common.rm-command ] ;
+
 actions capture-output bind INPUT_FILES output-file
 {
     $(PATH_SETUP)
@@ -418,6 +448,11 @@ actions capture-output bind INPUT_FILES output-file
         echo ====== END OUTPUT ======
     $(ENDIF)
     exit $(STATUS)      
+}
+
+actions quietly updated piecemeal together RmTemps
+{
+    $(RM) "$(>)"
 }
 
 MAKE_FILE = [ common.file-creation-command ] ;
