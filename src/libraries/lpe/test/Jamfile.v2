@@ -3,6 +3,8 @@ import testing ;
 project libraries/lpe/test
    : requirements
        <use>/boost//headers
+       <source>/libraries//parser
+       <source>/libraries/parser//alpha
        <source>/libraries//mcrl2_basic
        <source>/libraries//lpe
        <source>/site-config//boost_program_options
@@ -13,7 +15,7 @@ test-suite lpe
     :
       [ run data_expression.cpp ]
       [ run data_test.cpp ]
-      [ run time.cpp ]
+      [ run time.cpp ../../../mcrl22lpe/lin_std.cpp ../../../mcrl22lpe/lin_alt.cpp ]
       [ run apply_test.cpp ]
       [ run data_utility_test.cpp ]
       [ run aterm_algorithm_test.cpp ]

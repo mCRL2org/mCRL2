@@ -388,6 +388,21 @@ class LPE: public aterm_appl
       //assert(has_proper_action_labels());
     }
 
+    LPE(aterm_appl lpe)
+      : aterm_appl(lpe)
+    {
+      assert(gsIsLPE(lpe));
+      assert(is_well_typed());
+      assert(is_name_clash_free(true));
+      //assert(has_proper_action_labels());
+
+      // unpack LPE(.,.,.) term     
+      aterm_appl::iterator i = lpe.begin();
+      m_free_variables     = data_variable_list(*i++);
+      m_process_parameters = data_variable_list(*i++);
+      m_summands           = summand_list(*i);
+    }
+
     LPE(aterm_appl lpe, action_label_list action_labels)
       : aterm_appl(lpe)
     {
