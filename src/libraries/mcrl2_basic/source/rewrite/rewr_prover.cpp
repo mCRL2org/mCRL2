@@ -15,17 +15,13 @@
 RewriterProver::RewriterProver(ATermAppl DataEqnSpec, RewriteStrategy strat)
 {
   prover_obj = new BDD_Prover(
-                      gsMakeSpecV1(
                         gsMakeDataSpec(
                           gsMakeSortSpec(ATmakeList0()),
                           gsMakeConsSpec(ATmakeList0()),
                           gsMakeMapSpec(ATmakeList0()),
                           DataEqnSpec
-                        ),
-                        gsMakeActSpec(ATmakeList0()),
-			gsMakeLPE(ATmakeList0(),ATmakeList0(),ATmakeList0()),
-			gsMakeLPEInit(ATmakeList0(),ATmakeList0())
-                      ),strat);
+                        )
+                      ,strat);
   rewr_obj = prover_obj->get_rewriter();
 }
 
@@ -55,8 +51,13 @@ ATerm RewriterProver::rewriteInternal(ATerm Term)
 
 ATermAppl RewriterProver::rewrite(ATermAppl Term)
 {
-  prover_obj->set_formula(Term);
-  return prover_obj->get_bdd();
+  if ( gsGetSort(Term) == gsMakeSortExprBool() )
+  {
+    prover_obj->set_formula(Term);
+    return prover_obj->get_bdd();
+  } else {
+    return rewr_obj->rewrite(Term);
+  }
 }
 
 ATerm RewriterProver::toRewriteFormat(ATermAppl Term)

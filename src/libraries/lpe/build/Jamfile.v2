@@ -15,7 +15,10 @@ alias lpe
 # The functionality provided by this library belongs in the LPE framework
 lib dataelm
        : ../source/libdataelm.cpp
+         ../../../mcrl22lpe/lin_alt.cpp
+         ../../../mcrl22lpe/lin_std.cpp
          /libraries//lpe
+         /libraries//parser
        :
        :
        :

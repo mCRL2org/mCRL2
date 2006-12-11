@@ -14,8 +14,15 @@
 <!ENTITY opt_quiet "<option>--quiet</option>">
 <!ENTITY opt_v "<option>-v</option>">
 <!ENTITY opt_verbose "<option>--verbose</option>">
+<!ENTITY opt_b "<option>-b</option>">
+<!ENTITY opt_remove_basis "<option>--remove-basis</option>">
 <!ENTITY stdin "<constant>stdin</constant>">
 <!ENTITY stdout "<constant>stdout</constant>">
+<!ENTITY sort_bool "<constant>Bool</constant>">
+<!ENTITY sort_pos "<constant>Pos</constant>">
+<!ENTITY func_eq "<function>==</function>">
+<!ENTITY func_neq "<function>!=</function>">
+<!ENTITY func_if "<function>if</function>">
 ]>
 
 <refentry id="lpedataelm">
@@ -107,6 +114,19 @@
     <listitem>
       <para>
         display concise intermediate messages
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_b;</term>
+    <term>&opt_remove_basis;</term>
+    <listitem>
+      <para>
+	also remove standard data sorts and functions if unused; by default
+	basic sorts like &sort_bool; and &sort_pos; and functions &func_eq;,
+	&func_neq; and &func_if; are not removed as they may be needed by
+	certain tools
       </para>
     </listitem>
   </varlistentry>

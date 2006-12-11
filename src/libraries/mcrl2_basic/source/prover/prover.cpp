@@ -46,12 +46,12 @@
           break;
         }
         case (GS_REWR_INNERC): {
-          gsErrorMsg("The compiled innermost rewriter is not supported.\n");
+          gsErrorMsg("The compiled innermost rewriter is not supported by the prover.\n");
           exit(1);
           break;
         }
         case (GS_REWR_JITTYC): {
-          gsErrorMsg("The compiled jitty rewriter is not supported.\n");
+          gsErrorMsg("The compiled jitty rewriter is not supported by the prover.\n");
           exit(1);
           break;
         }

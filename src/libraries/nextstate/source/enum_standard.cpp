@@ -593,7 +593,7 @@ EnumeratorStandard::EnumeratorStandard(ATermAppl spec, Rewriter *r, bool clean_u
 	info.rewr_false = info.rewr_obj->toRewriteFormat(gsMakeDataExprFalse());
 	ATprotect(&info.rewr_false);
 
-	if ( info.rewr_obj->getStrategy() == GS_REWR_INNER )
+	if ( (info.rewr_obj->getStrategy() == GS_REWR_INNER) || (info.rewr_obj->getStrategy() == GS_REWR_INNER_P) )
 	{
 		info.FindEquality = &EnumeratorSolutionsStandard::FindInner3Equality;
 		info.build_solution_aux = &EnumeratorSolutionsStandard::build_solution_aux_inner3;

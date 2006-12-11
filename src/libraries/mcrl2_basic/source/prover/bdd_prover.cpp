@@ -24,24 +24,24 @@
       ATerm v_previous_1 = 0;
       ATerm v_previous_2 = 0;
 
-      gsVerboseMsg("Formula: %P\n", f_formula);
+      gsDebugMsg("Formula: %P\n", f_formula);
 
       f_internal_bdd = f_rewriter->toRewriteFormat(f_formula);
       f_internal_bdd = f_rewriter->rewriteInternal(f_internal_bdd);
       f_internal_bdd = f_manipulator->orient(f_internal_bdd);
 
-      gsVerboseMsg("Formula rewritten and oriented: %P\n", f_rewriter->fromRewriteFormat(f_internal_bdd));
+      gsDebugMsg("Formula rewritten and oriented: %P\n", f_rewriter->fromRewriteFormat(f_internal_bdd));
 
       while (v_previous_1 != f_internal_bdd && v_previous_2 != f_internal_bdd) {
         v_previous_2 = v_previous_1;
         v_previous_1 = f_internal_bdd;
         f_internal_bdd = bdd_down(f_internal_bdd);
-        gsVerboseMsg("End of iteration.\n");
-        gsVerboseMsg("Intermediate BDD: %P\n", f_rewriter->fromRewriteFormat(f_internal_bdd));
+        gsDebugMsg("End of iteration.\n");
+        gsDebugMsg("Intermediate BDD: %P\n", f_rewriter->fromRewriteFormat(f_internal_bdd));
       }
 
       f_bdd = f_rewriter->fromRewriteFormat(f_internal_bdd);
-      gsVerboseMsg("Resulting BDD: %P\n", f_bdd);
+      gsDebugMsg("Resulting BDD: %P\n", f_bdd);
 
       ATtableDestroy(f_formula_to_bdd);
       ATtableDestroy(f_smallest);
@@ -75,7 +75,7 @@
       if (!v_guard) {
         return a_formula;
       } else {
-        gsVerboseMsg("%sSmallest guard: %P\n", f_indent.blank_spaces, f_rewriter->fromRewriteFormat(v_guard));
+        gsDebugMsg("%sSmallest guard: %P\n", f_indent.blank_spaces, f_rewriter->fromRewriteFormat(v_guard));
       }
 
       ATerm v_term1, v_term2;
@@ -83,20 +83,20 @@
       v_term1 = f_manipulator->set_true(a_formula, v_guard);
       v_term1 = f_rewriter->rewriteInternal(v_term1);
       v_term1 = f_manipulator->orient(v_term1);
-      gsVerboseMsg("%sTrue-branch after rewriting and orienting: %P\n", f_indent.blank_spaces, f_rewriter->fromRewriteFormat(v_term1));
+      gsDebugMsg("%sTrue-branch after rewriting and orienting: %P\n", f_indent.blank_spaces, f_rewriter->fromRewriteFormat(v_term1));
       f_indent.indent();
       v_term1 = bdd_down(v_term1);
       f_indent.deindent();
-      gsVerboseMsg("%sBDD of the true-branch: %P\n", f_indent.blank_spaces, f_rewriter->fromRewriteFormat(v_term1));
+      gsDebugMsg("%sBDD of the true-branch: %P\n", f_indent.blank_spaces, f_rewriter->fromRewriteFormat(v_term1));
 
       v_term2 = f_manipulator->set_false(a_formula, v_guard);
       v_term2 = f_rewriter->rewriteInternal(v_term2);
       v_term2 = f_manipulator->orient(v_term2);
-      gsVerboseMsg("%sFalse-branch after rewriting and orienting: %P\n", f_indent.blank_spaces, f_rewriter->fromRewriteFormat(v_term2));
+      gsDebugMsg("%sFalse-branch after rewriting and orienting: %P\n", f_indent.blank_spaces, f_rewriter->fromRewriteFormat(v_term2));
       f_indent.indent();
       v_term2 = bdd_down(v_term2);
       f_indent.deindent();
-      gsVerboseMsg("%sBDD of the false-branch: %P\n", f_indent.blank_spaces, f_rewriter->fromRewriteFormat(v_term2));
+      gsDebugMsg("%sBDD of the false-branch: %P\n", f_indent.blank_spaces, f_rewriter->fromRewriteFormat(v_term2));
 
       v_bdd = f_manipulator->make_reduced_if_then_else(v_guard, v_term1, v_term2);
       ATtablePut(f_formula_to_bdd, a_formula, v_bdd);
@@ -160,10 +160,10 @@
 
       v_new_time_limit = f_deadline - time(0);
       if (v_new_time_limit > 0 || f_time_limit == 0) {
-        gsVerboseMsg("Simplifying the BDD:\n");
+        gsDebugMsg("Simplifying the BDD:\n");
         f_bdd_simplifier->set_time_limit(std::max(v_new_time_limit, 0));
         f_bdd = f_bdd_simplifier->simplify(f_bdd);
-        gsVerboseMsg("Resulting BDD: %P\n", f_bdd);
+        gsDebugMsg("Resulting BDD: %P\n", f_bdd);
       }
     }
 
@@ -181,7 +181,7 @@
         if (f_apply_induction && !(f_bdd_info.is_true(f_bdd) || f_bdd_info.is_false(f_bdd))) {
           f_induction.initialize(v_original_formula);
           while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd)) {
-            gsVerboseMsg("Applying induction.\n");
+            gsDebugMsg("Applying induction.\n");
             f_formula = f_induction.apply_induction();
             build_bdd();
             eliminate_paths();
@@ -194,7 +194,7 @@
             f_bdd = v_original_bdd;
             f_induction.initialize(v_original_formula);
             while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd)) {
-              gsVerboseMsg("Applying induction on the negated formula.\n");
+              gsDebugMsg("Applying induction on the negated formula.\n");
               f_formula = f_induction.apply_induction();
               build_bdd();
               eliminate_paths();

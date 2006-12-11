@@ -89,10 +89,11 @@ int main(int argc, char** argv)
 	try {
 		po::options_description desc;
 		desc.add_options()
-			("help,h",      "display this help")
-			("version",     "display version information")
-			("quiet,q",     "do not display warning messages")
-			("verbose,v",   "display concise intermediate messages")
+			("help,h",         "display this help")
+			("version",        "display version information")
+			("quiet,q",        "do not display warning messages")
+			("verbose,v",      "display concise intermediate messages")
+			("remove-basis,b", "also remove standard data sorts and functions if unused")
 			;
 
 		po::options_description hidden("Hidden options");
@@ -184,7 +185,7 @@ int main(int argc, char** argv)
 		}
 
 		gsVerboseMsg("removing unused data...\n");
-		Spec = (ATerm) removeUnusedData((ATermAppl) Spec);
+		Spec = (ATerm) removeUnusedData((ATermAppl) Spec, vm.count("remove-basis") == 0);
 
 		if ( verbose )
 		{

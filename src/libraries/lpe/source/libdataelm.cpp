@@ -13,7 +13,10 @@
 // ======================================================================
 
 #include "lpe/specification.h"
+#include "lpe/data_specification.h"
+#include "lpe/detail/mcrl22lpe.h"
 #include "liblowlevel.h"
+#include "libstruct.h"
 
 using namespace lpe;
 
@@ -122,12 +125,34 @@ static bool is_used(ATermAppl expr, ATermIndexedSet s)
 	return true;
 }
 
-ATermAppl removeUnusedData(ATermAppl ATSpec)
+ATermAppl removeUnusedData(ATermAppl ATSpec, bool keep_basis)
 {
 	specification spec(ATSpec);
 	LPE l = spec.lpe();
 	
 	ATermTable used_data = ATtableCreate(2*(spec.data().sorts().size()+spec.data().constructors().size()+spec.data().mappings().size()),50);
+
+	if ( keep_basis )
+	{
+		/* Add sorts/functions that should always be available */
+		specification basis_spec = detail::mcrl22lpe("init delta;");
+		data_specification data = basis_spec.data();
+		for (sort_list::iterator i = data.sorts().begin(); i != data.sorts().end(); i++)
+		{
+			add_used_sort(*i,used_data);
+			add_used(gsMakeOpIdIf(*i),used_data);
+			add_used(gsMakeOpIdEq(*i),used_data);
+			add_used(gsMakeOpIdNeq(*i),used_data);
+		}
+		for (function_list::iterator i = data.constructors().begin(); i != data.constructors().end(); i++)
+		{
+			add_used(*i,used_data);
+		}
+		for (function_list::iterator i = data.mappings().begin(); i != data.mappings().end(); i++)
+		{
+			add_used(*i,used_data);
+		}
+	}
 
 	add_used(spec.initial_state(),used_data);
 
@@ -197,6 +222,12 @@ ATermAppl removeUnusedData(ATermAppl ATSpec)
 			if ( ATindexedSetGetIndex(used_data,(ATerm) ((ATermAppl) (*ssb))) >= 0 )
 			{
 				bool b = add_sort((ATermAppl) (*ssb),used_data,used_sorts,conss);
+				if ( keep_basis )
+				{
+					add_used(gsMakeOpIdIf(*ssb),used_data);
+					add_used(gsMakeOpIdEq(*ssb),used_data);
+					add_used(gsMakeOpIdNeq(*ssb),used_data);
+				}
 				not_done = not_done || b;
 			}
 		}
