@@ -29,6 +29,7 @@
 #include <atermpp/aterm.h>
 #include <lpe/lpe.h>
 #include <lpe/specification.h>
+#include "liblowlevel.h"
 
 using namespace std;
 using namespace atermpp;
@@ -174,7 +175,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     right_column->add(new label(boost::lexical_cast < std::string > (lpe.summands().size())), a);
     right_column->add(new label(boost::lexical_cast < std::string > ((lpe_specification.initial_free_variables().size() + lpe.free_variables().size()))), a);
     right_column->add(new label(boost::lexical_cast < std::string > (lpe.process_parameters().size())), a);
-    right_column->add(new label(boost::lexical_cast < std::string > (lpe.action_labels().size())), a);
+    right_column->add(new label(boost::lexical_cast < std::string > (lpe_specification.action_labels().size())), a);
   
     /* Attach columns*/
     top->add(left_column, margins(0,5,0,5));
@@ -216,7 +217,7 @@ int main(int argc, char** argv) {
       cout << "Number of summands          : " << lpe.summands().size() << endl;
       cout << "Number of free variables    : " << lpe_specification.initial_free_variables().size() + lpe.free_variables().size() << endl;
       cout << "Number of process parameters: " << lpe.process_parameters().size() << endl; 
-      cout << "Number of action labels     : " << lpe.action_labels().size() << endl;
+      cout << "Number of action labels     : " << lpe_specification.action_labels().size() << endl;
     }
     else {
       std::cerr << "Error: Unable to load LPE from `" + file_name + "'\n";

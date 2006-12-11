@@ -22,7 +22,6 @@
 #include "atermpp/vector.h"
 #include "lpe/action.h"
 #include "lpe/data.h"
-#include "lpe/data_declaration.h"
 #include "lpe/data_specification.h"
 #include "lpe/pretty_print.h"
 #include "lpe/mucalculus_init.h"
@@ -335,13 +334,6 @@ class pbes_equation: public aterm_appl
       aterm t = atermpp::find_if(ATermAppl(m_formula), is_state_variable());
       return t == aterm(); // true if nothing was found
     }
-
-    /// Returns a pretty print representation of the term.
-    ///
-    std::string pp() const
-    {
-      return "<pbes_expression>";
-    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -494,14 +486,6 @@ class equation_system: public atermpp::vector<pbes_equation>
       return true;
     }
 
-    /// Returns a pretty print representation of the term.
-    ///
-    std::string pp() const
-    {
-      // todo: implement pp
-      return "equation_system";
-    }
-
     /// Returns a representation of the term.
     ///
     std::string to_string() const
@@ -617,14 +601,6 @@ class pbes
     bool is_well_formed() const
     {
       return m_equations.is_well_formed();
-    }
-
-    /// Returns a pretty print representation of the term.
-    ///
-    std::string pp() const
-    {
-      // TODO: implement pp
-      return "pbes::pp";
     }
 
     /// Returns a representation of the term.

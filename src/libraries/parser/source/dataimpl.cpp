@@ -561,20 +561,18 @@ ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls)
 static t_data_decls get_data_decls(lpe::specification &lpe_spec)
 {
   t_data_decls data_decls;
-  data_decls.sorts     = (ATermList) lpe_spec.sorts();
-  data_decls.cons_ops  = (ATermList) lpe_spec.constructors();
-  data_decls.ops       = (ATermList) lpe_spec.mappings();
-  data_decls.data_eqns = (ATermList) lpe_spec.equations();
+  data_decls.sorts     = (ATermList) lpe_spec.data().sorts();
+  data_decls.cons_ops  = (ATermList) lpe_spec.data().constructors();
+  data_decls.ops       = (ATermList) lpe_spec.data().mappings();
+  data_decls.data_eqns = (ATermList) lpe_spec.data().equations();
   return data_decls;
 }
 
 static void set_data_decls(lpe::specification &lpe_spec, t_data_decls data_decls)
 {
   assert(data_decls_is_initialised(data_decls));
-  lpe_spec.set_sorts(lpe::sort_list(data_decls.sorts));
-  lpe_spec.set_constructors(lpe::function_list(data_decls.cons_ops));
-  lpe_spec.set_mappings(lpe::function_list(data_decls.ops));
-  lpe_spec.set_equations(lpe::data_equation_list(data_decls.data_eqns));
+  lpe::data_specification data(data_decls.sorts, data_decls.cons_ops, data_decls.ops, data_decls.data_eqns);
+  lpe_spec = lpe::set_data_specification(lpe_spec, data);
 }
 
 ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,

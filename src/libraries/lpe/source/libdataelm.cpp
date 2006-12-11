@@ -127,7 +127,7 @@ ATermAppl removeUnusedData(ATermAppl ATSpec)
 	specification spec(ATSpec);
 	LPE l = spec.lpe();
 	
-	ATermTable used_data = ATtableCreate(2*(spec.sorts().size()+spec.constructors().size()+spec.mappings().size()),50);
+	ATermTable used_data = ATtableCreate(2*(spec.data().sorts().size()+spec.data().constructors().size()+spec.data().mappings().size()),50);
 
 	add_used(spec.initial_state(),used_data);
 
@@ -180,12 +180,12 @@ ATermAppl removeUnusedData(ATermAppl ATSpec)
 		}
 	}
 
-	ATermTable used_sorts = ATtableCreate(2*spec.sorts().size(),50);
-	data_equation_list eqns = spec.equations();
+	ATermTable used_sorts = ATtableCreate(2*spec.data().sorts().size(),50);
+	data_equation_list eqns = spec.data().equations();
 	data_equation_list::iterator ee = eqns.end();
-	sort_list sorts = spec.sorts();
+	sort_list sorts = spec.data().sorts();
 	sort_list::iterator sse = sorts.end();
-	function_list conss = spec.constructors();
+	function_list conss = spec.data().constructors();
 	bool not_done = true;
 	while ( not_done )
 	{
@@ -214,7 +214,7 @@ ATermAppl removeUnusedData(ATermAppl ATSpec)
 	}
 
 	sort_list new_sort;
-	for (sort_list::iterator i=spec.sorts().begin(); i != spec.sorts().end(); i++)
+	for (sort_list::iterator i=spec.data().sorts().begin(); i != spec.data().sorts().end(); i++)
 	{
 		if ( ATindexedSetGetIndex(used_data,(ATerm) ((ATermAppl) (*i))) >= 0 )
 		{
@@ -224,7 +224,7 @@ ATermAppl removeUnusedData(ATermAppl ATSpec)
 	new_sort = reverse(new_sort);
 
 	function_list new_cons;
-	for (function_list::iterator i=spec.constructors().begin(); i != spec.constructors().end(); i++)
+	for (function_list::iterator i=spec.data().constructors().begin(); i != spec.data().constructors().end(); i++)
 	{
 		if ( ATindexedSetGetIndex(used_data,(ATerm) ((ATermAppl) (*i))) >= 0 )
 		{
@@ -234,7 +234,7 @@ ATermAppl removeUnusedData(ATermAppl ATSpec)
 	new_cons = reverse(new_cons);
 
 	function_list new_maps;
-	for (function_list::iterator i=spec.mappings().begin(); i != spec.mappings().end(); i++)
+	for (function_list::iterator i=spec.data().mappings().begin(); i != spec.data().mappings().end(); i++)
 	{
 		if ( ATindexedSetGetIndex(used_data,(ATerm) ((ATermAppl) (*i))) >= 0 )
 		{
@@ -244,7 +244,7 @@ ATermAppl removeUnusedData(ATermAppl ATSpec)
 	new_maps = reverse(new_maps);
 
 	data_equation_list new_eqns;
-	for (data_equation_list::iterator i=spec.equations().begin(); i != spec.equations().end(); i++)
+	for (data_equation_list::iterator i=spec.data().equations().begin(); i != spec.data().equations().end(); i++)
 	{
 		if ( is_used((ATermAppl) (*i).lhs(),used_data) )
 		{
@@ -253,7 +253,7 @@ ATermAppl removeUnusedData(ATermAppl ATSpec)
 	}
 	new_eqns = reverse(new_eqns);
 	
-        data_declaration new_data(new_sort,new_cons,new_maps,new_eqns);
+        data_specification new_data(new_sort,new_cons,new_maps,new_eqns);
 	specification new_spec(new_data,spec.action_labels(),spec.lpe(),spec.initial_free_variables(),spec.initial_variables(),spec.initial_state());
 
 	ATtableDestroy(used_sorts);

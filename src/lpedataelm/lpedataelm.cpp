@@ -177,10 +177,10 @@ int main(int argc, char** argv)
 		{
 			specification s(Spec);
 			gsVerboseMsg("input LPE information\n");
-			gsVerboseMsg("number of sorts: %i\n",s.sorts().size());
-			gsVerboseMsg("number of constructors: %i\n",s.constructors().size());
-			gsVerboseMsg("number of mappings: %i\n",s.mappings().size());
-			gsVerboseMsg("number of equations: %i\n",s.equations().size());
+			gsVerboseMsg("number of sorts: %i\n",s.data().sorts().size());
+			gsVerboseMsg("number of constructors: %i\n",s.data().constructors().size());
+			gsVerboseMsg("number of mappings: %i\n",s.data().mappings().size());
+			gsVerboseMsg("number of equations: %i\n",s.data().equations().size());
 		}
 
 		gsVerboseMsg("removing unused data...\n");
@@ -190,10 +190,10 @@ int main(int argc, char** argv)
 		{
 			specification s(Spec);
 			gsVerboseMsg("output LPE information\n");
-			gsVerboseMsg("number of sorts: %i\n",s.sorts().size());
-			gsVerboseMsg("number of constructors: %i\n",s.constructors().size());
-			gsVerboseMsg("number of mappings: %i\n",s.mappings().size());
-			gsVerboseMsg("number of equations: %i\n",s.equations().size());
+			gsVerboseMsg("number of sorts: %i\n",s.data().sorts().size());
+			gsVerboseMsg("number of constructors: %i\n",s.data().constructors().size());
+			gsVerboseMsg("number of mappings: %i\n",s.data().mappings().size());
+			gsVerboseMsg("number of equations: %i\n",s.data().equations().size());
 		}
 
 		gsVerboseMsg("writing output LPE...\n");

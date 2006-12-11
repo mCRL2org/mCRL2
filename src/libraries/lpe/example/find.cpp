@@ -8,11 +8,14 @@
 #include "lpe/data_utility.h"
 #include "lpe/sort.h"
 #include "lpe/specification.h"
+#include "lpe/detail/mcrl22lpe.h"
+#include "test_specifications.h"
 
 using namespace std;
 using namespace atermpp;
 using namespace lpe;
 using namespace lpe::data_init;
+using namespace lpe::detail;
 
 struct compare_variable
 {
@@ -39,12 +42,7 @@ int main()
   aterm_init(bottom_of_stack);
   gsEnableConstructorFunctions();
 
-  specification spec;
-  if (!spec.load("data/abp_b.lpe"))
-  {
-    cerr << "could not load data/abp_b.lpe" << endl;
-    return 1;
-  }
+  specification spec = mcrl22lpe(ABP_SPECIFICATION);
   LPE lpe = spec.lpe();
   std::set<aterm_string> ids = identifiers(aterm(lpe));
   for (std::set<aterm_string>::iterator i = ids.begin(); i != ids.end(); ++i)

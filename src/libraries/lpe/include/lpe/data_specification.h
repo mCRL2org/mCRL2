@@ -5,6 +5,7 @@
 #define LPE_DATA_SPECIFICATION_H
 
 #include "atermpp/aterm.h"
+#include "lpe/data_specification.h"
 #include "lpe/sort.h"
 #include "lpe/function.h"
 #include "lpe/data.h"
@@ -89,28 +90,56 @@ class data_specification: public aterm_appl
     {
       return m_equations;
     }
-
-    /// Sets the sequence of sorts.
-    ///
-    void set_sorts(sort_list sorts)
-    { m_sorts = sorts; }
-
-    /// Sets the sequence of constructors.
-    ///
-    void set_constructors(function_list constructors)
-    { m_constructors = constructors; }
-
-    /// Sets the sequence of mappings.
-    ///
-    void set_mappings(function_list mappings)
-    { m_mappings = mappings; }
-
-    /// Sets the sequence of data equations.
-    ///
-    void set_equations(data_equation_list equations)
-    { m_equations = equations; }
 };
 
-} // namespace mcrl
+/// Sets the sequence of sorts.
+///
+inline
+data_specification set_sorts(data_specification s, sort_list sorts)
+{
+  return data_specification(sorts,
+                            s.constructors(),
+                            s.mappings(),
+                            s.equations()
+                           );
+}
+
+/// Sets the sequence of constructors.
+///
+inline
+data_specification set_constructors(data_specification s, function_list constructors)
+{
+  return data_specification(s.sorts(),
+                            constructors,
+                            s.mappings(),
+                            s.equations()
+                           );
+}
+
+/// Sets the sequence of mappings.
+///
+inline
+data_specification set_mappings(data_specification s, function_list mappings)
+{
+  return data_specification(s.sorts(),
+                            s.constructors(),
+                            mappings,
+                            s.equations()
+                           );
+}
+
+/// Sets the sequence of data equations.
+///
+inline
+data_specification set_equations(data_specification s, data_equation_list equations)
+{
+  return data_specification(s.sorts(),
+                            s.constructors(),
+                            s.mappings(),
+                            equations
+                           );
+}
+
+} // namespace lpe
 
 #endif // LPE_DATA_SPECIFICATION_H

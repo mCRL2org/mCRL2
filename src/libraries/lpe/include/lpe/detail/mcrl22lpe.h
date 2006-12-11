@@ -86,7 +86,7 @@ namespace detail {
     options.nosumelm = false;
     options.nodeltaelimination = false;
     options.opt_check_only = false;
-    options.opt_end_phase = phDataImpl;
+    options.opt_end_phase = phNone;
     options.opt_noalpha = false;
     options.infilename = "";
     options.outfilename = "";

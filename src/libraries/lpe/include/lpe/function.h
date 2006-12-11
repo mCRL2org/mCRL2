@@ -12,6 +12,7 @@
 #include "atermpp/aterm_string.h"
 #include "atermpp/aterm_access.h"
 #include "lpe/sort.h"
+#include "lpe/pretty_print.h"
 
 namespace lpe {
 
@@ -69,13 +70,6 @@ class function: public aterm_appl
     {
       return function(f(*this));
     }     
-
-    /// Returns a pretty print representation of the term.
-    ///                                                   
-    std::string pp() const                                
-    {                                                     
-      return pretty_print(term());                        
-    }
 };
 
 typedef term_list<function> function_list;
@@ -86,6 +80,23 @@ bool is_function(aterm_appl t)
   return gsIsOpId(t);
 }
 
-} // namespace mcrl
+} // namespace lpe
+
+namespace atermpp
+{
+using lpe::function;
+
+template<>
+struct aterm_traits<function>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(function t)   { t.protect(); }
+  static void unprotect(function t) { t.unprotect(); }
+  static void mark(function t)      { t.mark(); }
+  static ATerm term(function t)     { return t.term(); }
+  static ATerm* ptr(function& t)    { return &t.term(); }
+};
+
+} // namespace atermpp
 
 #endif // LPE_FUNCTION_H

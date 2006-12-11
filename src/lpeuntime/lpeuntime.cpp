@@ -243,7 +243,7 @@ lpe::specification untime(const lpe::specification& specification) {
   untime_summand_list = atermpp::reverse(untime_summand_list);
       
   // Create new LPE, this equals lpe, except for the new summand list and the additional process parameter.
-  untime_lpe = lpe::LPE(lpe.free_variables(), untime_process_parameters, untime_summand_list, lpe.action_labels());
+  untime_lpe = lpe::LPE(lpe.free_variables(), untime_process_parameters, untime_summand_list);
 
 
   // Create new initial_variables and initial_state in order to correctly initialize.

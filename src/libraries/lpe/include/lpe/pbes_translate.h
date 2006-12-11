@@ -622,7 +622,6 @@ pbes pbes_translate(state_formula f, specification spec, bool untimed = true)
     aterm_string X = fresh_identifier("X", context);
     f = nu(X, data_variable_init_list(), f);
   }  
-  data_specification dataspec(spec.sorts(), spec.constructors(), spec.mappings(), spec.equations());
   LPE lpe = spec.lpe();
   equation_system e;
 
@@ -652,12 +651,12 @@ pbes pbes_translate(state_formula f, specification spec, bool untimed = true)
   if (untimed)
   {   
     propositional_variable_instantiation init(Xe, fi + pi + Par(Xf, f));
-    return pbes(dataspec, e, init);
+    return pbes(spec.data(), e, init);
   }
   else
   {
     propositional_variable_instantiation init(Xe, data_init::real(0) + fi + pi + Par(Xf, f));
-    return pbes(dataspec, e, init);
+    return pbes(spec.data(), e, init);
   }
 }
 

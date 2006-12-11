@@ -3,6 +3,10 @@
 #include <assert.h>
 #include <limits.h>
 
+#ifdef _MSC_VER
+#include <boost/format.hpp>
+#endif
+
 #include "dataimpl.h"
 #include "libstruct.h"
 #include "liblowlevel.h"
@@ -176,7 +180,9 @@ ATermAppl create_new_var_name(bool cap, int index)
   gsDebugMsg("creating variable with index %d and cap %s\n",
     index, cap?"true":"false");
   int suffix = index / 3;
+#ifndef _MSC_VER
   char name[suffix+2];
+#endif // _MSC_VER
   char base;
   //choose x/X, y/Y or z/Z
   switch (index % 3) {
@@ -190,6 +196,7 @@ ATermAppl create_new_var_name(bool cap, int index)
       base = cap?'Z':'z';
       break;
   }
+#ifndef _MSC_VER
   //append suffix if necessary
   if (suffix == 0) {
     sprintf(name, "%c", base);
@@ -197,6 +204,15 @@ ATermAppl create_new_var_name(bool cap, int index)
     sprintf(name, "%c%d", base, suffix);
   }
   return gsString2ATermAppl(name);
+#endif // _MSC_VER
+#ifdef _MSC_VER
+  std::string name;
+  if (suffix == 0)
+    name = str(boost::format("%c") % base);
+  else
+    name = str(boost::format("%c%d") % base % suffix);
+  return gsString2ATermAppl(name.c_str());
+#endif
 }
 
 ATermAppl create_fresh_var_name(bool cap, ATermList terms)

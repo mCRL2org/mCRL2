@@ -7,10 +7,13 @@
 #include "lpe/specification.h"
 #include "lpe/predefined_symbols.h"
 #include "lpe/sort.h"
+#include "lpe/detail/mcrl22lpe.h"
+#include "test_specifications.h"
 
 using namespace std;
 using namespace atermpp;
 using namespace lpe;
+using namespace lpe::detail;
 using boost::format;
 
 /// Rewrites the data expressions x an y, and then compares if they are equal.
@@ -29,32 +32,27 @@ int main()
   ATinit(0, 0, &bottom_of_stack);
   gsEnableConstructorFunctions(); 
   
-  specification spec;
-  if (!spec.load("data/abp_b.lpe"))
-  {
-    cerr << "could not load data/abp_b.lpe" << endl;
-    return 1;
-  }
+  specification spec = mcrl22lpe(ABP_SPECIFICATION);
 
   cout << "--- sort -----------" << endl;
-  for (sort_list::iterator i = spec.sorts().begin(); i != spec.sorts().end(); ++i)
+  for (sort_list::iterator i = spec.data().sorts().begin(); i != spec.data().sorts().end(); ++i)
   {
     lpe::sort s = *i;
-    cout << str(format("%5s        %s") % i->pp() % i->to_string()) << endl;
+    cout << str(format("%5s        %s") % pp(*i) % i->to_string()) << endl;
   }
 
   cout << "--- map ------------" << endl;
-  for (function_list::iterator i = spec.mappings().begin(); i != spec.mappings().end(); ++i)
+  for (function_list::iterator i = spec.data().mappings().begin(); i != spec.data().mappings().end(); ++i)
   {
     function f = *i;
-    cout << str(format("%5s        %s") % i->pp() % i->to_string()) << endl;
+    cout << str(format("%5s        %s") % pp(*i) % i->to_string()) << endl;
   }
 
   cout << "--- cons -----------" << endl;
-  for (function_list::iterator i = spec.constructors().begin(); i != spec.constructors().end(); ++i)
+  for (function_list::iterator i = spec.data().constructors().begin(); i != spec.data().constructors().end(); ++i)
   {
     function f = *i;
-    cout << str(format("%5s        %s") % i->pp() % i->to_string()) << endl;
+    cout << str(format("%5s        %s") % pp(*i) % i->to_string()) << endl;
   }
   cout << endl;
 
@@ -75,17 +73,17 @@ int main()
   cout << "--- process parameters: ---" << endl;
   for (data_variable_list::iterator i = lpe.process_parameters().begin(); i != lpe.process_parameters().end(); ++i)
   {
-    cout << str(format("%8s : %8s  %s") % i->name() % i->type().pp() % i->to_string()) << endl;
+    cout << str(format("%8s : %8s  %s") % i->name() % pp(i->type()) % i->to_string()) << endl;
   }
   cout << endl;
 
   lpe::sort D("D");
   data_variable v("d1", D);
-  cout << "v  = " << v.pp() << " " << v.to_string() << endl;
+  cout << "v  = " << pp(v) << " " << v.to_string() << endl;
 
   data_variable w("YES", D);
   data_assignment a(v, w);
-  cout << "a = " << a.pp() << " " << a.to_string() << endl;
+  cout << "a = " << pp(a) << " " << a.to_string() << endl;
 
   // test substitution
   data_expression_list d0 = spec.initial_state();
@@ -103,7 +101,7 @@ int main()
 
   for (summand_list::iterator i = spec.lpe().summands().begin(); i != spec.lpe().summands().end(); ++i)
   {
-//    cout << "summand " << i->pp() << endl;
+//    cout << "summand " << pp(*i) << endl;
   }
   
   LPE_summand s = spec.lpe().summands().front();

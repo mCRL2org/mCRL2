@@ -458,25 +458,25 @@ void lpeConstElm::findSingleton() {
 
   std::map< lpe::sort, int >     p_countSort;
   //set< lpe::sort > result;
-  for(lpe::sort_list::iterator i = p_spec.sorts().begin(); i != p_spec.sorts().end() ; i++){
+  for(lpe::sort_list::iterator i = p_spec.data().sorts().begin(); i != p_spec.data().sorts().end() ; i++){
     p_countSort[*i] = 0;
     p_singletonSort.insert(*i);
   }
   
-  for(lpe::function_list::iterator i= p_spec.constructors().begin() ; i != p_spec.constructors().end() ; i++){
+  for(lpe::function_list::iterator i= p_spec.data().constructors().begin() ; i != p_spec.data().constructors().end() ; i++){
     p_countSort[i->range_sort()]++;
   }
 
   unsigned int n = p_singletonSort.size()+1;
   while (n != p_singletonSort.size()){
     n = p_singletonSort.size();
-    for(sort_list::iterator i = p_spec.sorts().begin(); i != p_spec.sorts().end() ; i++){
+    for(sort_list::iterator i = p_spec.data().sorts().begin(); i != p_spec.data().sorts().end() ; i++){
       int b = 1;
       //if p_countSort[*i] == 0 then there are sorts declared which are never used!!!!
         assert(p_countSort[*i] != 0);
 
       if (p_countSort[*i] == 1){
-        for(function_list::iterator j = p_spec.constructors().begin() ; j != p_spec.constructors().end() ;j++){
+        for(function_list::iterator j = p_spec.data().constructors().begin() ; j != p_spec.data().constructors().end() ;j++){
           if (j->range_sort() == *i){
             sort_list sorts = j->domain_sorts();
             for(sort_list::iterator k = sorts.begin() ; k != sorts.end() ; k++ ){
@@ -496,7 +496,7 @@ void lpeConstElm::findSingleton() {
   if (p_verbose){
     std::cerr << "lpeconstelm: Sorts which have singleton constructors:"<< std::endl;
     for(std::set<lpe::sort>::iterator i = p_singletonSort.begin(); i != p_singletonSort.end(); i++){
-      std::cerr <<"lpeconstelm:   "<< i->pp() << std::endl;
+      std::cerr <<"lpeconstelm:   "<< pp(*i) << std::endl;
     }
     if (p_singletonSort.empty()) {
       std::cerr <<"lpeconstelm:   []"<< std::endl;      
@@ -509,7 +509,7 @@ void lpeConstElm::findSingleton() {
 //---------------------------------------------------------------
 inline void lpeConstElm::printNextState() {
   for(std::vector< lpe::data_assignment >::iterator i = p_nextState.begin(); i != p_nextState.end() ; i++ ){
-    std::cerr << "[" << i->pp() << "]";
+    std::cerr << "[" << pp(*i) << "]";
   
   }
   std::cerr << std::endl;
@@ -535,18 +535,18 @@ inline void lpeConstElm::printState() {
     std::cerr << "lpeconstelm:   [ ";
     for(std::set< int >::iterator i = p_S.begin(); i != (--p_S.end()) ; i++ ){
       if (!p_nosingleton){
-        std::cerr << p_currentState[*i].pp() << ", ";
+        std::cerr << pp(p_currentState[*i]) << ", ";
       } else {
-        std::cerr << p_currentState[*i].pp() << ": " << p_currentState[*i].lhs().type().pp() << ", ";
+        std::cerr << pp(p_currentState[*i]) << ": " << pp(p_currentState[*i].lhs().type()) << ", ";
       }  
     }
-    std::cerr << p_currentState[*(--p_S.end())].pp() << " ]" << std::endl;
+    std::cerr << pp(p_currentState[*(--p_S.end())]) << " ]" << std::endl;
   }
 }
 
 inline void lpeConstElm::printCurrentState() {
   for(std::vector< lpe::data_assignment >::iterator i = p_currentState.begin(); i != p_currentState.end() ; i++ ){
-    std::cerr << "[" << i->pp() << "]";
+    std::cerr << "[" << pp(*i) << "]";
   
   }
   std::cerr << std::endl;
@@ -560,7 +560,7 @@ inline void lpeConstElm::printCurrentState() {
 void lpeConstElm::removeSingleton(int n)
 {
   bool empty = true;
-  sort_list rebuild_sort = p_spec.sorts();
+  sort_list rebuild_sort = p_spec.data().sorts();
   findSingleton();
   if(p_verbose){
   std::cerr <<
@@ -575,7 +575,7 @@ void lpeConstElm::removeSingleton(int n)
     {
       p_V.insert(i);
       if (p_verbose){
-        std::cerr << "lpeconstelm:   " << p_initAssignments[i].lhs().pp() << " : " << p_initAssignments[i].lhs().type().pp() << std::endl;
+        std::cerr << "lpeconstelm:   " << pp(p_initAssignments[i].lhs()) << " : " << pp(p_initAssignments[i].lhs().type()) << std::endl;
         empty = false;
       }
     }
@@ -691,13 +691,12 @@ inline void lpeConstElm::output() {
   //construct new specfication
   //
   //LPE(data_variable_list free_variables, data_variable_list process_parameters, 
-  //  summand_list summands, action_label_list action_labels);
+  //  summand_list summands);
   lpe::LPE rebuild_lpe;
   rebuild_lpe = lpe::LPE(
     setToList(usedFreeVars),
     vectorToList(variablePPvar), 
-    atermpp::reverse(rebuild_summandlist_no_cp),
-    p_lpe.action_labels()
+    atermpp::reverse(rebuild_summandlist_no_cp)
   );
    
    //std::cerr <<  p_spec.initial_free_variables() << std::endl;
@@ -866,7 +865,7 @@ void lpeConstElm::filter() {
   p_newVarCounter  = 0;
   
   lpe::LPE p_lpe = p_spec.lpe();
-  rewr           = createRewriter(gsMakeDataEqnSpec(p_spec.equations())); 
+  rewr           = createRewriter(gsMakeDataEqnSpec(p_spec.data().equations())); 
 
   for(lpe::data_assignment_list::iterator i = p_spec.initial_assignments().begin(); i != p_spec.initial_assignments().end() ; i++ ){
     p_lookupIndex[i->lhs()] = counter;

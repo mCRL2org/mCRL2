@@ -13,12 +13,10 @@ namespace lpe {
     return PrintPart_CXX(t, ppDefault);
   }
 
-  /// Returns a pretty print representation of the term_list.
-  ///
   template <typename Term>
-  std::string pp(atermpp::term_list<Term> l)
+  std::string pp(Term t)
   {
-    return pretty_print(atermpp::aterm(l));
+    return pretty_print(atermpp::aterm_traits<Term>::term(t));
   }
 
 } // namespace mcrl

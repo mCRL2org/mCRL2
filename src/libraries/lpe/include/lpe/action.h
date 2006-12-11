@@ -64,13 +64,6 @@ class action_label: public aterm_appl
     {
       return action_label(f(*this));
     }     
-
-    /// Returns a pretty print representation of the term.
-    ///                                                   
-    std::string pp() const                                
-    {                                                     
-      return pretty_print(term());                        
-    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -148,13 +141,6 @@ class action: public aterm_appl
     {
       return action(f(aterm_appl(*this)));
     }     
-
-    /// Returns a pretty print representation of the term.
-    ///                                                   
-    std::string pp() const                                
-    {                                                     
-      return pretty_print(term());                        
-    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

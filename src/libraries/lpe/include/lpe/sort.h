@@ -93,13 +93,6 @@ class sort: public aterm_appl
     {
       return gsGetSortExprResult(*this);
     }
-
-    /// Returns a pretty print representation of the term.
-    ///                                                   
-    std::string pp() const                                
-    {                                                     
-      return pretty_print(term());                        
-    }
 };
 
 inline
@@ -116,5 +109,22 @@ sort arrow(sort domain, sort range)
 }
 
 } // namespace lpe
+
+namespace atermpp
+{
+using lpe::sort;
+
+template<>
+struct aterm_traits<sort>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(sort t)   { t.protect(); }
+  static void unprotect(sort t) { t.unprotect(); }
+  static void mark(sort t)      { t.mark(); }
+  static ATerm term(sort t)     { return t.term(); }
+  static ATerm* ptr(sort& t)    { return &t.term(); }
+};
+
+} // namespace atermpp
 
 #endif // LPE_SORT_H

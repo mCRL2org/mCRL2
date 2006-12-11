@@ -15,7 +15,7 @@
 #include "lpe/function.h"
 #include "lpe/lpe.h"
 #include "lpe/pretty_print.h"
-#include "lpe/data_declaration.h"
+#include "lpe/data_specification.h"
 
 namespace lpe {
 
@@ -39,30 +39,13 @@ using atermpp::aterm_traits;
 // 
 // init P(true, 0);
 // 
-// parameters -\> b, n
-// initial_state -\> true, 0
-// data -\> ...
-// summands -\> [[],true,a(b),nil,[]], [[c],b,e,1,[b := c]]
-//
-// syntax: SpecV1(
-//           DataSpec(
-//             SortSpec(list<sort> sorts),
-//             ConsSpec(list<operation> constructors),
-//             MapSpec(list<operation> mappings),
-//             DataEqnSpec(list<data_equation> equations)
-//           ),
-//           ActSpec(list<action_label> action_labels),
-//           LPE(list<data_variable> free_variables, list<data_variable> process_parameters, list<LPESummand> lpe_summands),
-//           Init
-//         )
-//
 // <Spec>         ::= SpecV1(<DataSpec>, ActSpec(<ActId>*), <ProcEqnSpec>, <Init>)
 // <DataSpec>     ::= DataSpec(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
 //                      MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*)
 class specification: public aterm_appl
 {
   protected:
-    data_declaration     m_data;
+    data_specification   m_data;
     action_label_list    m_action_labels;
     LPE                  m_lpe;
     data_variable_list   m_initial_free_variables;
@@ -108,29 +91,40 @@ class specification: public aterm_appl
       return data_assignment_list(assignments.begin(), assignments.end());
     }
 
+    /// Returns true if the action labels in the specification are included in m_action_labels.
+    bool has_proper_action_labels() const
+    {
+      // find all action labels that occur in the LPE
+      std::set<action_label> labels;
+      atermpp::find_all_if(*this, is_action_label, std::inserter(labels, labels.end()));
+      
+      // put the elements of m_action_labels in a set
+      std::set<action_label> cached_labels;
+      for (action_label_list::iterator i = m_action_labels.begin(); i != m_action_labels.end(); ++i)
+      {
+        cached_labels.insert(*i);
+      }
+      
+      return std::includes(cached_labels.begin(), cached_labels.end(), labels.begin(), labels.end());
+    }
+
     /// Initialize the specification with an aterm_appl.
     ///
     void init_term(aterm_appl t)
     {
       m_term = aterm_traits<aterm_appl>::term(t);
       aterm_appl::iterator i = t.begin();
-      m_data = data_declaration(aterm_appl(*i++));
-      //sort_list          sorts        = sort_list(aterm_appl(*i++).argument(0));
-      //function_list      constructors = function_list(aterm_appl(*i++).argument(0));
-      //function_list      mappings     = function_list(aterm_appl(*i++).argument(0));
-      //data_equation_list equations    = data_equation_list(aterm_appl(*i++).argument(0));
-      //m_data = data_declaration(sorts, constructors, mappings, equations);
-      m_action_labels                 = action_label_list(aterm_appl(*i++).argument(0));
-      aterm_appl lpe                  = *i++;
-      aterm_appl lpe_init             = *i;
-
-      m_lpe = LPE(lpe, m_action_labels);
+      m_data              = aterm_appl(*i++);
+      m_action_labels     = aterm_appl(*i++)(0);
+      m_lpe               = aterm_appl(*i++);
+      aterm_appl lpe_init = *i;
 
       // unpack LPEInit(.,.) term
       aterm_appl::iterator k         = lpe_init.begin();
-      m_initial_free_variables       = data_variable_list(*k++);
-      m_initial_assignments          = data_assignment_list(*k);
+      m_initial_free_variables       = *k++;
+      m_initial_assignments          = *k;
       data_expression_list d0(static_cast<ATermList>(m_initial_free_variables));
+      assert(has_proper_action_labels());
     }
 
   public:
@@ -145,7 +139,7 @@ class specification: public aterm_appl
     }
 
     specification(
-        data_declaration     data             ,
+        data_specification   data             ,
         action_label_list    action_labels    ,
         LPE                  lpe              ,
         data_variable_list   initial_free_variables,
@@ -167,6 +161,7 @@ class specification: public aterm_appl
           gsMakeLPEInit(initial_free_variables, m_initial_assignments)
         )
       );        
+      assert(has_proper_action_labels());
     }
 
     /// Reads the LPE from file. Returns true if the operation succeeded.
@@ -201,57 +196,13 @@ class specification: public aterm_appl
       return m_lpe;
     }
 
-    /// Returns the data declaration.
+    /// Returns the data specification.
     ///
-    data_declaration data() const
+    data_specification data() const
     { return m_data; }
 
-    /// Returns the data declaration.
-    ///
-    data_declaration& data()
-    { return m_data; }
-
-    /// Returns the sequence of sorts.
-    ///
-    sort_list sorts() const
-    { return m_data.sorts(); }
-
-    /// Sets the sequence of sorts.
-    ///
-    void set_sorts(sort_list sorts)
-    { m_data.set_sorts(sorts); }
-
-    /// Returns the sequence of constructors.
-    ///
-    function_list constructors() const
-    { return m_data.constructors(); }
-
-    /// Sets the sequence of constructors.
-    ///
-    void set_constructors(function_list constructors)
-    { m_data.set_constructors(constructors); }
-
-    /// Returns the sequence of mappings.
-    ///
-    function_list mappings() const
-    { return m_data.mappings(); }
-
-    /// Sets the sequence of mappings.
-    ///
-    void set_mappings(function_list mappings)
-    { m_data.set_mappings(mappings); }
-
-    /// Returns the sequence of data equations.
-    ///
-    data_equation_list equations() const
-    { return m_data.equations(); }
-
-    /// Sets the sequence of data equations.
-    ///
-    void set_equations(data_equation_list equations)
-    { m_data.set_equations(equations); }
-
-    /// Returns the sequence of action labels.
+    /// Returns a sequence of action labels. This sequence includes all
+    /// action labels occurring in this specification, but it can have more.
     ///
     action_label_list action_labels() const
     { return m_action_labels; }
@@ -287,7 +238,7 @@ class specification: public aterm_appl
 
 
 inline
-specification set_data_declaration(specification spec, data_declaration data)
+specification set_data_specification(specification spec, data_specification data)
 {
   return specification(data,
                        spec.action_labels(),

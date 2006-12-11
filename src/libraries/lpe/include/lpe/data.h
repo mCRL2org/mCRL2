@@ -99,13 +99,6 @@ class data_expression: public aterm_appl
       return gsGetSort(*this);
     }
 
-    /// Returns a pretty print representation of the term.
-    ///
-    std::string pp() const
-    {
-      return pretty_print(term());
-    }
-
     /// Applies a substitution to this data_expression and returns the result.
     /// The Substitution object must supply the method aterm operator()(aterm).
     ///
@@ -179,13 +172,6 @@ class data_variable: public aterm_appl
     {
       return gsGetSort(*this);
     }
-
-    /// Returns a pretty print representation of the term.
-    ///                                                   
-    std::string pp() const                                
-    {                                                     
-      return pretty_print(term());
-    }
   };
                                                             
 ///////////////////////////////////////////////////////////////////////////////
@@ -238,13 +224,6 @@ class data_variable_init: public aterm_appl
       aterm_appl y = *i++;
       aterm_appl z = *i;
       return data_expression(z);
-    }
-
-    /// Returns a pretty print representation of the term.
-    ///                                                   
-    std::string pp() const                                
-    {                                                     
-      return pretty_print(term());
     }
 };
 
@@ -321,13 +300,6 @@ class data_equation: public aterm_appl
     data_expression rhs() const
     {
       return m_rhs;
-    }
-
-    /// Returns a pretty print representation of the term.
-    ///                                                   
-    std::string pp() const                                
-    {                                                     
-      return pretty_print(term());                        
     }
 
     /// Applies a substitution to this data_equation and returns the result.
@@ -407,13 +379,6 @@ class data_assignment: public aterm_appl
     data_expression rhs() const
     {
       return m_rhs;
-    }
-
-    /// Returns a pretty print representation of the term.
-    ///                                                   
-    std::string pp() const                                
-    {                                                     
-      return pretty_print(term());                        
     }
 };
 

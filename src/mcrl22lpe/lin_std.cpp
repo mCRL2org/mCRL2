@@ -22,6 +22,11 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <string.h>
+
+#ifdef _MSC_VER
+#include "atermpp/vector.h"
+#endif
+
 #include "lin_std.h"
 #include "libstruct.h"
 #include "liblowlevel.h"
@@ -6713,7 +6718,11 @@ static bool might_communicate(ATermList m, ATermList n = NULL)
     // the rest of actions of lhs that are not in m should be in n
 
     // rest[i] contains the part of n in which lhs i has to find matching actions
+#ifndef _MSC_VER
     ATermList rest[comm_table_num];
+#else
+    atermpp::vector<ATermList> rest(comm_table_num);
+#endif // _MSC_VER
     for(int i=0; i<comm_table_num; i++)
     {
       rest[i] = n;

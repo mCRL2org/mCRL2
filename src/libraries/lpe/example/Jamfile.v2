@@ -1,23 +1,23 @@
 project libraries/lpe/example
    : requirements
        <include>$(BOOST_ROOT)
+       <source>/libraries//parser
+       <source>/libraries/parser//alpha
        <source>/libraries//mcrl2_basic
        <source>/libraries//lpe
        <source>/site-config//boost_program_options
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
    ;
 
-exe constructors    : constructors.cpp : ;
-exe spec            : spec.cpp  : ;
-exe pbes            : pbes.cpp : ;
-exe filter_template : filter_template.cpp : ;
-exe find            : find.cpp : ;
+exe constructors    : constructors.cpp    ../../../mcrl22lpe/lin_std.cpp ../../../mcrl22lpe/lin_alt.cpp : ;
+exe spec            : spec.cpp            ../../../mcrl22lpe/lin_std.cpp ../../../mcrl22lpe/lin_alt.cpp : ;
+exe filter_template : filter_template.cpp                                                               : ;
+exe find            : find.cpp            ../../../mcrl22lpe/lin_std.cpp ../../../mcrl22lpe/lin_alt.cpp : ;
 
 install dist
    :
      constructors
      spec
-     pbes
      filter_template
      find
    :
