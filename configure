@@ -688,9 +688,9 @@ CADP_HEADERS
 CADP_LIBRARIES
 BOOST_INCLUDE_PATH
 BOOST_LIBRARY_PATH
-OPENGL_NAME
 OPENGL_IPATH
 OPENGL_LPATH
+OPENGL_NAME
 XML2_CONFIG
 XML2_CPPFLAGS
 XML2_LDFLAGS
@@ -4950,27 +4950,25 @@ fi
 
 case $host in
   *-*-mingw32*)
-    LIBS="opengl32"
+    OPENGL_NAME="opengl32"
     ;;
   *-*-cygwin*)
-    LIBS="opengl32"
+    OPENGL_NAME="opengl32"
     ;;
   *-*-darwin*)
-    LIBS="OpenGL"
+    OPENGL_NAME="OpenGL"
     USE_OPENGL="yes (framework OpenGL)"
     ;;
   *)
-    LIBS="GL"
+    OPENGL_NAME="GL"
     ;;
 esac
 
 if test "$USE_OPENGL"; then
-  OPENGL_NAME=$LIBS
-
-
   { echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6; }
 else
+  LIBS=$OPENGL_NAME
   USE_OPENGL=$with_opengl
   cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
@@ -5011,7 +5009,7 @@ else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-	USE_OPENGL=no
+
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
@@ -5028,13 +5026,14 @@ echo "${ECHO_T}yes" >&6; }
 
     fi
 
-    OPENGL_NAME=$LIBS
-
   else
+    USE_OPENGL="no"
+    OPENGL_NAME=""
     { echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
   fi
 fi
+
 
 # Check for xml2 library and header files
 
@@ -7144,9 +7143,9 @@ CADP_HEADERS!$CADP_HEADERS$ac_delim
 CADP_LIBRARIES!$CADP_LIBRARIES$ac_delim
 BOOST_INCLUDE_PATH!$BOOST_INCLUDE_PATH$ac_delim
 BOOST_LIBRARY_PATH!$BOOST_LIBRARY_PATH$ac_delim
-OPENGL_NAME!$OPENGL_NAME$ac_delim
 OPENGL_IPATH!$OPENGL_IPATH$ac_delim
 OPENGL_LPATH!$OPENGL_LPATH$ac_delim
+OPENGL_NAME!$OPENGL_NAME$ac_delim
 XML2_CONFIG!$XML2_CONFIG$ac_delim
 XML2_CPPFLAGS!$XML2_CPPFLAGS$ac_delim
 XML2_LDFLAGS!$XML2_LDFLAGS$ac_delim

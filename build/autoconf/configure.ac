@@ -360,31 +360,30 @@ fi
 
 case $host in
   *-*-mingw32*)
-    LIBS="opengl32"
+    OPENGL_NAME="opengl32"
     ;;
   *-*-cygwin*)
-    LIBS="opengl32"
+    OPENGL_NAME="opengl32"
     ;;
   *-*-darwin*)
-    LIBS="OpenGL"
+    OPENGL_NAME="OpenGL"
     USE_OPENGL="yes (framework OpenGL)"
     ;;
   *)
-    LIBS="GL"
+    OPENGL_NAME="GL"
     ;;
 esac
 
 if test "$USE_OPENGL"; then
-  AC_SUBST([OPENGL_NAME],[$LIBS])
-
   AC_MSG_RESULT([yes])
 else
+  LIBS=$OPENGL_NAME
   USE_OPENGL=$with_opengl
   AC_COMPILE_IFELSE(AC_LANG_PROGRAM([
                    #include <GL/gl.h>
                    #include <GL/glu.h>],
                   [glPointSize(1.0f);]),
-                  USE_OPENGL="yes",USE_OPENGL=no)
+                  USE_OPENGL="yes")
 
   if test $USE_OPENGL; then
     AC_MSG_RESULT([yes])
@@ -395,11 +394,13 @@ else
       AC_SUBST([OPENGL_LPATH],[$with_opengl/lib])
     fi
 
-    AC_SUBST([OPENGL_NAME],[$LIBS])
   else
+    USE_OPENGL="no"
+    OPENGL_NAME=""
     AC_MSG_RESULT([no])
   fi
 fi
+AC_SUBST([OPENGL_NAME],[])
 
 # Check for xml2 library and header files
 AC_ARG_WITH(
