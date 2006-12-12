@@ -31,6 +31,8 @@ project toolset
           <os>LINUX,<toolset>gcc:<cxxflags>"-std=c++98 -ansi"
           <toolset>msvc:<define>WIN32
           <toolset>msvc:<include>build/workarounds/msvc
+          <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
+          <toolset>msvc:<define>_SCL_SECURE_NO_DEPRECATE
           <os>NT,<toolset>gcc:<include>build/workarounds/mingw
        : default-build
           <address-model>$(ADDRESS_MODEL)

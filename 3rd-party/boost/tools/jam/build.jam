@@ -371,7 +371,7 @@ else if $(MAC)
 }
 else if $(NT)
 {
-    locate-target ?= ..\..\..\..\build\bin ;
+    locate-target ?= ..\\..\\..\\..\\build\\bin ;
     platform = $(OS:L) ;
 }
 else if $(OSPLAT)
