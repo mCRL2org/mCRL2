@@ -7,6 +7,7 @@
 
 #ifdef _MSC_VER
 #include <substitutes.h>
+#include <malloc.h>
 #endif
 
 #ifdef __cplusplus
@@ -30,8 +31,8 @@ extern char *strdup(const char *s);
 //Declare a local array NAME of type TYPE and SIZE elements (where SIZE
 //is not a constant value)
 #ifdef _MSC_VER
-#define DECL_A(NAME,TYPE,SIZE)  TYPE *NAME = (TYPE *) malloc((SIZE)*sizeof(TYPE))
-#define FREE_A(NAME)            free(NAME);
+#define DECL_A(NAME,TYPE,SIZE)  TYPE *NAME = (TYPE *) _alloca((SIZE)*sizeof(TYPE))
+#define FREE_A(NAME)            
 #else
 #define DECL_A(NAME,TYPE,SIZE)  TYPE NAME[SIZE]
 #define FREE_A(NAME)            
