@@ -34,22 +34,6 @@ lib struct
          <library>lowlevel
        ;
 
-local REWRITE_SOURCES = [ prepend rewrite/ : librewrite rewr_inner rewr_jitty rewr_innerc rewr_jittyc rewr_prover ] ;
-
-lib rewrite
-       : $(REWRITE_SOURCES).o
-         /libraries//aterm
-       : <include>../include/rewrite
-         <include>../include/print
-       :
-       : <library>struct
-         <os>LINUX:<library>/site-config//m
-         <os>CYGWIN:<library>/site-config//m
-         <include>../include/rewrite
-         <os>LINUX:<library>/site-config//dl
-         <link>static,<toolset>gcc:<linkflags>-Wl,-export-dynamic
-       ;
-
 local PRINT_SOURCES = [ prepend print/ : libprint libprint_c ] ;
 
 lib print
@@ -63,28 +47,33 @@ lib print
          <include>../include/print
        ;
 
-local MCRL2_BASIC_SOURCES = $(LOWLEVEL_SOURCES) $(PRINT_SOURCES) $(REWRITE_SOURCES) $(STRUCT_SOURCES) ;
+local MCRL2_BASIC_SOURCES = $(LOWLEVEL_SOURCES) $(PRINT_SOURCES) $(STRUCT_SOURCES) ;
 
 for object in $(MCRL2_BASIC_SOURCES) {
   obj $(object).o
       : $(object).cpp
       : <include>$(SETUP)
         <include>../include/print
-        <include>../include/rewrite
         <include>../include/lowlevel
         <include>../include/struct
         <dependency>/libraries//aterm
       ;
 }
 
+alias auxiliary
+       :
+       : <include>../include/auxiliary
+       :
+       : <include>../include/auxiliary
+       ;
+
 lib mcrl2_basic
        : $(MCRL2_BASIC_SOURCES).o
-         [ glob ../source/prover/*.cpp ]
          [ glob ../source/auxiliary/*.cpp ]
-       : <include>../include/rewrite
-         <include>../include/print
+       : <include>../include/print
          <include>../include/struct
          <include>../include/lowlevel
+         <include>../include/auxiliary
          <toolset>gcc:<library>/libraries//pstream
          <toolset>darwin:<library>/libraries//pstream
          <os>NT,<link>shared:<library>/libraries//aterm
@@ -96,6 +85,7 @@ lib mcrl2_basic
          <include>../include/print
          <include>../include/rewrite
          <include>../include/lowlevel
+         <include>../include/auxiliary
          <include>../include/struct
          <os>LINUX:<library>/site-config//dl
          <link>static,<toolset>gcc:<linkflags>-Wl,-export-dynamic

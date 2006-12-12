@@ -5,6 +5,7 @@ project toolset/lperewr
 exe lperewr
        : lperewr.cpp
          /libraries//mcrl2_basic
+         /libraries//rewrite
        : <include>.
          <toolset>msvc:<library>/workarounds/msvc//getopt
        ;

@@ -6,10 +6,19 @@ project lpe
 
 alias lpe
        :
+       : <dependency>data-specification
+       :
+       : <dependency>/boost//headers
+         <dependency>data-specification
+       ;
+
+alias data-specification
+       :
        : <library>/libraries//atermpp
          <library>/libraries//mcrl2_basic
        :
        : <dependency>/boost//headers
+         <library>/libraries//rewrite
        ;
 
 # The functionality provided by this library belongs in the LPE framework
@@ -19,6 +28,7 @@ lib dataelm
          ../../../mcrl22lpe/lin_std.cpp
          /libraries//lpe
          /libraries//parser
+         /libraries//rewrite
        :
        :
        :

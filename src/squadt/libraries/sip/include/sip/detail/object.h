@@ -24,6 +24,8 @@ namespace sip {
     class communicator;
   }
 
+  class object;
+
   /**
    * \brief Describes some tool capabilities (e.g. supported protocol version)
    *

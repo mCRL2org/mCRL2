@@ -16,6 +16,8 @@
 namespace sip {
   namespace tool {
 
+    class capabilities;
+
     /**
      * \brief Describes some tool capabilities (e.g. supported protocol version)
      *

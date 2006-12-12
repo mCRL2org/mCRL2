@@ -17,6 +17,7 @@ namespace sip {
   namespace controller {
 
     class communicator;
+    class capabilities;
 
     /**
      * \brief Describes some controller capabilities (e.g. supported protocol version)

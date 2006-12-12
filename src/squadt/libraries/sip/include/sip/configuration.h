@@ -19,6 +19,8 @@
 
 namespace sip {
 
+  class configuration;
+
   /** \brief This class models a tool configuration */
   class configuration : public boost::noncopyable, public utility::visitable < configuration > {
     friend class report;

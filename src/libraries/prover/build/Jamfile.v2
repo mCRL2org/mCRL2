@@ -13,12 +13,15 @@ lib prover
          invariant_checker.cpp
          invariant_eliminator.cpp
          formula_checker.cpp
-       : <library>/libraries//mcrl2_basic
+       : <use>/libraries//mcrl2_basic
+         <use>/libraries//rewrite
+         <use>/libraries/mcrl2_basic//auxiliary
 #         <dependency>/libraries//cvclite
 #         <toolset>gcc:<define>HAVE___GNU_CXX__EXT_HASH_MAP
 #         <toolset>gcc:<define>HAVE___GNU_CXX__EXT_HASH_SET
 #         <toolset>gcc:<define>CVC_LITE_LIB
        :
        : <library>/libraries//mcrl2_basic
+         <library>/libraries//rewrite
 #         <library>/libraries//cvclite
        ;

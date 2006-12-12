@@ -9,9 +9,11 @@ lib enum
        : libenum.cpp
          enum_standard.cpp
        : <use>/libraries//mcrl2_basic
+         <use>/libraries//rewrite
        :
        :
          <library>/libraries//mcrl2_basic
+         <library>/libraries//rewrite
        ;
 
 lib nextstate

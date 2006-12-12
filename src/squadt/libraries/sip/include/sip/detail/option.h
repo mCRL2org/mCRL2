@@ -14,6 +14,8 @@
 
 namespace sip {
 
+  class option;
+
   /** \brief Describes a single option (or option instance) the basic building block of a tool configuration */
   class option : public utility::visitable < option > {
     friend class configuration;

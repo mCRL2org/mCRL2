@@ -17,6 +17,8 @@
 
 namespace sip {
 
+  class report;
+
   /** \brief Describes a report of tool operation */
   class report : public utility::visitable < report > {
 

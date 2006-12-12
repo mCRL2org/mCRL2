@@ -1,0 +1,37 @@
+project libraries/rewrite
+       : source-location ../source
+       : build-dir $(BUILD_TOP)
+       : requirements
+          <include>../include
+          <os>NT:<define>NO_DYNLOAD
+       : usage-requirements
+          <include>../include
+          <os>NT:<define>NO_DYNLOAD
+       ;
+
+alias auxiliary
+       :
+       : <include>../include/auxiliary
+       :
+       : <include>../include/auxiliary
+       ;
+
+lib rewrite
+       : [ glob ../source/rewrite/*.cpp ]
+         [ glob ../source/prover/*.cpp ]
+         [ glob ../source/auxiliary/*.cpp ]
+       : <library>/libraries//aterm
+         <library>/libraries//mcrl2_basic
+         <include>../include/rewrite
+         <include>../include/prover
+         <include>$(SETUP)
+       :
+       : <library>/libraries/mcrl2_basic//struct
+         <include>../include/rewrite
+         <include>../include/prover
+         <os>LINUX:<library>/site-config//m
+         <os>CYGWIN:<library>/site-config//m
+         <os>LINUX:<library>/site-config//dl
+         <link>static,<toolset>gcc:<linkflags>-Wl,-export-dynamic
+       ;
+

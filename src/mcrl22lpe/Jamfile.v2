@@ -5,6 +5,7 @@ project toolset/mcrl22lpe
 obj lin_alt.o
        : lin_alt.cpp
          /libraries//mcrl2_basic
+         /libraries//rewrite
        ;
 
 exe mcrl22lpe
@@ -12,8 +13,9 @@ exe mcrl22lpe
          lin_alt.o
          lin_std.cpp
          /libraries//parser
-         /libraries/parser//alpha
          /libraries//mcrl2_basic
+         /libraries//rewrite
+         /libraries/parser//alpha
        : <toolset>msvc:<library>/workarounds/msvc//getopt
        : <squadt_support>enable
        ;
@@ -22,8 +24,9 @@ exe lin
        : lin.cpp
          lin_alt.o
          /libraries//parser
-         /libraries/parser//alpha
          /libraries//mcrl2_basic
+         /libraries//rewrite
+         /libraries/parser//alpha
        : <toolset>msvc:<library>/workarounds/msvc//getopt
          <status>experimental
        ;
@@ -33,6 +36,7 @@ exe alpha
          /libraries//parser
          /libraries/parser//alpha
          /libraries//mcrl2_basic
+         /libraries//rewrite
        : <toolset>msvc:<library>/workarounds/msvc//getopt
          <status>experimental
        ;
