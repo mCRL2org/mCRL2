@@ -341,7 +341,9 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, lpe::specification &lpe_spec
   gsDebugMsg ("type checking of state formulas read-in phase started\n");
 
   //XXX read-in from LPE (not finished)
-  if(/* gstcReadInSorts((ATermList) lpe_spec.sorts()) && */ gstcReadInActs((ATermList) lpe_spec.action_labels())){
+  if(/* gstcReadInSorts((ATermList) lpe_spec.sorts()) &&  gstcReadInActs((ATermList) lpe_spec.action_labels() */ true){
+    if(!gstcReadInActs((ATermList) lpe_spec.action_labels()))
+      gsWarningMsg("Ignoring the previous error(s), the formula will be typechecked without action label information.\n");
     gsDebugMsg ("type checking of state formulas read-in phase finished\n");
 
     ATermTable Vars=ATtableCreate(63,50);
