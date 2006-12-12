@@ -520,6 +520,18 @@ class pbes
         m_initial_state(initial_state)
     {}
 
+    /// Returns the data specification.
+    data_specification data() const
+    {
+      return m_data;
+    }
+
+    /// Returns the initial state.
+    propositional_variable_instantiation initial_state() const
+    {
+      return m_initial_state;
+    }
+
     /// Reads the pbes from file. Returns true if the operation succeeded.
     ///
     bool load(const std::string& filename)
