@@ -4,6 +4,7 @@
 #include "mcrl2parser.hpp"
 #include "libstruct.h"
 #include "liblowlevel.h"
+#include "libprint_c.h"
 
 //fix for the broken cygwin versions of flex
 #ifdef __CYGWIN__
@@ -214,8 +215,7 @@ void mcrl2_lexer::yyerror(const char *s) {
   if (oldcol_nr < 0) {
     oldcol_nr = 0;
   }
-  fprintf(
-    stderr,
+  gsErrorMsg(
     "token '%s' at position %d, %d caused the following error: %s\n", 
     YYText(), line_nr, oldcol_nr, s
   ); 
