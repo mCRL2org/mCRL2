@@ -53,7 +53,7 @@ namespace atermpp
   inline
   aterm replace(aterm t, aterm old_value, aterm new_value, bool recursive)
   {
-    aterm result;
+    aterm result = t;
     if (t == old_value)
     {
       result = new_value;

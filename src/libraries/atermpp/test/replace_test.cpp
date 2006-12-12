@@ -66,6 +66,10 @@ void test_replace()
   aterm d = make_term("h(g(b),f(a),p(a(x,y),q(a(a))))");
   aterm_appl e = replace_if(d, is_a_or_b(), make_term("u"));
   BOOST_CHECK(e == make_term("h(g(u),f(u),p(u,q(u)))"));
+  
+  aterm f = make_term("[]");
+  aterm_appl g = replace(f, a, b);
+  BOOST_CHECK(f == make_term("[]"));
 }
 
 int test_main( int, char*[] )
