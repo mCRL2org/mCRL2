@@ -2052,7 +2052,7 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
   // PrintHelp performs actual conversion by calling more specialised functions
   //==================================================
   bool perform_task(char const* InFileName, FILE* OutStream) {
-    ATprotect((ATerm*)&Appl0);
+    ATprotectAppl(&Appl0);
     Appl0=gsString2ATermAppl("_");
 
 
@@ -2099,7 +2099,7 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
     Spec=pn2gsTranslate(Spec);
     
 
-    ATunprotect((ATerm*)&Appl0);
+    ATunprotectAppl(&Appl0);
     ATtableDestroy(context.place_name);
     ATtableDestroy(context.place_mark); 
     ATtableDestroy(context.place_sort); 

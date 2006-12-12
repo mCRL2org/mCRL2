@@ -11,12 +11,3 @@ exe ltsconvert
          <toolset>msvc:<library>/workarounds/msvc//getopt
          <squadt_support>enable
        ;
-
-exe svc2fsm
-       : svc2fsm.cpp
-         /libraries//mcrl2_basic
-         /libraries//aterm
-         /libraries//svc
-       : <toolset>msvc:<library>/workarounds/msvc//getopt
-         <status>deprecated
-       ;
