@@ -36,7 +36,7 @@ namespace squadt {
         l->disconnect(this);
       }
 
-#if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32))
+#if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
       TerminateProcess(reinterpret_cast < void* > (identifier), 1);
 #else
       kill(identifier, SIGKILL);
@@ -68,7 +68,7 @@ namespace squadt {
      * @param c the command to execute
      **/
     void process::execute(const command& c) {
-#if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32))
+#if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
       command cc(c);
 
       cc.prepend_argument(c.working_directory);

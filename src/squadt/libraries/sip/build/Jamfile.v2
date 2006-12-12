@@ -26,6 +26,7 @@ alias transport
     : <library>/site-config//boost_thread
       <library>/site-config//boost_system
       <os>NT:<library>/site-config//winsock
+      <os>CYGWIN:<library>/site-config//winsock
       <os>CYGWIN:<define>__USE_W32_SOCKETS
       <os>CYGWIN:<define>_WIN32_WINNT=0x0500
       <os>NT:<define>__USE_W32_SOCKETS

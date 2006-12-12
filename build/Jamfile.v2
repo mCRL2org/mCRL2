@@ -11,6 +11,7 @@ feature site-library : opengl wx_base wx_gl xml2 : free incidental optional comp
 # OpenGL library
 if $(OPENGL_NAME) {
   lib GLU : : <os>NT <name>glu32 ;
+  lib GLU : : <os>CYGWIN <name>glu32 ;
   
   if $(OPENGL_LPATH) {
     lib opengl : : <name>$(OPENGL_NAME) <search>$(OPENGL_LPATH) : : <include>$(OPENGL_IPATH) <os>NT:<library>GLU ;
@@ -23,7 +24,7 @@ if $(OPENGL_NAME) {
       alias opengl : : <toolset>darwin : : <linkflags>"-framework OpenGL" ;
     }
     else {
-      lib opengl : : <name>$(OPENGL_NAME) : : <os>NT:<library>GLU ;
+      lib opengl : : <name>$(OPENGL_NAME) : : <os>NT:<library>GLU <os>CYGWIN:<library>GLU ;
     }
   }
 
