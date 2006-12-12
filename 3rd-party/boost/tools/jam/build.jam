@@ -369,15 +369,15 @@ else if $(MAC)
     locate-target ?= ../../../../build/bin ;
     platform = $(OS:L)$(OSPLAT:L) ;
 }
-else if $(OSPLAT)
-{
-    locate-target ?= ../../../../build/bin ;
-    platform = $(OS:L)$(OSPLAT:L) ;
-}
 else if $(NT)
 {
     locate-target ?= ..\..\..\..\build\bin ;
     platform = $(OS:L) ;
+}
+else if $(OSPLAT)
+{
+    locate-target ?= ../../../../build/bin ;
+    platform = $(OS:L)$(OSPLAT:L) ;
 }
 else
 {
