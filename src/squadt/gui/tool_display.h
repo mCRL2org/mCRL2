@@ -11,7 +11,7 @@
 #include <sip/report.h>
 #include <sip/detail/layout_tool_display.h>
 
-#include "processor.h"
+#include "../processor.h"
 
 namespace squadt {
   namespace GUI {

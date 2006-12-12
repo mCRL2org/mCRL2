@@ -8,8 +8,11 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <process.h>
 #include <unistd.h>
 #include <windows.h>
+
+#define getpid   _getpid
 
 inline pid_t waitpid(pid_t pid, int* status, int options) {
 

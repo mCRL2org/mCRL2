@@ -14,7 +14,7 @@
 #include <wx/treectrl.h>
 #include <wx/timer.h>
 
-#include "processor.h"
+#include "../processor.h"
 
 namespace squadt {
 

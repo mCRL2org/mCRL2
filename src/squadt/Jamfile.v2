@@ -14,7 +14,6 @@ exe squadt
         /libraries/sip//sip_controller
       : <site-library>wx_base
         <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
-        <include>.
         <include>$(SETUP)
         <threading>multi
       ;
