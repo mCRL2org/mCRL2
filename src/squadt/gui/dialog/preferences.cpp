@@ -65,6 +65,9 @@ namespace squadt {
         /* \brief Event handler for when the new button is pressed */
         void new_association(wxCommandEvent&);
 
+        /* \brief Event handler for when the delete button is pressed */
+        void remove_association(wxCommandEvent&);
+
         /* \brief Event handler for changes after a new association operation */
         void after_label_edit(wxListEvent&);
 
@@ -163,16 +166,24 @@ namespace squadt {
       formats_and_actions->SetItem(row, 1, wxEmptyString);
     }
 
+    void edit_preferences::remove_association(wxCommandEvent&) {
+      long       selected = formats_and_actions->GetFirstSelected();
+      wxListItem s;
+        
+      get_wxlist_value(s, formats_and_actions, selected, 0);
+
+      global_build_system.get_type_registry()->register_command(mime_type(std::string(s.GetText().fn_str())), type_registry::command_none);
+
+      formats_and_actions->DeleteItem(selected);
+    }
+
     void edit_preferences::after_label_edit(wxListEvent& e) {
       // Assumes that the wxListCtrl only allows edit of items in the first
       // columns, and deleting item i deletes all items on row i
       long row = e.GetIndex();
 
-      if (e.GetText() == wxEmptyString) {
+      if (e.GetLabel().IsEmpty()) {
         formats_and_actions->DeleteItem(row);
-      }
-      else {
-        apply_changes_for_row(row);
       }
     }
 
@@ -193,7 +204,7 @@ namespace squadt {
         
         get_wxlist_value(s, formats_and_actions, selected, 0);
 
-        if (s.GetText() == wxEmptyString) {
+        if (s.GetText().IsEmpty()) {
           formats_and_actions->DeleteItem(selected);
         }
         else {
@@ -282,11 +293,13 @@ namespace squadt {
 
       current_sizer = new wxBoxSizer(wxHORIZONTAL);
       current_sizer->Add(new wxButton(this, wxID_NEW), 0, wxRIGHT, 5);
+      current_sizer->Add(new wxButton(this, wxID_DELETE), 0, wxRIGHT, 5);
       current_sizer->Add(command_text, 1, wxEXPAND);
 
       GetSizer()->Add(current_sizer, 0, wxALL|wxALIGN_LEFT|wxEXPAND, 3);
 
-      Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(edit_preferences::new_association));
+      Connect(wxID_NEW, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(edit_preferences::new_association));
+      Connect(wxID_DELETE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(edit_preferences::remove_association));
       Connect(wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(edit_preferences::apply_changes));
       Connect(wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(edit_preferences::command_changed));
       Connect(wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler(edit_preferences::list_item_selected));

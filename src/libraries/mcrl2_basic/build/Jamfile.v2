@@ -60,20 +60,12 @@ for object in $(MCRL2_BASIC_SOURCES) {
       ;
 }
 
-alias auxiliary
-       :
-       : <include>../include/auxiliary
-       :
-       : <include>../include/auxiliary
-       ;
-
 lib mcrl2_basic
        : $(MCRL2_BASIC_SOURCES).o
          [ glob ../source/auxiliary/*.cpp ]
        : <include>../include/print
          <include>../include/struct
          <include>../include/lowlevel
-         <include>../include/auxiliary
          <toolset>gcc:<library>/libraries//pstream
          <toolset>darwin:<library>/libraries//pstream
          <os>NT,<link>shared:<library>/libraries//aterm

@@ -122,6 +122,10 @@ namespace squadt {
       formats.insert(c.first);
     }
 
+    for (actions_for_type::const_iterator i = command_for_type.begin(); i != command_for_type.end(); ++i) {
+      formats.insert((*i).first);
+    }
+
     BOOST_FOREACH(tool::sptr t, global_build_system.get_tool_manager()->get_tools()) {
       BOOST_FOREACH(sip::tool::capabilities::output_combination j, t->get_capabilities()->get_output_combinations()) {
         formats.insert(j.m_mime_type);
