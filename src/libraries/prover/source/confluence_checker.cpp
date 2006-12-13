@@ -379,7 +379,7 @@
     ):
       f_disjointness_checker(ATAgetArgument(a_lpe, 2)),
       f_invariant_checker(a_lpe, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, false, false, 0),
-      f_bdd_prover(ATAgetArgument(a_lpe,0), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
+      f_bdd_prover(lpe::data_specification(ATAgetArgument(a_lpe,0)), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {
       if (has_ctau_action(a_lpe)) {
         gsErrorMsg("An action named \'ctau\' already exists.\n");

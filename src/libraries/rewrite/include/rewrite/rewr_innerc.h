@@ -2,6 +2,7 @@
 #define __REWR_INNERC_H
 
 #include <aterm2.h>
+#include <lpe/data_specification.h>
 #include "librewrite.h"
 
 //#define _INNERC_STORE_TREES
@@ -9,7 +10,7 @@
 class RewriterCompilingInnermost: public Rewriter
 {
 	public:
-		RewriterCompilingInnermost(ATermAppl DataEqnSpec);
+		RewriterCompilingInnermost(lpe::data_specification DataSpec);
 		~RewriterCompilingInnermost();
 
 		RewriteStrategy getStrategy();
@@ -56,7 +57,7 @@ class RewriterCompilingInnermost: public Rewriter
 		void calcTerm(FILE *f, ATerm t, int startarg);
 		void implement_tree_aux(FILE *f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity);
 		void implement_tree(FILE *f, ATermAppl tree, int arity, int d, int opid);
-		void CompileRewriteSystem(ATermAppl DataEqnSpec);
+		void CompileRewriteSystem(lpe::data_specification DataSpec);
 
 		ATerm OpId2Int(ATermAppl Term, bool add_opids);
 		ATerm toInner(ATermAppl Term, bool add_opids);

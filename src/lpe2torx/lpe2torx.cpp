@@ -291,7 +291,7 @@ int main(int argc, char **argv)
     stateformat,
     createEnumerator(
       Spec,
-      createRewriter(ATAgetArgument(ATAgetArgument(Spec,0),3),strat),
+      createRewriter(lpe::data_specification(ATAgetArgument(Spec,0)),strat),
       true
     ),
     true

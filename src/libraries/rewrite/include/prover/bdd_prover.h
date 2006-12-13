@@ -6,6 +6,7 @@
 
 #include "aterm2.h"
 #include "librewrite.h"
+#include "lpe/data_specification.h"
 #include "prover/prover.h"
 #include "prover/bdd_simplifier.h"
 #include "prover/bdd_path_eliminator.h"
@@ -83,7 +84,7 @@ class BDD_Prover: public Prover {
     /// \brief Constructor that initializes the attributes BDD_Prover::f_data_spec, Prover::f_time_limit and
     /// \brief BDD_Prover::f_bdd_simplifier.
     BDD_Prover(
-      ATermAppl a_data_spec,
+      lpe::data_specification data_spec,
       RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
       int a_time_limit = 0,
       bool a_path_eliminator = false,

@@ -49,7 +49,7 @@ NextState *createNextState(
       createEnumerator(
         spec,
         createRewriter(
-          (ATermAppl) ATgetArgument((ATermAppl) ATgetArgument(spec, 0), 3),
+          lpe::data_specification((ATermAppl) ATgetArgument(spec, 0)),
           rewrite_strategy
         ),
         true,

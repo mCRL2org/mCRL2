@@ -1,10 +1,11 @@
 #ifdef NO_DYNLOAD
 
 #include <stdlib.h>
-#include "libprint_c.h"
+#include <libprint_c.h>
+#include <lpe/data_specification.h>
 #include "rewr_jittyc.h"
 
-RewriterCompilingJitty::RewriterCompilingJitty(ATermAppl DataEqnSpec)
+RewriterCompilingJitty::RewriterCompilingJitty(lpe::data_specification DataSpec)
 {
 	gsfprintf(stderr,"error: compiling JITty rewriter is not available\n");
 	exit(1);
@@ -68,10 +69,11 @@ void RewriterCompilingJitty::clearSubstitutions()
 #include <string.h>
 #include <dlfcn.h>
 #include <assert.h>
-#include "aterm2.h"
-#include "liblowlevel.h"
-#include "libstruct.h"
-#include "libprint_c.h"
+#include <aterm2.h>
+#include <liblowlevel.h>
+#include <libstruct.h>
+#include <libprint_c.h>
+#include <lpe/data_specification.h>
 #include "setup.h"
 #include "rewr_jittyc.h"
 
@@ -1899,7 +1901,7 @@ fflush(f);
 	finish_function(f,arity,opid,used);
 }
 
-void RewriterCompilingJitty::CompileRewriteSystem(ATermAppl DataEqnSpec)
+void RewriterCompilingJitty::CompileRewriteSystem(lpe::data_specification DataSpec)
 {
   ATermList l,n;
   ATermTable tmp_eqns;
@@ -1935,7 +1937,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(ATermAppl DataEqnSpec)
 
   l = dataappl_eqns;*/
 //  gsfprintf(stderr,"DATAAPPL_EQNS %T\n\n",l);
-  l = ATLgetArgument(DataEqnSpec,0);
+  l = DataSpec.equations();
   for (; !ATisEmpty(l); l=ATgetNext(l))
   {
     if ( !isValidRewriteRule(ATAgetFirst(l)) )
@@ -2646,11 +2648,11 @@ void RewriterCompilingJitty::CompileRewriteSystem(ATermAppl DataEqnSpec)
   free(s);
 }
 
-RewriterCompilingJitty::RewriterCompilingJitty(ATermAppl DataEqnSpec)
+RewriterCompilingJitty::RewriterCompilingJitty(lpe::data_specification DataSpec)
 {
   term2int = ATtableCreate(100,75);
   initialise_common();
-  CompileRewriteSystem(DataEqnSpec);
+  CompileRewriteSystem(DataSpec);
 }
 
 static void cleanup_file(char *f)

@@ -1,6 +1,7 @@
 // Implementation of class Prover
 // file: prover.cpp
 
+#include "lpe/data_specification.h"
 #include "prover/prover.h"
 #include "auxiliary/manipulator.h"
 #include "auxiliary/info.h"
@@ -15,7 +16,7 @@
   // Class Prover - Functions declared public -----------------------------------------------------
 
     Prover::Prover(
-      ATermAppl a_data_spec,
+      lpe::data_specification data_spec,
       RewriteStrategy a_rewrite_strategy,
       int a_time_limit
     ) {
@@ -26,7 +27,7 @@
       gsEnableConstructorFunctions();
       switch (a_rewrite_strategy) {
         case (GS_REWR_INNER): {
-          f_rewriter = createRewriter(ATAgetArgument(a_data_spec,3), GS_REWR_INNER);
+          f_rewriter = createRewriter(data_spec, GS_REWR_INNER);
           f_info = new AI_Inner(f_rewriter);
           f_manipulator = new AM_Inner(f_rewriter, f_info);
           gsDebugMsg(
@@ -36,7 +37,7 @@
           break;
         }
         case (GS_REWR_JITTY): {
-          f_rewriter = createRewriter(ATAgetArgument(a_data_spec,3), GS_REWR_JITTY);
+          f_rewriter = createRewriter(data_spec, GS_REWR_JITTY);
           f_info = new AI_Jitty(f_rewriter);
           f_manipulator = new AM_Jitty(f_rewriter, f_info);
           gsDebugMsg(

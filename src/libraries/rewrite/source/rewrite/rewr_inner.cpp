@@ -5,10 +5,11 @@
 #include <aterm2.h>
 #include <memory.h>
 #include <assert.h>
-#include "liblowlevel.h"
-#include "libstruct.h"
+#include <liblowlevel.h>
+#include <libstruct.h>
+#include <libprint_c.h>
+#include <lpe/data_specification.h>
 #include "rewr_inner.h"
-#include "libprint_c.h"
 
 static AFun nilAFun;
 static AFun opidAFun;
@@ -1064,7 +1065,7 @@ ATermAppl RewriterInnermost::fromInner(ATerm Term)
 	return a;
 }
 
-RewriterInnermost::RewriterInnermost(ATermAppl DataEqnSpec)
+RewriterInnermost::RewriterInnermost(lpe::data_specification DataSpec)
 {
 	ATermList l,m,n;
 	ATermTable tmp_eqns;
@@ -1090,7 +1091,7 @@ RewriterInnermost::RewriterInnermost(ATermAppl DataEqnSpec)
 	}*/
 
 //	l = dataappl_eqns;
-	l = ATLgetArgument(DataEqnSpec,0);
+	l = DataSpec.equations();
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
 		if ( !isValidRewriteRule(ATAgetFirst(l)) )

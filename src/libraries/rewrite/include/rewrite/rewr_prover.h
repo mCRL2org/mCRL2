@@ -2,13 +2,14 @@
 #define __REWR_PROVER_H
 
 #include <aterm2.h>
+#include <lpe/data_specification.h>
 #include <prover/bdd_prover.h>
 #include "librewrite.h"
 
 class RewriterProver: public Rewriter
 {
 	public:
-		RewriterProver(ATermAppl DataEqnSpec, RewriteStrategy strat);
+		RewriterProver(lpe::data_specification DataSpec, RewriteStrategy strat);
 		~RewriterProver();
 
 		RewriteStrategy getStrategy();

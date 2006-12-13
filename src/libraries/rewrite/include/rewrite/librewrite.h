@@ -2,6 +2,7 @@
 #define __LIBREWRITE_H
 
 #include <aterm2.h>
+#include <lpe/data_specification.h>
 
 /** \brief Rewrite strategies. */
 typedef enum { GS_REWR_INNER     /** \brief Innermost */
@@ -176,12 +177,12 @@ class Rewriter
 
 /**
  * \brief Create a rewriter.
- * \param DataEqnSpec The data equation specification of an LPE.
+ * \param DataSpec A data specification.
  * \param Strategy The rewrite strategy to be used by the rewriter.
- * \return A (pointer to a) rewriter that uses the data equations in DataEqnSpec
+ * \return A (pointer to a) rewriter that uses the data specification DataSpec
  *         and strategy Strategy to rewrite.
  **/
-Rewriter *createRewriter(ATermAppl DataEqnSpec, RewriteStrategy Strategy = GS_REWR_INNER);
+Rewriter *createRewriter(lpe::data_specification DataSpec, RewriteStrategy Strategy = GS_REWR_INNER);
 
 /**
  * \brief Check whether or not an mCRL2 data equation is a valid rewrite rule.

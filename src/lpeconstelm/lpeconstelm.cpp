@@ -864,7 +864,7 @@ void lpeConstElm::filter() {
   p_newVarCounter  = 0;
   
   lpe::LPE p_lpe = p_spec.lpe();
-  rewr           = createRewriter(gsMakeDataEqnSpec(p_spec.data().equations())); 
+  rewr           = createRewriter(p_spec.data()); 
 
   for(lpe::data_assignment_list::iterator i = p_spec.initial_assignments().begin(); i != p_spec.initial_assignments().end() ; i++ ){
     p_lookupIndex[i->lhs()] = counter;

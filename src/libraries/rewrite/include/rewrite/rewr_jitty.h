@@ -2,12 +2,13 @@
 #define __REWR_JITTY_H
 
 #include <aterm2.h>
+#include <lpe/data_specification.h>
 #include "librewrite.h"
 
 class RewriterJitty: public Rewriter
 {
 	public:
-		RewriterJitty(ATermAppl DataEqnSpec);
+		RewriterJitty(lpe::data_specification DataSpec);
 		~RewriterJitty();
 
 		RewriteStrategy getStrategy();

@@ -7,6 +7,7 @@
 #include "liblowlevel.h"
 #include "libprint_c.h"
 #include "librewrite.h"
+#include "lpe/data_specification.h" 
 
 /* Global variables */
 
@@ -2627,7 +2628,7 @@ static int main_linearisation(ATermAppl Spec)
 	ATbool init_used;
 	int i, init_id;
 
-	rewr = createRewriter(ATAgetArgument(ATAgetArgument(Spec,0),3));
+	rewr = createRewriter(lpe::data_specification(ATAgetArgument(Spec,0)));
 
 	linTrue = gsMakeDataExprTrue();
 	ATprotectAppl(&linTrue);

@@ -15,6 +15,7 @@ lib prover
          formula_checker.cpp
        : <use>/libraries//mcrl2_basic
          <use>/libraries//rewrite
+         <use>/libraries/lpe//data-specification
 #         <dependency>/libraries//cvclite
 #         <toolset>gcc:<define>HAVE___GNU_CXX__EXT_HASH_MAP
 #         <toolset>gcc:<define>HAVE___GNU_CXX__EXT_HASH_SET

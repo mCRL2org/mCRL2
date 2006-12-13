@@ -8454,7 +8454,7 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   //initialise local data structures
   initialize_data();
   if (mayrewrite) {
-    rewr = createRewriter(gsMakeDataEqnSpec(ATempty));
+    rewr = createRewriter(lpe::data_specification(ATAgetArgument(spec,0)));
   }
   specificationbasictype *spec_int = create_spec(spec);
   if (spec_int == NULL) {

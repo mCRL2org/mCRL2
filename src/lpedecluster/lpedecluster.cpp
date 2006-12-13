@@ -338,7 +338,7 @@ lpe::specification decluster(const lpe::specification& specification, const tool
   gsVerboseMsg("Input: %d summands.\n", lpe.summands().size());
 
   // Some use of internal format because we need it for the rewriter
-  Rewriter* rewriter = createRewriter(gsMakeDataEqnSpec(specification.data().equations()), options.strategy);
+  Rewriter* rewriter = createRewriter(specification.data(), options.strategy);
   EnumeratorStandard enumerator = EnumeratorStandard(specification, rewriter);
 
   lpe::summand_list sl = decluster_summands(specification, lpe.summands(), enumerator, options);

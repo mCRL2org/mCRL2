@@ -1,10 +1,11 @@
 #ifdef NO_DYNLOAD
 
 #include <stdlib.h>
-#include "libprint_c.h"
+#include <libprint_c.h>
+#include <lpe/data_specification.h>
 #include "rewr_innerc.h"
 
-RewriterCompilingInnermost::RewriterCompilingInnermost(ATermAppl DataEqnSpec)
+RewriterCompilingInnermost::RewriterCompilingInnermost(lpe::data_specification DataSpec)
 {
 	gsfprintf(stderr,"error: compiling Innermost rewriter is not available\n");
 	exit(1);
@@ -68,10 +69,11 @@ void RewriterCompilingInnermost::clearSubstitutions()
 #include <string.h>
 #include <dlfcn.h>
 #include <assert.h>
-#include "aterm2.h"
-#include "liblowlevel.h"
-#include "libstruct.h"
-#include "libprint_c.h"
+#include <aterm2.h>
+#include <liblowlevel.h>
+#include <libstruct.h>
+#include <libprint_c.h>
+#include <lpe/data_specification.h>
 #include "setup.h"
 #include "rewr_innerc.h"
 
@@ -1467,7 +1469,7 @@ static int getArity(ATermAppl op)
   return arity;
 }
 
-void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataEqnSpec)
+void RewriterCompilingInnermost::CompileRewriteSystem(lpe::data_specification DataSpec)
 {
   ATermList l,n;
   ATermTable tmp_eqns;
@@ -1503,7 +1505,7 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataEqnSpec)
 
   l = dataappl_eqns;*/
 //  gsfprintf(stderr,"DATAAPPL_EQNS %T\n\n",l);
-  l = ATLgetArgument(DataEqnSpec,0);
+  l = DataSpec.equations();
   for (; !ATisEmpty(l); l=ATgetNext(l))
   {
     if ( !isValidRewriteRule(ATAgetFirst(l)) )
@@ -2178,11 +2180,11 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataEqnSpec)
   free(s);
 }
 
-RewriterCompilingInnermost::RewriterCompilingInnermost(ATermAppl DataEqnSpec)
+RewriterCompilingInnermost::RewriterCompilingInnermost(lpe::data_specification DataSpec)
 {
   term2int = ATtableCreate(100,75);
   initialise_common();
-  CompileRewriteSystem(DataEqnSpec);
+  CompileRewriteSystem(DataSpec);
 }
 
 static void cleanup_file(char *f)

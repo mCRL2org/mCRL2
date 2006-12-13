@@ -21,6 +21,7 @@ lib rewrite
          [ glob ../source/prover/*.cpp ]
          [ glob ../source/auxiliary/*.cpp ]
        : <library>/libraries//mcrl2_basic
+         <library>/libraries/lpe//data-specification
          <include>../include/rewrite
          <include>../include/prover
          <include>$(SETUP)

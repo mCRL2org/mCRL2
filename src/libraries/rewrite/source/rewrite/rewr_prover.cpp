@@ -5,23 +5,17 @@
 #include <aterm2.h>
 #include <memory.h>
 #include <assert.h>
-#include "liblowlevel.h"
-#include "libstruct.h"
-#include "rewr_prover.h"
-#include "librewrite.h"
-#include "libprint_c.h"
+#include <liblowlevel.h>
+#include <libstruct.h>
+#include <libprint_c.h>
+#include <lpe/data_specification.h>
 #include <prover/bdd_prover.h>
+#include "librewrite.h"
+#include "rewr_prover.h"
 
-RewriterProver::RewriterProver(ATermAppl DataEqnSpec, RewriteStrategy strat)
+RewriterProver::RewriterProver(lpe::data_specification DataSpec, RewriteStrategy strat)
 {
-  prover_obj = new BDD_Prover(
-                        gsMakeDataSpec(
-                          gsMakeSortSpec(ATmakeList0()),
-                          gsMakeConsSpec(ATmakeList0()),
-                          gsMakeMapSpec(ATmakeList0()),
-                          DataEqnSpec
-                        )
-                      ,strat);
+  prover_obj = new BDD_Prover(DataSpec,strat);
   rewr_obj = prover_obj->get_rewriter();
 }
 

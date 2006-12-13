@@ -5,6 +5,7 @@ project lpeconstelm
 exe lpeconstelm
        : lpeconstelm.cpp
          /libraries//mcrl2_basic
+         /libraries//rewrite
          /libraries//lpe
          /site-config//boost_program_options
        : <squadt_support>enable

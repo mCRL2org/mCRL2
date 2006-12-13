@@ -166,7 +166,7 @@ int main(int argc, char **argv)
     PrintRewriteStrategy(stderr, opt_strat);  
     fprintf(stderr, "...\n");
   }
-  rewr = createRewriter(ATAgetArgument(ATAgetArgument(result, 0), 3), opt_strat);
+  rewr = createRewriter(lpe::data_specification(ATAgetArgument(result,0)), opt_strat);
 
   //rewrite result
   if (opt_benchmark) {

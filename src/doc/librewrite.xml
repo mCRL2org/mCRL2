@@ -8,6 +8,7 @@
 <!ENTITY tvoid "<type>void</type>">
 <!ENTITY tcbool "<type>bool</type>">
 <!ENTITY tpchar "<type>char*</type>">
+<!ENTITY tpfile "<type>FILE*</type>">
 <!ENTITY taterm "<type>ATerm</type>">
 <!ENTITY trewrstrat "<type>RewriteStrategy</type>">
 <!ENTITY tRewriter "<type>Rewriter</type>">
@@ -28,6 +29,7 @@
 <!ENTITY Rewriter_clearsubsts "<function>Rewriter::clearSubstitutions</function>">
 <!ENTITY createRewriter "<function>createRewriter</function>">
 <!ENTITY isValidRewriteRule "<function>isValidRewriteRule</function>">
+<!ENTITY PrintRewriteStrategy "<function>PrintRewriteStrategy</function>">
 <!ENTITY RewriteStrategyFromString "<function>RewriteStrategyFromString</function>">
 <!ENTITY parDataEqnSpec "<parameter>DataEqnSpec</parameter>">
 <!ENTITY parDataEqn "<parameter>DataEqn</parameter>">
@@ -38,10 +40,13 @@
 <!ENTITY parTerm "<parameter>Term</parameter>">
 <!ENTITY parTerms "<parameter>Terms</parameter>">
 <!ENTITY parS "<parameter>s</parameter>">
+<!ENTITY parStream "<parameter>stream</parameter>">
+<!ENTITY false "<constant>false</constant>">
 <!ENTITY stratINNER "<constant>GS_REWR_INNER</constant>">
 <!ENTITY stratINNERstring "<constant>inner</constant>">
 <!ENTITY stratINNERC "<constant>GS_REWR_INNERC</constant>">
 <!ENTITY stratJITTY "<constant>GS_REWR_JITTY</constant>">
+<!ENTITY stratJITTYC "<constant>GS_REWR_JITTYC</constant>">
 <!ENTITY stratINVALID "<constant>GS_REWR_INVALID</constant>">
 <!ENTITY gsEnableConstructorFunctions "<function>gsEnableConstructorFunctions</function>">
 ]>
@@ -121,10 +126,6 @@
   <paramdef>&tvoid;</paramdef>
 </funcprototype>
 <funcprototype>
-  <funcdef>&trewrstrat; &RewriteStrategyFromString;</funcdef>
-  <paramdef>&tconst; &tpchar; &parS;</paramdef>
-</funcprototype>
-<funcprototype>
   <funcdef>&tpRewriter; &createRewriter;</funcdef>
   <paramdef>&tatermappl; &parDataEqnSpec;</paramdef>
   <paramdef>&trewrstrat; &parStrategy;</paramdef>
@@ -132,6 +133,15 @@
 <funcprototype>
   <funcdef>&tcbool; &isValidRewriteRule;</funcdef>
   <paramdef>&tatermappl; &parDataEqn;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&trewrstrat; &PrintRewriteStrategy;</funcdef>
+  <paramdef>&tpfile; &parStream;</paramdef>
+  <paramdef>&trewrstrat; &parStrategy;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&trewrstrat; &RewriteStrategyFromString;</funcdef>
+  <paramdef>&tconst; &tpchar; &parS;</paramdef>
 </funcprototype>
 </funcsynopsis>
 </refsynopsisdiv>
@@ -148,13 +158,19 @@ To actually rewrite a data expression, the functions &Rewriter_rewr; and &Rewrit
 <refsect2>
 <title>Strategies</title>
 <para>
-Currently, there are three different rewriting strategies available in librewrite. A standard innermost rewriting strategy is available under the name &stratINNER;. This strategy will fit most non critical rewriting uses, such as simulation, (simple) LPE manipulation and generation of (very) small state spaces. For time critical uses, there is a compiling innermost rewriting strategy &stratINNERC;. With this strategy, the creation of a &tRewriter; object will result in the compilation of an optimised rewriter. This does mean that gcc and the appropriate headers and libraries must be available.
+Currently, there are four different rewriting strategies available in librewrite. A standard innermost rewriting strategy is available under the name &stratINNER;. This strategy will fit most non critical rewriting uses, such as simulation, (simple) LPE manipulation and generation of (very) small state spaces. For time critical uses, there is a compiling innermost rewriting strategy &stratINNERC;. With this strategy, the creation of a &tRewriter; object will result in the compilation of an optimised rewriter. This does mean that gcc and the appropriate headers and libraries must be available.
 </para>
 <para>
-An alternative to &stratINNER; is the JITty rewriter &stratJITTY;. This strategy can avoid a lot of unnecessary rewriting in certain cases and can handle some rewrite rules that cause the innermost rewriters to rewrite infinitely.
+An alternative to &stratINNER; is the JITty rewriter &stratJITTY;. This strategy can avoid a lot of unnecessary rewriting in certain cases and can handle some rewrite rules that cause the innermost rewriters to rewrite infinitely. There is also a compiling variant &stratJITTYC;. This compiling JITty rewriter is in general the best choice if one needs to generate large state spaces.
 </para>
 <para>
-To convert a string representation of a strategy to a &trewrstrat;, one can use &RewriteStrategyFromString;. This is useful for converting command line arguments, specifying a rewrite strategy. The string representations are derived from there &trewrstrat; name by taking the last part and writing it in lower case (e.g. &stratINNERstring; for &stratINNER;). If the supplied string does not match any of the available strategies, &stratINVALID; is returned. Note that it is not allowed to supply &stratINVALID; to &createRewriter;.
+For each of the interpreting rewriters (&stratINNER; and &stratJITTY;) there is also a variant that uses a prover for boolean expressions. This can be useful in cases where the default rewriters cannot reduce a term any further while the expression is, for example, always equivalent to &false;.
+</para>
+<para>
+A strategy &trewrstrat; can be printed to a stream in string representation using &PrintRewriteStrategy;. The string representations are derived from their &trewrstrat; name by taking the last part and writing it in lower case (e.g. &stratINNERstring; for &stratINNER;).
+</para>
+<para>
+To convert a string representation of a strategy to a &trewrstrat;, one can use &RewriteStrategyFromString;. This is useful for converting command line arguments specifying a rewrite strategy. If the supplied string does not match any of the available strategies, &stratINVALID; is returned. Note that it is not allowed to supply &stratINVALID; to &createRewriter;.
 </para>
 </refsect2>
 

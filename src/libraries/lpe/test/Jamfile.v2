@@ -5,6 +5,7 @@ project libraries/lpe/test
        <use>/boost//headers
        <source>/libraries//parser
        <source>/libraries/parser//alpha
+       <source>/libraries//rewrite
        <source>/libraries//mcrl2_basic
        <source>/libraries//lpe
        <source>/site-config//boost_program_options

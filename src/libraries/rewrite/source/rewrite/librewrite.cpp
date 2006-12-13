@@ -1,14 +1,17 @@
 #include <stdlib.h>
 #include <aterm2.h>
 #include <assert.h>
-#include "libprint_c.h"
-#include "libstruct.h"
+#include <libprint_c.h>
+#include <libstruct.h>
+#include <lpe/data_specification.h>
 #include "librewrite.h"
 #include "rewr_inner.h"
 #include "rewr_jitty.h"
 #include "rewr_innerc.h"
 #include "rewr_jittyc.h"
 #include "rewr_prover.h"
+
+using namespace lpe;
 
 Rewriter::Rewriter()
 {
@@ -150,26 +153,26 @@ ATerm Rewriter::lookupSubstitution(ATermAppl Var)
 }
 
 
-Rewriter *createRewriter(ATermAppl DataEqnSpec, RewriteStrategy Strategy)
+Rewriter *createRewriter(data_specification DataSpec, RewriteStrategy Strategy)
 {
 	switch ( Strategy )
 	{
 		case GS_REWR_INNER:
-			return new RewriterInnermost(DataEqnSpec);
+			return new RewriterInnermost(DataSpec);
 		case GS_REWR_JITTY:
-			return new RewriterJitty(DataEqnSpec);
+			return new RewriterJitty(DataSpec);
 		case GS_REWR_INNERC:
-			return new RewriterCompilingInnermost(DataEqnSpec);
+			return new RewriterCompilingInnermost(DataSpec);
 		case GS_REWR_JITTYC:
-			return new RewriterCompilingJitty(DataEqnSpec);
+			return new RewriterCompilingJitty(DataSpec);
 		case GS_REWR_INNER_P:
-			return new RewriterProver(DataEqnSpec,GS_REWR_INNER);
+			return new RewriterProver(DataSpec,GS_REWR_INNER);
 		case GS_REWR_JITTY_P:
-			return new RewriterProver(DataEqnSpec,GS_REWR_JITTY);
+			return new RewriterProver(DataSpec,GS_REWR_JITTY);
 		case GS_REWR_INNERC_P:
-			return new RewriterProver(DataEqnSpec,GS_REWR_INNERC);
+			return new RewriterProver(DataSpec,GS_REWR_INNERC);
 		case GS_REWR_JITTYC_P:
-			return new RewriterProver(DataEqnSpec,GS_REWR_JITTYC);
+			return new RewriterProver(DataSpec,GS_REWR_JITTYC);
 		default:
 			return NULL;
 	}

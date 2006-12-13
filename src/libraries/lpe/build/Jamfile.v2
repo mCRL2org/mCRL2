@@ -18,7 +18,6 @@ alias data-specification
        :
        : <dependency>/boost//headers
          <library>/libraries//parser
-         <library>/libraries//rewrite
          <library>/libraries//atermpp
        ;
 

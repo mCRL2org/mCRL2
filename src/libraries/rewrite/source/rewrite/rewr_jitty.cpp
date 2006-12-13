@@ -5,9 +5,10 @@
 #include <string.h>
 #include <aterm2.h>
 #include <assert.h>
-#include "liblowlevel.h"
-#include "libstruct.h"
-#include "libprint_c.h"
+#include <liblowlevel.h>
+#include <libstruct.h>
+#include <libprint_c.h>
+#include <lpe/data_specification.h>
 #include "rewr_jitty.h"
 
 static AFun nilAFun;
@@ -351,7 +352,7 @@ static ATermList create_strategy(ATermList rules)
 	return ATreverse(strat);
 }
 
-RewriterJitty::RewriterJitty(ATermAppl DataEqnSpec)
+RewriterJitty::RewriterJitty(lpe::data_specification DataSpec)
 {
 	ATermList l,n;
 	ATermTable tmp_eqns;
@@ -376,7 +377,7 @@ RewriterJitty::RewriterJitty(ATermAppl DataEqnSpec)
 	}
 
 	l = dataappl_eqns;*/
-	l = ATLgetArgument(DataEqnSpec,0);
+	l = DataSpec.equations();
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
 		if ( !isValidRewriteRule(ATAgetFirst(l)) )

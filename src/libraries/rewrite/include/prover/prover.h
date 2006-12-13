@@ -6,6 +6,7 @@
 
 #include "aterm2.h"
 #include "librewrite.h"
+#include "lpe/data_specification.h"
 #include "auxiliary/manipulator.h"
 #include "auxiliary/info.h"
 #include "auxiliary/utilities.h"
@@ -53,7 +54,7 @@ class Prover {
   public:
     /// \brief Constructor that initializes Prover::f_rewriter and Prover::f_time_limit.
     Prover(
-      ATermAppl a_data_equations,
+      lpe::data_specification a_data_spec,
       RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
       int a_time_limit = 0
     );

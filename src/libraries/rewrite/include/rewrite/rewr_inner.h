@@ -2,6 +2,7 @@
 #define __REWR_INNER_H
 
 #include <aterm2.h>
+#include <lpe/data_specification.h>
 #include "librewrite.h"
 
 //#define _INNER_STORE_TREES
@@ -9,7 +10,7 @@
 class RewriterInnermost: public Rewriter
 {
 	public:
-		RewriterInnermost(ATermAppl DataEqnSpec);
+		RewriterInnermost(lpe::data_specification DataSpec);
 		~RewriterInnermost();
 
 		RewriteStrategy getStrategy();
