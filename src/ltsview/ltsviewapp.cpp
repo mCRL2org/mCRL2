@@ -1,8 +1,9 @@
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-//SQuADT protocol interface
 #include <wx/wx.h>
-#include <squadt_utility.h>
+//SQuADT protocol interface
+#include <utility/squadt_utility.h>
+
 bool command_line = false;
 std::string lts_file_argument;
 

@@ -20,7 +20,7 @@ std::string lpd_file_argument;
  
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <squadt_utility.h>
+#include <utility/squadt_utility.h>
 
 class squadt_interactor: public squadt_tool_interface {
   

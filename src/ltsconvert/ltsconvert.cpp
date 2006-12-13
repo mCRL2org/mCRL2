@@ -18,7 +18,7 @@ bool write_lts_to_file(lts&, std::string const&, lts_type outtype, std::string c
 
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <squadt_utility.h>
+#include <utility/squadt_utility.h>
 
 class squadt_interactor : public squadt_tool_interface {
 

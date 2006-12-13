@@ -35,7 +35,7 @@
 
 //Squadt connectivity
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <squadt_utility.h>
+#include <utility/squadt_utility.h>
 #endif
 
 using namespace std;

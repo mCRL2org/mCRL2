@@ -14,7 +14,7 @@
 
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <squadt_utility.h>
+#include <utility/squadt_utility.h>
 #endif
 
 //C++
@@ -102,7 +102,6 @@ void parse_command_line(int ac, char** av) {
         
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <squadt_utility.h>
 
 class squadt_interactor : public squadt_tool_interface {
 

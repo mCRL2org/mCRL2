@@ -1,7 +1,5 @@
 project toolset/squadt
   : build-dir $(BUILD_TOP)/squadt
-  : requirements
-    <include>./libraries
   ;
 
 import sequence ;
@@ -13,6 +11,7 @@ exe squadt
         /libraries//md5pp
         /libraries/sip//sip_controller
       : <site-library>wx_base
+        <use>/libraries/utility//headers
         <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
         <include>$(SETUP)
         <threading>multi

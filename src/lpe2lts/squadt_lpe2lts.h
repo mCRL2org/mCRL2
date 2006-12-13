@@ -4,7 +4,7 @@
 #include <string>
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include "squadt_tool_interface.h"
+#include "utility/squadt_tool_interface.h"
 #endif
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY

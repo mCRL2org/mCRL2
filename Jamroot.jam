@@ -14,6 +14,7 @@ use-project /site-config               : build ;
 use-project /boost                     : 3rd-party/boost ;
 use-project /libraries                 : src/libraries ;
 use-project /libraries/sip             : src/squadt/libraries/sip/build ;
+use-project /libraries/utility         : src/squadt/libraries/utility/build ;
 use-project /workarounds/msvc          : build/workarounds/msvc ;
 
 project toolset

@@ -14,7 +14,7 @@
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <squadt_utility.h>
+#include <utility/squadt_utility.h>
 
 class squadt_interactor : public squadt_tool_interface {
 

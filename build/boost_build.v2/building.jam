@@ -21,8 +21,7 @@ feature.feature squadt_support : disable enable : composite optional incidental 
 if ! squadt in [ MATCH "^--disable-(squadt)-support" : [ modules.peek : ARGV ] ] && "$(XML2_CPPFLAGS)" != "" {
   feature.compose <squadt_support>enable
         : <define>ENABLE_SQUADT_CONNECTIVITY
-          <include>$(TOP)/src/squadt/libraries/utility
-          <library>/libraries/sip//sip_tool
+          <library>/libraries/utility//mcrl2_tool_interface
         ;
 }
 

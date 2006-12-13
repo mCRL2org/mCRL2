@@ -3,10 +3,11 @@ project squadt/libraries/sip
        ../source
     : build-dir $(BUILD_TOP)
     : requirements
+       <use>/libraries/utility//headers
        <include>$(BOOST_ROOT)
        <include>../include
     : usage-requirements
-       <include>../..
+       <use>/libraries/utility//headers
        <include>../include
     ;
 

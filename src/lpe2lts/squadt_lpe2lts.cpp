@@ -8,7 +8,7 @@
 using namespace std;
     
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <squadt_utility.h>
+#include <utility/squadt_utility.h>
 
 enum lpe2lts_options {
   option_out_info,
