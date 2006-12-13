@@ -9,9 +9,10 @@ project squadt/libraries/utility
 lib mcrl2_tool_interface
     : message_relay.cpp
     : <use>/libraries//mcrl2_basic
-      <library>/libraries/sip//sip_tool
+      <use>/libraries/sip//sip_tool
       <include>../include
     :
+    : <library>/libraries/sip//sip_tool
     ;
 
 alias headers 

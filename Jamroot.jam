@@ -24,8 +24,7 @@ project toolset
           <define>_FILE_OFFSET_BITS=64
           <define>REVISION=\\\"$(REVISION)-$(BUILD_VARIANT)-$(LINK_VARIANT)\\\"
           <toolset>darwin:<define>__darwin__
-          <toolset>darwin:<cxxflags>"-std=c++98 -ansi -m64"
-          <toolset>darwin:<cflags>"-m64"
+          <toolset>darwin:<cxxflags>"-std=c++98 -ansi"
           <os>CYGWIN,<toolset>gcc:<runtime-link>static
           <os>CYGWIN,<toolset>gcc:<link>static
           <os>NT:<runtime-link>static
