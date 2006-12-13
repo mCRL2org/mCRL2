@@ -14,6 +14,7 @@
 #include <unistd.h>
 
 #define chdir    _chdir
+#define strdup   _strdup
 #define dup      _dup
 #define dup2     _dup2
 #define getpid   _getpid
