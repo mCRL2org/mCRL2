@@ -4,7 +4,7 @@
 #include <memory>
 #include <list>
 #include "atermpp/aterm_traits.h"
-#include "atermextpp.h"          // IProtectedATerm
+#include "protaterm.h"          // IProtectedATerm
 
 namespace atermpp {
 

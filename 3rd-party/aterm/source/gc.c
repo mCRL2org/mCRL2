@@ -216,9 +216,9 @@ static void mark_memory_young(ATerm *start, ATerm *stop)
 
 /*}}}  */
 
-void ATmarkTerm(ATerm *atp)
+void ATmarkTerm(ATerm t)
 {
-  ATmarkArray(atp,1);
+  ATmarkArray(&t,1);
 }
 
 void ATmarkArray(ATerm *start, int size)

@@ -44,9 +44,9 @@ namespace atermpp
       }
 
     protected:
-      const ATermAppl& appl() const
+      const ATermAppl appl() const
       {
-        return reinterpret_cast<const ATermAppl&>(m_term);
+        return reinterpret_cast<const ATermAppl>(m_term);
       }
 
     public:

@@ -101,7 +101,7 @@ namespace atermpp
       ///
       void mark()
       {
-        ATmarkTerm(&m_term);
+        ATmarkTerm(m_term);
       }
 
       /// Return the type of term.

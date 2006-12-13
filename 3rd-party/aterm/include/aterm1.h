@@ -104,7 +104,7 @@ void ATprotectArray(ATerm *start, int size);
 void ATunprotectArray(ATerm *start);
 void ATaddProtectFunction(ATermProtFunc f);
 void ATremoveProtectFunction(ATermProtFunc f);
-void ATmarkTerm(ATerm *atp);
+void ATmarkTerm(ATerm t);
 void ATmarkArray(ATerm *start, int size);
 
 /* Convenience macro's to circumvent gcc's (correct) warning:

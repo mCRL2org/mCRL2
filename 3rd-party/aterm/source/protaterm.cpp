@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "atermextpp.h"
+#include "protaterm.h"
 
 IProtectedATerm::~IProtectedATerm()
 {
