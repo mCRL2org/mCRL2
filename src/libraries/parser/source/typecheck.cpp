@@ -3166,7 +3166,7 @@ static ATermAppl gstcMatchBagOpBagCount(ATermAppl Type){
 static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATermAppl StateFrm){
   gsDebugMsg("gstcTraverseStateFrm: %T\n",StateFrm);
 
-  if(gsIsStateTrue(StateFrm) || gsIsStateFalse(StateFrm) || gsIsStateDelay(StateFrm))
+  if(gsIsStateTrue(StateFrm) || gsIsStateFalse(StateFrm) || gsIsStateDelay(StateFrm) || gsIsStateYaled(StateFrm))
     return StateFrm;
   
   if(gsIsStateNot(StateFrm)){
@@ -3206,7 +3206,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
     return ATsetArgument(ATsetArgument(StateFrm,(ATerm)RegFrm,0),(ATerm)NewArg2,1);
   }
 
-  if(gsIsStateDelayTimed(StateFrm)){
+  if(gsIsStateDelayTimed(StateFrm) || gsIsStateYaledTimed(StateFrm)){
    ATermAppl Time=ATAgetArgument(StateFrm,0);
    ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&Time,gstcExpandNumTypesDown(gsMakeSortIdReal()));
    if(!NewType) {return NULL;}
@@ -3394,7 +3394,7 @@ static ATermAppl gstcTraverseActFrm(ATermTable Vars, ATermAppl ActFrm){
     return ATsetArgument(ATsetArgument(ActFrm,(ATerm)NewArg1,0),(ATerm)NewArg2,1);    
   }
   
-  if(gsIsActForall(ActFrm) || gsIsExists(ActFrm)){
+  if(gsIsActForall(ActFrm) || gsIsActExists(ActFrm)){
     ATermTable CopyVars=ATtableCreate(63,50);
     gstcATermTableCopy(Vars,CopyVars);
 
