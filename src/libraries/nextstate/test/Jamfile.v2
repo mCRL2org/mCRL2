@@ -2,7 +2,7 @@ import testing ;
 
 project libraries/temporary/test
    : requirements
-       <include>$(BOOST_ROOT)
+       <use>/boost//headers
        <source>/libraries//enum
        <source>/libraries//nextstate
    ;

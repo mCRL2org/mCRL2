@@ -3,7 +3,9 @@ project squadt/libraries/utility
        ../source
     : build-dir $(BUILD_TOP)
     : requirements
-       <include>$(BOOST_ROOT)
+       <use>/boost//headers
+    : usage-requirements
+       <use>/boost//headers
     ;
 
 lib mcrl2_tool_interface

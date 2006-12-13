@@ -4,7 +4,7 @@ project md5pp
     : build-dir $(BUILD_TOP)
     : requirements
        <include>../..
-       <include>$(BOOST_ROOT)
+       <use>/boost//headers
     : usage-requirements
        <include>../..
     ;

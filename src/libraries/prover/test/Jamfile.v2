@@ -2,7 +2,7 @@ import testing ;
 
 project libraries/prover/test
    : requirements
-       <include>$(BOOST_ROOT)
+       <use>/boost//headers
        <source>/libraries//prover
    ;
 

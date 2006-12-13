@@ -5,8 +5,8 @@ project aterm
 
 alias atermpp
        :
-       : <include>$(BOOST_ROOT)
+       : <use>/boost//headers
        :
-       : <include>$(BOOST_ROOT)
+       : <use>/boost//headers
          <dependency>/libraries//aterm
        ;

@@ -1,7 +1,8 @@
-project test_sip
+project libraries/sip/test
     : requirements
-       <include>$(BOOST_ROOT)
-       <include>../../ ;
+       <use>/boost//headers
+       <include>../../
+    ;
 
 import testing ;
 

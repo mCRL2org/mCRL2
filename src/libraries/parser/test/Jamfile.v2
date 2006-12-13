@@ -2,7 +2,7 @@ import testing ;
 
 project libraries/parser/test
    : requirements
-       <include>$(BOOST_ROOT)
+       <use>/boost//headers
        <source>/libraries//parser
        <source>/libraries/parser//alpha
    ;

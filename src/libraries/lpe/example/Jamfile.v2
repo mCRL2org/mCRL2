@@ -1,6 +1,6 @@
 project libraries/lpe/example
    : requirements
-       <include>$(BOOST_ROOT)
+       <use>/boost//headers
        <source>/libraries//parser
        <source>/libraries/parser//alpha
        <source>/libraries//mcrl2_basic

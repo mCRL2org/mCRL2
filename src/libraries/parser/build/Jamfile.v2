@@ -14,11 +14,10 @@ lib parser
          typecheck.cpp
          dataimpl.cpp
          regfrmtrans.cpp
-       : <use>/libraries//lpe
+       : <use>/libraries/lpe//headers
          <use>/libraries//mcrl2_basic
        :
-       : <library>/libraries//lpe
-         <library>/libraries//mcrl2_basic
+       : <library>/libraries//mcrl2_basic
        ;
 
 lib alpha

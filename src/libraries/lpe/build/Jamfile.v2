@@ -17,8 +17,9 @@ alias data-specification
        : <use>/libraries//atermpp
        :
        : <dependency>/boost//headers
-         <dependency>/libraries//rewrite
-         <dependency>/libraries//atermpp
+         <library>/libraries//parser
+         <library>/libraries//rewrite
+         <library>/libraries//atermpp
        ;
 
 # The functionality provided by this library belongs in the LPE framework
@@ -27,7 +28,11 @@ lib dataelm
          ../../../mcrl22lpe/lin_alt.cpp
          ../../../mcrl22lpe/lin_std.cpp
        : <use>/libraries//parser
+         <use>/libraries//rewrite
        :
-       : <dependency>/libraries//parser
+       : <library>/libraries//parser
+         <library>/libraries//rewrite
        ;
 
+# This target must not be used, it exists solely for the parser library which should not depend on the lpe framework
+alias headers : : <dependency>/libraries//atermpp : : ;
