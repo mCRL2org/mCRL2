@@ -20,14 +20,12 @@ lib rewrite
        : [ glob ../source/rewrite/*.cpp ]
          [ glob ../source/prover/*.cpp ]
          [ glob ../source/auxiliary/*.cpp ]
-       : <library>/libraries//aterm
-         <library>/libraries//mcrl2_basic
+       : <library>/libraries//mcrl2_basic
          <include>../include/rewrite
          <include>../include/prover
          <include>$(SETUP)
        :
-       : <library>/libraries/mcrl2_basic//struct
-         <include>../include/rewrite
+       : <include>../include/rewrite
          <include>../include/prover
          <os>LINUX:<library>/site-config//m
          <os>CYGWIN:<library>/site-config//m

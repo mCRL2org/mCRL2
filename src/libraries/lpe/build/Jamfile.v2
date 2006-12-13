@@ -14,11 +14,11 @@ alias lpe
 
 alias data-specification
        :
-       : <library>/libraries//atermpp
-         <library>/libraries//mcrl2_basic
+       : <use>/libraries//atermpp
        :
        : <dependency>/boost//headers
-         <library>/libraries//rewrite
+         <dependency>/libraries//rewrite
+         <dependency>/libraries//atermpp
        ;
 
 # The functionality provided by this library belongs in the LPE framework
@@ -26,11 +26,8 @@ lib dataelm
        : ../source/libdataelm.cpp
          ../../../mcrl22lpe/lin_alt.cpp
          ../../../mcrl22lpe/lin_std.cpp
-         /libraries//lpe
-         /libraries//parser
-         /libraries//rewrite
+       : <use>/libraries//parser
        :
-       :
-       :
+       : <dependency>/libraries//parser
        ;
 

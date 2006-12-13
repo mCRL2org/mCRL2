@@ -13,7 +13,7 @@
 int main(int argc, char** argv) {
 
   if (3 < argc) {
-    if (chdir(argv[0]) == 0) {
+    if (_chdir(argv[0]) == 0) {
       execv(argv[1], const_cast < char* const* > (argv + 2));
     }
   }
