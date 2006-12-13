@@ -20,7 +20,7 @@ namespace squadt {
   void extractor::extract() {
 
     /* Await connection */
-    await_connection(1);
+    await_connection(5);
 
     if (is_connected()) {
       request_tool_capabilities();
