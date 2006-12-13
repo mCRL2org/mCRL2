@@ -41,6 +41,7 @@ class Cluster
     float			position;
     float			size;
     std::vector< State* >	states;
+    std::vector< State* >       undecidedStates;
     float			topRadius;
     float			volume;
 
@@ -63,6 +64,7 @@ class Cluster
 
     // Functions on states
     void         addState( State* s );
+    void         addUndecidedState( State* s );
     void         getStates( std::vector< State* > &ss ) const;
     int          getNumberOfStates() const;
     bool         hasDeadlock() const;
@@ -73,6 +75,7 @@ class Cluster
     int          getNumberOfSlots();
     Utils::Slot  getSlot( int index) const;
     int          occupySlot( float pos );
+    void         resolveSlots();
 
     // Functions on transitions
     void      addActionLabel( ATerm l );

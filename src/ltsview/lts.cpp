@@ -9,7 +9,7 @@ LTS::LTS( Mediator* owner)
   deadlockCount = -1;
   markedTransitionCount = 0;
   stateVectorSpec = NULL;
-  tau = 1.;
+  tau = 1;
 }
 
 LTS::~LTS()
@@ -471,20 +471,12 @@ void LTS::positionClusters()
 	  c_it != r_it->end() ; ++c_it )
     {
       // compute the size of this cluster and the positions of its descendants
-      //std::cerr << "Computing..." << endl;
       (**c_it).computeSizeAndDescendantPositions();
-      //std::cerr << "Done!" << endl;
-      //std::cerr << "Rank: " << clustersInRank.rend() - r_it  << endl
-                //<< "Slots: " << (**c_it).getNumberOfSlots() << endl
-                //<< "Slot positions: " << endl;
       for (int i = 0; i < (**c_it).getNumberOfSlots(); ++i)
       {
         Slot slot = (**c_it).getSlot(i);
-        //std::cerr << "  Slot " << i << ": " << slot.position << endl;
       }
 
-      //std::cerr << endl;
-      
     }
   }
   // position the initial state's cluster
@@ -495,9 +487,11 @@ void LTS::positionStates()
 {
   vector< State* > undecided = edgeLengthBottomUp();
   undecided = edgeLengthTopDown( undecided );
+  resolveClusterSlots(undecided);
+  /*
   //TODO: Change to call of correct positioning functions.
   
-  /*for ( vector< vector< Cluster* > >::iterator r_it = clustersInRank.begin() ;
+  for ( vector< vector< Cluster* > >::iterator r_it = clustersInRank.begin() ;
 	r_it != clustersInRank.end() ; ++r_it )
   {
     for ( vector< Cluster* >::iterator c_it = r_it->begin() ;
@@ -521,7 +515,35 @@ void LTS::positionStates()
     }
   }*/
 }
+void LTS::resolveClusterSlots(vector< State* > undecided) 
+{
+  //Resolves the slots of each cluster, positioning the states within each 
+  //slots in such a way that they do not overlap.
+  
+  // First, we assign each state not yet positioned into a slot. This slot is
+  // decided as follows: Consider a node n, with n in undecided
+  // 1) Determine the cluster in which the node resides
+  // 2) Add the state to a vector of undecided states per cluster.
+  // 3) Determine the slots per cluster 
+  for( vector< State * >::iterator undecided_it = undecided.begin();
+       undecided_it != undecided.end(); ++undecided_it) {
+    (*undecided_it)->getCluster()->addUndecidedState(*undecided_it);
+  }
 
+
+  for( vector< vector< Cluster* > >::iterator rank_it = clustersInRank.begin(); 
+       rank_it != clustersInRank.end(); ++rank_it) 
+  {
+    for (vector< Cluster* >::iterator clus_it = rank_it->begin();
+         clus_it != rank_it->end(); ++clus_it)
+    {
+      (*clus_it)->resolveSlots();
+    }
+  }
+
+
+
+}
 vector< State* > LTS::edgeLengthBottomUp()
 {
   //Phase 1: Processes states bottom-up, keeping edges as short as possible.

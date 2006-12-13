@@ -44,6 +44,7 @@ class LTS
     void	mergeSuperiorClusters();
     void	positionClusters();
     void	positionStates();
+    void        resolveClusterSlots(std::vector< State* > undecided);
 //    void  	printStructure();
 //    void	printClusterSizesPositions();
     void	removeMarkRule( const int index );
