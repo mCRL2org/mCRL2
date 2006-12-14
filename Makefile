@@ -19,7 +19,7 @@ clean:
 	$(RM) -r autom4te.cache config.log *.o *~ core core.*
 
 test: $(BJAM)
-	$(BJAM) ./status
+	$(BJAM) ./status --preserve-test-targets
 
 distclean:
 	@${MAKE} -C src/doc distclean
