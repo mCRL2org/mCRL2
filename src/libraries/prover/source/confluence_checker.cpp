@@ -127,23 +127,25 @@
 
   // ----------------------------------------------------------------------------------------------
 
-  ATermAppl get_subst_equation_from_actions(ATermList a_actions, ATermList a_substitutions) {
+  ATermAppl get_subst_equation_from_multi_action_or_delta(ATermAppl a_multi_action_or_delta, ATermList a_substitutions) {
     ATermAppl v_result = gsMakeDataExprTrue();
-    ATermAppl v_action;
-    ATermList v_expressions;
-    ATermAppl v_expression;
-    ATermAppl v_subst_expression;
-
-    while (!ATisEmpty(a_actions)) {
-      v_action = ATAgetFirst(a_actions);
-      v_expressions = ATLgetArgument(v_action, 1);
-      while (!ATisEmpty(v_expressions)) {
-        v_expression = ATAgetFirst(v_expressions);
-        v_subst_expression = gsSubstValues_Appl(a_substitutions, v_expression, true);
-        v_result = gsMakeDataExprAnd(v_result, gsMakeDataExprEq(v_expression, v_subst_expression));
-        v_expressions = ATgetNext(v_expressions);
+    if (!gsIsDelta(a_multi_action_or_delta)) {
+      ATermAppl v_action;
+      ATermList v_expressions;
+      ATermAppl v_expression;
+      ATermAppl v_subst_expression;
+      ATermList v_actions = ATLgetArgument(a_multi_action_or_delta, 0);
+      while (!ATisEmpty(v_actions)) {
+        v_action = ATAgetFirst(v_actions);
+        v_expressions = ATLgetArgument(v_action, 1);
+        while (!ATisEmpty(v_expressions)) {
+          v_expression = ATAgetFirst(v_expressions);
+          v_subst_expression = gsSubstValues_Appl(a_substitutions, v_expression, true);
+          v_result = gsMakeDataExprAnd(v_result, gsMakeDataExprEq(v_expression, v_subst_expression));
+          v_expressions = ATgetNext(v_expressions);
+        }
+        v_actions = ATgetNext(v_actions);
       }
-      a_actions = ATgetNext(a_actions);
     }
     return v_result;
   }
@@ -158,8 +160,7 @@
     ATermAppl v_lhs, v_rhs;
     ATermAppl v_equation;
     ATermAppl v_subst_equation;
-    ATermList v_actions;
-    ATermAppl v_actions_equation;
+    ATermAppl v_multi_action_or_delta;
 
     v_condition_1 = ATAgetArgument(a_summand_1, 1);
     v_assignments_1 = ATLgetArgument(a_summand_1, 4);
@@ -173,8 +174,14 @@
     v_subst_condition_2 = gsSubstValues_Appl(v_substitutions_1, v_condition_2, true);
     v_subst_equation = get_subst_equation_from_assignments(a_variables, v_assignments_1, v_assignments_2, v_substitutions_1, v_substitutions_2);
 
-    v_actions = ATLgetArgument(ATAgetArgument(a_summand_2, 2), 0);
-    if (ATisEmpty(v_actions)) {
+    bool v_is_tau_summand;
+    v_multi_action_or_delta = ATAgetArgument(a_summand_2, 2);
+    if (gsIsMultAct(v_multi_action_or_delta)) {
+      v_is_tau_summand = ATisEmpty(ATLgetArgument(v_multi_action_or_delta, 0));
+    } else {
+      v_is_tau_summand = false;
+    }
+    if (v_is_tau_summand) {
       // tau-summand
       v_equation = get_equation_from_assignments(a_variables, v_assignments_1, v_assignments_2);
       v_rhs = gsMakeDataExprAnd(v_subst_condition_1, v_subst_condition_2);
@@ -182,9 +189,9 @@
       v_rhs = gsMakeDataExprOr(v_equation, v_rhs);
     } else {
       // non-tau-summand
-      v_actions_equation = get_subst_equation_from_actions(v_actions, v_substitutions_1);
+      v_equation = get_subst_equation_from_multi_action_or_delta(v_multi_action_or_delta, v_substitutions_1);
       v_rhs = gsMakeDataExprAnd(v_subst_condition_1, v_subst_condition_2);
-      v_rhs = gsMakeDataExprAnd(v_rhs, v_actions_equation);
+      v_rhs = gsMakeDataExprAnd(v_rhs, v_equation);
       v_rhs = gsMakeDataExprAnd(v_rhs, v_subst_equation);
     }
     return gsMakeDataExprImp(v_lhs, v_rhs);
