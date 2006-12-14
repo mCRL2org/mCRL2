@@ -51,12 +51,13 @@ substitution make_substitution(Src src, Dest dest)
 }
 
 /// Utility class for applying a substitution to a term.
+template <typename Src, typename Dest>
 struct list_substitution
 {
-  aterm_list m_src;
-  aterm_list m_dest;
+  Src m_src;
+  Dest m_dest;
   
-  list_substitution(aterm_list src, aterm_list dest)
+  list_substitution(Src src, Dest dest)
     : m_src(src), m_dest(dest)
   {
     assert(src.size() == dest.size());
@@ -64,7 +65,8 @@ struct list_substitution
   
   aterm operator()(aterm t) const
   {
-    aterm_list::iterator i, j;
+    typename Src::iterator i;
+    typename Dest::iterator j;
     for (i = m_src.begin(), j = m_dest.begin(); i != m_src.end(); ++i, ++j)
     {
       t = atermpp::replace(t, *i, *j);
@@ -75,10 +77,9 @@ struct list_substitution
 
 /// Creation function for a list of substitutions.
 template <typename Src, typename Dest>
-inline
-list_substitution make_list_substitution(Src src, Dest dest)
+list_substitution<Src, Dest> make_list_substitution(Src src, Dest dest)
 {
-  return list_substitution(aterm_list(src), aterm_list(dest));
+  return list_substitution<Src, Dest>(src, dest);
 }
 
 } // namespace atermpp
