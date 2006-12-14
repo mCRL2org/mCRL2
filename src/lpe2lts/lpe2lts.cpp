@@ -63,7 +63,7 @@ static void print_help(FILE *f, const char *Name)
     "OUTFILE is not supplied, the state space is not stored.\n"
     "\n"
     "The format of OUTFILE is determined by its extension (unless it is specified\n"
-    "by an option). If the extension is unknown, the aut format will be used.\n"
+    "by an option). If the extension is unknown, the svc format will be used.\n"
     "\n"
     "Mandatory arguments to long options are mandatory for short options too.\n"
     "  -h, --help               display this help message\n"

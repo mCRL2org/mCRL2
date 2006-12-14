@@ -86,7 +86,7 @@
   </para>
   <para>
     The format of &outfile; is determined by its extension (unless it is specified
-     by an option). If the extension is unknown, the aut format will be used.
+     by an option). If the extension is unknown, the svc format will be used.
   </para>
 </refsect1>
 
