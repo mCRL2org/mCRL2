@@ -13,6 +13,7 @@
 #include "atermpp/algorithm.h"
 #include "atermpp/substitute.h"
 #include "lpe/data_functional.h"
+#include "lpe/data_utility.h"
 #include "lpe/data_init.h"
 #include "lpe/data_operators.h"
 #include "lpe/mucalculus.h"
@@ -107,7 +108,7 @@ pbes_expression equal_data_parameters(action_list a, action_list b)
   for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
   {
     data_expression_list d1 = i->arguments();
-    data_expression_list d2 = i->arguments();
+    data_expression_list d2 = j->arguments();
     assert(d1.size() == d2.size());
     data_expression_list::iterator i1, i2;
     for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
@@ -197,7 +198,6 @@ namespace pbes_timed
   {
     using namespace lpe::act_init;
     namespace p = lpe::pbes_init;
-    namespace q = lpe::act_init;
   
     if (is_mult_act(b)) {
       action_list b_actions(list_arg1(b));
@@ -449,7 +449,6 @@ namespace pbes_untimed
   {
     using namespace lpe::act_init;
     namespace p = lpe::pbes_init;
-    namespace q = lpe::act_init;
   
     if (is_mult_act(b)) {
       action_list b_actions(list_arg1(b));
@@ -561,6 +560,7 @@ namespace pbes_untimed
       data_variable_list xp = lpe.process_parameters();
       return propvar(X, d + xp + Par(X, f));
     }
+    std::cout << "<RHS> unknown type:" << f << std::endl;
     assert(false); // this should never happen
     return pbes_expression();
   }
@@ -610,10 +610,46 @@ namespace pbes_untimed
   }
 } // namespace pbes_untimed
 
+/// Returns a formula that is equivalent to f and uses no variables occurring in spec.
+inline
+state_formula remove_name_clashes(state_formula f, specification spec)
+{
+  // find all data variables in spec
+  std::set<data_variable> variables = lpe::find_variables(spec);
+   
+  // find all data variables in f
+  std::set<data_variable> formula_variables = lpe::find_variables(f);
+
+  // compute the intersection and put it in x
+  std::vector<data_variable> x;
+  std::set_intersection(variables.begin(),
+                        variables.end(),
+                        formula_variables.begin(),
+                        formula_variables.end(),
+                        std::back_inserter(x)
+                       );
+
+  // generate a vector y with replacements
+  fresh_variable_generator generator;
+  generator.add_context_variables(variables.begin(), variables.end());
+  generator.add_context_variables(formula_variables.begin(), formula_variables.end());
+  std::vector<data_variable> y;
+  for (std::vector<data_variable>::iterator i = x.begin(); i != x.end(); ++i)
+  {
+    y.push_back(generator(*i));
+  }
+  
+  return f.substitute(make_list_substitution(x, y));
+}
+
 // translate a state_formula and an LPE to a pbes
+inline
 pbes pbes_translate(state_formula f, specification spec, bool untimed = true)
 {
   using namespace state_init;
+
+  // rename variables in f, to prevent name clashes with variables in spec
+  f = remove_name_clashes(f, spec);
 
   // wrap the formula inside a 'nu' if needed
   if (!is_mu(f) && !is_nu(f))

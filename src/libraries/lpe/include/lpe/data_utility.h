@@ -88,17 +88,6 @@ class fresh_variable_generator
     std::string m_hint;                  // used as a hint for operator()()
     lpe::sort m_sort;                    // used for operator()()
 
-    /// Add the variables occurring in term t to m_variables.
-    template <typename Term>
-    void add_to_context(Term t)
-    {
-      std::set<data_variable> variables = find_variables(t);
-      for (std::set<data_variable>::iterator i = variables.begin(); i != variables.end(); ++i)
-      {
-        m_variables.insert(*i);
-      }
-    }
-
   public:
     fresh_variable_generator()
      : m_hint("t"), m_sort(sort_init::real())
@@ -141,6 +130,14 @@ class fresh_variable_generator
     lpe::sort sort() const
     {
       return m_sort;
+    }
+
+    /// Add variables to context.
+    template <typename Iter>
+    void add_context_variables(Iter first, Iter last)
+    {
+      for (Iter i = first; i != last; ++i)
+        m_variables.insert(*i);
     }
 
     /// Returns a unique variable of the given sort, with the given hint as prefix.

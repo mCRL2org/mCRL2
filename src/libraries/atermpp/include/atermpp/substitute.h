@@ -65,8 +65,8 @@ struct list_substitution
   
   aterm operator()(aterm t) const
   {
-    typename Src::iterator i;
-    typename Dest::iterator j;
+    typename Src::const_iterator i;
+    typename Dest::const_iterator j;
     for (i = m_src.begin(), j = m_dest.begin(); i != m_src.end(); ++i, ++j)
     {
       t = atermpp::replace(t, *i, *j);
