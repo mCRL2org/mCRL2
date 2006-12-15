@@ -75,21 +75,6 @@ namespace detail {
   specification mcrl22lpe(const std::string& spec)
   {
     t_lin_options options;
-    options.lin_method = lmRegular;
-    options.no_intermediate_cluster = false;
-    options.final_cluster = false;
-    options.newstate = false;
-    options.binary = false;
-    options.statenames = false;
-    options.norewrite = false;
-    options.nofreevars = false;
-    options.nosumelm = false;
-    options.nodeltaelimination = false;
-    options.opt_check_only = false;
-    options.opt_end_phase = phNone;
-    options.opt_noalpha = false;
-    options.infilename = "";
-    options.outfilename = "";
 
     std::stringstream in;
     in << spec;
