@@ -9,7 +9,6 @@ constant BOOST_VERSION : 1.33.1 ;
 project boost
        : build-dir $(BUILD_TOP)
        : requirements
-          <include>.
           <include>$(BOOST_ROOT)
           <define>BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS=1
           <define>BOOST_ALL_NO_LIB=1
