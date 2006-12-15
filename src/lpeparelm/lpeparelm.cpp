@@ -361,9 +361,9 @@ void lpeParElm::filter() {
     if (p_S.size() !=0){
       std::cerr << "lpeparelm:   [ ";
       for(std::set< lpe::data_variable >::iterator i = p_S.begin(); i != (--p_S.end()); i++){
-        std::cerr << i->name() << ", ";
+        std::cerr << i->unquoted_name() << ", ";
       }
-      std::cerr << (*(--p_S.end())).name() << " ]" << std::endl;
+      std::cerr << (*(--p_S.end())).unquoted_name() << " ]" << std::endl;
     }
   }// else {  
    // std::cerr << " Number of removed process parameters : " << p_S.size() << std::endl;

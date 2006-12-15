@@ -19,6 +19,7 @@
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
 #include "atermpp/algorithm.h"
+#include "atermpp/utility.h"
 #include "lpe/action.h"
 #include "lpe/data.h"
 #include "lpe/data_init.h"
@@ -34,7 +35,7 @@ namespace {
     std::set<std::string> result;
     for (lpe::data_variable_list::iterator i = l.begin(); i != l.end(); ++i)
     {
-      result.insert(i->name());
+      result.insert(atermpp::unquote(i->name()));
     }
     return result;
   }

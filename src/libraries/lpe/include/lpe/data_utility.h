@@ -16,6 +16,7 @@
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
 #include "atermpp/aterm_string.h"
+#include "atermpp/utility.h"
 
 namespace lpe {
 
@@ -60,19 +61,53 @@ data_variable fresh_variable(std::string hint, aterm context, lpe::sort s = sort
   return data_variable(gsMakeDataVarId(id, s));
 }
 
+/// Returns all data variables that occur in the term t.
+template <typename Term>
+std::set<data_variable> find_variables(Term t)
+{
+  // find all data variables in t
+  std::set<data_variable> variables;
+  atermpp::find_all_if(t, is_data_variable, std::inserter(variables, variables.end()));
+
+  // find all data variable_init's in t (since they contain data variables implicitly!)
+  std::set<data_variable_init> variable_inits;
+  atermpp::find_all_if(t, lpe::is_data_variable_init, std::inserter(variable_inits, variable_inits.end()));
+  for (std::set<data_variable_init>::iterator i = variable_inits.begin(); i != variable_inits.end(); ++i)
+  {
+    variables.insert(i->to_variable());
+  }
+  return variables;
+}
+
 /// Fresh variable generator that generates data variables with
 /// names that do not appear in the given context.
 class fresh_variable_generator
 {
   protected:
-    std::set<aterm_string> m_identifiers;
-    std::string m_hint;
-    lpe::sort m_sort;
-  
-  public:
-    fresh_variable_generator(aterm context, std::string hint = "t", lpe::sort s = sort_init::real())
+    std::set<data_variable> m_variables; // context
+    std::string m_hint;                  // used as a hint for operator()()
+    lpe::sort m_sort;                    // used for operator()()
+
+    /// Add the variables occurring in term t to m_variables.
+    template <typename Term>
+    void add_to_context(Term t)
     {
-      m_identifiers = identifiers(context);
+      std::set<data_variable> variables = find_variables(t);
+      for (std::set<data_variable>::iterator i = variables.begin(); i != variables.end(); ++i)
+      {
+        m_variables.insert(*i);
+      }
+    }
+
+  public:
+    fresh_variable_generator()
+     : m_hint("t"), m_sort(sort_init::real())
+    { }
+
+    template <typename Term>
+    fresh_variable_generator(Term context, std::string hint = "t", lpe::sort s = sort_init::real())
+    {
+      m_variables = find_variables(context);
       m_hint = hint;
       m_sort = s;
     }
@@ -90,9 +125,10 @@ class fresh_variable_generator
     }
 
     /// Set a new context.
-    void set_context(aterm context)
+    template <typename Term>
+    void set_context(Term context)
     {
-      m_identifiers = identifiers(context);
+      m_variables = find_variables(context);
     }
 
     /// Set a new sort.
@@ -108,17 +144,34 @@ class fresh_variable_generator
     }
 
     /// Returns a unique variable of the given sort, with the given hint as prefix.
+    /// The returned variable is added to the context.
     data_variable operator()()
     {
       aterm_string id(m_hint);
+      data_variable v(gsMakeDataVarId(id, m_sort));
       int index = 0;
-      while (m_identifiers.find(id) != m_identifiers.end())
+      while (m_variables.find(v) != m_variables.end())
       {   
-        std::string name = str(boost::format(m_hint + "%02d") % index++);
-        id = aterm_string(name);
+        id = aterm_string(str(boost::format(m_hint + "%02d") % index++));
+        v = data_variable(gsMakeDataVarId(id, m_sort));
       }
-      m_identifiers.insert(id);
-      return data_variable(gsMakeDataVarId(id, m_sort));
+      m_variables.insert(v);
+      return v;
+    }
+
+    /// Returns a unique variable with the same sort as the variable v, and with
+    /// the same prefix. The returned variable is added to the context.
+    data_variable operator()(data_variable v)
+    {
+      int index = 0;
+      std::string name = atermpp::unquote(v.name());
+      while (m_variables.find(v) != m_variables.end())
+      {   
+        aterm_string id(str(boost::format(name + "%02d") % index++));
+        v = data_variable(gsMakeDataVarId(id, v.sort()));
+      }
+      m_variables.insert(v);
+      return v;
     }
 };
 

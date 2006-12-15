@@ -23,7 +23,7 @@ int test_main(int, char*[])
   data_variable d00("d00:D");
   data_expression e = and_(equal_to(d, d0), not_equal_to(d0, d00));
 
-  fresh_variable_generator generator(e, "d", d.type());
+  fresh_variable_generator generator(e, "d", d.sort());
   data_variable x = generator();
   BOOST_CHECK(x == data_variable("d01:D"));
   x = generator();
@@ -45,6 +45,12 @@ int test_main(int, char*[])
   BOOST_CHECK(*i++ == data_variable("e:E"));
   BOOST_CHECK(*i++ == data_variable("e00:E"));
   BOOST_CHECK(*i   == data_variable("e01:E"));
+
+  data_variable f("f:F");
+  x = generator(f);
+  BOOST_CHECK(x == data_variable("f:F"));
+  x = generator(f);
+  BOOST_CHECK(x == data_variable("f00:F"));
 
   return 0;
 }

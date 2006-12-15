@@ -145,14 +145,13 @@ bool occurs_in(data_type l, lpe::data_variable v)
 }
 
 
-//TODO: Make sure type() is renamed to sort()
 ///\ret a list of all data_variables of sort s in vl
 lpe::data_variable_list get_occurrences(const data_variable_list& vl, const lpe::sort& s)
 {
   data_variable_list result;
   for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
   {
-    if (i->type() == s)
+    if (i->sort() == s)
     {
       result = push_front(result, *i);
     }
@@ -215,7 +214,7 @@ data_variable_list get_variables(const data_variable_list& vl, const sort_list& 
   data_variable_list result;
   for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
   {
-    if (occurs_in(sl, i->type())) // TODO have type renamed to sort()
+    if (occurs_in(sl, i->sort()))
     {
       result = push_front(result, *i);
     }

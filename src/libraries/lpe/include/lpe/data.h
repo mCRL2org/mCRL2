@@ -13,6 +13,7 @@
 #include "atermpp/algorithm.h"
 #include "atermpp/aterm_access.h"
 #include "atermpp/aterm_string.h"
+#include "atermpp/utility.h"
 #include "lpe/sort.h"
 #include "lpe/pretty_print.h"
 #include "lpe/predefined_symbols.h"
@@ -159,16 +160,29 @@ class data_variable: public aterm_appl
 
     /// Returns the name of the data_variable.
     ///
-    std::string name() const
+    aterm_string name() const
     {
-      aterm_string s = arg1(*this);
-      return s;
-      // return unquote(aterm_appl(*this).argument(0).to_string());
+      return arg1(*this);
+    }
+
+    /// Returns the name of the data_variable.
+    /// DEPRECATED!
+    ///
+    std::string unquoted_name() const
+    {
+      return atermpp::unquote(name());
     }
 
     /// Returns the sort of the data_variable.
     ///
-    sort type() const
+    lpe::sort sort() const
+    {
+      return gsGetSort(*this);
+    }
+
+    /// Returns the sort of the data_variable.
+    ///
+    lpe::sort type() const
     {
       return gsGetSort(*this);
     }
@@ -226,6 +240,12 @@ class data_variable_init: public aterm_appl
       return data_expression(z);
     }
 };
+
+inline
+bool is_data_variable_init(aterm_appl t)
+{
+  return gsIsDataVarIdInit(t);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // data_variable_init_list

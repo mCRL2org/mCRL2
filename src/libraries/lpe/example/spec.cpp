@@ -4,6 +4,7 @@
 #include <fstream>
 #include <boost/format.hpp>
 
+#include "atermpp/utility.h"
 #include "lpe/specification.h"
 #include "lpe/predefined_symbols.h"
 #include "lpe/sort.h"
@@ -73,7 +74,7 @@ int main()
   cout << "--- process parameters: ---" << endl;
   for (data_variable_list::iterator i = lpe.process_parameters().begin(); i != lpe.process_parameters().end(); ++i)
   {
-    cout << str(format("%8s : %8s  %s") % i->name() % pp(i->type()) % i->to_string()) << endl;
+    cout << str(format("%8s : %8s  %s") % unquote(i->name()) % pp(i->sort()) % i->to_string()) << endl;
   }
   cout << endl;
 

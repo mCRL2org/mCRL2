@@ -342,52 +342,6 @@ class pbes_equation: public aterm_appl
 ///
 typedef term_list<pbes_equation> pbes_equation_list;
 
-/*
-template <typename T, typename Container<T> >
-struct container_inserter
-{
-  Container& m_container;
-  
-  container_inserter(Container& container)
-    : m_container(container)
-  {}
-  
-  void operator()(T t)
-  {
-    m_container.insert(t);
-  }
-};
-
-template <typename UnaryPredicate>
-void tmp_impl(aterm t, UnaryPredicate pred, atermpp::set<propositional_variable>& s)
-{
-  aterm_list arguments;
-  if (t.type() == AT_LIST) {
-    arguments = t;
-  }
-  else if (t.type() == AT_APPL) {
-    if (pred(t)) // only check elements of type aterm_appl...
-      s.insert(propositional_variable(aterm_appl(t)));
-    arguments = aterm_appl(t).argument_list();
-  }
-  else {
-    return;
-  }
-  for (aterm_list::iterator i = arguments.begin(); i != arguments.end(); ++i)
-  {
-    tmp_impl(*i, pred, s);
-  }
-}
-
-/// Finds all subterms of t that match the predicate op, and applies the given
-/// function to it.
-template <typename UnaryPredicate>
-void tmp(ATermAppl t, UnaryPredicate pred, atermpp::set<propositional_variable>& s)
-{
-  tmp_impl(t, pred, s);
-} 
-*/
-
 ///////////////////////////////////////////////////////////////////////////////
 // equation_system
 /// \brief equation_system.

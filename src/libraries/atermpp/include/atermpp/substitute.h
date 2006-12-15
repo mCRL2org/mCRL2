@@ -21,7 +21,7 @@
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_appl.h"
 #include "atermpp/aterm_list.h"
-#include "atermpp/detail/algorithm_impl.h"
+#include "atermpp/algorithm.h"
 
 namespace atermpp
 {
