@@ -11,6 +11,19 @@
 
 // Auxiliary functions ----------------------------------------------------------------------------
 
+  bool is_tau_summand(ATermAppl a_summand) {
+    ATermAppl v_multi_action_or_delta = ATAgetArgument(a_summand, 2);
+    if (gsIsMultAct(v_multi_action_or_delta)) {
+      return ATisEmpty(ATLgetArgument(v_multi_action_or_delta, 0));
+    } else {
+      return false;
+    }
+  }
+
+  bool is_delta_summand(ATermAppl a_summand) {
+    return gsIsDelta(ATAgetArgument(a_summand, 2));
+  }
+
   ATermList get_substitutions_from_assignments(ATermList a_assignments) {
     ATermAppl v_assignment;
     ATermAppl v_variable;
@@ -127,25 +140,23 @@
 
   // ----------------------------------------------------------------------------------------------
 
-  ATermAppl get_subst_equation_from_multi_action_or_delta(ATermAppl a_multi_action_or_delta, ATermList a_substitutions) {
+  ATermAppl get_subst_equation_from_actions(ATermList a_actions, ATermList a_substitutions) {
     ATermAppl v_result = gsMakeDataExprTrue();
-    if (!gsIsDelta(a_multi_action_or_delta)) {
-      ATermAppl v_action;
-      ATermList v_expressions;
-      ATermAppl v_expression;
-      ATermAppl v_subst_expression;
-      ATermList v_actions = ATLgetArgument(a_multi_action_or_delta, 0);
-      while (!ATisEmpty(v_actions)) {
-        v_action = ATAgetFirst(v_actions);
-        v_expressions = ATLgetArgument(v_action, 1);
-        while (!ATisEmpty(v_expressions)) {
-          v_expression = ATAgetFirst(v_expressions);
-          v_subst_expression = gsSubstValues_Appl(a_substitutions, v_expression, true);
-          v_result = gsMakeDataExprAnd(v_result, gsMakeDataExprEq(v_expression, v_subst_expression));
-          v_expressions = ATgetNext(v_expressions);
-        }
-        v_actions = ATgetNext(v_actions);
+    ATermAppl v_action;
+    ATermList v_expressions;
+    ATermAppl v_expression;
+    ATermAppl v_subst_expression;
+
+    while (!ATisEmpty(a_actions)) {
+      v_action = ATAgetFirst(a_actions);
+      v_expressions = ATLgetArgument(v_action, 1);
+      while (!ATisEmpty(v_expressions)) {
+        v_expression = ATAgetFirst(v_expressions);
+        v_subst_expression = gsSubstValues_Appl(a_substitutions, v_expression, true);
+        v_result = gsMakeDataExprAnd(v_result, gsMakeDataExprEq(v_expression, v_subst_expression));
+        v_expressions = ATgetNext(v_expressions);
       }
+      a_actions = ATgetNext(a_actions);
     }
     return v_result;
   }
@@ -153,6 +164,8 @@
   // ----------------------------------------------------------------------------------------------
 
   ATermAppl get_confluence_condition(ATermAppl a_invariant, ATermAppl a_summand_1, ATermAppl a_summand_2, ATermList a_variables) {
+    assert(is_tau_summand(a_summand_1));
+    assert(!is_delta_summand(a_summand_2));
     ATermAppl v_condition_1, v_condition_2;
     ATermList v_assignments_1, v_assignments_2;
     ATermList v_substitutions_1, v_substitutions_2;
@@ -160,7 +173,8 @@
     ATermAppl v_lhs, v_rhs;
     ATermAppl v_equation;
     ATermAppl v_subst_equation;
-    ATermAppl v_multi_action_or_delta;
+    ATermList v_actions;
+    ATermAppl v_actions_equation;
 
     v_condition_1 = ATAgetArgument(a_summand_1, 1);
     v_assignments_1 = ATLgetArgument(a_summand_1, 4);
@@ -174,14 +188,8 @@
     v_subst_condition_2 = gsSubstValues_Appl(v_substitutions_1, v_condition_2, true);
     v_subst_equation = get_subst_equation_from_assignments(a_variables, v_assignments_1, v_assignments_2, v_substitutions_1, v_substitutions_2);
 
-    bool v_is_tau_summand;
-    v_multi_action_or_delta = ATAgetArgument(a_summand_2, 2);
-    if (gsIsMultAct(v_multi_action_or_delta)) {
-      v_is_tau_summand = ATisEmpty(ATLgetArgument(v_multi_action_or_delta, 0));
-    } else {
-      v_is_tau_summand = false;
-    }
-    if (v_is_tau_summand) {
+    v_actions = ATLgetArgument(ATAgetArgument(a_summand_2, 2), 0);
+    if (ATisEmpty(v_actions)) {
       // tau-summand
       v_equation = get_equation_from_assignments(a_variables, v_assignments_1, v_assignments_2);
       v_rhs = gsMakeDataExprAnd(v_subst_condition_1, v_subst_condition_2);
@@ -189,9 +197,9 @@
       v_rhs = gsMakeDataExprOr(v_equation, v_rhs);
     } else {
       // non-tau-summand
-      v_equation = get_subst_equation_from_multi_action_or_delta(v_multi_action_or_delta, v_substitutions_1);
+      v_actions_equation = get_subst_equation_from_actions(v_actions, v_substitutions_1);
       v_rhs = gsMakeDataExprAnd(v_subst_condition_1, v_subst_condition_2);
-      v_rhs = gsMakeDataExprAnd(v_rhs, v_equation);
+      v_rhs = gsMakeDataExprAnd(v_rhs, v_actions_equation);
       v_rhs = gsMakeDataExprAnd(v_rhs, v_subst_equation);
     }
     return gsMakeDataExprImp(v_lhs, v_rhs);
@@ -271,15 +279,15 @@
     // --------------------------------------------------------------------------------------------
 
     bool Confluence_Checker::check_summands(ATermAppl a_invariant, ATermAppl a_summand_1, int a_summand_number_1, ATermAppl a_summand_2, int a_summand_number_2) {
+      assert(is_tau_summand(a_summand_1));
       ATermList v_variables = ATLgetArgument(ATAgetArgument(f_lpe, 2), 1);
-      ATermAppl v_multi_actions_or_delta, v_condition, v_new_invariant;
+      ATermAppl v_condition, v_new_invariant;
       bool v_is_confluent = true;
 
       if (f_disjointness_checker.disjoint(a_summand_number_1, a_summand_number_2)) {
         gsfprintf(stderr, ":");
       } else {
-        v_multi_actions_or_delta = ATAgetArgument(a_summand_1, 2);
-        if (!gsIsDelta(v_multi_actions_or_delta)) {
+        if (!is_delta_summand(a_summand_2)) {
           v_condition = get_confluence_condition(a_invariant, a_summand_1, a_summand_2, v_variables);
           f_bdd_prover.set_formula(v_condition);
           if (f_bdd_prover.is_tautology() == answer_yes) {
@@ -323,6 +331,7 @@
     // --------------------------------------------------------------------------------------------
 
     ATermAppl Confluence_Checker::check_confluence_and_mark_summand(ATermAppl a_invariant, ATermAppl a_summand, int a_summand_number, bool& a_is_marked) {
+      assert(is_tau_summand(a_summand));
       ATermList v_summands = ATLgetArgument(ATAgetArgument(f_lpe, 2), 2);
       ATermAppl v_summand, v_marked_summand;
       int v_summand_number = 1;
@@ -434,14 +443,12 @@
         v_summand = ATAgetFirst(v_summands);
         v_marked_summand = v_summand;
         if ((a_summand_number == v_summand_number) || (a_summand_number == 0)) {
-          v_multi_actions_or_delta = ATAgetArgument(v_summand, 2);
-          if (!gsIsDelta(v_multi_actions_or_delta)) {
+          if (is_tau_summand(v_summand)) {
+            v_multi_actions_or_delta = ATAgetArgument(v_summand, 2);
             v_multi_actions = ATLgetArgument(v_multi_actions_or_delta, 0);
-            if (ATisEmpty(v_multi_actions)) {
-              gsfprintf(stderr, "tau-summand %2d: ", v_summand_number);
-              v_marked_summand = check_confluence_and_mark_summand(a_invariant, v_summand, v_summand_number, v_is_marked);
-              gsfprintf(stderr, "\n");
-            }
+            gsfprintf(stderr, "tau-summand %2d: ", v_summand_number);
+            v_marked_summand = check_confluence_and_mark_summand(a_invariant, v_summand, v_summand_number, v_is_marked);
+            gsfprintf(stderr, "\n");
           }
         }
         v_marked_summands = ATinsert(v_marked_summands, (ATerm) v_marked_summand);
