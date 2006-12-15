@@ -22,5 +22,5 @@ alias process_wrapper ;
 
 exe process_wrapper
       : process_wrapper.cpp
-      : <toolset>msvc
+      : <os>NT
       ;

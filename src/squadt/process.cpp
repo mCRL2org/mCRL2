@@ -73,7 +73,7 @@ namespace squadt {
 
       cc.prepend_argument(c.working_directory);
       cc.prepend_argument(c.executable);
-      cc.set_executable(std::string(TOOL_DIRECTORY) + "/process_wrapper");
+      cc.set_executable(std::string(TOOL_DIRECTORY) + "\\process_wrapper.exe");
 
       identifier = _spawnv(_P_NOWAIT, cc.executable.c_str(), cc.get_argument_array().get());
 #else

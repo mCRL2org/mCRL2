@@ -11,10 +11,14 @@
  *  3... command arguments to pass along
  */
 int main(int argc, char** argv) {
-
-  if (3 < argc) {
-    if (_chdir(argv[0]) == 0) {
-      execv(argv[1], const_cast < char* const* > (argv + 2));
+  if (2 < argc) {
+    if (_chdir(argv[1]) == 0) {
+      if (3 < argc) {
+        execvp(argv[2], const_cast < char* const* > (argv + 3));
+      }
+      else {
+        execlp(argv[2], 0);
+      }
     }
   }
 
