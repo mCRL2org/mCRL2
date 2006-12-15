@@ -3,6 +3,7 @@
 #include <fstream>
 
 #include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/convenience.hpp>
 #include <boost/foreach.hpp>
 
 #include "build_system.h"
@@ -157,7 +158,13 @@ namespace squadt {
         path default_path(global_build_system.get_settings_manager()->path_to_default_binaries());
        
         for (char const** t = tool_manager_impl::default_tools; *t != 0; ++t) {
-          o << (f % *t % (default_path / path(*t)).native_file_string());
+#if defined(__WIN32__) || defined(__CYGWIN__) || defined(__MINGW32__)
+          path file_name(std::string(*t) + ".exe");
+#else
+          path file_name(*t);
+#endif
+
+          o << (f % *t % (default_path / file_name).native_file_string());
         }
        
         o << "</tool-catalog>\n";

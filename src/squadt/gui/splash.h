@@ -198,6 +198,7 @@ namespace squadt {
         progress_indicator->SetValue(new_amount);
 
         display->Refresh();
+        display->Update();
 
         wxTheApp->Yield();
       }

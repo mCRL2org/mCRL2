@@ -29,12 +29,6 @@ namespace squadt {
 
     private:
  
-      /** \brief Type for output print format variants */
-      enum output_variant {
-        plain_text,          ///< Output is formatted plain text
-        squadt_tool_catalog  ///< Output is squadt XML tool catalog format
-      };
-
       /** \brief The default TCP port for a tool manager */
       static const long   default_tcp_port;
 

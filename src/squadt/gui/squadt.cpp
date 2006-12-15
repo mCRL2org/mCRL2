@@ -162,7 +162,7 @@ bool Squadt::OnInit() {
     wxImage logo(logo_xpm);
  
     splash* splash_window = new splash(&logo, 1);
- 
+
     try {
       splash_window->set_category("Querying tools", global_build_system.get_tool_manager()->number_of_tools());
      
