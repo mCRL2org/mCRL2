@@ -347,7 +347,7 @@ namespace pbes_timed
       return or_(multi_or(v.begin(), v.end()), val(less_equal(t1, T)));
     } else if (s::is_var(f)) {
       aterm_string X(arg1(f));
-      data_expression_list d = state_formula_variable_expressions(f);
+      data_expression_list d = list_arg2(f);
       data_variable_list xp = lpe.process_parameters();
       return propvar(X, T + d + xp + Par(X, f));
     } else if (s::is_mu(f) || (s::is_nu(f))) {
@@ -551,7 +551,7 @@ namespace pbes_untimed
       return multi_or(v.begin(), v.end());
     } else if (s::is_var(f)) {
       aterm_string X(arg1(f));
-      data_expression_list d = state_formula_variable_expressions(f);
+      data_expression_list d = list_arg2(f);
       data_variable_list xp = lpe.process_parameters();
       return propvar(X, d + xp + Par(X, f));
     } else if (s::is_mu(f) || (s::is_nu(f))) {
