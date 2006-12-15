@@ -117,13 +117,15 @@ namespace squadt {
         dc.DrawText(wxString(s.category.c_str(), wxConvLocal), 380, 30);
         dc.SetFont(wxFont(11, wxFONTFAMILY_DECORATIVE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
      
+        wxString o = wxString(s.operation.c_str(), wxConvLocal);
+
         if (!s.operation.empty()) {
-          wxString o = wxString(s.operation.c_str(), wxConvLocal);
-     
-          o.Append(wxT(": ")).Append(wxString(s.operand.c_str(), wxConvLocal));
-     
-          dc.DrawText(o, 395, 70);
+          o.Append(wxT(": "));
         }
+
+        o.Append(wxString(s.operand.c_str(), wxConvLocal));
+
+        dc.DrawText(o, 395, 70);
       }
     }
     /// \endcond

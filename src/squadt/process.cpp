@@ -71,8 +71,8 @@ namespace squadt {
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
       command cc(c);
 
-      cc.prepend_argument(c.working_directory);
       cc.prepend_argument(c.executable);
+      cc.prepend_argument(c.working_directory);
       cc.set_executable(std::string(TOOL_DIRECTORY) + "\\process_wrapper.exe");
 
       identifier = _spawnv(_P_NOWAIT, cc.executable.c_str(), cc.get_argument_array().get());

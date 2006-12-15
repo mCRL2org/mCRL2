@@ -1,6 +1,11 @@
 #include <io.h>
 #include <process.h>
 
+/* TODO
+ *
+ * add signal handler for termination that kills the spawned tasks
+ */
+
 /*
  * Process wrapper that changes the working directory and then executes another program
  *

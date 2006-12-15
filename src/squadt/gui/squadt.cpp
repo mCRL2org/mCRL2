@@ -53,7 +53,7 @@ class initialisation : public wxThread {
 
     void* Entry() {
       squadt::global_build_system.get_tool_manager()->query_tools(
-                    boost::bind(&splash::set_operation, splash_window, std::string("processing"), _1));
+                    boost::bind(&splash::set_operation, splash_window, "", _1));
 
       return (0);
     }
