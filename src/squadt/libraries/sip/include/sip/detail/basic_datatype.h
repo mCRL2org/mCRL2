@@ -679,10 +679,6 @@ namespace sip {
      * Implementation of String
      ************************************************************************/
 
-    inline void string::initialise() {
-      standard = basic_datatype::sptr(new datatype::string);
-    }
-
     inline string::string() : minimum_length(0), maximum_length(UINT_MAX), default_value("") {
     }
 

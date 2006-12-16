@@ -1,7 +1,11 @@
 #include "type_registry.h"
 
+#include <functional>
+#include <algorithm>
+
 #include <boost/foreach.hpp>
 #include <boost/regex.hpp>
+#include <boost/bind.hpp>
 
 #include <sip/mime_type.h>
 
@@ -139,11 +143,21 @@ namespace squadt {
   bool type_registry::has_registered_command(mime_type const& t) const {
     bool result = true;
 
-    if (command_for_type.find(t) == command_for_type.end()) {
-      result = (global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal)) != 0);
+    actions_for_type::const_iterator i = command_for_type.find(t);
+
+    if (i == command_for_type.end()) {
+      i = std::find_if(command_for_type.begin(), command_for_type.end(),
+                boost::bind(&mime_type::operator==, t, boost::bind(&actions_for_type::value_type::first, _1)));
+
+      if (i == command_for_type.end()) {
+        result = (global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal)) != 0);
+      }
+      else {
+        result = ((*i).second != command_none);
+      }
     }
     else {
-      result = ((*command_for_type.find(t)).second != command_none);
+      result = ((*i).second != command_none);
     }
 
     return (result);
@@ -198,7 +212,12 @@ namespace squadt {
   std::auto_ptr < command > type_registry::get_registered_command(mime_type const& t, std::string const& f) const {
     std::auto_ptr < command > p;
 
-    std::map < mime_type, std::string >::const_iterator i = command_for_type.find(t);
+    actions_for_type::const_iterator i = command_for_type.find(t);
+
+    if (i == command_for_type.end()) {
+      i = std::find_if(command_for_type.begin(), command_for_type.end(),
+                boost::bind(&mime_type::operator==, t, boost::bind(&actions_for_type::value_type::first, _1)));
+    }
 
     if (i != command_for_type.end()) {
       std::string const& command_string = boost::regex_replace((*i).second, boost::regex("\\b\\$\\b"), f);

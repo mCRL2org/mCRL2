@@ -6,12 +6,6 @@ namespace sip {
 
   namespace datatype {
 
-    basic_datatype::sptr boolean::standard;
-
-    const std::string boolean::true_string("true");
-
-    const std::string boolean::false_string("false");
-
     std::pair < basic_datatype::sptr, std::string > basic_datatype::read(xml2pp::text_reader& r) {
       if (r.is_element("enumeration")) {
         return (enumeration::read(r));
@@ -49,6 +43,12 @@ namespace sip {
     /************************************************************************
      * Implementation of Boolean
      ************************************************************************/
+
+    basic_datatype::sptr boolean::standard;
+
+    const std::string boolean::true_string("true");
+
+    const std::string boolean::false_string("false");
 
     void boolean::initialise() {
       standard   = basic_datatype::sptr(new boolean);
@@ -323,6 +323,10 @@ namespace sip {
     const unsigned int string::implementation_maximum_length = UINT_MAX;
 
     basic_datatype::sptr string::standard;
+
+    void string::initialise() {
+      standard = basic_datatype::sptr(new datatype::string);
+    }
 
     /**
      * @param[in] minimum the minimum length

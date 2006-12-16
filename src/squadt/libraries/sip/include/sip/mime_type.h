@@ -24,6 +24,9 @@ namespace sip {
         unknown
       };
 
+      /** \brief Recognised sub types */
+      typedef std::string sub_type;
+
     private:
 
       /** \brief Strings for conversion of main types */
@@ -35,7 +38,7 @@ namespace sip {
       main_type   m_main;
 
       /** \brief The sub type */
-      std::string m_sub;
+      sub_type    m_sub;
 
     public:
 
@@ -91,7 +94,7 @@ namespace sip {
   }
 
   inline bool mime_type::operator==(mime_type const& r) const {
-    return (m_main == r.m_main && m_sub == r.m_sub);
+    return ((m_main == unknown || r.m_main == unknown || m_main == r.m_main) && m_sub == r.m_sub);
   }
 
   inline bool mime_type::operator!=(mime_type const& r) const {
