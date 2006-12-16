@@ -41,7 +41,7 @@ bool p_lts::read_from_svc(string const& filename, lts_type type)
       free(fn);
       return false;
     }
-    state_info = !((bool) SVCgetIndexFlag(&f));
+    state_info = (SVCgetIndexFlag(&f) == SVCfalse);
   } else if ( type == lts_mcrl2 )
   {
     if ( svc_type == "mCRL2" )
@@ -67,7 +67,7 @@ bool p_lts::read_from_svc(string const& filename, lts_type type)
       free(fn);
       return false;
     }
-    state_info = !((bool) SVCgetIndexFlag(&f));
+    state_info = (SVCgetIndexFlag(&f) == SVCfalse);
   }
 
   free(fn);

@@ -404,7 +404,7 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
     options(cmdline_options).positional(p).run(), vm);
   po::notify(vm);
   
-  if (vm.count("help")) {
+  if (0 < vm.count("help")) {
     cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE] [OUTFILE]" << endl;
     cerr << "Decluster the LPE in INFILE and store the result to OUTFILE" << endl;
 
@@ -414,23 +414,23 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
     exit (0);
   }
       
-  if (vm.count("version")) {
+  if (0 < vm.count("version")) {
     cerr << "lpedecluster " << VERSION << " (revision " << REVISION << ")" << endl;
 
     exit (0);
   }
 
-  if (vm.count("debug")) {
+  if (0 < vm.count("debug")) {
     gsSetDebugMsg();
   }
 
-  if (vm.count("verbose")) {
+  if (0 < vm.count("verbose")) {
     gsSetVerboseMsg();
   }
 
-  t_options.finite_only = vm.count("finite");
+  t_options.finite_only = (0 < vm.count("finite"));
 
-  if (vm.count("rewriter")) {
+  if (0 < vm.count("rewriter")) {
     cout << "rewrite strategy: " << rewriter << endl;
     if      (rewriter == "inner")  { t_options.strategy = GS_REWR_INNER; }
     else if (rewriter == "innerc") { t_options.strategy = GS_REWR_INNERC; }

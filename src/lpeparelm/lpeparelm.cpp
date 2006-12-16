@@ -528,8 +528,8 @@ void parse_command_line(int ac, char** av, lpeParElm& parelm) {
     exit (0);
   }
 
-  parelm.setVerbose(vm.count("verbose"));
-  parelm.setDebug(vm.count("debug"));
+  parelm.setVerbose(vm.count("verbose") > 0);
+  parelm.setDebug(vm.count("debug") > 0);
 
   if (vm.count("file_names")){
     file_names = vm["file_names"].as< std::vector< std::string > >();

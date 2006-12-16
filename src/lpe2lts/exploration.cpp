@@ -1,5 +1,6 @@
 #include <aterm2.h>
 #include <assert.h>
+#include <time.h>
 #include <sstream>
 #include "liblowlevel.h"
 #include "libstruct.h"
@@ -182,7 +183,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
   {
     if ( lgopts->outformat == OF_UNKNOWN )
     {
-      char *s = strrchr(lgopts->lts.c_str(),'.');
+      const char *s = strrchr(lgopts->lts.c_str(),'.');
       if ( s == NULL )
       {
         gsWarningMsg("no extension given for output file; writing state space in SVC format\n",s);

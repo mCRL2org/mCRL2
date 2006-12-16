@@ -246,7 +246,7 @@ VOIDCDECL mark_phase()
 
   unsigned int r_eax, r_ebx, r_ecx, r_edx, \
     r_esi, r_edi, r_esp, r_ebp;
-  ATerm reg[8], *real_term;
+  ATerm reg[8], real_term;
 
   __asm {
       /* Get the registers into local variables to check them
@@ -359,7 +359,7 @@ VOIDCDECL mark_phase_young()
 
   unsigned int r_eax, r_ebx, r_ecx, r_edx, \
     r_esi, r_edi, r_esp, r_ebp;
-  ATerm reg[8], *real_term;
+  ATerm reg[8], real_term;
 
   __asm {
       /* Get the registers into local variables to check them

@@ -6823,13 +6823,13 @@ static bool xi(ATermList alpha, ATermList beta)
 {
   if ( ATisEmpty(beta) )
   {
-    return can_communicate(alpha);
+    return can_communicate(alpha) != NULL;
   } else {
     ATerm a = ATgetFirst(beta);
     ATermList l = ATinsert(alpha,a);
     beta = ATgetNext(beta);
 
-    if ( can_communicate(l) )
+    if ( can_communicate(l) != NULL )
     {
       return true;
     } else if ( might_communicate(l,beta) )

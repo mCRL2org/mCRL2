@@ -50,7 +50,7 @@ static ATerm parse_mcrl2_action(ATerm label, lpe::specification &spec)
 static ATerm parse_mcrl2_state(ATerm state, lpe::specification &spec)
 {
   unsigned int len = ATgetLength((ATermList) state);
-  ATerm state_args[len];
+  DECL_A(state_args,ATerm,len);
 
   for (unsigned int i=0; !ATisEmpty((ATermList) state); state=(ATerm) ATgetNext((ATermList) state))
   {
@@ -95,7 +95,9 @@ static ATerm parse_mcrl2_state(ATerm state, lpe::specification &spec)
     state_args[i] = (ATerm) expr; 
   }
 
-  return (ATerm) ATmakeApplArray(ATmakeAFun("STATE",len,ATfalse),state_args);
+  ATerm r = (ATerm) ATmakeApplArray(ATmakeAFun("STATE",len,ATfalse),state_args);
+  FREE_A(state_args);
+  return r;
 }
 
 bool p_lts::read_from_fsm(std::istream &is, lts_type type, lpe::specification *spec)

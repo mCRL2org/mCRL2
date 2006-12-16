@@ -47,7 +47,7 @@ LPE make_timed_lpe(LPE lpe, aterm context)
   fresh_variable_generator generator(context);
   summand_list new_summands = apply(lpe.summands(), make_timed_lpe_summand(generator));
   return set_summands(lpe, new_summands);
-};
+}
 
 } // namespace lpe
 

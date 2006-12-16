@@ -586,7 +586,7 @@ static int MakeEquivalenceClasses(int initState,
      
 static int WriteTransitions(lts &l) {
    int b, n_tau_transitions = 0;
-   int label2new[nlabel];
+   DECL_A(label2new,int,nlabel);
    for (b=0;b<nstate;b++) {
      l.add_state();
    }
@@ -612,6 +612,7 @@ static int WriteTransitions(lts &l) {
              }
              }
         }
+   FREE_A(label2new);
    return n_tau_transitions;
    }
    

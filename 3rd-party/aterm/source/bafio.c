@@ -400,7 +400,7 @@ readString(byte_reader *reader)
   /* Assure buffer can hold the string */
   if (text_buffer_size < (len+1))
     {
-      text_buffer_size = len*1.5;
+      text_buffer_size = (unsigned int) (len*1.5);
       text_buffer = (char *) realloc(text_buffer, text_buffer_size);
       if(!text_buffer)
 	ATerror("out of memory in readString (%d)\n", text_buffer_size);
