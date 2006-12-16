@@ -192,7 +192,7 @@ bool Squadt::OnInit() {
 
       SetUseBestVisual(true);
     }
-    catch (sip::listening_exception& e) {
+    catch (boost::system::system_error& e) {
       /* Disable splash */
       splash_window->set_done();
 

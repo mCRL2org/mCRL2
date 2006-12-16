@@ -11,6 +11,7 @@
 #include <boost/shared_array.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition.hpp>
+#include <boost/system/system_error.hpp>
 
 #include <transport/transporter.h>
 #include <transport/detail/basics.h>
@@ -132,7 +133,7 @@ namespace transport {
     };
 
     /**
-     * @param o a transporter to deliver data to
+     * @param o a transporter to which to deliver data
      **/
     inline socket_transceiver::socket_transceiver(transporter* o) : basic_transceiver(o),
                 buffer(new char[input_buffer_size + 1]), socket(scheduler.io_service), send_count(0) {
@@ -141,7 +142,7 @@ namespace transport {
     }
 
     /**
-     * @param o a transporter to deliver data to
+     * @param o a transporter to which to deliver data
      **/
     boost::shared_ptr < socket_transceiver > socket_transceiver::create(transporter* o) {
       socket_transceiver::ptr t(new socket_transceiver(o));

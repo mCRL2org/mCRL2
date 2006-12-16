@@ -78,7 +78,7 @@ namespace transport {
           }
           else if (e != asio::error::operation_aborted) {
             /* The safe default error handling */
-            throw (e);
+            throw (boost::system::system_error(e));
           }
         }
       }
@@ -126,9 +126,17 @@ namespace transport {
     transport::host_name_t socket_transceiver::get_local_host() {
       using namespace boost::asio;
 
-      return ((*resolver.resolve(ip::tcp::resolver::query("0.0.0.0", "",
-                        ip::resolver_query_base::numeric_service|
-                        ip::resolver_query_base::address_configured))).host_name());
+      std::string current_host_name(ip::host_name());
+
+      ip::tcp::resolver::iterator i(resolver.resolve(ip::tcp::resolver::query(current_host_name, "",
+                        ip::resolver_query_base::numeric_service|ip::resolver_query_base::address_configured)));
+
+      if (i == ip::tcp::resolver::iterator() || (*i).host_name() == current_host_name) {
+        i = resolver.resolve(ip::tcp::resolver::query("0.0.0.0", "",
+                        ip::resolver_query_base::numeric_service|ip::resolver_query_base::address_configured));
+      }
+
+      return ((*i).host_name());
     }
 
     /**
@@ -165,7 +173,7 @@ namespace transport {
             handle_disconnect(this);
           }
           else if (e != asio::error::operation_aborted) {
-            throw (e);
+            throw (boost::system::system_error(e));
           }
         }
       }
@@ -192,7 +200,7 @@ namespace transport {
             handle_disconnect(this);
           }
           else if (e != boost::asio::error::operation_aborted) {
-            throw (e);
+            throw (boost::system::system_error(e));
           }
         }
       }
