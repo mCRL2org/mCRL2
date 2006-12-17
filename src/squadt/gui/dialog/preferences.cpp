@@ -9,6 +9,7 @@
 #include <wx/checkbox.h>
 #include <wx/listctrl.h>
 #include <wx/notebook.h>
+#include <wx/textdlg.h>
 #include <wx/slider.h>
 #include <wx/sizer.h>
 
@@ -45,8 +46,6 @@ namespace squadt {
 
         wxListView*                        formats_and_actions;
 
-        wxTextCtrl*                        command_text;
-
       private:
 
         static wxString no_action;
@@ -57,28 +56,17 @@ namespace squadt {
         void activate();
 
         /* \brief Event handler for when the new button is pressed */
-        void apply_changes(wxCommandEvent&);
-
-        /* \brief Event handler for when the new button is pressed */
-        void apply_changes_for_row(long const&);
-
-        /* \brief Event handler for when the new button is pressed */
         void new_association(wxCommandEvent&);
 
         /* \brief Event handler for when the delete button is pressed */
         void remove_association(wxCommandEvent&);
 
-        /* \brief Event handler for changes after a new association operation */
-        void after_label_edit(wxListEvent&);
-
-        /* \brief Event handler for selection changes in the list control */
-        void list_item_selected(wxListEvent&);
-
         /* \brief Event handler for command changes */
-        void command_changed(wxCommandEvent&);
+        void edit_command(wxCommandEvent&);
 
       public:
 
+        /** \brief Constructor */
         edit_preferences(wxWindow*);
     };
 
@@ -142,28 +130,52 @@ namespace squadt {
     }
     /// \endcond
 
-    void edit_preferences::command_changed(wxCommandEvent&) {
-      long selected = formats_and_actions->GetFirstSelected();
+    void edit_preferences::edit_command(wxCommandEvent&) {
+      wxTextEntryDialog command_dialog(this, wxT("Enter a command ($ is place holder for an input file)"));
 
-      if (0 <= selected) {
+      try {
+        long selected = formats_and_actions->GetFirstSelected();
+
         wxListItem s;
 
         get_wxlist_value(s, formats_and_actions, selected, 1);
 
-        s.SetText(command_text->GetValue());
+        command_dialog.SetValue(s.GetText());
 
-        formats_and_actions->SetItem(s);
+        if (command_dialog.ShowModal() == wxID_OK) {
+          formats_and_actions->SetItem(selected, 1, command_dialog.GetValue());
 
-        // On Mac OS X selection/focus is lost at this point
-        formats_and_actions->Select(selected);
+          get_wxlist_value(s, formats_and_actions, selected, 0);
+
+          global_build_system.get_type_registry()->register_command(
+                          mime_type(std::string(s.GetText().fn_str())), std::string(command_dialog.GetValue().fn_str()));
+        }
+      }
+      catch (...) {
+        wxMessageDialog error(this, wxT("Invalid command specification; ignoring"), wxT("Error"), wxICON_ERROR|wxOK);
+        
+        error.ShowModal();
       }
     }
 
     void edit_preferences::new_association(wxCommandEvent&) {
-      long row = formats_and_actions->InsertItem(formats_and_actions->GetItemCount(), wxEmptyString);
+      wxTextEntryDialog format_dialog(this, wxT("Enter format or MIME-type"));
 
-      formats_and_actions->EditLabel(row);
-      formats_and_actions->SetItem(row, 1, wxEmptyString);
+      try {
+        if (format_dialog.ShowModal() == wxID_OK) {
+          long row = formats_and_actions->InsertItem(formats_and_actions->GetItemCount(), wxEmptyString);
+      
+          formats_and_actions->SetItem(row, 0, wxString(mime_type(std::string(format_dialog.GetValue().fn_str())).to_string().c_str(), wxConvLocal));
+          formats_and_actions->SetItem(row, 1, wxEmptyString);
+
+          return;
+        }
+      }
+      catch (...) {
+        wxMessageDialog error(this, wxT("Invalid format or MIME-type; ignoring"), wxT("Error"), wxICON_ERROR|wxOK);
+        
+        error.ShowModal();
+      }
     }
 
     void edit_preferences::remove_association(wxCommandEvent&) {
@@ -172,19 +184,10 @@ namespace squadt {
         
       get_wxlist_value(s, formats_and_actions, selected, 0);
 
-      global_build_system.get_type_registry()->register_command(mime_type(std::string(s.GetText().fn_str())), type_registry::command_none);
+      global_build_system.get_type_registry()->register_command(
+                mime_type(std::string(s.GetText().fn_str())), type_registry::command_none);
 
       formats_and_actions->DeleteItem(selected);
-    }
-
-    void edit_preferences::after_label_edit(wxListEvent& e) {
-      // Assumes that the wxListCtrl only allows edit of items in the first
-      // columns, and deleting item i deletes all items on row i
-      long row = e.GetIndex();
-
-      if (e.GetLabel().IsEmpty()) {
-        formats_and_actions->DeleteItem(row);
-      }
     }
 
     void edit_preferences::activate() {
@@ -192,69 +195,6 @@ namespace squadt {
 
       formats_and_actions->SetColumnWidth(0, (width + 2) / 3);
       formats_and_actions->SetColumnWidth(1, (width * 2 + 2) / 3);
-    }
-
-    void edit_preferences::apply_changes(wxCommandEvent&) {
-      apply_changes_for_row(formats_and_actions->GetFirstSelected());
-    }
-
-    void edit_preferences::apply_changes_for_row(long const& selected) {
-      if (0 <= selected) {
-        wxListItem s;
-        
-        get_wxlist_value(s, formats_and_actions, selected, 0);
-
-        if (s.GetText().IsEmpty()) {
-          formats_and_actions->DeleteItem(selected);
-        }
-        else {
-          mime_type   type(std::string(s.GetText().fn_str()));
-          wxString    new_command = command_text->GetValue();
-         
-          get_wxlist_value(s, formats_and_actions, selected, 1);
-         
-          type_registry* registry = global_build_system.get_type_registry();
-         
-          if (new_command.IsEmpty()) {
-            registry->register_command(type, type_registry::command_none);
-
-            s.SetText(no_action);
-          }
-          else if (new_command.Lower() == wxT("system")) {
-         
-            registry->register_command(type, type_registry::command_system);
-         
-            if (registry->has_registered_command(type)) {
-              std::auto_ptr < command > command_line = registry->get_registered_command(type, "$");
-         
-              s.SetText(wxString(command_line->argument_string().c_str(), wxConvLocal));
-            }
-            else {
-              s.SetText(no_action);
-            }
-          }
-          else if (new_command != no_action) {
-            s.SetText(new_command);
-         
-            registry->register_command(type, std::string(new_command.fn_str()));
-          }
-         
-          formats_and_actions->SetItem(s);
-        }
-      }
-    }
-
-    void edit_preferences::list_item_selected(wxListEvent&) {
-      wxListItem s;
-
-      get_wxlist_value(s, formats_and_actions, formats_and_actions->GetFirstSelected(), 1);
-
-      if (s.GetText() == no_action) {
-        command_text->SetValue(wxEmptyString);
-      }
-      else {
-        command_text->SetValue(s.GetText());
-      }
     }
 
     edit_preferences::edit_preferences(wxWindow* w) : wxPanel(w, wxID_ANY) {
@@ -291,22 +231,16 @@ namespace squadt {
       known_formats->AddSpacer(5);
       known_formats->Add(formats_and_actions, 1, wxEXPAND|wxLEFT|wxRIGHT, 3);
 
-      command_text = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
-
       current_sizer = new wxBoxSizer(wxHORIZONTAL);
       current_sizer->Add(new wxButton(this, wxID_NEW), 0, wxRIGHT, 5);
+      current_sizer->Add(new wxButton(this, wxID_EDIT), 0, wxRIGHT, 5);
       current_sizer->Add(new wxButton(this, wxID_DELETE), 0, wxRIGHT, 5);
-      current_sizer->Add(command_text, 1, wxEXPAND);
 
       GetSizer()->Add(current_sizer, 0, wxALL|wxALIGN_LEFT|wxEXPAND, 3);
 
       Connect(wxID_NEW, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(edit_preferences::new_association));
+      Connect(wxID_EDIT, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(edit_preferences::edit_command));
       Connect(wxID_DELETE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(edit_preferences::remove_association));
-      Connect(wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(edit_preferences::apply_changes));
-      Connect(wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler(edit_preferences::command_changed));
-      Connect(wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler(edit_preferences::list_item_selected));
-      Connect(wxEVT_COMMAND_LIST_END_LABEL_EDIT, wxListEventHandler(edit_preferences::after_label_edit));
-      Connect(wxEVT_COMMAND_LIST_ITEM_DESELECTED, wxListEventHandler(edit_preferences::after_label_edit));
     }
 
     void debug_preferences::filter_level_changed(wxCommandEvent&) {

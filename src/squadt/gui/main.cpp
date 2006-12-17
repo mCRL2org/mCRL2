@@ -9,7 +9,8 @@
 #include <wx/menu.h>
 
 /* Some custom identifiers for use with event handlers */
-#define cmID_UPDATE (wxID_HIGHEST)
+#define cmID_UPDATE      (wxID_HIGHEST)
+#define cmID_PREFERENCES (wxID_HIGHEST + 1)
 
 namespace squadt {
   namespace GUI {
@@ -46,6 +47,7 @@ namespace squadt {
       Connect(wxID_ADD, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_add_file));
       Connect(wxID_CLOSE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_close));
       Connect(wxID_PREFERENCES, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_preferences));
+      Connect(cmID_PREFERENCES, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_preferences));
       Connect(wxID_ABOUT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_about));
       Connect(wxID_EXIT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_quit));
       Connect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(main::on_window_close));
@@ -92,6 +94,9 @@ namespace squadt {
       wxMenu* edit_menu  = new wxMenu();
 
       edit_menu->Append(wxID_PREFERENCES, wxT("&Preferences"));
+#ifdef __WXMAC__
+      edit_menu->Append(cmID_PREFERENCES, wxT("&Preferences"));
+#endif
       menu->Append(edit_menu, wxT("&Edit"));
 
       wxMenu* help_menu  = new wxMenu();
