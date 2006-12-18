@@ -220,8 +220,9 @@ namespace pbes_timed
       return p::or_(sat_bot(a, act_arg1(b)), sat_bot(a, act_arg2(b)));
     } else if (is_forall(b)) {
       data_expression_list x(list_arg1(b));
+      assert(x.size() > 0);
       action_formula alpha(act_arg2(b));
-      data_variable_list y = fresh_variable_list(x.size(), make_list(a.actions(), a.time(), b), "y");
+      data_variable_list y = fresh_variable_list(x.size(), make_list(a.actions(), a.time(), b), "y", x.front().sort());
       return p::exists(y, sat_bot(a, alpha.substitute(make_substitution(x, y))));
     }
     throw std::runtime_error(std::string("sat_bot[timed] error: unknown action formula ") + b.to_string());
@@ -256,7 +257,8 @@ namespace pbes_timed
     } else if (is_forall(b)) {
       data_expression_list x(list_arg1(b));
       action_formula alpha(act_arg2(b));
-      data_variable_list y = fresh_variable_list(x.size(), make_list(a.actions(), a.time(), b), "y");
+      assert(x.size() > 0);
+      data_variable_list y = fresh_variable_list(x.size(), make_list(a.actions(), a.time(), b), "y", x.front().sort());
       return p::forall(y, sat_top(a, alpha.substitute(make_substitution(x, y))));
     }
     throw std::runtime_error(std::string("sat_top[timed] error: unknown action formula ") + b.to_string());
@@ -333,17 +335,30 @@ namespace pbes_timed
       }
       return multi_or(v.begin(), v.end());
     } else if (s::is_delay_timed(f)) {
-      data_expression t1(arg1(f));
+      data_expression t(arg1(f));
       atermpp::vector<pbes_expression> v;
       for (summand_list::iterator i = lpe.summands().begin(); i != lpe.summands().end(); ++i)
       {
-        data_expression c(i->condition());
-        data_expression t(i->time());
-        data_variable_list e = i->summation_variables();
-        pbes_expression p = exists(e, and_(val(c), val(less_equal(t1, t))));
+        data_expression ck(i->condition());
+        data_expression tk(i->time());
+        data_variable_list yk = i->summation_variables();
+        pbes_expression p = exists(yk, and_(val(ck), val(less_equal(t, tk))));
         v.push_back(p);
       }
-      return or_(multi_or(v.begin(), v.end()), val(less_equal(t1, T)));
+      return or_(multi_or(v.begin(), v.end()), val(less_equal(t, T)));
+// The case is_yaled_timed doesn't work since not_ doesn't exist for pbes expressions.
+//    } else if (s::is_yaled_timed(f)) {
+//      data_expression t(arg1(f));
+//      atermpp::vector<pbes_expression> v;
+//      for (summand_list::iterator i = lpe.summands().begin(); i != lpe.summands().end(); ++i)
+//      {
+//        data_expression ck(i->condition());
+//        data_expression tk(i->time());
+//        data_variable_list yk = i->summation_variables();
+//        pbes_expression p = exists(yk, and_(not_(val(ck)), val(greater(t, tk))));
+//        v.push_back(p);
+//      }
+//      return and_(multi_or(v.begin(), v.end()), val(greater(t, T)));
     } else if (s::is_var(f)) {
       aterm_string X(arg1(f));
       data_expression_list d = list_arg2(f);
@@ -434,11 +449,13 @@ namespace pbes_untimed
     } else if (is_forall(b)) {
       data_expression_list x(list_arg1(b));
       action_formula alpha(act_arg2(b));
-      data_variable_list y = fresh_variable_list(x.size(), make_list(a, b), "y");
-      if (y.size() > 0)
+      if (x.size() > 0)
+      {
+        data_variable_list y = fresh_variable_list(x.size(), make_list(a, b), "y", x.front().sort());
         return p::exists(y, sat_bot(a, alpha.substitute(make_substitution(x, y))));
+      }
       else
-        return sat_bot(a, alpha.substitute(make_substitution(x, y)));
+        return sat_bot(a, alpha);
     }
     throw std::runtime_error(std::string("sat_bot[untimed] error: unknown action formula ") + b.to_string());
     return pbes_expression();
@@ -467,11 +484,13 @@ namespace pbes_untimed
     } else if (is_forall(b)) {
       data_expression_list x(list_arg1(b));
       action_formula alpha(act_arg2(b));
-      data_variable_list y = fresh_variable_list(x.size(), make_list(a, b), "y");
-      if (y.size() > 0)      
+      if (x.size() > 0)
+      {
+        data_variable_list y = fresh_variable_list(x.size(), make_list(a, b), "y", x.front().sort());
         return p::forall(y, sat_top(a, alpha.substitute(make_substitution(x, y))));
+      }
       else
-        return sat_top(a, alpha.substitute(make_substitution(x, y)));
+        return sat_top(a, alpha);
     }
     throw std::runtime_error(std::string("sat_top[untimed] error: unknown action formula ") + b.to_string());
     return pbes_expression();
