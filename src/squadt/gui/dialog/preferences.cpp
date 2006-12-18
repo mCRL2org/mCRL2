@@ -16,7 +16,10 @@
 #include <sip/controller.h>
 #include <utility/logger.h>
 
-#define cmID_EDIT      (wxID_HIGHEST + 1)
+// Compatibility with wx 2.6.3
+#if !defined(wxID_EDIT)
+#define wxID_EDIT      (wxID_HIGHEST + 1)
+#endif
 
 namespace squadt {
   namespace GUI {
