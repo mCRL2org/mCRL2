@@ -7,6 +7,7 @@
 
 #include <string>
 #include <iostream>
+#include <stdexcept>
 
 #include "atermpp/aterm_access.h"
 #include "atermpp/vector.h"
@@ -130,7 +131,7 @@ pbes_expression not_equal_data_parameters(action_list a, action_list b)
   for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
   {
     data_expression_list d1 = i->arguments();
-    data_expression_list d2 = i->arguments();
+    data_expression_list d2 = j->arguments();
     assert(d1.size() == d2.size());
     data_expression_list::iterator i1, i2;
     for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
@@ -223,7 +224,7 @@ namespace pbes_timed
       data_variable_list y = fresh_variable_list(x.size(), make_list(a.actions(), a.time(), b), "y");
       return p::exists(y, sat_bot(a, alpha.substitute(make_substitution(x, y))));
     }
-    assert(false);
+    throw std::runtime_error(std::string("sat_bot[timed] error: unknown action formula ") + b.to_string());
     return pbes_expression();
   }
   
@@ -252,15 +253,13 @@ namespace pbes_timed
       return sat_bot(a, act_arg1(b));
     } else if (is_and(b)) {
       return p::and_(sat_top(a, act_arg1(b)), sat_top(a, act_arg2(b)));
-  //  } else if (is_or(b)) {
-  //    return p::or_(sat_top(a, act_arg1(b)), sat_top(a, act_arg2(b)));
     } else if (is_forall(b)) {
       data_expression_list x(list_arg1(b));
       action_formula alpha(act_arg2(b));
       data_variable_list y = fresh_variable_list(x.size(), make_list(a.actions(), a.time(), b), "y");
       return p::forall(y, sat_top(a, alpha.substitute(make_substitution(x, y))));
     }
-    assert(false);
+    throw std::runtime_error(std::string("sat_top[timed] error: unknown action formula ") + b.to_string());
     return pbes_expression();
   }
 
@@ -356,7 +355,7 @@ namespace pbes_timed
       data_variable_list xp = lpe.process_parameters();
       return propvar(X, T + d + xp + Par(X, f));
     }
-    assert(false); // this should never happen
+    throw std::runtime_error(std::string("RHS[timed] error: unknown state formula ") + f.to_string());
     return pbes_expression();
   }
 
@@ -400,7 +399,7 @@ namespace pbes_timed
     } else if (is_delay_timed(f)) {
       return equation_system();
     }
-    assert(false); // this should never happen
+    throw std::runtime_error(std::string("E[timed] error: unknown state formula ") + f.to_string());
     return equation_system();
   }
 } // namespace pbes_timed
@@ -414,6 +413,7 @@ namespace pbes_untimed
   inline
   pbes_expression sat_bot(action_list a, action_formula b)
   {
+//std::cout << "sat_bot(" << pp(b) << ")" << std::endl;
     using namespace lpe::act_init;
     namespace p = lpe::pbes_init;
     namespace q = lpe::act_init;
@@ -440,13 +440,14 @@ namespace pbes_untimed
       else
         return sat_bot(a, alpha.substitute(make_substitution(x, y)));
     }
-    assert(false);
+    throw std::runtime_error(std::string("sat_bot[untimed] error: unknown action formula ") + b.to_string());
     return pbes_expression();
   }
   
   inline
   pbes_expression sat_top(action_list a, action_formula b)
   {
+//std::cout << "sat_top(" << pp(b) << ")" << std::endl;
     using namespace lpe::act_init;
     namespace p = lpe::pbes_init;
   
@@ -467,18 +468,19 @@ namespace pbes_untimed
       data_expression_list x(list_arg1(b));
       action_formula alpha(act_arg2(b));
       data_variable_list y = fresh_variable_list(x.size(), make_list(a, b), "y");
-      if (y.size() > 0)
+      if (y.size() > 0)      
         return p::forall(y, sat_top(a, alpha.substitute(make_substitution(x, y))));
       else
         return sat_top(a, alpha.substitute(make_substitution(x, y)));
     }
-    assert(false);
+    throw std::runtime_error(std::string("sat_top[untimed] error: unknown action formula ") + b.to_string());
     return pbes_expression();
   }
 
   inline
   pbes_expression RHS(state_formula f, LPE lpe)
   {
+//std::cout << "RHS(" << pp(f) << ")" << std::endl;
     using namespace lpe::pbes_init;
     using lpe::summand_list;
     namespace s = lpe::state_init;
@@ -560,14 +562,14 @@ namespace pbes_untimed
       data_variable_list xp = lpe.process_parameters();
       return propvar(X, d + xp + Par(X, f));
     }
-    std::cout << "<RHS> unknown type:" << f << std::endl;
-    assert(false); // this should never happen
+    throw std::runtime_error(std::string("RHS[untimed] error: unknown state formula ") + f.to_string());
     return pbes_expression();
   }
 
   inline
   equation_system E(state_formula f, LPE lpe)
   {
+//std::cout << "E(" << pp(f) << ")" << std::endl;
     using namespace lpe::state_init;
   
     if (is_data(f)) {
@@ -605,14 +607,14 @@ namespace pbes_untimed
     } else if (is_delay_timed(f)) {
       return equation_system();
     }
-    assert(false); // this should never happen
+    throw std::runtime_error(std::string("E[untimed] error: unknown state formula ") + f.to_string());
     return equation_system();
   }
 } // namespace pbes_untimed
 
 /// Returns a formula that is equivalent to f and uses no variables occurring in spec.
 inline
-state_formula remove_name_clashes(state_formula f, specification spec)
+state_formula remove_name_clashes(specification spec, state_formula f)
 {
   // find all data variables in spec
   std::set<data_variable> variables = lpe::find_variables(spec);
@@ -631,8 +633,14 @@ state_formula remove_name_clashes(state_formula f, specification spec)
 
   // generate a vector y with replacements
   fresh_variable_generator generator;
-  generator.add_context_variables(variables.begin(), variables.end());
-  generator.add_context_variables(formula_variables.begin(), formula_variables.end());
+  for (std::set<data_variable>::iterator i = variables.begin(); i != variables.end(); ++i)
+  {
+    generator.add_to_context(*i);
+  }
+  for (std::set<data_variable>::iterator i = formula_variables.begin(); i != formula_variables.end(); ++i)
+  {
+    generator.add_to_context(*i);
+  }
   std::vector<data_variable> y;
   for (std::vector<data_variable>::iterator i = x.begin(); i != x.end(); ++i)
   {
@@ -649,7 +657,8 @@ pbes pbes_translate(state_formula f, specification spec, bool untimed = true)
   using namespace state_init;
 
   // rename variables in f, to prevent name clashes with variables in spec
-  f = remove_name_clashes(f, spec);
+  f = remove_name_clashes(spec, f);
+//std::cout << "formula (rewritten) " << pp(f) << std::endl;
 
   // wrap the formula inside a 'nu' if needed
   if (!is_mu(f) && !is_nu(f))

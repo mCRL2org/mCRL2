@@ -17,9 +17,10 @@ test-suite lpe
       [ run data_expression.cpp ]
       [ run data_test.cpp ]
       [ run time.cpp ../../../mcrl22lpe/lin_std.cpp ../../../mcrl22lpe/lin_alt.cpp ]
-      [ run apply_test.cpp ]
+      #[ run apply_test.cpp ]
       [ run data_utility_test.cpp ]
       [ run aterm_algorithm_test.cpp ../../../mcrl22lpe/lin_std.cpp ../../../mcrl22lpe/lin_alt.cpp ]
       [ run operators.cpp ]
       [ run sort_test.cpp ]
+      [ run pbes_test.cpp ../../../mcrl22lpe/lin_std.cpp ../../../mcrl22lpe/lin_alt.cpp ]
     ;

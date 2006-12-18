@@ -37,16 +37,25 @@ int main(int argc, char* argv[])
 
   if (argc < 3)
   {
-    cout << "Usage: " << argv[0] << " specification_file formula_file" << endl;
+    cout << "Usage: " << argv[0] << " specification_file formula_file [timed=0]" << endl;
     return 1;
   }
   std::string spec    = read_text(argv[1], true);
   std::string formula = read_text(argv[2], true);
   bool untimed = true;
+  if (argc > 3 && argv[3][0] == '1' || argv[3][0] == 't')
+    untimed = false;
 
-  pbes p = lpe2pbes(spec, formula, untimed);
-  pbes_equation_list eqn(p.equations().begin(), p.equations().end());
-  cout << pp(eqn) << endl;
+  try
+  {
+    pbes p = lpe2pbes(spec, formula, untimed);
+    pbes_equation_list eqn(p.equations().begin(), p.equations().end());
+    cout << pp(eqn) << endl;
+  }
+  catch (std::runtime_error e)
+  {
+    cout << e.what() << endl;
+  }     
   
   return 0;
 }

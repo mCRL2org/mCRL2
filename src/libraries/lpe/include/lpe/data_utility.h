@@ -8,6 +8,7 @@
 #include <utility>
 #include <set>
 #include <iterator>
+#include <algorithm>
 
 #include "boost/format.hpp"
 #include "lpe/data.h"
@@ -20,6 +21,10 @@
 
 namespace lpe {
 
+using atermpp::aterm;
+using atermpp::aterm_string;
+using atermpp::aterm_traits;
+
 /// Test if a term is an identifier.
 struct is_identifier
 {
@@ -30,17 +35,17 @@ struct is_identifier
 };
 
 /// Returns the set of all identifiers occurring in the term t.
-inline
-std::set<aterm_string> identifiers(aterm t)
+template <typename Term>
+std::set<aterm_string> identifiers(Term t)
 {
   std::set<aterm_string> result;
-  find_all_if(t, is_identifier(), std::inserter(result, result.end()));
+  find_all_if(aterm_traits<Term>::term(t), is_identifier(), std::inserter(result, result.end()));
   return result;
 }
 
 /// Returns an identifier that doesn't appear in the term context.
-inline
-aterm_string fresh_identifier(std::string hint, aterm context)
+template <typename Term>
+aterm_string fresh_identifier(std::string hint, Term context)
 {
   std::set<aterm_string> ids = identifiers(context);
   aterm_string s(hint);
@@ -54,8 +59,8 @@ aterm_string fresh_identifier(std::string hint, aterm context)
 }
 
 /// Returns a variable that doesn't appear in context.
-inline
-data_variable fresh_variable(std::string hint, aterm context, lpe::sort s = sort_init::real())
+template <typename Term>
+data_variable fresh_variable(std::string hint, Term context, lpe::sort s = sort_init::real())
 {
   aterm_string id = fresh_identifier(hint, context);
   return data_variable(gsMakeDataVarId(id, s));
@@ -84,7 +89,7 @@ std::set<data_variable> find_variables(Term t)
 class fresh_variable_generator
 {
   protected:
-    std::set<data_variable> m_variables; // context
+    std::set<aterm_string> m_identifiers;
     std::string m_hint;                  // used as a hint for operator()()
     lpe::sort m_sort;                    // used for operator()()
 
@@ -96,7 +101,7 @@ class fresh_variable_generator
     template <typename Term>
     fresh_variable_generator(Term context, std::string hint = "t", lpe::sort s = sort_init::real())
     {
-      m_variables = find_variables(context);
+      m_identifiers = identifiers(context);
       m_hint = hint;
       m_sort = s;
     }
@@ -117,7 +122,7 @@ class fresh_variable_generator
     template <typename Term>
     void set_context(Term context)
     {
-      m_variables = find_variables(context);
+      m_identifiers = identifiers(context);
     }
 
     /// Set a new sort.
@@ -132,12 +137,12 @@ class fresh_variable_generator
       return m_sort;
     }
 
-    /// Add variables to context.
-    template <typename Iter>
-    void add_context_variables(Iter first, Iter last)
+    /// Add term t to the context.
+    template <typename Term>
+    void add_to_context(Term t)
     {
-      for (Iter i = first; i != last; ++i)
-        m_variables.insert(*i);
+      std::set<aterm_string> ids = identifiers(t);
+      std::copy(ids.begin(), ids.end(), std::inserter(m_identifiers, m_identifiers.end()));
     }
 
     /// Returns a unique variable of the given sort, with the given hint as prefix.
@@ -145,36 +150,36 @@ class fresh_variable_generator
     data_variable operator()()
     {
       aterm_string id(m_hint);
-      data_variable v(gsMakeDataVarId(id, m_sort));
       int index = 0;
-      while (m_variables.find(v) != m_variables.end())
+      while (m_identifiers.find(id) != m_identifiers.end())
       {   
-        id = aterm_string(str(boost::format(m_hint + "%02d") % index++));
-        v = data_variable(gsMakeDataVarId(id, m_sort));
+        std::string name = str(boost::format(m_hint + "%02d") % index++);
+        id = aterm_string(name);
       }
-      m_variables.insert(v);
-      return v;
+      m_identifiers.insert(id);
+      return data_variable(gsMakeDataVarId(id, m_sort));
     }
 
     /// Returns a unique variable with the same sort as the variable v, and with
     /// the same prefix. The returned variable is added to the context.
     data_variable operator()(data_variable v)
     {
+      std::string hint = atermpp::unquote(v.name());
+      aterm_string id(hint);
       int index = 0;
-      std::string name = atermpp::unquote(v.name());
-      while (m_variables.find(v) != m_variables.end())
+      while (m_identifiers.find(id) != m_identifiers.end())
       {   
-        aterm_string id(str(boost::format(name + "%02d") % index++));
-        v = data_variable(gsMakeDataVarId(id, v.sort()));
+        std::string name = str(boost::format(hint + "%02d") % index++);
+        id = aterm_string(name);
       }
-      m_variables.insert(v);
-      return v;
+      m_identifiers.insert(id);
+      return data_variable(gsMakeDataVarId(id, v.sort()));
     }
 };
 
 /// Returns a variable list that doesn't contain terms that appear in context.
-inline
-data_variable_list fresh_variable_list(unsigned int size, aterm context, std::string hint, lpe::sort s = sort_init::real())
+template <typename Term>
+data_variable_list fresh_variable_list(unsigned int size, Term context, std::string hint, lpe::sort s = sort_init::real())
 {
   data_variable_list result;
   fresh_variable_generator generator(context, hint, s);
