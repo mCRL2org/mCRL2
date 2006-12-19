@@ -203,6 +203,15 @@ class timed_action
     {
       return front(m_actions).arguments();
     }
+
+    /// Applies a substitution to this action and returns the result.
+    /// The Substitution object must supply the method aterm operator()(aterm).
+    ///
+    template <typename Substitution>
+    timed_action substitute(Substitution f)
+    {
+      return timed_action(m_actions.substitute(f), m_time.substitute(f));
+    }     
 };
 
 } // namespace lpe

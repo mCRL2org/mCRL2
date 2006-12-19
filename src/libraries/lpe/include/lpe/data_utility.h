@@ -7,6 +7,7 @@
 #include <string>
 #include <utility>
 #include <set>
+#include <vector>
 #include <iterator>
 #include <algorithm>
 
@@ -17,6 +18,7 @@
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
 #include "atermpp/aterm_string.h"
+#include "atermpp/set.h"
 #include "atermpp/utility.h"
 
 namespace lpe {
@@ -41,6 +43,54 @@ std::set<aterm_string> identifiers(Term t)
   std::set<aterm_string> result;
   find_all_if(aterm_traits<Term>::term(t), is_identifier(), std::inserter(result, result.end()));
   return result;
+}
+
+/// Returns the set of all identifiers occurring in the term t.
+template <typename Term>
+std::set<std::string> identifier_strings(Term t)
+{
+  std::set<aterm_string> s = identifiers(t);
+  std::string result;
+  for (std::set<aterm_string>::iterator i = s.begin(); i != s.end(); ++i)
+    result.insert(atermpp::unquote(*i));
+  return result;
+}
+
+/// Returns the names of the variables in t.
+std::vector<std::string> variable_strings(data_variable_list t)
+{
+  std::vector<std::string> result;
+  for (data_variable_list::iterator i = t.begin(); i != t.end(); ++i)
+    result.push_back(atermpp::unquote(i->name()));
+  return result;
+}
+
+/// Returns a copy of t, but with a common postfix added to each variable name,
+/// and such that the new names do not appear in context.
+///
+data_variable_list fresh_variables(data_variable_list t, const std::set<std::string>& context, std::string postfix_format = "_%02d")
+{
+  std::vector<std::string> ids = variable_strings(t);
+  std::string postfix;
+  for (int i = 0; ; i++)
+  {
+    postfix = str(boost::format(postfix_format) % i);
+    std::vector<std::string>::iterator j = ids.begin();
+    for ( ; j != ids.end(); j++)
+    {
+      if (context.find(*j + postfix) != context.end())
+        break;
+    }
+    if (j == ids.end()) // success!
+      break;
+  }
+  data_variable_list result;
+  for (data_variable_list::iterator k = t.begin(); k != t.end(); ++k)
+  {
+    aterm_string name(atermpp::unquote(k->name()) + postfix);
+    result = push_front(result, data_variable(gsMakeDataVarId(name, k->sort())));
+  }
+  return atermpp::reverse(result);
 }
 
 /// Returns an identifier that doesn't appear in the term context.
@@ -84,12 +134,36 @@ std::set<data_variable> find_variables(Term t)
   return variables;
 }
 
+/// Returns all names data variables that occur in the term t.
+template <typename Term>
+std::set<std::string> find_variable_names(Term t)
+{
+  // find all data variables in t
+  std::set<data_variable> variables;
+  atermpp::find_all_if(t, is_data_variable, std::inserter(variables, variables.end()));
+
+  // find all data variable_init's in t (since they contain data variables implicitly!)
+  std::set<data_variable_init> variable_inits;
+  atermpp::find_all_if(t, lpe::is_data_variable_init, std::inserter(variable_inits, variable_inits.end()));
+  for (std::set<data_variable_init>::iterator i = variable_inits.begin(); i != variable_inits.end(); ++i)
+  {
+    variables.insert(i->to_variable());
+  }
+
+  std::set<std::string> result;
+  for (std::set<data_variable>::iterator j = variables.begin(); j != variables.end(); ++j)
+  {
+    result.insert(atermpp::unquote(j->name()));
+  }
+  return result;
+}
+
 /// Fresh variable generator that generates data variables with
 /// names that do not appear in the given context.
 class fresh_variable_generator
 {
   protected:
-    std::set<aterm_string> m_identifiers;
+    atermpp::set<aterm_string> m_identifiers;
     std::string m_hint;                  // used as a hint for operator()()
     lpe::sort m_sort;                    // used for operator()()
 

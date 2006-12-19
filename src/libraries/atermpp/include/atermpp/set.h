@@ -62,6 +62,12 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
       ATunprotectProtectedATerm(this);
     }
 
+    atermpp::set<T, Compare, Allocator>& operator=(const std::set<T, Compare, Allocator>& other)
+    {
+      std::set<T, Compare, Allocator>::operator=(other);
+      return *this;
+    }
+
     void ATprotectTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION

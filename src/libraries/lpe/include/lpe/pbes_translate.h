@@ -39,19 +39,19 @@ using atermpp::list_arg3;
 inline
 action_formula act_arg1(ATermAppl t)
 {
-  return action_formula(aterm_appl(t).argument(0));
+  return action_formula(aterm_appl(t)(0));
 }
 
 inline
 action_formula act_arg2(ATermAppl t)
 {
-  return action_formula(aterm_appl(t).argument(1));
+  return action_formula(aterm_appl(t)(1));
 }
 
 inline
 action_formula act_arg3(ATermAppl t)
 {
-  return action_formula(aterm_appl(t).argument(2));
+  return action_formula(aterm_appl(t)(2));
 }
 
 inline
@@ -219,11 +219,17 @@ namespace pbes_timed
     } else if (is_and(b)) {
       return p::or_(sat_bot(a, act_arg1(b)), sat_bot(a, act_arg2(b)));
     } else if (is_forall(b)) {
-      data_expression_list x(list_arg1(b));
+      data_variable_list x(list_arg1(b));
       assert(x.size() > 0);
       action_formula alpha(act_arg2(b));
-      data_variable_list y = fresh_variable_list(x.size(), make_list(a.actions(), a.time(), b), "y", x.front().sort());
+      data_variable_list y = fresh_variables(x, find_variable_names(make_list(a.actions(), a.time(), b)));
       return p::exists(y, sat_bot(a, alpha.substitute(make_substitution(x, y))));
+    } else if (is_exists(b)) {
+      data_variable_list x(list_arg1(b));
+      assert(x.size() > 0);
+      action_formula alpha(act_arg2(b));
+      data_variable_list y = fresh_variables(x, find_variable_names(make_list(a.actions(), a.time(), b)));
+      return p::forall(y, sat_bot(a, alpha.substitute(make_substitution(x, y))));
     }
     throw std::runtime_error(std::string("sat_bot[timed] error: unknown action formula ") + b.to_string());
     return pbes_expression();
@@ -255,37 +261,47 @@ namespace pbes_timed
     } else if (is_and(b)) {
       return p::and_(sat_top(a, act_arg1(b)), sat_top(a, act_arg2(b)));
     } else if (is_forall(b)) {
-      data_expression_list x(list_arg1(b));
+      data_variable_list x(list_arg1(b));
       action_formula alpha(act_arg2(b));
       assert(x.size() > 0);
-      data_variable_list y = fresh_variable_list(x.size(), make_list(a.actions(), a.time(), b), "y", x.front().sort());
+      data_variable_list y = fresh_variables(x, find_variable_names(make_list(a.actions(), a.time(), b)));
       return p::forall(y, sat_top(a, alpha.substitute(make_substitution(x, y))));
+    } else if (is_exists(b)) {
+      data_variable_list x(list_arg1(b));
+      action_formula alpha(act_arg2(b));
+      assert(x.size() > 0);
+      data_variable_list y = fresh_variables(x, find_variable_names(make_list(a.actions(), a.time(), b)));
+      return p::exists(y, sat_top(a, alpha.substitute(make_substitution(x, y))));
     }
     throw std::runtime_error(std::string("sat_top[timed] error: unknown action formula ") + b.to_string());
     return pbes_expression();
   }
 
   inline
-  pbes_expression RHS(state_formula f, LPE lpe, data_variable T)
+  pbes_expression RHS(state_formula f, LPE lpe, data_variable T, std::set<std::string>& context)
   {
     using namespace lpe::pbes_init;
     using lpe::summand_list;
     namespace s = lpe::state_init;
   
     if (s::is_data(f)) {
-      return pbes_expression(aterm_appl(f));
+      return pbes_expression(f);
     } else if (s::is_true(f)) {
       return true_();
     } else if (s::is_false(f)) {
       return false_();
     } else if (s::is_and(f)) {
-      return and_(RHS(arg1(f), lpe, T), RHS(arg2(f), lpe, T));
+      return and_(RHS(arg1(f), lpe, T, context), RHS(arg2(f), lpe, T, context));
     } else if (s::is_or(f)) {
-      return or_(RHS(arg1(f), lpe, T), RHS(arg2(f), lpe, T));
+      return or_(RHS(arg1(f), lpe, T, context), RHS(arg2(f), lpe, T, context));
     } else if (s::is_forall(f)) {
-      return forall(list_arg1(f), RHS(arg2(f), lpe, T));
+      std::set<std::string> names = find_variable_names(arg1(f));
+      context.insert(names.begin(), names.end());
+      return forall(list_arg1(f), RHS(arg2(f), lpe, T, context));
     } else if (s::is_exists(f)) {
-      return exists(list_arg1(f), RHS(arg2(f), lpe, T));
+      std::set<std::string> names = find_variable_names(arg1(f));
+      context.insert(names.begin(), names.end());
+      return exists(list_arg1(f), RHS(arg2(f), lpe, T, context));
     } else if (s::is_must(f)) {
       atermpp::vector<pbes_expression> v;
       action_formula alpha(act_arg1(f));
@@ -294,19 +310,32 @@ namespace pbes_timed
       {
         if (i->is_delta())
           continue;
-        data_expression c(i->condition());
-        data_expression t(i->time());
-        timed_action a(i->actions(), t);
-        data_assignment_list g = i->assignments();
+        data_expression ci(i->condition());
+        data_expression ti(i->time());
+        timed_action ai(i->actions(), ti);
+        data_assignment_list gi = i->assignments();
         data_variable_list xp(lpe.process_parameters());
-        data_variable_list e(i->summation_variables());
-        pbes_expression p1 = sat_bot(a, alpha);
-        pbes_expression p2 = val(data_init::not_(c));
-        pbes_expression p3 = val(less_equal(t, T));
-        pbes_expression p4 = RHS(f1, lpe, T);
-        p4 = p4.substitute(make_substitution(T, t));
-        p4 = p4.substitute(assignment_list_substitution(g));
-        pbes_expression p = forall(e, or_(or_(or_(p1, p2), p3), p4));
+        data_variable_list yi(i->summation_variables());
+
+        pbes_expression rhs = RHS(f1, lpe, T, context);
+        std::set<std::string> rhs_context = find_variable_names(rhs);
+        context.insert(rhs_context.begin(), rhs_context.end());
+        data_variable_list y = fresh_variables(yi, context);
+        ci = ci.substitute(make_list_substitution(yi, y));
+        ti = ti.substitute(make_list_substitution(yi, y));
+        ai = ai.substitute(make_list_substitution(yi, y));
+        gi = gi.substitute(make_list_substitution(yi, y));
+
+        pbes_expression p1 = sat_bot(ai, alpha);
+        pbes_expression p2 = val(data_init::not_(ci));
+        pbes_expression p3 = val(less_equal(ti, T));
+        rhs = rhs.substitute(make_substitution(T, ti));
+        rhs = rhs.substitute(assignment_list_substitution(gi));
+
+        pbes_expression p = or_(or_(or_(p1, p2), p3), rhs);
+        if (y.size() > 0) {
+          p = forall(y, p);
+        }
         v.push_back(p);
       }
       return multi_and(v.begin(), v.end());
@@ -318,19 +347,32 @@ namespace pbes_timed
       {
         if (i->is_delta())
           continue;
-        data_expression c(i->condition());
-        data_expression t(i->time());
-        timed_action a(i->actions(), t);
-        data_assignment_list g = i->assignments();
+        data_expression ci(i->condition());
+        data_expression ti(i->time());
+        timed_action ai(i->actions(), ti);
+        data_assignment_list gi = i->assignments();
         data_variable_list xp(lpe.process_parameters());
-        data_variable_list e(i->summation_variables());
-        pbes_expression p1 = sat_top(a, alpha);
-        pbes_expression p2 = val(c);
-        pbes_expression p3 = val(greater(t, T));
-        pbes_expression p4 = RHS(f1, lpe, T);
-        p4 = p4.substitute(make_substitution(T, t));
-        p4 = p4.substitute(assignment_list_substitution(g));
-        pbes_expression p = exists(e, and_(and_(and_(p1, p2), p3), p4));
+        data_variable_list yi(i->summation_variables());
+
+        pbes_expression rhs = RHS(f1, lpe, T, context);
+        std::set<std::string> rhs_context = find_variable_names(rhs);
+        context.insert(rhs_context.begin(), rhs_context.end());
+        data_variable_list y = fresh_variables(yi, context);
+        ci = ci.substitute(make_list_substitution(yi, y));
+        ti = ti.substitute(make_list_substitution(yi, y));
+        ai = ai.substitute(make_list_substitution(yi, y));
+        gi = gi.substitute(make_list_substitution(yi, y));
+
+        pbes_expression p1 = sat_top(ai, alpha);
+        pbes_expression p2 = val(ci);
+        pbes_expression p3 = val(greater(ti, T));
+        rhs = rhs.substitute(make_substitution(T, ti));
+        rhs = rhs.substitute(assignment_list_substitution(gi));
+
+        pbes_expression p = and_(and_(and_(p1, p2), p3), rhs);
+        if (y.size() > 0) {
+          p = exists(y, p);
+        }
         v.push_back(p);
       }
       return multi_or(v.begin(), v.end());
@@ -346,19 +388,18 @@ namespace pbes_timed
         v.push_back(p);
       }
       return or_(multi_or(v.begin(), v.end()), val(less_equal(t, T)));
-// The case is_yaled_timed doesn't work since not_ doesn't exist for pbes expressions.
-//    } else if (s::is_yaled_timed(f)) {
-//      data_expression t(arg1(f));
-//      atermpp::vector<pbes_expression> v;
-//      for (summand_list::iterator i = lpe.summands().begin(); i != lpe.summands().end(); ++i)
-//      {
-//        data_expression ck(i->condition());
-//        data_expression tk(i->time());
-//        data_variable_list yk = i->summation_variables();
-//        pbes_expression p = exists(yk, and_(not_(val(ck)), val(greater(t, tk))));
-//        v.push_back(p);
-//      }
-//      return and_(multi_or(v.begin(), v.end()), val(greater(t, T)));
+    } else if (s::is_yaled_timed(f)) {
+      data_expression t(arg1(f));
+      atermpp::vector<pbes_expression> v;
+      for (summand_list::iterator i = lpe.summands().begin(); i != lpe.summands().end(); ++i)
+      {
+        data_expression ck(i->condition());
+        data_expression tk(i->time());
+        data_variable_list yk = i->summation_variables();
+        pbes_expression p = exists(yk, and_(val(data_init::not_(ck)), val(greater(t, tk))));
+        v.push_back(p);
+      }
+      return and_(multi_or(v.begin(), v.end()), val(greater(t, T)));
     } else if (s::is_var(f)) {
       aterm_string X(arg1(f));
       data_expression_list d = list_arg2(f);
@@ -406,7 +447,8 @@ namespace pbes_timed
       state_formula g = arg3(f);
       pbes_fixpoint_symbol sigma = is_mu(f) ? pbes_equation::mu() : pbes_equation::nu();
       propositional_variable v(X, T + xf + xp + Par(X, f));
-      pbes_expression expr = RHS(g, lpe, T);
+      std::set<std::string> context;
+      pbes_expression expr = RHS(g, lpe, T, context);
       pbes_equation e(sigma, v, expr);
       return equation_system(e) + E(g, lpe, T);
     } else if (is_yaled_timed(f)) {
@@ -428,7 +470,6 @@ namespace pbes_untimed
   inline
   pbes_expression sat_bot(action_list a, action_formula b)
   {
-//std::cout << "sat_bot(" << pp(b) << ")" << std::endl;
     using namespace lpe::act_init;
     namespace p = lpe::pbes_init;
     namespace q = lpe::act_init;
@@ -447,12 +488,22 @@ namespace pbes_untimed
     } else if (is_and(b)) {
       return p::or_(sat_bot(a, act_arg1(b)), sat_bot(a, act_arg2(b)));
     } else if (is_forall(b)) {
-      data_expression_list x(list_arg1(b));
+      data_variable_list x(list_arg1(b));
       action_formula alpha(act_arg2(b));
       if (x.size() > 0)
       {
-        data_variable_list y = fresh_variable_list(x.size(), make_list(a, b), "y", x.front().sort());
+        data_variable_list y = fresh_variables(x, find_variable_names(make_list(a, b)));
         return p::exists(y, sat_bot(a, alpha.substitute(make_substitution(x, y))));
+      }
+      else
+        return sat_bot(a, alpha);
+    } else if (is_exists(b)) {
+      data_variable_list x(list_arg1(b));
+      action_formula alpha(act_arg2(b));
+      if (x.size() > 0)
+      {
+        data_variable_list y = fresh_variables(x, find_variable_names(make_list(a, b)));
+        return p::forall(y, sat_bot(a, alpha.substitute(make_substitution(x, y))));
       }
       else
         return sat_bot(a, alpha);
@@ -464,7 +515,6 @@ namespace pbes_untimed
   inline
   pbes_expression sat_top(action_list a, action_formula b)
   {
-//std::cout << "sat_top(" << pp(b) << ")" << std::endl;
     using namespace lpe::act_init;
     namespace p = lpe::pbes_init;
   
@@ -482,12 +532,22 @@ namespace pbes_untimed
     } else if (is_and(b)) {
       return p::and_(sat_top(a, act_arg1(b)), sat_top(a, act_arg2(b)));
     } else if (is_forall(b)) {
-      data_expression_list x(list_arg1(b));
+      data_variable_list x(list_arg1(b));
       action_formula alpha(act_arg2(b));
       if (x.size() > 0)
       {
-        data_variable_list y = fresh_variable_list(x.size(), make_list(a, b), "y", x.front().sort());
+        data_variable_list y = fresh_variables(x, find_variable_names(make_list(a, b)));
         return p::forall(y, sat_top(a, alpha.substitute(make_substitution(x, y))));
+      }
+      else
+        return sat_top(a, alpha);
+    } else if (is_exists(b)) {
+      data_variable_list x(list_arg1(b));
+      action_formula alpha(act_arg2(b));
+      if (x.size() > 0)
+      {
+        data_variable_list y = fresh_variables(x, find_variable_names(make_list(a, b)));
+        return p::exists(y, sat_top(a, alpha.substitute(make_substitution(x, y))));
       }
       else
         return sat_top(a, alpha);
@@ -497,27 +557,30 @@ namespace pbes_untimed
   }
 
   inline
-  pbes_expression RHS(state_formula f, LPE lpe)
+  pbes_expression RHS(state_formula f, LPE lpe, std::set<std::string>& context)
   {
-//std::cout << "RHS(" << pp(f) << ")" << std::endl;
     using namespace lpe::pbes_init;
     using lpe::summand_list;
     namespace s = lpe::state_init;
   
     if (s::is_data(f)) {
-      return pbes_expression(aterm_appl(f));
+      return pbes_expression(f);
     } else if (s::is_true(f)) {
       return true_();
     } else if (s::is_false(f)) {
       return false_();
     } else if (s::is_and(f)) {
-      return and_(RHS(arg1(f), lpe), RHS(arg2(f), lpe));
+      return and_(RHS(arg1(f), lpe, context), RHS(arg2(f), lpe, context));
     } else if (s::is_or(f)) {
-      return or_(RHS(arg1(f), lpe), RHS(arg2(f), lpe));
+      return or_(RHS(arg1(f), lpe, context), RHS(arg2(f), lpe, context));
     } else if (s::is_forall(f)) {
-      return forall(list_arg1(f), RHS(arg2(f), lpe));
+      std::set<std::string> names = find_variable_names(arg1(f));
+      context.insert(names.begin(), names.end());
+      return forall(list_arg1(f), RHS(arg2(f), lpe, context));
     } else if (s::is_exists(f)) {
-      return exists(list_arg1(f), RHS(arg2(f), lpe));
+      std::set<std::string> names = find_variable_names(arg1(f));
+      context.insert(names.begin(), names.end());
+      return exists(list_arg1(f), RHS(arg2(f), lpe, context));
     } else if (s::is_must(f)) {
       atermpp::vector<pbes_expression> v;
       action_formula alpha(act_arg1(f));
@@ -526,22 +589,28 @@ namespace pbes_untimed
       {
         if (i->is_delta())
           continue;
-        data_expression c(i->condition());
-        action_list a(i->actions());
-        data_assignment_list g = i->assignments();
+        data_expression ci(i->condition());
+        action_list ai(i->actions());
+        data_assignment_list gi = i->assignments();
         data_variable_list xp(lpe.process_parameters());
-        data_variable_list e(i->summation_variables());
-        pbes_expression p1 = sat_bot(a, alpha);
-        pbes_expression p2 = val(data_init::not_(c));
-        pbes_expression p4 = RHS(f1, lpe);
-        p4 = p4.substitute(assignment_list_substitution(g));
-        if (e.size() > 0) {
-          pbes_expression p = forall(e, or_(or_(p1, p2), p4));
-          v.push_back(p);
-        } else {
-          pbes_expression p = or_(or_(p1, p2), p4);
-          v.push_back(p);
+        data_variable_list yi(i->summation_variables());
+
+        pbes_expression rhs = RHS(f1, lpe, context);
+        std::set<std::string> rhs_context = find_variable_names(rhs);
+        context.insert(rhs_context.begin(), rhs_context.end());
+        data_variable_list y = fresh_variables(yi, context);
+        ci = ci.substitute(make_list_substitution(yi, y));
+        ai = ai.substitute(make_list_substitution(yi, y));
+        gi = gi.substitute(make_list_substitution(yi, y));
+        pbes_expression p1 = sat_bot(ai, alpha);
+        pbes_expression p2 = val(data_init::not_(ci));
+        rhs = rhs.substitute(assignment_list_substitution(gi));
+
+        pbes_expression p = or_(or_(p1, p2), rhs);
+        if (y.size() > 0) {
+          p = forall(y, p);
         }
+        v.push_back(p);
       }
       return multi_and(v.begin(), v.end());
     } else if (s::is_may(f)) {
@@ -552,22 +621,28 @@ namespace pbes_untimed
       {
         if (i->is_delta())
           continue;
-        data_expression c(i->condition());
-        action_list a(i->actions());
-        data_assignment_list g = i->assignments();
+        data_expression ci(i->condition());
+        action_list ai(i->actions());
+        data_assignment_list gi = i->assignments();
         data_variable_list xp(lpe.process_parameters());
-        data_variable_list e(i->summation_variables());
-        pbes_expression p1 = sat_top(a, alpha);
-        pbes_expression p2 = val(c);
-        pbes_expression p4 = RHS(f1, lpe);
-        p4 = p4.substitute(assignment_list_substitution(g));
-        if (e.size() > 0) {
-          pbes_expression p = exists(e, and_(and_(p1, p2), p4));
-          v.push_back(p);
-        } else {
-          pbes_expression p = and_(and_(p1, p2), p4);
-          v.push_back(p);
+        data_variable_list yi(i->summation_variables());
+
+        pbes_expression rhs = RHS(f1, lpe, context);
+        std::set<std::string> rhs_context = find_variable_names(rhs);
+        context.insert(rhs_context.begin(), rhs_context.end());
+        data_variable_list y = fresh_variables(yi, context);
+        ci = ci.substitute(make_list_substitution(yi, y));
+        ai = ai.substitute(make_list_substitution(yi, y));
+        gi = gi.substitute(make_list_substitution(yi, y));
+        pbes_expression p1 = sat_top(ai, alpha);
+        pbes_expression p2 = val(ci);
+        rhs = rhs.substitute(assignment_list_substitution(gi));
+
+        pbes_expression p = and_(and_(p1, p2), rhs);
+        if (y.size() > 0) {
+          p = exists(y, p);
         }
+        v.push_back(p);
       }
       return multi_or(v.begin(), v.end());
     } else if (s::is_var(f)) {
@@ -588,7 +663,6 @@ namespace pbes_untimed
   inline
   equation_system E(state_formula f, LPE lpe)
   {
-//std::cout << "E(" << pp(f) << ")" << std::endl;
     using namespace lpe::state_init;
   
     if (is_data(f)) {
@@ -618,7 +692,8 @@ namespace pbes_untimed
       state_formula g = arg3(f);
       pbes_fixpoint_symbol sigma = is_mu(f) ? pbes_equation::mu() : pbes_equation::nu();
       propositional_variable v(X, xf + xp + Par(X, f));
-      pbes_expression expr = RHS(g, lpe);
+      std::set<std::string> context;
+      pbes_expression expr = RHS(g, lpe, context);
       pbes_equation e(sigma, v, expr);
       return equation_system(e) + E(g, lpe);
     } else if (is_yaled_timed(f)) {
@@ -677,7 +752,6 @@ pbes pbes_translate(state_formula f, specification spec, bool untimed = true)
 
   // rename variables in f, to prevent name clashes with variables in spec
   f = remove_name_clashes(spec, f);
-//std::cout << "formula (rewritten) " << pp(f) << std::endl;
 
   // wrap the formula inside a 'nu' if needed
   if (!is_mu(f) && !is_nu(f))

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <set>
+#include <algorithm>
 #include <boost/test/minimal.hpp>
 #include "atermpp/atermpp.h"
 #include "lpe/data.h"
@@ -51,6 +52,16 @@ int test_main(int, char*[])
   BOOST_CHECK(x == data_variable("f:F"));
   x = generator(f);
   BOOST_CHECK(x == data_variable("f00:F"));
+
+  data_variable_list w = make_list(data_variable("d:D"), data_variable("e:E"), data_variable("f:F"));
+  std::set<std::string> context;
+  context.insert("e");
+  context.insert("f_00");
+  data_variable_list w1 = fresh_variables(w, context);
+  std::cout << "w1 = " << w1 << std::endl;
+  BOOST_CHECK(std::find(w1.begin(), w1.end(), data_variable("d_01:D")) != w1.end());
+  BOOST_CHECK(std::find(w1.begin(), w1.end(), data_variable("e_01:E")) != w1.end());
+  BOOST_CHECK(std::find(w1.begin(), w1.end(), data_variable("f_01:F")) != w1.end());
 
   return 0;
 }
