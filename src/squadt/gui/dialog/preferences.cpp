@@ -10,15 +10,18 @@
 #include <wx/listctrl.h>
 #include <wx/notebook.h>
 #include <wx/textdlg.h>
+#include <wx/version.h>
 #include <wx/slider.h>
 #include <wx/sizer.h>
 
 #include <sip/controller.h>
 #include <utility/logger.h>
 
-// Compatibility with wx 2.6.3
-#if !defined(wxID_EDIT)
+// Compatibility with wx 2.6.*
+#if (wxMAJOR_VERSION <= 2) && (wxMINOR_VERSION < 8)
 #define wxID_EDIT      (wxID_HIGHEST + 1)
+
+STOCKITEM(wxID_EDIT, wxT("&Edit"))
 #endif
 
 namespace squadt {
