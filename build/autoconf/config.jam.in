@@ -11,6 +11,10 @@ BUILD_VARIANT      = "@BUILD_VARIANT@" ;
 LINK_VARIANT       = "@LINK_VARIANT@" ;
 ADDRESS_MODEL      = "@ADDRESS_MODEL@" ;
 
+if ! ( "@OPTIMISATIONS@" = "disable" ) {
+  OPTIMISATIONS = <optimization>speed <inlining>full ;
+}
+
 # Library specific variables
 XML2_CPPFLAGS      = "@XML2_CPPFLAGS@" ;
 XML2_LDFLAGS       = "@XML2_LDFLAGS@" ;

@@ -678,6 +678,7 @@ CXXFLAGS
 ac_ct_CXX
 FLEX
 BISON
+OPTIMISATIONS
 BFLAGS
 GREP
 EGREP
@@ -1309,7 +1310,7 @@ if test -n "$ac_init_help"; then
 Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --disable-optimisation  disables compile-time optimisations
+  --disable-optimisations disables compile-time optimisations
 
   --enable-debug          adds debugging information to libraries and
                           executables
@@ -3784,16 +3785,19 @@ R_CFLAGS="$R_CFLAGS $CFLAGS"
 R_CXXFLAGS="$R_CXXFLAGS $CXXFLAGS"
 
 # Check whether optimization must be suppressed
-# Check whether --enable-optimisation was given.
-if test "${enable_optimisation+set}" = set; then
-  enableval=$enable_optimisation;
+# Check whether --enable-optimisations was given.
+if test "${enable_optimisations+set}" = set; then
+  enableval=$enable_optimisations;
 fi
 
-if test $enable_optimisation; then
+if test $enable_optimisations; then
  OFLAGS=""
+ OPTIMISATIONS="disable"
 else
  OFLAGS="-O2"
+ OPTIMISATIONS="enable"
 fi
+
 
 # Check for debug/profile options
 # Check whether --enable-debug was given.
@@ -7133,6 +7137,7 @@ CXXFLAGS!$CXXFLAGS$ac_delim
 ac_ct_CXX!$ac_ct_CXX$ac_delim
 FLEX!$FLEX$ac_delim
 BISON!$BISON$ac_delim
+OPTIMISATIONS!$OPTIMISATIONS$ac_delim
 BFLAGS!$BFLAGS$ac_delim
 GREP!$GREP$ac_delim
 EGREP!$EGREP$ac_delim
@@ -7167,7 +7172,6 @@ DATA_DIR!$DATA_DIR$ac_delim
 LIB_DIR!$LIB_DIR$ac_delim
 BIN_DIR!$BIN_DIR$ac_delim
 INCLUDE_DIR!$INCLUDE_DIR$ac_delim
-MAN_DIR!$MAN_DIR$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -7209,6 +7213,7 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+MAN_DIR!$MAN_DIR$ac_delim
 R_CFLAGS!$R_CFLAGS$ac_delim
 R_SCFLAGS!$R_SCFLAGS$ac_delim
 R_CXXFLAGS!$R_CXXFLAGS$ac_delim
@@ -7220,7 +7225,7 @@ USE_BCG!$USE_BCG$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 9; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 10; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

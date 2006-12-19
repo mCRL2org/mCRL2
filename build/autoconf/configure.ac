@@ -176,15 +176,18 @@ R_CXXFLAGS="$R_CXXFLAGS $CXXFLAGS"
 
 # Check whether optimization must be suppressed
 AC_ARG_ENABLE(
-  [optimisation],
-  AS_HELP_STRING([--disable-optimisation],
+  [optimisations],
+  AS_HELP_STRING([--disable-optimisations],
                  [disables compile-time optimisations])
 )
-if test $enable_optimisation; then
+if test $enable_optimisations; then
  OFLAGS=""
+ OPTIMISATIONS="disable"
 else
  OFLAGS="-O2"
+ OPTIMISATIONS="enable"
 fi
+AC_SUBST([OPTIMISATIONS],[])
 
 # Check for debug/profile options
 AC_ARG_ENABLE(

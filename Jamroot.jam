@@ -38,8 +38,7 @@ project toolset
        : default-build
           <address-model>$(ADDRESS_MODEL)
           <variant>$(BUILD_VARIANT)
-          <optimization>speed
-          <inlining>full
+          $(OPTIMISATIONS)
           <link>$(LINK_VARIANT)
           $(BUILD_OPTIONS)
        ;
