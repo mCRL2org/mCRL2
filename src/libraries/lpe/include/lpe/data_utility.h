@@ -50,7 +50,7 @@ template <typename Term>
 std::set<std::string> identifier_strings(Term t)
 {
   std::set<aterm_string> s = identifiers(t);
-  std::string result;
+  std::set<std::string> result;
   for (std::set<aterm_string>::iterator i = s.begin(); i != s.end(); ++i)
     result.insert(atermpp::unquote(*i));
   return result;
