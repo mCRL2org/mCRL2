@@ -2044,7 +2044,7 @@ ATermAppl gsAlpha(ATermAppl Spec){
 
   ////First make a table of Positive constants
   ATermTable consts=ATtableCreate(10000,80);
-  for(ATermList l=ATLgetArgument(ATAgetArgument(Spec,3),0);!ATisEmpty(l);l=ATgetNext(l)){
+  for(ATermList l=ATLgetArgument(ATAgetArgument(ATAgetArgument(Spec,0),3),0);!ATisEmpty(l);l=ATgetNext(l)){
     ATermAppl eq=ATAgetFirst(l);
     ATermAppl left=ATAgetArgument(eq,2);
     ATermAppl right=ATAgetArgument(eq,3);
