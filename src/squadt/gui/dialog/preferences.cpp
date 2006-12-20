@@ -20,8 +20,6 @@
 // Compatibility with wx 2.6.*
 #if (wxMAJOR_VERSION <= 2) && (wxMINOR_VERSION < 8)
 #define wxID_EDIT      (wxID_HIGHEST + 1)
-
-STOCKITEM(wxID_EDIT, wxT("&Edit"))
 #endif
 
 namespace squadt {
@@ -239,7 +237,7 @@ namespace squadt {
 
       current_sizer = new wxBoxSizer(wxHORIZONTAL);
       current_sizer->Add(new wxButton(this, wxID_NEW), 0, wxRIGHT, 5);
-      current_sizer->Add(new wxButton(this, wxID_EDIT), 0, wxRIGHT, 5);
+      current_sizer->Add(new wxButton(this, wxID_EDIT, wxT("Edit")), 0, wxRIGHT, 5);
       current_sizer->Add(new wxButton(this, wxID_DELETE), 0, wxRIGHT, 5);
 
       GetSizer()->Add(current_sizer, 0, wxALL|wxALIGN_LEFT|wxEXPAND, 3);
