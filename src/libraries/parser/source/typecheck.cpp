@@ -76,7 +76,7 @@ static ATermAppl gstcRewrActProc(ATermTable, ATermAppl);
 static inline ATermAppl gstcMakeActionOrProc(ATbool, ATermAppl, ATermList, ATermList);
 static ATermAppl gstcTraverseActProcVarConstP(ATermTable, ATermAppl);
 static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl *, ATermAppl, ATermTable FreeVars=NULL);
-static ATermAppl gstcTraverseVarConsTypeDN(int, ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl* , ATermAppl, ATermTable FreeVars=NULL);
+static ATermAppl gstcTraverseVarConsTypeDN(unsigned int, ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl* , ATermAppl, ATermTable FreeVars=NULL);
 
 static ATermList gstcInsertType(ATermList TypeList, ATermAppl Type);
 
@@ -1315,7 +1315,7 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm){
   }
   assert(!ATisEmpty(ParList));
   
-  int nFactPars=ATgetLength(ATLgetArgument(ProcTerm,1));
+  unsigned int nFactPars=ATgetLength(ATLgetArgument(ProcTerm,1));
   const char *msg=(action)?"action":"process";
   
   //filter the list of lists ParList to keep only the lists of lenth nFactPars
@@ -1824,7 +1824,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
   if(gsIsDataApplProd(*DataTerm)){
     //arguments
     ATermList Arguments=ATLgetArgument(*DataTerm,1);
-    int nArguments=ATgetLength(Arguments);
+    unsigned int nArguments=ATgetLength(Arguments);
 
     ATermList NewArgumentTypes=ATmakeList0();
     ATermList NewArguments=ATmakeList0();
@@ -1979,7 +1979,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
   return Result;
 }
     
-static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl *DataTerm, ATermAppl PosType, ATermTable FreeVars){
+static ATermAppl gstcTraverseVarConsTypeDN(unsigned int nFactPars, ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl *DataTerm, ATermAppl PosType, ATermTable FreeVars){
   gsDebugMsg("gstcTraverseVarConsTypeDN: DataTerm %T with PosType %T, nFactPars %d\n",*DataTerm,PosType,nFactPars);    
   if(gsIsId(*DataTerm)||gsIsOpId(*DataTerm)){
     ATermAppl Name=ATAgetArgument(*DataTerm,0);
@@ -2292,7 +2292,7 @@ static ATermList gstcGetNotInferredList(ATermList TypeListList){
   //0..nFormPars-1
   
   ATermList Result=ATmakeList0();
-  int nFormPars=ATgetLength(ATgetFirst(TypeListList));
+  int nFormPars=ATgetLength((ATermList)ATgetFirst(TypeListList));
   ATermList *Pars = NULL;
   if ( nFormPars > 0 )
     Pars = (ATermList *) malloc(nFormPars*sizeof(ATermList));

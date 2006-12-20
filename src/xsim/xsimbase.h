@@ -76,7 +76,7 @@ public:
 	virtual NextState *GetNextState() = 0;
 	/* Returns the currently enabled transitions and the
 	 * resulting states. */
-	virtual bool ChooseTransition(int index) = 0;
+	virtual bool ChooseTransition(unsigned int index) = 0;
 	/* Goto a state x with a transition y, where [y,x] is
 	 * the index'th element in GetNextStates(). */
 
@@ -86,12 +86,12 @@ public:
 	virtual int GetTracePos() = 0;
 	/* Get the position of the current state in the current
 	 * trace. */
-	virtual bool SetTracePos(int pos) = 0;
+	virtual bool SetTracePos(unsigned int pos) = 0;
 	/* Set the current state to the pos'th element in the
 	 * trace. */
 	virtual ATermList GetTrace() = 0;
 	/* Get the whole trace. */
-	virtual bool SetTrace(ATermList Trace, int From = 0) = 0;
+	virtual bool SetTrace(ATermList Trace, unsigned int From = 0) = 0;
 	/* Set the trace to Trace starting at position From. */
 };
 
@@ -130,21 +130,21 @@ public:
 	virtual void Reset(ATerm State) = 0;
 	/* Is called whenever the current trace is reset to the
 	 * singleton trace containing State. */
-	virtual void Undo(int Count) = 0;
+	virtual void Undo(unsigned int Count) = 0;
 	/* Is called whenever one or more Undos are done, i.e.
 	 * the trace is still the same, but one of the previous
 	 * states is selected. */
-	virtual void Redo(int Count) = 0;
+	virtual void Redo(unsigned int Count) = 0;
 	/* Dual of Undo(). */
 
-	virtual void TraceChanged(ATermList Trace, int From) = 0;
+	virtual void TraceChanged(ATermList Trace, unsigned int From) = 0;
 	/* Is called whenever the current trace is (partially)
 	 * changed. (Not when the trace is extended (or partially
 	 * replaced) with one state because of a normal transition.
 	 * Note that this is also called when a view is loaded
 	 * to initialise it with the current trace.
 	 */
-	virtual void TracePosChanged(ATermAppl Transition, ATerm State, int Index) = 0;
+	virtual void TracePosChanged(ATermAppl Transition, ATerm State, unsigned int Index) = 0;
 	/* Is called whenever another element of the current trace
 	 * is selected. Note that Transition might be Nil in the
 	 * case that State is the initial state (i.e. Index is 0).

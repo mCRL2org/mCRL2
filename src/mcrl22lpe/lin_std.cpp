@@ -5335,7 +5335,7 @@ static ATermAppl collect_sum_arg_arg_cond(
     for( ; multiactioncount>0 ; multiactioncount-- )
     { 
       ATermList resultf=ATempty;
-      long fcnt=ATgetLength(
+      long fcnt=ATgetLength((ATermList)
                      ATgetArgument(
                        ATelementAt(
                          ATLgetArgument(ATAgetFirst(multiActionList),0),

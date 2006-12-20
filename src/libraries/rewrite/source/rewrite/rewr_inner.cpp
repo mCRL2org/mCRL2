@@ -951,7 +951,7 @@ ATerm RewriterInnermost::tree_matcher(ATermList t, ATermAppl tree)
 		int rslt_len;
 		if ( ATisList(rslt) )
 		{
-			rslt_len = ATgetLength(rslt)-1;
+			rslt_len = ATgetLength((ATermList) rslt)-1;
 			if ( !ATisEmpty(rargs) )
 			{
 				rslt = (ATerm) ATconcat((ATermList) rslt,rargs);

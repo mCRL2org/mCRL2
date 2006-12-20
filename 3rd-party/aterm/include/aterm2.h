@@ -20,51 +20,90 @@ extern "C"
 {
 #endif/* __cplusplus */
 
+
+
 /**
   * We define some new datatypes.
   */
 
-typedef struct _ATermInt
+struct __ATermInt
 {
-	header_type header;
-	ATerm       next;
-	int         value;
+  header_type header;
+  ATerm       next;
+  int         value;
+};
+
+typedef union _ATermInt
+{
+  header_type        header;
+  struct __ATermInt  aterm;
 } *ATermInt;
 
-typedef struct _ATermReal
+struct __ATermReal
 {
-	header_type header;
-	ATerm       next;
-	double      value;
+  header_type header;
+  ATerm       next;
+  double      value;
+};
+
+typedef union _ATermReal
+{
+  header_type         header;
+  struct __ATermReal  aterm;
 } *ATermReal;
 
-typedef struct _ATermAppl
+struct __ATermAppl
 {
-	header_type header;
-	ATerm       next;
+  header_type header;
+  ATerm       next;
+  ATerm       arg[MAX_ARITY+1];
+};
+
+typedef union _ATermAppl
+{
+  header_type         header;
+  struct __ATermAppl  aterm;
 } *ATermAppl;
 
-typedef struct _ATermList
+struct __ATermList
 {
-	header_type header;
-	ATerm       next;
-	ATerm       head;
-	struct _ATermList *tail;
+  header_type       header;
+  ATerm             next;
+  ATerm             head;
+  union _ATermList *tail;
+};
+
+typedef union _ATermList
+{
+  header_type         header;
+  struct __ATermList  aterm;
 } *ATermList;
 
-typedef struct _ATermPlaceholder
+struct __ATermPlaceholder
 {
-	header_type header;
-	ATerm       next;
-	ATerm       ph_type;
+  header_type header;
+  ATerm       next;
+  ATerm       ph_type;
+};
+
+typedef union _ATermPlaceholder
+{
+  header_type                header;
+  struct __ATermPlaceholder  aterm;
 } *ATermPlaceholder;
 
-typedef struct _ATermBlob
+struct __ATermBlob
 {
-	header_type header;
-	ATerm       next;
-	int	    size;
-	void       *data;
+  header_type  header;
+  ATerm        next;
+  unsigned int size;
+  void        *data;
+};
+
+typedef union _ATermBlob
+{
+  header_type         header;
+  struct __ATermBlob  aterm;
 } *ATermBlob;
 
 struct _ATermTable;
@@ -82,12 +121,12 @@ typedef struct _ATermTable *ATermTable;
 /* The ATermInt type */
 ATermInt ATmakeInt(int value);
 /*int      ATgetInt(ATermInt term);*/
-#define ATgetInt(t) ((t)->value)
+#define ATgetInt(t) (((ATermInt)t)->aterm.value)
 
 /* The ATermReal type */
 ATermReal ATmakeReal(double value);
 /*double    ATgetReal(ATermReal term);*/
-#define ATgetReal(t) ((t)->value)
+#define ATgetReal(t) (((ATermReal)t)->aterm.value)
 
 /* The ATermAppl type */
 ATermAppl ATmakeAppl(AFun sym, ...);
@@ -106,9 +145,9 @@ ATermAppl ATmakeAppl6(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2,
 #define ATgetAFun(appl) GET_SYMBOL((appl)->header)
 #define ATgetSymbol ATgetAFun
 
-/* ATerm     ATgetArgument(ATermAppl appl, int arg); */
-#define ATgetArgument(appl,arg) (*((ATerm *)(appl) + ARG_OFFSET + (arg)))
-ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, int n);
+/* ATerm     ATgetArgument(ATermAppl appl, unsigned int arg); */
+#define ATgetArgument(appl,idx) (((ATermAppl)appl)->aterm.arg[idx])
+ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, unsigned int n);
 
 /* Portability */
 ATermList ATgetArguments(ATermAppl appl);
@@ -118,7 +157,7 @@ ATermAppl ATmakeApplArray(AFun sym, ATerm args[]);
 /* The ATermList type */
 extern ATermList ATempty;
 
-ATermList ATmakeList(int n, ...);
+ATermList ATmakeList(unsigned int n, ...);
 
 /* ATermList ATmakeList0(); */
 #define ATmakeList0() (ATempty)
@@ -134,35 +173,35 @@ ATermList ATmakeList1(ATerm el0);
 #define ATmakeList6(el0, el1, el2, el3, el4, el5) \
                 ATinsert(ATmakeList5(el1,el2,el3,el4,el5), el0)
 
-/*int ATgetLength(ATermList list);*/
-#define   ATgetLength(l) ((int)GET_LENGTH((l)->header))
+/*unsigned int ATgetLength(ATermList list);*/
+unsigned int ATgetLength(ATermList list);
 
 /* ATerm ATgetFirst(ATermList list);*/
-#define   ATgetFirst(l) ((l)->head)
+#define   ATgetFirst(l) (((ATermList)l)->aterm.head)
 
 /* ATermList ATgetNext(ATermList list);*/
-#define   ATgetNext(l)  ((l)->tail)
+#define   ATgetNext(l)  (((ATermList)l)->aterm.tail)
 
 /*ATbool ATisEmpty(ATermList list);*/
-#define ATisEmpty(list) ((ATbool)(((ATermList)(list))->head == NULL \
-				 && ((ATermList)(list))->tail == NULL))
+#define ATisEmpty(list) ((ATbool)(((ATermList)list)->aterm.head == NULL \
+				 && ((ATermList)list)->aterm.tail == NULL))
 
 ATermList ATgetTail(ATermList list, int start);
 ATermList ATreplaceTail(ATermList list, ATermList newtail, int start);
 ATermList ATgetPrefix(ATermList list);
 ATerm     ATgetLast(ATermList list);
-ATermList ATgetSlice(ATermList list, int start, int end);
+ATermList ATgetSlice(ATermList list, unsigned int start, unsigned int end);
 ATermList ATinsert(ATermList list, ATerm el);
-ATermList ATinsertAt(ATermList list, ATerm el, int index);
+ATermList ATinsertAt(ATermList list, ATerm el, unsigned int index);
 ATermList ATappend(ATermList list, ATerm el);
 ATermList ATconcat(ATermList list1, ATermList list2);
 int       ATindexOf(ATermList list, ATerm el, int start);
 int       ATlastIndexOf(ATermList list, ATerm el, int start);
-ATerm     ATelementAt(ATermList list, int index);
+ATerm     ATelementAt(ATermList list, unsigned int index);
 ATermList ATremoveElement(ATermList list, ATerm el);
-ATermList ATremoveElementAt(ATermList list, int idx);
+ATermList ATremoveElementAt(ATermList list, unsigned int idx);
 ATermList ATremoveAll(ATermList list, ATerm el);
-ATermList ATreplace(ATermList list, ATerm el, int idx);
+ATermList ATreplace(ATermList list, ATerm el, unsigned int idx);
 ATermList ATreverse(ATermList list);
 ATermList ATsort(ATermList list, int (*compare)(const ATerm t1, const ATerm t2));
 int       ATcompare(ATerm t1, ATerm t2);
@@ -196,15 +235,15 @@ ATermList ATfilter(ATermList list, ATbool (*predicate)(ATerm));
 /* The ATermPlaceholder type */
 ATermPlaceholder ATmakePlaceholder(ATerm type);
 /*ATerm            ATgetPlaceholder(ATermPlaceholder ph);*/
-#define ATgetPlaceholder(ph) ((ph)->ph_type)
+#define ATgetPlaceholder(ph) (((ATermPlaceholder)ph)->aterm.ph_type)
 
 /* The ATermBlob type */
-ATermBlob ATmakeBlob(int size, void *data);
+ATermBlob ATmakeBlob(unsigned int size, void *data);
 /*void   *ATgetBlobData(ATermBlob blob);*/
-#define ATgetBlobData(blob) ((blob)->data)
+#define ATgetBlobData(blob) (((ATermBlob)blob)->aterm.data)
 
 /*int     ATgetBlobSize(ATermBlob blob);*/
-#define ATgetBlobSize(blob) ((blob)->size)
+#define ATgetBlobSize(blob) (((ATermBlob)blob)->aterm.size)
 
 void    ATregisterBlobDestructor(ATbool (*destructor)(ATermBlob));
 void    ATunregisterBlobDestructor(ATbool (*destructor)(ATermBlob));
@@ -215,7 +254,7 @@ AFun  ATmakeAFun(const char *name, int arity, ATbool quoted);
 /*char   *ATgetName(AFun sym);*/
 #define ATgetName(sym) (at_lookup_table[(sym)]->name)
 /*int     ATgetArity(AFun sym);*/
-#define ATgetArity(sym) GET_LENGTH(at_lookup_table_alias[(sym)]->header)
+#define ATgetArity(sym) ((unsigned int)GET_LENGTH(at_lookup_table_alias[(sym)]->header))
 /*ATbool  ATisQuoted(AFun sym);*/
 #define ATisQuoted(sym) IS_QUOTED(at_lookup_table_alias[(sym)]->header)
 
@@ -261,10 +300,10 @@ ATbool ATgetChecking(void);
 extern int at_gc_count;
 #define ATgetGCCount()    (at_gc_count)
 
-unsigned long ATcalcUniqueSubterms(ATerm t);
-unsigned long ATcalcUniqueSymbols(ATerm t);
+unsigned long  ATcalcUniqueSubterms(ATerm t);
+unsigned long  ATcalcUniqueSymbols(ATerm t);
 
-unsigned long ATcalcTextSize(ATerm t);
+unsigned long  ATcalcTextSize(ATerm t);
 
 void AT_writeToStringBuffer(ATerm t, char *buffer);
 #define ATwriteToStringBuffer(t,b) AT_writeToStringBuffer((t),(b))

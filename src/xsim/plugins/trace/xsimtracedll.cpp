@@ -67,7 +67,6 @@ XSimTraceDLL::XSimTraceDLL( wxWindow *parent ) :
     panel->SetSizer(sizer);
 
     simulator = NULL;
-    current_pos = -1;
 }
 
 void XSimTraceDLL::Registered(SimulatorInterface *Simulator)
@@ -82,7 +81,6 @@ void XSimTraceDLL::Unregistered()
 	SimulatorViewDLLInterface::Unregistered();
 
 	simulator = NULL;
-	current_pos = -1;
 	traceview->DeleteAllItems();
 }
 
@@ -95,9 +93,9 @@ void XSimTraceDLL::AddState(ATermAppl Transition, ATerm State, bool enabled)
 	if ( Transition != NULL )
 	{
 		stringstream ss;
-		int l = traceview->GetItemCount();
+		unsigned int l = traceview->GetItemCount();
 
-		traceview->InsertItem(l,wxString::Format(wxT("%i"),l));
+		traceview->InsertItem(l,wxString::Format(wxT("%u"),l));
 		traceview->SetItem(l,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) Transition, ppDefault).c_str()));
 		PrintState(ss,State,simulator->GetNextState());
 		traceview->SetItem(l,2,wxConvLocal.cMB2WX(ss.str().c_str()));
@@ -117,7 +115,7 @@ void XSimTraceDLL::StateChanged(ATermAppl Transition, ATerm State, ATermList /* 
 {
 	if ( Transition != NULL )
 	{
-		int l = traceview->GetItemCount()-1;
+		unsigned int l = traceview->GetItemCount()-1;
 
 		while ( l > current_pos )
 		{
@@ -142,7 +140,7 @@ void XSimTraceDLL::Reset(ATerm State)
 	current_pos = 0;
 }
 
-void XSimTraceDLL::Undo(int Count)
+void XSimTraceDLL::Undo(unsigned int Count)
 {
 	while ( Count > 0 )
 	{
@@ -153,7 +151,7 @@ void XSimTraceDLL::Undo(int Count)
 	}
 }
 
-void XSimTraceDLL::Redo(int Count)
+void XSimTraceDLL::Redo(unsigned int Count)
 {
 	while ( Count > 0 )
 	{
@@ -164,9 +162,9 @@ void XSimTraceDLL::Redo(int Count)
 	}
 }
 
-void XSimTraceDLL::TraceChanged(ATermList Trace, int From)
+void XSimTraceDLL::TraceChanged(ATermList Trace, unsigned int From)
 {
-	int l = traceview->GetItemCount()-1;
+	unsigned int l = traceview->GetItemCount()-1;
 	
 	while ( l >= From )
 	{
@@ -186,7 +184,7 @@ void XSimTraceDLL::TraceChanged(ATermList Trace, int From)
 	}
 }
 
-void XSimTraceDLL::TracePosChanged(ATermAppl /* Transition */, ATerm /* State */, int Index)
+void XSimTraceDLL::TracePosChanged(ATermAppl /* Transition */, ATerm /* State */, unsigned int Index)
 {
 	while ( current_pos > Index )
 	{

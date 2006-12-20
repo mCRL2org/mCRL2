@@ -17,7 +17,7 @@ class Induction {
     int f_fresh_dummy_number;
 
     /// \brief The number of variables used during the last application of induction.
-    int f_count;
+    unsigned int f_count;
 
     /// \brief An expression of soort Bool in mCRL2 format.
     ATermAppl f_formula;

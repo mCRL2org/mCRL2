@@ -2209,7 +2209,7 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
 
   // Added by Yarick: alternative generation of Places:
 //  static ATermAppl pn2gsGenerateP_pi_a(ATermList InActionLists, ATermList OutActionLists, ATermList ResetActionLists);
-  static ATermList pn2gsGetActionLists(int n, ATermList ActList);
+  static ATermList pn2gsGetActionLists(unsigned int n, ATermList ActList);
   static ATermAppl pn2gsMakeMultiAction(ATermList ActionList);
   static ATermList pn2gsMakeSendActions(ATermList ReadActions);
 
@@ -2657,7 +2657,7 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
 //   return Body;
 // }
 
-static ATermList pn2gsGetActionLists(int n, ATermList ActList){
+static ATermList pn2gsGetActionLists(unsigned int n, ATermList ActList){
     //returns all sublists (not necessarily consecutive) of length n
     
     //cannot

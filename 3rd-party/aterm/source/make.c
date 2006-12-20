@@ -28,7 +28,7 @@ typedef struct
 /*}}}  */
 /*{{{  globals */
 
-char make_id[] = "$Id: make.c,v 1.30 2003/06/24 18:57:10 jurgenv Exp $";
+char make_id[] = "$Id: make.c 20715 2006-12-13 09:35:02Z jurgenv $";
 
 static Symbol symbol_int;
 static Symbol symbol_str;
@@ -49,6 +49,7 @@ static va_list *args = (va_list *) &theargs;
 #if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
 extern char *strdup(const char *s);
 #endif
+
 static ATerm makePlaceholder(ATermPlaceholder pat);
 static ATermAppl makeArguments(ATermAppl appl, Symbol name);
 static ATerm AT_vmakeTerm(ATerm pat);
@@ -112,7 +113,12 @@ ATerm AT_getPattern(const char *pat)
 /*{{{  void AT_initMake(int argc, char *argv[]) */
 void AT_initMake(int argc, char *argv[])
 {
-  int	lcv;
+  int lcv;
+
+  /* Suppress unused arguments warning */  
+  (void) argc;
+  (void) argv;
+  
   for (lcv=0; lcv < PATTERN_CACHE_SIZE; lcv++)
   {
     pattern_table[lcv].pat  = NULL;
@@ -281,8 +287,8 @@ static ATermAppl
 makeArguments(ATermAppl appl, Symbol name)
 {
   Symbol sym = ATgetSymbol(appl);
-  int nr_args = ATgetArity(sym);
-  int cur = -1;
+  unsigned int cur;
+  unsigned int nr_args = ATgetArity(sym);
   ATerm terms[NR_INLINE_TERMS];
   ATerm term = NULL;
   ATerm type = NULL;
@@ -290,55 +296,72 @@ makeArguments(ATermAppl appl, Symbol name)
   ATermList arglist = NULL;
 
   if(nr_args == 0) {
-    if(ATgetArity(name) == 0)
+    if(ATgetArity(name) == 0) {
       sym = name;
-    else
+    }
+    else {
       sym = ATmakeSymbol(ATgetName(name), 0, ATisQuoted(name));
+    }
     return ATmakeAppl0(sym);
-  } else if (nr_args-- <= NR_INLINE_TERMS) {
-    for (cur = 0; cur < nr_args; cur++)
-      terms[cur] = AT_vmakeTerm(ATgetArgument(appl, cur));
+  } 
+  else if (nr_args-- <= NR_INLINE_TERMS) {
+    for (cur = 0; cur < nr_args; cur++) {
+      terms[cur] = AT_vmakeTerm(ATgetArgument(appl, cur)); 
+    }
+
     terms[nr_args] = ATgetArgument(appl, nr_args);
+
     if (ATgetType(terms[nr_args]) == AT_PLACEHOLDER) {
       type = ATgetPlaceholder((ATermPlaceholder)terms[nr_args]);
-      if (ATgetType(type) == AT_APPL &&
-	  ATgetSymbol((ATermAppl)type) == symbol_list) {
+
+      if (ATgetType(type) == AT_APPL 
+	  && ATgetSymbol((ATermAppl)type) == symbol_list) {
 	list = va_arg(*args, ATermList);
-	for (--cur; cur >= 0; cur--)
-	  list = ATinsert(list, terms[cur]);
-	if(ATgetArity(name) == ATgetLength(list))
+
+	while (cur > 0) {
+	  list = ATinsert(list, terms[cur - 1]);
+	  cur--;
+	}
+
+	if (ATgetArity(name) == ATgetLength(list)) {
 	  sym = name;
-	else
+	}
+	else {
 	  sym = ATmakeSymbol(ATgetName(name), ATgetLength(list), 
 			     ATisQuoted(name));
+	}
 	return ATmakeApplList(sym, list);
       }
     }
     terms[nr_args] = AT_vmakeTerm(terms[nr_args]);
-    if(ATgetArity(name) == ATgetArity(sym))
+
+    if (ATgetArity(name) == ATgetArity(sym)) {
       sym = name;
-    else
+    }
+    else {
       sym = ATmakeSymbol(ATgetName(name), ATgetArity(sym), ATisQuoted(name));
+    }
+
     return ATmakeApplArray(sym, terms);
   }
 
   arglist = ATmakeList0();
-  for (cur = 0; cur < nr_args; cur++)
+  for (cur = 0; cur < nr_args; cur++) {
     arglist = ATinsert(arglist, AT_vmakeTerm(ATgetArgument(appl,cur)));
+  }
 
   term = ATgetArgument(appl, nr_args);
-  if (ATgetType(term) == AT_PLACEHOLDER)
-  {
+  if (ATgetType(term) == AT_PLACEHOLDER) {
     type = ATgetPlaceholder((ATermPlaceholder)term);
     if (ATgetType(type) == AT_APPL &&
-	ATgetSymbol((ATermAppl)type) == symbol_list)
-    {
+	ATgetSymbol((ATermAppl)type) == symbol_list) {
       list = va_arg(*args, ATermList);
     }
   }
-  if (list == NULL)
-    list = ATmakeList1(AT_vmakeTerm(term));
 
+  if (list == NULL) {
+    list = ATmakeList1(AT_vmakeTerm(term));
+  }
 
   while (!ATisEmpty(arglist))
   {
@@ -346,10 +369,13 @@ makeArguments(ATermAppl appl, Symbol name)
     arglist = ATgetNext(arglist);
   }
 
-  if(ATgetArity(name) == ATgetLength(list))
+  if(ATgetArity(name) == ATgetLength(list)) {
     sym = name;
-  else
+  }
+  else {
     sym = ATmakeSymbol(ATgetName(name), ATgetLength(list), ATisQuoted(name));
+  }
+
   return ATmakeApplList(sym, list);
 }
 
@@ -550,8 +576,8 @@ static ATbool matchArguments(ATermAppl appl, ATermAppl applpat)
 {
   Symbol sym = ATgetSymbol(appl);
   Symbol psym = ATgetSymbol(applpat);
-  int i, arity = ATgetArity(sym);
-  int parity = ATgetArity(psym)-1; /* -1, because last arg can be <list> */
+  int i, arity = (int)ATgetArity(sym);
+  int parity = (int)ATgetArity(psym)-1; /* -1, because last arg can be <list> */
   ATerm pat;
 
   if(parity == -1)

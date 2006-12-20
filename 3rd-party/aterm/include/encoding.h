@@ -63,21 +63,13 @@ typedef unsigned int header_type;
 #define SHIFT_SYMBOL  SHIFT_LENGTH
 #define SHIFT_SYM_ARITY SHIFT_LENGTH
 
-#ifdef AT_64BIT
-#define TERM_SIZE_INT         3
-#define TERM_SIZE_REAL        3
-#define TERM_SIZE_BLOB        4
-#define TERM_SIZE_LIST        4
-#define TERM_SIZE_PLACEHOLDER 3
+#define TERM_SIZE_APPL(arity) ((sizeof(struct __ATerm)/sizeof(header_type))+arity)
+#define TERM_SIZE_INT         (sizeof(struct __ATermInt)/sizeof(header_type))
+#define TERM_SIZE_REAL        (sizeof(struct __ATermReal)/sizeof(header_type))
+#define TERM_SIZE_BLOB        (sizeof(struct __ATermBlob)/sizeof(header_type))
+#define TERM_SIZE_LIST        (sizeof(struct __ATermList)/sizeof(header_type))
+#define TERM_SIZE_PLACEHOLDER (sizeof(struct __ATermPlaceholder)/sizeof(header_type))
 #define TERM_SIZE_SYMBOL      (sizeof(struct _SymEntry)/sizeof(header_type))
-#else
-#define TERM_SIZE_INT         3
-#define TERM_SIZE_REAL        4
-#define TERM_SIZE_BLOB        4
-#define TERM_SIZE_LIST        4
-#define TERM_SIZE_PLACEHOLDER 3
-#define TERM_SIZE_SYMBOL      (sizeof(struct _SymEntry)/sizeof(header_type))
-#endif
 
 #define IS_MARKED(h)    (((h) & MASK_MARK) ? ATtrue : ATfalse)
 #define GET_TYPE(h)     (((h) & MASK_TYPE) >> SHIFT_TYPE)
@@ -87,10 +79,11 @@ typedef unsigned int header_type;
 #define GET_LENGTH(h)	((h) >> SHIFT_LENGTH)
 #define IS_QUOTED(h)	(((h) & MASK_QUOTED) ? ATtrue : ATfalse)
 
-#define SET_MARK(h)			((h) |= MASK_MARK)
-#define SET_ANNO(h)			((h) |= MASK_ANNO)
-#define SET_ARITY(h, ar)    ((h) = (((h) & ~MASK_ARITY) | \
+#define SET_MARK(h)     ((h) |= MASK_MARK)
+#define SET_ANNO(h)     ((h) |= MASK_ANNO)
+/* #define SET_ARITY(h, ar) ((h) = (((h) & ~MASK_ARITY) | \
 									((ar) << SHIFT_ARITY)))
+*/
 #define SET_SYMBOL(h, sym)	((h) = (((h) & ~MASK_SYMBOL) | \
 									((sym) << SHIFT_SYMBOL)))
 #define SET_LENGTH(h, len)  ((h) = (((h) & ~MASK_LENGTH) | \
@@ -128,7 +121,7 @@ typedef unsigned int header_type;
 
 #define FREE_HEADER               (AT_FREE << SHIFT_TYPE)
 
-#define ARG_OFFSET 2
+#define ARG_OFFSET                TERM_SIZE_APPL(0)
 
 
 

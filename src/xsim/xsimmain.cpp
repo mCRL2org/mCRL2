@@ -543,7 +543,7 @@ NextState *XSimMain::GetNextState()
 	return nextstate;
 }
 
-bool XSimMain::ChooseTransition(int index)
+bool XSimMain::ChooseTransition(unsigned int index)
 {
 	if ( !ATisEmpty(next_states) && (index < ATgetLength(next_states)) )
 	{
@@ -627,13 +627,18 @@ int XSimMain::GetTracePos()
 	return ATgetLength(trace)-1;
 }
 
-bool XSimMain::SetTracePos(int pos)
+bool XSimMain::SetTracePos(unsigned int pos)
 {
-	int l = ATgetLength(trace)-1;
+	if ( ATgetLength(trace) == 0 )
+	{
+		return false;
+	}
+
+	unsigned int l = ATgetLength(trace)-1;
 	ATermAppl trans;
 	ATerm state;
 
-	if ( (l >= 0) && (pos <= l+ATgetLength(ecart)) )
+	if ( pos <= l+ATgetLength(ecart) )
 	{
 		while ( l < pos )
 		{
@@ -682,7 +687,7 @@ ATermList XSimMain::GetTrace()
 	return l;
 }
 
-bool XSimMain::SetTrace(ATermList /* Trace */, int /* From */)
+bool XSimMain::SetTrace(ATermList /* Trace */, unsigned int /* From */)
 {
 	// XXX
 	return false;
@@ -1091,7 +1096,7 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
 	}
 	current_state = state;
 
-	for (int i=0; i<ATgetLength(state_vars); i++)
+	for (unsigned int i=0; i<ATgetLength(state_vars); i++)
 	{
 		ATermAppl oldval = nextstate->getStateArgument(old,i);
 		ATermAppl newval = nextstate->getStateArgument(state,i);
@@ -1219,7 +1224,7 @@ void XSimMain::UpdateTransitions(bool update_next_states)
 		ATerm n = ATgetFirst(ATgetNext(ATLgetFirst(l)));
 		ATermList o = state_varnames;
 		bool comma = false;
-		for (int i=0; i<ATgetLength(state_vars); i++)
+		for (unsigned int i=0; i<ATgetLength(state_vars); i++)
 		{
 			ATermAppl oldval = nextstate->getStateArgument(m,i);
 			ATermAppl newval = nextstate->getStateArgument(n,i);

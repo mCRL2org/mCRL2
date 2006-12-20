@@ -67,11 +67,11 @@ struct _ATermTable
   int max_load;
   long max_entries;
   long *hashtable; long nr_tables;
-  struct _ATerm ***keys;
+  union _ATerm ***keys;
   long nr_free_tables;
   long first_free_position;
   long **free_table;
-  struct _ATerm ***values;
+  union _ATerm ***values;
 };
 
 /*}}}  */

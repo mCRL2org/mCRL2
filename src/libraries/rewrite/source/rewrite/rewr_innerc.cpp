@@ -965,7 +965,7 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
 #ifdef _INNERC_STORE_TREES
 ATermAppl RewriterCompilingInnermost::create_tree(ATermList rules, int opid, int arity)
 #else
-static ATermAppl create_tree(ATermList rules, int /*opid*/, int arity)
+static ATermAppl create_tree(ATermList rules, int /*opid*/, unsigned int arity)
 #endif
 	// Create a match tree for OpId int2term[opid] and update the value of
 	// *max_vars accordingly.
@@ -987,7 +987,7 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int arity)
 	int total_rule_vars = 0;
 	for (; !ATisEmpty(rules); rules=ATgetNext(rules))
 	{
-		if ( ATgetLength(ATelementAt((ATermList) ATgetFirst(rules),2)) <= arity )
+		if ( ATgetLength((ATermList) ATelementAt((ATermList) ATgetFirst(rules),2)) <= arity )
 		{
 			rule_seqs = ATinsert(rule_seqs, (ATerm) create_sequence((ATermList) ATgetFirst(rules),&total_rule_vars));
 		}
@@ -1034,7 +1034,7 @@ void RewriterCompilingInnermost::calcTerm(FILE *f, ATerm t, int startarg)
 {
   if ( ATisList(t) )
   {
-    int arity = ATgetLength((ATermList) t)-1;
+    unsigned int arity = ATgetLength((ATermList) t)-1;
     ATermList l;
     bool b = false;
     bool v = false;

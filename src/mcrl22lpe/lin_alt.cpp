@@ -1729,7 +1729,7 @@ static ATermList get_firsts(ATermAppl t)
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			m = ATinsert(m,(ATerm) ATmakeList4(
-						(ATerm) ATconcat((ATermList) increase_index((ATerm) make_indices(ATLgetArgument(t,0)),ATgetLength(ATelementAt(ATLgetFirst(l),0))),ATLelementAt(ATLgetFirst(l),0)),
+						(ATerm) ATconcat((ATermList) increase_index((ATerm) make_indices(ATLgetArgument(t,0)),ATgetLength(ATLelementAt(ATLgetFirst(l),0))),ATLelementAt(ATLgetFirst(l),0)),
 						ATelementAt(ATLgetFirst(l),1),
 						ATelementAt(ATLgetFirst(l),2),
 						ATelementAt(ATLgetFirst(l),3)
@@ -1853,17 +1853,17 @@ static ATermList get_firsts(ATermAppl t)
 					u = ATAelementAt(ATLgetFirst(n),2);
 				} else if ( gsIsNil(ATAelementAt(ATLgetFirst(n),2)) )
 				{
-					u = (ATermAppl) increase_index(ATelementAt(ATLgetFirst(l),2),ATgetLength(ATelementAt(ATLgetFirst(n),0)));
+					u = (ATermAppl) increase_index(ATelementAt(ATLgetFirst(l),2),ATgetLength(ATLelementAt(ATLgetFirst(n),0)));
 				} else {
-					u = gsMakeMerge((ATermAppl) increase_index(ATelementAt(ATLgetFirst(l),2),ATgetLength(ATelementAt(ATLgetFirst(n),0))),ATAelementAt(ATLgetFirst(n),2));
+					u = gsMakeMerge((ATermAppl) increase_index(ATelementAt(ATLgetFirst(l),2),ATgetLength(ATLelementAt(ATLgetFirst(n),0))),ATAelementAt(ATLgetFirst(n),2));
 				}
 
-				ATermAppl a = rewr->rewrite(gsMakeDataExprAndWithTrueCheck((ATermAppl) increase_index(ATelementAt(ATLgetFirst(l),3),ATgetLength(ATelementAt(ATLgetFirst(n),0))),ATAelementAt(ATLgetFirst(n),3)));
+				ATermAppl a = rewr->rewrite(gsMakeDataExprAndWithTrueCheck((ATermAppl) increase_index(ATelementAt(ATLgetFirst(l),3),ATgetLength(ATLelementAt(ATLgetFirst(n),0))),ATAelementAt(ATLgetFirst(n),3)));
 				if ( !ATisEqual(a,linFalse) )
 				{
 					o = ATinsert(o,(ATerm) ATmakeList4(
-								(ATerm) ATconcat((ATermList) increase_index((ATerm) make_indices(ATLelementAt(ATLgetFirst(l),0)),ATgetLength(ATelementAt(ATLgetFirst(n),0))),ATLelementAt(ATLgetFirst(n),0)),
-								(ATerm) gsMakeSync((ATermAppl) increase_index(ATelementAt(ATLgetFirst(l),1),ATgetLength(ATelementAt(ATLgetFirst(n),0))),ATAelementAt(ATLgetFirst(n),1)),
+								(ATerm) ATconcat((ATermList) increase_index((ATerm) make_indices(ATLelementAt(ATLgetFirst(l),0)),ATgetLength(ATLelementAt(ATLgetFirst(n),0))),ATLelementAt(ATLgetFirst(n),0)),
+								(ATerm) gsMakeSync((ATermAppl) increase_index(ATelementAt(ATLgetFirst(l),1),ATgetLength(ATLelementAt(ATLgetFirst(n),0))),ATAelementAt(ATLgetFirst(n),1)),
 								(ATerm) u,
 								(ATerm) a
 //							(ATerm) ATconcat((ATermList) make_indices(ATLelementAt(ATLgetFirst(l),0)),(ATermList) increase_index(ATelementAt(ATLgetFirst(n),0),ATgetLength(ATLelementAt(ATLgetFirst(l),0)))),
@@ -2174,12 +2174,12 @@ static void update_spec_subst_trace(ATermInt next, ATermList trace, ATermList *n
 		}
 	}
 }
-static ATermAppl update_spec_subst(ATermAppl spec, int init, int reuse)
+static ATermAppl update_spec_subst(ATermAppl spec, unsigned int init, int reuse)
 {
 	ATermList nosubst;
 	ATermList l,m,n;
 	ATermAppl a;
-	int i;
+	unsigned int i;
 
 	nosubst = ATmakeList1((ATerm) ATmakeInt(init));
 	i = 0;
@@ -2211,12 +2211,12 @@ static ATermAppl update_spec_subst(ATermAppl spec, int init, int reuse)
 
 /* Result manipulation functions */
 
-static int remove_unused(int init, ATbool *init_used)
+static unsigned int remove_unused(unsigned int init, ATbool *init_used)
 {
 	ATermList used = ATmakeList1((ATerm) ATmakeInt(init));
 	ATermList sums;
-	int p;
-	int id;
+	unsigned int p;
+	unsigned int id;
 
 	*init_used = ATfalse;
 	p = 0;
@@ -2256,7 +2256,7 @@ static int remove_unused(int init, ATbool *init_used)
 	return init;
 }
 
-/* int merge_to_lpo(int init, ATermList cons, ATermList *maps)
+/* int merge_to_lpo(unsigned int init, ATermList cons, ATermList *maps)
 {
 	ATermList args = ATmakeList1((ATerm) gsMakeDataVarId(gsString2ATermAppl("state"),gsMakeSortExprPos()));
 	ATermList sums = ATmakeList0();
@@ -2311,7 +2311,7 @@ static int remove_unused(int init, ATbool *init_used)
 	return init;
 }*/
 
-static ATermAppl make_lpe(ATermAppl Spec, int init_id)
+static ATermAppl make_lpe(ATermAppl Spec, unsigned int init_id)
 {
 //	ATermList cons = ATLgetArgument(ATAgetArgument(Spec,1),0);
 //	ATermList maps = ATLgetArgument(ATAgetArgument(Spec,2),0);
@@ -2319,7 +2319,7 @@ static ATermAppl make_lpe(ATermAppl Spec, int init_id)
 	ATermList sums;
 	ATermList l,m,n,o,s1,s3,s5,vars;
 	ATermAppl s2;
-	int i,j,singleton;
+	unsigned int i,j,singleton;
 
 	singleton = (ATgetLength(processes) <= 1);
 	if ( singleton )
@@ -2621,12 +2621,12 @@ static ATermAppl unique_vars(ATermAppl spec)
 
 /* Interface */
 
-static int main_linearisation(ATermAppl Spec)
+static unsigned int main_linearisation(ATermAppl Spec)
 {
 	ATermAppl init;
 	ATermList l,m;
 	ATbool init_used;
-	int i, init_id;
+	unsigned int i, init_id;
 
 	rewr = createRewriter(lpe::data_specification(ATAgetArgument(Spec,0)));
 
@@ -2687,7 +2687,7 @@ static int main_linearisation(ATermAppl Spec)
 ATermAppl linearise_alt_nolpe(ATermAppl Spec)
 {
 //	ATermList lin;
-	int init_id;
+	unsigned int init_id;
 
 	generalise = true;
 	init_id = main_linearisation(Spec);
@@ -2699,7 +2699,7 @@ ATermAppl linearise_alt_nolpe(ATermAppl Spec)
 
 ATermAppl linearise_alt_nolpe_subst(ATermAppl Spec, int reuse_cycles)
 {
-	int init_id;
+	unsigned int init_id;
 
 	generalise = true;
 	init_id = main_linearisation(Spec);
@@ -2709,7 +2709,7 @@ ATermAppl linearise_alt_nolpe_subst(ATermAppl Spec, int reuse_cycles)
 
 ATermAppl linearise_alt_statespace(ATermAppl Spec, bool lpe)
 {
-	int init_id;
+	unsigned int init_id;
 
 	generalise = false;
 	init_id = main_linearisation(Spec);
@@ -2728,7 +2728,7 @@ ATermAppl linearise_alt(ATermAppl Spec, t_lin_options /*lin_options*/)
 {
 //	ATermList lin;
 //	ATermList l;
-	int init_id;
+	unsigned int init_id;
 
 	generalise = true;
 	init_id = main_linearisation(Spec);

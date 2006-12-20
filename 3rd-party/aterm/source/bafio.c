@@ -118,7 +118,7 @@ typedef struct
 /*}}}  */
 /*{{{  variables */
 
-char bafio_id[] = "$Id: bafio.c,v 1.44 2004/02/02 11:24:34 jurgenv Exp $";
+char bafio_id[] = "$Id: bafio.c 20711 2006-12-12 08:45:44Z jurgenv $";
 
 static int nr_unique_symbols = -1;
 static sym_read_entry *read_symbols;
@@ -126,7 +126,7 @@ static sym_entry *sym_entries = NULL;
 static sym_entry *first_topsym = NULL;
 
 static char *text_buffer = NULL;
-static unsigned int   text_buffer_size = 0;
+static unsigned int text_buffer_size = 0;
 
 static unsigned char bit_buffer = '\0';
 static int  bits_in_buffer = 0; /* how many bits in bit_buffer are used */
@@ -140,7 +140,10 @@ static int  bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 	*/
 
 void AT_initBafIO(int argc, char *argv[])
-{
+{ 
+  /* Suppress unused arguments warning */
+  (void) argc;
+  (void) argv;
 }
 
 /*}}}  */
@@ -280,6 +283,7 @@ static
 int
 flushBitsFromReader(byte_reader *reader)
 {
+  (void) reader; /* Suppress unused variable warning */
   bits_in_buffer = 0;
   return 0;
 }
@@ -291,10 +295,10 @@ static
 int
 writeInt(unsigned int val, byte_writer *writer)
 {
-  int nr_items;
+  unsigned int nr_items;
   unsigned char buf[8];
 
-  nr_items = writeIntToBuf(val, buf);
+  nr_items = (unsigned int)writeIntToBuf(val, buf);
   if(write_bytes((char *)buf, nr_items, writer) != nr_items)
     return -1;
 
@@ -366,11 +370,11 @@ readInt(unsigned int *val, byte_reader *reader)
 }
 
 /*}}}  */
-/*{{{  static int writeString(const char *str, int len, byte_writer *writer) */
+/*{{{  static int writeString(const char *str, unsigned int len, byte_writer *writer) */
 
 static
 int
-writeString(const char *str, int len, byte_writer *writer)
+writeString(const char *str, unsigned int len, byte_writer *writer)
 {
   /* Write length. */
   if (writeInt(len, writer) < 0)

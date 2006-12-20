@@ -19,10 +19,6 @@
 /*}}}  */
 /*{{{  defines */
 
-#if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
-extern char *strdup(const char *s);
-#endif
-
 #define MAX_ENCODED_SIZE 64
 
 #define ISBASE64(c) (isalnum((c)) || (c) == '+' || (c) == '/')
@@ -46,6 +42,13 @@ static char    *parse_buffer = NULL;
 
 static int line;
 static int col;
+
+/*}}}  */
+/*{{{  function declarations */
+
+#if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
+extern char *strdup(const char *s);
+#endif
 
 /*}}}  */
 /*{{{  functions */
@@ -139,7 +142,7 @@ static int writeToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet a
     case AT_INT:
       /*{{{  Print an integer */
 
-      elem_size = sprintf(print_buffer, "%d", ((ATermInt) t)->value);
+      elem_size = sprintf(print_buffer, "%d", ATgetInt(t));
       elem_size = write_bytes(print_buffer, elem_size, writer);
       if (elem_size < 0) {
 	return -1;
@@ -152,7 +155,7 @@ static int writeToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet a
     case AT_REAL:
       /*{{{  Print a real */
 
-      elem_size = sprintf(print_buffer, "%.15e", ((ATermReal) t)->value);
+      elem_size = sprintf(print_buffer, "%.15e", ATgetReal(t));
       elem_size = write_bytes(print_buffer, elem_size, writer);
       if (elem_size < 0) {
 	return -1;
@@ -506,7 +509,7 @@ ATermList rparse_terms(int *c, byte_reader *reader, ATermIndexedSet abbrevs)
 static ATerm rparse_blob(int *c, byte_reader *reader)
 {
   char lenspec[LENSPEC+2];
-  int len;
+  size_t len;
   char *data;
 
   if (read_bytes(lenspec, LENSPEC+1, reader) != LENSPEC+1) {
@@ -519,7 +522,7 @@ static ATerm rparse_blob(int *c, byte_reader *reader)
 
   lenspec[LENSPEC] = '\0';
 
-  len = atoi(lenspec);
+  len = strtoul(lenspec, (char**)NULL, 10);
 
   data = (char *)malloc(len);
   if (!data) {

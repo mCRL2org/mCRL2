@@ -42,9 +42,9 @@ typedef struct
 } byte_reader;
 
 int write_byte(int byte, byte_writer *writer);
-int write_bytes(const char *buf, int count, byte_writer *writer);
+unsigned int write_bytes(const char *buf, unsigned int count, byte_writer *writer);
 int read_byte(byte_reader *reader);
-int read_bytes(char *buf, int count, byte_reader *reader);
+unsigned int read_bytes(char *buf, unsigned int count, byte_reader *reader);
 void init_file_reader(byte_reader *reader, FILE *file);
 void init_string_reader(byte_reader *reader, char *buf, int max_size);
 

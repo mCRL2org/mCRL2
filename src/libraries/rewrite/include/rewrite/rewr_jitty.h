@@ -20,8 +20,8 @@ class RewriterJitty: public Rewriter
 		ATerm rewriteInternal(ATerm Term);
 
 	private:
-		int num_opids;
-		int max_vars;
+		unsigned int num_opids;
+		unsigned int max_vars;
 
 		ATermAppl jitty_true;
 

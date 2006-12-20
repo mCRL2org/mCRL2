@@ -67,12 +67,12 @@ public:
     virtual ATerm GetState();
     virtual ATermList GetNextStates();
     virtual NextState *GetNextState();
-    virtual bool ChooseTransition(int index);
+    virtual bool ChooseTransition(unsigned int index);
     virtual int GetTraceLength();
     virtual int GetTracePos();
-    virtual bool SetTracePos(int pos);
+    virtual bool SetTracePos(unsigned int pos);
     virtual ATermList GetTrace();
-    virtual bool SetTrace(ATermList Trace, int From);
+    virtual bool SetTrace(ATermList Trace, unsigned int From);
     virtual void InitialiseViews();
     
 private:

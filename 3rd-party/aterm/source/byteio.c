@@ -51,9 +51,9 @@ int write_byte(int byte, byte_writer *writer)
 }
 
 /*}}}  */
-/*{{{  int write_bytes(const char *buf, int count, byte_writer *writer) */
+/*{{{  unsigned int write_bytes(const char *buf, unsigned int count, byte_writer *writer) */
 
-int write_bytes(const char *buf, int count, byte_writer *writer)
+unsigned int write_bytes(const char *buf, unsigned int count, byte_writer *writer)
 {
   switch (writer->type) {
     case STRING_WRITER:
@@ -68,7 +68,7 @@ int write_bytes(const char *buf, int count, byte_writer *writer)
     default:
       abort();
   }
-  return EOF;
+  return 0;
 }
 
 /*}}}  */
@@ -103,20 +103,21 @@ int read_byte(byte_reader *reader)
 }
 
 /*}}}  */
-/*{{{  int read_bytes(char *buf, int count, byte_reader *reader) */
+/*{{{  unsigned int read_bytes(char *buf, int count, byte_reader *reader) */
 
-int read_bytes(char *buf, int count, byte_reader *reader)
+unsigned int read_bytes(char *buf, unsigned int count, byte_reader *reader)
 {
-  int index, size, left, result;
+  unsigned int index, size, left;
+  int result;
 
-  result = EOF;
+  result = 0;
   switch (reader->type) {
     case STRING_READER:
       index = reader->u.string_data.index;
       size  = reader->u.string_data.size;
       left  = size-index;
       if (left <= 0) {
-	return EOF;
+	return 0;
       }
       if (left < count) {
 	count = left;

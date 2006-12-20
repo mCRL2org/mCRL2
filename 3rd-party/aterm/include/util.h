@@ -24,6 +24,17 @@ extern "C"
 #define IDX_MIN                 1
 #define IDX_MAX                 2
 
+#ifdef WITH_STATS
+#define STATS(array, value)  \
+  array[IDX_TOTAL] += value; \
+  if(value < array[IDX_MIN]) \
+    array[IDX_MIN] = value;  \
+  if(value > array[IDX_MAX]) \
+    array[IDX_MAX] = value
+#else
+#define STATS(array, value)
+#endif
+
 #define MYMAXINT 0x7FFFFFFF
 
 #ifdef __cplusplus

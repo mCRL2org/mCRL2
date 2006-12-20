@@ -34,7 +34,7 @@
 /*}}}  */
 /*{{{  globals */
 
-char afun_id[] = "$Id: afun.c,v 1.26 2004/02/09 13:57:08 jong Exp $";
+char afun_id[] = "$Id: afun.c 20711 2006-12-12 08:45:44Z jurgenv $";
 
 static unsigned int table_class = INITIAL_AFUN_TABLE_CLASS;
 static unsigned int table_size  = AT_TABLE_SIZE(INITIAL_AFUN_TABLE_CLASS);
@@ -115,12 +115,12 @@ unsigned int AT_symbolTableSize()
 /*{{{  void AT_initSymbol(int argc, char *argv[]) */
 void AT_initSymbol(int argc, char *argv[])
 {
-  unsigned long i;
+  unsigned int i;
   AFun sym;
 
   for (i = 1; i < (unsigned int)argc; i++) {
     if (streq(argv[i], SYMBOL_HASH_OPT)) {
-      ATerror("Option %s is depcrecated, use %s instead!\n"
+      ATerror("Option %s is deprecated, use %s instead!\n"
 	      "Note that %s uses 2^<arg> as the actual table size.\n",
 	      SYMBOL_HASH_OPT, AFUN_TABLE_OPT, AFUN_TABLE_OPT);
     } else if (streq(argv[i], AFUN_TABLE_OPT)) {
@@ -504,32 +504,6 @@ ATbool AT_findSymbol(char *name, int arity, ATbool quoted)
     cur = cur->next;
   
   return (cur == NULL) ? ATfalse : ATtrue;
-}
-
-/*}}}  */
-
-/*{{{  ATbool AT_isValidSymbol(Symbol sym) */
-
-/**
-  * Check if a symbol is valid.
-  */
-
-ATbool AT_isValidSymbol(Symbol sym)
-{
-  return (sym >= 0 && sym < table_size
-	  && !SYM_IS_FREE(at_lookup_table[sym])) ?  ATtrue : ATfalse;
-}
-
-/*}}}  */
-/*{{{  ATbool AT_isMarkedSymbol(Symbol s) */
-
-/**
-  * Check the mark bit of a symbol.
-  */
-
-ATbool AT_isMarkedSymbol(Symbol s)
-{
-  return IS_MARKED(at_lookup_table[s]->header);
 }
 
 /*}}}  */

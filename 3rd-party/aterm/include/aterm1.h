@@ -10,6 +10,7 @@
 #include <stdarg.h>
 #include "encoding.h"
 #include "abool.h"
+#include "atypes.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -26,10 +27,20 @@ extern "C"
 
 #define AT_SYMBOL       7
 
-typedef struct _ATerm
+#define MAX_ARITY            256
+
+struct __ATerm
 {
-	header_type   header;
-	struct _ATerm *next;
+  header_type   header;
+  union _ATerm *next;
+};
+
+typedef union _ATerm
+{
+  header_type     header;
+  struct __ATerm  aterm;
+  union _ATerm*   subaterm[MAX_ARITY+3];
+  MachineWord     word[MAX_ARITY+3];
 } *ATerm;
 
 typedef void (*ATermProtFunc)();
@@ -89,6 +100,7 @@ ATbool ATwriteToTextFile(ATerm t, FILE *file);
 long   ATwriteToSharedTextFile(ATerm t, FILE *f);
 ATbool ATwriteToBinaryFile(ATerm t, FILE *file);
 ATbool ATwriteToNamedTextFile(ATerm t, const char *name);
+ATbool ATwriteToNamedSharedTextFile(ATerm t, const char *name);
 ATbool ATwriteToNamedBinaryFile(ATerm t, const char *name);
 char  *ATwriteToString(ATerm t);
 char  *ATwriteToSharedString(ATerm t, int *len);
@@ -125,6 +137,7 @@ void ATmarkArray(ATerm *start, int size);
 
 void ATinit(int argc, char *argv[], ATerm *bottomOfStack);
 void ATinitialize(int argc, char *argv[]);
+ATbool ATisInitialized();
 void ATsetWarningHandler(void (*handler)(const char *format, va_list args));
 void ATsetErrorHandler(void (*handler)(const char *format, va_list args));
 void ATsetAbortHandler(void (*handler)(const char *format, va_list args));

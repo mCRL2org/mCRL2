@@ -148,7 +148,7 @@ void GarageFrame::Reset( ATerm )
 
 
 // --------------------------------
-void GarageFrame::Undo( int )
+void GarageFrame::Undo( unsigned int )
 // --------------------------------
 {
 }
@@ -158,7 +158,7 @@ void GarageFrame::Undo( int )
 
 
 // --------------------------------
-void GarageFrame::Redo( int )
+void GarageFrame::Redo( unsigned int )
 // --------------------------------
 {
 }
@@ -168,7 +168,7 @@ void GarageFrame::Redo( int )
 
 
 // --------------------------------------------------------
-void GarageFrame::TraceChanged( ATermList , int )
+void GarageFrame::TraceChanged( ATermList , unsigned int )
 // --------------------------------------------------------
 {
 }
@@ -179,7 +179,7 @@ void GarageFrame::TraceChanged( ATermList , int )
 // ------------------------------------------------------
 void GarageFrame::TracePosChanged( ATermAppl ,
                                    ATerm ,
-                                   int             )
+                                   unsigned int    )
 // ------------------------------------------------------
 {
 }

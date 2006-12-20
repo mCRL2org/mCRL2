@@ -181,7 +181,7 @@ state :
 	|
 	state NUMBER
 	  { 
-	    int paramNo = ATgetLength( stateVector );
+	    unsigned int paramNo = ATgetLength( stateVector );
 	    if ( paramNo < ATgetLength( valueTable ) )
 	    {
 	      stateVector = ATinsert( stateVector, ATelementAt(

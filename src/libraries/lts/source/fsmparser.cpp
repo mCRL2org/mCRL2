@@ -1163,7 +1163,7 @@ yyreduce:
   case 34:
 #line 165 "fsmparser.yy"
     { 
-	    int paramNo = ATgetLength( fsm_lexer_obj->stateVector );
+	    unsigned int paramNo = ATgetLength( fsm_lexer_obj->stateVector );
 	    if ( paramNo < ATgetLength( fsm_lexer_obj->valueTable ) )
 	    {
 	      fsm_lexer_obj->stateVector = ATinsert( fsm_lexer_obj->stateVector, ATelementAt(

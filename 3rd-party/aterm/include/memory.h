@@ -8,9 +8,8 @@ extern "C"
 {
 #endif/* __cplusplus */
 
-#define MAX_ARITY            256
-#define MIN_TERM_SIZE          2
-#define MAX_TERM_SIZE       (MAX_ARITY+3)
+#define MIN_TERM_SIZE       TERM_SIZE_APPL(0)
+#define MAX_TERM_SIZE       (TERM_SIZE_APPL(MAX_ARITY)+1)
 #define MAX_BLOCKS_PER_SIZE 1024
 
 #define MAX_INLINE_ARITY       6
@@ -41,7 +40,7 @@ typedef struct Block
   /* We need platform alignment for this data block! */
   header_type data[BLOCK_SIZE];
 
-  int size;
+  unsigned int size;
   int frozen; /* this int is used as a boolean */
   struct Block *next_by_size;
   struct Block *next_before;
@@ -79,14 +78,15 @@ extern header_type *min_heap_address;
 extern header_type *max_heap_address;
 #define AT_isPotentialTerm(term) (min_heap_address <= (header_type*)(term) && (header_type*)(term) <= max_heap_address)
 
-void AT_initMemory(int argc, char *argv[]);
+void AT_initMemory(unsigned int argc, char *argv[]);
 void AT_cleanupMemory();
 HashNumber AT_hashnumber(ATerm t);
-ATerm AT_allocate(int size);
-void  AT_freeTerm(int size, ATerm t);
+ATerm AT_allocate(unsigned int size);
+void  AT_freeProtoTerm(unsigned int size, ATerm t);
+void  AT_freeTerm(unsigned int size, ATerm t);
 ATbool AT_isValidTerm(ATerm term);
 ATerm AT_isInsideValidTerm(ATerm term);
-void  AT_validateFreeList(int size);
+void  AT_validateFreeList(unsigned int size);
 int AT_inAnyFreeList(ATerm t);
 void AT_printAllTerms(FILE *file);
 void AT_printAllAFunCounts(FILE *file);
