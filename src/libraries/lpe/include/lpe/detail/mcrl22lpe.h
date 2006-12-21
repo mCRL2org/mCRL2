@@ -74,6 +74,17 @@ namespace detail {
   inline
   specification mcrl22lpe(const std::string& spec)
   {
+    static bool first_time_called = true;
+
+    if (first_time_called)
+    {
+      first_time_called = false;
+    }
+    else
+    {
+      throw std::runtime_error("mcrl22lpe may only be called once!");
+    }
+    
     t_lin_options options;
 
     std::stringstream in;
