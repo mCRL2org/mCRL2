@@ -47,12 +47,15 @@ namespace po = boost::program_options;
 
 #define VERSION "0.3"
 
-std::string input_file; // Name of the file to read input from
-std::string output_file; // Name of the file to write output to (or stdout)
+typedef struct
+{
+  std::string input_file; // Name of the file to read input from
+  std::string output_file; // Name of the file to write output to (or stdout)
+}tool_options;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 //Forward declaration needed for use within squadt_lpeuntime class
-int do_untime();
+int do_untime(const tool_options& options);
 class squadt_lpeuntime: public squadt_tool_interface
 {
   private:
@@ -96,9 +99,10 @@ bool squadt_lpeuntime::check_configuration(sip::configuration const& configurati
 
 bool squadt_lpeuntime::perform_task(sip::configuration& configuration)
 {
-  input_file = configuration.get_object(lpd_file_for_input)->get_location();
-  output_file = configuration.get_object(lpd_file_for_output)->get_location();
-  return (do_untime()==0);
+  tool_options options;
+  options.input_file = configuration.get_object(lpd_file_for_input)->get_location();
+  options.output_file = configuration.get_object(lpd_file_for_output)->get_location();
+  return (do_untime(options)==0);
 }
 
 #endif //ENABLE_SQUADT_CONNECTIVITY
@@ -129,7 +133,6 @@ lpe::specification remove_deltas(const lpe::specification& specification) {
                                                true_(),
                                                true,
                                                action_list(),
-                                               gsMakeNil(),
                                                data_assignment_list()
                                               );
 
@@ -143,10 +146,6 @@ lpe::specification remove_deltas(const lpe::specification& specification) {
 
 ///Returns an LPE specification in which the timed arguments have been rewritten
 lpe::specification untime(const lpe::specification& specification) {
-  // TODO: Strip use of gs functions as much as possible; everything that's possible through these
-  // should also be available through the LPE library!
-  // NOTE: The gs functions will be made available in the LPE library by Wieger.
-
   lpe::specification untime_specification; // Updated specification
   lpe::LPE lpe = specification.lpe(); // Original lpe
   lpe::LPE untime_lpe; // Updated lpe
@@ -215,7 +214,6 @@ lpe::specification untime(const lpe::specification& specification) {
 					  untime_condition,
 					  i->is_delta(),
 					  i->actions(),
-					  gsMakeNil(), // new time
 					  untime_assignments
 					  );
 
@@ -232,7 +230,6 @@ lpe::specification untime(const lpe::specification& specification) {
                                     data_expression(true_()),
                                     true,
                                     action_list(),
-                                    gsMakeNil(),
                                     data_assignment_list()
                                    );
 
@@ -249,7 +246,7 @@ lpe::specification untime(const lpe::specification& specification) {
   // NOTE: The initial assignments are calculated at creation 
   // time by "zipping" the initial_variables and the initial_state
   untime_initial_variables = push_back(specification.initial_variables(), last_action_time);
-  untime_initial_state = push_back(specification.initial_state(), data_expression(gsMakeDataExprInt2Real(gsMakeDataExprInt("0"))));
+  untime_initial_state = push_back(specification.initial_state(), real(0));
 
   // Create new specification, this equals original specification, except for the new LPE.
   untime_specification = lpe::specification(specification.data(), 
@@ -263,28 +260,28 @@ lpe::specification untime(const lpe::specification& specification) {
   return untime_specification;
 }
 
-int do_untime()
+int do_untime(const tool_options& options)
 {
   lpe::specification lpe_specification;
 
-  if (lpe_specification.load(input_file)) {
+  if (lpe_specification.load(options.input_file)) {
     // Untime lpe_specification and save the output to a binary file
-    if (!untime(lpe_specification).save(output_file, true)) 
+    if (!untime(lpe_specification).save(options.output_file, true)) 
     {
       // An error occurred when saving
-      gsErrorMsg("Could not save to '%s'\n", output_file.c_str());
+      gsErrorMsg("Could not save to '%s'\n", options.output_file.c_str());
       return (1);
     }
   }
   else {
-    gsErrorMsg("lpeuntime: Unable to load LPE from `%s'\n", input_file.c_str());
+    gsErrorMsg("lpeuntime: Unable to load LPE from `%s'\n", options.input_file.c_str());
     return (1);
   }
 
   return 0;
 }
 
-void parse_command_line(int ac, char** av) {
+void parse_command_line(int ac, char** av, tool_options& t_options) {
   po::options_description desc;
 
   desc.add_options()
@@ -338,13 +335,14 @@ void parse_command_line(int ac, char** av) {
     gsSetVerboseMsg();
   }
 
-  input_file = (0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-";
-  output_file = (0 < vm.count("OUTFILE")) ? vm["OUTFILE"].as< string >() : "-";
+  t_options.input_file = (0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-";
+  t_options.output_file = (0 < vm.count("OUTFILE")) ? vm["OUTFILE"].as< string >() : "-";
 }
 
 int main(int ac, char** av) {
   ATerm bot;
   ATinit(ac, av, &bot);
+  tool_options options;
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -354,6 +352,6 @@ int main(int ac, char** av) {
   }
 #endif
 
-  parse_command_line(ac,av);
-  return do_untime();
+  parse_command_line(ac, av, options);
+  return do_untime(options);
 }
