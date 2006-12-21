@@ -105,6 +105,27 @@ class LPE_summand: public aterm_appl
                 data_expression      condition,
                 bool                 delta,
                 action_list          actions,
+                data_assignment_list assignments
+               )
+      : aterm_appl(gsMakeLPESummand(summation_variables,
+               condition,
+               (delta ? gsMakeDelta() : gsMakeMultAct(actions)),
+               m_time(gsMakeNil()),
+               assignments)
+        ),
+        m_summation_variables(summation_variables),
+        m_condition          (condition),
+        m_delta              (delta),
+        m_actions            (actions),
+        m_assignments        (assignments)
+    {}
+
+    /// Constructs an LPE_summand with a multi-action.
+    ///
+    LPE_summand(data_variable_list   summation_variables,
+                data_expression      condition,
+                bool                 delta,
+                action_list          actions,
                 data_expression      time,
                 data_assignment_list assignments
                )

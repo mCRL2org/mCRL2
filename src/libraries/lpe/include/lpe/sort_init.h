@@ -48,19 +48,11 @@ namespace sort_init {
     return gsMakeSortExprBool();
   }
 
-  /// Returns the predefined sort nil.
-  inline
-  sort nil()
-  {
-    return gsMakeNil();
-  }
-
   inline bool is_real(aterm_appl t) { return t == real(); }
   inline bool is_int (aterm_appl t) { return t == int_(); }
   inline bool is_pos (aterm_appl t) { return t == pos(); }
   inline bool is_nat (aterm_appl t) { return t == nat(); }                                 
   inline bool is_bool(aterm_appl t) { return t == bool_(); }                                 
-  inline bool is_nil (aterm_appl t) { return t == nil(); }                                 
 
 } // namespace sort_init
 
