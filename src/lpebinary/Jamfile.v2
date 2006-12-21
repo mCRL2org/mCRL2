@@ -1,0 +1,14 @@
+project lpebinary
+       : build-dir $(BUILD_TOP)/lpebinary
+       ;
+
+exe lpebinary
+       : lpebinary.cpp
+         /libraries//mcrl2_basic
+         /libraries//lpe
+         /libraries//nextstate
+         /site-config//boost_program_options
+       : <include>.
+         <status>experimental
+       : <squadt_support>enable
+       ;
