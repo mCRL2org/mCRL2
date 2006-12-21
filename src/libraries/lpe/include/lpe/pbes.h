@@ -164,6 +164,12 @@ class propositional_variable: public aterm_appl
     }
 };
 
+inline
+bool is_propositional_variable(aterm_appl t)
+{
+  return gsIsPropVarDecl(t);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief A propositional variable instantiation
 ///
@@ -220,6 +226,12 @@ class propositional_variable_instantiation: public aterm_appl
       return m_expressions;
     }
 };
+
+inline
+bool is_propositional_variable_instantiation(aterm_appl t)
+{
+  return gsIsPropVarInst(t);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // pbes_fixpoint_symbol
