@@ -117,7 +117,7 @@ class LPE_summand: public aterm_appl
         m_condition          (condition),
         m_delta              (delta),
         m_actions            (actions),
-        m_time               (time),
+        m_time               (data_expression(gsMakeNil())),
         m_assignments        (assignments)
     {}
 
