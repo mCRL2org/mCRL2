@@ -16,6 +16,7 @@
 #include "lpe/lpe.h"
 #include "lpe/pretty_print.h"
 #include "lpe/data_specification.h"
+#include "lpe/detail/specification_utility.h"
 
 namespace lpe {
 
@@ -50,46 +51,6 @@ class specification: public aterm_appl
     LPE                  m_lpe;
     data_variable_list   m_initial_free_variables;
     data_assignment_list m_initial_assignments;
-
-    /// Create a list containing the left hand sides of the initial assignments.
-    ///
-    data_variable_list compute_initial_variables(data_assignment_list assignments) const
-    {
-      std::vector<data_variable> variables;
-      variables.reserve(assignments.size());
-      for (data_assignment_list::iterator i = assignments.begin(); i != assignments.end(); ++i)
-      {
-        variables.push_back(i->lhs());
-      }
-      return data_variable_list(variables.begin(), variables.end());
-    }
-
-    /// Create a list containing the right hand sides of the initial assignments.
-    ///
-    data_expression_list compute_initial_state(data_assignment_list assignments) const
-    {
-      std::vector<data_expression> expressions;
-      expressions.reserve(assignments.size());
-      for (data_assignment_list::iterator i = assignments.begin(); i != assignments.end(); ++i)
-      {
-        expressions.push_back(i->rhs());
-      }
-      return data_expression_list(expressions.begin(), expressions.end());
-    }
-
-    /// Create assignments for the initial state.
-    ///
-    data_assignment_list compute_initial_assignments(data_variable_list variables, data_expression_list initial_state) const
-    {
-      std::vector<data_assignment> assignments;
-      assignments.reserve(variables.size());
-      data_expression_list::iterator j = initial_state.begin();
-      for (data_variable_list::iterator i = variables.begin(); i != variables.end(); ++i, ++j)
-      {
-        assignments.push_back(data_assignment(*i, *j));
-      }
-      return data_assignment_list(assignments.begin(), assignments.end());
-    }
 
     /// Returns true if the action labels in the specification are included in m_action_labels.
     bool has_proper_action_labels() const
@@ -150,7 +111,7 @@ class specification: public aterm_appl
         m_action_labels(action_labels),
         m_lpe(lpe),
         m_initial_free_variables(initial_free_variables),        
-        m_initial_assignments(compute_initial_assignments(initial_variables, initial_state))
+        m_initial_assignments(detail::compute_initial_assignments(initial_variables, initial_state))
     {
       assert(initial_variables.size() == initial_state.size());
       m_term = reinterpret_cast<ATerm>(
@@ -211,14 +172,14 @@ class specification: public aterm_appl
     ///
     data_expression_list initial_state() const
     {
-      return compute_initial_state(m_initial_assignments);
+      return detail::compute_initial_state(m_initial_assignments);
     }
 
     /// Returns the variables of the initial state of the LPE.
     ///
     data_variable_list initial_variables() const
     {
-      return compute_initial_variables(m_initial_assignments);
+      return detail::compute_initial_variables(m_initial_assignments);
     }
 
     /// Returns the sequence of free variables of the initial state.
