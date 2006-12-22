@@ -190,7 +190,7 @@ data_assignment_list substitute_rhs(const data_assignment_list& dl, const data_a
 ///variable does not occur within the summand at all
 lpe::LPE_summand remove_unused_variables(const lpe::LPE_summand& summand)
 {
-  gsDebugMsg("Removing unused variables from summand %s\n", summand.to_string().c_str());
+  //gsVerboseMsg("Summand: %s\n", pp(summand).c_str());
 
   lpe::LPE_summand new_summand;
   // New summation variable list, all variables in this list occur in other terms in the summand.
@@ -315,7 +315,7 @@ data_expression recursive_substitute_equalities(const LPE_summand& summand,
 ///and returns X(..) = e -> a(..) . X(..)
 lpe::LPE_summand substitute_equalities(const lpe::LPE_summand& summand)
 {
-  gsDebugMsg("Substituting equality conditions in summand %s\n", summand.to_string().c_str());
+  gsVerboseMsg("Summand: %s\n", pp(summand).c_str());
  
   lpe::LPE_summand new_summand = summand;
 
@@ -360,7 +360,7 @@ lpe::specification sumelm(const lpe::specification& specification)
 
   lpe::specification new_specification = specification;
   new_specification = substitute_equalities_(new_specification); // new_specification used for future concerns, possibly disabling substitute_equalities_
-  new_specification = remove_unused_variables_(new_specification);
+  //new_specification = remove_unused_variables_(new_specification); // This should be enabled whenever a flag for disabling substitute_equalities_ is added
   return new_specification;
 }
 
