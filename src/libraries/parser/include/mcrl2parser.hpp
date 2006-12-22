@@ -1,7 +1,8 @@
-/* A Bison parser, made by GNU Bison 2.0.  */
+/* A Bison parser, made by GNU Bison 2.3.  */
 
-/* Skeleton parser for GLR parsing with Bison,
-   Copyright (C) 2002, 2003, 2004 Free Software Foundation, Inc.
+/* Skeleton interface for Bison GLR parsers in C
+
+   Copyright (C) 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,8 +16,21 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 51 Franklin Street, Fifth Floor,
+   Boston, MA 02110-1301, USA.  */
+
+/* As a special exception, you may create a larger work that contains
+   part or all of the Bison parser skeleton and distribute that work
+   under terms of your choice, so long as that work isn't itself a
+   parser generator using the skeleton or a modified version thereof
+   as a parser skeleton.  Alternatively, if you modify or redistribute
+   the parser skeleton itself, you may (at your option) remove this
+   special exception, which will cause the skeleton and the resulting
+   Bison output files to be licensed under the GNU General Public
+   License without this special exception.
+
+   This special exception was added by the Free Software Foundation in
+   version 2.2 of Bison.  */
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -112,111 +126,61 @@
      NUMBER = 343
    };
 #endif
-#define TAG_SORT_EXPR 258
-#define TAG_DATA_EXPR 259
-#define TAG_MULT_ACT 260
-#define TAG_PROC_EXPR 261
-#define TAG_SPEC 262
-#define TAG_STATE_FRM 263
-#define LMERGE 264
-#define ARROW 265
-#define LTE 266
-#define GTE 267
-#define CONS 268
-#define SNOC 269
-#define CONCAT 270
-#define EQ 271
-#define NEQ 272
-#define AND 273
-#define BARS 274
-#define IMP 275
-#define BINIT 276
-#define ELSE 277
-#define STAR 278
-#define PLUS 279
-#define MINUS 280
-#define EQUALS 281
-#define DOT 282
-#define COMMA 283
-#define COLON 284
-#define SEMICOLON 285
-#define QMARK 286
-#define EXCLAM 287
-#define AT 288
-#define HASH 289
-#define BAR 290
-#define LPAR 291
-#define RPAR 292
-#define PBRACK 293
-#define LBRACK 294
-#define RBRACK 295
-#define LANG 296
-#define RANG 297
-#define PBRACE 298
-#define LBRACE 299
-#define RBRACE 300
-#define KWSORT 301
-#define KWCONS 302
-#define KWMAP 303
-#define KWVAR 304
-#define KWEQN 305
-#define KWACT 306
-#define KWPROC 307
-#define KWINIT 308
-#define KWSTRUCT 309
-#define BOOL 310
-#define POS 311
-#define NAT 312
-#define INT 313
-#define REAL 314
-#define LIST 315
-#define SET 316
-#define BAG 317
-#define CTRUE 318
-#define CFALSE 319
-#define DIV 320
-#define MOD 321
-#define IN 322
-#define LAMBDA 323
-#define FORALL 324
-#define EXISTS 325
-#define WHR 326
-#define END 327
-#define DELTA 328
-#define TAU 329
-#define SUM 330
-#define BLOCK 331
-#define ALLOW 332
-#define HIDE 333
-#define RENAME 334
-#define COMM 335
-#define VAL 336
-#define MU 337
-#define NU 338
-#define DELAY 339
-#define YALED 340
-#define NIL 341
-#define ID 342
-#define NUMBER 343
 
 
+/* Copy the first part of user declarations.  */
+#line 10 "mcrl2parser.yy"
 
 
-#if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
+#include <stdio.h>
+#include <string.h>
+
+#include <aterm2.h>
+#include "libstruct.h"
+#include "liblowlevel.h"
+#include "libprint_c.h"
+
+//Global precondition: the ATerm library has been initialised
+
+//external declarations from mcrl2lexer.l
+void mcrl2yyerror(const char *s);
+int mcrl2yylex(void);
+extern ATermAppl spec_tree;
+extern ATermIndexedSet parser_protect_table;
+
+#ifdef _MSC_VER
+#define yyfalse 0
+#define yytrue 1
+#endif
+
+#define YYMAXDEPTH 160000
+
+//local declarations
+ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
+//Pre: SpecElts contains one initialisation and zero or more occurrences of
+//     sort, constructor, operation, equation, action and process
+//     specifications.
+//Ret: specification containing one sort, constructor, operation, equation,
+//     action and process specification, and one initialisation, in that order.
+
+#define safe_assign(lhs, rhs) { ATbool b; ATindexedSetPut(parser_protect_table, (ATerm) rhs, &b); lhs = rhs; }
+
+
+#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
+typedef union YYSTYPE 
 #line 46 "mcrl2parser.yy"
-typedef union YYSTYPE {
+{
   ATermAppl appl;
   ATermList list;
-} YYSTYPE;
-/* Line 2089 of glr.c.  */
-#line 213 "mcrl2parser.hpp"
+}
+/* Line 2616 of glr.c.  */
+#line 178 "mcrl2parser.hpp"
+	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
 #endif
 
-extern YYSTYPE mcrl2yylval;
-
-#if ! defined (YYLTYPE) && ! defined (YYLTYPE_IS_DECLARED)
+#if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED
 typedef struct YYLTYPE
 {
 
@@ -226,6 +190,9 @@ typedef struct YYLTYPE
 # define YYLTYPE_IS_DECLARED 1
 # define YYLTYPE_IS_TRIVIAL 1
 #endif
+
+
+extern YYSTYPE mcrl2yylval;
 
 
 

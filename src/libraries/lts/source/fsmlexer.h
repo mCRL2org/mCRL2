@@ -7,6 +7,8 @@
 class fsm_lexer
 {
   public:
+    ATermIndexedSet protect_table;
+
     ATermList stateVector;
     ATermList valueTable;
     ATermList stateId;

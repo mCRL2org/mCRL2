@@ -10,6 +10,8 @@ void fsmyyerror(const char *s);
 int fsmyylex(void);
 
 char* intToCString(int i);
+
+#define safe_assign(lhs, rhs) { ATbool b; ATindexedSetPut(fsm_lexer_obj->protect_table, (ATerm) rhs, &b); lhs = rhs; }
 %}
 
 %union {
@@ -78,28 +80,28 @@ type_def :
 
 type_name :
 	/* empty */
-	  { $$ = ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) ) }
+	  { safe_assign($$, ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) )) }
 	|
 	type_name1
-	  { $$ = $1 }
+	  { safe_assign($$, $1) }
 	| 
 	type_name ARROW type_name1
 	  {
 	    std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
 	      + "->" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
-	    $$ = ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) )
+	    safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ))
 	  }
 	;
 
 type_name1 :
 	ID
-	  { $$ = $1 }
+	  { safe_assign($$, $1) }
 	|
 	LPAR type_name RPAR
 	  {
 	    std::string result = "(" + static_cast<std::string> ( ATwriteToString(
 	      (ATerm)$2) ) + ")";
-	    $$ = ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) )
+	    safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ))
 	  }
 	;
 
@@ -199,10 +201,10 @@ transition:
 
 action :
 	/* empty */
-	  { $$ = ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) ) }
+	  { safe_assign($$, ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) )) }
 	|
 	QUOTED
-	  { $$ = $1 }
+	  { safe_assign($$, $1) }
 	;
 
 %%

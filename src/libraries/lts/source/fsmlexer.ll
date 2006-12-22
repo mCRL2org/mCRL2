@@ -166,6 +166,8 @@ bool concrete_fsm_lexer::parse_stream(std::istream &stream, lts &l)
   // INITIALISE
   fsm_lts = &l;
   
+  protect_table = ATindexedSetCreate(10000,50);
+
   const_ATtypeid = ATmakeAFun( "TypeId", 2, ATfalse );
   ATprotectAFun( const_ATtypeid );
   const_ATparmid = ATmakeAFun( "ParamId", 2, ATfalse );
@@ -210,6 +212,8 @@ bool concrete_fsm_lexer::parse_stream(std::istream &stream, lts &l)
   ATunprotectAppl( &typeId );
   ATtableDestroy( labelTable );
   
+  ATindexedSetDestroy( protect_table );
+
   fsm_lts = NULL;
 
   return result;
