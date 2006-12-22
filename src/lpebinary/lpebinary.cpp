@@ -6,7 +6,7 @@
 //
 // file          : lpebinary 
 // date          : 22-12-2006
-// version       : 0.2
+// version       : 0.25
 //
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
 //
@@ -54,7 +54,7 @@ using namespace lpe::data_init;
 
 namespace po = boost::program_options;
 
-#define VERSION "0.2"
+#define VERSION "0.25"
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief structure that holds all options available for the tool.
@@ -79,7 +79,19 @@ class squadt_interactor: public squadt_tool_interface
       lpd_file_for_output ///< file used to write output to
     };
 
+
+    enum further_options {
+      option_rewrite_strategy
+    };
+
+  private:
+    boost::shared_ptr < sip::datatype::enumeration > rewrite_strategy_enumeration;
+    
   public:
+
+    /** \brief constructor */
+    squadt_interactor();
+
     /** \brief configures tool capabilities */
     void set_capabilities(sip::tool::capabilities&) const;
 
@@ -93,6 +105,11 @@ class squadt_interactor: public squadt_tool_interface
     bool perform_task(sip::configuration&);
 };
 
+squadt_interactor::squadt_interactor() {
+  rewrite_strategy_enumeration = sip::datatype::enumeration::create("inner");
+  *rewrite_strategy_enumeration % "innerc" % "jitty" % "jittyc";
+}
+
 void squadt_interactor::set_capabilities(sip::tool::capabilities& capabilities) const
 {
   // The tool has only one main input combination
@@ -101,15 +118,47 @@ void squadt_interactor::set_capabilities(sip::tool::capabilities& capabilities) 
 
 void squadt_interactor::user_interactive_configuration(sip::configuration& configuration)
 {
+  using namespace sip;
+  using namespace sip::layout;
+  using namespace sip::datatype;
+  using namespace sip::layout::elements;
+
+  layout::manager::aptr top = layout::vertical_box::create();
+  layout::manager* current_box = new horizontal_box();
+
+  squadt_utility::radio_button_helper < RewriteStrategy >
+                                        strategy_selector(current_box, GS_REWR_INNER, "Inner");
+  strategy_selector.associate(current_box, GS_REWR_INNERC, "Innerc");
+  strategy_selector.associate(current_box, GS_REWR_JITTY,  "Jitty");
+  strategy_selector.associate(current_box, GS_REWR_JITTYC, "Jittyc");
+  
+  top->add(new label("Rewrite strategy"));
+  top->add(current_box);
+
+  button* okay_button = new button("OK");
+  top->add(new label(" "));
+  top->add(okay_button, layout::right);
+
+  send_display_layout(top);
+
+  okay_button->await_change();
+  
   configuration.add_output(lpd_file_for_output, sip::mime_type("lpe"), configuration.get_output_name(".lpe"));
+  configuration.add_option(option_rewrite_strategy).append_argument(rewrite_strategy_enumeration, strategy_selector.get_selection());
+  
 }
+
+//bool squadt_interactor::extract_task_options(sip::configuration const& configuration, 
 
 bool squadt_interactor::check_configuration(sip::configuration const& configuration) const
 {
-// Check if everything present (see lpe2lts)
-  return (configuration.object_exists(lpd_file_for_input) &&
-          configuration.object_exists(lpd_file_for_output)
-         );
+  bool result = true;
+
+  result |= configuration.object_exists(lpd_file_for_input);
+  result |= configuration.object_exists(lpd_file_for_output);
+  result |= configuration.object_exists(option_rewrite_strategy);
+
+  return result;
 }
 
 bool squadt_interactor::perform_task(sip::configuration& configuration)
@@ -117,7 +166,7 @@ bool squadt_interactor::perform_task(sip::configuration& configuration)
   tool_options options;
   options.input_file = configuration.get_object(lpd_file_for_input)->get_location();
   options.output_file = configuration.get_object(lpd_file_for_output)->get_location();
-  options.strategy = GS_REWR_INNER;
+  options.strategy = static_cast < RewriteStrategy > (boost::any_cast < size_t > (configuration.get_option_value(option_rewrite_strategy)));
 
   return (do_binary(options)==0);
 }
@@ -558,7 +607,7 @@ specification binary(const lpe::specification& spec,
                      const tool_options& options)
 {
   gsVerboseMsg("Executing binary...\n");
-
+  gsVerboseMsg("Using rewrite strategy %d\n", options.strategy);
   specification result = spec;
   table new_parameters_table = table(128, 50);
   table enumerated_elements_table = table(128,50);
