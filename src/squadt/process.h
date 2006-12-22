@@ -15,11 +15,14 @@ namespace squadt {
 
     class task_monitor;
 
+    class process_impl;
+
     /**
      * \brief Represents a system process with a status reporting facility
      **/
     class process {
       friend class executor;
+      friend class process_impl;
 
       public:
 
@@ -37,107 +40,40 @@ namespace squadt {
         /** \brief Convenience type to hide shared pointer implementation */
         typedef boost::shared_ptr < process >          sptr;
 
-        /** \brief Convenience type to hide shared pointer implementation */
-        typedef boost::shared_ptr < task_monitor >     task_monitor_ptr;
-
         /** \brief Convenience type for handlers */
         typedef boost::function < void (process*) >    handler;
 
       private:
 
-        /** \brief The default listener for changes in status */
-        static boost::shared_ptr < task_monitor >       default_monitor;
- 
-      private:
-
-        /** \brief The system's proces identifier for this process */
-        pid_t                                identifier;
-
-        /** \brief The status of this process */
-        mutable status                       current_status;
-
-        /** \brief The function that is called when the status changes */
-        handler                              signal_termination;
-    
-        /** \brief A reference to a monitor for this process */
-        boost::weak_ptr < task_monitor >     monitor;
-
-        /** \brief The command that is currently being exected (or 0) */
-        std::auto_ptr < command >            last_command;
-
-      private:
-
-        /** \brief Executed at process termination */
-        void termination_handler(pid_t);
+        /** \brief Pointer to implementation object (handle-body idiom) */
+        boost::shared_ptr < process_impl >             impl;
 
       public:
     
         /** \brief Constructor */
-        inline process(handler);
+        process(handler);
     
         /** \brief Constructor with listener */
-        inline process(handler, task_monitor_ptr&);
+        process(handler, boost::shared_ptr < task_monitor >&);
     
         /** \brief Start the process by executing a command */
         void execute(const command&);
      
         /** \brief Returns the process status */
-        inline status get_status() const;
-
-        /** Signals the current state to the monitor */
-        void signal_status() const;
+        status get_status() const;
 
         /** \brief Returns the process id */
-        inline pid_t get_identifier() const;
+        pid_t get_identifier() const;
  
         /** \brief Returns the process id */
-        inline std::string get_executable_name() const;
+        std::string get_executable_name() const;
 
-        /** \brief Returns the last command that is (or was) executing */
-        inline command const& get_command() const;
- 
         /** \brief Terminates the process */
-        void terminate();
+        bool terminate();
  
-        /** \brief Destructor */
-        inline ~process();
+        /** \brief Returns the last command that is (or was) executing */
+        command const& get_command() const;
     };
- 
-    /**
-     * @param h the function to call when the process terminates
-     **/
-    inline process::process(handler h) : current_status(stopped), signal_termination(h), monitor(default_monitor) {
-    }
- 
-    /**
-     * @param h the function to call when the process terminates
-     * @param l a reference to a listener for process status change events
-     **/
-    inline process::process(handler h, task_monitor_ptr& l) : current_status(stopped), signal_termination(h), monitor(l) {
-    }
- 
-    inline process::~process() {
-      /* Inform listener */
-      if (identifier) {
-        terminate();
-      }
-    }
- 
-    inline process::status process::get_status() const {
-      return (current_status);
-    }
-
-    inline pid_t process::get_identifier() const {
-      return (identifier);
-    }
-
-    inline std::string process::get_executable_name() const {
-      return (last_command->get_executable());
-    }
-
-    inline command const& process::get_command() const {
-      return (*last_command);
-    }
   }
 }
   

@@ -886,7 +886,7 @@ namespace squadt {
 
     c->set_working_directory(make_output_path(output_directory));
 
-    current_monitor->get_logger()->log(1, "executing command `" + c->argument_string() + "'\n");
+    current_monitor->get_logger()->log(1, "executing command `" + c->as_string() + "'\n");
 
     global_build_system.get_tool_manager()->impl->execute(c, boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
   }

@@ -128,6 +128,7 @@ namespace utility {
   inline typename T::result_type visitable< D >::accept(T& v,
                typename boost::disable_if < boost::mpl::and_<typename T::is_const_visitor, boost::is_const< D > > >::type* const_dummy,
                typename boost::enable_if < typename boost::is_void < typename T::result_type > >::type* void_dummy) {
+
     v.visit(dynamic_cast < D& > (*this));
   }
 

@@ -4,7 +4,7 @@ project toolset/squadt
 
 import sequence ;
 
-source_files = [ glob *.cpp gui/*.cpp gui/dialog/*.cpp : process_wrapper.cpp ] ;
+source_files = [ glob *.cpp gui/*.cpp gui/dialog/*.cpp ] ;
 
 exe squadt
       : [ sequence.insertion-sort $(source_files) ]
@@ -15,12 +15,4 @@ exe squadt
         <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
         <include>$(SETUP)
         <threading>multi
-      ;
-
-# Alternative for non-msvc builds (dummy)
-alias process_wrapper ;
-
-exe process_wrapper
-      : process_wrapper.cpp
-      : <os>NT
       ;

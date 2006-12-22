@@ -23,7 +23,7 @@ namespace squadt {
      **/
     class task_monitor : public sip::controller::communicator {
       friend class processor;
-      friend class process;
+      friend class process_impl;
       friend class executor_impl;
       friend class squadt::tool_manager_impl;
 

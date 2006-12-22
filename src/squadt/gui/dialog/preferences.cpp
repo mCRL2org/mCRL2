@@ -140,25 +140,28 @@ namespace squadt {
       try {
         long selected = formats_and_actions->GetFirstSelected();
 
-        wxListItem s;
-
-        get_wxlist_value(s, formats_and_actions, selected, 1);
-
-        command_dialog.SetValue(s.GetText());
-
-        if (command_dialog.ShowModal() == wxID_OK) {
-          formats_and_actions->SetItem(selected, 1, command_dialog.GetValue());
-
-          get_wxlist_value(s, formats_and_actions, selected, 0);
-
-          global_build_system.get_type_registry()->register_command(
-                          mime_type(std::string(s.GetText().fn_str())), std::string(command_dialog.GetValue().fn_str()));
+        if (0 <= formats_and_actions) {
+          wxListItem s;
+         
+          get_wxlist_value(s, formats_and_actions, selected, 1);
+         
+          command_dialog.SetValue(s.GetText());
+         
+          if (command_dialog.ShowModal() == wxID_OK) {
+            formats_and_actions->SetItem(selected, 1, command_dialog.GetValue());
+         
+            get_wxlist_value(s, formats_and_actions, selected, 0);
+         
+            global_build_system.get_type_registry()->register_command(
+                            mime_type(std::string(s.GetText().fn_str())), std::string(command_dialog.GetValue().fn_str()));
+          }
+        }
+        else {
+          wxMessageDialog(this, wxT("No format line selected"), wxT("Warning: ignoring request"), wxICON_WARNING|wxOK).ShowModal();
         }
       }
       catch (...) {
-        wxMessageDialog error(this, wxT("Invalid command specification; ignoring"), wxT("Error"), wxICON_ERROR|wxOK);
-        
-        error.ShowModal();
+        wxMessageDialog(this, wxT("Invalid command specification; ignoring"), wxT("Error"), wxICON_ERROR|wxOK).ShowModal();
       }
     }
 
@@ -229,7 +232,7 @@ namespace squadt {
 
         formats_and_actions->InsertItem(row, wxString(f.as_string().c_str(), wxConvLocal));
 
-        formats_and_actions->SetItem(row++, 1, command_line.get() ? wxString(command_line->argument_string().c_str(), wxConvLocal) : no_action);
+        formats_and_actions->SetItem(row++, 1, command_line.get() ? wxString(command_line->as_string().c_str(), wxConvLocal) : no_action);
       }
 
       known_formats->AddSpacer(5);

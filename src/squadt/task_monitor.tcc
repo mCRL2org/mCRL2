@@ -323,11 +323,15 @@ namespace squadt {
           boost::thread::sleep(timeout);
         }
       }
-      if (associated_process.get() != 0) {
-        associated_process->terminate();
+      else if (associated_process.get() != 0) {
+        std::string log_message(boost::str(
+                boost::format("process terminated (tool %s pid(%u))\n") %
+                        associated_process->get_executable_name() %
+                        associated_process->get_identifier()));
 
-        logger->log(1, boost::str(boost::format("process terminated (tool %s pid(%u))\n")
-                  % associated_process->get_executable_name() % associated_process->get_identifier()));
+        if (associated_process->terminate()) {
+          logger->log(1,log_message);
+        }
       }
 
       boost::mutex::scoped_lock l(register_lock);
@@ -337,8 +341,6 @@ namespace squadt {
 
       /* Signal completion to waiters */
       register_condition.notify_all();
-
-      associated_process.reset();
     }
 
     /// \endcond

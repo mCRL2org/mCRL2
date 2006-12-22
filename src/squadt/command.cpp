@@ -57,7 +57,7 @@ namespace squadt {
       return (new_command);
     }
 
-    std::string command::argument_string(bool b) const {
+    std::string command::as_string(bool b) const {
       std::string s;
 
       if (b) {
@@ -79,7 +79,7 @@ namespace squadt {
       return (boost::make_iterator_range(arguments.begin(), arguments.end()));
     }
 
-    boost::shared_array < char const* > command::get_argument_array(bool b) const {
+    boost::shared_array < char const* > command::get_array(bool b) const {
       boost::shared_array < char const* > p(new char const*[arguments.size() + 2]);
 
       char const** d = p.get();

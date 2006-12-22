@@ -19,7 +19,7 @@ namespace squadt {
      * the other hand system() is not thread safe, so it is unusable.
      **/
     class command {
-      friend class process;
+      friend class process_impl;
   
       private:
   
@@ -35,7 +35,7 @@ namespace squadt {
       private:
        
         /** \brief Get the command line arguments as an array */
-        boost::shared_array < char const* > get_argument_array(bool = true) const;
+        boost::shared_array < char const* > get_array(bool = true) const;
 
       public:
 
@@ -74,7 +74,7 @@ namespace squadt {
         void append_argument(std::string const&);
 
         /** \brief Get arguments as a traditional C string */
-        std::string argument_string(bool = true) const;
+        std::string as_string(bool = true) const;
 
         /** \brief Get arguments as an array of constant C strings */
         const_argument_sequence get_arguments() const;

@@ -1,4 +1,5 @@
 #include <boost/shared_array.hpp>
+
 #include <sip/tool/category.h>
 #include <sip/controller/capabilities.h>
 #include <sip/detail/tool.tcc>
@@ -42,7 +43,7 @@ namespace sip {
     }
 
     bool communicator::activate(std::vector < std::string > const& arguments) {
-      int    argc = arguments.size();
+      int                        argc = arguments.size();
       boost::shared_array<char*> argv(new char*[argc]);
 
       for (int i = 0; i != argc; ++i) {

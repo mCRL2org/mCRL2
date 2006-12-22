@@ -60,7 +60,7 @@ namespace squadt {
         void set_maximum_instance_count(size_t);
  
         /** \brief Execute a tool */
-        void execute(command const&, boost::shared_ptr < task_monitor >& = process::default_monitor, bool = false);
+        void execute(command const&, boost::shared_ptr < task_monitor >&, bool = false);
 
         /** \brief Execute a command */
         void execute(command const&, bool = false);
