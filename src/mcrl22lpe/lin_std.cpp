@@ -13,11 +13,6 @@
    the use of this software. 
 */
 
-/* TODO:
- * The program should be extensively tested,
-   and some points could be optimised
- */
-
 #include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
@@ -45,6 +40,7 @@ static bool statenames;
 static bool mayrewrite;
 static bool allowFreeDataVariablesInProcesses;
 static bool nodeltaelimination;
+static bool add_delta;
 
 static Rewriter *rewr = NULL;
 
@@ -5711,7 +5707,7 @@ static ATermAppl generateLPEpCRL(ATermAppl procId, int canterminate,
   alphaconversion(procId,parameters);
   /* We reverse the pCRLprocslist to give the processes that occur first the 
      lowest index. In particular initial states get value 1, instead of the
-     highest conceivable value, as happened hitherto (29/9/05) */
+     highest value, as happened hitherto (29/9/05) */
   pCRLprocs=ATreverse(pCRLprocs);
   if ((!singlecontrolstate)||(!regular)) 
   { declare_control_state(spec,pCRLprocs);
@@ -5726,31 +5722,48 @@ static ATermAppl generateLPEpCRL(ATermAppl procId, int canterminate,
 
 
   if (regular)
-  { if (!nocluster) 
-    { 
-      if ((binary) && (!oldstate))
-      { ATermList l=NULL;
-        ATermList vars=stack->parameterlist;
-        if (!singlecontrolstate)
-        { for(l=stack->booleanStateVariables; !ATisEmpty(l) ; l=ATgetNext(l))
-          { vars=ATinsertA(vars,ATAgetFirst(l));
-          }
+  { 
+    if ((binary) && (!oldstate))
+    { ATermList l=NULL;
+      parameters=stack->parameterlist;
+      if (!singlecontrolstate)
+      { for(l=stack->booleanStateVariables; !ATisEmpty(l) ; l=ATgetNext(l))
+        { parameters=ATinsertA(parameters,ATAgetFirst(l));
         }
-        sums=cluster_actions(sums,vars,spec,0);
       }
-      else 
-      { sums=cluster_actions(sums,
-              ((!singlecontrolstate)?
-                    ATinsertA(stack->parameterlist,stack->stackvar):
-                    stack->parameterlist),
-               spec,0); 
-      }
+    }
+    else  /* !binary or oldstate */
+    { parameters=
+            ((!singlecontrolstate)?
+                  ATinsertA(stack->parameterlist,stack->stackvar):
+                  stack->parameterlist);
     }
   }
   else /* not regular, use a stack */
-  { if (!nocluster)
-    { sums=cluster_actions(sums,ATinsertA(ATempty,stack->stackvar),spec,0); 
-    }
+  { parameters=ATinsertA(ATempty,stack->stackvar); 
+  }
+
+  if (!nocluster)
+  { sums=cluster_actions(sums,parameters,spec,0); 
+  }
+  
+
+  if (add_delta)
+  { /* We add a delta summand to each process, if the flag
+       add_delta is set. This affects the behaviour of each 
+       process in the sense that each process can idle 
+       indefinitely. It has the advantage that large numbers
+       numbers of timed delta summands are subsumed by
+       this delta. As the removal of timed delta's
+       is time consuming in the linearisation, the use
+       of this flag, can speed up linearisation considerably */
+    
+    sums=ATinsertA(sums,
+                    gsMakeLPESummand(ATempty,
+                                     gsMakeDataExprTrue(),
+                                     gsMakeDelta(),
+                                     gsMakeNil(),
+                                     parameters));
   }
 
   /* now the summands have been collected in the variable sums. We only
@@ -5948,9 +5961,10 @@ static ATermList insert_timed_delta_summand(
   for( ; l!=ATempty ; l=ATgetNext(l) )
   { ATermAppl summand=ATAgetFirst(l);
     ATermAppl cond1=linGetCondition(summand);
-    if ((implies_condition(cond,cond1)) &&
+    if ((!add_delta)&&
+        ((implies_condition(cond,cond1)) &&
         ((actiontime==linGetActionTime(summand))||
-         (linGetActionTime(summand)==gsMakeNil())))
+         (linGetActionTime(summand)==gsMakeNil()))))
     { /* put the summand that was effective in removing
          this delta summand to the front, such that it
          is encountered early later on, removing a next
@@ -5960,9 +5974,10 @@ static ATermList insert_timed_delta_summand(
                summand);
     }
     if ((linGetMultiAction(summand)==gsMakeDelta()) &&
-                implies_condition(cond1,cond) &&
+            ((add_delta)||
+               (implies_condition(cond1,cond) &&
                 ((actiontime==linGetActionTime(summand))||
-                 (actiontime==gsMakeNil())))
+                 (actiontime==gsMakeNil())))))
     { /* do not add summand to result, as it is superseded by s */
     }
     else 
@@ -6101,12 +6116,25 @@ static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
   }
 
   ATermList resultsumlist=resultactionsumlist;
-  resultdeltasumlist=ATconcat(resultsimpledeltasumlist,resultdeltasumlist);
+
+  if (nodeltaelimination)
+  { resultdeltasumlist=ATconcat(resultsimpledeltasumlist,resultdeltasumlist);
+  }
+  else 
+  { for ( ; resultsimpledeltasumlist!=ATempty ; 
+             resultsimpledeltasumlist=ATgetNext(resultsimpledeltasumlist))    
+    { 
+      resultsumlist=insert_timed_delta_summand(
+                      resultsumlist,
+                      ATAgetFirst(resultsimpledeltasumlist)); 
+    } 
+  }
 
   if (nodeltaelimination)
   { resultsumlist=ATconcat(resultactionsumlist,resultdeltasumlist); 
   }
-  else
+  else if (!add_delta) /* if a delta summand is added, conditional, timed
+                          delta's are subsumed and do not need to be added */
   { for ( ; resultdeltasumlist!=ATempty ; 
              resultdeltasumlist=ATgetNext(resultdeltasumlist))    
     { 
@@ -8451,6 +8479,7 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   mayrewrite = !lin_options.norewrite;
   allowFreeDataVariablesInProcesses = !lin_options.nofreevars;
   nodeltaelimination = lin_options.nodeltaelimination;
+  add_delta = lin_options.add_delta;
   //initialise local data structures
   initialize_data();
   if (mayrewrite) {

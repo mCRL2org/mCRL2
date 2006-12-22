@@ -26,6 +26,7 @@ struct t_lin_options {
   bool nofreevars;
   bool nosumelm;
   bool nodeltaelimination;
+  bool add_delta;
   bool opt_check_only;
   t_phase opt_end_phase;
   bool opt_noalpha;
@@ -43,9 +44,11 @@ struct t_lin_options {
       nofreevars(false),
       nosumelm(false),
       nodeltaelimination(false),
+      add_delta(false),
       opt_check_only(false),
       opt_end_phase(phNone),
       opt_noalpha(false)
+      
   {}
 };
 

@@ -58,7 +58,8 @@ class squadt_interactor : public squadt_tool_interface {
       option_no_freevars,
       option_no_sumelm,
       option_no_deltaelm,
-      option_end_phase
+      option_end_phase,
+      option_add_delta
     };
 
     enum report_options {
@@ -161,14 +162,16 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   checkbox* noclusterintermediate = new checkbox("No intermediate clustering");
   checkbox* clusterfinal          = new checkbox("Final clustering");
   checkbox* newstate              = new checkbox("Use enumerated states");
-  checkbox* binary                = new checkbox("Encode enumerated types by booleans");
+  checkbox* binary                = new checkbox("Encode enumerated types by booleans  ");
   checkbox* statenames            = new checkbox("Use informative state names ");
+  checkbox* add_delta             = new checkbox("Add delta summands");
 
   current_box->add(noclusterintermediate);
   current_box->add(clusterfinal);
   current_box->add(newstate);
   current_box->add(binary);
   current_box->add(statenames);
+  current_box->add(add_delta);
 
   columns->add(current_box);
 
@@ -274,6 +277,9 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
     if (nodeltaelm->get_status()) {
       c.add_option(option_no_deltaelm);
     }
+    if (add_delta->get_status()) {
+      c.add_option(option_add_delta);
+    }
     
     c.add_option(option_report_mode).
                 append_argument(report_mode_enumeration, report_selector.get_selection());
@@ -332,6 +338,7 @@ bool squadt_interactor::extract_task_options(sip::configuration const& c, t_lin_
   task_options.nofreevars              = c.option_exists(option_no_freevars);
   task_options.nosumelm                = c.option_exists(option_no_sumelm);
   task_options.nodeltaelimination      = c.option_exists(option_no_deltaelm);
+  task_options.add_delta               = c.option_exists(option_add_delta);
   
   task_options.opt_end_phase = static_cast < t_phase > (boost::any_cast < size_t > (c.get_option_value(option_end_phase)));
 
@@ -429,8 +436,9 @@ static bool parse_command_line(int argc, char *argv[],t_lin_options &lin_options
   bool opt_check_only = false;
   bool opt_nosumelm = false;
   bool opt_nodeltaelimination = false;
+  bool opt_add_delta = false;
   t_phase opt_end_phase = phNone;
-  #define ShortOptions   "0123cnrwbaofep:hqvdmg"
+  #define ShortOptions   "0123cnrwbaofep:hqvdmgD"
   #define VersionOption  CHAR_MAX + 1
   struct option LongOptions[] = {
     { "stack",       no_argument,       NULL, '0' },
@@ -454,6 +462,7 @@ static bool parse_command_line(int argc, char *argv[],t_lin_options &lin_options
     { "quiet",       no_argument,       NULL, 'q' },
     { "verbose",     no_argument,       NULL, 'v' },
     { "debug",       no_argument,       NULL, 'd' },
+    { "delta",       no_argument,       NULL, 'D' },
     { 0, 0, 0, 0 }
   };
   int Option;
@@ -525,6 +534,9 @@ static bool parse_command_line(int argc, char *argv[],t_lin_options &lin_options
         break;
       case 'g': /* no-deltaelm */
         opt_nodeltaelimination = true;
+        break;
+      case 'D': /* delta */
+        opt_add_delta = true;
         break;
       case 'p': /* end-phase */
         if (strcmp(optarg, "pa") == 0) {
@@ -619,6 +631,7 @@ static bool parse_command_line(int argc, char *argv[],t_lin_options &lin_options
   lin_options.opt_noalpha = opt_noalpha;
   lin_options.infilename = infilename;
   lin_options.outfilename = outfilename;
+  lin_options.add_delta = opt_add_delta;
 
   return true;  // main can continue
 }
@@ -762,9 +775,11 @@ void PrintHelp(char *Name)
     "                        instead of modelling them by free variables\n"
     "  -m, --no-sumelm       avoid applying sum elimination in parallel composition\n"
     "  -g, --no-deltaelm     avoid removing spurious delta summands\n"
+    "  -D, --delta           add delta summands to each process. This allows each\n"
+    "                        process to idle indefinitely. Speeds up linearisation\n"
     "  -e, --check-only      check syntax and static semantics; do not linearise\n"
-    "  -pPHASE, \n"
-    "  --end-phase=PHASE stop linearisation after phase PHASE and output the\n"
+    "  -pPHASE, --end-phase=PHASE     \n"
+    "                        stop linearisation after phase PHASE and output the\n"
     "                        result; PHASE can be 'pa' (parse), 'tc' (type check),\n"
     "                        'ar' (alphabet reduction) or 'di' (data implementation)\n"
     "  -h, --help            display this help and terminate\n"
