@@ -5,8 +5,8 @@
 // ----------------------------------------------------------------------
 //
 // file          : lpesumelm 
-// date          : 31-10-2006
-// version       : 0.3
+// date          : 22-12-2006
+// version       : 0.4
 //
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
 //
@@ -45,14 +45,16 @@ using namespace lpe::data_init;
 
 namespace po = boost::program_options;
 
-#define VERSION "0.3"
+#define VERSION "0.4"
 
-std::string input_file; ///< Name of the file to read input from
-std::string output_file; ///< Name of the file to write output to (or stdout)
-
+typedef struct{
+  std::string input_file; ///< Name of the file to read input from
+  std::string output_file; ///< Name of the file to write output to (or stdout)
+}tool_options;
+  
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 //Forward declaration because do_sumelm() is called within squadt_lpesumelm class
-int do_sumelm(const std::string input_file_name, const std::string output_file_name);
+int do_sumelm(const tool_options& options);
 
 class squadt_lpesumelm: public squadt_tool_interface
 {
@@ -92,7 +94,7 @@ void squadt_lpesumelm::user_interactive_configuration(sip::configuration& config
 bool squadt_lpesumelm::check_configuration(sip::configuration const& configuration) const
 {
   gsDebugMsg("squadt_lpesumelm: Checking configuration\n");
-// Check if everything present (see lpe2lts)
+  // Check if everything present
   return (configuration.object_exists(lpd_file_for_input) &&
           configuration.object_exists(lpd_file_for_output)
          );
@@ -101,12 +103,12 @@ bool squadt_lpesumelm::check_configuration(sip::configuration const& configurati
 bool squadt_lpesumelm::perform_task(sip::configuration& configuration)
 {
   gsDebugMsg("squadt_lpesumelm: Performing task\n");
-  std::string in_file, out_file;
-  in_file = configuration.get_object(lpd_file_for_input)->get_location();
-  out_file = configuration.get_object(lpd_file_for_output)->get_location();
+  tool_options options;
+  options.input_file = configuration.get_object(lpd_file_for_input)->get_location();
+  options.output_file = configuration.get_object(lpd_file_for_output)->get_location();
 
-  gsDebugMsg("Calling do_sumelm through SQuADT, with input: %s and output: %s\n", in_file.c_str(), out_file.c_str());
-  return (do_sumelm(in_file, out_file)==0);
+  gsDebugMsg("Calling do_sumelm through SQuADT, with input: %s and output: %s\n", options.input_file.c_str(), options.output_file.c_str());
+  return (do_sumelm(options)==0);
 }
 
 #endif //ENABLE_SQUADT_CONNECTIVITY
@@ -137,17 +139,6 @@ bool occurs_in(data_type d, data_variable v)
 {
   return find_if(aterm_appl(d), compare_data_variable(v)) != aterm();
 }
-
-///pre: is_var(t)
-///ret: The data_variable embedded in t
-inline
-data_variable get_var(data_expression t)
-{
-  assert(is_data_variable(t));
-  data_variable result = data_variable(ATermAppl(t));
-  return result;
-}
-
 
 ///pre: is_and(t) || is_equal_to(t)
 ///ret: lefthandside of t
@@ -199,6 +190,8 @@ data_assignment_list substitute_rhs(const data_assignment_list& dl, const data_a
 ///variable does not occur within the summand at all
 lpe::LPE_summand remove_unused_variables(const lpe::LPE_summand& summand)
 {
+  gsDebugMsg("Removing unused variables from summand %s\n", summand.to_string().c_str());
+
   lpe::LPE_summand new_summand;
   // New summation variable list, all variables in this list occur in other terms in the summand.
   lpe::data_variable_list new_summation_variables;
@@ -230,6 +223,8 @@ lpe::LPE_summand remove_unused_variables(const lpe::LPE_summand& summand)
 ///Take a specification and apply sum elimination to its summands
 lpe::specification remove_unused_variables_(const lpe::specification& specification)
 {
+  gsVerboseMsg("Removing unused variables from summands\n");
+
   lpe::LPE lpe = specification.lpe();
   lpe::specification new_specification;
   lpe::summand_list new_summand_list = lpe.summands();
@@ -296,9 +291,9 @@ data_expression recursive_substitute_equalities(const LPE_summand& summand,
       }
 
       //According to sum elimination lemma the variable that is being substituted can not occur in its replacement.
-      if (!occurs_in(lhs_subst, get_var(lhs(working_condition))) && occurs_in(summand.summation_variables(), get_var(lhs(working_condition))) && !occurs_in(rhs(working_condition), get_var(lhs(working_condition))))
+      if (!occurs_in(lhs_subst, data_variable(lhs(working_condition))) && occurs_in(summand.summation_variables(), data_variable(lhs(working_condition))) && !occurs_in(rhs(working_condition), data_variable(lhs(working_condition))))
       {
-        data_assignment substitution = data_assignment(get_var(lhs(working_condition)), rhs(working_condition));
+        data_assignment substitution = data_assignment(data_variable(lhs(working_condition)), rhs(working_condition));
  
         // First apply substitution to righthandside of other substitutions,
         // then add new substitution.
@@ -320,6 +315,8 @@ data_expression recursive_substitute_equalities(const LPE_summand& summand,
 ///and returns X(..) = e -> a(..) . X(..)
 lpe::LPE_summand substitute_equalities(const lpe::LPE_summand& summand)
 {
+  gsDebugMsg("Substituting equality conditions in summand %s\n", summand.to_string().c_str());
+ 
   lpe::LPE_summand new_summand = summand;
 
   //Apply elimination and store result
@@ -344,6 +341,8 @@ lpe::LPE_summand substitute_equalities(const lpe::LPE_summand& summand)
 ///and return an lpe specification
 lpe::specification substitute_equalities_(const lpe::specification& specification)
 {
+  gsVerboseMsg("Substituting equality conditions in summands\n");
+  
   lpe::LPE lpe = specification.lpe();
   lpe::specification new_specification;
   lpe::summand_list new_summand_list = lpe.summands();
@@ -357,7 +356,7 @@ lpe::specification substitute_equalities_(const lpe::specification& specificatio
 ///Returns an LPE specification in which the timed arguments have been rewritten
 lpe::specification sumelm(const lpe::specification& specification) 
 {
-  gsVerboseMsg("Applying sum elimination...\n");
+  gsVerboseMsg("Applying sum elimination on an LPE of %d summands\n", specification.lpe().summands().size());
 
   lpe::specification new_specification = specification;
   new_specification = substitute_equalities_(new_specification); // new_specification used for future concerns, possibly disabling substitute_equalities_
@@ -367,25 +366,25 @@ lpe::specification sumelm(const lpe::specification& specification)
 
 ///Reads a specification from input_file, 
 ///applies sum elimination to it and writes the result to output_file.
-int do_sumelm(const std::string input_file_name, const std::string output_file_name)
+int do_sumelm(const tool_options& options)
 {
   lpe::specification lpe_specification;
-  if (lpe_specification.load(input_file_name)) {
+  if (lpe_specification.load(options.input_file)) {
     // Untime lpe_specification and save the output to a binary file
     lpe::specification new_spec = sumelm(lpe_specification);
 
-    gsDebugMsg("Sum elimination completed, saving to %s\n", output_file_name.c_str());
-    bool success = new_spec.save(output_file_name, true);
+    gsDebugMsg("Sum elimination completed, saving to %s\n", options.output_file.c_str());
+    bool success = new_spec.save(options.output_file, true);
 
     if (!success) 
     {
       // An error occurred when saving
-      gsErrorMsg("Could not save to '%s'\n", output_file_name.c_str());
+      gsErrorMsg("Could not save to '%s'\n", options.output_file.c_str());
       return (1);
     }
   }
   else {
-    gsErrorMsg("lpesumelm: Unable to load LPE from `%s'\n", input_file_name.c_str());
+    gsErrorMsg("lpesumelm: Unable to load LPE from `%s'\n", options.input_file.c_str());
     return (1);
   }
 
@@ -393,7 +392,7 @@ int do_sumelm(const std::string input_file_name, const std::string output_file_n
 }
 
 ///Parses command line and sets settings from command line switches
-void parse_command_line(int ac, char** av) {
+void parse_command_line(int ac, char** av, tool_options& t_options) {
   po::options_description desc;
 
   desc.add_options()
@@ -446,13 +445,14 @@ void parse_command_line(int ac, char** av) {
     gsSetVerboseMsg();
   }
 
-  input_file = (0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-";
-  output_file = (0 < vm.count("OUTFILE")) ? vm["OUTFILE"].as< string >() : "-";
+  t_options.input_file = (0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-";
+  t_options.output_file = (0 < vm.count("OUTFILE")) ? vm["OUTFILE"].as< string >() : "-";
 }
 
 int main(int ac, char** av) {
   ATerm bot;
   ATinit(ac, av, &bot);
+  tool_options options;
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -463,6 +463,6 @@ int main(int ac, char** av) {
   }
 #endif
 
-  parse_command_line(ac,av);
-  return do_sumelm(input_file, output_file);
+  parse_command_line(ac, av, options);
+  return do_sumelm(options);
 }
