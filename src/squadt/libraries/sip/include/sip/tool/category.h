@@ -1,6 +1,7 @@
 #ifndef SIP_CATEGORY_H__
 #define SIP_CATEGORY_H__
 
+#include <string>
 #include <algorithm>
 #include <functional>
 #include <boost/bind.hpp>

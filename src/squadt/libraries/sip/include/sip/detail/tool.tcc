@@ -110,7 +110,7 @@ namespace sip {
     }
 
     inline void communicator_impl::send_display_layout(layout::tool_display::sptr d) {
-      message m(d->write(), sip::message_display_layout);
+      sip::message m(d->write(), sip::message_display_layout);
 
       send_message(m);
 
@@ -124,14 +124,14 @@ namespace sip {
 
       clear_handlers(sip::message_display_update);
 
-      message m(display.write(), sip::message_display_layout);
+      sip::message m(display.write(), sip::message_display_layout);
 
       send_message(m);
     }
 
     /* Send a specification of the tools capabilities */
     inline void communicator_impl::request_tool_capabilities_handler() {
-      message m(current_tool_capabilities.write(), sip::message_response_tool_capabilities);
+      sip::message m(current_tool_capabilities.write(), sip::message_response_tool_capabilities);
  
       send_message(m);
     }

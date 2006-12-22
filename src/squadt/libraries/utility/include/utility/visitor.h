@@ -6,6 +6,7 @@
 #include <boost/type_traits/is_void.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/static_assert.hpp>
+#include <boost/mpl/and.hpp>
 
 namespace utility {
 
@@ -80,13 +81,13 @@ namespace utility {
       /** \brief Hook for visitor pattern */
       template < typename T >
       typename T::result_type accept(T& v,
-                typename boost::disable_if_c < T::is_const_visitor::value && boost::is_const< D >::value >::type* = 0,
+                typename boost::disable_if < boost::mpl::and_<typename T::is_const_visitor, boost::is_const< D > > >::type* = 0,
                 typename boost::enable_if < typename boost::is_void < typename T::result_type > >::type* = 0);
 
       /** \brief Hook for visitor pattern */
       template < typename T >
       typename T::result_type accept(T& v,
-                typename boost::disable_if_c < T::is_const_visitor::value && boost::is_const< D >::value >::type* = 0,
+                typename boost::disable_if < boost::mpl::and_<typename T::is_const_visitor, boost::is_const< D > > >::type* = 0,
                 typename boost::disable_if < typename boost::is_void < typename T::result_type > >::type* = 0);
 
       /** \brief Pure virtual destructor */
@@ -119,19 +120,21 @@ namespace utility {
     return (v.visit(dynamic_cast < D const& > (*this)));
   }
 
+
+
+
   template < class D >
   template < typename T >
   inline typename T::result_type visitable< D >::accept(T& v,
-               typename boost::disable_if_c < T::is_const_visitor::value && boost::is_const< D >::value >::type* const_dummy,
+               typename boost::disable_if < boost::mpl::and_<typename T::is_const_visitor, boost::is_const< D > > >::type* const_dummy,
                typename boost::enable_if < typename boost::is_void < typename T::result_type > >::type* void_dummy) {
-
     v.visit(dynamic_cast < D& > (*this));
   }
 
   template < class D >
   template < typename T >
   inline typename T::result_type visitable< D >::accept(T& v,
-               typename boost::disable_if_c < T::is_const_visitor::value && boost::is_const< D >::value >::type* const_dummy,
+               typename boost::disable_if < boost::mpl::and_<typename T::is_const_visitor, boost::is_const< D > > >::type* const_dummy,
                typename boost::disable_if < typename boost::is_void < typename T::result_type > >::type* void_dummy) {
 
     return (v.visit(dynamic_cast < D& > (*this)));

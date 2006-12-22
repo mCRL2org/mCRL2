@@ -353,7 +353,7 @@ namespace sip {
             }
             else {
               const std::string::const_iterator b = data.end();
-              const size_t                      s = data.size() - std::min(tag_close.size(), data.size());
+              const size_t                      s = data.size() - (std::min)(tag_close.size(), data.size());
 
               /* End message sequence not matched look for partial match in data[(i - tag_close.size())..i] */
               n = data.substr(s).rfind('<');
@@ -429,7 +429,7 @@ namespace sip {
             }
             else {
               const std::string::const_iterator b = data.end();
-              const size_t                      s = data.size() - std::min(tag_open.size(), data.size());
+              const size_t                      s = data.size() - (std::min)(tag_open.size(), data.size());
 
               n = data.substr(s).rfind('<');
 

@@ -1,6 +1,7 @@
 #ifndef SIP_COMMAND_LINE_INTERFACE_TCC
 #define SIP_COMMAND_LINE_INTERFACE_TCC
 
+#include <boost/shared_array.hpp>
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
@@ -73,14 +74,14 @@ namespace sip {
           }
         }
 
-        char*  argv[argc];
+        boost::shared_array<char*> argv(new char*[argc]);
 
         // compile argv
         for (int i = 0; i < argc; ++i) {
           argv[i] = arguments[i];
         }
 
-        process(argc, argv);
+        process(argc, argv.get());
 
         current = cl;
 
