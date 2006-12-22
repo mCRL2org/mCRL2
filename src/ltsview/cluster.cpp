@@ -1,15 +1,15 @@
 #include "cluster.h"
+#include <algorithm>
+#include <math.h>
 #include <iostream>
 using namespace std;
 using namespace Utils;
 
-bool Comp_ClusterVolume::operator()(const Cluster* c1, const Cluster* c2) const
-{
-  return ( c1->getVolume() < c2->getVolume() );
+bool Comp_ClusterVolume::operator()(const Cluster* c1,const Cluster* c2) const {
+  return (c1->getVolume() < c2->getVolume());
 }
 
-Cluster::Cluster()
-{
+Cluster::Cluster(int r) {
   ancestor = NULL;
   position = 0.0f;
   size = 0.0f;
@@ -18,108 +18,92 @@ Cluster::Cluster()
   deadlock = false;
   markedState = 0;
   markedTransitionCount = 0;
+  rank = r;
+  matrix = (float*)malloc(16*sizeof(float));
 
   Slot centerSlot = { -1.0f, 0 };
   slots.push_back(centerSlot);
 }
 
-Cluster::~Cluster()
-{
+Cluster::~Cluster() {
+  free(matrix);
   actionLabelCounts.clear();
   descendants.clear();
   states.clear();
 }
 
-void Cluster::addState( State* s )
-{
-  states.push_back( s );
+void Cluster::addState(State* s) {
+  states.push_back(s);
 }
 
-void Cluster::addActionLabel( ATerm l )
-{
-  if ( actionLabelCounts.find( l ) == actionLabelCounts.end() )
+void Cluster::addActionLabel(ATerm l) {
+  if (actionLabelCounts.find(l) == actionLabelCounts.end())
     actionLabelCounts[l] = 1;
   else
     ++actionLabelCounts[l];
 }
 
-void Cluster::setAncestor( Cluster* c )
-{
+void Cluster::setAncestor(Cluster* c) {
   ancestor = c;
 }
 
-void Cluster::setPosition( float p )
-{
+void Cluster::setPosition(float p) {
   position = p;
 }
 
-void Cluster::addDescendant( Cluster* c )
-{
-  descendants.push_back( c );
+void Cluster::addDescendant(Cluster* c) {
+  descendants.push_back(c);
 }
 
-void Cluster::getStates( vector< State* > &ss ) const
-{
-  ss = states;
+State* Cluster::getState(int i) const {
+  return states[i];
 }
 
-int Cluster::getNumberOfStates() const
-{
+int Cluster::getNumberOfStates() const {
   return states.size();
 }
 
-Cluster* Cluster::getAncestor() const
-{
+Cluster* Cluster::getAncestor() const {
   return ancestor;
 }
 
-int Cluster::getNumberOfDescendants() const
-{
+int Cluster::getNumberOfDescendants() const {
   return descendants.size();
 }
 
-Cluster* Cluster::getDescendant( int i ) const
-{
+Cluster* Cluster::getDescendant(int i) const {
   return descendants[i];
 }
 
-void Cluster::getDescendants( vector< Cluster* > &cs ) const
-{
-  cs = descendants;
+bool Cluster::hasDescendants() const {
+  return (descendants.size() != 0);
 }
 
-bool Cluster::hasDescendants() const
-{
-  return ( descendants.size() != 0 );
-}
-
-float Cluster::getSize() const
-{
+float Cluster::getSize() const {
   return size;
 }
 
-float Cluster::getVolume() const
-{
+float Cluster::getVolume() const {
   return volume;
 }
 
-float Cluster::getPosition() const
-{
+float Cluster::getPosition() const {
   return position;
 }
 
-int Cluster::getNumberOfSlots()
-{
+int Cluster::getRank() const {
+  return rank;
+}
+
+int Cluster::getNumberOfSlots() {
   return slots.size();
 }
 
-Slot Cluster::getSlot(int index)  const
-{
+Slot Cluster::getSlot(int index) const {
   return slots[index];
 }
 
-int Cluster::occupySlot( float pos ) 
-{
+int Cluster::occupySlot(float pos) {
   //Pre:  (pos ~= -1.0f \/ 0 <= pos < 360) /\ 3 <= slots.size()
   //Post: slots[slot].occupy++, where 
   //  slot = (min s: 1 <= s < slots.size(): abs(slots[s].position - pos) \/
@@ -137,15 +121,13 @@ int Cluster::occupySlot( float pos )
   else {
     float minDiff = 362.0f; // Difference can't become larger than 360
     
-    for( size_t i = 1; i < slots.size(); ++i )
-    { 
+    for (size_t i = 1; i < slots.size(); ++i) { 
       float posDif = slots[i].position - pos;
 
-      if ( posDif < 0) {
+      if (posDif < 0) {
         posDif = -posDif;
       }
-      if (posDif < minDiff)
-      {
+      if (posDif < minDiff) {
         slot = i;
         minDiff = posDif;
       }
@@ -157,11 +139,10 @@ int Cluster::occupySlot( float pos )
   return slot;
   
 }
-void Cluster::addUndecidedState( State * s ) {
+void Cluster::addUndecidedState(State *s) {
   undecidedStates.push_back(s);
 }
-void Cluster::resolveSlots()
-{
+void Cluster::resolveSlots() {
   // Place undecided nodes in slots so there is as much space as possible 
   // between nodes.
   int remainingNodes = undecidedStates.size();
@@ -280,10 +261,9 @@ void Cluster::resolveSlots()
 
 }
 
-void Cluster::computeSizeAndDescendantPositions()
+void Cluster::computeSizeAndDescendantPositions() {
 // pre: size of every descendant and its number of slots are known 
 // (and assumed to be correct)
-{
   /* We also use this function to calculate the
    * number of slots and their positions for each cluster.
    * This process is described in Frank van Ham's Master's thesis, p. 24
@@ -298,10 +278,9 @@ void Cluster::computeSizeAndDescendantPositions()
    * So: N * pi * 0.1^2 = 0.25 * pi * r^2
    * Hence: r = sqrt( N * 0.04 )
    */
-  topRadius = sqrt( states.size() * 0.04 );
+  topRadius = sqrt(states.size()*0.04);
 
-  if ( descendants.size() == 0 )
-  { 
+  if (descendants.size() == 0) { 
     baseRadius = topRadius;
     size = topRadius;
     volume = 4 * PI/3 * topRadius * topRadius * topRadius;
@@ -327,23 +306,21 @@ void Cluster::computeSizeAndDescendantPositions()
     }
 
     else {
-      for (int i = 1; i < getNumberOfStates() + 1; ++i) 
-      {
+      for (int i = 1; i < getNumberOfStates() + 1; ++i) {
         Slot slot = {currPos, 0};
         slots.push_back(slot);
         currPos += step;
       }
     }
   }
-  else if ( descendants.size() == 1 )
-  {
+  else if (descendants.size() == 1) {
     Cluster* desc = *descendants.begin();
     baseRadius = desc->getTopRadius();
-    size = max( topRadius, (**descendants.begin()).getSize() );
+    size = max(topRadius,(**descendants.begin()).getSize());
     volume  = PI / 3 * (baseRadius - topRadius) * (baseRadius - topRadius);
     volume += PI * baseRadius * topRadius;
     volume += desc->getVolume();
-    desc->setPosition( -1.0f );
+    desc->setPosition(-1.0f);
 
     // The number of slots is double that of the descendant's slots, capped to
     // 32.
@@ -701,56 +678,65 @@ void Cluster::computeSizeAndDescendantPositions()
   }
 }
 
-float Cluster::getTopRadius() const
-{
+float Cluster::getTopRadius() const {
   return topRadius;
 }
 
-float Cluster::getBaseRadius() const
-{
+float Cluster::getBaseRadius() const {
   return baseRadius;
 }
 
-bool Cluster::hasMarkedState() const
-{
-  return ( markedState > 0 );
+bool Cluster::hasMarkedState() const {
+  return (markedState > 0);
 }
 
-bool Cluster::hasMarkedTransition() const
-{
-  return ( markedTransitionCount > 0 );
+bool Cluster::hasMarkedTransition() const {
+  return (markedTransitionCount > 0);
 }
 
-void Cluster::markState()
-{
+void Cluster::markState() {
   ++markedState;
 }
 
-void Cluster::unmarkState()
-{
+void Cluster::unmarkState() {
   --markedState;
 }
 
-int Cluster::markActionLabel( ATerm l )
-{
-  if ( actionLabelCounts.find( l ) != actionLabelCounts.end() )
+int Cluster::markActionLabel(ATerm l) {
+  if (actionLabelCounts.find(l) != actionLabelCounts.end()) {
     markedTransitionCount += actionLabelCounts[l];
+  }
   return markedTransitionCount;
 }
 
-int Cluster::unmarkActionLabel( ATerm l )
-{
-  if ( actionLabelCounts.find( l ) != actionLabelCounts.end() )
+int Cluster::unmarkActionLabel(ATerm l) {
+  if (actionLabelCounts.find(l) != actionLabelCounts.end()) {
     markedTransitionCount -= actionLabelCounts[l];
+  }
   return markedTransitionCount;
 }
 
-bool Cluster::hasDeadlock() const
-{
+bool Cluster::hasDeadlock() const {
   return deadlock;
 }
 
-void Cluster::setDeadlock( bool b )
-{
+void Cluster::setDeadlock(bool b) {
   deadlock = b;
+}
+
+int Cluster::getPrimitive() const {
+  return primitive;
+}
+
+void Cluster::setPrimitive(int p) {
+  primitive = p;
+}
+
+float* Cluster::getMatrix() const {
+  return matrix;
+}
+
+Point3D Cluster::getCoordinates() const {
+  Point3D result = { matrix[12],matrix[13],matrix[14] };
+  return result;
 }

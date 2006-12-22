@@ -2,8 +2,6 @@
 #define CLUSTER_H
 #include <vector>
 #include <map>
-#include <algorithm>
-#include <math.h>
 #include "utils.h"
 #include "aterm1.h"
 
@@ -13,59 +11,54 @@
   class State;
 #endif
 
-//using namespace Utils;
-//using namespace std;
-
 // forward declaration
 class Cluster;
 
 // class for cluster comparison based on cluster volumes
-class Comp_ClusterVolume
-{
+class Comp_ClusterVolume {
   public:
     bool operator()( const Cluster*, const Cluster* ) const;
 };
 
-class Cluster
-{
-  
+class Cluster {
   private:
-
     std::map< ATerm, int >	actionLabelCounts;
-    Cluster*			ancestor;
+    Cluster*	ancestor;
     float			baseRadius;
     bool			deadlock;
     std::vector< Cluster* >	descendants;
     int				markedState;
     int				markedTransitionCount;
     float			position;
+    int       rank;
     float			size;
     std::vector< State* >	states;
-    std::vector< State* >       undecidedStates;
+    std::vector< State* > undecidedStates;
     float			topRadius;
     float			volume;
+    std::vector< Utils::Slot > slots;
 
-    std::vector< Utils::Slot > 	slots;
+    float *matrix;
+    int primitive;
 
   public:
     // Constructor & destructor.
-    Cluster();
+    Cluster(int r);
     ~Cluster();
 
     // Functions on descendants and ancestors.
-    void      addDescendant( Cluster* c );
-    Cluster*  getDescendant( int i ) const;
-    void      getDescendants( std::vector< Cluster* > &cs ) const;
+    void      addDescendant(Cluster* c);
+    Cluster*  getDescendant(int i) const;
     int	      getNumberOfDescendants() const;
     bool      hasDescendants() const;
 
-    void      setAncestor( Cluster* c );
+    void      setAncestor(Cluster* c);
     Cluster*  getAncestor() const;
 
     // Functions on states
-    void         addState( State* s );
-    void         addUndecidedState( State* s );
-    void         getStates( std::vector< State* > &ss ) const;
+    void         addState(State* s);
+    void         addUndecidedState(State* s);
+    State*       getState(int i) const;
     int          getNumberOfStates() const;
     bool         hasDeadlock() const;
     bool         hasMarkedState() const;
@@ -73,8 +66,8 @@ class Cluster
     void         setDeadlock( bool b );
     void         unmarkState();
     int          getNumberOfSlots();
-    Utils::Slot  getSlot( int index) const;
-    int          occupySlot( float pos );
+    Utils::Slot  getSlot(int index) const;
+    int          occupySlot(float pos);
     void         resolveSlots();
 
     // Functions on transitions
@@ -87,10 +80,17 @@ class Cluster
     void      computeSizeAndDescendantPositions();
     float     getBaseRadius() const;
     float     getPosition() const;
+    int       getRank() const;
     float     getTopRadius() const;
     float     getSize() const;
     float     getVolume() const;
-    void      setPosition( float p );
+    void      setPosition(float p);
+    
+    // Functions for visualization
+    int    getPrimitive() const;
+    void   setPrimitive(int p);
+    float* getMatrix() const;
+    Utils::Point3D getCoordinates() const;
 };
 
 #endif

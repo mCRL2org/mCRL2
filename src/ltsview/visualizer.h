@@ -2,7 +2,6 @@
 #define VISUALIZER_H
 
 #include <vector>
-#include <math.h>
 #include "mediator.h"
 #ifdef __APPLE__
     #include <OpenGL/gl.h>
@@ -13,117 +12,91 @@
 #endif
 #include "utils.h"
 #include "lts.h"
-
-//using namespace std;
-//using namespace Utils;
-
-struct Primitive
-{
-  GLuint  displayList;
-  float   distance;
-  Utils::Point3D worldCoordinate;
-};
+#include "primitivefactory.h"
 
 // class for primitive comparison based on distance
-class Distance_desc
-{
+class Distance_greater {
+  private:
+    Utils::Point3D viewpoint;
   public:
-    bool operator()( const Primitive*, const Primitive* ) const;
+    explicit Distance_greater(const Utils::Point3D vp) : viewpoint(vp) {}
+    bool operator()(const Cluster*,const Cluster*) const;
 };
 
-class Visualizer
-{
+class Visualizer {
   private:
-    float		  boundingCylH;
-    float		  boundingCylW;
-    float		  clusterHeight;
-    float		  cos_ibt;
-    float		  cos_obt;
-    std::vector< float >	  cos_theta1;
-    std::vector< float >	  cos_theta2;
-    std::vector< float >	  cos_theta1_s;
-    std::vector< float >	  cos_theta2_s;
-    static Utils::VisSettings	  defaultVisSettings;
-    Utils::HSV_Color		  delta_col;
-    bool		  displayStates;
-    bool                  displayTransitions;
-    bool                  displayBackpointers;
-    bool		  displayWireframe;
-    void                  drawBackPointer(State* startState, 
-                                          State* endState);
-    void                  drawForwardPointer(State* startState, 
-                                             State* endState);
-    LTS*		  lts;
-    Utils::MarkStyle		  markStyle;
-    Mediator*		  mediator;
-    std::vector< Primitive* >  primitives;
-    Utils::RankStyle		  rankStyle;
-    bool		  refreshPrimitives;
-    bool		  refreshStates;
-    bool                  refreshTransitions;
-    float		  sin_ibt;
-    float		  sin_obt;
-    std::vector< float >	  sin_theta1;
-    std::vector< float >	  sin_theta2;
-    std::vector< float >	  sin_theta1_s;
-    std::vector< float >	  sin_theta2_s;
-    GLuint		          statesDisplayList;
-    GLuint                        transDisplayList;
-    Utils::Point3D		  viewpoint;
-    Utils::VisSettings		  visSettings;
-    Utils::VisStyle		  visStyle;
+    float boundingCylH;
+    float boundingCylW;
+    float clusterHeight;
+    float cos_ibt;
+    float cos_obt;
+    float sin_ibt;
+    float sin_obt;
+    LTS* lts;
+    std::vector< Cluster* > clusters;
+    Utils::MarkStyle markStyle;
+    Mediator* mediator;
+    PrimitiveFactory *primitiveFactory;
+    static Utils::VisSettings	defaultVisSettings;
+    Utils::VisSettings visSettings;
+    Utils::VisStyle visStyle;
+//    std::vector< float > sin_theta1_s;
+//    std::vector< float > sin_theta2_s;
+//    std::vector< float > cos_theta1_s;
+//    std::vector< float > cos_theta2_s;
+//    bool refreshStates;
+//    bool refreshTransitions;
+//    GLuint statesDisplayList;
+//    GLuint transDisplayList;
+//    Utils::RankStyle rankStyle;
     
     void clearDFSStates(State* root);
-    void computeStateAbsPos(State* root, int rot,  Utils::Point3D init);
-    void computeDeltaCol(Utils::HSV_Color &hsv1);
+    void computeStateAbsPos(State* root,int rot,Utils::Point3D init);
     void computeSubtreeBounds(Cluster* root,float &boundWidth,
                               float &boundHeight);
-    void drawCylinder(float baserad,float toprad,float height,Utils::RGB_Color basecol,
-                      Utils::RGB_Color topcol,bool interpolate,bool baseclosed,
-                      bool topclosed);
-    void drawEllipsoid(float d,float h);
-    void drawHemisphere(float rad);
-    void drawSphere(float rad);
-    void drawSphereState();
+    void drawBackPointer(State* startState,State* endState);
+    void drawForwardPointer(State* startState,State* endState);
     void drawStates(Cluster* root,int rot);
     void drawStatesMark(Cluster* root,int rot);
-    void drawSubtreeA(Cluster* root,int rot);
-    void drawSubtreeAMark(Cluster* root,int rot);
-    void drawSubtreeC(Cluster* root, bool topClosed, Utils::HSV_Color col,int rot);
-    void drawSubtreeCMark(Cluster* root,bool topClosed,int rot);
-    void drawSubtreeO(Cluster* root, Utils::HSV_Color col,int rot);
-    void drawSubtreeOMark(Cluster* root,int rot);
-    void drawTransitions(State* root);
-    void drawTube(float baserad,float toprad, Utils::RGB_Color basecol, Utils::RGB_Color topcol,
-    							bool interpolate,
-                                                        Utils::Point3D b1, Utils::Point3D b2,Utils::Point3D b3,
-    							Utils::Point3D &center);
+    void drawTransitions(State* root,bool disp_fp,bool disp_bp);
     bool isMarked(Cluster* c);
     bool isMarked(State* s);
-    void updateGeometryTables();
+//    void drawSphereState();
+//    void drawSubtreeA(Cluster* root,int rot);
+//    void drawSubtreeAMark(Cluster* root,int rot);
+//    void drawSubtreeT(Cluster* root,Utils::HSV_Color col,int rot);
+//    void drawSubtreeTMark(Cluster* root,int rot);
+//    void drawTube(float baserad,float toprad,Utils::RGB_Color basecol,
+//        Utils::RGB_Color topcol,bool interpolate,Utils::Point3D b1,
+//        Utils::Point3D b2,Utils::Point3D b3,Utils::Point3D &center);
+
+    void fillClusters();
+    void initClusterData(Cluster *root,bool topClosed,int rot);
+    void updateClusterPrimitives();
+    void updateClusterMatrices(Cluster *root,int rot);
   
   public:
-    Visualizer( Mediator* owner );
+    Visualizer(Mediator* owner);
     ~Visualizer();
     
-    void	computeBoundsInfo();
-    void	computeClusterHeight();
-    void	drawLTS( Utils::Point3D viewpoint );
+    void computeBoundsInfo();
+    float	getHalfStructureHeight() const;
     float	getBoundingCylinderHeight() const;
     float	getBoundingCylinderWidth() const;
-    Utils::VisSettings getDefaultVisSettings() const;
-    float	getHalfStructureHeight() const;
-    Utils::RankStyle	getRankStyle() const;
-    Utils::VisSettings getVisSettings() const;
     Utils::VisStyle	getVisStyle() const;
-    void	setLTS( LTS* l );
-    void	setMarkStyle( Utils::MarkStyle ms );
-    void	setRankStyle( Utils::RankStyle rs );
-    bool	setVisSettings( Utils::VisSettings vs );
-    void	setVisStyle( Utils::VisStyle vs );
-    void	toggleDisplayStates();
-    void        toggleDisplayTransitions();
-    void        toggleDisplayBackpointers();
-    void	toggleDisplayWireframe();
+    Utils::VisSettings getVisSettings() const;
+    Utils::VisSettings getDefaultVisSettings() const;
+    void setLTS(LTS *l);
+    void setMarkStyle(Utils::MarkStyle ms);
+    void setVisSettings(Utils::VisSettings vs);
+    void setVisStyle(Utils::VisStyle vs);
+
+    void drawStates();
+    void drawTransitions(bool disp_fp,bool disp_bp);
+    void drawStructure();
+    void sortClusters(Utils::Point3D viewpoint);
+//    void	drawLTS(Utils::Point3D viewpoint);
+//    Utils::RankStyle getRankStyle() const;
+//    void setRankStyle(Utils::RankStyle rs);
 };
 #endif

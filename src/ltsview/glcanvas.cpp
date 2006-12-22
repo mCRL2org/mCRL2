@@ -1,4 +1,14 @@
+#ifdef __APPLE__
+    #include <OpenGL/gl.h>
+    #include <OpenGL/glu.h>
+#else
+    #include <GL/gl.h>
+    #include <GL/glu.h>
+#endif
+#include <cmath>
+#include <wx/image.h>
 #include "glcanvas.h"
+#include "ids.h"
 #include "icons/zoom_cursor.xpm"
 #include "icons/zoom_cursor_mask.xpm"
 #include "icons/pan_cursor.xpm"
@@ -8,19 +18,19 @@
 
 using namespace Utils;
 using namespace IDs;
-BEGIN_EVENT_TABLE( GLCanvas, wxGLCanvas )
-    EVT_MOTION( GLCanvas::onMouseMove )
-    EVT_ENTER_WINDOW( GLCanvas::onMouseEnter )
-    EVT_LEFT_DOWN( GLCanvas::onMouseDown )
-    EVT_LEFT_UP( GLCanvas::onMouseUp )
-    EVT_RIGHT_DOWN( GLCanvas::onMouseDown )
-    EVT_RIGHT_UP( GLCanvas::onMouseUp )
-    EVT_MIDDLE_DOWN( GLCanvas::onMouseDown )
-    EVT_MIDDLE_UP( GLCanvas::onMouseUp )
-    EVT_MOUSEWHEEL( GLCanvas::onMouseWheel )
-    EVT_PAINT( GLCanvas::onPaint )
-    EVT_SIZE( GLCanvas::onSize )
-    EVT_ERASE_BACKGROUND( GLCanvas::OnEraseBackground )
+BEGIN_EVENT_TABLE(GLCanvas,wxGLCanvas)
+    EVT_MOTION(GLCanvas::onMouseMove)
+    EVT_ENTER_WINDOW(GLCanvas::onMouseEnter)
+    EVT_LEFT_DOWN(GLCanvas::onMouseDown)
+    EVT_LEFT_UP(GLCanvas::onMouseUp)
+    EVT_RIGHT_DOWN(GLCanvas::onMouseDown)
+    EVT_RIGHT_UP(GLCanvas::onMouseUp)
+    EVT_MIDDLE_DOWN(GLCanvas::onMouseDown)
+    EVT_MIDDLE_UP(GLCanvas::onMouseUp)
+    EVT_MOUSEWHEEL(GLCanvas::onMouseWheel)
+    EVT_PAINT(GLCanvas::onPaint)
+    EVT_SIZE(GLCanvas::onSize)
+    EVT_ERASE_BACKGROUND(GLCanvas::OnEraseBackground)
 END_EVENT_TABLE()
 
 GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,const wxSize &size,
@@ -39,14 +49,23 @@ GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,const wxSize &size,
   startPosZDefault = 0.0f;
   farPlane = 0.0f;
   nearPlane = 1.0f;
-  defaultBGColor.r = 0.4f; 
-  defaultBGColor.g = 0.4f; 
-  defaultBGColor.b = 0.4f; 
+  defaultBGColor.r = 100; 
+  defaultBGColor.g = 100; 
+  defaultBGColor.b = 100; 
+  displayBackpointers = false;
+  displayStates = false;
+  displayTransitions = false;
+  displayWireframe = false;
+  lightRenderMode = false;
 
   setActiveTool(myID_SELECT);
 }
 
 GLCanvas::~GLCanvas() {
+}
+
+void GLCanvas::setVisualizer(Visualizer *vis) {
+  visualizer = vis;
 }
 
 void GLCanvas::initialize() {
@@ -55,30 +74,31 @@ void GLCanvas::initialize() {
   glDepthFunc(GL_LEQUAL);
   glShadeModel(GL_SMOOTH);
 
-  GLfloat gray[] = { 0.35f, 0.35f, 0.35f, 1.0f };
-  GLfloat light_pos[] = { 50.0f, 50.0f, 50.0f, 1.0f };
-  glEnable(GL_NORMALIZE);
+  GLfloat gray[] = { 0.35f,0.35f,0.35f,1.0f };
+  GLfloat light_pos[] = { 50.0f,50.0f,50.0f,1.0f };
   glLightfv(GL_LIGHT0,GL_AMBIENT,gray);
   glLightfv(GL_LIGHT0,GL_DIFFUSE,gray);
   glLightfv(GL_LIGHT0,GL_POSITION,light_pos);
   
   glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-  
+  /*
+  glEnable(GL_NORMALIZE);
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_BLEND);
+  glEnable(GL_COLOR_MATERIAL);*/
   
-  GLfloat light_col[] = { 0.2f, 0.2f, 0.2f };
+  GLfloat light_col[] = { 0.2f,0.2f,0.2f };
   glMaterialfv(GL_FRONT,GL_SPECULAR,light_col);
   glMaterialf(GL_FRONT,GL_SHININESS,8.0f);
-  glEnable(GL_COLOR_MATERIAL);
   glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
 
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
   
-  glClearColor(defaultBGColor.r,defaultBGColor.g,defaultBGColor.b,1);
+  glClearColor(defaultBGColor.r/255.0f,defaultBGColor.g/255.0f,
+      defaultBGColor.b/255.0f,1.0f);
   glClearDepth(1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   SwapBuffers();
@@ -101,12 +121,22 @@ void GLCanvas::setDefaultPosition(float structWidth,float structHeight) {
   reshape();
 }
 
-RGB_Color GLCanvas::getBackgroundColor() const
-{
+RGB_Color GLCanvas::getBackgroundColor() const {
   GLfloat bgc[4];
-  glGetFloatv( GL_COLOR_CLEAR_VALUE, bgc );
-  RGB_Color result = { bgc[0], bgc[1], bgc[2] };
+  glGetFloatv(GL_COLOR_CLEAR_VALUE,bgc);
+  RGB_Color result = {
+    static_cast<unsigned char>(bgc[0]*255.0f),
+    static_cast<unsigned char>(bgc[1]*255.0f),
+    static_cast<unsigned char>(bgc[2]*255.0f) };
   return result;
+}
+
+RGB_Color GLCanvas::getDefaultBackgroundColor() const { 
+  return defaultBGColor;
+}
+
+void GLCanvas::setBackgroundColor(Utils::RGB_Color c) {
+  glClearColor(c.r/255.0f,c.g/255.0f,c.b/255.0f,1.0f);
 }
 
 void GLCanvas::getMaxViewportDims(int *w,int* h) {
@@ -149,40 +179,73 @@ void GLCanvas::display(bool coll_caller) {
     SetCurrent();
     glPushMatrix();
       glLoadIdentity(); 
+        
+      if (lightRenderMode) {
+        glDisable(GL_NORMALIZE);
+        glDisable(GL_LIGHTING);
+        glDisable(GL_LIGHT0);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_COLOR_MATERIAL);
+        //glPolygonMode(GL_FRONT,GL_LINE);
+      }
+      else {
+        glEnable(GL_NORMALIZE);
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glEnable(GL_COLOR_MATERIAL);
+        if (displayWireframe) {
+          glPolygonMode(GL_FRONT,GL_LINE);
+        }
+        else {
+          glPolygonMode(GL_FRONT,GL_FILL);
+        }
+      }
     
-      glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+      glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
      
-      // apply panning and zooming transformations
-      glTranslatef( moveVector.x, moveVector.y, moveVector.z - startPosZ );
-      
-      // apply rotation transformations
-      glRotatef( angleY, 1.0f, 0.0f, 0.0f );
-      glRotatef( angleX, 0.0f, 1.0f, 0.0f );
+      // apply panning, zooming and rotating transformations
+      glTranslatef(moveVector.x,moveVector.y,moveVector.z - startPosZ);
+      glRotatef(angleY,1.0f,0.0f,0.0f);
+      glRotatef(angleX,0.0f,1.0f,0.0f);
 
       // structure will be drawn around the positive z-axis starting from the
       // origin, so rotate to make the z-axis point downwards
-      glRotatef( 90.0f, 1.0f, 0.0f, 0.0f );
+      glRotatef(90.0f,1.0f,0.0f,0.0f);
 
-      // and translate along the z-axis to make the vertical center of the
-      // structure end up in the origin
-      float halfHeight = mediator->getHalfStructureHeight();
-      glTranslatef( 0.0f, 0.0f, -halfHeight );
+      // translate along the z-axis to make the vertical center of the structure
+      // end up in the current origin
+      float halfHeight = visualizer->getHalfStructureHeight();
+      glTranslatef(0.0f,0.0f,-halfHeight);
       
-      // determine current viewpoint in world coordinates
-      glPushMatrix();
-	      glLoadIdentity();
-	      glTranslatef( 0.0f, 0.0f, halfHeight );
-	      glRotatef( -90.0f , 1.0f, 0.0f, 0.0f );
-	      glRotatef( -angleX, 0.0f, 1.0f, 0.0f );
-	      glRotatef( -angleY, 1.0f, 0.0f, 0.0f );
-	      glTranslatef( -moveVector.x, -moveVector.y, -moveVector.z + startPosZ );
-	      GLfloat M[16];
-	      glGetFloatv( GL_MODELVIEW_MATRIX, M );
-	      Point3D viewpoint = { M[12], M[13], M[14] };
-      glPopMatrix();
+      if (!lightRenderMode && displayStates) {
+        visualizer->drawStates();
+      }
       
+      if (!lightRenderMode && (displayTransitions || displayBackpointers)) {
+        visualizer->drawTransitions(displayTransitions,displayBackpointers);
+      }
+      
+      if (!lightRenderMode) {
+        // determine current viewpoint in world coordinates
+        glPushMatrix();
+          glLoadIdentity();
+          glTranslatef(0.0f,0.0f,halfHeight);
+          glRotatef(-90.0f ,1.0f,0.0f,0.0f);
+          glRotatef(-angleX,0.0f,1.0f,0.0f);
+          glRotatef(-angleY,1.0f,0.0f,0.0f);
+          glTranslatef(-moveVector.x,-moveVector.y,-moveVector.z + startPosZ);
+          GLfloat M[16];
+          glGetFloatv(GL_MODELVIEW_MATRIX,M);
+          Point3D viewpoint = { M[12],M[13],M[14] };
+        glPopMatrix();
+        // sort clusters on distance to viewpoint
+        visualizer->sortClusters(viewpoint);
+      }
+
       // draw the structure
-      mediator->drawLTS( viewpoint );
+      visualizer->drawStructure();
       
       // do not show the picture in the canvas if we are collecting data
       if (!collectingData) {
@@ -218,7 +281,7 @@ void GLCanvas::OnEraseBackground(wxEraseEvent& /*event*/) {
 
 // Mouse event handlers
 
-void GLCanvas::determineCurrentTool( wxMouseEvent& event ) {
+void GLCanvas::determineCurrentTool(wxMouseEvent& event) {
   if (event.MiddleIsDown() || (event.LeftIsDown() && event.RightIsDown())) {
     currentTool = myID_ZOOM;
   }
@@ -269,16 +332,20 @@ void GLCanvas::onMouseEnter(wxMouseEvent& /*event*/) {
 }
 
 void GLCanvas::onMouseDown(wxMouseEvent& event) {
-  determineCurrentTool( event );
+  lightRenderMode = true;
+  determineCurrentTool(event);
   if (currentTool==myID_ZOOM || currentTool==myID_PAN ||
       currentTool==myID_ROTATE) {
     oldMouseX = event.GetX();
     oldMouseY = event.GetY();
   }
+  display();
 }
 
 void GLCanvas::onMouseUp(wxMouseEvent& event) {
-  determineCurrentTool( event );
+  lightRenderMode = false;
+  determineCurrentTool(event);
+  display();
 }
 
 void GLCanvas::onMouseMove(wxMouseEvent& event) {
@@ -421,4 +488,20 @@ unsigned char* GLCanvas::getPictureData(int w_res,int h_res) {
   }
 
   return pixels;
+}
+
+void GLCanvas::setDisplayWireframe(bool b) {
+  displayWireframe = b;
+}
+
+void GLCanvas::setDisplayBackpointers(bool b) {
+  displayBackpointers = b;
+}
+
+void GLCanvas::setDisplayStates(bool b) {
+  displayStates = b;
+}
+
+void GLCanvas::setDisplayTransitions(bool b) {
+  displayTransitions = b;
 }

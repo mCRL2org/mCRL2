@@ -337,118 +337,94 @@ void LTS::clearRanksAndClusters()
   clustersInRank.swap( temp2 );
 }
 
-void LTS::clusterComrades()
-{
-  vector< vector< State* > >::iterator rankit;
-  for ( rankit  = statesInRank.begin() ;
-	rankit != statesInRank.end()   ; ++rankit )
-  {
+void LTS::clusterComrades() {
+  for (unsigned int r=0; r<statesInRank.size(); ++r) {
     vector< Cluster* > cluslist;
     vector< State* >::iterator stateit;
-    for ( stateit = (*rankit).begin() ; stateit != (*rankit).end() ; ++stateit )
-    {
-      if ( (**stateit).getCluster() == NULL )
-      {
-	Cluster* c = new Cluster();
-	cluslist.push_back( c );
-	addComradesToCluster( c, *stateit );
+    for (stateit=statesInRank[r].begin(); stateit!=statesInRank[r].end();
+        ++stateit) {
+      if ((**stateit).getCluster() == NULL) {
+        Cluster* c = new Cluster(r);
+        cluslist.push_back(c);
+        addComradesToCluster(c,*stateit);
       }
     }
-    clustersInRank.push_back( cluslist );
+    clustersInRank.push_back(cluslist);
   }
 }
 
-void LTS::addComradesToCluster( Cluster* c, State* s )
-{
-  if ( s->getCluster() == NULL )
-  {
-    c->addState( s );
-    s->setCluster( c );
+void LTS::addComradesToCluster(Cluster* c, State* s) {
+  if (s->getCluster() == NULL) {
+    c->addState(s);
+    s->setCluster(c);
     set< State* > comrades;
-    s->getComrades( comrades );
+    s->getComrades(comrades);
     set< State* >::iterator comit;
-    for ( comit = comrades.begin() ; comit != comrades.end() ; ++comit )
-      addComradesToCluster( c, *comit );
+    for (comit=comrades.begin(); comit!=comrades.end(); ++comit) {
+      addComradesToCluster(c,*comit);
+    }
   }
 }
 
-void LTS::mergeSuperiorClusters()
-{
+void LTS::mergeSuperiorClusters() {
+  State *s;
   // iterate over the ranks in reverse order (bottom-up)
-  vector< vector< Cluster* > >::reverse_iterator rankit;
-  for ( rankit  = clustersInRank.rbegin() ; 
-	rankit != clustersInRank.rend()-1 ; ++rankit )
-  {
-    vector< Cluster* > *prevRank = &(*(rankit+1));
+  for (int r=clustersInRank.size()-1; r>0; --r) {
+    vector< Cluster* > *prevRank = &(clustersInRank[r-1]);
     // iterate over the clusters in this rank
     vector< Cluster* >::iterator clusit;
-    for ( clusit  = (*rankit).begin() ; clusit != (*rankit).end() ; ++clusit )
-    {
+    for (clusit=clustersInRank[r].begin(); clusit!=clustersInRank[r].end();
+        ++clusit) {
       set< Cluster* > mergeSet;
       
       // iterate over the states in this cluster
-      vector< State* > clusstates;
-      (**clusit).getStates( clusstates );
-      
-      vector< State* >::iterator stateit;
-      for ( stateit  = clusstates.begin() ; 
-	    stateit != clusstates.end()   ; ++stateit )
-      {
-	// set deadlock information
-	(**clusit).setDeadlock( (**clusit).hasDeadlock() ||
-				(**stateit).isDeadlock() );
+      for (int i = 0; i < (**clusit).getNumberOfStates(); ++i) {
+        s = (**clusit).getState(i);
+	      // set deadlock information
+	      (**clusit).setDeadlock((**clusit).hasDeadlock() || s->isDeadlock());
 			       
-	// iterate over the superiors of this state
-	set< State* > superiors;
-	(**stateit).getSuperiors( superiors );
+  	    // iterate over the superiors of this state
+	      set< State* > superiors;
+	      s->getSuperiors(superiors);
 	
-	set< State* >::iterator superit;
-	for ( superit  = superiors.begin() ; 
-	      superit != superiors.end()   ; ++superit )
-	{
-	  // add the superior's cluster to the merge set
-	  mergeSet.insert( (**superit).getCluster() );
-	}
+	      set< State* >::iterator superit;
+	      for (superit=superiors.begin(); superit!=superiors.end(); ++superit) {
+	        // add the superior's cluster to the merge set
+	        mergeSet.insert((**superit).getCluster());
+	      }
       }
       
-      if ( mergeSet.size() > 1 )
-      {
-	Cluster* c = new Cluster();
+      if (mergeSet.size() > 1) {
+	      Cluster* c = new Cluster(r-1);
 	
-	// iterate over the clusters in the mergeSet
-	set< Cluster* >::iterator clusit1;
-	for ( clusit1  = mergeSet.begin() ;
-	      clusit1 != mergeSet.end()   ; ++clusit1 )
-	{
-	  // add the cluster's states to c
-	  (**clusit1).getStates( clusstates );
-	  for ( stateit  = clusstates.begin() ;
-		stateit != clusstates.end()   ; ++stateit )
-	  {
-	    c->addState( *stateit );
-	    (**stateit).setCluster( c );
-	  }
+	      // iterate over the clusters in the mergeSet
+	      set< Cluster* >::iterator clusit1;
+	      for (clusit1=mergeSet.begin(); clusit1!=mergeSet.end(); ++clusit1) {
+          // add the cluster's states to c
+          for (int i=0; i < (**clusit1).getNumberOfStates(); ++i) {
+            s = (**clusit1).getState(i);
+            c->addState(s);
+            s->setCluster(c);
+          }
 	  
-	  // delete the cluster
-	  prevRank->erase( find( prevRank->begin(), prevRank->end(), *clusit1 ) );
-	  delete *clusit1;
-	}
-	prevRank->push_back( c );
+          // delete the cluster
+          prevRank->erase(find(prevRank->begin(),prevRank->end(),*clusit1));
+          delete *clusit1;
+        }
+        prevRank->push_back(c);
       }
     }
     
     // clusters on previous rank have been merged; compute hierarchy info
-    for ( clusit  = (*rankit).begin() ; clusit != (*rankit).end() ; ++clusit )
-    {
-      vector< State* > clusstates;
+    for (clusit=clustersInRank[r].begin(); clusit!=clustersInRank[r].end(); 
+        ++clusit) {
       set< State* > superiors;
       
-      (**clusit).getStates( clusstates );
-      clusstates[0]->getSuperiors( superiors );
+      (**clusit).getState(0)->getSuperiors(superiors);
       Cluster* ancestor = (**(superiors.begin())).getCluster();
 
-      (**clusit).setAncestor( ancestor );
-      ancestor->addDescendant( *clusit );
+      (**clusit).setAncestor(ancestor);
+      ancestor->addDescendant(*clusit);
     }
   }
 }
@@ -1131,107 +1107,3 @@ void LTS::unmarkAction( string label )
       markedTransitionCount += (**c_it).unmarkActionLabel( atLabel );
   }
 }
-
-/*
-// function for test purposes
-void LTS::printStructure()
-{
-  // give every state an id
-  map< State*, int > stateId;
-  for ( unsigned int i = 0 ; i < unmarkedStates.size() ; ++i )
-  {
-    stateId[ unmarkedStates[i] ] = i;
-  }
-  
-  // give every cluster an id
-  map< Cluster*, int > clusterId;
-  int n = 0;
-  for ( unsigned int i = 0 ; i < clustersInRank.size() ; ++i )
-  {
-    vector< Cluster* >::iterator j;
-    for ( j = clustersInRank[i].begin() ; j != clustersInRank[i].end() ; ++j )
-    {
-      clusterId[ *j ] = n++;
-    }
-  }
-
-  for ( unsigned int s = 0 ; s < unmarkedStates.size() ; ++s )
-  {
-    State* state = unmarkedStates[s];
-    cout << stateId[state] << "\t";
-    set< State* > ss;
-    set< State* >::iterator sit;
-    
-    state->getSuperiors( ss );
-    cout << "{";
-    for ( sit = ss.begin() ; sit != ss.end() ; ++sit )
-    {
-      cout << stateId[*sit] << ",";
-    }
-    cout << "}\t";
-    
-    state->getSubordinates( ss );
-    cout << "{";
-    for ( sit = ss.begin() ; sit != ss.end() ; ++sit )
-    {
-      cout << stateId[&(**sit)] << ",";
-    }
-    cout << "}\t";
-    
-    state->getComrades( ss );
-    cout << "{";
-    for ( sit = ss.begin() ; sit != ss.end() ; ++sit )
-    {
-      cout << stateId[&(**sit)] << ",";
-    }
-    cout << "}\t";
-    
-    cout << state->getRank() << endl;
-  }
-
-  for ( unsigned int r = 0 ; r < clustersInRank.size() ; ++r )
-  {
-    vector< Cluster* >::iterator clusit;
-    for ( clusit = clustersInRank[r].begin() ; clusit != clustersInRank[r].end() ; ++clusit )
-    {
-      cout << clusterId[ *clusit ] << "\t";
-      vector< State* > ss;
-      (**clusit).getStates( ss );
-      vector< State* >::iterator sit;
-      cout << "{";
-      for ( sit = ss.begin() ; sit!= ss.end() ; ++sit )
-      {
-	cout << stateId[ *sit ] << ",";
-      }
-      cout << "}\t";
-      if ( (**clusit).getAncestor() != NULL )
-	cout << clusterId[ (**clusit).getAncestor() ];
-      cout << "\t";
-      
-      vector< Cluster* > cs;
-      vector< Cluster* >::iterator cit;
-      (**clusit).getDescendants( cs );
-      cout << "{";
-      for ( cit = cs.begin() ; cit != cs.end() ; ++cit )
-      {
-	cout << clusterId[ *cit ] << ",";
-      }
-      cout << "}\t" << r << endl;
-    }
-  }
-}
-
-void LTS::printClusterSizesPositions()
-{
-  for ( unsigned int i = 0 ; i < clustersInRank.size() ; ++i )
-  {
-    cout << "Clusters in rank " << i << ": ";
-    vector< Cluster* >::iterator j;
-    for ( j = clustersInRank[i].begin() ; j != clustersInRank[i].end() ; ++j )
-    {
-      cout << "(" << (**j).getTopRadius() << "," << (**j).getSize() << "," << (**j).getPosition() << ") ";
-    }
-    cout << endl;
-  }
-}
-*/

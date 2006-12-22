@@ -3,19 +3,22 @@ project toolset/ltsview
   ;
 
 exe ltsview
-      : fsmparser.cpp
+      : cluster.cpp
+        conedb.cpp
+        fileloader.cpp
+        fsmparser.cpp
+        glcanvas.cpp
+        lts.cpp
         ltsviewapp.cpp
         mainframe.cpp
-        glcanvas.cpp
         markstateruledialog.cpp
+        primitivefactory.cpp
+        primitives.cpp
         savepicdialog.cpp
-        lts.cpp
         state.cpp
         transition.cpp
-        cluster.cpp
-        fileloader.cpp
-        visualizer.cpp
         utils.cpp
+        visualizer.cpp
         /libraries//wx_extension
         /libraries//mcrl2_basic
       : <site-library>wx_gl

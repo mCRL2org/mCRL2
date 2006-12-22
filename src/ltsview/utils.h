@@ -5,108 +5,98 @@
 #include <algorithm>
 //using namespace std;
 
-namespace Utils
-{
+namespace Utils {
   const double PI = 3.14159265359;
 
-  enum RankStyle { ITERATIVE, CYCLIC };
-  enum MarkStyle { NO_MARKS, MARK_DEADLOCKS, MARK_STATES, MARK_TRANSITIONS };
-  enum VisStyle	 { CONES, TUBES, ATOMIUM };
-  enum DFSState  { DFS_WHITE, DFS_GREY, DFS_BLACK };
+  enum RankStyle {ITERATIVE,CYCLIC};
+  enum MarkStyle {NO_MARKS,MARK_DEADLOCKS,MARK_STATES,MARK_TRANSITIONS};
+  enum VisStyle	 {CONES,TUBES,ATOMIUM};
+  enum DFSState  {DFS_WHITE,DFS_GREY,DFS_BLACK};
 
   struct RGB_Color {
-    float r;
-    float g;
-    float b;
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
   }; 
 
-  const RGB_Color RGB_WHITE = { 1.0f, 1.0f, 1.0f };
-  const RGB_Color RGB_BLUE  = { 0.0f, 0.0f, 1.0f };
-  const RGB_Color RGB_RED   = { 1.0f, 0.0f, 0.0f };
-  const RGB_Color RGB_YELLOW= { 1.0f, 1.0f, 0.0f };
+  const RGB_Color RGB_WHITE = {255,255,255};
+  const RGB_Color RGB_BLUE  = {0,0,255};
+  const RGB_Color RGB_RED   = {255,0,0};
+  const RGB_Color RGB_YELLOW= {255,255,0};
 
-  struct HSV_Color
-  {
-    float h;
-    float s;
-    float v;
+  struct HSV_Color {
+    int h;
+    int s;
+    int v;
   };
 
-  struct Point3D
-  {
+  struct Point3D {
     float x;
     float y;
     float z;
   };
 
-  struct VisSettings
-  {
-    float     alpha;
-//    float     backpointerCurve;
+  struct VisSettings {
+    float     ellipsoidThreshold;
+    float     nodeSize;
     int	      branchRotation;
+    int	      innerBranchTilt;
+    int	      outerBranchTilt;
+    int	      quality;
+    unsigned char alpha;
+    bool      longInterpolation;
+    RGB_Color downEdgeColor;
+    RGB_Color interpolateColor1;
+    RGB_Color interpolateColor2;
+    RGB_Color markedColor;
+    RGB_Color stateColor;
+    RGB_Color upEdgeColor;
+//    float     backpointerCurve;
 //    int	      branchScale;
 //    int	      branchSpread;
 //    float     clusterHeight;
-    RGB_Color downEdgeColor;
-    float     ellipsoidThreshold;
-    int	      innerBranchTilt;
-    RGB_Color interpolateColor1;
-    RGB_Color interpolateColor2;
 //    bool      levelDividers;
-    bool      longInterpolation;
-    RGB_Color markedColor;
-    float     nodeSize;
-    int	      outerBranchTilt;
-    int	      quality;
-    RGB_Color stateColor;
-    RGB_Color upEdgeColor;
   };
 
-  struct MarkRule
-  {
+  struct MarkRule {
     int		            paramIndex;
     bool	            isActivated;
     bool        	    isNegated;
     std::vector< bool >     valueSet;
   };
   
-  struct Slot
-  {
+  struct Slot {
     float position;  //INV: 0 <= position < 360
     int  occupying;  //INV: 0 <= occupying 
   };
 
-  struct Vect
-  {
+  struct Vect {
     float x;
     float y;
   };
 
-  bool operator==( RGB_Color c1, RGB_Color c2 );
-  bool operator!=( RGB_Color c1, RGB_Color c2 );
-  Point3D operator+( Point3D p1, Point3D p2 );
-  Point3D operator-( Point3D p1, Point3D p2 );
-  Point3D operator*( float s, Point3D p );
-  Vect operator+( Vect v1, Vect v2 );
-  float length( Point3D p );
-  void  normalize( Point3D &p );
+  int round_to_int(double f);
+  float deg_to_rad(float deg);
+  float rad_to_deg(float rad);
+  
+  bool operator==(RGB_Color c1,RGB_Color c2);
+  bool operator!=(RGB_Color c1,RGB_Color c2);
+  HSV_Color operator+(HSV_Color c1,HSV_Color c2);
+  HSV_Color RGB_to_HSV(RGB_Color c);
+  RGB_Color HSV_to_RGB(HSV_Color c);
+  HSV_Color interpolate(HSV_Color hsv1,HSV_Color hsv2,float r,bool l);
+
+  Point3D operator+(Point3D p1,Point3D p2);
+  Point3D operator-(Point3D p1,Point3D p2);
+  Point3D operator*(float s,Point3D p);
+  Vect operator+(Vect v1,Vect v2);
+  float length(Point3D p);
+  void normalize(Point3D &p);
   float dot_product(Point3D p1,Point3D p2);
   Point3D cross_product(Point3D p1,Point3D p2);
-  HSV_Color operator+( HSV_Color c1, HSV_Color c2 );
-  HSV_Color RGB_to_HSV( RGB_Color c );
-  RGB_Color HSV_to_RGB( HSV_Color c );
-  int round_to_int( double f );
-  float deg_to_rad( float deg );
-  float rad_to_deg( float rad );
-  
-  float vec_to_ang( Vect v);
-  //RET: atan2f(Vect.y, Vect.x)
-  
-  Vect ang_to_vec( float phi);
-  //RET: V, such that V.x =  cos(phi) /\ V.y = sin(phi)
-  
-  float vec_length( Vect v);
-  //RET: || v ||
+  float vec_to_ang(Vect v); //RET: atan2f(Vect.y, Vect.x)
+  Vect ang_to_vec(float phi); //RET: V, such that V.x = cos(phi) /\ V.y = sin(phi)
+  float vec_length(Vect v); //RET: || v ||
 
 }
 #endif

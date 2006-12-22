@@ -7,7 +7,6 @@
 bool command_line = false;
 std::string lts_file_argument;
 
-
 class squadt_interactor: public squadt_tool_interface {
   
   private:
@@ -48,7 +47,6 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   //skip
 }
 
-
 bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   if (c.object_exists(fsm_file_for_input)) {
     /* The input object is present, verify whether the specified format is supported */
@@ -80,24 +78,31 @@ bool squadt_interactor::perform_task(sip::configuration&) {
 }
 
 #endif
+#include <wx/cmdline.h>
+#include <wx/filename.h>
+#include <iostream>
 #include "ltsviewapp.h"
+#include "aterm1.h"
+#include "markstateruledialog.h"
+#include "fileloader.h"
 
 using namespace std;
 using namespace Utils;
-IMPLEMENT_APP_NO_MAIN( LTSViewApp )
+IMPLEMENT_APP_NO_MAIN(LTSViewApp)
 
-bool LTSViewApp::OnInit()
-{
-  mainFrame	  = new MainFrame( this );
-  visualizer	  = new Visualizer( this );
-  lts		  = NULL;
-  glCanvas	  = mainFrame->getGLCanvas();
+bool LTSViewApp::OnInit() {
+  lts = NULL;
+  rankStyle = ITERATIVE;
+  mainFrame = new MainFrame(this);
+  visualizer = new Visualizer(this);
+  glCanvas = mainFrame->getGLCanvas();
+  glCanvas->setVisualizer(visualizer);
   
-  SetTopWindow( mainFrame );
-  mainFrame->Show( true );
+  SetTopWindow(mainFrame);
+  mainFrame->Show(true);
   glCanvas->initialize();
-  mainFrame->setVisSettings( visualizer->getVisSettings() );
-  mainFrame->setBackgroundColor( glCanvas->getBackgroundColor() );
+  mainFrame->setVisSettings(visualizer->getVisSettings());
+  mainFrame->setBackgroundColor(glCanvas->getBackgroundColor());
 
   wxInitAllImageHandlers();
 
@@ -107,34 +112,28 @@ bool LTSViewApp::OnInit()
     std::string lts_file_argument;
 #endif
     // parse command line and check for specified input file
-    wxCmdLineEntryDesc cmdLineDesc[] = 
-    {
-      { wxCMD_LINE_PARAM, NULL, NULL, wxT("INFILE"), wxCMD_LINE_VAL_STRING,
-        wxCMD_LINE_PARAM_OPTIONAL },
-      { wxCMD_LINE_NONE, NULL, NULL, NULL, wxCMD_LINE_VAL_NONE, 0 }
+    wxCmdLineEntryDesc cmdLineDesc[] = {
+      {wxCMD_LINE_PARAM,NULL,NULL,wxT("INFILE"),wxCMD_LINE_VAL_STRING,
+        wxCMD_LINE_PARAM_OPTIONAL},
+      {wxCMD_LINE_NONE,NULL,NULL,NULL,wxCMD_LINE_VAL_NONE,0}
     };
-    wxCmdLineParser cmdParser( cmdLineDesc, argc, argv );
-    if ( cmdParser.Parse() == 0 )
-    {
-      if ( cmdParser.GetParamCount() > 0 )
-      {
+    wxCmdLineParser cmdParser(cmdLineDesc, argc,argv);
+    if (cmdParser.Parse() == 0) {
+      if (cmdParser.GetParamCount() > 0) {
         lts_file_argument = std::string(cmdParser.GetParam(0).fn_str());
       }
     }
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }
 #endif
-  
-  wxString wx_file_string(lts_file_argument.c_str(), wxConvLocal);
-  
+  wxString wx_file_string(lts_file_argument.c_str(),wxConvLocal);
   if (!wx_file_string.IsEmpty()) {
     wxFileName fileName(wx_file_string);
-    fileName.Normalize( wxPATH_NORM_LONG | wxPATH_NORM_DOTS |
-	  wxPATH_NORM_TILDE | wxPATH_NORM_ABSOLUTE );
-    mainFrame->setFileInfo( fileName );
-    openFile( static_cast< string > ( fileName.GetFullPath().fn_str() ) );
+    fileName.Normalize(wxPATH_NORM_LONG | wxPATH_NORM_DOTS |
+        wxPATH_NORM_TILDE | wxPATH_NORM_ABSOLUTE);
+    mainFrame->setFileInfo(fileName);
+    openFile(static_cast< string >(fileName.GetFullPath().fn_str()));
   }
-
   return true;
 }
 
@@ -142,135 +141,116 @@ bool LTSViewApp::OnInit()
 
 extern "C" int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,
                               wxCmdLineArgType lpCmdLine,int nCmdShow) {
-  ATerm stackbot;
-
   // initialise the ATerm library
+  ATerm stackbot;
   ATinit(0,0,&stackbot); // XXX args?
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-        squadt_utility::entry_wrapper starter(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
-
-        squadt_interactor c(starter);
-
-        if (!c.try_interaction(lpCmdLine)) {
+  squadt_utility::entry_wrapper starter(hInstance,hPrevInstance,lpCmdLine,
+      nCmdShow);
+  squadt_interactor c(starter);
+  if (!c.try_interaction(lpCmdLine)) {
 #endif
-          return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
+    return wxEntry(hInstance,hPrevInstance,lpCmdLine,nCmdShow);    
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-        }
-        return 0;
+  }
+  return 0;
 #endif
-  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+  return wxEntry(hInstance,hPrevInstance,lpCmdLine,nCmdShow);
 }
 #else
 int main(int argc, char **argv) {
-  ATerm stackbot;
-
   // initialise the ATerm library
+  ATerm stackbot;
   ATinit(argc,argv,&stackbot);
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   squadt_utility::entry_wrapper starter(argc, argv);
   squadt_interactor c(starter);
   if(!c.try_interaction(argc, argv)) {
-  command_line = true;
+    command_line = true;
 #endif
   return wxEntry(argc, argv);
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }
 #endif
-
   return 0;
 }
 #endif
 
-int LTSViewApp::OnExit()
-{
-  if ( lts != NULL ) delete lts;
+int LTSViewApp::OnExit() {
+  if (lts!=NULL) delete lts;
   delete visualizer;
   return 0;
 }
 
-void LTSViewApp::openFile( string fileName )
-{
+void LTSViewApp::openFile(string fileName) {
   glCanvas->disableDisplay();
 
-  mainFrame->createProgressDialog( "Opening file", "Parsing file" );
-  mainFrame->updateProgressDialog( 0, "Parsing file" );
-  LTS* newlts = new LTS( this );
-  try
-  {
-    FileLoader::loadFile( fileName, newlts );
+  mainFrame->createProgressDialog("Opening file","Parsing file");
+  mainFrame->updateProgressDialog(0,"Parsing file");
+  LTS* newlts = new LTS(this);
+  try {
+    FileLoader::loadFile(fileName,newlts);
   }
-  catch ( string msg )
-  {
+  catch (string msg) {
     delete newlts;
-    jobNames.clear();
-    mainFrame->updateProgressDialog( 100, "Error loading file" );
-    mainFrame->showMessage( "Error loading file", msg );
+    mainFrame->updateProgressDialog(100,"Error loading file");
+    mainFrame->showMessage("Error loading file",msg);
     return;
   }
-  if ( lts != NULL ) delete lts;
+  if (lts!=NULL) delete lts;
   lts = newlts;
   
-  ++currentJobNr;
-  mainFrame->updateProgressDialog( 14, "Applying ranking" );
-  applyRanking( visualizer->getRankStyle() );
+  mainFrame->updateProgressDialog(14,"Applying ranking");
+  applyRanking(rankStyle);
   
-  ++currentJobNr;
-  mainFrame->updateProgressDialog( 28, "Clustering comrades" );
+  mainFrame->updateProgressDialog(28,"Clustering comrades");
   lts->clusterComrades();
   
-  ++currentJobNr;
-  mainFrame->updateProgressDialog( 42, "Merging superiors" );
+  mainFrame->updateProgressDialog(42,"Merging superiors");
   lts->mergeSuperiorClusters();
 
-  mainFrame->updateProgressDialog( 57, "Setting mark info" );
+  mainFrame->updateProgressDialog(57,"Setting mark info");
   lts->computeClusterLabelInfo();
   
-  ++currentJobNr;
-  mainFrame->updateProgressDialog( 71, "Positioning clusters" );
+  mainFrame->updateProgressDialog(71,"Positioning clusters");
   lts->positionClusters();
 
-  visualizer->setLTS( lts );
-  visualizer->computeClusterHeight();
+  visualizer->setLTS(lts);
   
-  mainFrame->updateProgressDialog( 85, "Positioning states" );
+  mainFrame->updateProgressDialog(85,"Positioning states");
   lts->positionStates();
   
-  mainFrame->updateProgressDialog( 100, "Done" );
-  visualizer->setMarkStyle( NO_MARKS );
+  mainFrame->updateProgressDialog(100,"Done");
+  visualizer->setMarkStyle(NO_MARKS);
 
-  //lts->printStructure();
-
-  //lts->printClusterSizesPositions();
   glCanvas->enableDisplay();
   visualizer->computeBoundsInfo();
-  glCanvas->setDefaultPosition( visualizer->getBoundingCylinderWidth(),
-      visualizer->getBoundingCylinderHeight() );
+  glCanvas->setDefaultPosition(visualizer->getBoundingCylinderWidth(),
+      visualizer->getBoundingCylinderHeight());
   glCanvas->resetView();
   
   mainFrame->loadTitle();
-  mainFrame->setNumberInfo( lts->getNumberOfStates(),
-      lts->getNumberOfTransitions(), lts->getNumberOfClusters(),
-      lts->getNumberOfRanks() );
+  mainFrame->setNumberInfo(lts->getNumberOfStates(),
+      lts->getNumberOfTransitions(),lts->getNumberOfClusters(),
+      lts->getNumberOfRanks());
   mainFrame->resetMarkRules();
   
   vector< ATerm > ls;
-  lts->getActionLabels( ls );
-  mainFrame->setActionLabels( ls );
+  lts->getActionLabels(ls);
+  mainFrame->setActionLabels(ls);
 
-  mainFrame->setMarkedStatesInfo( 0 );
-  mainFrame->setMarkedTransitionsInfo( 0 );
-  mainFrame->setVisSettings( visualizer->getVisSettings() );
-  mainFrame->setBackgroundColor( glCanvas->getBackgroundColor() );
+  mainFrame->setMarkedStatesInfo(0);
+  mainFrame->setMarkedTransitionsInfo(0);
+  mainFrame->setVisSettings(visualizer->getVisSettings());
+  mainFrame->setBackgroundColor(glCanvas->getBackgroundColor());
 }
 
-void LTSViewApp::applyRanking( RankStyle rs )
-{
-  switch ( rs )
-  {
+void LTSViewApp::applyRanking(RankStyle rs) {
+  switch (rs) {
     case ITERATIVE:
       lts->applyIterativeRanking();
       break;
@@ -282,89 +262,69 @@ void LTSViewApp::applyRanking( RankStyle rs )
   }
 }
 
-void LTSViewApp::drawLTS( Point3D viewpoint )
-{
-  visualizer->drawLTS( viewpoint );
-}
-
-void LTSViewApp::applyDefaultSettings()
-{
-  mainFrame->setVisSettings( visualizer->getDefaultVisSettings() );
-  mainFrame->setBackgroundColor( glCanvas->getDefaultBackgroundColor() );
+void LTSViewApp::applyDefaultSettings() {
+  mainFrame->setVisSettings(visualizer->getDefaultVisSettings());
+  mainFrame->setBackgroundColor(glCanvas->getDefaultBackgroundColor());
   applySettings();
 }
 
-void LTSViewApp::applySettings()
-{
-  bool refreshBoundCyl = visualizer->setVisSettings( mainFrame->getVisSettings() );
-  glCanvas->setBackgroundColor( mainFrame->getBackgroundColor() );
-  if ( refreshBoundCyl )
-  {
-    visualizer->computeBoundsInfo();
-  }
+void LTSViewApp::applySettings() {
+  visualizer->setVisSettings(mainFrame->getVisSettings());
+  glCanvas->setBackgroundColor(mainFrame->getBackgroundColor());
   glCanvas->display();
-  glCanvas->setDefaultPosition( visualizer->getBoundingCylinderWidth(),
+  glCanvas->setDefaultPosition(visualizer->getBoundingCylinderWidth(),
       visualizer->getBoundingCylinderHeight() );
 }
 
-void LTSViewApp::setRankStyle( RankStyle rs )
-{
-  if ( visualizer->getRankStyle() != rs )
-  {
-    visualizer->setRankStyle( rs );
-     
-    if ( lts != NULL )
-    {
+void LTSViewApp::setRankStyle(RankStyle rs) {
+  if (rankStyle != rs) {
+    rankStyle = rs;
+    if (lts != NULL) {
       glCanvas->disableDisplay();
 
-      mainFrame->createProgressDialog( "Structuring LTS", "Applying ranking" );
-      mainFrame->updateProgressDialog( 0, "Applying ranking" );
+      mainFrame->createProgressDialog("Structuring LTS","Applying ranking");
 
-      applyRanking( rs );
+      mainFrame->updateProgressDialog(0,"Applying ranking");
+      applyRanking(rankStyle);
       
-      ++currentJobNr;
-      mainFrame->updateProgressDialog( 17, "Clustering comrades" );
+      mainFrame->updateProgressDialog(17,"Clustering comrades");
       lts->clusterComrades();
       
-      ++currentJobNr;
-      mainFrame->updateProgressDialog( 33, "Merging superiors" );
+      mainFrame->updateProgressDialog(33,"Merging superiors");
       lts->mergeSuperiorClusters();
 
-      mainFrame->updateProgressDialog( 50, "Setting mark info" );
+      mainFrame->updateProgressDialog(50,"Setting mark info");
       lts->computeClusterLabelInfo();
       lts->markClusters();
       
-      ++currentJobNr;
-      mainFrame->updateProgressDialog( 67, "Positioning clusters" );
+      mainFrame->updateProgressDialog(67,"Positioning clusters");
       lts->positionClusters();
-      visualizer->computeClusterHeight();
 
-      mainFrame->updateProgressDialog( 84, "Positioning states" );
+      visualizer->setLTS(lts);
+
+      mainFrame->updateProgressDialog(84,"Positioning states");
       lts->positionStates();
-      mainFrame->updateProgressDialog( 100, "Done" );
 
-      //lts->printStructure();
+      mainFrame->updateProgressDialog(100,"Done");
 
-      //lts->printClusterSizesPositions();
       glCanvas->enableDisplay();
       visualizer->computeBoundsInfo();
-      glCanvas->setDefaultPosition( visualizer->getBoundingCylinderWidth(),
-	  visualizer->getBoundingCylinderHeight() );
+      glCanvas->setDefaultPosition(visualizer->getBoundingCylinderWidth(),
+        visualizer->getBoundingCylinderHeight());
       glCanvas->resetView();
-      mainFrame->setNumberInfo( lts->getNumberOfStates(),
-	  lts->getNumberOfTransitions(), lts->getNumberOfClusters(),
-	  lts->getNumberOfRanks() );
-      mainFrame->setVisSettings( visualizer->getVisSettings() );
-      mainFrame->setBackgroundColor( glCanvas->getBackgroundColor() );
+
+      mainFrame->setNumberInfo(lts->getNumberOfStates(),
+        lts->getNumberOfTransitions(),lts->getNumberOfClusters(),
+        lts->getNumberOfRanks());
+      mainFrame->setVisSettings(visualizer->getVisSettings());
+      mainFrame->setBackgroundColor(glCanvas->getBackgroundColor());
     }
   }
 }
 
-void LTSViewApp::setVisStyle( VisStyle vs )
-{
-  if ( visualizer->getVisStyle() != vs )
-  {
-    visualizer->setVisStyle( vs );
+void LTSViewApp::setVisStyle(VisStyle vs) {
+  if (visualizer->getVisStyle() != vs) {
+    visualizer->setVisStyle(vs);
     glCanvas->display();
   }
 }
@@ -431,11 +391,6 @@ void LTSViewApp::activateMarkRule( const int index, const bool activate )
   }
 }
 
-float LTSViewApp::getHalfStructureHeight() const
-{
-  return visualizer->getHalfStructureHeight();
-}
-
 void LTSViewApp::setMatchAnyMarkRule( bool b )
 {
   if ( lts != NULL )
@@ -484,36 +439,10 @@ void LTSViewApp::applyMarkStyle( MarkStyle ms )
   glCanvas->display();
 }
 
-void LTSViewApp::toggleDisplayStates()
-{
-  visualizer->toggleDisplayStates();
-  glCanvas->display();
-}
-
-void LTSViewApp::toggleDisplayTransitions()
-{
-  visualizer->toggleDisplayTransitions();
-  glCanvas->display();
-}
-
-void LTSViewApp::toggleDisplayBackpointers()
-{
-  visualizer->toggleDisplayBackpointers();
-  glCanvas->display();
-}
-
-void LTSViewApp::toggleDisplayWireframe()
-{
-  visualizer->toggleDisplayWireframe();
-  glCanvas->display();
-}
-
-void LTSViewApp::notifyRenderingStarted()
-{
+void LTSViewApp::notifyRenderingStarted() {
   mainFrame->startRendering();
 }
 
-void LTSViewApp::notifyRenderingFinished()
-{
+void LTSViewApp::notifyRenderingFinished() {
   mainFrame->stopRendering();
 }
