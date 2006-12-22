@@ -613,7 +613,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     ATermList Summands = ATLgetArgument(Part, 2);
     int SummandsLength = ATgetLength(Summands);
     if (SummandsLength == 0) {
-      PRINT_FUNC(fprints)(OutStream, " delta\n");
+      PRINT_FUNC(fprints)(OutStream, " delta@0;\n");
     } else {
       //SummandsLength > 0
       PRINT_FUNC(fprints)(OutStream, "\n       ");

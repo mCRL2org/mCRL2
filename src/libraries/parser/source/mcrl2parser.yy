@@ -29,7 +29,7 @@ extern ATermAppl spec_tree;
 #define yytrue 1
 #endif
 
-#define YYMAXDEPTH 40000
+#define YYMAXDEPTH 160000
 
 //local declarations
 ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
