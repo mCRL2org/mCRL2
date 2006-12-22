@@ -163,12 +163,39 @@ bool squadt_interactor::check_configuration(sip::configuration const& configurat
 
 bool squadt_interactor::perform_task(sip::configuration& configuration)
 {
+  using namespace sip;
+  using namespace sip::layout;
+  using namespace sip::datatype;
+  using namespace sip::layout::elements;
+  
+  bool result = true;
+  
   tool_options options;
   options.input_file = configuration.get_object(lpd_file_for_input)->get_location();
   options.output_file = configuration.get_object(lpd_file_for_output)->get_location();
   options.strategy = static_cast < RewriteStrategy > (boost::any_cast < size_t > (configuration.get_option_value(option_rewrite_strategy)));
 
-  return (do_binary(options)==0);
+  layout::manager::aptr top(layout::vertical_box::create());
+  
+  top->add(new label("Binary in progress"), layout::left);
+  send_display_layout(top);
+
+  //Perform declustering
+  top = layout::vertical_box::create();
+  int binary_result = do_binary(options);
+  if (binary_result == 0) {
+    top->add(new label("Binary succeeded"));
+    result = true;
+  }
+  else
+  {
+    top->add(new label("Binary failed"));
+    result = false;
+  }
+
+  send_display_layout(top);
+  
+  return result;
 }
 
 #endif //ENABLE_SQUADT_CONNECTIVITY
