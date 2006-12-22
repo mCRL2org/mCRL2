@@ -515,6 +515,7 @@ void mcrl2yyerror(const char *s);/* error function */
 extern "C" int mcrl2yywrap(void);/* wrap function */
 //Note: C linkage is needed for older versions of flex (2.5.4)
 ATermAppl spec_tree = NULL;      /* the parse tree */
+ATermIndexedSet parser_protect_table = NULL; /* table to protect parsed ATerms */
 
 //local declarations
 class mcrl2_lexer : public mcrl2yyFlexLexer {
@@ -540,7 +541,7 @@ int mcrl2yyFlexLexer::yylex(void) { return 1; }
 mcrl2_lexer *lexer = NULL;       /* lexer object, used by parse_streams */
 
 #define YY_NO_UNPUT 1
-#line 544 "mcrl2lexer.cpp"
+#line 545 "mcrl2lexer.cpp"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -667,10 +668,10 @@ YY_DECL
 	register char *yy_cp = NULL, *yy_bp = NULL;
 	register int yy_act;
 
-#line 69 "mcrl2lexer.ll"
+#line 70 "mcrl2lexer.ll"
 
 
-#line 674 "mcrl2lexer.cpp"
+#line 675 "mcrl2lexer.cpp"
 
 	if ( yy_init )
 		{
@@ -755,452 +756,452 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 71 "mcrl2lexer.ll"
+#line 72 "mcrl2lexer.ll"
 { col_nr += YYLeng(); /* whitespace */ }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 73 "mcrl2lexer.ll"
+#line 74 "mcrl2lexer.ll"
 { line_nr++; col_nr = 1; /* newline */ }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 75 "mcrl2lexer.ll"
+#line 76 "mcrl2lexer.ll"
 { col_nr += YYLeng(); /* comment */ }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 77 "mcrl2lexer.ll"
+#line 78 "mcrl2lexer.ll"
 { process_string(); return TAG_SORT_EXPR; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 78 "mcrl2lexer.ll"
+#line 79 "mcrl2lexer.ll"
 { process_string(); return TAG_DATA_EXPR; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 79 "mcrl2lexer.ll"
+#line 80 "mcrl2lexer.ll"
 { process_string(); return TAG_MULT_ACT; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 80 "mcrl2lexer.ll"
+#line 81 "mcrl2lexer.ll"
 { process_string(); return TAG_PROC_EXPR; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 81 "mcrl2lexer.ll"
+#line 82 "mcrl2lexer.ll"
 { process_string(); return TAG_SPEC; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 82 "mcrl2lexer.ll"
+#line 83 "mcrl2lexer.ll"
 { process_string(); return TAG_STATE_FRM; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 84 "mcrl2lexer.ll"
+#line 85 "mcrl2lexer.ll"
 { process_string(); return LMERGE; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 85 "mcrl2lexer.ll"
+#line 86 "mcrl2lexer.ll"
 { process_string(); return ARROW; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 86 "mcrl2lexer.ll"
+#line 87 "mcrl2lexer.ll"
 { process_string(); return LTE; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 87 "mcrl2lexer.ll"
+#line 88 "mcrl2lexer.ll"
 { process_string(); return GTE; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 88 "mcrl2lexer.ll"
+#line 89 "mcrl2lexer.ll"
 { process_string(); return CONS; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 89 "mcrl2lexer.ll"
+#line 90 "mcrl2lexer.ll"
 { process_string(); return SNOC; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 90 "mcrl2lexer.ll"
+#line 91 "mcrl2lexer.ll"
 { process_string(); return CONCAT; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 91 "mcrl2lexer.ll"
+#line 92 "mcrl2lexer.ll"
 { process_string(); return EQ; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 92 "mcrl2lexer.ll"
+#line 93 "mcrl2lexer.ll"
 { process_string(); return NEQ; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 93 "mcrl2lexer.ll"
+#line 94 "mcrl2lexer.ll"
 { process_string(); return AND; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 94 "mcrl2lexer.ll"
+#line 95 "mcrl2lexer.ll"
 { process_string(); return BARS; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 95 "mcrl2lexer.ll"
+#line 96 "mcrl2lexer.ll"
 { process_string(); return IMP; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 96 "mcrl2lexer.ll"
+#line 97 "mcrl2lexer.ll"
 { process_string(); return BINIT; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 97 "mcrl2lexer.ll"
+#line 98 "mcrl2lexer.ll"
 { process_string(); return ELSE; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 98 "mcrl2lexer.ll"
+#line 99 "mcrl2lexer.ll"
 { process_string(); return STAR; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 99 "mcrl2lexer.ll"
+#line 100 "mcrl2lexer.ll"
 { process_string(); return PLUS; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 100 "mcrl2lexer.ll"
+#line 101 "mcrl2lexer.ll"
 { process_string(); return MINUS; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 101 "mcrl2lexer.ll"
+#line 102 "mcrl2lexer.ll"
 { process_string(); return EQUALS; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 102 "mcrl2lexer.ll"
+#line 103 "mcrl2lexer.ll"
 { process_string(); return DOT; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 103 "mcrl2lexer.ll"
+#line 104 "mcrl2lexer.ll"
 { process_string(); return COMMA; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 104 "mcrl2lexer.ll"
+#line 105 "mcrl2lexer.ll"
 { process_string(); return COLON; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 105 "mcrl2lexer.ll"
+#line 106 "mcrl2lexer.ll"
 { process_string(); return SEMICOLON; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 106 "mcrl2lexer.ll"
+#line 107 "mcrl2lexer.ll"
 { process_string(); return QMARK; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 107 "mcrl2lexer.ll"
+#line 108 "mcrl2lexer.ll"
 { process_string(); return EXCLAM; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 108 "mcrl2lexer.ll"
+#line 109 "mcrl2lexer.ll"
 { process_string(); return AT; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 109 "mcrl2lexer.ll"
+#line 110 "mcrl2lexer.ll"
 { process_string(); return HASH; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 110 "mcrl2lexer.ll"
+#line 111 "mcrl2lexer.ll"
 { process_string(); return BAR; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 111 "mcrl2lexer.ll"
+#line 112 "mcrl2lexer.ll"
 { process_string(); return LPAR; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 112 "mcrl2lexer.ll"
+#line 113 "mcrl2lexer.ll"
 { process_string(); return RPAR; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 113 "mcrl2lexer.ll"
+#line 114 "mcrl2lexer.ll"
 { process_string(); return PBRACK; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 114 "mcrl2lexer.ll"
+#line 115 "mcrl2lexer.ll"
 { process_string(); return LBRACK; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 115 "mcrl2lexer.ll"
+#line 116 "mcrl2lexer.ll"
 { process_string(); return RBRACK; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 116 "mcrl2lexer.ll"
+#line 117 "mcrl2lexer.ll"
 { process_string(); return LANG; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 117 "mcrl2lexer.ll"
+#line 118 "mcrl2lexer.ll"
 { process_string(); return RANG; }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 118 "mcrl2lexer.ll"
+#line 119 "mcrl2lexer.ll"
 { process_string(); return PBRACE; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 119 "mcrl2lexer.ll"
+#line 120 "mcrl2lexer.ll"
 { process_string(); return LBRACE; }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 120 "mcrl2lexer.ll"
+#line 121 "mcrl2lexer.ll"
 { process_string(); return RBRACE; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 122 "mcrl2lexer.ll"
+#line 123 "mcrl2lexer.ll"
 { process_string(); return KWSORT; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 123 "mcrl2lexer.ll"
+#line 124 "mcrl2lexer.ll"
 { process_string(); return KWCONS; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 124 "mcrl2lexer.ll"
+#line 125 "mcrl2lexer.ll"
 { process_string(); return KWMAP; }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 125 "mcrl2lexer.ll"
+#line 126 "mcrl2lexer.ll"
 { process_string(); return KWVAR; }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 126 "mcrl2lexer.ll"
+#line 127 "mcrl2lexer.ll"
 { process_string(); return KWEQN; }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 127 "mcrl2lexer.ll"
+#line 128 "mcrl2lexer.ll"
 { process_string(); return KWACT; }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 128 "mcrl2lexer.ll"
+#line 129 "mcrl2lexer.ll"
 { process_string(); return KWPROC; }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 129 "mcrl2lexer.ll"
+#line 130 "mcrl2lexer.ll"
 { process_string(); return KWINIT; }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 131 "mcrl2lexer.ll"
+#line 132 "mcrl2lexer.ll"
 { process_string(); return KWSTRUCT; }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 132 "mcrl2lexer.ll"
+#line 133 "mcrl2lexer.ll"
 { process_string(); return BOOL; }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 133 "mcrl2lexer.ll"
+#line 134 "mcrl2lexer.ll"
 { process_string(); return POS; }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 134 "mcrl2lexer.ll"
+#line 135 "mcrl2lexer.ll"
 { process_string(); return NAT; }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 135 "mcrl2lexer.ll"
+#line 136 "mcrl2lexer.ll"
 { process_string(); return INT; }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 136 "mcrl2lexer.ll"
+#line 137 "mcrl2lexer.ll"
 { process_string(); return REAL; }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 137 "mcrl2lexer.ll"
+#line 138 "mcrl2lexer.ll"
 { process_string(); return LIST; }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 138 "mcrl2lexer.ll"
+#line 139 "mcrl2lexer.ll"
 { process_string(); return SET; }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 139 "mcrl2lexer.ll"
+#line 140 "mcrl2lexer.ll"
 { process_string(); return BAG; }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 141 "mcrl2lexer.ll"
+#line 142 "mcrl2lexer.ll"
 { process_string(); return CTRUE; }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 142 "mcrl2lexer.ll"
+#line 143 "mcrl2lexer.ll"
 { process_string(); return CFALSE; }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 143 "mcrl2lexer.ll"
+#line 144 "mcrl2lexer.ll"
 { process_string(); return DIV; }
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 144 "mcrl2lexer.ll"
+#line 145 "mcrl2lexer.ll"
 { process_string(); return MOD; }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 145 "mcrl2lexer.ll"
+#line 146 "mcrl2lexer.ll"
 { process_string(); return IN; }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 146 "mcrl2lexer.ll"
+#line 147 "mcrl2lexer.ll"
 { process_string(); return LAMBDA; }
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 147 "mcrl2lexer.ll"
+#line 148 "mcrl2lexer.ll"
 { process_string(); return FORALL; }
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 148 "mcrl2lexer.ll"
+#line 149 "mcrl2lexer.ll"
 { process_string(); return EXISTS; }
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 149 "mcrl2lexer.ll"
+#line 150 "mcrl2lexer.ll"
 { process_string(); return WHR; }
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 150 "mcrl2lexer.ll"
+#line 151 "mcrl2lexer.ll"
 { process_string(); return END; }
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 152 "mcrl2lexer.ll"
+#line 153 "mcrl2lexer.ll"
 { process_string(); return DELTA; }
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 153 "mcrl2lexer.ll"
+#line 154 "mcrl2lexer.ll"
 { process_string(); return TAU; }
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 154 "mcrl2lexer.ll"
+#line 155 "mcrl2lexer.ll"
 { process_string(); return SUM; }
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 155 "mcrl2lexer.ll"
+#line 156 "mcrl2lexer.ll"
 { process_string(); return BLOCK; }
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 156 "mcrl2lexer.ll"
+#line 157 "mcrl2lexer.ll"
 { process_string(); return ALLOW; }
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
-#line 157 "mcrl2lexer.ll"
+#line 158 "mcrl2lexer.ll"
 { process_string(); return HIDE; }
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
-#line 158 "mcrl2lexer.ll"
+#line 159 "mcrl2lexer.ll"
 { process_string(); return RENAME; }
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 159 "mcrl2lexer.ll"
+#line 160 "mcrl2lexer.ll"
 { process_string(); return COMM; }
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 161 "mcrl2lexer.ll"
+#line 162 "mcrl2lexer.ll"
 { process_string(); return VAL; }
 	YY_BREAK
 case 83:
 YY_RULE_SETUP
-#line 162 "mcrl2lexer.ll"
+#line 163 "mcrl2lexer.ll"
 { process_string(); return MU; }
 	YY_BREAK
 case 84:
 YY_RULE_SETUP
-#line 163 "mcrl2lexer.ll"
+#line 164 "mcrl2lexer.ll"
 { process_string(); return NU; }
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
-#line 164 "mcrl2lexer.ll"
+#line 165 "mcrl2lexer.ll"
 { process_string(); return DELAY; }
 	YY_BREAK
 case 86:
 YY_RULE_SETUP
-#line 165 "mcrl2lexer.ll"
+#line 166 "mcrl2lexer.ll"
 { process_string(); return YALED; }
 	YY_BREAK
 case 87:
 YY_RULE_SETUP
-#line 166 "mcrl2lexer.ll"
+#line 167 "mcrl2lexer.ll"
 { process_string(); return NIL; }
 	YY_BREAK
 case 88:
 YY_RULE_SETUP
-#line 168 "mcrl2lexer.ll"
+#line 169 "mcrl2lexer.ll"
 { process_string(); return ID; }
 	YY_BREAK
 case 89:
 YY_RULE_SETUP
-#line 170 "mcrl2lexer.ll"
+#line 171 "mcrl2lexer.ll"
 { process_string(); return NUMBER; }
 	YY_BREAK
 case 90:
 YY_RULE_SETUP
-#line 172 "mcrl2lexer.ll"
+#line 173 "mcrl2lexer.ll"
 { 
              col_nr += YYLeng(); yyerror("unknown character");
              /* remaining characters */
@@ -1208,10 +1209,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 91:
 YY_RULE_SETUP
-#line 177 "mcrl2lexer.ll"
+#line 178 "mcrl2lexer.ll"
 ECHO;
 	YY_BREAK
-#line 1215 "mcrl2lexer.cpp"
+#line 1216 "mcrl2lexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2016,7 +2017,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 177 "mcrl2lexer.ll"
+#line 178 "mcrl2lexer.ll"
 
 
 //Implementation of parse_streams
@@ -2093,6 +2094,7 @@ ATermAppl mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
   //streams.size() > 0
   spec_tree = NULL;
   ATprotectAppl(&spec_tree);
+  parser_protect_table = ATindexedSetCreate(10000, 50);
   line_nr = 1;
   col_nr = 1;
   cur_index = 0;
@@ -2105,6 +2107,7 @@ ATermAppl mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
     result = spec_tree;
     spec_tree = NULL;
   }
+  ATindexedSetDestroy(parser_protect_table);
   ATunprotectAppl(&spec_tree);
   return result;
 }

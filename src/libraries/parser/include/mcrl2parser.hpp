@@ -203,7 +203,7 @@
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 43 "mcrl2parser.yy"
+#line 46 "mcrl2parser.yy"
 typedef union YYSTYPE {
   ATermAppl appl;
   ATermList list;

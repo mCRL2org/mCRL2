@@ -34,6 +34,7 @@ void mcrl2yyerror(const char *s);/* error function */
 extern "C" int mcrl2yywrap(void);/* wrap function */
 //Note: C linkage is needed for older versions of flex (2.5.4)
 ATermAppl spec_tree = NULL;      /* the parse tree */
+ATermIndexedSet parser_protect_table = NULL; /* table to protect parsed ATerms */
 
 //local declarations
 class mcrl2_lexer : public mcrl2yyFlexLexer {
@@ -250,6 +251,7 @@ ATermAppl mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
   //streams.size() > 0
   spec_tree = NULL;
   ATprotectAppl(&spec_tree);
+  parser_protect_table = ATindexedSetCreate(10000, 50);
   line_nr = 1;
   col_nr = 1;
   cur_index = 0;
@@ -262,6 +264,7 @@ ATermAppl mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
     result = spec_tree;
     spec_tree = NULL;
   }
+  ATindexedSetDestroy(parser_protect_table);
   ATunprotectAppl(&spec_tree);
   return result;
 }
