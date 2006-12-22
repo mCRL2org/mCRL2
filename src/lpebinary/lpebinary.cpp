@@ -5,8 +5,8 @@
 // ----------------------------------------------------------------------
 //
 // file          : lpebinary 
-// date          : 21-12-2006
-// version       : 0.1
+// date          : 22-12-2006
+// version       : 0.2
 //
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
 //
@@ -54,7 +54,7 @@ using namespace lpe::data_init;
 
 namespace po = boost::program_options;
 
-#define VERSION "0.1"
+#define VERSION "0.2"
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief structure that holds all options available for the tool.
@@ -204,8 +204,8 @@ data_expression_list split_at(data_expression_list& list, unsigned int n)
 data_expression make_if_tree(const data_variable_list& new_parameters,
                              const data_expression_list& enumerated_elements)
 {
-  gsDebugMsg("New parameters: %s\n", new_parameters.to_string().c_str());
-  gsDebugMsg("Enumerated elements: %s\n", enumerated_elements.to_string().c_str());
+  //gsDebugMsg("New parameters: %s\n", new_parameters.to_string().c_str());
+  //gsDebugMsg("Enumerated elements: %s\n", enumerated_elements.to_string().c_str());
   int n,m;
   data_expression result;
 
@@ -244,7 +244,7 @@ data_expression make_if_tree(const data_variable_list& new_parameters,
                  );
   }
   
-  gsDebugMsg("If tree: %s\n", result.to_string().c_str());
+  //gsDebugMsg("If tree: %s\n", result.to_string().c_str());
   return result;
 }
 
@@ -347,6 +347,7 @@ data_expression replace_enumerated_parameters_in_data_expression(data_expression
   data_variable_list orig_parameters = data_variable_list(new_parameters_table.table_keys());
   for (data_variable_list::iterator i = orig_parameters.begin(); i != orig_parameters.end(); ++i)
   { 
+    gsDebugMsg("Replacing data expression %s with tree %s\n", expression.to_string().c_str(), make_if_tree(new_parameters_table.get(*i), enumerated_elements_table.get(*i)).to_string().c_str());
     expression = data_expression(replace(expression, *i, make_if_tree(new_parameters_table.get(*i), enumerated_elements_table.get(*i)), true));
   }
   return expression;
@@ -467,6 +468,19 @@ data_assignment_list replace_enumerated_parameters_in_data_assignments(const dat
   return result;
 }
 
+///Replace all parameters of finite sorts != bool in list with an if tree of booleans.
+action_list replace_enumerated_parameters_in_actions(action_list list,
+                                                     table& new_parameters_table,
+                                                     table& enumerated_elements_table)
+{
+  data_variable_list orig_parms = data_variable_list(new_parameters_table.table_keys());
+  for (data_variable_list::iterator i = orig_parms.begin(); i != orig_parms.end(); ++i)
+  {
+    list = replace(list, *i, make_if_tree(new_parameters_table.get(*i), enumerated_elements_table.get(*i)), true);
+  }
+  return list;
+}
+
 ///Replace all parameters of finite sorts != bool in summand with a vector of booleans
 LPE_summand replace_enumerated_parameters_in_summand(const LPE_summand& summand,
                                                      table& new_parameters_table,
@@ -474,10 +488,14 @@ LPE_summand replace_enumerated_parameters_in_summand(const LPE_summand& summand,
 {
   LPE_summand result;
 
+  gsDebugMsg("Summand: %s\n\n", summand.to_string().c_str());
+  
+  gsDebugMsg("\nOriginal condition: %s\n\n New condition: %s\n\n", summand.condition().to_string().c_str(), replace_enumerated_parameters_in_data_expression(summand.condition(), new_parameters_table, enumerated_elements_table).to_string().c_str());
+
   result = LPE_summand(summand.summation_variables(),
                        replace_enumerated_parameters_in_data_expression(summand.condition(), new_parameters_table, enumerated_elements_table),
                        summand.is_delta(),
-                       summand.actions(),
+                       replace_enumerated_parameters_in_actions(summand.actions(), new_parameters_table, enumerated_elements_table),
                        replace_enumerated_parameters_in_data_expression(summand.time(), new_parameters_table, enumerated_elements_table),
                        replace_enumerated_parameters_in_data_assignments(summand.assignments(), new_parameters_table, enumerated_elements_table)); 
 
@@ -495,6 +513,7 @@ summand_list replace_enumerated_parameters_in_summands(const summand_list& list,
     result = push_front(result, replace_enumerated_parameters_in_summand(*i, new_parameters_table, enumerated_elements_table));
   }
   result = reverse(result);
+
   return result;
 }
 
@@ -518,10 +537,11 @@ specification replace_enumerated_parameters_in_specification(const lpe::specific
                                                              table& enumerated_elements_table)
 {
   lpe::specification result;
- 
-  gsDebugMsg("Initial variables/state: %s\n\n\n", replace_enumerated_parameters_in_data_assignments(specification.initial_assignments(), new_parameters_table, enumerated_elements_table).to_string().c_str());
+
+  // Compute new initial assignments
   data_assignment_list initial_assignments = replace_enumerated_parameters_in_data_assignments(specification.initial_assignments(), new_parameters_table, enumerated_elements_table);
 
+  // Compute new specification
   result = lpe::specification(specification.data(),
                               specification.action_labels(),
                               replace_enumerated_parameters_in_lpe(specification.lpe(), new_parameters_table, enumerated_elements_table),
