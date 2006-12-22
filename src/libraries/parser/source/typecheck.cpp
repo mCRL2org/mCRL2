@@ -507,6 +507,7 @@ void gstcDataInit(void){
   context.processes=ATtableCreate(63,50);
   body.proc_pars=ATtableCreate(63,50);
   body.proc_bodies=ATtableCreate(63,50);
+  ATprotectList(&body.equations);
 
   //Creation of operation identifiers for system defined operations.
   //Bool
@@ -773,6 +774,7 @@ void gstcDataDestroy(void){
   ATtableDestroy(context.processes);
   ATtableDestroy(body.proc_pars);
   ATtableDestroy(body.proc_bodies);
+  ATunprotectList(&body.equations);
 }
  
 static ATbool gstcReadInSorts (ATermList Sorts){
