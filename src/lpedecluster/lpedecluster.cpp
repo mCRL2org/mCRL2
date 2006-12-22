@@ -5,8 +5,8 @@
 // ----------------------------------------------------------------------
 //
 // file          : lpedecluster 
-// date          : 01-12-2006
-// version       : 0.41
+// date          : 22-12-2006
+// version       : 0.5
 //
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
 //
@@ -47,7 +47,7 @@ using namespace lpe;
 
 namespace po = boost::program_options;
 
-#define VERSION "0.41"
+#define VERSION "0.5"
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief structure that holds all options available for the tool.
@@ -72,7 +72,19 @@ class squadt_interactor: public squadt_tool_interface
       lpd_file_for_output ///< file used to write output to
     };
 
+    enum further_options {
+      option_finite_only,
+      option_rewrite_strategy
+    };
+
+  private:
+    boost::shared_ptr < sip::datatype::enumeration > rewrite_strategy_enumeration;
+    
   public:
+    
+    /** \brief constructor */
+    squadt_interactor();
+    
     /** \brief configures tool capabilities */
     void set_capabilities(sip::tool::capabilities&) const;
 
@@ -86,6 +98,11 @@ class squadt_interactor: public squadt_tool_interface
     bool perform_task(sip::configuration&);
 };
 
+squadt_interactor::squadt_interactor() {
+  rewrite_strategy_enumeration = sip::datatype::enumeration::create("inner");
+  *rewrite_strategy_enumeration % "innerc" % "jitty" % "jittyc";
+}
+
 void squadt_interactor::set_capabilities(sip::tool::capabilities& capabilities) const
 {
   // The tool has only one main input combination
@@ -94,26 +111,92 @@ void squadt_interactor::set_capabilities(sip::tool::capabilities& capabilities) 
 
 void squadt_interactor::user_interactive_configuration(sip::configuration& configuration)
 {
+  using namespace sip;
+  using namespace sip::layout;
+  using namespace sip::datatype;
+  using namespace sip::layout::elements;
+
+  layout::manager::aptr top = layout::vertical_box::create();
+  layout::manager* current_box = new horizontal_box();
+
+  squadt_utility::radio_button_helper < RewriteStrategy >
+                                        strategy_selector(current_box, GS_REWR_INNER, "Inner");
+  strategy_selector.associate(current_box, GS_REWR_INNERC, "Innerc");
+  strategy_selector.associate(current_box, GS_REWR_JITTY,  "Jitty");
+  strategy_selector.associate(current_box, GS_REWR_JITTYC, "Jittyc");
+  
+  top->add(new label("Rewrite strategy"));
+  top->add(current_box);
+
+  current_box = new horizontal_box();
+  checkbox* finite_only = new checkbox("Only decluster variables of finite sorts");
+  current_box->add(finite_only, layout::left);
+  top->add(new label(" "));
+  top->add(current_box);
+  
+  button* okay_button = new button("OK");
+  top->add(new label(" "));
+  top->add(okay_button, layout::right);
+
+  send_display_layout(top);
+
+  okay_button->await_change();
+  
   configuration.add_output(lpd_file_for_output, sip::mime_type("lpe"), configuration.get_output_name(".lpe"));
+  if (finite_only->get_status())
+  {
+    configuration.add_option(option_finite_only);
+  }
+  
+  configuration.add_option(option_rewrite_strategy).append_argument(rewrite_strategy_enumeration, strategy_selector.get_selection());
+
 }
 
 bool squadt_interactor::check_configuration(sip::configuration const& configuration) const
 {
-// Check if everything present (see lpe2lts)
-  return (configuration.object_exists(lpd_file_for_input) &&
-          configuration.object_exists(lpd_file_for_output)
-         );
+  bool result = true;
+  result |= configuration.object_exists(lpd_file_for_input);
+  result |= configuration.object_exists(lpd_file_for_output);
+  result |= configuration.object_exists(option_rewrite_strategy);
+
+  return result;
 }
 
 bool squadt_interactor::perform_task(sip::configuration& configuration)
 {
+  using namespace sip;
+  using namespace sip::layout;
+  using namespace sip::datatype;
+  using namespace sip::layout::elements;
+
+  bool result = true;
+  
   tool_options options;
   options.input_file = configuration.get_object(lpd_file_for_input)->get_location();
   options.output_file = configuration.get_object(lpd_file_for_output)->get_location();
-  options.finite_only = false;
-  options.strategy = GS_REWR_INNER;
+  options.finite_only = configuration.object_exists(option_finite_only);
+  options.strategy = static_cast < RewriteStrategy > (boost::any_cast < size_t > (configuration.get_option_value(option_rewrite_strategy)));
 
-  return (do_decluster(options)==0);
+  layout::manager::aptr top(layout::vertical_box::create());
+  
+  top->add(new label("Declustering in progress"), layout::left);
+  send_display_layout(top);
+
+  //Perform declustering
+  top = layout::vertical_box::create();
+  int decluster_result = do_decluster(options);
+  if (decluster_result == 0) {
+    top->add(new label("Declustering succeeded"));
+    result = true;
+  }
+  else
+  {
+    top->add(new label("Declustering failed"));
+  }
+
+  send_display_layout(top);
+
+  return result;
 }
 
 #endif //ENABLE_SQUADT_CONNECTIVITY
@@ -161,7 +244,6 @@ lpe::data_variable_list get_occurrences(const data_variable_list& vl, const lpe:
 }
 
 ///\ret the list of all data_variables in vl, which are unequal to v
-//TODO: Check if this could be done with find_all_if
 lpe::data_variable_list filter(const data_variable_list& vl, const data_variable& v)
 {
   gsDebugMsg("filter:vl = %s, v = %s\n", vl.to_string().c_str(), v.to_string().c_str());
@@ -294,9 +376,7 @@ void decluster_summand(const lpe::specification& specification, const lpe::LPE_s
                                 summand.time().substitute(assignment_list_substitution(substitutions)),
                                 summand.assignments().substitute(assignment_list_substitution(substitutions))
                                 );
-
-//    LPE_summand s = set_summation_variables(summand, new_vars);
-//    s.substitute(assignment_list_substitution(substitutions));
+    
     result = push_front(result, s);
     ++nr_summands;
   }
@@ -332,6 +412,7 @@ lpe::summand_list decluster_summands(const lpe::specification& specification,
 lpe::specification decluster(const lpe::specification& specification, const tool_options& options)
 {
   gsVerboseMsg("Declustering...\n");
+  gsDebugMsg("Using rewrite strategy %d\n", options.strategy);
   lpe::LPE lpe = specification.lpe();
 
   gsVerboseMsg("Input: %d summands.\n", lpe.summands().size());
