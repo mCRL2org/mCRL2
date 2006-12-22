@@ -1795,6 +1795,8 @@ ATermList ATinsert(ATermList tail, ATerm el)
   unsigned int curLength = GET_LENGTH(tail->header);
   unsigned int newLength;
   ATermList cur, protoList;
+  header_type header;
+  HashNumber hnr;
   
   /* If length exceeds the maximum length that can be stored in the header,
      store MAX_LENGTH-1 in the header. ATgetLength will then count the length of the
@@ -1807,8 +1809,7 @@ ATermList ATinsert(ATermList tail, ATerm el)
     newLength = curLength+1;
   }
   
-  header_type header = LIST_HEADER(0, newLength);
-  HashNumber hnr;
+  header = LIST_HEADER(0, newLength);
 
   CHECK_TERM((ATerm)tail);
   CHECK_TERM(el);
