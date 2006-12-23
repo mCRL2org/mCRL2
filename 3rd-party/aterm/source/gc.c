@@ -166,7 +166,7 @@ static void mark_memory(ATerm *start, ATerm *stop)
     real_term = AT_isInsideValidTerm(odd_term);
     if (real_term != NULL) {
       if(!IS_MARKED((real_term)->header)) {
-        AT_markTerm(odd_term);
+        AT_markTerm(real_term);
       }
     }
 
@@ -212,7 +212,7 @@ static void mark_memory_young(ATerm *start, ATerm *stop)
     real_term = AT_isInsideValidTerm(odd_term);
     if (real_term != NULL) {
       if(!IS_MARKED(real_term->header)) {
-        AT_markTerm_young(odd_term);
+        AT_markTerm_young(real_term);
       }
     }
 
