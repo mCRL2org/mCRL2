@@ -4311,9 +4311,6 @@ static ATermList insert_summand(
      equal to NULL. */
 
   ATermList newsumlist=ATempty; 
-  if (gsIsDelta(multiAction) && gsIsNil(actTime))
-  { return sumlist;
-  }
 
   for(newsumlist=ATempty ;
         sumlist!=ATempty ; sumlist=ATgetNext(sumlist) )
@@ -4400,7 +4397,6 @@ static void add_summands(
   ATermAppl condition1=NULL,condition2=NULL;
   ATermAppl emptypops=NULL, notemptypops=NULL;
 
-
   /* remove the sum operators; collect the sum variables in the
      list sumvars */
   for( ; gsIsSum(summandterm) ; )
@@ -4410,7 +4406,6 @@ static void add_summands(
   
   /* translate the condition */       
   
-
   if ((regular)&&(singlestate))
   { condition1=gsMakeDataExprTrue();
   }
