@@ -28,7 +28,8 @@
 <!ENTITY opt_v "<option>-v</option>">
 <!ENTITY opt_d "<option>-d</option>">
 <!ENTITY opt_m "<option>-m</option>">
-<!ENTITY opt_g "<option>-m</option>">
+<!ENTITY opt_g "<option>-g</option>">
+<!ENTITY opt_D "<option>-D</option>">
 <!ENTITY opt_stack "<option>--stack</option>">
 <!ENTITY opt_regular "<option>--regular</option>">
 <!ENTITY opt_regular2 "<option>--regular2</option>">
@@ -50,6 +51,7 @@
 <!ENTITY opt_debug "<option>--debug</option>">
 <!ENTITY opt_nosumelm "<option>--no-sumelm</option>">
 <!ENTITY opt_nodeltaelm "<option>--no-deltaelm</option>">
+<!ENTITY opt_delta "<option>--delta</option>">
 <!ENTITY stdin "<constant>stdin</constant>">
 <!ENTITY stdout "<constant>stdout</constant>">
 ]>
@@ -381,6 +383,24 @@
         summand with each other summand to see whether the condition of
         the one implies the condition of the other. Clearly, this has
         kwadratic complexity, and can a long time.
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_D;</term>
+    <term>&opt_delta;</term>
+    <listitem>
+      <para>
+         With this option a (untimed) delta summand is added to each
+         state of each process. This influences the behaviour of timed processes in 
+         the sense that processes can also choose to idle, without being forced to
+         perform an action. For untimed processes this was already the case, and
+         there is no effect on the semantics. The advantage of this option is that
+         the delta can subsume all other conditional and timed delta's reducing the
+         number of delta summands in the resulting linear process. Furthermore, as
+         processing delta summands can be very time consuming, this option can
+         make linearisation substantially faster.
       </para>
     </listitem>
   </varlistentry>
