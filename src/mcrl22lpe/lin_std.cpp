@@ -279,6 +279,20 @@ static int gsIsDataExprFalse(ATermAppl t)
   return t==gsMakeOpIdFalse();
 }
 
+static ATermAppl gsMakeDeltaAtZero(void)
+{ return gsMakeAtTime(gsMakeDelta(),gsMakeDataExprNat2Real(gsMakeDataExprNat_int(0)));
+}
+
+static bool isDeltaAtZero(ATermAppl t)
+{ 
+  if (!gsIsAtTime(t)) return 0;
+  if (!gsIsDelta(ATAgetArgument(t,0))) return 0;
+  ATermAppl time=ATAgetArgument(t,1);
+  if (gsNatValue_int(ATAgetArgument(time,1))!=0) return 0;
+  /* BETTER: if (gsRealValue(time)!=0) return 0;  awaiting the availability of gsRealValue */
+  return 1;
+}
+
 static int strequal(char *s1,char *s2)
 { 
   return (strcmp(s1,s2)==0);
@@ -1026,7 +1040,7 @@ static void initialize_symbols(void)
   insertProcDeclaration(
            terminatedProcId,
            ATempty,
-           gsMakeSeq(terminationAction,gsMakeDelta()),
+           gsMakeSeq(terminationAction,gsMakeDeltaAtZero()), /* Changed to DeltaAtZero on 24/12/2006 */
            pCRL,0);
 }
 
@@ -2100,10 +2114,11 @@ static ATermAppl wraptime(
   }
 
   if (gsIsCond(body))
-  { return gsMakeCond(
+  { assert(isDeltaAtZero(ATAgetArgument(body,2)));
+    return gsMakeCond(
               ATAgetArgument(body,0),
               wraptime(ATAgetArgument(body,1),time,freevars),
-              gsMakeDelta());
+              gsMakeDeltaAtZero()); /* This second argument has become irrelevant, and ought not be used */
   }
 
   if (gsIsSeq(body))
@@ -2173,6 +2188,46 @@ static ATermList make_pars(ATermList sortlist)
             getfreshvariable(s,sort));
 } 
 
+static ATermAppl bodytovarheadGNF(
+            ATermAppl body, 
+            state s,
+            ATermList freevars, 
+            variableposition v);
+
+static ATermAppl distributeActionOverConditions(
+                      ATermAppl action,
+                      ATermAppl condition,
+                      ATermAppl restterm,
+                      ATermList freevars)
+{ 
+  if (gsIsCond(restterm))
+  { /* Here we check whether the process body has the form
+       a (c -> x <> y). For state space generation it turns out
+       to be beneficial to rewrite this to c-> a x <> a y, as in
+       certain cases this leads to a reduction of the number
+       of states, despite the duplication of the a action. In this code,
+       we recursively check whether the action must be distributed over
+       x and y. This optimisation
+       was observed by Yaroslav Usenko, May 2006. Implemented by JFG.
+       On industrial examples, it appears to reduce the state space
+       with a factor up to 2. */
+
+       ATermAppl body3=bodytovarheadGNF(ATAgetArgument(restterm,1),seq,freevars,later);
+       ATermAppl body4=bodytovarheadGNF(ATAgetArgument(restterm,2),seq,freevars,later);;
+        
+       ATermAppl c=ATAgetArgument(restterm,0);
+
+       ATermAppl r= gsMakeChoice(
+                       distributeActionOverConditions(action,gsMakeDataExprAnd(condition,c),body3,freevars),
+                       distributeActionOverConditions(action,
+                                     gsMakeDataExprAnd(condition,gsMakeDataExprNot(c)),body4,freevars));
+
+       return r; 
+  }
+  return gsMakeCond(condition,gsMakeSeq(action,restterm),gsMakeDeltaAtZero()); 
+}
+
+
 
 /* the following variables give the indices of the processes that represent tau
      and delta, respectively */
@@ -2232,31 +2287,31 @@ static ATermAppl bodytovarheadGNF(
     ATermAppl body1=ATAgetArgument(body,1);
     ATermAppl body2=ATAgetArgument(body,2);
 
-    if ((s<=sum) && ((gsIsDelta(body1))||(gsIsDelta(body2))))
-    { if (gsIsDelta(body2))
+    if ((s<=sum) && ((isDeltaAtZero(body1))||(isDeltaAtZero(body2))))
+    { if (isDeltaAtZero(body2))
       { return gsMakeCond(
                 condition,
                 bodytovarheadGNF(body1,seq,freevars,first),
-                gsMakeDelta());
+                gsMakeDeltaAtZero());
       }
-      /* body1==ATmake("Delta") */
+      /* body1=="Delta@0" */
       { 
         return gsMakeCond(
                 gsMakeDataExprNot(condition),
                 bodytovarheadGNF(body2,seq,freevars,first),
-                gsMakeDelta());
+                gsMakeDeltaAtZero());
     } } 
-    if (alt==s) /* body1!=Delta and body1!=Delta */
+    if (alt==s) /* body1!=Delta@0 and body1!=Delta@0 */
     { return 
         gsMakeChoice(
           gsMakeCond(
                 condition,
                 bodytovarheadGNF(body1,seq,freevars,first),
-                gsMakeDelta()),
+                gsMakeDeltaAtZero()),
           gsMakeCond(
                 gsMakeDataExprNot(condition),
                 bodytovarheadGNF(body2,seq,freevars,first),
-                gsMakeDelta()));
+                gsMakeDeltaAtZero()));
     }     
     body=bodytovarheadGNF(body,alt,freevars,first);
     newproc=newprocess(freevars,body,pCRL,canterminatebody(body,NULL,NULL,0));
@@ -2276,7 +2331,9 @@ static ATermAppl bodytovarheadGNF(
            a (c -> x <> y). For state space generation it turns out
            to be beneficial to rewrite this to c-> a x <> a y, as in
            certain cases this leads to a reduction of the number
-           of states, despite the duplication of the a action. This
+           of states, despite the duplication of the a action. An extra 
+           change (24/12/2006) is that the conditions are distributed recursively over
+           all conditions. The optimisation
            was observed by Yaroslav Usenko, May 2006. Implemented by JFG.
            On industrial examples, it appears to reduce the state space
            with a factor up to 2. */
@@ -2287,9 +2344,9 @@ static ATermAppl bodytovarheadGNF(
         ATermAppl c=ATAgetArgument(body2,0);
 
         ATermAppl r= gsMakeChoice(
-                     gsMakeCond(c,gsMakeSeq(body1,body3),gsMakeDelta()),
-                     gsMakeCond(gsMakeDataExprNot(c),gsMakeSeq(body1,body4),gsMakeDelta()));
-        return r;
+                       distributeActionOverConditions(body1,c,body3,freevars),
+                       distributeActionOverConditions(body1,gsMakeDataExprNot(c),body4,freevars));
+        return r; 
       }
       body2=bodytovarheadGNF(body2,seq,freevars,later);
       return gsMakeSeq(body1,body2);
@@ -2466,11 +2523,11 @@ static ATermAppl putbehind(ATermAppl body1, ATermAppl body2)
    }
 
   if (gsIsCond(body1))
-  { assert(gsIsDelta(ATAgetArgument(body1,2)));
+  { assert(isDeltaAtZero(ATAgetArgument(body1,2)));
      return gsMakeCond(
              ATAgetArgument(body1,0),
              putbehind(ATAgetArgument(body1,1),body2),
-             gsMakeDelta());
+             gsMakeDeltaAtZero());
   }
   
   if (gsIsSum(body1))
@@ -2533,15 +2590,15 @@ static ATermAppl distribute_condition(
   }
   
   if (gsIsSeq(body1))
-  { return gsMakeCond(condition,body1,gsMakeDelta());
+  { return gsMakeCond(condition,body1,gsMakeDeltaAtZero());
   }
   
   if (gsIsCond(body1)) 
-  { assert(gsIsDelta(ATAgetArgument(body1,2)));
+  { assert(isDeltaAtZero(ATAgetArgument(body1,2)));
     return gsMakeCond(
               gsMakeDataExprAnd(ATAgetArgument(body1,0),condition),
               ATAgetArgument(body1,1),
-              gsMakeDelta());
+              gsMakeDeltaAtZero());
   }
   
   if (gsIsSum(body1))
@@ -2557,26 +2614,26 @@ static ATermAppl distribute_condition(
              distribute_condition(
                  substitute_pCRLproc(terms,vars,ATAgetArgument(body1,1)),
                  condition));
-   }
+  }
   
   if (gsIsAction(body1))
-   { return gsMakeCond(condition,body1,gsMakeDelta());
-   }
+  { return gsMakeCond(condition,body1,gsMakeDeltaAtZero());
+  }
   
   if (gsIsMultAct(body1))
-   { return gsMakeCond(condition,body1,gsMakeDelta());
-   }
+  { return gsMakeCond(condition,body1,gsMakeDeltaAtZero());
+  }
   
   if (gsIsProcess(body1))
-   { return gsMakeCond(condition,body1,gsMakeDelta());
-   }
+  { return gsMakeCond(condition,body1,gsMakeDeltaAtZero());
+  }
   
   if (gsIsDelta(body1))
-   { return body1;
-   }
+  { return gsMakeCond(condition,body1,gsMakeDeltaAtZero());
+  }
   
   if (gsIsTau(body1))
-  { return gsMakeCond(condition,body1,gsMakeDelta());
+  { return gsMakeCond(condition,body1,gsMakeDeltaAtZero());
   }
 
   gsErrorMsg("Unexpected process format in distribute condition %T\n",body1);
@@ -2838,11 +2895,12 @@ static ATermAppl to_regular_form(
   } 
   
   if (gsIsCond(t))
-  { assert(gsIsDelta(ATAgetArgument(t,2)));
+  { 
+    assert(isDeltaAtZero(ATAgetArgument(t,2)));
     return gsMakeCond(
               ATAgetArgument(t,0),
               to_regular_form(ATAgetArgument(t,1),todo,freevars),
-              gsMakeDelta());
+              gsMakeDeltaAtZero());
 
   } 
   
@@ -2904,7 +2962,7 @@ static ATermAppl distributeTime(
     return gsMakeCond(
               gsMakeDataExprAnd(ATAgetArgument(body,0),timecondition),
               body1,
-              gsMakeDelta());
+              gsMakeDeltaAtZero());
   }
 
   if (gsIsSeq(body))
@@ -4429,7 +4487,7 @@ static void add_summands(
     { /* regular and singlestate */
       condition1=gsMakeDataExprAnd(localcondition,condition1);
     }
-    assert(gsIsDelta(ATAgetArgument(summandterm,2)));
+    assert(isDeltaAtZero(ATAgetArgument(summandterm,2)));
     summandterm=ATAgetArgument(summandterm,1);
   }
 
@@ -7948,11 +8006,11 @@ static ATermAppl alphaconversionterm(
   }  
   
   if (gsIsCond(t))
-  { assert(gsIsDelta(ATAgetArgument(t,2)));
+  { assert(isDeltaAtZero(ATAgetArgument(t,2)));
     return gsMakeCond(
               substitute_data(tl,varlist,ATAgetArgument(t,0)),
               alphaconversionterm(ATAgetArgument(t,1),parameters,varlist,tl),
-              gsMakeDelta());
+              gsMakeDeltaAtZero());
   }  
   
   if (gsIsSum(t)) 
