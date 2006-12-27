@@ -2212,18 +2212,24 @@ static ATermAppl distributeActionOverConditions(
        On industrial examples, it appears to reduce the state space
        with a factor up to 2. */
 
-       ATermAppl body3=bodytovarheadGNF(ATAgetArgument(restterm,1),seq,freevars,later);
-       ATermAppl body4=bodytovarheadGNF(ATAgetArgument(restterm,2),seq,freevars,later);;
         
        ATermAppl c=ATAgetArgument(restterm,0);
 
        ATermAppl r= gsMakeChoice(
-                       distributeActionOverConditions(action,gsMakeDataExprAnd(condition,c),body3,freevars),
-                       distributeActionOverConditions(action,
-                                     gsMakeDataExprAnd(condition,gsMakeDataExprNot(c)),body4,freevars));
+                       distributeActionOverConditions(
+                                 action,
+                                 gsMakeDataExprAnd(condition,c),
+                                 ATAgetArgument(restterm,1),
+                                 freevars),
+                       distributeActionOverConditions(
+                                 action,
+                                 gsMakeDataExprAnd(condition,gsMakeDataExprNot(c)),
+                                 ATAgetArgument(restterm,2),
+                                 freevars));
 
        return r; 
   }
+  restterm=bodytovarheadGNF(restterm,seq,freevars,later);
   return gsMakeCond(condition,gsMakeSeq(action,restterm),gsMakeDeltaAtZero()); 
 }
 
@@ -2338,14 +2344,14 @@ static ATermAppl bodytovarheadGNF(
            On industrial examples, it appears to reduce the state space
            with a factor up to 2. */
 
-        ATermAppl body3=bodytovarheadGNF(ATAgetArgument(body2,1),seq,freevars,later);
-        ATermAppl body4=bodytovarheadGNF(ATAgetArgument(body2,2),seq,freevars,later);;
+//        ATermAppl body3=bodytovarheadGNF(ATAgetArgument(body2,1),seq,freevars,later);
+//        ATermAppl body4=bodytovarheadGNF(ATAgetArgument(body2,2),seq,freevars,later);
         
         ATermAppl c=ATAgetArgument(body2,0);
 
         ATermAppl r= gsMakeChoice(
-                       distributeActionOverConditions(body1,c,body3,freevars),
-                       distributeActionOverConditions(body1,gsMakeDataExprNot(c),body4,freevars));
+                       distributeActionOverConditions(body1,c,ATAgetArgument(body2,1),freevars),
+                       distributeActionOverConditions(body1,gsMakeDataExprNot(c),ATAgetArgument(body2,2),freevars));
         return r; 
       }
       body2=bodytovarheadGNF(body2,seq,freevars,later);
