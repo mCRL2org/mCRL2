@@ -293,12 +293,12 @@ static ATermAppl convert_lpe(ATermAppl spec, ATermList typelist, ATermList *ids)
 		ATermList n = ATmakeList0();
 		for (; !ATisEmpty(l); l=ATgetNext(l),o2=ATgetNext(o2))
 		{
-			n = ATinsert(n,
-				(ATerm) gsMakeAssignment(
-					ATAgetFirst(o2),
-					dataterm2ATermAppl(ATAgetFirst(l),o,typelist)
-				)
-			);
+			ATermAppl par = ATAgetFirst(o2);
+			ATermAppl val = dataterm2ATermAppl(ATAgetFirst(l),o,typelist);
+			if ( !ATisEqual(par,val) )
+			{
+				n = ATinsert(n,(ATerm) gsMakeAssignment(par,val));
+			}
 		}
 		n = ATreverse(n);
 
