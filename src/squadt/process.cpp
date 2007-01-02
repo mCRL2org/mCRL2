@@ -132,8 +132,8 @@ namespace squadt {
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
       TerminateProcess(pi.hProcess, 1);
 
-      CloseHandle( pi.hProcess );
-      CloseHandle( pi.hThread );
+      CloseHandle(pi.hProcess);
+      CloseHandle(pi.hThread);
 #else
       kill(identifier, SIGKILL);
 #endif
