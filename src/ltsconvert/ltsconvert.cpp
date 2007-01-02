@@ -387,6 +387,7 @@ static void print_help(FILE *f, char *Name)
     "                        parameter names of states when saving in fsm format and\n"
     "                        to convert non-mCRL2 LTSs to a mCRL2 LTS\n"
     "  -n, --no-state        leave out state information when saving in dot format\n"
+    "  -D, --determinise     determinise LTS\n"
     "\n"
     "Minimisation options:\n"
     "      --none            do not minimise (default)\n"
@@ -488,27 +489,28 @@ int main(int argc, char **argv)
   ATinit(argc,argv,&bot);
   gsEnableConstructorFunctions();
 
-  #define ShortOptions      "hqvi:o:fl:nsbtua"
+  #define ShortOptions      "hqvi:o:fl:nsbtuaD"
   #define VersionOption     0x1
   #define NoneOption        0x2
   #define TauOption         0x3
   struct option LongOptions[] = { 
-    {"help"      , no_argument,         NULL, 'h'},
-    {"version"   , no_argument,         NULL, VersionOption},
-    {"quiet"     , no_argument,         NULL, 'q'},
-    {"verbose"   , no_argument,         NULL, 'v'},
-    {"in"        , required_argument,   NULL, 'i'},
-    {"out"       , required_argument,   NULL, 'o'},
-    {"formats"   , no_argument,         NULL, 'f'},
-    {"lpe"       , required_argument,   NULL, 'l'},
-    {"no-state"  , no_argument,         NULL, 'n'},
-    {"strong"    , no_argument,         NULL, 's'},
-    {"none"      , no_argument,         NULL, NoneOption},
-    {"branching" , no_argument,         NULL, 'b'},
-    {"trace"     , no_argument,         NULL, 't'},
-    {"obs-trace" , no_argument,         NULL, 'u'},
-    {"tau"       , required_argument,   NULL, TauOption},
-    {"add"       , no_argument,         NULL, 'a'},
+    {"help"        , no_argument,         NULL, 'h'},
+    {"version"     , no_argument,         NULL, VersionOption},
+    {"verbose"     , no_argument,         NULL, 'v'},
+    {"quiet"       , no_argument,         NULL, 'q'},
+    {"in"          , required_argument,   NULL, 'i'},
+    {"out"         , required_argument,   NULL, 'o'},
+    {"formats"     , no_argument,         NULL, 'f'},
+    {"lpe"         , required_argument,   NULL, 'l'},
+    {"no-state"    , no_argument,         NULL, 'n'},
+    {"strong"      , no_argument,         NULL, 's'},
+    {"none"        , no_argument,         NULL, NoneOption},
+    {"branching"   , no_argument,         NULL, 'b'},
+    {"trace"       , no_argument,         NULL, 't'},
+    {"obs-trace"   , no_argument,         NULL, 'u'},
+    {"tau"         , required_argument,   NULL, TauOption},
+    {"add"         , no_argument,         NULL, 'a'},
+    {"determinise" , no_argument,         NULL, 'D'},
     {0, 0, 0, 0}
   };
 
@@ -521,6 +523,7 @@ int main(int argc, char **argv)
   bool print_dot_state = true;
   lts_equivalence equivalence = lts_eq_none;
   lts_eq_options eq_opts; set_eq_options_defaults(eq_opts);
+  bool determinise = false;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   squadt_interactor c;
@@ -601,6 +604,9 @@ int main(int argc, char **argv)
         case 'a':
           eq_opts.reduce.add_class_to_state = true;
           break;
+        case 'D':
+          determinise = true;
+          break;
         default:
           break;
       }
@@ -618,6 +624,12 @@ int main(int argc, char **argv)
     if ( verbose )
     {
       gsSetVerboseMsg();
+    }
+
+    if ( determinise && (equivalence != lts_eq_none) )
+    {
+      gsErrorMsg("cannot use option -D/--determinise together with LTS reduction options\n");
+      return 1;
     }
 
     bool use_stdin = (optind >= argc);
@@ -687,6 +699,12 @@ int main(int argc, char **argv)
     {
       gsVerboseMsg("reducing LTS...\n");
       l.reduce(equivalence,eq_opts);
+    }
+
+    if ( determinise )
+    {
+      gsVerboseMsg("determinising LTS...\n");
+      l.determinise();
     }
  
     if ( use_stdout )

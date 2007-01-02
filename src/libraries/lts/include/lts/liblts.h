@@ -141,10 +141,6 @@ namespace lts
       unsigned int num_transitions();
       unsigned int num_labels();
       
-      void set_num_states(unsigned int num_states);
-      void set_num_transitions(unsigned int num_transitions);
-      void set_num_labels(unsigned int num_labels);
-
       unsigned int initial_state();
       void set_initial_state(unsigned int state);
       
@@ -182,8 +178,14 @@ namespace lts
       bool has_state_info();
       bool has_label_info();
 
+      void remove_state_values();
+
+      void sort_transitions();
+      unsigned int* get_transition_indices();
+      
       bool reduce(lts_equivalence eq, lts_eq_options &opts);
       bool compare(lts &l, lts_equivalence eq, lts_eq_options &opts);
+      void determinise();
 
       friend class state_iterator;
       friend class label_iterator;

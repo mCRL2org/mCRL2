@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <assert.h>
+#include <stdlib.h>
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "lts/liblts.h"
@@ -48,6 +49,15 @@ ATermAppl make_timed_pair(ATermAppl action, ATermAppl time)
   return ATmakeAppl2(timed_pair,(ATerm) action,(ATerm) time);
 }
 
+static int compare_transitions(const void *t1, const void *t2) {
+  if (((transition*)t1)->from != ((transition*)t2)->from) {
+    return int(((transition*)t1)->from) - int(((transition*)t2)->from);
+  } else if (((transition*)t1)->label != ((transition*)t2)->label) {
+    return int(((transition*)t1)->label) - int(((transition*)t2)->label);
+  } else  {
+    return int(((transition*)t1)->to) - int(((transition*)t2)->to);
+  } 
+}
 
 
 lts_extra::lts_extra()
@@ -1063,6 +1073,39 @@ bool lts::has_label_info()
   return label_info;
 }
 
+void lts::remove_state_values() {
+  state_info = false;
+  if ( state_values != NULL )
+  {
+    ATunprotectArray(state_values);
+    free(state_values);
+    state_values = NULL;
+  }
+}
+
+void lts::sort_transitions() {
+  qsort(transitions,ntransitions,sizeof(transition),compare_transitions);
+}
+
+unsigned int* lts::get_transition_indices() {
+// PRE: the array of transitions is sorted on source state
+// RETURNS: array A of size (nstates+1) such that for every state s:
+// [ A[s] .. A[s+1] ) are all transitions starting in s
+  unsigned int *A = (unsigned int*)malloc((nstates+1)*sizeof(unsigned int));
+  if (A == NULL) {
+    gsErrorMsg("out of memory\n");
+    exit(1);
+  }
+  unsigned int t = 0;
+  A[0] = 0;
+  for (unsigned int s = 1; s <= nstates; ++s) {
+    while (t < ntransitions && transition_from(t) == s-1) {
+      ++t;
+    }
+    A[s] = t;
+  }
+  return A;
+}
 
 state_iterator::state_iterator(lts *l)
 {
