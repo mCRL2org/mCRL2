@@ -576,10 +576,10 @@ static int MakeEquivalenceClasses(int initState,
      nstate = n_states;
      /* Pi_pt = 0;
      n_partitions = 0; */
-     for (i=0;i<nstate;i++) {
+     for (i=0;i<nstate;i++) { // XXX What is the purpose of this loop?
           mark[i] = ATfalse;
           s[i] = i;
-          blockref[i] = 0;
+          //blockref[i] = 0;
           }
      return (int) result;
      }

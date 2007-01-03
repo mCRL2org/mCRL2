@@ -41,6 +41,8 @@ bool lts::reduce(lts_equivalence eq, lts_eq_options &opts)
     case lts_eq_branch:
       return bisimulation_reduce(*this,true,opts.reduce.add_class_to_state,&opts.reduce.tau_actions);
     case lts_eq_trace:
+      determinise();
+      return bisimulation_reduce(*this,false);
     case lts_eq_obs_trace:
     default:
       return false;

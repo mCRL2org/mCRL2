@@ -45,14 +45,17 @@ class squadt_interactor : public squadt_tool_interface {
       no_transformation,                          ///< copies from one format to the other without transformation
       minimisation_modulo_strong_bisimulation,    ///< minimisation modulo strong bisimulation
       minimisation_modulo_branching_bisimulation, ///< minimisation modulo branching bisimulation
-      add_bisimulation_equivalence_class          ///< adds a bisimulation equivalence class to the state information [mCRL2 SVC specific]
+      minimisation_modulo_trace_equivalence,      ///< minimisation modulo trace equivalence
+      minimisation_modulo_obs_trace_equivalence,  ///< minimisation modulo observational trace equivalence
+      determinisation                             ///< determinisation
     };
 
     enum further_options {
       option_selected_transformation = 3,                ///< the selected transformation method
       option_selected_output_format = 4,                 ///< the selected output format
       option_no_state_information = 5,                   ///< dot format output specific option to not save state information
-      option_tau_actions = 6                             ///< the actions that should be recognised as tau
+      option_tau_actions = 6,                            ///< the actions that should be recognised as tau
+      option_add_bisimulation_equivalence_class = 7      ///< adds bisimulation equivalence class to the state information of a state instead of actually reducing modulo bisimulation [mCRL2 SVC specific]
     };
 
   private:
@@ -82,7 +85,9 @@ squadt_interactor::squadt_interactor() {
 
   transformation_method_enumeration->add_value("modulo_strong_bisimulation");
   transformation_method_enumeration->add_value("modulo_branching_bisimulation");
-  transformation_method_enumeration->add_value("add_bisimulation_equivalence_class");
+  transformation_method_enumeration->add_value("modulo_trace_equivalence");
+  transformation_method_enumeration->add_value("modulo_observational_trace_equivalence");
+  transformation_method_enumeration->add_value("determinise");
 }
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
@@ -132,12 +137,19 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   checkbox* for_dot_omit_state_information = new checkbox("Omit state information (dot only)");
   top->add(for_dot_omit_state_information);
 
+  label* text_minimise = new label("LTS transformation:");
+  top->add(text_minimise);
   squadt_utility::radio_button_helper < transformation_options >
         transformation_selector(top, no_transformation, "none");
 
-  transformation_selector.associate(top, minimisation_modulo_strong_bisimulation, "minimisation modulo strong bisimulation");
-  transformation_selector.associate(top, minimisation_modulo_branching_bisimulation, "minimisation modulo branching bisimulation");
-  transformation_selector.associate(top, add_bisimulation_equivalence_class, "add bisimulation equivalence class");
+  transformation_selector.associate(top, minimisation_modulo_strong_bisimulation, "reduction modulo strong bisimulation");
+  transformation_selector.associate(top, minimisation_modulo_branching_bisimulation, "reduction modulo branching bisimulation");
+  transformation_selector.associate(top, minimisation_modulo_trace_equivalence, "reduction modulo trace equivalence");
+  //transformation_selector.associate(top, minimisation_modulo_obs_trace_equivalence, "reduction modulo observational trace equivalence");
+  transformation_selector.associate(top, determinisation, "determinisation");
+  
+  checkbox* bisimulation_add_eq_classes = new checkbox("Add equivalence classes to state instead of reducing LTS (bisimulation only)");
+  top->add(bisimulation_add_eq_classes);
 
   h = new layout::horizontal_box();
   h->add(new label("Internal (tau) actions : "));
@@ -177,8 +189,8 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
       c.add_input(lpd_file_auxiliary, sip::mime_type("lpe"), lpd_file_field->get_text());
 
-      c.add_option(option_selected_transformation).append_argument(transformation_method_enumeration,
-                 static_cast < transformation_options > (transformation_selector.get_selection()));
+      transformation_options trans_opt = static_cast < transformation_options > (transformation_selector.get_selection());
+      c.add_option(option_selected_transformation).append_argument(transformation_method_enumeration, trans_opt);
 
       c.add_option(option_selected_output_format).append_argument(sip::datatype::integer::naturals,
                  static_cast < unsigned int > (format_selector.get_selection()));
@@ -188,6 +200,12 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
       }
 
       c.add_option(option_tau_actions).append_argument(datatype::string::standard, tau_field->get_text());
+      
+      if ((trans_opt == minimisation_modulo_strong_bisimulation ||
+           trans_opt == minimisation_modulo_branching_bisimulation) &&
+          bisimulation_add_eq_classes->get_status()) {
+        c.add_option(option_add_bisimulation_equivalence_class);
+      }
     }
   }
 }
@@ -231,6 +249,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 
   if (method != no_transformation) {
     lts_equivalence equivalence = lts_eq_none;
+    bool determinise = false;
 
     lts_eq_options  eq_opts;
 
@@ -243,25 +262,37 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
       case minimisation_modulo_branching_bisimulation:
         equivalence = lts_eq_branch;
         break;
-      //case:
+      case minimisation_modulo_trace_equivalence:
+        equivalence = lts_eq_trace;
+        break;
+      //case minimisation_modulo_obs_trace_equivalence:
       //  equivalence = lts_eq_obs_trace
-      //case:
-      //  equivalence = lts_eq_trace;
-      case add_bisimulation_equivalence_class:
-        eq_opts.reduce.add_class_to_state = true;
+      //  break;
+      case determinisation:
+        determinise = true;
         break;
       default:
         break;
+    }
+    if (c.option_exists(option_add_bisimulation_equivalence_class)) {
+      eq_opts.reduce.add_class_to_state = true;
     }
 
     if (c.option_exists(option_tau_actions)) {
       lts_reduce_add_tau_actions(eq_opts, (boost::any_cast < std::string > (c.get_option_value(option_tau_actions)).c_str()));
     }
 
-    gsVerboseMsg("reducing LTS...\n");
+    if ( determinise )
+    {
+      gsVerboseMsg("determinising LTS..\n");
 
-    if (!l.reduce(equivalence,eq_opts)) {
-      return (false);
+      l.determinise();
+    } else {
+      gsVerboseMsg("reducing LTS...\n");
+
+      if (!l.reduce(equivalence,eq_opts)) {
+        return (false);
+      }
     }
   }
  
@@ -393,6 +424,8 @@ static void print_help(FILE *f, char *Name)
     "      --none            do not minimise (default)\n"
     "  -s, --strong          minimise using strong bisimulation\n"
     "  -b, --branching       minimise using branching bisimulation\n"
+    "  -t, --trace           minimise using trace equivalence\n"
+//    "  -u, --obs-trace       minimise using observational trace equivalence\n"
     "  -a, --add             do not minimise but save a copy of the original LTS\n"
     "                        extended with a state parameter indicating the\n"
     "                        bisimulation class a state belongs to (only for mCRL2)\n"
