@@ -9,12 +9,19 @@ called the same on other systems. Only top-level packages are mentioned; lower
 level packages are (usually) automatically installed. Furthermore, the status
 of the packages is mentioned (required, recommended or optional):
 - make >= 3.80: package make [required]
-- flex >= 2.5.4a-12: package flex [required]
-- bison >= 2.0: package bison [required]
+- flex >= 2.5.4a-12: package flex [optional]
+- bison >= 2.0: package bison [optional]
 - wxWidgets >= 2.6.2: package libwxgtk2.6-dev or libwxgtk2.6-dbg [recommended]
 - xml2 development libraries >= 2.6.22: package libxml2-dev [recommended]
 - default icon locations: package gnome-themes, gnome-themes-extras or
   hicolor-icon-theme [optional]
+
+Note: at this moment the toolset does not properly install without wxWidgets
+and libXML2. A workaround is to do a manual install after make. The cause of
+this is a bug in Boost Build v2 (build environment) for which no easy
+workaround seems possible at this time. At least no solution that does not
+bring back problems that have been solved with the last significant changes to
+the build procedure.
 
 The required packages enable the following tools:
 + mcrl22lpe:   translate an mCRL2 specification into a linear process equation
