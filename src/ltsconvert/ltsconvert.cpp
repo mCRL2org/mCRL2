@@ -430,7 +430,7 @@ static void print_help(FILE *f, char *Name)
     "                        extended with a state parameter indicating the\n"
     "                        bisimulation class a state belongs to (only for mCRL2)\n"
     "      --tau=ACTNAMES    consider actions with a name in the comma separated\n"
-    "                        list ACTNAMES to be a internal (tau) actions in\n"
+    "                        list ACTNAMES to be internal (tau) actions in\n"
     "                        addition to those defined as such by the input\n",
     Name);
 }
