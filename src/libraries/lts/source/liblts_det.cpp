@@ -27,31 +27,31 @@ class comp_trans_lds {
     }
 };
 
-static void get_trans(unsigned int *begin,tree_set_store &tss,unsigned int d,
+static void get_trans(unsigned int *begin,tree_set_store *tss,unsigned int d,
     vector<unsigned int> &d_trans) {
-  if (!tss.is_set_empty(d)) {
-    if (tss.is_set_empty(tss.get_set_child_right(d))) {
-      unsigned int e = begin[tss.get_set_child_left(d)+1];
-      for (unsigned int j = begin[tss.get_set_child_left(d)]; j < e; ++j) {
+  if (!tss->is_set_empty(d)) {
+    if (tss->is_set_empty(tss->get_set_child_right(d))) {
+      unsigned int e = begin[tss->get_set_child_left(d)+1];
+      for (unsigned int j = begin[tss->get_set_child_left(d)]; j < e; ++j) {
         d_trans.push_back(j);
       }
     }
     else {
-      get_trans(begin,tss,tss.get_set_child_left(d),d_trans);
-      get_trans(begin,tss,tss.get_set_child_right(d),d_trans);
+      get_trans(begin,tss,tss->get_set_child_left(d),d_trans);
+      get_trans(begin,tss,tss->get_set_child_right(d),d_trans);
     }
   }
 }
 
 void lts::determinise() {
-  tree_set_store tss;
+  tree_set_store *tss = new tree_set_store();
   
   vector<unsigned int> d_transs;
   vector<unsigned int> d_states;
   
   // create the initial state of the DLTS
   d_states.push_back(initial_state());
-  unsigned int d_id = tss.set_set_tag(tss.create_set(d_states));
+  unsigned int d_id = tss->set_set_tag(tss->create_set(d_states));
   d_states.clear();
   
   sort_transitions();
@@ -64,10 +64,10 @@ void lts::determinise() {
   int s;
   unsigned int i,to,lbl,n_t;
   
-  while (d_id < tss.get_next_tag()) {
+  while (d_id < tss->get_next_tag()) {
     // collect the outgoing transitions of every state of DLTS state d_id in
     // the vector d_transs
-    get_trans(begin,tss,tss.get_set(d_id),d_transs);
+    get_trans(begin,tss,tss->get_set(d_id),d_transs);
     
     // sort d_transs by label and (if labels are equal) by destination
     sort(d_transs.begin(),d_transs.end(),comp_trans_lds(this));
@@ -87,10 +87,10 @@ void lts::determinise() {
           ++i;
         }
       }
-      s = tss.create_set(d_states);
+      s = tss->create_set(d_states);
 
       // generate the transitions to each of the next states
-      if (!tss.is_set_empty(s)) {
+      if (!tss->is_set_empty(s)) {
         if (d_ntransitions >= d_trans_size) {
           d_trans_size *= 2;
           d_transitions = (transition*)realloc(d_transitions,d_trans_size*
@@ -102,12 +102,12 @@ void lts::determinise() {
         }
         d_transitions[d_ntransitions].from  = d_id;
         d_transitions[d_ntransitions].label = lbl;
-        d_transitions[d_ntransitions].to    = tss.set_set_tag(s);
+        d_transitions[d_ntransitions].to    = tss->set_set_tag(s);
         ++d_ntransitions;
         if (d_ntransitions%10000 == 0) {
           gsVerboseMsg(
               "generated %d states and %d transitions; explored %d states\n",
-              tss.get_next_tag(),d_ntransitions,d_id);
+              tss->get_next_tag(),d_ntransitions,d_id);
         }
       }
       d_states.clear();
@@ -116,6 +116,7 @@ void lts::determinise() {
     ++d_id;
   }
 
+  delete tss;
   remove_state_values();
   free(begin);
   free(states);

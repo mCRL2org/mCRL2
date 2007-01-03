@@ -6,11 +6,11 @@
 #define EMPTY_SET (-1)
 #define EMPTY_LIST (-1)
 #define EMPTY_TAG (-1)
-#define HASH_CLASS 17
+#define HASH_CLASS 16
 #define TAGS_BLOCK 15000
 #define BUCKETS_BLOCK 25000
 // simple hash function; uses two large primes
-#define hash(l,r,m) ((36425657*l + 77673689*r)&m)
+#define hash(l,r,m) (36425657*l + 77673689*r) & m
 
 using namespace std;
 
@@ -28,7 +28,7 @@ tree_set_store::tree_set_store() {
   tags_size = 0;
   tags_next = 0;
 
-  hashmask = 1 << HASH_CLASS - 1;
+  hashmask = (1 << HASH_CLASS) - 1;
   hashtable = (int*)malloc((hashmask+1)*sizeof(int));
   if (hashtable == NULL) {
     gsErrorMsg("out of memory\n");
@@ -72,7 +72,7 @@ void tree_set_store::check_buckets() {
       exit(1);
     }
   }
-  if (hashmask*3 < buckets_next*4) {
+  if (buckets_next*4 >= hashmask*3) {
     hashmask = hashmask + hashmask + 1;
     hashtable = (int*)realloc(hashtable,(hashmask+1)*sizeof(int));
     if (hashtable == NULL) {
@@ -99,7 +99,7 @@ int tree_set_store::build_set(int child_l,int child_r) {
 	buckets[buckets_next].tag	    = EMPTY_TAG;
 	buckets[buckets_next].next    = hashtable[hc];
 	hashtable[hc] = buckets_next;
-	return (buckets_next++);
+	return buckets_next++;
 }
 
 int tree_set_store::find_set(int child_l,int child_r) {
