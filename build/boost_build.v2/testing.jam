@@ -93,12 +93,10 @@ rule run_tool_expect_failure ( name tool : options * : requirements * ) {
 
 IMPORT $(__name__)
        : run_tool_on_examples
-         examples_by_extension
          run_tool_expect_success
          run_tool_expect_failure
        : $(caller)
        : run_tool_on_examples
-         examples_by_extension
          run_tool_expect_success
          run_tool_expect_failure
        ;
