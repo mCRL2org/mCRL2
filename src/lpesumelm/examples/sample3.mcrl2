@@ -1,3 +1,11 @@
+% lpesumelm Test Case 3 -- sum variable occurs in both lefthand side and 
+% righthand side of equality in condition
+%
+% The sum variable y occurs in both the lefthand side and righthand side of
+% the same equality in the condition, hence the variable should be left
+% unchanged.
 act a,b;
+
 proc X = sum y:Int . (y==y+1) -> a@y . b@(y+1) . X;
+
 init X;

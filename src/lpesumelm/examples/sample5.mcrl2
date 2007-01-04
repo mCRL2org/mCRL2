@@ -1,3 +1,15 @@
+% lpesumelm Test Case 5 -- sum variable occurs multiple times in lefthand sides
+% of equalities in the condition
+%
+% sum variable d occurs twice in the lefthandside of an equality
+% the substitutions d := e and d := f are possible, and only one should
+% be performed.
+% This results in either:
+% sum e:D . sum f:D . (e == f) -> a . X(e)
+% or sum e:D . sum f:D . (f == e) -> a . X(f)
+%
+% (Test introduced as regression test after a bugreport by M. Voorhoeve)
+
 sort D = struct d1|d2|d3;
 
 map

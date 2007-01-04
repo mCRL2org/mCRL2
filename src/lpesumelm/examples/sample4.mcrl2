@@ -1,3 +1,20 @@
+% lpesumelm Test Case 4 -- sum variable occurs in condition in multiple 
+% variations
+%
+% The sum variable e occurs in the condition in the following ways:
+% - As righthandside of an equality
+% - Both as lefthandside and righthandside of an equality
+% - As lefthandside of an equality
+% The sum variable d occurs in the lefthandside of an equality in the
+% condition.
+% The sum variable f occurs in the righthandside of an equality in the
+% condition.
+%
+% Result:
+% - The summation over d is removed by substituting e for d
+% - The summation over e is removed by substituting f for e
+% This should leave only a sum f:D . f == g(f) -> a . X(f)
+
 sort D = struct d1|d2|d3;
 
 map

@@ -1,3 +1,11 @@
+% lpesumelm Test Case 1 -- sum variable equal to constant in condition
+%
+% The sum variable y is equal to 4 in the condition, hence 4 should be
+% substituted for y in the summand, and sum y should be removed
+% In this case, this boils down to removing sum y, and removing 4==y from the
+% condition. The rest of the specification can be left untouched
 act a,b;
+
 proc X = sum y:Int . (4==y) -> a . b . X;
+
 init X;
