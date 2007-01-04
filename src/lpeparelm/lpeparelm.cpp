@@ -333,7 +333,7 @@ void lpeParElm::filter() {
           unsigned int  z = p_usedVars.size();
           for(std::set< lpe::data_variable >::iterator k = foundVariables.begin(); k != foundVariables.end(); k++){
 	          p_usedVars.insert(*k);
-	          //gsDebugMsg("%s\n", pp(k).c_str());
+	          gsDebugMsg("%s\n", pp(*k).c_str());
 	        }
 	        gsDebugMsg("%d----%d\n", z, p_usedVars.size());
           if (p_usedVars.size() != z){
@@ -357,7 +357,7 @@ void lpeParElm::filter() {
   //}
 
   if (p_verbose) {
-    gsVerboseMsg("lpeparelm: Number of removed process parameters: %s\n", p_S.size());
+    gsVerboseMsg("lpeparelm: Number of removed process parameters: %d\n", p_S.size());
     if (p_S.size() !=0){
       gsVerboseMsg("lpeparelm:   [ ");
       for(std::set< lpe::data_variable >::iterator i = p_S.begin(); i != (--p_S.end()); i++){
