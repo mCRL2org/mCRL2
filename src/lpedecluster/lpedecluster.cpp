@@ -434,6 +434,7 @@ lpe::specification decluster(const lpe::specification& specification, const tool
 int do_decluster(const tool_options& options)
 {
   lpe::specification lpe_specification;
+  
   if (lpe_specification.load(options.input_file)) {
     // decluster lpe_specification and save the output to a binary file
     if (!decluster(lpe_specification, options).save(options.output_file, true)) 
@@ -470,6 +471,7 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
       ("INFILE", po::value< string >(), "input file")
       ("OUTFILE", po::value< string >(), "output file")
   ;
+  
   po::options_description cmdline_options;
   cmdline_options.add(desc).add(hidden);
       
@@ -512,7 +514,7 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
   t_options.finite_only = (0 < vm.count("finite"));
 
   if (0 < vm.count("rewriter")) {
-    cout << "rewrite strategy: " << rewriter << endl;
+    cerr << "rewrite strategy: " << rewriter << endl;
     if      (rewriter == "inner")  { t_options.strategy = GS_REWR_INNER; }
     else if (rewriter == "innerc") { t_options.strategy = GS_REWR_INNERC; }
     else if (rewriter == "jitty")  { t_options.strategy = GS_REWR_JITTY; }
