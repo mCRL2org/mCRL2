@@ -5,6 +5,7 @@
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
 <!ENTITY outfile "<parameter>OUTFILE</parameter>">
+<!ENTITY name "<parameter>NAME</parameter>">
 <!ENTITY opt_h "<option>-h</option>">
 <!ENTITY opt_help "<option>--help</option>">
 <!ENTITY opt_version "<option>--version</option>">
@@ -14,6 +15,8 @@
 <!ENTITY opt_verbose "<option>--verbose</option>">
 <!ENTITY opt_f "<option>-f</option>">
 <!ENTITY opt_finite "<option>--finite</option>">
+<!ENTITY opt_r "<option>-R</option>">
+<!ENTITY opt_rewriter "<option>--rewriter</option>">
 <!ENTITY stdin "<option>stdin</option>">
 <!ENTITY stdout "<option>stdout</option>">
 ]>
@@ -103,14 +106,26 @@
         </listitem>
       </varlistentry>
 
+      <varlistentry>
+        <term>&opt_r;</term>
+        <term>&opt_rewriter;=&name;</term>
+        <listitem>
+          <para>
+            use rewriter &name; (default 'inner')
+          </para>
+        </listitem>
+      </varlistentry>
+
     </variablelist>
   </para>
 </refsect1>
 
 <refsect1>
 <title>Author</title>
-<para>Written by Jeroen Keiren. Please send all complaints, comments and bug
-reports to <email>bug@mcrl2.org</email>.</para>
+<para>
+  Written by Jeroen Keiren. Please send all complaints, comments and bug
+  reports to <email>bug@mcrl2.org</email>.
+</para>
 </refsect1>
 
 </refentry>

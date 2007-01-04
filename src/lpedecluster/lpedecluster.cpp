@@ -412,7 +412,7 @@ lpe::summand_list decluster_summands(const lpe::specification& specification,
 lpe::specification decluster(const lpe::specification& specification, const tool_options& options)
 {
   gsVerboseMsg("Declustering...\n");
-  gsDebugMsg("Using rewrite strategy %d\n", options.strategy);
+  gsVerboseMsg("Using rewrite strategy %d\n", options.strategy);
   lpe::LPE lpe = specification.lpe();
 
   gsVerboseMsg("Input: %d summands.\n", lpe.summands().size());
@@ -513,18 +513,13 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
 
   t_options.finite_only = (0 < vm.count("finite"));
 
-  if (0 < vm.count("rewriter")) {
-    cerr << "rewrite strategy: " << rewriter << endl;
-    if      (rewriter == "inner")  { t_options.strategy = GS_REWR_INNER; }
-    else if (rewriter == "innerc") { t_options.strategy = GS_REWR_INNERC; }
-    else if (rewriter == "jitty")  { t_options.strategy = GS_REWR_JITTY; }
-    else if (rewriter == "jittyc") { t_options.strategy = GS_REWR_JITTYC; }
-    else { 
-      cerr << rewriter << " is not a valid rewriter strategy" << endl;
-      exit(EXIT_FAILURE);
-    }
+  t_options.strategy = RewriteStrategyFromString(rewriter.c_str());
+  if (t_options.strategy == GS_REWR_INVALID)
+  {
+    cerr << rewriter << " is not a valid rewriter strategy" << endl;
+    exit(EXIT_FAILURE);
   }
-
+  
   t_options.input_file = (0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-";
   t_options.output_file = (0 < vm.count("OUTFILE")) ? vm["OUTFILE"].as< string >() : "-";
 }
