@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!ENTITY lpebinary "<function>lpebinary</function>">
+<!ENTITY option "<parameter>OPTION</parameter>">
+<!ENTITY infile "<parameter>INFILE</parameter>">
+<!ENTITY outfile "<parameter>OUTFILE</parameter>">
+<!ENTITY name "<parameter>NAME</parameter>">
+<!ENTITY opt_h "<option>-h</option>">
+<!ENTITY opt_help "<option>--help</option>">
+<!ENTITY opt_version "<option>--version</option>">
+<!ENTITY opt_d "<option>-d</option>">
+<!ENTITY opt_debug "<option>--debug</option>">
+<!ENTITY opt_v "<option>-v</option>">
+<!ENTITY opt_verbose "<option>--verbose</option>">
+<!ENTITY opt_r "<option>-R</option>">
+<!ENTITY opt_rewriter "<option>--rewriter</option>">
+<!ENTITY stdin "<option>stdin</option>">
+<!ENTITY stdout "<option>stdout</option>">
+]>
+
+<refentry id="lpebinary">
+
+<refmeta>
+  <refentrytitle>lpebinary</refentrytitle>
+  <manvolnum>1</manvolnum>
+</refmeta>
+
+<refnamediv>
+  <refname>lpebinary</refname>
+  <refpurpose>make sumvariables superfluous by splitting summands</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>&lpebinary;</command>
+    <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
+    <arg choice="opt">&infile;</arg>
+    <arg choice="opt">&outfile;</arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  <para>
+    Transform a linear process equation (LPE) in &infile; by 
+    replacing each variable of an enumerated sort by a vector
+    of boolean variables. 
+    The resulting LPE will be written to &outfile;. 
+    If &outfile; is not supplied the resulting LPE is written to &stdout;.
+  </para>
+  
+  <para>
+    The resulting LPE is written to &outfile; (or &stdout; if not specified).
+  </para>
+</refsect1>
+
+<refsect1>
+  <title>Options</title>
+  <para>
+    <variablelist>
+
+      <varlistentry>
+        <term>&opt_h;</term>
+        <term>&opt_help;</term>
+          <listitem>
+            <para>display help information and exit.</para>
+          </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_version;</term>
+        <listitem>
+          <para>display version information and exit.</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_v;</term>
+        <term>&opt_verbose;</term>
+        <listitem>
+          <para>
+          Displays short intermediate information during the run of the program.
+          </para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_d;</term>
+        <term>&opt_debug;</term>
+        <listitem>
+          <para>
+          Displays detailed intermediate information during the run of the program.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_r;</term>
+        <term>&opt_rewriter;=&name;</term>
+        <listitem>
+          <para>
+            use rewriter &name; (default 'inner')
+          </para>
+        </listitem>
+      </varlistentry>
+
+    </variablelist>
+  </para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+  Written by Jeroen Keiren. Please send all complaints, comments and bug
+  reports to <email>bug@mcrl2.org</email>.
+</para>
+</refsect1>
+
+</refentry>

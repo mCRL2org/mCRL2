@@ -2,7 +2,7 @@
 
 SOURCE_OBJECTS = $(wildcard %.xml)
 
-MAN_OBJECTS    = mcrl22lpe.1 lpe2lts.1 lpe2torx.1 lpeinfo.1 lpepp.1 \
+MAN_OBJECTS    = mcrl22lpe.1 lpe2lts.1 lpe2torx.1 lpebinary.1 lpeinfo.1 lpepp.1 \
 	         lperewr.1 lpedataelm.1 lpeconstelm.1 lpeparelm.1 ltsconvert.1 \
 	         ltsinfo.1 ltsgraph.1 ltsmin.1 pnml2mcrl2.1 tbf2lpe.1 sim.1 \
 	         xsim.1 ltsgraph.1 tracepp.1 lpeconfcheck.1 lpedecluster.1 lpeinvelm.1 lpeformcheck.1 \
