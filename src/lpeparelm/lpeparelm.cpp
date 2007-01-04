@@ -18,10 +18,12 @@
 //Boost
 #include <boost/program_options.hpp>
 
+//Lowlevel library for messages
+#include <libprint_c.h>
+
 //mCRL2
 #include "atermpp/aterm.h"
 #include "lpe/specification.h"
-#include "lpe/lpe_error.h"
 
 class lpeParElm {
 
@@ -190,6 +192,7 @@ inline term_list<Term> lpeParElm::setToList(std::set<Term> y) {
 // Note: Has to be set
 //
 inline void lpeParElm::setVerbose(bool b) {
+  gsSetVerboseMsg();
   p_verbose = b;
 }
 
@@ -197,6 +200,7 @@ inline void lpeParElm::setVerbose(bool b) {
 // Note: Has to be set
 //  
 inline void lpeParElm::setDebug(bool b) {
+  gsSetDebugMsg();
   p_debug = b;
 }
 
@@ -212,7 +216,7 @@ inline void lpeParElm::setSaveFile(std::string const& x) {
 inline bool lpeParElm::loadFile(std::string const& filename) {
   p_inputfile = filename;
   if (!p_spec.load(p_inputfile)){
-    std::cerr << "lpeparelm: error: could not read input file '" << filename << "'" << std::endl;
+    gsErrorMsg("lpeparelm: error: could not read input file '%s'\n", filename.c_str());
     return false;      
   };
   return true;   
@@ -224,11 +228,11 @@ inline bool lpeParElm::loadFile(std::string const& filename) {
 inline bool lpeParElm::readStream() {
   ATermAppl z = (ATermAppl) ATreadFromFile(stdin);
   if (z == NULL){
-    std::cerr << "lpeparelm: Could not read LPE from stdin"<< std::endl;
+    gsErrorMsg("lpeparelm: Could not read LPE from stdin\n");
     return false;
   };
   if (!gsIsSpecV1(z)){
-    std::cerr << "lpeparelm: Stdin does not contain an LPE" << std::endl;
+    gsErrorMsg("lpeparelm: Stdin does not contain an LPE\n");
     return false;
   }
 
@@ -261,21 +265,21 @@ void lpeParElm::filter() {
   // In a timecondition: t_i(d,e_i) for some i \in I
   //
   if(p_verbose){
-    std::cerr << "lpeparelm: Searching for used process parameters: ";
+    gsVerboseMsg("lpeparelm: Searching for used process parameters: ");
   }
-  //int counter = 0;
-  //int n = lpe.summands().size();
+  
+  int counter = 0;
+  int n = lpe.summands().size();
   for(lpe::summand_list::iterator currentSummand = lpe.summands().begin(); currentSummand != lpe.summands().end(); currentSummand++){ 
     
-    if (p_verbose){
-      //std::cerr << "    Summand :" << ++counter << "/" << n << std::endl;    
-      std::cerr << ".";
-    }
+    gsDebugMsg("Summand: %d/%d\n", ++counter, n);
+    gsVerboseMsg(".");
+    
     //Condition
     //
     foundVariables = getDataVarIDs(aterm_appl(currentSummand->condition()));
-    //      std::cerr << currentSummand->condition().pp()<< std::endl;
-    //      std::cerr << "\033[36m" << setToList(foundVariables).to_string() << "\033[0m" <<std::endl;
+    gsDebugMsg("%s\n", pp(currentSummand->condition()).c_str());
+    gsDebugMsg("\033[36m%s\033[0m\n", setToList(foundVariables).to_string().c_str());
     for(std::set< lpe::data_variable>::iterator i = foundVariables.begin(); i != foundVariables.end(); i++){
        p_usedVars.insert(data_variable(*i));
     }
@@ -284,8 +288,8 @@ void lpeParElm::filter() {
     //
     if (currentSummand->has_time()){
       foundVariables = getDataVarIDs(aterm_appl(currentSummand->time()));
-      //        std::cerr << currentSummand->time().pp() << std::endl;        
-      //        std::cerr << "\033[39m" << setToList(foundVariables).to_string() << "\033[0m" <<std::endl; 
+      gsDebugMsg("%s\n", pp(currentSummand->time()).c_str());
+      gsDebugMsg("\033[39m%s\033[0m\n", setToList(foundVariables).to_string().c_str());
       for(std::set< lpe::data_variable >::iterator i = foundVariables.begin(); i != foundVariables.end(); i++){
          p_usedVars.insert(data_variable(*i));
       };
@@ -297,54 +301,50 @@ void lpeParElm::filter() {
     for(lpe::action_list::iterator i = currentSummand->actions().begin(); i != currentSummand->actions().end(); i++){
       for(lpe::data_expression_list::iterator j = i->arguments().begin(); j != i->arguments().end(); j++){
         foundVariables = getDataVarIDs(aterm_appl(*j));
-        //          std::cerr << i->to_string() << std::endl;
-        //          std::cerr << "\033[31m" << setToList(foundVariables).to_string() << "\033[0m" <<std::endl;  
+        gsDebugMsg("%s\n", i->to_string().c_str());
+        gsDebugMsg("\033[31m%s\033[0m\n", setToList(foundVariables).to_string().c_str());  
         for(std::set< lpe::data_variable >::iterator k = foundVariables.begin(); k != foundVariables.end(); k++){
 	         p_usedVars.insert(*k);
 	      };
       };  
     };
-    //      std::cerr << "\033[32m" << setToList(p_usedVars).to_string() << "\033[0m" <<std::endl;     
+    gsDebugMsg("\033[32m%s\033[0m\n", setToList(p_usedVars).to_string().c_str());
   }
-  if (p_verbose) std::cerr << std::endl;
+  gsVerboseMsg("\n");
   
   // Needed all process parameters which are not marked have to be eliminated
   //
   int cycle = 0;
   if(p_verbose){
-    std::cerr << "lpeparelm: Searching for dependent process parameters" << std::endl;
+    gsVerboseMsg("lpeparelm: Searching for dependent process parameters\n");
   } 
   bool reset = true;
   while (reset){
-    if (p_verbose){
-      std::cerr << "lpeparelm:   Cycle "<< ++cycle << ": ";
-    }
+    gsVerboseMsg("lpeparelm:   Cycle %d: ", ++cycle);
     reset = false;
     //counter = 0; 
     for(summand_list::iterator currentSummand = lpe.summands().begin(); currentSummand != lpe.summands().end(); currentSummand++){
-      if (p_verbose){
-        //std::cerr << "    Summand :" << ++counter << "/" << n << std::endl;    
-        std::cerr << ".";
-      }
+      gsDebugMsg("Summand :%d/%d\n", ++counter, n);    
+      gsVerboseMsg(".");
       for(data_assignment_list::iterator i = currentSummand->assignments().begin(); i !=  currentSummand->assignments().end() ;i++){
         if (p_usedVars.find(i->lhs()) != p_usedVars.end()){
           foundVariables = getDataVarIDs(aterm_appl(i->rhs()));
-          //std::cerr << i->rhs().pp() << std::endl;
+          gsDebugMsg("%s\n", pp(i->rhs()).c_str());
           unsigned int  z = p_usedVars.size();
           for(std::set< lpe::data_variable >::iterator k = foundVariables.begin(); k != foundVariables.end(); k++){
 	          p_usedVars.insert(*k);
-	          //std::cerr << k->pp() << std::endl;
+	          //gsDebugMsg("%s\n", pp(k).c_str());
 	        }
-	        //std::cerr << z << "----" << p_usedVars.size() << std::endl;
+	        gsDebugMsg("%d----%d\n", z, p_usedVars.size());
           if (p_usedVars.size() != z){
             reset = true;
-            //          std::cerr << "\033[39m Match added: " << i->lhs().to_string() << "\033[0m" << std::endl; 
+            gsDebugMsg("\033[39m Match added: %s\033[0m\n", i->lhs().to_string().c_str()); 
           };  
         }
       }
     }
-    if (p_verbose) std::cerr << std::endl;
-    //std::cerr << setToList(p_usedVars).to_string() << std::endl;
+    gsVerboseMsg("\n");
+    gsDebugMsg("%s\n", setToList(p_usedVars).to_string().c_str());
   }
 
   for(data_variable_list::iterator di = lpe.process_parameters().begin(); di != lpe.process_parameters().end() ; di++){
@@ -357,16 +357,16 @@ void lpeParElm::filter() {
   //}
 
   if (p_verbose) {
-    std::cerr << "lpeparelm: Number of removed process parameters: " << p_S.size() << std::endl;
+    gsVerboseMsg("lpeparelm: Number of removed process parameters: %s\n", p_S.size());
     if (p_S.size() !=0){
-      std::cerr << "lpeparelm:   [ ";
+      gsVerboseMsg("lpeparelm:   [ ");
       for(std::set< lpe::data_variable >::iterator i = p_S.begin(); i != (--p_S.end()); i++){
-        std::cerr << i->unquoted_name() << ", ";
+        gsVerboseMsg("%s, ", i->unquoted_name().c_str());
       }
-      std::cerr << (*(--p_S.end())).unquoted_name() << " ]" << std::endl;
+      gsVerboseMsg("%s ]\n", (*(--p_S.end())).unquoted_name().c_str());
     }
   }// else {  
-   // std::cerr << " Number of removed process parameters : " << p_S.size() << std::endl;
+  // gsVerboseMsg("Number of removed process parameters : %d\n", p_S.size();
   //}
 }
 
@@ -469,7 +469,7 @@ inline void lpeParElm::output() {
     //};
   } else {
     if(!rebuild_spec.save(p_outputfile)){
-       std::cerr << "lpeparelm: Unsuccessfully written outputfile: " << p_outputfile << std::endl;
+       gsErrorMsg("lpeparelm: Unsuccessfully written outputfile: %s\n", p_outputfile.c_str());
     };
   } 
 }
