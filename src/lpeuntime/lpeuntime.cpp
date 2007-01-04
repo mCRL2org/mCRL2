@@ -109,10 +109,10 @@ bool squadt_lpeuntime::perform_task(sip::configuration& configuration)
 
 bool has_time(lpe::LPE& lpe)
 {
-  bool result = true;
+  bool result = false;
   for (lpe::summand_list::iterator i = lpe.summands().begin(); i != lpe.summands().end(); ++i)
   {
-    result = result && i->has_time();
+    result = result || i->has_time();
   }
   return result;
 }
@@ -156,9 +156,12 @@ lpe::specification untime(const lpe::specification& specification) {
   lpe::data_expression_list untime_initial_state; // Updated initial state
   // Note: initial variables and initial state together form initial assignment
 
+  gsVerboseMsg("Untiming %d summands\n", lpe.summands().size());
+  
   //If an lpe has got no time at the initialization, return the original lpe with all present delta's removed, and replaced with one true->delta.
   if (!has_time(lpe))
   {
+    gsVerboseMsg("LPE has no time, only removing deltas, and replacing with one true->delta summand\n");
     return remove_deltas(specification);
   }
 
@@ -170,8 +173,11 @@ lpe::specification untime(const lpe::specification& specification) {
   // Transpose the original summand list, and see if there are summands with time
   // If a summand has time, remove it, create new conditions for time, and add it to the new summand list (untime_summand_list)
   // If a summand does not contain time, first introduce time, and then untime it.
-  for (lpe::summand_list::iterator i = lpe.summands().begin(); i != lpe.summands().end(); ++i)
+  int j = 0; //Counter only used for verbose output (keep track of the summand number
+  for (lpe::summand_list::iterator i = lpe.summands().begin(); i != lpe.summands().end(); ++i,++j)
   { 
+    gsVerboseMsg("Untiming summand %d\n", j);
+
     // Declarations within scope of for-loop
     lpe::data_variable_list untime_summation_variables; //Updated set of summation variables
     lpe::data_expression untime_condition; //Updated condition
@@ -183,7 +189,7 @@ lpe::specification untime(const lpe::specification& specification) {
       if (i->has_time()) 
       { 
 	// The summand is already timed, therefor there is no need to add an extra summation variable for time
-	untime_summation_variables = i->summation_variables();   
+	untime_summation_variables = i->summation_variables();
 
 	// Extend the original condition with an additional argument t.i(d,e.i)>last_action_time
 	untime_condition = and_(i->condition(), lpe::greater(i->time(),data_expression(last_action_time)));
