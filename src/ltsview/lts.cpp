@@ -461,8 +461,9 @@ void LTS::positionClusters()
 
 void LTS::positionStates()
 {
-  vector< State* > undecided = edgeLengthBottomUp();
-  undecided = edgeLengthTopDown( undecided );
+  vector< State* > undecided;
+  edgeLengthBottomUp(undecided);
+  edgeLengthTopDown(undecided);
   resolveClusterSlots(undecided);
   /*
   //TODO: Change to call of correct positioning functions.
@@ -491,7 +492,7 @@ void LTS::positionStates()
     }
   }*/
 }
-void LTS::resolveClusterSlots(vector< State* > undecided) 
+void LTS::resolveClusterSlots(vector< State* > &undecided) 
 {
   //Resolves the slots of each cluster, positioning the states within each 
   //slots in such a way that they do not overlap.
@@ -520,7 +521,7 @@ void LTS::resolveClusterSlots(vector< State* > undecided)
 
 
 }
-vector< State* > LTS::edgeLengthBottomUp()
+void LTS::edgeLengthBottomUp(vector< State* > &undecided)
 {
   //Phase 1: Processes states bottom-up, keeping edges as short as possible.
   //Pre:  statesInRank is correctly sorted by rank. 
@@ -531,9 +532,6 @@ vector< State* > LTS::edgeLengthBottomUp()
   // The details of this algorithm can be found in  Frank van Ham's master's
   // thesis, pp. 21-29
  
-  //To keep the states that could not be placed in this pass.
-  vector< State * > undecided; 
-
   // Iterate over the ranks in reverse order (bottom-up)
   vector< vector< State* > >::reverse_iterator rank_it;
   for( rank_it = statesInRank.rbegin();
@@ -681,16 +679,14 @@ vector< State* > LTS::edgeLengthBottomUp()
       }
     }
   }
-  return undecided;
 }
 
-vector<State*> LTS::edgeLengthTopDown( vector< State* >  ss)
+void LTS::edgeLengthTopDown(vector< State* > &ss)
 {
   //Phase 2: Process states top-down, keeping edges as short as possible.
   //Pre:  ss is correctly sorted by rank, bottom-up.
-  //Post: states in ss are positioned top-down, keeping edges as short as
-  //      possible.
-  //Ret:  states that could not be placed by this phase, sorted top-down.
+  //Post: ss contains the states that could not be placed by this phase, sorted
+  //top-down.
 
   //To keep the states that could not be placed in this pass.
   vector< State * > undecided; 
@@ -769,7 +765,7 @@ vector<State*> LTS::edgeLengthTopDown( vector< State* >  ss)
       }
     }
   }      
-  return undecided;
+  ss.swap(undecided);
 }
 
 

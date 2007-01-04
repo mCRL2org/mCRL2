@@ -44,7 +44,6 @@ class LTS
     void	mergeSuperiorClusters();
     void	positionClusters();
     void	positionStates();
-    void        resolveClusterSlots(std::vector< State* > undecided);
 //    void  	printStructure();
 //    void	printClusterSizesPositions();
     void	removeMarkRule( const int index );
@@ -79,15 +78,14 @@ class LTS
     void updateMarksAny();  //Not implemented (?)
 
     // Functions for positioning states based on Frank van Ham's heuristics
-    std::vector< State* > edgeLengthBottomUp(); 
+    void edgeLengthBottomUp(std::vector< State* > &undecided); 
     //Phase 1: Processes states bottom-up, keeping edges as short as possible.
     //Pre:  statesInRank is correctly sorted by rank. 
     //Post: states in statesInRank are positioned bottom up, keeping edges as 
     //      short as possible, if information is available.
     //Ret:  states that could not be placed in this phase, bottom-up.
     
-    std::vector< State* >  edgeLengthTopDown( 
-      std::vector< State* >  ss );
+    void edgeLengthTopDown(std::vector< State* > &ss);
     //Phase 2: Process states top-down, keeping edges as short as possible.
     //Pre:  ss is correctly sorted by rank, bottom-up.
     //Post: states in ss are positioned top-down, keeping edges as short as 
@@ -99,8 +97,7 @@ class LTS
     //Pre:  ss is correctly sorted by rank.
     //Post: states in ss are positioned bottom-up, maximizing node distance per
     //      rank.
-
-
+    void resolveClusterSlots(std::vector< State* > &undecided);
 };
 
 #endif // LTS_H

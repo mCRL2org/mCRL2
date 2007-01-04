@@ -157,7 +157,7 @@ void Cluster::resolveSlots() {
     // Decide largest gap.
     
     // If the first slot is unoccupied, it is part of a gap, increase by one 
-    // untile we have found an occupied slot.
+    // until we have found an occupied slot.
     bool gapIsRim = false;
     while (slots[gapBegin].occupying == 0 && !gapIsRim) {
       gapBegin++;
