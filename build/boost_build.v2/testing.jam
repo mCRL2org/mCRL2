@@ -33,11 +33,39 @@ rule run_tool_on_examples ( tool prefix suffix ? : options * : paths + : extensi
  
         run $(tool)
                : $(options)
-                 $(file)
+                 "\"$(file)\""
                  $(output)
                : # input files
                : # requirements
                : $(prefix)-$(target)
+      ] ;
+    }
+  }
+
+  return $(results) ;
+}
+
+# Runs a program on a set of input files in a given directory
+#
+# program     the executable to run (target of an exe rule)
+# paths       the paths relative to which input files are searched
+# extensions  the extensions of files that are considered input
+#
+# the program is run once for each file found, with the absolute
+# location of that file as command line argument
+rule run_with_input ( program paths + : extensions + ) {
+  import path ;
+
+  for path in $(paths) {
+    for file in [ examples_by_extension $(path) : $(extensions) ] {
+ 
+      results += [
+ 
+        run $(program)
+               : "\"$(file)\""
+               : # input files
+               : # requirements
+               : 
       ] ;
     }
   }
