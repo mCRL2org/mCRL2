@@ -25,12 +25,19 @@
 //Boost
 #include <boost/program_options.hpp>
 
-#include "atermpp/aterm.h"
-#include "lpe/specification.h"
-
-#include "librewrite.h"
+//Lowlevel
+#include <libprint_c.h>
 #include "libstruct.h"
 #include "liblowlevel.h"
+
+//Rewriter
+#include "librewrite.h"
+
+//Aterm
+#include "atermpp/aterm.h"
+
+//LPE framework
+#include "lpe/specification.h"
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -344,9 +351,8 @@ inline bool lpeConstElm::compare(data_expression x, data_expression y) {
 inline bool lpeConstElm::conditionTest(data_expression x) {
   if (p_alltrue){return true;};
   //----------          Debug  
-  //    std::cerr << "\033[33m " << x.pp() << std::endl;
-  //    std::cerr << "\033[30m " << data_expression(rewrite(data_expression(p_substitute(x, p_currentState)))).pp() << std::endl;
-  //    std::cerr << "\033[0m";
+  gsDebugMsg("\033[33m %s\n", pp(x).c_str());
+  gsDebugMsg("\033[30m %s\033[0m\n", pp(data_expression(rewrite(data_expression(p_substitute(x, p_currentState))))).c_str());
   //----------          Debug
   return (!(data_expression(rewrite(data_expression(p_substitute(x, p_currentState)))).is_false()));
 }
@@ -365,21 +371,18 @@ inline bool lpeConstElm::cmpCurrToNext() {
           p_currentState.at(index) = p_nextState.at(index);  
           if (p_variableList.find(p_nextState.at(index).rhs()) != p_variableList.end()){
             p_V.insert(p_lookupIndex[i->lhs()]); 
-          //----------          Debug
-          //            std::cerr << "\033[34m OLD:    "<< i->pp() << std::endl;
-          //            std::cerr << "\033[32m NEW:    "<< p_nextState.at(index).pp() << std::endl;
-          //            std::cerr << "\033[0m";
-          //----------          Debug
+            //----------          Debug
+            gsDebugMsg("\033[34m OLD:    %s\n", pp(*i).c_str());
+            gsDebugMsg("\033[32m NEW:    %s\033[0m\n", pp(p_nextState.at(index)).c_str());
+            //----------          Debug
           }
         }
       } else {
         if (!inFreeVarList( p_nextState.at(index).rhs() )){
            if (!compare(i->rhs(), p_nextState.at(index).rhs())){
               //----------          Debug
-              //
-              //                std::cerr << "\033[34m OLD:    "<< i->pp() << std::endl;
-              //                std::cerr << "\033[32m NEW:    "<< p_nextState.at(index).pp() << std::endl;
-              //                std::cerr << "\033[0m";
+              gsDebugMsg("\033[34m OLD:    %s\n", pp(*i).c_str());
+              gsDebugMsg("\033[32m NEW:    %s\033[0m\n", pp(p_nextState.at(index)).c_str());
               //----------          Debug
               p_newCurrentState.at(index) = newExpression(*i) ;
       	p_currentState.at(index) = p_currentState.at(index);
@@ -493,12 +496,12 @@ void lpeConstElm::findSingleton() {
   //p_singletonSort = result;
   
   if (p_verbose){
-    std::cerr << "lpeconstelm: Sorts which have singleton constructors:"<< std::endl;
+    gsVerboseMsg("lpeconstelm: Sorts which have singleton constructors:\n");
     for(std::set<lpe::sort>::iterator i = p_singletonSort.begin(); i != p_singletonSort.end(); i++){
-      std::cerr <<"lpeconstelm:   "<< pp(*i) << std::endl;
+      gsVerboseMsg("lpeconstelm:   %s\n", pp(*i).c_str());
     }
     if (p_singletonSort.empty()) {
-      std::cerr <<"lpeconstelm:   []"<< std::endl;      
+      gsVerboseMsg("lpeconstelm:   []\n");
     }
   }
 } 
@@ -507,48 +510,64 @@ void lpeConstElm::findSingleton() {
 //---------------------   Debug begin  --------------------------
 //---------------------------------------------------------------
 inline void lpeConstElm::printNextState() {
-  for(std::vector< lpe::data_assignment >::iterator i = p_nextState.begin(); i != p_nextState.end() ; i++ ){
-    std::cerr << "[" << pp(*i) << "]";
-  
+  std::ostringstream result;
+  if (p_verbose)
+  {
+    for(std::vector< lpe::data_assignment >::iterator i = p_nextState.begin(); i != p_nextState.end() ; i++ ){
+      result << "[" << pp(*i) << "]";
+    }
+    gsVerboseMsg("%s\n", result.str().c_str());
   }
-  std::cerr << std::endl;
 }
 
 inline void lpeConstElm::printVar() {
-  std::cerr << "lpeconstelm: Variable indices : {";
-  std::set< int >::iterator i = p_V.begin();
-  int j = 0;
-  while(i != p_V.end()){
-    if (*i ==j){
-      std::cerr << j+1 << " ";
-      i++;
-     }
-    j++;
+  std::ostringstream result;
+  if (p_verbose)
+  {
+    result << "lpeconstelm: Variable indices : {";
+    std::set< int >::iterator i = p_V.begin();
+    int j = 0;
+    while(i != p_V.end()){
+      if (*i ==j){
+        result << j+1 << " ";
+        i++;
+      }
+      j++;
+    }
+    result << "}";
+    gsVerboseMsg("%s\n", result.str().c_str());
   }
-  std::cerr << "}" << std::endl;
 }
 
 inline void lpeConstElm::printState() {
-  if ( p_S.size() > 0 )
+  std::ostringstream result;
+  if (p_verbose)
   {
-    std::cerr << "lpeconstelm:   [ ";
-    for(std::set< int >::iterator i = p_S.begin(); i != (--p_S.end()) ; i++ ){
-      if (!p_nosingleton){
-        std::cerr << pp(p_currentState[*i]) << ", ";
-      } else {
-        std::cerr << pp(p_currentState[*i]) << ": " << pp(p_currentState[*i].lhs().type()) << ", ";
-      }  
+    if ( p_S.size() > 0 )
+    {
+      result << "lpeconstelm:   [ ";
+      for(std::set< int >::iterator i = p_S.begin(); i != (--p_S.end()) ; i++ ){
+        if (!p_nosingleton){
+          result << pp(p_currentState[*i]);
+        } else {
+          result << pp(p_currentState[*i]) << pp(p_currentState[*i].lhs().type());
+        }  
+      }
+      result << pp(p_currentState[*(--p_S.end())]) << " ]";
     }
-    std::cerr << pp(p_currentState[*(--p_S.end())]) << " ]" << std::endl;
+    gsVerboseMsg("%s\n", result.str().c_str());
   }
 }
 
 inline void lpeConstElm::printCurrentState() {
-  for(std::vector< lpe::data_assignment >::iterator i = p_currentState.begin(); i != p_currentState.end() ; i++ ){
-    std::cerr << "[" << pp(*i) << "]";
-  
+  std::ostringstream result;
+  if (p_verbose)
+  {
+    for(std::vector< lpe::data_assignment >::iterator i = p_currentState.begin(); i != p_currentState.end() ; i++ ){
+      result << "[" << pp(*i) << "]";
+    }
+    gsVerboseMsg("%s\n", result.str().c_str());
   }
-  std::cerr << std::endl;
 }
 //---------------------------------------------------------------
 //---------------------   Debug end  --------------------------
@@ -561,11 +580,7 @@ void lpeConstElm::removeSingleton(int n)
   bool empty = true;
   sort_list rebuild_sort = p_spec.data().sorts();
   findSingleton();
-  if(p_verbose){
-  std::cerr <<
-    "lpeconstelm: Constant process parameters which are not substituted and " << std::endl <<
-    "lpeconstelm: removed [--no-singleton]:" << std::endl;
-  }
+  gsVerboseMsg("lpeconstelm: Constant process parameters which are not substituted and removed [--no-singleton]:\n");
   for(int i = 0; i < n; i++)
   {
     if ( (p_V.find(i) == p_V.end()) &&
@@ -574,13 +589,13 @@ void lpeConstElm::removeSingleton(int n)
     {
       p_V.insert(i);
       if (p_verbose){
-        std::cerr << "lpeconstelm:   " << pp(p_initAssignments[i].lhs()) << " : " << pp(p_initAssignments[i].lhs().type()) << std::endl;
+        gsVerboseMsg("lpeconstelm:   %s : %s\n", pp(p_initAssignments[i].lhs()).c_str(), pp(p_initAssignments[i].lhs().type()).c_str());
         empty = false;
       }
     }
   }
-  if (p_verbose && empty){
-    std::cerr << "lpeconstelm:   []" << std::endl;
+  if (empty){
+    gsVerboseMsg("lpeconstelm:   []\n");
   }
 }
 
@@ -601,10 +616,8 @@ inline void lpeConstElm::output() {
     rebuild_summandlist = p_lpe.summands();
   }
 
-  if (p_verbose) {
-    std::cerr << "lpeconstelm: Number of summands of old LPD: " << p_lpe.summands().size() << std::endl;
-    std::cerr << "lpeconstelm: Number of summands of new LPD: " <<  rebuild_summandlist.size() << std::endl;
-  }
+  gsVerboseMsg("lpeconstelm: Number of summands of old LPD: %d\n", p_lpe.summands().size());
+  gsVerboseMsg("lpeconstelm: Number of summands of new LPD: %d\n", rebuild_summandlist.size());
 
   std::set< lpe::data_variable > constantVar;
   for(std::set< int >::iterator i = p_S.begin(); i != p_S.end(); i++){
@@ -698,7 +711,7 @@ inline void lpeConstElm::output() {
     atermpp::reverse(rebuild_summandlist_no_cp)
   );
    
-   //std::cerr <<  p_spec.initial_free_variables() << std::endl;
+   //gsDebugMsg("%s\n", p_spec.initial_free_variables().to_string().c_str());
    
   std::set< lpe::data_variable > initial_free_variables;
   usedFreeVars.empty();
@@ -730,7 +743,7 @@ inline void lpeConstElm::output() {
   
   assert(gsIsSpecV1((ATermAppl) rebuild_spec));
 
-  //std::cerr << p_lpe.pp() << std::endl;
+  //gsDebugMsg("%s\n", pp(p_lpe).c_str());
   if (p_outputfile.empty()){
     //if(!p_verbose){
     //  assert(!p_verbose);
@@ -739,7 +752,7 @@ inline void lpeConstElm::output() {
   }
   else {
     if(!rebuild_spec.save(p_outputfile)) {
-       std::cerr << "lpeconstelm: Unsuccessfully written outputfile: " << p_outputfile << std::endl;
+       gsErrorMsg("lpeconstelm: Unsuccessfully written outputfile: %s\n", p_outputfile.c_str());
     }
   } 
 }
@@ -753,17 +766,22 @@ inline void lpeConstElm::setSaveFile(std::string const& x) {
 // Print the set of constant process parameters
 //  
 inline void lpeConstElm::printSet() {
-  std::cerr << "lpeconstelm: Constant indices: { ";
-  std::set< int >::iterator i = p_S.begin();
-  int j = 0;
-  while(i != p_S.end()){
-    if (*i ==j){
-      std::cerr << j+1 << " ";
-      i++;
-     }
-    j++;
+  std::ostringstream result;
+  if (p_verbose)
+  {
+    result << "lpeconstelm: Constant indices: { ";
+    std::set< int >::iterator i = p_S.begin();
+    int j = 0;
+    while(i != p_S.end()){
+      if (*i ==j){
+        result << j+1;
+        i++;
+      }
+      j++;
+    }
+    result << " }";
+    gsVerboseMsg("%s\n", result.str().c_str());
   }
-  std::cerr << "}"<< std::endl;
 }
 
 // Loads an LPD from file
@@ -773,11 +791,11 @@ inline bool lpeConstElm::loadFile(std::string const& filename) {
   p_filenamein = filename;
   if (!p_spec.load(p_filenamein))
   {
-    std::cerr << "lpeconstelm: error: could not read input file '" << filename << "'" << std::endl;
+    gsErrorMsg("lpeconstelm: error: could not read input file '%s'\n", filename.c_str());
     return false;
   } 
   //LPD x = p_spec.lpe(); 
-  //std::cerr << x.pp() << std::endl;
+  //gsDebugMsg("%s\n", pp(x).c_str());
   //p_spec.save("/scratch/dump.lpe");
   //assert(false);
   return true;
@@ -789,15 +807,15 @@ inline bool lpeConstElm::loadFile(std::string const& filename) {
 inline bool lpeConstElm::readStream() {
   ATermAppl z = (ATermAppl) ATreadFromFile(stdin);
   if (z == NULL){
-    std::cerr << "lpeconstelm: Could not read LPD from stdin"<< std::endl;
+    gsErrorMsg("lpeconstelm: Could not read LPD from stdin\n");
     return false;
   };
   if (!gsIsSpecV1(z)){
-    std::cerr << "lpeconstelm: Stdin does not contain an LPD" << std::endl;
+    gsErrorMsg("lpeconstelm: Stdin does not contain an LPD\n");
     return false;
   }
   p_spec = specification(z);
-  //std::cerr << p_spec.lpe().pp() << std::endl;
+  //gsDebugMsg("%s\n", pp(p_spec.lpe()).c_str());
   return true;
 }
 
@@ -812,6 +830,7 @@ void lpeConstElm::writeStream(lpe::specification newSpec) {
 // Note: Has to be set
 //
 inline void lpeConstElm::setVerbose(bool b) {
+  gsSetVerboseMsg();
   p_verbose = b;
 }
 
@@ -819,6 +838,8 @@ inline void lpeConstElm::setVerbose(bool b) {
 // Note: Has to be set
 //
 inline void lpeConstElm::setDebug(bool b) {
+  setVerbose(b);
+  gsSetDebugMsg();
   p_debug = b;
 }
 
@@ -914,29 +935,22 @@ void lpeConstElm::filter() {
     same = false;  
     while (!same){
       same = true;
-      if (p_verbose){
-        //std::cerr << "Cycle:" << cycle++ << std::endl;
-        std::cerr << "lpeconstelm: Cycle " << cycle++ << ": ";
-      }
+      gsVerboseMsg("lpeconstelm: Cycle %d: \n", cycle++);
       //int summandnr = 1;
       for(summand_list::iterator currentSummand = p_lpe.summands().begin(); currentSummand != p_lpe.summands().end() ;currentSummand++ ){
         if ( (p_visitedSummands.find(*currentSummand) != p_visitedSummands.end()) || (conditionTest(currentSummand->condition()))) {
-          if(p_verbose){
-            //std::cerr << "  Summand: "<< summandnr++ << std::endl;
-            std::cerr << ".";
-          }
+          //gsDebugMsg(  "Summand: %d\n", summandnr++);
           p_visitedSummands.insert(*currentSummand); 
           //----------          Debug
-          //          printCurrentState();
+          if (p_debug) { printCurrentState(); }
           calculateNextState(currentSummand->assignments());
           //----------          Debug  
-          //          printCurrentState();
+          if (p_debug) { printCurrentState(); }
           same = cmpCurrToNext() && same ; 
           //ischanged = ischanged || !cmpCurrToNext();
           //if (!same) {break;}                                           //Break reduces time to complete; need to find out when to brake
         }
       }
-      if (p_verbose) std::cerr << std::endl;
       p_currentState = p_newCurrentState;
     }
 
@@ -950,15 +964,12 @@ void lpeConstElm::filter() {
       int n = p_V.size();
       detectVar(p_lpe.process_parameters().size());
       int diff = p_V.size()-n;
-      if ( p_verbose )
+      if ( diff == 1 )
       {
-        if ( diff == 1 )
-        {
-          std::cerr << "lpeconstelm: reset 1 parameter to variable because its value contained summation variables" << std::endl;
-        } else if ( diff > 1 )
-        {
-          std::cerr << "lpeconstelm: reset " << diff << " parameters to variable because their values contained summation variables" << std::endl;
-        }
+        gsVerboseMsg("lpeconstelm: reset 1 parameter to variable because its value contained summation variables\n");
+      } else if ( diff > 1 )
+      {
+        gsVerboseMsg("lpeconstelm: reset %d parameters to variable because their values contained summation variables\n", diff);
       }
     }
 
@@ -976,9 +987,7 @@ void lpeConstElm::filter() {
     // The arrow is detected with the FeeVar aftercheck
   
     if(!p_freeVarSet.empty()){
-      if (p_verbose){
-        std::cerr << "lpeconstelm: Free Variable checkup:" << std::endl;
-      }
+      gsVerboseMsg("lpeconstelm: Free Variable checkup:\n");
     
       int n = p_V.size();
       for(std::set< LPE_summand>::iterator i = p_visitedSummands.begin(); i != p_visitedSummands.end() ; i++){
@@ -988,7 +997,7 @@ void lpeConstElm::filter() {
 
       p_currentState = p_newCurrentState;
       if (p_verbose){
-        std::cerr << "lpeconstelm:   Detected "<<p_V.size() - n << " fake constant process parameters" <<std::endl;
+        gsVerboseMsg("lpeconstelm:   Detected %d fake constant process parameters\n", p_V.size() - n);
         foundFake = ((p_V.size() - n) != 0);
       }         
 
@@ -1004,15 +1013,12 @@ void lpeConstElm::filter() {
      int n = p_V.size();
      removeSingleton(p_lpe.process_parameters().size());
      int diff = p_V.size()-n;
-     if ( p_verbose )
+     if ( diff > 1 )
      {
-       if ( diff > 1 )
-       {
-         std::cerr << "lpeconstelm: " << diff << " constant parameters are not removed because their sorts contain only one element" << std::endl;
-       } else if ( diff == 1 )
-       {
-         std::cerr << "lpeconstelm: 1 constant parameter is not removed because its sort contains only one element" << std::endl;
-       }
+       gsVerboseMsg("lpeconstelm: %d constant parameters are not removed because their sorts contain only one element\n", diff);
+     } else if ( diff == 1 )
+     {
+       gsVerboseMsg("lpeconstelm: 1 constant parameter is not removed because its sort contains only one element\n");
      }
   }    
   
@@ -1027,7 +1033,7 @@ void lpeConstElm::filter() {
   set_difference(S.begin(), S.end(), p_V.begin(), p_V.end(), inserter(p_S, p_S.begin()));
   
   if (p_verbose){
-    std::cerr << "lpeconstelm: Number of removed process parameters: "<< p_S.size() << std::endl ;//printSet(); 
+    gsVerboseMsg("lpeconstelm: Number of removed process parameters: %d\n", p_S.size());
     printSetVar();  
   }
 }
