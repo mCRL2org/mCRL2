@@ -2,6 +2,9 @@
 #define PRINT_LOGGER_H_
 
 #include <iostream>
+#include <fstream>
+
+#include <boost/filesystem/path.hpp>
 
 #include "logger.h"
 
@@ -32,28 +35,48 @@ namespace utility {
       inline ~print_logger();
   };
 
+  class file_print_logger : public print_logger {
+
+    private:
+
+      /** \brief The stream to print to */
+      std::fstream out;
+
+    public:
+
+      /** \brief Constructor */
+      file_print_logger(boost::filesystem::path const& p, log_level = 1);
+  };
+
   /**
-   * @param[in,out] s the stream on which to print during the lifetime of the object
-   * @param[in] l the log level below which all messages will be printed
+   * \param[in,out] s the stream on which to print during the lifetime of the object
+   * \param[in] l the log level below which all messages will be printed
    **/
   inline print_logger::print_logger(std::ostream& s, log_level l) : logger(l), stream(s) {
   }
 
   /**
-   * @param[in] m the message content
+   * \param[in] m the message content
    **/
   inline void print_logger::actually_log(std::string const& m) {
     stream << m;
   }
 
   /**
-   * @param[in] m the message content
+   * \param[in] m the message content
    **/
   inline void print_logger::actually_log(boost::format const& m) {
     stream << m;
   }
 
   inline print_logger::~print_logger() {
+  }
+
+  /**
+   * \param[in] p the path to the file to which to write the log messages
+   * \param[in] l the log filter level
+   **/
+  file_print_logger::file_print_logger(boost::filesystem::path const& p, log_level l) : print_logger(out, l), out(p.native_file_string().c_str()) {
   }
 }
 
