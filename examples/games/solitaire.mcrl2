@@ -1,0 +1,199 @@
+% This file describes the well known solitaire pin game.
+% The question is to show how from a board that
+% has the shape:
+%
+%                  x x x
+%                  x x x
+%              x x x x x x x
+%              x x x . x x x
+%              x x x x x x x
+%                  x x x    
+%                  x x x    
+%
+% where each `x' is a pin, and `.' an empty hole, the situation
+% 
+%                  . . .
+%                  . . .
+%              . . . . . . .
+%              . . . x . . .
+%              . . . . . . .
+%                  . . .    
+%                  . . .    
+%
+% can be reached. A move constists of capturing a pin by 
+% moving one pin over another to an empty place. These moves
+% can both be horizontally, and vertically, but not diagonally.
+% So a typical first move in the game is:
+%
+%                  x x x
+%                  x x x
+%              x x x x x x x
+%              x . . x x x x
+%              x x x x x x x
+%                  x x x    
+%                  x x x    
+%
+% There are three other, moves in the initial situation.
+% The total number of reachable board positions is as yet unknown, 
+% but is estimated to be approximately 160Mstate. Using a 3.5Gbyte
+% machine we can now generate 45Mstate of which appr. 12M are 
+% explored.  An upperbound of the number of states is 2^33, which is appr.
+% 9 10^9. 
+%
+% We currently use the following commands to explore the state
+% space:
+%
+% mcrl22lpe -n solitaire.mcrl2 temps.lpe
+% lpeuntime temps.lpe temps1.lpe
+% lpedecluster temps1.lpe temps2.lpe
+% lperewr temps2.lpe temps3.lpe
+% lpe2lts -vRjittyc -r -t -aready temps3.lpe
+%
+% It is expected that the speed of state space generation will
+% increase a factor 10, after applying lpestructelm to replace
+% the Board data structure in the parameter list of the linear
+% process by a sequence of variables of sort Piece. Initially,
+% this will yield 47 variables, but I expect that the 16 `unused'
+% variables representing the corners, can be removed using
+% lpeconstelm. This would generate an additional speedup.
+% The use of lpestructelm is also expected to reduce the memory
+% footprint of the generation of the state space with a factor
+% of at least 2, provided the flag -t (store states as trees) is
+% used.
+%
+% Jan Friso Groote, 4/1/2007.
+
+
+sort Piece = struct empty | pin | unused;
+     Row = struct row(Piece,Piece,Piece,Piece,Piece,Piece,Piece);
+     Board = struct col(Row,Row,Row,Row,Row,Row,Row);
+
+map getPiece:Pos#Pos#Board -> Piece;
+    setPiece:Pos#Pos#Piece#Board->Board;
+var x:Pos;
+    r1,r2,r3,r4,r5,r6,r7:Row;
+    pc:Piece;
+eqn getPiece(x,1,col(r1,r2,r3,r4,r5,r6,r7))=getPiece(x,r1);
+    getPiece(x,2,col(r1,r2,r3,r4,r5,r6,r7))=getPiece(x,r2);
+    getPiece(x,3,col(r1,r2,r3,r4,r5,r6,r7))=getPiece(x,r3);
+    getPiece(x,4,col(r1,r2,r3,r4,r5,r6,r7))=getPiece(x,r4);
+    getPiece(x,5,col(r1,r2,r3,r4,r5,r6,r7))=getPiece(x,r5);
+    getPiece(x,6,col(r1,r2,r3,r4,r5,r6,r7))=getPiece(x,r6);
+    getPiece(x,7,col(r1,r2,r3,r4,r5,r6,r7))=getPiece(x,r7);
+    setPiece(x,1,pc,col(r1,r2,r3,r4,r5,r6,r7))=
+         col(setPiece(x,pc,r1),r2,r3,r4,r5,r6,r7);
+    setPiece(x,2,pc,col(r1,r2,r3,r4,r5,r6,r7))=
+         col(r1,setPiece(x,pc,r2),r3,r4,r5,r6,r7);
+    setPiece(x,3,pc,col(r1,r2,r3,r4,r5,r6,r7))=
+         col(r1,r2,setPiece(x,pc,r3),r4,r5,r6,r7);
+    setPiece(x,4,pc,col(r1,r2,r3,r4,r5,r6,r7))=
+         col(r1,r2,r3,setPiece(x,pc,r4),r5,r6,r7);
+    setPiece(x,5,pc,col(r1,r2,r3,r4,r5,r6,r7))=
+         col(r1,r2,r3,r4,setPiece(x,pc,r5),r6,r7);
+    setPiece(x,6,pc,col(r1,r2,r3,r4,r5,r6,r7))=
+         col(r1,r2,r3,r4,r5,setPiece(x,pc,r6),r7);
+    setPiece(x,7,pc,col(r1,r2,r3,r4,r5,r6,r7))=
+         col(r1,r2,r3,r4,r5,r6,setPiece(x,pc,r7));
+
+
+map getPiece:Pos#Row -> Piece;
+    setPiece:Pos#Piece#Row -> Row;
+var p:Pos;
+    p1,p2,p3,p4,p5,p6,p7: Piece;
+    pc:Piece;
+
+eqn setPiece(1,pc,row(p1,p2,p3,p4,p5,p6,p7))=row(pc,p2,p3,p4,p5,p6,p7);
+    setPiece(2,pc,row(p1,p2,p3,p4,p5,p6,p7))=row(p2,pc,p3,p4,p5,p6,p7);
+    setPiece(3,pc,row(p1,p2,p3,p4,p5,p6,p7))=row(p3,p2,pc,p4,p5,p6,p7);
+    setPiece(4,pc,row(p1,p2,p3,p4,p5,p6,p7))=row(p4,p2,p3,pc,p5,p6,p7);
+    setPiece(5,pc,row(p1,p2,p3,p4,p5,p6,p7))=row(p5,p2,p3,p4,pc,p6,p7);
+    setPiece(6,pc,row(p1,p2,p3,p4,p5,p6,p7))=row(p6,p2,p3,p4,p5,pc,p7);
+    setPiece(7,pc,row(p1,p2,p3,p4,p5,p6,p7))=row(p7,p2,p3,p4,p5,p6,pc);
+
+    getPiece(1,row(p1,p2,p3,p4,p5,p6,p7))=p1;
+    getPiece(2,row(p1,p2,p3,p4,p5,p6,p7))=p2;
+    getPiece(3,row(p1,p2,p3,p4,p5,p6,p7))=p3;
+    getPiece(4,row(p1,p2,p3,p4,p5,p6,p7))=p4;
+    getPiece(5,row(p1,p2,p3,p4,p5,p6,p7))=p5;
+    getPiece(6,row(p1,p2,p3,p4,p5,p6,p7))=p6;
+    getPiece(7,row(p1,p2,p3,p4,p5,p6,p7))=p7;
+
+
+map  initialBoard, finalBoard, emptyBoard : Board;
+eqn  initialBoard = col(row(unused,unused,pin,   pin,   pin,   unused,unused),
+                        row(unused,unused,pin,   pin,   pin,   unused,unused),
+                        row(pin,   pin,   pin,   pin,   pin,   pin,   pin),
+                        row(pin,   pin,   pin,   empty, pin,   pin,   pin),
+                        row(pin,   pin,   pin,   pin,   pin,   pin,   pin),
+                        row(unused,unused,pin,   pin,   pin,   unused,unused),
+                        row(unused,unused,pin,   pin,   pin,   unused,unused));
+
+     finalBoard =   col(row(unused,unused,empty, empty, empty, unused,unused),
+                        row(unused,unused,empty, empty, empty, unused,unused),
+                        row(empty, empty, empty, empty, empty, empty, empty),
+                        row(empty, empty, empty, pin,   empty, empty, empty),
+                        row(empty, empty, empty, empty, empty, empty, empty),
+                        row(unused,unused,empty, empty, empty, unused,unused),
+                        row(unused,unused,empty, empty, empty, unused,unused));
+
+     emptyBoard =   col(row(unused,unused,empty, empty, empty, unused,unused),
+                        row(unused,unused,empty, empty, empty, unused,unused),
+                        row(empty, empty, empty, empty, empty, empty, empty),
+                        row(empty, empty, empty, empty, empty, empty, empty),
+                        row(empty, empty, empty, empty, empty, empty, empty),
+                        row(unused,unused,empty, empty, empty, unused,unused),
+                        row(unused,unused,empty, empty, empty, unused,unused));
+
+
+
+map rightMovable,leftMovable,downMovable,upMovable:Pos#Pos#Board->Bool;
+    moveRight,moveLeft,moveDown,moveUp:Pos#Pos#Board->Board;
+var x,y:Pos;
+    b:Board;
+
+eqn rightMovable(x,y,b)=
+       getPiece(x,y,b)==pin && getPiece(x+1,y,b)==pin && getPiece(x+2,y,b)==empty && x<6;
+
+    moveRight(x,y,b)=setPiece(x,y,empty,setPiece(x+1,y,empty,setPiece(x+2,y,pin,b)));
+
+    leftMovable(x,y,b)=
+       getPiece(x,y,b)==pin && getPiece(Int2Pos(x-1),y,b)==pin && 
+       getPiece(Int2Pos(x-2),y,b)==empty && x>2;
+           
+    moveLeft(x,y,b)=setPiece(x,y,empty,setPiece(Int2Pos(x-1),y,empty,
+                      setPiece(Int2Pos(x-2),y,pin,b)));
+             
+    downMovable(x,y,b)=
+       getPiece(x,y,b)==pin && getPiece(x,Int2Pos(y-1),b)==pin &&
+       getPiece(x,Int2Pos(y-2),b)==empty && y>2;
+           
+    moveDown(x,y,b)=setPiece(x,y,empty,setPiece(x,Int2Pos(y-1),empty,
+                      setPiece(x,Int2Pos(y-2),pin,b)));
+             
+    upMovable(x,y,b)=
+       getPiece(x,y,b)==pin && getPiece(x,y+1,b)==pin && 
+             getPiece(x,y+2,b)==empty && y<6;
+           
+    moveUp(x,y,b)=setPiece(x,y,empty,setPiece(x,y+1,empty,setPiece(x,y+2,pin,b)));
+             
+act  moveright,moveleft,moveup,movedown:Pos#Pos#Piece;
+     ready;
+proc X(b:Board)=
+        (b==finalBoard) -> ready.X(emptyBoard)+
+        sum x,y:Pos.(x<=7 && y<=7 && 
+                     rightMovable(x,y,b) 
+                    ) -> moveright(x,y,getPiece(x,y,b)).X(moveRight(x,y,b))+
+        sum x,y:Pos.(x<=7 && y<=7 && 
+                     leftMovable(x,y,b)
+                    ) -> moveleft(x,y,getPiece(x,y,b)).X(moveLeft(x,y,b))+
+        sum x,y:Pos.(x<=7 && y<=7 && 
+                     downMovable(x,y,b)
+                    ) -> movedown(x,y,getPiece(x,y,b)).X(moveDown(x,y,b))+
+        sum x,y:Pos.(x<=7 && y<=7 &&
+                     upMovable(x,y,b)
+                    ) -> moveup(x,y,getPiece(x,y,b)).X(moveUp(x,y,b));
+
+init X(initialBoard);
+
+
+
