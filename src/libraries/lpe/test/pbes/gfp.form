@@ -1,0 +1,1 @@
+nu X(n:Nat = 1). [forall m:Nat. a(m)](val(n < 10)  && X(n+2))

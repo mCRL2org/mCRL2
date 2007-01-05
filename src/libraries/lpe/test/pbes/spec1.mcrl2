@@ -1,0 +1,12 @@
+act a:Nat;
+
+map smaller: Nat#Nat -> Bool;
+
+var x,y : Nat;
+
+eqn smaller(x,y) = x < y;
+
+proc P(n:Nat) = sum m: Nat. a(m). P(m);
+
+init P(0);
+

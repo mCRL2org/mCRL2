@@ -9,18 +9,36 @@ project libraries/lpe/test
        <source>/libraries//mcrl2_basic
        <source>/libraries//lpe
        <source>/site-config//boost_program_options
-       <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
+       <source>/site-config//boost_filesystem
    ;
+
+# use targets for the object files to prevent multiple compilation
+# for each input file of run_with_input
+obj lpe2pbes_timed_test.o : lpe2pbes_timed_test.cpp ;
+obj lpe2pbes_untimed_test.o : lpe2pbes_untimed_test.cpp ;
+
+# these files should become available as part of a library
+obj lin_std.o : ../../../mcrl22lpe/lin_std.cpp ;
+obj lin_alt.o : ../../../mcrl22lpe/lin_alt.cpp ;
+
+exe generate_lpe2pbes_result : generate_lpe2pbes_result.cpp lin_std.o lin_alt.o ;
 
 test-suite lpe
     :
+      [ run_with_input lpe2pbes_timed_test.o lin_std.o lin_alt.o : pbes : expected_timed_result ]
+      [ run_with_input lpe2pbes_untimed_test.o lin_std.o lin_alt.o : pbes : expected_untimed_result ]     
       [ run data_expression.cpp ]
       [ run data_test.cpp ]
-      [ run time.cpp ../../../mcrl22lpe/lin_std.cpp ../../../mcrl22lpe/lin_alt.cpp ]
-      #[ run apply_test.cpp ]
+      [ run time.cpp lin_std.o lin_alt.o ]
       [ run data_utility_test.cpp ]
-      [ run aterm_algorithm_test.cpp ../../../mcrl22lpe/lin_std.cpp ../../../mcrl22lpe/lin_alt.cpp ]
+      [ run aterm_algorithm_test.cpp lin_std.o lin_alt.o ]
       [ run operators.cpp ]
       [ run sort_test.cpp ]
-      [ run pbes_test.cpp ../../../mcrl22lpe/lin_std.cpp ../../../mcrl22lpe/lin_alt.cpp ]
+      #[ run apply_test.cpp ]
+    ;
+
+install dist 
+    :
+       generate_lpe2pbes_result
+    :
     ;
