@@ -91,19 +91,12 @@ namespace detail {
     in << spec;
 
     ATermAppl result;
-    try
-    {
-      result = parse_specification(in);
-      result = type_check(result);
-      // result = alpha_reduce(result);
-      result = implement_data(result);
-      result = linearise(result, options);
-    }
-    catch (std::runtime_error e)
-    {
-      cout << e.what() << endl;
-      return specification();
-    }
+    result = parse_specification(in);
+    result = type_check(result);
+    // result = alpha_reduce(result);
+    result = implement_data(result);
+    result = linearise(result, options);
+
     return specification(aterm_appl(result));
   }
 
