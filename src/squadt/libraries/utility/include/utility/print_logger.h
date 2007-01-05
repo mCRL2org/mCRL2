@@ -76,7 +76,7 @@ namespace utility {
    * \param[in] p the path to the file to which to write the log messages
    * \param[in] l the log filter level
    **/
-  file_print_logger::file_print_logger(boost::filesystem::path const& p, log_level l) : print_logger(out, l), out(p.native_file_string().c_str()) {
+  inline file_print_logger::file_print_logger(boost::filesystem::path const& p, log_level l) : print_logger(out, l), out(p.native_file_string().c_str()) {
   }
 }
 

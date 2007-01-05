@@ -12,7 +12,7 @@ namespace sip {
     const std::string basic_messenger_impl< sip::message >::tag_close("</message>");
 
     template < >
-    utility::print_logger basic_messenger_impl< sip::message >::standard_error_logger(std::clog);
+    boost::shared_ptr < utility::logger > basic_messenger_impl< sip::message >::standard_logger(new utility::print_logger(std::clog));
 
     template < >
     basic_messenger< sip::message >::basic_messenger() : impl(new basic_messenger_impl< sip::message >) {
@@ -22,7 +22,7 @@ namespace sip {
      * \param[in] l pointer to a logger object
      **/
     template < >
-    basic_messenger< sip::message >::basic_messenger(utility::logger* l) : impl(new basic_messenger_impl< sip::message >(l)) {
+    basic_messenger< sip::message >::basic_messenger(boost::shared_ptr < utility::logger > l) : impl(new basic_messenger_impl< sip::message >(l)) {
     }
 
     /**
@@ -34,12 +34,17 @@ namespace sip {
  
     template < >
     utility::logger* basic_messenger< sip::message >::get_logger() {
-      return (impl->logger);
+      return (impl->logger.get());
     }
 
     template < >
-    utility::logger* basic_messenger< sip::message >::get_standard_error_logger() {
-      return (&(basic_messenger_impl< sip::message >::standard_error_logger));
+    utility::logger* basic_messenger< sip::message >::get_standard_logger() {
+      return (basic_messenger_impl< sip::message >::standard_logger.get());
+    }
+
+    template < >
+    void basic_messenger< sip::message >::set_standard_logger(boost::shared_ptr < utility::logger > l) {
+      basic_messenger_impl< sip::message >::standard_logger = l;
     }
 
     template < >
@@ -48,7 +53,7 @@ namespace sip {
     }
 
     /**
-     * @param m the message that is to be sent
+     * \param[in] m the message that is to be sent
      **/
     template < >
     void basic_messenger< sip::message >::send_message(const sip::message& m) {
@@ -56,8 +61,8 @@ namespace sip {
     }
 
     /**
-     * @param h the handler function that is to be executed
-     * @param t the message type on which delivery h is to be executed
+     * \param[in] h the handler function that is to be executed
+     * \param[in] t the message type on which delivery h is to be executed
      **/
     template < >
     void basic_messenger< sip::message >::add_handler(const sip::message::type_identifier_t t, handler_type h) {
@@ -65,7 +70,7 @@ namespace sip {
     }
 
     /**
-     * @param t the message type for which to clear the event handler
+     * \param[in] t the message type for which to clear the event handler
      **/
     template < >
     void basic_messenger< sip::message >::clear_handlers(const sip::message::type_identifier_t t) {
@@ -73,8 +78,8 @@ namespace sip {
     }
 
     /**
-     * @param t the message type for which to clear the event handler
-     * @param h the handler to remove
+     * \param[in] t the message type for which to clear the event handler
+     * \param[in] h the handler to remove
      **/
     template < >
     inline void basic_messenger< sip::message >::remove_handler(const sip::message::type_identifier_t t, handler_type h) {
@@ -82,7 +87,7 @@ namespace sip {
     }
 
     /**
-     * @param[in] t the type of the message
+     * \param[in] t the type of the message
      **/
     template < >
     const boost::shared_ptr< sip::message > basic_messenger< sip::message >::await_message(sip::message::type_identifier_t t) {
@@ -90,8 +95,8 @@ namespace sip {
     }
 
     /**
-     * @param[in] t the type of the message
-     * @param[in] ts the maximum time to wait in seconds
+     * \param[in] t the type of the message
+     * \param[in] ts the maximum time to wait in seconds
      **/
     template < >
     const boost::shared_ptr< sip::message > basic_messenger< sip::message >::await_message(sip::message::type_identifier_t t, long const& ts) {

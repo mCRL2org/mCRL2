@@ -55,7 +55,7 @@ namespace sip {
         basic_messenger();
 
         /** \brief Default constructor */
-        basic_messenger(utility::logger*);
+        basic_messenger(boost::shared_ptr < utility::logger >);
 
         /** \brief Destroys all connections */
         void disconnect();
@@ -82,7 +82,10 @@ namespace sip {
         utility::logger* get_logger();
 
         /** \brief Gets the associated logger object */
-        static utility::logger* get_standard_error_logger();
+        static utility::logger* get_standard_logger();
+
+        /** \brief Sets the standard logger object */
+        static void set_standard_logger(boost::shared_ptr < utility::logger >);
     };
   }
 }

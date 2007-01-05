@@ -104,7 +104,7 @@ namespace sip {
         static const std::string                                                               tag_close;
 
         /** \brief Standard (clog) logging component */
-        static utility::print_logger                                                           standard_error_logger;
+        static boost::shared_ptr < utility::logger >                                           standard_logger;
 
       private:
 
@@ -141,7 +141,7 @@ namespace sip {
       protected:
 
         /** \brief The component used for logging */
-        utility::logger*           logger;
+        boost::shared_ptr < utility::logger > logger;
 
       private:
 
@@ -154,7 +154,7 @@ namespace sip {
       public:
 
         /** \brief Default constructor */
-        basic_messenger_impl(utility::logger* = &standard_error_logger);
+        basic_messenger_impl(boost::shared_ptr < utility::logger > = standard_logger);
 
         /** \brief Destroys all connections */
         void disconnect();
@@ -196,7 +196,7 @@ namespace sip {
      * \pre l != 0
      **/
     template < class M >
-    inline basic_messenger_impl< M >::basic_messenger_impl(utility::logger* l) :
+    inline basic_messenger_impl< M >::basic_messenger_impl(boost::shared_ptr < utility::logger > l) :
        message_open(false), delivery_thread_active(false), partially_matched(0), logger(l) {
     }
 
