@@ -67,7 +67,12 @@ namespace Utils {
   
   struct Slot {
     float position;  //INV: 0 <= position < 360
-    int  occupying;  //INV: 0 <= occupying 
+    int   occupying;  //INV: 0 <= occupying 
+    int   under_consideration; 
+    // Number of slot we are placing. Position this slot will be placed in is 
+    // P = 2 * PI s / S - 1/2 * total_size + under_consideration * total_size /
+    //     (n + 1)) fmod 2 * PI
+    float total_size;
   };
 
   struct Vect {
