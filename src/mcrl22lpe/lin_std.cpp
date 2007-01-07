@@ -2091,7 +2091,7 @@ static ATermAppl newprocess(
 { 
   numberOfNewProcesses++;
   if (numberOfNewProcesses == warningNumber)
-  { gsWarningMsg("Generated %d new internal processes. Use -2 (--regular2) instead of the default -1 (--regular).\n",
+  { gsWarningMsg("Generated %d new internal processes. A possible unbounded loop can be avoided by using the flag -2 (--regular2) instead of the default -1 (--regular).\n",
                          numberOfNewProcesses);
     warningNumber=warningNumber*2;
   }
