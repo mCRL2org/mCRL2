@@ -2075,9 +2075,26 @@ static ATermList parameters_that_occur_in_body(
   return parameters; 
 }        
 
-static ATermAppl newprocess(ATermList parameters, ATermAppl body,
-              processstatustype ps, int canterminate)
+// The variable below is used to count the number of new processes that
+// are made. If this number is very high, it is likely that the regular
+// flag is used, and an unbounded number of new processes are generated.
+// In such a case a warning is printed suggesting to use regular2.
+
+static unsigned long numberOfNewProcesses=0,warningNumber=1000;
+
+
+static ATermAppl newprocess(
+                    ATermList parameters, 
+                    ATermAppl body,
+                    processstatustype ps, 
+                    int canterminate)
 { 
+  numberOfNewProcesses++;
+  if (numberOfNewProcesses == warningNumber)
+  { gsWarningMsg("Generated %d new internal processes. Use -2 (--regular2) instead of the default -1 (--regular).\n",
+                         numberOfNewProcesses);
+    warningNumber=warningNumber*2;
+  }
   parameters=parameters_that_occur_in_body(parameters, body);
   ATermAppl p=gsMakeProcVarId(fresh_name("P"),linGetSorts(parameters));
   insertProcDeclaration(
@@ -4463,6 +4480,12 @@ static void add_summands(
 
   /* remove the sum operators; collect the sum variables in the
      list sumvars */
+
+  if (isDeltaAtZero(summandterm))
+  { // delta@0 does not need to be added.
+    return;
+  }
+
   for( ; gsIsSum(summandterm) ; )
   { sumvars=ATconcat(ATLgetArgument(summandterm,0),sumvars);
     summandterm=ATAgetArgument(summandterm,1);
