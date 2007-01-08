@@ -49,21 +49,20 @@ class MainFrame : public wxFrame {
     void	setMarkedStatesInfo(int number);
     void	setMarkedTransitionsInfo(int number);
     void	setNumberInfo(int ns,int nt,int nc,int nr);
-    void	setVisSettings(Utils::VisSettings ss);
+    void  setVisSettings(Utils::VisSettings ss);
     void	showMessage(std::string title,std::string text);
     void	startRendering();
     void	stopRendering();
     void	updateProgressDialog(int val,std::string msg);
 //    void  onIdle(wxIdleEvent &event);/* needed for computing the frame rate */
   private:
-    double previousTime; /* needed for computing the frame rate (FPS) */
-    int    frameCount; /* needed for computing the frame rate (FPS) */
+//    double previousTime; /* needed for computing the frame rate (FPS) */
+//    int    frameCount; /* needed for computing the frame rate (FPS) */
     wxColorButton*    backgroundButton;
     wxSpinCtrl*	      branchrotationSpinCtrl;
-    wxString	        directory;
     wxColorButton*    downEdgeButton;
     wxSpinCtrl*       ellipsoidSpinCtrl;
-    wxString	        filename;
+    wxFileName        filename;
     GLCanvas*	        glCanvas;
     wxSpinCtrl*	      innerbranchtiltSpinCtrl;
     wxColorButton*    interpolate1Button;

@@ -37,18 +37,9 @@ class Visualizer {
     Utils::MarkStyle markStyle;
     Mediator* mediator;
     PrimitiveFactory *primitiveFactory;
-    static Utils::VisSettings	defaultVisSettings;
+    static Utils::VisSettings  defaultVisSettings;
     Utils::VisSettings visSettings;
     Utils::VisStyle visStyle;
-//    std::vector< float > sin_theta1_s;
-//    std::vector< float > sin_theta2_s;
-//    std::vector< float > cos_theta1_s;
-//    std::vector< float > cos_theta2_s;
-//    bool refreshStates;
-//    bool refreshTransitions;
-//    GLuint statesDisplayList;
-//    GLuint transDisplayList;
-//    Utils::RankStyle rankStyle;
     
     void clearDFSStates(State* root);
     void computeStateAbsPos(State* root,int rot,Utils::Point3D init);
@@ -61,14 +52,6 @@ class Visualizer {
     void drawTransitions(State* root,bool disp_fp,bool disp_bp);
     bool isMarked(Cluster* c);
     bool isMarked(State* s);
-//    void drawSphereState();
-//    void drawSubtreeA(Cluster* root,int rot);
-//    void drawSubtreeAMark(Cluster* root,int rot);
-//    void drawSubtreeT(Cluster* root,Utils::HSV_Color col,int rot);
-//    void drawSubtreeTMark(Cluster* root,int rot);
-//    void drawTube(float baserad,float toprad,Utils::RGB_Color basecol,
-//        Utils::RGB_Color topcol,bool interpolate,Utils::Point3D b1,
-//        Utils::Point3D b2,Utils::Point3D b3,Utils::Point3D &center);
 
     void fillClusters();
     void initClusterData(Cluster *root,bool topClosed,int rot);
@@ -95,8 +78,5 @@ class Visualizer {
     void drawTransitions(bool disp_fp,bool disp_bp);
     void drawStructure();
     void sortClusters(Utils::Point3D viewpoint);
-//    void	drawLTS(Utils::Point3D viewpoint);
-//    Utils::RankStyle getRankStyle() const;
-//    void setRankStyle(Utils::RankStyle rs);
 };
 #endif

@@ -51,11 +51,9 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 END_EVENT_TABLE()
 
 MainFrame::MainFrame(Mediator* owner) : wxFrame(NULL,wxID_ANY,wxT("LTSView")) {
-  previousTime = 0.0;
-  frameCount = 0;
+//  previousTime = 0.0;
+//  frameCount = 0;
   mediator = owner;
-  directory = wxEmptyString;
-  filename = wxEmptyString;
   progDialog = NULL;
 
   SetIcon(wxIcon(main_window));
@@ -424,20 +422,24 @@ GLCanvas* MainFrame::getGLCanvas() const {
 }
 
 void MainFrame::setFileInfo(wxFileName fn) {
-  directory = fn.GetPath();
-  filename  = fn.GetFullName();
+  filename.Assign(fn);
 }
 
 void MainFrame::onAbout(wxCommandEvent& /*event*/) {
   wxString ttl = wxT("About LTSView");
   wxString msg = wxT("LTSView - revision "REVISION"\n\n")
     wxT("Tool for the interactive visualisation of state transition systems.\n\n")
-    wxT("Developed by Bas Ploeger and Carst Tankink.\n\n")
+    wxT("Developed by Bas Ploeger and Carst Tankink.\n")
+    wxT("Based on visualisation techniques by Frank van Ham and Jack van Wijk. ")
+    wxT("See: F. van Ham, H. van de Wetering and J.J. van Wijk, ")
+    wxT("\"Visualization of State Transition Graphs\". ")
+    wxT("Proc. IEEE Symp. Information Visualization 2001, IEEE CS Press, pp. 59-66, 2001.\n\n")
     wxT("Distributed as part of the mCRL2 toolset. For information see: http://www.mcrl2.org\n\n")
     wxT("Please send all complaints, comments and bug reports to: bug@mcrl2.org\n");
   wxMessageDialog dlg(this,msg,ttl,wxOK|wxICON_INFORMATION);
   dlg.ShowModal();
 }
+
 /*
 void MainFrame::onIdle(wxIdleEvent &event) {
   glCanvas->display();
@@ -445,19 +447,18 @@ void MainFrame::onIdle(wxIdleEvent &event) {
 */
 void MainFrame::onOpen(wxCommandEvent& /*event*/) {
   wxString filemask = wxT("FSM files (*.fsm)|*.fsm");
-  wxFileDialog* dialog = new wxFileDialog(this,wxT("Open LTS"),directory,
-      filename,filemask,wxFD_OPEN);
+  wxFileDialog* dialog = new wxFileDialog(this,wxT("Open LTS"),
+      filename.GetPath(),filename.GetFullName(),filemask,wxFD_OPEN);
   dialog->CentreOnParent();
-  if (dialog->ShowModal()==wxID_OK) {
-    directory = dialog->GetDirectory();
-    filename  = dialog->GetFilename();
-    mediator->openFile(string(dialog->GetPath().fn_str()));
+  if (dialog->ShowModal() == wxID_OK) {
+    filename.Assign(dialog->GetPath());
+    mediator->openFile(string(filename.GetFullPath().fn_str()));
   }
   dialog->Destroy();
 }
 
 void MainFrame::onSavePic(wxCommandEvent& /*event*/) {
-  SavePicDialog sp_dlg(this,glCanvas,filename,directory);
+  SavePicDialog sp_dlg(this,glCanvas,filename.GetFullName(),filename.GetPath());
   sp_dlg.ShowModal();
 }
 
@@ -557,6 +558,7 @@ void MainFrame::onRemoveMarkRuleButton(wxCommandEvent& /*event*/) {
     mediator->removeMarkRule(sel_index);
     markStatesRadio->SetValue(true);
   }
+  Layout();
 }
 
 void MainFrame::onMarkTransition(wxCommandEvent& event) {
@@ -650,8 +652,9 @@ void MainFrame::showMessage(string title,string text) {
 }
 
 void MainFrame::loadTitle() {
-  if (filename != wxEmptyString)
-    SetTitle(filename + wxT(" - LTSView"));
+  wxString fn = filename.GetFullName();
+  if (fn != wxEmptyString)
+    SetTitle(fn + wxT(" - LTSView"));
   else
     SetTitle(wxT("LTSView"));
 }
@@ -661,20 +664,24 @@ void MainFrame::setNumberInfo(int ns,int nt,int nc,int nr) {
   numberOfTransitionsLabel->SetLabel(wxString::Format(wxT("%d"), nt));
   numberOfClustersLabel->SetLabel(wxString::Format(wxT("%d"), nc));
   numberOfRanksLabel->SetLabel(wxString::Format(wxT("%d"), nr));
+  Layout();
 }
 
 void MainFrame::setMarkedStatesInfo(int number) {
   numberOfMarkedStatesLabel->SetLabel(wxString::Format(wxT("%d"),number));
+  Layout();
 }
 
 void MainFrame::setMarkedTransitionsInfo(int number) {
   numberOfMarkedTransitionsLabel->SetLabel(wxString::Format(wxT("%d"),number));
+  Layout();
 }
 
 void MainFrame::addMarkRule(wxString str) {
   markStatesListBox->Append(str);
   markStatesListBox->Check(markStatesListBox->GetCount()-1,true);
   markStatesRadio->SetValue(true);
+  Layout();
 }
 
 void MainFrame::replaceMarkRule(int index,wxString str) {
@@ -688,6 +695,7 @@ void MainFrame::resetMarkRules() {
   markStatesListBox->Clear();
   markAnyAllChoice->SetSelection(0);
   nomarksRadio->SetValue(true);
+  Layout();
 }
 
 void MainFrame::setActionLabels(vector< ATerm > &labels) {
@@ -698,6 +706,7 @@ void MainFrame::setActionLabels(vector< ATerm > &labels) {
   }
   strLabels.Sort();
   markTransitionsListBox->Set(strLabels);
+  Layout();
 }
 
 void MainFrame::startRendering() {
@@ -706,7 +715,7 @@ void MainFrame::startRendering() {
 }
 
 void MainFrame::stopRendering() {
-/*  double currentTime = clock() / CLOCKS_PER_SEC;
+  /*double currentTime = clock() / CLOCKS_PER_SEC;
   ++frameCount;
   if (currentTime-previousTime > 1.0) {
     SetStatusText(wxString::Format(wxT("FPS: %.3f"),

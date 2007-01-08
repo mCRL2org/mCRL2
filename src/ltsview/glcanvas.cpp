@@ -34,7 +34,7 @@ BEGIN_EVENT_TABLE(GLCanvas,wxGLCanvas)
 END_EVENT_TABLE()
 
 GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,const wxSize &size,
-		   int* attribList)
+    int* attribList)
 	: wxGLCanvas(parent,wxID_ANY,wxDefaultPosition,size,wxSUNKEN_BORDER,
 		     wxT(""),attribList) {
   mediator = owner;
@@ -72,7 +72,6 @@ void GLCanvas::initialize() {
   SetCurrent();
 
   glDepthFunc(GL_LEQUAL);
-  glShadeModel(GL_SMOOTH);
 
   GLfloat gray[] = { 0.35f,0.35f,0.35f,1.0f };
   GLfloat light_pos[] = { 50.0f,50.0f,50.0f,1.0f };
@@ -80,14 +79,11 @@ void GLCanvas::initialize() {
   glLightfv(GL_LIGHT0,GL_DIFFUSE,gray);
   glLightfv(GL_LIGHT0,GL_POSITION,light_pos);
   
-  glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-  /*
   glEnable(GL_NORMALIZE);
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
   glEnable(GL_DEPTH_TEST);
-  glEnable(GL_BLEND);
-  glEnable(GL_COLOR_MATERIAL);*/
+  glEnable(GL_COLOR_MATERIAL);
   
   GLfloat light_col[] = { 0.2f,0.2f,0.2f };
   glMaterialfv(GL_FRONT,GL_SPECULAR,light_col);
@@ -184,23 +180,23 @@ void GLCanvas::display(bool coll_caller) {
         glDisable(GL_NORMALIZE);
         glDisable(GL_LIGHTING);
         glDisable(GL_LIGHT0);
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_COLOR_MATERIAL);
-        //glPolygonMode(GL_FRONT,GL_LINE);
+        glShadeModel(GL_FLAT);
+        //glDisable(GL_DEPTH_TEST);
+        //glDisable(GL_COLOR_MATERIAL);
       }
       else {
         glEnable(GL_NORMALIZE);
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_BLEND);
-        glEnable(GL_COLOR_MATERIAL);
-        if (displayWireframe) {
-          glPolygonMode(GL_FRONT,GL_LINE);
-        }
-        else {
-          glPolygonMode(GL_FRONT,GL_FILL);
-        }
+        glShadeModel(GL_SMOOTH);
+        //glEnable(GL_DEPTH_TEST);
+        //glEnable(GL_COLOR_MATERIAL);
+      }
+      if (displayWireframe) {
+        glPolygonMode(GL_FRONT,GL_LINE);
+      }
+      else {
+        glPolygonMode(GL_FRONT,GL_FILL);
       }
     
       glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -245,7 +241,12 @@ void GLCanvas::display(bool coll_caller) {
       }
 
       // draw the structure
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+      glDepthMask(GL_FALSE);
       visualizer->drawStructure();
+      glDepthMask(GL_TRUE);
+      glDisable(GL_BLEND);
       
       // do not show the picture in the canvas if we are collecting data
       if (!collectingData) {

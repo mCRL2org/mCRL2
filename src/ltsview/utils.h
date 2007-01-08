@@ -39,10 +39,10 @@ namespace Utils {
   struct VisSettings {
     float     ellipsoidThreshold;
     float     nodeSize;
-    int	      branchRotation;
-    int	      innerBranchTilt;
-    int	      outerBranchTilt;
-    int	      quality;
+    int              branchRotation;
+    int              innerBranchTilt;
+    int              outerBranchTilt;
+    int              quality;
     unsigned char alpha;
     bool      longInterpolation;
     RGB_Color downEdgeColor;
@@ -52,12 +52,12 @@ namespace Utils {
     RGB_Color stateColor;
     RGB_Color upEdgeColor;
 //    float     backpointerCurve;
-//    int	      branchScale;
-//    int	      branchSpread;
+//    int            branchScale;
+//    int            branchSpread;
 //    float     clusterHeight;
 //    bool      levelDividers;
   };
-
+  
   struct MarkRule {
     int		            paramIndex;
     bool	            isActivated;
