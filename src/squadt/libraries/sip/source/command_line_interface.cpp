@@ -245,7 +245,8 @@ namespace sip {
               identifier = std::atol(t);
               break;
             case 2: /* Verbosity level (log filter level) */
-              utility::logger::set_default_filter_level(boost::lexical_cast< utility::logger::log_level > (t));
+              utility::logger::set_default_filter_level(
+                static_cast < utility::logger::log_level > (boost::lexical_cast< unsigned int > (t)));
               break;
             default: /* Unknown option */
               break;
