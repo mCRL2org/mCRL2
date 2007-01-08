@@ -22,7 +22,12 @@ namespace utility {
     protected:
 
       /** \brief The log level below which all messages are printed */
-      log_level     filter_level;
+      log_level        filter_level;
+
+    protected:
+
+      /** \brief The default log level */
+      static log_level default_filter_level;
 
     private:
      
@@ -34,13 +39,19 @@ namespace utility {
 
     public:
 
-      inline logger(log_level);
+      inline logger(log_level = default_filter_level);
 
       /** \brief Adds a log message with a string and a log level */
       inline void log(log_level, std::string const&);
 
       /** \brief Adds a log message with a format object and a log level */
       inline void log(log_level, boost::format const&);
+
+      /** \brief Sets default filter level */
+      inline static void set_default_filter_level(log_level l);
+
+      /** \brief Sets default filter level */
+      inline static log_level get_default_filter_level();
 
       /** \brief Sets filter level below which messages are logged */
       inline void set_filter_level(log_level l);
@@ -53,6 +64,14 @@ namespace utility {
   };
 
   inline logger::logger(log_level l) : filter_level(l) {
+  }
+
+  inline void logger::set_default_filter_level(log_level l) {
+    default_filter_level = l;
+  }
+
+  inline logger::log_level logger::get_default_filter_level() {
+    return (default_filter_level);
   }
 
   inline void logger::set_filter_level(log_level l) {

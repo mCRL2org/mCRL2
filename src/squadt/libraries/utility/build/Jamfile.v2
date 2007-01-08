@@ -4,22 +4,24 @@ project squadt/libraries/utility
     : build-dir $(BUILD_TOP)
     : requirements
        <use>/boost//headers
+       <include>../include
     : usage-requirements
        <use>/boost//headers
+       <include>../include
+    ;
+
+obj logger.o
+    : logger.cpp
     ;
 
 lib mcrl2_tool_interface
     : message_relay.cpp
     : <use>/libraries//mcrl2_basic
       <use>/libraries/sip//sip_tool
-      <include>../include
     :
     : <library>/libraries/sip//sip_tool
     ;
 
-alias headers 
-    :
-    :
-    :
-    : <include>../include
-    ;
+alias logger : logger.o : : : ;
+
+alias headers : : : : ;

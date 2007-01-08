@@ -3,11 +3,9 @@ project squadt/libraries/sip
        ../source
     : build-dir $(BUILD_TOP)
     : requirements
-       <use>/libraries/utility//headers
        <use>/boost//headers
        <include>../include
     : usage-requirements
-       <use>/libraries/utility//headers
        <use>/boost//headers
        <include>../include
     ;
@@ -44,6 +42,7 @@ alias messenger
       mime_type.cpp
       basic_datatype.cpp
       configuration.cpp
+      command_line_interface.cpp
       layout_elements.cpp
       basic_messenger.cpp
       tool_capabilities.cpp
@@ -52,10 +51,12 @@ alias messenger
       <dependency>/site-config//boost_regex
       <dependency>/site-config//boost_filesystem
       <dependency>/libraries//xml2pp
+      <dependency>/libraries/utility//logger
     : # no default build
     : <library>/site-config//boost_regex
       <library>/site-config//boost_filesystem
       <library>/libraries//xml2pp
+      <library>/libraries/utility//logger
     ;
 
 lib sip_controller

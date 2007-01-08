@@ -62,6 +62,8 @@ namespace squadt {
 
       processes.push_back(p);
 
+      l->get_logger()->log(1, "executing command `" + c.as_string() + "'\n");
+
       p->execute(c);
     }
 

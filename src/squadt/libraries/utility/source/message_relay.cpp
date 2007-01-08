@@ -1,3 +1,4 @@
+#include <utility/logger.h>
 #include <utility/squadt_utility.h>
 
 namespace squadt_utility {
@@ -30,6 +31,16 @@ namespace squadt_utility {
     postman = std::auto_ptr < printer_helper > (new printer_helper(t));
 
     gsSetCustomMessageHandler(relay_message);
+
+    utility::logger::log_level l = utility::logger::get_default_filter_level();
+
+    if (1 < l) {
+      gsSetVerboseMsg();
+
+      if (2 < l) {
+        gsSetDebugMsg();
+      }
+    }
   }
 
   void finalise() {

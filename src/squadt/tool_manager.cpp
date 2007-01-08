@@ -30,10 +30,13 @@ namespace squadt {
   namespace bf = boost::filesystem;
 
   /** \brief Socket connection option scheme for easy command generation */
-  const char* socket_connect_pattern = "--si-connect=socket://%s:%s";
+  const char* socket_connect_pattern    = "--si-connect=socket://%s:%s";
 
   /** \brief Identifier option scheme for easy command generation */
-  const char* identifier_pattern     = "--si-identifier=%s";
+  const char* identifier_pattern        = "--si-identifier=%s";
+
+  /** \brief Identifier option scheme for easy command generation */
+  const char* log_filter_level_pattern  = "--si-log-filter-level=%s";
 
   const long tool_manager_impl::default_tcp_port = 10947;
 
@@ -74,6 +77,8 @@ namespace squadt {
                             % impl->get_local_host() % default_tcp_port));
     c.append_argument(boost::str(boost::format(identifier_pattern)
                             % id));
+    c.append_argument(boost::str(boost::format(log_filter_level_pattern)
+                            % boost::lexical_cast < std::string > (static_cast < unsigned int > (get_standard_logger()->get_filter_level()))));
 
     instances[id] = p;
 

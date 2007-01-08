@@ -6,7 +6,7 @@
 #include <sip/tool/capabilities.h>
 #include <sip/layout_base.h>
 #include <sip/detail/message.h>
-#include <sip/detail/command_line_interface.tcc>
+#include <sip/detail/command_line_interface.h>
 
 namespace sip {
   namespace tool {

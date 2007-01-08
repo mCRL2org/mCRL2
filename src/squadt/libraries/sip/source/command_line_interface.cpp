@@ -1,15 +1,19 @@
 #ifndef SIP_COMMAND_LINE_INTERFACE_TCC
 #define SIP_COMMAND_LINE_INTERFACE_TCC
 
-#include <boost/shared_array.hpp>
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
 
-#include <sip/exception.h>
+#include <boost/shared_array.hpp>
+#include <boost/lexical_cast.hpp>
+
+#include <utility/logger.h>
 
 #include <sip/detail/command_line_interface.h>
-#include <sip/detail/schemes.h>
+#include <sip/detail/tool.tcc>
+#include <sip/detail/schemes.tcc>
+#include <sip/exception.h>
 
 namespace sip {
 
@@ -17,10 +21,10 @@ namespace sip {
 
     using namespace messaging;
 
-    const size_t argument_extractor::known_option_number = 2;
+    const size_t argument_extractor::known_option_number = 3;
     const size_t argument_extractor::known_scheme_number = 2;
 
-    const char*  argument_extractor::known_options[known_option_number] = { "--si-connect", "--si-identifier" };
+    const char*  argument_extractor::known_options[known_option_number] = { "--si-connect", "--si-identifier", "--si-log-filter-level" };
     const char*  argument_extractor::known_schemes[known_scheme_number] = { "traditional", "socket" };
 
     /**
@@ -204,6 +208,7 @@ namespace sip {
      *    - socket://\<host\>:\<port\> (for a socket connection)
      *    - traditional:// (for standard input/output communication)
      *  - --si-identifier=\<positive natural number\>
+     *  - --si-log-filter-level=\<natural number\>
      *
      * @param argc the number of command line arguments
      * @param argv a pointer to the list of command line arguments
@@ -237,7 +242,10 @@ namespace sip {
               }
               break;
             case 1: /* Identifier option */
-              identifier = atol(t);
+              identifier = std::atol(t);
+              break;
+            case 2: /* Verbosity level (log filter level) */
+              utility::logger::set_default_filter_level(boost::lexical_cast< utility::logger::log_level > (t));
               break;
             default: /* Unknown option */
               break;

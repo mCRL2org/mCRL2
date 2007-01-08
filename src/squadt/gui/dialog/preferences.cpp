@@ -260,7 +260,7 @@ namespace squadt {
 
       SetSizer(current_sizer);
 
-      current_sizer->AddSpacer(30);
+      current_sizer->AddStretchSpacer();
       current_sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Filter level for diagnostic messages and warnings")), 0, wxEXPAND|wxLEFT|wxRIGHT, 4);
 
       filter_level = new wxSlider(this, wxID_ANY, std::max(sip::controller::communicator::get_standard_logger()->get_filter_level(),
@@ -268,21 +268,12 @@ namespace squadt {
 
       Connect(wxEVT_SCROLL_CHANGED, wxCommandEventHandler(debug_preferences::filter_level_changed));
 
-      current_sizer->AddSpacer(3);
+      current_sizer->AddSpacer(8);
       current_sizer->Add(filter_level, 0, wxEXPAND|wxLEFT|wxRIGHT, 4);
       current_sizer->AddSpacer(8);
-      current_sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Notice that lower filter levels are more restrictive")), 0, wxEXPAND|wxLEFT|wxRIGHT, 4);
-      current_sizer->AddSpacer(15);
-
-      wxStaticBoxSizer* tool_group = new wxStaticBoxSizer(wxVERTICAL, this, wxT("Tool specific"));
-
-      toggle_verbose = new wxCheckBox(this, wxID_ANY, wxT("verbose messages"));
-      toggle_debug   = new wxCheckBox(this, wxID_ANY, wxT("debug messages"));
-
-      tool_group->Add(toggle_verbose, 0, wxEXPAND|wxLEFT|wxRIGHT, 3);
-      tool_group->Add(toggle_debug, 0, wxEXPAND|wxLEFT|wxRIGHT, 3);
-
-      current_sizer->Add(tool_group, 0, wxEXPAND|wxLEFT|wxRIGHT, 4);
+      current_sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Notice that lower filter levels are more restrictive and"
+                                "that tools started after making this change also assume this verbosity setting")), 0, wxEXPAND|wxLEFT|wxRIGHT, 4);
+      current_sizer->AddStretchSpacer();
     }
 
     /**

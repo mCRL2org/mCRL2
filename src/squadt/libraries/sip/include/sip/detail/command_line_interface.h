@@ -5,6 +5,7 @@
 #include <boost/noncopyable.hpp>
 
 #include <sip/tool.h>
+#include <sip/detail/schemes.h>
 
 namespace sip {
 

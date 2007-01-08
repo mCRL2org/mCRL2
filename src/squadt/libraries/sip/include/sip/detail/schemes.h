@@ -65,22 +65,9 @@ namespace sip {
     inline traditional_scheme< M >::traditional_scheme() {
     }
  
-    /* Builds a connection between a tool communicator and a controller communicator */
-    template < typename M >
-    inline void traditional_scheme< M >::connect(basic_messenger_impl< M >* t) const {
-      /** Not yet implemented */
-      throw (sip::exception(sip::not_yet_implemented));
-    }
- 
     /** \brief Constructor */
     template < typename M >
     inline socket_scheme< M >::socket_scheme() {
-    }
- 
-    /* Builds a connection between a tool communicator and a controller communicator */
-    template < typename M >
-    inline void socket_scheme< M >::connect(basic_messenger_impl< M >* t) const {
-      t->connect(host_name, port);
     }
   }
 }

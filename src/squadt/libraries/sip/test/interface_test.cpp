@@ -8,7 +8,6 @@
 #include <boost/test/unit_test_monitor.hpp>
 
 #include <sip/detail/basic_messenger.tcc>
-#include <sip/detail/command_line_interface.tcc>
 #include <sip/tool.h>
 #include <sip/controller.h>
 

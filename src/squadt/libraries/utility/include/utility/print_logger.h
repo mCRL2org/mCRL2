@@ -29,7 +29,7 @@ namespace utility {
     public:
      
       /** \brief Constructor */
-      inline print_logger(std::ostream&, log_level = 1);
+      inline print_logger(std::ostream&, log_level = logger::default_filter_level);
 
       /** \brief Destructor */
       inline ~print_logger();
@@ -45,7 +45,7 @@ namespace utility {
     public:
 
       /** \brief Constructor */
-      file_print_logger(boost::filesystem::path const& p, log_level = 1);
+      file_print_logger(boost::filesystem::path const& p, log_level = logger::default_filter_level);
   };
 
   /**
