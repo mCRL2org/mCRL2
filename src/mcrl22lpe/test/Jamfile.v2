@@ -2,7 +2,7 @@ project toolset/mcrl22lpe/test
      : source-location .
      ;
 
-# run mcrl22lpe on all mcrl2 files located somewhere in ../../../examples
+# run mcrl22lpe on all mcrl2 files located somewhere in $(TOP)/examples
 #
 #  the output files get the extension lpe and are located in $(BUILD_TOP)
 #

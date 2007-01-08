@@ -13,7 +13,14 @@ rule run_tool_on_examples ( tool prefix suffix ? : options * : paths + : extensi
   import path ;
 
   for path in $(paths) {
-    for file in [ path.glob-tree $(path) : *.$(extensions) ] {
+    if $(path) = "." {
+      files = [ glob-tree *.$(extensions) ] ;
+    }
+    else {
+      files = [ path.glob-tree $(path) : *.$(extensions) ] ;
+    }
+
+    for file in $(files) {
       local target = [ MATCH "^(.+)[.][^.]+$" : [ path.basename $(file) ] ] ;
       local output ;
  
@@ -49,7 +56,14 @@ rule run_with_input ( sources + : paths + : extensions + ) {
   import path ;
 
   for path in $(paths) {
-    for file in [ path.glob-tree $(path) : *.$(extensions) ] {
+    if $(path) = "." {
+      files = [ glob-tree *.$(extensions) ] ;
+    }
+    else {
+      files = [ path.glob-tree $(path) : *.$(extensions) ] ;
+    }
+
+    for file in $(files) {
  
       results += [
  
