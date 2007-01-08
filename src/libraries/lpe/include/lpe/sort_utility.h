@@ -94,7 +94,7 @@ bool is_finite(const function_list& fl, const lpe::sort& s, const lpe::sort_list
   }
 
   //Otherwise a sort is finite if all its constructors are finite;
-  //i.e. the constructors have no arguments, of their arguments are finite.
+  //i.e. the constructors have no arguments, or their arguments are finite.
   //In the recursive call pass s add s to the visited sorts, so that we know
   //it may not occur in a constructor anymore.
   for (function_list::iterator i = cl.begin(); i != cl.end(); ++i)
