@@ -8,7 +8,7 @@
 namespace squadt {
 
   /**
-   * @param[in] t reference to the tool object to use for storage
+   * \param[in] t reference to the tool object to use for storage
    **/
   extractor::extractor(tool& t) : task_monitor() {
     add_handler(sip::message_response_tool_capabilities, bind(&extractor::handle_store_tool_capabilities, this, _1, boost::ref(t)));
@@ -30,8 +30,8 @@ namespace squadt {
   }
 
   /**
-   * @param[in] m the message that was just delivered
-   * @param[in,out] t the tool object in which to store the result
+   * \param[in] m the message that was just delivered
+   * \param[in,out] t the tool object in which to store the result
    **/
   void extractor::handle_store_tool_capabilities(const sip::message_ptr& m, tool& t) {
     xml2pp::text_reader reader(m->to_string().c_str());

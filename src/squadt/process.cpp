@@ -62,11 +62,14 @@ namespace squadt {
         /** \brief Executed at process termination */
         void termination_handler(pid_t);
 
+        /** \brief Initialisation procedure */
+        void initialise();
+ 
       private:
 
         /** \brief The default listener for changes in status */
         static boost::shared_ptr < task_monitor >      default_monitor;
- 
+
       public:
 
         /** \brief Constructor */
@@ -97,6 +100,7 @@ namespace squadt {
      * \param h the function to call when the process terminates
      **/
     process_impl::process_impl(process::handler h) : current_status(process::stopped), signal_termination(h), monitor(default_monitor) {
+      initialise();
     }
 
     /**
@@ -104,6 +108,15 @@ namespace squadt {
      * \param[in] l a reference to a listener for process status change events
      **/
     process_impl::process_impl(process::handler h, boost::shared_ptr < task_monitor >& l) : current_status(process::stopped), signal_termination(h), monitor(l) {
+      initialise();
+    }
+
+    inline void process_impl::initialise() {
+#if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
+      ZeroMemory(&si, sizeof(STARTUPINFO));
+      si.cb = sizeof(STARTUPINFO);
+      ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
+#endif
     }
  
     process_impl::~process_impl() {
@@ -192,7 +205,7 @@ namespace squadt {
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
       LPTSTR command = _tcsdup(TEXT(c.as_string().c_str()));
 
-      int identifier = CreateProcess(0,command,0,0,false,0,0,c.working_directory.c_str(),&si,&pi);
+      int identifier  = CreateProcess(0,command,0,0,false,0,0,c.working_directory.c_str(),&si,&pi);
 #else
       boost::shared_array < char const* > arguments(c.get_array());
 
@@ -215,7 +228,7 @@ namespace squadt {
 
       current_status = (identifier < 0) ? process::aborted : process::running;
 
-      if (0 < identifier) {
+      if (current_status == process::running) {
         using namespace boost;
 
         signal_status();

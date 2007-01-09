@@ -263,7 +263,9 @@ namespace squadt {
   }
  
   void tool_manager::query_tools() {
-    BOOST_FOREACH(tool_list::value_type t, get_tools()) {
+    tool_manager::tool_const_sequence tools(get_tools());
+
+    BOOST_FOREACH(tool_list::value_type t, tools) {
       impl->query_tool(*t);
     }
   }
@@ -274,9 +276,11 @@ namespace squadt {
   void tool_manager::query_tools(boost::function < void (const std::string&) > h) {
     using namespace boost;
 
+    tool_manager::tool_const_sequence tools(get_tools());
+
     tool_list retry_list;
 
-    BOOST_FOREACH(tool_list::value_type t, get_tools()) {
+    BOOST_FOREACH(tool_list::value_type t, tools) {
       h(t->get_name());
 
       if (!impl->query_tool(*t)) {

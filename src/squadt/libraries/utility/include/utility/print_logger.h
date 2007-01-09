@@ -40,12 +40,15 @@ namespace utility {
     private:
 
       /** \brief The stream to print to */
-      std::fstream out;
+      std::ofstream out;
 
     public:
 
       /** \brief Constructor */
       file_print_logger(boost::filesystem::path const& p, log_level = logger::default_filter_level);
+
+      /** \brief Destructor */
+      ~file_print_logger();
   };
 
   /**
@@ -77,6 +80,10 @@ namespace utility {
    * \param[in] l the log filter level
    **/
   inline file_print_logger::file_print_logger(boost::filesystem::path const& p, log_level l) : print_logger(out, l), out(p.native_file_string().c_str()) {
+  }
+
+  inline file_print_logger::~file_print_logger() {
+    out.close();
   }
 }
 
