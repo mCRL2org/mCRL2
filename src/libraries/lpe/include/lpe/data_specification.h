@@ -5,7 +5,6 @@
 #define LPE_DATA_SPECIFICATION_H
 
 #include "atermpp/aterm.h"
-#include "lpe/data_specification.h"
 #include "lpe/sort.h"
 #include "lpe/function.h"
 #include "lpe/data.h"
