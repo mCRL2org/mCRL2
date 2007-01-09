@@ -207,6 +207,46 @@ data_expression::data_expression(const data_variable& v)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// data_application
+/// \brief data application.
+///
+// DataAppl(<DataExpr>, <DataExpr>)
+class data_application: public aterm_appl
+{
+  public:
+    data_application()
+    {}
+
+    data_application(aterm_appl t)
+     : aterm_appl(t)
+    {
+      assert(gsIsDataAppl(t));
+    }
+
+    operator data_expression() const
+    {
+      return data_expression(m_term);
+    }
+
+// ATermAppl gsMakeDataAppl(ATermAppl DataExpr, ATermAppl DataArg);
+    data_application(data_expression d, data_expression e)
+     : aterm_appl(gsMakeDataAppl(d, e))
+    {}
+  };
+                                                            
+///////////////////////////////////////////////////////////////////////////////
+// data_application_list
+/// \brief singly linked list of data applications
+///
+typedef term_list<data_application> data_application_list;
+
+inline
+bool is_data_application(aterm_appl t)
+{
+  return gsIsDataAppl(t);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // data_variable_init
 /// \brief data variable with an initial value.
 ///
