@@ -200,17 +200,14 @@ lpe::LPE_summand remove_unused_variables(const lpe::LPE_summand& summand)
   {
     data_variable v = *i;
    
-    if (!summand.is_delta())
-    { 
-      //Check whether variable occurs in other terms of summand
-      //If variable occurs leave the variable, so add variable to new list
-      if (occurs_in(summand.condition(), v) || occurs_in(summand.actions(), v)
-          || occurs_in(summand.time(), v) || occurs_in(summand.assignments(), v))
-      {
-        new_summation_variables = push_front(new_summation_variables, v);
-      }
-      //else remove the variable, i.e. do not add it to the new list (skip)
+    //Check whether variable occurs in other terms of summand
+    //If variable occurs leave the variable, so add variable to new list
+    if (occurs_in(summand.condition(), v) || occurs_in(summand.actions(), v)
+        || occurs_in(summand.time(), v) || occurs_in(summand.assignments(), v))
+    {
+      new_summation_variables = push_front(new_summation_variables, v);
     }
+    //else remove the variable, i.e. do not add it to the new list (skip)
   }
 
   new_summation_variables = reverse(new_summation_variables);
