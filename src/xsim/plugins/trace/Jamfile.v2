@@ -7,7 +7,8 @@ lib xsim_trace_view
          /libraries//nextstate
        : <include>../..
          <site-library>wx_base
-         <link>shared
          <toolset>darwin:<bundle>yes
+       : <link>shared
+         <runtime-link>shared
        ;
 

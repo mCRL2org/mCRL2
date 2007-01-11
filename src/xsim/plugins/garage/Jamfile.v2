@@ -12,9 +12,9 @@ lib xsim_garage_view
          /libraries//mcrl2_basic
        : <site-library>wx_gl
          <define>GARAGEFRAMEDLL
-         <link>shared
          <toolset>darwin:<bundle>yes
-       :
+       : <link>shared
+         <runtime-link>shared
        ;
 
 exe garageframe

@@ -8,8 +8,14 @@ rule import_user_config {
 
 # Build specific settings
 BUILD_VARIANT      = "@BUILD_VARIANT@" ;
-LINK_VARIANT       = "@LINK_VARIANT@" ;
-ADDRESS_MODEL      = "@ADDRESS_MODEL@" ;
+
+if [ MATCH (link).* : [ modules.peek : ARGV ] ] {
+  LINK_VARIANT       = "@LINK_VARIANT@" ;
+}
+
+if [ MATCH (address-model).* : [ modules.peek : ARGV ] ] {
+  ADDRESS_MODEL      = "@ADDRESS_MODEL@" ;
+}
 
 if ! ( "@OPTIMISATIONS@" = "disable" ) {
   OPTIMISATIONS = <optimization>speed <inlining>full ;
