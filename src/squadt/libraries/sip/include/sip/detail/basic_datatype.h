@@ -256,10 +256,10 @@ namespace sip {
         real(double d = implementation_minimum, double = implementation_minimum, double = implementation_maximum);
 
         /** \brief whether the minimum bound should be interpreted as open-ended or close-ended */
-        void real::set_include_minimum(bool b);
+        void set_include_minimum(bool b);
 
         /** \brief whether the maximum bound should be interpreted as open-ended or close-ended */
-        void real::set_include_maximum(bool b);
+        void set_include_maximum(bool b);
 
         /** \brief Converts a double to a string representation */
         static std::string convert(double const&);
