@@ -334,15 +334,15 @@ static void check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewSta
         {
           if ( saved_ok )
           {
-            gsVerboseMsg("detect: action '%P' found and saved to '%s_act_%lu_%P.trc'.\n",lgopts->trace_actions[j],basefilename,tracecnt,lgopts->trace_actions[j]);
+            gsVerboseMsg("detect: action '%P' found and saved to '%s_act_%lu_%P.trc'.\n",Transition,basefilename,tracecnt,lgopts->trace_actions[j]);
           } else {
-            gsVerboseMsg("detect: action '%P' found, but could not be saved to '%s_act_%lu_%P.trc'.\n",lgopts->trace_actions[j],basefilename,tracecnt,lgopts->trace_actions[j]);
+            gsVerboseMsg("detect: action '%P' found, but could not be saved to '%s_act_%lu_%P.trc'.\n",Transition,basefilename,tracecnt,lgopts->trace_actions[j]);
           }
           fflush(stderr);
         }
         tracecnt++;
       } else {
-        gsVerboseMsg("detect: action '%P' found.\n",lgopts->trace_actions[j]);
+        gsVerboseMsg("detect: action '%P' found.\n",Transition);
         fflush(stderr);
       }
     }
