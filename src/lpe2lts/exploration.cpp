@@ -805,7 +805,7 @@ bool generate_lts()
 
     if ( lgopts->expl_strat == es_random )
     {
-      srand((unsigned)time(NULL));
+      srand((unsigned)clock());
       NextStateGenerator *nsgen = NULL;
       while ( current_state < lgopts->max_states )
       {
