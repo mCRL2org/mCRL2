@@ -938,6 +938,7 @@ bool generate_lts()
           {
             swap_queues();
           }
+          current_state = current_state+statestobeskipped;
           lgopts->squadt->update_status_display(level,current_state,num_states,num_found_same,trans);
           if ( gsVerbose )
           {
