@@ -32,7 +32,7 @@ namespace sip {
       protected:
  
         /** \brief The capabilities object of the controller as it is send, when requested */
-        static controller::capabilities         current_controller_capabilities;
+        static controller::capabilities         m_controller_capabilities;
 
       public:
 
@@ -77,10 +77,10 @@ namespace sip {
         void set_configuration(boost::shared_ptr < sip::configuration >);
 
         /** \brief Creates a new configuration object based on a given input_combination */
-        static configuration::sptr new_configuration(sip::tool::capabilities::input_combination const&);
+        static boost::shared_ptr < configuration > new_configuration(sip::tool::capabilities::input_combination const&);
  
         /** \brief Get the current (perhaps partial) configuration */
-        configuration::sptr get_configuration() const;
+        boost::shared_ptr < configuration > get_configuration() const;
 
         /** \brief Sets a handler for layout messages using a handler function */
         void activate_display_layout_handler(display_layout_handler_function);
@@ -93,7 +93,7 @@ namespace sip {
     };
  
     inline const controller::capabilities& communicator::get_controller_capabilities() {
-      return (current_controller_capabilities);
+      return (m_controller_capabilities);
     }
   }
 }

@@ -59,10 +59,9 @@ int do_untime(const tool_options& options);
 class squadt_lpeuntime: public squadt_tool_interface
 {
   private:
-    enum input_files {
-      lpd_file_for_input, ///< file containing an lpd that can be imported
-      lpd_file_for_output ///< file used to write output to
-    };
+
+    static const char*  lpd_file_for_input;  ///< file containing an LPE that can be imported
+    static const char*  lpd_file_for_output; ///< file used to write the output to
 
   public:
     /** \brief configures tool capabilities */
@@ -78,6 +77,9 @@ class squadt_lpeuntime: public squadt_tool_interface
     bool perform_task(sip::configuration&);
 };
 
+const char* squadt_lpeuntime::lpd_file_for_input  = "lpd_in";
+const char* squadt_lpeuntime::lpd_file_for_output = "lpd_out";
+
 void squadt_lpeuntime::set_capabilities(sip::tool::capabilities& capabilities) const
 {
   // The tool has only one main input combination
@@ -92,16 +94,16 @@ void squadt_lpeuntime::user_interactive_configuration(sip::configuration& config
 bool squadt_lpeuntime::check_configuration(sip::configuration const& configuration) const
 {
 // Check if everything present
-  return (configuration.object_exists(lpd_file_for_input) &&
-          configuration.object_exists(lpd_file_for_output)
+  return (configuration.input_exists(lpd_file_for_input) &&
+          configuration.output_exists(lpd_file_for_output)
          );
 }
 
 bool squadt_lpeuntime::perform_task(sip::configuration& configuration)
 {
   tool_options options;
-  options.input_file = configuration.get_object(lpd_file_for_input)->get_location();
-  options.output_file = configuration.get_object(lpd_file_for_output)->get_location();
+  options.input_file = configuration.get_input(lpd_file_for_input).get_location();
+  options.output_file = configuration.get_output(lpd_file_for_output).get_location();
   return (do_untime(options)==0);
 }
 

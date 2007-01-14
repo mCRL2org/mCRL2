@@ -16,10 +16,8 @@ bool command_line = false;
 class squadt_interactor: public squadt_tool_interface {
   
   private:
-    /* Constants for identifiers of options and objects */
-    enum identifiers {
-      lts_file_for_input // Main input file that contains an lts
-    };
+
+    static const char*  lts_file_for_input;  ///< file containing an LTS that can be imported
  
     // Wrapper for wxEntry invocation
     squadt_utility::entry_wrapper& starter;
@@ -41,9 +39,10 @@ class squadt_interactor: public squadt_tool_interface {
     bool perform_task(sip::configuration&);
 };
 
+const char* squadt_interactor::lts_file_for_input  = "lts_in";
+
 squadt_interactor::squadt_interactor(squadt_utility::entry_wrapper& w): starter(w) {
 }
-
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
   c.add_input_combination(lts_file_for_input, sip::mime_type("aut", sip::mime_type::text), sip::tool::category::visualisation);
@@ -59,13 +58,12 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
 
 bool squadt_interactor::check_configuration(sip::configuration const& c) const {
-  if (c.object_exists(lts_file_for_input)) {
+  if (c.input_exists(lts_file_for_input)) {
     /* The input object is present, verify whether the specified format is supported */
-    sip::object::sptr input_object = c.get_object(lts_file_for_input);
-    lts_file_argument = input_object->get_location();
+    sip::object input_object(c.get_input(lts_file_for_input));
+    lts_file_argument = input_object.get_location();
 
-
-    lts_type t = lts::parse_format(input_object->get_mime_type().get_sub_type().c_str());
+    lts_type t = lts::parse_format(input_object.get_mime_type().get_sub_type().c_str());
 
     if (t == lts_none) {
       send_error(boost::str(boost::format("Invalid configuration: unsupported type `%s' for main input") % lts::string_for_type(t)));

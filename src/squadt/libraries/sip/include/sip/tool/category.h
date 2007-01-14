@@ -9,12 +9,16 @@
 #include <boost/array.hpp>
 
 namespace sip {
+
+  class configuration;
+
   namespace tool {
 
     class capabilities;
 
     class category {
       friend class sip::tool::capabilities;
+      friend class sip::configuration;
       friend std::ostream& operator <<(std::ostream&, category const&);
 
       private:

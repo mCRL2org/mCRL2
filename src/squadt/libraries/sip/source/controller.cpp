@@ -16,7 +16,7 @@ namespace sip {
   }
   namespace controller {
 
-    controller::capabilities communicator::current_controller_capabilities;
+    controller::capabilities communicator::m_controller_capabilities;
  
     communicator::communicator(communicator_impl* c) : sip::messenger(c) {
     }
@@ -28,23 +28,21 @@ namespace sip {
      * \param[in] c the current configuration
      **/
     void communicator::set_configuration(boost::shared_ptr < sip::configuration > c) {
-      boost::dynamic_pointer_cast < communicator_impl > (impl)->current_configuration = c;
+      boost::dynamic_pointer_cast < communicator_impl > (impl)->m_configuration = c;
     }
  
     /** \attention use get_configuration().swap() to set the configuration */
-    configuration::sptr communicator::get_configuration() const {
-      return (boost::dynamic_pointer_cast < communicator_impl > (impl)->current_configuration);
+    boost::shared_ptr < configuration > communicator::get_configuration() const {
+      return (boost::dynamic_pointer_cast < communicator_impl > (impl)->m_configuration);
     }
  
     /**
      * \param[in] c the input combination on which to base the new configuration
      **/
-    configuration::sptr communicator::new_configuration(sip::tool::capabilities::input_combination const& c) {
-      sip::configuration::sptr nc(new sip::configuration(c.m_category));
-
-      return (nc);
+    boost::shared_ptr < configuration > communicator::new_configuration(sip::tool::capabilities::input_combination const& c) {
+      return (communicator_impl::new_configuration(c));
     }
- 
+
     /* Request a tool what input configurations it has available */
     void communicator::request_tool_capabilities() {
       message m(sip::message_request_tool_capabilities);
@@ -54,8 +52,9 @@ namespace sip {
  
     /* Send the selected input configuration */
     void communicator::send_configuration() {
-      sip::message m(boost::dynamic_pointer_cast < communicator_impl > (impl)->
-                       current_configuration->write(), sip::message_offer_configuration);
+      sip::message m(visitors::store(
+                *boost::dynamic_pointer_cast < communicator_impl > (impl)->m_configuration),
+                                                                sip::message_offer_configuration);
 
       impl->send_message(m);
     }

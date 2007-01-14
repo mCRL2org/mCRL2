@@ -516,9 +516,10 @@ namespace squadt {
       copy_file(s, destination_path);
     }
 
+    build_system::mime_type type(extension(s).empty() ? "unknown" : extension(s).substr(1));
+
     /* Add the file to the project */
-    p->append_output(build_system::mime_type(extension(s).substr(1)),
-          destination_path.leaf(), processor::object_descriptor::original);
+    p->append_output(type, "", destination_path.leaf(), processor::object_descriptor::original);
 
     processors.push_back(p);
 

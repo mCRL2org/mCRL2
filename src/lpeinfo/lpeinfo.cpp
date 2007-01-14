@@ -107,9 +107,7 @@ class squadt_interactor : public squadt_tool_interface {
 
   private:
 
-    enum input_files {
-      lpd_file_for_input,  ///< file containing an LPD
-    };
+    static const char*  lpd_file_for_input;  ///< file containing an LPE that can be imported
 
   public:
 
@@ -126,6 +124,8 @@ class squadt_interactor : public squadt_tool_interface {
     bool perform_task(sip::configuration&);
 };
 
+const char* squadt_interactor::lpd_file_for_input  = "lpd_in";
+
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
   c.add_input_combination(lpd_file_for_input, sip::mime_type("lpe"), sip::tool::category::reporting);
 }
@@ -136,7 +136,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   bool result = true;
 
-  result &= c.object_exists(lpd_file_for_input);
+  result &= c.input_exists(lpd_file_for_input);
 
   return (result);
 }
@@ -146,7 +146,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 
   lpe::specification lpe_specification;
 
-  if (lpe_specification.load(c.get_object(lpd_file_for_input)->get_location())) {
+  if (lpe_specification.load(c.get_input(lpd_file_for_input).get_location())) {
     using namespace sip;
     using namespace sip::layout;
     using namespace sip::layout::elements;

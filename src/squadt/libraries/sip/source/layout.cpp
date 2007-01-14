@@ -4,7 +4,7 @@
 #include <sip/detail/layout_manager.h>
 #include <sip/detail/layout_elements.h>
 #include <sip/detail/layout_tool_display.h>
-#include <sip/detail/object.h>
+#include <sip/object.h>
 
 #include <xml2pp/text_reader.h>
 

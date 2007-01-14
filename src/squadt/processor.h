@@ -50,6 +50,9 @@ namespace squadt {
       /** \brief Convenience type for hiding shared pointer implementation */
       typedef boost::weak_ptr < processor >                                 wptr;
 
+      /** \brief Convenient type alias */
+      typedef sip::configuration::parameter_identifier                      parameter_identifier;
+
       /** \brief Type to hold information about output objects */
       struct object_descriptor {
 
@@ -68,13 +71,13 @@ namespace squadt {
           generation_in_progress    /* outputs are being generated */
         };
 
-        processor::wptr               generator;      ///< The process responsible for generating this object
-        build_system::storage_format  mime_type;      ///< The used storage format
-        std::string                   location;       ///< The location of the object
-        unsigned int                  identifier;     ///< The identifier of the associated output object in a configuration
-        md5pp::compact_digest         checksum;       ///< The digest for the completed object
-        std::time_t                   timestamp;      ///< The last time the file was modified just before the last checksum was computed
-        t_status                      status;         ///< The status of this object
+        processor::wptr                          generator;      ///< The process responsible for generating this object
+        build_system::storage_format             mime_type;      ///< The used storage format
+        std::string                              location;       ///< The location of the object
+        sip::configuration::parameter_identifier identifier;     ///< The identifier of the associated output object in a configuration
+        md5pp::compact_digest                    checksum;       ///< The digest for the completed object
+        std::time_t                              timestamp;      ///< The last time the file was modified just before the last checksum was computed
+        t_status                                 status;         ///< The status of this object
 
         object_descriptor(sip::mime_type const&);
 
@@ -192,17 +195,17 @@ namespace squadt {
       /** \brief Add an input object */
       void append_input(object_descriptor::sptr const&);
 
-      /** \brief Find an object descriptor for a given pointer to an object */
-      const object_descriptor::sptr find_output(object_descriptor*) const;
+      /** \brief Find an object descriptor for a given pointer to an object (by id) */
+      const object_descriptor::sptr find_input(parameter_identifier const&) const;
  
       /** \brief Find an object descriptor for a given pointer to an object */
       const object_descriptor::sptr find_input(object_descriptor*) const;
  
       /** \brief Find an object descriptor for a given pointer to an object (by id) */
-      const object_descriptor::sptr find_output(const unsigned int) const;
+      const object_descriptor::sptr find_output(parameter_identifier const&) const;
  
-      /** \brief Find an object descriptor for a given pointer to an object (by id) */
-      const object_descriptor::sptr find_input(const unsigned int) const;
+      /** \brief Find an object descriptor for a given pointer to an object */
+      const object_descriptor::sptr find_output(object_descriptor*) const;
  
       /** \brief Find an object descriptor for a given name and rename if it exists */
       void rename_output(std::string const&, std::string const&);
@@ -211,7 +214,7 @@ namespace squadt {
       void rename_input(std::string const&, std::string const&);
  
       /** \brief Add an output object */
-      void append_output(const build_system::storage_format&, const std::string&,
+      void append_output(const build_system::storage_format&, parameter_identifier const&, const std::string&,
                 object_descriptor::t_status const& = object_descriptor::reproducible_nonexistent);
  
       /** \brief Add an output object */

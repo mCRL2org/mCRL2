@@ -4,7 +4,6 @@
 #include <ostream>
 #include <sstream>
 
-#include <xml2pp/text_reader.h>
 #include <sip/detail/common.h>
 
 #include <utility/visitor.h>
@@ -32,10 +31,13 @@ namespace sip {
      * for a tool developer.
      **/
     class capabilities : public utility::visitable < controller::capabilities > {
-      friend class tool::communicator;
-      friend class controller::communicator;
+      friend class sip::tool::communicator;
+      friend class sip::controller::communicator;
+      friend class sip::restore_visitor_impl;
+      friend class sip::store_visitor_impl;
  
       public:
+
         /** \brief Type for display dimensions */
         struct display_dimensions {
           unsigned short x; ///< \brief Horizontal dimension
@@ -43,136 +45,49 @@ namespace sip {
           unsigned short z; ///< \brief Unused for the moment
         };
  
-        /** Convenience type to hide boost shared pointer implementation */
-        typedef boost::shared_ptr < capabilities > sptr;
- 
       private:
  
         /** \brief The protocol version */
-        version            current_protocol_version;
+        version            m_protocol_version;
  
         /** \brief The dimensions of the screen that are currently reserved for this tool */
-        display_dimensions current_dimensions;
+        display_dimensions m_dimensions;
+ 
+      private:
  
         /** \brief Constructor */
-        inline capabilities(const version = default_protocol_version);
- 
-        /** \brief Read from XML stream */
-        inline static capabilities::sptr read(xml2pp::text_reader& reader) throw ();
+        capabilities(const version = default_protocol_version);
  
       public:
  
         /** \brief Get the protocol version */
-        inline version get_version() const;
+        version get_version() const;
  
         /** \brief Set display dimensions */
-        inline void set_display_dimensions(const unsigned short x, const unsigned short y, const unsigned short z);
+        void set_display_dimensions(const unsigned short x, const unsigned short y, const unsigned short z);
  
         /** \brief Get the dimensions of the part of the display that is reserved for this tool */
-        inline display_dimensions get_display_dimensions() const;
- 
-        /** \brief Read from XML string */
-        inline static capabilities::sptr read(const std::string&);
-
-        /** \brief Write to XML string */
-        inline std::string write() const;
- 
-        /** \brief Write to XML stream */
-        inline void write(std::ostream&) const;
+        display_dimensions get_display_dimensions() const;
     };
  
-    /**
-     * \brief Operator for writing to stream
-     *
-     * @param s stream to write to
-     * @param c the capabilities object to write out
-     **/
-    inline std::ostream& operator << (std::ostream& s, const capabilities& c) {
-      c.write(s);
- 
-      return (s);
-    }
- 
-    inline controller::capabilities::capabilities(const version v) : current_protocol_version(v) {
-      current_dimensions.x = 0;
-      current_dimensions.y = 0;
-      current_dimensions.z = 0;
+     inline controller::capabilities::capabilities(const version v) : m_protocol_version(v) {
+      m_dimensions.x = 0;
+      m_dimensions.y = 0;
+      m_dimensions.z = 0;
     }
  
     inline version controller::capabilities::get_version() const {
-      return (current_protocol_version);
+      return (m_protocol_version);
     }
  
     inline void controller::capabilities::set_display_dimensions(const unsigned short x, const unsigned short y, const unsigned short z) {
-      current_dimensions.x = x;
-      current_dimensions.y = y;
-      current_dimensions.z = z;
+      m_dimensions.x = x;
+      m_dimensions.y = y;
+      m_dimensions.z = z;
     }
  
     inline controller::capabilities::display_dimensions controller::capabilities::get_display_dimensions() const {
-      return (current_dimensions);
-    }
- 
-    inline void controller::capabilities::write(std::ostream& output) const {
-      output << "<capabilities>"
-             << "<protocol-version major=\"" << (unsigned short) current_protocol_version.major
-             << "\" minor=\"" << (unsigned short) current_protocol_version.minor << "\"/>"
-             << "<display-dimensions x=\"" << current_dimensions.x
-             << "\" y=\"" << current_dimensions.y
-             << "\" z=\"" << current_dimensions.z << "\"/>"
-             << "</capabilities>";
-    }
- 
-    inline std::string controller::capabilities::write() const {
-      std::ostringstream output;
- 
-      write(output);
- 
-      return (output.str());
-    }
- 
-    /**
-     * @param s the string to read from
-     **/
-    inline controller::capabilities::sptr controller::capabilities::read(const std::string& s) {
-      xml2pp::text_reader r(s);
-
-      return (read(r));
-    }
-
-    /**
-     * @param r the XML text reader to read from
-     *
-     * \attention if the reader does not point at a capabilities element nothing is read
-     **/
-    inline controller::capabilities::sptr controller::capabilities::read(xml2pp::text_reader& r) throw () {
-      if (r.is_element("capabilities")) {
-        version v = {0,0};
- 
-        r.next_element();
- 
-        assert (r.is_element("protocol-version"));
- 
-        r.get_attribute(&v.major, "major");
-        r.get_attribute(&v.minor, "minor");
- 
-        boost::shared_ptr < capabilities > c(new capabilities(v));
- 
-        r.next_element();
-        r.skip_end_element("protocol-version");
- 
-        assert (r.is_element("display-dimensions"));
- 
-        r.get_attribute(&c->current_dimensions.x, "x");
-        r.get_attribute(&c->current_dimensions.y, "y");
-        r.get_attribute(&c->current_dimensions.z, "z");
- 
-        r.next_element();
- 
-        return (c);
-      }
- 
-      return boost::shared_ptr < capabilities >();
+      return (m_dimensions);
     }
   }
 }

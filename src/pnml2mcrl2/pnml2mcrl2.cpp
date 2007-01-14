@@ -93,10 +93,8 @@ class squadt_interactor : public squadt_tool_interface {
 
   private:
 
-    enum input_files {
-      pnml_file_for_input   = 0,  ///< file containing an LTS that can be imported using the LTS library
-      mcrl2_file_for_output = 1,  ///< file used to write the output to
-    };
+    static const char*  pnml_file_for_input;   ///< file containing an LTS that can be imported
+    static const char*  mcrl2_file_for_output; ///< file used to write the output to
 
   public:
 
@@ -115,6 +113,9 @@ class squadt_interactor : public squadt_tool_interface {
     /** \brief performs the task specified by a configuration */
     bool perform_task(sip::configuration&);
 };
+
+const char* squadt_interactor::pnml_file_for_input   = "pnml_in";
+const char* squadt_interactor::mcrl2_file_for_output = "mcrl2_out";
 
 squadt_interactor::squadt_interactor() {
 }
@@ -136,8 +137,8 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   bool result = true;
 
-  result |= c.object_exists(pnml_file_for_input);
-  result |= c.object_exists(mcrl2_file_for_output);
+  result |= c.input_exists(pnml_file_for_input);
+  result |= c.output_exists(mcrl2_file_for_output);
 
   return (result);
 }
@@ -153,8 +154,8 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 
   rec_par=ATfalse;
 
-  result = ::perform_task(c.get_object(pnml_file_for_input)->get_location().c_str(),
-                          c.get_object(mcrl2_file_for_output)->get_location().c_str());
+  result = ::perform_task(c.get_input(pnml_file_for_input).get_location().c_str(),
+                          c.get_output(mcrl2_file_for_output).get_location().c_str());
 
   return (result);
 }

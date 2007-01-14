@@ -24,11 +24,9 @@ class squadt_interactor : public squadt_tool_interface {
 
   private:
 
-    enum input_files {
-      lts_file_for_input = 0,  ///< file containing an LTS that can be imported using the LTS library
-      lts_file_for_output = 1, ///< file used to write the output to
-      lpd_file_auxiliary = 2   ///< LPD file needed for some conversion operations
-    };
+    static const char*  lts_file_for_input;  ///< file containing an LTS that can be imported using the LTS library
+    static const char*  lts_file_for_output; ///< file used to write the output to
+    static const char*  lpd_file_auxiliary;  ///< LPD file needed for some conversion operations
 
     enum lts_output_format {
       aldebaran,   ///< Aldebaran format (AUT)
@@ -50,13 +48,11 @@ class squadt_interactor : public squadt_tool_interface {
       determinisation                             ///< determinisation
     };
 
-    enum further_options {
-      option_selected_transformation = 3,                ///< the selected transformation method
-      option_selected_output_format = 4,                 ///< the selected output format
-      option_no_state_information = 5,                   ///< dot format output specific option to not save state information
-      option_tau_actions = 6,                            ///< the actions that should be recognised as tau
-      option_add_bisimulation_equivalence_class = 7      ///< adds bisimulation equivalence class to the state information of a state instead of actually reducing modulo bisimulation [mCRL2 SVC specific]
-    };
+    static const char* option_selected_transformation;               ///< the selected transformation method
+    static const char* option_selected_output_format;                ///< the selected output format
+    static const char* option_no_state_information;                  ///< dot format output specific option to not save state information
+    static const char* option_tau_actions;                           ///< the actions that should be recognised as tau
+    static const char* option_add_bisimulation_equivalence_class;    ///< adds bisimulation equivalence class to the state information of a state instead of actually reducing modulo bisimulation [mCRL2 SVC specific]
 
   private:
 
@@ -80,8 +76,18 @@ class squadt_interactor : public squadt_tool_interface {
     bool perform_task(sip::configuration&);
 };
 
+const char* squadt_interactor::lts_file_for_input  = "lts_in";
+const char* squadt_interactor::lts_file_for_output = "lts_out";
+const char* squadt_interactor::lpd_file_auxiliary  = "lpd_aux";
+
+const char* squadt_interactor::option_selected_transformation            = "selected_transformation";
+const char* squadt_interactor::option_selected_output_format             = "selected_output_format";
+const char* squadt_interactor::option_no_state_information               = "no_state_information";
+const char* squadt_interactor::option_tau_actions                        = "tau_actions";
+const char* squadt_interactor::option_add_bisimulation_equivalence_class = "add_bisimulation_equivalence_class";
+
 squadt_interactor::squadt_interactor() {
-  transformation_method_enumeration = sip::datatype::enumeration::create("none");
+  transformation_method_enumeration.reset(new sip::datatype::enumeration("none"));
 
   transformation_method_enumeration->add_value("modulo_strong_bisimulation");
   transformation_method_enumeration->add_value("modulo_branching_bisimulation");
@@ -167,10 +173,10 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   /* Wait until the ok button was pressed */
   okay_button->await_change();
 
-  std::string lts_input_file_name = c.get_object(lts_file_for_input)->get_location();
+  std::string lts_input_file_name = c.get_input(lts_file_for_input).get_location();
 
   if (c.is_fresh()) {
-    if (!c.object_exists(lts_file_for_output)) {
+    if (!c.output_exists(lts_file_for_output)) {
       static char const* extensions[6] = {
         lts::extension_for_type(lts_aut),
         lts::extension_for_type(lts_mcrl),
@@ -192,14 +198,11 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
       transformation_options trans_opt = static_cast < transformation_options > (transformation_selector.get_selection());
       c.add_option(option_selected_transformation).append_argument(transformation_method_enumeration, trans_opt);
 
-      c.add_option(option_selected_output_format).append_argument(sip::datatype::integer::naturals,
-                 static_cast < unsigned int > (format_selector.get_selection()));
-
       if (format_selector.get_selection() == dot && for_dot_omit_state_information->get_status()) {
         c.add_option(option_no_state_information);
       }
 
-      c.add_option(option_tau_actions).append_argument(datatype::string::standard, tau_field->get_text());
+      c.add_option(option_tau_actions).append_argument< sip::datatype::string >(tau_field->get_text());
       
       if ((trans_opt == minimisation_modulo_strong_bisimulation ||
            trans_opt == minimisation_modulo_branching_bisimulation) &&
@@ -213,17 +216,15 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   bool result = true;
 
-  result &= c.object_exists(lts_file_for_input);
-  result &= c.object_exists(lts_file_for_output);
-
-  result &= c.option_exists(option_selected_output_format);
+  result &= c.input_exists(lts_file_for_input);
+  result &= c.output_exists(lts_file_for_output);
   result &= c.option_exists(option_selected_transformation);
 
   if (c.option_exists(option_tau_actions)) {
     lts_eq_options eq_opts;
 
     /* Need to detect whether the next operation completes successfully or not, exceptions anyone? */
-    lts_reduce_add_tau_actions(eq_opts,(boost::any_cast < std::string > (c.get_option_value(option_tau_actions)).c_str()));
+    lts_reduce_add_tau_actions(eq_opts,(boost::any_cast < std::string > (c.get_option_argument(option_tau_actions)).c_str()));
   }
 
   return (result);
@@ -234,18 +235,18 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 
   std::string lpe_path;
 
-  if (c.object_exists(lpd_file_auxiliary)) {
-    lpe_path = c.get_object(lpd_file_auxiliary)->get_location();
+  if (c.input_exists(lpd_file_auxiliary)) {
+    lpe_path = c.get_input(lpd_file_auxiliary).get_location();
   }
 
-  if ( !read_lts_from_file(l, c.get_object(lts_file_for_input)->get_location(),lts_none,lpe_path) ) {
+  if ( !read_lts_from_file(l, c.get_input(lts_file_for_input).get_location(),lts_none,lpe_path) ) {
 
-    send_error("Fatal: error reading input from `" + c.get_object(lts_file_for_input)->get_location() + "'!");
+    send_error("Fatal: error reading input from `" + c.get_input(lts_file_for_input).get_location() + "'!");
 
     return (false);
   }
  
-  transformation_options method = static_cast < transformation_options > (boost::any_cast < size_t > (c.get_option_value(option_selected_transformation)));
+  transformation_options method = static_cast < transformation_options > (boost::any_cast < size_t > (c.get_option_argument(option_selected_transformation)));
 
   if (method != no_transformation) {
     lts_equivalence equivalence = lts_eq_none;
@@ -279,7 +280,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     }
 
     if (c.option_exists(option_tau_actions)) {
-      lts_reduce_add_tau_actions(eq_opts, (boost::any_cast < std::string > (c.get_option_value(option_tau_actions)).c_str()));
+      lts_reduce_add_tau_actions(eq_opts, (boost::any_cast < std::string > (c.get_option_argument(option_tau_actions)).c_str()));
     }
 
     if ( determinise )
@@ -298,8 +299,8 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
  
   bool result = true;
 
-  result = write_lts_to_file(l, c.get_object(lts_file_for_output)->get_location(),
-                 lts::parse_format(c.get_object(lts_file_for_output)->get_mime_type().get_sub_type().c_str()), lpe_path, c.option_exists(option_no_state_information));
+  result = write_lts_to_file(l, c.get_output(lts_file_for_output).get_location(),
+                 lts::parse_format(c.get_output(lts_file_for_output).get_mime_type().get_sub_type().c_str()), lpe_path, c.option_exists(option_no_state_information));
 
   send_hide_display();
 

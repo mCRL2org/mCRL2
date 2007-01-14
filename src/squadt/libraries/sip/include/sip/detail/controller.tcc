@@ -2,8 +2,11 @@
 #define SIP_CONTROLLER_TCC_
 
 #include <sip/controller.h>
+#include <sip/configuration.h>
+#include <sip/controller/capabilities.h>
 #include <sip/detail/basic_messenger.tcc>
 #include <sip/detail/common.h>
+#include <sip/visitors.h>
 
 namespace sip {
   namespace controller {
@@ -39,16 +42,19 @@ namespace sip {
         /** \brief Event handler for storing configurations */
         void tool_configuration_handler(messenger::message_ptr const& m);
 
+        /** \brief Creates a new configuration object */
+        static boost::shared_ptr < configuration > new_configuration(sip::tool::capabilities::input_combination const& c);
+
       private:
 
         /** \brief The current configuration of a tool (may be limited to a main input configuration) */
-        configuration::sptr             current_configuration;
+        boost::shared_ptr < configuration >  m_configuration;
 
         /** \brief The current handler for layout change events */
-        display_layout_handler_function current_layout_handler;
+        display_layout_handler_function      m_layout_handler;
 
         /** \brief The current handler for layout state change events */
-        display_update_handler_function   current_data_handler;
+        display_update_handler_function      m_data_handler;
  
       public:
 
@@ -82,7 +88,7 @@ namespace sip {
 
       add_handler(sip::message_display_layout, boost::bind(&communicator_impl::display_layout_handler, this, _1, h));
 
-      current_layout_handler = h;
+      m_layout_handler = h;
     }
 
     /**
@@ -97,7 +103,7 @@ namespace sip {
 
       add_handler(sip::message_display_update, boost::bind(&communicator_impl::display_update_handler, this, _1, d, h));
 
-      current_data_handler = h;
+      m_data_handler = h;
     }
 
     /**
@@ -115,6 +121,10 @@ namespace sip {
      * @param h the function that is called when a new layout for the display has been received
      **/
     inline void communicator_impl::display_layout_handler(messenger::message_ptr const& m, display_layout_handler_function h) {
+//      sip::layout::tool_display::sptr d(new layout::tool_display);
+
+//      visitors::restore(*d, m->to_string().c_str());
+
       xml2pp::text_reader reader(m->to_string().c_str());
 
       sip::layout::tool_display::sptr d = layout::tool_display::read(reader);
@@ -153,7 +163,7 @@ namespace sip {
 
     /* Reply details about the amount of reserved display space */
     inline void communicator_impl::request_controller_capabilities_handler() {
-      message m(communicator::current_controller_capabilities.write(), sip::message_response_controller_capabilities);
+      message m(visitors::store(communicator::m_controller_capabilities), sip::message_response_controller_capabilities);
 
       send_message(m);
     }
@@ -162,7 +172,20 @@ namespace sip {
      * @param[in] m a reference to the message
      **/
     inline void communicator_impl::tool_configuration_handler(const messenger::message_ptr& m) {
-      current_configuration = sip::configuration::read(m->to_string());
+      if (m_configuration.get() == 0) {
+        m_configuration = boost::shared_ptr < configuration > (new configuration);
+      }
+
+      visitors::restore(*m_configuration, m->to_string());
+    }
+
+    /**
+     * \param[in] c the input combination on which to base the new configuration
+     **/
+    inline boost::shared_ptr < configuration > communicator_impl::new_configuration(sip::tool::capabilities::input_combination const& c) {
+      boost::shared_ptr < configuration > nc(new sip::configuration(c.m_category));
+
+      return (nc);
     }
   }
 }

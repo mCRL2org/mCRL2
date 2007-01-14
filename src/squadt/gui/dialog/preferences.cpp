@@ -135,7 +135,7 @@ namespace squadt {
     /// \endcond
 
     void edit_preferences::edit_command(wxCommandEvent&) {
-      wxTextEntryDialog command_dialog(this, wxT("Enter a command ($ is place holder for an input file)"));
+      wxTextEntryDialog command_dialog(this, wxT("Enter a command ($ is a place holder for an input file)"));
 
       try {
         long selected = formats_and_actions->GetFirstSelected();

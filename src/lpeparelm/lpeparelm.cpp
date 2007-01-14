@@ -74,10 +74,8 @@ class squadt_interactor : public squadt_tool_interface {
 
   private:
 
-    enum input_files {
-      lpd_file_for_input,  ///< file containing an LPE that can be imported
-      lpd_file_for_output, ///< file used to write the output to
-    };
+    static const char*  lpd_file_for_input;  ///< file containing an LPE that can be imported
+    static const char*  lpd_file_for_output; ///< file used to write the output to
 
   public:
 
@@ -94,6 +92,9 @@ class squadt_interactor : public squadt_tool_interface {
     bool perform_task(sip::configuration&);
 };
 
+const char* squadt_interactor::lpd_file_for_input  = "lpd_in";
+const char* squadt_interactor::lpd_file_for_output = "lpd_out";
+
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
   c.add_input_combination(lpd_file_for_input, sip::mime_type("lpe"), sip::tool::category::transformation);
 }
@@ -107,8 +108,8 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   bool result = true;
 
-  result &= c.object_exists(lpd_file_for_input);
-  result &= c.object_exists(lpd_file_for_output);
+  result &= c.input_exists(lpd_file_for_input);
+  result &= c.output_exists(lpd_file_for_output);
 
   return (result);
 }
@@ -116,8 +117,8 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
 bool squadt_interactor::perform_task(sip::configuration& c) {
   lpeParElm parelm;
 
-  std::string input_file_name  = c.get_object(lpd_file_for_input)->get_location();
-  std::string output_file_name = c.get_object(lpd_file_for_output)->get_location();
+  std::string input_file_name  = c.get_input(lpd_file_for_input).get_location();
+  std::string output_file_name = c.get_output(lpd_file_for_output).get_location();
 
   if (parelm.loadFile(input_file_name)) {
     parelm.setSaveFile(output_file_name);

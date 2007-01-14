@@ -41,8 +41,5 @@ namespace sip {
 
     return (message_identifier_strings[t]);
   }
-
-  /** \brief global variable that indicates whether or not the library was initialised */
-  bool initialised = datatype::basic_datatype::initialise();
 }
 

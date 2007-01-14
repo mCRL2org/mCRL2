@@ -6,10 +6,10 @@
 #include <memory>
 
 #include <sip/layout_base.h>
+#include <sip/object.h>
 #include <sip/detail/layout_elements.h>
 #include <sip/detail/layout_manager.h>
 #include <sip/detail/layout_mediator.h>
-#include <sip/detail/object.h>
 
 namespace sip {
   namespace layout {

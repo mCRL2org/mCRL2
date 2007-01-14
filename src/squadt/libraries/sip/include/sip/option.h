@@ -3,22 +3,24 @@
 
 #include <vector>
 #include <string>
-#include <ostream>
 
 #include <boost/any.hpp>
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <sip/detail/basic_datatype.h>
+#include <sip/parameter.h>
 #include <sip/exception.h>
 
 namespace sip {
 
-  class option;
+  class configuration;
 
   /** \brief Describes a single option (or option instance) the basic building block of a tool configuration */
-  class option : public utility::visitable < option > {
-    friend class configuration;
+  class option : public sip::parameter, public utility::visitable < option > {
+    friend class sip::configuration;
+    friend class sip::restore_visitor_impl;
+    friend class sip::store_visitor_impl;
 
     private:
 
@@ -30,9 +32,6 @@ namespace sip {
 
     public:
 
-      /** Datatype for the identifier of an option */
-      typedef unsigned int                  identifier;
-
       /** \brief Convenience type to hide the shared pointer wrapping */
       typedef boost::shared_ptr < option >  sptr;
 
@@ -42,10 +41,10 @@ namespace sip {
         private:
 
           /** \brief the start of the sequence */
-                type_value_list::const_iterator iterator;
+          type_value_list::const_iterator       iterator;
 
           /** \brief the end of the sequence */
-          const type_value_list::const_iterator end;
+          type_value_list::const_iterator const end;
 
         public:
 
@@ -65,55 +64,51 @@ namespace sip {
     private:
 
       /** \brief List of (type, default value) */
-      type_value_list arguments;
-
-      /** \brief Must uniquely identify the option in a configuration */
-      identifier id;
+      type_value_list m_arguments;
 
     private:
 
-      /** \brief Constructor (only accessible from class configuration) */
-      inline option(const identifier);
+      /** \brief Constructor */
+      option();
 
     public:
 
       /** \brief Whether the option takes arguments */
-      inline bool takes_arguments() const;
-
-      /** \brief Returns the option's identifier */
-      inline const identifier get_id() const;
+      bool takes_arguments() const;
 
       /** \brief Returns the value of the first argument */
-      inline boost::any get_value() const;
+      boost::any get_value(size_t const&) const;
 
       /** \brief Gets an iterator that in order of appearance returns the values for each argument */
-      inline argument_iterator get_value_iterator() const;
+      boost::iterator_range< type_value_list::const_iterator > get_value_iterator() const;
+
+      /** \brief Gets an iterator that in order of appearance returns the values for each argument */
+      boost::iterator_range< type_value_list::iterator > get_value_iterator();
 
       /** \brief Append to the type (option takes an additional argument of the specified type) */
-      inline void append_type(datatype::basic_datatype::sptr);
+      void append_type(datatype::basic_datatype::sptr const&);
 
       /** \brief Append to the type (option takes an additional argument of the specified type) */
-      inline void append_type(datatype::basic_datatype::sptr&);
+      template < typename S >
+      void append_type();
 
       /** \brief Append type and instance ... */
-      template < typename T >
-      inline void append_argument(datatype::basic_datatype::sptr, T const&);
+      template < typename S, typename T >
+      void append_argument(S const&, T const&);
+
+      /** \brief Append type and instance ... */
+      template < typename S, typename T >
+      void append_argument(T const&);
 
       /** \brief Replace an argument (type and instance) ... */
       template < typename T >
-      inline void replace_argument(const size_t i, datatype::basic_datatype::sptr, T const&);
+      void replace_argument(const size_t i, datatype::basic_datatype::sptr, T const&);
 
       /** \brief Assigns a value to the n-th argument of the option */
-      inline void bind_argument(const size_t n, std::string const&);
-
-      /** \brief Generate XML representation */
-      inline void write(std::ostream&) const;
-
-      /** \brief Generate XML representation */
-      inline static option::sptr read(xml2pp::text_reader&);
+      void bind_argument(const size_t n, std::string const&);
 
       /** \brief Clears the list of arguments */
-      inline void clear();
+      void clear();
   };
 
   /**
@@ -138,64 +133,77 @@ namespace sip {
     return (p->evaluate((*iterator).second));
   }
 
-  inline option::option(const identifier i) : id(i) {
+  inline option::option() {
   }
 
   inline bool option::takes_arguments() const {
-    return (arguments.size() != 0);
+    return (m_arguments.size() != 0);
   }
 
   /**
-   * \pre the option must have exactly one argument
+   * \param[in] n the argument of which to return the value
+   * \pre the option must have at least n arguments
    **/
-  inline boost::any option::get_value() const {
-    assert(arguments.size() == 1);
+  inline boost::any option::get_value(size_t const& n) const {
+    assert(n < m_arguments.size());
 
-    return (arguments[0].first->evaluate(arguments[0].second));
+    return (m_arguments[n].first->evaluate(m_arguments[0].second));
   }
 
-  inline const option::identifier option::get_id() const {
-    return (id);
+  inline boost::iterator_range < option::type_value_list::const_iterator > option::get_value_iterator() const {
+    return (boost::make_iterator_range(m_arguments.begin(), m_arguments.end()));
   }
 
-  inline option::argument_iterator option::get_value_iterator() const {
-    return (argument_iterator(arguments.begin(), arguments.end()));
+  inline boost::iterator_range < option::type_value_list::iterator > option::get_value_iterator() {
+    return (boost::make_iterator_range(m_arguments.begin(), m_arguments.end()));
   }
 
-  inline void option::append_type(datatype::basic_datatype::sptr& t) {
+  inline void option::append_type(datatype::basic_datatype::sptr const& t) {
     assert(t.get() != 0);
 
-    arguments.push_back(std::make_pair(t, ""));
+    m_arguments.push_back(std::make_pair(t, ""));
   }
 
-  inline void option::append_type(datatype::basic_datatype::sptr t) {
-    assert(t.get() != 0);
+  template < typename S >
+  inline void option::append_type() {
+    boost::shared_ptr < S > p(new S);
 
-    arguments.push_back(std::make_pair(t, ""));
+    m_arguments.push_back(std::make_pair(p, ""));
   }
 
   /**
-   * \param[in] t pointer to the data type definition
+   * \param[in] t smart pointer to the data type definition
    * \param[in] d data that must be an instance of the chosen data type
    **/
-  template < typename T >
-  inline void option::append_argument(datatype::basic_datatype::sptr t, T const& d) {
+  template < typename S, typename T >
+  inline void option::append_argument(S const& t, T const& d) {
     assert(t.get() != 0);
 
-    append_argument(t, t->convert(d));
+    append_argument(boost::static_pointer_cast < sip::datatype::basic_datatype > (t), t->convert(d));
   }
 
   /**
-   * \param[in] t pointer to the data type definition
+   * \param[in] t smart pointer to the data type definition
    * \param[in] d data that must be an instance of the chosen data type
    **/
   template < >
-  inline void option::append_argument(datatype::basic_datatype::sptr t, std::string const& d) {
+  inline void option::append_argument(datatype::basic_datatype::sptr const& t, std::string const& d) {
     assert(t.get() != 0);
 
     assert(t->validate(d));
 
-    arguments.push_back(std::make_pair(t, d));
+    m_arguments.push_back(std::make_pair(t, d));
+  }
+
+  /**
+   * \param[in] t pointer to the data type definition
+   * \param[in] d data that must be an instance of the chosen data type
+   **/
+  template < typename S, typename T >
+  inline void option::append_argument(T const& d) {
+    boost::shared_ptr < S > p(new S);
+
+    append_argument(p, d);
   }
 
   /**
@@ -218,10 +226,10 @@ namespace sip {
   template < >
   inline void option::replace_argument(const size_t i, datatype::basic_datatype::sptr t, std::string const& d) {
     assert(t.get() != 0);
-    assert(0 <= i && i < arguments.size());
+    assert(0 <= i && i < m_arguments.size());
     assert(t->validate(d));
 
-    arguments[i] = std::make_pair(t, d);
+    m_arguments[i] = std::make_pair(t, d);
   }
 
   /**
@@ -229,74 +237,14 @@ namespace sip {
    * \param[in] d data that is valid w.r.t. the data type
    **/
   inline void option::bind_argument(const size_t i, std::string const& d) {
-    assert(0 <= i && i < arguments.size());
-    assert(arguments[i].first->validate(d));
+    assert(0 <= i && i < m_arguments.size());
+    assert(m_arguments[i].first->validate(d));
 
-    arguments[i].second = d;
-  }
-
-  inline void option::write(std::ostream& output) const {
-    using sip::exception;
-
-    output << "<option id=\"" << id << "\"";
-
-    if (takes_arguments()) {
-            type_value_list::const_iterator i = arguments.begin();
-      const type_value_list::const_iterator b = arguments.end();
-
-      output << ">";
-
-      while (i != b) {
-        try {
-          (*i).first->write(output, (*i).second);
-        }
-        catch (exception e) {
-          /* Invalid datatype exception; substitute context */
-          e.message() % boost::str(boost::format("option -> argument %u") % (i - arguments.begin()));
-        }
-
-        ++i;
-      }
-
-      output << "</option>";
-    }
-    else {
-      output << "/>";
-    }
-  }
-
-  inline option::sptr option::read(xml2pp::text_reader& r) {
-    using sip::exception;
-
-    option::identifier id = 0;
-
-    assert(r.is_element("option"));
-
-    if (!r.get_attribute(&id, "id")) {
-      throw (exception(sip::message_missing_required_attribute, "id", "option"));
-    }
-    else {
-      option::sptr o(new option(id));
-
-      if (!r.is_empty_element()) {
-        r.next_element();
-     
-        while (!r.is_end_element("option")) {
-          using namespace sip::datatype;
-
-          /* The current element must be a datatype specification */
-          o->arguments.push_back(basic_datatype::read(r));
-        }
-      }
-
-      r.next_element();
-
-      return (o);
-    }
+    m_arguments[i].second = d;
   }
 
   inline void option::clear() {
-    arguments.clear();
+    m_arguments.clear();
   }
 }
 

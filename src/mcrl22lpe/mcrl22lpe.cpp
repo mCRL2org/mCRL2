@@ -40,41 +40,28 @@ class squadt_interactor : public squadt_tool_interface {
 
   private:
 
-    enum input_files {
-      mcrl2_file_for_input = 0,  ///< file containing an LTS that can be imported using the LTS library
-      lpd_file_for_output  = 1,  ///< file used to write the output to
-    };
+    static const char* mcrl2_file_for_input; ///< file containing an LTS that can be imported using the LTS library
+    static const char* lpd_file_for_output;  ///< file containing an LTS that can be imported using the LTS library
 
-    enum further_options {
-      option_linearisation_method = 2,
-      option_report_mode,
-      option_final_cluster,
-      option_no_intermediate_cluster,
-      option_no_alpha,
-      option_newstate,
-      option_binary,
-      option_statenames,
-      option_no_rewrite,
-      option_no_freevars,
-      option_no_sumelm,
-      option_no_deltaelm,
-      option_end_phase,
-      option_add_delta
-    };
-
-    enum report_options {
-      report_normal,
-      report_verbose,
-      report_debug
-    };
+    static const char* option_linearisation_method;
+    static const char* option_final_cluster;
+    static const char* option_no_intermediate_cluster;
+    static const char* option_no_alpha;
+    static const char* option_newstate;
+    static const char* option_binary;
+    static const char* option_statenames;
+    static const char* option_no_rewrite;
+    static const char* option_no_freevars;
+    static const char* option_no_sumelm;
+    static const char* option_no_deltaelm;
+    static const char* option_end_phase;
+    static const char* option_add_delta;
 
   private:
 
     boost::shared_ptr < sip::datatype::enumeration > linearisation_method_enumeration;
 
     boost::shared_ptr < sip::datatype::enumeration > linearisation_phase_enumeration;
-
-    boost::shared_ptr < sip::datatype::enumeration > report_mode_enumeration;
 
   private:
 
@@ -99,18 +86,31 @@ class squadt_interactor : public squadt_tool_interface {
     bool perform_task(sip::configuration&);
 };
 
+const char* squadt_interactor::mcrl2_file_for_input = "mcrl2_in";
+const char* squadt_interactor::lpd_file_for_output  = "lpd_out";
+
+const char* squadt_interactor::option_linearisation_method     = "linearisation_method";
+const char* squadt_interactor::option_final_cluster            = "final_cluster";
+const char* squadt_interactor::option_no_intermediate_cluster  = "no_intermediate_cluster";
+const char* squadt_interactor::option_no_alpha                 = "no_alpha";
+const char* squadt_interactor::option_newstate                 = "newstate";
+const char* squadt_interactor::option_binary                   = "binary";
+const char* squadt_interactor::option_statenames               = "statenames";
+const char* squadt_interactor::option_no_rewrite               = "no_rewrite";
+const char* squadt_interactor::option_no_freevars              = "no_freevars"; 
+const char* squadt_interactor::option_no_sumelm                = "no_sumelm";
+const char* squadt_interactor::option_no_deltaelm              = "no_dataelm";
+const char* squadt_interactor::option_end_phase                = "end_phase";
+const char* squadt_interactor::option_add_delta                = "add_delta";
+
 squadt_interactor::squadt_interactor() {
-  linearisation_method_enumeration = sip::datatype::enumeration::create("stack");
+  linearisation_method_enumeration.reset(new sip::datatype::enumeration("stack"));
 
   *linearisation_method_enumeration % "regular" % "regular2" % "expansion";
 
-  linearisation_phase_enumeration = sip::datatype::enumeration::create("all");
+  linearisation_phase_enumeration.reset(new sip::datatype::enumeration("all"));
 
   *linearisation_phase_enumeration % "parsing" % "type-checking" % "alphabet_reduction" % "data_implementation";
-
-  report_mode_enumeration = sip::datatype::enumeration::create("normal");
-
-  *report_mode_enumeration % "verbose" % "debug";
 }
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
@@ -124,7 +124,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   using namespace sip::datatype;
   using namespace sip::layout::elements;
 
-  std::string infilename = c.get_object(mcrl2_file_for_input)->get_location();
+  std::string infilename = c.get_input(mcrl2_file_for_input).get_location();
 
   layout::manager::aptr top = layout::vertical_box::create();
 
@@ -210,19 +210,6 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   top->add(new label("Stop after"),layout::left);
   top->add(current_box);
 
-  // Message report level
-  current_box = new horizontal_box();
-
-  squadt_utility::radio_button_helper < report_options >
-                                        report_selector(current_box, report_normal, "Normal");
-
-  report_selector.associate(current_box, report_verbose, "Verbose");
-  report_selector.associate(current_box, report_debug, "Debug");
-
-  top->add(new label(" "));
-  top->add(new label("Report level"));
-  top->add(current_box);
-
   // Add okay button
   button* okay_button = new button("OK");
 
@@ -280,9 +267,6 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
     if (add_delta->get_status()) {
       c.add_option(option_add_delta);
     }
-    
-    c.add_option(option_report_mode).
-                append_argument(report_mode_enumeration, report_selector.get_selection());
   }
 
   m_communicator.send_clear_display();
@@ -291,8 +275,8 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   bool result = true;
 
-  result |= c.object_exists(mcrl2_file_for_input);
-  result |= c.object_exists(lpd_file_for_output);
+  result |= c.input_exists(mcrl2_file_for_input);
+  result |= c.output_exists(lpd_file_for_output);
   result |= c.option_exists(option_linearisation_method);
 
   return (result);
@@ -301,8 +285,8 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
 bool squadt_interactor::extract_task_options(sip::configuration const& c, t_lin_options& task_options) const {
   bool result = true;
 
-  if (c.object_exists(mcrl2_file_for_input)) {
-    task_options.infilename = c.get_object(mcrl2_file_for_input)->get_location();
+  if (c.input_exists(mcrl2_file_for_input)) {
+    task_options.infilename = c.get_input(mcrl2_file_for_input).get_location();
   }
   else {
     send_error("Configuration does not contain an input object\n");
@@ -310,8 +294,8 @@ bool squadt_interactor::extract_task_options(sip::configuration const& c, t_lin_
     result = false;
   }
 
-  if (c.object_exists(lpd_file_for_output) ) {
-    task_options.outfilename = c.get_object(lpd_file_for_output)->get_location();
+  if (c.output_exists(lpd_file_for_output) ) {
+    task_options.outfilename = c.get_output(lpd_file_for_output).get_location();
   }
   else {
     send_error("Configuration does not contain an output object\n");
@@ -320,7 +304,7 @@ bool squadt_interactor::extract_task_options(sip::configuration const& c, t_lin_
   }
 
   if (c.option_exists(option_linearisation_method)) {
-    task_options.lin_method = static_cast < t_lin_method > (boost::any_cast < size_t > (c.get_option_value(option_linearisation_method)));
+    task_options.lin_method = static_cast < t_lin_method > (boost::any_cast < size_t > (c.get_option_argument(option_linearisation_method, 0)));
   }
   else {
     send_error("Configuration does not contain a linearisation method\n");
@@ -340,21 +324,9 @@ bool squadt_interactor::extract_task_options(sip::configuration const& c, t_lin_
   task_options.nodeltaelimination      = c.option_exists(option_no_deltaelm);
   task_options.add_delta               = c.option_exists(option_add_delta);
   
-  task_options.opt_end_phase = static_cast < t_phase > (boost::any_cast < size_t > (c.get_option_value(option_end_phase)));
+  task_options.opt_end_phase = static_cast < t_phase > (boost::any_cast < size_t > (c.get_option_argument(option_end_phase, 0)));
 
   task_options.opt_check_only = (task_options.opt_end_phase != phNone);
-  
-  switch (static_cast < report_options > (boost::any_cast < size_t > (c.get_option_value(option_report_mode)))) {
-    case report_verbose:
-      gsSetVerboseMsg();
-      break;
-    case report_debug:
-      gsSetDebugMsg();
-      break;
-    case report_normal:
-    default:
-      break;
-  }
 
   return (result);
 }

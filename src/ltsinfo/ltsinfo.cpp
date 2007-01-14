@@ -20,9 +20,7 @@ class squadt_interactor : public squadt_tool_interface {
 
   private:
 
-    enum input_files {
-      lts_file_for_input // Main input file that contains an LTS
-    };
+    static const char*  lts_file_for_input;  ///< file containing an LTS that can be imported
 
   public:
 
@@ -39,6 +37,8 @@ class squadt_interactor : public squadt_tool_interface {
     bool perform_task(sip::configuration&);
 };
 
+const char* squadt_interactor::lts_file_for_input  = "lts_in";
+
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
   c.add_input_combination(lts_file_for_input, sip::mime_type("aut", sip::mime_type::text), sip::tool::category::reporting);
 #ifdef MCRL2_BCG
@@ -53,7 +53,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   bool result = true;
 
-  result &= c.object_exists(lts_file_for_input);
+  result &= c.input_exists(lts_file_for_input);
 
   return (result);
 }
@@ -64,7 +64,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   using namespace sip::layout;
   using namespace sip::layout::elements;
 
-  sip::object::sptr input_object = c.get_object(lts_file_for_input);
+  sip::object& input_object = c.get_input(lts_file_for_input);
 
   /* Create and add the top layout manager */
   layout::manager::aptr top = layout::vertical_box::create();
@@ -75,9 +75,9 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   layout::vertical_box::alignment a = layout::left;
 
   lts l;
-  lts_type t = lts::parse_format(input_object->get_mime_type().get_sub_type().c_str());
+  lts_type t = lts::parse_format(input_object.get_mime_type().get_sub_type().c_str());
 
-  if (l.read_from(input_object->get_location(), t)) {
+  if (l.read_from(input_object.get_location(), t)) {
     left_column->add(new label("States (#):"), a);
     left_column->add(new label("Labels (#):"), a);
     left_column->add(new label("Transitions (#):"), a);
@@ -110,13 +110,13 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
    
     boost::format c = boost::format("Input read from `%s' (in %s format)");
 
-    top->add(new label("Input read from " + input_object->get_location() + " (" + lts::string_for_type(t) + " format)"), margins(5,0,5,0));
+    top->add(new label("Input read from " + input_object.get_location() + " (" + lts::string_for_type(t) + " format)"), margins(5,0,5,0));
     top->add(columns);
 
     send_display_layout(top);
   }
   else {
-    send_error("Could not read `" + c.get_object(lts_file_for_input)->get_location() + "', corruption or incorrect format?\n");
+    send_error("Could not read `" + c.get_input(lts_file_for_input).get_location() + "', corruption or incorrect format?\n");
 
     return (false);
   }

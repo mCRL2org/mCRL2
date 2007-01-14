@@ -31,8 +31,10 @@ namespace sip {
      * for a tool developer.
      **/
     class capabilities : public utility::visitable < tool::capabilities > {
-      friend class tool::communicator;
-      friend class controller::communicator;
+      friend class sip::tool::communicator;
+      friend class sip::controller::communicator;
+      friend class sip::store_visitor_impl;
+      friend class sip::restore_visitor_impl;
   
       public:
   
@@ -43,12 +45,12 @@ namespace sip {
  
             tool::category const& m_category;   ///< tool category
             mime_type const       m_mime_type;  ///< storage format
-            object::identifier    m_identifier; ///< identifier for the main input object
+            std::string           m_identifier; ///< identifier for the main input object
  
           public:
  
             /** \brief Constructor */
-            input_combination(tool::category const&, mime_type const&, object::identifier const&);
+            input_combination(tool::category const&, mime_type const&, std::string const&);
  
             /** \brief Compares two input combinations for equality */
             static bool equal(const input_combination&, const input_combination&);
@@ -60,12 +62,12 @@ namespace sip {
           public:
  
             mime_type          m_mime_type;  ///< storage format
-            object::identifier m_identifier; ///< identifier for the output object
+            std::string        m_identifier; ///< identifier for the output object
  
           public:
  
             /** \brief Constructor */
-            output_combination(mime_type const&, object::identifier const&);
+            output_combination(mime_type const&, std::string const&);
  
             /** \brief Compares two input combinations for equality */
             static bool equal(const output_combination&, const output_combination&);
@@ -83,51 +85,31 @@ namespace sip {
         /** \brief Convenience type for use in interface */
         typedef boost::iterator_range < output_combination_list::const_iterator > output_combination_range;
  
-        /** \brief Convenience type that hides the shared pointer implementation */
-        typedef boost::shared_ptr < capabilities >                                sptr;
-  
       private:
   
         /** \brief The protocol version */
-        version                  protocol_version;
+        version                  m_protocol_version;
   
         /** \brief The available input configurations */
-        input_combination_list   input_combinations;
+        input_combination_list   m_input_combinations;
  
         /** \brief The available input configurations */
-        output_combination_list  output_combinations;
+        output_combination_list  m_output_combinations;
   
-        /** \brief Whether the configuration can be changed through user interaction, after the start signal */
-        bool                     interactive;
- 
       public:
   
         /** \brief Constructor */
         capabilities(const version = default_protocol_version);
   
         /** \brief Add an input configuration */
-        void add_input_combination(object::identifier const&, mime_type const&, tool::category const& = category::unknown);
+        void add_input_combination(std::string const&, mime_type const&, tool::category const& = category::unknown);
   
         /** \brief Add an output configuration */
-        void add_output_combination(object::identifier const&, mime_type const&);
+        void add_output_combination(std::string const&, mime_type const&);
   
         /** \brief Get the protocol version */
         version get_version() const;
   
-        /** \brief Set or reset flag that the tool is interactive (configuration may change through user interaction) */
-        void set_interactive(bool);
-  
-        static capabilities::sptr read(std::string const&);
-  
-        /** \brief Read from XML stream */
-        static capabilities::sptr read(xml2pp::text_reader& reader);
-  
-        /** \brief Write to XML string */
-        std::string write() const;
-  
-        /** \brief Write to XML stream */
-        void write(std::ostream&) const;
- 
         /** \brief Returns a reference to the list of input combinations */
         input_combination_range get_input_combinations() const;
  
@@ -138,12 +120,22 @@ namespace sip {
         input_combination const* find_input_combination(const mime_type&, const tool::category&) const;
     };
   
-    inline capabilities::input_combination::input_combination(tool::category const& c,
-                        mime_type const& m, object::identifier const& id) : m_category(c), m_mime_type(m), m_identifier(id) {
+    /** \brief Smaller, performs simple lexicographic comparison (included for use with standard data structures) */
+    inline bool operator < (const capabilities::input_combination& a, const capabilities::input_combination& b) {
+      return (a.m_mime_type < b.m_mime_type || ((a.m_mime_type == b.m_mime_type) && a.m_category < b.m_category));
     }
  
-    inline capabilities::output_combination::output_combination(mime_type const& f,
-                        object::identifier const& id) : m_mime_type(f), m_identifier(id) {
+    /** \brief Smaller, performs simple lexicographic comparison (included for use with standard data structures) */
+    inline bool operator < (const capabilities::output_combination& a, const capabilities::output_combination& b) {
+      return (a.m_mime_type < b.m_mime_type || a.m_mime_type == b.m_mime_type);
+    }
+ 
+    inline capabilities::input_combination::input_combination(tool::category const& c,
+                        mime_type const& m, std::string const& id) : m_category(c), m_mime_type(m), m_identifier(id) {
+    }
+ 
+    inline capabilities::output_combination::output_combination(mime_type const& f, std::string const& id) :
+                                                                                m_mime_type(f), m_identifier(id) {
     }
  
     inline bool capabilities::input_combination::equal(input_combination const& p, input_combination const& q) {

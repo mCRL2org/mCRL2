@@ -26,7 +26,7 @@ namespace squadt {
     public:
 
       /** \brief Convenience type for hiding shared pointer implementation */
-      typedef boost::shared_ptr < tool >                 sptr;
+      typedef boost::shared_ptr < tool >             sptr;
 
       /** \brief Convenience type alias */
       typedef sip::tool::capabilities::input_combination input_combination;
@@ -34,21 +34,23 @@ namespace squadt {
     private:
 
       /** \brief A name for the tool */
-      std::string                                name;
+      std::string                                    m_name;
 
       /** \brief The location where the tool can be found */
-      std::string                                location;
+      std::string                                    m_location;
 
       /** \brief Stores the tool capabilities object obtained through protocol implementation */
-      sip::tool::capabilities::sptr              capabilities;
+      boost::shared_ptr < sip::tool::capabilities >  m_capabilities;
+
+    private:
 
       /** \brief The default capabilities descriptor; one that is empty */
-      static const sip::tool::capabilities::sptr no_capabilities;
+      static const boost::shared_ptr < sip::tool::capabilities > no_capabilities;
 
     private:
 
       /** \brief Constructor */
-      inline tool(std::string, std::string, sip::tool::capabilities::sptr = tool::no_capabilities);
+      inline tool(std::string, std::string, boost::shared_ptr < sip::tool::capabilities > = tool::no_capabilities);
 
       /** \brief Copy constructor */
       inline tool(tool const&);
@@ -59,10 +61,10 @@ namespace squadt {
     public:
 
       /** \brief Set capabilities object for this tool */
-      inline void set_capabilities(sip::tool::capabilities::sptr);
+      inline void set_capabilities(boost::shared_ptr < sip::tool::capabilities >);
 
       /** \brief Get capabilities object for this tool */
-      inline const sip::tool::capabilities::sptr get_capabilities() const;
+      inline boost::shared_ptr < sip::tool::capabilities > get_capabilities() const;
 
       /** \brief Get the location to for this tool */
       inline std::string get_location() const;
@@ -79,34 +81,34 @@ namespace squadt {
    * \param[in] n a name for the tool
    * \param[in] c a tool::capabilities object for the tool
    **/
-  inline tool::tool(std::string n, std::string l, sip::tool::capabilities::sptr c) : name(n), location(l), capabilities(c) {
+  inline tool::tool(std::string n, std::string l, boost::shared_ptr < sip::tool::capabilities > c) : m_name(n), m_location(l), m_capabilities(c) {
   }
 
-  inline tool::tool(tool const& t) : name(t.name), location(t.location), capabilities(t.capabilities) {
+  inline tool::tool(tool const& t) : m_name(t.m_name), m_location(t.m_location), m_capabilities(t.m_capabilities) {
   }
 
-  inline tool::tool() : capabilities(tool::no_capabilities) {
+  inline tool::tool() : m_capabilities(tool::no_capabilities) {
   }
 
   /**
    * \param[in] c a shared pointer to a capabilities object
    **/
-  inline void tool::set_capabilities(sip::tool::capabilities::sptr c) {
+  inline void tool::set_capabilities(boost::shared_ptr < sip::tool::capabilities > c) {
     if (c.get() != 0) {
-      capabilities = c;
+      m_capabilities = c;
     }
   }
 
-  inline const sip::tool::capabilities::sptr tool::get_capabilities() const {
-    return (capabilities);
+  inline boost::shared_ptr < sip::tool::capabilities > tool::get_capabilities() const {
+    return (m_capabilities);
   }
 
   inline std::string tool::get_location() const {
-    return (location);
+    return (m_location);
   }
 
   inline std::string tool::get_name() const {
-    return (name);
+    return (m_name);
   }
 
   /**
@@ -114,7 +116,7 @@ namespace squadt {
    * \param[in] t the category in which the tool operates
    **/
   inline tool::input_combination const* tool::find_input_combination(build_system::tool_category const& t, build_system::storage_format const& f) const {
-    return (capabilities->find_input_combination(f, t));
+    return (m_capabilities->find_input_combination(f, t));
   }
 }
 

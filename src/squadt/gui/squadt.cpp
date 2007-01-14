@@ -151,21 +151,21 @@ bool Squadt::OnInit() {
   bool c = parse_command_line(argc, argv, action);
 
   if (c) {
-    global_build_system.initialise(
-        std::auto_ptr < settings_manager > (new settings_manager(std::string(wxFileName::GetHomeDir().fn_str()))),
-        std::auto_ptr < tool_manager > (new tool_manager()),
-        std::auto_ptr < executor > (new executor()),
-        std::auto_ptr < type_registry > (new type_registry()));
-
     wxInitAllImageHandlers();
- 
+    
     #include "pixmaps/logo.xpm"
-
+    
     wxImage logo(logo_xpm);
- 
+    
     splash* splash_window(new splash(&logo, 1));
 
     try {
+      global_build_system.initialise(
+          std::auto_ptr < settings_manager > (new settings_manager(std::string(wxFileName::GetHomeDir().fn_str()))),
+          std::auto_ptr < tool_manager > (new tool_manager()),
+          std::auto_ptr < executor > (new executor()),
+          std::auto_ptr < type_registry > (new type_registry()));
+     
       splash_window->set_category("Querying tools", global_build_system.get_tool_manager()->number_of_tools());
      
       /* Perform initialisation */
@@ -201,6 +201,13 @@ bool Squadt::OnInit() {
       wxMessageDialog error_dialog(0, wxString(e.what(), wxConvLocal), wxT("Fatal"), wxOK|wxICON_ERROR);
       
       error_dialog.ShowModal();
+
+      return (false);
+    }
+    catch (...) {
+      splash_window->set_done();
+
+      wxMessageDialog(0, wxT("Initialisation failed! Another instance, or tool related to a previous instance, is still active and blocking the initialisation."), wxT("Fatal"), wxOK|wxICON_ERROR).ShowModal();
 
       return (false);
     }

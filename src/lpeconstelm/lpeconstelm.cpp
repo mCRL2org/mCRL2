@@ -139,16 +139,12 @@ class squadt_interactor : public squadt_tool_interface {
 
   private:
 
-    enum input_files {
-      lpd_file_for_input,  ///< file containing an LPE that can be imported
-      lpd_file_for_output, ///< file used to write the output to
-    };
+    static const char*  lpd_file_for_input;  ///< file containing an LPE that can be imported
+    static const char*  lpd_file_for_output; ///< file used to write the output to
 
-    enum options {
-      option_remove_single_element_sorts,
-      option_remove_unvisited_summands,
-      option_ignore_summand_conditions
-    };
+    static const char*  option_remove_single_element_sorts;
+    static const char*  option_remove_unvisited_summands;
+    static const char*  option_ignore_summand_conditions;
 
   public:
 
@@ -164,6 +160,13 @@ class squadt_interactor : public squadt_tool_interface {
     /** \brief performs the task specified by a configuration */
     bool perform_task(sip::configuration&);
 };
+
+const char* squadt_interactor::lpd_file_for_input  = "lpd_in";
+const char* squadt_interactor::lpd_file_for_output = "lpd_out";
+
+const char* squadt_interactor::option_remove_single_element_sorts = "remove_single_element_sorts";
+const char* squadt_interactor::option_remove_unvisited_summands   = "remove_unvisited_summands";
+const char* squadt_interactor::option_ignore_summand_conditions   = "ignore_summand_conditions";
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
   c.add_input_combination(lpd_file_for_input, sip::mime_type("lpe"), sip::tool::category::transformation);
@@ -201,7 +204,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   okay_button->await_change();
 
   if (c.is_fresh()) {
-    if (!c.object_exists(lpd_file_for_output)) {
+    if (!c.output_exists(lpd_file_for_output)) {
       /* Add output file to the configuration */
       c.add_output(lpd_file_for_output, sip::mime_type("lpe"), c.get_output_name(".lpe"));
     }
@@ -222,8 +225,8 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   bool result = true;
 
-  result &= c.object_exists(lpd_file_for_input);
-  result &= c.object_exists(lpd_file_for_output);
+  result &= c.input_exists(lpd_file_for_input);
+  result &= c.output_exists(lpd_file_for_output);
 
   return (result);
 }
@@ -238,8 +241,8 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 
   send_hide_display();
 
-  if (constelm.loadFile(c.get_object(lpd_file_for_input)->get_location())) {
-    constelm.setSaveFile(c.get_object(lpd_file_for_output)->get_location());
+  if (constelm.loadFile(c.get_input(lpd_file_for_input).get_location())) {
+    constelm.setSaveFile(c.get_output(lpd_file_for_output).get_location());
 
     constelm.filter();
     constelm.output(); 
@@ -247,7 +250,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     return (true);
   }
   else {
-    send_error("Could not read `" + c.get_object(lpd_file_for_input)->get_location() + "', corruption or incorrect format?\n");
+    send_error("Could not read `" + c.get_input(lpd_file_for_input).get_location() + "', corruption or incorrect format?\n");
   }
 
   return (false);

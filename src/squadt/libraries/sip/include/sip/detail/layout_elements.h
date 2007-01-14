@@ -294,7 +294,10 @@ namespace sip {
         public:
      
           /** \brief Constructor */
-          text_field(const std::string& i, basic_datatype::sptr& = string::standard);
+          text_field(std::string const& i);
+
+          /** \brief Constructor */
+          text_field(std::string const& i, basic_datatype::sptr&);
 
           /** \brief Set the text */
           void set_text(std::string const&);

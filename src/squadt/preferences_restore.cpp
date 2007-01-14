@@ -16,9 +16,11 @@
 
 #include <utility/visitor.h>
 
+#include <sip/visitors.h>
+
 namespace squadt {
 
-  class preferences_read_visitor_impl : public utility::visitor< preferences_read_visitor, void, true > {
+  class preferences_read_visitor_impl : public utility::visitor< preferences_read_visitor, void, false > {
 
     private:
 
@@ -50,14 +52,16 @@ namespace squadt {
 
   template <>
   void preferences_read_visitor_impl::visit(tool& t) {
-    if (!(m_reader->get_attribute(&t.name, "name") && m_reader->get_attribute(&t.location, "location"))) {
+    if (!(m_reader->get_attribute(&t.m_name, "name") && m_reader->get_attribute(&t.m_location, "location"))) {
       throw (exception::exception(exception::required_attributes_missing, "tool"));
     }
 
     if (!m_reader->is_end_element()) {
+      t.m_capabilities.reset(new sip::tool::capabilities);
+
       m_reader->next_element();
 
-      t.set_capabilities(sip::tool::capabilities::read(*m_reader));
+      sip::visitors::restore(*t.m_capabilities, *m_reader);
     }
 
     m_reader->skip_end_element("tool");

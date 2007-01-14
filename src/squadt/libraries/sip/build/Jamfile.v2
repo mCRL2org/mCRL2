@@ -35,18 +35,20 @@ alias transport
 
 alias messenger
     : # no sources
-      layout_base.cpp
-      layout.cpp
-      common.cpp
-      report.cpp
-      mime_type.cpp
       basic_datatype.cpp
+      basic_messenger.cpp
+      capabilities.cpp
+      common.cpp
       configuration.cpp
+      layout.cpp
+      layout_base.cpp
       command_line_interface.cpp
       layout_elements.cpp
-      basic_messenger.cpp
-      tool_capabilities.cpp
+      mime_type.cpp
+      report.cpp
       transport
+      store_visitor.cpp
+      restore_visitor.cpp
     : <threading>multi
       <dependency>/site-config//boost_regex
       <dependency>/site-config//boost_filesystem

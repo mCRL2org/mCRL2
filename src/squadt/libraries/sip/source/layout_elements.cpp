@@ -468,15 +468,17 @@ namespace sip {
         current_event_handler->process(this);
       }
 
-      text_field::text_field() {
-        type = string::standard;
+      text_field::text_field() : type(new sip::datatype::string()) {
+      }
+
+      text_field::text_field(std::string const& s) : text(s), type(new sip::datatype::string()) {
       }
 
       /**
        * \param[in] s the initial content of the text control
        * \param[in] t the a type description object for validation purposes
        **/
-      text_field::text_field(const std::string& s, basic_datatype::sptr& t) : text(s), type(t) {
+      text_field::text_field(std::string const& s, basic_datatype::sptr& t) : text(s), type(t) {
       }
      
       /**

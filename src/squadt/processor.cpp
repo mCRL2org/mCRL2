@@ -434,15 +434,16 @@ namespace squadt {
 
   /**
    * \param[in] f the storage format that l uses
+   * \param[in] id the unique identifier for this object in the configuration
    * \param[in] l a URI (local path) to where the file is stored
    * \param[in] s the status of the new object
    **/
-  void processor::append_output(build_system::mime_type const& m, const std::string& l, object_descriptor::t_status const& s) {
+  void processor::append_output(build_system::mime_type const& m, parameter_identifier const& id, const std::string& l, object_descriptor::t_status const& s) {
     object_descriptor::sptr p = object_descriptor::sptr(new object_descriptor(m));
 
     p->generator  = impl->interface_object;
     p->location   = l;
-    p->identifier = 0;
+    p->identifier = "";
     p->status     = s;
     p->timestamp  = time(0);
     p->checksum.zero_out();
@@ -452,14 +453,15 @@ namespace squadt {
 
   /**
    * \param[in] o a sip::object object that describes an output object
+   * \param[in] id the unique identifier for this object in the configuration
    * \param[in] s the status of the new object
    **/
-  void processor_impl::append_output(sip::object const& o, object_descriptor::t_status const& s) {
+  void processor_impl::append_output(sip::object const& o, parameter_identifier const& id, object_descriptor::t_status const& s) {
     object_descriptor::sptr p = object_descriptor::sptr(new object_descriptor(o.get_mime_type()));
 
     p->generator  = interface_object;
     p->location   = o.get_location();
-    p->identifier = o.get_id();
+    p->identifier = id;
     p->status     = s;
     p->timestamp  = time(0);
     p->checksum.zero_out();
@@ -469,13 +471,14 @@ namespace squadt {
 
   /**
    * \param[in] p the object descriptor that should be replaced
+   * \param[in] id the unique identifier for this object in the configuration
    * \param[in] o a sip::object object that describes an output object
    * \param[in] s the new status of the object
    **/
-  void processor_impl::replace_output(object_descriptor::sptr p, sip::object const& o, object_descriptor::t_status const& s) {
+  void processor_impl::replace_output(object_descriptor::sptr p, parameter_identifier const& id, sip::object const& o, object_descriptor::t_status const& s) {
     p->mime_type  = o.get_mime_type();
     p->location   = o.get_location();
-    p->identifier = o.get_id();
+    p->identifier = id;
     p->status     = s;
     p->timestamp  = time(0);
     p->checksum.zero_out();

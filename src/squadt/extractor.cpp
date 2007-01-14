@@ -3,6 +3,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 
+#include <sip/visitors.h>
 #include "extractor.h"
 
 namespace squadt {
@@ -34,8 +35,6 @@ namespace squadt {
    * \param[in,out] t the tool object in which to store the result
    **/
   void extractor::handle_store_tool_capabilities(const sip::message_ptr& m, tool& t) {
-    xml2pp::text_reader reader(m->to_string().c_str());
-
-    t.capabilities = sip::tool::capabilities::read(reader);
+    sip::visitors::restore(*t.m_capabilities, m->to_string());
   }
 }

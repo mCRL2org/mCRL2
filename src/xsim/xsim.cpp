@@ -26,10 +26,8 @@ class squadt_interactor: public squadt_tool_interface {
   
   private:
 
-    /* Constants for identifiers of options and objects */
-    enum identifiers {
-      lpd_file_for_input // Main input file that contains an lts
-    };
+    // Identifier for main input file that contains an LTS
+    static const char* lpd_file_for_input;
  
     // Wrapper for wxEntry invocation
     squadt_utility::entry_wrapper& starter;
@@ -52,6 +50,8 @@ class squadt_interactor: public squadt_tool_interface {
     bool perform_task(sip::configuration&);
 };
 
+const char* squadt_interactor::lpd_file_for_input = "lpd_in";
+
 squadt_interactor::squadt_interactor(squadt_utility::entry_wrapper& w): starter(w) {
 }
 
@@ -64,7 +64,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 }
 
 bool squadt_interactor::check_configuration(sip::configuration const& c) const {
-  bool valid = c.object_exists(lpd_file_for_input);
+  bool valid = c.input_exists(lpd_file_for_input);
 
   if (!valid) {
     send_error("Invalid input combination!");
@@ -74,7 +74,7 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
 }
 
 bool squadt_interactor::perform_task(sip::configuration& c) {
-  lpd_file_argument = c.get_object(lpd_file_for_input)->get_location();
+  lpd_file_argument = c.get_input(lpd_file_for_input).get_location();
 
   return starter.perform_entry();
 }

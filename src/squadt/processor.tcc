@@ -8,6 +8,8 @@
 #include <boost/thread/thread.hpp>
 #include <boost/filesystem/convenience.hpp>
 
+#include <sip/visitors.h>
+
 #include "task_monitor.h"
 #include "processor.h"
 #include "project_manager.h"
@@ -25,25 +27,28 @@ namespace squadt {
     private:
 
       /** \brief Pointer type for implementation object (handle-body idiom) */
-      typedef boost::shared_ptr < processor_impl >    impl_ptr;
+      typedef boost::shared_ptr < processor_impl >      impl_ptr;
 
       /** \brief Pointer type for interface object (handle-body idiom) */
-      typedef boost::shared_ptr < processor >         interface_ptr;
+      typedef boost::shared_ptr < processor >           interface_ptr;
 
       /** \brief Type for object specification */
-      typedef processor::object_descriptor            object_descriptor;
+      typedef processor::object_descriptor              object_descriptor;
 
       /** \brief Type for object status specification */
-      typedef processor::object_descriptor::t_status  object_status;
+      typedef processor::object_descriptor::t_status    object_status;
 
       /** \brief Type alias for monitor class */
-      typedef processor::monitor                      monitor;
+      typedef processor::monitor                        monitor;
 
       /** \brief Type alias for list of inputs */
-      typedef processor::input_list                   input_list;
+      typedef processor::input_list                     input_list;
 
       /** \brief Type alias for list of inputs */
-      typedef processor::output_list                  output_list;
+      typedef processor::output_list                    output_list;
+
+      /** \brief Convenient type alias */
+      typedef processor::parameter_identifier           parameter_identifier;
 
     private:
 
@@ -93,7 +98,7 @@ namespace squadt {
       void edit(execution::command*);
 
       /** \brief Extracts useful information from a configuration object */
-      void process_configuration(sip::configuration::sptr const& c);
+      void process_configuration(boost::shared_ptr < sip::configuration > const& c);
 
       /** \brief Find an object descriptor for a given pointer to an object */
       const object_descriptor::sptr find_output(object_descriptor*) const;
@@ -101,17 +106,11 @@ namespace squadt {
       /** \brief Find an object descriptor for a given pointer to an object */
       const object_descriptor::sptr find_input(object_descriptor*) const;
  
-      /** \brief Find an object descriptor for a given pointer to an object (by id) */
-      const object_descriptor::sptr find_output(const unsigned int) const;
- 
-      /** \brief Find an object descriptor for a given pointer to an object (by id) */
-      const object_descriptor::sptr find_input(const unsigned int) const;
+      /** \brief Find an object descriptor for a given pointer to an object */
+      const object_descriptor::sptr find_output(parameter_identifier const&) const;
  
       /** \brief Find an object descriptor for a given pointer to an object */
-      const object_descriptor::sptr find_output(std::string const&) const;
- 
-      /** \brief Find an object descriptor for a given pointer to an object */
-      const object_descriptor::sptr find_input(std::string const&) const;
+      const object_descriptor::sptr find_input(parameter_identifier const&) const;
  
       /** \brief Get the most original (main) input */
       const object_descriptor::sptr find_initial_object() const;
@@ -153,11 +152,11 @@ namespace squadt {
       void append_output(object_descriptor::sptr&);
 
       /** \brief Add an output object */
-      void append_output(sip::object const&,
+      void append_output(sip::object const&, parameter_identifier const&,
                 object_descriptor::t_status const& = object_descriptor::reproducible_nonexistent);
 
       /** \brief Replace an existing output object */
-      void replace_output(object_descriptor::sptr, sip::object const&,
+      void replace_output(object_descriptor::sptr, parameter_identifier const&, sip::object const&,
                 object_descriptor::t_status const& = object_descriptor::reproducible_up_to_date);
 
       /** \brief Read from XML using a libXML2 reader */
@@ -348,10 +347,10 @@ namespace squadt {
     }
 
     /* The last received configuration from the tool */
-    sip::configuration::sptr c = current_monitor->get_configuration();
+    boost::shared_ptr < sip::configuration > c = current_monitor->get_configuration();
 
     if (c.get() != 0) {
-      c->write(s);
+      sip::visitors::store(*c, s);
     }
 
     /* The inputs */
@@ -363,9 +362,13 @@ namespace squadt {
     for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
       s << "<output id=\"" << std::dec << reinterpret_cast < unsigned long > ((*i).get())
         << "\" format=\"" << (*i)->mime_type
-        << "\" location=\"" << (*i)->location
-        << "\" identifier=\"" << std::dec << (*i)->identifier
-        << "\" status=\"" << (*i)->status;
+        << "\" location=\"" << (*i)->location;
+
+      if ((*i)->status != object_descriptor::original) {
+        s << "\" identifier=\"" << std::dec << (*i)->identifier;
+      }
+
+      s << "\" status=\"" << (*i)->status;
 
       if (!(*i)->checksum.is_zero()) {
         s << "\" digest=\"" << (*i)->checksum;
@@ -406,7 +409,11 @@ namespace squadt {
     r.next_element();
 
     if (r.is_element("configuration")) {
-      c->impl->current_monitor->set_configuration(sip::configuration::read(r));
+      boost::shared_ptr < sip::configuration > new_configuration(new sip::configuration);
+
+      sip::visitors::restore(*new_configuration, r);
+
+       c->impl->current_monitor->set_configuration(new_configuration);
     }
 
     /* Read inputs */
@@ -450,9 +457,9 @@ namespace squadt {
       object_descriptor& new_descriptor = *m[id];
 
       if (!(b && r.get_attribute(&new_descriptor.location, "location")
-              && r.get_attribute(&new_descriptor.identifier, "identifier")
-              && r.get_attribute(&new_descriptor.timestamp, "timestamp")
-              && r.get_attribute(&id, "status"))) {
+              && r.get_attribute(&id, "status"))
+              && (r.get_attribute(&new_descriptor.identifier, "identifier") || id == object_descriptor::original)
+              && r.get_attribute(&new_descriptor.timestamp, "timestamp")) {
 
         throw (exception::exception(exception::required_attributes_missing, "processor->output"));
       }
@@ -565,7 +572,7 @@ namespace squadt {
   /**
    * \param[in] id a pointer to the object to find
    **/
-  inline const processor::object_descriptor::sptr processor_impl::find_output(const unsigned int id) const {
+  inline const processor::object_descriptor::sptr processor_impl::find_output(parameter_identifier const& id) const {
     for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
       if ((*i)->identifier == id) {
 
@@ -581,44 +588,11 @@ namespace squadt {
   /**
    * \param[in] id the id of the object to find
    **/
-  inline const processor::object_descriptor::sptr processor_impl::find_input(const unsigned int id) const {
+  inline const processor::object_descriptor::sptr processor_impl::find_input(parameter_identifier const& id) const {
     for (input_list::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
       object_descriptor::sptr s = (*i);
 
       if (s.get() != 0 && s->identifier == id) {
-        return (s);
-      }
-    }
-                               
-    object_descriptor::sptr s;
-
-    return (s);
-  }
-
-  /**
-   * \param o the name of the input object to find
-   **/
-  inline const processor::object_descriptor::sptr processor_impl::find_output(std::string const& o) const {
-    for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
-      if ((*i)->location == o) {
-
-        return (*i);
-      }
-    }
-
-    object_descriptor::sptr s;
-
-    return (s);
-  }
-
-  /**
-   * \param o the name of the input object to find
-   **/
-  inline const processor::object_descriptor::sptr processor_impl::find_input(std::string const& o) const {
-    for (input_list::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
-      object_descriptor::sptr s = (*i);
-
-      if (s.get() != 0 && s->location == o) {
         return (s);
       }
     }
@@ -652,14 +626,12 @@ namespace squadt {
       o->location = n;
 
       /* Update configuration */
-      sip::configuration::sptr c = current_monitor->get_configuration();
+      boost::shared_ptr < sip::configuration > c = current_monitor->get_configuration();
 
       if (c.get() != 0) {
-        sip::object::sptr object(c->get_output(o->identifier));
+        sip::object& object(c->get_output(o->identifier));
 
-        if (object.get() != 0) {
-          object->set_location(n);
-        }
+        object.set_location(n);
       }
     }
   }
@@ -667,32 +639,35 @@ namespace squadt {
   /**
    * \param[in] c a reference to a configuration object
    **/
-  inline void processor_impl::process_configuration(sip::configuration::sptr const& c) {
+  inline void processor_impl::process_configuration(boost::shared_ptr < sip::configuration > const& c) {
     boost::shared_ptr < project_manager > g(manager.lock());
 
     if (g.get() != 0) {
+      sip::configuration::const_iterator_output_range ir(c->get_output_objects());
+
       /* Extract information about output objects from the configuration */
-      for (sip::configuration::object_iterator i = c->get_object_iterator(); i.valid(); ++i) {
-        if ((*i)->get_type() == sip::object::output) {
-          object_descriptor::sptr o = find_output((*i)->get_id());
-      
-          if (o.get() == 0) {
-            /* Output not registered yet */
-            append_output(*(*i), object_descriptor::reproducible_nonexistent);
+      for (sip::configuration::const_iterator_output_range::const_iterator i = ir.begin(); i != ir.end(); ++i) {
+        sip::configuration::object const& object(static_cast < sip::configuration::object& > (*i));
+
+        parameter_identifier    id = c->get_identifier(*i);
+        object_descriptor::sptr o  = find_output(id);
+       
+        if (o.get() == 0) {
+          /* Output not registered yet */
+          append_output(object, id, object_descriptor::reproducible_nonexistent);
+        }
+        else {
+          if (object.get_location() != o->location) {
+            /* Output already known, but filenames do not match */
+            remove(g->get_path_for_name(o->location));
           }
-          else {
-            if ((*i)->get_location() != o->location) {
-              /* Output already known, but filenames do not match */
-              remove(g->get_path_for_name(o->location));
-            }
-      
-            replace_output(o, *(*i));
-          }
-      
-          if (!boost::filesystem::exists(g->get_path_for_name((*i)->get_location()))) {
-            /* TODO Signal error with exception */
-            std::cerr << "Critical error, output file with name: " << (*i)->get_location() << " does not exist!" << std::endl;
-          }
+       
+          replace_output(o, id, object);
+        }
+       
+        if (!boost::filesystem::exists(g->get_path_for_name(object.get_location()))) {
+          /* TODO Signal error with exception */
+          std::cerr << "Critical error, output file with name: " << object.get_location() << " does not exist!" << std::endl;
         }
       }
 
@@ -700,7 +675,7 @@ namespace squadt {
         g->add(interface_object.lock());
       }
     }
-    /* TODO Adjust status for outputs that are not produced using the new configuration */
+    /* TODO Adjust status for outputs that are not produced with a changed configuration */
   }
 
   /*
@@ -746,7 +721,7 @@ namespace squadt {
     if (g.get()) {
       selected_input_combination = const_cast < tool::input_combination* > (ic);
 
-      sip::configuration::sptr c(sip::controller::communicator::new_configuration(*selected_input_combination));
+      boost::shared_ptr < sip::configuration > c(sip::controller::communicator::new_configuration(*selected_input_combination));
 
       c->set_output_prefix(str(format("%s%04X") % (basename(find_initial_object()->location)) % g->get_unique_count()));
 
@@ -788,10 +763,10 @@ namespace squadt {
   inline void processor_impl::reconfigure(interface_ptr const& t, std::string const& w) {
     assert(selected_input_combination != 0);
 
-    sip::configuration::sptr c(sip::controller::communicator::new_configuration(*selected_input_combination));
+    boost::shared_ptr < sip::configuration > c(sip::controller::communicator::new_configuration(*selected_input_combination));
 
     c->set_output_prefix(current_monitor->get_configuration()->get_output_prefix());
-    c->add_object(current_monitor->get_configuration()->get_object(selected_input_combination->m_identifier));
+    c->add_input(selected_input_combination->m_identifier, current_monitor->get_configuration()->get_input(selected_input_combination->m_identifier));
 
     current_monitor->set_configuration(c);
 

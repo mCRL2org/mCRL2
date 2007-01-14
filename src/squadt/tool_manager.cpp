@@ -40,7 +40,7 @@ namespace squadt {
 
   const long tool_manager_impl::default_tcp_port = 10947;
 
-  const sip::tool::capabilities::sptr tool::no_capabilities(new sip::tool::capabilities());
+  const boost::shared_ptr < sip::tool::capabilities > tool::no_capabilities(new sip::tool::capabilities());
 
   char const* tool_manager_impl::default_tools[] = {"lpebinary", "lpeconstelm", "lpedecluster", "lpeinfo", "lpeparelm", "lpeuntime", "lpe2lts",                                                     "lpesumelm", "ltsconvert", "ltsinfo", "ltsgraph", "ltsview", "mcrl22lpe", "pnml2mcrl2", "xsim", 0};
 

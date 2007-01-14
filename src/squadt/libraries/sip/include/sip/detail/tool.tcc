@@ -5,6 +5,7 @@
 #include <sip/tool.h>
 #include <sip/tool/capabilities.h>
 #include <sip/layout_base.h>
+#include <sip/visitors.h>
 #include <sip/detail/message.h>
 #include <sip/detail/command_line_interface.h>
 
@@ -24,7 +25,7 @@ namespace sip {
         tool::capabilities                             current_tool_capabilities;
  
         /** \brief This object reflects the current configuration */
-        configuration::sptr                            current_configuration;
+        boost::shared_ptr < configuration >            current_configuration;
  
         /** \brief Unique identifier for the running tool, obtained via the command line */
         long                                           instance_identifier;
@@ -131,7 +132,7 @@ namespace sip {
 
     /* Send a specification of the tools capabilities */
     inline void communicator_impl::request_tool_capabilities_handler() {
-      sip::message m(current_tool_capabilities.write(), sip::message_response_tool_capabilities);
+      sip::message m(sip::visitors::store(current_tool_capabilities), sip::message_response_tool_capabilities);
  
       send_message(m);
     }
@@ -143,7 +144,7 @@ namespace sip {
     inline void communicator_impl::receive_display_data_handler(const sip::messenger::message_ptr& m, layout::tool_display::sptr d) {
       std::vector < sip::layout::element const* > elements;
       
-      xml2pp::text_reader reader(m->to_string().c_str());
+      xml2pp::text_reader reader(m->to_string());
 
       d->update(reader, elements);
     }
@@ -155,7 +156,11 @@ namespace sip {
       assert(m->get_type() == sip::message_offer_configuration);
 
       if (m.get() != 0) {
-        current_configuration = sip::configuration::read(m->to_string());
+        boost::shared_ptr < configuration > c(new configuration);
+
+        sip::visitors::restore(*c, m->to_string());
+
+        current_configuration = c;
       }
     }
   } 

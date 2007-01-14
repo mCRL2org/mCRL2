@@ -10,6 +10,22 @@
 /* Interface classes for both the tool and the controller side */
 namespace sip {
 
+  class visitors;
+  class report;
+  class configuration;
+  class store_visitor;
+  class store_visitor_impl;
+  class restore_visitor;
+  class restore_visitor_impl;
+
+  namespace controller {
+    class communicator_impl;
+  }
+
+  namespace tool {
+    class communicator_impl;
+  }
+
   /** Helper function to invoke the as_string method a type T */
   template < typename T > std::string as_string(T const& t) {
     return (as_string(t));

@@ -39,7 +39,7 @@ namespace sip {
         void send_accept_configuration(sip::configuration&);
  
         /** \brief Set the current tool configuration object */
-        inline void set_configuration(configuration::sptr);
+        inline void set_configuration(boost::shared_ptr < configuration >);
 
       protected:
  

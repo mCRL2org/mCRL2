@@ -67,15 +67,12 @@ int do_decluster(const tool_options& options);
 class squadt_interactor: public squadt_tool_interface
 {
   private:
-    enum input_files {
-      lpd_file_for_input, ///< file containing an lpd that can be imported
-      lpd_file_for_output ///< file used to write output to
-    };
 
-    enum further_options {
-      option_finite_only,
-      option_rewrite_strategy
-    };
+    static const char*  lpd_file_for_input;  ///< file containing an LPE that can be imported
+    static const char*  lpd_file_for_output; ///< file used to write the output to
+
+    static const char*  option_finite_only;
+    static const char*  option_rewrite_strategy;
 
   private:
     boost::shared_ptr < sip::datatype::enumeration > rewrite_strategy_enumeration;
@@ -98,8 +95,14 @@ class squadt_interactor: public squadt_tool_interface
     bool perform_task(sip::configuration&);
 };
 
+const char* squadt_interactor::lpd_file_for_input  = "lpd_in";
+const char* squadt_interactor::lpd_file_for_output = "lpd_out";
+
+const char* squadt_interactor::option_finite_only      = "finite_only";
+const char* squadt_interactor::option_rewrite_strategy = "rewrite_strategy";
+
 squadt_interactor::squadt_interactor() {
-  rewrite_strategy_enumeration = sip::datatype::enumeration::create("inner");
+  rewrite_strategy_enumeration.reset(new sip::datatype::enumeration("inner"));
   *rewrite_strategy_enumeration % "innerc" % "jitty" % "jittyc";
 }
 
@@ -155,9 +158,9 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& confi
 bool squadt_interactor::check_configuration(sip::configuration const& configuration) const
 {
   bool result = true;
-  result |= configuration.object_exists(lpd_file_for_input);
-  result |= configuration.object_exists(lpd_file_for_output);
-  result |= configuration.object_exists(option_rewrite_strategy);
+  result |= configuration.input_exists(lpd_file_for_input);
+  result |= configuration.output_exists(lpd_file_for_output);
+  result |= configuration.option_exists(option_rewrite_strategy);
 
   return result;
 }
@@ -172,10 +175,10 @@ bool squadt_interactor::perform_task(sip::configuration& configuration)
   bool result = true;
   
   tool_options options;
-  options.input_file = configuration.get_object(lpd_file_for_input)->get_location();
-  options.output_file = configuration.get_object(lpd_file_for_output)->get_location();
-  options.finite_only = configuration.object_exists(option_finite_only);
-  options.strategy = static_cast < RewriteStrategy > (boost::any_cast < size_t > (configuration.get_option_value(option_rewrite_strategy)));
+  options.input_file = configuration.get_input(lpd_file_for_input).get_location();
+  options.output_file = configuration.get_output(lpd_file_for_output).get_location();
+  options.finite_only = configuration.option_exists(option_finite_only);
+  options.strategy = static_cast < RewriteStrategy > (boost::any_cast < size_t > (configuration.get_option_argument(option_rewrite_strategy, 0)));
 
   layout::manager::aptr top(layout::vertical_box::create());
   

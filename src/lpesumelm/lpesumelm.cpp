@@ -53,16 +53,15 @@ typedef struct{
 }tool_options;
   
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-//Forward declaration because do_sumelm() is called within squadt_lpesumelm class
+//Forward declaration because do_sumelm() is called within squadt_interactor class
 int do_sumelm(const tool_options& options);
 
-class squadt_lpesumelm: public squadt_tool_interface
+class squadt_interactor: public squadt_tool_interface
 {
   private:
-    enum input_files {
-      lpd_file_for_input, ///< file containing an lpd that can be imported
-      lpd_file_for_output ///< file used to write output to
-    };
+
+    static const char*  lpd_file_for_input;  ///< file containing an LPD that can be imported
+    static const char*  lpd_file_for_output; ///< file used to write the output to
 
   public:
     /** \brief configures tool capabilities */
@@ -78,34 +77,37 @@ class squadt_lpesumelm: public squadt_tool_interface
     bool perform_task(sip::configuration&);
 };
 
-void squadt_lpesumelm::set_capabilities(sip::tool::capabilities& capabilities) const
+const char* squadt_interactor::lpd_file_for_input  = "lpd_in";
+const char* squadt_interactor::lpd_file_for_output = "lpd_out";
+
+void squadt_interactor::set_capabilities(sip::tool::capabilities& capabilities) const
 {
   // The tool has only one main input combination
-  gsDebugMsg("squadt_lpesumelm: Setting capabilities\n");
+  gsDebugMsg("squadt_interactor: Setting capabilities\n");
   capabilities.add_input_combination(lpd_file_for_input, sip::mime_type("lpe"), sip::tool::category::transformation);
 }
 
-void squadt_lpesumelm::user_interactive_configuration(sip::configuration& configuration)
+void squadt_interactor::user_interactive_configuration(sip::configuration& configuration)
 {
-  gsDebugMsg("squadt_lpesumelm: User interactive configuration\n");
+  gsDebugMsg("squadt_interactor: User interactive configuration\n");
   configuration.add_output(lpd_file_for_output, sip::mime_type("lpe"), configuration.get_output_name(".lpe"));
 }
 
-bool squadt_lpesumelm::check_configuration(sip::configuration const& configuration) const
+bool squadt_interactor::check_configuration(sip::configuration const& configuration) const
 {
-  gsDebugMsg("squadt_lpesumelm: Checking configuration\n");
+  gsDebugMsg("squadt_interactor: Checking configuration\n");
   // Check if everything present
-  return (configuration.object_exists(lpd_file_for_input) &&
-          configuration.object_exists(lpd_file_for_output)
+  return (configuration.input_exists(lpd_file_for_input) &&
+          configuration.output_exists(lpd_file_for_output)
          );
 }
 
-bool squadt_lpesumelm::perform_task(sip::configuration& configuration)
+bool squadt_interactor::perform_task(sip::configuration& configuration)
 {
-  gsDebugMsg("squadt_lpesumelm: Performing task\n");
+  gsDebugMsg("squadt_interactor: Performing task\n");
   tool_options options;
-  options.input_file = configuration.get_object(lpd_file_for_input)->get_location();
-  options.output_file = configuration.get_object(lpd_file_for_output)->get_location();
+  options.input_file = configuration.get_input(lpd_file_for_input).get_location();
+  options.output_file = configuration.get_output(lpd_file_for_output).get_location();
 
   gsDebugMsg("Calling do_sumelm through SQuADT, with input: %s and output: %s\n", options.input_file.c_str(), options.output_file.c_str());
   return (do_sumelm(options)==0);
@@ -454,7 +456,7 @@ int main(int ac, char** av) {
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   gsDebugMsg("Squadt connectivity enabled\n");
-  squadt_lpesumelm sl;
+  squadt_interactor sl;
   if (sl.try_interaction(ac, av)) {
     return 0;
   }
