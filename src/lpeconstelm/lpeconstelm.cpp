@@ -553,7 +553,7 @@ inline void lpeConstElm::printState() {
         if (!p_nosingleton){
           result << pp(p_currentState[*i]);
         } else {
-          result << pp(p_currentState[*i]) << pp(p_currentState[*i].lhs().type());
+          result << pp(p_currentState[*i]) << pp(p_currentState[*i].lhs().sort());
         }  
       }
       result << pp(p_currentState[*(--p_S.end())]) << " ]";
@@ -587,12 +587,12 @@ void lpeConstElm::removeSingleton(int n)
   for(int i = 0; i < n; i++)
   {
     if ( (p_V.find(i) == p_V.end()) &&
-         (p_singletonSort.find(p_initAssignments[i].lhs().type()) != p_singletonSort.end())
+         (p_singletonSort.find(p_initAssignments[i].lhs().sort()) != p_singletonSort.end())
        )
     {
       p_V.insert(i);
       if (p_verbose){
-        gsVerboseMsg("lpeconstelm:   %s : %s\n", pp(p_initAssignments[i].lhs()).c_str(), pp(p_initAssignments[i].lhs().type()).c_str());
+        gsVerboseMsg("lpeconstelm:   %s : %s\n", pp(p_initAssignments[i].lhs()).c_str(), pp(p_initAssignments[i].lhs().sort()).c_str());
         empty = false;
       }
     }

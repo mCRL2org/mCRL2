@@ -31,8 +31,15 @@ using atermpp::arg1;
 using atermpp::arg2;
 using atermpp::arg3;
 
-// prototype
+// prototypes
+class data_expression;
 class data_variable;
+
+///////////////////////////////////////////////////////////////////////////////
+// data_expression_list
+/// \brief singly linked list of data expressions
+///
+typedef term_list<data_expression> data_expression_list;
 
 ///////////////////////////////////////////////////////////////////////////////
 // data_expression
@@ -55,8 +62,6 @@ class data_expression: public aterm_appl
     {
       assert(gsIsNil(term) || gsIsDataVarId(term) || gsIsOpId(term) || gsIsDataAppl(term));
     }
-
-    explicit data_expression(const data_variable& v);
 
     /// Returns the sort of the data expression.
     ///
@@ -93,13 +98,18 @@ class data_expression: public aterm_appl
       return *this == gsMakeDataExprFalse();
     }
 
-    /// Returns the sort of the data_expression.
-    ///
-    lpe::sort type() const
+    /// Returns head of the data expression.
+    data_expression head() const
     {
-      return gsGetSort(*this);
+      return gsGetDataExprHead(*this);
     }
 
+    /// Returns arguments of the data expression.
+    data_expression_list arguments() const
+    {
+      return gsGetDataExprArgs(*this);
+    }  
+  
     /// Applies a substitution to this data_expression and returns the result.
     /// The Substitution object must supply the method aterm operator()(aterm).
     ///
@@ -127,21 +137,16 @@ bool is_data_expression(aterm_appl t)
 /// \brief data variable.
 ///
 // DataVarId(<String>, <SortExpr>)
-class data_variable: public aterm_appl
+class data_variable: public data_expression
 {
   public:
     data_variable()
     {}
 
     data_variable(aterm_appl t)
-     : aterm_appl(t)
+     : data_expression(t)
     {
       assert(gsIsDataVarId(t));
-    }
-
-    operator data_expression() const
-    {
-      return data_expression(m_term);
     }
 
     /// Very incomplete implementation for initialization using strings like "d:D".
@@ -155,7 +160,7 @@ class data_variable: public aterm_appl
     }
 
     data_variable(const std::string& name, const lpe::sort& s)
-     : aterm_appl(gsMakeDataVarId(gsString2ATermAppl(name.c_str()), s))
+     : data_expression(gsMakeDataVarId(gsString2ATermAppl(name.c_str()), s))
     {}
 
     /// Returns the name of the data_variable.
@@ -179,13 +184,6 @@ class data_variable: public aterm_appl
     {
       return gsGetSort(*this);
     }
-
-    /// Returns the sort of the data_variable.
-    ///
-    lpe::sort type() const
-    {
-      return gsGetSort(*this);
-    }
   };
                                                             
 ///////////////////////////////////////////////////////////////////////////////
@@ -200,37 +198,25 @@ bool is_data_variable(aterm_appl t)
   return gsIsDataVarId(t);
 }
 
-inline
-data_expression::data_expression(const data_variable& v)
-  : aterm_appl(aterm_appl(v))
-{
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // data_application
 /// \brief data application.
 ///
 // DataAppl(<DataExpr>, <DataExpr>)
-class data_application: public aterm_appl
+class data_application: public data_expression
 {
   public:
     data_application()
     {}
 
     data_application(aterm_appl t)
-     : aterm_appl(t)
+     : data_expression(t)
     {
       assert(gsIsDataAppl(t));
     }
 
-    operator data_expression() const
-    {
-      return data_expression(m_term);
-    }
-
-// ATermAppl gsMakeDataAppl(ATermAppl DataExpr, ATermAppl DataArg);
-    data_application(data_expression d, data_expression e)
-     : aterm_appl(gsMakeDataAppl(d, e))
+    data_application(data_expression expr, data_expression arg)
+     : data_expression(gsMakeDataAppl(expr, arg))
     {}
   };
                                                             
@@ -244,6 +230,39 @@ inline
 bool is_data_application(aterm_appl t)
 {
   return gsIsDataAppl(t);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// data_operation
+/// \brief operation on data.
+///
+class data_operation: public data_expression
+{
+  public:
+    data_operation()
+    {}
+
+    data_operation(aterm_appl t)
+     : data_expression(t)
+    {
+      assert(gsIsOpId(t));
+    }
+
+    data_operation(aterm_string name, lpe::sort s)
+     : data_expression(gsMakeOpId(name, s))
+    {}
+  };
+                                                            
+///////////////////////////////////////////////////////////////////////////////
+// data_operation_list
+/// \brief singly linked list of data operations
+///
+typedef term_list<data_operation> data_operation_list;
+
+inline
+bool is_data_operation(aterm_appl t)
+{
+  return gsIsOpId(t);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -500,6 +519,8 @@ namespace atermpp
 {
 using lpe::data_expression;
 using lpe::data_variable;
+using lpe::data_application;
+using lpe::data_operation;
 using lpe::data_assignment;
 using lpe::data_variable_init;
 using lpe::data_equation;
@@ -524,6 +545,28 @@ struct aterm_traits<data_variable>
   static void mark(data_variable t)      { t.mark(); }
   static ATerm term(data_variable t)     { return t.term(); }
   static ATerm* ptr(data_variable& t)    { return &t.term(); }
+};
+
+template<>
+struct aterm_traits<data_application>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(data_application t)   { t.protect(); }
+  static void unprotect(data_application t) { t.unprotect(); }
+  static void mark(data_application t)      { t.mark(); }
+  static ATerm term(data_application t)     { return t.term(); }
+  static ATerm* ptr(data_application& t)    { return &t.term(); }
+};
+
+template<>
+struct aterm_traits<data_operation>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(data_operation t)   { t.protect(); }
+  static void unprotect(data_operation t) { t.unprotect(); }
+  static void mark(data_operation t)      { t.mark(); }
+  static ATerm term(data_operation t)     { return t.term(); }
+  static ATerm* ptr(data_operation& t)    { return &t.term(); }
 };
 
 template<>

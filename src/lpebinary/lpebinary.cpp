@@ -346,7 +346,7 @@ data_variable_list replace_enumerated_parameters(const lpe::specification& speci
   for (data_variable_list::iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
   {
     data_variable par = *i;
-    if (!is_bool(par) && is_finite(specification.data().constructors(), par.type()))
+    if (!is_bool(par) && is_finite(specification.data().constructors(), par.sort()))
     {
       //Get all constructors for par
       aterm_list pl;

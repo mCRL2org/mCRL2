@@ -65,6 +65,23 @@ namespace detail {
   }
 
   inline
+  std::pair<pbes, specification> lpe2pbes_and_spec(const std::string& spec_text, const std::string& formula_text, bool untimed)
+  {
+    pbes result;
+    specification spec = lpe::detail::mcrl22lpe(spec_text);
+    std::stringstream from;
+    from << formula_text;
+
+    ATermAppl formula = parse_state_formula(from);
+    formula = type_check(formula, spec);
+    formula = implement_data(formula, spec);
+    formula = translate_formula(formula);
+    result = lpe::pbes_translate(state_formula(formula), spec, untimed);
+
+    return std::make_pair(result, spec);
+  }
+
+  inline
   pbes lpe2pbes(const std::string& spec_text, const std::string& formula_text, bool untimed)
   {
     pbes result;
