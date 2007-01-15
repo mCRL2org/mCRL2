@@ -202,23 +202,19 @@ namespace sip {
 
     template < class M >
     basic_messenger_impl< M >::~basic_messenger_impl() {
-      boost::recursive_mutex::scoped_lock w(waiter_lock);
-      boost::mutex::scoped_lock           ww(delivery_lock);
-
-      transporter::disconnect();
-
-      // Unblock all waiters;
-      BOOST_FOREACH(typename waiter_map::value_type w, waiters) {
-        w.second->wake();
-      }
+      disconnect();
     }
 
     template < class M >
     inline void basic_messenger_impl< M >::disconnect() {
 
+      boost::recursive_mutex::scoped_lock w(waiter_lock);
+      boost::mutex::scoped_lock           ww(delivery_lock);
+
       transporter::disconnect();
 
       task_queue.clear();
+      message_queue.clear();
 
       // Unblock all waiters;
       BOOST_FOREACH(typename waiter_map::value_type w, waiters) {

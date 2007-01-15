@@ -763,12 +763,7 @@ namespace squadt {
   inline void processor_impl::reconfigure(interface_ptr const& t, std::string const& w) {
     assert(selected_input_combination != 0);
 
-    boost::shared_ptr < sip::configuration > c(sip::controller::communicator::new_configuration(*selected_input_combination));
-
-    c->set_output_prefix(current_monitor->get_configuration()->get_output_prefix());
-    c->add_input(selected_input_combination->m_identifier, current_monitor->get_configuration()->get_input(selected_input_combination->m_identifier));
-
-    current_monitor->set_configuration(c);
+    current_monitor->get_configuration()->set_fresh();
 
     configure(t, w);
   }

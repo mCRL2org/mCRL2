@@ -155,6 +155,9 @@ namespace sip {
       /** \brief Get the state of the configuration */
       bool is_fresh() const;
 
+      /** \brief Marks configuration as fresh */
+      void set_fresh();
+
       /** \brief Whether or not a parameter is an option */
       bool is_option(parameter const&) const;
 
@@ -296,6 +299,10 @@ namespace sip {
 
   inline bool configuration::is_fresh() const {
     return (m_fresh);
+  }
+
+  inline void configuration::set_fresh() {
+    m_fresh = true;
   }
 
   /** \param[in] p the parameter to check */
