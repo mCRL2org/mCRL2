@@ -114,9 +114,9 @@ int tree_set_store::find_set(int child_l,int child_r) {
 
 int tree_set_store::create_set(vector<unsigned int> &elems) {
 	if (elems.size() == 0) {
-    return EMPTY_SET;
-  }
-	int nodes[elems.size()];
+		return EMPTY_SET;
+	}
+	DECL_A(nodes,int,elems.size());
 	unsigned int node_size = 0;
 	unsigned int i,j;
 	for (i=0; i < elems.size(); ++i) {
@@ -136,7 +136,9 @@ int tree_set_store::create_set(vector<unsigned int> &elems) {
 		}
 		node_size = j;
 	}
-	return nodes[0];
+	unsigned int r = nodes[0];
+	FREE_A(nodes);
+	return r;
 }
 
 unsigned int tree_set_store::get_next_tag() {
