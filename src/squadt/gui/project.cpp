@@ -471,6 +471,7 @@ namespace squadt {
      * \param[in] tp the processor of which to read objects
      **/
     void project::process_configuration(wxTreeItemId s, processor::sptr tp) {
+
       if (0 < tp->number_of_outputs()) {
         /* Add the processor to the project */
         if (add_outputs_as_objects(s, tp)) {

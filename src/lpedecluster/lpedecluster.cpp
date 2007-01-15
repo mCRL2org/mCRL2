@@ -535,6 +535,7 @@ int main(int ac, char** av) {
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   squadt_interactor si;
+
   if (si.try_interaction(ac, av)) {
     return 0;
   }

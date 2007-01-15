@@ -301,7 +301,6 @@ namespace squadt {
 
         logger->log(1, boost::str(boost::format("termination request sent to %s pid(%u)\n")
                   % associated_process->get_executable_name() % associated_process->get_identifier()));
-
         await_message(sip::message_signal_termination, 1);
 
         sip::controller::communicator_impl::disconnect();
@@ -318,12 +317,12 @@ namespace squadt {
 
           boost::xtime timeout;
           boost::xtime_get(&timeout, boost::TIME_UTC);
-          timeout.nsec += 500000000;
+          timeout.sec += 1;
 
           boost::thread::sleep(timeout);
         }
       }
-      else if (associated_process.get() != 0) {
+      if (associated_process.get() != 0) {
         std::string log_message(boost::str(
                 boost::format("process terminated (tool %s pid(%u))\n") %
                         associated_process->get_executable_name() %

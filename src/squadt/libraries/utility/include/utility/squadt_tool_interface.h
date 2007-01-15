@@ -161,10 +161,10 @@ inline bool squadt_tool_interface::try_run() {
 
     finalise();
 
+    m_communicator.send_signal_termination();
+
     /* Unregister message relay */
     squadt_utility::finalise();
-
-    m_communicator.send_signal_termination();
 
     active = false;
 

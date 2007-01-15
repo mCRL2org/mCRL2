@@ -226,7 +226,8 @@ namespace transport {
         d.copy(buffer.get(), d.size(), 0);
 
         boost::asio::async_write(socket, boost::asio::buffer(buffer.get(), d.size()), 
-                      boost::bind(&socket_transceiver::handle_write, this, w, buffer, _1));
+               boost::asio::transfer_all(),
+               boost::bind(&socket_transceiver::handle_write, this, w, buffer, _1));
       }
     }
 
@@ -257,7 +258,8 @@ namespace transport {
         s.str().copy(buffer.get(), s.str().size(), 0);
 
         async_write(socket, asio::buffer(buffer.get(), s.str().size()), 
-                      bind(&socket_transceiver::handle_write, this, w, buffer, _1));
+               boost::asio::transfer_all(),
+               bind(&socket_transceiver::handle_write, this, w, buffer, _1));
       }
     }
   }
