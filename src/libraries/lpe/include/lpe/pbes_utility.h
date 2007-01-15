@@ -33,9 +33,10 @@ std::set<propositional_variable_instantiation> find_propositional_variable_insta
 }
 
 inline
-data_specification implement_data_specification(const data_specification& spec)
+specification implement_data_specification(const specification& spec)
 {
-  return data_specification(implement_data_spec(spec));
+  specification result(implement_data_spec(spec));
+  return result;
 }
 
 /// Fresh variable generator that generates propositional variables with
@@ -144,7 +145,7 @@ class fresh_propositional_variable_generator
 
 /// Converts a pbes expression to a data expression.
 inline
-data_expression pbes2data(pbes_expression p, data_specification spec)
+data_expression pbes2data(const pbes_expression& p, const specification& spec)
 {
   using namespace pbes_init;
   namespace d = lpe::data_init;
@@ -164,8 +165,9 @@ data_expression pbes2data(pbes_expression p, data_specification spec)
       data_expression d1 = gsMakeForall(list_arg1(p), pbes2data(arg2(p), implement_data_specification(spec)));
       return d1;
   } else if (is_exists(p)) {
-      data_specification s1 = implement_data_spec(spec);
-      data_expression d1 = pbes2data(arg2(p), s1);
+      data_expression d1 = pbes2data(arg2(p), implement_data_specification(spec));
+aterm x = gsMakeExists(list_arg1(p), d1);
+std::cout << "x = " << x << std::endl;
       data_expression d2 = gsMakeExists(list_arg1(p), d1);
       return d2;
   } else if (is_propositional_variable_instantiation(p)) {
@@ -173,7 +175,7 @@ data_expression pbes2data(pbes_expression p, data_specification spec)
     data_expression_list parameters = list_arg2(p);
     sort_list sorts = apply(parameters, gsGetSort);
     lpe::sort vsort = gsMakeSortArrowList(sorts, s::bool_());
-    data_variable v = gsMakeDataVarId(vname, vsort);
+    data_variable v(gsMakeDataVarId(vname, vsort));
     return gsMakeDataApplList(v, parameters);
   }
   throw std::runtime_error(std::string("pbes2data error: unknown pbes_variable_instantiation ") + p.to_string());

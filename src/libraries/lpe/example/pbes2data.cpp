@@ -1,7 +1,6 @@
 #include <iostream>
 #include <iterator>
 #include <utility>
-#include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include "lpe/pbes.h"
 #include "lpe/pbes_utility.h"
@@ -26,7 +25,7 @@ const std::string SPECIFICATION =
 
 const std::string FORMULA = "nu X(n:Nat = 1). [forall m:Nat. a(m)](val(n < 10)  && X(n+2))";
 
-int test_main(int argc, char* argv[])
+int main()
 {
   aterm bottom_of_stack;
   aterm_init(bottom_of_stack);
