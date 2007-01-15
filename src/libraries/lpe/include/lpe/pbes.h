@@ -164,6 +164,12 @@ class propositional_variable: public aterm_appl
     }
 };
 
+///////////////////////////////////////////////////////////////////////////////
+// propositional_variable_list
+/// \brief singly linked list of propositional variables
+///
+typedef term_list<propositional_variable> propositional_variable_list;
+
 inline
 bool is_propositional_variable(aterm_appl t)
 {
@@ -226,6 +232,12 @@ class propositional_variable_instantiation: public aterm_appl
       return m_expressions;
     }
 };
+
+///////////////////////////////////////////////////////////////////////////////
+// propositional_variable_instantiation_list
+/// \brief singly linked list of propositional variables instantiations
+///
+typedef term_list<propositional_variable_instantiation> propositional_variable_instantiation_list;
 
 inline
 bool is_propositional_variable_instantiation(aterm_appl t)
