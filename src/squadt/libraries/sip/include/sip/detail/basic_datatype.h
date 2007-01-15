@@ -8,6 +8,7 @@
 #include <ostream>
 #include <utility>
 #include <iostream>
+#include <typeinfo>
 
 #include <boost/any.hpp>
 #include <boost/lexical_cast.hpp>
@@ -324,7 +325,7 @@ namespace sip {
     };
 
     /** \brief Derived data type for strings */
-    class string : public basic_datatype_impl< boolean > {
+    class string : public basic_datatype_impl< datatype::string > {
       friend class sip::store_visitor_impl;
       friend class sip::restore_visitor_impl;
 

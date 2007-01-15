@@ -199,12 +199,21 @@ namespace sip {
   void restore_visitor_impl::visit(boost::tuple < sip::datatype::boolean&, std::string& >& o) {
     assert(in.is_element("boolean"));
 
-    o.get< 1 >() = in.get_attribute("value");
+    o.get< 1 >() = in.get_attribute_as_string("value");
+
+    if (o.get< 1 >() != sip::datatype::boolean::true_string) {
+      o.get< 1 >() = sip::datatype::boolean::false_string;
+    }
 
     in.next_element();
     in.skip_end_element("boolean");
 
     assert(o.get< 0 >().validate(o.get< 1 >()));
+
+    /* Set to default if value is invalid */
+    if (!(o.get< 0 >().validate(o.get< 1 >()))) {
+      o.get< 1 >() = sip::datatype::boolean::false_string;
+    }
   }
 
   template <>
@@ -230,6 +239,11 @@ namespace sip {
     in.skip_end_element("integer");
 
     assert(o.get< 0 >().validate(o.get< 1 >()));
+
+    /* Set to default if value is invalid */
+    if (!(o.get< 0 >().validate(o.get< 1 >()))) {
+      o.get< 1 >() = "0";
+    }
   }
 
   template <>
@@ -255,6 +269,11 @@ namespace sip {
     in.skip_end_element("real");
 
     assert(o.get< 0 >().validate(o.get< 1 >()));
+
+    /* Set to default if value is invalid */
+    if (!(o.get< 0 >().validate(o.get< 1 >()))) {
+      o.get< 1 >() = "0";
+    }
   }
 
   template <>

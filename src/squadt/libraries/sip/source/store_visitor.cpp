@@ -195,7 +195,7 @@ namespace sip {
   }
 
   template <>
-  void store_visitor_impl::visit(boost::tuple < datatype::boolean const&, std::string const& > const& o) {
+  void store_visitor_impl::visit(boost::tuple < sip::datatype::boolean const&, std::string const& > const& o) {
     out << "<boolean";
     
     if (o.get< 1 >().compare(sip::datatype::boolean::true_string) == 0) {
@@ -206,7 +206,7 @@ namespace sip {
   }
 
   template <>
-  void store_visitor_impl::visit(boost::tuple < datatype::integer const&, std::string const& > const& o) {
+  void store_visitor_impl::visit(boost::tuple < sip::datatype::integer const&, std::string const& > const& o) {
     out << "<integer";
 
     if (!o.get< 1 >().empty()) {
@@ -217,7 +217,7 @@ namespace sip {
       out << " minimum=\"" << o.get< 0 >().m_minimum << "\"";
     }
       
-    if (o.get< 0 >().m_maximum != datatype::integer::implementation_maximum) {
+    if (o.get< 0 >().m_maximum != sip::datatype::integer::implementation_maximum) {
       out << " maximum=\"" << o.get< 0 >().m_maximum << "\"";
     }
 
@@ -229,7 +229,7 @@ namespace sip {
   }
 
   template <>
-  void store_visitor_impl::visit(boost::tuple < datatype::real const&, std::string const& > const& o) {
+  void store_visitor_impl::visit(boost::tuple < sip::datatype::real const&, std::string const& > const& o) {
     out << "<real";
 
     if (!o.get< 1 >().empty()) {
@@ -252,7 +252,7 @@ namespace sip {
   }
 
   template <>
-  void store_visitor_impl::visit(boost::tuple < datatype::enumeration const&, std::string const& > const& o) {
+  void store_visitor_impl::visit(boost::tuple < sip::datatype::enumeration const&, std::string const& > const& o) {
     out << "<enumeration value=\"" << o.get< 1 >();
 
     if (o.get< 0 >().m_default_value != 0) {
@@ -269,7 +269,7 @@ namespace sip {
   }
 
   template <>
-  void store_visitor_impl::visit(boost::tuple < datatype::string const&, std::string const& > const& o) {
+  void store_visitor_impl::visit(boost::tuple < sip::datatype::string const&, std::string const& > const& o) {
     assert(!boost::regex_search(o.get< 1 >(), boost::regex("]]>")));
 
     out << "<string";
