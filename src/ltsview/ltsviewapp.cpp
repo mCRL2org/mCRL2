@@ -103,6 +103,7 @@ bool LTSViewApp::OnInit() {
   glCanvas->initialize();
   mainFrame->setVisSettings(visualizer->getVisSettings());
   mainFrame->setBackgroundColor(glCanvas->getBackgroundColor());
+  mainFrame->Layout();
 
   wxInitAllImageHandlers();
 

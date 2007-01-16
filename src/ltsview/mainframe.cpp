@@ -179,11 +179,11 @@ void MainFrame::setupRightPanel(wxPanel* panel) {
       wxID_ANY);
   wxScrolledWindow* markPanel = new wxScrolledWindow(bottomNotebook,wxID_ANY);
   
+  settingsPanel->SetScrollRate(0,5);
+  markPanel->SetScrollRate(0,5);
+  
   setupSettingsPanel(settingsPanel);
   setupMarkPanel(markPanel);
-  
-  settingsPanel->SetScrollRate(10,10);
-  markPanel->SetScrollRate(10,10);
   
   bottomNotebook->AddPage(settingsPanel, wxT("Settings"), true);
   bottomNotebook->AddPage(markPanel, wxT("Mark"), false);
@@ -192,6 +192,7 @@ void MainFrame::setupRightPanel(wxPanel* panel) {
   sizer->Add(bottomNotebook, 0, wxEXPAND | wxALL, 5);
   sizer->Fit(panel);
   panel->SetSizer(sizer);
+  panel->Fit();
   panel->Layout();
 }
 
@@ -356,6 +357,7 @@ void MainFrame::setupSettingsPanel(wxPanel* panel) {
       lflags,border);
   panelSizer->Fit(panel);
   panel->SetSizer(panelSizer);
+  panel->Fit();
   panel->Layout();
 }
 
@@ -393,8 +395,9 @@ void MainFrame::setupMarkPanel(wxPanel* panel) {
   markStatesSizer->Add(markAnyAllChoice,0,flags,border);
   
   markStatesListBox = new wxCheckListBox(panel,myID_MARK_RULES,
-      wxDefaultPosition,wxDefaultSize,0,NULL,
+      wxDefaultPosition,wxSize(200,100),0,NULL,
       wxLB_SINGLE|wxLB_NEEDED_SB|wxLB_HSCROLL);
+  //markStatesListBox->SetMinSize(wxSize(200,-1));
   markStatesSizer->Add(markStatesListBox,1,flags|wxEXPAND,border);
   wxBoxSizer* addremoveSizer = new wxBoxSizer(wxHORIZONTAL);
   addremoveSizer->Add(new wxButton(panel,myID_ADD_RULE,wxT("Add")),0,flags,
@@ -406,14 +409,16 @@ void MainFrame::setupMarkPanel(wxPanel* panel) {
   wxStaticBoxSizer* markTransitionsSizer = new wxStaticBoxSizer(wxVERTICAL,
       panel,wxT("Mark transitions"));
   markTransitionsListBox = new wxCheckListBox(panel,myID_MARK_TRANSITIONS,
-      wxDefaultPosition,wxDefaultSize,0,NULL,wxLB_SINGLE|wxLB_SORT|
+      wxDefaultPosition,wxSize(200,-1),0,NULL,wxLB_SINGLE|wxLB_SORT|
       wxLB_NEEDED_SB|wxLB_HSCROLL);
+  markTransitionsListBox->SetMinSize(wxSize(200,-1));
   markTransitionsSizer->Add(markTransitionsListBox,1,flags|wxEXPAND,border);
   
   markSizer->Add(markStatesSizer,0,wxEXPAND|wxALL,border);
   markSizer->Add(markTransitionsSizer,0,wxEXPAND|wxALL,border);
   markSizer->Fit(panel);
   panel->SetSizer(markSizer);
+  panel->Fit();
   panel->Layout();
 }
 
@@ -557,8 +562,9 @@ void MainFrame::onRemoveMarkRuleButton(wxCommandEvent& /*event*/) {
     markStatesListBox->Delete(sel_index);
     mediator->removeMarkRule(sel_index);
     markStatesRadio->SetValue(true);
+    markStatesListBox->GetParent()->Fit();
+    Layout();
   }
-  Layout();
 }
 
 void MainFrame::onMarkTransition(wxCommandEvent& event) {
@@ -664,6 +670,7 @@ void MainFrame::setNumberInfo(int ns,int nt,int nc,int nr) {
   numberOfTransitionsLabel->SetLabel(wxString::Format(wxT("%d"), nt));
   numberOfClustersLabel->SetLabel(wxString::Format(wxT("%d"), nc));
   numberOfRanksLabel->SetLabel(wxString::Format(wxT("%d"), nr));
+  numberOfRanksLabel->GetParent()->Fit();
   Layout();
 }
 
@@ -681,6 +688,7 @@ void MainFrame::addMarkRule(wxString str) {
   markStatesListBox->Append(str);
   markStatesListBox->Check(markStatesListBox->GetCount()-1,true);
   markStatesRadio->SetValue(true);
+  markStatesListBox->GetParent()->Fit();
   Layout();
 }
 
@@ -695,6 +703,7 @@ void MainFrame::resetMarkRules() {
   markStatesListBox->Clear();
   markAnyAllChoice->SetSelection(0);
   nomarksRadio->SetValue(true);
+  markStatesListBox->GetParent()->Fit();
   Layout();
 }
 
@@ -706,6 +715,7 @@ void MainFrame::setActionLabels(vector< ATerm > &labels) {
   }
   strLabels.Sort();
   markTransitionsListBox->Set(strLabels);
+  markTransitionsListBox->GetParent()->Fit();
   Layout();
 }
 
