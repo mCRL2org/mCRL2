@@ -67,7 +67,6 @@ class lpeConstElm {
     std::set< lpe::data_expression >      p_variableList; 
     int                                   p_newVarCounter;
     bool                                  p_verbose;
-    bool                                  p_debug;
     bool                                  p_nosingleton;
     bool                                  p_alltrue;
     bool                                  p_reachable; 
@@ -354,8 +353,8 @@ inline bool lpeConstElm::compare(data_expression x, data_expression y) {
 inline bool lpeConstElm::conditionTest(data_expression x) {
   if (p_alltrue){return true;};
   //----------          Debug  
-  gsDebugMsg("\033[33m %s\n", pp(x).c_str());
-  gsDebugMsg("\033[30m %s\033[0m\n", pp(data_expression(rewrite(data_expression(p_substitute(x, p_currentState))))).c_str());
+  //gsDebugMsg("\033[33m %s\n", pp(x).c_str());
+  //gsDebugMsg("\033[30m %s\033[0m\n", pp(data_expression(rewrite(data_expression(p_substitute(x, p_currentState))))).c_str());
   //----------          Debug
   return (!(data_expression(rewrite(data_expression(p_substitute(x, p_currentState)))).is_false()));
 }
@@ -375,8 +374,8 @@ inline bool lpeConstElm::cmpCurrToNext() {
           if (p_variableList.find(p_nextState.at(index).rhs()) != p_variableList.end()){
             p_V.insert(p_lookupIndex[i->lhs()]); 
             //----------          Debug
-            gsDebugMsg("\033[34m OLD:    %s\n", pp(*i).c_str());
-            gsDebugMsg("\033[32m NEW:    %s\033[0m\n", pp(p_nextState.at(index)).c_str());
+            //gsDebugMsg("\033[34m OLD:    %s\n", pp(*i).c_str());
+            //gsDebugMsg("\033[32m NEW:    %s\033[0m\n", pp(p_nextState.at(index)).c_str());
             //----------          Debug
           }
         }
@@ -384,8 +383,8 @@ inline bool lpeConstElm::cmpCurrToNext() {
         if (!inFreeVarList( p_nextState.at(index).rhs() )){
            if (!compare(i->rhs(), p_nextState.at(index).rhs())){
               //----------          Debug
-              gsDebugMsg("\033[34m OLD:    %s\n", pp(*i).c_str());
-              gsDebugMsg("\033[32m NEW:    %s\033[0m\n", pp(p_nextState.at(index)).c_str());
+              //gsDebugMsg("\033[34m OLD:    %s\n", pp(*i).c_str());
+              //gsDebugMsg("\033[32m NEW:    %s\033[0m\n", pp(p_nextState.at(index)).c_str());
               //----------          Debug
               p_newCurrentState.at(index) = newExpression(*i) ;
       	p_currentState.at(index) = p_currentState.at(index);
@@ -513,64 +512,55 @@ void lpeConstElm::findSingleton() {
 //---------------------   Debug begin  --------------------------
 //---------------------------------------------------------------
 inline void lpeConstElm::printNextState() {
+// (JK: 16/1/2006: This function is never called)  
   std::ostringstream result;
-  if (p_verbose)
-  {
-    for(std::vector< lpe::data_assignment >::iterator i = p_nextState.begin(); i != p_nextState.end() ; i++ ){
-      result << "[" << pp(*i) << "]";
-    }
-    gsVerboseMsg("%s\n", result.str().c_str());
+  for(std::vector< lpe::data_assignment >::iterator i = p_nextState.begin(); i != p_nextState.end() ; i++ ){
+    result << "[" << pp(*i) << "]";
   }
+  gsVerboseMsg("%s\n", result.str().c_str());
 }
 
 inline void lpeConstElm::printVar() {
+// (JK: 16/1/2006: This function is never called)  
   std::ostringstream result;
-  if (p_verbose)
-  {
-    result << "lpeconstelm: Variable indices : {";
-    std::set< int >::iterator i = p_V.begin();
-    int j = 0;
-    while(i != p_V.end()){
-      if (*i ==j){
-        result << j+1 << " ";
-        i++;
-      }
-      j++;
+  result << "lpeconstelm: Variable indices : {";
+  std::set< int >::iterator i = p_V.begin();
+  int j = 0;
+  while(i != p_V.end()){
+    if (*i ==j){
+      result << j+1 << " ";
+      i++;
     }
-    result << "}";
-    gsVerboseMsg("%s\n", result.str().c_str());
+    j++;
   }
+  result << "}";
+  gsVerboseMsg("%s\n", result.str().c_str());
 }
 
 inline void lpeConstElm::printState() {
   std::ostringstream result;
-  if (p_verbose)
+  if ( p_S.size() > 0 )
   {
-    if ( p_S.size() > 0 )
-    {
-      result << "lpeconstelm:   [ ";
-      for(std::set< int >::iterator i = p_S.begin(); i != (--p_S.end()) ; i++ ){
-        if (!p_nosingleton){
-          result << pp(p_currentState[*i]);
-        } else {
-          result << pp(p_currentState[*i]) << pp(p_currentState[*i].lhs().sort());
-        }  
-      }
-      result << pp(p_currentState[*(--p_S.end())]) << " ]";
+    result << "lpeconstelm:   [ ";
+    for(std::set< int >::iterator i = p_S.begin(); i != (--p_S.end()) ; i++ ){
+      if (!p_nosingleton){
+        result << pp(p_currentState[*i]);
+      } else {
+        result << pp(p_currentState[*i]) << pp(p_currentState[*i].lhs().sort());
+      }  
     }
-    gsVerboseMsg("%s\n", result.str().c_str());
+    result << pp(p_currentState[*(--p_S.end())]) << " ]";
   }
+  gsVerboseMsg("%s\n", result.str().c_str());
 }
 
 inline void lpeConstElm::printCurrentState() {
+// (JK: 16/1/2006: This function is never called)  
   std::ostringstream result;
-  if (p_verbose)
-  {
-    for(std::vector< lpe::data_assignment >::iterator i = p_currentState.begin(); i != p_currentState.end() ; i++ ){
-      result << "[" << pp(*i) << "]";
-    }
-    gsVerboseMsg("%s\n", result.str().c_str());
+  for(std::vector< lpe::data_assignment >::iterator i = p_currentState.begin(); i != p_currentState.end() ; i++ ){
+    result << "[" << pp(*i) << "]";
   }
+  gsVerboseMsg("%s\n", result.str().c_str());
 }
 //---------------------------------------------------------------
 //---------------------   Debug end  --------------------------
@@ -770,21 +760,18 @@ inline void lpeConstElm::setSaveFile(std::string const& x) {
 //  
 inline void lpeConstElm::printSet() {
   std::ostringstream result;
-  if (p_verbose)
-  {
-    result << "lpeconstelm: Constant indices: { ";
-    std::set< int >::iterator i = p_S.begin();
-    int j = 0;
-    while(i != p_S.end()){
-      if (*i ==j){
-        result << j+1;
-        i++;
-      }
-      j++;
+  result << "lpeconstelm: Constant indices: { ";
+  std::set< int >::iterator i = p_S.begin();
+  int j = 0;
+  while(i != p_S.end()){
+    if (*i ==j){
+      result << j+1;
+      i++;
     }
-    result << " }";
-    gsVerboseMsg("%s\n", result.str().c_str());
+    j++;
   }
+  result << " }";
+  gsVerboseMsg("%s\n", result.str().c_str());
 }
 
 // Loads an LPD from file
@@ -833,7 +820,10 @@ void lpeConstElm::writeStream(lpe::specification newSpec) {
 // Note: Has to be set
 //
 inline void lpeConstElm::setVerbose(bool b) {
-  gsSetVerboseMsg();
+  if (b)
+  {
+    gsSetVerboseMsg();
+  }
   p_verbose = b;
 }
 
@@ -842,8 +832,10 @@ inline void lpeConstElm::setVerbose(bool b) {
 //
 inline void lpeConstElm::setDebug(bool b) {
   setVerbose(b);
-  gsSetDebugMsg();
-  p_debug = b;
+  if (b)
+  {
+    gsSetDebugMsg();
+  }
 }
 
 // Sets no singleton option
@@ -945,10 +937,10 @@ void lpeConstElm::filter() {
           //gsDebugMsg(  "Summand: %d\n", summandnr++);
           p_visitedSummands.insert(*currentSummand); 
           //----------          Debug
-          if (p_debug) { printCurrentState(); }
+          // printCurrentState();
           calculateNextState(currentSummand->assignments());
           //----------          Debug  
-          if (p_debug) { printCurrentState(); }
+          // printCurrentState(); 
           same = cmpCurrToNext() && same ; 
           //ischanged = ischanged || !cmpCurrToNext();
           //if (!same) {break;}                                           //Break reduces time to complete; need to find out when to brake
