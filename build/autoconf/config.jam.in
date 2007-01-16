@@ -25,6 +25,8 @@ else {
   OPTIMISATIONS = <optimization>off <inlining>off ;
 }
 
+BUILD_EXTRA = "@BUILD_EXTRA@" ;
+
 # Library specific variables
 XML2_CPPFLAGS      = "@XML2_CPPFLAGS@" ;
 XML2_LDFLAGS       = "@XML2_LDFLAGS@" ;

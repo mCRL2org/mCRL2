@@ -18,7 +18,7 @@ feature.feature status : basic experimental deprecated : incidental ;
 feature.feature squadt_support : disable enable : composite optional incidental ;
 
 # Disable squadt support in tools
-if ! squadt in [ MATCH "^--disable-(squadt)-support" : [ modules.peek : ARGV ] ] && "$(XML2_CPPFLAGS)" != "" {
+if ! squadt in [ MATCH "^--disable-(squadt)-support" : [ modules.peek : ARGV ] $(BUILD_EXTRA) ] && "$(XML2_CPPFLAGS)" != "" {
   feature.compose <squadt_support>enable
         : <define>ENABLE_SQUADT_CONNECTIVITY
           <library>/libraries/utility//mcrl2_tool_interface
