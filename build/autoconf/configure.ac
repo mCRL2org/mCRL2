@@ -180,7 +180,7 @@ AC_ARG_ENABLE(
   AS_HELP_STRING([--disable-optimisation],
                  [disables compile-time optimisation])
 )
-if test $enable_optimisation; then
+if test "x$enable_optimisation" = xno; then
  OFLAGS=""
  OPTIMISATIONS="disable"
 else
@@ -195,7 +195,7 @@ AC_ARG_ENABLE(
   AS_HELP_STRING([--enable-debug],
                  [adds debugging information to libraries and executables])
 )
-if test $enable_debug; then
+if test "x$enable_debug" = xyes; then
   CFLAGS="$CFLAGS -g -Wall $OFLAGS -W -pedantic"
   CXXFLAGS="$CXXFLAGS -g -Wall $OFLAGS -W"
   BFLAGS="-t $BFLAGS"
@@ -212,7 +212,7 @@ AC_ARG_ENABLE(
   [profile],
   AS_HELP_STRING([--enable-profile],[adds profiling support to libraries and executables])
 )
-if test $enable_profile; then
+if test "x$enable_profile" = xyes; then
   BUILD_VARIANT="profile"
   CPPFLAGS="-pg $CPPFLAGS"
   LDFLAGS="-pg $LDFLAGS"
@@ -223,7 +223,7 @@ AC_ARG_WITH(
   [static],
   AS_HELP_STRING([--enable-static],[produce and link to static libraries])
 )
-if test $enable_static; then
+if test "x$enable_static" = xyes; then
   LINK_VARIANT="static"
 else
   LINK_VARIANT="shared"
@@ -235,7 +235,7 @@ AC_ARG_ENABLE(
   AS_HELP_STRING([--enable-experimental],[also build experimental tools
   ])
 )
-if test $enable_experimental; then
+if test "x$enable_experimental" = xyes; then
   BUILD_EXTRA="--enable-experimental $BUILD_EXTRA"
 fi
 
@@ -245,7 +245,7 @@ AC_ARG_ENABLE(
   AS_HELP_STRING([--enable-deprecated],[also build deprecated tools
   ])
 )
-if test $enable_deprecated; then
+if test "x$enable_deprecated" = xyes; then
   BUILD_EXTRA="--enable-deprecated $BUILD_EXTRA"
 fi
 
@@ -255,7 +255,7 @@ AC_ARG_ENABLE(
   AS_HELP_STRING([--disable-squadt-support],[do not compile squadt support in tools
   ])
 )
-if test $enable_squadt_support; then
+if test "x$enable_squadt_support" = xyes; then
   BUILD_EXTRA="--disable-squadt-support $BUILD_EXTRA"
 fi
 

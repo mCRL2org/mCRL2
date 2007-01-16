@@ -3790,7 +3790,7 @@ if test "${enable_optimisation+set}" = set; then
   enableval=$enable_optimisation;
 fi
 
-if test $enable_optimisation; then
+if test "x$enable_optimisation" = xno; then
  OFLAGS=""
  OPTIMISATIONS="disable"
 else
@@ -3805,7 +3805,7 @@ if test "${enable_debug+set}" = set; then
   enableval=$enable_debug;
 fi
 
-if test $enable_debug; then
+if test "x$enable_debug" = xyes; then
   CFLAGS="$CFLAGS -g -Wall $OFLAGS -W -pedantic"
   CXXFLAGS="$CXXFLAGS -g -Wall $OFLAGS -W"
   BFLAGS="-t $BFLAGS"
@@ -3823,7 +3823,7 @@ if test "${enable_profile+set}" = set; then
   enableval=$enable_profile;
 fi
 
-if test $enable_profile; then
+if test "x$enable_profile" = xyes; then
   BUILD_VARIANT="profile"
   CPPFLAGS="-pg $CPPFLAGS"
   LDFLAGS="-pg $LDFLAGS"
@@ -3836,7 +3836,7 @@ if test "${with_static+set}" = set; then
   withval=$with_static;
 fi
 
-if test $enable_static; then
+if test "x$enable_static" = xyes; then
   LINK_VARIANT="static"
 else
   LINK_VARIANT="shared"
@@ -3848,7 +3848,7 @@ if test "${enable_experimental+set}" = set; then
   enableval=$enable_experimental;
 fi
 
-if test $enable_experimental; then
+if test "x$enable_experimental" = xyes; then
   BUILD_EXTRA="--enable-experimental $BUILD_EXTRA"
 fi
 
@@ -3858,7 +3858,7 @@ if test "${enable_deprecated+set}" = set; then
   enableval=$enable_deprecated;
 fi
 
-if test $enable_deprecated; then
+if test "x$enable_deprecated" = xyes; then
   BUILD_EXTRA="--enable-deprecated $BUILD_EXTRA"
 fi
 
@@ -3868,7 +3868,7 @@ if test "${enable_squadt_support+set}" = set; then
   enableval=$enable_squadt_support;
 fi
 
-if test $enable_squadt_support; then
+if test "x$enable_squadt_support" = xyes; then
   BUILD_EXTRA="--disable-squadt-support $BUILD_EXTRA"
 fi
 
