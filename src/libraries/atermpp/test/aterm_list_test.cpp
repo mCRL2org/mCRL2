@@ -81,6 +81,15 @@ void test_aterm_list()
   aterm_list v = make_term("[1,2,3,4]");
   aterm_list w = make_term("[0,1,2,3,4]");
   BOOST_CHECK(pop_front(w) == v);
+  
+  // test concatenation
+  {
+    aterm_list a = make_term("[1,2,3]");
+    aterm x = make_term("0");
+    BOOST_CHECK(x + a == make_term("[0,1,2,3]"));  
+    BOOST_CHECK(a + a == make_term("[1,2,3,1,2,3]"));  
+    BOOST_CHECK(a + x == make_term("[1,2,3,0]"));  
+  }
 }
 
 int test_main( int, char*[] )

@@ -252,7 +252,7 @@ namespace atermpp {
   inline
   term_list<Term> push_front(term_list<Term> l, Term elem)
   {
-    return term_list<Term>(ATinsert(l, aterm(elem)));
+    return term_list<Term>(ATinsert(l, aterm_traits<Term>::term(elem)));
   }
 
   ///
@@ -264,7 +264,7 @@ namespace atermpp {
   inline
   term_list<Term> push_back(term_list<Term> l, Term elem)
   {
-    return term_list<Term>(ATappend(l, aterm(elem)));
+    return term_list<Term>(ATappend(l, aterm_traits<Term>::term(elem)));
   }
 
   ///
@@ -316,7 +316,7 @@ namespace atermpp {
   template <typename Term>
   inline
   term_list<Term> operator+(term_list<Term> l, Term t)
-  { return term_list<Term>(ATappend(l, aterm(t))); }
+  { return term_list<Term>(ATappend(l, aterm_traits<Term>::term(t))); }
 
   ///
   /// Return the concatenation of the element t and the list l.
@@ -324,7 +324,7 @@ namespace atermpp {
   template <typename Term>
   inline
   term_list<Term> operator+(Term t, term_list<Term> l)
-  { return term_list<Term>(ATappend(l, aterm(t))); }
+  { return push_front(l, t); }
 
   template <typename Term>
   struct aterm_traits<term_list<Term> >
