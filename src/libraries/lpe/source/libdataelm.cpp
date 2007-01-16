@@ -160,13 +160,13 @@ ATermAppl removeUnusedData(ATermAppl ATSpec, bool keep_basis)
 	data_variable_list::iterator ve = spec.initial_free_variables().end();
 	for (; vb != ve; vb++)
 	{
-		add_used_sort((ATermAppl) vb->type(),used_data);
+		add_used_sort((ATermAppl) vb->sort(),used_data);
 	}
 	vb = l.free_variables().begin();
 	ve = l.free_variables().end();
 	for (; vb != ve; vb++)
 	{
-		add_used_sort((ATermAppl) vb->type(),used_data);
+		add_used_sort((ATermAppl) vb->sort(),used_data);
 	}
 
 	summand_list::iterator b = l.summands().begin();
@@ -177,7 +177,7 @@ ATermAppl removeUnusedData(ATermAppl ATSpec, bool keep_basis)
 		data_variable_list::iterator se = (*b).summation_variables().end();
 		for (; sb != se; sb++)
 		{
-			add_used_sort((ATermAppl) sb->type(),used_data);
+			add_used_sort((ATermAppl) sb->sort(),used_data);
 		}
 
 		add_used((ATermAppl) (*b).condition(),used_data);
