@@ -1224,21 +1224,22 @@ static ATbool gstcAddFunction(ATermAppl Name, ATermAppl Sort, const char *msg){
   return Result;
 }
 
-static void gstcAddSystemConstant(ATermAppl OpId, ATermAppl Type){
-  ATermList Types=ATLtableGet(gssystem.constants, (ATerm)OpId);
+static void gstcAddSystemConstant(ATermAppl OpIdName, ATermAppl Type){
+  // append Type to OpIdName entry in gsstystem.constants table
+  ATermList Types=ATLtableGet(gssystem.constants, (ATerm)OpIdName);
 
   if (!Types) Types=ATmakeList0();
   Types=ATappend(Types,(ATerm)Type);
-  ATtablePut(gssystem.constants,(ATerm)OpId,(ATerm)Types);
+  ATtablePut(gssystem.constants,(ATerm)OpIdName,(ATerm)Types);
 }
 
-static void gstcAddSystemFunctionProd(ATermAppl OpId, ATermAppl Type){
-  // Replace type in OpId with Type and add
-  ATermList Types=ATLtableGet(gssystem.functions, (ATerm)OpId);
+static void gstcAddSystemFunctionProd(ATermAppl OpIdName, ATermAppl Type){
+  // append Type to OpIdName entry in gsstystem.functions table
+  ATermList Types=ATLtableGet(gssystem.functions, (ATerm)OpIdName);
 
   if (!Types) Types=ATmakeList0();
   Types=ATappend(Types,(ATerm)Type);
-  ATtablePut(gssystem.functions,(ATerm)OpId,(ATerm)Types);
+  ATtablePut(gssystem.functions,(ATerm)OpIdName,(ATerm)Types);
 }
 
 static void gstcATermTableCopy(ATermTable Orig, ATermTable Copy){
