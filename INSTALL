@@ -12,6 +12,7 @@ of the packages is mentioned (required, recommended or optional):
 - flex >= 2.5.4a-12: package flex [optional]
 - bison >= 2.0: package bison [optional]
 - wxWidgets >= 2.6.2: package libwxgtk2.6-dev or libwxgtk2.6-dbg [recommended]
+   + for the ltsview tool wxWidgets must be build with OpenGL support (--with-opengl)
 - xml2 development libraries >= 2.6.22: package libxml2-dev [recommended]
 - default icon locations: package gnome-themes, gnome-themes-extras or
   hicolor-icon-theme [optional]
