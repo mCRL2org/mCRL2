@@ -3868,7 +3868,7 @@ if test "${enable_squadt_support+set}" = set; then
   enableval=$enable_squadt_support;
 fi
 
-if test "x$enable_squadt_support" = xyes; then
+if test "x$enable_squadt_support" = xno; then
   BUILD_EXTRA="--disable-squadt-support $BUILD_EXTRA"
 fi
 

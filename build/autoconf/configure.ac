@@ -255,7 +255,7 @@ AC_ARG_ENABLE(
   AS_HELP_STRING([--disable-squadt-support],[do not compile squadt support in tools
   ])
 )
-if test "x$enable_squadt_support" = xyes; then
+if test "x$enable_squadt_support" = xno; then
   BUILD_EXTRA="--disable-squadt-support $BUILD_EXTRA"
 fi
 
