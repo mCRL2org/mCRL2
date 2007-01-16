@@ -23,7 +23,7 @@ lib lowlevel
        : <include>../include/lowlevel
        ;
 
-local STRUCT_SOURCES = [ prepend struct/ : libstruct ] ; 
+local STRUCT_SOURCES = [ prepend struct/ : libstruct libstruct_core ] ; 
 
 lib struct
        : $(STRUCT_SOURCES).o
