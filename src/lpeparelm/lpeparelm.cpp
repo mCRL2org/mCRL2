@@ -193,7 +193,10 @@ inline term_list<Term> lpeParElm::setToList(std::set<Term> y) {
 // Note: Has to be set
 //
 inline void lpeParElm::setVerbose(bool b) {
-  gsSetVerboseMsg();
+  if (b)
+  {
+    gsSetVerboseMsg();
+  }
   p_verbose = b;
 }
 
@@ -201,7 +204,10 @@ inline void lpeParElm::setVerbose(bool b) {
 // Note: Has to be set
 //  
 inline void lpeParElm::setDebug(bool b) {
-  gsSetDebugMsg();
+  if (b)
+  {
+    gsSetDebugMsg();
+  }
   p_debug = b;
 }
 
