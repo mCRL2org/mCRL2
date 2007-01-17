@@ -1282,9 +1282,19 @@ static void PRINT_FUNC(PrintProcExpr)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(PrintProcExpr)(OutStream, ATAgetArgument(ProcExpr, 1),
       pp_format, ShowSorts, 3);
     if (PrecLevel > 3) PRINT_FUNC(fprints)(OutStream, ")");
-  } else if (gsIsCond(ProcExpr)) {
-    //print conditional
-    PRINT_FUNC(dbg_prints)("printing conditional\n");
+  } else if (gsIsIfThen(ProcExpr)) {
+    //print if then 
+    PRINT_FUNC(dbg_prints)("printing if then\n");
+    if (PrecLevel > 4) PRINT_FUNC(fprints)(OutStream, "(");
+    PRINT_FUNC(PrintDataExpr)(OutStream, ATAgetArgument(ProcExpr, 0),
+      pp_format, ShowSorts, 11);
+    PRINT_FUNC(fprints)(OutStream, " -> ");
+    PRINT_FUNC(PrintProcExpr)(OutStream, ATAgetArgument(ProcExpr, 1),
+      pp_format, ShowSorts, 5);
+    if (PrecLevel > 4) PRINT_FUNC(fprints)(OutStream, ")");
+  } else if (gsIsIfThenElse(ProcExpr)) {
+    //print if then else
+    PRINT_FUNC(dbg_prints)("printing if then else\n");
     if (PrecLevel > 4) PRINT_FUNC(fprints)(OutStream, "(");
     PRINT_FUNC(PrintDataExpr)(OutStream, ATAgetArgument(ProcExpr, 0),
       pp_format, ShowSorts, 11);
@@ -1292,11 +1302,9 @@ static void PRINT_FUNC(PrintProcExpr)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(PrintProcExpr)(OutStream, ATAgetArgument(ProcExpr, 1),
       pp_format, ShowSorts, 5);
     ATermAppl ProcExprElse = ATAgetArgument(ProcExpr, 2);
-    if (!gsIsDelta(ProcExprElse)) {
-      PRINT_FUNC(fprints)(OutStream, " <> ");
-      PRINT_FUNC(PrintProcExpr)(OutStream, ProcExprElse,
-        pp_format, ShowSorts, 5);
-    }
+    PRINT_FUNC(fprints)(OutStream, " <> ");
+    PRINT_FUNC(PrintProcExpr)(OutStream, ProcExprElse,
+      pp_format, ShowSorts, 5);
     if (PrecLevel > 4) PRINT_FUNC(fprints)(OutStream, ")");
   } else if (gsIsSeq(ProcExpr)) {
     //print sequential composition

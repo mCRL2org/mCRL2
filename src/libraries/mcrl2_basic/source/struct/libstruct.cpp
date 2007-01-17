@@ -2623,13 +2623,13 @@ ATermAppl gsSortMultAct(ATermAppl MultAct)
 bool gsIsProcExpr(ATermAppl Term)
 {
   return
-    gsIsParamId(Term) || gsIsAction(Term) || gsIsProcess(Term) ||
-    gsIsDelta(Term)   || gsIsTau (Term)   || gsIsSum(Term)     ||
-    gsIsBlock(Term)   || gsIsHide(Term)   || gsIsRename(Term)  ||
-    gsIsComm(Term)    || gsIsAllow(Term)  || gsIsSync(Term)    ||
-    gsIsAtTime(Term)  || gsIsSeq(Term)    || gsIsCond(Term)    ||
-    gsIsBInit(Term)   || gsIsMerge(Term)  || gsIsLMerge(Term)  ||
-    gsIsChoice(Term);
+    gsIsParamId(Term)    || gsIsAction(Term) || gsIsProcess(Term) ||
+    gsIsDelta(Term)      || gsIsTau (Term)   || gsIsSum(Term)     ||
+    gsIsBlock(Term)      || gsIsHide(Term)   || gsIsRename(Term)  ||
+    gsIsComm(Term)       || gsIsAllow(Term)  || gsIsSync(Term)    ||
+    gsIsAtTime(Term)     || gsIsSeq(Term)    || gsIsIfThen(Term)  ||
+    gsIsIfThenElse(Term) || gsIsBInit(Term)  || gsIsMerge(Term)   ||
+    gsIsLMerge(Term)     || gsIsChoice(Term);
 }
 
 

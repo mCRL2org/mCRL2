@@ -115,7 +115,8 @@ static AFun gsAFunAllow;
 static AFun gsAFunSync;
 static AFun gsAFunAtTime;
 static AFun gsAFunSeq;
-static AFun gsAFunCond;
+static AFun gsAFunIfThen;
+static AFun gsAFunIfThenElse;
 static AFun gsAFunBInit;
 static AFun gsAFunMerge;
 static AFun gsAFunLMerge;
@@ -247,7 +248,8 @@ void gsEnableCoreConstructorFunctions(void)
     gsAFunSync             = ATmakeAFun("Sync", 2, ATfalse);
     gsAFunAtTime           = ATmakeAFun("AtTime", 2, ATfalse);
     gsAFunSeq              = ATmakeAFun("Seq", 2, ATfalse);
-    gsAFunCond             = ATmakeAFun("Cond", 3, ATfalse);
+    gsAFunIfThen           = ATmakeAFun("IfThen", 2, ATfalse);
+    gsAFunIfThenElse       = ATmakeAFun("IfThenElse", 3, ATfalse);
     gsAFunBInit            = ATmakeAFun("BInit", 2, ATfalse);
     gsAFunMerge            = ATmakeAFun("Merge", 2, ATfalse);
     gsAFunLMerge           = ATmakeAFun("LMerge", 2, ATfalse);
@@ -370,7 +372,8 @@ void gsEnableCoreConstructorFunctions(void)
     ATprotectAFun(gsAFunSync);
     ATprotectAFun(gsAFunAtTime);
     ATprotectAFun(gsAFunSeq);
-    ATprotectAFun(gsAFunCond);
+    ATprotectAFun(gsAFunIfThen);
+    ATprotectAFun(gsAFunIfThenElse);
     ATprotectAFun(gsAFunBInit);
     ATprotectAFun(gsAFunMerge);
     ATprotectAFun(gsAFunLMerge);
@@ -766,11 +769,17 @@ ATermAppl gsMakeSeq(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS)
   return ATmakeAppl2(gsAFunSeq, (ATerm) ProcExprLHS, (ATerm) ProcExprRHS);
 }
 
-ATermAppl gsMakeCond(ATermAppl BoolExpr, ATermAppl ProcExprThen,
+ATermAppl gsMakeIfThen(ATermAppl BoolExprIf, ATermAppl ProcExprThen)
+{
+  assert(CoreConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunIfThen, (ATerm) BoolExprIf, (ATerm) ProcExprThen);
+}
+
+ATermAppl gsMakeIfThenElse(ATermAppl BoolExprIf, ATermAppl ProcExprThen,
   ATermAppl ProcExprElse)
 {
   assert(CoreConstructorFunctionsEnabled);
-  return ATmakeAppl3(gsAFunCond, (ATerm) BoolExpr, (ATerm) ProcExprThen,
+  return ATmakeAppl3(gsAFunIfThenElse, (ATerm) BoolExprIf, (ATerm) ProcExprThen,
     (ATerm) ProcExprElse);
 }
 
@@ -1413,9 +1422,14 @@ bool gsIsSeq(ATermAppl Term) {
   return ATgetAFun(Term) == gsAFunSeq;
 }
 
-bool gsIsCond(ATermAppl Term) {
+bool gsIsIfThen(ATermAppl Term) {
   assert(CoreConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunCond;
+  return ATgetAFun(Term) == gsAFunIfThen;
+}
+
+bool gsIsIfThenElse(ATermAppl Term) {
+  assert(CoreConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunIfThenElse;
 }
 
 bool gsIsBInit(ATermAppl Term) {

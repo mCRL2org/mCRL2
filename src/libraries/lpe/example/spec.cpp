@@ -6,7 +6,6 @@
 
 #include "atermpp/utility.h"
 #include "lpe/specification.h"
-#include "lpe/predefined_symbols.h"
 #include "lpe/sort.h"
 #include "lpe/detail/mcrl22lpe.h"
 #include "test_specifications.h"

@@ -929,11 +929,11 @@ static ATermAppl PushBlock(ATermList H, ATermAppl a){
     return a;
   }
   else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsSeq(a) 
-	    || gsIsCond(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
+	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
     // all distributing rules together
     short ia1=0,ia2=1,args=2;
-    if(gsIsCond(a) || gsIsSum(a)) { ia1=1; ia2=2; }
-    if(gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter 
+    if(gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSum(a)) { ia1=1; ia2=2; }
+    if(gsIsIfThen(a) || gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument does not matter 
     
     ATermAppl p,q=NULL;
     p = PushBlock(H,ATAgetArgument(a,ia1));
@@ -1012,11 +1012,11 @@ static ATermAppl PushHide(ATermList I, ATermAppl a){
     return a;
   } 
   else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsSeq(a) 
-	      || gsIsCond(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
+	      || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
     // all distributing rules together
     short ia1=0,ia2=1,args=2;
-    if(gsIsCond(a) || gsIsSum(a)) { ia1=1; ia2=2; }
-    if(gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter 
+    if(gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSum(a)) { ia1=1; ia2=2; }
+    if(gsIsIfThen(a) || gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter 
     
     ATermAppl p,q=NULL;
     p = PushHide(I,ATAgetArgument(a,ia1));
@@ -1246,11 +1246,11 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     return a;
   }
   else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsSeq(a) 
-	    || gsIsCond(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
+	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
     // all distributing rules together
     short ia1=0,ia2=1,args=2;
-    if(gsIsCond(a) || gsIsSum(a)) { ia1=1; ia2=2; }
-    if(gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter 
+    if(gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSum(a)) { ia1=1; ia2=2; }
+    if(gsIsIfThen(a) || gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter 
     
     ATermAppl p,q=NULL;
     p = PushAllow(V,ATAgetArgument(a,ia1));
@@ -1406,11 +1406,11 @@ static ATermAppl PushComm(ATermList C, ATermAppl a){
     }
   } 
   else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsSeq(a)
-	    || gsIsCond(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
+	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
     // all distributing rules together
     short ia1=0,ia2=1,args=2;
-    if(gsIsCond(a) || gsIsSum(a)) { ia1=1; ia2=2; }
-    if(gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter 
+    if(gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSum(a)) { ia1=1; ia2=2; }
+    if(gsIsIfThen(a) || gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter 
     
     ATermAppl p,q=NULL;
     p = PushComm(C,ATAgetArgument(a,ia1));
@@ -1538,11 +1538,11 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList allowed, AT
     assert(l);
   } 
   else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsSeq(a) 
-	    || gsIsCond(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
+	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
     // all distributing rules together
     short ia1=0,ia2=1,args=2;
-    if(gsIsCond(a) || gsIsSum(a)) { ia1=1; ia2=2; }
-    if(gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter 
+    if(gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSum(a)) { ia1=1; ia2=2; }
+    if(gsIsIfThen(a) || gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter 
     
     ATermList l2;
     l = gsaGetAlpha(ATAgetArgument(a,ia1),length,allowed);
@@ -1596,7 +1596,7 @@ static ATermList gsaGetSyncAlpha(ATermAppl a, unsigned length, ATermList allowed
   else if ( gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsAllow(a) || gsIsComm(a)){
     // XXX
   } 
-  else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsCond(a) || gsIsBInit(a)){
+  else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsBInit(a)){
     // XXX
   } 
   else if ( gsIsSeq(a) || gsIsMerge(a) || gsIsLMerge(a)){
@@ -1684,11 +1684,11 @@ static ATermAppl gsApplyAlpha(ATermAppl a){
     a = PushComm(ATLgetArgument(a,0),p); //takes care about l
   } 
   else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsSeq(a) 
-	    || gsIsCond(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
+	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
     // all distributing rules together
     short ia1=0,ia2=1,args=2;
-    if(gsIsCond(a) || gsIsSum(a)) { ia1=1; ia2=2; }
-    if(gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter 
+    if(gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSum(a)) { ia1=1; ia2=2; }
+    if(gsIsIfThen(a) || gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter 
     
     ATermAppl p,q=NULL;
     p = gsApplyAlpha(ATAgetArgument(a,ia1));
@@ -1736,13 +1736,13 @@ ATermList gsaGetDeps(ATermAppl a){
   }
   else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsSeq(a) 
 	    || gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsAllow(a) || gsIsComm(a)
-	    || gsIsCond(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
+	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
     // all distributing rules together
     short ia1=0,ia2=1,args=2;
-    if(gsIsCond(a) || gsIsSum(a)
+    if(gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSum(a)
        || gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsAllow(a) || gsIsComm(a)
        ) { ia1=1; ia2=2; }
-    if(gsIsSum(a) || gsIsAtTime(a) 
+    if(gsIsIfThen(a) || gsIsSum(a) || gsIsAtTime(a) 
        || gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsAllow(a) || gsIsComm(a)
        ) args=1; //second argument of BInit does not matter 
     
@@ -1766,13 +1766,13 @@ ATermAppl gsaGetProp(ATermAppl a, ATermAppl context){
   }
   else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsSeq(a) 
 	    || gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsAllow(a) || gsIsComm(a)
-	    || gsIsCond(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
+	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
     // all distributing rules together
     short ia1=0,ia2=1,args=2;
-    if(gsIsCond(a) || gsIsSum(a)
+    if(gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSum(a)
        || gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsAllow(a) || gsIsComm(a)
        ) { ia1=1; ia2=2; }
-    if(gsIsSum(a) || gsIsAtTime(a) 
+    if(gsIsIfThen(a) || gsIsSum(a) || gsIsAtTime(a) 
        || gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsAllow(a) || gsIsComm(a)
        ) args=1; 
     
@@ -1846,13 +1846,13 @@ ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a){
   }
   else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsSeq(a) 
 	    || gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsAllow(a) || gsIsComm(a)
-	    || gsIsCond(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
+	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
     // all distributing rules together
     short ia1=0,ia2=1,args=2;
-    if(gsIsCond(a) || gsIsSum(a)
+    if(gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSum(a)
        || gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsAllow(a) || gsIsComm(a)
        ) { ia1=1; ia2=2; }
-    if(gsIsSum(a) || gsIsAtTime(a) 
+    if(gsIsIfThen(a) || gsIsSum(a) || gsIsAtTime(a) 
        || gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsAllow(a) || gsIsComm(a)
        ) args=1; 
     
@@ -2004,7 +2004,7 @@ ATermAppl gsAlpha(ATermAppl Spec){
       //lets learn what <P> is
       ATermAppl P=NULL;
       ATermAppl body=ATAtableGet(procs,(ATerm)p);
-      if(gsIsCond(body)){
+      if(gsIsIfThenElse(body)){
 	ATermAppl p1=ATAgetArgument(body,2);
 	if(gsIsProcess(p1))
 	  P=ATAgetArgument(p1,0);

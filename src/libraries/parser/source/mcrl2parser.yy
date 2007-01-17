@@ -1026,12 +1026,12 @@ proc_expr_cond:
     }
   | data_expr_prefix ARROW proc_expr_cond_la
     {
-      safe_assign($$, gsMakeCond($1, $3, gsMakeDelta()));
+      safe_assign($$, gsMakeIfThen($1, $3));
       gsDebugMsg("parsed conditional expression\n  %T\n", $$);
     }
   | data_expr_prefix ARROW proc_expr_seq_rhs_wo_cond ELSE proc_expr_cond_la
     {
-      safe_assign($$, gsMakeCond($1, $3, $5));
+      safe_assign($$, gsMakeIfThenElse($1, $3, $5));
       gsDebugMsg("parsed conditional expression\n  %T\n", $$);
     }
   ;
@@ -1088,12 +1088,12 @@ proc_expr_seq_rhs:
     }
   | data_expr_prefix ARROW proc_expr_seq_rhs
     {
-      safe_assign($$, gsMakeCond($1, $3, gsMakeDelta()));
+      safe_assign($$, gsMakeIfThen($1, $3));
       gsDebugMsg("parsed conditional expression\n  %T\n", $$);
     }
   | data_expr_prefix ARROW proc_expr_seq_rhs_wo_cond ELSE proc_expr_seq_rhs
     {
-      safe_assign($$, gsMakeCond($1, $3, $5));
+      safe_assign($$, gsMakeIfThenElse($1, $3, $5));
       gsDebugMsg("parsed conditional expression\n  %T\n", $$);
     }
   ;
@@ -1176,12 +1176,12 @@ proc_expr_sync_rhs:
     }
   | data_expr_prefix ARROW proc_expr_sync_rhs
     {
-      safe_assign($$, gsMakeCond($1, $3, gsMakeDelta()));
+      safe_assign($$, gsMakeIfThen($1, $3));
       gsDebugMsg("parsed conditional expression\n  %T\n", $$);
     }
   | data_expr_prefix ARROW proc_expr_sync_rhs_wo_cond ELSE proc_expr_sync_rhs
     {
-      safe_assign($$, gsMakeCond($1, $3, $5));
+      safe_assign($$, gsMakeIfThenElse($1, $3, $5));
       gsDebugMsg("parsed conditional expression\n  %T\n", $$);
     }
   ;

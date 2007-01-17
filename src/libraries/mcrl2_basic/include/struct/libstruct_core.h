@@ -105,7 +105,8 @@ ATermAppl gsMakeAllow(ATermList MultActNames, ATermAppl ProcExpr);
 ATermAppl gsMakeSync(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS);
 ATermAppl gsMakeAtTime(ATermAppl ProcExpr, ATermAppl TimeExpr);
 ATermAppl gsMakeSeq(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS);
-ATermAppl gsMakeCond(ATermAppl BoolExpr, ATermAppl ProcExprThen,
+ATermAppl gsMakeIfThen(ATermAppl BoolExprIf, ATermAppl ProcExprThen);
+ATermAppl gsMakeIfThenElse(ATermAppl BoolExprIf, ATermAppl ProcExprThen,
   ATermAppl ProcExprElse);
 ATermAppl gsMakeBInit(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS);
 ATermAppl gsMakeMerge(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS);
@@ -232,7 +233,8 @@ bool gsIsAllow(ATermAppl Term);
 bool gsIsSync(ATermAppl Term);
 bool gsIsAtTime(ATermAppl Term);
 bool gsIsSeq(ATermAppl Term);
-bool gsIsCond(ATermAppl Term);
+bool gsIsIfThen(ATermAppl Term);
+bool gsIsIfThenElse(ATermAppl Term);
 bool gsIsBInit(ATermAppl Term);
 bool gsIsMerge(ATermAppl Term);
 bool gsIsLMerge(ATermAppl Term);

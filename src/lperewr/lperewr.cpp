@@ -347,9 +347,12 @@ ATermAppl rewrite_proc(ATermAppl p)
   } else if ( gsIsSum(p) || gsIsAllow(p) || gsIsBlock(p) || gsIsHide(p) || gsIsRename(p) || gsIsComm(p) )
   {
     return ATmakeAppl2(ATgetAFun(p),ATgetArgument(p,0),(ATerm) rewrite_proc(ATAgetArgument(p,1)));
-  } else if ( gsIsCond(p) )
+  } else if ( gsIsIfThenElse(p) )
   {
-    return gsMakeCond(rewr->rewrite(ATAgetArgument(p,0)),rewrite_proc(ATAgetArgument(p,1)),rewrite_proc(ATAgetArgument(p,2)));
+    return gsMakeIfThenElse(rewr->rewrite(ATAgetArgument(p,0)),rewrite_proc(ATAgetArgument(p,1)),rewrite_proc(ATAgetArgument(p,2)));
+  } else if ( gsIsIfThen(p) )
+  {
+    return gsMakeIfThen(rewr->rewrite(ATAgetArgument(p,0)),rewrite_proc(ATAgetArgument(p,1))));
   } else {
     l = ATgetArguments(p);
     m = ATmakeList0();

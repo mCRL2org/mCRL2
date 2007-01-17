@@ -1265,21 +1265,21 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
       SumVars = ATmakeList1((ATerm)SumVar0);
       CondIf0 = pn2gsMakeDataApplProd2(OpLTE,SumVar0,MaxConcIn);
       CondThan0 = gsMakeSeq(gsMakeParamId(CurrentPlaceAdd, ATmakeList1((ATerm)SumVar0)), gsMakeParamId(CurrentPlace, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpAdd,SumVar0,ProcVar))));
-      SubProcess0 = gsMakeSum(SumVars, gsMakeCond(CondIf0, CondThan0, gsMakeDelta()));
+      SubProcess0 = gsMakeSum(SumVars, gsMakeIfThen(CondIf0, CondThan0));
       gsDebugMsg("Parameter %T is %d a Sum\n", SubProcess0, gsIsSum(SubProcess0));
 
       // create second sum-sub-process
       SumVars = ATmakeList1((ATerm)SumVar1);
       CondIf1 = pn2gsMakeDataApplProd2(OpLTE,SumVar1, pn2gsMakeDataApplProd2(OpMin, MaxConcOut, ProcVar));
       CondThan1 = gsMakeSeq(gsMakeParamId(CurrentPlaceRem, ATmakeList1((ATerm)SumVar1)), gsMakeParamId(CurrentPlace, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax,Number0, pn2gsMakeDataApplProd2(OpSubt,ProcVar,SumVar1)))));
-      SubProcess1 = gsMakeSum(SumVars, gsMakeCond(CondIf1, CondThan1, gsMakeDelta()));
+      SubProcess1 = gsMakeSum(SumVars, gsMakeIfThen(CondIf1, CondThan1));
       gsDebugMsg("Parameter %T is %d a Sum\n", SubProcess1, gsIsSum(SubProcess1));
 
       // create third sum-sub-process
       SumVars = ATmakeList2((ATerm)SumVar0, (ATerm)SumVar1);
       CondIf2 = pn2gsMakeDataApplProd2(OpAnd, CondIf0, CondIf1);
       CondThan2 = gsMakeSeq(gsMakeSync(gsMakeParamId(CurrentPlaceAdd, ATmakeList1((ATerm)SumVar0)), gsMakeParamId(CurrentPlaceRem, ATmakeList1((ATerm)SumVar1))), gsMakeParamId(CurrentPlace, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax,Number0,pn2gsMakeDataApplProd2(OpSubt,pn2gsMakeDataApplProd2(OpAdd,SumVar0,ProcVar), SumVar1)))));
-      SubProcess2 = gsMakeSum(SumVars, gsMakeCond(CondIf2, CondThan2, gsMakeDelta()));
+      SubProcess2 = gsMakeSum(SumVars, gsMakeIfThen(CondIf2, CondThan2));
       gsDebugMsg("Parameter %T is %d a Sum\n", SubProcess2, gsIsSum(SubProcess2));
 
       // create P_pi
@@ -1294,7 +1294,7 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
       ATermAppl CondIf = pn2gsMakeDataApplProd2(OpGT,ProcVar, Number1);
       ATermAppl CondThan = gsMakeSync(gsMakeParamId(CurrentPlaceIn, ATmakeList0()), gsMakeParamId(CurrentPlaceAdd, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax,Number1, pn2gsMakeDataApplProd2(OpSubt,ProcVar, Number1)))));
       ATermAppl CondElse = gsMakeParamId(CurrentPlaceIn, ATmakeList0());
-      ATermAppl Process = gsMakeCond(CondIf, CondThan, CondElse);
+      ATermAppl Process = gsMakeIfThenElse(CondIf, CondThan, CondElse);
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceAdd, ATmakeList1((ATerm)gsMakeSortIdPos())), ATmakeList1((ATerm)ProcVar), Process));
       gsDebugMsg("Process: %T created.\n", CurrentPlaceAdd);
     }
@@ -1317,7 +1317,7 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
       ATermAppl CondIf = pn2gsMakeDataApplProd2(OpGT,ProcVar, Number1);
       ATermAppl CondThan = gsMakeSync(gsMakeParamId(CurrentPlaceOut, ATmakeList0()), gsMakeParamId(CurrentPlaceRem, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax, Number1, pn2gsMakeDataApplProd2(OpSubt,ProcVar, Number1)))));
       ATermAppl CondElse = gsMakeParamId(CurrentPlaceOut, ATmakeList0());
-      ATermAppl Process = gsMakeCond(CondIf, CondThan, CondElse);
+      ATermAppl Process = gsMakeIfThenElse(CondIf, CondThan, CondElse);
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceRem, ATmakeList1((ATerm)gsMakeSortIdPos())), ATmakeList1((ATerm)ProcVar), Process));
       gsDebugMsg("Process: %T created.\n", CurrentPlaceRem);
     }
@@ -2432,11 +2432,11 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
       //condition
       if(nOut>0){
 	ATermAppl Cond=pn2gsMakeDataApplProd2(OpLTE,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(nOut)),gsMakeSortIdPos()),VarX);//make nOut<=x
-	Summand=gsMakeCond(Cond,Summand,gsMakeDelta());
+	Summand=gsMakeIfThen(Cond,Summand);
       }
       else /*never together */ if(inhib){
 	ATermAppl Cond=pn2gsMakeDataApplProd2(OpEq,VarX,Number0);//make x==0
-	Summand=gsMakeCond(Cond,Summand,gsMakeDelta());
+	Summand=gsMakeIfThen(Cond,Summand);
       }	
       
       if(Body) Body=gsMakeChoice(Summand,Body);
@@ -2537,7 +2537,7 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
       
 //       if(j>0){ //generate the condition
 // 	ATermAppl Cond=pn2gsMakeDataApplProd2(OpLTE,NumberJ,VarX);//make j<=x
-// 	Summand=gsMakeCond(Cond,Summand,gsMakeDelta());
+// 	Summand=gsMakeIfThen(Cond,Summand);
 //       }
       
 //       if(Body){
@@ -2592,7 +2592,7 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
       
 //       //generate the condition
 //       ATermAppl Cond=pn2gsMakeDataApplProd2(OpEq,VarX,Number0);//make j<=x
-//       Summand=gsMakeCond(Cond,Summand,gsMakeDelta());
+//       Summand=gsMakeIfThen(Cond,Summand);
       
 //       if(Body){
 // 	if(Summand) Body=gsMakeChoice(Summand,Body);

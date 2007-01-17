@@ -1,4 +1,4 @@
-// Date: 07-12-2006
+// Date: 17-01-2007
 // This document describes the internal format of the mCRL2 language and the
 // corresponding mu-calculus formulas. Here:
 // - the following phases of implementation are distinguised:
@@ -152,7 +152,8 @@
                  | Sync(<ProcExpr>, <ProcExpr>)
                  | AtTime(<ProcExpr>, <DataExpr>)
                  | Seq(<ProcExpr>, <ProcExpr>)
-                 | Cond(<DataExpr>, <ProcExpr>, <ProcExpr>) 
+                 | IfThen(<DataExpr>, <ProcExpr>) 
+                 | IfThenElse(<DataExpr>, <ProcExpr>, <ProcExpr>) 
                  | BInit(<ProcExpr>, <ProcExpr>)
                  | Merge(<ProcExpr>, <ProcExpr>)
                  | LMerge(<ProcExpr>, <ProcExpr>)

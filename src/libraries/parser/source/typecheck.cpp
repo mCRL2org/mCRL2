@@ -1589,15 +1589,24 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
     return gsMakeAtTime(NewProc,Time);
   }
 
-  if(gsIsCond(ProcTerm)){
+  if(gsIsIfThen(ProcTerm)){
     ATermAppl Cond=ATAgetArgument(ProcTerm,0);
     ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&Cond,gsMakeSortIdBool());
     if(!NewType) {return NULL;}
-    ATermAppl NewLeft=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,1));
-    if(!NewLeft) {return NULL;}
-    ATermAppl NewRight=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,2));
-    if(!NewRight) {return NULL;}
-    return gsMakeCond(Cond,NewLeft,NewRight);
+    ATermAppl NewThen=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,1));
+    if(!NewThen) {return NULL;}
+    return gsMakeIfThen(Cond,NewThen);
+  }
+
+  if(gsIsIfThenElse(ProcTerm)){
+    ATermAppl Cond=ATAgetArgument(ProcTerm,0);
+    ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&Cond,gsMakeSortIdBool());
+    if(!NewType) {return NULL;}
+    ATermAppl NewThen=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,1));
+    if(!NewThen) {return NULL;}
+    ATermAppl NewElse=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,2));
+    if(!NewElse) {return NULL;}
+    return gsMakeIfThenElse(Cond,NewThen,NewElse);
   }
 
   if(gsIsSum(ProcTerm)){

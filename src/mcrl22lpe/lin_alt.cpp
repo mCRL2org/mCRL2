@@ -557,9 +557,14 @@ static ATermList get_vars(ATermAppl a)
 		return ATmakeList0();
 	}
 	else
-	if ( gsIsDataAppl(a) || gsIsSync(a) || gsIsSeq(a) ||  gsIsMerge(a) || gsIsLMerge(a) || gsIsChoice(a) || gsIsCond(a) )
+	if ( gsIsDataAppl(a) || gsIsSync(a) || gsIsSeq(a) ||  gsIsMerge(a) || gsIsLMerge(a) || gsIsChoice(a) || gsIsIfThen(a) )
 	{
 		return merge_list(get_vars(ATAgetArgument(a,0)),get_vars(ATAgetArgument(a,1)));
+	}
+        else
+	if ( gsIsIfThenElse(a) )
+	{
+		return merge_list(get_vars(ATAgetArgument(a,0)),merge_list(get_vars(ATAgetArgument(a,1)),get_vars(ATAgetArgument(a,2))));
 	}
 	else
 	if ( gsIsAction(a) || gsIsProcess(a) )
@@ -1549,7 +1554,18 @@ static bool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 		}
 	}
 	else
-	if ( gsIsCond(a) )
+	if ( gsIsIfThen(a) )
+	{
+		if ( match_data(ATAgetArgument(a,0),ATAgetArgument(m,0),l,r) )
+		{
+			return match_proc(ATAgetArgument(a,1),ATAgetArgument(m,1),l,r);
+		} else {
+//fprintf(stderr,"c!\n");
+			return false;
+		}
+	}
+	else
+	if ( gsIsIfThenElse(a) )
 	{
 		if ( match_data(ATAgetArgument(a,0),ATAgetArgument(m,0),l,r) )
 		{
@@ -1899,7 +1915,21 @@ static ATermList get_firsts(ATermAppl t)
 		}
 		return ATreverse(m);
 	}
-	if ( gsIsCond(t) )
+	if ( gsIsIfThen(t) )
+	{
+		l = get_firsts(ATAgetArgument(t,1));
+		m = ATmakeList0();
+		for (; !ATisEmpty(l); l=ATgetNext(l))
+		{
+			ATermAppl a = rewr->rewrite(gsMakeDataExprAnd(ATAgetArgument(t,0),ATAelementAt(ATLgetFirst(l),3)));
+			if ( !ATisEqual(a,linFalse) )
+			{
+				m = ATinsert(m,(ATerm) ATreplace(ATLgetFirst(l),(ATerm) a,3));
+			}
+		}
+		return ATreverse(m);
+	}
+	if ( gsIsIfThenElse(t) )
 	{
 		l = get_firsts(ATAgetArgument(t,1));
 		m = ATmakeList0();
@@ -2035,7 +2065,7 @@ static ATermAppl gen_linproc(ATermList sums, ATermList c)
 		}
 		if ( !ATisEqual(ATAelementAt(ATLgetFirst(sums),3),linTrue) )
 		{
-			t = gsMakeCond(ATAelementAt(ATLgetFirst(sums),3),t,gsMakeDelta());
+			t = gsMakeIfThen(ATAelementAt(ATLgetFirst(sums),3),t);
 		}
 		if ( ATgetLength(ATLelementAt(ATLgetFirst(sums),0)) > 0 )
 		{
@@ -2118,9 +2148,14 @@ static ATermAppl subst_procs(ATermAppl a, ATermList nosubst)
 		return ATmakeAppl2(ATgetAFun(a),(ATerm) subst_procs(ATAgetArgument(a,0),nosubst),(ATerm) subst_procs(ATAgetArgument(a,1),nosubst));
 	}
 	else
-	if ( gsIsCond(a) )
+	if ( gsIsIfThen(a) )
 	{
-		return gsMakeCond(ATAgetArgument(a,0),subst_procs(ATAgetArgument(a,1),nosubst),subst_procs(ATAgetArgument(a,2),nosubst));
+		return gsMakeIfThen(ATAgetArgument(a,0),subst_procs(ATAgetArgument(a,1),nosubst));
+	}
+	else
+	if ( gsIsIfThenElse(a) )
+	{
+		return gsMakeIfThenElse(ATAgetArgument(a,0),subst_procs(ATAgetArgument(a,1),nosubst),subst_procs(ATAgetArgument(a,2),nosubst));
 	}
 	else
 	if ( gsIsSum(a) )

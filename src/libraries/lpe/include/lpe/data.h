@@ -16,7 +16,6 @@
 #include "atermpp/utility.h"
 #include "lpe/sort.h"
 #include "lpe/pretty_print.h"
-#include "lpe/predefined_symbols.h"
 #include "lpe/detail/string_utility.h"
 #include "libstruct.h"
 
