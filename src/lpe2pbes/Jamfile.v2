@@ -10,5 +10,5 @@ exe lpe2pbes
          /libraries//mcrl2_basic
        : <include>.
          <toolset>msvc:<library>/workarounds/msvc//getopt
-#         <status>experimental
+         <status>experimental
        ;
