@@ -201,6 +201,11 @@ static void gstcSplitSortDecls(ATermList SortDecls, ATermList *PSortIds,
 //Post:*PSortIds and *PSortRefs contain the SortId's and SortRef's from
 //     SortDecls, in the same order
 
+static ATermAppl gstcUpdateSortSpec(ATermAppl Spec, ATermAppl SortSpec);
+//Pre: Spec and SortSpec are resp. specifications and sort specifications that
+//     adhere to the internal syntax after type checking
+//Ret: Spec in which the sort specification is replaced by SortSpec
+
 //type checking functions
 //-----------------------
 
@@ -385,9 +390,20 @@ void gstcSplitSortDecls(ATermList SortDecls, ATermList *PSortIds,
   *PSortRefs = ATreverse(SortRefs);
 }
 
+ATermAppl gstcUpdateSortSpec(ATermAppl Spec, ATermAppl SortSpec)
+{
+  assert(gsIsSpecV1(Spec));
+  assert(gsIsSortSpec(SortSpec));
+  ATermAppl DataSpec = ATAgetArgument(Spec, 0);
+  DataSpec = ATsetArgument(DataSpec, (ATerm) SortSpec, 0);
+  Spec = ATsetArgument(Spec, (ATerm) DataSpec, 0);
+  return Spec;
+}
+
 ATermAppl gstcFoldSortRefs(ATermAppl Spec)
 {
   assert(gsIsSpecV1(Spec));
+  gsDebugMsg("specification before folding:\n%T\n\n", Spec);
   //get sort declarations
   ATermAppl DataSpec = ATAgetArgument(Spec, 0);
   ATermAppl SortSpec = ATAgetArgument(DataSpec, 0);
@@ -400,9 +416,7 @@ ATermAppl gstcFoldSortRefs(ATermAppl Spec)
   SortRefs = gstcFoldSortRefsInSortRefs(SortRefs);
   //substitute sort references in the rest of Spec, i.e.
   //(a) remove sort references from Spec
-  SortDecls = SortIds;
-  SortSpec = ATsetArgument(SortSpec, (ATerm) SortDecls, 0);
-  Spec = ATsetArgument(Spec, (ATerm) SortSpec, 0);
+  Spec = gstcUpdateSortSpec(Spec, gsMakeSortSpec(SortIds));
   //(b) build substitution table
   ATermTable Substs = ATtableCreate(2*ATgetLength(SortRefs),50);
   ATermList l = SortRefs;
@@ -423,16 +437,14 @@ ATermAppl gstcFoldSortRefs(ATermAppl Spec)
   //(c) perform substitutions until the specification becomes stable
   ATermAppl NewSpec = Spec;
   do {
-    gsDebugMsg("substituting sort references in specification\n");
+    gsDebugMsg("substituting sort references in specification\n\n");
     Spec = NewSpec;
     NewSpec = (ATermAppl) gsSubstValuesTable(Substs, (ATerm) Spec, true);
   } while (!ATisEqual(NewSpec, Spec));
   ATtableDestroy(Substs);
   //add the removed sort references back to Spec
-  SortDecls = ATconcat(SortIds, SortRefs);
-  SortSpec = ATsetArgument(SortSpec, (ATerm) SortDecls, 0);
-  DataSpec = ATsetArgument(DataSpec, (ATerm) SortSpec, 0);
-  Spec = ATsetArgument(Spec, (ATerm) DataSpec, 0);
+  Spec = gstcUpdateSortSpec(Spec, gsMakeSortSpec(ATconcat(SortIds, SortRefs)));
+  gsDebugMsg("specification after folding:\n%T\n\n", Spec);
   return Spec;
 }
 
