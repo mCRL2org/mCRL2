@@ -591,6 +591,12 @@ static void set_bithash(unsigned long long i)
   bithashtable[i/(8*sizeof(unsigned long))] |=  1 << (i%(8*sizeof(unsigned long)));
 }
 
+static void remove_state_from_bithash(ATerm state)
+{
+  unsigned long long i = calc_hash(state);
+  bithashtable[i/(8*sizeof(unsigned long))] &=  ~(1 << (i%(8*sizeof(unsigned long))));
+}
+
 static unsigned long long add_state(ATerm state, bool *is_new)
 {
   if ( lgopts->bithashing )
@@ -629,24 +635,25 @@ static unsigned long queue_put_count = 0;
 static unsigned long queue_put_count_extra = 0;
 static bool queue_size_fixed = false;
 
-static void add_to_full_queue(ATerm state)
+static bool add_to_full_queue(ATerm state)
 {
   queue_put_count_extra++;
   if ( (rand() % (queue_put_count+queue_put_count_extra)) < queue_size )
   {
     unsigned long pos = rand() % queue_size;
     queue_put[pos] = state;
+    return true;
   }
+  return false;
 }
 
-static void add_to_queue(ATerm state)
+static bool add_to_queue(ATerm state)
 {
   if ( queue_put_count == queue_size )
   {
     if ( queue_size_fixed )
     {
-      add_to_full_queue(state);
-      return;
+      return add_to_full_queue(state);
     }
     if ( queue_size == 0 )
     {
@@ -657,8 +664,7 @@ static void add_to_queue(ATerm state)
         queue_size_fixed = true;
         if ( queue_size == queue_size_max )
         {
-          add_to_full_queue(state);
-          return;
+          return add_to_full_queue(state);
         } else {
           queue_size = queue_size_max;
         }
@@ -677,8 +683,7 @@ static void add_to_queue(ATerm state)
       ATprotectArray(queue_get,queue_size);
       ATprotectArray(queue_put,queue_size);
       queue_size_fixed = true;
-      add_to_full_queue(state);
-      return;
+      return add_to_full_queue(state);
     }
     queue_get = tmp;
     tmp = (ATerm *) realloc(queue_put, queue_size*sizeof(ATerm));
@@ -694,8 +699,7 @@ static void add_to_queue(ATerm state)
       ATprotectArray(queue_get,queue_size);
       ATprotectArray(queue_put,queue_size);
       queue_size_fixed = true;
-      add_to_full_queue(state);
-      return;
+      return add_to_full_queue(state);
     }
     queue_put = tmp;
     for (unsigned long i=queue_put_count; i<queue_size; i++)
@@ -708,6 +712,7 @@ static void add_to_queue(ATerm state)
   }
 
   queue_put[queue_put_count++] = state;
+  return true;
 }
 
 static ATerm get_from_queue()
@@ -885,7 +890,11 @@ bool generate_lts()
             bool b = add_transition(state,Transition,NewState);
             if ( lgopts->bithashing && b )
             {
-              add_to_queue(NewState);
+              if ( !add_to_queue(NewState) )
+              {
+                remove_state_from_bithash(NewState);
+                num_states--;
+              }
             }
           }
         }
