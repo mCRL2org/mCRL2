@@ -626,7 +626,18 @@ static unsigned long queue_size_max = UINT_MAX;
 static unsigned long queue_get_pos = 0;
 static unsigned long queue_get_count = 0;
 static unsigned long queue_put_count = 0;
+static unsigned long queue_put_count_extra = 0;
 static bool queue_size_fixed = false;
+
+static void add_to_full_queue(ATerm state)
+{
+  queue_put_count_extra++;
+  if ( (rand() % (queue_put_count+queue_put_count_extra)) < queue_size )
+  {
+    unsigned long pos = rand() % queue_size;
+    queue_put[pos] = state;
+  }
+}
 
 static void add_to_queue(ATerm state)
 {
@@ -634,6 +645,7 @@ static void add_to_queue(ATerm state)
   {
     if ( queue_size_fixed )
     {
+      add_to_full_queue(state);
       return;
     }
     if ( queue_size == 0 )
@@ -645,6 +657,7 @@ static void add_to_queue(ATerm state)
         queue_size_fixed = true;
         if ( queue_size == queue_size_max )
         {
+          add_to_full_queue(state);
           return;
         } else {
           queue_size = queue_size_max;
@@ -664,6 +677,7 @@ static void add_to_queue(ATerm state)
       ATprotectArray(queue_get,queue_size);
       ATprotectArray(queue_put,queue_size);
       queue_size_fixed = true;
+      add_to_full_queue(state);
       return;
     }
     queue_get = tmp;
@@ -680,6 +694,7 @@ static void add_to_queue(ATerm state)
       ATprotectArray(queue_get,queue_size);
       ATprotectArray(queue_put,queue_size);
       queue_size_fixed = true;
+      add_to_full_queue(state);
       return;
     }
     queue_put = tmp;
@@ -713,6 +728,7 @@ static void swap_queues()
   queue_get_pos = 0;
   queue_get_count = queue_put_count;
   queue_put_count = 0;
+  queue_put_count_extra = 0;
 }
 
 
@@ -841,6 +857,7 @@ bool generate_lts()
       if ( lgopts->bithashing )
       {
         queue_size_max = lgopts->todo_max;
+        srand((unsigned)time(NULL)+getpid());
         add_to_queue(state);
         swap_queues();
       }
