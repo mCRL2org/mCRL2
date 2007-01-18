@@ -2,7 +2,7 @@
 // win_iocp_io_service.hpp
 // ~~~~~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -31,6 +31,7 @@
 #include <boost/asio/detail/call_stack.hpp>
 #include <boost/asio/detail/handler_alloc_helpers.hpp>
 #include <boost/asio/detail/handler_invoke_helpers.hpp>
+#include <boost/asio/detail/service_base.hpp>
 #include <boost/asio/detail/socket_types.hpp>
 #include <boost/asio/detail/win_iocp_operation.hpp>
 
@@ -39,7 +40,7 @@ namespace asio {
 namespace detail {
 
 class win_iocp_io_service
-  : public boost::asio::io_service::service
+  : public boost::asio::detail::service_base<win_iocp_io_service>
 {
 public:
   // Base class for all operations.
@@ -47,10 +48,10 @@ public:
 
   // Constructor.
   win_iocp_io_service(boost::asio::io_service& io_service)
-    : boost::asio::io_service::service(io_service),
+    : boost::asio::detail::service_base<win_iocp_io_service>(io_service),
       iocp_(),
       outstanding_work_(0),
-      interrupted_(0),
+      stopped_(0),
       shutdown_(0)
   {
   }
@@ -100,62 +101,74 @@ public:
     ::CreateIoCompletionPort(handle, iocp_.handle, 0, 0);
   }
 
-  // Run the event loop until interrupted or no more work.
-  size_t run()
+  // Run the event loop until stopped or no more work.
+  size_t run(boost::system::error_code& ec)
   {
     if (::InterlockedExchangeAdd(&outstanding_work_, 0) == 0)
+    {
+      ec = boost::system::error_code();
       return 0;
+    }
 
     call_stack<win_iocp_io_service>::context ctx(this);
 
     size_t n = 0;
-    while (do_one(true))
+    while (do_one(true, ec))
       if (n != (std::numeric_limits<size_t>::max)())
         ++n;
     return n;
   }
 
-  // Run until interrupted or one operation is performed.
-  size_t run_one()
+  // Run until stopped or one operation is performed.
+  size_t run_one(boost::system::error_code& ec)
   {
     if (::InterlockedExchangeAdd(&outstanding_work_, 0) == 0)
+    {
+      ec = boost::system::error_code();
       return 0;
+    }
 
     call_stack<win_iocp_io_service>::context ctx(this);
 
-    return do_one(true);
+    return do_one(true, ec);
   }
 
   // Poll for operations without blocking.
-  size_t poll()
+  size_t poll(boost::system::error_code& ec)
   {
     if (::InterlockedExchangeAdd(&outstanding_work_, 0) == 0)
+    {
+      ec = boost::system::error_code();
       return 0;
+    }
 
     call_stack<win_iocp_io_service>::context ctx(this);
 
     size_t n = 0;
-    while (do_one(false))
+    while (do_one(false, ec))
       if (n != (std::numeric_limits<size_t>::max)())
         ++n;
     return n;
   }
 
   // Poll for one operation without blocking.
-  size_t poll_one()
+  size_t poll_one(boost::system::error_code& ec)
   {
     if (::InterlockedExchangeAdd(&outstanding_work_, 0) == 0)
+    {
+      ec = boost::system::error_code();
       return 0;
+    }
 
     call_stack<win_iocp_io_service>::context ctx(this);
 
-    return do_one(false);
+    return do_one(false, ec);
   }
 
-  // Interrupt the event processing loop.
-  void interrupt()
+  // Stop the event processing loop.
+  void stop()
   {
-    if (::InterlockedExchange(&interrupted_, 1) == 0)
+    if (::InterlockedExchange(&stopped_, 1) == 0)
     {
       if (!::PostQueuedCompletionStatus(iocp_.handle, 0, 0, 0))
       {
@@ -171,7 +184,7 @@ public:
   // Reset in preparation for a subsequent run invocation.
   void reset()
   {
-    ::InterlockedExchange(&interrupted_, 0);
+    ::InterlockedExchange(&stopped_, 0);
   }
 
   // Notify that some work has started.
@@ -184,7 +197,7 @@ public:
   void work_finished()
   {
     if (::InterlockedDecrement(&outstanding_work_) == 0)
-      interrupt();
+      stop();
   }
 
   // Request invocation of the given handler.
@@ -245,7 +258,7 @@ private:
   // Dequeues at most one operation from the I/O completion port, and then
   // executes it. Returns the number of operations that were dequeued (i.e.
   // either 0 or 1).
-  size_t do_one(bool block)
+  size_t do_one(bool block, boost::system::error_code& ec)
   {
     for (;;)
     {
@@ -266,6 +279,7 @@ private:
       {
         if (block && last_error == WAIT_TIMEOUT)
           continue;
+        ec = boost::system::error_code();
         return 0;
       }
 
@@ -285,25 +299,25 @@ private:
         operation* op = static_cast<operation*>(overlapped);
         op->do_completion(last_error, bytes_transferred);
 
+        ec = boost::system::error_code();
         return 1;
       }
       else
       {
-        // The interrupted_ flag is always checked to ensure that any leftover
+        // The stopped_ flag is always checked to ensure that any leftover
         // interrupts from a previous run invocation are ignored.
-        if (::InterlockedExchangeAdd(&interrupted_, 0) != 0)
+        if (::InterlockedExchangeAdd(&stopped_, 0) != 0)
         {
           // Wake up next thread that is blocked on GetQueuedCompletionStatus.
           if (!::PostQueuedCompletionStatus(iocp_.handle, 0, 0, 0))
           {
             DWORD last_error = ::GetLastError();
-            boost::system::system_error e(
-                boost::system::error_code(last_error, 
-                  boost::system::native_ecat),
-                "pqcs");
-            boost::throw_exception(e);
+            ec = boost::system::error_code(last_error,
+                boost::system::native_ecat);
+            return 0;
           }
 
+          ec = boost::system::error_code();
           return 0;
         }
       }
@@ -394,8 +408,8 @@ private:
   // The count of unfinished work.
   long outstanding_work_;
 
-  // Flag to indicate whether the event loop has been interrupted.
-  long interrupted_;
+  // Flag to indicate whether the event loop has been stopped.
+  long stopped_;
 
   // Flag to indicate whether the service has been shut down.
   long shutdown_;

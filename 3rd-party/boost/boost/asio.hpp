@@ -2,7 +2,7 @@
 // asio.hpp
 // ~~~~~~~~
 //
-// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -52,6 +52,8 @@
 #include <boost/asio/ip/resolver_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ip/udp.hpp>
+#include <boost/asio/ip/unicast.hpp>
+#include <boost/asio/ip/v6_only.hpp>
 #include <boost/asio/is_read_buffered.hpp>
 #include <boost/asio/is_write_buffered.hpp>
 #include <boost/asio/placeholders.hpp>

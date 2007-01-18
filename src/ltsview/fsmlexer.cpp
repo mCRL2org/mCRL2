@@ -1029,7 +1029,7 @@ static int yy_get_next_buffer (void)
 
 		/* Read in more data. */
 		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			(yy_n_chars), (size_t) num_to_read );
+			(yy_n_chars), num_to_read );
 
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
 		}
@@ -1303,9 +1303,19 @@ static void fsm_load_buffer_state  (void)
 	fsmfree((void *) b  );
 }
 
-#ifndef __cplusplus
+#ifndef _UNISTD_H /* assume unistd.h has isatty() for us */
+#ifdef __cplusplus
+extern "C" {
+#endif
+#ifdef __THROW /* this is a gnuism */
+extern int isatty (int ) __THROW;
+#else
 extern int isatty (int );
-#endif /* __cplusplus */
+#endif
+#ifdef __cplusplus
+}
+#endif
+#endif
     
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
@@ -1493,16 +1503,16 @@ YY_BUFFER_STATE fsm_scan_buffer  (char * base, yy_size_t  size )
 
 /** Setup the input buffer state to scan a string. The next call to fsmlex() will
  * scan from a @e copy of @a str.
- * @param yystr a NUL-terminated string to scan
+ * @param str a NUL-terminated string to scan
  * 
  * @return the newly allocated buffer state object.
  * @note If you want to scan bytes that may contain NUL values, then use
  *       fsm_scan_bytes() instead.
  */
-YY_BUFFER_STATE fsm_scan_string (yyconst char * yystr )
+YY_BUFFER_STATE fsm_scan_string (yyconst char * __yystr )
 {
     
-	return fsm_scan_bytes(yystr,strlen(yystr) );
+	return fsm_scan_bytes(__yystr,strlen(__yystr) );
 }
 
 /** Setup the input buffer state to scan the given bytes. The next call to fsmlex() will

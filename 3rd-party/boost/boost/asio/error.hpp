@@ -2,7 +2,7 @@
 // error.hpp
 // ~~~~~~~~~
 //
-// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -39,32 +39,44 @@
 # define BOOST_ASIO_WIN_OR_POSIX(e_win, e_posix) implementation_defined
 #elif defined(BOOST_WINDOWS) || defined(__CYGWIN__)
 # define BOOST_ASIO_NATIVE_ERROR(e) \
-    boost::system::error_code(e, boost::system::native_ecat)
+    boost::system::error_code(e, \
+        boost::system::native_ecat)
 # define BOOST_ASIO_SOCKET_ERROR(e) \
-    boost::system::error_code(WSA ## e, boost::system::native_ecat)
+    boost::system::error_code(WSA ## e, \
+        boost::system::native_ecat)
 # define BOOST_ASIO_NETDB_ERROR(e) \
-    boost::system::error_code(WSA ## e, boost::system::native_ecat)
+    boost::system::error_code(WSA ## e, \
+        boost::system::native_ecat)
 # define BOOST_ASIO_GETADDRINFO_ERROR(e) \
-    boost::system::error_code(WSA ## e, boost::system::native_ecat)
-# define BOOST_ASIO_EOF_ERROR(e) \
-    boost::system::error_code(e, boost::system::native_ecat)
+    boost::system::error_code(WSA ## e, \
+        boost::system::native_ecat)
+# define BOOST_ASIO_MISC_ERROR(e) \
+    boost::system::error_code(e, \
+        boost::asio::detail::error_base<T>::misc_ecat)
 # define BOOST_ASIO_WIN_OR_POSIX(e_win, e_posix) e_win
 #else
 # define BOOST_ASIO_NATIVE_ERROR(e) \
-    boost::system::error_code(e, boost::system::native_ecat)
+    boost::system::error_code(e, \
+        boost::system::native_ecat)
 # define BOOST_ASIO_SOCKET_ERROR(e) \
-    boost::system::error_code(e, boost::system::native_ecat)
+    boost::system::error_code(e, \
+        boost::system::native_ecat)
 # define BOOST_ASIO_NETDB_ERROR(e) \
-    boost::system::error_code(e, boost::asio::error_base<T>::netdb_ecat)
+    boost::system::error_code(e, \
+        boost::asio::detail::error_base<T>::netdb_ecat)
 # define BOOST_ASIO_GETADDRINFO_ERROR(e) \
-    boost::system::error_code(e, boost::asio::error_base<T>::addrinfo_ecat)
-# define BOOST_ASIO_EOF_ERROR(e) \
-    boost::system::error_code(e, boost::asio::error_base<T>::eof_ecat)
+    boost::system::error_code(e, \
+        boost::asio::detail::error_base<T>::addrinfo_ecat)
+# define BOOST_ASIO_MISC_ERROR(e) \
+    boost::system::error_code(e, \
+        boost::asio::detail::error_base<T>::misc_ecat)
 # define BOOST_ASIO_WIN_OR_POSIX(e_win, e_posix) e_posix
 #endif
 
 namespace boost {
 namespace asio {
+
+namespace detail {
 
 /// Hack to keep asio library header-file-only.
 template <typename T>
@@ -83,12 +95,12 @@ public:
   static std::string addrinfo_md(const boost::system::error_code& ec);
   static boost::system::wstring_t addrinfo_wmd(
       const boost::system::error_code& ec);
-
-  static boost::system::error_category eof_ecat;
-  static int eof_ed(const boost::system::error_code& ec);
-  static std::string eof_md(const boost::system::error_code& ec);
-  static boost::system::wstring_t eof_wmd(const boost::system::error_code& ec);
 #endif // !defined(BOOST_WINDOWS) && !defined(__CYGWIN__)
+
+  static boost::system::error_category misc_ecat;
+  static int misc_ed(const boost::system::error_code& ec);
+  static std::string misc_md(const boost::system::error_code& ec);
+  static boost::system::wstring_t misc_wmd(const boost::system::error_code& ec);
 
   static boost::system::error_category ssl_ecat;
   static int ssl_ed(const boost::system::error_code& ec);
@@ -106,6 +118,9 @@ public:
 
   /// Transport endpoint is already connected.
   static const boost::system::error_code already_connected;
+
+  /// Already open.
+  static const boost::system::error_code already_open;
 
   /// Operation already in progress.
   static const boost::system::error_code already_started;
@@ -182,14 +197,17 @@ public:
   /// Transport endpoint is not connected.
   static const boost::system::error_code not_connected;
 
+  /// Element not found.
+  static const boost::system::error_code not_found;
+
   /// Socket operation on non-socket.
   static const boost::system::error_code not_socket;
 
-  /// Operation not supported.
-  static const boost::system::error_code not_supported;
-
   /// Operation cancelled.
   static const boost::system::error_code operation_aborted;
+
+  /// Operation not supported.
+  static const boost::system::error_code operation_not_supported;
 
   /// The service is not supported for the given socket type.
   static const boost::system::error_code service_not_found;
@@ -287,35 +305,41 @@ boost::system::wstring_t error_base<T>::addrinfo_wmd(
   return L"EINVAL";
 }
 
-template <typename T>
-boost::system::error_category error_base<T>::eof_ecat(
-    boost::system::error_code::new_category(&error_base<T>::eof_ed,
-      &error_base<T>::eof_md, &error_base<T>::eof_wmd));
+#endif // !defined(BOOST_WINDOWS) && !defined(__CYGWIN__)
 
 template <typename T>
-int error_base<T>::eof_ed(const boost::system::error_code& ec)
+boost::system::error_category error_base<T>::misc_ecat(
+    boost::system::error_code::new_category(&error_base<T>::misc_ed,
+      &error_base<T>::misc_md, &error_base<T>::misc_wmd));
+
+template <typename T>
+int error_base<T>::misc_ed(const boost::system::error_code& ec)
 {
   return EOTHER;
 }
 
 template <typename T>
-std::string error_base<T>::eof_md(const boost::system::error_code& ec)
+std::string error_base<T>::misc_md(const boost::system::error_code& ec)
 {
+  if (ec == error_base<T>::already_open)
+    return "Already open";
   if (ec == error_base<T>::eof)
     return "End of file";
+  if (ec == error_base<T>::not_found)
+    return "Element not found";
   return "EINVAL";
 }
 
 template <typename T>
-boost::system::wstring_t error_base<T>::eof_wmd(
+boost::system::wstring_t error_base<T>::misc_wmd(
     const boost::system::error_code& ec)
 {
   if (ec == error_base<T>::eof)
     return L"End of file";
+  if (ec == error_base<T>::not_found)
+    return L"Element not found";
   return L"EINVAL";
 }
-
-#endif // !defined(BOOST_WINDOWS) && !defined(__CYGWIN__)
 
 template <typename T>
 boost::system::error_category error_base<T>::ssl_ecat(
@@ -355,6 +379,9 @@ template <typename T> const boost::system::error_code
 error_base<T>::already_connected = BOOST_ASIO_SOCKET_ERROR(EISCONN);
 
 template <typename T> const boost::system::error_code
+error_base<T>::already_open = BOOST_ASIO_MISC_ERROR(1);
+
+template <typename T> const boost::system::error_code
 error_base<T>::already_started = BOOST_ASIO_SOCKET_ERROR(EALREADY);
 
 template <typename T> const boost::system::error_code
@@ -370,9 +397,7 @@ template <typename T> const boost::system::error_code
 error_base<T>::bad_descriptor = BOOST_ASIO_SOCKET_ERROR(EBADF);
 
 template <typename T> const boost::system::error_code
-error_base<T>::eof = BOOST_ASIO_WIN_OR_POSIX(
-    BOOST_ASIO_EOF_ERROR(ERROR_HANDLE_EOF),
-    BOOST_ASIO_EOF_ERROR(-1));
+error_base<T>::eof = BOOST_ASIO_MISC_ERROR(2);
 
 template <typename T> const boost::system::error_code
 error_base<T>::fault = BOOST_ASIO_SOCKET_ERROR(EFAULT);
@@ -436,15 +461,18 @@ template <typename T> const boost::system::error_code
 error_base<T>::not_connected = BOOST_ASIO_SOCKET_ERROR(ENOTCONN);
 
 template <typename T> const boost::system::error_code
-error_base<T>::not_socket = BOOST_ASIO_SOCKET_ERROR(ENOTSOCK);
+error_base<T>::not_found = BOOST_ASIO_MISC_ERROR(3);
 
 template <typename T> const boost::system::error_code
-error_base<T>::not_supported = BOOST_ASIO_SOCKET_ERROR(EOPNOTSUPP);
+error_base<T>::not_socket = BOOST_ASIO_SOCKET_ERROR(ENOTSOCK);
 
 template <typename T> const boost::system::error_code
 error_base<T>::operation_aborted = BOOST_ASIO_WIN_OR_POSIX(
     BOOST_ASIO_NATIVE_ERROR(ERROR_OPERATION_ABORTED),
     BOOST_ASIO_NATIVE_ERROR(ECANCELED));
+
+template <typename T> const boost::system::error_code
+error_base<T>::operation_not_supported = BOOST_ASIO_SOCKET_ERROR(EOPNOTSUPP);
 
 template <typename T> const boost::system::error_code
 error_base<T>::service_not_found = BOOST_ASIO_WIN_OR_POSIX(
@@ -470,8 +498,10 @@ error_base<T>::try_again = BOOST_ASIO_WIN_OR_POSIX(
 template <typename T> const boost::system::error_code
 error_base<T>::would_block = BOOST_ASIO_SOCKET_ERROR(EWOULDBLOCK);
 
+} // namespace detail
+
 /// Contains error constants.
-class error : public error_base<error>
+class error : public boost::asio::detail::error_base<error>
 {
 private:
   error();
@@ -484,7 +514,7 @@ private:
 #undef BOOST_ASIO_SOCKET_ERROR
 #undef BOOST_ASIO_NETDB_ERROR
 #undef BOOST_ASIO_GETADDRINFO_ERROR
-#undef BOOST_ASIO_EOF_ERROR
+#undef BOOST_ASIO_MISC_ERROR
 #undef BOOST_ASIO_WIN_OR_POSIX
 
 

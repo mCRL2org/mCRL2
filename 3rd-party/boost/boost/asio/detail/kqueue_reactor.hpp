@@ -2,7 +2,7 @@
 // kqueue_reactor.hpp
 // ~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 // Copyright (c) 2005 Stefan Arentz (stefan at soze dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -42,6 +42,7 @@
 #include <boost/asio/detail/thread.hpp>
 #include <boost/asio/detail/reactor_op_queue.hpp>
 #include <boost/asio/detail/select_interrupter.hpp>
+#include <boost/asio/detail/service_base.hpp>
 #include <boost/asio/detail/signal_blocker.hpp>
 #include <boost/asio/detail/socket_types.hpp>
 #include <boost/asio/detail/timer_queue.hpp>
@@ -57,12 +58,13 @@ namespace detail {
 
 template <bool Own_Thread>
 class kqueue_reactor
-  : public boost::asio::io_service::service
+  : public boost::asio::detail::service_base<kqueue_reactor<Own_Thread> >
 {
 public:
   // Constructor.
   kqueue_reactor(boost::asio::io_service& io_service)
-    : boost::asio::io_service::service(io_service),
+    : boost::asio::detail::service_base<
+        kqueue_reactor<Own_Thread> >(io_service),
       mutex_(),
       kqueue_fd_(do_kqueue_create()),
       wait_in_progress_(false),

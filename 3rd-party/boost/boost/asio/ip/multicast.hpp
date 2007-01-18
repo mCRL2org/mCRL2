@@ -2,7 +2,7 @@
 // multicast.hpp
 // ~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -125,7 +125,7 @@ typedef boost::asio::ip::detail::socket_option::network_interface<
  * ...
  * boost::asio::ip::multicast::hops option;
  * socket.get_option(option);
- * int ttl = option.get();
+ * int ttl = option.value();
  * @endcode
  *
  * @par Concepts:
@@ -159,7 +159,7 @@ typedef boost::asio::ip::detail::socket_option::integer<
  * ...
  * boost::asio::ip::multicast::enable_loopback option;
  * socket.get_option(option);
- * bool is_set = option.get();
+ * bool is_set = option.value();
  * @endcode
  *
  * @par Concepts:

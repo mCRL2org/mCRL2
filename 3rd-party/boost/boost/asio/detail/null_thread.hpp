@@ -2,7 +2,7 @@
 // null_thread.hpp
 // ~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -43,7 +43,8 @@ public:
   template <typename Function>
   null_thread(Function f)
   {
-    boost::system::system_error e(boost::asio::error::not_supported, "thread");
+    boost::system::system_error e(
+        boost::asio::error::operation_not_supported, "thread");
     boost::throw_exception(e);
   }
 

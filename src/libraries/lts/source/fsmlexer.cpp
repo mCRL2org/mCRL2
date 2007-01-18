@@ -917,6 +917,13 @@ yyFlexLexer::yyFlexLexer( std::istream* arg_yyin, std::ostream* arg_yyout )
 
 }
 
+yyFlexLexer::~yyFlexLexer()
+{
+	delete [] yy_state_buf;
+	fsmyyfree(yy_start_stack  );
+	yy_delete_buffer( YY_CURRENT_BUFFER );
+}
+
 void yyFlexLexer::switch_streams( std::istream* new_in, std::ostream* new_out )
 {
 	if ( new_in )
@@ -1062,7 +1069,7 @@ int yyFlexLexer::yy_get_next_buffer()
 
 		/* Read in more data. */
 		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			(yy_n_chars), (size_t) num_to_read );
+			(yy_n_chars), num_to_read );
 
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
 		}
@@ -1582,25 +1589,6 @@ void yyFlexLexer::LexerError( yyconst char msg[] )
 	while ( 0 )
 
 /* Accessor  methods (get/set functions) to struct members. */
-
-yyFlexLexer::~yyFlexLexer()
-{
-    
-    /* Pop the buffer stack, destroying each element. */
-	while(YY_CURRENT_BUFFER){
-		yy_delete_buffer( YY_CURRENT_BUFFER  );
-		YY_CURRENT_BUFFER_LVALUE = NULL;
-		yypop_buffer_state();
-	}
-
-	/* Destroy the stack itself. */
-	fsmyyfree((yy_buffer_stack) );
-	(yy_buffer_stack) = NULL;
-
-	delete [] (yy_state_buf);
-	fsmyyfree((yy_start_stack)  );
-
-}
 
 /*
  * Internal utility routines.

@@ -2,7 +2,7 @@
 // socket_acceptor_service.hpp
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -23,6 +23,7 @@
 #include <boost/asio/detail/epoll_reactor.hpp>
 #include <boost/asio/detail/kqueue_reactor.hpp>
 #include <boost/asio/detail/select_reactor.hpp>
+#include <boost/asio/detail/service_base.hpp>
 #include <boost/asio/detail/reactive_socket_service.hpp>
 #include <boost/asio/detail/win_iocp_socket_service.hpp>
 
@@ -32,9 +33,18 @@ namespace asio {
 /// Default service implementation for a socket acceptor.
 template <typename Protocol>
 class socket_acceptor_service
+#if defined(GENERATING_DOCUMENTATION)
   : public boost::asio::io_service::service
+#else
+  : public boost::asio::detail::service_base<socket_acceptor_service<Protocol> >
+#endif
 {
 public:
+#if defined(GENERATING_DOCUMENTATION)
+  /// The unique service identifier.
+  static boost::asio::io_service::id id;
+#endif
+
   /// The protocol type.
   typedef Protocol protocol_type;
 
@@ -73,7 +83,8 @@ public:
 
   /// Construct a new socket acceptor service for the specified io_service.
   explicit socket_acceptor_service(boost::asio::io_service& io_service)
-    : boost::asio::io_service::service(io_service),
+    : boost::asio::detail::service_base<
+        socket_acceptor_service<Protocol> >(io_service),
       service_impl_(boost::asio::use_service<service_impl_type>(io_service))
   {
   }
@@ -180,35 +191,18 @@ public:
   template <typename SocketService>
   boost::system::error_code accept(implementation_type& impl,
       basic_socket<protocol_type, SocketService>& peer,
-      boost::system::error_code& ec)
+      endpoint_type* peer_endpoint, boost::system::error_code& ec)
   {
-    return service_impl_.accept(impl, peer, ec);
-  }
-
-  /// Accept a new connection.
-  template <typename SocketService>
-  boost::system::error_code accept_endpoint(implementation_type& impl,
-      basic_socket<protocol_type, SocketService>& peer,
-      endpoint_type& peer_endpoint, boost::system::error_code& ec)
-  {
-    return service_impl_.accept_endpoint(impl, peer, peer_endpoint, ec);
+    return service_impl_.accept(impl, peer, peer_endpoint, ec);
   }
 
   /// Start an asynchronous accept.
   template <typename SocketService, typename AcceptHandler>
   void async_accept(implementation_type& impl,
-      basic_socket<protocol_type, SocketService>& peer, AcceptHandler handler)
-  {
-    service_impl_.async_accept(impl, peer, handler);
-  }
-
-  /// Start an asynchronous accept.
-  template <typename SocketService, typename AcceptHandler>
-  void async_accept_endpoint(implementation_type& impl,
       basic_socket<protocol_type, SocketService>& peer,
-      endpoint_type& peer_endpoint, AcceptHandler handler)
+      endpoint_type* peer_endpoint, AcceptHandler handler)
   {
-    service_impl_.async_accept_endpoint(impl, peer, peer_endpoint, handler);
+    service_impl_.async_accept(impl, peer, peer_endpoint, handler);
   }
 
 private:

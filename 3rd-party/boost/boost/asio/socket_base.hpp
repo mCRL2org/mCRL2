@@ -2,7 +2,7 @@
 // socket_base.hpp
 // ~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -95,7 +95,7 @@ public:
    * ...
    * boost::asio::socket_base::broadcast option;
    * socket.get_option(option);
-   * bool is_set = option.get();
+   * bool is_set = option.value();
    * @endcode
    *
    * @par Concepts:
@@ -106,6 +106,39 @@ public:
 #else
   typedef boost::asio::detail::socket_option::boolean<
     SOL_SOCKET, SO_BROADCAST> broadcast;
+#endif
+
+  /// Socket option to enable socket-level debugging.
+  /**
+   * Implements the SOL_SOCKET/SO_DEBUG socket option.
+   *
+   * @par Examples
+   * Setting the option:
+   * @code
+   * boost::asio::ip::tcp::socket socket(io_service); 
+   * ...
+   * boost::asio::socket_base::debug option(true);
+   * socket.set_option(option);
+   * @endcode
+   *
+   * @par
+   * Getting the current option value:
+   * @code
+   * boost::asio::ip::tcp::socket socket(io_service); 
+   * ...
+   * boost::asio::socket_base::debug option;
+   * socket.get_option(option);
+   * bool is_set = option.value();
+   * @endcode
+   *
+   * @par Concepts:
+   * Socket_Option, Boolean_Socket_Option.
+   */
+#if defined(GENERATING_DOCUMENTATION)
+  typedef implementation_defined debug;
+#else
+  typedef boost::asio::detail::socket_option::boolean<
+    SOL_SOCKET, SO_DEBUG> debug;
 #endif
 
   /// Socket option to prevent routing, use local interfaces only.
@@ -128,7 +161,7 @@ public:
    * ...
    * boost::asio::socket_base::do_not_route option;
    * socket.get_option(option);
-   * bool is_set = option.get();
+   * bool is_set = option.value();
    * @endcode
    *
    * @par Concepts:
@@ -161,7 +194,7 @@ public:
    * ...
    * boost::asio::socket_base::keep_alive option;
    * socket.get_option(option);
-   * bool is_set = option.get();
+   * bool is_set = option.value();
    * @endcode
    *
    * @par Concepts:
@@ -194,7 +227,7 @@ public:
    * ...
    * boost::asio::socket_base::send_buffer_size option;
    * socket.get_option(option);
-   * int size = option.get();
+   * int size = option.value();
    * @endcode
    *
    * @par Concepts:
@@ -227,7 +260,7 @@ public:
    * ...
    * boost::asio::socket_base::send_low_watermark option;
    * socket.get_option(option);
-   * int size = option.get();
+   * int size = option.value();
    * @endcode
    *
    * @par Concepts:
@@ -260,7 +293,7 @@ public:
    * ...
    * boost::asio::socket_base::receive_buffer_size option;
    * socket.get_option(option);
-   * int size = option.get();
+   * int size = option.value();
    * @endcode
    *
    * @par Concepts:
@@ -293,7 +326,7 @@ public:
    * ...
    * boost::asio::socket_base::receive_low_watermark option;
    * socket.get_option(option);
-   * int size = option.get();
+   * int size = option.value();
    * @endcode
    *
    * @par Concepts:
@@ -327,7 +360,7 @@ public:
    * ...
    * boost::asio::socket_base::reuse_address option;
    * acceptor.get_option(option);
-   * bool is_set = option.get();
+   * bool is_set = option.value();
    * @endcode
    *
    * @par Concepts:
@@ -397,7 +430,7 @@ public:
    * ...
    * boost::asio::socket_base::enable_connection_aborted option;
    * acceptor.get_option(option);
-   * bool is_set = option.get();
+   * bool is_set = option.value();
    * @endcode
    *
    * @par Concepts:

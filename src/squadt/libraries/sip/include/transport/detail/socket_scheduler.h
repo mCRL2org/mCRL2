@@ -72,7 +72,7 @@ namespace transport {
 
     inline void socket_scheduler::stop() {
       if (active) {
-        io_service.interrupt();
+        io_service.stop();
 
         thread->join();
       }

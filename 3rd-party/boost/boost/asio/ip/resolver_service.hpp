@@ -2,7 +2,7 @@
 // resolver_service.hpp
 // ~~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -20,6 +20,7 @@
 #include <boost/asio/error.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/detail/resolver_service.hpp>
+#include <boost/asio/detail/service_base.hpp>
 
 namespace boost {
 namespace asio {
@@ -28,9 +29,19 @@ namespace ip {
 /// Default service implementation for a resolver.
 template <typename InternetProtocol>
 class resolver_service
+#if defined(GENERATING_DOCUMENTATION)
   : public boost::asio::io_service::service
+#else
+  : public boost::asio::detail::service_base<
+      resolver_service<InternetProtocol> >
+#endif
 {
 public:
+#if defined(GENERATING_DOCUMENTATION)
+  /// The unique service identifier.
+  static boost::asio::io_service::id id;
+#endif
+
   /// The protocol type.
   typedef InternetProtocol protocol_type;
 
@@ -58,7 +69,8 @@ public:
 
   /// Construct a new resolver service for the specified io_service.
   explicit resolver_service(boost::asio::io_service& io_service)
-    : boost::asio::io_service::service(io_service),
+    : boost::asio::detail::service_base<
+        resolver_service<InternetProtocol> >(io_service),
       service_impl_(boost::asio::use_service<service_impl_type>(io_service))
   {
   }

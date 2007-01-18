@@ -2,7 +2,7 @@
 // deadline_timer_service.hpp
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -27,6 +27,7 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/detail/bind_handler.hpp>
 #include <boost/asio/detail/noncopyable.hpp>
+#include <boost/asio/detail/service_base.hpp>
 #include <boost/asio/detail/socket_ops.hpp>
 #include <boost/asio/detail/socket_types.hpp>
 #include <boost/asio/detail/timer_queue.hpp>
@@ -37,7 +38,8 @@ namespace detail {
 
 template <typename Time_Traits, typename Timer_Scheduler>
 class deadline_timer_service
-  : public boost::asio::io_service::service
+  : public boost::asio::detail::service_base<
+      deadline_timer_service<Time_Traits, Timer_Scheduler> >
 {
 public:
   // The time type.
@@ -57,7 +59,8 @@ public:
 
   // Constructor.
   deadline_timer_service(boost::asio::io_service& io_service)
-    : boost::asio::io_service::service(io_service),
+    : boost::asio::detail::service_base<
+        deadline_timer_service<Time_Traits, Timer_Scheduler> >(io_service),
       scheduler_(boost::asio::use_service<Timer_Scheduler>(io_service))
   {
     scheduler_.add_timer_queue(timer_queue_);
@@ -84,16 +87,21 @@ public:
   // Destroy a timer implementation.
   void destroy(implementation_type& impl)
   {
-    cancel(impl);
+    boost::system::error_code ec;
+    cancel(impl, ec);
   }
 
   // Cancel any asynchronous wait operations associated with the timer.
-  std::size_t cancel(implementation_type& impl)
+  std::size_t cancel(implementation_type& impl, boost::system::error_code& ec)
   {
     if (!impl.might_have_pending_waits)
+    {
+      ec = boost::system::error_code();
       return 0;
+    }
     std::size_t count = scheduler_.cancel_timer(timer_queue_, &impl);
     impl.might_have_pending_waits = false;
+    ec = boost::system::error_code();
     return count;
   }
 
@@ -105,10 +113,11 @@ public:
 
   // Set the expiry time for the timer as an absolute time.
   std::size_t expires_at(implementation_type& impl,
-      const time_type& expiry_time)
+      const time_type& expiry_time, boost::system::error_code& ec)
   {
-    std::size_t count = cancel(impl);
+    std::size_t count = cancel(impl, ec);
     impl.expiry = expiry_time;
+    ec = boost::system::error_code();
     return count;
   }
 
@@ -120,13 +129,14 @@ public:
 
   // Set the expiry time for the timer relative to now.
   std::size_t expires_from_now(implementation_type& impl,
-      const duration_type& expiry_time)
+      const duration_type& expiry_time, boost::system::error_code& ec)
   {
-    return expires_at(impl, Time_Traits::add(Time_Traits::now(), expiry_time));
+    return expires_at(impl,
+        Time_Traits::add(Time_Traits::now(), expiry_time), ec);
   }
 
   // Perform a blocking wait on the timer.
-  void wait(implementation_type& impl)
+  void wait(implementation_type& impl, boost::system::error_code& ec)
   {
     time_type now = Time_Traits::now();
     while (Time_Traits::less_than(now, impl.expiry))
@@ -140,6 +150,7 @@ public:
       socket_ops::select(0, 0, 0, 0, &tv, ec);
       now = Time_Traits::now();
     }
+    ec = boost::system::error_code();
   }
 
   template <typename Handler>
@@ -170,7 +181,7 @@ public:
   {
     impl.might_have_pending_waits = true;
     scheduler_.schedule_timer(timer_queue_, impl.expiry,
-        wait_handler<Handler>(io_service(), handler), &impl);
+        wait_handler<Handler>(this->io_service(), handler), &impl);
   }
 
 private:

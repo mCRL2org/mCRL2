@@ -2,7 +2,7 @@
 // read.ipp
 // ~~~~~~~~
 //
-// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -16,6 +16,10 @@
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
 #include <boost/asio/detail/push_options.hpp>
+
+#include <boost/asio/detail/push_options.hpp>
+#include <algorithm>
+#include <boost/asio/detail/pop_options.hpp>
 
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/completion_condition.hpp>
@@ -78,10 +82,13 @@ std::size_t read(SyncReadStream& s,
   std::size_t total_transferred = 0;
   for (;;)
   {
-    std::size_t bytes_transferred = s.read_some(b.prepare(512), ec);
+    std::size_t bytes_available =
+      std::min<std::size_t>(512, b.max_size() - b.size());
+    std::size_t bytes_transferred = s.read_some(b.prepare(bytes_available), ec);
     b.commit(bytes_transferred);
     total_transferred += bytes_transferred;
-    if (completion_condition(ec, total_transferred))
+    if (b.size() == b.max_size()
+        || completion_condition(ec, total_transferred))
       return total_transferred;
   }
 }
@@ -115,7 +122,10 @@ namespace detail
   class read_handler
   {
   public:
-    read_handler(AsyncReadStream& stream, const MutableBufferSequence& buffers,
+    typedef boost::asio::detail::consuming_buffers<
+      mutable_buffer, MutableBufferSequence> buffers_type;
+
+    read_handler(AsyncReadStream& stream, const buffers_type& buffers,
         CompletionCondition completion_condition, ReadHandler handler)
       : stream_(stream),
         buffers_(buffers),
@@ -143,8 +153,7 @@ namespace detail
 
   //private:
     AsyncReadStream& stream_;
-    boost::asio::detail::consuming_buffers<
-      mutable_buffer, MutableBufferSequence> buffers_;
+    buffers_type buffers_;
     std::size_t total_transferred_;
     CompletionCondition completion_condition_;
     ReadHandler handler_;
@@ -187,10 +196,12 @@ template <typename AsyncReadStream, typename MutableBufferSequence,
 inline void async_read(AsyncReadStream& s, const MutableBufferSequence& buffers,
     CompletionCondition completion_condition, ReadHandler handler)
 {
-  s.async_read_some(buffers,
+  boost::asio::detail::consuming_buffers<
+    mutable_buffer, MutableBufferSequence> tmp(buffers);
+  s.async_read_some(tmp,
       detail::read_handler<AsyncReadStream, MutableBufferSequence,
         CompletionCondition, ReadHandler>(
-          s, buffers, completion_condition, handler));
+          s, tmp, completion_condition, handler));
 }
 
 template <typename AsyncReadStream, typename MutableBufferSequence,
@@ -224,13 +235,16 @@ namespace detail
     {
       total_transferred_ += bytes_transferred;
       streambuf_.commit(bytes_transferred);
-      if (completion_condition_(ec, total_transferred_))
+      if (streambuf_.size() == streambuf_.max_size()
+          || completion_condition_(ec, total_transferred_))
       {
         handler_(ec, total_transferred_);
       }
       else
       {
-        stream_.async_read_some(streambuf_.prepare(512), *this);
+        std::size_t bytes_available =
+          std::min<std::size_t>(512, streambuf_.max_size() - streambuf_.size());
+        stream_.async_read_some(streambuf_.prepare(bytes_available), *this);
       }
     }
 
@@ -279,7 +293,9 @@ inline void async_read(AsyncReadStream& s,
     boost::asio::basic_streambuf<Allocator>& b,
     CompletionCondition completion_condition, ReadHandler handler)
 {
-  s.async_read_some(b.prepare(512),
+  std::size_t bytes_available =
+    std::min<std::size_t>(512, b.max_size() - b.size());
+  s.async_read_some(b.prepare(bytes_available),
       detail::read_streambuf_handler<AsyncReadStream, Allocator,
         CompletionCondition, ReadHandler>(
           s, b, completion_condition, handler));

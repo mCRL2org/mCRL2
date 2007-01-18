@@ -2,7 +2,7 @@
 // address_v6.hpp
 // ~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -167,8 +167,8 @@ public:
   {
     if (!is_v4_mapped() && !is_v4_compatible())
       throw std::bad_cast();
-    address_v4::bytes_type v4_bytes = { { addr_.s6_addr[12],
-      addr_.s6_addr[13], addr_.s6_addr[14], addr_.s6_addr[15] } };
+    address_v4::bytes_type v4_bytes = { addr_.s6_addr[12],
+      addr_.s6_addr[13], addr_.s6_addr[14], addr_.s6_addr[15] };
     return address_v4(v4_bytes);
   }
 
@@ -346,8 +346,8 @@ public:
   static address_v6 v4_mapped(const address_v4& addr)
   {
     address_v4::bytes_type v4_bytes = addr.to_bytes();
-    bytes_type v6_bytes = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF,
-      v4_bytes[0], v4_bytes[1], v4_bytes[2], v4_bytes[3] } };
+    bytes_type v6_bytes = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF,
+      v4_bytes[0], v4_bytes[1], v4_bytes[2], v4_bytes[3] };
     return address_v6(v6_bytes);
   }
 
@@ -355,8 +355,8 @@ public:
   static address_v6 v4_compatible(const address_v4& addr)
   {
     address_v4::bytes_type v4_bytes = addr.to_bytes();
-    bytes_type v6_bytes = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      v4_bytes[0], v4_bytes[1], v4_bytes[2], v4_bytes[3] } };
+    bytes_type v6_bytes = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      v4_bytes[0], v4_bytes[1], v4_bytes[2], v4_bytes[3] };
     return address_v6(v6_bytes);
   }
 
