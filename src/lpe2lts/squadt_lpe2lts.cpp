@@ -238,7 +238,7 @@ bool squadt_lpe2lts::check_configuration(sip::configuration const &configuration
 
 bool squadt_lpe2lts::perform_task(sip::configuration &configuration)
 {
-  lts_generation_options lgopts; initialise_lts_generation_options(lgopts);
+  lts_generation_options lgopts;
 
   create_status_display();
 

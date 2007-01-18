@@ -163,7 +163,6 @@ int main(int argc, char **argv)
 #endif
 
   lts_generation_options lgopts;
-  initialise_lts_generation_options(lgopts);
   lgopts.squadt = &sl;
 
   #define sopts "hqvfyucrb::l:da:t::C::R:s:"

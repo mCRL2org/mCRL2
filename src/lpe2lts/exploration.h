@@ -3,6 +3,7 @@
 
 #include <string>
 #include <aterm2.h>
+#include "lts.h"
 #include "libnextstate.h"
 #include "librewrite.h"
 #include "squadt_lpe2lts.h"
@@ -18,7 +19,34 @@
 
 enum exploration_strategy { es_none, es_breadth, es_depth, es_random };
 
-typedef struct {
+struct lts_generation_options {
+  lts_generation_options()
+    :
+      quiet(false),
+      verbose(false),
+      strat(GS_REWR_INNER),
+      usedummies(true),
+      removeunused(true),
+      stateformat(GS_STATE_VECTOR),
+      outformat(OF_UNKNOWN),
+      outinfo(true),
+      max_states(DEFAULT_MAX_STATES),
+      trace(false),
+      num_trace_actions(0),
+      trace_actions(NULL),
+      max_traces(DEFAULT_MAX_TRACES),
+      detect_deadlock(false),
+      detect_action(false),
+      save_error_trace(false),
+      error_trace_saved(false),
+      expl_strat(es_breadth),
+      bithashing(false),
+      bithashsize(DEFAULT_BITHASHSIZE),
+      todo_max(ULONG_MAX),
+      initial_table_size(DEFAULT_INIT_TSIZE),
+      squadt(NULL)
+  {}
+  
   bool quiet;
   bool verbose;
   RewriteStrategy strat;
@@ -45,12 +73,10 @@ typedef struct {
   std::string specification;
   std::string lts;
   squadt_lpe2lts *squadt;
-} lts_generation_options;
+};
 
 exploration_strategy str_to_expl_strat(const char *s);
 const char *expl_strat_to_str(exploration_strategy es);
-
-void initialise_lts_generation_options(lts_generation_options &opts);
 
 bool initialise_lts_generation(lts_generation_options *opts);
 bool generate_lts();

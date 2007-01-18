@@ -48,37 +48,6 @@ const char *expl_strat_to_str(exploration_strategy es)
   }
 }
 
-void initialise_lts_generation_options(lts_generation_options &lgopts)
-{
-  lgopts.quiet = false;
-  lgopts.verbose = false;
-  lgopts.strat = GS_REWR_INNER;
-  lgopts.usedummies = true;
-  lgopts.removeunused = true;
-  lgopts.stateformat = GS_STATE_VECTOR;
-  lgopts.outformat = OF_UNKNOWN;
-  lgopts.outinfo = true;
-  lgopts.max_states = DEFAULT_MAX_STATES;
-  lgopts.priority_action = "";
-  lgopts.trace = false;
-  lgopts.num_trace_actions = 0;
-  lgopts.trace_actions = NULL;
-  lgopts.max_traces = DEFAULT_MAX_TRACES;
-  lgopts.detect_deadlock = false;
-  lgopts.detect_action = false;
-  lgopts.save_error_trace = false;
-  lgopts.error_trace_saved = false;
-  lgopts.expl_strat = es_breadth;
-  lgopts.bithashing = false;
-  lgopts.bithashsize = DEFAULT_BITHASHSIZE;
-  lgopts.todo_max = ULONG_MAX;
-  lgopts.initial_table_size = DEFAULT_INIT_TSIZE;
-  lgopts.specification = "";
-  lgopts.lts = "";
-  lgopts.squadt = NULL;
-}
-
-
 static lts_generation_options *lgopts;
 
 static NextState *nstate;
