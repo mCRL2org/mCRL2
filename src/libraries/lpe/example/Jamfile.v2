@@ -8,6 +8,7 @@ project libraries/lpe/example
        <source>/libraries//lpe
        <source>/site-config//boost_program_options
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
+       <define>LPE_RECURSIVE_SOUNDNESS_CHECKS
    ;
 
 exe constructors    : constructors.cpp    ../../../mcrl22lpe/lin_std.cpp ../../../mcrl22lpe/lin_alt.cpp : ;

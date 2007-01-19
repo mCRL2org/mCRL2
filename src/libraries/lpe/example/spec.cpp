@@ -8,6 +8,7 @@
 #include "lpe/specification.h"
 #include "lpe/sort.h"
 #include "lpe/detail/mcrl22lpe.h"
+#include "lpe/soundness_checks.h"
 #include "test_specifications.h"
 
 using namespace std;
@@ -16,16 +17,6 @@ using namespace lpe;
 using namespace lpe::detail;
 using boost::format;
 
-/// Rewrites the data expressions x an y, and then compares if they are equal.
-///
-//bool compare(data_expression x, data_expression y, data_equation_list equations)
-//{
-//  rewriter r(equations);
-//  ATermAppl x1 = r.rewrite(x);
-//  ATermAppl y1 = r.rewrite(y); 
-//  return atermpp::aterm(x1) == atermpp::aterm(y1);
-//}
-
 int main()
 {
   ATerm bottom_of_stack;
@@ -33,6 +24,14 @@ int main()
   gsEnableConstructorFunctions(); 
   
   specification spec = mcrl22lpe(ABP_SPECIFICATION);
+  cout << "check_rule_Spec(spec) = " << check_rule_Spec(spec) << endl;
+
+  aterm_appl f1 = make_term("OpId(\"!=\",SortArrow(SortArrow(SortId(\"Bool\"),SortArrow(SortId(\"Pos\"),SortId(\"Pos\"))),SortArrow(SortArrow(SortId(\"Bool\"),SortArrow(SortId(\"Pos\"),SortId(\"Pos\"))),SortId(\"Bool\"))))");
+  cout << "check_rule_OpId(f1) = " << check_rule_OpId(f1) << endl;
+  aterm_appl f2 = make_term("OpId(\"!=\",SortArrow(sortarrow(SortId(\"Bool\"),SortArrow(SortId(\"Pos\"),SortId(\"Pos\"))),SortArrow(SortArrow(SortId(\"Bool\"),SortArrow(SortId(\"Pos\"),SortId(\"Pos\"))),SortId(\"Bool\"))))");
+  cout << "check_rule_OpId(f2) = " << check_rule_OpId(f2) << endl;
+  aterm_appl f3 = make_term("OpId(\"!=\",SortArrow(SortArrow(bogus(\"Bool\"),SortArrow(SortId(\"Pos\"),SortId(\"Pos\"))),SortArrow(SortArrow(SortId(\"Bool\"),SortArrow(SortId(\"Pos\"),SortId(\"Pos\"))),SortId(\"Bool\"))))");
+  cout << "check_rule_OpId(f3) = " << check_rule_OpId(f3) << endl;
 
   cout << "--- sort -----------" << endl;
   for (sort_list::iterator i = spec.data().sorts().begin(); i != spec.data().sorts().end(); ++i)
