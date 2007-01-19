@@ -509,7 +509,7 @@ bool check_term_ProcEqn(Term t)
   // check the children
   if (a.size() != 4)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
     return false;
   if (!check_term_argument(a(1), check_rule_ProcVarId<aterm>))
@@ -518,7 +518,7 @@ bool check_term_ProcEqn(Term t)
     return false;
   if (!check_term_argument(a(3), check_rule_ProcExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -538,12 +538,12 @@ bool check_term_Hide(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_String<aterm>, 0))
     return false;
   if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -563,12 +563,12 @@ bool check_term_SortArrow(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_SortExpr<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_SortExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -588,12 +588,12 @@ bool check_term_CommExpr(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_MultActName<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_StringOrNil<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -613,10 +613,10 @@ bool check_term_StateNot(Term t)
   // check the children
   if (a.size() != 1)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_StateFrm<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -636,12 +636,12 @@ bool check_term_IfThen(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_DataExpr<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -661,12 +661,12 @@ bool check_term_StateImp(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_StateFrm<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_StateFrm<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -686,12 +686,12 @@ bool check_term_PBESExists(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 1))
     return false;
   if (!check_term_argument(a(1), check_rule_PBExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -711,12 +711,12 @@ bool check_term_Assignment(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_DataVarId<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_DataExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -736,12 +736,12 @@ bool check_term_StateForall(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 1))
     return false;
   if (!check_term_argument(a(1), check_rule_StateFrm<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -761,10 +761,10 @@ bool check_term_SortId(Term t)
   // check the children
   if (a.size() != 1)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_String<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -784,14 +784,14 @@ bool check_term_StateNu(Term t)
   // check the children
   if (a.size() != 3)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_String<aterm>))
     return false;
   if (!check_list_argument(a(1), check_rule_DataVarIdInit<aterm>, 0))
     return false;
   if (!check_term_argument(a(2), check_rule_StateFrm<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -811,7 +811,7 @@ bool check_term_DataSpec(Term t)
   // check the children
   if (a.size() != 4)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_term_SortSpec<aterm>))
     return false;
   if (!check_term_argument(a(1), check_term_ConsSpec<aterm>))
@@ -820,7 +820,7 @@ bool check_term_DataSpec(Term t)
     return false;
   if (!check_term_argument(a(3), check_term_DataEqnSpec<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -840,14 +840,14 @@ bool check_term_LPE(Term t)
   // check the children
   if (a.size() != 3)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
     return false;
   if (!check_list_argument(a(1), check_rule_DataVarId<aterm>, 0))
     return false;
   if (!check_list_argument(a(2), check_rule_LPESummand<aterm>, 0))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -867,7 +867,7 @@ bool check_term_SpecV1(Term t)
   // check the children
   if (a.size() != 4)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_DataSpec<aterm>))
     return false;
   if (!check_term_argument(a(1), check_term_ActSpec<aterm>))
@@ -876,7 +876,7 @@ bool check_term_SpecV1(Term t)
     return false;
   if (!check_term_argument(a(3), check_rule_Init<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -915,10 +915,10 @@ bool check_term_StateYaledTimed(Term t)
   // check the children
   if (a.size() != 1)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_DataExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -938,10 +938,10 @@ bool check_term_DataEqnSpec(Term t)
   // check the children
   if (a.size() != 1)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_DataEqn<aterm>, 0))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -961,12 +961,12 @@ bool check_term_PBESOr(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_PBExpr<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_PBExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -986,12 +986,12 @@ bool check_term_ProcVarId(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_String<aterm>))
     return false;
   if (!check_list_argument(a(1), check_rule_SortExpr<aterm>, 0))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1011,10 +1011,10 @@ bool check_term_ConsSpec(Term t)
   // check the children
   if (a.size() != 1)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_OpId<aterm>, 0))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1034,12 +1034,12 @@ bool check_term_Sum(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 1))
     return false;
   if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1059,12 +1059,12 @@ bool check_term_DataVarId(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_String<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_SortExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1084,10 +1084,10 @@ bool check_term_SortSpec(Term t)
   // check the children
   if (a.size() != 1)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_SortDecl<aterm>, 0))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1107,10 +1107,10 @@ bool check_term_MapSpec(Term t)
   // check the children
   if (a.size() != 1)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_OpId<aterm>, 0))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1149,12 +1149,12 @@ bool check_term_Choice(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_ProcExpr<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1174,10 +1174,10 @@ bool check_term_MultAct(Term t)
   // check the children
   if (a.size() != 1)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_Action<aterm>, 0))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1197,12 +1197,12 @@ bool check_term_PropVarInst(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_String<aterm>))
     return false;
   if (!check_list_argument(a(1), check_rule_DataExpr<aterm>, 0))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1241,7 +1241,7 @@ bool check_term_LPESummand(Term t)
   // check the children
   if (a.size() != 5)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
     return false;
   if (!check_term_argument(a(1), check_rule_DataExpr<aterm>))
@@ -1252,7 +1252,7 @@ bool check_term_LPESummand(Term t)
     return false;
   if (!check_list_argument(a(4), check_rule_Assignment<aterm>, 0))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1272,14 +1272,14 @@ bool check_term_StructCons(Term t)
   // check the children
   if (a.size() != 3)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_String<aterm>))
     return false;
   if (!check_list_argument(a(1), check_rule_StructProj<aterm>, 0))
     return false;
   if (!check_term_argument(a(2), check_rule_StringOrNil<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1318,10 +1318,10 @@ bool check_term_ActNot(Term t)
   // check the children
   if (a.size() != 1)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_ActFrm<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1341,12 +1341,12 @@ bool check_term_Block(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_String<aterm>, 0))
     return false;
   if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1366,12 +1366,12 @@ bool check_term_Rename(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_RenameExpr<aterm>, 0))
     return false;
   if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1391,12 +1391,12 @@ bool check_term_Sync(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_ProcExpr<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1416,12 +1416,12 @@ bool check_term_ActExists(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 1))
     return false;
   if (!check_term_argument(a(1), check_rule_ActFrm<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1441,14 +1441,14 @@ bool check_term_StateMu(Term t)
   // check the children
   if (a.size() != 3)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_String<aterm>))
     return false;
   if (!check_list_argument(a(1), check_rule_DataVarIdInit<aterm>, 0))
     return false;
   if (!check_term_argument(a(2), check_rule_StateFrm<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1487,12 +1487,12 @@ bool check_term_PBESForall(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 1))
     return false;
   if (!check_term_argument(a(1), check_rule_PBExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1531,12 +1531,12 @@ bool check_term_BInit(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_ProcExpr<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1575,12 +1575,12 @@ bool check_term_WhrDecl(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_String<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_DataExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1600,12 +1600,12 @@ bool check_term_DataAppl(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_DataExpr<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_DataExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1625,10 +1625,10 @@ bool check_term_StateDelayTimed(Term t)
   // check the children
   if (a.size() != 1)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_DataExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1667,12 +1667,12 @@ bool check_term_AtTime(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_ProcExpr<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_DataExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1692,12 +1692,12 @@ bool check_term_ActOr(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_ActFrm<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_ActFrm<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1717,12 +1717,12 @@ bool check_term_Comm(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_CommExpr<aterm>, 0))
     return false;
   if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1761,12 +1761,12 @@ bool check_term_StateAnd(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_StateFrm<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_StateFrm<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1786,12 +1786,12 @@ bool check_term_LMerge(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_ProcExpr<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1811,12 +1811,12 @@ bool check_term_ActForall(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 1))
     return false;
   if (!check_term_argument(a(1), check_rule_ActFrm<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1836,12 +1836,12 @@ bool check_term_RenameExpr(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_String<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_String<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1861,12 +1861,12 @@ bool check_term_Merge(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_ProcExpr<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1886,10 +1886,10 @@ bool check_term_ActSpec(Term t)
   // check the children
   if (a.size() != 1)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_ActId<aterm>, 0))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1909,12 +1909,12 @@ bool check_term_Action(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_ActId<aterm>))
     return false;
   if (!check_list_argument(a(1), check_rule_DataExpr<aterm>, 0))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1934,12 +1934,12 @@ bool check_term_PBESAnd(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_PBExpr<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_PBExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1959,12 +1959,12 @@ bool check_term_StateMust(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_RegFrm<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_StateFrm<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1984,12 +1984,12 @@ bool check_term_Seq(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_ProcExpr<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2009,14 +2009,14 @@ bool check_term_DataVarIdInit(Term t)
   // check the children
   if (a.size() != 3)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_String<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_SortExpr<aterm>))
     return false;
   if (!check_term_argument(a(2), check_rule_DataExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2036,12 +2036,12 @@ bool check_term_Process(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_ProcVarId<aterm>))
     return false;
   if (!check_list_argument(a(1), check_rule_DataExpr<aterm>, 0))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2061,12 +2061,12 @@ bool check_term_ActAnd(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_ActFrm<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_ActFrm<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2086,14 +2086,14 @@ bool check_term_PBES(Term t)
   // check the children
   if (a.size() != 3)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_DataSpec<aterm>))
     return false;
   if (!check_list_argument(a(1), check_rule_PBEqn<aterm>, 0))
     return false;
   if (!check_term_argument(a(2), check_rule_PropVarInst<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2113,12 +2113,12 @@ bool check_term_BagEnumElt(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_DataExpr<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_DataExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2138,12 +2138,12 @@ bool check_term_StateVar(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_String<aterm>))
     return false;
   if (!check_list_argument(a(1), check_rule_DataExpr<aterm>, 0))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2163,12 +2163,12 @@ bool check_term_ActAt(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_ActFrm<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_DataExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2188,7 +2188,7 @@ bool check_term_DataEqn(Term t)
   // check the children
   if (a.size() != 4)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
     return false;
   if (!check_term_argument(a(1), check_rule_DataExprOrNil<aterm>))
@@ -2197,7 +2197,7 @@ bool check_term_DataEqn(Term t)
     return false;
   if (!check_term_argument(a(3), check_rule_DataExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2217,12 +2217,12 @@ bool check_term_StateExists(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 1))
     return false;
   if (!check_term_argument(a(1), check_rule_StateFrm<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2242,12 +2242,12 @@ bool check_term_StateMay(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_RegFrm<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_StateFrm<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2267,12 +2267,12 @@ bool check_term_ParamId(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_String<aterm>))
     return false;
   if (!check_list_argument(a(1), check_rule_DataExpr<aterm>, 0))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2311,10 +2311,10 @@ bool check_term_MultActName(Term t)
   // check the children
   if (a.size() != 1)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_String<aterm>, 1))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2334,14 +2334,14 @@ bool check_term_IfThenElse(Term t)
   // check the children
   if (a.size() != 3)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_DataExpr<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
     return false;
   if (!check_term_argument(a(2), check_rule_ProcExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2380,12 +2380,12 @@ bool check_term_StateOr(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_StateFrm<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_StateFrm<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2405,12 +2405,12 @@ bool check_term_StructProj(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_StringOrNil<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_SortExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2430,14 +2430,14 @@ bool check_term_PBEqn(Term t)
   // check the children
   if (a.size() != 3)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_FixPoint<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_PropVarDecl<aterm>))
     return false;
   if (!check_term_argument(a(2), check_rule_PBExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2457,12 +2457,12 @@ bool check_term_OpId(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_String<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_SortExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2501,12 +2501,12 @@ bool check_term_ActId(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_String<aterm>))
     return false;
   if (!check_list_argument(a(1), check_rule_SortExpr<aterm>, 0))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2526,12 +2526,12 @@ bool check_term_LPEInit(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
     return false;
   if (!check_list_argument(a(1), check_rule_Assignment<aterm>, 0))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2551,12 +2551,12 @@ bool check_term_Allow(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(a(0), check_rule_MultActName<aterm>, 0))
     return false;
   if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2576,12 +2576,12 @@ bool check_term_PropVarDecl(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_String<aterm>))
     return false;
   if (!check_list_argument(a(1), check_rule_DataVarId<aterm>, 0))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2601,12 +2601,12 @@ bool check_term_ActImp(Term t)
   // check the children
   if (a.size() != 2)
     return false;
-#ifdef LPE_RECURSIVE_SOUNDNESS_CHECKS
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_ActFrm<aterm>))
     return false;
   if (!check_term_argument(a(1), check_rule_ActFrm<aterm>))
     return false;
-#endif // LPE_RECURSIVE_SOUNDNESS_CHECKS
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
