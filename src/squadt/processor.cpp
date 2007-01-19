@@ -190,13 +190,13 @@ namespace squadt {
       send_configuration(c);
 
       /* Wait until configuration is accepted, or the tool has terminated */
-      await_message(sip::message_accept_configuration).get();
-
-      /* End tool execution */
-      finish();
-
-      /* Now run the tool */
-      t->run(true);
+      if (await_message(sip::message_accept_configuration).get() != 0) {
+        /* End tool execution */
+        finish();
+       
+        /* Now run the tool */
+        t->run(true);
+      }
     }
     else {
       /* End tool execution */
