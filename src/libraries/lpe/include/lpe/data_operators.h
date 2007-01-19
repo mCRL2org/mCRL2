@@ -32,12 +32,12 @@ data_expression_list operator+(data_variable v, data_expression_list l)
 }
 
 ///
-/// Return the concatenation of [v] and the list l.
+/// Return the concatenation of the list l and [v].
 ///
 inline
 data_expression_list operator+(data_expression_list l, data_variable v)
 {
-  return data_expression(aterm_appl(v)) + l;
+  return l + data_expression(aterm_appl(v));
 }
 
 } // namespace lpe
