@@ -83,7 +83,7 @@ class LPE_summand: public aterm_appl
     LPE_summand(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(gsIsLPESummand(t));
+      assert(check_rule_LPESummand(m_term));
       aterm_appl::iterator i = t.begin();
 
       m_summation_variables = data_variable_list(*i++);
@@ -386,7 +386,7 @@ class LPE: public aterm_appl
     LPE(aterm_appl lpe)
       : aterm_appl(lpe)
     {
-      assert(gsIsLPE(lpe));
+      assert(check_term_LPE(m_term));
       assert(is_well_typed());
       assert(is_name_clash_free(true));
 

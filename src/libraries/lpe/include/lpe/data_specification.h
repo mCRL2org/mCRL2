@@ -40,7 +40,7 @@ class data_specification: public aterm_appl
     data_specification(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(gsIsDataSpec(t));
+      assert(check_rule_DataSpec(m_term));
       aterm_appl::iterator i = t.begin();
       m_sorts        = sort_list(aterm_appl(*i++).argument(0));
       m_constructors = function_list(aterm_appl(*i++).argument(0));

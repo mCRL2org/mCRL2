@@ -8,12 +8,14 @@
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
 #include "atermpp/aterm_appl.h"
+#include "atermpp/aterm_traits.h"
 
 namespace lpe {
 
 using atermpp::aterm;
 using atermpp::aterm_list;
 using atermpp::aterm_appl;
+using atermpp::aterm_traits;
 
 // checks
 // 1) if term t satisfies the predicate f
@@ -498,7 +500,7 @@ bool check_term_ProcEqn(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsProcEqn(a))
@@ -527,7 +529,7 @@ bool check_term_Hide(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsHide(a))
@@ -552,7 +554,7 @@ bool check_term_SortArrow(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsSortArrow(a))
@@ -577,7 +579,7 @@ bool check_term_CommExpr(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsCommExpr(a))
@@ -602,7 +604,7 @@ bool check_term_StateNot(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsStateNot(a))
@@ -625,7 +627,7 @@ bool check_term_IfThen(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsIfThen(a))
@@ -650,7 +652,7 @@ bool check_term_StateImp(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsStateImp(a))
@@ -675,7 +677,7 @@ bool check_term_PBESExists(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsPBESExists(a))
@@ -700,7 +702,7 @@ bool check_term_Assignment(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsAssignment(a))
@@ -725,7 +727,7 @@ bool check_term_StateForall(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsStateForall(a))
@@ -750,7 +752,7 @@ bool check_term_SortId(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsSortId(a))
@@ -773,7 +775,7 @@ bool check_term_StateNu(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsStateNu(a))
@@ -800,7 +802,7 @@ bool check_term_DataSpec(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsDataSpec(a))
@@ -829,7 +831,7 @@ bool check_term_LPE(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsLPE(a))
@@ -856,7 +858,7 @@ bool check_term_SpecV1(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsSpecV1(a))
@@ -885,7 +887,7 @@ bool check_term_Tau(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsTau(a))
@@ -904,7 +906,7 @@ bool check_term_StateYaledTimed(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsStateYaledTimed(a))
@@ -927,7 +929,7 @@ bool check_term_DataEqnSpec(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsDataEqnSpec(a))
@@ -950,7 +952,7 @@ bool check_term_PBESOr(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsPBESOr(a))
@@ -975,7 +977,7 @@ bool check_term_ProcVarId(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsProcVarId(a))
@@ -1000,7 +1002,7 @@ bool check_term_ConsSpec(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsConsSpec(a))
@@ -1023,7 +1025,7 @@ bool check_term_Sum(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsSum(a))
@@ -1048,7 +1050,7 @@ bool check_term_DataVarId(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsDataVarId(a))
@@ -1073,7 +1075,7 @@ bool check_term_SortSpec(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsSortSpec(a))
@@ -1096,7 +1098,7 @@ bool check_term_MapSpec(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsMapSpec(a))
@@ -1119,7 +1121,7 @@ bool check_term_StateYaled(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsStateYaled(a))
@@ -1138,7 +1140,7 @@ bool check_term_Choice(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsChoice(a))
@@ -1163,7 +1165,7 @@ bool check_term_MultAct(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsMultAct(a))
@@ -1186,7 +1188,7 @@ bool check_term_PropVarInst(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsPropVarInst(a))
@@ -1211,7 +1213,7 @@ bool check_term_StateDelay(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsStateDelay(a))
@@ -1230,7 +1232,7 @@ bool check_term_LPESummand(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsLPESummand(a))
@@ -1261,7 +1263,7 @@ bool check_term_StructCons(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsStructCons(a))
@@ -1288,7 +1290,7 @@ bool check_term_Mu(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsMu(a))
@@ -1307,7 +1309,7 @@ bool check_term_ActNot(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsActNot(a))
@@ -1330,7 +1332,7 @@ bool check_term_Block(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsBlock(a))
@@ -1355,7 +1357,7 @@ bool check_term_Rename(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsRename(a))
@@ -1380,7 +1382,7 @@ bool check_term_Sync(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsSync(a))
@@ -1405,7 +1407,7 @@ bool check_term_ActExists(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsActExists(a))
@@ -1430,7 +1432,7 @@ bool check_term_StateMu(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsStateMu(a))
@@ -1457,7 +1459,7 @@ bool check_term_StateFalse(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsStateFalse(a))
@@ -1476,7 +1478,7 @@ bool check_term_PBESForall(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsPBESForall(a))
@@ -1501,7 +1503,7 @@ bool check_term_StateTrue(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsStateTrue(a))
@@ -1520,7 +1522,7 @@ bool check_term_BInit(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsBInit(a))
@@ -1545,7 +1547,7 @@ bool check_term_PBESFalse(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsPBESFalse(a))
@@ -1564,7 +1566,7 @@ bool check_term_WhrDecl(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsWhrDecl(a))
@@ -1589,7 +1591,7 @@ bool check_term_DataAppl(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsDataAppl(a))
@@ -1614,7 +1616,7 @@ bool check_term_StateDelayTimed(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsStateDelayTimed(a))
@@ -1637,7 +1639,7 @@ bool check_term_Nu(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsNu(a))
@@ -1656,7 +1658,7 @@ bool check_term_AtTime(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsAtTime(a))
@@ -1681,7 +1683,7 @@ bool check_term_ActOr(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsActOr(a))
@@ -1706,7 +1708,7 @@ bool check_term_Comm(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsComm(a))
@@ -1731,7 +1733,7 @@ bool check_term_Delta(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsDelta(a))
@@ -1750,7 +1752,7 @@ bool check_term_StateAnd(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsStateAnd(a))
@@ -1775,7 +1777,7 @@ bool check_term_LMerge(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsLMerge(a))
@@ -1800,7 +1802,7 @@ bool check_term_ActForall(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsActForall(a))
@@ -1825,7 +1827,7 @@ bool check_term_RenameExpr(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsRenameExpr(a))
@@ -1850,7 +1852,7 @@ bool check_term_Merge(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsMerge(a))
@@ -1875,7 +1877,7 @@ bool check_term_ActSpec(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsActSpec(a))
@@ -1898,7 +1900,7 @@ bool check_term_Action(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsAction(a))
@@ -1923,7 +1925,7 @@ bool check_term_PBESAnd(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsPBESAnd(a))
@@ -1948,7 +1950,7 @@ bool check_term_StateMust(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsStateMust(a))
@@ -1973,7 +1975,7 @@ bool check_term_Seq(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsSeq(a))
@@ -1998,7 +2000,7 @@ bool check_term_DataVarIdInit(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsDataVarIdInit(a))
@@ -2025,7 +2027,7 @@ bool check_term_Process(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsProcess(a))
@@ -2050,7 +2052,7 @@ bool check_term_ActAnd(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsActAnd(a))
@@ -2075,7 +2077,7 @@ bool check_term_PBES(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsPBES(a))
@@ -2102,7 +2104,7 @@ bool check_term_BagEnumElt(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsBagEnumElt(a))
@@ -2127,7 +2129,7 @@ bool check_term_StateVar(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsStateVar(a))
@@ -2152,7 +2154,7 @@ bool check_term_ActAt(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsActAt(a))
@@ -2177,7 +2179,7 @@ bool check_term_DataEqn(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsDataEqn(a))
@@ -2206,7 +2208,7 @@ bool check_term_StateExists(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsStateExists(a))
@@ -2231,7 +2233,7 @@ bool check_term_StateMay(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsStateMay(a))
@@ -2256,7 +2258,7 @@ bool check_term_ParamId(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsParamId(a))
@@ -2281,7 +2283,7 @@ bool check_term_PBESTrue(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsPBESTrue(a))
@@ -2300,7 +2302,7 @@ bool check_term_MultActName(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsMultActName(a))
@@ -2323,7 +2325,7 @@ bool check_term_IfThenElse(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsIfThenElse(a))
@@ -2350,7 +2352,7 @@ bool check_term_Nil(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsNil(a))
@@ -2369,7 +2371,7 @@ bool check_term_StateOr(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsStateOr(a))
@@ -2394,7 +2396,7 @@ bool check_term_StructProj(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsStructProj(a))
@@ -2419,7 +2421,7 @@ bool check_term_PBEqn(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsPBEqn(a))
@@ -2446,7 +2448,7 @@ bool check_term_OpId(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsOpId(a))
@@ -2471,7 +2473,7 @@ bool check_term_ActFalse(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsActFalse(a))
@@ -2490,7 +2492,7 @@ bool check_term_ActId(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsActId(a))
@@ -2515,7 +2517,7 @@ bool check_term_LPEInit(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsLPEInit(a))
@@ -2540,7 +2542,7 @@ bool check_term_Allow(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsAllow(a))
@@ -2565,7 +2567,7 @@ bool check_term_PropVarDecl(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsPropVarDecl(a))
@@ -2590,7 +2592,7 @@ bool check_term_ActImp(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsActImp(a))
@@ -2615,7 +2617,7 @@ bool check_term_ActTrue(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
-  if (t.type() != AT_APPL)
+  if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
   if (!gsIsActTrue(a))

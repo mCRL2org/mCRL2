@@ -9,6 +9,7 @@
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
 #include "lpe/pretty_print.h"
+#include "lpe/soundness_checks.h"
 #include "libstruct.h"
 
 namespace lpe {
@@ -52,13 +53,13 @@ class sort: public aterm_appl
     sort(ATermAppl t)
       : aterm_appl(t)
     {
-      assert(gsIsSortId(t) || gsIsSortArrow(t));
+      assert(check_rule_SortExpr(m_term));
     }
 
     sort(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(gsIsSortId(t) || gsIsSortArrow(t));
+      assert(check_rule_SortExpr(m_term));
     }
 
     /// Constructs a sort from a string.

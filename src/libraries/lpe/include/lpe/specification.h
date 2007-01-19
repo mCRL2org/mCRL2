@@ -95,7 +95,7 @@ class specification: public aterm_appl
     specification(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(gsIsSpecV1(t));
+      assert(check_rule_Spec(m_term));
       init_term(t);
     }
 

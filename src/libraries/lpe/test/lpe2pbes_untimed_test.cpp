@@ -26,7 +26,7 @@ int test_main(int argc, char* argv[])
 
   BOOST_CHECK(argc > 1);
   std::string result_file = argv[1];
-  BOOST_CHECK(boost::ends_with(result_file, ".expected_untimed_result"));
+  // BOOST_CHECK(boost::ends_with(result_file, ".expected_untimed_result"));
   std::string formula_file = result_file.substr(0, result_file.find_last_of('.') + 1) + "form"; 
   std::string formula = read_text(formula_file);
 

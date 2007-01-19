@@ -34,7 +34,7 @@ class function: public aterm_appl
     function(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(gsIsOpId(t));
+      assert(check_rule_OpId(m_term));
     }
 
     function(std::string name, sort s)

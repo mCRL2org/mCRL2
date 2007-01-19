@@ -11,6 +11,7 @@
 #include "atermpp/aterm_string.h"
 #include "lpe/data.h"
 #include "lpe/pretty_print.h"
+#include "lpe/soundness_checks.h"
 
 namespace lpe {
 
@@ -36,7 +37,7 @@ class action_label: public aterm_appl
     action_label(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(gsIsActId(t));
+      assert(check_rule_ActId(m_term));
       aterm_appl::iterator i = t.begin();
       m_name  = *i++;
       m_sorts = *i;
@@ -83,7 +84,6 @@ bool is_action_label(aterm_appl t)
 /// \brief Represents an action.
 ///
 // <Action>       ::= Action(<ActId>, <DataExpr>*)
-// <ActId>        ::= ActId(<String>, <SortExpr>*)
 class action: public aterm_appl
 {
   protected:
@@ -98,7 +98,7 @@ class action: public aterm_appl
     action(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(gsIsAction(t));
+      assert(check_rule_Action(m_term));
       aterm_appl::iterator i = t.begin();
       aterm_appl act_id = *i++;
       m_arguments = data_expression_list(*i);

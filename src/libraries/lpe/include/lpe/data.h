@@ -17,6 +17,7 @@
 #include "lpe/sort.h"
 #include "lpe/pretty_print.h"
 #include "lpe/detail/string_utility.h"
+#include "lpe/soundness_checks.h"
 #include "libstruct.h"
 
 namespace lpe {
@@ -43,7 +44,7 @@ typedef term_list<data_expression> data_expression_list;
 ///////////////////////////////////////////////////////////////////////////////
 // data_expression
 /// \brief data expression.
-///
+/// Represents a data expression or nil(!!!).
 class data_expression: public aterm_appl
 {
   public:
@@ -53,13 +54,13 @@ class data_expression: public aterm_appl
     data_expression(aterm_appl term)
       : aterm_appl(term)
     {
-      assert(gsIsNil(term) || gsIsDataVarId(term) || gsIsOpId(term) || gsIsDataAppl(term));
+      assert(check_rule_DataExprOrNil(m_term));
     }
 
     data_expression(ATermAppl term)
       : aterm_appl(term)
     {
-      assert(gsIsNil(term) || gsIsDataVarId(term) || gsIsOpId(term) || gsIsDataAppl(term));
+      assert(check_rule_DataExprOrNil(m_term));
     }
 
     /// Returns the sort of the data expression.
@@ -145,7 +146,7 @@ class data_variable: public data_expression
     data_variable(aterm_appl t)
      : data_expression(t)
     {
-      assert(gsIsDataVarId(t));
+      assert(check_rule_DataVarId(m_term));
     }
 
     /// Very incomplete implementation for initialization using strings like "d:D".
@@ -211,7 +212,7 @@ class data_application: public data_expression
     data_application(aterm_appl t)
      : data_expression(t)
     {
-      assert(gsIsDataAppl(t));
+      assert(check_term_DataAppl(m_term));
     }
 
     data_application(data_expression expr, data_expression arg)
@@ -244,7 +245,7 @@ class data_operation: public data_expression
     data_operation(aterm_appl t)
      : data_expression(t)
     {
-      assert(gsIsOpId(t));
+      assert(check_rule_OpId(m_term));
     }
 
     data_operation(aterm_string name, lpe::sort s)
@@ -278,7 +279,7 @@ class data_variable_init: public aterm_appl
     data_variable_init(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(gsIsDataVarIdInit(t));
+      assert(check_rule_DataVarIdInit(m_term));
     }
     
     data_variable to_variable() const
@@ -315,6 +316,8 @@ typedef term_list<data_variable_init> data_variable_init_list;
 // data_equation
 /// \brief data equation.
 ///
+//<DataEqn>      ::= DataEqn(<DataVarId>*, <DataExprOrNil>,
+//                     <DataExpr>, <DataExpr>)
 class data_equation: public aterm_appl
 {
   protected:
@@ -332,7 +335,7 @@ class data_equation: public aterm_appl
     data_equation(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(gsIsDataEqn(t));
+      assert(check_rule_DataEqn(m_term));
       aterm_appl::iterator i = t.begin();
       m_variables = data_variable_list(*i++);
       m_condition = data_expression(*i++);
@@ -423,7 +426,7 @@ class data_assignment: public aterm_appl
     data_assignment(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(gsIsAssignment(t));
+      assert(check_rule_Assignment(m_term));
       aterm_appl::iterator i = t.begin();
       m_lhs = data_variable(*i++);
       m_rhs = data_expression(*i);

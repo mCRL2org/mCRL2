@@ -40,13 +40,13 @@ class state_formula: public aterm_appl
     state_formula(ATermAppl t)
       : aterm_appl(aterm_appl(t))
     {
-      assert(gsIsStateFrm(t));
+      assert(check_rule_StateFrm(m_term));
     }
 
     state_formula(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(gsIsStateFrm(t));
+      assert(check_rule_StateFrm(m_term));
     }
 
     // example: "X(d:D,e:E)"
@@ -112,13 +112,13 @@ class action_formula: public aterm_appl
     action_formula(ATermAppl t)
       : aterm_appl(aterm_appl(t))
     {
-      assert(gsIsActFrm(t));
+      assert(check_rule_ActFrm(m_term));
     }
 
     action_formula(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(gsIsActFrm(t));
+      assert(check_rule_ActFrm(m_term));
     }
 
     /// Returns true if the action formula equals 'true'.
@@ -166,13 +166,13 @@ class regular_formula: public aterm_appl
     regular_formula(ATermAppl t)
       : aterm_appl(aterm_appl(t))
     {
-      assert(gsIsRegFrm(t));
+      assert(check_rule_RegFrm(m_term));
     }
 
     regular_formula(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(gsIsRegFrm(t));
+      assert(check_rule_RegFrm(m_term));
     }
 
     /// Applies a substitution to this regular_formula and returns the result.

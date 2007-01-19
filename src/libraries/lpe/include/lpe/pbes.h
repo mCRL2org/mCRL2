@@ -18,6 +18,7 @@
 #include <sstream>
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
+#include "atermpp/aterm_traits.h"
 #include "atermpp/set.h"
 #include "atermpp/vector.h"
 #include "lpe/action.h"
@@ -65,7 +66,7 @@ class pbes_expression: public aterm_appl
     pbes_expression(aterm_appl term)
       : aterm_appl(term)
     {
-      assert(gsIsPBExpr(term));
+      assert(check_rule_PBExpr(m_term));
     }
 
     // allow assignment to aterms
@@ -133,7 +134,7 @@ class propositional_variable: public aterm_appl
     propositional_variable(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(gsIsPropVarDecl(t));
+      assert(check_rule_PropVarDecl(m_term));
       iterator i = t.begin();
       m_name = *i++;
       m_variables = *i;
@@ -202,7 +203,7 @@ class propositional_variable_instantiation: public aterm_appl
     propositional_variable_instantiation(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(gsIsPropVarInst(t));
+      assert(check_rule_PropVarInst(m_term));
       iterator i = t.begin();
       m_name = *i++;
       m_expressions = *i;
@@ -260,7 +261,7 @@ class pbes_fixpoint_symbol: public aterm_appl
     pbes_fixpoint_symbol(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(gsIsMu(t) || gsIsNu(t));
+      assert(check_rule_FixPoint(m_term));
     }
     
     // allow assignment to aterms
@@ -311,7 +312,7 @@ class pbes_equation: public aterm_appl
     pbes_equation(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(gsIsPBEqn(t));
+      assert(check_rule_PBEqn(m_term));
       iterator i = t.begin();
       m_symbol   = pbes_fixpoint_symbol(*i++);
       m_variable = propositional_variable(*i++);
@@ -480,10 +481,17 @@ class equation_system: public atermpp::vector<pbes_equation>
 // <PBES>         ::= PBES(<DataSpec>, <PBEqn>*, <PropVarInst>)
 class pbes
 {
+  friend struct atermpp::aterm_traits<pbes>;
+
   protected:
     data_specification m_data;
     equation_system m_equations;
     propositional_variable_instantiation m_initial_state;
+
+    ATerm term() const
+    {
+      return reinterpret_cast<ATerm>(ATermAppl(*this));
+    }
 
   public:
     pbes()
@@ -496,7 +504,9 @@ class pbes
         m_data(data),
         m_equations(equations),
         m_initial_state(initial_state)
-    {}
+    {
+      assert(check_rule_PBES(term()));
+    }
 
     /// Returns the data specification.
     data_specification data() const
@@ -558,11 +568,6 @@ class pbes
     {
       pbes_equation_list l(m_equations.begin(), m_equations.end());
       return gsMakePBES(m_data, l, m_initial_state);
-    }
-
-    ATerm term() const
-    {
-      return reinterpret_cast<ATerm>(ATermAppl(*this));
     }
 
     /// Returns the set of binding variables of the pbes, i.e. the variables that

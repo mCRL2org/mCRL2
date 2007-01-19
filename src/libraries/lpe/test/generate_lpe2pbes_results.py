@@ -10,11 +10,9 @@ for file in path('pbes').files('*.form'):
     print ''
 
     arg = "dist%sgenerate_lpe2pbes_result %s %s %s" % (os.sep, SPEC, file, "timed")
-    #print 'result (timed)'
     os.system(arg)
     print ''
 
     arg = "dist%sgenerate_lpe2pbes_result %s %s %s" % (os.sep, SPEC, file, "untimed")
-    #print 'result (untimed)'
     os.system(arg)
     print ''
