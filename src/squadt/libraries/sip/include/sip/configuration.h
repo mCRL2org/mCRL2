@@ -4,7 +4,6 @@
 #include <map>
 #include <set>
 
-#include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/iterator/filter_iterator.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
@@ -23,8 +22,7 @@ namespace sip {
   class configuration;
 
   /** \brief This class models a tool configuration */
-  class configuration : public utility::visitable < configuration >,
-                        private boost::noncopyable {
+  class configuration : public utility::visitable < configuration > {
 
     friend class sip::report;
     friend class sip::tool::communicator_impl;
@@ -156,7 +154,7 @@ namespace sip {
       bool is_fresh() const;
 
       /** \brief Marks configuration as fresh */
-      void set_fresh();
+      void set_fresh(bool = true);
 
       /** \brief Whether or not a parameter is an option */
       bool is_option(parameter const&) const;
@@ -301,8 +299,8 @@ namespace sip {
     return (m_fresh);
   }
 
-  inline void configuration::set_fresh() {
-    m_fresh = true;
+  inline void configuration::set_fresh(bool b) {
+    m_fresh = b;
   }
 
   /** \param[in] p the parameter to check */

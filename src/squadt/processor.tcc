@@ -131,22 +131,22 @@ namespace squadt {
       void configure(interface_ptr const&, const tool::input_combination*, const boost::filesystem::path&, std::string const& = "");
  
       /** \brief Start tool configuration */
-      void configure(interface_ptr const&, std::string const& = "");
+      void configure(interface_ptr const&, boost::shared_ptr < sip::configuration > const&, std::string const& = "");
 
       /** \brief Start tool reconfiguration */
-      void reconfigure(interface_ptr const&, std::string const& = "");
+      void reconfigure(interface_ptr const&, boost::shared_ptr < sip::configuration > const&, std::string const& = "");
  
       /** \brief Start processing: generate outputs from inputs */
-      void run(interface_ptr const&, bool b = false);
+      void run(interface_ptr const&, boost::shared_ptr < sip::configuration > c, bool b = false);
 
       /** \brief Start running and afterward execute a function */
-      void run(interface_ptr const&, boost::function < void () > h, bool b = false);
+      void run(interface_ptr const&, boost::function < void () > h, boost::shared_ptr < sip::configuration > c, bool b = false);
 
       /** \brief Start processing if not all outputs are up to date */
-      void update(interface_ptr const&, bool b = false);
+      void update(interface_ptr const&, boost::shared_ptr < sip::configuration > c, bool b = false);
  
       /** \brief Start updating and afterward execute a function */
-      void update(interface_ptr const&, boost::function < void () > h, bool b = false);
+      void update(interface_ptr const&, boost::function < void () > h, boost::shared_ptr < sip::configuration > c, bool b = false);
 
       /** \brief Add an output object */
       void append_output(object_descriptor::sptr&);
@@ -178,27 +178,29 @@ namespace squadt {
   /**
    * \param[in] t shared pointer to the interface object
    * \param[in] h the function to execute when the process terminates
+   * \param[in] c the configuration object to use
    * \param[in] b whether or not to run when there are no input objects defined
    *
    * \pre t.get() == this
    **/
-  inline void processor_impl::update(interface_ptr const& t, boost::function < void () > h, bool b) {
+  inline void processor_impl::update(interface_ptr const& t, boost::function < void () > h, boost::shared_ptr < sip::configuration > c, bool b) {
     current_monitor->once_on_completion(h);
 
-    run(t, b);
+    run(t, c, b);
   }
 
   /**
    * \param[in] t shared pointer to the interface object
    * \param[in] h the function to execute when the process terminates
+   * \param[in] c the configuration object to use
    * \param[in] b whether or not to run when there are no input objects defined
    *
    * \pre t.get() == this
    **/
-  inline void processor_impl::run(interface_ptr const& t, boost::function < void () > h, bool b) {
+  inline void processor_impl::run(interface_ptr const& t, boost::function < void () > h, boost::shared_ptr < sip::configuration > c, bool b) {
     current_monitor->once_on_completion(h);
 
-    run(t, b);
+    run(t, c, b);
   }
 
   /**
@@ -727,56 +729,57 @@ namespace squadt {
 
       c->add_input(ic->m_identifier, ic->m_mime_type.as_string(), l.string());
 
-      current_monitor->set_configuration(c);
-
-      configure(t, w);
+      configure(t, c, w);
     }
   }
 
   /**
    * \param[in] t shared pointer to the interface object
    * \param[in] w the path to the directory relative to the project directory in which to run the tool
+   * \param[in] c the configuration object to use
    *
    * \pre The existing configuration must contain the input object matching the selected input combination
    * \pre t->impl.get() == this
    *
    * \attention This function is non-blocking
    **/
-  inline void processor_impl::configure(interface_ptr const& t, std::string const& w) {
+  inline void processor_impl::configure(interface_ptr const& t, boost::shared_ptr < sip::configuration > const& c, std::string const& w) {
     output_directory = w;
 
     global_build_system.get_tool_manager()->impl->execute(*tool_descriptor, make_output_path(w),
          boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
 
-    current_monitor->start_tool_configuration(t);
+    current_monitor->start_tool_configuration(t, c);
   }
 
   /**
    * \param[in] t shared pointer to the interface object
    * \param[in] w the path to the directory in which to run the tool
+   * \param[in] c the configuration object to use
    *
    * \pre The existing configuration must contain the input object matching the selected input combination
    * \pre t.get() == this
    *
    * \attention This function is non-blocking
    **/
-  inline void processor_impl::reconfigure(interface_ptr const& t, std::string const& w) {
+  inline void processor_impl::reconfigure(interface_ptr const& t, boost::shared_ptr < sip::configuration > const& c, std::string const& w) {
     assert(selected_input_combination != 0);
 
-    current_monitor->get_configuration()->set_fresh();
+    c->set_fresh();
 
-    configure(t, w);
+    configure(t, c, w);
   }
 
   /**
    * \param[in] t shared pointer to the interface object
    * \param[in] b whether or not to run when there are no input objects defined
+   * \param[in] c the configuration object to use
    *
    * \attention This function is non-blocking
    *
    * \pre !is_active() and t.get() == this
    **/
-  inline void processor_impl::run(interface_ptr const& t, bool b) {
+  inline void processor_impl::run(interface_ptr const& t, boost::shared_ptr < sip::configuration > c, bool b) {
     if (b || 0 < inputs.size()) {
       boost::shared_ptr < project_manager > g(manager);
 
@@ -787,7 +790,7 @@ namespace squadt {
 
           if (p.get() != 0) {
             /* Reschedule process operation after process p has completed */
-            p->run(boost::bind(&processor_impl::run, this, t, false));
+            p->run(boost::bind(&processor_impl::run, this, t, c, false));
 
             return;
           }
@@ -798,7 +801,7 @@ namespace squadt {
         }
       }
     
-      current_monitor->start_tool_operation(t);
+      current_monitor->start_tool_operation(t, c);
 
       global_build_system.get_tool_manager()->impl->execute(*tool_descriptor, make_output_path(output_directory),
          boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), false);
@@ -812,12 +815,13 @@ namespace squadt {
   /**
    * \param[in] t shared pointer to the interface object
    * \param[in] b whether or not to run when there are no input objects are specified
+   * \param[in] c the configuration object to use
    *
    * \attention This function is non-blocking
    *
    * \pre !is_active() and t.get() == this
    **/
-  inline void processor_impl::update(interface_ptr const& t, bool b) {
+  inline void processor_impl::update(interface_ptr const& t, boost::shared_ptr < sip::configuration > c, bool b) {
     if (b || 0 < inputs.size()) {
       /* Check that dependent files exist and rebuild if this is not the case */
       BOOST_FOREACH(input_list::value_type i, inputs) {
@@ -826,7 +830,7 @@ namespace squadt {
         if (p.get() != 0) {
           if (p->check_status(true)) {
             /* Reschedule process operation after process p has completed */
-            p->update(boost::bind(&processor_impl::update, this, t, false));
+            p->update(boost::bind(&processor_impl::update, this, t, c, false));
      
             return;
           }
@@ -837,7 +841,7 @@ namespace squadt {
         }
       }
     
-      current_monitor->start_tool_operation(t);
+      current_monitor->start_tool_operation(t, c);
 
       global_build_system.get_tool_manager()->impl->execute(*tool_descriptor, make_output_path(output_directory),
          boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), false);

@@ -179,7 +179,7 @@ namespace squadt {
     return (execution::process::stopped);
   }
 
-  void processor::monitor::tool_configuration(processor::sptr t) {
+  void processor::monitor::tool_configuration(processor::sptr t, boost::shared_ptr < sip::configuration > const& c) {
     assert(t.get() == &owner);
 
     /* Wait until the tool has connected and identified itself */
@@ -187,7 +187,7 @@ namespace squadt {
 
     if (is_connected()) {
       /* Make sure that the task_monitor state is not cleaned up if the tool quits unexpectedly */
-      send_configuration();
+      send_configuration(c);
 
       /* Wait until configuration is accepted, or the tool has terminated */
       await_message(sip::message_accept_configuration).get();
@@ -204,7 +204,7 @@ namespace squadt {
     }
   }
 
-  void processor::monitor::tool_operation(processor::sptr t) {
+  void processor::monitor::tool_operation(processor::sptr t, boost::shared_ptr < sip::configuration > const& c) {
     assert(t.get() == &owner);
 
     /* Wait until the tool has connected and identified itself */
@@ -212,7 +212,7 @@ namespace squadt {
 
     if (is_connected()) {
       /* Make sure that the task_monitor state is not cleaned up if the tool quits unexpectedly */
-      send_configuration();
+      send_configuration(c);
 
       /* Wait until configuration is accepted, or the tool has terminated */
       if (await_message(sip::message_accept_configuration).get() != 0) {
@@ -299,12 +299,12 @@ namespace squadt {
     status_change_handler = h;
   }
 
-  void processor::monitor::start_tool_configuration(processor::sptr const& t) {
-    boost::thread thread(boost::bind(&processor::monitor::tool_configuration, this, t));
+  void processor::monitor::start_tool_configuration(processor::sptr const& t, boost::shared_ptr < sip::configuration > const& c) {
+    boost::thread thread(boost::bind(&processor::monitor::tool_configuration, this, t, c));
   }
 
-  void processor::monitor::start_tool_operation(processor::sptr const& t) {
-    boost::thread thread(boost::bind(&processor::monitor::tool_operation, this, t));
+  void processor::monitor::start_tool_operation(processor::sptr const& t, boost::shared_ptr < sip::configuration > const& c) {
+    boost::thread thread(boost::bind(&processor::monitor::tool_operation, this, t, c));
   }
 
   processor::processor() {
@@ -487,7 +487,7 @@ namespace squadt {
   void processor::configure(std::string const& w) {
     assert(impl->interface_object.lock().get() == this);
 
-    impl->configure(impl->interface_object.lock(), w);
+    impl->configure(impl->interface_object.lock(), impl->current_monitor->get_configuration(), w);
   }
 
   void processor::configure(const tool::input_combination* i, const boost::filesystem::path& p, std::string const& w) {
@@ -499,7 +499,7 @@ namespace squadt {
   void processor::reconfigure(std::string const& w) {
     assert(impl->interface_object.lock().get() == this);
 
-    impl->reconfigure(impl->interface_object.lock(), w);
+    impl->reconfigure(impl->interface_object.lock(), boost::shared_ptr < sip::configuration > (new sip::configuration(*impl->current_monitor->get_configuration())), w);
   }
 
   /**
@@ -511,7 +511,7 @@ namespace squadt {
   void processor::update(boost::function < void () > h, bool b) {
     assert(impl->interface_object.lock().get() == this);
 
-    impl->run(impl->interface_object.lock(), h, b);
+    impl->run(impl->interface_object.lock(), h, impl->current_monitor->get_configuration(), b);
   }
 
   /**
@@ -523,19 +523,19 @@ namespace squadt {
   void processor::run(boost::function < void () > h, bool b) {
     assert(impl->interface_object.lock().get() == this);
 
-    impl->run(impl->interface_object.lock(), h, b);
+    impl->run(impl->interface_object.lock(), h, impl->current_monitor->get_configuration(), b);
   }
 
   void processor::run(bool b) {
     assert(impl->interface_object.lock().get() == this);
 
-    impl->run(impl->interface_object.lock(), b);
+    impl->run(impl->interface_object.lock(), impl->current_monitor->get_configuration(), b);
   }
 
   void processor::update(bool b) {
     assert(impl->interface_object.lock().get() == this);
 
-    impl->update(impl->interface_object.lock(), b);
+    impl->update(impl->interface_object.lock(), impl->current_monitor->get_configuration(), b);
   }
 
   const size_t processor::number_of_inputs() const {

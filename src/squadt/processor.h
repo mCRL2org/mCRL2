@@ -300,16 +300,16 @@ namespace squadt {
       void status_message_change_dummy(sip::report::sptr);
 
       /** \brief Helper function for communication with a tool, starts a new thread with tool_configuration() */
-      void start_tool_configuration(processor::sptr const&);
+      void start_tool_configuration(processor::sptr const&, boost::shared_ptr < sip::configuration > const& c);
 
       /** \brief Helper function for communication with a tool, starts a new thread with tool_operation() */
-      void start_tool_operation(processor::sptr const&);
+      void start_tool_operation(processor::sptr const&, boost::shared_ptr < sip::configuration > const&);
 
       /** \brief Actual tool configuration operation */
-      void tool_configuration(processor::sptr);
+      void tool_configuration(processor::sptr, boost::shared_ptr < sip::configuration > const&);
 
       /** \brief Actual tool execution with a configuration */
-      void tool_operation(processor::sptr);
+      void tool_operation(processor::sptr, boost::shared_ptr < sip::configuration > const&);
 
     public:
  

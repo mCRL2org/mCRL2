@@ -51,10 +51,8 @@ namespace sip {
     }
  
     /* Send the selected input configuration */
-    void communicator::send_configuration() {
-      sip::message m(visitors::store(
-                *boost::dynamic_pointer_cast < communicator_impl > (impl)->m_configuration),
-                                                                sip::message_offer_configuration);
+    void communicator::send_configuration(boost::shared_ptr < sip::configuration > const& c) {
+      sip::message m(visitors::store(*c), sip::message_offer_configuration);
 
       impl->send_message(m);
     }

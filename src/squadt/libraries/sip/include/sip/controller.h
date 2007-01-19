@@ -62,7 +62,7 @@ namespace sip {
         void request_tool_capabilities();
 
         /** \brief Send a specification of a (perhaps partial) configuration */
-        void send_configuration();
+        void send_configuration(boost::shared_ptr < sip::configuration > const&);
  
         /** \brief Send data to update the state of the last communicated display layout */
         void send_display_update(sip::layout::element const*);
