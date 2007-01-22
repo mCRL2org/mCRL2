@@ -99,6 +99,7 @@ class specification: public aterm_appl
       init_term(t);
     }
 
+    /// THIS CONSTRUCTOR IS DEPRECATED AND WILL BE REMOVED!
     specification(
         data_specification   data             ,
         action_label_list    action_labels    ,
@@ -114,6 +115,30 @@ class specification: public aterm_appl
         m_initial_assignments(detail::compute_initial_assignments(initial_variables, initial_state))
     {
       assert(initial_variables.size() == initial_state.size());
+      m_term = reinterpret_cast<ATerm>(
+        gsMakeSpecV1(
+          data,
+          gsMakeActSpec(action_labels),
+          lpe,
+          gsMakeLPEInit(initial_free_variables, m_initial_assignments)
+        )
+      );        
+      assert(has_proper_action_labels());
+    }
+
+    specification(
+        data_specification   data             ,
+        action_label_list    action_labels    ,
+        LPE                  lpe              ,
+        data_variable_list   initial_free_variables,
+        data_assignment_list initial_assignments)
+      :
+        m_data(data),
+        m_action_labels(action_labels),
+        m_lpe(lpe),
+        m_initial_free_variables(initial_free_variables),        
+        m_initial_assignments(initial_assignments)
+    {
       m_term = reinterpret_cast<ATerm>(
         gsMakeSpecV1(
           data,
