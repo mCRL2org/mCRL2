@@ -1,4 +1,4 @@
-// Date: 17-01-2007
+// Date: 22-01-2007
 // This document describes the internal format of the mCRL2 language and the
 // corresponding mu-calculus formulas. Here:
 // - the following phases of implementation are distinguised:
@@ -11,13 +11,13 @@
 // - <String> is an arbitrary non-empty string excluding the keywords:
 //     sort cons map var eqn act proc init
 //     struct List Set Bag
-//     lambda forall exists whr end
+//     lambda whr end
 //     delta tau sum allow block hide rename comm
-//     eval mu nu delay nil
+//     val mu nu delay yaled nil
 //   Note that this is not as restrictive as user-defined identifiers, which
 //   also excludes the following keywords:
 //     Bool Pos Nat Int Real
-//     true false div mod in 
+//     true false div mod in forall exists
 // - <NumberString> is a string of the format '"0"|("-"?[1-9][0-9]*)'
 // - <String> and <NumberString> are represented by a quoted ATermAppl constant
 // - the other alphabetical strings within angular brackets are non-terminals

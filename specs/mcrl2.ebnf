@@ -19,7 +19,7 @@ Comment      ::= "%"~[\n]*"\n"
 Keyword      ::= kwSpec | kwProcExpr | kwSortExpr | kwDataExpr
 kwSpec       ::= "sort" | "cons" | "map" | "var" | "eqn" | "act" | "proc" | "init"
 kwProcExpr   ::= "delta" | "tau" | "sum" | "restrict" | "allow" | "hide" | "rename" | "comm"
-kwSortExpr   ::= "Bool" | "Pos" | "Nat" | "Int" | "List" | "Set" | "Bag" | "Struct"
+kwSortExpr   ::= "struct" | "Bool" | "Pos" | "Nat" | "Int" | "Real" | "List" | "Set" | "Bag"
 kwDataExpr   ::= "true" | "false" | "whr" | "end" | "lambda" | "forall" | "exists" | "div" | "mod" | "in"
 
 //identifier (not a keyword)
@@ -157,7 +157,7 @@ SortSpec     ::= "sort" SortDecl+
 //sort declaration
 SortDecl     ::= Ids ";"                                           //standard sort
                | Ids "=" SortExpr ";"                              //sort expression
-               | Ids "=" "Struct" ConstrDecl ("|" ConstrDecl)* ";" //structured sort
+               | Ids "=" "struct" ConstrDecl ("|" ConstrDecl)* ";" //structured sort
 
 //operation specification
 OpSpec       ::= ("cons" | "map") OpDecl+
