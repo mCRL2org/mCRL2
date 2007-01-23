@@ -480,17 +480,17 @@ ATermAppl gsMakeSortExprReal()
 //Creation for system defined sort expressions list/set/bag
 ATermAppl gsMakeSortExprList(ATermAppl SortExpr)
 {
-  return gsMakeSortCons(gsMakeSortConsTypeSortList(), SortExpr);
+  return gsMakeSortCons(gsMakeSortList(), SortExpr);
 }
 
 ATermAppl gsMakeSortExprSet(ATermAppl SortExpr)
 {
-  return gsMakeSortCons(gsMakeSortConsTypeSortSet(), SortExpr);
+  return gsMakeSortCons(gsMakeSortSet(), SortExpr);
 }
 
 ATermAppl gsMakeSortExprBag(ATermAppl SortExpr)
 {
-  return gsMakeSortCons(gsMakeSortConsTypeSortBag(), SortExpr);
+  return gsMakeSortCons(gsMakeSortBag(), SortExpr);
 }
 
 //Recognition functions for system defined sort expressions list/set/bag
@@ -499,7 +499,7 @@ bool gsIsSortExprList(ATermAppl Term)
   if (!gsIsSortCons(Term))
     return false;
   else
-    return gsIsSortConsTypeSortList(ATAgetArgument(Term, 0));
+    return gsIsSortList(ATAgetArgument(Term, 0));
 }
 
 bool gsIsSortExprSet(ATermAppl Term)
@@ -507,7 +507,7 @@ bool gsIsSortExprSet(ATermAppl Term)
   if (!gsIsSortCons(Term))
     return false;
   else
-    return gsIsSortConsTypeSortSet(ATAgetArgument(Term, 0));
+    return gsIsSortSet(ATAgetArgument(Term, 0));
 }
 
 bool gsIsSortExprBag(ATermAppl Term)
@@ -515,7 +515,7 @@ bool gsIsSortExprBag(ATermAppl Term)
   if (!gsIsSortCons(Term))
     return false;
   else
-    return gsIsSortConsTypeSortBag(ATAgetArgument(Term, 0));
+    return gsIsSortBag(ATAgetArgument(Term, 0));
 }
 
 //Auxiliary functions concerning sort expressions
@@ -638,9 +638,9 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
     ATermAppl Var = ATAgetArgument(DataExpr, 0);
     ATermAppl SortBody = gsGetSort(ATAgetArgument(DataExpr, 1));
     if (ATisEqual(SortBody, gsMakeSortExprBool()))
-      Result = gsMakeSortCons(gsMakeSortConsTypeSortSet(), gsGetSort(Var));
+      Result = gsMakeSortCons(gsMakeSortSet(), gsGetSort(Var));
     else if (ATisEqual(SortBody, gsMakeSortExprNat()))
-      Result = gsMakeSortCons(gsMakeSortConsTypeSortBag(), gsGetSort(Var));
+      Result = gsMakeSortCons(gsMakeSortBag(), gsGetSort(Var));
     else
       Result = gsMakeUnknown();
   } else if (gsIsLambda(DataExpr)) {

@@ -2488,7 +2488,7 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType){
   if(gsIsSortCons(Type))
   {
     ATermAppl ConsType = ATAgetArgument(Type, 0);
-    if(gsIsSortConsTypeSortList(ConsType))
+    if(gsIsSortList(ConsType))
     {
       if(!gsIsSortExprList(PosType)) return NULL;
       ATermAppl Res=gstcTypeMatchA(ATAgetArgument(Type,1),ATAgetArgument(PosType,1));
@@ -2496,7 +2496,7 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType){
       return gsMakeSortExprList(Res);
     }
 
-    if(gsIsSortConsTypeSortSet(ConsType))
+    if(gsIsSortSet(ConsType))
     {
       if(!gsIsSortExprSet(PosType)) return NULL;
       else {
@@ -2506,7 +2506,7 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType){
       }
     }
 
-    if(gsIsSortConsTypeSortBag(ConsType))
+    if(gsIsSortBag(ConsType))
     {
       if(!gsIsSortExprBag(PosType)) return NULL;
       else {

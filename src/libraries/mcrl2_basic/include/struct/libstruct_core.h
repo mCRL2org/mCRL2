@@ -53,9 +53,9 @@ ATermAppl gsMakeSortArrowProd(ATermList SortExprsDomain,
   ATermAppl SortExprResult);
 ATermAppl gsMakeSortArrow(ATermAppl SortExprDomain, ATermAppl SortExprResult);
 ATermAppl gsMakeSortId(ATermAppl Name);
-ATermAppl gsMakeSortConsTypeSortList();
-ATermAppl gsMakeSortConsTypeSortSet();
-ATermAppl gsMakeSortConsTypeSortBag();
+ATermAppl gsMakeSortList();
+ATermAppl gsMakeSortSet();
+ATermAppl gsMakeSortBag();
 ATermAppl gsMakeStructCons(ATermAppl ConsName, ATermList StructProjs,
   ATermAppl RecNameOrNil); 
 ATermAppl gsMakeStructProj(ATermAppl ProjNameOrNil, ATermAppl SortExpr);
@@ -187,9 +187,9 @@ bool gsIsSortStruct(ATermAppl Term);
 bool gsIsSortArrowProd(ATermAppl Term);
 bool gsIsSortArrow(ATermAppl Term);
 bool gsIsSortId(ATermAppl Term);
-bool gsIsSortConsTypeSortList(ATermAppl Term);
-bool gsIsSortConsTypeSortSet(ATermAppl Term);
-bool gsIsSortConsTypeSortBag(ATermAppl Term);
+bool gsIsSortList(ATermAppl Term);
+bool gsIsSortSet(ATermAppl Term);
+bool gsIsSortBag(ATermAppl Term);
 bool gsIsStructCons(ATermAppl Term);
 bool gsIsStructProj(ATermAppl Term);
 bool gsIsNil(ATermAppl Term);
