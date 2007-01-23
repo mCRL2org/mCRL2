@@ -772,24 +772,6 @@ static ATermAppl pCRLrewrite(ATermAppl t)
              pCRLrewrite(ATAgetArgument(t,1)));
   }
 
-/* Replaced by IsIfThen 
-  if (gsIsIfThenElse(t))
-  { ATermAppl newcond=RewriteTerm(ATAgetArgument(t,0));
-    //XXX
-    gsDebugMsg("1 Process %T is not in pCRL format.\n",t);
-    if (gsIsDataExprTrue(newcond))
-    { return pCRLrewrite(ATAgetArgument(t,1));
-    }
-    if (gsIsDataExprFalse(newcond))
-    { return pCRLrewrite(ATAgetArgument(t,2));
-    }
-    return gsMakeIfThenElse(
-             newcond,
-             pCRLrewrite(ATAgetArgument(t,1)),
-             pCRLrewrite(ATAgetArgument(t,2)));
-  }
-*/
-
   if (gsIsSeq(t)) 
   { /* only one summand is needed */
     return gsMakeSeq(
@@ -1273,8 +1255,7 @@ static processstatustype determine_process_statusterm(
   }
 
   if (gsIsIfThenElse(body))      
-  { //XXX
-    //gsDebugMsg("Process %P is not in pCRL format\n", body);
+  { 
     if (status==multiAction) 
     { gsErrorMsg("If-then-else occurs in a multi-action in %P.\n",body);
       stop();
@@ -1467,8 +1448,6 @@ static void collectPcrlProcesses_term(ATermAppl body, ATermIndexedSet visited)
 
   if (gsIsIfThenElse(body))  
   { 
-    //XXX
-    //gsDebugMsg("2 Process %T is not in pCRL format.\n", body);
     collectPcrlProcesses_term(ATAgetArgument(body,1),visited);
     collectPcrlProcesses_term(ATAgetArgument(body,2),visited);
     return;
@@ -1659,17 +1638,6 @@ static int occursinpCRLterm(ATermAppl var, ATermAppl p, int strict)
   { return occursinterm(var,ATAgetArgument(p,0))||
            occursinpCRLterm(var,ATAgetArgument(p,1),strict);
   }
-
-/* Replaced by IsIfTHen 
-  if (gsIsIfThenElse(p))
-  { 
-    //XXX
-    gsDebugMsg("3 Process %T is not in pCRL format\n", p);
-    return occursinterm(var,ATAgetArgument(p,0))||
-           occursinpCRLterm(var,ATAgetArgument(p,1),strict)||
-           occursinpCRLterm(var,ATAgetArgument(p,2),strict);
-  }
-*/
 
   if (gsIsSum(p)) 
   { if (strict)
@@ -2043,8 +2011,7 @@ static ATermAppl substitute_pCRLproc(
                 substitute_pCRLproc(terms,vars,ATAgetArgument(p,1)));
   }
   if (gsIsIfThenElse(p))
-  { //XXX
-    //gsDebugMsg("4 Process %T is not in pCRL format.\n", p);
+  { 
     return gsMakeIfThenElse(
                 substitute_data(terms,vars,ATAgetArgument(p,0)),
                 substitute_pCRLproc(terms,vars,ATAgetArgument(p,1)),
@@ -2190,17 +2157,6 @@ static ATermAppl wraptime(
               ATAgetArgument(body,0),
               wraptime(ATAgetArgument(body,1),time,freevars));
   }
-
-/* Replaced by IsIfThen
-  if (gsIsIfThenElse(body))
-  { //XXX
-    gsDebugMsg("5 Process %T is not in pCRL format.\n");
-    assert(isDeltaAtZero(ATAgetArgument(body,2)));
-    return gsMakeIfThen(
-              ATAgetArgument(body,0),
-              wraptime(ATAgetArgument(body,1),time,freevars));
-  }
-*/
 
   if (gsIsSeq(body))
   { return gsMakeSeq(
@@ -2357,10 +2313,17 @@ static ATermAppl bodytovarheadGNF(
   ATermAppl newproc=NULL;
 
   if (gsIsChoice(body)) 
-   { if (alt>=s)
+   { 
+     if (alt>=s)
       { 
         ATermAppl body1=bodytovarheadGNF(ATAgetArgument(body,0),alt,freevars,first);
         ATermAppl body2=bodytovarheadGNF(ATAgetArgument(body,1),alt,freevars,first);
+        if (isDeltaAtZero(body1))
+        { return body2;
+        }
+        if (isDeltaAtZero(body2))
+        { return body1;
+        }
         return gsMakeChoice(body1,body2);
       }  
      body=bodytovarheadGNF(body,alt,freevars,first);
@@ -2411,11 +2374,13 @@ static ATermAppl bodytovarheadGNF(
 
   if (gsIsIfThenElse(body))
   { 
-    //XXX
-    //gsDebugMsg("Process %T not in pCRL format.\n", body);
     ATermAppl condition=ATAgetArgument(body,0);
     ATermAppl body1=ATAgetArgument(body,1);
     ATermAppl body2=ATAgetArgument(body,2);
+ 
+    if ((isDeltaAtZero(body1))&&(isDeltaAtZero(body2)))
+    { return body1;
+    }
 
     if ((s<=sum) && ((isDeltaAtZero(body1))||(isDeltaAtZero(body2))))
     { if (isDeltaAtZero(body2))
@@ -2675,18 +2640,6 @@ static ATermAppl putbehind(ATermAppl body1, ATermAppl body2)
              putbehind(ATAgetArgument(body1,1),body2));
   }
   
-/* Replaced by IsIfThen
-  if (gsIsIfThenElse(body1))
-  {
-    //XXX
-    gsDebugMsg("7 Process %T not in pCRL format.\n", body1);
-    assert(isDeltaAtZero(ATAgetArgument(body1,2)));
-     return gsMakeIfThen(
-             ATAgetArgument(body1,0),
-             putbehind(ATAgetArgument(body1,1),body2));
-  }
-*/
-  
   if (gsIsSum(body1))
   { /* we must take care that no variables in body2 are
         inadvertently bound */
@@ -2756,17 +2709,6 @@ static ATermAppl distribute_condition(
               ATAgetArgument(body1,1));
   }
 
-/* Replaced by IsIfThen
-  if (gsIsIfThenElse(body1)) 
-  { //XXX
-    gsDebugMsg("8 Process %T not in pCRL format.\n", body1);
-    assert(isDeltaAtZero(ATAgetArgument(body1,2)));
-    return gsMakeIfThen(
-              gsMakeDataExprAnd(ATAgetArgument(body1,0),condition),
-              ATAgetArgument(body1,1));
-  }
-*/
-  
   if (gsIsSum(body1))
   { /* we must take care that no variables in condition are
         inadvertently bound */
@@ -2780,6 +2722,10 @@ static ATermAppl distribute_condition(
              distribute_condition(
                  substitute_pCRLproc(terms,vars,ATAgetArgument(body1,1)),
                  condition));
+  }
+  
+  if (gsIsAtTime(body1))
+  { return gsMakeIfThen(condition,body1);
   }
   
   if (gsIsAction(body1))
@@ -2822,14 +2768,6 @@ static ATermAppl distribute_sum(ATermList sumvars,ATermAppl body1)
   { return gsMakeSum(sumvars,body1);
   }
   
-/* Replaced by IfThen
-  if (gsIsIfThenElse(body1))
-  { //XXX
-    gsDebugMsg("9 Process %T is not in pCRL format.\n", body1);
-    return gsMakeSum(sumvars,body1);
-  }
-*/
-
   if (gsIsSum(body1))
   { return gsMakeSum(
              ATconcat(sumvars,ATLgetArgument(body1,0)),
@@ -3076,19 +3014,6 @@ static ATermAppl to_regular_form(
 
   } 
   
-/*Replaced by IfThenElse
-  if (gsIsIfThenElse(t))
-  { 
-    //XXX
-    gsDebugMsg("10 Process %T is not in pCRL format.\n", t);
-    assert(isDeltaAtZero(ATAgetArgument(t,2)));
-    return gsMakeIfThen(
-              ATAgetArgument(t,0),
-              to_regular_form(ATAgetArgument(t,1),todo,freevars));
-
-  } 
-*/
-  
   if (gsIsSum(t))
   { ATermList sumvars=ATLgetArgument(t,0);
     return gsMakeSum(
@@ -3148,24 +3073,6 @@ static ATermAppl distributeTime(
               gsMakeDataExprAnd(ATAgetArgument(body,0),timecondition),
               body1);
   }
-
-/* Replaced by IfThenElse
-  if (gsIsIfThenElse(body))
-  { //XXX
-    gsDebugMsg("11 Process %T is not in pCRL format.\n", body);
-    assert(isDeltaAtZero(ATAgetArgument(body,2)));
-    ATermAppl timecondition=gsMakeDataExprTrue();
-    ATermAppl body1=distributeTime(
-                       ATAgetArgument(body,1),
-                       time,
-                       freevars,
-                       &timecondition);
-    
-    return gsMakeIfThen(
-              gsMakeDataExprAnd(ATAgetArgument(body,0),timecondition),
-              body1);
-  }
-*/
 
   if (gsIsSeq(body))
   { return gsMakeSeq(
@@ -3259,19 +3166,6 @@ static ATermAppl procstorealGNFbody(
               ATAgetArgument(body,0));
     return r;
   }  
-  
-/* Replaced by IfThenElse
-  if (gsIsIfThenElse(body))  
-  { //XXX
-    gsDebugMsg("12 Process %T is not in pCRL format.\n", body);
-    assert(isDeltaAtZero(ATAgetArgument(body,2)));
-    ATermAppl r=distribute_condition(
-              procstorealGNFbody(ATAgetArgument(body,1),first,
-                        todo,regular,mode,freevars),
-              ATAgetArgument(body,0));
-    return r;
-  }  
-*/
   
   if (gsIsSum(body))
   { ATermList sumvars=ATLgetArgument(body,0);
@@ -3474,7 +3368,7 @@ static void makepCRLprocs_rec(ATermAppl t)
   }
 
 /* Replaced by IfThenElse
-  if (gsIsIfThenElse(t))
+  if (gsIsIfThen
   { //XXX
     gsDebugMsg("13 Process %T is not in pCRL format.\n", t);
     assert(isDeltaAtZero(ATAgetArgument(t,2)));
@@ -4720,31 +4614,6 @@ static void add_summands(
     }
     summandterm=ATAgetArgument(summandterm,1);
   }
-
-/* Replaced by IfThenELse
-  for( ; (gsIsIfThenElse(summandterm)) ; )
-  { 
-    //XXX
-    gsDebugMsg("14 Process %T is not in pCRL format.\n", summandterm);
-    assert(isDeltaAtZero(ATAgetArgument(summandterm,2)));
-    ATermAppl localcondition=ATAgetArgument(summandterm,0);
-    if (!((regular)&&(singlestate)))
-    { condition1=gsMakeDataExprAnd(
-                     condition1,
-                     ((regular)?localcondition:      
-                                adapt_term_to_stack(
-                                       localcondition,
-                                       stack,
-                                       sumvars,spec)));
-    }
-    else
-    { / * regular and singlestate * /
-      condition1=gsMakeDataExprAnd(localcondition,condition1);
-    }
-    summandterm=ATAgetArgument(summandterm,1);
-  }
-*/
-
 
   if (gsIsSeq(summandterm)) 
   { /* only one summand is needed */
@@ -8265,18 +8134,6 @@ static ATermAppl alphaconversionterm(
               substitute_data(tl,varlist,ATAgetArgument(t,0)),
               alphaconversionterm(ATAgetArgument(t,1),parameters,varlist,tl));
   }  
-  
-/* Replaced by IfThen
-  if (gsIsIfThenElse(t))
-  {
-    //XXX
-    gsDebugMsg("15 Process %T is not in pCRL format.\n", t);
-    assert(isDeltaAtZero(ATAgetArgument(t,2)));
-    return gsMakeIfThen(
-              substitute_data(tl,varlist,ATAgetArgument(t,0)),
-              alphaconversionterm(ATAgetArgument(t,1),parameters,varlist,tl));
-  }  
-*/
   
   if (gsIsSum(t)) 
   { ATermList sumvars=ATLgetArgument(t,0);
