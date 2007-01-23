@@ -463,54 +463,9 @@ void LTS::positionStates()
   vector< State* > undecided;
   edgeLengthBottomUp(undecided);
   edgeLengthTopDown(undecided);
-  int i = 0;
-
-  /*std::cerr << "Starting resolve of clusters... \n";
-  for ( vector<vector<Cluster*> >::iterator r_it = clustersInRank.begin();
-        r_it != clustersInRank.end(); ++ r_it)
-  {
-    for ( vector < Cluster* >::iterator c_it = r_it->begin();
-          c_it != r_it->end(); ++c_it) 
-    {
-      std::cerr << "Cluster " << i << endl;
-      std::cerr << "=========================\n";
-
-      for( int j = 0; j < (*c_it)->getNumberOfStates(); ++j) 
-      {
-        std::cerr << "State " << j << endl;
-        std::cerr << "Position: " << (*c_it)->getState(j)->getPosition()<< endl;
-      }
-      std::cerr << "=========================\n";
-      std::cerr << endl;
-      ++i;
-    }
-  }
-  */
   resolveClusterSlots(undecided);
 
-  /*//DEBUG
-  i = 0;
-  std::cerr << "Resolved slots...\n";
-  for ( vector<vector<Cluster*> >::iterator r_it = clustersInRank.begin();
-        r_it != clustersInRank.end(); ++ r_it)
-  {
-    for ( vector < Cluster* >::iterator c_it = r_it->begin();
-          c_it != r_it->end(); ++c_it) 
-    {
-      std::cerr << "Cluster " << i << endl;
-      std::cerr << "=========================\n";
-
-      for( int j = 0; j < (*c_it)->getNumberOfStates(); ++j) 
-      {
-        std::cerr << "State " << j << endl;
-        std::cerr << "Position: " << (*c_it)->getState(j)->getPosition()<< endl;
-      }
-      std::cerr << "=========================\n";
-      std::cerr << endl;
-      ++i;
-    }
-  }*/
-        
+          
   /*
   //TODO: Change to call of correct positioning functions.
   
@@ -579,6 +534,7 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided)
   // thesis, pp. 21-29
  
   // Iterate over the ranks in reverse order (bottom-up)
+
   vector< vector< State* > >::reverse_iterator rank_it;
   for( rank_it = statesInRank.rbegin();
        rank_it != statesInRank.rend(); ++rank_it) {
@@ -713,6 +669,8 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided)
               }
 
               (*state_it)->setPosition(position);
+              int slot = currCluster->occupySlot(position);
+              (*state_it)->setSlot(slot);
             }
           }
         }
@@ -727,14 +685,14 @@ void LTS::edgeLengthTopDown(vector< State* > &ss)
   //Pre:  ss is correctly sorted by rank, bottom-up.
   //Post: ss contains the states that could not be placed by this phase, sorted
   //top-down.
-
+  
   //To keep the states that could not be placed in this pass.
   vector< State * > undecided; 
 
   // Iterate over the ranks in reverse order (bottom-up)
   // Iterate over the clusters in this rank
-  for( vector< State* >::iterator state_it = ss.begin();
-       state_it != ss.end(); ++state_it) {
+  for( vector< State* >::reverse_iterator state_it = ss.rbegin();
+       state_it != ss.rend(); ++state_it) {
     // Get the cluster belonging to this state
     Cluster* currCluster = (*state_it)->getCluster();
 
@@ -759,6 +717,9 @@ void LTS::edgeLengthTopDown(vector< State* > &ss)
 
         // Get the ancestor states. These are all in one cluster, and we
         // can calculate the position of the current state directly from them.
+
+        // NOTE: Incorrect code: The ancestor is not necessarily centered
+        // above the child we are evaluating.
 
         set< State* > superiors;
         (*state_it)->getSuperiors( superiors );

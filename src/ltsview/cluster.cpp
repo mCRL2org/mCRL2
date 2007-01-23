@@ -155,7 +155,6 @@ void Cluster::slotUndecided() {
     bool gapIsRim = false;
 
     while (slots[gapBegin].occupying == 0 && !gapIsRim) {
-      //std::cerr << "slots[gapBegin].occupying == 0 && ...\n";
       gapBegin = (gapBegin + 1) % totalSlots;
 
       if (gapBegin == gapStart) {
@@ -177,9 +176,7 @@ void Cluster::slotUndecided() {
       // then, put gapBegin at the new gapEnd, and continue, until we have gone 
       // round.
       do {
-        //std::cerr << "gapBegin != gapStart\n";
         do  {
-          //std::cerr << "slots[gapEnd.occupying == 0\n";
           gapEnd = (gapEnd + 1) % totalSlots;
         } while (slots[gapEnd].occupying == 0);
 
@@ -261,14 +258,6 @@ void Cluster::spreadSlots() {
 
     if (toPlaceState->getPosition() >= -0.9f) {
       int slotOfStateIndex = toPlaceState->getSlot();
-
-      if ((slotOfStateIndex < 0) || (slotOfStateIndex > totalSlots)) {
-        toPlaceState->setSlot(
-          toPlaceState->getCluster()->occupySlot(
-            toPlaceState->getPosition()));
-        slotOfStateIndex = toPlaceState->getSlot();
-      }
-  
       Slot slotOfState = slots[slotOfStateIndex];
       float statePosition = 0.0f;
     

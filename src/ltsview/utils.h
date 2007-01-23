@@ -7,7 +7,7 @@
 
 namespace Utils {
   const double PI = 3.14159265359;
-  const double tau = 1.50;
+  const double tau = 0.80;
 
   enum RankStyle {ITERATIVE,CYCLIC};
   enum MarkStyle {NO_MARKS,MARK_DEADLOCKS,MARK_STATES,MARK_TRANSITIONS};
