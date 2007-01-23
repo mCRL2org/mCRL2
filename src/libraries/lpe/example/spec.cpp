@@ -107,7 +107,10 @@ int main()
   cout << "actions:" << endl;
   for (action_list::iterator i = s.actions().begin(); i != s.actions().end(); ++i)
   {
+    action a = *i;
+    action b(i->name(), i->arguments());
     cout << i->to_string() << endl;
+    cout << "b == " << b << endl;
   }
 
   ofstream o1("lpe1.txt");

@@ -93,9 +93,8 @@ bool is_action_label(aterm_appl t)
 class action: public aterm_appl
 {
   protected:
-    aterm_string m_name;
-    sort_list m_sorts;
-    data_expression_list m_arguments;    // elements are of type data_expression
+    action_label m_label;
+    data_expression_list m_arguments;
 
   public:
     action()
@@ -106,30 +105,29 @@ class action: public aterm_appl
     {
       assert(check_rule_Action(m_term));
       aterm_appl::iterator i = t.begin();
-      aterm_appl act_id = *i++;
+      m_label = action_label(*i++);
       m_arguments = data_expression_list(*i);
-      
-      aterm_appl::iterator j = act_id.begin();
-      m_name = *j++;
-      m_sorts = *j;
     }
 
-    action(const aterm_string& name, const data_expression_list& arguments)
-     : aterm_appl(gsMakeAction(gsMakeActId(name, apply(arguments, gsGetSort)), arguments)),
-       m_name(name),
+    action(const action_label& label, const data_expression_list& arguments)
+     : aterm_appl(gsMakeAction(label, arguments)),
+       m_label(label),
        m_arguments(arguments)
     {}
 
-    /// Returns the name of the action.
-    ///
-    aterm_string name() const
+    /// DEPRECATED (This constructor will disappear).
+    action(const aterm_string& name, const data_expression_list& arguments)
+     : aterm_appl(gsMakeAction(gsMakeActId(name, apply(arguments, gsGetSort)), arguments)),
+       m_arguments(arguments)
     {
-      return m_name;
+      m_label = action_label(*begin());
     }
 
-    sort_list sorts() const
+    /// Returns the label of the action.
+    ///
+    action_label label() const
     {
-      return m_sorts;
+      return m_label;
     }
 
     /// Returns the sequence of arguments.
@@ -137,6 +135,22 @@ class action: public aterm_appl
     data_expression_list arguments() const
     {
       return m_arguments;
+    }
+
+    /// DEPRECATED (This method will disappear).
+    /// Returns the name of the action.
+    ///
+    aterm_string name() const
+    {
+      return m_label.name();
+    }
+
+    /// DEPRECATED (This method will disappear).
+    /// Returns the sorts of the action.
+    ///
+    sort_list sorts() const
+    {
+      return m_label.sorts();
     }
 
     /// Applies a substitution to this action and returns the result.
