@@ -126,7 +126,13 @@ int Cluster::occupySlot(float pos) {
 void Cluster::addUndecidedState(State *s) {
   undecidedStates.push_back(s);
 }
+
 void Cluster::resolveSlots() {
+  slotUndecided();
+  spreadSlots();
+}
+
+void Cluster::slotUndecided() {
   // Place undecided nodes in slots so there is as much space as possible 
   // between nodes.
   int remainingNodes = undecidedStates.size();
@@ -140,14 +146,13 @@ void Cluster::resolveSlots() {
   int largestGapBegin = 0;  // initial begin of largest gap
   int largestGapEnd = 0;    // initial end of largest gap
   int largestGap = 0;       // initial size of largest gap
- 
+  
   while (remainingNodes != 0) {
     // Decide largest gap.
     
     // If the first slot is unoccupied, it is part of a gap, increase by one 
     // until we have found an occupied slot.
     bool gapIsRim = false;
-
 
     while (slots[gapBegin].occupying == 0 && !gapIsRim) {
       //std::cerr << "slots[gapBegin].occupying == 0 && ...\n";
@@ -159,7 +164,7 @@ void Cluster::resolveSlots() {
         largestGap = totalSlots;
       }
     }
-    
+
     // We need to remember at which slot we started, to make sure we've had all
     // slots.
     gapStart = gapBegin;
@@ -177,12 +182,12 @@ void Cluster::resolveSlots() {
           //std::cerr << "slots[gapEnd.occupying == 0\n";
           gapEnd = (gapEnd + 1) % totalSlots;
         } while (slots[gapEnd].occupying == 0);
-        
+
         gapSize = gapEnd - gapBegin;
         // If gapSize is negative, this means that the end is before the begin.
         gapSize = (gapSize <= 0 ? (totalSlots - gapBegin) + gapEnd
                                : gapSize);
-        
+
         if (gapSize > largestGap) {
           largestGap = gapSize;
           largestGapBegin = gapBegin;
@@ -191,10 +196,9 @@ void Cluster::resolveSlots() {
 
         gapBegin = gapEnd;
       } while (gapBegin != gapStart);      
-      
+
     }
-
-
+    
     // largestGap is the size of the gap between largestGapBegin and 
     // largestGapEnd.
     // We place (largestGap / totalSlots) * remainingNodes nodes into this gap,
@@ -219,7 +223,11 @@ void Cluster::resolveSlots() {
 
     remainingNodes = undecidedStates.size();
   }
+}
 
+void Cluster::spreadSlots() {
+  int totalSlots = slots.size();
+  
   // Distribute nodes over each slot.
   for(int i = 0; i < totalSlots; ++i) {
     // Calculate free slots neighbouring each slots.
@@ -244,7 +252,6 @@ void Cluster::resolveSlots() {
       
       toSpread.under_consideration = 1;
     }
-
   }
 
   // Iterate over the states, placing them according to the space available to 
@@ -252,10 +259,9 @@ void Cluster::resolveSlots() {
   for(unsigned int i = 0; i < states.size(); ++i) {
     State* toPlaceState = states[i];
 
-    if (toPlaceState->getPosition() < -0.9f) {
-    }
-    else {
+    if (toPlaceState->getPosition() >= -0.9f) {
       int slotOfStateIndex = toPlaceState->getSlot();
+
       if ((slotOfStateIndex < 0) || (slotOfStateIndex > totalSlots)) {
         toPlaceState->setSlot(
           toPlaceState->getCluster()->occupySlot(

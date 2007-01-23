@@ -46,7 +46,7 @@ class Cluster {
     Cluster(int r);
     ~Cluster();
 
-    // Functions on descendants and ancestors.
+    // Methods on descendants and ancestors.
     void      addDescendant(Cluster* c);
     Cluster*  getDescendant(int i) const;
     int	      getNumberOfDescendants() const;
@@ -55,7 +55,7 @@ class Cluster {
     void      setAncestor(Cluster* c);
     Cluster*  getAncestor() const;
 
-    // Functions on states
+    // Methods on states
     void         addState(State* s);
     void         addUndecidedState(State* s);
     State*       getState(int i) const;
@@ -69,8 +69,10 @@ class Cluster {
     Utils::Slot  getSlot(int index) const;
     int          occupySlot(float pos);
     void         resolveSlots();
+    void         slotUndecided();
+    void         spreadSlots();
 
-    // Functions on transitions
+    // Methods on transitions
     void      addActionLabel( ATerm l );
     bool      hasMarkedTransition() const;
     int	      markActionLabel( ATerm l );
@@ -86,7 +88,7 @@ class Cluster {
     float     getVolume() const;
     void      setPosition(float p);
     
-    // Functions for visualization
+    // Methods for visualization
     int    getPrimitive() const;
     void   setPrimitive(int p);
     float* getMatrix() const;
