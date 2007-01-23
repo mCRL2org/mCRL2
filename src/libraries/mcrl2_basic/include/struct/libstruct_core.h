@@ -47,14 +47,15 @@ void gsEnableCoreConstructorFunctions(void);
 //--------------------------------------------------------------
 
 //sort expressions
-ATermAppl gsMakeSortList(ATermAppl SortExpr);
-ATermAppl gsMakeSortSet(ATermAppl SortExpr);
-ATermAppl gsMakeSortBag(ATermAppl SortExpr);
+ATermAppl gsMakeSortCons(ATermAppl SortConsType, ATermAppl SortExpr);
 ATermAppl gsMakeSortStruct(ATermList StructConss);
 ATermAppl gsMakeSortArrowProd(ATermList SortExprsDomain,
   ATermAppl SortExprResult);
 ATermAppl gsMakeSortArrow(ATermAppl SortExprDomain, ATermAppl SortExprResult);
 ATermAppl gsMakeSortId(ATermAppl Name);
+ATermAppl gsMakeSortConsTypeSortList();
+ATermAppl gsMakeSortConsTypeSortSet();
+ATermAppl gsMakeSortConsTypeSortBag();
 ATermAppl gsMakeStructCons(ATermAppl ConsName, ATermList StructProjs,
   ATermAppl RecNameOrNil); 
 ATermAppl gsMakeStructProj(ATermAppl ProjNameOrNil, ATermAppl SortExpr);
@@ -181,13 +182,14 @@ ATermAppl gsMakePBESExists(ATermList DataVarId, ATermAppl PBExpr);
 //-----------------------------------------------------------------
 
 //sort expressions
-bool gsIsSortList(ATermAppl Term);
-bool gsIsSortSet(ATermAppl Term);
-bool gsIsSortBag(ATermAppl Term);
+bool gsIsSortCons(ATermAppl Term);
 bool gsIsSortStruct(ATermAppl Term);
 bool gsIsSortArrowProd(ATermAppl Term);
 bool gsIsSortArrow(ATermAppl Term);
 bool gsIsSortId(ATermAppl Term);
+bool gsIsSortConsTypeSortList(ATermAppl Term);
+bool gsIsSortConsTypeSortSet(ATermAppl Term);
+bool gsIsSortConsTypeSortBag(ATermAppl Term);
 bool gsIsStructCons(ATermAppl Term);
 bool gsIsStructProj(ATermAppl Term);
 bool gsIsNil(ATermAppl Term);

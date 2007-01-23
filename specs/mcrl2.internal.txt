@@ -39,15 +39,18 @@
 
 //sort expression
 <SortExpr>    ::= <SortId>
-                | SortList(<SortExpr>)                                   [- di]
-                | SortSet(<SortExpr>)                                    [- di]
-                | SortBag(<SortExpr>)                                    [- di]
+                | SortCons(<SortConsType>, <SortExpr>)                   [- di]
                 | SortStruct(<StructCons>+)                              [- di]
                 | SortArrowProd(<SortExpr>+, <SortExpr>)                 [- di]
                 | SortArrow(<SortExpr>, <SortExpr>)                      [+ di]
 
 //sort identifier
 <SortId>       ::= SortId(<String>)
+
+//sort constructor type
+<SortConsType> ::= SortList                                              [- di]
+                 | SortSet                                               [- di]
+                 | SortBag                                               [- di]
 
 //constructor declaration of a structured sort
 <StructCons>   ::= StructCons(<String>, <StructProj>*, <StringOrNil>)

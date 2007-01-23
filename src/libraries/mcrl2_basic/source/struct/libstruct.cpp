@@ -363,8 +363,7 @@ bool gsIsSortExpr(ATermAppl Term)
 {
   return
     gsIsSortId(Term)   || gsIsSortArrow(Term)  ||
-    gsIsSortList(Term) || gsIsSortSet(Term)    ||
-    gsIsSortBag(Term)  || gsIsSortStruct(Term) ||
+    gsIsSortCons(Term) || gsIsSortStruct(Term) ||
     gsIsSortArrowProd(Term);
 }
 
@@ -478,6 +477,46 @@ ATermAppl gsMakeSortExprReal()
   return gsMakeSortIdReal();
 }
 
+//Creation for system defined sort expressions list/set/bag
+ATermAppl gsMakeSortExprList(ATermAppl SortExpr)
+{
+  return gsMakeSortCons(gsMakeSortConsTypeSortList(), SortExpr);
+}
+
+ATermAppl gsMakeSortExprSet(ATermAppl SortExpr)
+{
+  return gsMakeSortCons(gsMakeSortConsTypeSortSet(), SortExpr);
+}
+
+ATermAppl gsMakeSortExprBag(ATermAppl SortExpr)
+{
+  return gsMakeSortCons(gsMakeSortConsTypeSortBag(), SortExpr);
+}
+
+//Recognition functions for system defined sort expressions list/set/bag
+bool gsIsSortExprList(ATermAppl Term)
+{
+  if (!gsIsSortCons(Term))
+    return false;
+  else
+    return gsIsSortConsTypeSortList(ATAgetArgument(Term, 0));
+}
+
+bool gsIsSortExprSet(ATermAppl Term)
+{
+  if (!gsIsSortCons(Term))
+    return false;
+  else
+    return gsIsSortConsTypeSortSet(ATAgetArgument(Term, 0));
+}
+
+bool gsIsSortExprBag(ATermAppl Term)
+{
+  if (!gsIsSortCons(Term))
+    return false;
+  else
+    return gsIsSortConsTypeSortBag(ATAgetArgument(Term, 0));
+}
 
 //Auxiliary functions concerning sort expressions
 
@@ -599,9 +638,9 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
     ATermAppl Var = ATAgetArgument(DataExpr, 0);
     ATermAppl SortBody = gsGetSort(ATAgetArgument(DataExpr, 1));
     if (ATisEqual(SortBody, gsMakeSortExprBool()))
-      Result = gsMakeSortSet(gsGetSort(Var));
+      Result = gsMakeSortCons(gsMakeSortConsTypeSortSet(), gsGetSort(Var));
     else if (ATisEqual(SortBody, gsMakeSortExprNat()))
-      Result = gsMakeSortBag(gsGetSort(Var));
+      Result = gsMakeSortCons(gsMakeSortConsTypeSortBag(), gsGetSort(Var));
     else
       Result = gsMakeUnknown();
   } else if (gsIsLambda(DataExpr)) {

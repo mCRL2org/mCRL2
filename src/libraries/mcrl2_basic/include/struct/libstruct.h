@@ -89,6 +89,23 @@ ATermAppl gsMakeSortExprInt(void);
 ATermAppl gsMakeSortExprReal(void);
 //Ret: Sort expression for `Real'
 
+ATermAppl gsMakeSortExprList(ATermAppl SortExpr);
+//Ret: Sort expression for `List of SortExpr'
+
+ATermAppl gsMakeSortExprSet(ATermAppl SortExpr);
+//Ret: Sort expression for `Set of SortExpr'
+
+ATermAppl gsMakeSortExprBag(ATermAppl SortExpr);
+//Ret: Sort expression for `Bag of SortExpr'
+
+bool gsIsSortExprList(ATermAppl Term);
+//Ret: Term is a SortExprList
+
+bool gsIsSortExprSet(ATermAppl Term);
+//Ret: Term is a SortExprBag
+
+bool gsIsSortExprBag(ATermAppl Term);
+//Ret: Term is a SortExprSet
 
 //Auxiliary functions concerning sort expressions
 

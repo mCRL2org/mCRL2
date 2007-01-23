@@ -590,15 +590,15 @@ ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
     //part is a structured sort; replace by a new sort and add data
     //declarations for this sort
     part = impl_sort_struct(part, p_substs, p_data_decls);
-  } else if (gsIsSortList(part)) {
+  } else if (gsIsSortExprList(part)) {
     //part is a list sort; replace by a new sort and add data declarations for
     //this sort
     part = impl_sort_list(part, p_substs, p_data_decls);
-  } else if (gsIsSortSet(part)) {
+  } else if (gsIsSortExprSet(part)) {
     //part is a set sort; replace by a new sort and add data declarations for
     //this sort
     part = impl_sort_set(part, p_substs, p_data_decls);
-  } else if (gsIsSortBag(part)) {
+  } else if (gsIsSortExprBag(part)) {
     //part is a bag sort; replace by a new sort and add data declarations for
     //this sort
     part = impl_sort_bag(part, p_substs, p_data_decls);
@@ -691,11 +691,11 @@ ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
       if (ATisEqual(body_sort, gsMakeSortIdBool())) {
         //part is a set comprehension
         part = gsMakeDataExprSetComp(gsMakeLambda(ATmakeList1((ATerm) var),
-          body), gsMakeSortSet(var_sort));
+          body), gsMakeSortExprSet(var_sort));
       } else {
         //part is a bag comprehension
         part = gsMakeDataExprBagComp(gsMakeLambda(ATmakeList1((ATerm) var),
-          body), gsMakeSortBag(var_sort));
+          body), gsMakeSortExprBag(var_sort));
       }
     }
   } else if (gsIsForall(part) || gsIsExists(part)) {
@@ -1303,9 +1303,9 @@ ATermAppl impl_sort_struct(ATermAppl sort_struct, ATermList *p_substs,
 ATermAppl impl_sort_list(ATermAppl sort_list, ATermList *p_substs,
   t_data_decls *p_data_decls)
 {
-  assert(gsIsSortList(sort_list));
+  assert(gsIsSortExprList(sort_list));
   //implement expressions in the target sort of sort_list
-  ATermAppl sort_elt = impl_exprs_appl(ATAgetArgument(sort_list, 0),
+  ATermAppl sort_elt = impl_exprs_appl(ATAgetArgument(sort_list, 1),
     p_substs, p_data_decls);
   //declare fresh sort identifier for sort_list
   ATermAppl sort_id = make_fresh_list_sort_id((ATerm) p_data_decls->sorts);
@@ -1463,9 +1463,9 @@ ATermAppl impl_sort_list(ATermAppl sort_list, ATermList *p_substs,
 ATermAppl impl_sort_set(ATermAppl sort_set, ATermList *p_substs,
   t_data_decls *p_data_decls)
 {
-  assert(gsIsSortSet(sort_set));
+  assert(gsIsSortExprSet(sort_set));
   //implement expressions in the target sort of sort_set
-  ATermAppl sort_elt = impl_exprs_appl(ATAgetArgument(sort_set, 0),
+  ATermAppl sort_elt = impl_exprs_appl(ATAgetArgument(sort_set, 1),
     p_substs, p_data_decls);
   //declare fresh sort identifier for sort_set
   ATermAppl sort_id = make_fresh_set_sort_id((ATerm) p_data_decls->sorts);
@@ -1611,13 +1611,13 @@ ATermAppl impl_sort_set(ATermAppl sort_set, ATermList *p_substs,
 ATermAppl impl_sort_bag(ATermAppl sort_bag, ATermList *p_substs,
   t_data_decls *p_data_decls)
 {
-  assert(gsIsSortBag(sort_bag));
+  assert(gsIsSortExprBag(sort_bag));
   //implement expressions in the target sort of sort_bag
-  ATermAppl sort_elt = impl_exprs_appl(ATAgetArgument(sort_bag, 0),
+  ATermAppl sort_elt = impl_exprs_appl(ATAgetArgument(sort_bag, 1),
     p_substs, p_data_decls);
   //add implementation of sort Set(sort_elt), if necessary
   // XXX This piece of code should somehow be moved to the end of the function
-  ATermAppl sort_set = gsMakeSortSet(sort_elt);
+  ATermAppl sort_set = gsMakeSortExprSet(sort_elt);
   ATermAppl sort_set_impl =
     (ATermAppl) gsSubstValues(*p_substs, (ATerm) sort_set, false);
   if (ATisEqual(sort_set_impl, sort_set)) {

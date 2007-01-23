@@ -984,25 +984,25 @@ static void PRINT_FUNC(PrintSortExprOrUnknown)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(PrintSortExprOrUnknown)(OutStream, ATAgetArgument(SortExpr, 1),
       pp_format, ShowSorts, 0);
     if (PrecLevel > 0) PRINT_FUNC(fprints)(OutStream, ")");
-  } else if (gsIsSortList(SortExpr)) {
+  } else if (gsIsSortExprList(SortExpr)) {
     //print list sort
     PRINT_FUNC(dbg_prints)("printing list sort\n");
     PRINT_FUNC(fprints)(OutStream, "List(");
-    PRINT_FUNC(PrintSortExprOrUnknown)(OutStream, ATAgetArgument(SortExpr, 0),
+    PRINT_FUNC(PrintSortExprOrUnknown)(OutStream, ATAgetArgument(SortExpr, 1),
       pp_format, ShowSorts, 0);
     PRINT_FUNC(fprints)(OutStream, ")");
-  } else if (gsIsSortSet(SortExpr)) {
+  } else if (gsIsSortExprSet(SortExpr)) {
     //print set sort
     PRINT_FUNC(dbg_prints)("printing set sort\n");
     PRINT_FUNC(fprints)(OutStream, "Set(");
-    PRINT_FUNC(PrintSortExprOrUnknown)(OutStream, ATAgetArgument(SortExpr, 0),
+    PRINT_FUNC(PrintSortExprOrUnknown)(OutStream, ATAgetArgument(SortExpr, 1),
       pp_format, ShowSorts, 0);
     PRINT_FUNC(fprints)(OutStream, ")");
-  } else if (gsIsSortBag(SortExpr)) {
+  } else if (gsIsSortExprBag(SortExpr)) {
     //print bag sort
     PRINT_FUNC(dbg_prints)("printing bag sort\n");
     PRINT_FUNC(fprints)(OutStream, "Bag(");
-    PRINT_FUNC(PrintSortExprOrUnknown)(OutStream, ATAgetArgument(SortExpr, 0),
+    PRINT_FUNC(PrintSortExprOrUnknown)(OutStream, ATAgetArgument(SortExpr, 1),
       pp_format, ShowSorts, 0);
     PRINT_FUNC(fprints)(OutStream, ")");
   } else if (gsIsSortStruct(SortExpr)) {

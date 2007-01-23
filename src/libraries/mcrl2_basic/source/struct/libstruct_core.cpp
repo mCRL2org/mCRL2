@@ -61,13 +61,14 @@ ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term, bool TryNoSuffix)
 //------------------------------
 //Constant AFun's for each constructor element of the internal ATerm structure.
 //sort expressions
-static AFun gsAFunSortList;
-static AFun gsAFunSortSet;
-static AFun gsAFunSortBag;
+static AFun gsAFunSortCons;
 static AFun gsAFunSortStruct;
 static AFun gsAFunSortArrowProd;
 static AFun gsAFunSortArrow;
 static AFun gsAFunSortId;
+static AFun gsAFunSortConsList;
+static AFun gsAFunSortConsSet;
+static AFun gsAFunSortConsBag;
 static AFun gsAFunStructCons;
 static AFun gsAFunStructProj;
 static AFun gsAFunNil;
@@ -195,13 +196,14 @@ void gsEnableCoreConstructorFunctions(void)
   if (!CoreConstructorFunctionsEnabled) {
     //create constructor AFun's
     //sort expressions
-    gsAFunSortList         = ATmakeAFun("SortList", 1, ATfalse);
-    gsAFunSortSet          = ATmakeAFun("SortSet", 1, ATfalse);
-    gsAFunSortBag          = ATmakeAFun("SortBag", 1, ATfalse);
+    gsAFunSortCons         = ATmakeAFun("SortCons", 2, ATfalse);
     gsAFunSortStruct       = ATmakeAFun("SortStruct", 1, ATfalse);
     gsAFunSortArrowProd    = ATmakeAFun("SortArrowProd", 2, ATfalse);
     gsAFunSortArrow        = ATmakeAFun("SortArrow", 2, ATfalse);
     gsAFunSortId           = ATmakeAFun("SortId", 1, ATfalse);
+    gsAFunSortConsList     = ATmakeAFun("SortConsList", 0, ATfalse);
+    gsAFunSortConsSet      = ATmakeAFun("SortConsSet", 0, ATfalse);
+    gsAFunSortConsBag      = ATmakeAFun("SortConsBag", 0, ATfalse);
     gsAFunStructCons       = ATmakeAFun("StructCons", 3, ATfalse);
     gsAFunStructProj       = ATmakeAFun("StructProj", 2, ATfalse);
     gsAFunUnknown          = ATmakeAFun("Unknown", 0, ATfalse);
@@ -318,13 +320,14 @@ void gsEnableCoreConstructorFunctions(void)
 
     //protect constructor AFun's
     //sort expressions
-    ATprotectAFun(gsAFunSortList);
-    ATprotectAFun(gsAFunSortSet);
-    ATprotectAFun(gsAFunSortBag);
+    ATprotectAFun(gsAFunSortCons);
     ATprotectAFun(gsAFunSortStruct);
     ATprotectAFun(gsAFunSortArrowProd);
     ATprotectAFun(gsAFunSortArrow);
     ATprotectAFun(gsAFunSortId);
+    ATprotectAFun(gsAFunSortConsList);
+    ATprotectAFun(gsAFunSortConsSet);
+    ATprotectAFun(gsAFunSortConsBag);
     ATprotectAFun(gsAFunStructCons);
     ATprotectAFun(gsAFunStructProj);
     ATprotectAFun(gsAFunNil);
@@ -447,23 +450,10 @@ void gsEnableCoreConstructorFunctions(void)
 //--------------------------------------------------------------
 
 //sort expressions
-
-ATermAppl gsMakeSortList(ATermAppl SortExpr)
+ATermAppl gsMakeSortCons(ATermAppl SortConsType, ATermAppl SortExpr)
 {
   assert(CoreConstructorFunctionsEnabled);
-  return ATmakeAppl1(gsAFunSortList, (ATerm) SortExpr);
-}
-
-ATermAppl gsMakeSortSet(ATermAppl SortExpr)
-{
-  assert(CoreConstructorFunctionsEnabled);
-  return ATmakeAppl1(gsAFunSortSet, (ATerm) SortExpr);
-}
-
-ATermAppl gsMakeSortBag(ATermAppl SortExpr)
-{
-  assert(CoreConstructorFunctionsEnabled);
-  return ATmakeAppl1(gsAFunSortBag, (ATerm) SortExpr);
+  return ATmakeAppl2(gsAFunSortCons, (ATerm) SortConsType, (ATerm) SortExpr);
 }
 
 ATermAppl gsMakeSortStruct(ATermList StructConss)
@@ -491,6 +481,24 @@ ATermAppl gsMakeSortId(ATermAppl Name)
 {
   assert(CoreConstructorFunctionsEnabled);
   return ATmakeAppl1(gsAFunSortId, (ATerm) Name);
+}
+
+ATermAppl gsMakeSortConsTypeSortList()
+{
+  assert(CoreConstructorFunctionsEnabled);
+  return ATmakeAppl0(gsAFunSortConsList);
+}
+
+ATermAppl gsMakeSortConsTypeSortSet()
+{
+  assert(CoreConstructorFunctionsEnabled);
+  return ATmakeAppl0(gsAFunSortConsSet);
+}
+
+ATermAppl gsMakeSortConsTypeSortBag()
+{
+  assert(CoreConstructorFunctionsEnabled);
+  return ATmakeAppl0(gsAFunSortConsBag);
 }
 
 ATermAppl gsMakeStructCons(ATermAppl ConsName, ATermList StructProjs,
@@ -1168,19 +1176,9 @@ ATermAppl gsMakePBESExists(ATermList DataVarId, ATermAppl PBExpr)
 //-----------------------------------------------------------------
 
 //sort expressions
-bool gsIsSortList(ATermAppl Term) {
+bool gsIsSortCons(ATermAppl Term) {
   assert(CoreConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunSortList;
-}
-
-bool gsIsSortSet(ATermAppl Term) {
-  assert(CoreConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunSortSet;
-}
-
-bool gsIsSortBag(ATermAppl Term) {
-  assert(CoreConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunSortBag;
+  return ATgetAFun(Term) == gsAFunSortCons;
 }
 
 bool gsIsSortStruct(ATermAppl Term) {
@@ -1201,6 +1199,21 @@ bool gsIsSortArrow(ATermAppl Term) {
 bool gsIsSortId(ATermAppl Term) {
   assert(CoreConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunSortId;
+}
+
+bool gsIsSortConsTypeSortList(ATermAppl Term) {
+  assert(CoreConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunSortConsList;
+}
+
+bool gsIsSortConsTypeSortSet(ATermAppl Term) {
+  assert(CoreConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunSortConsSet;
+}
+
+bool gsIsSortConsTypeSortBag(ATermAppl Term) {
+  assert(CoreConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunSortConsBag;
 }
 
 bool gsIsStructCons(ATermAppl Term) {

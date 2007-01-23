@@ -471,15 +471,15 @@ static void insertsort(ATermAppl sortterm, specificationbasictype *spec)
     insertsort(ATAgetArgument(sortterm,1),spec);
     return;
   }
-  /* if (gsIsSortList(sortterm))
+  /* if (gsIsSortExprList(sortterm))
   { gsErrorMsg("SortList is not an implemented sort\n");
     stop();
   }
-  if (gsIsSortSet(sortterm))
+  if (gsIsSortExprSet(sortterm))
   { gsErrorMsg("SortSet is not an implemented sort\n");
     stop();
   }
-  if (gsIsSortBag(sortterm))
+  if (gsIsSortExprBag(sortterm))
   { gsErrorMsg("SortBag is not an implemented sort\n");
     stop();
   } */

@@ -365,15 +365,15 @@ sort_constant:
 sort_constructor:
   LIST LPAR sort_expr RPAR
     {
-      safe_assign($$, gsMakeSortList($3));
+      safe_assign($$, gsMakeSortExprList($3));
     }
   | SET LPAR sort_expr RPAR
     {
-      safe_assign($$, gsMakeSortSet($3));
+      safe_assign($$, gsMakeSortExprSet($3));
     }
   | BAG LPAR sort_expr RPAR
     {
-      safe_assign($$, gsMakeSortBag($3));
+      safe_assign($$, gsMakeSortExprBag($3));
     }
   ;
 
