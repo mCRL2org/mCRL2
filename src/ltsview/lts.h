@@ -68,7 +68,6 @@ class LTS
     ATermList			            stateVectorSpec;
     std::vector< Transition* >	            transitions;
     std::vector< State* >		    unmarkedStates;
-    float                                   tau; //Treshold for centering nodes
 
     void addComradesToCluster( Cluster* c, State* s );
     void clearRanksAndClusters();

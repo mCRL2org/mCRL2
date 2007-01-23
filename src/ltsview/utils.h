@@ -7,6 +7,7 @@
 
 namespace Utils {
   const double PI = 3.14159265359;
+  const double tau = 1.00;
 
   enum RankStyle {ITERATIVE,CYCLIC};
   enum MarkStyle {NO_MARKS,MARK_DEADLOCKS,MARK_STATES,MARK_TRANSITIONS};
@@ -66,7 +67,6 @@ namespace Utils {
   };
   
   struct Slot {
-    float position;  //INV: 0 <= position < 360
     int   occupying;  //INV: 0 <= occupying 
     int   under_consideration; 
     // Number of slot we are placing. Position this slot will be placed in is 

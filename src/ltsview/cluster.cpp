@@ -20,9 +20,6 @@ Cluster::Cluster(int r) {
   markedTransitionCount = 0;
   rank = r;
   matrix = (float*)malloc(16*sizeof(float));
-
-  Slot centerSlot = { -1.0f, 0, 0, 0 };
-  slots.push_back(centerSlot);
 }
 
 Cluster::~Cluster() {
@@ -104,41 +101,28 @@ Slot Cluster::getSlot(int index) const {
 }
 
 int Cluster::occupySlot(float pos) {
-  //Pre:  (pos ~= -1.0f \/ 0 <= pos < 360) /\ 3 <= slots.size()
-  //Post: slots[slot].occupy++, where 
-  //  slot = (min s: 1 <= s < slots.size(): abs(slots[s].position - pos) \/
-  //  (pos ~= -1.0f /\ slot = 0)
-  //Ret:  slot
-  // Above Post-condition is currently not fullfilled, since we have not 
-  // finished developing the slots system.
-  
   int slot = -1;
+  float minDiff = 362.0f; // Difference can't become larger than 360
+  unsigned int numberOfSlots = slots.size();
 
-  if (pos < -0.9f) {
-    // Put the state in the center slot.
-    slot = 0;
-  }  
-  else {
-    float minDiff = 362.0f; // Difference can't become larger than 360
-    
-    for (size_t i = 1; i < slots.size(); ++i) { 
-      float posDif = slots[i].position - pos;
+  for (size_t i = 0; i < numberOfSlots; ++i) { 
+    // Slot with index i has position i * 360 / (slots.size()
+    float slotPosition =  i  * 360 / numberOfSlots;
+    float posDif = fabsf(slotPosition - pos);
 
-      if (posDif < 0) {
-        posDif = -posDif;
-      }
-      if (posDif < minDiff) {
+
+    if (posDif < minDiff) {
         slot = i;
         minDiff = posDif;
-      }
     }
   }
   
-  ++slots[slot].occupying;
+  
+  ++(slots[slot].occupying);
 
   return slot;
-  
 }
+
 void Cluster::addUndecidedState(State *s) {
   undecidedStates.push_back(s);
 }
@@ -147,12 +131,15 @@ void Cluster::resolveSlots() {
   // between nodes.
   int remainingNodes = undecidedStates.size();
   int totalSlots = slots.size();
-  int gapSize = 1;
-  int largestGap = 1;
-  int largestGapBegin = 1;
-  int largestGapEnd = 2;
-  int gapBegin = 1;
-  int gapEnd = 2;
+
+  int gapStart = 0; // Start of checking for gaps 
+  int gapBegin = 0; // Initial begin of gap
+  int gapEnd   = 0; // Initial end of gap
+  int gapSize  = 0; // Initial size of gap (gapEnd - gapBegin);
+
+  int largestGapBegin = 0;  // initial begin of largest gap
+  int largestGapEnd = 0;    // initial end of largest gap
+  int largestGap = 0;       // initial size of largest gap
  
   while (remainingNodes != 0) {
     // Decide largest gap.
@@ -163,46 +150,39 @@ void Cluster::resolveSlots() {
 
 
     while (slots[gapBegin].occupying == 0 && !gapIsRim) {
-      gapBegin++;
+      //std::cerr << "slots[gapBegin].occupying == 0 && ...\n";
+      gapBegin = (gapBegin + 1) % totalSlots;
 
-      if (gapBegin >= totalSlots) {
+      if (gapBegin == gapStart) {
         // Check to see if we have the entire rim to position the node.
-        gapBegin = 1;
         gapIsRim = true;
-        largestGap = totalSlots - 1;
+        largestGap = totalSlots;
       }
     }
     
     // We need to remember at which slot we started, to make sure we've had all
-    // slots
-    int gapStart = gapBegin;
+    // slots.
+    gapStart = gapBegin;
     // A gap is at least of size one.
-    gapEnd = gapBegin + 1;
-
-    if (gapEnd >= totalSlots) {
-      // Modulo calculation, excluding the center slot, which is always denoted
-      // by 0 
-      gapEnd -= (totalSlots - 1);
-    }
+    gapEnd = gapBegin;
 
     if (!gapIsRim) {
-      //INV: largestGap == (max i, j: 1 <= i < j < totalSlots &&
-      //                     (forall k: i < k < j: slots[k].occupied = 0): j-i)
-      while (gapEnd != gapStart) {
-        while (slots[gapEnd].occupying == 0 ) {
-          gapEnd++;
-          if (gapEnd >= totalSlots) {
-            gapEnd -= (totalSlots - 1);
-          }
-        }
-
+      // Search for the largest gap: Keep gapBegin at the first occupied slot, 
+      // and let gapEnd move from gapBegin to the first occupied slot after this
+      // then, put gapBegin at the new gapEnd, and continue, until we have gone 
+      // round.
+      do {
+        //std::cerr << "gapBegin != gapStart\n";
+        do  {
+          //std::cerr << "slots[gapEnd.occupying == 0\n";
+          gapEnd = (gapEnd + 1) % totalSlots;
+        } while (slots[gapEnd].occupying == 0);
+        
         gapSize = gapEnd - gapBegin;
-
-        if (gapEnd < gapBegin) {
-          // gapBegin lies before slot 1, gapEnd lies after it
-          gapSize = gapBegin - gapEnd;
-        }
-
+        // If gapSize is negative, this means that the end is before the begin.
+        gapSize = (gapSize <= 0 ? (totalSlots - gapBegin) + gapEnd
+                               : gapSize);
+        
         if (gapSize > largestGap) {
           largestGap = gapSize;
           largestGapBegin = gapBegin;
@@ -210,107 +190,96 @@ void Cluster::resolveSlots() {
         }
 
         gapBegin = gapEnd;
-        if (gapEnd != gapStart) {
-          ++gapEnd;
-        }
-
-        if (gapEnd >= totalSlots) {
-          // Modulo calculation, excluding 0.
-          gapEnd -= (totalSlots - 1);
-        }
-      }
+      } while (gapBegin != gapStart);      
+      
     }
+
 
     // largestGap is the size of the gap between largestGapBegin and 
     // largestGapEnd.
     // We place (largestGap / totalSlots) * remainingNodes nodes into this gap,
-    // rounding the position to the nearest gap.
-    int toPlace = static_cast<int>( ceil(static_cast<float>(largestGap) / 
-                                         static_cast<float>(totalSlots)) * 
-                                         remainingNodes);
-
-    float placementStep = ceil(static_cast<float>(gapSize) / 
-                                                static_cast<float>(toPlace+1));
-   
-    float placeSlot = ceil(gapBegin + placementStep);
+    // rounding the position to the nearest slot.
+    int toPlace = (largestGap * remainingNodes + totalSlots - 1) / totalSlots;
+    float gapAngle = largestGap * 360.0 / totalSlots;
+    float gapBeginAngle = gapBegin * 360.0 / totalSlots;
+    toPlace = (toPlace > remainingNodes ? remainingNodes
+                                        : toPlace);
 
     for(int i = 0; i < toPlace; ++i) {
-      int actualSlot = static_cast<int>(ceil(placeSlot));
-      State* placeState = undecidedStates.back();
+      State* undecided = undecidedStates.back();
+      float positionToPlace = gapBeginAngle + (i+1) * gapAngle / (toPlace + 1);
+      int slotToPlace = occupySlot(positionToPlace);
 
-      placeState->setPosition(slots[actualSlot].position);
-      placeSlot += placementStep;
+      undecided->setPosition(positionToPlace);
+      undecided->setSlot(slotToPlace);
+      ++(slots[slotToPlace].occupying);
+
       undecidedStates.pop_back();
     }
 
     remainingNodes = undecidedStates.size();
   }
 
-
-  for(vector<State* >::iterator state_it = states.begin();
-      state_it != states.end(); ++state_it) 
-  {
-    unsigned int slotIndex = (*state_it)->getSlot();
-
-    // WORKAROUND: I seem to be missing one case when adding states to slots
-    if ((slotIndex < 0) || slots.size() < slotIndex) {
-      slotIndex = occupySlot((*state_it)->getPosition());
-      (*state_it)->setSlot(slotIndex);
-    }
-
-    Slot currStateSlot = slots[slotIndex];
-
-    float position = currStateSlot.position;
-    (*state_it)->setPosition(position);
-  }
-
-
   // Distribute nodes over each slot.
   for(int i = 0; i < totalSlots; ++i) {
+    // Calculate free slots neighbouring each slots.
     Slot toSpread = slots[i];
 
-    if (toSpread.occupying > 0) {
-
-      // Calculate total space available for this slot.
-      int size = 0;
-      int next_slot = 0;
-      int former_slot = 0;
-      bool space_free = true;
-
-
+    if (toSpread.occupying > 1) {
+      int free_space = 0;
+      int next_slot; 
+      int previous_slot;
+      
       do {
-        next_slot = (((i + size) >= totalSlots) ? i + size - (totalSlots - 1)
-                                                : i + size                   );
+        ++free_space;
+        next_slot = (i + free_space) % totalSlots;
+        previous_slot = i - free_space;
 
-        former_slot = (((i - size) < 1) ? i - size + (totalSlots - 1)
-                                        : i - size                   );
+        previous_slot = (previous_slot < 0 ? totalSlots - previous_slot
+                                         : previous_slot);
 
-
-        space_free = (slots[next_slot].occupying   = 0) && 
-                     (slots[former_slot].occupying = 0);
-        ++size;
-      } while (space_free);
-
-      slots[i].total_size = size * 360 / totalSlots;
-
-      // Set the slot's node under consideration.
-      slots[i].under_consideration = 1;
+      } while ((slots[previous_slot].occupying == 0) &&
+               (slots[next_slot].occupying == 0) && 
+               (previous_slot != i) && (next_slot != i));
+      
+      toSpread.under_consideration = 1;
     }
+
   }
 
   // Iterate over the states, placing them according to the space available to 
   // the node.
   for(unsigned int i = 0; i < states.size(); ++i) {
-    State* state = states[i];
-    int slot_index = state->getSlot();
-    if (slot_index != 0) {
-      Slot state_slot = slots[slot_index];
+    State* toPlaceState = states[i];
 
-      float final_position = fmodf(state_slot.position - 
-        .5 * state_slot.total_size / (state_slot.occupying + 1), 360);
+    if (toPlaceState->getPosition() < -0.9f) {
+    }
+    else {
+      int slotOfStateIndex = toPlaceState->getSlot();
+      if ((slotOfStateIndex < 0) || (slotOfStateIndex > totalSlots)) {
+        toPlaceState->setSlot(
+          toPlaceState->getCluster()->occupySlot(
+            toPlaceState->getPosition()));
+        slotOfStateIndex = toPlaceState->getSlot();
+      }
+  
+      Slot slotOfState = slots[slotOfStateIndex];
+      float statePosition = 0.0f;
+    
+      if (slotOfState.occupying == 1) {
+        statePosition = 360 * slotOfStateIndex / totalSlots;
+      }
+      else {
+        // slots[slotOfState].occupying > 1
+        statePosition =  fmodf( 360 * slotOfStateIndex / totalSlots - 
+                               0.5f * slotOfState.total_size + 
+                               slotOfState.under_consideration * 
+                          (slotOfState.total_size /(slotOfState.occupying + 1)),
+                          360.0f);
+        slotOfState.under_consideration++;
+      }
 
-      state->setPosition(final_position);
-      ++state_slot.under_consideration;
+      toPlaceState->setPosition(statePosition);
     }
   }
 }
@@ -318,8 +287,9 @@ void Cluster::resolveSlots() {
 void Cluster::computeSizeAndDescendantPositions() {
 // pre: size of every descendant and its number of slots are known 
 // (and assumed to be correct)
+  
   /* We also use this function to calculate the
-   * number of slots and their positions for each cluster.
+   * number of slots.
    * This process is described in Frank van Ham's Master's thesis, p. 24
    */
    
@@ -339,32 +309,16 @@ void Cluster::computeSizeAndDescendantPositions() {
     size = topRadius;
     volume = 4 * PI/3 * topRadius * topRadius * topRadius;
     //volume = 0.0f;
+    
     // Assign as much slots as there are nodes, to provide the best  
     // possible spacing
     // The position of the nodes is by the index as follows:
-    // 0: The center slot, this has been assigned already.
-    // 1 -- getNumberOfStates + 1: The rim slots, space these evenly, starting 
-    // from 0.0
+    // 0: The center slot, this has been assigned at creation.
+    // 1 -- getNumberOfStates + 1: The rim slots.
     // This means we have one slots extra, for centered states.
-
-    float step = 360.0f/getNumberOfStates();
-    float currPos = 0.0f;
-
-    if (getNumberOfStates() < 2) {
-      // To prevent mistakes in future computations, we need at least two
-      // slots, not counting the center slot.
-      Slot slot = {0.0f, 0, 0, 0};
-      Slot slot2 = {180.0f, 0, 0};
-      slots.push_back(slot);
-      slots.push_back(slot2);
-    }
-
-    else {
-      for (int i = 1; i < getNumberOfStates() + 1; ++i) {
-        Slot slot = {currPos, 0, 0, 0};
-        slots.push_back(slot);
-        currPos += step;
-      }
+    for(int i = 0; i < getNumberOfStates(); ++i) {
+      Slot toAdd = {0, 0, 0};
+      slots.push_back(toAdd);
     }
   }
   else if (descendants.size() == 1) {
@@ -378,63 +332,15 @@ void Cluster::computeSizeAndDescendantPositions() {
 
     // The number of slots is double that of the descendant's slots, capped to
     // 32.
-    // Please note that the center position is a slot as well, hence we need to
-    // substract one, before doubling the number of slots.
-    int numSlots = (desc->getNumberOfSlots() - 1) * 2;
-   
-    // calculate the positions of the slots.
-    // Index 0: Already determined to be the center position, do not touch.
-    // Index 1 -- numSlots + 1: Rim positions, these need to at the following
-    //   positions, if numSlots =/= 32:
-    //     -descSlot((i '+' 1) / 2).pos, if i is odd.
-    //     -(descSlot( i / 2).pos + descSlot(i /2 ''+'' 1)) / 2
-    //       if i is even.
-    //     Here, '+' is defined as:
-    //       a '+' b = (a + b) mod numSlots
-    //     And ''+'' is defined as:
-    //       a ''+'' b = a + b, if a + b < desc.numSlots
-    //       a ''+'' b = a + b - desc.numSlots - 1, otherwise.
-    // If numSlots = 32, space the slots evenly.
-    // descSlot(i) is the slot[i] of the desc.
-   
+    int numSlots = desc->getNumberOfSlots() * 2;
 
-    if (numSlots > 32) 
-    {
-      numSlots = 32;
-      // Distribute slots evenly
-      float stepSize = 360.f / 32;
-      float pos = 0.0f;
-      
-      for (int i = 1; i < numSlots + 1; ++i) {
-        Slot slot = {pos, 0, 0, 0};
+    numSlots = (numSlots > 32 ? 32 
+                              : numSlots);
+
+    for (int i = 0; i < numSlots; ++i) {
+        Slot slot = {0, 0, 0};
         slots.push_back(slot);
-        pos += stepSize;
-      }
     }
-    else 
-    {
-      for (int i = 1; i < numSlots + 1; ++i) {
-        float pos = 0.0f;
-      
-        if ( i % 2 == 0) {
-          // i is even
-          int j = (i / 2) + 1;
-          if (j > (desc->getNumberOfSlots() - 1)) {
-            j = j - (desc->getNumberOfSlots() - 1);
-          }
-          float descPos1 = desc->getSlot(i / 2).position;
-          float descPos2 = desc->getSlot(j).position;
-
-          pos = (descPos1 + descPos2) / 2;
-        }
-        else {
-          // i is odd
-          pos = desc->getSlot((i+1) / 2).position;
-        }
-        Slot slot = {pos, 0, 0, 0};
-        slots.push_back(slot);
-      }
-    }  
   }
   else // descendants.size() > 1
   {
@@ -451,7 +357,6 @@ void Cluster::computeSizeAndDescendantPositions() {
     // determine whether a unique largest descendant exists
     Cluster* largest = descendants[ descendants.size()-1 ];
     Cluster* nextLargest = descendants[ descendants.size()-2 ];
-
 
     bool uniqueLargest = ( ( nextLargest->getVolume() - largest->getVolume() ) /
 	largest->getVolume() ) < -0.01f;
@@ -600,91 +505,25 @@ void Cluster::computeSizeAndDescendantPositions() {
     int numSlots;
     if (uniqueLargest) {
       // There is a unique centered descendant, the largest cluster.
-      numSlots = (largest->getNumberOfSlots() - 1) * 2;
-      if (numSlots > 32) {
-        numSlots = 32;
-        float stepSize = 360.0f / 32;
-        float currPos = 0.0f;
+      numSlots = largest->getNumberOfSlots() * 2;
+      numSlots = (numSlots > 32 ? 32 
+                                : numSlots);
 
-        for (int i = 1; i < numSlots + 1; ++i) {
-          Slot slot = {currPos, 0, 0, 0};
-          slots.push_back(slot);
-          currPos += stepSize;
-        }
-      }
-      else {
-        for (int i = 1; i < numSlots + 1; ++i) 
-        {
-          float position = 0.0f;
-          
-          if (i % 2 == 0) {
-            // i is even
-            int j = (i / 2) + 1;
-            
-            if (j > (largest->getNumberOfSlots() - 1)) 
-            {
-              j = j - (largest->getNumberOfSlots() - 1);
-            }
-
-            float descPos1 = largest->getSlot(i / 2).position;
-            float descPos2 = largest->getSlot(j).position;
-
-            position = (descPos1 + descPos2) / 2;
-             
-          }
-          else 
-          {
-            // i is odd
-            position = largest->getSlot((i+1)/2).position;
-          }
-          Slot slot = {position, 0, 0, 0};
-          slots.push_back(slot);
-        }
+      for (int i = 0; i < numSlots; ++i) {
+        Slot slot = {0, 0, 0};
+        slots.push_back(slot);
       }
     }
     else if (uniqueSmallest) {
       // There is a unique centered descendant, the smallest cluster.
-      numSlots = (smallest->getNumberOfSlots() - 1) * 2;      
+      numSlots = smallest->getNumberOfSlots() * 2;      
       
-      if (numSlots > 32) {
-        numSlots = 32;
-        float stepSize = 360.0f / 32;
-        float currPos = 0.0f;
+      numSlots = (numSlots > 32 ? 32 
+                                : numSlots);
 
-        for (int i = 1; i < numSlots + 1; ++i) {
-          Slot slot = {currPos ,0, 0, 0};
-          slots.push_back(slot);
-          currPos += stepSize;
-        }
-     }
-      else {
-        for (int i = 1; i < numSlots + 1; ++i) 
-        {
-          float position = 0.0f;
-          
-          if (i % 2 == 0) {
-            // i is even
-            int j = (i / 2) + 1;
-            
-            if (j > (smallest->getNumberOfSlots() - 1)) 
-            {
-              j = j - (smallest->getNumberOfSlots() - 1);
-            }
-
-            float descPos1 = smallest->getSlot(i / 2).position;
-            float descPos2 = smallest->getSlot(j).position;
-
-            position = (descPos1 + descPos2) / 2;
-             
-          }
-          else 
-          {
-            // i is odd
-            position = smallest->getSlot((i+1)/2).position;
-          }
-          Slot slot = {position, 0, 0, 0};
-          slots.push_back(slot);
-        }
+      for (int i = 0; i < numSlots; ++i) {
+        Slot slot = {0, 0, 0};
+        slots.push_back(slot);
       }
     }
     else {
@@ -692,41 +531,12 @@ void Cluster::computeSizeAndDescendantPositions() {
       // the rim.
       numSlots = getNumberOfDescendants() * 2;
       
-      if (numSlots > 32) {
-        numSlots = 32;
-        float stepSize = 360.0f / 32;
-        float currPos = 0.0f;
+      numSlots = (numSlots > 32 ? 32
+                                : numSlots);
 
-        for (int i = 1; i < numSlots + 1; ++i) {
-          Slot slot = {currPos, 0, 0, 0};
+      for (int i = 0; i < numSlots; ++i) {
+          Slot slot = {0, 0, 0};
           slots.push_back(slot);
-          currPos += stepSize;
-        }
-      }
-
-      else {
-        for (int i = 1; i < numSlots + 1; ++i) 
-        {
-          float position = 0.0f;
-          if (i % 2 == 0) {
-            // i is even
-            // 2 <= i, so 0 <= i - 2.
-            int j = (i  - 2)/ 2;
-            
-            float descPos1 = getDescendant(j)->getPosition();
-            float descPos2 = 
-              getDescendant((j + 1) % getNumberOfDescendants())->getPosition();
-            position = (descPos1 + descPos2) / 2;
-             
-          }
-          else 
-          {
-            // i is odd
-            position = getDescendant((i-1)/2)->getPosition();
-          }
-          Slot slot = {position, 0, 0, 0};
-          slots.push_back(slot);
-        }
       }
     }
   }
