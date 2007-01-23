@@ -1,4 +1,4 @@
-// Date: 22-01-2007
+// Date: 23-01-2007
 // This document describes the internal format of the mCRL2 language and the
 // corresponding mu-calculus formulas. Here:
 // - the following phases of implementation are distinguised:
@@ -6,7 +6,7 @@
 //   di : data implementation
 //   lin: linearisation
 //   rft: regular formula translation
-// - (+p)/(-p) at the end of a branch means that this branch is added/removed at
+// - [+p]/[-p] at the end of a branch means that this branch is added/removed at
 //   the end of phase p 
 // - <String> is an arbitrary non-empty string excluding the keywords:
 //     sort cons map var eqn act proc init
@@ -39,12 +39,12 @@
 
 //sort expression
 <SortExpr>    ::= <SortId>
-                | SortList(<SortExpr>)                                   (- di)
-                | SortSet(<SortExpr>)                                    (- di)
-                | SortBag(<SortExpr>)                                    (- di)
-                | SortStruct(<StructCons>+)                              (- di)
-                | SortArrowProd(<SortExpr>+, <SortExpr>)                 (- di)
-                | SortArrow(<SortExpr>, <SortExpr>)                      (+ di)
+                | SortList(<SortExpr>)                                   [- di]
+                | SortSet(<SortExpr>)                                    [- di]
+                | SortBag(<SortExpr>)                                    [- di]
+                | SortStruct(<StructCons>+)                              [- di]
+                | SortArrowProd(<SortExpr>+, <SortExpr>)                 [- di]
+                | SortArrow(<SortExpr>, <SortExpr>)                      [+ di]
 
 //sort identifier
 <SortId>       ::= SortId(<String>)
@@ -62,27 +62,27 @@
 //sort expression or unknown
 <SortExprOrUnknown>
                ::= <SortExpr> 
-                 | Unknown                                               (- tc)
+                 | Unknown                                               [- tc]
 
 
 //Data expressions
 //----------------
 
 //data expression
-<DataExpr>     ::= Id(<String>)                                          (- tc)
-                 | <DataVarId>                                           (+ tc)
-                 | <OpId>                                                (+ tc)
-                 | DataApplProd(<DataExpr>, <DataExpr>+)                 (- di)
-                 | DataAppl(<DataExpr>, <DataExpr>)                      (+ di)
-                 | Number(<NumberString>, <SortExprOrUnknown>)           (- di)
-                 | ListEnum(<DataExpr>+, <SortExprOrUnknown>)            (- di)
-                 | SetEnum(<DataExpr>+, <SortExprOrUnknown>)             (- di)
-                 | BagEnum(<BagEnumElt>+, <SortExprOrUnknown>)           (- di)
-                 | SetBagComp(<DataVarId>, <DataExpr>)                   (- di)
-                 | Forall(<DataVarId>+, <DataExpr>)                      (- di)
-                 | Exists(<DataVarId>+, <DataExpr>)                      (- di)
-                 | Lambda(<DataVarId>+, <DataExpr>)                      (- di)
-                 | Whr(<DataExpr>, <WhrDecl>+)                           (- di)
+<DataExpr>     ::= Id(<String>)                                          [- tc]
+                 | <DataVarId>                                           [+ tc]
+                 | <OpId>                                                [+ tc]
+                 | DataApplProd(<DataExpr>, <DataExpr>+)                 [- di]
+                 | DataAppl(<DataExpr>, <DataExpr>)                      [+ di]
+                 | Number(<NumberString>, <SortExprOrUnknown>)           [- di]
+                 | ListEnum(<DataExpr>+, <SortExprOrUnknown>)            [- di]
+                 | SetEnum(<DataExpr>+, <SortExprOrUnknown>)             [- di]
+                 | BagEnum(<BagEnumElt>+, <SortExprOrUnknown>)           [- di]
+                 | SetBagComp(<DataVarId>, <DataExpr>)                   [- di]
+                 | Forall(<DataVarId>+, <DataExpr>)                      [- di]
+                 | Exists(<DataVarId>+, <DataExpr>)                      [- di]
+                 | Lambda(<DataVarId>+, <DataExpr>)                      [- di]
+                 | Whr(<DataExpr>, <WhrDecl>+)                           [- di]
 
 //data variable identifier
 <DataVarId>    ::= DataVarId(<String>, <SortExpr>)
@@ -101,12 +101,24 @@
 //-------------------
 
 //data specification
-<DataSpec>     ::= DataSpec(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
-                     MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*))
+<DataSpec>     ::= DataSpec(<SortSpec>, <ConsSpec>,
+                     <MapSpec>, <DataEqnSpec>)
+
+//sort specification
+<SortSpec>     ::= SortSpec(<SortDecl>*)
+
+//constructor specification
+<ConsSpec>     ::= ConsSpec(<OpId>*)
+
+//mapping specification
+<MapSpec>      ::= MapSpec(<OpId>*)
+
+//data equation specification
+<DataEqnSpec>  ::= DataEqnSpec(<DataEqn>*)
 
 //sort declaration
 <SortDecl>     ::= <SortId>
-                 | SortRef(<String>, <SortExpr>)                         (- di)
+                 | SortRef(<String>, <SortExpr>)                         [- di]
 
 //data equation
 <DataEqn>      ::= DataEqn(<DataVarId>*, <DataExprOrNil>,
@@ -121,8 +133,10 @@
 //-------------
 
 //multiaction
-<MultAct>      ::= MultAct(<ParamId>*)                                   (- tc)
-                 | MultAct(<Action>*)                                    (+ tc)
+<MultAct>      ::= MultAct(<ParamIdOrAction>*)
+
+<ParamIdOrAction> ::= <ParamId>                                          [- tc]
+                    | <Action>                                           [+ tc]
 
 //parameterised id
 <ParamId>      ::= ParamId(<String>, <DataExpr>*)
@@ -138,9 +152,9 @@
 //-------------------
 
 //process expression
-<ProcExpr>     ::= <ParamId>                                             (- tc)
-                 | <Action>                                              (+ tc)
-                 | Process(<ProcVarId>, <DataExpr>*)                     (+ tc)
+<ProcExpr>     ::= <ParamId>                                             [- tc]
+                 | <Action>                                              [+ tc]
+                 | Process(<ProcVarId>, <DataExpr>*)                     [+ tc]
                  | Delta
                  | Tau 
                  | Sum(<DataVarId>+, <ProcExpr>) 
@@ -176,11 +190,14 @@
 //--------------------
 
 //specification
-<Spec>         ::= SpecV1(<DataSpec>, ActSpec(<ActId>*), <ProcEqnSpec>, <Init>)
+<Spec>         ::= SpecV1(<DataSpec>, <ActSpec>, <ProcEqnSpec>, <Init>)
+
+//action specification
+<ActSpec>      ::= ActSpec(<ActId>*)
 
 //process equations or LPE
-<ProcEqnSpec>  ::= ProcEqnSpec(<ProcEqn>*)                               (-lin)
-                 | LPE(<DataVarId>*, <DataVarId>*, <LPESummand>*)        (+lin)
+<ProcEqnSpec>  ::= ProcEqnSpec(<ProcEqn>*)                               [-lin]
+                 | LPE(<DataVarId>*, <DataVarId>*, <LPESummand>*)        [+lin]
 
 //process equation
 <ProcEqn>      ::= ProcEqn(<DataVarId>*, <ProcVarId>, <DataVarId>*, <ProcExpr>)
@@ -198,8 +215,8 @@
 <Assignment>   ::= Assignment(<DataVarId>, <DataExpr>)
 
 //process expressions or data expression
-<Init>         ::= Init(<DataVarId>*, <ProcExpr>)                        (-lin)
-                 | LPEInit(<DataVarId>*, <Assignment>*)                  (+lin)
+<Init>         ::= Init(<DataVarId>*, <ProcExpr>)                        [-lin]
+                 | LPEInit(<DataVarId>*, <Assignment>*)                  [+lin]
 
 
 //Mu-calculus formulas
@@ -230,11 +247,11 @@
 
 //regular formula
 <RegFrm>       ::= <ActFrm>
-                 | RegNil                                                (-rft)
-                 | RegSeq(<RegFrm>, <RegFrm>)                            (-rft)
-                 | RegAlt(<RegFrm>, <RegFrm>)                            (-rft)
-                 | RegTrans(<RegFrm>)                                    (-rft)
-                 | RegTransOrNil(<RegFrm>)                               (-rft)
+                 | RegNil                                                [-rft]
+                 | RegSeq(<RegFrm>, <RegFrm>)                            [-rft]
+                 | RegAlt(<RegFrm>, <RegFrm>)                            [-rft]
+                 | RegTrans(<RegFrm>)                                    [-rft]
+                 | RegTransOrNil(<RegFrm>)                               [-rft]
 
 //action formula
 <ActFrm>       ::= <MultAct>
