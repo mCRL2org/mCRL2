@@ -43,6 +43,12 @@ class action_label: public aterm_appl
       m_sorts = *i;
     }
 
+    action_label(const aterm_string& name, const sort_list &sorts)
+     : aterm_appl(gsMakeActId(name, sorts)),
+       m_name(name),
+       m_sorts(sorts)
+    {}
+
     /// Returns the name of the action label.
     ///
     aterm_string name() const
