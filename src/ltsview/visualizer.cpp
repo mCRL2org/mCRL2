@@ -97,8 +97,10 @@ void Visualizer::setVisSettings(VisSettings vs) {
       (oldSettings.outerBranchTilt != vs.outerBranchTilt)) {
     sin_obt = float(sin(deg_to_rad(vs.outerBranchTilt)));
     cos_obt = float(cos(deg_to_rad(vs.outerBranchTilt)));
-    updateClusterMatrices(lts->getInitialState()->getCluster(),0);
-    computeBoundsInfo();
+    if (lts != NULL) {
+      updateClusterMatrices(lts->getInitialState()->getCluster(),0);
+      computeBoundsInfo();
+    }
   }
 }
 
