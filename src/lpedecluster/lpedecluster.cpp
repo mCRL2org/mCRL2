@@ -12,6 +12,10 @@
 //
 // ======================================================================
 
+#ifdef BOOST_BUILD_PCH_ENABLED
+# include <lpe/lpe.h>
+#endif
+
 //C++
 #include <exception>
 #include <cstdio>

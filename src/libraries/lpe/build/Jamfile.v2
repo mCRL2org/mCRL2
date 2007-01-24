@@ -1,19 +1,36 @@
 project lpe
+       : source-location ../include
        : build-dir $(BUILD_TOP)
        : usage-requirements
           <include>../include
        ;
 
+cpp-pch lpe.h
+       : lpe/lpe.h
+       : <dependency>data-specification
+         <dependency>/boost//headers
+         <use>/libraries//parser
+         <include>../include
+       ;
+
 alias lpe
-       :
+       : lpe.h
        : <dependency>data-specification
        :
        : <dependency>/boost//headers
          <dependency>data-specification
        ;
 
+cpp-pch data_specification.h
+       : lpe/data_specification.h
+       : <use>/libraries//atermpp
+         <use>/libraries//parser
+         <dependency>/boost//headers
+         <include>../include
+       ;
+
 alias data-specification
-       :
+       : data_specification.h
        : <use>/libraries//atermpp
        :
        : <dependency>/boost//headers

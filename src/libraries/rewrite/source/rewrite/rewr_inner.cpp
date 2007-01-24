@@ -1,15 +1,14 @@
+#include "rewr_inner.h"
+
 #define NAME "rewr_inner"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <aterm2.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cassert>
 #include <memory.h>
-#include <assert.h>
 #include <liblowlevel.h>
 #include <libstruct.h>
 #include <libprint_c.h>
-#include <lpe/data_specification.h>
-#include "rewr_inner.h"
 
 static AFun nilAFun;
 static AFun opidAFun;

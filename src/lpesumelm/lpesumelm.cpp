@@ -11,6 +11,10 @@
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
 //
 // ======================================================================
+//
+#ifdef BOOST_BUILD_PCH_ENABLED
+# include <lpe/lpe.h>
+#endif
 
 //C++
 #include <exception>

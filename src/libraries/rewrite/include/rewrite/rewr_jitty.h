@@ -1,8 +1,6 @@
 #ifndef __REWR_JITTY_H
 #define __REWR_JITTY_H
 
-#include <aterm2.h>
-#include <lpe/data_specification.h>
 #include "librewrite.h"
 
 class RewriterJitty: public Rewriter

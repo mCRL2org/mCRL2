@@ -2,9 +2,6 @@
 #define __REWR_JITTYC_H
 
 //#define _JITTYC_STORE_TREES
-
-#include <aterm2.h>
-#include <lpe/data_specification.h>
 #include "librewrite.h"
 
 class RewriterCompilingJitty: public Rewriter

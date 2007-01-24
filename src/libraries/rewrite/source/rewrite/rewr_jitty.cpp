@@ -1,15 +1,15 @@
+#include "rewr_jitty.h"
+
 #define NAME "rewr_jitty"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
 #include <aterm2.h>
-#include <assert.h>
 #include <liblowlevel.h>
 #include <libstruct.h>
 #include <libprint_c.h>
-#include <lpe/data_specification.h>
-#include "rewr_jitty.h"
 
 static AFun nilAFun;
 static AFun opidAFun;

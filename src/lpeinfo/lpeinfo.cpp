@@ -12,6 +12,10 @@
 //
 // ======================================================================
 
+#ifdef BOOST_BUILD_PCH_ENABLED
+# include <lpe/lpe.h>
+#endif
+
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <utility/squadt_utility.h>

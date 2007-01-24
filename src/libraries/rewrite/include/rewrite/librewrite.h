@@ -1,8 +1,8 @@
 #ifndef __LIBREWRITE_H
 #define __LIBREWRITE_H
 
-#include <aterm2.h>
 #include <lpe/data_specification.h>
+#include <aterm2.h>
 
 /** \brief Rewrite strategies. */
 typedef enum { GS_REWR_INNER     /** \brief Innermost */

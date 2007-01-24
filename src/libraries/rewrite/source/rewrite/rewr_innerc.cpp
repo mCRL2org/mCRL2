@@ -1,9 +1,9 @@
 #ifdef NO_DYNLOAD
 
-#include <stdlib.h>
-#include <libprint_c.h>
-#include <lpe/data_specification.h>
 #include "rewr_innerc.h"
+
+#include <cstdlib>
+#include <libprint_c.h>
 
 RewriterCompilingInnermost::RewriterCompilingInnermost(lpe::data_specification DataSpec)
 {

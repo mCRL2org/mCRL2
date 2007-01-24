@@ -1,8 +1,6 @@
 #ifndef __REWR_INNER_H
 #define __REWR_INNER_H
 
-#include <aterm2.h>
-#include <lpe/data_specification.h>
 #include "librewrite.h"
 
 //#define _INNER_STORE_TREES

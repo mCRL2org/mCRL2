@@ -1,8 +1,6 @@
 #ifndef __REWR_INNERC_H
 #define __REWR_INNERC_H
 
-#include <aterm2.h>
-#include <lpe/data_specification.h>
 #include "librewrite.h"
 
 //#define _INNERC_STORE_TREES
