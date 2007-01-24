@@ -221,7 +221,7 @@ int main(int argc, char** argv)
 				cout << "                     " << pv_i->name() << " :: ";
 			for (term_list<data_variable>::iterator dv_i = pv_i->parameters().begin(); dv_i != pv_i->parameters().end(); dv_i++)
 			{
-				cout << dv_i->type();
+				cout << dv_i->sort();
 				if (nr_sorts < bv_size)
 				{
 					cout << " x ";
