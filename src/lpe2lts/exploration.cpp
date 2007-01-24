@@ -635,19 +635,23 @@ static unsigned long queue_put_count = 0;
 static unsigned long queue_put_count_extra = 0;
 static bool queue_size_fixed = false;
 
-static bool add_to_full_queue(ATerm state)
+static ATerm add_to_full_queue(ATerm state)
 {
   queue_put_count_extra++;
   if ( (rand() % (queue_put_count+queue_put_count_extra)) < queue_size )
   {
     unsigned long pos = rand() % queue_size;
-    queue_put[pos] = state;
-    return true;
+    ATerm old_state = queue_put[pos];
+    if ( !ATisEqual(old_state,state) )
+    {
+      queue_put[pos] = state;
+      return old_state;
+    }
   }
-  return false;
+  return NULL;
 }
 
-static bool add_to_queue(ATerm state)
+static ATerm add_to_queue(ATerm state)
 {
   if ( queue_put_count == queue_size )
   {
@@ -712,7 +716,7 @@ static bool add_to_queue(ATerm state)
   }
 
   queue_put[queue_put_count++] = state;
-  return true;
+  return NULL;
 }
 
 static ATerm get_from_queue()
@@ -783,7 +787,6 @@ bool generate_lts()
 
   if ( lgopts->max_states != 0 )
   {
-    unsigned long long nextlevelat = 1;
     unsigned long long endoflevelat = 1;
     unsigned long long prevtrans = 0;
     unsigned long long prevcurrent = 0;
@@ -890,11 +893,13 @@ bool generate_lts()
             bool b = add_transition(state,Transition,NewState);
             if ( lgopts->bithashing && b )
             {
-              if ( !add_to_queue(NewState) )
+              ATerm removed_state = add_to_queue(NewState);
+              if ( removed_state != NULL )
               {
-                remove_state_from_bithash(NewState);
-                num_states--;
+                remove_state_from_bithash(removed_state);
               }
+              if ( num_states > endoflevelat+lgopts->todo_max )
+                num_states--;
             }
           }
         }
@@ -948,6 +953,7 @@ bool generate_lts()
           }
           level++;
 	  statesskipped = statesskipped+statestobeskipped;
+          unsigned long long nextcurrent = endoflevelat;
           if ( lgopts->bithashing && (current_state+lgopts->todo_max < num_states) )
           {
             endoflevelat = current_state+lgopts->todo_max;
@@ -955,8 +961,7 @@ bool generate_lts()
           } else {
             endoflevelat = num_states;
           }
-	  current_state = nextlevelat;
-          nextlevelat = num_states;
+	  current_state = nextcurrent;
           prevcurrent = current_state;
           prevtrans = trans;
         }
