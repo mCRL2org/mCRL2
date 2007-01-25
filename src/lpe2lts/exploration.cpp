@@ -637,6 +637,36 @@ static bool queue_size_fixed = false;
 
 static ATerm add_to_full_queue(ATerm state)
 {
+  /* We wish that every state has equal chance of being in the queue.
+   * Let N be the size of the queue and M the number of states from which
+   * we can choose. (Note that N <= M; otherwise every state is simply in
+   * the queue. We show that addition of state i, with N < i <= M, should
+   * be done with chance i/N and at random in the queue. With induction
+   * on the difference between M-N we show that doing so leads to a
+   * uniform distribution (i.e. every state has chance N/M of being in the
+   * queue):
+   *
+   * M-N = 0:   Trivial.
+   * M-N = k+1: We added the last state, M, with probability N/M, so we
+   *            need only consider the other states. Before adding state M
+   *            they are in the queue with probability N/(M-1) (by
+   *            induction) and if the last state is added, they are still
+   *            in the queue afterwards with probability 1-1/N. So:
+   *
+   *              N/(M-1) ( N/M ( 1 - 1/N ) + ( 1 - N/M ) )
+   *            =
+   *              N/(M-1) ( N/M (N-1)/N + (M-N)/M )
+   *            =
+   *              N/(M-1) ( (N-1)/M + (M-N)/M )
+   *            =
+   *              N/(M-1) (M-1)/M
+   *            =
+   *              N/M
+   *
+   *
+   * Here we have that N = queue_size and
+   * i = queue_put_count + queue_put_count_extra.
+   */
   queue_put_count_extra++;
   if ( (rand() % (queue_put_count+queue_put_count_extra)) < queue_size )
   {
