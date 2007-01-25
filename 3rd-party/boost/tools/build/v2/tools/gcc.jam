@@ -218,11 +218,11 @@ class gcc-pch-generator : pch-generator
         # of precompiled header.
         local header-name = [ $(header).name ] ;
         local header-basename = $(header-name:B) ;
-        if $(header-basename) != $(name)
-        {
-            local location = [ $(project).project-module ] ;
-            errors.user-error "in" $(location)": pch target name `"$(name)"' should be the same as the base name of header file `"$(header-name)"'" ;
-        }
+#        if $(header-basename) != $(name)
+#        {
+#            local location = [ $(project).project-module ] ;
+#            errors.user-error "in" $(location)": pch target name `"$(name)"' should be the same as the base name of header file `"$(header-name)"'" ;
+#        }
 
         local pch-file =
             [ 

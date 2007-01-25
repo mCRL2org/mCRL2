@@ -12,13 +12,6 @@
 //
 // ======================================================================
 
-//LPE framework
-#ifdef BOOST_BUILD_PCH_ENABLED
-# include "specification.h"
-#else
-# include "lpe/specification.h"
-#endif
-
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <utility/squadt_utility.h>
@@ -37,6 +30,9 @@
 #include <lpe/lpe.h>
 #include <lpe/specification.h>
 #include "liblowlevel.h"
+
+//LPE framework
+#include "lpe/specification.h"
 
 using namespace std;
 using namespace atermpp;

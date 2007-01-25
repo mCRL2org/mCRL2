@@ -42,6 +42,7 @@ project toolset
           $(OPTIMISATIONS)
           <link>$(LINK_VARIANT)
           $(BUILD_OPTIONS)
+          <pch>off
        ;
 
 import path ;
