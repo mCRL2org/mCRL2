@@ -12,8 +12,11 @@
 //
 // ======================================================================
 
+//LPE framework
 #ifdef BOOST_BUILD_PCH_ENABLED
-# include <lpe/lpe.h>
+# include "specification.h"
+#else
+# include "lpe/specification.h"
 #endif
 
 // Squadt protocol interface

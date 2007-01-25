@@ -29,7 +29,7 @@ namespace sip {
     private:
 
       /** \brief Points to interface object */
-      restore_visitor&     interface;
+      restore_visitor&     m_interface;
 
       /** \brief The source of input */
       xml2pp::text_reader& in;
@@ -89,7 +89,7 @@ namespace sip {
   template void restore_visitor::visit(boost::tuple < sip::datatype::real&, std::string& >&);
 
 
-  inline restore_visitor_impl::restore_visitor_impl(restore_visitor& i, xml2pp::text_reader& s) : interface(i), in(s) {
+  inline restore_visitor_impl::restore_visitor_impl(restore_visitor& i, xml2pp::text_reader& s) : m_interface(i), in(s) {
   }
 
   inline restore_visitor_alternate_impl::restore_visitor_alternate_impl(restore_visitor& i, std::string const& s) : restore_visitor_impl(i, in), in(s) {

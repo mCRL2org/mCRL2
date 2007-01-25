@@ -12,8 +12,19 @@
 //
 // ======================================================================
 
+#if BOOST_BUILD_PCH_ENABLED
+# ifdef ENABLE_SQUADT_CONNECTIVITY
+#  include <utility/squadt_utility.h>
+#  include "lpe/specification.h"
+# else
+#  include "specification.h"
+# endif
+#else
+# include "lpe/specification.h"
+#endif
+
 //C++
-#include <stdio.h>
+#include <cstdio>
 
 //Boost
 #include <boost/program_options.hpp>
@@ -23,7 +34,6 @@
 
 //mCRL2
 #include "atermpp/aterm.h"
-#include "lpe/specification.h"
 
 class lpeParElm {
 

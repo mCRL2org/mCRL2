@@ -55,11 +55,18 @@ for tool in $(tools) {
 }
 
 import set ;
+import regex ;
 
-local targets = [ set.intersection [ MATCH "^([0-9a-zA-Z]+)$" : [ modules.peek : ARGV ] ] : $(tools) ] ;
+local targets  = [ set.intersection [ MATCH "^([0-9a-zA-Z]+)$" : [ modules.peek : ARGV ] ] : $(tools) ] ;
+local plugins  = [ MATCH $(root)/(src/.*/plugins/.*)/Jamfile.v2 : [ glob $(root)/src/*/plugins/*/Jamfile.v2 ] ] ;
+local disabled = [ MATCH "^--disable-tools=([,0-9a-zA-Z]+)$" : [ modules.peek : ARGV ] ] ;
 
-local plugins = [ MATCH $(root)/(src/.*/plugins/.*)/Jamfile.v2 : [ glob $(root)/src/*/plugins/*/Jamfile.v2 ] ] ;
-
+if ! $(targets) {
+  targets = $(tools) ;
+}
+if $(disabled) {
+  targets = [ set.difference $(targets) : [ regex.split "$(disabled)" "," ] ] ;
+}
 
 # Install when requested
 if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
@@ -74,7 +81,7 @@ if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
     targets = /tools/$(targets) ;
   }
   else {
-    targets = /tools/$(tools) build-plugins ;
+    targets += build-plugins ;
   }
 
   stage build

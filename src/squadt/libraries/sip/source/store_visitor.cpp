@@ -31,7 +31,7 @@ namespace sip {
     private:
 
       /** \brief Points to interface object */
-      store_visitor&  interface;
+      store_visitor&  m_interface;
 
       /** \brief The destination of output */
       std::ostream&   out;
@@ -122,7 +122,7 @@ namespace sip {
 
   }
 
-  inline store_visitor_impl::store_visitor_impl(store_visitor& i, std::ostream& o) : interface(i), out(o) {
+  inline store_visitor_impl::store_visitor_impl(store_visitor& i, std::ostream& o) : m_interface(i), out(o) {
   }
 
   template <>
@@ -145,7 +145,7 @@ namespace sip {
         try {
           boost::tuple < sip::datatype::basic_datatype&, std::string& > p(*(i.first), i.second);
 
-          i.first->accept(interface, p);
+          i.first->accept(m_interface, p);
         }
         catch (exception e) {
           /* Invalid datatype exception; substitute context */

@@ -13,7 +13,14 @@
 // ======================================================================
 //
 #ifdef BOOST_BUILD_PCH_ENABLED
-# include <lpe/lpe.h>
+# ifdef ENABLE_SQUADT_CONNECTIVITY
+#  include <utility/squadt_utility.h>
+#  include "lpe/specification.h"
+# else
+#  include "specification.h"
+# endif
+#else
+# include "lpe/specification.h"
 #endif
 
 //C++

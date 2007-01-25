@@ -1,6 +1,6 @@
 project squadt/libraries/utility
     : source-location
-       ../include
+       ..
     : build-dir $(BUILD_TOP)
     : requirements
        <use>/boost//headers
@@ -11,22 +11,22 @@ project squadt/libraries/utility
     ;
 
 obj logger.o
-    : ../source/logger.cpp
+    : source/logger.cpp
     ;
 
 cpp-pch squadt_tool_interface.h
-    : utility/squadt_tool_interface.h
+    : include/utility/squadt_tool_interface.h
     : <use>/libraries/sip//sip_tool
     ;
 
 cpp-pch squadt_utility.h
-    : utility/squadt_utility.h
+    : include/utility/squadt_utility.h
     : <use>/libraries/sip//sip_tool
       <use>/libraries//mcrl2_basic
     ;
 
 lib mcrl2_tool_interface
-    : ../source/message_relay.cpp
+    : source/message_relay.cpp
       squadt_tool_interface.h
       squadt_utility.h
     : <use>/libraries//mcrl2_basic

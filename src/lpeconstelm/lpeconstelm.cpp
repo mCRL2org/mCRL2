@@ -12,6 +12,18 @@
 //
 // ======================================================================
 
+//LPE framework
+#ifdef BOOST_BUILD_PCH_ENABLED
+# ifdef ENABLE_SQUADT_CONNECTIVITY
+#  include <utility/squadt_utility.h>
+#  include "lpe/specification.h"
+# else
+#  include "specification.h"
+# endif
+#else
+# include "lpe/specification.h"
+#endif
+
 //C++
 #include <iostream>
 #include <vector>
@@ -35,9 +47,6 @@
 
 //Aterm
 #include "atermpp/aterm.h"
-
-//LPE framework
-#include "lpe/specification.h"
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
