@@ -841,11 +841,12 @@ static ATermList filter_rename_list(ATermList l, ATermList R){
 }
 
 static ATermAppl PushBlock(ATermList H, ATermAppl a){
+  //gsWarningMsg("push block: H: %T; a: %T\n\n",H,a);
   if ( gsIsDelta(a) || gsIsTau(a) ){
     return a;
   } 
   else if ( gsIsAction(a) ){
-    return (ATindexOf(H,(ATerm)ATAgetArgument(a,0),0)>=0)?gsMakeDelta():a;
+    return (ATindexOf(H,(ATerm)ATAgetArgument(ATAgetArgument(a,0),0),0)>=0)?gsMakeDelta():a;
   } 
   else if ( gsIsProcess(a) ){
     ATermList l = ATLtableGet(alphas,(ATerm) a);
@@ -964,7 +965,7 @@ static ATermAppl PushHide(ATermList I, ATermAppl a){
     return a;
   } 
   else if ( gsIsAction(a) ){
-    return (ATindexOf(I,(ATerm)ATAgetArgument(a,0),0)>=0)?gsMakeTau():a;
+    return (ATindexOf(I,(ATerm)ATAgetArgument(ATAgetArgument(a,0),0),0)>=0)?gsMakeTau():a;
   } 
   else if ( gsIsProcess(a) ){
     ATermList l = ATLtableGet(alphas,(ATerm) a);
@@ -1629,6 +1630,7 @@ static ATermList gsaGetSyncAlpha(ATermAppl a, unsigned length, ATermList allowed
 static ATermAppl gsApplyAlpha(ATermAppl a){
   // apply the alpha reductions to a.
   // makes sure that the alphabet of a is in the table alphas after the function returns its value
+  //gsVerboseMsg("gsApplyAlpha: a: %T\n\n", a);
   assert(all_stable);
   if ( gsIsDelta (a) || gsIsTau(a) ){
   }
@@ -1644,16 +1646,15 @@ static ATermAppl gsApplyAlpha(ATermAppl a){
   else if ( gsIsProcess(a) ){
     ATermAppl pn=ATAgetArgument(a,0);
     ATermList l=ATLtableGet(alphas,(ATerm)pn); // for this particular process term
-    //XXX may be something else?
-    if(!l){
-      //this should be a mCRL process. 
+    
+    // if this process is not recursive we apply the alphabeth reductions to it
+    if(ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),1),nrec_aterm)){
+      //if this is a mCRL process. 
       //we apply the alphabeth reductions to its body and then we know the alphabet
-      //gsWarningMsg("Exploring new mCRL process %T\n\n",pn);
       ATermAppl new_p=gsApplyAlpha(ATAtableGet(procs,(ATerm)pn));
-      //gsWarningMsg("new_p: %P\n\n",new_p);
       ATtablePut(procs,(ATerm)pn,(ATerm)new_p);
       ATtablePut(alphas,(ATerm)pn,(ATerm)ATLtableGet(alphas,(ATerm)new_p));
-      l=ATLtableGet(alphas,(ATerm)pn);
+      if(!l) l=ATLtableGet(alphas,(ATerm)pn);
     }
     assert(l);
     ATtablePut(alphas,(ATerm)a,(ATerm)l); //for this full process call
@@ -1766,7 +1767,7 @@ ATermAppl gsaGetProp(ATermAppl a, ATermAppl context){
   }
   else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsSeq(a) 
 	    || gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsAllow(a) || gsIsComm(a)
-	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
+	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsBInit(a)){
     // all distributing rules together
     short ia1=0,ia2=1,args=2;
     if(gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSum(a)
@@ -1776,25 +1777,18 @@ ATermAppl gsaGetProp(ATermAppl a, ATermAppl context){
        || gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsAllow(a) || gsIsComm(a)
        ) args=1; 
     
-    ATermAppl p,q=NULL;
-    p = gsaGetProp(ATAgetArgument(a,ia1),context);
-    if(args==2) q = gsaGetProp(ATAgetArgument(a,ia2),context);
-
-    if(args==1) return p;
-    if(ATisEqual(p,mCRL_aterm)) return p;
-    if(ATisEqual(q,mCRL_aterm)) return q;
-    if(gsIsMerge(a) || gsIsLMerge(a)) return mCRL_aterm;
-    if(gsIsSync(a)){
-      if(ATindexOf(gsaGetDeps(a),(ATerm)context,0)>=0)
-	return mCRL_aterm;
-      else 
-	return pCRL_aterm;
+    ATermAppl p = gsaGetProp(ATAgetArgument(a,ia1),context);
+    if(ATisEqual(p,mCRL_aterm)) r=mCRL_aterm;
+    if(args==2 && ATisEqual(gsaGetProp(ATAgetArgument(a,ia2),context),mCRL_aterm)) r=mCRL_aterm;
     }
-    
-    return r;
+  else if(gsIsMerge(a)||gsIsLMerge(a)) r=mCRL_aterm;
+  else if(gsIsSync(a)){
+    if(ATindexOf(gsaGetDeps(a),(ATerm)context,0)>=0) r=mCRL_aterm;
   }
-  assert(0);
-  return NULL; //to suppress warnings  
+  else 
+    assert(0);
+
+  return r;
 }
 
 ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a){
@@ -2151,7 +2145,7 @@ ATermAppl gsAlpha(ATermAppl Spec){
   all_stable=false;
   //possibly endless loop (X=a.X||X ;)
   while(!stable){
-    //apply Alpha to each and compare with the old values.
+    //apply getAlpha to each and compare with the old values.
     stable=true;
     for(ATermList pr=todo; !ATisEmpty(pr); pr=ATgetNext(pr)){
       ATermAppl pn=ATAgetFirst(pr);
