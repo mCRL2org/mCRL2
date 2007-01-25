@@ -261,16 +261,79 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, lpe::specification &lpe_spec
 {
   //check correctness of the sort expression in sort_expr using
   //the LPE specification in lpe_spec
-  gsWarningMsg("type checking of sort expressions is not yet implemented\n");
-  return sort_expr;
+  gsWarningMsg("type checking of sort expressions is partially implemented\n");
+  
+  ATermAppl Result=NULL;
+
+  gsDebugMsg ("type checking phase started\n");
+  
+  gstcDataInit();
+
+  gsDebugMsg ("type checking of sort expressions read-in phase started\n");
+
+  //XXX read-in from LPE (not finished)
+  if(/* gstcReadInSorts((ATermList) lpe_spec.sorts())  &&  gstcReadInActs((ATermList) lpe_spec.action_labels() )*/1){
+    gsDebugMsg ("type checking of sort expressions read-in phase finished\n");
+
+    if(gsIsSortExpr(sort_expr)){
+      if(gstcIsSortExprDeclared(sort_expr)) Result=sort_expr;
+    }
+    else {
+      gsErrorMsg("type checking of sort expressions failed (%T is not a sort expressions)\n\n",sort_expr);
+    }
+  }
+  else {
+      gsErrorMsg("Reading Sorts from LPE failed.\n\n");
+  }
+
+  gstcDataDestroy();
+  return Result;
 }
 
 ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lpe::specification &lpe_spec)
 {
   //check correctness of the data expression in data_expr using
   //the LPE specification in lpe_spec
-  gsWarningMsg("type checking of data expressions is not yet implemented\n");
-  return data_expr;
+  gsWarningMsg("type checking of data expressions is partially implemented\n");
+
+  ATermAppl Result=NULL;
+
+  gsDebugMsg ("type checking phase started\n");
+
+  gstcDataInit();
+
+  gsDebugMsg ("type checking of data expressions read-in phase started\n");
+
+  //XXX read-in from LPE (not finished)
+  if(/* gstcReadInSorts((ATermList) lpe_spec.sorts())  &&  gstcReadInActs((ATermList) lpe_spec.action_labels() )*/1){
+    gsDebugMsg ("type checking of data expressions read-in phase finished\n");
+
+    if(!gsIsSortExpr(sort_expr)){
+      gsErrorMsg("type checking of data expressions failed (%T is not a sort expressions)\n\n",sort_expr);
+      goto failed;
+    }
+
+    if(gstcIsSortExprDeclared(sort_expr)){
+      if(!gsIsDataExpr(data_expr)){
+        gsErrorMsg("type checking of data expressions failed (%T is not a data expressions)\n\n",data_expr);
+        goto failed;
+      }
+      ATermTable Vars=ATtableCreate(63,50);
+
+      ATermAppl data=data_expr;
+      ATermAppl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,sort_expr);
+      ATtableDestroy(Vars);
+      if(Type) Result=data;
+      else gsErrorMsg("type checking of data expressions failed.\n\n");
+    }
+  }
+  else {
+      gsErrorMsg("Reading Sorts from LPE failed.\n\n");
+  }
+
+  failed:
+  gstcDataDestroy();
+  return Result;
 }
 
 ATermAppl type_check_mult_act(ATermAppl mult_act, lpe::specification &lpe_spec)
