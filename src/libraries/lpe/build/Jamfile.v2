@@ -5,23 +5,23 @@ project lpe
           <include>../include
        ;
 
-cpp-pch specification.h
+cpp-pch lpe/specification.h
        : include/lpe/specification.h
        : <use>/boost//headers
          <use>/libraries//parser
-         <include>../include
+         <toolset>msvc:<include>../include/lpe
        ;
 
-cpp-pch data_specification.h
+cpp-pch lpe/data_specification.h
        : include/lpe/data_specification.h
        : <use>/libraries//atermpp
          <use>/libraries//parser
          <use>/boost//headers
-         <include>../include
+         <toolset>msvc:<include>../include/lpe
        ;
 
 alias lpe
-       : specification.h
+       : lpe/specification.h
        : <dependency>data-specification
        :
        : <dependency>/boost//headers
@@ -29,7 +29,7 @@ alias lpe
        ;
 
 alias data-specification
-       : data_specification.h
+       : lpe/data_specification.h
        : <use>/libraries//atermpp
        :
        : <dependency>/boost//headers
@@ -42,7 +42,7 @@ lib dataelm
        : source/libdataelm.cpp
          ../../mcrl22lpe/lin_alt.cpp
          ../../mcrl22lpe/lin_std.cpp
-         specification.h
+         lpe/specification.h
        : <use>/libraries//parser
          <use>/libraries//rewrite
        :
