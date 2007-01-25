@@ -447,11 +447,6 @@ void LTS::positionClusters()
     {
       // compute the size of this cluster and the positions of its descendants
       (**c_it).computeSizeAndDescendantPositions();
-      for (int i = 0; i < (**c_it).getNumberOfSlots(); ++i)
-      {
-        Slot slot = (**c_it).getSlot(i);
-      }
-
     }
   }
   // position the initial state's cluster
@@ -464,7 +459,6 @@ void LTS::positionStates()
   edgeLengthBottomUp(undecided);
   edgeLengthTopDown(undecided);
   resolveClusterSlots(undecided);
-
           
   /*
   //TODO: Change to call of correct positioning functions.
@@ -580,27 +574,32 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided)
             bool allcentered = true;
 
             for(set< State* >::iterator sub_it = subordinates.begin();
-                sub_it != subordinates.end(); ++sub_it) {
-
-              // Get the position of subordinate state 
-              float sub_position = (*sub_it)->getPosition();
-              float position_rad = deg_to_rad(sub_position);
-
-              if (sub_position >= -0.9f) {
-                // This subordinated is not centered
-                allcentered = false;
-              }
-
-              // Convert to vectors and add.
-              Vect subVec = ang_to_vec(position_rad);
-              vecSum = vecSum + subVec;
+                sub_it != subordinates.end() && allcentered; ++sub_it) {
+              allcentered = allcentered && ((*sub_it)->getPosition() < -0.9f);
             }
 
             if ( allcentered ) {
               (*state_it)->setPosition(-1.0f);
               undecided.push_back(*state_it);
             }
-            else {
+            else {            
+              for(set< State* >::iterator sub_it = subordinates.begin();
+                sub_it != subordinates.end(); ++sub_it) {
+
+                // Get the position of subordinate state 
+                float sub_position = (*sub_it)->getPosition();
+                float position_rad = deg_to_rad(sub_position);
+
+                if (sub_position >= -0.9f) {
+                  // This subordinated is not centered
+                  allcentered = false;
+                }
+
+                // Convert to vectors and add.
+                Vect subVec = ang_to_vec(position_rad);
+                vecSum = vecSum + subVec;
+              }
+
               if (vec_length(vecSum) < tau) {
                 // vecSum is sufficiently small, center the state.
                 (*state_it)->setPosition(-1.0f);
@@ -638,11 +637,10 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided)
               if (clusterPos < -0.9f) {
                 // Cluster is centered
 
-                if ( (*sub_it)->getPosition() < -0.9f) {
+                if ((*sub_it)->getPosition() >= -0.9f) {
                   float position_rad = deg_to_rad((*sub_it)->getPosition());
                   vecSum = vecSum + ang_to_vec(position_rad);
                 }
-
               }
               else
               {
@@ -696,80 +694,67 @@ void LTS::edgeLengthTopDown(vector< State* > &ss)
     // Get the cluster belonging to this state
     Cluster* currCluster = (*state_it)->getCluster();
 
+    // We know there is only one ancestor cluster.
+    // We know the states in the above cluster have pseudo-correct
+    // positions, as determined in this and the previous pass, so we can
+    // proceed placing the states based on this information.
 
-    if ( currCluster->getNumberOfStates() == 1) {
+    // Get the ancestor states. These are all in one cluster, and we
+    // can calculate the position of the current state directly from them.
+
+    set< State* > superiors;
+    (*state_it)->getSuperiors( superiors );
+
+    // Calculate the sum of the vectors gained from all subordinate angles
+    Vect vecSum = {0, 0};
+    bool allcentered = true;
+
+    for(set< State* >::iterator sup_it = superiors.begin();
+        sup_it != superiors.end() && allcentered; ++sup_it) {
+      allcentered = allcentered && ((*sup_it)->getPosition() < -0.9f);
+    }
+
+    
+
+    if (allcentered) {
       (*state_it)->setPosition(-1.0f);
+      undecided.push_back(*state_it);
     }
     else {
-      // A cluster can have at most one ancestor, meaning we check the 
-      // hasAncestor() function.
-      if (currCluster->getAncestor() == NULL ) {
-        // No ancestor cluster. This is the initial cluster.
-        // Center the state.
-        (*state_it)->setPosition(-1.0f);
-        undecided.push_back(*state_it);
+      for(set< State* >::iterator sup_it = superiors.begin();
+          sup_it != superiors.end(); ++sup_it) {
+        // Get the position of subordinate state 
+        float position_rad = deg_to_rad((*sup_it)->getPosition());
+
+        float cluster_position = deg_to_rad(
+          (*sup_it)->getCluster()->getPosition());
+
+        // Convert to vectors and add.
+        Vect subVec = ang_to_vec(position_rad);
+        Vect clusVec = ang_to_vec(cluster_position);
+        vecSum = vecSum + subVec + clusVec;
       }
-      else  {
-        // One ancestor cluster.
-        // We know the states in the above cluster have pseudo-correct
-        // positions, as determined in this and the previous pass, so we can
-        // proceed placing the states based on this information.
 
-        // Get the ancestor states. These are all in one cluster, and we
-        // can calculate the position of the current state directly from them.
+      if (vec_length(vecSum) < tau) {
 
-        // NOTE: Incorrect code: The ancestor is not necessarily centered
-        // above the child we are evaluating.
-
-        set< State* > superiors;
-        (*state_it)->getSuperiors( superiors );
-
-        // Calculate the sum of the vectors gained from all subordinate angles
-        Vect vecSum = {0, 0};
-        bool allcentered = true;
-
-        for(set< State* >::iterator sup_it = superiors.begin();
-            sup_it != superiors.end(); ++sup_it) {
-          // Get the position of subordinate state 
-          float position_rad = deg_to_rad((*sup_it)->getPosition());
-
-          if (position_rad > -0.9f) {
-            // state is not centered
-            allcentered = false;
-          }
-
-          // Convert to vectors and add.
-          Vect subVec = ang_to_vec(position_rad);
-          vecSum = vecSum + subVec;
+        // vecSum is sufficiently small, center the state.
+        (*state_it)->setPosition(-1.0f);
+      }
+      else {
+        // Transform vecSum into an angle, assign it to state position.
+        float position = rad_to_deg(vec_to_ang(vecSum));
+        
+        if (position < 0) {
+          position = 360 + position;
         }
 
-        if (allcentered) {
-          (*state_it)->setPosition(-1.0f);
-          undecided.push_back(*state_it);
-        }
-        else {
-
-          if (vec_length(vecSum) < tau) {
-
-            // vecSum is sufficiently small, center the state.
-            (*state_it)->setPosition(-1.0f);
-          }
-          else {
-            // Transform vecSum into an angle, assign it to state position.
-            float position = rad_to_deg(vec_to_ang(vecSum));
-            
-            if (position < 0) {
-              position = 360 + position;
-            }
-
-            (*state_it)->setPosition(position);
-            int slot = currCluster->occupySlot(position);
-            (*state_it)->setSlot(slot);
-          }
-        }
+        (*state_it)->setPosition(position);
+        int slot = currCluster->occupySlot(position);
+        (*state_it)->setSlot(slot);
       }
     }
-  }      
+  }
+  
   ss.swap(undecided);
 }
 

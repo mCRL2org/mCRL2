@@ -36,7 +36,7 @@ class Cluster {
     std::vector< State* > undecidedStates;
     float			topRadius;
     float			volume;
-    std::vector< Utils::Slot > slots;
+    std::vector< Utils::Slot* > slots;
 
     float *matrix;
     int primitive;
@@ -66,7 +66,7 @@ class Cluster {
     void         setDeadlock( bool b );
     void         unmarkState();
     int          getNumberOfSlots();
-    Utils::Slot  getSlot(int index) const;
+    Utils::Slot*  getSlot(int index) const;
     int          occupySlot(float pos);
     void         resolveSlots();
     void         slotUndecided();
