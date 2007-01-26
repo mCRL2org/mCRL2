@@ -13,6 +13,7 @@
 #include "utils.h"
 #include "lts.h"
 #include "primitivefactory.h"
+#include "settings.h"
 
 // class for primitive comparison based on distance
 class Distance_greater {
@@ -23,7 +24,7 @@ class Distance_greater {
     bool operator()(const Cluster*,const Cluster*) const;
 };
 
-class Visualizer {
+class Visualizer: public Subscriber {
   private:
     float boundingCylH;
     float boundingCylW;
@@ -37,8 +38,7 @@ class Visualizer {
     Utils::MarkStyle markStyle;
     Mediator* mediator;
     PrimitiveFactory *primitiveFactory;
-    static Utils::VisSettings  defaultVisSettings;
-    Utils::VisSettings visSettings;
+    Settings* settings;
     Utils::VisStyle visStyle;
     
     void clearDFSStates(State* root);
@@ -59,24 +59,26 @@ class Visualizer {
     void updateClusterMatrices(Cluster *root,int rot);
   
   public:
-    Visualizer(Mediator* owner);
+    Visualizer(Mediator* owner,Settings* ss);
     ~Visualizer();
     
-    void computeBoundsInfo();
+    void computeBoundsInfo(float &bcw,float &bch);
     float	getHalfStructureHeight() const;
-    float	getBoundingCylinderHeight() const;
-    float	getBoundingCylinderWidth() const;
     Utils::VisStyle	getVisStyle() const;
-    Utils::VisSettings getVisSettings() const;
-    Utils::VisSettings getDefaultVisSettings() const;
+    void notify(SettingID s);
     void setLTS(LTS *l);
     void setMarkStyle(Utils::MarkStyle ms);
     void setVisSettings(Utils::VisSettings vs);
     void setVisStyle(Utils::VisStyle vs);
 
     void drawStates();
-    void drawTransitions(bool disp_fp,bool disp_bp);
+    void drawTransitions(bool draw_fp,bool draw_bp);
     void drawStructure();
     void sortClusters(Utils::Point3D viewpoint);
 };
+
+inline Utils::VisStyle Visualizer::getVisStyle() const { return visStyle; }
+inline void Visualizer::setMarkStyle(Utils::MarkStyle ms) { markStyle = ms; }
+inline void Visualizer::setVisStyle(Utils::VisStyle vs) { visStyle = vs; }
+
 #endif

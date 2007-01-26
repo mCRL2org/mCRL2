@@ -6,12 +6,13 @@ using namespace Utils;
 
 /* Primitive Factory -------------------------------------------------------- */
 
-PrimitiveFactory::PrimitiveFactory(int accrcy) {
-  accuracy = accrcy;
+PrimitiveFactory::PrimitiveFactory(Settings* ss) {
   disc = -1;
   sphere = -1;
   hemisphere = -1;
   simple_sphere = -1;
+  settings = ss;
+  settings->subscribe(Quality,this);
   
   cos_theta = NULL;
   sin_theta = NULL;
@@ -72,7 +73,7 @@ int PrimitiveFactory::makeCone(float r,bool topClosed,bool bottomClosed) {
 int PrimitiveFactory::makeHemisphere() {
   if (hemisphere==-1) {
     P_Hemisphere *p = new P_Hemisphere();
-    p->reshape(accuracy,cos_theta,sin_theta);
+    p->reshape(settings->getInt(Quality),cos_theta,sin_theta);
     hemisphere = primitives.size();
     primitives.push_back(p);
   }
@@ -82,7 +83,7 @@ int PrimitiveFactory::makeHemisphere() {
 int PrimitiveFactory::makeSphere() {
   if (sphere==-1) {
     P_Sphere *p = new P_Sphere();
-    p->reshape(accuracy,cos_theta,sin_theta);
+    p->reshape(settings->getInt(Quality),cos_theta,sin_theta);
     sphere = primitives.size();
     primitives.push_back(p);
   }
@@ -93,15 +94,15 @@ int PrimitiveFactory::makeTube() {
   return -1;
 }
 */
-void PrimitiveFactory::setAccuracy(int accrcy) {
-  if (accuracy!=accrcy) {
-    accuracy = accrcy;
+void PrimitiveFactory::notify(SettingID s) {
+  if (s == Quality) {
     update_geom_tables();
     update_primitives();
   }
 }
   
 void PrimitiveFactory::update_geom_tables() {
+  int accuracy = settings->getInt(Quality);
   cos_theta = (float*)realloc(cos_theta,2*accuracy*sizeof(float));
   sin_theta = (float*)realloc(sin_theta,2*accuracy*sizeof(float));
   
@@ -115,6 +116,7 @@ void PrimitiveFactory::update_geom_tables() {
 }
 
 void PrimitiveFactory::update_primitives() {
+  int accuracy = settings->getInt(Quality);
   for (unsigned int i=0; i<primitives.size(); ++i) {
     primitives[i]->reshape(accuracy,cos_theta,sin_theta);
   }
@@ -125,7 +127,7 @@ int PrimitiveFactory::make_ring(float r) {
   int result = coneDB->findCone(key,0);
   if (result == -1) {
     P_Ring *p = new P_Ring(r);
-    p->reshape(accuracy,cos_theta,sin_theta);
+    p->reshape(settings->getInt(Quality),cos_theta,sin_theta);
     result = primitives.size();
     primitives.push_back(p);
     coneDB->addCone(key,0,result);
@@ -136,7 +138,7 @@ int PrimitiveFactory::make_ring(float r) {
 void PrimitiveFactory::make_disc() {
   if (disc == -1) {
     P_Disc *p = new P_Disc();
-    p->reshape(accuracy,cos_theta,sin_theta);
+    p->reshape(settings->getInt(Quality),cos_theta,sin_theta);
     disc = primitives.size();
     primitives.push_back(p);
   }

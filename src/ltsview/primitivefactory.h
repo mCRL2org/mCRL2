@@ -3,10 +3,11 @@
 #include <vector>
 #include "primitives.h"
 #include "conedb.h"
+#include "settings.h"
 
-class PrimitiveFactory {
+class PrimitiveFactory: public Subscriber {
   public:
-    PrimitiveFactory(int accrcy);
+    PrimitiveFactory(Settings* ss);
     ~PrimitiveFactory();
     void drawPrimitive(int p);
     void drawSimpleSphere();
@@ -14,11 +15,11 @@ class PrimitiveFactory {
     int  makeHemisphere();
     int  makeSphere();
     //int  makeTube();
-    void setAccuracy(int accrcy);
+    void notify(SettingID s);
   private:
     std::vector<Primitive*> primitives;
     ConeDB  *coneDB;
-    int     accuracy;
+    Settings *settings;
     int     disc;
     int     simple_sphere;
     int     sphere;

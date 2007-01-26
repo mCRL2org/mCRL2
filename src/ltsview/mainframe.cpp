@@ -29,16 +29,17 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU  (myID_DISPLAY_TRANSITIONS,MainFrame::onDisplay)
   EVT_MENU  (myID_DISPLAY_BACKPOINTERS,MainFrame::onDisplay)
   EVT_MENU  (myID_DISPLAY_WIREFRAME,MainFrame::onDisplay)
-  EVT_MENU  (myID_PAN, MainFrame::onActivateTool)
-  EVT_MENU  (myID_ROTATE, MainFrame::onActivateTool)
-  EVT_MENU  (myID_SELECT, MainFrame::onActivateTool)
-  EVT_MENU  (myID_ZOOM, MainFrame::onActivateTool)
-  EVT_MENU  (wxID_ABOUT, MainFrame::onAbout)
-  EVT_CHOICE(myID_RANK_STYLE, MainFrame::onRankStyle)
-  EVT_CHOICE(myID_VIS_STYLE, MainFrame::onVisStyle)
-  EVT_BUTTON(myID_COLOR_BUTTON, MainFrame::onColorButton)
-  EVT_SPINCTRL(myID_SETTINGS_CONTROL, MainFrame::onSpinSettingChanged)
-  EVT_CHECKBOX(myID_SETTINGS_CONTROL, MainFrame::onCommandSettingChanged)
+  EVT_MENU  (wxID_PREFERENCES,MainFrame::onSettings)
+  EVT_MENU  (myID_PAN,MainFrame::onActivateTool)
+  EVT_MENU  (myID_ROTATE,MainFrame::onActivateTool)
+  EVT_MENU  (myID_SELECT,MainFrame::onActivateTool)
+  EVT_MENU  (myID_ZOOM,MainFrame::onActivateTool)
+  EVT_MENU  (wxID_ABOUT,MainFrame::onAbout)
+  EVT_MENU  (myID_ITERATIVE,MainFrame::onRankStyle)
+  EVT_MENU  (myID_CYCLIC,MainFrame::onRankStyle)
+  EVT_MENU  (myID_CONES_STYLE,MainFrame::onVisStyle)
+  EVT_MENU  (myID_TUBES_STYLE,MainFrame::onVisStyle)
+  EVT_MENU  (myID_ATOMIUM_STYLE,MainFrame::onVisStyle)
   EVT_BUTTON(wxID_RESET, MainFrame::onResetButton)
   EVT_RADIOBUTTON(myID_MARK_RADIOBUTTON, MainFrame::onMarkRadio)
   EVT_CHOICE(myID_MARK_ANYALL, MainFrame::onMarkAnyAll)
@@ -50,10 +51,12 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 //  EVT_IDLE(MainFrame::onIdle)
 END_EVENT_TABLE()
 
-MainFrame::MainFrame(Mediator* owner) : wxFrame(NULL,wxID_ANY,wxT("LTSView")) {
+MainFrame::MainFrame(Mediator* owner,Settings* ss)
+  : wxFrame(NULL,wxID_ANY,wxT("LTSView")) {
 //  previousTime = 0.0;
 //  frameCount = 0;
   mediator = owner;
+  settings = ss;
   progDialog = NULL;
 
   SetIcon(wxIcon(main_window));
@@ -61,6 +64,7 @@ MainFrame::MainFrame(Mediator* owner) : wxFrame(NULL,wxID_ANY,wxT("LTSView")) {
   CreateStatusBar(2);
   setupMenuBar();
   setupMainArea();
+  settingsDialog = new SettingsDialog(this,glCanvas,ss);
   
   SetSize(800,600);
   CentreOnScreen();
@@ -84,6 +88,11 @@ void MainFrame::setupMenuBar() {
   viewMenu->Append(wxID_RESET, wxT("&Reset viewpoint\tF2"),
       wxT("Set the viewpoint to the default position"));
   viewMenu->AppendSeparator();
+  viewMenu->AppendRadioItem(myID_ITERATIVE,wxT("Iterative ranking"),
+    wxT("Apply iterative ranking"));
+  viewMenu->AppendRadioItem(myID_CYCLIC,wxT("Cyclic ranking"),
+    wxT("Apply cyclic ranking"));
+  viewMenu->AppendSeparator();
   viewMenu->AppendCheckItem(myID_DISPLAY_STATES, wxT("Display &states\tF3"),
       wxT("Show/hide individual states"));
   viewMenu->AppendCheckItem(myID_DISPLAY_TRANSITIONS, 
@@ -92,6 +101,26 @@ void MainFrame::setupMenuBar() {
     wxT("Display &backpointers\tF5"), wxT("Show/hide backpointers"));
   viewMenu->AppendCheckItem(myID_DISPLAY_WIREFRAME,
       wxT("Display &wireframe\tF6"),wxT("Toggle wireframe/surface"));
+  viewMenu->AppendSeparator();
+  viewMenu->AppendRadioItem(myID_CONES_STYLE,wxT("Cones"),
+    wxT("Cones visualization style"));
+  viewMenu->AppendRadioItem(myID_TUBES_STYLE,wxT("Tubes"),
+    wxT("Tubes visualization style"));
+  viewMenu->AppendRadioItem(myID_ATOMIUM_STYLE,wxT("Atomium"),
+    wxT("Atomium visualization style"));
+  viewMenu->AppendSeparator();
+  viewMenu->Append(wxID_PREFERENCES,wxT("S&ettings..."),
+    wxT("Show the settings panel"));
+
+  viewMenu->Check(myID_DISPLAY_STATES,settings->getBool(DisplayStates));
+  viewMenu->Check(myID_DISPLAY_TRANSITIONS,
+    settings->getBool(DisplayTransitions));
+  viewMenu->Check(myID_DISPLAY_BACKPOINTERS,
+    settings->getBool(DisplayBackpointers));
+  viewMenu->Check(myID_DISPLAY_WIREFRAME,
+    settings->getBool(DisplayWireframe));
+  viewMenu->Enable(myID_TUBES_STYLE,false);
+  viewMenu->Enable(myID_ATOMIUM_STYLE,false);
 
   toolMenu->AppendRadioItem(myID_SELECT,wxT("&Select\tS"),wxT("Select tool"));
   toolMenu->AppendRadioItem(myID_PAN,wxT("&Pan\tP"),wxT("Pan tool"));
@@ -117,10 +146,8 @@ void MainFrame::setupMainArea() {
       wxDefaultSize,wxRAISED_BORDER);
   setupRightPanel(rightPanel);
 
-  int w,h;
-  rightPanel->GetSize(&w,&h);
   int attribList[] = { WX_GL_RGBA,WX_GL_DOUBLEBUFFER };
-  glCanvas = new GLCanvas(mediator,this,wxDefaultSize,attribList);
+  glCanvas = new GLCanvas(mediator,this,settings,wxDefaultSize,attribList);
   
   mainSizer->Add(glCanvas,1,wxALIGN_CENTER|wxEXPAND|wxALL,0);
   mainSizer->Add(rightPanel,1,wxALIGN_CENTER|wxEXPAND|wxALL,0);
@@ -135,228 +162,49 @@ void MainFrame::setupRightPanel(wxPanel* panel) {
   sizer->AddGrowableCol(0);
   sizer->AddGrowableRow(1);
 
-  int lflags = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
-  int rflags = wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL;
+  int lf = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
+  int rf = wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL;
   
   // setup the top part (information box)
-  wxFlexGridSizer* topSizer = new wxFlexGridSizer(6, 2, 0, 0);
-  numberOfStatesLabel = new wxStaticText(panel, wxID_ANY, wxEmptyString,
-      wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE);
-  numberOfTransitionsLabel = new wxStaticText(panel, wxID_ANY, wxEmptyString,
-      wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE);
-  numberOfClustersLabel = new wxStaticText(panel, wxID_ANY, wxEmptyString,
-      wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE);
-  numberOfRanksLabel = new wxStaticText(panel, wxID_ANY, wxEmptyString,
-      wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE);
-  numberOfMarkedStatesLabel = new wxStaticText(panel, wxID_ANY, wxEmptyString,
-      wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE);
-  numberOfMarkedTransitionsLabel = new wxStaticText(panel, wxID_ANY, wxEmptyString,
-      wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE);
+  wxFlexGridSizer* topSizer = new wxFlexGridSizer(6,2,0,0);
+  nsLabel = new wxStaticText(panel,wxID_ANY,wxEmptyString,wxDefaultPosition,
+    wxDefaultSize,wxALIGN_RIGHT|wxST_NO_AUTORESIZE);
+  ntLabel = new wxStaticText(panel,wxID_ANY,wxEmptyString,wxDefaultPosition,
+    wxDefaultSize,wxALIGN_RIGHT|wxST_NO_AUTORESIZE);
+  ncLabel = new wxStaticText(panel,wxID_ANY,wxEmptyString,wxDefaultPosition,
+    wxDefaultSize,wxALIGN_RIGHT|wxST_NO_AUTORESIZE);
+  nrLabel = new wxStaticText(panel,wxID_ANY,wxEmptyString,wxDefaultPosition,
+    wxDefaultSize,wxALIGN_RIGHT|wxST_NO_AUTORESIZE);
+  nmsLabel = new wxStaticText(panel,wxID_ANY,wxEmptyString,wxDefaultPosition,
+    wxDefaultSize,wxALIGN_RIGHT|wxST_NO_AUTORESIZE);
+  nmtLabel = new wxStaticText(panel,wxID_ANY,wxEmptyString,wxDefaultPosition,
+    wxDefaultSize,wxALIGN_RIGHT|wxST_NO_AUTORESIZE);
   
   topSizer->AddGrowableCol(1);
-  topSizer->Add(new wxStaticText(panel, wxID_ANY, wxT("Number of states:")),
-      0, lflags, 3);
-  topSizer->Add(numberOfStatesLabel, 0, rflags, 3);
-  topSizer->Add(new wxStaticText(panel, wxID_ANY,
-	wxT("Number of transitions:")), 0, lflags, 3);
-  topSizer->Add(numberOfTransitionsLabel, 0, rflags, 3);
-  topSizer->Add(new wxStaticText(panel, wxID_ANY, wxT("Number of clusters:")
-	), 0, lflags, 3);
-  topSizer->Add(numberOfClustersLabel, 0, rflags, 3);
-  topSizer->Add(new wxStaticText(panel, wxID_ANY, wxT("Number of ranks:")),
-      0, lflags, 3);
-  topSizer->Add(numberOfRanksLabel, 0, rflags, 3);
-  topSizer->Add(new wxStaticText(panel, wxID_ANY,
-	wxT("Number of marked states:")), 0, rflags, 3);
-  topSizer->Add(numberOfMarkedStatesLabel, 0, rflags, 3);
-  topSizer->Add(new wxStaticText(panel, wxID_ANY,
-	wxT("Number of marked transitions:")), 0, rflags, 3);
-  topSizer->Add(numberOfMarkedTransitionsLabel, 0, rflags, 3);
+  topSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("States:")),0,lf,3);
+  topSizer->Add(nsLabel,0,rf,3);
+  topSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Transitions:")),0,lf,3);
+  topSizer->Add(ntLabel,0,rf,3);
+  topSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Clusters:")),0,lf,3);
+  topSizer->Add(ncLabel,0,rf,3);
+  topSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Ranks:")),0,lf,3);
+  topSizer->Add(nrLabel,0,rf,3);
+  topSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Marked states:")),0,rf,3);
+  topSizer->Add(nmsLabel,0,rf,3);
+  topSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Marked transitions:")),0,rf,3);
+  topSizer->Add(nmtLabel,0,rf,3);
 
   // setup the bottom part (notebook)
   wxNotebook* bottomNotebook = new wxNotebook(panel, wxID_ANY);
-  wxScrolledWindow* settingsPanel = new wxScrolledWindow(bottomNotebook,
-      wxID_ANY);
   wxScrolledWindow* markPanel = new wxScrolledWindow(bottomNotebook,wxID_ANY);
-  
-  settingsPanel->SetScrollRate(0,5);
   markPanel->SetScrollRate(0,5);
-  
-  setupSettingsPanel(settingsPanel);
   setupMarkPanel(markPanel);
-  
-  bottomNotebook->AddPage(settingsPanel, wxT("Settings"), true);
   bottomNotebook->AddPage(markPanel, wxT("Mark"), false);
   
   sizer->Add(topSizer, 0, wxEXPAND | wxALL, 5);
   sizer->Add(bottomNotebook, 0, wxEXPAND | wxALL, 5);
   sizer->Fit(panel);
   panel->SetSizer(sizer);
-  panel->Fit();
-  panel->Layout();
-}
-
-void MainFrame::setupSettingsPanel(wxPanel* panel) {
-  wxStaticBoxSizer* parSizer = new wxStaticBoxSizer(wxVERTICAL,panel,
-      wxT("Parameters"));
-
-  int lflags = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL; 
-  int rflags = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL; 
-  int border = 3;
-
-  wxFlexGridSizer* styleSizer = new wxFlexGridSizer(2,2,0,0);
-  styleSizer->AddGrowableCol(0);
-  styleSizer->AddGrowableCol(1);
-  styleSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Rank style:")),1,lflags,
-      border);
-  wxString rs_choices[2] = { wxT("Iterative"),wxT("Cyclic") };
-  wxChoice* rankstyleChoice = new wxChoice(panel,myID_RANK_STYLE,
-      wxDefaultPosition,wxDefaultSize,2,rs_choices);
-  rankstyleChoice->SetSelection(0);
-  styleSizer->Add(rankstyleChoice,1,lflags,border);
-  styleSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Visualisation style:")),
-      1,lflags,border);
-  wxString vs_choices[3] = { wxT("Cones"),wxT("Tubes"),wxT("Atomium") };
-  wxChoice* visstyleChoice = new wxChoice(panel,myID_VIS_STYLE,
-      wxDefaultPosition,wxDefaultSize,3,vs_choices);
-  visstyleChoice->SetSelection(0);
-  styleSizer->Add(visstyleChoice,1,lflags,border);
-  
-  wxFlexGridSizer* parsubSizer = new wxFlexGridSizer(7,2,0,0);
-  parsubSizer->AddGrowableCol(0);
-  for (int i=0; i<5; ++i) {
-    parsubSizer->AddGrowableRow(i);
-  }
-  parSizer->Add(parsubSizer,1,wxEXPAND|wxALL,0);
-  
-  wxSize spinctrlSize(50,-1);
-
-  nodesizeSpinCtrl = new wxSpinCtrl(panel,myID_SETTINGS_CONTROL,
-      wxEmptyString,wxDefaultPosition);
-  nodesizeSpinCtrl->SetRange(0,1000);
-  nodesizeSpinCtrl->SetSizeHints(spinctrlSize,spinctrlSize);
-  parsubSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Node size:")),0,lflags,
-      border);
-  parsubSizer->Add(nodesizeSpinCtrl,0,rflags,border);
-  
-  branchrotationSpinCtrl = new wxSpinCtrl(panel,myID_SETTINGS_CONTROL,
-      wxEmptyString,wxDefaultPosition);
-  branchrotationSpinCtrl->SetRange(0, 360);
-  branchrotationSpinCtrl->SetSizeHints(spinctrlSize, spinctrlSize);
-  parsubSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Branch rotation:")),0,
-      lflags,border);
-  parsubSizer->Add(branchrotationSpinCtrl,0,rflags,border);
-
-  innerbranchtiltSpinCtrl = new wxSpinCtrl(panel,myID_SETTINGS_CONTROL,
-      wxEmptyString,wxDefaultPosition);
-  innerbranchtiltSpinCtrl->SetRange(0,90);
-  innerbranchtiltSpinCtrl->SetSizeHints(spinctrlSize,spinctrlSize);
-  parsubSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Inner branch tilt:")),0,
-      lflags,border);
-  parsubSizer->Add(innerbranchtiltSpinCtrl,0,rflags,border);
-
-  outerbranchtiltSpinCtrl = new wxSpinCtrl(panel,myID_SETTINGS_CONTROL,
-      wxEmptyString,wxDefaultPosition);
-  outerbranchtiltSpinCtrl->SetRange(0,90);
-  outerbranchtiltSpinCtrl->SetSizeHints(spinctrlSize,spinctrlSize);
-  parsubSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Outer branch tilt:")),0,
-      lflags,border);
-  parsubSizer->Add(outerbranchtiltSpinCtrl,0,rflags,border);
-  
-  qualitySpinCtrl = new wxSpinCtrl(panel, myID_SETTINGS_CONTROL,wxEmptyString,
-      wxDefaultPosition);
-  qualitySpinCtrl->SetRange(2,50);
-  qualitySpinCtrl->SetSizeHints(spinctrlSize,spinctrlSize);
-  parsubSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Accuracy:")),0,lflags,
-      border);
-  parsubSizer->Add(qualitySpinCtrl,0,rflags,border);
-  
-  ellipsoidSpinCtrl = new wxSpinCtrl(panel,myID_SETTINGS_CONTROL,wxEmptyString,
-      wxDefaultPosition);
-  ellipsoidSpinCtrl->SetRange(1,100);
-  ellipsoidSpinCtrl->SetSizeHints(spinctrlSize, spinctrlSize);
-  parsubSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Ellipsoid threshold:")),
-      0,lflags,border);
-  parsubSizer->Add(ellipsoidSpinCtrl,0,rflags,border);
-
-  // Setup the Colors panel
-  
-  wxStaticBoxSizer* colSizer = new wxStaticBoxSizer(wxVERTICAL,panel,
-      wxT("Colours"));
-  
-  wxFlexGridSizer* colsubSizer = new wxFlexGridSizer(8,3,0,0);
-  colsubSizer->AddGrowableCol(0);
-  for (int i=0; i<8 ; ++i) {
-    colsubSizer->AddGrowableRow(i);
-  }
-  colSizer->Add(colsubSizer,1,wxEXPAND|wxALL,0);
-  
-  transparencySpinCtrl = new wxSpinCtrl(panel,myID_SETTINGS_CONTROL);
-  transparencySpinCtrl->SetRange(0,100);
-  transparencySpinCtrl->SetSizeHints(spinctrlSize,spinctrlSize);
-  colsubSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Transparency:")),0,
-      lflags,border);
-  colsubSizer->AddSpacer(0);
-  colsubSizer->Add(transparencySpinCtrl,0,rflags,border);
-
-  wxSize btnSize(25,25);
-
-  backgroundButton = new wxColorButton(panel,this,myID_COLOR_BUTTON);
-  backgroundButton->SetSizeHints(btnSize,btnSize);
-  colsubSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Background:")),0,lflags,
-      border);
-  colsubSizer->AddSpacer(0);
-  colsubSizer->Add(backgroundButton,0,rflags,border);
-
-  nodeButton = new wxColorButton(panel,this,myID_COLOR_BUTTON);
-  nodeButton->SetSizeHints(btnSize,btnSize);
-  colsubSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Node:")),0,lflags,
-      border);
-  colsubSizer->AddSpacer(0);
-  colsubSizer->Add(nodeButton,0,rflags,border);
-
-  downEdgeButton = new wxColorButton(panel,this,myID_COLOR_BUTTON);
-  downEdgeButton->SetSizeHints(btnSize,btnSize);
-  colsubSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Edge (down/up):")),0,
-      lflags,border);
-  colsubSizer->Add(downEdgeButton,0,rflags,border);
-
-  upEdgeButton = new wxColorButton(panel,this,myID_COLOR_BUTTON);
-  upEdgeButton->SetSizeHints(btnSize,btnSize);
-  colsubSizer->Add(upEdgeButton,0,rflags,border);
-
-  markButton = new wxColorButton(panel,this,myID_COLOR_BUTTON);
-  markButton->SetSizeHints(btnSize,btnSize);
-  colsubSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Mark:")),0,lflags,
-      border);
-  colsubSizer->AddSpacer(0);
-  colsubSizer->Add(markButton,0,rflags,border);
-
-  interpolate1Button = new wxColorButton(panel,this,myID_COLOR_BUTTON);
-  interpolate1Button->SetSizeHints(btnSize,btnSize);
-  interpolate2Button = new wxColorButton(panel,this,myID_COLOR_BUTTON);
-  interpolate2Button->SetSizeHints(btnSize,btnSize);
-  colsubSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Interpolate:")),0,
-      lflags,border);
-  colsubSizer->Add(interpolate1Button,0,rflags,border);
-  colsubSizer->Add(interpolate2Button,0,rflags,border);
-  
-  longinterpolateCheckBox = new wxCheckBox(panel,myID_SETTINGS_CONTROL,
-      wxT("Long interpolation"));
-  colsubSizer->Add(longinterpolateCheckBox,0,lflags,border);
-
-  wxFlexGridSizer* panelSizer = new wxFlexGridSizer(4,1,0,0);
-  panelSizer->AddGrowableCol(0);
-  panelSizer->AddGrowableRow(0);
-  panelSizer->AddGrowableRow(1);
-  panelSizer->Add(styleSizer,0,wxEXPAND|wxALL,border);
-  panelSizer->Add(parSizer,1,wxEXPAND|wxALL,5);
-  panelSizer->Add(colSizer,1,wxEXPAND|wxALL,5);
-
-  panelSizer->Add(new wxButton(panel,wxID_RESET,wxT("Default settings")),0,
-      lflags,border);
-  panelSizer->Fit(panel);
-  panel->SetSizer(panelSizer);
   panel->Fit();
   panel->Layout();
 }
@@ -468,6 +316,7 @@ void MainFrame::onSavePic(wxCommandEvent& /*event*/) {
 }
 
 void MainFrame::onExit(wxCommandEvent& /*event*/) {
+  settingsDialog->Destroy();
   Close();
 }
 
@@ -476,19 +325,21 @@ void MainFrame::onActivateTool(wxCommandEvent& event) {
 }
 
 void MainFrame::onRankStyle(wxCommandEvent& event) {
-  if (event.GetSelection() == 0)
+  if (event.GetId() == myID_ITERATIVE) {
     mediator->setRankStyle(ITERATIVE);
-  else
+  } else if (event.GetId() == myID_CYCLIC) {
     mediator->setRankStyle(CYCLIC);
+  }
 }
 
 void MainFrame::onVisStyle(wxCommandEvent& event){
-  if (event.GetSelection() == 0)
+  if (event.GetId() == myID_CONES_STYLE) {
     mediator->setVisStyle(CONES);
-  else if (event.GetSelection() == 1)
+  } else if (event.GetId() == myID_TUBES_STYLE) {
     mediator->setVisStyle(TUBES);
-  else
+  } else if (event.GetId() == myID_ATOMIUM_STYLE) {
     mediator->setVisStyle(ATOMIUM);
+  }
 }
 
 void MainFrame::onResetView(wxCommandEvent& /*event*/) {
@@ -497,31 +348,24 @@ void MainFrame::onResetView(wxCommandEvent& /*event*/) {
 
 void MainFrame::onDisplay(wxCommandEvent& event) {
   if (event.GetId() == myID_DISPLAY_STATES) {
-    glCanvas->setDisplayStates(event.IsChecked());
+    settings->setBool(DisplayStates,event.IsChecked());
   } else if (event.GetId() == myID_DISPLAY_TRANSITIONS) {
-    glCanvas->setDisplayTransitions(event.IsChecked());
+    settings->setBool(DisplayTransitions,event.IsChecked());
   } else if (event.GetId() == myID_DISPLAY_BACKPOINTERS) {
-    glCanvas->setDisplayBackpointers(event.IsChecked());
+    settings->setBool(DisplayBackpointers,event.IsChecked());
   } else if (event.GetId() == myID_DISPLAY_WIREFRAME) {
-    glCanvas->setDisplayWireframe(event.IsChecked());
+    settings->setBool(DisplayWireframe,event.IsChecked());
+  } else {
+    return;
   }
   glCanvas->display();
 }
 
-void MainFrame::onColorButton(wxCommandEvent& /*event*/) {
-  mediator->applySettings();
-}
-
-void MainFrame::onSpinSettingChanged(wxSpinEvent& /*event*/) {
-  mediator->applySettings();
-}
-
-void MainFrame::onCommandSettingChanged(wxCommandEvent& /*event*/) {
-  mediator->applySettings();
+void MainFrame::onSettings(wxCommandEvent& /*event*/) {
+  settingsDialog->Show();
 }
 
 void MainFrame::onResetButton(wxCommandEvent& /*event*/) {
-  mediator->applyDefaultSettings();
 }
 
 void MainFrame::onMarkRadio(wxCommandEvent& event) {
@@ -578,57 +422,6 @@ void MainFrame::onMarkTransition(wxCommandEvent& event) {
   markTransitionsRadio->SetValue(true);
 }
 
-VisSettings MainFrame::getVisSettings() const {
-  RGB_Color downC = wxC_to_RGB(downEdgeButton->GetBackgroundColour());
-  RGB_Color intC1 = wxC_to_RGB(interpolate1Button->GetBackgroundColour());
-  RGB_Color intC2 = wxC_to_RGB(interpolate2Button->GetBackgroundColour());
-  RGB_Color markC = wxC_to_RGB(markButton->GetBackgroundColour());
-  RGB_Color stateC = wxC_to_RGB(nodeButton->GetBackgroundColour());
-  RGB_Color upC = wxC_to_RGB(upEdgeButton->GetBackgroundColour());
-  VisSettings result = {
-    ellipsoidSpinCtrl->GetValue() / 10.0f,
-    nodesizeSpinCtrl->GetValue() / 10.0f,
-    branchrotationSpinCtrl->GetValue(),
-    innerbranchtiltSpinCtrl->GetValue(),
-    outerbranchtiltSpinCtrl->GetValue(),
-    qualitySpinCtrl->GetValue()*2,
-    static_cast<unsigned char>((100-transparencySpinCtrl->GetValue())*2.55f),
-    longinterpolateCheckBox->GetValue(),
-    downC,
-    intC1,
-    intC2,
-    markC,
-    stateC,
-    upC
-  };
-  return result;
-}
-
-RGB_Color MainFrame::getBackgroundColor() const {
-  return wxC_to_RGB(backgroundButton->GetBackgroundColour());
-}
-
-void MainFrame::setBackgroundColor(RGB_Color c) {
-  backgroundButton->SetBackgroundColour(RGB_to_wxC(c));
-}
-
-void MainFrame::setVisSettings(VisSettings ss) {
-  nodeButton->SetBackgroundColour(RGB_to_wxC(ss.stateColor));
-  downEdgeButton->SetBackgroundColour(RGB_to_wxC(ss.downEdgeColor));
-  ellipsoidSpinCtrl->SetValue(int(10*ss.ellipsoidThreshold));
-  upEdgeButton->SetBackgroundColour(RGB_to_wxC(ss.upEdgeColor));
-  markButton->SetBackgroundColour(RGB_to_wxC(ss.markedColor));
-  innerbranchtiltSpinCtrl->SetValue(ss.innerBranchTilt);
-  interpolate1Button->SetBackgroundColour(RGB_to_wxC(ss.interpolateColor1));
-  interpolate2Button->SetBackgroundColour(RGB_to_wxC(ss.interpolateColor2));
-  longinterpolateCheckBox->SetValue(ss.longInterpolation);
-  transparencySpinCtrl->SetValue(static_cast<int>((255-ss.alpha)/2.55f));
-  nodesizeSpinCtrl->SetValue(int(10*ss.nodeSize));
-  outerbranchtiltSpinCtrl->SetValue(ss.outerBranchTilt);
-  qualitySpinCtrl->SetValue(ss.quality/2);
-  branchrotationSpinCtrl->SetValue(ss.branchRotation);
-}
-
 void MainFrame::createProgressDialog(const string title,const string text) {
   progDialog = new wxProgressDialog(wxString(title.c_str(),wxConvUTF8),
       wxString(text.c_str(),wxConvUTF8),100,this,
@@ -666,21 +459,21 @@ void MainFrame::loadTitle() {
 }
 
 void MainFrame::setNumberInfo(int ns,int nt,int nc,int nr) {
-  numberOfStatesLabel->SetLabel(wxString::Format(wxT("%d"), ns));
-  numberOfTransitionsLabel->SetLabel(wxString::Format(wxT("%d"), nt));
-  numberOfClustersLabel->SetLabel(wxString::Format(wxT("%d"), nc));
-  numberOfRanksLabel->SetLabel(wxString::Format(wxT("%d"), nr));
-  numberOfRanksLabel->GetParent()->Fit();
+  nsLabel->SetLabel(wxString::Format(wxT("%d"), ns));
+  ntLabel->SetLabel(wxString::Format(wxT("%d"), nt));
+  ncLabel->SetLabel(wxString::Format(wxT("%d"), nc));
+  nrLabel->SetLabel(wxString::Format(wxT("%d"), nr));
+  nrLabel->GetParent()->Fit();
   Layout();
 }
 
 void MainFrame::setMarkedStatesInfo(int number) {
-  numberOfMarkedStatesLabel->SetLabel(wxString::Format(wxT("%d"),number));
+  nmsLabel->SetLabel(wxString::Format(wxT("%d"),number));
   Layout();
 }
 
 void MainFrame::setMarkedTransitionsInfo(int number) {
-  numberOfMarkedTransitionsLabel->SetLabel(wxString::Format(wxT("%d"),number));
+  nmtLabel->SetLabel(wxString::Format(wxT("%d"),number));
   Layout();
 }
 
@@ -735,13 +528,4 @@ void MainFrame::stopRendering() {
   }*/
   SetStatusText(wxT(""),0);
   GetStatusBar()->Update();
-}
-
-wxColour MainFrame::RGB_to_wxC(RGB_Color c) const {
-  return wxColour(c.r,c.g,c.b);
-}
-
-RGB_Color MainFrame::wxC_to_RGB(wxColour c) const {
-  RGB_Color result = {c.Red(),c.Green(),c.Blue()};
-  return result;
 }

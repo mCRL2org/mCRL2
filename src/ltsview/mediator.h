@@ -10,9 +10,7 @@ class Mediator {
     virtual ~Mediator() {}
     virtual void      activateMarkRule(const int index,const bool activate) = 0;
     virtual void      addMarkRule() = 0;
-    virtual void      applyDefaultSettings() = 0;
     virtual void      applyMarkStyle(Utils::MarkStyle ms) = 0;
-    virtual void      applySettings() = 0;
     virtual void      editMarkRule(const int index) = 0;
     virtual void      markAction(std::string label) = 0;
     virtual void      notifyRenderingFinished() = 0;

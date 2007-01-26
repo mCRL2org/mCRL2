@@ -33,11 +33,13 @@ BEGIN_EVENT_TABLE(GLCanvas,wxGLCanvas)
     EVT_ERASE_BACKGROUND(GLCanvas::OnEraseBackground)
 END_EVENT_TABLE()
 
-GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,const wxSize &size,
-    int* attribList)
+GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
+    const wxSize &size,int* attribList)
 	: wxGLCanvas(parent,wxID_ANY,wxDefaultPosition,size,wxSUNKEN_BORDER,
 		     wxT(""),attribList) {
   mediator = owner;
+  settings = ss;
+  settings->subscribe(BackgroundColor,this);
   displayAllowed = true;
   collectingData = false;
   angleX = 0.0f;
@@ -46,26 +48,14 @@ GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,const wxSize &size,
   moveVector.y = 0.0f;
   moveVector.z = 0.0f;
   startPosZ = 0.0f;
-  startPosZDefault = 0.0f;
   farPlane = 0.0f;
   nearPlane = 1.0f;
-  defaultBGColor.r = 100; 
-  defaultBGColor.g = 100; 
-  defaultBGColor.b = 100; 
-  displayBackpointers = false;
-  displayStates = false;
-  displayTransitions = false;
-  displayWireframe = false;
   lightRenderMode = false;
 
   setActiveTool(myID_SELECT);
 }
 
 GLCanvas::~GLCanvas() {
-}
-
-void GLCanvas::setVisualizer(Visualizer *vis) {
-  visualizer = vis;
 }
 
 void GLCanvas::initialize() {
@@ -93,46 +83,11 @@ void GLCanvas::initialize() {
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
   
-  glClearColor(defaultBGColor.r/255.0f,defaultBGColor.g/255.0f,
-      defaultBGColor.b/255.0f,1.0f);
+  RGB_Color c = settings->getRGB(BackgroundColor);
+  glClearColor(c.r/255.0f,c.g/255.0f,c.b/255.0f,1.0f);
   glClearDepth(1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   SwapBuffers();
-}
-
-void GLCanvas::disableDisplay() {
-  displayAllowed = false;
-}
-
-void GLCanvas::enableDisplay() {
-  displayAllowed = true;
-}
-
-void GLCanvas::setDefaultPosition(float structWidth,float structHeight) {
-  // structWidth is the radius of the smallest cylinder that contains the entire
-  // structure; structHeight is the height of that cylinder
-  // 0.5 / tan(60) = 0.866
-  startPosZDefault = 0.866f*structHeight + structWidth + nearPlane;
-  farPlane = startPosZDefault + 2*structWidth;
-  reshape();
-}
-
-RGB_Color GLCanvas::getBackgroundColor() const {
-  GLfloat bgc[4];
-  glGetFloatv(GL_COLOR_CLEAR_VALUE,bgc);
-  RGB_Color result = {
-    static_cast<unsigned char>(bgc[0]*255.0f),
-    static_cast<unsigned char>(bgc[1]*255.0f),
-    static_cast<unsigned char>(bgc[2]*255.0f) };
-  return result;
-}
-
-RGB_Color GLCanvas::getDefaultBackgroundColor() const { 
-  return defaultBGColor;
-}
-
-void GLCanvas::setBackgroundColor(Utils::RGB_Color c) {
-  glClearColor(c.r/255.0f,c.g/255.0f,c.b/255.0f,1.0f);
 }
 
 void GLCanvas::getMaxViewportDims(int *w,int* h) {
@@ -148,9 +103,21 @@ void GLCanvas::resetView() {
   moveVector.x = 0.0f;
   moveVector.y = 0.0f;
   moveVector.z = 0.0f;
-  startPosZ = startPosZDefault;
+  if (visualizer != NULL) {
+    float sw,sh;
+    visualizer->computeBoundsInfo(sw,sh);
+    startPosZ = 0.866f*sh + sw + nearPlane;
+    farPlane = startPosZ + 2*sw;
+  }
   reshape();
   display();
+}
+
+void GLCanvas::notify(SettingID s) {
+  if (s == BackgroundColor) {
+    RGB_Color c = settings->getRGB(BackgroundColor);
+    glClearColor(c.r/255.0f,c.g/255.0f,c.b/255.0f,1.0f);
+  }
 }
 
 void GLCanvas::setActiveTool(int t) {
@@ -172,34 +139,35 @@ void GLCanvas::display(bool coll_caller) {
   if (displayAllowed) {
     displayAllowed = false;
     mediator->notifyRenderingStarted();
+
     SetCurrent();
+    
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    
     glPushMatrix();
       glLoadIdentity(); 
         
-      if (lightRenderMode) {
-        glDisable(GL_NORMALIZE);
-        glDisable(GL_LIGHTING);
-        glDisable(GL_LIGHT0);
-        glShadeModel(GL_FLAT);
-        //glDisable(GL_DEPTH_TEST);
-        //glDisable(GL_COLOR_MATERIAL);
-      }
-      else {
+      if (!lightRenderMode || settings->getBool(NavLighting)) {
         glEnable(GL_NORMALIZE);
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);
+      } else {
+        glDisable(GL_NORMALIZE);
+        glDisable(GL_LIGHTING);
+        glDisable(GL_LIGHT0);
+      }
+
+      if (!lightRenderMode || settings->getBool(NavSmoothShading)) {
         glShadeModel(GL_SMOOTH);
-        //glEnable(GL_DEPTH_TEST);
-        //glEnable(GL_COLOR_MATERIAL);
+      } else {
+        glShadeModel(GL_FLAT);
       }
-      if (displayWireframe) {
+      
+      if (settings->getBool(DisplayWireframe)) {
         glPolygonMode(GL_FRONT,GL_LINE);
-      }
-      else {
+      } else {
         glPolygonMode(GL_FRONT,GL_FILL);
       }
-    
-      glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
      
       // apply panning, zooming and rotating transformations
       glTranslatef(moveVector.x,moveVector.y,moveVector.z - startPosZ);
@@ -215,13 +183,16 @@ void GLCanvas::display(bool coll_caller) {
       float halfHeight = visualizer->getHalfStructureHeight();
       glTranslatef(0.0f,0.0f,-halfHeight);
       
-      if (!lightRenderMode && displayStates) {
+      if (settings->getBool(DisplayStates) &&
+          (!lightRenderMode || settings->getBool(NavShowStates))) {
         visualizer->drawStates();
       }
       
-      if (!lightRenderMode && (displayTransitions || displayBackpointers)) {
-        visualizer->drawTransitions(displayTransitions,displayBackpointers);
-      }
+      visualizer->drawTransitions(
+        settings->getBool(DisplayTransitions)
+          && (!lightRenderMode || settings->getBool(NavShowTransitions)),
+        settings->getBool(DisplayBackpointers)
+          && (!lightRenderMode || settings->getBool(NavShowBackpointers)));
       
       if (!lightRenderMode) {
         // determine current viewpoint in world coordinates
@@ -253,6 +224,7 @@ void GLCanvas::display(bool coll_caller) {
         SwapBuffers();
       }
     glPopMatrix();
+
     mediator->notifyRenderingFinished();
     displayAllowed = true;
   }
@@ -489,20 +461,4 @@ unsigned char* GLCanvas::getPictureData(int w_res,int h_res) {
   }
 
   return pixels;
-}
-
-void GLCanvas::setDisplayWireframe(bool b) {
-  displayWireframe = b;
-}
-
-void GLCanvas::setDisplayBackpointers(bool b) {
-  displayBackpointers = b;
-}
-
-void GLCanvas::setDisplayStates(bool b) {
-  displayStates = b;
-}
-
-void GLCanvas::setDisplayTransitions(bool b) {
-  displayTransitions = b;
 }

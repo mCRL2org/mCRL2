@@ -27,6 +27,9 @@ Cluster::~Cluster() {
   actionLabelCounts.clear();
   descendants.clear();
   states.clear();
+  for (unsigned int i = 0; i <slots.size(); ++i) {
+    delete slots[i];
+  }
 }
 
 void Cluster::addState(State* s) {

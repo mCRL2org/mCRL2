@@ -5,24 +5,26 @@
 namespace IDs
 {
   const int myID_SAVEPIC = wxID_HIGHEST + 1;
-  const int myID_SELECT = myID_SAVEPIC + 1;
-  const int myID_ZOOM   = myID_SELECT + 1;
-  const int myID_PAN    = myID_ZOOM + 1;
-  const int myID_ROTATE = myID_PAN + 1;
-  const int myID_RANK_STYLE = myID_ROTATE + 1;
-  const int myID_VIS_STYLE = myID_RANK_STYLE + 1;
-  const int myID_COLOR_BUTTON = myID_VIS_STYLE + 1;
-  const int myID_SETTINGS_CONTROL = myID_COLOR_BUTTON + 1;
-  const int myID_MARK_RADIOBUTTON = myID_SETTINGS_CONTROL + 1;
-  const int myID_MARK_ANYALL = myID_MARK_RADIOBUTTON + 1;
-  const int myID_MARK_RULES = myID_MARK_ANYALL + 1;
-  const int myID_ADD_RULE = myID_MARK_RULES + 1;
-  const int myID_REMOVE_RULE = myID_ADD_RULE + 1;
-  const int myID_MARK_TRANSITIONS = myID_REMOVE_RULE + 1;
-  const int myID_PARAMETER_CHOICE = myID_MARK_TRANSITIONS + 1;
-  const int myID_DISPLAY_STATES = myID_PARAMETER_CHOICE + 1;
-  const int myID_DISPLAY_TRANSITIONS = myID_DISPLAY_STATES + 1;
-  const int myID_DISPLAY_BACKPOINTERS = myID_DISPLAY_TRANSITIONS + 1;
-  const int myID_DISPLAY_WIREFRAME = myID_DISPLAY_BACKPOINTERS + 1;
+  const int myID_SELECT = wxID_HIGHEST + 2;
+  const int myID_ZOOM   = wxID_HIGHEST + 3;
+  const int myID_PAN    = wxID_HIGHEST + 4;
+  const int myID_ROTATE = wxID_HIGHEST + 5;
+  const int myID_CONES_STYLE = wxID_HIGHEST + 6;
+  const int myID_TUBES_STYLE = wxID_HIGHEST + 7;
+  const int myID_ATOMIUM_STYLE = wxID_HIGHEST + 8;
+  const int myID_MARK_RADIOBUTTON = wxID_HIGHEST + 9;
+  const int myID_MARK_ANYALL = wxID_HIGHEST + 10;
+  const int myID_MARK_RULES = wxID_HIGHEST + 11;
+  const int myID_ADD_RULE = wxID_HIGHEST + 12;
+  const int myID_REMOVE_RULE = wxID_HIGHEST + 13;
+  const int myID_MARK_TRANSITIONS = wxID_HIGHEST + 14;
+  const int myID_PARAMETER_CHOICE = wxID_HIGHEST + 15;
+  const int myID_DISPLAY_STATES = wxID_HIGHEST + 16;
+  const int myID_DISPLAY_TRANSITIONS = wxID_HIGHEST + 17;
+  const int myID_DISPLAY_BACKPOINTERS = wxID_HIGHEST + 18;
+  const int myID_DISPLAY_WIREFRAME = wxID_HIGHEST + 19;
+  const int myID_ITERATIVE = wxID_HIGHEST + 20;
+  const int myID_CYCLIC = wxID_HIGHEST + 21;
+  const int myID_ANY = wxID_HIGHEST + 22;
 }
 #endif

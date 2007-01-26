@@ -5,29 +5,23 @@
 #include "mediator.h"
 #include "visualizer.h"
 #include "utils.h"
+#include "settings.h"
 
-class GLCanvas: public wxGLCanvas {
+class GLCanvas: public wxGLCanvas,public Subscriber {
   public:
-    GLCanvas(Mediator* owner,wxWindow* parent,const wxSize &size=wxDefaultSize,
-        int* attribList=NULL);
+    GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
+      const wxSize &size=wxDefaultSize, int* attribList=NULL);
     ~GLCanvas();
     void      display(bool coll_caller=false);
     void      enableDisplay();
     void      disableDisplay();
-    Utils::RGB_Color getBackgroundColor() const;
-    Utils::RGB_Color getDefaultBackgroundColor() const;
     void      getMaxViewportDims(int *w,int *h);
     unsigned char* getPictureData(int res_x,int res_y);
     void      initialize();
+    void      notify(SettingID s);
     void      resetView();
     void      reshape();
     void      setActiveTool(int t);
-    void      setBackgroundColor(Utils::RGB_Color c);
-    void      setDefaultPosition(float structWidth,float structHeight);
-    void      setDisplayBackpointers(bool b);
-    void      setDisplayStates(bool b);
-    void      setDisplayTransitions(bool b);
-    void      setDisplayWireframe(bool b);
     void      setVisualizer(Visualizer *vis);
 
     void      onMouseDown(wxMouseEvent& event);
@@ -44,13 +38,7 @@ class GLCanvas: public wxGLCanvas {
     float     angleX;
     float     angleY;
     int	      currentTool;
-    Utils::RGB_Color defaultBGColor;
-    bool      displayBackpointers;
-    bool      displayStates;
-    bool      displayTransitions;
-    bool      displayWireframe;
     float     startPosZ;
-    float     startPosZDefault;
     bool      collectingData;
     bool      displayAllowed;
     float     farPlane;
@@ -61,6 +49,7 @@ class GLCanvas: public wxGLCanvas {
     float     nearPlane;
     int	      oldMouseX;
     int	      oldMouseY;
+    Settings  *settings;
     Visualizer *visualizer;
     
     void      determineCurrentTool(wxMouseEvent& event);
@@ -68,5 +57,9 @@ class GLCanvas: public wxGLCanvas {
 
     DECLARE_EVENT_TABLE()
 };
+
+inline void GLCanvas::setVisualizer(Visualizer *vis) { visualizer = vis; }
+inline void GLCanvas::disableDisplay() { displayAllowed = false; }
+inline void GLCanvas::enableDisplay() { displayAllowed = true; }
 
 #endif

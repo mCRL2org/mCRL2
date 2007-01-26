@@ -14,6 +14,7 @@ class LTSViewApp : public wxApp, public Mediator {
     LTS *lts;
     GLCanvas *glCanvas;
     MainFrame *mainFrame;
+    Settings *settings;
     Visualizer *visualizer;
     Utils::RankStyle rankStyle;
     void applyRanking(Utils::RankStyle rs);
@@ -21,9 +22,7 @@ class LTSViewApp : public wxApp, public Mediator {
   public:
     void	  activateMarkRule(const int index,const bool activate);
     void	  addMarkRule();
-    void	  applyDefaultSettings();
     void	  applyMarkStyle(Utils::MarkStyle ms);
-    void	  applySettings();
     void	  editMarkRule(const int index);
     void	  markAction(std::string label);
     void	  notifyRenderingFinished();

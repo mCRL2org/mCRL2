@@ -86,6 +86,7 @@ bool squadt_interactor::perform_task(sip::configuration&) {
 #include "aterm1.h"
 #include "markstateruledialog.h"
 #include "fileloader.h"
+#include "settings.h"
 
 using namespace std;
 using namespace Utils;
@@ -93,17 +94,16 @@ IMPLEMENT_APP_NO_MAIN(LTSViewApp)
 
 bool LTSViewApp::OnInit() {
   lts = NULL;
+  settings = new Settings();
   rankStyle = ITERATIVE;
-  mainFrame = new MainFrame(this);
-  visualizer = new Visualizer(this);
+  mainFrame = new MainFrame(this,settings);
+  visualizer = new Visualizer(this,settings);
   glCanvas = mainFrame->getGLCanvas();
   glCanvas->setVisualizer(visualizer);
   
   SetTopWindow(mainFrame);
   mainFrame->Show(true);
   glCanvas->initialize();
-  mainFrame->setVisSettings(visualizer->getVisSettings());
-  mainFrame->setBackgroundColor(glCanvas->getBackgroundColor());
   mainFrame->Layout();
 
   wxInitAllImageHandlers();
@@ -184,6 +184,7 @@ int main(int argc, char **argv) {
 
 int LTSViewApp::OnExit() {
   if (lts!=NULL) delete lts;
+  delete settings;
   delete visualizer;
   return 0;
 }
@@ -230,9 +231,6 @@ void LTSViewApp::openFile(string fileName) {
   visualizer->setMarkStyle(NO_MARKS);
 
   glCanvas->enableDisplay();
-  visualizer->computeBoundsInfo();
-  glCanvas->setDefaultPosition(visualizer->getBoundingCylinderWidth(),
-      visualizer->getBoundingCylinderHeight());
   glCanvas->resetView();
   
   mainFrame->loadTitle();
@@ -247,8 +245,6 @@ void LTSViewApp::openFile(string fileName) {
 
   mainFrame->setMarkedStatesInfo(0);
   mainFrame->setMarkedTransitionsInfo(0);
-  mainFrame->setVisSettings(visualizer->getVisSettings());
-  mainFrame->setBackgroundColor(glCanvas->getBackgroundColor());
 }
 
 void LTSViewApp::applyRanking(RankStyle rs) {
@@ -262,20 +258,6 @@ void LTSViewApp::applyRanking(RankStyle rs) {
     default:
       break;
   }
-}
-
-void LTSViewApp::applyDefaultSettings() {
-  mainFrame->setVisSettings(visualizer->getDefaultVisSettings());
-  mainFrame->setBackgroundColor(glCanvas->getDefaultBackgroundColor());
-  applySettings();
-}
-
-void LTSViewApp::applySettings() {
-  visualizer->setVisSettings(mainFrame->getVisSettings());
-  glCanvas->setBackgroundColor(mainFrame->getBackgroundColor());
-  glCanvas->display();
-  glCanvas->setDefaultPosition(visualizer->getBoundingCylinderWidth(),
-      visualizer->getBoundingCylinderHeight() );
 }
 
 void LTSViewApp::setRankStyle(RankStyle rs) {
@@ -310,16 +292,11 @@ void LTSViewApp::setRankStyle(RankStyle rs) {
       mainFrame->updateProgressDialog(100,"Done");
 
       glCanvas->enableDisplay();
-      visualizer->computeBoundsInfo();
-      glCanvas->setDefaultPosition(visualizer->getBoundingCylinderWidth(),
-        visualizer->getBoundingCylinderHeight());
       glCanvas->resetView();
 
       mainFrame->setNumberInfo(lts->getNumberOfStates(),
         lts->getNumberOfTransitions(),lts->getNumberOfClusters(),
         lts->getNumberOfRanks());
-      mainFrame->setVisSettings(visualizer->getVisSettings());
-      mainFrame->setBackgroundColor(glCanvas->getBackgroundColor());
     }
   }
 }
