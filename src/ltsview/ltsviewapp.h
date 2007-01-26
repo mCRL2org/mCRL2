@@ -1,7 +1,6 @@
 #ifndef LTSVIEWAPP_H
 #define LTSVIEWAPP_H
 #include <wx/wx.h>
-#include <vector>
 #include <string>
 #include "mediator.h"
 #include "mainframe.h"

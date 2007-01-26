@@ -26,8 +26,6 @@ class Distance_greater {
 
 class Visualizer: public Subscriber {
   private:
-    float boundingCylH;
-    float boundingCylW;
     float clusterHeight;
     float cos_ibt;
     float cos_obt;
@@ -68,7 +66,6 @@ class Visualizer: public Subscriber {
     void notify(SettingID s);
     void setLTS(LTS *l);
     void setMarkStyle(Utils::MarkStyle ms);
-    void setVisSettings(Utils::VisSettings vs);
     void setVisStyle(Utils::VisStyle vs);
 
     void drawStates();
@@ -76,9 +73,5 @@ class Visualizer: public Subscriber {
     void drawStructure();
     void sortClusters(Utils::Point3D viewpoint);
 };
-
-inline Utils::VisStyle Visualizer::getVisStyle() const { return visStyle; }
-inline void Visualizer::setMarkStyle(Utils::MarkStyle ms) { markStyle = ms; }
-inline void Visualizer::setVisStyle(Utils::VisStyle vs) { visStyle = vs; }
 
 #endif

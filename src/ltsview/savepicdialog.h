@@ -3,9 +3,7 @@
 
 #include <wx/wx.h>
 #include <wx/slider.h>
-#include <wx/statline.h>
 #include <wx/filename.h>
-#include <wx/image.h>
 #include <vector>
 #include "glcanvas.h"
 

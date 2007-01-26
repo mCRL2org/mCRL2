@@ -58,8 +58,4 @@ class GLCanvas: public wxGLCanvas,public Subscriber {
     DECLARE_EVENT_TABLE()
 };
 
-inline void GLCanvas::setVisualizer(Visualizer *vis) { visualizer = vis; }
-inline void GLCanvas::disableDisplay() { displayAllowed = false; }
-inline void GLCanvas::enableDisplay() { displayAllowed = true; }
-
 #endif

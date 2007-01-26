@@ -1,7 +1,5 @@
 #ifndef MEDIATOR_H
 #define MEDIATOR_H
-
-#include <vector>
 #include <string>
 #include "utils.h"
 

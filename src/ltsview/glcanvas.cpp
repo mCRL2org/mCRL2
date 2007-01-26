@@ -113,6 +113,18 @@ void GLCanvas::resetView() {
   display();
 }
 
+void GLCanvas::setVisualizer(Visualizer *vis) {
+  visualizer = vis;
+}
+
+void GLCanvas::disableDisplay() {
+  displayAllowed = false;
+}
+
+void GLCanvas::enableDisplay() {
+  displayAllowed = true;
+}
+
 void GLCanvas::notify(SettingID s) {
   if (s == BackgroundColor) {
     RGB_Color c = settings->getRGB(BackgroundColor);

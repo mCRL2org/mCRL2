@@ -1,9 +1,7 @@
 %{
-#include <stdio.h>
 #include <string>
 #include "aterm2.h"
 #include "fsmparser.hpp"
-//using namespace std;
 
 int lineNo=1, posNo=1;
 extern void fsmerror(const char* s);

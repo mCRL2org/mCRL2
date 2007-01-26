@@ -4,7 +4,6 @@
 #include <vector>
 #include <set>
 #include "aterm2.h"
-#include "liblowlevel.h"
 #include "utils.h"
 
 #ifndef TRANSITION_H
@@ -18,8 +17,6 @@
 #else
   class Cluster;
 #endif
-
-//using namespace std;
 
 class State
 {

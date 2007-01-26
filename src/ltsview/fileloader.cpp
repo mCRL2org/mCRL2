@@ -1,4 +1,5 @@
 #include "fileloader.h"
+#include "fsmparser.h"
 using namespace std;
 using namespace Utils;
 

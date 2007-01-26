@@ -51,6 +51,18 @@ void Visualizer::setLTS(LTS* l) {
   fillClusters();
 }
 
+Utils::VisStyle Visualizer::getVisStyle() const {
+  return visStyle;
+}
+
+void Visualizer::setMarkStyle(Utils::MarkStyle ms) {
+  markStyle = ms;
+}
+
+void Visualizer::setVisStyle(Utils::VisStyle vs) {
+  visStyle = vs;
+}
+
 void Visualizer::notify(SettingID s) {
   switch (s) {
     case OuterBranchTilt:

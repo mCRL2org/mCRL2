@@ -81,7 +81,6 @@ bool squadt_interactor::perform_task(sip::configuration&) {
 #include <wx/cmdline.h>
 #include <wx/filename.h>
 #include <wx/image.h>
-#include <iostream>
 #include "ltsviewapp.h"
 #include "aterm1.h"
 #include "markstateruledialog.h"

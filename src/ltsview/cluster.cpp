@@ -1,7 +1,6 @@
 #include "cluster.h"
 #include <algorithm>
 #include <math.h>
-#include <iostream>
 using namespace std;
 using namespace Utils;
 

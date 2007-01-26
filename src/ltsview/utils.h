@@ -1,8 +1,6 @@
 #ifndef UTILS_H
 #define UTILS_H
-#include <math.h>
 #include <vector>
-#include <algorithm>
 //using namespace std;
 
 namespace Utils {
@@ -37,28 +35,6 @@ namespace Utils {
     float z;
   };
 
-  struct VisSettings {
-    float     ellipsoidThreshold;
-    float     nodeSize;
-    int              branchRotation;
-    int              innerBranchTilt;
-    int              outerBranchTilt;
-    int              quality;
-    unsigned char alpha;
-    bool      longInterpolation;
-    RGB_Color downEdgeColor;
-    RGB_Color interpolateColor1;
-    RGB_Color interpolateColor2;
-    RGB_Color markedColor;
-    RGB_Color stateColor;
-    RGB_Color upEdgeColor;
-//    float     backpointerCurve;
-//    int            branchScale;
-//    int            branchSpread;
-//    float     clusterHeight;
-//    bool      levelDividers;
-  };
-  
   struct MarkRule {
     int		            paramIndex;
     bool	            isActivated;

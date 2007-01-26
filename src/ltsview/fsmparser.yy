@@ -1,6 +1,13 @@
 %{
 #include "fsmparser.h"
 #include "fsmlexer.cpp"
+#include <vector>
+#include <ostream>
+#include <sstream>
+#include "aterm2.h"
+#include "state.h"
+#include "transition.h"
+#include "liblowlevel.h"
 
 // Global variables
 

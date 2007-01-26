@@ -1,18 +1,13 @@
 #ifndef LTS_H
 #define LTS_H
-
-#include <iostream>
 #include <vector>
 #include <map>
 #include "aterm2.h"
-#include "liblowlevel.h"
 #include "mediator.h"
 #include "state.h"
 #include "transition.h"
 #include "cluster.h"
 #include "utils.h"
-
-//using namespace Utils;
 
 class LTS
 {

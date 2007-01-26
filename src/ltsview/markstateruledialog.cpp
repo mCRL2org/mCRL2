@@ -1,4 +1,6 @@
 #include "markstateruledialog.h"
+#include <wx/statline.h>
+#include "ids.h"
 using namespace IDs;
 using namespace Utils;
 
