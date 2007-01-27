@@ -404,12 +404,12 @@ namespace pbes_timed
       aterm_string X(arg1(f));
       data_expression_list d = list_arg2(f);
       data_variable_list xp = lpe.process_parameters();
-      return propvar(X, T + d + xp + Par(X, f));
+      return propositional_variable_instantiation(X, T + d + xp + Par(X, f));
     } else if (s::is_mu(f) || (s::is_nu(f))) {
       aterm_string X(arg1(f));
       data_expression_list d = state_formula_variable_expressions(f);
       data_variable_list xp = lpe.process_parameters();
-      return propvar(X, T + d + xp + Par(X, f));
+      return propositional_variable_instantiation(X, T + d + xp + Par(X, f));
     }
     throw std::runtime_error(std::string("RHS[timed] error: unknown state formula ") + f.to_string());
     return pbes_expression();
@@ -649,12 +649,12 @@ namespace pbes_untimed
       aterm_string X(arg1(f));
       data_expression_list d = list_arg2(f);
       data_variable_list xp = lpe.process_parameters();
-      return propvar(X, d + xp + Par(X, f));
+      return propositional_variable_instantiation(X, d + xp + Par(X, f));
     } else if (s::is_mu(f) || (s::is_nu(f))) {
       aterm_string X(arg1(f));
       data_expression_list d = state_formula_variable_expressions(f);
       data_variable_list xp = lpe.process_parameters();
-      return propvar(X, d + xp + Par(X, f));
+      return propositional_variable_instantiation(X, d + xp + Par(X, f));
     }
     throw std::runtime_error(std::string("RHS[untimed] error: unknown state formula ") + f.to_string());
     return pbes_expression();

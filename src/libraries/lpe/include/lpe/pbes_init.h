@@ -42,14 +42,14 @@ namespace pbes_init {
 // <DataSpec>     ::= DataSpec(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
 //                      MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*))
 
-  inline bool is_data       (pbes_expression t) { return gsIsDataExpr      (t); }
-  inline bool is_true       (pbes_expression t) { return gsIsPBESTrue      (t); }
-  inline bool is_false      (pbes_expression t) { return gsIsPBESFalse     (t); }
-  inline bool is_and        (pbes_expression t) { return gsIsPBESAnd       (t); }
-  inline bool is_or         (pbes_expression t) { return gsIsPBESOr        (t); }
-  inline bool is_forall     (pbes_expression t) { return gsIsPBESForall    (t); }
-  inline bool is_exists     (pbes_expression t) { return gsIsPBESExists    (t); }
-  inline bool is_prop_var   (pbes_expression t) { return gsIsPropVarInst   (t); }
+  inline bool is_data                                (pbes_expression t) { return gsIsDataExpr      (t); }
+  inline bool is_true                                (pbes_expression t) { return gsIsPBESTrue      (t); }
+  inline bool is_false                               (pbes_expression t) { return gsIsPBESFalse     (t); }
+  inline bool is_and                                 (pbes_expression t) { return gsIsPBESAnd       (t); }
+  inline bool is_or                                  (pbes_expression t) { return gsIsPBESOr        (t); }
+  inline bool is_forall                              (pbes_expression t) { return gsIsPBESForall    (t); }
+  inline bool is_exists                              (pbes_expression t) { return gsIsPBESExists    (t); }
+  inline bool is_propositional_variable_instantiation(pbes_expression t) { return gsIsPropVarInst   (t); }
 
   /// Conversion of a data expression to a pbes expression.
   inline
@@ -112,12 +112,6 @@ namespace pbes_init {
     return pbes_expression(gsMakePBESExists(l, p));
   }
 
-  inline
-  pbes_expression propvar(aterm_string name, data_expression_list l)
-  {
-    return pbes_expression(gsMakePropVarInst(name, l));
-  }
-  
   inline
   pbes_fixpoint_symbol mu()
   {

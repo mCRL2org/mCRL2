@@ -57,6 +57,7 @@ ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term, bool TryNoSuffix)
   }
 }
 
+#ifndef USE_GENERATED_LIBSTRUCT_CODE
 //Enabling core constructor functions
 //------------------------------
 //Constant AFun's for each constructor element of the internal ATerm structure.
@@ -1752,5 +1753,6 @@ bool gsIsPBESExists(ATermAppl Term) {
   assert(CoreConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunPBESExists;
 }
+#endif USE_GENERATED_LIBSTRUCT_CODE
 
 } // extern "C"
