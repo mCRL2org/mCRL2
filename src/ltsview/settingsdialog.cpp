@@ -13,7 +13,7 @@ BEGIN_EVENT_TABLE(SettingsDialog,wxDialog)
 END_EVENT_TABLE()
 
 SettingsDialog::SettingsDialog(wxWindow* parent,GLCanvas* glc,Settings* ss)
-  : wxDialog(parent,wxID_ANY,wxT("Settings")) {
+  : wxDialog(parent,wxID_ANY,wxT("Settings"),wxDefaultPosition) {
   glCanvas = glc;
   settings = ss;
   wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
