@@ -69,7 +69,7 @@ int main(int argc, char **argv)
   ATinit(argc,argv,&bot);
   gsEnableConstructorFunctions();
 
-  #define ShortOptions      "hqvi:j:fsbtu"
+  #define ShortOptions      "hqvi:j:fsb"
   #define VersionOption     0x1
   #define TauOption         0x2
   struct option LongOptions[] = { 
@@ -82,8 +82,6 @@ int main(int argc, char **argv)
     {"formats"   , no_argument,         NULL, 'f'},
     {"strong"    , no_argument,         NULL, 's'},
     {"branching" , no_argument,         NULL, 'b'},
-    {"trace"     , no_argument,         NULL, 't'},
-    {"obs-trace" , no_argument,         NULL, 'u'},
     {"tau"       , required_argument,   NULL, TauOption},
     {0, 0, 0, 0}
   };
@@ -143,12 +141,6 @@ int main(int argc, char **argv)
         break;
       case 'b':
         equivalence = lts_eq_branch;
-        break;
-      case 't':
-        equivalence = lts_eq_trace;
-        break;
-      case 'u':
-        equivalence = lts_eq_obs_trace;
         break;
       case TauOption:
 	lts_reduce_add_tau_actions(eq_opts,optarg);
