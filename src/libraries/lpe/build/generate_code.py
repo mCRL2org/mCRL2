@@ -4,6 +4,7 @@
 
 import os
 import re
+from optparse import OptionParser
 from mcrl2_parser import *
 
 #--------------------------------------------------------#
@@ -287,14 +288,27 @@ def parse_ebnf(filename):
 #---------------------------------------------------------------#
 #                          main
 #---------------------------------------------------------------#
-if __name__ == '__main__':
+def main():
+    usage = "usage: %prog [options]"
+    parser = OptionParser(usage)
+    parser.add_option("-s", "--soundness-checks", action="store_true", help="generate soundness check functions from internal mcrl2 format")
+    parser.add_option("-l", "--libstruct", action="store_true", help="generate libstruct functions from internal mcrl2 format")
+    (options, args) = parser.parse_args()
+
     filename = '../../../../specs/mcrl2.internal.txt'
     rules = parse_ebnf(filename)
+
+    if options.soundness_checks:
+        ignored_phases = ['-tc', '-lin', '-di', '-rft']
+        filename = '../include/lpe/soundness_checks.h'
+        generate_soundness_check_functions(rules, filename, ignored_phases)
+
+    if options.libstruct:
+        ignored_phases = []
+        filename = '../../mcrl2_basic/include/struct/libstruct_core.h'
+        generate_libstruct_functions(rules, filename, ignored_phases)
     
-    ignored_phases = ['-tc', '-lin', '-di', '-rft']
-    filename = '../include/lpe/soundness_checks.h'
-    generate_soundness_check_functions(rules, filename, ignored_phases)
-    
-    ignored_phases = []
-    filename = '../../mcrl2_basic/include/struct/libstruct_core.h'
-    generate_libstruct_functions(rules, filename, ignored_phases)
+    print options
+
+if __name__ == "__main__":
+    main()
