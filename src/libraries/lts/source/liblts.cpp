@@ -898,6 +898,30 @@ unsigned int p_lts::p_add_transition(unsigned int from,
   return ntransitions++;
 }
 
+void p_lts::p_sort_transitions() {
+  qsort(transitions,ntransitions,sizeof(transition),compare_transitions);
+}
+
+unsigned int* p_lts::p_get_transition_indices() {
+// PRE: the array of transitions is sorted on source state
+// RETURNS: array A of size (nstates+1) such that for every state s:
+// [ A[s] .. A[s+1] ) are all transitions starting in s
+  unsigned int *A = (unsigned int*)malloc((nstates+1)*sizeof(unsigned int));
+  if (A == NULL) {
+    gsErrorMsg("out of memory\n");
+    exit(1);
+  }
+  unsigned int t = 0;
+  A[0] = 0;
+  for (unsigned int s = 1; s <= nstates; ++s) {
+    while (t < ntransitions && transitions[t].from == s-1) {
+      ++t;
+    }
+    A[s] = t;
+  }
+  return A;
+}
+
 void lts::set_state(unsigned int state, ATerm value)
 {
   assert(state_info && (value != NULL));
@@ -1084,27 +1108,11 @@ void lts::remove_state_values() {
 }
 
 void lts::sort_transitions() {
-  qsort(transitions,ntransitions,sizeof(transition),compare_transitions);
+  p_sort_transitions();
 }
 
 unsigned int* lts::get_transition_indices() {
-// PRE: the array of transitions is sorted on source state
-// RETURNS: array A of size (nstates+1) such that for every state s:
-// [ A[s] .. A[s+1] ) are all transitions starting in s
-  unsigned int *A = (unsigned int*)malloc((nstates+1)*sizeof(unsigned int));
-  if (A == NULL) {
-    gsErrorMsg("out of memory\n");
-    exit(1);
-  }
-  unsigned int t = 0;
-  A[0] = 0;
-  for (unsigned int s = 1; s <= nstates; ++s) {
-    while (t < ntransitions && transition_from(t) == s-1) {
-      ++t;
-    }
-    A[s] = t;
-  }
-  return A;
+  return p_get_transition_indices();
 }
 
 state_iterator::state_iterator(lts *l)

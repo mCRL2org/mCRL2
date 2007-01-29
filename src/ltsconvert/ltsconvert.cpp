@@ -44,7 +44,7 @@ class squadt_interactor : public squadt_tool_interface {
       minimisation_modulo_strong_bisimulation,    ///< minimisation modulo strong bisimulation
       minimisation_modulo_branching_bisimulation, ///< minimisation modulo branching bisimulation
       minimisation_modulo_trace_equivalence,      ///< minimisation modulo trace equivalence
-      minimisation_modulo_obs_trace_equivalence,  ///< minimisation modulo observational trace equivalence
+      minimisation_modulo_weak_trace_equivalence, ///< minimisation modulo weak trace equivalence
       determinisation                             ///< determinisation
     };
 
@@ -92,7 +92,7 @@ squadt_interactor::squadt_interactor() {
   transformation_method_enumeration->add_value("modulo_strong_bisimulation");
   transformation_method_enumeration->add_value("modulo_branching_bisimulation");
   transformation_method_enumeration->add_value("modulo_trace_equivalence");
-  transformation_method_enumeration->add_value("modulo_observational_trace_equivalence");
+  transformation_method_enumeration->add_value("modulo_weak_trace_equivalence");
   transformation_method_enumeration->add_value("determinise");
 }
 
@@ -151,7 +151,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   transformation_selector.associate(top, minimisation_modulo_strong_bisimulation, "reduction modulo strong bisimulation");
   transformation_selector.associate(top, minimisation_modulo_branching_bisimulation, "reduction modulo branching bisimulation");
   transformation_selector.associate(top, minimisation_modulo_trace_equivalence, "reduction modulo trace equivalence");
-  //transformation_selector.associate(top, minimisation_modulo_obs_trace_equivalence, "reduction modulo observational trace equivalence");
+  transformation_selector.associate(top, minimisation_modulo_weak_trace_equivalence, "reduction modulo weak trace equivalence");
   transformation_selector.associate(top, determinisation, "determinisation");
   
   checkbox* bisimulation_add_eq_classes = new checkbox("Add equivalence classes to state instead of reducing LTS (bisimulation only)");
@@ -266,9 +266,9 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
       case minimisation_modulo_trace_equivalence:
         equivalence = lts_eq_trace;
         break;
-      //case minimisation_modulo_obs_trace_equivalence:
-      //  equivalence = lts_eq_obs_trace
-      //  break;
+      case minimisation_modulo_weak_trace_equivalence:
+        equivalence = lts_eq_weak_trace;
+        break;
       case determinisation:
         determinise = true;
         break;
@@ -426,7 +426,7 @@ static void print_help(FILE *f, char *Name)
     "  -s, --strong          minimise using strong bisimulation\n"
     "  -b, --branching       minimise using branching bisimulation\n"
     "  -t, --trace           minimise using trace equivalence\n"
-//    "  -u, --obs-trace       minimise using observational trace equivalence\n"
+    "  -u, --weak-trace      minimise using weak trace equivalence\n"
     "  -a, --add             do not minimise but save a copy of the original LTS\n"
     "                        extended with a state parameter indicating the\n"
     "                        bisimulation class a state belongs to (only for mCRL2)\n"
@@ -541,7 +541,7 @@ int main(int argc, char **argv)
     {"none"        , no_argument,         NULL, NoneOption},
     {"branching"   , no_argument,         NULL, 'b'},
     {"trace"       , no_argument,         NULL, 't'},
-    {"obs-trace"   , no_argument,         NULL, 'u'},
+    {"weak-trace"  , no_argument,         NULL, 'u'},
     {"tau"         , required_argument,   NULL, TauOption},
     {"add"         , no_argument,         NULL, 'a'},
     {"determinise" , no_argument,         NULL, 'D'},
@@ -630,7 +630,7 @@ int main(int argc, char **argv)
           equivalence = lts_eq_trace;
           break;
         case 'u':
-          equivalence = lts_eq_obs_trace;
+          equivalence = lts_eq_weak_trace;
           break;
         case TauOption:
           lts_reduce_add_tau_actions(eq_opts,optarg);

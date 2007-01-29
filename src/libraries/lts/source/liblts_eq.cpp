@@ -44,7 +44,12 @@ bool lts::reduce(lts_equivalence eq, lts_eq_options &opts)
       bisimulation_reduce(*this,false);
       determinise();
       return bisimulation_reduce(*this,false);
-    case lts_eq_obs_trace:
+    case lts_eq_weak_trace:
+      bisimulation_reduce(*this,true,false,&opts.reduce.tau_actions);
+      tau_star_reduce();
+      bisimulation_reduce(*this,false);
+      determinise();
+      return bisimulation_reduce(*this,false);
     default:
       return false;
   }
@@ -61,7 +66,7 @@ bool lts::compare(lts &l, lts_equivalence eq, lts_eq_options &opts)
     case lts_eq_branch:
       return bisimulation_compare(*this,l,true,&opts.reduce.tau_actions);
     case lts_eq_trace:
-    case lts_eq_obs_trace:
+    case lts_eq_weak_trace:
     default:
       gsErrorMsg("comparision for this equivalence is not yet implemented\n");
       return false;

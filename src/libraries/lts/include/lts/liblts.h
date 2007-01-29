@@ -23,7 +23,7 @@ namespace lts
 #endif
                 };
 
-  enum lts_equivalence { lts_eq_none, lts_eq_trace, lts_eq_strong, lts_eq_obs_trace, lts_eq_branch };
+  enum lts_equivalence { lts_eq_none, lts_eq_trace, lts_eq_strong, lts_eq_weak_trace, lts_eq_branch };
   typedef struct
   {
     struct {

@@ -23,6 +23,7 @@ lib lts
          bsimdata.cpp
          bsimkernel.cpp
          liblts_bisim.cpp
+         liblts_tau_star.cpp
          /libraries//mcrl2_basic
          /libraries//parser
          /libraries//svc

@@ -110,4 +110,9 @@
       bool read_from_bcg(std::string const& filename);
       bool write_to_bcg(std::string const& filename);
 #endif
+      
+      void p_sort_transitions();
+      unsigned int* p_get_transition_indices();
+
+      void tau_star_reduce(); // This method assumes the absence of tau loops!
   };
