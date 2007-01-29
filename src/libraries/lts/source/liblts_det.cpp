@@ -119,9 +119,7 @@ void lts::determinise() {
   delete tss;
   remove_state_values();
   free(begin);
-  free(states);
   free(transitions);
-  states = NULL;
   states_size = 0;
   nstates = d_id;
   set_initial_state(0);

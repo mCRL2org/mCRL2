@@ -133,7 +133,27 @@ void p_lts::tau_star_reduce()
     if ( reachable[i] != unknown )
     {
       state_map[i] = new_nstates;
+      if ( state_info )
+      {
+        state_values[new_nstates] = state_values[i];
+      }
       new_nstates++;
+    }
+  }
+
+  unsigned int label_map[nlabels];
+  unsigned int new_nlabels = 0;
+  for (unsigned int i=0; i < nlabels; i++)
+  {
+    if ( !taus[i] )
+    {
+      label_map[i] = new_nlabels;
+      taus[new_nlabels] = false;
+      if ( label_info )
+      {
+        label_values[new_nlabels] = label_values[i];
+      }
+      new_nlabels++;
     }
   }
 
@@ -141,30 +161,20 @@ void p_lts::tau_star_reduce()
   for (unsigned int i=0; i < ntransitions; i++)
   {
     if ( (reachable[transitions[i].from] != unknown) &&
-         !taus[transitions[i].label] )
+         !taus[label_map[transitions[i].label]] )
     {
       transition t = transitions[i];
       t.from = state_map[t.from];
+      t.label = label_map[t.label];
       t.to = state_map[t.to];
       transitions[new_ntransitions] = t;
       new_ntransitions++;
     }
   }
 
-  unsigned int new_nlabels = 0;
-  for (unsigned int i=0; i < nlabels; i++)
-  {
-    if ( !taus[i] )
-    {
-      labels[new_nlabels] = labels[i];
-      taus[new_nlabels] = false;
-      new_nlabels++;
-    }
-  }
-
   nstates = new_nstates;
-  ntransitions = new_ntransitions;
   nlabels = new_nlabels;
+  ntransitions = new_ntransitions;
 }
 
 }

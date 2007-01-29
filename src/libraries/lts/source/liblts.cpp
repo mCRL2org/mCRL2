@@ -141,10 +141,8 @@ lts::~lts()
     ATunprotectArray(label_values);
   }
 
-  free(states);
   free(state_values);
   free(taus);
-  free(labels);
   free(label_values);
   free(transitions);
 }
@@ -158,12 +156,10 @@ void p_lts::init(lts_type type, bool state_info, bool label_info)
 {
   states_size = 0;
   nstates = 0;
-  states = NULL;
   state_values = NULL;
 
   labels_size = 0;
   nlabels = 0;
-  labels = NULL;
   taus = NULL;
   label_values = NULL;
 
@@ -178,10 +174,8 @@ void p_lts::init(lts_type type, bool state_info, bool label_info)
 
 void p_lts::clear(lts_type type, bool state_info, bool label_info)
 {
-  free(states);
   free(state_values);
   free(taus);
-  free(labels);
   free(label_values);
   free(transitions);
 
@@ -753,12 +747,6 @@ unsigned int p_lts::p_add_state(ATerm value)
 
     assert(state_info == (value != NULL));
 
-    states = (unsigned int *) realloc(states,new_states_size*sizeof(unsigned int));
-    if ( states == NULL )
-    {
-      gsErrorMsg("insufficient memory to store LTS\n");
-      exit(1);
-    }
     if ( state_info )
     {
       if ( state_values != NULL )
@@ -780,7 +768,6 @@ unsigned int p_lts::p_add_state(ATerm value)
     states_size = new_states_size;
   }
 
-  states[nstates] = nstates;
   if ( state_info )
   {
     state_values[nstates] = value;
@@ -816,12 +803,6 @@ unsigned int p_lts::p_add_label(ATerm value, bool is_tau)
 
     assert(label_info == (value != NULL));
 
-    labels = (unsigned int *) realloc(labels,new_labels_size*sizeof(unsigned int));
-    if ( labels == NULL )
-    {
-      gsErrorMsg("insufficient memory to store LTS\n");
-      exit(1);
-    }
     taus = (bool *) realloc(taus,new_labels_size*sizeof(bool));
     if ( taus == NULL )
     {
@@ -849,7 +830,6 @@ unsigned int p_lts::p_add_label(ATerm value, bool is_tau)
     labels_size = new_labels_size;
   }
 
-  labels[nlabels] = nlabels;
   taus[nlabels] = is_tau;
   if ( label_info )
   {
@@ -1129,7 +1109,7 @@ bool state_iterator::more()
 
 unsigned int state_iterator::operator *()
 {
-  return l->states[pos];
+  return pos;
 }
 
 void state_iterator::operator ++()
@@ -1152,7 +1132,7 @@ bool label_iterator::more()
 
 unsigned int label_iterator::operator *()
 {
-  return l->labels[pos];
+  return pos;
 }
 
 void label_iterator::operator ++()

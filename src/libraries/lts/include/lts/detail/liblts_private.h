@@ -56,9 +56,7 @@
       unsigned int nstates;
       unsigned int nlabels;
       unsigned int ntransitions;
-      unsigned int *states;
       ATerm *state_values;
-      unsigned int *labels;
       bool *taus;
       ATerm *label_values;
       transition *transitions;
