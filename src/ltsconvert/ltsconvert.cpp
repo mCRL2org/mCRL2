@@ -287,13 +287,17 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     {
       gsVerboseMsg("determinising LTS..\n");
 
+      gsVerboseMsg("before determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
       l.determinise();
+      gsVerboseMsg("after determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
     } else {
       gsVerboseMsg("reducing LTS...\n");
 
+      gsVerboseMsg("before reduction: %lu states and %lu transitions \n",l.num_states(),l.num_labels(),l.num_transitions());
       if (!l.reduce(equivalence,eq_opts)) {
         return (false);
       }
+      gsVerboseMsg("after reduction: %lu states and %lu transitions\n",l.num_states(),l.num_labels(),l.num_transitions());
     }
   }
  
@@ -732,13 +736,17 @@ int main(int argc, char **argv)
     if ( equivalence != lts_eq_none )
     {
       gsVerboseMsg("reducing LTS...\n");
+      gsVerboseMsg("before reduction: %lu states and %lu transitions \n",l.num_states(),l.num_labels(),l.num_transitions());
       l.reduce(equivalence,eq_opts);
+      gsVerboseMsg("after reduction: %lu states and %lu transitions\n",l.num_states(),l.num_labels(),l.num_transitions());
     }
 
     if ( determinise )
     {
       gsVerboseMsg("determinising LTS...\n");
+      gsVerboseMsg("before determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
       l.determinise();
+      gsVerboseMsg("after determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
     }
  
     if ( use_stdout )
