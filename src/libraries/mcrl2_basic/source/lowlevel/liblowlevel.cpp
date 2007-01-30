@@ -27,12 +27,14 @@ char *strdup(const char *s)
 //Message printing options
 //------------------------
 
-bool gsWarning = true; //indicates if warning should be printed
+bool gsQuiet   = false;//indicates if quiet mode is enabled
+bool gsWarning = true; //indicates if warning messages should be printed
 bool gsVerbose = false;//indicates if verbose messages should be printed
 bool gsDebug   = false;//indicates if debug messages should be printed
 
 void gsSetQuietMsg(void)
 {
+  gsQuiet   = true;
   gsWarning = false;
   gsVerbose = false;
   gsDebug   = false;
@@ -40,6 +42,7 @@ void gsSetQuietMsg(void)
 
 void gsSetNormalMsg(void)
 {
+  gsQuiet   = false;
   gsWarning = true;
   gsVerbose = false;
   gsDebug   = false;
@@ -47,6 +50,7 @@ void gsSetNormalMsg(void)
 
 void gsSetVerboseMsg(void)
 {
+  gsQuiet   = false;
   gsWarning = true;
   gsVerbose = true;
   gsDebug   = false;
@@ -54,6 +58,7 @@ void gsSetVerboseMsg(void)
 
 void gsSetDebugMsg(void)
 {
+  gsQuiet   = false;
   gsWarning = true;
   gsVerbose = true;
   gsDebug   = true;

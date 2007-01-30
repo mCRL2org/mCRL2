@@ -303,15 +303,15 @@ static void check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewSta
         {
           if ( saved_ok )
           {
-            gsVerboseMsg("detect: action '%P' found and saved to '%s_act_%lu_%P.trc'.\n",Transition,basefilename,tracecnt,lgopts->trace_actions[j]);
+            gsMessage("detect: action '%P' found and saved to '%s_act_%lu_%P.trc'.\n",Transition,basefilename,tracecnt,lgopts->trace_actions[j]);
           } else {
-            gsVerboseMsg("detect: action '%P' found, but could not be saved to '%s_act_%lu_%P.trc'.\n",Transition,basefilename,tracecnt,lgopts->trace_actions[j]);
+            gsMessage("detect: action '%P' found, but could not be saved to '%s_act_%lu_%P.trc'.\n",Transition,basefilename,tracecnt,lgopts->trace_actions[j]);
           }
           fflush(stderr);
         }
         tracecnt++;
       } else {
-        gsVerboseMsg("detect: action '%P' found.\n",Transition);
+        gsMessage("detect: action '%P' found.\n",Transition);
         fflush(stderr);
       }
     }
@@ -350,15 +350,15 @@ static void check_deadlocktrace(ATerm state)
       {
         if ( saved_ok )
         {
-          gsVerboseMsg("deadlock-detect: deadlock found and saved to '%s_dlk_%lu.trc'.\n",basefilename,tracecnt);
+          gsMessage("deadlock-detect: deadlock found and saved to '%s_dlk_%lu.trc'.\n",basefilename,tracecnt);
         } else {
-          gsVerboseMsg("deadlock-detect: deadlock found, but could not be saved to '%s_dlk_%lu.trc'.\n",basefilename,tracecnt);
+          gsMessage("deadlock-detect: deadlock found, but could not be saved to '%s_dlk_%lu.trc'.\n",basefilename,tracecnt);
         }
         fflush(stderr);
       }
       tracecnt++;
     } else  {
-      gsVerboseMsg("deadlock-detect: deadlock found.\n");
+      gsMessage("deadlock-detect: deadlock found.\n");
       fflush(stderr);
     }
   }

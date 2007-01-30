@@ -69,6 +69,28 @@ static void handler_wrapper(gsMessageType t, char *Format, va_list args) {
   free(output);
 }
 
+inline static void gsMessage(char *Format, ...)
+//Post: Format is printed to stderr where the remaining parameters are used as
+//      gsprintf arguments to Format.
+//
+//Note that this function is intended for printing explicitly requested
+//information (i.e. information that is not a error, warning or verbose message
+//nor part of the output going to stdout).
+//
+//Also note that the message handler does not receive these messages; they are
+//part of the output.
+{
+  if ( !gsQuiet )
+  {
+    va_list Args;
+    va_start(Args, Format);
+
+    gsvfprintf(stderr, Format, Args);
+
+    va_end(Args);
+  }
+}
+
 inline static void gsErrorMsg(char *Format, ...)
 //Post: "error: " is printed to stderr followed by Format, where the remaining
 //      parameters are used as gsprintf arguments to Format.

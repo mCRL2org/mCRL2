@@ -238,10 +238,10 @@ int main(int argc, char **argv)
   gsVerboseMsg("comparing LTSs...\n");
   if ( l1.compare(l2,equivalence,eq_opts) )
   {
-    gsVerboseMsg("LTSs are equivalent\n");
+    gsMessage("LTSs are equivalent\n");
     return 0;
   } else {
-    gsVerboseMsg("LTSs are not equivalent\n");
+    gsMessage("LTSs are not equivalent\n");
     return 2;
   }
 }

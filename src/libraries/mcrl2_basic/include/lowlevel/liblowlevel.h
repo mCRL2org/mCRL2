@@ -66,6 +66,7 @@ void gsSetDebugMsg(void);
 //Post: Printing of warnings, verbose information and extended debugging
 //      information during program execution is enabled.
 
+extern bool gsQuiet;
 extern bool gsWarning;
 extern bool gsVerbose;
 extern bool gsDebug;
