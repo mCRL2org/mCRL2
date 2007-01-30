@@ -257,6 +257,93 @@ ATermAppl type_check_spec(ATermAppl input)
   return Result;
 }
 
+ATermAppl type_check_spec_part(ATermAppl spec){
+  if(!ATAgetArgument(spec,3)) spec=ATsetArgument(spec,(ATerm)gsMakeDelta(),3);
+  return type_check_spec(spec);
+}
+
+ATermAppl type_check_sort_expr_part(ATermAppl sort_expr, ATermAppl spec){
+  ATermAppl Result=NULL;
+  gsDebugMsg ("type checking sort expression part phase started\n");
+  gstcDataInit();
+
+  gsDebugMsg ("type checking sort expression part read-in phase started\n");
+
+  ATermAppl data_spec = ATAgetArgument(spec, 0);
+  if(gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
+    // Check sorts for loops
+    // Unwind sorts to enable equiv and subtype relations
+    gsDebugMsg ("type checking sort expression part read-in phase finished\n");
+  
+    if(gsIsSortExpr(sort_expr)){
+      if(gstcIsSortExprDeclared(sort_expr)) Result=sort_expr;
+    }
+    else {
+      gsErrorMsg("type checking of sort expressions failed (%T is not a sort expressions)\n\n",sort_expr);
+    }
+  }
+  gsDebugMsg ("type checking sort expression part phase finished\n");
+
+  if (Result != NULL) {
+    gsDebugMsg("return %T\n", Result);
+  }
+  else {
+    gsDebugMsg("return NULL\n");
+  }
+  gstcDataDestroy();
+  return Result;
+}
+
+ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec){
+  ATermAppl Result=NULL;
+  gsDebugMsg ("type checking data expression part phase started\n");
+  gstcDataInit();
+
+  gsDebugMsg ("type checking data expression part read-in phase started\n");
+
+  ATermAppl data_spec = ATAgetArgument(spec, 0);
+  if(gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
+  // Check sorts for loops
+  // Unwind sorts to enable equiv and subtype relations
+  if(gstcReadInConstructors()) {
+  if(gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(data_spec,1),0),
+                               ATLgetArgument(ATAgetArgument(data_spec,2),0)))) {
+  gsDebugMsg ("type checking data expression part read-in phase finished\n");
+  
+  if(!gsIsSortExpr(sort_expr)){
+    gsErrorMsg("type checking of data expressions failed (%T is not a sort expressions)\n\n",sort_expr);
+    goto done;
+  }
+
+  if(gstcIsSortExprDeclared(sort_expr)){
+    if(!gsIsDataExpr(data_expr)){
+      gsErrorMsg("type checking of data expressions failed (%T is not a data expressions)\n\n",data_expr);
+      goto done;
+    }
+  ATermTable Vars=ATtableCreate(63,50);
+
+  ATermAppl data=data_expr;
+  ATermAppl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,sort_expr);
+  ATtableDestroy(Vars);
+  if(Type) Result=data;
+  else gsErrorMsg("type checking of data expressions failed.\n\n");
+
+
+  gsDebugMsg ("type checking data expression part phase finished\n");
+  }}}}
+
+  done:
+
+  if (Result != NULL) {
+    gsDebugMsg("return %T\n", Result);
+  }
+  else {
+    gsDebugMsg("return NULL\n");
+  }
+  gstcDataDestroy();
+  return Result;
+}
+
 ATermAppl type_check_sort_expr(ATermAppl sort_expr, lpe::specification &lpe_spec)
 {
   //check correctness of the sort expression in sort_expr using
