@@ -987,7 +987,10 @@ string p_lts::p_label_value_str(unsigned int label)
       s = PrintPart_CXX(ATgetArgument((ATermAppl) value,0),ppDefault);
     } else {
       s = ATwriteToString(value);
-      s = s.substr(1,s.length()-2);
+      if ( ATisAppl(value) && (ATgetArity(ATgetAFun((ATermAppl) value)) == 0) && (ATisQuoted(ATgetAFun((ATermAppl) value))) )
+      {
+        s = s.substr(1,s.length()-2);
+      }
     }
   } else {
     stringstream ss;
