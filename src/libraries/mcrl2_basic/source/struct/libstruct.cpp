@@ -600,8 +600,7 @@ bool gsIsDataExpr(ATermAppl Term)
   return gsIsId(Term)    || gsIsDataVarId(Term)    || gsIsOpId(Term)    ||
     gsIsDataAppl(Term)   || gsIsDataApplProd(Term) || gsIsNumber(Term)  ||
     gsIsListEnum(Term)   || gsIsSetEnum(Term)      || gsIsBagEnum(Term) ||
-    gsIsSetBagComp(Term) || gsIsForall(Term)       || gsIsExists(Term)  ||
-    gsIsLambda(Term)     || gsIsWhr(Term);
+    gsIsBinder(Term)     || gsIsWhr(Term);
 }
 
 ATermAppl gsGetSort(ATermAppl DataExpr)
@@ -629,30 +628,43 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
       Result = ATAgetArgument(HeadSort, 1);
     else
       Result = gsMakeUnknown();
-  } else if (gsIsForall(DataExpr) || gsIsExists(DataExpr)) {
-      Result = gsMakeSortExprBool();
-  } else if (gsIsSetBagComp(DataExpr)) {
-    //DataExpr is a set of bag comprehension; depending on the sort of the
-    //body, return Set(S) or Bag(S), where S is the sort of the variable
-    //declaration
-    ATermAppl Var = ATAgetArgument(DataExpr, 0);
-    ATermAppl SortBody = gsGetSort(ATAgetArgument(DataExpr, 1));
-    if (ATisEqual(SortBody, gsMakeSortExprBool()))
+  } else if (gsIsBinder(DataExpr)) {
+      ATermAppl BindingOperator = ATAgetArgument(DataExpr, 0);
+      if (gsIsForall(BindingOperator) || gsIsExists(BindingOperator)) {
+        Result = gsMakeSortExprBool();
+    } else if (gsIsSetBagComp(BindingOperator)) {
+      //DataExpr is a set or bag comprehension; depending on the sort of the
+      //body, return Set(S) or Bag(S), where S is the sort of the variable
+      //declaration
+      ATermAppl Var = ATAgetArgument(DataExpr, 1);
+      ATermAppl SortBody = gsGetSort(ATAgetArgument(DataExpr, 2));
+      if (ATisEqual(SortBody, gsMakeSortExprBool()))
+        Result = gsMakeSortCons(gsMakeSortSet(), gsGetSort(Var));
+      else if (ATisEqual(SortBody, gsMakeSortExprNat()))
+        Result = gsMakeSortCons(gsMakeSortBag(), gsGetSort(Var));
+      else
+        Result = gsMakeUnknown();
+    } else if (gsIsSetComp(BindingOperator)) {
+      //DataExpr is a set comprehension, return Set(S), where S is the sort of
+      //the variable declaration
+      ATermAppl Var = ATAgetArgument(DataExpr, 1);
       Result = gsMakeSortCons(gsMakeSortSet(), gsGetSort(Var));
-    else if (ATisEqual(SortBody, gsMakeSortExprNat()))
-      Result = gsMakeSortCons(gsMakeSortBag(), gsGetSort(Var));
-    else
-      Result = gsMakeUnknown();
-  } else if (gsIsLambda(DataExpr)) {
-    //DataExpr is a lambda abstraction of the form
-    //  lambda x0: S0, ..., xn: Sn. e
-    //return S0 -> ... -> Sn -> gsGetSort(e)
-    Result = gsGetSort(ATAgetArgument(DataExpr, 1));
-    ATermList Vars = ATreverse(ATLgetArgument(DataExpr, 0));
-    while (!ATisEmpty(Vars))
-    {
-      Result = gsMakeSortArrow(gsGetSort(ATAgetFirst(Vars)), Result);
-      Vars = ATgetNext(Vars);
+    } else if (gsIsSetComp(BindingOperator)) {
+      //DataExpr is a bag comprehension, return Bag(S), where S is the sort of
+      //the variable declaration
+      ATermAppl Var = ATAgetArgument(DataExpr, 1);
+      Result = gsMakeSortCons(gsMakeSortSet(), gsGetSort(Var));
+    } else if (gsIsLambda(BindingOperator)) {
+      //DataExpr is a lambda abstraction of the form
+      //  lambda x0: S0, ..., xn: Sn. e
+      //return S0 -> ... -> Sn -> gsGetSort(e)
+      Result = gsGetSort(ATAgetArgument(DataExpr, 2));
+      ATermList Vars = ATreverse(ATLgetArgument(DataExpr, 1));
+      while (!ATisEmpty(Vars))
+      {
+        Result = gsMakeSortArrow(gsGetSort(ATAgetFirst(Vars)), Result);
+        Vars = ATgetNext(Vars);
+      }
     }
   } else if (gsIsWhr(DataExpr)) {
     //DataExpr is a where clause; return the sort of the body

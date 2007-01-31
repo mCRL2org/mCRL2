@@ -162,13 +162,13 @@ data_expression pbes2data(const pbes_expression& p, const specification& spec)
   } else if (is_or(p)) {
     return d::or_(pbes2data(arg1(p), spec), pbes2data(arg2(p), spec));
   } else if (is_forall(p)) {
-      data_expression d1 = gsMakeForall(list_arg1(p), pbes2data(arg2(p), implement_data_specification(spec)));
+      data_expression d1 = gsMakeBinder(gsMakeForall(), list_arg1(p), pbes2data(arg2(p), implement_data_specification(spec)));
       return d1;
   } else if (is_exists(p)) {
       data_expression d1 = pbes2data(arg2(p), implement_data_specification(spec));
-aterm x = gsMakeExists(list_arg1(p), d1);
+aterm x = gsMakeBinder(gsMakeExists(), list_arg1(p), d1);
 std::cout << "x = " << x << std::endl;
-      data_expression d2 = gsMakeExists(list_arg1(p), d1);
+      data_expression d2 = gsMakeBinder(gsMakeExists(), list_arg1(p), d1);
       return d2;
   } else if (is_propositional_variable_instantiation(p)) {
     aterm_string vname = arg1(p);

@@ -433,17 +433,17 @@ data_expr_quant:
     }
   | LAMBDA data_vars_decls_cs DOT data_expr_quant
     {
-      safe_assign($$, gsMakeLambda($2, $4));
+      safe_assign($$, gsMakeBinder(gsMakeLambda(), $2, $4));
       gsDebugMsg("parsed lambda abstraction\n  %T\n", $$);
     }
   | FORALL data_vars_decls_cs DOT data_expr_quant
     {
-      safe_assign($$, gsMakeForall($2, $4));
+      safe_assign($$, gsMakeBinder(gsMakeForall(), $2, $4));
       gsDebugMsg("parsed quantification\n  %T\n", $$);
     }
   | EXISTS data_vars_decls_cs DOT data_expr_quant
     {
-      safe_assign($$, gsMakeExists($2, $4));
+      safe_assign($$, gsMakeBinder(gsMakeExists(), $2, $4));
       gsDebugMsg("parsed quantification\n  %T\n", $$);
     }
   ;
@@ -470,12 +470,12 @@ data_expr_imp_rhs:
     }
   | FORALL data_vars_decls_cs DOT data_expr_imp_rhs
     {
-      safe_assign($$, gsMakeForall($2, $4));
+      safe_assign($$, gsMakeBinder(gsMakeForall(), $2, $4));
       gsDebugMsg("parsed quantification\n  %T\n", $$);
     }
   | EXISTS data_vars_decls_cs DOT data_expr_imp_rhs
     {
-      safe_assign($$, gsMakeExists($2, $4));
+      safe_assign($$, gsMakeBinder(gsMakeExists(), $2, $4));
       gsDebugMsg("parsed quantification\n  %T\n", $$);
     }
   ;
@@ -508,12 +508,12 @@ data_expr_and_rhs:
     }
   | FORALL data_vars_decls_cs DOT data_expr_and_rhs
     {
-      safe_assign($$, gsMakeForall($2, $4));
+      safe_assign($$, gsMakeBinder(gsMakeForall(), $2, $4));
       gsDebugMsg("parsed quantification\n  %T\n", $$);
     }
   | EXISTS data_vars_decls_cs DOT data_expr_and_rhs
     {
-      safe_assign($$, gsMakeExists($2, $4));
+      safe_assign($$, gsMakeBinder(gsMakeExists(), $2, $4));
       gsDebugMsg("parsed quantification\n  %T\n", $$);
     }
   ;
@@ -546,12 +546,12 @@ data_expr_eq_rhs:
     }
   | FORALL data_vars_decls_cs DOT data_expr_eq_rhs
     {
-      safe_assign($$, gsMakeForall($2, $4));
+      safe_assign($$, gsMakeBinder(gsMakeForall(), $2, $4));
       gsDebugMsg("parsed quantification\n  %T\n", $$);
     }
   | EXISTS data_vars_decls_cs DOT data_expr_eq_rhs
     {
-      safe_assign($$, gsMakeExists($2, $4));
+      safe_assign($$, gsMakeBinder(gsMakeExists(), $2, $4));
       gsDebugMsg("parsed quantification\n  %T\n", $$);
     }
   ;
@@ -727,12 +727,12 @@ data_expr_quant_prefix:
     }
   | FORALL data_vars_decls_cs DOT data_expr_quant_prefix
     {
-      safe_assign($$, gsMakeForall($2, $4));
+      safe_assign($$, gsMakeBinder(gsMakeForall(), $2, $4));
       gsDebugMsg("parsed quantification\n  %T\n", $$);
     }
   | EXISTS data_vars_decls_cs DOT data_expr_quant_prefix
     {
-      safe_assign($$, gsMakeExists($2, $4));
+      safe_assign($$, gsMakeBinder(gsMakeExists(), $2, $4));
       gsDebugMsg("parsed quantification\n  %T\n", $$);
     }
   ;
@@ -864,7 +864,7 @@ bag_enum_elt:
 data_comprehension:
   LBRACE data_var_decl BAR data_expr RBRACE
     {
-      safe_assign($$, gsMakeSetBagComp($2, $4));
+      safe_assign($$, gsMakeBinder(gsMakeSetBagComp(), ATmakeList1((ATerm) $2), $4));
       gsDebugMsg("parsed data comprehension\n  %T\n", $$);
     }
   ;

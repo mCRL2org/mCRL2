@@ -1820,98 +1820,90 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
     return CastedNewType;
   }
 
-  if(gsIsSetBagComp(*DataTerm)){
+  if(gsIsBinder(*DataTerm)){
+    ATermAppl BindingOperator = ATAgetArgument(*DataTerm, 0);
     ATermTable CopyAllowedVars=ATtableCreate(63,50);
     gstcATermTableCopy(AllowedVars,CopyAllowedVars);
     ATermTable CopyDeclaredVars=ATtableCreate(63,50);
     //if(AllowedVars!=DeclaredVars)
     gstcATermTableCopy(DeclaredVars,CopyDeclaredVars);
-   
-    ATermAppl VarDecl=ATAgetArgument(*DataTerm,0);
-    ATermAppl NewType=ATAgetArgument(VarDecl,1);
-    ATermList VarList=ATmakeList1((ATerm)VarDecl);
-    ATermTable NewAllowedVars=gstcAddVars2Table(CopyAllowedVars,VarList);
-    if(!NewAllowedVars) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
-    ATermTable NewDeclaredVars=gstcAddVars2Table(CopyDeclaredVars,VarList);
-    if(!NewDeclaredVars) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
-    ATermAppl Data=ATAgetArgument(*DataTerm,1);
+      
+    if(gsIsSetBagComp(BindingOperator) || gsIsSetComp(BindingOperator)
+        || gsIsBagComp(BindingOperator)){
+      ATermAppl VarDecl=ATAgetFirst(ATLgetArgument(*DataTerm,1));
+      ATermAppl NewType=ATAgetArgument(VarDecl,1);
+      ATermList VarList=ATmakeList1((ATerm)VarDecl);
+      ATermTable NewAllowedVars=gstcAddVars2Table(CopyAllowedVars,VarList);
+      if(!NewAllowedVars) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
+      ATermTable NewDeclaredVars=gstcAddVars2Table(CopyDeclaredVars,VarList);
+      if(!NewDeclaredVars) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
+      ATermAppl Data=ATAgetArgument(*DataTerm,2);
     
-    ATermAppl ResType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,gsMakeUnknown(),FreeVars);
-    ATtableDestroy(CopyAllowedVars); 
-    ATtableDestroy(CopyDeclaredVars); 
+      ATermAppl ResType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,gsMakeUnknown(),FreeVars);
+      ATtableDestroy(CopyAllowedVars); 
+      ATtableDestroy(CopyDeclaredVars); 
 
-    if(!ResType) return NULL;
-    if(gstcTypeMatchA(gsMakeSortIdBool(),ResType)) {
-      NewType=gsMakeSortExprSet(NewType);
-    } else if(gstcTypeMatchA(gsMakeSortIdNat(),ResType)) {
-             NewType=gsMakeSortExprBag(NewType);
-           } else return NULL;
+      if(!ResType) return NULL;
+      if(gstcTypeMatchA(gsMakeSortIdBool(),ResType)) {
+        NewType=gsMakeSortExprSet(NewType);
+      } else if(gstcTypeMatchA(gsMakeSortIdNat(),ResType)) {
+               NewType=gsMakeSortExprBag(NewType);
+             } else return NULL;
 
-    if(!(NewType=gstcTypeMatchA(NewType,PosType))){
-      gsErrorMsg("a set or bag comprehansion of type %P does not match possible type %P (while typechecking %P)\n",ATAgetArgument(VarDecl,1),PosType,*DataTerm);
-      return NULL;
+      if(!(NewType=gstcTypeMatchA(NewType,PosType))){
+        gsErrorMsg("a set or bag comprehansion of type %P does not match possible type %P (while typechecking %P)\n",ATAgetArgument(VarDecl,1),PosType,*DataTerm);
+        return NULL;
+      }
+      
+      if(FreeVars) 
+        gstcRemoveVars(FreeVars,VarList);
+      *DataTerm=ATsetArgument(*DataTerm,(ATerm)Data,2);
+      return NewType;
     }
 
-    if(FreeVars) 
-      gstcRemoveVars(FreeVars,VarList);
-    *DataTerm=ATsetArgument(*DataTerm,(ATerm)Data,1);
-    return NewType;
-  }
+    if(gsIsForall(BindingOperator) || gsIsExists(BindingOperator)){
+      ATermList VarList=ATLgetArgument(*DataTerm,1);
+      ATermTable NewAllowedVars=gstcAddVars2Table(CopyAllowedVars,VarList);
+      if(!NewAllowedVars) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
+      ATermTable NewDeclaredVars=gstcAddVars2Table(CopyDeclaredVars,VarList);
+      if(!NewDeclaredVars) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
 
-  if(gsIsForall(*DataTerm) || gsIsExists(*DataTerm)){
-    ATermTable CopyAllowedVars=ATtableCreate(63,50);
-    gstcATermTableCopy(AllowedVars,CopyAllowedVars);
-    ATermTable CopyDeclaredVars=ATtableCreate(63,50);
-    //if(AllowedVars!=DeclaredVars)
-    gstcATermTableCopy(DeclaredVars,CopyDeclaredVars);
+      ATermAppl Data=ATAgetArgument(*DataTerm,2);
+      if(!gstcTypeMatchA(gsMakeSortIdBool(),PosType)) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
+      ATermAppl NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,gsMakeSortIdBool(),FreeVars);
+      ATtableDestroy(CopyAllowedVars); 
+      ATtableDestroy(CopyDeclaredVars); 
 
-    ATermList VarList=ATLgetArgument(*DataTerm,0);
-    ATermTable NewAllowedVars=gstcAddVars2Table(CopyAllowedVars,VarList);
-    if(!NewAllowedVars) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
-    ATermTable NewDeclaredVars=gstcAddVars2Table(CopyDeclaredVars,VarList);
-    if(!NewDeclaredVars) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
+      if(!NewType) {return NULL;}
+      if(!gstcTypeMatchA(gsMakeSortIdBool(),NewType)) {return NULL;}
 
-    ATermAppl Data=ATAgetArgument(*DataTerm,1);
-    if(!gstcTypeMatchA(gsMakeSortIdBool(),PosType)) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
-    ATermAppl NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,gsMakeSortIdBool(),FreeVars);
-    ATtableDestroy(CopyAllowedVars); 
-    ATtableDestroy(CopyDeclaredVars); 
+      if(FreeVars) 
+        gstcRemoveVars(FreeVars,VarList);
+      *DataTerm=ATsetArgument(*DataTerm,(ATerm)Data,2);
+      return gsMakeSortIdBool();
+    }
 
-    if(!NewType) {return NULL;}
-    if(!gstcTypeMatchA(gsMakeSortIdBool(),NewType)) {return NULL;}
+    if(gsIsLambda(BindingOperator)){
+      ATermList VarList=ATLgetArgument(*DataTerm,1);
+      ATermTable NewAllowedVars=gstcAddVars2Table(CopyAllowedVars,VarList);
+      if(!NewAllowedVars) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
+      ATermTable NewDeclaredVars=gstcAddVars2Table(CopyDeclaredVars,VarList);
+      if(!NewDeclaredVars) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
 
-    if(FreeVars) 
-      gstcRemoveVars(FreeVars,VarList);
-    *DataTerm=ATsetArgument(*DataTerm,(ATerm)Data,1);
-    return gsMakeSortIdBool();
-  }
+      ATermList ArgTypes=gstcGetVarTypes(VarList);
+      ATermAppl NewType=gstcUnArrowProd(ArgTypes,PosType);
+      if(!NewType) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); gsErrorMsg("no functions with arguments %P among %P (while typechecking %P)\n", ArgTypes,PosType,*DataTerm);return NULL;}
+      ATermAppl Data=ATAgetArgument(*DataTerm,2);
+      NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,NewType,FreeVars);
+      ATtableDestroy(CopyAllowedVars); 
+      ATtableDestroy(CopyDeclaredVars); 
 
-  if(gsIsLambda(*DataTerm)){
-    ATermTable CopyAllowedVars=ATtableCreate(63,50);
-    gstcATermTableCopy(AllowedVars,CopyAllowedVars);
-    ATermTable CopyDeclaredVars=ATtableCreate(63,50);
-    //if(AllowedVars!=DeclaredVars)
-    gstcATermTableCopy(DeclaredVars,CopyDeclaredVars);
-
-    ATermList VarList=ATLgetArgument(*DataTerm,0);
-    ATermTable NewAllowedVars=gstcAddVars2Table(CopyAllowedVars,VarList);
-    if(!NewAllowedVars) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
-    ATermTable NewDeclaredVars=gstcAddVars2Table(CopyDeclaredVars,VarList);
-    if(!NewDeclaredVars) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
-
-    ATermList ArgTypes=gstcGetVarTypes(VarList);
-    ATermAppl NewType=gstcUnArrowProd(ArgTypes,PosType);
-    if(!NewType) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); gsErrorMsg("no functions with arguments %P among %P (while typechecking %P)\n", ArgTypes,PosType,*DataTerm);return NULL;}
-    ATermAppl Data=ATAgetArgument(*DataTerm,1);
-    NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,NewType,FreeVars);
-    ATtableDestroy(CopyAllowedVars); 
-    ATtableDestroy(CopyDeclaredVars); 
-
-    if(FreeVars) 
-      gstcRemoveVars(FreeVars,VarList);
-    if(!NewType) {return NULL;}
-    *DataTerm=ATsetArgument(*DataTerm,(ATerm)Data,1);
-    return gsMakeSortArrowProd(ArgTypes,NewType);
+      if(FreeVars) 
+        gstcRemoveVars(FreeVars,VarList);
+      if(!NewType) {return NULL;}
+      *DataTerm=ATsetArgument(*DataTerm,(ATerm)Data,2);
+      return gsMakeSortArrowProd(ArgTypes,NewType);
+    }
   }
   
   if(gsIsWhr(*DataTerm)){
@@ -2598,7 +2590,7 @@ static ATbool gstcIsTypeAllowedL(ATermList TypeList, ATermList PosTypeList){
 }
 
 static ATbool gstcIsTypeAllowedA(ATermAppl Type, ATermAppl PosType){
-  //Checks if Type is alowed by PosType
+  //Checks if Type is allowed by PosType
   if(gsIsUnknown(PosType)) return ATtrue;
   if(gstcIsNotInferred(PosType))
     return gstcInTypesA(Type,ATLgetArgument(PosType,0));

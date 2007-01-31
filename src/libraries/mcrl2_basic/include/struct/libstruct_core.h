@@ -389,6 +389,28 @@ bool gsIsBInit(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunBInit();
 }
 
+// BagComp
+inline
+AFun initAFunBagComp(AFun& f)
+{
+  f = ATmakeAFun("BagComp", 0, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunBagComp()
+{
+  static AFun AFunBagComp = initAFunBagComp(AFunBagComp);
+  return AFunBagComp;
+}
+
+inline
+bool gsIsBagComp(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunBagComp();
+}
+
 // BagEnum
 inline
 AFun initAFunBagEnum(AFun& f)
@@ -431,6 +453,28 @@ inline
 bool gsIsBagEnumElt(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunBagEnumElt();
+}
+
+// Binder
+inline
+AFun initAFunBinder(AFun& f)
+{
+  f = ATmakeAFun("Binder", 3, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunBinder()
+{
+  static AFun AFunBinder = initAFunBinder(AFunBinder);
+  return AFunBinder;
+}
+
+inline
+bool gsIsBinder(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunBinder();
 }
 
 // Block
@@ -723,7 +767,7 @@ bool gsIsDelta(ATermAppl Term)
 inline
 AFun initAFunExists(AFun& f)
 {
-  f = ATmakeAFun("Exists", 2, ATfalse);
+  f = ATmakeAFun("Exists", 0, ATfalse);
   ATprotectAFun(f);
   return f;
 }
@@ -745,7 +789,7 @@ bool gsIsExists(ATermAppl Term)
 inline
 AFun initAFunForall(AFun& f)
 {
-  f = ATmakeAFun("Forall", 2, ATfalse);
+  f = ATmakeAFun("Forall", 0, ATfalse);
   ATprotectAFun(f);
   return f;
 }
@@ -965,7 +1009,7 @@ bool gsIsLPESummand(ATermAppl Term)
 inline
 AFun initAFunLambda(AFun& f)
 {
-  f = ATmakeAFun("Lambda", 2, ATfalse);
+  f = ATmakeAFun("Lambda", 0, ATfalse);
   ATprotectAFun(f);
   return f;
 }
@@ -1713,7 +1757,7 @@ bool gsIsSeq(ATermAppl Term)
 inline
 AFun initAFunSetBagComp(AFun& f)
 {
-  f = ATmakeAFun("SetBagComp", 2, ATfalse);
+  f = ATmakeAFun("SetBagComp", 0, ATfalse);
   ATprotectAFun(f);
   return f;
 }
@@ -1729,6 +1773,28 @@ inline
 bool gsIsSetBagComp(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunSetBagComp();
+}
+
+// SetComp
+inline
+AFun initAFunSetComp(AFun& f)
+{
+  f = ATmakeAFun("SetComp", 0, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunSetComp()
+{
+  static AFun AFunSetComp = initAFunSetComp(AFunSetComp);
+  return AFunSetComp;
+}
+
+inline
+bool gsIsSetComp(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunSetComp();
 }
 
 // SetEnum
@@ -2642,6 +2708,12 @@ ATermAppl gsMakeBInit(ATermAppl ProcExpr_0, ATermAppl ProcExpr_1)
 }
 
 inline
+ATermAppl gsMakeBagComp()
+{
+  return ATmakeAppl0(gsAFunBagComp());
+}
+
+inline
 ATermAppl gsMakeBagEnum(ATermList BagEnumElt_0, ATermAppl SortExprOrUnknown_1)
 {
   return ATmakeAppl2(gsAFunBagEnum(), (ATerm) BagEnumElt_0, (ATerm) SortExprOrUnknown_1);
@@ -2651,6 +2723,12 @@ inline
 ATermAppl gsMakeBagEnumElt(ATermAppl DataExpr_0, ATermAppl DataExpr_1)
 {
   return ATmakeAppl2(gsAFunBagEnumElt(), (ATerm) DataExpr_0, (ATerm) DataExpr_1);
+}
+
+inline
+ATermAppl gsMakeBinder(ATermAppl BindingOperator_0, ATermList DataVarId_1, ATermAppl DataExpr_2)
+{
+  return ATmakeAppl3(gsAFunBinder(), (ATerm) BindingOperator_0, (ATerm) DataVarId_1, (ATerm) DataExpr_2);
 }
 
 inline
@@ -2732,15 +2810,15 @@ ATermAppl gsMakeDelta()
 }
 
 inline
-ATermAppl gsMakeExists(ATermList DataVarId_0, ATermAppl DataExpr_1)
+ATermAppl gsMakeExists()
 {
-  return ATmakeAppl2(gsAFunExists(), (ATerm) DataVarId_0, (ATerm) DataExpr_1);
+  return ATmakeAppl0(gsAFunExists());
 }
 
 inline
-ATermAppl gsMakeForall(ATermList DataVarId_0, ATermAppl DataExpr_1)
+ATermAppl gsMakeForall()
 {
-  return ATmakeAppl2(gsAFunForall(), (ATerm) DataVarId_0, (ATerm) DataExpr_1);
+  return ATmakeAppl0(gsAFunForall());
 }
 
 inline
@@ -2798,9 +2876,9 @@ ATermAppl gsMakeLPESummand(ATermList DataVarId_0, ATermAppl DataExpr_1, ATermApp
 }
 
 inline
-ATermAppl gsMakeLambda(ATermList DataVarId_0, ATermAppl DataExpr_1)
+ATermAppl gsMakeLambda()
 {
-  return ATmakeAppl2(gsAFunLambda(), (ATerm) DataVarId_0, (ATerm) DataExpr_1);
+  return ATmakeAppl0(gsAFunLambda());
 }
 
 inline
@@ -3002,9 +3080,15 @@ ATermAppl gsMakeSeq(ATermAppl ProcExpr_0, ATermAppl ProcExpr_1)
 }
 
 inline
-ATermAppl gsMakeSetBagComp(ATermAppl DataVarId_0, ATermAppl DataExpr_1)
+ATermAppl gsMakeSetBagComp()
 {
-  return ATmakeAppl2(gsAFunSetBagComp(), (ATerm) DataVarId_0, (ATerm) DataExpr_1);
+  return ATmakeAppl0(gsAFunSetBagComp());
+}
+
+inline
+ATermAppl gsMakeSetComp()
+{
+  return ATmakeAppl0(gsAFunSetComp());
 }
 
 inline

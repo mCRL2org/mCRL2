@@ -27,10 +27,7 @@ namespace data_init {
   //                  | ListEnum(<DataExpr>+, <SortExprOrUnknown>)            (- di)
   //                  | SetEnum(<DataExpr>+, <SortExprOrUnknown>)             (- di)
   //                  | BagEnum(<BagEnumElt>+, <SortExprOrUnknown>)           (- di)
-  //                  | SetBagComp(<DataVarId>, <DataExpr>)                   (- di)
-  //                  | Forall(<DataVarId>+, <DataExpr>)                      (- di)
-  //                  | Exists(<DataVarId>+, <DataExpr>)                      (- di)
-  //                  | Lambda(<DataVarId>+, <DataExpr>)                      (- di)
+  //                  | Binder(<BindingOperator>, <DataVarId>+, <DataExpr>)   (- di)
   //                  | Whr(<DataExpr>, <WhrDecl>+)                           (- di)
 
   inline bool is_true   (aterm_appl t) { return has_expression_type_level_0(t, gsMakeOpIdNameTrue ); }
@@ -39,15 +36,20 @@ namespace data_init {
   inline bool is_and    (aterm_appl t) { return has_expression_type_level_2(t, gsMakeOpIdNameAnd  ); }
   inline bool is_or     (aterm_appl t) { return has_expression_type_level_2(t, gsMakeOpIdNameOr   ); }
   inline bool is_implies(aterm_appl t) { return has_expression_type_level_2(t, gsMakeOpIdNameImp  ); }
-  inline bool is_forall (aterm_appl t) { return gsIsForall       (t); }
-  inline bool is_exists (aterm_appl t) { return gsIsExists       (t); }
-  inline bool is_lambda (aterm_appl t) { return gsIsLambda       (t); }
+  inline bool is_binder (aterm_appl t) { return gsIsBinder       (t); }
   inline bool is_where  (aterm_appl t) { return gsIsWhr          (t); }                                 
   inline bool is_real   (aterm_appl t) { return sort_init::is_real(data_expression(t).sort()); }
   inline bool is_int    (aterm_appl t) { return sort_init::is_int (data_expression(t).sort()); }
   inline bool is_pos    (aterm_appl t) { return sort_init::is_pos (data_expression(t).sort()); }
   inline bool is_nat    (aterm_appl t) { return sort_init::is_nat (data_expression(t).sort()); }
   inline bool is_bool   (aterm_appl t) { return sort_init::is_bool(data_expression(t).sort()); }
+  // TODO: The following three functions do not belong here anymore, we need to find
+  // a better place for these. Note that they have been changed to make sure
+  // that we know we are working with a Binder before we take the binding operator
+  // Furthermore, only is_exists is used in one place, namely in src/libraries/lpe/test/aterm_algorithm_test.cpp
+  //inline bool is_forall (aterm_appl t) { return gsIsBinder (t) && gsIsForall       (aterm_appl(t.argument(0))); }
+  inline bool is_exists (aterm_appl t) { return gsIsBinder (t) && gsIsExists       (aterm_appl(t.argument(0))); }
+  //inline bool is_lambda (aterm_appl t) { return gsIsBinder (t) && gsIsLambda       (aterm_appl(t.argument(0))); }
 
   // inline bool is_id            (data_expression t) { return gsIsId           (t); }
   // inline bool is_op_id         (data_expression t) { return gsIsOpId         (t); }

@@ -676,71 +676,91 @@ ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
         part = impl_bag_enum(elts, sort);
       }
     }
-  } else if (gsIsSetBagComp(part)) {
-    //part is a set/bag comprehension; replace by its implementation
-    ATermAppl var = ATAgetArgument(part, 0);
-    ATermAppl body = ATAgetArgument(part, 1);
-    ATermAppl body_sort = gsGetSort(body);
-    ATermAppl var_sort = gsGetSort(var);
-    if (!(ATisEqual(body_sort, gsMakeSortIdBool()) ||
-        ATisEqual(body_sort, gsMakeSortIdNat()))) {
-      //sort of the comprehension is wrong
-      gsWarningMsg("%P can not be implemented because the body is of sort %P "
-        "instead of Bool or Nat\n", part, body_sort);
-    } else {
-      if (ATisEqual(body_sort, gsMakeSortIdBool())) {
-        //part is a set comprehension
-        part = gsMakeDataExprSetComp(gsMakeLambda(ATmakeList1((ATerm) var),
-          body), gsMakeSortExprSet(var_sort));
+  } else if (gsIsBinder(part)) {
+    ATermAppl binding_operator = ATAgetArgument(part, 0);
+    if (gsIsSetBagComp(binding_operator)) {
+      //part is a set/bag comprehension; replace by its implementation
+      ATermList vars = ATLgetArgument(part, 1);
+      ATermAppl var = ATAgetFirst(vars);
+      ATermAppl body = ATAgetArgument(part, 2);
+      ATermAppl body_sort = gsGetSort(body);
+      ATermAppl var_sort = gsGetSort(var);
+      if (!(ATisEqual(body_sort, gsMakeSortIdBool()) ||
+          ATisEqual(body_sort, gsMakeSortIdNat()))) {
+        //sort of the comprehension is wrong
+        gsWarningMsg("%P can not be implemented because the body is of sort %P "
+          "instead of Bool or Nat\n", part, body_sort);
       } else {
-        //part is a bag comprehension
-        part = gsMakeDataExprBagComp(gsMakeLambda(ATmakeList1((ATerm) var),
-          body), gsMakeSortExprBag(var_sort));
+        if (ATisEqual(body_sort, gsMakeSortIdBool())) {
+          //part is a set comprehension
+          part = gsMakeDataExprSetComp(gsMakeBinder(gsMakeLambda(), vars, body), 
+            gsMakeSortExprSet(var_sort));
+        } else {
+          //part is a bag comprehension
+          part = gsMakeDataExprBagComp(gsMakeBinder(gsMakeLambda(), vars, body), 
+            gsMakeSortExprBag(var_sort));
+        }
       }
-    }
-  } else if (gsIsForall(part) || gsIsExists(part)) {
-    //part is a quantification; replace by its implementation
-    ATermList vars = ATreverse(ATLgetArgument(part, 0));
-    bool is_forall = gsIsForall(part);
-    part = gsMakeLambda(ATmakeList1(ATgetFirst(vars)), ATAgetArgument(part, 1));
-    part = is_forall?gsMakeDataExprForall(part):gsMakeDataExprExists(part);
-    vars = ATgetNext(vars);
-    while (!ATisEmpty(vars))
-    {
-      part = gsMakeLambda(ATmakeList1(ATgetFirst(vars)), part);
+    } else if (gsIsSetComp(binding_operator)) {
+      //part is a set comprehension; replace by its implementation
+      ATermList vars = ATLgetArgument(part, 1);
+      ATermAppl var = ATAgetFirst(vars);
+      ATermAppl body = ATAgetArgument(part, 2);
+      ATermAppl var_sort = gsGetSort(var);
+      part = gsMakeDataExprSetComp(gsMakeBinder(gsMakeLambda(), vars, body), 
+        gsMakeSortExprSet(var_sort));
+    } else if (gsIsBagComp(binding_operator)) {
+      //part is a bag comprehension; replace by its implementation
+      ATermList vars = ATLgetArgument(part, 1);
+      ATermAppl var = ATAgetFirst(vars);
+      ATermAppl body = ATAgetArgument(part, 2);
+      ATermAppl var_sort = gsGetSort(var);
+      part = gsMakeDataExprBagComp(gsMakeBinder(gsMakeLambda(), vars, body),
+        gsMakeSortExprBag(var_sort));
+    } else if (gsIsForall(binding_operator) || gsIsExists(binding_operator)) {
+      //part is a quantification; replace by its implementation
+      ATermList vars = ATreverse(ATLgetArgument(part, 1));
+      bool is_forall = gsIsForall(binding_operator);
+      part = gsMakeBinder(gsMakeLambda(), ATmakeList1(ATgetFirst(vars)), ATAgetArgument(part, 2));
       part = is_forall?gsMakeDataExprForall(part):gsMakeDataExprExists(part);
-      vars = ATgetNext(vars);      
+      vars = ATgetNext(vars);
+      while (!ATisEmpty(vars))
+      {
+        part = gsMakeBinder(gsMakeLambda(), ATmakeList1(ATgetFirst(vars)), part);
+        part = is_forall?gsMakeDataExprForall(part):gsMakeDataExprExists(part);
+        vars = ATgetNext(vars);      
+      }
+    } else if (gsIsLambda(binding_operator)) {
+      //part is a lambda abstraction; replace by a named function
+      //implement the body, the bound variables and the free variables
+      ATermList bound_vars = impl_exprs_list(ATLgetArgument(part, 1),
+        p_substs, p_data_decls);
+      ATermAppl body = impl_exprs_appl(ATAgetArgument(part, 2),
+        p_substs, p_data_decls);
+      ATermList FreeVars = impl_exprs_list(get_free_vars(part),
+        p_substs, p_data_decls);
+      ATermList vars = ATconcat(FreeVars, bound_vars);
+      //create sort for the new operation identifier
+      ATermAppl op_id_sort = gsGetSort(body);
+      ATermList l = ATreverse(vars);
+      while (!ATisEmpty(l))
+      {
+        op_id_sort = gsMakeSortArrow(ATAgetArgument(ATAgetFirst(l), 1), op_id_sort);
+        l = ATgetNext(l);
+      }
+      //create new operation identifier
+      ATermAppl op_id = make_fresh_lambda_op_id(op_id_sort, (ATerm) p_data_decls->ops);
+      //add operation identifier to the data declarations
+      p_data_decls->ops = ATinsert(p_data_decls->ops, (ATerm) op_id);
+      //add data equation for the operation to the data declarations
+      p_data_decls->data_eqns = ATinsert(p_data_decls->data_eqns, (ATerm)
+        gsMakeDataEqn(vars, gsMakeNil(), gsMakeDataApplList(op_id, vars), body));
+      //replace part
+      ATermAppl new_part = gsMakeDataApplList(op_id, FreeVars);
+      *p_substs = gsAddSubstToSubsts(gsMakeSubst_Appl(part, new_part), *p_substs);
+      part = new_part;
+      recursive = false;
     }
-  } else if (gsIsLambda(part)) {
-    //part is a lambda abstraction; replace by a named function
-    //implement the body, the bound variables and the free variables
-    ATermList bound_vars = impl_exprs_list(ATLgetArgument(part, 0),
-      p_substs, p_data_decls);
-    ATermAppl body = impl_exprs_appl(ATAgetArgument(part, 1),
-      p_substs, p_data_decls);
-    ATermList FreeVars = impl_exprs_list(get_free_vars(part),
-      p_substs, p_data_decls);
-    ATermList vars = ATconcat(FreeVars, bound_vars);
-    //create sort for the new operation identifier
-    ATermAppl op_id_sort = gsGetSort(body);
-    ATermList l = ATreverse(vars);
-    while (!ATisEmpty(l))
-    {
-      op_id_sort = gsMakeSortArrow(ATAgetArgument(ATAgetFirst(l), 1), op_id_sort);
-      l = ATgetNext(l);
-    }
-    //create new operation identifier
-    ATermAppl op_id = make_fresh_lambda_op_id(op_id_sort, (ATerm) p_data_decls->ops);
-    //add operation identifier to the data declarations
-    p_data_decls->ops = ATinsert(p_data_decls->ops, (ATerm) op_id);
-    //add data equation for the operation to the data declarations
-    p_data_decls->data_eqns = ATinsert(p_data_decls->data_eqns, (ATerm)
-      gsMakeDataEqn(vars, gsMakeNil(), gsMakeDataApplList(op_id, vars), body));
-    //replace part
-    ATermAppl new_part = gsMakeDataApplList(op_id, FreeVars);
-    *p_substs = gsAddSubstToSubsts(gsMakeSubst_Appl(part, new_part), *p_substs);
-    part = new_part;
-    recursive = false;
   } else if (gsIsWhr(part)) {
     //part is a where clause; replace by its corresponding lambda expression
     ATermAppl body = ATAgetArgument(part, 0);
@@ -765,7 +785,7 @@ ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
         whr_decls = ATgetNext(whr_decls);
       }
       //replace part
-      part = gsMakeDataApplList(gsMakeLambda(vars, body), exprs);
+      part = gsMakeDataApplList(gsMakeBinder(gsMakeLambda(), vars, body), exprs);
     }
   }
   //implement expressions in the arguments of part
@@ -822,7 +842,7 @@ ATermAppl impl_set_enum(ATermList elts, ATermAppl sort_expr)
     elts = ATgetNext(elts);
   }
   //make lambda abstraction
-  result = gsMakeLambda(ATmakeList1((ATerm) var), result);
+  result = gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) var), result);
   //make set comprehension
   result = gsMakeDataExprSetComp(result, sort_expr);
   //return result
@@ -851,7 +871,7 @@ ATermAppl impl_bag_enum(ATermList elts, ATermAppl sort_expr)
     elts = ATgetNext(elts);
   }
   //make lambda abstraction
-  result = gsMakeLambda(ATmakeList1((ATerm) var), result);
+  result = gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) var), result);
   //make bag comprehension
   result = gsMakeDataExprBagComp(result, sort_expr);
   //return result
@@ -891,27 +911,32 @@ void get_free_vars_appl(ATermAppl data_expr, ATermList bound_vars,
       gsIsBagEnum(data_expr)) {
     //data_expr is an enumeration; get free variables from the elements
     get_free_vars_list(ATLgetArgument(data_expr, 0), bound_vars, p_free_vars);
-  } else if (gsIsSetBagComp(data_expr)) {
-    //data_expr is a set of bag comprehension; get free variables from the body
-    //where bound_vars is extended with the variable declaration
-    ATermAppl var = ATAgetArgument(data_expr, 0);
-    if (ATindexOf(bound_vars, (ATerm) var, 0) == -1) {
-      bound_vars = ATinsert(bound_vars, (ATerm) var);
-    }
-    get_free_vars_appl(ATAgetArgument(data_expr, 1), bound_vars, p_free_vars);
-  } else if (gsIsLambda(data_expr) || gsIsForall(data_expr) ||
-      gsIsExists(data_expr)) {
-    //data_expr is a lambda abstraction or a quantification; get free variables
-    //from the body where bound_vars is extended with the variable declaration
-    ATermList vars = ATLgetArgument(data_expr, 0);
-    while (!ATisEmpty(vars)) {
+  } else if (gsIsBinder(data_expr)) {
+    ATermAppl binding_operator = ATAgetArgument(data_expr, 0);
+    if (gsIsSetBagComp(binding_operator) || gsIsSetComp(binding_operator)
+        || gsIsBagComp(binding_operator)) {
+      //data_expr is a set or bag comprehension; get free variables from the body
+      //where bound_vars is extended with the variable declaration
+      ATermList vars = ATLgetArgument(data_expr, 1);
       ATermAppl var = ATAgetFirst(vars);
       if (ATindexOf(bound_vars, (ATerm) var, 0) == -1) {
         bound_vars = ATinsert(bound_vars, (ATerm) var);
       }
-      vars = ATgetNext(vars);
+      get_free_vars_appl(ATAgetArgument(data_expr, 2), bound_vars, p_free_vars);
+    } else if (gsIsLambda(binding_operator) || gsIsForall(binding_operator) ||
+      gsIsExists(binding_operator)) {
+      //data_expr is a lambda abstraction or a quantification; get free variables
+      //from the body where bound_vars is extended with the variable declaration
+      ATermList vars = ATLgetArgument(data_expr, 1);
+      while (!ATisEmpty(vars)) {
+        ATermAppl var = ATAgetFirst(vars);
+        if (ATindexOf(bound_vars, (ATerm) var, 0) == -1) {
+          bound_vars = ATinsert(bound_vars, (ATerm) var);
+        }
+        vars = ATgetNext(vars);
+      }
+      get_free_vars_appl(ATAgetArgument(data_expr, 2), bound_vars, p_free_vars);
     }
-    get_free_vars_appl(ATAgetArgument(data_expr, 1), bound_vars, p_free_vars);
   } else if (gsIsWhr(data_expr)) {
     //data_expr is a where clause; get free variables from the rhs's of the
     //where clause declarations and from the body where bound_vars is extended
@@ -1507,30 +1532,30 @@ ATermAppl impl_sort_set(ATermAppl sort_set, ATermList *p_substs,
   ATermList dfl = ATmakeList2((ATerm) d_sort_elt, (ATerm) f_sort_func);
   ATermList fgl = ATmakeList2((ATerm) f_sort_func, (ATerm) g_sort_func);
   ATermAppl false_func = impl_exprs_appl(
-    gsMakeLambda(ATmakeList1((ATerm) x_sort_elt), f), p_substs, p_data_decls);
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt), f), p_substs, p_data_decls);
   ATermAppl imp_func = impl_exprs_appl(
-    gsMakeLambda(ATmakeList1((ATerm) x_sort_elt),
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),
       gsMakeDataExprImp(
         gsMakeDataAppl(f_sort_func, x_sort_elt),
         gsMakeDataAppl(g_sort_func, x_sort_elt)
       )
     ), p_substs, p_data_decls);
   ATermAppl OrFunc = impl_exprs_appl(
-    gsMakeLambda(ATmakeList1((ATerm) x_sort_elt),
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),
       gsMakeDataExprOr(
         gsMakeDataAppl(f_sort_func, x_sort_elt),
         gsMakeDataAppl(g_sort_func, x_sort_elt)
       )
     ), p_substs, p_data_decls);
   ATermAppl and_func = impl_exprs_appl(
-    gsMakeLambda(ATmakeList1((ATerm) x_sort_elt),
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),
       gsMakeDataExprAnd(
         gsMakeDataAppl(f_sort_func, x_sort_elt),
         gsMakeDataAppl(g_sort_func, x_sort_elt)
       )
     ), p_substs, p_data_decls);
   ATermAppl not_func = impl_exprs_appl(
-    gsMakeLambda(ATmakeList1((ATerm) x_sort_elt),
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),
       gsMakeDataExprNot(gsMakeDataAppl(f_sort_func, x_sort_elt))
     ), p_substs, p_data_decls);
   p_data_decls->data_eqns = ATconcat(ATmakeList(13,
@@ -1675,23 +1700,23 @@ ATermAppl impl_sort_bag(ATermAppl sort_bag, ATermList *p_substs,
   ATermList dfl = ATmakeList2((ATerm) d_sort_elt, (ATerm) f_sort_func);
   ATermList fgl = ATmakeList2((ATerm) f_sort_func, (ATerm) g_sort_func);
   ATermAppl zero_func = impl_exprs_appl(
-    gsMakeLambda(ATmakeList1((ATerm) x_sort_elt), zero), p_substs, p_data_decls);
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt), zero), p_substs, p_data_decls);
   ATermAppl lte_func = impl_exprs_appl(
-    gsMakeLambda(ATmakeList1((ATerm) x_sort_elt),
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),
       gsMakeDataExprLTE(
         gsMakeDataAppl(f_sort_func, x_sort_elt),
         gsMakeDataAppl(g_sort_func, x_sort_elt)
       )
     ), p_substs, p_data_decls);
   ATermAppl add_func = impl_exprs_appl(
-    gsMakeLambda(ATmakeList1((ATerm) x_sort_elt),
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),
       gsMakeDataExprAdd(
         gsMakeDataAppl(f_sort_func, x_sort_elt),
         gsMakeDataAppl(g_sort_func, x_sort_elt)
       )
     ), p_substs, p_data_decls);
   ATermAppl subt_max0_func = impl_exprs_appl(
-    gsMakeLambda(ATmakeList1((ATerm) x_sort_elt),
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),
       gsMakeWhr(
         gsMakeDataExprIf(
           gsMakeDataExprGT(m, n), gsMakeDataExprGTESubt(m, n), zero
@@ -1702,18 +1727,18 @@ ATermAppl impl_sort_bag(ATermAppl sort_bag, ATermList *p_substs,
       )
     ), p_substs, p_data_decls);
   ATermAppl min_func = impl_exprs_appl(
-    gsMakeLambda(ATmakeList1((ATerm) x_sort_elt),
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),
       gsMakeDataExprMin(
         gsMakeDataAppl(f_sort_func, x_sort_elt),
         gsMakeDataAppl(g_sort_func, x_sort_elt)
       )
     ), p_substs, p_data_decls);
   ATermAppl bag2set_func = impl_exprs_appl(
-    gsMakeLambda(ATmakeList1((ATerm) x_sort_elt),
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),
       gsMakeDataExprEltIn(x_sort_elt, s_sort_id)
     ), p_substs, p_data_decls);
   ATermAppl set2bag_func = impl_exprs_appl(
-    gsMakeLambda(ATmakeList1((ATerm) x_sort_elt),
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),
       gsMakeDataExprIf(
         gsMakeDataExprEltIn(x_sort_elt, u_sort_set_impl),
         gsMakeDataExprNat_int(1),

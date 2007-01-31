@@ -1784,17 +1784,17 @@ static ATermAppl substitute_data_rec(
   }
 
   /* Exists en forall do not occur in terms.
-  if (gsIsExists(t))
+  if (gsIsExists(ATAgetArgument(t, 0)))
   { gsfprintf(stderr,"Warning: no renaming of variable in exists\n");
-    return gsMakeExists(
+    return gsMakeBinder(gsMakeExists(),
                  ATLgetArgument(t,0),
                  substitute_data_rec(terms,vars,ATAgetArgument(t,1)));
                    
   } 
 
-  if (gsIsForall(t))
+  if (gsIsForall(ATAgetArgument(t, 0)))
   { gsfprintf(stderr,"Warning: no renaming of variable in forall\n");
-    return gsMakeForall(
+    return gsMakeBinder(gsMakeForall(), 
                  ATLgetArgument(t,0),
                  substitute_data_rec(terms,vars,ATAgetArgument(t,1)));
                    

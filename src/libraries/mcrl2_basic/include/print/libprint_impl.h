@@ -1178,27 +1178,34 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(PrintPart_List)(OutStream, ATLgetArgument(DataExpr, 0),
       pp_format, ShowSorts, 0, NULL, ", ");
     PRINT_FUNC(fprints)(OutStream, "}");
-  } else if (gsIsSetBagComp(DataExpr)) {
-    //print set/bag comprehension
-    PRINT_FUNC(dbg_prints)("printing set/bag comprehension\n");
-    PRINT_FUNC(fprints)(OutStream, "{ ");
-    PRINT_FUNC(PrintDecl)(OutStream, ATAgetArgument(DataExpr, 0),
-      pp_format, true);
-    PRINT_FUNC(fprints)(OutStream, " | ");
-    PRINT_FUNC(PrintDataExpr)(OutStream, ATAgetArgument(DataExpr, 1),
-      pp_format, ShowSorts, 0);
-    PRINT_FUNC(fprints)(OutStream, " }");
-  } else if (gsIsLambda(DataExpr) || gsIsForall(DataExpr) || gsIsExists(DataExpr)) {
-    //print lambda abstraction or universal/existential quantification
-    PRINT_FUNC(dbg_prints)("printing lambda abstraction or universal/existential quantification\n");
-    if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, "(");
-    PRINT_FUNC(fprints)(OutStream, (gsIsLambda(DataExpr)?"lambda ":(gsIsForall(DataExpr))?"forall ":"exists "));
-    PRINT_FUNC(PrintDecls)(OutStream, ATLgetArgument(DataExpr, 0),
-      pp_format, NULL, ", ");
-    PRINT_FUNC(fprints)(OutStream, ". ");
-    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(DataExpr, 1),
-      pp_format, ShowSorts, 1);
-    if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, ")");
+  } else if (gsIsBinder(DataExpr)) {
+    ATermAppl BindingOperator = ATAgetArgument(DataExpr, 0);
+    if (gsIsSetBagComp(BindingOperator) || gsIsSetComp(BindingOperator)
+        || gsIsBagComp(BindingOperator)) {
+      //print set/bag comprehension
+      PRINT_FUNC(dbg_prints)("printing set/bag comprehension\n");
+      PRINT_FUNC(fprints)(OutStream, "{ ");
+      PRINT_FUNC(PrintDecl)(OutStream, ATAgetArgument(DataExpr, 1),
+        pp_format, true);
+      PRINT_FUNC(fprints)(OutStream, " | ");
+      PRINT_FUNC(PrintDataExpr)(OutStream, ATAgetArgument(DataExpr, 2),
+        pp_format, ShowSorts, 0);
+      PRINT_FUNC(fprints)(OutStream, " }");
+    } else if (gsIsLambda(BindingOperator) || gsIsForall(BindingOperator) 
+            || gsIsExists(BindingOperator)) {
+      //print lambda abstraction or universal/existential quantification
+      PRINT_FUNC(dbg_prints)("printing lambda abstraction or universal/existential quantification\n");
+      if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, "(");
+      PRINT_FUNC(fprints)(OutStream, (gsIsLambda(BindingOperator)?"lambda ":
+                                     (gsIsForall(BindingOperator))?"forall ":
+                                     "exists "));
+      PRINT_FUNC(PrintDecls)(OutStream, ATLgetArgument(DataExpr, 1),
+        pp_format, NULL, ", ");
+      PRINT_FUNC(fprints)(OutStream, ". ");
+      PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(DataExpr, 2),
+        pp_format, ShowSorts, 1);
+      if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, ")");
+    }
   } else if (gsIsWhr(DataExpr)) {
     //print where clause
     PRINT_FUNC(dbg_prints)("printing where clause\n");

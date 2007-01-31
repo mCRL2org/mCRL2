@@ -81,10 +81,7 @@
                  | ListEnum(<DataExpr>+, <SortExprOrUnknown>)            [- di]
                  | SetEnum(<DataExpr>+, <SortExprOrUnknown>)             [- di]
                  | BagEnum(<BagEnumElt>+, <SortExprOrUnknown>)           [- di]
-                 | SetBagComp(<DataVarId>, <DataExpr>)                   [- di]
-                 | Forall(<DataVarId>+, <DataExpr>)                      [- di]
-                 | Exists(<DataVarId>+, <DataExpr>)                      [- di]
-                 | Lambda(<DataVarId>+, <DataExpr>)                      [- di]
+                 | Binder(<BindingOperator>, <DataVarId>+, <DataExpr>)   [- di]
                  | Whr(<DataExpr>, <WhrDecl>+)                           [- di]
 
 //data variable identifier
@@ -95,6 +92,15 @@
 
 //bag enumeration element
 <BagEnumElt>   ::= BagEnumElt(<DataExpr>, <DataExpr>)
+
+//binding operator
+<BindingOperator> 
+                ::= SetBagComp                                           [- tc]
+                 | SetComp                                               [+ tc]
+                 | BagComp                                               [+ tc]
+                 | Forall
+                 | Exists
+                 | Lambda
 
 //where clause declaration
 <WhrDecl>      ::= WhrDecl(<String>, <DataExpr>)
