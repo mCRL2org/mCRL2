@@ -135,7 +135,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& confi
   using namespace sip::datatype;
   using namespace sip::layout::elements;
 
-  layout::manager::aptr top = layout::vertical_box::create();
+  layout::manager::aptr top(layout::vertical_box::create());
   layout::manager* current_box = new horizontal_box();
 
   squadt_utility::radio_button_helper < RewriteStrategy >

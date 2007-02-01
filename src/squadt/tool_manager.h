@@ -41,9 +41,11 @@ namespace squadt {
    *    act as a proxy, and in the future do load balancing for a number
    *    executors that may run on different machines
    **/
-  class tool_manager {
+  class tool_manager : public utility::visitable< tool_manager > {
     friend class build_system;
     friend class processor_impl;
+    friend class store_visitor_impl;
+    friend class restore_visitor_impl;
  
     public:
  
@@ -92,6 +94,9 @@ namespace squadt {
 
       /** \brief Get the tool_capabilities object for a tool */
       bool query_tool(tool&);
+
+      /** \brief Reverts to the default configuration */
+      void factory_configuration();
 
       /** \brief Get the list of known tools */
       tool_const_sequence get_tools() const;

@@ -6,6 +6,8 @@
 #include <map>
 #include <memory>
 
+#include <boost/integer.hpp>
+
 #include <sip/layout_base.h>
 #include <sip/detail/layout_mediator.h>
 
@@ -50,51 +52,54 @@ namespace sip {
       inline bool operator!=(margins const&) const;
     };
 
+    /** \brief Type for element identifiers () */
+    typedef boost::uint_t< (sizeof(sip::layout::element*) << 3) >::least  element_identifier;
+
     /** \brief Base class for layout constraint containers */
-    class constraints {
+    class properties : public utility::visitable< properties > {
+      friend class sip::store_visitor_impl;
+      friend class sip::restore_visitor_impl;
+
       public:
-        horizontal_alignment alignment_horizontal; ///< how the element is aligned horizontally
-        vertical_alignment   alignment_vertical;   ///< how the element is aligned vertically
-        margins              margin;               ///< the margins that should be observed around the element
-        visibility           visible;              ///< whether or not the element affects layout and is visible
-        bool                 grow;                 ///< whether or not to expand the control to fill available space
-        bool                 enabled;              ///< whether or not the control is enabled
+
+        horizontal_alignment m_alignment_horizontal; ///< how the element is aligned horizontally
+        vertical_alignment   m_alignment_vertical;   ///< how the element is aligned vertically
+        margins              m_margin;               ///< the margins that should be observed around the element
+        visibility           m_visible;              ///< whether or not the element affects layout and is visible
+        bool                 m_grow;                 ///< whether or not to expand the control to fill available space
+        bool                 m_enabled;              ///< whether or not the control is enabled
+
+        /** \brief Constructor */
+        inline properties();
        
         /** \brief Constructor */
-        inline constraints(vertical_alignment const&, horizontal_alignment const&, margins const&, visibility const&);
+        inline properties(vertical_alignment const&, horizontal_alignment const&, margins const&, visibility const&);
        
         /** \brief Constructor, for when horizontal alignment does not matter */
-        inline constraints(vertical_alignment const&, margins const&, visibility const&);
+        inline properties(vertical_alignment const&, margins const&, visibility const&);
        
         /** \brief Constructor, for when vertical alignment does not matter */
-        inline constraints(horizontal_alignment const&, margins const&, visibility const&);
-
-        /** \brief Write out the layout constraint in XML format */
-        void write(std::ostream&) const;
-
-        /** \brief Write out the layout constraint in XML format (differences only) */
-        void write(constraints const&, std::ostream&) const;
-
-        /** \brief Read back a layout constraint, in XML format (differences only) */
-        void read(xml2pp::text_reader&);
+        inline properties(horizontal_alignment const&, margins const&, visibility const&);
 
         /** \brief Whether the control is allowed to grow */
         inline void set_growth(bool b);
 
         /** \brief Compares for equality */
-        inline bool operator==(constraints const&) const;
+        inline bool operator==(properties const&) const;
 
         /** \brief Compares for inequality */
-        inline bool operator!=(constraints const&) const;
+        inline bool operator!=(properties const&) const;
     };
 
     /** \brief Abstract base class for layout managers */
-    class manager : public element {
+    class manager : public sip::layout::element {
+      friend class sip::store_visitor_impl;
+      friend class sip::restore_visitor_impl;
       friend class sip::layout::element;
 
       public:
 
-        /** \brief Convenience type for hiding auto pointer implementation */
+        /** \brief Type alias to simplify using auto pointers */
         typedef std::auto_ptr < manager > aptr;
 
       public:
@@ -105,13 +110,13 @@ namespace sip {
         /** \brief The default visibility of elements */
         static const visibility  default_visibility;
 
-        /** \brief Default constraints */
-        static const constraints default_constraints;
+        /** \brief Default properties */
+        static const properties  default_properties;
 
       protected:
 
-        /** \brief Attaches a layout element to a manager, using layout constraints */
-        inline void attach(layout::mediator*, mediator::wrapper_aptr, constraints const*) const;
+        /** \brief Attaches a layout element to a manager, using layout properties */
+        inline void attach(layout::mediator*, mediator::wrapper_aptr, properties const*) const;
 
       public:
 
@@ -125,14 +130,15 @@ namespace sip {
         /** Adds a new element to the box */
         virtual element* add(element*, visibility const&) = 0;
 
-        /** \brief Recursively builds the state of the object */
-        static aptr static_read_structure(element::read_context&); 
-
         /** \brief Instantiate a layout element, through a mediator */
         virtual mediator::wrapper_aptr instantiate(layout::mediator*) = 0;
 
         /** \brief Destructor */
         virtual ~manager() = 0;
+    };
+
+    template < typename T >
+    class manager_impl : public base_element_impl< T >, public manager {
     };
 
     /**
@@ -141,27 +147,24 @@ namespace sip {
      * Elements are laid out horizontally or vertically, according to the chosen box variant.
      **/
     class box : public manager {
+      friend class sip::store_visitor_impl;
+      friend class sip::restore_visitor_impl;
 
       protected:
 
         /** \brief The type of the list with the element managed by this manager */
-        typedef std::vector < std::pair < element*, constraints > > children_list;
+        typedef std::map < element_identifier, std::pair< element*, properties > > children_list;
 
       protected:
 
         /** \brief The layout elements directly contained in this box */
-        children_list children;
+        children_list m_children;
 
         /** \brief Resets private members to defaults */
         inline void clear();
 
         /** \brief Instantiate a layout element, through a mediator */
         inline mediator::wrapper_aptr instantiate(layout::mediator::aptr) const;
-
-      private:
-
-        /** \brief Read back a layout structure in XML format */
-        void read_structure(element::read_context& r);
 
       public:
 
@@ -172,7 +175,7 @@ namespace sip {
         inline element* add(element*);
 
         /** Adds a new element to the box */
-        inline element* add(element*, constraints const&);
+        inline element* add(element*, properties const&);
 
         /** Adds a new element to the box */
         inline element* add(element*, margins const&,
@@ -184,11 +187,12 @@ namespace sip {
         /** \brief Instantiate a layout element, through a mediator */
         virtual mediator::wrapper_aptr instantiate(layout::mediator*) = 0;
 
-        /** \brief Recursively traverses layout structure to find an element by its id */
-        element* find(element::identifier);
-
         /** \brief Destructor */
         virtual ~box() = 0;
+    };
+
+    template < typename T >
+    class box_impl : public base_element_impl< T >, public box {
     };
 
     /**
@@ -196,7 +200,9 @@ namespace sip {
      *
      * Elements are laid out vertically
      **/
-    class vertical_box : public box {
+    class vertical_box : public box_impl< vertical_box > {
+      friend class sip::store_visitor_impl;
+      friend class sip::restore_visitor_impl;
       friend class sip::layout::manager;
       friend class sip::layout::element;
 
@@ -216,15 +222,12 @@ namespace sip {
         inline vertical_box();
 
         /** \brief Instantiates a layout manager and returns a shared pointer */
-        inline static manager::aptr create();
+        inline static std::auto_ptr < vertical_box > create();
 
         /** Adds a new element to the box */
         inline element* add(element*, alignment const&,
                                   margins const& = manager::default_margins,
                                   visibility const& = manager::default_visibility);
-
-        /** \brief Write out the layout structure in XML format */
-        void write_structure(std::ostream&) const;
 
         /** \brief Instantiate a layout element, through a mediator */
         inline mediator::wrapper_aptr instantiate(layout::mediator*);
@@ -235,7 +238,9 @@ namespace sip {
      *
      * Elements are laid out vertically
      **/
-    class horizontal_box : public box {
+    class horizontal_box : public box_impl< horizontal_box > {
+      friend class sip::store_visitor_impl;
+      friend class sip::restore_visitor_impl;
       friend class sip::layout::manager;
       friend class sip::layout::element;
 
@@ -255,90 +260,91 @@ namespace sip {
         inline horizontal_box();
 
         /** \brief Instantiates a layout manager and returns a shared pointer */
-        inline static manager::aptr create();
+        inline static std::auto_ptr < horizontal_box > create();
 
         /** Adds a new element to the box */
         inline element* add(element*, alignment const&,
                                   margins const& = manager::default_margins,
                                   visibility const& = manager::default_visibility);
 
-        /** \brief Write out the layout structure in XML format */
-        void write_structure(std::ostream&) const;
-
         /** \brief Instantiate a layout element, through a mediator */
         inline mediator::wrapper_aptr instantiate(layout::mediator*);
     };
 
     /**
-     * @param m the mediator object to use
-     * @param d the data needed
-     * @param c the layout constraints
+     * \param m the mediator object to use
+     * \param d the data needed
+     * \param c the layout properties
      **/
-    inline void manager::attach(layout::mediator* m, mediator::wrapper_aptr d, constraints const* c) const {
+    inline void manager::attach(layout::mediator* m, mediator::wrapper_aptr d, properties const* c) const {
       m->attach(d, c);
     }
 
     inline manager::~manager() {
     }
 
-    inline constraints::constraints(vertical_alignment const& av, horizontal_alignment const& ah, margins const& m, visibility const& v) :
-                                                alignment_horizontal(ah), alignment_vertical(av), margin(m), visible(v), grow(false) {
+    inline properties::properties() : m_alignment_horizontal(center), m_alignment_vertical(middle),
+                m_margin(manager::default_margins), m_visible(manager::default_visibility), m_grow(false) {
     }
 
-    inline constraints::constraints(vertical_alignment const& av, margins const& m, visibility const& v) :
-                                                alignment_horizontal(center), alignment_vertical(av), margin(m), visible(v), grow(false) {
+    inline properties::properties(vertical_alignment const& av, horizontal_alignment const& ah, margins const& m, visibility const& v) :
+                                                m_alignment_horizontal(ah), m_alignment_vertical(av), m_margin(m), m_visible(v), m_grow(false) {
     }
 
-    inline constraints::constraints(horizontal_alignment const& ah, margins const& m, visibility const& v) :
-                                                alignment_horizontal(ah), alignment_vertical(middle), margin(m), visible(v), grow(false) {
+    inline properties::properties(vertical_alignment const& av, margins const& m, visibility const& v) :
+                                                m_alignment_horizontal(center), m_alignment_vertical(av), m_margin(m), m_visible(v), m_grow(false) {
     }
 
-    inline void constraints::set_growth(bool b) {
-      grow = b;
+    inline properties::properties(horizontal_alignment const& ah, margins const& m, visibility const& v) :
+                                                m_alignment_horizontal(ah), m_alignment_vertical(middle), m_margin(m), m_visible(v), m_grow(false) {
+    }
+
+    inline void properties::set_growth(bool b) {
+      m_grow = b;
     }
 
     /**
-     * @param[in] t the top margin
-     * @param[in] r the right margin
-     * @param[in] b the bottom margin
-     * @param[in] l the left margin
+     * \param[in] t the top margin
+     * \param[in] r the right margin
+     * \param[in] b the bottom margin
+     * \param[in] l the left margin
      **/
     inline margins::margins(const unsigned short t, const unsigned short r, const unsigned short b, const unsigned short l) :
                                                                 top(t), right(r), bottom(b), left(l) {
     }
 
     /**
-     * @param[in] m the margins to compare agains
+     * \param[in] m the margins to compare agains
      **/
     inline bool margins::operator==(margins const& m) const {
       return (top == m.top && left == m.left && bottom == m.bottom && right == m.right);
     }
 
     /**
-     * @param[in] m the margins to compare agains
+     * \param[in] m the margins to compare agains
      **/
     inline bool margins::operator!=(margins const& m) const {
       return (top != m.top || left != m.left || bottom != m.bottom || right != m.right);
     }
 
     /**
-     * @param[in] c the constraints object to compare against
+     * \param[in] c the properties object to compare against
      **/
-    inline bool constraints::operator==(constraints const& c) const {
-      return (alignment_horizontal == c.alignment_horizontal &&
-              alignment_vertical == c.alignment_vertical &&
-              margin == c.margin && visible == c.visible &&
-              grow == c.grow && enabled == c.enabled);
+    inline bool properties::operator==(properties const& c) const {
+      return (m_alignment_horizontal == c.m_alignment_horizontal &&
+              m_alignment_vertical == c.m_alignment_vertical &&
+              m_margin == c.m_margin && m_visible == c.m_visible &&
+              m_grow == c.m_grow && m_enabled == c.m_enabled);
     }
 
     /**
-     * @param[in] c the constraints object to compare against
+     * \param[in] c the properties object to compare against
      **/
-    inline bool constraints::operator!=(constraints const& c) const {
-      return (alignment_horizontal != c.alignment_horizontal ||
-              alignment_vertical != c.alignment_vertical ||
-              margin != c.margin || visible != c.visible ||
-              grow != c.grow || enabled != c.enabled);
+    inline bool properties::operator!=(properties const& c) const {
+      return (m_alignment_horizontal != c.m_alignment_horizontal ||
+              m_alignment_vertical != c.m_alignment_vertical ||
+              m_margin != c.m_margin || m_visible != c.m_visible ||
+              m_grow != c.m_grow || m_enabled != c.m_enabled);
     }
 
     inline box::box() {
@@ -350,106 +356,106 @@ namespace sip {
     inline horizontal_box::horizontal_box() {
     }
 
-    inline manager::aptr vertical_box::create() {
-      return (manager::aptr(new vertical_box()));
+    inline std::auto_ptr < vertical_box > vertical_box::create() {
+      return (std::auto_ptr < vertical_box >(new vertical_box()));
     }
 
-    inline manager::aptr horizontal_box::create() {
-      return (manager::aptr(new horizontal_box()));
+    inline std::auto_ptr < horizontal_box > horizontal_box::create() {
+      return (std::auto_ptr < horizontal_box >(new horizontal_box()));
     }
 
     inline void box::clear() {
-      children.clear();
+      m_children.clear();
     }
 
     /**
-     * @param[in] e a pointer to a layout element
+     * \param[in] e a pointer to a layout element
      **/
     inline element* box::add(element* e) {
-      return (add(e, default_constraints));
+      return (add(e, manager::default_properties));
     }
 
     /**
-     * @param[in] e a pointer to a layout element
-     * @param[in] c the layout constraints to observe
+     * \param[in] e a pointer to a layout element
+     * \param[in] c the layout properties to observe
      **/
-    inline element* box::add(element* e, constraints const& c) {
-      constraints cn = c;
+    inline element* box::add(element* e, properties const& c) {
+      properties cn = c;
       
       cn.set_growth(e->get_grow());
 
-      children.push_back(children_list::value_type(e, cn));
+      m_children[reinterpret_cast < element_identifier > (e)] = std::make_pair(e, cn);
 
       return (e);
     }
 
     /**
-     * @param[in] e a pointer to a layout element
-     * @param[in] a how the element should be aligned relative to the box
-     * @param[in] m the margins of the element relative to other elements that occupy the box
-     * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
+     * \param[in] e a pointer to a layout element
+     * \param[in] a how the element should be aligned relative to the box
+     * \param[in] m the margins of the element relative to other elements that occupy the box
+     * \param[in] v whether the element is visible and has an effect on other elements that occupy the box
      **/
     inline element* vertical_box::add(element* e, alignment const& a, margins const& m, visibility const& v) {
-      return (box::add(e, constraints(middle, a, m, v)));
+      return (box::add(e, properties(middle, a, m, v)));
     }
 
     /**
-     * @param[in] e a pointer to a layout element
-     * @param[in] a how the element should be aligned relative to the box
-     * @param[in] m the margins of the element relative to other elements that occupy the box
-     * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
+     * \param[in] e a pointer to a layout element
+     * \param[in] a how the element should be aligned relative to the box
+     * \param[in] m the margins of the element relative to other elements that occupy the box
+     * \param[in] v whether the element is visible and has an effect on other elements that occupy the box
      **/
     inline element* horizontal_box::add(element* e, alignment const& a, margins const& m, visibility const& v) {
-      return (box::add(e, constraints(a, left, m, v)));
+      return (box::add(e, properties(a, left, m, v)));
     }
 
     /**
-     * @param[in] e a pointer to a layout element
-     * @param[in] m the margins of the element relative to other elements that occupy the box
-     * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
+     * \param[in] e a pointer to a layout element
+     * \param[in] m the margins of the element relative to other elements that occupy the box
+     * \param[in] v whether the element is visible and has an effect on other elements that occupy the box
      **/
     inline element* box::add(element* e, margins const& m, visibility const& v) {
-      return (box::add(e, constraints(middle, left, m, v)));
+      return (box::add(e, properties(middle, left, m, v)));
     }
 
     /**
-     * @param[in] e a pointer to a layout element
-     * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
+     * \param[in] e a pointer to a layout element
+     * \param[in] v whether the element is visible and has an effect on other elements that occupy the box
      **/
     inline element* box::add(element* e, visibility const& v) {
-      return (box::add(e, constraints(middle, left, manager::default_margins, v)));
+      return (box::add(e, properties(middle, left, manager::default_margins, v)));
     }
 
     /**
-     * @param m the mediator object to use
+     * \param m the mediator object to use
      **/
     inline layout::mediator::wrapper_aptr box::instantiate(layout::mediator::aptr m) const {
       layout::mediator* n = m.get();
 
-      for (children_list::const_iterator i = children.begin(); i != children.end(); ++i) {
-        attach(n, (*i).first->instantiate(n), dynamic_cast < const layout::constraints* > (&(*i).second));
+      for (children_list::const_iterator i = m_children.begin(); i != m_children.end(); ++i) {
+        manager::attach(n, (*i).second.first->instantiate(n), dynamic_cast < const layout::properties* > (&(*i).second.second));
       }
 
       return (n->extract_data());
     }
 
     /**
-     * @param m the mediator object to use
+     * \param m the mediator object to use
      **/
     inline layout::mediator::wrapper_aptr vertical_box::instantiate(layout::mediator* m) {
       return (box::instantiate(m->build_vertical_box()));
     }
 
     /**
-     * @param m the mediator object to use
+     * \param m the mediator object to use
      **/
     inline layout::mediator::wrapper_aptr horizontal_box::instantiate(layout::mediator* m) {
       return (box::instantiate(m->build_horizontal_box()));
     }
 
     inline box::~box() {
-      for (children_list::const_iterator i = children.begin(); i != children.end(); ++i) {
-        delete (*i).first;
+      for (children_list::const_iterator i = m_children.begin(); i != m_children.end(); ++i) {
+        delete (*i).second.first;
       }
     }
   }

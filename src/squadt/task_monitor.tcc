@@ -8,6 +8,8 @@ namespace squadt {
 
     class task_monitor_impl : public sip::controller::communicator_impl {
       friend class task_monitor;
+      friend class restore_visitor_impl;
+      friend class store_visitor_impl;
 
       private:
  

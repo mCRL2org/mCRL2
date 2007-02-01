@@ -10,7 +10,7 @@ namespace sip {
 
     class manager;
     class element;
-    class constraints;
+    class properties;
 
     /**
      * \brief Abstract base class for interaction with a structure of connected
@@ -40,7 +40,7 @@ namespace sip {
         typedef std::auto_ptr < std::pair < aptr, wrapper_aptr > >                   connector_pair;
 
         /** \brief Function type for wrapping the attach methods */
-        typedef boost::function < void (wrapper_aptr, layout::constraints const*) >  attach_function;
+        typedef boost::function < void (wrapper_aptr, layout::properties const*) >  attach_function;
 
       protected:
 

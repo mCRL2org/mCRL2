@@ -24,7 +24,7 @@ namespace sip {
 
   namespace datatype {
 
-    class basic_datatype {
+    class basic_datatype : public utility::base_visitable {
 
       public:
 
@@ -32,12 +32,6 @@ namespace sip {
         typedef boost::shared_ptr < basic_datatype > sptr;
 
       public:
-
-        /** \brief Hook for store_visitor (visitor pattern) */
-        virtual void accept(store_visitor&, boost::tuple < basic_datatype const&, std::string const& > const&) const = 0;
-
-        /** \brief Converts a boolean to a string representation */
-        virtual void accept(restore_visitor&, boost::tuple < basic_datatype&, std::string& >&) = 0;
 
         /** \brief Converts a boolean to a string representation */
         template < typename U >
@@ -64,29 +58,7 @@ namespace sip {
      **/
     template < typename T >
     class basic_datatype_impl : public utility::visitable< T >, public basic_datatype {
-
-      public:
-
-        /** \brief Hook for store_visitor (visitor pattern) */
-        void accept(store_visitor&, boost::tuple < basic_datatype const&, std::string const& > const&) const;
-
-        /** \brief Converts a boolean to a string representation */
-        void accept(restore_visitor&, boost::tuple < basic_datatype&, std::string& >&);
     };
-
-    template < typename T >
-    inline void basic_datatype_impl< T >::accept(store_visitor& v, boost::tuple < basic_datatype const&, std::string const& > const& p) const {
-      boost::tuple < T const&, std::string const& > lp(static_cast < T const& > (p.get< 0 >()), p.get< 1 >());
-
-      v.visit(lp);
-    }
-
-    template < typename T >
-    inline void basic_datatype_impl< T >::accept(restore_visitor& v, boost::tuple < basic_datatype&, std::string& >& p) {
-      boost::tuple < T&, std::string& > lp(static_cast < T& > (p.get< 0 >()), p.get< 1 >());
-
-      v.visit(dynamic_cast < boost::tuple < T&, std::string& >& > (lp));
-    }
 
     /**
      * \brief Derived data type specifier for enumerations

@@ -32,8 +32,8 @@ namespace squadt {
    * and tool categories when given a format.
    **/
   class type_registry : public utility::visitable< type_registry > {
-    friend class preferences_read_visitor_impl;
-    friend class preferences_write_visitor_impl;
+    friend class restore_visitor_impl;
+    friend class store_visitor_impl;
 
     public:
 

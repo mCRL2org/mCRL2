@@ -1,8 +1,5 @@
-#include <iostream>
-
 #include <sip/layout_base.h>
 #include <sip/detail/layout_elements.h>
-#include <sip/detail/event_handlers.h>
 
 namespace sip {
   namespace layout {
@@ -14,14 +11,14 @@ namespace sip {
       /**
        * \param[in] c the text of the label
        **/
-      label::label(std::string const& c) : text(c) {
+      label::label(std::string const& c) : m_text(c) {
       }
 
       /**
        * \param[in] t the text of the label
        **/
       void label::set_text(std::string const& t) {
-        text = t;
+        m_text = t;
       }
      
       /**
@@ -38,7 +35,7 @@ namespace sip {
        * \param[in] m the mediator object to use
        **/
       layout::mediator::wrapper_aptr label::instantiate(layout::mediator* m) {
-        return (m->build_label(this, text));
+        return (m->build_label(this, m_text));
       }
      
       /**
@@ -46,34 +43,7 @@ namespace sip {
        * \param[in] t pointer to the associated (G)UI object
        **/
       void label::update(layout::mediator* m, layout::mediator::wrapper* t) const {
-        m->update_label(t, text);
-      }
-     
-      /**
-       * \param[out] o the stream to which to write the result
-       **/
-      void label::write_structure(std::ostream& o) const {
-        o << "<label id=\"" << id << "\">" << text << "</label>";
-      }
-
-      /**
-       * \param[in] r the read context with which to read
-       *
-       * \pre reader should point to a button element
-       * \post reader points to after the associated end tag of the box
-       **/
-      void label::read_structure(element::read_context& r) {
-        r.reader.next_element();
-
-        if (!r.reader.is_empty_element() && !r.reader.is_element("label")) {
-          r.reader.get_value(&text);
-
-          r.reader.next_element();
-        }
-
-        r.reader.skip_end_element("label");
-
-        current_event_handler->process(this);
+        m->update_label(t, m_text);
       }
 
       button::button() {
@@ -83,7 +53,7 @@ namespace sip {
       /**
        * \param[in] c the label for the button
        **/
-      button::button(std::string const& c) : label(c) {
+      button::button(std::string const& c) : m_label(c) {
         set_grow(false);
       }
      
@@ -91,7 +61,7 @@ namespace sip {
        * \param[in] l the label for the button
        **/
       void button::set_label(std::string const& l) {
-        label = l;
+        m_label = l;
       }
 
       /**
@@ -108,7 +78,7 @@ namespace sip {
        * \param[in] m the mediator object to use
        **/
       layout::mediator::wrapper_aptr button::instantiate(layout::mediator* m) {
-        return (m->build_button(this, label));
+        return (m->build_button(this, m_label));
       }
      
       /**
@@ -116,37 +86,16 @@ namespace sip {
        * \param[in] t pointer to the associated (G)UI object
        **/
       void button::update(layout::mediator* m, layout::mediator::wrapper* t) const {
-        m->update_button(t, label);
+        m->update_button(t, m_label);
       }
 
-      /**
-       * \param[out] o the stream to which to write the result
-       **/
-      void button::write_structure(std::ostream& o) const {
-        o << "<button id=\"" << id << "\" label=\"" << label << "\"/>";
-      }
-
-      /**
-       * \param[in] r the read context with which to read
-       *
-       * \pre reader should point to a button element
-       * \post reader points to after the associated end tag of the box
-       **/
-      void button::read_structure(element::read_context& r) {
-        r.reader.get_attribute(&label, "label");
-
-        r.reader.next_element();
-
-        current_event_handler->process(this);
-      }
-
-      radio_button::radio_button() : connection(this), selected(true), first(false) {
+      radio_button::radio_button() : m_connection(this), m_selected(true), m_first(false) {
       }
 
       /**
        * \param[in] c the label for the button
        **/
-      radio_button::radio_button(std::string const& c) : label(c), connection(this), selected(true), first(true) {
+      radio_button::radio_button(std::string const& c) : m_label(c), m_connection(this), m_selected(true), m_first(true) {
       }
 
       /**
@@ -155,53 +104,53 @@ namespace sip {
        * \param[in] s whether the button is selected or not
        **/
       radio_button::radio_button(std::string const& c, radio_button* r, bool s) :
-                        label(c), selected(s), first(false) {
+                        m_label(c), m_selected(s), m_first(false) {
 
         radio_button* n = r;
 
-        while (!n->connection->first) {
-          n = n->connection;
+        while (!n->m_connection->m_first) {
+          n = n->m_connection;
         }
 
-        connection = n->connection;
-        n->connection = this;
+        m_connection = n->m_connection;
+        n->m_connection = this;
 
-        if (selected) {
+        if (m_selected) {
           set_selected(true);
         }
       }
 
       std::string radio_button::get_label() const {
-        return (label);
+        return (m_label);
       }
      
       /**
        * \param[in] b whether or not to unselect connected radio buttons
        **/
       void radio_button::set_selected(bool b) {
-        for (radio_button* r = connection; r != this; r = r->connection) {
-          if (r->selected) {
-            r->selected = false;
+        for (radio_button* r = m_connection; r != this; r = r->m_connection) {
+          if (r->m_selected) {
+            r->m_selected = false;
 
             break;
           }
         }
 
-        selected = true;
+        m_selected = true;
       }
 
       radio_button const* radio_button::get_selected() const {
         radio_button const* r = this;
 
-        while (!r->selected) {
-          r = r->connection;
+        while (!r->m_selected) {
+          r = r->m_connection;
         }
 
         return (r);
       }
 
       bool radio_button::is_first_in_group() const {
-        return (first);
+        return (m_first);
       }
 
       /**
@@ -214,14 +163,14 @@ namespace sip {
       }
      
       bool radio_button::is_selected() const {
-        return (selected);
+        return (m_selected);
       }
 
       /**
        * \param[in] m the mediator object to use
        **/
       layout::mediator::wrapper_aptr radio_button::instantiate(layout::mediator* m) {
-        return (m->build_radio_button(this, label, selected));
+        return (m->build_radio_button(this, m_label, m_selected));
       }
      
       /**
@@ -229,62 +178,7 @@ namespace sip {
        * \param[in] t pointer to the associated (G)UI object
        **/
       void radio_button::update(layout::mediator* m, layout::mediator::wrapper* t) const {
-        m->update_radio_button(t, label, selected);
-      }
-
-      /**
-       * \param[out] o the stream to which to write the result
-       **/
-      void radio_button::write_structure(std::ostream& o) const {
-        o << "<radio-button id=\"" << id << "\" label=\"" << label
-          << "\" connected=\"" << connection->id;
-
-        if (selected) {
-          o << "\" selected=\"" << selected;
-        }
-        if (first) {
-          o << "\" first=\"true";
-        }
-
-        o << "\"/>";
-      }
-
-      /**
-       * \param[in] r the read context with which to read
-       *
-       * \pre reader should point to a radio-button element
-       * \post reader points to after the associated end tag of the box
-       **/
-      void radio_button::read_structure(element::read_context& r) {
-        element::identifier connected_to = 0;
-
-        r.reader.get_attribute(&label, "label");
-        r.reader.get_attribute(&connected_to, "connected");
-
-        first    = r.reader.get_attribute("first");
-        selected = r.reader.get_attribute("selected");
-
-        if (connection == 0) {
-          connection = static_cast < radio_button* > (r.element_for_id(connected_to));
-         
-          if (connection != 0) {
-            for (radio_button* i = connection; i != this; i = i->connection) {
-              i->connection = static_cast < radio_button* > (r.element_for_id(reinterpret_cast < element::identifier > (i->connection)));
-            }
-          }
-          else {
-            connection = reinterpret_cast < radio_button* > (connected_to);
-          }
-        }
-         
-        if (selected) {
-          /* Make sure all related radio buttons are not unselected */
-          set_selected(true);
-        }
-
-        r.reader.next_element();
-
-        current_event_handler->process(this);
+        m->update_radio_button(t, m_label, m_selected);
       }
 
       checkbox::checkbox() {
@@ -294,14 +188,14 @@ namespace sip {
        * \param[in] c the label for the button
        * \param[in] s the status of the checkbox
        **/
-      checkbox::checkbox(std::string const& c, bool s) : label(c), status(s) {
+      checkbox::checkbox(std::string const& c, bool s) : m_label(c), m_status(s) {
       }
 
       /**
        * \param[in] b the new status
        **/
       void checkbox::set_status(bool b) {
-        status = b;
+        m_status = b;
       }
 
       /**
@@ -315,14 +209,14 @@ namespace sip {
       }
 
       bool checkbox::get_status() const {
-        return (status);
+        return (m_status);
       }
      
       /**
        * \param[in] m the mediator object to use
        **/
       layout::mediator::wrapper_aptr checkbox::instantiate(layout::mediator* m){
-        return (m->build_checkbox(this, label, status));
+        return (m->build_checkbox(this, m_label, m_status));
       }
 
       /**
@@ -330,31 +224,7 @@ namespace sip {
        * \param[in] t pointer to the associated (G)UI object
        **/
       void checkbox::update(layout::mediator* m, layout::mediator::wrapper* t) const {
-        m->update_checkbox(t, label, status);
-      }
-
-      /**
-       * \param[out] o the stream to which to write the result
-       **/
-      void checkbox::write_structure(std::ostream& o) const {
-        o << "<checkbox id=\"" << id << "\""
-          << " label=\"" << label << "\" status=\"" << status << "\"/>";
-      }
-
-      /**
-       * \param[in] r the read context with which to read
-       *
-       * \pre reader should point to a radio-button element
-       * \post reader points to after the associated end tag of the box
-       **/
-      void checkbox::read_structure(element::read_context& r) {
-        r.reader.get_attribute(&label, "label");
-
-        status = r.reader.get_attribute("status");
-
-        r.reader.next_element();
-
-        current_event_handler->process(this);
+        m->update_checkbox(t, m_label, m_status);
       }
 
       progress_bar::progress_bar() {
@@ -366,7 +236,7 @@ namespace sip {
        * \param[in] c the current position
        **/
       progress_bar::progress_bar(const unsigned int min, const unsigned int max, const unsigned int c)
-              : minimum(min), maximum(max), current(c) {
+              : m_minimum(min), m_maximum(max), m_current(c) {
       }
 
       /**
@@ -375,7 +245,7 @@ namespace sip {
        * \pre minimum <= v <= maximum
        **/
       void progress_bar::set_value(unsigned int v) {
-        current = v;
+        m_current = v;
       }
 
       /**
@@ -394,7 +264,7 @@ namespace sip {
        * \param[in] v the new value
        **/
       void progress_bar::set_minimum(unsigned int v) {
-        minimum = v;
+        m_minimum = v;
       }
 
       /**
@@ -411,7 +281,7 @@ namespace sip {
        * \param[in] v the new value
        **/
       void progress_bar::set_maximum(unsigned int v) {
-        maximum = v;
+        m_maximum = v;
       }
 
       /**
@@ -425,14 +295,14 @@ namespace sip {
       }
 
       unsigned int progress_bar::get_value() const {
-        return (current);
+        return (m_current);
       }
      
       /**
        * \param[in] m the mediator object to use
        **/
       layout::mediator::wrapper_aptr progress_bar::instantiate(layout::mediator* m) {
-        return (m->build_progress_bar(this, minimum, maximum, current));
+        return (m->build_progress_bar(this, m_minimum, m_maximum, m_current));
       }
      
       /**
@@ -440,52 +310,27 @@ namespace sip {
        * \param[in] t pointer to the associated (G)UI object
        **/
       void progress_bar::update(layout::mediator* m, layout::mediator::wrapper* t) const {
-        m->update_progress_bar(t, minimum, maximum, current);
+        m->update_progress_bar(t, m_minimum, m_maximum, m_current);
       }
 
-      /**
-       * \param[out] o the stream to which to write the result
-       **/
-      void progress_bar::write_structure(std::ostream& o) const {
-        o << "<progress-bar id=\"" << id << "\" minimum=\""
-          << minimum << "\" maximum=\"" << maximum
-          << "\" current=\"" << current <<  "\"/>";
+      text_field::text_field() : m_type(new sip::datatype::string()) {
       }
 
-      /**
-       * \param[in] r the read context with which to read
-       *
-       * \pre reader should point to a progress-bar element
-       * \post reader points to after the associated end tag of the box
-       **/
-      void progress_bar::read_structure(element::read_context& r) {
-        r.reader.get_attribute(&minimum, "minimum");
-        r.reader.get_attribute(&maximum, "maximum");
-        r.reader.get_attribute(&current, "current");
-
-        r.reader.next_element();
-
-        current_event_handler->process(this);
-      }
-
-      text_field::text_field() : type(new sip::datatype::string()) {
-      }
-
-      text_field::text_field(std::string const& s) : text(s), type(new sip::datatype::string()) {
+      text_field::text_field(std::string const& s) : m_text(s), m_type(new sip::datatype::string()) {
       }
 
       /**
        * \param[in] s the initial content of the text control
        * \param[in] t the a type description object for validation purposes
        **/
-      text_field::text_field(std::string const& s, basic_datatype::sptr& t) : text(s), type(t) {
+      text_field::text_field(std::string const& s, basic_datatype::sptr& t) : m_text(s), m_type(t) {
       }
      
       /**
        * \param[in] s the new text
        **/
       void text_field::set_text(std::string const& s) {
-        text = s;
+        m_text = s;
       }
 
       /**
@@ -499,14 +344,14 @@ namespace sip {
       }
 
       std::string text_field::get_text() const {
-        return (text);
+        return (m_text);
       }
 
       /**
        * \param[in] m the mediator object to use
        **/
       layout::mediator::wrapper_aptr text_field::instantiate(layout::mediator* m) {
-        return (m->build_text_field(this, text));
+        return (m->build_text_field(this, m_text));
       }
 
       /**
@@ -514,52 +359,7 @@ namespace sip {
        * \param[in] t pointer to the associated (G)UI object
        **/
       void text_field::update(layout::mediator* m, layout::mediator::wrapper* t) const {
-        m->update_text_field(t, text);
-      }
-
-      /**
-       * \param[out] o the stream to which to write the result
-       **/
-      void text_field::write_structure(std::ostream& o) const {
-        o << "<text-field id=\"" << id << "\">"
-          << "<text>" << text << "</text>";
-
-//        type->write(o, text);
-
-        o << "</text-field>";
-      }
-
-      /**
-       * \param[in] r the read context with which to read
-       *
-       * \pre reader should point to a text-field element
-       * \post reader points to after the associated end tag of the box
-       **/
-      void text_field::read_structure(element::read_context& r) {
-        r.reader.next_element();
-
-        if (r.reader.is_element("text")) {
-          if (!r.reader.is_end_element()) {
-            r.reader.next_element();
-
-            if (!r.reader.is_end_element()) { 
-              r.reader.get_value(&text);
-
-              r.reader.next_element();
-            }
-
-            r.reader.skip_end_element("text");
-          }
-        }
-
-        if (!r.reader.is_end_element("text")) {
-          /* Assume datatype specification */
-//          type = basic_datatype::read(r.reader).first;
-        }
-
-        r.reader.skip_end_element("text-field");
-
-        current_event_handler->process(this);
+        m->update_text_field(t, m_text);
       }
     }
   }

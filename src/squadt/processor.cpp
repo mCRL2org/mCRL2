@@ -10,7 +10,6 @@
 #include <boost/format.hpp>
 #include <boost/foreach.hpp>
 
-#include <xml2pp/text_reader.h>
 #include <sip/controller.h>
 #include <utility/logger.h>
 
@@ -345,13 +344,6 @@ namespace squadt {
   }
 
   /**
-   * \param s the stream to write to
-   **/
-  void processor::write(std::ostream& s) const {
-    impl->write(s);
-  }
-
-  /**
    * \param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
    **/
   void processor::set_tool(tool::sptr const& t) {
@@ -410,18 +402,6 @@ namespace squadt {
 
   processor::output_object_iterator processor::get_output_iterator() const {
     return (output_object_iterator(impl->outputs));
-  }
-
-  /**
-   * \param[in] p reference to the associated project_manager object
-   * \param[in] r an XML text reader object to read from
-   * \param[in] m a map that is used to associate shared pointers to processors with identifiers
-   *
-   * \pre must point to a processor element
-   * \attention the same map m must be used to read back all processor instances that were written with write()
-   **/
-  processor::sptr processor::read(boost::weak_ptr < project_manager > const& p, id_conversion_map& m, xml2pp::text_reader& r) {
-    return (processor_impl::read(p, m, r));
   }
 
   void processor::shutdown() {
@@ -548,6 +528,15 @@ namespace squadt {
 
   bool processor::is_active() const {
     return (impl->is_active());
+  }
+
+  /**
+   * \param[in] c the edit command to execute
+   **/
+  void processor::edit(execution::command* c) {
+    if (c != 0) {
+      impl->edit(c);
+    }
   }
 }
 

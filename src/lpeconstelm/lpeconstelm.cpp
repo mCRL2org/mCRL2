@@ -186,7 +186,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   using namespace sip::layout::elements;
 
   /* Create and add the top layout manager */
-  layout::manager::aptr top = layout::horizontal_box::create();
+  layout::manager::aptr top(layout::horizontal_box::create());
 
   /* First column */
   layout::vertical_box* column = new layout::vertical_box();

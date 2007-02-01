@@ -1,0 +1,14 @@
+project aterm
+       : source-location ../source
+       : build-dir $(BUILD_TOP)
+       : requirements
+          <include>../include
+       ;
+
+lib ticpp
+       : [ glob *.cpp ]
+       : <define>TIXML_USE_STL=YES
+       :
+       :
+       ;
+

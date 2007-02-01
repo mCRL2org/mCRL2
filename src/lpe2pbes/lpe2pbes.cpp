@@ -23,7 +23,6 @@
 #include "lpe/mucalculus.h"
 #include "lpe/pbes_translate.h"
 #include "lpe/pbes.h"
-#include "libpbes.h"
 
 using namespace std;
 using namespace lpe;

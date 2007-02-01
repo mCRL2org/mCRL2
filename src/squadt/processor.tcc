@@ -19,7 +19,9 @@
 namespace squadt {
   /// \cond PRIVATE_PART
 
-  class processor_impl {
+  class processor_impl : public utility::visitable < processor_impl > {
+    friend class store_visitor_impl;
+    friend class restore_visitor_impl;
     friend class processor;
     friend class processor::object_descriptor;
     friend class processor::monitor;
@@ -159,12 +161,6 @@ namespace squadt {
       void replace_output(object_descriptor::sptr, parameter_identifier const&, sip::object const&,
                 object_descriptor::t_status const& = object_descriptor::reproducible_up_to_date);
 
-      /** \brief Read from XML using a libXML2 reader */
-      static processor::sptr read(boost::weak_ptr < project_manager > const&, id_conversion_map&, xml2pp::text_reader&);
-
-      /** \brief Write as XML to stream */
-      void write(std::ostream& stream = std::cout) const;
-      
       /** \brief Removes the outputs of this processor from storage */
       void flush_outputs();
 
@@ -216,18 +212,6 @@ namespace squadt {
 
       outputs.push_back(p);
     }
-  }
-
-  /**
-   * \brief Operator for writing to stream
-   *
-   * \param[in] s stream to write to
-   * \param[out] p the processor to write out
-   **/
-  inline std::ostream& operator << (std::ostream& s, const processor& p) {
-    p.write(s);
-
-    return (s);
   }
 
   inline processor_impl::processor_impl(boost::shared_ptr < processor > const& tp, boost::weak_ptr < project_manager > p) :
@@ -314,7 +298,7 @@ namespace squadt {
     return (false);
   }
 
-  bool processor_impl::demote_status() {
+  inline bool processor_impl::demote_status() {
     bool result = false;
 
     if (!is_active()) {
@@ -324,168 +308,6 @@ namespace squadt {
     }
 
     return (result);
-  }
-
-  /**
-   * \param s the stream to write to
-   **/
-  inline void processor_impl::write(std::ostream& s) const {
-    s << "<processor";
-
-    if (tool_descriptor.get() != 0) {
-      s << " tool-name=\"" << tool_descriptor->get_name() << "\"";
-
-      if (selected_input_combination != 0) {
-        s << " format=\"" << selected_input_combination->m_mime_type << "\"";
-        s << " category=\"" << selected_input_combination->m_category << "\"";
-      }
-    }
-
-    if (!output_directory.empty()) {
-      s << " output-directory=\"" << output_directory << "\">";
-    }
-    else {
-      s << ">";
-    }
-
-    /* The last received configuration from the tool */
-    boost::shared_ptr < sip::configuration > c = current_monitor->get_configuration();
-
-    if (c.get() != 0) {
-      sip::visitors::store(*c, s);
-    }
-
-    /* The inputs */
-    for (input_list::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
-      s << "<input id=\"" << std::dec << reinterpret_cast < unsigned long > ((*i).get()) << "\"/>\n";
-    }
-
-    /* The outputs */
-    for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
-      s << "<output id=\"" << std::dec << reinterpret_cast < unsigned long > ((*i).get())
-        << "\" format=\"" << (*i)->mime_type
-        << "\" location=\"" << (*i)->location;
-
-      if ((*i)->status != object_descriptor::original) {
-        s << "\" identifier=\"" << std::dec << (*i)->identifier;
-      }
-
-      s << "\" status=\"" << (*i)->status;
-
-      if (!(*i)->checksum.is_zero()) {
-        s << "\" digest=\"" << (*i)->checksum;
-      }
-
-      s << "\" timestamp=\"" << std::dec << (*i)->timestamp << "\"/>\n";
-    }
-
-    s << "</processor>\n";
-  }
-
-  /**
-   * \param[in] p reference to the associated project_manager object
-   * \param[in] r an XML text reader object to read from
-   * \param[in] m a map that is used to associate shared pointers to processors with identifiers
-   *
-   * \pre must point to a processor element
-   * \attention the same map m must be used to read back all processor instances that were written with write()
-   **/
-  inline processor::sptr processor_impl::read(boost::weak_ptr < project_manager > const& p, id_conversion_map& m, xml2pp::text_reader& r) {
-    processor::sptr c = processor::create(p);
-    std::string     temporary;
-
-    if (r.get_attribute(&temporary, "tool-name")) {
-      c->impl->tool_descriptor = global_build_system.get_tool_manager()->get_tool_by_name(temporary);
-
-      std::string format;
-      std::string category;
-
-      if (r.get_attribute(&category, "category") && r.get_attribute(&format, "format")) {
-        c->impl->selected_input_combination = c->impl->tool_descriptor->find_input_combination(
-                      sip::tool::category::fit(category), sip::mime_type(format));
-      }
-    }
-
-    c->impl->output_directory = r.get_attribute_as_string("output-directory");
-
-    r.next_element();
-
-    if (r.is_element("configuration")) {
-      boost::shared_ptr < sip::configuration > new_configuration(new sip::configuration);
-
-      sip::visitors::restore(*new_configuration, r);
-
-       c->impl->current_monitor->set_configuration(new_configuration);
-    }
-
-    /* Read inputs */
-    while (r.is_element("input")) {
-      unsigned long id;
-
-      if (!r.get_attribute(&id, "id")) {
-        throw (exception::exception(exception::required_attributes_missing, "processor->input"));
-      }
-      else {
-        assert(m.find(id) != m.end());
-
-        c->impl->inputs.push_back(object_descriptor::sptr(m[id]));
-      }
-
-      r.next_element();
-
-      r.skip_end_element("input");
-    }
-
-    /* Read outputs */
-    while (r.is_element("output")) {
-      unsigned long id;
-      bool          b = r.get_attribute(&id, "id");
-
-      if (b) {
-        std::string format = r.get_attribute_as_string("format");
-
-        if (!format.empty()) {
-          assert(m.find(id) == m.end());
-
-          m[id] = object_descriptor::sptr(new object_descriptor(sip::mime_type(format)));
-       
-          c->impl->outputs.push_back(m[id]);
-        }
-        else {
-          throw (exception::exception(exception::required_attributes_missing, "processor->output"));
-        }
-      }
-
-      object_descriptor& new_descriptor = *m[id];
-
-      if (!(b && r.get_attribute(&new_descriptor.location, "location")
-              && r.get_attribute(&id, "status"))
-              && (r.get_attribute(&new_descriptor.identifier, "identifier") || id == object_descriptor::original)
-              && r.get_attribute(&new_descriptor.timestamp, "timestamp")) {
-
-        throw (exception::exception(exception::required_attributes_missing, "processor->output"));
-      }
-
-      new_descriptor.status = static_cast < object_status > ((id == object_descriptor::generation_in_progress) ?
-                                                      object_descriptor::reproducible_nonexistent : id);
-
-      if (r.get_attribute(&temporary, "digest")) {
-        new_descriptor.checksum.read(temporary.c_str());
-      }
-      else {
-        new_descriptor.checksum = md5pp::zero_digest;
-      }
-
-      new_descriptor.generator = c;
-
-      r.next_element();
-
-      r.skip_end_element("output");
-    }
-
-    r.skip_end_element("processor");
-
-    return (c);
   }
 
   inline bool processor_impl::is_active() const {
@@ -863,15 +685,6 @@ namespace squadt {
     current_monitor->get_logger()->log(1, "executing command `" + c->as_string() + "'\n");
 
     global_build_system.get_tool_manager()->impl->execute(c, boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
-  }
-
-  /**
-   * \param[in] c the edit command to execute
-   **/
-  void processor::edit(execution::command* c) {
-    if (c != 0) {
-      impl->edit(c);
-    }
   }
 
   /// \endcond

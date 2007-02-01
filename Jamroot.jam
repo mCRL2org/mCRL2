@@ -111,8 +111,8 @@ else {
     }
    
     alias install
-            : install-shared-libraries
-              install-binaries
+            : install-binaries
+              install-shared-libraries
             ;
 
     targets = /tools/$(targets) ;
@@ -120,8 +120,9 @@ else {
   else {
     # Complete install
     alias install
-            : install-shared-libraries
-              install-static-libraries
+            :
+              install-shared-libraries
+#              install-static-libraries
               install-binaries
               install-plugins
               install-examples
@@ -152,11 +153,11 @@ else {
             <install-dependencies>on <install-type>EXE
           ;
 
-  stage install-static-libraries
-          : $(targets)
-          : <location>$(LIB_DIR)
-            <install-dependencies>on <install-type>STATIC_LIB
-          ;
+#  stage install-static-libraries
+#          : $(targets)
+#          : <location>$(LIB_DIR)
+#            <install-dependencies>on <install-type>STATIC_LIB
+#          ;
 
   stage install-shared-libraries
           : $(targets)
@@ -187,5 +188,5 @@ else {
             <install-type>SHARED_LIB
           ;
 
-  explicit install-examples install-headers install-binaries install-plugins install-static-libraries install-shared-libraries ;
+  explicit install-headers install-binaries install-plugins install-examples install-shared-libraries ;
 }

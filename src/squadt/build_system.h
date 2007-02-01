@@ -31,8 +31,8 @@ namespace squadt {
    * \brief Container class for main components
    **/
   class build_system : public utility::visitable< build_system >, private boost::noncopyable {
-    friend class preferences_read_visitor_impl;
-    friend class preferences_write_visitor_impl;
+    friend class restore_visitor_impl;
+    friend class store_visitor_impl;
 
     private:
 

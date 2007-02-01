@@ -191,7 +191,7 @@ namespace sip {
     };
 
     /**
-     * @param[in] l a logger object used to write logging messages to
+     * \param[in] l a logger object used to write logging messages to
      *
      * \pre l != 0
      **/
@@ -223,8 +223,8 @@ namespace sip {
     }
 
     /**
-     * @param d a stream that contains the data to be delived
-     * @param o a pointer to the transceiver on which the data was received
+     * \param d a stream that contains the data to be delived
+     * \param o a pointer to the transceiver on which the data was received
      **/
     template < class M >
     void basic_messenger_impl< M >::deliver(std::istream& d, typename M::end_point o) {
@@ -238,14 +238,14 @@ namespace sip {
     }
 
     /**
-     * @param m the message that is to be sent
+     * \param m the message that is to be sent
      **/
     template < class M >
     inline void basic_messenger_impl< M >::send_message(const M& m) {
       logger->log(1, boost::format("sent     id : %u, type : %s\n") % getpid() % as_string(m.get_type()));
-      logger->log(2, boost::format(" data : \"%s\"\n") % m.to_xml());
+      logger->log(2, boost::format(" data : \"%s\"\n") % m.to_string());
 
-      send(tag_open + m.to_xml() + tag_close);
+      send(tag_open + sip::visitors::store(m) + tag_close);
     }
  
     template < class M >
@@ -254,8 +254,8 @@ namespace sip {
     }
 
     /**
-     * @param h the handler function that is to be executed
-     * @param t the message type on which delivery h is to be executed
+     * \param h the handler function that is to be executed
+     * \param t the message type on which delivery h is to be executed
      **/
     template < class M >
     inline void basic_messenger_impl< M >::add_handler(const typename M::type_identifier_t t, handler_type h) {
@@ -269,7 +269,7 @@ namespace sip {
     }
 
     /**
-     * @param t the message type for which to clear the event handler
+     * \param t the message type for which to clear the event handler
      **/
     template < class M >
     inline void basic_messenger_impl< M >::clear_handlers(const typename M::type_identifier_t t) {
@@ -281,8 +281,8 @@ namespace sip {
     }
  
     /**
-     * @param t the message type for which to clear the event handler
-     * @param h the handler to remove
+     * \param t the message type for which to clear the event handler
+     * \param h the handler to remove
      **/
     template < class M >
     inline void basic_messenger_impl< M >::remove_handler(const typename M::type_identifier_t t, handler_type h) {
@@ -294,8 +294,8 @@ namespace sip {
     }
 
     /**
-     * @param data a stream that contains the data to be delived
-     * @param o a pointer to the transceiver on which the data was received
+     * \param data a stream that contains the data to be delivered
+     * \param o a pointer to the transceiver on which the data was received
      *
      * \pre A message is of the form tag_open...tag_close
      * \pre Both tag_close == tag_open start with == '<' and do not further contain this character 
@@ -377,21 +377,25 @@ namespace sip {
 
             new_string.swap(buffer);
 
-            typename M::type_identifier_t t = M::extract_type(new_string);
+            if (!new_string.empty()) {
+              boost::shared_ptr< M > message(new M(o));
 
-            logger->log(1, boost::format("received id : %u, type : %u\n") % getpid() % as_string(t));
-            logger->log(2, boost::format(" data : \"%s\"\n") % new_string);
+              sip::visitors::restore(*message, new_string);
 
-            task_queue.push_back(boost::shared_ptr< M >(new M(new_string, t, o)));
+              logger->log(1, boost::format("received id : %u, type : %u\n") % getpid() % as_string(message->get_type()));
+              logger->log(2, boost::format(" data : \"%s\"\n") % message->to_string());
 
-            if (task_queue.size() == 1) {
-              boost::mutex::scoped_lock w(delivery_lock);
+              task_queue.push_back(message);
 
-              if (!delivery_thread_active) {
-                delivery_thread_active = true;
-
-                /* Start delivery thread */
-                boost::thread thread(boost::bind(&basic_messenger_impl< M >::service_handlers, this));
+              if (task_queue.size() == 1) {
+                boost::mutex::scoped_lock w(delivery_lock);
+             
+                if (!delivery_thread_active) {
+                  delivery_thread_active = true;
+             
+                  /* Start delivery thread */
+                  boost::thread thread(boost::bind(&basic_messenger_impl< M >::service_handlers, this));
+                }
               }
             }
           }
@@ -448,7 +452,7 @@ namespace sip {
     }
  
     /**
-     * @param t the type of the message
+     * \param t the type of the message
      **/
     template < class M >
     boost::shared_ptr< M > basic_messenger_impl< M >::find_message(typename M::type_identifier_t t) {
@@ -478,7 +482,7 @@ namespace sip {
     }
 
     /**
-     * @param p a reference to message_ptr that points to the message that should be removed from the queue
+     * \param p a reference to message_ptr that points to the message that should be removed from the queue
      * \pre the message must be in the queue
      **/
     template < class M >
@@ -547,7 +551,7 @@ namespace sip {
     }
 
     /**
-     * @param[in] m reference to the pointer to a message to deliver
+     * \param[in] m reference to the pointer to a message to deliver
      **/
     template < class M >
     basic_messenger_impl< M >::waiter_data::waiter_data(boost::shared_ptr < M >& m) {
@@ -555,7 +559,7 @@ namespace sip {
     }
 
     /**
-     * @param[in] m reference to the pointer to a message to deliver
+     * \param[in] m reference to the pointer to a message to deliver
      **/
     template < class M >
     void basic_messenger_impl< M >::waiter_data::wake(boost::shared_ptr < M > const& m) {
@@ -580,7 +584,7 @@ namespace sip {
     }
 
     /**
-     * @param[in] h a function, called after lock on mutex is obtained and before notification
+     * \param[in] h a function, called after lock on mutex is obtained and before notification
      **/
     template < class M >
     void basic_messenger_impl< M >::waiter_data::wait(boost::function < void () > h) {
@@ -592,8 +596,8 @@ namespace sip {
     }
 
     /**
-     * @param[in] h a function, called after lock on mutex is obtained and before notification
-     * @param[in] ts the maximum time to wait in seconds
+     * \param[in] h a function, called after lock on mutex is obtained and before notification
+     * \param[in] ts the maximum time to wait in seconds
      **/
     template < class M >
     void basic_messenger_impl< M >::waiter_data::wait(boost::function < void () > h, long const& ts) {
@@ -617,8 +621,8 @@ namespace sip {
     }
 
     /**
-     * @param[in] t the type of the message
-     * @param[in] ts the maximum time to wait in seconds
+     * \param[in] t the type of the message
+     * \param[in] ts the maximum time to wait in seconds
      **/
     template < class M >
     const boost::shared_ptr< M > basic_messenger_impl< M >::await_message(typename M::type_identifier_t t, long const& ts) {
@@ -645,7 +649,7 @@ namespace sip {
     }
 
     /**
-     * @param[in] t the type of the message
+     * \param[in] t the type of the message
      **/
     template < class M >
     const boost::shared_ptr< M > basic_messenger_impl< M >::await_message(typename M::type_identifier_t t) {

@@ -13,8 +13,6 @@ namespace squadt {
 
   using iterator_wrapper::constant_indirect_iterator;
 
-
-
   class project_manager_impl;
 
   /**
@@ -29,8 +27,10 @@ namespace squadt {
    *
    * \attention Processors may not depend on themselves.
    **/
-  class project_manager : public boost::noncopyable {
+  class project_manager : public utility::visitable< project_manager >, public boost::noncopyable {
     friend class project_manager_impl;
+    friend class restore_visitor_impl;
+    friend class store_visitor_impl;
 
     public:
 
@@ -101,7 +101,7 @@ namespace squadt {
       void read();
  
       /** \brief Writes project configuration to the project file */
-      void write() const;
+      void store() const;
 
       /** \brief Add a new processor to the project, if it is not already */
       void add(processor::ptr const&);

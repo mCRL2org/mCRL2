@@ -20,6 +20,10 @@ namespace md5pp {
 
   compact_digest zero_digest = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } };
 
+  void compact_digest::read(std::string const& s) {
+    read(s.c_str());
+  }
+
   void compact_digest::read(const char* string) {
     unsigned char* pointer = (unsigned char*) string;
     unsigned char  buffer[3];

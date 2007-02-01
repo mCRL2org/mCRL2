@@ -29,6 +29,9 @@ namespace md5pp {
     /** \brief Read digest from a string and convert to compact format */
     void read(const char*);
 
+    /** \brief Read digest from a string and convert to compact format */
+    void read(std::string const&);
+
     /** \brief Whether digest is the zero checksum */
     inline bool is_zero() const;
 

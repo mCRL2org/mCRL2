@@ -7,7 +7,7 @@
 #include <ostream>
 #include <sstream>
 
-#include <xml2pp/text_reader.h>
+#include <sip/visitors.h>
 
 namespace transport {
   namespace transceiver {
@@ -30,8 +30,10 @@ namespace sip {
      *   a value A that is used as any (the wildcard) message type
      */
     template < class M, M D, M A >
-    class message {
+    class message : public utility::visitable < message< M, D, A > > {
       friend class basic_messenger_impl < message < M, D, A > >;
+      friend class sip::restore_visitor_impl;
+      friend class sip::store_visitor_impl;
 
       public:
 
@@ -49,20 +51,23 @@ namespace sip {
 
       private:
 
-        /** \brief Identifier for the origin of this message */
-        end_point         originator;
-
         /** \brief The message type */
         type_identifier_t type;
+
+        /** \brief Identifier for the origin of this message */
+        end_point         originator;
 
         /** \brief The content of a message */
         std::string       content;
 
       private:
 
-        /** \brief Tries to extract the message type, which is the first element */
-        inline static type_identifier_t extract_type(std::string& content);
- 
+        /** \brief Default constructor */
+        inline message();
+
+        /** \brief Constructor used by messenger implementations */
+        inline message(end_point&);
+
       public:
 
         /** \brief Generates an XML text string for the message */
@@ -80,12 +85,6 @@ namespace sip {
  
         /** \brief Returns the message originator information */
         inline end_point get_originator() const;
- 
-        /** \brief Generates an XML text string for the message */
-        inline std::string to_xml() const;
-
-        /** \brief Generates an XML representation and writes to stream */
-        inline void to_xml(std::ostream&) const;
  
         /** \brief Returns the content without formatting */
         inline std::string to_string() const;
@@ -112,25 +111,33 @@ namespace sip {
 //    const M message< M, D, A >::message_any     = A;
 
     /**
-     * @param o message originator identifier
-     * @param t a message type identifier
+     * \param o message originator identifier
+     * \param t a message type identifier
      **/
     template < class M, M D, M A >
-    inline message< M, D, A >::message(type_identifier_t t, end_point o) : originator(o), type(t) {
+    inline message< M, D, A >::message(type_identifier_t t, end_point o) : type(t), originator(o) {
     }
 
     template < class M, M D, M A >
     inline message< M, D, A >::message(message& m) : type(m.type), content(m.content) {
     }
 
+    template < class M, M D, M A >
+    inline message< M, D, A >::message() : type(D) {
+    }
+
+    template < class M, M D, M A >
+    inline message< M, D, A >::message(end_point& e) : type(D), originator(e) {
+    }
+
     /**
-     * @param c the initial content of the message
-     * @param t a message type identifier
-     * @param o the local endpoint
+     * \param c the initial content of the message
+     * \param t a message type identifier
+     * \param o the local endpoint
      **/
     template < class M, M D, M A >
     template < typename T >
-    inline message< M, D, A >::message(T c, type_identifier_t t, end_point o) : originator(o), type(t) {
+    inline message< M, D, A >::message(T c, type_identifier_t t, end_point o) : type(t), originator(o) {
       set_content(c);
     }
 
@@ -144,46 +151,7 @@ namespace sip {
     inline typename message< M, D, A >::end_point message< M, D, A >::get_originator() const {
       return (originator);
     }
-
-    template < class M, M D, M A >
-    inline M message< M, D, A >::extract_type(std::string& content) {
-      const std::string message_meta_tag("<message-meta");
-
-      std::string::iterator i = content.begin();
-
-      if (std::mismatch(message_meta_tag.begin(),message_meta_tag.end(),i).first == message_meta_tag.end()) {
-        size_t identifier = 0;
-
-        std::string::iterator e = std::find(content.begin(), content.end(), '>');
-
-        xml2pp::text_reader reader(content, (++e - i));
-
-        reader.get_attribute(&identifier, "type");
-
-        /* Remove message meta element */
-        content.erase(content.begin(),e);
-
-        return ((std::max)(static_cast < M > (identifier), D));
-      }
-
-      return (D);
-    }
  
-    template < class M, M D, M A >
-    inline std::string message< M, D, A >::to_xml() const {
-      std::ostringstream output;
-      
-      to_xml(output);
- 
-      return (output.str());
-    }
- 
-    template < class M, M D, M A >
-    inline void message< M, D, A >::to_xml(std::ostream& output) const {
-      output << "<message-meta type=\"" << type << "\"/>"
-             << content;
-    }
-
     template < class M, M D, M A >
     inline std::string message< M, D, A >::to_string() const {
       return (content);
@@ -195,7 +163,7 @@ namespace sip {
     }
 
     /**
-     * @param c contains the initial content of the message
+     * \param c contains the initial content of the message
      **/
     template < class M, M D, M A >
     inline void message< M, D, A >::set_content(std::istream& c) {
@@ -207,7 +175,7 @@ namespace sip {
     }
 
     /**
-     * @param c the initial content of the message
+     * \param c the initial content of the message
      **/
     template < class M, M D, M A >
     inline void message< M, D, A >::set_content(const std::string& c) {
@@ -215,7 +183,7 @@ namespace sip {
     }
 
     /**
-     * @param c the initial content of the message
+     * \param c the initial content of the message
      **/
     template < class M, M D, M A >
     inline void message< M, D, A >::set_content(const char* c) {

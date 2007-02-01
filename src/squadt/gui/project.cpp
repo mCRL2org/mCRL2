@@ -71,7 +71,7 @@ namespace squadt {
     }
 
     void project::store() {
-      manager->write();
+      manager->store();
     }
 
     /**
@@ -89,7 +89,7 @@ namespace squadt {
 
       if (!d.empty()) {
         manager->set_description(d);
-        manager->write();
+        manager->store();
       }
 
       build();
@@ -267,7 +267,7 @@ namespace squadt {
         object_view->SetItemData(i, new tool_data(*this, p->get_output_iterator().pointer()));
         object_view->EnsureVisible(i);
 
-        manager->write();
+        manager->store();
       }
     }
 

@@ -1,3 +1,6 @@
+#ifndef TOOL_MANAGER_TCC__
+#define TOOL_MANAGER_TCC__
+
 #include "tool_manager.h"
 #include "task_monitor.h"
 #include "executor.h"
@@ -8,7 +11,8 @@ namespace squadt {
   class tool_manager_impl : public utility::visitable< tool_manager_impl >, public sip::controller::communicator {
     friend class tool_manager;
     friend class processor_impl;
-    friend class preferences_read_visitor_impl;
+    friend class store_visitor_impl;
+    friend class restore_visitor_impl;
 
     private:
  
@@ -92,6 +96,9 @@ namespace squadt {
       /** \brief Get the tool_capabilities object for a tool */
       bool query_tool(tool&);
 
+      /** \brief Reverts to the default configuration */
+      void factory_configuration();
+
       /** \brief Get the number of known tools */
       const unsigned int number_of_tools() const;
 
@@ -101,3 +108,6 @@ namespace squadt {
 
   /// \endcond
 }
+
+#endif
+

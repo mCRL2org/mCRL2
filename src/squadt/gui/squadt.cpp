@@ -207,7 +207,7 @@ bool Squadt::OnInit() {
     catch (...) {
       splash_window->set_done();
 
-      wxMessageDialog(0, wxT("Initialisation failed! Another instance, or tool related to a previous instance, is still active and blocking the initialisation."), wxT("Fatal"), wxOK|wxICON_ERROR).ShowModal();
+      wxMessageDialog(0, wxT("Initialisation failed! Another instance, or tool related to a previous instance, is probably still active and blocking the initialisation."), wxT("Fatal"), wxOK|wxICON_ERROR).ShowModal();
 
       return (false);
     }

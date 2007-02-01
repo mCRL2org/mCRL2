@@ -113,7 +113,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   layout::tool_display::sptr display(new layout::tool_display);
 
   /* Create and add the top layout manager */
-  layout::vertical_box::aptr top(new layout::vertical_box());
+  layout::vertical_box::aptr top(new layout::vertical_box);
 
   /* First column */
   layout::manager* h = new layout::horizontal_box();
@@ -166,7 +166,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
   top->add(okay_button, layout::top);
 
-  display->set_top_manager(top);
+  display->set_manager(top);
 
   m_communicator.send_display_layout(display);
 

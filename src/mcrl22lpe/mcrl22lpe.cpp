@@ -126,7 +126,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
   std::string infilename = c.get_input(mcrl2_file_for_input).get_location();
 
-  layout::manager::aptr top = layout::vertical_box::create();
+  layout::manager::aptr top(layout::vertical_box::create());
 
   // box to select the output file
 //  layout::manager* current_box      = new horizontal_box();

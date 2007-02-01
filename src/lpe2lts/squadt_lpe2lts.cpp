@@ -61,7 +61,7 @@ void squadt_lpe2lts::user_interactive_configuration(sip::configuration& c)
   bool make_lts = c.input_exists(lpd_file_for_input_lts);
 
   /* Create and add the top layout manager */
-  manager::aptr layout_manager = horizontal_box::create();
+  manager::aptr layout_manager(horizontal_box::create());
 
   /* First column */
   vertical_box* column = new vertical_box();

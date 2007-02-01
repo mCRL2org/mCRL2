@@ -15,21 +15,20 @@ namespace sip {
       using namespace sip::datatype;
      
       /** \brief A basic text label widget */
-      class label : public layout::element {
+      class label : public layout::element_impl< label > {
+        friend class sip::store_visitor_impl;
+        friend class sip::restore_visitor_impl;
         friend class layout::element;
      
         private:
      
           /** \brief The text to be displayed */
-          std::string text;
+          std::string m_text;
 
         private:
      
           /** \brief Default constructor */
           label();
-
-          /** \brief Write out the layout structure in XML format */
-          void read_structure(element::read_context&);
      
         public:
      
@@ -47,27 +46,23 @@ namespace sip {
 
           /** \brief Synchronise with instantiation that is part of a (G)UI */
           void update(layout::mediator*, layout::mediator::wrapper*) const;
-
-          /** \brief Write out the layout structure in XML format */
-          void write_structure(std::ostream&) const;
       };
      
       /** \brief A basic button widget */
-      class button : public layout::element {
+      class button : public layout::element_impl< button > {
+        friend class sip::store_visitor_impl;
+        friend class sip::restore_visitor_impl;
         friend class layout::element;
      
         private:
 
           /** \brief The caption */
-          std::string label;
+          std::string m_label;
      
         private:
      
           /** \brief Default constructor */
           button();
-
-          /** \brief Write out the layout structure in XML format */
-          void read_structure(element::read_context&);
      
         public:
      
@@ -85,9 +80,6 @@ namespace sip {
 
           /** \brief Synchronise with instantiation that is part of a (G)UI */
           void update(layout::mediator*, layout::mediator::wrapper*) const;
-
-          /** \brief Write out the layout structure in XML format */
-          void write_structure(std::ostream&) const;
       };
      
       /**
@@ -101,29 +93,28 @@ namespace sip {
        *    - p is connected to r and
        *    - r is connected to q
        **/
-      class radio_button : public layout::element {
+      class radio_button : public layout::element_impl< radio_button > {
+        friend class sip::store_visitor_impl;
+        friend class sip::restore_visitor_impl;
         friend class layout::element;
      
         private:
           /** \brief The caption */
-          std::string          label;
+          std::string          m_label;
      
           /** \brief The connection reference */
-          radio_button*        connection;
+          radio_button*        m_connection;
 
           /** \brief Whether the radio button is selected or not */
-          bool                 selected;
+          bool                 m_selected;
 
           /** \brief Whether the radio button is the first in the group */
-          bool                 first;
+          bool                 m_first;
      
         private:
      
           /** \brief Default constructor */
           radio_button();
-
-          /** \brief Write out the layout structure in XML format */
-          void read_structure(element::read_context&);
      
         public:
      
@@ -156,33 +147,29 @@ namespace sip {
 
           /** \brief Synchronise with instantiation that is part of a (G)UI */
           void update(layout::mediator*, layout::mediator::wrapper*) const;
-
-          /** \brief Write out the layout structure in XML format */
-          void write_structure(std::ostream&) const;
       };
      
       /**
        * \brief A checkbox widget
        **/
-      class checkbox : public layout::element {
+      class checkbox : public layout::element_impl< checkbox > {
+        friend class sip::store_visitor_impl;
+        friend class sip::restore_visitor_impl;
         friend class layout::element;
      
         private:
 
           /** \brief The caption */
-          std::string          label;
+          std::string          m_label;
 
           /** \brief The status of the checkbox */
-          bool                 status;
+          bool                 m_status;
      
         private:
      
           /** \brief Default constructor */
           checkbox();
 
-          /** \brief Write out the layout structure in XML format */
-          void read_structure(element::read_context&);
-     
         public:
      
           /** \brief Alternative constructor for a checkbox */
@@ -202,58 +189,54 @@ namespace sip {
 
           /** \brief Synchronise with instantiation that is part of a (G)UI */
           void update(layout::mediator*, layout::mediator::wrapper*) const;
-
-          /** \brief Write out the layout structure in XML format */
-          void write_structure(std::ostream&) const;
       };
      
       /** \brief A basic progress bar widget */
-      class progress_bar : public layout::element {
+      class progress_bar : public layout::element_impl< progress_bar > {
+        friend class sip::store_visitor_impl;
+        friend class sip::restore_visitor_impl;
         friend class layout::element;
      
         private:
 
           /** \brief The minimum value */
-          unsigned int minimum;
+          unsigned int m_minimum;
      
           /** \brief The maximum value */
-          unsigned int maximum;
+          unsigned int m_maximum;
      
           /** \brief The current value */
-          unsigned int current;
+          unsigned int m_current;
      
         private:
      
           /** \brief Default constructor */
           progress_bar();
 
-          /** \brief Write out the layout structure in XML format */
-          void read_structure(element::read_context&);
-     
         public:
      
           /** \brief Constructor for a progress bar */
           progress_bar(const unsigned int, const unsigned int, const unsigned int);
 
-          /** \brief Sets the current value of the progess bar */
+          /** \brief Sets the current value of the progress bar */
           void set_value(unsigned int);
      
-          /** \brief Sets the current value of the progess bar, and sends an update */
+          /** \brief Sets the current value of the progress bar, and sends an update */
           void set_value(unsigned int, tool::communicator*);
      
-          /** \brief Sets the minimum value of the progess bar */
+          /** \brief Sets the minimum value of the progress bar */
           void set_minimum(unsigned int);
      
-          /** \brief Sets the minimum value of the progess bar , and sends an update*/
+          /** \brief Sets the minimum value of the progress bar , and sends an update*/
           void set_minimum(unsigned int, tool::communicator*);
      
-          /** \brief Sets the minimum value of the progess bar */
+          /** \brief Sets the minimum value of the progress bar */
           void set_maximum(unsigned int);
      
-          /** \brief Sets the minimum value of the progess bar , and sends an update*/
+          /** \brief Sets the minimum value of the progress bar , and sends an update*/
           void set_maximum(unsigned int, tool::communicator*);
      
-          /** \brief Gets the current value of the progess bar */
+          /** \brief Gets the current value of the progress bar */
           unsigned int get_value() const;
      
           /** \brief Instantiate a layout element, through a mediator */
@@ -261,35 +244,31 @@ namespace sip {
 
           /** \brief Synchronise with instantiation that is part of a (G)UI */
           void update(layout::mediator*, layout::mediator::wrapper*) const;
-
-          /** \brief Write out the layout structure in XML format */
-          void write_structure(std::ostream&) const;
       };
      
       /**
        * \brief A text input field
        *
-       * A datatype derived from basic_datatype can be specified for validation
+       * A data type derived from basic_datatype can be specified for validation
        * purposes. By default any string is accepted.
        **/
-      class text_field : public layout::element {
+      class text_field : public layout::element_impl< text_field > {
+        friend class sip::store_visitor_impl;
+        friend class sip::restore_visitor_impl;
         friend class layout::element;
      
         private:
      
-          /** \brief The text to be displayed initialy */
-          std::string text;
+          /** \brief The text to be displayed initially */
+          std::string          m_text;
      
           /** \brief Type for validation purposes */
-          basic_datatype::sptr type;
+          basic_datatype::sptr m_type;
      
         private:
      
           /** \brief Default constructor */
           text_field();
-
-          /** \brief Write out the layout structure in XML format */
-          void read_structure(element::read_context&);
 
         public:
      
@@ -313,9 +292,6 @@ namespace sip {
 
           /** \brief Synchronise with instantiation that is part of a (G)UI */
           void update(layout::mediator*, layout::mediator::wrapper*) const;
-
-          /** \brief Write out the layout structure in XML format */
-          void write_structure(std::ostream&) const;
       };
     }
   }

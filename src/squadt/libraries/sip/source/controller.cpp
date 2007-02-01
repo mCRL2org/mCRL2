@@ -97,7 +97,7 @@ namespace sip {
      * \param[in] e a sip layout element of which the data is to be sent
      **/
     void communicator::send_display_update(sip::layout::element const* e) {
-      message m(e->get_state(), sip::message_display_update);
+      message m(sip::visitors::store(*e), sip::message_display_update);
 
       impl->send_message(m);
     }

@@ -160,7 +160,7 @@ namespace sip {
  
     /* Send a status report to the controller */
     void communicator::send_report(sip::report const& r) const {
-      message m(r.write(), sip::message_report);
+      message m(sip::visitors::store(r), sip::message_report);
  
       impl->send_message(m);
     }
@@ -179,11 +179,7 @@ namespace sip {
      * @param[in] e pointer to a sip layout element of which the data is to be sent
      **/
     void communicator::send_display_data(layout::element const* e) {
-      std::ostringstream c;
-
-      e->write_structure(c);
-
-      message m(c.str(), sip::message_display_update);
+      message m(sip::visitors::store(*e), sip::message_display_update);
 
       impl->send_message(m);
     }

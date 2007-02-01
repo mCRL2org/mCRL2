@@ -1,6 +1,9 @@
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
+
 #include "build_system.h"
 
-#include "preferences_visitors.h"
+#include "visitors.h"
 #include "settings_manager.h"
 #include "type_registry.h"
 #include "tool_manager.h"
@@ -111,14 +114,37 @@ namespace squadt {
   }
 
   void build_system::restore() {
-    static boost::filesystem::path path_to_file(m_settings_manager->path_to_user_settings("preferences"));
 
-    preferences_read_visitor::restore(*this, path_to_file);
+    const boost::filesystem::path miscellaneous_file_name(global_build_system.get_settings_manager()->path_to_user_settings("preferences"));
+    const boost::filesystem::path tool_manager_file_name(global_build_system.get_settings_manager()->path_to_user_settings(settings_manager::tool_catalog_base_name));
+
+    if (!boost::filesystem::exists(tool_manager_file_name)) {
+      m_tool_manager->factory_configuration();
+
+      visitors::store(*m_tool_manager, tool_manager_file_name);
+    }
+    else {
+      visitors::restore(*m_tool_manager, tool_manager_file_name);
+    }
+
+    if (boost::filesystem::exists(miscellaneous_file_name)) {
+      restore_visitor preferences(miscellaneous_file_name);
+
+      preferences.restore(*m_executor);
+      preferences.restore(*m_type_registry);
+    }
   }
 
   void build_system::store() {
-    static boost::filesystem::path path_to_file(m_settings_manager->path_to_user_settings("preferences"));
 
-    preferences_write_visitor::store(*this, path_to_file);
+    const boost::filesystem::path miscellaneous_file_name(global_build_system.get_settings_manager()->path_to_user_settings("preferences"));
+    const boost::filesystem::path tool_manager_file_name(global_build_system.get_settings_manager()->path_to_user_settings(settings_manager::tool_catalog_base_name));
+
+    visitors::store(*m_tool_manager, tool_manager_file_name);
+
+    store_visitor preferences(miscellaneous_file_name);
+   
+    preferences.store(*m_executor);
+    preferences.store(*m_type_registry);
   }
 }

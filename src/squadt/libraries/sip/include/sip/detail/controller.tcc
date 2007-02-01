@@ -80,7 +80,7 @@ namespace sip {
     }
     
     /**
-     * @param h the function that is called when a new layout for the display has been received
+     * \param h the function that is called when a new layout for the display has been received
      **/
     inline void communicator_impl::activate_display_layout_handler(display_layout_handler_function h) {
       /* Remove any previous handlers */
@@ -92,8 +92,8 @@ namespace sip {
     }
 
     /**
-     * @param d pointer to a tool display
-     * @param h the function that is called when a new layout for the display has been received
+     * \param d pointer to a tool display
+     * \param h the function that is called when a new layout for the display has been received
      *
      * \pre d.get() != 0
      **/
@@ -107,7 +107,7 @@ namespace sip {
     }
 
     /**
-     * @param h the function that is called when a new layout for the display has been received
+     * \param h the function that is called when a new layout for the display has been received
      **/
     inline void communicator_impl::activate_status_message_handler(status_message_handler_function h) {
       /* Remove any previous handlers */
@@ -117,46 +117,40 @@ namespace sip {
     }
 
     /**
-     * @param m pointer to the message
-     * @param h the function that is called when a new layout for the display has been received
+     * \param m pointer to the message
+     * \param h the function that is called when a new layout for the display has been received
      **/
     inline void communicator_impl::display_layout_handler(messenger::message_ptr const& m, display_layout_handler_function h) {
-//      sip::layout::tool_display::sptr d(new layout::tool_display);
+      sip::layout::tool_display::sptr d(new layout::tool_display);
 
-//      visitors::restore(*d, m->to_string().c_str());
-
-      xml2pp::text_reader reader(m->to_string().c_str());
-
-      sip::layout::tool_display::sptr d = layout::tool_display::read(reader);
+      visitors::restore(*d, m->to_string());
 
       h(d);
     }
 
     /**
-     * @param m pointer to the message
-     * @param h the function that is called when data for the display has been received
-     * @param d a shared pointer to a tool display
+     * \param m pointer to the message
+     * \param h the function that is called when data for the display has been received
+     * \param d a shared pointer to a tool display
      **/
     inline void communicator_impl::display_update_handler(const messenger::message_ptr& m, sip::layout::tool_display::sptr d, display_update_handler_function h) {
       if (d.get() != 0) {
         std::vector < sip::layout::element const* > elements;
 
-        xml2pp::text_reader reader(m->to_string().c_str());
-
-        d->update(reader, elements);
+        d->update(m->to_string(), elements);
 
         h(elements);
       }
     }
 
     /**
-     * @param m pointer to the message
-     * @param h the function that is called when a new rport has been received
+     * \param m pointer to the message
+     * \param h the function that is called when a new report has been received
      **/
     inline void communicator_impl::status_message_handler(const messenger::message_ptr& m, status_message_handler_function h) {
-      xml2pp::text_reader reader(m->to_string().c_str());
+      boost::shared_ptr < sip::report > r(new sip::report);
 
-      sip::report::sptr r = report::read(reader);
+      sip::visitors::restore(*r, m->to_string());
 
       h(r);
     }
@@ -169,7 +163,7 @@ namespace sip {
     }
  
     /**
-     * @param[in] m a reference to the message
+     * \param[in] m a reference to the message
      **/
     inline void communicator_impl::tool_configuration_handler(const messenger::message_ptr& m) {
       if (m_configuration.get() == 0) {

@@ -1,18 +1,19 @@
 #ifndef SIP_VISITORS_H__
 #define SIP_VISITORS_H__
 
+#include <boost/mpl/or.hpp>
+#include <boost/mpl/not.hpp>
+#include <boost/type_traits/is_same.hpp>
+#include <boost/utility/enable_if.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/shared_ptr.hpp>
+
+#include <utility/visitor.h>
 
 namespace sip {
 
   class store_visitor_impl;
 
-  class store_visitor {
-
-    private:
-
-      boost::shared_ptr < store_visitor_impl > impl;
+  class store_visitor : public utility::visitor_interface< sip::store_visitor_impl > {
 
     public:
 
@@ -24,19 +25,11 @@ namespace sip {
 
       /** \brief Constructor to writes to stream */
       store_visitor(std::ostream&);
-
-      /** \brief Start storage procedure */
-      template < typename T >
-      void visit(T const&);
   };
 
   class restore_visitor_impl;
 
-  class restore_visitor {
-
-    private:
-
-      boost::shared_ptr < restore_visitor_impl > impl;
+  class restore_visitor : public utility::visitor_interface< sip::restore_visitor_impl, false > {
 
     public:
 
@@ -49,13 +42,17 @@ namespace sip {
       /** \brief Constructor to read from stream */
       template < typename T >
       restore_visitor(T&);
-
-      /** \brief Start storage procedure */
-      template < typename T >
-      void visit(T&);
   };
 
   class visitors {
+
+    private:
+
+      template < typename U >
+      struct not_string_or_path : public boost::enable_if_c < boost::mpl::not_<
+                                           boost::mpl::or_< boost::is_same < U, std::string >,
+                                              boost::is_same < U, boost::filesystem::path > > >::value, void > {
+      };
 
     public:
 
@@ -85,7 +82,7 @@ namespace sip {
 
       /** \brief Reads from stream */
       template < typename T, typename U >
-      static void restore(T&, U&);
+      static typename not_string_or_path< U >::type restore(T&, U&);
   };
 
   template < typename T >
@@ -101,42 +98,42 @@ namespace sip {
   inline void visitors::store(T const& t, std::string& s) {
     sip::store_visitor  v(s);
 
-    v.visit(t);
+    v.do_accept(t);
   }
 
   template < typename T >
   inline void visitors::store(T const& t, boost::filesystem::path const& p) {
     sip::store_visitor  v(p);
 
-    v.visit(t);
+    v.do_accept(t);
   }
 
   template < typename T >
   inline void visitors::store(T const& t, std::ostream& o) {
     sip::store_visitor  v(o);
 
-    v.visit(t);
+    v.do_accept(t);
   }
 
   template < typename T >
   inline void visitors::restore(T& t, std::string const& s) {
     sip::restore_visitor  v(s);
 
-    v.visit(t);
+    v.do_accept(t);
   }
 
   template < typename T >
   inline void visitors::restore(T& t, boost::filesystem::path const& p) {
     sip::restore_visitor  v(p);
 
-    v.visit(t);
+    v.do_accept(t);
   }
 
   template < typename T, typename U >
-  inline void visitors::restore(T& t, U& s) {
+  inline typename visitors::not_string_or_path< U >::type visitors::restore(T& t, U& s) {
     sip::restore_visitor  v(s);
 
-    v.visit(t);
+    v.do_accept(t);
   }
 }
 

@@ -125,6 +125,21 @@ namespace squadt {
       global_build_system.get_executor()->terminate((*i)->get_process());
     }
   }
+  
+  void tool_manager_impl::factory_configuration() {
+    const boost::filesystem::path default_path(global_build_system.get_settings_manager()->path_to_default_binaries());
+       
+    for (char const** t = tool_manager_impl::default_tools; *t != 0; ++t) {
+#if defined(__WIN32__) || defined(__CYGWIN__) || defined(__MINGW32__)
+      boost::filesystem::path file_name(std::string(*t) + ".exe");
+#else
+      boost::filesystem::path file_name(*t);
+#endif
+
+      tools.push_back(boost::shared_ptr < tool > (new tool(*t, (default_path / file_name).native_file_string())));
+    }
+
+  }
 
   /**
    * \param[in] n the name of the tool
@@ -202,7 +217,7 @@ namespace squadt {
       throw (exception::exception(exception::unexpected_instance_identifier));
     }
 
-    execution::task_monitor::sptr p = instances[id];
+    execution::task_monitor::sptr p(instances[id]);
 
     impl->relay_connection(p->impl.get(), const_cast < transport::transceiver::basic_transceiver* > (m->get_originator()));
 
@@ -305,6 +320,10 @@ namespace squadt {
    **/
   bool tool_manager::query_tool(tool& t) {
     return (impl->query_tool(t));
+  }
+
+  void tool_manager::factory_configuration() {
+    impl->factory_configuration();
   }
 
   /** \brief Get the list of known tools */

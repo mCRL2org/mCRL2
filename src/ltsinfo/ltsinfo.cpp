@@ -67,7 +67,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   sip::object& input_object = c.get_input(lts_file_for_input);
 
   /* Create and add the top layout manager */
-  layout::manager::aptr top = layout::vertical_box::create();
+  layout::manager::aptr top(layout::vertical_box::create());
 
   /* First column */
   layout::vertical_box* left_column = new layout::vertical_box();

@@ -45,7 +45,6 @@ alias messenger
       command_line_interface.cpp
       layout_elements.cpp
       mime_type.cpp
-      report.cpp
       transport
       store_visitor.cpp
       restore_visitor.cpp

@@ -4,7 +4,6 @@ project toolset/lpe2pbes
 
 exe lpe2pbes
        : lpe2pbes.cpp
-         libpbes.cpp
          /libraries//lpe
          /libraries//parser
          /libraries//mcrl2_basic

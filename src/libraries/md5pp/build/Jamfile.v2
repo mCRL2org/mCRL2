@@ -4,15 +4,19 @@ project md5pp
     : build-dir $(BUILD_TOP)
     : requirements
        <include>../..
-       <use>/boost//headers
     : usage-requirements
        <include>../..
     ;
 
-lib md5pp
-    : md5.cpp
-      md5pp.cpp
+obj md5.o : md5.cpp ;
+obj md5pp.o
+    : md5pp.cpp
     : <use>/site-config//boost_filesystem
+    ;
+
+alias md5pp 
+    : md5.o
+      md5pp.o
     :
-    : <library>/site-config//boost_filesystem
+    : <dependency>/site-config//boost_filesystem
     ;

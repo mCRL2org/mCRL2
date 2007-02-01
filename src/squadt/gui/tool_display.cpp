@@ -95,10 +95,10 @@ namespace squadt {
         private:
      
           /** \brief Helper function for layout managers to attach widgets */
-          void attach_to_vertical_box(mediator::wrapper_aptr, sip::layout::constraints const*);
+          void attach_to_vertical_box(mediator::wrapper_aptr, sip::layout::properties const*);
      
           /** \brief Helper function for layout managers to attach widgets */
-          void attach_to_horizontal_box(mediator::wrapper_aptr, sip::layout::constraints const*);
+          void attach_to_horizontal_box(mediator::wrapper_aptr, sip::layout::properties const*);
      
         public:
      
@@ -226,19 +226,19 @@ namespace squadt {
      
       /**
        * \param p pointer to the data that represent the window to be attached
-       * \param c layout constraints
+       * \param c layout properties
        **/
-      void tool_display_mediator::attach_to_vertical_box(mediator::wrapper_aptr d, sip::layout::constraints const* c) {
+      void tool_display_mediator::attach_to_vertical_box(mediator::wrapper_aptr d, sip::layout::properties const* c) {
         wrapper* sd     = static_cast < wrapper* > (d.get());
         int      flags  = wxLEFT|wxRIGHT;
      
-        layout::constraints const& cr = *(static_cast < layout::constraints const* > (c));
+        layout::properties const& cr = *(static_cast < layout::properties const* > (c));
      
-        if (cr.grow) {
+        if (cr.m_grow) {
           flags |= wxEXPAND;
         }
 
-        switch (cr.alignment_horizontal) {
+        switch (cr.m_alignment_horizontal) {
           case layout::right:
             flags |= wxALIGN_RIGHT;
             break;
@@ -252,43 +252,43 @@ namespace squadt {
      
         wxSizer* sizer = static_cast < wrapper* > (data.get())->get_sizer();
      
-        if (0 < cr.margin.top) {
-          sizer->AddSpacer(cr.margin.bottom);
+        if (0 < cr.m_margin.top) {
+          sizer->AddSpacer(cr.m_margin.bottom);
         }
      
         wxSizerItem* new_sizer_item;
      
         if (sd->wraps_window()) {
-          new_sizer_item = sizer->Add(sd->release_window(), 0, flags, (cr.margin.left + cr.margin.right) >> 1);
+          new_sizer_item = sizer->Add(sd->release_window(), 0, flags, (cr.m_margin.left + cr.m_margin.right) >> 1);
         }
         else {
-          new_sizer_item = sizer->Add(sd->release_sizer(), 0, flags|wxEXPAND, (cr.margin.left + cr.margin.right) >> 1);
+          new_sizer_item = sizer->Add(sd->release_sizer(), 0, flags|wxEXPAND, (cr.m_margin.left + cr.m_margin.right) >> 1);
         }
      
-        if (0 < cr.margin.bottom) {
-          sizer->AddSpacer(cr.margin.bottom);
+        if (0 < cr.m_margin.bottom) {
+          sizer->AddSpacer(cr.m_margin.bottom);
         }
      
-        if (cr.visible == sip::layout::hidden) {
+        if (cr.m_visible == sip::layout::hidden) {
           new_sizer_item->Show(false);
         }
       }
      
       /**
        * \param p pointer to the data that represent the window to be attached
-       * \param c layout constraints
+       * \param c layout properties
        **/
-      void tool_display_mediator::attach_to_horizontal_box(mediator::wrapper_aptr d, sip::layout::constraints const* c) {
+      void tool_display_mediator::attach_to_horizontal_box(mediator::wrapper_aptr d, sip::layout::properties const* c) {
         wrapper* sd     = static_cast < wrapper* > (d.get());
         int      flags  = wxTOP|wxBOTTOM;
 
-        sip::layout::constraints const& cr = *(static_cast < layout::constraints const* > (c));
+        sip::layout::properties const& cr = *(static_cast < layout::properties const* > (c));
 
-        if (cr.grow) {
+        if (cr.m_grow) {
           flags |= wxEXPAND;
         }
 
-        switch (cr.alignment_vertical) {
+        switch (cr.m_alignment_vertical) {
           case sip::layout::top:
             flags |= wxALIGN_TOP;
             break;
@@ -302,24 +302,24 @@ namespace squadt {
 
         wxSizer* sizer = static_cast < wrapper* > (data.get())->get_sizer();
 
-        if (0 < cr.margin.left) {
-          sizer->AddSpacer(cr.margin.left);
+        if (0 < cr.m_margin.left) {
+          sizer->AddSpacer(cr.m_margin.left);
         }
 
         wxSizerItem* new_sizer_item;
 
         if (sd->wraps_window()) {
-          new_sizer_item = sizer->Add(sd->release_window(), 0, flags, (cr.margin.top + cr.margin.bottom) >> 1);
+          new_sizer_item = sizer->Add(sd->release_window(), 0, flags, (cr.m_margin.top + cr.m_margin.bottom) >> 1);
         }
         else {
-          new_sizer_item = sizer->Add(sd->release_sizer(), 0, flags|wxEXPAND, (cr.margin.top + cr.margin.bottom) >> 1);
+          new_sizer_item = sizer->Add(sd->release_sizer(), 0, flags|wxEXPAND, (cr.m_margin.top + cr.m_margin.bottom) >> 1);
         }
 
-        if (0 < cr.margin.right) {
-          sizer->AddSpacer(cr.margin.right);
+        if (0 < cr.m_margin.right) {
+          sizer->AddSpacer(cr.m_margin.right);
         }
 
-        if (cr.visible == sip::layout::hidden) {
+        if (cr.m_visible == sip::layout::hidden) {
           new_sizer_item->Show(false);
         }
       }

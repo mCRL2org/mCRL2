@@ -107,6 +107,7 @@ namespace sip {
       return (unknown);
     }
 
+    /** \brief Conversion to print category to a standard stream */
     inline std::ostream& operator <<(std::ostream& s, category const& c) {
       return (s << c.name);
     }

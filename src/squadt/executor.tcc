@@ -1,10 +1,14 @@
 #include "executor.h"
 
 namespace squadt {
+  /// \cond PRIVATE_PART
+
   namespace execution {
 
     class executor_impl : public utility::visitable< executor_impl > {
       friend class executor;
+      friend class restore_visitor_impl;
+      friend class store_visitor_impl;
 
       private:
 
@@ -66,4 +70,5 @@ namespace squadt {
         void terminate_all();
     };
   }
+  /// \endcond
 }

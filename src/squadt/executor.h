@@ -8,6 +8,8 @@
 namespace squadt {
   class tool_manager;
   class build_system;
+  class store_visitor_impl;
+  class restore_visitor_impl;
 
   namespace execution {
 
@@ -25,9 +27,11 @@ namespace squadt {
      *    concluded about the execution of the command except through a
      *    task_monitor object
      **/
-    class executor {
+    class executor : public utility::visitable< executor > {
       friend class squadt::build_system;
       friend class squadt::tool_manager;
+      friend class squadt::restore_visitor_impl;
+      friend class squadt::store_visitor_impl;
 
       private:
 

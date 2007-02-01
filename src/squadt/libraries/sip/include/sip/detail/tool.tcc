@@ -1,13 +1,11 @@
-#include <xml2pp/text_reader.h>
-
 #include <sip/detail/common.h>
 #include <sip/detail/basic_messenger.tcc>
 #include <sip/tool.h>
 #include <sip/tool/capabilities.h>
 #include <sip/layout_base.h>
-#include <sip/visitors.h>
 #include <sip/detail/message.h>
 #include <sip/detail/command_line_interface.h>
+#include <sip/visitors.h>
 
 namespace sip {
   namespace tool {
@@ -111,7 +109,7 @@ namespace sip {
     }
 
     inline void communicator_impl::send_display_layout(layout::tool_display::sptr d) {
-      sip::message m(d->write(), sip::message_display_layout);
+      sip::message m(sip::visitors::store(*d), sip::message_display_layout);
 
       send_message(m);
 
@@ -125,7 +123,7 @@ namespace sip {
 
       clear_handlers(sip::message_display_update);
 
-      sip::message m(display.write(), sip::message_display_layout);
+      sip::message m(sip::visitors::store(display), sip::message_display_layout);
 
       send_message(m);
     }
@@ -138,19 +136,17 @@ namespace sip {
     }
  
     /**
-     * @param[in] m shared pointer to the message
-     * @param[out] d tool display on which to execute changes
+     * \param[in] m shared pointer to the message
+     * \param[out] d tool display on which to execute changes
      **/
     inline void communicator_impl::receive_display_data_handler(const sip::messenger::message_ptr& m, layout::tool_display::sptr d) {
       std::vector < sip::layout::element const* > elements;
-      
-      xml2pp::text_reader reader(m->to_string());
 
-      d->update(reader, elements);
+      d->update(m->to_string(), elements);
     }
     
     /**
-     * @param[in] m shared pointer reference to an offer_configuration message
+     * \param[in] m shared pointer reference to an offer_configuration message
      **/
     inline void communicator_impl::receive_configuration_handler(const sip::messenger::message_ptr& m) {
       assert(m->get_type() == sip::message_offer_configuration);

@@ -52,7 +52,6 @@ namespace sip {
     /**
      * \param[in] id a unique identifier for the output object
      * \param[in] f mime-type for the object
-     * \param[in] c category to which the functionality of the tool must be counted
      **/
     void capabilities::add_output_combination(std::string const& id, mime_type const& f) {
       output_combination oc(f, id);

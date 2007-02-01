@@ -288,7 +288,7 @@ namespace xml2pp {
     std::string v = get_attribute_as_string(n);
 
     if (!v.empty()) {
-      if (v == "true" || v == "1" || v == "yes") {
+      if (v != "false" && v != "0" && v != "no") {
         return (true);
       }
     }

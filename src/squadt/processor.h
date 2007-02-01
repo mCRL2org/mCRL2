@@ -8,7 +8,6 @@
 #include <boost/noncopyable.hpp>
 
 #include <md5pp/md5pp.h>
-#include <xml2pp/text_reader.h>
 
 #include "utility/indirect_iterator.h"
 #include "task_monitor.h"
@@ -33,7 +32,9 @@ namespace squadt {
    * input of other processors.
    *
    **/
-  class processor : boost::noncopyable {
+  class processor : public utility::visitable < processor >, private boost::noncopyable {
+    friend class store_visitor_impl;
+    friend class restore_visitor_impl;
     friend class processor_impl;
     friend class project_manager;
     friend class tool_manager;
@@ -119,7 +120,7 @@ namespace squadt {
     private:
 
       /** \brief Basic constructor */
-      inline processor();
+      processor();
 
     public:
 
@@ -176,12 +177,6 @@ namespace squadt {
 
       /** \brief Get the object for the tool associated with this processor */
       boost::shared_ptr < monitor > get_monitor();
-
-      /** \brief Read from XML using a libXML2 reader */
-      static processor::sptr read(boost::weak_ptr < project_manager > const&, id_conversion_map&, xml2pp::text_reader&);
-
-      /** \brief Write as XML to stream */
-      void write(std::ostream& stream = std::cout) const;
 
       /** \brief Whether or not a tool is running for this object */
       bool is_active() const;

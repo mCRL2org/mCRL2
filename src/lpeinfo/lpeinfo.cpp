@@ -157,7 +157,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     lpe::LPE lpe = lpe_specification.lpe();
   
     /* Create and add the top layout manager */
-    layout::manager::aptr top = layout::horizontal_box::create();
+    layout::manager::aptr top(layout::horizontal_box::create());
   
     /* First column */
     layout::vertical_box* left_column = new layout::vertical_box();
