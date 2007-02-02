@@ -308,7 +308,8 @@ AC_ARG_WITH(
 USE_BCG=no
 if test ${with_cadp}; then
   AC_MSG_CHECKING([for CADP in $with_cadp])
-  AC_COMPILE_IFELSE(
+  LIBS="-lBCG_IO"
+  AC_LINK_IFELSE(
      [
       #include <$with_cadp/incl/bcg_user.h>
      ],
