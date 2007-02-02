@@ -1821,6 +1821,10 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
   }
 
   if(gsIsBinder(*DataTerm)){
+    //The variable declaration of a binder should have at least 1 declaration
+    if(ATAgetFirst(ATLgetArgument(*DataTerm, 1)) == NULL)
+      {gsErrorMsg("Binder %P should have at least one declared variable\n",*DataTerm); return NULL;}
+
     ATermAppl BindingOperator = ATAgetArgument(*DataTerm, 0);
     ATermTable CopyAllowedVars=ATtableCreate(63,50);
     gstcATermTableCopy(AllowedVars,CopyAllowedVars);
@@ -1830,7 +1834,14 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       
     if(gsIsSetBagComp(BindingOperator) || gsIsSetComp(BindingOperator)
         || gsIsBagComp(BindingOperator)){
-      ATermAppl VarDecl=ATAgetFirst(ATLgetArgument(*DataTerm,1));
+      ATermList VarDecls=ATLgetArgument(*DataTerm,1);
+      ATermAppl VarDecl=ATAgetFirst(VarDecls);
+      
+      //A Set/bag comprehension should have exactly one variable declared
+      VarDecls=ATgetNext(VarDecls);
+      if(ATAgetFirst(VarDecls) != NULL)
+        {gsErrorMsg("Set/Bag comprehension %P should have exactly one declared variable\n", *DataTerm); return NULL;}
+
       ATermAppl NewType=ATAgetArgument(VarDecl,1);
       ATermList VarList=ATmakeList1((ATerm)VarDecl);
       ATermTable NewAllowedVars=gstcAddVars2Table(CopyAllowedVars,VarList);
@@ -1846,9 +1857,11 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       if(!ResType) return NULL;
       if(gstcTypeMatchA(gsMakeSortIdBool(),ResType)) {
         NewType=gsMakeSortExprSet(NewType);
+        *DataTerm = ATsetArgument(*DataTerm, (ATerm)gsMakeSetComp(), 0);
       } else if(gstcTypeMatchA(gsMakeSortIdNat(),ResType)) {
-               NewType=gsMakeSortExprBag(NewType);
-             } else return NULL;
+        NewType=gsMakeSortExprBag(NewType);
+        *DataTerm = ATsetArgument(*DataTerm, (ATerm)gsMakeBagComp(), 0);
+      } else return NULL;
 
       if(!(NewType=gstcTypeMatchA(NewType,PosType))){
         gsErrorMsg("a set or bag comprehension of type %P does not match possible type %P (while typechecking %P)\n",ATAgetArgument(VarDecl,1),PosType,*DataTerm);

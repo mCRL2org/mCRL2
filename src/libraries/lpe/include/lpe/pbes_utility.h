@@ -10,7 +10,6 @@
 #include "lpe/pbes_init.h"
 #include "lpe/sort_init.h"
 #include "atermpp/algorithm.h"
-#include "dataimpl.h"
 
 namespace lpe {
 
@@ -32,12 +31,12 @@ std::set<propositional_variable_instantiation> find_propositional_variable_insta
   return variables;
 }
 
-inline
-specification implement_data_specification(const specification& spec)
-{
-  specification result(implement_data_spec(spec));
-  return result;
-}
+//inline
+//specification implement_data_specification(const specification& spec)
+//{
+//  specification result(implement_data_spec(spec));
+//  return result;
+//}
 
 /// Fresh variable generator that generates propositional variables with
 /// names that do not appear in the given context.
@@ -162,10 +161,10 @@ data_expression pbes2data(const pbes_expression& p, const specification& spec)
   } else if (is_or(p)) {
     return d::or_(pbes2data(arg1(p), spec), pbes2data(arg2(p), spec));
   } else if (is_forall(p)) {
-      data_expression d1 = gsMakeBinder(gsMakeForall(), list_arg1(p), pbes2data(arg2(p), implement_data_specification(spec)));
+      data_expression d1 = gsMakeBinder(gsMakeForall(), list_arg1(p), pbes2data(arg2(p), spec));
       return d1;
   } else if (is_exists(p)) {
-      data_expression d1 = pbes2data(arg2(p), implement_data_specification(spec));
+      data_expression d1 = pbes2data(arg2(p), spec);
 aterm x = gsMakeBinder(gsMakeExists(), list_arg1(p), d1);
 std::cout << "x = " << x << std::endl;
       data_expression d2 = gsMakeBinder(gsMakeExists(), list_arg1(p), d1);
