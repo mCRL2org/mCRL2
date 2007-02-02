@@ -649,11 +649,11 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
       //the variable declaration
       ATermAppl Var = ATAgetArgument(DataExpr, 1);
       Result = gsMakeSortCons(gsMakeSortSet(), gsGetSort(Var));
-    } else if (gsIsSetComp(BindingOperator)) {
+    } else if (gsIsBagComp(BindingOperator)) {
       //DataExpr is a bag comprehension, return Bag(S), where S is the sort of
       //the variable declaration
       ATermAppl Var = ATAgetArgument(DataExpr, 1);
-      Result = gsMakeSortCons(gsMakeSortSet(), gsGetSort(Var));
+      Result = gsMakeSortCons(gsMakeSortBag(), gsGetSort(Var));
     } else if (gsIsLambda(BindingOperator)) {
       //DataExpr is a lambda abstraction of the form
       //  lambda x0: S0, ..., xn: Sn. e
@@ -665,6 +665,8 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
         Result = gsMakeSortArrow(gsGetSort(ATAgetFirst(Vars)), Result);
         Vars = ATgetNext(Vars);
       }
+    } else {
+      Result = gsMakeUnknown();
     }
   } else if (gsIsWhr(DataExpr)) {
     //DataExpr is a where clause; return the sort of the body
