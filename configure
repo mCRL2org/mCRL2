@@ -4702,10 +4702,14 @@ USE_BCG=no
 if test ${with_cadp}; then
   { echo "$as_me:$LINENO: checking for CADP in $with_cadp" >&5
 echo $ECHO_N "checking for CADP in $with_cadp... $ECHO_C" >&6; }
-  LIBS="-lBCG_IO"
+  LIBS="-L${with_cadp}/bin.`${with_cadp}/com/arch` -lBCG_IO"
   cat >conftest.$ac_ext <<_ACEOF
 
       #include <$with_cadp/incl/bcg_user.h>
+
+      int main() {
+        return (0);
+      }
 
 _ACEOF
 rm -f conftest.$ac_objext conftest$ac_exeext

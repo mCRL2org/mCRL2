@@ -308,10 +308,14 @@ AC_ARG_WITH(
 USE_BCG=no
 if test ${with_cadp}; then
   AC_MSG_CHECKING([for CADP in $with_cadp])
-  LIBS="-lBCG_IO"
+  LIBS="-L${with_cadp}/bin.`${with_cadp}/com/arch` -lBCG_IO"
   AC_LINK_IFELSE(
      [
       #include <$with_cadp/incl/bcg_user.h>
+
+      int main() {
+        return (0);
+      }
      ],
      [
        AC_SUBST([CADP_HEADERS],["$with_cadp/incl"])
