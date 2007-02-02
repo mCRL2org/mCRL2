@@ -213,19 +213,16 @@
 
 //LPE summand
 <LPESummand>   ::= LPESummand(<DataVarId>*, <DataExpr>, <MultActOrDelta>,
-                    <DataExprOrNil>, <Assignment>*)
+                    <DataExprOrNil>, <DataVarIdInit>*)
 
 //multiaction or delta
 <MultActOrDelta>
                ::= <MultAct>
                  | Delta
 
-//assignment
-<Assignment>   ::= Assignment(<DataVarId>, <DataExpr>)
-
 //process expressions or data expression
 <Init>         ::= Init(<DataVarId>*, <ProcExpr>)                        [-lin]
-                 | LPEInit(<DataVarId>*, <Assignment>*)                  [+lin]
+                 | LPEInit(<DataVarId>*, <DataVarIdInit>*)               [+lin]
 
 
 //Mu-calculus formulas

@@ -323,28 +323,6 @@ bool gsIsAllow(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunAllow();
 }
 
-// Assignment
-inline
-AFun initAFunAssignment(AFun& f)
-{
-  f = ATmakeAFun("Assignment", 2, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunAssignment()
-{
-  static AFun AFunAssignment = initAFunAssignment(AFunAssignment);
-  return AFunAssignment;
-}
-
-inline
-bool gsIsAssignment(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunAssignment();
-}
-
 // AtTime
 inline
 AFun initAFunAtTime(AFun& f)
@@ -2690,12 +2668,6 @@ ATermAppl gsMakeAllow(ATermList MultActName_0, ATermAppl ProcExpr_1)
 }
 
 inline
-ATermAppl gsMakeAssignment(ATermAppl DataVarId_0, ATermAppl DataExpr_1)
-{
-  return ATmakeAppl2(gsAFunAssignment(), (ATerm) DataVarId_0, (ATerm) DataExpr_1);
-}
-
-inline
 ATermAppl gsMakeAtTime(ATermAppl ProcExpr_0, ATermAppl DataExpr_1)
 {
   return ATmakeAppl2(gsAFunAtTime(), (ATerm) ProcExpr_0, (ATerm) DataExpr_1);
@@ -2864,15 +2836,15 @@ ATermAppl gsMakeLPE(ATermList DataVarId_0, ATermList DataVarId_1, ATermList LPES
 }
 
 inline
-ATermAppl gsMakeLPEInit(ATermList DataVarId_0, ATermList Assignment_1)
+ATermAppl gsMakeLPEInit(ATermList DataVarId_0, ATermList DataVarIdInit_1)
 {
-  return ATmakeAppl2(gsAFunLPEInit(), (ATerm) DataVarId_0, (ATerm) Assignment_1);
+  return ATmakeAppl2(gsAFunLPEInit(), (ATerm) DataVarId_0, (ATerm) DataVarIdInit_1);
 }
 
 inline
-ATermAppl gsMakeLPESummand(ATermList DataVarId_0, ATermAppl DataExpr_1, ATermAppl MultActOrDelta_2, ATermAppl DataExprOrNil_3, ATermList Assignment_4)
+ATermAppl gsMakeLPESummand(ATermList DataVarId_0, ATermAppl DataExpr_1, ATermAppl MultActOrDelta_2, ATermAppl DataExprOrNil_3, ATermList DataVarIdInit_4)
 {
-  return ATmakeAppl5(gsAFunLPESummand(), (ATerm) DataVarId_0, (ATerm) DataExpr_1, (ATerm) MultActOrDelta_2, (ATerm) DataExprOrNil_3, (ATerm) Assignment_4);
+  return ATmakeAppl5(gsAFunLPESummand(), (ATerm) DataVarId_0, (ATerm) DataExpr_1, (ATerm) MultActOrDelta_2, (ATerm) DataExprOrNil_3, (ATerm) DataVarIdInit_4);
 }
 
 inline

@@ -1934,7 +1934,7 @@ static ATermList substitute_assignmentlist(
                     ATgetNext(parameters),
                     replacelhs,
                     replacerhs),
-                gsMakeAssignment(lhs,rhs));
+                gsMakeDataVarIdInit(lhs,rhs));
     }
   }
 
@@ -1972,7 +1972,7 @@ static ATermList substitute_assignmentlist(
                     ATgetNext(parameters),
                     replacelhs,
                     replacerhs),
-                gsMakeAssignment(lhs,rhs));
+                gsMakeDataVarIdInit(lhs,rhs));
 }
 
 static ATermAppl substitute_time(
@@ -7969,7 +7969,7 @@ static ATermList replaceArgumentsByAssignments(ATermList args,ATermList pars)
          will become available, it might be useful to simplify
          arg first, to minimize the number of assignments */
 
-      resultargs=ATinsertA(resultargs,gsMakeAssignment(par,arg));
+      resultargs=ATinsertA(resultargs,gsMakeDataVarIdInit(par,arg));
     }
     args=ATgetNext(args); 
   }

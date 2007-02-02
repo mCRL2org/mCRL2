@@ -676,14 +676,6 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(fprints)(OutStream, ")");
       }
     }
-  } else if (gsIsAssignment(Part)) {
-    //print assignment
-    PRINT_FUNC(dbg_prints)("printing assignment\n");
-    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0),
-      pp_format, ShowSorts, PrecLevel);
-    PRINT_FUNC(fprints)(OutStream, " := ");
-    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1),
-      pp_format, ShowSorts, 0);
   } else if (gsIsInit(Part)) {
     //print initialisation
     PRINT_FUNC(dbg_prints)("printing initialisation\n");

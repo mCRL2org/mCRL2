@@ -2400,20 +2400,20 @@ static ATermAppl make_lpe(ATermAppl Spec, unsigned int init_id)
 				{
 					n = ATmakeList0();
 				} else {
-					n = ATmakeList1((ATerm) gsMakeAssignment(ATAelementAt(args,0),gsMakeDataExprPos_int(proc_id(ATAelementAt(ATLgetFirst(m),2))+1)));
+					n = ATmakeList1((ATerm) gsMakeDataVarIdInit(ATAelementAt(args,0),gsMakeDataExprPos_int(proc_id(ATAelementAt(ATLgetFirst(m),2))+1)));
 				}
 				for (j=(singleton?0:1); j<ATgetLength(args); j++)
 				{
 					if ( ATindexOf(o,ATelementAt(args,j),0) == -1 )
 					{
-						//n = ATappend(n,(ATerm) gsMakeAssignment(ATAelementAt(args,j),gsMakeNil()));
+						//n = ATappend(n,(ATerm) gsMakeDataVarIdInit(ATAelementAt(args,j),gsMakeNil()));
 						s3 = ATconcat(args,vars);
 						vars = ATappend(vars,(ATerm) get_new_var(ATAelementAt(args,j),&s3));
-						n = ATappend(n,(ATerm) gsMakeAssignment(ATAelementAt(args,j),(ATermAppl) ATgetLast(vars)));
+						n = ATappend(n,(ATerm) gsMakeDataVarIdInit(ATAelementAt(args,j),(ATermAppl) ATgetLast(vars)));
 					} else {
 						if ( !ATisEqual(ATelementAt(args,j),ATAelementAt(ATLgetArgument(ATAelementAt(ATLgetFirst(m),2),1),ATindexOf(o,ATelementAt(args,j),0))) )
 						{
-							n = ATappend(n,(ATerm) gsMakeAssignment(ATAelementAt(args,j),ATAelementAt(ATLgetArgument(ATAelementAt(ATLgetFirst(m),2),1),ATindexOf(o,ATelementAt(args,j),0))));
+							n = ATappend(n,(ATerm) gsMakeDataVarIdInit(ATAelementAt(args,j),ATAelementAt(ATLgetArgument(ATAelementAt(ATLgetFirst(m),2),1),ATindexOf(o,ATelementAt(args,j),0))));
 						}
 					}
 				}
@@ -2453,14 +2453,14 @@ static ATermAppl make_lpe(ATermAppl Spec, unsigned int init_id)
 	{
 		l = ATmakeList0();
 	} else {
-		l = ATmakeList1((ATerm) gsMakeAssignment(ATAgetFirst(args),gsMakeDataExprPos_int(init_id+1)));
+		l = ATmakeList1((ATerm) gsMakeDataVarIdInit(ATAgetFirst(args),gsMakeDataExprPos_int(init_id+1)));
 	}
 	for (j=(singleton?0:1); j<ATgetLength(args); j++)
 	{
 		if ( ATindexOf(m,ATelementAt(args,j),0) == -1 )
-			l = ATappend(l,(ATerm) gsMakeAssignment(ATAelementAt(args,j),get_new_var(ATAelementAt(args,j),&vars)));
+			l = ATappend(l,(ATerm) gsMakeDataVarIdInit(ATAelementAt(args,j),get_new_var(ATAelementAt(args,j),&vars)));
 		else
-			l = ATappend(l,(ATerm) gsMakeAssignment(ATAelementAt(args,j),ATAelementAt(n,ATindexOf(m,ATelementAt(args,j),0))));
+			l = ATappend(l,(ATerm) gsMakeDataVarIdInit(ATAelementAt(args,j),ATAelementAt(n,ATindexOf(m,ATelementAt(args,j),0))));
 	}
 	
 //	Spec = ATsetArgument(Spec,(ATerm) gsMakeMapSpec(maps),2);
@@ -2640,7 +2640,7 @@ static ATermAppl unique_vars(ATermAppl spec)
 	{
 		ATermAppl a = (ATermAppl) ATgetFirst(m);
 
-		l = ATinsert(l,(ATerm) gsMakeAssignment((ATermAppl) uvSubstValues(lpe_pars_substs,ATgetArgument(a,0)),(ATermAppl) uvSubstValues(init_vars_substs,ATgetArgument(a,1))));
+		l = ATinsert(l,(ATerm) gsMakeDataVarIdInit((ATermAppl) uvSubstValues(lpe_pars_substs,ATgetArgument(a,0)),(ATermAppl) uvSubstValues(init_vars_substs,ATgetArgument(a,1))));
 	}
 	l = ATreverse(l);
 	init = gsMakeLPEInit(init_vars,l);
