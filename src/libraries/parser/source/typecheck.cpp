@@ -1851,7 +1851,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
              } else return NULL;
 
       if(!(NewType=gstcTypeMatchA(NewType,PosType))){
-        gsErrorMsg("a set or bag comprehansion of type %P does not match possible type %P (while typechecking %P)\n",ATAgetArgument(VarDecl,1),PosType,*DataTerm);
+        gsErrorMsg("a set or bag comprehension of type %P does not match possible type %P (while typechecking %P)\n",ATAgetArgument(VarDecl,1),PosType,*DataTerm);
         return NULL;
       }
       
