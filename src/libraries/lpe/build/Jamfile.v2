@@ -45,7 +45,8 @@ lib dataelm
        : <use>/libraries//parser
          <use>/libraries//rewrite
        :
-       : <library>/libraries//rewrite
+       : <library>/libraries//parser
+         <library>/libraries//rewrite
        ;
 
 # This target must not be used, it exists solely for the parser library which should not depend on the lpe framework
