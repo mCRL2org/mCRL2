@@ -6,7 +6,7 @@
 //
 // file          : lpeuntime 
 // date          : 07-11-2006
-// version       : 0.3
+// version       : 0.31
 //
 // author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
 //
@@ -56,7 +56,7 @@ using namespace lpe::data_init;
 
 namespace po = boost::program_options;
 
-#define VERSION "0.3"
+#define VERSION "0.31"
 
 typedef struct
 {
@@ -165,9 +165,7 @@ lpe::specification untime(const lpe::specification& specification) {
   lpe::summand_list untime_summand_list; // Updated summand list
   lpe::data_variable_list untime_process_parameters; // Updated process parameters
   lpe::data_variable last_action_time; // Extra parameter to display the last action time
-  lpe::data_variable_list untime_initial_variables; // Updated initial variables
-  lpe::data_expression_list untime_initial_state; // Updated initial state
-  // Note: initial variables and initial state together form initial assignment
+  lpe::data_assignment_list untime_initial_assignments; // Updated initial assignments
 
   gsVerboseMsg("Untiming %d summands\n", lpe.summands().size());
   
@@ -260,20 +258,15 @@ lpe::specification untime(const lpe::specification& specification) {
   // Create new LPE, this equals lpe, except for the new summand list and the additional process parameter.
   untime_lpe = lpe::LPE(lpe.free_variables(), untime_process_parameters, untime_summand_list);
 
-
   // Create new initial_variables and initial_state in order to correctly initialize.
-  // NOTE: The initial assignments are calculated at creation 
-  // time by "zipping" the initial_variables and the initial_state
-  untime_initial_variables = push_back(specification.initial_variables(), last_action_time);
-  untime_initial_state = push_back(specification.initial_state(), real(0));
+  untime_initial_assignments = push_back(specification.initial_assignments(), data_assignment(last_action_time, real(0)));
 
   // Create new specification, this equals original specification, except for the new LPE.
   untime_specification = lpe::specification(specification.data(), 
 						specification.action_labels(),
 						untime_lpe, //new LPE
 						specification.initial_free_variables(),
-						untime_initial_variables, //new initial variables
-						untime_initial_state // new initial state
+                                                untime_initial_assignments
 						);
 
   return untime_specification;
