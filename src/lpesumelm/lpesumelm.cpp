@@ -239,8 +239,6 @@ lpe::specification remove_unused_variables_(const lpe::specification& specificat
   lpe::specification new_specification;
   lpe::summand_list new_summand_list = lpe.summands();
 
-  // Traverse the summand list, and apply sum elimination to its summands,
-  // whilst constructing a new summand list in the process.
   new_summand_list = atermpp::apply(new_summand_list, remove_unused_variables);
 
   new_specification = set_lpe(specification, set_summands(lpe, new_summand_list));
