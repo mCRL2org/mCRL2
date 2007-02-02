@@ -269,7 +269,7 @@ bool is_data_operation(aterm_appl t)
 // data_variable_init
 /// \brief data variable with an initial value.
 ///
-// DataVarIdInit(<String>, <SortExpr>, <DataExpr>)
+// DataVarIdInit(<DataVarId>, <DataExpr>)
 class data_variable_init: public aterm_appl
 {
   public:
@@ -286,17 +286,15 @@ class data_variable_init: public aterm_appl
     {
       iterator i = begin();
       aterm_appl x = *i++;
-      aterm_appl y = *i;
-      return data_variable(gsMakeDataVarId(x, y));
+      return data_variable(x);
     }
 
     data_expression to_expression() const
     {
       iterator i = begin();
       aterm_appl x = *i++;
-      aterm_appl y = *i++;
-      aterm_appl z = *i;
-      return data_expression(z);
+      aterm_appl y = *i;
+      return data_expression(y);
     }
 };
 

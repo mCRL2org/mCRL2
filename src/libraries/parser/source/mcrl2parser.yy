@@ -1863,7 +1863,7 @@ data_var_decl_inits_cs:
 data_var_decl_init:
   ID COLON sort_expr EQUALS data_expr
     {
-      safe_assign($$, gsMakeDataVarIdInit($1, $3, $5));
+      safe_assign($$, gsMakeDataVarIdInit(gsMakeDataVarId($1, $3), $5));
       gsDebugMsg("parsed data variable declaration and initialisation\n  %T\n", $$);
     }
   ;

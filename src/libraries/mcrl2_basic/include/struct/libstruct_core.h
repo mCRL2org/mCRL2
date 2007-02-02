@@ -723,7 +723,7 @@ bool gsIsDataVarId(ATermAppl Term)
 inline
 AFun initAFunDataVarIdInit(AFun& f)
 {
-  f = ATmakeAFun("DataVarIdInit", 3, ATfalse);
+  f = ATmakeAFun("DataVarIdInit", 2, ATfalse);
   ATprotectAFun(f);
   return f;
 }
@@ -2798,9 +2798,9 @@ ATermAppl gsMakeDataVarId(ATermAppl String_0, ATermAppl SortExpr_1)
 }
 
 inline
-ATermAppl gsMakeDataVarIdInit(ATermAppl String_0, ATermAppl SortExpr_1, ATermAppl DataExpr_2)
+ATermAppl gsMakeDataVarIdInit(ATermAppl DataVarId_0, ATermAppl DataExpr_1)
 {
-  return ATmakeAppl3(gsAFunDataVarIdInit(), (ATerm) String_0, (ATerm) SortExpr_1, (ATerm) DataExpr_2);
+  return ATmakeAppl2(gsAFunDataVarIdInit(), (ATerm) DataVarId_0, (ATerm) DataExpr_1);
 }
 
 inline

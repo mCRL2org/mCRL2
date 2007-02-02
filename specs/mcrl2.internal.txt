@@ -252,7 +252,7 @@
                  | StateMu(<String>, <DataVarIdInit>*, <StateFrm>)
 
 //data variable identifier and initialisation
-<DataVarIdInit>::= DataVarIdInit(<String>, <SortExpr>, <DataExpr>)
+<DataVarIdInit>::= DataVarIdInit(<DataVarId>, <DataExpr>)
 
 //regular formula
 <RegFrm>       ::= <ActFrm>
