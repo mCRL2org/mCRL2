@@ -21,7 +21,8 @@ exe ltsview
         transition.cpp
         utils.cpp
         visualizer.cpp
-        /libraries//wx_extension
+        /libraries/wxe//spinctrlfloat.o
+        /libraries/wxe//colorbutton.o
         /libraries//mcrl2_basic
       : <site-library>wx_gl
       : <squadt_support>enable

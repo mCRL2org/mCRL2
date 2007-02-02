@@ -11,7 +11,6 @@ exe xsim
          /libraries//nextstate
          /libraries//mcrl2_basic
        : <site-library>wx_base
-         <link>shared:<use>plugins
          <include>$(SETUP)
          <toolset>gcc:<linkflags>"-Wl,-export-dynamic"
        : <squadt_support>enable
@@ -25,15 +24,3 @@ exe sim
        : <toolset>msvc:<library>/workarounds/msvc//getopt
        ;
 
-# Gather names of view plugins
-for plugin in [ MATCH plugins/(.*)/Jamfile.v2 : [ glob plugins/*/Jamfile.v2 ] ] {
-  alias $(plugin)
-         : plugins/$(plugin)//xsim_$(plugin)_view
-         ;
-
-  view_plugins += plugins/$(plugin)//xsim_$(plugin)_view ;
-}
-
-alias plugins
-       : $(view_plugins)
-       ;

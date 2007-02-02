@@ -6,14 +6,6 @@
 #include <sip/detail/controller.tcc>
 
 namespace sip {
-  namespace layout {
-    /**
-     * \param[in] t the tool communicator object to use
-     * \param[in] e the layout element of which to send the state
-     **/
-    void element::update(tool::communicator* t, layout::element const* e) {
-    }
-  }
   namespace controller {
 
     controller::capabilities communicator::m_controller_capabilities;

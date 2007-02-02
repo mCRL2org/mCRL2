@@ -5,15 +5,6 @@
 #include <sip/detail/tool.tcc>
 
 namespace sip {
-  namespace layout {
-    /**
-     * @param[in] t the tool communicator object to use
-     * @param[in] e the layout element of which to send the state
-     **/
-    void element::update(tool::communicator* t, layout::element const* e) {
-      t->send_display_data(e);
-    }
-  }
   namespace tool {
 
     communicator::communicator(communicator_impl* c) : sip::messenger(c) {
@@ -29,8 +20,8 @@ namespace sip {
      *    - socket://\<host\>:\<port\> (for a socket connection)
      *    - traditional:// (for standard input/output communication)
      *
-     * @param argc the number of command line arguments
-     * @param argv a pointer to the list of command line arguments
+     * \param argc the number of command line arguments
+     * \param argv a pointer to the list of command line arguments
      * \attention the specific command line options are removed, so and argc and argv are modified
      * \return whether options were found and whether a connection is being opened with a controller
      **/
@@ -118,7 +109,7 @@ namespace sip {
     }
  
     /**
-     * @param[in] c the configuration object that specifies the accepted configuration
+     * \param[in] c the configuration object that specifies the accepted configuration
      **/
     void communicator::send_accept_configuration(sip::configuration& c) {
       c.m_fresh = false;
@@ -166,8 +157,8 @@ namespace sip {
     }
 
     /**
-     * @param[in] t the report type
-     * @param[in] e a description
+     * \param[in] t the report type
+     * \param[in] e a description
      **/
     void communicator::send_status_report(sip::report::type t, std::string const& e) const {
       sip::report report(t, e);
@@ -176,7 +167,7 @@ namespace sip {
     }
 
     /**
-     * @param[in] e pointer to a sip layout element of which the data is to be sent
+     * \param[in] e pointer to a sip layout element of which the data is to be sent
      **/
     void communicator::send_display_data(layout::element const* e) {
       message m(sip::visitors::store(*e), sip::message_display_update);

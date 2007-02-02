@@ -8,6 +8,7 @@
 #include <sip/detail/layout_elements.h>
 #include <sip/detail/layout_tool_display.h>
 #include <sip/object.h>
+#include <sip/tool.h>
 
 #include <xml2pp/text_reader.h>
 
@@ -48,6 +49,14 @@ namespace sip {
      **/
     void element::set_event_handler(basic_event_handler* e) {
       m_event_handler->transfer(*e, this);
+    }
+
+    /**
+     * \param[in] t the tool communicator object to use
+     * \param[in] e the layout element of which to send the state
+     **/
+    void element::update(tool::communicator* t, layout::element const* e) {
+      t->send_display_data(e);
     }
 
     /**

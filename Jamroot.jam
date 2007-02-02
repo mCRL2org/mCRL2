@@ -122,7 +122,6 @@ else {
     alias install
             :
               install-shared-libraries
-#              install-static-libraries
               install-binaries
               install-plugins
               install-examples
@@ -187,6 +186,4 @@ else {
           : <location>$(LIB_DIR)/plugins
             <install-type>SHARED_LIB
           ;
-
-  explicit install-headers install-binaries install-plugins install-examples install-shared-libraries ;
 }

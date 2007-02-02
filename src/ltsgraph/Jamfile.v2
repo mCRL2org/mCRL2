@@ -4,7 +4,7 @@ project toolset/ltsgraph
 
 exe ltsgraph
        : [ glob *.cpp ]
-         /libraries//wx_extension
+         /libraries/wxe//spinctrlfloat.o
          /libraries//mcrl2_basic
          /libraries//lts
        : <site-library>wx_base

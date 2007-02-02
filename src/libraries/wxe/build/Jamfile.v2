@@ -1,4 +1,4 @@
-project wx_extension
+project libraries/wxe
        : source-location ../source
        : build-dir $(BUILD_TOP)
        : requirements
@@ -19,13 +19,4 @@ obj colorbutton.o
       : <cxxflags>"$(WX_CPPFLAGS)"
       ;
 
-lib wx_extension
-       : colorbutton.o
-         spinctrlfloat.o
-       : <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
-         <os>NT:<link>static
-         <os>CYGWIN:<link>static
-       :
-       : <cxxflags>"$(WX_CPPFLAGS)"
-       ;
-
+alias wxe ;

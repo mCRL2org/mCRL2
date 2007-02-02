@@ -64,10 +64,25 @@ lib sip_controller
     : controller.cpp
       messenger
     : <threading>multi
+      <link>static
+    ;
+
+lib sip
+    : controller.cpp
+      tool.cpp
+      messenger
+    : <threading>multi
+      <link>shared
     ;
 
 lib sip_tool
     : tool.cpp
       messenger
     : <threading>multi
+      <link>static
     ;
+
+alias sip_tool : sip ;
+
+alias sip_controller : sip ;
+
