@@ -13,24 +13,6 @@ extern "C" {
 
 //Global precondition: the ATerm library has been initialised
 
-//Conversion between strings and quoted ATermAppl's
-//-------------------------------------------------
-
-ATermAppl gsString2ATermAppl(const char *s);
-//Ret: quoted constant s, if s != NULL
-//     unquoted constant Nil, if s == NULL
-
-char *gsATermAppl2String(ATermAppl term);
-//Ret: string s, if term is a quoted constant s
-//     NULL, otherwise
-
-ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term, bool TryNoSuffix);
-//Pre: Term is an ATerm containing ATermAppl's and ATermList's only
-//     s is not NULL
-//Ret: "s", if it does not occur in Term, and TryNoSuffix holds
-//     "sk" as a quoted ATermAppl constant, where k is the smallest natural
-//     number such that "sk" does not occur in Term, otherwise
-
 // TODO: remove this function.
 inline
 void gsEnableCoreConstructorFunctions()
@@ -3285,6 +3267,48 @@ ATermAppl gsMakeWhrDecl(ATermAppl String_0, ATermAppl DataExpr_1)
   return ATmakeAppl2(gsAFunWhrDecl(), (ATerm) String_0, (ATerm) DataExpr_1);
 }
 //--- end generated code
+
+//Conversion between strings and quoted ATermAppl's
+//-------------------------------------------------
+
+inline
+ATermAppl gsString2ATermAppl(const char *s)
+//Ret: quoted constant s, if s != NULL
+//     unquoted constant Nil, if s == NULL
+{
+  if (s != NULL) {
+    return ATmakeAppl0(ATmakeAFun(s, 0, ATtrue));
+  } else {
+    return gsMakeNil();   
+  }
+}
+
+inline
+bool gsIsString(ATermAppl term)
+//Ret: term is a quoted constant
+{
+  AFun head = ATgetAFun(term);
+  return ((ATgetArity(head) == 0) && (ATisQuoted(head) == ATtrue));
+}
+
+inline
+char *gsATermAppl2String(ATermAppl term)
+//Ret: string s, if term is a quoted constant s
+//     NULL, otherwise
+{
+  if (gsIsString(term)) {
+    return ATgetName(ATgetAFun(term));
+  } else {
+    return NULL;
+  }
+}
+
+ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term, bool TryNoSuffix);
+//Pre: Term is an ATerm containing ATermAppl's and ATermList's only
+//     s is not NULL
+//Ret: "s", if it does not occur in Term, and TryNoSuffix holds
+//     "sk" as a quoted ATermAppl constant, where k is the smallest natural
+//     number such that "sk" does not occur in Term, otherwise
 
 #ifdef __cplusplus
 }

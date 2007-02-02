@@ -387,7 +387,7 @@ void PRINT_FUNC(PrintPart_)(PRINT_OUTTYPE OutStream, const ATerm Part,
 void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
   const ATermAppl Part, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
 {
-  if (ATisQuoted(ATgetAFun(Part)) == ATtrue) {
+  if (gsIsString(Part)) {
     //print string
     PRINT_FUNC(fprints)(OutStream, ATgetName(ATgetAFun(Part)));
   } else if (gsIsSortExprOrUnknown(Part)) {

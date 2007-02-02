@@ -8,28 +8,6 @@
 
 extern "C" {
 
-//Conversion between strings and quoted ATermAppl's
-//-------------------------------------------------
-
-ATermAppl gsString2ATermAppl(const char *s)
-{
-  if (s != NULL) {
-    return ATmakeAppl0(ATmakeAFun(s, 0, ATtrue));
-  } else {
-    return gsMakeNil();   
-  }
-}
-
-char *gsATermAppl2String(ATermAppl term)
-{
-  AFun head = ATgetAFun(term);
-  if ((ATgetArity(head) == 0) && (ATisQuoted(head) == ATtrue)) {
-    return ATgetName(head);
-  } else {
-    return NULL;
-  }
-}
-
 ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term, bool TryNoSuffix)
 {
   bool found = false;
