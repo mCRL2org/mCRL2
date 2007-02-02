@@ -1,13 +1,4 @@
-project libraries
-       : requirements
-          <tag>@$(__name__).tag
-       ;
-
-rule tag ( name : type ? : property-set ) {
-  import common : format-name ;
-
-  return [ format-name <base> <threading> <runtime> : $(name) : $(type) : $(property-set) ] ;
-}
+project libraries ;
 
 libraries = [ MATCH .*/src/libraries/(.*)/build/.* : [ glob */build/Jamfile.v2 ] ] ;
 
