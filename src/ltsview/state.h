@@ -44,6 +44,8 @@ class State
     int       getNumberOfOutTransitions() const;
     float     getPosition() const;
     Utils::Point3D getPositionAbs() const;
+    Utils::Point3D getOutgoingControl() const;
+    Utils::Point3D getIncomingControl() const;
     int	      getRank() const;
     int       getSlot() const;
     void      getSubordinates( std::set< State* > &ss ) const;
@@ -57,6 +59,8 @@ class State
     void      setCluster( Cluster* c );
     void      setPosition( float p );
     void      setPositionAbs( Utils::Point3D p );
+    void      setOutgoingControl( Utils::Point3D p);
+    void      setIncomingControl( Utils::Point3D p);
     void      setRank( int r );
     void      setSlot( int s );
     void      unmark();
@@ -73,6 +77,8 @@ class State
     std::vector< Transition* > outTransitions;
     float		  position;
     Utils::Point3D	  positionAbs;
+    Utils::Point3D        outgoingControl;
+    Utils::Point3D        incomingControl;
     int			  rank;
     //bool		  selected;
     int                   slot; // The slot this state occupies

@@ -224,16 +224,16 @@ void Visualizer::clearDFSStates(State* root) {
   }
 }
 
-void Visualizer::computeStateAbsPos(State* root,int rot,Point3D initVect) {
+void Visualizer::computeStateAbsPos(State* root, int rot, Point3D initVect) {
 // Does a DFS on the states to calculate their `absolute' position, taking the 
 // position of the initial state as (0,0,0). 
-// Pre: True (?)
-// Post: root->getPosAbs() = absolute position of root, taking the position of
-//                           the initial state as (0, 0, 0)
+// Secondly, it also assigns the incoming and outgoing control points for the 
+// back pointers of each state. 
   root->DFSvisit();
   Cluster* startCluster = root->getCluster();
 
   float M[16];
+  float N[16]; // For the backpointers
   glGetFloatv(GL_MODELVIEW_MATRIX, M);
 
   if (root->getRank() == 0) {
@@ -246,22 +246,56 @@ void Visualizer::computeStateAbsPos(State* root,int rot,Point3D initVect) {
   }
 
   if(root->getPosition() < -0.9f) {
+    // The outgoing vector of the state lies clusterHeight above the state.
+    glTranslatef(0.0f, 0.0f, clusterHeight);
+    glGetFloatv(GL_MODELVIEW_MATRIX, N);
+    Point3D outgoingVect = { N[12] - initVect.x,
+                             N[14] - initVect.y,
+                           - N[13] + initVect.z };
+    root->setOutgoingControl( outgoingVect );
+    glTranslatef(0.0f, 0.0f, -clusterHeight);
+
     Point3D rootPos = { M[12] - initVect.x, 
                         M[14] - initVect.y, 
-                       - M[13] + initVect.z};    
+                      - M[13] + initVect.z};    
     root->setPositionAbs(rootPos);
+
+    // The incoming vector of the state lies clusterHeight beneath the state.
+    glTranslatef(0.0f, 0.0f, -clusterHeight);
+    glGetFloatv(GL_MODELVIEW_MATRIX, N);
+    Point3D incomingVect = { N[12] - initVect.x,
+                             N[14] - initVect.y,
+                           - N[13] + initVect.z };
+    root->setIncomingControl( incomingVect );
+    glTranslatef(0.0f, 0.0f, clusterHeight);
   }
   else {
+    // The outgoing vector of the state points out of the cluster, in the 
+    // direction the state itself is positioned. Furhtermore, it points 
+    // clusterHeight up.
     glRotatef(-root->getPosition(), 0.0f, 0.0f, 1.0f);
-    glTranslatef(startCluster->getTopRadius(), 0.0f, 0.0f);
+
+    glTranslatef(startCluster->getTopRadius() * 3, 0.0f, -clusterHeight);
+    glGetFloatv(GL_MODELVIEW_MATRIX, N);
+    Point3D outgoingVect = { N[12] - initVect.x,
+                             N[14] - initVect.y,
+                            -N[13] + initVect.z };
+    root->setOutgoingControl(outgoingVect);
+    glTranslatef(-startCluster->getTopRadius() * 2, 0.0f, clusterHeight);
+    
     glGetFloatv(GL_MODELVIEW_MATRIX, M);
     Point3D rootPos = { M[12] - initVect.x, 
                         M[14] - initVect.y, 
-                        - M[13] + initVect.z};
-
-                        
+                      - M[13] + initVect.z};                    
     root->setPositionAbs(rootPos);
-    glTranslatef(-startCluster->getTopRadius(), 0.0f, 0.0f);
+
+    glTranslatef( startCluster->getTopRadius() * 2, 0.0f, clusterHeight);
+    glGetFloatv(GL_MODELVIEW_MATRIX, N);
+    Point3D incomingVect = { N[12] - initVect.x,
+                             N[14] - initVect.y,
+                            -N[13] + initVect.z };
+    root->setIncomingControl(incomingVect);
+    glTranslatef(-startCluster->getTopRadius() * 3, 0.0f, -clusterHeight);
     glRotatef(root->getPosition(), 0.0f, 0.0f, 1.0f);
   }
 
@@ -454,24 +488,10 @@ void Visualizer::drawForwardPointer(State* startState, State* endState) {
 }
 
 void Visualizer::drawBackPointer(State* startState, State* endState) {
-
-  int rankDiff = startState->getRank() - endState->getRank();
   Point3D startPoint = startState->getPositionAbs();
-
-  Point3D startControl;
-  startControl.x = startPoint.x * rankDiff * clusterHeight / 8;
-  startControl.y = startPoint.y * rankDiff * clusterHeight / 8;
-  startControl.z = startPoint.z;
-
-  Point3D endPoint   = endState->getPositionAbs();
-
-  Point3D zUp = {0.0, 0.0, - endPoint.z * rankDiff * clusterHeight / 2};
-  Point3D endControl;
-  endControl.x = startControl.x;
-  endControl.y = startControl.y;
-  endControl.z = endPoint.z;
-
-  endControl = endControl + zUp;
+  Point3D startControl = startState->getOutgoingControl();
+  Point3D endControl = endState->getIncomingControl();
+  Point3D endPoint = endState->getPositionAbs();
 
   GLfloat ctrlPts [4][3] = { {startPoint.x, startPoint.y, startPoint.z},
                              {startControl.x, startControl.y, startControl.z},

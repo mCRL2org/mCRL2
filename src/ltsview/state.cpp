@@ -121,6 +121,15 @@ Point3D State::getPositionAbs() const
   return positionAbs;
 }
 
+Point3D State::getOutgoingControl() const 
+{
+  return outgoingControl;
+}
+
+Point3D State::getIncomingControl() const 
+{
+  return incomingControl;
+}
 
 void State::setPosition( float p )
 {
@@ -131,6 +140,17 @@ void State::setPositionAbs(Point3D p)
 {
   positionAbs = p;
 }
+
+void State::setOutgoingControl(Point3D p) 
+{
+  outgoingControl = p;
+}
+
+void State::setIncomingControl(Point3D p) 
+{
+  incomingControl = p;
+}
+
 Cluster* State::getCluster() const
 {
   return cluster;
