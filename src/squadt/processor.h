@@ -232,6 +232,8 @@ namespace squadt {
       void shutdown();
   };
 
+  std::istream& operator >> (std::istream&, processor::object_descriptor::t_status&);
+
   /**
    * \brief Basic monitor for task progress
    *

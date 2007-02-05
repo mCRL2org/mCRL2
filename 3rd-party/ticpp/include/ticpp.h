@@ -53,7 +53,7 @@ It throws exceptions, uses templates, is in its own name space, and
 <b>requires</b> STL (Standard Template Library). This is done to ease the use
 of getting values in and out of the xml.
 
-If you don't perfer to use some of the concepts just don't use it.
+If you don't prefer to use some of the concepts just don't use it.
 It is just a wrapper that extends TinyXML. It doesn't actually change
 any of TinyXML.
 */
@@ -87,7 +87,7 @@ namespace ticpp
 	public:
 
 		/**
-		Converts any class with a proper overload of the << opertor to a std::string
+		Converts any class with a proper overload of the << operator to a std::string
 		@param value The value to be converted
 		@throws Exception When value cannot be converted to a std::string
 		*/
@@ -176,7 +176,7 @@ namespace ticpp
 			m_impRC = node->m_tiRC;
 		}
 
-		void ValidatePointer()
+		void ValidatePointer() const
 		{
 			if ( m_impRC->IsNull() )
 			{
@@ -384,6 +384,9 @@ namespace ticpp
 	*/
 	class Node : public Base
 	{
+          friend std::istream& operator>> (std::istream & in, Node& node);
+          friend std::ostream& operator<< (std::ostream & out, const Node& node);
+
 	public:
 
 		/**
@@ -869,6 +872,12 @@ namespace ticpp
 		@internal
 		Allows NodeImp to use Node*'s.
 		*/
+		virtual TiXmlNode const* GetTiXmlPointer() const = 0;
+
+		/**
+		@internal
+		Allows NodeImp to use Node*'s.
+		*/
 		virtual TiXmlNode* GetTiXmlPointer() = 0;
 
 		TiXmlBase* GetBasePointer()
@@ -883,6 +892,14 @@ namespace ticpp
 		Node* NodeFactory( TiXmlNode* tiXmlNode, bool throwIfNull = true, bool rememberSpawnedWrapper = true );
 
 	};
+
+        inline std::istream& operator>> (std::istream & in, Node& node) {
+          return (in >> *(node.GetTiXmlPointer()));
+        }
+
+        inline std::ostream& operator<< (std::ostream & out, const Node& node) {
+          return (out << *(node.GetTiXmlPointer()));
+        }
 
 	/** Iterator for conveniently stepping through Nodes and Attributes */
 	template < class T = Node >
@@ -1013,6 +1030,18 @@ namespace ticpp
 	protected:
 
 		T* m_tiXmlPointer;		/**< Internal pointer to the TiXml Class which is being wrapped */
+
+		/**
+		@internal
+		Gets the internal TinyXML pointer.
+
+		@returns The internal TiXmlNode*.
+		*/
+		TiXmlNode const* GetTiXmlPointer() const
+		{
+			ValidatePointer();
+			return m_tiXmlPointer;
+		}
 
 		/**
 		@internal
@@ -1198,7 +1227,7 @@ namespace ticpp
 		Write the document to a string using formatted printing ("pretty print").
 		@return the document as a formatted standard string.
 		*/
-		std::string GetAsString();
+		void Print(std::ostream&);
 
 		/**
 		Load a file using the current document value. Throws if load is unsuccessful.
@@ -1491,17 +1520,61 @@ namespace ticpp
 			FromString( temp, value );
 		}
 
+		/**
+		Gets an attribute of @a name from an element.
+		Uses FromString to convert the string to the type of choice.
+
+		@param name				The name of the attribute you are querying.
+		@param throwIfNotFound	[DEF]	If true, will throw an exception if the attribute doesn't exist
+		@throws Exception When the attribute doesn't exist and throwIfNotFound is true
+
+		*/
+		std::string GetAttributeValue( const std::string& name, bool throwIfNotFound = true )
+		{
+			// Get the attribute's value as a std::string
+			std::string temp;
+			if ( !GetAttributeImp( name, &temp ) )
+			{
+				if ( throwIfNotFound )
+				{
+					THROW( "Attribute does not exist" );
+				}
+			}
+
+                        return (temp);
+		}
+
+		/**
+		Gets an attribute of @a name from an element.
+		Uses FromString to convert the string to the type of choice.
+
+		@param name				The name of the attribute you are querying.
+		@param defaultValue	What to put in @a value if there is no attribute in this element.
+		@throws Exception When the attribute doesn't exist and throwIfNotFound is true
+
+		*/
+		std::string GetAttributeValueOrDefault( const std::string& name, std::string defaultValue )
+		{
+			// Get the attribute's value as a std::string
+			std::string temp;
+			if ( !GetAttributeImp( name, &temp ) )
+			{
+                                return (defaultValue);
+			}
+
+                        return (temp);
+		}
 	private:
 
 		/**
 		@internal
-		Implimentation of the GetAttribute and GetAttributeOrDefault template methods.
+		Implementation of the GetAttribute and GetAttributeOrDefault template methods.
 		*/
 		bool GetAttributeImp( const std::string& name, std::string* value );
 
 		/**
 		@internal
-		Implimentation of the GetText, GetTextOrDefault, GetTextValue, and GetTextValueOrDefault template methods.
+		Implementation of the GetText, GetTextOrDefault, GetTextValue, and GetTextValueOrDefault template methods.
 		*/
 		bool GetTextImp( std::string* value );
 	};

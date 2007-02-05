@@ -17,7 +17,7 @@
 #include "executor.tcc"
 #include "processor.tcc"
 
-#include <xml2pp/text_reader.h>
+#include <ticpp.h>
 
 #include <utility/visitor.h>
 
@@ -27,13 +27,25 @@ namespace squadt {
 
   class restore_visitor_impl : public utility::visitor< restore_visitor_impl, false > {
 
+    protected:
+
+      /** \brief Points to the current element */
+      ticpp::Element*  tree;
+
+    protected:
+
+      /** \brief Default constructor */
+      restore_visitor_impl();
+
     private:
 
-      xml2pp::text_reader& in;
+      /** \brief Changes the currently pointed to tree (FIXME this is a temporary solution) */
+      restore_visitor_impl& visit_tree(ticpp::Element*);
 
     public:
 
-      restore_visitor_impl(xml2pp::text_reader& s);
+      /** \brief Reads from parse tree */
+      restore_visitor_impl(ticpp::Element* s);
 
       /** \brief Reads state for objects of type T */
       template < typename T >
@@ -57,65 +69,96 @@ namespace utility {
 
 namespace squadt {
 
-  class restore_visitor_alternate_impl : public restore_visitor_impl {
+  class restore_visitor_impl_frontend : public restore_visitor_impl {
 
     private:
 
       /** \brief The source of input */
-      xml2pp::text_reader in;
+      ticpp::Document in;
 
     public:
 
+      /** \brief Reads from stream */
+      restore_visitor_impl_frontend(std::istream& s);
+
       /** \brief Reads from string */
-      restore_visitor_alternate_impl(std::string const&);
+      restore_visitor_impl_frontend(std::string const&);
 
       /** \brief Reads from file */
-      restore_visitor_alternate_impl(boost::filesystem::path const&);
+      restore_visitor_impl_frontend(boost::filesystem::path const&);
   };
 
-  inline restore_visitor_impl::restore_visitor_impl(xml2pp::text_reader& s) : in(s) {
+  inline restore_visitor_impl::restore_visitor_impl() {
   }
 
-  inline restore_visitor_alternate_impl::restore_visitor_alternate_impl(std::string const& s) : restore_visitor_impl(in), in(s) {
+  inline restore_visitor_impl::restore_visitor_impl(ticpp::Element* s) : tree(s) {
   }
 
-  inline restore_visitor_alternate_impl::restore_visitor_alternate_impl(boost::filesystem::path const& p) : restore_visitor_impl(in), in(p) {
+  inline restore_visitor_impl& restore_visitor_impl::visit_tree(ticpp::Element* s) {
+    tree = s;
+
+    return (*this);
+  }
+
+  inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(std::istream& s) {
+    s >> in;
+
+    tree = in.FirstChildElement();
+  }
+
+  inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(std::string const& s) {
+    std::istringstream ins(s);
+
+    ins >> in;
+
+    tree = in.FirstChildElement();
+  }
+
+  inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(boost::filesystem::path const& p) {
+    std::ifstream ins(p.native_file_string().c_str());
+
+    ins >> in;
+
+    tree = in.FirstChildElement();
   }
 
   template < >
-  restore_visitor::restore_visitor(xml2pp::text_reader& s) :
-        utility::visitor_interface< restore_visitor_impl, false >(boost::shared_ptr < visitor_type > (new restore_visitor_impl(s))) {
+  restore_visitor::restore_visitor(ticpp::Element& s) :
+        utility::visitor_interface< restore_visitor_impl, false >(boost::shared_ptr < visitor_type > (new restore_visitor_impl(&s))) {
   }
 
   /**
    * \param[in] p a string from which to read
    **/
   restore_visitor::restore_visitor(std::string const& s) :
-        utility::visitor_interface< restore_visitor_impl, false >(boost::shared_ptr < visitor_type > (new restore_visitor_alternate_impl(s))) {
+        utility::visitor_interface< restore_visitor_impl, false >(boost::shared_ptr < visitor_type > (new restore_visitor_impl_frontend(s))) {
   }
 
   /**
    * \param[in] p a path to the file from which to read
    **/
   restore_visitor::restore_visitor(boost::filesystem::path const& p) :
-        utility::visitor_interface< restore_visitor_impl, false >(boost::shared_ptr < visitor_type > (new restore_visitor_alternate_impl(p))) {
+        utility::visitor_interface< restore_visitor_impl, false >(boost::shared_ptr < visitor_type > (new restore_visitor_impl_frontend(p))) {
   }
 
   template <>
   void restore_visitor_impl::visit(tool& t) {
-    if (!(in.get_attribute(&t.m_name, "name") && in.get_attribute(&t.m_location, "location"))) {
-      throw (exception::exception(exception::required_attributes_missing, "tool"));
-    }
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "tool");
 
-    if (!in.is_end_element()) {
+    tree->GetAttribute("name", &t.m_name);
+    tree->GetAttribute("location", &t.m_location);
+
+    if (!tree->NoChildren()) {
       t.m_capabilities.reset(new sip::tool::capabilities);
 
-      in.next_element();
+      try {
+        tree->FirstChildElement("capabilities");
 
-      sip::visitors::restore(*t.m_capabilities, in);
+//        sip::visitors::restore(*t.m_capabilities, in);
+      }
+      catch (...) {
+      }
     }
-
-    in.skip_end_element("tool");
   }
 
   template <>
@@ -127,15 +170,12 @@ namespace squadt {
   void restore_visitor_impl::visit(tool_manager_impl& tm) {
     using namespace boost::filesystem;
 
-    assert(in.is_element("tool-catalog"));
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "tool-catalog");
 
-    in.next_element();
-
-    while (!in.is_end_element("tool-catalog")) {
-      /* Add a new tool to the list of tools */
+    for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
       tool new_tool;
 
-      new_tool.accept(*this);
+      visit_tree(e).visit(new_tool);
 
       tm.add_tool(new_tool);
     }
@@ -147,68 +187,58 @@ namespace squadt {
   }
 
   template <>
-  void restore_visitor_impl::visit(executor_impl& e) {
+  void restore_visitor_impl::visit(executor_impl& o) {
     /** FIXME temporary measure until xml2pp is phased out */
-    if (in.is_element("squadt-preferences")) {
-      in.next_element();
+    if (tree->Value() == "squadt-preferences") {
+      tree = tree->FirstChildElement();
     }
 
-    assert(in.is_element("execution-settings"));
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "execution-settings");
 
-    if (in.is_element("execution-settings")) {
+    if (tree->Value() == "execution-settings") {
       unsigned int maximum_instance_count = 3;
-     
-      while (!in.is_end_element("execution-settings")) {
-        in.next_element();
-      
-        if (in.is_element("concurrency-constraints")) {
-          if (in.get_attribute(&maximum_instance_count, "maximum-process-total")) {
-            e.set_maximum_instance_count(maximum_instance_count);
+
+      for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
+        if (e->Value() == "concurrency-constraints") {
+          try {
+            e->GetAttribute("maximum-process-total", &maximum_instance_count);
+
+            o.set_maximum_instance_count(maximum_instance_count);
+          }
+          catch (...) {
           }
         }
       }
-     
-      in.skip_end_element("execution-settings");
     }
+
+    tree = tree->NextSiblingElement(false);
   }
 
   template <>
   void restore_visitor_impl::visit(type_registry& r) {
-    assert(in.is_element("default-actions"));
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "default-actions");
 
-    while (!in.is_end_element("default-actions")) {
-      in.next_element();
+    if (tree->Value() == "default-actions") {
+      for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
+        if (e->Value() == "associate-commands") {
+          mime_type t(e->GetAttributeValue("mime-type"));
 
-      if (in.is_element("associate-commands")) {
-        while (!in.is_end_element("associate-commands")) {
-          mime_type t(in.get_attribute_as_string("mime-type"));
-
-          in.next_element();
-
-          if (in.is_element("command")) {
-            if (in.is_end_element() || in.is_empty_element()) {
+          ticpp::Element* command_element = e->FirstChildElement(false);
+    
+          if (command_element != 0 && command_element->Value() == "command") {
+            if (command_element->NoChildren()) {
               r.register_command(t, type_registry::command_system);
             }
             else {
-              in.next_element();
-
-              r.register_command(t, in.get_value_as_string());
-
-              in.next_element();
+              r.register_command(t, command_element->GetText());
             }
-
-            in.skip_end_element("command");
           }
           else {
-            in.skip_end_element("no-command");
+            r.register_command(t, type_registry::command_none);
           }
-
-          in.skip_end_element("associate_commands");
         }
       }
     }
-
-    in.skip_end_element("default-actions");
   }
 
   typedef std::map < unsigned long, processor::object_descriptor::sptr > id_conversion_map;
@@ -223,100 +253,66 @@ namespace squadt {
    **/
   template <>
   void restore_visitor_impl::visit(processor_impl& p, id_conversion_map& m) {
-    std::string tool_name = in.get_attribute_as_string("tool-name");
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "processor");
 
-    if (!tool_name.empty()) {
-      p.tool_descriptor = global_build_system.get_tool_manager()->get_tool_by_name(tool_name);
-
-      std::string format   = in.get_attribute_as_string("category");
-      std::string category = in.get_attribute_as_string("format");
-
-      if (!(format.empty() || category.empty())) {
-        p.selected_input_combination = p.tool_descriptor->find_input_combination(
-                      sip::tool::category::fit(category), sip::mime_type(format));
-      }
+    try {
+      p.tool_descriptor            = global_build_system.get_tool_manager()->
+                                       get_tool_by_name(tree->GetAttributeValue("tool-name"));
+      p.selected_input_combination = p.tool_descriptor->find_input_combination(
+                                       sip::tool::category::fit(tree->GetAttributeValue("category")),
+                                       sip::mime_type(tree->GetAttributeValue("format")));
+    }
+    catch (...) {
     }
 
-    p.output_directory = in.get_attribute_as_string("output-directory");
+    tree->GetAttribute("output-directory", &p.output_directory, false);
 
-    in.next_element();
+    for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
+      if (e->Value() == "input") {
+        /* Read input */
+        unsigned long id;
 
-    if (in.is_element("configuration")) {
-      boost::shared_ptr < sip::configuration > new_configuration(new sip::configuration);
+        e->GetAttribute("id", &id);
 
-      sip::visitors::restore(*new_configuration, in);
-
-      p.current_monitor->set_configuration(new_configuration);
-    }
-
-    /* Read inputs */
-    while (in.is_element("input")) {
-      unsigned long id;
-
-      if (!in.get_attribute(&id, "id")) {
-        throw (exception::exception(exception::required_attributes_missing, "processor->input"));
-      }
-      else {
         assert(m.find(id) != m.end());
-
+       
         p.inputs.push_back(processor::object_descriptor::sptr(m[id]));
       }
-
-      in.next_element();
-
-      in.skip_end_element("input");
-    }
-
-    /* Read outputs */
-    while (in.is_element("output")) {
-      unsigned long id;
-      bool          b = in.get_attribute(&id, "id");
-
-      if (b) {
-        std::string format = in.get_attribute_as_string("format");
-
-        if (!format.empty()) {
-          assert(m.find(id) == m.end());
-
-          m[id] = processor::object_descriptor::sptr(new processor::object_descriptor(sip::mime_type(format)));
+      else if (e->Value() == "output") {
+        /* Read output */
+        unsigned long id;
        
-          p.outputs.push_back(m[id]);
+        e->GetAttribute("id", &id);
+
+        assert(m.find(id) == m.end());
+       
+        m[id] = processor::object_descriptor::sptr(new processor::object_descriptor(sip::mime_type(e->GetAttributeValue("format"))));
+        
+        p.outputs.push_back(m[id]);
+       
+        processor::object_descriptor& new_descriptor = *m[id];
+        
+        e->GetAttribute("location", &new_descriptor.location);
+        e->GetAttributeOrDefault("status", &new_descriptor.status, processor::object_descriptor::original);
+        e->GetAttribute("identifier", &new_descriptor.identifier);
+        e->GetAttribute("timestamp", &new_descriptor.timestamp);
+        
+        if (new_descriptor.status == processor::object_descriptor::generation_in_progress) {
+          new_descriptor.status = processor::object_descriptor::reproducible_out_of_date;
         }
-        else {
-          throw (exception::exception(exception::required_attributes_missing, "processor->output"));
-        }
+        
+        e->GetAttributeOrDefault("digest", &new_descriptor.checksum, md5pp::zero_digest);
+
+        new_descriptor.generator = boost::weak_ptr < processor > (p.interface_object);
       }
+      else if (e->Value() == "configuration") {
+        boost::shared_ptr < sip::configuration > new_configuration(new sip::configuration);
 
-      processor::object_descriptor& new_descriptor = *m[id];
+//        sip::visitors::restore(*new_configuration, in);
 
-      if (!(b && in.get_attribute(&new_descriptor.location, "location")
-              && in.get_attribute(&id, "status"))
-              && (in.get_attribute(&new_descriptor.identifier, "identifier") || id == processor::object_descriptor::original)
-              && in.get_attribute(&new_descriptor.timestamp, "timestamp")) {
-
-        throw (exception::exception(exception::required_attributes_missing, "processor->output"));
+        p.current_monitor->set_configuration(new_configuration);
       }
-
-      new_descriptor.status = static_cast < processor_impl::object_status > ((id == processor::object_descriptor::generation_in_progress) ?
-                                                      processor::object_descriptor::reproducible_nonexistent : id);
-
-      std::string digest = in.get_attribute_as_string("digest");
-
-      if (digest.empty()) {
-        new_descriptor.checksum = md5pp::zero_digest;
-      }
-      else {
-        new_descriptor.checksum.read(digest);
-      }
-
-      new_descriptor.generator = boost::weak_ptr < processor > (p.interface_object);
-
-      in.next_element();
-
-      in.skip_end_element("output");
     }
-
-    in.skip_end_element("processor");
   }
 
   template <>
@@ -326,36 +322,27 @@ namespace squadt {
 
   template <>
   void restore_visitor_impl::visit(squadt::project_manager_impl& p) {
-    if (!in.is_element("squadt-project")) {
-      throw (exception::exception(exception::failed_loading_object, "SQuADT project", "expected squadt-project element"));
-    }
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "squadt-project");
 
-    in.get_attribute(&p.count, "count");
-
-    /* Advance beyond project element */
-    in.next_element();
-
-    if (in.is_element("description") && !in.is_empty_element()) {
-      in.next_element();
-
-      in.get_value(&p.description);
-
-      in.next_element(1);
-    }
+    tree->GetAttribute("count", &p.count);
 
     id_conversion_map cmap;
 
     p.processors.clear();
 
-    /* Read processors */
-    while (in.is_element("processor")) {
-      processor::sptr new_processor(processor::create(p.m_interface));
+    for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
+      if (e->Value() == "processor") {
+        processor::sptr new_processor(processor::create(p.m_interface));
+       
+        new_processor->accept(visit_tree(e), cmap);
 
-      new_processor->accept(*this, cmap);
-      
-      new_processor->check_status(true);
-
-      p.processors.push_back(new_processor);
+        new_processor->check_status(true);
+       
+        p.processors.push_back(new_processor);
+      }
+      else if (e->Value() == "description") {
+        e->GetText(&p.description, false);
+      }
     }
 
     p.sort_processors();

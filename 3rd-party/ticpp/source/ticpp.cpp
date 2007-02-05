@@ -734,9 +734,13 @@ Document::Document( const std::string& documentName )
 	m_impRC->InitRef();
 }
 
-std::string Document::GetAsString()
+void Document::Print(std::ostream& o)
 {
-	return m_tiXmlPointer->GetAsString();
+	TiXmlPrinter printer;
+        printer.SetIndent(" ");
+	GetTiXmlPointer()->Accept( &printer );
+
+        o << printer.Str();
 }
 
 void Document::LoadFile( TiXmlEncoding encoding )

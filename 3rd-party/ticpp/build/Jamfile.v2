@@ -7,8 +7,8 @@ project aterm
 
 lib ticpp
        : [ glob *.cpp ]
-       : <define>TIXML_USE_STL=YES
+       : <define>TIXML_USE_TICPP
        :
-       :
+       : <define>TIXML_USE_TICPP
        ;
 

@@ -21,6 +21,16 @@ namespace squadt {
 
   using namespace boost::filesystem;
 
+  std::istream& operator >> (std::istream& stream, processor::object_descriptor::t_status& s) {
+    size_t t;
+
+    stream >> t;
+
+    s = static_cast < processor::object_descriptor::t_status > (t);
+
+    return (stream);
+  }
+
   bool processor_impl::try_change_status(processor::object_descriptor& o, processor::object_descriptor::t_status s) {
     if (s < o.status) {
       o.status = s;

@@ -101,5 +101,13 @@ namespace md5pp {
 
     return (stream);
   }
+
+  std::istream& operator>> (std::istream& stream, compact_digest& digest) {
+    for (unsigned int i = 0; i < 16; ++i) {
+      stream >> std::hex >> std::setw(2) >> digest.bytes[i];
+    }
+
+    return (stream);
+  }
 }
 

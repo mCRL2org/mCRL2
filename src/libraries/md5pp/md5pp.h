@@ -85,6 +85,9 @@ namespace md5pp {
   /** \brief Print the current digest to a stream */
   std::ostream& operator<< (std::ostream&, const compact_digest&);
 
+  /** \brief Read a digest from a stream */
+  std::istream& operator>> (std::istream&, compact_digest&);
+
   /**
    * Basic C++ wrapper around an MD5 context
    **/
