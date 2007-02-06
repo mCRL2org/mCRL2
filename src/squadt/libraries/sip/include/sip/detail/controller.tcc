@@ -166,9 +166,7 @@ namespace sip {
      * \param[in] m a reference to the message
      **/
     inline void communicator_impl::tool_configuration_handler(const messenger::message_ptr& m) {
-      if (m_configuration.get() == 0) {
-        m_configuration = boost::shared_ptr < configuration > (new configuration);
-      }
+      m_configuration.reset(new configuration);
 
       visitors::restore(*m_configuration, m->to_string());
     }

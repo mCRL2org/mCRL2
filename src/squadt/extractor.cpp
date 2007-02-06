@@ -35,6 +35,8 @@ namespace squadt {
    * \param[in,out] t the tool object in which to store the result
    **/
   void extractor::handle_store_tool_capabilities(const sip::message_ptr& m, tool& t) {
+    t.m_capabilities.reset(new sip::tool::capabilities);
+
     sip::visitors::restore(*t.m_capabilities, m->to_string());
   }
 }

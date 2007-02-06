@@ -33,6 +33,16 @@ alias transport
       <os>NT:<define>_WIN32_WINNT=0x0500
     ;
 
+obj restore_visitor.o
+    : restore_visitor.cpp
+    : <use>/libraries/utility//headers
+      <use>/libraries//ticpp
+      <use>/site-config//boost_filesystem
+    :
+    : <library>/libraries//ticpp
+      <library>/site-config//boost_filesystem
+    ;
+
 alias messenger
     : # no sources
       basic_datatype.cpp
@@ -47,16 +57,14 @@ alias messenger
       mime_type.cpp
       transport
       store_visitor.cpp
-      restore_visitor.cpp
+      restore_visitor.o
     : <threading>multi
       <dependency>/site-config//boost_regex
       <dependency>/site-config//boost_filesystem
-      <dependency>/libraries//xml2pp
       <dependency>/libraries/utility//logger
     : # no default build
     : <library>/site-config//boost_regex
       <library>/site-config//boost_filesystem
-      <library>/libraries//xml2pp
       <library>/libraries/utility//logger
     ;
 

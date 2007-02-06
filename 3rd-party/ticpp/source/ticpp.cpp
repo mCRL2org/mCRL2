@@ -862,7 +862,7 @@ bool Element::GetAttributeImp( const std::string& name, std::string* value )
 	}
 	else
 	{
-		*value = retVal;
+		value->assign(retVal);
 		return true;
 	}
 }

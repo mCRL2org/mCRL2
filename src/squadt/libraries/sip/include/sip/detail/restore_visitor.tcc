@@ -1,4 +1,4 @@
-#include <xml2pp/text_reader.h>
+#include <ticpp.h>
 
 #include <sip/visitors.h>
 
@@ -21,13 +21,25 @@ namespace sip {
       /** \brief Points to interface object */
       sip::restore_visitor&     m_interface;
 
-      /** \brief The source of input */
-      xml2pp::text_reader&      in;
+    protected:
+
+      /** \brief Points to the current element */
+      ticpp::Element*  tree;
 
     protected:
 
-      /** \brief Reads from string */
-      restore_visitor_impl(restore_visitor&, xml2pp::text_reader&);
+      /** \brief Default constructor */
+      restore_visitor_impl(restore_visitor&);
+
+    private:
+
+      /** \brief Changes the currently pointed to tree (FIXME this is a temporary solution) */
+      restore_visitor_impl& visit_tree(ticpp::Element*);
+
+    public:
+
+      /** \brief Reads from parse tree */
+      restore_visitor_impl(restore_visitor&, ticpp::Element* s);
 
     public:
 

@@ -154,7 +154,7 @@ namespace squadt {
       try {
         tree->FirstChildElement("capabilities");
 
-//        sip::visitors::restore(*t.m_capabilities, in);
+        sip::visitors::restore(*t.m_capabilities, *tree);
       }
       catch (...) {
       }
@@ -293,9 +293,12 @@ namespace squadt {
         processor::object_descriptor& new_descriptor = *m[id];
         
         e->GetAttribute("location", &new_descriptor.location);
-        e->GetAttributeOrDefault("status", &new_descriptor.status, processor::object_descriptor::original);
-        e->GetAttribute("identifier", &new_descriptor.identifier);
         e->GetAttribute("timestamp", &new_descriptor.timestamp);
+        e->GetAttributeOrDefault("status", &new_descriptor.status, processor::object_descriptor::original);
+
+        if (new_descriptor.status != processor::object_descriptor::original) {
+          e->GetAttribute("identifier", &new_descriptor.identifier);
+        }
         
         if (new_descriptor.status == processor::object_descriptor::generation_in_progress) {
           new_descriptor.status = processor::object_descriptor::reproducible_out_of_date;
@@ -308,7 +311,7 @@ namespace squadt {
       else if (e->Value() == "configuration") {
         boost::shared_ptr < sip::configuration > new_configuration(new sip::configuration);
 
-//        sip::visitors::restore(*new_configuration, in);
+        sip::visitors::restore(*new_configuration, *e);
 
         p.current_monitor->set_configuration(new_configuration);
       }

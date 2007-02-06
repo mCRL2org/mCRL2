@@ -10,8 +10,6 @@
 #include <sip/object.h>
 #include <sip/tool.h>
 
-#include <xml2pp/text_reader.h>
-
 #include <sip/detail/event_handlers.h>
 
 namespace sip {
@@ -70,6 +68,25 @@ namespace sip {
       return mediator::wrapper_aptr();
     }
 
+    /** \todo remove this class after new generic visitor has been added */
+    class elements_wrapper {
+      private:
+
+        tool_display&                                m_object;
+
+        std::vector < sip::layout::element const* >& m_elements;
+
+      public:
+
+        elements_wrapper(tool_display& t, std::vector < sip::layout::element const* >& e) : m_object(t), m_elements(e) {
+        }
+
+        template < typename V >
+        void accept(V& visitor) {
+          visitor.visit(m_object, m_elements);
+        }
+    };
+
     /**
      * \param[in] s string data with state descriptions
      * \param[in] elements a vector with the elements that should be updated
@@ -83,35 +100,9 @@ namespace sip {
 
       /* Find the element that is to be changed */
       if (m_manager.get() != 0) {
-        xml2pp::text_reader r(s.c_str());
+        elements_wrapper w(*this, elements);
 
-        while (r.valid()) {
-          element_identifier id = boost::lexical_cast < element_identifier > (r.get_attribute_as_string("id")); 
-
-          if (m_element_by_id.count(id)) {
-        
-            element* t = m_element_by_id[id];
-         
-            if (t != 0) {
-              sip::visitors::restore(*t, r);
-         
-              elements.push_back(t);
-            }
-            else {
-              std::string name = r.element_name();
-         
-              while (r.valid() && !r.is_end_element(name.c_str())) {
-                r.next_element();
-              }
-         
-              r.next_element();
-            }
-          }
-        }
-      }
-      else {
-        /** \todo log instead of print */
-        std::cerr << "Warning : update operation on empty layout!\n";
+        sip::visitors::restore(w, s);
       }
     }
   }

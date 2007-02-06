@@ -52,13 +52,13 @@ namespace sip {
       private:
 
         /** \brief The message type */
-        type_identifier_t type;
+        type_identifier_t m_type;
 
         /** \brief Identifier for the origin of this message */
-        end_point         originator;
+        end_point         m_originator;
 
         /** \brief The content of a message */
-        std::string       content;
+        std::string       m_content;
 
       private:
 
@@ -115,19 +115,19 @@ namespace sip {
      * \param t a message type identifier
      **/
     template < class M, M D, M A >
-    inline message< M, D, A >::message(type_identifier_t t, end_point o) : type(t), originator(o) {
+    inline message< M, D, A >::message(type_identifier_t t, end_point o) : m_type(t), m_originator(o) {
     }
 
     template < class M, M D, M A >
-    inline message< M, D, A >::message(message& m) : type(m.type), content(m.content) {
+    inline message< M, D, A >::message(message& m) : m_type(m.m_type), m_content(m.m_content) {
     }
 
     template < class M, M D, M A >
-    inline message< M, D, A >::message() : type(D) {
+    inline message< M, D, A >::message() : m_type(D) {
     }
 
     template < class M, M D, M A >
-    inline message< M, D, A >::message(end_point& e) : type(D), originator(e) {
+    inline message< M, D, A >::message(end_point& e) : m_type(D), m_originator(e) {
     }
 
     /**
@@ -137,29 +137,29 @@ namespace sip {
      **/
     template < class M, M D, M A >
     template < typename T >
-    inline message< M, D, A >::message(T c, type_identifier_t t, end_point o) : type(t), originator(o) {
+    inline message< M, D, A >::message(T c, type_identifier_t t, end_point o) : m_type(t), m_originator(o) {
       set_content(c);
     }
 
     template < class M, M D, M A >
     inline M message< M, D, A >::get_type() const {
-      return (type);
+      return (m_type);
     }
 
     /** Returns the remote end point, or 0 if the message contains no originator information */
     template < class M, M D, M A >
     inline typename message< M, D, A >::end_point message< M, D, A >::get_originator() const {
-      return (originator);
+      return (m_originator);
     }
  
     template < class M, M D, M A >
     inline std::string message< M, D, A >::to_string() const {
-      return (content);
+      return (m_content);
     }
 
     template < class M, M D, M A >
     inline bool message< M, D, A >::is_empty() const {
-      return (content.empty());
+      return (m_content.empty());
     }
 
     /**
@@ -171,7 +171,7 @@ namespace sip {
  
       temporary << c.rdbuf();
  
-      content = temporary.str();
+      m_content = temporary.str();
     }
 
     /**
@@ -179,7 +179,7 @@ namespace sip {
      **/
     template < class M, M D, M A >
     inline void message< M, D, A >::set_content(const std::string& c) {
-      content = c;
+      m_content = c;
     }
 
     /**
@@ -187,7 +187,7 @@ namespace sip {
      **/
     template < class M, M D, M A >
     inline void message< M, D, A >::set_content(const char* c) {
-      content = c;
+      m_content = c;
     }
   }
 }

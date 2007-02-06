@@ -78,7 +78,7 @@ namespace sip {
   };
 
   /** \brief Protocol version {major,minor} */
-  static const version default_protocol_version = {1,0};
+  const version default_protocol_version = {1,0};
 }
 
 #endif

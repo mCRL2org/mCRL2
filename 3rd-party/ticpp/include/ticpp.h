@@ -127,6 +127,14 @@ namespace ticpp
 		}
 
 		/**
+		Specialization for bool
+		*/
+			void FromString( const std::string& temp, bool* out )
+		{
+                        *out = (temp == "1" || temp == "yes" || temp == "true" || temp == "on");
+		}
+
+		/**
 		Specialization for std::string
 		*/
 		void FromString( const std::string& temp, std::string* out )

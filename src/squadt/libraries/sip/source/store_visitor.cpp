@@ -91,20 +91,20 @@ namespace sip {
 
   template <>
   void store_visitor_impl::visit(sip::message const& o) {
-    out << "<message-meta type=\"" << o.type << "\">"
+    out << "<message-meta type=\"" << o.m_type << "\">"
         << "<![CDATA[";
 
     size_t i = 0;
-    size_t j = o.content.find("]]>", 0); 
+    size_t j = o.m_content.find("]]>", 0); 
 
-    while (j < o.content.size()) {
-      out << o.content.substr(i,j) << "]]]]><![CDATA[>";
+    while (j < o.m_content.size()) {
+      out << o.m_content.substr(i,j) << "]]]]><![CDATA[>";
 
       i = j + 3;
-      j = o.content.find("]]>", i);
+      j = o.m_content.find("]]>", i);
     }
 
-    out << o.content.substr(i) << "]]></message-meta>";
+    out << o.m_content.substr(i) << "]]></message-meta>";
   }
 
   template <>

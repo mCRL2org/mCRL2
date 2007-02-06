@@ -100,10 +100,11 @@ namespace sip {
  
     /* Send a specification of the current configuration (it may change during tool execution) */
     void communicator::send_accept_configuration() {
-      boost::dynamic_pointer_cast < communicator_impl > (impl)->current_configuration->m_fresh = false;
+      boost::shared_ptr < configuration > c(boost::dynamic_pointer_cast < communicator_impl > (impl)->current_configuration);
 
-      message m(sip::visitors::store(*boost::dynamic_pointer_cast < communicator_impl > (impl)->current_configuration),
-                                                                          sip::message_accept_configuration);
+      c->set_fresh(false);
+
+      message m(sip::visitors::store(*c), sip::message_accept_configuration);
  
       impl->send_message(m);
     }
@@ -112,7 +113,7 @@ namespace sip {
      * \param[in] c the configuration object that specifies the accepted configuration
      **/
     void communicator::send_accept_configuration(sip::configuration& c) {
-      c.m_fresh = false;
+      c.set_fresh(false);
 
       message m(sip::visitors::store(c), sip::message_accept_configuration);
  
