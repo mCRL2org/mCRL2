@@ -516,7 +516,7 @@ namespace squadt {
    * \param[in] s a path to a project file
    **/
   bool project_manager::is_project_store(const std::string& s) {
-    bool return_value = true;
+    bool return_value = false;
 
     bf::path path_to(settings_manager::path_concatenate(s, settings_manager::project_definition_base_name));
 
@@ -525,9 +525,10 @@ namespace squadt {
         project_manager p;
 
         visitors::restore(p, path_to);
+
+        return_value = true;
       }
       catch (...) {
-        return_value = false;
       }
     }
 
