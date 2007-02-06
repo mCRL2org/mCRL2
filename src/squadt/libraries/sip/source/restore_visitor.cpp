@@ -165,7 +165,7 @@ namespace sip {
       if (e->Value() == "option") {
         boost::shared_ptr < option > o(new sip::option);
 
-        o->accept(*this);
+        o->accept(visit_tree(e));
 
         c.add_option(identifier, o);
       }
