@@ -5,6 +5,7 @@
 #define LPE_PBES_UTILITY_H
 
 #include "lpe/pbes.h"
+#include "lpe/specification.h"
 #include "lpe/data_init.h"
 #include "lpe/data_utility.h"
 #include "lpe/pbes_init.h"

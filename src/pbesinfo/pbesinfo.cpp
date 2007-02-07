@@ -2,13 +2,13 @@
 //
 // file          : pbesinfo 
 // date          : 01-12-2006
-// version       : 0.0.5a
+// version       : 0.0.6
 //
 // author(s)     : Alexander van Dam <avandam@damdonk.nl>
 //
 // ======================================================================
 #define NAME "pbesinfo"
-#define VERSION "0.0.5a"
+#define VERSION "0.0.6"
 #define AUTHOR "Alexander van Dam"
 
 //C++
@@ -100,7 +100,7 @@ int main(int argc, char** argv)
 
 	parse_command_line(argc, argv);
 
-	lpe::pbes pbes_specification;
+	pbes pbes_specification;
 
 	/// If PBES can be loaded from file_name, then
 	/// - Show if PBES is closed and if it is well formed
@@ -113,7 +113,7 @@ int main(int argc, char** argv)
 	if (pbes_specification.load(file_name))
 	{
 		// Get PBES equations. Makes a lot of function calls more readable.
-		lpe::equation_system eqsys;
+		equation_system eqsys;
 		eqsys = pbes_specification.equations();
 		
 		bool pbes_well_formed = pbes_specification.is_well_formed();
@@ -129,7 +129,7 @@ int main(int argc, char** argv)
 		int nu = 0;
 		int fp_errors = 0;
 		
-		for (lpe::equation_system::iterator fp_i = eqsys.begin(); fp_i != eqsys.end(); fp_i++)
+		for (equation_system::iterator fp_i = eqsys.begin(); fp_i != eqsys.end(); fp_i++)
 		{
 			 // - Store data_variables
 			predvar_data.push_back(fp_i->variable());
