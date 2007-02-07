@@ -127,23 +127,16 @@ namespace sip {
   void restore_visitor_impl::visit(sip::option& o) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "option");
 
-    if (!tree->NoChildren() && (tree = tree->FirstChildElement(false))) {
-      for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e->NextSiblingElement(false)) {
-        /* The current element must be a valid datatype specification */
-        std::pair < boost::shared_ptr < sip::datatype::basic_datatype >, std::string >      p;
+    for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
+      /* The current element must be a valid datatype specification */
+      std::pair < boost::shared_ptr < sip::datatype::basic_datatype >, std::string >      p;
 
-        visit(p.first, p.second);
+      visit_tree(e).visit(p.first, p.second);
 
-        o.m_arguments.push_back(p);
-      }
+      o.m_arguments.push_back(p);
     }
   }
 
-  /**
-   * \param reader is a reference to a libXML 2 text reader instance
-   * /pre the reader points to a \<configuration\> instance
-   * /post the readers position is just past the configuration block
-   **/
   template <>
   void restore_visitor_impl::visit(sip::configuration& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "configuration");
@@ -287,19 +280,19 @@ namespace sip {
     if (name == "enumeration") {
       visit_tuple_datatype< sip::datatype::enumeration >(this, c, v);
     }
-    if (name == "boolean") {
+    else if (name == "boolean") {
       visit_tuple_datatype< sip::datatype::boolean >(this, c, v);
     }
-    if (name == "integer") {
+    else if (name == "integer") {
       visit_tuple_datatype< sip::datatype::integer >(this, c, v);
     }
-    if (name == "real") {
+    else if (name == "real") {
       visit_tuple_datatype< sip::datatype::real >(this, c, v);
     }
-    if (name == "uri") {
+    else if (name == "uri") {
 //      return (uri::read(r));
     }
-    if (name == "string") {
+    else if (name == "string") {
       visit_tuple_datatype< sip::datatype::string >(this, c, v);
     }
     else {
@@ -539,7 +532,7 @@ namespace sip {
       }
     }
     else {
-      throw (new sip::exception(sip::unknown_layout_element, name));
+      throw (sip::exception(sip::unknown_layout_element, name));
     }
   }
 
