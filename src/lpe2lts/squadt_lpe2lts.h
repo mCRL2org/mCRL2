@@ -4,11 +4,9 @@
 #include <string>
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include "utility/squadt_tool_interface.h"
-#endif
+#include "utility/mcrl2_squadt.h"
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-class squadt_lpe2lts: public squadt_tool_interface
+class squadt_lpe2lts: public mcrl2_squadt::tool_interface
 #else
 class squadt_lpe2lts
 #endif

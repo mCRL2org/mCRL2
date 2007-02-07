@@ -87,9 +87,9 @@ bool perform_task(char const* InFileName, char const* OutFileName) {
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utility/squadt_utility.h>
+#include <utility/mcrl2_squadt.h>
 
-class squadt_interactor : public squadt_tool_interface {
+class squadt_interactor : public mcrl2_squadt::tool_interface {
 
   private:
 
@@ -2144,7 +2144,7 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
     ATinit(0,NULL,&stackbot);
     
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-    if (!squadt_tool_interface::free_activation< squadt_interactor >(argc, argv)) {
+    if (!mcrl2_squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
 #endif
 
       #define sopts "adhpqv"

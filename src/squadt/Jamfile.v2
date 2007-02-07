@@ -17,8 +17,3 @@ exe squadt
         <include>$(SETUP)
         <threading>multi
       ;
-
-#exe ticpp_test
-#      : ticpp_test.c++
-#      : <library>/libraries//ticpp
-#      ;

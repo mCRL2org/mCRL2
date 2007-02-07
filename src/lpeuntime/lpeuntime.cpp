@@ -12,16 +12,6 @@
 //
 // ======================================================================
 //
-#ifdef BOOST_BUILD_PCH_ENABLED
-# ifdef ENABLE_SQUADT_CONNECTIVITY
-#  include <utility/squadt_utility.h>
-#  include "lpe/specification.h"
-# else
-#  include "specification.h"
-# endif
-#else
-# include "lpe/specification.h"
-#endif
 
 //C++
 #include <exception>
@@ -43,12 +33,6 @@
 #include <lpe/data_functional.h>
 #include <lpe/data_utility.h>
 
-//Squadt connectivity
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utility/squadt_utility.h>
-#endif
-
-
 using namespace std;
 using namespace atermpp;
 using namespace lpe;
@@ -64,10 +48,13 @@ typedef struct
   std::string output_file; // Name of the file to write output to (or stdout)
 }tool_options;
 
+//Squadt connectivity
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-//Forward declaration needed for use within squadt_lpeuntime class
+#include <utility/mcrl2_squadt.h>
+
+//Forward declaration needed for use within squadt_interactor class
 int do_untime(const tool_options& options);
-class squadt_lpeuntime: public squadt_tool_interface
+class squadt_interactor: public mcrl2_squadt::tool_interface
 {
   private:
 
@@ -88,21 +75,21 @@ class squadt_lpeuntime: public squadt_tool_interface
     bool perform_task(sip::configuration&);
 };
 
-const char* squadt_lpeuntime::lpd_file_for_input  = "lpd_in";
-const char* squadt_lpeuntime::lpd_file_for_output = "lpd_out";
+const char* squadt_interactor::lpd_file_for_input  = "lpd_in";
+const char* squadt_interactor::lpd_file_for_output = "lpd_out";
 
-void squadt_lpeuntime::set_capabilities(sip::tool::capabilities& capabilities) const
+void squadt_interactor::set_capabilities(sip::tool::capabilities& capabilities) const
 {
   // The tool has only one main input combination
   capabilities.add_input_combination(lpd_file_for_input, sip::mime_type("lpe"), sip::tool::category::transformation);
 }
 
-void squadt_lpeuntime::user_interactive_configuration(sip::configuration& configuration)
+void squadt_interactor::user_interactive_configuration(sip::configuration& configuration)
 {
   configuration.add_output(lpd_file_for_output, sip::mime_type("lpe"), configuration.get_output_name(".lpe"));
 }
 
-bool squadt_lpeuntime::check_configuration(sip::configuration const& configuration) const
+bool squadt_interactor::check_configuration(sip::configuration const& configuration) const
 {
 // Check if everything present
   return (configuration.input_exists(lpd_file_for_input) &&
@@ -110,7 +97,7 @@ bool squadt_lpeuntime::check_configuration(sip::configuration const& configurati
          );
 }
 
-bool squadt_lpeuntime::perform_task(sip::configuration& configuration)
+bool squadt_interactor::perform_task(sip::configuration& configuration)
 {
   tool_options options;
   options.input_file = configuration.get_input(lpd_file_for_input).get_location();
@@ -358,8 +345,7 @@ int main(int ac, char** av) {
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  squadt_lpeuntime sl;
-  if (sl.try_interaction(ac, av)) {
+  if (!mcrl2_squadt::interactor< squadt_interactor >::free_activation(ac, av)) {
     return 0;
   }
 #endif

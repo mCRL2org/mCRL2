@@ -2,12 +2,12 @@
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <wx/wx.h>
 //SQuADT protocol interface
-#include <utility/squadt_utility.h>
+#include <utility/mcrl2_squadt.h>
 
 bool command_line = false;
 std::string lts_file_argument;
 
-class squadt_interactor: public squadt_tool_interface {
+class squadt_interactor: public mcrl2_squadt::tool_interface {
   
   private:
 

@@ -18,9 +18,9 @@ bool write_lts_to_file(lts&, std::string const&, lts_type outtype, std::string c
 
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utility/squadt_utility.h>
+#include <utility/mcrl2_squadt.h>
 
-class squadt_interactor : public squadt_tool_interface {
+class squadt_interactor : public mcrl2_squadt::tool_interface {
 
   private:
 
@@ -564,9 +564,7 @@ int main(int argc, char **argv)
   bool determinise = false;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  squadt_interactor c;
-
-  if (!c.try_interaction(argc, argv)) {
+  if (!mcrl2_squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
 #endif
     while ( (opt = getopt_long(argc, argv, ShortOptions, LongOptions, NULL)) != -1 )
     {

@@ -12,16 +12,6 @@
 //
 // ======================================================================
 //
-#ifdef BOOST_BUILD_PCH_ENABLED
-# ifdef ENABLE_SQUADT_CONNECTIVITY
-#  include <utility/squadt_utility.h>
-#  include "lpe/specification.h"
-# else
-#  include "specification.h"
-# endif
-#else
-# include "lpe/specification.h"
-#endif
 
 //C++
 #include <exception>
@@ -44,11 +34,6 @@
 #include <lpe/data_functional.h>
 #include <lpe/data_init.h>
 
-//Squadt connectivity
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utility/squadt_utility.h>
-#endif
-
 using namespace std;
 using namespace atermpp;
 using namespace lpe;
@@ -63,11 +48,14 @@ typedef struct{
   std::string output_file; ///< Name of the file to write output to (or stdout)
 }tool_options;
   
+//Squadt connectivity
 #ifdef ENABLE_SQUADT_CONNECTIVITY
+#include <utility/mcrl2_squadt.h>
+
 //Forward declaration because do_sumelm() is called within squadt_interactor class
 int do_sumelm(const tool_options& options);
 
-class squadt_interactor: public squadt_tool_interface
+class squadt_interactor: public mcrl2_squadt::tool_interface
 {
   private:
 
@@ -465,8 +453,7 @@ int main(int ac, char** av) {
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   gsDebugMsg("Squadt connectivity enabled\n");
-  squadt_interactor sl;
-  if (sl.try_interaction(ac, av)) {
+  if (!mcrl2_squadt::interactor< squadt_interactor >::free_activation(ac, av)) {
     return 0;
   }
 #endif

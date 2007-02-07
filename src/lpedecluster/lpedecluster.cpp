@@ -12,17 +12,6 @@
 //
 // ======================================================================
 
-#ifdef BOOST_BUILD_PCH_ENABLED
-# ifdef ENABLE_SQUADT_CONNECTIVITY
-#  include <utility/squadt_utility.h>
-#  include "lpe/specification.h"
-# else
-#  include "specification.h"
-# endif
-#else
-# include "lpe/specification.h"
-#endif
-
 //C++
 #include <exception>
 #include <cstdio>
@@ -47,11 +36,6 @@
 #include <libnextstate.h>
 #include <enum_standard.h>
 
-//Squadt connectivity
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utility/squadt_utility.h>
-#endif
-
 using namespace std;
 using namespace atermpp;
 using namespace lpe;
@@ -71,11 +55,14 @@ typedef struct
   RewriteStrategy strategy; ///< Rewrite strategy to use, default inner
 }tool_options;
 
+//Squadt connectivity
 #ifdef ENABLE_SQUADT_CONNECTIVITY
+#include <utility/mcrl2_squadt.h>
+
 //Forward declaration because do_decluster() is called within squadt_interactor class
 int do_decluster(const tool_options& options);
 
-class squadt_interactor: public squadt_tool_interface
+class squadt_interactor: public mcrl2_squadt::tool_interface
 {
   private:
 
@@ -545,9 +532,7 @@ int main(int ac, char** av) {
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  squadt_interactor si;
-
-  if (si.try_interaction(ac, av)) {
+  if (!mcrl2_squadt::interactor< squadt_interactor >::free_activation(ac, av)) {
     return 0;
   }
 #endif

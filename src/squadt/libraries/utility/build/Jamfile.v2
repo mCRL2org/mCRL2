@@ -14,8 +14,8 @@ obj logger.o
     : source/logger.cpp
     ;
 
-cpp-pch squadt_tool_interface.h
-    : include/utility/squadt_tool_interface.h
+cpp-pch mcrl2_squadt.h
+    : include/utility/mcrl2_squadt.h
     : <use>/libraries/sip//sip_tool
     ;
 
@@ -25,9 +25,9 @@ cpp-pch squadt_utility.h
       <use>/libraries//mcrl2_basic
     ;
 
-lib mcrl2_tool_interface
-    : source/message_relay.cpp
-      squadt_tool_interface.h
+lib mcrl2_squadt
+    : source/mcrl2_squadt.cpp
+      mcrl2_squadt.h
       squadt_utility.h
     : <use>/libraries//mcrl2_basic
       <use>/libraries/sip//sip_tool

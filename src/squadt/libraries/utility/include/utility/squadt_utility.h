@@ -1,36 +1,12 @@
 #ifndef SQUADT_UTILITY_H_
 #define SQUADT_UTILITY_H_
 
-/**
- * This is a small collection of functions that make it easier to adapt mCRL2
- * tools to support communication with SQuADT.
- **/
-
 #include <memory>
 #include <string>
 
 #include <sip/tool.h>
 
-#include "liblowlevel.h"
-
-#include "squadt_tool_interface.h"
-
 namespace squadt_utility {
-
-  /** \brief Helps relaying messages printed through the mcrl2_basic::print */
-  class printer_helper {
-    friend void relay_message(gsMessageType t, char* data);
-
-    private:
-
-      /* The communicator object to use */
-      sip::tool::communicator& tc;
-
-    public:
-
-      printer_helper(sip::tool::communicator& t) : tc(t) {
-      }
-  };
 
 #ifdef __WXWINDOWS__
   /** 
