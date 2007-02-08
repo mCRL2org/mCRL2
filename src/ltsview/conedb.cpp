@@ -1,10 +1,13 @@
 #include "conedb.h"
 #include <stdlib.h>
+#include <iostream>
+#include <iomanip>
+using namespace std;
 
 #define hash(k,tb,m) ((k*11408669 + tb*97416181) & m)
 
 ConeDB::ConeDB(int hashclass,int blocksize) {
-  hashmask = 1<<hashclass - 1;
+  hashmask = (1 << hashclass) - 1;
   hashtable = (int*)malloc((hashmask+1)*sizeof(int));
   for (int i=0; i<=hashmask; ++i) {
     hashtable[i] = -1;
