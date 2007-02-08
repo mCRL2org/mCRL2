@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdarg.h>
+#include <assert.h>
 #include <aterm2.h>
 
 #ifdef _MSC_VER
@@ -41,7 +42,7 @@ extern char *strdup(const char *s);
 //Make sure __func__ works (as well as possible)
 #ifndef __func__
 #ifdef __FUNCTION__
-#define __func__ __FILE__
+#define __func__ __FUNCTION__
 #else
 #define __func__ __FILE__
 #endif
@@ -111,17 +112,132 @@ void      ATunprotectList(ATermList *PList);
 void      ATunprotectInt(ATermInt *PInt);
 #endif
 
+inline bool ATisApplOrNull(ATerm t)
+//Ret: t is NULL or an ATermAppl
+{
+  if (t == NULL) return true;
+  else return ATgetType(t) == AT_APPL;
+}
+
+inline bool ATisListOrNull(ATerm t)
+//Ret: t is NULL or an ATermList
+{
+  if (t == NULL) return true;
+  else return ATgetType(t) == AT_LIST;
+}
+
+inline ATermAppl ATAelementAt(ATermList List, int Index) {
+  ATerm Result = ATelementAt(List, Index);
+  assert(ATisApplOrNull(Result));
+  return (ATermAppl) Result;
+}
+
+inline ATermList ATLelementAt(ATermList List, int Index)
+{
+  ATerm Result = ATelementAt(List, Index);
+  assert(ATisListOrNull(Result));
+  return (ATermList) Result;
+}
+
+inline ATermAppl ATAgetArgument(ATermAppl Appl, int Nr)
+{
+  ATerm Result = ATgetArgument(Appl, Nr);
+  assert(ATisApplOrNull(Result));
+  return (ATermAppl) Result;
+}
+
+inline ATermList ATLgetArgument(ATermAppl Appl, int Nr)
+{
+  ATerm Result = ATgetArgument(Appl, Nr);
+  assert(ATisListOrNull(Result));
+  return (ATermList) Result;
+}
+
+inline ATermAppl ATAgetFirst(ATermList List)
+{
+  ATerm Result = ATgetFirst(List);
+  assert(ATisApplOrNull(Result));
+  return (ATermAppl) Result;
+}
+
+inline ATermList ATLgetFirst(ATermList List)
+{
+  ATerm Result = ATgetFirst(List);
+  assert(ATisListOrNull(Result));
+  return (ATermList) Result;
+}
+
+inline ATermAppl ATAtableGet(ATermTable Table, ATerm Key)
+{
+  ATerm Result = ATtableGet(Table, Key);
+  assert(ATisApplOrNull(Result));
+  return (ATermAppl) Result;
+}
+
+inline ATermList ATLtableGet(ATermTable Table, ATerm Key)
+{
+  ATerm Result = ATtableGet(Table, Key);
+  assert(ATisListOrNull(Result));
+  return (ATermList) Result;
+}
+
+#ifndef ATprotectAppl
+inline void ATprotectAppl(ATermAppl *PAppl)
+{
+  ATprotect((ATerm *) PAppl);
+}
+#endif
+
+#ifndef ATprotectList
+inline void ATprotectList(ATermList *PList)
+{
+  ATprotect((ATerm *) PList);
+}
+#endif
+
+#ifndef ATprotectInt
+inline void ATprotectInt(ATermInt *PInt)
+{
+  ATprotect((ATerm *) PInt);
+}
+#endif
+
+#ifndef ATunprotectAppl
+inline void ATunprotectAppl(ATermAppl *PAppl)
+{
+  ATunprotect((ATerm *) PAppl);
+}
+#endif
+
+#ifndef ATunprotectList
+inline void ATunprotectList(ATermList *PList)
+{
+  ATunprotect((ATerm *) PList);
+}
+#endif
+
+#ifndef ATunprotectInt
+inline void ATunprotectInt(ATermInt *PInt)
+{
+  ATunprotect((ATerm *) PInt);
+}
+#endif
+
 //Substitutions on ATerm's
 //------------------------
 
 ATermAppl gsMakeSubst(ATerm OldValue, ATerm NewValue);
 //Ret: a substitution, i.e. an ATermAppl of the form 'subst(OldValue, NewValue)'
 
-ATermAppl gsMakeSubst_Appl(ATermAppl OldValue, ATermAppl NewValue);
 //ATermAppl variant of gsMakeSubst
+inline ATermAppl gsMakeSubst_Appl(ATermAppl OldValue, ATermAppl NewValue) {
+  return gsMakeSubst((ATerm) OldValue, (ATerm) NewValue);
+}
 
-ATermAppl gsMakeSubst_List(ATermList OldValue, ATermList NewValue);
 //ATermList variant of gsMakeSubst
+inline ATermAppl gsMakeSubst_List(ATermList OldValue, ATermList NewValue) {
+  return gsMakeSubst((ATerm) OldValue, (ATerm) NewValue);
+}
 
 ATerm gsSubstValues(ATermList Substs, ATerm Term, bool Recursive);
 //Pre: Substs is a list containing substitutions only
@@ -130,13 +246,15 @@ ATerm gsSubstValues(ATermList Substs, ATerm Term, bool Recursive);
 //     from head to tail; if Recursive and there was no match, the
 //     substitutions are distributed over the arguments/elements of Term
 
-ATermAppl gsSubstValues_Appl(ATermList Substs, ATermAppl Appl,
-  bool Recursive);
 //ATermAppl variant of gsSubstValues
+inline ATermAppl gsSubstValues_Appl(ATermList Substs, ATermAppl Appl, bool Recursive) {
+  return (ATermAppl) gsSubstValues(Substs, (ATerm) Appl, Recursive);
+}
 
-ATermList gsSubstValues_List(ATermList Substs, ATermList List,
-  bool Recursive);
 //ATermList variant of gsSubstValues
+inline ATermList gsSubstValues_List(ATermList Substs, ATermList List, bool Recursive) {
+  return (ATermList) gsSubstValues(Substs, (ATerm) List, Recursive);
+}
 
 ATerm gsSubstValuesTable(ATermTable Substs, ATerm Term, bool Recursive);
 //Pre: Substs is a table containing substitutions from ATerm's to ATerm's

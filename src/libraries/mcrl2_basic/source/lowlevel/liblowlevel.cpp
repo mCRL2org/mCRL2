@@ -72,121 +72,6 @@ void gsSetCustomMessageHandler(void (*h)(gsMessageType, char*)) {
   custom_message_handler = h;
 }
 
-//ATerm libary work arounds
-//-------------------------
-
-bool      ATisApplOrNull(ATerm t)
-//Ret: t is NULL or an ATermAppl
-{
-  if (t == NULL) return true;
-  else return ATgetType(t) == AT_APPL;
-}
-
-bool      ATisListOrNull(ATerm t)
-//Ret: t is NULL or an ATermList
-{
-  if (t == NULL) return true;
-  else return ATgetType(t) == AT_LIST;
-}
-
-ATermAppl ATAelementAt(ATermList List, int Index)
-{
-  ATerm Result = ATelementAt(List, Index);
-  assert(ATisApplOrNull(Result));
-  return (ATermAppl) Result;
-}
-
-ATermList ATLelementAt(ATermList List, int Index)
-{
-  ATerm Result = ATelementAt(List, Index);
-  assert(ATisListOrNull(Result));
-  return (ATermList) Result;
-}
-
-ATermAppl ATAgetArgument(ATermAppl Appl, int Nr)
-{
-  ATerm Result = ATgetArgument(Appl, Nr);
-  assert(ATisApplOrNull(Result));
-  return (ATermAppl) Result;
-}
-
-ATermList ATLgetArgument(ATermAppl Appl, int Nr)
-{
-  ATerm Result = ATgetArgument(Appl, Nr);
-  assert(ATisListOrNull(Result));
-  return (ATermList) Result;
-}
-
-ATermAppl ATAgetFirst(ATermList List)
-{
-  ATerm Result = ATgetFirst(List);
-  assert(ATisApplOrNull(Result));
-  return (ATermAppl) Result;
-}
-
-ATermList ATLgetFirst(ATermList List)
-{
-  ATerm Result = ATgetFirst(List);
-  assert(ATisListOrNull(Result));
-  return (ATermList) Result;
-}
-
-ATermAppl ATAtableGet(ATermTable Table, ATerm Key)
-{
-  ATerm Result = ATtableGet(Table, Key);
-  assert(ATisApplOrNull(Result));
-  return (ATermAppl) Result;
-}
-
-ATermList ATLtableGet(ATermTable Table, ATerm Key)
-{
-  ATerm Result = ATtableGet(Table, Key);
-  assert(ATisListOrNull(Result));
-  return (ATermList) Result;
-}
-
-#ifndef ATprotectAppl
-void ATprotectAppl(ATermAppl *PAppl)
-{
-  ATprotect((ATerm *) PAppl);
-}
-#endif
-
-#ifndef ATprotectList
-void ATprotectList(ATermList *PList)
-{
-  ATprotect((ATerm *) PList);
-}
-#endif
-
-#ifndef ATprotectInt
-void ATprotectInt(ATermInt *PInt)
-{
-  ATprotect((ATerm *) PInt);
-}
-#endif
-
-#ifndef ATunprotectAppl
-void ATunprotectAppl(ATermAppl *PAppl)
-{
-  ATunprotect((ATerm *) PAppl);
-}
-#endif
-
-#ifndef ATunprotectList
-void ATunprotectList(ATermList *PList)
-{
-  ATunprotect((ATerm *) PList);
-}
-#endif
-
-#ifndef ATunprotectInt
-void ATunprotectInt(ATermInt *PInt)
-{
-  ATunprotect((ATerm *) PInt);
-}
-#endif
-
 //Substitutions on ATerm's
 //------------------------
 
@@ -201,16 +86,6 @@ ATermAppl gsMakeSubst(ATerm OldValue, ATerm NewValue)
 	  substafun_notset = false;
   }
   return ATmakeAppl2(substafun, OldValue, NewValue);
-}
-
-ATermAppl gsMakeSubst_Appl(ATermAppl OldValue, ATermAppl NewValue)
-{
-  return gsMakeSubst((ATerm) OldValue, (ATerm) NewValue);
-}
-
-ATermAppl gsMakeSubst_List(ATermList OldValue, ATermList NewValue)
-{
-  return gsMakeSubst((ATerm) OldValue, (ATerm) NewValue);
 }
 
 ATerm gsSubstValues(ATermList Substs, ATerm Term, bool Recursive)
@@ -256,16 +131,6 @@ ATerm gsSubstValues(ATermList Substs, ATerm Term, bool Recursive)
       return Term;
     }
   }
-}
-
-ATermAppl gsSubstValues_Appl(ATermList Substs, ATermAppl Appl, bool Recursive)
-{
-  return (ATermAppl) gsSubstValues(Substs, (ATerm) Appl, Recursive);
-}
-
-ATermList gsSubstValues_List(ATermList Substs, ATermList List, bool Recursive)
-{
-  return (ATermList) gsSubstValues(Substs, (ATerm) List, Recursive);
 }
 
 ATerm gsSubstValuesTable(ATermTable Substs, ATerm Term, bool Recursive)
