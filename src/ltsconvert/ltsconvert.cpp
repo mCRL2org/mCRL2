@@ -734,9 +734,9 @@ int main(int argc, char **argv)
     if ( equivalence != lts_eq_none )
     {
       gsVerboseMsg("reducing LTS...\n");
-      gsVerboseMsg("before reduction: %lu states and %lu transitions \n",l.num_states(),l.num_labels(),l.num_transitions());
+      gsVerboseMsg("before reduction: %lu states and %lu transitions \n",l.num_states(),l.num_transitions());
       l.reduce(equivalence,eq_opts);
-      gsVerboseMsg("after reduction: %lu states and %lu transitions\n",l.num_states(),l.num_labels(),l.num_transitions());
+      gsVerboseMsg("after reduction: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
     }
 
     if ( determinise )
