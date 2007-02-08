@@ -8,8 +8,7 @@
 #include <string.h>
 #include <getopt.h>
 #include <assert.h>
-#include <libxml/xmlmemory.h>
-#include <libxml/parser.h>
+#include <ticpp.h>
 #include <aterm2.h>
 #include "liblowlevel.h"
 #include "libstruct.h"
@@ -65,7 +64,7 @@ static ATermList pn2gsListNNats(int n);
 static inline ATermAppl pn2gsMakeDataApplProd2(ATermAppl Op, ATermAppl Left, ATermAppl Right){
   return gsMakeDataApplProd(Op,ATmakeList2((ATerm)Left,(ATerm)Right));
 }
-static char *pn2gsGetText(xmlNodePtr cur);
+static char *pn2gsGetText(ticpp::Element* cur);
 
 
 bool perform_task(char const* InFileName, FILE* OutStream);
@@ -281,84 +280,82 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   //==================================================
   // pn2gsRetrieveTextWithCheck gets the contents of a child <text> element of cur, and checks it to format [a-zA-Z_][a-zA-Z0-9_]*
   //==================================================
-  static ATermAppl pn2gsRetrieveTextWithCheck(xmlNodePtr cur) {
+  static ATermAppl pn2gsRetrieveTextWithCheck(ticpp::Element* cur) {
     // input: a pointer to the current element
     // output: the contents of the first child <text> attribute 
     //         of the current element, following format [a-zA-Z_][a-zA-Z0-9_]*
 
     // this function is used for the retrieval of names and ids
     
-    cur=cur->xmlChildrenNode;
-    while (cur != NULL) {
-      if (!xmlNodeIsText(cur)) {
-	if (!xmlStrcmp(cur->name, (const xmlChar *)"text")) {
-	  return ATmakeAppl0(pn2gsCheckAFun(ATmakeAFunId((char *)xmlNodeGetContent(cur))));
-	  //	  return (ATerm)ATmakeAppl0(ATmakeAFun(RV,0,ATfalse));
-	}
+    for (cur = cur->FirstChildElement(false); cur != 0; cur = cur->NextSiblingElement(false)) {
+      if (cur->Value() == "text") {
+        return ATmakeAppl0(pn2gsCheckAFun(ATmakeAFunId(const_cast < char* > (cur->GetText().c_str()))));
       }
-      cur=cur->next;
     }
-    return NULL;
+
+    return 0;
   }
 
   //==================================================
   // pn2gsRetrieveText gets the contents of a child <text> element of cur
   //==================================================
-  static ATermAppl pn2gsRetrieveText(xmlNodePtr cur) {
+  static ATermAppl pn2gsRetrieveText(ticpp::Element* cur) {
     // input: a pointer to the current element
     // output: the contents of the first child <text> attribute 
     //         of the current element
 
     // this function is used for the retrieval of types, initial markings, etc.
-    char *s=pn2gsGetText(cur->xmlChildrenNode);
+    for (cur = cur->FirstChildElement(false); cur != 0; cur = cur->NextSiblingElement(false)) {
+      if (cur->Value() == "text") {
+        return (gsString2ATermAppl(cur->GetText().c_str()));
+      }
+    }
 
-    if(!s) return NULL;
-    return gsString2ATermAppl(s);
+    return 0;
   }
   //==================================================
   // pn2gsGetText gets the contents of a child <text> element of cur
   //==================================================
-  static char *pn2gsGetText(xmlNodePtr cur) {
+  static char* pn2gsGetText(ticpp::Element* cur) {
     // input: a pointer to the current element
     // output: the contents of the first <text> attribute 
     //         of the current element
 
     // this function is used for the retrieval of types, initial markings, etc.
-    while (cur != NULL) {
-      if (!xmlNodeIsText(cur)) {
-	if (!xmlStrcmp(cur->name, (const xmlChar *)"text")) {
-	  return (char *)xmlNodeGetContent(cur);
-	}
+    while (cur != 0) {
+      if (cur->Value() == "text") {
+        return const_cast < char* > (cur->GetText().c_str());
       }
-      cur=cur->next;
+
+      cur = cur->NextSiblingElement(false);
     }
-    return NULL;
+
+    return 0;
   }
 
-//==================================================
-// pn2gsGetElement gets the contents of a child name element of cur
-//==================================================
-static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
-  // input: a pointer to the current element
-  // output: the contents of the first child <name> attribute 
-  //         of the current element
+  //==================================================
+  // pn2gsGetElement gets the contents of a child name element of cur
+  //==================================================
+  static char *pn2gsGetElement(ticpp::Element* cur, std::string const& name) {
+    // input: a pointer to the current element
+    // output: the contents of the first child <name> attribute 
+    //         of the current element
   
-  // this function is used for the retrieval of types, initial markings, etc.
+    // this function is used for the retrieval of types, initial markings, etc.
     
-  cur=cur->xmlChildrenNode;
-  while (cur != NULL) {
-    if (!xmlStrcmp(cur->name, (const xmlChar *)name)) {
-      return pn2gsGetText(cur->xmlChildrenNode);
+    for (cur = cur->FirstChildElement(false); cur != 0; cur = cur->NextSiblingElement(false)) {
+      if (cur->Value() == name) {
+        return (pn2gsGetText(cur));
+      }
     }
-    cur=cur->next;
+
+    return 0;
   }
-  return NULL;
-}
   
   //==================================================
   // pn2gsAterm_place converts a pnml-place to a usable ATerm
   //==================================================
-  static ATermAppl pn2gsAterm_place(xmlNodePtr cur) {
+  static ATermAppl pn2gsAterm_place(ticpp::Element* cur) {
     // input: a pointer to the current place
     // output: a usable translation of the place,
     //         if the place needs to be translated
@@ -366,20 +363,18 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
     gsDebugMsg("> Start examining a place...  \n");
     // first, we want to retrieve the id of the place
     ATermAppl Aid;
-    if (!xmlGetProp(cur, (const xmlChar *)"id")) {
+    if (char const* id = cur->GetAttributeValue("id", false).c_str()) {
+      // the place has an id, put it in Aid
+      Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(const_cast < char* > (id)))));
+      gsDebugMsg("    id: '%T'\n", Aid); 
+    } else {
       // the place has NO id, so translation should be aborted!
       context.Abort = ATtrue;
       gsErrorMsg("A place has no ID. \n");
-      return NULL;
-    } else {
-      // the place has an id, put it in Aid
-      Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId((char *)xmlGetProp(cur, (const xmlChar *)"id")))));
+      return 0;
     }
-    gsDebugMsg("    id: '%T'\n", Aid); 
     
     // second, we want to retrieve the necessary attributes of the place
-    cur = cur->xmlChildrenNode;
-    // cur now points to the first child of the place  
     
     // temporary variables that contain data of the current place so this data can be returned
     // default values are assigned here
@@ -392,12 +387,12 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
     
     // this loop goes through all the children of the <place>element
     // these children will be translated or ignored, this depends on the element name
-    while (cur != NULL) {
+    for (cur = cur->FirstChildElement(false); cur != 0; cur = cur->NextSiblingElement(false)) {
       // current elements that are conceivable for translation are:
       // <name>  -  <initialMarking>  -  <type>
       // all other elements will be ignored in the translation
       
-      if (!xmlStrcmp(cur->name, (const xmlChar *)"name")) {
+      if (cur->Value() == "name") {
 	// the place contains a <name> element
 	// a <name> element contains a childelement <text> which contains the name of the place
 	// the name is retrieved below and assigned to Aname
@@ -406,14 +401,14 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
 	}
 	gsDebugMsg("    name: '%T'\n", Aname);
       } 
-      else if (!xmlStrcmp(cur->name, (const xmlChar *)"initialMarking")) {
+      else if (cur->Value() == "initialMarking") {
 	// the place contains an <initialMarking> element
 	// this element contains a childelement <text> which contains the initial marking of the place
 	// this marking is retrieved below and assigned to AinitialMarking
         //for coloured petri nets initialMarking can also contain a toolspecific element
-	for(xmlNodePtr cur1=cur->children; cur1!=NULL; cur1=cur1->next){
-          if (!xmlNodeIsText(cur1) && !xmlStrcmp(cur1->name, (const xmlChar *)"text")) {
-	    char *im=pn2gsGetText(cur1);
+        for (ticpp::Element* curl = cur->FirstChildElement(false); curl != 0; curl = curl->NextSiblingElement(false)) {
+          if (curl->Value() == "text") {
+	    char *im=pn2gsGetText(curl);
             if(im){
               std::istringstream iss(im);
               ATermAppl Marking=parse_data_expr(iss);
@@ -428,8 +423,8 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
             //}
             //AinitialMarking=im;
           }
-          else if(with_colors && !xmlStrcmp(cur1->name, (const xmlChar *)"toolspecific")) {
-            const char *mcrl2marking=pn2gsGetElement(cur1,"mcrl2marking");
+          else if(with_colors && curl->Value() == "toolspecific") {
+            const char *mcrl2marking=pn2gsGetElement(curl,"mcrl2marking");
             if(mcrl2marking){
               colored=ATtrue;
               std::istringstream iss(mcrl2marking);
@@ -439,15 +434,13 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
               gsWarningMsg("Ignore an element named 'toolspecific'\n");
             }
           }
-          else if (xmlNodeIsText(cur1)) {
-          }
 	  else {
-            gsWarningMsg("Ignore an element named '%s'.\n", (const char *)cur1->name);
+            gsWarningMsg("Ignore an element named '%s'.\n", curl->Value().c_str());
           }
 	}
 	gsDebugMsg("    initialMarking: '%T'\n", AinitialMarking);
       } 
-      else if (!xmlStrcmp(cur->name, (const xmlChar *)"type")) {
+      else if (cur->Value() == "type") {
 	// the place contains an <type> element
 	// this element contains a childelement <text> which contains the type of the place
 	
@@ -462,7 +455,7 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
 	}
 	gsDebugMsg("    type: '%T'\n", Atype);
       } 
-      else if (with_colors && !xmlStrcmp(cur->name, (const xmlChar *)"toolspecific")) {
+      else if (cur->Value() == "toolspecific") {
 	// the place contains an <toolspecific> element
 	// this element contains a childelement <mcrl2sort> which contains
 	// a childelement <text> which contains the type of the place
@@ -472,19 +465,18 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
 	if(sort){
 	  colored=ATtrue;
 	  std::istringstream iss(sort);
-	  ATermAppl Type=parse_sort_expr(iss);
-	  if(Type) Place_type=Type;
+
+	  if (ATermAppl Type=parse_sort_expr(iss)) {
+	    Place_type=Type;
+          }
 	}
 	else {
 	  gsWarningMsg("Ignore an element named 'toolspecific'\n");
 	}
       } 
-      else if (xmlNodeIsText(cur)) {
-      } 
       else {
-	gsWarningMsg("Ignore an element named '%s'.\n", (const char *)cur->name);
+	gsWarningMsg("Ignore an element named '%s'.\n", cur->Value().c_str());
       }
-      cur = cur->next;
     }
     
     // argument order of returnvalue is id - name - initialMarking - Type
@@ -494,7 +486,7 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
   //==================================================
   // pn2gsAterm_trans converts a pnml-transition to a usable ATerm
   //==================================================
-  static ATermAppl pn2gsAterm_trans(xmlNodePtr cur) {
+  static ATermAppl pn2gsAterm_trans(ticpp::Element* cur) {
     // input: a pointer to the current transition
     // output: a usable translation of the transition,
     //         if the transition needs to be translated
@@ -502,20 +494,18 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
     gsDebugMsg("> Start examining a transition...  \n");
     // first, we want to retrieve the id of the transition
     ATermAppl Aid;
-    if (!xmlGetProp(cur, (const xmlChar *)"id")) {
+    if (char const* id = cur->GetAttributeValue("id", false).c_str()) {
+      // the transition has an id, put it in Aid
+      Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(const_cast < char* > (id)))));
+      gsDebugMsg("    id: '%T'\n", Aid); 
+    } else {
       // the transition has NO id, so translation should be aborted!
       context.Abort = ATtrue;
       gsErrorMsg("A transition has no ID. \n");
-      return NULL;
-    } else {
-      // the transition has an id, put it in Aid
-      Aid = ATmakeAppl0(pn2gsCheckAFun(ATmakeAFunId((char *)xmlGetProp(cur, (const xmlChar *)"id"))));
+      return 0;
     }
-    gsDebugMsg("    id: '%T'\n", Aid); 
     
     // second, we want to retrieve the necessary attributes of the transition
-    cur = cur->xmlChildrenNode;
-    // cur now points to the first child of the transition
     
     // temporary variables that contain data of the current transition so this data can be returned
     // default values are assigned here
@@ -526,12 +516,12 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
     
     // this loop goes through all the children of the <transition>element
     // these children will be translated or ignored, this depends on the element name
-    while (cur != NULL) {
+    for (cur = cur->FirstChildElement(false); cur != 0; cur = cur->NextSiblingElement(false)) {
       // current elements that are conceivable for translation are:
       // <name>  -  <type>
       // all other elements will be ignored in the translation
       
-      if (!xmlStrcmp(cur->name, (const xmlChar *)"name")) {
+      if (cur->Value() == "name") {
 	// the transition contains a <name> element
 	// a <name> element contains a childelement <text> which contains the name of the transition
 	// the name is retrieved below and assigned to Aname
@@ -540,7 +530,7 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
 	}
 	gsDebugMsg("    name: '%T'\n", Aname);
       }
-      else if (with_colors && !xmlStrcmp(cur->name, (const xmlChar *)"toolspecific")) {
+      else if (with_colors && cur->Value() == "toolspecific") {
 	// the transition contains a <toolspecific> element
 	// this element contains a childelement <mcrl2sort> which contains
 	// a childelement <text> which contains the type of the place
@@ -557,7 +547,7 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
 	  gsWarningMsg("Ignore an element named 'toolspecific'\n");
 	}
       }  
-      else if (!xmlStrcmp(cur->name, (const xmlChar *)"type")) {
+      else if (cur->Value() == "type") {
 	// the transition contains an <type> element
 	// this element contains a childelement <text> which contains the type of the transition
 	if (!(Atype=pn2gsRetrieveText(cur))) {
@@ -571,12 +561,9 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
 	}
 	gsDebugMsg("    type: '%T'\n", Atype);
       }
-      else if (xmlNodeIsText(cur)) {
-      } 
       else {
-	gsWarningMsg("Ignore an element named '%s'.\n", (const char *)cur->name);
+	gsWarningMsg("Ignore an element named '%s'.\n", cur->Value().c_str());
       }
-      cur = cur->next;
     }
     
     // argument order of returnvalue is id - name  
@@ -586,7 +573,7 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
   //==================================================
   // pn2gsAterm_arc converts a pnml-arc to a usable ATerm
   //==================================================
-  static ATermAppl pn2gsAterm_arc(xmlNodePtr cur) {
+  static ATermAppl pn2gsAterm_arc(ticpp::Element* cur) {
     // input: a pointer to the current arc
     // output: a usable translation of the arc,
     //         if the arc needs to be translated
@@ -594,41 +581,39 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
     gsDebugMsg("> Start examining an arc...  \n");
     // first, we want to retrieve the id of the arc
     ATermAppl Aid;
-    if (!xmlGetProp(cur, (const xmlChar *)"id")) {
+    if (char const* id = cur->GetAttributeValue("id", false).c_str()) {
+      // the arc has an id, put it in Aid
+      Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(const_cast < char* > (id)))));
+      gsDebugMsg("    id: '%T'\n", Aid); 
+    } else {
       // the arc has NO id, so translation should be aborted!
       context.Abort = ATtrue;
       gsErrorMsg("An arc has no ID. \n");
-      return NULL;
-    } else {
-      // the arc has an id, put it in Aid
-      Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId((char *)xmlGetProp(cur, (const xmlChar *)"id")))));
+      return 0;
     }
-    gsDebugMsg("    id: '%T'\n", Aid); 
     
     // second, we want to retrieve the source and the target of the arc
     ATermAppl Asource;
-    if (!xmlGetProp(cur, (const xmlChar *)"source")) {
+    if (char const* source = cur->GetAttributeValue("source", false).c_str()) {
+      Asource = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(const_cast < char* > (source)))));
+      gsDebugMsg("    source: '%T'\n", Asource);
+    } else {
       // the arc has NO source, so the arc will not be translated!
       gsWarningMsg("Arc with id '%T' has no source and will not be translated.\n", Aid);
-      return NULL;
-    } else {
-      Asource = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId((char *)xmlGetProp(cur, (const xmlChar *)"source")))));
+      return 0;
     }
-    gsDebugMsg("    source: '%T'\n", Asource);
     
     ATermAppl Atarget;
-    if (!xmlGetProp(cur, (const xmlChar *)"target")) {
+    if (char const* target = cur->GetAttributeValue("target", false).c_str()) {
+      Atarget = ATmakeAppl0(pn2gsCheckAFun(ATmakeAFunId(const_cast < char* > (target))));
+      gsDebugMsg("    target: '%T'\n", Atarget);
+    } else {
       // the arc has NO target, so the arc will not be translated!
       gsWarningMsg("Arc with id '%T' has no target and will not be translated.\n", Aid);
-      return NULL;
-    } else {
-      Atarget = ATmakeAppl0(pn2gsCheckAFun(ATmakeAFunId((char *)xmlGetProp(cur, (const xmlChar *)"target"))));
+      return 0;
     }
-    gsDebugMsg("    target: '%T'\n", Atarget);
     
     // third, we want to verify the arc needs translation (thus is of the correct type)
-    cur = cur->xmlChildrenNode;
-    // cur now points to the first child of the arc
     
     // temporary variables that contain data of the current arctype
     ATermAppl Atype = gsString2ATermAppl("some_strange`type=that n0b0dy u5e5...");
@@ -637,12 +622,12 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
 
     // this loop goes through all the children of the <arc>element
     // these children will be examined or ignored, this depends on the element name
-    while (cur != NULL) {
+    for (cur = cur->FirstChildElement(false); cur != 0; cur = cur->NextSiblingElement(false)) {
       // current elements that are conceivable for examination are:
       // <type>
       // all other elements will be ignored in the translation
       
-      if (!xmlStrcmp(cur->name, (const xmlChar *)"type")) {
+      if (cur->Value() == "type") {
 	// the arc contains a <type> element
 	// this element contains a childelement <text> which contains the type of the transition
 	if (!(Atype=pn2gsRetrieveText(cur))) {
@@ -668,30 +653,30 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
 	}
 	gsDebugMsg("    type: '%T'\n", Atype);
       } 
-      if (!xmlStrcmp(cur->name, (const xmlChar *)"name")) {
+      else if (cur->Value() == "name") {
 	// the arc contains a <name> element
 	// this element contains a childelement <text> which contains the type of the transition
-        const char *name=pn2gsGetText(cur->xmlChildrenNode);
+        const char *name=pn2gsGetText(cur->FirstChildElement());
         if(name){
           colored=ATtrue;
           std::istringstream iss(name);
-          ATermAppl Name=parse_data_expr(iss);
-          if(Name) Arc_name=Name; 
+
+          if (ATermAppl Name = parse_data_expr(iss)) {
+            Arc_name = Name;
+          }
         }
         else {
 	  // the name should be omitted
 	  // otherwise the arc does not need to be translated!
 	  gsErrorMsg("Arc with id '%T' has unparseable name and will not be translated.\n", Aid);
 	}
-	if (Arc_name)
+	if (Arc_name) {
 	  gsDebugMsg("    name: '%T'\n", Arc_name);
-      } 
-      else if (xmlNodeIsText(cur)) {
+        }
       } 
       else {
-	gsWarningMsg("Ignore an element named '%s'.\n", (const char *)cur->name);
+	gsWarningMsg("Ignore an element named '%s'.\n", cur->Value().c_str());
       }
-      cur = cur->next;
     }
     
     // argument order of returnvalue is id - source - target
@@ -709,36 +694,33 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
   //==================================================
   // pn2gsAterm converts the pnml-input to a usable ATerm
   //==================================================
-  static ATermAppl pn2gsAterm(xmlDocPtr doc) {
-    // input: a pointer of the type xmlDocPtr which points to the parsed XML-file
+  static ATermAppl pn2gsAterm(ticpp::Document& doc) {
+    // input: a pointer of the type ticpp::Document which points to the parsed XML-file
     // output: an ATermAppl, translated from the XML-file,
     //         in which only relevant elements/attributes are concluded
     
     //==================================================
     // initializations and initial checks.
     //==================================================
-    xmlNodePtr cur = xmlDocGetRootElement(doc);
-    if (cur == NULL) {
-      gsErrorMsg("File is empty. \n");
-      return NULL;
+    ticpp::Element* cur = doc.FirstChildElement(false);
+
+    // cur should point to the <pnml>element
+    if (cur == 0 || cur->Value() != "pnml") {
+      gsErrorMsg("File is not a usable PNML file!  \n");
+
+      return 0;
     }
-    if (xmlStrcmp(cur->name, (const xmlChar *)"pnml")) {
-      gsErrorMsg("File is not a PNML file!  \n");
-      return NULL;
-    }
-    // cur now points to the <pnml>element
     
-    cur = cur->xmlChildrenNode;
     // the first <net>element, if any present, is selected by cur
-    while (cur != NULL && xmlStrcmp(cur->name, (const xmlChar *)"net")) {
-      if (!xmlNodeIsText(cur)) {
-	gsWarningMsg("Element '%s' is not a Petri net and will be ignored (including it's sub-elements).\n",(const char *)cur->name);
+    try {
+      for (cur = cur->FirstChildElement(); cur->Value() != "net"; cur = cur->NextSiblingElement()) {
+        gsWarningMsg("Element '%s' is not a Petri net and will be ignored (including it's sub-elements).\n", cur->Value().c_str());
       }
-      cur = cur->next;
     }
-    if (cur == NULL) {
+    catch (ticpp::Exception& e) {
       gsErrorMsg("File does not contain a Petri net. \n");
-      return NULL;
+
+      return 0;
     }   
     
     // cur now points to the first <net>element
@@ -749,19 +731,14 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
     //==================================================
     // retrieve the ID of the Petri net
     ATermAppl ANetID;
-    if (!xmlGetProp(cur, (const xmlChar *)"id")) {
+    if (char const* id = cur->GetAttributeValue("id", false).c_str()) {
+      // the net has an id, put it in ANetID
+      ANetID = ATmakeAppl0(ATprependAFun("Net_",pn2gsCheckAFun(ATmakeAFunId(const_cast < char* > (id)))));
+    } else {
       ANetID = ATmakeAppl0(ATmakeAFun("Net_Petri_net", 0, ATtrue));
       gsWarningMsg("NO NET-ID FOUND!\n");
-    } else {
-      // the net has an id, put it in ANetID
-      AFun NetID = pn2gsCheckAFun(ATmakeAFunId((char *)xmlGetProp(cur, (const xmlChar *)"id")));
-      NetID = ATprependAFun("Net_",NetID);
-      ANetID = ATmakeAppl0(NetID);
     }
     gsDebugMsg("NetID = '%T'\n",ANetID);
-    
-    cur = cur->xmlChildrenNode;
-    // cur now points to the first element in the Petri net
     
     // lists of the places, transitions and arcs that will be translated
     ATermList APlaces=ATmakeList0();
@@ -785,12 +762,12 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
     
     // this loop goes through all the children of the <net>element
     // these children will be translated or ignored, this depends on the element name
-    while (cur != NULL) {
+    for (cur = cur->FirstChildElement(false); cur != NULL; cur = cur->NextSiblingElement(false)) {
       // current elements that are conceivable for translation are:
       // <place>  -  <transition>  -  <arc>
       // all other elements will be ignored in the translation
       
-      if (!xmlStrcmp(cur->name, (const xmlChar *)"place")) {
+      if (cur->Value() == "place") {
 	if (!(ACurrentPlace=pn2gsAterm_place(cur))) {
 	  // pn2gsAterm_place returns NULL, so the place will not be translated.
 	  if (context.Abort == ATtrue) {
@@ -804,7 +781,7 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
 	  gsDebugMsg("  Translate this place: %T\n", (ATerm)ACurrentPlace);
 	}
       } 
-      else if (!xmlStrcmp(cur->name, (const xmlChar *)"transition")) {
+      else if (cur->Value() == "transition") {
 	if(!(ACurrentTransition=pn2gsAterm_trans(cur))) {
 	  // pn2gsAterm_trans returns NULL, so the transition will not be translated.
 	  if (context.Abort == ATtrue) {
@@ -818,7 +795,7 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
 	  gsDebugMsg("  Translate this transition: %T\n", (ATerm)ACurrentTransition);
 	}
       } 
-      else if (!xmlStrcmp(cur->name, (const xmlChar *)"arc")) {
+      else if (cur->Value() == "arc") {
 	if(!(ACurrentArc=pn2gsAterm_arc(cur))) {
 	  // pn2gsAterm_arc returns NULL, so the arc will not be translated.
 	  if (context.Abort == ATtrue) {
@@ -832,26 +809,25 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
 	  gsDebugMsg("  Translate this arc: %T\n", (ATerm)ACurrentArc);
 	}
       }
-      else if (with_colors && !xmlStrcmp(cur->name, (const xmlChar *)"toolspecific")){
+      else if (with_colors && cur->Value() == "toolspecific") {
 	const char *prelude=pn2gsGetElement(cur,"mcrl2prelude");
 
 	if(prelude){
 	  colored=ATtrue;
 	  std::string s(prelude);
           std::istringstream iss(s+"init delta;");
-	  ATermAppl Prelude=parse_spec(iss);
-          if(Prelude) Net_prelude=Prelude;
+
+          if (ATermAppl Prelude = parse_spec(iss)) {
+            Net_prelude = Prelude;
+          }
 	}
 	else {
 	  gsWarningMsg("Ignore an element named 'toolspecific'\n");
 	}
       }	
-      else if (xmlNodeIsText(cur)) {
-      } 
       else {
-	gsWarningMsg("An element named '%s' will be ignored in the translation (including it's sub-elements).\n",(const char *)cur->name);
+	gsWarningMsg("An element named '%s' will be ignored in the translation (including it's sub-elements).\n", cur->Value().c_str());
       };
-      cur = cur->next;
     };
     
     gsDebugMsg("\nConversion of PNML to ATerm succesfully completed. \n");
@@ -2056,18 +2032,25 @@ static char *pn2gsGetElement(xmlNodePtr cur, const char* name) {
     ATprotectAppl(&Appl0);
     Appl0=gsString2ATermAppl("_");
 
-
-    xmlDocPtr doc = xmlParseFile(InFileName);
+    ticpp::Document doc(InFileName);
    
-    if(!doc) {
+    try {
+      if (InFileName == "-") {
+        std::cin >> doc;
+      }
+      else {
+        doc.LoadFile();
+      }
+    }
+    catch (...) {
       gsErrorMsg("Document not parsed succesfully. \n");
+
       return false;
     }
    
     gsEnableConstructorFunctions();
     
     ATermAppl Spec=pn2gsAterm(doc);
-    xmlFreeDoc(doc);
     
     if(!Spec){	
       gsErrorMsg("Error while converting PNML to ATerm, conversion stopped!  \n");

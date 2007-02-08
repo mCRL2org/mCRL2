@@ -692,9 +692,6 @@ BOOST_LIBRARY_PATH
 OPENGL_IPATH
 OPENGL_LPATH
 OPENGL_NAME
-XML2_CONFIG
-XML2_CPPFLAGS
-XML2_LDFLAGS
 XMLTO
 USE_XMLTO
 WX_CONFIG
@@ -1338,8 +1335,6 @@ Optional Packages:
   --with-boost=prefix     try this for the boost prefix install directory
 
   --with-opengl=DIR       OpenGL/Mesa installation directory
-  --with-libxml2=prefix   try this for the libxml2 prefix install directory
-
   --with-xmlto=prefix     try this for the xmlto prefix install directory
 
   --with-wx=DIR           use wxWidgets configuration program wx-config in DIR
@@ -4702,14 +4697,37 @@ USE_BCG=no
 if test ${with_cadp}; then
   { echo "$as_me:$LINENO: checking for CADP in $with_cadp" >&5
 echo $ECHO_N "checking for CADP in $with_cadp... $ECHO_C" >&6; }
-  LIBS="-L${with_cadp}/bin.`${with_cadp}/com/arch` -lBCG_IO"
   cat >conftest.$ac_ext <<_ACEOF
 
       #include <$with_cadp/incl/bcg_user.h>
 
-      int main() {
-        return (0);
-      }
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+
+       LIBS="-L${with_cadp}/bin.`${with_cadp}/com/arch` -lBCG_IO"
+       cat >conftest.$ac_ext <<_ACEOF
+
+        #include <$with_cadp/incl/bcg_user.h>
+
+        int main() {
+          return (0);
+        }
 
 _ACEOF
 rm -f conftest.$ac_objext conftest$ac_exeext
@@ -4731,11 +4749,11 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
        } && test -s conftest$ac_exeext &&
        $as_test_x conftest$ac_exeext; then
 
-       CADP_HEADERS="$with_cadp/incl"
+         CADP_HEADERS="$with_cadp/incl"
 
-       CADP_LIBRARIES="${with_cadp}/bin.`${with_cadp}/com/arch`"
+         CADP_LIBRARIES="${with_cadp}/bin.`${with_cadp}/com/arch`"
 
-       USE_BCG=yes
+         USE_BCG=yes
 
 else
   echo "$as_me: failed program was:" >&5
@@ -4746,6 +4764,15 @@ fi
 
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
   { echo "$as_me:$LINENO: result: $USE_BCG" >&5
 echo "${ECHO_T}$USE_BCG" >&6; }
 fi
@@ -5044,107 +5071,6 @@ echo "${ECHO_T}yes" >&6; }
 echo "${ECHO_T}no" >&6; }
   fi
 fi
-
-
-# Check for xml2 library and header files
-
-# Check whether --with-xml2 was given.
-if test "${with_xml2+set}" = set; then
-  withval=$with_xml2;
-fi
-
-USE_XML2=no
-if test $with_libxml2; then
-  { echo "$as_me:$LINENO: checking for libxml2 in $with_libxml2" >&5
-echo $ECHO_N "checking for libxml2 in $with_libxml2... $ECHO_C" >&6; }
-  cat >conftest.$ac_ext <<_ACEOF
-
-      #include <$with_xml2/include/libxml2/libxml/xmlversion.h>
-
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest.$ac_objext; then
-
-       USE_XML2=yes
-       XML2_CPPFLAGS="-I$with_libxml2/include/libxml2"
-       XML2_LDFLAGS="-I$with_libxml2/lib"
-
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-
-  { echo "$as_me:$LINENO: result: $USE_XML2" >&5
-echo "${ECHO_T}$USE_XML2" >&6; }
-  USE_XML2="yes ($with_libxml2)"
-else
-  #Headers may be in a standard location, ask xml2-config
-  # Extract the first word of "xml2-config", so it can be a program name with args.
-set dummy xml2-config; ac_word=$2
-{ echo "$as_me:$LINENO: checking for $ac_word" >&5
-echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
-if test "${ac_cv_prog_XML2_CONFIG+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  if test -n "$XML2_CONFIG"; then
-  ac_cv_prog_XML2_CONFIG="$XML2_CONFIG" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_XML2_CONFIG="xml2-config"
-    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-done
-IFS=$as_save_IFS
-
-fi
-fi
-XML2_CONFIG=$ac_cv_prog_XML2_CONFIG
-if test -n "$XML2_CONFIG"; then
-  { echo "$as_me:$LINENO: result: $XML2_CONFIG" >&5
-echo "${ECHO_T}$XML2_CONFIG" >&6; }
-else
-  { echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6; }
-fi
-
-
-
-  if test $XML2_CONFIG; then
-    USE_XML2="yes ($($XML2_CONFIG --prefix))"
-    XML2_CPPFLAGS="$($XML2_CONFIG --cflags)"
-    XML2_LDFLAGS="$($XML2_CONFIG --libs)"
-  fi
-fi
-
-
-
 
 
 # Check for xmlto
@@ -6423,7 +6349,6 @@ R_SLDFLAGS="$R_SLDFLAGS"
      ATerm         :  $BUILD_ATERM
      Boost         :  $USE_BOOST
      CADP          :  $USE_BCG
-     libxml2       :  $USE_XML2
      OpenGL        :  $USE_OPENGL
      wxWidgets     :  $USE_WX
 
@@ -6435,7 +6360,6 @@ echo "${ECHO_T}
      ATerm         :  $BUILD_ATERM
      Boost         :  $USE_BOOST
      CADP          :  $USE_BCG
-     libxml2       :  $USE_XML2
      OpenGL        :  $USE_OPENGL
      wxWidgets     :  $USE_WX
 
@@ -7158,9 +7082,6 @@ BOOST_LIBRARY_PATH!$BOOST_LIBRARY_PATH$ac_delim
 OPENGL_IPATH!$OPENGL_IPATH$ac_delim
 OPENGL_LPATH!$OPENGL_LPATH$ac_delim
 OPENGL_NAME!$OPENGL_NAME$ac_delim
-XML2_CONFIG!$XML2_CONFIG$ac_delim
-XML2_CPPFLAGS!$XML2_CPPFLAGS$ac_delim
-XML2_LDFLAGS!$XML2_LDFLAGS$ac_delim
 XMLTO!$XMLTO$ac_delim
 USE_XMLTO!$USE_XMLTO$ac_delim
 WX_CONFIG!$WX_CONFIG$ac_delim
@@ -7179,6 +7100,9 @@ DATA_DIR!$DATA_DIR$ac_delim
 LIB_DIR!$LIB_DIR$ac_delim
 BIN_DIR!$BIN_DIR$ac_delim
 INCLUDE_DIR!$INCLUDE_DIR$ac_delim
+MAN_DIR!$MAN_DIR$ac_delim
+R_CFLAGS!$R_CFLAGS$ac_delim
+R_SCFLAGS!$R_SCFLAGS$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -7220,9 +7144,6 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
-MAN_DIR!$MAN_DIR$ac_delim
-R_CFLAGS!$R_CFLAGS$ac_delim
-R_SCFLAGS!$R_SCFLAGS$ac_delim
 R_CXXFLAGS!$R_CXXFLAGS$ac_delim
 R_SCXXFLAGS!$R_SCXXFLAGS$ac_delim
 R_CPPFLAGS!$R_CPPFLAGS$ac_delim
@@ -7232,7 +7153,7 @@ USE_BCG!$USE_BCG$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 10; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 7; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

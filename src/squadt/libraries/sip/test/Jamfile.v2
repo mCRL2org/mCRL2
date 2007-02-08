@@ -9,7 +9,6 @@ import testing ;
 unit-test basic_messenger_test :
         basic_messenger_test.cpp
         /libraries//transport
-        /libraries//xml2pp
         /site-config//boost_test ;
 
 unit-test interface_test :

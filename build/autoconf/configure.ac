@@ -308,19 +308,25 @@ AC_ARG_WITH(
 USE_BCG=no
 if test ${with_cadp}; then
   AC_MSG_CHECKING([for CADP in $with_cadp])
-  LIBS="-L${with_cadp}/bin.`${with_cadp}/com/arch` -lBCG_IO"
-  AC_LINK_IFELSE(
+  AC_COMPILE_IFELSE(
      [
       #include <$with_cadp/incl/bcg_user.h>
-
-      int main() {
-        return (0);
-      }
      ],
      [
-       AC_SUBST([CADP_HEADERS],["$with_cadp/incl"])
-       AC_SUBST([CADP_LIBRARIES],["${with_cadp}/bin.`${with_cadp}/com/arch`"])
-       USE_BCG=yes
+       LIBS="-L${with_cadp}/bin.`${with_cadp}/com/arch` -lBCG_IO"
+       AC_LINK_IFELSE(
+       [
+        #include <$with_cadp/incl/bcg_user.h>
+     
+        int main() {
+          return (0);
+        }
+       ],
+       [
+         AC_SUBST([CADP_HEADERS],["$with_cadp/incl"])
+         AC_SUBST([CADP_LIBRARIES],["${with_cadp}/bin.`${with_cadp}/com/arch`"])
+         USE_BCG=yes
+       ])
      ])
   AC_MSG_RESULT($USE_BCG)
 fi
@@ -409,41 +415,6 @@ else
   fi
 fi
 AC_SUBST([OPENGL_NAME],[])
-
-# Check for xml2 library and header files
-AC_ARG_WITH(
-  [xml2],
-  AS_HELP_STRING([--with-libxml2=prefix],[try this for the libxml2 prefix install directory])  
-)
-USE_XML2=no
-if test $with_libxml2; then
-  AC_MSG_CHECKING([for libxml2 in $with_libxml2])
-  AC_COMPILE_IFELSE(
-     [
-      #include <$with_xml2/include/libxml2/libxml/xmlversion.h>
-     ],
-     [
-       USE_XML2=yes
-       XML2_CPPFLAGS="-I$with_libxml2/include/libxml2"
-       XML2_LDFLAGS="-I$with_libxml2/lib"
-     ],)
-
-  AC_MSG_RESULT($USE_XML2)
-  USE_XML2="yes ($with_libxml2)"
-else
-  #Headers may be in a standard location, ask xml2-config
-  AC_CHECK_PROG([XML2_CONFIG],[xml2-config],[xml2-config])
-
-  if test $XML2_CONFIG; then
-    USE_XML2="yes ($($XML2_CONFIG --prefix))"
-    XML2_CPPFLAGS="$($XML2_CONFIG --cflags)"
-    XML2_LDFLAGS="$($XML2_CONFIG --libs)"
-  fi
-fi
-
-AC_SUBST([XML2_CONFIG],[])
-AC_SUBST([XML2_CPPFLAGS],[])
-AC_SUBST([XML2_LDFLAGS],[])
 
 # Check for xmlto
 AC_ARG_WITH(
@@ -564,7 +535,6 @@ AC_MSG_RESULT([
      ATerm         :  $BUILD_ATERM
      Boost         :  $USE_BOOST
      CADP          :  $USE_BCG
-     libxml2       :  $USE_XML2
      OpenGL        :  $USE_OPENGL
      wxWidgets     :  $USE_WX
      

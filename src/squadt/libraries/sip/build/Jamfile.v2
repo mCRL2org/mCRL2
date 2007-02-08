@@ -49,10 +49,10 @@ alias messenger
       basic_messenger.cpp
       capabilities.cpp
       common.cpp
+      command_line_interface.cpp
       configuration.cpp
       layout.cpp
       layout_base.cpp
-      command_line_interface.cpp
       layout_elements.cpp
       mime_type.cpp
       transport
