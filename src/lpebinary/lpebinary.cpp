@@ -423,7 +423,7 @@ data_expression replace_enumerated_parameters_in_data_expression(data_expression
   for (data_variable_list::iterator i = orig_parameters.begin(); i != orig_parameters.end(); ++i)
   { 
     gsDebugMsg("Replacing data expression %s with tree %s\n", expression.to_string().c_str(), make_if_tree(new_parameters_table.get(*i), enumerated_elements_table.get(*i)).to_string().c_str());
-    expression = data_expression(replace(expression, *i, make_if_tree(new_parameters_table.get(*i), enumerated_elements_table.get(*i)), true));
+    expression = data_expression(bottom_up_replace(expression, *i, make_if_tree(new_parameters_table.get(*i), enumerated_elements_table.get(*i))));
   }
   return expression;
 }
@@ -551,7 +551,7 @@ action_list replace_enumerated_parameters_in_actions(action_list list,
   data_variable_list orig_parms = data_variable_list(new_parameters_table.table_keys());
   for (data_variable_list::iterator i = orig_parms.begin(); i != orig_parms.end(); ++i)
   {
-    list = replace(list, *i, make_if_tree(new_parameters_table.get(*i), enumerated_elements_table.get(*i)), true);
+    list = bottom_up_replace(list, *i, make_if_tree(new_parameters_table.get(*i), enumerated_elements_table.get(*i)));
   }
   return list;
 }

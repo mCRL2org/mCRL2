@@ -42,6 +42,34 @@ struct is_a_or_b
   }
 };
 
+// replaces function names f by g and vice versa
+struct fg_replacer
+{
+  aterm_appl operator()(aterm_appl t) const
+  {
+    if (t.function().name() == "f")
+      return aterm_appl(function_symbol("g", t.function().arity()), aterm_list(t.begin(), t.end()));
+    else if (t.function().name() == "g")
+      return aterm_appl(function_symbol("f", t.function().arity()), aterm_list(t.begin(), t.end()));
+    else
+      return t;
+  }
+};
+
+// replaces function names f by g and vice versa, but stops the recursion once an f or g term is found
+struct fg_partial_replacer
+{
+  std::pair<aterm_appl, bool> operator()(aterm_appl t) const
+  {
+    if (t.function().name() == "f")
+      return std::make_pair(aterm_appl(function_symbol("g", t.function().arity()), aterm_list(t.begin(), t.end())), false);
+    else if (t.function().name() == "g")
+      return std::make_pair(aterm_appl(function_symbol("f", t.function().arity()), aterm_list(t.begin(), t.end())), false);
+    else
+      return std::make_pair(t, true);
+  }
+};
+
 void test_find()
 {
   aterm_appl a = make_term("h(g(x),f(y),p(a(x,y),q(f(z))))");
@@ -60,16 +88,23 @@ void test_replace()
   aterm_appl a = make_term("f(f(x))");
   aterm_appl b = replace(a, make_term("f(x)"), make_term("x"));
   BOOST_CHECK(b == make_term("f(x)"));
-  aterm_appl c = replace(a, make_term("f(x)"), make_term("x"), true);
-  BOOST_CHECK(c == make_term("x"));
+  b = bottom_up_replace(a, make_term("f(x)"), make_term("x"));
+  BOOST_CHECK(b == make_term("x"));
 
-  aterm d = make_term("h(g(b),f(a),p(a(x,y),q(a(a))))");
-  aterm_appl e = replace_if(d, is_a_or_b(), make_term("u"));
-  BOOST_CHECK(e == make_term("h(g(u),f(u),p(u,q(u)))"));
+//  aterm d = make_term("h(g(b),f(a),p(a(x,y),q(a(a))))");
+//  aterm_appl e = replace_if(d, is_a_or_b(), make_term("u"));
+//  BOOST_CHECK(e == make_term("h(g(u),f(u),p(u,q(u)))"));
   
   aterm f = make_term("[]");
   aterm_appl g = replace(f, a, b);
   BOOST_CHECK(f == make_term("[]"));
+
+  aterm x = make_term("g(f(x),f(y),h(f(x)))");
+  aterm y = replace(x, fg_replacer());
+  aterm z = partial_replace(x, fg_partial_replacer());
+
+  BOOST_CHECK(y == make_term("f(g(x),g(y),h(g(x)))"));
+  BOOST_CHECK(z == make_term("f(f(x),f(y),h(f(x)))"));
 }
 
 int test_main( int, char*[] )

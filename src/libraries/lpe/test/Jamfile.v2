@@ -34,7 +34,7 @@ test-suite lpe
       [ run aterm_algorithm_test.cpp lin_std.o lin_alt.o ]
       [ run operators.cpp ]
       [ run sort_test.cpp ]
-      #[ run apply_test.cpp ]
+      [ run replace_test.cpp ]
     ;
 
 install dist 

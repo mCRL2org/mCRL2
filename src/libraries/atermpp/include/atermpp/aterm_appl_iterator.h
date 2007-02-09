@@ -58,7 +58,11 @@ class term_appl_iterator: public boost::iterator_facade<
 
     /// INTERNAL ONLY
     void increment()
-    { m_term = m_term + 1; }
+    { m_term++; }
+
+    /// INTERNAL ONLY
+    void decrement()
+    { m_term--; }
 
     ATerm* m_term;
 };
