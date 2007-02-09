@@ -22,7 +22,6 @@
 #include "lpe/data_init.h"
 #include "lpe/data_functional.h"
 
-using namespace std;
 using namespace atermpp;
 using namespace lpe;
 
@@ -56,9 +55,6 @@ void test_replace()
   data_expression h = replace(g, add_zero());
   BOOST_CHECK(h == and_(equal_to(d0, e0), not_equal_to(e0, f0)));
 
-  data_expression h1 = partial_replace(g, add_zero());
-  BOOST_CHECK(h == h1);
-
   data_expression i = replace(g, d, e); 
   BOOST_CHECK(i == and_(equal_to(e, e), not_equal_to(e, f)));
 }
@@ -67,6 +63,7 @@ int test_main( int, char*[] )
 {
   ATerm bottom_of_stack;
   ATinit(0, 0, &bottom_of_stack);
+  gsEnableConstructorFunctions();
 
   test_replace();
 

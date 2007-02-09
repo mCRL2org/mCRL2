@@ -236,7 +236,7 @@ namespace atermpp {
   typedef term_list<aterm> aterm_list;
 
   ///
-  /// Returns the list obtained by inserting a new element at the beginning.
+  /// Returns the first element of the list l.
   ///
   template <typename Term>
   inline
