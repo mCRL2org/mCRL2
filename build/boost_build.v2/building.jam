@@ -15,7 +15,7 @@ if ! $(REVISION) {
 # Feature to mark tools as basic experimental or deprecated
 feature.feature status : basic experimental deprecated : incidental ;
 
-feature.feature squadt_support : disable enable : composite optional incidental ;
+feature.feature squadt_support : disable enable : composite optional ;
 
 # Disable squadt support in tools
 if ! squadt in [ MATCH "^--disable-(squadt)-support" : [ modules.peek : ARGV ] $(BUILD_EXTRA) ] {
@@ -30,13 +30,6 @@ feature.feature opengl : no yes ;
 
 if $(OPENGL_NAME) {
   feature.set-default opengl : yes ;
-}
-
-# Feature for linking to the xml2 library
-feature.feature xml2 : no yes ;
-
-if $(XML2_CPPFLAGS) {
-  feature.set-default xml2 : yes ;
 }
 
 # Feature for linking to wx widget libraries

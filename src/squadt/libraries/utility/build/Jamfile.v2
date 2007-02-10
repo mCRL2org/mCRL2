@@ -10,17 +10,8 @@ project squadt/libraries/utility
        <include>../include
     ;
 
-obj logger.o
-    : source/logger.cpp
-    ;
-
 cpp-pch mcrl2_squadt.h
     : include/utility/mcrl2_squadt.h
-    : <use>/libraries/sip//sip_tool
-    ;
-
-cpp-pch squadt_utility.h
-    : include/utility/squadt_utility.h
     : <use>/libraries/sip//sip_tool
       <use>/libraries//mcrl2_basic
     ;
@@ -28,11 +19,14 @@ cpp-pch squadt_utility.h
 lib mcrl2_squadt
     : source/mcrl2_squadt.cpp
       mcrl2_squadt.h
-      squadt_utility.h
     : <use>/libraries//mcrl2_basic
       <use>/libraries/sip//sip_tool
     :
     : <library>/libraries/sip//sip_tool
+    ;
+
+obj logger.o
+    : source/logger.cpp
     ;
 
 alias logger : logger.o : : : ;
