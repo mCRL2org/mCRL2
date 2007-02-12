@@ -5,6 +5,16 @@
 #include <sip/detail/tool.tcc>
 
 namespace sip {
+  namespace layout {
+    /**
+     * \param[in] t the tool communicator object to use
+     * \param[in] e the layout element of which to send the state
+     **/
+    void element::update(tool::communicator* t, layout::element const* e) {
+      t->send_display_data(e);
+    }
+  }
+
   namespace tool {
 
     communicator::communicator(communicator_impl* c) : sip::messenger(c) {

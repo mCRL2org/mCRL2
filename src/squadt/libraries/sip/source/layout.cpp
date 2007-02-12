@@ -50,14 +50,6 @@ namespace sip {
     }
 
     /**
-     * \param[in] t the tool communicator object to use
-     * \param[in] e the layout element of which to send the state
-     **/
-    void element::update(tool::communicator* t, layout::element const* e) {
-      t->send_display_data(e);
-    }
-
-    /**
      * \param[in] m a mediator to synchronise an element with the associated element in a (G)UI
      **/
     mediator::wrapper_aptr tool_display::instantiate(mediator* m) const {

@@ -68,7 +68,7 @@ alias messenger
       <library>/libraries/utility//logger
     ;
 
-lib sip_controller
+lib sip-controller
     : controller.cpp
       messenger
     : <threading>multi
@@ -83,14 +83,15 @@ lib sip
       <link>shared
     ;
 
-lib sip_tool
+lib sip-tool
     : tool.cpp
       messenger
     : <threading>multi
       <link>static
     ;
 
-alias sip_tool : sip ;
-
-alias sip_controller : sip ;
+alias sip_tool       : sip            : <link>shared ;
+alias sip_tool       : sip-tool       : <link>static ;
+alias sip_controller : sip            : <link>shared ;
+alias sip_controller : sip-controller : <link>static ;
 
