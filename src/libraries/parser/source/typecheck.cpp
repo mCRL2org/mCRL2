@@ -127,11 +127,11 @@ static inline ATermAppl INIT_KEY(void){return gsMakeProcVarId(gsString2ATermAppl
 
 static inline ATermAppl gstcMakeNotInferred(ATermList PossibleTypes){
   assert(PossibleTypes);
-  return ATmakeAppl1(ATmakeAFun("notInferred",1,ATtrue),(ATerm)PossibleTypes);
+  return ATmakeAppl1(ATmakeAFun("notInferred",1,ATfalse),(ATerm)PossibleTypes);
 }
 
 static inline bool gstcIsNotInferred(ATermAppl SortTerm){
-  return (ATgetAFun(SortTerm)==ATmakeAFun("notInferred",1,ATtrue));
+  return (ATgetAFun(SortTerm)==ATmakeAFun("notInferred",1,ATfalse));
 }
 
 static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATermAppl *Par);
