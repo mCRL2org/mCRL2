@@ -6,7 +6,9 @@
 
 #include "libstruct_core.h"
 
+#ifndef __cplusplus
 #include <stdbool.h>
+#endif
 #include <aterm2.h>
 
 #ifdef __cplusplus

@@ -1,7 +1,9 @@
 #ifndef __LOWLEVEL_H
 #define __LOWLEVEL_H
 
+#ifndef __cplusplus
 #include <stdbool.h>
+#endif
 #include <stdarg.h>
 #include <assert.h>
 #include <aterm2.h>

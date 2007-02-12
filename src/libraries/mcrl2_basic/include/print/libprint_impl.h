@@ -5,8 +5,10 @@
 #if defined(PRINT_C)
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
+#ifndef __cplusplus
+#include <stdbool.h>
+#endif
 #define PRINT_OUTTYPE FILE*
 #define PRINT_FUNC(x) x ## _C
 #endif
