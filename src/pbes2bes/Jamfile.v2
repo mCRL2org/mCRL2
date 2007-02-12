@@ -1,0 +1,16 @@
+project toolset/pbes2bes
+       : build-dir $(BUILD_TOP)/pbes2bes
+       ;
+
+exe pbes2bes
+       : pbes2bes.cpp
+		 pbes_rewrite.cpp
+		 sort_functions.cpp
+         /libraries//mcrl2_basic
+		 /libraries//lpe
+		 /libraries//rewrite
+         /site-config//boost_program_options
+       : <include>.
+       : <squadt_support>disable
+		 <status>experimental
+       ;
