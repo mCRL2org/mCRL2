@@ -376,11 +376,15 @@ void lpeParElm::filter() {
   if (p_verbose) {
     gsVerboseMsg("lpeparelm: Number of removed process parameters: %d\n", p_S.size());
     if (p_S.size() !=0){
-      gsVerboseMsg("lpeparelm:   [ ");
-      for(std::set< lpe::data_variable >::iterator i = p_S.begin(); i != (--p_S.end()); i++){
-        gsVerboseMsg("%s, ", std::string(i->name()).c_str());
+      std::set< lpe::data_variable >::iterator i = p_S.begin();
+
+      gsVerboseMsg("lpeparelm:   [ %s", std::string(i->name()).c_str());
+
+      while (++i != p_S.end()){
+        gsVerboseMsg(", %s", std::string(i->name()).c_str());
       }
-      gsVerboseMsg("%s ]\n", std::string(p_S.back().name()).c_str());
+
+      gsVerboseMsg(" ]");
     }
   }// else {  
   // gsVerboseMsg("Number of removed process parameters : %d\n", p_S.size();

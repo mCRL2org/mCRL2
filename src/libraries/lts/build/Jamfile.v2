@@ -30,7 +30,7 @@ lib lts
          /libraries/atermpp
          /libraries//lpe
          /site-config//BCG
-       :
+       : <threading>single
        :
        : <library>/libraries//parser
          <library>/libraries//svc

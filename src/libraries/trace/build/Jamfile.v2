@@ -7,7 +7,7 @@ project libraries/trace
 lib trace
        : libtrace.cpp
          /libraries//mcrl2_basic
-       :
+       : <threading>single
        :
        :
        ;

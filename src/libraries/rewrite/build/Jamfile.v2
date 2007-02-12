@@ -25,6 +25,7 @@ lib rewrite
          <include>../include/rewrite
          <include>../include/prover
          <include>$(SETUP)
+         <threading>single
        :
        : <include>../include/rewrite
          <include>../include/prover

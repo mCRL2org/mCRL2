@@ -21,6 +21,7 @@ lib mcrl2_squadt
       mcrl2_squadt.h
     : <use>/libraries//mcrl2_basic
       <use>/libraries/sip//sip_tool
+      <threading>multi
     :
     : <library>/libraries/sip//sip_tool
     ;

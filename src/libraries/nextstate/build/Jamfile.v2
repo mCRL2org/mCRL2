@@ -5,7 +5,7 @@ project libraries/nextstate
           <include>../include
        ;
 
-lib enum
+alias enum
        : libenum.cpp
          enum_standard.cpp
        : <use>/libraries//mcrl2_basic
@@ -20,7 +20,7 @@ lib nextstate
        : libnextstate.cpp
          nextstate_standard.cpp
          enum
-       :
+       : <threading>single
        :
        : <library>enum
        ;

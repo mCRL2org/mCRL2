@@ -16,6 +16,7 @@ lib parser
          regfrmtrans.cpp
        : <use>/libraries/lpe//headers
          <use>/libraries//mcrl2_basic
+         <threading>single
        :
        : <library>/libraries//mcrl2_basic
        ;
@@ -23,7 +24,7 @@ lib parser
 lib alpha
        : libalpha.cpp
          /libraries//mcrl2_basic
-       :
+       : <threading>single
        :
        : <library>/libraries//aterm
          <library>/libraries//mcrl2_basic

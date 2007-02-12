@@ -21,6 +21,5 @@ lib svc
          svc2.c
          /libraries//aterm
        : <toolset>darwin:<cflags>"-fno-common"
-       :
-       :
+         <threading>single
        ;

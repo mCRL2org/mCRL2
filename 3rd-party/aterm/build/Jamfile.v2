@@ -27,6 +27,7 @@ lib aterm
          <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
          <toolset>gcc,<os>NT,<link>shared:<cflags>""
          <toolset>gcc,<os>LINUX,<link>shared:<cflags>-fPIC
+         <threading>single
        :
        : <address-model>64:<define>AT_64BIT
          <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
