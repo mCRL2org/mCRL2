@@ -379,7 +379,7 @@ data_variable_list replace_enumerated_parameters(const lpe::specification& speci
       gsVerboseMsg("Parameter `%s' has been replaced by %d parameters of type bool\n", par.to_string().c_str(), n);
  
       //Set hint for fresh variable names
-      generator.set_hint(unquote(par.name()));
+      generator.set_hint(par.name());
 
       //Create new parameters and add them to the parameter list.
       for (int i = 0; i<n; ++i)

@@ -52,7 +52,7 @@ std::set<std::string> identifier_strings(Term t)
   std::set<aterm_string> s = identifiers(t);
   std::set<std::string> result;
   for (std::set<aterm_string>::iterator i = s.begin(); i != s.end(); ++i)
-    result.insert(atermpp::unquote(*i));
+    result.insert(*i);
   return result;
 }
 
@@ -61,7 +61,7 @@ std::vector<std::string> variable_strings(data_variable_list t)
 {
   std::vector<std::string> result;
   for (data_variable_list::iterator i = t.begin(); i != t.end(); ++i)
-    result.push_back(atermpp::unquote(i->name()));
+    result.push_back(i->name());
   return result;
 }
 
@@ -87,7 +87,7 @@ data_variable_list fresh_variables(data_variable_list t, const std::set<std::str
   data_variable_list result;
   for (data_variable_list::iterator k = t.begin(); k != t.end(); ++k)
   {
-    aterm_string name(atermpp::unquote(k->name()) + postfix);
+    aterm_string name(std::string(k->name()) + postfix);
     result = push_front(result, data_variable(gsMakeDataVarId(name, k->sort())));
   }
   return atermpp::reverse(result);
@@ -153,7 +153,7 @@ std::set<std::string> find_variable_names(Term t)
   std::set<std::string> result;
   for (std::set<data_variable>::iterator j = variables.begin(); j != variables.end(); ++j)
   {
-    result.insert(atermpp::unquote(j->name()));
+    result.insert(j->name());
   }
   return result;
 }
@@ -238,7 +238,7 @@ class fresh_variable_generator
     /// the same prefix. The returned variable is added to the context.
     data_variable operator()(data_variable v)
     {
-      std::string hint = atermpp::unquote(v.name());
+      std::string hint = v.name();
       aterm_string id(hint);
       int index = 0;
       while (m_identifiers.find(id) != m_identifiers.end())

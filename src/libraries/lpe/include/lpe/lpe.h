@@ -35,7 +35,7 @@ namespace {
     std::set<std::string> result;
     for (lpe::data_variable_list::iterator i = l.begin(); i != l.end(); ++i)
     {
-      result.insert(atermpp::unquote(i->name()));
+      result.insert(i->name());
     }
     return result;
   }

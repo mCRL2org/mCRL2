@@ -38,10 +38,6 @@ void test_aterm()
   
   aterm e = aterm();
   BOOST_CHECK(!e);
-  
-  aterm_string s = make_term("\"abc\"");
-  std::string s1 = unquote(s);
-  BOOST_CHECK(s1 == "abc");
 }
 
 int test_main( int, char*[] )

@@ -16,7 +16,6 @@
 #include "atermpp/utility.h"
 #include "lpe/sort.h"
 #include "lpe/pretty_print.h"
-#include "lpe/detail/string_utility.h"
 #include "lpe/soundness_checks.h"
 #include "libstruct.h"
 
@@ -168,14 +167,6 @@ class data_variable: public data_expression
     aterm_string name() const
     {
       return arg1(*this);
-    }
-
-    /// Returns the name of the data_variable.
-    /// DEPRECATED!
-    ///
-    std::string unquoted_name() const
-    {
-      return atermpp::unquote(name());
     }
 
     /// Returns the sort of the data_variable.

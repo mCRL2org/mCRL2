@@ -130,7 +130,7 @@ class fresh_propositional_variable_generator
     /// the same prefix. The returned variable is added to the context.
     propositional_variable operator()(propositional_variable v)
     {
-      std::string hint = atermpp::unquote(v.name());
+      std::string hint = v.name();
       aterm_string id(hint);
       int index = 0;
       while (m_identifiers.find(id) != m_identifiers.end())

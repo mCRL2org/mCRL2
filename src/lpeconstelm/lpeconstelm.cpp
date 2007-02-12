@@ -342,7 +342,7 @@ inline bool lpeConstElm::inFreeVarList(data_expression dexpr) {
 //
 inline lpe::data_assignment lpeConstElm::newExpression(lpe::data_assignment ass) {
   char buffer [99];
-  sprintf(buffer, "%s^%d", ass.lhs().unquoted_name().c_str(), p_newVarCounter++);
+  sprintf(buffer, "%s^%d", std::string(ass.lhs().name()).c_str(), p_newVarCounter++);
   data_variable w(buffer, ass.lhs().sort() );
   data_assignment a(ass.lhs() , w);
   return a;

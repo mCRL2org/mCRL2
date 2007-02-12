@@ -32,7 +32,7 @@ struct add_zero
     if (is_data_variable(t))
     {
       data_variable d(t);
-      return data_variable(unquote(d.name()) + "0", d.sort());
+      return data_variable(std::string(d.name()) + "0", d.sort());
     }
     else
       return t;

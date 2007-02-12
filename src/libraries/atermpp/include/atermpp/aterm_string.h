@@ -77,7 +77,7 @@ namespace atermpp
 
       operator std::string() const
       {
-        return this->to_string();
+        return function().name();
       }
   };
 
