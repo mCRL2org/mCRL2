@@ -27,7 +27,7 @@ extern "C"
 
 #define AT_SYMBOL       7
 
-#define MAX_ARITY            256
+#define MAX_ARITY            4096
 
 struct __ATerm
 {
