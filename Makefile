@@ -25,6 +25,7 @@ distclean:
 	@${MAKE} -C src/doc distclean
 	$(RM) -r autom4te.cache *.o *.app *~ core core.*
 	$(RM) -r config.log config.status build/config.mk build/config.jam src/setup.h
+	$(RM) -rf build/bin/*
 	$(RM) -rf build/bin
 
 parsers:

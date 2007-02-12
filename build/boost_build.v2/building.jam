@@ -21,6 +21,7 @@ feature.feature squadt_support : disable enable : composite optional ;
 if ! squadt in [ MATCH "^--disable-(squadt)-support" : [ modules.peek : ARGV ] $(BUILD_EXTRA) ] {
   feature.compose <squadt_support>enable
         : <define>ENABLE_SQUADT_CONNECTIVITY
+          <threading>multi
           <library>/libraries/utility//mcrl2_squadt
         ;
 }

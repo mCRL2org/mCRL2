@@ -309,8 +309,8 @@ namespace sip {
       for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
      
         if (e->Value() == "protocol-version") {
-          c.m_protocol_version.major = boost::lexical_cast < unsigned short > (e->GetAttributeValue("major"));
-          c.m_protocol_version.minor = boost::lexical_cast < unsigned short > (e->GetAttributeValue("minor"));
+          c.m_protocol_version.major = static_cast < unsigned char > (boost::lexical_cast < unsigned short > (e->GetAttributeValue("major")));
+          c.m_protocol_version.minor = static_cast < unsigned char > (boost::lexical_cast < unsigned short > (e->GetAttributeValue("minor")));
         }
         else if (e->Value() == "input-configuration") {
           c.m_input_combinations.insert(
