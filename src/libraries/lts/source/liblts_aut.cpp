@@ -1,6 +1,6 @@
 #include <string>
+#include <cstdlib>
 #include <fstream>
-#include <boost/lexical_cast.hpp>
 #include <assert.h>
 #include <aterm2.h>
 #include "libprint_c.h"
@@ -185,9 +185,9 @@ bool p_lts::read_from_aut(istream &is)
   is.getline(buf,READ_FROM_AUT_BUF_SIZE);
   if ( read_aut_header(buf,&s1,&s2,&s3) )
   {
-    init_state = boost::lexical_cast<unsigned int>(s1);
-    ntrans = boost::lexical_cast<unsigned int>(s2);
-    nstate = boost::lexical_cast<unsigned int>(s3);
+    init_state = strtoul(s1,NULL,10);
+    ntrans = strtoul(s2,NULL,10);
+    nstate = strtoul(s3,NULL,10);
   } else { 
     gsErrorMsg("cannot parse AUT input! (invalid header)\n");
     return false;
@@ -212,9 +212,9 @@ bool p_lts::read_from_aut(istream &is)
     }
     if ( read_aut_transition((char *)buf,&s1,&s2,&s3) )
     {
-      from = boost::lexical_cast<unsigned int>(s1);
+      from = strtoul(s1,NULL,10);
       s = s2;
-      to = boost::lexical_cast<unsigned int>(s3);
+      to = strtoul(s3,NULL,10);
     } else {
       gsErrorMsg("cannot parse AUT input! (invalid transition)\n");
       return false;

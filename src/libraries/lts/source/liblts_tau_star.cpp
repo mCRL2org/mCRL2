@@ -1,3 +1,4 @@
+#include <liblowlevel.h>
 #include <lts/liblts.h>
 
 using namespace std;
@@ -12,7 +13,7 @@ void p_lts::tau_star_reduce()
 {
   p_sort_transitions();
   unsigned int *trans_lut = p_get_transition_indices();
-  unsigned int new_trans_lut[nstates+1];
+  DECL_A(new_trans_lut,unsigned int,nstates+1);
 
   new_trans_lut[0] = ntransitions;
   for (unsigned int state = 0; state < nstates; state++)
@@ -81,8 +82,10 @@ void p_lts::tau_star_reduce()
     }
     new_trans_lut[state+1] = ntransitions;
   }
+  FREE_A(new_trans_lut);
 
-  enum { unknown, reached, explored } reachable[nstates];
+  typedef enum { unknown, reached, explored } t_reach;
+  DECL_A(reachable,t_reach,nstates);
   for (unsigned int i=0; i<nstates; i++)
   {
     reachable[i] = unknown;
@@ -126,7 +129,7 @@ void p_lts::tau_star_reduce()
       }
     }
   }
-  unsigned int state_map[nstates];
+  DECL_A(state_map,unsigned int,nstates);
   unsigned int new_nstates = 0;
   for (unsigned int i=0; i < nstates; i++)
   {
@@ -141,7 +144,7 @@ void p_lts::tau_star_reduce()
     }
   }
 
-  unsigned int label_map[nlabels];
+  DECL_A(label_map,unsigned int,nlabels);
   unsigned int new_nlabels = 0;
   for (unsigned int i=0; i < nlabels; i++)
   {
@@ -171,6 +174,10 @@ void p_lts::tau_star_reduce()
       new_ntransitions++;
     }
   }
+  
+  FREE_A(label_map);
+  FREE_A(state_map);
+  FREE_A(reachable);
 
   nstates = new_nstates;
   nlabels = new_nlabels;
