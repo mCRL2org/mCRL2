@@ -2,12 +2,11 @@
 #define VERSION "1.1"
 
 #include <sstream>
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
 #include <getopt.h>
-#include <assert.h>
 #include <ticpp.h>
 #include <aterm2.h>
 #include "liblowlevel.h"
@@ -717,7 +716,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
         gsWarningMsg("Element '%s' is not a Petri net and will be ignored (including it's sub-elements).\n", cur->Value().c_str());
       }
     }
-    catch (ticpp::Exception& e) {
+    catch (ticpp::Exception&) {
       gsErrorMsg("File does not contain a Petri net. \n");
 
       return 0;

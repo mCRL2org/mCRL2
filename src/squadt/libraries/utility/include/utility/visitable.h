@@ -22,27 +22,33 @@ namespace utility {
 
       /** \brief Hook for visitor pattern */
       template < typename V >
-      typename boost::enable_if < typename V::is_const_visitor >::type accept(V&) const;
+      typename boost::enable_if < typename V::is_const_visitor >::type accept(V&) const {
+      }
 
       /** \brief Hook for visitor pattern */
       template < typename V, typename U >
-      typename boost::enable_if < typename V::is_const_visitor >::type accept(V&, U const&) const;
+      typename boost::enable_if < typename V::is_const_visitor >::type accept(V&, U const&) const {
+      }
 
       /** \brief Hook for visitor pattern */
       template < typename V, typename U >
-      typename boost::enable_if < typename V::is_const_visitor >::type accept(V&, U&) const;
+      typename boost::enable_if < typename V::is_const_visitor >::type accept(V&, U&) const {
+      }
 
       /** \brief Hook for visitor pattern */
       template < typename V >
-      typename boost::disable_if < typename V::is_const_visitor >::type accept(V&);
+      typename boost::disable_if < typename V::is_const_visitor >::type accept(V&) {
+      }
 
       /** \brief Hook for visitor pattern */
       template < typename V, typename U >
-      typename boost::disable_if < typename V::is_const_visitor >::type accept(V&, U const&);
+      typename boost::disable_if < typename V::is_const_visitor >::type accept(V&, U const&) {
+      }
 
       /** \brief Hook for visitor pattern */
       template < typename V, typename U >
-      typename boost::disable_if < typename V::is_const_visitor >::type accept(V&, U&);
+      typename boost::disable_if < typename V::is_const_visitor >::type accept(V&, U&) {
+      }
 
       /** \brief Pure virtual destructor */
       virtual ~base_visitable() = 0;
@@ -133,36 +139,6 @@ namespace utility {
 
   template < class D >
   inline visitable< D >::~visitable() {
-  }
-
-  template < typename V >
-  inline typename boost::enable_if < typename V::is_const_visitor >::type base_visitable::accept(V& v) const {
-
-  }
-
-  template < typename V, typename U >
-  inline typename boost::enable_if < typename V::is_const_visitor >::type base_visitable::accept(V& v, U const& u) const {
-
-  }
-
-  template < typename V, typename U >
-  inline typename boost::enable_if < typename V::is_const_visitor >::type base_visitable::accept(V& v, U& u) const {
-
-  }
-
-  template < typename V >
-  inline typename boost::disable_if < typename V::is_const_visitor >::type base_visitable::accept(V& v) {
-
-  }
-
-  template < typename V, typename U >
-  inline typename boost::disable_if < typename V::is_const_visitor >::type base_visitable::accept(V& v, U const& u) {
-
-  }
-
-  template < typename V, typename U >
-  inline typename boost::disable_if < typename V::is_const_visitor >::type base_visitable::accept(V& v, U& u) {
-
   }
 
   inline base_visitable::base_visitable() {
