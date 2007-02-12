@@ -1,7 +1,6 @@
 #include <string>
 #include <fstream>
 #include <boost/lexical_cast.hpp>
-#include <boost/regex.hpp>
 #include <assert.h>
 #include <aterm2.h>
 #include "libprint_c.h"
@@ -31,25 +30,164 @@ bool p_lts::read_from_aut(string const& filename)
   return r;
 }
 
+static bool read_aut_header(char *s, char **initial_state, char **transitions, char **states)
+{
+  while ( *s == ' ' )
+    s++;
+
+  if ( strncmp(s,"des",3) ) 
+    return false;
+  s += 3;
+
+  while ( *s == ' ' )
+    s++;
+
+  if ( *s != '(' )
+    return false;
+  s++;
+  
+  while ( *s == ' ' )
+    s++;
+
+  *initial_state = s;
+  while ( (*s >= '0') && ( *s <= '9') )
+    s++;
+  char *end_initial_state = s;
+
+  while ( *s == ' ' )
+    s++;
+
+  if ( *s != ',' )
+    return false;
+  s++;
+  
+  while ( *s == ' ' )
+    s++;
+
+  *transitions = s;
+  while ( (*s >= '0') && ( *s <= '9') )
+    s++;
+  char *end_transitions = s;
+
+  while ( *s == ' ' )
+    s++;
+
+  if ( *s != ',' )
+    return false;
+  s++;
+  
+  while ( *s == ' ' )
+    s++;
+
+  *states = s;
+  while ( (*s >= '0') && ( *s <= '9') )
+    s++;
+  char *end_states = s;
+
+  while ( *s == ' ' )
+    s++;
+
+  if ( *s != ')' )
+    return false;
+  s++;
+  
+  while ( *s == ' ' )
+    s++;
+
+  if ( *s != '\0' )
+    return false;
+
+  *end_initial_state = '\0';
+  *end_transitions = '\0';
+  *end_states = '\0';
+
+  return true;
+}
+
+static bool read_aut_transition(char *s, char **from, char **label, char **to)
+{
+  while ( *s == ' ' )
+    s++;
+
+  if ( *s != '(' )
+    return false;
+  s++;
+  
+  while ( *s == ' ' )
+    s++;
+
+  *from = s;
+  while ( (*s >= '0') && ( *s <= '9') )
+    s++;
+  char *end_from = s;
+
+  while ( *s == ' ' )
+    s++;
+
+  if ( *s != ',' )
+    return false;
+  s++;
+  
+  while ( *s == ' ' )
+    s++;
+
+  if ( *s == '"' )
+    s++;
+  *label = s;
+  while ( (*s != '"') && ( *s != '\0') )
+    s++;
+  char *end_label = s;
+  if ( *s == '"' )
+    s++;
+
+  while ( *s == ' ' )
+    s++;
+
+  if ( *s != ',' )
+    return false;
+  s++;
+  
+  while ( *s == ' ' )
+    s++;
+
+  *to = s;
+  while ( (*s >= '0') && ( *s <= '9') )
+    s++;
+  char *end_to = s;
+
+  while ( *s == ' ' )
+    s++;
+
+  if ( *s != ')' )
+    return false;
+  s++;
+  
+  while ( *s == ' ' )
+    s++;
+
+  if ( *s != '\0' )
+    return false;
+
+  *end_from = '\0';
+  *end_label = '\0';
+  *end_to = '\0';
+
+  return true;
+}
+
 bool p_lts::read_from_aut(istream &is)
 {
-  boost::regex regex_aut_header("^[[:space:]]*des[[:space:]]*\\([[:space:]]*([[:digit:]]+)[[:space:]]*,[[:space:]]*([[:digit:]]+)[[:space:]]*,[[:space:]]*([[:digit:]]+)[[:space:]]*\\)[[:space:]]*$");
-  boost::regex regex_aut_transition("^[[:space:]]*\\([[:space:]]*([[:digit:]]+)[[:space:]]*,[[:space:]]*\"?([^\"]+)\"?[[:space:]]*,[[:space:]]*([[:digit:]]+)[[:space:]]*\\)[[:space:]]*$");
-
   unsigned int ntrans,nstate;
   #define READ_FROM_AUT_BUF_SIZE 8196
   char buf[READ_FROM_AUT_BUF_SIZE];
-  boost::match_results<const char *> what;
+  char *s1,*s2,*s3;
   
   is.getline(buf,READ_FROM_AUT_BUF_SIZE);
-  if ( regex_search((char *)buf,what,regex_aut_header) )
+  if ( read_aut_header(buf,&s1,&s2,&s3) )
   {
-    *(const_cast<char *>(what[1].second)) = '\0';
-    *(const_cast<char *>(what[2].second)) = '\0';
-    *(const_cast<char *>(what[3].second)) = '\0';
-    init_state = boost::lexical_cast<unsigned int>(what[1].first);
-    ntrans = boost::lexical_cast<unsigned int>(what[2]);
-    nstate = boost::lexical_cast<unsigned int>(what[3]);
+    init_state = boost::lexical_cast<unsigned int>(s1);
+    ntrans = boost::lexical_cast<unsigned int>(s2);
+    nstate = boost::lexical_cast<unsigned int>(s3);
   } else { 
     gsErrorMsg("cannot parse AUT input! (invalid header)\n");
     return false;
@@ -72,14 +210,11 @@ bool p_lts::read_from_aut(istream &is)
     {
       break;
     }
-    if ( regex_search((char *)buf,what,regex_aut_transition) )
+    if ( read_aut_transition((char *)buf,&s1,&s2,&s3) )
     {
-      *(const_cast<char *>(what[1].second)) = '\0';
-      *(const_cast<char *>(what[2].second)) = '\0';
-      *(const_cast<char *>(what[3].second)) = '\0';
-      from = boost::lexical_cast<unsigned int>(what[1].first);
-      s = what[2].first;
-      to = boost::lexical_cast<unsigned int>(what[3].first);
+      from = boost::lexical_cast<unsigned int>(s1);
+      s = s2;
+      to = boost::lexical_cast<unsigned int>(s3);
     } else {
       gsErrorMsg("cannot parse AUT input! (invalid transition)\n");
       return false;
