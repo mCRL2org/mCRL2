@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
-<!ENTITY tbf2lpe "<function>tbf2lpe</function>">
+<!ENTITY tbf2lpe "<command>tbf2lpe</command>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY input_lpe "<parameter>INFILE</parameter>">
 <!ENTITY output_lpe "<parameter>OUTFILE</parameter>">

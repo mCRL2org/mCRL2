@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
-<!ENTITY lpeconstelm "<function>lpeconstelm</function>">
+<!ENTITY lpeconstelm "<command>lpeconstelm</command>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
 <!ENTITY outfile "<parameter>OUTFILE</parameter>">
 <!ENTITY opt_h "<option>-h</option>">

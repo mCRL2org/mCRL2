@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
-<!ENTITY ltscompare "<function>ltsconvert</function>">
+<!ENTITY ltscompare "<command>ltscompare</command>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY infile1 "<parameter>INFILE1</parameter>">
 <!ENTITY infile2 "<parameter>INFILE2</parameter>">

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
-<!ENTITY lpe2lts "<function>lpe2lts</function>">
-<!ENTITY tracepp "<function>tracepp</function>">
+<!ENTITY lpe2lts "<command>lpe2lts</command>">
+<!ENTITY tracepp "<command>tracepp</command>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
 <!ENTITY outfile "<parameter>OUTFILE</parameter>">
@@ -11,6 +11,7 @@
 <!ENTITY debug "<parameter>debug</parameter>">
 <!ENTITY internal "<parameter>internal</parameter>">
 <!ENTITY name "<parameter>NAME</parameter>">
+<!ENTITY num "<parameter>NUM</parameter>">
 <!ENTITY opt_h "<option>-h</option>">
 <!ENTITY opt_q "<option>-q</option>">
 <!ENTITY opt_v "<option>-v</option>">
@@ -192,10 +193,10 @@ Mandatory arguments to long options are also mandatory to short options.
 
   <varlistentry>
     <term>&opt_l;</term>
-    <term>&opt_max;=NUM</term>
+    <term>&opt_max;=&num;</term>
     <listitem>
       <para>
-        Explore at most NUM states. After exploring of NUM states
+        Explore at most &num; states. After exploring of &num; states
         &lpe2lts; will stop, having generated a partial state space.
       </para>
     </listitem>
@@ -255,10 +256,10 @@ Mandatory arguments to long options are also mandatory to short options.
 
   <varlistentry>
     <term>&opt_n;</term>
-    <term>&opt_max-traces;=NUM</term>
+    <term>&opt_max-traces;=&num;</term>
     <listitem>
       <para>
-	Save no more than NUM trace files when using the options
+	Save no more than &num; trace files when using the options
 	&opt_e;/&opt_deadlock-trace; or &opt_t;/&opt_trace;.
       </para>
     </listitem>

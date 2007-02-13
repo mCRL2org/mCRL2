@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
-<!ENTITY ltsgraph "<function>ltsgraph</function>">
+<!ENTITY ltsgraph "<command>ltsgraph</command>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
 <!ENTITY name "<parameter>NAME</parameter>">

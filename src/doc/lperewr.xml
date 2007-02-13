@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
-<!ENTITY lperewr "<function>lperewr</function>">
-<!ENTITY lpepp "<function>lpepp</function>">
-<!ENTITY lpe2lts "<function>lpe2lts</function>">
+<!ENTITY lperewr "<command>lperewr</command>">
+<!ENTITY lpepp "<command>lpepp</command>">
+<!ENTITY lpe2lts "<command>lpe2lts</command>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
 <!ENTITY outfile "<parameter>OUTFILE</parameter>">

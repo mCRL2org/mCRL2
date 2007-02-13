@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
-<!ENTITY lpeinvelm "<function>lpeinvelm</function>">
-<!ENTITY lpeparelm "<function>lpeparelm</function>">
-<!ENTITY lpeconstelm "<function>lpeconstelm</function>">
+<!ENTITY lpeinvelm "<command>lpeinvelm</command>">
+<!ENTITY lpeparelm "<command>lpeparelm</command>">
+<!ENTITY lpeconstelm "<command>lpeconstelm</command>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY invariant "<parameter>INVARIANT</parameter>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
