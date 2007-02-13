@@ -15,7 +15,7 @@ if ! $(REVISION) {
 # Feature to mark tools as basic experimental or deprecated
 feature.feature status : basic experimental deprecated : incidental ;
 
-feature.feature squadt_support : disable enable : composite optional ;
+feature.feature squadt_support : disable enable : composite ;
 
 # Disable squadt support in tools
 if ! squadt in [ MATCH "^--disable-(squadt)-support" : [ modules.peek : ARGV ] $(BUILD_EXTRA) ] {

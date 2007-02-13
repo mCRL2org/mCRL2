@@ -8,7 +8,7 @@
 
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
 # include <windows.h>
-# include <substitutes.h>
+# include <workarounds.h>
 # include <tchar.h>
 #else
 # include <unistd.h>

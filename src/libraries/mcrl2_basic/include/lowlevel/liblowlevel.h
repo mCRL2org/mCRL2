@@ -8,47 +8,13 @@
 #include <assert.h>
 #include <aterm2.h>
 
-#ifdef _MSC_VER
-#include <substitutes.h>
-#include <malloc.h>
-#endif
+#include <workarounds.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 //Global precondition: the ATerm library has been initialised
-
-//String manipulation
-//-------------------
-//
-//Re-implementation of strdup (because it is not part of the C99 standard)
-#if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
-extern char *strdup(const char *s);
-#endif
-
-//General definitions
-//-------------------
-//
-
-//Declare a local array NAME of type TYPE and SIZE elements (where SIZE
-//is not a constant value)
-#ifdef _MSC_VER
-#define DECL_A(NAME,TYPE,SIZE)  TYPE *NAME = (TYPE *) _alloca((SIZE)*sizeof(TYPE))
-#define FREE_A(NAME)            
-#else
-#define DECL_A(NAME,TYPE,SIZE)  TYPE NAME[SIZE]
-#define FREE_A(NAME)            
-#endif
-
-//Make sure __func__ works (as well as possible)
-#ifndef __func__
-#ifdef __FUNCTION__
-#define __func__ __FUNCTION__
-#else
-#define __func__ __FILE__
-#endif
-#endif
 
 //Message printing options
 //------------------------

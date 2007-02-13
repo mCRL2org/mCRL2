@@ -6,11 +6,12 @@
  * Windows environment.
  */
 
-#include <assert.h>
-#include <errno.h>
+#include <cassert>
+#include <cerrno>
 #include <process.h>
 #include <unistd.h>
 #include <windows.h>
+#include "../workarounds.h"
 
 #define getpid   _getpid
 

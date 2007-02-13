@@ -5,6 +5,7 @@
 #include <ctype.h>
 
 #include "liblowlevel.h"
+#include "workarounds.h"
 
 extern "C" {
 

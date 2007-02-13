@@ -1,12 +1,18 @@
 #ifndef PRIMITIVES_H
 #define PRIMITIVES_H
+
+extern "C" {
 #ifdef __APPLE__
-    #include <OpenGL/gl.h>
-    #include <OpenGL/glu.h>
+# include <OpenGL/gl.h>
+# include <OpenGL/glu.h>
 #else
-    #include <GL/gl.h>
-    #include <GL/glu.h>
+# if defined(__WIN32__) || defined(__MSVC__)
+#  include <windows.h>
+# endif
+# include <GL/gl.h>
+# include <GL/glu.h>
 #endif
+}
 
 #define BOT_BIT 1
 #define TOP_BIT 2

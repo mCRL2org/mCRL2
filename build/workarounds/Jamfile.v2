@@ -1,0 +1,44 @@
+import project ;
+
+project.initialize $(__name__) ;
+
+project workarounds ;
+
+# Cygwin
+alias configuration : : <os>CYGWIN <toolset>gcc :
+       : <runtime-link>static
+         <link>static
+         <include>$(TOP)/build/workarounds
+       ;
+
+# MinGW
+alias configuration : : <os>NT <toolset>gcc :
+       : <runtime-link>static
+         <link>static
+         <include>$(TOP)/build/workarounds/mingw
+       ;
+
+# MSVC
+alias configuration : : <os>NT <toolset>msvc :
+       : <runtime-link>static
+         <link>static
+         <define>WIN32
+         <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
+         <toolset>msvc:<define>_SCL_SECURE_NO_DEPRECATE
+         <include>$(TOP)/build/workarounds/msvc
+       ;
+
+# Mac OS X, darwin
+alias configuration : : <toolset>darwin :
+       : <define>__darwin__
+         <include>$(TOP)/build/workarounds
+         <cxxflags>"-std=c++98 -ansi"
+         <debug-symbols>on:<cxxflags>"-ggdb"
+       ;
+
+# Default gcc (known to work on Linux)
+alias configuration : : <toolset>gcc :
+       : <include>$(TOP)/build/workarounds
+         <cxxflags>"-std=c++98 -ansi"
+       ;
+

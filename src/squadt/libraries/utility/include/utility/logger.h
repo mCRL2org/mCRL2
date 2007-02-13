@@ -6,7 +6,7 @@
 #include <boost/format.hpp>
 
 #if defined(_MSC_VER) || defined(__MINGW32__)
-# include <substitutes.h>
+# include <workarounds.h>
 #endif // _MSC_VER
 
 namespace utility {

@@ -89,10 +89,10 @@ namespace sip {
         virtual void update_radio_button(wrapper*, std::string const&, bool) = 0;
 
         /** \brief Instantiates a single radio button */
-        virtual wrapper_aptr build_checkbox(layout::element const*, std::string const&, const bool status) = 0;
+        virtual wrapper_aptr build_checkbox(layout::element const*, std::string const&, bool status) = 0;
 
         /** \brief Updates a checkbox, (G)UI part */
-        virtual void update_checkbox(wrapper*, std::string const&, const bool status) = 0;
+        virtual void update_checkbox(wrapper*, std::string const&, bool status) = 0;
 
         /** \brief Instantiates a progress bar */
         virtual wrapper_aptr build_progress_bar(layout::element const*, unsigned int const&, unsigned int const&, unsigned int const&) = 0;

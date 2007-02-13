@@ -53,13 +53,13 @@ if $(WX_CPPFLAGS) {
              <library>/site-config//opengl
            ;
 
-    feature.compose <site-library>wx_gl : <dependency>/site-config//wx_gl ;
+    feature.compose <site-library>wx_gl : <dependency>/site-config//wx_gl <user-interface>gui ;
   }
   else {
     feature.compose <site-library>wx_gl : <build>no ;
   }
 
-  feature.compose <site-library>wx_base : <dependency>/site-config//wx_base ;
+  feature.compose <site-library>wx_base : <dependency>/site-config//wx_base <user-interface>gui ;
 }
 else {
   feature.compose <site-library>wx_base : <build>no ;

@@ -1,17 +1,20 @@
-#ifndef _NT_SUBSTITUTES_H_
-#define _NT_SUBSTITUTES_H_
+#ifndef _MSVC_WORKAROUNDS_H_
+#define _MSVC_WORKAROUNDS_H_
 
 /*
  * Windows Compatibility Functions -- functions to support portability to the
  * Windows environment.
  */
 
-#include <assert.h>
-#include <stdio.h>
+#include <cassert>
+#include <cmath>
+#include <cstdio>
+#include <cerrno>
 #include <process.h>
-#include <errno.h>
 #include <io.h>
 #include <unistd.h>
+#include <malloc.h>
+#include "../workarounds.h"
 
 #define chdir    _chdir
 #define strdup   _strdup
@@ -20,6 +23,11 @@
 #define getpid   _getpid
 #define pipe     _pipe
 #define snprintf _snprintf
+
+//Declare a local array NAME of type TYPE and SIZE elements (where SIZE
+//is not a constant value)
+#define DECL_A(NAME,TYPE,SIZE)  TYPE *NAME = (TYPE *) _alloca((SIZE)*sizeof(TYPE))
+#define FREE_A(NAME)            
 
 typedef int pid_t;
 
@@ -34,6 +42,10 @@ typedef int pid_t;
 inline pid_t waitpid(pid_t pid, int* status, int options) {
 
   return _cwait (status, pid, _WAIT_CHILD);
+}
+
+inline double round(double d) {
+  return (std::floor(d));
 }
 
 #endif

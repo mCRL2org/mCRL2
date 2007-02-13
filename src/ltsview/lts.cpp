@@ -1,5 +1,8 @@
 #include "lts.h"
 #include "liblowlevel.h"
+
+#include <algorithm>
+
 using namespace Utils;
 using namespace std; 
 LTS::LTS( Mediator* owner)
@@ -408,7 +411,7 @@ void LTS::mergeSuperiorClusters() {
           }
 	  
           // delete the cluster
-          prevRank->erase(find(prevRank->begin(),prevRank->end(),*clusit1));
+          prevRank->erase(std::find(prevRank->begin(),prevRank->end(),*clusit1));
           delete *clusit1;
         }
         prevRank->push_back(c);

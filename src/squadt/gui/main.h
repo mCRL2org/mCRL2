@@ -65,14 +65,16 @@ namespace squadt {
         /** \brief Cleans up and closes the window */
         inline void on_window_close(wxCloseEvent&);
 
+      public:
+
         /** \brief Shows a project creation dialog and switches the active view to the new project */
         void project_new();
 
-        /** \brief Creates a new project view */
-        void project_new(std::string const&, std::string const& = "");
-
         /** \brief Open a new project view */
         void project_open();
+
+        /** \brief Creates a new project view */
+        void project_new(std::string const&, std::string const& = "");
 
         /** \brief Open a new project view from a path */
         void project_open(std::string const&);
@@ -103,8 +105,6 @@ namespace squadt {
 
         /** \brief Cleans up and closes the window */
         void quit();
-
-      public:
 
         /** \brief Constructor */
         main();

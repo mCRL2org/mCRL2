@@ -1,4 +1,5 @@
 #include "graph_frame.h"
+#include "workarounds.h"
 
 const wxColour border_colour_selected = wxT("BLUE");
 
@@ -527,8 +528,8 @@ bool GraphFrame::OptimizeDrawing(double precision) {
     return false;
   }
 	
-  double arraySumForceX[vectNode.size()];
-  double arraySumForceY[vectNode.size()];
+  DECL_A(arraySumForceX,double,vectNode.size() << 1);
+  double* arraySumForceY = &arraySumForceX[vectNode.size()];
 
   double WindowWidth  = (double)leftPanel->Get_Width();
   double WindowHeight = (double)leftPanel->Get_Height();
@@ -587,6 +588,8 @@ bool GraphFrame::OptimizeDrawing(double precision) {
     
     arraySumForceX[i]+=(WindowWidth-2*x1) / (1 * WindowWidth); 
     arraySumForceY[i]+=(WindowHeight-2*y1) /(1 * WindowHeight); 
+
+    FREE_A(arraySumForceX);
   } 
 
   // Finally calculate the attracting forces of the edges.  

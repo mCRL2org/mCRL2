@@ -1,4 +1,5 @@
 #include "node.h"
+#include "workarounds.h"
 #include "images/lock.xpm"
 
 const wxColour border_color      = wxT("BLACK");

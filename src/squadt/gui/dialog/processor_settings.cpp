@@ -14,6 +14,16 @@ namespace squadt {
   namespace GUI {
     namespace dialog {
 
+      /** \brief Helper function to avoid casts (necessary for MSVC compilation) */
+      inline double log(unsigned long const& c) {
+        return (std::log(static_cast < long double > (c)));
+      }
+
+      /** \brief Helper function to avoid casts (necessary for MSVC compilation) */
+      inline double pow(unsigned long const& c, int const& p) {
+        return (std::pow(static_cast < long double > (c), p));
+      }
+
       /** \brief SI prefixes for binary multiples */
       const char* prefixes_for_binary_multiples[7] = { "", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei" };
 
@@ -65,7 +75,7 @@ namespace squadt {
               p = p / path((*i)->location);
         
               input_objects->InsertItem(row, wxString(p.leaf().c_str(), wxConvLocal));
-        
+
               if (exists(p)) {
                 unsigned long size       = file_size(p);
                 time_t        write_time = last_write_time(p);
