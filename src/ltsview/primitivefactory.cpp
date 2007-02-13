@@ -1,5 +1,5 @@
 #include "primitivefactory.h"
-#include <math.h>
+#include <cmath>
 #include "utils.h"
 
 using namespace Utils;

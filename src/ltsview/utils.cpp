@@ -1,5 +1,5 @@
 #include "utils.h"
-#include <math.h>
+#include <cmath>
 
 namespace Utils
 {
@@ -84,7 +84,7 @@ Utils::HSV_Color interpolate(HSV_Color hsv1,HSV_Color hsv2,float r,bool l) {
     }
   }
   else {
-    if (fabs(delta_h1) < fabs(delta_h2)) {
+    if (fabs(static_cast < float > (delta_h1)) < static_cast < float > (delta_h2)) {
       result.h = round_to_int(hsv1.h + r*delta_h1);
     }
     else {

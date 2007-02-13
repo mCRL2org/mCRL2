@@ -23,7 +23,7 @@ namespace squadt {
     friend class store_visitor_impl;
     friend class restore_visitor_impl;
     friend class processor;
-    friend class processor::object_descriptor;
+    friend struct processor::object_descriptor;
     friend class processor::monitor;
 
     private:

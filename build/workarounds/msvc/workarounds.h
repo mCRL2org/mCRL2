@@ -14,7 +14,6 @@
 #include <io.h>
 #include <unistd.h>
 #include <malloc.h>
-#include "../workarounds.h"
 
 #define chdir    _chdir
 #define strdup   _strdup
@@ -23,6 +22,8 @@
 #define getpid   _getpid
 #define pipe     _pipe
 #define snprintf _snprintf
+#define fileno   _fileno
+#define isatty   _isatty
 
 //Declare a local array NAME of type TYPE and SIZE elements (where SIZE
 //is not a constant value)
@@ -47,5 +48,7 @@ inline pid_t waitpid(pid_t pid, int* status, int options) {
 inline double round(double d) {
   return (std::floor(d));
 }
+
+#include "../workarounds.h"
 
 #endif

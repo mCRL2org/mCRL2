@@ -6,7 +6,7 @@ extern "C" {
 # include <OpenGL/gl.h>
 # include <OpenGL/glu.h>
 #else
-# if defined(__WIN32__) || defined(__MSVC__)
+# if defined(_WIN32_) || defined(_MSC_VER)
 #  include <windows.h>
 # endif
 # include <GL/gl.h>

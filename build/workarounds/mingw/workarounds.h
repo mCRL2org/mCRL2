@@ -11,7 +11,6 @@
 #include <process.h>
 #include <unistd.h>
 #include <windows.h>
-#include "../workarounds.h"
 
 #define getpid   _getpid
 
@@ -33,5 +32,7 @@ inline int kill(int pid, int signal) {
 #ifndef WEXITSTATUS
   #define WEXITSTATUS(S) (S)
 #endif
+
+#include "../workarounds.h"
 
 #endif
