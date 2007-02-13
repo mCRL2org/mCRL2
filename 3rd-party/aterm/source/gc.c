@@ -1144,8 +1144,8 @@ void AT_collect()
 
       /* snapshop*/
   for(size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++) {
-    TermInfo* ti = terminfo[size];
-    nb_live_blocks_before_last_gc[size] = ti->at_nrblocks;
+    TermInfo* ti = &terminfo[size];
+    ti->nb_live_blocks_before_last_gc[size] = ti->at_nrblocks;
     ti->nb_reclaimed_blocks_during_last_gc=0;
     ti->nb_reclaimed_cells_during_last_gc=0;
   }
@@ -1195,8 +1195,8 @@ void AT_collect_minor()
 
       /* snapshop*/
   for(size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++) {
-    TermInfo* ti = terminfo[size];
-    nb_live_blocks_before_last_gc[size] = ti->at_nrblocks;
+    TermInfo* ti = &terminfo[size];
+    ti->nb_live_blocks_before_last_gc[size] = ti->at_nrblocks;
     ti->nb_reclaimed_blocks_during_last_gc=0;
     ti->nb_reclaimed_cells_during_last_gc=0;
   }

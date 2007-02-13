@@ -602,6 +602,7 @@ static void allocate_block(unsigned int size)
   int idx;
   Block *newblock;
   int init = 0;
+  TermInfo* ti; 
   
   if(at_freeblocklist != NULL) {
 #ifdef GC_VERBOSE
@@ -636,7 +637,7 @@ static void allocate_block(unsigned int size)
 
   assert(size >= MIN_TERM_SIZE && size < maxTermSize);
   
-  TermInfo* ti = &terminfo[size];
+  ti = &terminfo[size];
 
   ti->at_nrblocks++;
   
@@ -866,13 +867,14 @@ void AT_growMaxTermSize(unsigned int neededsize)
 ATerm AT_allocate(unsigned int size) 
 {
   ATerm at;
+  TermInfo* ti;
   nb_at_allocate++;
   
   if (size+1 > maxTermSize) {
     AT_growMaxTermSize(size+1);
   }
   
-  TermInfo* ti = &terminfo[size];
+  ti = &terminfo[size];
 
   while(1) {
     if(ti->at_blocks[AT_BLOCK] && ti->top_at_blocks < ti->at_blocks[AT_BLOCK]->end) {
