@@ -247,13 +247,13 @@ void Visualizer::computeStateAbsPos(State* root, int rot, Point3D initVect) {
 
   if(root->getPosition() < -0.9f) {
     // The outgoing vector of the state lies clusterHeight above the state.
-    glTranslatef(0.0f, 0.0f, clusterHeight);
+    glTranslatef(0.0f, 0.0f, 2 * clusterHeight);
     glGetFloatv(GL_MODELVIEW_MATRIX, N);
     Point3D outgoingVect = { N[12] - initVect.x,
                              N[14] - initVect.y,
                            - N[13] + initVect.z };
     root->setOutgoingControl( outgoingVect );
-    glTranslatef(0.0f, 0.0f, -clusterHeight);
+    glTranslatef(0.0f, 0.0f, -2 * clusterHeight);
 
     Point3D rootPos = { M[12] - initVect.x, 
                         M[14] - initVect.y, 
@@ -261,13 +261,13 @@ void Visualizer::computeStateAbsPos(State* root, int rot, Point3D initVect) {
     root->setPositionAbs(rootPos);
 
     // The incoming vector of the state lies clusterHeight beneath the state.
-    glTranslatef(0.0f, 0.0f, -clusterHeight);
+    glTranslatef(0.0f, 0.0f, -2 * clusterHeight);
     glGetFloatv(GL_MODELVIEW_MATRIX, N);
     Point3D incomingVect = { N[12] - initVect.x,
                              N[14] - initVect.y,
                            - N[13] + initVect.z };
     root->setIncomingControl( incomingVect );
-    glTranslatef(0.0f, 0.0f, clusterHeight);
+    glTranslatef(0.0f, 0.0f, 2 * clusterHeight);
   }
   else {
     // The outgoing vector of the state points out of the cluster, in the 
@@ -492,6 +492,13 @@ void Visualizer::drawBackPointer(State* startState, State* endState) {
   Point3D startControl = startState->getOutgoingControl();
   Point3D endControl = endState->getIncomingControl();
   Point3D endPoint = endState->getPositionAbs();
+
+
+  if ( (startState->getPosition() < -0.9f) && (endState->getPosition() < -0.9f))
+  {
+    startControl.x = startPoint.x * 1.25;
+    endControl.x = startControl.x;
+  }
 
   GLfloat ctrlPts [4][3] = { {startPoint.x, startPoint.y, startPoint.z},
                              {startControl.x, startControl.y, startControl.z},

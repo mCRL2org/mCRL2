@@ -239,20 +239,24 @@ void Cluster::spreadSlots() {
       
       do {
         ++free_space;
-        next_slot = (i + free_space) % totalSlots;
         previous_slot = i - free_space;
-
         previous_slot = (previous_slot < 0 ? totalSlots + previous_slot
                                          : previous_slot);
-
-
       } while ((slots[previous_slot]->occupying == 0) &&
-               (slots[next_slot]->occupying == 0) && 
-               (previous_slot != i) && (next_slot != i));
+               (previous_slot != i));
+      
+      toSpread->total_size_ac = free_space * 360 / totalSlots;
 
-      toSpread->total_size = free_space * 360 / totalSlots;
+      free_space = 0;
+      
+      do {
+        ++free_space;
+        next_slot = (i + free_space) % totalSlots;
+      } while ((slots[next_slot]->occupying == 0) && (next_slot !=i));
 
-      toSpread->under_consideration = 1;
+      toSpread->total_size_c = free_space * 360 / totalSlots;
+
+      toSpread->under_consideration = 0;
     }
   }
 
@@ -267,29 +271,19 @@ void Cluster::spreadSlots() {
       float statePosition = 0.0f;
     
       if (slotOfState->occupying == 1) {
+        // Center the state in the slot.
         statePosition = 360 * slotOfStateIndex / totalSlots;
       }
 
       else {
+        float sizeClockwise = slotOfState->total_size_c;
+        float totalsize = slotOfState->total_size_ac + sizeClockwise;
         // slots[slotOfState].occupying > 1
-        if (slotOfState->total_size > 359.0) {
-          // This slot has all the space in the cluster, meaning we can place 
-          // the states even more evenly than when it wouldn't.
-          statePosition = fmodf(360 * slotOfStateIndex / totalSlots -
-                                0.5f * slotOfState->total_size + 
-                                slotOfState->under_consideration *
-                                (slotOfState->total_size / 
-                                 slotOfState->occupying),
-                                360.0f);
-        }
-        else {
-          statePosition =  fmodf( 360 * slotOfStateIndex / totalSlots - 
-                                 0.5f * slotOfState->total_size + 
+        statePosition =  fmodf( 360 * slotOfStateIndex / totalSlots - 
+                                 0.5f * sizeClockwise + 
                                  slotOfState->under_consideration * 
-                            (slotOfState->total_size 
-                            / (slotOfState->occupying + 1)),
-                          360.0f);
-        }
+                            totalsize / slotOfState->occupying, 360.0f);
+
         statePosition = (statePosition < 0 ? 360 + statePosition
                                            : statePosition);
 
@@ -336,7 +330,8 @@ void Cluster::computeSizeAndDescendantPositions() {
       Slot* toAdd = new Slot;
       toAdd->occupying = 0;
       toAdd->under_consideration = 0;
-      toAdd->total_size = 0;
+      toAdd->total_size_ac = 0;
+      toAdd->total_size_c = 0;
       slots.push_back(toAdd);
     }
   }
@@ -360,7 +355,8 @@ void Cluster::computeSizeAndDescendantPositions() {
         Slot* slot = new Slot;
         slot->occupying = 0;
         slot->under_consideration = 0;
-        slot->total_size = 0;
+        slot->total_size_ac = 0;
+        slot->total_size_c = 0;
         slots.push_back(slot);
     }
   }
@@ -535,7 +531,8 @@ void Cluster::computeSizeAndDescendantPositions() {
         Slot* slot = new Slot;
         slot->occupying = 0;
         slot->under_consideration = 0;
-        slot->total_size = 0;
+        slot->total_size_ac = 0;
+        slot->total_size_c = 0;
         slots.push_back(slot);
       }
     }
@@ -550,7 +547,8 @@ void Cluster::computeSizeAndDescendantPositions() {
         Slot* slot = new Slot;
         slot->occupying = 0;
         slot->under_consideration = 0;
-        slot->total_size = 0;
+        slot->total_size_ac = 0;
+        slot->total_size_c = 0;
         slots.push_back(slot);
       }
     }
@@ -566,7 +564,8 @@ void Cluster::computeSizeAndDescendantPositions() {
           Slot* slot = new Slot;
           slot->under_consideration = 0;
           slot->occupying = 0;
-          slot->total_size = 0;
+          slot->total_size_ac = 0;
+          slot->total_size_c = 0;
           slots.push_back(slot);
       }
     }
