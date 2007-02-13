@@ -27,7 +27,10 @@ extern "C"
 
 #define AT_SYMBOL       7
 
-#define MAX_ARITY            4096
+#define MAX_ARITY             MAX_LENGTH
+
+#define MIN_TERM_SIZE         TERM_SIZE_APPL(0)
+#define INITIAL_MAX_TERM_SIZE 256
 
 struct __ATerm
 {
@@ -39,8 +42,8 @@ typedef union _ATerm
 {
   header_type     header;
   struct __ATerm  aterm;
-  union _ATerm*   subaterm[MAX_ARITY+3];
-  MachineWord     word[MAX_ARITY+3];
+  union _ATerm*   subaterm[1];
+  MachineWord     word[1];
 } *ATerm;
 
 typedef void (*ATermProtFunc)();
