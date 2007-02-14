@@ -6,5 +6,5 @@ exe pbespp
        : pbespp.cpp
          /libraries//mcrl2_basic
        : <include>.
-         <toolset>msvc:<library>/workarounds/msvc//getopt
+         <toolset>msvc:<library>/libraries//getopt
        ;

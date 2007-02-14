@@ -7,5 +7,5 @@ exe tracepp
          /libraries//mcrl2_basic
          /libraries//trace
        : <include>.
-         <toolset>msvc:<library>/workarounds/msvc//getopt
+         <toolset>msvc:<library>/libraries//getopt
        ;

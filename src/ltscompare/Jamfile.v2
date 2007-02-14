@@ -8,5 +8,5 @@ exe ltscompare
          /libraries//lts
          /libraries//svc
        : <include>.
-         <toolset>msvc:<library>/workarounds/msvc//getopt
+         <toolset>msvc:<library>/libraries//getopt
        ;

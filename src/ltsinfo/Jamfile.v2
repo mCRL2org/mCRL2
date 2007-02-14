@@ -7,6 +7,6 @@ exe ltsinfo
          /libraries//mcrl2_basic
          /libraries//lts
        : <include>.
-         <toolset>msvc:<library>/workarounds/msvc//getopt
+         <toolset>msvc:<library>/libraries//getopt
        : <squadt_support>enable
        ;

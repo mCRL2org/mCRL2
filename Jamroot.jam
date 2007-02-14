@@ -16,7 +16,6 @@ use-project /libraries                 : src/libraries ;
 use-project /libraries/sip             : src/squadt/libraries/sip/build ;
 use-project /libraries/utility         : src/squadt/libraries/utility/build ;
 use-project /workarounds               : build/workarounds ;
-use-project /workarounds/msvc          : build/workarounds/msvc ;
 
 project toolset
        : build-dir $(BUILD_TOP)

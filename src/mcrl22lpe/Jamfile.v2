@@ -16,7 +16,7 @@ exe mcrl22lpe
          /libraries//mcrl2_basic
          /libraries//rewrite
          /libraries/parser//alpha
-       : <toolset>msvc:<library>/workarounds/msvc//getopt
+       : <toolset>msvc:<library>/libraries//getopt
        : <squadt_support>enable
        ;
 
@@ -27,7 +27,7 @@ exe lin
          /libraries//mcrl2_basic
          /libraries//rewrite
          /libraries/parser//alpha
-       : <toolset>msvc:<library>/workarounds/msvc//getopt
+       : <toolset>msvc:<library>/libraries//getopt
          <status>experimental
        ;
 
@@ -37,7 +37,7 @@ exe alpha
          /libraries/parser//alpha
          /libraries//mcrl2_basic
          /libraries//rewrite
-       : <toolset>msvc:<library>/workarounds/msvc//getopt
+       : <toolset>msvc:<library>/libraries//getopt
          <status>experimental
        ;
 

@@ -8,6 +8,6 @@ exe lpe2pbes
          /libraries//parser
          /libraries//mcrl2_basic
        : <include>.
-         <toolset>msvc:<library>/workarounds/msvc//getopt
+         <toolset>msvc:<library>/libraries//getopt
          <status>experimental
        ;

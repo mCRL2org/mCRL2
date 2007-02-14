@@ -7,5 +7,5 @@ exe lpeformcheck
          /libraries//prover
        : <include>.
 #         <toolset>gcc:<define>CVC_LITE_LIB
-         <toolset>msvc:<library>/workarounds/msvc//getopt
+         <toolset>msvc:<library>/libraries//getopt
        ;

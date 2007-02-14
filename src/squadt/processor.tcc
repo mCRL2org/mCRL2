@@ -256,7 +256,7 @@ namespace squadt {
      
       /* Check whether outputs all exist and find the minimum timestamp of the inputs */
       BOOST_FOREACH(object_descriptor::sptr i, outputs) {
-        i->self_check(*g, maximum_input_timestamp);
+        i->self_check(*g, static_cast < const long int > (maximum_input_timestamp));
      
         result |= (i->status != object_descriptor::original) && (i->status != object_descriptor::reproducible_up_to_date);
       }

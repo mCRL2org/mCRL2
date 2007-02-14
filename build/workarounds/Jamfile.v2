@@ -2,7 +2,10 @@ import project ;
 
 project.initialize $(__name__) ;
 
-project workarounds ;
+project workarounds 
+       : usage-requirements
+          <include>$(TOP)/build/workarounds/all
+       ;
 
 # Cygwin
 alias configuration : : <os>CYGWIN <toolset>gcc :
@@ -24,6 +27,7 @@ alias configuration : : <os>NT <toolset>msvc :
          <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
          <toolset>msvc:<define>_SCL_SECURE_NO_DEPRECATE
          <include>$(TOP)/build/workarounds/msvc
+         <include>$(TOP)/3rd-party/getopt
        ;
 
 # Mac OS X, darwin

@@ -12,6 +12,6 @@ exe lpe2lts
          /libraries//mcrl2_basic
          /libraries//trace
          /libraries//lts
-       : <toolset>msvc:<library>/workarounds/msvc//getopt
+       : <toolset>msvc:<library>/libraries//getopt
          <squadt_support>enable
        ;
