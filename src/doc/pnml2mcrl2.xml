@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
 <!ENTITY pnml2mcrl2 "<command>pnml2mcrl2</command>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
@@ -20,6 +20,9 @@
 <!ENTITY stdin "<option>STDIN</option>">
 <!ENTITY stdout "<option>STDOUT</option>">
 ]>
+
+<webpage id="pnml2mcrl2-web">
+  <head><title>pnml2mcrl2</title></head>
 
 <refentry id="pnml2mcrl2">
 
@@ -138,3 +141,4 @@ Written by Johfra Kamphuis and Yaroslav S. Usenko. Please send all complaints, c
 </refsect1>
 
 </refentry>
+</webpage>

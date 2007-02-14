@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
+<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
 <!ENTITY lpeformcheck "<command>lpeformcheck</command>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY formulas "<parameter>FORMULAS</parameter>">
@@ -48,6 +48,9 @@
 <!ENTITY link_ario "<uri>http://www.eecs.umich.edu/~ario/</uri>">
 <!ENTITY link_cvc "<uri>http://www.cs.nyu.edu/acsys/cvcl/</uri>">
 ]>
+
+<webpage id="lpeformcheck-web">
+  <head><title>lpeformcheck</title></head>
 
 <refentry id="lpeformcheck">
 
@@ -300,3 +303,4 @@
 </refsect1>
 
 </refentry>
+</webpage>

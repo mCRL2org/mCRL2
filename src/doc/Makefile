@@ -27,7 +27,8 @@ MAN_INSTALL_TARGETS = $(patsubst %,%.install,$(MAN_OBJECT_SUFFIXES))
 all: $(USE_XMLTO)
 
 clean:
-	rm -f $(addprefix *.,$(MAN_OBJECT_SUFFIXES)) *.txt *.html
+	rm -f $(addprefix *.,$(MAN_OBJECT_SUFFIXES)) *.txt *.html autolayout.xml
+	rm -rf web
 
 distclean: clean
 
@@ -37,7 +38,9 @@ install: all $(MAN_INSTALL_TARGETS)
 
 documentation: all
 
-web: $(HTML_OBJECTS)
+web: 
+	@xsltproc -o autolayout.xml http://docbook.sourceforge.net/release/xsl/current/website/autolayout.xsl weblayout.xml
+	@xsltproc --stringparam output-root web http://docbook.sourceforge.net/release/xsl/current/website/chunk-tabular.xsl autolayout.xml
 
 %.install:
 	@install -d $(mandir)/man$*
@@ -49,10 +52,8 @@ web: $(HTML_OBJECTS)
 	done
 
 %.1 %.2 %.3 %.4 %.5 %.6 %.7 %.8 %.9: %.xml
-	@xmlto man $<
-
-%.html: %.xml
-	@xmlto xhtml-nochunks $<
+	@xsltproc http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl $<
+# @xmlto man $<
 
 %.txt: %.xml
 	@xmlto txt $<

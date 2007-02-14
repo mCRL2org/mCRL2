@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!DOCTYPE  webpage>
+<webpage id="webhome"> 
+  <head> 
+    <title>mCRL2 Online Man Pages</title>  
+  </head>
+  <para>
+  Welcome to the mCRL2 online manual pages.
+  </para>
+</webpage>

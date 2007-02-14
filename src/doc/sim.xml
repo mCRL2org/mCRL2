@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
+<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
 <!ENTITY sim "<command>sim</command>">
 <!ENTITY xsim "<command>xsim</command>">
 <!ENTITY option "<parameter>OPTION</parameter>">
@@ -18,6 +18,9 @@
 <!ENTITY h "<parameter>h</parameter>">
 <!ENTITY ctrl-d "<parameter>Ctrl-D</parameter>">
 ]>
+
+<webpage id="sim-web">
+  <head><title>sim</title></head>
 
 <refentry id="sim">
 
@@ -149,3 +152,4 @@ For a simulator that uses a graphical user interface, see the &xsim; tool.
 </refsect1>
 
 </refentry>
+</webpage>

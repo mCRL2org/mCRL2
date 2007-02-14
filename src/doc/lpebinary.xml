@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
 <!ENTITY lpebinary "<command>lpebinary</command>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
@@ -18,6 +18,9 @@
 <!ENTITY stdin "<option>stdin</option>">
 <!ENTITY stdout "<option>stdout</option>">
 ]>
+
+<webpage id="lpebinary-web">
+  <head><title>lpebinary</title></head>
 
 <refentry id="lpebinary">
 
@@ -118,3 +121,4 @@
 </refsect1>
 
 </refentry>
+</webpage>

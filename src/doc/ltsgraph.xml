@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
+<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
 <!ENTITY ltsgraph "<command>ltsgraph</command>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
@@ -9,6 +9,9 @@
 <!ENTITY opt_h "<option>-h</option>">
 <!ENTITY opt_help "<option>--help</option>">
 ]>
+
+<webpage id="ltsgraph-web">
+  <head><title>ltsgraph</title></head>
 
 <refentry id="ltsgraph">
 
@@ -140,3 +143,4 @@
 </refsect1>
 
 </refentry>
+</webpage>

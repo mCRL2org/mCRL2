@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
 <!ENTITY lpeconstelm "<command>lpeconstelm</command>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
 <!ENTITY outfile "<parameter>OUTFILE</parameter>">
@@ -19,6 +19,9 @@
 <!ENTITY stdout "<option>stdout</option>">
 
 ]>
+
+<webpage id="lpeconstelm-web">
+  <head><title>lpeconstelm</title></head>
 
 <refentry id="lpeconstelm">
 
@@ -146,3 +149,4 @@
 fixes to <email>bug@mcrl2.org</email>.</para>
 </refsect1>
 </refentry>
+</webpage>

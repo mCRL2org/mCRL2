@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
+<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
 <!ENTITY lpeinvelm "<command>lpeinvelm</command>">
 <!ENTITY lpeparelm "<command>lpeparelm</command>">
 <!ENTITY lpeconstelm "<command>lpeconstelm</command>">
@@ -61,6 +61,9 @@
 <!ENTITY link_ario "<uri>http://www.eecs.umich.edu/~ario/</uri>">
 <!ENTITY link_cvc "<uri>http://www.cs.nyu.edu/acsys/cvcl/</uri>">
 ]>
+
+<webpage id="lpeinvelm-web">
+  <head><title>lpeinvelm</title></head>
 
 <refentry id="lpeinvelm">
 
@@ -391,3 +394,4 @@
 </refsect1>
 
 </refentry>
+</webpage>

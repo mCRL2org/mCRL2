@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
 <!ENTITY tbf2lpe "<command>tbf2lpe</command>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY input_lpe "<parameter>INFILE</parameter>">
@@ -26,6 +26,9 @@
 <!ENTITY Bool_or2 "<constant>||</constant>">
 <!ENTITY Bool_eq2 "<constant>==</constant>">
 ]>
+
+<webpage id="tbf2lpe-web">
+  <head><title>tbf2lpe</title></head>
 
 <refentry id="tbf2lpe">
 
@@ -141,3 +144,4 @@ Written by Muck van Weerdenburg. Please send all complaints, comments and bug fi
 </refsect1>
 
 </refentry>
+</webpage>

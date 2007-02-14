@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
+<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
 <!ENTITY mcrl22lpe "<command>mcrl22lpe</command>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
@@ -55,6 +55,9 @@
 <!ENTITY stdin "<constant>stdin</constant>">
 <!ENTITY stdout "<constant>stdout</constant>">
 ]>
+
+<webpage id="mcrl22lpe-web">
+  <head><title>mcrl22lpe</title></head>
 
 <refentry id="mcrl22lpe">
 
@@ -491,3 +494,4 @@
 </refsect1>
 
 </refentry>
+</webpage>

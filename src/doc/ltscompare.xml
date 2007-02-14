@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
+<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
 <!ENTITY ltscompare "<command>ltscompare</command>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY infile1 "<parameter>INFILE1</parameter>">
@@ -29,6 +29,9 @@
 <!ENTITY fsm "<constant>fsm</constant>">
 <!ENTITY dot "<constant>dot</constant>">
 ]>
+
+<webpage id="ltscompare-web">
+  <head><title>ltscompare</title></head>
 
 <refentry id="ltscompare">
 
@@ -181,3 +184,4 @@
 </refsect1>
 
 </refentry>
+</webpage>

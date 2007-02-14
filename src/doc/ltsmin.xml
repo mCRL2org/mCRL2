@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
+<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
 <!ENTITY ltsmin "<command>ltsmin</command>">
 <!ENTITY lpe2lts "<command>lpe2lts</command>">
 <!ENTITY option "<parameter>OPTION</parameter>">
@@ -25,6 +25,9 @@
 <!ENTITY stdin "<constant>stdin</constant>">
 <!ENTITY stdout "<constant>stdout</constant>">
 ]>
+
+<webpage id="ltsmin-web">
+  <head><title>ltsmin</title></head>
 
 <refentry id="ltsmin">
 
@@ -157,3 +160,4 @@
 </refsect1>
 
 </refentry>
+</webpage>

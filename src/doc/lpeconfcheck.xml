@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
+<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
 <!ENTITY lpeconfcheck "<command>lpeconfcheck</command>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
@@ -61,6 +61,9 @@
 <!ENTITY tau "<literal>tau</literal>">
 <!ENTITY ctau "<literal>ctau</literal>">
 ]>
+
+<webpage id="lpeconfcheck-web">
+  <head><title>lpeconfcheck</title></head>
 
 <refentry id="lpeconfcheck">
 
@@ -436,3 +439,4 @@
 </refsect1>
 
 </refentry>
+</webpage>

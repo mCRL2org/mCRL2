@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
+<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
 <!ENTITY lperewr "<command>lperewr</command>">
 <!ENTITY lpepp "<command>lpepp</command>">
 <!ENTITY lpe2lts "<command>lpe2lts</command>">
@@ -23,6 +23,9 @@
 <!ENTITY stdin "<constant>stdin</constant>">
 <!ENTITY stdout "<constant>stdout</constant>">
 ]>
+
+<webpage id="lperewr-web">
+  <head><title>lperewr</title></head>
 
 <refentry id="lperewr">
 
@@ -151,3 +154,4 @@
 </refsect1>
 
 </refentry>
+</webpage>

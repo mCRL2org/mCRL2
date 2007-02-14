@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
 <!ENTITY lpeinfo "<command>lpeinfo</command>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
@@ -14,6 +14,9 @@
 <!ENTITY stdin "<option>stdin</option>">
 <!ENTITY stdout "<option>stdout</option>">
 ]>
+
+<webpage id="lpeinfo-web">
+  <head><title>lpeinfo</title></head>
 
 <refentry id="lpeinfo">
 
@@ -109,3 +112,4 @@ fixes to <email>bug@mcrl2.org</email>.</para>
 </refsect1>
 
 </refentry>
+</webpage>

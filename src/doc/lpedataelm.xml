@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
+<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
 <!ENTITY lpedataelm "<command>lpedataelm</command>">
 <!ENTITY lpepp "<command>lpepp</command>">
 <!ENTITY lpe2lts "<command>lpe2lts</command>">
@@ -24,6 +24,9 @@
 <!ENTITY func_neq "<function>!=</function>">
 <!ENTITY func_if "<function>if</function>">
 ]>
+
+<webpage id="lpedataelm-web">
+  <head><title>lpedataelm</title></head>
 
 <refentry id="lpedataelm">
 
@@ -143,3 +146,4 @@
 </refsect1>
 
 </refentry>
+</webpage>
