@@ -20,7 +20,7 @@ void P_Sphere::draw() {
 
 void P_Sphere::reshape(int N,float *coss,float *sins) {
   int i,j,k;
-  GLfloat vertices[3*((N-1)*N+2)];
+  GLfloat* vertices = (GLfloat*)malloc(3*((N-1)*N+2)*sizeof(GLfloat));
   vertices[0] = 0;
   vertices[1] = 0;
   vertices[2] = -1;
@@ -38,14 +38,15 @@ void P_Sphere::reshape(int N,float *coss,float *sins) {
   vertices[k+2] = 1;
 
   int M = N+2;
-  GLuint is_bot[M];
+
+  GLuint* is_bot = (GLuint*)malloc(M*sizeof(GLuint));
   is_bot[0] = 0;
   is_bot[1] = 1;
   for (i=N; i>=1; --i) {
     is_bot[M-i] = i;
   }
   
-  GLuint is_mid[(N-2)*(2*N+2)];
+  GLuint* is_mid = (GLuint*)malloc((N-2)*(2*N+2)*sizeof(GLuint));
   i = 0;
   for (j=N+1; j<=(N-2)*N+1; j+=N) {
     for (k=0; k<N; ++k) {
@@ -58,7 +59,7 @@ void P_Sphere::reshape(int N,float *coss,float *sins) {
     i += 2;
   }
   
-  GLuint is_top[M];
+  GLuint* is_top = (GLuint*)malloc(M*sizeof(GLuint));
   j = (N-2)*N;
   is_top[0] = j + N + 1;
   i = 1;
@@ -83,6 +84,9 @@ void P_Sphere::reshape(int N,float *coss,float *sins) {
       glDrawElements(GL_QUAD_STRIP,M,GL_UNSIGNED_INT,is_mid + i*M);
     }
   glEndList();
+  free(vertices);
+  free(is_mid);
+  free(is_top);
 }
 
 /* -------- P_SimpleSphere -------------------------------------------------- */
@@ -142,7 +146,7 @@ void P_Hemisphere::draw() {
 void P_Hemisphere::reshape(int N,float *coss,float *sins) {
   int Ndiv2 = N/2;
   int i,j,k;
-  GLfloat vertices[3*(N*Ndiv2+1)];
+  GLfloat* vertices = (GLfloat*)malloc(3*(N*Ndiv2+1)*sizeof(GLfloat));
   k = 0;
   for (j=0; j<Ndiv2; ++j) {
     for (i=0; i<2*N; i+=2) {
@@ -156,7 +160,7 @@ void P_Hemisphere::reshape(int N,float *coss,float *sins) {
   vertices[k+1] = 0;
   vertices[k+2] = 1;
 
-  GLuint is_mid[N*N+N];
+  GLuint* is_mid = (GLuint*)malloc((N*N+N)*sizeof(GLuint));
   i = 0;
   for (j=N; j<N+Ndiv2-1; ++j) {
     for (k=0; k<N; ++k) {
@@ -169,7 +173,7 @@ void P_Hemisphere::reshape(int N,float *coss,float *sins) {
     i += 2;
   }
 
-  GLuint is_top[N+2];
+  GLuint* is_top = (GLuint*)malloc((N+2)*sizeof(GLuint));
   is_top[0] = N*Ndiv2;
   i = 1;
   j = (Ndiv2-1)*N;
@@ -193,6 +197,9 @@ void P_Hemisphere::reshape(int N,float *coss,float *sins) {
       glDrawElements(GL_QUAD_STRIP,M,GL_UNSIGNED_INT,is_mid + i*M);
     }
   glEndList();
+  free(vertices);
+  free(is_mid);
+  free(is_top);
 }
 
 /* -------- P_Disc ------------------------------------------------------ */
@@ -210,7 +217,7 @@ void P_Disc::draw() {
 }
 
 void P_Disc::reshape(int N,float *coss,float *sins) {
-  GLfloat vertices[3*N];
+  GLfloat* vertices = (GLfloat*)malloc(3*N*sizeof(GLfloat));
   int i,j;
   j = 0;
   for (i=0; i<2*N; i+=2) {
@@ -230,6 +237,7 @@ void P_Disc::reshape(int N,float *coss,float *sins) {
     glNormal3f(0.0f,0.0f,1.0f);
     glDrawArrays(GL_POLYGON,0,N);
   glEndList();
+  free(vertices);
 }
 
 /* -------- P_Ring ------------------------------------------------------ */
@@ -250,7 +258,7 @@ void P_Ring::draw() {
 void P_Ring::reshape(int N,float *coss,float *sins) {
   int N3 = 3*N;
   int i,j,k;
-  GLfloat vertices[2*N3];
+  GLfloat* vertices = (GLfloat*)malloc(2*N3*sizeof(GLfloat));
   k = 0;
   j = N3;
   for (i=0; i<2*N; i+=2) {
@@ -264,7 +272,7 @@ void P_Ring::reshape(int N,float *coss,float *sins) {
     j += 3;
   }
 
-  GLfloat normals[2*N3];
+  GLfloat* normals = (GLfloat*)malloc(2*N3*sizeof(GLfloat));
   float z = 1-r_top;
   memcpy(normals,vertices,N3*sizeof(float));
   for (k=2; k<N3; k+=3) {
@@ -272,7 +280,7 @@ void P_Ring::reshape(int N,float *coss,float *sins) {
   }
   memcpy(normals+N3,normals,N3*sizeof(float));
 
-  GLuint is[2*N+2];
+  GLuint* is = (GLuint*)malloc((2*N+2)*sizeof(GLuint));
   k = 0;
   for (i=0; i<N; ++i) {
     is[k] = i + N;
@@ -294,6 +302,9 @@ void P_Ring::reshape(int N,float *coss,float *sins) {
   glNewList(disp_list,GL_COMPILE);
     glDrawElements(GL_QUAD_STRIP,2*N+2,GL_UNSIGNED_INT,is);
   glEndList();
+  free(vertices);
+  free(normals);
+  free(is);
 }
 
 float P_Ring::getTopRadius() {

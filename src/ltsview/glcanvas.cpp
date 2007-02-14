@@ -396,7 +396,8 @@ unsigned char* GLCanvas::getPictureData(int w_res,int h_res) {
   if (w_rem > 0) ++M;
   int N = H;		       /* number of blocks in Y incl.remaining strip */
   if (h_rem > 0) ++N;
-  unsigned char* pixel_ptrs[M][N]; /* pointers to the blocks of data */
+  unsigned char** pixel_ptrs = (unsigned char**)malloc(M*N*sizeof(unsigned
+        char*)); /* pointers to the blocks of data */
 
   glReadBuffer(GL_BACK);
   glPixelStorei(GL_PACK_ALIGNMENT,1);
@@ -412,21 +413,26 @@ unsigned char* GLCanvas::getPictureData(int w_res,int h_res) {
   collectingData = true;
   int bx,by; /* x and y coordinate of lower left corner of current block */
   int bw,bh; /* width and height of current block */
+  int i,j;
   by = 0;
   bh = h_block;
-  for (int j=0; j<N; ++j) {
-    if (j==H) bh = h_rem;
+  for (j = 0; j < N; ++j) {
+    if (j == H) {
+      bh = h_rem;
+    }
     bx = 0;
     bw = w_block;
-    for (int i=0; i<M; ++i) {
-      if (i==W) bw = w_rem;
-      pixel_ptrs[i][j] = (unsigned char*)malloc(3*bw*bh*sizeof(unsigned char));
+    for (i = 0; i < M; ++i) {
+      if (i == W) {
+        bw = w_rem;
+      }
+      pixel_ptrs[i*N+j] = (unsigned char*)malloc(3*bw*bh*sizeof(unsigned char));
       glViewport(-bx,-by,w_res,h_res);
       // we do not want other methods to call display() while collecting data, 
       // so we call display(true): 'true' indicates that we are the method that 
       // is collecting data and are thus allowed to call display() 
       display(true);
-      glReadPixels(0,0,bw,bh,GL_RGB,GL_UNSIGNED_BYTE,pixel_ptrs[i][j]);
+      glReadPixels(0,0,bw,bh,GL_RGB,GL_UNSIGNED_BYTE,pixel_ptrs[i*N+j]);
       bx += w_block;
     }
     by += h_block;
@@ -443,15 +449,20 @@ unsigned char* GLCanvas::getPictureData(int w_res,int h_res) {
   unsigned char* pixels = 
     (unsigned char*)malloc(3*w_res*h_res*sizeof(unsigned char));
   
-  int offset = 0;
+  int r,offset;
+  offset = 0;
   bh = h_block;
-  for (int j=0; j<N; ++j) {
-    if (j==H) bh = h_rem;
-    for (int r=0; r<bh; ++r) {
+  for (j = 0; j < N; ++j) {
+    if (j == H) {
+      bh = h_rem;
+    }
+    for (r = 0; r < bh; ++r) {
       bw = w_block;
-      for (int i=0; i<M; ++i) {
-	      if (i==W) bw = w_rem;
-        memcpy(pixels+offset,pixel_ptrs[i][j]+3*r*bw,3*bw);
+      for (i = 0; i < M; ++i) {
+	      if (i == W) {
+          bw = w_rem;
+        }
+        memcpy(pixels+offset,pixel_ptrs[i*N+j]+3*r*bw,3*bw);
         offset += 3*bw;
       }
     }
@@ -461,9 +472,9 @@ unsigned char* GLCanvas::getPictureData(int w_res,int h_res) {
 
   for (int j=0; j<N; ++j) {
     for (int i=0; i<M; ++i) {
-      free(pixel_ptrs[i][j]);
+      free(pixel_ptrs[i*N+j]);
     }
   }
-
+  free(pixel_ptrs);
   return pixels;
 }
