@@ -161,12 +161,12 @@ void XSimTrace::Redo(unsigned int Count)
 
 void XSimTrace::TraceChanged(ATermList Trace, unsigned int From)
 {
-	unsigned int l = traceview->GetItemCount()-1;
+	unsigned int l = traceview->GetItemCount();
 	
-	while ( l >= From )
+	while ( l > From )
 	{
-		traceview->DeleteItem(l);
 		l--;
+		traceview->DeleteItem(l);
 	}
 
 	for (; !ATisEmpty(Trace); Trace=ATgetNext(Trace))
