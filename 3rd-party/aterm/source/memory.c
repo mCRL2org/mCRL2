@@ -1703,11 +1703,6 @@ ATermInt ATmakeInt(int val)
  */
 
 #define DOUBLEWORDSIZE (sizeof(double)/sizeof(MachineWord))
-union doublewords {
-  double      val; 
-  MachineWord word[DOUBLEWORDSIZE];
-};
-
 ATermReal ATmakeReal(double val)
 {
   ATermReal cur;
@@ -1715,9 +1710,16 @@ ATermReal ATmakeReal(double val)
   HashNumber hnr;
   unsigned int i;
   
+  union doublewords {
+    double      val; 
+    MachineWord word[DOUBLEWORDSIZE];
+  } uval;
+
+  uval.val = val;
+
   hnr = START(header);
   for (i=0; i<DOUBLEWORDSIZE; i++)
-    hnr = COMBINE(hnr, HN(((union doublewords)val).word[i]));
+    hnr = COMBINE(hnr, HN(uval.word[i]));
   hnr = FINISH(hnr);
   
   cur = (ATermReal) hashtable[hnr & table_mask];

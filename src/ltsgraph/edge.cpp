@@ -1,7 +1,8 @@
 #include "edge.h"
 #include <string>
 #include <iostream>
-#include <math.h>
+#include <cmath>
+#include <workarounds.h>
 
 #define ARROW_WIDTH 1
 #define PI 3.14159265
