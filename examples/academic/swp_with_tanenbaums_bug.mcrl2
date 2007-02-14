@@ -29,6 +29,13 @@
 % bug with formal techniques. Clearly this cannot be a serious problem". However, 
 % others have apparently detected the bug in "more ordinary" ways, as, as said above,
 % from edition 4 of Computer Networks, the bug does not occur anymore.
+%   Below the bug occurs when the action "error" can occur. Actually, as the
+% problem takes place when the sender's buffer is full, the receiver received
+% all data the sender sent, and the timer is switched off, the error is
+% a communication of three actions, error1, error2 and error3. For larger
+% values of MaxBuf, it is interesting to see how effective bughunting
+% strategies are. For MaxBuf=1, the problem occurs after 9 interactions,
+% for MaxBuf=2 the problem occurs after 17 actions, etc.
 %   Besides the bug, the protocol is also interesting for another reason.
 % The external behaviour of the protocol is appalling. The protocol can
 % unpredictably force the processes that use the protocol to accept sequences
@@ -46,14 +53,14 @@ sort CS=struct accept | deliver | error | lost;
 
 % Data packets 
 
-sort DP = struct edp | dp; % empty and default data packet
+sort DP = struct d1 | d2; % restricted to two data packets, for simulation.
 
 
 % The constants MaxSeq en MaxBuf
 
 map MaxSeq,MaxBuf : Pos;
 
-eqn MaxBuf = 4;  % An arbitrary constant
+eqn MaxBuf = 2;  % An arbitrary constant
     MaxSeq = MaxBuf + MaxBuf;
 
 
@@ -68,7 +75,6 @@ eqn inWindow(fr,low,upp) = seq(fr,low,upp) || wrap(fr,low,upp);
     seq(fr,low,upp) = upp>low && fr>=low && fr<upp;
     wrap(fr,low,upp) = upp<low && (fr>=low || fr<upp);
 
- 
 % The data type for buffers to store data in protocol entities that
 % still have to be sent or received.
 
@@ -85,7 +91,6 @@ eqn b==[] -> in_table(k,b) = false;
     b==[] -> del(k,b) = [];
     del(k,item(p,k')|>b) = if(k==k',del(k,b),item(p,k')|>del(k,b));
     retr(k,item(p,k')|>b) = if(k==k',p,retr(k,b));
- 
 
 % TTAB contains a list of indices for which a timer is set
 
@@ -136,6 +141,8 @@ act ri1,si2  : DP;
 proc IMP = IMP(0,0,0,[],[],false);
 
      IMP(fts,fta,ftr:Nat,sbuf,rbuf:Buffer,nfs:Bool) = 
+          ((fta+MaxBuf) mod MaxSeq==fts) -> error2(fts).IMP(fts,fta,ftr,sbuf,rbuf,nfs)+
+          error3(ftr).IMP(fts,fta,ftr,sbuf,rbuf,nfs)+
           (((fts+MaxBuf) mod MaxSeq)!=fta) -> 
              sum d:DP.ri1(d).
                       si3(dframe(dat,d,fts,(ftr-1) mod MaxSeq)).
@@ -197,7 +204,8 @@ proc TIM = TIM([],false);
            rt1(start,act_).TIM(ttab,true) + 
            rt1(stop,act_).TIM(ttab,false) +
            sum fn2:Nat.in_table(fn2,ttab) -> (rt1(stop,fn2) + st2(fn2)).TIM(del(fn2,ttab),atr) +
-           atr -> st2(act_).TIM(ttab,false);
+           atr -> st2(act_).TIM(ttab,false) +
+           !atr -> sum n:Nat.error1(n).TIM(ttab,atr);
 
 % Below all the components above are combined into one process.
 
@@ -214,16 +222,17 @@ act ra,rd,sb,sc:DP;
     s7,r7,c7:Tis#Act;
     s8,r8,c8:Nat;
     s8,r8,c8:Act;
+    error,error1,error2,error3:Nat;
 
-proc IMPa=rename({ri1->ra, si2->sb, si3->s1, ri4->r2, si5->s3, ri6->r4},IMP);
-     IMPb=rename({ri1->rd, si2->sc, si3->s6, ri4->r5, si5->s7, ri6->r8},IMP);
+proc IMPa=block({error3},rename({ri1->ra, si2->sb, si3->s1, ri4->r2, si5->s3, ri6->r4},IMP));
+     IMPb=block({error2},rename({ri1->rd, si2->sc, si3->s6, ri4->r5, si5->s7, ri6->r8},IMP));
      CHab=rename({rc1->r1, sc2->s5},CH([],accept));
      CHba=rename({rc1->r6, sc2->s2},CH([],accept));
-     TIMa=rename({rt1->r3, st2->s4},TIM);
+     TIMa=block({error1},rename({rt1->r3, st2->s4},TIM));
      TIMb=rename({rt1->r7, st2->s8},TIM);
 
      SWP3 = 
-      allow({ra,rd,sb,sc,c1,c2,c3,c4,c5,c6,c7,c8,skip,lost},
+      allow({ra,rd,sb,sc,c1,c2,c3,c4,c5,c6,c7,c8,skip,lost,error},
       comm({ s1|r1 -> c1,
              s2|r2 -> c2,
              s3|r3 -> c3,
@@ -231,7 +240,8 @@ proc IMPa=rename({ri1->ra, si2->sb, si3->s1, ri4->r2, si5->s3, ri6->r4},IMP);
              s5|r5 -> c5,
              s6|r6 -> c6,
              s7|r7 -> c7,
-             s8|r8 -> c8},
+             s8|r8 -> c8,
+             error1|error2|error3 -> error},
                 IMPa || TIMa || CHab || IMPb || TIMb || CHba));
 
 init SWP3;
