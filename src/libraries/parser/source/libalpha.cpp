@@ -54,14 +54,17 @@ static ATermTable deps;
     return Res;
   }
 
-  static AFun ATmakeAFunInt(long name, int arity, ATbool quoted) {
+  static AFun ATmakeAFunInt(int name, int arity, ATbool quoted) {
     // input: an integer value (name), it's arity and whether it is quoted or not
     // output: an AFun, as in ATmakeAFun, but now with a name from an integer value
 
-    // on 128 bit architecture long cannot ocupy more than 256/3+2=87 8-ary digits, even less 10-ary
-    char buf[90];
-    sprintf(buf, "%ld", name);
-    return ATmakeAFun(buf, arity, quoted);
+    // on 128 bit architecture long cannot occupy more than 256/3+2=87 8-ary digits, even less 10-ary
+    // char buf[90];
+    DECL_A(buf,char,NrOfChars(name)+1);
+    sprintf(buf, "%d", name);
+    AFun a=ATmakeAFun(buf, arity, quoted);
+    FREE_A(buf);
+    return a;
   }
 
   //==================================================
