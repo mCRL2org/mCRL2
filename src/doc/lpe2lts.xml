@@ -8,33 +8,35 @@
 <!ENTITY opt_u "<option>-u</option>">
 <!ENTITY opt_c "<option>-c</option>">
 <!ENTITY opt_r "<option>-r</option>">
+<!ENTITY opt_b "<option>-b</option>">
 <!ENTITY opt_l "<option>-l</option>">
-<!ENTITY opt_e "<option>-e</option>">
-<!ENTITY opt_D "<option>-D</option>">
+<!ENTITY opt_D "<option>-a</option>">
+<!ENTITY opt_a "<option>-a</option>">
 <!ENTITY opt_t "<option>-t</option>">
 <!ENTITY opt_n "<option>-n</option>">
-<!ENTITY opt_p "<option>-p</option>">
-<!ENTITY opt_m "<option>-m</option>">
+<!ENTITY opt_C "<option>-C</option>">
+<!ENTITY opt_s "<option>-s</option>">
 <!ENTITY opt_R "<option>-R</option>">
 <!ENTITY opt_freevar "<option>--freevar</option>">
 <!ENTITY opt_dummy "<option>--dummy</option>">
 <!ENTITY opt_unused-data "<option>--unused-data</option>">
 <!ENTITY opt_vector "<option>--vector</option>">
 <!ENTITY opt_tree "<option>--tree</option>">
+<!ENTITY opt_bit_hash "<option>--bit-hash</option>">
 <!ENTITY opt_max "<option>--max</option>">
+<!ENTITY opt_todo_max "<option>--todo-max</option>">
 <!ENTITY opt_deadlock "<option>--deadlock</option>">
 <!ENTITY opt_deadlock-detect "<option>--deadlock-detect</option>">
-<!ENTITY opt_deadlock-trace "<option>--deadlock-trace</option>">
-<!ENTITY opt_detect "<option>--detect</option>">
+<!ENTITY opt_action "<option>--action</option>">
 <!ENTITY opt_trace "<option>--trace</option>">
-<!ENTITY opt_max-traces "<option>--max-traces</option>">
 <!ENTITY opt_error-trace "<option>--error-trace</option>">
-<!ENTITY opt_priority "<option>--priority</option>">
-<!ENTITY opt_monitor "<option>--monitor</option>">
+<!ENTITY opt_confluence "<option>--confluence</option>">
+<!ENTITY opt_strategy "<option>--strategy</option>">
 <!ENTITY opt_rewriter "<option>--rewriter</option>">
 <!ENTITY opt_aut "<option>--aut</option>">
 <!ENTITY opt_svc "<option>--svc</option>">
 <!ENTITY opt_no-info "<option>--no-info</option>">
+<!ENTITY opt_init_tsize "<option>--init_tsize</option>">
 ]>
 
 <webpage id="lpe2lts-web">
@@ -111,7 +113,7 @@ Mandatory arguments to long options are also mandatory to short options.
     <term>&opt_quiet;</term>
     <listitem>
       <para>
-        Do not display warning messages.
+        Do not display any unrequested information.
       </para>
     </listitem>
   </varlistentry>
@@ -121,7 +123,23 @@ Mandatory arguments to long options are also mandatory to short options.
     <term>&opt_verbose;</term>
     <listitem>
       <para>
-        Display concise intermediate messages.
+        Display concise intermediate messages. This includes detailed status of
+        the generation process. Once a level (in terms of breadth-first search)
+        is completed, a message stating this is printed. After exploration of
+        every 1000 states the following information is printed: current level,
+        states explored, transitions explored, states seen. A state is explored
+        if all its outgoing transitions have been explored.  A state is seen if
+        (at least) one of the transitions leading to it has been explored.
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_d;</term>
+    <term>&opt_debug;</term>
+    <listitem>
+      <para>
+        Display detailed intermediate messages.
       </para>
     </listitem>
   </varlistentry>
@@ -183,7 +201,23 @@ Mandatory arguments to long options are also mandatory to short options.
   </varlistentry>
 
   <varlistentry>
-    <term>&opt_l;</term>
+    <term>&opt_b;[&num;]</term>
+    <term>&opt_bit_hash;[=&num;]</term>
+    <listitem>
+      <para>
+        Make use of bit hashing to store states and store at most &num; states.
+        This means that instead of keeping a full record of all states that
+        have been visited, a bit array is used that indicate whether or not a
+        hash of a state has been seen before. Although this means that this
+        option may cause states to be mistaken for others (because they are
+        mapped to the same hash), it can be useful to explore very large
+        state spaces that are otherwise not explorable.
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_l;&num;</term>
     <term>&opt_max;=&num;</term>
     <listitem>
       <para>
@@ -194,7 +228,19 @@ Mandatory arguments to long options are also mandatory to short options.
   </varlistentry>
 
   <varlistentry>
-    <term>&opt_d;</term>
+    <term>&opt_todo_max;=&num;</term>
+    <listitem>
+      <para>
+        Keep at most &num; states in todo lists; this option is only relevant
+        for breadth-first search with bithashing, where &num; is the maximum
+        number of states per level, and for depth first, where &num; is the
+        maximum depth.
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_D;</term>
     <term>&opt_deadlock;</term>
     <term>&opt_deadlock-detect;</term>
     <listitem>
@@ -207,22 +253,8 @@ Mandatory arguments to long options are also mandatory to short options.
   </varlistentry>
 
   <varlistentry>
-    <term>&opt_e;</term>
-    <term>&opt_deadlock-trace;</term>
-    <listitem>
-      <para>
-         Write trace to each deadlock state to a file. For each deadlock found
-         during the state space exploration a unique file with extension .trc
-         (trace) will be created containing a shortest trace from the initial
-         state to the deadlock state. The traces can be pretty printed and
-         converted to other formats using <command moreinfo="refentry">tracepp</command>.
-      </para>
-    </listitem>
-  </varlistentry>
-
-  <varlistentry>
-    <term>&opt_D;</term>
-    <term>&opt_detect;=&name;*</term>
+    <term>&opt_a;&name;*</term>
+    <term>&opt_action;=&name;*</term>
     <listitem>
       <para>
         Detect action names from the list &name;*, which is a comma separated
@@ -234,24 +266,22 @@ Mandatory arguments to long options are also mandatory to short options.
   </varlistentry>
 
   <varlistentry>
-    <term>&opt_t;</term>
-    <term>&opt_trace;=&name;*</term>
+    <term>&opt_t;[&num;]</term>
+    <term>&opt_trace;[=&num;]</term>
     <listitem>
       <para>
         Write a shortest trace to each state that is reached with an action
-        from &name;* to a file (similar to &opt_deadlock-trace;, but for
-        actions).
+        from &name;* from option &opt_a;/&opt_action; or is a deadlock detected
+        with &opt_D;/&opt_deadlock; to a file. No more than &num; traces will
+        be written. If &num; is not supplied the maximum number of traces is
+        10.
       </para>
-    </listitem>
-  </varlistentry>
-
-  <varlistentry>
-    <term>&opt_n;</term>
-    <term>&opt_max-traces;=&num;</term>
-    <listitem>
       <para>
-	Save no more than &num; trace files when using the options
-	&opt_e;/&opt_deadlock-trace; or &opt_t;/&opt_trace;.
+        For each trace that is to be written a unique file with extension .trc
+        (trace) will be created containing a shortest trace from the initial
+        state to the deadlock state. The traces can be pretty printed and
+        converted to other formats using <command
+        moreinfo="refentry">tracepp</command>.
       </para>
     </listitem>
   </varlistentry>
@@ -267,36 +297,56 @@ Mandatory arguments to long options are also mandatory to short options.
   </varlistentry>
 
   <varlistentry>
-    <term>&opt_p;</term>
-    <term>&opt_priority;=&name;</term>
+    <term>&opt_C;[&name;]</term>
+    <term>&opt_confluence;[=&name;]</term>
     <listitem>
       <para>
-         Give priority to action &name; (i.e. if it is possible to
-         execute an action &name; in some state, then make it the only
-         executable action from that state).
+         Apply on-the-fly confluence reduction where action &name; is
+         considered to denote a confluent silent step. If &name; is not
+         supplied, tau is assumed to be the confluent silent step.
       </para>
     </listitem>
   </varlistentry>
   
   <varlistentry>
-    <term>&opt_m;</term>
-    <term>&opt_monitor;</term>
+    <term>&opt_s;&name;</term>
+    <term>&opt_strategy;=&name;</term>
     <listitem>
       <para>
-         Print detailed status of generation. Once a level (in terms
-         of breadth-first search) is completed, a message stating this
-         is printed. After exploration of every 1000 states the
-         following information is printed: current level, states
-         explored, transitions explored, states seen. A state is
-         explored if all its outgoing transitions have been explored.
-         A state is seen if (at least) one of the transitions leading
-         to it has been explored.
-       </para>
+         Use strategy &name; to explore the state space. The following strategies are available.
+         <variablelist>
+           <varlistentry>
+             <term>b, breadth</term>
+             <listitem>
+               <para>
+                 breadth-first search (default)
+               </para>
+             </listitem>
+           </varlistentry>
+           <varlistentry>
+             <term>d, depth</term>
+             <listitem>
+               <para>
+                 depth-first search
+               </para>
+             </listitem>
+           </varlistentry>
+           <varlistentry>
+             <term>r, random</term>
+             <listitem>
+               <para>
+                 random search
+               </para>
+             </listitem>
+           </varlistentry>
+         </variablelist>
+      </para>
     </listitem>
   </varlistentry>
 
   <varlistentry>
-    <term>&opt_R;</term> <term>&opt_rewriter;=&name;</term>
+    <term>&opt_R;&name;</term>
+    <term>&opt_rewriter;=&name;</term>
     <listitem>
       <para>
          Use rewriter &name; (default 'inner'). &lpe2lts; makes heavy use of a
@@ -337,6 +387,16 @@ Mandatory arguments to long options are also mandatory to short options.
         purposes, for instance, but can cause the &outfile; to grow
         considerably. Note that this option is implicit when writing in the AUT
         format.
+      </para>
+    </listitem>
+  </varlistentry>
+  
+  <varlistentry>
+    <term>&opt_init_tsize;=&num;</term>
+    <listitem>
+      <para>
+         Set the initial size of the internally used hash tables. The default
+         size is 10000.
       </para>
     </listitem>
   </varlistentry>

@@ -52,11 +52,13 @@ void print_help(FILE *f, char *Name)
     "\n"
     "%s"
     "\n"
-    "The following command line options are available. Mandatory arguments to long\n"
-    "options are mandatory for short options too.\n"
-    "  -h, --help            display this help message\n"
-    "  -y, --dummy           replace free variables in the LPE with dummy values\n"
-    "  -R, --rewriter=NAME   use rewriter NAME (default 'inner')\n",
+    "The following command line options are available.\n"
+    "  -h, --help               display this help message\n"
+    "  -q, --quiet              do not display any unrequested information\n"
+    "  -v, --verbose            display consise intermediate messages\n"
+    "  -d, --debug              display detailed intermediate messages\n"
+    "  -y, --dummy              replace free variables in the LPE with dummy values\n"
+    "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'inner')\n",
     Name,
     help_message
   );
@@ -68,21 +70,25 @@ int main(int argc, char **argv)
 	ATerm stackbot, state;
 	ATermAppl Spec;
 	ATermList states;
-	#define sopts "hyR:"
+	#define sopts "hqvdyR:"
 	struct option lopts[] = {
 		{ "help",	no_argument,	NULL,	'h' },
+		{ "quiet",	no_argument,	NULL,	'q' },
+		{ "verbose",    no_argument,	NULL,	'v' },
+		{ "debug",	no_argument,	NULL,	'd' },
 		{ "dummy",	no_argument,	NULL,	'y' },
 		{ "rewriter",	no_argument,	NULL,	'R' },
 		{ 0, 0, 0, 0 }
 	};
-	int opt;
-	RewriteStrategy strat;
-	bool usedummy;
 
 	ATinit(argc,argv,&stackbot);
 
-	usedummy = false;
-	strat = GS_REWR_INNER;
+	bool quiet = false;
+	bool verbose = false;
+	bool debug = false;
+	bool usedummy = false;
+	RewriteStrategy strat = GS_REWR_INNER;
+	int opt;
 	while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
 	{
 		switch ( opt )
@@ -90,6 +96,15 @@ int main(int argc, char **argv)
 			case 'h':
 				print_help(stderr, argv[0]);
 				return 0;
+			case 'q':
+				quiet = true;
+				break;
+			case 'v':
+				verbose = true;
+				break;
+			case 'd':
+				debug = true;
+				break;
 			case 'y':
 				usedummy = true;
 				break;
@@ -104,6 +119,29 @@ int main(int argc, char **argv)
 			default:
 				break;
 		}
+	}
+
+	if ( quiet && verbose )
+	{
+		gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
+		return false;
+	}
+	if ( quiet && debug )
+	{
+		gsErrorMsg("options -q/--quiet and -d/--debug cannot be used together\n");
+		return false;
+	}
+	if ( quiet )
+	{
+		gsSetQuietMsg();
+	}
+	if ( verbose )
+	{
+		gsSetVerboseMsg();
+	}
+	if ( debug )
+	{
+		gsSetDebugMsg();
 	}
 
 	if ( argc-optind < 1 )

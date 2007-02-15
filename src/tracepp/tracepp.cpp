@@ -107,8 +107,9 @@ static void print_help(FILE *f, char *Name)
     "\n"
     "  -h, --help            display this help message\n"
     "      --version         display version information\n"
-    "  -q, --quiet           do not print any unrequested information\n"
-    "  -v, --verbose         print information about the rewriting process\n"
+    "  -q, --quiet           do not display any unrequested information\n"
+    "  -v, --verbose         display concise intermediate messages\n"
+    "  -d, --debug           display detailed intermediate messages\n"
     "\n"
     "The output formats that can be chosen are the following. By default --plain is\n"
     "assumed.\n"
@@ -129,16 +130,17 @@ static void print_version(FILE *f)
 
 int main(int argc, char **argv)
 {
-  #define sopts "hqvpmda"
+  #define sopts "hqvdpmDa"
 //  #define sopts "hqvpmdas"
   struct option lopts[] = {
     { "help",     no_argument,  NULL,  'h' },
     { "version",  no_argument,  NULL,  0x1 },
     { "quiet",    no_argument,  NULL,  'q' },
     { "verbose",  no_argument,  NULL,  'v' },
+    { "debug",    no_argument,  NULL,  'd' },
     { "plain",    no_argument,  NULL,  'p' },
     { "mcrl2",    no_argument,  NULL,  'm' },
-    { "dot",      no_argument,  NULL,  'd' },
+    { "dot",      no_argument,  NULL,  'D' },
     { "aut",      no_argument,  NULL,  'a' },
 //    { "svc",      no_argument,  NULL,  's' },
     { 0, 0, 0, 0 }
@@ -150,6 +152,7 @@ int main(int argc, char **argv)
 
   bool quiet = false;
   bool verbose = false;
+  bool debug = false;
   output_type outtype = otNone;
   int opt;
   while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
@@ -168,6 +171,9 @@ int main(int argc, char **argv)
       case 'v':
         verbose = true;
         break;
+      case 'd':
+        debug = true;
+        break;
       case 'p':
         if ( outtype != otNone )
         {
@@ -184,7 +190,7 @@ int main(int argc, char **argv)
         }
         outtype = otMcrl2;
         break;
-      case 'd':
+      case 'D':
         if ( outtype != otNone )
         {
           gsErrorMsg("cannot set multiple output formats\n");
@@ -217,10 +223,17 @@ int main(int argc, char **argv)
     gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
     return 1;
   }
+  if ( quiet && debug )
+  {
+    gsErrorMsg("options -q/--quiet and -d/--debug cannot be used together\n");
+    return 1;
+  }
   if ( quiet )
     gsSetQuietMsg();
   if ( verbose )
     gsSetVerboseMsg();
+  if ( debug )
+    gsSetDebugMsg();
 
   if ( outtype == otNone )
     outtype = otPlain;

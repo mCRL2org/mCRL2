@@ -152,13 +152,14 @@ static void print_help(FILE *f, char *Name)
     "The format of INFILE is determined by its contents. The option --in can be used\n"
     "to force the format for INFILE.\n"
     "\n"
-    "Mandatory arguments to long options are mandatory for short options too.\n"
+    "Options:\n"
     "  -h, --help            display this help message and terminate\n"
     "      --version         display version information and terminate\n"
-    "  -q, --quiet           do not display warning messages\n"
+    "  -q, --quiet           do not display any unrequested information\n"
     "  -v, --verbose         display concise intermediate messages\n"
+    "  -d, --debug           display detailed intermediate messages\n"
     "  -f, --formats         list accepted formats\n"
-    "  -i, --in=FORMAT       use FORMAT as the input format\n",
+    "  -iFORMAT, --in=FORMAT use FORMAT as the input format\n",
     Name);
 }
 
@@ -170,13 +171,14 @@ static void print_version(FILE *f)
 bool parse_command_line(int argc, char** argv, mcrl2::lts::lts& l) {
   using namespace mcrl2::lts;
 
-  #define ShortOptions      "hqvi:f"
+  #define ShortOptions      "hqvdi:f"
   #define VersionOption     0x1
   struct option LongOptions[] = { 
     {"help"      , no_argument,         NULL, 'h'},
     {"version"   , no_argument,         NULL, VersionOption},
     {"quiet"     , no_argument,         NULL, 'q'},
     {"verbose"   , no_argument,         NULL, 'v'},
+    {"debug"     , no_argument,         NULL, 'd'},
     {"in"        , required_argument,   NULL, 'i'},
     {"formats"   , no_argument,         NULL, 'f'},
     {0, 0, 0, 0}
@@ -184,6 +186,7 @@ bool parse_command_line(int argc, char** argv, mcrl2::lts::lts& l) {
 
   bool verbose = false;
   bool quiet = false;
+  bool debug = false;
   lts_type intype = lts_none;
   int opt;
   while ( (opt = getopt_long(argc, argv, ShortOptions, LongOptions, NULL)) != -1 )
@@ -201,6 +204,9 @@ bool parse_command_line(int argc, char** argv, mcrl2::lts::lts& l) {
         break;
       case 'q':
         quiet = true;
+        break;
+      case 'd':
+        debug = true;
         break;
       case 'i':
         if ( intype != lts_none )
@@ -228,6 +234,12 @@ bool parse_command_line(int argc, char** argv, mcrl2::lts::lts& l) {
 
     return (false);
   }
+  if ( quiet && debug )
+  {
+    gsErrorMsg("options -q/--quiet and -d/--debug cannot be used together\n");
+
+    return (false);
+  }
   if ( quiet )
   {
     gsSetQuietMsg();
@@ -235,6 +247,10 @@ bool parse_command_line(int argc, char** argv, mcrl2::lts::lts& l) {
   if ( verbose )
   {
     gsSetVerboseMsg();
+  }
+  if ( debug )
+  {
+    gsSetDebugMsg();
   }
 
   bool use_stdin = (optind >= argc);

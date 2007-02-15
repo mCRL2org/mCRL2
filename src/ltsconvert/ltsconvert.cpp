@@ -410,33 +410,34 @@ static void print_help(FILE *f, char *Name)
     "format is determined by the content of INFILE. Options --in and --out can be\n"
     "used to force the input and output formats.\n"
     "\n"
-    "Mandatory arguments to long options are mandatory for short options too.\n"
-    "  -h, --help            display this help message and terminate\n"
-    "      --version         display version information and terminate\n"
-    "  -q, --quiet           do not display warning messages\n"
-    "  -v, --verbose         display concise intermediate messages\n"
-    "  -f, --formats         list accepted formats\n"
-    "  -i, --in=FORMAT       use FORMAT as the input format\n"
-    "  -o, --out=FORMAT      use FORMAT as the output format\n"
-    "  -l, --lpe=FILE        use FILE as the LPE from which the input LTS was\n"
-    "                        generated; this is needed to store the correct\n"
-    "                        parameter names of states when saving in fsm format and\n"
-    "                        to convert non-mCRL2 LTSs to a mCRL2 LTS\n"
-    "  -n, --no-state        leave out state information when saving in dot format\n"
-    "  -D, --determinise     determinise LTS\n"
+    "Options:\n"
+    "  -h, --help             display this help message and terminate\n"
+    "      --version          display version information and terminate\n"
+    "  -q, --quiet            do not display any unrequested information\n"
+    "  -v, --verbose          display concise intermediate messages\n"
+    "  -d, --debug            display detailed intermediate messages\n"
+    "  -f, --formats          list accepted formats\n"
+    "  -iFORMAT, --in=FORMAT  use FORMAT as the input format\n"
+    "  -oFORMAT, --out=FORMAT use FORMAT as the output format\n"
+    "  -lFILE, --lpe=FILE     use FILE as the LPE from which the input LTS was\n"
+    "                         generated; this is needed to store the correct\n"
+    "                         parameter names of states when saving in fsm format and\n"
+    "                         to convert non-mCRL2 LTSs to a mCRL2 LTS\n"
+    "  -n, --no-state         leave out state information when saving in dot format\n"
+    "  -D, --determinise      determinise LTS\n"
     "\n"
     "Minimisation options:\n"
-    "      --none            do not minimise (default)\n"
-    "  -s, --strong          minimise using strong bisimulation\n"
-    "  -b, --branching       minimise using branching bisimulation\n"
-    "  -t, --trace           minimise using trace equivalence\n"
-    "  -u, --weak-trace      minimise using weak trace equivalence\n"
-    "  -a, --add             do not minimise but save a copy of the original LTS\n"
-    "                        extended with a state parameter indicating the\n"
-    "                        bisimulation class a state belongs to (only for mCRL2)\n"
-    "      --tau=ACTNAMES    consider actions with a name in the comma separated\n"
-    "                        list ACTNAMES to be internal (tau) actions in\n"
-    "                        addition to those defined as such by the input\n",
+    "      --none             do not minimise (default)\n"
+    "  -s, --strong           minimise using strong bisimulation\n"
+    "  -b, --branching        minimise using branching bisimulation\n"
+    "  -t, --trace            minimise using trace equivalence\n"
+    "  -u, --weak-trace       minimise using weak trace equivalence\n"
+    "  -a, --add              do not minimise but save a copy of the original LTS\n"
+    "                         extended with a state parameter indicating the\n"
+    "                         bisimulation class a state belongs to (only for mCRL2)\n"
+    "      --tau=ACTNAMES     consider actions with a name in the comma separated\n"
+    "                         list ACTNAMES to be internal (tau) actions in\n"
+    "                         addition to those defined as such by the input\n",
     Name);
 }
 
@@ -527,7 +528,7 @@ int main(int argc, char **argv)
   ATinit(argc,argv,&bot);
   gsEnableConstructorFunctions();
 
-  #define ShortOptions      "hqvi:o:fl:nsbtuaD"
+  #define ShortOptions      "hqvdi:o:fl:nsbtuaD"
   #define VersionOption     0x1
   #define NoneOption        0x2
   #define TauOption         0x3
@@ -536,6 +537,7 @@ int main(int argc, char **argv)
     {"version"     , no_argument,         NULL, VersionOption},
     {"verbose"     , no_argument,         NULL, 'v'},
     {"quiet"       , no_argument,         NULL, 'q'},
+    {"debug"       , no_argument,         NULL, 'd'},
     {"in"          , required_argument,   NULL, 'i'},
     {"out"         , required_argument,   NULL, 'o'},
     {"formats"     , no_argument,         NULL, 'f'},
@@ -554,6 +556,7 @@ int main(int argc, char **argv)
 
   bool verbose = false;
   bool quiet = false;
+  bool debug = false;
   lts_type intype = lts_none;
   lts_type outtype = lts_none;
   int opt;
@@ -581,6 +584,9 @@ int main(int argc, char **argv)
           break;
         case 'q':
           quiet = true;
+          break;
+        case 'd':
+          debug = true;
           break;
         case 'i':
           if ( intype != lts_none )
@@ -653,6 +659,11 @@ int main(int argc, char **argv)
       gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
       return 1;
     }
+    if ( quiet && debug )
+    {
+      gsErrorMsg("options -q/--quiet and -d/--debug cannot be used together\n");
+      return 1;
+    }
     if ( quiet )
     {
       gsSetQuietMsg();
@@ -660,6 +671,10 @@ int main(int argc, char **argv)
     if ( verbose )
     {
       gsSetVerboseMsg();
+    }
+    if ( debug )
+    {
+      gsSetDebugMsg();
     }
 
     if ( determinise && (equivalence != lts_eq_none) )

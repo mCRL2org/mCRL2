@@ -129,19 +129,20 @@ static void print_help(FILE *f, char *Name)
     "\n"
     "The LPE can be explored using TorX as described in torx_explorer(5).\n"
     "\n"
-    "Mandatory arguments to long options are mandatory for short options too.\n"
-    "  -h, --help            display this help message and terminate\n"
-    "      --version         display version information and terminate\n"
-    "  -q, --quiet           do not display warning messages\n"
-    "  -v, --verbose         display concise intermediate messages\n"
-    "  -f, --freevar         do not replace free variables in the LPE with dummy\n"
-    "                        values\n"
-    "  -y, --dummy           replace free variables in the LPE with dummy values\n"
-    "                        (default)\n"
-    "  -u, --unused-data     do not remove unused parts of the data specification\n"
-    "  -c, --vector          store state in a vector (fastest, default)\n"
-    "  -r, --tree            store state in a tree (for memory efficiency)\n"
-    "  -R, --rewriter=NAME   use rewriter NAME (default 'inner')\n",
+    "Options:\n"
+    "  -h, --help              display this help message and terminate\n"
+    "      --version           display version information and terminate\n"
+    "  -q, --quiet             do not display any unrequested information\n"
+    "  -v, --verbose           display concise intermediate messages\n"
+    "  -d, --debug             display detailed intermediate messages\n"
+    "  -f, --freevar           do not replace free variables in the LPE with dummy\n"
+    "                          values\n"
+    "  -y, --dummy             replace free variables in the LPE with dummy values\n"
+    "                          (default)\n"
+    "  -u, --unused-data       do not remove unused parts of the data specification\n"
+    "  -c, --vector            store state in a vector (fastest, default)\n"
+    "  -r, --tree              store state in a tree (for memory efficiency)\n"
+    "  -RNAME, --rewriter=NAME use rewriter NAME (default 'inner')\n",
     Name);
 }
 
@@ -155,12 +156,13 @@ int main(int argc, char **argv)
   FILE *SpecStream;
   ATerm stackbot;
   ATermAppl Spec;
-  #define sopts "hqvfyucrR:"
+  #define sopts "hqvdfyucrR:"
   struct option lopts[] = {
     { "help",            no_argument,       NULL, 'h' },
     { "version",         no_argument,       NULL, 0   },
     { "quiet",           no_argument,       NULL, 'q' },
     { "verbose",         no_argument,       NULL, 'v' },
+    { "debug",           no_argument,       NULL, 'd' },
     { "freevar",         no_argument,       NULL, 'f' },
     { "dummy",           no_argument,       NULL, 'y' },
     { "unused-data",     no_argument,       NULL, 'u' },
@@ -174,6 +176,7 @@ int main(int argc, char **argv)
 
   bool quiet = false;
   bool verbose = false;
+  bool debug = false;
   RewriteStrategy strat = GS_REWR_INNER;
   bool usedummies = true;
   bool removeunused = true;
@@ -194,6 +197,9 @@ int main(int argc, char **argv)
         break;
       case 'v':
         verbose = true;
+        break;
+      case 'd':
+        debug = true;
         break;
       case 'f':
         usedummies = false;
@@ -227,10 +233,17 @@ int main(int argc, char **argv)
     gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
     return 1;
   }
+  if ( quiet && debug )
+  {
+    gsErrorMsg("options -q/--quiet and -d/--debug cannot be used together\n");
+    return 1;
+  }
   if ( quiet )
     gsSetQuietMsg();
   if ( verbose )
     gsSetVerboseMsg();
+  if ( debug )
+    gsSetDebugMsg();
   
   if ( argc-optind > 1 )
   {

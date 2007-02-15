@@ -24,6 +24,7 @@ struct lts_generation_options {
     :
       quiet(false),
       verbose(false),
+      debug(false),
       strat(GS_REWR_INNER),
       usedummies(true),
       removeunused(true),
@@ -49,6 +50,7 @@ struct lts_generation_options {
   
   bool quiet;
   bool verbose;
+  bool debug;
   RewriteStrategy strat;
   bool usedummies;
   bool removeunused;

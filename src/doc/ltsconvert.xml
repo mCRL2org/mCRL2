@@ -135,6 +135,16 @@
   </varlistentry>
 
   <varlistentry>
+    <term>&opt_d;</term>
+    <term>&opt_debug;</term>
+    <listitem>
+      <para>
+        display detailed intermediate messages
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
     <term>&opt_f;</term>
     <term>&opt_formats;</term>
     <listitem>
@@ -145,7 +155,7 @@
   </varlistentry>
 
   <varlistentry>
-    <term>&opt_i;</term>
+    <term>&opt_i;&format;</term>
     <term>&opt_in;=&format;</term>
     <listitem>
       <para>use &format; format as the input format</para>
@@ -153,7 +163,7 @@
   </varlistentry>
 
   <varlistentry>
-    <term>&opt_o;</term>
+    <term>&opt_o;&format;</term>
     <term>&opt_out;=&format;</term>
     <listitem>
       <para>use &format; format as the output format</para>
@@ -161,7 +171,7 @@
   </varlistentry>
 
   <varlistentry>
-    <term>&opt_l;</term>
+    <term>&opt_l;&name;</term>
     <term>&opt_lpe;=&name;</term>
     <listitem>
       <para>use &name; as the LPE from which the input LTS was

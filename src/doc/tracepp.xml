@@ -4,6 +4,7 @@
 <!ENTITY % param SYSTEM "param.xml"> %param;
 <!ENTITY opt_p "<option>-p</option>">
 <!ENTITY opt_m "<option>-m</option>">
+<!ENTITY opt_D "<option>-D</option>">
 <!ENTITY opt_a "<option>-a</option>">
 <!ENTITY opt_plain "<option>--plain</option>">
 <!ENTITY opt_mcrl2 "<option>--mcrl2</option>">
@@ -98,6 +99,16 @@
       </para>
     </listitem>
   </varlistentry>
+
+  <varlistentry>
+    <term>&opt_d;</term>
+    <term>&opt_debug;</term>
+    <listitem>
+      <para>
+        display detailed intermediate messages
+      </para>
+    </listitem>
+  </varlistentry>
   </variablelist>
 </para>
 <para>
@@ -123,7 +134,7 @@ assumed.
     </listitem>
   </varlistentry>
   <varlistentry>
-    <term>&opt_d;</term>
+    <term>&opt_D;</term>
     <term>&opt_dot;</term>
     <listitem>
       <para> 

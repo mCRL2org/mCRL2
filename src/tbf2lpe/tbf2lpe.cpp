@@ -26,8 +26,9 @@ static void print_help(FILE *f, char *Name)
     "- mapping eq: S # S -> Bool is replaced by ==, for all sorts S\n"
     "\n"
     "  -h, --help            display this help message\n"
-    "  -q, --quiet           do not print any unrequested information\n"
-    "  -v, --verbose         display extra information about the conversion process\n"
+    "  -q, --quiet           do not display any unrequested information\n"
+    "  -v, --verbose         display concise intermediate messages\n"
+    "  -d, --debug           display detailed intermediate messages\n"
     "  -n, --no-conv-map     do not apply the conversion of mappings and, or and eq\n"
     "      --no-conv-cons    do not apply the conversion of constructors T and F\n",
     Name);
@@ -37,26 +38,26 @@ int main(int argc, char **argv)
 {
   FILE *InStream, *OutStream;
   ATerm bot;
-  #define sopts "hqvn"
+  #define sopts "hqvdn"
   struct option lopts[] = {
-    { "help",    no_argument,  NULL,  'h' },
-    { "quiet",    no_argument,  NULL,  'q' },
-    { "verbose",    no_argument,  NULL,  'v' },
-    { "no-conv-map",        no_argument,  NULL,  'n' },
+    { "help",          no_argument,  NULL,  'h' },
+    { "quiet",         no_argument,  NULL,  'q' },
+    { "verbose",       no_argument,  NULL,  'v' },
+    { "debug",         no_argument,  NULL,  'd' },
+    { "no-conv-map",   no_argument,  NULL,  'n' },
     { "no-conv-cons",  no_argument,  NULL,  0x1 },
      { 0, 0, 0, 0 }
   };
-  int opt;
-  bool opt_quiet,opt_verbose,convert_funcs,convert_bools;
-  ATermAppl mu_spec,spec;
 
   ATinit(argc,argv,&bot);
   gsEnableConstructorFunctions();
 
-  opt_quiet = false;
-  opt_verbose = false;
-  convert_funcs = true;
-  convert_bools = true;
+  bool opt_quiet = false;
+  bool opt_verbose = false;
+  bool opt_debug = false;
+  bool convert_funcs = true;
+  bool convert_bools = true;
+  int opt;
   while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
   {
     switch ( opt )
@@ -69,6 +70,9 @@ int main(int argc, char **argv)
         break;
       case 'v':
         opt_verbose = true;
+        break;
+      case 'd':
+        opt_debug = true;
         break;
       case 'n':
         convert_funcs = false;
@@ -85,10 +89,17 @@ int main(int argc, char **argv)
     gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
     return 1;
   }
+  if ( opt_quiet && opt_debug )
+  {
+    gsErrorMsg("options -q/--quiet and -d/--debug cannot be used together\n");
+    return 1;
+  }
   if ( opt_quiet )
     gsSetQuietMsg();
   if ( opt_verbose )
     gsSetVerboseMsg();
+  if ( opt_debug )
+    gsSetDebugMsg();
 
 
 
@@ -109,7 +120,8 @@ int main(int argc, char **argv)
     gsVerboseMsg("reading mCRL LPE from stdin...\n");
   }
 
-  mu_spec = (ATermAppl) ATreadFromFile(InStream);
+  ATermAppl mu_spec = (ATermAppl) ATreadFromFile(InStream);
+  ATprotectAppl(&mu_spec);
 
   if (InStream != stdin) {
     fclose(InStream);
@@ -137,7 +149,8 @@ int main(int argc, char **argv)
   assert(is_mCRL_spec(mu_spec));
 
 
-  spec = translate(mu_spec,convert_bools,convert_funcs);
+  ATermAppl spec = translate(mu_spec,convert_bools,convert_funcs);
+  ATprotectAppl(&spec);
 
 
   OutStream = stdout;

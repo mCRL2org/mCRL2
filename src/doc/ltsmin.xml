@@ -106,6 +106,16 @@
   </varlistentry>
 
   <varlistentry>
+    <term>&opt_d;</term>
+    <term>&opt_debug;</term>
+    <listitem>
+      <para>
+        display detailed intermediate messages
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
     <term>&opt_s;</term>
     <term>&opt_strong;</term>
     <listitem>
@@ -137,7 +147,7 @@
   </varlistentry>
   
   <varlistentry>
-    <term>&opt_t;</term>
+    <term>&opt_t;&actname;</term>
     <term>&opt_tau;=&actname;</term>
     <listitem>
       <para>

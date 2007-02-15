@@ -12,6 +12,7 @@
 #include <wx/cmdline.h>
 #include <aterm2.h>
 #include "xsimmain.h"
+#include "libprint_c.h"
 #include "libstruct.h"
 #include "librewrite.h"
 
@@ -99,6 +100,9 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
   wxCmdLineParser cmdln(argc,argv);
 
   cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("displays this message"));
+  cmdln.AddSwitch(wxT("q"),wxT("quiet"),wxT("do not display any unrequested information"));
+  cmdln.AddSwitch(wxT("v"),wxT("verbose"),wxT("display concise intermediate messages"));
+  cmdln.AddSwitch(wxT("d"),wxT("debug"),wxT("display detailed intermediate messages"));
   cmdln.AddSwitch(wxT("y"),wxT("dummy"),wxT("replace free variables in the LPE with dummy values"));
   cmdln.AddOption(wxT("R"),wxT("rewriter"),wxT("use specified rewriter (default 'inner')"));
   cmdln.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
@@ -113,12 +117,33 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
               << "Simulate LPEs in a graphical environment. If INFILE is supplied it will be\n"
               << "loaded into the simulator.\n"
               << "\n"
-              << "Mandatory arguments to long options are mandatory for short options too.\n"
-              << "  -h, --help            display this help message\n"
-              << "  -y, --dummy           replace free variables in the LPE with dummy values\n"
-              << "  -R, --rewriter=NAME   use rewriter NAME (default 'inner')\n";
+              << "Options:\n"
+              << "  -h, --help               display this help message\n"
+              << "  -q, --quiet              do not display any unrequested information\n"
+              << "  -v, --verbose            display concise intermediate messages\n"
+              << "  -d, --debug              display detailed intermediate messages\n"
+              << "  -y, --dummy              replace free variables in the LPE with dummy values\n"
+              << "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'inner')\n";
 
     return false;
+  }
+
+  if (cmdln.Found(wxT("q")) && cmdln.Found(wxT("v"))) {
+    gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
+    return false;
+  }
+  if (cmdln.Found(wxT("q")) && cmdln.Found(wxT("d"))) {
+    gsErrorMsg("options -q/--quiet and -d/--debug cannot be used together\n");
+    return false;
+  }
+  if (cmdln.Found(wxT("q"))) {
+    gsSetQuietMsg();
+  }
+  if (cmdln.Found(wxT("v"))) {
+    gsSetVerboseMsg();
+  }
+  if (cmdln.Found(wxT("d"))) {
+    gsSetDebugMsg();
   }
 
   if (cmdln.Found(wxT("y"))) {

@@ -109,6 +109,16 @@
       </varlistentry>
 
       <varlistentry>
+        <term>&opt_d;</term>
+        <term>&opt_debug;</term>
+        <listitem>
+          <para>
+            display detailed intermediate messages
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
         <term>&opt_n;</term>
         <term>&opt_noconvmaps;</term>
 	<listitem>

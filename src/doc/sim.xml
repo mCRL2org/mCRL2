@@ -113,6 +113,36 @@
   </varlistentry>
 
   <varlistentry>
+    <term>&opt_q;</term>
+    <term>&opt_quiet;</term>
+    <listitem>
+      <para>
+        do not display warning messages
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_v;</term>
+    <term>&opt_verbose;</term>
+    <listitem>
+      <para>
+        display concise intermediate messages
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_d;</term>
+    <term>&opt_debug;</term>
+    <listitem>
+      <para>
+        display detailed intermediate messages
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
     <term>&opt_y;</term>
     <term>&opt_dummy;</term>
     <listitem>
@@ -123,7 +153,7 @@
   </varlistentry>
 
   <varlistentry>
-    <term>&opt_R;</term>
+    <term>&opt_R;&name;</term>
     <term>&opt_rewriter;=&name;</term>
     <listitem>
       <para>

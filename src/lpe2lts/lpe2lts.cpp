@@ -65,11 +65,12 @@ static void print_help(FILE *f, const char *Name)
     "The format of OUTFILE is determined by its extension (unless it is specified\n"
     "by an option). If the extension is unknown, the svc format will be used.\n"
     "\n"
-    "Mandatory arguments to long options are mandatory for short options too.\n"
+    "Options:\n"
     "  -h, --help               display this help message\n"
     "      --version            display version information\n"
-    "  -q, --quiet              do not print any unrequested information\n"
+    "  -q, --quiet              do not display any unrequested information\n"
     "  -v, --verbose            display extra information about the state space\n"
+    "  -d, --debug              display detailed intermediate messages\n"
     "                           generation\n"
     "  -f, --freevar            do not replace free variables in the LPE with dummy\n"
     "                           values\n"
@@ -78,36 +79,38 @@ static void print_help(FILE *f, const char *Name)
     "  -u, --unused-data        do not remove unused parts of the data specification\n"
     "  -c, --vector             store state in a vector (fastest, default)\n"
     "  -r, --tree               store state in a tree (for memory efficiency)\n"
-    "  -b, --bit-hash[=NUM]     use bit hashing to store states and store at most NUM\n"
+    "  -b[NUM], --bit-hash[=NUM]\n"
+    "                           use bit hashing to store states and store at most NUM\n"
     "                           states; note that this option may cause states to be\n"
     "                           mistaken for others\n"
-    "  -l, --max=NUM            explore at most NUM states\n"
+    "  -lNUM, --max=NUM         explore at most NUM states\n"
     "      --todo-max=NUM       keep at most NUM states in todo lists; this option is\n"
     "                           only relevant for breadth-first search with\n"
     "                           bithashing, where NUM is the maximum number of states\n"
     "                           per level, and for depth first, where NUM is the\n"
     "                           maximum depth\n"
-    "  -d, --deadlock           detect deadlocks (i.e. for every deadlock a message\n"
+    "  -D, --deadlock           detect deadlocks (i.e. for every deadlock a message\n"
     "                           is printed)\n"
-    "  -a, --action=NAME*       detect actions from NAME* (i.e. print a message for\n"
+    "  -aNAME*, --action=NAME*  detect actions from NAME* (i.e. print a message for\n"
     "                           every occurrence)\n"
-    "  -t, --trace[=NUM]        write at most NUM traces to states detected with the\n"
+    "  -t[NUM], --trace[=NUM]   write at most NUM traces to states detected with the\n"
     "                           --deadlock or --action options\n"
     "                           (NUM is 10 by default)\n"
     "      --error-trace        if an error occurs during exploration, save a trace\n"
     "                           to the state that could not be explored\n"
-    "  -C, --confluence[=NAME]  apply on-the-fly confluence reduction with NAME the\n"
+    "  -C[NAME], --confluence[=NAME]\n"
+    "                           apply on-the-fly confluence reduction with NAME the\n"
     "                           confluent tau action\n"
 /*    "  -p, --priority=NAME   give priority to action NAME (i.e. if it is\n"
     "                        possible to execute an action NAME in some state,\n"
     "                        than make it the only executable action from that\n"
     "                        state)\n" */
-    "  -s, --strategy=NAME      use strategy NAME to explore the state space with;\n"
+    "  -sNAME, --strategy=NAME  use strategy NAME to explore the state space with;\n"
     "                           the following strategies are available:\n"
     "                             b, breadth   breadth-first search (default)\n"
     "                             d, depth     depth-first search\n"
     "                             r, random    random search\n"
-    "  -R, --rewriter=NAME      use rewriter NAME (default 'inner');\n"
+    "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'inner');\n"
     "                           available rewriters are inner, jitty, innerc and\n"
     "                           jittyc\n"
     "      --aut                force OUTFILE to be in the aut format (implies\n"
@@ -165,12 +168,13 @@ int main(int argc, char **argv)
   lts_generation_options lgopts;
   lgopts.squadt = &sl;
 
-  #define sopts "hqvfyucrb::l:da:t::C::R:s:"
+  #define sopts "hqvdfyucrb::l:Da:t::C::R:s:"
   struct option lopts[] = {
     { "help",            no_argument,       NULL, 'h' },
     { "version",         no_argument,       NULL, 0   },
     { "quiet",           no_argument,       NULL, 'q' },
     { "verbose",         no_argument,       NULL, 'v' },
+    { "debug",           no_argument,       NULL, 'd' },
     { "freevar",         no_argument,       NULL, 'f' },
     { "dummy",           no_argument,       NULL, 'y' },
     { "unused-data",     no_argument,       NULL, 'u' },
@@ -178,8 +182,8 @@ int main(int argc, char **argv)
     { "tree",            no_argument,       NULL, 'r' },
     { "bit-hash",        optional_argument, NULL, 'b' },
     { "max",             required_argument, NULL, 'l' },
-    { "deadlock",        no_argument,       NULL, 'd' },
-    { "deadlock-detect", no_argument,       NULL, 'd' },
+    { "deadlock",        no_argument,       NULL, 'D' },
+    { "deadlock-detect", no_argument,       NULL, 'D' },
     { "action",          required_argument, NULL, 'a' },
     { "action-detect",   required_argument, NULL, 'a' },
     { "trace",           optional_argument, NULL, 't' },
@@ -223,6 +227,9 @@ int main(int argc, char **argv)
       case 'v':
         lgopts.verbose = true;
         break;
+      case 'd':
+        lgopts.debug = true;
+        break;
       case 'f':
         lgopts.usedummies = false;
         break;
@@ -260,7 +267,7 @@ int main(int argc, char **argv)
           return 1;
         }
         break;
-      case 'd':
+      case 'D':
         lgopts.detect_deadlock = true;
         break;
       case 'a':
@@ -352,6 +359,11 @@ int main(int argc, char **argv)
     gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
     return 1;
   }
+  if ( lgopts.quiet && lgopts.debug )
+  {
+    gsErrorMsg("options -q/--quiet and -d/--debug cannot be used together\n");
+    return 1;
+  }
   if ( lgopts.bithashing && lgopts.trace )
   {
     gsErrorMsg("options -b/--bit-hash and -t/--trace cannot be used together\n");
@@ -361,6 +373,8 @@ int main(int argc, char **argv)
     gsSetQuietMsg();
   if ( lgopts.verbose )
     gsSetVerboseMsg();
+  if ( lgopts.debug )
+    gsSetDebugMsg();
   
   if ( lgopts.specification == "" )
   {
