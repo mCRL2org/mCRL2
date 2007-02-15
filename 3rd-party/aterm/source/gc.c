@@ -29,7 +29,7 @@
 
 /*{{{  global variables */
 
-char gc_id[] = "$Id: gc.c 20804 2006-12-21 10:09:47Z eriks $";
+char gc_id[] = "$Id: gc.c 21333 2007-02-15 10:45:45Z eriks $";
 
 static ATerm *stackBot = NULL;
 

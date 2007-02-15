@@ -61,7 +61,7 @@
 /*}}}  */
 /*{{{  globals */
 
-char memory_id[] = "$Id: memory.c 20804 2006-12-21 10:09:47Z eriks $";
+char memory_id[] = "$Id: memory.c 21331 2007-02-15 09:37:39Z eriks $";
 
 unsigned int maxTermSize = INITIAL_MAX_TERM_SIZE;
 
@@ -602,7 +602,7 @@ static void allocate_block(unsigned int size)
   int idx;
   Block *newblock;
   int init = 0;
-  TermInfo* ti; 
+  TermInfo* ti;
   
   if(at_freeblocklist != NULL) {
 #ifdef GC_VERBOSE
@@ -638,7 +638,6 @@ static void allocate_block(unsigned int size)
   assert(size >= MIN_TERM_SIZE && size < maxTermSize);
   
   ti = &terminfo[size];
-
   ti->at_nrblocks++;
   
   /*
@@ -868,6 +867,7 @@ ATerm AT_allocate(unsigned int size)
 {
   ATerm at;
   TermInfo* ti;
+  
   nb_at_allocate++;
   
   if (size+1 > maxTermSize) {
@@ -1703,23 +1703,23 @@ ATermInt ATmakeInt(int val)
  */
 
 #define DOUBLEWORDSIZE (sizeof(double)/sizeof(MachineWord))
+union doublewords {
+  double      val; 
+  MachineWord word[DOUBLEWORDSIZE];
+};
+
 ATermReal ATmakeReal(double val)
 {
   ATermReal cur;
   header_type header = REAL_HEADER(0);
   HashNumber hnr;
   unsigned int i;
+  union doublewords dw;
   
-  union doublewords {
-    double      val; 
-    MachineWord word[DOUBLEWORDSIZE];
-  } uval;
-
-  uval.val = val;
-
   hnr = START(header);
+  dw.val = val;
   for (i=0; i<DOUBLEWORDSIZE; i++)
-    hnr = COMBINE(hnr, HN(uval.word[i]));
+    hnr = COMBINE(hnr, HN(dw.word[i]));
   hnr = FINISH(hnr);
   
   cur = (ATermReal) hashtable[hnr & table_mask];
