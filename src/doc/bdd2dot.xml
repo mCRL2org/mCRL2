@@ -33,10 +33,16 @@
 ]>
 
 <refentry id="bdd2dot">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
-<refentrytitle>bdd2dot</refentrytitle>
-<manvolnum>7</manvolnum>
+ <refentrytitle>bdd2dot</refentrytitle>
+ <manvolnum>7</manvolnum>
+ <refmiscinfo class="source">bdd2dot</refmiscinfo>
+ <refmiscinfo class="version"></refmiscinfo>
+ <refmiscinfo class="manual">Library functions</refmiscinfo>
 </refmeta>
 
 <refnamediv>

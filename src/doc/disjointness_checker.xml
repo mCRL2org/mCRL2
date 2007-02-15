@@ -19,10 +19,16 @@
 ]>
 
 <refentry id="disjointness_checker">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
-<refentrytitle>disjointness_checker</refentrytitle>
-<manvolnum>7</manvolnum>
+ <refentrytitle>disjointness_checker</refentrytitle>
+ <manvolnum>7</manvolnum>
+ <refmiscinfo class="source">disjointness_checker</refmiscinfo>
+ <refmiscinfo class="version"></refmiscinfo>
+ <refmiscinfo class="manual">Library functions</refmiscinfo>
 </refmeta>
 
 <refnamediv>

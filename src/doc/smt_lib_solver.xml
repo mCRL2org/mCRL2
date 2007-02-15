@@ -34,10 +34,16 @@
 ]>
 
 <refentry id="smt_lib_solver">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
-<refentrytitle>smt_lib_solver</refentrytitle>
-<manvolnum>7</manvolnum>
+ <refentrytitle>smt_lib_solver</refentrytitle>
+ <manvolnum>7</manvolnum>
+  <refmiscinfo class="source">smt_lib_solver</refmiscinfo>
+  <refmiscinfo class="version"></refmiscinfo>
+  <refmiscinfo class="manual">Library Functions</refmiscinfo>
 </refmeta>
 
 <refnamediv>

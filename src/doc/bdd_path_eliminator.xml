@@ -37,10 +37,16 @@
 ]>
 
 <refentry id="bdd_path_eliminator">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
-<refentrytitle>bdd_path_eliminator</refentrytitle>
-<manvolnum>7</manvolnum>
+ <refentrytitle>bdd_path_eliminator</refentrytitle>
+ <manvolnum>7</manvolnum>
+  <refmiscinfo class="source">bdd_path_eliminator</refmiscinfo>
+  <refmiscinfo class="version"></refmiscinfo>
+  <refmiscinfo class="manual">Library Functions</refmiscinfo>
 </refmeta>
 
 <refnamediv>
