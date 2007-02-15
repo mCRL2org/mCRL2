@@ -242,6 +242,20 @@ class data_operation: public data_expression
     data_operation(aterm_string name, lpe::sort s)
      : data_expression(gsMakeOpId(name, s))
     {}
+
+    /// Returns the name of the data_operation.
+    ///
+    aterm_string name() const
+    {
+      return arg1(*this);
+    }
+
+    /// Returns the sort of the data_operation.
+    ///
+    lpe::sort sort() const
+    {
+      return gsGetSort(*this);
+    }
   };
                                                             
 ///////////////////////////////////////////////////////////////////////////////
