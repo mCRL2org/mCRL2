@@ -452,8 +452,7 @@ int main(int ac, char** av) {
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  gsDebugMsg("Squadt connectivity enabled\n");
-  if (!mcrl2_squadt::interactor< squadt_interactor >::free_activation(ac, av)) {
+  if (mcrl2_squadt::interactor< squadt_interactor >::free_activation(ac, av)) {
     return 0;
   }
 #endif
