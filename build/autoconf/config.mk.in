@@ -15,4 +15,4 @@ mandir             = @mandir@
 BJAM               = @BJAM@
 BOOST_BUILD       := $(BJAM) --prefix=${prefix}
 
-USE_XSLTPROC       = @USE_XSLTPROC@
+XSLTPROC           = @XSLTPROC@

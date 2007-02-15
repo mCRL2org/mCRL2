@@ -693,7 +693,6 @@ OPENGL_IPATH
 OPENGL_LPATH
 OPENGL_NAME
 XSLTPROC
-USE_XSLTPROC
 WX_CONFIG
 WX_CPPFLAGS
 WX_BASE_LDFLAGS
@@ -5157,9 +5156,7 @@ fi
 
 
 fi
-if test $XSLT_PROC; then
-  USE_XSLTPROC=xsltproc_available
-else
+if test -z $XSLTPROC; then
   { echo "$as_me:$LINENO: documentation cannot be built because xsltproc was not found." >&5
 echo "$as_me: documentation cannot be built because xsltproc was not found." >&6;}
 fi
@@ -6308,7 +6305,7 @@ fi
 eval "eval PREFIX_DIR=${prefix}"
 eval "eval EXEC_PREFIX_DIR=${exec_prefix}"
 
-prefix="\$(prefix)"
+prefix="\$\(prefix\)"
 includedir="$includedir/mcrl2"
 datadir="$datadir/mcrl2"
 libdir="$libdir/mcrl2"
@@ -7081,7 +7078,6 @@ OPENGL_IPATH!$OPENGL_IPATH$ac_delim
 OPENGL_LPATH!$OPENGL_LPATH$ac_delim
 OPENGL_NAME!$OPENGL_NAME$ac_delim
 XSLTPROC!$XSLTPROC$ac_delim
-USE_XSLTPROC!$USE_XSLTPROC$ac_delim
 WX_CONFIG!$WX_CONFIG$ac_delim
 WX_CPPFLAGS!$WX_CPPFLAGS$ac_delim
 WX_BASE_LDFLAGS!$WX_BASE_LDFLAGS$ac_delim
@@ -7101,6 +7097,7 @@ INCLUDE_DIR!$INCLUDE_DIR$ac_delim
 MAN_DIR!$MAN_DIR$ac_delim
 R_CFLAGS!$R_CFLAGS$ac_delim
 R_SCFLAGS!$R_SCFLAGS$ac_delim
+R_CXXFLAGS!$R_CXXFLAGS$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -7142,7 +7139,6 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
-R_CXXFLAGS!$R_CXXFLAGS$ac_delim
 R_SCXXFLAGS!$R_SCXXFLAGS$ac_delim
 R_CPPFLAGS!$R_CPPFLAGS$ac_delim
 R_LDFLAGS!$R_LDFLAGS$ac_delim
@@ -7151,7 +7147,7 @@ USE_BCG!$USE_BCG$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 7; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 6; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

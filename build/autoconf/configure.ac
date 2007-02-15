@@ -426,12 +426,10 @@ if test $with_xsltproc; then
 else 
   AC_CHECK_PROG([XSLTPROC],[xsltproc],[xsltproc])
 fi
-if test $XSLT_PROC; then
-  USE_XSLTPROC=xsltproc_available
-else
+if test -z $XSLTPROC; then
   AC_MSG_NOTICE(documentation cannot be built because xsltproc was not found.)
 fi
-AC_SUBST([USE_XSLTPROC],[])
+AC_SUBST([XSLTPROC],[])
 
 # Check for wxWidgets
 AC_ARG_WITH(
@@ -500,7 +498,7 @@ fi
 eval "eval PREFIX_DIR=${prefix}"
 eval "eval EXEC_PREFIX_DIR=${exec_prefix}"
 
-prefix="\$(prefix)"
+prefix="\$\(prefix\)"
 includedir="$includedir/mcrl2"
 datadir="$datadir/mcrl2"
 libdir="$libdir/mcrl2"
