@@ -29,7 +29,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 		else if (d.is_false())
 			result = false_();
 		else
-			result = val(p);
+			result = val(d);
 		//std::cout << result << std::endl;
 	}
 	else if (is_true(p))
