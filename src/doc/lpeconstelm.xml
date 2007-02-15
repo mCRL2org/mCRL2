@@ -1,33 +1,28 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY lpeconstelm "<command>lpeconstelm</command>">
-<!ENTITY infile "<parameter>INFILE</parameter>">
-<!ENTITY outfile "<parameter>OUTFILE</parameter>">
-<!ENTITY opt_h "<option>-h</option>">
-<!ENTITY opt_help "<option>--help</option>">
-<!ENTITY opt_version "<option>--version</option>">
-<!ENTITY opt_v "<option>-v</option>">
-<!ENTITY opt_d "<option>-d</option>">
-<!ENTITY opt_debug "<option>--debug</option>">
-<!ENTITY opt_verbose "<option>--verbose</option>">
+<!ENTITY % param SYSTEM "param.xml"> %param;
 <!ENTITY opt_nosingleton "<option>--no-singleton</option>">
 <!ENTITY opt_noreachable "<option>--no-reachable</option>">
 <!ENTITY opt_nocondition "<option>--no-condition</option>">
-
-<!ENTITY stdin "<option>stdin</option>">
-<!ENTITY stdout "<option>stdout</option>">
-
 ]>
 
 <webpage id="lpeconstelm-web">
-  <head><title>lpeconstelm</title></head>
+ <head>
+  <title>lpeconstelm</title>
+ </head>
+ <releaseinfo>
+  <date>2005-2007</date>
+ </releaseinfo>
 
 <refentry id="lpeconstelm">
 
 <refmeta>
-<refentrytitle>lpeconstelm</refentrytitle>
-<manvolnum>1</manvolnum>
+ <refentrytitle>lpeconstelm</refentrytitle>
+ <manvolnum>1</manvolnum>
+ <refmiscinfo class="source">lpeconstelm</refmiscinfo>
+ <refmiscinfo class="version"></refmiscinfo>
+ <refmiscinfo class="manual">User Commands</refmiscinfo>
 </refmeta>
 
 <refnamediv>
@@ -51,7 +46,7 @@
   any run of the process, all occurrences of these process parameter are
   replaced by the initial value and the process parameters are removed from the
   LPE. The result is written to &outfile;. If &outfile; is not supplied,
-  &stdout; is used. If &infile; is not supplied, &stdin; is used instead.
+  &cstdout; is used. If &infile; is not supplied, &cstdin; is used instead.
   </para>
   <para>
   If the initial value of a process parameter is a free variable and remains a 

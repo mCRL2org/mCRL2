@@ -1,28 +1,30 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY sim "<command>sim</command>">
-<!ENTITY xsim "<command>xsim</command>">
-<!ENTITY option "<parameter>OPTION</parameter>">
-<!ENTITY infile "<parameter>INFILE</parameter>">
-<!ENTITY name "<parameter>NAME</parameter>">
+<!ENTITY % param SYSTEM "param.xml"> %param;
 <!ENTITY inner "<parameter>inner</parameter>">
-<!ENTITY opt_h "<option>-h</option>">
 <!ENTITY opt_y "<option>-y</option>">
 <!ENTITY opt_R "<option>-R</option>">
 <!ENTITY opt_help "<option>--help</option>">
 <!ENTITY opt_dummy "<option>--dummy</option>">
 <!ENTITY opt_rewriter "<option>--rewriter</option>">
 ]>
-
 <webpage id="xsim-web">
-  <head><title>xsim</title></head>
+ <head>
+  <title>xsim</title>
+ </head>
+ <releaseinfo>
+  <date>2005-2007</date>
+ </releaseinfo>
 
 <refentry id="xsim">
 
 <refmeta>
   <refentrytitle>xsim</refentrytitle>
   <manvolnum>1</manvolnum>
+  <refmiscinfo class="source">xsim</refmiscinfo>
+  <refmiscinfo class="version"></refmiscinfo>
+  <refmiscinfo class="manual">User Commands</refmiscinfo>
 </refmeta>
 
 <refnamediv>

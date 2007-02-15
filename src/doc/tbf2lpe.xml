@@ -1,17 +1,8 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY tbf2lpe "<command>tbf2lpe</command>">
-<!ENTITY option "<parameter>OPTION</parameter>">
-<!ENTITY input_lpe "<parameter>INFILE</parameter>">
-<!ENTITY output_lpe "<parameter>OUTFILE</parameter>">
-<!ENTITY opt_h "<option>-h</option>">
-<!ENTITY opt_q "<option>-q</option>">
-<!ENTITY opt_v "<option>-v</option>">
+<!ENTITY % param SYSTEM "param.xml"> %param;
 <!ENTITY opt_n "<option>-n</option>">
-<!ENTITY opt_help "<option>--help</option>">
-<!ENTITY opt_quiet "<option>--quiet</option>">
-<!ENTITY opt_verbose "<option>--verbose</option>">
 <!ENTITY opt_noconvmaps "<option>--no-conv-maps</option>">
 <!ENTITY opt_noconvcons "<option>--no-conv-cons</option>">
 <!ENTITY Bool "<constant>Bool</constant>">
@@ -28,17 +19,25 @@
 ]>
 
 <webpage id="tbf2lpe-web">
-  <head><title>tbf2lpe</title></head>
+ <head>
+  <title>tbf2lpe</title>
+ </head>
+ <releaseinfo>
+  <date>2005-2007</date>
+ </releaseinfo>
 
 <refentry id="tbf2lpe">
 
 <refmeta>
-  <refentrytitle>tbf2lpe</refentrytitle>
-  <manvolnum>1</manvolnum>
+ <refentrytitle>tbf2lpe</refentrytitle>
+ <manvolnum>1</manvolnum>
+ <refmiscinfo class="source">tbf2lpe</refmiscinfo>
+ <refmiscinfo class="version"></refmiscinfo>
+ <refmiscinfo class="manual">User Commands</refmiscinfo>
 </refmeta>
 
 <refnamediv>
-  <refname>tbf2lpe</refname>
+  <refname>&tbf2lpe;</refname>
   <refpurpose>convert mCRL LPEs to mCRL2 LPEs</refpurpose>
 </refnamediv>
 
@@ -46,8 +45,8 @@
   <cmdsynopsis>
     <command>&tbf2lpe;</command>
     <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
-    <arg choice="opt">&input_lpe;
-    <arg choice="opt">&output_lpe;</arg>
+    <arg choice="opt">&infile;
+    <arg choice="opt">&outfile;</arg>
     </arg>
   </cmdsynopsis>
 </refsynopsisdiv>

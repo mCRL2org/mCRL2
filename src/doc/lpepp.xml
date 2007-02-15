@@ -1,37 +1,30 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY lpepp "<command>lpepp</command>">
-<!ENTITY option "<parameter>OPTION</parameter>">
-<!ENTITY infile "<parameter>INFILE</parameter>">
-<!ENTITY outfile "<parameter>OUTFILE</parameter>">
-<!ENTITY format "<parameter>FORMAT</parameter>">
-<!ENTITY default "<parameter>default</parameter>">
+<!ENTITY % param SYSTEM "param.xml"> %param;
 <!ENTITY debug "<parameter>debug</parameter>">
+<!ENTITY default "<parameter>default</parameter>">
 <!ENTITY internal "<parameter>internal</parameter>">
 <!ENTITY opt_f "<option>-f</option>">
-<!ENTITY opt_h "<option>-h</option>">
-<!ENTITY opt_q "<option>-q</option>">
-<!ENTITY opt_v "<option>-v</option>">
-<!ENTITY opt_d "<option>-d</option>">
 <!ENTITY opt_format "<option>--format</option>">
-<!ENTITY opt_help "<option>--help</option>">
-<!ENTITY opt_version "<option>--version</option>">
-<!ENTITY opt_quiet "<option>--quiet</option>">
-<!ENTITY opt_verbose "<option>--verbose</option>">
-<!ENTITY opt_debug "<option>--debug</option>">
-<!ENTITY stdin "<constant>stdin</constant>">
-<!ENTITY stdout "<constant>stdout</constant>">
 ]>
 
 <webpage id="lpepp-web">
-  <head><title>lpepp</title></head>
+ <head>
+  <title>lpepp</title>
+ </head>
+ <releaseinfo>
+  <date>2005-2007</date>
+ </releaseinfo>
 
 <refentry id="lpepp">
 
 <refmeta>
   <refentrytitle>lpepp</refentrytitle>
   <manvolnum>1</manvolnum>
+  <refmiscinfo class="source">lpepp</refmiscinfo>
+  <refmiscinfo class="version"></refmiscinfo>
+  <refmiscinfo class="manual">User Commands</refmiscinfo>
 </refmeta>
 
 <refnamediv>
@@ -54,7 +47,7 @@
   <para>
     The &lpepp; tool prints the linear process equation (LPE) from &infile; to
     &outfile; in a human readable format. If &outfile; is not present,
-    &stdout; is used. If &infile; is not present, &stdin; is used.
+    &cstdout; is used. If &infile; is not present, &cstdin; is used.
   </para>
 </refsect1>
 

@@ -1,27 +1,13 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY lpe2torx "<command>lpe2torx</command>">
-<!ENTITY option "<parameter>OPTION</parameter>">
-<!ENTITY infile "<parameter>INFILE</parameter>">
-<!ENTITY outfile "<parameter>OUTFILE</parameter>">
-<!ENTITY format "<parameter>FORMAT</parameter>">
-<!ENTITY default "<parameter>default</parameter>">
-<!ENTITY debug "<parameter>debug</parameter>">
-<!ENTITY internal "<parameter>internal</parameter>">
-<!ENTITY opt_h "<option>-h</option>">
-<!ENTITY opt_q "<option>-q</option>">
-<!ENTITY opt_v "<option>-v</option>">
+<!ENTITY % param SYSTEM "param.xml"> %param;
 <!ENTITY opt_f "<option>-f</option>">
 <!ENTITY opt_y "<option>-y</option>">
 <!ENTITY opt_u "<option>-u</option>">
 <!ENTITY opt_c "<option>-c</option>">
 <!ENTITY opt_r "<option>-r</option>">
 <!ENTITY opt_R "<option>-R</option>">
-<!ENTITY opt_help "<option>--help</option>">
-<!ENTITY opt_version "<option>--version</option>">
-<!ENTITY opt_quiet "<option>--quiet</option>">
-<!ENTITY opt_verbose "<option>--verbose</option>">
 <!ENTITY opt_freevar "<option>--freevar</option>">
 <!ENTITY opt_dummy "<option>--dummy</option>">
 <!ENTITY opt_unused-data "<option>--unused-data</option>">
@@ -31,18 +17,24 @@
 <!ENTITY opt_aut "<option>--aut</option>">
 <!ENTITY opt_svc "<option>--svc</option>">
 <!ENTITY opt_no-info "<option>--no-info</option>">
-<!ENTITY stdin "<constant>stdin</constant>">
-<!ENTITY stdout "<constant>stdout</constant>">
 ]>
 
 <webpage id="lpe2torx-web">
-  <head><title>lpe2torx</title></head>
+ <head>
+  <title>lpe2torx</title>
+ </head>
+ <releaseinfo>
+  <date>2005-2007</date>
+ </releaseinfo>
 
 <refentry id="lpe2torx">
 
 <refmeta>
   <refentrytitle>lpe2torx</refentrytitle>
   <manvolnum>1</manvolnum>
+  <refmiscinfo class="source">lpe2torx</refmiscinfo>
+  <refmiscinfo class="version"></refmiscinfo>
+  <refmiscinfo class="manual">User Commands</refmiscinfo>
 </refmeta>
 
 <refnamediv>
@@ -63,7 +55,7 @@
   <title>Description</title>
   <para>
     The &lpe2torx; tool provides a TorX explorer interface to the linear
-    process equation (LPE) in &infile;. If &infile; is not supplied, &stdin; is
+    process equation (LPE) in &infile;. If &infile; is not supplied, &cstdin; is
     used.
   </para>
   <para>    

@@ -1,34 +1,27 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY pnml2mcrl2 "<command>pnml2mcrl2</command>">
-<!ENTITY option "<parameter>OPTION</parameter>">
-<!ENTITY infile "<parameter>INFILE</parameter>">
-<!ENTITY outfile "<parameter>OUTFILE</parameter>">
-
-<!ENTITY opt_h "<option>-h</option>">
-<!ENTITY opt_help "<option>--help</option>">
-<!ENTITY opt_q "<option>-q</option>">
-<!ENTITY opt_quiet "<option>--quiet</option>">
-<!ENTITY opt_d "<option>-d</option>">
-<!ENTITY opt_debug "<option>--debug</option>">
+<!ENTITY % param SYSTEM "param.xml"> %param;
 <!ENTITY opt_p "<option>-p</option>">
 <!ENTITY opt_no_rec_par "<option>--no_rec_par</option>">
-<!ENTITY opt_v "<option>-d</option>">
-<!ENTITY opt_verbose "<option>--verbose</option>">
-<!ENTITY opt_version "<option>--version</option>">
-<!ENTITY stdin "<option>STDIN</option>">
-<!ENTITY stdout "<option>STDOUT</option>">
 ]>
 
 <webpage id="pnml2mcrl2-web">
-  <head><title>pnml2mcrl2</title></head>
+ <head>
+  <title>pnml2mcrl2</title>
+ </head>
+ <releaseinfo>
+  <date>2005-2007</date>
+ </releaseinfo>
 
 <refentry id="pnml2mcrl2">
 
 <refmeta>
   <refentrytitle>pnml2mcrl2</refentrytitle>
   <manvolnum>1</manvolnum>
+  <refmiscinfo class="source">pnml2mcrl2</refmiscinfo>
+  <refmiscinfo class="version"></refmiscinfo>
+  <refmiscinfo class="manual">User Commands</refmiscinfo>
 </refmeta>
 
 <refnamediv>

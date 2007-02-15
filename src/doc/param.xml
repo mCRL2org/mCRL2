@@ -9,6 +9,7 @@
 <!ENTITY pvblevel             '<parameter>vbLevel</parameter>'>
 <!ENTITY psavetomcrlformat    '<parameter>saveToMCRLFormat</parameter>'>
 <!ENTITY cnull                '<constant>NULL</constant>'>
+<!ENTITY cstdin               '<constant>stdin</constant>'>
 <!ENTITY cstderr              '<constant>stderr</constant>'>
 <!ENTITY cstdout              '<constant>stdout</constant>'>
 <!ENTITY tfile                '<type>FILE</type>'>
@@ -87,3 +88,49 @@
 <!ENTITY nvdilist    '<literal>VDI_LIST</literal>'>
 <!ENTITY nfpvd       '<literal>FP_VD</literal>'>
 <!ENTITY nfpvo       '<literal>FP_VO</literal>'>
+
+<!-- mCRL2 standard tool interface elements -->
+<!ENTITY option "<parameter>OPTION</parameter>">
+<!ENTITY infile "<parameter>INFILE</parameter>">
+<!ENTITY outfile "<parameter>OUTFILE</parameter>">
+<!ENTITY format "<parameter>FORMAT</parameter>">
+<!ENTITY name "<parameter>NAME</parameter>">
+<!ENTITY opt_help "<option>--help</option>">
+<!ENTITY opt_h "<option>-h</option>">
+<!ENTITY opt_version "<option>--version</option>">
+<!ENTITY opt_verbose "<option>--verbose</option>">
+<!ENTITY opt_v "<option>-v</option>">
+<!ENTITY opt_quiet "<option>--quiet</option>">
+<!ENTITY opt_q "<option>-q</option>">
+<!ENTITY opt_debug "<option>--debug</option>">
+<!ENTITY opt_d "<option>-d</option>">
+
+<!-- mCRL2 tools -->
+<!ENTITY mcrl22lpe "<command>mcrl22lpe</command>">
+<!ENTITY lpe2lts "<command>lpe2lts</command>">
+<!ENTITY lpe2torx "<command>lpe2torx</command>">
+<!ENTITY lpebinary "<command>lpebinary</command>">
+<!ENTITY lpeconstelm "<command>lpeconstelm</command>">
+<!ENTITY lpeconfcheck "<command>lpeconfcheck</command>">
+<!ENTITY lpedataelm "<command>lpedataelm</command>">
+<!ENTITY lpedecluster "<command>lpedecluster</command>">
+<!ENTITY lpeformcheck "<command>lpeformcheck</command>">
+<!ENTITY lpeinfo "<command>lpeinfo</command>">
+<!ENTITY lpeinvelm "<command>lpeinvelm</command>">
+<!ENTITY lpeparelm "<command>lpeparelm</command>">
+<!ENTITY lpeuntime "<command>lpeuntime</command>">
+<!ENTITY lpepp "<command>lpepp</command>">
+<!ENTITY lperewr "<command>lperewr</command>">
+<!ENTITY lpesumelm "<command>lpesumelm</command>">
+<!ENTITY ltsinfo "<command>ltsinfo</command>">
+<!ENTITY ltscompare "<command>ltscompare</command>">
+<!ENTITY ltsconvert "<command>ltsconvert</command>">
+<!ENTITY ltsgraph "<command>ltsgraph</command>">
+<!ENTITY ltsmin "<command>ltsmin</command>">
+<!ENTITY pnml2mcrl2 "<command>pnml2mcrl2</command>">
+<!ENTITY tracepp "<command>tracepp</command>">
+<!ENTITY sim "<command>sim</command>">
+<!ENTITY tbf2lpe "<command>tbf2lpe</command>">
+<!ENTITY xsim "<command>xsim</command>">
+
+

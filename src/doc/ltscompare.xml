@@ -1,43 +1,41 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY ltscompare "<command>ltscompare</command>">
-<!ENTITY option "<parameter>OPTION</parameter>">
+<!ENTITY % param SYSTEM "param.xml"> %param;
 <!ENTITY infile1 "<parameter>INFILE1</parameter>">
 <!ENTITY infile2 "<parameter>INFILE2</parameter>">
-<!ENTITY format "<parameter>FORMAT</parameter>">
 <!ENTITY actnames "<parameter>ACTNAMES</parameter>">
-<!ENTITY opt_h "<option>-h</option>">
-<!ENTITY opt_q "<option>-q</option>">
-<!ENTITY opt_v "<option>-v</option>">
 <!ENTITY opt_i "<option>-i</option>">
 <!ENTITY opt_j "<option>-j</option>">
 <!ENTITY opt_f "<option>-f</option>">
 <!ENTITY opt_s "<option>-n</option>">
 <!ENTITY opt_b "<option>-n</option>">
-<!ENTITY opt_help "<option>--help</option>">
-<!ENTITY opt_version "<option>--version</option>">
-<!ENTITY opt_quiet "<option>--quiet</option>">
-<!ENTITY opt_verbose "<option>--verbose</option>">
 <!ENTITY opt_in1 "<option>--in1</option>">
 <!ENTITY opt_in2 "<option>--in2</option>">
 <!ENTITY opt_formats "<option>--formats</option>">
 <!ENTITY opt_strong "<option>--strong</option>">
 <!ENTITY opt_branching "<option>--branching</option>">
 <!ENTITY opt_tau "<option>--tau</option>">
-<!ENTITY stdin "<constant>stdin</constant>">
 <!ENTITY fsm "<constant>fsm</constant>">
 <!ENTITY dot "<constant>dot</constant>">
 ]>
 
 <webpage id="ltscompare-web">
-  <head><title>ltscompare</title></head>
+ <head>
+  <title>ltscompare</title>
+ </head>
+ <releaseinfo>
+  <date>2005-2007</date>
+ </releaseinfo>
 
 <refentry id="ltscompare">
 
 <refmeta>
   <refentrytitle>ltscompare</refentrytitle>
   <manvolnum>1</manvolnum>
+  <refmiscinfo class="source">ltscompare</refmiscinfo>
+  <refmiscinfo class="version"></refmiscinfo>
+  <refmiscinfo class="manual">User Commands</refmiscinfo>
 </refmeta>
 
 <refnamediv>
@@ -59,7 +57,7 @@
   <para>
     The ltscompare tool determines whether or not the labelled transition
     systems (LTSs) in &infile1; and &infile2; are the same modulo some
-    equivalence. If &infile1; is not supplied, &stdin; is used.
+    equivalence. If &infile1; is not supplied, &cstdin; is used.
   </para>
 
   <para>
@@ -128,7 +126,7 @@
     <term>&opt_i;</term>
     <term>&opt_in1;=&format;</term>
     <listitem>
-      <para>use &format; format as the format for &infile1; (or &stdin; if
+      <para>use &format; format as the format for &infile1; (or &cstdin; if
       &infile1; is not supplied)
       </para>
     </listitem>

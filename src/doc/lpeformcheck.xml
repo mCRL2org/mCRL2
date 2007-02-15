@@ -1,10 +1,8 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY lpeformcheck "<command>lpeformcheck</command>">
-<!ENTITY option "<parameter>OPTION</parameter>">
+<!ENTITY % param SYSTEM "param.xml"> %param;
 <!ENTITY formulas "<parameter>FORMULAS</parameter>">
-<!ENTITY infile "<parameter>INFILE</parameter>">
 <!ENTITY prefix "<parameter>PREFIX</parameter>">
 <!ENTITY strategy "<parameter>STRATEGY</parameter>">
 <!ENTITY seconds "<parameter>SECONDS</parameter>">
@@ -15,10 +13,7 @@
 <!ENTITY opt_c "<option>-c</option>">
 <!ENTITY opt_w "<option>-w</option>">
 <!ENTITY opt_p "<option>-p</option>">
-<!ENTITY opt_h "<option>-h</option>">
-<!ENTITY opt_q "<option>-q</option>">
 <!ENTITY opt_v "<option>-v</option>">
-<!ENTITY opt_d "<option>-d</option>">
 <!ENTITY opt_r "<option>-r</option>">
 <!ENTITY opt_t "<option>-t</option>">
 <!ENTITY opt_z "<option>-z</option>">
@@ -27,11 +22,6 @@
 <!ENTITY opt_counter_example "<option>--counter-example</option>">
 <!ENTITY opt_witness "<option>--witness</option>">
 <!ENTITY opt_print_dot "<option>--print-dot</option>">
-<!ENTITY opt_help "<option>--help</option>">
-<!ENTITY opt_version "<option>--version</option>">
-<!ENTITY opt_quiet "<option>--quiet</option>">
-<!ENTITY opt_verbose "<option>--verbose</option>">
-<!ENTITY opt_debug "<option>--debug</option>">
 <!ENTITY opt_rewrite_strategy "<option>--rewrite-strategy</option>">
 <!ENTITY opt_time_limit "<option>--time-limit</option>">
 <!ENTITY opt_smt_solver "<option>--smt-solver</option>">
@@ -50,13 +40,21 @@
 ]>
 
 <webpage id="lpeformcheck-web">
-  <head><title>lpeformcheck</title></head>
+ <head>
+  <title>lpeformcheck</title>
+ </head>
+ <releaseinfo>
+  <date>2005-2007</date>
+ </releaseinfo>
 
 <refentry id="lpeformcheck">
 
 <refmeta>
   <refentrytitle>lpeformcheck</refentrytitle>
   <manvolnum>1</manvolnum>
+  <refmiscinfo class="source">lpeformcheck</refmiscinfo>
+  <refmiscinfo class="version"></refmiscinfo>
+  <refmiscinfo class="manual">User Commands</refmiscinfo>
 </refmeta>
 
 <refnamediv>

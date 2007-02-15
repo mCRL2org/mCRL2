@@ -1,27 +1,14 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY lpe2lts "<command>lpe2lts</command>">
-<!ENTITY tracepp "<command>tracepp</command>">
-<!ENTITY option "<parameter>OPTION</parameter>">
-<!ENTITY infile "<parameter>INFILE</parameter>">
-<!ENTITY outfile "<parameter>OUTFILE</parameter>">
-<!ENTITY format "<parameter>FORMAT</parameter>">
-<!ENTITY default "<parameter>default</parameter>">
-<!ENTITY debug "<parameter>debug</parameter>">
-<!ENTITY internal "<parameter>internal</parameter>">
-<!ENTITY name "<parameter>NAME</parameter>">
+<!ENTITY % param SYSTEM "param.xml"> %param;
 <!ENTITY num "<parameter>NUM</parameter>">
-<!ENTITY opt_h "<option>-h</option>">
-<!ENTITY opt_q "<option>-q</option>">
-<!ENTITY opt_v "<option>-v</option>">
 <!ENTITY opt_f "<option>-f</option>">
 <!ENTITY opt_y "<option>-y</option>">
 <!ENTITY opt_u "<option>-u</option>">
 <!ENTITY opt_c "<option>-c</option>">
 <!ENTITY opt_r "<option>-r</option>">
 <!ENTITY opt_l "<option>-l</option>">
-<!ENTITY opt_d "<option>-d</option>">
 <!ENTITY opt_e "<option>-e</option>">
 <!ENTITY opt_D "<option>-D</option>">
 <!ENTITY opt_t "<option>-t</option>">
@@ -29,10 +16,6 @@
 <!ENTITY opt_p "<option>-p</option>">
 <!ENTITY opt_m "<option>-m</option>">
 <!ENTITY opt_R "<option>-R</option>">
-<!ENTITY opt_help "<option>--help</option>">
-<!ENTITY opt_version "<option>--version</option>">
-<!ENTITY opt_quiet "<option>--quiet</option>">
-<!ENTITY opt_verbose "<option>--verbose</option>">
 <!ENTITY opt_freevar "<option>--freevar</option>">
 <!ENTITY opt_dummy "<option>--dummy</option>">
 <!ENTITY opt_unused-data "<option>--unused-data</option>">
@@ -52,18 +35,23 @@
 <!ENTITY opt_aut "<option>--aut</option>">
 <!ENTITY opt_svc "<option>--svc</option>">
 <!ENTITY opt_no-info "<option>--no-info</option>">
-<!ENTITY stdin "<constant>stdin</constant>">
-<!ENTITY stdout "<constant>stdout</constant>">
 ]>
 
 <webpage id="lpe2lts-web">
-  <head><title>lpe2lts</title></head>
-
+ <head>
+  <title>lpe2lts</title>
+ </head>
+ <releaseinfo>
+  <date>2005-2007</date>
+ </releaseinfo>
 <refentry id="lpe2lts">
 
 <refmeta>
   <refentrytitle>lpe2lts</refentrytitle>
   <manvolnum>1</manvolnum>
+  <refmiscinfo class="source">lpe2lts</refmiscinfo>
+  <refmiscinfo class="version"></refmiscinfo>
+  <refmiscinfo class="manual">User Commands</refmiscinfo>
 </refmeta>
 
 <refnamediv>
@@ -227,7 +215,7 @@ Mandatory arguments to long options are also mandatory to short options.
          during the state space exploration a unique file with extension .trc
          (trace) will be created containing a shortest trace from the initial
          state to the deadlock state. The traces can be pretty printed and
-         converted to other formats using &tracepp;.
+         converted to other formats using <command moreinfo="refentry">tracepp</command>.
       </para>
     </listitem>
   </varlistentry>

@@ -692,8 +692,8 @@ BOOST_LIBRARY_PATH
 OPENGL_IPATH
 OPENGL_LPATH
 OPENGL_NAME
-XMLTO
-USE_XMLTO
+XSLTPROC
+USE_XSLTPROC
 WX_CONFIG
 WX_CPPFLAGS
 WX_BASE_LDFLAGS
@@ -1335,7 +1335,7 @@ Optional Packages:
   --with-boost=prefix     try this for the boost prefix install directory
 
   --with-opengl=DIR       OpenGL/Mesa installation directory
-  --with-xmlto=prefix     try this for the xmlto prefix install directory
+  --with-xsltproc=prefix  try this for the xsltproc prefix install directory
 
   --with-wx=DIR           use wxWidgets configuration program wx-config in DIR
 
@@ -5073,32 +5073,32 @@ echo "${ECHO_T}no" >&6; }
 fi
 
 
-# Check for xmlto
+# Check for xsltproc
 
-# Check whether --with-xmlto was given.
-if test "${with_xmlto+set}" = set; then
-  withval=$with_xmlto;
+# Check whether --with-xsltproc was given.
+if test "${with_xsltproc+set}" = set; then
+  withval=$with_xsltproc;
 fi
 
-if test $with_xmlto; then
-  # Extract the first word of "xmlto", so it can be a program name with args.
-set dummy xmlto; ac_word=$2
+if test $with_xsltproc; then
+  # Extract the first word of "xsltproc", so it can be a program name with args.
+set dummy xsltproc; ac_word=$2
 { echo "$as_me:$LINENO: checking for $ac_word" >&5
 echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
-if test "${ac_cv_prog_XMLTO+set}" = set; then
+if test "${ac_cv_prog_XSLTPROC+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  if test -n "$XMLTO"; then
-  ac_cv_prog_XMLTO="$XMLTO" # Let the user override the test.
+  if test -n "$XSLTPROC"; then
+  ac_cv_prog_XSLTPROC="$XSLTPROC" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $with_xmlto
+for as_dir in $with_xsltproc
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
   for ac_exec_ext in '' $ac_executable_extensions; do
   if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_XMLTO="$with_xmlto/xmlto"
+    ac_cv_prog_XSLTPROC="$with_xsltproc/xsltproc"
     echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -5108,10 +5108,10 @@ IFS=$as_save_IFS
 
 fi
 fi
-XMLTO=$ac_cv_prog_XMLTO
-if test -n "$XMLTO"; then
-  { echo "$as_me:$LINENO: result: $XMLTO" >&5
-echo "${ECHO_T}$XMLTO" >&6; }
+XSLTPROC=$ac_cv_prog_XSLTPROC
+if test -n "$XSLTPROC"; then
+  { echo "$as_me:$LINENO: result: $XSLTPROC" >&5
+echo "${ECHO_T}$XSLTPROC" >&6; }
 else
   { echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
@@ -5119,15 +5119,15 @@ fi
 
 
 else
-  # Extract the first word of "xmlto", so it can be a program name with args.
-set dummy xmlto; ac_word=$2
+  # Extract the first word of "xsltproc", so it can be a program name with args.
+set dummy xsltproc; ac_word=$2
 { echo "$as_me:$LINENO: checking for $ac_word" >&5
 echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
-if test "${ac_cv_prog_XMLTO+set}" = set; then
+if test "${ac_cv_prog_XSLTPROC+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  if test -n "$XMLTO"; then
-  ac_cv_prog_XMLTO="$XMLTO" # Let the user override the test.
+  if test -n "$XSLTPROC"; then
+  ac_cv_prog_XSLTPROC="$XSLTPROC" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
@@ -5136,7 +5136,7 @@ do
   test -z "$as_dir" && as_dir=.
   for ac_exec_ext in '' $ac_executable_extensions; do
   if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_XMLTO="xmlto"
+    ac_cv_prog_XSLTPROC="xsltproc"
     echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -5146,10 +5146,10 @@ IFS=$as_save_IFS
 
 fi
 fi
-XMLTO=$ac_cv_prog_XMLTO
-if test -n "$XMLTO"; then
-  { echo "$as_me:$LINENO: result: $XMLTO" >&5
-echo "${ECHO_T}$XMLTO" >&6; }
+XSLTPROC=$ac_cv_prog_XSLTPROC
+if test -n "$XSLTPROC"; then
+  { echo "$as_me:$LINENO: result: $XSLTPROC" >&5
+echo "${ECHO_T}$XSLTPROC" >&6; }
 else
   { echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
@@ -5157,13 +5157,11 @@ fi
 
 
 fi
-if test $XMLTO; then
-  USE_XMLTO=xmlto_available
+if test $XSLT_PROC; then
+  USE_XSLTPROC=xsltproc_available
 else
-  { echo "$as_me:$LINENO: documentation cannot be built because xmlto was not found." >&5
-echo "$as_me: documentation cannot be built because xmlto was not found." >&6;}
-  { echo "$as_me:$LINENO: xmlto can be obtained from http://cyberelk.net/tim/xmlto/." >&5
-echo "$as_me: xmlto can be obtained from http://cyberelk.net/tim/xmlto/." >&6;}
+  { echo "$as_me:$LINENO: documentation cannot be built because xsltproc was not found." >&5
+echo "$as_me: documentation cannot be built because xsltproc was not found." >&6;}
 fi
 
 
@@ -7082,8 +7080,8 @@ BOOST_LIBRARY_PATH!$BOOST_LIBRARY_PATH$ac_delim
 OPENGL_IPATH!$OPENGL_IPATH$ac_delim
 OPENGL_LPATH!$OPENGL_LPATH$ac_delim
 OPENGL_NAME!$OPENGL_NAME$ac_delim
-XMLTO!$XMLTO$ac_delim
-USE_XMLTO!$USE_XMLTO$ac_delim
+XSLTPROC!$XSLTPROC$ac_delim
+USE_XSLTPROC!$USE_XSLTPROC$ac_delim
 WX_CONFIG!$WX_CONFIG$ac_delim
 WX_CPPFLAGS!$WX_CPPFLAGS$ac_delim
 WX_BASE_LDFLAGS!$WX_BASE_LDFLAGS$ac_delim

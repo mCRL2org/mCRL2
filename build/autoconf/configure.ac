@@ -416,23 +416,22 @@ else
 fi
 AC_SUBST([OPENGL_NAME],[])
 
-# Check for xmlto
+# Check for xsltproc
 AC_ARG_WITH(
-  [xmlto],
-  AS_HELP_STRING([--with-xmlto=prefix],[try this for the xmlto prefix install directory])
+  [xsltproc],
+  AS_HELP_STRING([--with-xsltproc=prefix],[try this for the xsltproc prefix install directory])
 )
-if test $with_xmlto; then
-  AC_CHECK_PROG([XMLTO],[xmlto],[$with_xmlto/xmlto],[],[$with_xmlto])
+if test $with_xsltproc; then
+  AC_CHECK_PROG([XSLTPROC],[xsltproc],[$with_xsltproc/xsltproc],[],[$with_xsltproc])
 else 
-  AC_CHECK_PROG([XMLTO],[xmlto],[xmlto])
+  AC_CHECK_PROG([XSLTPROC],[xsltproc],[xsltproc])
 fi
-if test $XMLTO; then
-  USE_XMLTO=xmlto_available
+if test $XSLT_PROC; then
+  USE_XSLTPROC=xsltproc_available
 else
-  AC_MSG_NOTICE(documentation cannot be built because xmlto was not found.)
-  AC_MSG_NOTICE(xmlto can be obtained from http://cyberelk.net/tim/xmlto/.)
+  AC_MSG_NOTICE(documentation cannot be built because xsltproc was not found.)
 fi
-AC_SUBST([USE_XMLTO],[])
+AC_SUBST([USE_XSLTPROC],[])
 
 # Check for wxWidgets
 AC_ARG_WITH(

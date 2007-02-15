@@ -24,7 +24,7 @@ MAN_INSTALL_TARGETS = $(patsubst %,%.install,$(MAN_OBJECT_SUFFIXES))
 
 .PHONY: all clean distclean install xmlto_available web
 
-all: $(USE_XMLTO)
+all: $(USE_XSLTPROC)
 
 clean:
 	rm -f $(addprefix *.,$(MAN_OBJECT_SUFFIXES)) *.txt *.html autolayout.xml
@@ -32,15 +32,15 @@ clean:
 
 distclean: clean
 
-xmlto_available: $(MAN_OBJECTS)
+xsltproc_available: $(MAN_OBJECTS)
 
 install: all $(MAN_INSTALL_TARGETS)
 
 documentation: all
 
 web: 
-	@xsltproc -o autolayout.xml http://docbook.sourceforge.net/release/xsl/current/website/autolayout.xsl weblayout.xml
-	@xsltproc --stringparam output-root web http://docbook.sourceforge.net/release/xsl/current/website/chunk-tabular.xsl autolayout.xml
+	@xsltproc --novalid -o autolayout.xml http://docbook.sourceforge.net/release/xsl/current/website/autolayout.xsl weblayout.xml
+	@xsltproc --novalid --stringparam output-root web http://docbook.sourceforge.net/release/xsl/current/website/chunk-tabular.xsl autolayout.xml
 
 %.install:
 	@install -d $(mandir)/man$*
@@ -52,7 +52,7 @@ web:
 	done
 
 %.1 %.2 %.3 %.4 %.5 %.6 %.7 %.8 %.9: %.xml
-	@xsltproc http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl $<
+	@xsltproc --novalid http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl $<
 # @xmlto man $<
 
 %.txt: %.xml

@@ -1,32 +1,29 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY lpeinfo "<command>lpeinfo</command>">
-<!ENTITY option "<parameter>OPTION</parameter>">
-<!ENTITY infile "<parameter>INFILE</parameter>">
-<!ENTITY opt_h "<option>-h</option>">
-<!ENTITY opt_help "<option>--help</option>">
-<!ENTITY opt_version "<option>--version</option>">
-<!ENTITY opt_d "<option>-d</option>">
-<!ENTITY opt_debug "<option>--debug</option>">
-<!ENTITY opt_v "<option>-v</option>">
-<!ENTITY opt_verbose "<option>--verbose</option>">
-<!ENTITY stdin "<option>stdin</option>">
-<!ENTITY stdout "<option>stdout</option>">
+<!ENTITY % param SYSTEM "param.xml"> %param;
 ]>
 
 <webpage id="lpeinfo-web">
-  <head><title>lpeinfo</title></head>
+ <head>
+  <title>lpeinfo</title>
+ </head>
+ <releaseinfo>
+  <date>2005-2007</date>
+ </releaseinfo>
 
 <refentry id="lpeinfo">
 
 <refmeta>
   <refentrytitle>lpeinfo</refentrytitle>
   <manvolnum>1</manvolnum>
+  <refmiscinfo class="source">lpeinfo</refmiscinfo>
+  <refmiscinfo class="version"></refmiscinfo>
+  <refmiscinfo class="manual">User Commands</refmiscinfo>
 </refmeta>
 
 <refnamediv>
-  <refname>lpeinfo</refname>
+  <refname>&lpeinfo;</refname>
   <refpurpose>display basic information about an LPE</refpurpose>
 </refnamediv>
 
@@ -42,7 +39,7 @@
   <title>Description</title>
   <para>
     Display basic information about the linear process equation (LPE) in
-    &infile;.  If &infile; is not supplied an LPE is read from &stdin;. By
+    &infile;.  If &infile; is not supplied an LPE is read from &cstdin;. By
     default, the following information about the LPE is shown:
     <itemizedlist>
       <listitem>

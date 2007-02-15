@@ -1,34 +1,29 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY lpedecluster "<command>lpedecluster</command>">
-<!ENTITY option "<parameter>OPTION</parameter>">
-<!ENTITY infile "<parameter>INFILE</parameter>">
-<!ENTITY outfile "<parameter>OUTFILE</parameter>">
-<!ENTITY name "<parameter>NAME</parameter>">
-<!ENTITY opt_h "<option>-h</option>">
-<!ENTITY opt_help "<option>--help</option>">
-<!ENTITY opt_version "<option>--version</option>">
-<!ENTITY opt_d "<option>-d</option>">
-<!ENTITY opt_debug "<option>--debug</option>">
-<!ENTITY opt_v "<option>-v</option>">
-<!ENTITY opt_verbose "<option>--verbose</option>">
+<!ENTITY % param SYSTEM "param.xml"> %param;
 <!ENTITY opt_f "<option>-f</option>">
 <!ENTITY opt_finite "<option>--finite</option>">
 <!ENTITY opt_r "<option>-R</option>">
 <!ENTITY opt_rewriter "<option>--rewriter</option>">
-<!ENTITY stdin "<option>stdin</option>">
-<!ENTITY stdout "<option>stdout</option>">
 ]>
 
 <webpage id="lpedecluster-web">
-  <head><title>lpedecluster</title></head>
+ <head>
+  <title>lpedecluster</title>
+ </head>
+ <releaseinfo>
+  <date>2005-2007</date>
+ </releaseinfo>
 
 <refentry id="lpedecluster">
 
 <refmeta>
   <refentrytitle>lpedecluster</refentrytitle>
   <manvolnum>1</manvolnum>
+  <refmiscinfo class="source">lpedecluster</refmiscinfo>
+  <refmiscinfo class="version"></refmiscinfo>
+  <refmiscinfo class="manual">User Commands</refmiscinfo>
 </refmeta>
 
 <refnamediv>
@@ -51,11 +46,11 @@
     Transform a linear process equation (LPE) in &infile; by rewriting it,
     making sumvariables superfluous by enlarging the number of summands. 
     Write the resulting LPE to &outfile;. 
-    If &outfile; is not supplied the resulting LPE is written to &stdout;.
+    If &outfile; is not supplied the resulting LPE is written to &cstdout;.
   </para>
   
   <para>
-    The resulting LPE is written to &outfile; (or &stdout; if not specified).
+    The resulting LPE is written to &outfile; (or &cstdout; if not specified).
   </para>
 </refsect1>
 

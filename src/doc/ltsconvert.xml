@@ -1,16 +1,8 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY ltsconvert "<command>ltsconvert</command>">
-<!ENTITY option "<parameter>OPTION</parameter>">
-<!ENTITY infile "<parameter>INFILE</parameter>">
-<!ENTITY outfile "<parameter>OUTFILE</parameter>">
-<!ENTITY format "<parameter>FORMAT</parameter>">
-<!ENTITY file "<parameter>FILE</parameter>">
+<!ENTITY % param SYSTEM "param.xml"> %param;
 <!ENTITY actnames "<parameter>ACTNAMES</parameter>">
-<!ENTITY opt_h "<option>-h</option>">
-<!ENTITY opt_q "<option>-q</option>">
-<!ENTITY opt_v "<option>-v</option>">
 <!ENTITY opt_i "<option>-i</option>">
 <!ENTITY opt_o "<option>-o</option>">
 <!ENTITY opt_f "<option>-f</option>">
@@ -19,10 +11,6 @@
 <!ENTITY opt_s "<option>-n</option>">
 <!ENTITY opt_b "<option>-n</option>">
 <!ENTITY opt_a "<option>-n</option>">
-<!ENTITY opt_help "<option>--help</option>">
-<!ENTITY opt_version "<option>--version</option>">
-<!ENTITY opt_quiet "<option>--quiet</option>">
-<!ENTITY opt_verbose "<option>--verbose</option>">
 <!ENTITY opt_in "<option>--in</option>">
 <!ENTITY opt_out "<option>--out</option>">
 <!ENTITY opt_formats "<option>--formats</option>">
@@ -33,20 +21,26 @@
 <!ENTITY opt_branching "<option>--branching</option>">
 <!ENTITY opt_add "<option>--add</option>">
 <!ENTITY opt_tau "<option>--tau</option>">
-<!ENTITY stdin "<constant>stdin</constant>">
-<!ENTITY stdout "<constant>stdout</constant>">
 <!ENTITY fsm "<constant>fsm</constant>">
 <!ENTITY dot "<constant>dot</constant>">
 ]>
 
 <webpage id="ltsconvert-web">
-  <head><title>ltsconvert</title></head>
+ <head>
+  <title>ltsconvert</title>
+ </head>
+ <releaseinfo>
+  <date>2005-2007</date>
+ </releaseinfo>
 
 <refentry id="ltsconvert">
 
 <refmeta>
   <refentrytitle>ltsconvert</refentrytitle>
   <manvolnum>1</manvolnum>
+  <refmiscinfo class="source">ltsconvert</refmiscinfo>
+  <refmiscinfo class="version"></refmiscinfo>
+  <refmiscinfo class="manual">User Commands</refmiscinfo>
 </refmeta>
 
 <refnamediv>
@@ -70,7 +64,7 @@
     The ltsconvert tool converts the labelled transition system (LTS) in
     &infile; to &outfile; in the requested format after applying the selected
     minimisation method to &infile; (default is no minimisation). If &outfile;
-    is not supplied, &stdout; is used. If &infile; is not supplied, &stdin; is
+    is not supplied, &cstdout; is used. If &infile; is not supplied, &cstdin; is
     used.
   </para>
 
@@ -168,9 +162,9 @@
 
   <varlistentry>
     <term>&opt_l;</term>
-    <term>&opt_lpe;=&file;</term>
+    <term>&opt_lpe;=&name;</term>
     <listitem>
-      <para>use &file; as the LPE from which the input LTS was
+      <para>use &name; as the LPE from which the input LTS was
         generated; this is needed to store the correct parameter
 	names of states when saving in &fsm; format and to convert non-mCRL2
 	LTSs to a mCRL2 LTS

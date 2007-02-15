@@ -1,29 +1,25 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY lpesumelm "<command>lpesumelm</command>">
-<!ENTITY option "<parameter>OPTION</parameter>">
-<!ENTITY infile "<parameter>INFILE</parameter>">
-<!ENTITY outfile "<parameter>OUTFILE</parameter>">
-<!ENTITY opt_h "<option>-h</option>">
-<!ENTITY opt_help "<option>--help</option>">
-<!ENTITY opt_version "<option>--version</option>">
-<!ENTITY opt_d "<option>-d</option>">
-<!ENTITY opt_debug "<option>--debug</option>">
-<!ENTITY opt_v "<option>-v</option>">
-<!ENTITY opt_verbose "<option>--verbose</option>">
-<!ENTITY stdin "<option>stdin</option>">
-<!ENTITY stdout "<option>stdout</option>">
+<!ENTITY % param SYSTEM "param.xml"> %param;
 ]>
 
 <webpage id="lpesumelm-web">
-  <head><title>lpesumelm</title></head>
+ <head>
+  <title>lpesumelm</title>
+ </head>
+ <releaseinfo>
+  <date>2005-2007</date>
+ </releaseinfo>
 
 <refentry id="lpesumelm">
 
 <refmeta>
   <refentrytitle>lpesumelm</refentrytitle>
   <manvolnum>1</manvolnum>
+  <refmiscinfo class="source">lpesumelm</refmiscinfo>
+  <refmiscinfo class="version"></refmiscinfo>
+  <refmiscinfo class="manual">User Commands</refmiscinfo>
 </refmeta>
 
 <refnamediv>
@@ -46,7 +42,7 @@
     Transform a linear process equation (LPE) in &infile; by rewriting it,
     and in the process removing superfluous summations. Write the resulting LPE
     to &outfile;. If &outfile; is not supplied the resulting LPE is written to
-    &stdout;.
+    &cstdout;.
   </para>
   
   <para>
@@ -61,7 +57,7 @@
     the condition. There is an axiom that says that we may then substitute the
     other term of the equality for the summation variable. We can then remove
     both the summation variable and the condition in which it occurred.
-    The resulting LPE to &outfile; (or &stdout; if not specified).
+    The resulting LPE to &outfile; (or &cstdout; if not specified).
   </para>
 </refsect1>
 

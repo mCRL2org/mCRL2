@@ -1,13 +1,8 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY lpeinvelm "<command>lpeinvelm</command>">
-<!ENTITY lpeparelm "<command>lpeparelm</command>">
-<!ENTITY lpeconstelm "<command>lpeconstelm</command>">
-<!ENTITY option "<parameter>OPTION</parameter>">
+<!ENTITY % param SYSTEM "param.xml"> %param;
 <!ENTITY invariant "<parameter>INVARIANT</parameter>">
-<!ENTITY infile "<parameter>INFILE</parameter>">
-<!ENTITY outfile "<parameter>OUTFILE</parameter>">
 <!ENTITY prefix "<parameter>PREFIX</parameter>">
 <!ENTITY number "<parameter>NUMBER</parameter>">
 <!ENTITY strategy "<parameter>STRATEGY</parameter>">
@@ -23,10 +18,6 @@
 <!ENTITY opt_y "<option>-y</option>">
 <!ENTITY opt_c "<option>-c</option>">
 <!ENTITY opt_p "<option>-p</option>">
-<!ENTITY opt_h "<option>-h</option>">
-<!ENTITY opt_q "<option>-q</option>">
-<!ENTITY opt_v "<option>-v</option>">
-<!ENTITY opt_d "<option>-d</option>">
 <!ENTITY opt_r "<option>-r</option>">
 <!ENTITY opt_t "<option>-t</option>">
 <!ENTITY opt_z "<option>-z</option>">
@@ -39,11 +30,6 @@
 <!ENTITY opt_all_violations "<option>--all-violations</option>">
 <!ENTITY opt_counter_example "<option>--counter-example</option>">
 <!ENTITY opt_print_dot "<option>--print-dot</option>">
-<!ENTITY opt_help "<option>--help</option>">
-<!ENTITY opt_version "<option>--version</option>">
-<!ENTITY opt_quiet "<option>--quiet</option>">
-<!ENTITY opt_verbose "<option>--verbose</option>">
-<!ENTITY opt_debug "<option>--debug</option>">
 <!ENTITY opt_rewrite_strategy "<option>--rewrite-strategy</option>">
 <!ENTITY opt_time_limit "<option>--time-limit</option>">
 <!ENTITY opt_smt_solver "<option>--smt-solver</option>">
@@ -56,20 +42,26 @@
 <!ENTITY solver_cvc_lite_string "<constant>'cvc-lite'</constant>">
 <!ENTITY solver_ario "<constant>ario</constant>">
 <!ENTITY solver_cvc_lite "<constant>cvc-lite</constant>">
-<!ENTITY stdin "<constant>stdin</constant>">
-<!ENTITY stdout "<constant>stdout</constant>">
 <!ENTITY link_ario "<uri>http://www.eecs.umich.edu/~ario/</uri>">
 <!ENTITY link_cvc "<uri>http://www.cs.nyu.edu/acsys/cvcl/</uri>">
 ]>
 
 <webpage id="lpeinvelm-web">
-  <head><title>lpeinvelm</title></head>
+ <head>
+  <title>lpeinvelm</title>
+ </head>
+ <releaseinfo>
+  <date>2005-2007</date>
+ </releaseinfo>
 
 <refentry id="lpeinvelm">
 
 <refmeta>
   <refentrytitle>lpeinvelm</refentrytitle>
   <manvolnum>1</manvolnum>
+  <refmiscinfo class="source">lpeinvelm</refmiscinfo>
+  <refmiscinfo class="version"></refmiscinfo>
+  <refmiscinfo class="manual">User Commands</refmiscinfo>
 </refmeta>
 
 <refnamediv>
@@ -97,8 +89,8 @@
   </para>
 
   <para>
-    If &infile; is not specified, the LPE is read from &stdin;. If &outfile; is
-    not specified, the resulting LPE is written to &stdout;.
+    If &infile; is not specified, the LPE is read from &cstdin;. If &outfile; is
+    not specified, the resulting LPE is written to &cstdout;.
   </para>
 
   <para>

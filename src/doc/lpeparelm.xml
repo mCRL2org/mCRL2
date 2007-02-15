@@ -1,30 +1,25 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY lpeparelm "<command>lpeparelm</command>">
-<!ENTITY infile "<parameter>INFILE</parameter>">
-<!ENTITY outfile "<parameter>OUTFILE</parameter>">
-<!ENTITY opt_h "<option>-h</option>">
-<!ENTITY opt_help "<option>--help</option>">
-<!ENTITY opt_version "<option>--version</option>">
-<!ENTITY opt_d "<option>-d</option>">
-<!ENTITY opt_debug "<option>--debug</option>">
-<!ENTITY opt_v "<option>-d</option>">
-<!ENTITY opt_verbose "<option>--verbose</option>">
-
-<!ENTITY stdin "<option>stdin</option>">
-<!ENTITY stdout "<option>stdout</option>">
-
+<!ENTITY % param SYSTEM "param.xml"> %param;
 ]>
 
 <webpage id="lpeparelm-web">
-  <head><title>lpeparelm</title></head>
+ <head>
+  <title>lpeparelm</title>
+ </head>
+ <releaseinfo>
+  <date>2005-2007</date>
+ </releaseinfo>
 
 <refentry id="lpeparelm">
 
 <refmeta>
-<refentrytitle>lpeparelm</refentrytitle>
-<manvolnum>1</manvolnum>
+ <refentrytitle>lpeparelm</refentrytitle>
+ <manvolnum>1</manvolnum>
+ <refmiscinfo class="source">lpeparelm</refmiscinfo>
+ <refmiscinfo class="version"></refmiscinfo>
+ <refmiscinfo class="manual">User Commands</refmiscinfo>
 </refmeta>
 
 <refnamediv>
@@ -46,8 +41,8 @@
    This tool removes parameters which have no influence on condition, action 
    or time arguments of the LPE specified by &infile;. Removing these parameters
    from the LPE can lead to a reduction when generating a state space of an LPE.
-   The result is written to &outfile;. If &outfile; is not supplied, &stdout; is
-   used. If &infile; is not supplied, &stdin; is used instead.
+   The result is written to &outfile;. If &outfile; is not supplied, &cstdout; is
+   used. If &infile; is not supplied, &cstdin; is used instead.
   </para>
 </refsect1>
 

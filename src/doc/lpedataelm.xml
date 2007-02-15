@@ -1,23 +1,9 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY lpedataelm "<command>lpedataelm</command>">
-<!ENTITY lpepp "<command>lpepp</command>">
-<!ENTITY lpe2lts "<command>lpe2lts</command>">
-<!ENTITY option "<parameter>OPTION</parameter>">
-<!ENTITY infile "<parameter>INFILE</parameter>">
-<!ENTITY outfile "<parameter>OUTFILE</parameter>">
-<!ENTITY opt_h "<option>-h</option>">
-<!ENTITY opt_help "<option>--help</option>">
-<!ENTITY opt_version "<option>--version</option>">
-<!ENTITY opt_q "<option>-q</option>">
-<!ENTITY opt_quiet "<option>--quiet</option>">
-<!ENTITY opt_v "<option>-v</option>">
-<!ENTITY opt_verbose "<option>--verbose</option>">
+<!ENTITY % param SYSTEM "param.xml"> %param;
 <!ENTITY opt_b "<option>-b</option>">
 <!ENTITY opt_remove_basis "<option>--remove-basis</option>">
-<!ENTITY stdin "<constant>stdin</constant>">
-<!ENTITY stdout "<constant>stdout</constant>">
 <!ENTITY sort_bool "<constant>Bool</constant>">
 <!ENTITY sort_pos "<constant>Pos</constant>">
 <!ENTITY func_eq "<function>==</function>">
@@ -26,13 +12,21 @@
 ]>
 
 <webpage id="lpedataelm-web">
-  <head><title>lpedataelm</title></head>
+ <head>
+  <title>lpedataelm</title>
+ </head>
+ <releaseinfo>
+  <date>2005-2007</date>
+ </releaseinfo>
 
 <refentry id="lpedataelm">
 
 <refmeta>
   <refentrytitle>lpedataelm</refentrytitle>
   <manvolnum>1</manvolnum>
+  <refmiscinfo class="source">lpedataelm</refmiscinfo>
+  <refmiscinfo class="version"></refmiscinfo>
+  <refmiscinfo class="manual">User Commands</refmiscinfo>
 </refmeta>
 
 <refnamediv>
@@ -55,8 +49,8 @@
   <para>
     The &lpedataelm; tool removes unused parts from the data specification from
     a linear process equation (LPE). It reads the LPE from &infile; and writes
-    the result to &outfile;. If &outfile; is not present, &stdout; is used. If
-    &infile; is not present, &stdin; is used.
+    the result to &outfile;. If &outfile; is not present, &cstdout; is used. If
+    &infile; is not present, &cstdin; is used.
   </para>
   <para>
     Unused parts are sorts, constructors, mappings and data equations that do
