@@ -22,6 +22,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 	pbes_expression result;
 	if (is_data(p))	
 	{ // p is a data_expression
+		//std::cout << p << std::endl;
 		data_expression d = rewriter->rewrite(p);
 		if (d.is_true())
 			result = true_();
@@ -29,6 +30,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 			result = false_();
 		else
 			result = val(p);
+		//std::cout << result << std::endl;
 	}
 	else if (is_true(p))
 	{ // p is True
@@ -58,7 +60,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 		//Rewrite left and right as far as possible
 		pbes_expression left = pbes_expression_rewrite(arg1(p), data, rewriter);
 		pbes_expression right = pbes_expression_rewrite(arg2(p), data, rewriter);
-		//Rewrite left and right as far as possible
+		//Options for left and right
 		if (left.is_true() || right.is_true())
 			result = true_();
 		else if (left.is_false())
@@ -80,8 +82,8 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 		//If the forall  has only finite data variables, make a conjunction out of it.
 		else if (check_finite_list(data.constructors(), get_sorts(data_vars)))
 		{
-			pbes_expression_list and_list = get_all_possible_expressions(data_vars, pbexp, data);
-			result = pbes_expression_rewrite(make_and_from_list(and_list), data, rewriter);
+			pbes_expression_list and_list = get_and_expressions(get_all_possible_expressions(data_vars, pbexp, data), data, rewriter);
+			result = make_and_from_list(and_list);
 		}
 		else
 			//Probably some advanced stuff is needed here to check finiteness...
@@ -99,8 +101,8 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 		//If the exists  has only finite data variables, make a conjunction out of it.
 		else if (check_finite_list(data.constructors(), get_sorts(data_vars)))
 		{
-			pbes_expression_list or_list = get_all_possible_expressions(data_vars, pbexp, data);
-			result = pbes_expression_rewrite(make_or_from_list(or_list), data, rewriter);
+			pbes_expression_list or_list = get_or_expressions(get_all_possible_expressions(data_vars, pbexp, data), data, rewriter);
+			result = make_or_from_list(or_list);
 		}
 		else 
 			//Probably some advanced stuff is needed here to check finiteness...
@@ -144,10 +146,32 @@ pbes_expression_list get_all_possible_expressions(data_variable_list data_vars, 
 	return result;
 }
 
+pbes_expression_list get_and_expressions(pbes_expression_list and_list, data_specification data, Rewriter *rewriter)
+{
+	pbes_expression_list result;
+	bool is_pbes_false = false;
+	
+	pbes_expression_list::iterator it_enum = and_list.begin();
+	while ((it_enum != and_list.end()) && (!is_pbes_false))
+	{
+		pbes_expression current = pbes_expression_rewrite(*it_enum, data, rewriter);
+		if (is_false(current))
+		{
+			pbes_expression_list list_false;
+			list_false = push_front(list_false, false_());
+			result = list_false;
+			is_pbes_false = true;
+		}
+		else if (!is_true(current))
+			result = push_front(result, current);
+		it_enum++;
+	}
+	return reverse(result);
+}
+
 pbes_expression make_and_from_list(pbes_expression_list and_list)
 {
 	pbes_expression result;
-	
 	if (and_list.size() > 1)
 	{
 		result = and_(front(and_list), make_and_from_list(pop_front(and_list)));
@@ -156,7 +180,35 @@ pbes_expression make_and_from_list(pbes_expression_list and_list)
 	{
 		result = front(and_list);
 	}
+	else
+	{
+		gsErrorMsg("Cannot make pbes_expression out of empty list\n");
+		exit(1);
+	}
 	return result;
+}
+
+pbes_expression_list get_or_expressions(pbes_expression_list or_list, data_specification data, Rewriter *rewriter)
+{
+	pbes_expression_list result;
+	bool is_pbes_true = false;
+	
+	pbes_expression_list::iterator it_enum = or_list.begin();
+	while ((it_enum != or_list.end()) && (!is_pbes_true))
+	{
+		pbes_expression current = pbes_expression_rewrite(*it_enum, data, rewriter);
+		if (is_true(current))
+		{
+			pbes_expression_list list_true;
+			list_true = push_front(list_true, true_());
+			result = list_true;
+			is_pbes_true = true;
+		}
+		else if (!is_false(current))
+			result = push_front(result, current);
+		it_enum++;
+	}
+	return reverse(result);
 }
 
 pbes_expression make_or_from_list(pbes_expression_list or_list)

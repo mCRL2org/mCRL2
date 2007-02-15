@@ -1,8 +1,8 @@
 // ======================================================================
 //
 // file          : pbes2bes
-// date          : 24-01-2007
-// version       : 0.0.6 - Prototype
+// date          : 14-02-2007
+// version       : 0.0.7 - Prototype
 //
 // author(s)     : Alexander van Dam <avandam@damdonk.nl>
 //
@@ -10,7 +10,7 @@
 
 
 #define NAME "pbes2bes"
-#define VERSION "0.0.6 - Prototype"
+#define VERSION "0.0.7 - Prototype"
 #define AUTHOR "Alexander van Dam"
 
 
@@ -20,6 +20,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <utility>
 
 //Boost
 #include <boost/program_options.hpp>
@@ -39,6 +40,7 @@
 #include "atermpp/substitute.h"
 #include "atermpp/aterm_list.h"
 #include "atermpp/utility.h"
+#include "atermpp/table.h"
 
 //Tool-specific
 #include "pbes_rewrite.h"		// PBES rewriter
@@ -60,9 +62,11 @@ typedef struct{
 } t_tool_options;
 
 typedef struct {
-	pbes_equation pbeq;
-	data_expression_list instantiation;
-} naive_eqsys;
+	data_variable_list original;		// Complete instantiation of a PBE
+	data_variable_list original_finite;	// List of all original finite sorts
+	data_expression_list finite_inst;	// List of values of enumerated finite data sorts
+	data_variable_list infinite_inst;	// List of all infinite data sorts
+} t_instantiations;
 
 //Function declarations used by main program
 //------------------------------------------
@@ -85,15 +89,11 @@ void save_pbes(pbes pbes_spec, t_tool_options tool_options);
 //Post: pbes_spec is saved
 //Ret: -
 
-sort_list get_eqsys_sorts(pbes pbes_spec);
-//Post: The finiteness of the sorts are checked
-//Ret: True if all sorts of the equation_system are finite, false otherwise
-
-
 pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options);
 
-data_expression_list get_finite_parameters(function_list fl, data_expression_list parameters);
+propositional_variable_instantiation create_propositional_variable_instantiation(propositional_variable_instantiation propvar, bool change_propvar, map<lpe::sort, bool> sort_list_is_finite);
 
+propositional_variable create_propositional_variable(propositional_variable propvar, data_expression_list finite_inst, bool change_propvar, map<lpe::sort, bool> sort_list_is_finite);
 
 //Main Program
 //------------
@@ -132,147 +132,198 @@ pbes create_bes(pbes pbes_spec, t_tool_options tool_options)
 
 pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 {
-	
-	// Get all sorts of the lhs of the equation of the pbes
-	gsVerboseMsg("Checking if all sorts are finite\n");
-	sort_list eqsys_sorts = get_eqsys_sorts(pbes_spec);
-	bool finite = check_finite_list(pbes_spec.data().constructors(), eqsys_sorts);
+	pbes result;
 
-	// If not all sorts are finite throw error
-	// This function will be deleted when the algorithm will leave infinite sorts as they are.
-	if (!finite)
-	{
-		cerr << "One or more of the data sorts of the equation system are infinite." << endl;
-		cerr << "Computation of all possible states will therefore be an infinite computation." << endl;
-		cerr << "pbes2bes aborted." << endl;
-		exit(1);
-	}
+	bool change_propvarinst_initial_state;
 
-	// Initial state to store
+	bool is_bes_system = true;		// True if the resulting equation system is a BES, false otherwise
+	//int nr_of_equations = 0;		// Number of equations computed
 	propositional_variable_instantiation initial_state = pbes_spec.initial_state();
+	equation_system eqsys = pbes_spec.equations();
+	data_specification data = pbes_spec.data();
 
-	// Struct used to store the equation system with the parameters it stands for.
-	naive_eqsys eqsys_naive;
-	vector< naive_eqsys > eqsys_naive_list;
-	data_expression_list empty_data_expression_list;
-	data_variable_list empty_data_variable_list;
-	// Create a list of structs which contains all equations of the naive generated bes
-	for (equation_system::iterator eq = pbes_spec.equations().begin(); eq != pbes_spec.equations().end(); eq++)
+	// map which contains if a data sort is finite
+	map<lpe::sort, bool> sort_list_is_finite;
+	for (equation_system::iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
 	{
-		// List which holds all computed equations for eq.
-		vector< naive_eqsys > eq_naive_list;
-		eqsys_naive.instantiation = empty_data_expression_list;
-		eqsys_naive.pbeq = *eq;
-		eq_naive_list.push_back(eqsys_naive);
-		for (data_variable_list::iterator p = eq->variable().parameters().begin(); p != eq->variable().parameters().end(); p++)
+		for (data_variable_list::iterator p = eq_i->variable().parameters().begin(); p != eq_i->variable().parameters().end(); p++)
 		{
-			vector< naive_eqsys > eq_naive_currentp_list;
-			for (vector< naive_eqsys >::iterator cur = eq_naive_list.begin(); cur != eq_naive_list.end(); cur++)
-			{
-				data_expression_list instantiation = cur->instantiation;
-				data_expression_list enumerations = enumerate_constructors(pbes_spec.data().constructors(), p->sort());
-				for (data_expression_list::iterator e = enumerations.begin(); e != enumerations.end(); e++)
+			lpe::sort cur_sort = p->sort();
+			if (sort_list_is_finite.find(cur_sort) == sort_list_is_finite.end())
+			{ // If the data sort isn't in the map yet, add it.
+				bool finite;
+				check_finite(data.constructors(), cur_sort)?finite = true:finite = false;
+				sort_list_is_finite.insert(pair<lpe::sort,bool>(cur_sort, finite));
+			}
+		}
+	}
+	
+	
+	Rewriter *rewriter = createRewriter(data);
+	
+	equation_system result_es;
+
+	for (equation_system::iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
+	{
+		propositional_variable propvar = eq_i->variable();
+		aterm_string propvar_name = propvar.name();
+		string propvar_name_string = propvar_name;				// string representation of the propvar_name
+		data_variable_list parameters = propvar.parameters();
+		
+		gsVerboseMsg("Rewriting PBES equation with propositional variable %s\n", propvar_name_string.c_str());
+		vector< t_instantiations > instantiation_list;
+		t_instantiations instantiation;
+				
+		data_variable_list empty_data_variable_list;
+		data_expression_list empty_data_expression_list;
+
+		instantiation.original = parameters;
+		instantiation.original_finite = empty_data_variable_list;
+		instantiation.finite_inst = empty_data_expression_list;
+		instantiation.infinite_inst = empty_data_variable_list;
+		
+		instantiation_list.push_back(instantiation);
+		
+		for (data_variable_list::iterator p = parameters.begin(); p != parameters.end(); p++)
+		{
+			vector< t_instantiations > current_instantiation_list;
+			if (check_finite(data.constructors(), p->sort()))
+			{ // Data sort is finite, enumerate it
+				data_expression_list enumerations = enumerate_constructors(data.constructors(), p->sort());
+				for (vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
 				{
-					pbes_expression rhs = cur->pbeq.formula().substitute(make_substitution(*p, *e));
-					eqsys_naive.pbeq = pbes_equation(cur->pbeq.symbol(), cur->pbeq.variable(), rhs);
-					eqsys_naive.instantiation = push_back(instantiation, *e);
-					eq_naive_currentp_list.push_back(eqsys_naive);
+					for (data_expression_list::iterator e = enumerations.begin(); e != enumerations.end(); e++)
+					{	
+						t_instantiations new_values;
+						new_values.original = inst_i->original;
+						new_values.original_finite = push_back(inst_i->original_finite, *p);
+						new_values.finite_inst = push_back(inst_i->finite_inst, *e);
+						new_values.infinite_inst = inst_i->infinite_inst;
+						current_instantiation_list.push_back(new_values);
+					}
 				}
 			}
-			eq_naive_list = eq_naive_currentp_list;
+			else
+			{ // Data sort is infinite don't enumerate; resulting system is a PBES
+				is_bes_system = false;
+				for (vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
+				{
+					t_instantiations new_values;
+					new_values.original = inst_i->original;
+					new_values.original_finite = inst_i->original_finite;
+					new_values.finite_inst = inst_i->finite_inst;
+					new_values.infinite_inst = push_back(inst_i->infinite_inst, *p);
+					current_instantiation_list.push_back(new_values);
+				}
+			}
+			instantiation_list = current_instantiation_list;
 		}
-		eqsys_naive_list.insert(eqsys_naive_list.end(), eq_naive_list.begin(), eq_naive_list.end());
-	} // eqsys_naive_list now contains all possible equations with the appropriate instantiations
-	
-	gsVerboseMsg("Total number of equations: %d\n", eqsys_naive_list.size());
-	// Now create the pbes out of it.
-	// eqsys_naive_list contains all needed information
-	
-	fresh_propositional_variable_generator generator;
-	for (vector< naive_eqsys>::iterator i = eqsys_naive_list.begin(); i != eqsys_naive_list.end(); i++)
-	{
-		generator.add_to_context(i->pbeq);
+
+		for (vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
+		{
+			bool change_propvar = inst_i->finite_inst.size() > 0; // Has the propvar to be changed?
+			if (propvar.name() == initial_state.name())
+				change_propvarinst_initial_state = change_propvar;
+			// Rewrite lhs
+			propositional_variable current_propvar = create_propositional_variable(propvar, inst_i->finite_inst, change_propvar, sort_list_is_finite);	
+			
+			// Rewrite rhs and replace PropVars with BES-equivalents in rhs
+			pbes_equation current = *eq_i;
+
+			pbes_expression current_exp = pbes_expression_rewrite(current.formula().substitute(make_list_substitution(inst_i->original_finite, inst_i->finite_inst)), data, rewriter);
+			current_exp = pbes_expression_rewrite(current_exp, data, rewriter);
+			//cout << current_exp << endl;
+			propositional_variable_instantiation_list oldpropvarinst_list;
+			propositional_variable_instantiation_list newpropvarinst_list;
+			set< propositional_variable_instantiation > propvarinst_set = find_propositional_variable_instantiations(current_exp);
+			for (set< propositional_variable_instantiation >::iterator pvi = propvarinst_set.begin(); pvi != propvarinst_set.end(); pvi++)
+			{
+				oldpropvarinst_list = push_front(oldpropvarinst_list, *pvi);
+				propositional_variable_instantiation propvarinst_toAdd = create_propositional_variable_instantiation(*pvi, change_propvar, sort_list_is_finite);
+				newpropvarinst_list = push_front(newpropvarinst_list, propvarinst_toAdd);
+			}
+			current_exp = current_exp.substitute(make_list_substitution(oldpropvarinst_list, newpropvarinst_list));
+
+			result_es.push_back(pbes_equation(eq_i->symbol(), current_propvar, current_exp));
+		}
 	}
+
+	// rewrite initial state
+	propositional_variable_instantiation new_initial_state = create_propositional_variable_instantiation(initial_state, change_propvarinst_initial_state, sort_list_is_finite); 
+
+	result = pbes(data, result_es, new_initial_state);
 	
-	// Create:
-	// - Equation system for pbes
-	// - 2 lists for replacing all the stuff.
-	equation_system result_eqsys;
-	propositional_variable_instantiation_list oldpropvarlist;
-	propositional_variable_instantiation_list newpropvarlist;
-
-	int count = 1;
-	Rewriter *rewriter = createRewriter(pbes_spec.data());
-	for (vector< naive_eqsys>::iterator i = eqsys_naive_list.begin(); i != eqsys_naive_list.end(); i++)
-	{
-		gsVerboseMsg("At equation %d\n", count);
-		count++;
-		pbes_equation cur_pbeq = i->pbeq;
-		pbes_expression rhs = pbes_expression_rewrite(cur_pbeq.formula(), pbes_spec.data(), rewriter);
-		data_expression_list instantiation = i->instantiation;
-		propositional_variable_instantiation old_propvar = propositional_variable_instantiation(i->pbeq.variable().name(), i->instantiation);
-		oldpropvarlist = push_front(oldpropvarlist, old_propvar);
-		rhs = pbes_expression_rewrite(rhs, pbes_spec.data(), rewriter) ;
-		data_expression_list inst;
-		data_variable_list vars;
-
-		propositional_variable new_propvar = generator( propositional_variable(i->pbeq.variable().name(), empty_data_variable_list) );
-		propositional_variable_instantiation new_propvarinst = propositional_variable_instantiation(new_propvar.name(), empty_data_expression_list);
-		newpropvarlist = push_front(newpropvarlist, new_propvarinst);
-
-		if (initial_state == old_propvar)
-			initial_state = new_propvarinst;
-		cur_pbeq = pbes_equation(cur_pbeq.symbol(), new_propvar, rhs);
-
-		result_eqsys.push_back(cur_pbeq);
-	}
 	delete rewriter;
-	equation_system result;
-	for (equation_system::iterator i = result_eqsys.begin(); i != result_eqsys.end(); i++)
-	{
-		result.push_back(pbes_equation(i->symbol(), i->variable(), i->formula().substitute(make_list_substitution(oldpropvarlist, newpropvarlist))));
-	}
-//	result_eqsys = result_eqsys.substitute(make_list_substitution(oldpropvarlist, newpropvarlist));
-
-	pbes_spec = pbes(pbes_spec.data(), result, initial_state);
-
-	return pbes_spec;
-}
-
-data_expression_list get_finite_parameters(function_list fl, data_expression_list parameters)
-{
-	data_expression_list result;
-	for (data_expression_list::iterator i = parameters.begin(); i != parameters.end(); i++)
-	{
-		if (check_finite(fl, i->sort()))
-			result = push_back(result, *i);
-	}
+	
 	return result;
 }
 
-
-
-//function get_eqsys_sorts
-//------------------------
-sort_list get_eqsys_sorts(pbes pbes_spec)
+propositional_variable create_propositional_variable(propositional_variable propvar, data_expression_list finite_inst, bool change_propvar, map<lpe::sort, bool> sort_list_is_finite)
 {
-	sort_list eqsys_sorts;
-	set<lpe::sort> sorts;
-	for (equation_system::iterator i = pbes_spec.equations().begin(); i != pbes_spec.equations().end(); i++)
+	string propvar_name_current = propvar.name();
+	bool is_first;
+	if (change_propvar)
 	{
-		for (data_variable_list::iterator j = i->variable().parameters().begin(); j != i->variable().parameters().end(); j++)
+		propvar_name_current += "[";
+		is_first = true;
+	}
+	data_variable_list parameters_current;
+	for (data_variable_list::iterator deli = propvar.parameters().begin(); deli != propvar.parameters().end(); deli++)
+	{
+		if (sort_list_is_finite.find(deli->sort())->second)
 		{
-			sorts.insert(j->sort());
+			if (is_first)
+				is_first = false;
+			else
+					propvar_name_current += ";";
+			propvar_name_current += data_operation(front(finite_inst).head()).name();
+			finite_inst = pop_front(finite_inst);
+		}
+		else
+		{
+			parameters_current = push_back(parameters_current, *deli);
 		}
 	}
-
-	for (set<lpe::sort>::iterator i = sorts.begin(); i != sorts.end(); i++)
+	if (change_propvar)
 	{
-		eqsys_sorts = push_front(eqsys_sorts, *i);
+		propvar_name_current += "]";
 	}
-	eqsys_sorts = reverse(eqsys_sorts);
 
-	return eqsys_sorts;
+	return propositional_variable(propvar_name_current, parameters_current);
+}
+
+propositional_variable_instantiation create_propositional_variable_instantiation(propositional_variable_instantiation propvarinst, bool change_propvar, map<lpe::sort, bool> sort_list_is_finite)
+{
+	string propvarinst_name_current = propvarinst.name();
+	bool is_first;
+	if (change_propvar)
+	{
+		propvarinst_name_current += "[";
+		is_first = true;
+	}
+	data_expression_list parameters_current;
+	for (data_expression_list::iterator deli = propvarinst.parameters().begin(); deli != propvarinst.parameters().end(); deli++)
+	{
+		if (sort_list_is_finite.find(deli->sort())->second)
+		{
+			if (is_first)
+				is_first = false;
+			else
+					propvarinst_name_current += ";";
+			//cout << deli->head() << endl;
+			propvarinst_name_current += data_operation(deli->head()).name();
+		}
+		else
+		{
+			parameters_current = push_back(parameters_current, *deli);
+		}
+	}
+	if (change_propvar)
+	{
+		propvarinst_name_current += "]";
+	}
+
+	return propositional_variable_instantiation(propvarinst_name_current, parameters_current);
 }
 
 //function load_pbes
