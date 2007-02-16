@@ -22,7 +22,7 @@ project toolset
        : requirements
           <define>_FILE_OFFSET_BITS=64
           <define>REVISION=\\\"$(REVISION)-$(BUILD_VARIANT)-$(LINK_VARIANT)\\\"
-          <dependency>/workarounds//configuration
+          <use>/workarounds//configuration
        : default-build
           <address-model>$(ADDRESS_MODEL)
           <variant>$(BUILD_VARIANT)
