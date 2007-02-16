@@ -43,10 +43,10 @@
  <head>
   <title>lpe2lts</title>
  </head>
- <releaseinfo>
-  <date>2005-2007</date>
- </releaseinfo>
 <refentry id="lpe2lts">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
   <refentrytitle>lpe2lts</refentrytitle>

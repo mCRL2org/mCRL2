@@ -13,11 +13,11 @@
  <head>
   <title>xsim</title>
  </head>
- <releaseinfo>
-  <date>2005-2007</date>
- </releaseinfo>
 
 <refentry id="xsim">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
   <refentrytitle>xsim</refentrytitle>

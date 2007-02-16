@@ -15,11 +15,11 @@
  <head>
   <title>lpedataelm</title>
  </head>
- <releaseinfo>
-  <date>2005-2007</date>
- </releaseinfo>
 
 <refentry id="lpedataelm">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
   <refentrytitle>lpedataelm</refentrytitle>

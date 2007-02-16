@@ -22,11 +22,11 @@
  <head>
   <title>tbf2lpe</title>
  </head>
- <releaseinfo>
-  <date>2005-2007</date>
- </releaseinfo>
 
 <refentry id="tbf2lpe">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
  <refentrytitle>tbf2lpe</refentrytitle>

@@ -12,11 +12,11 @@
  <head>
   <title>ltsinfo</title>
  </head>
- <releaseinfo>
-  <date>2005-2007</date>
- </releaseinfo>
 
 <refentry id="ltsinfo">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
   <refentrytitle>ltsinfo</refentrytitle>

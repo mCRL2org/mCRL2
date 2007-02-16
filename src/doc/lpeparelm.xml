@@ -8,11 +8,11 @@
  <head>
   <title>lpeparelm</title>
  </head>
- <releaseinfo>
-  <date>2005-2007</date>
- </releaseinfo>
 
 <refentry id="lpeparelm">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
  <refentrytitle>lpeparelm</refentrytitle>

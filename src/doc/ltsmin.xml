@@ -20,11 +20,11 @@
  <head>
   <title>ltsmin</title>
  </head>
- <releaseinfo>
-  <date>2005-2007</date>
- </releaseinfo>
 
 <refentry id="ltsmin">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
   <refentrytitle>ltsmin</refentrytitle>

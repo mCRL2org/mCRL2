@@ -24,11 +24,11 @@
  <head>
   <title>ltscompare</title>
  </head>
- <releaseinfo>
-  <date>2005-2007</date>
- </releaseinfo>
 
 <refentry id="ltscompare">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
   <refentrytitle>ltscompare</refentrytitle>

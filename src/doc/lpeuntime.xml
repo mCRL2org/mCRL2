@@ -8,11 +8,11 @@
  <head>
   <title>lpeuntime</title>
  </head>
- <releaseinfo>
-  <date>2005-2007</date>
- </releaseinfo>
 
 <refentry id="lpeuntime">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
   <refentrytitle>lpeuntime</refentrytitle>

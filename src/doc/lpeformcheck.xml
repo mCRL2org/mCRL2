@@ -43,11 +43,11 @@
  <head>
   <title>lpeformcheck</title>
  </head>
- <releaseinfo>
-  <date>2005-2007</date>
- </releaseinfo>
 
 <refentry id="lpeformcheck">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
   <refentrytitle>lpeformcheck</refentrytitle>

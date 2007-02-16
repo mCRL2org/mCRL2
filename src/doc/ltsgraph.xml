@@ -9,11 +9,11 @@
  <head>
   <title>ltsgraph</title>
  </head>
- <releaseinfo>
-  <date>2005-2007</date>
- </releaseinfo>
 
 <refentry id="ltsgraph">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
   <refentrytitle>ltsgraph</refentrytitle>

@@ -10,11 +10,11 @@
  <head>
   <title>pnml2mcrl2</title>
  </head>
- <releaseinfo>
-  <date>2005-2007</date>
- </releaseinfo>
 
 <refentry id="pnml2mcrl2">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
   <refentrytitle>pnml2mcrl2</refentrytitle>

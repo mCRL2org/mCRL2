@@ -29,11 +29,11 @@
  <head>
   <title>ltsconvert</title>
  </head>
- <releaseinfo>
-  <date>2005-2007</date>
- </releaseinfo>
 
 <refentry id="ltsconvert">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
   <refentrytitle>ltsconvert</refentrytitle>

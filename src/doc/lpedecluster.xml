@@ -12,11 +12,11 @@
  <head>
   <title>lpedecluster</title>
  </head>
- <releaseinfo>
-  <date>2005-2007</date>
- </releaseinfo>
 
 <refentry id="lpedecluster">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
   <refentrytitle>lpedecluster</refentrytitle>

@@ -13,11 +13,11 @@
  <head>
   <title>lperewr</title>
  </head>
- <releaseinfo>
-  <date>2005-2007</date>
- </releaseinfo>
 
 <refentry id="lperewr">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
   <refentrytitle>lperewr</refentrytitle>

@@ -53,7 +53,3 @@ web:
 
 %.1 %.2 %.3 %.4 %.5 %.6 %.7 %.8 %.9: %.xml
 	@$(XSLTPROC) --novalid http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl $<
-# @xmlto man $<
-
-%.txt: %.xml
-	@xmlto txt $<

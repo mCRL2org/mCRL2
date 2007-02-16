@@ -16,11 +16,11 @@
  <head>
   <title>tracepp</title>
  </head>
- <releaseinfo>
-  <date>2005-2007</date>
- </releaseinfo>
 
 <refentry id="tracepp">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
   <refentrytitle>tracepp</refentrytitle>

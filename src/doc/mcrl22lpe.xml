@@ -46,11 +46,11 @@
  <head>
   <title>mcrl22lpe</title>
  </head>
- <releaseinfo>
-  <date>2005-2007</date>
- </releaseinfo>
 
 <refentry id="mcrl22lpe">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
   <refentrytitle>mcrl22lpe</refentrytitle>

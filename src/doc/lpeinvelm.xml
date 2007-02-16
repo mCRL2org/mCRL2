@@ -50,11 +50,11 @@
  <head>
   <title>lpeinvelm</title>
  </head>
- <releaseinfo>
-  <date>2005-2007</date>
- </releaseinfo>
 
 <refentry id="lpeinvelm">
+ <info>
+  <date>2005-2007</date>
+ </info>
 
 <refmeta>
   <refentrytitle>lpeinvelm</refentrytitle>
