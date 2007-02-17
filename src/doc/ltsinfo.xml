@@ -1,18 +1,3 @@
-<?xml version="1.0"?>
-
-<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY % param SYSTEM "param.xml"> %param;
-<!ENTITY opt_i "<option>-i</option>">
-<!ENTITY opt_f "<option>-f</option>">
-<!ENTITY opt_in "<option>--in</option>">
-<!ENTITY opt_formats "<option>--formats</option>">
-]>
-
-<webpage id="ltsinfo-web">
- <head>
-  <title>ltsinfo</title>
- </head>
-
 <refentry id="ltsinfo">
  <info>
   <date>2005-2007</date>
@@ -138,4 +123,3 @@
 </refsect1>
 
 </refentry>
-</webpage>

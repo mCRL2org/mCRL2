@@ -1,49 +1,3 @@
-<?xml version="1.0"?>
-
-<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY % param SYSTEM "param.xml"> %param;
-<!ENTITY formulas "<parameter>FORMULAS</parameter>">
-<!ENTITY prefix "<parameter>PREFIX</parameter>">
-<!ENTITY strategy "<parameter>STRATEGY</parameter>">
-<!ENTITY seconds "<parameter>SECONDS</parameter>">
-<!ENTITY solver "<parameter>SOLVER</parameter>">
-<!ENTITY sort_bool "<type>Bool</type>">
-<!ENTITY opt_f "<option>-f</option>">
-<!ENTITY opt_l "<option>-l</option>">
-<!ENTITY opt_c "<option>-c</option>">
-<!ENTITY opt_w "<option>-w</option>">
-<!ENTITY opt_p "<option>-p</option>">
-<!ENTITY opt_v "<option>-v</option>">
-<!ENTITY opt_r "<option>-r</option>">
-<!ENTITY opt_t "<option>-t</option>">
-<!ENTITY opt_z "<option>-z</option>">
-<!ENTITY opt_o "<option>-o</option>">
-<!ENTITY opt_formulas "<option>--formulas</option>">
-<!ENTITY opt_counter_example "<option>--counter-example</option>">
-<!ENTITY opt_witness "<option>--witness</option>">
-<!ENTITY opt_print_dot "<option>--print-dot</option>">
-<!ENTITY opt_rewrite_strategy "<option>--rewrite-strategy</option>">
-<!ENTITY opt_time_limit "<option>--time-limit</option>">
-<!ENTITY opt_smt_solver "<option>--smt-solver</option>">
-<!ENTITY opt_induction "<option>--induction</option>">
-<!ENTITY strat_inner_string "<constant>'inner'</constant>">
-<!ENTITY strat_innerc_string "<constant>'innerc'</constant>">
-<!ENTITY strat_jitty_string "<constant>'jitty'</constant>">
-<!ENTITY strat_jittyc_string "<constant>'jittyc'</constant>">
-<!ENTITY solver_ario_string "<constant>'ario'</constant>">
-<!ENTITY solver_cvc_lite_string "<constant>'cvc-lite'</constant>">
-<!ENTITY solver_ario "<constant>ario</constant>">
-<!ENTITY solver_cvc_lite "<constant>cvc-lite</constant>">
-<!ENTITY stdin "<constant>stdin</constant>">
-<!ENTITY link_ario "<uri>http://www.eecs.umich.edu/~ario/</uri>">
-<!ENTITY link_cvc "<uri>http://www.cs.nyu.edu/acsys/cvcl/</uri>">
-]>
-
-<webpage id="lpeformcheck-web">
- <head>
-  <title>lpeformcheck</title>
- </head>
-
 <refentry id="lpeformcheck">
  <info>
   <date>2005-2007</date>
@@ -301,4 +255,3 @@
 </refsect1>
 
 </refentry>
-</webpage>

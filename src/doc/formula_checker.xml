@@ -1,55 +1,3 @@
-<?xml version="1.0"?>
-
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
-<!ENTITY class_bdd_prover "<classname>BDD_Prover</classname>">
-<!ENTITY class_formula_checker "<classname>Formula_Checker</classname>">
-<!ENTITY class_bdd2dot "<classname>BDD2Dot</classname>">
-
-<!ENTITY type_virtual "<type>virtual</type>">
-<!ENTITY type_void "<type>void</type>">
-<!ENTITY type_bool "<type>bool</type>">
-<!ENTITY type_int "<type>int</type>">
-<!ENTITY type_aterm "<type>ATerm</type>">
-<!ENTITY type_aterm_appl "<type>ATermAppl</type>">
-<!ENTITY type_aterm_list "<type>ATermList</type>">
-<!ENTITY type_smt_solver_type "<type>SMT_Solver_Type</type>">
-<!ENTITY type_rewrite_strategy "<type>RewriteStrategy</type>">
-<!ENTITY type_char_string "<type>char*</type>">
-
-<!ENTITY sort_bool "<type>Bool</type>">
-
-<!ENTITY formula_checker_constructor "<function>Formula_Checker::Formula_Checker</function>">
-<!ENTITY formula_checker_check_formulas "<function>Formula_Checker::check_formulas</function>">
-
-<!ENTITY par_rewrite_strategy "<parameter>a_rewrite_strategy</parameter>">
-<!ENTITY par_time_limit "<parameter>a_time_limit</parameter>">
-<!ENTITY par_path_eliminator "<parameter>a_path_eliminator</parameter>">
-<!ENTITY par_solver_type "<parameter>a_solver_type</parameter>">
-<!ENTITY par_apply_induction "<parameter>a_apply_induction</parameter>">
-<!ENTITY par_lpe "<parameter>a_lpe</parameter>">
-<!ENTITY par_counter_example "<parameter>a_counter_example</parameter>">
-<!ENTITY par_witness "<parameter>a_witness</parameter>">
-<!ENTITY par_formulas "<parameter>a_formulas</parameter>">
-<!ENTITY par_dot_file_name "<parameter>a_dot_file_name</parameter>">
-
-<!ENTITY strat_jitty "<constant>GS_REWR_JITTY</constant>">
-
-<!ENTITY stderr "<constant>stderr</constant>">
-
-<!ENTITY solver_ario "<constant>ario</constant>">
-<!ENTITY solver_cvc_lite "<constant>cvc-lite</constant>">
-<!ENTITY link_ario "<uri>http://www.eecs.umich.edu/~ario/</uri>">
-<!ENTITY link_cvc "<uri>http://www.cs.nyu.edu/acsys/cvcl/</uri>">
-
-<!ENTITY const_strat_jitty "<constant>GS_REWR_JITTY</constant>">
-<!ENTITY const_strat_jittyc "<constant>GS_REWR_JITTYC</constant>">
-<!ENTITY const_strat_inner "<constant>GS_REWR_INNER</constant>">
-<!ENTITY const_strat_innerc "<constant>GS_REWR_INNERC</constant>">
-<!ENTITY const_solver_type_ario "<constant>solver_type_ario</constant>">
-<!ENTITY const_true "<constant>true</constant>">
-<!ENTITY const_false "<constant>false</constant>">
-]>
-
 <refentry id="formula_checker">
  <info>
   <date>2005-2007</date>
@@ -72,7 +20,7 @@
 <funcsynopsis>
 <funcprototype>
   <funcdef>&formula_checker_constructor;</funcdef>
-  <paramdef>&type_aterm_appl; &par_lpe;</paramdef>
+  <paramdef>&type_atermappl; &par_lpe;</paramdef>
   <paramdef>&type_rewrite_strategy; &par_rewrite_strategy; = &strat_jitty;</paramdef>
   <paramdef>&type_int; &par_time_limit; = 0</paramdef>
   <paramdef>&type_bool; &par_path_eliminator; = &const_false;</paramdef>
@@ -84,7 +32,7 @@
 </funcprototype>
 <funcprototype>
   <funcdef>&type_void; &formula_checker_check_formulas;</funcdef>
-  <paramdef>&type_aterm_list; &par_formulas;</paramdef>
+  <paramdef>&type_atermlist; &par_formulas;</paramdef>
 </funcprototype>
 </funcsynopsis>
 </refsynopsisdiv>

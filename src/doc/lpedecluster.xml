@@ -1,18 +1,3 @@
-<?xml version="1.0"?>
-
-<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY % param SYSTEM "param.xml"> %param;
-<!ENTITY opt_f "<option>-f</option>">
-<!ENTITY opt_finite "<option>--finite</option>">
-<!ENTITY opt_r "<option>-R</option>">
-<!ENTITY opt_rewriter "<option>--rewriter</option>">
-]>
-
-<webpage id="lpedecluster-web">
- <head>
-  <title>lpedecluster</title>
- </head>
-
 <refentry id="lpedecluster">
  <info>
   <date>2005-2007</date>
@@ -127,4 +112,3 @@
 </refsect1>
 
 </refentry>
-</webpage>

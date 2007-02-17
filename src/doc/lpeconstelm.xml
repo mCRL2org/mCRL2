@@ -1,17 +1,3 @@
-<?xml version="1.0"?>
-
-<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY % param SYSTEM "param.xml"> %param;
-<!ENTITY opt_nosingleton "<option>--no-singleton</option>">
-<!ENTITY opt_noreachable "<option>--no-reachable</option>">
-<!ENTITY opt_nocondition "<option>--no-condition</option>">
-]>
-
-<webpage id="lpeconstelm-web">
- <head>
-  <title>lpeconstelm</title>
- </head>
-
 <refentry id="lpeconstelm">
  <info>
   <date>2005-2007</date>
@@ -33,7 +19,7 @@
 <refsynopsisdiv>
   <cmdsynopsis>
     <command>&lpeconstelm;</command>
-    <arg choice="plain" rep="repeat"><arg choice="opt">OPTION</arg></arg>
+    <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
     <arg choice="opt">&infile;<arg choice="opt">&outfile;</arg></arg>
   </cmdsynopsis>
 </refsynopsisdiv>
@@ -144,4 +130,3 @@
 fixes to <email>bug@mcrl2.org</email>.</para>
 </refsect1>
 </refentry>
-</webpage>

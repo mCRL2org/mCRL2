@@ -1,30 +1,3 @@
-<?xml version="1.0"?>
-
-<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY % param SYSTEM "param.xml"> %param;
-<!ENTITY infile1 "<parameter>INFILE1</parameter>">
-<!ENTITY infile2 "<parameter>INFILE2</parameter>">
-<!ENTITY actnames "<parameter>ACTNAMES</parameter>">
-<!ENTITY opt_i "<option>-i</option>">
-<!ENTITY opt_j "<option>-j</option>">
-<!ENTITY opt_f "<option>-f</option>">
-<!ENTITY opt_s "<option>-n</option>">
-<!ENTITY opt_b "<option>-n</option>">
-<!ENTITY opt_in1 "<option>--in1</option>">
-<!ENTITY opt_in2 "<option>--in2</option>">
-<!ENTITY opt_formats "<option>--formats</option>">
-<!ENTITY opt_strong "<option>--strong</option>">
-<!ENTITY opt_branching "<option>--branching</option>">
-<!ENTITY opt_tau "<option>--tau</option>">
-<!ENTITY fsm "<constant>fsm</constant>">
-<!ENTITY dot "<constant>dot</constant>">
-]>
-
-<webpage id="ltscompare-web">
- <head>
-  <title>ltscompare</title>
- </head>
-
 <refentry id="ltscompare">
  <info>
   <date>2005-2007</date>
@@ -182,4 +155,3 @@
 </refsect1>
 
 </refentry>
-</webpage>

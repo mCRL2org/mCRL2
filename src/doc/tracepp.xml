@@ -1,22 +1,3 @@
-<?xml version="1.0"?>
-
-<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY % param SYSTEM "param.xml"> %param;
-<!ENTITY opt_p "<option>-p</option>">
-<!ENTITY opt_m "<option>-m</option>">
-<!ENTITY opt_D "<option>-D</option>">
-<!ENTITY opt_a "<option>-a</option>">
-<!ENTITY opt_plain "<option>--plain</option>">
-<!ENTITY opt_mcrl2 "<option>--mcrl2</option>">
-<!ENTITY opt_dot "<option>--dot</option>">
-<!ENTITY opt_aut "<option>--aut</option>">
-]>
-
-<webpage id="tracepp-web">
- <head>
-  <title>tracepp</title>
- </head>
-
 <refentry id="tracepp">
  <info>
   <date>2005-2007</date>
@@ -164,4 +145,3 @@ assumed.
 </refsect1>
 
 </refentry>
-</webpage>

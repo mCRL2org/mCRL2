@@ -1,21 +1,3 @@
-<?xml version="1.0"?>
-
-<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY % param SYSTEM "param.xml"> %param;
-<!ENTITY opt_b "<option>-b</option>">
-<!ENTITY opt_remove_basis "<option>--remove-basis</option>">
-<!ENTITY sort_bool "<constant>Bool</constant>">
-<!ENTITY sort_pos "<constant>Pos</constant>">
-<!ENTITY func_eq "<function>==</function>">
-<!ENTITY func_neq "<function>!=</function>">
-<!ENTITY func_if "<function>if</function>">
-]>
-
-<webpage id="lpedataelm-web">
- <head>
-  <title>lpedataelm</title>
- </head>
-
 <refentry id="lpedataelm">
  <info>
   <date>2005-2007</date>
@@ -140,4 +122,3 @@
 </refsect1>
 
 </refentry>
-</webpage>

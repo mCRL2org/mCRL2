@@ -1,59 +1,3 @@
-<?xml version="1.0"?>
-
-<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY % param SYSTEM "param.xml"> %param;
-<!ENTITY invariant "<parameter>INVARIANT</parameter>">
-<!ENTITY number "<parameter>NUMBER</parameter>">
-<!ENTITY prefix "<parameter>PREFIX</parameter>">
-<!ENTITY strategy "<parameter>STRATEGY</parameter>">
-<!ENTITY seconds "<parameter>SECONDS</parameter>">
-<!ENTITY solver "<parameter>SOLVER</parameter>">
-<!ENTITY opt_i "<option>-i</option>">
-<!ENTITY opt_g "<option>-g</option>">
-<!ENTITY opt_s "<option>-s</option>">
-<!ENTITY opt_n "<option>-n</option>">
-<!ENTITY opt_m "<option>-m</option>">
-<!ENTITY opt_a "<option>-a</option>">
-<!ENTITY opt_c "<option>-c</option>">
-<!ENTITY opt_p "<option>-p</option>">
-<!ENTITY opt_v "<option>-v</option>">
-<!ENTITY opt_r "<option>-r</option>">
-<!ENTITY opt_t "<option>-t</option>">
-<!ENTITY opt_z "<option>-z</option>">
-<!ENTITY opt_o "<option>-o</option>">
-<!ENTITY opt_invariant "<option>--invariant</option>">
-<!ENTITY opt_generate_invariants "<option>--generate-invariants</option>">
-<!ENTITY opt_summand "<option>--summand</option>">
-<!ENTITY opt_no_check "<option>--no-check</option>">
-<!ENTITY opt_no_marking "<option>--no-marking</option>">
-<!ENTITY opt_check_all "<option>--check-all</option>">
-<!ENTITY opt_counter_example "<option>--counter-example</option>">
-<!ENTITY opt_print_dot "<option>--print-dot</option>">
-<!ENTITY opt_rewrite_strategy "<option>--rewrite-strategy</option>">
-<!ENTITY opt_time_limit "<option>--time-limit</option>">
-<!ENTITY opt_smt_solver "<option>--smt-solver</option>">
-<!ENTITY opt_induction "<option>--induction</option>">
-<!ENTITY strat_inner_string "<constant>inner</constant>">
-<!ENTITY strat_innerc_string "<constant>innerc</constant>">
-<!ENTITY strat_jitty_string "<constant>jitty</constant>">
-<!ENTITY strat_jittyc_string "<constant>jittyc</constant>">
-<!ENTITY solver_ario_string "<constant>'ario'</constant>">
-<!ENTITY solver_cvc_lite_string "<constant>'cvc-lite'</constant>">
-<!ENTITY solver_ario "<constant>ario</constant>">
-<!ENTITY solver_cvc_lite "<constant>cvc-lite</constant>">
-<!ENTITY const_true "<constant>true</constant>">
-<!ENTITY link_ario "<uri>http://www.eecs.umich.edu/~ario/</uri>">
-<!ENTITY link_cvc "<uri>http://www.cs.nyu.edu/acsys/cvcl/</uri>">
-<!ENTITY inv "<literal>inv()</literal>">
-<!ENTITY tau "<literal>tau</literal>">
-<!ENTITY ctau "<literal>ctau</literal>">
-]>
-
-<webpage id="lpeconfcheck-web">
- <head>
-  <title>lpeconfcheck</title>
- </head>
-
 <refentry id="lpeconfcheck">
  <info>
   <date>2005-2007</date>
@@ -225,10 +169,10 @@
 
   <varlistentry>
     <term>&opt_s;</term>
-    <term>&opt_summand;=&number;</term>
+    <term>&opt_summand;=&num;</term>
     <listitem>
       <para>
-        Check the summand with number &number; only
+        Check the summand with number &num; only
       </para>
     </listitem>
   </varlistentry>
@@ -434,4 +378,3 @@
 </refsect1>
 
 </refentry>
-</webpage>

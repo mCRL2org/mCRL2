@@ -1,14 +1,3 @@
-<?xml version="1.0"?>
-
-<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY % param SYSTEM "param.xml"> %param;
-]>
-
-<webpage id="lpesumelm-web">
- <head>
-  <title>lpesumelm</title>
- </head>
-
 <refentry id="lpesumelm">
  <info>
   <date>2005-2007</date>
@@ -112,4 +101,3 @@ reports to <email>bug@mcrl2.org</email>.</para>
 </refsect1>
 
 </refentry>
-</webpage>

@@ -1,7 +1,5 @@
 -include ../../build/config.mk
 
-SOURCE_OBJECTS = $(wildcard *.xml)
-
 ifneq ($(XSLTPROC),)
 MAN_OBJECTS    = mcrl22lpe.1 lpe2lts.1 lpe2torx.1 lpebinary.1 lpeinfo.1 lpepp.1 \
 	         lperewr.1 lpedataelm.1 lpeconstelm.1 lpeparelm.1 ltsconvert.1 \
@@ -13,10 +11,6 @@ MAN_OBJECTS    = mcrl22lpe.1 lpe2lts.1 lpe2torx.1 lpebinary.1 lpeinfo.1 lpepp.1 
 		 invariant_eliminator.7 \
                  bdd2dot.7 smt_solver.7 bdd_simplifier.7 smt_solver_ario.7 smt_solver_cvc_lite.7 \
                  bdd_path_eliminator.7 smt_lib_solver.7
-
-TXT_OBJECTS    = $(patsubst %.xml,%.txt,$(SOURCE_OBJECTS))
-HTML_OBJECTS   = $(patsubst param.html,, \
-								 $(patsubst %.xml,%.html,$(SOURCE_OBJECTS)))
 endif
 
 # For now build only man objects
@@ -24,12 +18,12 @@ OBJECTS             = $(MAN_OBJECTS)
 MAN_OBJECT_SUFFIXES = $(patsubst .%,%, $(sort $(suffix $(MAN_OBJECTS))))
 MAN_INSTALL_TARGETS = $(patsubst %,%.install,$(MAN_OBJECT_SUFFIXES))
 
-.PHONY: all clean distclean install web
+.PHONY: all clean distclean install web man
 
-all: $(MAN_OBJECTS)
+all: man
 
 clean:
-	rm -f $(addprefix *.,$(MAN_OBJECT_SUFFIXES)) *.txt *.html autolayout.xml
+	rm -f $(addprefix *.,$(MAN_OBJECT_SUFFIXES)) *.txt
 	rm -rf web
 
 distclean: clean
@@ -38,9 +32,11 @@ install: all $(MAN_INSTALL_TARGETS)
 
 documentation: all
 
+man:
+	@$(XSLTPROC) http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl index.xml
+
 web: 
-	@$(XSLTPROC) --novalid -o autolayout.xml http://docbook.sourceforge.net/release/xsl/current/website/autolayout.xsl weblayout.xml
-	@$(XSLTPROC) --novalid --stringparam output-root web http://docbook.sourceforge.net/release/xsl/current/website/chunk-tabular.xsl autolayout.xml
+	@$(XSLTPROC) --stringparam base.dir web/ http://docbook.sourceforge.net/release/xsl/current/html/chunk.xsl index.xml
 
 %.install:
 	@install -d $(mandir)/man$*
@@ -50,6 +46,3 @@ web:
 	    install -m 644 $$f $(mandir)/man$*;\
 	  fi;\
 	done
-
-%.1 %.2 %.3 %.4 %.5 %.6 %.7 %.8 %.9: %.xml
-	@$(XSLTPROC) --novalid http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl $<

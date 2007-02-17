@@ -1,53 +1,3 @@
-<?xml version="1.0"?>
-
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
-<!ENTITY class_bdd_prover "<classname>BDD_Prover</classname>">
-<!ENTITY class_invariant_checker "<classname>Invariant_Checker</classname>">
-<!ENTITY class_bdd2dot "<classname>BDD2Dot</classname>">
-
-<!ENTITY type_virtual "<type>virtual</type>">
-<!ENTITY type_void "<type>void</type>">
-<!ENTITY type_bool "<type>bool</type>">
-<!ENTITY type_int "<type>int</type>">
-<!ENTITY type_aterm "<type>ATerm</type>">
-<!ENTITY type_aterm_appl "<type>ATermAppl</type>">
-<!ENTITY type_smt_solver_type "<type>SMT_Solver_Type</type>">
-<!ENTITY type_rewrite_strategy "<type>RewriteStrategy</type>">
-<!ENTITY type_char_string "<type>char*</type>">
-
-<!ENTITY sort_bool "<type>Bool</type>">
-
-<!ENTITY invariant_checker_constructor "<function>Invariant_Checker::Invariant_Checker</function>">
-<!ENTITY invariant_checker_check_invariant "<function>Invariant_Checker::check_invariant</function>">
-
-<!ENTITY par_rewrite_strategy "<parameter>a_rewrite_strategy</parameter>">
-<!ENTITY par_time_limit "<parameter>a_time_limit</parameter>">
-<!ENTITY par_path_eliminator "<parameter>a_path_eliminator</parameter>">
-<!ENTITY par_solver_type "<parameter>a_solver_type</parameter>">
-<!ENTITY par_apply_induction "<parameter>a_apply_induction</parameter>">
-<!ENTITY par_lpe "<parameter>a_lpe</parameter>">
-<!ENTITY par_counter_example "<parameter>a_counter_example</parameter>">
-<!ENTITY par_all_violations "<parameter>a_all_violations</parameter>">
-<!ENTITY par_invariant "<parameter>a_invariant</parameter>">
-<!ENTITY par_dot_file_name "<parameter>a_dot_file_name</parameter>">
-
-<!ENTITY solver_ario "<constant>ario</constant>">
-<!ENTITY solver_cvc_lite "<constant>cvc-lite</constant>">
-
-<!ENTITY link_ario "<uri>http://www.eecs.umich.edu/~ario/</uri>">
-<!ENTITY link_cvc "<uri>http://www.cs.nyu.edu/acsys/cvcl/</uri>">
-
-<!ENTITY const_strat_jitty "<constant>GS_REWR_JITTY</constant>">
-<!ENTITY const_strat_jittyc "<constant>GS_REWR_JITTYC</constant>">
-<!ENTITY const_strat_inner "<constant>GS_REWR_INNER</constant>">
-<!ENTITY const_strat_innerc "<constant>GS_REWR_INNERC</constant>">
-<!ENTITY const_solver_type_ario "<constant>solver_type_ario</constant>">
-<!ENTITY const_true "<constant>true</constant>">
-<!ENTITY const_false "<constant>false</constant>">
-
-<!ENTITY stderr "<constant>stderr</constant>">
-]>
-
 <refentry id="invariant_checker">
  <info>
   <date>2005-2007</date>
@@ -70,7 +20,7 @@
 <funcsynopsis>
 <funcprototype>
   <funcdef>&invariant_checker_constructor;</funcdef>
-  <paramdef>&type_aterm_appl; &par_lpe;</paramdef>
+  <paramdef>&type_atermappl; &par_lpe;</paramdef>
   <paramdef>&type_rewrite_strategy; &par_rewrite_strategy; = &const_strat_jitty;</paramdef>
   <paramdef>&type_int; &par_time_limit; = 0</paramdef>
   <paramdef>&type_bool; &par_path_eliminator; = &const_false;</paramdef>
@@ -81,8 +31,8 @@
   <paramdef>&type_char_string; &par_dot_file_name; = 0</paramdef>
 </funcprototype>
 <funcprototype>
-  <funcdef>&type_aterm_appl; &invariant_checker_check_invariant;</funcdef>
-  <paramdef>&type_aterm_appl; &par_invariant;</paramdef>
+  <funcdef>&type_atermappl; &invariant_checker_check_invariant;</funcdef>
+  <paramdef>&type_atermappl; &par_invariant;</paramdef>
 </funcprototype>
 </funcsynopsis>
 </refsynopsisdiv>

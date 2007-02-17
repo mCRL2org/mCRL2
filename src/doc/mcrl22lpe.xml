@@ -1,52 +1,3 @@
-<?xml version="1.0"?>
-
-<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY % param SYSTEM "param.xml"> %param;
-<!ENTITY basic "<parameter>basic</parameter>">
-<!ENTITY advanced "<parameter>advanced</parameter>">
-<!ENTITY opt_0 "<option>-0</option>">
-<!ENTITY opt_1 "<option>-1</option>">
-<!ENTITY opt_2 "<option>-2</option>">
-<!ENTITY opt_3 "<option>-3</option>">
-<!ENTITY opt_c "<option>-c</option>">
-<!ENTITY opt_n "<option>-n</option>">
-<!ENTITY opt_r "<option>-r</option>">
-<!ENTITY opt_w "<option>-w</option>">
-<!ENTITY opt_b "<option>-b</option>">
-<!ENTITY opt_a "<option>-a</option>">
-<!ENTITY opt_o "<option>-o</option>">
-<!ENTITY opt_f "<option>-f</option>">
-<!ENTITY opt_e "<option>-e</option>">
-<!ENTITY opt_p "<option>-p</option>">
-<!ENTITY opt_v "<option>-v</option>">
-<!ENTITY opt_d "<option>-d</option>">
-<!ENTITY opt_m "<option>-m</option>">
-<!ENTITY opt_g "<option>-g</option>">
-<!ENTITY opt_D "<option>-D</option>">
-<!ENTITY opt_stack "<option>--stack</option>">
-<!ENTITY opt_regular "<option>--regular</option>">
-<!ENTITY opt_regular2 "<option>--regular2</option>">
-<!ENTITY opt_alternative "<option>--alternative</option>">
-<!ENTITY opt_cluster "<option>--cluster</option>">
-<!ENTITY opt_no-cluster  "<option>--no-cluster</option>">
-<!ENTITY opt_no-alpha "<option>--no-alpha</option>">
-<!ENTITY opt_newstate "<option>--newstate</option>">
-<!ENTITY opt_binary "<option>--binary</option>">
-<!ENTITY opt_statenames "<option>--statenames</option>">
-<!ENTITY opt_no-rewrite "<option>--no-rewrite</option>">
-<!ENTITY opt_no-freevars "<option>--no-freevars</option>">
-<!ENTITY opt_check-only "<option>--check-only</option>">
-<!ENTITY opt_end-phase "<option>--end-phase</option>">
-<!ENTITY opt_nosumelm "<option>--no-sumelm</option>">
-<!ENTITY opt_nodeltaelm "<option>--no-deltaelm</option>">
-<!ENTITY opt_delta "<option>--delta</option>">
-]>
-
-<webpage id="mcrl22lpe-web">
- <head>
-  <title>mcrl22lpe</title>
- </head>
-
 <refentry id="mcrl22lpe">
  <info>
   <date>2005-2007</date>
@@ -488,4 +439,3 @@
 </refsect1>
 
 </refentry>
-</webpage>

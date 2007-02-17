@@ -1,29 +1,3 @@
-<?xml version="1.0"?>
-
-<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY % param SYSTEM "param.xml"> %param;
-<!ENTITY opt_f "<option>-f</option>">
-<!ENTITY opt_y "<option>-y</option>">
-<!ENTITY opt_u "<option>-u</option>">
-<!ENTITY opt_c "<option>-c</option>">
-<!ENTITY opt_r "<option>-r</option>">
-<!ENTITY opt_R "<option>-R</option>">
-<!ENTITY opt_freevar "<option>--freevar</option>">
-<!ENTITY opt_dummy "<option>--dummy</option>">
-<!ENTITY opt_unused-data "<option>--unused-data</option>">
-<!ENTITY opt_vector "<option>--vector</option>">
-<!ENTITY opt_tree "<option>--tree</option>">
-<!ENTITY opt_rewriter "<option>--rewriter</option>">
-<!ENTITY opt_aut "<option>--aut</option>">
-<!ENTITY opt_svc "<option>--svc</option>">
-<!ENTITY opt_no-info "<option>--no-info</option>">
-]>
-
-<webpage id="lpe2torx-web">
- <head>
-  <title>lpe2torx</title>
- </head>
-
 <refentry id="lpe2torx">
  <info>
   <date>2005-2007</date>
@@ -189,4 +163,3 @@
 </refsect1>
 
 </refentry>
-</webpage>

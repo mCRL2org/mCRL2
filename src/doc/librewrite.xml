@@ -1,56 +1,3 @@
-<?xml version="1.0"?>
-
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
-<!ENTITY % param SYSTEM "param.xml">
-%param;
-<!ENTITY virtual "<type>virtual</type>">
-<!ENTITY tconst "<type>const</type>">
-<!ENTITY tvoid "<type>void</type>">
-<!ENTITY tcbool "<type>bool</type>">
-<!ENTITY tpchar "<type>char*</type>">
-<!ENTITY tpfile "<type>FILE*</type>">
-<!ENTITY taterm "<type>ATerm</type>">
-<!ENTITY trewrstrat "<type>RewriteStrategy</type>">
-<!ENTITY tRewriter "<type>Rewriter</type>">
-<!ENTITY tpRewriter "<type>Rewriter *</type>">
-<!ENTITY Rewriter_constructor "<function>Rewriter::Rewriter</function>">
-<!ENTITY Rewriter_destructor "<function>Rewriter::~Rewriter</function>">
-<!ENTITY Rewriter_rewr "<function>Rewriter::rewrite</function>">
-<!ENTITY Rewriter_rewrlist "<function>Rewriter::rewriteList</function>">
-<!ENTITY Rewriter_toInt "<function>Rewriter::toRewriteFormat</function>">
-<!ENTITY Rewriter_fromInt "<function>Rewriter::fromRewriteFormat</function>">
-<!ENTITY Rewriter_rewrInt "<function>Rewriter::rewriteInternal</function>">
-<!ENTITY Rewriter_rewrIntlist "<function>Rewriter::rewriteInternalList</function>">
-<!ENTITY Rewriter_addRule "<function>Rewriter::addRewriteRule</function>">
-<!ENTITY Rewriter_remRule "<function>Rewriter::removeRewriteRule</function>">
-<!ENTITY Rewriter_setsubst "<function>Rewriter::setSubstitution</function>">
-<!ENTITY Rewriter_getsubst "<function>Rewriter::getSubstitution</function>">
-<!ENTITY Rewriter_clearsubst "<function>Rewriter::clearSubstitution</function>">
-<!ENTITY Rewriter_clearsubsts "<function>Rewriter::clearSubstitutions</function>">
-<!ENTITY createRewriter "<function>createRewriter</function>">
-<!ENTITY isValidRewriteRule "<function>isValidRewriteRule</function>">
-<!ENTITY PrintRewriteStrategy "<function>PrintRewriteStrategy</function>">
-<!ENTITY RewriteStrategyFromString "<function>RewriteStrategyFromString</function>">
-<!ENTITY parDataEqnSpec "<parameter>DataEqnSpec</parameter>">
-<!ENTITY parDataEqn "<parameter>DataEqn</parameter>">
-<!ENTITY parStrategy "<parameter>Strategy</parameter>">
-<!ENTITY parVar "<parameter>Var</parameter>">
-<!ENTITY parExpr "<parameter>Expr</parameter>">
-<!ENTITY parRule "<parameter>Rule</parameter>">
-<!ENTITY parTerm "<parameter>Term</parameter>">
-<!ENTITY parTerms "<parameter>Terms</parameter>">
-<!ENTITY parS "<parameter>s</parameter>">
-<!ENTITY parStream "<parameter>stream</parameter>">
-<!ENTITY false "<constant>false</constant>">
-<!ENTITY stratINNER "<constant>GS_REWR_INNER</constant>">
-<!ENTITY stratINNERstring "<constant>inner</constant>">
-<!ENTITY stratINNERC "<constant>GS_REWR_INNERC</constant>">
-<!ENTITY stratJITTY "<constant>GS_REWR_JITTY</constant>">
-<!ENTITY stratJITTYC "<constant>GS_REWR_JITTYC</constant>">
-<!ENTITY stratINVALID "<constant>GS_REWR_INVALID</constant>">
-<!ENTITY gsEnableConstructorFunctions "<function>gsEnableConstructorFunctions</function>">
-]>
-
 <refentry id="librewrite">
  <info>
   <date>2005-2007</date>
@@ -76,69 +23,69 @@
 </funcsynopsisinfo>
 <funcprototype>
   <funcdef>&Rewriter_constructor;</funcdef>
-  <paramdef>&tvoid;</paramdef>
+  <paramdef>&type_void;</paramdef>
 </funcprototype>
 <funcprototype>
   <funcdef>&virtual; &Rewriter_destructor;</funcdef>
-  <paramdef>&tvoid;</paramdef>
+  <paramdef>&type_void;</paramdef>
 </funcprototype>
 <funcprototype>
-  <funcdef>&virtual; &tatermappl; &Rewriter_rewr;</funcdef>
-  <paramdef>&tatermappl; &parTerm;</paramdef>
+  <funcdef>&virtual; &type_atermappl; &Rewriter_rewr;</funcdef>
+  <paramdef>&type_atermappl; &parTerm;</paramdef>
 </funcprototype>
 <funcprototype>
-  <funcdef>&virtual; &tatermlist; &Rewriter_rewrlist;</funcdef>
-  <paramdef>&tatermlist; &parTerms;</paramdef>
+  <funcdef>&virtual; &type_atermlist; &Rewriter_rewrlist;</funcdef>
+  <paramdef>&type_atermlist; &parTerms;</paramdef>
 </funcprototype>
 <funcprototype>
-  <funcdef>&virtual; &taterm; &Rewriter_toInt;</funcdef>
-  <paramdef>&tatermappl; &parTerm;</paramdef>
+  <funcdef>&virtual; &type_aterm; &Rewriter_toInt;</funcdef>
+  <paramdef>&type_atermappl; &parTerm;</paramdef>
 </funcprototype>
 <funcprototype>
-  <funcdef>&virtual; &tatermappl; &Rewriter_fromInt;</funcdef>
-  <paramdef>&taterm; &parTerm;</paramdef>
+  <funcdef>&virtual; &type_atermappl; &Rewriter_fromInt;</funcdef>
+  <paramdef>&type_aterm; &parTerm;</paramdef>
 </funcprototype>
 <funcprototype>
-  <funcdef>&virtual; &taterm; &Rewriter_rewrInt;</funcdef>
-  <paramdef>&taterm; &parTerm;</paramdef>
+  <funcdef>&virtual; &type_aterm; &Rewriter_rewrInt;</funcdef>
+  <paramdef>&type_aterm; &parTerm;</paramdef>
 </funcprototype>
 <funcprototype>
-  <funcdef>&virtual; &tatermlist; &Rewriter_rewrIntlist;</funcdef>
-  <paramdef>&tatermlist; &parTerms;</paramdef>
+  <funcdef>&virtual; &type_atermlist; &Rewriter_rewrIntlist;</funcdef>
+  <paramdef>&type_atermlist; &parTerms;</paramdef>
 </funcprototype>
 <funcprototype>
   <funcdef>&virtual; &tcbool; &Rewriter_addRule;</funcdef>
-  <paramdef>&tatermappl; &parRule;</paramdef>
+  <paramdef>&type_atermappl; &parRule;</paramdef>
 </funcprototype>
 <funcprototype>
   <funcdef>&virtual; &tcbool; &Rewriter_remRule;</funcdef>
-  <paramdef>&tatermappl; &parRule;</paramdef>
+  <paramdef>&type_atermappl; &parRule;</paramdef>
 </funcprototype>
 <funcprototype>
-  <funcdef>&virtual; &tvoid; &Rewriter_setsubst;</funcdef>
-  <paramdef>&tatermappl; &parVar;</paramdef>
-  <paramdef>&taterm; &parExpr;</paramdef>
+  <funcdef>&virtual; &type_void; &Rewriter_setsubst;</funcdef>
+  <paramdef>&type_atermappl; &parVar;</paramdef>
+  <paramdef>&type_aterm; &parExpr;</paramdef>
 </funcprototype>
 <funcprototype>
-  <funcdef>&virtual; &taterm; &Rewriter_getsubst;</funcdef>
-  <paramdef>&tatermappl; &parVar;</paramdef>
+  <funcdef>&virtual; &type_aterm; &Rewriter_getsubst;</funcdef>
+  <paramdef>&type_atermappl; &parVar;</paramdef>
 </funcprototype>
 <funcprototype>
-  <funcdef>&virtual; &tvoid; &Rewriter_clearsubst;</funcdef>
-  <paramdef>&tatermappl; &parVar;</paramdef>
+  <funcdef>&virtual; &type_void; &Rewriter_clearsubst;</funcdef>
+  <paramdef>&type_atermappl; &parVar;</paramdef>
 </funcprototype>
 <funcprototype>
-  <funcdef>&virtual; &tvoid; &Rewriter_clearsubsts;</funcdef>
-  <paramdef>&tvoid;</paramdef>
+  <funcdef>&virtual; &type_void; &Rewriter_clearsubsts;</funcdef>
+  <paramdef>&type_void;</paramdef>
 </funcprototype>
 <funcprototype>
   <funcdef>&tpRewriter; &createRewriter;</funcdef>
-  <paramdef>&tatermappl; &parDataEqnSpec;</paramdef>
+  <paramdef>&type_atermappl; &parDataEqnSpec;</paramdef>
   <paramdef>&trewrstrat; &parStrategy;</paramdef>
 </funcprototype>
 <funcprototype>
   <funcdef>&tcbool; &isValidRewriteRule;</funcdef>
-  <paramdef>&tatermappl; &parDataEqn;</paramdef>
+  <paramdef>&type_atermappl; &parDataEqn;</paramdef>
 </funcprototype>
 <funcprototype>
   <funcdef>&trewrstrat; &PrintRewriteStrategy;</funcdef>
@@ -147,7 +94,7 @@
 </funcprototype>
 <funcprototype>
   <funcdef>&trewrstrat; &RewriteStrategyFromString;</funcdef>
-  <paramdef>&tconst; &tpchar; &parS;</paramdef>
+  <paramdef>&type_const; &type_pchar; &parS;</paramdef>
 </funcprototype>
 </funcsynopsis>
 </refsynopsisdiv>
@@ -158,7 +105,7 @@
 The librewrite library provides a rewrite system for mCRL2 data expressions (only after data implementation). To use it, one creates a &tRewriter; class through the &createRewriter; function. The created rewriter is initialised with the equations from &parDataEqnSpec;, which are used as rewrite rules, and a rewriter strategy &parStrategy; (see below). After creation, one can still add or remove an rewrite rule &parRule; with the functions &Rewriter_addRule; and &Rewriter_remRule;. The latter removes (all occurrences of) &parRule; from the rules used by the rewrite system. To check whether a &parDataEqn; is a valid rewrite rule the function &isValidRewriteRule; can be used.
 </para>
 <para>
-To actually rewrite a data expression, the functions &Rewriter_rewr; and &Rewriter_rewrlist; can be used. The function &Rewriter_rewr; rewrites a single mCRL2 data expression &parTerm;, while &Rewriter_rewrlist; rewrites every expression in the list &parTerms;. Because the rewriters use their own internal format for data expressions (for more efficient rewriting), every call to &Rewriter_rewr; or &Rewriter_rewrlist; results in an implicit conversion to and from the internal format before, respectively after the actual rewriting. When rewriting is a critical part of an application, it is wise to explicitly convert the data expressions before repeated calls on such an expression. This is done with the functions &Rewriter_toInt; and &Rewriter_fromInt;. (Note that the expression in the internal format is an &taterm; instead of an &tatermappl;.) Terms in the internal format can be rewritten with the function &Rewriter_rewrInt; and &Rewriter_rewrIntlist; (analogous to &Rewriter_rewr; and &Rewriter_rewrlist;).
+To actually rewrite a data expression, the functions &Rewriter_rewr; and &Rewriter_rewrlist; can be used. The function &Rewriter_rewr; rewrites a single mCRL2 data expression &parTerm;, while &Rewriter_rewrlist; rewrites every expression in the list &parTerms;. Because the rewriters use their own internal format for data expressions (for more efficient rewriting), every call to &Rewriter_rewr; or &Rewriter_rewrlist; results in an implicit conversion to and from the internal format before, respectively after the actual rewriting. When rewriting is a critical part of an application, it is wise to explicitly convert the data expressions before repeated calls on such an expression. This is done with the functions &Rewriter_toInt; and &Rewriter_fromInt;. (Note that the expression in the internal format is an &type_aterm; instead of an &type_atermappl;.) Terms in the internal format can be rewritten with the function &Rewriter_rewrInt; and &Rewriter_rewrIntlist; (analogous to &Rewriter_rewr; and &Rewriter_rewrlist;).
 </para>
 
 <refsect2>

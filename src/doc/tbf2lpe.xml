@@ -1,28 +1,3 @@
-<?xml version="1.0"?>
-
-<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website Full V2.6//EN" "http://docbook.sourceforge.net/release/website/current/schema/dtd/website-full.dtd" [
-<!ENTITY % param SYSTEM "param.xml"> %param;
-<!ENTITY opt_n "<option>-n</option>">
-<!ENTITY opt_noconvmaps "<option>--no-conv-maps</option>">
-<!ENTITY opt_noconvcons "<option>--no-conv-cons</option>">
-<!ENTITY Bool "<constant>Bool</constant>">
-<!ENTITY Bool_F "<constant>F</constant>">
-<!ENTITY Bool_T "<constant>T</constant>">
-<!ENTITY Bool_and "<constant>and</constant>">
-<!ENTITY Bool_or "<constant>or</constant>">
-<!ENTITY Bool_eq "<constant>eq</constant>">
-<!ENTITY Bool_false "<constant>false</constant>">
-<!ENTITY Bool_true "<constant>true</constant>">
-<!ENTITY Bool_and2 "<constant>&amp;&amp;</constant>">
-<!ENTITY Bool_or2 "<constant>||</constant>">
-<!ENTITY Bool_eq2 "<constant>==</constant>">
-]>
-
-<webpage id="tbf2lpe-web">
- <head>
-  <title>tbf2lpe</title>
- </head>
-
 <refentry id="tbf2lpe">
  <info>
   <date>2005-2007</date>
@@ -62,7 +37,7 @@
     some conversions are applied to generate an LPE that all mCRL2 tools can
     use as can be expected. Specifically, this means that the constructors
     &Bool_F; and &Bool_T; of sort &Bool; are converted to their mCRL2
-    counterparts (&Bool_false; and &Bool_true;) as well as the functions
+    counterparts (&const_false; and &const_true;) as well as the functions
     &Bool_and; and &Bool_or; (to &Bool_and2; and &Bool_or2;) and all equalities
     &Bool_eq; (to &Bool_eq2;). The conversion of &Bool_F; and &Bool_T; is
     needed for detecting whether or not a boolean expression is equal to true or
@@ -153,4 +128,3 @@ Written by Muck van Weerdenburg. Please send all complaints, comments and bug fi
 </refsect1>
 
 </refentry>
-</webpage>

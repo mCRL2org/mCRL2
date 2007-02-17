@@ -1,23 +1,3 @@
-<?xml version="1.0"?>
-
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
-<!ENTITY class_disjointness_checker "<classname>Disjointness_Checker</classname>">
-
-<!ENTITY type_virtual "<type>virtual</type>">
-<!ENTITY type_void "<type>void</type>">
-<!ENTITY type_bool "<type>bool</type>">
-<!ENTITY type_int "<type>int</type>">
-<!ENTITY type_aterm "<type>ATerm</type>">
-<!ENTITY type_aterm_appl "<type>ATermAppl</type>">
-
-<!ENTITY disjointness_checker_constructor "<function>Disjointness_Checker::Disjointness_Checker</function>">
-<!ENTITY disjointness_checker_disjoint "<function>Disjointness_Checker::disjoint</function>">
-
-<!ENTITY par_process_equations "<parameter>a_process_equations</parameter>">
-<!ENTITY par_summand_number_1 "<parameter>a_summand_number_1</parameter>">
-<!ENTITY par_summand_number_2 "<parameter>a_summand_number_2</parameter>">
-]>
-
 <refentry id="disjointness_checker">
  <info>
   <date>2005-2007</date>
@@ -40,7 +20,7 @@
 <funcsynopsis>
 <funcprototype>
   <funcdef>&disjointness_checker_constructor;</funcdef>
-  <paramdef>&type_aterm_appl; &par_process_equations;</paramdef>
+  <paramdef>&type_atermappl; &par_process_equations;</paramdef>
 </funcprototype>
 <funcprototype>
   <funcdef>&type_bool; &disjointness_checker_disjoint;</funcdef>
