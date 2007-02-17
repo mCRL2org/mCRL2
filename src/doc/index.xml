@@ -101,7 +101,6 @@
 <!ENTITY nfpvo       '<literal>FP_VO</literal>'>
 <!ENTITY nmf                  '<literal>MF</literal>'>
 <!ENTITY nname                '<literal>NAME</literal>'>
-<!ENTITY n "<parameter>n</parameter>">
 <!ENTITY nrf                  '<literal>RF</literal>'>
 <!ENTITY nrname               '<literal>RNAME</literal>'>
 <!ENTITY num "<parameter>NUM</parameter>">
@@ -243,11 +242,14 @@
 <!ENTITY par_formulas "<parameter>a_formulas</parameter>">
 <!ENTITY par_full "<parameter>a_full</parameter>">
 <!ENTITY par_generate_invariants "<parameter>a_generate_invariants</parameter>">
+<!ENTITY par_h "<parameter>h</parameter>">
 <!ENTITY par_invariant "<parameter>a_invariant</parameter>">
 <!ENTITY par_lpe "<parameter>a_lpe</parameter>">
+<!ENTITY par_n "<parameter>n</parameter>">
 <!ENTITY par_no_marking "<parameter>a_no_marking</parameter>">
 <!ENTITY par_path_eliminator "<parameter>a_path_eliminator</parameter>">
 <!ENTITY par_process_equations "<parameter>a_process_equations</parameter>">
+<!ENTITY par_q "<parameter>q</parameter>">
 <!ENTITY par_reverse "<parameter>a_reverse</parameter>">
 <!ENTITY par_rewrite_strategy "<parameter>a_rewrite_strategy</parameter>">
 <!ENTITY parRule "<parameter>Rule</parameter>">

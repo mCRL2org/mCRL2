@@ -47,17 +47,17 @@
     <variablelist>
       
       <varlistentry>
-	<term>&n;</term>
+	<term>&par_n;</term>
 	<listitem>
 	  <para>
-	    Execute the action with number &n; from the list of actions that are
-	    possible in the current state. 
+            Execute the action with number &par_n; from the list of actions
+            that are possible in the current state. 
 	  </para>
 	</listitem>
       </varlistentry>
       
       <varlistentry>
-	<term>&opt_h;</term>
+	<term>&par_h;</term>
 	<listitem>
 	  <para>
 	    Display a help message explaining the available commands.
@@ -66,7 +66,7 @@
       </varlistentry>
     
       <varlistentry>
-	<term>&opt_q;</term>
+	<term>&par_q;</term>
 	<term>&ctrl-d;</term>
 	<listitem>
 	  <para>
