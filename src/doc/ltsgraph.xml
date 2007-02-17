@@ -12,7 +12,7 @@
 </refmeta>
 
 <refnamediv>
-  <refname>&ltsgraph;</refname>
+  <refname>ltsgraph</refname>
   <refpurpose>Visualise graphs and optimise their layout</refpurpose>
 </refnamediv>
 
@@ -129,7 +129,7 @@
 <title>Author</title>
 <para>
   Written by Didier Le Lann, Jeroen van der Wulp and Carst Tankink. Please send all
-  complaints, comments and bug reports to <email>bug@mcrl2.org</email>, or file them at the bugtracker found through <address>www.mcrl2.org</address>.
+  complaints, comments and bug reports to &bugmail;.
 </para>
 </refsect1>
 

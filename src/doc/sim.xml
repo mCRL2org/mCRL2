@@ -12,7 +12,7 @@
 </refmeta>
 
 <refnamediv>
-  <refname>&sim;</refname>
+  <refname>sim</refname>
   <refpurpose>simulate LPEs</refpurpose>
 </refnamediv>
 
@@ -151,7 +151,7 @@
 <refsect1>
 <title>See also</title>
 <para>
-For a simulator that uses a graphical user interface, see the &xsim; tool. 
+For a simulator that uses a graphical user interface, see the &xsim-lnk; tool. 
 </para>
 </refsect1>
 
@@ -159,7 +159,7 @@ For a simulator that uses a graphical user interface, see the &xsim; tool.
 <title>Author</title>
 <para>
   Written by Muck van Weerdenburg. Please send all complaints, comments and bug
-  reports to <email>bug@mcrl2.org</email>.
+  reports to &bugmail;.
 </para>
 </refsect1>
 

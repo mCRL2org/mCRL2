@@ -32,9 +32,10 @@
 <refsect1>
 <title>Description</title>
 <para>
-  The class &class_smt_solver_cvc_lite; inherits from the class &class_smt_lib_solver;. It uses the SMT solver CVC Lite to determine
+  The class &class_smt_solver_cvc_lite; inherits from the class
+  &class_smt_lib_solver;. It uses the SMT solver CVC Lite (&solver_cvc_lite-url;) to determine
   the satisfiability of propositional formulas. To use the solver CVC Lite, the directory containing the corresponding
-  executable must be in the path. On June the 20th of 2006, CVC Lite was available on &link_cvc;.
+  executable must be in the path.
 </para>
 <para>
   The constructor &smt_solver_cvc_lite_constructor; checks if CVC Lite's executable is indeed available and reports an error if it is not.
@@ -63,7 +64,7 @@
 <refsect1>
 <title>Author</title>
 <para>
-  Written by Luc Engelen. Please send all complaints, comments and bug reports to <email>bug@mcrl2.org</email>.
+  Written by Luc Engelen. Please send all complaints, comments and bug reports to &bugmail;.
 </para>
 </refsect1>
 

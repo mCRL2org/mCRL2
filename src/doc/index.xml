@@ -65,56 +65,15 @@
 <!ENTITY disjointness_checker_disjoint "<function>Disjointness_Checker::disjoint</function>">
 <!ENTITY dot "<constant>dot</constant>">
 <!ENTITY false "<constant>false</constant>">
-<!ENTITY fbdd2dot SYSTEM "bdd2dot.xml">
-<!ENTITY fbdd_path_eliminator SYSTEM "bdd_path_eliminator.xml">
-<!ENTITY fbdd_prover SYSTEM "bdd_prover.xml">
-<!ENTITY fbdd_simplifier SYSTEM "bdd_simplifier.xml">
-<!ENTITY fconfluence_checker SYSTEM "confluence_checker.xml">
-<!ENTITY fdisjointness_checker SYSTEM "disjointness_checker.xml">
-<!ENTITY fformula_checker SYSTEM "formula_checker.xml">
-<!ENTITY finvariant_checker SYSTEM "invariant_checker.xml">
-<!ENTITY finvariant_eliminator SYSTEM "invariant_eliminator.xml">
-<!ENTITY flibrewrite SYSTEM "librewrite.xml">
-<!ENTITY flpe2lts SYSTEM "lpe2lts.xml">
-<!ENTITY flpe2torx SYSTEM "lpe2torx.xml">
-<!ENTITY flpebinary SYSTEM "lpebinary.xml">
-<!ENTITY flpeconfcheck SYSTEM "lpeconfcheck.xml">
-<!ENTITY flpeconstelm SYSTEM "lpeconstelm.xml">
-<!ENTITY flpedataelm SYSTEM "lpedataelm.xml">
-<!ENTITY flpedecluster SYSTEM "lpedecluster.xml">
-<!ENTITY flpeformcheck SYSTEM "lpeformcheck.xml">
-<!ENTITY flpeinfo SYSTEM "lpeinfo.xml">
-<!ENTITY flpeinvelm SYSTEM "lpeinvelm.xml">
-<!ENTITY flpeparelm SYSTEM "lpeparelm.xml">
-<!ENTITY flpepp SYSTEM "lpepp.xml">
-<!ENTITY flperewr SYSTEM "lperewr.xml">
-<!ENTITY flpesumelm SYSTEM "lpesumelm.xml">
-<!ENTITY flpeuntime SYSTEM "lpeuntime.xml">
-<!ENTITY fltscompare SYSTEM "ltscompare.xml">
-<!ENTITY fltsconvert SYSTEM "ltsconvert.xml">
-<!ENTITY fltsgraph SYSTEM "ltsgraph.xml">
-<!ENTITY fltsinfo SYSTEM "ltsinfo.xml">
-<!ENTITY fltsmin SYSTEM "ltsmin.xml">
 <!ENTITY fmcparsemodalformula '<function>MCparseModalFormula</function>'>
-<!ENTITY fmcrl22lpe SYSTEM "mcrl22lpe.xml">
 <!ENTITY format "<parameter>FORMAT</parameter>">
 <!ENTITY formula_checker_check_formulas "<function>Formula_Checker::check_formulas</function>">
 <!ENTITY formula_checker_constructor "<function>Formula_Checker::Formula_Checker</function>">
 <!ENTITY formulas "<parameter>FORMULAS</parameter>">
-<!ENTITY fpnml2mcrl2 SYSTEM "pnml2mcrl2.xml">
-<!ENTITY fprover SYSTEM "prover.xml">
-<!ENTITY fsim SYSTEM "sim.xml">
 <!ENTITY fsm "<constant>fsm</constant>">
-<!ENTITY fsmt_lib_solver SYSTEM "smt_lib_solver.xml">
-<!ENTITY fsmt_solver_ario SYSTEM "smt_solver_ario.xml">
-<!ENTITY fsmt_solver_cvc_lite SYSTEM "smt_solver_cvc_lite.xml">
-<!ENTITY fsmt_solver SYSTEM "smt_solver.xml">
-<!ENTITY ftbf2lpe SYSTEM "tbf2lpe.xml">
-<!ENTITY ftracepp SYSTEM "tracepp.xml">
 <!ENTITY func_eq "<function>==</function>">
 <!ENTITY func_if "<function>if</function>">
 <!ENTITY func_neq "<function>!=</function>">
-<!ENTITY fxsim SYSTEM "xsim.xml">
 <!ENTITY gsEnableConstructorFunctions "<function>gsEnableConstructorFunctions</function>">
 <!ENTITY if_then_else "<constant>if-then-else</constant>">
 <!ENTITY infile1 "<parameter>INFILE1</parameter>">
@@ -129,29 +88,6 @@
 <!ENTITY invariant "<parameter>INVARIANT</parameter>">
 <!ENTITY inv "<literal>inv()</literal>">
 <!ENTITY isValidRewriteRule "<function>isValidRewriteRule</function>">
-<!ENTITY link_ario "<uri>http://www.eecs.umich.edu/~ario/</uri>">
-<!ENTITY link_cvc "<uri>http://www.cs.nyu.edu/acsys/cvcl/</uri>">
-<!ENTITY lpe2lts "<command>lpe2lts</command>">
-<!ENTITY lpe2torx "<command>lpe2torx</command>">
-<!ENTITY lpebinary "<command>lpebinary</command>">
-<!ENTITY lpeconfcheck "<command>lpeconfcheck</command>">
-<!ENTITY lpeconstelm "<command>lpeconstelm</command>">
-<!ENTITY lpedataelm "<command>lpedataelm</command>">
-<!ENTITY lpedecluster "<command>lpedecluster</command>">
-<!ENTITY lpeformcheck "<command>lpeformcheck</command>">
-<!ENTITY lpeinfo "<command>lpeinfo</command>">
-<!ENTITY lpeinvelm "<command>lpeinvelm</command>">
-<!ENTITY lpeparelm "<command>lpeparelm</command>">
-<!ENTITY lpepp "<command>lpepp</command>">
-<!ENTITY lperewr "<command>lperewr</command>">
-<!ENTITY lpesumelm "<command>lpesumelm</command>">
-<!ENTITY lpeuntime "<command>lpeuntime</command>">
-<!ENTITY ltscompare "<command>ltscompare</command>">
-<!ENTITY ltsconvert "<command>ltsconvert</command>">
-<!ENTITY ltsgraph "<command>ltsgraph</command>">
-<!ENTITY ltsinfo "<command>ltsinfo</command>">
-<!ENTITY ltsmin "<command>ltsmin</command>">
-<!ENTITY mcrl22lpe "<command>mcrl22lpe</command>">
 <!ENTITY mcrl                 '<acronym>mCRL</acronym>'>
 <!ENTITY naf                  '<literal>AF</literal>'>
 <!ENTITY name "<parameter>NAME</parameter>">
@@ -330,7 +266,6 @@
 <!ENTITY parVar "<parameter>Var</parameter>">
 <!ENTITY par_witness "<parameter>a_witness</parameter>">
 <!ENTITY pformstream          '<parameter>formStream</parameter>'>
-<!ENTITY pnml2mcrl2 "<command>pnml2mcrl2</command>">
 <!ENTITY preduce              '<parameter>reduce</parameter>'>
 <!ENTITY prefix "<parameter>PREFIX</parameter>">
 <!ENTITY PrintRewriteStrategy "<function>PrintRewriteStrategy</function>">
@@ -361,7 +296,6 @@
 <!ENTITY RewriteStrategyFromString "<function>RewriteStrategyFromString</function>">
 <!ENTITY sbool       '<literal>"Bool"</literal>'>
 <!ENTITY seconds "<parameter>SECONDS</parameter>">
-<!ENTITY sim "<command>sim</command>">
 <!ENTITY smt_lib_solver_translate "<function>SMT_LIB_Solver::translate</function>">
 <!ENTITY smt_solver_ario_constructor "<function>SMT_Solver_Ario::SMT_Solver_Ario</function>">
 <!ENTITY smt_solver_ario_is_satisfiable "<function>SMT_Solver_Ario::is_satisfiable</function>">
@@ -370,8 +304,12 @@
 <!ENTITY smt_solver_is_satisfiable "<function>SMT_Solver::is_satisfiable</function>">
 <!ENTITY solver_ario "<constant>ario</constant>">
 <!ENTITY solver_ario_string "<constant>'ario'</constant>">
+<!ENTITY solver_ario-url "<ulink url='http://www.eecs.umich.edu/~ario/'/>">
+<!ENTITY solver_ario-lnk "&solver_ario; (&solver_ario-url;)">
 <!ENTITY solver_cvc_lite "<constant>cvc-lite</constant>">
 <!ENTITY solver_cvc_lite_string "<constant>'cvc-lite'</constant>">
+<!ENTITY solver_cvc_lite-url "<ulink url='http://www.cs.nyu.edu/acsys/cvcl/'/>">
+<!ENTITY solver_cvc_lite-lnk "&solver_cvc_lite; (&solver_cvc_lite-url;)">
 <!ENTITY solver "<parameter>SOLVER</parameter>">
 <!ENTITY sort_bool "<constant>Bool</constant>">
 <!ENTITY sort_bool "<type>Bool</type>">
@@ -397,7 +335,6 @@
 <!ENTITY tact                 "'<literal>act</literal>'">
 <!ENTITY tand                 "'<literal>and</literal>'">
 <!ENTITY tau "<literal>tau</literal>">
-<!ENTITY tbf2lpe "<command>tbf2lpe</command>">
 <!ENTITY tbool                '<type>_Bool</type>'>
 <!ENTITY tcbool "<type>bool</type>">
 <!ENTITY tchoice              "'<literal>choice</literal>'">
@@ -419,7 +356,6 @@
 <!ENTITY tor                  "'<literal>or</literal>'">
 <!ENTITY tpfile "<type>FILE*</type>">
 <!ENTITY tpRewriter "<type>Rewriter *</type>">
-<!ENTITY tracepp "<command>tracepp</command>">
 <!ENTITY trec                 "'<literal>rec</literal>'">
 <!ENTITY tRewriter "<type>Rewriter</type>">
 <!ENTITY trewrstrat "<type>RewriteStrategy</type>">
@@ -444,49 +380,170 @@
 <!ENTITY type_void "<type>void</type>">
 <!ENTITY var_benchmark "<varname>f_benchmark</varname>">
 <!ENTITY virtual "<type>virtual</type>">
+
+<!-- bug mail address -->
+<!ENTITY bugmail "<email>bug@mcrl2.org</email>">
+
+<!-- tools -->
+<!ENTITY lpe2lts "<command>lpe2lts</command>">
+<!ENTITY lpe2torx "<command>lpe2torx</command>">
+<!ENTITY lpebinary "<command>lpebinary</command>">
+<!ENTITY lpeconfcheck "<command>lpeconfcheck</command>">
+<!ENTITY lpeconstelm "<command>lpeconstelm</command>">
+<!ENTITY lpedataelm "<command>lpedataelm</command>">
+<!ENTITY lpedecluster "<command>lpedecluster</command>">
+<!ENTITY lpeformcheck "<command>lpeformcheck</command>">
+<!ENTITY lpeinfo "<command>lpeinfo</command>">
+<!ENTITY lpeinvelm "<command>lpeinvelm</command>">
+<!ENTITY lpeparelm "<command>lpeparelm</command>">
+<!ENTITY lpepp "<command>lpepp</command>">
+<!ENTITY lperewr "<command>lperewr</command>">
+<!ENTITY lpesumelm "<command>lpesumelm</command>">
+<!ENTITY lpeuntime "<command>lpeuntime</command>">
+<!ENTITY ltscompare "<command>ltscompare</command>">
+<!ENTITY ltsconvert "<command>ltsconvert</command>">
+<!ENTITY ltsgraph "<command>ltsgraph</command>">
+<!ENTITY ltsinfo "<command>ltsinfo</command>">
+<!ENTITY ltsmin "<command>ltsmin</command>">
+<!ENTITY mcrl22lpe "<command>mcrl22lpe</command>">
+<!ENTITY pnml2mcrl2 "<command>pnml2mcrl2</command>">
+<!ENTITY sim "<command>sim</command>">
+<!ENTITY tbf2lpe "<command>tbf2lpe</command>">
+<!ENTITY tracepp "<command>tracepp</command>">
 <!ENTITY xsim "<command>xsim</command>">
+
+<!-- tools with link -->
+<!ENTITY lpe2lts-lnk "<link linkend='lpe2lts'>&lpe2lts;</link>">
+<!ENTITY sim-lnk "<link linkend='sim'>&sim;</link>">
+<!ENTITY lpe2torx-lnk "<link linkend='lpe2torx'>&lpe2torx;</link>">
+<!ENTITY lpebinary-lnk "<link linkend='lpebinary'>&lpebinary;</link>">
+<!ENTITY lpeconfcheck-lnk "<link linkend='lpeconfcheck'>&lpeconfcheck;</link>">
+<!ENTITY lpeconstelm-lnk "<link linkend='lpeconstelm'>&lpeconstelm;</link>">
+<!ENTITY lpedataelm-lnk "<link linkend='lpedataelm'>&lpedataelm;</link>">
+<!ENTITY lpedecluster-lnk "<link linkend='lpedecluster'>&lpedecluster;</link>">
+<!ENTITY lpeformcheck-lnk "<link linkend='lpeformcheck'>&lpeformcheck;</link>">
+<!ENTITY lpeinfo-lnk "<link linkend='lpeinfo'>&lpeinfo;</link>">
+<!ENTITY lpeinvelm-lnk "<link linkend='lpeinvelm'>&lpeinvelm;</link>">
+<!ENTITY lpeparelm-lnk "<link linkend='lpeparelm'>&lpeparelm;</link>">
+<!ENTITY lpepp-lnk "<link linkend='lpepp'>&lpepp;</link>">
+<!ENTITY lperewr-lnk "<link linkend='lperewr'>&lperewr;</link>">
+<!ENTITY lpesumelm-lnk "<link linkend='lpesumelm'>&lpesumelm;</link>">
+<!ENTITY lpeuntime-lnk "<link linkend='lpeuntime'>&lpeuntime;</link>">
+<!ENTITY ltscompare-lnk "<link linkend='ltscompare'>&ltscompare;</link>">
+<!ENTITY ltsconvert-lnk "<link linkend='ltsconvert'>&ltsconvert;</link>">
+<!ENTITY ltsgraph-lnk "<link linkend='ltsgraph'>&ltsgraph;</link>">
+<!ENTITY ltsinfo-lnk "<link linkend='ltsinfo'>&ltsinfo;</link>">
+<!ENTITY ltsmin-lnk "<link linkend='ltsmin'>&ltsmin;</link>">
+<!ENTITY mcrl22lpe-lnk "<link linkend='mcrl22lpe'>&mcrl22lpe;</link>">
+<!ENTITY pnml2mcrl2-lnk "<link linkend='pnml2mcrl2'>&pnml2mcrl2;</link>">
+<!ENTITY tbf2lpe-lnk "<link linkend='tbf2lpe'>&tbf2lpe;</link>">
+<!ENTITY tracepp-lnk "<link linkend='tracepp'>&tracepp;</link>">
+<!ENTITY xsim-lnk "<link linkend='xsim'>&xsim;</link>">
+
+<!-- list of source files to be included -->
+<!ENTITY fbdd2dot SYSTEM "bdd2dot.xml">
+<!ENTITY fbdd_path_eliminator SYSTEM "bdd_path_eliminator.xml">
+<!ENTITY fbdd_prover SYSTEM "bdd_prover.xml">
+<!ENTITY fbdd_simplifier SYSTEM "bdd_simplifier.xml">
+<!ENTITY fconfluence_checker SYSTEM "confluence_checker.xml">
+<!ENTITY fdisjointness_checker SYSTEM "disjointness_checker.xml">
+<!ENTITY fformula_checker SYSTEM "formula_checker.xml">
+<!ENTITY finvariant_checker SYSTEM "invariant_checker.xml">
+<!ENTITY finvariant_eliminator SYSTEM "invariant_eliminator.xml">
+<!ENTITY flibrewrite SYSTEM "librewrite.xml">
+<!ENTITY flpe2lts SYSTEM "lpe2lts.xml">
+<!ENTITY flpe2torx SYSTEM "lpe2torx.xml">
+<!ENTITY flpebinary SYSTEM "lpebinary.xml">
+<!ENTITY flpeconfcheck SYSTEM "lpeconfcheck.xml">
+<!ENTITY flpeconstelm SYSTEM "lpeconstelm.xml">
+<!ENTITY flpedataelm SYSTEM "lpedataelm.xml">
+<!ENTITY flpedecluster SYSTEM "lpedecluster.xml">
+<!ENTITY flpeformcheck SYSTEM "lpeformcheck.xml">
+<!ENTITY flpeinfo SYSTEM "lpeinfo.xml">
+<!ENTITY flpeinvelm SYSTEM "lpeinvelm.xml">
+<!ENTITY flpeparelm SYSTEM "lpeparelm.xml">
+<!ENTITY flpepp SYSTEM "lpepp.xml">
+<!ENTITY flperewr SYSTEM "lperewr.xml">
+<!ENTITY flpesumelm SYSTEM "lpesumelm.xml">
+<!ENTITY flpeuntime SYSTEM "lpeuntime.xml">
+<!ENTITY fltscompare SYSTEM "ltscompare.xml">
+<!ENTITY fltsconvert SYSTEM "ltsconvert.xml">
+<!ENTITY fltsgraph SYSTEM "ltsgraph.xml">
+<!ENTITY fltsinfo SYSTEM "ltsinfo.xml">
+<!ENTITY fltsmin SYSTEM "ltsmin.xml">
+<!ENTITY fmcrl22lpe SYSTEM "mcrl22lpe.xml">
+<!ENTITY fpnml2mcrl2 SYSTEM "pnml2mcrl2.xml">
+<!ENTITY fprover SYSTEM "prover.xml">
+<!ENTITY fsim SYSTEM "sim.xml">
+<!ENTITY fsmt_lib_solver SYSTEM "smt_lib_solver.xml">
+<!ENTITY fsmt_solver_ario SYSTEM "smt_solver_ario.xml">
+<!ENTITY fsmt_solver_cvc_lite SYSTEM "smt_solver_cvc_lite.xml">
+<!ENTITY fsmt_solver SYSTEM "smt_solver.xml">
+<!ENTITY ftbf2lpe SYSTEM "tbf2lpe.xml">
+<!ENTITY ftracepp SYSTEM "tracepp.xml">
+<!ENTITY fxsim SYSTEM "xsim.xml">
 ]>
 <book xmlns="http://docbook.org/ns/docbook">
-<title>mCRL2 Manual Pages</title>
-&fbdd2dot;
-&fbdd_path_eliminator;
-&fbdd_prover;
-&fbdd_simplifier;
-&fconfluence_checker;
-&fdisjointness_checker;
-&fformula_checker;
-&finvariant_checker;
-&finvariant_eliminator;
-&flibrewrite;
-&flpe2lts;
-&flpe2torx;
-&flpebinary;
-&flpeconfcheck;
-&flpeconstelm;
-&flpedataelm;
-&flpedecluster;
-&flpeformcheck;
-&flpeinfo;
-&flpeinvelm;
-&flpeparelm;
-&flpepp;
-&flperewr;
-&flpesumelm;
-&flpeuntime;
-&fltscompare;
-&fltsconvert;
-&fltsgraph;
-&fltsinfo;
-&fltsmin;
-&fmcrl22lpe;
-&fpnml2mcrl2;
-&fprover;
-&fsim;
-&fsmt_lib_solver;
-&fsmt_solver_ario;
-&fsmt_solver_cvc_lite;
-&fsmt_solver;
-&ftbf2lpe;
-&ftracepp;
-&fxsim;
+<info>
+  <title>mCRL2 Manual Pages</title>
+</info>
+<part><title>Tools</title>
+  <chapter><title>Linearisation</title>
+    &fmcrl22lpe;
+  </chapter>
+  <chapter><title>Linear Process Equations</title>
+    &flpe2lts;
+    &flpebinary;
+    &flpeconfcheck;
+    &flpeconstelm;
+    &flpedataelm;
+    &flpedecluster;
+    &flpeformcheck;
+    &flpeinfo;
+    &flpeinvelm;
+    &flpeparelm;
+    &flpepp;
+    &flperewr;
+    &flpesumelm;
+    &flpeuntime;
+  </chapter>
+  <chapter><title>Simulation</title>
+    &fsim;
+    &fxsim;
+  </chapter>
+  <chapter><title>Labelled Transition Systems</title>
+    &fltscompare;
+    &fltsconvert;
+    &fltsgraph;
+    &fltsinfo;
+    &fltsmin;
+    &ftracepp;
+  </chapter>
+  <chapter><title>Import/Export</title>
+    &fpnml2mcrl2;
+    &ftbf2lpe;
+    &flpe2torx;
+  </chapter>
+</part>
+<part><title>Libraries</title>
+  <chapter><title>Prover</title>
+    &fbdd2dot;
+    &fbdd_path_eliminator;
+    &fbdd_prover;
+    &fbdd_simplifier;
+    &fconfluence_checker;
+    &fdisjointness_checker;
+    &fformula_checker;
+    &finvariant_checker;
+    &finvariant_eliminator;
+    &fprover;
+    &fsmt_lib_solver;
+    &fsmt_solver_ario;
+    &fsmt_solver_cvc_lite;
+    &fsmt_solver;
+  </chapter>
+  <chapter><title>Rewriter</title>
+    &flibrewrite;
+  </chapter>
+</part>
 </book>

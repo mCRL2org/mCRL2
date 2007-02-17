@@ -44,10 +44,10 @@
       <para>The speed of initialisation of the rewriters increases
       significantly, in particular the compilation time of the compiling
       rewriters. Note that data elimination is performed automatically when
-      using the tool &lpe2lts;.</para>
+      using the tool &lpe2lts-lnk;.</para>
     </listitem>
     <listitem>
-      <para>When pretty printing the LPE using &lpepp;, the resulting
+      <para>When pretty printing the LPE using &lpepp-lnk;, the resulting
       specification is smaller.</para>
     </listitem>
     </itemizedlist>
@@ -117,7 +117,7 @@
 <title>Author</title>
 <para>
   Written by Muck van Weerdenburg. Please send all complaints, comments and bug
-  reports to <email>bug@mcrl2.org</email>.
+  reports to &bugmail;.
 </para>
 </refsect1>
 

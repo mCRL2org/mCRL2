@@ -97,7 +97,7 @@
 <refsect1>
 <title>Author</title>
 <para>Written by Jeroen Keiren. Please send all complaints, comments and bug
-reports to <email>bug@mcrl2.org</email>.</para>
+reports to &bugmail;.</para>
 </refsect1>
 
 </refentry>

@@ -55,9 +55,8 @@
   enforced.
   The parameter &par_path_eliminator; specifies whether or not path elimination is applied. When path elimination is applied, the prover uses an
   SMT solver to remove inconsistent paths from BDDs. The parameter &par_solver_type; specifies which SMT solver is used for path elimination.
-  Either the SMT solver &solver_ario; or
-  &solver_cvc_lite; can be used. To use one of these solvers, the directory containing the corresponding executable must be in the path.
-  On June the 20th of 2006, Ario 1.1 was available on &link_ario; and CVC Lite was available on &link_cvc;.
+  Either the SMT solver &solver_ario-lnk; or &solver_cvc_lite-lnk; can be used.
+  To use one of these solvers, the directory containing the corresponding executable must be in the path.
   If the parameter &par_path_eliminator; is set to &const_false;, the parameter &par_solver_type; is ignored. The parameter &par_apply_induction;
   indicates whether or not induction on list will be applied.
 </para>
@@ -132,7 +131,7 @@ The following preconditions have to be satisfied for &invariant_eliminator_simpl
 <refsect1>
 <title>Author</title>
 <para>
-  Written by Luc Engelen. Please send all complaints, comments and bug reports to <email>bug@mcrl2.org</email>.
+  Written by Luc Engelen. Please send all complaints, comments and bug reports to &bugmail;.
 </para>
 </refsect1>
 

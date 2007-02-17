@@ -66,11 +66,12 @@
   The constructor &bdd_prover_constructor; has two additional parameters, &par_path_eliminator; and &par_solver_type;. The parameter
   &par_path_eliminator; can be used to enable the use of an instance of the class &class_bdd_path_eliminator;. Instances of this class use an SMT
   solver to eliminate inconsistent paths from BDDs. The parameter &par_solver_type;
-  can be used to indicate which SMT solver should be used for this task. Either the SMT solver &solver_ario; or &solver_cvc_lite; can be used.
+  can be used to indicate which SMT solver should be used for this task. Either
+  the SMT solver &solver_ario-lnk; or &solver_cvc_lite-lnk; can be used.
   To use one of these solvers, the directory containing the corresponding
-  executable must be in the path. On June the 20th of 2006, Ario 1.1 was available on &link_ario; and CVC Lite was available on &link_cvc;.
-  If the parameter &par_path_eliminator; is set to &const_false;, the parameter &par_solver_type; is ignored and no instance of the class
-  &class_bdd_path_eliminator; is initialized.
+  executable must be in the path. If the parameter &par_path_eliminator; is set
+  to &const_false;, the parameter &par_solver_type; is ignored and no instance
+  of the class &class_bdd_path_eliminator; is initialized.
 </para>
 <para>
   The formula to be handled is set using the method &prover_set_formula; inherited from the class &class_prover;. An entity of the class
@@ -118,7 +119,7 @@
 <refsect1>
 <title>Author</title>
 <para>
-  Written by Luc Engelen. Please send all complaints, comments and bug reports to <email>bug@mcrl2.org</email>.
+  Written by Luc Engelen. Please send all complaints, comments and bug reports to &bugmail;.
 </para>
 </refsect1>
 

@@ -12,8 +12,8 @@
 </refmeta>
 
 <refnamediv>
-  <refname>&lpeconfcheck;</refname>
-  <refpurpose>check which &tau;-summands of an LPE are confluent and mark them by renaming their &tau;-actions to &ctau;</refpurpose>
+  <refname>lpeconfcheck</refname>
+  <refpurpose>mark confluent &tau;-summands of an LPE</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -78,10 +78,10 @@
   <para>
     In some cases it may be useful to use an SMT solver to assist the prover. The SMT
     solver can further reduce BDDs by removing inconsistent paths. A specific SMT solver
-    can be chosen using the option &opt_smt_solver;=&solver;. Either the SMT solver &solver_ario; or
-    &solver_cvc_lite; can be used. To use one of these solvers, the directory containing the
+    can be chosen using the option &opt_smt_solver;=&solver;. Either
+  the SMT solver &solver_ario-lnk; or &solver_cvc_lite-lnk; can be used.
+  To use one of these solvers, the directory containing the
     corresponding executable must be in the path.
-    On June the 20th of 2006, Ario 1.1 was available on &link_ario; and CVC Lite was available on &link_cvc;.
   </para>
 
   <para>
@@ -373,7 +373,7 @@
 <title>Author</title>
 <para>
   Written by Luc Engelen. Please send all complaints, comments and bug
-  reports to <email>bug@mcrl2.org</email>.
+  reports to &bugmail;.
 </para>
 </refsect1>
 

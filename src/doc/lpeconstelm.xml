@@ -127,6 +127,6 @@
 <refsect1>
 <title>Author</title>
 <para>Written by Frank Stappers. Please send all complaints, comments and bug
-fixes to <email>bug@mcrl2.org</email>.</para>
+fixes to &bugmail;.</para>
 </refsect1>
 </refentry>

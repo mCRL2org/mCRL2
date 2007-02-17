@@ -23,8 +23,7 @@ MAN_INSTALL_TARGETS = $(patsubst %,%.install,$(MAN_OBJECT_SUFFIXES))
 all: man
 
 clean:
-	rm -f $(addprefix *.,$(MAN_OBJECT_SUFFIXES)) *.txt
-	rm -rf web
+	rm -f $(addprefix *.,$(MAN_OBJECT_SUFFIXES)) *.txt web/*.html
 
 distclean: clean
 
@@ -36,7 +35,7 @@ man:
 	@$(XSLTPROC) http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl index.xml
 
 web: 
-	@$(XSLTPROC) --stringparam base.dir web/ http://docbook.sourceforge.net/release/xsl/current/html/chunk.xsl index.xml
+	@$(XSLTPROC) --stringparam base.dir web/ --stringparam html.stylesheet man.css http://docbook.sourceforge.net/release/xsl/current/html/chunk.xsl index.xml
 
 %.install:
 	@install -d $(mandir)/man$*

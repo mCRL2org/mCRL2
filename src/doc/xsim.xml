@@ -12,7 +12,7 @@
 </refmeta>
 
 <refnamediv>
-  <refname>&xsim;</refname>
+  <refname>xsim</refname>
   <refpurpose>simulate LPEs</refpurpose>
 </refnamediv>
 
@@ -148,7 +148,7 @@
 <refsect1>
 <title>See also</title>
 <para>
-For a simulator that uses a command-line interface, see the &sim; tool. 
+For a simulator that uses a command-line interface, see the &sim-lnk; tool. 
 </para>
 </refsect1>
 
@@ -156,7 +156,7 @@ For a simulator that uses a command-line interface, see the &sim; tool.
 <title>Author</title>
 <para>
   Written by Muck van Weerdenburg and Jeroen van der Wulp. Please send all
-  complaints, comments and bug reports to <email>bug@mcrl2.org</email>.
+  complaints, comments and bug reports to &bugmail;.
 </para>
 </refsect1>
 

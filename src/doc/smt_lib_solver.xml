@@ -30,7 +30,7 @@
 <para>
   The class &class_smt_lib_solver; is a base class for SMT solvers that read the SMT-LIB format [Silvio Ranise and Cesare Tinelli. The SMT-LIB
   Standard: Version 1.1. Technical Report, Department of Computer Science, The University of Iowa, 2005. (Available at
-  goedel.cs.uiowa.edu/smtlib)]. It inherits from the class &class_smt_solver;.
+  <ulink url="http://goedel.cs.uiowa.edu/smtlib"/>)]. It inherits from the class &class_smt_solver;.
 </para>
 <para>
   The method &smt_lib_solver_translate; receives an expression of sort &sort_bool; in conjunctive normal form as parameter &par_formula; and
@@ -56,7 +56,7 @@
 <refsect1>
 <title>Author</title>
 <para>
-  Written by Luc Engelen. Please send all complaints, comments and bug reports to <email>bug@mcrl2.org</email>.
+  Written by Luc Engelen. Please send all complaints, comments and bug reports to &bugmail;.
 </para>
 </refsect1>
 

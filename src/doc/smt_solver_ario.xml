@@ -32,9 +32,10 @@
 <refsect1>
 <title>Description</title>
 <para>
-  The class &class_smt_solver_ario; inherits from the class &class_smt_lib_solver;. It uses the SMT solver Ario 1.1 to determine
+  The class &class_smt_solver_ario; inherits from the class
+  &class_smt_lib_solver;. It uses the SMT solver Ario 1.1 (&solver_ario-url;) to determine
   the satisfiability of propositional formulas. To use the solver Ario 1.1, the directory containing the corresponding
-  executable must be in the path. On June the 20th of 2006, Ario 1.1 was available on &link_ario;.
+  executable must be in the path. 
 </para>
 <para>
   The constructor &smt_solver_ario_constructor; checks if Ario's executable is indeed available and reports an error if it is not.
@@ -63,7 +64,7 @@
 <refsect1>
 <title>Author</title>
 <para>
-  Written by Luc Engelen. Please send all complaints, comments and bug reports to <email>bug@mcrl2.org</email>.
+  Written by Luc Engelen. Please send all complaints, comments and bug reports to &bugmail;.
 </para>
 </refsect1>
 

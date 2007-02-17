@@ -35,12 +35,12 @@
     &cstdout; is used. If &infile; is not present, &cstdin; is used.
   </para>
   <para>
-    The input consists of a behavioural description in mCRL2 (milli Common 
+    The input consists of a behavioural description in mCRL2 (micro Common 
     Representation Language 2). For the language description see the tutorial
     Process Algebra and mCRL2, by
     J.F. Groote, A.H.J. Mathijssen, S.C.W. Ploeger, 
-    M.A. Reniers, M.J. van Weerdenburg and J. van der Wulp to be found
-    at <filename>www.mcrl2.org</filename>.
+    M.A. Reniers, M.J. van Weerdenburg and J. van der Wulp at <ulink
+    url="http://www.mcrl2.org"/>.
   </para>
   <para>
     The process in the input must be in parallel pCRL format. This means
@@ -434,7 +434,7 @@
 <title>Author</title>
 <para>
   Written by Jan Friso Groote. Please send all complaints, comments and bug fixes
-  to <email>bug@mcrl2.org</email>.
+  to &bugmail;.
 </para>
 </refsect1>
 
