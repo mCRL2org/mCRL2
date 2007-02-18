@@ -1,4 +1,4 @@
-// Date: 02-02-2007
+// Date: 18-02-2007
 // This document describes the internal format of the mCRL2 language and the
 // corresponding mu-calculus formulas. Here:
 // - the following phases of implementation are distinguised:
@@ -77,7 +77,6 @@
                  | <OpId>                                                [+ tc]
                  | DataApplProd(<DataExpr>, <DataExpr>+)                 [- di]
                  | DataAppl(<DataExpr>, <DataExpr>)                      [+ di]
-                 | Number(<NumberString>, <SortExprOrUnknown>)           [- di]
                  | ListEnum(<DataExpr>+, <SortExprOrUnknown>)            [- di]
                  | SetEnum(<DataExpr>+, <SortExprOrUnknown>)             [- di]
                  | BagEnum(<BagEnumElt>+, <SortExprOrUnknown>)           [- di]

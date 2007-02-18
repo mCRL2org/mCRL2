@@ -8,6 +8,8 @@
 #include <stdbool.h>
 #endif
 #include <aterm2.h>
+#include <string.h>
+#include <ctype.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -1163,28 +1165,6 @@ inline
 bool gsIsNu(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunNu();
-}
-
-// Number
-inline
-AFun initAFunNumber(AFun& f)
-{
-  f = ATmakeAFun("Number", 2, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunNumber()
-{
-  static AFun AFunNumber = initAFunNumber(AFunNumber);
-  return AFunNumber;
-}
-
-inline
-bool gsIsNumber(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunNumber();
 }
 
 // OpId
@@ -2886,12 +2866,6 @@ ATermAppl gsMakeNu()
 }
 
 inline
-ATermAppl gsMakeNumber(ATermAppl NumberString_0, ATermAppl SortExprOrUnknown_1)
-{
-  return ATmakeAppl2(gsAFunNumber(), (ATerm) NumberString_0, (ATerm) SortExprOrUnknown_1);
-}
-
-inline
 ATermAppl gsMakeOpId(ATermAppl String_0, ATermAppl SortExpr_1)
 {
   return ATmakeAppl2(gsAFunOpId(), (ATerm) String_0, (ATerm) SortExpr_1);
@@ -3303,6 +3277,24 @@ char *gsATermAppl2String(ATermAppl term)
   } else {
     return NULL;
   }
+}
+
+inline
+bool gsIsNumericString(const char* s)
+//Ret: true if s is of form "0 | -? [1-9][0-9]*", false otherwise
+{
+  if (s == NULL) return false;
+  if (s[0] == '\0') return false;
+  if (s[0] == '-') ++s;
+  if (s[0] == '\0') return false;
+  if (s[0] == '0') {
+    ++s;
+    if (s[0] == '\0') return true;
+    else return false;
+  }
+  for (; s[0] != '\0'; ++s)
+    if(!isdigit(s[0])) return false;
+  return true;
 }
 
 ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term, bool TryNoSuffix);

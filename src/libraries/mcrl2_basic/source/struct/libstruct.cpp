@@ -598,9 +598,9 @@ ATermList gsGetSortExprDomain(ATermAppl SortExpr)
 bool gsIsDataExpr(ATermAppl Term)
 {
   return gsIsId(Term)    || gsIsDataVarId(Term)    || gsIsOpId(Term)    ||
-    gsIsDataAppl(Term)   || gsIsDataApplProd(Term) || gsIsNumber(Term)  ||
-    gsIsListEnum(Term)   || gsIsSetEnum(Term)      || gsIsBagEnum(Term) ||
-    gsIsBinder(Term)     || gsIsWhr(Term);
+    gsIsDataAppl(Term)   || gsIsDataApplProd(Term) || gsIsListEnum(Term)||
+    gsIsSetEnum(Term)    || gsIsBagEnum(Term)      || gsIsBinder(Term)  ||
+    gsIsWhr(Term);
 }
 
 ATermAppl gsGetSort(ATermAppl DataExpr)
@@ -615,8 +615,8 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
     else
       Result = gsMakeUnknown();
   } else if (gsIsDataVarId(DataExpr) || gsIsOpId(DataExpr) ||
-      gsIsNumber(DataExpr) || gsIsListEnum(DataExpr) ||
-      gsIsSetEnum(DataExpr) || gsIsBagEnum(DataExpr)) {
+      gsIsListEnum(DataExpr) || gsIsSetEnum(DataExpr) || 
+      gsIsBagEnum(DataExpr)) {
     //DataExpr is a data variable, an operation identifier, a number or an
     //enumeration; return its sort
     Result = ATAgetArgument(DataExpr, 1);
@@ -704,6 +704,14 @@ ATermList gsGetDataExprArgs(ATermAppl DataExpr)
   return l;
 }
 
+bool gsIsDataExprNumber(ATermAppl DataExpr)
+{
+  if (!gsIsOpId(DataExpr)) return false;
+  ATermAppl Name = ATAgetArgument(DataExpr, 0);
+  char* s = gsATermAppl2String(Name);
+  if (s == NULL) return false;
+  return gsIsNumericString(s);
+}
 
 //Creation of names for system operation identifiers
 

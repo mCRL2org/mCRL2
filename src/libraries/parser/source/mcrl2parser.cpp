@@ -2642,7 +2642,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
   case 105:
 #line 805 "mcrl2parser.yy"
     {
-      safe_assign(((*yyvalp).appl), gsMakeNumber((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl), gsMakeUnknown()));
+      safe_assign(((*yyvalp).appl), gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed data constant\n  %T\n", ((*yyvalp).appl));
     ;}
     break;

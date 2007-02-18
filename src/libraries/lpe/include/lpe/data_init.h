@@ -55,7 +55,7 @@ namespace data_init {
   // inline bool is_op_id         (data_expression t) { return gsIsOpId         (t); }
   // inline bool is_data_appl_prod(data_expression t) { return gsIsDataApplProd (t); }
   // inline bool is_data_appl     (data_expression t) { return gsIsDataAppl     (t); }
-  // inline bool is_number        (data_expression t) { return gsIsNumber       (t); }
+  // inline bool is_number        (data_expression t) { return gsIsDataExprNumber(t); }
   // inline bool is_list_enum     (data_expression t) { return gsIsListEnum     (t); }
   // inline bool is_set_enum      (data_expression t) { return gsIsSetEnum      (t); }
   // inline bool is_bag_enum      (data_expression t) { return gsIsBagEnum      (t); }

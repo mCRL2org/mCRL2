@@ -1808,7 +1808,7 @@ ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a){
     assert(ATgetLength(ATLgetArgument(a,1))==1); 
     ATermAppl par=ATAgetFirst(ATLgetArgument(a,1));
     ATermAppl k=NULL;
-    if(gsIsNumber(par) && ATisEqual(ATAgetArgument(par,1),gsMakeSortIdPos())){
+    if(gsIsDataExprNumber(par) && ATisEqual(ATAgetArgument(par,1),gsMakeSortIdPos())){
       k=ATAgetArgument(par,0);
     }
     else 
@@ -1868,9 +1868,9 @@ ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a){
 ATermAppl gsaGenNInst(ATermAppl number, ATermAppl P){
   //return a || composition of n processes P
   unsigned long n=atol(ATgetName(ATgetAFun(number)));
-  ATermAppl r=gsMakeProcess(P,ATmakeList1((ATerm)gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(1)),gsMakeSortIdPos())));
+  ATermAppl r=gsMakeProcess(P,ATmakeList1((ATerm)gsMakeOpId(ATmakeAppl0(ATmakeAFunInt0(1)),gsMakeSortIdPos())));
   for(unsigned long i=2; i<=n; i++){
-    r=gsMakeMerge(r,gsMakeProcess(P,ATmakeList1((ATerm)gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(i)),gsMakeSortIdPos()))));
+    r=gsMakeMerge(r,gsMakeProcess(P,ATmakeList1((ATerm)gsMakeOpId(ATmakeAppl0(ATmakeAFunInt0(i)),gsMakeSortIdPos()))));
   }
 
   return r;
@@ -2046,7 +2046,7 @@ ATermAppl gsAlpha(ATermAppl Spec){
     ATermAppl left=ATAgetArgument(eq,2);
     ATermAppl right=ATAgetArgument(eq,3);
     if(gsIsOpId(left) && ATisEqual(ATAgetArgument(left,1),gsMakeSortIdPos()) && 
-       gsIsNumber(right) && ATisEqual(ATAgetArgument(right,1),gsMakeSortIdPos())){
+       gsIsDataExprNumber(right) && ATisEqual(ATAgetArgument(right,1),gsMakeSortIdPos())){
       ATtablePut(consts,(ATerm)ATAgetArgument(left,0),(ATerm)ATAgetArgument(right,0));
     }
   }

@@ -803,7 +803,7 @@ data_constant:
     }
   | NUMBER
     {
-      safe_assign($$, gsMakeNumber($1, gsMakeUnknown()));
+      safe_assign($$, gsMakeId($1));
       gsDebugMsg("parsed data constant\n  %T\n", $$);
     }
   | PBRACK

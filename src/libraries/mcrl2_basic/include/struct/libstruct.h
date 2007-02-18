@@ -172,6 +172,9 @@ ATermList gsGetDataExprArgs(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: the arguments of the data expression
 
+bool gsIsDataExprNumber(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: the data expression is a number
 
 //Creation of names for system operation identifiers
 ATermAppl gsMakeOpIdNameTrue();

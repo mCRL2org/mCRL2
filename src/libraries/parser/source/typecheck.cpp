@@ -1803,23 +1803,6 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
  
   gsDebugMsg("gstcTraverseVarConsTypeD: DataTerm %T with PosType %T\n",*DataTerm,PosType);    
 
-  if(gsIsNumber(*DataTerm)){
-    ATermAppl Number=ATAgetArgument(*DataTerm,0);
-    ATermAppl Sort=gsMakeSortIdInt();
-    if(gstcIsPos(Number)) Sort=gsMakeSortIdPos();
-    else if(gstcIsNat(Number)) Sort=gsMakeSortIdNat(); 
-    
-    *DataTerm=ATsetArgument(*DataTerm,(ATerm)Sort,1);
-    
-    if(gstcTypeMatchA(Sort,PosType)) return Sort;
-
-    //upcasting
-    ATermAppl CastedNewType=gstcUpCastNumericType(PosType,Sort,DataTerm);
-    if(!CastedNewType)
-      {gsErrorMsg("Cannot (up)cast number %P to type %P\n",*DataTerm, PosType);return NULL;}
-    return CastedNewType;
-  }
-
   if(gsIsBinder(*DataTerm)){
     //The variable declaration of a binder should have at least 1 declaration
     if(ATAgetFirst(ATLgetArgument(*DataTerm, 1)) == NULL)
@@ -2071,6 +2054,22 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
 
   if(gsIsId(*DataTerm)||gsIsOpId(*DataTerm)){
     ATermAppl Name=ATAgetArgument(*DataTerm,0);
+    if(gsIsNumericString(gsATermAppl2String(Name)))
+    {
+      ATermAppl Sort=gsMakeSortIdInt();
+      if(gstcIsPos(Name)) Sort=gsMakeSortIdPos();
+      else if(gstcIsNat(Name)) Sort=gsMakeSortIdNat();
+      *DataTerm=gsMakeOpId(Name,Sort);
+
+      if(gstcTypeMatchA(Sort,PosType)) return Sort;
+
+      //upcasting
+      ATermAppl CastedNewType=gstcUpCastNumericType(PosType,Sort,DataTerm);
+      if(!CastedNewType)
+        {gsErrorMsg("Cannot (up)cast number %P to type %P\n",*DataTerm, PosType);return NULL;}
+      return CastedNewType;
+    }
+
     ATermAppl Type=ATAtableGet(DeclaredVars,(ATerm)Name);
     if(Type){
       gsDebugMsg("Recognised declared variable %P, Type: %P\n",Name,Type);

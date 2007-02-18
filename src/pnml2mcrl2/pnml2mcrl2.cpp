@@ -171,10 +171,11 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     // input: an integer value (name), it's arity and whether it is quoted or not
     // output: an AFun, as in ATmakeAFun, but now with a name from an integer value
 
-    // on 128 bit architecture int cannot ocupy more than 128/3+1=43 8-ary digits, even less 10-ary
-    char buf[50];
-    sprintf(buf, "%d", name);
-    return ATmakeAFun(buf, arity, quoted);
+    DECL_A(s,char,NrOfChars(name)+1);
+    sprintf(s, "%d", name);
+    AFun f = ATmakeAFun(s, arity, quoted);
+    FREE_A(s);
+    return f;
   }
 
   //==================================================
@@ -378,7 +379,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     // temporary variables that contain data of the current place so this data can be returned
     // default values are assigned here
     ATermAppl Aname = gsString2ATermAppl("default_name");
-    ATermAppl AinitialMarking = gsMakeNumber(gsString2ATermAppl("0"),gsMakeSortIdNat());
+    ATermAppl AinitialMarking = gsMakeId(gsString2ATermAppl("0"));
     ATermAppl Atype = gsString2ATermAppl("channel");
 
     ATermAppl Place_type=Appl0; //gsMakeSortId(gsString2ATermAppl("Unit"));
@@ -1176,8 +1177,8 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
       MaxConcIn_int = ATgetLength((ATermList)ATtableGet(context.place_in, PlaceID));
     }
     ATermAppl MaxConcIn;
-    MaxConcIn = gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(MaxConcIn_int)), gsMakeUnknown());
-    if (gsIsNumber(MaxConcIn)) {
+    MaxConcIn = gsMakeId(ATmakeAppl0(ATmakeAFunInt0(MaxConcIn_int)));
+    if (gsIsNumericString(gsATermAppl2String(MaxConcIn))) {
      gsDebugMsg("Parameter %T is a Number\n", MaxConcIn);
     } else {
       gsDebugMsg("Parameter %T is not a Number\n", MaxConcIn);
@@ -1190,8 +1191,8 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
       MaxConcOut_int = ATgetLength((ATermList)ATtableGet(context.place_out, PlaceID));
     }
     ATermAppl MaxConcOut;
-    MaxConcOut = gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(MaxConcOut_int)), gsMakeUnknown());
-    if (gsIsNumber(MaxConcIn)) {
+    MaxConcOut = gsMakeId(ATmakeAppl0(ATmakeAFunInt0(MaxConcOut_int)));
+    if (gsIsNumericString(gsATermAppl2String(MaxConcOut))) {
       gsDebugMsg("Parameter %T is a Number\n", MaxConcOut);
     } else {
       gsDebugMsg("Parameter %T is not a Number\n", MaxConcOut);
@@ -1210,8 +1211,8 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     ATermAppl OpGT=gsMakeId(gsMakeOpIdNameGT());
     ATermAppl OpLTE=gsMakeId(gsMakeOpIdNameLTE());
     ATermAppl OpAnd=gsMakeId(gsMakeOpIdNameAnd());
-    ATermAppl Number0=gsMakeNumber(gsString2ATermAppl("0"),gsMakeSortIdNat());
-    ATermAppl Number1=gsMakeNumber(gsString2ATermAppl("1"),gsMakeSortIdPos());
+    ATermAppl Number0=gsMakeId(gsString2ATermAppl("0"));
+    ATermAppl Number1=gsMakeId(gsString2ATermAppl("1"));
     
     {
       /* Creation of P_pi */
@@ -2321,7 +2322,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     // foreach transition t : find all arks between p and t
     // calculate its value n input arcs - m out arcs, take into account the inhibitor and reset arcs.
     ATermAppl VarX=gsMakeDataVarId(ATmakeAppl0(ATmakeAFunId("x")),gsMakeSortIdNat());;
-    ATermAppl Number0=gsMakeNumber(gsString2ATermAppl("0"),gsMakeSortIdNat());
+    ATermAppl Number0=gsMakeId(gsString2ATermAppl("0"));
     ATermAppl OpAdd=gsMakeId(gsMakeOpIdNameAdd());
     ATermAppl OpSubt=gsMakeId(gsMakeOpIdNameSubt());
     //ATermAppl OpMax=gsMakeId(gsMakeOpIdNameMax());
@@ -2400,11 +2401,11 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
       ATermAppl RightExpr=VarX;  //x;
       int d=nIn-nOut;
       if(!reset) {
-	if(d>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(d)),gsMakeSortIdPos()));//RightExpr=RightExpr+d;
-	else if(d<0) RightExpr=gsMakeDataApplProd(OpInt2Nat,ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpSubt,RightExpr,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(-d)),gsMakeSortIdPos()))));//RightExpr=max(RightExpr-d,0);
+	if(d>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(d))));//RightExpr=RightExpr+d;
+	else if(d<0) RightExpr=gsMakeDataApplProd(OpInt2Nat,ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpSubt,RightExpr,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(-d))))));//RightExpr=max(RightExpr-d,0);
       }
       else {
-	if(d>0) RightExpr=gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(d)),gsMakeSortIdPos());//RightExpr=d;
+	if(d>0) RightExpr=gsMakeId(ATmakeAppl0(ATmakeAFunInt0(d)));//RightExpr=d;
 	else RightExpr=Number0;
       }
 
@@ -2413,7 +2414,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
       
       //condition
       if(nOut>0){
-	ATermAppl Cond=pn2gsMakeDataApplProd2(OpLTE,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(nOut)),gsMakeSortIdPos()),VarX);//make nOut<=x
+	ATermAppl Cond=pn2gsMakeDataApplProd2(OpLTE,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(nOut))),VarX);//make nOut<=x
 	Summand=gsMakeIfThen(Cond,Summand);
       }
       else /*never together */ if(inhib){
@@ -2445,7 +2446,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     
 //     //generate the main process
 //     ATermAppl VarX=gsMakeDataVarId(ATmakeAppl0(ATmakeAFunId("x")),gsMakeSortIdNat());;
-//     //ATermAppl Number0=gsMakeNumber(gsString2ATermAppl("0"),gsMakeSortIdNat());
+//     //ATermAppl Number0=gsMakeId(gsString2ATermAppl("0"));
 //     AFun CurrentPlaceARId=ATappendAFun(CurrentPlaceId,"_ar_");
 //     AFun CurrentPlaceAIId=ATappendAFun(CurrentPlaceId,"_ai_");
 //     AFun CurrentPlaceARRId=ATappendAFun(CurrentPlaceId,"_arr_");
@@ -2456,12 +2457,12 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 //     ATermAppl OpLTE=gsMakeId(gsMakeOpIdNameLTE());
 //     ATermAppl OpEq=gsMakeId(gsMakeOpIdNameEq());
 //     ATermAppl OpInt2Nat=gsMakeId(gsMakeOpIdNameInt2Nat());
-//     ATermAppl Number0=gsMakeNumber(gsString2ATermAppl("0"),gsMakeSortIdNat());
+//     ATermAppl Number0=gsMakeId(gsString2ATermAppl("0"));
     
 //     for(int j=m;j>-1;j--){
 //       ATermAppl Summand=NULL;
 //       AFun NumberJId=ATmakeAFunInt0(j);
-//       ATermAppl NumberJ=gsMakeNumber(ATmakeAppl0(NumberJId),(j)?gsMakeSortIdPos():gsMakeSortIdNat());
+//       ATermAppl NumberJ=gsMakeId(ATmakeAppl0(NumberJId)));
 //       ATermList OutActionLists=NULL;
 //       if(j>0) OutActionLists=pn2gsGetActionLists(j,ActsOut);
 //       for(int i=n;i>-1;i--){
@@ -2481,8 +2482,8 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 // 	ATermAppl RightExpr=VarX;  //x;
 // 	{
 // 	  int d=i-j;
-// 	  if(d>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(d)),gsMakeSortIdPos()));//RightExpr=RightExpr+d;
-// 	  else if(d<0) RightExpr=gsMakeDataApplProd(OpInt2Nat,ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpSubt,RightExpr,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(-d)),gsMakeSortIdPos()))));//RightExpr=max(RightExpr-d,0);
+// 	  if(d>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(d))));//RightExpr=RightExpr+d;
+// 	  else if(d<0) RightExpr=gsMakeDataApplProd(OpInt2Nat,ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpSubt,RightExpr,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(-d))))));//RightExpr=max(RightExpr-d,0);
 // 	}
 // 	ATermAppl Right=gsMakeParamId(CurrentPlace,ATmakeList1((ATerm)RightExpr));//make P_pi(max(x+i-j,0))
 // 	ATermAppl RightResets=gsMakeParamId(CurrentPlace,ATmakeList1((ATerm)Number0));//make P_pi(0)
@@ -2545,7 +2546,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 // 	ATermAppl LeftResets=gsMakeParamId(LeftNameResets,ATmakeList0());//make name P_pi_ai_i
 	
 // 	ATermAppl RightExpr=VarX;  //x;
-// 	if(i>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(i)),gsMakeSortIdPos()));//RightExpr=RightExpr+i;
+// 	if(i>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(i))));//RightExpr=RightExpr+i;
 	
 // 	ATermAppl Right=gsMakeParamId(CurrentPlace,ATmakeList1((ATerm)RightExpr));//make P_pi(x+i)
 // 	ATermAppl RightResets=gsMakeParamId(CurrentPlace,ATmakeList1((ATerm)Number0));//make P_pi(x+i)

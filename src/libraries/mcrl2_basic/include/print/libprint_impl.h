@@ -1150,11 +1150,6 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         if (PrecLevel > 11) PRINT_FUNC(fprints)(OutStream, ")");
       }
     }
-  } else if (gsIsNumber(DataExpr)) {
-    //print number
-    PRINT_FUNC(dbg_prints)("printing number\n");
-    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(DataExpr, 0),
-      pp_format, ShowSorts, PrecLevel);
   } else if (gsIsListEnum(DataExpr)) {
     //print list enumeration
     PRINT_FUNC(dbg_prints)("printing list enumeration\n");

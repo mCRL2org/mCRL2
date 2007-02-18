@@ -630,7 +630,7 @@ ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
       part = gsMakeDataAppl(part, ATAgetFirst(l));
       l = ATgetNext(l);
     }
-  } else if (gsIsNumber(part)) {
+  } else if (gsIsDataExprNumber(part)) {
     //part is a number; replace by its internal representation
     ATermAppl Number = ATAgetArgument(part, 0);
     ATermAppl sort = ATAgetArgument(part, 1);
@@ -895,7 +895,7 @@ void get_free_vars_appl(ATermAppl data_expr, ATermList bound_vars,
         (ATindexOf(*p_free_vars, (ATerm) data_expr, 0) == -1)) {
       *p_free_vars = ATinsert(*p_free_vars, (ATerm) data_expr);
     }
-  } else if (gsIsOpId(data_expr) || gsIsNumber(data_expr)) {
+  } else if (gsIsOpId(data_expr)) {
     //data_expr is an operation identifier or a number; do nothing
   } else if (gsIsDataAppl(data_expr) || gsIsBagEnumElt(data_expr)) {
     //data_expr is a data application or a bag enumeration element; get free
