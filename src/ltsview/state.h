@@ -65,6 +65,42 @@ class State
     void      setSlot( int s );
     void      unmark();
    
+    // Methods for simulation
+    // Getters
+    bool      isSelected() const;
+    // PRE: True
+    // RET: selected
+    
+    Utils::SimState  getSimulationState() const;
+    // PRE: True
+    // RET: simulationState
+
+    int       getVisitedAt() const;
+    // PRE: True
+    // RET: visitedAt
+
+    void simVisit(int va); 
+    // Visits this state in simulation
+    // PRE:  0 <= va
+    // POST: simulationState == NOW && visitedAt = va && 
+    //   visitDesc().POST
+
+    void simHistory(); 
+    // Makes this state go into the past
+    // PRE:  simulationState == NOW
+    // POST: simulationState == HISTORY && 
+    //   (forall d in subordinates:: d->simUnset())
+
+    void simUnset(); 
+    // Makes this state and all of its descendants invisible
+    // PRE:  simulationState == FUTURE
+    // POST: simulationState == UNSEEN &&
+    //   (forall d in subordinates:: d->simUnset.POST)
+    
+    void setFuture(int va);
+    // PRE:  True
+    // POST: simulationState == FUTURE && visitedAt = va && 
+    //       (forall d in subordinates:: d->setFuture.POST)
 
   private:
     Cluster*		  cluster;
@@ -80,13 +116,18 @@ class State
     Utils::Point3D        outgoingControl;
     Utils::Point3D        incomingControl;
     int			  rank;
-    //bool		  selected;
     int                   slot; // The slot this state occupies
     std::vector< ATerm >  stateVector;
     ATermList		  stateVectorAT;
     std::set< State* >	  subordinates;
     std::set< State* >	  superiors;
     Utils::DFSState       visitState;
+
+
+    // Variables used for simulation
+    bool		  selected;
+    Utils::SimState       simulationState;
+    int                   visitedAt; // Used for calculating transparency.
 };
 
 #endif //STATE_H

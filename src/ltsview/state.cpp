@@ -18,6 +18,11 @@ State::State( ATermList sv )
   marked = false;
   outTransitions = vector<Transition*> ();
   visitState = DFS_WHITE;
+
+  // Simulation initialisation
+  selected = false;
+  simulationState = UNSEEN;
+  visitedAt = 0;
 }
 
 State::~State()
@@ -223,4 +228,85 @@ int State::getValueIndexOfParam( int paramIndex )
 {
   return ATgetInt((ATermInt)ATgetArgument((ATermAppl)stateVector[paramIndex],1));
 }
+
+// Methods for simulation, implementation
+bool State::isSelected() const {
+  return selected;
+}
+
+SimState State::getSimulationState() const {
+  return simulationState;
+}
+
+int State::getVisitedAt() const {
+  return visitedAt;
+}
+
+
+void State::simVisit(int va) {
+  // Set state's state
+  simulationState = NOW;
+  visitedAt = va;
+  
+  // Trigger all outgoing transitions to be future ones:
+  for(unsigned int i = 0; i < outTransitions.size(); ++i) {
+    Transition* toFuture = outTransitions[i];
+    toFuture->setSimulationState(FUTURE);
+  }
+  
+  for(set<State*>::iterator it = subordinates.begin();
+      it != subordinates.end(); ++it) {
+    (*it)->setFuture(va + 1);
+  }
+  // TODO: How to handle with states on backpointers?
+}
+
+void State::simHistory() {
+  // Set state's state
+  simulationState = HISTORY;
+  
+  // Unset all subordinates
+  for(set< State* >::iterator i = subordinates.begin(); 
+      i != subordinates.end(); ++i) {
+    State* toUnset = (*i);
+    toUnset->simUnset();
+  }
+
+  // Unset all transitions
+  for(unsigned int i = 0; i < outTransitions.size(); ++i) {
+    Transition* toUnset = outTransitions[i];
+    toUnset->setSimulationState(UNSEEN);
+  }
+
+  // TODO: How to handle with states on backpointers?
+}
+
+void State::simUnset() {
+  // Sets the state's state
+  simulationState = UNSEEN;
+
+  // Unset the descendants
+  for(set< State* >::iterator it = subordinates.begin(); 
+      it != subordinates.end(); ++it) {
+    (*it)->simUnset();
+  }
+
+  // Unset the transitions
+  for(unsigned int i = 0; i < outTransitions.size(); ++i) {
+    Transition* toUnset = outTransitions[i];
+    toUnset->setSimulationState(UNSEEN);
+  }
+}
+
+void State::setFuture(int va) {
+  // Set state
+  visitedAt = va;
+  simulationState = FUTURE;
+
+  for(set<State*>::iterator it = subordinates.begin();
+      it != subordinates.end(); ++it) {
+    (*it)->setFuture(va + 1);
+  }
+}
+
 

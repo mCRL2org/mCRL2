@@ -1,4 +1,5 @@
 #include "transition.h"
+using namespace Utils;
 
 // Constructor and Destructor
 
@@ -10,6 +11,11 @@ Transition::Transition(State* bs, State* es, ATerm lbl )
   ATprotect( &label );
   backpointer = false;
   marked = NULL;
+
+  // Initialisation of simulation
+  selected = false;
+  simulationState = UNSEEN;
+  visitedAt = 0;
 }
 
 Transition::~Transition()
@@ -50,4 +56,29 @@ bool Transition::isMarked() const
 void Transition::setMarkedPointer( bool* bp )
 {
   marked = bp;
+}
+
+// Method implementation of simulation
+bool Transition::isSelected() const {
+  return selected;
+}
+
+SimState Transition::getSimulationState() const {
+  return simulationState;
+}
+
+int Transition::getVisitedAt() const {
+  return visitedAt;
+}
+
+void Transition::setSelected(bool s) {
+  selected = s;
+}
+
+void Transition::setSimulationState(SimState st) {
+  simulationState = st;
+}
+
+void Transition::setVisitedAt(int va) {
+  visitedAt = va;
 }

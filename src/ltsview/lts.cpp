@@ -13,6 +13,12 @@ LTS::LTS( Mediator* owner)
   deadlockCount = -1;
   markedTransitionCount = 0;
   stateVectorSpec = NULL;
+
+  // Initialisation of simulation variables
+  simulation = false;
+  currSimLevel = 0;
+  currSimState = NULL;
+  initialSimState = NULL;
 }
 
 LTS::~LTS()
@@ -1097,3 +1103,47 @@ void LTS::unmarkAction( string label )
       markedTransitionCount += (**c_it).unmarkActionLabel( atLabel );
   }
 }
+
+// Methods for simulation, implementation
+void LTS::startSimulation(State* initialState) {
+  // Initialize the simulation state of the lts
+  currSimLevel = 0;
+  currSimState = initialState;
+  initialSimState = initialState;
+
+  // Start simulation
+  simulation = true;
+
+  // Set values for the initial state
+  currSimState->simVisit(currSimLevel);
+}
+
+void LTS::resetSimulation() {
+  // Reset simulation's state
+  currSimLevel = 0;
+  currSimState = initialState;
+
+  // Unset entire structure of states
+  currSimState->simUnset();
+
+  // Visit initial state
+  currSimState->simVisit(currSimLevel);
+}
+
+void LTS::stopSimulation() {
+  // Clear simulatiuon state
+  initialState->simUnset();
+
+  // stop simulation 
+  simulation = false;
+}
+
+void LTS::triggerTransition(Transition* transition) {
+  // Set new state of simulaton
+  currSimState = transition->getEndState();
+  ++currSimLevel;
+
+  // Visit the next state
+  currSimState->simVisit(currSimLevel);
+}
+

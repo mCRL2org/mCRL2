@@ -49,7 +49,32 @@ class LTS
     void	setStateVectorSpec( ATermList spec );
     void	unmarkAction( std::string label );
 
+    // Methods for simulation
+    void        startSimulation(State* initialState);
+    // Starts simulation 
+    // PRE:   initialState != NULL && simulation = false
+    // POST:  simulation = true && currSimLevel = 0 && 
+    //        currSimState = initialState && initialSimState = initialState &&
+    //        initialState->
+    
+    void        resetSimulation();
+    // Resets simulation
+    // PRE:   simulation = true
+    // POST:  currSimLevel = 0 && currSimState = initialSimState
+
+    void        stopSimulation();
+    // Stops simulation
+    // PRE:   simulation = true
+    // POST:  simulation = false
+
+    void        triggerTransition(Transition* transition);
+    // Triggers transition, leading to a new state of the simulation
+    // PRE:   speccon a = currState && simulation = true && b = currSimLevel &&
+    //        transition in (Set i: 0 <= i < a->getNumberOfOutTransitions():
+    //                          a->getOutTransitioni(i))
+    // POST:  currState = transition->getEndState() && currSimLevel = b + 1
   private:
+    // Variables
     std::map< ATerm, bool* >		    actionLabelMarkings;
     std::vector< std::vector< Cluster* > >  clustersInRank;
     int				            deadlockCount;
@@ -64,6 +89,15 @@ class LTS
     std::vector< Transition* >	            transitions;
     std::vector< State* >		    unmarkedStates;
 
+    // Variables used for simulation
+    bool    simulation; // triggers whether or not we are simulating.
+    int     currSimLevel;  // Number of steps made in simulation this far.
+    State*  currSimState;  // Current state of simulation.
+    State*  initialSimState; // Initial simulation state, for reset
+    std::vector< Transition* > futurePaths; 
+    // The transitions leaving currSimState
+
+    // Methods
     void addComradesToCluster( Cluster* c, State* s );
     void clearRanksAndClusters();
     void processAddedMarkRule( Utils::MarkRule* r );
