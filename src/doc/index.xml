@@ -407,6 +407,7 @@
 <!ENTITY ltsgraph "<command>ltsgraph</command>">
 <!ENTITY ltsinfo "<command>ltsinfo</command>">
 <!ENTITY ltsmin "<command>ltsmin</command>">
+<!ENTITY ltsview "<command>ltsview</command>">
 <!ENTITY mcrl22lpe "<command>mcrl22lpe</command>">
 <!ENTITY pnml2mcrl2 "<command>pnml2mcrl2</command>">
 <!ENTITY sim "<command>sim</command>">
@@ -436,6 +437,7 @@
 <!ENTITY ltsgraph-lnk "<link linkend='ltsgraph'>&ltsgraph;</link>">
 <!ENTITY ltsinfo-lnk "<link linkend='ltsinfo'>&ltsinfo;</link>">
 <!ENTITY ltsmin-lnk "<link linkend='ltsmin'>&ltsmin;</link>">
+<!ENTITY ltsview-lnk "<link linkend='ltsview'>&ltsview;</link>">
 <!ENTITY mcrl22lpe-lnk "<link linkend='mcrl22lpe'>&mcrl22lpe;</link>">
 <!ENTITY pnml2mcrl2-lnk "<link linkend='pnml2mcrl2'>&pnml2mcrl2;</link>">
 <!ENTITY tbf2lpe-lnk "<link linkend='tbf2lpe'>&tbf2lpe;</link>">
@@ -473,6 +475,7 @@
 <!ENTITY fltsgraph SYSTEM "ltsgraph.xml">
 <!ENTITY fltsinfo SYSTEM "ltsinfo.xml">
 <!ENTITY fltsmin SYSTEM "ltsmin.xml">
+<!ENTITY fltsview SYSTEM "ltsview.xml">
 <!ENTITY fmcrl22lpe SYSTEM "mcrl22lpe.xml">
 <!ENTITY fpnml2mcrl2 SYSTEM "pnml2mcrl2.xml">
 <!ENTITY fprover SYSTEM "prover.xml">
@@ -519,6 +522,7 @@
     &fltsgraph;
     &fltsinfo;
     &fltsmin;
+    &fltsview;
     &ftracepp;
   </chapter>
   <chapter><title>Import/Export</title>

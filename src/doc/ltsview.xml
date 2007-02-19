@@ -1,0 +1,57 @@
+<refentry id="ltsview">
+ <info>
+  <date>2005-2007</date>
+ </info>
+
+<refmeta>
+  <refentrytitle>ltsview</refentrytitle>
+  <manvolnum>1</manvolnum>
+  <refmiscinfo class="source">ltsview</refmiscinfo>
+  <refmiscinfo class="version"></refmiscinfo>
+  <refmiscinfo class="manual">User Commands</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+  <refname>ltsview</refname>
+  <refpurpose>3D interactive visualisation of an LTS</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>&ltsview;</command>
+    <arg choice="opt">&infile;</arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  <para>
+    The &ltsview; tool visualises the LTS in &infile; using a graphical user
+    interface. If &infile; is not supplied the tool starts without drawing.
+    Currently, only FSM files are supported.
+  </para>
+  <para>
+    The tool clusters states based on structural properties. These clusters are
+    then visualised to form a backbone of the LTS on which the states and
+    transitions can be drawn. The tool provides functionalities to explore the
+    visualisation (zooming, panning, rotating), mark deadlocks, mark states
+    based on the values of their state vector parameters and mark transitions
+    based on their labels. An image of the visualisation can also be saved in
+    various bitmap formats.
+  </para>
+  <para>
+    The visualisation is based on techniques from: F. van Ham, H. van de Wetering and J.J. van Wijk,
+    "Visualization of State Transition Graphs", Proc. IEEE Symp. Information
+    Visualization 2001, IEEE CS Press, pp. 59-66, 2001.
+  </para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+  Written by Bas Ploeger and Carst Tankink. Please send all complaints, comments
+  and bug reports to &bugmail;.
+</para>
+</refsect1>
+
+</refentry>
