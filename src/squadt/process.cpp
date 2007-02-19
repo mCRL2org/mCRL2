@@ -54,7 +54,7 @@ namespace squadt {
         PROCESS_INFORMATION pi;
 #else
         /** \brief The system's proces identifier for this process */
-        pid_t                                identifier;
+        pid_t               identifier;
 #endif
 
       private:
@@ -122,11 +122,7 @@ namespace squadt {
     process_impl::~process_impl() {
       /* Inform listener */
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
-      LPDWORD exit_code = 0;
-
-      if (GetExitCodeProcess(pi.hProcess, exit_code) || *exit_code == STILL_ACTIVE) {
-        terminate();
-      }
+      terminate();
 #else
       if (identifier) {
         terminate();
@@ -143,10 +139,23 @@ namespace squadt {
       }
 
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
-      TerminateProcess(pi.hProcess, 1);
+      if (pi.hProcess != 0) {
+        DWORD exit_code = 0;
 
-      CloseHandle(pi.hProcess);
-      CloseHandle(pi.hThread);
+        if (::GetExitCodeProcess(pi.hProcess, &exit_code)) {
+          ::PostThreadMessage(pi.dwThreadId, WM_CLOSE, 0, 0);
+          ::WaitForSingleObject(pi.hProcess, 1000);
+
+          ::GetExitCodeProcess(pi.hProcess, &exit_code);
+
+          if (exit_code == STILL_ACTIVE) {
+            TerminateProcess(pi.hProcess, 1);
+          }
+
+          CloseHandle(pi.hThread);
+          CloseHandle(pi.hProcess);
+        }
+      }
 #else
       kill(identifier, SIGKILL);
 #endif
@@ -164,16 +173,18 @@ namespace squadt {
       boost::shared_ptr < process_impl > guard(interface_pointer->impl);
 
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
-      LPDWORD exit_code = 0;
+      if (pi.hProcess != 0) {
+        DWORD exit_code;
 
-      WaitForSingleObject(pi.hProcess, INFINITE);
+        WaitForSingleObject(pi.hProcess, INFINITE);
 
-      if (GetExitCodeProcess(pi.hProcess, exit_code)) {
-        current_status = (exit_code) ? process::completed : process::aborted;
-      }
-      else {
-        current_status = process::aborted;
-      }
+        if (GetExitCodeProcess(pi.hProcess, &exit_code)) {
+          current_status = (exit_code) ? process::completed : process::aborted;
+        }
+        else {
+          current_status = process::aborted;
+        }
+     }
 #else
       int exit_code;
 
