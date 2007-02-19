@@ -9,9 +9,7 @@ project workarounds
 
 # Cygwin
 alias configuration : : <os>CYGWIN <toolset>gcc :
-       : <runtime-link>static
-         <link>static
-         <include>$(TOP)/build/workarounds
+       : <include>$(TOP)/build/workarounds
        ;
 
 # MinGW
