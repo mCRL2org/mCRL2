@@ -456,7 +456,7 @@ void AT_initMemory(unsigned int argc, char *argv[])
               TERM_CHECK_OPT);
 #endif
       fprintf(stderr, "    %-20s: initial maximum term size " 
-              "(minimum=%d, default=%d)\n", TERM_SIZE_OPT " <size>", MIN_TERM_SIZE, maxTermSize);
+              "(minimum=%u, default=%u)\n", TERM_SIZE_OPT " <size>", MIN_TERM_SIZE, maxTermSize);
     } 
   }
 
