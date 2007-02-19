@@ -81,7 +81,7 @@ int test_main(int, char*[])
   gsEnableConstructorFunctions();
 
   specification spec = mcrl22lpe(SPECIFICATION);
-  LPE lpe = spec.lpe();
+  process_definition lpe = spec.lpe();
  
   // find all action labels in lpe
   std::set<action_label> labels;

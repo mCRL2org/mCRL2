@@ -428,7 +428,7 @@ static ATermList get_lpe_params(ATerm lpe)
   return params;
 }
 
-static ATermList get_lpe_params(lpe::LPE &lpe)
+static ATermList get_lpe_params(lpe::process_definition &lpe)
 {
   ATermList params = ATmakeList0();
 
@@ -564,7 +564,7 @@ static bool check_type(lts_type type, ATerm lpe)
   }
 }
 
-static bool check_type(lts_type type, lpe::LPE &/*lpe*/)
+static bool check_type(lts_type type, lpe::process_definition &/*lpe*/)
 {
   return (type == lts_mcrl2);
 }
@@ -612,7 +612,7 @@ bool p_lts::write_to_fsm(std::string const& filename, ATerm lpe)
 bool p_lts::write_to_fsm(std::string const& filename, lpe::specification &spec)
 {
   lts_type tmp = fsm_get_lts_type();
-  lpe::LPE lpe = spec.lpe();
+  lpe::process_definition lpe = spec.lpe();
   return check_type(tmp,lpe) && write_to_fsm(filename,tmp,get_lpe_params(lpe));
 }
 
@@ -625,7 +625,7 @@ bool p_lts::write_to_fsm(std::ostream &os, ATerm lpe)
 bool p_lts::write_to_fsm(std::ostream &os, lpe::specification &spec)
 {
   lts_type tmp = fsm_get_lts_type();
-  lpe::LPE lpe = spec.lpe();
+  lpe::process_definition lpe = spec.lpe();
   return check_type(tmp,lpe) && write_to_fsm(os,tmp,get_lpe_params(lpe));
 }
 

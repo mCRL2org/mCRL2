@@ -8,7 +8,7 @@
 #include <string>
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
-#include "lpe/lpe.h"
+#include "lpe/process_definition.h"
 #include "lpe/data.h"
 #include "lpe/data_utility.h"
 
@@ -27,22 +27,22 @@ struct make_timed_lpe_summand
     : m_generator(generator)
   {}
 
-  LPE_summand operator()(LPE_summand summand) const
+  summand operator()(summand summand_) const
   {
-    if (!summand.has_time())
+    if (!summand_.has_time())
     {
       data_variable v = m_generator();
-      summand = set_time(summand, data_expression(v));
-      summand = set_summation_variables(summand, summand.summation_variables() + v);
+      summand_ = set_time(summand_, data_expression(v));
+      summand_ = set_summation_variables(summand_, summand_.summation_variables() + v);
     }
-    return summand;
+    return summand_;
   }
 };
 
 /// Adds time parameters to the lpe if needed and returns the result. The times
 /// are chosen such that they don't appear in context.
 inline
-LPE make_timed_lpe(LPE lpe, aterm context)
+process_definition make_timed_lpe(process_definition lpe, aterm context)
 {
   fresh_variable_generator generator(context);
   summand_list new_summands = apply(lpe.summands(), make_timed_lpe_summand(generator));

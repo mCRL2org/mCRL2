@@ -28,7 +28,7 @@
 
 //LPE Framework
 #include <lpe/function.h>
-#include <lpe/lpe.h>
+#include <lpe/process_definition.h>
 #include <lpe/specification.h>
 #include <lpe/sort_utility.h>
 
@@ -314,7 +314,7 @@ data_variable_list get_variables(const data_variable_list& vl, const sort_list& 
 ///\pre specification is the specification belonging to summand
 ///\post the declustered version of summand has been appended to result
 ///\ret none
-void decluster_summand(const lpe::specification& specification, const lpe::LPE_summand& summand, lpe::summand_list& result, EnumeratorStandard& enumerator, bool finite_only)
+void decluster_summand(const lpe::specification& specification, const lpe::summand& summand_, lpe::summand_list& result, EnumeratorStandard& enumerator, bool finite_only)
 {
   int nr_summands = 0; // Counter for the nummer of new summands, used for verbose output
 
@@ -324,20 +324,20 @@ void decluster_summand(const lpe::specification& specification, const lpe::LPE_s
   if (finite_only)
   {
     // Only consider finite variables
-    variables = get_variables(summand.summation_variables(), get_finite_sorts(specification.data().constructors(), specification.data().sorts()));
+    variables = get_variables(summand_.summation_variables(), get_finite_sorts(specification.data().constructors(), specification.data().sorts()));
   }
   else
   {
-    variables = summand.summation_variables();
+    variables = summand_.summation_variables();
   }
 
   // List of variables with the declustered variables removed (can be done upfront, which is more efficient,
   // because we only need to calculate it once.
-  data_variable_list new_vars = filter(summand.summation_variables(), variables);
+  data_variable_list new_vars = filter(summand_.summation_variables(), variables);
 
   ATermList vars = ATermList(variables);
 
-  ATerm expr = enumerator.getRewriter()->toRewriteFormat(aterm_appl(summand.condition()));
+  ATerm expr = enumerator.getRewriter()->toRewriteFormat(aterm_appl(summand_.condition()));
 
   // Solutions
   EnumeratorSolutions* sols = enumerator.findSolutions(vars, expr, false, NULL);
@@ -370,12 +370,12 @@ void decluster_summand(const lpe::specification& specification, const lpe::LPE_s
     }
     gsDebugMsg("substitutions: %s\n", substitutions.to_string().c_str());
 
-    LPE_summand s = LPE_summand(new_vars,
-                                summand.condition().substitute(assignment_list_substitution(substitutions)),
-                                summand.is_delta(),
-                                summand.actions().substitute(assignment_list_substitution(substitutions)),
-                                summand.time().substitute(assignment_list_substitution(substitutions)),
-                                summand.assignments().substitute(assignment_list_substitution(substitutions))
+    summand s = summand(new_vars,
+                                summand_.condition().substitute(assignment_list_substitution(substitutions)),
+                                summand_.is_delta(),
+                                summand_.actions().substitute(assignment_list_substitution(substitutions)),
+                                summand_.time().substitute(assignment_list_substitution(substitutions)),
+                                summand_.assignments().substitute(assignment_list_substitution(substitutions))
                                 );
     
     result = push_front(result, s);
@@ -401,7 +401,7 @@ lpe::summand_list decluster_summands(const lpe::specification& specification,
   for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i, ++j)
   {
     gsVerboseMsg("Summand %d\n", j);
-    lpe::LPE_summand s = *i;
+    lpe::summand s = *i;
     decluster_summand(specification, s, result, enumerator, options.finite_only);
   }
 
@@ -414,7 +414,7 @@ lpe::specification decluster(const lpe::specification& specification, const tool
 {
   gsVerboseMsg("Declustering...\n");
   gsVerboseMsg("Using rewrite strategy %d\n", options.strategy);
-  lpe::LPE lpe = specification.lpe();
+  lpe::process_definition lpe = specification.lpe();
 
   gsVerboseMsg("Input: %d summands.\n", lpe.summands().size());
 

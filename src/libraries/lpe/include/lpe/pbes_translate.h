@@ -278,7 +278,7 @@ namespace pbes_timed
   }
 
   inline
-  pbes_expression RHS(state_formula f, LPE lpe, data_variable T, std::set<std::string>& context)
+  pbes_expression RHS(state_formula f, process_definition lpe, data_variable T, std::set<std::string>& context)
   {
     using namespace lpe::pbes_init;
     using lpe::summand_list;
@@ -416,7 +416,7 @@ namespace pbes_timed
   }
 
   inline
-  equation_system E(state_formula f, LPE lpe, data_variable T)
+  equation_system E(state_formula f, process_definition lpe, data_variable T)
   {
     using namespace lpe::state_init;
   
@@ -557,7 +557,7 @@ namespace pbes_untimed
   }
 
   inline
-  pbes_expression RHS(state_formula f, LPE lpe, std::set<std::string>& context)
+  pbes_expression RHS(state_formula f, process_definition lpe, std::set<std::string>& context)
   {
     using namespace lpe::pbes_init;
     using lpe::summand_list;
@@ -661,7 +661,7 @@ namespace pbes_untimed
   }
 
   inline
-  equation_system E(state_formula f, LPE lpe)
+  equation_system E(state_formula f, process_definition lpe)
   {
     using namespace lpe::state_init;
   
@@ -760,7 +760,7 @@ pbes pbes_translate(state_formula f, specification spec, bool untimed = true)
     aterm_string X = fresh_identifier("X", context);
     f = nu(X, data_variable_init_list(), f);
   }  
-  LPE lpe = spec.lpe();
+  process_definition lpe = spec.lpe();
   equation_system e;
 
   if (untimed)

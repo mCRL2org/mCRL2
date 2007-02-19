@@ -67,7 +67,7 @@ class lpeConstElm {
     std::set< lpe::data_expression >      p_freeVarSet; 
     std::set< int >                       p_V; 
     std::set< int >                       p_S;
-    std::set< lpe::LPE_summand >          p_visitedSummands;
+    std::set< lpe::summand >          p_visitedSummands;
     std::set< lpe::data_expression >      p_variableList; 
     int                                   p_newVarCounter;
     bool                                  p_verbose;
@@ -604,7 +604,7 @@ void lpeConstElm::removeSingleton(int n)
 // Constant parameters (stored in p_S)
 //
 inline void lpeConstElm::output() {
-  lpe::LPE p_lpe = p_spec.lpe();
+  lpe::process_definition p_lpe = p_spec.lpe();
   summand_list rebuild_summandlist;
 
   //Remove the summands that are never visited
@@ -646,7 +646,7 @@ inline void lpeConstElm::output() {
 
     //construct new LPD_summand
     //
-    lpe::LPE_summand tmp;
+    lpe::summand tmp;
 
     //Remove constant process parameters from the summands assignments 
     //
@@ -682,7 +682,7 @@ inline void lpeConstElm::output() {
     //LPD_summand(data_variable_list summation_variables, data_expression condition, 
     //            bool delta, action_list actions, data_expression time, 
     //            data_assignment_list assignments);    
-    tmp = LPE_summand(currentSummand->summation_variables(), rebuild_condition, 
+    tmp = summand(currentSummand->summation_variables(), rebuild_condition, 
       currentSummand->is_delta(), atermpp::reverse(rebuild_actions) , rebuild_time, 
             atermpp::reverse(rebuildAssignments));
       rebuild_summandlist_no_cp = push_front(rebuild_summandlist_no_cp, tmp); 
@@ -703,8 +703,8 @@ inline void lpeConstElm::output() {
   //
   //LPE(data_variable_list free_variables, data_variable_list process_parameters, 
   //  summand_list summands);
-  lpe::LPE rebuild_lpe;
-  rebuild_lpe = lpe::LPE(
+  lpe::process_definition rebuild_lpe;
+  rebuild_lpe = lpe::process_definition(
     setToList(usedFreeVars),
     vectorToList(variablePPvar), 
     atermpp::reverse(rebuild_summandlist_no_cp)
@@ -885,7 +885,7 @@ void lpeConstElm::filter() {
   int     cycle    = 0;
   p_newVarCounter  = 0;
   
-  lpe::LPE p_lpe = p_spec.lpe();
+  lpe::process_definition p_lpe = p_spec.lpe();
   rewr           = createRewriter(p_spec.data()); 
 
   for(lpe::data_assignment_list::iterator i = p_spec.initial_assignments().begin(); i != p_spec.initial_assignments().end() ; i++ ){
@@ -991,7 +991,7 @@ void lpeConstElm::filter() {
       gsVerboseMsg("lpeconstelm: Free Variable checkup:\n");
     
       int n = p_V.size();
-      for(std::set< LPE_summand>::iterator i = p_visitedSummands.begin(); i != p_visitedSummands.end() ; i++){
+      for(std::set< summand>::iterator i = p_visitedSummands.begin(); i != p_visitedSummands.end() ; i++){
         calculateNextState(i->assignments());
         cmpCurrToNext();
       }

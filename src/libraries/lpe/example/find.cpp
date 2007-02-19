@@ -43,7 +43,7 @@ int main()
   gsEnableConstructorFunctions();
 
   specification spec = mcrl22lpe(ABP_SPECIFICATION);
-  LPE lpe = spec.lpe();
+  process_definition lpe = spec.lpe();
   std::set<aterm_string> ids = identifiers(aterm(lpe));
   for (std::set<aterm_string>::iterator i = ids.begin(); i != ids.end(); ++i)
   {
@@ -51,10 +51,10 @@ int main()
   }
   cin.get();
   
-  LPE_summand summand = *lpe.summands().begin();
-  data_expression d = summand.condition();
+  summand summand_ = *lpe.summands().begin();
+  data_expression d = summand_.condition();
   cout << "d = " << d << endl;
-  for (data_variable_list::iterator j = summand.summation_variables().begin(); j != summand.summation_variables().end(); ++j)
+  for (data_variable_list::iterator j = summand_.summation_variables().begin(); j != summand_.summation_variables().end(); ++j)
   {
     data_variable v = *j;
     bool b = occurs_in(d, v);

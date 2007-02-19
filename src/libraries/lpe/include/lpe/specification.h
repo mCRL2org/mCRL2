@@ -13,7 +13,7 @@
 
 #include "atermpp/aterm.h"
 #include "lpe/function.h"
-#include "lpe/lpe.h"
+#include "lpe/process_definition.h"
 #include "lpe/pretty_print.h"
 #include "lpe/data_specification.h"
 #include "lpe/detail/specification_utility.h"
@@ -48,7 +48,7 @@ class specification: public aterm_appl
   protected:
     data_specification   m_data;
     action_label_list    m_action_labels;
-    LPE                  m_lpe;
+    process_definition   m_lpe;
     data_variable_list   m_initial_free_variables;
     data_assignment_list m_initial_assignments;
 
@@ -103,7 +103,7 @@ class specification: public aterm_appl
     specification(
         data_specification   data             ,
         action_label_list    action_labels    ,
-        LPE                  lpe              ,
+        process_definition   lpe              ,
         data_variable_list   initial_free_variables,
         data_variable_list   initial_variables,
         data_expression_list initial_state)
@@ -129,7 +129,7 @@ class specification: public aterm_appl
     specification(
         data_specification   data             ,
         action_label_list    action_labels    ,
-        LPE                  lpe              ,
+        process_definition   lpe              ,
         data_variable_list   initial_free_variables,
         data_assignment_list initial_assignments)
       :
@@ -177,7 +177,7 @@ class specification: public aterm_appl
 
     /// Returns the LPE of the specification.
     ///
-    LPE lpe() const
+    process_definition lpe() const
     {
       return m_lpe;
     }
@@ -248,7 +248,7 @@ specification set_action_labels(specification spec, action_label_list action_lab
 }
 
 inline
-specification set_lpe(specification spec, LPE lpe)
+specification set_lpe(specification spec, process_definition lpe)
 {
   return specification(spec.data(),
                        spec.action_labels(),

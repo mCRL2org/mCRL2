@@ -29,7 +29,7 @@
 #include <atermpp/algorithm.h>
 
 //LPE Framework
-#include <lpe/lpe.h>
+#include <lpe/process_definition.h>
 #include <lpe/specification.h>
 #include <lpe/data_functional.h>
 #include <lpe/data_init.h>
@@ -189,22 +189,22 @@ data_assignment_list substitute_rhs(const data_assignment_list& dl, const data_a
 
 ///Apply a simple form of sum elimination in the case a summation
 ///variable does not occur within the summand at all
-lpe::LPE_summand remove_unused_variables(const lpe::LPE_summand& summand)
+lpe::summand remove_unused_variables(const lpe::summand& summand_)
 {
-  //gsVerboseMsg("Summand: %s\n", pp(summand).c_str());
+  //gsVerboseMsg("Summand: %s\n", pp(summand_).c_str());
 
-  lpe::LPE_summand new_summand;
+  lpe::summand new_summand;
   // New summation variable list, all variables in this list occur in other terms in the summand.
   lpe::data_variable_list new_summation_variables;
 
-  for(lpe::data_variable_list::iterator i = summand.summation_variables().begin(); i != summand.summation_variables().end(); ++i)
+  for(lpe::data_variable_list::iterator i = summand_.summation_variables().begin(); i != summand_.summation_variables().end(); ++i)
   {
     data_variable v = *i;
    
     //Check whether variable occurs in other terms of summand
     //If variable occurs leave the variable, so add variable to new list
-    if (occurs_in(summand.condition(), v) || occurs_in(summand.actions(), v)
-        || occurs_in(summand.time(), v) || occurs_in(summand.assignments(), v))
+    if (occurs_in(summand_.condition(), v) || occurs_in(summand_.actions(), v)
+        || occurs_in(summand_.time(), v) || occurs_in(summand_.assignments(), v))
     {
       new_summation_variables = push_front(new_summation_variables, v);
     }
@@ -213,7 +213,7 @@ lpe::LPE_summand remove_unused_variables(const lpe::LPE_summand& summand)
 
   new_summation_variables = reverse(new_summation_variables);
 
-  new_summand = set_summation_variables(summand, new_summation_variables);
+  new_summand = set_summation_variables(summand_, new_summation_variables);
 
   return new_summand;
 }
@@ -223,7 +223,7 @@ lpe::specification remove_unused_variables_(const lpe::specification& specificat
 {
   gsVerboseMsg("Removing unused variables from summands\n");
 
-  lpe::LPE lpe = specification.lpe();
+  lpe::process_definition lpe = specification.lpe();
   lpe::specification new_specification;
   lpe::summand_list new_summand_list = lpe.summands();
 
@@ -239,7 +239,7 @@ lpe::specification remove_unused_variables_(const lpe::specification& specificat
 //the caller of this function needs to apply sumstitutions to the summand
 //once we exit recursion
 //working_condition is a parameter that we use to split up the problem,
-//at the first call of this function working_condition == summand->condition()
+//at the first call of this function working_condition == summand_->condition()
 //should hold.
 //The new condition is built up on the return path of the recursion, so
 //the last exit of the recursion is the new condition of the summand.
@@ -248,7 +248,7 @@ lpe::specification remove_unused_variables_(const lpe::specification& specificat
 //function, by applying remove_unused_variables_ on the result, because that is a little
 //more efficient.
 //!!!INTERNAL USE ONLY!!!
-data_expression recursive_substitute_equalities(const LPE_summand& summand,
+data_expression recursive_substitute_equalities(const summand& summand_,
                                                 data_expression working_condition,
                                                 data_assignment_list& substitutions)
 {
@@ -260,8 +260,8 @@ data_expression recursive_substitute_equalities(const LPE_summand& summand,
     //Recursively apply sum elimination on lhs and rhs
     //Note that recursive application provides for progress because lhs and rhs split the working condition.
     data_expression a,b;
-    a = recursive_substitute_equalities(summand, lhs(working_condition), substitutions);
-    b = recursive_substitute_equalities(summand, rhs(working_condition), substitutions);
+    a = recursive_substitute_equalities(summand_, lhs(working_condition), substitutions);
+    b = recursive_substitute_equalities(summand_, rhs(working_condition), substitutions);
     result = and_(a,b);
   }
   
@@ -287,7 +287,7 @@ data_expression recursive_substitute_equalities(const LPE_summand& summand,
       }
 
       //According to sum elimination lemma the variable that is being substituted can not occur in its replacement.
-      if (!occurs_in(lhs_subst, data_variable(lhs(working_condition))) && occurs_in(summand.summation_variables(), data_variable(lhs(working_condition))) && !occurs_in(rhs(working_condition), data_variable(lhs(working_condition))))
+      if (!occurs_in(lhs_subst, data_variable(lhs(working_condition))) && occurs_in(summand_.summation_variables(), data_variable(lhs(working_condition))) && !occurs_in(rhs(working_condition), data_variable(lhs(working_condition))))
       {
         data_assignment substitution = data_assignment(data_variable(lhs(working_condition)), rhs(working_condition));
  
@@ -309,11 +309,11 @@ data_expression recursive_substitute_equalities(const LPE_summand& summand,
 ///This checks the following:
 ///X(..) = sum d. d=e -> a(..) . X(..)
 ///and returns X(..) = e -> a(..) . X(..)
-lpe::LPE_summand substitute_equalities(const lpe::LPE_summand& summand)
+lpe::summand substitute_equalities(const lpe::summand& summand_)
 {
-  gsVerboseMsg("Summand: %s\n", pp(summand).c_str());
+  gsVerboseMsg("Summand: %s\n", pp(summand_).c_str());
  
-  lpe::LPE_summand new_summand = summand;
+  lpe::summand new_summand = summand_;
 
   //Apply elimination and store result
   lpe::data_assignment_list substitutions;
@@ -321,7 +321,7 @@ lpe::LPE_summand substitute_equalities(const lpe::LPE_summand& summand)
 
   //Apply the substitutions that were returned from the recursive call
   new_condition = new_condition.substitute(assignment_list_substitution(substitutions));
-  new_summand = LPE_summand(new_summand.summation_variables(),
+  new_summand = summand(new_summand.summation_variables(),
                             new_condition.substitute(assignment_list_substitution(substitutions)),
                             new_summand.is_delta(),
                             new_summand.actions().substitute(assignment_list_substitution(substitutions)),
@@ -339,11 +339,11 @@ lpe::specification substitute_equalities_(const lpe::specification& specificatio
 {
   gsVerboseMsg("Substituting equality conditions in summands\n");
   
-  lpe::LPE lpe = specification.lpe();
+  lpe::process_definition lpe = specification.lpe();
   lpe::specification new_specification;
   lpe::summand_list new_summand_list = lpe.summands();
 
-  // Apply sum elimination on each of the summands in the summand list.
+  // Apply sum elimination on each of the summands in the summand_ list.
   new_summand_list = atermpp::apply(new_summand_list, substitute_equalities);
   new_specification = set_lpe(specification, set_summands(lpe, new_summand_list));
   return new_specification;

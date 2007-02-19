@@ -63,7 +63,7 @@ int main()
   }
   cout << endl;
 
-  LPE lpe = spec.lpe();
+  process_definition lpe = spec.lpe();
   cout << "lpe = " << lpe.to_string() << endl;
 
   cout << "free variables: " << pp(lpe.free_variables()) << " " << lpe.free_variables().to_string() << endl;
@@ -103,7 +103,7 @@ int main()
 //    cout << "summand " << pp(*i) << endl;
   }
   
-  LPE_summand s = spec.lpe().summands().front();
+  summand s = spec.lpe().summands().front();
   cout << "actions:" << endl;
   for (action_list::iterator i = s.actions().begin(); i != s.actions().end(); ++i)
   {

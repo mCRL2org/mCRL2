@@ -128,7 +128,7 @@ static bool is_used(ATermAppl expr, ATermIndexedSet s)
 ATermAppl removeUnusedData(ATermAppl ATSpec, bool keep_basis)
 {
 	specification spec(ATSpec);
-	LPE l = spec.lpe();
+	process_definition l = spec.lpe();
 	
 	ATermTable used_data = ATtableCreate(2*(spec.data().sorts().size()+spec.data().constructors().size()+spec.data().mappings().size()),50);
 

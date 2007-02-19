@@ -28,7 +28,7 @@
 
 //LPE framework
 #include <lpe/specification.h>
-#include <lpe/lpe.h>
+#include <lpe/process_definition.h>
 #include <lpe/data_init.h>
 #include <lpe/data_functional.h>
 #include <lpe/data_utility.h>
@@ -107,7 +107,7 @@ bool squadt_interactor::perform_task(sip::configuration& configuration)
 
 #endif //ENABLE_SQUADT_CONNECTIVITY
 
-bool has_time(lpe::LPE& lpe)
+bool has_time(lpe::process_definition& lpe)
 {
   bool result = false;
   for (lpe::summand_list::iterator i = lpe.summands().begin(); i != lpe.summands().end(); ++i)
@@ -129,7 +129,7 @@ lpe::specification remove_deltas(const lpe::specification& specification) {
     }
   }
 
-  lpe::LPE_summand delta_summand = LPE_summand(data_variable_list(),
+  lpe::summand delta_summand = summand(data_variable_list(),
                                                true_(),
                                                true,
                                                action_list(),
@@ -147,8 +147,8 @@ lpe::specification remove_deltas(const lpe::specification& specification) {
 ///Returns an LPE specification in which the timed arguments have been rewritten
 lpe::specification untime(const lpe::specification& specification) {
   lpe::specification untime_specification; // Updated specification
-  lpe::LPE lpe = specification.lpe(); // Original lpe
-  lpe::LPE untime_lpe; // Updated lpe
+  lpe::process_definition lpe = specification.lpe(); // Original lpe
+  lpe::process_definition untime_lpe; // Updated lpe
   lpe::summand_list untime_summand_list; // Updated summand list
   lpe::data_variable_list untime_process_parameters; // Updated process parameters
   lpe::data_variable last_action_time; // Extra parameter to display the last action time
@@ -180,7 +180,7 @@ lpe::specification untime(const lpe::specification& specification) {
     lpe::data_variable_list untime_summation_variables; //Updated set of summation variables
     lpe::data_expression untime_condition; //Updated condition
     lpe::data_assignment_list untime_assignments; //Updated assignments (or next state)
-    lpe::LPE_summand untime_summand; //Updated summand
+    lpe::summand untime_summand; //Updated summand
 
     if (!(i->is_delta())){
 
@@ -214,7 +214,7 @@ lpe::specification untime(const lpe::specification& specification) {
       } // i->has_time()
 
       // Create a new summand with the changed parameters
-      untime_summand = lpe::LPE_summand(untime_summation_variables,
+      untime_summand = lpe::summand(untime_summation_variables,
 					  untime_condition,
 					  i->is_delta(),
 					  i->actions(),
@@ -229,8 +229,8 @@ lpe::specification untime(const lpe::specification& specification) {
   }
 
   // Add delta summand
-  lpe::LPE_summand untime_summand;
-  untime_summand = lpe::LPE_summand(data_variable_list(),
+  lpe::summand untime_summand;
+  untime_summand = lpe::summand(data_variable_list(),
                                     data_expression(true_()),
                                     true,
                                     action_list(),
@@ -243,7 +243,7 @@ lpe::specification untime(const lpe::specification& specification) {
   untime_summand_list = atermpp::reverse(untime_summand_list);
       
   // Create new LPE, this equals lpe, except for the new summand list and the additional process parameter.
-  untime_lpe = lpe::LPE(lpe.free_variables(), untime_process_parameters, untime_summand_list);
+  untime_lpe = lpe::process_definition(lpe.free_variables(), untime_process_parameters, untime_summand_list);
 
   // Create new initial_variables and initial_state in order to correctly initialize.
   untime_initial_assignments = push_back(specification.initial_assignments(), data_assignment(last_action_time, real(0)));

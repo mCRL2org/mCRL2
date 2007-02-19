@@ -34,7 +34,7 @@
 #include <lpe/data_functional.h>
 #include <lpe/data_utility.h>
 #include <lpe/function.h>
-#include <lpe/lpe.h>
+#include <lpe/process_definition.h>
 #include <lpe/sort_utility.h>
 #include <lpe/specification.h>
 #include <lpe/detail/specification_utility.h>
@@ -557,22 +557,22 @@ action_list replace_enumerated_parameters_in_actions(action_list list,
 }
 
 ///Replace all parameters of finite sorts != bool in summand with a vector of booleans
-LPE_summand replace_enumerated_parameters_in_summand(const LPE_summand& summand,
+summand replace_enumerated_parameters_in_summand(const summand& summand_,
                                                      table& new_parameters_table,
                                                      table& enumerated_elements_table)
 {
-  LPE_summand result;
+  summand result;
 
-  gsDebugMsg("Summand: %s\n\n", summand.to_string().c_str());
+  gsDebugMsg("Summand: %s\n\n", summand_.to_string().c_str());
   
-  gsDebugMsg("\nOriginal condition: %s\n\n New condition: %s\n\n", summand.condition().to_string().c_str(), replace_enumerated_parameters_in_data_expression(summand.condition(), new_parameters_table, enumerated_elements_table).to_string().c_str());
+  gsDebugMsg("\nOriginal condition: %s\n\n New condition: %s\n\n", summand_.condition().to_string().c_str(), replace_enumerated_parameters_in_data_expression(summand_.condition(), new_parameters_table, enumerated_elements_table).to_string().c_str());
 
-  result = LPE_summand(summand.summation_variables(),
-                       replace_enumerated_parameters_in_data_expression(summand.condition(), new_parameters_table, enumerated_elements_table),
-                       summand.is_delta(),
-                       replace_enumerated_parameters_in_actions(summand.actions(), new_parameters_table, enumerated_elements_table),
-                       replace_enumerated_parameters_in_data_expression(summand.time(), new_parameters_table, enumerated_elements_table),
-                       replace_enumerated_parameters_in_data_assignments(summand.assignments(), new_parameters_table, enumerated_elements_table)); 
+  result = summand(summand_.summation_variables(),
+                       replace_enumerated_parameters_in_data_expression(summand_.condition(), new_parameters_table, enumerated_elements_table),
+                       summand_.is_delta(),
+                       replace_enumerated_parameters_in_actions(summand_.actions(), new_parameters_table, enumerated_elements_table),
+                       replace_enumerated_parameters_in_data_expression(summand_.time(), new_parameters_table, enumerated_elements_table),
+                       replace_enumerated_parameters_in_data_assignments(summand_.assignments(), new_parameters_table, enumerated_elements_table)); 
 
   return result;
 }
@@ -593,13 +593,13 @@ summand_list replace_enumerated_parameters_in_summands(const summand_list& list,
 }
 
 ///Replace all parameters of finite sorts != bool in lpe with a vector of booleans
-LPE replace_enumerated_parameters_in_lpe(const lpe::LPE& lpe,
+process_definition replace_enumerated_parameters_in_lpe(const lpe::process_definition& lpe,
                                          table& new_parameters_table,
                                          table& enumerated_elements_table)
 {
-  LPE result;
+  process_definition result;
 
-  result = LPE(lpe.free_variables(),
+  result = process_definition(lpe.free_variables(),
                replace_enumerated_parameters_in_data_variables(lpe.process_parameters(), new_parameters_table, enumerated_elements_table),
                replace_enumerated_parameters_in_summands(lpe.summands(), new_parameters_table, enumerated_elements_table));
   

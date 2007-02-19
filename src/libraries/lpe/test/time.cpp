@@ -2,7 +2,7 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include "atermpp/aterm.h"
-#include "lpe/lpe.h"
+#include "lpe/process_definition.h"
 #include "lpe/detail/mcrl22lpe.h"
 
 using namespace std;
@@ -56,11 +56,11 @@ int test_main(int, char*[])
   gsEnableConstructorFunctions(); 
 
   specification spec = mcrl22lpe(SPECIFICATION);
-  LPE lpe = spec.lpe();
+  process_definition lpe = spec.lpe();
   BOOST_CHECK(lpe.is_well_typed()); 
   BOOST_CHECK(lpe.is_name_clash_free()); 
 
-  LPE_summand s = lpe.summands().front();
+  summand s = lpe.summands().front();
   BOOST_CHECK(!s.has_time()); 
 
   return 0;

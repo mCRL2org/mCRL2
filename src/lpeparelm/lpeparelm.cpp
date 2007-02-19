@@ -269,7 +269,7 @@ void lpeParElm::writeStream(lpe::specification newSpec)  {
 void lpeParElm::filter() {
   using namespace lpe;
 
-  LPE                      lpe       = p_spec.lpe();
+  process_definition lpe = p_spec.lpe();
 
   std::vector< aterm_appl >          foundParameters;
   std::set< data_variable >     T;
@@ -394,7 +394,7 @@ void lpeParElm::filter() {
 inline void lpeParElm::output() {
   using namespace lpe;
 
-  LPE lpe = p_spec.lpe();
+  process_definition lpe = p_spec.lpe();
   summand_list rebuild_summandlist;
   data_variable_list rebuild_process_parameters;
   data_expression_list rebuild_data_expression_pars;
@@ -431,19 +431,19 @@ inline void lpeParElm::output() {
         rebuild_summation_variables = push_front(rebuild_summation_variables, *j);
       }    
     }
-    //LPE_summand(data_variable_list summation_variables, data_expression condition, 
+    //summand(data_variable_list summation_variables, data_expression condition, 
     //          bool delta, action_list actions, data_expression time, 
     //          data_assignment_list assignments);
-    LPE_summand rebuild_summand; 
+    summand rebuild_summand; 
    
-    rebuild_summand = LPE_summand(atermpp::reverse(rebuild_summation_variables), i->condition(),
+    rebuild_summand = summand(atermpp::reverse(rebuild_summation_variables), i->condition(),
       i->is_delta(), i->actions(), i-> time(), atermpp::reverse(rebuild_assignments));  
     rebuild_summandlist = push_front(rebuild_summandlist, rebuild_summand);
   }
   
   //construct new specfication
-  LPE rebuild_lpe;
-  rebuild_lpe = LPE(
+  process_definition rebuild_lpe;
+  rebuild_lpe = process_definition(
     lpe.free_variables(), 
     atermpp::reverse(rebuild_process_parameters), 
     atermpp::reverse(rebuild_summandlist)
@@ -466,7 +466,7 @@ inline void lpeParElm::output() {
   //
   //specification(sort_list sorts, function_list constructors, 
   //            function_list mappings, data_equation_list equations, 
-  //            action_label_list action_labels, LPE lpe, 
+  //            action_label_list action_labels, process_definition lpe, 
   //            data_variable_list initial_free_variables, 
   //            data_variable_list initial_variables, 
   //            data_expression_list initial_state);
