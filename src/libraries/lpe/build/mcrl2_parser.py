@@ -224,6 +224,7 @@ class EBNFParser(tpg.Parser):
              (
                 '\-'/sign
               | '\+'/sign
+              | '\.'/sign
              )
              identifier/i                 $ p = sign + i $
              '\]'

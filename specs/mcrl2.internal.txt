@@ -44,8 +44,8 @@
                 | SortStruct(<StructCons>+)                              [- di]
                 | SortArrowProd(<SortExpr>+, <SortExpr>)                 [- di]
                 | SortArrow(<SortExpr>, <SortExpr>)                      [+ di]
-                | <SortUnknown>                                          //[. tc]
-                | SortsPossible(<SortExpr>+)                             //[. tc]
+                | <SortUnknown>                                          [. tc]
+                | SortsPossible(<SortExpr>+)                             [. tc]
 
 //sort unknown
 <SortUnknown>  ::= SortUnknown

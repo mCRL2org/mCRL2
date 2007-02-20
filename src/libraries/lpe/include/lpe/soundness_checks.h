@@ -130,7 +130,6 @@ template <typename Term> bool check_term_StateNot(Term t);
 template <typename Term> bool check_term_IfThen(Term t);
 template <typename Term> bool check_term_StateImp(Term t);
 template <typename Term> bool check_term_PBESExists(Term t);
-template <typename Term> bool check_term_SortsPossible(Term t);
 template <typename Term> bool check_term_StateForall(Term t);
 template <typename Term> bool check_term_SortId(Term t);
 template <typename Term> bool check_term_StateNu(Term t);
@@ -220,9 +219,7 @@ template <typename Term>
 bool check_rule_SortExpr(Term t)
 {
   return    check_rule_SortId(t)
-         || check_term_SortArrow(t)
-         || check_rule_SortUnknown(t)
-         || check_term_SortsPossible(t);
+         || check_term_SortArrow(t);
 }
 
 template <typename Term>
@@ -790,29 +787,6 @@ bool check_term_PBESExists(Term t)
   if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 1))
     return false;
   if (!check_term_argument(a(1), check_rule_PBExpr<aterm>))
-    return false;
-#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-  return true;
-}
-
-// SortsPossible(SortExpr+)
-template <typename Term>
-bool check_term_SortsPossible(Term t)
-{
-  // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
-  if (term.type() != AT_APPL)
-    return false;
-  aterm_appl a(term);
-  if (!gsIsSortsPossible(a))
-    return false;
-
-  // check the children
-  if (a.size() != 1)
-    return false;
-#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_SortExpr<aterm>, 1))
     return false;
 #endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 

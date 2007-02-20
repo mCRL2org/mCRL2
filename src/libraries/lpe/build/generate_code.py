@@ -299,7 +299,7 @@ def main():
     rules = parse_ebnf(filename)
 
     if options.soundness_checks:
-        ignored_phases = ['-tc', '-lin', '-di', '-rft']
+        ignored_phases = ['-tc', '-lin', '-di', '-rft', '.tc']
         filename = '../include/lpe/soundness_checks.h'
         generate_soundness_check_functions(rules, filename, ignored_phases)
 
@@ -307,8 +307,6 @@ def main():
         ignored_phases = []
         filename = '../../mcrl2_basic/include/struct/libstruct_core.h'
         generate_libstruct_functions(rules, filename, ignored_phases)
-    
-    print options
 
 if __name__ == "__main__":
     main()
