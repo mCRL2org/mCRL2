@@ -34,7 +34,7 @@
 #include <lpe/data_functional.h>
 #include <lpe/data_utility.h>
 #include <lpe/function.h>
-#include <lpe/process_definition.h>
+#include <lpe/linear_process.h>
 #include <lpe/sort_utility.h>
 #include <lpe/specification.h>
 #include <lpe/detail/specification_utility.h>
@@ -593,13 +593,13 @@ summand_list replace_enumerated_parameters_in_summands(const summand_list& list,
 }
 
 ///Replace all parameters of finite sorts != bool in lpe with a vector of booleans
-process_definition replace_enumerated_parameters_in_lpe(const lpe::process_definition& lpe,
+linear_process replace_enumerated_parameters_in_lpe(const lpe::linear_process& lpe,
                                          table& new_parameters_table,
                                          table& enumerated_elements_table)
 {
-  process_definition result;
+  linear_process result;
 
-  result = process_definition(lpe.free_variables(),
+  result = linear_process(lpe.free_variables(),
                replace_enumerated_parameters_in_data_variables(lpe.process_parameters(), new_parameters_table, enumerated_elements_table),
                replace_enumerated_parameters_in_summands(lpe.summands(), new_parameters_table, enumerated_elements_table));
   

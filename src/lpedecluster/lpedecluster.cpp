@@ -28,7 +28,7 @@
 
 //LPE Framework
 #include <lpe/function.h>
-#include <lpe/process_definition.h>
+#include <lpe/linear_process.h>
 #include <lpe/specification.h>
 #include <lpe/sort_utility.h>
 
@@ -414,7 +414,7 @@ lpe::specification decluster(const lpe::specification& specification, const tool
 {
   gsVerboseMsg("Declustering...\n");
   gsVerboseMsg("Using rewrite strategy %d\n", options.strategy);
-  lpe::process_definition lpe = specification.lpe();
+  lpe::linear_process lpe = specification.lpe();
 
   gsVerboseMsg("Input: %d summands.\n", lpe.summands().size());
 

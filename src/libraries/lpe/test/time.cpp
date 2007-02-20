@@ -2,7 +2,7 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include "atermpp/aterm.h"
-#include "lpe/process_definition.h"
+#include "lpe/linear_process.h"
 #include "lpe/detail/mcrl22lpe.h"
 
 using namespace std;
@@ -56,7 +56,7 @@ int test_main(int, char*[])
   gsEnableConstructorFunctions(); 
 
   specification spec = mcrl22lpe(SPECIFICATION);
-  process_definition lpe = spec.lpe();
+  linear_process lpe = spec.lpe();
   BOOST_CHECK(lpe.is_well_typed()); 
   BOOST_CHECK(lpe.is_name_clash_free()); 
 

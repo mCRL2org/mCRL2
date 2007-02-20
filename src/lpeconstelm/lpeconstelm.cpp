@@ -604,7 +604,7 @@ void lpeConstElm::removeSingleton(int n)
 // Constant parameters (stored in p_S)
 //
 inline void lpeConstElm::output() {
-  lpe::process_definition p_lpe = p_spec.lpe();
+  lpe::linear_process p_lpe = p_spec.lpe();
   summand_list rebuild_summandlist;
 
   //Remove the summands that are never visited
@@ -703,8 +703,8 @@ inline void lpeConstElm::output() {
   //
   //LPE(data_variable_list free_variables, data_variable_list process_parameters, 
   //  summand_list summands);
-  lpe::process_definition rebuild_lpe;
-  rebuild_lpe = lpe::process_definition(
+  lpe::linear_process rebuild_lpe;
+  rebuild_lpe = lpe::linear_process(
     setToList(usedFreeVars),
     vectorToList(variablePPvar), 
     atermpp::reverse(rebuild_summandlist_no_cp)
@@ -885,7 +885,7 @@ void lpeConstElm::filter() {
   int     cycle    = 0;
   p_newVarCounter  = 0;
   
-  lpe::process_definition p_lpe = p_spec.lpe();
+  lpe::linear_process p_lpe = p_spec.lpe();
   rewr           = createRewriter(p_spec.data()); 
 
   for(lpe::data_assignment_list::iterator i = p_spec.initial_assignments().begin(); i != p_spec.initial_assignments().end() ; i++ ){

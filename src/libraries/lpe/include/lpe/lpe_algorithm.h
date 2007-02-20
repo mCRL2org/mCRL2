@@ -8,7 +8,7 @@
 #include <string>
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
-#include "lpe/process_definition.h"
+#include "lpe/linear_process.h"
 #include "lpe/data.h"
 #include "lpe/data_utility.h"
 
@@ -42,7 +42,7 @@ struct make_timed_lpe_summand
 /// Adds time parameters to the lpe if needed and returns the result. The times
 /// are chosen such that they don't appear in context.
 inline
-process_definition make_timed_lpe(process_definition lpe, aterm context)
+linear_process make_timed_lpe(linear_process lpe, aterm context)
 {
   fresh_variable_generator generator(context);
   summand_list new_summands = apply(lpe.summands(), make_timed_lpe_summand(generator));

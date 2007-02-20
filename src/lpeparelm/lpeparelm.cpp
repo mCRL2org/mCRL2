@@ -269,7 +269,7 @@ void lpeParElm::writeStream(lpe::specification newSpec)  {
 void lpeParElm::filter() {
   using namespace lpe;
 
-  process_definition lpe = p_spec.lpe();
+  linear_process lpe = p_spec.lpe();
 
   std::vector< aterm_appl >          foundParameters;
   std::set< data_variable >     T;
@@ -394,7 +394,7 @@ void lpeParElm::filter() {
 inline void lpeParElm::output() {
   using namespace lpe;
 
-  process_definition lpe = p_spec.lpe();
+  linear_process lpe = p_spec.lpe();
   summand_list rebuild_summandlist;
   data_variable_list rebuild_process_parameters;
   data_expression_list rebuild_data_expression_pars;
@@ -442,8 +442,8 @@ inline void lpeParElm::output() {
   }
   
   //construct new specfication
-  process_definition rebuild_lpe;
-  rebuild_lpe = process_definition(
+  linear_process rebuild_lpe;
+  rebuild_lpe = linear_process(
     lpe.free_variables(), 
     atermpp::reverse(rebuild_process_parameters), 
     atermpp::reverse(rebuild_summandlist)
@@ -466,7 +466,7 @@ inline void lpeParElm::output() {
   //
   //specification(sort_list sorts, function_list constructors, 
   //            function_list mappings, data_equation_list equations, 
-  //            action_label_list action_labels, process_definition lpe, 
+  //            action_label_list action_labels, linear_process lpe, 
   //            data_variable_list initial_free_variables, 
   //            data_variable_list initial_variables, 
   //            data_expression_list initial_state);

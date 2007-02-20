@@ -29,7 +29,7 @@
 #include <atermpp/algorithm.h>
 
 //LPE Framework
-#include <lpe/process_definition.h>
+#include <lpe/linear_process.h>
 #include <lpe/specification.h>
 #include <lpe/data_functional.h>
 #include <lpe/data_init.h>
@@ -223,7 +223,7 @@ lpe::specification remove_unused_variables_(const lpe::specification& specificat
 {
   gsVerboseMsg("Removing unused variables from summands\n");
 
-  lpe::process_definition lpe = specification.lpe();
+  lpe::linear_process lpe = specification.lpe();
   lpe::specification new_specification;
   lpe::summand_list new_summand_list = lpe.summands();
 
@@ -339,7 +339,7 @@ lpe::specification substitute_equalities_(const lpe::specification& specificatio
 {
   gsVerboseMsg("Substituting equality conditions in summands\n");
   
-  lpe::process_definition lpe = specification.lpe();
+  lpe::linear_process lpe = specification.lpe();
   lpe::specification new_specification;
   lpe::summand_list new_summand_list = lpe.summands();
 

@@ -28,7 +28,7 @@
 
 //LPE framework
 #include <lpe/specification.h>
-#include <lpe/process_definition.h>
+#include <lpe/linear_process.h>
 #include <lpe/data_init.h>
 #include <lpe/data_functional.h>
 #include <lpe/data_utility.h>
@@ -107,7 +107,7 @@ bool squadt_interactor::perform_task(sip::configuration& configuration)
 
 #endif //ENABLE_SQUADT_CONNECTIVITY
 
-bool has_time(lpe::process_definition& lpe)
+bool has_time(lpe::linear_process& lpe)
 {
   bool result = false;
   for (lpe::summand_list::iterator i = lpe.summands().begin(); i != lpe.summands().end(); ++i)
@@ -147,8 +147,8 @@ lpe::specification remove_deltas(const lpe::specification& specification) {
 ///Returns an LPE specification in which the timed arguments have been rewritten
 lpe::specification untime(const lpe::specification& specification) {
   lpe::specification untime_specification; // Updated specification
-  lpe::process_definition lpe = specification.lpe(); // Original lpe
-  lpe::process_definition untime_lpe; // Updated lpe
+  lpe::linear_process lpe = specification.lpe(); // Original lpe
+  lpe::linear_process untime_lpe; // Updated lpe
   lpe::summand_list untime_summand_list; // Updated summand list
   lpe::data_variable_list untime_process_parameters; // Updated process parameters
   lpe::data_variable last_action_time; // Extra parameter to display the last action time
@@ -243,7 +243,7 @@ lpe::specification untime(const lpe::specification& specification) {
   untime_summand_list = atermpp::reverse(untime_summand_list);
       
   // Create new LPE, this equals lpe, except for the new summand list and the additional process parameter.
-  untime_lpe = lpe::process_definition(lpe.free_variables(), untime_process_parameters, untime_summand_list);
+  untime_lpe = lpe::linear_process(lpe.free_variables(), untime_process_parameters, untime_summand_list);
 
   // Create new initial_variables and initial_state in order to correctly initialize.
   untime_initial_assignments = push_back(specification.initial_assignments(), data_assignment(last_action_time, real(0)));

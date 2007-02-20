@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-/// \file process_definition.h
+/// \file linear_process.h
 /// Contains LPE data structures for the LPE Library.
 
 #ifndef LPE_LPE_H
@@ -312,7 +312,7 @@ typedef term_list<summand> summand_list;
 // LPE
 /// \brief linear process equation.
 ///
-class process_definition: public aterm_appl
+class linear_process: public aterm_appl
 {
   protected:
     data_variable_list m_free_variables;
@@ -367,10 +367,10 @@ class process_definition: public aterm_appl
       return v.empty();
     }
 
-    process_definition()
+    linear_process()
     {}
 
-    process_definition(data_variable_list free_variables,
+    linear_process(data_variable_list free_variables,
         data_variable_list process_parameters,
         summand_list       summands
        )
@@ -383,7 +383,7 @@ class process_definition: public aterm_appl
       assert(is_name_clash_free(true));
     }
 
-    process_definition(aterm_appl lpe)
+    linear_process(aterm_appl lpe)
       : aterm_appl(lpe)
     {
       assert(check_term_LPE(m_term));
@@ -422,12 +422,12 @@ class process_definition: public aterm_appl
     /// The Substitution object must supply the method aterm operator()(aterm).
     ///
     template <typename Substitution>
-    process_definition substitute(Substitution f)
+    linear_process substitute(Substitution f)
     {
       data_variable_list d = m_free_variables    .substitute(f);
       data_variable_list p = m_process_parameters.substitute(f);
       summand_list       s = m_summands          .substitute(f);
-      return process_definition(d, p, s);
+      return linear_process(d, p, s);
     }     
 
     /// Returns a representation of the term.
@@ -442,27 +442,27 @@ class process_definition: public aterm_appl
   };
 
 inline
-process_definition set_free_variables(process_definition l, data_variable_list free_variables)
+linear_process set_free_variables(linear_process l, data_variable_list free_variables)
 {
-  return process_definition(free_variables,
+  return linear_process(free_variables,
              l.process_parameters(),
              l.summands          ()
             );
 }
 
 inline
-process_definition set_process_parameters(process_definition l, data_variable_list process_parameters)
+linear_process set_process_parameters(linear_process l, data_variable_list process_parameters)
 {
-  return process_definition(l.free_variables    (),
+  return linear_process(l.free_variables    (),
              process_parameters,
              l.summands          ()
             );
 }
 
 inline
-process_definition set_summands(process_definition l, summand_list summands)
+linear_process set_summands(linear_process l, summand_list summands)
 {
-  return process_definition(l.free_variables    (),
+  return linear_process(l.free_variables    (),
              l.process_parameters(),
              summands
             );
@@ -473,7 +473,7 @@ process_definition set_summands(process_definition l, summand_list summands)
 namespace atermpp
 {
 using lpe::summand;
-using lpe::process_definition;
+using lpe::linear_process;
 
 template<>
 struct aterm_traits<summand>
@@ -487,14 +487,14 @@ struct aterm_traits<summand>
 };
 
 template<>
-struct aterm_traits<process_definition>
+struct aterm_traits<linear_process>
 {
   typedef ATermAppl aterm_type;
-  static void protect(process_definition t)   { t.protect(); }
-  static void unprotect(process_definition t) { t.unprotect(); }
-  static void mark(process_definition t)      { t.mark(); }
-  static ATerm term(process_definition t)     { return t.term(); }
-  static ATerm* ptr(process_definition& t)    { return &t.term(); }
+  static void protect(linear_process t)   { t.protect(); }
+  static void unprotect(linear_process t) { t.unprotect(); }
+  static void mark(linear_process t)      { t.mark(); }
+  static ATerm term(linear_process t)     { return t.term(); }
+  static ATerm* ptr(linear_process& t)    { return &t.term(); }
 };
 
 } // namespace atermpp

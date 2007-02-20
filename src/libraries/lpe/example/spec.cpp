@@ -63,7 +63,7 @@ int main()
   }
   cout << endl;
 
-  process_definition lpe = spec.lpe();
+  linear_process lpe = spec.lpe();
   cout << "lpe = " << lpe.to_string() << endl;
 
   cout << "free variables: " << pp(lpe.free_variables()) << " " << lpe.free_variables().to_string() << endl;

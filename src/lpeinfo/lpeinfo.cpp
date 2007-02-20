@@ -27,7 +27,7 @@
 
 //mCRL2
 #include <atermpp/aterm.h>
-#include <lpe/process_definition.h>
+#include <lpe/linear_process.h>
 #include <lpe/specification.h>
 #include "liblowlevel.h"
 
@@ -154,7 +154,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     using namespace sip::layout;
     using namespace sip::layout::elements;
    
-    lpe::process_definition lpe = lpe_specification.lpe();
+    lpe::linear_process lpe = lpe_specification.lpe();
   
     /* Create and add the top layout manager */
     layout::manager::aptr top(layout::horizontal_box::create());
@@ -210,7 +210,7 @@ int main(int argc, char** argv) {
     lpe::specification lpe_specification;
  
     if (lpe_specification.load(file_name)) {
-      lpe::process_definition lpe = lpe_specification.lpe();
+      lpe::linear_process lpe = lpe_specification.lpe();
     
       cout << "Input read from " << ((file_name == "-") ? "standard input" : file_name) << endl << endl;
      

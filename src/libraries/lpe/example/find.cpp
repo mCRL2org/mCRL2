@@ -43,7 +43,7 @@ int main()
   gsEnableConstructorFunctions();
 
   specification spec = mcrl22lpe(ABP_SPECIFICATION);
-  process_definition lpe = spec.lpe();
+  linear_process lpe = spec.lpe();
   std::set<aterm_string> ids = identifiers(aterm(lpe));
   for (std::set<aterm_string>::iterator i = ids.begin(); i != ids.end(); ++i)
   {
