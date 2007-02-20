@@ -2666,7 +2666,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
   case 108:
 #line 824 "mcrl2parser.yy"
     {
-      safe_assign(((*yyvalp).appl), gsMakeListEnum(ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list)), gsMakeUnknown()));
+      safe_assign(((*yyvalp).appl), gsMakeListEnum(ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list)), gsMakeSortUnknown()));
       gsDebugMsg("parsed data enumeration\n  %T\n", ((*yyvalp).appl));
     ;}
     break;
@@ -2674,7 +2674,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
   case 109:
 #line 829 "mcrl2parser.yy"
     {
-      safe_assign(((*yyvalp).appl), gsMakeSetEnum(ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list)), gsMakeUnknown()));
+      safe_assign(((*yyvalp).appl), gsMakeSetEnum(ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list)), gsMakeSortUnknown()));
       gsDebugMsg("parsed data enumeration\n  %T\n", ((*yyvalp).appl));
     ;}
     break;
@@ -2682,7 +2682,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
   case 110:
 #line 834 "mcrl2parser.yy"
     {
-      safe_assign(((*yyvalp).appl), gsMakeBagEnum(ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list)), gsMakeUnknown()));
+      safe_assign(((*yyvalp).appl), gsMakeBagEnum(ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list)), gsMakeSortUnknown()));
       gsDebugMsg("parsed data enumeration\n  %T\n", ((*yyvalp).appl));
     ;}
     break;

@@ -822,17 +822,17 @@ data_constant:
 data_enumeration:
   LBRACK data_exprs_cs RBRACK
     {
-      safe_assign($$, gsMakeListEnum(ATreverse($2), gsMakeUnknown()));
+      safe_assign($$, gsMakeListEnum(ATreverse($2), gsMakeSortUnknown()));
       gsDebugMsg("parsed data enumeration\n  %T\n", $$);
     }
   | LBRACE data_exprs_cs RBRACE
     {
-      safe_assign($$, gsMakeSetEnum(ATreverse($2), gsMakeUnknown()));
+      safe_assign($$, gsMakeSetEnum(ATreverse($2), gsMakeSortUnknown()));
       gsDebugMsg("parsed data enumeration\n  %T\n", $$);
     }
   | LBRACE bag_enum_elts_cs RBRACE
     {
-      safe_assign($$, gsMakeBagEnum(ATreverse($2), gsMakeUnknown()));
+      safe_assign($$, gsMakeBagEnum(ATreverse($2), gsMakeSortUnknown()));
       gsDebugMsg("parsed data enumeration\n  %T\n", $$);
     }
   ;

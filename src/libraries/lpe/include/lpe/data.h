@@ -67,7 +67,7 @@ class data_expression: public aterm_appl
     lpe::sort sort() const
     {
       ATermAppl result = gsGetSort(*this);
-      assert(!gsIsUnknown(result));
+      assert(!gsIsSortUnknown(result));
       return lpe::sort(result);
     }     
 

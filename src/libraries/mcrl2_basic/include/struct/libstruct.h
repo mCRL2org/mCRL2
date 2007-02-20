@@ -36,9 +36,9 @@ bool gsIsSortExpr(ATermAppl Term);
 //Pre: Term is not NULL
 //Ret: Term is a sort expression
 
-bool gsIsSortExprOrUnknown(ATermAppl Term);
+bool gsIsNotInferred(ATermAppl Term);
 //Pre: Term is not NULL
-//Ret: Term is a sort expression or unknown
+//Ret: Term is either SortUnknown or SortsPossible
 
 //Creation of names for system sort identifiers
 

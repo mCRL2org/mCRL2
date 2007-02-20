@@ -115,7 +115,7 @@ static void PRINT_FUNC(PrintDecl)(PRINT_OUTTYPE OutStream,
        - "x", otherwise
 */
 
-static void PRINT_FUNC(PrintSortExprOrUnknown)(PRINT_OUTTYPE OutStream,
+static void PRINT_FUNC(PrintSortExpr)(PRINT_OUTTYPE OutStream,
   const ATermAppl SortExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
        SortExprOrUnknown is a sort expression or unknown
@@ -392,10 +392,10 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
   if (gsIsString(Part)) {
     //print string
     PRINT_FUNC(fprints)(OutStream, ATgetName(ATgetAFun(Part)));
-  } else if (gsIsSortExprOrUnknown(Part)) {
+  } else if (gsIsSortExpr(Part)) {
     //print sort expression or unknown
     PRINT_FUNC(dbg_prints)("printing sort expression or unknown\n");
-    PRINT_FUNC(PrintSortExprOrUnknown)(OutStream, Part, pp_format, ShowSorts, PrecLevel);
+    PRINT_FUNC(PrintSortExpr)(OutStream, Part, pp_format, ShowSorts, PrecLevel);
   } else if (gsIsStructCons(Part)) {
     //print structured sort constructor
     PRINT_FUNC(dbg_prints)("printing structured sort constructor\n");
@@ -946,10 +946,10 @@ void PRINT_FUNC(PrintDecl)(PRINT_OUTTYPE OutStream, const ATermAppl Decl,
   }
 }
 
-static void PRINT_FUNC(PrintSortExprOrUnknown)(PRINT_OUTTYPE OutStream,
+static void PRINT_FUNC(PrintSortExpr)(PRINT_OUTTYPE OutStream,
   const ATermAppl SortExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
 {
-  assert(gsIsSortExprOrUnknown(SortExpr));
+  assert(gsIsSortExpr(SortExpr));
   if (gsIsSortId(SortExpr)) {
     //print sort identifier
     PRINT_FUNC(dbg_prints)("printing standard sort identifier\n");
@@ -959,10 +959,10 @@ static void PRINT_FUNC(PrintSortExprOrUnknown)(PRINT_OUTTYPE OutStream,
     //print arrow sort
     PRINT_FUNC(dbg_prints)("printing arrow sort\n");
     if (PrecLevel > 0) PRINT_FUNC(fprints)(OutStream, "(");
-    PRINT_FUNC(PrintSortExprOrUnknown)(OutStream, ATAgetArgument(SortExpr, 0),
+    PRINT_FUNC(PrintSortExpr)(OutStream, ATAgetArgument(SortExpr, 0),
       pp_format, ShowSorts, 1);
     PRINT_FUNC(fprints)(OutStream, " -> ");
-    PRINT_FUNC(PrintSortExprOrUnknown)(OutStream, ATAgetArgument(SortExpr, 1),
+    PRINT_FUNC(PrintSortExpr)(OutStream, ATAgetArgument(SortExpr, 1),
       pp_format, ShowSorts, 0);
     if (PrecLevel > 0) PRINT_FUNC(fprints)(OutStream, ")");
   } else if (gsIsSortArrowProd(SortExpr)) {
@@ -972,28 +972,28 @@ static void PRINT_FUNC(PrintSortExprOrUnknown)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(PrintPart_List)(OutStream, ATLgetArgument(SortExpr, 0),
       pp_format, ShowSorts, 1, NULL, " # ");
     PRINT_FUNC(fprints)(OutStream, " -> ");
-    PRINT_FUNC(PrintSortExprOrUnknown)(OutStream, ATAgetArgument(SortExpr, 1),
+    PRINT_FUNC(PrintSortExpr)(OutStream, ATAgetArgument(SortExpr, 1),
       pp_format, ShowSorts, 0);
     if (PrecLevel > 0) PRINT_FUNC(fprints)(OutStream, ")");
   } else if (gsIsSortExprList(SortExpr)) {
     //print list sort
     PRINT_FUNC(dbg_prints)("printing list sort\n");
     PRINT_FUNC(fprints)(OutStream, "List(");
-    PRINT_FUNC(PrintSortExprOrUnknown)(OutStream, ATAgetArgument(SortExpr, 1),
+    PRINT_FUNC(PrintSortExpr)(OutStream, ATAgetArgument(SortExpr, 1),
       pp_format, ShowSorts, 0);
     PRINT_FUNC(fprints)(OutStream, ")");
   } else if (gsIsSortExprSet(SortExpr)) {
     //print set sort
     PRINT_FUNC(dbg_prints)("printing set sort\n");
     PRINT_FUNC(fprints)(OutStream, "Set(");
-    PRINT_FUNC(PrintSortExprOrUnknown)(OutStream, ATAgetArgument(SortExpr, 1),
+    PRINT_FUNC(PrintSortExpr)(OutStream, ATAgetArgument(SortExpr, 1),
       pp_format, ShowSorts, 0);
     PRINT_FUNC(fprints)(OutStream, ")");
   } else if (gsIsSortExprBag(SortExpr)) {
     //print bag sort
     PRINT_FUNC(dbg_prints)("printing bag sort\n");
     PRINT_FUNC(fprints)(OutStream, "Bag(");
-    PRINT_FUNC(PrintSortExprOrUnknown)(OutStream, ATAgetArgument(SortExpr, 1),
+    PRINT_FUNC(PrintSortExpr)(OutStream, ATAgetArgument(SortExpr, 1),
       pp_format, ShowSorts, 0);
     PRINT_FUNC(fprints)(OutStream, ")");
   } else if (gsIsSortStruct(SortExpr)) {
@@ -1004,10 +1004,17 @@ static void PRINT_FUNC(PrintSortExprOrUnknown)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(PrintPart_List)(OutStream, ATLgetArgument(SortExpr, 0),
       pp_format, ShowSorts, PrecLevel, NULL, " | ");
     if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, ")");
-  } else if (gsIsUnknown(SortExpr)) {
+  } else if (gsIsSortUnknown(SortExpr)) {
     //print unknown
     PRINT_FUNC(dbg_prints)("printing unknown\n");
     PRINT_FUNC(fprints)(OutStream, "unknown");
+  } else if (gsIsSortsPossible(SortExpr)) {
+    //print possible sorts
+    PRINT_FUNC(dbg_prints)("printing possible sorts\n");
+    PRINT_FUNC(fprints)(OutStream, "Possible sorts(");
+    PRINT_FUNC(PrintSortExpr)(OutStream, ATAgetArgument(SortExpr, 0),
+      pp_format, ShowSorts, 0);
+    PRINT_FUNC(fprints)(OutStream, ")");
   }
 }
 

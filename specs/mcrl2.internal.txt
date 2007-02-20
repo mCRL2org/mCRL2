@@ -1,4 +1,4 @@
-// Date: 18-02-2007
+// Date: 20-02-2007
 // This document describes the internal format of the mCRL2 language and the
 // corresponding mu-calculus formulas. Here:
 // - the following phases of implementation are distinguised:
@@ -8,6 +8,7 @@
 //   rft: regular formula translation
 // - [+p]/[-p] at the end of a branch means that this branch is added/removed at
 //   the end of phase p 
+// - [.p] at the end of a branch means that this branch is only used in phase p
 // - <String> is an arbitrary non-empty string excluding the keywords:
 //     sort cons map var eqn act proc init
 //     struct List Set Bag
@@ -43,6 +44,11 @@
                 | SortStruct(<StructCons>+)                              [- di]
                 | SortArrowProd(<SortExpr>+, <SortExpr>)                 [- di]
                 | SortArrow(<SortExpr>, <SortExpr>)                      [+ di]
+                | <SortUnknown>                                          //[. tc]
+                | SortsPossible(<SortExpr>+)                             //[. tc]
+
+//sort unknown
+<SortUnknown>  ::= SortUnknown
 
 //sort identifier
 <SortId>       ::= SortId(<String>)
@@ -65,7 +71,7 @@
 //sort expression or unknown
 <SortExprOrUnknown>
                ::= <SortExpr> 
-                 | Unknown                                               [- tc]
+                 | <SortUnknown>                                         [- tc]
 
 
 //Data expressions

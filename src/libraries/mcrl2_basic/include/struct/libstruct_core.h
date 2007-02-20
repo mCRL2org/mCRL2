@@ -1981,6 +1981,50 @@ bool gsIsSortStruct(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunSortStruct();
 }
 
+// SortUnknown
+inline
+AFun initAFunSortUnknown(AFun& f)
+{
+  f = ATmakeAFun("SortUnknown", 0, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunSortUnknown()
+{
+  static AFun AFunSortUnknown = initAFunSortUnknown(AFunSortUnknown);
+  return AFunSortUnknown;
+}
+
+inline
+bool gsIsSortUnknown(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunSortUnknown();
+}
+
+// SortsPossible
+inline
+AFun initAFunSortsPossible(AFun& f)
+{
+  f = ATmakeAFun("SortsPossible", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunSortsPossible()
+{
+  static AFun AFunSortsPossible = initAFunSortsPossible(AFunSortsPossible);
+  return AFunSortsPossible;
+}
+
+inline
+bool gsIsSortsPossible(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunSortsPossible();
+}
+
 // SpecV1
 inline
 AFun initAFunSpecV1(AFun& f)
@@ -2485,28 +2529,6 @@ inline
 bool gsIsTau(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunTau();
-}
-
-// Unknown
-inline
-AFun initAFunUnknown(AFun& f)
-{
-  f = ATmakeAFun("Unknown", 0, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunUnknown()
-{
-  static AFun AFunUnknown = initAFunUnknown(AFunUnknown);
-  return AFunUnknown;
-}
-
-inline
-bool gsIsUnknown(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunUnknown();
 }
 
 // Whr
@@ -3088,6 +3110,18 @@ ATermAppl gsMakeSortStruct(ATermList StructCons_0)
 }
 
 inline
+ATermAppl gsMakeSortUnknown()
+{
+  return ATmakeAppl0(gsAFunSortUnknown());
+}
+
+inline
+ATermAppl gsMakeSortsPossible(ATermList SortExpr_0)
+{
+  return ATmakeAppl1(gsAFunSortsPossible(), (ATerm) SortExpr_0);
+}
+
+inline
 ATermAppl gsMakeSpecV1(ATermAppl DataSpec_0, ATermAppl ActSpec_1, ATermAppl ProcEqnSpec_2, ATermAppl Init_3)
 {
   return ATmakeAppl4(gsAFunSpecV1(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) ProcEqnSpec_2, (ATerm) Init_3);
@@ -3223,12 +3257,6 @@ inline
 ATermAppl gsMakeTau()
 {
   return ATmakeAppl0(gsAFunTau());
-}
-
-inline
-ATermAppl gsMakeUnknown()
-{
-  return ATmakeAppl0(gsAFunUnknown());
 }
 
 inline

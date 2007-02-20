@@ -125,15 +125,6 @@ static inline ATermAppl gstcMakeOpIdSet2Bag(ATermAppl Type){
 
 static inline ATermAppl INIT_KEY(void){return gsMakeProcVarId(gsString2ATermAppl("init"),ATmakeList0());}
 
-static inline ATermAppl gstcMakeNotInferred(ATermList PossibleTypes){
-  assert(PossibleTypes);
-  return ATmakeAppl1(ATmakeAFun("notInferred",1,ATfalse),(ATerm)PossibleTypes);
-}
-
-static inline bool gstcIsNotInferred(ATermAppl SortTerm){
-  return (ATgetAFun(SortTerm)==ATmakeAFun("notInferred",1,ATfalse));
-}
-
 static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATermAppl *Par);
 static ATermList gstcGetNotInferredList(ATermList TypeListList);
 static ATermList gstcAdjustNotInferredList(ATermList TypeList, ATermList TypeListList);
@@ -263,6 +254,7 @@ ATermAppl type_check_spec_part(ATermAppl spec){
 }
 
 ATermAppl type_check_sort_expr_part(ATermAppl sort_expr, ATermAppl spec){
+  assert(gsIsSortExpr(sort_expr));
   ATermAppl Result=NULL;
   gsDebugMsg ("type checking sort expression part phase started\n");
   gstcDataInit();
@@ -275,7 +267,7 @@ ATermAppl type_check_sort_expr_part(ATermAppl sort_expr, ATermAppl spec){
     // Unwind sorts to enable equiv and subtype relations
     gsDebugMsg ("type checking sort expression part read-in phase finished\n");
   
-    if(gsIsSortExpr(sort_expr)){
+    if(!gsIsNotInferred(sort_expr)){
       if(gstcIsSortExprDeclared(sort_expr)) Result=sort_expr;
     }
     else {
@@ -295,6 +287,7 @@ ATermAppl type_check_sort_expr_part(ATermAppl sort_expr, ATermAppl spec){
 }
 
 ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec){
+  assert(gsIsSortExpr(sort_expr));
   ATermAppl Result=NULL;
   gsDebugMsg ("type checking data expression part phase started\n");
   gstcDataInit();
@@ -310,7 +303,7 @@ ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, AT
                                ATLgetArgument(ATAgetArgument(data_spec,2),0)))) {
   gsDebugMsg ("type checking data expression part read-in phase finished\n");
   
-  if(!gsIsSortExpr(sort_expr)){
+  if(gsIsNotInferred(sort_expr)){
     gsErrorMsg("type checking of data expressions failed (%T is not a sort expressions)\n\n",sort_expr);
     goto done;
   }
@@ -348,6 +341,7 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, lpe::specification &lpe_spec
 {
   //check correctness of the sort expression in sort_expr using
   //the LPE specification in lpe_spec
+  assert(gsIsSortExpr(sort_expr));
   gsWarningMsg("type checking of sort expressions is partially implemented\n");
   
   ATermAppl Result=NULL;
@@ -362,7 +356,7 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, lpe::specification &lpe_spec
   if(/* gstcReadInSorts((ATermList) lpe_spec.sorts())  &&  gstcReadInActs((ATermList) lpe_spec.action_labels() )*/1){
     gsDebugMsg ("type checking of sort expressions read-in phase finished\n");
 
-    if(gsIsSortExpr(sort_expr)){
+    if(!gsIsNotInferred(sort_expr)){
       if(gstcIsSortExprDeclared(sort_expr)) Result=sort_expr;
     }
     else {
@@ -381,6 +375,7 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lpe::sp
 {
   //check correctness of the data expression in data_expr using
   //the LPE specification in lpe_spec
+  assert(gsIsSortExpr(sort_expr));
   gsWarningMsg("type checking of data expressions is partially implemented\n");
 
   ATermAppl Result=NULL;
@@ -395,7 +390,7 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lpe::sp
   if(/* gstcReadInSorts((ATermList) lpe_spec.sorts())  &&  gstcReadInActs((ATermList) lpe_spec.action_labels() )*/1){
     gsDebugMsg ("type checking of data expressions read-in phase finished\n");
 
-    if(!gsIsSortExpr(sort_expr)){
+    if(gsIsNotInferred(sort_expr)){
       gsErrorMsg("type checking of data expressions failed (%T is not a sort expressions)\n\n",sort_expr);
       goto failed;
     }
@@ -684,11 +679,11 @@ void gstcDataInit(void){
   gstcAddSystemFunctionProd(gsMakeOpIdNameImp(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdBool(),gsMakeSortIdBool(),gsMakeSortIdBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameEq(),
-			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeUnknown(),gsMakeSortIdBool()));
+			    gstcMakeSortArrowProd2(gsMakeSortUnknown(),gsMakeSortUnknown(),gsMakeSortIdBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameNeq(),
-			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeUnknown(),gsMakeSortIdBool()));
+			    gstcMakeSortArrowProd2(gsMakeSortUnknown(),gsMakeSortUnknown(),gsMakeSortIdBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameIf(),
-			    gstcMakeSortArrowProd3(gsMakeSortIdBool(),gsMakeUnknown(),gsMakeUnknown(),gsMakeUnknown()));
+			    gstcMakeSortArrowProd3(gsMakeSortIdBool(),gsMakeSortUnknown(),gsMakeSortUnknown(),gsMakeSortUnknown()));
   //Numbers
   gstcAddSystemFunctionProd(gsMakeOpIdNamePos2Nat(),
 			gstcMakeSortArrowProd1(gsMakeSortIdPos(),gsMakeSortIdNat()));
@@ -864,65 +859,65 @@ void gstcDataInit(void){
   gstcAddSystemFunctionProd(gsMakeOpIdNameExp(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdReal(),gsMakeSortIdNat(),gsMakeSortIdReal()));
 //Lists
-  gstcAddSystemConstant(gsMakeOpIdNameEmptyList(),gsMakeSortExprList(gsMakeUnknown()));
+  gstcAddSystemConstant(gsMakeOpIdNameEmptyList(),gsMakeSortExprList(gsMakeSortUnknown()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameEltIn(),
-			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortExprList(gsMakeUnknown()),gsMakeSortExprBool()));  gstcAddSystemFunctionProd(gsMakeOpIdNameListSize(),
-			    gstcMakeSortArrowProd1(gsMakeSortExprList(gsMakeUnknown()),gsMakeSortExprNat()));
+			    gstcMakeSortArrowProd2(gsMakeSortUnknown(),gsMakeSortExprList(gsMakeSortUnknown()),gsMakeSortExprBool()));  gstcAddSystemFunctionProd(gsMakeOpIdNameListSize(),
+			    gstcMakeSortArrowProd1(gsMakeSortExprList(gsMakeSortUnknown()),gsMakeSortExprNat()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameCons(),
-			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortExprList(gsMakeUnknown()),gsMakeSortExprList(gsMakeUnknown())));
+			    gstcMakeSortArrowProd2(gsMakeSortUnknown(),gsMakeSortExprList(gsMakeSortUnknown()),gsMakeSortExprList(gsMakeSortUnknown())));
   gstcAddSystemFunctionProd(gsMakeOpIdNameSnoc(),
-			    gstcMakeSortArrowProd2(gsMakeSortExprList(gsMakeUnknown()),gsMakeUnknown(),gsMakeSortExprList(gsMakeUnknown())));
+			    gstcMakeSortArrowProd2(gsMakeSortExprList(gsMakeSortUnknown()),gsMakeSortUnknown(),gsMakeSortExprList(gsMakeSortUnknown())));
   gstcAddSystemFunctionProd(gsMakeOpIdNameConcat(),
-			    gstcMakeSortArrowProd2(gsMakeSortExprList(gsMakeUnknown()),gsMakeSortExprList(gsMakeUnknown()),gsMakeSortExprList(gsMakeUnknown())));
+			    gstcMakeSortArrowProd2(gsMakeSortExprList(gsMakeSortUnknown()),gsMakeSortExprList(gsMakeSortUnknown()),gsMakeSortExprList(gsMakeSortUnknown())));
   gstcAddSystemFunctionProd(gsMakeOpIdNameEltAt(),
-			    gstcMakeSortArrowProd2(gsMakeSortExprList(gsMakeUnknown()),gsMakeSortExprNat(),gsMakeUnknown()));
+			    gstcMakeSortArrowProd2(gsMakeSortExprList(gsMakeSortUnknown()),gsMakeSortExprNat(),gsMakeSortUnknown()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameHead(),
-			    gstcMakeSortArrowProd1(gsMakeSortExprList(gsMakeUnknown()), gsMakeUnknown()));
+			    gstcMakeSortArrowProd1(gsMakeSortExprList(gsMakeSortUnknown()), gsMakeSortUnknown()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameTail(),
-			    gstcMakeSortArrowProd1(gsMakeSortExprList(gsMakeUnknown()),gsMakeSortExprList(gsMakeUnknown())));
+			    gstcMakeSortArrowProd1(gsMakeSortExprList(gsMakeSortUnknown()),gsMakeSortExprList(gsMakeSortUnknown())));
   gstcAddSystemFunctionProd(gsMakeOpIdNameRHead(),
-			    gstcMakeSortArrowProd1(gsMakeSortExprList(gsMakeUnknown()),gsMakeUnknown()));
+			    gstcMakeSortArrowProd1(gsMakeSortExprList(gsMakeSortUnknown()),gsMakeSortUnknown()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameRTail(),
-			    gstcMakeSortArrowProd1(gsMakeSortExprList(gsMakeUnknown()),gsMakeSortExprList(gsMakeUnknown())));
+			    gstcMakeSortArrowProd1(gsMakeSortExprList(gsMakeSortUnknown()),gsMakeSortExprList(gsMakeSortUnknown())));
 	    
 //Sets
   gstcAddSystemFunctionProd(gsMakeOpIdNameSet2Bag(),
-			    gstcMakeSortArrowProd1(gsMakeSortExprSet(gsMakeUnknown()),gsMakeSortExprBag(gsMakeUnknown())));
-  gstcAddSystemConstant(gsMakeOpIdNameEmptySet(),gsMakeSortExprSet(gsMakeUnknown()));
+			    gstcMakeSortArrowProd1(gsMakeSortExprSet(gsMakeSortUnknown()),gsMakeSortExprBag(gsMakeSortUnknown())));
+  gstcAddSystemConstant(gsMakeOpIdNameEmptySet(),gsMakeSortExprSet(gsMakeSortUnknown()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameEltIn(),
-			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortExprSet(gsMakeUnknown()),gsMakeSortExprBool()));
+			    gstcMakeSortArrowProd2(gsMakeSortUnknown(),gsMakeSortExprSet(gsMakeSortUnknown()),gsMakeSortExprBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameSubSetEq(),
-			    gstcMakeSortArrowProd2(gsMakeSortExprSet(gsMakeUnknown()),gsMakeSortExprSet(gsMakeUnknown()),gsMakeSortExprBool()));
+			    gstcMakeSortArrowProd2(gsMakeSortExprSet(gsMakeSortUnknown()),gsMakeSortExprSet(gsMakeSortUnknown()),gsMakeSortExprBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameSubSet(),
-			    gstcMakeSortArrowProd2(gsMakeSortExprSet(gsMakeUnknown()),gsMakeSortExprSet(gsMakeUnknown()),gsMakeSortExprBool()));
+			    gstcMakeSortArrowProd2(gsMakeSortExprSet(gsMakeSortUnknown()),gsMakeSortExprSet(gsMakeSortUnknown()),gsMakeSortExprBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameSetUnion(),
-			    gstcMakeSortArrowProd2(gsMakeSortExprSet(gsMakeUnknown()),gsMakeSortExprSet(gsMakeUnknown()),gsMakeSortExprSet(gsMakeUnknown())));
+			    gstcMakeSortArrowProd2(gsMakeSortExprSet(gsMakeSortUnknown()),gsMakeSortExprSet(gsMakeSortUnknown()),gsMakeSortExprSet(gsMakeSortUnknown())));
   gstcAddSystemFunctionProd(gsMakeOpIdNameSetDiff(),
-			    gstcMakeSortArrowProd2(gsMakeSortExprSet(gsMakeUnknown()),gsMakeSortExprSet(gsMakeUnknown()),gsMakeSortExprSet(gsMakeUnknown())));
+			    gstcMakeSortArrowProd2(gsMakeSortExprSet(gsMakeSortUnknown()),gsMakeSortExprSet(gsMakeSortUnknown()),gsMakeSortExprSet(gsMakeSortUnknown())));
   gstcAddSystemFunctionProd(gsMakeOpIdNameSetIntersect(),
-			    gstcMakeSortArrowProd2(gsMakeSortExprSet(gsMakeUnknown()),gsMakeSortExprSet(gsMakeUnknown()),gsMakeSortExprSet(gsMakeUnknown())));
+			    gstcMakeSortArrowProd2(gsMakeSortExprSet(gsMakeSortUnknown()),gsMakeSortExprSet(gsMakeSortUnknown()),gsMakeSortExprSet(gsMakeSortUnknown())));
   gstcAddSystemFunctionProd(gsMakeOpIdNameSetCompl(),
-			    gstcMakeSortArrowProd1(gsMakeSortExprSet(gsMakeUnknown()),gsMakeSortExprSet(gsMakeUnknown())));
+			    gstcMakeSortArrowProd1(gsMakeSortExprSet(gsMakeSortUnknown()),gsMakeSortExprSet(gsMakeSortUnknown())));
 
 
 //Bags
   gstcAddSystemFunctionProd(gsMakeOpIdNameBag2Set(),
-			    gstcMakeSortArrowProd1(gsMakeSortExprBag(gsMakeUnknown()),gsMakeSortExprSet(gsMakeUnknown())));
-  gstcAddSystemConstant(gsMakeOpIdNameEmptyBag(),gsMakeSortExprBag(gsMakeUnknown()));
+			    gstcMakeSortArrowProd1(gsMakeSortExprBag(gsMakeSortUnknown()),gsMakeSortExprSet(gsMakeSortUnknown())));
+  gstcAddSystemConstant(gsMakeOpIdNameEmptyBag(),gsMakeSortExprBag(gsMakeSortUnknown()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameEltIn(),
-			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortExprBag(gsMakeUnknown()),gsMakeSortExprBool()));
+			    gstcMakeSortArrowProd2(gsMakeSortUnknown(),gsMakeSortExprBag(gsMakeSortUnknown()),gsMakeSortExprBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameCount(),
-			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortExprBag(gsMakeUnknown()),gsMakeSortExprNat()));
+			    gstcMakeSortArrowProd2(gsMakeSortUnknown(),gsMakeSortExprBag(gsMakeSortUnknown()),gsMakeSortExprNat()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameSubBagEq(),
-			    gstcMakeSortArrowProd2(gsMakeSortExprBag(gsMakeUnknown()),gsMakeSortExprBag(gsMakeUnknown()),gsMakeSortExprBool()));
+			    gstcMakeSortArrowProd2(gsMakeSortExprBag(gsMakeSortUnknown()),gsMakeSortExprBag(gsMakeSortUnknown()),gsMakeSortExprBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameSubBag(),
-			    gstcMakeSortArrowProd2(gsMakeSortExprBag(gsMakeUnknown()),gsMakeSortExprBag(gsMakeUnknown()),gsMakeSortExprBool()));
+			    gstcMakeSortArrowProd2(gsMakeSortExprBag(gsMakeSortUnknown()),gsMakeSortExprBag(gsMakeSortUnknown()),gsMakeSortExprBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameBagUnion(),
-			    gstcMakeSortArrowProd2(gsMakeSortExprBag(gsMakeUnknown()),gsMakeSortExprBag(gsMakeUnknown()),gsMakeSortExprBag(gsMakeUnknown())));
+			    gstcMakeSortArrowProd2(gsMakeSortExprBag(gsMakeSortUnknown()),gsMakeSortExprBag(gsMakeSortUnknown()),gsMakeSortExprBag(gsMakeSortUnknown())));
   gstcAddSystemFunctionProd(gsMakeOpIdNameBagDiff(),
-			    gstcMakeSortArrowProd2(gsMakeSortExprBag(gsMakeUnknown()),gsMakeSortExprBag(gsMakeUnknown()),gsMakeSortExprBag(gsMakeUnknown())));
+			    gstcMakeSortArrowProd2(gsMakeSortExprBag(gsMakeSortUnknown()),gsMakeSortExprBag(gsMakeSortUnknown()),gsMakeSortExprBag(gsMakeSortUnknown())));
   gstcAddSystemFunctionProd(gsMakeOpIdNameBagIntersect(),
-			    gstcMakeSortArrowProd2(gsMakeSortExprBag(gsMakeUnknown()),gsMakeSortExprBag(gsMakeUnknown()),gsMakeSortExprBag(gsMakeUnknown())));
+			    gstcMakeSortArrowProd2(gsMakeSortExprBag(gsMakeSortUnknown()),gsMakeSortExprBag(gsMakeSortUnknown()),gsMakeSortExprBag(gsMakeSortUnknown())));
 }
 
 void gstcDataDestroy(void){
@@ -1132,7 +1127,7 @@ static ATbool gstcTransformVarConsTypeData(void){
     DeclaredVars=gstcAddVars2Table(DeclaredVars,VarList);
     if(!DeclaredVars){ b = false; break; }
     ATermAppl Left=ATAgetArgument(Eqn,2);
-    ATermAppl LeftType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Left,gsMakeUnknown(),FreeVars);
+    ATermAppl LeftType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Left,gsMakeSortUnknown(),FreeVars);
     if(!LeftType){ b = false; gsErrorMsg("the previous error occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn); break;}
     
     ATermAppl Cond=ATAgetArgument(Eqn,1);
@@ -1833,7 +1828,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       if(!NewDeclaredVars) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
       ATermAppl Data=ATAgetArgument(*DataTerm,2);
     
-      ATermAppl ResType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,gsMakeUnknown(),FreeVars);
+      ATermAppl ResType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,gsMakeSortUnknown(),FreeVars);
       ATtableDestroy(CopyAllowedVars); 
       ATtableDestroy(CopyDeclaredVars); 
 
@@ -1908,7 +1903,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
     for(ATermList WhereList=ATLgetArgument(*DataTerm,1);!ATisEmpty(WhereList);WhereList=ATgetNext(WhereList)){
       ATermAppl WhereElem=ATAgetFirst(WhereList);
       ATermAppl WhereTerm=ATAgetArgument(WhereElem,1);
-      ATermAppl WhereType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&WhereTerm,gsMakeUnknown(),FreeVars);
+      ATermAppl WhereType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&WhereTerm,gsMakeSortUnknown(),FreeVars);
       if(!WhereType) {return NULL;}
       WhereVarList=ATinsert(WhereVarList,(ATerm)gsMakeDataVarId(ATAgetArgument(WhereElem,0),WhereType));
       NewWhereList=ATinsert(NewWhereList,(ATerm)ATsetArgument(WhereElem,(ATerm)WhereTerm,1));
@@ -1991,7 +1986,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
     ATermList NewArguments=ATmakeList0();
     for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
       ATermAppl Arg=ATAgetFirst(Arguments);
-      ATermAppl Type=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,gsMakeUnknown(),FreeVars);
+      ATermAppl Type=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,gsMakeSortUnknown(),FreeVars);
       if(!Type) {return NULL;}
       NewArguments=ATinsert(NewArguments,(ATerm)Arg);
       NewArgumentTypes=ATinsert(NewArgumentTypes,(ATerm)Type);
@@ -2121,8 +2116,8 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       }
       else{
 	//gsWarningMsg("ambiguous system constant %T\n",Name);    
-	*DataTerm=gsMakeOpId(Name,gsMakeUnknown());
-	return gsMakeUnknown();
+	*DataTerm=gsMakeOpId(Name,gsMakeSortUnknown());
+	return gsMakeSortUnknown();
       }
     }
 
@@ -2143,8 +2138,8 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
     }
     else{
       gsWarningMsg("unknown operation %P\n",Name);    
-      *DataTerm=gsMakeOpId(Name,gsMakeUnknown());
-      return gsMakeUnknown();
+      *DataTerm=gsMakeOpId(Name,gsMakeSortUnknown());
+      return gsMakeSortUnknown();
     }
   }
 
@@ -2191,7 +2186,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(unsigned int nFactPars, ATermTable De
 	  }
 	  else{
 	    gsWarningMsg("ambiguous system constant %P\n",Name);    
-	    *DataTerm=gsMakeOpId(Name,gsMakeUnknown());
+	    *DataTerm=gsMakeOpId(Name,gsMakeSortUnknown());
 	    return Type;
 	  }
 	}
@@ -2448,8 +2443,8 @@ static ATermAppl gstcTraverseVarConsTypeDN(unsigned int nFactPars, ATermTable De
     }
     else{
       gsErrorMsg("ambiguous operation %P with %d parameters\n",Name,nFactPars);    
-      *DataTerm=gsMakeOpId(Name,gsMakeUnknown());
-      return NULL; //gsMakeUnknown();
+      *DataTerm=gsMakeOpId(Name,gsMakeSortUnknown());
+      return NULL; //gsMakeSortUnknown();
     }
   }
   else {
@@ -2485,7 +2480,7 @@ static ATermList gstcGetNotInferredList(ATermList TypeListList){
     }
   }
   
-  for(int i=nFormPars-1;i>=0;i--) Result=ATinsert(Result,(ATerm)gstcMakeNotInferred(ATreverse(Pars[i])));
+  for(int i=nFormPars-1;i>=0;i--) Result=ATinsert(Result,(ATerm)gsMakeSortsPossible(ATreverse(Pars[i])));
   free(Pars);
   return Result;
 }
@@ -2493,7 +2488,7 @@ static ATermList gstcGetNotInferredList(ATermList TypeListList){
 static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATermAppl *Par){
   // Makes upcasting from Type to Needed Type for Par. Returns the resulting type      
 
-  if(gsIsUnknown(NeededType)) return Type;
+  if(gsIsSortUnknown(NeededType)) return Type;
   if(gstcEqTypesA(NeededType,Type)) return Type;
 
   // Try Upcasting to Pos
@@ -2603,8 +2598,8 @@ static ATbool gstcIsTypeAllowedL(ATermList TypeList, ATermList PosTypeList){
 
 static ATbool gstcIsTypeAllowedA(ATermAppl Type, ATermAppl PosType){
   //Checks if Type is allowed by PosType
-  if(gsIsUnknown(PosType)) return ATtrue;
-  if(gstcIsNotInferred(PosType))
+  if(gsIsSortUnknown(PosType)) return ATtrue;
+  if(gsIsSortsPossible(PosType))
     return gstcInTypesA(Type,ATLgetArgument(PosType,0));
 
   //PosType is a normal type
@@ -2617,9 +2612,9 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType){
   
   gsDebugMsg("gstcTypeMatchA Type: %T;    PosType: %T \n",Type,PosType);
 
-  if(gsIsUnknown(Type)) return PosType;
-  if(gsIsUnknown(PosType) || gstcEqTypesA(Type,PosType)) return Type;
-  if(gstcIsNotInferred(PosType)){
+  if(gsIsSortUnknown(Type)) return PosType;
+  if(gsIsSortUnknown(PosType) || gstcEqTypesA(Type,PosType)) return Type;
+  if(gsIsSortsPossible(PosType)){
     for(ATermList PosTypeList=ATLgetArgument(PosType,0);!ATisEmpty(PosTypeList);PosTypeList=ATgetNext(PosTypeList)){
       ATermAppl NewPosType=ATAgetFirst(PosTypeList);
       gsDebugMsg("Matching candidate gstcTypeMatchA Type: %T;    PosType: %T New Type: %T\n",Type,PosType,NewPosType);
@@ -2704,7 +2699,7 @@ static ATermList gstcTypeMatchL(ATermList TypeList, ATermList PosTypeList){
 static ATbool gstcIsNotInferredL(ATermList TypeList){
   for(;!ATisEmpty(TypeList);TypeList=ATgetNext(TypeList)){
     ATermAppl Type=ATAgetFirst(TypeList);
-    if(gstcIsNotInferred(Type)||gsIsUnknown(Type)) return ATtrue;
+    if(gsIsNotInferred(Type)) return ATtrue;
   }
   return ATfalse;
 }
@@ -2729,19 +2724,19 @@ static ATermAppl gstcUnSet(ATermAppl PosType){
   //select Set(Type), elements, return their list of arguments.
   if(gsIsSortId(PosType)) PosType=gstcUnwindType(PosType);
   if(gsIsSortExprSet(PosType)) return ATAgetArgument(PosType,1);
-  if(gsIsUnknown(PosType)) return PosType;
+  if(gsIsSortUnknown(PosType)) return PosType;
 
   ATermList NewPosTypes=ATmakeList0();
-  if(gstcIsNotInferred(PosType)){
+  if(gsIsSortsPossible(PosType)){
     for(ATermList PosTypes=ATLgetArgument(PosType,1);!ATisEmpty(PosTypes);PosTypes=ATgetNext(PosTypes)){
       ATermAppl NewPosType=ATAgetFirst(PosTypes);
       if(gsIsSortId(NewPosType)) NewPosType=gstcUnwindType(NewPosType);
       if(gsIsSortExprSet(NewPosType)) NewPosType=ATAgetArgument(NewPosType,1);
-      else if(!gsIsUnknown(NewPosType)) continue;
+      else if(!gsIsSortUnknown(NewPosType)) continue;
       NewPosTypes=ATinsert(NewPosTypes,(ATerm)NewPosType);
     }
     NewPosTypes=ATreverse(NewPosTypes);
-    return gstcMakeNotInferred(NewPosTypes);
+    return gsMakeSortsPossible(NewPosTypes);
   }
   return NULL;
 }
@@ -2750,19 +2745,19 @@ static ATermAppl gstcUnBag(ATermAppl PosType){
   //select Bag(Type), elements, return their list of arguments.
   if(gsIsSortId(PosType)) PosType=gstcUnwindType(PosType);
   if(gsIsSortExprBag(PosType)) return ATAgetArgument(PosType,1);
-  if(gsIsUnknown(PosType)) return PosType;
+  if(gsIsSortUnknown(PosType)) return PosType;
 
   ATermList NewPosTypes=ATmakeList0();
-  if(gstcIsNotInferred(PosType)){
+  if(gsIsSortsPossible(PosType)){
     for(ATermList PosTypes=ATLgetArgument(PosType,1);!ATisEmpty(PosTypes);PosTypes=ATgetNext(PosTypes)){
       ATermAppl NewPosType=ATAgetFirst(PosTypes);
       if(gsIsSortId(NewPosType)) NewPosType=gstcUnwindType(NewPosType);
       if(gsIsSortExprBag(NewPosType)) NewPosType=ATAgetArgument(NewPosType,1);
-      else if(!gsIsUnknown(NewPosType)) continue;
+      else if(!gsIsSortUnknown(NewPosType)) continue;
       NewPosTypes=ATinsert(NewPosTypes,(ATerm)NewPosType);
     }
     NewPosTypes=ATreverse(NewPosTypes);
-    return gstcMakeNotInferred(NewPosTypes);
+    return gsMakeSortsPossible(NewPosTypes);
   }
   return NULL;
 }
@@ -2771,19 +2766,19 @@ static ATermAppl gstcUnList(ATermAppl PosType){
   //select List(Type), elements, return their list of arguments.
   if(gsIsSortId(PosType)) PosType=gstcUnwindType(PosType);
   if(gsIsSortExprList(PosType)) return ATAgetArgument(PosType,1);
-  if(gsIsUnknown(PosType)) return PosType;
+  if(gsIsSortUnknown(PosType)) return PosType;
 
   ATermList NewPosTypes=ATmakeList0();
-  if(gstcIsNotInferred(PosType)){
+  if(gsIsSortsPossible(PosType)){
     for(ATermList PosTypes=ATLgetArgument(PosType,1);!ATisEmpty(PosTypes);PosTypes=ATgetNext(PosTypes)){
       ATermAppl NewPosType=ATAgetFirst(PosTypes);
       if(gsIsSortId(NewPosType)) NewPosType=gstcUnwindType(NewPosType);
       if(gsIsSortExprList(NewPosType)) NewPosType=ATAgetArgument(NewPosType,1);
-      else if(!gsIsUnknown(NewPosType)) continue;
+      else if(!gsIsSortUnknown(NewPosType)) continue;
       NewPosTypes=ATinsert(NewPosTypes,(ATerm)NewPosType);
     }
     NewPosTypes=ATreverse(NewPosTypes);
-    return gstcMakeNotInferred(NewPosTypes);
+    return gsMakeSortsPossible(NewPosTypes);
   }
   return NULL;
 }
@@ -2800,10 +2795,10 @@ static ATermAppl gstcUnArrowProd(ATermList ArgTypes, ATermAppl PosType){
     if(ATgetLength(PosArgTypes)!=ATgetLength(ArgTypes)) return NULL;
     if(gstcEqTypesL(PosArgTypes,ArgTypes)) return ATAgetArgument(PosType,1);
   }
-  if(gsIsUnknown(PosType)) return PosType;
+  if(gsIsSortUnknown(PosType)) return PosType;
 
   ATermList NewPosTypes=ATmakeList0();
-  if(gstcIsNotInferred(PosType)){
+  if(gsIsSortsPossible(PosType)){
     for(ATermList PosTypes=ATLgetArgument(PosType,1);!ATisEmpty(PosTypes);PosTypes=ATgetNext(PosTypes)){
       ATermAppl NewPosType=ATAgetFirst(PosTypes);
       if(gsIsSortId(NewPosType)) NewPosType=gstcUnwindType(NewPosType);
@@ -2812,11 +2807,11 @@ static ATermAppl gstcUnArrowProd(ATermList ArgTypes, ATermAppl PosType){
 	if(ATgetLength(PosArgTypes)!=ATgetLength(ArgTypes)) continue;
 	if(gstcEqTypesL(PosArgTypes,ArgTypes)) NewPosType=ATAgetArgument(NewPosType,1);
       }
-      else if(!gsIsUnknown(NewPosType)) continue;
+      else if(!gsIsSortUnknown(NewPosType)) continue;
       NewPosTypes=ATinsert(NewPosTypes,(ATerm)NewPosType);
     }
     NewPosTypes=ATreverse(NewPosTypes);
-    return gstcMakeNotInferred(NewPosTypes);
+    return gsMakeSortsPossible(NewPosTypes);
   }
   return NULL;
 }
@@ -2829,7 +2824,7 @@ static ATermList gstcGetVarTypes(ATermList VarDecls){
 }
 
 static ATbool gstcHasUnknown(ATermAppl Type){
-  if(gsIsUnknown(Type)) return ATtrue;
+  if(gsIsSortUnknown(Type)) return ATtrue;
   if(gsIsSortId(Type)) return ATfalse;
   if(gsIsSortCons(Type)) return gstcHasUnknown(ATAgetArgument(Type,1));
   if(gsIsSortStruct(Type)) return ATfalse;
@@ -2846,16 +2841,16 @@ static ATbool gstcHasUnknown(ATermAppl Type){
 static ATbool gstcIsNumericType(ATermAppl Type){
   //returns true if Type is Bool,Pos,Nat,Int or Real
   //otherwise return fase
-  if(gsIsUnknown(Type)) return ATfalse;
+  if(gsIsSortUnknown(Type)) return ATfalse;
   return (ATbool)(ATisEqual(gsMakeSortIdBool(),Type)||ATisEqual(gsMakeSortIdPos(),Type)||ATisEqual(gsMakeSortIdNat(),Type)||ATisEqual(gsMakeSortIdInt(),Type)||ATisEqual(gsMakeSortIdReal(),Type));
 }
 
 static ATermAppl gstcExpandNumTypesUp(ATermAppl Type){
   //Expand Pos.. to possible bigger types.
-  if(gsIsUnknown(Type)) return Type;
-  if(gstcEqTypesA(gsMakeSortIdPos(),Type)) return gstcMakeNotInferred(ATmakeList4((ATerm)gsMakeSortIdPos(),(ATerm)gsMakeSortIdNat(),(ATerm)gsMakeSortIdInt(),(ATerm)gsMakeSortIdReal()));
-  if(gstcEqTypesA(gsMakeSortIdNat(),Type)) return gstcMakeNotInferred(ATmakeList3((ATerm)gsMakeSortIdNat(),(ATerm)gsMakeSortIdInt(),(ATerm)gsMakeSortIdReal()));
-  if(gstcEqTypesA(gsMakeSortIdInt(),Type)) return gstcMakeNotInferred(ATmakeList2((ATerm)gsMakeSortIdInt(),(ATerm)gsMakeSortIdReal()));
+  if(gsIsSortUnknown(Type)) return Type;
+  if(gstcEqTypesA(gsMakeSortIdPos(),Type)) return gsMakeSortsPossible(ATmakeList4((ATerm)gsMakeSortIdPos(),(ATerm)gsMakeSortIdNat(),(ATerm)gsMakeSortIdInt(),(ATerm)gsMakeSortIdReal()));
+  if(gstcEqTypesA(gsMakeSortIdNat(),Type)) return gsMakeSortsPossible(ATmakeList3((ATerm)gsMakeSortIdNat(),(ATerm)gsMakeSortIdInt(),(ATerm)gsMakeSortIdReal()));
+  if(gstcEqTypesA(gsMakeSortIdInt(),Type)) return gsMakeSortsPossible(ATmakeList2((ATerm)gsMakeSortIdInt(),(ATerm)gsMakeSortIdReal()));
   if(gsIsSortId(Type)) return Type;
   if(gsIsSortCons(Type)) return ATsetArgument(Type,(ATerm)gstcExpandNumTypesUp(ATAgetArgument(Type,1)),1);
   if(gsIsSortStruct(Type)) return Type;
@@ -2877,7 +2872,7 @@ static ATermAppl gstcExpandNumTypesUp(ATermAppl Type){
 
 static ATermAppl gstcExpandNumTypesDown(ATermAppl Type){
   // Expand Numeric types down
-  if(gsIsUnknown(Type)) return Type;
+  if(gsIsSortUnknown(Type)) return Type;
   if(gsIsSortId(Type)) Type=gstcUnwindType(Type);
   
   ATbool function=ATfalse;
@@ -2888,9 +2883,9 @@ static ATermAppl gstcExpandNumTypesDown(ATermAppl Type){
     Type=ATAgetArgument(Type,1);
   }
   
-  if(gstcEqTypesA(gsMakeSortIdReal(),Type)) Type=gstcMakeNotInferred(ATmakeList4((ATerm)gsMakeSortIdPos(),(ATerm)gsMakeSortIdNat(),(ATerm)gsMakeSortIdInt(),(ATerm)gsMakeSortIdReal()));
-  if(gstcEqTypesA(gsMakeSortIdInt(),Type)) Type=gstcMakeNotInferred(ATmakeList3((ATerm)gsMakeSortIdPos(),(ATerm)gsMakeSortIdNat(),(ATerm)gsMakeSortIdInt()));
-  if(gstcEqTypesA(gsMakeSortIdNat(),Type)) Type=gstcMakeNotInferred(ATmakeList2((ATerm)gsMakeSortIdPos(),(ATerm)gsMakeSortIdNat()));
+  if(gstcEqTypesA(gsMakeSortIdReal(),Type)) Type=gsMakeSortsPossible(ATmakeList4((ATerm)gsMakeSortIdPos(),(ATerm)gsMakeSortIdNat(),(ATerm)gsMakeSortIdInt(),(ATerm)gsMakeSortIdReal()));
+  if(gstcEqTypesA(gsMakeSortIdInt(),Type)) Type=gsMakeSortsPossible(ATmakeList3((ATerm)gsMakeSortIdPos(),(ATerm)gsMakeSortIdNat(),(ATerm)gsMakeSortIdInt()));
+  if(gstcEqTypesA(gsMakeSortIdNat(),Type)) Type=gsMakeSortsPossible(ATmakeList2((ATerm)gsMakeSortIdPos(),(ATerm)gsMakeSortIdNat()));
   
   return (function)?gsMakeSortArrowProd(Args,Type):Type;
 }
@@ -2960,7 +2955,7 @@ static ATermAppl gstcUnifyMinType(ATermAppl Type1, ATermAppl Type2){
   ATermAppl Res=gstcTypeMatchA(Type1,gstcExpandNumTypesUp(Type2));
   if(!Res) Res=gstcTypeMatchA(Type2,gstcExpandNumTypesUp(Type1));
   if(!Res) return NULL;
-  if(gstcIsNotInferred(Res)) Res=ATAgetFirst(ATLgetArgument(Res,0));
+  if(gsIsSortsPossible(Res)) Res=ATAgetFirst(ATLgetArgument(Res,0));
   gsDebugMsg("gstcUnifyMinType: Type1 %T; Type2 %T; Res: %T\n",Type1,Type2,Res);    
   return Res;
 }

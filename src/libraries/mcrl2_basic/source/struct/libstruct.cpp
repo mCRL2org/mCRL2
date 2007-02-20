@@ -362,16 +362,16 @@ void gsEnableConstructorFunctions(void)
 bool gsIsSortExpr(ATermAppl Term)
 {
   return
-    gsIsSortId(Term)   || gsIsSortArrow(Term)  ||
-    gsIsSortCons(Term) || gsIsSortStruct(Term) ||
-    gsIsSortArrowProd(Term);
+    gsIsSortId(Term)        || gsIsSortArrow(Term)   ||
+    gsIsSortCons(Term)      || gsIsSortStruct(Term)  ||
+    gsIsSortArrowProd(Term) || gsIsSortUnknown(Term) ||
+    gsIsSortsPossible(Term);
 }
 
-bool gsIsSortExprOrUnknown(ATermAppl Term)
+bool gsIsNotInferred(ATermAppl Term)
 {
-  return gsIsSortExpr(Term) || gsIsUnknown(Term);
+  return gsIsSortUnknown(Term) || gsIsSortsPossible(Term);
 }
-
 
 //Creation of names for system sort identifiers
 
@@ -613,7 +613,7 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
     if (gsIsSortArrow(HeadSort))
       Result = ATAgetArgument(HeadSort, 1);
     else
-      Result = gsMakeUnknown();
+      Result = gsMakeSortUnknown();
   } else if (gsIsDataVarId(DataExpr) || gsIsOpId(DataExpr) ||
       gsIsListEnum(DataExpr) || gsIsSetEnum(DataExpr) || 
       gsIsBagEnum(DataExpr)) {
@@ -627,7 +627,7 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
     if (gsIsSortArrowProd(HeadSort))
       Result = ATAgetArgument(HeadSort, 1);
     else
-      Result = gsMakeUnknown();
+      Result = gsMakeSortUnknown();
   } else if (gsIsBinder(DataExpr)) {
       ATermAppl BindingOperator = ATAgetArgument(DataExpr, 0);
       if (gsIsForall(BindingOperator) || gsIsExists(BindingOperator)) {
@@ -643,7 +643,7 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
       else if (ATisEqual(SortBody, gsMakeSortExprNat()))
         Result = gsMakeSortCons(gsMakeSortBag(), gsGetSort(Var));
       else
-        Result = gsMakeUnknown();
+        Result = gsMakeSortUnknown();
     } else if (gsIsSetComp(BindingOperator)) {
       //DataExpr is a set comprehension, return Set(S), where S is the sort of
       //the variable declaration
@@ -666,7 +666,7 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
         Vars = ATgetNext(Vars);
       }
     } else {
-      Result = gsMakeUnknown();
+      Result = gsMakeSortUnknown();
     }
   } else if (gsIsWhr(DataExpr)) {
     //DataExpr is a where clause; return the sort of the body
@@ -674,7 +674,7 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
   } else {
     //DataExpr is a data variable or operation identifier of which the sort is
     //not known; return Unknown
-    Result = gsMakeUnknown();
+    Result = gsMakeSortUnknown();
   }
   return Result;
 }
@@ -1879,7 +1879,7 @@ ATermAppl gsMakeDataExprExists(ATermAppl DataExpr)
 ATermAppl gsMakeDataExprEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
-  assert(!gsIsUnknown(ExprSort));
+  assert(!gsIsSortUnknown(ExprSort));
   assert(ATisEqual(ExprSort, gsGetSort(DataExprRHS)));
   return gsMakeDataAppl2(gsMakeOpIdEq(ExprSort), DataExprLHS, DataExprRHS);
 }
@@ -1887,7 +1887,7 @@ ATermAppl gsMakeDataExprEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 ATermAppl gsMakeDataExprNeq(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
-  assert(!gsIsUnknown(ExprSort));
+  assert(!gsIsSortUnknown(ExprSort));
   assert(ATisEqual(ExprSort, gsGetSort(DataExprRHS)));
   return gsMakeDataAppl2(gsMakeOpIdNeq(ExprSort), DataExprLHS, DataExprRHS);
 }
@@ -1897,7 +1897,7 @@ ATermAppl gsMakeDataExprIf(ATermAppl DataExprCond, ATermAppl DataExprThen,
 {
   assert(ATisEqual(gsGetSort(DataExprCond), gsMakeSortIdBool())); 
   ATermAppl ExprSort = gsGetSort(DataExprThen);
-  assert(!gsIsUnknown(ExprSort));
+  assert(!gsIsSortUnknown(ExprSort));
   assert(ATisEqual(ExprSort, gsGetSort(DataExprElse)));
   return gsMakeDataAppl3(gsMakeOpIdIf(ExprSort), DataExprCond, DataExprThen,
     DataExprElse);
@@ -2290,7 +2290,7 @@ ATermAppl gsMakeDataExprEltIn(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 ATermAppl gsMakeDataExprSetComp(ATermAppl DataExpr, ATermAppl SortExprResult)
 {
   ATermAppl ExprSort = gsGetSort(DataExpr);
-  assert(!gsIsUnknown(ExprSort));
+  assert(!gsIsSortUnknown(ExprSort));
   assert(gsIsSortArrow(ExprSort));
   assert(ATisEqual(ATAgetArgument(ExprSort, 1), gsMakeSortExprBool()));
   //ExprSort is of the form S -> Bool
@@ -2346,7 +2346,7 @@ ATermAppl gsMakeDataExprSetCompl(ATermAppl DataExpr)
 ATermAppl gsMakeDataExprBagComp(ATermAppl DataExpr, ATermAppl SortExprResult)
 {
   ATermAppl ExprSort = gsGetSort(DataExpr);
-  assert(!gsIsUnknown(ExprSort));
+  assert(!gsIsSortUnknown(ExprSort));
   assert(gsIsSortArrow(ExprSort));
   assert(ATisEqual(ATAgetArgument(ExprSort, 1), gsMakeSortExprNat()));
   //ExprSort is of the form S -> Nat

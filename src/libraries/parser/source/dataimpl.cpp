@@ -357,7 +357,7 @@ ATermAppl implement_data_state_frm(ATermAppl state_frm,
 ATermAppl impl_exprs_spec(ATermAppl spec)
 {
   assert(gsIsSpecV1(spec));
-  int occ = gsCount((ATerm) gsMakeUnknown(), (ATerm) spec);
+  int occ = gsCount((ATerm) gsMakeSortUnknown(), (ATerm) spec);
   if (occ > 0) {
     gsErrorMsg("specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
     return NULL;
@@ -389,7 +389,7 @@ ATermAppl impl_exprs_spec(ATermAppl spec)
 
 static ATermAppl impl_exprs(ATermAppl expr, lpe::specification &lpe_spec)
 {
-  int occ = gsCount((ATerm) gsMakeUnknown(), (ATerm) expr);
+  int occ = gsCount((ATerm) gsMakeSortUnknown(), (ATerm) expr);
   if (occ > 0) {
     gsErrorMsg("specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
     return NULL;
