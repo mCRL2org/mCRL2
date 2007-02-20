@@ -7,10 +7,11 @@ namespace Utils {
   const double PI = 3.14159265359;
   const double tau = 0.80;
 
-  enum RankStyle {ITERATIVE,CYCLIC};
-  enum MarkStyle {NO_MARKS,MARK_DEADLOCKS,MARK_STATES,MARK_TRANSITIONS};
-  enum VisStyle	 {CONES,TUBES,ATOMIUM};
-  enum DFSState  {DFS_WHITE,DFS_GREY,DFS_BLACK};
+  enum RankStyle      {ITERATIVE,CYCLIC};
+  enum MarkStyle      {NO_MARKS,MARK_DEADLOCKS,MARK_STATES,MARK_TRANSITIONS};
+  enum VisStyle	      {CONES,TUBES,ATOMIUM};
+  enum DFSState       {DFS_WHITE,DFS_GREY,DFS_BLACK};
+  enum SimState       {UNSEEN, HISTORY, NOW, FUTURE};
 
   struct RGB_Color {
     unsigned char r;
