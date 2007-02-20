@@ -27,7 +27,7 @@
 #include <wx/msgdlg.h>
 
 const char* program_name    = "squadt";
-const char* program_version = "0.2.4";
+const char* program_version = "0.3.0";
 
 /**
  * \namespace squadt

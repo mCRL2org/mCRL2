@@ -131,12 +131,12 @@ namespace transport {
       ip::tcp::resolver::iterator i(resolver.resolve(ip::tcp::resolver::query(current_host_name, "",
                         ip::resolver_query_base::numeric_service|ip::resolver_query_base::address_configured)));
 
-      if (i == ip::tcp::resolver::iterator() || (*i).host_name() == current_host_name) {
+      if (i == ip::tcp::resolver::iterator()) {
         i = resolver.resolve(ip::tcp::resolver::query("0.0.0.0", "",
                         ip::resolver_query_base::numeric_service|ip::resolver_query_base::address_configured));
       }
 
-      return ((*i).host_name());
+      return ((*i).endpoint().address().to_string());
     }
 
     /**
