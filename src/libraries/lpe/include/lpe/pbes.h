@@ -27,6 +27,7 @@
 #include "lpe/pretty_print.h"
 #include "lpe/mucalculus_init.h"
 #include "lpe/detail/utility.h"
+#include "lpe/pbes_expression.h"
 #include "libstruct.h"
 
 namespace lpe {
@@ -44,69 +45,6 @@ using lpe::detail::parse_variable;
         return gsIsStateVar(t);
       }
     };
-
-///////////////////////////////////////////////////////////////////////////////
-// pbes_expression
-/// \brief pbes expression.
-///
-// <PBExpr>       ::= <DataExpr>
-//                  | PBESTrue
-//                  | PBESFalse
-//                  | PBESAnd(<PBExpr>, <PBExpr>)
-//                  | PBESOr(<PBExpr>, <PBExpr>)
-//                  | PBESForall(<DataVarId>+, <PBExpr>)
-//                  | PBESExists(<DataVarId>+, <PBExpr>)
-//                  | <PropVarInst>
-class pbes_expression: public aterm_appl
-{
-  public:
-    pbes_expression()
-    {}
-
-    pbes_expression(aterm_appl term)
-      : aterm_appl(term)
-    {
-      assert(check_rule_PBExpr(m_term));
-    }
-
-    // allow assignment to aterms
-    pbes_expression& operator=(aterm t)
-    {
-      m_term = t;
-      return *this;
-    }
-
-    /// Returns true if the pbes expression equals 'true'.
-    /// Note that the term will not be rewritten first.
-    ///
-    bool is_true() const
-    {
-      return *this == gsMakePBESTrue();
-    }     
-
-    /// Returns true if the pbes expression equals 'false'.
-    /// Note that the term will not be rewritten first.
-    ///
-    bool is_false() const
-    {
-      return *this == gsMakePBESFalse();
-    }
-
-    /// Applies a substitution to this pbes expression and returns the result.
-    /// The Substitution object must supply the method aterm operator()(aterm).
-    ///
-    template <typename Substitution>
-    pbes_expression substitute(Substitution f)
-    {
-      return pbes_expression(f(*this));
-    }     
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// pbes_expression_list
-/// \brief singly linked list of data expressions
-///
-typedef term_list<pbes_expression> pbes_expression_list;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief A propositional variable declaration
@@ -666,17 +604,6 @@ using lpe::pbes_fixpoint_symbol;
 using lpe::pbes_equation;
 using lpe::equation_system;
 using lpe::pbes;
-
-template<>
-struct aterm_traits<pbes_expression>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(lpe::pbes_expression t)   { t.protect(); }
-  static void unprotect(lpe::pbes_expression t) { t.unprotect(); }
-  static void mark(lpe::pbes_expression t)      { t.mark(); }
-  static ATerm term(lpe::pbes_expression t)     { return t.term(); }
-  static ATerm* ptr(lpe::pbes_expression& t)    { return &t.term(); }
-};
 
 template<>
 struct aterm_traits<propositional_variable>
