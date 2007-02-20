@@ -1011,10 +1011,10 @@ static void PRINT_FUNC(PrintSortExpr)(PRINT_OUTTYPE OutStream,
   } else if (gsIsSortsPossible(SortExpr)) {
     //print possible sorts
     PRINT_FUNC(dbg_prints)("printing possible sorts\n");
-    PRINT_FUNC(fprints)(OutStream, "Possible sorts(");
+    PRINT_FUNC(fprints)(OutStream, "{");
     PRINT_FUNC(PrintPart_List)(OutStream, ATLgetArgument(SortExpr, 0),
       pp_format, ShowSorts, 0, NULL, ", ");
-    PRINT_FUNC(fprints)(OutStream, ")");
+    PRINT_FUNC(fprints)(OutStream, "}");
   }
 }
 
