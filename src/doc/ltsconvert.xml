@@ -139,13 +139,13 @@
   </varlistentry>
 
   <varlistentry>
-    <term>&opt_l;&name;</term>
-    <term>&opt_lpe;=&name;</term>
+    <term>&opt_l;&file;</term>
+    <term>&opt_lpe;=&file;</term>
     <listitem>
-      <para>use &name; as the LPE from which the input LTS was
-        generated; this is needed to store the correct parameter
-	names of states when saving in &fsm; format and to convert non-mCRL2
-	LTSs to a mCRL2 LTS
+      <para>
+        use &file; as the LPE from which the input LTS was generated; this is
+        needed to store the correct parameter names of states when saving in
+        &fsm; format and to convert non-mCRL2 LTSs to a mCRL2 LTS
       </para>
     </listitem>
   </varlistentry>
@@ -155,6 +155,15 @@
     <term>&opt_no_state;</term>
     <listitem>
       <para>leave out state information when saving in &dot; format
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_D;</term>
+    <term>&opt_determinise;</term>
+    <listitem>
+      <para>determinise the LTS
       </para>
     </listitem>
   </varlistentry>
@@ -190,6 +199,24 @@
   </varlistentry>
 
   <varlistentry>
+    <term>&opt_t;</term>
+    <term>&opt_trace;</term>
+    <listitem>
+      <para>minimise using trace equivalence
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_u;</term>
+    <term>&opt_weak_trace;</term>
+    <listitem>
+      <para>minimise using weak trace equivalence
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
     <term>&opt_a;</term>
     <term>&opt_add;</term>
     <listitem>
@@ -216,6 +243,15 @@
   </varlistentry>
   </variablelist>
 
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+In case ltsconvert requires to much memory for bisimulation reductions one can
+try the &ltsmin-lnk; tool. Note, however, that this tools is deprecated and can
+only handle files in the mCRL2 SVC format.
 </para>
 </refsect1>
 

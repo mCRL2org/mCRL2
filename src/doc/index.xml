@@ -65,6 +65,7 @@
 <!ENTITY disjointness_checker_disjoint "<function>Disjointness_Checker::disjoint</function>">
 <!ENTITY dot "<constant>dot</constant>">
 <!ENTITY false "<constant>false</constant>">
+<!ENTITY file "<parameter>FILE</parameter>">
 <!ENTITY fmcparsemodalformula '<function>MCparseModalFormula</function>'>
 <!ENTITY format "<parameter>FORMAT</parameter>">
 <!ENTITY formula_checker_check_formulas "<function>Formula_Checker::check_formulas</function>">
@@ -135,6 +136,7 @@
 <!ENTITY opt_deadlock "<option>--deadlock</option>">
 <!ENTITY opt_debug "<option>--debug</option>">
 <!ENTITY opt_delta "<option>--delta</option>">
+<!ENTITY opt_determinise "<option>--determinise</option>">
 <!ENTITY opt_d "<option>-d</option>">
 <!ENTITY opt_D "<option>-D</option>">
 <!ENTITY opt_dot "<option>--dot</option>">
@@ -221,6 +223,7 @@
 <!ENTITY opt_verbose "<option>--verbose</option>">
 <!ENTITY opt_version "<option>--version</option>">
 <!ENTITY opt_v "<option>-v</option>">
+<!ENTITY opt_weak_trace "<option>--weak-trace</option>">
 <!ENTITY opt_witness "<option>--witness</option>">
 <!ENTITY opt_w "<option>-w</option>">
 <!ENTITY opt_y "<option>-y</option>">

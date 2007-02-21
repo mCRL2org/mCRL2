@@ -235,8 +235,7 @@ Mandatory arguments to long options are also mandatory to short options.
         For each trace that is to be written a unique file with extension .trc
         (trace) will be created containing a shortest trace from the initial
         state to the deadlock state. The traces can be pretty printed and
-        converted to other formats using <command
-        moreinfo="refentry">tracepp</command>.
+        converted to other formats using &tracepp-lnk;.
       </para>
     </listitem>
   </varlistentry>
