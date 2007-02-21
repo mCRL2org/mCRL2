@@ -56,7 +56,7 @@ struct __ATermAppl
 {
   header_type header;
   ATerm       next;
-  ATerm       arg[1];
+  ATerm       arg[MAX_ARITY+1];
 };
 
 typedef union _ATermAppl

@@ -35,7 +35,7 @@
 #define RESIZE_BUFFER(n) if(n > buffer_size) resize_buffer(n)
 #define ERROR_SIZE 32
 #define INITIAL_MARK_STACK_SIZE   16384
-#define MARK_STACK_MARGE          AT_getMaxTermSize()
+#define MARK_STACK_MARGE          MAX_ARITY
 
 /* Initial number of terms that can be protected */
 /* In the current implementation this means that
@@ -51,7 +51,7 @@
 /*}}}  */
 /*{{{  globals */
 
-char            aterm_id[] = "$Id: aterm.c 20804 2006-12-21 10:09:47Z eriks $";
+char            aterm_id[] = "$Id: aterm.c 20716 2006-12-13 13:43:29Z jurgenv $";
 
 /* Flag to tell whether to keep quiet or not. */
 ATbool silent	  = ATtrue;
@@ -2664,23 +2664,29 @@ void AT_unmarkIfAllMarked(ATerm t)
 void AT_unmarkAll()
 {
   unsigned int size;
-  unsigned int blocktype;
-  Block* block;
 
-  for (size=1; size<AT_getMaxTermSize(); size++) {
+  for (size=1; size<MAX_TERM_SIZE; size++) {
     unsigned int last = BLOCK_SIZE - (BLOCK_SIZE % size) - size;
+    Block *block = at_blocks[size];
     
-    for (blocktype = AT_BLOCK; blocktype <= AT_OLD_BLOCK; blocktype++) {
-      block = terminfo[size].at_blocks[blocktype];
-    
-      while (block) {
-        unsigned int idx;
-        ATerm data = (ATerm)block->data;
-        for (idx=0; idx <= last; idx += size) {
-          CLR_MARK(((ATerm)(((header_type *)data)+idx))->header);
-        }
-        block = block->next_by_size;
+    while (block) {
+      unsigned int idx;
+      ATerm data = (ATerm)block->data;
+      for (idx=0; idx <= last; idx += size) {
+	CLR_MARK(((ATerm)(((header_type *)data)+idx))->header);
       }
+      block = block->next_by_size;
+    }
+
+    /* and we also unmark all blocks in the old generation */
+    block = at_old_blocks[size];
+    while (block) {
+      unsigned int idx;
+      ATerm data = (ATerm)block->data;
+      for (idx=0; idx <= last; idx += size) {
+	CLR_MARK(((ATerm)(((header_type *)data)+idx))->header);
+      }
+      block = block->next_by_size;
     }
   }
 

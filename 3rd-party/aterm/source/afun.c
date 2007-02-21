@@ -34,7 +34,7 @@
 /*}}}  */
 /*{{{  globals */
 
-char afun_id[] = "$Id: afun.c 20804 2006-12-21 10:09:47Z eriks $";
+char afun_id[] = "$Id: afun.c 20711 2006-12-12 08:45:44Z jurgenv $";
 
 static unsigned int table_class = INITIAL_AFUN_TABLE_CLASS;
 static unsigned int table_size  = AT_TABLE_SIZE(INITIAL_AFUN_TABLE_CLASS);
@@ -451,7 +451,7 @@ void AT_freeSymbol(SymEntry sym)
 {
   ShortHashNumber hnr;
 
-  terminfo[TERM_SIZE_SYMBOL].nb_reclaimed_cells_during_last_gc++;
+  nb_reclaimed_cells_during_last_gc[TERM_SIZE_SYMBOL]++;
   
   assert(sym->name);
 
