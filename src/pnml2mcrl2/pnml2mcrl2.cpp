@@ -21,22 +21,24 @@ typedef struct {
   // read-in
   ATermTable place_name;	// place_id -> name
   ATermTable place_mark;	// place_id -> Nat
-  ATermTable place_sort;	// place_id -> SortExpr
+  ATermTable place_mark_mcrl2;  // place_id -> Bag(SortExpr)
+  ATermTable place_type;	// place_id -> SortExpr
   ATermTable trans_name;	// trans_id -> name
   ATermTable trans_predicate;	// trans_id -> DataExpr
   ATermTable arc_in;	        // arc_id -> trans_id x place_id
   ATermTable arc_out;	        // arc_id -> place_id x trans_id
   ATermTable arc_inhibit;	// arc_id -> place_id x trans_id (always this way)
-  ATermTable arc_reset;	// arc_id -> trans_id x place_id (always this way)
-  ATermTable arc_name;        // arc_id -> name
+  ATermTable arc_reset;	        // arc_id -> trans_id x place_id (always this way)
+  ATermTable arc_name;          // arc_id -> name
   
   // generate
   ATermTable place_in;	        // place_id -> List(arc_id) (arc_in)
   ATermTable trans_in;	        // trans_id -> List(arc_id) (arc_out+arc_inhibit)
   ATermTable place_out;	        // place_id -> List(arc_id) (arc_out)
   ATermTable trans_out;	        // trans_id -> List(arc_id) (arc_in+arc_reset)
-  ATermTable place_inhibit;	        // place_inhibit -> List(arc_id) (arc_inhibit)
-  ATermTable place_reset;	        // place_reset -> List(arc_id) (arc_reset)
+  ATermTable place_inhibit;     // place_inhibit -> List(arc_id) (arc_inhibit)
+  ATermTable place_reset;       // place_reset -> List(arc_id) (arc_reset)
+  ATermTable arc_type;          // arc_id -> SortExpr
   // not needed as thay are the same as arc_out 
   //ATermTable transition_inhibit;	// transition_inhibit -> List(arc_id) (arc_inhibit)
   // not needed as thay are the same as arc_in 
@@ -345,7 +347,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     
     for (cur = cur->FirstChildElement(false); cur != 0; cur = cur->NextSiblingElement(false)) {
       if (cur->Value() == name) {
-        return (pn2gsGetText(cur));
+        return (pn2gsGetText(cur->FirstChildElement(false)));
       }
     }
 
@@ -412,7 +414,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
             if(im){
               std::istringstream iss(im);
               ATermAppl Marking=parse_data_expr(iss);
-              if(!Marking) return NULL;
+              if(!Marking) {gsErrorMsg("Parsing of the initial marking for place %T failed\n", Aid); return NULL;}
 	      AinitialMarking=Marking;
             }
             //if (!im) im="0";
@@ -429,7 +431,8 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
               colored=ATtrue;
               std::istringstream iss(mcrl2marking);
               ATermAppl A=parse_data_expr(iss);
-              if(A) Place_mcrl2initialMarking=A;
+              if(!A) {gsErrorMsg("Parsing of the mCRL2 initial marking for place %T failed\n", Aid); return NULL;}
+              Place_mcrl2initialMarking=A;
             } else {
               gsWarningMsg("Ignore an element named 'toolspecific'\n");
             }
@@ -466,9 +469,9 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 	  colored=ATtrue;
 	  std::istringstream iss(sort);
 
-	  if (ATermAppl Type=parse_sort_expr(iss)) {
-	    Place_type=Type;
-          }
+	  ATermAppl Sort=parse_sort_expr(iss);
+	  if(!Sort) {gsErrorMsg("Parsing of mCRL2 sort for place %T failed\n", Aid); return NULL;}
+          Place_type=Sort;
 	}
 	else {
 	  gsWarningMsg("Ignore an element named 'toolspecific'\n");
@@ -479,7 +482,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
       }
     }
     
-    // argument order of returnvalue is id - name - initialMarking - Type
+    // argument order of returnvalue is id - name - initialMarking - Sort
     return ATmakeAppl5(ATmakeAFun("place", 5, ATfalse), (ATerm)Aid, (ATerm)Aname, (ATerm)AinitialMarking, (ATerm)Place_type, (ATerm)Place_mcrl2initialMarking);
   }
   
@@ -541,7 +544,8 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 	  colored=ATtrue;
 	  std::istringstream iss(predicate);
 	  ATermAppl Predicate=parse_data_expr(iss);
-	  if(Predicate) Trans_predicate=Predicate;
+          if(!Predicate) {gsErrorMsg("Parsing of the mCRL2 predicate for transition %T failed\n", Aid); return NULL;}
+	  Trans_predicate=Predicate;
 	}
 	else {
 	  gsWarningMsg("Ignore an element named 'toolspecific'\n");
@@ -661,9 +665,9 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
           colored=ATtrue;
           std::istringstream iss(name);
 
-          if (ATermAppl Name = parse_data_expr(iss)) {
-            Arc_name = Name;
-          }
+          ATermAppl Name = parse_data_expr(iss);
+          if(!Name) {gsErrorMsg("Parsing of the name of arc %T failed\n", Aid); return NULL;} 
+          Arc_name = Name;
         }
         else {
 	  // the name should be omitted
@@ -810,16 +814,17 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 	}
       }
       else if (with_colors && cur->Value() == "toolspecific") {
-	const char *prelude=pn2gsGetElement(cur,"mcrl2prelude");
+        const char *prelude=pn2gsGetElement(cur,"mcrl2prelude");
 
 	if(prelude){
 	  colored=ATtrue;
 	  std::string s(prelude);
           std::istringstream iss(s+"init delta;");
-
-          if (ATermAppl Prelude = parse_spec(iss)) {
-            Net_prelude = Prelude;
-          }
+	  ATermAppl Prelude=parse_spec(iss);
+          if(!Prelude) {gsErrorMsg("Parsing of the mCRL2 prelude failed\n"); return NULL;}
+          Prelude=type_check_spec_part(Prelude);
+          if(!Prelude) {gsErrorMsg("Type-checking of the mCRL2 prelude failed\n"); return NULL;}
+          Net_prelude=Prelude;
 	}
 	else {
 	  gsWarningMsg("Ignore an element named 'toolspecific'\n");
@@ -1615,7 +1620,9 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     // temporary variable to store the current key
     // used for Places, Transitions and Arcs!!!
     ATerm CurrentKey;
-    
+    ATermAppl Prelude=ATAgetArgument(Spec,4);    
+    if(ATisEqual(Prelude,Appl0)) Prelude=NULL;
+
     gsDebugMsg("> Insert the data of places that will be translated into tables...  \n");
     while (ATisEmpty(APlaces) == ATfalse) {
       // this loop itterates all places that will be translated
@@ -1634,10 +1641,27 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 	// value = name
 	ATtablePut(context.place_name, CurrentKey , ATgetArgument(ATgetFirst(APlaces), 1));
 	
-	// insert the data into context.place_mark
-	// key = id
-	// value = initialMarking
-	ATtablePut(context.place_mark, CurrentKey , ATgetArgument(ATgetFirst(APlaces), 2));
+        //typechecking of the place-related data and putting it into the tables:
+        ATermAppl Value=ATAgetArgument(ATAgetFirst(APlaces), 2);
+        ATermAppl Type=type_check_data_expr_part(Value, gsMakeSortIdNat());
+        if(!Type) {gsErrorMsg("Type-checking of the initial marking of place %T failed (%T is not a natural number)\n",CurrentKey,Value); return NULL;}
+	ATtablePut(context.place_mark, CurrentKey, (ATerm)Value);
+
+        Value=ATAgetArgument(ATAgetFirst(APlaces), 3);
+        if(!ATisEqual(Value,Appl0)){
+          Type=type_check_sort_expr_part(Value,Prelude);
+          if(!Type) {gsErrorMsg("Type-checking of sort expression %P as a type of place %T failed \n",Value,CurrentKey); return NULL;}
+        }
+        ATtablePut(context.place_type, CurrentKey, (ATerm)Value);
+
+        ATermAppl SortValue=Value;
+        
+        Value=ATAgetArgument(ATAgetFirst(APlaces), 4);
+        if(!ATisEqual(Value,Appl0)){
+          Type=type_check_data_expr_part(Value,gsMakeSortExprBag(SortValue),Prelude);
+          if(!Type) {gsErrorMsg("Type-checking of data expression %T as an initial mCRL2 marking of place %T failed \n",Value,CurrentKey); return NULL;}
+	}
+        ATtablePut(context.place_mark_mcrl2, CurrentKey, (ATerm)Value);
       }
       
       // remove the entry from the list
@@ -1667,6 +1691,9 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 	// key = id
 	// value = name
 	ATtablePut(context.trans_name, CurrentKey , ATgetArgument(ATgetFirst(ATransitions), 1));
+
+        //typechecking later
+        ATtablePut(context.trans_predicate, CurrentKey , ATgetArgument(ATgetFirst(ATransitions), 2));
       }
       // remove the entry from the list ATransitions
       ATransitions = ATgetNext(ATransitions);
@@ -1969,6 +1996,13 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     // creation of mCRL2 ATerms
     //==================================================
 
+    if(!ATgetLength(ATtableKeys(context.arc_in))&&
+       !ATgetLength(ATtableKeys(context.arc_out))&&
+       !ATgetLength(ATtableKeys(context.arc_inhibit))&&
+       !ATgetLength(ATtableKeys(context.arc_reset))
+      )
+      {gsErrorMsg("specification contains no arcs.\n"); return NULL;}
+
     ATermList Actions=pn2gsGenerateActions();       // store all the mCRL2 Actions
     ATermList ProcEqns=pn2gsGenerateProcEqns(ATAgetArgument(Spec, 3));      // store all the mCRL2 Process Equations
     
@@ -2058,8 +2092,9 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     }
     
     context.place_name=ATtableCreate(63,50);
-    context.place_mark=ATtableCreate(63,50); 
-    context.place_sort=ATtableCreate(63,50); 
+    context.place_mark=ATtableCreate(63,50);
+    context.place_mark_mcrl2=ATtableCreate(63,50); 
+    context.place_type=ATtableCreate(63,50); 
     context.trans_name=ATtableCreate(63,50); 
     context.trans_predicate=ATtableCreate(63,50); 
     context.arc_in=ATtableCreate(63,50);  
@@ -2074,6 +2109,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     context.trans_out=ATtableCreate(63,50);  
     context.place_inhibit=ATtableCreate(63,50);   
     context.place_reset=ATtableCreate(63,50);   
+    context.arc_type=ATtableCreate(63,50);
    
     context.transitions=ATmakeList0();
     context.places=ATmakeList0();
@@ -2086,7 +2122,8 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     ATunprotectAppl(&Appl0);
     ATtableDestroy(context.place_name);
     ATtableDestroy(context.place_mark); 
-    ATtableDestroy(context.place_sort); 
+    ATtableDestroy(context.place_mark_mcrl2);
+    ATtableDestroy(context.place_type); 
     ATtableDestroy(context.trans_name); 
     ATtableDestroy(context.trans_predicate); 
     ATtableDestroy(context.arc_in);  
@@ -2102,7 +2139,8 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     ATtableDestroy(context.place_inhibit);   
     ATtableDestroy(context.place_reset);   
     ATtableDestroy(context.place_process_name);
-    
+    ATtableDestroy(context.arc_type);
+
     if(!Spec) {
       gsErrorMsg("Error while converting PNML ATerm to mCRL2 ATerm, conversion stopped!  \n");
       return false;

@@ -261,8 +261,9 @@ ATermAppl type_check_sort_expr_part(ATermAppl sort_expr, ATermAppl spec){
 
   gsDebugMsg ("type checking sort expression part read-in phase started\n");
 
-  ATermAppl data_spec = ATAgetArgument(spec, 0);
-  if(gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
+  ATermAppl data_spec=NULL;
+  if(spec) data_spec = ATAgetArgument(spec, 0);
+  if(!spec || gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
     // Check sorts for loops
     // Unwind sorts to enable equiv and subtype relations
     gsDebugMsg ("type checking sort expression part read-in phase finished\n");
@@ -294,12 +295,13 @@ ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, AT
 
   gsDebugMsg ("type checking data expression part read-in phase started\n");
 
-  ATermAppl data_spec = ATAgetArgument(spec, 0);
-  if(gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
+  ATermAppl data_spec=NULL;
+  if(spec) data_spec = ATAgetArgument(spec, 0);
+  if(!spec || gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
   // Check sorts for loops
   // Unwind sorts to enable equiv and subtype relations
-  if(gstcReadInConstructors()) {
-  if(gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(data_spec,1),0),
+  if(!spec || gstcReadInConstructors()) {
+  if(!spec || gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(data_spec,1),0),
                                ATLgetArgument(ATAgetArgument(data_spec,2),0)))) {
   gsDebugMsg ("type checking data expression part read-in phase finished\n");
   
