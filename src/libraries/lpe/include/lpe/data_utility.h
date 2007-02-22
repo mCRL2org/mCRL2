@@ -123,14 +123,6 @@ std::set<data_variable> find_variables(Term t)
   // find all data variables in t
   std::set<data_variable> variables;
   atermpp::find_all_if(t, is_data_variable, std::inserter(variables, variables.end()));
-
-  // find all data variable_init's in t (since they contain data variables implicitly!)
-  std::set<data_variable_init> variable_inits;
-  atermpp::find_all_if(t, lpe::is_data_variable_init, std::inserter(variable_inits, variable_inits.end()));
-  for (std::set<data_variable_init>::iterator i = variable_inits.begin(); i != variable_inits.end(); ++i)
-  {
-    variables.insert(i->to_variable());
-  }
   return variables;
 }
 
@@ -141,14 +133,6 @@ std::set<std::string> find_variable_names(Term t)
   // find all data variables in t
   std::set<data_variable> variables;
   atermpp::find_all_if(t, is_data_variable, std::inserter(variables, variables.end()));
-
-  // find all data variable_init's in t (since they contain data variables implicitly!)
-  std::set<data_variable_init> variable_inits;
-  atermpp::find_all_if(t, lpe::is_data_variable_init, std::inserter(variable_inits, variable_inits.end()));
-  for (std::set<data_variable_init>::iterator i = variable_inits.begin(); i != variable_inits.end(); ++i)
-  {
-    variables.insert(i->to_variable());
-  }
 
   std::set<std::string> result;
   for (std::set<data_variable>::iterator j = variables.begin(); j != variables.end(); ++j)

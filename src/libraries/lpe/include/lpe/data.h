@@ -271,51 +271,6 @@ bool is_data_operation(aterm_appl t)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// data_variable_init
-/// \brief data variable with an initial value.
-///
-// DataVarIdInit(<DataVarId>, <DataExpr>)
-class data_variable_init: public aterm_appl
-{
-  public:
-    data_variable_init()
-    {}
-
-    data_variable_init(aterm_appl t)
-     : aterm_appl(t)
-    {
-      assert(check_rule_DataVarIdInit(m_term));
-    }
-    
-    data_variable to_variable() const
-    {
-      iterator i = begin();
-      aterm_appl x = *i++;
-      return data_variable(x);
-    }
-
-    data_expression to_expression() const
-    {
-      iterator i = begin();
-      aterm_appl x = *i++;
-      aterm_appl y = *i;
-      return data_expression(y);
-    }
-};
-
-inline
-bool is_data_variable_init(aterm_appl t)
-{
-  return gsIsDataVarIdInit(t);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// data_variable_init_list
-/// \brief singly linked list of initialized data variables
-///
-typedef term_list<data_variable_init> data_variable_init_list;
-
-///////////////////////////////////////////////////////////////////////////////
 // data_equation
 /// \brief data equation.
 ///
@@ -543,7 +498,6 @@ using lpe::data_variable;
 using lpe::data_application;
 using lpe::data_operation;
 using lpe::data_assignment;
-using lpe::data_variable_init;
 using lpe::data_equation;
 
 template<>
@@ -599,17 +553,6 @@ struct aterm_traits<data_assignment>
   static void mark(data_assignment t)      { t.mark(); }
   static ATerm term(data_assignment t)     { return t.term(); }
   static ATerm* ptr(data_assignment& t)    { return &t.term(); }
-};
-
-template<>
-struct aterm_traits<data_variable_init>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(lpe::data_variable_init t)   { t.protect(); }
-  static void unprotect(lpe::data_variable_init t) { t.unprotect(); }
-  static void mark(lpe::data_variable_init t)      { t.mark(); }
-  static ATerm term(lpe::data_variable_init t)     { return t.term(); }
-  static ATerm* ptr(lpe::data_variable_init& t)    { return &t.term(); }
 };
 
 template<>

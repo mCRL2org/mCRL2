@@ -245,13 +245,13 @@ namespace state_init {
   }
 
   inline
-  state_formula mu(aterm_string name, data_variable_init_list l, state_formula p)
+  state_formula mu(aterm_string name, data_assignment_list l, state_formula p)
   {
     return state_formula(gsMakeStateMu(name, l, p));
   }
 
   inline
-  state_formula nu(aterm_string name, data_variable_init_list l, state_formula p)
+  state_formula nu(aterm_string name, data_assignment_list l, state_formula p)
   {
     return state_formula(gsMakeStateNu(name, l, p));
   }

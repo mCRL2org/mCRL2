@@ -343,7 +343,7 @@ aterm_string mu_name(state_formula t)
 
 /// Returns the parameters of a mu-operator expression.
 inline
-data_variable_init_list mu_params(state_formula t)
+data_assignment_list mu_params(state_formula t)
 {
   assert(gsIsStateMu(t) || gsIsStateNu(t));
   return list_arg2(t);
@@ -354,11 +354,11 @@ inline
 data_variable_list mu_variables(state_formula f)
 {
   assert(gsIsStateMu(f) || gsIsStateNu(f));
-  data_variable_init_list l = mu_params(f);
+  data_assignment_list l = mu_params(f);
   data_variable_list result;
-  for (data_variable_init_list::iterator i = l.begin(); i != l.end(); ++i)
+  for (data_assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
-    result = push_front(result, i->to_variable());
+    result = push_front(result, i->lhs());
   }
   return atermpp::reverse(result);
 }
@@ -368,11 +368,11 @@ inline
 data_expression_list mu_expressions(state_formula f)
 {
   assert(gsIsStateMu(f) || gsIsStateNu(f));
-  data_variable_init_list l = mu_params(f);
+  data_assignment_list l = mu_params(f);
   data_expression_list result;
-  for (data_variable_init_list::iterator i = l.begin(); i != l.end(); ++i)
+  for (data_assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
-    result = push_front(result, i->to_expression());
+    result = push_front(result, i->rhs());
   }
   return atermpp::reverse(result);
 }
