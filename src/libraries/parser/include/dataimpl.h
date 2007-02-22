@@ -1,5 +1,5 @@
-ifndef PARSER_DATAIMPL_H
-define PARSER_DATAIMPL_H
+#ifndef PARSER_DATAIMPL_H
+#define PARSER_DATAIMPL_H
 
 #include <aterm2.h>
 #include "lpe/specification.h"
@@ -89,4 +89,4 @@ ATermAppl implement_data_state_frm(ATermAppl state_frm,
  *     NULL is returned.
  */
 
-endif // PARSER_DATAIMPL_H
+#endif // PARSER_DATAIMPL_H

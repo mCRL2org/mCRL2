@@ -1,5 +1,5 @@
-ifndef PARSER_LIBPARSE_H
-define PARSER_LIBPARSE_H
+#ifndef PARSER_LIBPARSE_H
+#define PARSER_LIBPARSE_H
 
 #include <iostream>
 #include <vector>
@@ -49,4 +49,4 @@ ATermAppl parse_state_frm(std::istream &sf_stream);
        NULL, otherwise
 */ 
 
-endif // PARSER_LIBPARSE_H
+#endif // PARSER_LIBPARSE_H

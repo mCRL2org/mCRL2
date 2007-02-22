@@ -1,5 +1,5 @@
-ifndef PARSER_REGFRMTRANS_H
-define PARSER_REGFRMTRANS_H
+#ifndef PARSER_REGFRMTRANS_H
+#define PARSER_REGFRMTRANS_H
 
 #include <aterm2.h>
 
@@ -13,4 +13,4 @@ ATermAppl translate_reg_frms(ATermAppl state_frm);
  *     terms of state and action formulas
  */
 
-endif // PARSER_REGFRMTRANS_H
+#endif // PARSER_REGFRMTRANS_H

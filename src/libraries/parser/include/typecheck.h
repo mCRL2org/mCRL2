@@ -1,5 +1,5 @@
-ifndef PARSER_TYPECHECK_H
-define PARSER_TYPECHECK_H
+#ifndef PARSER_TYPECHECK_H
+#define PARSER_TYPECHECK_H
 
 #include <aterm2.h>
 #include "lpe/specification.h"
@@ -113,4 +113,4 @@ ATermAppl type_check_state_frm(ATermAppl state_formula, lpe::specification &lpe_
  *     NULL is returned.
  */
 
-endif // PARSER_TYPECHECK_H
+#endif // PARSER_TYPECHECK_H

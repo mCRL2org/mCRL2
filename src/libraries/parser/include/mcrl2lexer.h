@@ -1,5 +1,5 @@
-ifndef PARSER_MCRL2LEXER_H
-define PARSER_MCRL2LEXER_H
+#ifndef PARSER_MCRL2LEXER_H
+#define PARSER_MCRL2LEXER_H
 
 #include <istream>
 #include <vector>
@@ -15,4 +15,4 @@ ATermAppl parse_streams(std::vector<std::istream*> &streams);
        NULL, otherwise
 */ 
 
-endif // PARSER_MCRL2LEXER_H
+#endif // PARSER_MCRL2LEXER_H
