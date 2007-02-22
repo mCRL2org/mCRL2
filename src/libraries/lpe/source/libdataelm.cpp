@@ -154,10 +154,10 @@ ATermAppl removeUnusedData(ATermAppl ATSpec, bool keep_basis)
 		}
 	}
 
-	add_used(spec.initial_state(),used_data);
+	add_used(spec.initial_process().state(),used_data);
 
-	data_variable_list::iterator vb = spec.initial_free_variables().begin();
-	data_variable_list::iterator ve = spec.initial_free_variables().end();
+	data_variable_list::iterator vb = spec.initial_process().free_variables().begin();
+	data_variable_list::iterator ve = spec.initial_process().free_variables().end();
 	for (; vb != ve; vb++)
 	{
 		add_used_sort((ATermAppl) vb->sort(),used_data);
@@ -285,7 +285,7 @@ ATermAppl removeUnusedData(ATermAppl ATSpec, bool keep_basis)
 	new_eqns = reverse(new_eqns);
 	
         data_specification new_data(new_sort,new_cons,new_maps,new_eqns);
-	specification new_spec(new_data,spec.action_labels(),spec.lpe(),spec.initial_free_variables(),spec.initial_variables(),spec.initial_state());
+	specification new_spec = set_data_specification(spec, new_data);
 
 	ATtableDestroy(used_sorts);
 	ATtableDestroy(used_data);

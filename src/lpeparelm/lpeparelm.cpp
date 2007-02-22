@@ -451,10 +451,10 @@ inline void lpeParElm::output() {
 
   data_variable_list               rebuild_initial_variables;
   data_expression_list             rebuild_initial_state;
-  data_expression_list::iterator   j = p_spec.initial_state().begin();
+  data_expression_list::iterator   j = p_spec.initial_process().state().begin();
 
-  
-  for(data_variable_list::iterator i = p_spec.initial_variables().begin() ; i != p_spec.initial_variables().end() ; i++){
+  data_variable_list initial_variables = p_spec.initial_process().free_variables();
+  for(data_variable_list::iterator i = initial_variables.begin() ; i != initial_variables.end() ; i++){
     if (p_usedVars.find(*i) != p_usedVars.end()){
       rebuild_initial_variables = push_front(rebuild_initial_variables, *i);
       rebuild_initial_state = push_front(rebuild_initial_state, *j);
@@ -476,9 +476,11 @@ inline void lpeParElm::output() {
     p_spec.data(), 
     p_spec.action_labels(), 
     rebuild_lpe,
-    p_spec.initial_free_variables(), 
-    atermpp::reverse(rebuild_initial_variables),
-    atermpp::reverse(rebuild_initial_state)
+    process_initializer(p_spec.initial_process().free_variables(), 
+                        make_assignment_list(atermpp::reverse(rebuild_initial_variables),
+                                             atermpp::reverse(rebuild_initial_state)
+                                            )
+                       )
   );
   
   assert(gsIsSpecV1((ATermAppl) rebuild_spec));

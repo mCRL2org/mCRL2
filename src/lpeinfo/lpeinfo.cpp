@@ -175,7 +175,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   
     right_column->add(new label(file_name), a);
     right_column->add(new label(boost::lexical_cast < std::string > (lpe.summands().size())), a);
-    right_column->add(new label(boost::lexical_cast < std::string > ((lpe_specification.initial_free_variables().size() + lpe.free_variables().size()))), a);
+    right_column->add(new label(boost::lexical_cast < std::string > ((lpe_specification.initial_process().free_variables().size() + lpe.free_variables().size()))), a);
     right_column->add(new label(boost::lexical_cast < std::string > (lpe.process_parameters().size())), a);
     right_column->add(new label(boost::lexical_cast < std::string > (lpe_specification.action_labels().size())), a);
   
@@ -215,7 +215,7 @@ int main(int argc, char** argv) {
       cout << "Input read from " << ((file_name == "-") ? "standard input" : file_name) << endl << endl;
      
       cout << "Number of summands          : " << lpe.summands().size() << endl;
-      cout << "Number of free variables    : " << lpe_specification.initial_free_variables().size() + lpe.free_variables().size() << endl;
+      cout << "Number of free variables    : " << lpe_specification.initial_process().free_variables().size() + lpe.free_variables().size() << endl;
       cout << "Number of process parameters: " << lpe.process_parameters().size() << endl; 
       cout << "Number of action labels     : " << lpe_specification.action_labels().size() << endl;
     }

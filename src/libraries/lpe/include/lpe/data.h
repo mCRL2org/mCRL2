@@ -481,6 +481,22 @@ bool is_data_assignment(aterm_appl t)
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief Returns the right hand sides of the assignments.
 inline
+data_assignment_list make_assignment_list(data_variable_list lhs, data_expression_list rhs)
+{
+  assert(lhs.size() == rhs.size());
+  data_assignment_list result;
+  data_variable_list::iterator i = lhs.begin();
+  data_expression_list::iterator j = rhs.begin();
+  for ( ; i != lhs.end(); ++i, ++j)
+  {
+    result = push_front(result, data_assignment(*i, *j));
+  }
+  return atermpp::reverse(result);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// \brief Returns the right hand sides of the assignments.
+inline
 data_expression_list data_assignment_expressions(data_assignment_list l)
 {
   data_expression_list result;

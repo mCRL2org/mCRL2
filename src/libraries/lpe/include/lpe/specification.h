@@ -16,7 +16,7 @@
 #include "lpe/linear_process.h"
 #include "lpe/pretty_print.h"
 #include "lpe/data_specification.h"
-#include "lpe/detail/specification_utility.h"
+//#include "lpe/detail/specification_utility.h"
 
 namespace lpe {
 
@@ -40,17 +40,17 @@ using atermpp::aterm_traits;
 // 
 // init P(true, 0);
 // 
-// <Spec>         ::= SpecV1(<DataSpec>, ActSpec(<ActId>*), <ProcEqnSpec>, <Init>)
-// <DataSpec>     ::= DataSpec(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
-//                      MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*)
+//<Spec>         ::= SpecV1(<DataSpec>, <ActSpec>, <ProcEqnSpec>, <Init>)
 class specification: public aterm_appl
 {
   protected:
     data_specification   m_data;
     action_label_list    m_action_labels;
-    linear_process   m_lpe;
-    data_variable_list   m_initial_free_variables;
-    data_assignment_list m_initial_assignments;
+    linear_process       m_process;
+    process_initializer  m_initial_process;
+
+    //data_variable_list   m_initial_free_variables;
+    //data_assignment_list m_initial_assignments;   
 
     /// Returns true if the action labels in the specification are included in m_action_labels.
     bool has_proper_action_labels() const
@@ -75,17 +75,10 @@ class specification: public aterm_appl
     {
       m_term = aterm_traits<aterm_appl>::term(t);
       aterm_appl::iterator i = t.begin();
-      m_data              = aterm_appl(*i++);
-      m_action_labels     = aterm_appl(*i++)(0);
-      m_lpe               = aterm_appl(*i++);
-      aterm_appl lpe_init = *i;
-
-      // unpack LPEInit(.,.) term
-      aterm_appl::iterator k         = lpe_init.begin();
-      m_initial_free_variables       = *k++;
-      m_initial_assignments          = *k;
-      data_expression_list d0(static_cast<ATermList>(m_initial_free_variables));
-      assert(has_proper_action_labels());
+      m_data            = aterm_appl(*i++);
+      m_action_labels   = aterm_appl(*i++)(0);
+      m_process         = aterm_appl(*i++);
+      m_initial_process = aterm_appl(*i);
     }
 
   public:
@@ -99,52 +92,24 @@ class specification: public aterm_appl
       init_term(t);
     }
 
-    /// THIS CONSTRUCTOR IS DEPRECATED AND WILL BE REMOVED!
     specification(
-        data_specification   data             ,
-        action_label_list    action_labels    ,
-        linear_process   lpe              ,
-        data_variable_list   initial_free_variables,
-        data_variable_list   initial_variables,
-        data_expression_list initial_state)
+        data_specification  data         ,
+        action_label_list   action_labels,
+        linear_process      lpe          ,
+        process_initializer initial_process
+       )
       :
         m_data(data),
         m_action_labels(action_labels),
-        m_lpe(lpe),
-        m_initial_free_variables(initial_free_variables),        
-        m_initial_assignments(detail::compute_initial_assignments(initial_variables, initial_state))
-    {
-      assert(initial_variables.size() == initial_state.size());
-      m_term = reinterpret_cast<ATerm>(
-        gsMakeSpecV1(
-          data,
-          gsMakeActSpec(action_labels),
-          lpe,
-          gsMakeLPEInit(initial_free_variables, m_initial_assignments)
-        )
-      );        
-      assert(has_proper_action_labels());
-    }
-
-    specification(
-        data_specification   data             ,
-        action_label_list    action_labels    ,
-        linear_process   lpe              ,
-        data_variable_list   initial_free_variables,
-        data_assignment_list initial_assignments)
-      :
-        m_data(data),
-        m_action_labels(action_labels),
-        m_lpe(lpe),
-        m_initial_free_variables(initial_free_variables),        
-        m_initial_assignments(initial_assignments)
+        m_process(lpe),
+        m_initial_process(initial_process)
     {
       m_term = reinterpret_cast<ATerm>(
         gsMakeSpecV1(
           data,
           gsMakeActSpec(action_labels),
           lpe,
-          gsMakeLPEInit(initial_free_variables, m_initial_assignments)
+          initial_process
         )
       );        
       assert(has_proper_action_labels());
@@ -179,7 +144,7 @@ class specification: public aterm_appl
     ///
     linear_process lpe() const
     {
-      return m_lpe;
+      return m_process;
     }
 
     /// Returns the data specification.
@@ -193,33 +158,13 @@ class specification: public aterm_appl
     action_label_list action_labels() const
     { return m_action_labels; }
 
-    /// Returns the initial state of the LPE.
+    /// Returns the initial process.
     ///
-    data_expression_list initial_state() const
+    process_initializer initial_process() const
     {
-      return detail::compute_initial_state(m_initial_assignments);
+      return m_initial_process;
     }
-
-    /// Returns the variables of the initial state of the LPE.
-    ///
-    data_variable_list initial_variables() const
-    {
-      return detail::compute_initial_variables(m_initial_assignments);
-    }
-
-    /// Returns the sequence of free variables of the initial state.
-    ///
-    data_variable_list initial_free_variables() const
-    {
-      return m_initial_free_variables;
-    }
-
-    /// Returns the assignments of the initial state.
-    ///
-    data_assignment_list initial_assignments() const
-    {
-      return m_initial_assignments;
-    }
+    // data_assignment_list initial_assignments() const
 };
 
 
@@ -229,9 +174,7 @@ specification set_data_specification(specification spec, data_specification data
   return specification(data,
                        spec.action_labels(),
                        spec.lpe(),
-                       spec.initial_free_variables(),
-                       spec.initial_variables(),
-                       spec.initial_state()
+                       spec.initial_process()
                       );
 }
 
@@ -241,9 +184,7 @@ specification set_action_labels(specification spec, action_label_list action_lab
   return specification(spec.data(),
                        action_labels,
                        spec.lpe(),
-                       spec.initial_free_variables(),
-                       spec.initial_variables(),
-                       spec.initial_state()
+                       spec.initial_process()
                       );
 }
 
@@ -253,45 +194,17 @@ specification set_lpe(specification spec, linear_process lpe)
   return specification(spec.data(),
                        spec.action_labels(),
                        lpe,
-                       spec.initial_free_variables(),
-                       spec.initial_variables(),
-                       spec.initial_state()
+                       spec.initial_process()
                       );
 }
 
 inline
-specification set_initial_free_variables(specification spec, data_variable_list initial_free_variables)
+specification set_initial_process(specification spec, process_initializer initial_process)
 {
   return specification(spec.data(),
                        spec.action_labels(),
                        spec.lpe(),
-                       initial_free_variables,
-                       spec.initial_variables(),
-                       spec.initial_state()
-                      );
-}
-
-inline
-specification set_initial_variables(specification spec, data_variable_list initial_variables)
-{
-  return specification(spec.data(),
-                       spec.action_labels(),
-                       spec.lpe(),
-                       spec.initial_free_variables(),
-                       initial_variables,
-                       spec.initial_state()
-                      );
-}
-
-inline
-specification set_initial_state(specification spec, data_expression_list initial_state)
-{
-  return specification(spec.data(),
-                       spec.action_labels(),
-                       spec.lpe(),
-                       spec.initial_free_variables(),
-                       spec.initial_variables(),
-                       initial_state
+                       initial_process
                       );
 }
 

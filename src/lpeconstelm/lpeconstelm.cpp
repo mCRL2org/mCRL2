@@ -710,7 +710,7 @@ inline void lpeConstElm::output() {
     atermpp::reverse(rebuild_summandlist_no_cp)
   );
    
-   //gsDebugMsg("%s\n", p_spec.initial_free_variables().to_string().c_str());
+   //gsDebugMsg("%s\n", p_spec.initial_process().free_variables().to_string().c_str());
    
   std::set< lpe::data_variable > initial_free_variables;
   usedFreeVars.empty();
@@ -730,16 +730,21 @@ inline void lpeConstElm::output() {
   //            data_variable_list initial_variables, 
   //            data_expression_list initial_state);
   //
+data_assignment_expressions(data_assignment_list());
+data_assignment_list xyz = make_assignment_list(data_variable_list(), data_expression_list());
   specification rebuild_spec;
+/*
   rebuild_spec = specification(
     p_spec.data(),
     p_spec.action_labels(), 
-    rebuild_lpe, 
-    setToList(initial_free_variables), 
-    vectorToList(variablePPvar), 
-    vectorToList(variablePPexpr)
+    rebuild_lpe,
+    process_initializer(setToList(initial_free_variables), 
+                        make_assignment_list(vectorToList(variablePPvar), 
+                                             vectorToList(variablePPexpr)
+                                            )
+                       )
   );
-  
+*/  
   assert(gsIsSpecV1((ATermAppl) rebuild_spec));
 
   //gsDebugMsg("%s\n", pp(p_lpe).c_str());
@@ -888,7 +893,8 @@ void lpeConstElm::filter() {
   lpe::linear_process p_lpe = p_spec.lpe();
   rewr           = createRewriter(p_spec.data()); 
 
-  for(lpe::data_assignment_list::iterator i = p_spec.initial_assignments().begin(); i != p_spec.initial_assignments().end() ; i++ ){
+  data_assignment_list initial_assignments = p_spec.initial_process().assignments();
+  for(lpe::data_assignment_list::iterator i = initial_assignments.begin(); i != initial_assignments.end() ; i++ ){
     p_lookupIndex[i->lhs()] = counter;
 //      p_currentState.push_back(data_assignment(i->lhs(), data_expression(rewrite(i->rhs()))));
     data_assignment da(i->lhs(),data_expression(rewrite(i->rhs())));
@@ -901,7 +907,8 @@ void lpeConstElm::filter() {
   p_newCurrentState = p_currentState;
   p_initAssignments = p_currentState;
 
-  for (data_variable_list::iterator di = p_spec.initial_free_variables().begin(); di != p_spec.initial_free_variables().end(); di++){
+  data_variable_list initial_free_variables = p_spec.initial_process().free_variables();
+  for (data_variable_list::iterator di = initial_free_variables.begin(); di != initial_free_variables.end(); di++){
     p_freeVarSet.insert(*di);
   }
   for (data_variable_list::iterator di = p_lpe.free_variables().begin(); di != p_lpe.free_variables().end(); di++){
@@ -921,7 +928,7 @@ void lpeConstElm::filter() {
     }
   }
 
-  int n = p_spec.initial_assignments().size();
+  int n = p_spec.initial_process().assignments().size();
 
   while (foundFake){
     foundFake = false;

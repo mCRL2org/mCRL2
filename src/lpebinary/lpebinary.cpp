@@ -614,15 +614,14 @@ specification replace_enumerated_parameters_in_specification(const lpe::specific
   lpe::specification result;
 
   // Compute new initial assignments
-  data_assignment_list initial_assignments = replace_enumerated_parameters_in_data_assignments(specification.initial_assignments(), new_parameters_table, enumerated_elements_table);
+  data_assignment_list initial_assignments = replace_enumerated_parameters_in_data_assignments(specification.initial_process().assignments(), new_parameters_table, enumerated_elements_table);
+  process_initializer initial_process(specification.initial_process().free_variables(), initial_assignments);
 
   // Compute new specification
   result = lpe::specification(specification.data(),
                               specification.action_labels(),
                               replace_enumerated_parameters_in_lpe(specification.lpe(), new_parameters_table, enumerated_elements_table),
-                              specification.initial_free_variables(),
-                              lpe::detail::compute_initial_variables(initial_assignments),
-                              lpe::detail::compute_initial_state(initial_assignments));
+                              initial_process);
 
   return result;
 }

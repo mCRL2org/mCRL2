@@ -246,14 +246,14 @@ lpe::specification untime(const lpe::specification& specification) {
   untime_lpe = lpe::linear_process(lpe.free_variables(), untime_process_parameters, untime_summand_list);
 
   // Create new initial_variables and initial_state in order to correctly initialize.
-  untime_initial_assignments = push_back(specification.initial_assignments(), data_assignment(last_action_time, real(0)));
+  untime_initial_assignments = push_back(specification.initial_process().assignments(), data_assignment(last_action_time, real(0)));
 
   // Create new specification, this equals original specification, except for the new LPE.
   untime_specification = lpe::specification(specification.data(), 
 						specification.action_labels(),
 						untime_lpe, //new LPE
-						specification.initial_free_variables(),
-                                                untime_initial_assignments
+						process_initializer(specification.initial_process().free_variables(),
+                                                untime_initial_assignments)
 						);
 
   return untime_specification;

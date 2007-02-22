@@ -18,10 +18,8 @@ int main()
   specification spec2(spec1.data(),
                       spec1.action_labels(),
                       spec1.lpe(),
-                      spec1.initial_free_variables(),
-                      spec1.initial_variables(),
-                      spec1.initial_state());
-
+                      spec1.initial_process()
+                     );
   assert(spec1 == spec2);
 
   return 0;

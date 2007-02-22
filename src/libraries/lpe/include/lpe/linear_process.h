@@ -25,6 +25,7 @@
 #include "lpe/data_init.h"
 #include "lpe/data_specification.h"
 #include "lpe/pretty_print.h"
+#include "lpe/detail/specification_utility.h"
 
 namespace {
   /// INTERNAL ONLY
@@ -468,12 +469,74 @@ linear_process set_summands(linear_process l, summand_list summands)
             );
 }
 
+/// \brief initial linear process
+// LPEInit(<DataVarId>*, <DataVarIdInit>*)
+class process_initializer: public aterm_appl
+{
+  protected:
+    data_variable_list   m_free_variables;
+    data_assignment_list m_assignments;
+
+  public:
+    process_initializer()
+    {}
+
+    process_initializer(data_variable_list free_variables,
+                        data_assignment_list assignments
+                       )
+     : aterm_appl(gsMakeLPEInit(free_variables, assignments)),
+       m_free_variables(free_variables),
+       m_assignments(assignments)
+    {
+    }
+
+    process_initializer(aterm_appl t)
+      : aterm_appl(t)
+    {
+      assert(check_term_LPEInit(m_term));
+      aterm_appl::iterator i   = t.begin();
+      m_free_variables = *i++;
+      m_assignments    = *i;
+    }
+
+    /// Returns the sequence of free variables.
+    ///
+    data_variable_list free_variables() const
+    {
+      return m_free_variables;
+    }
+
+    /// Returns the sequence of assignments.
+    ///
+    data_assignment_list assignments() const
+    {
+      return m_assignments;
+    }
+
+    /// Returns the initial state of the LPE.
+    ///
+    data_expression_list state() const
+    {
+      return detail::compute_initial_state(m_assignments);
+    }
+
+    /// Applies a substitution to this LPE and returns the result.
+    /// The Substitution object must supply the method aterm operator()(aterm).
+    ///
+    template <typename Substitution>
+    process_initializer substitute(Substitution f)
+    {
+      return process_initializer(f(aterm(*this)));
+    }     
+};
+
 } // namespace lpe
 
 namespace atermpp
 {
 using lpe::summand;
 using lpe::linear_process;
+using lpe::process_initializer;
 
 template<>
 struct aterm_traits<summand>
@@ -495,6 +558,17 @@ struct aterm_traits<linear_process>
   static void mark(linear_process t)      { t.mark(); }
   static ATerm term(linear_process t)     { return t.term(); }
   static ATerm* ptr(linear_process& t)    { return &t.term(); }
+};
+
+template<>
+struct aterm_traits<process_initializer>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(process_initializer t)   { t.protect(); }
+  static void unprotect(process_initializer t) { t.unprotect(); }
+  static void mark(process_initializer t)      { t.mark(); }
+  static ATerm term(process_initializer t)     { return t.term(); }
+  static ATerm* ptr(process_initializer& t)    { return &t.term(); }
 };
 
 } // namespace atermpp

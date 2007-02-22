@@ -731,7 +731,7 @@ pbes pbes_translate(state_formula f, specification spec, bool untimed = true)
   {
     using namespace pbes_timed;
     data_variable T = fresh_variable("T", make_list(f, lpe));
-    aterm_list context = make_list(T, spec.initial_state(), lpe, f);
+    aterm_list context = make_list(T, spec.initial_process(), lpe, f);
     lpe = make_timed_lpe(lpe, context);
     e = E(f, lpe, T);
   }
@@ -743,7 +743,7 @@ pbes pbes_translate(state_formula f, specification spec, bool untimed = true)
   assert(is_mu(f) || is_nu(f));
   aterm_string Xf = mu_name(f);
   data_expression_list fi = mu_expressions(f);
-  data_expression_list pi = spec.initial_state();
+  data_expression_list pi = spec.initial_process().state();
 
   if (untimed)
   {   

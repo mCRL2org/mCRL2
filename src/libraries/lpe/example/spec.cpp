@@ -85,7 +85,7 @@ int main()
   cout << "a = " << pp(a) << " " << a.to_string() << endl;
 
   // test substitution
-  data_expression_list d0 = spec.initial_state();
+  data_expression_list d0 = spec.initial_process().state();
   cout << "d0 = " << pp(d0) << " " << d0.to_string() << endl;
 
   data_expression_list d1 = d0.substitute(a);
