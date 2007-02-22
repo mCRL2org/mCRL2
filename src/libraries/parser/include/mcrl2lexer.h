@@ -1,3 +1,6 @@
+ifndef PARSER_MCRL2LEXER_H
+define PARSER_MCRL2LEXER_H
+
 #include <istream>
 #include <vector>
 #include <aterm2.h>
@@ -11,3 +14,5 @@ ATermAppl parse_streams(std::vector<std::istream*> &streams);
   Ret: the parsed content, if everything went ok
        NULL, otherwise
 */ 
+
+endif // PARSER_MCRL2LEXER_H

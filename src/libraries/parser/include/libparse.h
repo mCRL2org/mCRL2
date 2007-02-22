@@ -1,3 +1,6 @@
+ifndef PARSER_LIBPARSE_H
+define PARSER_LIBPARSE_H
+
 #include <iostream>
 #include <vector>
 #include <aterm2.h>
@@ -45,3 +48,5 @@ ATermAppl parse_state_frm(std::istream &sf_stream);
   Ret: the parsed state formula, if everything went ok
        NULL, otherwise
 */ 
+
+endif // PARSER_LIBPARSE_H

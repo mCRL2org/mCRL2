@@ -1,3 +1,6 @@
+ifndef PARSER_MCRL2PARSER_H
+define PARSER_MCRL2PARSER_H
+
 /* A Bison parser, made by GNU Bison 2.3.  */
 
 /* Skeleton interface for Bison GLR parsers in C
@@ -196,3 +199,5 @@ extern YYSTYPE mcrl2yylval;
 
 
 
+
+endif // PARSER_MCRL2PARSER_H

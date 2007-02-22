@@ -1,3 +1,6 @@
+ifndef PARSER_REGFRMTRANS_H
+define PARSER_REGFRMTRANS_H
+
 #include <aterm2.h>
 
 //Global preconditions:
@@ -9,3 +12,5 @@ ATermAppl translate_reg_frms(ATermAppl state_frm);
  *Ret: state_frm in which all regular formulas are translated in
  *     terms of state and action formulas
  */
+
+endif // PARSER_REGFRMTRANS_H
