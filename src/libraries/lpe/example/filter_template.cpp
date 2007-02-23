@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <cstdlib> // EXIT_SUCCESS
 #include <boost/program_options.hpp>
-#include "lpe/filter_program.h"
+#include "lpe/detail/filter_program.h"
 
 using namespace std;
 using namespace lpe;

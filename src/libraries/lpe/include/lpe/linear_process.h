@@ -532,6 +532,7 @@ class process_initializer: public aterm_appl
 
 } // namespace lpe
 
+/// INTERNAL ONLY
 namespace atermpp
 {
 using lpe::summand;

@@ -443,6 +443,7 @@ typedef term_list<regular_formula> regular_formula_list;
 
 } // namespace lpe
 
+/// INTERNAL ONLY
 namespace atermpp
 {
 using lpe::state_formula;

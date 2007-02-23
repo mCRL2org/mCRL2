@@ -82,6 +82,7 @@ bool is_function(aterm_appl t)
 
 } // namespace lpe
 
+/// INTERNAL ONLY
 namespace atermpp
 {
 using lpe::function;

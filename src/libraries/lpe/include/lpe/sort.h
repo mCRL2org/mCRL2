@@ -111,6 +111,7 @@ sort arrow(sort domain, sort range)
 
 } // namespace lpe
 
+/// INTERNAL ONLY
 namespace atermpp
 {
 using lpe::sort;

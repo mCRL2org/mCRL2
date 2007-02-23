@@ -118,6 +118,7 @@ pbes_expression quant_expr(pbes_expression t)
 
 } // namespace lpe
 
+/// INTERNAL ONLY
 namespace atermpp
 {
 using lpe::pbes_expression;

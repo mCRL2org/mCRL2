@@ -236,6 +236,7 @@ class timed_action
 
 } // namespace lpe
 
+/// INTERNAL ONLY
 namespace atermpp
 {
 using lpe::action_label;

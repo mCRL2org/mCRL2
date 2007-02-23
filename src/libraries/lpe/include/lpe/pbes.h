@@ -595,6 +595,7 @@ struct term_list_iterator_traits<pbes_equation>
 
 } // namespace atermpp
 
+/// INTERNAL ONLY
 namespace atermpp
 {
 using lpe::pbes_expression;

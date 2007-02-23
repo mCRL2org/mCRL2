@@ -491,6 +491,7 @@ struct assignment_list_substitution
 
 } // namespace lpe
 
+/// INTERNAL ONLY
 namespace atermpp
 {
 using lpe::data_expression;

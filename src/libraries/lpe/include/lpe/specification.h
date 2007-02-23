@@ -210,6 +210,7 @@ specification set_initial_process(specification spec, process_initializer initia
 
 } // namespace lpe
 
+/// INTERNAL ONLY
 namespace atermpp
 {
 using lpe::specification;
