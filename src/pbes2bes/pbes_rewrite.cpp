@@ -20,19 +20,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 	// Initialize rewriter for data-terms (is_data) and parameters of propositional variable instantiations
 	
 	pbes_expression result;
-	if (is_data(p))	
-	{ // p is a data_expression
-		//std::cout << p << std::endl;
-		data_expression d = rewriter->rewrite(p);
-		if (d.is_true())
-			result = true_();
-		else if (d.is_false())
-			result = false_();
-		else
-			result = val(d);
-		//std::cout << result << std::endl;
-	}
-	else if (is_true(p))
+	if (is_true(p))
 	{ // p is True
 		result = p;
 	}
@@ -115,11 +103,14 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 		result = pbes_expression(propositional_variable_instantiation(name, parameters));
 	}
 	else
-	{ // p is not a correct pbes_expression
-
-		//Is this one needed???????
-		gsErrorMsg("Term to rewrite is not a correct pbes_expression");
-		exit(1);
+	{ // p is a data_expression
+		data_expression d = rewriter->rewrite(p);
+		if (d.is_true())
+			result = true_();
+		else if (d.is_false())
+			result = false_();
+		else
+			result = val(d);
 	}
 	
 	return result;

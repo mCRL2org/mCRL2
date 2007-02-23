@@ -22,6 +22,8 @@
 #include <string>
 #include <utility>
 
+#include <sstream>
+
 //Boost
 #include <boost/program_options.hpp>
 
@@ -31,6 +33,7 @@
 
 //LPE-Framework
 #include "lpe/pbes.h"
+#include "lpe/pbes_init.h"
 #include "lpe/pbes_utility.h"
 #include "lpe/data_operators.h"
 #include "lpe/sort.h"
@@ -40,7 +43,7 @@
 #include "atermpp/substitute.h"
 #include "atermpp/aterm_list.h"
 #include "atermpp/utility.h"
-#include "atermpp/table.h"
+#include "atermpp/indexed_set.h"
 
 //Tool-specific
 #include "pbes_rewrite.h"		// PBES rewriter
@@ -56,7 +59,7 @@ namespace po = boost::program_options;
 //Type definitions
 //----------------
 typedef struct{
-	bool opt_pretty;
+	string opt_outputformat;
 	string infilename;
 	string outfilename;
 } t_tool_options;
@@ -88,6 +91,12 @@ pbes load_pbes(t_tool_options tool_options);
 void save_pbes(pbes pbes_spec, t_tool_options tool_options);
 //Post: pbes_spec is saved
 //Ret: -
+
+void save_pbes_in_cwi_format(pbes pbes_spec, string outfilename);
+//Post: pbes_spec is saved in cwi-format
+//Ret: -
+
+string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variables);
 
 pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options);
 
@@ -124,6 +133,16 @@ int main(int argc, char** argv)
 pbes create_bes(pbes pbes_spec, t_tool_options tool_options)
 {
 	//Do naive algorithm. In later stage a check for naive or improved is added.
+	if (!pbes_spec.is_well_formed())
+	{
+		gsErrorMsg("The PBES is not well formed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.");
+		exit(1);
+	}
+	if (!pbes_spec.is_closed())
+	{
+		gsErrorMsg("The PBES is not closed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.");
+		exit(1);
+	}
 	pbes_spec = do_naive_algorithm(pbes_spec, tool_options);
 
 	//return new pbes
@@ -134,10 +153,10 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 {
 	pbes result;
 
-	bool change_propvarinst_initial_state;
+	bool change_propvarinst_initial_state = false;
 
 	bool is_bes_system = true;		// True if the resulting equation system is a BES, false otherwise
-	//int nr_of_equations = 0;		// Number of equations computed
+	int nr_of_equations = 0;		// Number of equations computed
 	propositional_variable_instantiation initial_state = pbes_spec.initial_state();
 	equation_system eqsys = pbes_spec.equations();
 	data_specification data = pbes_spec.data();
@@ -245,6 +264,10 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 			current_exp = current_exp.substitute(make_list_substitution(oldpropvarinst_list, newpropvarinst_list));
 
 			result_es.push_back(pbes_equation(eq_i->symbol(), current_propvar, current_exp));
+			if (++nr_of_equations % 100 == 0)
+			{
+				gsVerboseMsg("At Boolean equation %d\n", nr_of_equations);
+			}
 		}
 	}
 
@@ -252,6 +275,8 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 	propositional_variable_instantiation new_initial_state = create_propositional_variable_instantiation(initial_state, change_propvarinst_initial_state, sort_list_is_finite); 
 
 	result = pbes(data, result_es, new_initial_state);
+
+	gsVerboseMsg("Number of Boolean equations generated: %d\n", nr_of_equations);
 	
 	delete rewriter;
 	
@@ -261,11 +286,10 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 propositional_variable create_propositional_variable(propositional_variable propvar, data_expression_list finite_inst, bool change_propvar, map<lpe::sort, bool> sort_list_is_finite)
 {
 	string propvar_name_current = propvar.name();
-	bool is_first;
+	bool is_first = true;
 	if (change_propvar)
 	{
 		propvar_name_current += "[";
-		is_first = true;
 	}
 	data_variable_list parameters_current;
 	for (data_variable_list::iterator deli = propvar.parameters().begin(); deli != propvar.parameters().end(); deli++)
@@ -295,11 +319,10 @@ propositional_variable create_propositional_variable(propositional_variable prop
 propositional_variable_instantiation create_propositional_variable_instantiation(propositional_variable_instantiation propvarinst, bool change_propvar, map<lpe::sort, bool> sort_list_is_finite)
 {
 	string propvarinst_name_current = propvarinst.name();
-	bool is_first;
+	bool is_first = true;
 	if (change_propvar)
 	{
 		propvarinst_name_current += "[";
-		is_first = true;
 	}
 	data_expression_list parameters_current;
 	for (data_expression_list::iterator deli = propvarinst.parameters().begin(); deli != propvarinst.parameters().end(); deli++)
@@ -311,7 +334,16 @@ propositional_variable_instantiation create_propositional_variable_instantiation
 			else
 					propvarinst_name_current += ";";
 			//cout << deli->head() << endl;
-			propvarinst_name_current += data_operation(deli->head()).name();
+			if (is_data_operation(deli->head()))
+			{
+				propvarinst_name_current += data_operation(deli->head()).name();
+			}
+			else if (is_data_variable(deli->head()))
+			{
+				gsErrorMsg("The PBES contains a free variable in the propositional variable instantiation.\n");
+				gsErrorMsg("Try using mcrl22lpe with the flag -f or --no-freevars to solve this.\n");
+				exit(1);
+			}
 		}
 		else
 		{
@@ -360,7 +392,7 @@ void save_pbes(pbes pbes_spec, t_tool_options tool_options)
 	string outfilename = tool_options.outfilename;
 
 	//Write PBES
-	if (tool_options.opt_pretty)
+	if (tool_options.opt_outputformat == "external")
 	{
 		if (!pbes_spec.save(outfilename, false))
 		{
@@ -368,7 +400,7 @@ void save_pbes(pbes pbes_spec, t_tool_options tool_options)
 			exit(1);
 		}
 	}
-	else
+	else if (tool_options.opt_outputformat == "binary")
 	{
 		if (!pbes_spec.save(outfilename, true))
 		{
@@ -376,6 +408,113 @@ void save_pbes(pbes pbes_spec, t_tool_options tool_options)
 			exit(1);
 		}
 	}
+	else if (tool_options.opt_outputformat == "cwi")
+	{
+		// if (is_bes(pbes_spec.equations()))
+		// {
+			save_pbes_in_cwi_format(pbes_spec, outfilename);
+		// }
+		// else
+		// {
+		// 		gsErrorMsg("Pbes to write is not a BES. Aborting");
+		// 		exit(1);
+		// }
+	}
+}
+
+void save_pbes_in_cwi_format(pbes pbes_spec, string outfilename)
+{
+	equation_system eqsys = pbes_spec.equations();
+	atermpp::indexed_set *variables = new atermpp::indexed_set(2*eqsys.size(), 50);
+	// First fill indexed set
+	for (equation_system::iterator eq = eqsys.begin(); eq != eqsys.end(); eq++)
+	{
+		variables->put(eq->variable());
+	} // because pbes is closed, all variables are done at this point
+	
+	// Then convert it.
+	
+	ofstream outputfile;
+   	outputfile.open(outfilename.c_str(), ios::trunc);
+	for (equation_system::iterator eq = eqsys.begin(); eq != eqsys.end(); eq++)
+	{
+		string fp;
+		(eq->symbol().is_mu())?fp = "min":fp = "max";
+	    string variable;
+		stringstream variable_stream;
+		variable_stream << variables->index(eq->variable());
+		variable = variable_stream.str();
+		string rhs = convert_rhs_to_cwi(eq->formula(), variables);
+
+		string equation = fp + " " + variable + " = " + rhs + "\n";
+		if (outputfile.is_open())
+			outputfile << equation;
+		else
+		{
+			gsErrorMsg("Could not save PBES to %s\n", outfilename.c_str());
+			exit(1);
+		}
+	}
+	outputfile.close();
+}
+
+string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variables)
+{
+	string result;
+	if (pbes_init::is_true(p))
+		result = "T";
+	else if (pbes_init::is_true(p))
+		result = "F";
+	else if (pbes_init::is_and(p))
+	{
+		string left = convert_rhs_to_cwi(arg1(p), variables);
+		string right = convert_rhs_to_cwi(arg2(p), variables);
+		if ((left == "false") || (right == "false"))
+			result = "false";
+		else if (left == "true")
+			result = right;
+		else if (right == "true")
+			result = left;
+		else
+			result = "(" + left + "&" + right + ")";
+	}
+	else if (pbes_init::is_or(p))
+	{
+		string left = convert_rhs_to_cwi(arg1(p), variables);
+		string right = convert_rhs_to_cwi(arg2(p), variables);
+		if ((left == "true") || (right == "true"))
+			result = "true";
+		else if (left == "false")
+			result = right;
+		else if (right == "false")
+			result = left;
+		else
+			result = "(" + left + "|" + right + ")";
+	}
+	else if (pbes_init::is_propositional_variable_instantiation(p))
+	{
+		propositional_variable_instantiation propvarinst = propositional_variable_instantiation(p);
+		data_variable_list empty;
+		propositional_variable propvar = propositional_variable(propvarinst.name(), empty);
+		long variable = variables->index(propvar);
+		if (variable < 0)
+		{
+			gsErrorMsg("Error: The PBES is not closed. Write to cwi-format failed.");
+			exit(1);
+		}
+		else
+		{
+			stringstream variable_stream;
+			variable_stream << variable;
+			result = variable_stream.str();
+		}
+	}
+	else
+	{
+		gsErrorMsg("Result is not in BES-format. Saving in CWI-format aborted.\n");
+		exit(1);
+	}
+	return result;
 }
 
 //function parse_command_line
@@ -383,13 +522,16 @@ void save_pbes(pbes pbes_spec, t_tool_options tool_options)
 t_tool_options parse_command_line(int argc, char** argv)
 {
 	t_tool_options tool_options;
-	bool opt_pretty = false;
+	string opt_outputformat;
 	vector< string > file_names;
 
 	po::options_description desc;
 
 	desc.add_options()
+			("output,o",	po::value<string>(&opt_outputformat)->default_value("binary"), "use outputformat arg (default 'binary');"
+			 				"available outputformats are binary, external and cwi")
 			("external,e",	"return the result in external format")
+			("cwi,c", 		"return the result in the format used at CWI")
 			("verbose,v",	"turn on the display of short intermediate messages")
 			("debug,d",		"turn on the display of detailed intermediate messages")
 			("version",		"display version information")
@@ -442,9 +584,14 @@ t_tool_options parse_command_line(int argc, char** argv)
 		gsSetVerboseMsg();
 	}
 
-	if (vm.count("external")) // Pretty printed version
+	if (vm.count("output")) // Pretty printed version
 	{
-		opt_pretty = true;
+		opt_outputformat = vm["output"].as< string >();
+		if (!((opt_outputformat == "external") || (opt_outputformat == "binary") || (opt_outputformat == "cwi")))
+		{
+			gsErrorMsg("Unknown outputformat specified. Available outputformats are binary, external and cwi");
+			exit(1);
+		}
 	}
 
 	if (vm.count("file_names"))
@@ -478,7 +625,7 @@ t_tool_options parse_command_line(int argc, char** argv)
 			outfilename = "-";
 		}
 	}
-	tool_options.opt_pretty = opt_pretty;
+	tool_options.opt_outputformat = opt_outputformat;
 	tool_options.infilename = infilename;
 	tool_options.outfilename = outfilename;
 	return tool_options;
