@@ -66,7 +66,7 @@ namespace atermpp
       std::pair<long, bool> put(aterm elem)
       {
         ATbool b;
-        long l = ATindexedSetPut(m_set, elem.to_ATerm(), &b);
+        long l = ATindexedSetPut(m_set, elem, &b);
         return std::make_pair(l, b == ATtrue);
       }
       
@@ -76,7 +76,7 @@ namespace atermpp
       ///
       long index(aterm elem)
       {
-        return ATindexedSetGetIndex(m_set, elem.to_ATerm());
+        return ATindexedSetGetIndex(m_set, elem);
       }
       
       /// Retrieve the element at index in set.
@@ -94,16 +94,16 @@ namespace atermpp
       ///
       void remove(aterm elem)
       {
-        ATindexedSetRemove(m_set, elem.to_ATerm());
+        ATindexedSetRemove(m_set, elem);
       }
       
       /// Retrieve all elements in set.
       /// A list with all valid elements stored in the indexed set is returned.  The list is
       /// ordered from element with index 0 onwards.
       ///
-      term_list elements()
+      aterm_list elements()
       {
-        return term_list(ATindexedSetElements(m_set));
+        return aterm_list(ATindexedSetElements(m_set));
       }
   };
 
