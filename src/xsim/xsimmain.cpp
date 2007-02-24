@@ -1210,6 +1210,11 @@ void XSimMain::UpdateTransitions(bool update_next_states)
 		{
 			next_states = ATinsert(next_states,(ATerm) ATmakeList2((ATerm) transition,newstate));
 		}
+		if ( nextstategen->errorOccurred() )
+		{
+			wxMessageDialog msg(this,wxT("An error occurred while calculating the transitions from this state. This likely means that not all possible transitions are shown."),wxT("Error while calculating transitions"),wxOK|wxICON_ERROR);
+			msg.ShowModal();
+		}
 	}
 
 	transview->DeleteAllItems();

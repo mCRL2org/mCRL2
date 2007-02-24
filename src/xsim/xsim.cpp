@@ -10,6 +10,8 @@
 
 #include <iostream>
 #include <wx/cmdline.h>
+#include <wx/msgdlg.h>
+#include <wx/string.h>
 #include <aterm2.h>
 #include "xsimmain.h"
 #include "libprint_c.h"
@@ -169,9 +171,57 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
   return (true);
 }
 
+static XSim *this_xsim = NULL;
+void xsim_message_handler(gsMessageType msg_type, char *msg)
+{
+  if ( this_xsim == NULL )
+  {
+    fprintf(stderr,msg);
+    fprintf(stderr,"this message was brought to you by XSim (all rights reserved)\n");
+  } else {
+    char *msg_end = msg+strlen(msg)-1;
+    while ( (msg <= msg_end) && ((*msg == '\r') || (*msg == '\n')) )
+    {
+      *msg = '\0';
+      msg--;
+    }
+    wxString wx_msg(msg
+#ifdef wxUSE_UNICODE
+                   ,wxConvLocal
+#endif
+                   );
+    switch (msg_type)
+    {
+      case gs_warning:
+        {
+        wxMessageDialog dlg(NULL,wx_msg,wxT("mCRL2 warning"),wxOK|wxICON_EXCLAMATION);
+        dlg.ShowModal();
+        }
+        break;
+      case gs_error:
+        {
+        wxMessageDialog dlg(NULL,wx_msg,wxT("mCRL2 error"),wxOK|wxICON_ERROR);
+        dlg.ShowModal();
+        }
+        break;
+      case gs_notice:
+      default:
+        {
+        wxMessageDialog dlg(NULL,wx_msg,wxT("mCRL2 notice"),wxOK|wxICON_INFORMATION);
+        dlg.ShowModal();
+        }
+        break;
+    }
+  }
+}
+
+
 bool XSim::OnInit()
 {
   gsEnableConstructorFunctions();
+
+  this_xsim = this;
+  gsSetCustomMessageHandler(xsim_message_handler);
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if (interactor->is_active()) {
