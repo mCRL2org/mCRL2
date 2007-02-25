@@ -109,12 +109,11 @@ bool squadt_interactor::perform_task(sip::configuration& configuration)
 
 bool has_time(lpe::linear_process& lpe)
 {
-  bool result = false;
   for (lpe::summand_list::iterator i = lpe.summands().begin(); i != lpe.summands().end(); ++i)
   {
-    result = result || i->has_time();
+    if(i->has_time()) return true;
   }
-  return result;
+  return false;
 }
 
 ///\ret specification, in which all delta summands have been removed, and replaced with a single true->delta
@@ -130,11 +129,11 @@ lpe::specification remove_deltas(const lpe::specification& specification) {
   }
 
   lpe::summand delta_summand = summand(data_variable_list(),
-                                               true_(),
-                                               true,
-                                               action_list(),
-                                               data_assignment_list()
-                                              );
+                                       true_(),
+                                       true,
+                                       action_list(),
+                                       data_assignment_list()
+                                      );
 
   summands = push_front(summands, delta_summand);
   summands = atermpp::reverse(summands);
@@ -182,6 +181,7 @@ lpe::specification untime(const lpe::specification& specification) {
     lpe::data_assignment_list untime_assignments; //Updated assignments (or next state)
     lpe::summand untime_summand; //Updated summand
 
+    // Only untime summands that are not delta summands; all delta summands are removed, and replaced by one true->delta summand
     if (!(i->is_delta())){
 
       if (i->has_time()) 
@@ -231,11 +231,11 @@ lpe::specification untime(const lpe::specification& specification) {
   // Add delta summand
   lpe::summand untime_summand;
   untime_summand = lpe::summand(data_variable_list(),
-                                    data_expression(true_()),
-                                    true,
-                                    action_list(),
-                                    data_assignment_list()
-                                   );
+                                data_expression(true_()),
+                                true,
+                                action_list(),
+                                data_assignment_list()
+                               );
 
   untime_summand_list = push_front(untime_summand_list, untime_summand);
   
@@ -250,11 +250,11 @@ lpe::specification untime(const lpe::specification& specification) {
 
   // Create new specification, this equals original specification, except for the new LPE.
   untime_specification = lpe::specification(specification.data(), 
-						specification.action_labels(),
-						untime_lpe, //new LPE
-						process_initializer(specification.initial_process().free_variables(),
-                                                untime_initial_assignments)
-						);
+			                    specification.action_labels(),
+					    untime_lpe, //new LPE
+					    process_initializer(specification.initial_process().free_variables(),
+                                            untime_initial_assignments)
+					   );
 
   return untime_specification;
 }
