@@ -59,6 +59,7 @@ int test_main(int, char*[])
   linear_process lpe = spec.lpe();
   BOOST_CHECK(lpe.is_well_typed()); 
   BOOST_CHECK(lpe.is_name_clash_free()); 
+  BOOST_CHECK(!lpe.has_time()); 
 
   summand s = lpe.summands().front();
   BOOST_CHECK(!s.has_time()); 

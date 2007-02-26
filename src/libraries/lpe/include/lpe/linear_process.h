@@ -419,6 +419,17 @@ class linear_process: public aterm_appl
       return m_process_parameters;
     }
 
+    /// Returns true if time is available in at least one of the summands.
+    ///
+    bool has_time() const
+    {
+      for (summand_list::iterator i = summands().begin(); i != summands().end(); ++i)
+      {
+        if(i->has_time()) return true;
+      }
+      return false;
+    }
+
     /// Applies a substitution to this LPE and returns the result.
     /// The Substitution object must supply the method aterm operator()(aterm).
     ///
