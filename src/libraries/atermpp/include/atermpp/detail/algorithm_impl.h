@@ -181,7 +181,8 @@ namespace detail {
     if (t.type() == AT_APPL)
     {
       aterm_appl a(t);
-      result = appl_apply(f(a), replace_helper<ReplaceFunction>(f));
+      aterm_appl fa = f(a);
+      result = (a == fa) ? appl_apply(f(a), replace_helper<ReplaceFunction>(f)) : fa;
     }
     else if (t.type() == AT_LIST)
     {

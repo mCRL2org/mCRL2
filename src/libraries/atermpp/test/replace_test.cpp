@@ -85,6 +85,10 @@ void test_find()
 
 void test_replace()
 {
+  BOOST_CHECK(replace(make_term("x"), make_term("x"), make_term("f(a)")) == make_term("f(a)"));
+  BOOST_CHECK(replace(make_term("x"), make_term("x"), make_term("f(x)")) == make_term("f(x)"));
+  //BOOST_CHECK(replace(make_term("[x]"), make_term("x"), make_term("f(x)")) == make_term("[f(x)]"));
+
   aterm_appl a = make_term("f(f(x))");
   aterm_appl b = replace(a, make_term("f(x)"), make_term("x"));
   BOOST_CHECK(b == make_term("f(x)"));
@@ -103,7 +107,7 @@ void test_replace()
   aterm y = replace(x, fg_replacer());
   aterm z = partial_replace(x, fg_partial_replacer());
 
-  BOOST_CHECK(y == make_term("f(g(x),g(y),h(g(x)))"));
+  BOOST_CHECK(y == make_term("f(f(x),f(y),h(f(x)))"));
   BOOST_CHECK(z == make_term("f(f(x),f(y),h(f(x)))"));
 }
 

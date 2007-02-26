@@ -49,15 +49,6 @@ namespace atermpp
     detail::find_all_if_impl(aterm_traits<Term>::term(t), op, i);
   }
 
-  /// Replaces each subterm in t that is equal to old_value with new_value.
-  /// The replacements are performed in top down order. For example,
-  /// replace(f(f(x)), f(x), x) returns f(x) and not x.
-  template <typename Term>
-  Term replace(Term t, aterm_appl old_value, aterm_appl new_value)
-  {
-    return replace(t, detail::default_replace(old_value, new_value));
-  }
-
   /// Replaces each subterm x of t by r(x). The ReplaceFunction r has
   /// the following signature:
   ///
@@ -70,6 +61,15 @@ namespace atermpp
   {
     ATerm x = detail::replace_impl(aterm_traits<Term>::term(t), r);
     return Term(reinterpret_cast<ATermAppl>(x));   
+  }
+
+  /// Replaces each subterm in t that is equal to old_value with new_value.
+  /// The replacements are performed in top down order. For example,
+  /// replace(f(f(x)), f(x), x) returns f(x) and not x.
+  template <typename Term>
+  Term replace(Term t, aterm_appl old_value, aterm_appl new_value)
+  {
+    return replace(t, detail::default_replace(old_value, new_value));
   }
 
   /// Replaces each subterm x of t by r(x). The ReplaceFunction r has
