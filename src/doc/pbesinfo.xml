@@ -1,0 +1,99 @@
+<refentry id="pbesinfo">
+ <info>
+  <date>2005-2007</date>
+ </info>
+
+<refmeta>
+  <refentrytitle>pbesinfo</refentrytitle>
+  <manvolnum>1</manvolnum>
+  <refmiscinfo class="source">pbesinfo</refmiscinfo>
+  <refmiscinfo class="version"></refmiscinfo>
+  <refmiscinfo class="manual">User Commands</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+  <refname>pbesinfo</refname>
+  <refpurpose>display basic information about a PPES</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>&pbesinfo;</command>
+    <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
+    <arg choice="opt">&infile;</arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  <para>
+    Display basic information about the parameterised boolean equation system
+	(PBES) in &infile;.  If &infile; is not supplied a PBES is read from &cstdin;. 
+	By default, the following information about the PBES is shown:
+    <itemizedlist>
+      <listitem>
+        <para>information if the PBES is closed and well-formed</para>
+      </listitem>
+      <listitem>
+        <para>number of equations</para>
+      </listitem>
+      <listitem>
+        <para>number of mu's</para>
+      </listitem>
+      <listitem>
+        <para>number of nu's</para>
+      </listitem>
+      <listitem>
+        <para>predicate variables and their signature</para>
+      </listitem>
+    </itemizedlist>
+  </para>
+</refsect1>
+
+<refsect1>
+  <title>Options</title>
+  <para>
+    <variablelist>
+
+      <varlistentry>
+        <term>&opt_h;</term>
+        <term>&opt_help;</term>
+          <listitem>
+            <para>display help information and exit</para>
+          </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_version;</term>
+        <listitem>
+          <para>display version information and exit</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_v;</term>
+        <term>&opt_verbose;</term>
+        <listitem>
+          <para>displays short intermediate information during the run of the program.</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_d;</term>
+        <term>&opt_debug;</term>
+        <listitem>
+          <para>displays detailed intermediate information during the run of the program.</para>
+        </listitem>
+      </varlistentry>
+
+    </variablelist>
+  </para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>Written by Alexander van Dam. Please send all complaints, comments and bug
+fixes to &bugmail;.</para>
+</refsect1>
+
+</refentry>
