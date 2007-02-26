@@ -33,7 +33,6 @@
 
 //LPE-Framework
 #include "lpe/pbes.h"
-#include "lpe/pbes_init.h"
 #include "lpe/pbes_utility.h"
 #include "lpe/data_operators.h"
 #include "lpe/sort.h"
@@ -410,15 +409,20 @@ void save_pbes(pbes pbes_spec, t_tool_options tool_options)
 	}
 	else if (tool_options.opt_outputformat == "cwi")
 	{
-		// if (is_bes(pbes_spec.equations()))
-		// {
+		if (pbes_spec.equations().is_bes())
+		{
 			save_pbes_in_cwi_format(pbes_spec, outfilename);
-		// }
-		// else
-		// {
-		// 		gsErrorMsg("Pbes to write is not a BES. Aborting");
-		// 		exit(1);
-		// }
+		}
+		else
+		{
+			gsWarningMsg("Result is not a BES. Result is written in binary format.\n");
+			if (!pbes_spec.save(outfilename, true))
+			{
+				gsErrorMsg("Could not save PBES to %s\n", outfilename.c_str());
+				exit(1);
+			}
+				
+		}
 	}
 }
 
@@ -440,6 +444,11 @@ void save_pbes_in_cwi_format(pbes pbes_spec, string outfilename)
 	{
 		string fp;
 		(eq->symbol().is_mu())?fp = "min":fp = "max";
+		if (eq->variable().parameters().size() != 0)
+		{
+			gsErrorMsg("The used equation system is not a BES. Could not save this in CWI-format.\n");
+			exit(1);
+		}
 	    string variable;
 		stringstream variable_stream;
 		variable_stream << variables->index(eq->variable());
@@ -461,11 +470,11 @@ void save_pbes_in_cwi_format(pbes pbes_spec, string outfilename)
 string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variables)
 {
 	string result;
-	if (pbes_init::is_true(p))
+	if (pbes_expr::is_true(p))
 		result = "T";
-	else if (pbes_init::is_true(p))
+	else if (pbes_expr::is_true(p))
 		result = "F";
-	else if (pbes_init::is_and(p))
+	else if (pbes_expr::is_and(p))
 	{
 		string left = convert_rhs_to_cwi(arg1(p), variables);
 		string right = convert_rhs_to_cwi(arg2(p), variables);
@@ -478,7 +487,7 @@ string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variables)
 		else
 			result = "(" + left + "&" + right + ")";
 	}
-	else if (pbes_init::is_or(p))
+	else if (pbes_expr::is_or(p))
 	{
 		string left = convert_rhs_to_cwi(arg1(p), variables);
 		string right = convert_rhs_to_cwi(arg2(p), variables);
@@ -491,7 +500,7 @@ string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variables)
 		else
 			result = "(" + left + "|" + right + ")";
 	}
-	else if (pbes_init::is_propositional_variable_instantiation(p))
+	else if (pbes_expr::is_propositional_variable_instantiation(p))
 	{
 		propositional_variable_instantiation propvarinst = propositional_variable_instantiation(p);
 		data_variable_list empty;
@@ -499,7 +508,7 @@ string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variables)
 		long variable = variables->index(propvar);
 		if (variable < 0)
 		{
-			gsErrorMsg("Error: The PBES is not closed. Write to cwi-format failed.");
+			gsErrorMsg("Error: The BES is not closed. Write to cwi-format failed.");
 			exit(1);
 		}
 		else
@@ -511,7 +520,7 @@ string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variables)
 	}
 	else
 	{
-		gsErrorMsg("Result is not in BES-format. Saving in CWI-format aborted.\n");
+		gsErrorMsg("The used equation system is not a BES. Could not save this in CWI-format.\n");
 		exit(1);
 	}
 	return result;

@@ -4,7 +4,7 @@
 #include "sort_functions.h"
 
 using namespace lpe;
-using namespace pbes_init;
+using namespace pbes_expr;
 
 // parameterized boolean expression
 //<PBExpr>       ::= <DataExpr>
