@@ -71,7 +71,7 @@ namespace detail {
     ATermAppl result = standard ? linearise_std(spec, options) : linearise_alt(spec, options);
     if (result == NULL)
       throw std::runtime_error("linearisation error");
-    return result;
+    return aterm_appl(result);
   }
 
   inline
