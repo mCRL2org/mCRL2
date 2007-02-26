@@ -3,7 +3,7 @@
 #include <boost/test/minimal.hpp>
 #include "atermpp/aterm.h"
 #include "lpe/linear_process.h"
-#include "lpe/detail/mcrl22lpe.h"
+#include "lpe/detail/tools.h"
 
 using namespace std;
 using namespace atermpp;

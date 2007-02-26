@@ -8,7 +8,7 @@
 #include <string>
 #include <cstdio>
 #include <boost/algorithm/string.hpp>
-#include "specification.h"
+#include "lpe/specification.h"
 
 namespace lpe {
 

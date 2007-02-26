@@ -703,7 +703,7 @@ state_formula remove_name_clashes(specification spec, state_formula f)
 
 // translate a state_formula and an LPE to a pbes
 inline
-pbes pbes_translate(state_formula f, specification spec, bool untimed = true)
+pbes pbes_translate(state_formula f, specification spec, bool timed = false)
 {
   using namespace state_init;
   using namespace state_frm;
@@ -721,7 +721,7 @@ pbes pbes_translate(state_formula f, specification spec, bool untimed = true)
   linear_process lpe = spec.lpe();
   equation_system e;
 
-  if (untimed)
+  if (!timed)
   {
     using namespace pbes_untimed;
     e = E(f, lpe);   
@@ -744,7 +744,7 @@ pbes pbes_translate(state_formula f, specification spec, bool untimed = true)
   data_expression_list fi = mu_expressions(f);
   data_expression_list pi = spec.initial_process().state();
 
-  if (untimed)
+  if (!timed)
   {   
     propositional_variable_instantiation init(Xe, fi + pi + Par(Xf, f));
     return pbes(spec.data(), e, init);

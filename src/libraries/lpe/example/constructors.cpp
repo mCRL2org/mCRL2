@@ -1,6 +1,6 @@
 #include <iostream>
 #include "lpe/specification.h"
-#include "lpe/detail/mcrl22lpe.h"
+#include "lpe/detail/tools.h"
 #include "test_specifications.h"
 
 using namespace std;

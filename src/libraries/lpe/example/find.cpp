@@ -8,7 +8,7 @@
 #include "lpe/data_utility.h"
 #include "lpe/sort.h"
 #include "lpe/specification.h"
-#include "lpe/detail/mcrl22lpe.h"
+#include "lpe/detail/tools.h"
 #include "test_specifications.h"
 
 using namespace std;

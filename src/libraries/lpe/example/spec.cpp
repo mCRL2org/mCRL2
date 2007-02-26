@@ -7,7 +7,7 @@
 #include "atermpp/utility.h"
 #include "lpe/specification.h"
 #include "lpe/sort.h"
-#include "lpe/detail/mcrl22lpe.h"
+#include "lpe/detail/tools.h"
 #include "lpe/soundness_checks.h"
 #include "test_specifications.h"
 

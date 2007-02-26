@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include "lpe/pbes.h"
-#include "lpe/detail/lpe2pbes.h"
+#include "lpe/detail/tools.h"
 #include "lpe/detail/read_text.h"
 
 using namespace atermpp;

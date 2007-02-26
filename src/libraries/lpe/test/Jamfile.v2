@@ -25,6 +25,7 @@ exe generate_lpe2pbes_result : generate_lpe2pbes_result.cpp lin_std.o lin_alt.o 
 
 test-suite lpe
     :
+      [ run pbes_test.cpp lin_std.o lin_alt.o ]
       [ run_with_input lpe2pbes_timed_test.o lin_std.o lin_alt.o : pbes : expected_timed_result ]
       [ run_with_input lpe2pbes_untimed_test.o lin_std.o lin_alt.o : pbes : expected_untimed_result ]     
       [ run data_expression.cpp ]

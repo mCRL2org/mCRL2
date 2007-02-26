@@ -9,7 +9,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include "lpe/pbes.h"
-#include "lpe/detail/lpe2pbes.h"
+#include "lpe/detail/tools.h"
 #include "lpe/detail/read_text.h"
 #include "test_specifications.h"
 
@@ -32,7 +32,7 @@ int test_main(int argc, char* argv[])
 
   if (exists(result_file))
   {
-    pbes result = lpe2pbes(SPEC1, formula, true);
+    pbes result = lpe2pbes(SPEC1, formula, false);
     pbes expected_result;
     expected_result.load(result_file);
     BOOST_CHECK(result == expected_result);
