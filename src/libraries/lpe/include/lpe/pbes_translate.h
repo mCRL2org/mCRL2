@@ -20,7 +20,6 @@
 #include "lpe/mucalculus.h"
 #include "lpe/mucalculus_init.h"
 #include "lpe/pbes.h"
-#include "lpe/pbes_init.h"
 #include "lpe/specification.h"
 #include "lpe/data_utility.h"
 #include "lpe/lpe_algorithm.h"
@@ -53,7 +52,7 @@ bool equal_names(action_list a, action_list b)
 inline
 pbes_expression equal_data_parameters(action_list a, action_list b)
 {
-  namespace p = lpe::pbes_init;
+  namespace p = lpe::pbes_expr;
   atermpp::vector<pbes_expression> v;
 
   assert(a.size() == b.size());
@@ -75,7 +74,7 @@ pbes_expression equal_data_parameters(action_list a, action_list b)
 inline
 pbes_expression not_equal_data_parameters(action_list a, action_list b)
 {
-  namespace p = lpe::pbes_init;
+  namespace p = lpe::pbes_expr;
   atermpp::vector<pbes_expression> v;
 
   assert(a.size() == b.size());
@@ -151,7 +150,7 @@ namespace pbes_timed
   {
     using namespace lpe::act_init;
     using namespace lpe::act_frm;
-    namespace p = lpe::pbes_init;
+    namespace p = lpe::pbes_expr;
   
     if (is_mult_act(b)) {
       action_list b_actions = mult_params(b);
@@ -193,7 +192,7 @@ namespace pbes_timed
   {
     using namespace lpe::act_init;
     using namespace lpe::act_frm;
-    namespace p = lpe::pbes_init;
+    namespace p = lpe::pbes_expr;
   
     if (is_mult_act(b)) {
       action_list b_actions = mult_params(b);
@@ -233,7 +232,7 @@ namespace pbes_timed
   inline
   pbes_expression RHS(state_formula f, linear_process lpe, data_variable T, std::set<std::string>& context)
   {
-    using namespace lpe::pbes_init;
+    using namespace lpe::pbes_expr;
     using namespace lpe::state_frm;
     using lpe::summand_list;
     namespace s = lpe::state_init;
@@ -427,7 +426,7 @@ namespace pbes_untimed
   {
     using namespace lpe::act_init;
     using namespace lpe::act_frm;
-    namespace p = lpe::pbes_init;
+    namespace p = lpe::pbes_expr;
   
     if (is_mult_act(b)) {
       action_list b_actions = mult_params(b);
@@ -472,7 +471,7 @@ namespace pbes_untimed
   {
     using namespace lpe::act_init;
     using namespace lpe::act_frm;
-    namespace p = lpe::pbes_init;
+    namespace p = lpe::pbes_expr;
   
     if (is_mult_act(b)) {
       action_list b_actions = mult_params(b);
@@ -515,7 +514,7 @@ namespace pbes_untimed
   inline
   pbes_expression RHS(state_formula f, linear_process lpe, std::set<std::string>& context)
   {
-    using namespace lpe::pbes_init;
+    using namespace lpe::pbes_expr;
     using namespace lpe::state_frm;
     using lpe::summand_list;
     namespace s = lpe::state_init;

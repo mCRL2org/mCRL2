@@ -27,8 +27,8 @@
 #include "lpe/pretty_print.h"
 #include "lpe/mucalculus_init.h"
 #include "lpe/detail/utility.h"
-#include "lpe/pbes_expression.h"
 #include "libstruct.h"
+#include "lpe/pbes_expression.h"
 
 namespace lpe {
 
@@ -45,144 +45,6 @@ using lpe::detail::parse_variable;
         return gsIsStateVar(t);
       }
     };
-
-///////////////////////////////////////////////////////////////////////////////
-/// \brief A propositional variable declaration
-///
-// <PropVarDecl>  ::= PropVarDecl(<String>, <DataVarId>*)
-class propositional_variable: public aterm_appl
-{
-  protected:
-    aterm_string m_name;
-    data_variable_list m_variables;
-
-  public:
-    propositional_variable()
-    {}
-
-    // example: "X(d:D,e:E)"
-    propositional_variable(std::string s)
-    {
-      std::pair<std::string, data_expression_list> p = parse_variable(s);
-      m_name      = aterm_string(p.first);
-      m_variables = p.second;
-      m_term      = reinterpret_cast<ATerm>(gsMakePropVarDecl(m_name, m_variables));
-    }
-
-    propositional_variable(aterm_appl t)
-      : aterm_appl(t)
-    {
-      assert(check_rule_PropVarDecl(m_term));
-      iterator i = t.begin();
-      m_name = *i++;
-      m_variables = *i;
-    }
-
-    propositional_variable(aterm_string name, data_variable_list variables)
-      : aterm_appl(gsMakePropVarDecl(name, variables)),
-        m_name(name),
-        m_variables(variables)
-    {
-    }
-
-    operator pbes_expression() const
-    {
-      return pbes_expression(m_term);
-    }
-
-    /// Returns the term containing the name of the propositional variable.
-    aterm_string name() const
-    {
-      return m_name;
-    }
-
-    /// Returns the parameters of the propositional variable.
-    data_variable_list parameters() const
-    {
-      return m_variables;
-    }
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// propositional_variable_list
-/// \brief singly linked list of propositional variables
-///
-typedef term_list<propositional_variable> propositional_variable_list;
-
-inline
-bool is_propositional_variable(aterm_appl t)
-{
-  return gsIsPropVarDecl(t);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// \brief A propositional variable instantiation
-///
-// <PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*)
-class propositional_variable_instantiation: public aterm_appl
-{
-  protected:
-    aterm_string m_name;
-    data_expression_list m_expressions;
-
-  public:
-    propositional_variable_instantiation()
-    {}
-
-    // example: "X(d:D,e:E)"
-    propositional_variable_instantiation(std::string s)
-    {
-      std::pair<std::string, data_expression_list> p = parse_variable(s);
-      m_name        = aterm_string(p.first);
-      m_expressions = p.second;
-      m_term        = reinterpret_cast<ATerm>(gsMakePropVarInst(m_name, m_expressions));
-    }
-
-    propositional_variable_instantiation(aterm_appl t)
-      : aterm_appl(t)
-    {
-      assert(check_rule_PropVarInst(m_term));
-      iterator i = t.begin();
-      m_name = *i++;
-      m_expressions = *i;
-    }
-
-    propositional_variable_instantiation(aterm_string name, data_expression_list expressions)
-      : aterm_appl(gsMakePropVarInst(name, expressions)),
-        m_name(name),
-        m_expressions(expressions)
-    {
-    }
-
-    operator pbes_expression() const
-    {
-      return pbes_expression(m_term);
-    }
-
-    /// Returns the term containing the name of the propositional variable.
-    aterm_string name() const
-    {
-      return m_name;
-    }
-
-    /// Returns the parameters of the propositional variable.
-    data_expression_list parameters() const
-    {
-      return m_expressions;
-    }
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// propositional_variable_instantiation_list
-/// \brief singly linked list of propositional variables instantiations
-///
-typedef term_list<propositional_variable_instantiation> propositional_variable_instantiation_list;
-
-inline
-bool is_propositional_variable_instantiation(aterm_appl t)
-{
-  return gsIsPropVarInst(t);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // pbes_fixpoint_symbol
@@ -297,6 +159,12 @@ class pbes_equation: public aterm_appl
       aterm t = atermpp::find_if(ATermAppl(m_formula), is_state_variable());
       return t == aterm(); // true if nothing was found
     }
+
+    /// Returns true if the equation is a BES (boolean equation system).
+    bool is_bes() const
+    {
+      return variable().parameters().empty() && formula().is_bes();
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -409,6 +277,17 @@ class equation_system: public atermpp::vector<pbes_equation>
     {
       pbes_equation_list eqn(begin(), end());
       return "jammer!";
+    }
+
+    /// Returns true if the equation is a BES (boolean equation system).
+    bool is_bes() const
+    {
+      for (const_iterator i = begin(); i != end(); ++i)
+      {
+        if (!i->is_bes())
+          return false;
+      }
+      return true;
     }
 };
 
@@ -599,34 +478,10 @@ struct term_list_iterator_traits<pbes_equation>
 namespace atermpp
 {
 using lpe::pbes_expression;
-using lpe::propositional_variable;
-using lpe::propositional_variable_instantiation;
 using lpe::pbes_fixpoint_symbol;
 using lpe::pbes_equation;
 using lpe::equation_system;
 using lpe::pbes;
-
-template<>
-struct aterm_traits<propositional_variable>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(propositional_variable t)   { t.protect(); }
-  static void unprotect(propositional_variable t) { t.unprotect(); }
-  static void mark(propositional_variable t)      { t.mark(); }
-  static ATerm term(propositional_variable t)     { return t.term(); }
-  static ATerm* ptr(propositional_variable& t)    { return &t.term(); }
-};
-
-template<>
-struct aterm_traits<propositional_variable_instantiation>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(propositional_variable_instantiation t)   { t.protect(); }
-  static void unprotect(propositional_variable_instantiation t) { t.unprotect(); }
-  static void mark(propositional_variable_instantiation t)      { t.mark(); }
-  static ATerm term(propositional_variable_instantiation t)     { return t.term(); }
-  static ATerm* ptr(propositional_variable_instantiation& t)    { return &t.term(); }
-};
 
 template<>
 struct aterm_traits<pbes_fixpoint_symbol>

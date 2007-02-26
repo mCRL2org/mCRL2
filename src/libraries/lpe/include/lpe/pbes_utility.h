@@ -8,7 +8,6 @@
 #include "lpe/specification.h"
 #include "lpe/data_init.h"
 #include "lpe/data_utility.h"
-#include "lpe/pbes_init.h"
 #include "lpe/sort_init.h"
 #include "atermpp/algorithm.h"
 
@@ -147,7 +146,7 @@ class fresh_propositional_variable_generator
 inline
 data_expression pbes2data(const pbes_expression& p, const specification& spec)
 {
-  using namespace pbes_init;
+  using namespace pbes_expr;
   namespace d = lpe::data_init;
   namespace s = lpe::sort_init;
   
@@ -187,7 +186,7 @@ inline
 pbes_expression data2pbes(data_expression q)
 {
   namespace d = lpe::data_init;
-  namespace p = lpe::pbes_init;
+  namespace p = lpe::pbes_expr;
   namespace s = lpe::sort_init;
 
   data_expression head = q.head();
