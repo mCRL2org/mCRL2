@@ -17,7 +17,7 @@ test-suite aterm
       [ run make_term.cpp ]
       [ run constructors.cpp ]
       [ run is_quoted.cpp ]
-      [ run algorithm.cpp ]
+      [ run algorithm_test.cpp ]
       [ run operators.cpp ]
       [ run table_test.cpp ]
       [ run replace_test.cpp ]
