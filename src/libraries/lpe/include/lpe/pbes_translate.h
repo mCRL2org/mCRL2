@@ -15,7 +15,6 @@
 #include "atermpp/substitute.h"
 #include "lpe/data_functional.h"
 #include "lpe/data_utility.h"
-#include "lpe/data_init.h"
 #include "lpe/data_operators.h"
 #include "lpe/mucalculus.h"
 #include "lpe/mucalculus_init.h"
@@ -280,7 +279,7 @@ namespace pbes_timed
         gi = gi.substitute(make_list_substitution(yi, y));
 
         pbes_expression p1 = sat_bot(ai, alpha);
-        pbes_expression p2 = val(data_init::not_(ci));
+        pbes_expression p2 = val(data_expr::not_(ci));
         pbes_expression p3 = val(less_equal(ti, T));
         rhs = rhs.substitute(make_substitution(T, ti));
         rhs = rhs.substitute(assignment_list_substitution(gi));
@@ -349,7 +348,7 @@ namespace pbes_timed
         data_expression ck(i->condition());
         data_expression tk(i->time());
         data_variable_list yk = i->summation_variables();
-        pbes_expression p = exists(yk, and_(val(data_init::not_(ck)), val(greater(t, tk))));
+        pbes_expression p = exists(yk, and_(val(data_expr::not_(ck)), val(greater(t, tk))));
         v.push_back(p);
       }
       return and_(multi_or(v.begin(), v.end()), val(greater(t, T)));
@@ -559,7 +558,7 @@ namespace pbes_untimed
         ai = ai.substitute(make_list_substitution(yi, y));
         gi = gi.substitute(make_list_substitution(yi, y));
         pbes_expression p1 = sat_bot(ai, alpha);
-        pbes_expression p2 = val(data_init::not_(ci));
+        pbes_expression p2 = val(data_expr::not_(ci));
         rhs = rhs.substitute(assignment_list_substitution(gi));
 
         pbes_expression p = or_(or_(p1, p2), rhs);
@@ -751,7 +750,7 @@ pbes pbes_translate(state_formula f, specification spec, bool timed = false)
   }
   else
   {
-    propositional_variable_instantiation init(Xe, data_init::real(0) + fi + pi + Par(Xf, f));
+    propositional_variable_instantiation init(Xe, data_expr::real(0) + fi + pi + Par(Xf, f));
     return pbes(spec.data(), e, init);
   }
 }

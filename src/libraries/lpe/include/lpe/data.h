@@ -14,8 +14,7 @@
 #include "atermpp/aterm_access.h"
 #include "atermpp/utility.h"
 #include "lpe/identifier_string.h"
-#include "lpe/sort.h"
-#include "lpe/pretty_print.h"
+#include "lpe/data_expression.h"
 #include "lpe/soundness_checks.h"
 #include "libstruct.h"
 
@@ -28,107 +27,6 @@ using atermpp::aterm;
 using atermpp::arg1;
 using atermpp::arg2;
 using atermpp::arg3;
-
-// prototypes
-class data_expression;
-class data_variable;
-
-///////////////////////////////////////////////////////////////////////////////
-// data_expression_list
-/// \brief singly linked list of data expressions
-///
-typedef term_list<data_expression> data_expression_list;
-
-///////////////////////////////////////////////////////////////////////////////
-// data_expression
-/// \brief data expression.
-/// Represents a data expression or nil(!!!).
-class data_expression: public aterm_appl
-{
-  public:
-    data_expression()
-    {}
-
-    data_expression(aterm_appl term)
-      : aterm_appl(term)
-    {
-      assert(check_rule_DataExprOrNil(m_term));
-    }
-
-    data_expression(ATermAppl term)
-      : aterm_appl(term)
-    {
-      assert(check_rule_DataExprOrNil(m_term));
-    }
-
-    /// Returns the sort of the data expression.
-    ///
-    lpe::sort sort() const
-    {
-      ATermAppl result = gsGetSort(*this);
-      assert(!gsIsSortUnknown(result));
-      return lpe::sort(result);
-    }     
-
-    /// Returns true if the data expression equals 'nil' (meaning it has no
-    /// sensible value).
-    ///
-    bool is_nil() const
-    {
-      return *this == gsMakeNil();
-    }     
-
-    /// Returns true if the data expression equals 'true'.
-    /// Note that the term will not be rewritten first.
-    ///
-    bool is_true() const
-    {
-      assert(!is_nil());
-      return *this == gsMakeDataExprTrue();
-    }     
-
-    /// Returns true if the data expression equals 'false'.
-    /// Note that the term will not be rewritten first.
-    ///
-    bool is_false() const
-    {
-      assert(!is_nil());
-      return *this == gsMakeDataExprFalse();
-    }
-
-    /// Returns head of the data expression.
-    data_expression head() const
-    {
-      return gsGetDataExprHead(*this);
-    }
-
-    /// Returns arguments of the data expression.
-    data_expression_list arguments() const
-    {
-      return gsGetDataExprArgs(*this);
-    }  
-  
-    /// Applies a substitution to this data_expression and returns the result.
-    /// The Substitution object must supply the method aterm operator()(aterm).
-    ///
-    template <typename Substitution>
-    data_expression substitute(Substitution f) const
-    {
-      return data_expression(f(aterm(*this)));
-    }     
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// data_expression_list
-/// \brief singly linked list of data expressions
-///
-typedef term_list<data_expression> data_expression_list;
-
-inline
-bool is_data_expression(aterm_appl t)
-{
-  return gsIsDataExpr(t);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // data_variable
@@ -493,23 +391,11 @@ struct assignment_list_substitution
 /// INTERNAL ONLY
 namespace atermpp
 {
-using lpe::data_expression;
 using lpe::data_variable;
 using lpe::data_application;
 using lpe::data_operation;
 using lpe::data_assignment;
 using lpe::data_equation;
-
-template<>
-struct aterm_traits<data_expression>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(lpe::data_expression t)   { t.protect(); }
-  static void unprotect(lpe::data_expression t) { t.unprotect(); }
-  static void mark(lpe::data_expression t)      { t.mark(); }
-  static ATerm term(lpe::data_expression t)     { return t.term(); }
-  static ATerm* ptr(lpe::data_expression& t)    { return &t.term(); }
-};
 
 template<>
 struct aterm_traits<data_variable>

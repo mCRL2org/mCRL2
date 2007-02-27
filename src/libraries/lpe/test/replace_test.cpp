@@ -19,7 +19,7 @@
 
 #include "atermpp/atermpp.h"
 #include "atermpp/algorithm.h"
-#include "lpe/data_init.h"
+#include "lpe/data.h"
 #include "lpe/data_functional.h"
 
 using namespace atermpp;
@@ -41,7 +41,7 @@ struct add_zero
 
 void test_replace()
 {
-  using namespace lpe::data_init;
+  using namespace lpe::data_expr;
 
   data_variable d("d:D");
   data_variable e("e:D");

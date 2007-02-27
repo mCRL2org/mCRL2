@@ -4,7 +4,6 @@
 #include "atermpp/atermpp.h"
 #include "atermpp/algorithm.h"
 #include "lpe/data.h"
-#include "lpe/data_init.h"
 #include "lpe/data_utility.h"
 #include "lpe/sort.h"
 #include "lpe/specification.h"
@@ -14,7 +13,7 @@
 using namespace std;
 using namespace atermpp;
 using namespace lpe;
-using namespace lpe::data_init;
+using namespace lpe::data_expr;
 using namespace lpe::detail;
 
 struct compare_variable

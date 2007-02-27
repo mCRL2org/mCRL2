@@ -30,7 +30,6 @@
 
 //LPE Framework
 #include <lpe/data.h>
-#include <lpe/data_init.h>
 #include <lpe/data_functional.h>
 #include <lpe/data_utility.h>
 #include <lpe/function.h>
@@ -46,7 +45,7 @@
 using namespace std;
 using namespace atermpp;
 using namespace lpe;
-using namespace lpe::data_init;
+using namespace lpe::data_expr;
 
 namespace po = boost::program_options;
 
@@ -338,7 +337,7 @@ data_variable_list replace_enumerated_parameters(const lpe::specification& speci
   gsDebugMsg("Original process parameters: %s\n", process_parameters.to_string().c_str());
   
   fresh_variable_generator generator = fresh_variable_generator(aterm(specification));
-  generator.set_sort(sort_init::bool_());
+  generator.set_sort(sort_expr::bool_());
 
   // Transpose all process parameters, and replace those that are finite, and not bool with boolean variables.
   for (data_variable_list::iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)

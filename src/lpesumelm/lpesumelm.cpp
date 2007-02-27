@@ -32,12 +32,12 @@
 #include <lpe/linear_process.h>
 #include <lpe/specification.h>
 #include <lpe/data_functional.h>
-#include <lpe/data_init.h>
+#include <lpe/data.h>
 
 using namespace std;
 using namespace atermpp;
 using namespace lpe;
-using namespace lpe::data_init;
+using namespace lpe::data_expr;
 
 namespace po = boost::program_options;
 

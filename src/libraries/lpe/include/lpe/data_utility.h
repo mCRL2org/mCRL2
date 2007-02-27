@@ -13,7 +13,7 @@
 
 #include "boost/format.hpp"
 #include "lpe/data.h"
-#include "lpe/sort_init.h"
+#include "lpe/sort.h"
 #include "lpe/identifier_string.h"
 #include "atermpp/algorithm.h"
 #include "atermpp/aterm.h"
@@ -108,7 +108,7 @@ identifier_string fresh_identifier(std::string hint, Term context)
 
 /// Returns a variable that doesn't appear in context.
 template <typename Term>
-data_variable fresh_variable(std::string hint, Term context, lpe::sort s = sort_init::real())
+data_variable fresh_variable(std::string hint, Term context, lpe::sort s = sort_expr::real())
 {
   identifier_string id = fresh_identifier(hint, context);
   return data_variable(gsMakeDataVarId(id, s));
@@ -151,11 +151,11 @@ class fresh_variable_generator
 
   public:
     fresh_variable_generator()
-     : m_hint("t"), m_sort(sort_init::real())
+     : m_hint("t"), m_sort(sort_expr::real())
     { }
 
     template <typename Term>
-    fresh_variable_generator(Term context, std::string hint = "t", lpe::sort s = sort_init::real())
+    fresh_variable_generator(Term context, std::string hint = "t", lpe::sort s = sort_expr::real())
     {
       m_identifiers = identifiers(context);
       m_hint = hint;
@@ -235,7 +235,7 @@ class fresh_variable_generator
 
 /// Returns a variable list that doesn't contain terms that appear in context.
 template <typename Term>
-data_variable_list fresh_variable_list(unsigned int size, Term context, std::string hint, lpe::sort s = sort_init::real())
+data_variable_list fresh_variable_list(unsigned int size, Term context, std::string hint, lpe::sort s = sort_expr::real())
 {
   data_variable_list result;
   fresh_variable_generator generator(context, hint, s);

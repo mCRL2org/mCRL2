@@ -6,9 +6,9 @@
 
 #include "lpe/pbes.h"
 #include "lpe/specification.h"
-#include "lpe/data_init.h"
+#include "lpe/data.h"
 #include "lpe/data_utility.h"
-#include "lpe/sort_init.h"
+#include "lpe/sort.h"
 #include "atermpp/algorithm.h"
 
 namespace lpe {
@@ -147,8 +147,8 @@ inline
 data_expression pbes2data(const pbes_expression& p, const specification& spec)
 {
   using namespace pbes_expr;
-  namespace d = lpe::data_init;
-  namespace s = lpe::sort_init;
+  namespace d = lpe::data_expr;
+  namespace s = lpe::sort_expr;
   
   if (is_data(p)) {
     return val(p);
@@ -185,9 +185,9 @@ std::cout << "x = " << x << std::endl;
 inline
 pbes_expression data2pbes(data_expression q)
 {
-  namespace d = lpe::data_init;
+  namespace d = lpe::data_expr;
   namespace p = lpe::pbes_expr;
-  namespace s = lpe::sort_init;
+  namespace s = lpe::sort_expr;
 
   data_expression head = q.head();
   data_expression_list arguments = q.arguments();

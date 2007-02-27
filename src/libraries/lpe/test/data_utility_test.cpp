@@ -5,13 +5,12 @@
 #include <boost/test/minimal.hpp>
 #include "atermpp/atermpp.h"
 #include "lpe/data.h"
-#include "lpe/data_init.h"
 #include "lpe/data_functional.h"
 #include "lpe/data_utility.h"
 
 using namespace atermpp;
 using namespace lpe;
-using namespace lpe::data_init;
+using namespace lpe::data_expr;
 
 int test_main(int, char*[])
 {

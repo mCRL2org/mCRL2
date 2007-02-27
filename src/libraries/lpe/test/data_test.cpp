@@ -6,11 +6,11 @@
 #include "atermpp/aterm_access.h"
 #include "lpe/data_functional.h"
 #include "lpe/data_operators.h"
-#include "lpe/data_init.h"
+#include "lpe/data.h"
 
 using namespace lpe;
 using namespace atermpp;
-using namespace lpe::data_init;
+using namespace lpe::data_expr;
 
 int test_main(int, char*[])
 {

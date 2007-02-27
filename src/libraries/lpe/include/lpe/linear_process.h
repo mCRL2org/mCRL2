@@ -22,7 +22,6 @@
 #include "atermpp/utility.h"
 #include "lpe/action.h"
 #include "lpe/data.h"
-#include "lpe/data_init.h"
 #include "lpe/data_specification.h"
 #include "lpe/pretty_print.h"
 #include "lpe/detail/specification_utility.h"
@@ -223,11 +222,11 @@ class summand: public aterm_appl
         if (!i->is_well_typed())
           return false;
       }
-      if (has_time() && !data_init::is_real(m_time))
+      if (has_time() && !data_expr::is_real(m_time))
       {
         return false;
       }
-      if (!data_init::is_bool(m_condition))
+      if (!data_expr::is_bool(m_condition))
       {
         return false;
       }

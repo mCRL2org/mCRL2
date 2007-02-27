@@ -1,18 +1,121 @@
-///////////////////////////////////////////////////////////////////////////////
-/// \file data_init.h
-//
-/// Convenience functions for creating DataExpr formulas.
+#ifndef LPE_DATA_EXPRESSION_H
+#define LPE_DATA_EXPRESSION_H
 
-#ifndef LPE_DATA_INIT_H
-#define LPE_DATA_INIT_H
-
-#include "lpe/data.h"
-#include "lpe/sort_init.h"
-#include "lpe/detail/utility.h"
+#include <string>
+#include <cassert>
+#include "lpe/sort.h"
+#include "lpe/pretty_print.h"
+#include "lpe/soundness_checks.h"
+#include "lpe/detail/data_expr_utility.h"
+#include "libstruct.h"
 
 namespace lpe {
 
-namespace data_init {
+using atermpp::aterm_appl;
+using atermpp::term_list;
+using atermpp::aterm;
+
+// prototypes
+class data_expression;
+
+///////////////////////////////////////////////////////////////////////////////
+// data_expression_list
+/// \brief singly linked list of data expressions
+///
+typedef term_list<data_expression> data_expression_list;
+
+///////////////////////////////////////////////////////////////////////////////
+// data_expression
+/// \brief data expression.
+/// Represents a data expression or nil(!!!).
+class data_expression: public aterm_appl
+{
+  public:
+    data_expression()
+    {}
+
+    data_expression(aterm_appl term)
+      : aterm_appl(term)
+    {
+      assert(check_rule_DataExprOrNil(m_term));
+    }
+
+    data_expression(ATermAppl term)
+      : aterm_appl(term)
+    {
+      assert(check_rule_DataExprOrNil(m_term));
+    }
+
+    /// Returns the sort of the data expression.
+    ///
+    lpe::sort sort() const
+    {
+      ATermAppl result = gsGetSort(*this);
+      assert(!gsIsSortUnknown(result));
+      return lpe::sort(result);
+    }     
+
+    /// Returns true if the data expression equals 'nil' (meaning it has no
+    /// sensible value).
+    ///
+    bool is_nil() const
+    {
+      return *this == gsMakeNil();
+    }     
+
+    /// Returns true if the data expression equals 'true'.
+    /// Note that the term will not be rewritten first.
+    ///
+    bool is_true() const
+    {
+      assert(!is_nil());
+      return *this == gsMakeDataExprTrue();
+    }     
+
+    /// Returns true if the data expression equals 'false'.
+    /// Note that the term will not be rewritten first.
+    ///
+    bool is_false() const
+    {
+      assert(!is_nil());
+      return *this == gsMakeDataExprFalse();
+    }
+
+    /// Returns head of the data expression.
+    data_expression head() const
+    {
+      return gsGetDataExprHead(*this);
+    }
+
+    /// Returns arguments of the data expression.
+    data_expression_list arguments() const
+    {
+      return gsGetDataExprArgs(*this);
+    }  
+  
+    /// Applies a substitution to this data_expression and returns the result.
+    /// The Substitution object must supply the method aterm operator()(aterm).
+    ///
+    template <typename Substitution>
+    data_expression substitute(Substitution f) const
+    {
+      return data_expression(f(aterm(*this)));
+    }     
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// data_expression_list
+/// \brief singly linked list of data expressions
+///
+typedef term_list<data_expression> data_expression_list;
+
+inline
+bool is_data_expression(aterm_appl t)
+{
+  return gsIsDataExpr(t);
+}
+
+namespace data_expr {
   using detail::has_expression_type_level_0;
   using detail::has_expression_type_level_1;
   using detail::has_expression_type_level_2;
@@ -38,11 +141,11 @@ namespace data_init {
   inline bool is_implies(aterm_appl t) { return has_expression_type_level_2(t, gsMakeOpIdNameImp  ); }
   inline bool is_binder (aterm_appl t) { return gsIsBinder       (t); }
   inline bool is_where  (aterm_appl t) { return gsIsWhr          (t); }                                 
-  inline bool is_real   (aterm_appl t) { return sort_init::is_real(data_expression(t).sort()); }
-  inline bool is_int    (aterm_appl t) { return sort_init::is_int (data_expression(t).sort()); }
-  inline bool is_pos    (aterm_appl t) { return sort_init::is_pos (data_expression(t).sort()); }
-  inline bool is_nat    (aterm_appl t) { return sort_init::is_nat (data_expression(t).sort()); }
-  inline bool is_bool   (aterm_appl t) { return sort_init::is_bool(data_expression(t).sort()); }
+  inline bool is_real   (aterm_appl t) { return sort_expr::is_real(data_expression(t).sort()); }
+  inline bool is_int    (aterm_appl t) { return sort_expr::is_int (data_expression(t).sort()); }
+  inline bool is_pos    (aterm_appl t) { return sort_expr::is_pos (data_expression(t).sort()); }
+  inline bool is_nat    (aterm_appl t) { return sort_expr::is_nat (data_expression(t).sort()); }
+  inline bool is_bool   (aterm_appl t) { return sort_expr::is_bool(data_expression(t).sort()); }
   // TODO: The following three functions do not belong here anymore, we need to find
   // a better place for these. Note that they have been changed to make sure
   // that we know we are working with a Binder before we take the binding operator
@@ -154,10 +257,10 @@ where
   template <typename FwdIt>
   data_expression multi_or(FwdIt first, FwdIt last)
   {
-    using namespace data_init;
+    using namespace data_expr;
   
     if (first == last)
-      return data_init::false_();
+      return data_expr::false_();
     data_expression result = *first++;
     while (first != last)
     {
@@ -170,10 +273,10 @@ where
   template <typename FwdIt>
   data_expression multi_and(FwdIt first, FwdIt last)
   {
-    using namespace data_init;
+    using namespace data_expr;
   
     if (first == last)
-      return data_init::true_();
+      return data_expr::true_();
     data_expression result = *first++;
     while (first != last)
     {
@@ -182,8 +285,26 @@ where
     return result;
   }
 
-} // namespace data_init
+} // namespace data_expr
 
 } // namespace lpe
 
-#endif // LPE_DATA_INIT_H
+/// INTERNAL ONLY
+namespace atermpp
+{
+using lpe::data_expression;
+
+template<>
+struct aterm_traits<data_expression>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(lpe::data_expression t)   { t.protect(); }
+  static void unprotect(lpe::data_expression t) { t.unprotect(); }
+  static void mark(lpe::data_expression t)      { t.mark(); }
+  static ATerm term(lpe::data_expression t)     { return t.term(); }
+  static ATerm* ptr(lpe::data_expression& t)    { return &t.term(); }
+};
+
+} // namespace atermpp
+
+#endif // LPE_DATA_EXPRESSION_H
