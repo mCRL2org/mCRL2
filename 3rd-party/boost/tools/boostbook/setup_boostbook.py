@@ -4,7 +4,7 @@
 # right now it is used only be release scripts
 
 # User configuration
-DOCBOOK_XSL_VERSION = "1.71.0"
+DOCBOOK_XSL_VERSION = "1.71.1"
 DOCBOOK_DTD_VERSION = "4.5"
 FOP_VERSION = "0.20.5"
 FOP_MIRROR = "http://mirrors.ibiblio.org/pub/mirrors/apache/xml/fop/"
