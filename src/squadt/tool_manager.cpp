@@ -30,7 +30,7 @@ namespace squadt {
   namespace bf = boost::filesystem;
 
   /** \brief Socket connection option scheme for easy command generation */
-  const char* socket_connect_pattern    = "--si-connect=socket://%s:%s";
+  const char* socket_connect_pattern    = "--si-connect=sip://%s:%s";
 
   /** \brief Identifier option scheme for easy command generation */
   const char* identifier_pattern        = "--si-identifier=%s";
@@ -38,7 +38,7 @@ namespace squadt {
   /** \brief Identifier option scheme for easy command generation */
   const char* log_filter_level_pattern  = "--si-log-filter-level=%s";
 
-  const long tool_manager_impl::default_tcp_port = 10947;
+  const long tool_manager_impl::default_port = 10947;
 
   const boost::shared_ptr < sip::tool::capabilities > tool::no_capabilities(new sip::tool::capabilities());
 
@@ -47,7 +47,7 @@ namespace squadt {
 
   tool_manager_impl::tool_manager_impl() : sip::controller::communicator(), free_identifier(0) {
     /* Listen for incoming socket connections on the loopback interface with the default port */
-    impl->add_listener();
+    impl->add_listener(transport::ip_any, default_port);
 
     /* Set handler for incoming instance identification messages */
     add_handler(sip::message_instance_identification, boost::bind(&tool_manager_impl::handle_relay_connection, this, _1));
@@ -74,7 +74,7 @@ namespace squadt {
     execution::command c(t.get_location(), w);
 
     c.append_argument(boost::str(boost::format(socket_connect_pattern)
-                            % impl->get_local_host() % default_tcp_port));
+                            % transport::ip_loopback % default_port));
     c.append_argument(boost::str(boost::format(identifier_pattern)
                             % id));
     c.append_argument(boost::str(boost::format(log_filter_level_pattern)

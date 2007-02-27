@@ -34,7 +34,7 @@ namespace squadt {
     private:
  
       /** \brief The default TCP port for a tool manager */
-      static const long   default_tcp_port;
+      static const long   default_port;
 
       /** \brief Set of tool names that are assumed to be available */
       static char const*  default_tools[];

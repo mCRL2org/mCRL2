@@ -33,7 +33,7 @@ namespace transport {
   }
 
   /**
-   * @param p the peer to connect to
+   * \param p the peer to connect to
    **/
   void transporter::connect(transporter& p) {
     basic_transceiver::ptr t(new direct_transceiver(this));
@@ -46,8 +46,8 @@ namespace transport {
   }
 
   /**
-   * @param a an address
-   * @param p a port
+   * \param a an address
+   * \param p a port
    **/
   void transporter::connect(const ip_address_t& a, port_t const& p) {
     basic_transceiver::ptr c = socket_transceiver::create(this);
@@ -60,8 +60,8 @@ namespace transport {
   }
 
   /**
-   * @param h a hostname
-   * @param p a port
+   * \param h a hostname
+   * \param p a port
    **/
   void transporter::connect(const std::string& h, port_t const& p) {
     basic_transceiver::ptr c = socket_transceiver::create(this);
@@ -74,7 +74,7 @@ namespace transport {
   }
 
   /**
-   * @param t the connection to associate with this transporter
+   * \param t the connection to associate with this transporter
    **/
   void transporter::associate(const basic_transceiver::ptr& t) {
     boost::recursive_mutex::scoped_lock l(lock);
@@ -93,7 +93,7 @@ namespace transport {
   }
 
   /**
-   * @param t the transceiver that identifies the connection to be severed
+   * \param t the transceiver that identifies the connection to be severed
    *
    * \return a shared pointer to the transceiver that is removed
    **/
@@ -126,7 +126,7 @@ namespace transport {
   }
 
   /**
-   * @param n the number of the connection that is to be closed
+   * \param n the number of the connection that is to be closed
    **/
   void transporter::disconnect(size_t n) {
     assert(n < connections.size());
@@ -147,7 +147,7 @@ namespace transport {
   }
 
   /**
-   * @param m the directly connected peer
+   * \param m the directly connected peer
    **/
   void transporter::disconnect(transporter& m) {
     using namespace boost;
@@ -167,8 +167,8 @@ namespace transport {
   }
 
   /**
-   * @param a an address
-   * @param p a port
+   * \param a an address
+   * \param p a port
    **/
   void transporter::add_listener(const ip_address_t& a, port_t const& p) {
     basic_listener::ptr new_listener(new socket_listener(*this, a, p));
@@ -179,7 +179,19 @@ namespace transport {
   }
 
   /**
-   * @param n the number of the listener that is to be removed
+   * \param a an address
+   * \param p a port
+   **/
+  void transporter::add_listener(const host_name_t& a, port_t const& p) {
+    basic_listener::ptr new_listener(new socket_listener(*this, boost::asio::ip::address_v4::from_string(a), p));
+
+    listeners.push_back(new_listener);
+
+    reinterpret_cast < socket_listener* > (new_listener.get())->activate(new_listener);
+  }
+
+  /**
+   * \param n the number of the listener that is to be removed
    **/
   void transporter::remove_listener(size_t n) {
     assert(n < listeners.size());

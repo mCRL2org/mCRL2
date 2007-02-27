@@ -88,7 +88,7 @@ namespace transport {
       void connect(ip_address_t const& = ip_loopback, port_t const& = 0);
 
       /** \brief Creates socket connection to another transporter object (using a loopback connection by default) */
-      void connect(std::string const&, port_t const& = 0);
+      void connect(host_name_t const&, port_t const& = 0);
 
       /** \brief Disconnect all */
       void disconnect();
@@ -104,6 +104,9 @@ namespace transport {
 
       /** \brief Activate a socket listener */
       void add_listener(ip_address_t const& = ip_any, port_t const& port = 0);
+
+      /** \brief Activate a socket listener */
+      void add_listener(host_name_t const&, port_t const& port = 0);
 
       /** \brief Activate a socket listener by its number */
       void remove_listener(size_t number = 0);

@@ -25,7 +25,7 @@ namespace sip {
     const size_t argument_extractor::known_scheme_number = 2;
 
     const char*  argument_extractor::known_options[known_option_number] = { "--si-connect", "--si-identifier", "--si-log-filter-level" };
-    const char*  argument_extractor::known_schemes[known_scheme_number] = { "traditional", "socket" };
+    const char*  argument_extractor::known_schemes[known_scheme_number] = { "traditional", "sip" };
 
     /**
      * \param[in] cl the unparsed command line
@@ -176,14 +176,14 @@ namespace sip {
                 /* Take everything between s and t as hostname */
                 const size_t d = s - t;
 
-                std::string& host_name = dynamic_cast < socket_scheme< sip::message >* > (selected_scheme.get())->host_name;
+                std::string& host_name = static_cast < socket_scheme< sip::message >* > (selected_scheme.get())->host_name;
 
                 host_name.reserve(d);
                 host_name.assign(t, d);
                 host_name.resize(d);
 
                 /* The remaining string should be a port number */
-                dynamic_cast < socket_scheme< sip::message >* > (selected_scheme.get())->port = atol(++t);
+                static_cast < socket_scheme< sip::message >* > (selected_scheme.get())->port = atol(++s);
               }
 
               break;
@@ -205,7 +205,7 @@ namespace sip {
      * The following connection options are recognised and extracted from the command line arguments:
      *
      *  - --si-connect=\<scheme\>, where \<scheme\> is one of
-     *    - socket://\<host\>:\<port\> (for a socket connection)
+     *    - sip://\<host\>:\<port\> (for a socket connection)
      *    - traditional:// (for standard input/output communication)
      *  - --si-identifier=\<positive natural number\>
      *  - --si-log-filter-level=\<natural number\>

@@ -132,8 +132,7 @@ namespace transport {
                         ip::resolver_query_base::numeric_service|ip::resolver_query_base::address_configured)));
 
       if (i == ip::tcp::resolver::iterator()) {
-        i = resolver.resolve(ip::tcp::resolver::query("0.0.0.0", "",
-                        ip::resolver_query_base::numeric_service|ip::resolver_query_base::address_configured));
+        return (boost::asio::ip::address_v4::loopback().to_string());
       }
 
       return ((*i).endpoint().address().to_string());
