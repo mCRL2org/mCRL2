@@ -167,7 +167,7 @@ namespace transport {
           scheduler.run();
         }
         else {
-          if (e == asio::error::eof) {
+          if (e == asio::error::eof || e == asio::error::connection_reset) {
             /* The safe default error handling */
             handle_disconnect(this);
           }
@@ -183,6 +183,8 @@ namespace transport {
      * @param e reference to an asio error object
      **/
     void socket_transceiver::handle_write(socket_transceiver::wptr w, boost::shared_array < char >, const boost::system::error_code& e) {
+      using namespace boost;
+
       socket_transceiver::ptr s = w.lock();
 
       if (!w.expired()) {
@@ -194,7 +196,7 @@ namespace transport {
 
         /* Object still exists, so continue processing the write operation */
         if (e) {
-          if (e == boost::asio::error::eof) {
+          if (e == asio::error::eof || e == asio::error::connection_reset) {
             /* Connection was closed by peer */
             handle_disconnect(this);
           }

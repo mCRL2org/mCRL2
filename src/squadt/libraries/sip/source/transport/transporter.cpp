@@ -27,8 +27,8 @@ namespace transport {
     disconnect();
   
     /* Clean up listeners */
-    BOOST_FOREACH(listener_list::value_type i, listeners) {
-      i->shutdown();
+    for (listener_list::iterator i = listeners.begin(); i != listeners.end(); ++i) {
+      (*i)->shutdown();
     }
   }
 

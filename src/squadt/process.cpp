@@ -144,11 +144,8 @@ namespace squadt {
 
         if (::GetExitCodeProcess(pi.hProcess, &exit_code)) {
           ::PostThreadMessage(pi.dwThreadId, WM_CLOSE, 0, 0);
-          ::WaitForSingleObject(pi.hProcess, 1000);
 
-          ::GetExitCodeProcess(pi.hProcess, &exit_code);
-
-          if (exit_code == STILL_ACTIVE) {
+          if (::WaitForSingleObject(pi.hProcess, 1000) == WAIT_TIMEOUT) {
             TerminateProcess(pi.hProcess, 1);
           }
 
