@@ -165,10 +165,7 @@ namespace squadt {
   bool tool_manager_impl::exists(std::string const& n) const {
     using namespace boost;
 
-    return (tools.end() != std::find_if(tools.begin(), tools.end(), 
-               bind(std::equal_to< std::string >(), n, 
-                       bind(&tool::get_name,
-                               bind(&tool::sptr::get, _1)))));
+    return (find(n).get() != 0);
   }
 
   /**

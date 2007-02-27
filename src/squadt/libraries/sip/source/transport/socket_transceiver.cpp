@@ -6,7 +6,7 @@
 namespace transport {
   namespace transceiver {
 
-    unsigned int                   socket_transceiver::input_buffer_size = 4096;
+    unsigned int                   socket_transceiver::input_buffer_size = 8192;
 
     socket_scheduler               socket_transceiver::scheduler;
 
@@ -14,8 +14,8 @@ namespace transport {
 
     transport::port_t socket_transceiver::default_port = 10947;
 
-    boost::asio::socket_base::keep_alive option_keep_alive(true);
-    boost::asio::socket_base::linger     option_linger(false, 0);
+    boost::asio::socket_base::keep_alive  option_keep_alive(true);
+    boost::asio::socket_base::linger      option_linger(false, 0);
 
     /* Start listening */
     void socket_transceiver::activate(socket_transceiver::wptr w) {

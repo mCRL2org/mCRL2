@@ -22,6 +22,7 @@ alias configuration : : <os>NT <toolset>gcc :
 # MSVC
 alias configuration : : <os>NT <toolset>msvc :
        : <define>WIN32
+         <define>__WIN32__
          <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
          <toolset>msvc:<define>_SCL_SECURE_NO_DEPRECATE
          <include>$(TOP)/build/workarounds/msvc
