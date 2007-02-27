@@ -291,12 +291,8 @@ recursive_mutex::recursive_mutex()
 
     res = pthread_mutex_init(&m_mutex, &attr);
     {
-#   if defined(NDEBUG)
-        pthread_mutexattr_destroy(&attr);
-#   else
         int res = pthread_mutexattr_destroy(&attr);
         assert(res == 0);
-#   endif
     }
     if (res != 0)
         throw thread_resource_error();
@@ -451,12 +447,8 @@ recursive_try_mutex::recursive_try_mutex()
 
     res = pthread_mutex_init(&m_mutex, &attr);
     {
-#   if defined(NDEBUG)
-        pthread_mutexattr_destroy(&attr);
-#   else
         int res = pthread_mutexattr_destroy(&attr);
         assert(res == 0);
-#   endif
     }
     if (res != 0)
         throw thread_resource_error();
