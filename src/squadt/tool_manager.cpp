@@ -5,7 +5,6 @@
 #include <boost/format.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
-#include <boost/ref.hpp>
 #include <boost/foreach.hpp>
 
 #include <utility/visitor.h>
@@ -149,13 +148,12 @@ namespace squadt {
 
     tool::sptr t;
 
-    tool_list::const_iterator i = std::find_if(tools.begin(), tools.end(), 
-               bind(std::equal_to< std::string >(), n, 
-                       bind(&tool::get_name,
-                               bind(&tool::sptr::get, _1))));
+    for (tool_list::const_iterator i = tools.begin(); i != tools.end(); ++i) {
+      if ((*i)->get_name() == n) {
+        t = *i;
 
-    if (i != tools.end()) {
-      t = *i;
+        break;
+      }
     }
 
     return (t);
