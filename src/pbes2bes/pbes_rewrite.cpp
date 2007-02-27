@@ -98,7 +98,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 	}
 	else if (is_propositional_variable_instantiation(p))
 	{ // p is a propositional variable
-		aterm_string name = arg1(p);
+		identifier_string name = arg1(p);
 		data_expression_list parameters = rewriter->rewriteList(list_arg2(p));
 		result = pbes_expression(propositional_variable_instantiation(name, parameters));
 	}

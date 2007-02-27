@@ -44,8 +44,8 @@ int main()
 
   specification spec = mcrl22lpe(ABP_SPECIFICATION);
   linear_process lpe = spec.lpe();
-  std::set<aterm_string> ids = identifiers(aterm(lpe));
-  for (std::set<aterm_string>::iterator i = ids.begin(); i != ids.end(); ++i)
+  std::set<identifier_string> ids = identifiers(aterm(lpe));
+  for (std::set<identifier_string>::iterator i = ids.begin(); i != ids.end(); ++i)
   {
     cout << "- " << *i << endl;
   }

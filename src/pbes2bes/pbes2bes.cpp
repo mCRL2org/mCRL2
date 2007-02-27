@@ -40,7 +40,7 @@
 
 //ATERM-specific
 #include "atermpp/substitute.h"
-#include "atermpp/aterm_list.h"
+#include "lpe/identifier_string.h"
 #include "atermpp/utility.h"
 #include "atermpp/indexed_set.h"
 
@@ -184,7 +184,7 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 	for (equation_system::iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
 	{
 		propositional_variable propvar = eq_i->variable();
-		aterm_string propvar_name = propvar.name();
+		identifier_string propvar_name = propvar.name();
 		string propvar_name_string = propvar_name;				// string representation of the propvar_name
 		data_variable_list parameters = propvar.parameters();
 		

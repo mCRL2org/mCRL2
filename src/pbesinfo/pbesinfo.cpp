@@ -120,8 +120,8 @@ int main(int argc, char** argv)
 		bool pbes_closed = pbes_specification.is_closed();
 
 		// Vectors for storing intermediate results
-		vector<aterm_string> predvar_mu;
-		vector<aterm_string> predvar_nu;
+		vector<identifier_string> predvar_mu;
+		vector<identifier_string> predvar_nu;
 		vector<propositional_variable> predvar_data;
 				
 		// Integers for showing totals
@@ -180,7 +180,7 @@ int main(int argc, char** argv)
 		int mu_done = 1;
 		if (size_mu > 0)
 			cout << "   (";
-		for (vector<aterm_string>::iterator i = predvar_mu.begin(); i != predvar_mu.end(); i++)
+		for (vector<identifier_string>::iterator i = predvar_mu.begin(); i != predvar_mu.end(); i++)
 		{
 			cout << *i;
 			if (mu_done == size_mu)
@@ -197,7 +197,7 @@ int main(int argc, char** argv)
 		int nu_done = 1;
 		if (size_nu > 0)
 			cout << "   (";
-		for (vector<aterm_string>::iterator i = predvar_nu.begin(); i != predvar_nu.end(); i++)
+		for (vector<identifier_string>::iterator i = predvar_nu.begin(); i != predvar_nu.end(); i++)
 		{
 			cout << *i;
 			if (nu_done == size_nu)

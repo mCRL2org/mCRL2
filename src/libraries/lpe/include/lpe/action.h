@@ -7,8 +7,7 @@
 
 #include <cassert>
 #include "atermpp/atermpp.h"
-#include "atermpp/aterm_list.h"
-#include "atermpp/aterm_string.h"
+#include "lpe/identifier_string.h"
 #include "lpe/data.h"
 #include "lpe/pretty_print.h"
 #include "lpe/soundness_checks.h"
@@ -16,7 +15,6 @@
 namespace lpe {
 
 using atermpp::aterm_appl;
-using atermpp::aterm_string;
 using atermpp::term_list;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,7 +25,7 @@ using atermpp::term_list;
 class action_label: public aterm_appl
 {
   protected:
-    aterm_string m_name;
+    identifier_string m_name;
     sort_list m_sorts;
 
   public:
@@ -43,7 +41,7 @@ class action_label: public aterm_appl
       m_sorts = *i;
     }
 
-    action_label(const aterm_string& name, const sort_list &sorts)
+    action_label(const identifier_string& name, const sort_list &sorts)
      : aterm_appl(gsMakeActId(name, sorts)),
        m_name(name),
        m_sorts(sorts)
@@ -51,7 +49,7 @@ class action_label: public aterm_appl
 
     /// Returns the name of the action label.
     ///
-    aterm_string name() const
+    identifier_string name() const
     {
       return m_name;
     }
@@ -116,7 +114,7 @@ class action: public aterm_appl
     {}
 
     /// DEPRECATED (This constructor will disappear).
-    action(const aterm_string& name, const data_expression_list& arguments)
+    action(const identifier_string& name, const data_expression_list& arguments)
      : aterm_appl(gsMakeAction(gsMakeActId(name, apply(arguments, gsGetSort)), arguments)),
        m_arguments(arguments)
     {
@@ -140,7 +138,7 @@ class action: public aterm_appl
     /// DEPRECATED (This method will disappear).
     /// Returns the name of the action.
     ///
-    aterm_string name() const
+    identifier_string name() const
     {
       return m_label.name();
     }
@@ -213,7 +211,7 @@ class timed_action
     
     /// Returns a term representing the name of the first action.
     ///
-    aterm_string name() const
+    identifier_string name() const
     {
       return front(m_actions).name();
     }

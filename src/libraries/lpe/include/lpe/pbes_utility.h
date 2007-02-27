@@ -43,7 +43,7 @@ std::set<propositional_variable_instantiation> find_propositional_variable_insta
 class fresh_propositional_variable_generator
 {
   protected:
-    atermpp::set<aterm_string> m_identifiers;
+    atermpp::set<identifier_string> m_identifiers;
     std::string m_hint;                // used as a hint for operator()()
     data_variable_list m_parameters;   // used for operator()()
 
@@ -95,7 +95,7 @@ class fresh_propositional_variable_generator
     template <typename Term>
     void add_to_context(Term t)
     {
-      std::set<aterm_string> ids = identifiers(t);
+      std::set<identifier_string> ids = identifiers(t);
       std::copy(ids.begin(), ids.end(), std::inserter(m_identifiers, m_identifiers.end()));
     }
 
@@ -105,7 +105,7 @@ class fresh_propositional_variable_generator
     {
       for (Iter i = first; i != last; ++i)
       {
-        std::set<aterm_string> ids = identifiers(*i);
+        std::set<identifier_string> ids = identifiers(*i);
         std::copy(ids.begin(), ids.end(), std::inserter(m_identifiers, m_identifiers.end()));
       }
     }
@@ -114,12 +114,12 @@ class fresh_propositional_variable_generator
     /// The returned variable is added to the context.
     propositional_variable operator()()
     {
-      aterm_string id(m_hint);
+      identifier_string id(m_hint);
       int index = 0;
       while (m_identifiers.find(id) != m_identifiers.end())
       {   
         std::string name = str(boost::format(m_hint + "%02d") % index++);
-        id = aterm_string(name);
+        id = identifier_string(name);
       }
       m_identifiers.insert(id);
       return propositional_variable(id, m_parameters);
@@ -130,12 +130,12 @@ class fresh_propositional_variable_generator
     propositional_variable operator()(propositional_variable v)
     {
       std::string hint = v.name();
-      aterm_string id(hint);
+      identifier_string id(hint);
       int index = 0;
       while (m_identifiers.find(id) != m_identifiers.end())
       {   
         std::string name = str(boost::format(hint + "%02d") % index++);
-        id = aterm_string(name);
+        id = identifier_string(name);
       }
       m_identifiers.insert(id);
       return propositional_variable(id, v.parameters());
@@ -170,7 +170,7 @@ std::cout << "x = " << x << std::endl;
       data_expression d2 = gsMakeBinder(gsMakeExists(), list_arg1(p), d1);
       return d2;
   } else if (is_propositional_variable_instantiation(p)) {
-    aterm_string vname = arg1(p);
+    identifier_string vname = arg1(p);
     data_expression_list parameters = list_arg2(p);
     sort_list sorts = apply(parameters, gsGetSort);
     lpe::sort vsort = gsMakeSortArrowList(sorts, s::bool_());

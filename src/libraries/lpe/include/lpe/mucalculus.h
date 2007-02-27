@@ -11,7 +11,7 @@
 #include <cassert>
 #include "atermpp/aterm_traits.h"
 #include "atermpp/atermpp.h"
-#include "atermpp/aterm_string.h"
+#include "lpe/identifier_string.h"
 #include "lpe/detail/utility.h"
 #include "lpe/sort.h"
 #include "lpe/action.h"
@@ -22,7 +22,6 @@ namespace lpe {
 
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
-using atermpp::aterm_string;
 using atermpp::aterm;
 using atermpp::term_list;
 using lpe::detail::parse_variable;
@@ -213,7 +212,7 @@ class state_formula: public aterm_appl
     state_formula(std::string s)
     {
       std::pair<std::string, data_expression_list> p = parse_variable(s);
-      m_term = reinterpret_cast<ATerm>(gsMakeStateVar(aterm_string(p.first), p.second));
+      m_term = reinterpret_cast<ATerm>(gsMakeStateVar(identifier_string(p.first), p.second));
     }
 
     /// Returns true if every propositional variable occurring in the formula
@@ -319,7 +318,7 @@ data_expression time(state_formula t)
 
 /// Returns the name of a variable.
 inline
-aterm_string var_name(state_formula t)
+identifier_string var_name(state_formula t)
 {
   assert(gsIsStateVar(t) || gsIsStateMu(t) || gsIsStateNu(t));
   return arg1(t);
@@ -335,7 +334,7 @@ data_expression_list var_val(state_formula t)
 
 /// Returns the name of a mu-operator expression.
 inline
-aterm_string mu_name(state_formula t)
+identifier_string mu_name(state_formula t)
 {
   assert(gsIsStateMu(t) || gsIsStateNu(t));
   return arg1(t);

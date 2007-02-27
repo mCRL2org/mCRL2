@@ -7,18 +7,16 @@
 
 #include <iostream>
 #include <cassert>
-#include "atermpp/aterm_list.h"
 #include "atermpp/aterm_appl.h"
-#include "atermpp/aterm_string.h"
 #include "atermpp/aterm_access.h"
 #include "lpe/sort.h"
 #include "lpe/pretty_print.h"
+#include "lpe/identifier_string.h"
 
 namespace lpe {
 
 using atermpp::term_list;
 using atermpp::aterm_appl;
-using atermpp::aterm_string;
 
 ///////////////////////////////////////////////////////////////////////////////
 // function
@@ -42,7 +40,7 @@ class function: public aterm_appl
     {
     }
 
-    aterm_string name() const
+    identifier_string name() const
     {
       return arg1(*this);
     }

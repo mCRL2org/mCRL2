@@ -94,7 +94,7 @@ pbes_expression not_equal_data_parameters(action_list a, action_list b)
 }
 
 inline
-data_variable_list Par(aterm_string x, state_formula f)
+data_variable_list Par(identifier_string x, state_formula f)
 {
   using namespace lpe::state_init;
   using namespace lpe::state_frm;
@@ -354,12 +354,12 @@ namespace pbes_timed
       }
       return and_(multi_or(v.begin(), v.end()), val(greater(t, T)));
     } else if (s::is_var(f)) {
-      aterm_string X = var_name(f);
+      identifier_string X = var_name(f);
       data_expression_list d = var_val(f);
       data_variable_list xp = lpe.process_parameters();
       return propositional_variable_instantiation(X, T + d + xp + Par(X, f));
     } else if (s::is_mu(f) || (s::is_nu(f))) {
-      aterm_string X = mu_name(f);
+      identifier_string X = mu_name(f);
       data_expression_list d = mu_expressions(f);
       data_variable_list xp = lpe.process_parameters();
       return propositional_variable_instantiation(X, T + d + xp + Par(X, f));
@@ -395,7 +395,7 @@ namespace pbes_timed
     } else if (is_var(f)) {
       return equation_system();
     } else if (is_mu(f) || (is_nu(f))) {
-      aterm_string X = mu_name(f);
+      identifier_string X = mu_name(f);
       data_variable_list xf = mu_variables(f);
       data_variable_list xp = lpe.process_parameters();
       state_formula g = mu_form(f);
@@ -602,12 +602,12 @@ namespace pbes_untimed
       }
       return multi_or(v.begin(), v.end());
     } else if (s::is_var(f)) {
-      aterm_string X = var_name(f);
+      identifier_string X = var_name(f);
       data_expression_list d = var_val(f);
       data_variable_list xp = lpe.process_parameters();
       return propositional_variable_instantiation(X, d + xp + Par(X, f));
     } else if (s::is_mu(f) || (s::is_nu(f))) {
-      aterm_string X = mu_name(f);
+      identifier_string X = mu_name(f);
       data_expression_list d = mu_expressions(f);
       data_variable_list xp = lpe.process_parameters();
       return propositional_variable_instantiation(X, d + xp + Par(X, f));
@@ -643,7 +643,7 @@ namespace pbes_untimed
     } else if (is_var(f)) {
       return equation_system();
     } else if (is_mu(f) || (is_nu(f))) {
-      aterm_string X = mu_name(f);
+      identifier_string X = mu_name(f);
       data_variable_list xf = mu_variables(f);
       data_variable_list xp = lpe.process_parameters();
       state_formula g = mu_form(f);
@@ -715,7 +715,7 @@ pbes pbes_translate(state_formula f, specification spec, bool timed = false)
   if (!is_mu(f) && !is_nu(f))
   {
     aterm_list context = make_list(f, spec);
-    aterm_string X = fresh_identifier("X", context);
+    identifier_string X = fresh_identifier("X", context);
     f = nu(X, data_assignment_list(), f);
   }  
   linear_process lpe = spec.lpe();
@@ -738,9 +738,9 @@ pbes pbes_translate(state_formula f, specification spec, bool timed = false)
   // create initial state
   assert(e.size() > 0);
   pbes_equation e1 = e.front();
-  aterm_string Xe(e1.variable().name());
+  identifier_string Xe(e1.variable().name());
   assert(is_mu(f) || is_nu(f));
-  aterm_string Xf = mu_name(f);
+  identifier_string Xf = mu_name(f);
   data_expression_list fi = mu_expressions(f);
   data_expression_list pi = spec.initial_process().state();
 

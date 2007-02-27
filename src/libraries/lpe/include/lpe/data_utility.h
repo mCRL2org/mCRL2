@@ -14,17 +14,15 @@
 #include "boost/format.hpp"
 #include "lpe/data.h"
 #include "lpe/sort_init.h"
+#include "lpe/identifier_string.h"
 #include "atermpp/algorithm.h"
 #include "atermpp/aterm.h"
-#include "atermpp/aterm_list.h"
-#include "atermpp/aterm_string.h"
 #include "atermpp/set.h"
 #include "atermpp/utility.h"
 
 namespace lpe {
 
 using atermpp::aterm;
-using atermpp::aterm_string;
 using atermpp::aterm_traits;
 
 /// Test if a term is an identifier.
@@ -38,9 +36,9 @@ struct is_identifier
 
 /// Returns the set of all identifiers occurring in the term t.
 template <typename Term>
-std::set<aterm_string> identifiers(Term t)
+std::set<identifier_string> identifiers(Term t)
 {
-  std::set<aterm_string> result;
+  std::set<identifier_string> result;
   find_all_if(aterm_traits<Term>::term(t), is_identifier(), std::inserter(result, result.end()));
   return result;
 }
@@ -49,9 +47,9 @@ std::set<aterm_string> identifiers(Term t)
 template <typename Term>
 std::set<std::string> identifier_strings(Term t)
 {
-  std::set<aterm_string> s = identifiers(t);
+  std::set<identifier_string> s = identifiers(t);
   std::set<std::string> result;
-  for (std::set<aterm_string>::iterator i = s.begin(); i != s.end(); ++i)
+  for (std::set<identifier_string>::iterator i = s.begin(); i != s.end(); ++i)
     result.insert(*i);
   return result;
 }
@@ -87,7 +85,7 @@ data_variable_list fresh_variables(data_variable_list t, const std::set<std::str
   data_variable_list result;
   for (data_variable_list::iterator k = t.begin(); k != t.end(); ++k)
   {
-    aterm_string name(std::string(k->name()) + postfix);
+    identifier_string name(std::string(k->name()) + postfix);
     result = push_front(result, data_variable(gsMakeDataVarId(name, k->sort())));
   }
   return atermpp::reverse(result);
@@ -95,15 +93,15 @@ data_variable_list fresh_variables(data_variable_list t, const std::set<std::str
 
 /// Returns an identifier that doesn't appear in the term context.
 template <typename Term>
-aterm_string fresh_identifier(std::string hint, Term context)
+identifier_string fresh_identifier(std::string hint, Term context)
 {
-  std::set<aterm_string> ids = identifiers(context);
-  aterm_string s(hint);
+  std::set<identifier_string> ids = identifiers(context);
+  identifier_string s(hint);
   int index = 0;
   while (ids.find(s) != ids.end())
   {   
     std::string name = str(boost::format(hint + "%02d") % index++);
-    s = aterm_string(name);
+    s = identifier_string(name);
   }
   return s;
 }
@@ -112,7 +110,7 @@ aterm_string fresh_identifier(std::string hint, Term context)
 template <typename Term>
 data_variable fresh_variable(std::string hint, Term context, lpe::sort s = sort_init::real())
 {
-  aterm_string id = fresh_identifier(hint, context);
+  identifier_string id = fresh_identifier(hint, context);
   return data_variable(gsMakeDataVarId(id, s));
 }
 
@@ -147,7 +145,7 @@ std::set<std::string> find_variable_names(Term t)
 class fresh_variable_generator
 {
   protected:
-    atermpp::set<aterm_string> m_identifiers;
+    atermpp::set<identifier_string> m_identifiers;
     std::string m_hint;                  // used as a hint for operator()()
     lpe::sort m_sort;                    // used for operator()()
 
@@ -199,7 +197,7 @@ class fresh_variable_generator
     template <typename Term>
     void add_to_context(Term t)
     {
-      std::set<aterm_string> ids = identifiers(t);
+      std::set<identifier_string> ids = identifiers(t);
       std::copy(ids.begin(), ids.end(), std::inserter(m_identifiers, m_identifiers.end()));
     }
 
@@ -207,12 +205,12 @@ class fresh_variable_generator
     /// The returned variable is added to the context.
     data_variable operator()()
     {
-      aterm_string id(m_hint);
+      identifier_string id(m_hint);
       int index = 0;
       while (m_identifiers.find(id) != m_identifiers.end())
       {   
         std::string name = str(boost::format(m_hint + "%02d") % index++);
-        id = aterm_string(name);
+        id = identifier_string(name);
       }
       m_identifiers.insert(id);
       return data_variable(gsMakeDataVarId(id, m_sort));
@@ -223,12 +221,12 @@ class fresh_variable_generator
     data_variable operator()(data_variable v)
     {
       std::string hint = v.name();
-      aterm_string id(hint);
+      identifier_string id(hint);
       int index = 0;
       while (m_identifiers.find(id) != m_identifiers.end())
       {   
         std::string name = str(boost::format(hint + "%02d") % index++);
-        id = aterm_string(name);
+        id = identifier_string(name);
       }
       m_identifiers.insert(id);
       return data_variable(gsMakeDataVarId(id, v.sort()));

@@ -9,7 +9,7 @@
 #include <string>
 #include <utility>
 #include "atermpp/aterm_appl.h"
-#include "atermpp/aterm_string.h"
+#include "lpe/identifier_string.h"
 #include "lpe/data.h"
 #include "lpe/pretty_print.h"
 #include "libstruct.h"
@@ -28,7 +28,7 @@ using lpe::detail::parse_variable;
 class propositional_variable: public aterm_appl
 {
   protected:
-    aterm_string m_name;
+    identifier_string m_name;
     data_variable_list m_parameters;
 
   public:
@@ -39,7 +39,7 @@ class propositional_variable: public aterm_appl
     propositional_variable(std::string s)
     {
       std::pair<std::string, data_expression_list> p = parse_variable(s);
-      m_name      = aterm_string(p.first);
+      m_name      = identifier_string(p.first);
       m_parameters = p.second;
       m_term      = reinterpret_cast<ATerm>(gsMakePropVarDecl(m_name, m_parameters));
     }
@@ -53,7 +53,7 @@ class propositional_variable: public aterm_appl
       m_parameters = *i;
     }
 
-    propositional_variable(aterm_string name, data_variable_list parameters)
+    propositional_variable(identifier_string name, data_variable_list parameters)
       : aterm_appl(gsMakePropVarDecl(name, parameters)),
         m_name(name),
         m_parameters(parameters)
@@ -66,7 +66,7 @@ class propositional_variable: public aterm_appl
 //    }
 
     /// Returns the term containing the name of the propositional variable.
-    aterm_string name() const
+    identifier_string name() const
     {
       return m_name;
     }
@@ -97,7 +97,7 @@ bool is_propositional_variable(aterm_appl t)
 class propositional_variable_instantiation: public aterm_appl
 {
   protected:
-    aterm_string m_name;
+    identifier_string m_name;
     data_expression_list m_parameters;
 
   public:
@@ -108,7 +108,7 @@ class propositional_variable_instantiation: public aterm_appl
     propositional_variable_instantiation(std::string s)
     {
       std::pair<std::string, data_expression_list> p = parse_variable(s);
-      m_name        = aterm_string(p.first);
+      m_name        = identifier_string(p.first);
       m_parameters = p.second;
       m_term        = reinterpret_cast<ATerm>(gsMakePropVarInst(m_name, m_parameters));
     }
@@ -122,7 +122,7 @@ class propositional_variable_instantiation: public aterm_appl
       m_parameters = *i;
     }
 
-    propositional_variable_instantiation(aterm_string name, data_expression_list parameters)
+    propositional_variable_instantiation(identifier_string name, data_expression_list parameters)
       : aterm_appl(gsMakePropVarInst(name, parameters)),
         m_name(name),
         m_parameters(parameters)
@@ -135,7 +135,7 @@ class propositional_variable_instantiation: public aterm_appl
 //    }
 
     /// Returns the term containing the name of the propositional variable.
-    aterm_string name() const
+    identifier_string name() const
     {
       return m_name;
     }

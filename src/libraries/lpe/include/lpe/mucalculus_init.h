@@ -9,8 +9,6 @@
 
 namespace lpe {
 
-using atermpp::aterm_string;
-
 namespace act_init {
 
 // <ActFrm>       ::= <MultAct>
@@ -239,19 +237,19 @@ namespace state_init {
   }
 
   inline
-  state_formula var(aterm_string name, data_expression_list l)
+  state_formula var(identifier_string name, data_expression_list l)
   {
     return state_formula(gsMakeStateVar(name, l));
   }
 
   inline
-  state_formula mu(aterm_string name, data_assignment_list l, state_formula p)
+  state_formula mu(identifier_string name, data_assignment_list l, state_formula p)
   {
     return state_formula(gsMakeStateMu(name, l, p));
   }
 
   inline
-  state_formula nu(aterm_string name, data_assignment_list l, state_formula p)
+  state_formula nu(identifier_string name, data_assignment_list l, state_formula p)
   {
     return state_formula(gsMakeStateNu(name, l, p));
   }

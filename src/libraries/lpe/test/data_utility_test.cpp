@@ -30,16 +30,16 @@ int test_main(int, char*[])
   x = generator();
   BOOST_CHECK(x == data_variable("d02:D"));
 
-  std::set<aterm_string> ids = identifiers(e);
+  std::set<identifier_string> ids = identifiers(e);
   BOOST_CHECK(ids.size() == 8);
-  BOOST_CHECK(ids.find(aterm_string("d"))    != ids.end());
-  BOOST_CHECK(ids.find(aterm_string("d0"))   != ids.end());
-  BOOST_CHECK(ids.find(aterm_string("d00"))  != ids.end());
-  BOOST_CHECK(ids.find(aterm_string("D"))    != ids.end());
-  BOOST_CHECK(ids.find(aterm_string("Bool")) != ids.end());
-  BOOST_CHECK(ids.find(aterm_string("=="))   != ids.end());
-  BOOST_CHECK(ids.find(aterm_string("!="))   != ids.end());
-  BOOST_CHECK(ids.find(aterm_string("&&"))   != ids.end());
+  BOOST_CHECK(ids.find(identifier_string("d"))    != ids.end());
+  BOOST_CHECK(ids.find(identifier_string("d0"))   != ids.end());
+  BOOST_CHECK(ids.find(identifier_string("d00"))  != ids.end());
+  BOOST_CHECK(ids.find(identifier_string("D"))    != ids.end());
+  BOOST_CHECK(ids.find(identifier_string("Bool")) != ids.end());
+  BOOST_CHECK(ids.find(identifier_string("=="))   != ids.end());
+  BOOST_CHECK(ids.find(identifier_string("!="))   != ids.end());
+  BOOST_CHECK(ids.find(identifier_string("&&"))   != ids.end());
 
   data_variable_list l = fresh_variable_list(3, e, "e", lpe::sort("E"));
   data_variable_list::iterator i = l.begin();

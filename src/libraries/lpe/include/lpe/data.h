@@ -12,8 +12,8 @@
 #include "atermpp/atermpp.h"
 #include "atermpp/algorithm.h"
 #include "atermpp/aterm_access.h"
-#include "atermpp/aterm_string.h"
 #include "atermpp/utility.h"
+#include "lpe/identifier_string.h"
 #include "lpe/sort.h"
 #include "lpe/pretty_print.h"
 #include "lpe/soundness_checks.h"
@@ -23,7 +23,6 @@ namespace lpe {
 
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
-using atermpp::aterm_string;
 using atermpp::term_list;
 using atermpp::aterm;
 using atermpp::arg1;
@@ -164,7 +163,7 @@ class data_variable: public data_expression
 
     /// Returns the name of the data_variable.
     ///
-    aterm_string name() const
+    identifier_string name() const
     {
       return arg1(*this);
     }
@@ -239,13 +238,13 @@ class data_operation: public data_expression
       assert(check_rule_OpId(m_term));
     }
 
-    data_operation(aterm_string name, lpe::sort s)
+    data_operation(identifier_string name, lpe::sort s)
      : data_expression(gsMakeOpId(name, s))
     {}
 
     /// Returns the name of the data_operation.
     ///
-    aterm_string name() const
+    identifier_string name() const
     {
       return arg1(*this);
     }
