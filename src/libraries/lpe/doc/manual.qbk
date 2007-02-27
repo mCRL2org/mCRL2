@@ -1,0 +1,105 @@
+[library mCRL2
+    [version 2]
+    [authors [Wesselink, Wieger]]
+    [copyright 2005 Technische Universiteit Eindhoven]
+    [category string-text]
+    [purpose
+        The mCRL2 library contains data structures and algorithms
+        for the mCRL2 toolset.
+    ]
+    [license
+        Distributed under the Boost Software License, Version 1.0.
+        (See accompanying file LICENSE_1_0.txt or copy at
+        <ulink url="http://www.boost.org/LICENSE_1_0.txt">
+            http://www.boost.org/LICENSE_1_0.txt
+        </ulink>)
+    ]
+]
+
+[/  Images   ]
+
+[def __note__              [$images/note.png]]
+[def __alert__             [$images/caution.png]]
+[def __detail__            [$images/note.png]]
+[def __tip__               [$images/tip.png]]
+
+[/  Links   ]
+
+[def __boost__                 [@http://www.boost.org www.boost.org]]
+[def __mcrllib__               [@http://www.cwi.nl/~mcrl mCRL]]
+[def __mcrl__                  mCRL]
+[def __mcrl2__                 mCRL2]
+[def __atermpp__               [@http://www.win.tue.nl/~wieger/atermpp/doc/ atermpp]]
+
+[section: Introduction]
+__mcrl2__ is a language and tool set to study communicating processes with data.
+This document covers the data structures and algorithms used for developing the
+__mcrl2__ toolset.
+
+[h2 The language]
+__mcrl__ (micro CRL) is a process algebraic language that was especially
+developed to take account of data in the study of communicating processes. It is
+intended to study description and analysis techniques for (large)
+distributed systems. __mcrl2__ is a follow-up to the tool set, that contains an
+improved language for data specification.
+
+[h2 The toolset]
+The use of __mcrl2__ will be supported by a collection of tools, the __mcrl2__ toolset.
+This toolset is built around a linearized form of __mcrl2__, the so called Linear Process
+Operator (LPO) format. The __mcrl2__ toolset will comprise a well-formedness
+checker, a linearizer, a simulator, a state space generator as well as a few
+tools to analyze and optimize LPOs.
+
+[endsect]
+
+[section: Design considerations]
+
+[section: Library Requirements and Guidelines]
+Requirements and guidelines for the code are needed. For example a consistent naming
+scheme should be chosen. As an example of a set of guidelines, see
+[@http://www.boost.org/more/lib_guide.htm].
+
+[endsect]
+
+[section: Some notes on the current implementation]
+* The current implementation uses the __atermpp__ library, a C++ wrapper of the ATerm library.
+* Proper constructors for the data types (currently construction is exclusively via aterms) need to be added.
+* I/O functions need to be improved.
+* Several methods are still missing (for example search + replace) or not implemented.
+* Methods for modifying data types need to be added.
+* In a few cases the result of a method can have different types. For example DataEquation::condition is
+  a DataExpression, which can be either a DataVariable, an Operation or a DataApplication. It needs to
+  be seen if the current interface is a satisfactory solution for that.
+]
+
+[endsect]
+
+[section: Sequences in the interface]
+There are several classes that are containers of one or more sequences. For
+example, the class `Sort` has a domain consisting of a sequence of
+sort expressions. These sequences are currently modelled using iterators.
+by supplying `begin()` and `end()` member functions  to get to the start
+and end of the sequence.
+
+[endsect]
+
+[section: Predefined sorts]
+There are some sort identifiers like Bool, Nat, Int and Pos that occur frequently.
+For efficiency reasons these should not be constructed from scratch every time.
+A possible solution for this is to predefine these sort identifiers, to avoid that
+they are constructed too often.
+
+[endsect]
+
+[section: Search and replace]
+A very common operation in the __mcrl2__ library is search and replace, applied to
+data expressions(?). This should be approached in a generic way. On the one hand
+a sequence of substitutions of type `DataVariableId -> DataExpression` should be supported.
+But if this sequence is large this approach may become very inefficient. So it should
+also be possible to specify the replacements by means of a function `f : DataVariableId -> DataExpression`.
+
+[endsect]
+
+[endsect]
+
+[xinclude autodoc.boostbook]

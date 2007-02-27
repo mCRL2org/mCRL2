@@ -1,0 +1,539 @@
+[library ATerm++
+    [quickbook 1.3]
+    [version 0.1]
+    [authors [Wesselink, Wieger]]
+    [copyright 2004, 2005 Wieger Wesselink]
+    [category string-text]
+    [purpose
+        The ATerm++ library is a C++ wrapper around the ATerm library, which
+        is a library for manipulating tree-like data structures.
+    ]
+    [license ]
+]
+
+[/ QuickBook Document version 0.5 ]
+
+[/  Images   ]
+
+[def __note__              [$images/note.png]]
+[def __alert__             [$images/caution.png]]
+[def __warn__              [$images/warning.png]]
+[def __detail__            [$images/note.png]]
+[def __tip__               [$images/tip.png]]
+
+[/  Links   ]
+
+[def _aterm_                 [@http://www.cwi.nl/projects/MetaEnv/aterm/ CWI]]
+[def _boost_                 [@http://www.boost.org www.boost.org]]
+
+[section:preface Preface]
+
+[h2 Description]
+
+The ATerm++ library is a C++ wrapper around the ATerm Library, which is a C library for
+manipulating tree-like data structures. Important features of the ATerm Library are maximal
+subterm sharing, automatic garbage collection, and an efficient binary exchange format.
+The purpose of the ATerm++ Library is to provide the user with a common C++ interface, and to
+hide certain implementation details.
+
+[endsect]
+
+[section:userguide User's Guide]
+
+[section:introduction Introduction]
+
+[h2 What is the ATerm++ Library?]
+
+The ATerm++ Library is a library for manipulating tree-structured terms.
+The library is very space efficient, both in memory and on disk. This chapter
+describes how to use the ATerm++ Library.
+
+[blurb __warn__ The ATerm++ Library has special rules for memory management. It uses a
+very aggressive garbage collection method, that requires the user to explicitly protect
+certain terms from being automatically cleaned up. Make sure you read the
+section about [@aterm__/userguide/memory.html memory management] before starting to use the library.]
+[endsect]
+
+[section:installation Installing ATerm++]
+
+[h2 Building with ATerm++]
+
+The ATerm++ Library is a header-only template library, which means you don't need to alter your build scripts
+or link to any separate lib file to use it. All you need to do is `#include "atermpp/aterm.h"`.
+
+[h2 Requirements]
+
+The ATerm++ Library has two dependencies.
+
+In the first place it depends on the ATerm Library. You can download the latest version of the ATerm
+Library from _aterm_.
+
+[blurb __alert__ It is strongly recommended to use the ATerm Library version 2.4.2 or higher.
+Versions before 2.3.1 need to be patched with the following [@../aterm2.h.diff patch].]
+
+The ATerm++ Library also depends on Boost. You can download the latest version of the Boost
+libraries from _boost_. The ATerm++ Library requires Boost version 1.32 or higher. This dependency
+is header only, so there is no need to install any library from Boost. Specifying the Boost include
+path is all that is needed.
+
+[h2 Supported Compilers]
+
+Currently, the ATerm++ Library has only been tested on the following compilers:
+
+* Visual C++ .NET 2003 (7.1)
+* GNU C++ 3.4
+
+[blurb __note__ Please send any questions, comments and bug reports to J.W.Wesselink at tue dot nl.]
+
+[endsect]
+
+[section:quickstart Quick Start]
+
+There are 6 different types of terms supported, as shown in the following table.
+The class `aterm` is a base class for all other aterms.
+
+[table ATerm++ terms
+  [[type]              [description                                ]]
+  [[aterm]             [a general aterm                            ]]
+  [[aterm_appl]        [an aterm containing a function application ]]
+  [[aterm_int]         [an aterm containing an int                 ]]
+  [[aterm_real]        [an aterm containing a real                 ]]
+  [[aterm_blob]        [an aterm containing binary data            ]]
+  [[aterm_list]        [an aterm containing a list of aterms       ]]
+  [[aterm_place_holder][a place holder for aterms                  ]]
+]
+
+Besides that the library contains a few more data types that use
+aterms internally.
+
+[table ATerm++ other data types
+  [[type]              [description                                ]]
+  [[dictionary     ]   [a dictionary based on aterms               ]]
+  [[table          ]   [a table based on aterms                    ]]
+  [[indexed_set    ]   [an indexed set based on aterms             ]]
+]
+
+For the latter types alternatives are available in the C++
+standard library like `set`, `multiset`, `map` and `multimap`.
+
+[blurb __note__ The ATerm++ Library doesn't support user defined terms.]
+
+[endsect]
+
+[section:creation Creating an aterm]
+
+All aterm types have their own appropriate constructors for creating them:
+
+    aterm_int i(10);
+    aterm_real r(2.5);
+    aterm_appl f(function_symbol("f", 2), aterm("x"), aterm("y")); // represents f(x,y)
+
+There is also a convenience function `make_term` for easily creating aterms from
+strings: `make_term(const std::string& format, ...)`. The `format` argument is
+a string that may contain several patterns as given in the table below. For each
+occurrence of a pattern, one or more additional arguments need to be supplied to
+the function `make_term`.
+
+[table ATerm++ patterns
+  [[type          ] [pattern       ] [argument                    ]]
+  [[Application   ] [<appl>        ] [``string pattern, arguments`` ]]
+  [[Blob          ] [<blob>        ] [``int length, void* data   `` ]]
+  [[Integer       ] [<int>         ] [``int value                `` ]]
+  [[List          ] [<list>        ] [``aterm                    `` ]]
+  [[Placeholder   ] [<placeholder> ] [``string type              `` ]]
+  [[Real          ] [<real>        ] [``double value             `` ]]
+  [[String        ] [<str>         ] [``string pattern, arguments`` ]]
+  [[Term          ] [<term>        ] [``aterm                    `` ]]
+]
+
+The following program illustrates the usage of `make_term`.
+
+  #include <iostream>
+  #include "atermpp/atermpp.h"
+  
+  using namespace atermpp;
+  
+  void foo()
+  {
+    const int i       = 42;
+    const char* s     = "example";
+    const char* blob  = "12345678";
+    const double r    = 3.14;
+    const char *func  = "f";
+  
+    aterm_int  t0 = make_term("<int>" , i);         // integer value: 42
+    aterm      t1 = make_term("<str>" , func);      // quoted application: "f", no args
+    aterm_real t2 = make_term("<real>", r);         // real value: 3.14
+    aterm_blob t3 = make_term("<blob>", 8, blob);   // blob of size 8, data: 12345678
+  
+    aterm_list l0 = make_term("[]");
+    aterm_list l1 = make_term("[1,<int>,<real>]", i, r);
+    aterm_list l2 = make_term("[<int>,<list>]", i+1, l1); 
+  
+    aterm_appl a0 = make_term("<appl>", func);
+    aterm_appl a1 = make_term("<appl(<int>)>", func, i); 
+    aterm_appl a2 = make_term("<appl(<int>, <term>, <list>)>", func, 42, t3, l2);
+  }
+  
+  int main()
+  {
+    aterm bottom_of_stack;
+    aterm_init(bottom_of_stack);
+
+    foo();
+    return 0;
+  }
+
+The function `match` can be used to extract pieces of aterms, as illustrated by the
+following program fragment:
+
+  aterm t = make_term("and(a,not(b))");
+  aterm t1;
+  aterm t2;
+  if (match(t, "and(<term>,<term>)", t1, t2))
+  {
+    assert(t1 == aterm("a"));
+    assert(t2 == aterm("not(b)"));
+  }
+
+[endsect]
+
+[section:memory Memory management]
+
+The ATerm++ Library has its own garbage collector. The garbage collector is very
+efficient, but it relies on non-standard behavior of the compiler. An important
+consequence is that there are restrictions on the usage of aterms. This section
+describes how to safely use aterms.
+
+[h2 Initialization]
+
+[blurb __alert__ The `main` function of each program that uses the ATerm++ Library
+must start with the following initialization code:]
+
+    aterm bottom_of_stack;
+    aterm_init(bottom_of_stack);
+
+The ATerm++ Library needs the term `bottom_of_stack` to determine the program
+stack at runtime.
+
+[h2 Global / dynamically allocated aterms]
+
+The garbage collector of the ATerm Library assumes that all aterms that are in
+use can be found on the program stack. By default, all terms that are
+not on the stack will be garbage collected, unless the user explicitly prevents
+this by calling the `protect` method. 
+
+[blurb __alert__ Aterm objects that are not on the stack (like global
+or dynamically allocated variables) must be protected from being garbage collected,
+using the `protect` member function.]
+
+The following program illustrates this.
+
+    #include <string>
+    #include "atermpp/atermpp.h"
+    using namespace atermpp;
+
+    aterm a; // using global aterm variables is usually not a good idea
+    aterm b;
+    
+    aterm f(const std::string& s)
+    {
+      aterm x = make_term("f(" + s + ")"); // no need to protect x, since it will be created on stack
+      return x;
+    }
+    
+    int main()
+    {
+      aterm bottom_of_stack;
+      aterm_init(bottom_of_stack);
+
+      a.protect();          // Wrong! Protecting a term should be done after assignment.
+      a = aterm_int(4);
+
+      b = aterm_real(1.1);
+      b.protect();          // OK, now it is safe to use b
+      b = aterm_real(2.5);  // Forgot to unprotect b, so the term aterm_real(1.1)
+                            // will not be garbage collected.
+
+      aterm_appl* c = new aterm_appl(make_term("f(x)"));
+      c->protect();         // Term c is on the heap, so it must be protected.
+      // use c
+      c->unprotect();
+      delete c;             // After calling unprotect the term can be safely deleted.
+    }
+
+[h2 Compiler optimization]
+
+One should be very careful with choosing optimization flags when compiling
+code using the ATerm++ Library. It is known that the -O3 flag of the g++ compiler
+may result in optimizations that make the garbage collector fail, resulting in
+unexpected garbage collection of terms.
+
+[blurb __alert__ Using the g++ compiler, the -O3 flag should not be used.]
+
+The situation is even worse than this. Even a simple piece of code like this
+may potentially lead to problems:
+
+    int main()
+    {
+      aterm bottom_of_stack;
+      aterm_init(bottom_of_stack);
+      aterm_int i(4);
+      ...
+    }
+
+The reason for this is that the compiler is free to change the order of the first
+three statements of this program. As a result the object `i` may possibly lie outside
+the range `[bottom_of_stack, ...[`, and thus may be garbage collected any time.
+
+[blurb __note__ The safest way to prevent problems with unintended garbage
+collection of terms is to declare all terms as local variables of user
+defined functions.]
+
+[endsect]
+
+[section:atermproperties Aterm properties]
+
+The aterms in the ATerm++ Library have some properties that need to be understood
+to use the library effectively. The aterm classes all wrap pointers to ATerm objects
+of the underlying ATerm Library. Copying an aterm is thus a very cheap operation.
+
+[h2 Constant objects]
+
+A very important property of aterm objects is that they are constant.
+All member functions of the aterm classes (except the assignment operator) are constant.
+
+[blurb __note__ All aterm objects are constant. Whenever you want to
+modify an attribute of an aterm, a new object has to be created.]
+
+[h2 Conversions]
+
+The class `aterm` is a base class for all other aterm types. An essential feature
+of the underlying ATerm Library is that all derivatives of aterms can be converted
+back and forth to aterms, using unsafe C-style casts. To compensate for this, in
+the ATerm++ Library aterms and their derivatives may be converted into each other
+using the assignment operator, like in the following example:
+
+    aterm_int x(10);
+    aterm y = x;
+    aterm_int z = y;                    // will be type-checked in debug mode
+    assert(z.value() == 10);
+    aterm_appl f = make_term("f(x,y)"); // will be type-checked in debug mode 
+
+Of course, in the third and fifth statement the user is responsible for assuring
+that the right hand side of the assignment is of the right type. In debug mode
+this will be checked at runtime.
+
+There is a lot of C-code written in terms of the ATerm Library, containing
+`ATerm`, `ATermAppl` and `ATermList` in the interface. The ATerm++ Library
+integrates well with this code, since the types `aterm`, `aterm_appl` and
+`aterm_list` contain conversion operators into these types. For example, if
+we take a function with signature `void f(ATermList l, ATerm x)`, it can be
+used as follows:
+
+    aterm_list l;
+    aterm x = make_term("x");
+    f(l,x);
+
+In some cases there will be ambiguities, since for example an `aterm_appl` may
+be converted to both an `ATerm` and an `ATermAppl`. In such cases the user
+is required to 
+
+
+[h2 Maximal sharing]
+
+The ATerm Library uses maximal sharing of terms, which makes it very memory efficient.
+Any time a new aterm is created, a lookup is done to see if it already exists. If so,
+that term is reused and no new term is created. The following code fragment illustrates
+how this works:
+
+  aterm_appl f = make_term("f(g(a,b),c)").to_appl();
+  aterm_appl g = make_term("g(a,b)").to_appl();
+  assert(f.argument(0) == g);
+
+  aterm_list v = make_term("[1,2,3,4]").to_list();
+  aterm_list w = make_term("[0,1,2,3,4]").to_list();
+  assert(pop_front(w) == v);
+
+If two lists have the same tail, these tails will be shared.
+
+[h2 Annotations]
+Aterm objects may be annotated by other aterms. In the following
+example `y` is an annotated version of `x`.
+
+    aterm x("f(a)");
+    aterm label("label");
+    aterm annotation("annotation");
+    aterm y = set_annotation(x, label, annotation);
+    assert(x != y);
+
+[blurb __note__ Aterms with different annotations are considered to be different.]
+
+[endsect]
+
+[section:listapp Lists and function applications]
+
+The ATerm++ Library contains two types that can be used for creating hierarchies
+of terms: `term_list` (a singly linked list) and `aterm_appl` (a function application).
+Both can contain nested lists and function applications. For example:
+
+    term_list<aterm> v("[1,[2,3],4]");
+    aterm_appl f("f(a,(g(b,c))"));
+
+The class `term_list` models a constant singly linked list. It has the element type
+of the list as template argument. This type should be `aterm` or one of its derivatives.
+There is a special typedef for the most common use case:
+
+    typedef term_list<aterm> aterm_list;
+
+The class `term_list` has a C++ standard conforming iterator interface. Thus it operates
+well with the C++ Standard Library, as illustrated by the following example:
+
+    #include <algorithm>
+    #include <iostream>
+    #include "atermpp/atermpp.h"
+    
+    using namespace std;
+    using namespace atermpp;
+
+    struct counter
+    {
+      int& m_sum;   
+
+      counter(int& sum)
+        : m_sum(sum)
+      {}   
+
+      void operator()(const aterm_int& t)
+      {
+        m_sum += t.value();
+      }
+    };
+
+    int main()
+    {
+      aterm bottom_of_stack;
+      aterm_init(bottom_of_stack);
+
+      term_list<aterm_int> q = make_term("[1,2,3,4]");
+      int sum = 0;
+      for_each(q.begin(), q.end(), counter(sum));
+      assert(sum == 10);
+      
+      for (term_list<aterm_int>::iterator i = q.begin(); i != q.end(); ++i)
+      {
+        cout << i->value() << " ";
+      }     
+    }
+
+An `aterm_appl` is a function application. It consists of a function symbol (of type
+`function_symbol`) and a list of arguments (of type `aterm_list`).
+
+[blurb __alert__ The conversion to string doesn't always preserve the quoted attribute of a function
+application. See the example below.]
+
+    function_symbol s("\"F\"", 1, false); // s == "F", not quoted
+    aterm_appl f(s, aterm("x"));
+    string s = f.to_string();
+    aterm_appl g = make_term(s); 
+    assert(g.is_quoted());                // this unexpectedly fails
+
+[endsect]
+
+[section:algorithms Algorithms]
+
+Due to the fact that `aterm_list`s are read-only singly linked lists,
+care must be taken to design efficient algorithms for them. This section
+describes two algorithms that are part of the ATerm++ Library, and
+possibly more will be added in the future.
+
+[h3 Transform]
+A common pattern is to transform a list "[x0,x1,...,xn]" to a new list
+"[f(x0),f(x1),...,f(xn)]". An `aterm_list` can only be traversed
+efficiently from beginning to end, but can only be built efficiently
+from end to beginning, using the `push_front` function. The `transform`
+function is an efficient implementation of this pattern that uses the
+stack to store the intermediary results, and its usage is illustrated
+below.
+
+    #include <cassert>
+    #include "atermpp/atermpp.h"
+    #include "atermpp/transform.h"
+    
+    using namespace atermpp;
+
+    struct f
+    {
+      aterm operator()(const aterm& t) const
+      {
+        return make_term("f(" + t.to_string() + ")");
+      }
+    };
+    
+    int main()
+    {
+      aterm bottom_of_stack;
+      aterm_init(bottom_of_stack);
+    
+      aterm_list l = make_term("[a,b,c]");
+      aterm_list m = transform(l, f());
+      assert(m == make_term("[f(a),f(b),f(c)]"));
+    
+      return 0;
+    }
+
+[h3 Search and replace]
+Aterms are frequently used to store tree-like term structures. The `replace`
+can be used to replace a subterm with another in an arbitrary `aterm`. It
+recursively traverses all inner `aterm_appl`s and `aterm_list`s, and is
+illustrated below. Note that the current implementation is not necessarily
+optimal.
+
+    #include <cassert>
+    #include "atermpp/atermpp.h"
+    #include "atermpp/replace.h"
+    
+    using namespace atermpp;
+    
+    int main()
+    {
+      aterm bottom_of_stack;
+      aterm_init(bottom_of_stack);
+    
+      aterm_appl x = make_term("f(x,g(y))");
+      aterm_appl src = make_term("g(y)");
+      aterm_appl dest = make_term("h(z)");
+      aterm_appl t = replace(src, dest, x);
+      assert(t == make_term("f(x,h(z))"));
+    
+      return 0;
+    }
+
+[endsect]
+
+[/ section:implementation Implementation
+
+The ATerm++ Library is a thin wrapper around the ATerm Library. The ATerm++
+classes only contain a pointer to a struct that is maintained by the ATerm
+Library. Typical ATerm code contains many unsafe C-style casts, like this:
+
+    ATermList l;
+    int n = ATgetLength((ATerm) l);
+
+An attempt has been made to 
+]
+
+[/
+   The ATerm++ Library doesn't require any special initialization. The underlying ATerm
+   initialization function `ATInit` is automatically called by including the file
+   `atermpp/aterm.h`. If this behavior is undesired, it is possible to override this by defining the
+   symbol `ATERM_USER_INITIALIZATION`. Then the user is responsible for adding something
+   similar to
+   
+       aterm bottom_of_stack;
+       init(argc, argv, bottom_of_stack);
+]
+
+[endsect]
+
+[xinclude autodoc.boostbook]

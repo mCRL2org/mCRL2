@@ -1,0 +1,21 @@
+import boostbook : boostbook ;
+using quickbook ;
+
+doxygen autodoc 
+     : [ glob ../include/atermpp/*.h ] ;
+
+boostbook lpe
+    :
+      manual.qbk
+    :
+        <xsl:param>nav.layout=none
+        <xsl:param>boost.image.src=images/mcrl2.png
+        <xsl:param>boost.image.alt=mCRL2
+        <xsl:param>boost.image.w=294
+        <xsl:param>boost.image.h=70
+        <xsl:param>boost.root=../../../atermpp/include
+        <xsl:param>toc.max.depth=3
+        <xsl:param>toc.section.depth=3
+        <xsl:param>chunk.section.depth=3
+        <xsl:param>boost.doxygen.header.prefix=atermpp
+    ;
