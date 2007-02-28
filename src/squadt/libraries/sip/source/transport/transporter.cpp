@@ -98,13 +98,15 @@ namespace transport {
    * \return a shared pointer to the transceiver that is removed
    **/
   basic_transceiver::ptr transporter::disassociate(basic_transceiver* t) {
-    boost::recursive_mutex::scoped_lock l(lock);
-
     basic_transceiver::ptr p;
 
+    assert(t->owner == this);
+
+    boost::recursive_mutex::scoped_lock l(lock);
+
     connection_list::iterator i = std::find_if(connections.begin(), connections.end(),
-                      boost::bind(std::equal_to< const basic_transceiver* >(), t,
-                              boost::bind(&basic_transceiver::ptr::get, _1)));
+                    boost::bind(std::equal_to< const basic_transceiver* >(), t,
+                            boost::bind(&basic_transceiver::ptr::get, _1)));
 
     if (i != connections.end()) {
       p = *i;
