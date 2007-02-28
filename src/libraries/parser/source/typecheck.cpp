@@ -287,7 +287,7 @@ ATermAppl type_check_sort_expr_part(ATermAppl sort_expr, ATermAppl spec){
   return Result;
 }
 
-ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec){
+ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec, ATermTable Vars){
   assert(gsIsSortExpr(sort_expr));
   ATermAppl Result=NULL;
   gsDebugMsg ("type checking data expression part phase started\n");
@@ -315,11 +315,15 @@ ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, AT
       gsErrorMsg("type checking of data expressions failed (%T is not a data expressions)\n\n",data_expr);
       goto done;
     }
-  ATermTable Vars=ATtableCreate(63,50);
+
+  bool destroy_vars=(!Vars);
+  if(destroy_vars) Vars=ATtableCreate(63,50);
 
   ATermAppl data=data_expr;
   ATermAppl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,sort_expr);
-  ATtableDestroy(Vars);
+
+  if(destroy_vars) ATtableDestroy(Vars);
+
   if(Type) Result=data;
   else gsErrorMsg("type checking of data expressions failed.\n\n");
 
@@ -373,7 +377,7 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, lpe::specification &lpe_spec
   return Result;
 }
 
-ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lpe::specification &lpe_spec)
+ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lpe::specification &lpe_spec, ATermTable Vars)
 {
   //check correctness of the data expression in data_expr using
   //the LPE specification in lpe_spec
@@ -402,11 +406,13 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lpe::sp
         gsErrorMsg("type checking of data expressions failed (%T is not a data expressions)\n\n",data_expr);
         goto failed;
       }
-      ATermTable Vars=ATtableCreate(63,50);
+
+      bool destroy_vars=(!Vars);
+      if(destroy_vars) Vars=ATtableCreate(63,50);
 
       ATermAppl data=data_expr;
       ATermAppl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,sort_expr);
-      ATtableDestroy(Vars);
+      if(destroy_vars) ATtableDestroy(Vars);
       if(Type) Result=data;
       else gsErrorMsg("type checking of data expressions failed.\n\n");
     }

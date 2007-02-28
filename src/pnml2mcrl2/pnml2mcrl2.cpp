@@ -22,7 +22,7 @@ typedef struct {
   ATermTable place_name;	// place_id -> name
   ATermTable place_mark;	// place_id -> Nat
   ATermTable place_mark_mcrl2;  // place_id -> Bag(SortExpr)
-  ATermTable place_type;	// place_id -> SortExpr
+  ATermTable place_type_mcrl2;	// place_id -> SortExpr
   ATermTable trans_name;	// trans_id -> name
   ATermTable trans_predicate;	// trans_id -> DataExpr
   ATermTable arc_in;	        // arc_id -> trans_id x place_id
@@ -38,7 +38,7 @@ typedef struct {
   ATermTable trans_out;	        // trans_id -> List(arc_id) (arc_in+arc_reset)
   ATermTable place_inhibit;     // place_inhibit -> List(arc_id) (arc_inhibit)
   ATermTable place_reset;       // place_reset -> List(arc_id) (arc_reset)
-  ATermTable arc_type;          // arc_id -> SortExpr
+  ATermTable arc_type_mcrl2;    // arc_id -> SortExpr
   // not needed as thay are the same as arc_out 
   //ATermTable transition_inhibit;	// transition_inhibit -> List(arc_id) (arc_inhibit)
   // not needed as thay are the same as arc_in 
@@ -1652,7 +1652,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
           Type=type_check_sort_expr_part(Value,Prelude);
           if(!Type) {gsErrorMsg("Type-checking of sort expression %P as a type of place %T failed \n",Value,CurrentKey); return NULL;}
         }
-        ATtablePut(context.place_type, CurrentKey, (ATerm)Value);
+        ATtablePut(context.place_type_mcrl2, CurrentKey, (ATerm)Value);
 
         ATermAppl SortValue=Value;
         
@@ -1797,6 +1797,8 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 	  // therefore the arc will not be translated either!
 	  gsWarningMsg("The source or target of arc with id '%T' will not be translated, and thus this arc will not be translated either.\n", CurrentKey);
 	}
+	//not to forget, the name of the arc:
+	ATtablePut(context.arc_name, (ATerm)CurrentKey, (ATerm)ATAgetArgument(ATAgetFirst(AArcs),4));
       }
       // remove the entry from the list ATransitions
       AArcs = ATgetNext(AArcs);
@@ -1980,8 +1982,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 	ArcValueList = (ATermList)ATtableGet(context.trans_out, CurrentTrans);
 	ArcValueList = ATinsert(ArcValueList, CurrentArc);
 	ATtablePut(context.trans_out, CurrentTrans, (ATerm)ArcValueList);
-      }
-      Arcs = ATgetNext(Arcs);
+      }      Arcs = ATgetNext(Arcs);
     }
     Arcs = ATtableKeys(context.place_reset);
     gsDebugMsg("context.place_reset contains the following keys: %T\n", Arcs);
@@ -1989,6 +1990,86 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
       gsDebugMsg("Place '%T' has the following outgoing arcs: %T\n", ATgetFirst(Arcs), ATtableGet(context.place_reset, ATgetFirst(Arcs)));
       Arcs = ATgetNext(Arcs);
     }
+
+    //Filling in the color data for arcs
+    for(ATermList Arcs=ATtableKeys(context.arc_in);!ATisEmpty(Arcs);Arcs=ATgetNext(Arcs)){
+      ATermAppl Arc=ATAgetFirst(Arcs);
+      ATermAppl Place=ATAgetArgument(ATAtableGet(context.arc_in,(ATerm)Arc),1);
+      ATermAppl Type=ATAtableGet(context.place_type_mcrl2,(ATerm)Place);
+      ATtablePut(context.arc_type_mcrl2,(ATerm)Arc,(ATerm)Type);
+    }
+    for(ATermList Arcs=ATtableKeys(context.arc_reset);!ATisEmpty(Arcs);Arcs=ATgetNext(Arcs)){
+      ATermAppl Arc=ATAgetFirst(Arcs);
+      ATermAppl Place=ATAgetArgument(ATAtableGet(context.arc_reset,(ATerm)Arc),1);
+      ATermAppl Type=ATAtableGet(context.place_type_mcrl2,(ATerm)Place);
+      ATtablePut(context.arc_type_mcrl2,(ATerm)Arc,(ATerm)Type);
+    }
+    for(ATermList Arcs=ATtableKeys(context.arc_out);!ATisEmpty(Arcs);Arcs=ATgetNext(Arcs)){
+      ATermAppl Arc=ATAgetFirst(Arcs);
+      ATermAppl Place=ATAgetArgument(ATAtableGet(context.arc_out,(ATerm)Arc),0);
+      ATermAppl Type=ATAtableGet(context.place_type_mcrl2,(ATerm)Place);
+      ATtablePut(context.arc_type_mcrl2,(ATerm)Arc,(ATerm)Type);
+    }  
+    for(ATermList Arcs=ATtableKeys(context.arc_inhibit);!ATisEmpty(Arcs);Arcs=ATgetNext(Arcs)){
+      ATermAppl Arc=ATAgetFirst(Arcs);
+      ATermAppl Place=ATAgetArgument(ATAtableGet(context.arc_inhibit,(ATerm)Arc),0);
+      ATermAppl Type=ATAtableGet(context.place_type_mcrl2,(ATerm)Place);
+      ATtablePut(context.arc_type_mcrl2,(ATerm)Arc,(ATerm)Type);
+    }  
+
+    //Typechecking the transition predicates
+    //for each transition create a table of variables
+    //taking the names of the arcs as the names of the variables
+    //for uncolored arcs the names are ignored
+    //2 arcs with the same name are not allowed at 1 transition
+    //then typecheck the predicate w.r.t the variables and the prelude
+
+    ATermTable Vars=ATtableCreate(63,50);
+    for(ATermList Trans=ATtableKeys(context.trans_name);!ATisEmpty(Trans);Trans=ATgetNext(Trans)){
+      ATermAppl Tran=ATAgetFirst(Trans);
+
+      ATermList Arcs=ATLtableGet(context.trans_in,(ATerm)Tran);
+      if(!Arcs) Arcs=ATLtableGet(context.trans_out,(ATerm)Tran);
+      else {
+	ATermList Arcs2=ATLtableGet(context.trans_out,(ATerm)Tran);
+	if(Arcs2) Arcs=ATconcat(Arcs,Arcs2);
+      }
+
+      if(!Arcs) continue; //this transition has no ajusent arcs...
+      
+      for(;!ATisEmpty(Arcs);Arcs=ATgetNext(Arcs)){
+	ATermAppl Arc=ATAgetFirst(Arcs);
+
+	ATermAppl ArcName=ATAtableGet(context.arc_name,(ATerm)Arc);
+	if(!ArcName || ATisEqual(ArcName,Appl0)) continue;
+        ArcName=ATAgetArgument(ArcName,0); //to get rid of Id()	
+
+	if(ATAtableGet(Vars,(ATerm)ArcName)){
+	  ATtableDestroy(Vars);
+	  gsErrorMsg("transition %T has more than 1 adjucent arc with name %T.\n",Tran,ArcName);
+	  return NULL;
+	}
+	
+	ATermAppl ArcType=ATAtableGet(context.arc_type_mcrl2,(ATerm)Arc);
+	if(ATisEqual(ArcType,Appl0)) continue;
+	
+	ATtablePut(Vars, (ATerm)ArcName, (ATerm)ArcType);
+      }
+
+      
+      ATermAppl Value=ATAtableGet(context.trans_predicate,(ATerm)Tran);
+      if(!ATisEqual(Value,Appl0)){
+	ATermAppl Type=type_check_data_expr_part(Value,gsMakeSortIdBool(),Prelude,Vars);
+	if(!Type) {
+	  ATtableDestroy(Vars);
+	  gsErrorMsg("Type-checking of the mCRL2 predicate %P of transition %T failed\n",Value,Tran); 
+	  return NULL;
+	}
+      }
+      ATtableReset(Vars);
+    }
+    ATtableDestroy(Vars);
+
     
     gsDebugMsg("\n====================\n\n");
     
@@ -2094,7 +2175,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     context.place_name=ATtableCreate(63,50);
     context.place_mark=ATtableCreate(63,50);
     context.place_mark_mcrl2=ATtableCreate(63,50); 
-    context.place_type=ATtableCreate(63,50); 
+    context.place_type_mcrl2=ATtableCreate(63,50); 
     context.trans_name=ATtableCreate(63,50); 
     context.trans_predicate=ATtableCreate(63,50); 
     context.arc_in=ATtableCreate(63,50);  
@@ -2109,7 +2190,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     context.trans_out=ATtableCreate(63,50);  
     context.place_inhibit=ATtableCreate(63,50);   
     context.place_reset=ATtableCreate(63,50);   
-    context.arc_type=ATtableCreate(63,50);
+    context.arc_type_mcrl2=ATtableCreate(63,50);
    
     context.transitions=ATmakeList0();
     context.places=ATmakeList0();
@@ -2123,7 +2204,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     ATtableDestroy(context.place_name);
     ATtableDestroy(context.place_mark); 
     ATtableDestroy(context.place_mark_mcrl2);
-    ATtableDestroy(context.place_type); 
+    ATtableDestroy(context.place_type_mcrl2); 
     ATtableDestroy(context.trans_name); 
     ATtableDestroy(context.trans_predicate); 
     ATtableDestroy(context.arc_in);  
@@ -2139,7 +2220,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     ATtableDestroy(context.place_inhibit);   
     ATtableDestroy(context.place_reset);   
     ATtableDestroy(context.place_process_name);
-    ATtableDestroy(context.arc_type);
+    ATtableDestroy(context.arc_type_mcrl2);
 
     if(!Spec) {
       gsErrorMsg("Error while converting PNML ATerm to mCRL2 ATerm, conversion stopped!  \n");

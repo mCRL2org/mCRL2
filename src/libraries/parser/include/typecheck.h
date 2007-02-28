@@ -50,7 +50,7 @@ ATermAppl type_check_sort_expr_part(ATermAppl sort_expr, ATermAppl spec=NULL);
  *     NULL is returned.
  */
 
-ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lpe::specification &lpe_spec);
+ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lpe::specification &lpe_spec, ATermTable Vars=NULL);
 /*Pre: data_expr represents an mCRL2 data expression that adheres to the
  *     initial internal ATerm structure.
  *     sort_expr represents an mCRL2 sort expression that adheres to the
@@ -64,7 +64,7 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lpe::sp
  *     NULL is returned.
  */
 
-ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec=NULL);
+ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec=NULL, ATermTable Vars=NULL);
 /*Pre: data_expr represents an mCRL2 data expression that adheres to the
  *     initial internal ATerm structure.
  *     sort_expr represents an mCRL2 sort expression that adheres to the
