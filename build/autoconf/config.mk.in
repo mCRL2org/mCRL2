@@ -16,3 +16,8 @@ BJAM               = @BJAM@
 BOOST_BUILD       := $(BJAM) --prefix=${prefix}
 
 XSLTPROC           = @XSLTPROC@
+
+ifndef ($(XSLTPROC),)
+  MAN_MANIFEST = ../../build/bin/MAN.MANIFEST
+endif
+

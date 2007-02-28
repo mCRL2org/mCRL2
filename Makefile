@@ -5,27 +5,27 @@ CONFIG = build/config.mk
 # Creates an application bundle on Mac OS X
 .PHONY: all bjam install clean distclean distribution
 
-all: $(CONFIG) $(BJAM)
-	$(BOOST_BUILD)
-	@$(MAKE) -C src/doc
+all: $(CONFIG) $(BJAM) tools man
 
 install: $(CONFIG) $(BJAM)
 	$(BOOST_BUILD) --install
-	@$(MAKE) -C src/doc install
+	@install -d $(mandir)
+	@cp -rf ../../build/man/* $(mandir)
+
+tools:
+	$(BOOST_BUILD)
 
 clean:
-	@$(MAKE) -C src/doc clean
+	$(RM) -r autom4te.cache config.log core core.*
 	$(RM) -rf build/bin/*
-	$(RM) -r autom4te.cache config.log *.o *~ core core.*
+	$(RM) -rf build/man
+	$(RM) -rf build/web
 
 test: $(BJAM)
 	$(BJAM) ./status --preserve-test-targets
 
-distclean:
-	@${MAKE} -C src/doc distclean
-	$(RM) -r autom4te.cache *.o *.app *~ core core.*
+distclean: clean
 	$(RM) -r config.log config.status build/config.mk build/config.jam src/setup.h
-	$(RM) -rf build/bin/*
 	$(RM) -rf build/bin
 
 parsers:
@@ -41,6 +41,21 @@ parsers:
 	bison -p mcrl2 -d -o mcrl2parser.cpp mcrl2parser.yy; \
 	mv mcrl2parser.hpp ../include
 	cp /usr/include/FlexLexer.h build/workarounds
+
+$(MAN_MANIFEST): src/doc/*.xml
+	@cd ./src/doc; $(XSLTPROC) --stringparam man.output.subdirs.enabled 1 \
+	             --stringparam man.output.manifest.enabled 1 \
+	             --stringparam man.output.manifest.filename $(MAN_MANIFEST) \
+	             --stringparam man.output.in.separate.dir 1 \
+	             --stringparam man.output.base.dir ../../build/man/ \
+		     http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl index.xml
+man: $(MAN_MANIFEST)
+
+web: 
+	@cd ./src/doc; $(XSLTPROC) --stringparam base.dir ../../build/web/ \
+	             --stringparam html.stylesheet man.css \
+		     http://docbook.sourceforge.net/release/xsl/current/html/chunk.xsl index.xml; \
+	 install -m 0644 man.css ../../build/web/
 
 configure: build/autoconf/configure.ac
 	autoconf -o $@ -W all $<

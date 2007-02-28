@@ -71,9 +71,10 @@ else {
   import_user_config ;
 }
 using boostbook
-  : /tmp/MCRLC/3rd-party/boost/tools/boostbook/docbook-xsl-1.71.0
+  : /tmp/MCRLC/3rd-party/boost/tools/boostbook/docbook-xsl-1.71.1
   : /tmp/MCRLC/3rd-party/boost/tools/boostbook/docbook-dtd-4.5
-  ;
+  ; 
 using xsltproc : xsltproc ;
 using doxygen : doxygen ;
+using quickbook : /home/jwulp/quickbook ;
 using fop : /tmp/MCRLC/3rd-party/boost/tools/boostbook/fop-0.20.5/fop.sh : : java ;
