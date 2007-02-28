@@ -17,9 +17,8 @@ using namespace pbes_expr;
 //                 | <PropVarInst>
 pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification data, Rewriter *rewriter)
 {
-	// Initialize rewriter for data-terms (is_data) and parameters of propositional variable instantiations
-	
 	pbes_expression result;
+	
 	if (is_true(p))
 	{ // p is True
 		result = p;
@@ -31,8 +30,8 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 	else if (is_and(p))
 	{ // p = and(left, right)
 		//Rewrite left and right as far as possible
-		pbes_expression left = pbes_expression_rewrite(arg1(p), data, rewriter);
-		pbes_expression right = pbes_expression_rewrite(arg2(p), data, rewriter);
+		pbes_expression left = pbes_expression_rewrite(lhs(p), data, rewriter);
+		pbes_expression right = pbes_expression_rewrite(rhs(p), data, rewriter);
 		//Options for left and right
 		if (left.is_false() || right.is_false())
 			result = false_();
@@ -46,8 +45,8 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 	else if (is_or(p))
 	{ // p = or(left, right)
 		//Rewrite left and right as far as possible
-		pbes_expression left = pbes_expression_rewrite(arg1(p), data, rewriter);
-		pbes_expression right = pbes_expression_rewrite(arg2(p), data, rewriter);
+		pbes_expression left = pbes_expression_rewrite(lhs(p), data, rewriter);
+		pbes_expression right = pbes_expression_rewrite(rhs(p), data, rewriter);
 		//Options for left and right
 		if (left.is_true() || right.is_true())
 			result = true_();
@@ -60,46 +59,43 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 	}
 	else if (is_forall(p))
 	{ // p = forall(data_expression_list, pbes_expression)
-		data_variable_list data_vars = list_arg1(p);
-		pbes_expression pbexp = arg2(p);
-		//Rewrite expression as far as possible
-		pbes_expression expr = pbes_expression_rewrite(arg2(p), data, rewriter);
+		data_variable_list data_vars = quant_vars(p);
+		pbes_expression expr = pbes_expression_rewrite(quant_expr(p), data, rewriter);
 		//If expression is true or false -> return it
 		if (expr.is_true() || expr.is_false())
 			result = expr;
 		//If the forall  has only finite data variables, make a conjunction out of it.
 		else if (check_finite_list(data.constructors(), get_sorts(data_vars)))
 		{
-			pbes_expression_list and_list = get_and_expressions(get_all_possible_expressions(data_vars, pbexp, data), data, rewriter);
-			result = make_and_from_list(and_list);
+			pbes_expression_list and_list = get_and_expressions(get_all_possible_expressions(data_vars, expr, data), data, rewriter);
+			result = multi_and(and_list.begin(), and_list.end());
 		}
 		else
 			//Probably some advanced stuff is needed here to check finiteness...
-			result = forall(list_arg1(p), pbes_expression_rewrite(arg2(p), data, rewriter));
+			result = forall(data_vars, expr);
 	}
 	else if (is_exists(p))
 	{ // p = exists(data_expression_list, pbes_expression)
-		data_variable_list data_vars = list_arg1(p);
-		pbes_expression pbexp = arg2(p);
-		//Rewrite expression as far as possible
-		pbes_expression expr = pbes_expression_rewrite(arg2(p), data, rewriter);
+		data_variable_list data_vars = quant_vars(p);
+		pbes_expression expr = pbes_expression_rewrite(quant_expr(p), data, rewriter);
 		//If expression is true or false -> return it
 		if (expr.is_true() || expr.is_false())
 			result = expr;
 		//If the exists  has only finite data variables, make a conjunction out of it.
 		else if (check_finite_list(data.constructors(), get_sorts(data_vars)))
 		{
-			pbes_expression_list or_list = get_or_expressions(get_all_possible_expressions(data_vars, pbexp, data), data, rewriter);
-			result = make_or_from_list(or_list);
+			pbes_expression_list or_list = get_or_expressions(get_all_possible_expressions(data_vars, expr, data), data, rewriter);
+			result = multi_or(or_list.begin(), or_list.end());
 		}
 		else 
 			//Probably some advanced stuff is needed here to check finiteness...
-			result = exists(list_arg1(p), pbes_expression_rewrite(arg2(p), data, rewriter));
+			result = exists(data_vars, expr);
 	}
 	else if (is_propositional_variable_instantiation(p))
 	{ // p is a propositional variable
-		identifier_string name = arg1(p);
-		data_expression_list parameters = rewriter->rewriteList(list_arg2(p));
+		propositional_variable_instantiation propvar = p;
+		identifier_string name = propvar.name();
+		data_expression_list parameters = rewriter->rewriteList(propvar.parameters());
 		result = pbes_expression(propositional_variable_instantiation(name, parameters));
 	}
 	else
@@ -118,6 +114,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 
 pbes_expression_list get_all_possible_expressions(data_variable_list data_vars, pbes_expression pbexp, data_specification data)
 {
+	// Create a pbes_expression for each possible instantiations of the variables and put those in a list.
 	pbes_expression_list result;	
 	result = push_front(result, pbexp);
 	for (data_variable_list::iterator vars = data_vars.begin(); vars != data_vars.end(); vars++)
@@ -139,6 +136,8 @@ pbes_expression_list get_all_possible_expressions(data_variable_list data_vars, 
 
 pbes_expression_list get_and_expressions(pbes_expression_list and_list, data_specification data, Rewriter *rewriter)
 {
+	// From a pbes_expression_list: Remove all expressions which are true.
+	// Return a list with only one element False, if an element in the original list is false.
 	pbes_expression_list result;
 	bool is_pbes_false = false;
 	
@@ -160,27 +159,10 @@ pbes_expression_list get_and_expressions(pbes_expression_list and_list, data_spe
 	return reverse(result);
 }
 
-pbes_expression make_and_from_list(pbes_expression_list and_list)
-{
-	pbes_expression result;
-	if (and_list.size() > 1)
-	{
-		result = and_(front(and_list), make_and_from_list(pop_front(and_list)));
-	}
-	else if (and_list.size() == 1)
-	{
-		result = front(and_list);
-	}
-	else
-	{
-		gsErrorMsg("Cannot make pbes_expression out of empty list\n");
-		exit(1);
-	}
-	return result;
-}
-
 pbes_expression_list get_or_expressions(pbes_expression_list or_list, data_specification data, Rewriter *rewriter)
 {
+	// From a pbes_expression_list: Remove all expressions which are false.
+	// Return a list with only one element False, if an element in the original list is true.
 	pbes_expression_list result;
 	bool is_pbes_true = false;
 	
@@ -202,21 +184,3 @@ pbes_expression_list get_or_expressions(pbes_expression_list or_list, data_speci
 	return reverse(result);
 }
 
-pbes_expression make_or_from_list(pbes_expression_list or_list)
-{
-	pbes_expression result;
-	if (or_list.size() > 1)
-	{
-		result = or_(front(or_list), make_or_from_list(pop_front(or_list)));
-	}
-	else if (or_list.size() == 1)
-	{
-		result = front(or_list);
-	}
-	else
-	{
-		gsErrorMsg("Cannot make pbes_expression out of empty list\n");
-		exit(1);
-	}
-	return result;
-}

@@ -21,10 +21,3 @@ lpe::pbes_expression_list get_and_expressions(lpe::pbes_expression_list and_list
 // - a list with only non-false elements out of the or_list if all expressions are !true
 lpe::pbes_expression_list get_or_expressions(lpe::pbes_expression_list or_list, lpe::data_specification data, Rewriter *rewriter);
 
-// make_and_from_list creates a PBESAnd structure from a list of pbes_expressions 
-// So: [a, b, c] will be rewritten to: and(a, and(b,c))
-lpe::pbes_expression make_and_from_list(lpe::pbes_expression_list and_list);
-
-// make_or_from_list creates a PBESOr structure from a list of pbes_expressions 
-// So: [a, b, c] will be rewritten to: or(a, or(b,c))
-lpe::pbes_expression make_or_from_list(lpe::pbes_expression_list or_list);
