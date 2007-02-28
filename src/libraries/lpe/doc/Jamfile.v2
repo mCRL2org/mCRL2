@@ -1,8 +1,10 @@
 import boostbook : boostbook ;
 using quickbook ;
 
-doxygen autodoc 
-     : [ glob ../include/lpe/*.h ] ;
+doxygen autodoc
+     : [ glob ../include/lpe/*.h ]
+     : <prefix>lpe
+     ;
 
 boostbook lpe
     :
@@ -17,5 +19,4 @@ boostbook lpe
         <xsl:param>toc.max.depth=3
         <xsl:param>toc.section.depth=3
         <xsl:param>chunk.section.depth=3
-        <xsl:param>boost.doxygen.header.prefix=lpe
     ;
