@@ -117,6 +117,30 @@ namespace transport {
     return (p);
   }
 
+  /**
+   * \param t the transceiver that identifies the connection to be associated
+   * \pre t->owner != 0 && t->owner != this
+   **/
+  void transporter::associate(basic_transceiver* t) {
+    assert(t->owner != 0);
+
+    if (t->owner != this) {
+      boost::recursive_mutex::scoped_lock l(lock);
+      boost::recursive_mutex::scoped_lock ll(t->owner->lock);
+
+      for (connection_list::iterator i = t->owner->connections.begin(); i != t->owner->connections.end(); ++i) {
+        if (t == (*i).get()) {
+          connections.push_back(*i);
+          t->owner->connections.erase(i);
+
+          break;
+        }
+      }
+
+      t->owner = this;
+    }
+  }
+
   void transporter::disconnect() {
     boost::recursive_mutex::scoped_lock l(lock);
 

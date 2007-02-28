@@ -70,6 +70,9 @@ namespace transport {
       /** \brief Associate a connection with this transporter */
       void associate(const basic_transceiver::ptr&);
 
+      /** \brief Associate a connection with this transporter */
+      void associate(basic_transceiver*);
+
       /** \brief Disassociate a connection from this transporter */
       basic_transceiver::ptr disassociate(basic_transceiver*);
 
@@ -172,7 +175,7 @@ namespace transport {
     boost::recursive_mutex::scoped_lock l(lock);
     boost::recursive_mutex::scoped_lock tl(t->lock);
 
-    t->associate(c->owner->disassociate(c));
+    t->associate(c);
   }
 }
 
