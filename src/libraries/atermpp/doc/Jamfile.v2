@@ -2,7 +2,7 @@ import boostbook : boostbook ;
 using quickbook ;
 
 doxygen autodoc
-     : [ glob ../include/atermpp/*.h ] ;
+     : [ glob ../include/atermpp/*.h ]
      : <prefix>atermpp
      ;
 
