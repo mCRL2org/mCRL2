@@ -625,10 +625,58 @@ ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
     //part is a product data application; replace by data applications
     ATermList l = ATLgetArgument(part, 1);
     part = ATAgetArgument(part, 0);
-    while (!ATisEmpty(l))
-    {
-      part = gsMakeDataAppl(part, ATAgetFirst(l));
-      l = ATgetNext(l);
+    if (gsIsOpId(part)) {
+      ATermAppl Name = ATAgetArgument(part, 0);
+      if (Name == gsMakeOpIdNameListEnum()) {
+        //part is a list enumeration; replace by its internal representation
+        ATermAppl sort = gsGetSortExprResult(ATAgetArgument(part, 1));
+        if (ATgetLength(l) == 0) {
+          //enumeration consists of 0 elements
+          gsWarningMsg(
+            "%P can not be implemented because it has 0 elements\n", part);
+        } else {
+          //make cons list
+          l = ATreverse(l);
+          part = gsMakeDataExprEmptyList(sort);
+          while (!ATisEmpty(l))
+          {
+            part = gsMakeDataExprCons(ATAgetFirst(l), part);
+            l = ATgetNext(l);
+          }
+        }
+      } else if (Name == gsMakeOpIdNameSetEnum()) {
+        //part is a set enumeration; replace by a set comprehension
+        ATermAppl sort = gsGetSortExprResult(ATAgetArgument(part, 1));
+        if (ATgetLength(l) == 0) {
+          //enumeration consists of 0 elements
+          gsWarningMsg(
+            "%P can not be implemented because it has 0 elements\n", part);
+        } else {
+          part = impl_set_enum(l, sort);
+        }
+      } else if (Name == gsMakeOpIdNameBagEnum()) {
+        //part is a bag enumeration; replace by a bag comprehension
+        ATermAppl sort = gsGetSortExprResult(ATAgetArgument(part, 1));
+        if (ATgetLength(l) == 0) {
+          //enumeration consists of 0 elements
+          gsWarningMsg(
+            "%P can not be implemented because it has 0 elements\n", part);
+        } else {
+          part = impl_bag_enum(l, sort);
+        }
+      } else {
+        while (!ATisEmpty(l))
+        {
+          part = gsMakeDataAppl(part, ATAgetFirst(l));
+          l = ATgetNext(l);
+        }
+      }
+    } else {
+      while (!ATisEmpty(l))
+      {
+        part = gsMakeDataAppl(part, ATAgetFirst(l));
+        l = ATgetNext(l);
+      }
     }
   } else if (gsIsDataExprNumber(part)) {
     //part is a number; replace by its internal representation
@@ -643,39 +691,6 @@ ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
     else //sort of part is wrong
       gsWarningMsg("%P can not be implemented because its sort differs from "
         "Pos, Nat or Int\n", part);
-  } else if (gsIsListEnum(part)) {
-    //part is a list enumeration; replace by its internal representation
-    ATermList elts = ATLgetArgument(part, 0);
-    ATermAppl sort = ATAgetArgument(part, 1);
-    if (ATgetLength(elts) == 0) {
-      //enumeration consists of 0 elements
-      gsWarningMsg(
-        "%P can not be implemented because it has 0 elements\n", part);
-    } else {
-      //make cons list
-      elts = ATreverse(elts);
-      part = gsMakeDataExprEmptyList(sort);
-      while (!ATisEmpty(elts))
-      {
-        part = gsMakeDataExprCons(ATAgetFirst(elts), part);
-        elts = ATgetNext(elts);
-      }
-    }
-  } else if (gsIsSetEnum(part) || gsIsBagEnum(part)) {
-    //part is a set/bag enumeration; replace by a set/bag comprehension
-    ATermList elts = ATLgetArgument(part, 0);
-    ATermAppl sort = ATAgetArgument(part, 1);
-    if (ATgetLength(elts) == 0) {
-      //enumeration consists of 0 elements
-      gsWarningMsg(
-        "%P can not be implemented because it has 0 elements\n", part);
-    } else {
-      if (gsIsSetEnum(part)) {
-        part = impl_set_enum(elts, sort);
-      } else { //gsIsBagEnum(part)
-        part = impl_bag_enum(elts, sort);
-      }
-    }
   } else if (gsIsBinder(part)) {
     ATermAppl binding_operator = ATAgetArgument(part, 0);
     if (gsIsSetBagComp(binding_operator)) {
@@ -856,18 +871,22 @@ ATermAppl impl_bag_enum(ATermList elts, ATermAppl sort_expr)
   //introduce a fresh variable
   ATermAppl var =
     gsMakeDataVarId(gsFreshString2ATermAppl("x", (ATerm) elts, true),
-      gsGetSort(ATAgetArgument(ATAgetFirst(elts),0)));
+      gsGetSort(ATAgetFirst(elts)));
   //make body for the lambda abstraction
   elts = ATreverse(elts);
   ATermAppl elt = ATAgetFirst(elts);
-  result = gsMakeDataExprIf(gsMakeDataExprEq(var, ATAgetArgument(elt, 0)),
-    ATAgetArgument(elt, 1), gsMakeDataExprC0());
+  elts = ATgetNext(elts);
+  ATermAppl amt = ATAgetFirst(elts);
+  result = gsMakeDataExprIf(gsMakeDataExprEq(var, elt),
+    amt, gsMakeDataExprC0());
   elts = ATgetNext(elts);
   while (!ATisEmpty(elts)) {
     elt = ATAgetFirst(elts);
+    elts = ATgetNext(elts);
+    amt = ATAgetFirst(elts);
     result = gsMakeDataExprAdd(
-      gsMakeDataExprIf(gsMakeDataExprEq(var, ATAgetArgument(elt, 0)),
-      ATAgetArgument(elt, 1), gsMakeDataExprC0()), result);
+      gsMakeDataExprIf(gsMakeDataExprEq(var, elt),
+      amt, gsMakeDataExprC0()), result);
     elts = ATgetNext(elts);
   }
   //make lambda abstraction
@@ -897,7 +916,7 @@ void get_free_vars_appl(ATermAppl data_expr, ATermList bound_vars,
     }
   } else if (gsIsOpId(data_expr)) {
     //data_expr is an operation identifier or a number; do nothing
-  } else if (gsIsDataAppl(data_expr) || gsIsBagEnumElt(data_expr)) {
+  } else if (gsIsDataAppl(data_expr)) {
     //data_expr is a data application or a bag enumeration element; get free
     //variables from the arguments
     get_free_vars_appl(ATAgetArgument(data_expr, 0), bound_vars, p_free_vars);
@@ -907,10 +926,6 @@ void get_free_vars_appl(ATermAppl data_expr, ATermList bound_vars,
     //arguments
     get_free_vars_appl(ATAgetArgument(data_expr, 0), bound_vars, p_free_vars);
     get_free_vars_list(ATLgetArgument(data_expr, 1), bound_vars, p_free_vars);
-  } else if (gsIsListEnum(data_expr) || gsIsSetEnum(data_expr) ||
-      gsIsBagEnum(data_expr)) {
-    //data_expr is an enumeration; get free variables from the elements
-    get_free_vars_list(ATLgetArgument(data_expr, 0), bound_vars, p_free_vars);
   } else if (gsIsBinder(data_expr)) {
     ATermAppl binding_operator = ATAgetArgument(data_expr, 0);
     if (gsIsSetBagComp(binding_operator) || gsIsSetComp(binding_operator)

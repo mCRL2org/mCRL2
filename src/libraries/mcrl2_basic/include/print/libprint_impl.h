@@ -71,6 +71,23 @@ static void PRINT_FUNC(PrintPart_List)(PRINT_OUTTYPE OutStream,
        - two successive parts are separated by Separator, if it is not NULL
 */
 
+static void PRINT_FUNC(PrintPart_BagEnum)(PRINT_OUTTYPE OutStream,
+  const ATermList Parts, t_pp_format pp_format, bool ShowSorts, int PrecLevel,
+  const char *Terminator, const char *Separator);
+/*Pre: OutStream points to a stream to which can be written
+       Parts is a Bag Enumeration containing parts of the internal format
+       pp_format != ppInternal
+       ShowSorts indicates if sorts should be shown for the part
+       PrecLevel indicates the precedence level of the context of the parts
+       0 <= PrecLevel
+  Post:A textual representation of Parts is written to OutStream using method
+       pp_format. In this textual representation:
+       - PrecLevel and ShowSort are distributed over the parts
+       - each part is terminated by Terminator, if it is not NULL
+       - two successive parts are separated by Separator, if it is not NULL
+*/
+
+
 static void PRINT_FUNC(PrintEqns)(PRINT_OUTTYPE OutStream,
   const ATermList DataEqns, t_pp_format, bool ShowSorts, int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
@@ -433,14 +450,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     //print data expression
     PRINT_FUNC(dbg_prints)("printing data expression\n");
     PRINT_FUNC(PrintDataExpr)(OutStream, Part, pp_format, ShowSorts, PrecLevel);
-  } else if (gsIsBagEnumElt(Part)) {
-    //print bag enumeration element
-    PRINT_FUNC(dbg_prints)("printing bag enumeration element\n");
-    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0),
-      pp_format, ShowSorts, 0);
-    PRINT_FUNC(fprints)(OutStream, ": ");
-    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1),
-      pp_format, ShowSorts, 0);
+
   } else if (gsIsWhrDecl(Part)) {
     //print where declaration element
     PRINT_FUNC(dbg_prints)("printing where declaration\n");
@@ -814,6 +824,28 @@ void PRINT_FUNC(PrintPart_List)(PRINT_OUTTYPE OutStream,
   }
 }
 
+void PRINT_FUNC(PrintPart_BagEnum)(PRINT_OUTTYPE OutStream,
+  const ATermList Parts, t_pp_format pp_format, bool ShowSorts, int PrecLevel,
+  const char *Terminator, const char *Separator)
+{
+  ATermList l = Parts;
+  while (!ATisEmpty(l)) {
+    if (!ATisEqual(l, Parts) && Separator != NULL) {
+      PRINT_FUNC(fprints)(OutStream, Separator);
+    }
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetFirst(l),
+      pp_format, ShowSorts, PrecLevel);
+    l = ATgetNext(l);
+    PRINT_FUNC(fprints)(OutStream, ": ");
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetFirst(l),
+      pp_format, ShowSorts, PrecLevel);
+    if (Terminator != NULL) {
+      PRINT_FUNC(fprints)(OutStream, Terminator);
+    }
+    l = ATgetNext(l);
+  }
+}
+
 void PRINT_FUNC(PrintEqns)(PRINT_OUTTYPE OutStream, const ATermList Eqns,
   t_pp_format pp_format, bool ShowSorts, int PrecLevel)
 {
@@ -1055,6 +1087,27 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(fprints)(OutStream, "[");
         PRINT_FUNC(PrintListEnumElts)(OutStream, DataExpr, pp_format, ShowSorts);
         PRINT_FUNC(fprints)(OutStream, "]");
+
+      } else if (gsIsDataExprListEnum(Head)) {
+        //print list enumeration
+        PRINT_FUNC(dbg_prints)("printing list enumeration\n");
+        PRINT_FUNC(fprints)(OutStream, "[");
+        PRINT_FUNC(PrintPart_List)(OutStream, Args,
+          pp_format, ShowSorts, 0, NULL, ", ");
+        PRINT_FUNC(fprints)(OutStream, "]");
+      } else if (gsIsDataExprSetEnum(Head)) {
+        //print set/bag enumeration
+        PRINT_FUNC(dbg_prints)("printing set enumeration\n");
+        PRINT_FUNC(fprints)(OutStream, "{");
+        PRINT_FUNC(PrintPart_List)(OutStream, Args,
+          pp_format, ShowSorts, 0, NULL, ", ");
+        PRINT_FUNC(fprints)(OutStream, "}");
+      } else if (gsIsDataExprBagEnum(Head)) {
+        //print bag enumeration
+        PRINT_FUNC(fprints)(OutStream, "{");
+        PRINT_FUNC(PrintPart_BagEnum)(OutStream, Args,
+          pp_format, ShowSorts, 0, NULL, ", ");
+        PRINT_FUNC(fprints)(OutStream, "}");
       } else if (gsIsOpIdSetBagComp(Head) && ArgsLength == 1) {
         //set/bag comprehension
         PRINT_FUNC(fprints)(OutStream, "{ ");
@@ -1157,20 +1210,6 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         if (PrecLevel > 11) PRINT_FUNC(fprints)(OutStream, ")");
       }
     }
-  } else if (gsIsListEnum(DataExpr)) {
-    //print list enumeration
-    PRINT_FUNC(dbg_prints)("printing list enumeration\n");
-    PRINT_FUNC(fprints)(OutStream, "[");
-    PRINT_FUNC(PrintPart_List)(OutStream, ATLgetArgument(DataExpr, 0),
-      pp_format, ShowSorts, 0, NULL, ", ");
-    PRINT_FUNC(fprints)(OutStream, "]");
-  } else if (gsIsSetEnum(DataExpr) || gsIsBagEnum(DataExpr)) {
-    //print set/bag enumeration
-    PRINT_FUNC(dbg_prints)("printing set/bag enumeration\n");
-    PRINT_FUNC(fprints)(OutStream, "{");
-    PRINT_FUNC(PrintPart_List)(OutStream, ATLgetArgument(DataExpr, 0),
-      pp_format, ShowSorts, 0, NULL, ", ");
-    PRINT_FUNC(fprints)(OutStream, "}");
   } else if (gsIsBinder(DataExpr)) {
     ATermAppl BindingOperator = ATAgetArgument(DataExpr, 0);
     if (gsIsSetBagComp(BindingOperator) || gsIsSetComp(BindingOperator)

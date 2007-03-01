@@ -172,10 +172,6 @@ ATermList gsGetDataExprArgs(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: the arguments of the data expression
 
-bool gsIsDataExprNumber(ATermAppl DataExpr);
-//Pre: DataExpr is a data expression
-//Ret: the data expression is a number
-
 //Creation of names for system operation identifiers
 ATermAppl gsMakeOpIdNameTrue();
 ATermAppl gsMakeOpIdNameFalse();
@@ -236,6 +232,7 @@ ATermAppl gsMakeOpIdNameGGDivMod();
 ATermAppl gsMakeOpIdNameExp();
 ATermAppl gsMakeOpIdNameEven();
 ATermAppl gsMakeOpIdNameEmptyList();
+ATermAppl gsMakeOpIdNameListEnum();
 ATermAppl gsMakeOpIdNameListSize();
 ATermAppl gsMakeOpIdNameCons();
 ATermAppl gsMakeOpIdNameSnoc();
@@ -248,6 +245,7 @@ ATermAppl gsMakeOpIdNameRTail();
 ATermAppl gsMakeOpIdNameEltIn();
 ATermAppl gsMakeOpIdNameSetComp();
 ATermAppl gsMakeOpIdNameEmptySet();
+ATermAppl gsMakeOpIdNameSetEnum();
 ATermAppl gsMakeOpIdNameSubSetEq();
 ATermAppl gsMakeOpIdNameSubSet();
 ATermAppl gsMakeOpIdNameSetUnion();
@@ -258,6 +256,7 @@ ATermAppl gsMakeOpIdNameBagComp();
 ATermAppl gsMakeOpIdNameBag2Set();
 ATermAppl gsMakeOpIdNameSet2Bag();
 ATermAppl gsMakeOpIdNameEmptyBag();
+ATermAppl gsMakeOpIdNameBagEnum();
 ATermAppl gsMakeOpIdNameCount();
 ATermAppl gsMakeOpIdNameSubBagEq();
 ATermAppl gsMakeOpIdNameSubBag();
@@ -510,6 +509,10 @@ ATermAppl gsMakeOpIdEmptyList(ATermAppl SortExpr);
 //Pre: SortExpr is a sort expression
 //Ret: Operation identifier for the empty list of sort SortExpr
 
+ATermAppl gsMakeOpIdListEnum(ATermAppl SortExpr);
+//Pre: SortExpr is a sort expression
+//Ret: Operation identifier for the list enum of sort SortExpr
+
 ATermAppl gsMakeOpIdCons(ATermAppl SortExprLHS, ATermAppl SortExprRHS);
 //Pre: SortExprLHS and SortExprRHS are sort expressions
 //Ret: Operation identifier for 'list cons (element at the head of a list)' of
@@ -568,6 +571,10 @@ ATermAppl gsMakeOpIdEmptySet(ATermAppl SortExpr);
 //Pre: SortExpr is a sort expression
 //Ret: Operation identifier for the empty set of sort SortExpr
 
+ATermAppl gsMakeOpIdSetEnum(ATermAppl SortExpr);
+//Pre: SortExpr is a sort expression
+//Ret: Operation identifier for the set enumeration of sort SortExpr
+
 ATermAppl gsMakeOpIdSubSetEq(ATermAppl SortExpr);
 //Pre: SortExpr is a sort expression
 //Ret: Operation identifier for 'subset or equal', which has sort
@@ -606,6 +613,10 @@ ATermAppl gsMakeOpIdBagComp(ATermAppl SortExprDom, ATermAppl SortExprResult);
 ATermAppl gsMakeOpIdEmptyBag(ATermAppl SortExpr);
 //Pre: SortExpr is a sort expression
 //Ret: Operation identifier for the empty bag of sort SortExpr
+
+ATermAppl gsMakeOpIdBagEnum(ATermAppl SortExpr);
+//Pre: SortExpr is a sort expression
+//Ret: Operation identifier for the bag enumeration of sort SortExpr
 
 ATermAppl gsMakeOpIdCount(ATermAppl SortExprLHS, ATermAppl SortExprRHS);
 //Pre: SortExpr is a sort expression
@@ -943,6 +954,11 @@ ATermAppl gsMakeDataExprEmptyList(ATermAppl SortExpr);
 //Pre: SortExpr is a sort expression
 //Ret: Data expression for the empty list of sort SortExpr
 
+ATermAppl gsMakeDataExprListEnum(ATermList DataExprs, ATermAppl SortExpr);
+//Pre: All Data expressions in DataExprs are of the same sort.
+//     SortExpr is a sort expression (List of Sort(DataExprs))
+//Ret: Data expression for the list enumeration of DataExpr
+
 ATermAppl gsMakeDataExprCons(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //Pre: DataExprLHS and DataExprRHS are data expressions
 //Ret: Data expression for the list cons of DataExprLHS and DataExprRHS
@@ -997,6 +1013,10 @@ ATermAppl gsMakeDataExprEmptySet(ATermAppl SortExpr);
 //Pre: SortExpr is a sort expression
 //Ret: Data expression for the empty set of sort SortExpr
 
+ATermAppl gsMakeDataExprSetEnum(ATermList DataExprs, ATermAppl SortExpr);
+//Pre: SortExpr is a sort expression
+//Ret: Data expression for the set enumeration of DataExprs
+
 ATermAppl gsMakeDataExprSubSetEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //Pre: DataExprLHS and DataExprRHS are data expressions of the same sort
 //Ret: Data expression for the subset or equality relation "e <= e'", where
@@ -1031,6 +1051,10 @@ ATermAppl gsMakeDataExprBagComp(ATermAppl DataExpr, ATermAppl SortExprResult);
 ATermAppl gsMakeDataExprEmptyBag(ATermAppl SortExpr);
 //Pre: SortExpr is a sort expression
 //Ret: Data expression for the empty set of sort SortExpr
+
+ATermAppl gsMakeDataExprBagEnum(ATermList DataExprs, ATermAppl SortExpr);
+//Pre: SortExpr is a sort expression
+//Ret: Data expression for a bag of SortExpr, with DataExprs as bag elements
 
 ATermAppl gsMakeDataExprCount(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //Pre: DataExprLHS and DataExprRHS are data expressions
@@ -1155,6 +1179,21 @@ int gsIntValue_int(const ATermAppl IntConstant);
 //Pre: IntConstant is a data expression of sort Int built from constructors only
 //Ret: The value of IntExpr
 
+bool gsIsDataExprNumber(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: the data expression is a number
+
+bool gsIsDataExprListEnum(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: the data expression is a list enumeration
+
+bool gsIsDataExprSetEnum(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: the data expression is a list enumeration
+
+bool gsIsDataExprBagEnum(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: the data expression is a list enumeration
 
 //Multiactions
 //------------

@@ -83,7 +83,6 @@ template <typename Term> bool check_rule_SortExprOrUnknown(Term t);
 template <typename Term> bool check_rule_DataExpr(Term t);
 template <typename Term> bool check_rule_DataVarId(Term t);
 template <typename Term> bool check_rule_OpId(Term t);
-template <typename Term> bool check_rule_BagEnumElt(Term t);
 template <typename Term> bool check_rule_BindingOperator(Term t);
 template <typename Term> bool check_rule_WhrDecl(Term t);
 template <typename Term> bool check_rule_DataSpec(Term t);
@@ -190,7 +189,6 @@ template <typename Term> bool check_term_DataVarIdInit(Term t);
 template <typename Term> bool check_term_Process(Term t);
 template <typename Term> bool check_term_ActAnd(Term t);
 template <typename Term> bool check_term_PBES(Term t);
-template <typename Term> bool check_term_BagEnumElt(Term t);
 template <typename Term> bool check_term_StateVar(Term t);
 template <typename Term> bool check_term_ActAt(Term t);
 template <typename Term> bool check_term_DataEqn(Term t);
@@ -283,12 +281,6 @@ template <typename Term>
 bool check_rule_OpId(Term t)
 {
   return    check_term_OpId(t);
-}
-
-template <typename Term>
-bool check_rule_BagEnumElt(Term t)
-{
-  return    check_term_BagEnumElt(t);
 }
 
 template <typename Term>
@@ -2213,31 +2205,6 @@ bool check_term_PBES(Term t)
   if (!check_list_argument(a(1), check_rule_PBEqn<aterm>, 0))
     return false;
   if (!check_term_argument(a(2), check_rule_PropVarInst<aterm>))
-    return false;
-#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-  return true;
-}
-
-// BagEnumElt(DataExpr, DataExpr)
-template <typename Term>
-bool check_term_BagEnumElt(Term t)
-{
-  // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
-  if (term.type() != AT_APPL)
-    return false;
-  aterm_appl a(term);
-  if (!gsIsBagEnumElt(a))
-    return false;
-
-  // check the children
-  if (a.size() != 2)
-    return false;
-#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_DataExpr<aterm>))
-    return false;
-  if (!check_term_argument(a(1), check_rule_DataExpr<aterm>))
     return false;
 #endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 

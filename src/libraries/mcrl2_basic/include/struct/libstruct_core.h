@@ -375,50 +375,6 @@ bool gsIsBagComp(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunBagComp();
 }
 
-// BagEnum
-inline
-AFun initAFunBagEnum(AFun& f)
-{
-  f = ATmakeAFun("BagEnum", 2, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunBagEnum()
-{
-  static AFun AFunBagEnum = initAFunBagEnum(AFunBagEnum);
-  return AFunBagEnum;
-}
-
-inline
-bool gsIsBagEnum(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunBagEnum();
-}
-
-// BagEnumElt
-inline
-AFun initAFunBagEnumElt(AFun& f)
-{
-  f = ATmakeAFun("BagEnumElt", 2, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunBagEnumElt()
-{
-  static AFun AFunBagEnumElt = initAFunBagEnumElt(AFunBagEnumElt);
-  return AFunBagEnumElt;
-}
-
-inline
-bool gsIsBagEnumElt(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunBagEnumElt();
-}
-
 // Binder
 inline
 AFun initAFunBinder(AFun& f)
@@ -989,28 +945,6 @@ inline
 bool gsIsLambda(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunLambda();
-}
-
-// ListEnum
-inline
-AFun initAFunListEnum(AFun& f)
-{
-  f = ATmakeAFun("ListEnum", 2, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunListEnum()
-{
-  static AFun AFunListEnum = initAFunListEnum(AFunListEnum);
-  return AFunListEnum;
-}
-
-inline
-bool gsIsListEnum(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunListEnum();
 }
 
 // MapSpec
@@ -1737,28 +1671,6 @@ inline
 bool gsIsSetComp(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunSetComp();
-}
-
-// SetEnum
-inline
-AFun initAFunSetEnum(AFun& f)
-{
-  f = ATmakeAFun("SetEnum", 2, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunSetEnum()
-{
-  static AFun AFunSetEnum = initAFunSetEnum(AFunSetEnum);
-  return AFunSetEnum;
-}
-
-inline
-bool gsIsSetEnum(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSetEnum();
 }
 
 // SortArrow
@@ -2672,18 +2584,6 @@ ATermAppl gsMakeBagComp()
 }
 
 inline
-ATermAppl gsMakeBagEnum(ATermList BagEnumElt_0, ATermAppl SortExprOrUnknown_1)
-{
-  return ATmakeAppl2(gsAFunBagEnum(), (ATerm) BagEnumElt_0, (ATerm) SortExprOrUnknown_1);
-}
-
-inline
-ATermAppl gsMakeBagEnumElt(ATermAppl DataExpr_0, ATermAppl DataExpr_1)
-{
-  return ATmakeAppl2(gsAFunBagEnumElt(), (ATerm) DataExpr_0, (ATerm) DataExpr_1);
-}
-
-inline
 ATermAppl gsMakeBinder(ATermAppl BindingOperator_0, ATermList DataVarId_1, ATermAppl DataExpr_2)
 {
   return ATmakeAppl3(gsAFunBinder(), (ATerm) BindingOperator_0, (ATerm) DataVarId_1, (ATerm) DataExpr_2);
@@ -2837,12 +2737,6 @@ inline
 ATermAppl gsMakeLambda()
 {
   return ATmakeAppl0(gsAFunLambda());
-}
-
-inline
-ATermAppl gsMakeListEnum(ATermList DataExpr_0, ATermAppl SortExprOrUnknown_1)
-{
-  return ATmakeAppl2(gsAFunListEnum(), (ATerm) DataExpr_0, (ATerm) SortExprOrUnknown_1);
 }
 
 inline
@@ -3041,12 +2935,6 @@ inline
 ATermAppl gsMakeSetComp()
 {
   return ATmakeAppl0(gsAFunSetComp());
-}
-
-inline
-ATermAppl gsMakeSetEnum(ATermList DataExpr_0, ATermAppl SortExprOrUnknown_1)
-{
-  return ATmakeAppl2(gsAFunSetEnum(), (ATerm) DataExpr_0, (ATerm) SortExprOrUnknown_1);
 }
 
 inline

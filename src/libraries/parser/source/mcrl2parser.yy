@@ -90,7 +90,7 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %type <appl> data_expr_concat data_expr_add data_expr_div data_expr_mult
 %type <appl> data_expr_prefix data_expr_quant_prefix data_expr_postfix
 %type <appl> data_expr_primary data_constant data_enumeration
-%type <appl> bag_enum_elt data_comprehension data_var_decl
+%type <appl> data_comprehension data_var_decl
 //multi-actions
 %type <appl> mult_act param_id 
 //process expressions
@@ -121,6 +121,7 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %type <list> domain_no_arrow domain_no_arrow_elts_hs struct_constructors_bs
 %type <list> struct_projections_cs ids_cs 
 //data expressions
+%type <list> bag_enum_elt
 %type <list> whr_decls_cs data_exprs_cs bag_enum_elts_cs
 //process expressions
 %type <list> act_names_set ren_expr_set ren_exprs_cs comm_expr_set comm_exprs_cs
@@ -822,17 +823,17 @@ data_constant:
 data_enumeration:
   LBRACK data_exprs_cs RBRACK
     {
-      safe_assign($$, gsMakeListEnum(ATreverse($2), gsMakeSortUnknown()));
+      safe_assign($$, gsMakeDataApplProd(gsMakeId(gsMakeOpIdNameListEnum()), ATreverse($2)));
       gsDebugMsg("parsed data enumeration\n  %T\n", $$);
     }
   | LBRACE data_exprs_cs RBRACE
     {
-      safe_assign($$, gsMakeSetEnum(ATreverse($2), gsMakeSortUnknown()));
+      safe_assign($$, gsMakeDataApplProd(gsMakeId(gsMakeOpIdNameSetEnum()), ATreverse($2)));
       gsDebugMsg("parsed data enumeration\n  %T\n", $$);
     }
   | LBRACE bag_enum_elts_cs RBRACE
     {
-      safe_assign($$, gsMakeBagEnum(ATreverse($2), gsMakeSortUnknown()));
+      safe_assign($$, gsMakeDataApplProd(gsMakeId(gsMakeOpIdNameBagEnum()), ATreverse($2)));
       gsDebugMsg("parsed data enumeration\n  %T\n", $$);
     }
   ;
@@ -841,12 +842,12 @@ data_enumeration:
 bag_enum_elts_cs:
   bag_enum_elt
     {
-      safe_assign($$, ATmakeList1((ATerm) $1));
+      safe_assign($$, $1);
       gsDebugMsg("parsed bag enumeration elements\n  %T\n", $$);
     }
   | bag_enum_elts_cs COMMA bag_enum_elt
     {
-      safe_assign($$, ATinsert($1, (ATerm) $3));
+      safe_assign($$, ATconcat($1, $3));
       gsDebugMsg("parsed bag enumeration elements\n  %T\n", $$);
     }
   ;
@@ -855,7 +856,7 @@ bag_enum_elts_cs:
 bag_enum_elt:
   data_expr COLON data_expr
     {
-      safe_assign($$, gsMakeBagEnumElt($1, $3));
+      safe_assign($$, ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed bag enumeration element\n  %T\n", $$);
     }
   ;

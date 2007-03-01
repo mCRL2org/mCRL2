@@ -115,6 +115,7 @@ static ATermAppl gsOpIdNameLast;
 static ATermAppl gsOpIdNameExp;
 static ATermAppl gsOpIdNameEven;
 static ATermAppl gsOpIdNameEmptyList;
+static ATermAppl gsOpIdNameListEnum;
 static ATermAppl gsOpIdNameListSize;
 static ATermAppl gsOpIdNameCons;
 static ATermAppl gsOpIdNameSnoc;
@@ -127,6 +128,7 @@ static ATermAppl gsOpIdNameRTail;
 static ATermAppl gsOpIdNameEltIn;
 static ATermAppl gsOpIdNameSetComp;
 static ATermAppl gsOpIdNameEmptySet;
+static ATermAppl gsOpIdNameSetEnum;
 static ATermAppl gsOpIdNameSubSetEq;
 static ATermAppl gsOpIdNameSubSet;
 static ATermAppl gsOpIdNameSetUnion;
@@ -137,6 +139,7 @@ static ATermAppl gsOpIdNameBagComp;
 static ATermAppl gsOpIdNameBag2Set;
 static ATermAppl gsOpIdNameSet2Bag;
 static ATermAppl gsOpIdNameEmptyBag;
+static ATermAppl gsOpIdNameBagEnum;
 static ATermAppl gsOpIdNameCount;
 static ATermAppl gsOpIdNameSubBagEq;
 static ATermAppl gsOpIdNameSubBag;
@@ -226,6 +229,7 @@ void gsEnableConstructorFunctions(void)
     gsOpIdNameExp          = gsString2ATermAppl("exp");
     gsOpIdNameEven         = gsString2ATermAppl("@even");
     gsOpIdNameEmptyList    = gsString2ATermAppl("[]");
+    gsOpIdNameListEnum     = gsString2ATermAppl("@ListEnum");
     gsOpIdNameListSize     = gsString2ATermAppl("#");
     gsOpIdNameCons         = gsString2ATermAppl("|>");
     gsOpIdNameSnoc         = gsString2ATermAppl("<|");
@@ -238,6 +242,7 @@ void gsEnableConstructorFunctions(void)
     gsOpIdNameEltIn        = gsString2ATermAppl("in");
     gsOpIdNameSetComp      = gsString2ATermAppl("@set");
     gsOpIdNameEmptySet     = gsString2ATermAppl("{}");
+    gsOpIdNameSetEnum      = gsString2ATermAppl("@SetEnum");
     gsOpIdNameSubSetEq     = gsString2ATermAppl("<=");
     gsOpIdNameSubSet       = gsString2ATermAppl("<");
     gsOpIdNameSetUnion     = gsString2ATermAppl("+");
@@ -248,6 +253,7 @@ void gsEnableConstructorFunctions(void)
     gsOpIdNameBag2Set      = gsString2ATermAppl("Bag2Set");
     gsOpIdNameSet2Bag      = gsString2ATermAppl("Set2Bag");
     gsOpIdNameEmptyBag     = gsString2ATermAppl("{}");
+    gsOpIdNameBagEnum      = gsString2ATermAppl("@BagEnum");
     gsOpIdNameCount        = gsString2ATermAppl("count");
     gsOpIdNameSubBagEq     = gsString2ATermAppl("<=");
     gsOpIdNameSubBag       = gsString2ATermAppl("<");
@@ -322,6 +328,7 @@ void gsEnableConstructorFunctions(void)
     ATprotectAppl(&gsOpIdNameExp);
     ATprotectAppl(&gsOpIdNameEven);
     ATprotectAppl(&gsOpIdNameEmptyList);
+    ATprotectAppl(&gsOpIdNameListEnum);
     ATprotectAppl(&gsOpIdNameListSize);
     ATprotectAppl(&gsOpIdNameCons);
     ATprotectAppl(&gsOpIdNameSnoc);
@@ -333,6 +340,7 @@ void gsEnableConstructorFunctions(void)
     ATprotectAppl(&gsOpIdNameRTail);
     ATprotectAppl(&gsOpIdNameSetComp);
     ATprotectAppl(&gsOpIdNameEmptySet);
+    ATprotectAppl(&gsOpIdNameSetEnum);
     ATprotectAppl(&gsOpIdNameEltIn);
     ATprotectAppl(&gsOpIdNameSubSetEq);
     ATprotectAppl(&gsOpIdNameSubSet);
@@ -344,6 +352,7 @@ void gsEnableConstructorFunctions(void)
     ATprotectAppl(&gsOpIdNameBag2Set);
     ATprotectAppl(&gsOpIdNameSet2Bag);
     ATprotectAppl(&gsOpIdNameEmptyBag);
+    ATprotectAppl(&gsOpIdNameBagEnum);
     ATprotectAppl(&gsOpIdNameCount);
     ATprotectAppl(&gsOpIdNameSubBagEq);
     ATprotectAppl(&gsOpIdNameSubBag);
@@ -598,8 +607,7 @@ ATermList gsGetSortExprDomain(ATermAppl SortExpr)
 bool gsIsDataExpr(ATermAppl Term)
 {
   return gsIsId(Term)    || gsIsDataVarId(Term)    || gsIsOpId(Term)    ||
-    gsIsDataAppl(Term)   || gsIsDataApplProd(Term) || gsIsListEnum(Term)||
-    gsIsSetEnum(Term)    || gsIsBagEnum(Term)      || gsIsBinder(Term)  ||
+    gsIsDataAppl(Term)   || gsIsDataApplProd(Term) || gsIsBinder(Term)  ||
     gsIsWhr(Term);
 }
 
@@ -614,10 +622,8 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
       Result = ATAgetArgument(HeadSort, 1);
     else
       Result = gsMakeSortUnknown();
-  } else if (gsIsDataVarId(DataExpr) || gsIsOpId(DataExpr) ||
-      gsIsListEnum(DataExpr) || gsIsSetEnum(DataExpr) || 
-      gsIsBagEnum(DataExpr)) {
-    //DataExpr is a data variable, an operation identifier, a number or an
+  } else if (gsIsDataVarId(DataExpr) || gsIsOpId(DataExpr)) {
+    //DataExpr is a data variable, an operation identifier or an
     //enumeration; return its sort
     Result = ATAgetArgument(DataExpr, 1);
   } else if (gsIsDataApplProd(DataExpr)) {
@@ -702,15 +708,6 @@ ATermList gsGetDataExprArgs(ATermAppl DataExpr)
     DataExpr = ATAgetArgument(DataExpr, 0);
   }
   return l;
-}
-
-bool gsIsDataExprNumber(ATermAppl DataExpr)
-{
-  if (!gsIsOpId(DataExpr)) return false;
-  ATermAppl Name = ATAgetArgument(DataExpr, 0);
-  char* s = gsATermAppl2String(Name);
-  if (s == NULL) return false;
-  return gsIsNumericString(s);
 }
 
 //Creation of names for system operation identifiers
@@ -1010,6 +1007,11 @@ ATermAppl gsMakeOpIdNameEmptyList() {
   return gsOpIdNameEmptyList;
 }
 
+ATermAppl gsMakeOpIdNameListEnum() {
+  assert(ConstructorFunctionsEnabled);
+  return gsOpIdNameListEnum;
+}
+
 ATermAppl gsMakeOpIdNameListSize() {
   assert(ConstructorFunctionsEnabled);
   return gsOpIdNameListSize;
@@ -1070,6 +1072,11 @@ ATermAppl gsMakeOpIdNameEmptySet() {
   return gsOpIdNameEmptySet;
 }
 
+ATermAppl gsMakeOpIdNameSetEnum() {
+  assert(ConstructorFunctionsEnabled);
+  return gsOpIdNameSetEnum;
+}
+
 ATermAppl gsMakeOpIdNameSubSetEq() {
   assert(ConstructorFunctionsEnabled);
   return gsOpIdNameSubSetEq;
@@ -1118,6 +1125,11 @@ ATermAppl gsMakeOpIdNameSet2Bag() {
 ATermAppl gsMakeOpIdNameEmptyBag() {
   assert(ConstructorFunctionsEnabled);
   return gsOpIdNameEmptyBag;
+}
+
+ATermAppl gsMakeOpIdNameBagEnum() {
+  assert(ConstructorFunctionsEnabled);
+  return gsOpIdNameBagEnum;
 }
 
 ATermAppl gsMakeOpIdNameCount() {
@@ -1628,6 +1640,12 @@ ATermAppl gsMakeOpIdEmptyList(ATermAppl SortExpr)
   return gsMakeOpId(gsMakeOpIdNameEmptyList(), SortExpr);
 }
 
+ATermAppl gsMakeOpIdListEnum(ATermAppl SortExpr)
+{
+  assert(ConstructorFunctionsEnabled);
+  return gsMakeOpId(gsMakeOpIdNameListEnum(), SortExpr);
+}
+
 ATermAppl gsMakeOpIdListSize(ATermAppl SortExpr)
 {
   assert(ConstructorFunctionsEnabled);
@@ -1705,6 +1723,12 @@ ATermAppl gsMakeOpIdEmptySet(ATermAppl SortExpr)
   return gsMakeOpId(gsMakeOpIdNameEmptySet(), SortExpr);
 }
 
+ATermAppl gsMakeOpIdSetEnum(ATermAppl SortExpr)
+{
+  assert(ConstructorFunctionsEnabled);
+  return gsMakeOpId(gsMakeOpIdNameSetEnum(), SortExpr);
+}
+
 ATermAppl gsMakeOpIdEltIn(ATermAppl SortExprLHS, ATermAppl SortExprRHS)
 {
   assert(ConstructorFunctionsEnabled);
@@ -1765,6 +1789,12 @@ ATermAppl gsMakeOpIdEmptyBag(ATermAppl SortExpr)
 {
   assert(ConstructorFunctionsEnabled);
   return gsMakeOpId(gsMakeOpIdNameEmptyBag(), SortExpr);
+}
+
+ATermAppl gsMakeOpIdBagEnum(ATermAppl SortExpr)
+{
+  assert(ConstructorFunctionsEnabled);
+  return gsMakeOpId(gsMakeOpIdNameBagEnum(), SortExpr);
 }
 
 ATermAppl gsMakeOpIdCount(ATermAppl SortExprLHS, ATermAppl SortExprRHS)
@@ -2222,6 +2252,24 @@ ATermAppl gsMakeDataExprEmptyList(ATermAppl SortExpr)
   return gsMakeOpIdEmptyList(SortExpr);
 }
 
+ATermAppl gsMakeDataExprListEnum(ATermList DataExprs, ATermAppl SortExpr)
+{
+  assert(gsIsSortExpr(SortExpr));
+  int nDataExprs = ATgetLength(DataExprs);
+  // If the list of data expressions is non-empty build up the sort expression
+  if(nDataExprs > 0) {
+    ATermAppl EltSort = gsGetSort(ATAgetFirst(DataExprs));
+    ATermList DomSort=ATmakeList0();
+    for(int i = 0; i < nDataExprs; ++i)
+    {
+      DomSort=ATinsert(DomSort,(ATerm) EltSort);
+    }
+    SortExpr=gsMakeSortArrowProd(DomSort, SortExpr);
+    return gsMakeDataApplProd(gsMakeOpIdListEnum(SortExpr), DataExprs);
+  } // If the list of data expressions is empty, we just use SortExpr
+  return gsMakeOpIdListEnum(SortExpr);
+}
+
 ATermAppl gsMakeDataExprCons(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
   return gsMakeDataAppl2(
@@ -2303,6 +2351,24 @@ ATermAppl gsMakeDataExprEmptySet(ATermAppl SortExpr)
   return gsMakeOpIdEmptySet(SortExpr);
 }
 
+ATermAppl gsMakeDataExprSetEnum(ATermList DataExprs, ATermAppl SortExpr)
+{
+  assert(gsIsSortExpr(SortExpr));
+  int nDataExprs = ATgetLength(DataExprs);
+  // If the list of data expressions is non-empty build up the sort expression
+  if(nDataExprs > 0) {
+    ATermAppl EltSort = gsGetSort(ATAgetFirst(DataExprs));
+    ATermList DomSort=ATmakeList0();
+    for(int i = 0; i < nDataExprs; ++i)
+    {
+      DomSort=ATinsert(DomSort,(ATerm) EltSort);
+    }
+    SortExpr=gsMakeSortArrowProd(DomSort, SortExpr);
+    return gsMakeDataApplProd(gsMakeOpIdSetEnum(SortExpr), DataExprs);
+  } // If the list of data expressions is empty, we just use SortExpr
+  return gsMakeOpIdSetEnum(SortExpr);
+}
+
 ATermAppl gsMakeDataExprSubSetEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
   assert(ATisEqual(gsGetSort(DataExprLHS), gsGetSort(DataExprRHS)));
@@ -2357,6 +2423,29 @@ ATermAppl gsMakeDataExprBagComp(ATermAppl DataExpr, ATermAppl SortExprResult)
 ATermAppl gsMakeDataExprEmptyBag(ATermAppl SortExpr)
 {
   return gsMakeOpIdEmptyBag(SortExpr);
+}
+
+ATermAppl gsMakeDataExprBagEnum(ATermList DataExprs, ATermAppl SortExpr)
+{
+  assert(gsIsSortExpr(SortExpr));
+  int nDataExprs = ATgetLength(DataExprs);
+  assert(nDataExprs % 2==0);
+  nDataExprs = nDataExprs / 2;
+  // If the list of data expressions is non-empty build up the sort expression
+  if(nDataExprs > 0) {
+    ATermAppl EltSort = gsGetSort(ATAgetFirst(DataExprs));
+    ATermAppl NatSort = gsMakeSortExprNat();
+    ATermList DomSort=ATmakeList0();
+    for(int i = 0; i < nDataExprs; ++i)
+    {
+      DomSort=ATinsert(DomSort,(ATerm) EltSort);
+      DomSort=ATinsert(DomSort,(ATerm) NatSort);
+    }
+    assert(ATgetLength(DomSort)==ATgetLength(DataExprs));
+    SortExpr=gsMakeSortArrowProd(DomSort, SortExpr);
+    return gsMakeDataApplProd(gsMakeOpIdBagEnum(SortExpr), DataExprs);
+  } // If the list of data expressions is empty, we just use SortExpr
+  return gsMakeOpIdBagEnum(SortExpr);
 }
 
 ATermAppl gsMakeDataExprCount(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
@@ -2637,6 +2726,54 @@ int gsIntValue_int(const ATermAppl IntConstant)
   int n = strtol(s, NULL, 10);
   free(s);
   return n;
+}
+
+bool gsIsDataExprNumber(ATermAppl DataExpr)
+{
+  if (!gsIsOpId(DataExpr)) return false;
+  ATermAppl Name = ATAgetArgument(DataExpr, 0);
+  char* s = gsATermAppl2String(Name);
+  if (s == NULL) return false;
+  return gsIsNumericString(s);
+}
+
+bool gsIsDataExprListEnum(ATermAppl DataExpr)
+{
+  assert(gsIsDataExpr(DataExpr));
+  if (gsIsDataApplProd(DataExpr)) {
+    DataExpr = ATAgetArgument(DataExpr, 0);
+  }
+  if (gsIsOpId(DataExpr)) {
+    ATermAppl Name = ATAgetArgument(DataExpr, 0);
+    return Name == gsMakeOpIdNameListEnum();
+  }
+  return false;
+}
+
+bool gsIsDataExprSetEnum(ATermAppl DataExpr)
+{
+  assert(gsIsDataExpr(DataExpr));
+  if (gsIsDataApplProd(DataExpr)) {
+    DataExpr = ATAgetArgument(DataExpr, 0);
+  }
+  if (gsIsOpId(DataExpr)) {
+    ATermAppl Name = ATAgetArgument(DataExpr, 0);
+    return Name == gsMakeOpIdNameSetEnum();
+  }
+  return false;
+}
+
+bool gsIsDataExprBagEnum(ATermAppl DataExpr)
+{
+  assert(gsIsDataExpr(DataExpr));
+  if (gsIsDataApplProd(DataExpr)) {
+    DataExpr = ATAgetArgument(DataExpr, 0);
+  }
+  if (gsIsOpId(DataExpr)) {
+    ATermAppl Name = ATAgetArgument(DataExpr, 0);
+    return Name == gsMakeOpIdNameBagEnum();
+  }
+  return false;
 }
 
 

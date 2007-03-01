@@ -155,7 +155,7 @@
       v_dummy_sort = get_sort_of_list_elements(v_induction_variable);
       v_dummy_variable = get_fresh_dummy(v_dummy_sort);
 
-      v_substitution = gsMakeSubst_Appl(v_induction_variable, gsMakeOpIdEmptyList(v_induction_variable_sort));
+      v_substitution = gsMakeSubst_Appl(v_induction_variable, gsMakeOpIdListEnum(v_induction_variable_sort));
       v_substitution_list = ATmakeList1((ATerm) v_substitution);
       v_base_case = gsSubstValues_Appl(v_substitution_list, f_formula, true);
 
@@ -228,7 +228,7 @@
       v_substitution = gsMakeSubst_Appl(v_variable, gsMakeDataExprCons(v_dummy, v_variable));
       v_substitution_list = ATmakeList1((ATerm) v_substitution);
       v_formula_1 = gsSubstValues_Appl(v_substitution_list, a_formula, true);
-      v_substitution = gsMakeSubst_Appl(v_variable, gsMakeOpIdEmptyList(v_variable_sort));
+      v_substitution = gsMakeSubst_Appl(v_variable, gsMakeOpIdListEnum(v_variable_sort));
       v_substitution_list = ATmakeList1((ATerm) v_substitution);
       v_formula_2 = gsSubstValues_Appl(v_substitution_list, a_formula, true);
       v_hypothesis = gsSubstValues_Appl(v_substitution_list, a_hypothesis, true);
