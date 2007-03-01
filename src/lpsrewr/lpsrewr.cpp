@@ -236,7 +236,7 @@ void print_more_info(char *Name)
 bool is_valid_lps(ATermAppl spec)
 {
   if (gsIsSpecV1(spec)) {
-    return gsIsLPS(ATAgetArgument(spec,2));
+    return gsIsLinearProcess(ATAgetArgument(spec,2));
   } else {
     return false;
   }
@@ -272,15 +272,15 @@ static ATermAppl rewrite_lps(ATermAppl Spec)
 
   //rewrite LPS summands
   ATermAppl LPS = ATAgetArgument(Spec, 2);
-  ATermList LPSSummands = ATLgetArgument(LPS, 2);
+  ATermList LinearProcessSummands = ATLgetArgument(LPS, 2);
   l = ATmakeList0();
-  for (; !ATisEmpty(LPSSummands); LPSSummands = ATgetNext(LPSSummands)) {
+  for (; !ATisEmpty(LinearProcessSummands); LinearProcessSummands = ATgetNext(LinearProcessSummands)) {
     //rewrite LPS summand
-    ATermAppl LPSSummand = ATAgetFirst(LPSSummands);
-    ATermList LPSVars = ATLgetArgument(LPSSummand, 0);
-    ATermAppl Cond = ATAgetArgument(LPSSummand, 1);
+    ATermAppl LinearProcessSummand = ATAgetFirst(LinearProcessSummands);
+    ATermList LPSVars = ATLgetArgument(LinearProcessSummand, 0);
+    ATermAppl Cond = ATAgetArgument(LinearProcessSummand, 1);
     Cond = rewr->rewrite(Cond);
-    ATermAppl MultAct = ATAgetArgument(LPSSummand, 2);
+    ATermAppl MultAct = ATAgetArgument(LinearProcessSummand, 2);
     if ( gsIsMultAct(MultAct) ) {
       ATermList Acts = ATLgetArgument(MultAct, 0);
       ATermList m = ATmakeList0();
@@ -294,11 +294,11 @@ static ATermAppl rewrite_lps(ATermAppl Spec)
       }
       MultAct = gsMakeMultAct(ATreverse(m));
     }
-    ATermAppl Time = ATAgetArgument(LPSSummand, 3);
+    ATermAppl Time = ATAgetArgument(LinearProcessSummand, 3);
     if ( !gsIsNil(Time) ) {
       Time = rewr->rewrite(Time);
     }
-    ATermList Assignments = ATLgetArgument(LPSSummand, 4);
+    ATermList Assignments = ATLgetArgument(LinearProcessSummand, 4);
     ATermList m = ATmakeList0();
     for (; !ATisEmpty(Assignments); Assignments = ATgetNext(Assignments)) {
       ATermAppl Assignment = ATAgetFirst(Assignments);
@@ -308,11 +308,11 @@ static ATermAppl rewrite_lps(ATermAppl Spec)
       m = ATinsert(m, (ATerm) Assignment);
     }
     Assignments = ATreverse(m);
-    LPSSummand = gsMakeLPSSummand(LPSVars, Cond, MultAct, Time, Assignments);
-    l = ATinsert(l, (ATerm) LPSSummand);
+    LinearProcessSummand = gsMakeLinearProcessSummand(LPSVars, Cond, MultAct, Time, Assignments);
+    l = ATinsert(l, (ATerm) LinearProcessSummand);
   }
-  LPSSummands = ATreverse(l);
-  LPS = ATsetArgument(LPS, (ATerm) LPSSummands, 2);
+  LinearProcessSummands = ATreverse(l);
+  LPS = ATsetArgument(LPS, (ATerm) LinearProcessSummands, 2);
   Spec = ATsetArgument(Spec, (ATerm) LPS, 2);
  
   //rewrite initial state

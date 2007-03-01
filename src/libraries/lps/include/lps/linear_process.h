@@ -84,7 +84,11 @@ class summand: public aterm_appl
     summand(aterm_appl t)
      : aterm_appl(t)
     {
+<<<<<<< .mine
+      assert(check_rule_LinearProcessSummand(m_term));
+=======
       assert(detail::check_rule_LinearProcessSummand(m_term));
+>>>>>>> .r2653
       aterm_appl::iterator i = t.begin();
 
       m_summation_variables = data_variable_list(*i++);
@@ -388,7 +392,11 @@ class linear_process: public aterm_appl
     linear_process(aterm_appl lps)
       : aterm_appl(lps)
     {
+<<<<<<< .mine
+      assert(check_term_LinearProcess(m_term));
+=======
       assert(detail::check_term_LinearProcess(m_term));
+>>>>>>> .r2653
       assert(is_well_typed());
       assert(is_name_clash_free(true));
 

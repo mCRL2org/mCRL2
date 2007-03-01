@@ -303,11 +303,11 @@ static ATermAppl convert_lps(ATermAppl spec, ATermList typelist, ATermList *ids)
 		n = ATreverse(n);
 
 		smds = ATinsert(smds,
-			(ATerm) gsMakeLPSSummand(m,c,a,gsMakeNil(),n)
+			(ATerm) gsMakeLinearProcessSummand(m,c,a,gsMakeNil(),n)
 		);
 	}
 
-	return gsMakeLPS(ATmakeList0(),pars,ATreverse(smds));
+	return gsMakeLinearProcess(ATmakeList0(),pars,ATreverse(smds));
 }
 
 static ATermList convert_init(ATermAppl spec, ATermList typelist, ATermList * /*ids*/)
@@ -361,7 +361,7 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
         data_spec = gsMakeDataSpec(sort_spec, cons_spec, map_spec, data_eqn_spec);
 
 	gsVerboseMsg("converting initial LPE state...\n");
-	init = gsMakeLPSInit(ATmakeList0(),convert_init(spec,typelist,&ids));
+	init = gsMakeLinearProcessInit(ATmakeList0(),convert_init(spec,typelist,&ids));
 	
 	gsVerboseMsg("converting LPE...\n");
 	lps = convert_lps(spec,typelist,&ids);
