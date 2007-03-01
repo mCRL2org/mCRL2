@@ -414,7 +414,7 @@ lps::specification decluster(const lps::specification& specification, const tool
 {
   gsVerboseMsg("Declustering...\n");
   gsVerboseMsg("Using rewrite strategy %d\n", options.strategy);
-  lps::linear_process lps = specification.lps();
+  lps::linear_process lps = specification.process();
 
   gsVerboseMsg("Input: %d summands.\n", lps.summands().size());
 

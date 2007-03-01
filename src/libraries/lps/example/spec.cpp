@@ -63,7 +63,7 @@ int main()
   }
   cout << endl;
 
-  linear_process lps = spec.lps();
+  linear_process lps = spec.process();
   cout << "lps = " << lps.to_string() << endl;
 
   cout << "free variables: " << pp(lps.free_variables()) << " " << lps.free_variables().to_string() << endl;
@@ -98,12 +98,12 @@ int main()
   cout << "d2 = " << pp(d2) << " " << d2.to_string() << endl;
   cin.get();
 
-  for (summand_list::iterator i = spec.lps().summands().begin(); i != spec.lps().summands().end(); ++i)
+  for (summand_list::iterator i = spec.process().summands().begin(); i != spec.process().summands().end(); ++i)
   {
 //    cout << "summand " << pp(*i) << endl;
   }
   
-  summand s = spec.lps().summands().front();
+  summand s = spec.process().summands().front();
   cout << "actions:" << endl;
   for (action_list::iterator i = s.actions().begin(); i != s.actions().end(); ++i)
   {

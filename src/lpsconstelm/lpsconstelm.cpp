@@ -604,7 +604,7 @@ void lpsConstElm::removeSingleton(int n)
 // Constant parameters (stored in p_S)
 //
 inline void lpsConstElm::output() {
-  lps::linear_process p_lps = p_spec.lps();
+  lps::linear_process p_lps = p_spec.process();
   summand_list rebuild_summandlist;
 
   //Remove the summands that are never visited
@@ -795,7 +795,7 @@ inline bool lpsConstElm::loadFile(std::string const& filename) {
     gsErrorMsg("lpsconstelm: error: could not read input file '%s'\n", filename.c_str());
     return false;
   } 
-  //LPS x = p_spec.lps(); 
+  //LPS x = p_spec.process(); 
   //gsDebugMsg("%s\n", pp(x).c_str());
   //p_spec.save("/scratch/dump.lps");
   //assert(false);
@@ -816,7 +816,7 @@ inline bool lpsConstElm::readStream() {
     return false;
   }
   p_spec = specification(z);
-  //gsDebugMsg("%s\n", pp(p_spec.lps()).c_str());
+  //gsDebugMsg("%s\n", pp(p_spec.process()).c_str());
   return true;
 }
 
@@ -890,7 +890,7 @@ void lpsConstElm::filter() {
   int     cycle    = 0;
   p_newVarCounter  = 0;
   
-  lps::linear_process p_lps = p_spec.lps();
+  lps::linear_process p_lps = p_spec.process();
   rewr           = createRewriter(p_spec.data()); 
 
   data_assignment_list initial_assignments = p_spec.initial_process().assignments();
@@ -916,7 +916,7 @@ void lpsConstElm::filter() {
   } 
   
   // Make a set containing all summation variables (for detectVar)
-  summand_list sums = p_spec.lps().summands();
+  summand_list sums = p_spec.process().summands();
   summand_list::iterator sums_b = sums.begin();
   summand_list::iterator sums_e = sums.end();
   for (summand_list::iterator i = sums_b; i != sums_e; i++)

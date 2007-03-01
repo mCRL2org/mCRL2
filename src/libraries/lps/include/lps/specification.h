@@ -143,7 +143,7 @@ class specification: public aterm_appl
 
     /// Returns the LPS of the specification.
     ///
-    linear_process lps() const
+    linear_process process() const
     {
       return m_process;
     }
@@ -174,7 +174,7 @@ specification set_data_specification(specification spec, data_specification data
 {
   return specification(data,
                        spec.action_labels(),
-                       spec.lps(),
+                       spec.process(),
                        spec.initial_process()
                       );
 }
@@ -184,13 +184,13 @@ specification set_action_labels(specification spec, action_label_list action_lab
 {
   return specification(spec.data(),
                        action_labels,
-                       spec.lps(),
+                       spec.process(),
                        spec.initial_process()
                       );
 }
 
 inline
-specification set_lpe(specification spec, linear_process lps)
+specification set_lps(specification spec, linear_process lps)
 {
   return specification(spec.data(),
                        spec.action_labels(),
@@ -204,7 +204,7 @@ specification set_initial_process(specification spec, process_initializer initia
 {
   return specification(spec.data(),
                        spec.action_labels(),
-                       spec.lps(),
+                       spec.process(),
                        initial_process
                       );
 }

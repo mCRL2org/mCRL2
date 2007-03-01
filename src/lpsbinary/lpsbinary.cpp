@@ -333,7 +333,7 @@ data_variable_list replace_enumerated_parameters(const lps::specification& speci
                                                  table& enumerated_elements_table)
 {
   data_variable_list result;
-  data_variable_list process_parameters = specification.lps().process_parameters();
+  data_variable_list process_parameters = specification.process().process_parameters();
   gsDebugMsg("Original process parameters: %s\n", process_parameters.to_string().c_str());
   
   fresh_variable_generator generator = fresh_variable_generator(aterm(specification));
@@ -619,7 +619,7 @@ specification replace_enumerated_parameters_in_specification(const lps::specific
   // Compute new specification
   result = lps::specification(specification.data(),
                               specification.action_labels(),
-                              replace_enumerated_parameters_in_lps(specification.lps(), new_parameters_table, enumerated_elements_table),
+                              replace_enumerated_parameters_in_lps(specification.process(), new_parameters_table, enumerated_elements_table),
                               initial_process);
 
   return result;
@@ -639,7 +639,7 @@ specification binary(const lps::specification& spec,
   Rewriter* rewriter = createRewriter(spec.data(), options.strategy);
   EnumeratorStandard enumerator = EnumeratorStandard(spec, rewriter);
   
-  result = set_lps(result, set_process_parameters(result.lps(), replace_enumerated_parameters(result, enumerator, new_parameters_table, enumerated_elements_table)));
+  result = set_lps(result, set_process_parameters(result.process(), replace_enumerated_parameters(result, enumerator, new_parameters_table, enumerated_elements_table)));
 
   result = replace_enumerated_parameters_in_specification(result, new_parameters_table, enumerated_elements_table);
   

@@ -612,7 +612,7 @@ bool p_lts::write_to_fsm(std::string const& filename, ATerm lps)
 bool p_lts::write_to_fsm(std::string const& filename, lps::specification &spec)
 {
   lts_type tmp = fsm_get_lts_type();
-  lps::linear_process lps = spec.lps();
+  lps::linear_process lps = spec.process();
   return check_type(tmp,lps) && write_to_fsm(filename,tmp,get_lps_params(lps));
 }
 
@@ -625,7 +625,7 @@ bool p_lts::write_to_fsm(std::ostream &os, ATerm lps)
 bool p_lts::write_to_fsm(std::ostream &os, lps::specification &spec)
 {
   lts_type tmp = fsm_get_lts_type();
-  lps::linear_process lps = spec.lps();
+  lps::linear_process lps = spec.process();
   return check_type(tmp,lps) && write_to_fsm(os,tmp,get_lps_params(lps));
 }
 

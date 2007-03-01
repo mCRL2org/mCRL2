@@ -120,7 +120,7 @@ bool has_time(lps::linear_process& lps)
 lps::specification remove_deltas(const lps::specification& specification) {
   lps::specification result;
   lps::summand_list summands;
-  for (summand_list::iterator i = specification.lps().summands().begin(); i != specification.lps().summands().end(); ++i)
+  for (summand_list::iterator i = specification.process().summands().begin(); i != specification.process().summands().end(); ++i)
   {
     if (!(i->is_delta()))
     {
@@ -138,7 +138,7 @@ lps::specification remove_deltas(const lps::specification& specification) {
   summands = push_front(summands, delta_summand);
   summands = atermpp::reverse(summands);
 
-  result = set_lps(specification, set_summands(specification.lps(), summands));
+  result = set_lps(specification, set_summands(specification.process(), summands));
 
   return result;
 }
@@ -146,7 +146,7 @@ lps::specification remove_deltas(const lps::specification& specification) {
 ///Returns an LPS specification in which the timed arguments have been rewritten
 lps::specification untime(const lps::specification& specification) {
   lps::specification untime_specification; // Updated specification
-  lps::linear_process lps = specification.lps(); // Original lps
+  lps::linear_process lps = specification.process(); // Original lps
   lps::linear_process untime_lps; // Updated lps
   lps::summand_list untime_summand_list; // Updated summand list
   lps::data_variable_list untime_process_parameters; // Updated process parameters

@@ -17,7 +17,7 @@ int main()
   specification spec1 = mcrl22lps(ABP_SPECIFICATION);
   specification spec2(spec1.data(),
                       spec1.action_labels(),
-                      spec1.lps(),
+                      spec1.process(),
                       spec1.initial_process()
                      );
   assert(spec1 == spec2);

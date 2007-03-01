@@ -717,7 +717,7 @@ pbes pbes_translate(state_formula f, specification spec, bool timed = false)
     identifier_string X = fresh_identifier("X", context);
     f = nu(X, data_assignment_list(), f);
   }  
-  linear_process lps = spec.lps();
+  linear_process lps = spec.process();
   equation_system e;
 
   if (!timed)

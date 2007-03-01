@@ -223,7 +223,7 @@ lps::specification remove_unused_variables_(const lps::specification& specificat
 {
   gsVerboseMsg("Removing unused variables from summands\n");
 
-  lps::linear_process lps = specification.lps();
+  lps::linear_process lps = specification.process();
   lps::specification new_specification;
   lps::summand_list new_summand_list = lps.summands();
 
@@ -339,7 +339,7 @@ lps::specification substitute_equalities_(const lps::specification& specificatio
 {
   gsVerboseMsg("Substituting equality conditions in summands\n");
   
-  lps::linear_process lps = specification.lps();
+  lps::linear_process lps = specification.process();
   lps::specification new_specification;
   lps::summand_list new_summand_list = lps.summands();
 
@@ -352,7 +352,7 @@ lps::specification substitute_equalities_(const lps::specification& specificatio
 ///Returns an LPS specification in which the timed arguments have been rewritten
 lps::specification sumelm(const lps::specification& specification) 
 {
-  gsVerboseMsg("Applying sum elimination on an LPS of %d summands\n", specification.lps().summands().size());
+  gsVerboseMsg("Applying sum elimination on an LPS of %d summands\n", specification.process().summands().size());
 
   lps::specification new_specification = specification;
   new_specification = substitute_equalities_(new_specification); // new_specification used for future concerns, possibly disabling substitute_equalities_

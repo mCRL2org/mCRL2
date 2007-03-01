@@ -80,7 +80,7 @@ int test_main(int, char*[])
   gsEnableConstructorFunctions();
 
   specification spec = mcrl22lps(SPECIFICATION);
-  linear_process lps = spec.lps();
+  linear_process lps = spec.process();
  
   // find all action labels in lps
   std::set<action_label> labels;

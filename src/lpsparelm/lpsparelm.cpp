@@ -269,7 +269,7 @@ void lpsParElm::writeStream(lps::specification newSpec)  {
 void lpsParElm::filter() {
   using namespace lps;
 
-  linear_process lps = p_spec.lps();
+  linear_process lps = p_spec.process();
 
   std::vector< aterm_appl >          foundParameters;
   std::set< data_variable >     T;
@@ -394,7 +394,7 @@ void lpsParElm::filter() {
 inline void lpsParElm::output() {
   using namespace lps;
 
-  linear_process lps = p_spec.lps();
+  linear_process lps = p_spec.process();
   summand_list rebuild_summandlist;
   data_variable_list rebuild_process_parameters;
   data_expression_list rebuild_data_expression_pars;

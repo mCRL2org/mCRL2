@@ -154,7 +154,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     using namespace sip::layout;
     using namespace sip::layout::elements;
    
-    lps::linear_process lps = lps_specification.lps();
+    lps::linear_process lps = lps_specification.process();
   
     /* Create and add the top layout manager */
     layout::manager::aptr top(layout::horizontal_box::create());
@@ -210,7 +210,7 @@ int main(int argc, char** argv) {
     lps::specification lps_specification;
  
     if (lps_specification.load(file_name)) {
-      lps::linear_process lps = lps_specification.lps();
+      lps::linear_process lps = lps_specification.process();
     
       cout << "Input read from " << ((file_name == "-") ? "standard input" : file_name) << endl << endl;
      
