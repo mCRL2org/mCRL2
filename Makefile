@@ -10,7 +10,7 @@ all: $(CONFIG) $(BJAM) tools man
 install: $(CONFIG) $(BJAM)
 	$(BOOST_BUILD) --install
 	@install -d $(mandir)
-	@cp -rf ../../build/man/* $(mandir)
+	@cp -rf build/man/* $(mandir)
 
 tools:
 	$(BOOST_BUILD)
