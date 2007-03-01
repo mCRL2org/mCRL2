@@ -44,11 +44,8 @@
                 | SortStruct(<StructCons>+)                              [- di]
                 | SortArrowProd(<SortExpr>+, <SortExpr>)                 [- di]
                 | SortArrow(<SortExpr>, <SortExpr>)                      [+ di]
-                | <SortUnknown>                                          [. tc]
+                | SortUnknown                                            [. tc]
                 | SortsPossible(<SortExpr>+)                             [. tc]
-
-//sort unknown
-<SortUnknown>  ::= SortUnknown
 
 //sort identifier
 <SortId>       ::= SortId(<String>)
@@ -65,13 +62,8 @@
 <StructProj>   ::= StructProj(<StringOrNil>, <SortExpr>)
 
 //string or nil
-<StringOrNil> ::= <String>
-                | Nil
-
-//sort expression or unknown
-<SortExprOrUnknown>
-               ::= <SortExpr> 
-                 | <SortUnknown>                                         [- tc]
+<StringOrNil>  ::= <String>
+                 | Nil
 
 
 //Data expressions
@@ -94,7 +86,7 @@
 
 //binding operator
 <BindingOperator> 
-                ::= SetBagComp                                           [- tc]
+               ::= SetBagComp                                            [- tc]
                  | SetComp                                               [+ tc]
                  | BagComp                                               [+ tc]
                  | Forall
