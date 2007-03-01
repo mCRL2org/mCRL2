@@ -56,12 +56,13 @@ class pbes_fixpoint_symbol: public aterm_appl
 {
   public:
     pbes_fixpoint_symbol()
+      : aterm_appl(detail::constructFixPoint())
     {}
 
     pbes_fixpoint_symbol(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(check_rule_FixPoint(m_term));
+      assert(detail::check_rule_FixPoint(m_term));
     }
     
     // allow assignment to aterms
@@ -107,12 +108,13 @@ class pbes_equation: public aterm_appl
     }
 
     pbes_equation()
+      : aterm_appl(detail::constructPBEqn())
     {}
 
     pbes_equation(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(check_rule_PBEqn(m_term));
+      assert(detail::check_rule_PBEqn(m_term));
       iterator i = t.begin();
       m_symbol   = pbes_fixpoint_symbol(*i++);
       m_variable = propositional_variable(*i++);
@@ -322,7 +324,7 @@ class pbes
         m_equations(equations),
         m_initial_state(initial_state)
     {
-      assert(check_rule_PBES(term()));
+      assert(detail::check_rule_PBES(term()));
     }
 
     /// Returns the data specification.

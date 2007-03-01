@@ -83,12 +83,13 @@ class specification: public aterm_appl
 
   public:
     specification()
+      : aterm_appl(detail::constructSpec())
     {}
 
     specification(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(check_rule_Spec(m_term));
+      assert(detail::check_rule_Spec(m_term));
       init_term(t);
     }
 
@@ -189,7 +190,7 @@ specification set_action_labels(specification spec, action_label_list action_lab
 }
 
 inline
-specification set_lps(specification spec, linear_process lps)
+specification set_lpe(specification spec, linear_process lps)
 {
   return specification(spec.data(),
                        spec.action_labels(),

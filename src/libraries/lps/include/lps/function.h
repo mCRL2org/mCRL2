@@ -27,12 +27,13 @@ class function: public aterm_appl
 {
   public:
     function()
+      : aterm_appl(detail::constructOpId())
     {}
 
     function(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(check_rule_OpId(m_term));
+      assert(detail::check_rule_OpId(m_term));
     }
 
     function(std::string name, sort s)

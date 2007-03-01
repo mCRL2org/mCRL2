@@ -219,6 +219,80 @@ def generate_soundness_check_functions(rules, filename, ignored_phases = []):
 
     insert_text_in_file(string.strip(ptext + '\n' + text), filename, begin, end)
 
+CONSTRUCTOR_FUNCTIONS = '''// %(name)s
+inline
+ATermAppl initConstruct%(name)s(ATermAppl& t)
+{
+  t = ATmakeAppl%(arity)d(gsAFun%(name)s()%(arguments)s);
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl construct%(name)s()
+{
+  static ATermAppl t = initConstruct%(name)s(t);
+  return t;
+}
+
+'''
+
+CONSTRUCTOR_RULE = '''// %(name)s
+inline
+ATermAppl construct%(name)s()
+{
+  return construct%(fname)s();
+}
+
+'''
+
+#---------------------------------------------------------------#
+#                      generate_constructor_functions
+#---------------------------------------------------------------#
+# generates C++ code for constructor functions
+#
+def generate_constructor_functions(rules, filename, ignored_phases = []):
+    begin = '//--- begin generated code'
+    end   = '//--- end generated code'
+    text  = ''
+    ptext = '' # function declarations (prototypes)
+
+    functions = find_functions(rules, ignored_phases)
+
+    for f in functions:
+        ptext = ptext + 'ATermAppl construct%s();\n' % f.name()
+        name  = f.name()
+        arity = f.arity()
+        args = map(lambda x: 'reinterpret_cast<ATerm>(construct%s())' % x.name() if x.repetitions == '' else 'reinterpret_cast<ATerm>(constructList())', f.arguments)
+        arguments = ', ' + ', '.join(args) if len(args) > 0 else ''
+        text = text + CONSTRUCTOR_FUNCTIONS % {
+            'name'       : name,
+            'name'       : name,
+            'arity'      : arity,
+            'name'       : name,
+            'arguments'  : arguments,
+            'name'       : name,
+            'name'       : name
+        }
+
+    ctext = ''
+    function_names = map(lambda x: x.name(), functions)
+    for rule in rules:
+        if not rule.name() in function_names:
+            name = rule.name()
+            for f in rule.rhs:
+                if f.phase == None or not f.phase.startswith('-') or not f.phase.startswith('.'):
+                    fname = f.name()
+                    break
+            ptext = ptext + 'ATermAppl construct%s();\n' % name             
+            text = text + CONSTRUCTOR_RULE % {
+                'name'       : name,
+                'name'       : name,
+                'fname'      : fname
+            }
+
+    insert_text_in_file(string.strip(ptext + '\n' + text), filename, begin, end)
+
 #---------------------------------------------------------------#
 #                          find_functions
 #---------------------------------------------------------------#
@@ -293,6 +367,7 @@ def main():
     parser = OptionParser(usage)
     parser.add_option("-s", "--soundness-checks", action="store_true", help="generate soundness check functions from internal mcrl2 format")
     parser.add_option("-l", "--libstruct", action="store_true", help="generate libstruct functions from internal mcrl2 format")
+    parser.add_option("-c", "--constructors", action="store_true", help="generate constructor functions from internal mcrl2 format")
     (options, args) = parser.parse_args()
 
     filename = '../../../../specs/mcrl2.internal.txt'
@@ -300,13 +375,18 @@ def main():
 
     if options.soundness_checks:
         ignored_phases = ['-tc', '-lin', '-di', '-rft', '.tc']
-        filename = '../include/lps/soundness_checks.h'
+        filename = '../include/lps/detail/soundness_checks.h'
         generate_soundness_check_functions(rules, filename, ignored_phases)
 
     if options.libstruct:
         ignored_phases = []
         filename = '../../mcrl2_basic/include/struct/libstruct_core.h'
         generate_libstruct_functions(rules, filename, ignored_phases)
+
+    if options.constructors:
+        ignored_phases = []
+        filename = '../include/lps/detail/constructors.h'
+        generate_constructor_functions(rules, filename, ignored_phases)
 
 if __name__ == "__main__":
     main()

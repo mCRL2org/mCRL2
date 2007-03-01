@@ -9,7 +9,8 @@
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
 #include "lps/pretty_print.h"
-#include "lps/soundness_checks.h"
+#include "lps/detail/soundness_checks.h"
+#include "lps/detail/constructors.h"
 #include "libstruct.h"
 
 namespace lps {
@@ -46,6 +47,7 @@ class sort: public aterm_appl
 {
   public:
     sort()
+      : aterm_appl(detail::constructSortId())
     {}
 
     /// Constructs a sort with internal representation t.
@@ -53,13 +55,13 @@ class sort: public aterm_appl
     sort(ATermAppl t)
       : aterm_appl(t)
     {
-      assert(check_rule_SortExpr(m_term));
+      assert(detail::check_rule_SortExpr(m_term));
     }
 
     sort(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(check_rule_SortExpr(m_term));
+      assert(detail::check_rule_SortExpr(m_term));
     }
 
     /// Constructs a sort from a string.

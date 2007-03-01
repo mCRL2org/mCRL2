@@ -15,7 +15,7 @@
 #include "atermpp/utility.h"
 #include "lps/identifier_string.h"
 #include "lps/data_expression.h"
-#include "lps/soundness_checks.h"
+#include "lps/detail/soundness_checks.h"
 #include "libstruct.h"
 
 namespace lps {
@@ -37,12 +37,13 @@ class data_variable: public data_expression
 {
   public:
     data_variable()
+      : data_expression(detail::constructDataVarId())
     {}
 
     data_variable(aterm_appl t)
      : data_expression(t)
     {
-      assert(check_rule_DataVarId(m_term));
+      assert(detail::check_rule_DataVarId(m_term));
     }
 
     /// Very incomplete implementation for initialization using strings like "d:D".
@@ -95,12 +96,13 @@ class data_application: public data_expression
 {
   public:
     data_application()
+      : data_expression(detail::constructDataAppl())
     {}
 
     data_application(aterm_appl t)
      : data_expression(t)
     {
-      assert(check_term_DataAppl(m_term));
+      assert(detail::check_term_DataAppl(m_term));
     }
 
     data_application(data_expression expr, data_expression arg)
@@ -128,12 +130,13 @@ class data_operation: public data_expression
 {
   public:
     data_operation()
+      : data_expression(detail::constructOpId())
     {}
 
     data_operation(aterm_appl t)
      : data_expression(t)
     {
-      assert(check_rule_OpId(m_term));
+      assert(detail::check_rule_OpId(m_term));
     }
 
     data_operation(identifier_string name, lps::sort s)
@@ -185,12 +188,13 @@ class data_equation: public aterm_appl
     typedef data_variable_list::iterator variable_iterator;
 
     data_equation()
+      : aterm_appl(detail::constructDataEqn())
     {}
 
     data_equation(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(check_rule_DataEqn(m_term));
+      assert(detail::check_rule_DataEqn(m_term));
       aterm_appl::iterator i = t.begin();
       m_variables = data_variable_list(*i++);
       m_condition = data_expression(*i++);
@@ -272,16 +276,14 @@ class data_assignment: public aterm_appl
     data_expression m_rhs;         // right hand side of the assignment
 
   public:
-    /// Returns true if the types of the left and right hand side are equal.
-    bool is_well_typed() const
-    {
-      return gsGetSort(m_lhs) == gsGetSort(m_rhs);
-    }
+    data_assignment()
+      : aterm_appl(detail::constructPBExpr())
+    {}
 
     data_assignment(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(check_rule_DataVarIdInit(m_term));
+      assert(detail::check_rule_DataVarIdInit(m_term));
       aterm_appl::iterator i = t.begin();
       m_lhs = data_variable(*i++);
       m_rhs = data_expression(*i);
@@ -294,6 +296,12 @@ class data_assignment: public aterm_appl
        m_lhs(lhs),
        m_rhs(rhs)
     {
+    }
+
+    /// Returns true if the types of the left and right hand side are equal.
+    bool is_well_typed() const
+    {
+      return gsGetSort(m_lhs) == gsGetSort(m_rhs);
     }
 
     /// Applies the assignment to t and returns the result.

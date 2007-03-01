@@ -18,6 +18,10 @@ int test_main(int, char*[])
   ATinit(0, 0, &bottom_of_stack);
   gsEnableConstructorFunctions(); 
 
+  data_variable v;
+  std::string name = v.name();
+  BOOST_CHECK(name == "@NoValue"); 
+
   data_expression d;
   data_expression d1 = pos(2);
   data_expression d2 = pos(4);

@@ -4,7 +4,7 @@
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_traits.h"
 #include "atermpp/aterm_access.h"
-#include "lps/soundness_checks.h"
+#include "lps/detail/soundness_checks.h"
 #include "lps/propositional_variable.h"
 
 namespace lps {
@@ -35,12 +35,13 @@ class pbes_expression: public aterm_appl
 {
   public:
     pbes_expression()
+      : aterm_appl(detail::constructPBExpr())
     {}
 
     pbes_expression(aterm_appl term)
       : aterm_appl(term)
     {
-      assert(check_rule_PBExpr(m_term));
+      assert(detail::check_rule_PBExpr(m_term));
     }
 
     // allow assignment to aterms

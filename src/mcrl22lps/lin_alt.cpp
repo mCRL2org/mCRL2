@@ -2113,11 +2113,11 @@ static ATermAppl update_spec(ATermAppl spec, int /*init*/)
 			m = ATappend(m,(ATerm) gsMakeDataExprOfSort(ATAgetArgument(ATAelementAt(ATLelementAt(ATLelementAt(processes,init),1),i),1),ATLgetArgument(ATAgetArgument(spec,1),0),&o));
 		}
 		spec = ATsetArgument(spec,(ATerm) gsMakeMapSpec(o),2);
-		spec = ATsetArgument(spec,(ATerm) gsMakeInit(gsMakeProcess(gsMakeProcVarId(ATAelementAt(ATLelementAt(processes,init),0),get_sorts(ATLelementAt(ATLelementAt(processes,init),1))),m)),6);
+		spec = ATsetArgument(spec,(ATerm) gsMakeProcessInit(gsMakeProcess(gsMakeProcVarId(ATAelementAt(ATLelementAt(processes,init),0),get_sorts(ATLelementAt(ATLelementAt(processes,init),1))),m)),6);
 	} else {
-		spec = ATsetArgument(spec,(ATerm) gsMakeInit(gsMakeProcess(gsMakeProcVarId(ATAelementAt(ATLelementAt(processes,init),0),ATmakeList0()),ATmakeList0())),6);
+		spec = ATsetArgument(spec,(ATerm) gsMakeProcessInit(gsMakeProcess(gsMakeProcVarId(ATAelementAt(ATLelementAt(processes,init),0),ATmakeList0()),ATmakeList0())),6);
 	}*/
-	spec = ATsetArgument(spec,(ATerm) gsMakeInit(ATmakeList0(),initial_process),3);
+	spec = ATsetArgument(spec,(ATerm) gsMakeProcessInit(ATmakeList0(),initial_process),3);
 
 	return spec;
 }
@@ -2238,7 +2238,7 @@ static ATermAppl update_spec_subst(ATermAppl spec, unsigned int init, int reuse)
 	l = ATreverse(l);
 	spec = ATsetArgument(spec,(ATerm) gsMakeProcEqnSpec(l),2);
 
-	spec = ATsetArgument(spec,(ATerm) gsMakeInit(ATmakeList0(),initial_process),3);
+	spec = ATsetArgument(spec,(ATerm) gsMakeProcessInit(ATmakeList0(),initial_process),3);
 
 	return spec;
 }
@@ -2433,7 +2433,7 @@ static ATermAppl make_lps(ATermAppl Spec, unsigned int init_id)
 			remove_indices_contextL((ATerm) s1,&s3,&n);
 			n = ATconcat(args,vars);
 			s1 = (ATermList) remove_indices_contextL((ATerm) s1,&s5,&n);
-			sums = ATappend(sums,(ATerm) gsMakeLPSSummand(
+			sums = ATappend(sums,(ATerm) gsMakeLinearProcessSummand(
 						s1,
 						s2,
 						gsMakeMultAct(s3),
@@ -2444,7 +2444,7 @@ static ATermAppl make_lps(ATermAppl Spec, unsigned int init_id)
 		i++;
 	}
 	
-	Spec = ATsetArgument(Spec,(ATerm) gsMakeLPS(vars,args,sums),2);
+	Spec = ATsetArgument(Spec,(ATerm) gsMakeLinearProcess(vars,args,sums),2);
 
 	vars = ATmakeList0();
 	m = ATLelementAt(ATLelementAt(processes,proc_id(initial_process)),1);
@@ -2464,7 +2464,7 @@ static ATermAppl make_lps(ATermAppl Spec, unsigned int init_id)
 	}
 	
 //	Spec = ATsetArgument(Spec,(ATerm) gsMakeMapSpec(maps),2);
-	Spec = ATsetArgument(Spec,(ATerm) gsMakeLPSInit(vars,l),3);
+	Spec = ATsetArgument(Spec,(ATerm) gsMakeLinearProcessInit(vars,l),3);
 
 	return Spec;
 }
@@ -2485,7 +2485,7 @@ static ATermAppl make_lps(ATermAppl Spec, unsigned int init_id)
 		newsums = ;
 	}
 
-	return ATsetArgument(spec,(ATerm) gsMakeLPS(ATLgetArgument(ATAgetArgument(spec,4),0),newsums),4); */
+	return ATsetArgument(spec,(ATerm) gsMakeLinearProcess(ATLgetArgument(ATAgetArgument(spec,4),0),newsums),4); */
 //}
 
 static ATermAppl get_unique_var(ATermAppl var, ATermTable names, ATermList *substs, ATermList *new_list)
@@ -2632,7 +2632,7 @@ static ATermAppl unique_vars(ATermAppl spec)
 //gsprintf("new sum: %T\n\n",ATgetFirst(l));
 	}
 	l = ATreverse(l);
-	lps = gsMakeLPS(lps_vars,lps_pars,l);
+	lps = gsMakeLinearProcess(lps_vars,lps_pars,l);
 
 	l = ATmakeList0();
 	m = (ATermList) ATgetArgument(init,1);
@@ -2643,7 +2643,7 @@ static ATermAppl unique_vars(ATermAppl spec)
 		l = ATinsert(l,(ATerm) gsMakeDataVarIdInit((ATermAppl) uvSubstValues(lps_pars_substs,ATgetArgument(a,0)),(ATermAppl) uvSubstValues(init_vars_substs,ATgetArgument(a,1))));
 	}
 	l = ATreverse(l);
-	init = gsMakeLPSInit(init_vars,l);
+	init = gsMakeLinearProcessInit(init_vars,l);
 
 	spec = ATsetArgument(spec,(ATerm) lps,2);
 	spec = ATsetArgument(spec,(ATerm) init,3);

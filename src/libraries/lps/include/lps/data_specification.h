@@ -35,12 +35,13 @@ class data_specification: public aterm_appl
     typedef data_equation_list::iterator equation_iterator;
 
     data_specification()
+      : aterm_appl(detail::constructDataSpec())
     {}
 
     data_specification(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(check_rule_DataSpec(m_term));
+      assert(detail::check_rule_DataSpec(m_term));
       aterm_appl::iterator i = t.begin();
       m_sorts        = sort_list(aterm_appl(*i++).argument(0));
       m_constructors = function_list(aterm_appl(*i++).argument(0));

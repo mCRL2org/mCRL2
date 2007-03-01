@@ -10,7 +10,7 @@
 #include "lps/identifier_string.h"
 #include "lps/data.h"
 #include "lps/pretty_print.h"
-#include "lps/soundness_checks.h"
+#include "lps/detail/soundness_checks.h"
 
 namespace lps {
 
@@ -30,12 +30,13 @@ class action_label: public aterm_appl
 
   public:
     action_label()
+      : aterm_appl(detail::constructActId())
     {}
 
     action_label(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(check_rule_ActId(m_term));
+      assert(detail::check_rule_ActId(m_term));
       aterm_appl::iterator i = t.begin();
       m_name  = *i++;
       m_sorts = *i;
@@ -96,12 +97,13 @@ class action: public aterm_appl
 
   public:
     action()
+      : aterm_appl(detail::constructAction())
     {}
 
     action(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(check_rule_Action(m_term));
+      assert(detail::check_rule_Action(m_term));
       aterm_appl::iterator i = t.begin();
       m_label = action_label(*i++);
       m_arguments = data_expression_list(*i);

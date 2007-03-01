@@ -5,7 +5,7 @@
 #include <cassert>
 #include "lps/sort.h"
 #include "lps/pretty_print.h"
-#include "lps/soundness_checks.h"
+#include "lps/detail/soundness_checks.h"
 #include "lps/detail/data_expr_utility.h"
 #include "libstruct.h"
 
@@ -32,18 +32,19 @@ class data_expression: public aterm_appl
 {
   public:
     data_expression()
+      : aterm_appl(detail::constructDataExpr())
     {}
 
     data_expression(aterm_appl term)
       : aterm_appl(term)
     {
-      assert(check_rule_DataExprOrNil(m_term));
+      assert(detail::check_rule_DataExprOrNil(m_term));
     }
 
     data_expression(ATermAppl term)
       : aterm_appl(term)
     {
-      assert(check_rule_DataExprOrNil(m_term));
+      assert(detail::check_rule_DataExprOrNil(m_term));
     }
 
     /// Returns the sort of the data expression.

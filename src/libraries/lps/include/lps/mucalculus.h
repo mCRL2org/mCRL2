@@ -45,18 +45,19 @@ class action_formula: public aterm_appl
 {
   public:
     action_formula()
+      : aterm_appl(detail::constructActFrm())
     {}
 
     action_formula(ATermAppl t)
       : aterm_appl(aterm_appl(t))
     {
-      assert(check_rule_ActFrm(m_term));
+      assert(detail::check_rule_ActFrm(m_term));
     }
 
     action_formula(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(check_rule_ActFrm(m_term));
+      assert(detail::check_rule_ActFrm(m_term));
     }
 
     /// Returns true if the action formula equals 'true'.
@@ -194,18 +195,19 @@ class state_formula: public aterm_appl
 {
   public:
     state_formula()
+      : aterm_appl(detail::constructStateFrm())
     {}
 
     state_formula(ATermAppl t)
       : aterm_appl(aterm_appl(t))
     {
-      assert(check_rule_StateFrm(m_term));
+      assert(detail::check_rule_StateFrm(m_term));
     }
 
     state_formula(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(check_rule_StateFrm(m_term));
+      assert(detail::check_rule_StateFrm(m_term));
     }
 
     // example: "X(d:D,e:E)"
@@ -410,18 +412,19 @@ class regular_formula: public aterm_appl
 {
   public:
     regular_formula()
+      : aterm_appl(detail::constructRegFrm())
     {}
 
     regular_formula(ATermAppl t)
       : aterm_appl(aterm_appl(t))
     {
-      assert(check_rule_RegFrm(m_term));
+      assert(detail::check_rule_RegFrm(m_term));
     }
 
     regular_formula(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(check_rule_RegFrm(m_term));
+      assert(detail::check_rule_RegFrm(m_term));
     }
 
     /// Applies a substitution to this regular_formula and returns the result.

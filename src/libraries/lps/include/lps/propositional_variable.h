@@ -33,6 +33,7 @@ class propositional_variable: public aterm_appl
 
   public:
     propositional_variable()
+      : aterm_appl(detail::constructPropVarDecl())
     {}
 
     // example: "X(d:D,e:E)"
@@ -47,7 +48,7 @@ class propositional_variable: public aterm_appl
     propositional_variable(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(check_rule_PropVarDecl(m_term));
+      assert(detail::check_rule_PropVarDecl(m_term));
       iterator i = t.begin();
       m_name = *i++;
       m_parameters = *i;
@@ -59,11 +60,6 @@ class propositional_variable: public aterm_appl
         m_parameters(parameters)
     {
     }
-
-//    operator pbes_expression() const
-//    {
-//      return pbes_expression(m_term);
-//    }
 
     /// Returns the term containing the name of the propositional variable.
     identifier_string name() const
@@ -102,6 +98,7 @@ class propositional_variable_instantiation: public aterm_appl
 
   public:
     propositional_variable_instantiation()
+      : aterm_appl(detail::constructPropVarInst())
     {}
 
     // example: "X(d:D,e:E)"
@@ -116,7 +113,7 @@ class propositional_variable_instantiation: public aterm_appl
     propositional_variable_instantiation(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(check_rule_PropVarInst(m_term));
+      assert(detail::check_rule_PropVarInst(m_term));
       iterator i = t.begin();
       m_name = *i++;
       m_parameters = *i;
