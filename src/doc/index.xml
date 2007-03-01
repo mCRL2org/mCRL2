@@ -502,7 +502,7 @@
   <chapter><title>Linearisation</title>
     &fmcrl22lps;
   </chapter>
-  <chapter><title>Linear Process Equations</title>
+  <chapter><title>Linear Process Specifications</title>
     &flps2lts;
     &flpsbinary;
     &flpsconfcheck;
