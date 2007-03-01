@@ -94,8 +94,8 @@
                  | Lambda
 
 //where clause declaration
-<WhrDecl>      ::= WhrDecl(<String>, <DataExpr>)
-
+<WhrDecl>      ::= WhrDecl(<String>, <DataExpr>)                         [- tc]
+                 | <DataVarIdInit>                                       [+ tc]  
 
 //Data specifications
 //-------------------

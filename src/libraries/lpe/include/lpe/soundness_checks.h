@@ -73,13 +73,11 @@ bool check_rule_NumberString(Term t)
 
 //--- begin generated code
 template <typename Term> bool check_rule_SortExpr(Term t);
-template <typename Term> bool check_rule_SortUnknown(Term t);
 template <typename Term> bool check_rule_SortId(Term t);
 template <typename Term> bool check_rule_SortConsType(Term t);
 template <typename Term> bool check_rule_StructCons(Term t);
 template <typename Term> bool check_rule_StructProj(Term t);
 template <typename Term> bool check_rule_StringOrNil(Term t);
-template <typename Term> bool check_rule_SortExprOrUnknown(Term t);
 template <typename Term> bool check_rule_DataExpr(Term t);
 template <typename Term> bool check_rule_DataVarId(Term t);
 template <typename Term> bool check_rule_OpId(Term t);
@@ -123,7 +121,7 @@ template <typename Term> bool check_rule_PBExpr(Term t);
 template <typename Term> bool check_term_ProcEqn(Term t);
 template <typename Term> bool check_term_Hide(Term t);
 template <typename Term> bool check_term_SortArrow(Term t);
-template <typename Term> bool check_term_Forall(Term t);
+template <typename Term> bool check_term_Action(Term t);
 template <typename Term> bool check_term_CommExpr(Term t);
 template <typename Term> bool check_term_StateNot(Term t);
 template <typename Term> bool check_term_IfThen(Term t);
@@ -165,7 +163,6 @@ template <typename Term> bool check_term_PBESForall(Term t);
 template <typename Term> bool check_term_StateTrue(Term t);
 template <typename Term> bool check_term_BInit(Term t);
 template <typename Term> bool check_term_PBESFalse(Term t);
-template <typename Term> bool check_term_WhrDecl(Term t);
 template <typename Term> bool check_term_DataAppl(Term t);
 template <typename Term> bool check_term_StateDelayTimed(Term t);
 template <typename Term> bool check_term_Nu(Term t);
@@ -180,7 +177,7 @@ template <typename Term> bool check_term_ActForall(Term t);
 template <typename Term> bool check_term_RenameExpr(Term t);
 template <typename Term> bool check_term_Merge(Term t);
 template <typename Term> bool check_term_ActSpec(Term t);
-template <typename Term> bool check_term_Action(Term t);
+template <typename Term> bool check_term_Forall(Term t);
 template <typename Term> bool check_term_PBESAnd(Term t);
 template <typename Term> bool check_term_Lambda(Term t);
 template <typename Term> bool check_term_StateMust(Term t);
@@ -206,7 +203,6 @@ template <typename Term> bool check_term_OpId(Term t);
 template <typename Term> bool check_term_ActFalse(Term t);
 template <typename Term> bool check_term_ActId(Term t);
 template <typename Term> bool check_term_LPEInit(Term t);
-template <typename Term> bool check_term_SortUnknown(Term t);
 template <typename Term> bool check_term_ActExists(Term t);
 template <typename Term> bool check_term_Allow(Term t);
 template <typename Term> bool check_term_PropVarDecl(Term t);
@@ -218,12 +214,6 @@ bool check_rule_SortExpr(Term t)
 {
   return    check_rule_SortId(t)
          || check_term_SortArrow(t);
-}
-
-template <typename Term>
-bool check_rule_SortUnknown(Term t)
-{
-  return    check_term_SortUnknown(t);
 }
 
 template <typename Term>
@@ -255,12 +245,6 @@ bool check_rule_StringOrNil(Term t)
 {
   return    check_rule_String(t)
          || check_term_Nil(t);
-}
-
-template <typename Term>
-bool check_rule_SortExprOrUnknown(Term t)
-{
-  return    check_rule_SortExpr(t);
 }
 
 template <typename Term>
@@ -296,7 +280,7 @@ bool check_rule_BindingOperator(Term t)
 template <typename Term>
 bool check_rule_WhrDecl(Term t)
 {
-  return    check_term_WhrDecl(t);
+  return    check_rule_DataVarIdInit(t);
 }
 
 template <typename Term>
@@ -643,21 +627,27 @@ bool check_term_SortArrow(Term t)
   return true;
 }
 
-// Forall()
+// Action(ActId, DataExpr*)
 template <typename Term>
-bool check_term_Forall(Term t)
+bool check_term_Action(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
-  if (!gsIsForall(a))
+  if (!gsIsAction(a))
     return false;
 
   // check the children
-  if (a.size() != 0)
+  if (a.size() != 2)
     return false;
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_ActId<aterm>))
+    return false;
+  if (!check_list_argument(a(1), check_rule_DataExpr<aterm>, 0))
+    return false;
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1637,31 +1627,6 @@ bool check_term_PBESFalse(Term t)
   return true;
 }
 
-// WhrDecl(String, DataExpr)
-template <typename Term>
-bool check_term_WhrDecl(Term t)
-{
-  // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
-  if (term.type() != AT_APPL)
-    return false;
-  aterm_appl a(term);
-  if (!gsIsWhrDecl(a))
-    return false;
-
-  // check the children
-  if (a.size() != 2)
-    return false;
-#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_String<aterm>))
-    return false;
-  if (!check_term_argument(a(1), check_rule_DataExpr<aterm>))
-    return false;
-#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-  return true;
-}
-
 // DataAppl(DataExpr, DataExpr)
 template <typename Term>
 bool check_term_DataAppl(Term t)
@@ -1990,27 +1955,21 @@ bool check_term_ActSpec(Term t)
   return true;
 }
 
-// Action(ActId, DataExpr*)
+// Forall()
 template <typename Term>
-bool check_term_Action(Term t)
+bool check_term_Forall(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
-  if (!gsIsAction(a))
+  if (!gsIsForall(a))
     return false;
 
   // check the children
-  if (a.size() != 2)
+  if (a.size() != 0)
     return false;
-#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_ActId<aterm>))
-    return false;
-  if (!check_list_argument(a(1), check_rule_DataExpr<aterm>, 0))
-    return false;
-#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2620,25 +2579,6 @@ bool check_term_LPEInit(Term t)
   if (!check_list_argument(a(1), check_rule_DataVarIdInit<aterm>, 0))
     return false;
 #endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-  return true;
-}
-
-// SortUnknown()
-template <typename Term>
-bool check_term_SortUnknown(Term t)
-{
-  // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
-  if (term.type() != AT_APPL)
-    return false;
-  aterm_appl a(term);
-  if (!gsIsSortUnknown(a))
-    return false;
-
-  // check the children
-  if (a.size() != 0)
-    return false;
 
   return true;
 }

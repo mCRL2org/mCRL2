@@ -792,10 +792,9 @@ ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
       while (!ATisEmpty(whr_decls))
       {
         ATermAppl whr_decl = ATAgetFirst(whr_decls);
-        ATermAppl var_name = ATAgetArgument(whr_decl, 0);
+        ATermAppl var = ATAgetArgument(whr_decl, 0);
         ATermAppl expr = ATAgetArgument(whr_decl, 1);
-        vars = ATinsert(vars,
-          (ATerm) gsMakeDataVarId(var_name, gsGetSort(expr)));
+        vars = ATinsert(vars, (ATerm) var);
         exprs = ATinsert(exprs, (ATerm) expr);
         whr_decls = ATgetNext(whr_decls);
       }
@@ -967,8 +966,7 @@ void get_free_vars_appl(ATermAppl data_expr, ATermList bound_vars,
     whr_decls = ATLgetArgument(data_expr, 1);
     while (!ATisEmpty(whr_decls)) {
       ATermAppl whr_decl = ATAgetFirst(whr_decls);
-      ATermAppl var = gsMakeDataVarId(ATAgetArgument(whr_decl, 0),
-        gsGetSort(ATAgetArgument(whr_decl, 1)));
+      ATermAppl var = ATAgetArgument(whr_decl, 0);
       if (ATindexOf(bound_vars, (ATerm) var, 0) == -1) {
         bound_vars = ATinsert(bound_vars, (ATerm) var);
       }
@@ -1736,8 +1734,8 @@ ATermAppl impl_sort_bag(ATermAppl sort_bag, ATermList *p_substs,
         gsMakeDataExprIf(
           gsMakeDataExprGT(m, n), gsMakeDataExprGTESubt(m, n), zero
         ), ATmakeList2(
-          (ATerm) gsMakeWhrDecl(m_name, gsMakeDataAppl(f_sort_func, x_sort_elt)),
-          (ATerm) gsMakeWhrDecl(n_name, gsMakeDataAppl(g_sort_func, x_sort_elt))
+          (ATerm) gsMakeDataVarIdInit(m, gsMakeDataAppl(f_sort_func, x_sort_elt)),
+          (ATerm) gsMakeDataVarIdInit(n, gsMakeDataAppl(g_sort_func, x_sort_elt))
         )
       )
     ), p_substs, p_data_decls);
