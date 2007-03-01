@@ -38,7 +38,7 @@ int gsvfprintf(FILE *stream, const char *format, va_list args);
 // The default message handler (defined in lowlevel.cpp)
 extern void (*custom_message_handler)(gsMessageType, char*);
 
-// Helper function (wrapper around gsvfprintf) for printing to string
+// Helpsr function (wrapper around gsvfprintf) for printing to string
 static void handler_wrapper(gsMessageType t, char *Format, va_list args) {
   FILE* stream = tmpfile();
 

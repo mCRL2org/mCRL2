@@ -143,7 +143,7 @@ class Enumerator
 
 /**
  * \brief Create a Enumerator object.
- * \param spec              A mCRL2 LPE containing the data specification
+ * \param spec              A mCRL2 LPS containing the data specification
  *                          related to the expressions which solutions need
  *                          to be found.
  * \param r                 Rewriter to use for rewriting terms.

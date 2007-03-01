@@ -48,7 +48,7 @@ void print_help(FILE *f, char *Name)
 {
   fprintf(f,
     "Usage: %s [OPTION]... INFILE\n"
-    "Simulate the LPE in INFILE via a text-based interface.\n"
+    "Simulate the LPS in INFILE via a text-based interface.\n"
     "\n"
     "%s"
     "\n"
@@ -57,7 +57,7 @@ void print_help(FILE *f, char *Name)
     "  -q, --quiet              do not display any unrequested information\n"
     "  -v, --verbose            display consise intermediate messages\n"
     "  -d, --debug              display detailed intermediate messages\n"
-    "  -y, --dummy              replace free variables in the LPE with dummy values\n"
+    "  -y, --dummy              replace free variables in the LPS with dummy values\n"
     "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'inner')\n",
     Name,
     help_message
@@ -161,14 +161,14 @@ int main(int argc, char **argv)
 	Spec = (ATermAppl) ATreadFromFile(SpecStream);
 	if ( Spec == NULL )
 	{
-                gsErrorMsg("could not read LPE from '%s'\n", SpecFileName);
+                gsErrorMsg("could not read LPS from '%s'\n", SpecFileName);
                 fclose(SpecStream);
 		return 1;
 	}
         assert(Spec != NULL);
         gsEnableConstructorFunctions();
         if (!gsIsSpecV1(Spec)) {
-          gsErrorMsg("'%s' does not contain an LPE\n", SpecFileName);
+          gsErrorMsg("'%s' does not contain an LPS\n", SpecFileName);
           fclose(SpecStream);
           return false;
         }

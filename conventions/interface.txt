@@ -29,11 +29,11 @@ to read from stdin or write to stdout.
 
 Furthermore, the following features are forbidden:
 - designate the input file without its extension, e.g.
-    wrong: "mcrl22lpe abp"
-    right: "mcrl22lpe abp.mcrl2"
+    wrong: "mcrl22lps abp"
+    right: "mcrl22lps abp.mcrl2"
 - option '-' to indicate input should be read from stdin, e.g.
-    wrong: "... | lperewr - abp.rewr.lpe"
-    right: "... | lperewr > abp.rewr.lpe"
+    wrong: "... | lpsrewr - abp.rewr.lps"
+    right: "... | lpsrewr > abp.rewr.lps"
 
 
 File formats
@@ -42,13 +42,13 @@ File formats
 To provide users with a consistent way of handling files, the following
 extensions should be used only for corresponding purpose:
   .mcrl2                mCRL2 specification
-  .lpe                  mCRL2 LPE
+  .lps                  mCRL2 LPS
   .svc                  LTS in SVC format
   .aut                  LTS in AUT format
   .trc                  trace for simulation
   .dot                  GraphViz format
   .mcrl                 mCRL specification
-  .tbf                  mCRL LPE
+  .tbf                  mCRL LPS
   .pnml                 PNML specification
 
 
@@ -74,5 +74,5 @@ Referring to mCRL
 -----------------
 
 When referring to mCRL, type it as such. Do not use muCRL.
-When referring to mCRL LPEs, type it as such. Do not use LPO, or tbf. tbf may
+When referring to mCRL LPSs, type it as such. Do not use LPO, or tbf. tbf may
 only be used to indicate the file format.

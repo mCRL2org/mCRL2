@@ -8,11 +8,11 @@
 % if the final situation has been reached.
 %  The most effective way to do a state space search is using 
 %
-% mcrl22lpe -n knights.mcrl2 | lpeuntime > temp.lpe
-% lpedecluster temp.lpe temp1.lpe
-% lpestructelm -depth 10 temp1.lpe temp2.lpe [to replace the
+% mcrl22lps -n knights.mcrl2 | lpsuntime > temp.lps
+% lpsdecluster temp.lps temp1.lps
+% lpsstructelm -depth 10 temp1.lps temp2.lps [to replace the
 % list structure of the Board by explicit variables]
-% lpe2lts -Rjittyc -t -v -aready temp2.lpe | less
+% lps2lts -Rjittyc -t -v -aready temp2.lps | less
 %
 % There are 35144889 states at 19 levels. The action ready
 % is found at the end. There are 36 moves necessary to 

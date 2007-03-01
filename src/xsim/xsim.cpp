@@ -18,8 +18,8 @@
 #include "libstruct.h"
 #include "librewrite.h"
 
-/* The optional input file that should contain an LPD */
-std::string lpd_file_argument;
+/* The optional input file that should contain an LPS */
+std::string lps_file_argument;
  
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -30,7 +30,7 @@ class squadt_interactor: public mcrl2_squadt::tool_interface {
   private:
 
     // Identifier for main input file that contains an LTS
-    static const char* lpd_file_for_input;
+    static const char* lps_file_for_input;
  
     // Wrapper for wxEntry invocation
     squadt_utility::entry_wrapper& starter;
@@ -53,21 +53,21 @@ class squadt_interactor: public mcrl2_squadt::tool_interface {
     bool perform_task(sip::configuration&);
 };
 
-const char* squadt_interactor::lpd_file_for_input = "lpd_in";
+const char* squadt_interactor::lps_file_for_input = "lps_in";
 
 squadt_interactor::squadt_interactor(squadt_utility::entry_wrapper& w): starter(w) {
 }
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  /* The tool has only one main input combination it takes an LPE and then behaves as a reporter */
-  c.add_input_combination(lpd_file_for_input, sip::mime_type("lpe"), sip::tool::category::simulation);
+  /* The tool has only one main input combination it takes an LPS and then behaves as a reporter */
+  c.add_input_combination(lps_file_for_input, sip::mime_type("lps"), sip::tool::category::simulation);
 }
 
 void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 }
 
 bool squadt_interactor::check_configuration(sip::configuration const& c) const {
-  bool valid = c.input_exists(lpd_file_for_input);
+  bool valid = c.input_exists(lps_file_for_input);
 
   if (!valid) {
     send_error("Invalid input combination!");
@@ -77,7 +77,7 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
 }
 
 bool squadt_interactor::perform_task(sip::configuration& c) {
-  lpd_file_argument = c.get_input(lpd_file_for_input).get_location();
+  lps_file_argument = c.get_input(lps_file_for_input).get_location();
 
   return starter.perform_entry();
 }
@@ -98,17 +98,17 @@ public:
 };
 
 bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strategy,
-                        bool& dummies, std::string& lpd_file_argument) {
+                        bool& dummies, std::string& lps_file_argument) {
   wxCmdLineParser cmdln(argc,argv);
 
   cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("displays this message"));
   cmdln.AddSwitch(wxT("q"),wxT("quiet"),wxT("do not display any unrequested information"));
   cmdln.AddSwitch(wxT("v"),wxT("verbose"),wxT("display concise intermediate messages"));
   cmdln.AddSwitch(wxT("d"),wxT("debug"),wxT("display detailed intermediate messages"));
-  cmdln.AddSwitch(wxT("y"),wxT("dummy"),wxT("replace free variables in the LPE with dummy values"));
+  cmdln.AddSwitch(wxT("y"),wxT("dummy"),wxT("replace free variables in the LPS with dummy values"));
   cmdln.AddOption(wxT("R"),wxT("rewriter"),wxT("use specified rewriter (default 'inner')"));
   cmdln.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
-  cmdln.SetLogo(wxT("Graphical simulator for mCRL2 LPEs."));
+  cmdln.SetLogo(wxT("Graphical simulator for mCRL2 LPSs."));
 
   if (cmdln.Parse()) {
     return false;
@@ -116,7 +116,7 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
 
   if (cmdln.Found(wxT("h"))) {
     std::cout << "Usage: " << PROGRAM_NAME << " [OPTION]... [INFILE]\n"
-              << "Simulate LPEs in a graphical environment. If INFILE is supplied it will be\n"
+              << "Simulate LPSs in a graphical environment. If INFILE is supplied it will be\n"
               << "loaded into the simulator.\n"
               << "\n"
               << "Options:\n"
@@ -124,7 +124,7 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
               << "  -q, --quiet              do not display any unrequested information\n"
               << "  -v, --verbose            display concise intermediate messages\n"
               << "  -d, --debug              display detailed intermediate messages\n"
-              << "  -y, --dummy              replace free variables in the LPE with dummy values\n"
+              << "  -y, --dummy              replace free variables in the LPS with dummy values\n"
               << "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'inner')\n";
 
     return false;
@@ -165,7 +165,7 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
   }
 
   if ( cmdln.GetParamCount() > 0 ) {
-    lpd_file_argument = std::string(cmdln.GetParam(0).fn_str());
+    lps_file_argument = std::string(cmdln.GetParam(0).fn_str());
   }
 
   return (true);
@@ -227,17 +227,17 @@ bool XSim::OnInit()
   if (interactor->is_active()) {
     XSimMain *frame = new XSimMain( 0, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
     frame->Show(true);
-    frame->LoadFile(wxString(lpd_file_argument.c_str(), wxConvLocal));
+    frame->LoadFile(wxString(lps_file_argument.c_str(), wxConvLocal));
   }
   else {
 #endif
-    /* Whether to replace free variables in the LPE with dummies */
+    /* Whether to replace free variables in the LPS with dummies */
     bool dummies = false;
  
     /* The rewrite strategy that will be used */
     RewriteStrategy rewrite_strategy = GS_REWR_INNER;
  
-    if (!parse_command_line(argc, argv, rewrite_strategy, dummies, lpd_file_argument)) {
+    if (!parse_command_line(argc, argv, rewrite_strategy, dummies, lps_file_argument)) {
       return (false);
     }
  
@@ -246,8 +246,8 @@ bool XSim::OnInit()
     frame->rewr_strat  = rewrite_strategy;
     frame->Show(true);
      
-    if (!lpd_file_argument.empty()) {
-      frame->LoadFile(wxString(lpd_file_argument.c_str(), wxConvLocal));
+    if (!lps_file_argument.empty()) {
+      frame->LoadFile(wxString(lps_file_argument.c_str(), wxConvLocal));
     }
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }

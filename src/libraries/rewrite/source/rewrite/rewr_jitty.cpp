@@ -352,7 +352,7 @@ static ATermList create_strategy(ATermList rules)
 	return ATreverse(strat);
 }
 
-RewriterJitty::RewriterJitty(lpe::data_specification DataSpec)
+RewriterJitty::RewriterJitty(lps::data_specification DataSpec)
 {
 	ATermList l,n;
 	ATermTable tmp_eqns;

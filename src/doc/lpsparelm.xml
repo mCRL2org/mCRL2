@@ -1,0 +1,88 @@
+<refentry id="lpsparelm">
+ <info>
+  <date>2005-2007</date>
+ </info>
+
+<refmeta>
+ <refentrytitle>lpsparelm</refentrytitle>
+ <manvolnum>1</manvolnum>
+ <refmiscinfo class="source">lpsparelm</refmiscinfo>
+ <refmiscinfo class="version"></refmiscinfo>
+ <refmiscinfo class="manual">User Commands</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>lpsparelm</refname>
+<refpurpose>remove unused parameters from a linear process equation.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>&lpsparelm;</command>
+    <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
+    <arg choice="opt">&infile; <arg choice="opt">&outfile;</arg></arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  <para>
+   This tool removes parameters which have no influence on condition, action 
+   or time arguments of the LPS specified by &infile;. Removing these parameters
+   from the LPS can lead to a reduction when generating a state space of an LPS.
+   The result is written to &outfile;. If &outfile; is not supplied, &cstdout; is
+   used. If &infile; is not supplied, &cstdin; is used instead.
+  </para>
+</refsect1>
+
+<refsect1>
+  <title>Options</title>
+  <para>
+    <variablelist>
+
+      <varlistentry>
+        <term>&opt_h;</term>
+        <term>&opt_help;</term>
+          <listitem>
+            <para>Displays help information and exits.</para>
+          </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_version;</term>
+        <listitem>
+          <para>Displays version information and exits.</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_v;</term>
+        <term>&opt_verbose;</term>
+        <listitem>
+          <para>
+          Displays short intermediate information during the run of the program.
+          </para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_d;</term>
+        <term>&opt_debug;</term>
+        <listitem>
+          <para>
+          Displays detailed intermediate information during the run of the program.
+          </para>
+        </listitem>
+      </varlistentry>
+      
+    </variablelist>
+  </para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>Written by Frank Stappers. Please send all complaints, comments and bug
+fixes to &bugmail;.</para>
+</refsect1>
+
+</refentry>

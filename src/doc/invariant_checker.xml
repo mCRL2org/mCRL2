@@ -13,14 +13,14 @@
 
 <refnamediv>
 <refname>invariant_checker</refname>
-<refpurpose>a class that checks if an expression is an invariant of an mCRL2 LPE</refpurpose>
+<refpurpose>a class that checks if an expression is an invariant of an mCRL2 LPS</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
 <funcsynopsis>
 <funcprototype>
   <funcdef>&invariant_checker_constructor;</funcdef>
-  <paramdef>&type_atermappl; &par_lpe;</paramdef>
+  <paramdef>&type_atermappl; &par_lps;</paramdef>
   <paramdef>&type_rewrite_strategy; &par_rewrite_strategy; = &const_strat_jitty;</paramdef>
   <paramdef>&type_int; &par_time_limit; = 0</paramdef>
   <paramdef>&type_bool; &par_path_eliminator; = &const_false;</paramdef>
@@ -40,16 +40,16 @@
 <refsect1>
 <title>Description</title>
 <para>
-  The class &class_invariant_checker; is initialized with an LPE using the constructor &invariant_checker_constructor;. After initialization,
+  The class &class_invariant_checker; is initialized with an LPS using the constructor &invariant_checker_constructor;. After initialization,
   the function &invariant_checker_check_invariant; can be called any number of times to check whether an expression of sort &sort_bool; passed as
-  argument &par_invariant; is an invariant of this LPE. A new instance of the class &class_invariant_checker; has to be created for each new LPE
+  argument &par_invariant; is an invariant of this LPS. A new instance of the class &class_invariant_checker; has to be created for each new LPS
   that has to be checked.
 </para>
 <para>
   The class &class_invariant_checker; uses an instance of the class &class_bdd_prover; to check whether a formula is a valid invariant of an mCRL2
-  LPE. The constructor &invariant_checker_constructor; initializes the BDD based prover with the parameters &par_rewrite_strategy;,
+  LPS. The constructor &invariant_checker_constructor; initializes the BDD based prover with the parameters &par_rewrite_strategy;,
   &par_time_limit;,
-  &par_path_eliminator;, &par_solver_type; and the data specification of the LPE passed as parameter &par_lpe;. The
+  &par_path_eliminator;, &par_solver_type; and the data specification of the LPS passed as parameter &par_lps;. The
   parameter &par_rewrite_strategy; specifies which rewrite strategy is used by the prover's rewriter. It can be set to either
   &const_strat_inner;, &const_strat_innerc;, &const_strat_jitty; or &const_strat_jittyc;. The parameter &par_time_limit; specifies the maximum
   amount of time in seconds to be spent by the prover on proving a single expression. If &par_time_limit; is set to 0, no time limit will be 
@@ -75,7 +75,7 @@
   is found, but will report all violations instead.
 </para>
 <para>
-  Given an LPE,
+  Given an LPS,
   <literallayout>
     P(d: D) = ...
             + sum ei: Ei. ci(d, ei) -> ai(fi(d, ei)) . P(gi(d, ei))
@@ -96,7 +96,7 @@
   The following precondition has to be satisfied for &invariant_checker_constructor;:
   <itemizedlist>
     <listitem>
-      <para>the argument passed as parameter &par_lpe; is a valid mCRL2 LPE</para>
+      <para>the argument passed as parameter &par_lps; is a valid mCRL2 LPS</para>
     </listitem>
     <listitem>
       <para>

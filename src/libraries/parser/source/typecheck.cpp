@@ -343,10 +343,10 @@ ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, AT
   return Result;
 }
 
-ATermAppl type_check_sort_expr(ATermAppl sort_expr, lpe::specification &lpe_spec)
+ATermAppl type_check_sort_expr(ATermAppl sort_expr, lps::specification &lps_spec)
 {
   //check correctness of the sort expression in sort_expr using
-  //the LPE specification in lpe_spec
+  //the LPS specification in lps_spec
   assert(gsIsSortExpr(sort_expr));
   gsWarningMsg("type checking of sort expressions is partially implemented\n");
   
@@ -358,8 +358,8 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, lpe::specification &lpe_spec
 
   gsDebugMsg ("type checking of sort expressions read-in phase started\n");
 
-  //XXX read-in from LPE (not finished)
-  if(/* gstcReadInSorts((ATermList) lpe_spec.sorts())  &&  gstcReadInActs((ATermList) lpe_spec.action_labels() )*/1){
+  //XXX read-in from LPS (not finished)
+  if(/* gstcReadInSorts((ATermList) lps_spec.sorts())  &&  gstcReadInActs((ATermList) lps_spec.action_labels() )*/1){
     gsDebugMsg ("type checking of sort expressions read-in phase finished\n");
 
     if(!gsIsNotInferred(sort_expr)){
@@ -370,17 +370,17 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, lpe::specification &lpe_spec
     }
   }
   else {
-      gsErrorMsg("Reading Sorts from LPE failed.\n\n");
+      gsErrorMsg("Reading Sorts from LPS failed.\n\n");
   }
 
   gstcDataDestroy();
   return Result;
 }
 
-ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lpe::specification &lpe_spec, ATermTable Vars)
+ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::specification &lps_spec, ATermTable Vars)
 {
   //check correctness of the data expression in data_expr using
-  //the LPE specification in lpe_spec
+  //the LPS specification in lps_spec
   assert(gsIsSortExpr(sort_expr));
   gsWarningMsg("type checking of data expressions is partially implemented\n");
 
@@ -392,8 +392,8 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lpe::sp
 
   gsDebugMsg ("type checking of data expressions read-in phase started\n");
 
-  //XXX read-in from LPE (not finished)
-  if(/* gstcReadInSorts((ATermList) lpe_spec.sorts())  &&  gstcReadInActs((ATermList) lpe_spec.action_labels() )*/1){
+  //XXX read-in from LPS (not finished)
+  if(/* gstcReadInSorts((ATermList) lps_spec.sorts())  &&  gstcReadInActs((ATermList) lps_spec.action_labels() )*/1){
     gsDebugMsg ("type checking of data expressions read-in phase finished\n");
 
     if(gsIsNotInferred(sort_expr)){
@@ -418,7 +418,7 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lpe::sp
     }
   }
   else {
-      gsErrorMsg("Reading Sorts from LPE failed.\n\n");
+      gsErrorMsg("Reading Sorts from LPS failed.\n\n");
   }
 
   failed:
@@ -426,10 +426,10 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lpe::sp
   return Result;
 }
 
-ATermAppl type_check_mult_act(ATermAppl mult_act, lpe::specification &lpe_spec)
+ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec)
 {
   //check correctness of the multi-action in mult_act using
-  //the LPE specification in lpe_spec
+  //the LPS specification in lps_spec
   gsWarningMsg("type checking of multiactions is partially implemented\n");
   ATermAppl Result=NULL;
 
@@ -438,8 +438,8 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lpe::specification &lpe_spec)
 
   gsDebugMsg ("type checking of multiactions read-in phase started\n");
 
-  //XXX read-in from LPE (not finished)
-  if(/* gstcReadInSorts((ATermList) lpe_spec.sorts())  && */ gstcReadInActs((ATermList) lpe_spec.action_labels())){
+  //XXX read-in from LPS (not finished)
+  if(/* gstcReadInSorts((ATermList) lps_spec.sorts())  && */ gstcReadInActs((ATermList) lps_spec.action_labels())){
     gsDebugMsg ("type checking of multiactions read-in phase finished\n");
 
     if(gsIsMultAct(mult_act)){
@@ -463,29 +463,29 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lpe::specification &lpe_spec)
     }
   }
   else {
-      gsErrorMsg("Reading Sorts from LPE failed.\n\n");
+      gsErrorMsg("Reading Sorts from LPS failed.\n\n");
   }
     
   gstcDataDestroy();
   return Result;
 }
 
-ATermAppl type_check_proc_expr(ATermAppl proc_expr, lpe::specification &lpe_spec)
+ATermAppl type_check_proc_expr(ATermAppl proc_expr, lps::specification &lps_spec)
 {
   //check correctness of the process expression in proc_expr using
-  //the LPE specification in lpe_spec
+  //the LPS specification in lps_spec
   gsWarningMsg("type checking of process expressions is not yet implemented\n");
   return proc_expr;
 }
 
-ATermAppl type_check_state_frm(ATermAppl state_frm, lpe::specification &lpe_spec)
+ATermAppl type_check_state_frm(ATermAppl state_frm, lps::specification &lps_spec)
 {
   //check correctness of the state formula in state_formula using
-  //the LPE specification in lpe_spec as follows:
+  //the LPS specification in lps_spec as follows:
   //1) determine the types of actions according to the definitions
-  //   in lpe_spec
+  //   in lps_spec
   //2) determine the types of data expressions according to the
-  //   definitions in lpe_spec
+  //   definitions in lps_spec
   //3) check for name conflicts of data variable declarations in
   //   forall, exists, mu and nu quantifiers
   //4) check for monotonicity of fixpoint variables
@@ -498,16 +498,16 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, lpe::specification &lpe_spec
 
   gsDebugMsg ("type checking of state formulas read-in phase started\n");
 
-  //XXX read-in from LPE (not finished)
-  if(/* gstcReadInSorts((ATermList) lpe_spec.sorts()) &&  gstcReadInActs((ATermList) lpe_spec.action_labels() */ true){
-    if(!gstcReadInActs((ATermList) lpe_spec.action_labels()))
+  //XXX read-in from LPS (not finished)
+  if(/* gstcReadInSorts((ATermList) lps_spec.sorts()) &&  gstcReadInActs((ATermList) lps_spec.action_labels() */ true){
+    if(!gstcReadInActs((ATermList) lps_spec.action_labels()))
       gsWarningMsg("Ignoring the previous error(s), the formula will be typechecked without action label information.\n");
     gsDebugMsg ("type checking of state formulas read-in phase finished\n");
 
     ATermTable Vars=ATtableCreate(63,50);
     ATermTable StateVars=ATtableCreate(63,50);
 
-    //add LPE params as data vars??
+    //add LPS params as data vars??
 
     Result=gstcTraverseStateFrm(Vars,StateVars,state_frm);
 

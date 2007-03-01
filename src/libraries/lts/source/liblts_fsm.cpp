@@ -11,7 +11,7 @@
 #include "libprint_c.h"
 #include "libprint.h"
 #include "lts/liblts.h"
-#include "lpe/specification.h"
+#include "lps/specification.h"
 #include "fsmparser.h"
 
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)
@@ -22,7 +22,7 @@ namespace mcrl2
 namespace lts
 {
 
-static ATerm parse_mcrl2_action(ATerm label, lpe::specification &spec)
+static ATerm parse_mcrl2_action(ATerm label, lps::specification &spec)
 {
   std::stringstream ss(ATgetName(ATgetAFun((ATermAppl) label)));
 
@@ -47,7 +47,7 @@ static ATerm parse_mcrl2_action(ATerm label, lpe::specification &spec)
   return (ATerm) t;
 }
 
-static ATerm parse_mcrl2_state(ATerm state, lpe::specification &spec)
+static ATerm parse_mcrl2_state(ATerm state, lps::specification &spec)
 {
   unsigned int len = ATgetLength((ATermList) state);
   DECL_A(state_args,ATerm,len);
@@ -100,7 +100,7 @@ static ATerm parse_mcrl2_state(ATerm state, lpe::specification &spec)
   return r;
 }
 
-bool p_lts::read_from_fsm(std::istream &is, lts_type type, lpe::specification *spec)
+bool p_lts::read_from_fsm(std::istream &is, lts_type type, lps::specification *spec)
 {
   if ( parse_fsm(is,*lts_object) )
   {
@@ -140,7 +140,7 @@ bool p_lts::read_from_fsm(std::istream &is, lts_type type, lpe::specification *s
   }
 }
 
-bool p_lts::read_from_fsm(std::string const &filename, lts_type type, lpe::specification *spec)
+bool p_lts::read_from_fsm(std::string const &filename, lts_type type, lps::specification *spec)
 {
   std::ifstream is(filename.c_str());
 
@@ -227,7 +227,7 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
       assert( ((unsigned int) ATgetLength(state_pars)) >= num_params );
       if ( ((unsigned int) ATgetLength(state_pars)) < num_params )
       {
-        gsErrorMsg("invalid state in LTS (it does not have as much parameters as the LPE)\n");
+        gsErrorMsg("invalid state in LTS (it does not have as much parameters as the LPS)\n");
         exit(1);
       }
   
@@ -396,25 +396,25 @@ bool p_lts::write_to_fsm(std::string const& filename, lts_type type, ATermList p
   return write_to_fsm(os,type,params);
 }
 
-static ATermList get_lpe_params(ATerm lpe)
+static ATermList get_lps_params(ATerm lps)
 {
   ATermList params = NULL;
 
-  if ( lpe != NULL )
+  if ( lps != NULL )
   {
     params = ATmakeList0();
 
-    if ( ATisAppl(lpe) && gsIsSpecV1((ATermAppl) lpe) )
+    if ( ATisAppl(lps) && gsIsSpecV1((ATermAppl) lps) )
     {
-      ATermList pars = ATLgetArgument(ATAgetArgument((ATermAppl) lpe,5),1);
+      ATermList pars = ATLgetArgument(ATAgetArgument((ATermAppl) lps,5),1);
       for (; !ATisEmpty(pars); pars=ATgetNext(pars))
       {
         params = ATinsert(params,(ATerm) ATmakeList2(ATgetFirst(pars),(ATerm) gsGetSort(ATAgetFirst(pars))));
       }
       params = ATreverse(params);
-    } else if ( ATisAppl(lpe) && !strcmp(ATgetName(ATgetAFun((ATermAppl) lpe)),"spec2gen") )
+    } else if ( ATisAppl(lps) && !strcmp(ATgetName(ATgetAFun((ATermAppl) lps)),"spec2gen") )
     {
-      ATermList pars = ATLgetArgument(ATAgetArgument((ATermAppl) lpe,1),1);
+      ATermList pars = ATLgetArgument(ATAgetArgument((ATermAppl) lps,1),1);
       for (; !ATisEmpty(pars); pars=ATgetNext(pars))
       {
         params = ATinsert(params,(ATerm) ATmakeList2(ATgetArgument(ATAgetFirst(pars),0),ATgetArgument(ATAgetFirst(pars),1)));
@@ -428,13 +428,13 @@ static ATermList get_lpe_params(ATerm lpe)
   return params;
 }
 
-static ATermList get_lpe_params(lpe::linear_process &lpe)
+static ATermList get_lps_params(lps::linear_process &lps)
 {
   ATermList params = ATmakeList0();
 
-  lpe::data_variable_list pars = lpe.process_parameters();
-  lpe::data_variable_list::iterator pb = pars.begin();
-  lpe::data_variable_list::iterator pe = pars.end();
+  lps::data_variable_list pars = lps.process_parameters();
+  lps::data_variable_list::iterator pb = pars.begin();
+  lps::data_variable_list::iterator pe = pars.end();
   for (; pb != pe; pb++)
   {
     ATermAppl p = *pb;
@@ -527,106 +527,106 @@ lts_type p_lts::fsm_get_lts_type()
   }
 }
 
-static lts_type get_lpe_type(ATerm lpe)
+static lts_type get_lps_type(ATerm lps)
 {
-  if ( lpe == NULL )
+  if ( lps == NULL )
   {
     return lts_none;
-  } else if ( ATisAppl(lpe) && gsIsSpecV1((ATermAppl) lpe) )
+  } else if ( ATisAppl(lps) && gsIsSpecV1((ATermAppl) lps) )
   {
-    gsVerboseMsg("detected mCRL2 LPE\n");
+    gsVerboseMsg("detected mCRL2 LPS\n");
     return lts_mcrl2;
-  } else if ( ATisAppl(lpe) && !strcmp(ATgetName(ATgetAFun((ATermAppl) lpe)),"spec2gen") )
+  } else if ( ATisAppl(lps) && !strcmp(ATgetName(ATgetAFun((ATermAppl) lps)),"spec2gen") )
   {
-    gsVerboseMsg("detected mCRL LPE\n");
+    gsVerboseMsg("detected mCRL LPS\n");
     return lts_mcrl;
   } else {
     assert(0);
-    gsErrorMsg("invalid LPE supplied\n");
+    gsErrorMsg("invalid LPS supplied\n");
     return lts_none;
   }
 }
 
-static bool check_type(lts_type type, ATerm lpe)
+static bool check_type(lts_type type, ATerm lps)
 {
-  if ( (lpe == NULL) || (type == lts_none) )
+  if ( (lps == NULL) || (type == lts_none) )
   {
     return true;
   } else {
-    lts_type lpe_type = get_lpe_type(lpe);
-    if ( type == lpe_type )
+    lts_type lps_type = get_lps_type(lps);
+    if ( type == lps_type )
     {
       return true;
     } else {
-      gsVerboseMsg("supplied LPE cannot be used with LTS\n");
+      gsVerboseMsg("supplied LPS cannot be used with LTS\n");
       return false;
     }
   }
 }
 
-static bool check_type(lts_type type, lpe::linear_process &/*lpe*/)
+static bool check_type(lts_type type, lps::linear_process &/*lps*/)
 {
   return (type == lts_mcrl2);
 }
 
-bool p_lts::read_from_fsm(std::string const& filename, ATerm lpe)
+bool p_lts::read_from_fsm(std::string const& filename, ATerm lps)
 {
-  lts_type tmp = get_lpe_type(lpe);
+  lts_type tmp = get_lps_type(lps);
   if ( tmp == lts_mcrl2 )
   {
-    lpe::specification spec(lpe);
+    lps::specification spec(lps);
     return read_from_fsm(filename,tmp,&spec);
   } else {
     return read_from_fsm(filename,tmp);
   }
 }
 
-bool p_lts::read_from_fsm(std::string const& filename, lpe::specification &spec)
+bool p_lts::read_from_fsm(std::string const& filename, lps::specification &spec)
 {
   return read_from_fsm(filename,lts_mcrl2,&spec);
 }
 
-bool p_lts::read_from_fsm(std::istream &is, ATerm lpe)
+bool p_lts::read_from_fsm(std::istream &is, ATerm lps)
 {
-  lts_type tmp = get_lpe_type(lpe);
+  lts_type tmp = get_lps_type(lps);
   if ( tmp == lts_mcrl2 )
   {
-    lpe::specification spec(lpe);
+    lps::specification spec(lps);
     return read_from_fsm(is,tmp,&spec);
   } else {
     return read_from_fsm(is,tmp);
   }
 }
 
-bool p_lts::read_from_fsm(std::istream &is, lpe::specification &spec)
+bool p_lts::read_from_fsm(std::istream &is, lps::specification &spec)
 {
   return read_from_fsm(is,lts_mcrl2,&spec);
 }
 
-bool p_lts::write_to_fsm(std::string const& filename, ATerm lpe)
+bool p_lts::write_to_fsm(std::string const& filename, ATerm lps)
 {
   lts_type tmp = fsm_get_lts_type();
-  return check_type(tmp,lpe) && write_to_fsm(filename,tmp,get_lpe_params(lpe));
+  return check_type(tmp,lps) && write_to_fsm(filename,tmp,get_lps_params(lps));
 }
 
-bool p_lts::write_to_fsm(std::string const& filename, lpe::specification &spec)
+bool p_lts::write_to_fsm(std::string const& filename, lps::specification &spec)
 {
   lts_type tmp = fsm_get_lts_type();
-  lpe::linear_process lpe = spec.lpe();
-  return check_type(tmp,lpe) && write_to_fsm(filename,tmp,get_lpe_params(lpe));
+  lps::linear_process lps = spec.lps();
+  return check_type(tmp,lps) && write_to_fsm(filename,tmp,get_lps_params(lps));
 }
 
-bool p_lts::write_to_fsm(std::ostream &os, ATerm lpe)
+bool p_lts::write_to_fsm(std::ostream &os, ATerm lps)
 {
   lts_type tmp = fsm_get_lts_type();
-  return check_type(tmp,lpe) && write_to_fsm(os,tmp,get_lpe_params(lpe));
+  return check_type(tmp,lps) && write_to_fsm(os,tmp,get_lps_params(lps));
 }
 
-bool p_lts::write_to_fsm(std::ostream &os, lpe::specification &spec)
+bool p_lts::write_to_fsm(std::ostream &os, lps::specification &spec)
 {
   lts_type tmp = fsm_get_lts_type();
-  lpe::linear_process lpe = spec.lpe();
-  return check_type(tmp,lpe) && write_to_fsm(os,tmp,get_lpe_params(lpe));
+  lps::linear_process lps = spec.lps();
+  return check_type(tmp,lps) && write_to_fsm(os,tmp,get_lps_params(lps));
 }
 
 }

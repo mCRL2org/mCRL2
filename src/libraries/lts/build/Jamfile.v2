@@ -28,7 +28,7 @@ lib lts
          /libraries//parser
          /libraries//svc
          /libraries/atermpp
-         /libraries//lpe
+         /libraries//lps
          /site-config//BCG
        : <threading>single
        :

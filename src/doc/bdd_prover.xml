@@ -21,7 +21,7 @@
 <funcsynopsis>
 <funcprototype>
   <funcdef>&bdd_prover_constructor;</funcdef>
-  <paramdef>&type_atermappl; &par_lpe;</paramdef>
+  <paramdef>&type_atermappl; &par_lps;</paramdef>
   <paramdef>&type_rewrite_strategy; &par_rewrite_strategy; = &const_strat_jitty;</paramdef>
   <paramdef>&type_int; &par_time_limit; = 0</paramdef>
   <paramdef>&type_bool; &par_path_eliminator; = &const_false;</paramdef>
@@ -58,8 +58,8 @@
 </para>
 <para>
   A prover uses a rewriter to rewrite parts of the formulas it manipulates. The constructor &bdd_prover_constructor; initializes the prover's
-  rewriter with the data equations in internal mCRL2 format contained in the LPE passed as parameter
-  &par_lpe; and the rewrite strategy passed as parameter &par_rewrite_strategy;. The parameter &par_rewrite_strategy; can be set to either
+  rewriter with the data equations in internal mCRL2 format contained in the LPS passed as parameter
+  &par_lps; and the rewrite strategy passed as parameter &par_rewrite_strategy;. The parameter &par_rewrite_strategy; can be set to either
   &const_strat_inner;, &const_strat_innerc;, &const_strat_jitty; or &const_strat_jittyc;. To limit the number of seconds spent on proving a single
   formula, a time limit can be set. If the time limit is set to 0, no time limit will be enforced.
   The parameter &par_apply_induction; indicates whether or induction on lists is applied.
@@ -101,7 +101,7 @@
       </para>
     </listitem>
     <listitem>
-      <para>the argument passed as parameter &par_lpe; is an LPE</para>
+      <para>the argument passed as parameter &par_lps; is an LPS</para>
     </listitem>
   </itemizedlist>
 </para>

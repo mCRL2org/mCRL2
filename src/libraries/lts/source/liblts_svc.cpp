@@ -3,7 +3,7 @@
 #include "libprint_c.h"
 #include "libstruct.h"
 #include "lts/liblts.h"
-#include "lpe/specification.h"
+#include "lps/specification.h"
 #include "libparse.h"
 #include "typecheck.h"
 #include "dataimpl.h"
@@ -129,7 +129,7 @@ bool p_lts::read_from_svc(string const& filename, lts_type type)
   return true;
 }
 
-bool p_lts::write_to_svc(string const& filename, lts_type type, lpe::specification *spec)
+bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specification *spec)
 {
   bool applied_conversion = false;
 
@@ -224,7 +224,7 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lpe::specificati
           gsVerboseMsg("cannot save LTS in mCRL2 format; label values are incompatible\n");
           if ( spec == NULL )
           {
-            gsVerboseMsg("using the -l/--lpe option might help\n");
+            gsVerboseMsg("using the -l/--lps option might help\n");
           }
           return false;
         }

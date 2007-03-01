@@ -5,7 +5,7 @@ project toolset/pbesinfo
 exe pbesinfo
        : pbesinfo.cpp
          /libraries//mcrl2_basic
-		 /libraries//lpe
+		 /libraries//lps
          /site-config//boost_program_options
        : <include>.
        : <squadt_support>disable

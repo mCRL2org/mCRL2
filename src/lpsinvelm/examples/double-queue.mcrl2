@@ -1,0 +1,44 @@
+% This specification serves as an example of the use of lpsinvelm. It
+% specifies a component called Q that has two process parameters, q1
+% and q2 of sort List(D). q1 == q2 holds as an invariant for this
+% specification.
+%
+%
+% lpsinvelm takes an invariant in internal mCRL2 format as input. The
+% representation of q1 == q2 in internal mCRL2 format is as follows:
+%
+% DataAppl(
+%   DataAppl(
+%     OpId("==",SortArrow(SortId("List@0"),SortArrow(SortId("List@0"),SortId("Bool")))),
+%     DataVarId("q1",SortId("List@0"))
+%   ),
+%   DataVarId("q2",SortId("List@0")))
+% )
+% 
+%
+% After storing this invariant in a file called "inv", it can be used to
+% simplify an lps as follows:
+%
+% mcrl22lps -n double-queue.mcrl2 double-queue.lps
+% lpsinvelm -i inv double-queue.lps double-queue-elm.lps
+
+
+sort
+  D = struct D1 | D2;
+
+act
+  r, s, r', s', c: D;
+
+proc
+  Q(q1: List(D), q2: List(D)) = sum d: D. r(d) . Q(d |>  q1, d |> q2) +
+                            ((q1 != []) && (q2 != [])) -> s(head(q1)) . Q(tail(q1), tail(q2)) +
+                            (q1 != q2) -> s(D1) . delta;
+
+  Q1 = rename({s -> s'}, Q([], []));
+
+  Q2 = rename({r -> r'}, Q([], []));
+
+  Q = hide({c}, allow({s, r, c}, comm({s' | r' -> c}, Q1 || Q2)));
+
+init
+  Q;

@@ -8,12 +8,12 @@
 #include <liblowlevel.h>
 #include <libstruct.h>
 #include <libprint_c.h>
-#include <lpe/data_specification.h>
+#include <lps/data_specification.h>
 #include <prover/bdd_prover.h>
 #include "librewrite.h"
 #include "rewr_prover.h"
 
-RewriterProver::RewriterProver(lpe::data_specification DataSpec, RewriteStrategy strat)
+RewriterProver::RewriterProver(lps::data_specification DataSpec, RewriteStrategy strat)
 {
   prover_obj = new BDD_Prover(DataSpec,strat);
   rewr_obj = prover_obj->get_rewriter();

@@ -6,7 +6,7 @@ doxygen autodoc
      : <prefix>atermpp
      ;
 
-boostbook lpe
+boostbook lps
     :
       manual.qbk
     :

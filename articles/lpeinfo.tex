@@ -9,8 +9,8 @@
 \newtheorem{tcase}[thmfs]{Test case}
 
 \newcommand{\mcrl}{mCRL2}
-\newcommand{\lpe}{linear process equation}
-\newcommand{\tool}{\textit{lpeinfo}}
+\newcommand{\lps}{linear process equation}
+\newcommand{\tool}{\textit{lpsinfo}}
 \newcommand{\ti}{\textit}
 \newcommand{\tb}{\textbf}
 
@@ -18,7 +18,7 @@
 
 \newcommand{\pp}{process parameter}
 \newcommand{\pps}{process parameters}
-\newcommand{\framework}{\textit{LPE framework} \cite{LPEframework}}
+\newcommand{\framework}{\textit{LPS framework} \cite{LPSframework}}
 
 \newcommand{\bisim}{\frac{\leftrightarrow}{}}
 
@@ -28,7 +28,7 @@
 \newcommand{\at}[1]{\mbox{\aap ,} #1}
 
 %opening
-\title{lpeinfo}
+\title{lpsinfo}
 \author{F.P.M.Stappers}
 
 \begin{document}
@@ -37,18 +37,18 @@
 
 \begin{abstract}
 This documentation describes the usage and implementation of the tool \tool\ within the \mcrl\ toolset.
-Basically, \tool\ is a tool which displays information about a \lpe\ (LPE).
+Basically, \tool\ is a tool which displays information about a \lps\ (LPS).
 \end{abstract}
 
 \section{Introduction}
-This \tool\ tool is a tool for the \mcrl\ studio. The tool is a program which reads from a \ti{input.lpe}. The file \ti{input.lpe} is
-a file in \ti{.lpe} format \cite{LPEformat}. We make use of the
-\framework\ to read the \ti{input.lpe}. The \tool\ will write
-information about an \lpe\ to stdout. 
+This \tool\ tool is a tool for the \mcrl\ studio. The tool is a program which reads from a \ti{input.lps}. The file \ti{input.lps} is
+a file in \ti{.lps} format \cite{LPSformat}. We make use of the
+\framework\ to read the \ti{input.lps}. The \tool\ will write
+information about an \lps\ to stdout. 
 \section{Definitions} \label{sec:def}
 
-The equation below is a \lpe\ in \mcrl : 
-\begin{defn}\lpe\ (LPE) \newline
+The equation below is a \lps\ in \mcrl : 
+\begin{defn}\lps\ (LPS) \newline
 %\at werkt niet
 \begin{tabbing}
 \tab
@@ -63,17 +63,17 @@ $X (\ovr{d: D}) = $ \> \> \> $ \sum_{i \in I} \sum_{\ovr{e_i: E_i}} \ovr{c_i} ( 
 Where $I$ and $J$ are disjoint.\\
 \end{defn}
 
-\noindent If we speak about an LPE in this article we refer to Definition \ref{def}.  The different states 
+\noindent If we speak about an LPS in this article we refer to Definition \ref{def}.  The different states 
 %are $\ovr{d}$ 
-of the process are represented by the data vector parameter $\ovr{d}:\ovr{D}$. $\ovr{D}$ may be a Cartesian product of $n$ data types, meaning that $\ovr{d}$ may consist of a tuple $(d_1, \ldots, d_n)$. The LPE expresses that in state $\ovr{d}$, it preforms (multi)actions $\rbrace a_i^0, \ldots , a_i^n \rbrace$, carrying data parameters $\ovr{f_{i,0}}(\ovr{d},\ovr{e_i}), \ldots , \ovr{f_{i,n(i)}}(\ovr{d},\ovr{e_i})$ and 
+of the process are represented by the data vector parameter $\ovr{d}:\ovr{D}$. $\ovr{D}$ may be a Cartesian product of $n$ data types, meaning that $\ovr{d}$ may consist of a tuple $(d_1, \ldots, d_n)$. The LPS expresses that in state $\ovr{d}$, it preforms (multi)actions $\rbrace a_i^0, \ldots , a_i^n \rbrace$, carrying data parameters $\ovr{f_{i,0}}(\ovr{d},\ovr{e_i}), \ldots , \ovr{f_{i,n(i)}}(\ovr{d},\ovr{e_i})$ and 
 it can reach the new state $\ovr{g_i}(\ovr{d},e_i)$ under the condition that $\ovr{c_i}(\ovr{d},\ovr{e_i})$ is \ti{true}. So for each summand $i$ from $I$ we have at least a function $\ovr{g_i}: \ovr{D} \times \ovr{E} \rightarrow \ovr{D}$ and a function $\ovr{c_i}: \ovr{D} \times \ovr{E} \rightarrow \mathbb{B}$.
 Data parameters $\ovr{e_i} : \ovr{E_i}$ are sum variables. These variables are used to range parameters over a data domain. 
 
-\noindent For an more detailed explanation of \lpe s  we refer to \cite{LPE_info}.
+\noindent For an more detailed explanation of \lps s  we refer to \cite{LPS_info}.
 %\end{defn}
 
 \section{Definition}\label{Def}
-The \tool\ displays information about an LPE. To retrieve information about an LPE we make use of the \framework .  The \tool\ will display the following information\footnote{If a option is used, other information is displayed}:
+The \tool\ displays information about an LPS. To retrieve information about an LPS we make use of the \framework .  The \tool\ will display the following information\footnote{If a option is used, other information is displayed}:
 \begin{itemize}
 \item Number of summands.
 \item Number of free variables.
@@ -87,18 +87,18 @@ This section describes the options which can be used.
 \tab
 \> \tb{-h} \> \> \tb{--help} \> \> \> Displays help about the \tool .\\
 \> \tb{-v} \> \> \tb{--version} \> \> \> Dispays the version of the \tool .\\
-\>         \> \> \tb{--pars} \> \> \> Prints the \pps\ of an LPE.\\
-\>         \> \> \tb{--npars} \> \> \> Prints the number of \pps\ of an LPE.\\
+\>         \> \> \tb{--pars} \> \> \> Prints the \pps\ of an LPS.\\
+\>         \> \> \tb{--npars} \> \> \> Prints the number of \pps\ of an LPS.\\
 \end{tabbing}
 If no option is given the \tool\ displays the information as described in Section \ref{Def}.
 
-\begin{thebibliography}{99}  \bibitem{LPEformat} Aad Mathijssen\\
+\begin{thebibliography}{99}  \bibitem{LPSformat} Aad Mathijssen\\
    \textit{https://svn.win.tue.nl/viewcvs-checkout/MCRL2/trunk/specs/mcrl2.internal.txt},
    A description of the internal format of the mCRL2 language.
-  \bibitem{LPEframework} J.W. Wesselink,
+  \bibitem{LPSframework} J.W. Wesselink,
    \textit{http://www.win.tue.nl/~wieger/mcrl2/html/index.html}\\
    A C++ wrapper for the ATerm library.
-   \bibitem{LPE_info} unknown author \\
+   \bibitem{LPS_info} unknown author \\
    \textit{Article not ready at the moment},
 
 \end{thebibliography}

@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <libprint_c.h>
 #include <libstruct.h>
-#include <lpe/data_specification.h>
+#include <lps/data_specification.h>
 #include "librewrite.h"
 #include "rewr_inner.h"
 #include "rewr_jitty.h"
@@ -11,7 +11,7 @@
 #include "rewr_jittyc.h"
 #include "rewr_prover.h"
 
-using namespace lpe;
+using namespace lps;
 
 Rewriter::Rewriter()
 {

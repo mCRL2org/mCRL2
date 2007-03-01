@@ -15,19 +15,19 @@
 % The following commands illustrate how to effectively generate
 % the state space using confluence reduction.
 
-% mcrl22lpe -nv leader.mcrl2 leader.lpe
-% lpe2lts -v leader.lpe                  // This indicates the 
+% mcrl22lps -nv leader.mcrl2 leader.lps
+% lps2lts -v leader.lps                  // This indicates the 
 %                                        // size of the non-reduced
 %                                        // state space
-% lpeconstelm -v leader.lpe temp.lpe     // find and eliminate the
+% lpsconstelm -v leader.lps temp.lps     // find and eliminate the
 %                                        // constants representing
 %                                        // process id's
-% lpeconfcheck -o temp.lpe temp1.lpe     // find confluent tau's
+% lpsconfcheck -o temp.lps temp1.lps     // find confluent tau's
 %                                        // and rename these to ctau's.
 %                                        // The flag -o enables induction
 %                                        // on lists, which is necessary
 %                                        // to prove confluence
-% lpe2lts -vCctau temp1.lpe temp1.svc    // This shows the dramatically
+% lps2lts -vCctau temp1.lps temp1.svc    // This shows the dramatically
 %                                        // reduced statespace, generated
 %                                        // by giving priority to ctau's
 

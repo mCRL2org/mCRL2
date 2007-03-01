@@ -1,7 +1,7 @@
 #ifndef __LIBREWRITE_H
 #define __LIBREWRITE_H
 
-#include <lpe/data_specification.h>
+#include <lps/data_specification.h>
 #include <aterm2.h>
 
 /** \brief Rewrite strategies. */
@@ -182,7 +182,7 @@ class Rewriter
  * \return A (pointer to a) rewriter that uses the data specification DataSpec
  *         and strategy Strategy to rewrite.
  **/
-Rewriter *createRewriter(lpe::data_specification DataSpec, RewriteStrategy Strategy = GS_REWR_INNER);
+Rewriter *createRewriter(lps::data_specification DataSpec, RewriteStrategy Strategy = GS_REWR_INNER);
 
 /**
  * \brief Check whether or not an mCRL2 data equation is a valid rewrite rule.

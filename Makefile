@@ -7,7 +7,7 @@ CONFIG = build/config.mk
 
 all: $(CONFIG) $(BJAM) tools man
 
-install: $(CONFIG) $(BJAM)
+install: $(CONFIG) $(BJAM) man
 	$(BOOST_BUILD) --install
 	@install -d $(mandir)
 	@cp -rf build/man/* $(mandir)

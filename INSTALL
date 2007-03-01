@@ -25,27 +25,27 @@ bring back problems that have been solved with the last significant changes to
 the build procedure.
 
 The required packages enable the following tools:
-+ mcrl22lpe:   translate an mCRL2 specification into a linear process equation
-               (LPE)
-+ lpepp:       pretty print an LPE as an mCRL2 specification
-+ lpeinfo:     print basic information of an LPE
-+ sim:         text based simulator for LPEs
-+ lperewr:     rewrite data expressions in an LPE
-+ lpedataelm:  remove unused parts of the data specification of an LPE
-+ lpeconstelm: remove constant process parameters from an LPE
-+ lpeparelm:   remove unused process parameters from an LPE
-+ lpe2lts:     generate a labelled transition system (LTS) from an LPE
++ mcrl22lps:   translate an mCRL2 specification into a linear process equation
+               (LPS)
++ lpspp:       pretty print an LPS as an mCRL2 specification
++ lpsinfo:     print basic information of an LPS
++ sim:         text based simulator for LPSs
++ lpsrewr:     rewrite data expressions in an LPS
++ lpsdataelm:  remove unused parts of the data specification of an LPS
++ lpsconstelm: remove constant process parameters from an LPS
++ lpsparelm:   remove unused process parameters from an LPS
++ lps2lts:     generate a labelled transition system (LTS) from an LPS
 + ltsinfo:     print basic information of an LTS
 + ltsconvert:  convert an LTS, possibly using minimisation
 + ltscompare:  compare two LTS's
 + tracepp:     pretty print a trace
-+ tbf2lpe:     convert an mCRL LPE to an mCRL2 LPE
-+ lpe2torx:    provide TorX with an explorer interface using an LPE
++ tbf2lps:     convert an mCRL LPS to an mCRL2 LPS
++ lps2torx:    provide TorX with an explorer interface using an LPS
 
 The recommended packages libwxgtk2.6-dev [1] and libxml2-dev [2] enable the
 following tools:
 + pnml2mcrl2:  convert classic Petri nets in the PNML format to mCRL2 [2]
-+ xsim:        graphical simulator for LPEs [1]
++ xsim:        graphical simulator for LPSs [1]
 + ltsgraph:    visualise an LTS in 2D using spring model techniques [1]
 + ltsview:     visualise an LTS in FSM format in 3D using clustering techniques
                [1]

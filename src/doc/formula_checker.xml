@@ -20,7 +20,7 @@
 <funcsynopsis>
 <funcprototype>
   <funcdef>&formula_checker_constructor;</funcdef>
-  <paramdef>&type_atermappl; &par_lpe;</paramdef>
+  <paramdef>&type_atermappl; &par_lps;</paramdef>
   <paramdef>&type_rewrite_strategy; &par_rewrite_strategy; = &strat_jitty;</paramdef>
   <paramdef>&type_int; &par_time_limit; = 0</paramdef>
   <paramdef>&type_bool; &par_path_eliminator; = &const_false;</paramdef>
@@ -48,7 +48,7 @@
 <para>
   The class &class_formula_checker; uses an instance of the class &class_bdd_prover; to prove a number of propositional formulas. The prover is
   initialized with the parameters &par_rewrite_strategy;, &par_time_limit;,
-  &par_path_eliminator;, &par_solver_type;, &par_apply_induction; and &par_lpe;. The
+  &par_path_eliminator;, &par_solver_type;, &par_apply_induction; and &par_lps;. The
   parameter &par_rewrite_strategy; specifies which rewrite strategy is used by the prover's rewriter. It can be set to either
   &const_strat_inner;, &const_strat_innerc;, &const_strat_jitty; or &const_strat_jittyc;. The parameter &par_time_limit; specifies the maximum
   amount of time in seconds to be spent by the prover on proving a single formula. If &par_time_limit; is set to 0, no time limit will be enforced.
@@ -91,7 +91,7 @@
   The following precondition has to be satisfied for &formula_checker_constructor;:
   <itemizedlist>
     <listitem>
-      <para>the argument passed as parameter &par_lpe; is an LPE</para>
+      <para>the argument passed as parameter &par_lps; is an LPS</para>
     </listitem>
     <listitem>
       <para>

@@ -6,7 +6,7 @@
 class RewriterJitty: public Rewriter
 {
 	public:
-		RewriterJitty(lpe::data_specification DataSpec);
+		RewriterJitty(lps::data_specification DataSpec);
 		~RewriterJitty();
 
 		RewriteStrategy getStrategy();

@@ -11,7 +11,7 @@
 #include "invariant_checker.h"
 #include "auxiliary/bdd2dot.h"
 
-    /// \brief A class that takes a linear process equation and checks all tau-summands of that LPE for confluence.
+    /// \brief A class that takes a linear process equation and checks all tau-summands of that LPS for confluence.
     /// \brief The tau actions of all confluent tau-summands are renamed to ctau.
 
 class Confluence_Checker {
@@ -19,7 +19,7 @@ class Confluence_Checker {
     /// \brief Class that can check if two summands are disjoint.
     Disjointness_Checker f_disjointness_checker;
 
-    /// \brief Class that checks if an invariant holds for an LPE.
+    /// \brief Class that checks if an invariant holds for an LPS.
     Invariant_Checker f_invariant_checker;
 
     /// \brief BDD based prover.
@@ -29,7 +29,7 @@ class Confluence_Checker {
     BDD2Dot f_bdd2dot;
 
     /// \brief A linear process equation.
-    ATermAppl f_lpe;
+    ATermAppl f_lps;
 
     /// \brief Flag indicating whether or not the tau actions of confluent tau summands are renamed to ctau.
     bool f_no_marking;
@@ -48,7 +48,7 @@ class Confluence_Checker {
     /// \brief summand is encountered that is not confluent with the tau summand at hand.
     bool f_generate_invariants;
 
-    /// \brief The number of summands of the current LPE.
+    /// \brief The number of summands of the current LPS.
     int f_number_of_summands;
 
     /// \brief An integer array, storing intermediate results per summand.
@@ -66,10 +66,10 @@ class Confluence_Checker {
     /// \brief Checks the confluence of summand a_summand concerning all other tau-summands.
     ATermAppl check_confluence_and_mark_summand(ATermAppl a_invariant, ATermAppl a_summand, int a_summand_number, bool& a_is_marked);
   public:
-    /// \brief Constructor that initializes Confluence_Checker::f_lpe, Confluence_Checker::f_bdd_prover,
+    /// \brief Constructor that initializes Confluence_Checker::f_lps, Confluence_Checker::f_bdd_prover,
     /// \brief Confluence_Checker::f_generate_invariants and Confluence_Checker::f_dot_file_name.
     Confluence_Checker(
-      ATermAppl a_lpe,
+      ATermAppl a_lps,
       RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
@@ -85,7 +85,7 @@ class Confluence_Checker {
     /// \brief Destructor that frees the memory used by Confluence_Checker::f_dot_file_name.
     ~Confluence_Checker();
 
-    /// \brief Check the confluence of the LPE Confluence_Checker::f_lpe.
+    /// \brief Check the confluence of the LPS Confluence_Checker::f_lps.
     ATermAppl check_confluence_and_mark(ATermAppl a_invariant, int a_summand_number);
 };
 

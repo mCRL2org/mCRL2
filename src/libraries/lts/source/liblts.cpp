@@ -6,7 +6,7 @@
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "lts/liblts.h"
-#include "lpe/specification.h"
+#include "lps/specification.h"
 #include "setup.h"
 
 #ifdef MCRL2_BCG
@@ -71,7 +71,7 @@ lts_extra::lts_extra(ATerm t)
   content.mcrl1_spec = t;
 }
 
-lts_extra::lts_extra(lpe::specification *spec)
+lts_extra::lts_extra(lps::specification *spec)
 {
   type = le_mcrl2;
   content.mcrl2_spec = spec;
@@ -94,7 +94,7 @@ ATerm lts_extra::get_mcrl1_spec()
   return content.mcrl1_spec;
 }
 
-lpe::specification *lts_extra::get_mcrl2_spec()
+lps::specification *lts_extra::get_mcrl2_spec()
 {
   assert( type == le_mcrl2 );
   return content.mcrl2_spec;

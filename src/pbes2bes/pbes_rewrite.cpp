@@ -3,7 +3,7 @@
 
 #include "sort_functions.h"
 
-using namespace lpe;
+using namespace lps;
 using namespace pbes_expr;
 
 // parameterized boolean expression

@@ -177,7 +177,7 @@ class NextState
 
 /**
  * \brief Create a NextState object.
- * \param spec                A mCRL2 LPE containing the process to be explored.
+ * \param spec                A mCRL2 LPS containing the process to be explored.
  * \param allow_free_vars     Whether to allow free variables or to substitute
  *                            them  with dummy values.
  * \param state_format        Format to store the state in (internally).
@@ -199,7 +199,7 @@ NextState *createNextState(
 
 /**
  * \brief Create a NextState object.
- * \param spec                A mCRL2 LPE containing the process to be explored.
+ * \param spec                A mCRL2 LPS containing the process to be explored.
  * \param allow_free_vars     Whether to allow free variables or to substitute
  *                            them  with dummy values.
  * \param state_format        Format to store the state in (internally).

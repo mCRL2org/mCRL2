@@ -44,8 +44,8 @@
 % region twice without the other having been in the critical region in between.
 % Note the initial tau's that determine which train must enter the critical region
 % first. The commands to generate the state space are (set Variant below to 1):
-% mcrl22lpe trains.mcrl2 trains.lpe
-% lpe2lts trains.lpe trains.svc
+% mcrl22lps trains.mcrl2 trains.lps
+% lps2lts trains.lps trains.svc
 % ltsconvert -b trains.svc trainsr.svc
 % ltsgraph trainsr.svc
 %
@@ -58,7 +58,7 @@
 % desire to enter the critical region simultaneously, they both block the entrance
 % for the other train, and the whole system will end up in deadlock. This is also
 % clearly visible in the reduced state space. Another way to obtain the deadlock
-% and a trace to it, is by using lpe2lts -td trains.lpe. It is also interesting
+% and a trace to it, is by using lps2lts -td trains.lps. It is also interesting
 % to try to find the deadlock situation using the simulator (xsim). The deadlock
 % can be reached in a very small number of steps. It turns out to be very hard
 % to find using the simulator, if it is not known where the deadlock resides.

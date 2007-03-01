@@ -1,6 +1,6 @@
 % Test Case 6
 %
-% The following LPE is generated:  
+% The following LPS is generated:  
 % 
 % proc P(s3: Pos, i,j: Nat) =
 %       (s3 == 1 && i < 5) ->
@@ -26,13 +26,13 @@ proc X(i: Nat)   = (i <  5) -> act1(i).X(i+1) +
 
 init X(0);
 
-% In this LPE no process parameters can be eliminated
+% In this LPS no process parameters can be eliminated
 % Because all process parameters are used
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% NOTE:                                                  %%
 %% =====                                                  %%
 %%                                                        %%
-%% Use: mcrl22lpe --no-cluster $DIR$/case6.mcrl2          %%
+%% Use: mcrl22lps --no-cluster $DIR$/case6.mcrl2          %%
 %%                                                        %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

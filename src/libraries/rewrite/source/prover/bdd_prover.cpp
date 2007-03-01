@@ -3,7 +3,7 @@
 
 #include "aterm2.h"
 #include "librewrite.h"
-#include "lpe/data_specification.h"
+#include "lps/data_specification.h"
 #include "prover/prover.h"
 #include "prover/bdd_prover.h"
 #include "auxiliary/utilities.h"
@@ -260,7 +260,7 @@
   // Class BDD_Prover - Functions declared public -------------------------------------------------
 
     BDD_Prover::BDD_Prover(
-      lpe::data_specification data_spec, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, bool a_apply_induction
+      lps::data_specification data_spec, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, bool a_apply_induction
     ):
       Prover(data_spec, a_rewrite_strategy, a_time_limit),
       f_induction(data_spec)

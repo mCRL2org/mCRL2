@@ -13,7 +13,7 @@
 
 <refnamediv>
   <refname>xsim</refname>
-  <refpurpose>simulate LPEs</refpurpose>
+  <refpurpose>simulate LPSs</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -28,9 +28,9 @@
 <refsect1>
   <title>Description</title>
   <para>
-    The &xsim; tool simulates the linear process equation (LPE) in &infile; using
+    The &xsim; tool simulates the linear process equation (LPS) in &infile; using
     a graphical user interface. If &infile; is not supplied the simulator starts
-    without an LPE. The interface consists of two parts. In the top
+    without an LPS. The interface consists of two parts. In the top
     part every transition that is possible from the current state, is listed
     including the changes to the state vector that would result from executing
     that transition. A transition can be executed by double clicking it. In the
@@ -126,7 +126,7 @@
     <term>&opt_dummy;</term>
     <listitem>
       <para>
-        Replace free variables in the LPE with dummy values
+        Replace free variables in the LPS with dummy values
       </para>
     </listitem>
   </varlistentry>

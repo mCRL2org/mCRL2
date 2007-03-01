@@ -1,0 +1,12 @@
+project toolset/mcrl22lps/test
+     : source-location .
+     ;
+
+# run mcrl22lps on all mcrl2 files located somewhere in $(TOP)/examples
+#
+#  the output files get the extension lps and are located in $(BUILD_TOP)
+#
+test-suite toolset/mcrl22lps/test
+    : [ run_tool_on_examples /tools/mcrl22lps//mcrl22lps mcrl22lps lps : : $(TOP)/examples . : mcrl2 ]
+    ;
+

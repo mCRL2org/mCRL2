@@ -1,0 +1,11 @@
+project toolset/lpsconfcheck
+  : build-dir $(BUILD_TOP)/lpsconfcheck
+  ;
+
+exe lpsconfcheck
+       : lpsconfcheck.cpp
+         /libraries//prover
+       : <include>.
+         <toolset>msvc:<library>/libraries//getopt
+#         <toolset>gcc:<define>CVC_LITE_LIB
+       ;

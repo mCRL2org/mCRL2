@@ -14,7 +14,7 @@
 <refnamediv>
 <refname>confluence_checker</refname>
 <refpurpose>
-  a class that checks which &tau;-summands of an mCRL2 LPE are confluent and marks them by renaming their &tau;-actions to &ctau;
+  a class that checks which &tau;-summands of an mCRL2 LPS are confluent and marks them by renaming their &tau;-actions to &ctau;
 </refpurpose>
 </refnamediv>
 
@@ -22,7 +22,7 @@
 <funcsynopsis>
 <funcprototype>
   <funcdef>&confluence_checker_constructor;</funcdef>
-  <paramdef>&type_atermappl; &par_lpe;</paramdef>
+  <paramdef>&type_atermappl; &par_lps;</paramdef>
   <paramdef>&type_rewrite_strategy; &par_rewrite_strategy; = &strat_jitty;</paramdef>
   <paramdef>&type_int; &par_time_limit; = 0</paramdef>
   <paramdef>&type_bool; &par_path_eliminator; = &const_false;</paramdef>
@@ -44,7 +44,7 @@
 <refsect1>
 <title>Description</title>
 <para>
-  Given an LPE,
+  Given an LPS,
   <literallayout>
     P(d: D) = ...
             + sum ei: Ei. ci(d, ei) -> ai(fi(d, ei)) . P(gi(d, ei))
@@ -114,7 +114,7 @@
         indicates this by printing a plus sign ('+').
         If the parameter &par_generate_invariants; is set to &const_true;, the class
         &class_confluence_checker;
-        will try to prove that the reduced confluence condition is an invariant of the LPE,
+        will try to prove that the reduced confluence condition is an invariant of the LPS,
         in case the confluence condition is not a tautology. If the reduced confluence
         condition is indeed an invariant, the two summands are proven confluent.
         The class &class_confluence_checker; indicates this by printing an 'i'.
@@ -126,10 +126,10 @@
 <para>
   The class &class_confluence_checker; uses an instance of the class &class_bdd_prover;, an instance of the class &class_disjointness_checker; and
   an instance of the class &class_invariant_checker;
-  to determine which &tau;-summands of an mCRL2 LPE are confluent. Confluent &tau;-summands will be marked by renaming their &tau;-actions to
+  to determine which &tau;-summands of an mCRL2 LPS are confluent. Confluent &tau;-summands will be marked by renaming their &tau;-actions to
   &ctau;. The constructor &confluence_checker_constructor; initializes the BDD based prover with the parameters &par_rewrite_strategy;,
   &par_time_limit;,
-  &par_path_eliminator;, &par_solver_type;, &par_apply_induction; and &par_lpe;. The
+  &par_path_eliminator;, &par_solver_type;, &par_apply_induction; and &par_lps;. The
   parameter &par_rewrite_strategy; specifies which rewrite strategy is used by the prover's rewriter. It can be set to either
   &const_strat_inner;, &const_strat_innerc;, &const_strat_jitty; or &const_strat_jittyc;. The parameter &par_time_limit; specifies the maximum
   amount of time in seconds to be spent by the prover on proving a single expression. If &par_time_limit; is set to 0, no time limit will be 
@@ -160,15 +160,15 @@
 </para>
 <para>
   If the parameter &par_generate_invariants; is set, an invariant checker is used to check if the reduced confluence condition is an invariant of
-  the LPE passed as parameter &par_lpe;. If the reduced confluence condition is an invariant, the two summands are confluent.
+  the LPS passed as parameter &par_lps;. If the reduced confluence condition is an invariant, the two summands are confluent.
 </para>
 <para>
-  The function &confluence_checker_check_confluence_and_mark; returns an LPE with all &tau;-actions of confluent &tau;-summands renamed to &ctau;,
+  The function &confluence_checker_check_confluence_and_mark; returns an LPS with all &tau;-actions of confluent &tau;-summands renamed to &ctau;,
   unless the parameter &par_no_marking; is set to &const_true;. In case the parameter &par_no_marking; was set to &const_true;, the confluent
   tau-summands will not be marked, only the results of the confluence checking will be displayed.
 </para>
 <para>
-  If there already is an action named &ctau; present in the LPE passed as parameter &par_lpe;, an error will be reported.
+  If there already is an action named &ctau; present in the LPS passed as parameter &par_lps;, an error will be reported.
 </para>
 </refsect1>
 
@@ -178,7 +178,7 @@
   The following precondition has to be satisfied for &confluence_checker_constructor;:
   <itemizedlist>
     <listitem>
-      <para>the argument passed as parameter &par_lpe; is a valid mCRL2 LPE</para>
+      <para>the argument passed as parameter &par_lps; is a valid mCRL2 LPS</para>
     </listitem>
     <listitem>
       <para>
@@ -198,7 +198,7 @@
     </listitem>
     <listitem>
       <para>
-        the argument passed as parameter &par_summand_number; corresponds with a summands of the LPE passed as parameter &par_lpe;.
+        the argument passed as parameter &par_summand_number; corresponds with a summands of the LPS passed as parameter &par_lps;.
         It lies in the interval from and including 1 upto and including the highest summand number
       </para>
     </listitem>

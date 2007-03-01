@@ -1,0 +1,132 @@
+<refentry id="lpsconstelm">
+ <info>
+  <date>2005-2007</date>
+ </info>
+
+<refmeta>
+ <refentrytitle>lpsconstelm</refentrytitle>
+ <manvolnum>1</manvolnum>
+ <refmiscinfo class="source">lpsconstelm</refmiscinfo>
+ <refmiscinfo class="version"></refmiscinfo>
+ <refmiscinfo class="manual">User Commands</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>lpsconstelm</refname>
+<refpurpose>remove constant parameters from a linear process equation.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>&lpsconstelm;</command>
+    <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
+    <arg choice="opt">&infile;<arg choice="opt">&outfile;</arg></arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  <para>
+  The &lpsconstelm; tool reads and LPS from &infile; and, if it can be
+  determined that certain parameters of this LPS remain constant throughout 
+  any run of the process, all occurrences of these process parameter are
+  replaced by the initial value and the process parameters are removed from the
+  LPS. The result is written to &outfile;. If &outfile; is not supplied,
+  &cstdout; is used. If &infile; is not supplied, &cstdin; is used instead.
+  </para>
+  <para>
+  If the initial value of a process parameter is a free variable and remains a 
+  free variable throughout the run of the process, the process variable is 
+  considered constant.
+  </para>
+  <para> 
+  If the initial value of a process parameter is a free variable and is only 
+  changed once to a certain value, the process parameter is constant and the
+  specific value is used for substitution.
+  </para>
+</refsect1>
+
+<refsect1>
+  <title>Options</title>
+  <para>
+    <variablelist>
+    
+      <varlistentry>
+        <term>&opt_h;</term>
+        <term>&opt_help;</term>
+          <listitem>
+            <para>Displays help information and exits.</para>
+          </listitem>
+      </varlistentry> 
+      
+      <varlistentry>
+        <term>&opt_version;</term>
+        <listitem>
+          <para>Displays version information and exits.</para>
+        </listitem>
+      </varlistentry>   
+      
+      <varlistentry>
+        <term>&opt_v;</term>
+        <term>&opt_verbose;</term>
+        <listitem>
+          <para>
+          Displays short intermediate information during the run of the program.
+          </para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_d;</term>
+        <term>&opt_debug;</term>
+        <listitem>
+          <para>
+          Displays detailed intermediate information during the run of the program.
+          </para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_nocondition;</term>
+        <listitem>
+          <para>
+          &lpsconstelm; will not determine if a condition of a summand is false 
+          or not. All conditions are be treated true if this option is 
+          used. This option may take less time, however it may find less 
+          constant process parameters.
+          </para>
+        </listitem>
+      </varlistentry>      
+
+      <varlistentry>
+        <term>&opt_noreachable;</term>
+        <listitem>
+          <para>
+          &lpsconstelm; will not remove summands that are not visited.
+          By default, summands that are not visited are removed from the LPS.
+          </para>
+        </listitem>
+      </varlistentry>  
+
+      <varlistentry>
+        <term>&opt_nosingleton;</term>
+        <listitem>
+          <para>
+          &lpsconstelm; will not remove process parameters
+          for which the sort only contain one element. 
+          </para>
+        </listitem>
+      </varlistentry>
+            
+    </variablelist>
+  </para>
+</refsect1> 
+
+      
+
+<refsect1>
+<title>Author</title>
+<para>Written by Frank Stappers. Please send all complaints, comments and bug
+fixes to &bugmail;.</para>
+</refsect1>
+</refentry>

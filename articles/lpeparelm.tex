@@ -10,8 +10,8 @@
 \newtheorem{tcase}[thmfs]{Test case}
 
 \newcommand{\mcrl}{mCRL2}
-\newcommand{\lpe}{linear process equation}
-\newcommand{\tool}{\textit{lpeparelm}}
+\newcommand{\lps}{linear process equation}
+\newcommand{\tool}{\textit{lpsparelm}}
 \newcommand{\ti}{\textit}
 \newcommand{\tb}{\textbf}
 
@@ -19,7 +19,7 @@
 
 \newcommand{\pp}{process parameter}
 \newcommand{\pps}{process parameters}
-\newcommand{\framework}{\textit{LPE framework} \cite{LPEframework}}
+\newcommand{\framework}{\textit{LPS framework} \cite{LPSframework}}
 
 \newcommand{\bisim}{\frac{\leftrightarrow}{}}
 
@@ -31,7 +31,7 @@
 \newcommand{\at}[1]{\mbox{\aap ,} #1}
 
 %opening
-\title{lpeparelm}
+\title{lpsparelm}
 \author{F.P.M.Stappers}
 
 \begin{document}
@@ -40,24 +40,24 @@
 
 \begin{abstract}
 This documentation describes the implementation and test cases of the tool \tool\ in  the \mcrl\ toolset.
-Basically, \tool\ is a tool which removes unused \pp\ and unused sum variables from a \lpe\ (LPE).
+Basically, \tool\ is a tool which removes unused \pp\ and unused sum variables from a \lps\ (LPS).
 \end{abstract}
 
 \tableofcontents
 
 \section{Introduction}
 The \tool\ tool is a tool for \mcrl\ studio. The tool is a
-filter which reads from file \ti{input.lpe}, which is
-a file in \ti{.lpe} format \cite{LPEformat}. We make use of the
-\framework\ to read \ti{input.lpe}. The filter removes \pps\ and sum variables, which are not used, from the
-\lpe. After the algorithm (Section \ref{sec:alg}) terminates, \tool\
-will write the output to an output file \ti{output.lpe} (in the \ti{.lpe} format.)
+filter which reads from file \ti{input.lps}, which is
+a file in \ti{.lps} format \cite{LPSformat}. We make use of the
+\framework\ to read \ti{input.lps}. The filter removes \pps\ and sum variables, which are not used, from the
+\lps. After the algorithm (Section \ref{sec:alg}) terminates, \tool\
+will write the output to an output file \ti{output.lps} (in the \ti{.lps} format.)
 
 
 \section{Definitions} \label{sec:def}
 
-The equation below is a \lpe\ in \mcrl : 
-\begin{defn}\lpe\ (LPE) \newline
+The equation below is a \lps\ in \mcrl : 
+\begin{defn}\lps\ (LPS) \newline
 \begin{tabbing}
 \tab
 $X (\ovr{d: D}) = $ \> \> \> $ \sum_{i \in I} \sum_{\ovr{e_i: E_i}} \ovr{c_i} ( \ovr{d, e_i }) \rightarrow 
@@ -71,15 +71,15 @@ $X (\ovr{d: D}) = $ \> \> \> $ \sum_{i \in I} \sum_{\ovr{e_i: E_i}} \ovr{c_i} ( 
 Where $I$ and $J$ are disjoint.\\
 \end{defn}
 
-If we speak about an LPE in this article we refer to Definition \ref{sec:def}.  The different states 
-of the process are represented by the data vector parameter $\ovr{d}:\ovr{D}$. $\ovr{D}$ may be a Cartesian product of $n$ data types, meaning that $\ovr{d}$ consist of a tuple $(d_1, \ldots, d_n)$. The LPE expresses that in state $\ovr{d}$ it performs (multi)actions $a_i^1, \ldots , a_i^{n(i)}$, carrying data parameters $\ovr{f_{i,1}}(\ovr{d,e_i}), \ldots , \ovr{f_{i,n(i)}}(\ovr{d, e_i})$ and 
+If we speak about an LPS in this article we refer to Definition \ref{sec:def}.  The different states 
+of the process are represented by the data vector parameter $\ovr{d}:\ovr{D}$. $\ovr{D}$ may be a Cartesian product of $n$ data types, meaning that $\ovr{d}$ consist of a tuple $(d_1, \ldots, d_n)$. The LPS expresses that in state $\ovr{d}$ it performs (multi)actions $a_i^1, \ldots , a_i^{n(i)}$, carrying data parameters $\ovr{f_{i,1}}(\ovr{d,e_i}), \ldots , \ovr{f_{i,n(i)}}(\ovr{d, e_i})$ and 
 it can reach the new state $\ovr{g_i}(\ovr{d ,e_i})$ under the condition that $c_i(\ovr{d , e_i})$ is \ti{true}. So for each summand $i$ from $I$ we have a function $\ovr{g_i}: \ovr{D} \times \ovr{E_i} \rightarrow \ovr{D}$ and a function $c_i: \ovr{D} \times \ovr{E_i} \rightarrow \mathbb{B}$.
 Data parameters $\ovr{e_i : E_i}$ are sum variables. These variables are used to action range over a data domain. 
 
-For an more detailed explanation of \lpe s  we refer to \cite{LPE_info}.
+For an more detailed explanation of \lps s  we refer to \cite{LPS_info}.
 
-\section{Definition lpeparelm}
-A parameter of an LPE which has no influence on condition, action arguments and time is removed from the LPE in the \tool\ filter. Elimination of parameters can lead to a reduction when generating a state space of an LPE. If a \pp\ ranges over an infinite domain, the number of generated states can even be reduced to a finite domain, using this operation. %This typically happens after hiding parts of a specification.
+\section{Definition lpsparelm}
+A parameter of an LPS which has no influence on condition, action arguments and time is removed from the LPS in the \tool\ filter. Elimination of parameters can lead to a reduction when generating a state space of an LPS. If a \pp\ ranges over an infinite domain, the number of generated states can even be reduced to a finite domain, using this operation. %This typically happens after hiding parts of a specification.
 
 \begin{defn}
 Let $\ovr{x}$ be a vector and  $n$ be $\vert \ovr{x} \vert$. If we want to address the $j^{th}$ element ($ 1 \leq j \leq \vert \ovr{x} \vert $) of vector $\ovr{x}$, the do so by:
@@ -107,7 +107,7 @@ If $j \in X$ then $\boxtimes^w_X._j = \ovr{vect^w}._j$ \\
 \newcommand{\zj}{{\boxtimes}^l_{S_L}}
 \newcommand{\zd}{{\boxtimes}^\delta_{S_L}}
 
-% \begin{defn}(L) \label{def:lpe:L} We define $M$:
+% \begin{defn}(L) \label{def:lps:L} We define $M$:
 % \begin{tabbing}
 % \tab
 %  \>$\sum_{i \in I} \sum_{\ovr{e_i:E_i}} c_i ( \ovr{vect^i} ) \rightarrow $
@@ -121,7 +121,7 @@ If $j \in X$ then $\boxtimes^w_X._j = \ovr{vect^w}._j$ \\
 % \end{tabbing}
 % \end{defn}
 
-\begin{defn} \label{def:lpe:M} Let $M$ and $L$ be an LPE, with $ S_L \subseteq \lbrace 1, \ldots, n \rbrace $ as the biggest possible set such that:
+\begin{defn} \label{def:lps:M} Let $M$ and $L$ be an LPS, with $ S_L \subseteq \lbrace 1, \ldots, n \rbrace $ as the biggest possible set such that:
 $M \bisim L$, with $M$ defined as follows:
 \begin{tabbing}
 \tab
@@ -138,13 +138,13 @@ $ \\
 \end{defn}
 
 \section{Description} \label{sec:desc}
-It is possible having \pps\ which can have any value without influencing the behavior of the LPE. 
-If we look at the next states in an LPE in the LPE-format, we see that the LPE only contains \pps\ which influence the behavior and it omits those \pps\ which do not influence the behavior. So, if \pps\ do not occur in condition, action arguments or time tags, they do not influence the behavior in a direct way. If we collect all \pps , which are used in the condition, action arguments and time tags, we know which \pps\ are used. To indicate which \pps\ are used, we keep a set $UsedPP$\footnote{$UsedPP = S_M$ : Due the length off the word $UsedPP$ the Definition \ref{def:lpe:M} would get to long and clipped} which contains all indices used \pps . To find all \pps in a condition, action argument or time tag we have function called $FindUsedPP$. This function returns a set of  \pp\ indices which occur in a given condition, action argument or time tag. 
+It is possible having \pps\ which can have any value without influencing the behavior of the LPS. 
+If we look at the next states in an LPS in the LPS-format, we see that the LPS only contains \pps\ which influence the behavior and it omits those \pps\ which do not influence the behavior. So, if \pps\ do not occur in condition, action arguments or time tags, they do not influence the behavior in a direct way. If we collect all \pps , which are used in the condition, action arguments and time tags, we know which \pps\ are used. To indicate which \pps\ are used, we keep a set $UsedPP$\footnote{$UsedPP = S_M$ : Due the length off the word $UsedPP$ the Definition \ref{def:lps:M} would get to long and clipped} which contains all indices used \pps . To find all \pps in a condition, action argument or time tag we have function called $FindUsedPP$. This function returns a set of  \pp\ indices which occur in a given condition, action argument or time tag. 
 
 A next state is always used as an input state, to calculate another next state. So for each \pp\ we have to check while  all \pps\ which are used to construct a next state are in the set of used \pps . If a \pp\ is used as an input and is not in the set of used \pps\ this \pp\ is added to the set of indices. 
 Also, we have to check, that all \pps\ on which the added \pp\ depends, are also in the list of used \pps. We continue adding \pps\ dependant on other \pps\ which are also in the set of used \pp\ indices.
 
-In short: Throughout the run of the algorithm \pps\ get marked if they are used in an action, time or condition. Process parameters which are dependant of other marked \pps\ also get marked. If a \pp\ gets marked it should not be removed. Initially, all parameters in the LPE are unmarked. After the algorithm terminates all unmarked \pps\ are removed. A \pp\ gets marked if it occurs in one of the following places:
+In short: Throughout the run of the algorithm \pps\ get marked if they are used in an action, time or condition. Process parameters which are dependant of other marked \pps\ also get marked. If a \pp\ gets marked it should not be removed. Initially, all parameters in the LPS are unmarked. After the algorithm terminates all unmarked \pps\ are removed. A \pp\ gets marked if it occurs in one of the following places:
 
 \begin{itemize}
 \item In a condition: $c_i(\ovr{vect^i})$ for some $i \in I \cup J$
@@ -157,7 +157,7 @@ $(\ovr{f_{i,j}}(\ovr{vect^i})$ for some $i \in I \cup J$ and $j \in \lbrace 1, \
 \newpage
 \section{Algorithm} \label{sec:alg}
 \begin{algorithm}[h]
-\caption{lpeparelm}
+\caption{lpsparelm}
 \begin{algorithmic}[1]
 \STATE $UsedPP := \emptyset $
   \FORALL{$i \in I \cup J $}
@@ -190,12 +190,12 @@ $FindUsedPP$ \> \> \> \> : \> A routine which returns a set of indices of used\\
 \newpage
 \section{Test Cases}
 All specifications are given in \mcrl\ specification.
-Transformation from a \mcrl\ specification to an LPE file is done with the tool:
-$mcrl22lpe$. Each transformation is executed with the \verb"-no-cluster" option, unless
+Transformation from a \mcrl\ specification to an LPS file is done with the tool:
+$mcrl22lps$. Each transformation is executed with the \verb"-no-cluster" option, unless
 mentioned otherwise.
 
 \subsection*{Case 1}
-inputfile: \verb"$DIR$/tests/lpeparelm/case1.mcrl2"
+inputfile: \verb"$DIR$/tests/lpsparelm/case1.mcrl2"
 \begin{tabbing}
 \tabw
 \ti{info} \> This test case will show if if the \tool\ works without condition, action and time arguments.\\
@@ -208,7 +208,7 @@ inputfile: \verb"$DIR$/tests/lpeparelm/case1.mcrl2"
 \end{tabbing}
 
 \subsection*{Case 2}
-inputfile: \verb"$DIR$/tests/lpeparelm/case2.mcrl2"
+inputfile: \verb"$DIR$/tests/lpsparelm/case2.mcrl2"
 \begin{tabbing}
 \tabw
 \ti{info} \> This test case will show if if the \tool\ works with an action argument.\\
@@ -221,7 +221,7 @@ inputfile: \verb"$DIR$/tests/lpeparelm/case2.mcrl2"
 \end{tabbing}
 
 \subsection*{Case 3}
-inputfile: \verb"$DIR$/tests/lpeparelm/case3.mcrl2"
+inputfile: \verb"$DIR$/tests/lpsparelm/case3.mcrl2"
 \begin{tabbing}
 \tabw
 \ti{info} \> This test case will show if if the \tool\ works with a condition argument.\\
@@ -234,7 +234,7 @@ inputfile: \verb"$DIR$/tests/lpeparelm/case3.mcrl2"
 \end{tabbing}
 
 \subsection*{Case 4}
-inputfile: \verb"$DIR$/tests/lpeparelm/case4.mcrl2"
+inputfile: \verb"$DIR$/tests/lpsparelm/case4.mcrl2"
 \begin{tabbing}
 \tabw
 \ti{info} \> This test case will show if if the \tool\ works with a time argument.\\
@@ -247,7 +247,7 @@ inputfile: \verb"$DIR$/tests/lpeparelm/case4.mcrl2"
 \end{tabbing}
 
 \subsection*{Case 5}
-inputfile: \verb"$DIR$/tests/lpeparelm/case5.mcrl2"
+inputfile: \verb"$DIR$/tests/lpsparelm/case5.mcrl2"
 \begin{tabbing}
 \tabw
 \ti{info} \> This test case will show if the \tool\ checks for dependant \pps .\\
@@ -262,7 +262,7 @@ inputfile: \verb"$DIR$/tests/lpeparelm/case5.mcrl2"
 \end{tabbing}
 
 \subsection*{Case 6}
-inputfile: \verb"$DIR$/tests/lpeparelm/case6.mcrl2"
+inputfile: \verb"$DIR$/tests/lpsparelm/case6.mcrl2"
 \begin{tabbing}
 \tabw
 \ti{info} \> This test case will show how the tool reacts on free variables and multiple summands.\\
@@ -276,7 +276,7 @@ inputfile: \verb"$DIR$/tests/lpeparelm/case6.mcrl2"
 \ti{Result} \> No \pp\ should be removed.\\ 
 \> \textbf{Note:} Different linearization might lead to other results.\\
 \line(1,0){120}\\
-\ti{Genarated LPE} \\
+\ti{Genarated LPS} \\
 \>  \verb"var  freevar0: Nat;"\\
 \>  \verb"proc P(s3: Pos, i,j: Nat)"\\
 \>  \verb" (s3 == 1 && i < 5) ->"\\
@@ -294,7 +294,7 @@ inputfile: \verb"$DIR$/tests/lpeparelm/case6.mcrl2"
 \end{tabbing}
 
 \subsection*{Case 7}
-inputfile: \verb"$DIR$/tests/lpeparelm/case7.mcrl2"
+inputfile: \verb"$DIR$/tests/lpsparelm/case7.mcrl2"
 \begin{tabbing}
 \tabw
 \ti{info} \> This test case will show how the tool reacts on time, actions, conditions, multiple \\
@@ -307,7 +307,7 @@ inputfile: \verb"$DIR$/tests/lpeparelm/case7.mcrl2"
 \line(1,0){120}\\
 \ti{Result} \> No \pp\ should be removed.\\ 
 \line(1,0){120}\\
-\ti{Genarated LPE} \\
+\ti{Genarated LPS} \\
 \>  \verb" proc P(i,z,j: Nat) ="\\
 \>  \verb"       (i == 5) ->"\\
 \>  \verb"         act3(i) ."\\
@@ -320,12 +320,12 @@ inputfile: \verb"$DIR$/tests/lpeparelm/case7.mcrl2"
 \end{tabbing}
 
 \begin{thebibliography}{99}  
-   \bibitem{LPE_info} unknown author \\
+   \bibitem{LPS_info} unknown author \\
    \textit{Article not ready at the moment},
-  \bibitem{LPEframework} J.W. Wesselink,
+  \bibitem{LPSframework} J.W. Wesselink,
    \textit{http://www.win.tue.nl/~wieger/mcrl2/html/index.html}\\
    A C++ wrapper for the ATerm library.
-   \bibitem{LPEformat} Aad Mathijssen\\
+   \bibitem{LPSformat} Aad Mathijssen\\
    \textit{https://svn.win.tue.nl/viewcvs-checkout/MCRL2/trunk/specs/mcrl2.internal.txt},
    A description of the internal format of the mCRL2 language.
 

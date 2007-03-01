@@ -13,7 +13,7 @@
 
 <refnamediv>
 <refname>disjointness_checker</refname>
-<refpurpose>a class that indicates whether two summands of an mCRL2 LPE are syntactically disjoint</refpurpose>
+<refpurpose>a class that indicates whether two summands of an mCRL2 LPS are syntactically disjoint</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>

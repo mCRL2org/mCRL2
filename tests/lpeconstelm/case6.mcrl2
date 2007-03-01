@@ -14,9 +14,9 @@ init P(0);
 %% NOTE:                                                  %%
 %% =====                                                  %%
 %%                                                        %%
-%% Usage of: mcrl22lpe $DIR$/case6.mcrl2                  %%
+%% Usage of: mcrl22lps $DIR$/case6.mcrl2                  %%
 %% + indicates the second process parameter is constant   %%
-%% Usage of: mcrl22lpe --no-cluster $DIR$/case6.mcrl2     %%
+%% Usage of: mcrl22lps --no-cluster $DIR$/case6.mcrl2     %%
 %% + indicates the second process parameter is constant   %%
 %% In this case they are the same                         %%
 %%                                                        %%

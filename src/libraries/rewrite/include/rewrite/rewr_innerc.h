@@ -8,7 +8,7 @@
 class RewriterCompilingInnermost: public Rewriter
 {
 	public:
-		RewriterCompilingInnermost(lpe::data_specification DataSpec);
+		RewriterCompilingInnermost(lps::data_specification DataSpec);
 		~RewriterCompilingInnermost();
 
 		RewriteStrategy getStrategy();
@@ -55,7 +55,7 @@ class RewriterCompilingInnermost: public Rewriter
 		void calcTerm(FILE *f, ATerm t, int startarg);
 		void implement_tree_aux(FILE *f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity);
 		void implement_tree(FILE *f, ATermAppl tree, int arity, int d, int opid);
-		void CompileRewriteSystem(lpe::data_specification DataSpec);
+		void CompileRewriteSystem(lps::data_specification DataSpec);
 
 		ATerm OpId2Int(ATermAppl Term, bool add_opids);
 		ATerm toInner(ATermAppl Term, bool add_opids);

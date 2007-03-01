@@ -1,0 +1,12 @@
+project toolset/lpsinfo
+       : build-dir $(BUILD_TOP)/lpsinfo
+       ;
+
+exe lpsinfo
+       : lpsinfo.cpp
+         /libraries//mcrl2_basic
+         /libraries//lps
+         /site-config//boost_program_options
+       : <include>.
+       : <squadt_support>enable
+       ;

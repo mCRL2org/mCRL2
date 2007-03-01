@@ -1,0 +1,14 @@
+project lpsconstelm
+       : build-dir $(BUILD_TOP)/lpsconstelm
+       ;
+
+exe lpsconstelm
+       : lpsconstelm.cpp
+         /libraries//mcrl2_basic
+         /libraries//rewrite
+         /libraries//lps
+         /site-config//boost_program_options
+       : <squadt_support>enable
+         <include>.
+       ;
+

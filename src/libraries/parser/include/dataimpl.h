@@ -2,7 +2,7 @@
 #define PARSER_DATAIMPL_H
 
 #include <aterm2.h>
-#include "lpe/specification.h"
+#include "lps/specification.h"
 
 //Global preconditions:
 //- the ATerm library has been initialised
@@ -20,12 +20,12 @@ ATermAppl implement_data_spec(ATermAppl spec);
  */
 
 ATermAppl implement_data_sort_expr(ATermAppl sort_expr,
-  lpe::specification &lpe_spec);
+  lps::specification &lps_spec);
 /*Pre: sort_expr represents a sort expression that adheres to the internal
  *     ATerm structure after the type checking phase.
- *     lpe_spec represents an LPE specification
+ *     lps_spec represents an LPS specification
  *Post:The datatypes of sort_expr are implemented as higher-order abstract data
- *     types in lpe_spec
+ *     types in lps_spec
  *Ret: if the data implementation went ok, an equivalent version of sort_expr
  *     is returned that adheres to the internal ATerm structure after data
  *     implementation.
@@ -34,12 +34,12 @@ ATermAppl implement_data_sort_expr(ATermAppl sort_expr,
  */
 
 ATermAppl implement_data_data_expr(ATermAppl data_expr,
-  lpe::specification &lpe_spec);
+  lps::specification &lps_spec);
 /*Pre: data_expr represents a data expression that adheres to the internal
  *     ATerm structure after the type checking phase.
- *     lpe_spec represents an LPE specification
+ *     lps_spec represents an LPS specification
  *Post:The datatypes of data_expr are implemented as higher-order abstract data
- *     types in lpe_spec
+ *     types in lps_spec
  *Ret: if the data implementation went ok, an equivalent version of data_expr
  *     is returned that adheres to the internal ATerm structure after data
  *     implementation.
@@ -48,12 +48,12 @@ ATermAppl implement_data_data_expr(ATermAppl data_expr,
  */
 
 ATermAppl implement_data_mult_act(ATermAppl mult_act,
-  lpe::specification &lpe_spec);
+  lps::specification &lps_spec);
 /*Pre: mult_act represents a multiaction that adheres to the internal ATerm
  *     structure after the type checking phase.
- *     lpe_spec represents an LPE specification
+ *     lps_spec represents an LPS specification
  *Post:The datatypes of spec are implemented as higher-order abstract data
- *     types in lpe_spec
+ *     types in lps_spec
  *Ret: if the data implementation went ok, an equivalent version of mult_act
  *     is returned that adheres to the internal ATerm structure after data
  *     implementation.
@@ -62,12 +62,12 @@ ATermAppl implement_data_mult_act(ATermAppl mult_act,
  */
 
 ATermAppl implement_data_proc_expr(ATermAppl proc_expr,
-  lpe::specification &lpe_spec);
+  lps::specification &lps_spec);
 /*Pre: proc_expr represents a process expression that adheres to the internal
  *     ATerm structure after the type checking phase.
- *     lpe_spec represents an LPE specification
+ *     lps_spec represents an LPS specification
  *Post:The datatypes of proc_expr are implemented as higher-order abstract data
- *     types in lpe_spec
+ *     types in lps_spec
  *Ret: if the data implementation went ok, an equivalent version of proc_expr
  *     is returned that adheres to the internal ATerm structure after data
  *     implementation.
@@ -76,12 +76,12 @@ ATermAppl implement_data_proc_expr(ATermAppl proc_expr,
  */
 
 ATermAppl implement_data_state_frm(ATermAppl state_frm,
-  lpe::specification &lpe_spec);
+  lps::specification &lps_spec);
 /*Pre: state_frm represents a state formula that adheres to the internal ATerm
  *     structure after the type checking phase.
- *     lpe_spec represents an LPE specification
+ *     lps_spec represents an LPS specification
  *Post:The datatypes of spec are implemented as higher-order abstract data
- *     types in lpe_spec
+ *     types in lps_spec
  *Ret: if the data implementation went ok, an equivalent version of state_frm
  *     is returned that adheres to the internal ATerm structure after data
  *     implementation.

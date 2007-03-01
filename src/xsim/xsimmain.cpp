@@ -733,7 +733,7 @@ ATermList XSimMain::traceRedo()
 
 void XSimMain::OnOpen( wxCommandEvent& /* event */ )
 {
-    wxFileDialog dialog( this, wxT("Select a LPE file..."), wxT(""), wxT(""), wxT("LPEs (*.lpe)|*.lpe|All files|*"));
+    wxFileDialog dialog( this, wxT("Select a LPS file..."), wxT(""), wxT(""), wxT("LPSs (*.lps)|*.lps|All files|*"));
     if ( dialog.ShowModal() == wxID_OK )
     {
 	    LoadFile(dialog.GetPath());

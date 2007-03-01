@@ -4,7 +4,7 @@
       lts_extra_type type;
       union {
         ATerm mcrl1_spec;
-        lpe::specification *mcrl2_spec;
+        lps::specification *mcrl2_spec;
 	lts_dot_options dot_options;
       } content;
   };
@@ -85,21 +85,21 @@
       bool write_to_aut(std::ostream& os);
 
       bool read_from_svc(std::string const& filename, lts_type type);
-      bool write_to_svc(std::string const& filename, lts_type type, lpe::specification *spec = NULL);
+      bool write_to_svc(std::string const& filename, lts_type type, lps::specification *spec = NULL);
 
       lts_type fsm_get_lts_type();
-      bool read_from_fsm(std::string const& filename, lts_type type, lpe::specification *spec = NULL);
-      bool read_from_fsm(std::string const& filename, ATerm lpe = NULL);
-      bool read_from_fsm(std::string const& filename, lpe::specification &spec);
-      bool read_from_fsm(std::istream& is, lts_type type, lpe::specification *spec = NULL);
-      bool read_from_fsm(std::istream& is, ATerm lpe = NULL);
-      bool read_from_fsm(std::istream& is, lpe::specification &spec);
+      bool read_from_fsm(std::string const& filename, lts_type type, lps::specification *spec = NULL);
+      bool read_from_fsm(std::string const& filename, ATerm lps = NULL);
+      bool read_from_fsm(std::string const& filename, lps::specification &spec);
+      bool read_from_fsm(std::istream& is, lts_type type, lps::specification *spec = NULL);
+      bool read_from_fsm(std::istream& is, ATerm lps = NULL);
+      bool read_from_fsm(std::istream& is, lps::specification &spec);
       bool write_to_fsm(std::string const& filename, lts_type type, ATermList params);
-      bool write_to_fsm(std::string const& filename, ATerm lpe = NULL);
-      bool write_to_fsm(std::string const& filename, lpe::specification &spec);
+      bool write_to_fsm(std::string const& filename, ATerm lps = NULL);
+      bool write_to_fsm(std::string const& filename, lps::specification &spec);
       bool write_to_fsm(std::ostream& os, lts_type type, ATermList params);
-      bool write_to_fsm(std::ostream& os, ATerm lpe = NULL);
-      bool write_to_fsm(std::ostream& os, lpe::specification &spec);
+      bool write_to_fsm(std::ostream& os, ATerm lps = NULL);
+      bool write_to_fsm(std::ostream& os, lps::specification &spec);
 
       bool write_to_dot(std::ostream& os, lts_dot_options opts);
       bool write_to_dot(std::string const& filename, lts_dot_options opts);

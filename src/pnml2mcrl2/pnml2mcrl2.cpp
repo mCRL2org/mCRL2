@@ -126,7 +126,7 @@ void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
 
 void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   /* set the squadt configuration to be sent back, such
-   * that mcrl22lpe can be restarted later with exactly
+   * that mcrl22lps can be restarted later with exactly
    * the same parameters
    */
   if (c.is_fresh()) {

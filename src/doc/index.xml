@@ -164,7 +164,7 @@
 <!ENTITY opt_i "<option>-i</option>">
 <!ENTITY opt_j "<option>-j</option>">
 <!ENTITY opt_l "<option>-l</option>">
-<!ENTITY opt_lpe "<option>--lpe</option>">
+<!ENTITY opt_lps "<option>--lps</option>">
 <!ENTITY opt_max "<option>--max</option>">
 <!ENTITY opt_mcrl2 "<option>--mcrl2</option>">
 <!ENTITY opt_m "<option>-m</option>">
@@ -247,7 +247,7 @@
 <!ENTITY par_generate_invariants "<parameter>a_generate_invariants</parameter>">
 <!ENTITY par_h "<parameter>h</parameter>">
 <!ENTITY par_invariant "<parameter>a_invariant</parameter>">
-<!ENTITY par_lpe "<parameter>a_lpe</parameter>">
+<!ENTITY par_lps "<parameter>a_lps</parameter>">
 <!ENTITY par_n "<parameter>n</parameter>">
 <!ENTITY par_no_marking "<parameter>a_no_marking</parameter>">
 <!ENTITY par_path_eliminator "<parameter>a_path_eliminator</parameter>">
@@ -390,62 +390,62 @@
 <!ENTITY bugmail "<email>bug@mcrl2.org</email>">
 
 <!-- tools -->
-<!ENTITY lpe2lts "<command>lpe2lts</command>">
-<!ENTITY lpe2torx "<command>lpe2torx</command>">
-<!ENTITY lpebinary "<command>lpebinary</command>">
-<!ENTITY lpeconfcheck "<command>lpeconfcheck</command>">
-<!ENTITY lpeconstelm "<command>lpeconstelm</command>">
-<!ENTITY lpedataelm "<command>lpedataelm</command>">
-<!ENTITY lpedecluster "<command>lpedecluster</command>">
-<!ENTITY lpeformcheck "<command>lpeformcheck</command>">
-<!ENTITY lpeinfo "<command>lpeinfo</command>">
-<!ENTITY lpeinvelm "<command>lpeinvelm</command>">
-<!ENTITY lpeparelm "<command>lpeparelm</command>">
-<!ENTITY lpepp "<command>lpepp</command>">
-<!ENTITY lperewr "<command>lperewr</command>">
-<!ENTITY lpesumelm "<command>lpesumelm</command>">
-<!ENTITY lpeuntime "<command>lpeuntime</command>">
+<!ENTITY lps2lts "<command>lps2lts</command>">
+<!ENTITY lps2torx "<command>lps2torx</command>">
+<!ENTITY lpsbinary "<command>lpsbinary</command>">
+<!ENTITY lpsconfcheck "<command>lpsconfcheck</command>">
+<!ENTITY lpsconstelm "<command>lpsconstelm</command>">
+<!ENTITY lpsdataelm "<command>lpsdataelm</command>">
+<!ENTITY lpsdecluster "<command>lpsdecluster</command>">
+<!ENTITY lpsformcheck "<command>lpsformcheck</command>">
+<!ENTITY lpsinfo "<command>lpsinfo</command>">
+<!ENTITY lpsinvelm "<command>lpsinvelm</command>">
+<!ENTITY lpsparelm "<command>lpsparelm</command>">
+<!ENTITY lpspp "<command>lpspp</command>">
+<!ENTITY lpsrewr "<command>lpsrewr</command>">
+<!ENTITY lpssumelm "<command>lpssumelm</command>">
+<!ENTITY lpsuntime "<command>lpsuntime</command>">
 <!ENTITY ltscompare "<command>ltscompare</command>">
 <!ENTITY ltsconvert "<command>ltsconvert</command>">
 <!ENTITY ltsgraph "<command>ltsgraph</command>">
 <!ENTITY ltsinfo "<command>ltsinfo</command>">
 <!ENTITY ltsmin "<command>ltsmin</command>">
 <!ENTITY ltsview "<command>ltsview</command>">
-<!ENTITY mcrl22lpe "<command>mcrl22lpe</command>">
+<!ENTITY mcrl22lps "<command>mcrl22lps</command>">
 <!ENTITY pbesinfo "<command>pbesinfo</command>">
 <!ENTITY pnml2mcrl2 "<command>pnml2mcrl2</command>">
 <!ENTITY sim "<command>sim</command>">
-<!ENTITY tbf2lpe "<command>tbf2lpe</command>">
+<!ENTITY tbf2lps "<command>tbf2lps</command>">
 <!ENTITY tracepp "<command>tracepp</command>">
 <!ENTITY xsim "<command>xsim</command>">
 
 <!-- tools with link -->
-<!ENTITY lpe2lts-lnk "<link linkend='lpe2lts'>&lpe2lts;</link>">
+<!ENTITY lps2lts-lnk "<link linkend='lps2lts'>&lps2lts;</link>">
 <!ENTITY sim-lnk "<link linkend='sim'>&sim;</link>">
-<!ENTITY lpe2torx-lnk "<link linkend='lpe2torx'>&lpe2torx;</link>">
-<!ENTITY lpebinary-lnk "<link linkend='lpebinary'>&lpebinary;</link>">
-<!ENTITY lpeconfcheck-lnk "<link linkend='lpeconfcheck'>&lpeconfcheck;</link>">
-<!ENTITY lpeconstelm-lnk "<link linkend='lpeconstelm'>&lpeconstelm;</link>">
-<!ENTITY lpedataelm-lnk "<link linkend='lpedataelm'>&lpedataelm;</link>">
-<!ENTITY lpedecluster-lnk "<link linkend='lpedecluster'>&lpedecluster;</link>">
-<!ENTITY lpeformcheck-lnk "<link linkend='lpeformcheck'>&lpeformcheck;</link>">
-<!ENTITY lpeinfo-lnk "<link linkend='lpeinfo'>&lpeinfo;</link>">
-<!ENTITY lpeinvelm-lnk "<link linkend='lpeinvelm'>&lpeinvelm;</link>">
-<!ENTITY lpeparelm-lnk "<link linkend='lpeparelm'>&lpeparelm;</link>">
-<!ENTITY lpepp-lnk "<link linkend='lpepp'>&lpepp;</link>">
-<!ENTITY lperewr-lnk "<link linkend='lperewr'>&lperewr;</link>">
-<!ENTITY lpesumelm-lnk "<link linkend='lpesumelm'>&lpesumelm;</link>">
-<!ENTITY lpeuntime-lnk "<link linkend='lpeuntime'>&lpeuntime;</link>">
+<!ENTITY lps2torx-lnk "<link linkend='lps2torx'>&lps2torx;</link>">
+<!ENTITY lpsbinary-lnk "<link linkend='lpsbinary'>&lpsbinary;</link>">
+<!ENTITY lpsconfcheck-lnk "<link linkend='lpsconfcheck'>&lpsconfcheck;</link>">
+<!ENTITY lpsconstelm-lnk "<link linkend='lpsconstelm'>&lpsconstelm;</link>">
+<!ENTITY lpsdataelm-lnk "<link linkend='lpsdataelm'>&lpsdataelm;</link>">
+<!ENTITY lpsdecluster-lnk "<link linkend='lpsdecluster'>&lpsdecluster;</link>">
+<!ENTITY lpsformcheck-lnk "<link linkend='lpsformcheck'>&lpsformcheck;</link>">
+<!ENTITY lpsinfo-lnk "<link linkend='lpsinfo'>&lpsinfo;</link>">
+<!ENTITY lpsinvelm-lnk "<link linkend='lpsinvelm'>&lpsinvelm;</link>">
+<!ENTITY lpsparelm-lnk "<link linkend='lpsparelm'>&lpsparelm;</link>">
+<!ENTITY lpspp-lnk "<link linkend='lpspp'>&lpspp;</link>">
+<!ENTITY lpsrewr-lnk "<link linkend='lpsrewr'>&lpsrewr;</link>">
+<!ENTITY lpssumelm-lnk "<link linkend='lpssumelm'>&lpssumelm;</link>">
+<!ENTITY lpsuntime-lnk "<link linkend='lpsuntime'>&lpsuntime;</link>">
 <!ENTITY ltscompare-lnk "<link linkend='ltscompare'>&ltscompare;</link>">
 <!ENTITY ltsconvert-lnk "<link linkend='ltsconvert'>&ltsconvert;</link>">
 <!ENTITY ltsgraph-lnk "<link linkend='ltsgraph'>&ltsgraph;</link>">
 <!ENTITY ltsinfo-lnk "<link linkend='ltsinfo'>&ltsinfo;</link>">
 <!ENTITY ltsmin-lnk "<link linkend='ltsmin'>&ltsmin;</link>">
 <!ENTITY ltsview-lnk "<link linkend='ltsview'>&ltsview;</link>">
-<!ENTITY mcrl22lpe-lnk "<link linkend='mcrl22lpe'>&mcrl22lpe;</link>">
+<!ENTITY mcrl22lps-lnk "<link linkend='mcrl22lps'>&mcrl22lps;</link>">
 <!ENTITY pbesinfo-lnk "<link linkend='pbesinfo'>&pbesinfo;</link>">
 <!ENTITY pnml2mcrl2-lnk "<link linkend='pnml2mcrl2'>&pnml2mcrl2;</link>">
-<!ENTITY tbf2lpe-lnk "<link linkend='tbf2lpe'>&tbf2lpe;</link>">
+<!ENTITY tbf2lps-lnk "<link linkend='tbf2lps'>&tbf2lps;</link>">
 <!ENTITY tracepp-lnk "<link linkend='tracepp'>&tracepp;</link>">
 <!ENTITY xsim-lnk "<link linkend='xsim'>&xsim;</link>">
 
@@ -460,28 +460,28 @@
 <!ENTITY finvariant_checker SYSTEM "invariant_checker.xml">
 <!ENTITY finvariant_eliminator SYSTEM "invariant_eliminator.xml">
 <!ENTITY flibrewrite SYSTEM "librewrite.xml">
-<!ENTITY flpe2lts SYSTEM "lpe2lts.xml">
-<!ENTITY flpe2torx SYSTEM "lpe2torx.xml">
-<!ENTITY flpebinary SYSTEM "lpebinary.xml">
-<!ENTITY flpeconfcheck SYSTEM "lpeconfcheck.xml">
-<!ENTITY flpeconstelm SYSTEM "lpeconstelm.xml">
-<!ENTITY flpedataelm SYSTEM "lpedataelm.xml">
-<!ENTITY flpedecluster SYSTEM "lpedecluster.xml">
-<!ENTITY flpeformcheck SYSTEM "lpeformcheck.xml">
-<!ENTITY flpeinfo SYSTEM "lpeinfo.xml">
-<!ENTITY flpeinvelm SYSTEM "lpeinvelm.xml">
-<!ENTITY flpeparelm SYSTEM "lpeparelm.xml">
-<!ENTITY flpepp SYSTEM "lpepp.xml">
-<!ENTITY flperewr SYSTEM "lperewr.xml">
-<!ENTITY flpesumelm SYSTEM "lpesumelm.xml">
-<!ENTITY flpeuntime SYSTEM "lpeuntime.xml">
+<!ENTITY flps2lts SYSTEM "lps2lts.xml">
+<!ENTITY flps2torx SYSTEM "lps2torx.xml">
+<!ENTITY flpsbinary SYSTEM "lpsbinary.xml">
+<!ENTITY flpsconfcheck SYSTEM "lpsconfcheck.xml">
+<!ENTITY flpsconstelm SYSTEM "lpsconstelm.xml">
+<!ENTITY flpsdataelm SYSTEM "lpsdataelm.xml">
+<!ENTITY flpsdecluster SYSTEM "lpsdecluster.xml">
+<!ENTITY flpsformcheck SYSTEM "lpsformcheck.xml">
+<!ENTITY flpsinfo SYSTEM "lpsinfo.xml">
+<!ENTITY flpsinvelm SYSTEM "lpsinvelm.xml">
+<!ENTITY flpsparelm SYSTEM "lpsparelm.xml">
+<!ENTITY flpspp SYSTEM "lpspp.xml">
+<!ENTITY flpsrewr SYSTEM "lpsrewr.xml">
+<!ENTITY flpssumelm SYSTEM "lpssumelm.xml">
+<!ENTITY flpsuntime SYSTEM "lpsuntime.xml">
 <!ENTITY fltscompare SYSTEM "ltscompare.xml">
 <!ENTITY fltsconvert SYSTEM "ltsconvert.xml">
 <!ENTITY fltsgraph SYSTEM "ltsgraph.xml">
 <!ENTITY fltsinfo SYSTEM "ltsinfo.xml">
 <!ENTITY fltsmin SYSTEM "ltsmin.xml">
 <!ENTITY fltsview SYSTEM "ltsview.xml">
-<!ENTITY fmcrl22lpe SYSTEM "mcrl22lpe.xml">
+<!ENTITY fmcrl22lps SYSTEM "mcrl22lps.xml">
 <!ENTITY fpbesinfo SYSTEM "pbesinfo.xml">
 <!ENTITY fpnml2mcrl2 SYSTEM "pnml2mcrl2.xml">
 <!ENTITY fprover SYSTEM "prover.xml">
@@ -490,7 +490,7 @@
 <!ENTITY fsmt_solver_ario SYSTEM "smt_solver_ario.xml">
 <!ENTITY fsmt_solver_cvc_lite SYSTEM "smt_solver_cvc_lite.xml">
 <!ENTITY fsmt_solver SYSTEM "smt_solver.xml">
-<!ENTITY ftbf2lpe SYSTEM "tbf2lpe.xml">
+<!ENTITY ftbf2lps SYSTEM "tbf2lps.xml">
 <!ENTITY ftracepp SYSTEM "tracepp.xml">
 <!ENTITY fxsim SYSTEM "xsim.xml">
 ]>
@@ -500,23 +500,23 @@
 </info>
 <part><title>Tools</title>
   <chapter><title>Linearisation</title>
-    &fmcrl22lpe;
+    &fmcrl22lps;
   </chapter>
   <chapter><title>Linear Process Equations</title>
-    &flpe2lts;
-    &flpebinary;
-    &flpeconfcheck;
-    &flpeconstelm;
-    &flpedataelm;
-    &flpedecluster;
-    &flpeformcheck;
-    &flpeinfo;
-    &flpeinvelm;
-    &flpeparelm;
-    &flpepp;
-    &flperewr;
-    &flpesumelm;
-    &flpeuntime;
+    &flps2lts;
+    &flpsbinary;
+    &flpsconfcheck;
+    &flpsconstelm;
+    &flpsdataelm;
+    &flpsdecluster;
+    &flpsformcheck;
+    &flpsinfo;
+    &flpsinvelm;
+    &flpsparelm;
+    &flpspp;
+    &flpsrewr;
+    &flpssumelm;
+    &flpsuntime;
   </chapter>
   <chapter><title>Simulation</title>
     &fsim;
@@ -536,8 +536,8 @@
   </chapter>
   <chapter><title>Import/Export</title>
     &fpnml2mcrl2;
-    &ftbf2lpe;
-    &flpe2torx;
+    &ftbf2lps;
+    &flps2torx;
   </chapter>
 </part>
 <part><title>Libraries</title>

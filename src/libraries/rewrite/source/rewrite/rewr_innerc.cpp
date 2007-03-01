@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <libprint_c.h>
 
-RewriterCompilingInnermost::RewriterCompilingInnermost(lpe::data_specification DataSpec)
+RewriterCompilingInnermost::RewriterCompilingInnermost(lps::data_specification DataSpec)
 {
 	gsfprintf(stderr,"error: compiling Innermost rewriter is not available\n");
 	exit(1);
@@ -73,7 +73,7 @@ void RewriterCompilingInnermost::clearSubstitutions()
 #include <liblowlevel.h>
 #include <libstruct.h>
 #include <libprint_c.h>
-#include <lpe/data_specification.h>
+#include <lps/data_specification.h>
 #include "setup.h"
 #include "rewr_innerc.h"
 
@@ -1469,7 +1469,7 @@ static int getArity(ATermAppl op)
   return arity;
 }
 
-void RewriterCompilingInnermost::CompileRewriteSystem(lpe::data_specification DataSpec)
+void RewriterCompilingInnermost::CompileRewriteSystem(lps::data_specification DataSpec)
 {
   ATermList l,n;
   ATermTable tmp_eqns;
@@ -2180,7 +2180,7 @@ void RewriterCompilingInnermost::CompileRewriteSystem(lpe::data_specification Da
   free(s);
 }
 
-RewriterCompilingInnermost::RewriterCompilingInnermost(lpe::data_specification DataSpec)
+RewriterCompilingInnermost::RewriterCompilingInnermost(lps::data_specification DataSpec)
 {
   term2int = ATtableCreate(100,75);
   initialise_common();

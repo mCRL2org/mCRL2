@@ -207,14 +207,14 @@
 
   // --------------------------------------------------------------------------------------------
 
-  bool has_ctau_action(ATermAppl a_lpe) {
+  bool has_ctau_action(ATermAppl a_lps) {
     ATermList v_action_specification;
     ATermAppl v_action;
     ATermAppl v_ctau_action;
     bool v_has_ctau_action = false;
 
     v_ctau_action = make_ctau_act_id();
-    v_action_specification = ATLgetArgument(ATAgetArgument(a_lpe, 1), 0);
+    v_action_specification = ATLgetArgument(ATAgetArgument(a_lps, 1), 0);
     while (!ATisEmpty(v_action_specification)) {
       v_action = ATAgetFirst(v_action_specification);
       if (v_action == v_ctau_action) {
@@ -227,13 +227,13 @@
 
   // --------------------------------------------------------------------------------------------
 
-  ATermAppl add_ctau_action(ATermAppl a_lpe) {
+  ATermAppl add_ctau_action(ATermAppl a_lps) {
     ATermList v_action_specification;
 
-    v_action_specification = ATLgetArgument(ATAgetArgument(a_lpe, 1), 0);
+    v_action_specification = ATLgetArgument(ATAgetArgument(a_lps, 1), 0);
     v_action_specification = ATinsert(v_action_specification, (ATerm) make_ctau_act_id());
-    a_lpe = ATsetArgument(a_lpe, (ATerm) gsMakeActSpec(v_action_specification), 1);
-    return a_lpe;
+    a_lps = ATsetArgument(a_lps, (ATerm) gsMakeActSpec(v_action_specification), 1);
+    return a_lps;
   }
 
 // Class Confluence_Checker -----------------------------------------------------------------------
@@ -280,7 +280,7 @@
 
     bool Confluence_Checker::check_summands(ATermAppl a_invariant, ATermAppl a_summand_1, int a_summand_number_1, ATermAppl a_summand_2, int a_summand_number_2) {
       assert(is_tau_summand(a_summand_1));
-      ATermList v_variables = ATLgetArgument(ATAgetArgument(f_lpe, 2), 1);
+      ATermList v_variables = ATLgetArgument(ATAgetArgument(f_lps, 2), 1);
       ATermAppl v_condition, v_new_invariant;
       bool v_is_confluent = true;
 
@@ -332,7 +332,7 @@
 
     ATermAppl Confluence_Checker::check_confluence_and_mark_summand(ATermAppl a_invariant, ATermAppl a_summand, int a_summand_number, bool& a_is_marked) {
       assert(is_tau_summand(a_summand));
-      ATermList v_summands = ATLgetArgument(ATAgetArgument(f_lpe, 2), 2);
+      ATermList v_summands = ATLgetArgument(ATAgetArgument(f_lps, 2), 2);
       ATermAppl v_summand, v_marked_summand;
       int v_summand_number = 1;
       bool v_is_confluent = true;
@@ -390,19 +390,19 @@
   // Class Confluence_Checker - Functions declared public -----------------------------------------
 
     Confluence_Checker::Confluence_Checker(
-      ATermAppl a_lpe, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
+      ATermAppl a_lps, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
       bool a_apply_induction, bool a_no_marking, bool a_check_all, bool a_counter_example, bool a_generate_invariants, char* a_dot_file_name
     ):
-      f_disjointness_checker(ATAgetArgument(a_lpe, 2)),
-      f_invariant_checker(a_lpe, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, false, false, 0),
-      f_bdd_prover(lpe::data_specification(ATAgetArgument(a_lpe,0)), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
+      f_disjointness_checker(ATAgetArgument(a_lps, 2)),
+      f_invariant_checker(a_lps, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, false, false, 0),
+      f_bdd_prover(lps::data_specification(ATAgetArgument(a_lps,0)), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {
-      if (has_ctau_action(a_lpe)) {
+      if (has_ctau_action(a_lps)) {
         gsErrorMsg("An action named \'ctau\' already exists.\n");
         exit(1);
       }
 
-      f_lpe = a_lpe;
+      f_lps = a_lps;
       f_no_marking = a_no_marking;
       f_check_all = a_check_all;
       f_counter_example = a_counter_example;
@@ -423,7 +423,7 @@
     // --------------------------------------------------------------------------------------------
 
     ATermAppl Confluence_Checker::check_confluence_and_mark(ATermAppl a_invariant, int a_summand_number) {
-      ATermAppl v_process_equation = ATAgetArgument(f_lpe, 2);
+      ATermAppl v_process_equation = ATAgetArgument(f_lps, 2);
       ATermList v_summands = ATLgetArgument(v_process_equation, 2);
       ATermAppl v_summand;
       ATermList v_marked_summands = ATmakeList0();
@@ -457,14 +457,14 @@
       }
       v_marked_summands = ATreverse(v_marked_summands);
       v_process_equation = ATsetArgument(v_process_equation, (ATerm) v_marked_summands, 2);
-      ATermAppl v_lpe = ATsetArgument(f_lpe, (ATerm) v_process_equation, 2);
+      ATermAppl v_lps = ATsetArgument(f_lps, (ATerm) v_process_equation, 2);
 
-      if (v_is_marked && !has_ctau_action(f_lpe)) {
-        v_lpe = add_ctau_action(v_lpe);
+      if (v_is_marked && !has_ctau_action(f_lps)) {
+        v_lps = add_ctau_action(v_lps);
       }
 
       free(f_intermediate);
       f_intermediate = 0;
 
-      return v_lpe;
+      return v_lps;
     }

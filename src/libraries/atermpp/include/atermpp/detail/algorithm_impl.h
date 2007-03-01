@@ -158,11 +158,11 @@ namespace detail {
   aterm replace_impl(aterm t, ReplaceFunction replace);
  
   template <typename ReplaceFunction>
-  struct replace_helper
+  struct replace_helpsr
   {
     ReplaceFunction m_replace;
   
-    replace_helper(ReplaceFunction replace)
+    replace_helpsr(ReplaceFunction replace)
       : m_replace(replace)
     {}
   
@@ -182,12 +182,12 @@ namespace detail {
     {
       aterm_appl a(t);
       aterm_appl fa = f(a);
-      result = (a == fa) ? appl_apply(f(a), replace_helper<ReplaceFunction>(f)) : fa;
+      result = (a == fa) ? appl_apply(f(a), replace_helpsr<ReplaceFunction>(f)) : fa;
     }
     else if (t.type() == AT_LIST)
     {
       aterm_list l(t);
-      result = list_apply(l, replace_helper<ReplaceFunction>(f));
+      result = list_apply(l, replace_helpsr<ReplaceFunction>(f));
     }
     return result;
   }
@@ -214,11 +214,11 @@ namespace detail {
   aterm partial_replace_impl(aterm t, ReplaceFunction replace);
 
   template <typename ReplaceFunction>
-  struct partial_replace_helper
+  struct partial_replace_helpsr
   {
     ReplaceFunction m_replace;
   
-    partial_replace_helper(ReplaceFunction replace)
+    partial_replace_helpsr(ReplaceFunction replace)
       : m_replace(replace)
     {}
   
@@ -239,14 +239,14 @@ namespace detail {
       aterm_appl a(t);
       std::pair<aterm_appl, bool> fa = f(a);
       if (fa.second) // continue recursion
-        result = appl_apply(fa.first, partial_replace_helper<ReplaceFunction>(f));
+        result = appl_apply(fa.first, partial_replace_helpsr<ReplaceFunction>(f));
       else
         result = fa.first;
     }
     else if (t.type() == AT_LIST)
     {
       aterm_list l(t);
-      result = list_apply(l, partial_replace_helper<ReplaceFunction>(f));
+      result = list_apply(l, partial_replace_helpsr<ReplaceFunction>(f));
     }
     return result;
   }
@@ -257,11 +257,11 @@ namespace detail {
   aterm bottom_up_replace_impl(aterm t, ReplaceFunction bottom_up_replace);
  
   template <typename ReplaceFunction>
-  struct bottom_up_replace_helper
+  struct bottom_up_replace_helpsr
   {
     ReplaceFunction m_bottom_up_replace;
   
-    bottom_up_replace_helper(ReplaceFunction bottom_up_replace)
+    bottom_up_replace_helpsr(ReplaceFunction bottom_up_replace)
       : m_bottom_up_replace(bottom_up_replace)
     {}
   
@@ -280,12 +280,12 @@ namespace detail {
     if (t.type() == AT_APPL)
     {
       aterm_appl a(t);
-      result = appl_apply(a, bottom_up_replace_helper<ReplaceFunction>(f));
+      result = appl_apply(a, bottom_up_replace_helpsr<ReplaceFunction>(f));
     }
     else if (t.type() == AT_LIST)
     {
       aterm_list l(t);
-      result = list_apply(l, bottom_up_replace_helper<ReplaceFunction>(f));
+      result = list_apply(l, bottom_up_replace_helpsr<ReplaceFunction>(f));
     }
     return f(result);
   }

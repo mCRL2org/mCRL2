@@ -8,7 +8,7 @@
 class RewriterInnermost: public Rewriter
 {
 	public:
-		RewriterInnermost(lpe::data_specification DataSpec);
+		RewriterInnermost(lps::data_specification DataSpec);
 		~RewriterInnermost();
 
 		RewriteStrategy getStrategy();

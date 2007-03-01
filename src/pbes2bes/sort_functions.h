@@ -1,16 +1,16 @@
-//#include "lpe/data.h"
-#include "lpe/pbes.h"
+//#include "lps/data.h"
+#include "lps/pbes.h"
 
-//#include "lpe/sort.h"
-//using namespace lpe;
+//#include "lps/sort.h"
+//using namespace lps;
 //using namespace std;
 
-lpe::sort_list get_sorts(lpe::data_variable_list v);
+lps::sort_list get_sorts(lps::data_variable_list v);
 
-bool check_finite(lpe::function_list fl, lpe::sort s);
+bool check_finite(lps::function_list fl, lps::sort s);
 
-bool check_finite_list(lpe::function_list fl, lpe::sort_list s);
+bool check_finite_list(lps::function_list fl, lps::sort_list s);
 
-lpe::data_expression_list enumerate_constructors(lpe::function_list fl, lpe::sort s);
+lps::data_expression_list enumerate_constructors(lps::function_list fl, lps::sort s);
 
-lpe::data_expression_list create_data_expression_list(lpe::function f, std::vector< lpe::data_expression_list > dess);
+lps::data_expression_list create_data_expression_list(lps::function f, std::vector< lps::data_expression_list > dess);

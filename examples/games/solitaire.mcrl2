@@ -43,20 +43,20 @@
 % We currently use the following commands to explore the state
 % space:
 %
-% mcrl22lpe -n solitaire.mcrl2 temps.lpe
-% lpeuntime temps.lpe temps1.lpe
-% lpedecluster temps1.lpe temps2.lpe
-% lperewr temps2.lpe temps3.lpe
-% lpe2lts -vRjittyc -r -t -aready temps3.lpe
+% mcrl22lps -n solitaire.mcrl2 temps.lps
+% lpsuntime temps.lps temps1.lps
+% lpsdecluster temps1.lps temps2.lps
+% lpsrewr temps2.lps temps3.lps
+% lps2lts -vRjittyc -r -t -aready temps3.lps
 %
 % It is expected that the speed of state space generation will
-% increase a factor 10, after applying lpestructelm to replace
+% increase a factor 10, after applying lpsstructelm to replace
 % the Board data structure in the parameter list of the linear
 % process by a sequence of variables of sort Piece. Initially,
 % this will yield 47 variables, but I expect that the 16 `unused'
 % variables representing the corners, can be removed using
-% lpeconstelm. This would generate an additional speedup.
-% The use of lpestructelm is also expected to reduce the memory
+% lpsconstelm. This would generate an additional speedup.
+% The use of lpsstructelm is also expected to reduce the memory
 % footprint of the generation of the state space with a factor
 % of at least 2, provided the flag -t (store states as trees) is
 % used.

@@ -29,12 +29,12 @@
   // Class Invariant_Eliminator - Functions declared public ---------------------------------------
 
     Invariant_Eliminator::Invariant_Eliminator(
-      ATermAppl a_lpe, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
+      ATermAppl a_lps, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
       bool a_apply_induction, bool a_simplify_all
     ):
-      f_bdd_prover(lpe::data_specification(ATAgetArgument(a_lpe, 0)), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
+      f_bdd_prover(lps::data_specification(ATAgetArgument(a_lps, 0)), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {
-      f_lpe = a_lpe;
+      f_lps = a_lps;
       f_simplify_all = a_simplify_all;
     }
 
@@ -47,7 +47,7 @@
     // --------------------------------------------------------------------------------------------
 
     ATermAppl Invariant_Eliminator::simplify(ATermAppl a_invariant, int a_summand_number) {
-      ATermList v_summands = ATLgetArgument(ATAgetArgument(f_lpe, 2), 2);
+      ATermList v_summands = ATLgetArgument(ATAgetArgument(f_lps, 2), 2);
       ATermAppl v_summand;
       ATermList v_simplified_summands = ATmakeList0();
       int v_summand_number = 1;
@@ -67,8 +67,8 @@
         v_summand_number++;
       }
       v_simplified_summands = ATreverse(v_simplified_summands);
-      ATermAppl v_process_equations = ATAgetArgument(f_lpe, 2);
+      ATermAppl v_process_equations = ATAgetArgument(f_lps, 2);
       v_process_equations = ATsetArgument(v_process_equations, (ATerm) v_simplified_summands, 2);
-      ATermAppl v_lpe = ATsetArgument(f_lpe, (ATerm) v_process_equations, 2);
-      return v_lpe;
+      ATermAppl v_lps = ATsetArgument(f_lps, (ATerm) v_process_equations, 2);
+      return v_lps;
     }

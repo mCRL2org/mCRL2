@@ -22,10 +22,10 @@
 
 //MCRL-specific
 #include "liblowlevel.h"
-#include "lpe/pbes.h"
+#include "lps/pbes.h"
 
 using namespace std;
-using namespace lpe;
+using namespace lps;
 
 namespace po = boost::program_options;
 
@@ -228,7 +228,7 @@ int main(int argc, char** argv)
 					nr_sorts++;
 				}
 				else
-					cout << " -> "<< lpe::sort(sort_bool);
+					cout << " -> "<< lps::sort(sort_bool);
 			}
 			cout << endl;
 			nr_predvar++;

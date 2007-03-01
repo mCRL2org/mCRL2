@@ -45,7 +45,7 @@
  
   <para>
     In order to convert a non-mCRL2 LTS to a mCRL2 LTS one needs to supply the
-    original LPE with &opt_lpe;. This is because actions need to be stored in
+    original LPS with &opt_lps;. This is because actions need to be stored in
     the internal mCRL2 format in mCRL2 and in non-mCRL2 LTSs are represented by
     strings (lacking essential information such as data types). 
   </para>
@@ -53,7 +53,7 @@
   <para>
     Note that tools that use the &fsm; format may depend on state information and
     parameter names. The former requires that the state information is in the
-    input LTS file and the latter that the &opt_lpe; option is used (see the
+    input LTS file and the latter that the &opt_lps; option is used (see the
     options sections below).
   </para>
 </refsect1>
@@ -140,10 +140,10 @@
 
   <varlistentry>
     <term>&opt_l;&file;</term>
-    <term>&opt_lpe;=&file;</term>
+    <term>&opt_lps;=&file;</term>
     <listitem>
       <para>
-        use &file; as the LPE from which the input LTS was generated; this is
+        use &file; as the LPS from which the input LTS was generated; this is
         needed to store the correct parameter names of states when saving in
         &fsm; format and to convert non-mCRL2 LTSs to a mCRL2 LTS
       </para>

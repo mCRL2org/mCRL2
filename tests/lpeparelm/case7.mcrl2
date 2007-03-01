@@ -1,6 +1,6 @@
 % Test Case 7
 %
-% The following LPE is generated:  
+% The following LPS is generated:  
 % 
 % act  act1,act2,act3: Nat;
 %
@@ -29,6 +29,6 @@ init X(0,5, 1);
 %% NOTE:                                                  %%
 %% =====                                                  %%
 %%                                                        %%
-%% Use: mcrl22lpe --no-cluster $DIR$/case7.mcrl2          %%
+%% Use: mcrl22lps --no-cluster $DIR$/case7.mcrl2          %%
 %%                                                        %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

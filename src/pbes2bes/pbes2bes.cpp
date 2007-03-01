@@ -31,16 +31,16 @@
 #include "liblowlevel.h"
 #include "libprint_c.h"
 
-//LPE-Framework
-#include "lpe/pbes.h"
-#include "lpe/pbes_utility.h"
-#include "lpe/data_operators.h"
-#include "lpe/sort.h"
-//#include "lpe/sort_utility.h"
+//LPS-Framework
+#include "lps/pbes.h"
+#include "lps/pbes_utility.h"
+#include "lps/data_operators.h"
+#include "lps/sort.h"
+//#include "lps/sort_utility.h"
 
 //ATERM-specific
 #include "atermpp/substitute.h"
-#include "lpe/identifier_string.h"
+#include "lps/identifier_string.h"
 #include "atermpp/utility.h"
 #include "atermpp/indexed_set.h"
 
@@ -49,7 +49,7 @@
 #include "sort_functions.h"
 
 using namespace std;
-using namespace lpe;
+using namespace lps;
 
 using atermpp::make_substitution;
 
@@ -101,7 +101,7 @@ string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variables);
 pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options);
 //
 
-propositional_variable_instantiation create_naive_propositional_variable_instantiation(propositional_variable_instantiation propvarinst, map<lpe::sort, bool> is_finite_sort_list);
+propositional_variable_instantiation create_naive_propositional_variable_instantiation(propositional_variable_instantiation propvarinst, map<lps::sort, bool> is_finite_sort_list);
 // Create a propositional variable instantiation with the checks needed in the naive algorithm
 
 identifier_string create_propvar_name(identifier_string propvar_name, data_expression_list finite_exp);
@@ -171,18 +171,18 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 	int nr_of_equations = 0;		// Number of equations computed
 
 	// map which contains pairs of each data sort of the LHS of the equation system and a boolean value if it is finite.
-	map<lpe::sort, bool> is_finite_sort_list;
+	map<lps::sort, bool> is_finite_sort_list;
 	// is_finite_sort_list is populated with the sort, bool pairs
 	for (equation_system::iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
 	{
 		for (data_variable_list::iterator p = eq_i->variable().parameters().begin(); p != eq_i->variable().parameters().end(); p++)
 		{
-			lpe::sort cur_sort = p->sort();
+			lps::sort cur_sort = p->sort();
 			if (is_finite_sort_list.find(cur_sort) == is_finite_sort_list.end())
 			{ // If the data sort isn't in the map yet, add it.
 				bool finite;
 				check_finite(data.constructors(), cur_sort)?finite = true:finite = false;
-				is_finite_sort_list.insert(pair<lpe::sort,bool>(cur_sort, finite));
+				is_finite_sort_list.insert(pair<lps::sort,bool>(cur_sort, finite));
 			}
 		}
 	}
@@ -309,7 +309,7 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 
 //function create_naive_propositional_variable_instantiation 
 //----------------------------------------------------------
-propositional_variable_instantiation create_naive_propositional_variable_instantiation(propositional_variable_instantiation propvarinst, map<lpe::sort, bool> is_finite_sort_list)
+propositional_variable_instantiation create_naive_propositional_variable_instantiation(propositional_variable_instantiation propvarinst, map<lps::sort, bool> is_finite_sort_list)
 {
 	data_expression_list finite_expression;
 	data_expression_list infinite_expression;
@@ -326,7 +326,7 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
 			else if (is_data_operation(*p))
 			{ // If p is a freevar
 				gsErrorMsg("The PBES contains a free variable in the propositional variable instantiation.\n");
-				gsErrorMsg("Try using mcrl22lpe with the flag -f or --no-freevars to solve this.\n");
+				gsErrorMsg("Try using mcrl22lps with the flag -f or --no-freevars to solve this.\n");
 				exit(1);
 			}
 		}

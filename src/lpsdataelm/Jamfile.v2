@@ -1,0 +1,11 @@
+project lpsdataelm
+       : build-dir $(BUILD_TOP)/lpsdataelm
+       ;
+
+exe lpsdataelm
+       : lpsdataelm.cpp
+         /libraries/lps//dataelm
+         /libraries//mcrl2_basic
+         /site-config//boost_program_options
+       :
+       ;

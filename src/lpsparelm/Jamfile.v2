@@ -1,0 +1,12 @@
+project lpsparelm
+       : build-dir $(BUILD_TOP)/lpsparelm
+       ;
+
+exe lpsparelm
+       : lpsparelm.cpp
+         /libraries//mcrl2_basic
+         /libraries//lps
+         /site-config//boost_program_options
+       : <squadt_support>enable
+         <include>.
+       ;

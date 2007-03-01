@@ -9,11 +9,11 @@
 \theoremstyle{definition}
 \newtheorem{tcase}[thmfs]{Test case}
 
-\newcommand{\lpe}{linear process equation}
-\newcommand{\tool}{\textit{lpeconstelm}}
+\newcommand{\lps}{linear process equation}
+\newcommand{\tool}{\textit{lpsconstelm}}
 \newcommand{\ovr}{\overrightarrow}
 \newcommand{\mcrl}{mCRL2}
-\newcommand{\framework}{\textit{LPE framework} \cite{LPEframework}}
+\newcommand{\framework}{\textit{LPS framework} \cite{LPSframework}}
 \newcommand{\pp}{process parameter}
 \newcommand{\pps}{process parameters}
 \newcommand{\ti}{\textit}
@@ -44,7 +44,7 @@
 
 
 %opening
-\title{lpeconstelm}
+\title{lpsconstelm}
 \author{F.P.M. Stappers}
 
 \begin{document}
@@ -53,24 +53,24 @@
 
 \begin{abstract}
 This documentation describes the implementation and test cases of the tool \tool\ in  the \mcrl\ toolset.
-Basically, \tool\ is a tool which eliminates constant parameters in a \lpe\ (LPE).
+Basically, \tool\ is a tool which eliminates constant parameters in a \lps\ (LPS).
 \end{abstract}
 
 \tableofcontents
 
 \section{Introduction}
 The \tool\ tool is a tool for \mcrl\ studio. The tool is a
-filter which reads from file \ti{input.lpe}, which is
-a file in \ti{.lpe} format \cite{LPEformat}. We make use of the
-\framework\ to read \ti{input.lpe}. For
+filter which reads from file \ti{input.lps}, which is
+a file in \ti{.lps} format \cite{LPSformat}. We make use of the
+\framework\ to read \ti{input.lps}. For
 each detected constant \pp\ the filter substitutes its constant value and removes the \pp\ from the
-\lpe . After the algorithm (Section \ref{sec:alg}) terminates, \tool\
-will write the output to an output file \ti{output.lpe} (in the \ti{.lpe} format.)
+\lps . After the algorithm (Section \ref{sec:alg}) terminates, \tool\
+will write the output to an output file \ti{output.lps} (in the \ti{.lps} format.)
 
 \section{Definitions} \label{sec:def}
 
-The equation below is a \lpe\ in \mcrl : 
-\begin{defn}\lpe\ (LPE) \newline
+The equation below is a \lps\ in \mcrl : 
+\begin{defn}\lps\ (LPS) \newline
 %\at werkt niet
 \begin{tabbing}
 \tab
@@ -85,42 +85,42 @@ $X (\ovr{d: D}) = $ \> \> \> $ \sum_{i \in I} \sum_{\ovr{e_i: E_i}} c_i ( \ovr{d
 Where $I$ and $J$ are disjoint.\\
 \end{defn}
 
-\noindent For the description of the \tool\ tool we only use those elements of an LPE which are relevant. So we use a simplified\footnote{Multiactions, time, deadlock and termination are not taken into account} representation of an LPE .
-\begin{defn}[Simplified LPE]\label{def:LPE}
+\noindent For the description of the \tool\ tool we only use those elements of an LPS which are relevant. So we use a simplified\footnote{Multiactions, time, deadlock and termination are not taken into account} representation of an LPS .
+\begin{defn}[Simplified LPS]\label{def:LPS}
 \begin{displaymath}
 X (\ovr{d:D}) = \sum_{i \in I} \sum_{\ovr{e_i:E_i}} c_i ( \ovr{d, e_i}) \rightarrow X(\ovr{g_i}(\ovr{d,e_i}))
 \end{displaymath}\\
-If we talk about an LPE in this article we refer to Definition \ref{def:LPE}.  The different states 
+If we talk about an LPS in this article we refer to Definition \ref{def:LPS}.  The different states 
 %are $\ovr{d}$ 
 of a process are represented by the data vector parameter $\ovr{d: D}$. Type $\ovr{D}$ may be a Cartesian product of $n$ data types, meaning that $\ovr{d}$ is of a tuple $(d_1, \ldots, d_n)$. 
 Let $x \in \lbrace 1, \ldots , \vert \ovr{d} \vert \rbrace$. The $x^{th}$ element in the tuple is notated: $\ovr{d}._x$.
-The LPE expresses that in state $\ovr{d}$ %it preforms action $a$, carrying data parameter $\ovr{f_i}(\ovr{d},e_i)$ and 
+The LPS expresses that in state $\ovr{d}$ %it preforms action $a$, carrying data parameter $\ovr{f_i}(\ovr{d},e_i)$ and 
 it can reach the new state $\ovr{g_i}(\ovr{d,e_i})$ under the condition that $c_i(\ovr{d,e_i})$ is \ti{true}. So, for each summand $i$ from $I$ we have a function $\ovr{g_i}: \ovr{D} \times \ovr{E_i} \rightarrow \ovr{D}$ and a function $c_i: \ovr{D} \times \ovr{E_i} \rightarrow \mathbb{B}$.
 % Data parameters $\ovr{e_i : E_i}$ are sum variables. These variables are used to let a action range over a data domain. 
-If we want to speak about a specific statespace, which is generated from an LPE, we can instantiate this state space with the initial state $X(\ovr{v_0})$. 
+If we want to speak about a specific statespace, which is generated from an LPS, we can instantiate this state space with the initial state $X(\ovr{v_0})$. 
 
-\noindent For an more detailed explanation of \lpe s  we refer to \cite{LPE_info}.
+\noindent For an more detailed explanation of \lps s  we refer to \cite{LPS_info}.
 \end{defn}
 
 \section{Free Variables}
 \subsection{Explanation}
 
-If a parameter at a certain state does not influence the behavior of an LPE at that specific state, we can assign to this \pp\ a \ti{free variable}. With these \ti{free variables} we are able to model that \pp\ can have values, which will not influence the behavior of an LPE.
+If a parameter at a certain state does not influence the behavior of an LPS at that specific state, we can assign to this \pp\ a \ti{free variable}. With these \ti{free variables} we are able to model that \pp\ can have values, which will not influence the behavior of an LPS.
 
 \subsection{Assumptions}
-We make certain assumptions about \ti{free variables} which occur in an LPE, otherwise reasoning about LPE's would be to complicated. The first assumption is that the value of these variables will not influence the behavior of the LPE. Another assumption is that \ti{free variables} only occur once in an LPE. Therefore each \ti{free variable} is unique.
+We make certain assumptions about \ti{free variables} which occur in an LPS, otherwise reasoning about LPS's would be to complicated. The first assumption is that the value of these variables will not influence the behavior of the LPS. Another assumption is that \ti{free variables} only occur once in an LPS. Therefore each \ti{free variable} is unique.
 Also we assume that each value of a state is either a closed term or a free variable. 
  
-For further reading about \lpe\ and free variables please refer to \cite{LPEfreevar} 
+For further reading about \lps\ and free variables please refer to \cite{LPSfreevar} 
 
-\section{lpeconstelm definition}\label{subsec:lpedef}
-\subsection{lpeconstelm definition - without free variables}
+\section{lpsconstelm definition}\label{subsec:lpsdef}
+\subsection{lpsconstelm definition - without free variables}
 
 In this definition we do not consider free variables.
-A parameter of an LPE can be replaced by its initial value if it can be determined that this parameter remains constant throughout the run of any trace, starting at the initial state. The elimination of constant parameters does not reduce the resulting state space, however it may reduce the time and space needed to for example generate a state space from an LPE. \\
+A parameter of an LPS can be replaced by its initial value if it can be determined that this parameter remains constant throughout the run of any trace, starting at the initial state. The elimination of constant parameters does not reduce the resulting state space, however it may reduce the time and space needed to for example generate a state space from an LPS. \\
 If we have infinite time and space we can inspect each state and check whether a \pp\ changes throughout the execution of the process. For this we define the reachable state set $R$ for each state ($\ovr{v_0}$). 
 
-\begin{defn} Let $L$ be an LPE, where: \\ 
+\begin{defn} Let $L$ be an LPS, where: \\ 
 \begin{itemize}
 \item $I$ is the set of summand indices, \\ $\ovr{E_i}$ is the set of sum variables of summand $i$, \\ $c_i$ is the condition function of summand $i$ and \\ $\ovr{g_i}$ is the next state function of summand $i$.
 \end{itemize}
@@ -132,19 +132,19 @@ $R_L(\ovr{v_0})$ is the smallest set for which the following holds:
    \end{itemize}
 \end{defn}
 
-\begin{defn}\label{def:lpe_comp} We define $S_L(\ovr{v_0})$ to be the set of indices of \pps\ for LPE $L$ which are constant. That is:\\
+\begin{defn}\label{def:lps_comp} We define $S_L(\ovr{v_0})$ to be the set of indices of \pps\ for LPS $L$ which are constant. That is:\\
 
 $S_L(\ovr{v_0}) = \lbrace j \in  \lbrace 1, \ldots, \vert \ovr{v_0}\vert  \rbrace \vert (\forall_{\ovr{v} \in R_L(\ovr{v_0})}( \ovr{v}._j = \ovr{v_{0}}._j)) \rbrace $
 \end{defn}
 
-To get $S_L(\ovr{v_0})$ we have to compute $R_L(\ovr{v_0})$. This means we have to generate the entire state space starting at state $\ovr{v_0}$. Generating the entire state space can take a lot of time and space; it might take infinite time and/or space. However if we can make an approximation of Definition \ref{def:lpe_comp} we do not necessarily have to inspect all states. Note that if we use an approximation there are cases in which not all constant parameters can be found. In practice we do not mind, because these are hard to find and the cost/benefit is to small.
+To get $S_L(\ovr{v_0})$ we have to compute $R_L(\ovr{v_0})$. This means we have to generate the entire state space starting at state $\ovr{v_0}$. Generating the entire state space can take a lot of time and space; it might take infinite time and/or space. However if we can make an approximation of Definition \ref{def:lps_comp} we do not necessarily have to inspect all states. Note that if we use an approximation there are cases in which not all constant parameters can be found. In practice we do not mind, because these are hard to find and the cost/benefit is to small.
 
-\subsection{lpeconstelm definition - with free variables}
+\subsection{lpsconstelm definition - with free variables}
 
-A \pp\ of an LPE can be replaced by its constant value if it can be determined that this parameter remains constant throughout any run of the process, starting at the initial state. However if a \pp\ is initially a free variable and the \pp\ remains constant, the specific assigned value or the initial \ti{free variable} value is used.\\
+A \pp\ of an LPS can be replaced by its constant value if it can be determined that this parameter remains constant throughout any run of the process, starting at the initial state. However if a \pp\ is initially a free variable and the \pp\ remains constant, the specific assigned value or the initial \ti{free variable} value is used.\\
 
 We define the reachable state set $R^{FV}$ for each state ($\ovr{v_0}$). 
-\begin{defn} Let $L$ be an LPE, where\begin{itemize}
+\begin{defn} Let $L$ be an LPS, where\begin{itemize}
 \item $I$ is the set of summand indices, \\ $\ovr{E_i}$ is the set of sum variables of summand $i$, \\ $c_i$ is the condition function of summand $i$ and \\ $\ovr{g_i}$ is the next state function of summand $i$. \\
 $FV$ is the set of \ti{free variables} occurring in $L$.\\
 \end{itemize}
@@ -156,7 +156,7 @@ $R_L^{FV}(\ovr{v_0})$ is the smallest set for which the following holds:
    \end{itemize}
 \end{defn}
 
-\begin{defn}\label{def:lpe_comp_fv} We define $S_L^{FV}(\ovr{v_0})$ to be the set of indices of \pps\ which are constant. That is:\\
+\begin{defn}\label{def:lps_comp_fv} We define $S_L^{FV}(\ovr{v_0})$ to be the set of indices of \pps\ which are constant. That is:\\
 
 $S_L^{FV}(\ovr{v_0}) = \lbrace j \in  \lbrace 1, \ldots, n \rbrace \vert \forall_{\ovr{v}, \ovr{w} \in R_L^{FV}(\ovr{v_0})}( \ovr{v}._j \not\in FV \wedge \ovr{w}._j \not\in FV \rightarrow ( \ovr{v}._j = \ovr{w}._j)))
 \rbrace $
@@ -165,7 +165,7 @@ $S_L^{FV}(\ovr{v_0}) = \lbrace j \in  \lbrace 1, \ldots, n \rbrace \vert \forall
 To get $S_L^{FV} (\ovr{v_0})$ we have to compute $R_L^{FV}(\ovr{v_0})$, and this means we have to generate the entire state space starting from state $\ovr{v_0}$. However we interested in an approximation. We take proposal 3 (Section \ref{def:sug3}) as a starting point for constructing Proposal 4 (Section \ref{def:sug4}).
 
 \section{Proposals}
-In this section we speak about different techniques to find an algorithm that find as many constant \pps\ in polynomial time. These proposals are all estimations, so we can reduce complexity of the given definitions in Section \ref{subsec:lpedef}. Each proposal contains a small description, which describes how a certain proposal was born. 
+In this section we speak about different techniques to find an algorithm that find as many constant \pps\ in polynomial time. These proposals are all estimations, so we can reduce complexity of the given definitions in Section \ref{subsec:lpsdef}. Each proposal contains a small description, which describes how a certain proposal was born. 
 
 \subsection{Proposal 1 - without free variables} \label{sec:prop1}
 Because variables can occur in non-normal forms we introduce a form function which allows us to take the normal form of such a data term. 
@@ -174,7 +174,7 @@ Let $j \in \lbrace 1, \ldots,  n \rbrace $ and let $\ovr{d}$ be state vector. We
 
  However some conditions $NF(c_i(\ovr{d,e_i}))$ might never be \ti{true}, so it useless to compare $NF(\ovr{d}._j)$ with $NF(\ovr{g_i}(\ovr{d,e_i})._j)$  if $NF(c_i(\ovr{d,e_i}))$ is not  $"true"$. \\
 
-\begin{defn} \label{def:sug1} Let $L$ be an LPE and we define $S_L^1$:
+\begin{defn} \label{def:sug1} Let $L$ be an LPS and we define $S_L^1$:
 \begin{displaymath}
 S_L^1 =
 \lbrace   
@@ -202,13 +202,13 @@ If we use Definition \ref{def:sug1}, we get:\\
 \> \> $\emptyset$ \\
 \end{tabbing}
 In Definition \ref{def:sug1} it has to hold for every $\ovr{d}$, however
-we don't want to inspect all possible $\ovr{d}$'s. We want to inspect it for a specific instantiation LPE of a $X(\ovr{v_0})$.
+we don't want to inspect all possible $\ovr{d}$'s. We want to inspect it for a specific instantiation LPS of a $X(\ovr{v_0})$.
 \end{defn}
 
 \subsection{Proposal 2 - without free variables}
 In Section \ref{sec:prop1} we see that Definition \ref{def:sug1} can be improved, if we can give a specific $\ovr{d}$. We try to improve that approximation, by giving $\ovr{d}$ a specific value in $S_L^2$. So we define: 
 
-\begin{defn}\label{def:sug2}  Let $L$ be an LPE
+\begin{defn}\label{def:sug2}  Let $L$ be an LPS
 \begin{displaymath}
 S_L^2(\ovr{d})=
 \lbrace   
@@ -267,7 +267,7 @@ To overcome the problem in which only the states adjacent to the initial state a
 
 We are interested in the largest subset of constant \pps\ so:
 
-Let $X \subseteq \lbrace 1, \ldots, n \rbrace$ \footnote{$X$ is the set of indices which we are looking for} be a set of indices of constant \pps\ of an LPE:
+Let $X \subseteq \lbrace 1, \ldots, n \rbrace$ \footnote{$X$ is the set of indices which we are looking for} be a set of indices of constant \pps\ of an LPS:
 
 \begin{defn} We define $\otimes_X(\ovr{d})$:\\
 Let $j \in \lbrace 1, \dots, \vert \ovr{d} \vert \rbrace $. \\
@@ -277,7 +277,7 @@ If $j \in X$ then $\otimes_X(\ovr{d})._j = \ovr{d}._j$.\\
 
 In order find the largest subset we give:
 
-\begin{defn} \label{def:sug3} Let $L$ be an LPE. We define: $ S_L^3(\ovr{v_0}) \subseteq \lbrace 1, \ldots, n \rbrace $ 
+\begin{defn} \label{def:sug3} Let $L$ be an LPS. We define: $ S_L^3(\ovr{v_0}) \subseteq \lbrace 1, \ldots, n \rbrace $ 
  as the biggest possible set such that:\\ 
 \begin{tabbing}
 \tab
@@ -285,7 +285,7 @@ In order find the largest subset we give:
 \end{tabbing}
 \end{defn}
 
-\begin{thm} Let $L$ be an LPE and $\ovr{d}$ a vector of \pps \label{thm:sub}
+\begin{thm} Let $L$ be an LPS and $\ovr{d}$ a vector of \pps \label{thm:sub}
 $$S_L^3(\ovr{d}) \subseteq S_L(\ovr{d}) $$
 \end{thm} 
 \begin{flushleft}
@@ -334,7 +334,7 @@ We do case distinction on $S_L^3(\ovr{v_0})$:\\
 % \tmp $\Rightarrow$ \hspace*{20pt} $\lbrace \forall_{x,y \in R_L(\ovr{v_0})\ovr{e_i} \in \ovr{E_i}}(c(\ovr{x,e_i}) \Rightarrow \ovr{v_0}._k = \ovr{y}._k)\rbrace$ \\
 \tmp $ \equiv$ \hspace{20pt} $\lbrace \ovr{v_0}  \in R_L(\ovr{v_0}) \rbrace$\\
 \tmp $ j \in \lbrace k \in \lbrace 1, \ldots, n \rbrace \vert \forall_{x \in R_L(\ovr{v_0})}(\ovr{x}._k = \ovr{v_0}._k) \rbrace$\\
-\tmp $ \equiv$ \hspace{20pt} $\lbrace$ Def \ref{def:lpe_comp} of $S_L\rbrace$\\
+\tmp $ \equiv$ \hspace{20pt} $\lbrace$ Def \ref{def:lps_comp} of $S_L\rbrace$\\
 \tmp $ j \in S_L(\ovr{v_0})$
 
 \begin{example}\label{example:proof3}
@@ -364,7 +364,7 @@ So we have derived that each element in $S_L^3(\ovr{v_0})$, is also in $S_L(\ovr
 
 We are interested in the largest subset of constant \pps ; for each \pp\ it should hold that it should equal to all their next state \pps.
 
-Let $X \subseteq \lbrace 1, \ldots, n \rbrace$ of constant \pps\ of an LPE:
+Let $X \subseteq \lbrace 1, \ldots, n \rbrace$ of constant \pps\ of an LPS:
 
 % \begin{defn} We define $\oplus_X^{FV}(\ovr{d})$:\\
 % Let $j \in \lbrace 1, \dots, \vert \ovr{d} \vert \rbrace $ and let $y$ be an element out of a proper domain.\\
@@ -376,7 +376,7 @@ Let $X \subseteq \lbrace 1, \ldots, n \rbrace$ of constant \pps\ of an LPE:
 \newcommand{\z}{(\ovr{\otimes_{S_L^4}^{FV}(\ovr{v_0}),e_i})}
 
 \noindent In order find the largest subset we give: % to the following definition: 
-\begin{defn} \label{def:sug4} Let $L$ be an LPE. We define $S_L^4$:
+\begin{defn} \label{def:sug4} Let $L$ be an LPS. We define $S_L^4$:
 \begin{tabbing}
 \tab
 $ S_L^4(\ovr{v_0}) \subseteq \lbrace 1 \ldots n  \rbrace $ \\ \\
@@ -402,8 +402,8 @@ is the biggest subset, for which holds:\\
 \end{tabbing}
 \end{defn}
 
-If we compare Definition \ref{def:sug4} to Definition \ref{def:lpe_comp_fv} we see that Theorem \ref{thm:sub_fv} holds :
-\begin{thm}\label{thm:sub_fv} Let $L$ be an LPE and $\ovr{d}$ a vector op \pps . 
+If we compare Definition \ref{def:sug4} to Definition \ref{def:lps_comp_fv} we see that Theorem \ref{thm:sub_fv} holds :
+\begin{thm}\label{thm:sub_fv} Let $L$ be an LPS and $\ovr{d}$ a vector op \pps . 
 $$S_L^4(\ovr{d}) \subseteq S_L^{FV}(\ovr{d}) $$
 \end{thm} 
 % \begin{flushleft}
@@ -422,11 +422,11 @@ $$S_L^4(\ovr{d}) \subseteq S_L^{FV}(\ovr{d}) $$
 
 
 \section{Algorithm description}
-In this section we informally describe the algorithms for finding constant \pps\ in LPEs with and without \ti{free variables}. First a description is given about how to determine the constant \pps\ when an LPE does not contain any free variables. Next an informal description is given for finding constant \pps\ when an LPE contains free variables.
+In this section we informally describe the algorithms for finding constant \pps\ in LPSs with and without \ti{free variables}. First a description is given about how to determine the constant \pps\ when an LPS does not contain any free variables. Next an informal description is given for finding constant \pps\ when an LPS contains free variables.
 
 \subsection{without free variables}\label{alg:org}
 
-First the \sv\ is constructed from the initial process of the \lpe. Next the set $S$ is defined, which $S$ contains the indices for all \pps\ that might be constant. It might be the case that all \pps\ are constant so we start off with having all indices in set $S$. If a \pp\ is detected to be variable, this \pp\ is removed from the set $S$.
+First the \sv\ is constructed from the initial process of the \lps. Next the set $S$ is defined, which $S$ contains the indices for all \pps\ that might be constant. It might be the case that all \pps\ are constant so we start off with having all indices in set $S$. If a \pp\ is detected to be variable, this \pp\ is removed from the set $S$.
 
 We keep on removing elements from $S$ until no more elements can be removed. Removing the elements is done as follows:
 First we fill in all values of the \pps , for which the index is in $S$, into the conditions. Next all conditions are rewritten and compared to \ti{false}.
@@ -434,7 +434,7 @@ First we fill in all values of the \pps , for which the index is in $S$, into th
 If the rewritten condition, in its normal form, is different from \ti{false} the condition might be \ti{true}, thus we calculate the nextstate of the current summand.  We compare each element from the \sv\ with the nextstate vector for which the indices are in $S$. If an element is not equal, the corresponding index is removed from the set $S$. 
 At value at the removed index of the \sv\ is replaced by $\bot$. 
 
-If no elements are removed from $S$ during the iteration, there are either no more constant \pps\ or all \pps\ are constant. If this is the case we stop the iteration. Next all occurrences in of constant \pps\ are substituted with their constant values and are constant \pps\ are removed form the list of \pps\ from the LPE. 
+If no elements are removed from $S$ during the iteration, there are either no more constant \pps\ or all \pps\ are constant. If this is the case we stop the iteration. Next all occurrences in of constant \pps\ are substituted with their constant values and are constant \pps\ are removed form the list of \pps\ from the LPS. 
 
 \subsection{with free variables}
 Before describing the algorithm informally we define some rules which should hold when we use \ti{free variables}. The set  $S$ is again the set of indices of constant \pps .
@@ -453,7 +453,7 @@ If the substituted value differs from the original value, the \pp\ becomes marke
 If they are equal, the \pp\ remains in the set $S$ if it already had been in the set $S$.
 \end{enumerate}
 
-If no constant \pps\ can be removed, the algorithm ends. However it is possible that we end in a situation like in Example \ref{freevarcheckup}. If we follow the algorithm, we see that the algorithm detects the $3^{th}$ element as a constant \pp. However the $3^{th}$ is not a constant \pp . To overcome the detection of fake constant \pps , we have to take an extra pass on the LPE. The current state vector is compared to the nextstates of summands on which the condition is not false.
+If no constant \pps\ can be removed, the algorithm ends. However it is possible that we end in a situation like in Example \ref{freevarcheckup}. If we follow the algorithm, we see that the algorithm detects the $3^{th}$ element as a constant \pp. However the $3^{th}$ is not a constant \pp . To overcome the detection of fake constant \pps , we have to take an extra pass on the LPS. The current state vector is compared to the nextstates of summands on which the condition is not false.
 If all \pps\ of all nextstates are equal\footnote{with respect to the extended rules on \ti{free variables}} to the current state, then there are no fake constant \pps . If the pass detects a \pp\ which is not the same in the nextstate as in the current state, the algorithm starts over with:
 \begin{itemize}
 \item $S$ without the indices of found fake constant \pps .
@@ -461,7 +461,7 @@ If all \pps\ of all nextstates are equal\footnote{with respect to the extended r
 \end{itemize}
 If the "Free Variable Checkup" does not find fake constants the algorithm ends.
 
-\begin{example}\label{freevarcheckup} This LPE contains fake constant \pps .  $FV_x$ indicates the $x^{th}$ element in the set of $FV$. 
+\begin{example}\label{freevarcheckup} This LPS contains fake constant \pps .  $FV_x$ indicates the $x^{th}$ element in the set of $FV$. 
 \begin{tabbing}
 \tabw
 \tb{act} \> a; \\
@@ -479,7 +479,7 @@ In this part we only describe the difference between the algorithm without \ti{f
 \section{Algorithms}
 \subsection{without free variables} \label{sec:alg}
 \line(1,0){200}\\
-\textbf{lpeconstelm (without free variables)}\\
+\textbf{lpsconstelm (without free variables)}\\
 \line(1,0){200}
 \begin{algorithmic}[1]
 \STATE $curr := v_0$
@@ -504,7 +504,7 @@ In this part we only describe the difference between the algorithm without \ti{f
 \newpage
 \subsection{with free variables}
 \line(1,0){200}\\
-\textbf{lpeconstelm (with free variables)}\\
+\textbf{lpsconstelm (with free variables)}\\
 \line(1,0){200}
 \begin{algorithmic}[1]
 \STATE $curr := v_0$
@@ -557,12 +557,12 @@ In this part we only describe the difference between the algorithm without \ti{f
 
 \section{Test Cases}
 All specifications are given in \mcrl\ specification.
-Transformation from a \mcrl\ specification to an LPE file is done with the tool:
-$mcrl22lpe$. Each transformation is executed with the \verb"-no-cluster" option, unless
+Transformation from a \mcrl\ specification to an LPS file is done with the tool:
+$mcrl22lps$. Each transformation is executed with the \verb"-no-cluster" option, unless
 mentioned otherwise.
 
 \subsection*{Case 1}
-inputfile: \verb"$DIR$/tests/lpeconstelm/case1.mcrl2"
+inputfile: \verb"$DIR$/tests/lpsconstelm/case1.mcrl2"
 \begin{tabbing}
 \tabw
 \ti{info} \> This case is designed to detect if the \tool\ can detect a simple constant \\
@@ -580,7 +580,7 @@ inputfile: \verb"$DIR$/tests/lpeconstelm/case1.mcrl2"
 \end{tabbing}
 
 \subsection*{Case 2}
-inputfile: \verb"$DIR$/tests/lpeconstelm/case2.mcrl2"
+inputfile: \verb"$DIR$/tests/lpsconstelm/case2.mcrl2"
 \begin{tabbing}
 \tabw
 \ti{info} 
@@ -591,12 +591,12 @@ inputfile: \verb"$DIR$/tests/lpeconstelm/case2.mcrl2"
 \tb{proc} \> P(i: Nat) \> = \> action(i).P(i+1);\\
 \tb{init} \> P(0);\\
 \line(1,0){120}\\
-\ti{Result} \> $i$ is not constant, therefor $i$ should not be substituted and removed. The LPE \\
+\ti{Result} \> $i$ is not constant, therefor $i$ should not be substituted and removed. The LPS \\
 \> remains the same. \\ 
 \end{tabbing}
 
 \subsection*{Case 3}
-inputfile: \verb"$DIR$/tests/lpeconstelm/case3.mcrl2"
+inputfile: \verb"$DIR$/tests/lpsconstelm/case3.mcrl2"
 \begin{tabbing}
 \tabw
 \ti{info} 
@@ -612,7 +612,7 @@ inputfile: \verb"$DIR$/tests/lpeconstelm/case3.mcrl2"
 \end{tabbing}
 
 \subsection*{Case 4}
-inputfile: \verb"$DIR$/tests/lpeconstelm/case4.mcrl2"
+inputfile: \verb"$DIR$/tests/lpsconstelm/case4.mcrl2"
 \begin{tabbing}
 \tabw
 \ti{info} \> This case is to designed to test the arguments \verb"-no-condition", \\
@@ -627,7 +627,7 @@ inputfile: \verb"$DIR$/tests/lpeconstelm/case4.mcrl2"
 \> \verb"-": \> \> Only the fist summand is not false, therefor $j$ is constant and $i$ \\
 \> \> \> is not constant. All occurrences of $j$ should be substituted by 5 and \\
 \> \> \> $j$ should be removed from the list of \pps. Only the \\
-\> \> \> first summand is written to the new LPE, because the \\
+\> \> \> first summand is written to the new LPS, because the \\
 \> \> \> second summand is never evaluated.\\
 \> \verb"-no-condition": \> \> All the conditions of the summands are considered to be true. If \\
 \> \> \> this argument is used $i$ and $j$ are not constant\footnote{j is still constant but should not be marked as a constant \pp } and therefore no \\
@@ -635,13 +635,13 @@ inputfile: \verb"$DIR$/tests/lpeconstelm/case4.mcrl2"
 \> \verb"-no-reachable": \> \> Only the fist summand is not false, therefor $j$ is constant \\
 \> \> \> and $i$ is not constant. All occurrences of $j$ should be substituted by \\
 \> \> \> 5 and $j$ should be removed from the list of \pps. \\
-\> \> \> Both summands are written to in the new LPE, allthough the second \\
+\> \> \> Both summands are written to in the new LPS, allthough the second \\
 \> \> \> summand is never inspected. Note that in the second summand $j$ is \\
 \> \> \> the occurrences of $j$ is substituted with 5.\\
 \end{tabbing}
 
 \subsection*{Case 5}
-inputfile: \verb"$DIR$/tests/lpeconstelm/case5.mcrl2"
+inputfile: \verb"$DIR$/tests/lpsconstelm/case5.mcrl2"
 \begin{tabbing}
 \tabw
 \ti{info} \> This case is designed to test the \verb"-no-singleton" argument. \\
@@ -657,11 +657,11 @@ inputfile: \verb"$DIR$/tests/lpeconstelm/case5.mcrl2"
 \> \verb"-no-singleton" : \> \> "Singleton" has only one constructor. So all \pps\  \\
 \> \> \>                       of type "Singleton" are not to be substituted and removed  \\
 \> \> \>                       from the list of \pps . So in this case no  \\
-\> \> \>                       modification is made to the LPE.
+\> \> \>                       modification is made to the LPS.
 \end{tabbing}
 \newpage
 \subsection*{Case 6}
-inputfile: \verb"$DIR$/tests/lpeconstelm/case6.mcrl2"
+inputfile: \verb"$DIR$/tests/lpsconstelm/case6.mcrl2"
 \begin{tabbing}
 \tabw
 \ti{info} \> This test is designed to test a mCRL2 specification with multiple actions. \\
@@ -673,12 +673,12 @@ inputfile: \verb"$DIR$/tests/lpeconstelm/case6.mcrl2"
 
 \tb{init} \> P(0);\\
 \line(1,0){120}\\
-\ti{Result} \> From the generated LPE we see that $i$ is constant. All occurrences of $i$ are to substituted \\
+\ti{Result} \> From the generated LPS we see that $i$ is constant. All occurrences of $i$ are to substituted \\
  \> by 0 and $i$ is removed from the list of \pps .
 \end{tabbing}
 
 \subsection*{Case 7}
-inputfile: \verb"$DIR$/tests/lpeconstelm/case7.mcrl2"
+inputfile: \verb"$DIR$/tests/lpsconstelm/case7.mcrl2"
 \begin{tabbing}
 \tabw
 \tb{into} \> This case is designed to test if guards will influence the \tool\ correctly.\\
@@ -697,7 +697,7 @@ inputfile: \verb"$DIR$/tests/lpeconstelm/case7.mcrl2"
 \> \> \> occurrences of $j$ are substituted by 0 and $j$ is removed from the \\
 \> \> \> list of \pps .\\
 \line(1,0){120}\\
-\ti{Generated LPE} \\
+\ti{Generated LPS} \\
 \>  \verb" var  freevar,freevar0: Nat;"\\                            
 \>  \verb" proc P(s3: Pos, j,i: Nat) = "\\                           
 \>  \verb"        (s3 == 2) ->          "\\                          
@@ -714,7 +714,7 @@ inputfile: \verb"$DIR$/tests/lpeconstelm/case7.mcrl2"
 \end{tabbing}
 \newpage
 \subsection*{Case 8}
-inputfile: \verb"$DIR$/tests/lpeconstelm/case8.mcrl2"
+inputfile: \verb"$DIR$/tests/lpsconstelm/case8.mcrl2"
 \begin{tabbing}
 \tabw
 \ti{info} \> This case is designed to show the short comings of the algorithm. The \tool \ \\
@@ -729,7 +729,7 @@ inputfile: \verb"$DIR$/tests/lpeconstelm/case8.mcrl2"
 \> \pp\ are substituted by their value and are removed from the list of \\
 \> \pps.\\
 \line(1,0){120}\\
-\ti{Generated LPE} \\
+\ti{Generated LPS} \\
 \>  \verb" var  freevar0: Nat;"                              \\      %%
 \>  \verb" proc P(s3: Pos, i,j: Nat) = "                       \\    %%
 \>  \verb"        (s3 == 2) ->        "                        \\    %%
@@ -747,14 +747,14 @@ inputfile: \verb"$DIR$/tests/lpeconstelm/case8.mcrl2"
 \end{tabbing}
 % \newpage
 % \subsection*{Case 9}
-% inputfile: \verb"$DIR$/tests/lpeconstelm/case9.lpe"
+% inputfile: \verb"$DIR$/tests/lpsconstelm/case9.lps"
 % \begin{tabbing}
 % \tabw
 % \ti{info} \> This test is designed to find fake constant \pps . It can \\
 %  \> be the case that \pps\ appear to be constant, due the usage \\
 % \> of free variables. However they may be dependant upon other \pps , \\
 % \> for which there is a combination, that a constant marked \pp\ \\
-% \> is not a constant \pp . Note that this LPE is self build LPE, to \\
+% \> is not a constant \pp . Note that this LPS is self build LPS, to \\
 % \> ensure that the "free variable check" is conducted. The test will only work when \\
 % \> the argument \verb"-no-condition" is used.\\
 % \line(1,0){120}\\
@@ -762,7 +762,7 @@ inputfile: \verb"$DIR$/tests/lpeconstelm/case8.mcrl2"
 % \> So only \pp\ $y$ is subsituted with 2 and is removed from the list of \\ 
 % \> \pps . \\
 % \line(1,0){120}\\
-% \ti{Generated LPE} \\
+% \ti{Generated LPS} \\
 % \>  \verb" act  a;"\\
 % \>  \verb""\\
 % \>  \verb" var  freevar1,freevar2: Nat;"\\
@@ -783,15 +783,15 @@ inputfile: \verb"$DIR$/tests/lpeconstelm/case8.mcrl2"
 
 \newpage
 \begin{thebibliography}{99}  
-   \bibitem{LPE_info} unknown author \\
+   \bibitem{LPS_info} unknown author \\
      \textit{Article not ready at the moment},
-   \bibitem{LPEframework} J.W. Wesselink,
+   \bibitem{LPSframework} J.W. Wesselink,
    \textit{http://www.win.tue.nl/~wieger/mcrl2/html/index.html}\\
    A C++ wrapper for the ATerm library.
-   \bibitem{LPEformat} Aad Mathijssen\\
+   \bibitem{LPSformat} Aad Mathijssen\\
    \textit{https://svn.win.tue.nl/viewcvs-checkout/MCRL2/trunk/specs/mcrl2.internal.txt},
    A description of the internal format of the mCRL2 language.
-  \bibitem{LPEfreevar} unknown author,
+  \bibitem{LPSfreevar} unknown author,
    \textit{Article not ready at the moment}
 
 \end{thebibliography}

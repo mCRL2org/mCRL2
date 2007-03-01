@@ -25,7 +25,7 @@ class Invariant_Checker {
     bool check_summands(ATermAppl a_invariant);
   public:
     Invariant_Checker(
-      ATermAppl a_lpe,
+      ATermAppl a_lps,
       RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
       int a_time_limit = 0,
       bool a_path_eliminator = false,

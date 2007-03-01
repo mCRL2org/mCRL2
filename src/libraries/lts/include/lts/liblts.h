@@ -5,7 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <aterm2.h>
-#include "lpe/specification.h"
+#include "lps/specification.h"
 #include "setup.h"
 
 #ifdef MCRL2_BCG
@@ -52,12 +52,12 @@ namespace lts
     public:
       lts_extra();
       lts_extra(ATerm t);
-      lts_extra(lpe::specification *spec);
+      lts_extra(lps::specification *spec);
       lts_extra(lts_dot_options opts);
 
       lts_extra_type get_type();
       ATerm get_mcrl1_spec();
-      lpe::specification *get_mcrl2_spec();
+      lps::specification *get_mcrl2_spec();
       lts_dot_options get_dot_options();
   };
   extern lts_extra lts_no_extra;
@@ -112,16 +112,16 @@ namespace lts
 
     public:
 
-      /** \brief Helper function to guess the lts format from a filename (by its extension) */
+      /** \brief Helpsr function to guess the lts format from a filename (by its extension) */
       static lts_type guess_format(std::string const& s);
 
-      /** \brief Helper function to get storage format from a storage format specification */
+      /** \brief Helpsr function to get storage format from a storage format specification */
       static lts_type parse_format(char const* s);
 
-      /** \brief Helper function to get storage format for a given file extension */
+      /** \brief Helpsr function to get storage format for a given file extension */
       static char const* string_for_type(const lts_type s);
 
-      /** \brief Helper function to get the extension associated to an element (of lts_type) */
+      /** \brief Helpsr function to get the extension associated to an element (of lts_type) */
       static char const* extension_for_type(const lts_type type);
 
     public:

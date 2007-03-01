@@ -1,8 +1,8 @@
 #include "sort_functions.h"
 
-#include "lpe/sort_utility.h"
+#include "lps/sort_utility.h"
 
-using namespace lpe;
+using namespace lps;
 using namespace std;
 
 sort_list get_sorts(data_variable_list v)
@@ -15,7 +15,7 @@ sort_list get_sorts(data_variable_list v)
 	return reverse(result);
 }
 
-bool check_finite(function_list fl, lpe::sort s)
+bool check_finite(function_list fl, lps::sort s)
 {
 	return is_finite(fl, s);
 }
@@ -25,7 +25,7 @@ bool check_finite_list(function_list fl, sort_list s)
 	return is_finite(fl, s);
 }
 
-data_expression_list enumerate_constructors(function_list fl, lpe::sort s)
+data_expression_list enumerate_constructors(function_list fl, lps::sort s)
 {
 	// All datasorts which are taken into account must be finite. Normally this is the case, because a check on finiteness is done in create_bes
 	assert(is_finite(fl, s));

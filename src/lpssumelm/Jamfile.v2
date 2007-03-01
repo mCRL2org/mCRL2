@@ -1,0 +1,12 @@
+project lpssumelm
+       : build-dir $(BUILD_TOP)/lpssumelm
+       ;
+
+exe lpssumelm
+       : lpssumelm.cpp
+         /libraries//mcrl2_basic
+         /libraries//lps
+         /site-config//boost_program_options
+       : <squadt_support>enable
+         <include>.
+       ;

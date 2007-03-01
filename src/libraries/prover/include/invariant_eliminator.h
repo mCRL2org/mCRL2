@@ -11,12 +11,12 @@
 class Invariant_Eliminator {
   private:
     BDD_Prover f_bdd_prover;
-    ATermAppl f_lpe;
+    ATermAppl f_lps;
     bool f_simplify_all;
     ATermAppl simplify_summand(ATermAppl a_invariant, ATermAppl a_summand, int a_summand_number);
   public:
     Invariant_Eliminator(
-      ATermAppl a_lpe,
+      ATermAppl a_lps,
       RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
       int a_time_limit = 0,
       bool a_path_eliminator = false,

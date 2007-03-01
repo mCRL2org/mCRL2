@@ -7,7 +7,7 @@ exe pbes2bes
 		 pbes_rewrite.cpp
 		 sort_functions.cpp
          /libraries//mcrl2_basic
-		 /libraries//lpe
+		 /libraries//lps
 		 /libraries//rewrite
          /site-config//boost_program_options
        : <include>.

@@ -6,7 +6,7 @@
 % If --nocondition is used, occurrences of process parameters j are NOT 
 % substituted and removed. If --noreachable are summand 
 % "false -> action(j). P(i+1,j+1);" will not be removed. If both options are 
-% used, the LPE remains the same.
+% used, the LPS remains the same.
 
 act action :Nat;
 
@@ -19,7 +19,7 @@ init P(0,5);
 %% NOTE:                                                  %%
 %% =====                                                  %%
 %%                                                        %%
-%% Use: mcrl22lpe --no-cluster $DIR$/case4.mcrl2          %%
+%% Use: mcrl22lps --no-cluster $DIR$/case4.mcrl2          %%
 %%                                                        %%
 %% Not using "no-cluster" will result in differt results. %%
 %%                                                        %%

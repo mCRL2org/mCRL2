@@ -6,7 +6,7 @@ At the moment Windows builds are only possible using the gcc/g++ compilers
 provided by MinGW and Cygwin.
 
 Send bug reports to <bug@mcrl2.org>. Please include the version number from
-`mcrl22lpe --version', and a complete, self-contained test case in each bug
+`mcrl22lps --version', and a complete, self-contained test case in each bug
 report.
 
 If you have questions about using the mCRL2 toolset which the documentation

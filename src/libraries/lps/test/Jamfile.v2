@@ -1,0 +1,45 @@
+import testing ;
+
+project libraries/lps/test
+   : requirements
+       <use>/boost//headers
+       <source>/libraries//parser
+       <source>/libraries/parser//alpha
+       <source>/libraries//rewrite
+       <source>/libraries//mcrl2_basic
+       <source>/libraries//lps
+       <source>/site-config//boost_program_options
+       <source>/site-config//boost_filesystem
+   ;
+
+# use targets for the object files to prevent multiple compilation
+# for each input file of run_with_input
+obj lps2pbes_timed_test.o : lps2pbes_timed_test.cpp ;
+obj lps2pbes_untimed_test.o : lps2pbes_untimed_test.cpp ;
+
+# these files should become available as part of a library
+obj lin_std.o : ../../../mcrl22lps/lin_std.cpp ;
+obj lin_alt.o : ../../../mcrl22lps/lin_alt.cpp ;
+
+exe generate_lps2pbes_result : generate_lps2pbes_result.cpp lin_std.o lin_alt.o ;
+
+test-suite lps
+    :
+      [ run pbes_test.cpp lin_std.o lin_alt.o ]
+      [ run_with_input lps2pbes_timed_test.o lin_std.o lin_alt.o : pbes : expected_timed_result ]
+      [ run_with_input lps2pbes_untimed_test.o lin_std.o lin_alt.o : pbes : expected_untimed_result ]     
+      [ run data_expression.cpp ]
+      [ run data_test.cpp ]
+      [ run time.cpp lin_std.o lin_alt.o ]
+      [ run data_utility_test.cpp ]
+      [ run aterm_algorithm_test.cpp lin_std.o lin_alt.o ]
+      [ run operators.cpp ]
+      [ run sort_test.cpp ]
+      [ run replace_test.cpp ]
+    ;
+
+install dist 
+    :
+       generate_lps2pbes_result
+    :
+    ;

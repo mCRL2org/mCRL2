@@ -2,10 +2,10 @@ This directory contains specifications of the safety layer of the automated
 parking garage as described in [1,2]. Also some trace files are provided to
 give more insight in the specifications.
 
-Each specification (.mcrl2 file) can be linearised to an LPE (.lpe file) using
-mcrl22lpe. After that, the possibilities are listed in the following table.
+Each specification (.mcrl2 file) can be linearised to an LPS (.lps file) using
+mcrl22lps. After that, the possibilities are listed in the following table.
 
-  LPE                xsim    traces    lpe2lts
+  LPS                xsim    traces    lps2lts
   --------------------------------------------
   garage              no       no         no
   garage-r1          yes       no         no
@@ -14,10 +14,10 @@ mcrl22lpe. After that, the possibilities are listed in the following table.
   garage-r3          yes       no        yes
   garage-ver         yes       no        yes
 
-* For this LPE, the error traces do not work. This means that the errors cannot
-  occur in the LPE.
+* For this LPS, the error traces do not work. This means that the errors cannot
+  occur in the LPS.
 
-For the LPE's where traces can be used, an xsim plugin can be used that
+For the LPS's where traces can be used, an xsim plugin can be used that
 represents the visualization of the floorplan of the garage. After opening
 xsim, it can be loaded by choosing the "Views" menu, then "Load Plugin..."  and
 then "libxsim_garage_view.so".

@@ -1,0 +1,13 @@
+project toolset/lps2pbes
+       : build-dir $(BUILD_TOP)/lps2pbes
+       ;
+
+exe lps2pbes
+       : lps2pbes.cpp
+         /libraries//lps
+         /libraries//parser
+         /libraries//mcrl2_basic
+       : <include>.
+         <toolset>msvc:<library>/libraries//getopt
+         <status>experimental
+       ;

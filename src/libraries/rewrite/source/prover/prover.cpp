@@ -1,7 +1,7 @@
 // Implementation of class Prover
 // file: prover.cpp
 
-#include "lpe/data_specification.h"
+#include "lps/data_specification.h"
 #include "prover/prover.h"
 #include "auxiliary/manipulator.h"
 #include "auxiliary/info.h"
@@ -16,7 +16,7 @@
   // Class Prover - Functions declared public -----------------------------------------------------
 
     Prover::Prover(
-      lpe::data_specification data_spec,
+      lps::data_specification data_spec,
       RewriteStrategy a_rewrite_strategy,
       int a_time_limit
     ) {

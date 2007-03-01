@@ -11,10 +11,10 @@
 
 class Disjointness_Checker {
   private:
-    /// \brief The number of summands of the LPE passed as argument of the constructor.
+    /// \brief The number of summands of the LPS passed as argument of the constructor.
     int f_number_of_summands;
 
-    /// \brief The number of parameters of the LPE passed as argument of the constructor.
+    /// \brief The number of parameters of the LPS passed as argument of the constructor.
     int f_number_of_parameters;
 
     /// \brief An indexed set of parameters.

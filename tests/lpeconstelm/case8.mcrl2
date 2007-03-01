@@ -2,7 +2,7 @@
 %  
 % No constant parameters are found
 % 
-% lpeconstelm cannot detect (i==5)
+% lpsconstelm cannot detect (i==5)
 
 act action: Nat;
 
@@ -16,7 +16,7 @@ init X(0);
 %% NOTE:                                                  %%
 %% =====                                                  %%
 %%                                                        %%
-%% Use: mcrl22lpe --no-cluster $DIR$/case8.mcrl2          %%
+%% Use: mcrl22lps --no-cluster $DIR$/case8.mcrl2          %%
 %%                                                        %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

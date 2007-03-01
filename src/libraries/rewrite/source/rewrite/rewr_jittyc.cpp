@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <libprint_c.h>
 
-RewriterCompilingJitty::RewriterCompilingJitty(lpe::data_specification DataSpec)
+RewriterCompilingJitty::RewriterCompilingJitty(lps::data_specification DataSpec)
 {
 	gsfprintf(stderr,"error: compiling JITty rewriter is not available\n");
 	exit(1);
@@ -73,7 +73,7 @@ void RewriterCompilingJitty::clearSubstitutions()
 #include <liblowlevel.h>
 #include <libstruct.h>
 #include <libprint_c.h>
-#include <lpe/data_specification.h>
+#include <lps/data_specification.h>
 #include "setup.h"
 #include "rewr_jittyc.h"
 
@@ -1901,7 +1901,7 @@ fflush(f);
 	finish_function(f,arity,opid,used);
 }
 
-void RewriterCompilingJitty::CompileRewriteSystem(lpe::data_specification DataSpec)
+void RewriterCompilingJitty::CompileRewriteSystem(lps::data_specification DataSpec)
 {
   ATermList l,n;
   ATermTable tmp_eqns;
@@ -2648,7 +2648,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(lpe::data_specification DataSp
   free(s);
 }
 
-RewriterCompilingJitty::RewriterCompilingJitty(lpe::data_specification DataSpec)
+RewriterCompilingJitty::RewriterCompilingJitty(lps::data_specification DataSpec)
 {
   term2int = ATtableCreate(100,75);
   initialise_common();

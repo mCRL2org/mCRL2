@@ -1,0 +1,14 @@
+project lpsdecluster
+       : build-dir $(BUILD_TOP)/lpsdecluster
+       ;
+
+exe lpsdecluster
+       : lpsdecluster.cpp
+         /libraries//mcrl2_basic
+         /libraries//lps
+         /libraries//nextstate
+         /site-config//boost_program_options
+       : <include>.
+         <status>experimental
+       : <squadt_support>enable
+       ;

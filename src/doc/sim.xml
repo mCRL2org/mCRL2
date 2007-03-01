@@ -13,7 +13,7 @@
 
 <refnamediv>
   <refname>sim</refname>
-  <refpurpose>simulate LPEs</refpurpose>
+  <refpurpose>simulate LPSs</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -28,7 +28,7 @@
 <refsect1>
   <title>Description</title>
   <para>
-    The &sim; tool simulates the linear process equation (LPE) in &infile; using
+    The &sim; tool simulates the linear process equation (LPS) in &infile; using
     a command-line interface. 
   </para>
   <para>
@@ -129,7 +129,7 @@
     <term>&opt_dummy;</term>
     <listitem>
       <para>
-        Replace free variables in the LPE with dummy values
+        Replace free variables in the LPS with dummy values
       </para>
     </listitem>
   </varlistentry>

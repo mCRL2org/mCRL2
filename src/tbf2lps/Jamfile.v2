@@ -1,0 +1,11 @@
+project toolset/tbf2lps
+       : build-dir $(BUILD_TOP)/tbf2lps
+       ;
+
+exe tbf2lps
+       : tbf2lps.cpp
+         lpstrans.cpp
+         /libraries//mcrl2_basic
+       : <include>.
+         <toolset>msvc:<library>/libraries//getopt
+       ;

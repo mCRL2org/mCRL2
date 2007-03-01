@@ -1,0 +1,29 @@
+project libraries/lps/example
+   : requirements
+       <use>/boost//headers
+       <source>/libraries//parser
+       <source>/libraries/parser//alpha
+       <source>/libraries//rewrite
+       <source>/libraries//mcrl2_basic
+       <source>/libraries//lps
+       <source>/site-config//boost_program_options
+       <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
+   ;
+
+exe constructors    : constructors.cpp    ../../../mcrl22lps/lin_std.cpp ../../../mcrl22lps/lin_alt.cpp : ;
+exe spec            : spec.cpp            ../../../mcrl22lps/lin_std.cpp ../../../mcrl22lps/lin_alt.cpp : ;
+exe filter_template : filter_template.cpp                                                               : ;
+exe find            : find.cpp            ../../../mcrl22lps/lin_std.cpp ../../../mcrl22lps/lin_alt.cpp : ;
+exe pbes_test       : pbes_test.cpp       ../../../mcrl22lps/lin_std.cpp ../../../mcrl22lps/lin_alt.cpp : ;
+#exe pbes2data       : pbes2data.cpp       ../../../mcrl22lps/lin_std.cpp ../../../mcrl22lps/lin_alt.cpp : ;
+
+install dist
+   :
+     constructors
+     spec
+     filter_template
+     find
+     pbes_test
+#     pbes2data
+   :
+   ;

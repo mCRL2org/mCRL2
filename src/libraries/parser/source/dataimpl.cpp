@@ -18,11 +18,11 @@ static ATermAppl impl_exprs_spec(ATermAppl spec);
 //     type checking in which sort references are maximally folded
 //Ret: spec in which all expressions are implemented
 
-static ATermAppl impl_exprs(ATermAppl expr, lpe::specification &lpe_spec);
+static ATermAppl impl_exprs(ATermAppl expr, lps::specification &lps_spec);
 //Pre: expr represents a part of the internal syntax after type checking
 //     in which sort references are maximally folded
-//     lpe_spec represents an LPE specification
-//Post:the datatypes of expr are implemented as in lpe_spec
+//     lps_spec represents an LPS specification
+//Post:the datatypes of expr are implemented as in lps_spec
 //Ret: expr in which all expressions are implemented
 
 static ATermAppl impl_sort_refs(ATermAppl spec);
@@ -41,11 +41,11 @@ static ATermAppl impl_function_sorts_spec(ATermAppl spec);
 //Ret: spec in which an implementation is added for each function
 //     sort occurring in spec that has not already been implemented
 
-static void impl_function_sorts(ATerm term, lpe::specification &lpe_spec);
+static void impl_function_sorts(ATerm term, lps::specification &lps_spec);
 //Pre: term represents a part of the internal syntax after data
 //     implementation
-//     lpe_spec represents an LPE specification
-//Post:an implementation is added to lpe_spec for each function sort
+//     lps_spec represents an LPS specification
+//Post:an implementation is added to lps_spec for each function sort
 //     occurring in term that has not already been implemented
 
 typedef struct {
@@ -68,11 +68,11 @@ static ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls);
 //     arbitary phase
 //Ret: spec in which the data declarations from data_decls are added
 
-static t_data_decls get_data_decls(lpe::specification &lpe_spec);
-//Ret: data declarations of lpe_spec
+static t_data_decls get_data_decls(lps::specification &lps_spec);
+//Ret: data declarations of lps_spec
 
-static void set_data_decls(lpe::specification &lpe_spec, t_data_decls data_decls);
-//Ret: lpe_spec in which the data declarations are replaced by data_decls
+static void set_data_decls(lps::specification &lps_spec, t_data_decls data_decls);
+//Ret: lps_spec in which the data declarations are replaced by data_decls
 
 static ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
   t_data_decls *p_data_decls);
@@ -325,33 +325,33 @@ ATermAppl implement_data_spec(ATermAppl spec)
 }
 
 ATermAppl implement_data_sort_expr(ATermAppl sort_expr,
-  lpe::specification &lpe_spec)
+  lps::specification &lps_spec)
 {
-  return impl_exprs(sort_expr, lpe_spec);
+  return impl_exprs(sort_expr, lps_spec);
 }
 
 ATermAppl implement_data_data_expr(ATermAppl data_expr,
-  lpe::specification &lpe_spec)
+  lps::specification &lps_spec)
 {
-  return impl_exprs(data_expr, lpe_spec);
+  return impl_exprs(data_expr, lps_spec);
 }
 
 ATermAppl implement_data_mult_act(ATermAppl mult_act,
-  lpe::specification &lpe_spec)
+  lps::specification &lps_spec)
 {
-  return impl_exprs(mult_act, lpe_spec);
+  return impl_exprs(mult_act, lps_spec);
 }
 
 ATermAppl implement_data_proc_expr(ATermAppl proc_expr,
-  lpe::specification &lpe_spec)
+  lps::specification &lps_spec)
 {
-  return impl_exprs(proc_expr, lpe_spec);
+  return impl_exprs(proc_expr, lps_spec);
 }
 
 ATermAppl implement_data_state_frm(ATermAppl state_frm,
-  lpe::specification &lpe_spec)
+  lps::specification &lps_spec)
 {
-  return impl_exprs(state_frm, lpe_spec);
+  return impl_exprs(state_frm, lps_spec);
 }
 
 ATermAppl impl_exprs_spec(ATermAppl spec)
@@ -387,7 +387,7 @@ ATermAppl impl_exprs_spec(ATermAppl spec)
   return spec;
 }
 
-static ATermAppl impl_exprs(ATermAppl expr, lpe::specification &lpe_spec)
+static ATermAppl impl_exprs(ATermAppl expr, lps::specification &lps_spec)
 {
   int occ = gsCount((ATerm) gsMakeSortUnknown(), (ATerm) expr);
   if (occ > 0) {
@@ -396,7 +396,7 @@ static ATermAppl impl_exprs(ATermAppl expr, lpe::specification &lpe_spec)
   }
   //implement system sort and data expressions occurring in expr
   ATermList substs     = ATmakeList0();
-  t_data_decls old_data_decls = get_data_decls(lpe_spec);
+  t_data_decls old_data_decls = get_data_decls(lps_spec);
   t_data_decls data_decls = old_data_decls;
   expr = impl_exprs_appl(expr, &substs, &data_decls);
   //perform substitutions on data declarations
@@ -404,8 +404,8 @@ static ATermAppl impl_exprs(ATermAppl expr, lpe::specification &lpe_spec)
   data_decls.cons_ops  = gsSubstValues_List(substs, data_decls.cons_ops,  true);
   data_decls.ops       = gsSubstValues_List(substs, data_decls.ops,       true);
   data_decls.data_eqns = gsSubstValues_List(substs, data_decls.data_eqns, true);
-  //update data declarations in lpe_spec
-  set_data_decls(lpe_spec, data_decls);
+  //update data declarations in lps_spec
+  set_data_decls(lps_spec, data_decls);
   //store new declarations in new_decls
   ATermList new_decls = ATmakeList0();
   ATermList sorts = data_decls.sorts;
@@ -430,7 +430,7 @@ static ATermAppl impl_exprs(ATermAppl expr, lpe::specification &lpe_spec)
   }
   new_decls = ATreverse(new_decls);
   //implement function sorts in expr and the new declarations
-  impl_function_sorts((ATerm) ATinsert(new_decls, (ATerm) expr), lpe_spec);
+  impl_function_sorts((ATerm) ATinsert(new_decls, (ATerm) expr), lps_spec);
   return expr;
 }
 
@@ -505,12 +505,12 @@ ATermAppl impl_function_sorts_spec(ATermAppl spec)
   return spec;
 }
 
-void impl_function_sorts(ATerm term, lpe::specification &lpe_spec)
+void impl_function_sorts(ATerm term, lps::specification &lps_spec)
 {
   //get function sorts occurring in term
   ATermList func_sorts = get_function_sorts(term);
-  //get data declarations from lpe_spec
-  t_data_decls data_decls = get_data_decls(lpe_spec);
+  //get data declarations from lps_spec
+  t_data_decls data_decls = get_data_decls(lps_spec);
   //implement function sorts that are not already implemented
   while (!ATisEmpty(func_sorts))
   {
@@ -520,8 +520,8 @@ void impl_function_sorts(ATerm term, lpe::specification &lpe_spec)
     }
     func_sorts = ATgetNext(func_sorts);
   }
-  //update data declarations in lpe_spec
-  set_data_decls(lpe_spec, data_decls);
+  //update data declarations in lps_spec
+  set_data_decls(lps_spec, data_decls);
 }
 
 ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls)
@@ -558,21 +558,21 @@ ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls)
   return spec;
 }
 
-static t_data_decls get_data_decls(lpe::specification &lpe_spec)
+static t_data_decls get_data_decls(lps::specification &lps_spec)
 {
   t_data_decls data_decls;
-  data_decls.sorts     = (ATermList) lpe_spec.data().sorts();
-  data_decls.cons_ops  = (ATermList) lpe_spec.data().constructors();
-  data_decls.ops       = (ATermList) lpe_spec.data().mappings();
-  data_decls.data_eqns = (ATermList) lpe_spec.data().equations();
+  data_decls.sorts     = (ATermList) lps_spec.data().sorts();
+  data_decls.cons_ops  = (ATermList) lps_spec.data().constructors();
+  data_decls.ops       = (ATermList) lps_spec.data().mappings();
+  data_decls.data_eqns = (ATermList) lps_spec.data().equations();
   return data_decls;
 }
 
-static void set_data_decls(lpe::specification &lpe_spec, t_data_decls data_decls)
+static void set_data_decls(lps::specification &lps_spec, t_data_decls data_decls)
 {
   assert(data_decls_is_initialised(data_decls));
-  lpe::data_specification data(data_decls.sorts, data_decls.cons_ops, data_decls.ops, data_decls.data_eqns);
-  lpe_spec = lpe::set_data_specification(lpe_spec, data);
+  lps::data_specification data(data_decls.sorts, data_decls.cons_ops, data_decls.ops, data_decls.data_eqns);
+  lps_spec = lps::set_data_specification(lps_spec, data);
 }
 
 ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
