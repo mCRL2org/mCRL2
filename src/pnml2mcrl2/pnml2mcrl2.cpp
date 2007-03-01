@@ -2101,7 +2101,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
         ),
         gsMakeActSpec(Actions),
         gsMakeProcEqnSpec(ProcEqns),
-        gsMakeInit(ATmakeList0(),gsMakeParamId(ATAgetArgument(Spec, 3), ATmakeList0()))
+        gsMakeProcessInit(ATmakeList0(),gsMakeParamId(ATAgetArgument(Spec, 3), ATmakeList0()))
       );
   }
 

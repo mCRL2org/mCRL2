@@ -1141,29 +1141,29 @@ static ATermAppl linMergeMultiAction(ATermAppl ma1, ATermAppl ma2)
 } */
 
 static ATermList linGetSumVars(ATermAppl summand)
-{ assert(gsIsLPESummand(summand));
+{ assert(gsIsLinearProcessSummand(summand));
   return ATLgetArgument(summand,0);
 }
 
 static ATermAppl linGetCondition(ATermAppl summand)
-{ assert(gsIsLPESummand(summand));
+{ assert(gsIsLinearProcessSummand(summand));
   return ATAgetArgument(summand,1);
 }
 
 static ATermAppl linGetMultiAction(ATermAppl summand)
-{ assert(gsIsLPESummand(summand));
+{ assert(gsIsLinearProcessSummand(summand));
   return ATAgetArgument(summand,2);
 }
 
 static ATermAppl linGetActionTime(ATermAppl summand)
 { 
-  assert(gsIsLPESummand(summand));
+  assert(gsIsLinearProcessSummand(summand));
   return ATAgetArgument(summand,3);
 }
 
 static ATermList linGetNextState(ATermAppl summand)
 { 
-  assert(gsIsLPESummand(summand));
+  assert(gsIsLinearProcessSummand(summand));
   
   return ATLgetArgument(summand,4);
 }
@@ -4534,7 +4534,7 @@ static ATermList insert_summand(
                                               renamingvariablelist,
                                               condition));
               return ATinsertA(ATconcat(newsumlist,ATgetNext(sumlist)),
-                               gsMakeLPESummand(
+                               gsMakeLinearProcessSummand(
                                          sumvars1,
                                          condition2,
                                          multiAction1,
@@ -4548,7 +4548,7 @@ static ATermList insert_summand(
      at the beginning */
   
   return ATinsertA(newsumlist,
-                   gsMakeLPESummand(
+                   gsMakeLinearProcessSummand(
                          sumvars,
                          condition,
                          multiAction,
@@ -5709,7 +5709,7 @@ static ATermAppl collect_sum_arg_arg_cond(
     resultnextstate=replaceArgumentsByAssignments(resultnextstate,gsorts);
   }
   
-  return gsMakeLPESummand(resultsum,
+  return gsMakeLinearProcessSummand(resultsum,
                         resultcondition,
                         ((multiActionIsDelta)?
                             resultmultiaction:
@@ -5935,7 +5935,7 @@ static ATermAppl generateLPEpCRL(ATermAppl procId, int canterminate,
        of this flag, can speed up linearisation considerably */
     
     sums=ATinsertA(sums,
-                    gsMakeLPESummand(ATempty,
+                    gsMakeLinearProcessSummand(ATempty,
                                      gsMakeDataExprTrue(),
                                      gsMakeDelta(),
                                      gsMakeNil(),
@@ -6027,7 +6027,7 @@ static ATermAppl hidecomposition(ATermList hidelist, ATermAppl ips)
 
     resultsumlist=ATinsertA(
                     resultsumlist,
-                    gsMakeLPESummand(
+                    gsMakeLinearProcessSummand(
                            sumvars,
                            condition,
                            hide(hidelist,multiaction),
@@ -6161,7 +6161,7 @@ static ATermList insert_timed_delta_summand(
     }
   }
   result=ATinsertA(ATreverse(result),
-                   gsMakeLPESummand(
+                   gsMakeLinearProcessSummand(
                       sumvars,
                       cond,
                       multiaction,
@@ -6271,7 +6271,7 @@ static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
       if (gsIsDataExprTrue(condition))
       { resultsimpledeltasumlist=ATinsertA(
                     resultsimpledeltasumlist,
-                      gsMakeLPESummand(
+                      gsMakeLinearProcessSummand(
                              sumvars,
                              condition,
                              gsMakeDelta(),
@@ -6281,7 +6281,7 @@ static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
       else
       { resultdeltasumlist=ATinsertA(
                     resultdeltasumlist,
-                      gsMakeLPESummand(
+                      gsMakeLinearProcessSummand(
                              sumvars,
                              condition,
                              gsMakeDelta(),
@@ -6373,7 +6373,7 @@ static ATermAppl encapcomposition(ATermList encaplist , ATermAppl ips)
     { 
       resultdeltasumlist=ATinsertA(
                     resultdeltasumlist,
-                    gsMakeLPESummand(
+                    gsMakeLinearProcessSummand(
                            sumvars,
                            condition,
                            resultmultiaction,
@@ -6384,7 +6384,7 @@ static ATermAppl encapcomposition(ATermList encaplist , ATermAppl ips)
     { 
       resultactionsumlist=ATinsertA(
                     resultactionsumlist,
-                    gsMakeLPESummand(
+                    gsMakeLinearProcessSummand(
                            sumvars,
                            condition,
                            resultmultiaction,
@@ -6462,7 +6462,7 @@ static ATermAppl renamecomposition(ATermList renamings, ATermAppl ips)
 
     resultsumlist=ATinsertA(
                     resultsumlist,
-                    gsMakeLPESummand(
+                    gsMakeLinearProcessSummand(
                            sumvars,
                            condition,
                            rename_actions(renamings,multiaction),
@@ -7344,7 +7344,7 @@ static ATermAppl communicationcomposition(
 
       resultingDeltaSummands=ATinsertA(
                                 resultingDeltaSummands,
-                                gsMakeLPESummand(
+                                gsMakeLinearProcessSummand(
                                         newsumvars,
                                         condition,
                                         gsMakeDelta(),
@@ -7399,7 +7399,7 @@ static ATermAppl communicationcomposition(
         { 
           resultsumlist=ATinsertA(
                       resultsumlist,
-                      gsMakeLPESummand(
+                      gsMakeLinearProcessSummand(
                              newsumvars,
                              newcondition,
                              newmultiaction,
@@ -7588,7 +7588,7 @@ static ATermList combinesumlist(
       { resultsumlist=
           ATinsertA(
             resultsumlist,
-            gsMakeLPESummand(
+            gsMakeLinearProcessSummand(
                sumvars1new,
                condition1,
                substitute_multiaction(rename1_list,sums1renaming,multiaction1), 
@@ -7655,7 +7655,7 @@ static ATermList combinesumlist(
         resultsumlist=
           ATinsertA(
             resultsumlist,
-            gsMakeLPESummand(
+            gsMakeLinearProcessSummand(
                sumvars2new,
                condition2,
                substitute_multiaction(rename_list,par2,
@@ -7786,7 +7786,7 @@ static ATermList combinesumlist(
         { resultsumlist=
             ATinsertA(
               resultsumlist,
-              gsMakeLPESummand(
+              gsMakeLinearProcessSummand(
                 allsums,
                 condition3,
                 multiaction3,
@@ -7989,7 +7989,7 @@ static ATermAppl replaceArgumentsByAssignmentsIPS(ATermAppl ips)
 
   for( ; sums!=ATempty ; sums=ATgetNext(sums))
   { ATermAppl summand=ATAgetFirst(sums);
-    assert(gsIsLPESummand(summand));
+    assert(gsIsLinearProcessSummand(summand));
     ATermList DataVarIds=ATLgetArgument(summand,0);
     ATermAppl BoolExpr=ATAgetArgument(summand,1);
     ATermAppl MultAcOrDelta=ATAgetArgument(summand,2);
@@ -7998,7 +7998,7 @@ static ATermAppl replaceArgumentsByAssignmentsIPS(ATermAppl ips)
                         ATLgetArgument(summand,4),
                         parameters);
     resultsums=ATinsertA(resultsums,
-                      gsMakeLPESummand(
+                      gsMakeLinearProcessSummand(
                           DataVarIds,
                           BoolExpr,
                           MultAcOrDelta,
@@ -8691,7 +8691,7 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
       gsMakeDataEqnSpec(spec_int->eqns)
     ),
     gsMakeActSpec(spec_int->acts),
-    gsMakeLPE(SieveProcDataVarsSummands(
+    gsMakeLinearProcess(SieveProcDataVarsSummands(
                    spec_int->procdatavars,
                    ATLgetArgument(result,2),
                    ATLgetArgument(result,1)),
@@ -8700,7 +8700,7 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
                                              // of summands appear in the same
                                              // order as in the input, if the 
                                              // input were an LPE.
-    gsMakeLPEInit(SieveProcDataVarsAssignments(
+    gsMakeLinearProcessInit(SieveProcDataVarsAssignments(
                    spec_int->procdatavars,
                    ATLgetArgument(result,0),
                    ATLgetArgument(result,1)),

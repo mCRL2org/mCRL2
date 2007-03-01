@@ -2233,7 +2233,7 @@ ATermAppl gsAlpha(ATermAppl Spec){
   gsDebugMsg("init: l:%T\n\n", ATLtableGet(alphas,(ATerm)ATAtableGet(procs,(ATerm)INIT_KEY())));
 
   Spec = ATsetArgument(Spec,(ATerm) gsMakeProcEqnSpec(new_pr),2);
-  Spec = ATsetArgument(Spec,(ATerm) gsMakeInit(ATLgetArgument(ATAgetArgument(Spec,3),0),ATAtableGet(procs,(ATerm)INIT_KEY())),3);
+  Spec = ATsetArgument(Spec,(ATerm) gsMakeProcessInit(ATLgetArgument(ATAgetArgument(Spec,3),0),ATAtableGet(procs,(ATerm)INIT_KEY())),3);
   
   ATindexedSetDestroy(tmpIndexedSet);
   ATtableDestroy(alphas);

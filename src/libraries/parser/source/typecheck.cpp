@@ -230,7 +230,7 @@ ATermAppl type_check_spec(ATermAppl input)
   data_spec=ATsetArgument(data_spec, (ATerm) gsMakeDataEqnSpec(body.equations),3);
   Result=ATsetArgument(input,(ATerm)data_spec,0);
   Result=ATsetArgument(Result,(ATerm)gsMakeProcEqnSpec(gstcWriteProcs(ATLgetArgument(ATAgetArgument(input,2),0))),2);
-  Result=ATsetArgument(Result,(ATerm)gsMakeInit(ATmakeList0(),
+  Result=ATsetArgument(Result,(ATerm)gsMakeProcessInit(ATmakeList0(),
     ATAtableGet(body.proc_bodies,(ATerm)INIT_KEY())),3);
 
   Result=gstcFoldSortRefs(Result);

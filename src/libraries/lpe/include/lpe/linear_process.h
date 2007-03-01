@@ -59,7 +59,7 @@ using atermpp::read_from_named_file;
 // summand
 /// \brief LPE summand.
 ///
-// <LPESummand>   ::= LPESummand(<DataVarId>*, <DataExpr>, <MultActOrDelta>,
+// <LinearProcessSummand>   ::= LinearProcessSummand(<DataVarId>*, <DataExpr>, <MultActOrDelta>,
 //                    <DataExprOrNil>, <Assignment>*)
 //<MultActOrDelta>
 //               ::= <MultAct>
@@ -83,7 +83,7 @@ class summand: public aterm_appl
     summand(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(check_rule_LPESummand(m_term));
+      assert(check_rule_LinearProcessSummand(m_term));
       aterm_appl::iterator i = t.begin();
 
       m_summation_variables = data_variable_list(*i++);
@@ -107,7 +107,7 @@ class summand: public aterm_appl
                 action_list          actions,
                 data_assignment_list assignments
                )
-      : aterm_appl(gsMakeLPESummand(summation_variables,
+      : aterm_appl(gsMakeLinearProcessSummand(summation_variables,
                condition,
                (delta ? gsMakeDelta() : gsMakeMultAct(actions)),
                gsMakeNil(),
@@ -130,7 +130,7 @@ class summand: public aterm_appl
                 data_expression      time,
                 data_assignment_list assignments
                )
-      : aterm_appl(gsMakeLPESummand(summation_variables,
+      : aterm_appl(gsMakeLinearProcessSummand(summation_variables,
                condition,
                (delta ? gsMakeDelta() : gsMakeMultAct(actions)),
                time,
@@ -374,7 +374,7 @@ class linear_process: public aterm_appl
         data_variable_list process_parameters,
         summand_list       summands
        )
-     : aterm_appl(gsMakeLPE(free_variables, process_parameters, summands)),
+     : aterm_appl(gsMakeLinearProcess(free_variables, process_parameters, summands)),
        m_free_variables    (free_variables    ),
        m_process_parameters(process_parameters),
        m_summands          (summands          )
@@ -386,7 +386,7 @@ class linear_process: public aterm_appl
     linear_process(aterm_appl lpe)
       : aterm_appl(lpe)
     {
-      assert(check_term_LPE(m_term));
+      assert(check_term_LinearProcess(m_term));
       assert(is_well_typed());
       assert(is_name_clash_free(true));
 
@@ -494,7 +494,7 @@ class process_initializer: public aterm_appl
     process_initializer(data_variable_list free_variables,
                         data_assignment_list assignments
                        )
-     : aterm_appl(gsMakeLPEInit(free_variables, assignments)),
+     : aterm_appl(gsMakeLinearProcessInit(free_variables, assignments)),
        m_free_variables(free_variables),
        m_assignments(assignments)
     {
@@ -503,7 +503,7 @@ class process_initializer: public aterm_appl
     process_initializer(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(check_term_LPEInit(m_term));
+      assert(check_term_LinearProcessInit(m_term));
       aterm_appl::iterator i   = t.begin();
       m_free_variables = *i++;
       m_assignments    = *i;

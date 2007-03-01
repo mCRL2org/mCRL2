@@ -1786,7 +1786,7 @@ data_vars_decls_cs:
 initialisation:
   KWINIT proc_expr SEMICOLON
     {
-      safe_assign($$, gsMakeInit(ATmakeList0(), $2));
+      safe_assign($$, gsMakeProcessInit(ATmakeList0(), $2));
       gsDebugMsg("parsed initialisation\n  %T\n", $$);
     }
   ;
@@ -2370,7 +2370,7 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts)
   int n = ATgetLength(SpecElts);
   for (int i = 0; i < n; i++) {
     ATermAppl SpecElt = ATAelementAt(SpecElts, i);
-    if (gsIsInit(SpecElt)) {
+    if (gsIsProcessInit(SpecElt)) {
       if (Init == NULL) {
         Init = SpecElt;
       } else {

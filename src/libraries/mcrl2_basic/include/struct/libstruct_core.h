@@ -815,28 +815,6 @@ bool gsIsIfThenElse(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunIfThenElse();
 }
 
-// Init
-inline
-AFun initAFunInit(AFun& f)
-{
-  f = ATmakeAFun("Init", 2, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunInit()
-{
-  static AFun AFunInit = initAFunInit(AFunInit);
-  return AFunInit;
-}
-
-inline
-bool gsIsInit(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunInit();
-}
-
 // LMerge
 inline
 AFun initAFunLMerge(AFun& f)
@@ -859,72 +837,6 @@ bool gsIsLMerge(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunLMerge();
 }
 
-// LPE
-inline
-AFun initAFunLPE(AFun& f)
-{
-  f = ATmakeAFun("LPE", 3, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunLPE()
-{
-  static AFun AFunLPE = initAFunLPE(AFunLPE);
-  return AFunLPE;
-}
-
-inline
-bool gsIsLPE(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunLPE();
-}
-
-// LPEInit
-inline
-AFun initAFunLPEInit(AFun& f)
-{
-  f = ATmakeAFun("LPEInit", 2, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunLPEInit()
-{
-  static AFun AFunLPEInit = initAFunLPEInit(AFunLPEInit);
-  return AFunLPEInit;
-}
-
-inline
-bool gsIsLPEInit(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunLPEInit();
-}
-
-// LPESummand
-inline
-AFun initAFunLPESummand(AFun& f)
-{
-  f = ATmakeAFun("LPESummand", 5, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunLPESummand()
-{
-  static AFun AFunLPESummand = initAFunLPESummand(AFunLPESummand);
-  return AFunLPESummand;
-}
-
-inline
-bool gsIsLPESummand(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunLPESummand();
-}
-
 // Lambda
 inline
 AFun initAFunLambda(AFun& f)
@@ -945,6 +857,72 @@ inline
 bool gsIsLambda(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunLambda();
+}
+
+// LinearProcess
+inline
+AFun initAFunLinearProcess(AFun& f)
+{
+  f = ATmakeAFun("LinearProcess", 3, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunLinearProcess()
+{
+  static AFun AFunLinearProcess = initAFunLinearProcess(AFunLinearProcess);
+  return AFunLinearProcess;
+}
+
+inline
+bool gsIsLinearProcess(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunLinearProcess();
+}
+
+// LinearProcessInit
+inline
+AFun initAFunLinearProcessInit(AFun& f)
+{
+  f = ATmakeAFun("LinearProcessInit", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunLinearProcessInit()
+{
+  static AFun AFunLinearProcessInit = initAFunLinearProcessInit(AFunLinearProcessInit);
+  return AFunLinearProcessInit;
+}
+
+inline
+bool gsIsLinearProcessInit(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunLinearProcessInit();
+}
+
+// LinearProcessSummand
+inline
+AFun initAFunLinearProcessSummand(AFun& f)
+{
+  f = ATmakeAFun("LinearProcessSummand", 5, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunLinearProcessSummand()
+{
+  static AFun AFunLinearProcessSummand = initAFunLinearProcessSummand(AFunLinearProcessSummand);
+  return AFunLinearProcessSummand;
+}
+
+inline
+bool gsIsLinearProcessSummand(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunLinearProcessSummand();
 }
 
 // MapSpec
@@ -1407,6 +1385,28 @@ inline
 bool gsIsProcess(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunProcess();
+}
+
+// ProcessInit
+inline
+AFun initAFunProcessInit(AFun& f)
+{
+  f = ATmakeAFun("ProcessInit", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunProcessInit()
+{
+  static AFun AFunProcessInit = initAFunProcessInit(AFunProcessInit);
+  return AFunProcessInit;
+}
+
+inline
+bool gsIsProcessInit(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunProcessInit();
 }
 
 // PropVarDecl
@@ -2704,39 +2704,33 @@ ATermAppl gsMakeIfThenElse(ATermAppl DataExpr_0, ATermAppl ProcExpr_1, ATermAppl
 }
 
 inline
-ATermAppl gsMakeInit(ATermList DataVarId_0, ATermAppl ProcExpr_1)
-{
-  return ATmakeAppl2(gsAFunInit(), (ATerm) DataVarId_0, (ATerm) ProcExpr_1);
-}
-
-inline
 ATermAppl gsMakeLMerge(ATermAppl ProcExpr_0, ATermAppl ProcExpr_1)
 {
   return ATmakeAppl2(gsAFunLMerge(), (ATerm) ProcExpr_0, (ATerm) ProcExpr_1);
 }
 
 inline
-ATermAppl gsMakeLPE(ATermList DataVarId_0, ATermList DataVarId_1, ATermList LPESummand_2)
-{
-  return ATmakeAppl3(gsAFunLPE(), (ATerm) DataVarId_0, (ATerm) DataVarId_1, (ATerm) LPESummand_2);
-}
-
-inline
-ATermAppl gsMakeLPEInit(ATermList DataVarId_0, ATermList DataVarIdInit_1)
-{
-  return ATmakeAppl2(gsAFunLPEInit(), (ATerm) DataVarId_0, (ATerm) DataVarIdInit_1);
-}
-
-inline
-ATermAppl gsMakeLPESummand(ATermList DataVarId_0, ATermAppl DataExpr_1, ATermAppl MultActOrDelta_2, ATermAppl DataExprOrNil_3, ATermList DataVarIdInit_4)
-{
-  return ATmakeAppl5(gsAFunLPESummand(), (ATerm) DataVarId_0, (ATerm) DataExpr_1, (ATerm) MultActOrDelta_2, (ATerm) DataExprOrNil_3, (ATerm) DataVarIdInit_4);
-}
-
-inline
 ATermAppl gsMakeLambda()
 {
   return ATmakeAppl0(gsAFunLambda());
+}
+
+inline
+ATermAppl gsMakeLinearProcess(ATermList DataVarId_0, ATermList DataVarId_1, ATermList LinearProcessSummand_2)
+{
+  return ATmakeAppl3(gsAFunLinearProcess(), (ATerm) DataVarId_0, (ATerm) DataVarId_1, (ATerm) LinearProcessSummand_2);
+}
+
+inline
+ATermAppl gsMakeLinearProcessInit(ATermList DataVarId_0, ATermList DataVarIdInit_1)
+{
+  return ATmakeAppl2(gsAFunLinearProcessInit(), (ATerm) DataVarId_0, (ATerm) DataVarIdInit_1);
+}
+
+inline
+ATermAppl gsMakeLinearProcessSummand(ATermList DataVarId_0, ATermAppl DataExpr_1, ATermAppl MultActOrDelta_2, ATermAppl DataExprOrNil_3, ATermList DataVarIdInit_4)
+{
+  return ATmakeAppl5(gsAFunLinearProcessSummand(), (ATerm) DataVarId_0, (ATerm) DataExpr_1, (ATerm) MultActOrDelta_2, (ATerm) DataExprOrNil_3, (ATerm) DataVarIdInit_4);
 }
 
 inline
@@ -2863,6 +2857,12 @@ inline
 ATermAppl gsMakeProcess(ATermAppl ProcVarId_0, ATermList DataExpr_1)
 {
   return ATmakeAppl2(gsAFunProcess(), (ATerm) ProcVarId_0, (ATerm) DataExpr_1);
+}
+
+inline
+ATermAppl gsMakeProcessInit(ATermList DataVarId_0, ATermAppl ProcExpr_1)
+{
+  return ATmakeAppl2(gsAFunProcessInit(), (ATerm) DataVarId_0, (ATerm) ProcExpr_1);
 }
 
 inline

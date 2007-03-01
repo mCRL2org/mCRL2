@@ -3758,7 +3758,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
   case 243:
 #line 1788 "mcrl2parser.yy"
     {
-      safe_assign(((*yyvalp).appl), gsMakeInit(ATmakeList0(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)));
+      safe_assign(((*yyvalp).appl), gsMakeProcessInit(ATmakeList0(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed initialisation\n  %T\n", ((*yyvalp).appl));
     ;}
     break;
@@ -6149,7 +6149,7 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts)
   int n = ATgetLength(SpecElts);
   for (int i = 0; i < n; i++) {
     ATermAppl SpecElt = ATAelementAt(SpecElts, i);
-    if (gsIsInit(SpecElt)) {
+    if (gsIsProcessInit(SpecElt)) {
       if (Init == NULL) {
         Init = SpecElt;
       } else {

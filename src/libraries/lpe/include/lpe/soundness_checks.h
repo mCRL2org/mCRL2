@@ -105,7 +105,7 @@ template <typename Term> bool check_rule_Spec(Term t);
 template <typename Term> bool check_rule_ActSpec(Term t);
 template <typename Term> bool check_rule_ProcEqnSpec(Term t);
 template <typename Term> bool check_rule_ProcEqn(Term t);
-template <typename Term> bool check_rule_LPESummand(Term t);
+template <typename Term> bool check_rule_LinearProcessSummand(Term t);
 template <typename Term> bool check_rule_MultActOrDelta(Term t);
 template <typename Term> bool check_rule_Init(Term t);
 template <typename Term> bool check_rule_StateFrm(Term t);
@@ -131,12 +131,11 @@ template <typename Term> bool check_term_StateForall(Term t);
 template <typename Term> bool check_term_SortId(Term t);
 template <typename Term> bool check_term_StateNu(Term t);
 template <typename Term> bool check_term_DataSpec(Term t);
-template <typename Term> bool check_term_LPE(Term t);
 template <typename Term> bool check_term_SpecV1(Term t);
 template <typename Term> bool check_term_Tau(Term t);
 template <typename Term> bool check_term_StateYaledTimed(Term t);
 template <typename Term> bool check_term_DataEqnSpec(Term t);
-template <typename Term> bool check_term_PBESOr(Term t);
+template <typename Term> bool check_term_LinearProcessSummand(Term t);
 template <typename Term> bool check_term_SortSpec(Term t);
 template <typename Term> bool check_term_ConsSpec(Term t);
 template <typename Term> bool check_term_Sum(Term t);
@@ -145,11 +144,11 @@ template <typename Term> bool check_term_ProcVarId(Term t);
 template <typename Term> bool check_term_MapSpec(Term t);
 template <typename Term> bool check_term_StateYaled(Term t);
 template <typename Term> bool check_term_Choice(Term t);
+template <typename Term> bool check_term_LinearProcessInit(Term t);
 template <typename Term> bool check_term_MultAct(Term t);
 template <typename Term> bool check_term_PropVarInst(Term t);
 template <typename Term> bool check_term_BagComp(Term t);
 template <typename Term> bool check_term_StateDelay(Term t);
-template <typename Term> bool check_term_LPESummand(Term t);
 template <typename Term> bool check_term_StructCons(Term t);
 template <typename Term> bool check_term_Mu(Term t);
 template <typename Term> bool check_term_ActNot(Term t);
@@ -187,6 +186,7 @@ template <typename Term> bool check_term_Process(Term t);
 template <typename Term> bool check_term_ActAnd(Term t);
 template <typename Term> bool check_term_PBES(Term t);
 template <typename Term> bool check_term_StateVar(Term t);
+template <typename Term> bool check_term_LinearProcess(Term t);
 template <typename Term> bool check_term_ActAt(Term t);
 template <typename Term> bool check_term_DataEqn(Term t);
 template <typename Term> bool check_term_StateExists(Term t);
@@ -202,7 +202,7 @@ template <typename Term> bool check_term_PBEqn(Term t);
 template <typename Term> bool check_term_OpId(Term t);
 template <typename Term> bool check_term_ActFalse(Term t);
 template <typename Term> bool check_term_ActId(Term t);
-template <typename Term> bool check_term_LPEInit(Term t);
+template <typename Term> bool check_term_PBESOr(Term t);
 template <typename Term> bool check_term_ActExists(Term t);
 template <typename Term> bool check_term_Allow(Term t);
 template <typename Term> bool check_term_PropVarDecl(Term t);
@@ -425,7 +425,7 @@ bool check_rule_ActSpec(Term t)
 template <typename Term>
 bool check_rule_ProcEqnSpec(Term t)
 {
-  return    check_term_LPE(t);
+  return    check_term_LinearProcess(t);
 }
 
 template <typename Term>
@@ -435,9 +435,9 @@ bool check_rule_ProcEqn(Term t)
 }
 
 template <typename Term>
-bool check_rule_LPESummand(Term t)
+bool check_rule_LinearProcessSummand(Term t)
 {
-  return    check_term_LPESummand(t);
+  return    check_term_LinearProcessSummand(t);
 }
 
 template <typename Term>
@@ -450,7 +450,7 @@ bool check_rule_MultActOrDelta(Term t)
 template <typename Term>
 bool check_rule_Init(Term t)
 {
-  return    check_term_LPEInit(t);
+  return    check_term_LinearProcessInit(t);
 }
 
 template <typename Term>
@@ -879,33 +879,6 @@ bool check_term_DataSpec(Term t)
   return true;
 }
 
-// LPE(DataVarId*, DataVarId*, LPESummand*)
-template <typename Term>
-bool check_term_LPE(Term t)
-{
-  // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
-  if (term.type() != AT_APPL)
-    return false;
-  aterm_appl a(term);
-  if (!gsIsLPE(a))
-    return false;
-
-  // check the children
-  if (a.size() != 3)
-    return false;
-#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
-    return false;
-  if (!check_list_argument(a(1), check_rule_DataVarId<aterm>, 0))
-    return false;
-  if (!check_list_argument(a(2), check_rule_LPESummand<aterm>, 0))
-    return false;
-#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-  return true;
-}
-
 // SpecV1(DataSpec, ActSpec, ProcEqnSpec, Init)
 template <typename Term>
 bool check_term_SpecV1(Term t)
@@ -1000,25 +973,31 @@ bool check_term_DataEqnSpec(Term t)
   return true;
 }
 
-// PBESOr(PBExpr, PBExpr)
+// LinearProcessSummand(DataVarId*, DataExpr, MultActOrDelta, DataExprOrNil, DataVarIdInit*)
 template <typename Term>
-bool check_term_PBESOr(Term t)
+bool check_term_LinearProcessSummand(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
-  if (!gsIsPBESOr(a))
+  if (!gsIsLinearProcessSummand(a))
     return false;
 
   // check the children
-  if (a.size() != 2)
+  if (a.size() != 5)
     return false;
 #ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_PBExpr<aterm>))
+  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
     return false;
-  if (!check_term_argument(a(1), check_rule_PBExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_DataExpr<aterm>))
+    return false;
+  if (!check_term_argument(a(2), check_rule_MultActOrDelta<aterm>))
+    return false;
+  if (!check_term_argument(a(3), check_rule_DataExprOrNil<aterm>))
+    return false;
+  if (!check_list_argument(a(4), check_rule_DataVarIdInit<aterm>, 0))
     return false;
 #endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
@@ -1213,6 +1192,31 @@ bool check_term_Choice(Term t)
   return true;
 }
 
+// LinearProcessInit(DataVarId*, DataVarIdInit*)
+template <typename Term>
+bool check_term_LinearProcessInit(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsLinearProcessInit(a))
+    return false;
+
+  // check the children
+  if (a.size() != 2)
+    return false;
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
+    return false;
+  if (!check_list_argument(a(1), check_rule_DataVarIdInit<aterm>, 0))
+    return false;
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+  return true;
+}
+
 // MultAct(ParamIdOrAction*)
 template <typename Term>
 bool check_term_MultAct(Term t)
@@ -1295,37 +1299,6 @@ bool check_term_StateDelay(Term t)
   // check the children
   if (a.size() != 0)
     return false;
-
-  return true;
-}
-
-// LPESummand(DataVarId*, DataExpr, MultActOrDelta, DataExprOrNil, DataVarIdInit*)
-template <typename Term>
-bool check_term_LPESummand(Term t)
-{
-  // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
-  if (term.type() != AT_APPL)
-    return false;
-  aterm_appl a(term);
-  if (!gsIsLPESummand(a))
-    return false;
-
-  // check the children
-  if (a.size() != 5)
-    return false;
-#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
-    return false;
-  if (!check_term_argument(a(1), check_rule_DataExpr<aterm>))
-    return false;
-  if (!check_term_argument(a(2), check_rule_MultActOrDelta<aterm>))
-    return false;
-  if (!check_term_argument(a(3), check_rule_DataExprOrNil<aterm>))
-    return false;
-  if (!check_list_argument(a(4), check_rule_DataVarIdInit<aterm>, 0))
-    return false;
-#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -2195,6 +2168,33 @@ bool check_term_StateVar(Term t)
   return true;
 }
 
+// LinearProcess(DataVarId*, DataVarId*, LinearProcessSummand*)
+template <typename Term>
+bool check_term_LinearProcess(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsLinearProcess(a))
+    return false;
+
+  // check the children
+  if (a.size() != 3)
+    return false;
+#ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
+    return false;
+  if (!check_list_argument(a(1), check_rule_DataVarId<aterm>, 0))
+    return false;
+  if (!check_list_argument(a(2), check_rule_LinearProcessSummand<aterm>, 0))
+    return false;
+#endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+  return true;
+}
+
 // ActAt(ActFrm, DataExpr)
 template <typename Term>
 bool check_term_ActAt(Term t)
@@ -2558,25 +2558,25 @@ bool check_term_ActId(Term t)
   return true;
 }
 
-// LPEInit(DataVarId*, DataVarIdInit*)
+// PBESOr(PBExpr, PBExpr)
 template <typename Term>
-bool check_term_LPEInit(Term t)
+bool check_term_PBESOr(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
-  if (!gsIsLPEInit(a))
+  if (!gsIsPBESOr(a))
     return false;
 
   // check the children
   if (a.size() != 2)
     return false;
 #ifndef LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
+  if (!check_term_argument(a(0), check_rule_PBExpr<aterm>))
     return false;
-  if (!check_list_argument(a(1), check_rule_DataVarIdInit<aterm>, 0))
+  if (!check_term_argument(a(1), check_rule_PBExpr<aterm>))
     return false;
 #endif // LPE_NO_RECURSIVE_SOUNDNESS_CHECKS
 

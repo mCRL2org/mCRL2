@@ -236,7 +236,7 @@ void print_more_info(char *Name)
 bool is_valid_lpe(ATermAppl spec)
 {
   if (gsIsSpecV1(spec)) {
-    return gsIsLPE(ATAgetArgument(spec,2));
+    return gsIsLinearProcess(ATAgetArgument(spec,2));
   } else {
     return false;
   }
@@ -308,7 +308,7 @@ static ATermAppl rewrite_lpe(ATermAppl Spec)
       m = ATinsert(m, (ATerm) Assignment);
     }
     Assignments = ATreverse(m);
-    LPESummand = gsMakeLPESummand(LPEVars, Cond, MultAct, Time, Assignments);
+    LPESummand = gsMakeLinearProcessSummand(LPEVars, Cond, MultAct, Time, Assignments);
     l = ATinsert(l, (ATerm) LPESummand);
   }
   LPESummands = ATreverse(l);
@@ -382,7 +382,7 @@ static ATermAppl rewrite_nolpe(ATermAppl Spec)
 
   a = ATAgetArgument(ATAgetArgument(Spec,6),1);
   a = rewrite_proc(a);
-  Spec = ATsetArgument(Spec,(ATerm) gsMakeInit(ATLgetArgument(ATAgetArgument(Spec,6),0),a),6);
+  Spec = ATsetArgument(Spec,(ATerm) gsMakeProcessInit(ATLgetArgument(ATAgetArgument(Spec,6),0),a),6);
 
   return Spec;
 }

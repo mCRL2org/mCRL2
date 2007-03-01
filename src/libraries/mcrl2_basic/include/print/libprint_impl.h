@@ -601,7 +601,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(dbg_prints)("printing process specification\n");
     PRINT_FUNC(PrintEqns)(OutStream, ATLgetArgument(Part, 0),
       pp_format, ShowSorts, PrecLevel);
-  } else if (gsIsLPE(Part)) {
+  } else if (gsIsLinearProcess(Part)) {
     //print LPE
     PRINT_FUNC(dbg_prints)("printing LPE\n");
     //print global variables
@@ -648,7 +648,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(fprints)(OutStream, " = ");
     PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 3),
       pp_format, ShowSorts, 0);
-  } else if (gsIsLPESummand(Part)) {
+  } else if (gsIsLinearProcessSummand(Part)) {
     //print LPE summand
     PRINT_FUNC(dbg_prints)("printing LPE summand\n");
     //print data summations
@@ -688,7 +688,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(fprints)(OutStream, ")");
       }
     }
-  } else if (gsIsInit(Part)) {
+  } else if (gsIsProcessInit(Part)) {
     //print initialisation
     PRINT_FUNC(dbg_prints)("printing initialisation\n");
     ATermList Vars = ATLgetArgument(Part, 0);
@@ -702,7 +702,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1),
       pp_format, ShowSorts, PrecLevel);
     PRINT_FUNC(fprints)(OutStream, ";\n");
-  } else if (gsIsLPEInit(Part)) {
+  } else if (gsIsLinearProcessInit(Part)) {
     //print LPE initialisation
     PRINT_FUNC(dbg_prints)("printing LPE initialisation\n");
     ATermList Vars = ATLgetArgument(Part, 0);

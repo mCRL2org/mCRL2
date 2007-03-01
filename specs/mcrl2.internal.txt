@@ -27,12 +27,12 @@
 // - each c(a_0, ..., a_n), where c is an alphabetical string, represents an
 //   ATermAppl with c as its unquoted head and a_0, ..., a_n as its arguments
 // - a number of restrictions apply to the Assignment's, which we denote by A,
-//   of an LPESummand:
-//   + the lhs of an element of A should be declared by the LPE
+//   of a Linear process summand:
+//   + the lhs of an element of A should be declared by the linear process
 //   + A may not contain duplicate lhs's
 //   + the lhs's of A should obey the order in which they are declared 
-// - the DataVarId's of the Assignment's of an LPEInit should be identical to the
-//   DataVarId's of the corresponding LPE
+// - the DataVarId's of the Assignment's of an LinearProcessInit should be 
+//   identical to the DataVarId's of the corresponding Linear Process
 
 
 //Sort expressions
@@ -195,16 +195,18 @@
 //action specification
 <ActSpec>      ::= ActSpec(<ActId>*)
 
-//process equations or LPE
+//process equations or linear processes
 <ProcEqnSpec>  ::= ProcEqnSpec(<ProcEqn>*)                               [-lin]
-                 | LPE(<DataVarId>*, <DataVarId>*, <LPESummand>*)        [+lin]
+                 | LinearProcess(<DataVarId>*, <DataVarId>*, 
+                    <LinearProcessSummand>*)                             [+lin]
 
 //process equation
 <ProcEqn>      ::= ProcEqn(<DataVarId>*, <ProcVarId>, <DataVarId>*, <ProcExpr>)
 
-//LPE summand
-<LPESummand>   ::= LPESummand(<DataVarId>*, <DataExpr>, <MultActOrDelta>,
-                    <DataExprOrNil>, <DataVarIdInit>*)
+//Linear process summand
+<LinearProcessSummand>   
+               ::= LinearProcessSummand(<DataVarId>*, <DataExpr>, 
+                    <MultActOrDelta>, <DataExprOrNil>, <DataVarIdInit>*)
 
 //multiaction or delta
 <MultActOrDelta>
@@ -212,8 +214,8 @@
                  | Delta
 
 //process expressions or data expression
-<Init>         ::= Init(<DataVarId>*, <ProcExpr>)                        [-lin]
-                 | LPEInit(<DataVarId>*, <DataVarIdInit>*)               [+lin]
+<Init>         ::= ProcessInit(<DataVarId>*, <ProcExpr>)                 [-lin]
+                 | LinearProcessInit(<DataVarId>*, <DataVarIdInit>*)     [+lin]
 
 
 //Mu-calculus formulas
