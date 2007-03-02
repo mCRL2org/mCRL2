@@ -1,17 +1,20 @@
-#include <cstdio>
 #include <cstring>
+#include <fstream>
 #include <aterm2.h>
 #include "svc/svc.h" //XXX
 #include "libstruct.h"
 #include "libprint_c.h"
+#include "libprint.h"
 #include "lps2lts.h"
 #include "lts.h"
+
+using namespace std;
 
 static lts_options lts_opts;
 static ATermAppl term_nil;
 static AFun afun_pair;
 static unsigned long long initial_state;
-static FILE *aut = NULL;
+static ofstream aut;
 static SVCfile svcf;
 static SVCfile *svc = &svcf;
 static SVCparameterIndex svcparam = 0;
@@ -31,7 +34,8 @@ void open_lts(const char *filename, lts_options &opts)
     case OF_AUT:
       gsVerboseMsg("writing state space in AUT format to '%s'.\n",filename);
       lts_opts.outinfo = false;
-      if ( (aut = fopen(filename,"w")) == NULL )
+      aut.open(filename);
+      if ( !aut.is_open() )
       {
         gsErrorMsg("cannot open '%s' for writing\n",filename);
         exit(1);
@@ -66,7 +70,7 @@ void save_initial_state(unsigned long long idx, ATerm state)
   switch ( lts_opts.outformat )
   {
     case OF_AUT:
-      fprintf(aut,"des (0,0,0)                   \n");
+      aut << "des (0,0,0)                                      " << endl;
       break;
     case OF_SVC:
       {
@@ -93,8 +97,10 @@ void save_transition(unsigned long long idx_from, ATerm from, ATermAppl action, 
         idx_from = 0;
       if ( idx_to == initial_state )
         idx_to = 0;
-      gsfprintf(aut,"(%llu,\"%P\",%llu)\n",idx_from,action,idx_to);
-      fflush(aut);
+      aut << "(" << idx_from << ",\"";
+      PrintPart_CXX(aut,(ATerm) action,ppDefault);
+      aut << "\"," << idx_to << ")" << endl;
+      aut.flush();
       break;
     case OF_SVC:
       if ( lts_opts.outinfo )
@@ -124,16 +130,16 @@ void close_lts(unsigned long long num_states, unsigned long long num_trans)
   switch ( lts_opts.outformat )
   {
     case OF_AUT:
-      rewind(aut);
-      fprintf(aut,"des (0,%llu,%llu)",num_trans,num_states);
-      fclose(aut);
+      aut.seekp(0);
+      aut << "des (0," << num_trans << "," << num_states << ")";
+      aut.close();
       break;
     case OF_SVC:
       {
         int e = SVCclose(svc);
         if ( e )
         {
-          printf("svcerror: %s\n",SVCerror(e)); 
+          gsErrorMsg("svcerror: %s\n",SVCerror(e)); 
         }
       }
       break;
