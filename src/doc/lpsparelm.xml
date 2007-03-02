@@ -13,7 +13,7 @@
 
 <refnamediv>
 <refname>lpsparelm</refname>
-<refpurpose>remove unused parameters from a linear process equation.</refpurpose>
+<refpurpose>remove unused parameters from a linear process specification.</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>

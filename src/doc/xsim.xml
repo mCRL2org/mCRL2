@@ -28,7 +28,7 @@
 <refsect1>
   <title>Description</title>
   <para>
-    The &xsim; tool simulates the linear process equation (LPS) in &infile; using
+    The &xsim; tool simulates the linear process specification (LPS) in &infile; using
     a graphical user interface. If &infile; is not supplied the simulator starts
     without an LPS. The interface consists of two parts. In the top
     part every transition that is possible from the current state, is listed

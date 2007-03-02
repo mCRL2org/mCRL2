@@ -28,7 +28,7 @@
 <refsect1>
   <title>Description</title>
   <para>
-    Transform a (timed) linear process equation (LPS) in &infile; by rewriting
+    Transform a (timed) linear process specification (LPS) in &infile; by rewriting
     it, and in the process removing the timed argument. Write the resulting LPS
     to &outfile;. If &outfile; is not supplied the resulting LPS is
     written to &cstdout;.

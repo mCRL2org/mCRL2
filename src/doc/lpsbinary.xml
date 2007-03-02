@@ -28,7 +28,7 @@
 <refsect1>
   <title>Description</title>
   <para>
-    Transform a linear process equation (LPS) in &infile; by 
+    Transform a linear process specification (LPS) in &infile; by 
     replacing each variable of an enumerated sort by a vector
     of boolean variables. 
     The resulting LPS will be written to &outfile;. 

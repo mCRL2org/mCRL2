@@ -29,7 +29,7 @@
 <refsect1>
   <title>Description</title>
   <para>
-    The &lpspp; tool prints the linear process equation (LPS) from &infile; to
+    The &lpspp; tool prints the linear process specification (LPS) from &infile; to
     &outfile; in a human readable format. If &outfile; is not present,
     &cstdout; is used. If &infile; is not present, &cstdin; is used.
   </para>

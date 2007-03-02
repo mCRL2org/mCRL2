@@ -28,7 +28,7 @@
 <refsect1>
   <title>Description</title>
   <para>
-    Transform a linear process equation (LPS) in &infile; by rewriting it,
+    Transform a linear process specification (LPS) in &infile; by rewriting it,
     making sumvariables superfluous by enlarging the number of summands. 
     Write the resulting LPS to &outfile;. 
     If &outfile; is not supplied the resulting LPS is written to &cstdout;.

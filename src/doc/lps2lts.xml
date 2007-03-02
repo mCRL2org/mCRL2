@@ -29,7 +29,7 @@
 <refsect1>
   <title>Description</title>
   <para>
-    The &lps2lts; tool generates a state space of the linear process equation (LPS) in &infile; and
+    The &lps2lts; tool generates a state space of the linear process specification (LPS) in &infile; and
     saves the result to &outfile;. If &outfile; is not present,
     the state space is not stored.
   </para>

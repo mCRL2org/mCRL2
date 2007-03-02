@@ -30,7 +30,7 @@
   <title>Description</title>
   <para>
     The &lpsdataelm; tool removes unused parts from the data specification from
-    a linear process equation (LPS). It reads the LPS from &infile; and writes
+    a linear process specification (LPS). It reads the LPS from &infile; and writes
     the result to &outfile;. If &outfile; is not present, &cstdout; is used. If
     &infile; is not present, &cstdin; is used.
   </para>

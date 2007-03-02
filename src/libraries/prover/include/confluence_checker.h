@@ -11,7 +11,7 @@
 #include "invariant_checker.h"
 #include "auxiliary/bdd2dot.h"
 
-    /// \brief A class that takes a linear process equation and checks all tau-summands of that LPS for confluence.
+    /// \brief A class that takes a linear process specification and checks all tau-summands of that LPS for confluence.
     /// \brief The tau actions of all confluent tau-summands are renamed to ctau.
 
 class Confluence_Checker {
@@ -28,7 +28,7 @@ class Confluence_Checker {
     /// \brief Class that prints BDDs in dot format.
     BDD2Dot f_bdd2dot;
 
-    /// \brief A linear process equation.
+    /// \brief A linear process specification.
     ATermAppl f_lps;
 
     /// \brief Flag indicating whether or not the tau actions of confluent tau summands are renamed to ctau.

@@ -5859,7 +5859,7 @@ static ATermAppl clusterfinalresult(ATermAppl t,specificationbasictype *spec)
 
 static ATermAppl generateLPSpCRL(ATermAppl procId, int canterminate,
                        specificationbasictype *spec,int regular)
-/* A pair of initial state and linear process equation must be extracted
+/* A pair of initial state and linear process must be extracted
    from the underlying GNF */
 { ATermList parameters=NULL,sums=NULL,initial=NULL;
   ATermList pCRLprocs=NULL;

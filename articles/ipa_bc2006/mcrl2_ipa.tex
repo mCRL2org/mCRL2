@@ -665,13 +665,13 @@ mCRL2 (see also Figure~\ref{fig:overview}):
 \begin{itemize}
   \item A specification of the system's behaviour is written in the mCRL2
     language.
-  \item This specification is converted to a \emph{Linear Process Equation}
-    (LPE) by the mCRL2 lineariser tool. As we shall see, an LPE is an
+  \item This specification is converted to a \emph{Linear Process Specification}
+    (LPS) by the mCRL2 lineariser tool. As we shall see, an LPS is an
     mCRL2 specification in a stricter format.
-  \item The LPE can be modified using various manipulation tools and can be
+  \item The LPS can be modified using various manipulation tools and can be
     simulated using various simulation tools.
   \item A \emph{Labelled Transition System} (LTS) or \emph{state space} is
-    generated from the modified LPE.
+    generated from the modified LPS.
 \end{itemize}
 
 \noindent Subsequently, this LTS can be analysed for errors using model
@@ -679,7 +679,7 @@ checking techniques. This is a topic which is beyond the scope of this
 document. The remainder of this document contains the following sections:
 \begin{itemize}
   \item Language (Section \ref{sec:language});
-  \item Linear Process Equations (Section \ref{sec:lpe});
+  \item Linear Process Specifications (Section \ref{sec:lps});
   \item Toolset (Section \ref{sec:toolset}).
 \end{itemize}
 
@@ -1725,18 +1725,19 @@ proc & \f{DC}(t: \nnreal) = \sum_{\epsilon:\nnreal}
 \end{mcrl2}
 
 
-\section{Linear process equations}
-\label{sec:lpe}
+\section{Linear process specifications}
+\label{sec:lps}
 
 For manipulating processes -- either by hand or using tools -- it is useful to
 transform them to a basic form. This basic form is called a {\bf linear process
-equation} or LPE for short. The most important characteristics of a linear
+specification} or LPS for short. The most important characteristics of a linear
 process are that there is one single equation and that there is precisely one
 action in front of the recursive invocation of the process variable at the
 right-hand side:
 
 \begin{definition}
-A linear process equation (LPE) is a process equation of the form
+A linear process specification (LPS) is a process specification of which the process
+part is of the form
 \begin{mcrl2}
 proc & P(d \ap D)=\sum_{i\in I} \sum_{e_i{:}E_i} c_i(d,e_i)\to a_i(f_i(d,e_i))
 \at t_i(d,e_i){\seq}P(g_i(d,e_i));
@@ -1744,7 +1745,7 @@ proc & P(d \ap D)=\sum_{i\in I} \sum_{e_i{:}E_i} c_i(d,e_i)\to a_i(f_i(d,e_i))
 \noindent
 where $I$ a finite index set, $c_i$ a condition, $f_i$ the parameter of action
 $a_i$ occurring at time $t_i$ and $g_i$ the next state.\footnote{The general
-form of an LPE also contains terminating summands and multiactions. We do not
+form of an LPS also contains terminating summands and multiactions. We do not
 include these here because they only add complexity and provide no essential
 insight in the concept.} Note that the first summand is a \emph{meta-level}
 operation: $\sum_{i\in I}p_i$ is a shorthand for $p_1 \alt \cdots \alt p_n$,
@@ -1770,7 +1771,7 @@ the action is given by the function $g_i$.
 %\noindent
 The process {\it Buffer} on page~\pageref{spec:buffer} is \emph{not} linear
 because there are two actions in front of the reference to {\it Buffer} in the
-right-hand side of the process definition. The LPE for the buffer has the
+right-hand side of the process definition. The LPS for the buffer has the
 following form:
 \begin{mcrl2}
 proc & P(n\ap\nat,b\ap\bool) & =  &\sum_{m\ap\nat} b\to r(m){\seq}P(m,\neg b)\\
@@ -1782,7 +1783,7 @@ init & P(0,true);
 Note that the linear form is less readable than the much more concise form we
 started with.
 \end{example}
-LPEs can be seen as a (symbolic) representation of the state space of a model.
+LPSs can be seen as a (symbolic) representation of the state space of a model.
 The state space often has a number of states that is exponential in the number
 of parallel processes. The fact that many process descriptions lead to systems
 with a huge number of states is commonly known as the \emph{state space
@@ -1793,7 +1794,7 @@ In general, it is relatively straightforward to transform processes to linear
 form. For two parallel processes it generally boils down to joining the state
 variables and concatenating the summands. In \cite{Usenko 2002} it is described
 how this can be done for all timed \mCRL processes. Using these techniques, a
-model of hundreds of parallel processes can be transformed to a single LPE
+model of hundreds of parallel processes can be transformed to a single LPS
 relatively easily and within a small amount of time; even if the corresponding
 state space is infinitely large. 
 
@@ -1819,7 +1820,7 @@ proc & P_{12}(n\ap\nat,b\ap\bool)
 \end{mcrl2}
 \noindent
 The process $\f{System}$ behaves exactly the same as the process
-$P_{13}(0,\true,0,\true)$ defined by the following LPE
+$P_{13}(0,\true,0,\true)$ defined by the following LPS
 that has been derived from the three equations above:
 \begin{mcrl2}
 proc & P_{13}(n_1\ap\nat,b_1\ap\bool,n_2\ap\nat,b_2\ap\bool)
@@ -1829,17 +1830,17 @@ proc & P_{13}(n_1\ap\nat,b_1\ap\bool,n_2\ap\nat,b_2\ap\bool)
 \end{mcrl2}
 \end{example}
 \begin{exercise}
-Give an LPE that is behaviourally equivalent to the process $P$ defined by
+Give an LPS that is behaviourally equivalent to the process $P$ defined by
 $P=a{\seq}b{\seq}c{\seq}P$.
 \end{exercise}
 \begin{exercise}
-Give an LPE that is behaviourally equivalent to the process $P$ defined by
+Give an LPS that is behaviourally equivalent to the process $P$ defined by
 $P=a{\seq}(P \alt Q)$ and $Q=b{\seq}Q$. 
 \end{exercise}
 \begin{exercise}
 Consider the process
 $P=a_1{\seq}a_2{\seq}a_3{\seq}a_4{\seq}a_5{\seq}a_6{\seq}a_7{\seq}a_8{\seq}a_9{\seq}a_{10}{\seq}P$.
-How many summands does an LPE with the same behaviour as
+How many summands does an LPS with the same behaviour as
 \[\allow{\{a_1,a_2,a_3,a_4,a_5,a_6,a_7,a_8,a_9,a_{10}\}}
 (P\pmerge P\pmerge P\pmerge P\pmerge P\pmerge P\pmerge P\pmerge
 P\pmerge P\pmerge P)\]
@@ -1863,35 +1864,35 @@ line option can be used to view a compact description of available options.
 
 As depicted in Figure~\ref{fig:overview} on page~\pageref{fig:overview},
 analysis starts with a model of a system expressed in the mCRL2 language.
-The next step is to generate an LPE for the model. This is accomplished by
-using the tool \texttt{mcrl22lpe}. It also provides a number of useful options
+The next step is to generate an LPS for the model. This is accomplished by
+using the tool \texttt{mcrl22lps}. It also provides a number of useful options
 that may prove useful during the case study later on.
  
-%The \texttt{mcrl22lpe} tool has options to allow selection out of four
+%The \texttt{mcrl22lps} tool has options to allow selection out of four
 %linearisation methods, action clustering behaviour, and whether or not
 %alphabet reductions are applied.  Note that this is not a complete listing of
 %the options, but rather a listing of some of the more important ones.
 
-\subsection{LPE manipulation}
+\subsection{LPS manipulation}
 
-The following tools can be used to manipulate LPEs:
+The following tools can be used to manipulate LPSs:
 \begin{itemize} 
-\item \texttt{lpeinfo}: print basic information about an LPE;
-\item \texttt{lpepp}: pretty print an LPE;
-\item \texttt{lpeconstelm}: eliminate process parameters which are constant in the reachable state space;
-\item \texttt{lpeparelm}: eliminate unused parameters from an LPE;
-\item \texttt{lpedataelm}: remove unused parts of the data specification of an LPE;
-\item \texttt{lperewr}: evaluate conditions through rewriting and remove unused alternatives.
+\item \texttt{lpsinfo}: print basic information about an LPS;
+\item \texttt{lpspp}: pretty print an LPS;
+\item \texttt{lpsconstelm}: eliminate process parameters which are constant in the reachable state space;
+\item \texttt{lpsparelm}: eliminate unused parameters from an LPS;
+\item \texttt{lpsdataelm}: remove unused parts of the data specification of an LPS;
+\item \texttt{lpsrewr}: evaluate conditions through rewriting and remove unused alternatives.
 \end{itemize} 
 Most of these tools perform either transformation or conversion operations
-except for \texttt{lpeinfo} and \texttt{lpepp}. The other tools are useful
-for simplifying LPEs, which can have a substantial effect on the final size
+except for \texttt{lpsinfo} and \texttt{lpspp}. The other tools are useful
+for simplifying LPSs, which can have a substantial effect on the final size
 of the state space, or the time/space needed for generation.
  
 To get some more feeling for the kind of transformations that these tools
 perform consider the following example.
 \begin{example}
-Consider the following LPE:
+Consider the following LPS:
 \begin{mcrl2}
 act  & a;\\
      & c: \bool;\\
@@ -1901,7 +1902,7 @@ proc & P(b\ap\bool,x\ap\nat,y\ap\nat,z\ap\nat)
 init & P(\false,0,0,0);
 \end{mcrl2}
 \end{example}
-The tool \texttt{lpeparelm} eliminates process parameter $x$, while \texttt{lpeconstelm}
+The tool \texttt{lpsparelm} eliminates process parameter $x$, while \texttt{lpsconstelm}
 also eliminates $y$.
 
 \subsection{Simulation}
@@ -1909,7 +1910,7 @@ also eliminates $y$.
 Using simulation a model can be explored without generating the state space.
 It is used to get more intuition about the possible behaviour of the model
 under scrutiny.  Using the interactive simulation tools \texttt{sim} (command
-line) and \texttt{xsim} (GUI), a user can explore a model (expressed as an LPE)
+line) and \texttt{xsim} (GUI), a user can explore a model (expressed as an LPS)
 by manually performing individual (multi)actions. After an action is performed
 the simulator shows a representation of the new state (a state vector), and the
 actions that are possible from this state.
@@ -1922,7 +1923,7 @@ print traces.
 
 \subsection{State space generation}
 
-To generate a state space from an LPE the tool \texttt{lpe2lts} can be used.
+To generate a state space from an LPS the tool \texttt{lps2lts} can be used.
 The state space contains the behaviour of a model.  It can be stored in two
 different file formats: SVC and Aldebaran (AUT).  The Aldebaran format uses
 plain text which may result in large files. SVC files are more compressed but
@@ -1962,19 +1963,19 @@ Table~\ref{tab:toolref} is included for easy reference of what tools are availab
 \hline
 \textbf{Name}             & \textbf{Description}\\
 \hline
-\texttt{mcrl22lpe}                   & generate an LPE of an mCRL2 specification \\
+\texttt{mcrl22lps}                   & generate an LPS of an mCRL2 specification \\
 \hline
-\texttt{lpeinfo}                     & print some basic information about an LPE \\
-\texttt{lpepp}                       & pretty print an LPE\\
-\texttt{lpeconstelm}                 & remove constant process parameters from an LPE \\
-\texttt{lpeparelm}                   & remove unused process parameters from an LPE \\
-\texttt{lpedataelm}                  & remove unnecessary parts of the data specification of an LPE \\
-\texttt{lperewr}                     & remove unused alternatives in conditions of an LPE\\
+\texttt{lpsinfo}                     & print some basic information about an LPS \\
+\texttt{lpspp}                       & pretty print an LPS\\
+\texttt{lpsconstelm}                 & remove constant process parameters from an LPS \\
+\texttt{lpsparelm}                   & remove unused process parameters from an LPS \\
+\texttt{lpsdataelm}                  & remove unnecessary parts of the data specification of an LPS \\
+\texttt{lpsrewr}                     & remove unused alternatives in conditions of an LPS\\
 \hline
-\texttt{sim} / \texttt{xsim}         & manually explore the behaviour of an LPE \\
+\texttt{sim} / \texttt{xsim}         & manually explore the behaviour of an LPS \\
 \texttt{tracepp}                     & pretty print a trace \\
 \hline
-\texttt{lpe2lts}                     & generate the state space for an LPE \\
+\texttt{lps2lts}                     & generate the state space for an LPS \\
 \texttt{ltsconvert}                  & convert an LTS to a different format \\
 \texttt{ltsmin}                      & minimise an LTS \\
 \hline

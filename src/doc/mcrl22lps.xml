@@ -29,7 +29,7 @@
 <refsect1>
   <title>Description</title>
   <para>
-    The tool &mcrl22lps; translates an mCRL2 specification to a linear process equation
+    The tool &mcrl22lps; translates an mCRL2 specification to a linear process specification 
 (LPS). The input is read from &infile; and the output is written to
     &outfile;. If &outfile; is not present,
     &cstdout; is used. If &infile; is not present, &cstdin; is used.

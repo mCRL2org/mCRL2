@@ -311,7 +311,7 @@ typedef term_list<summand> summand_list;
 
 ///////////////////////////////////////////////////////////////////////////////
 // LPS
-/// \brief linear process equation.
+/// \brief linear process.
 ///
 class linear_process: public aterm_appl
 {

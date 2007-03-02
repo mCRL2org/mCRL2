@@ -28,7 +28,7 @@
 <refsect1>
   <title>Description</title>
   <para>
-    The &sim; tool simulates the linear process equation (LPS) in &infile; using
+    The &sim; tool simulates the linear process specification (LPS) in &infile; using
     a command-line interface. 
   </para>
   <para>

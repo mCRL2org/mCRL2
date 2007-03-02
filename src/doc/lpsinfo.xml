@@ -27,7 +27,7 @@
 <refsect1>
   <title>Description</title>
   <para>
-    Display basic information about the linear process equation (LPS) in
+    Display basic information about the linear process specification (LPS) in
     &infile;.  If &infile; is not supplied an LPS is read from &cstdin;. By
     default, the following information about the LPS is shown:
     <itemizedlist>
