@@ -42,7 +42,7 @@ int svcInit(ltsFile *file, char *filename, SVCfileMode fileMode, SVCbool *indexe
    file->fileMode=fileMode;
 
    if (fileMode==SVCread) {
-      fp=fopen(filename,"r");
+      fp=fopen(filename,"rb");
       if (fp==NULL) {
          svcErrno=EACCESS;
          return -1;
@@ -83,7 +83,7 @@ int svcInit(ltsFile *file, char *filename, SVCfileMode fileMode, SVCbool *indexe
       }
    } else {
 
-      fp=fopen(filename,"w");
+      fp=fopen(filename,"wb");
       if (fp==NULL) {
          svcErrno=EACCESS;
          return -1;

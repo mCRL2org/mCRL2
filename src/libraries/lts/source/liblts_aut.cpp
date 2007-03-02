@@ -94,6 +94,9 @@ static bool read_aut_header(char *s, char **initial_state, char **transitions, c
   while ( *s == ' ' )
     s++;
 
+  if ( *s == '\r' )
+    s++;
+
   if ( *s != '\0' )
     return false;
 
@@ -163,6 +166,9 @@ static bool read_aut_transition(char *s, char **from, char **label, char **to)
   s++;
   
   while ( *s == ' ' )
+    s++;
+
+  if ( *s == '\r' )
     s++;
 
   if ( *s != '\0' )

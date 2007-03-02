@@ -31,7 +31,7 @@ void open_lts(const char *filename, lts_options &opts)
     case OF_AUT:
       gsVerboseMsg("writing state space in AUT format to '%s'.\n",filename);
       lts_opts.outinfo = false;
-      if ( (aut = fopen(filename,"wb")) == NULL )
+      if ( (aut = fopen(filename,"w")) == NULL )
       {
         gsErrorMsg("cannot open '%s' for writing\n",filename);
         exit(1);
