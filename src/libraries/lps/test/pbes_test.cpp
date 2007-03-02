@@ -25,7 +25,7 @@ const std::string SPECIFICATION =
 "init P(0);                               \n";
 
 const std::string FORMULA  = "nu X(n:Nat = 1). [forall m:Nat. a(m)](val(n < 10)  && X(n+2))";
-const std::string FORMULA2 = "nu X. X";
+const std::string FORMULA2 = "forall m:Nat. [a(m)]false";
 
 int test_main(int argc, char* argv[])
 {
@@ -33,17 +33,18 @@ int test_main(int argc, char* argv[])
   aterm_init(bottom_of_stack);
   gsEnableConstructorFunctions();
 
-  pbes p = lps2pbes(SPECIFICATION, FORMULA2, true);
+  specification spec    = mcrl22lps(SPECIFICATION);
+  state_formula formula = mcf2statefrm(FORMULA2, spec);
+  bool timed = false;
+  pbes p = lps2pbes(spec, formula, timed);
   pbes_expression e = p.equations().front().formula();
 
   BOOST_CHECK(!p.equations().is_bes());
   BOOST_CHECK(!e.is_bes());
-  cout << "e                      = " << pp(e) << endl;
   
-  //data_expression d = pbes2data(e, spec);
-  //pbes_expression f = data2pbes(d); 
-  //cout << "pbes2data(e)           = " << pp(d) << endl;
-  //cout << "data2pbes(pbes2data(e) = " << pp(e) << endl;
-    
+  data_expression d  = pbes2data(e, spec);
+  // pbes_expression e1 = data2pbes(d);
+  // BOOST_CHECK(e == e1);
+
   return 0;
 }

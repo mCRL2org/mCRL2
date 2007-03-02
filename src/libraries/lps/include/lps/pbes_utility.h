@@ -10,6 +10,7 @@
 #include "lps/data_utility.h"
 #include "lps/sort.h"
 #include "atermpp/algorithm.h"
+#include "dataimpl.h" // implement_data_data_expr
 
 namespace lps {
 
@@ -142,9 +143,10 @@ class fresh_propositional_variable_generator
     }
 };
 
-/// Converts a pbes expression to a data expression.
+/// Converts a pbes expression to a data expression. Note that the specification
+/// spec may change as a result of this.
 inline
-data_expression pbes2data(const pbes_expression& p, const specification& spec)
+data_expression pbes2data(const pbes_expression& p, specification& spec)
 {
   using namespace pbes_expr;
   namespace d = lps::data_expr;
@@ -157,28 +159,25 @@ data_expression pbes2data(const pbes_expression& p, const specification& spec)
   } else if(is_false(p)) {
     return d::false_();
   } else if (is_and(p)) {
-    return d::and_(pbes2data(arg1(p), spec), pbes2data(arg2(p), spec));
+    return d::and_(pbes2data(lhs(p), spec), pbes2data(rhs(p), spec));
   } else if (is_or(p)) {
-    return d::or_(pbes2data(arg1(p), spec), pbes2data(arg2(p), spec));
+    return d::or_(pbes2data(lhs(p), spec), pbes2data(rhs(p), spec));
   } else if (is_forall(p)) {
-      data_expression d1 = gsMakeBinder(gsMakeForall(), list_arg1(p), pbes2data(arg2(p), spec));
-      return d1;
+      aterm_appl x = gsMakeBinder(gsMakeForall(), quant_vars(p), pbes2data(quant_expr(p), spec));
+      return implement_data_data_expr(x, spec);
   } else if (is_exists(p)) {
-      data_expression d1 = pbes2data(arg2(p), spec);
-aterm x = gsMakeBinder(gsMakeExists(), list_arg1(p), d1);
-std::cout << "x = " << x << std::endl;
-      data_expression d2 = gsMakeBinder(gsMakeExists(), list_arg1(p), d1);
-      return d2;
+      aterm_appl x = gsMakeBinder(gsMakeExists(), quant_vars(p), pbes2data(quant_expr(p), spec));
+      return implement_data_data_expr(x, spec);
   } else if (is_propositional_variable_instantiation(p)) {
-    identifier_string vname = arg1(p);
-    data_expression_list parameters = list_arg2(p);
+    identifier_string vname = var_name(p);
+    data_expression_list parameters = var_val(p);
     sort_list sorts = apply(parameters, gsGetSort);
     lps::sort vsort = gsMakeSortArrowList(sorts, s::bool_());
     data_variable v(gsMakeDataVarId(vname, vsort));
     return gsMakeDataApplList(v, parameters);
   }
   throw std::runtime_error(std::string("pbes2data error: unknown pbes_variable_instantiation ") + p.to_string());
-  return data_expression();
+  return data_expression(); // to prevent compiler warnings
 }
 
 /// Converts a data expression to a pbes expression.

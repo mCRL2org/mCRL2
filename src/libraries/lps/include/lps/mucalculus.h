@@ -322,7 +322,7 @@ data_expression time(state_formula t)
 inline
 identifier_string var_name(state_formula t)
 {
-  assert(gsIsStateVar(t) || gsIsStateMu(t) || gsIsStateNu(t));
+  assert(gsIsStateVar(t));
   return arg1(t);
 }
 

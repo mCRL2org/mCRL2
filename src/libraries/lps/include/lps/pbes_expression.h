@@ -164,20 +164,6 @@ pbes_expression exists(data_variable_list l, pbes_expression p)
   return pbes_expression(gsMakePBESExists(l, p));
 }
 
-/*
-inline
-pbes_fixpoint_symbol mu()
-{
-  return pbes_equation::mu();
-}
-
-inline
-pbes_fixpoint_symbol nu()
-{
-  return pbes_equation::nu();
-}
-*/
-
 /// Returns or_ applied to the sequence of pbes expressions [first, last[
 template <typename FwdIt>
 inline pbes_expression multi_or(FwdIt first, FwdIt last)
@@ -240,6 +226,22 @@ pbes_expression quant_expr(pbes_expression t)
 {
   assert(gsIsPBESExists(t) || gsIsPBESForall(t));
   return arg2(t);
+}
+
+/// Returns the name of a propositional variable.
+inline
+identifier_string var_name(pbes_expression t)
+{
+  assert(gsIsPropVarInst(t));
+  return arg1(t);
+}
+
+/// Returns the value of a propositional variable.
+inline
+data_expression_list var_val(pbes_expression t)
+{
+  assert(gsIsPropVarInst(t));
+  return list_arg2(t);
 }
 
 } // namespace pbes_expr

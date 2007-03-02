@@ -8,7 +8,6 @@
 #include "lps/specification.h"
 #include "lps/sort.h"
 #include "lps/detail/tools.h"
-#include "lps/soundness_checks.h"
 #include "test_specifications.h"
 
 using namespace std;

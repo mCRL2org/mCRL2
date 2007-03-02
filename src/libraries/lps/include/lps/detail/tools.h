@@ -60,18 +60,25 @@ namespace detail {
     return lps::pbes_translate(formula, spec, timed);
   }
 
-  // 
   inline
-  pbes lps2pbes(const std::string& spec_text, const std::string& formula_text, bool timed)
+  state_formula mcf2statefrm(const std::string& formula_text, const specification& spec)
   {
-    pbes result;
-    specification spec = mcrl22lps(spec_text);
     std::stringstream formula_stream;
     formula_stream << formula_text;
     ATermAppl f = parse_state_formula(formula_stream);
     f = type_check_state_formula(f, spec);
     f = implement_data_state_formula(f, spec);
     f = translate_regular_formula(f);
+    return f;
+  }
+
+  // 
+  inline
+  pbes lps2pbes(const std::string& spec_text, const std::string& formula_text, bool timed)
+  {
+    pbes result;
+    specification spec = mcrl22lps(spec_text);
+    state_formula f = mcf2statefrm(formula_text, spec);
     return lps2pbes(spec, f, timed);
   }
 
