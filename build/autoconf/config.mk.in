@@ -15,9 +15,10 @@ mandir             = @mandir@
 BJAM               = @BJAM@
 BOOST_BUILD       := $(BJAM) --prefix=${prefix}
 
-XSLTPROC           = @XSLTPROC@
+DOCBOOK_XSL_PREFIX = @abs_top_srcdir@/3rd-party/docbook/xsl
+XSLTPROC           = XML_CATALOG_FILES=$(DOCBOOK_XSL_PREFIX)/catalog.xml @XSLTPROC@
 
-ifndef ($(XSLTPROC),)
-  MAN_MANIFEST = @abs_top_builddir@/build/bin/MAN.MANIFEST
+ifndef (@XSLTPROC@,)
+  MAN_MANIFEST = @abs_top_srcdir@/build/bin/MAN.MANIFEST
 endif
 

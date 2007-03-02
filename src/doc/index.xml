@@ -1,13 +1,12 @@
-<?xml version='1.0'?>
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
-               "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
 <!ENTITY actname "<parameter>ACTNAME</parameter>">
 <!ENTITY actnames "<parameter>ACTNAMES</parameter>">
 <!ENTITY advanced "<parameter>advanced</parameter>">
 <!ENTITY answer_no "<constant>answer_no</constant>">
 <!ENTITY answer_undefined "<constant>answer_undefined</constant>">
 <!ENTITY answer_yes "<constant>answer_yes</constant>">
-<!ENTITY aterm                '<acronym>ATerm</acronym>'>
+<!ENTITY aterm "<acronym>ATerm</acronym>">
 <!ENTITY basic "<parameter>basic</parameter>">
 <!ENTITY bdd2dot_output_bdd "<function>BDD2Dot::output_bdd</function>">
 <!ENTITY bdd_path_eliminator_constructor "<function>BDD_Path_Eliminator::BDD_Path_Eliminator</function>">
@@ -42,7 +41,7 @@
 <!ENTITY class_smt_solver_ario "<classname>SMT_Solver_Ario</classname>">
 <!ENTITY class_smt_solver "<classname>SMT_Solver</classname>">
 <!ENTITY class_smt_solver_cvc_lite "<classname>SMT_Solver_CVC_Lite</classname>">
-<!ENTITY cnull                '<constant>NULL</constant>'>
+<!ENTITY cnull "<constant>NULL</constant>">
 <!ENTITY confluence_checker_check_confluence_and_mark "<function>Confluence_Checker::check_confluence_and_mark</function>">
 <!ENTITY confluence_checker_constructor "<function>Confluence_Checker::Confluence_Checker</function>">
 <!ENTITY const_false "<constant>false</constant>">
@@ -53,12 +52,12 @@
 <!ENTITY const_strat_jitty "<constant>GS_REWR_JITTY</constant>">
 <!ENTITY const_true "<constant>true</constant>">
 <!ENTITY createRewriter "<function>createRewriter</function>">
-<!ENTITY cstderr              '<constant>stderr</constant>'>
-<!ENTITY cstdin               '<constant>stdin</constant>'>
-<!ENTITY cstdout              '<constant>stdout</constant>'>
+<!ENTITY cstderr "<constant>stderr</constant>">
+<!ENTITY cstdin "<constant>stdin</constant>">
+<!ENTITY cstdout "<constant>stdout</constant>">
 <!ENTITY ctau "<literal>ctau</literal>">
 <!ENTITY ctrl-d "<parameter>Ctrl-D</parameter>">
-<!ENTITY cwi                  '<acronym>CWI</acronym>'>
+<!ENTITY cwi "<acronym>CWI</acronym>">
 <!ENTITY debug "<parameter>debug</parameter>">
 <!ENTITY default "<parameter>default</parameter>">
 <!ENTITY disjointness_checker_constructor "<function>Disjointness_Checker::Disjointness_Checker</function>">
@@ -66,7 +65,7 @@
 <!ENTITY dot "<constant>dot</constant>">
 <!ENTITY false "<constant>false</constant>">
 <!ENTITY file "<parameter>FILE</parameter>">
-<!ENTITY fmcparsemodalformula '<function>MCparseModalFormula</function>'>
+<!ENTITY fmcparsemodalformula "<function>MCparseModalFormula</function>">
 <!ENTITY format "<parameter>FORMAT</parameter>">
 <!ENTITY formula_checker_check_formulas "<function>Formula_Checker::check_formulas</function>">
 <!ENTITY formula_checker_constructor "<function>Formula_Checker::Formula_Checker</function>">
@@ -89,27 +88,25 @@
 <!ENTITY invariant "<parameter>INVARIANT</parameter>">
 <!ENTITY inv "<literal>inv()</literal>">
 <!ENTITY isValidRewriteRule "<function>isValidRewriteRule</function>">
-<!ENTITY mcrl                 '<acronym>mCRL</acronym>'>
-<!ENTITY naf                  '<literal>AF</literal>'>
+<!ENTITY mcrl "<acronym>mCRL</acronym>">
+<!ENTITY naf "<literal>AF</literal>">
 <!ENTITY name "<parameter>NAME</parameter>">
-<!ENTITY nan                  '<literal>AN</literal>'>
-<!ENTITY ndtlist              '<literal>DT_LIST</literal>'>
-<!ENTITY ndtlist     '<literal>DT_LIST</literal>'>
-<!ENTITY ndt                  '<literal>DT</literal>'>
-<!ENTITY ndt         '<literal>DT</literal>'>
-<!ENTITY nform       '<literal>FORM</literal>'>
-<!ENTITY nfpvd       '<literal>FP_VD</literal>'>
-<!ENTITY nfpvo       '<literal>FP_VO</literal>'>
-<!ENTITY nmf                  '<literal>MF</literal>'>
-<!ENTITY nname                '<literal>NAME</literal>'>
-<!ENTITY nrf                  '<literal>RF</literal>'>
-<!ENTITY nrname               '<literal>RNAME</literal>'>
+<!ENTITY nan "<literal>AN</literal>">
+<!ENTITY ndtlist "<literal>DT_LIST</literal>">
+<!ENTITY ndt "<literal>DT</literal>">
+<!ENTITY nform "<literal>FORM</literal>">
+<!ENTITY nfpvd "<literal>FP_VD</literal>">
+<!ENTITY nfpvo "<literal>FP_VO</literal>">
+<!ENTITY nmf "<literal>MF</literal>">
+<!ENTITY nname "<literal>NAME</literal>">
+<!ENTITY nrf "<literal>RF</literal>">
+<!ENTITY nrname "<literal>RNAME</literal>">
 <!ENTITY num "<parameter>NUM</parameter>">
-<!ENTITY nvdilist    '<literal>VDI_LIST</literal>'>
-<!ENTITY nvdi        '<literal>VDI</literal>'>
-<!ENTITY nvdlist              '<literal>VD_LIST</literal>'>
-<!ENTITY nvd                  '<literal>VD</literal>'>
-<!ENTITY nvo                  '<literal>VO</literal>'>
+<!ENTITY nvdilist "<literal>VDI_LIST</literal>">
+<!ENTITY nvdi "<literal>VDI</literal>">
+<!ENTITY nvdlist "<literal>VD_LIST</literal>">
+<!ENTITY nvd "<literal>VD</literal>">
+<!ENTITY nvo "<literal>VO</literal>">
 <!ENTITY opt_0 "<option>-0</option>">
 <!ENTITY opt_1 "<option>-1</option>">
 <!ENTITY opt_2 "<option>-2</option>">
@@ -171,7 +168,7 @@
 <!ENTITY opt_newstate "<option>--newstate</option>">
 <!ENTITY opt_no-alpha "<option>--no-alpha</option>">
 <!ENTITY opt_no_check "<option>--no-check</option>">
-<!ENTITY opt_no-cluster  "<option>--no-cluster</option>">
+<!ENTITY opt_no-cluster "<option>--no-cluster</option>">
 <!ENTITY opt_nocondition "<option>--no-condition</option>">
 <!ENTITY opt_noconvcons "<option>--no-conv-cons</option>">
 <!ENTITY opt_noconvmaps "<option>--no-conv-maps</option>">
@@ -229,7 +226,7 @@
 <!ENTITY opt_y "<option>-y</option>">
 <!ENTITY opt_z "<option>-z</option>">
 <!ENTITY outfile "<parameter>OUTFILE</parameter>">
-<!ENTITY paclevel             '<parameter>acLevel</parameter>'>
+<!ENTITY paclevel "<parameter>acLevel</parameter>">
 <!ENTITY par_all_violations "<parameter>a_all_violations</parameter>">
 <!ENTITY par_apply_induction "<parameter>a_apply_induction</parameter>">
 <!ENTITY par_bdd "<parameter>a_bdd</parameter>">
@@ -270,8 +267,8 @@
 <!ENTITY par_time_limit "<parameter>a_time_limit</parameter>">
 <!ENTITY parVar "<parameter>Var</parameter>">
 <!ENTITY par_witness "<parameter>a_witness</parameter>">
-<!ENTITY pformstream          '<parameter>formStream</parameter>'>
-<!ENTITY preduce              '<parameter>reduce</parameter>'>
+<!ENTITY pformstream "<parameter>formStream</parameter>">
+<!ENTITY preduce "<parameter>reduce</parameter>">
 <!ENTITY prefix "<parameter>PREFIX</parameter>">
 <!ENTITY PrintRewriteStrategy "<function>PrintRewriteStrategy</function>">
 <!ENTITY prover_constructor "<function>Prover::Prover</function>">
@@ -281,9 +278,9 @@
 <!ENTITY prover_is_tautology "<function>Prover::is_tautology</function>">
 <!ENTITY prover_set_formula "<function>Prover::set_formula</function>">
 <!ENTITY prover_set_time_limit "<function>Prover::set_time_limit</function>">
-<!ENTITY psavetomcrlformat    '<parameter>saveToMCRLFormat</parameter>'>
-<!ENTITY pvblevel             '<parameter>vbLevel</parameter>'>
-<!ENTITY refmucalculus        '<literal>mucalculus(7)</literal>'>
+<!ENTITY psavetomcrlformat "<parameter>saveToMCRLFormat</parameter>">
+<!ENTITY pvblevel "<parameter>vbLevel</parameter>">
+<!ENTITY refmucalculus "<literal>mucalculus(7)</literal>">
 <!ENTITY Rewriter_addRule "<function>Rewriter::addRewriteRule</function>">
 <!ENTITY Rewriter_clearsubst "<function>Rewriter::clearSubstitution</function>">
 <!ENTITY Rewriter_clearsubsts "<function>Rewriter::clearSubstitutions</function>">
@@ -299,7 +296,7 @@
 <!ENTITY Rewriter_setsubst "<function>Rewriter::setSubstitution</function>">
 <!ENTITY Rewriter_toInt "<function>Rewriter::toRewriteFormat</function>">
 <!ENTITY RewriteStrategyFromString "<function>RewriteStrategyFromString</function>">
-<!ENTITY sbool       '<literal>"Bool"</literal>'>
+<!ENTITY sbool '<literal>"Bool"</literal>'>
 <!ENTITY seconds "<parameter>SECONDS</parameter>">
 <!ENTITY smt_lib_solver_translate "<function>SMT_LIB_Solver::translate</function>">
 <!ENTITY smt_solver_ario_constructor "<function>SMT_Solver_Ario::SMT_Solver_Ario</function>">
@@ -317,7 +314,6 @@
 <!ENTITY solver_cvc_lite-lnk "&solver_cvc_lite; (&solver_cvc_lite-url;)">
 <!ENTITY solver "<parameter>SOLVER</parameter>">
 <!ENTITY sort_bool "<constant>Bool</constant>">
-<!ENTITY sort_bool "<type>Bool</type>">
 <!ENTITY sort_pos "<constant>Pos</constant>">
 <!ENTITY stderr "<constant>stderr</constant>">
 <!ENTITY stdin "<constant>stdin</constant>">
@@ -325,49 +321,45 @@
 <!ENTITY stratINNERC "<constant>GS_REWR_INNERC</constant>">
 <!ENTITY stratINNER "<constant>GS_REWR_INNER</constant>">
 <!ENTITY strat_innerc_string "<constant>'innerc'</constant>">
-<!ENTITY strat_innerc_string "<constant>innerc</constant>">
 <!ENTITY strat_inner_string "<constant>'inner'</constant>">
-<!ENTITY strat_inner_string "<constant>inner</constant>">
 <!ENTITY stratINNERstring "<constant>inner</constant>">
 <!ENTITY stratINVALID "<constant>GS_REWR_INVALID</constant>">
 <!ENTITY stratJITTYC "<constant>GS_REWR_JITTYC</constant>">
 <!ENTITY strat_jitty "<constant>GS_REWR_JITTY</constant>">
 <!ENTITY stratJITTY "<constant>GS_REWR_JITTY</constant>">
 <!ENTITY strat_jittyc_string "<constant>'jittyc'</constant>">
-<!ENTITY strat_jittyc_string "<constant>jittyc</constant>">
 <!ENTITY strat_jitty_string "<constant>'jitty'</constant>">
-<!ENTITY strat_jitty_string "<constant>jitty</constant>">
-<!ENTITY tact                 "'<literal>act</literal>'">
-<!ENTITY tand                 "'<literal>and</literal>'">
+<!ENTITY tact "'<literal>act</literal>'">
+<!ENTITY tand "'<literal>and</literal>'">
 <!ENTITY tau "<literal>tau</literal>">
-<!ENTITY tbool                '<type>_Bool</type>'>
+<!ENTITY tbool "<type>_Bool</type>">
 <!ENTITY tcbool "<type>bool</type>">
-<!ENTITY tchoice              "'<literal>choice</literal>'">
-<!ENTITY tconcat              "'<literal>concat</literal>'">
-<!ENTITY teq                  "'<literal>eq</literal>'">
-<!ENTITY texists              "'<literal>exists</literal>'">
-<!ENTITY tfalse               "'<literal>F</literal>'">
-<!ENTITY tfile                '<type>FILE</type>'>
-<!ENTITY tforall              "'<literal>forall</literal>'">
-<!ENTITY tform                "'<literal>form</literal>'">
-<!ENTITY timp                 "'<literal>imp</literal>'">
-<!ENTITY tloop                "'<literal>loop</literal>'">
-<!ENTITY tmay                 "'<literal>may</literal>'">
-<!ENTITY tmu                  "'<literal>mu</literal>'">
-<!ENTITY tmust                "'<literal>must</literal>'">
-<!ENTITY tnil                 "'<literal>nil</literal>'">
-<!ENTITY tnot                 "'<literal>not</literal>'">
-<!ENTITY tnu                  "'<literal>nu</literal>'">
-<!ENTITY tor                  "'<literal>or</literal>'">
+<!ENTITY tchoice "'<literal>choice</literal>'">
+<!ENTITY tconcat "'<literal>concat</literal>'">
+<!ENTITY teq "'<literal>eq</literal>'">
+<!ENTITY texists "'<literal>exists</literal>'">
+<!ENTITY tfalse "'<literal>F</literal>'">
+<!ENTITY tfile "<type>FILE</type>">
+<!ENTITY tforall "'<literal>forall</literal>'">
+<!ENTITY tform "'<literal>form</literal>'">
+<!ENTITY timp "'<literal>imp</literal>'">
+<!ENTITY tloop "'<literal>loop</literal>'">
+<!ENTITY tmay "'<literal>may</literal>'">
+<!ENTITY tmu "'<literal>mu</literal>'">
+<!ENTITY tmust "'<literal>must</literal>'">
+<!ENTITY tnil "'<literal>nil</literal>'">
+<!ENTITY tnot "'<literal>not</literal>'">
+<!ENTITY tnu "'<literal>nu</literal>'">
+<!ENTITY tor "'<literal>or</literal>'">
 <!ENTITY tpfile "<type>FILE*</type>">
 <!ENTITY tpRewriter "<type>Rewriter *</type>">
-<!ENTITY trec                 "'<literal>rec</literal>'">
+<!ENTITY trec "'<literal>rec</literal>'">
 <!ENTITY tRewriter "<type>Rewriter</type>">
 <!ENTITY trewrstrat "<type>RewriteStrategy</type>">
-<!ENTITY ttclose              "'<literal>t_close</literal>'">
-<!ENTITY ttrclose             "'<literal>tr_close</literal>'">
-<!ENTITY ttrue                "'<literal>T</literal>'">
-<!ENTITY tvar                 "'<literal>v</literal>'">
+<!ENTITY ttclose "'<literal>t_close</literal>'">
+<!ENTITY ttrclose "'<literal>tr_close</literal>'">
+<!ENTITY ttrue "'<literal>T</literal>'">
+<!ENTITY tvar "'<literal>v</literal>'">
 <!ENTITY type_abstract "<type>abstract</type>">
 <!ENTITY type_atermappl "<type>ATermAppl</type>">
 <!ENTITY type_atermlist "<type>ATermList</type>">
@@ -385,10 +377,8 @@
 <!ENTITY type_void "<type>void</type>">
 <!ENTITY var_benchmark "<varname>f_benchmark</varname>">
 <!ENTITY virtual "<type>virtual</type>">
-
 <!-- bug mail address -->
 <!ENTITY bugmail "<email>bug@mcrl2.org</email>">
-
 <!-- tools -->
 <!ENTITY lps2lts "<command>lps2lts</command>">
 <!ENTITY lps2torx "<command>lps2torx</command>">
@@ -418,7 +408,6 @@
 <!ENTITY tbf2lps "<command>tbf2lps</command>">
 <!ENTITY tracepp "<command>tracepp</command>">
 <!ENTITY xsim "<command>xsim</command>">
-
 <!-- tools with link -->
 <!ENTITY lps2lts-lnk "<link linkend='lps2lts'>&lps2lts;</link>">
 <!ENTITY sim-lnk "<link linkend='sim'>&sim;</link>">
@@ -448,7 +437,6 @@
 <!ENTITY tbf2lps-lnk "<link linkend='tbf2lps'>&tbf2lps;</link>">
 <!ENTITY tracepp-lnk "<link linkend='tracepp'>&tracepp;</link>">
 <!ENTITY xsim-lnk "<link linkend='xsim'>&xsim;</link>">
-
 <!-- list of source files to be included -->
 <!ENTITY fbdd2dot SYSTEM "bdd2dot.xml">
 <!ENTITY fbdd_path_eliminator SYSTEM "bdd_path_eliminator.xml">

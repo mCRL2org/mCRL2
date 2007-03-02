@@ -54,9 +54,9 @@ import toolset : using ;
 #  Configure with explicit installation prefix
 #  using qt : /usr/opt/qt ;
 
-local CONFIG_JAM = [ build-system.location ] ;
+local TOP        = [ path.join [ build-system.location ] ../../../../.. ] ;
 
-CONFIG_JAM = $(CONFIG_JAM)"/../../../../../build/config.jam" ;
+CONFIG_JAM = $(TOP)"/build/config.jam" ;
 
 if ! [ path.exists $(CONFIG_JAM) ] {
   import errors ;
@@ -70,11 +70,12 @@ else {
 
   import_user_config ;
 }
+
 using boostbook
-  : /tmp/MCRLC/3rd-party/boost/tools/boostbook/docbook-xsl-1.71.1
-  : /tmp/MCRLC/3rd-party/boost/tools/boostbook/docbook-dtd-4.5
+  : $(TOP)/3rd-party/docbook/xsl
+  : $(TOP)/3rd-party/docbook/dtd
   ; 
+
 using xsltproc : xsltproc ;
 using doxygen : doxygen ;
-using quickbook : /home/jwulp/quickbook ;
-using fop : /tmp/MCRLC/3rd-party/boost/tools/boostbook/fop-0.20.5/fop.sh : : java ;
+using quickbook : "$(TOP)/build/bin/quickbook" ;

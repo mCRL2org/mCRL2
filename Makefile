@@ -43,18 +43,19 @@ parsers:
 	cp /usr/include/FlexLexer.h build/workarounds
 
 $(MAN_MANIFEST): src/doc/*.xml
-	@cd ./src/doc; $(XSLTPROC) --stringparam man.output.subdirs.enabled 1 \
+	cd ./src/doc; $(XSLTPROC) --stringparam man.output.subdirs.enabled 1 \
 	             --stringparam man.output.manifest.enabled 1 \
 	             --stringparam man.output.manifest.filename $(MAN_MANIFEST) \
 	             --stringparam man.output.in.separate.dir 1 \
 	             --stringparam man.output.base.dir ../../build/man/ \
-		     http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl index.xml
+		     $(DOCBOOK_XSL_PREFIX)/manpages/docbook.xsl index.xml
+
 man: $(MAN_MANIFEST)
 
 web: 
-	@cd ./src/doc; $(XSLTPROC) --stringparam base.dir ../../build/web/ \
+	cd ./src/doc; $(XSLTPROC) --stringparam base.dir ../../build/web/ \
 	             --stringparam html.stylesheet man.css \
-		     http://docbook.sourceforge.net/release/xsl/current/html/chunk.xsl index.xml; \
+		     $(DOCBOOK_XSL_PREFIX)/html/chunk.xsl index.xml; \
 	 install -m 0644 man.css ../../build/web/
 
 configure: build/autoconf/configure.ac

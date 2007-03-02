@@ -406,7 +406,7 @@
 <!ENTITY % type.module           "IGNORE">
 
 <!--========== Import DocBook DTD ==========-->
-<!ENTITY % DocBook PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
-           "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+<!ENTITY % DocBook PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+           "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
  
 %DocBook;
