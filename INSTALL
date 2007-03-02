@@ -4,9 +4,11 @@ Installation Instructions
 Supported compiler suites
 =========================
 
-GCC versions 3.4 and higher
-MSVC 8.0 (requires service pack 1)
-Apple's patched gcc distributed with XCode 2.4.1 and higher
+The following compiler suites are supported:
+- GCC versions 3.4 and higher
+- MSVC 8.0 (requires service pack 1)
+- Apple's patched gcc distributed with XCode 2.4.1 and higher
+
 
 Packages (Debian)
 =================
@@ -16,51 +18,62 @@ called the same on other systems. Only top-level packages are mentioned; lower
 level packages are (usually) automatically installed. Furthermore, the status
 of the packages is mentioned (required, recommended or optional):
 - make >= 3.80: package make [required]
-- flex >= 2.5.4a-12: package flex [optional]
-- bison >= 2.0: package bison [optional]
 - wxWidgets >= 2.6.2: package libwxgtk2.6-dev or libwxgtk2.6-dbg [recommended]
    + for the ltsview tool wxWidgets must be build with OpenGL support (--with-opengl)
-- xml2 development libraries >= 2.6.22: package libxml2-dev [recommended]
+- xsltproc: package xsltproc [recommended]
 - default icon locations: package gnome-themes, gnome-themes-extras or
   hicolor-icon-theme [optional]
-
-Note: at this moment the toolset does not properly install without wxWidgets
-and libXML2. A workaround is to do a manual install after make. The cause of
-this is a bug in Boost Build v2 (build environment) for which no easy
-workaround seems possible at this time. At least no solution that does not
-bring back problems that have been solved with the last significant changes to
-the build procedure.
+- flex >= 2.5.4a-12: package flex [optional]
+- bison >= 2.0: package bison [optional]
+- doxygen: package doxygen [optional]
+- python: package python [optional]
 
 The required packages enable the following tools:
-+ mcrl22lps:   translate an mCRL2 specification into a linear process equation
-               (LPS)
-+ lpspp:       pretty print an LPS as an mCRL2 specification
-+ lpsinfo:     print basic information of an LPS
-+ sim:         text based simulator for LPSs
-+ lpsrewr:     rewrite data expressions in an LPS
-+ lpsdataelm:  remove unused parts of the data specification of an LPS
-+ lpsconstelm: remove constant process parameters from an LPS
-+ lpsparelm:   remove unused process parameters from an LPS
-+ lps2lts:     generate a labelled transition system (LTS) from an LPS
-+ ltsinfo:     print basic information of an LTS
-+ ltsconvert:  convert an LTS, possibly using minimisation
-+ ltscompare:  compare two LTS's
-+ tracepp:     pretty print a trace
-+ tbf2lps:     convert an mCRL LPS to an mCRL2 LPS
-+ lps2torx:    provide TorX with an explorer interface using an LPS
++ mcrl22lps:    translate an mCRL2 specification into a linear process
+                specification (LPS)
++ lpspp:        pretty print an LPS as an mCRL2 specification
++ lpsinfo:      print basic information of an LPS
++ sim:          text based simulator for LPSs
++ lpsrewr:      rewrite data expressions in an LPS
++ lpsdataelm:   remove unused parts of the data specification of an LPS
++ lpsconstelm:  remove constant process parameters from an LPS
++ lpssumelm:    remove summation variables from an LPS
++ lpsparelm:    remove unused process parameters from an LPS
++ lpsuntime:    remove time from an LPS
++ lpsformcheck: check formulas using the data specification of an LPS
++ lpsinvelm:    check invariants and use these to simplify an LPS 
++ lps2lts:      generate a labelled transition system (LTS) from an LPS
++ ltsinfo:      print basic information of an LTS
++ ltsconvert:   convert an LTS, possibly using minimisation
++ ltscompare:   compare two LTS's
++ tracepp:      pretty print a trace
++ tbf2lps:      convert an mCRL LPS to an mCRL2 LPS
++ lps2torx:     provide TorX with an explorer interface using an LPS
++ pnml2mcrl2:   convert classic Petri nets in the PNML format to mCRL2
++ pbesinfo:     print basic information of a parameterised boolean
+                equation system (PBES)
 
-The recommended packages libwxgtk2.6-dev [1] and libxml2-dev [2] enable the
-following tools:
-+ pnml2mcrl2:  convert classic Petri nets in the PNML format to mCRL2 [2]
-+ xsim:        graphical simulator for LPSs [1]
-+ ltsgraph:    visualise an LTS in 2D using spring model techniques [1]
+The recommended packages for wxWidgets enable the following tools:
++ xsim:        graphical simulator for LPSs
++ ltsgraph:    visualise an LTS in 2D using spring model techniques
 + ltsview:     visualise an LTS in FSM format in 3D using clustering techniques
-               [1]
-+ squadt:      systems quality analysis and design toolset [1,2]
++ squadt:      systems quality analysis and design toolset
 
-Any of the default icon location packages ensures that xsim doesn't generate
-warnings on missing icons.
+Note: at this moment the toolset does not properly install without wxWidgets.
+A workaround is to do a manual install after make. The cause of this is a bug
+in Boost Build v2 (build environment) for which no easy workaround seems
+possible at this time. At least no solution that does not bring back problems
+that have been solved with the last significant changes to the build procedure.
 
+The recommended package for xstlproc enables the installation of the
+documentation.
+
+Any of the default icon location packages ensures that any of the above tools
+do not generate warnings on missing icons.
+
+The packages for flex, bison, and python are used to generate source code.
+The package for doxygen is used to generate html documentation for the web
+page. These packages are only needed for developers of the toolset.
 
 Installation
 ============
@@ -93,6 +106,7 @@ setenv MACOSX_DEPLOYMENT_TARGET 10.3
 For bash, add the following line to your local .bashrc:
 
 export MACOSX_DEPLOYMENT_TARGET=10.3
+
 
 Syntax highlighting (vim)
 =========================
