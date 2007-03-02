@@ -63,5 +63,11 @@ configure: build/autoconf/configure.ac
 
 include build/make/bjam.mk
 
-$(CONFIG):
+config.log:
 	$(error Please run configure first)
+
+config.status: configure config.log
+	@./config.status --recheck
+	@./config.status
+
+$(CONFIG): config.status
