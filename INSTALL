@@ -1,6 +1,13 @@
 Installation Instructions
 *************************
 
+Supported compiler suites
+=========================
+
+GCC versions 3.4 and higher
+MSVC 8.0 (requires service pack 1)
+Apple's patched gcc distributed with XCode 2.4.1 and higher
+
 Packages (Debian)
 =================
 
@@ -86,7 +93,6 @@ setenv MACOSX_DEPLOYMENT_TARGET 10.3
 For bash, add the following line to your local .bashrc:
 
 export MACOSX_DEPLOYMENT_TARGET=10.3
-
 
 Syntax highlighting (vim)
 =========================
