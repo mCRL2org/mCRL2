@@ -12,7 +12,6 @@
 #include <wx/config.h>
 #include <wx/textfile.h>
 #include <wx/dynarray.h>
-#include <fstream>
 #include <sstream>
 #include <cstdlib>
 #include <aterm2.h>
@@ -765,9 +764,14 @@ void XSimMain::OnLoadTrace( wxCommandEvent& /* event */ )
     wxFileDialog dialog( this, wxT("Load trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"));
     if ( dialog.ShowModal() == wxID_OK )
     {
-	    ifstream f(dialog.GetPath().fn_str());
-	    Trace tr(f);
-	    f.close();
+	    string fn(dialog.GetPath());
+	    Trace tr;
+	    if ( !tr.load(fn) )
+	    {
+		    wxMessageDialog dialog(this,wxT("Cannot read trace from file.\n"),wxT("Error reading file"),wxOK|wxICON_ERROR);
+		    dialog.ShowModal();
+		    return;
+	    }
 
 	    //SetInteractiveness(false);
 	    Stopper_Enter();
@@ -867,15 +871,6 @@ void XSimMain::OnSaveTrace( wxCommandEvent& /* event */ )
     wxFileDialog dialog( this, wxT("Save trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"),wxFD_SAVE);
     if ( dialog.ShowModal() == wxID_OK )
     {
-	    ofstream f(dialog.GetPath().mb_str());
-
-	    if ( !f.is_open() )
-            {
-              wxMessageDialog dialog(this,wxT("Cannot open file for writing"),wxT("File error"),wxOK|wxICON_ERROR);
-              dialog.ShowModal();
-              return;
-            }
-
 	    Trace tr;
 	    if ( !ATisEmpty(trace) )
 	    {
@@ -889,9 +884,14 @@ void XSimMain::OnSaveTrace( wxCommandEvent& /* event */ )
                         f << endl;*/
 		    }
 	    }
-	    tr.save(f);
-	    
-            f.close();
+
+	    string fn(dialog.GetPath());
+	    if ( !tr.save(fn) )
+            {
+              wxMessageDialog dialog(this,wxT("Cannot save trace to file"),wxT("File error"),wxOK|wxICON_ERROR);
+              dialog.ShowModal();
+              return;
+            }
     }
 }
 
