@@ -764,7 +764,7 @@ void XSimMain::OnLoadTrace( wxCommandEvent& /* event */ )
     wxFileDialog dialog( this, wxT("Load trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"));
     if ( dialog.ShowModal() == wxID_OK )
     {
-	    string fn(dialog.GetPath());
+	    string fn(dialog.GetPath().fn_str());
 	    Trace tr;
 	    if ( !tr.load(fn) )
 	    {
@@ -885,7 +885,7 @@ void XSimMain::OnSaveTrace( wxCommandEvent& /* event */ )
 		    }
 	    }
 
-	    string fn(dialog.GetPath());
+	    string fn(dialog.GetPath().fn_str());
 	    if ( !tr.save(fn) )
             {
               wxMessageDialog dialog(this,wxT("Cannot save trace to file"),wxT("File error"),wxOK|wxICON_ERROR);

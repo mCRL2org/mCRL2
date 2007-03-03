@@ -17,3 +17,8 @@ exe squadt
         <include>$(SETUP)
         <threading>multi
       ;
+
+exe visitor_test
+      : visitor_test.cpp
+      : <use>/libraries/utility//headers
+      ;
