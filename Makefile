@@ -16,7 +16,7 @@ tools:
 	$(BOOST_BUILD)
 
 clean:
-	$(RM) -r autom4te.cache config.log core core.*
+	@$(RM) -r autom4te.cache core core.*
 	$(RM) -rf build/bin/*
 	$(RM) -rf build/man
 	$(RM) -rf build/web
