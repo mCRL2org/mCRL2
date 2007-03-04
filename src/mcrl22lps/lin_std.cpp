@@ -3331,7 +3331,7 @@ static void procstorealGNF(ATermAppl procsIdDecl, int regular)
 }
 
 
-/**************** GENERATE LPS **********************************/
+/**************** GENERATE LPE **********************************/
 /*                                                              */
 /*                                                              */
 /*                                                              */
@@ -3704,9 +3704,15 @@ static stacklisttype *new_stack(
   if (regular)
   { stack->opns=NULL;
     if (oldstate==0)
-    { enumeratedtype *e=create_enumeratedtype(no_of_states,spec);
-      stack->stackvar=gsMakeDataVarId(fresh_name(s3),
+    { if (!binary)
+      { enumeratedtype *e=create_enumeratedtype(no_of_states,spec);
+        stack->stackvar=gsMakeDataVarId(fresh_name(s3),
                                     e->sortId); 
+      }
+      else
+      { stack->stackvar=gsMakeDataVarId(fresh_name(s3),
+                                              gsMakeSortExprBool());
+      }
     }
     else
     { stack->stackvar=gsMakeDataVarId(fresh_name(s3),
@@ -3911,21 +3917,6 @@ static ATermAppl getvar(ATermAppl var,stacklisttype *stack, specificationbasicty
 
 ATermList sumlist=NULL;
 
-/* static ATerm processencoding_rec(int i)
-{ ATerm t3=NULL;
-  
-  if (i==1) 
-     t3=ATmake("t(<str>,emt))",controlstate->one);
-  else
-   {if ((i % 2)==0)
-       t3=ATmake("t(<str>,ins(<term>,emt))",controlstate->x2plus0,
-              processencoding_rec(i/2));
-    else
-       t3=ATmake("t(<str>,ins(<term>,emt))",controlstate->x2plus1,
-               processencoding_rec((i-1)/2));
-   }
-  return t3; 
-} */
 
 static ATermList processencoding(
                      int i,
@@ -4433,12 +4424,13 @@ static ATermList make_initialstate(
 
 /*************************  Routines for summands  **************************/
 
-static ATermList dummyparameterlist(stacklisttype *stack, ATbool singlestate)
+static ATermList dummyparameterlist(stacklisttype *stack, ATbool singlestate,specificationbasictype *spec)
 { if (singlestate)
   { return stack->parameterlist;
   }
 
-  return ATinsertA(stack->parameterlist,stack->stackvar);
+  return processencoding(1,stack->parameterlist,spec,stack); /* Take 1 as dummy indicator */
+  /* return ATinsertA(stack->parameterlist,stack->stackvar); Erroneous, repaired 5/3 */
 }
 
 static int identicalActionIds_rec(ATermList ma1, ATermList ma2)
@@ -4574,13 +4566,13 @@ static void add_summands(
   ATermAppl condition1=NULL,condition2=NULL;
   ATermAppl emptypops=NULL, notemptypops=NULL;
 
-  /* remove the sum operators; collect the sum variables in the
-     list sumvars */
-
   if (isDeltaAtZero(summandterm))
   { // delta@0 does not need to be added.
     return;
   }
+
+  /* remove the sum operators; collect the sum variables in the
+     list sumvars */
 
   for( ; gsIsSum(summandterm) ; )
   { sumvars=ATconcat(ATLgetArgument(summandterm,0),sumvars);
@@ -4686,6 +4678,8 @@ static void add_summands(
 
   if (regular)
   { if (!gsIsDelta(multiAction))
+    /* As termination has been replaced by an explicit action terminated, followed
+     * by delta, a single terminating action cannot exist for regular processes. */
     { gsErrorMsg("with the flag regular terminating processes should not exist\n");
       stop();
     }
@@ -4694,7 +4688,7 @@ static void add_summands(
                    RewriteTerm(condition1),
                    multiAction,
                    atTime,
-                   dummyparameterlist(stack,(ATbool) singlestate));
+                   dummyparameterlist(stack,(ATbool) singlestate,spec));
     return;
   }
 
@@ -4802,7 +4796,6 @@ static enumeratedtype *create_enumeratedtype
 { enumeratedtype *w=NULL;
   int j=0;
   ATermAppl equalitymapping=NULL;
-
 
   for(w=enumeratedtypelist; ((w!=NULL)&&(w->size!=n));
                 w=w->next){};
@@ -5851,13 +5844,13 @@ static ATermAppl clusterfinalresult(ATermAppl t,specificationbasictype *spec)
                  cluster_actions(linGetSums(t),linGetParameters(t),spec,1));
 }
 
-/**************** GENERATE LPSpCRL **********************************/
+/**************** GENERATE LPEpCRL **********************************/
 
 
 /* The variable regular indicates that we are interested in generating 
-   a LPS assuming the pCRL term under consideration is regular */
+   a LPE assuming the pCRL term under consideration is regular */
 
-static ATermAppl generateLPSpCRL(ATermAppl procId, int canterminate,
+static ATermAppl generateLPEpCRL(ATermAppl procId, int canterminate,
                        specificationbasictype *spec,int regular)
 /* A pair of initial state and linear process must be extracted
    from the underlying GNF */
@@ -5885,7 +5878,7 @@ static ATermAppl generateLPSpCRL(ATermAppl procId, int canterminate,
      lowest index. In particular initial states get value 1, instead of the
      highest value, as happened hitherto (29/9/05) */
   pCRLprocs=ATreverse(pCRLprocs);
-  if ((!singlecontrolstate)||(!regular)) 
+  if ((!regular)||((!singlecontrolstate)&&(!oldstate)&&(!binary))) 
   { declare_control_state(spec,pCRLprocs);
   }
   stack=new_stack(parameters,spec,regular,pCRLprocs);
@@ -5933,7 +5926,7 @@ static ATermAppl generateLPSpCRL(ATermAppl procId, int canterminate,
        this delta. As the removal of timed delta's
        is time consuming in the linearisation, the use
        of this flag, can speed up linearisation considerably */
-    
+   
     sums=ATinsertA(sums,
                     gsMakeLinearProcessSummand(ATempty,
                                      gsMakeDataExprTrue(),
@@ -5945,6 +5938,7 @@ static ATermAppl generateLPSpCRL(ATermAppl procId, int canterminate,
   /* now the summands have been collected in the variable sums. We only
      need to put the result in `initprocspec' and return it.
   */
+
   if (regular)
   { 
     
@@ -6166,7 +6160,7 @@ static ATermList insert_timed_delta_summand(
                       cond,
                       multiaction,
                       actiontime,
-                      ATempty));
+                      linGetNextState(s))); 
   return result;
 }
 
@@ -7858,16 +7852,16 @@ static ATermAppl namecomposition(
                 sums);
 }
 
-/**************** GENERATE LPSmCRL **********************************/
+/**************** GENERATE LPEmCRL **********************************/
 
 
-static ATermAppl generateLPSmCRL(
+static ATermAppl generateLPEmCRL(
                ATermAppl procIdDecl,
                int canterminate,
                specificationbasictype *spec, 
                int regular);
 
-static ATermAppl generateLPSmCRLterm(
+static ATermAppl generateLPEmCRLterm(
                    ATermAppl t,
                    int canterminate,
                    specificationbasictype *spec,
@@ -7876,7 +7870,7 @@ static ATermAppl generateLPSmCRLterm(
   if (gsIsProcess(t)) 
   { 
     ATermAppl t3=namecomposition(ATAgetArgument(t,0),ATLgetArgument(t,1),
-                        generateLPSmCRL(
+                        generateLPEmCRL(
                               ATAgetArgument(t,0),
                               canterminate,
                               spec,
@@ -7885,12 +7879,12 @@ static ATermAppl generateLPSmCRLterm(
   }
   
   if (gsIsMerge(t)) 
-  { ATermAppl t1=generateLPSmCRLterm(
+  { ATermAppl t1=generateLPEmCRLterm(
                           ATAgetArgument(t,0),
                           canterminate,
                           spec,
                           regular);
-    ATermAppl t2=generateLPSmCRLterm(
+    ATermAppl t2=generateLPEmCRLterm(
                           ATAgetArgument(t,1),
                           canterminate,
                           spec,
@@ -7899,7 +7893,7 @@ static ATermAppl generateLPSmCRLterm(
   }
   
   if (gsIsHide(t)) 
-  {  ATermAppl t2=generateLPSmCRLterm(
+  {  ATermAppl t2=generateLPEmCRLterm(
                           ATAgetArgument(t,1),
                           canterminate,
                           spec,
@@ -7908,7 +7902,7 @@ static ATermAppl generateLPSmCRLterm(
   }
 
   if (gsIsAllow(t)) 
-  { ATermAppl t2=generateLPSmCRLterm(
+  { ATermAppl t2=generateLPEmCRLterm(
                           ATAgetArgument(t,1),
                           canterminate,
                           spec,
@@ -7917,7 +7911,7 @@ static ATermAppl generateLPSmCRLterm(
   }
 
   if (gsIsBlock(t)) 
-  { ATermAppl t2=generateLPSmCRLterm(
+  { ATermAppl t2=generateLPEmCRLterm(
                           ATAgetArgument(t,1),
                           canterminate,
                           spec,
@@ -7926,7 +7920,7 @@ static ATermAppl generateLPSmCRLterm(
   }
   
   if (gsIsRename(t))
-  { ATermAppl t2=generateLPSmCRLterm(
+  { ATermAppl t2=generateLPEmCRLterm(
                           ATAgetArgument(t,1),
                           canterminate,
                           spec,
@@ -7936,7 +7930,7 @@ static ATermAppl generateLPSmCRLterm(
   }
 
   if (gsIsComm(t))
-  { ATermAppl t1=generateLPSmCRLterm(
+  { ATermAppl t1=generateLPEmCRLterm(
                           ATAgetArgument(t,1),
                           canterminate,
                           spec,
@@ -7990,7 +7984,7 @@ static ATermAppl replaceArgumentsByAssignmentsIPS(ATermAppl ips)
   for( ; sums!=ATempty ; sums=ATgetNext(sums))
   { ATermAppl summand=ATAgetFirst(sums);
     assert(gsIsLinearProcessSummand(summand));
-    ATermList DataVarIds=ATLgetArgument(summand,0);
+    ATermList DataVarIds=linGetSumVars(summand); // ATLgetArgument(summand,0);
     ATermAppl BoolExpr=ATAgetArgument(summand,1);
     ATermAppl MultAcOrDelta=ATAgetArgument(summand,2);
     ATermAppl TimeExprOrNil=ATAgetArgument(summand,3);
@@ -8003,16 +7997,16 @@ static ATermAppl replaceArgumentsByAssignmentsIPS(ATermAppl ips)
                           BoolExpr,
                           MultAcOrDelta,
                           TimeExprOrNil,
-                          Assignments));
+                          Assignments));     
   }
 
   return linMakeInitProcSpec(init,parameters,resultsums);
 
 }
 
-/**************** GENERATE LPSmCRL **********************************/
+/**************** GENERATE LPEmCRL **********************************/
 
-static ATermAppl generateLPSmCRL(
+static ATermAppl generateLPEmCRL(
                        ATermAppl procIdDecl,
                        int canterminate,
                        specificationbasictype *spec,
@@ -8030,7 +8024,7 @@ static ATermAppl generateLPSmCRL(
       (objectdata[n].processstatus==pCRL)||
       (objectdata[n].processstatus==GNFalpha)||
       (objectdata[n].processstatus==multiAction))
-  { ATermAppl t3=generateLPSpCRL(procIdDecl,
+  { ATermAppl t3=generateLPEpCRL(procIdDecl,
         (canterminate&&objectdata[n].canterminate),spec,regular);
     t3=replaceArgumentsByAssignmentsIPS(t3); 
     return t3;
@@ -8040,7 +8034,7 @@ static ATermAppl generateLPSmCRL(
               (objectdata[n].processstatus==mCRLlin)||
               (objectdata[n].processstatus==mCRL))
   { objectdata[n].processstatus=mCRLlin;
-    return generateLPSmCRLterm(objectdata[n].processbody,
+    return generateLPEmCRLterm(objectdata[n].processbody,
              (canterminate&&objectdata[n].canterminate),spec,
              regular); 
   }
@@ -8637,7 +8631,7 @@ static ATermAppl transform(
      first variable in a sequence is always an actionvariable */
   procstorealGNF(init,regular);
   
-  t3=generateLPSmCRL(
+  t3=generateLPEmCRL(
            init,
            objectdata[objectIndex(init)].canterminate,
            spec,
@@ -8699,7 +8693,7 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
       ATreverse(ATLgetArgument(result,2))),  // reverse, to let the list
                                              // of summands appear in the same
                                              // order as in the input, if the 
-                                             // input were an LPS.
+                                             // input were an LPE.
     gsMakeLinearProcessInit(SieveProcDataVarsAssignments(
                    spec_int->procdatavars,
                    ATLgetArgument(result,0),
