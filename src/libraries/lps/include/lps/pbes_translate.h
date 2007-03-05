@@ -17,7 +17,6 @@
 #include "lps/data_utility.h"
 #include "lps/data_operators.h"
 #include "lps/mucalculus.h"
-#include "lps/mucalculus_init.h"
 #include "lps/pbes.h"
 #include "lps/specification.h"
 #include "lps/data_utility.h"
@@ -95,7 +94,6 @@ pbes_expression not_equal_data_parameters(action_list a, action_list b)
 inline
 data_variable_list Par(identifier_string x, state_formula f)
 {
-  using namespace lps::state_init;
   using namespace lps::state_frm;
 
   if (is_data(f)) {
@@ -147,7 +145,6 @@ namespace pbes_timed
   inline
   pbes_expression sat_bot(timed_action a, action_formula b)
   {
-    using namespace lps::act_init;
     using namespace lps::act_frm;
     namespace p = lps::pbes_expr;
   
@@ -189,7 +186,6 @@ namespace pbes_timed
   inline
   pbes_expression sat_top(timed_action a, action_formula b)
   {
-    using namespace lps::act_init;
     using namespace lps::act_frm;
     namespace p = lps::pbes_expr;
   
@@ -232,9 +228,8 @@ namespace pbes_timed
   pbes_expression RHS(state_formula f, linear_process lps, data_variable T, std::set<std::string>& context)
   {
     using namespace lps::pbes_expr;
-    using namespace lps::state_frm;
     using lps::summand_list;
-    namespace s = lps::state_init;
+    namespace s = lps::state_frm;
   
     if (s::is_data(f)) {
       return pbes_expression(f);
@@ -247,17 +242,17 @@ namespace pbes_timed
     } else if (s::is_or(f)) {
       return or_(RHS(lhs(f), lps, T, context), RHS(rhs(f), lps, T, context));
     } else if (s::is_forall(f)) {
-      std::set<std::string> names = find_variable_names(quant_vars(f));
+      std::set<std::string> names = find_variable_names(s::quant_vars(f));
       context.insert(names.begin(), names.end());
-      return forall(quant_vars(f), RHS(quant_form(f), lps, T, context));
+      return forall(s::quant_vars(f), RHS(s::quant_form(f), lps, T, context));
     } else if (s::is_exists(f)) {
-      std::set<std::string> names = find_variable_names(quant_vars(f));
+      std::set<std::string> names = find_variable_names(s::quant_vars(f));
       context.insert(names.begin(), names.end());
-      return exists(quant_vars(f), RHS(quant_form(f), lps, T, context));
+      return exists(s::quant_vars(f), RHS(s::quant_form(f), lps, T, context));
     } else if (s::is_must(f)) {
       atermpp::vector<pbes_expression> v;
-      action_formula alpha = mod_act(f);
-      state_formula f1 = mod_form(f);
+      action_formula alpha = s::mod_act(f);
+      state_formula f1 = s::mod_form(f);
       for (lps::summand_list::iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
       {
         if (i->is_delta())
@@ -293,8 +288,8 @@ namespace pbes_timed
       return multi_and(v.begin(), v.end());
     } else if (s::is_may(f)) {
       atermpp::vector<pbes_expression> v;
-      action_formula alpha = mod_act(f);
-      state_formula f1 = mod_form(f);
+      action_formula alpha = s::mod_act(f);
+      state_formula f1 = s::mod_form(f);
       for (summand_list::iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
       {
         if (i->is_delta())
@@ -329,7 +324,7 @@ namespace pbes_timed
       }
       return multi_or(v.begin(), v.end());
     } else if (s::is_delay_timed(f)) {
-      data_expression t = time(f);
+      data_expression t = s::time(f);
       atermpp::vector<pbes_expression> v;
       for (summand_list::iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
       {
@@ -341,7 +336,7 @@ namespace pbes_timed
       }
       return or_(multi_or(v.begin(), v.end()), val(less_equal(t, T)));
     } else if (s::is_yaled_timed(f)) {
-      data_expression t = time(f);
+      data_expression t = s::time(f);
       atermpp::vector<pbes_expression> v;
       for (summand_list::iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
       {
@@ -358,8 +353,8 @@ namespace pbes_timed
       data_variable_list xp = lps.process_parameters();
       return propositional_variable_instantiation(X, T + d + xp + Par(X, f));
     } else if (s::is_mu(f) || (s::is_nu(f))) {
-      identifier_string X = mu_name(f);
-      data_expression_list d = mu_expressions(f);
+      identifier_string X = s::mu_name(f);
+      data_expression_list d = s::mu_expressions(f);
       data_variable_list xp = lps.process_parameters();
       return propositional_variable_instantiation(X, T + d + xp + Par(X, f));
     }
@@ -370,7 +365,6 @@ namespace pbes_timed
   inline
   equation_system E(state_formula f, linear_process lps, data_variable T)
   {
-    using namespace lps::state_init;
     using namespace lps::state_frm;
   
     if (is_data(f)) {
@@ -423,7 +417,6 @@ namespace pbes_untimed
   inline
   pbes_expression sat_bot(action_list a, action_formula b)
   {
-    using namespace lps::act_init;
     using namespace lps::act_frm;
     namespace p = lps::pbes_expr;
   
@@ -468,7 +461,6 @@ namespace pbes_untimed
   inline
   pbes_expression sat_top(action_list a, action_formula b)
   {
-    using namespace lps::act_init;
     using namespace lps::act_frm;
     namespace p = lps::pbes_expr;
   
@@ -514,9 +506,8 @@ namespace pbes_untimed
   pbes_expression RHS(state_formula f, linear_process lps, std::set<std::string>& context)
   {
     using namespace lps::pbes_expr;
-    using namespace lps::state_frm;
     using lps::summand_list;
-    namespace s = lps::state_init;
+    namespace s = lps::state_frm;
   
     if (s::is_data(f)) {
       return pbes_expression(f);
@@ -525,21 +516,21 @@ namespace pbes_untimed
     } else if (s::is_false(f)) {
       return false_();
     } else if (s::is_and(f)) {
-      return and_(RHS(lhs(f), lps, context), RHS(rhs(f), lps, context));
+      return and_(RHS(s::lhs(f), lps, context), RHS(s::rhs(f), lps, context));
     } else if (s::is_or(f)) {
-      return or_(RHS(lhs(f), lps, context), RHS(rhs(f), lps, context));
+      return or_(RHS(s::lhs(f), lps, context), RHS(s::rhs(f), lps, context));
     } else if (s::is_forall(f)) {
-      std::set<std::string> names = find_variable_names(quant_vars(f));
+      std::set<std::string> names = find_variable_names(s::quant_vars(f));
       context.insert(names.begin(), names.end());
-      return forall(quant_vars(f), RHS(quant_form(f), lps, context));
+      return forall(s::quant_vars(f), RHS(s::quant_form(f), lps, context));
     } else if (s::is_exists(f)) {
-      std::set<std::string> names = find_variable_names(quant_vars(f));
+      std::set<std::string> names = find_variable_names(s::quant_vars(f));
       context.insert(names.begin(), names.end());
-      return exists(quant_vars(f), RHS(quant_form(f), lps, context));
+      return exists(s::quant_vars(f), RHS(s::quant_form(f), lps, context));
     } else if (s::is_must(f)) {
       atermpp::vector<pbes_expression> v;
-      action_formula alpha(mod_act(f));
-      state_formula f1(mod_form(f));
+      action_formula alpha(s::mod_act(f));
+      state_formula f1(s::mod_form(f));
       for (lps::summand_list::iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
       {
         if (i->is_delta())
@@ -570,8 +561,8 @@ namespace pbes_untimed
       return multi_and(v.begin(), v.end());
     } else if (s::is_may(f)) {
       atermpp::vector<pbes_expression> v;
-      action_formula alpha(mod_act(f));
-      state_formula f1(mod_form(f));
+      action_formula alpha(s::mod_act(f));
+      state_formula f1(s::mod_form(f));
       for (summand_list::iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
       {
         if (i->is_delta())
@@ -601,13 +592,13 @@ namespace pbes_untimed
       }
       return multi_or(v.begin(), v.end());
     } else if (s::is_var(f)) {
-      identifier_string X = var_name(f);
-      data_expression_list d = var_val(f);
+      identifier_string X = s::var_name(f);
+      data_expression_list d = s::var_val(f);
       data_variable_list xp = lps.process_parameters();
       return propositional_variable_instantiation(X, d + xp + Par(X, f));
     } else if (s::is_mu(f) || (s::is_nu(f))) {
-      identifier_string X = mu_name(f);
-      data_expression_list d = mu_expressions(f);
+      identifier_string X = s::mu_name(f);
+      data_expression_list d = s::mu_expressions(f);
       data_variable_list xp = lps.process_parameters();
       return propositional_variable_instantiation(X, d + xp + Par(X, f));
     }
@@ -618,7 +609,6 @@ namespace pbes_untimed
   inline
   equation_system E(state_formula f, linear_process lps)
   {
-    using namespace lps::state_init;
     using namespace lps::state_frm;
   
     if (is_data(f)) {
@@ -704,7 +694,6 @@ state_formula remove_name_clashes(specification spec, state_formula f)
 inline
 pbes pbes_translate(state_formula f, specification spec, bool timed = false)
 {
-  using namespace state_init;
   using namespace state_frm;
 
   // rename variables in f, to prevent name clashes with variables in spec

@@ -12,6 +12,7 @@
 #include "lps/identifier_string.h"
 #include "lps/data.h"
 #include "lps/pretty_print.h"
+#include "lps/detail/utility.h"
 #include "libstruct.h"
 
 namespace lps {

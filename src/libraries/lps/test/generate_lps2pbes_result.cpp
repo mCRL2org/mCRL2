@@ -1,3 +1,6 @@
+// N.B. This program can handle only one file at a time, due to limitations
+// in the toolset.
+
 #include <iostream>
 #include <string>
 #include "lps/pbes.h"
@@ -35,7 +38,7 @@ int main(int argc, char* argv[])
     if (timed)
     {
       std::cout << formula_file << "[timed] ";
-      pbes p = lps2pbes(spec, formula, false);
+      pbes p = lps2pbes(spec, formula, true);
       pbes_equation_list eqn(p.equations().begin(), p.equations().end());
       std::cout << pp(eqn) << std::endl;
       result_file = formula_file.substr(0, formula_file.size() - 4) + "expected_timed_result";
@@ -44,7 +47,7 @@ int main(int argc, char* argv[])
     else
     {
       cout << formula_file << "[untimed] ";
-      pbes p = lps2pbes(spec, formula, true);
+      pbes p = lps2pbes(spec, formula, false);
       pbes_equation_list eqn(p.equations().begin(), p.equations().end());
       std::cout << pp(eqn) << std::endl;
       result_file = formula_file.substr(0, formula_file.size() - 4) + "expected_untimed_result";

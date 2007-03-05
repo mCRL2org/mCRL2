@@ -24,11 +24,10 @@
 #include "lps/action.h"
 #include "lps/data.h"
 #include "lps/data_specification.h"
+#include "lps/pbes_expression.h"
 #include "lps/pretty_print.h"
-#include "lps/mucalculus_init.h"
 #include "lps/detail/utility.h"
 #include "libstruct.h"
-#include "lps/pbes_expression.h"
 
 namespace lps {
 
