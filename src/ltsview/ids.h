@@ -26,5 +26,13 @@ namespace IDs
   const int myID_ITERATIVE = wxID_HIGHEST + 20;
   const int myID_CYCLIC = wxID_HIGHEST + 21;
   const int myID_ANY = wxID_HIGHEST + 22;
+
+  const int myID_SIM_START_BUTTON = wxID_HIGHEST + 23;
+  const int myID_SIM_RESET_BUTTON = wxID_HIGHEST + 24;
+  const int myID_SIM_STOP_BUTTON = wxID_HIGHEST + 25;
+  const int myID_SIM_TRANSITIONS_VIEW = wxID_HIGHEST + 26;
+  const int myID_SIM_TRIGGER_BUTTON = wxID_HIGHEST + 27;
+  const int myID_SIM_UNDO_BUTTON = wxID_HIGHEST + 28;
+  const int myID_SIM_STATE_VIEW = wxID_HIGHEST + 29;
 }
 #endif

@@ -19,13 +19,14 @@ class MainFrame : public wxFrame {
     void	createProgressDialog(const std::string title,const std::string text);
     GLCanvas*	getGLCanvas() const;
     void	loadTitle();
-    void  onAbout(wxCommandEvent &event);
+
+    void        onAbout(wxCommandEvent &event);
     void	onActivateTool(wxCommandEvent& event);
     void	onAddMarkRuleButton(wxCommandEvent& event);
     void	onDisplay(wxCommandEvent& event);
     void	onExit(wxCommandEvent& event);
     void	onOpen(wxCommandEvent& event);
-    void  onSavePic(wxCommandEvent& event);
+    void        onSavePic(wxCommandEvent& event);
     void	onRankStyle(wxCommandEvent& event);
     void	onVisStyle(wxCommandEvent& event);
     void	onRemoveMarkRuleButton(wxCommandEvent& event);
@@ -37,6 +38,16 @@ class MainFrame : public wxFrame {
     void	onMarkRuleActivate(wxCommandEvent& event);
     void	onMarkRuleEdit(wxCommandEvent& event);
     void	onMarkTransition(wxCommandEvent& event);
+    
+    // Simulation event handlers
+    void        onSimStartButton(wxCommandEvent& event);
+    void        onSimResetButton(wxCommandEvent& event);
+    void        onSimStopButton(wxCommandEvent& event);
+    void        onSimTransitionSelected(wxListEvent& event);
+    void        onSimTriggerButton(wxCommandEvent& event);
+    void        onSimUndoButton(wxCommandEvent& event);
+    void        onSimStateSelected(wxListEvent& event);
+
     void	replaceMarkRule(int index, wxString str);
     void	resetMarkRules();
     void	setActionLabels(std::vector< ATerm > &labels);
@@ -76,6 +87,7 @@ class MainFrame : public wxFrame {
     void setupMenuBar();
     void setupRightPanel(wxPanel* panel);
     void setupMarkPanel(wxPanel* panel);
+    void setupSimPanel(wxPanel* panel);
 //    void setupSettingsPanel(wxPanel* panel);
 
     DECLARE_EVENT_TABLE()
