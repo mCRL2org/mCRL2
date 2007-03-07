@@ -5,6 +5,7 @@
 #include <wx/wx.h>
 #include <wx/checklst.h>
 #include <wx/filename.h>
+#include <wx/listctrl.h>
 #include <wx/progdlg.h>
 #include "aterm1.h"
 #include "settingsdialog.h"
