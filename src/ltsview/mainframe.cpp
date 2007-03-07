@@ -155,7 +155,7 @@ void MainFrame::setupMainArea() {
       wxDefaultSize,wxRAISED_BORDER);
   setupRightPanel(rightPanel);
 
-  int attribList[] = { WX_GL_RGBA,WX_GL_DOUBLEBUFFER };
+  int attribList[] = { WX_GL_RGBA,WX_GL_DOUBLEBUFFER,0 };
   glCanvas = new GLCanvas(mediator,this,settings,wxDefaultSize,attribList);
   
   mainSizer->Add(glCanvas,1,wxALIGN_CENTER|wxEXPAND|wxALL,0);
