@@ -12,7 +12,7 @@
 
 using namespace mcrl2::lts;
 
-bool read_lts_from_file(lts&, std::string const&, lts_type, std::string const&);
+bool read_lts_from_file(lts&, std::string const&, lts_type, std::string const&, bool perform_reachability_check);
 bool write_lts_to_stdout(lts&, lts_type outtype, std::string const&, bool);
 bool write_lts_to_file(lts&, std::string const&, lts_type outtype, std::string const&, bool);
 
@@ -50,6 +50,7 @@ class squadt_interactor : public mcrl2_squadt::tool_interface {
 
     static const char* option_selected_transformation;               ///< the selected transformation method
     static const char* option_selected_output_format;                ///< the selected output format
+    static const char* option_no_reachability_check;                 ///< do not check reachability of input LTS
     static const char* option_no_state_information;                  ///< dot format output specific option to not save state information
     static const char* option_tau_actions;                           ///< the actions that should be recognised as tau
     static const char* option_add_bisimulation_equivalence_class;    ///< adds bisimulation equivalence class to the state information of a state instead of actually reducing modulo bisimulation [mCRL2 SVC specific]
@@ -82,6 +83,7 @@ const char* squadt_interactor::lps_file_auxiliary  = "lps_aux";
 
 const char* squadt_interactor::option_selected_transformation            = "selected_transformation";
 const char* squadt_interactor::option_selected_output_format             = "selected_output_format";
+const char* squadt_interactor::option_no_reachability_check              = "no_reachability_check";
 const char* squadt_interactor::option_no_state_information               = "no_state_information";
 const char* squadt_interactor::option_tau_actions                        = "tau_actions";
 const char* squadt_interactor::option_add_bisimulation_equivalence_class = "add_bisimulation_equivalence_class";
@@ -139,6 +141,9 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   h->add(new label("LPS file name : "));
   text_field* lps_file_field = static_cast < text_field* > (h->add(new text_field("")));
   top->add(h);
+
+  checkbox* do_not_check_reachability = new checkbox("Do not check reachability of input LTS");
+  top->add(do_not_check_reachability);
 
   checkbox* for_dot_omit_state_information = new checkbox("Omit state information (dot only)");
   top->add(for_dot_omit_state_information);
@@ -198,6 +203,10 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
       transformation_options trans_opt = static_cast < transformation_options > (transformation_selector.get_selection());
       c.add_option(option_selected_transformation).append_argument(transformation_method_enumeration, trans_opt);
 
+      if (do_not_check_reachability->get_status()) {
+        c.add_option(option_no_reachability_check);
+      }
+
       if (format_selector.get_selection() == dot && for_dot_omit_state_information->get_status()) {
         c.add_option(option_no_state_information);
       }
@@ -239,7 +248,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     lps_path = c.get_input(lps_file_auxiliary).get_location();
   }
 
-  if ( !read_lts_from_file(l, c.get_input(lts_file_for_input).get_location(),lts_none,lps_path) ) {
+  if ( !read_lts_from_file(l, c.get_input(lts_file_for_input).get_location(),lts_none,lps_path,!c.option_exists(option_no_reachability_check)) ) {
 
     send_error("Fatal: error reading input from `" + c.get_input(lts_file_for_input).get_location() + "'!");
 
@@ -423,6 +432,7 @@ static void print_help(FILE *f, char *Name)
     "                         generated; this is needed to store the correct\n"
     "                         parameter names of states when saving in fsm format and\n"
     "                         to convert non-mCRL2 LTSs to a mCRL2 LTS\n"
+    "      --no-reach         do not perform a reachability check on the input LTS\n"
     "  -n, --no-state         leave out state information when saving in dot format\n"
     "  -D, --determinise      determinise LTS\n"
     "\n"
@@ -446,7 +456,16 @@ static void print_version(FILE *f)
   fprintf(f,NAME " " VERSION " (revision %s)\n", REVISION);
 }
 
-bool read_lts_from_stdin(lts& l, lts_type intype, std::string const& lpsfile) {
+void reachability_check(lts &l)
+{
+  gsVerboseMsg("checking reachability of input LTS...\n");
+  if ( !l.reachability_check() )
+  {
+    gsErrorMsg("not all states of the input LTS are reachable from the initial state; this will invoke unspecified behaviour in LTS tools (including this one)!\n");
+  }
+}
+
+bool read_lts_from_stdin(lts& l, lts_type intype, std::string const& lpsfile, bool perform_reachability_check) {
   gsVerboseMsg("reading LTS from stdin...\n");
   
   lts_extra extra = get_extra(intype, lpsfile, false, "");
@@ -457,11 +476,16 @@ bool read_lts_from_stdin(lts& l, lts_type intype, std::string const& lpsfile) {
     gsErrorMsg("use -v/--verbose for more information\n");
     return (false);
   }
+  
+  if ( perform_reachability_check )
+  {
+    reachability_check(l);
+  }
 
   return (true);
 }
 
-bool read_lts_from_file(lts& l, std::string const& infile, lts_type intype, std::string const& lpsfile) {
+bool read_lts_from_file(lts& l, std::string const& infile, lts_type intype, std::string const& lpsfile, bool perform_reachability_check) {
   gsVerboseMsg("reading LTS from '%s'...\n",infile.c_str());
   
   lts_extra extra = get_extra(intype, lpsfile, false, "");
@@ -492,6 +516,11 @@ bool read_lts_from_file(lts& l, std::string const& infile, lts_type intype, std:
       gsErrorMsg("use -v/--verbose for more information\n");
       return (false);
     }
+  }
+
+  if ( perform_reachability_check )
+  {
+    reachability_check(l);
   }
 
   return (true);
@@ -537,6 +566,7 @@ int main(int argc, char **argv)
   #define VersionOption     0x1
   #define NoneOption        0x2
   #define TauOption         0x3
+  #define NoReachOption     0x4
   struct option LongOptions[] = { 
     {"help"        , no_argument,         NULL, 'h'},
     {"version"     , no_argument,         NULL, VersionOption},
@@ -556,6 +586,7 @@ int main(int argc, char **argv)
     {"tau"         , required_argument,   NULL, TauOption},
     {"add"         , no_argument,         NULL, 'a'},
     {"determinise" , no_argument,         NULL, 'D'},
+    {"no-reach"    , no_argument,         NULL, NoReachOption},
     {0, 0, 0, 0}
   };
 
@@ -570,6 +601,7 @@ int main(int argc, char **argv)
   lts_equivalence equivalence = lts_eq_none;
   lts_eq_options eq_opts; set_eq_options_defaults(eq_opts);
   bool determinise = false;
+  bool check_reach = true;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if (!mcrl2_squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
@@ -654,6 +686,9 @@ int main(int argc, char **argv)
         case 'D':
           determinise = true;
           break;
+        case NoReachOption:
+          check_reach = false;
+          break;
         default:
           break;
       }
@@ -736,7 +771,7 @@ int main(int argc, char **argv)
 
     lts l;
  
-    if (!(use_stdin ? read_lts_from_stdin(l, intype, lpsfile) : read_lts_from_file(l, infile, intype, lpsfile)))
+    if (!(use_stdin ? read_lts_from_stdin(l, intype, lpsfile, check_reach) : read_lts_from_file(l, infile, intype, lpsfile, check_reach)))
     {
       return (1);
     }

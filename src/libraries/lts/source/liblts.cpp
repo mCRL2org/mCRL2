@@ -1098,6 +1098,202 @@ unsigned int* lts::get_transition_indices() {
   return p_get_transition_indices();
 }
 
+bool lts::reachability_check()
+{
+  // We use two algorithms here. One is O(nstates*ntransitions) and needs
+  // nstates bits of memory. The other is O(ntransitions), but needs an
+  // additional 2*nstates bytes of memory and requires the transitions to be
+  // sorted (or more precisely: grouped on the source state).
+  //
+  // We first allocate memory needed by but algorithms. Then we try to allocate
+  // memory for the faster one. If this, or the following test for sortedness,
+  // fails, then we just the slower algorithm.
+
+  // bit array to represent the set of visited states
+  #define visited_bpi (8*sizeof(unsigned int)) // bits per (unsigned) int
+  unsigned int visited_size = ((nstates-1)/visited_bpi)+1;
+                                // nstates/visited_bpi rounded upwards
+  unsigned int *visited = (unsigned int *) malloc(visited_size*sizeof(unsigned int));
+  #define add_visited(s) (visited[s/visited_bpi] |= 1 << (s % visited_bpi))
+  #define in_visited(s) (visited[s/visited_bpi] & (1 << (s % visited_bpi)))
+  if ( visited == NULL )
+  {
+    gsErrorMsg("cannot allocate enough memory for reachability check");
+    exit(1);
+  }
+
+  // We try to allocate the memory for the faster algorithm. For ease we
+  // allocate both needed arrays at once.
+  // Note that we also just (todo_stack != NULL) as a general check to see
+  // which algorithm we will use.
+  unsigned int *todo_stack = (unsigned int *) malloc(2*nstates*sizeof(unsigned int));
+  unsigned int *state2trans = &todo_stack[nstates];
+  if ( todo_stack != NULL ) // Do we have enough memory for fast algorithm?
+  {
+    // XXX sort transitions array? Allows us to always use the fast algorithm
+    //     (if sufficient memory). However, we must make sure that the
+    //     algorithm is O(ntransitions*log(ntransitions)) in the worst case;
+    //     otherwise the other reachability algorithm might be faster than the
+    //     sorting itself. Also the memory usage should be minimal. (Heapsort
+    //     seems a obvious choice.) A downside is that you change the order of
+    //     the transitions, which might be undesirable.
+    //     (NB: Technically we only need to group the transitions on the from
+    //     field)
+
+    // We check whether or not the transitions are grouped on from field (i.e.
+    // the source state). While doing this we also store the location of these
+    // groups in state2trans (i.e. state2trans[s] will be an index to the
+    // beginning of the block of transitions from state s).
+
+    // empty visited states set
+    for (unsigned int i=0; i<visited_size; i++)
+    {
+      visited[i] = 0;
+    }
+    // initialise state2trans; we use ntransitions as default because we know
+    // it exists and no actual transitions have such a high index
+    for (unsigned int i=0; i<nstates; i++)
+    {
+      state2trans[i] = ntransitions;
+    }
+
+    unsigned int current_state = nstates;
+    bool is_sorted = true;
+    // (We just a ghost transitions[-1] with transitions[-1].from == nstates)
+    // inv: !is_sorted || ( P(i) && transitions[i-1].from == current_state )
+    //       where P(j) = for all states s that occur as source in
+    //                    transitions[-1..j) we have that all transitions in
+    //                    this part of the array with s as source are stored
+    //                    consecutively starting at state2trans[i]
+    //                    and for all other states s we have that
+    //                    state2trans[i] == ntransitions
+    for (unsigned int i=0; i<ntransitions; i++)
+    {
+      if ( transitions[i].from != current_state )
+      {
+        current_state = transitions[i].from;
+        if ( in_visited(current_state) )
+        {
+          // We already saw this state are source in another block; the
+          // transitions are not sorted.
+          is_sorted = false;
+          break;
+        }
+        add_visited(current_state); // remember we saw this state
+        state2trans[current_state] = i;
+      }
+    }
+    // post: !is_sorted || P(ntransitions)
+
+    if ( !is_sorted )
+    {
+      // transitions are not sorted; set todo_stack to NULL such that we use
+      // the slower algorithm
+      free(todo_stack);
+      todo_stack = NULL;
+    }
+  }
+
+  // empty visited states set
+  for (unsigned int i=0; i<visited_size; i++)
+  {
+    visited[i] = 0;
+  }
+
+  // choose between algorithms and execute choice; afterwards in_visited(s)
+  // must must hold for all states s reachable from the initial state
+  if ( todo_stack == NULL )
+  {
+    gsDebugMsg("checking reachability with incremental algorithm\n");
+    // We're doing the slower algorithm: just loop over all transitions and add
+    // target states from transitions that have a source that we have already
+    // reached.
+    
+    add_visited(init_state);
+
+    bool notdone = true;
+    while ( notdone )
+    {
+      notdone = false;
+      for (unsigned int i=0; i<ntransitions; i++)
+      {
+        if ( in_visited(transitions[i].from) && !in_visited(transitions[i].to) )
+        {
+          add_visited(transitions[i].to);
+          notdone = true;
+        }
+      }
+    }
+
+  } else {
+    gsDebugMsg("checking reachability with todo list\n");
+    // We're doing the faster algorithm: we know that all transitions are
+    // grouped on source state with state2trans[s] being the beginning of such
+    // a group for source s. We keep a todo list in todo_stack of states that
+    // are reachable but of which the outgoing transitions have not yet been
+    // investigated.
+
+    // the nitial state is always reachable and will be the initial contents of
+    // the todo list
+    add_visited(init_state);
+    todo_stack[0] = init_state;
+    unsigned int todo_stack_num = 1; // number of elements on the stack 
+
+    while ( todo_stack_num > 0 )
+    {
+      unsigned int current_state = todo_stack[--todo_stack_num]; // top of stack
+      unsigned int i = state2trans[current_state]; // index of first transition
+                                                   // with current_state as
+                                                   // source
+
+      // iterate over all transitions with current_state as source
+      while ( (i < ntransitions) && (transitions[i].from == current_state) )
+      {
+        if ( !in_visited(transitions[i].to) )
+        {
+          // we haven't seen transitions[i].to before; add it to the todo list
+          add_visited(transitions[i].to);
+          todo_stack[todo_stack_num++] = transitions[i].to;
+        }
+        i++;
+      }
+    }
+
+    // clean up memory needed specifically for this algorithm
+    free(todo_stack);
+  }
+  // in_visited(s) == state s is reachable from the initial state
+ 
+  // check to see if all states are reachable from the initial state
+  for (unsigned int i=0; i<visited_size-1; i++) // quickly check the elements
+                                                // of the visited array of
+                                                // which all bits are used
+  {
+    if ( visited[i] != (~0U) ) // all bits should be set
+    {
+      free(visited);
+      return false;
+    }
+  }
+  // the last element of the visited array needs special care as not all bits
+  // are necessarily used
+  if ( visited_size > 0 )
+  {
+    // the states in the last element have a index in
+    // [(visited_size-1)*visited_bpi..nstates)
+    for (unsigned int i=(visited_size-1)*visited_bpi; i<nstates; i++)
+    {
+      if ( !in_visited(i) )
+      {
+        free(visited);
+        return false;
+      }
+    }
+  }
+  free(visited);
+  return true;
+}
+
 state_iterator::state_iterator(lts *l)
 {
   this->l = l;

@@ -100,7 +100,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     right_column->add(new label(l.has_label_info() ? "present" : "not present"), a);
     right_column->add(new label(""), a);
     right_column->add(new label(l.get_creator()), a);
-   
+
     /* Create and add a layout manager for the columns */
     layout::manager* columns = new layout::horizontal_box();
 
@@ -112,6 +112,13 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 
     top->add(new label("Input read from " + input_object.get_location() + " (" + lts::string_for_type(t) + " format)"), margins(5,0,5,0));
     top->add(columns);
+    gsVerboseMsg("checking reachability...\n");
+    if ( !l.reachability_check() )
+    {
+        top->add(new label("Warning: some states are not reachable from the initial state!"));
+        top->add(new label("(This might result in unspecificied behaviour of LTS tools.)"));
+    }
+   
 
     send_display_layout(top);
   }
@@ -335,6 +342,11 @@ int main(int argc, char **argv) {
       if ( l.has_creator() )
       {
         cout << "Created by: " << l.get_creator() << endl;
+      }
+      gsVerboseMsg("checking reachability...\n");
+      if ( !l.reachability_check() )
+      {
+        cout << "Warning: some states are not reachable from the initial state! (This might result in unspecificied behaviour of LTS tools.)" << endl;
       }
     }
 #ifdef ENABLE_SQUADT_CONNECTIVITY

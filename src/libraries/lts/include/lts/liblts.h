@@ -186,6 +186,13 @@ namespace lts
       bool reduce(lts_equivalence eq, lts_eq_options &opts);
       bool compare(lts &l, lts_equivalence eq, lts_eq_options &opts);
       void determinise();
+      /**
+       * \brief  Check whether or not all states in the LTS are reachable from
+       *         the initial state. (Worst case: O(nstates*ntransitions))
+       *
+       * \return  true iff all states are reachable from the initial state
+       **/
+      bool reachability_check();
 
       friend class state_iterator;
       friend class label_iterator;
