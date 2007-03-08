@@ -221,8 +221,21 @@ bool p_lts::read_from_aut(istream &is)
       from = strtoul(s1,NULL,10);
       s = s2;
       to = strtoul(s3,NULL,10);
+      if ( from >= nstates )
+      {
+        gsErrorMsg("invalid AUT transition; state index (%u) higher than maximum (%u) given by header\n",from,nstates);
+        ATtableDestroy(labs);
+        return false;
+      }
+      if ( to >= nstates )
+      {
+        gsErrorMsg("invalid AUT transition; state index (%u) higher than maximum (%u) given by header\n",to,nstates);
+        ATtableDestroy(labs);
+        return false;
+      }
     } else {
       gsErrorMsg("cannot parse AUT input! (invalid transition)\n");
+      ATtableDestroy(labs);
       return false;
     }
 
@@ -237,8 +250,12 @@ bool p_lts::read_from_aut(istream &is)
 
     p_add_transition(from,(unsigned int) label,to);
   }
-  assert(ntrans == ntransitions);
   ATtableDestroy(labs);
+  if ( ntrans != ntransitions )
+  {
+    gsErrorMsg("number of transitions read (%u) does not correspond to the number of transition given in the header (%u)\n",ntransitions,ntrans);
+    return false;
+  }
 
   this->type = lts_aut;
 

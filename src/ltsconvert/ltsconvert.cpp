@@ -473,12 +473,17 @@ bool read_lts_from_file(lts& l, std::string const& infile, lts_type intype, std:
     {
       gsVerboseMsg("reading failed; trying to force format by extension...\n");
       intype = lts::guess_format(infile);
-      extra = get_extra(intype, lpsfile, false, "");
-      if ( (intype != lts_none) && l.read_from(infile,intype,extra) )
+      if ( intype == lts_none )
       {
-        b = false;
+        gsVerboseMsg("unsupported input format extension\n");
       } else {
-        gsErrorMsg("unsupported input format extension\n");
+        extra = get_extra(intype, lpsfile, false, "");
+        if ( l.read_from(infile,intype,extra) )
+        {
+          b = false;
+        } else {
+          gsVerboseMsg("reading based on format extension failed as well\n");
+        }
       }
     }
     if ( b )
