@@ -1,0 +1,11 @@
+% lpsuntime Test Case 2 -- Timed actions
+%
+% An extra process parameter (say "lat") of type Real is introduced
+% time is removed from the actions, and the condition
+% is weakened with time > lat (i.e. 2 > lat or 3 > lat in this case).
+% Furthermore a summand true->delta is introduced.
+act a,b;
+
+proc X = a@2 . b@3 . X;
+
+init X;

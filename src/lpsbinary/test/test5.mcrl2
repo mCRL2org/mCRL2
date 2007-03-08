@@ -1,0 +1,16 @@
+% lpsbinary Test Case 5 -- #constructors of sort is (n^2)+1
+%
+% Sort D has got 9 constructors, therefore it should be encoded in
+% a vector of 4 boolean variables. Note that this does leave a lot of
+% combinations of booleans that are not used (7 to be precise).
+% Process parameter e should be replaced by a vector of boolean variables,
+% and should be replaced in nextstate.
+% The initial state should be altered accordingly.
+
+sort
+  D = struct d1 | d2 | d3 | d4 | d5 | d6 | d7 | d8 | d9;
+
+act a,b;
+
+proc X(e:D) = sum d:D . a . b . X(d);
+init X(d1);

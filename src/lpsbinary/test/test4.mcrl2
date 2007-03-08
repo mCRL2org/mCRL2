@@ -1,0 +1,12 @@
+% lpsbinary Test Case 4 -- replacement in actions
+%
+% Sort D has got 2 constructors, and should be encoded into one boolean
+% variable. Process parameter e should be replaced by a single boolean variable
+% and the action a(e) and the initial state should be altered accordingly.
+sort
+  D = struct d1 | d2;
+
+act a,b : D;
+
+proc X(e:D) = sum d:D . a(e) . b(d) . X(d);
+init X(d1);

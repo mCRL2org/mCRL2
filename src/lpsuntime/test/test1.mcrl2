@@ -1,0 +1,8 @@
+% lpsuntime Test Case 1 -- No time
+%
+% LPS is left as is, because there is no time involved.
+act a,b;
+
+proc X = a . b . X;
+
+init X;

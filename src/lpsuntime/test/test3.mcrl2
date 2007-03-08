@@ -1,0 +1,14 @@
+% lpsuntime Test Case 3 -- One timed summand, one untimed summand
+%
+% An extra process parameter (say "lat") of type Real is introduced
+% time is removed from the actions in timed summand, and the condition
+% is weakened with time > lat (i.e. 2 > lat or 3 > lat in this case).
+% In the untimed summand, a summation over Real (say sum tv:Real) is introduced,
+% and the condition is weakened with tv > lat.
+% Furthermore a summand true->delta is introduced.
+act a,b;
+
+proc X = a@2 . b@3 . X
+       + a . X;
+
+init X;
