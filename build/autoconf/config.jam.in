@@ -42,20 +42,20 @@ CADP_LIBRARIES     = "@CADP_LIBRARIES@" ;
 BOOST_INCLUDE_PATH = "@BOOST_INCLUDE_PATH@" ;
 BOOST_LIBRARY_PATH = "@BOOST_LIBRARY_PATH@" ;
 
-prefix      = [ MATCH "^--prefix=([^ ]+)" : [ modules.peek : ARGV ] ] ;
-exec_prefix = [ MATCH "^--exec-prefix=([^ ]+)" : [ modules.peek : ARGV ] ] ;
+prefix      = "\"" [ MATCH "^--prefix=([^ ]+)" : [ modules.peek : ARGV ] ] "\"" ;
+exec_prefix = "\"" [ MATCH "^--exec-prefix=([^ ]+)" : [ modules.peek : ARGV ] ] "\"" ;
 
 # Installation related variables
 if ! $(prefix) {
-  prefix = @PREFIX_DIR@ ;
+  prefix = "@PREFIX_DIR@" ;
 }
 if ! $(exec_prefix) {
-  exec_prefix = @EXEC_PREFIX_DIR@ ;
+  exec_prefix = "@EXEC_PREFIX_DIR@" ;
 }
 
-BIN_DIR         = @BIN_DIR@ ;
-LIB_DIR         = @LIB_DIR@ ;
-DATA_DIR        = @DATA_DIR@ ;
-INCLUDE_DIR     = @INCLUDE_DIR@ ;
-MAN_DIR         = @MAN_DIR@ ;
+BIN_DIR         = "@BIN_DIR@" ;
+LIB_DIR         = "@LIB_DIR@" ;
+DATA_DIR        = "@DATA_DIR@" ;
+INCLUDE_DIR     = "@INCLUDE_DIR@" ;
+MAN_DIR         = "@MAN_DIR@" ;
 

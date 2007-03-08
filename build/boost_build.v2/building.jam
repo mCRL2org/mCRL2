@@ -5,7 +5,7 @@ include $(BUILD_TOOLS)/testing.jam ;
 
 # Make sure the revision variable is defined
 if ! $(REVISION) {
-  REVISION = [ MATCH ([0-9]*) : [ SHELL "svnversion -n $(TOP)" ] ] ;
+  REVISION = [ MATCH ([0-9]*) : [ SHELL "svnversion -n \"$(TOP)\"" ] ] ;
 
   if ! $(REVISION) {
     REVISION = "0" ;
