@@ -197,7 +197,6 @@ class summand: public aterm_appl
     /// <li>the (optional) time has sort Real</li>
     /// <li>the condition has sort Bool</li>
     /// <li>the summation variables have unique names</li>
-    /// <li>the left hand sides of the assignments are contained in the set of summation variables</li>
     /// </ul>
     bool is_well_typed() const
     {
@@ -225,12 +224,6 @@ class summand: public aterm_appl
       {
         return false;
       }
-
-      // check 5)
-      // if (!detail::check_assignment_variables(m_assignments, m_summation_variables))
-      // {
-      //   return false;
-      // }
 
       return true;
     }
@@ -425,6 +418,7 @@ class linear_process: public aterm_appl
     /// <li>the process parameters have unique names</li>
     /// <li>the free variables have unique names</li>
     /// <li>the names of the process parameters do not appear as the name of a summation variable</li>
+    /// <li>the left hand sides of the assignments of summands are contained in the process parameters</li>
     /// </ul>
     bool is_well_typed() const
     {
@@ -456,6 +450,13 @@ class linear_process: public aterm_appl
       for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
       {
         if (!detail::check_variable_names(i->summation_variables(), names))
+          return false;
+      }
+
+      // check 5)
+      for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
+      {
+        if (!detail::check_assignment_variables(i->assignments(), m_process_parameters))
           return false;
       }
 
