@@ -3520,11 +3520,7 @@ echo "${ECHO_T}no" >&6; }
 fi
 
 
-if test -z $FLEX; then
-  { echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6; }
-#  AC_MSG_ERROR([cannot find flex])
-else
+if test -n $FLEX; then
   { echo "$as_me:$LINENO: checking whether flex option c++ is available" >&5
 echo $ECHO_N "checking whether flex option c++ is available... $ECHO_C" >&6; }
   if $FLEX -I -o/dev/null build/autoconf/test.l &> /dev/null; then
@@ -3590,11 +3586,7 @@ echo "${ECHO_T}no" >&6; }
 fi
 
 
-if test -z $BISON; then
-  { echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6; }
-#  AC_MSG_ERROR([cannot find bison])
-else
+if test -n $BISON; then
   { echo "$as_me:$LINENO: checking whether bison option %glr-parser is available" >&5
 echo $ECHO_N "checking whether bison option %glr-parser is available... $ECHO_C" >&6; }
   if $BISON build/autoconf/test.y -o/dev/null &> /dev/null; then
@@ -3880,8 +3872,8 @@ echo $ECHO_N "checking for ATerm library in $with_aterm... $ECHO_C" >&6; }
   ATERM_ROOT=$(echo $with_aterm, | cut -d, -f1)
   ATERM_SUFFIX=/$(echo $with_aterm, | cut -d, -f2 -s)
   if test $ATERM_ROOT; then
-    ATERM_CPPFLAGS="-I$ATERM_ROOT/include$ATERM_SUFFIX"
-    ATERM_LDFLAGS="-L$ATERM_LIB$ATERM_SUFFIX"
+    ATERM_CPPFLAGS="-I\\\\"$ATERM_ROOT/include$ATERM_SUFFIX\\\\""
+    ATERM_LDFLAGS="-L\\\\"$ATERM_LIB$ATERM_SUFFIX\\\\""
   fi
   if test $enable_profile; then
 
@@ -4673,8 +4665,8 @@ fi
 done
 
 else
-  ATERM_CPPFLAGS="-I$PWD/src/aterm"
-  ATERM_LDFLAGS="-L$PWD/src/aterm"
+  ATERM_CPPFLAGS="-I\\\"$PWD/src/aterm\\\""
+  ATERM_LDFLAGS="-L\\\"$PWD/src/aterm\\\""
   ATERM_NAME="ATerm"
   BUILD_ATERM="builtin"
 
@@ -6285,19 +6277,22 @@ fi
 
 
 if test "$BUILD_ATERM" = "builtin"; then
-  eval "eval IATERM_CPPFLAGS=-I\\\"${includedir}/mcrl2/aterm\\\""
+  eval "eval IATERM_CPPFLAGS=\\\"${includedir}/mcrl2/aterm\\\""
   if test "$ADDRESS_MODEL" = "64"; then
-    IATERM_CPPFLAGS="-DAT_64BIT \"${IATERM_CPPFLAGS}\""
+    IATERM_CPPFLAGS="-DAT_64BIT -I\\\"${IATERM_CPPFLAGS}\\\""
+
+  else
+    IATERM_CPPFLAGS="-I\\\"${IATERM_CPPFLAGS}\\\""
+
   fi
 
-
-  eval "eval IATERM_LDFLAGS=-L\\\"${libdir}/mcrl2\\\""
-  IATERM_LDFLAGS="\"${IATERM_LDFLAGS}\" -lATerm"
+  eval "eval IATERM_LDFLAGS=\\\"${libdir}/mcrl2\\\""
+  IATERM_LDFLAGS="-L\\\"${IATERM_LDFLAGS}\\\" -lATerm"
 
 else
-  IATERM_CPPFLAGS="\"${ATERM_CPPFLAGS}\""
+  IATERM_CPPFLAGS="${ATERM_CPPFLAGS}"
 
-  IATERM_LDFLAGS="\"${ATERM_LDFLAGS}\" -lATerm"
+  IATERM_LDFLAGS="${ATERM_LDFLAGS} -lATerm"
 
 fi
 
@@ -6368,7 +6363,7 @@ else
 
 fi
 
-ac_config_files="$ac_config_files build/config.mk:build/autoconf/config.mk.in build/config.jam:build/autoconf/config.jam.in src/setup.h:build/autoconf/setup.h.in"
+ac_config_files="$ac_config_files build/Makefile:build/autoconf/Makefile.in build/config.jam:build/autoconf/config.jam.in src/setup.h:build/autoconf/setup.h.in"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -6937,7 +6932,7 @@ cat >>$CONFIG_STATUS <<\_ACEOF
 for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
-    "build/config.mk") CONFIG_FILES="$CONFIG_FILES build/config.mk:build/autoconf/config.mk.in" ;;
+    "build/Makefile") CONFIG_FILES="$CONFIG_FILES build/Makefile:build/autoconf/Makefile.in" ;;
     "build/config.jam") CONFIG_FILES="$CONFIG_FILES build/config.jam:build/autoconf/config.jam.in" ;;
     "src/setup.h") CONFIG_FILES="$CONFIG_FILES src/setup.h:build/autoconf/setup.h.in" ;;
 

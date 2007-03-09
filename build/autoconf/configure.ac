@@ -78,10 +78,7 @@ AC_PROG_CXX
 
 # Check for compatible flex
 AC_CHECK_PROG([FLEX], [flex], [flex], [])
-if test -z $FLEX; then
-  AC_MSG_RESULT([no])
-#  AC_MSG_ERROR([cannot find flex])
-else
+if test -n $FLEX; then
   AC_MSG_CHECKING([whether flex option c++ is available])
   if $FLEX -I -o/dev/null build/autoconf/test.l &> /dev/null; then
     AC_MSG_RESULT([yes]);
@@ -105,10 +102,7 @@ fi
 
 # Check for compatible bison
 AC_CHECK_PROG([BISON], [bison], [bison], [])
-if test -z $BISON; then
-  AC_MSG_RESULT([no])
-#  AC_MSG_ERROR([cannot find bison])
-else
+if test -n $BISON; then
   AC_MSG_CHECKING([whether bison option %glr-parser is available])
   if $BISON build/autoconf/test.y -o/dev/null &> /dev/null; then
     AC_MSG_RESULT([yes]);
@@ -271,8 +265,8 @@ if test $with_aterm; then
   ATERM_ROOT=$(echo $with_aterm, | cut -d, -f1)
   ATERM_SUFFIX=/$(echo $with_aterm, | cut -d, -f2 -s)
   if test $ATERM_ROOT; then
-    ATERM_CPPFLAGS="-I$ATERM_ROOT/include$ATERM_SUFFIX"
-    ATERM_LDFLAGS="-L$ATERM_LIB$ATERM_SUFFIX"
+    ATERM_CPPFLAGS="-I\\\\"$ATERM_ROOT/include$ATERM_SUFFIX\\\\""
+    ATERM_LDFLAGS="-L\\\\"$ATERM_LIB$ATERM_SUFFIX\\\\""
   fi
   if test $enable_profile; then
     AC_CHECK_LIB([ATerm-prof], [ATinit], , [AC_MSG_ERROR([cannot find ATerm-prof library])])
@@ -288,8 +282,8 @@ if test $with_aterm; then
   fi;
   AC_CHECK_HEADERS([aterm2.h], , [AC_MSG_ERROR([cannot find ATerm headers])])
 else
-  ATERM_CPPFLAGS="-I$PWD/src/aterm"
-  ATERM_LDFLAGS="-L$PWD/src/aterm"
+  ATERM_CPPFLAGS="-I\\\"$PWD/src/aterm\\\""
+  ATERM_LDFLAGS="-L\\\"$PWD/src/aterm\\\""
   ATERM_NAME="ATerm"
   BUILD_ATERM="builtin"
 
@@ -482,17 +476,18 @@ AC_SUBST([LINK_VARIANT],[])
 AC_SUBST([BUILD_EXTRA])
 
 if test "$BUILD_ATERM" = "builtin"; then
-  eval "eval IATERM_CPPFLAGS=-I\\\"${includedir}/mcrl2/aterm\\\""
+  eval "eval IATERM_CPPFLAGS=\\\"${includedir}/mcrl2/aterm\\\""
   if test "$ADDRESS_MODEL" = "64"; then
-    IATERM_CPPFLAGS="-DAT_64BIT \"${IATERM_CPPFLAGS}\""
+    AC_SUBST([IATERM_CPPFLAGS],["-DAT_64BIT -I\\\"${IATERM_CPPFLAGS}\\\""])
+  else
+    AC_SUBST([IATERM_CPPFLAGS],["-I\\\"${IATERM_CPPFLAGS}\\\""])
   fi
-  AC_SUBST([IATERM_CPPFLAGS],[])
 
-  eval "eval IATERM_LDFLAGS=-L\\\"${libdir}/mcrl2\\\""
-  AC_SUBST([IATERM_LDFLAGS],["\"${IATERM_LDFLAGS}\" -lATerm"])
+  eval "eval IATERM_LDFLAGS=\\\"${libdir}/mcrl2\\\""
+  AC_SUBST([IATERM_LDFLAGS],["-L\\\"${IATERM_LDFLAGS}\\\" -lATerm"])
 else
-  AC_SUBST([IATERM_CPPFLAGS],["\"${ATERM_CPPFLAGS}\""])
-  AC_SUBST([IATERM_LDFLAGS],["\"${ATERM_LDFLAGS}\" -lATerm"])
+  AC_SUBST([IATERM_CPPFLAGS],["${ATERM_CPPFLAGS}"])
+  AC_SUBST([IATERM_LDFLAGS],["${ATERM_LDFLAGS} -lATerm"])
 fi
 
 eval "eval PREFIX_DIR=\\\"${prefix}\\\""
@@ -544,7 +539,7 @@ else
   AC_SUBST([USE_BCG],[""])
 fi
 
-AC_CONFIG_FILES([build/config.mk:build/autoconf/config.mk.in
+AC_CONFIG_FILES([build/Makefile:build/autoconf/Makefile.in
                  build/config.jam:build/autoconf/config.jam.in
                  src/setup.h:build/autoconf/setup.h.in])
 AC_OUTPUT

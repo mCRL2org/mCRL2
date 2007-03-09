@@ -1,0 +1,72 @@
+HOST_OS            = "@HOST_OS@"
+
+# Installation directories
+prefix             = "@PREFIX_DIR@"
+exec_prefix        = "@EXEC_PREFIX_DIR@"
+bindir             = "@bindir@"
+libdir             = "@libdir@"
+datadir            = "@datarootdir@"
+datarootdir        = "@datarootdir@"
+includedir         = "@includedir@"
+infodir            = "@infodir@"
+mandir             = "@mandir@"
+
+# Boost Build configuration
+BJAM               = @BJAM@
+BJAM_BUILD         = ./build.sh
+ifeq ($(HOST_OS),WINDOWS)
+BJAM_BUILD         = build.bat runtime-link=static link=static
+endif
+
+BOOST_BUILD       := $(BJAM) --prefix=${prefix}
+
+DOCBOOK_XSL_PREFIX = "@abs_top_srcdir@/3rd-party/docbook/xsl"
+XSLTPROC           = XML_CATALOG_FILES=$(DOCBOOK_XSL_PREFIX)/catalog.xml @XSLTPROC@
+
+ifneq ($(XSLTPROC),)
+  MAN_MANIFEST = "build/bin/MAN.MANIFEST"
+endif
+
+# Creates an application bundle on Mac OS X
+.PHONY: all bjam install clean distclean distribution
+
+all: $(BJAM) tools man
+
+install: $(BJAM) man
+	$(BOOST_BUILD) --install
+	@install -d $(mandir)
+	@cp -rf build/man/* $(mandir)
+
+tools:
+	$(BOOST_BUILD)
+
+test: $(BJAM)
+	$(BJAM) ./status --preserve-test-targets
+
+$(MAN_MANIFEST): src/doc/*.xml
+	cd ./src/doc; $(XSLTPROC) --stringparam man.output.subdirs.enabled 1 \
+	             --stringparam man.output.manifest.enabled 1 \
+	             --stringparam man.output.manifest.filename ../../$(MAN_MANIFEST) \
+	             --stringparam man.output.in.separate.dir 1 \
+	             --stringparam man.output.base.dir ../../build/man/ \
+		     $(DOCBOOK_XSL_PREFIX)/manpages/docbook.xsl index.xml
+
+man: $(MAN_MANIFEST)
+
+web: 
+	cd ./src/doc; $(XSLTPROC) --stringparam base.dir ../../build/web/ \
+	             --stringparam html.stylesheet man.css \
+		     $(DOCBOOK_XSL_PREFIX)/html/chunk.xsl index.xml; \
+	 install -m 0644 man.css ../../build/web/
+
+# Build boost build tool
+bjam: $(BJAM)
+
+$(BJAM):
+	@mkdir -p build/bin
+	@cd 3rd-party/boost/tools/jam; $(BJAM_BUILD)
+	@rm -rf 3rd-party/boost/tools/jam/bootstrap
+
+config.status: configure build/autoconf/config.jam.in
+	$(error Update to configure detected, please run: ./config.status --recheck; ./config.status)
+
