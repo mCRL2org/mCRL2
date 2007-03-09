@@ -4,10 +4,13 @@
 #ifndef LPS_DATA_SPECIFICATION_H
 #define LPS_DATA_SPECIFICATION_H
 
+#include <set>
+
 #include "atermpp/aterm.h"
 #include "lps/sort.h"
 #include "lps/function.h"
 #include "lps/data.h"
+#include "lps/detail/utility.h"
 
 namespace lps {
 
@@ -89,6 +92,34 @@ class data_specification: public aterm_appl
     data_equation_list equations() const
     {
       return m_equations;
+    }
+
+    /// Returns true if
+    /// <ul>
+    /// <li>the domain and range sorts of constructors are contained in the list of sorts</li>
+    /// <li>the domain and range sorts of mappings are contained in the list of sorts</li>
+    /// </ul>
+    bool is_well_typed() const
+    {
+      std::set<lps::sort> sorts;
+      for (sort_list::iterator i = m_sorts.begin(); i != m_sorts.end(); ++i)
+      {
+        sorts.insert(*i);
+      }
+
+      // check 1)
+      if (!detail::check_data_spec_sorts(constructors(), sorts))
+      {
+        return false;
+      }
+
+      // check 2)
+      if (!detail::check_data_spec_sorts(mappings(), sorts))
+      {
+        return false;
+      }
+      
+      return true;
     }
 };
 

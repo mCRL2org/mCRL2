@@ -58,7 +58,6 @@ int test_main(int, char*[])
   specification spec = mcrl22lps(SPECIFICATION);
   linear_process lps = spec.process();
   BOOST_CHECK(lps.is_well_typed()); 
-  BOOST_CHECK(lps.is_name_clash_free()); 
   BOOST_CHECK(!lps.has_time()); 
 
   summand s = lps.summands().front();

@@ -10,6 +10,8 @@
 #include <vector>
 #include <utility>
 #include <cassert>
+#include <iterator>
+#include <algorithm>
 
 #include "atermpp/aterm.h"
 #include "lps/function.h"
@@ -84,13 +86,16 @@ class specification: public aterm_appl
   public:
     specification()
       : aterm_appl(detail::constructSpec())
-    {}
+    {
+      assert(is_well_typed());
+    }
 
     specification(aterm_appl t)
       : aterm_appl(t)
     {
       assert(detail::check_rule_Spec(m_term));
       init_term(t);
+      assert(is_well_typed());
     }
 
     specification(
@@ -114,6 +119,7 @@ class specification: public aterm_appl
         )
       );        
       assert(has_proper_action_labels());
+      assert(is_well_typed());
     }
 
     /// Reads the LPS from file. Returns true if the operation succeeded.
@@ -165,7 +171,62 @@ class specification: public aterm_appl
     {
       return m_initial_process;
     }
-    // data_assignment_list initial_assignments() const
+    
+    /// Returns true if
+    /// <ul>
+    /// <li>the process is well typed</li>
+    /// <li>the sorts occurring in summation variables are declared in the data specification</li>
+    /// <li>the sorts occurring in process parameters are declared in the data specification</li>
+    /// <li>the sorts occurring in the free variables are declared in the data specification</li>
+    /// <li>the sorts occurring in the action labels are declared in the data specification</li>
+    /// <li>the labels occurring in the actions of the summands are contained in the action labels</li>
+    /// </ul>
+    bool is_well_typed() const
+    {
+      // check 1)
+      if (!process().is_well_typed())
+      {
+        return false;
+      }
+      
+      std::set<lps::sort> sorts = detail::make_set(data().sorts());
+
+      // check 2)
+      for (summand_list::iterator i = process().summands().begin(); i != process().summands().end(); ++i)
+      {
+        if (!(detail::check_variable_sorts(i->summation_variables(), sorts)))
+          return false;
+      }
+
+      // check 3)
+      if (!(detail::check_variable_sorts(process().process_parameters(), sorts)))
+      {
+        return false;
+      }
+
+      // check 4)
+      if (!(detail::check_variable_sorts(process().free_variables(), sorts)))
+      {
+        return false;
+      }
+
+      // check 5)
+      if (!(detail::check_action_label_sorts(action_labels(), sorts)))
+      {
+        return false;
+      }
+
+      std::set<action_label> labels = detail::make_set(action_labels());
+
+      // check 6)
+      for (summand_list::iterator i = process().summands().begin(); i != process().summands().end(); ++i)
+      {
+        if (!(detail::check_action_labels(i->actions(), labels)))
+          return false;
+      }
+      
+      return true;
+    }    
 };
 
 

@@ -200,6 +200,7 @@ class data_equation: public aterm_appl
       m_condition = data_expression(*i++);
       m_lhs       = data_expression(*i++);
       m_rhs       = data_expression(*i);
+      assert(data_expr::is_bool(m_condition));
     } 
 
     data_equation(data_variable_list variables,
@@ -212,7 +213,9 @@ class data_equation: public aterm_appl
        m_condition(condition),
        m_lhs(lhs),
        m_rhs(rhs)     
-    {}
+    {
+      assert(data_expr::is_bool(m_condition));
+    }
 
     /// Returns the sequence of variables.
     ///
@@ -249,7 +252,22 @@ class data_equation: public aterm_appl
     data_equation substitute(Substitution f) const
     {
       return data_equation(f(aterm(*this)));
-    }     
+    }
+    
+    /// Returns true if
+    /// <ul>
+    /// <li>the types of the left and right hand side are equal</li>
+    /// </ul>
+    bool is_well_typed() const
+    {
+      // check 1)
+      if (m_lhs.sort() != m_rhs.sort())
+      {
+        return false;
+      }
+      
+      return true;
+    }   
 };
 
 ///////////////////////////////////////////////////////////////////////////////

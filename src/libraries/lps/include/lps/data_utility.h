@@ -55,6 +55,7 @@ std::set<std::string> identifier_strings(Term t)
 }
 
 /// Returns the names of the variables in t.
+inline
 std::vector<std::string> variable_strings(data_variable_list t)
 {
   std::vector<std::string> result;
@@ -66,6 +67,7 @@ std::vector<std::string> variable_strings(data_variable_list t)
 /// Returns a copy of t, but with a common postfix added to each variable name,
 /// and such that the new names do not appear in context.
 ///
+inline
 data_variable_list fresh_variables(data_variable_list t, const std::set<std::string>& context, std::string postfix_format = "_%02d")
 {
   std::vector<std::string> ids = variable_strings(t);

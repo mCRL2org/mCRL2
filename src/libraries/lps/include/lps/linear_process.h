@@ -23,31 +23,10 @@
 #include "lps/action.h"
 #include "lps/data.h"
 #include "lps/data_specification.h"
+#include "lps/data_utility.h"
 #include "lps/pretty_print.h"
 #include "lps/detail/specification_utility.h"
-
-namespace {
-  /// INTERNAL ONLY
-  /// Returns a set containing the names of the variables in l.
-  inline
-  std::set<std::string> make_string_set(lps::data_variable_list l)
-  {
-    std::set<std::string> result;
-    for (lps::data_variable_list::iterator i = l.begin(); i != l.end(); ++i)
-    {
-      result.insert(i->name());
-    }
-    return result;
-  }
-
-  inline
-  std::string print_string_set(const std::set<std::string>& v)
-  {
-    std::ostringstream out;
-    std::copy(v.begin(), v.end(), std::ostream_iterator<std::string>(out, " "));
-    return out.str();
-  }
-} // unnamed namespace
+#include "lps/detail/utility.h" // unique_names
 
 namespace lps {
 
@@ -213,24 +192,46 @@ class summand: public aterm_appl
     }     
 
     /// Returns true if
-    /// 1) all data assignments are well typed
-    /// 2) the (optional) time has sort Real
-    /// 3) the condition has sort Bool
+    /// <ul>
+    /// <li>the data assignments are well typed</li>
+    /// <li>the (optional) time has sort Real</li>
+    /// <li>the condition has sort Bool</li>
+    /// <li>the summation variables have unique names</li>
+    /// <li>the left hand sides of the assignments are contained in the set of summation variables</li>
+    /// </ul>
     bool is_well_typed() const
     {
+      // check 1)
       for (data_assignment_list::iterator i = m_assignments.begin(); i != m_assignments.end(); ++i)
       {
         if (!i->is_well_typed())
           return false;
       }
+
+      // check 2)
       if (has_time() && !data_expr::is_real(m_time))
       {
         return false;
       }
+
+      // check 3)
       if (!data_expr::is_bool(m_condition))
       {
         return false;
       }
+
+      // check 4)
+      if (!detail::unique_names(m_summation_variables))
+      {
+        return false;
+      }
+
+      // check 5)
+      // if (!detail::check_assignment_variables(m_assignments, m_summation_variables))
+      // {
+      //   return false;
+      // }
+
       return true;
     }
 };
@@ -320,54 +321,7 @@ class linear_process: public aterm_appl
     data_variable_list m_process_parameters;
     summand_list       m_summands;
 
-    typedef std::vector<std::pair<summand_list::iterator, std::set<std::string> > > name_clash_list;
-
-    /// Returns all name clashes between variables names occurring in a sum operator
-    /// of a summand and variable names occurring in the process parameters of the LPS.
-    name_clash_list variable_name_clashes() const
-    {
-      std::vector<std::pair<summand_list::iterator, std::set<std::string> > > result;
-      std::set<std::string> pv = make_string_set(process_parameters());
-      for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
-      {
-        std::set<std::string> sv = make_string_set(i->summation_variables());
-        std::set<std::string> v;
-        std::set_intersection(pv.begin(), pv.end(), sv.begin(), sv.end(), std::inserter(v, v.end()));
-        if (!v.empty())
-        {
-          result.push_back(make_pair(i, v));
-        }
-      }
-      return result;
-    }
-
   public:
-    /// Returns true if all summands are well typed
-    bool is_well_typed() const
-    {
-      for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
-      {
-        if (!i->is_well_typed())
-          return false;
-      }
-      return true;
-    }
-
-    /// Returns true if there are no name clashes between variables in all sum operators
-    /// of the summands and the process parameters of the LPS. If print is true, an
-    /// overview of the name clashes will be printed to cerr.
-    bool is_name_clash_free(bool print=false) const
-    {
-      name_clash_list v = variable_name_clashes();
-      if (print && !v.empty()) {
-        for (name_clash_list::const_iterator i = v.begin(); i != v.end(); ++i)
-        {
-          std::cerr << "LPS " << i->first->to_string() << " has name clashes " << print_string_set(i->second) << std::endl;
-        }
-      }
-      return v.empty();
-    }
-
     linear_process()
       : aterm_appl(detail::constructLinearProcess())
     {}
@@ -380,17 +334,12 @@ class linear_process: public aterm_appl
        m_free_variables    (free_variables    ),
        m_process_parameters(process_parameters),
        m_summands          (summands          )
-    {
-      assert(is_well_typed());
-      assert(is_name_clash_free(true));
-    }
+    { }
 
     linear_process(aterm_appl lps)
       : aterm_appl(lps)
     {
       assert(detail::check_term_LinearProcess(m_term));
-      assert(is_well_typed());
-      assert(is_name_clash_free(true));
 
       // unpack LPS(.,.,.) term     
       aterm_appl::iterator i = lps.begin();
@@ -451,6 +400,66 @@ class linear_process: public aterm_appl
       std::string s2 = m_process_parameters.to_string();
       std::string s3 = m_summands          .to_string();
       return s1 + "\n" + s2 + "\n" + s3;
+    }
+
+    /// Returns the set of free variables that appear in the process. This set
+    /// is a subset of <tt>free_variables()</tt>.
+    std::set<data_variable> find_free_variables()
+    {
+      // TODO: the efficiency of this implementation is not optimal
+      std::set<data_variable> result;
+      std::set<data_variable> parameters = detail::make_set(process_parameters());
+      for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
+      {
+        std::set<data_variable> summation_variables = detail::make_set(i->summation_variables());
+        std::set<data_variable> used_variables = find_variables(make_list(i->condition(), i->actions(), i->time()));
+        std::set<data_variable> bound_variables = detail::set_union(parameters, summation_variables);
+        std::set<data_variable> free_variables = detail::set_difference(used_variables, bound_variables);
+        result.insert(free_variables.begin(), free_variables.end());
+      }
+      return result;
+    }
+    /// Returns true if
+    /// <ul>
+    /// <li>the summands are well typed</li>
+    /// <li>the process parameters have unique names</li>
+    /// <li>the free variables have unique names</li>
+    /// <li>the names of the process parameters do not appear as the name of a summation variable</li>
+    /// </ul>
+    bool is_well_typed() const
+    {
+      // check 1)
+      for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
+      {
+        if (!i->is_well_typed())
+          return false;
+      }
+
+      // check 2)
+      if (!detail::unique_names(m_process_parameters))
+      {
+        return false;
+      }
+
+      // check 3)
+      if (!detail::unique_names(m_free_variables))
+      {
+        return false;
+      }
+
+      // check 4)
+      std::set<identifier_string> names;
+      for (data_variable_list::iterator i = m_process_parameters.begin(); i != m_process_parameters.end(); ++i)
+      {
+        names.insert(i->name());
+      }
+      for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
+      {
+        if (!detail::check_variable_names(i->summation_variables(), names))
+          return false;
+      }
+
+      return true;
     }
   };
 

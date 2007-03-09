@@ -7,16 +7,45 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <iterator>
+#include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
 #include "lps/data.h"
+#include "lps/action.h"
+#include "lps/function.h"
 #include "libstruct.h"
 
 namespace lps {
 
 namespace detail {
+
+/// Makes a set of the given container.
+template <class Container>
+std::set<typename Container::value_type> make_set(const Container& c)
+{
+  std::set<typename Container::value_type> result;
+  std::copy(c.begin(), c.end(), std::inserter(result, result.begin()));
+  return result;
+}
+
+template <typename T>
+std::set<T> set_union(const std::set<T>& x, const std::set<T>& y)
+{
+  std::set<T> result;
+  std::set_union(x.begin(), x.end(), y.begin(), y.end(), std::inserter(result, result.begin()));
+  return result;
+}
+
+template <typename T>
+std::set<T> set_difference(const std::set<T>& x, const std::set<T>& y)
+{
+  std::set<T> result;
+  std::set_difference(x.begin(), x.end(), y.begin(), y.end(), std::inserter(result, result.begin()));
+  return result;
+}
 
 // example: "X(d:D,e:E)"
 inline
@@ -54,6 +83,123 @@ std::pair<std::string, data_expression_list> parse_variable(std::string s)
     }
   }
   return std::make_pair(name, atermpp::reverse(variables));
+}
+
+/// Returns true if the names of the given variables are unique.
+inline
+bool unique_names(data_variable_list variables)
+{
+  std::set<identifier_string> summation_variable_names;
+  for (data_variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
+  {
+    summation_variable_names.insert(i->name());
+  }
+  if (summation_variable_names.size() != variables.size())
+  {
+    return false;
+  }
+  return true;
+}
+
+/// Returns true if the left hand sides of assignments are contained in variables.
+inline
+bool check_assignment_variables(data_assignment_list assignments, data_variable_list variables)
+{
+  std::set<data_variable> v;
+  std::copy(variables.begin(), variables.end(), std::inserter(v, v.begin()));
+  for (data_assignment_list::iterator i = assignments.begin(); i != assignments.end(); ++i)
+  {
+    if (v.find(i->lhs()) == v.end())
+      return false;
+  }
+  return true;
+}
+
+/// Returns true if the sorts of the given variables are contained in sorts.
+inline
+bool check_variable_sorts(data_variable_list variables, const std::set<lps::sort>& sorts)
+{
+  for (data_variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
+  {
+    if (sorts.find(i->sort()) == sorts.end())
+      return false;
+  }
+  return true;
+}
+
+/// Returns true if the sorts of the given actions are contained in sorts.
+inline
+bool check_action_sorts(action_list actions, const std::set<lps::sort>& sorts)
+{
+  for (action_list::iterator i = actions.begin(); i != actions.end(); ++i)
+  {
+    for (sort_list::iterator j = i->sorts().begin(); j != i->sorts().end(); ++j)
+    {
+      if (sorts.find(*j) == sorts.end())
+        return false;
+    }
+  }
+  return true;
+}
+
+/// Returns true if the labels of the given actions are contained in labels.
+inline
+bool check_action_labels(action_list actions, const std::set<action_label>& labels)
+{
+  for (action_list::iterator i = actions.begin(); i != actions.end(); ++i)
+  {
+    if (labels.find(i->label()) == labels.end())
+      return false;
+  }
+  return true;
+}
+
+/// Returns true if the sorts of the given action labels are contained in sorts.
+inline
+bool check_action_label_sorts(action_label_list action_labels, const std::set<lps::sort>& sorts)
+{
+  for (action_label_list::iterator i = action_labels.begin(); i != action_labels.end(); ++i)
+  {
+    for (sort_list::iterator j = i->sorts().begin(); j != i->sorts().end(); ++j)
+    {
+      if (sorts.find(*j) == sorts.end())
+        return false;
+    }
+  }
+  return true;
+}
+
+/// Returns true if names of the given variables are not contained in names.
+inline
+bool check_variable_names(data_variable_list variables, const std::set<identifier_string>& names)
+{
+  for (data_variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
+  {
+    if (names.find(i->name()) != names.end())
+      return false;
+  }
+  return true;
+}
+
+/// Returns true if the domain sorts and range sort of the given functions are
+/// contained in sorts.
+inline
+bool check_data_spec_sorts(function_list functions, const std::set<lps::sort>& sorts)
+{
+  for (function_list::iterator i = functions.begin(); i != functions.end(); ++i)
+  {
+    sort_list ds = i->domain_sorts();
+    lps::sort rs = i->range_sort();
+    for (sort_list::iterator j = ds.begin(); j != ds.end(); ++j)
+    {
+      if (sorts.find(*j) == sorts.end())
+        return false;
+    }
+    if (sorts.find(rs) == sorts.end())
+      return false;
+  }
+
+  return true;
 }
 
 } // namespace detail
