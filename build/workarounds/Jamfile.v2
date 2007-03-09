@@ -14,8 +14,7 @@ alias configuration : : <os>CYGWIN <toolset>gcc :
 
 # MinGW
 alias configuration : : <os>NT <toolset>gcc :
-       : <link>static
-         <include>$(TOP)/build/workarounds/mingw
+       : <include>$(TOP)/build/workarounds/mingw
        ;
 
 # MSVC
