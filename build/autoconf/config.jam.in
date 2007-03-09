@@ -42,8 +42,8 @@ CADP_LIBRARIES     = "@CADP_LIBRARIES@" ;
 BOOST_INCLUDE_PATH = "@BOOST_INCLUDE_PATH@" ;
 BOOST_LIBRARY_PATH = "@BOOST_LIBRARY_PATH@" ;
 
-prefix      = [ MATCH "^--prefix=([^ ]+)" : [ modules.peek : ARGV ] ] ;
-exec_prefix = [ MATCH "^--exec-prefix=([^ ]+)" : [ modules.peek : ARGV ] ] ;
+prefix      = [ MATCH "^--prefix=(.+)" : [ modules.peek : ARGV ] ] ;
+exec_prefix = [ MATCH "^--exec-prefix=(.+)" : [ modules.peek : ARGV ] ] ;
 
 # Installation related variables
 if ! $(prefix) {

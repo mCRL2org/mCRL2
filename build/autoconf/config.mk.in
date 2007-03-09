@@ -19,6 +19,6 @@ DOCBOOK_XSL_PREFIX = "@abs_top_srcdir@/3rd-party/docbook/xsl"
 XSLTPROC           = XML_CATALOG_FILES=$(DOCBOOK_XSL_PREFIX)/catalog.xml @XSLTPROC@
 
 ifneq ($(XSLTPROC),XML_CATALOG_FILES=$(DOCBOOK_XSL_PREFIX)/catalog.xml)
-  MAN_MANIFEST = "@abs_top_srcdir@/build/bin/MAN.MANIFEST"
+  MAN_MANIFEST = build/bin/MAN.MANIFEST
 endif
 

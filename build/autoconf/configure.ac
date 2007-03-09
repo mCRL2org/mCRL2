@@ -470,7 +470,7 @@ AC_CHECK_FUNCS([strdup])
 #evaluate some location variables for use with Boost Build
 if test "x$prefix" = xNONE
 then
-  prefix=$ac_default_prefix
+  prefix="$ac_default_prefix"
 fi
 if test "x$exec_prefix" = xNONE
 then
@@ -482,21 +482,21 @@ AC_SUBST([LINK_VARIANT],[])
 AC_SUBST([BUILD_EXTRA])
 
 if test "$BUILD_ATERM" = "builtin"; then
-  eval "eval IATERM_CPPFLAGS=-I${includedir}/mcrl2"
+  eval "eval IATERM_CPPFLAGS=-I\\\"${includedir}/mcrl2/aterm\\\""
   if test "$ADDRESS_MODEL" = "64"; then
-    IATERM_CPPFLAGS="-DAT_64BIT ${IATERM_CPPFLAGS}"
+    IATERM_CPPFLAGS="-DAT_64BIT \"${IATERM_CPPFLAGS}\""
   fi
-  AC_SUBST([IATERM_CPPFLAGS],["${IATERM_CPPFLAGS}/aterm"])
+  AC_SUBST([IATERM_CPPFLAGS],[])
 
-  eval "eval IATERM_LDFLAGS=-L${libdir}/mcrl2"
-  AC_SUBST([IATERM_LDFLAGS],["${IATERM_LDFLAGS} -lATerm"])
+  eval "eval IATERM_LDFLAGS=-L\\\"${libdir}/mcrl2\\\""
+  AC_SUBST([IATERM_LDFLAGS],["\"${IATERM_LDFLAGS}\" -lATerm"])
 else
-  AC_SUBST([IATERM_CPPFLAGS],["${ATERM_CPPFLAGS}"])
-  AC_SUBST([IATERM_LDFLAGS],["${ATERM_LDFLAGS} -lATerm"])
+  AC_SUBST([IATERM_CPPFLAGS],["\"${ATERM_CPPFLAGS}\""])
+  AC_SUBST([IATERM_LDFLAGS],["\"${ATERM_LDFLAGS}\" -lATerm"])
 fi
 
-eval "eval PREFIX_DIR=${prefix}"
-eval "eval EXEC_PREFIX_DIR=${exec_prefix}"
+eval "eval PREFIX_DIR=\\\"${prefix}\\\""
+eval "eval EXEC_PREFIX_DIR=\\\"${exec_prefix}\\\""
 
 prefix="\$\(prefix\)"
 includedir="$includedir/mcrl2"
@@ -506,7 +506,7 @@ libdir="$libdir/mcrl2"
 eval "eval DATA_DIR=${datadir}"
 eval "eval BIN_DIR=${bindir}"
 eval "eval LIB_DIR=${libdir}"
-eval INCLUDE_DIR=${includedir}
+eval INCLUDE_DIR="${includedir}"
 eval "eval MAN_DIR=${mandir}"
 
 AC_SUBST([PREFIX_DIR],[])

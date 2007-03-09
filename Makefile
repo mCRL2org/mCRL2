@@ -67,7 +67,6 @@ config.log:
 	$(error Please run configure first)
 
 config.status: configure build/autoconf/config.mk.in build/autoconf/config.jam.in
-	@./config.status --recheck
-	@./config.status
+	$(error Update to configure detected, please run: ./config.status --recheck; ./config.status)
 
 $(CONFIG): config.log config.status

@@ -6273,7 +6273,7 @@ done
 #evaluate some location variables for use with Boost Build
 if test "x$prefix" = xNONE
 then
-  prefix=$ac_default_prefix
+  prefix="$ac_default_prefix"
 fi
 if test "x$exec_prefix" = xNONE
 then
@@ -6285,25 +6285,24 @@ fi
 
 
 if test "$BUILD_ATERM" = "builtin"; then
-  eval "eval IATERM_CPPFLAGS=-I${includedir}/mcrl2"
+  eval "eval IATERM_CPPFLAGS=-I\\\"${includedir}/mcrl2/aterm\\\""
   if test "$ADDRESS_MODEL" = "64"; then
-    IATERM_CPPFLAGS="-DAT_64BIT ${IATERM_CPPFLAGS}"
+    IATERM_CPPFLAGS="-DAT_64BIT \"${IATERM_CPPFLAGS}\""
   fi
-  IATERM_CPPFLAGS="${IATERM_CPPFLAGS}/aterm"
 
 
-  eval "eval IATERM_LDFLAGS=-L${libdir}/mcrl2"
-  IATERM_LDFLAGS="${IATERM_LDFLAGS} -lATerm"
+  eval "eval IATERM_LDFLAGS=-L\\\"${libdir}/mcrl2\\\""
+  IATERM_LDFLAGS="\"${IATERM_LDFLAGS}\" -lATerm"
 
 else
-  IATERM_CPPFLAGS="${ATERM_CPPFLAGS}"
+  IATERM_CPPFLAGS="\"${ATERM_CPPFLAGS}\""
 
-  IATERM_LDFLAGS="${ATERM_LDFLAGS} -lATerm"
+  IATERM_LDFLAGS="\"${ATERM_LDFLAGS}\" -lATerm"
 
 fi
 
-eval "eval PREFIX_DIR=${prefix}"
-eval "eval EXEC_PREFIX_DIR=${exec_prefix}"
+eval "eval PREFIX_DIR=\\\"${prefix}\\\""
+eval "eval EXEC_PREFIX_DIR=\\\"${exec_prefix}\\\""
 
 prefix="\$\(prefix\)"
 includedir="$includedir/mcrl2"
@@ -6313,7 +6312,7 @@ libdir="$libdir/mcrl2"
 eval "eval DATA_DIR=${datadir}"
 eval "eval BIN_DIR=${bindir}"
 eval "eval LIB_DIR=${libdir}"
-eval INCLUDE_DIR=${includedir}
+eval INCLUDE_DIR="${includedir}"
 eval "eval MAN_DIR=${mandir}"
 
 
