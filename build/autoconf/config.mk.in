@@ -12,7 +12,7 @@ infodir            = "@infodir@"
 mandir             = "@mandir@"
 
 # Boost Build configuration
-BJAM               = "@BJAM@"
+BJAM               = @BJAM@
 BOOST_BUILD       := $(BJAM) --prefix=${prefix}
 
 DOCBOOK_XSL_PREFIX = "@abs_top_srcdir@/3rd-party/docbook/xsl"

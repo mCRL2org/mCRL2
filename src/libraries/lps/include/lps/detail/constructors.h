@@ -1,5 +1,5 @@
-#ifndef LPE_DETAIL_CONSTRUCTORS
-#define LPE_DETAIL_CONSTRUCTORS
+#ifndef LPS_DETAIL_CONSTRUCTORS
+#define LPS_DETAIL_CONSTRUCTORS
 
 #include "libstruct_core.h" // gsString2ATermAppl
 
@@ -2077,4 +2077,4 @@ ATermAppl constructPBExpr()
 
 } // namespace lps
 
-#endif // LPE_DETAIL_CONSTRUCTORS
+#endif // LPS_DETAIL_CONSTRUCTORS

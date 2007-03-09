@@ -482,7 +482,7 @@ linear_process set_summands(linear_process l, summand_list summands)
 }
 
 /// \brief initial linear process
-// LPEInit(<DataVarId>*, <DataVarIdInit>*)
+// LinearProcessInit(<DataVarId>*, <DataVarIdInit>*)
 class process_initializer: public aterm_appl
 {
   protected:
