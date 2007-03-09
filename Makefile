@@ -1,11 +1,11 @@
-ifneq ($(filter all install tools test man web, ${MAKECMDGOALS}),)
+ifneq ($(filter all bjam install tools test man web, ${MAKECMDGOALS}),)
 include build/Makefile
 endif
 ifeq (${MAKECMDGOALS},)
 include build/Makefile
 endif
 
-.PHONY: all bjam install clean distclean
+.PHONY: clean distclean parsers
 
 build/Makefile:
 	$(error Please run configure first)
