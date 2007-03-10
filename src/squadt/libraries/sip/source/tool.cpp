@@ -70,7 +70,7 @@ namespace sip {
      **/
     const boost::shared_ptr < controller::capabilities > communicator::get_controller_capabilities() const {
       if (boost::dynamic_pointer_cast < communicator_impl > (impl)->current_controller_capabilities.get() == 0) {
-        throw (sip::exception(sip::controller_capabilities_unknown));
+        throw std::runtime_error("Controller capabilities are unknown");
       }
  
       return (boost::dynamic_pointer_cast < communicator_impl > (impl)->current_controller_capabilities);

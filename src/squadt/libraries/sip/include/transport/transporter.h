@@ -10,7 +10,6 @@
 #include <boost/thread/recursive_mutex.hpp>
 
 #include <transport/detail/basics.h>
-#include <transport/detail/exception.h>
 #include <transport/detail/transceiver.h>
 #include <transport/detail/listener.h>
 

@@ -297,7 +297,7 @@ namespace sip {
     }
     else {
       /* Unknown type in configuration */
-      throw (sip::exception(sip::message_unknown_type, name));
+      throw std::runtime_error("Message received with unknown type: '" + name + "'");
     }
   }
 
@@ -532,7 +532,7 @@ namespace sip {
       }
     }
     else {
-      throw (sip::exception(sip::unknown_layout_element, name));
+      throw std::runtime_error("Layout element: '" + name + "' unknown");
     }
   }
 

@@ -3,6 +3,7 @@
 #include <vector>
 #include <iosfwd>
 #include <ctime>
+#include <exception>
 
 #include <boost/function.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -14,7 +15,6 @@
 #include <utility/logger.h>
 
 #include "processor.tcc"
-#include "exception.h"
 #include "task_monitor.h"
 
 namespace squadt {

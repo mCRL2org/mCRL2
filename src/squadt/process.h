@@ -7,7 +7,6 @@
 #include <boost/function.hpp>
 #include <boost/weak_ptr.hpp>
 
-#include "exception.h"
 #include "command.h"
 
 namespace squadt {

@@ -209,7 +209,7 @@ namespace squadt {
     instance_identifier id = atol(m->to_string().c_str());
 
     if (instances.find(id) == instances.end()) {
-      throw (exception::exception(exception::unexpected_instance_identifier));
+      throw std::runtime_error("Peer provided invalid instance identifier; the connection has been terminated.");
     }
 
     execution::task_monitor::sptr p(instances[id]);
@@ -249,7 +249,7 @@ namespace squadt {
 
     /* Check tool existence */
     if (!t) {
-      throw (exception::exception(exception::requested_tool_unavailable, n));
+      throw std::runtime_error("No tool has been registered by the name " + n);
     }
 
     return (t);

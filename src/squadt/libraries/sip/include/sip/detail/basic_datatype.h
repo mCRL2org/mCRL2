@@ -10,10 +10,10 @@
 #include <iostream>
 
 #include <boost/any.hpp>
+#include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#include <sip/exception.h>
 #include <sip/visitors.h>
 #include <utility/visitor.h>
 

@@ -1,9 +1,9 @@
 #include <iostream>
+#include <exception>
 #include <cstdio>
 
 #include "setup.h"
 
-#include "exception.h"
 #include "settings_manager.h"
 
 namespace squadt {
@@ -39,7 +39,7 @@ namespace squadt {
       bf::create_directory(user_settings_path);
     }
     else if (!is_directory(user_settings_path)) {
-      throw (exception::exception(exception::cannot_access_user_settings_directory, user_settings_path.native_file_string()));
+      throw std::runtime_error("Cannot write user specific data to directory " + user_settings_path.native_file_string());
     }
   }
 

@@ -22,10 +22,8 @@ namespace transport {
         /** \brief Convenience type alias to hide the shared pointer implementation */
         typedef boost::shared_ptr < basic_listener > ptr;
 
-        /** \brief Type for listener exceptions */
-        typedef transport::exception exception;
-
       protected:
+
         /** \brief The communicator that will take over the accepted connections */
         transport::transporter& owner;
 

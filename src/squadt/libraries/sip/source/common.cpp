@@ -1,7 +1,6 @@
 #define SIP_IMPORT_STATIC_DEFINITIONS
 
 #include <sip/configuration.h>
-#include <sip/exception.h>
 #include <sip/tool/category.h>
 #include <sip/detail/basic_messenger.h>
 #include <sip/detail/common.h>

@@ -20,7 +20,6 @@
 
 #include <sip/detail/basic_messenger.h>
 #include <sip/detail/common.h>
-#include <sip/exception.h>
 
 namespace sip {
 

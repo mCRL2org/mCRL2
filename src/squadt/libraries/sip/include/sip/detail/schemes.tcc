@@ -11,7 +11,7 @@ namespace sip {
     template < typename M >
     inline void traditional_scheme< M >::connect(basic_messenger_impl< M >* t) const {
       /** Not yet implemented */
-      throw (sip::exception(sip::not_yet_implemented));
+      throw std::runtime_error("Sorry direct connection is not yet implemented");
     }
  
     /** \brief Builds a connection between a tool communicator and a controller communicator */

@@ -118,19 +118,11 @@ namespace sip {
 
   template <>
   void store_visitor_impl::visit(option const& o) {
-    using sip::exception;
-
     out << ">";
 
     if (o.takes_arguments()) {
       BOOST_FOREACH(option::type_value_list::value_type i, o.m_arguments) {
-        try {
-          m_interface.do_accept(*i.first, i.second);
-        }
-        catch (exception e) {
-          /* Invalid datatype exception; substitute context */
-          e.message() % boost::str(boost::format("option -> argument %u") % i.second);
-        }
+        m_interface.do_accept(*i.first, i.second);
       }
     }
   }
@@ -295,8 +287,6 @@ namespace sip {
 
   template <>
   void store_visitor_impl::visit(sip::report const& c) {
-    using sip::exception;
-
     out << "<report type=\"" << c.m_report_type << "\">";
 
     /* Include description */
@@ -305,7 +295,7 @@ namespace sip {
 
       /* Sanity check... (todo better would be to use Base-64 or some other encoding) */
       if (std::search(c.description.begin(), c.description.end(), pattern.begin(), pattern.end()) != c.description.end()) {
-        throw (std::exception());
+        throw std::runtime_error("Illegal instance of ']]>' found");
       }
 
       out << "<description><![CDATA[" << c.description << "]]></description>";

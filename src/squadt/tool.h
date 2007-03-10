@@ -8,7 +8,6 @@
 
 #include <utility/visitor.h>
 
-#include "exception.h"
 #include "build_system.h"
 
 namespace squadt {

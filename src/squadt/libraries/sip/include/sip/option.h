@@ -10,7 +10,6 @@
 
 #include <sip/detail/basic_datatype.h>
 #include <sip/parameter.h>
-#include <sip/exception.h>
 
 namespace sip {
 

@@ -13,7 +13,6 @@
 #include <sip/detail/command_line_interface.h>
 #include <sip/detail/tool.tcc>
 #include <sip/detail/schemes.tcc>
-#include <sip/exception.h>
 
 namespace sip {
 
@@ -160,7 +159,7 @@ namespace sip {
           char* s = option + l;
 
           if (last_matched != 0 && strncmp(s, "://", 3) != 0) {
-            throw (sip::exception(sip::cli_parse_error_expected, "://", s));
+            throw std::runtime_error("Parse error: expected token '://' instead of " + std::string(s));
           }
 
           char* t = s + 3;
@@ -227,7 +226,7 @@ namespace sip {
           s = strchr(s, '=');
 
           if (s == 0) {
-            throw (sip::exception(sip::cli_parse_error_expected, '=', s));
+            throw std::runtime_error("Parse error: expected token '=' instead of " + std::string(s));
           }
 
           char* t = s + 1;
@@ -238,7 +237,7 @@ namespace sip {
               s = parse_scheme(t);
 
               if (s == t) {
-                throw (sip::exception(sip::cli_parse_error_expected, "valid scheme", s));
+                throw std::runtime_error("Parse error: expected scheme specification but got: " + std::string(s));
               }
               break;
             case 1: /* Identifier option */

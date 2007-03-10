@@ -244,7 +244,7 @@ namespace squadt {
         object_descriptor::sptr d = i.lock();
       
         if (d.get() == 0) {
-          throw (exception::exception(exception::missing_object_descriptor));
+          throw std::runtime_error("dependency on a missing object");
         }
       
         d->self_check(*g);
@@ -267,7 +267,7 @@ namespace squadt {
           object_descriptor::sptr d = i.lock();
       
           if (d.get() == 0) {
-            throw (exception::exception(exception::missing_object_descriptor));
+            throw std::runtime_error("dependency on a missing object");
           }
      
           processor::sptr p(d->generator);
@@ -618,7 +618,7 @@ namespace squadt {
           }
           else {
             /* Should signal an error via the monitor ... */
-            throw (exception::exception(exception::cannot_build, i->location));
+            throw std::runtime_error("Do not know how to (re)create " + i->location);
           }
         }
       }
@@ -659,7 +659,7 @@ namespace squadt {
         }
         else {
           /* Should signal an error via the monitor ... */
-          throw (exception::exception(exception::cannot_build, i->location));
+          throw std::runtime_error("Do not know how to (re)create " + i->location);
         }
       }
     

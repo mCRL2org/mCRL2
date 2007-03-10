@@ -1,6 +1,7 @@
 #include "visitors.h"
 
 #include <fstream>
+#include <exception>
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/lexical_cast.hpp>

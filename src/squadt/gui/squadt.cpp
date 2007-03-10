@@ -14,7 +14,6 @@
 #include "../tool_manager.h"
 #include "../build_system.h"
 #include "../executor.h"
-#include "../exception.h"
 
 #include "splash.h"
 #include "main.h"
