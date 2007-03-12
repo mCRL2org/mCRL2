@@ -939,9 +939,9 @@ matching:
 \begin{mCRL2}
 proc & \fa{P}{t: \f{BATree}} & = &
     \sum_{a:A}         
-    & (t & == & \fa{leaf}{a}) \To \fa{get}{a}.\delta\ +\\
+    & (t & \approx & \fa{leaf}{a}) \To \fa{get}{a}.\delta\ +\\
 &&& \sum_{a:A, u,v: \f{BATree}}
-    & (t & == & \faaa{node}{u}{a}{v}) \To \fa{get}{a}.(\fa{P}{u} + \fa{P}{v})\\
+    & (t & \approx & \faaa{node}{u}{a}{v}) \To \fa{get}{a}.(\fa{P}{u} + \fa{P}{v})\\
 \end{mCRL2}
 
 \noindent
