@@ -5,7 +5,7 @@ ifeq (${MAKECMDGOALS},)
 include build/Makefile
 endif
 
-.PHONY: clean distclean parsers
+.PHONY: tags clean distclean parsers
 
 build/Makefile:
 	$(error Please run configure first)
@@ -36,3 +36,6 @@ parsers:
 
 configure: build/autoconf/configure.ac
 	autoconf -o $@ -W all $<
+
+tags:
+	ctags -h '.h.hpp.c.cpp' --recurse=yes --extra=+q --fields=+i --totals=yes .
