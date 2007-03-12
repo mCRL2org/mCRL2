@@ -11,7 +11,7 @@ build/Makefile:
 	$(error Please run configure first)
 
 clean:
-	@$(RM) -r autom4te.cache core core.*
+	@$(RM) -r autom4te.cache core core.* tags
 	$(RM) -rf build/bin/*
 	$(RM) -rf build/man
 	$(RM) -rf build/web
@@ -38,4 +38,4 @@ configure: build/autoconf/configure.ac
 	autoconf -o $@ -W all $<
 
 tags:
-	ctags -h '.h.hpp.c.cpp' --recurse=yes --extra=+q --fields=+i --totals=yes .
+	ctags --languages=C,C++ --recurse=yes --extra=+q --fields=+i --totals=yes .
