@@ -28,7 +28,7 @@ typedef struct
 /*}}}  */
 /*{{{  globals */
 
-char make_id[] = "$Id: make.c 20715 2006-12-13 09:35:02Z jurgenv $";
+char make_id[] = "$Id: make.c 21232 2007-02-05 14:54:20Z eriks $";
 
 static Symbol symbol_int;
 static Symbol symbol_str;

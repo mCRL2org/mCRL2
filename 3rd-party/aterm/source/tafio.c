@@ -136,7 +136,7 @@ static int writeToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet a
   ATermBlob       blob;
 
   size = 0;
-
+  
   switch (ATgetType(t))
     {
     case AT_INT:
@@ -177,7 +177,7 @@ static int writeToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet a
       }
       size += elem_size;
       arity = ATgetArity(sym);
-      if (arity > 0) {
+      if ((elem_size == 0) || (arity > 0)) {
 	write_byte('(', writer);
 	size++;
 	for (i = 0; i < arity; i++) {
@@ -217,7 +217,7 @@ static int writeToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet a
 	elem_size = topWriteToSharedTextFile(ATgetFirst(list), writer, abbrevs);
 	if (elem_size < 0) {
 	  return -1;
-	}
+ 	}
 	size += elem_size;
 	list = ATgetNext(list);
       }
@@ -354,8 +354,13 @@ long ATwriteToSharedTextFile(ATerm t, FILE *file)
   size = topWriteToSharedTextFile(t, &writer, abbrevs);
 
   ATindexedSetDestroy(abbrevs);
-
-  return size;
+  
+  if (size < 0) {
+    return -1;
+  }
+  else {
+    return size + 1; /* +1 because of START_OF_SHARED_TEXT_FILE */
+  }
 }
 
 /*}}}  */

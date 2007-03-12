@@ -45,11 +45,11 @@ union _ATerm;
 extern union _ATerm **at_lookup_table_alias;
 extern SymEntry *at_lookup_table;
 
-unsigned int AT_symbolTableSize();
+unsigned long AT_symbolTableSize();
 void AT_initSymbol(int argc, char *argv[]);
 int AT_printSymbol(Symbol sym, FILE *f);
 /* ATbool AT_isValidSymbol(Symbol sym); */
-#define AT_isValidSymbol(sym) (((Symbol)sym >= 0 && (Symbol)sym < AT_symbolTableSize() \
+#define AT_isValidSymbol(sym) (((Symbol)sym >= 0 && (unsigned long)(Symbol)sym < AT_symbolTableSize() \
                                  && !SYM_IS_FREE(at_lookup_table[(Symbol)sym])) ?  ATtrue : ATfalse)
 
 /* ATbool AT_isMarkedSymbol(Symbol sym); */

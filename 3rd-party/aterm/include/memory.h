@@ -8,11 +8,9 @@ extern "C"
 {
 #endif/* __cplusplus */
 
-#define MIN_TERM_SIZE       TERM_SIZE_APPL(0)
-#define MAX_TERM_SIZE       (TERM_SIZE_APPL(MAX_ARITY)+1)
 #define MAX_BLOCKS_PER_SIZE 1024
 
-#define MAX_INLINE_ARITY       6
+#define MAX_INLINE_ARITY    ((1 << ARITY_BITS)-2)
 
 /* To change the block size, modify BLOCK_SHIFT only! */
 #define BLOCK_SHIFT      13
@@ -21,10 +19,10 @@ extern "C"
 #define BLOCK_TABLE_SIZE 4099     /* nextprime(4096) */
 
 #ifdef AT_64BIT 
-#define FOLD(w)        ((HN(w)) ^ (HN(w) >> 32))
+#define FOLD(w)         ((HN(w)) ^ (HN(w) >> 32))
 #define PTR_ALIGN_SHIFT	4
 #else
-#define FOLD(w)        (HN(w))
+#define FOLD(w)         (HN(w))
 #define PTR_ALIGN_SHIFT	2
 #endif
 
@@ -55,24 +53,33 @@ typedef struct BlockBucket
   struct Block *first_after;
 } BlockBucket;
 
-extern Block *at_blocks[MAX_TERM_SIZE];
-extern Block *at_old_blocks[MAX_TERM_SIZE];
-extern header_type *top_at_blocks[MAX_TERM_SIZE];
+#define AT_BLOCK      0
+#define AT_OLD_BLOCK  1
+  
+typedef struct TermInfo {
+  Block*       at_blocks[2];
+  header_type* top_at_blocks;
+  int          at_nrblocks;
+  ATerm        at_freelist;
+  int          nb_live_blocks_before_last_gc;
+  int          nb_reclaimed_blocks_during_last_gc;
+  int          nb_reclaimed_cells_during_last_gc;
+} TermInfo;
+
+extern TermInfo *terminfo;
+  
 extern Block *at_freeblocklist;
-extern int at_freeblocklist_size;
+extern unsigned int at_freeblocklist_size;
 #define SIZE_TO_BYTES(size) ((size)*sizeof(header_type))
 
-extern int at_nrblocks[MAX_TERM_SIZE];
-extern ATerm at_freelist[MAX_TERM_SIZE];
 extern BlockBucket block_table[BLOCK_TABLE_SIZE];
 
 extern int nb_minor_since_last_major;
 extern int old_bytes_in_young_blocks_after_last_major;
 extern int old_bytes_in_old_blocks_after_last_major;
 extern int old_bytes_in_young_blocks_since_last_major;
-extern int nb_live_blocks_before_last_gc[MAX_TERM_SIZE];
-extern int nb_reclaimed_blocks_during_last_gc[MAX_TERM_SIZE];
-extern int nb_reclaimed_cells_during_last_gc[MAX_TERM_SIZE];
+
+extern unsigned int maxTermSize;
 
 extern header_type *min_heap_address;
 extern header_type *max_heap_address;
@@ -82,7 +89,6 @@ void AT_initMemory(unsigned int argc, char *argv[]);
 void AT_cleanupMemory();
 HashNumber AT_hashnumber(ATerm t);
 ATerm AT_allocate(unsigned int size);
-void  AT_freeProtoTerm(unsigned int size, ATerm t);
 void  AT_freeTerm(unsigned int size, ATerm t);
 ATbool AT_isValidTerm(ATerm term);
 ATerm AT_isInsideValidTerm(ATerm term);
@@ -91,6 +97,8 @@ int AT_inAnyFreeList(ATerm t);
 void AT_printAllTerms(FILE *file);
 void AT_printAllAFunCounts(FILE *file);
 unsigned long AT_getAllocatedCount();
+
+#define AT_getMaxTermSize() (maxTermSize)
 
 #ifdef __cplusplus
 }

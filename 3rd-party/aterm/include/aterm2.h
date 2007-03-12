@@ -30,7 +30,7 @@ struct __ATermInt
 {
   header_type header;
   ATerm       next;
-  int         value;
+  long        value; /* Only use lower 32 bits */
 };
 
 typedef union _ATermInt
@@ -56,7 +56,7 @@ struct __ATermAppl
 {
   header_type header;
   ATerm       next;
-  ATerm       arg[MAX_ARITY+1];
+  ATerm       arg[1];
 };
 
 typedef union _ATermAppl
@@ -94,10 +94,10 @@ typedef union _ATermPlaceholder
 
 struct __ATermBlob
 {
-  header_type  header;
-  ATerm        next;
-  unsigned int size;
-  void        *data;
+  header_type   header;
+  ATerm         next;
+  unsigned long size;
+  void         *data;
 };
 
 typedef union _ATermBlob
@@ -121,7 +121,7 @@ typedef struct _ATermTable *ATermTable;
 /* The ATermInt type */
 ATermInt ATmakeInt(int value);
 /*int      ATgetInt(ATermInt term);*/
-#define ATgetInt(t) (((ATermInt)t)->aterm.value)
+#define ATgetInt(t) ((int)(((ATermInt)t)->aterm.value))
 
 /* The ATermReal type */
 ATermReal ATmakeReal(double value);
@@ -262,7 +262,7 @@ void    ATprotectAFun(AFun sym);
 #define ATprotectSymbol ATprotectAFun
 void    ATunprotectAFun(AFun sym);
 #define ATunprotectSymbol ATunprotectAFun
-void ATprotectMemory(void *start, int size);
+void ATprotectMemory(void *start, unsigned long size);
 void ATunprotectMemory(void *start);
 
 /* convenience macro's for previously private functions */

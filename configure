@@ -4678,6 +4678,98 @@ fi
 
 
 
+# Check whether C types fulfil ATerm library assumption
+{ echo "$as_me:$LINENO: checking ATerm library assumptions" >&5
+echo $ECHO_N "checking ATerm library assumptions... $ECHO_C" >&6; }
+if test "$ADDRESS_MODEL" = "64"; then
+  EXP_SIZEOF_LONG=8
+else
+  EXP_SIZEOF_LONG=4
+fi
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+if test "$cross_compiling" = yes; then
+  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling
+See \`config.log' for more details." >&5
+echo "$as_me: error: cannot run test program while cross compiling
+See \`config.log' for more details." >&2;}
+   { (exit 1); exit 1; }; }
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+  #include <stdio.h>
+  int main(int argc,char **argv)
+  {
+    int r = 0;
+    if ( sizeof(long) != $EXP_SIZEOF_LONG )
+    {
+      fprintf(stderr,"error: sizeof(long) is not %i but %i\n",$EXP_SIZEOF_LONG,sizeof(long));
+      r = 1;
+    }
+    if ( sizeof(long) != sizeof(void *) )
+    {
+      fprintf(stderr,"error: sizeof(long) and sizeof(void *) differ (%i vs. %i)\n",sizeof(long),sizeof(void *));
+      r = 1;
+    }
+    if ( sizeof(int) != 4 )
+    {
+      fprintf(stderr,"error: sizeof(int) is not 4 but %i\n",sizeof(int));
+      r = 1;
+    }
+    return r;
+  }
+
+_ACEOF
+rm -f conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ATERM_CHECK=yes
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+( exit $ac_status )
+ATERM_CHECK=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+
+
+{ echo "$as_me:$LINENO: result: $ATERM_CHECK" >&5
+echo "${ECHO_T}$ATERM_CHECK" >&6; }
+if test "$ATERM_CHECK" = "no"; then
+  { { echo "$as_me:$LINENO: error: assumptions of the ATerm library are not fulfilled" >&5
+echo "$as_me: error: assumptions of the ATerm library are not fulfilled" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
 
 # Check whether --with-cadp was given.
 if test "${with_cadp+set}" = set; then

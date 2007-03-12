@@ -30,20 +30,20 @@
 
 #define BAF_LIST_BATCH_SIZE 64
 
-#define PLAIN_INT		      0
-#define ANNO_INT	        (PLAIN_INT | 1)
+#define PLAIN_INT         0
+#define ANNO_INT          (PLAIN_INT | 1)
 
 #define PLAIN_REAL        2
-#define ANNO_REAL	        (PLAIN_REAL | 1)
+#define ANNO_REAL         (PLAIN_REAL | 1)
 
-#define PLAIN_LIST	      4
-#define ANNO_LIST	        (PLAIN_LIST | 1)
+#define PLAIN_LIST        4
+#define ANNO_LIST         (PLAIN_LIST | 1)
 
-#define PLAIN_PLAC	      6
-#define ANNO_PLAC	        (PLAIN_PLAC | 1)
+#define PLAIN_PLAC        6
+#define ANNO_PLAC         (PLAIN_PLAC | 1)
 
-#define PLAIN_BLOB	      8
-#define ANNO_BLOB	        (PLAIN_BLOB | 1)
+#define PLAIN_BLOB        8
+#define ANNO_BLOB         (PLAIN_BLOB | 1)
 
 #define SYMBOL_OFFSET     10
 
@@ -118,7 +118,7 @@ typedef struct
 /*}}}  */
 /*{{{  variables */
 
-char bafio_id[] = "$Id: bafio.c 20711 2006-12-12 08:45:44Z jurgenv $";
+char bafio_id[] = "$Id: bafio.c 21776 2007-03-09 09:15:52Z eriks $";
 
 static int nr_unique_symbols = -1;
 static sym_read_entry *read_symbols;
@@ -224,6 +224,8 @@ writeBits(unsigned int val, int nr_bits, byte_writer *writer)
       bit_buffer = '\0';
     }
   }
+
+  if (val) return -1;
 
   /* Ok */
   return 0;
@@ -404,7 +406,7 @@ readString(byte_reader *reader)
   /* Assure buffer can hold the string */
   if (text_buffer_size < (len+1))
     {
-      text_buffer_size = (unsigned int) (len*1.5);
+      text_buffer_size = len*1.5;
       text_buffer = (char *) realloc(text_buffer, text_buffer_size);
       if(!text_buffer)
 	ATerror("out of memory in readString (%d)\n", text_buffer_size);
@@ -548,8 +550,8 @@ static int bit_width(int val)
   * terms have been sorted by symbol.
 	*/
 
-void gather_top_symbols(sym_entry *cur_entry, int cur_arg, 
-			int total_top_symbols)
+static void gather_top_symbols(sym_entry *cur_entry, int cur_arg, 
+			       int total_top_symbols)
 {
   int index;
   unsigned int hnr;
@@ -904,7 +906,8 @@ static ATbool write_term(ATerm t, byte_writer *writer, ATbool anno_done)
   } else {
     switch(ATgetType(t)) {
     case AT_INT:
-      if(writeBits(ATgetInt((ATermInt)t), HEADER_BITS, writer) < 0) {
+      /* If ATerm integers are > 32 bits, then this can fail. */
+      if(writeBits(ATgetInt((ATermInt)t), INT_SIZE_IN_BAF, writer) < 0) {
 	return ATfalse;
       }
 #if 0
@@ -1038,7 +1041,7 @@ static void free_write_space()
 /*}}}  */
 /*{{{  ATbool write_baf(ATerm t, byte_writer *writer) */
 
-ATbool
+static ATbool
 write_baf(ATerm t, byte_writer *writer)
 {
   int nr_unique_terms = 0;
@@ -1238,7 +1241,7 @@ ATbool ATwriteToNamedBinaryFile(ATerm t, const char *name)
 	* Read a single symbol from file.
 	*/
 
-Symbol read_symbol(byte_reader *reader)
+static Symbol read_symbol(byte_reader *reader)
 {
   unsigned int arity, quoted;
   int len;
@@ -1265,7 +1268,7 @@ Symbol read_symbol(byte_reader *reader)
  * Read all symbols from file.
  */
 
-ATbool read_all_symbols(byte_reader *reader)
+static ATbool read_all_symbols(byte_reader *reader)
 {
   unsigned int val;
   int i, j, k, arity;
@@ -1285,14 +1288,11 @@ ATbool read_all_symbols(byte_reader *reader)
     /*}}}  */
     /*{{{  Read term count and allocate space */
 
-    if(readInt(&val, reader) < 0)
+    if(readInt(&val, reader) < 0 || val == 0)
       return ATfalse;
     read_symbols[i].nr_terms = val;
     read_symbols[i].term_width = bit_width(val);
-    if(val == 0)
-      read_symbols[i].terms = NULL;
-    else
-      read_symbols[i].terms = (ATerm *)calloc(val, sizeof(ATerm));
+    read_symbols[i].terms = (ATerm *)calloc(val, sizeof(ATerm));
     if(!read_symbols[i].terms)
       ATerror("read_symbols: could not allocate space for %d terms.\n", val);
     ATprotectArray(read_symbols[i].terms, val);
@@ -1356,7 +1356,7 @@ ATbool read_all_symbols(byte_reader *reader)
 /*}}}  */
 /*{{{  ATerm read_term(sym_read_entry *sym, byte_reader *reader) */
 
-ATerm read_term(sym_read_entry *sym, byte_reader *reader)
+static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
 {
   unsigned int val;
   int i, arity = sym->arity;
@@ -1370,12 +1370,15 @@ ATerm read_term(sym_read_entry *sym, byte_reader *reader)
     ATprotectArray(args, arity);
     if(!args)
       ATerror("could not allocate space for %d arguments.\n", arity);
+    /* !!! leaks memory on the "return NULL" paths */
   }
 
   /*ATfprintf(stderr, "reading term over symbol %y\n", sym->sym);*/
   for(i=0; i<arity; i++) {
     /*ATfprintf(stderr, "  reading argument %d (%d)", i, sym->sym_width[i]);*/
     if(readBits(&val, sym->sym_width[i], reader) < 0)
+      return NULL;
+    if(val >= sym->nr_topsyms[i])
       return NULL;
     arg_sym = &read_symbols[sym->topsyms[i][val]];
     /*		ATfprintf(stderr, "argument %d, symbol index = %d, symbol = %y\n", 
@@ -1386,6 +1389,8 @@ ATerm read_term(sym_read_entry *sym, byte_reader *reader)
     if(readBits(&val, arg_sym->term_width, reader) < 0)
       return NULL;
     /*		ATfprintf(stderr, "arg term index = %d\n", val);*/
+    if(val >= arg_sym->nr_terms)
+      return NULL;
     if(!arg_sym->terms[val]) {
       arg_sym->terms[val] = read_term(arg_sym, reader);
       if(!arg_sym->terms[val])
@@ -1401,7 +1406,7 @@ ATerm read_term(sym_read_entry *sym, byte_reader *reader)
   case AS_INT:
     /*{{{  Read an integer */
 
-    if(readBits(&val, HEADER_BITS, reader) < 0)
+    if(readBits(&val, INT_SIZE_IN_BAF, reader) < 0)
       return NULL;
 
     result = (ATerm)ATmakeInt((int)val);
@@ -1499,9 +1504,10 @@ static void free_read_space()
   for(i=0; i<nr_unique_symbols; i++) {
     sym_read_entry *entry = &read_symbols[i];
 
-    ATunprotectArray(entry->terms);
-    if(entry->terms)
+    if(entry->terms) {
+      ATunprotectArray(entry->terms);
       free(entry->terms);
+    }
     if(entry->nr_topsyms)
       free(entry->nr_topsyms);
     if(entry->sym_width)
@@ -1511,6 +1517,8 @@ static void free_read_space()
       free(entry->topsyms[j]);
     if(entry->topsyms)
       free(entry->topsyms);
+    
+    ATunprotectSymbol(entry->sym);
   }
   free(read_symbols);
 }

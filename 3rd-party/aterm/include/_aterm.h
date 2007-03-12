@@ -11,8 +11,8 @@ extern "C"
 typedef struct ProtEntry
 {
 	struct ProtEntry *next;
-	ATerm *start;
-	int    size;
+	ATerm            *start;
+	unsigned long     size;
 } ProtEntry;
 
 #define STRING_MARK 0xFF /* marker for binary strings */
@@ -22,7 +22,7 @@ extern ATbool silent;
 extern ATbool low_memory;
 
 extern ProtEntry **at_prot_table;
-extern int at_prot_table_size;
+extern unsigned int at_prot_table_size;
 extern ProtEntry *at_prot_memory;
 extern ATermProtFunc *at_prot_functions;
 extern int at_prot_functions_count;

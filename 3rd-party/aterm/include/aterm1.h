@@ -17,17 +17,20 @@ extern "C"
 {
 #endif/* __cplusplus */
 
-#define	AT_FREE         0
-#define AT_APPL         1
-#define AT_INT          2 
-#define AT_REAL         3
-#define AT_LIST         4
-#define AT_PLACEHOLDER  5
-#define AT_BLOB         6
+#define	AT_FREE         0L
+#define AT_APPL         1L
+#define AT_INT          2L 
+#define AT_REAL         3L
+#define AT_LIST         4L
+#define AT_PLACEHOLDER  5L
+#define AT_BLOB         6L
 
-#define AT_SYMBOL       7
+#define AT_SYMBOL       7L
 
-#define MAX_ARITY            4096
+#define MAX_ARITY             MAX_LENGTH
+
+#define MIN_TERM_SIZE         TERM_SIZE_APPL(0)
+#define INITIAL_MAX_TERM_SIZE 256
 
 struct __ATerm
 {
@@ -39,8 +42,8 @@ typedef union _ATerm
 {
   header_type     header;
   struct __ATerm  aterm;
-  union _ATerm*   subaterm[MAX_ARITY+3];
-  MachineWord     word[MAX_ARITY+3];
+  union _ATerm*   subaterm[1];
+  MachineWord     word[1];
 } *ATerm;
 
 typedef void (*ATermProtFunc)();
@@ -112,7 +115,7 @@ ATerm  ATremoveAnnotation(ATerm t, ATerm label);
 
 void ATprotect(ATerm *atp);
 void ATunprotect(ATerm *atp);
-void ATprotectArray(ATerm *start, int size);
+void ATprotectArray(ATerm *start, unsigned int size);
 void ATunprotectArray(ATerm *start);
 void ATaddProtectFunction(ATermProtFunc f);
 void ATremoveProtectFunction(ATermProtFunc f);

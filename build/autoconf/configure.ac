@@ -295,6 +295,42 @@ AC_SUBST([ATERM_CPPFLAGS],[])
 AC_SUBST([ATERM_LDFLAGS],[])
 AC_SUBST([ATERM_NAME],[])
 
+# Check whether C types fulfil ATerm library assumption
+AC_MSG_CHECKING([ATerm library assumptions])
+if test "$ADDRESS_MODEL" = "64"; then
+  EXP_SIZEOF_LONG=8
+else
+  EXP_SIZEOF_LONG=4
+fi
+AC_LANG(C)
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
+  #include <stdio.h>
+  int main(int argc,char **argv)
+  {
+    int r = 0;
+    if ( sizeof(long) != $EXP_SIZEOF_LONG )
+    {
+      fprintf(stderr,"error: sizeof(long) is not %i but %i\n",$EXP_SIZEOF_LONG,sizeof(long));
+      r = 1;
+    }
+    if ( sizeof(long) != sizeof(void *) )
+    {
+      fprintf(stderr,"error: sizeof(long) and sizeof(void *) differ (%i vs. %i)\n",sizeof(long),sizeof(void *));
+      r = 1;
+    }
+    if ( sizeof(int) != 4 )
+    {
+      fprintf(stderr,"error: sizeof(int) is not 4 but %i\n",sizeof(int));
+      r = 1;
+    }
+    return r;
+  }
+]])],[ATERM_CHECK=yes],[ATERM_CHECK=no])
+AC_MSG_RESULT($ATERM_CHECK)
+if test "$ATERM_CHECK" = "no"; then
+  AC_MSG_ERROR([assumptions of the ATerm library are not fulfilled])
+fi
+
 AC_ARG_WITH(
   [cadp],
   AS_HELP_STRING([--with-cadp=prefix],[try this for the CADP prefix directory])  

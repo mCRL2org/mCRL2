@@ -34,19 +34,19 @@
 /*}}}  */
 /*{{{  globals */
 
-char afun_id[] = "$Id: afun.c 20711 2006-12-12 08:45:44Z jurgenv $";
+char afun_id[] = "$Id: afun.c 21776 2007-03-09 09:15:52Z eriks $";
 
 static unsigned int table_class = INITIAL_AFUN_TABLE_CLASS;
-static unsigned int table_size  = AT_TABLE_SIZE(INITIAL_AFUN_TABLE_CLASS);
-static unsigned int table_mask  = AT_TABLE_MASK(INITIAL_AFUN_TABLE_CLASS);
+static unsigned long table_size  = AT_TABLE_SIZE(INITIAL_AFUN_TABLE_CLASS);
+static unsigned long table_mask  = AT_TABLE_MASK(INITIAL_AFUN_TABLE_CLASS);
 
 static SymEntry *hash_table     = NULL;
 
 static Symbol first_free = -1;
 
 static Symbol *protected_symbols = NULL;
-static int nr_protected_symbols  = 0;
-static int max_protected_symbols  = 0;
+static unsigned int nr_protected_symbols  = 0;
+static unsigned int max_protected_symbols  = 0;
 
 /* Efficiency hack: was static */
 SymEntry *at_lookup_table = NULL;
@@ -65,15 +65,15 @@ extern char *strdup(const char *s);
 
 static void resize_table()
 {
-  unsigned int i;
+  unsigned long i;
   unsigned int new_class = table_class+1;
-  unsigned int new_size  = AT_TABLE_SIZE(new_class);
-  unsigned int new_mask  = AT_TABLE_MASK(new_class);
+  unsigned long new_size  = AT_TABLE_SIZE(new_class);
+  unsigned long new_mask  = AT_TABLE_MASK(new_class);
 
   at_lookup_table = (SymEntry *)realloc(at_lookup_table, new_size*sizeof(SymEntry));
   at_lookup_table_alias = (ATerm *)at_lookup_table;
   if (!at_lookup_table) {
-    ATerror("afun.c:resize_table - could not allocate space for lookup table of %d afuns\n", new_size);
+    ATerror("afun.c:resize_table - could not allocate space for lookup table of %ld afuns\n", new_size);
   }
   for (i = table_size; i < new_size; i++) {
     at_lookup_table[i] = (SymEntry) SYM_SET_NEXT_FREE(first_free);
@@ -82,7 +82,7 @@ static void resize_table()
 
   hash_table = (SymEntry *)realloc(hash_table, new_size*sizeof(SymEntry));
   if (!hash_table) {
-    ATerror("afun.c:resize_table - could not allocate space for hashtable of %d afuns\n", new_size);
+    ATerror("afun.c:resize_table - could not allocate space for hashtable of %ld afuns\n", new_size);
   }
   memset(hash_table, 0, new_size*sizeof(SymEntry));
 
@@ -105,7 +105,7 @@ static void resize_table()
 
 /*{{{  unsigned int AT_symbolTableSize() */
 
-unsigned int AT_symbolTableSize()
+unsigned long AT_symbolTableSize()
 {
   return table_size;
 }
@@ -135,22 +135,22 @@ void AT_initSymbol(int argc, char *argv[])
 
   hash_table = (SymEntry *) calloc(table_size, sizeof(SymEntry));
   if (hash_table == NULL) {
-    ATerror("AT_initSymbol: cannot allocate %d hash-entries.\n",
+    ATerror("AT_initSymbol: cannot allocate %ld hash-entries.\n",
 	    table_size);
   }
 
   at_lookup_table = (SymEntry *) calloc(table_size, sizeof(SymEntry));
   at_lookup_table_alias = (ATerm *)at_lookup_table;
   if (at_lookup_table == NULL) {
-    ATerror("AT_initSymbol: cannot allocate %d lookup-entries.\n",
+    ATerror("AT_initSymbol: cannot allocate %ld lookup-entries.\n",
 	    table_size);
   }
-
-  for (i = first_free = 0; i < table_size; i++) {
-    at_lookup_table[i] = (SymEntry) SYM_SET_NEXT_FREE(i+1);
+  
+  first_free = 0;
+  for (sym = 0; sym < table_size; sym++) {
+    at_lookup_table[sym] = (SymEntry) SYM_SET_NEXT_FREE(sym+1);
   }
-
-  at_lookup_table[i-1] = (SymEntry) SYM_SET_NEXT_FREE(-1);		/* Sentinel */
+  at_lookup_table[table_size-1] = (SymEntry) SYM_SET_NEXT_FREE(-1);		/* Sentinel */
 
   protected_symbols = (Symbol *)calloc(INITIAL_PROTECTED_SYMBOLS, 
 				       sizeof(Symbol));
@@ -319,8 +319,8 @@ int AT_writeAFun(AFun fun, byte_writer *writer)
   b -= c; b -= a; b ^= (a<<10); \
   c -= a; c -= b; c ^= (b>>15); \
 }
-typedef  unsigned long  int  ub4;   /* unsigned 4-byte quantities */
-typedef  unsigned       char ub1;   /* unsigned 1-byte quantities */
+typedef  unsigned int  ub4;   /* unsigned 4-byte quantities */
+typedef  unsigned char ub1;   /* unsigned 1-byte quantities */
 
 ShortHashNumber AT_hashSymbol(const char *name, int arity) {
    register ub4 a,b,c,len;
@@ -361,7 +361,7 @@ ShortHashNumber AT_hashSymbol(const char *name, int arity) {
    }
    mix(a,b,c);
    /*-------------------------------------------- report the result */
-     /*fprintf(stderr,"AT_hashSymbol(%s,%d) = %u\tsize = %d\n",name,length,c,table_size);*/
+     /*fprintf(stderr,"AT_hashSymbol(%s,%ld) = %u\tsize = %d\n",name,length,c,table_size);*/
    return c;
 }
 #else
@@ -451,7 +451,7 @@ void AT_freeSymbol(SymEntry sym)
 {
   ShortHashNumber hnr;
 
-  nb_reclaimed_cells_during_last_gc[TERM_SIZE_SYMBOL]++;
+  terminfo[TERM_SIZE_SYMBOL].nb_reclaimed_cells_during_last_gc++;
   
   assert(sym->name);
 
@@ -522,7 +522,7 @@ void ATprotectSymbol(Symbol sym)
     protected_symbols = (Symbol *)realloc(protected_symbols,
 					  max_protected_symbols * sizeof(Symbol));
     if(!protected_symbols)
-      ATerror("ATprotectSymbol: no space to hold %d protected symbols.\n",
+      ATerror("ATprotectSymbol: no space to hold %ld protected symbols.\n",
 	      max_protected_symbols);
   }
 
@@ -538,7 +538,7 @@ void ATprotectSymbol(Symbol sym)
 
 void ATunprotectSymbol(Symbol sym)
 {
-  int lcv;
+  unsigned int lcv;
 
   for(lcv = 0; lcv < nr_protected_symbols; ++lcv) {
     if(protected_symbols[lcv] == sym) {
@@ -558,7 +558,7 @@ void ATunprotectSymbol(Symbol sym)
 
 void AT_markProtectedSymbols()
 {
-  int lcv;
+  unsigned int lcv;
   for(lcv = 0; lcv < nr_protected_symbols; lcv++) {
     SET_MARK(((ATerm)at_lookup_table[protected_symbols[lcv]])->header);
   }
@@ -566,7 +566,7 @@ void AT_markProtectedSymbols()
 
 /* TODO: Optimisation (Old+Mark in one step)*/
 void AT_markProtectedSymbols_young() {
-  int lcv;
+  unsigned int lcv;
 
     /*printf("Warning: AT_markProtectedSymbols_young\n");*/
   for(lcv = 0; lcv < nr_protected_symbols; lcv++) {
@@ -581,11 +581,11 @@ void AT_markProtectedSymbols_young() {
 
 void AT_unmarkAllAFuns()
 {
-  unsigned int i;
+  Symbol s;
 
-  for (i=0; i<table_size; i++) {
-    if (AT_isValidSymbol((AFun)i)) {
-      AT_unmarkSymbol(i);
+  for (s=0; s<table_size; s++) {
+    if (AT_isValidSymbol((AFun)s)) {
+      AT_unmarkSymbol(s);
     }
   }
 }

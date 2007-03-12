@@ -23,7 +23,7 @@
 /*}}}  */
 /*{{{  variables */
 
-char list_id[] = "$Id: list.c 20716 2006-12-13 13:43:29Z jurgenv $";
+char list_id[] = "$Id: list.c 21232 2007-02-05 14:54:20Z eriks $";
 
 static unsigned int buffer_size = 0;
 static ATerm *buffer;

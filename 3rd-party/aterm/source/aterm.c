@@ -35,7 +35,7 @@
 #define RESIZE_BUFFER(n) if(n > buffer_size) resize_buffer(n)
 #define ERROR_SIZE 32
 #define INITIAL_MARK_STACK_SIZE   16384
-#define MARK_STACK_MARGE          MAX_ARITY
+#define MARK_STACK_MARGE          AT_getMaxTermSize()
 
 /* Initial number of terms that can be protected */
 /* In the current implementation this means that
@@ -51,7 +51,7 @@
 /*}}}  */
 /*{{{  globals */
 
-char            aterm_id[] = "$Id: aterm.c 20716 2006-12-13 13:43:29Z jurgenv $";
+char            aterm_id[] = "$Id: aterm.c 21776 2007-03-09 09:15:52Z eriks $";
 
 /* Flag to tell whether to keep quiet or not. */
 ATbool silent	  = ATtrue;
@@ -80,14 +80,14 @@ static int      error_idx = 0;
 
 ProtEntry      *free_prot_entries = NULL;
 ProtEntry     **at_prot_table = NULL;
-int             at_prot_table_size = 0;
+unsigned int    at_prot_table_size = 0;
 ProtEntry      *at_prot_memory = NULL;
 ATermProtFunc  *at_prot_functions = NULL;
 int             at_prot_functions_size = 0;
 int             at_prot_functions_count = 0;
 
 static ATerm   *mark_stack = NULL;
-static int      mark_stack_size = 0;
+static unsigned int mark_stack_size = 0;
 int             mark_stats[3] = {0, MYMAXINT, 0};
 #ifdef WITH_STATS
 int             nr_marks = 0;
@@ -216,7 +216,7 @@ ATinit(int argc, char *argv[], ATerm * bottomOfStack)
   at_prot_table_size = INITIAL_PROT_TABLE_SIZE;
   at_prot_table = (ProtEntry **)calloc(at_prot_table_size, sizeof(ProtEntry *));
   if(!at_prot_table)
-    ATerror("ATinit: cannot allocate space for prot-table of size %d\n",
+    ATerror("ATinit: cannot allocate space for prot-table of size %ud\n",
 	    at_prot_table_size);
 
   /*}}}  */
@@ -225,7 +225,7 @@ ATinit(int argc, char *argv[], ATerm * bottomOfStack)
   /* Allocate initial mark stack */
   mark_stack = (ATerm *) malloc(sizeof(ATerm) * INITIAL_MARK_STACK_SIZE);
   if (!mark_stack)
-    ATerror("cannot allocate marks stack of %d entries.\n",
+    ATerror("cannot allocate marks stack of %ud entries.\n",
 	    INITIAL_MARK_STACK_SIZE);
   mark_stack_size = INITIAL_MARK_STACK_SIZE;
 
@@ -396,13 +396,13 @@ ATunprotect(ATerm * term)
  * Protect an array
  */
 
-void ATprotectArray(ATerm *start, int size)
+void ATprotectArray(ATerm *start, unsigned int size)
 {
   ProtEntry *entry;
   ShortHashNumber hnr;
+  unsigned int i;
 
 #ifndef NDEBUG
-  int i;
   for(i=0; i<size; i++) {
     assert(start[i] == NULL || 
 	   AT_isValidTerm(start[i])); /* Check the precondition */
@@ -410,7 +410,6 @@ void ATprotectArray(ATerm *start, int size)
 #endif
 
   if(!free_prot_entries) {
-    int i;
     ProtEntry *entries = (ProtEntry *)calloc(PROTECT_EXPAND_SIZE, 
 					     sizeof(ProtEntry));
     if(!entries)
@@ -503,7 +502,7 @@ void ATremoveProtectFunction(ATermProtFunc f)
 
 void AT_printAllProtectedTerms(FILE *file)
 {
-  int i, j;
+  unsigned int i, j;
 
   fprintf(file, "protected terms:\n");
   for(i=0; i<at_prot_table_size; i++) {
@@ -522,7 +521,7 @@ void AT_printAllProtectedTerms(FILE *file)
 /*}}}  */
 /*{{{  void ATprotectMemory(void *start, int size) */
 
-void ATprotectMemory(void *start, int size)
+void ATprotectMemory(void *start, unsigned long size)
 {
   ProtEntry *entry = (ProtEntry *)malloc(sizeof(ProtEntry));
   if (entry == NULL) {
@@ -2308,10 +2307,10 @@ void AT_markTerm(ATerm t)
       mark_stack_size = mark_stack_size * 2;
       mark_stack = (ATerm *) realloc(mark_stack, sizeof(ATerm) * mark_stack_size);
       if (!mark_stack)
-	ATerror("cannot realloc mark stack to %d entries.\n", mark_stack_size);
+	ATerror("cannot realloc mark stack to %ud entries.\n", mark_stack_size);
       limit = mark_stack + mark_stack_size - MARK_STACK_MARGE;
       if(!silent) {
-	fprintf(stderr, "resized mark stack to %d entries\n", mark_stack_size);
+	fprintf(stderr, "resized mark stack to %ud entries\n", mark_stack_size);
       }
       fflush(stderr);
 
@@ -2664,29 +2663,23 @@ void AT_unmarkIfAllMarked(ATerm t)
 void AT_unmarkAll()
 {
   unsigned int size;
+  unsigned int blocktype;
+  Block* block;
 
-  for (size=1; size<MAX_TERM_SIZE; size++) {
+  for (size=1; size<AT_getMaxTermSize(); size++) {
     unsigned int last = BLOCK_SIZE - (BLOCK_SIZE % size) - size;
-    Block *block = at_blocks[size];
     
-    while (block) {
-      unsigned int idx;
-      ATerm data = (ATerm)block->data;
-      for (idx=0; idx <= last; idx += size) {
-	CLR_MARK(((ATerm)(((header_type *)data)+idx))->header);
+    for (blocktype = AT_BLOCK; blocktype <= AT_OLD_BLOCK; blocktype++) {
+      block = terminfo[size].at_blocks[blocktype];
+    
+      while (block) {
+        unsigned int idx;
+        ATerm data = (ATerm)block->data;
+        for (idx=0; idx <= last; idx += size) {
+          CLR_MARK(((ATerm)(((header_type *)data)+idx))->header);
+        }
+        block = block->next_by_size;
       }
-      block = block->next_by_size;
-    }
-
-    /* and we also unmark all blocks in the old generation */
-    block = at_old_blocks[size];
-    while (block) {
-      unsigned int idx;
-      ATerm data = (ATerm)block->data;
-      for (idx=0; idx <= last; idx += size) {
-	CLR_MARK(((ATerm)(((header_type *)data)+idx))->header);
-      }
-      block = block->next_by_size;
     }
   }
 
@@ -2715,18 +2708,21 @@ calcCoreSize(ATerm t)
 
   switch (ATgetType(t)) {
     case AT_INT:
-      size = 12;
+      size = sizeof(struct __ATermInt);
       break;
 
     case AT_REAL:
+      size = sizeof(struct __ATermReal);
+      break;
+
     case AT_BLOB:
-      size = 16;
+      size = sizeof(struct __ATermBlob);
       break;
 
     case AT_APPL:
       sym = ATgetSymbol((ATermAppl) t);
       arity = ATgetArity(sym);
-      size = 8 + arity * 4;
+      size = sizeof(struct __ATerm) + arity * sizeof(ATerm);
       if (!AT_isMarkedSymbol(sym)) {
 	size += strlen(ATgetName(sym)) + 1;
 	size += sizeof(struct _SymEntry);
@@ -2737,16 +2733,16 @@ calcCoreSize(ATerm t)
       break;
 
     case AT_LIST:
-      size = 16;
+      size = sizeof(struct __ATermList);
       while (!ATisEmpty((ATermList) t)) {
-	size += 16;
+	size += sizeof(struct __ATermList);
 	size += calcCoreSize(ATgetFirst((ATermList) t));
 	t = (ATerm)ATgetNext((ATermList)t);
       }
       break;
 
     case AT_PLACEHOLDER:
-      size = 12;
+      size = sizeof(struct __ATermPlaceholder);
       size += calcCoreSize(ATgetPlaceholder((ATermPlaceholder) t));
       break;
   }
