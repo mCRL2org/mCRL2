@@ -7024,7 +7024,7 @@ static bool xi(ATermList alpha, ATermList beta)
     return can_communicate(alpha) != NULL;
   } else {
     ATerm a = ATgetFirst(beta);
-    ATermList l = ATinsert(alpha,a);
+    ATermList l = ATappend(alpha,a);
     beta = ATgetNext(beta);
 
     if ( can_communicate(l) != NULL )
@@ -7050,19 +7050,20 @@ static ATermAppl makeNegatedConjunction(ATermList S)
 
 static ATermList psi(ATermList alpha)
 {
+  alpha=ATreverse(alpha);
   ATermList l = ATmakeList0();
   while ( !ATisEmpty(alpha) )
   {
-    ATermList a = ATmakeList1(ATgetFirst(alpha));
+    ATerm a = ATgetFirst(alpha);
     ATermList beta = ATgetNext(alpha);
 
     while ( !ATisEmpty(beta) )
     {
-      if ( might_communicate(ATinsert(a,ATgetFirst(beta)),ATgetNext(beta)) && xi(ATinsert(a,ATgetFirst(beta)),ATgetNext(beta)) )
+      if ( might_communicate(ATmakeList2(a,ATgetFirst(beta)),ATgetNext(beta)) && xi(ATmakeList2(a,ATgetFirst(beta)),ATgetNext(beta)) )
       {
         // sort and remove duplicates??
         l = ATinsert(l,
-              (ATerm) gsMakeDataExprAnd(gsMakeDataExprTrue(),pairwiseMatch(ATLgetArgument(ATAgetFirst(a),1),ATLgetArgument(ATAgetFirst(beta),1)))
+              (ATerm) gsMakeDataExprAnd(gsMakeDataExprTrue(),pairwiseMatch(ATLgetArgument((ATermAppl) a,1),ATLgetArgument(ATAgetFirst(beta),1)))
             );
       }
       beta = ATgetNext(beta);
