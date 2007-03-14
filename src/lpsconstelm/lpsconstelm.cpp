@@ -604,7 +604,7 @@ void lpsConstElm::removeSingleton(int n)
 // Constant parameters (stored in p_S)
 //
 inline void lpsConstElm::output() {
-  lps::linear_process p_lps = p_spec.process();
+  lps::linear_process p_process = p_spec.process();
   summand_list rebuild_summandlist;
 
   //Remove the summands that are never visited
@@ -612,10 +612,10 @@ inline void lpsConstElm::output() {
   if (p_reachable){
     rebuild_summandlist = setToList(p_visitedSummands); 
   } else {
-    rebuild_summandlist = p_lps.summands();
+    rebuild_summandlist = p_process.summands();
   }
 
-  gsVerboseMsg("lpsconstelm: Number of summands of old LPS: %d\n", p_lps.summands().size());
+  gsVerboseMsg("lpsconstelm: Number of summands of old LPS: %d\n", p_process.summands().size());
   gsVerboseMsg("lpsconstelm: Number of summands of new LPS: %d\n", rebuild_summandlist.size());
 
   std::set< lps::data_variable > constantVar;
@@ -701,10 +701,10 @@ inline void lpsConstElm::output() {
 
   //construct new specfication
   //
-  //LPS(data_variable_list free_variables, data_variable_list process_parameters, 
+  //linear_process(data_variable_list free_variables, data_variable_list process_parameters, 
   //  summand_list summands);
-  lps::linear_process rebuild_lps;
-  rebuild_lps = lps::linear_process(
+  lps::linear_process rebuild_process;
+  rebuild_process = lps::linear_process(
     setToList(usedFreeVars),
     vectorToList(variablePPvar), 
     atermpp::reverse(rebuild_summandlist_no_cp)
@@ -730,24 +730,21 @@ inline void lpsConstElm::output() {
   //            data_variable_list initial_variables, 
   //            data_expression_list initial_state);
   //
-data_assignment_expressions(data_assignment_list());
-data_assignment_list xyz = make_assignment_list(data_variable_list(), data_expression_list());
-  specification rebuild_spec;
-/*
-  rebuild_spec = specification(
+//data_assignment_expressions(data_assignment_list());
+//data_assignment_list xyz = make_assignment_list(data_variable_list(), data_expression_list());
+  lps::specification rebuild_spec = lps::specification(
     p_spec.data(),
     p_spec.action_labels(), 
-    rebuild_lps,
+    rebuild_process,
     process_initializer(setToList(initial_free_variables), 
                         make_assignment_list(vectorToList(variablePPvar), 
                                              vectorToList(variablePPexpr)
                                             )
                        )
   );
-*/  
   assert(gsIsSpecV1((ATermAppl) rebuild_spec));
 
-  //gsDebugMsg("%s\n", pp(p_lps).c_str());
+  //gsDebugMsg("%s\n", pp(p_process).c_str());
   if (p_outputfile.empty()){
     //if(!p_verbose){
     //  assert(!p_verbose);
@@ -890,7 +887,7 @@ void lpsConstElm::filter() {
   int     cycle    = 0;
   p_newVarCounter  = 0;
   
-  lps::linear_process p_lps = p_spec.process();
+  lps::linear_process p_process = p_spec.process();
   rewr           = createRewriter(p_spec.data()); 
 
   data_assignment_list initial_assignments = p_spec.initial_process().assignments();
@@ -911,7 +908,7 @@ void lpsConstElm::filter() {
   for (data_variable_list::iterator di = initial_free_variables.begin(); di != initial_free_variables.end(); di++){
     p_freeVarSet.insert(*di);
   }
-  for (data_variable_list::iterator di = p_lps.free_variables().begin(); di != p_lps.free_variables().end(); di++){
+  for (data_variable_list::iterator di = p_process.free_variables().begin(); di != p_process.free_variables().end(); di++){
     p_freeVarSet.insert(*di);
   } 
   
@@ -945,7 +942,7 @@ void lpsConstElm::filter() {
       same = true;
       gsVerboseMsg("lpsconstelm: Cycle %d: \n", cycle++);
       //int summandnr = 1;
-      for(summand_list::iterator currentSummand = p_lps.summands().begin(); currentSummand != p_lps.summands().end() ;currentSummand++ ){
+      for(summand_list::iterator currentSummand = p_process.summands().begin(); currentSummand != p_process.summands().end() ;currentSummand++ ){
         if ( (p_visitedSummands.find(*currentSummand) != p_visitedSummands.end()) || (conditionTest(currentSummand->condition()))) {
           //gsDebugMsg(  "Summand: %d\n", summandnr++);
           p_visitedSummands.insert(*currentSummand); 
@@ -970,7 +967,7 @@ void lpsConstElm::filter() {
     // variables or non constant parameter variables
     {
       int n = p_V.size();
-      detectVar(p_lps.process_parameters().size());
+      detectVar(p_process.process_parameters().size());
       int diff = p_V.size()-n;
       if ( diff == 1 )
       {
@@ -1019,7 +1016,7 @@ void lpsConstElm::filter() {
   //
   if(p_nosingleton){
      int n = p_V.size();
-     removeSingleton(p_lps.process_parameters().size());
+     removeSingleton(p_process.process_parameters().size());
      int diff = p_V.size()-n;
      if ( diff > 1 )
      {
@@ -1034,7 +1031,7 @@ void lpsConstElm::filter() {
   // Construct S    
   //
   std::set< int > S;
-  n = p_lps.process_parameters().size(); 
+  n = p_process.process_parameters().size(); 
   for(int j=0; j < n ; j++){
     S.insert(j);
   };
