@@ -38,4 +38,4 @@ configure: build/autoconf/configure.ac
 	autoconf -o $@ -W all $<
 
 tags:
-	ctags --languages=C,C++ --recurse=yes --extra=+q --fields=+i --totals=yes .
+	ctags --extra=+q --fields=+i --totals=yes `find . -iname '*.c' -or -iname '*.cpp' -or -iname '*.h' -or -iname '*.hpp' | grep -v "\.svn"`
