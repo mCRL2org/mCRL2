@@ -268,7 +268,7 @@ ATerm readATerm(istream &is)
 
 	}
 
-	ATerm t = ATreadFromBinaryString(buf,len);
+	ATerm t = ATreadFromBinaryString((unsigned char *) buf,len);
 
 	free(buf);
 
@@ -393,7 +393,7 @@ void Trace::saveMcrl2(ostream &os)
 	os << TRACE_MCRL2_MARKER;
 	os.write(TRACE_MCRL2_VERSION,TRACE_MCRL2_VERSION_SIZE);
 	int len;
-	char *bs = ATwriteToBinaryString((ATerm) trace,&len); //XXX
+	const char *bs = (const char *) ATwriteToBinaryString((ATerm) trace,&len); //XXX
 	os.write(bs,len);
 }
 
