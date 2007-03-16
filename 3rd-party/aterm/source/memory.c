@@ -2,7 +2,6 @@
 
 #include <ctype.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <stdarg.h>
 #include <assert.h>
 #include "_aterm.h"
@@ -11,6 +10,10 @@
 #include "util.h"
 #include "debug.h"
 #include "gc.h"
+
+#ifndef NDEBUG
+#include <stdint.h>
+#endif
 
 #ifdef DMALLOC
 #include <dmalloc.h>
@@ -52,8 +55,6 @@
 #define COMBINE(hnr,w) ((hnr)<<1 ^ (hnr)>>1 ^ HN(FOLD(w)))
 #define FINISH(hnr)    (hnr)
 
-//#define HASHINT(val)   FINISH(COMBINE(START( (AT_INT<<SHIFT_TYPE) ), val))
-
 #define CHECK_TERM(t) \
   assert((t) != NULL \
          && (!at_check || (AT_isValidTerm(t) && "term is invalid")))
@@ -61,7 +62,7 @@
 /*}}}  */
 /*{{{  globals */
 
-char memory_id[] = "$Id: memory.c 21783 2007-03-09 11:22:00Z eriks $";
+char memory_id[] = "$Id: memory.c 21917 2007-03-14 11:45:54Z eriks $";
 
 unsigned int maxTermSize = INITIAL_MAX_TERM_SIZE;
 

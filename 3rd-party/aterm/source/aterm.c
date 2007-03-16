@@ -48,10 +48,14 @@
 #define PROTECT_ARRAY_INITIAL_SIZE 128
 #define PROTECT_ARRAY_EXPAND_SIZE  256
 
+/* The same for protection function */
+#define PROTECT_FUNC_INITIAL_SIZE 32
+#define PROTECT_FUNC_EXPAND_SIZE 32
+
 /*}}}  */
 /*{{{  globals */
 
-char            aterm_id[] = "$Id: aterm.c 21776 2007-03-09 09:15:52Z eriks $";
+char            aterm_id[] = "$Id: aterm.c 21959 2007-03-15 15:07:13Z eriks $";
 
 /* Flag to tell whether to keep quiet or not. */
 ATbool silent	  = ATtrue;
@@ -103,6 +107,8 @@ extern char *strdup(const char *s);
 static ATerm    fparse_term(int *c, FILE * f);
 static ATerm    sparse_term(int *c, char **s);
 static ATerm AT_diff(ATerm t1, ATerm t2, ATermList *diffs);
+
+extern void AT_freeTempArray();
 
 /*}}}  */
 
@@ -466,34 +472,62 @@ void ATunprotectArray(ATerm *start)
 
 void ATaddProtectFunction(ATermProtFunc f)
 {
+  ATermProtFunc* new_at_prot_functions;
+  int old_at_prot_functions_size = at_prot_functions_size;
+
   if ( at_prot_functions_count == at_prot_functions_size )
   {
-    if ( at_prot_functions_size == 0 )
-    {
-      at_prot_functions_size = 32;
-    } else {
-      at_prot_functions_size = at_prot_functions_size * 2;
+    if (!at_prot_functions) {
+      at_prot_functions_size = PROTECT_FUNC_INITIAL_SIZE;
+      new_at_prot_functions = (ATermProtFunc *) malloc(at_prot_functions_size*sizeof(ATermProtFunc));
+
+      /* Initial allocation failed; try again after releasing the temporary array */
+      if ( !new_at_prot_functions ) {
+        AT_freeTempArray();
+        new_at_prot_functions = (ATermProtFunc *) malloc(at_prot_functions_size*sizeof(ATermProtFunc));
+      }
     }
-    at_prot_functions = (ATermProtFunc *) realloc(at_prot_functions, at_prot_functions_size*sizeof(ATermProtFunc));
-    if( !at_prot_functions )
-    {
+    else {
+      if (low_memory)
+        at_prot_functions_size += 1;
+      else
+        at_prot_functions_size += PROTECT_FUNC_EXPAND_SIZE;
+    
+      new_at_prot_functions = (ATermProtFunc *) realloc(at_prot_functions, at_prot_functions_size*sizeof(ATermProtFunc));
+
+      /* Initial reallocation failed; try again after releasing the temporary array */
+      if ( !new_at_prot_functions ) {
+        AT_freeTempArray();
+        new_at_prot_functions = (ATermProtFunc *) realloc(at_prot_functions, at_prot_functions_size*sizeof(ATermProtFunc));
+      }
+    
+      /* Reallocation failed again; try with a single extra element */
+      if ( (!new_at_prot_functions) && (!low_memory) ) {
+        at_prot_functions_size = old_at_prot_functions_size + 1;
+        new_at_prot_functions = (ATermProtFunc *) realloc(at_prot_functions, at_prot_functions_size*sizeof(ATermProtFunc));
+      }
+    }
+      
+    if (!new_at_prot_functions)
       ATerror("out of memory in ATaddProtectFunction.\n");
-    }
+    else
+      at_prot_functions = new_at_prot_functions;
   }
 
-  at_prot_functions[at_prot_functions_count] = f;
-  at_prot_functions_count++;
+  at_prot_functions[at_prot_functions_count++] = f;
 }
 
 void ATremoveProtectFunction(ATermProtFunc f)
 {
   int i;
+  
   for (i=0; i<at_prot_functions_count; i++)
   {
     if ( at_prot_functions[i] == f )
     {
       at_prot_functions_count--;
       at_prot_functions[i] = at_prot_functions[at_prot_functions_count];
+      break;
     }
   }
 }

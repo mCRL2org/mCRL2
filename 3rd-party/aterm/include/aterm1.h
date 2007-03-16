@@ -73,8 +73,8 @@ ATerm ATreadFromBinaryFile(FILE *file);
 ATerm ATreadFromFile(FILE *file);
 ATerm ATreadFromNamedFile(const char *name);
 ATerm ATreadFromString(const char *string);
-ATerm ATreadFromSharedString(char *s, int size);
-ATerm ATreadFromBinaryString(char *s, int size);
+ATerm ATreadFromSharedString(const char *s, int size);
+ATerm ATreadFromBinaryString(const unsigned char *s, int size);
 
 /* Abbreviation for ATreadFromString */
 #define ATparse(s)	ATreadFromString((s))
@@ -106,8 +106,8 @@ ATbool ATwriteToNamedTextFile(ATerm t, const char *name);
 ATbool ATwriteToNamedSharedTextFile(ATerm t, const char *name);
 ATbool ATwriteToNamedBinaryFile(ATerm t, const char *name);
 char  *ATwriteToString(ATerm t);
-char  *ATwriteToSharedString(ATerm t, int *len);
-char  *ATwriteToBinaryString(ATerm t, int *len);
+char *ATwriteToSharedString(ATerm t, int *len);
+unsigned char *ATwriteToBinaryString(ATerm t, int *len);
 ATerm  ATsetAnnotation(ATerm t, ATerm label, ATerm anno);
 ATerm  ATgetAnnotation(ATerm t, ATerm label);
 ATerm  ATremoveAnnotation(ATerm t, ATerm label);
@@ -126,11 +126,19 @@ void ATmarkArray(ATerm *start, int size);
  *   "dereferencing type-punned pointer will break strict-aliasing rules"
  * example usage: ATprotectList(&ATempty);
  */
+#define ATprotectTerm(p) ATprotect((ATerm *)(void *)(p))
 #define ATprotectList(p) ATprotect((ATerm *)(void *)(p))
 #define ATprotectAppl(p) ATprotect((ATerm *)(void *)(p))
 #define ATprotectPlaceholder(p) ATprotect((ATerm *)(void *)(p))
 #define ATprotectInt(p) ATprotect((ATerm *)(void *)(p))
 #define ATprotectReal(p) ATprotect((ATerm *)(void *)(p))
+
+#define ATunprotectTerm(p) ATunprotect((ATerm *)(void *)(p))
+#define ATunprotectList(p) ATunprotect((ATerm *)(void *)(p))
+#define ATunprotectAppl(p) ATunprotect((ATerm *)(void *)(p))
+#define ATunprotectPlaceholder(p) ATunprotect((ATerm *)(void *)(p))
+#define ATunprotectInt(p) ATunprotect((ATerm *)(void *)(p))
+#define ATunprotectReal(p) ATunprotect((ATerm *)(void *)(p))
 
 /**
   * We also define some functions that are specific

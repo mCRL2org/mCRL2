@@ -20,7 +20,7 @@ typedef struct
   union {
     FILE *file_data;
     struct {
-      char *buf;
+      unsigned char *buf;
       int   max_size;
       int   cur_size;
     } string_data;
@@ -34,7 +34,7 @@ typedef struct
   union {
     FILE *file_data;
     struct {
-      char *buf;
+      const unsigned char *buf;
       int   index;
       int   size;
     } string_data;
@@ -46,7 +46,7 @@ unsigned int write_bytes(const char *buf, unsigned int count, byte_writer *write
 int read_byte(byte_reader *reader);
 unsigned int read_bytes(char *buf, unsigned int count, byte_reader *reader);
 void init_file_reader(byte_reader *reader, FILE *file);
-void init_string_reader(byte_reader *reader, char *buf, int max_size);
+void init_string_reader(byte_reader *reader, const unsigned char *buf, int max_size);
 
 #ifdef __cplusplus
 }

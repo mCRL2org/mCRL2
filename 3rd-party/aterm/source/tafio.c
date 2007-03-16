@@ -364,7 +364,7 @@ long ATwriteToSharedTextFile(ATerm t, FILE *file)
 }
 
 /*}}}  */
-/*{{{  char *ATwriteToSharedString(ATerm t, int *len) */
+/*{{{  unsigned char *ATwriteToSharedString(ATerm t, int *len) */
 
 char *ATwriteToSharedString(ATerm t, int *len)
 {
@@ -379,7 +379,7 @@ char *ATwriteToSharedString(ATerm t, int *len)
 
   if (!initialized) {
     writer.type = STRING_WRITER;
-    writer.u.string_data.buf = (char *)calloc(BUFSIZ, 1);
+    writer.u.string_data.buf = (unsigned char *)calloc(BUFSIZ, 1);
     writer.u.string_data.max_size = BUFSIZ;
     initialized = ATtrue;
   }
@@ -405,7 +405,7 @@ char *ATwriteToSharedString(ATerm t, int *len)
 
   ATindexedSetDestroy(abbrevs);
 
-  return writer.u.string_data.buf;
+  return (char*)writer.u.string_data.buf;
 }
 
 /*}}}  */
@@ -966,9 +966,9 @@ ATerm ATreadFromSharedTextFile(FILE *f)
 }
 
 /*}}}  */
-/*{{{  ATerm ATreadFromSharedString(char *s, int size) */
+/*{{{  ATerm ATreadFromSharedString(const unsigned char *s, int size) */
 
-ATerm ATreadFromSharedString(char *s, int size)
+ATerm ATreadFromSharedString(const char *s, int size)
 {
   byte_reader reader;
   ATermIndexedSet abbrevs;
@@ -978,7 +978,7 @@ ATerm ATreadFromSharedString(char *s, int size)
   line = 0;
   col = 0;
 
-  init_string_reader(&reader, s, size);
+  init_string_reader(&reader, (const unsigned char*)s, size);
 
   c = read_byte(&reader);
   if (c != START_OF_SHARED_TEXT_FILE) {

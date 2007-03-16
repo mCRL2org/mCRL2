@@ -150,9 +150,9 @@ void init_file_reader(byte_reader *reader, FILE *file)
 }
 
 /*}}}  */
-/*{{{  void init_string_reader(byte_reader *reader, char *buf, int max_size) */
+/*{{{  void init_string_reader(byte_reader *reader, const unsigned char *buf, int max_size) */
 
-void init_string_reader(byte_reader *reader, char *buf, int max_size)
+void init_string_reader(byte_reader *reader, const unsigned char *buf, int max_size)
 {
   reader->type = STRING_READER;
   reader->bytes_read = 0;
