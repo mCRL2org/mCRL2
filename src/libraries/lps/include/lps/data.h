@@ -200,7 +200,7 @@ class data_equation: public aterm_appl
       m_condition = data_expression(*i++);
       m_lhs       = data_expression(*i++);
       m_rhs       = data_expression(*i);
-      assert(data_expr::is_bool(m_condition));
+      assert(m_condition.is_nil() || data_expr::is_bool(m_condition));
     } 
 
     data_equation(data_variable_list variables,
@@ -214,7 +214,7 @@ class data_equation: public aterm_appl
        m_lhs(lhs),
        m_rhs(rhs)     
     {
-      assert(data_expr::is_bool(m_condition));
+      assert(m_condition.is_nil() || data_expr::is_bool(m_condition));
     }
 
     /// Returns the sequence of variables.
