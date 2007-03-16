@@ -216,7 +216,7 @@ namespace atermpp
   inline
   aterm read_from_binary_string(const std::string& s, unsigned int size)
   {
-    return ATreadFromBinaryString(const_cast<char*>(s.c_str()), size);
+    return ATreadFromBinaryString(reinterpret_cast<const unsigned char *>(s.c_str()), size);
   }
   
   /// Read a aterm from a string in taf format.
@@ -225,7 +225,7 @@ namespace atermpp
   inline
   aterm read_from_shared_string(const std::string& s, unsigned int size)
   {
-    return ATreadFromSharedString(const_cast<char*>(s.c_str()), size);
+    return ATreadFromSharedString(s.c_str(), size);
   }
   
   /// Read an aterm from named binary or text file.
