@@ -238,9 +238,9 @@ namespace pbes_timed
     } else if (s::is_false(f)) {
       return false_();
     } else if (s::is_and(f)) {
-      return and_(RHS(lhs(f), lps, T, context), RHS(rhs(f), lps, T, context));
+		return and_(RHS(s::lhs(f), lps, T, context), RHS(s::rhs(f), lps, T, context));
     } else if (s::is_or(f)) {
-      return or_(RHS(lhs(f), lps, T, context), RHS(rhs(f), lps, T, context));
+      return or_(RHS(s::lhs(f), lps, T, context), RHS(s::rhs(f), lps, T, context));
     } else if (s::is_forall(f)) {
       std::set<std::string> names = find_variable_names(s::quant_vars(f));
       context.insert(names.begin(), names.end());
@@ -348,8 +348,8 @@ namespace pbes_timed
       }
       return and_(multi_or(v.begin(), v.end()), val(greater(t, T)));
     } else if (s::is_var(f)) {
-      identifier_string X = var_name(f);
-      data_expression_list d = var_val(f);
+      identifier_string X = s::var_name(f);
+      data_expression_list d = s::var_val(f);
       data_variable_list xp = lps.process_parameters();
       return propositional_variable_instantiation(X, T + d + xp + Par(X, f));
     } else if (s::is_mu(f) || (s::is_nu(f))) {
