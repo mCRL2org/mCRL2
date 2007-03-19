@@ -325,7 +325,7 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
     }
     return r;
   }
-]])],[ATERM_CHECK=yes],[ATERM_CHECK=no])
+]])],[ATERM_CHECK=yes],[ATERM_CHECK=no],[ATERM_CHECK=no])
 AC_MSG_RESULT($ATERM_CHECK)
 if test "$ATERM_CHECK" = "no"; then
   AC_MSG_ERROR([assumptions of the ATerm library are not fulfilled])
@@ -437,12 +437,12 @@ else
       AC_SUBST([OPENGL_IPATH],[$with_opengl/include])
       AC_SUBST([OPENGL_LPATH],[$with_opengl/lib])
     fi
-
   else
     USE_OPENGL="no"
     OPENGL_NAME=""
     AC_MSG_RESULT([no])
   fi
+  LIBS=""
 fi
 AC_SUBST([OPENGL_NAME],[])
 

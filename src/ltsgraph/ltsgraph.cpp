@@ -1,10 +1,10 @@
+// Graphical shell
+#include "graph_frame.h"
+
 #include "ltsgraph_version.h"
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include "lts/liblts.h"
-
-// Graphical shell
-#include "graph_frame.h"
 
 std::string lts_file_argument;
 bool command_line = false;
