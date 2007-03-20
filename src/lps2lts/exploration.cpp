@@ -1024,7 +1024,7 @@ bool generate_lts()
         ATermAppl Transition;
         ATerm NewState;
         bool new_state = false;
-        bool trans_seen_new = false;
+        bool state_is_deadlock = !top_trans_seen /* && !nsgen->next(...) */ ;
         bool priority;
         if ( nsgen->next(&Transition,&NewState,&priority) )
         {
@@ -1032,6 +1032,8 @@ bool generate_lts()
           if ( !priority ) // don't store confluent self loops
           {
             top_trans_seen = true;
+            // inv
+            state_is_deadlock = false;
             if ( add_transition(state,Transition,NewState) )
             {
               new_state = true;
@@ -1057,13 +1059,17 @@ bool generate_lts()
               {
                 nsgens[nsgens_num] = nstate->getNextStates(NewState,nsgens[nsgens_num]);
                 nsgens_num++;
-                trans_seen_new = false;
+                top_trans_seen = false;
+                // inv
               }
             }
           }
         } else {
           nsgens_num--;
+          top_trans_seen = true;
+          // inv
         }
+        // inv
         
         if ( nsgen->errorOccurred() )
         {
@@ -1071,11 +1077,10 @@ bool generate_lts()
           save_error_trace(state);
           break;
         }
-        if ( !top_trans_seen )
+        if ( state_is_deadlock )
         {
           check_deadlocktrace(state);
         }
-        top_trans_seen = trans_seen_new;
 
         if ( new_state )
         {
