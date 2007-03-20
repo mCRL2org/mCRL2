@@ -7,7 +7,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/range/iterator_range.hpp>
 
-#include <utility/visitor.h>
+#include <utility/generic_visitor.h>
 
 #include <sip/configuration.h>
 #include <sip/mime_type.h>
@@ -30,11 +30,12 @@ namespace sip {
      * As well as any information about the controller that might be interesting
      * for a tool developer.
      **/
-    class capabilities : public utility::visitable < tool::capabilities > {
+    class capabilities : public utility::visitable {
       friend class sip::tool::communicator;
       friend class sip::controller::communicator;
-      friend class sip::store_visitor_impl;
-      friend class sip::restore_visitor_impl;
+
+      template < typename R, typename S >
+      friend class utility::visitor;
   
       public:
   

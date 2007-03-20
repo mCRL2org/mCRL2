@@ -8,11 +8,12 @@
 namespace squadt {
   /// \cond PRIVATE_PART
 
-  class tool_manager_impl : public utility::visitable< tool_manager_impl >, public sip::controller::communicator {
+  class tool_manager_impl : public sip::controller::communicator, public utility::visitable {
     friend class tool_manager;
     friend class processor_impl;
-    friend class store_visitor_impl;
-    friend class restore_visitor_impl;
+
+    template < typename R, typename S >
+    friend class utility::visitor;
 
     private:
  

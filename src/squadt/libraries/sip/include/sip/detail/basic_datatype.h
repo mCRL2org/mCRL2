@@ -15,16 +15,12 @@
 #include <boost/tuple/tuple.hpp>
 
 #include <sip/visitors.h>
-#include <utility/visitor.h>
 
 namespace sip {
 
-  class store_visitor_impl;
-  class restore_visitor_impl;
-
   namespace datatype {
 
-    class basic_datatype : public utility::base_visitable {
+    class basic_datatype : public utility::visitable {
 
       public:
 
@@ -48,26 +44,13 @@ namespace sip {
     };
 
     /**
-     * \brief Basic data types used by configurations and simple form validation
-     *
-     * The idea behind these data types is to lift some of the burden of input
-     * validation of the back of the tool developer.  The data types presented
-     * here are just a hand full of examples used for simple validation
-     * purposes. In the future regular expression based descriptions can be
-     * added for instance, should there be a need for it.
-     **/
-    template < typename T >
-    class basic_datatype_impl : public utility::visitable< T >, public basic_datatype {
-    };
-
-    /**
      * \brief Derived data type specifier for enumerations
      *
      * An enumeration is a finite set of alternatives.
      **/
-    class enumeration : public basic_datatype_impl< enumeration > {
-      friend class sip::store_visitor_impl;
-      friend class sip::restore_visitor_impl;
+    class enumeration : public basic_datatype {
+      template < typename R, typename S >
+      friend class utility::visitor;
 
       private:
         
@@ -114,9 +97,9 @@ namespace sip {
      * course, must be smaller than the maximum. The default value is taken to
      * be the minimum, unless it is specified at construction time.
      **/
-    class integer : public basic_datatype_impl< integer > {
-      friend class sip::store_visitor_impl;
-      friend class sip::restore_visitor_impl;
+    class integer : public basic_datatype {
+      template < typename R, typename S >
+      friend class utility::visitor;
 
       protected:
 
@@ -158,6 +141,8 @@ namespace sip {
     };
 
     class natural : public datatype::integer {
+      template < typename R, typename S >
+      friend class utility::visitor;
 
       public:
 
@@ -166,6 +151,8 @@ namespace sip {
     };
 
     class positive_integer : public datatype::integer {
+      template < typename R, typename S >
+      friend class utility::visitor;
 
       public:
 
@@ -174,6 +161,8 @@ namespace sip {
     };
 
     class negative_integer : public datatype::integer {
+      template < typename R, typename S >
+      friend class utility::visitor;
 
       public:
 
@@ -188,9 +177,9 @@ namespace sip {
      * course, must be smaller than the maximum. The default value is taken to
      * be the minimum, unless it is specified at construction time.
      **/
-    class real : public basic_datatype_impl< real > {
-      friend class sip::store_visitor_impl;
-      friend class sip::restore_visitor_impl;
+    class real : public basic_datatype {
+      template < typename R, typename S >
+      friend class utility::visitor;
 
       protected:
 
@@ -244,6 +233,8 @@ namespace sip {
     };
 
     class positive_real : public datatype::real {
+      template < typename R, typename S >
+      friend class utility::visitor;
 
       public:
 
@@ -252,6 +243,8 @@ namespace sip {
     };
 
     class negative_real : public datatype::real {
+      template < typename R, typename S >
+      friend class utility::visitor;
 
       public:
 
@@ -263,9 +256,9 @@ namespace sip {
 //    };
 
     /** \brief Derived data type specifier for booleans */
-    class boolean : public basic_datatype_impl< boolean > {
-      friend class sip::store_visitor_impl;
-      friend class sip::restore_visitor_impl;
+    class boolean : public basic_datatype {
+      template < typename R, typename S >
+      friend class utility::visitor;
 
       public:
 
@@ -296,9 +289,9 @@ namespace sip {
     };
 
     /** \brief Derived data type for strings */
-    class string : public basic_datatype_impl< datatype::string > {
-      friend class sip::store_visitor_impl;
-      friend class sip::restore_visitor_impl;
+    class string : public basic_datatype {
+      template < typename R, typename S >
+      friend class utility::visitor;
 
       protected:
 

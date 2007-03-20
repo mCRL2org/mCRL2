@@ -6,8 +6,6 @@
 
 #include <boost/function.hpp>
 
-#include <utility/visitor.h>
-
 #include <sip/detail/layout_mediator.h>
 #include <sip/visitors.h>
 
@@ -23,9 +21,9 @@ namespace sip {
     class element;
 
     /** \brief Abstract base class for layout elements */
-    class element : public utility::base_visitable {
-      friend class sip::store_visitor;
-      friend class sip::restore_visitor;
+    class element : public utility::visitable {
+      template < typename R, typename S >
+      friend class utility::visitor;
 
       public:
 
@@ -85,14 +83,6 @@ namespace sip {
 
         /** \brief Abstract destructor */
         virtual ~element() = 0;
-    };
-
-    template < typename T >
-    class base_element_impl : public utility::visitable< T > {
-    };
-
-    template < typename T >
-    class element_impl : public utility::visitable< T >, public sip::layout::element {
     };
 
     inline void element::set_enabled(bool b) {

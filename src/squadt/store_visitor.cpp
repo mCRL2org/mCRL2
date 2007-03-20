@@ -7,9 +7,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
 
-// necessary because utility/visitor.tcc will be included
-#include <sip/detail/store_visitor.tcc>
-
 #include "build_system.h"
 #include "settings_manager.h"
 #include "project_manager.tcc"
@@ -18,16 +15,16 @@
 #include "executor.tcc"
 #include "processor.tcc"
 
-#include <utility/visitor.h>
+#include <utility/generic_visitor.tcc>
 
 namespace squadt {
 
-  class store_visitor_impl : public utility::visitor< store_visitor_impl > {
+  class store_visitor_impl {
 
     friend class visitors;
     friend class store_visitor;
 
-    private:
+    protected:
 
       /** \brief The destination of output */
       std::ostream&   out;
@@ -36,29 +33,9 @@ namespace squadt {
 
       /** \brief Writes to stream */
       store_visitor_impl(std::ostream&);
-
-      /** \brief Writes state for objects of type T */
-      template < typename T >
-      void visit(T const&);
-
-      template < typename T, typename U >
-      void visit(T const&, U const&);
   };
-}
 
-#include <utility/visitor.tcc>
-
-namespace utility {
-  template void visitor< squadt::store_visitor_impl, true >::visit(squadt::tool_manager const&);
-  template void visitor< squadt::store_visitor_impl, true >::visit(squadt::project_manager const&);
-  template void visitor< squadt::store_visitor_impl, true >::visit(squadt::project_manager_impl const&);
-  template void visitor< squadt::store_visitor_impl, true >::visit(squadt::executor const&);
-  template void visitor< squadt::store_visitor_impl, true >::visit(squadt::type_registry const&);
-}
-
-namespace squadt {
-
-  class store_visitor_path_impl : public store_visitor_impl {
+  class store_visitor_path_impl : public utility::visitor< store_visitor_impl > {
 
     private:
 
@@ -71,7 +48,7 @@ namespace squadt {
       store_visitor_path_impl(boost::filesystem::path const&);
   };
 
-  class store_visitor_string_impl : public store_visitor_impl {
+  class store_visitor_string_impl : public utility::visitor< store_visitor_impl > {
 
     private:
 
@@ -94,25 +71,25 @@ namespace squadt {
    * \param[in] s a string to write to
    **/
   store_visitor::store_visitor(std::string& s) :
-        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < visitor_type > (new store_visitor_string_impl(s))) {
+        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < utility::visitor< store_visitor_impl > > (new store_visitor_string_impl(s))) {
   }
 
   /**
    * \param[in] p a path to the file to write to
    **/
   store_visitor::store_visitor(boost::filesystem::path const& p) :
-        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < visitor_type > (new store_visitor_path_impl(p))) {
+        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < utility::visitor< store_visitor_impl > > (new store_visitor_path_impl(p))) {
   }
 
   /**
    * \param[in] s a stream to write to
    **/
   store_visitor::store_visitor(std::ostream& o) :
-        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < visitor_type > (new store_visitor_impl(o))) {
+        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < utility::visitor< store_visitor_impl > > (new utility::visitor < store_visitor_impl >(o))) {
   }
 
   inline store_visitor_string_impl::store_visitor_string_impl(std::string& s) :
-                                store_visitor_impl(m_help_stream),
+                                utility::visitor< store_visitor_impl >(m_help_stream),
                                 m_target_string(s) {
   }
 
@@ -124,34 +101,41 @@ namespace squadt {
    * \param[in] p a path to the file from which to read
    **/
   inline store_visitor_path_impl::store_visitor_path_impl(boost::filesystem::path const& p) :
-                                store_visitor_impl(m_help_stream),
+                                utility::visitor< store_visitor_impl >(m_help_stream),
                                 m_help_stream(p.string().c_str(), std::ios_base::out) {
 
   }
 
   inline store_visitor_impl::store_visitor_impl(std::ostream& o) : out(o) {
   }
+}
+
+namespace utility {
+  using namespace squadt;
 
   template <>
-  void store_visitor_impl::visit(tool const& t) {
+  template <>
+  void visitor< squadt::store_visitor_impl >::visit(tool const& t) {
     out << "<tool name=\"" << t.get_name()
                     << "\" location=\"" << t.get_location() << "\"/>\n";
   }
 
   template <>
-  void store_visitor_impl::visit(tool_manager const& t) {
-    t.impl->accept(*this);
+  template <>
+  void visitor< squadt::store_visitor_impl >::visit(tool_manager const& t) {
+    do_visit(*t.impl);
   }
 
   template <>
-  void store_visitor_impl::visit(tool_manager_impl const& tm) {
+  template <>
+  void visitor< squadt::store_visitor_impl >::visit(tool_manager_impl const& tm) {
     /* Write header */
     out << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
                     << "<tool-catalog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
                     << " xsi:noNamespaceSchemaLocation=\"tool_catalog.xsd\" version=\"1.0\">\n";
  
     BOOST_FOREACH(tool_manager::tool_list::value_type t, tm.get_tools()) {
-      t->accept(*this);
+      do_visit(*t);
     }
  
     /* Write footer */
@@ -159,12 +143,14 @@ namespace squadt {
   }
 
   template <>
-  void store_visitor_impl::visit(execution::executor const& t) {
-    t.impl->accept(*this);
+  template <>
+  void visitor< squadt::store_visitor_impl >::visit(execution::executor const& t) {
+    do_visit(*t.impl);
   }
 
   template <>
-  void store_visitor_impl::visit(executor_impl const& e) {
+  template <>
+  void visitor< squadt::store_visitor_impl >::visit(executor_impl const& e) {
     /** FIXME temporary measure until xml2pp is phased out */
     out << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
         << "<squadt-preferences xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" version=\"1.0\">\n";
@@ -176,7 +162,8 @@ namespace squadt {
   }
 
   template <>
-  void store_visitor_impl::visit(type_registry const& r) {
+  template <>
+  void visitor< squadt::store_visitor_impl >::visit(type_registry const& r) {
 
     out << "<default-actions>\n";
 
@@ -205,12 +192,14 @@ namespace squadt {
   }
 
   template <>
-  void store_visitor_impl::visit(processor const& p) {
-    p.impl->accept(*this);
+  template <>
+  void visitor< squadt::store_visitor_impl >::visit(processor const& p) {
+    do_visit(*p.impl);
   }
 
   template <>
-  void store_visitor_impl::visit(processor_impl const& p) {
+  template <>
+  void visitor< squadt::store_visitor_impl >::visit(processor_impl const& p) {
     out << "<processor";
 
     if (p.tool_descriptor.get() != 0) {
@@ -264,12 +253,14 @@ namespace squadt {
   }
 
   template <>
-  void store_visitor_impl::visit(squadt::project_manager const& p) {
-    p.impl->accept(*this);
+  template <>
+  void visitor< squadt::store_visitor_impl >::visit(squadt::project_manager const& p) {
+    do_visit(*p.impl);
   }
 
   template <>
-  void store_visitor_impl::visit(squadt::project_manager_impl const& p) {
+  template <>
+  void visitor< squadt::store_visitor_impl >::visit(squadt::project_manager_impl const& p) {
     /* Write header */
     out << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
       << "<squadt-project xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
@@ -281,10 +272,26 @@ namespace squadt {
     }
  
     BOOST_FOREACH(project_manager::processor_list::value_type i, p.processors) {
-      i->accept(*this);
+      do_visit(*i);
     }
  
     out << "</squadt-project>\n";
+  }
+
+  template <>
+  bool visitor< squadt::store_visitor_impl >::initialise() {
+    register_visit_method< const tool >();
+    register_visit_method< const tool_manager >();
+    register_visit_method< const tool_manager_impl >();
+    register_visit_method< const executor >();
+    register_visit_method< const executor_impl >();
+    register_visit_method< const type_registry >();
+    register_visit_method< const processor >();
+    register_visit_method< const processor_impl >();
+    register_visit_method< const project_manager >();
+    register_visit_method< const project_manager_impl >();
+
+    return true;
   }
 }
 

@@ -19,12 +19,14 @@
 namespace squadt {
   /// \cond PRIVATE_PART
 
-  class processor_impl : public utility::visitable < processor_impl > {
-    friend class store_visitor_impl;
-    friend class restore_visitor_impl;
+  class processor_impl : public utility::visitable {
     friend class processor;
-    friend struct processor::object_descriptor;
     friend class processor::monitor;
+
+    friend struct processor::object_descriptor;
+
+    template < typename R, typename S >
+    friend class utility::visitor;
 
     private:
 

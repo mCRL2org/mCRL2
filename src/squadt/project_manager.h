@@ -27,10 +27,11 @@ namespace squadt {
    *
    * \attention Processors may not depend on themselves.
    **/
-  class project_manager : public utility::visitable< project_manager >, public boost::noncopyable {
+  class project_manager : public utility::visitable, public boost::noncopyable {
     friend class project_manager_impl;
-    friend class restore_visitor_impl;
-    friend class store_visitor_impl;
+
+    template < typename R, typename S >
+    friend class utility::visitor;
 
     public:
 

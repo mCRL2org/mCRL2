@@ -13,8 +13,8 @@ namespace sip {
 
   /** \brief Basic container class for layout elements */
   class display {
-    friend class sip::store_visitor_impl;
-    friend class sip::restore_visitor_impl;
+    template < typename R, typename S >
+    friend class utility::visitor;
 
     public:
 
@@ -46,9 +46,9 @@ namespace sip {
   namespace layout {
 
     /** \brief Basic container class for controller-side layout definitions */
-    class tool_display : public sip::display, public utility::visitable< tool_display > {
-      friend class sip::store_visitor_impl;
-      friend class sip::restore_visitor_impl;
+    class tool_display : public sip::display, public utility::visitable {
+      template < typename R, typename S >
+      friend class utility::visitor;
 
       public:
 

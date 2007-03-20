@@ -12,7 +12,7 @@
 #include <sip/configuration.h>
 #include <sip/mime_type.h>
 
-#include <utility/visitor.h>
+#include <utility/generic_visitor.h>
 
 #include "build_system.h"
 
@@ -31,9 +31,9 @@ namespace squadt {
    * Indexes tools by format and category to help list the available tools
    * and tool categories when given a format.
    **/
-  class type_registry : public utility::visitable< type_registry > {
-    friend class restore_visitor_impl;
-    friend class store_visitor_impl;
+  class type_registry : public utility::visitable {
+    template < typename R, typename S >
+    friend class utility::visitor;
 
     public:
 

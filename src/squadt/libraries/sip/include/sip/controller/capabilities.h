@@ -6,7 +6,7 @@
 
 #include <sip/detail/common.h>
 
-#include <utility/visitor.h>
+#include <utility/generic_visitor.h>
 
 namespace sip {
   namespace tool {
@@ -30,11 +30,12 @@ namespace sip {
      * As well as any information about the controller that might be interesting
      * for a tool developer.
      **/
-    class capabilities : public utility::visitable < controller::capabilities > {
+    class capabilities : public utility::visitable {
       friend class sip::tool::communicator;
       friend class sip::controller::communicator;
-      friend class sip::restore_visitor_impl;
-      friend class sip::store_visitor_impl;
+
+      template < typename R, typename S >
+      friend class utility::visitor;
  
       public:
 

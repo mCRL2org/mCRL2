@@ -16,10 +16,11 @@ namespace sip {
   class configuration;
 
   /** \brief Describes a single option (or option instance) the basic building block of a tool configuration */
-  class option : public sip::parameter, public utility::visitable < option > {
+  class option : public sip::parameter {
     friend class sip::configuration;
-    friend class sip::restore_visitor_impl;
-    friend class sip::store_visitor_impl;
+
+    template < typename R, typename S >
+    friend class utility::visitor;
 
     private:
 

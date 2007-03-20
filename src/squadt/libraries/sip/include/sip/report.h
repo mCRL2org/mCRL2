@@ -5,7 +5,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <utility/visitor.h>
+#include <utility/generic_visitor.h>
 
 #include <sip/configuration.h>
 
@@ -14,9 +14,9 @@ namespace sip {
   class report;
 
   /** \brief Describes a report of tool operation */
-  class report : public utility::visitable < report > {
-    friend class sip::store_visitor_impl;
-    friend class sip::restore_visitor_impl;
+  class report : public utility::visitable {
+    template < typename R, typename S >
+    friend class utility::visitor;
 
     public:
 

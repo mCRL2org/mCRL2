@@ -5,8 +5,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <utility/visitor.h>
-
 #include <sip/parameter.h>
 #include <sip/mime_type.h>
 #include <sip/uri.h>
@@ -37,10 +35,11 @@ namespace sip {
    * As well as any information about the controller that might be interesting
    * for a tool developer.
    **/
-  class object : public sip::parameter, public utility::visitable < object > {
+  class object : public sip::parameter {
     friend class sip::configuration;
-    friend class sip::restore_visitor_impl;
-    friend class sip::store_visitor_impl;
+
+    template < typename R, typename S >
+    friend class utility::visitor;
 
     public:
 

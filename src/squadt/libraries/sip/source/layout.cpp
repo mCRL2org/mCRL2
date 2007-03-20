@@ -100,9 +100,7 @@ namespace sip {
 
       /* Find the element that is to be changed */
       if (m_manager.get() != 0) {
-        elements_wrapper w(*this, elements);
-
-        sip::visitors::restore(w, s);
+        sip::visitors::restore(*this, elements, s);
       }
     }
   }

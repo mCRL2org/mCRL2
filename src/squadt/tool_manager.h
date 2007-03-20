@@ -41,11 +41,12 @@ namespace squadt {
    *    act as a proxy, and in the future do load balancing for a number
    *    executors that may run on different machines
    **/
-  class tool_manager : public utility::visitable< tool_manager > {
+  class tool_manager : public utility::visitable {
     friend class build_system;
     friend class processor_impl;
-    friend class store_visitor_impl;
-    friend class restore_visitor_impl;
+
+    template < typename R, typename S >
+    friend class utility::visitor;
  
     public:
  

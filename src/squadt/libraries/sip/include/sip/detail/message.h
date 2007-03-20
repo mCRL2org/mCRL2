@@ -30,10 +30,11 @@ namespace sip {
      *   a value A that is used as any (the wildcard) message type
      */
     template < class M, M D, M A >
-    class message : public utility::visitable < message< M, D, A > > {
+    class message : public utility::visitable {
       friend class basic_messenger_impl < message < M, D, A > >;
-      friend class sip::restore_visitor_impl;
-      friend class sip::store_visitor_impl;
+
+      template < typename R, typename S >
+      friend class utility::visitor;
 
       public:
 

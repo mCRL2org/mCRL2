@@ -32,13 +32,14 @@ namespace squadt {
    * input of other processors.
    *
    **/
-  class processor : public utility::visitable < processor >, private boost::noncopyable {
-    friend class store_visitor_impl;
-    friend class restore_visitor_impl;
+  class processor : public utility::visitable, private boost::noncopyable {
     friend class processor_impl;
     friend class project_manager;
     friend class tool_manager;
     friend class executor;
+
+    template < typename R, typename S >
+    friend class utility::visitor;
  
     public:
 

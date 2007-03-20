@@ -56,9 +56,9 @@ namespace sip {
     typedef boost::uint_t< (sizeof(sip::layout::element*) << 3) >::least  element_identifier;
 
     /** \brief Base class for layout constraint containers */
-    class properties : public utility::visitable< properties > {
-      friend class sip::store_visitor_impl;
-      friend class sip::restore_visitor_impl;
+    class properties : public utility::visitable {
+      template < typename R, typename S >
+      friend class utility::visitor;
 
       public:
 
@@ -93,9 +93,10 @@ namespace sip {
 
     /** \brief Abstract base class for layout managers */
     class manager : public sip::layout::element {
-      friend class sip::store_visitor_impl;
-      friend class sip::restore_visitor_impl;
       friend class sip::layout::element;
+
+      template < typename R, typename S >
+      friend class utility::visitor;
 
       public:
 
@@ -137,18 +138,14 @@ namespace sip {
         virtual ~manager() = 0;
     };
 
-    template < typename T >
-    class manager_impl : public base_element_impl< T >, public manager {
-    };
-
     /**
      * \brief Box layout manager
      *
      * Elements are laid out horizontally or vertically, according to the chosen box variant.
      **/
     class box : public manager {
-      friend class sip::store_visitor_impl;
-      friend class sip::restore_visitor_impl;
+      template < typename R, typename S >
+      friend class utility::visitor;
 
       protected:
 
@@ -191,20 +188,17 @@ namespace sip {
         virtual ~box() = 0;
     };
 
-    template < typename T >
-    class box_impl : public base_element_impl< T >, public box {
-    };
-
     /**
      * \brief Vertical box layout manager
      *
      * Elements are laid out vertically
      **/
-    class vertical_box : public box_impl< vertical_box > {
-      friend class sip::store_visitor_impl;
-      friend class sip::restore_visitor_impl;
+    class vertical_box : public box {
       friend class sip::layout::manager;
       friend class sip::layout::element;
+
+      template < typename R, typename S >
+      friend class utility::visitor;
 
       public:
 
@@ -238,11 +232,12 @@ namespace sip {
      *
      * Elements are laid out vertically
      **/
-    class horizontal_box : public box_impl< horizontal_box > {
-      friend class sip::store_visitor_impl;
-      friend class sip::restore_visitor_impl;
+    class horizontal_box : public box {
       friend class sip::layout::manager;
       friend class sip::layout::element;
+
+      template < typename R, typename S >
+      friend class utility::visitor;
 
       public:
 

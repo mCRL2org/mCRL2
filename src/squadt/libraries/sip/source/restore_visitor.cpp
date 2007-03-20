@@ -3,6 +3,8 @@
 #include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
 
+#include <utility/generic_visitor.tcc>
+
 #include <sip/visitors.h>
 #include <sip/report.h>
 #include <sip/tool/capabilities.h>
@@ -12,21 +14,32 @@
 #include <sip/detail/layout_manager.h>
 #include <sip/detail/layout_tool_display.h>
 #include <sip/detail/event_handlers.h>
-#include <sip/detail/restore_visitor.tcc>
 #include <sip/detail/common.h>
 
-#include <utility/visitor.tcc>
-
-template void utility::visitor< sip::restore_visitor_impl, false >::visit(sip::configuration&);
-template void utility::visitor< sip::restore_visitor_impl, false >::visit(sip::tool::capabilities&);
-template void utility::visitor< sip::restore_visitor_impl, false >::visit(sip::controller::capabilities&);
-template void utility::visitor< sip::restore_visitor_impl, false >::visit(sip::layout::tool_display&);
-template void utility::visitor< sip::restore_visitor_impl, false >::visit(sip::report&);
-template void utility::visitor< sip::restore_visitor_impl, false >::visit(sip::message&);
+#include <ticpp.h>
 
 namespace sip {
 
-  class restore_visitor_impl_frontend : public restore_visitor_impl {
+    class restore_visitor_impl : private boost::noncopyable {
+
+    friend class visitors;
+    friend class restore_visitor;
+
+    protected:
+
+      /** \brief Points to the current element */
+      ticpp::Element*  tree;
+
+    public:
+
+      /** \brief Reads from parse tree */
+      restore_visitor_impl();
+
+      /** \brief Reads from parse tree */
+      restore_visitor_impl(ticpp::Element* s);
+  };
+
+  class restore_visitor_impl_frontend : public utility::visitor< restore_visitor_impl > {
 
     private:
 
@@ -36,47 +49,41 @@ namespace sip {
     public:
 
       /** \brief Reads from stream */
-      restore_visitor_impl_frontend(restore_visitor&, std::istream& s);
+      restore_visitor_impl_frontend(std::istream& s);
 
       /** \brief Reads from string */
-      restore_visitor_impl_frontend(restore_visitor&, std::string const&);
+      restore_visitor_impl_frontend(std::string const&);
 
       /** \brief Reads from file */
-      restore_visitor_impl_frontend(restore_visitor&, boost::filesystem::path const&);
+      restore_visitor_impl_frontend(boost::filesystem::path const&);
   };
 
   template < >
   restore_visitor::restore_visitor(ticpp::Element& s) :
-        utility::visitor_interface< restore_visitor_impl, false >(boost::shared_ptr < visitor_type > (new restore_visitor_impl(*this, &s))) {
+        utility::visitor_interface< restore_visitor_impl >(boost::shared_ptr < utility::visitor< restore_visitor_impl > > (new utility::visitor< restore_visitor_impl >(&s))) {
   }
 
   restore_visitor::restore_visitor(std::string const& s) :
-        utility::visitor_interface< restore_visitor_impl, false >(boost::shared_ptr < visitor_type > (new restore_visitor_impl_frontend(*this, s))) {
+        utility::visitor_interface< restore_visitor_impl >(boost::shared_ptr < utility::visitor< restore_visitor_impl > > (new restore_visitor_impl_frontend(s))) {
   }
 
   restore_visitor::restore_visitor(boost::filesystem::path const& p) :
-        utility::visitor_interface< restore_visitor_impl, false >(boost::shared_ptr < visitor_type > (new restore_visitor_impl_frontend(*this, p))) {
+        utility::visitor_interface< restore_visitor_impl >(boost::shared_ptr < utility::visitor< restore_visitor_impl > > (new restore_visitor_impl_frontend(p))) {
   }
 
-  inline restore_visitor_impl::restore_visitor_impl(restore_visitor& i) : m_interface(i) {
+  inline restore_visitor_impl::restore_visitor_impl() {
   }
 
-  inline restore_visitor_impl::restore_visitor_impl(restore_visitor& i, ticpp::Element* s) : m_interface(i), tree(s) {
+  inline restore_visitor_impl::restore_visitor_impl(ticpp::Element* s) : tree(s) {
   }
 
-  inline restore_visitor_impl& restore_visitor_impl::visit_tree(ticpp::Element* s) {
-    tree = s;
-
-    return (*this);
-  }
-
-  inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(restore_visitor& i, std::istream& s) : restore_visitor_impl(i) {
+  inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(std::istream& s) {
     s >> in;
 
     tree = in.FirstChildElement();
   }
 
-  inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(restore_visitor& i, std::string const& s) : restore_visitor_impl(i) {
+  inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(std::string const& s) {
     std::istringstream ins(s);
 
     ins >> in;
@@ -84,16 +91,13 @@ namespace sip {
     tree = in.FirstChildElement();
   }
 
-  inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(restore_visitor& i, boost::filesystem::path const& p) : restore_visitor_impl(i) {
+  inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(boost::filesystem::path const& p) {
     std::ifstream ins(p.native_file_string().c_str());
 
     ins >> in;
 
     tree = in.FirstChildElement();
   }
-
-  template <>
-  void restore_visitor_impl::visit(boost::shared_ptr < sip::datatype::basic_datatype >&, std::string&);
 
   std::istream& operator >> (std::istream& s, sip::message::type_identifier_t& id) {
     size_t t;
@@ -104,9 +108,13 @@ namespace sip {
 
     return (s);
   }
+}
+
+namespace utility {
 
   template <>
-  void restore_visitor_impl::visit(sip::message& o) {
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::message& o) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "message-meta");
 
     tree->GetAttributeOrDefault("type", &o.m_type, sip::message::message_unknown);
@@ -115,70 +123,8 @@ namespace sip {
   }
 
   template <>
-  void restore_visitor_impl::visit(sip::object& o) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "object");
-
-    o.m_mime_type = mime_type(tree->GetAttributeValue("mime-type"));
-    
-    tree->GetAttribute("location", &o.m_location);
-  }
-
   template <>
-  void restore_visitor_impl::visit(sip::option& o) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "option");
-
-    for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
-      /* The current element must be a valid datatype specification */
-      std::pair < boost::shared_ptr < sip::datatype::basic_datatype >, std::string >      p;
-
-      visit_tree(e).visit(p.first, p.second);
-
-      o.m_arguments.push_back(p);
-    }
-  }
-
-  template <>
-  void restore_visitor_impl::visit(sip::configuration& c) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "configuration");
-
-    /* reset object state */
-    c.m_parameter_by_id.clear();
-    c.m_options.clear();
-    c.m_input_objects.clear();
-    c.m_output_objects.clear();
-    c.m_positions.clear();
-
-    tree->GetAttributeOrDefault("fresh", &c.m_fresh, false);
-    tree->GetAttribute("output-prefix", &c.m_output_prefix, false);
-    tree->GetAttribute("category", &c.m_category);
-
-    for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
-      std::string identifier = e->GetAttributeValue("id");
-     
-      if (e->Value() == "option") {
-        boost::shared_ptr < option > o(new sip::option);
-
-        o->accept(visit_tree(e));
-
-        c.add_option(identifier, o);
-      }
-      else if (e->Value() == "object") {
-        boost::shared_ptr < object > o(new sip::object);
-
-        o->accept(visit_tree(e));
-
-        if (e->GetAttributeValue("type") == "input") {
-          c.add_input(identifier, o);
-        }
-        else {
-          c.add_output(identifier, o);
-        }
-      }
-    }
-  }
-
-  template <>
-  void restore_visitor_impl::visit(sip::datatype::boolean& e, std::string& s) {
+  void visitor< sip::restore_visitor_impl >::visit(sip::datatype::boolean& e, std::string& s) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "boolean");
 
     s = tree->GetAttributeValue("value");
@@ -196,12 +142,13 @@ namespace sip {
   }
 
   template <>
-  void restore_visitor_impl::visit(sip::datatype::integer& e, std::string& s) {
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::datatype::integer& e, std::string& s) {
     /* Current element must be <integer> */
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "integer");
 
-    tree->GetAttributeOrDefault("minimum", &e.m_minimum, datatype::integer::implementation_minimum);
-    tree->GetAttributeOrDefault("maximum", &e.m_maximum, datatype::integer::implementation_maximum);
+    tree->GetAttributeOrDefault("minimum", &e.m_minimum, sip::datatype::integer::implementation_minimum);
+    tree->GetAttributeOrDefault("maximum", &e.m_maximum, sip::datatype::integer::implementation_maximum);
     tree->GetAttributeOrDefault("default", &e.m_default_value, e.m_minimum);
     tree->GetAttributeOrDefault("value", &s, boost::lexical_cast < std::string > (e.m_default_value));
 
@@ -214,12 +161,13 @@ namespace sip {
   }
 
   template <>
-  void restore_visitor_impl::visit(sip::datatype::real& e, std::string& s) {
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::datatype::real& e, std::string& s) {
     /* Current element must be <integer> */
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "real");
 
-    tree->GetAttributeOrDefault("minimum", &e.m_minimum, datatype::integer::implementation_minimum);
-    tree->GetAttributeOrDefault("maximum", &e.m_maximum, datatype::integer::implementation_maximum);
+    tree->GetAttributeOrDefault("minimum", &e.m_minimum, sip::datatype::integer::implementation_minimum);
+    tree->GetAttributeOrDefault("maximum", &e.m_maximum, sip::datatype::integer::implementation_maximum);
     tree->GetAttributeOrDefault("default", &e.m_default_value, e.m_minimum);
     tree->GetAttributeOrDefault("value", &s, boost::lexical_cast < std::string > (e.m_default_value));
 
@@ -232,7 +180,8 @@ namespace sip {
   }
 
   template <>
-  void restore_visitor_impl::visit(sip::datatype::enumeration& e, std::string& s) {
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::datatype::enumeration& e, std::string& s) {
     /* Current element must be <enumeration> */
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "enumeration");
 
@@ -250,13 +199,14 @@ namespace sip {
   }
 
   template <>
-  void restore_visitor_impl::visit(sip::datatype::string& e, std::string& s) {
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::datatype::string& e, std::string& s) {
     /* Current element must be <string> */
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "string");
 
     tree->GetAttributeOrDefault("default", &e.m_default_value, "");
     tree->GetAttributeOrDefault("minimum", &e.m_minimum_length, 0);
-    tree->GetAttributeOrDefault("maximum", &e.m_maximum_length, datatype::string::implementation_maximum_length);
+    tree->GetAttributeOrDefault("maximum", &e.m_maximum_length, sip::datatype::string::implementation_maximum_length);
 
     if ((tree = tree->FirstChildElement(false))) {
       s = tree->GetText();
@@ -265,44 +215,105 @@ namespace sip {
     assert(e.validate(s));
   }
 
-  template < typename T >
-  inline void visit_tuple_datatype(restore_visitor_impl* v, boost::shared_ptr < sip::datatype::basic_datatype >& c, std::string& l) {
-    c.reset(new T);
-
-    v->visit(*(boost::static_pointer_cast < T > (c)), l);
-  }
-
   template <>
-  void restore_visitor_impl::visit(boost::shared_ptr < sip::datatype::basic_datatype >& c, std::string& v) {
-
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(boost::shared_ptr < sip::datatype::basic_datatype >& c, std::string& v) {
     std::string name(tree->Value());
 
     if (name == "enumeration") {
-      visit_tuple_datatype< sip::datatype::enumeration >(this, c, v);
+      c.reset(new sip::datatype::enumeration);
     }
     else if (name == "boolean") {
-      visit_tuple_datatype< sip::datatype::boolean >(this, c, v);
+      c.reset(new sip::datatype::boolean);
     }
     else if (name == "integer") {
-      visit_tuple_datatype< sip::datatype::integer >(this, c, v);
+      c.reset(new sip::datatype::integer);
     }
     else if (name == "real") {
-      visit_tuple_datatype< sip::datatype::real >(this, c, v);
+      c.reset(new sip::datatype::real);
     }
     else if (name == "uri") {
-//      return (uri::read(r));
     }
     else if (name == "string") {
-      visit_tuple_datatype< sip::datatype::string >(this, c, v);
+      c.reset(new sip::datatype::string);
     }
     else {
       /* Unknown type in configuration */
       throw std::runtime_error("Message received with unknown type: '" + name + "'");
     }
+
+    do_visit(*c, v);
   }
 
   template <>
-  void restore_visitor_impl::visit(sip::tool::capabilities& c) {
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::object& o) {
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "object");
+
+    o.m_mime_type = sip::mime_type(tree->GetAttributeValue("mime-type"));
+    
+    tree->GetAttribute("location", &o.m_location);
+  }
+
+  template <>
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::option& o) {
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "option");
+
+    for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
+      /* The current element must be a valid datatype specification */
+      std::pair < boost::shared_ptr < sip::datatype::basic_datatype >, std::string >      p;
+
+      visitor< sip::restore_visitor_impl >(e).visit(p.first, p.second);
+
+      o.m_arguments.push_back(p);
+    }
+  }
+
+  template <>
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::configuration& c) {
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "configuration");
+
+    /* reset object state */
+    c.m_parameter_by_id.clear();
+    c.m_options.clear();
+    c.m_input_objects.clear();
+    c.m_output_objects.clear();
+    c.m_positions.clear();
+
+    tree->GetAttributeOrDefault("fresh", &c.m_fresh, false);
+    tree->GetAttribute("output-prefix", &c.m_output_prefix, false);
+    tree->GetAttribute("category", &c.m_category);
+
+    for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
+      std::string identifier = e->GetAttributeValue("id");
+     
+      if (e->Value() == "option") {
+        boost::shared_ptr < sip::option > o(new sip::option);
+
+        visitor< sip::restore_visitor_impl >(e).visit(*o);
+
+        c.add_option(identifier, o);
+      }
+      else if (e->Value() == "object") {
+        boost::shared_ptr < sip::object > o(new sip::object);
+
+        visitor< sip::restore_visitor_impl >(e).visit(*o);
+
+        if (e->GetAttributeValue("type") == "input") {
+          c.add_input(identifier, o);
+        }
+        else {
+          c.add_output(identifier, o);
+        }
+      }
+    }
+  }
+
+  template <>
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::tool::capabilities& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "capabilities");
 
     if (tree->Value() == "capabilities") {
@@ -315,20 +326,21 @@ namespace sip {
         else if (e->Value() == "input-configuration") {
           c.m_input_combinations.insert(
               sip::tool::capabilities::input_combination(
-                  tool::category::fit(e->GetAttributeValue("category")),
-                  mime_type(e->GetAttributeValue("format")), e->GetAttributeValue("identifier")));
+                  sip::tool::category::fit(e->GetAttributeValue("category")),
+                  sip::mime_type(e->GetAttributeValue("format")), e->GetAttributeValue("identifier")));
         }
         else if (e->Value() == "output-configuration") {
           c.m_output_combinations.insert(
               sip::tool::capabilities::output_combination(
-                      mime_type(e->GetAttributeValue("format")), e->GetAttributeValue("identifier")));
+                      sip::mime_type(e->GetAttributeValue("format")), e->GetAttributeValue("identifier")));
         }
       }
     }
   }
 
   template <>
-  void restore_visitor_impl::visit(sip::controller::capabilities& c) {
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::controller::capabilities& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "capabilities");
 
     if (tree->Value() == "capabilities") {
@@ -347,7 +359,8 @@ namespace sip {
   }  
 
   template <>
-  void restore_visitor_impl::visit(sip::report& c) {
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::report& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "report");
 
     c.m_report_type = static_cast < sip::report::type > (boost::lexical_cast < unsigned int > (tree->GetAttributeValue("type")));
@@ -362,7 +375,8 @@ namespace sip {
   }
 
   template <>
-  void restore_visitor_impl::visit(sip::layout::elements::label& c) {
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::layout::elements::label& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "label");
     
     c.m_text = tree->GetText();
@@ -371,7 +385,8 @@ namespace sip {
   }
 
   template <>
-  void restore_visitor_impl::visit(sip::layout::elements::button& c) {
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::layout::elements::button& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "button");
 
     tree->GetAttribute("label", &c.m_label);
@@ -380,7 +395,8 @@ namespace sip {
   }
 
   template <>
-  void restore_visitor_impl::visit(sip::layout::elements::radio_button& c, sip::display::element_for_id& element_by_id) {
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::layout::elements::radio_button& c, sip::display::element_for_id& element_by_id) {
     using sip::layout::elements::radio_button;
 
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "radio-button");
@@ -416,7 +432,8 @@ namespace sip {
   }
 
   template <>
-  void restore_visitor_impl::visit(sip::layout::elements::checkbox& c) {
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::layout::elements::checkbox& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "checkbox");
 
     tree->GetAttribute("label", &c.m_label);
@@ -426,7 +443,8 @@ namespace sip {
   }
 
   template <>
-  void restore_visitor_impl::visit(sip::layout::elements::progress_bar& c) {
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::layout::elements::progress_bar& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "progress-bar");
 
     tree->GetAttribute("minimum", &c.m_minimum);
@@ -437,7 +455,8 @@ namespace sip {
   }
 
   template <>
-  void restore_visitor_impl::visit(sip::layout::elements::text_field& c) {
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::layout::elements::text_field& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "text-field");
 
     if (!tree->NoChildren()) {
@@ -448,7 +467,8 @@ namespace sip {
   }
 
   template <>
-  void restore_visitor_impl::visit(std::auto_ptr < sip::layout::element >& c, sip::layout::element_identifier& id) {
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(std::auto_ptr < sip::layout::element >& c, sip::layout::element_identifier& id) {
     using namespace sip::layout::elements;
 
     std::string name(tree->Value());
@@ -476,63 +496,7 @@ namespace sip {
 
     if (c.get() != 0) {
       /* Read abstract element specific data */
-      c->accept(*this);
-    }
-  }
-
-  template <>
-  void restore_visitor_impl::visit(sip::layout::box& c, sip::display::element_for_id& element_by_id) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "box-layout-manager");
-
-    sip::layout::properties current_properties = sip::layout::manager::default_properties;
-
-    c.clear();
-
-    for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
-      if (e->Value() == "properties") {
-        current_properties.accept(visit_tree(e));
-      }
-      else {
-        std::auto_ptr < sip::layout::element > p;
-        sip::layout::element_identifier        id;
-
-        visit(p, id);
-
-        element_by_id[id] = p.release();
-
-        c.m_children[id] = std::make_pair(element_by_id[id], current_properties);
-      }
-    }
-  }
-
-  template <>
-  void restore_visitor_impl::visit(sip::layout::horizontal_box& c, sip::display::element_for_id& element_by_id) {
-    visit(static_cast < sip::layout::box& > (c), element_by_id);
-  }
-
-  template <>
-  void restore_visitor_impl::visit(sip::layout::vertical_box& c, sip::display::element_for_id& element_by_id) {
-    visit(static_cast < sip::layout::box& > (c), element_by_id);
-  }
-
-  template <>
-  void restore_visitor_impl::visit(std::auto_ptr < sip::layout::manager >& c, sip::display::element_for_id& element_by_id) {
-    std::string name(tree->Value());
-
-    if (name == "box-layout-manager") {
-      if (tree->GetAttributeValue("variant", false) == "vertical") {
-        c.reset(new sip::layout::vertical_box());
-
-        visit(static_cast < sip::layout::vertical_box& > (*c), element_by_id);
-      }
-      else {
-        c.reset(new sip::layout::horizontal_box());
-
-        visit(static_cast < sip::layout::horizontal_box& > (*c), element_by_id);
-      }
-    }
-    else {
-      throw std::runtime_error("Layout element: '" + name + "' unknown");
+      do_visit(*c);
     }
   }
 
@@ -576,7 +540,8 @@ namespace sip {
   }
 
   template <>
-  void restore_visitor_impl::visit(sip::layout::properties& c) {
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::layout::properties& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "properties");
 
     c.m_alignment_horizontal = text_to_horizontal_alignment(tree->GetAttributeValueOrDefault("horizontal-alignment", "right"));
@@ -592,25 +557,83 @@ namespace sip {
   }
 
   template <>
-  void restore_visitor_impl::visit(sip::layout::tool_display& c) {
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::layout::box& c, sip::display::element_for_id& element_by_id) {
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "box-layout-manager");
+
+    sip::layout::properties current_properties = sip::layout::manager::default_properties;
+
+    c.clear();
+
+    for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
+      if (e->Value() == "properties") {
+        visitor< sip::restore_visitor_impl >(e).visit(current_properties);
+      }
+      else {
+        std::auto_ptr < sip::layout::element > p;
+        sip::layout::element_identifier        id;
+
+        visit(p, id);
+
+        element_by_id[id] = p.release();
+
+        c.m_children[id] = std::make_pair(element_by_id[id], current_properties);
+      }
+    }
+  }
+
+  template <>
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::layout::horizontal_box& c, sip::display::element_for_id& element_by_id) {
+    visit(static_cast < sip::layout::box& > (c), element_by_id);
+  }
+
+  template <>
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::layout::vertical_box& c, sip::display::element_for_id& element_by_id) {
+    visit(static_cast < sip::layout::box& > (c), element_by_id);
+  }
+
+  template <>
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(std::auto_ptr < sip::layout::manager >& c, sip::display::element_for_id& element_by_id) {
+    std::string name(tree->Value());
+
+    if (name == "box-layout-manager") {
+      if (tree->GetAttributeValue("variant", false) == "vertical") {
+        c.reset(new sip::layout::vertical_box());
+
+        visit(static_cast < sip::layout::vertical_box& > (*c), element_by_id);
+      }
+      else {
+        c.reset(new sip::layout::horizontal_box());
+
+        visit(static_cast < sip::layout::horizontal_box& > (*c), element_by_id);
+      }
+    }
+    else {
+      throw std::runtime_error("Layout element: '" + name + "' unknown");
+    }
+  }
+
+  template <>
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::layout::tool_display& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "display-layout");
 
     if (tree->Value() == "display-layout") {
       tree->GetAttribute("visible", &c.m_visible, false);
      
       if (!tree->NoChildren()) {
-        visit_tree(tree->FirstChildElement(false)).visit(c.m_manager, c.m_element_by_id);
+        visitor< sip::restore_visitor_impl >(tree->FirstChildElement(false)).visit(c.m_manager, c.m_element_by_id);
       }
     }
   }
-}
 
-template void utility::visitor< sip::restore_visitor_impl, false >::visit(sip::layout::tool_display& c, std::vector < sip::layout::element const* >& elements);
-
-namespace sip {
   /** \todo create and move to mediator / update visitors */
   template <>
-  void restore_visitor_impl::visit(sip::layout::tool_display& c, std::vector < sip::layout::element const* >& elements) {
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::layout::tool_display& c, std::vector < sip::layout::element const* >& elements) {
   
     if (c.m_manager.get() != 0) {
 
@@ -633,5 +656,34 @@ namespace sip {
         }
       }
     }
+  }
+
+  template <>
+  bool visitor< sip::restore_visitor_impl >::initialise() {
+    register_visit_method< sip::message >();
+    register_visit_method< sip::datatype::boolean, std::string >();
+    register_visit_method< sip::datatype::integer, std::string >();
+    register_visit_method< sip::datatype::real, std::string >();
+    register_visit_method< sip::datatype::enumeration, std::string >();
+    register_visit_method< sip::datatype::string, std::string >();
+    register_visit_method< sip::object >();
+    register_visit_method< sip::option >();
+    register_visit_method< sip::configuration >();
+    register_visit_method< sip::controller::capabilities >();
+    register_visit_method< sip::tool::capabilities >();
+    register_visit_method< sip::report >();
+    register_visit_method< sip::layout::tool_display >();
+    register_visit_method< sip::layout::tool_display, std::vector< sip::layout::element const* > >();
+    register_visit_method< sip::layout::elements::button >();
+    register_visit_method< sip::layout::elements::checkbox >();
+    register_visit_method< sip::layout::elements::label >();
+    register_visit_method< sip::layout::elements::progress_bar >();
+    register_visit_method< sip::layout::elements::radio_button, sip::display::element_for_id >();
+    register_visit_method< sip::layout::elements::text_field >();
+    register_visit_method< sip::layout::horizontal_box, sip::display::element_for_id >();
+    register_visit_method< sip::layout::vertical_box, sip::display::element_for_id >();
+    register_visit_method< sip::layout::properties >();
+
+    return true;
   }
 }

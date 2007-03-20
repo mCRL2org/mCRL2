@@ -15,10 +15,11 @@ namespace sip {
       using namespace sip::datatype;
      
       /** \brief A basic text label widget */
-      class label : public layout::element_impl< label > {
-        friend class sip::store_visitor_impl;
-        friend class sip::restore_visitor_impl;
+      class label : public layout::element {
         friend class layout::element;
+
+        template < typename R, typename S >
+        friend class utility::visitor;
      
         private:
      
@@ -49,10 +50,11 @@ namespace sip {
       };
      
       /** \brief A basic button widget */
-      class button : public layout::element_impl< button > {
-        friend class sip::store_visitor_impl;
-        friend class sip::restore_visitor_impl;
+      class button : public layout::element {
         friend class layout::element;
+
+        template < typename R, typename S >
+        friend class utility::visitor;
      
         private:
 
@@ -93,11 +95,12 @@ namespace sip {
        *    - p is connected to r and
        *    - r is connected to q
        **/
-      class radio_button : public layout::element_impl< radio_button > {
-        friend class sip::store_visitor_impl;
-        friend class sip::restore_visitor_impl;
+      class radio_button : public layout::element {
         friend class layout::element;
      
+        template < typename R, typename S >
+        friend class utility::visitor;
+
         private:
           /** \brief The caption */
           std::string          m_label;
@@ -152,11 +155,12 @@ namespace sip {
       /**
        * \brief A checkbox widget
        **/
-      class checkbox : public layout::element_impl< checkbox > {
-        friend class sip::store_visitor_impl;
-        friend class sip::restore_visitor_impl;
+      class checkbox : public layout::element {
         friend class layout::element;
      
+        template < typename R, typename S >
+        friend class utility::visitor;
+
         private:
 
           /** \brief The caption */
@@ -192,10 +196,11 @@ namespace sip {
       };
      
       /** \brief A basic progress bar widget */
-      class progress_bar : public layout::element_impl< progress_bar > {
-        friend class sip::store_visitor_impl;
-        friend class sip::restore_visitor_impl;
+      class progress_bar : public layout::element {
         friend class layout::element;
+
+        template < typename R, typename S >
+        friend class utility::visitor;
      
         private:
 
@@ -252,10 +257,11 @@ namespace sip {
        * A data type derived from basic_datatype can be specified for validation
        * purposes. By default any string is accepted.
        **/
-      class text_field : public layout::element_impl< text_field > {
-        friend class sip::store_visitor_impl;
-        friend class sip::restore_visitor_impl;
+      class text_field : public layout::element {
         friend class layout::element;
+
+        template < typename R, typename S >
+        friend class utility::visitor;
      
         private:
      

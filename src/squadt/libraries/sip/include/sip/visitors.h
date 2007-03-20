@@ -7,7 +7,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/filesystem/path.hpp>
 
-#include <utility/visitor.h>
+#include <utility/generic_visitor.h>
 
 namespace sip {
 
@@ -29,7 +29,7 @@ namespace sip {
 
   class restore_visitor_impl;
 
-  class restore_visitor : public utility::visitor_interface< sip::restore_visitor_impl, false > {
+  class restore_visitor : public utility::visitor_interface< sip::restore_visitor_impl > {
 
     public:
 
@@ -76,6 +76,10 @@ namespace sip {
       template < typename T >
       static void restore(T&, std::string const&);
 
+      /** \brief Reads from string */
+      template < typename T, typename U >
+      static void restore(T&, U&, std::string const&);
+
       /** \brief Reads from file */
       template < typename T >
       static void restore(T&, boost::filesystem::path const&);
@@ -98,42 +102,49 @@ namespace sip {
   inline void visitors::store(T const& t, std::string& s) {
     sip::store_visitor  v(s);
 
-    v.do_accept(t);
+    v.visit(t);
   }
 
   template < typename T >
   inline void visitors::store(T const& t, boost::filesystem::path const& p) {
     sip::store_visitor  v(p);
 
-    v.do_accept(t);
+    v.visit(t);
   }
 
   template < typename T >
   inline void visitors::store(T const& t, std::ostream& o) {
     sip::store_visitor  v(o);
 
-    v.do_accept(t);
+    v.visit(t);
   }
 
   template < typename T >
   inline void visitors::restore(T& t, std::string const& s) {
     sip::restore_visitor  v(s);
 
-    v.do_accept(t);
+    v.visit(t);
+  }
+
+  template < typename T, typename U >
+  inline void visitors::restore(T& t, U& u, std::string const& s) {
+    sip::restore_visitor  v(s);
+
+    v.visit(t, u);
   }
 
   template < typename T >
   inline void visitors::restore(T& t, boost::filesystem::path const& p) {
     sip::restore_visitor  v(p);
 
-    v.do_accept(t);
+    v.visit(t);
   }
 
   template < typename T, typename U >
   inline typename visitors::not_string_or_path< U >::type visitors::restore(T& t, U& s) {
     sip::restore_visitor  v(s);
 
-    v.do_accept(t);
+    v.visit(t);
   }
 }
 

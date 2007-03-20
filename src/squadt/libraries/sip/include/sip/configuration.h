@@ -9,7 +9,7 @@
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/range/iterator_range.hpp>
 
-#include <utility/visitor.h>
+#include <utility/generic_visitor.h>
 
 #include <sip/option.h>
 #include <sip/object.h>
@@ -22,15 +22,16 @@ namespace sip {
   class configuration;
 
   /** \brief This class models a tool configuration */
-  class configuration : public utility::visitable < configuration > {
+  class configuration : public utility::visitable {
 
     friend class sip::report;
     friend class sip::tool::communicator_impl;
     friend class sip::tool::communicator;
     friend class sip::controller::communicator_impl;
     friend class sip::controller::communicator;
-    friend class sip::restore_visitor_impl;
-    friend class sip::store_visitor_impl;
+
+    template < typename R, typename S >
+    friend class utility::visitor;
 
     public:
 

@@ -1,13 +1,8 @@
-#include "visitors.h"
-
 #include <fstream>
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/foreach.hpp>
-
-// necessary because utility/visitor.tcc will be included
-#include <sip/detail/restore_visitor.tcc>
 
 #include "build_system.h"
 #include "settings_manager.h"
@@ -17,59 +12,31 @@
 #include "executor.tcc"
 #include "processor.tcc"
 
-#include <ticpp.h>
+#include <utility/generic_visitor.tcc>
 
-#include <utility/visitor.h>
+#include "visitors.h"
 
 #include <sip/visitors.h>
 
+#include <ticpp.h>
+
 namespace squadt {
 
-  class restore_visitor_impl : public utility::visitor< restore_visitor_impl, false > {
+  class restore_visitor_impl {
 
     protected:
 
       /** \brief Points to the current element */
       ticpp::Element*  tree;
 
-    protected:
-
-      /** \brief Default constructor */
-      restore_visitor_impl();
-
-    private:
-
-      /** \brief Changes the currently pointed to tree (FIXME this is a temporary solution) */
-      restore_visitor_impl& visit_tree(ticpp::Element*);
-
     public:
 
-      /** \brief Reads from parse tree */
-      restore_visitor_impl(ticpp::Element* s);
+      restore_visitor_impl(ticpp::Element* t) : tree(t) { }
 
-      /** \brief Reads state for objects of type T */
-      template < typename T >
-      void visit(T&);
-
-      /** \brief Reads state for objects of type T */
-      template < typename T, typename U >
-      void visit(T&, U&);
+      restore_visitor_impl() { }
   };
-}
 
-#include <utility/visitor.tcc>
-
-namespace utility {
-  template void visitor< squadt::restore_visitor_impl, false >::visit(squadt::tool_manager&);
-  template void visitor< squadt::restore_visitor_impl, false >::visit(squadt::project_manager&);
-  template void visitor< squadt::restore_visitor_impl, false >::visit(squadt::project_manager_impl&);
-  template void visitor< squadt::restore_visitor_impl, false >::visit(squadt::executor&);
-  template void visitor< squadt::restore_visitor_impl, false >::visit(squadt::type_registry&);
-}
-
-namespace squadt {
-
-  class restore_visitor_impl_frontend : public restore_visitor_impl {
+  class restore_visitor_impl_frontend : public utility::visitor < restore_visitor_impl > {
 
     private:
 
@@ -77,6 +44,9 @@ namespace squadt {
       ticpp::Document in;
 
     public:
+
+      /** \brief Reads from parse tree */
+      restore_visitor_impl_frontend(ticpp::Element* s);
 
       /** \brief Reads from stream */
       restore_visitor_impl_frontend(std::istream& s);
@@ -88,16 +58,8 @@ namespace squadt {
       restore_visitor_impl_frontend(boost::filesystem::path const&);
   };
 
-  inline restore_visitor_impl::restore_visitor_impl() {
-  }
-
-  inline restore_visitor_impl::restore_visitor_impl(ticpp::Element* s) : tree(s) {
-  }
-
-  inline restore_visitor_impl& restore_visitor_impl::visit_tree(ticpp::Element* s) {
+  inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(ticpp::Element* s) {
     tree = s;
-
-    return (*this);
   }
 
   inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(std::istream& s) {
@@ -124,25 +86,33 @@ namespace squadt {
 
   template < >
   restore_visitor::restore_visitor(ticpp::Element& s) :
-        utility::visitor_interface< restore_visitor_impl, false >(boost::shared_ptr < visitor_type > (new restore_visitor_impl(&s))) {
+        utility::visitor_interface< squadt::restore_visitor_impl >(
+                boost::shared_ptr < utility::visitor< squadt::restore_visitor_impl > >(new restore_visitor_impl_frontend(&s))) {
   }
 
   /**
    * \param[in] p a string from which to read
    **/
   restore_visitor::restore_visitor(std::string const& s) :
-        utility::visitor_interface< restore_visitor_impl, false >(boost::shared_ptr < visitor_type > (new restore_visitor_impl_frontend(s))) {
+        utility::visitor_interface< squadt::restore_visitor_impl >(
+                boost::shared_ptr < utility::visitor< squadt::restore_visitor_impl > >(new restore_visitor_impl_frontend(s))) {
   }
 
   /**
    * \param[in] p a path to the file from which to read
    **/
   restore_visitor::restore_visitor(boost::filesystem::path const& p) :
-        utility::visitor_interface< restore_visitor_impl, false >(boost::shared_ptr < visitor_type > (new restore_visitor_impl_frontend(p))) {
+        utility::visitor_interface< restore_visitor_impl >(
+                boost::shared_ptr < utility::visitor< squadt::restore_visitor_impl > > (new restore_visitor_impl_frontend(p))) {
   }
+}
+
+namespace utility {
+  using namespace squadt;
 
   template <>
-  void restore_visitor_impl::visit(tool& t) {
+  template <>
+  void visitor< squadt::restore_visitor_impl >::visit(tool& t) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "tool");
 
     tree->GetAttribute("name", &t.m_name);
@@ -162,12 +132,14 @@ namespace squadt {
   }
 
   template <>
-  void restore_visitor_impl::visit(tool_manager& t) {
-    t.impl->accept(*this);
+  template <>
+  void visitor< squadt::restore_visitor_impl >::visit(tool_manager& t) {
+    do_visit(*t.impl);
   }
 
   template <>
-  void restore_visitor_impl::visit(tool_manager_impl& tm) {
+  template <>
+  void visitor< squadt::restore_visitor_impl >::visit(tool_manager_impl& tm) {
     using namespace boost::filesystem;
 
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "tool-catalog");
@@ -175,19 +147,21 @@ namespace squadt {
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
       tool new_tool;
 
-      visit_tree(e).visit(new_tool);
+      visitor< squadt::restore_visitor_impl >(e).visit(new_tool);
 
       tm.add_tool(new_tool);
     }
   }
 
   template <>
-  void restore_visitor_impl::visit(executor& e) {
-    e.impl->accept(*this);
+  template <>
+  void visitor< squadt::restore_visitor_impl >::visit(executor& e) {
+    do_visit(*e.impl);
   }
 
   template <>
-  void restore_visitor_impl::visit(executor_impl& o) {
+  template <>
+  void visitor< squadt::restore_visitor_impl >::visit(executor_impl& o) {
     /** FIXME temporary measure until xml2pp is phased out */
     if (tree->Value() == "squadt-preferences") {
       tree = tree->FirstChildElement();
@@ -215,7 +189,8 @@ namespace squadt {
   }
 
   template <>
-  void restore_visitor_impl::visit(type_registry& r) {
+  template <>
+  void visitor< squadt::restore_visitor_impl >::visit(type_registry& r) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "default-actions");
 
     if (tree->Value() == "default-actions") {
@@ -243,40 +218,50 @@ namespace squadt {
 
   typedef std::map < unsigned long, processor::object_descriptor::sptr > id_conversion_map;
 
+  struct id_helper {
+    id_conversion_map  cmap;
+    ticpp::Element*    tree;
+
+    inline id_helper(ticpp::Element* t) : tree(t) {
+    }
+  };
+
   template <>
-  void restore_visitor_impl::visit(processor& p, id_conversion_map& m) {
-    p.impl->accept(*this, m);
+  template <>
+  void visitor< squadt::restore_visitor_impl >::visit(processor& p, id_helper& h) {
+    do_visit(*p.impl, h);
   }
 
   /**
    * \attention the same map m must be used to read back all processor instances that were written with write()
    **/
   template <>
-  void restore_visitor_impl::visit(processor_impl& p, id_conversion_map& m) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "processor");
+  template <>
+  void visitor< squadt::restore_visitor_impl >::visit(processor_impl& p, id_helper& h) {
+    assert((h.tree->Type() == TiXmlNode::ELEMENT) && h.tree->Value() == "processor");
 
     try {
       p.tool_descriptor            = global_build_system.get_tool_manager()->
-                                       get_tool_by_name(tree->GetAttributeValue("tool-name"));
+                                       get_tool_by_name(h.tree->GetAttributeValue("tool-name"));
       p.selected_input_combination = p.tool_descriptor->find_input_combination(
-                                       sip::tool::category::fit(tree->GetAttributeValue("category")),
-                                       sip::mime_type(tree->GetAttributeValue("format")));
+                                       sip::tool::category::fit(h.tree->GetAttributeValue("category")),
+                                       sip::mime_type(h.tree->GetAttributeValue("format")));
     }
     catch (...) {
     }
 
-    tree->GetAttribute("output-directory", &p.output_directory, false);
+    h.tree->GetAttribute("output-directory", &p.output_directory, false);
 
-    for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
+    for (ticpp::Element* e = h.tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
       if (e->Value() == "input") {
         /* Read input */
         unsigned long id;
 
         e->GetAttribute("id", &id);
 
-        assert(m.find(id) != m.end());
+        assert(h.cmap.find(id) != h.cmap.end());
        
-        p.inputs.push_back(processor::object_descriptor::sptr(m[id]));
+        p.inputs.push_back(processor::object_descriptor::sptr(h.cmap[id]));
       }
       else if (e->Value() == "output") {
         /* Read output */
@@ -284,13 +269,13 @@ namespace squadt {
        
         e->GetAttribute("id", &id);
 
-        assert(m.find(id) == m.end());
+        assert(h.cmap.find(id) == h.cmap.end());
        
-        m[id] = processor::object_descriptor::sptr(new processor::object_descriptor(sip::mime_type(e->GetAttributeValue("format"))));
+        h.cmap[id] = processor::object_descriptor::sptr(new processor::object_descriptor(sip::mime_type(e->GetAttributeValue("format"))));
         
-        p.outputs.push_back(m[id]);
+        p.outputs.push_back(h.cmap[id]);
        
-        processor::object_descriptor& new_descriptor = *m[id];
+        processor::object_descriptor& new_descriptor = *h.cmap[id];
         
         e->GetAttribute("location", &new_descriptor.location);
         e->GetAttribute("timestamp", &new_descriptor.timestamp);
@@ -319,35 +304,49 @@ namespace squadt {
   }
 
   template <>
-  void restore_visitor_impl::visit(squadt::project_manager& p) {
-    p.impl->accept(*this);
+  template <>
+  void visitor< squadt::restore_visitor_impl >::visit(squadt::project_manager& p) {
+    do_visit(*p.impl);
   }
 
   template <>
-  void restore_visitor_impl::visit(squadt::project_manager_impl& p) {
+  template <>
+  void visitor< squadt::restore_visitor_impl >::visit(squadt::project_manager_impl& p) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "squadt-project");
 
     tree->GetAttribute("count", &p.count);
 
-    id_conversion_map cmap;
-
     p.processors.clear();
 
-    for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
-      if (e->Value() == "processor") {
+    for (id_helper h(tree->FirstChildElement(false)); h.tree != 0; h.tree = h.tree->NextSiblingElement(false)) {
+      if (h.tree->Value() == "processor") {
         processor::sptr new_processor(processor::create(p.m_interface));
        
-        new_processor->accept(visit_tree(e), cmap);
+        visit(*new_processor, h);
 
         new_processor->check_status(true);
        
         p.processors.push_back(new_processor);
       }
-      else if (e->Value() == "description") {
-        e->GetText(&p.description, false);
+      else if (h.tree->Value() == "description") {
+        h.tree->GetText(&p.description, false);
       }
     }
 
     p.sort_processors();
+  }
+
+  template <>
+  bool visitor< squadt::restore_visitor_impl >::initialise() {
+    register_visit_method< squadt::tool >();
+    register_visit_method< squadt::tool_manager >();
+    register_visit_method< squadt::tool_manager_impl >();
+    register_visit_method< squadt::executor >();
+    register_visit_method< squadt::executor_impl >();
+    register_visit_method< squadt::type_registry >();
+    register_visit_method< squadt::project_manager >();
+    register_visit_method< squadt::project_manager_impl >();
+
+    return true;
   }
 }

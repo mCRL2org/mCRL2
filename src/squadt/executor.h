@@ -27,11 +27,12 @@ namespace squadt {
      *    concluded about the execution of the command except through a
      *    task_monitor object
      **/
-    class executor : public utility::visitable< executor > {
+    class executor : public utility::visitable {
       friend class squadt::build_system;
       friend class squadt::tool_manager;
-      friend class squadt::restore_visitor_impl;
-      friend class squadt::store_visitor_impl;
+
+      template < typename R, typename S >
+      friend class utility::visitor;
 
       private:
 

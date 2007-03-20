@@ -6,7 +6,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/filesystem/path.hpp>
 
-#include <utility/visitor.h>
+#include <utility/generic_visitor.h>
 
 namespace squadt {
   class store_visitor_impl;
@@ -36,7 +36,7 @@ namespace squadt {
   /**
    * \brief Reads preferences from file and updates the state of components accordingly
    **/
-  class restore_visitor : public utility::visitor_interface< squadt::restore_visitor_impl, false > {
+  class restore_visitor : public utility::visitor_interface< squadt::restore_visitor_impl > {
  
     public:
 
@@ -97,12 +97,12 @@ namespace squadt {
 
   template < typename T >
   void store_visitor::store(T const& t) {
-    do_accept(t);
+    visit(t);
   }
 
   template < typename T >
   void restore_visitor::restore(T& t) {
-    do_accept(t);
+    visit(t);
   }
 
   template < typename T >
@@ -118,21 +118,21 @@ namespace squadt {
   inline void visitors::store(T const& t, std::string& s) {
     squadt::store_visitor  v(s);
 
-    v.do_accept(t);
+    v.visit(t);
   }
 
   template < typename T >
   inline void visitors::store(T const& t, boost::filesystem::path const& p) {
     squadt::store_visitor  v(p);
 
-    v.do_accept(t);
+    v.visit(t);
   }
 
   template < typename T >
   inline void visitors::store(T const& t, std::ostream& o) {
     squadt::store_visitor  v(o);
 
-    v.do_accept(t);
+    v.visit(t);
   }
 
   /** \brief Reads from string */
@@ -140,7 +140,7 @@ namespace squadt {
   inline void visitors::restore(T& t, std::string const& s) {
     squadt::restore_visitor  v(s);
 
-    v.do_accept(t);
+    v.visit(t);
   }
 
   /** \brief Reads from string */
@@ -148,7 +148,7 @@ namespace squadt {
   inline void visitors::restore(T& t, boost::filesystem::path const& p) {
     squadt::restore_visitor  v(p);
 
-    v.do_accept(t);
+    v.visit(t);
   }
 
   template < typename T, typename U >
@@ -156,6 +156,6 @@ namespace squadt {
 
     squadt::restore_visitor v(s);
 
-    v.do_accept(t);
+    v.visit(t);
   }
 }

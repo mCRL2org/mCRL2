@@ -5,10 +5,11 @@ namespace squadt {
 
   namespace execution {
 
-    class executor_impl : public utility::visitable< executor_impl > {
+    class executor_impl : public utility::visitable {
       friend class executor;
-      friend class restore_visitor_impl;
-      friend class store_visitor_impl;
+
+      template < typename R, typename S >
+      friend class utility::visitor;
 
       private:
 

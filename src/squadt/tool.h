@@ -6,7 +6,7 @@
 
 #include <sip/tool/capabilities.h>
 
-#include <utility/visitor.h>
+#include <utility/generic_visitor.h>
 
 #include "build_system.h"
 
@@ -17,10 +17,12 @@ namespace squadt {
   /**
    * \brief Container for information about a single tool
    **/
-  class tool : public utility::visitable< tool > {
+  class tool : public utility::visitable {
     friend class extractor;
     friend class tool_manager_impl;
-    friend class restore_visitor_impl;
+
+    template < typename R, typename S >
+    friend class utility::visitor;
 
     public:
 
