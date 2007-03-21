@@ -113,13 +113,18 @@ namespace utility {
         << "<![CDATA[";
 
     size_t i = 0;
-    size_t j = o.m_content.find("]]>", 0); 
+    size_t j = o.m_content.find(']', 0); 
 
-    while (j < o.m_content.size()) {
-      out << o.m_content.substr(i,j) << "]]]]><![CDATA[>";
+    while (j < o.m_content.size() - 3) {
+      if (o.m_content[++j] == ']') {
+        if (o.m_content[++j] == '>') {
+          out << o.m_content.substr(i,j - i) << "]]><![CDATA[>";
 
-      i = j + 3;
-      j = o.m_content.find("]]>", i);
+          i = ++j;
+        }
+      }
+
+      j = o.m_content.find(']', j); 
     }
 
     out << o.m_content.substr(i) << "]]></message-meta>";
@@ -472,8 +477,8 @@ namespace utility {
 
   template <>
   template <>
-  void visitor< sip::store_visitor_impl >::visit(sip::layout::vertical_box const& c) {
-    out << "<box-layout-manager variant=\"vertical\">";
+  void visitor< sip::store_visitor_impl >::visit(sip::layout::vertical_box const& c, sip::layout::element_identifier const& id) {
+    out << "<box-layout-manager variant=\"vertical\" id=\"" << id << "\">";
 
     visit(static_cast < sip::layout::box const& > (c));
 
@@ -482,36 +487,26 @@ namespace utility {
 
   template <>
   template <>
-  void visitor< sip::store_visitor_impl >::visit(sip::layout::vertical_box const& c, sip::layout::element_identifier const&) {
-    visit(c);
-  }
-
-  template <>
-  template <>
-  void visitor< sip::store_visitor_impl >::visit(sip::layout::horizontal_box const& c) {
-    out << "<box-layout-manager variant=\"horizontal\">";
+  void visitor< sip::store_visitor_impl >::visit(sip::layout::horizontal_box const& c, sip::layout::element_identifier const& id) {
+    out << "<box-layout-manager variant=\"horizontal\" id=\"" << id << "\">";
 
     visit(static_cast < sip::layout::box const& > (c));
 
     out << "</box-layout-manager>";
-  }
-
-  template <>
-  template <>
-  void visitor< sip::store_visitor_impl >::visit(sip::layout::horizontal_box const& c, sip::layout::element_identifier const&) {
-    visit(c);
   }
 
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::layout::tool_display const& c) {
-    out << "<display-layout visible=\"" << c.m_visible << "\">";
+    out << "<display-layout visible=\"" << c.m_visible << "\">"
+        << "<layout-manager>";
 
     if (c.m_manager.get() != 0) {
-      do_visit(*c.m_manager);
+      do_visit(*c.m_manager, static_cast < sip::layout::element_identifier const& > (0));
     }
 
-    out << "</display-layout>";
+    out << "</layout-manager>"
+        << "</display-layout>";
   }
 
   
@@ -536,9 +531,7 @@ namespace utility {
     register_visit_method< const sip::layout::elements::progress_bar, const sip::layout::element_identifier >();
     register_visit_method< const sip::layout::elements::radio_button, const sip::layout::element_identifier >();
     register_visit_method< const sip::layout::elements::text_field, const sip::layout::element_identifier >();
-    register_visit_method< const sip::layout::horizontal_box >();
     register_visit_method< const sip::layout::horizontal_box, const sip::layout::element_identifier >();
-    register_visit_method< const sip::layout::vertical_box >();
     register_visit_method< const sip::layout::vertical_box, const sip::layout::element_identifier >();
     register_visit_method< const sip::layout::box >();
     register_visit_method< const sip::layout::properties >();

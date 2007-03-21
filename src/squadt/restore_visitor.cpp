@@ -343,6 +343,8 @@ namespace utility {
     register_visit_method< squadt::tool_manager_impl >();
     register_visit_method< squadt::executor >();
     register_visit_method< squadt::executor_impl >();
+    register_visit_method< squadt::processor, id_helper >();
+    register_visit_method< squadt::processor_impl, id_helper >();
     register_visit_method< squadt::type_registry >();
     register_visit_method< squadt::project_manager >();
     register_visit_method< squadt::project_manager_impl >();

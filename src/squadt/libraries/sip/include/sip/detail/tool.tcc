@@ -75,7 +75,7 @@ namespace sip {
      **/
     inline bool communicator_impl::activate(char*& argv) {
       command_line_interface::argument_extractor e(argv);
- 
+
       return (activate(e.get_scheme(), e.get_identifier())); 
     }
 
@@ -85,7 +85,7 @@ namespace sip {
      **/
     inline bool communicator_impl::activate(int& argc, char** const argv) {
       command_line_interface::argument_extractor e(argc, argv);
- 
+
       return (activate(e.get_scheme(), e.get_identifier())); 
     }
 

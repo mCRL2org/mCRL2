@@ -376,7 +376,7 @@ namespace sip {
      **/
     inline element* box::add(element* e, properties const& c) {
       properties cn = c;
-      
+
       cn.set_growth(e->get_grow());
 
       m_children[reinterpret_cast < element_identifier > (e)] = std::make_pair(e, cn);
@@ -428,7 +428,8 @@ namespace sip {
       layout::mediator* n = m.get();
 
       for (children_list::const_iterator i = m_children.begin(); i != m_children.end(); ++i) {
-        manager::attach(n, (*i).second.first->instantiate(n), dynamic_cast < const layout::properties* > (&(*i).second.second));
+std::cerr << "n = " << (*i).second.first << std::endl <<  std::flush;
+        manager::attach(n, (*i).second.first->instantiate(n), static_cast < const layout::properties* > (&(*i).second.second));
       }
 
       return (n->extract_data());

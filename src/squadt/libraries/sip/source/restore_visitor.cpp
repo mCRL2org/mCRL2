@@ -80,7 +80,7 @@ namespace sip {
   inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(std::istream& s) {
     s >> in;
 
-    tree = in.FirstChildElement();
+    tree = in.FirstChildElement(false);
   }
 
   inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(std::string const& s) {
@@ -88,7 +88,7 @@ namespace sip {
 
     ins >> in;
 
-    tree = in.FirstChildElement();
+    tree = in.FirstChildElement(false);
   }
 
   inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(boost::filesystem::path const& p) {
@@ -96,7 +96,7 @@ namespace sip {
 
     ins >> in;
 
-    tree = in.FirstChildElement();
+    tree = in.FirstChildElement(false);
   }
 
   std::istream& operator >> (std::istream& s, sip::message::type_identifier_t& id) {
@@ -119,7 +119,15 @@ namespace utility {
 
     tree->GetAttributeOrDefault("type", &o.m_type, sip::message::message_unknown);
 
-    o.m_content.assign(tree->GetText());
+    o.m_content.clear();
+
+    for (ticpp::Node* e = tree->FirstChild(false); e != 0; e = e->NextSibling(false)) {
+      if (e->Type() == TiXmlNode::TEXT) {
+        static_cast < ticpp::Text* > (e)->SetCDATA(false);
+
+        o.m_content += e->ToString(*e);
+      }
+    }
   }
 
   template <>
@@ -403,19 +411,33 @@ namespace utility {
 
     tree->GetAttribute("label", &c.m_label);
 
-    sip::layout::element_identifier connected_to =
-                boost::lexical_cast < sip::layout::element_identifier > (
-                        tree->GetAttributeValueOrDefault("connected", boost::lexical_cast < std::string > (&c)));
+    sip::layout::element_identifier connected_to;
+
+    tree->GetAttributeOrDefault("connected", &connected_to, reinterpret_cast < sip::layout::element_identifier > (&c));
 
     tree->GetAttributeOrDefault("first", &c.m_first, false);
     tree->GetAttributeOrDefault("selected", &c.m_selected, false);
 
     if (connected_to != reinterpret_cast < sip::layout::element_identifier > (&c)) {
       if (element_by_id.count(connected_to) != 0) {
-        c.m_connection = dynamic_cast < radio_button* > (element_by_id[connected_to]);
-     
-        for (radio_button* i = c.m_connection; i != &c; i = i->m_connection) {
-          i->m_connection = dynamic_cast < radio_button* > (element_by_id[reinterpret_cast < sip::layout::element_identifier > (i->m_connection)]);
+        c.m_connection = reinterpret_cast < radio_button* > (connected_to);
+
+        radio_button* i = &c;
+
+        while (0 < element_by_id.count(reinterpret_cast < sip::layout::element_identifier > (i->m_connection))) {
+          if (element_by_id[reinterpret_cast < sip::layout::element_identifier > (i->m_connection)] == &c) {
+            while (i->m_connection != &c) {
+              i->m_connection = static_cast < radio_button* > (element_by_id[reinterpret_cast < sip::layout::element_identifier > (i->m_connection)]);
+
+              i = i->m_connection;
+            }
+
+            i->m_connection = static_cast < radio_button* > (element_by_id[reinterpret_cast < sip::layout::element_identifier > (i->m_connection)]);
+         
+            break;
+          }
+
+          i = static_cast < radio_button* > (element_by_id[reinterpret_cast < sip::layout::element_identifier > (i->m_connection)]);
         }
       }
       else {
@@ -424,7 +446,7 @@ namespace utility {
     }
      
     if (c.m_selected) {
-      /* Make sure all related radio buttons are not unselected */
+      /* Make sure all associated radio buttons are unselected */
       c.set_selected(true);
     }
 
@@ -464,40 +486,6 @@ namespace utility {
     }
 
     c.m_event_handler->process(&c);
-  }
-
-  template <>
-  template <>
-  void visitor< sip::restore_visitor_impl >::visit(std::auto_ptr < sip::layout::element >& c, sip::layout::element_identifier& id) {
-    using namespace sip::layout::elements;
-
-    std::string name(tree->Value());
-
-    tree->GetAttribute("id", &id);
-
-    if (name == "label") {
-      c.reset(new label());
-    }
-    else if (name == "button") {
-      c.reset(new button());
-    }
-    else if (name == "radio-button") {
-      c.reset(new radio_button());
-    }
-    else if (name == "checkbox") {
-      c.reset(new checkbox());
-    }
-    else if (name == "progress-bar") {
-      c.reset(new progress_bar());
-    }
-    else if (name == "text-field") {
-      c.reset(new text_field());
-    }
-
-    if (c.get() != 0) {
-      /* Read abstract element specific data */
-      do_visit(*c);
-    }
   }
 
   /** \brief Finds a member of the visibility domain for a string */
@@ -548,37 +536,36 @@ namespace utility {
     c.m_alignment_vertical   = text_to_vertical_alignment(tree->GetAttributeValueOrDefault("vertical-alignment", "bottom"));
     c.m_visible              = text_to_visibility(tree->GetAttributeValueOrDefault("visibility", "visible"));
 
-    tree->GetAttribute("margin-top", &c.m_margin.top);
-    tree->GetAttribute("margin-left", &c.m_margin.left);
-    tree->GetAttribute("margin-bottom", &c.m_margin.bottom);
-    tree->GetAttribute("margin-right", &c.m_margin.right);
-    tree->GetAttribute("grow", &c.m_grow);
-    tree->GetAttribute("enabled", &c.m_enabled);
+    tree->GetAttribute("margin-top", &c.m_margin.top, false);
+    tree->GetAttribute("margin-left", &c.m_margin.left, false);
+    tree->GetAttribute("margin-bottom", &c.m_margin.bottom, false);
+    tree->GetAttribute("margin-right", &c.m_margin.right, false);
+    tree->GetAttribute("grow", &c.m_grow, false);
+    tree->GetAttribute("enabled", &c.m_enabled, false);
   }
 
   template <>
   template <>
-  void visitor< sip::restore_visitor_impl >::visit(sip::layout::box& c, sip::display::element_for_id& element_by_id) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "box-layout-manager");
+  void visitor< sip::restore_visitor_impl >::visit(sip::layout::box&, sip::display::element_for_id&);
 
-    sip::layout::properties current_properties = sip::layout::manager::default_properties;
+  template <>
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(std::auto_ptr < sip::layout::manager >& c, sip::display::element_for_id& element_by_id) {
+    std::string name(tree->Value());
 
-    c.clear();
+    if (name == "box-layout-manager") {
+      if (tree->GetAttributeValue("variant", false) == "vertical") {
+        c.reset(new sip::layout::vertical_box());
 
-    for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
-      if (e->Value() == "properties") {
-        visitor< sip::restore_visitor_impl >(e).visit(current_properties);
       }
       else {
-        std::auto_ptr < sip::layout::element > p;
-        sip::layout::element_identifier        id;
-
-        visit(p, id);
-
-        element_by_id[id] = p.release();
-
-        c.m_children[id] = std::make_pair(element_by_id[id], current_properties);
+        c.reset(new sip::layout::horizontal_box());
       }
+
+      visit(static_cast < sip::layout::box& > (*c), element_by_id);
+    }
+    else {
+      throw std::runtime_error("Layout manager: '" + name + "' unknown");
     }
   }
 
@@ -596,23 +583,83 @@ namespace utility {
 
   template <>
   template <>
-  void visitor< sip::restore_visitor_impl >::visit(std::auto_ptr < sip::layout::manager >& c, sip::display::element_for_id& element_by_id) {
-    std::string name(tree->Value());
+  void visitor< sip::restore_visitor_impl >::visit(std::auto_ptr < sip::layout::element >& c, sip::display::element_for_id& element_by_id);
 
-    if (name == "box-layout-manager") {
-      if (tree->GetAttributeValue("variant", false) == "vertical") {
-        c.reset(new sip::layout::vertical_box());
+  template <>
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::layout::box& c, sip::display::element_for_id& element_by_id) {
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "box-layout-manager");
 
-        visit(static_cast < sip::layout::vertical_box& > (*c), element_by_id);
+    sip::layout::properties current_properties = sip::layout::manager::default_properties;
+
+    c.clear();
+
+    for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
+      if (e->Value() == "properties") {
+        visitor< sip::restore_visitor_impl >(e).visit(current_properties);
       }
       else {
-        c.reset(new sip::layout::horizontal_box());
+        sip::layout::element_identifier id;
 
-        visit(static_cast < sip::layout::horizontal_box& > (*c), element_by_id);
+        tree->GetAttribute("id", &id, false);
+       
+        std::auto_ptr < sip::layout::element > p;
+
+        visitor< sip::restore_visitor_impl >(e).visit(p, element_by_id);
+
+        if (p.get()) {
+          element_by_id[id] = p.get();
+
+          c.m_children[id] = std::make_pair(p.release(), current_properties);
+        }
       }
     }
+  }
+
+  template <>
+  template <>
+  void visitor< sip::restore_visitor_impl >::visit(std::auto_ptr < sip::layout::element >& c, sip::display::element_for_id& element_by_id) {
+    using namespace sip::layout::elements;
+
+    std::string name(tree->Value());
+
+    if (name == "radio-button") {
+      c.reset(new radio_button());
+
+      // Read concrete element data
+      do_visit(*c, element_by_id);
+    }
     else {
-      throw std::runtime_error("Layout element: '" + name + "' unknown");
+      if (name == "label") {
+        c.reset(new label());
+      }
+      else if (name == "button") {
+        c.reset(new button());
+      }
+      else if (name == "checkbox") {
+        c.reset(new checkbox());
+      }
+      else if (name == "progress-bar") {
+        c.reset(new progress_bar());
+      }
+      else if (name == "text-field") {
+        c.reset(new text_field());
+      }
+
+      if (c.get()) {
+        // Read concrete element data
+        do_visit(*c);
+      }
+      else {
+        // Assume the element is a layout manager
+        std::auto_ptr< sip::layout::manager > m;
+         
+        visit(m, element_by_id);
+     
+        if (m.get()) {
+          c.reset(m.release()); 
+        }
+      }
     }
   }
 
@@ -622,10 +669,14 @@ namespace utility {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "display-layout");
 
     if (tree->Value() == "display-layout") {
+      c.m_element_by_id.clear();
+
       tree->GetAttribute("visible", &c.m_visible, false);
      
-      if (!tree->NoChildren()) {
-        visitor< sip::restore_visitor_impl >(tree->FirstChildElement(false)).visit(c.m_manager, c.m_element_by_id);
+      for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
+        if (e->Value() == "layout-manager") {
+          visitor< sip::restore_visitor_impl >(e->FirstChildElement(false)).visit(c.m_manager, c.m_element_by_id);
+        }
       }
     }
   }
@@ -636,24 +687,23 @@ namespace utility {
   void visitor< sip::restore_visitor_impl >::visit(sip::layout::tool_display& c, std::vector < sip::layout::element const* >& elements) {
   
     if (c.m_manager.get() != 0) {
-
-      for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
-        try {
+      try {
+        for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
           sip::layout::element_identifier id = boost::lexical_cast < sip::layout::element_identifier > (e->GetAttributeValue("id")); 
-         
+
           if (c.m_element_by_id.count(id)) {
-       
+
             sip::layout::element* t = c.m_element_by_id[id];
-        
+
             if (t != 0) {
               sip::visitors::restore(*t, *e);
-        
+
               elements.push_back(t);
             }
           }
         }
-        catch (...) {
-        }
+      }
+      catch (...) {
       }
     }
   }

@@ -1201,6 +1201,10 @@ namespace ticpp
 		{
 			m_impRC->InitRef();
 		}
+
+                void SetCDATA(bool b) {
+			m_tiXmlPointer->SetCDATA(b);
+                }
 	};
 
 	/** Wrapper around TiXmlDocument */

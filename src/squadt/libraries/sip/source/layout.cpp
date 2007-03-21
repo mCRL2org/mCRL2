@@ -68,25 +68,6 @@ namespace sip {
       return mediator::wrapper_aptr();
     }
 
-    /** \todo remove this class after new generic visitor has been added */
-    class elements_wrapper {
-      private:
-
-        tool_display&                                m_object;
-
-        std::vector < sip::layout::element const* >& m_elements;
-
-      public:
-
-        elements_wrapper(tool_display& t, std::vector < sip::layout::element const* >& e) : m_object(t), m_elements(e) {
-        }
-
-        template < typename V >
-        void accept(V& visitor) {
-          visitor.visit(m_object, m_elements);
-        }
-    };
-
     /**
      * \param[in] s string data with state descriptions
      * \param[in] elements a vector with the elements that should be updated

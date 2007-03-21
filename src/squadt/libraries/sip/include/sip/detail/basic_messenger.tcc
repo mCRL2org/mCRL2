@@ -383,6 +383,7 @@ namespace sip {
 
               logger->log(1, boost::format("received id : %u, type : %u\n") % getpid() % as_string(message->get_type()));
               logger->log(2, boost::format(" data : \"%s\"\n") % message->to_string());
+              logger->log(4, boost::format(" raw  : \"%s\"\n") % new_string);
 
               task_queue.push_back(message);
 
