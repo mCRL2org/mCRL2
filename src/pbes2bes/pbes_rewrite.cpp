@@ -61,35 +61,65 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 	{ // p = forall(data_expression_list, pbes_expression)
 		data_variable_list data_vars = quant_vars(p);
 		pbes_expression expr = pbes_expression_rewrite(quant_expr(p), data, rewriter);
-		//If expression is true or false -> return it
-		if (expr.is_true() || expr.is_false())
-			result = expr;
-		//If the forall  has only finite data variables, make a conjunction out of it.
-		else if (check_finite_list(data.constructors(), get_sorts(data_vars)))
+		//Remove data_vars which does not occur in expr
+		data_variable_list occured_data_vars;
+		for (data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
 		{
-			pbes_expression_list and_list = get_and_expressions(get_all_possible_expressions(data_vars, expr, data), data, rewriter);
-			result = multi_and(and_list.begin(), and_list.end());
+			if (occurs_in(expr, *i)) // The var occurs in expr
+				occured_data_vars = push_back(occured_data_vars, *i);
 		}
+
+		// If no data_vars
+		if (occured_data_vars.empty())
+			result = expr;
 		else
-			//Probably some advanced stuff is needed here to check finiteness...
-			result = forall(data_vars, expr);
+		{
+			data_vars = occured_data_vars;
+			//If expression is true or false -> return it
+			if (expr.is_true() || expr.is_false())
+				result = expr;
+			//If the forall  has only finite data variables, make a conjunction out of it.
+			else if (check_finite_list(data.constructors(), get_sorts(data_vars)))
+			{
+				pbes_expression_list and_list = get_and_expressions(get_all_possible_expressions(data_vars, expr, data), data, rewriter);
+				result = multi_and(and_list.begin(), and_list.end());
+			}
+			else
+				//Probably some advanced stuff is needed here to check finiteness...
+				result = forall(data_vars, expr);
+		}
 	}
 	else if (is_exists(p))
 	{ // p = exists(data_expression_list, pbes_expression)
 		data_variable_list data_vars = quant_vars(p);
 		pbes_expression expr = pbes_expression_rewrite(quant_expr(p), data, rewriter);
-		//If expression is true or false -> return it
-		if (expr.is_true() || expr.is_false())
-			result = expr;
-		//If the exists  has only finite data variables, make a conjunction out of it.
-		else if (check_finite_list(data.constructors(), get_sorts(data_vars)))
+		//Remove data_vars which does not occur in expr
+		data_variable_list occured_data_vars;
+		for (data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
 		{
-			pbes_expression_list or_list = get_or_expressions(get_all_possible_expressions(data_vars, expr, data), data, rewriter);
-			result = multi_or(or_list.begin(), or_list.end());
+			if (occurs_in(expr, *i)) // The var occurs in expr
+				occured_data_vars = push_back(occured_data_vars, *i);
 		}
-		else 
-			//Probably some advanced stuff is needed here to check finiteness...
-			result = exists(data_vars, expr);
+		
+		//If no data_vars remaining
+		if (occured_data_vars.empty())
+			result = expr;
+		else
+		{
+			data_vars = occured_data_vars;
+			//If expression is true or false -> return it
+			if (expr.is_true() || expr.is_false())
+				result = expr;
+			//If the exists  has only finite data variables, make a conjunction out of it.
+			else if (check_finite_list(data.constructors(), get_sorts(data_vars)))
+			{
+				pbes_expression_list or_list = get_or_expressions(get_all_possible_expressions(data_vars, expr, data), data, rewriter);
+				result = multi_or(or_list.begin(), or_list.end());
+			}
+			else 
+				//Probably some advanced stuff is needed here to check finiteness...
+				result = exists(data_vars, expr);
+		}
 	}
 	else if (is_propositional_variable_instantiation(p))
 	{ // p is a propositional variable
@@ -110,6 +140,26 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 	}
 	
 	return result;
+}
+
+struct compare_data_variable
+{
+  aterm v;
+
+  compare_data_variable(data_variable v_)
+    : v(aterm_appl(v_))
+  {}
+  
+  bool operator()(aterm t) const
+  {
+    return v == t;
+  }
+};
+
+///\ret variable v occurs in l.
+bool occurs_in(aterm_appl l, data_variable v)
+{
+  return find_if(l, compare_data_variable(v)) != aterm();
 }
 
 pbes_expression_list get_all_possible_expressions(data_variable_list data_vars, pbes_expression pbexp, data_specification data)
