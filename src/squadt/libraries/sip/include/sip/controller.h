@@ -65,7 +65,7 @@ namespace sip {
         void send_configuration(boost::shared_ptr < sip::configuration > const&);
  
         /** \brief Send data to update the state of the last communicated display layout */
-        void send_display_update(sip::layout::element const*);
+        void send_display_update(sip::layout::element const&, boost::shared_ptr < sip::display const >&);
  
         /** \brief Sends a message to a tool that it may start processing */
         void send_start_signal();

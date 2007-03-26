@@ -100,6 +100,14 @@ namespace sip {
 
       public:
 
+        struct layout_descriptor {
+          element*           layout_element;
+          properties         layout_properties;
+          element_identifier identifier;
+
+          layout_descriptor(element* e, properties const& p, element_identifier const& id) : layout_element(e), layout_properties(p), identifier(id) { }
+        };
+
         /** \brief Type alias to simplify using auto pointers */
         typedef std::auto_ptr < manager > aptr;
 
@@ -150,12 +158,14 @@ namespace sip {
       protected:
 
         /** \brief The type of the list with the element managed by this manager */
-        typedef std::map < element_identifier, std::pair< element*, properties > > children_list;
+        typedef std::vector< layout_descriptor >                  children_list;
 
       protected:
 
         /** \brief The layout elements directly contained in this box */
-        children_list m_children;
+        children_list    m_children;
+
+      protected:
 
         /** \brief Resets private members to defaults */
         inline void clear();
@@ -375,11 +385,11 @@ namespace sip {
      * \param[in] c the layout properties to observe
      **/
     inline element* box::add(element* e, properties const& c) {
-      properties cn = c;
+      properties cn;
 
       cn.set_growth(e->get_grow());
 
-      m_children[reinterpret_cast < element_identifier > (e)] = std::make_pair(e, cn);
+      m_children.push_back(layout_descriptor(e,cn,reinterpret_cast < element_identifier > (e)));
 
       return (e);
     }
@@ -428,8 +438,7 @@ namespace sip {
       layout::mediator* n = m.get();
 
       for (children_list::const_iterator i = m_children.begin(); i != m_children.end(); ++i) {
-std::cerr << "n = " << (*i).second.first << std::endl <<  std::flush;
-        manager::attach(n, (*i).second.first->instantiate(n), static_cast < const layout::properties* > (&(*i).second.second));
+        manager::attach(n, (i->layout_element)->instantiate(n), static_cast < const layout::properties* > (&(i->layout_properties)));
       }
 
       return (n->extract_data());
@@ -451,7 +460,7 @@ std::cerr << "n = " << (*i).second.first << std::endl <<  std::flush;
 
     inline box::~box() {
       for (children_list::const_iterator i = m_children.begin(); i != m_children.end(); ++i) {
-        delete (*i).second.first;
+        delete (i->layout_element);
       }
     }
   }

@@ -37,29 +37,21 @@ namespace sip {
 
     /* Request a tool what input configurations it has available */
     void communicator::request_tool_capabilities() {
-      message m(sip::message_request_tool_capabilities);
-
-      impl->send_message(m);
+      impl->send_message(sip::message_request_tool_capabilities);
     }
  
     /* Send the selected input configuration */
     void communicator::send_configuration(boost::shared_ptr < sip::configuration > const& c) {
-      sip::message m(visitors::store(*c), sip::message_offer_configuration);
-
-      impl->send_message(m);
+      impl->send_message(sip::message(visitors::store(*c), sip::message_offer_configuration));
     }
  
     /* Request a tool to terminate */
     void communicator::request_termination() {
-      sip::message m(sip::message_request_termination);
-
-      impl->send_message(m);
+      impl->send_message(sip::message_request_termination);
     }
  
     void communicator::send_start_signal() {
-      sip::message m(sip::message_signal_start);
-
-      impl->send_message(m);
+      impl->send_message(sip::message_signal_start);
     }
 
     /**
@@ -85,13 +77,20 @@ namespace sip {
     void communicator::activate_status_message_handler(status_message_handler_function h) {
       boost::dynamic_pointer_cast < communicator_impl > (impl)->activate_status_message_handler(h);
     }
+
     /**
      * \param[in] e a sip layout element of which the data is to be sent
      **/
-    void communicator::send_display_update(sip::layout::element const* e) {
-      message m(sip::visitors::store(*e), sip::message_display_update);
+    void communicator::send_display_update(sip::layout::element const& e, boost::shared_ptr < sip::display const >& display) {
+      std::string        c;
 
-      impl->send_message(m);
+      {
+        sip::store_visitor v(c);
+
+        v.visit(e, display->find(&e));
+      }
+
+      impl->send_message(sip::message(c, sip::message_display_update));
     }
   }
 }

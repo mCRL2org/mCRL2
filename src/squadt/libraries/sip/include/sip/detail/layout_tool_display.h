@@ -4,6 +4,9 @@
 #include <iosfwd>
 #include <map>
 #include <vector>
+#include <functional>
+
+#include <boost/bind.hpp>
 
 #include "sip/layout_base.h"
 #include "sip/detail/basic_datatype.h"
@@ -12,11 +15,17 @@
 namespace sip {
 
   /** \brief Basic container class for layout elements */
-  class display {
+  class display : public utility::visitable {
     template < typename R, typename S >
     friend class utility::visitor;
 
     public:
+
+      /** \brief Type alias for the abstract element class */
+      typedef sip::layout::element                                                       element;
+
+      /** \brief Type alias for element identifiers */
+      typedef sip::layout::element_identifier                                            element_identifier;
 
       /** \brief Type alias for a mapping from identifier to element */
       typedef std::map < sip::layout::element_identifier, sip::layout::element* >        element_for_id;
@@ -39,6 +48,12 @@ namespace sip {
 
     public:
 
+      /** \brief Find an element by its id */
+      sip::layout::element const* find(sip::layout::element_identifier const&) const;
+
+      /** \brief Find the id for an element */
+      sip::layout::element_identifier find(sip::layout::element const*) const;
+
       /** \brief Pure virtual destructor */
       virtual ~display() = 0;
   };
@@ -46,7 +61,7 @@ namespace sip {
   namespace layout {
 
     /** \brief Basic container class for controller-side layout definitions */
-    class tool_display : public sip::display, public utility::visitable {
+    class tool_display : public sip::display {
       template < typename R, typename S >
       friend class utility::visitor;
 
@@ -129,6 +144,20 @@ namespace sip {
   }
 
   inline display::~display() {
+  }
+
+  /**
+   * \pre the element should be in the list
+   **/
+  inline sip::layout::element const* display::find(sip::layout::element_identifier const& id) const {
+    return visitors::search(*this, id);
+  }
+
+  /**
+   * \pre the element should be in the list
+   **/
+  inline sip::layout::element_identifier display::find(sip::layout::element const* e) const {
+    return visitors::search(*this, e);
   }
 
   inline void display::associate(sip::layout::element_identifier const& id, sip::layout::element* e) {

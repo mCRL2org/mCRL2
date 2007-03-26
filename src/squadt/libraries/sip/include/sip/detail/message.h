@@ -76,10 +76,10 @@ namespace sip {
 
         /** \brief Generates an XML text string for the message */
         template < typename T >
-        inline message(T, type_identifier_t t, end_point o = 0);
+        inline message(T const&, type_identifier_t t, end_point o = 0);
 
         /** \brief Copy constructor */
-        inline message(message&);
+        inline message(message const&);
 
         /** \brief Returns the message type */
         inline type_identifier_t get_type() const;
@@ -120,7 +120,7 @@ namespace sip {
     }
 
     template < class M, M D, M A >
-    inline message< M, D, A >::message(message& m) : m_type(m.m_type), m_content(m.m_content) {
+    inline message< M, D, A >::message(message const& m) : m_type(m.m_type), m_content(m.m_content) {
     }
 
     template < class M, M D, M A >
@@ -138,7 +138,7 @@ namespace sip {
      **/
     template < class M, M D, M A >
     template < typename T >
-    inline message< M, D, A >::message(T c, type_identifier_t t, end_point o) : m_type(t), m_originator(o) {
+    inline message< M, D, A >::message(T const& c, type_identifier_t t, end_point o) : m_type(t), m_originator(o) {
       set_content(c);
     }
 

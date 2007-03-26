@@ -26,7 +26,7 @@ namespace squadt {
 
       /** \brief Handles state events of widgets */
       class state_change_handler : public wxEvtHandler {
-        friend class tool_display;
+        friend class squadt::GUI::tool_display;
         friend class detail::tool_display_mediator;
 
         private:
@@ -37,11 +37,14 @@ namespace squadt {
         private:
      
           /** \brief Associated processor */
-          boost::shared_ptr < processor::monitor >  monitor;
+          boost::shared_ptr < processor::monitor >               monitor;
 
           /** \brief Associates a sip layout element with a wxWidgets control */
-          element_for_window_map                    element_for_window;
+          element_for_window_map                                 element_for_window;
      
+          /** \brief Delegate to actually send a display update */
+          boost::function < void (sip::layout::element const&) > send_display_update;
+
         private:
      
           /** \brief Handler for when a button was clicked */

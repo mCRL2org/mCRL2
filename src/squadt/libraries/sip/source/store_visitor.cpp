@@ -465,13 +465,13 @@ namespace utility {
     sip::layout::properties const* current_properties = &sip::layout::manager::default_properties;
 
     for (sip::layout::vertical_box::children_list::const_iterator i = c.m_children.begin(); i != c.m_children.end(); ++i) {
-      if ((*i).second.second != *current_properties) {
-        visit(*current_properties, (*i).second.second);
+      if ((i->layout_properties) != *current_properties) {
+        visit(*current_properties, (i->layout_properties));
 
-        current_properties = &((*i).second.second);
+        current_properties = &(i->layout_properties);
       }
 
-      do_visit(*(i->second).first, (i->first));
+      do_visit(*(i->layout_element), (i->identifier));
     }
   }
 

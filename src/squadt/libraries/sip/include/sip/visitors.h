@@ -1,11 +1,14 @@
 #ifndef SIP_VISITORS_H__
 #define SIP_VISITORS_H__
 
+#include <iostream>
+
 #include <boost/mpl/or.hpp>
 #include <boost/mpl/not.hpp>
 #include <boost/type_traits/is_same.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include <utility/generic_visitor.h>
 
@@ -42,6 +45,16 @@ namespace sip {
       /** \brief Constructor to read from stream */
       template < typename T >
       restore_visitor(T&);
+  };
+
+  class search_visitor_impl;
+
+  class search_visitor : public utility::visitor_interface< sip::search_visitor_impl, bool > {
+
+    public:
+
+      /** \brief Constructor */
+      search_visitor();
   };
 
   class visitors {
@@ -87,6 +100,14 @@ namespace sip {
       /** \brief Reads from stream */
       template < typename T, typename U >
       static typename not_string_or_path< U >::type restore(T&, U&);
+
+      /** \brief Searches a layout hierarchy for an element by its id */
+      template < typename T >
+      static typename T::element const* search(T const&, typename T::element_identifier const&);
+
+      /** \brief Searches a layout hierarchy for an element and returns its identifier */
+      template < typename T >
+      static typename T::element_identifier search(T const&, typename T::element const*);
   };
 
   template < typename T >
@@ -145,6 +166,42 @@ namespace sip {
     sip::restore_visitor  v(s);
 
     v.visit(t);
+  }
+
+  /**
+   * \brief Searches for an element by its id
+   * \throws false if not found
+   **/
+  template < typename T >
+  inline typename T::element const* visitors::search(T const& d, typename T::element_identifier const& id) {
+
+    sip::search_visitor v;
+
+    boost::tuple < typename T::element const*, typename T::element_identifier const& > t(0, id);
+
+    if (!v.visit(d, t)) {
+      throw false;
+    }
+    
+    return boost::get< 0 >(t);
+  }
+
+  /**
+   * \brief Searches a hierarchy for an element and returns its identifier
+   * \throws false if not found
+   **/
+  template < typename T >
+  inline typename T::element_identifier visitors::search(T const& d, typename T::element const* e) {
+
+    sip::search_visitor v;
+
+    boost::tuple < typename T::element_identifier, typename T::element const* > t(0, e);
+
+    if (!v.visit(d, t)) {
+      throw false;
+    }
+    
+    return boost::get< 0 >(t);
   }
 }
 

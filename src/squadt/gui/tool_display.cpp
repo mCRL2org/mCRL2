@@ -538,7 +538,7 @@ namespace squadt {
       void state_change_handler::button_clicked(wxCommandEvent& e) {
         layout::elements::button const* b = static_cast < layout::elements::button const* > (element_for_window[e.GetEventObject()]);
 
-        monitor->send_display_update(b);
+        send_display_update(*b);
       }
      
       void state_change_handler::radio_button_selected(wxCommandEvent& e) {
@@ -548,7 +548,7 @@ namespace squadt {
 
         r->set_selected(wxr->GetValue());
 
-        monitor->send_display_update(r);
+        send_display_update(*r);
       }
      
       void state_change_handler::checkbox_clicked(wxCommandEvent& e) {
@@ -558,7 +558,7 @@ namespace squadt {
 
         c->set_status(wxc->GetValue());
 
-        monitor->send_display_update(c);
+        send_display_update(*c);
       }
      
       void state_change_handler::text_field_changed(wxCommandEvent& e) {
@@ -568,7 +568,7 @@ namespace squadt {
 
         t->set_text(std::string(wxt->GetValue().fn_str()));
 
-        monitor->send_display_update(t);
+        send_display_update(*t);
       }
 
       /**
@@ -603,6 +603,7 @@ namespace squadt {
       /* Connect event handlers */
       s->set_display_layout_handler(boost::bind(&GUI::tool_display::schedule_layout_change, this, _1));
       s->set_status_message_handler(boost::bind(&GUI::tool_display::schedule_log_update, this, _1));
+      event_handler.send_display_update = boost::bind(&sip::controller::communicator::send_display_update, static_cast < sip::controller::communicator& > (*s), _1, boost::static_pointer_cast < sip::display const > (current_layout));
     }
 
     void tool_display::build() {
@@ -715,6 +716,10 @@ namespace squadt {
         }
 
         current_layout = l;
+
+        // Tie handler to the new layout object
+        event_handler.send_display_update = boost::bind(&sip::controller::communicator::send_display_update,
+                static_cast < sip::controller::communicator& > (*event_handler.monitor), _1, boost::static_pointer_cast < sip::display const > (current_layout));
 
         std::auto_ptr < wxSizer > root(new wxBoxSizer(wxVERTICAL));
 

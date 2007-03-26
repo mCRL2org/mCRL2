@@ -67,7 +67,7 @@ namespace sip {
         const boost::shared_ptr < M > await_message(typename M::type_identifier_t, long const&);
  
         /** \brief Send a message */
-        void send_message(const message&);
+        void send_message(message const&);
  
         /** \brief Set the handler for a type */
         void add_handler(const typename M::type_identifier_t, handler_type);

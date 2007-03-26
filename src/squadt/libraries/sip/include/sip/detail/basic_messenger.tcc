@@ -171,7 +171,7 @@ namespace sip {
         const boost::shared_ptr < M > await_message(typename M::type_identifier_t, long const&);
  
         /** \brief Send a message */
-        void send_message(const M&);
+        void send_message(M const&);
  
         /** \brief Wait until the first message of type t has arrived */
         boost::shared_ptr < M > find_message(const typename M::type_identifier_t);

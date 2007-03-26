@@ -1,3 +1,4 @@
+#include <boost/bind.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/foreach.hpp>
@@ -20,7 +21,7 @@
 
 namespace sip {
 
-    class restore_visitor_impl : private boost::noncopyable {
+  class restore_visitor_impl : private boost::noncopyable {
 
     friend class visitors;
     friend class restore_visitor;
@@ -411,28 +412,28 @@ namespace utility {
 
     tree->GetAttribute("label", &c.m_label);
 
-    sip::layout::element_identifier connected_to;
-
-    tree->GetAttributeOrDefault("connected", &connected_to, reinterpret_cast < sip::layout::element_identifier > (&c));
-
+    tree->GetAttributeOrDefault("connected", reinterpret_cast < void** > (&c.m_connection), reinterpret_cast < void* > (&c));
     tree->GetAttributeOrDefault("first", &c.m_first, false);
     tree->GetAttributeOrDefault("selected", &c.m_selected, false);
 
-    if (connected_to != reinterpret_cast < sip::layout::element_identifier > (&c)) {
-      if (element_by_id.count(connected_to) != 0) {
-        c.m_connection = reinterpret_cast < radio_button* > (connected_to);
-
+    if (c.m_connection != &c) {
+      if (0 < element_by_id.count(reinterpret_cast < sip::layout::element_identifier > (c.m_connection))) {
         radio_button* i = &c;
 
         while (0 < element_by_id.count(reinterpret_cast < sip::layout::element_identifier > (i->m_connection))) {
           if (element_by_id[reinterpret_cast < sip::layout::element_identifier > (i->m_connection)] == &c) {
+            i->m_connection = &c;
+            i               = i->m_connection;
+
             while (i->m_connection != &c) {
               i->m_connection = static_cast < radio_button* > (element_by_id[reinterpret_cast < sip::layout::element_identifier > (i->m_connection)]);
-
-              i = i->m_connection;
+              i               = i->m_connection;
             }
 
-            i->m_connection = static_cast < radio_button* > (element_by_id[reinterpret_cast < sip::layout::element_identifier > (i->m_connection)]);
+            if (c.m_selected) {
+              /* Make sure all associated radio buttons are unselected */
+              c.set_selected(true);
+            }
          
             break;
           }
@@ -440,16 +441,8 @@ namespace utility {
           i = static_cast < radio_button* > (element_by_id[reinterpret_cast < sip::layout::element_identifier > (i->m_connection)]);
         }
       }
-      else {
-        c.m_connection = reinterpret_cast < radio_button* > (connected_to);
-      }
     }
      
-    if (c.m_selected) {
-      /* Make sure all associated radio buttons are unselected */
-      c.set_selected(true);
-    }
-
     c.m_event_handler->process(&c);
   }
 
@@ -601,16 +594,16 @@ namespace utility {
       else {
         sip::layout::element_identifier id;
 
-        tree->GetAttribute("id", &id, false);
+        e->GetAttribute("id", &id, false);
        
         std::auto_ptr < sip::layout::element > p;
 
         visitor< sip::restore_visitor_impl >(e).visit(p, element_by_id);
 
-        if (p.get()) {
+        if (p.get() != 0) {
           element_by_id[id] = p.get();
 
-          c.m_children[id] = std::make_pair(p.release(), current_properties);
+          c.m_children.push_back(sip::layout::manager::layout_descriptor(p.release(), current_properties, id));
         }
       }
     }
@@ -624,7 +617,13 @@ namespace utility {
     std::string name(tree->Value());
 
     if (name == "radio-button") {
+      sip::layout::element_identifier id;
+
+      tree->GetAttribute("id", &id, false);
+      
       c.reset(new radio_button());
+
+      element_by_id[id] = c.get();
 
       // Read concrete element data
       do_visit(*c, element_by_id);
@@ -674,7 +673,7 @@ namespace utility {
       tree->GetAttribute("visible", &c.m_visible, false);
      
       for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
-        if (e->Value() == "layout-manager") {
+        if (e->Value() == "layout-manager" && !e->NoChildren()) {
           visitor< sip::restore_visitor_impl >(e->FirstChildElement(false)).visit(c.m_manager, c.m_element_by_id);
         }
       }
@@ -688,18 +687,13 @@ namespace utility {
   
     if (c.m_manager.get() != 0) {
       try {
-        for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
-          sip::layout::element_identifier id = boost::lexical_cast < sip::layout::element_identifier > (e->GetAttributeValue("id")); 
+        for (ticpp::Element* e = tree; e != 0; e = e->NextSiblingElement(false)) {
+          sip::layout::element const* t = c.find(boost::lexical_cast < sip::layout::element_identifier > (e->GetAttributeValue("id")));
 
-          if (c.m_element_by_id.count(id)) {
+          if (t != 0) {
+            sip::visitors::restore(*t, *e);
 
-            sip::layout::element* t = c.m_element_by_id[id];
-
-            if (t != 0) {
-              sip::visitors::restore(*t, *e);
-
-              elements.push_back(t);
-            }
+            elements.push_back(t);
           }
         }
       }

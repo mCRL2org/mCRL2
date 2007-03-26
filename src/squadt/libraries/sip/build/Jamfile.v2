@@ -57,6 +57,7 @@ alias messenger
       mime_type.cpp
       transport
       store_visitor.cpp
+      search_visitor.cpp
       restore_visitor.o
     : <threading>multi
       <dependency>/site-config//boost_regex
