@@ -1,7 +1,7 @@
 [library mCRL2
-    [version 2]
+    [quickbook 1.4]
     [authors [Wesselink, Wieger]]
-    [copyright 2005 Technische Universiteit Eindhoven]
+    [copyright 2005-2007 Technische Universiteit Eindhoven]
     [category string-text]
     [purpose
         The mCRL2 library contains data structures and algorithms
@@ -9,10 +9,6 @@
     ]
     [license
         Distributed under the Boost Software License, Version 1.0.
-        (See accompanying file LICENSE_1_0.txt or copy at
-        <ulink url="http://www.boost.org/LICENSE_1_0.txt">
-            http://www.boost.org/LICENSE_1_0.txt
-        </ulink>)
     ]
 ]
 
@@ -22,84 +18,304 @@
 [def __alert__             [$images/caution.png]]
 [def __detail__            [$images/note.png]]
 [def __tip__               [$images/tip.png]]
+[def __pbes__              [$images/pbes.gif]]
+[def __summand__           [$images/summand.gif]]
+[def __linear_process__    [$images/linear_process.gif]]
+
+[def __mu     [' '''&mu;''']]
+[def __nu     [' '''&nu;''']]
+[def __sigmai [' '''&sigma;<subscript>i</subscript>''']]
+[def __phii   [' '''&#x03C6;<subscript>i</subscript>''']]
+[def __ai     [' '''a<subscript>i</subscript>''']]
+[def __ci     [' '''c<subscript>i</subscript>''']]
+[def __di     [' '''d<subscript>i</subscript>''']]
+[def __fi     [' '''f<subscript>i</subscript>''']]
+[def __gi     [' '''g<subscript>i</subscript>''']]
+[def __si     [' '''s<subscript>i</subscript>''']]
+[def __ti     [' '''t<subscript>i</subscript>''']]
+[def __Di     [' '''D<subscript>i</subscript>''']]
+[def __d0     [' '''d<subscript>0</subscript>''']]
+[def __D0     [' '''D<subscript>0</subscript>''']]
+[def __Ei     [' '''E<subscript>i</subscript>''']]
 
 [/  Links   ]
-
 [def __boost__                 [@http://www.boost.org www.boost.org]]
 [def __mcrllib__               [@http://www.cwi.nl/~mcrl mCRL]]
+[def __mcrl2__                 [@http://mcrl2.org mCRL2]]
 [def __mcrl__                  mCRL]
-[def __mcrl2__                 mCRL2]
-[def __atermpp__               [@http://www.win.tue.nl/~wieger/atermpp/doc/ atermpp]]
+[def __atermlib__               [@http://www.cwi.nl/htbin/sen1/twiki/bin/view/Meta-Environment/ATerms ATerm Library]]
 
 [section: Introduction]
-__mcrl2__ is a language and tool set to study communicating processes with data.
-This document covers the data structures and algorithms used for developing the
-__mcrl2__ toolset.
 
-[h2 The language]
-__mcrl__ (micro CRL) is a process algebraic language that was especially
-developed to take account of data in the study of communicating processes. It is
-intended to study description and analysis techniques for (large)
-distributed systems. __mcrl2__ is a follow-up to the tool set, that contains an
-improved language for data specification.
+mCRL2 stands for Micro Common Representation Language 2. It is a specification language
+that can be used to specify and analyse the behaviour of distributed systems and protocols
+and is the successor to CRL. Using its accompanying tool set systems can be analysed and
+verified automatically.
 
-[h2 The toolset]
-The use of __mcrl2__ will be supported by a collection of tools, the __mcrl2__ toolset.
-This toolset is built around a linearized form of __mcrl2__, the so called Linear Process
-Operator (LPO) format. The __mcrl2__ toolset will comprise a well-formedness
-checker, a linearizer, a simulator, a state space generator as well as a few
-tools to analyze and optimize LPOs.
+The mCRL2 tool set contains tools to automatically:
 
-[endsect]
+* Translate any mCRL2 specification to a linear process
+* Manipulate and simulate linear processes
+* Generate the state space associated with a linear process
+* Manipulate and visualize state spaces
 
-[section: Design considerations]
+The LPS library is a =C++= class library that is used for the implementation of the tool set.
+It contains classes for manipulating linear processes and parameterised boolean equation
+systems. Note that there are no classes available that represent general processes as they
+appear in an mCRL2 specification.
 
-[section: Library Requirements and Guidelines]
-Requirements and guidelines for the code are needed. For example a consistent naming
-scheme should be chosen. As an example of a set of guidelines, see
-[@http://www.boost.org/more/lib_guide.htm].
+The LPS library uses the __atermlib__ internally, which is a term library that has maximal
+sharing of subterms as the most important feature. Since programming with the ATerm Library
+isn't straightforward, a section with some recommendations is added.
 
 [endsect]
 
-[section: Some notes on the current implementation]
-* The current implementation uses the __atermpp__ library, a C++ wrapper of the ATerm library.
-* Proper constructors for the data types (currently construction is exclusively via aterms) need to be added.
-* I/O functions need to be improved.
-* Several methods are still missing (for example search + replace) or not implemented.
-* Methods for modifying data types need to be added.
-* In a few cases the result of a method can have different types. For example DataEquation::condition is
-  a DataExpression, which can be either a DataVariable, an Operation or a DataApplication. It needs to
-  be seen if the current interface is a satisfactory solution for that.
+[section: Linear processes]
+
+[section: Definition]
+A /linear process/ is defined as
+
+__linear_process__
+
+with
+
+__summand__
+
+where
+
+* /d/ is a vector of data variables, called the /process parameters/. The corresponding vector of sorts /D/ models the states of the process.
+* __si is a linear process term, called a /summand/
+* __Ei is a sort, and the elements /e/ of __Ei are called /summation variables/. [footnote The tool set requires that the condition __ci is chosen such that there are only finitely many values /e/ for which __ci has the value true. ]
+* __ci is a boolean term, called the /condition/
+* __ai is a term called the /action/
+* __ti is a real valued term, called the /time/
+* __gi is an /assignment/ function to data variables, with the following interpretation. The expression __gi/(d,e)/ is a state that can be reached from state /d/ by performing the action __ai at time __ti.
+
+A linear process usually has an accompanying initial value __d0:/D/. The summands of a linear process
+can have /free variables/, i.e. variables that do not appear in either /d/ or the summation variables /e/:/__Ei/.
+
+[endsect] [/ Definition]
+
+[section: Overview of the classes]
+
+This section describes the classes that correspond to a linear process.
+
+[section: class =specification=]
+The mCRL2 tool set contains a tool (mcrl22lps) that converts an mCRL2 specification
+into a linearised process specification. Such a linearised specification is represented
+by the class [classref lps::specification]. This specification consists of
+
+* a [classref lps::linear_process linear process]
+* a [classref lps::data_specification data specification], i.e. a specification of the sorts, constructors, mappings and equations
+* an [classref lps::action_label_list action specification], i.e. a sequence of actions that may occur during execution of the process
+* an [classref lps::process_initializer initial state]
+
+A typical mCRL2 specification is the following:
+
+[pre
+sort
+  D     = struct d1 | d2;
+  Error = struct e;
+
+act
+  r1,s4: D;
+  s2,r2,c2: D # Bool;
+  s3,r3,c3: D # Bool;
+  s3,r3,c3: Error;
+  s5,r5,c5: Bool;
+  s6,r6,c6: Bool;
+  s6,r6,c6: Error;
+  i;
+
+proc
+  S(b:Bool)     = sum d:D. r1(d).T(d,b);
+  T(d:D,b:Bool) = s2(d,b).(r6(b).S(!b)+(r6(!b)+r6(e)).T(d,b));
+
+  R(b:Bool)     = sum d:D. r3(d,b).s4(d).s5(b).R(!b)+
+                  (sum d:D.r3(d,!b)+r3(e)).s5(!b).R(b);
+
+  K             = sum d:D,b:Bool. r2(d,b).(i.s3(d,b)+i.s3(e)).K;
+
+  L             = sum b:Bool. r5(b).(i.s6(b)+i.s6(e)).L;
+
+init
+  allow({r1,s4,c2,c3,c5,c6,i},
+    comm({r2|s2->c2, r3|s3->c3, r5|s5->c5, r6|s6->c6},
+        S(true) || K || L || R(true)
+    )
+  );
 ]
 
-[endsect]
+A specification can be stored in binary or ascii format. The [memberref lps::specification::load]
+and [memberref lps::specification::save] methods are available for this. An example of loading
+a linearised specification is:
 
-[section: Sequences in the interface]
-There are several classes that are containers of one or more sequences. For
-example, the class `Sort` has a domain consisting of a sequence of
-sort expressions. These sequences are currently modelled using iterators.
-by supplying `begin()` and `end()` member functions  to get to the start
-and end of the sequence.
+    specification spec;
+    spec.load("abp.lps");
+    if (!spec) // check if load succeeded
+    {
+      std::exit(EXIT_FAILURE);
+    }
 
-[endsect]
+All sequences that occur in the classes of the LPS library have an iterator interface
+as defined in the C++ standard. An example of printing the summands of a process of
+a specification is given below.
 
-[section: Predefined sorts]
-There are some sort identifiers like Bool, Nat, Int and Pos that occur frequently.
-For efficiency reasons these should not be constructed from scratch every time.
-A possible solution for this is to predefine these sort identifiers, to avoid that
-they are constructed too often.
+    linear_process p = spec.process();
+    for (summand_iterator i = p.summands().begin(); i != p.summands().end(); ++i)
+    {
+      std::cout << pp(*i) << std::endl; // pp is the pretty print function
+    }
 
-[endsect]
+[endsect] [/ class =specification=]
 
-[section: Search and replace]
-A very common operation in the __mcrl2__ library is search and replace, applied to
-data expressions(?). This should be approached in a generic way. On the one hand
-a sequence of substitutions of type `DataVariableId -> DataExpression` should be supported.
-But if this sequence is large this approach may become very inefficient. So it should
-also be possible to specify the replacements by means of a function `f : DataVariableId -> DataExpression`.
+[section: class =linear_process=]
+A linear process is represented by the class [classref lps::linear_process]. It has member
+functions for retrieving the summands and the process parameters. There are two
+member functions for retrieving the free variables. The function
+[memberref lps::linear_process::find_free_variables find_free_variables]
+computes the exact set of free variables, while the function
+[memberref lps::linear_process::free_variables free_variables] returns a superset
+of the free variables. [footnote Perhaps these two functions can be replaced
+by one that caches the free variables?]
+[endsect] [/ class =linear_process=]
 
-[endsect]
+[section: class =summand=]
 
-[endsect]
+A summand is represented by the class [classref lps::summand].
 
-[xinclude autodoc.boostbook]
+[note There are a few restrictions on the usage of summands.
+The condition of a summand may be nil, in which case it must be ignored.
+The time of a summand is optional, so before using it one must check that it exists.
+]
+
+[endsect] [/ class =summand=]
+
+[section: class =action=]
+
+An action is represented by the class [classref lps::action]. An action has two
+attributes. It has a name (__ai), which is a label that may be shared with other
+actions. And it has a parameter, which is the vector of data expressions __fi(/d/,/e/).
+
+[endsect] [/ class =action=]
+
+[section: class =data_variable= / =data_expression=]
+
+A data variable is represented by the class [classref lps::data_variable], and a vector
+of data variables is represented by [classref lps::data_variable_list]. A data variable
+has a name and a sort as attributes.
+
+An instance of a data variable is modeled by the class [classref lps::data_expression].
+There are three different types of data expressions: data applications, data variables
+and data operations (or functions).
+
+[endsect] [/ class =data_variable= / =data_expression=]
+
+[endsect] [/ Classes]
+
+[endsect] [/ Linear processes]
+
+[section: Parameterised Boolean Equation Systems]
+A Parameterised Boolean Equation System (PBES) is a sequence of equations of the form
+
+__pbes__
+
+where
+
+* __sigmai is either a least fixpoint symbol __mu or a greatest fixpoint symbol __nu
+* __fi is a propositional formula
+* __di is a data variable of sort __Di
+* __phii is a predicate formula
+
+[section: Classes]
+
+This section describes the classes that correspond to parameterised boolean equation systems.
+
+[section: class =equation_system=]
+
+A PBES is represented by the class [classref lps::equation_system]. There is also
+a class [classref lps::pbes] that contains an equation system together with an initial state,
+and a data specification for the data __Di.
+
+[endsect] [/ =equation_system=]
+
+[section: class =propositional_variable=]
+
+propositional_variable
+
+[endsect] [/ =propositional_variable=]
+
+A PBES can be constructed from a linear process and a modal formula using the
+function [funcref lps::pbes_translate]. There is no other convenient way to
+create a PBES.
+
+[tip A parser that can parse an equation system like
+
+    ``
+      X(d0:D, d1:D) = f(X, Y)
+      Y(d0:D, d1:D) = g(X, Y)
+    ``
+
+    would be very useful.
+]
+
+[endsect] [/ Creating a PBES]
+
+[endsect] [/ Parameterised Boolean Equation Systems]
+
+[section: Programming with terms]
+
+The __atermlib__ has some peculiarities that are important to know.
+
+[section: Initialization]
+
+Every program that uses the LPS library must have the following statements
+at the beginning of the `main` function:
+
+[import term_initialization.cpp]
+[term_initialization]
+
+[endsect] [/ Initialization]
+
+[section: Modifying terms]
+
+ATerms have the property that they are read-only. This is reflected in the interface
+of the LPS Library. Most classes of the LPS library are read-only too. In normal
+code, setting the time of the first summand would look like this:
+
+    // normal interface
+    specification spec;
+    spec.load("spec.lps");
+    linear_process& p = spec.process();
+    summand &s = p.summands().front();
+    p.time() = data_expr::real(10);
+
+Due to the read-only property of ATerms this is not possible. To achieve this,
+one has to do it as follows:
+
+    // LPS interface
+    specification spec;
+    spec.load("spec.lps");
+    linear_process p = spec.process();
+    summand s = p.summands().front();
+    summand s1 = set_time(s, data_expr::real(10));
+    summand_list l = push_front(pop_front(l), s1);
+    linear_process p1 = set_summands(p, l);
+    spec = set_process(spec, p1);
+
+[endsect] [/ ]
+
+[section: Replacing subterms]
+
+Replacing subterms is a common operation. Most classes in the LPS library
+have a member function `substitute` that can be used for this. The following
+code fragment illustrates this.
+
+[import term_replace.cpp]
+[term_replace]
+
+[endsect] [/ Replacing subterms]
+
+[endsect] [/ Programming with terms]
+
+[/ xinclude autodoc.boostbook]
