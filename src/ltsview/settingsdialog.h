@@ -22,6 +22,7 @@ class SettingsDialog: public wxDialog {
     wxCheckBox*	   nstCheck;
     wxCheckBox*	   nshCheck;
     wxCheckBox*	   nliCheck;
+    wxCheckBox*	   ntrCheck;
     wxColorButton* bgButton;
     wxColorButton* deButton;
     wxColorButton* i1Button;

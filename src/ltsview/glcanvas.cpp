@@ -199,7 +199,7 @@ void GLCanvas::display(bool coll_caller) {
         settings->getBool(DisplayBackpointers)
           && (!lightRenderMode || settings->getBool(NavShowBackpointers)));
       
-      if (!lightRenderMode) {
+      if (!lightRenderMode || settings->getBool(NavTransparency)) {
         // determine current viewpoint in world coordinates
         glPushMatrix();
           glLoadIdentity();

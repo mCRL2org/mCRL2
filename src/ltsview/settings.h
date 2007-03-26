@@ -21,6 +21,7 @@ enum SettingID {
   NavShowTransitions,
   NavSmoothShading,
   NavLighting,
+	NavTransparency,
   DownEdgeColor,
   InterpolateColor1,
   InterpolateColor2,

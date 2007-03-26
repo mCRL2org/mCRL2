@@ -227,6 +227,7 @@ Settings::Settings() {
   settings[NavShowTransitions]  = new Setting_Bool(NavShowTransitions,true);
   settings[NavSmoothShading]    = new Setting_Bool(NavSmoothShading,true);
   settings[NavLighting]         = new Setting_Bool(NavLighting,true);
+  settings[NavTransparency]     = new Setting_Bool(NavTransparency,true);
   settings[DownEdgeColor]       = new Setting_RGB(DownEdgeColor,RGB_WHITE);
   settings[InterpolateColor1]   = new Setting_RGB(InterpolateColor1,RGB_WHITE);
   settings[InterpolateColor2]   = new Setting_RGB(InterpolateColor2,RGB_BLUE);

@@ -192,6 +192,10 @@ void SettingsDialog::setupPfmPanel(wxPanel* panel) {
   nliCheck = new wxCheckBox(panel,myID_ANY,wxT("Enable lighting"));
   nliCheck->SetValue(settings->getBool(NavLighting));
   sizer->Add(nliCheck,0,lf,bd);
+  ntrCheck = new wxCheckBox(panel,myID_ANY,
+			wxT("Render transparent objects correctly"));
+  ntrCheck->SetValue(settings->getBool(NavTransparency));
+  sizer->Add(ntrCheck,0,lf,bd);
 
   panel->SetSizer(sizer);
   panel->Fit();
@@ -240,6 +244,8 @@ void SettingsDialog::onCheck(wxCommandEvent& event) {
     settings->setBool(NavSmoothShading,nshCheck->GetValue());
   } else if (event.GetEventObject() == nliCheck) {
     settings->setBool(NavLighting,nliCheck->GetValue());
+  } else if (event.GetEventObject() == ntrCheck) {
+    settings->setBool(NavTransparency,ntrCheck->GetValue());
   }
 }
 

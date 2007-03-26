@@ -80,9 +80,47 @@ void Visualizer::notify(SettingID s) {
   }
 }
 
-void Visualizer::sortClusters(Point3D viewpoint) {
-  stable_sort(clusters.begin(),clusters.end(),Distance_greater(viewpoint));
+void Visualizer::computeBoundsInfo(float &bcw,float &bch) {
+  bcw = 0.0f;
+  bch = 0.0f;
+  if (lts != NULL) {
+    computeSubtreeBounds(lts->getInitialState()->getCluster(),bcw,bch);
+  }
 }
+
+void Visualizer::computeSubtreeBounds(Cluster* root,float &bw,float &bh) {
+// compute the bounding cylinder of the structure.
+  if (!root->hasDescendants()) {
+    bw = root->getTopRadius();
+    bh = 2.0f * root->getTopRadius();
+  }
+  else {
+    Cluster *desc;
+    int i;
+    for (i=0; i<root->getNumberOfDescendants(); ++i) {
+      desc = root->getDescendant(i);
+      if (desc->getPosition() < -0.9f) {
+      	// descendant is centered
+      	float dw = 0.0f;
+      	float dh = 0.0f;
+      	computeSubtreeBounds(desc,dw,dh);
+      	bw = max(bw,dw);
+      	bh = max(bh,dh);
+      }
+      else {
+      	float dw = 0.0f;
+      	float dh = 0.0f;
+      	computeSubtreeBounds(desc,dw,dh);
+      	bw = max(bw,root->getBaseRadius() + dh*sin_obt + dw*cos_obt);
+      	bh = max(bh,dh*cos_obt + dw*sin_obt);
+      }
+    }
+    bw = max(bw,root->getTopRadius());
+    bh += clusterHeight;
+  }
+}
+
+// ------------- STRUCTURE -----------------------------------------------------
 
 void Visualizer::drawStructure() {
   if (lts == NULL) return;
@@ -129,6 +167,136 @@ void Visualizer::drawStructure() {
   }
 }
 
+void Visualizer::fillClusters() {
+  // compute the cluster height that results in a picture with a "nice" aspect
+  // ratio
+  float ratio = lts->getInitialState()->getCluster()->getSize() /
+    (lts->getNumberOfRanks()-1);
+  clusterHeight = max(4,round_to_int(40.0f * ratio)) / 10.0f;
+
+  clusters.clear();
+  clusters.reserve(lts->getNumberOfClusters());
+  initClusterData(lts->getInitialState()->getCluster(),true,0);
+}
+
+void Visualizer::initClusterData(Cluster *root,bool topClosed,int rot) {
+  if (!root->hasDescendants()) {
+    float r = root->getTopRadius();
+    glPushMatrix();
+      glScalef(r,r,r);
+      glGetFloatv(GL_MODELVIEW_MATRIX,(GLfloat*)root->getMatrix());
+    glPopMatrix();
+    root->setPrimitive(primitiveFactory->makeSphere());
+  }
+  else {
+    int desc_rot = rot + settings->getInt(BranchRotation);
+    if (desc_rot < 0) desc_rot += 360;
+    else if (desc_rot >= 360) desc_rot -= 360;
+
+    glTranslatef(0.0f,0.0f,clusterHeight);
+    for (int i=0; i<root->getNumberOfDescendants(); ++i) {
+      Cluster* desc = root->getDescendant(i);
+      if (desc->getPosition() < -0.9f) {
+      	initClusterData(desc,false,(root->getNumberOfDescendants()>1)?desc_rot:rot);
+      }
+      else {
+      	glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
+      	glTranslatef(root->getBaseRadius(),0.0f,0.0f);
+      	glRotatef(settings->getInt(OuterBranchTilt),0.0f,1.0f,0.0f);
+       	initClusterData(desc,true,desc_rot);
+      	glRotatef(-settings->getInt(OuterBranchTilt),0.0f,1.0f,0.0f);
+      	glTranslatef(-root->getBaseRadius(),0.0f,0.0f);
+      	glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
+      }
+    }
+    glTranslatef(0.0f,0.0f,-clusterHeight);
+    
+    float r = root->getBaseRadius() / root->getTopRadius();
+    if (r > 1.0f) {
+      glPushMatrix();
+        glTranslatef(0.0f,0.0f,0.5f*clusterHeight);
+        glRotatef(180.0f,1.0f,0.0f,0.0f);
+        glScalef(root->getBaseRadius(),root->getBaseRadius(),clusterHeight);
+        glGetFloatv(GL_MODELVIEW_MATRIX,(GLfloat*)root->getMatrix());
+      glPopMatrix();
+      r = 1.0f / r;
+      root->setPrimitive(primitiveFactory->makeCone(r,topClosed,
+            root->getNumberOfDescendants() > 1));
+    }
+    else {
+      glPushMatrix();
+        glTranslatef(0.0f,0.0f,0.5f*clusterHeight);
+        glScalef(root->getTopRadius(),root->getTopRadius(),clusterHeight);
+        glGetFloatv(GL_MODELVIEW_MATRIX,(GLfloat*)root->getMatrix());
+      glPopMatrix();
+      root->setPrimitive(primitiveFactory->makeCone(r,
+        root->getNumberOfDescendants() > 1,topClosed));
+    }
+  }
+  clusters.push_back(root);
+}
+
+void Visualizer::updateClusterPrimitives() {
+}
+
+void Visualizer::updateClusterMatrices(Cluster *root,int rot) {
+  if (!root->hasDescendants()) {
+    float r = root->getTopRadius();
+    glPushMatrix();
+      glScalef(r,r,r);
+      glGetFloatv(GL_MODELVIEW_MATRIX,(GLfloat*)root->getMatrix());
+    glPopMatrix();
+  }
+  else {
+    int desc_rot = rot + settings->getInt(BranchRotation);
+    if (desc_rot < 0) desc_rot += 360;
+    else if (desc_rot >= 360) desc_rot -= 360;
+
+    glTranslatef(0.0f,0.0f,clusterHeight);
+    for (int i=0; i<root->getNumberOfDescendants(); ++i) {
+      Cluster* desc = root->getDescendant(i);
+      if (desc->getPosition() < -0.9f) {
+      	updateClusterMatrices(desc,
+            (root->getNumberOfDescendants()>1)?desc_rot:rot);
+      }
+      else {
+      	glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
+      	glTranslatef(root->getBaseRadius(),0.0f,0.0f);
+      	glRotatef(settings->getInt(OuterBranchTilt),0.0f,1.0f,0.0f);
+       	updateClusterMatrices(desc,desc_rot);
+      	glRotatef(-settings->getInt(OuterBranchTilt),0.0f,1.0f,0.0f);
+      	glTranslatef(-root->getBaseRadius(),0.0f,0.0f);
+      	glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
+      }
+    }
+    glTranslatef(0.0f,0.0f,-clusterHeight);
+    
+    float r = root->getBaseRadius() / root->getTopRadius();
+    glPushMatrix();
+      glTranslatef(0.0f,0.0f,0.5f*clusterHeight);
+      if (r > 1.0f) {
+        glScalef(root->getBaseRadius(),-root->getBaseRadius(),-clusterHeight);
+      }
+      else {
+        glScalef(root->getTopRadius(),root->getTopRadius(),clusterHeight);
+      }
+      glGetFloatv(GL_MODELVIEW_MATRIX,(GLfloat*)root->getMatrix());
+    glPopMatrix();
+  }
+}
+
+void Visualizer::sortClusters(Point3D viewpoint) {
+  stable_sort(clusters.begin(),clusters.end(),Distance_greater(viewpoint));
+}
+
+bool Visualizer::isMarked(Cluster* c) {
+  return ((markStyle == MARK_STATES && c->hasMarkedState()) || 
+          (markStyle == MARK_DEADLOCKS && c->hasDeadlock()) ||
+          (markStyle == MARK_TRANSITIONS && c->hasMarkedTransition()));
+}
+
+// ------------- STATES --------------------------------------------------------
+
 void Visualizer::drawStates() {
   if (lts == NULL) return;
 
@@ -141,76 +309,6 @@ void Visualizer::drawStates() {
     drawStatesMark(lts->getInitialState()->getCluster(),0);
   }
 }
-
-void Visualizer::drawTransitions(bool draw_fp,bool draw_bp) {
-  if (lts == NULL) return;
-  if (!draw_fp && !draw_bp) return;
-
-  clearDFSStates(lts->getInitialState());
-  Point3D init = {0, 0, 0};
-  glPushMatrix();
-    glLoadIdentity();
-    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-    computeStateAbsPos(lts->getInitialState(), 0, init);
-  glPopMatrix();
-  clearDFSStates(lts->getInitialState());
-        
-  drawTransitions(lts->getInitialState(),draw_fp,draw_bp);
-}
-
-void Visualizer::computeBoundsInfo(float &bcw,float &bch) {
-  bcw = 0.0f;
-  bch = 0.0f;
-  if (lts != NULL) {
-    computeSubtreeBounds(lts->getInitialState()->getCluster(),bcw,bch);
-  }
-}
-
-void Visualizer::computeSubtreeBounds(Cluster* root,float &bw,float &bh) {
-// compute the bounding cylinder of the structure.
-  if (!root->hasDescendants()) {
-    bw = root->getTopRadius();
-    bh = 2.0f * root->getTopRadius();
-  }
-  else {
-    Cluster *desc;
-    int i;
-    for (i=0; i<root->getNumberOfDescendants(); ++i) {
-      desc = root->getDescendant(i);
-      if (desc->getPosition() < -0.9f) {
-      	// descendant is centered
-      	float dw = 0.0f;
-      	float dh = 0.0f;
-      	computeSubtreeBounds(desc,dw,dh);
-      	bw = max(bw,dw);
-      	bh = max(bh,dh);
-      }
-      else {
-      	float dw = 0.0f;
-      	float dh = 0.0f;
-      	computeSubtreeBounds(desc,dw,dh);
-      	bw = max(bw,root->getBaseRadius() + dh*sin_obt + dw*cos_obt);
-      	bh = max(bh,dh*cos_obt + dw*sin_obt);
-      }
-    }
-    bw = max(bw,root->getTopRadius());
-    bh += clusterHeight;
-  }
-}
-
-bool Visualizer::isMarked(Cluster* c) {
-  return ((markStyle == MARK_STATES && c->hasMarkedState()) || 
-          (markStyle == MARK_DEADLOCKS && c->hasDeadlock()) ||
-          (markStyle == MARK_TRANSITIONS && c->hasMarkedTransition()));
-}
-
-bool Visualizer::isMarked(State* s) {
-  return ((markStyle == MARK_STATES && s->isMarked()) || 
-          (markStyle == MARK_DEADLOCKS && s->isDeadlock())/* ||
-          (markStyle == MARK_TRANSITIONS && s->hasMarkedTransition())*/);
-}
-
-// ------------- STATES --------------------------------------------------------
 
 void Visualizer::clearDFSStates(State* root) {
   root->DFSclear();
@@ -390,6 +488,12 @@ void Visualizer::drawStates(Cluster* root,int rot) {
   }
 }
 
+bool Visualizer::isMarked(State* s) {
+  return ((markStyle == MARK_STATES && s->isMarked()) || 
+          (markStyle == MARK_DEADLOCKS && s->isDeadlock())/* ||
+          (markStyle == MARK_TRANSITIONS && s->hasMarkedTransition())*/);
+}
+
 void Visualizer::drawStatesMark(Cluster* root,int rot) {
   State *s;
   for (int i=0; i < root->getNumberOfStates(); ++i) {
@@ -444,6 +548,22 @@ void Visualizer::drawStatesMark(Cluster* root,int rot) {
 }
 
 // ------------- TRANSITIONS ---------------------------------------------------
+
+void Visualizer::drawTransitions(bool draw_fp,bool draw_bp) {
+  if (lts == NULL) return;
+  if (!draw_fp && !draw_bp) return;
+
+  clearDFSStates(lts->getInitialState());
+  Point3D init = {0, 0, 0};
+  glPushMatrix();
+    glLoadIdentity();
+    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+    computeStateAbsPos(lts->getInitialState(), 0, init);
+  glPopMatrix();
+  clearDFSStates(lts->getInitialState());
+        
+  drawTransitions(lts->getInitialState(),draw_fp,draw_bp);
+}
 
 void Visualizer::drawTransitions(State* root,bool disp_fp,bool disp_bp) {
   root->DFSvisit();
@@ -542,887 +662,3 @@ void Visualizer::drawBackPointer(State* startState, State* endState) {
   */
   glEnd();
 }
-
-// ------------- PRIMITIVES ----------------------------------------------------
-
-void Visualizer::fillClusters() {
-  // compute the cluster height that results in a picture with a "nice" aspect
-  // ratio
-  float ratio = lts->getInitialState()->getCluster()->getSize() /
-    (lts->getNumberOfRanks()-1);
-  clusterHeight = max(4,round_to_int(40.0f * ratio)) / 10.0f;
-
-  clusters.clear();
-  clusters.reserve(lts->getNumberOfClusters());
-  initClusterData(lts->getInitialState()->getCluster(),true,0);
-}
-
-void Visualizer::initClusterData(Cluster *root,bool topClosed,int rot) {
-  if (!root->hasDescendants()) {
-    float r = root->getTopRadius();
-    glPushMatrix();
-      glScalef(r,r,r);
-      glGetFloatv(GL_MODELVIEW_MATRIX,(GLfloat*)root->getMatrix());
-    glPopMatrix();
-    root->setPrimitive(primitiveFactory->makeSphere());
-  }
-  else {
-    int desc_rot = rot + settings->getInt(BranchRotation);
-    if (desc_rot < 0) desc_rot += 360;
-    else if (desc_rot >= 360) desc_rot -= 360;
-
-    glTranslatef(0.0f,0.0f,clusterHeight);
-    for (int i=0; i<root->getNumberOfDescendants(); ++i) {
-      Cluster* desc = root->getDescendant(i);
-      if (desc->getPosition() < -0.9f) {
-      	initClusterData(desc,false,(root->getNumberOfDescendants()>1)?desc_rot:rot);
-      }
-      else {
-      	glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
-      	glTranslatef(root->getBaseRadius(),0.0f,0.0f);
-      	glRotatef(settings->getInt(OuterBranchTilt),0.0f,1.0f,0.0f);
-       	initClusterData(desc,true,desc_rot);
-      	glRotatef(-settings->getInt(OuterBranchTilt),0.0f,1.0f,0.0f);
-      	glTranslatef(-root->getBaseRadius(),0.0f,0.0f);
-      	glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
-      }
-    }
-    glTranslatef(0.0f,0.0f,-clusterHeight);
-    
-    float r = root->getBaseRadius() / root->getTopRadius();
-    if (r > 1.0f) {
-      glPushMatrix();
-        glTranslatef(0.0f,0.0f,0.5f*clusterHeight);
-        glRotatef(180.0f,1.0f,0.0f,0.0f);
-        glScalef(root->getBaseRadius(),root->getBaseRadius(),clusterHeight);
-        glGetFloatv(GL_MODELVIEW_MATRIX,(GLfloat*)root->getMatrix());
-      glPopMatrix();
-      r = 1.0f / r;
-      root->setPrimitive(primitiveFactory->makeCone(r,topClosed,
-            root->getNumberOfDescendants() > 1));
-    }
-    else {
-      glPushMatrix();
-        glTranslatef(0.0f,0.0f,0.5f*clusterHeight);
-        glScalef(root->getTopRadius(),root->getTopRadius(),clusterHeight);
-        glGetFloatv(GL_MODELVIEW_MATRIX,(GLfloat*)root->getMatrix());
-      glPopMatrix();
-      root->setPrimitive(primitiveFactory->makeCone(r,
-        root->getNumberOfDescendants() > 1,topClosed));
-    }
-  }
-  clusters.push_back(root);
-}
-
-void Visualizer::updateClusterPrimitives() {
-}
-
-void Visualizer::updateClusterMatrices(Cluster *root,int rot) {
-  if (!root->hasDescendants()) {
-    float r = root->getTopRadius();
-    glPushMatrix();
-      glScalef(r,r,r);
-      glGetFloatv(GL_MODELVIEW_MATRIX,(GLfloat*)root->getMatrix());
-    glPopMatrix();
-  }
-  else {
-    int desc_rot = rot + settings->getInt(BranchRotation);
-    if (desc_rot < 0) desc_rot += 360;
-    else if (desc_rot >= 360) desc_rot -= 360;
-
-    glTranslatef(0.0f,0.0f,clusterHeight);
-    for (int i=0; i<root->getNumberOfDescendants(); ++i) {
-      Cluster* desc = root->getDescendant(i);
-      if (desc->getPosition() < -0.9f) {
-      	updateClusterMatrices(desc,
-            (root->getNumberOfDescendants()>1)?desc_rot:rot);
-      }
-      else {
-      	glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
-      	glTranslatef(root->getBaseRadius(),0.0f,0.0f);
-      	glRotatef(settings->getInt(OuterBranchTilt),0.0f,1.0f,0.0f);
-       	updateClusterMatrices(desc,desc_rot);
-      	glRotatef(-settings->getInt(OuterBranchTilt),0.0f,1.0f,0.0f);
-      	glTranslatef(-root->getBaseRadius(),0.0f,0.0f);
-      	glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
-      }
-    }
-    glTranslatef(0.0f,0.0f,-clusterHeight);
-    
-    float r = root->getBaseRadius() / root->getTopRadius();
-    glPushMatrix();
-      glTranslatef(0.0f,0.0f,0.5f*clusterHeight);
-      if (r > 1.0f) {
-        glScalef(root->getBaseRadius(),-root->getBaseRadius(),-clusterHeight);
-      }
-      else {
-        glScalef(root->getTopRadius(),root->getTopRadius(),clusterHeight);
-      }
-      glGetFloatv(GL_MODELVIEW_MATRIX,(GLfloat*)root->getMatrix());
-    glPopMatrix();
-  }
-}
-
-/* 
---------------------------- OLD METHODS' GRAVEYARD :) --------------------------
-
-void Visualizer::drawLTS(Point3D viewpoint) {
-  if (lts == NULL) return;
-
-  if (displayStates && refreshStates) {
-    glDeleteLists(statesDisplayList,1);
-    statesDisplayList = glGenLists(1);
-    glNewList(statesDisplayList,GL_COMPILE);
-      if (markStyle == NO_MARKS) {
-        glColor4ub(visSettings.stateColor.r,visSettings.stateColor.g,
-                  visSettings.stateColor.b,255);
-        drawStates(lts->getInitialState()->getCluster(),0);
-      }
-      else {
-        drawStatesMark(lts->getInitialState()->getCluster(),0);
-      }
-    glEndList();
-
-    refreshStates = false;
-  }
-
-  if ((displayTransitions || displayBackpointers) && refreshTransitions) {
-    clearDFSStates(lts->getInitialState());
-    Point3D init = {0, 0, 0};
-    glPushMatrix();
-    glLoadIdentity();
-    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-    computeStateAbsPos(lts->getInitialState(), 0, init);
-    glPopMatrix();
-    clearDFSStates(lts->getInitialState());
-        
-    glDeleteLists(transDisplayList, 1);
-    transDisplayList = glGenLists(1);
-    glNewList(transDisplayList, GL_COMPILE);
-      drawTransitions(lts->getInitialState());
-    glEndList();
-
-    refreshTransitions = false;
-  }
-
-  if (refreshPrimitives) {
-    // refresh necessary
-    // delete all primitives
-    for (unsigned int i=0; i<primitiveObjs.size(); ++i) {
-      delete primitiveObjs[i];
-    }
-    primitiveObjs.clear();
-    
-    glPushMatrix();
-      glLoadIdentity();
-        // coloring based on interpolation settings
-        HSV_Color hsv;
-        computeDeltaCol(hsv);
-        drawSubtreeC(lts->getInitialState()->getCluster(),true,hsv,0);
-    glPopMatrix();
-    refreshPrimitives = false;
-  }
-
-  // first draw the opaque objects in the scene (if required)
-  if (displayStates) {
-    glCallList(statesDisplayList);
-  }
-
-  if (displayTransitions || displayBackpointers) {
-    glCallList(transDisplayList);
-  }
-  
-  // compute distance of every primitive to viewpoint
-  for (unsigned int i=0; i<primitiveObjs.size(); ++i) {
-    Point3D d = {
-      primitiveObjs[i]->matrix[12]-viewpoint.x,
-      primitiveObjs[i]->matrix[13]-viewpoint.y,
-      primitiveObjs[i]->matrix[14]-viewpoint.z
-    };
-    primitives[i]->distance = sqrt(d.x*d.x + d.y*d.y + d.z*d.z);
-  }
-
-  // sort primitives descending based on distance to viewpoint
-  sort(primitiveObjs.begin(),primitiveObjs.end(),Distance_descObj()); 
-  
-  // draw primitives in sorted order
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glEnableClientState(GL_NORMAL_ARRAY);
-  for (unsigned int i=0; i<primitiveObjs.size(); ++i) {
-    glMultMatrixf(primitiveObjs[i]->matrix);
-    glColor4ub(primitiveObjs[i]->color.r,primitiveObjs[i]->color.g,
-        primitiveObjs[i]->color.b,visSettings.alpha);
-    glVertexPointer(3,GL_FLOAT,0,primitiveObjs[i]->vertices);
-    glNormalPointer(GL_FLOAT,0,primitiveObjs[i]->normals);
-    glDrawArrays(GL_QUAD_STRIP,0,primitiveObjs[i]->size);
-  }
-}
-*/
-/*
-// ------------- ATOMIUM -------------------------------------------------------
-void Visualizer::drawSubtreeA(Cluster* root,int rot) {
-  int desc_rot = rot + visSettings.branchRotation;
-  if (desc_rot < 0) desc_rot += 360;
-  else if (desc_rot >= 360) desc_rot -= 360;
-    
-  for (int i=0; i<root->getNumberOfDescendants(); ++i) {
-    Cluster* desc = root->getDescendant(i);
-    if (desc->getPosition() < -0.9f) {
-      glTranslatef(0.0f,0.0f,clusterHeight);
-      drawSubtreeA(desc,(root->getNumberOfDescendants()>1)?desc_rot:rot);
-      glTranslatef(0.0f,0.0f,-clusterHeight);
-      
-      GLfloat M[16];
-      glGetFloatv(GL_MODELVIEW_MATRIX,M);
-      GLuint displist = glGenLists(1);
-      glNewList(displist,GL_COMPILE);
-      	glPushMatrix();
-      	glMultMatrixf(M);
-      	drawCylinder(0.1f,0.1f,clusterHeight,visSettings.interpolateColor1,
-                     visSettings.interpolateColor1,true,false,false);
-      	glPopMatrix();
-      glEndList();
-
-      Primitive* p = new Primitive;
-      glPushMatrix();
-      	glTranslatef(0.0f,0.0f,0.5f*clusterHeight);
-      	glGetFloatv(GL_MODELVIEW_MATRIX,M);
-      glPopMatrix();
-      p->worldCoordinate.x = M[12];
-      p->worldCoordinate.y = M[13];
-      p->worldCoordinate.z = M[14];
-      p->displayList = displist;
-      primitives.push_back(p);
-    }
-    else {
-      glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
-      glTranslatef(root->getBaseRadius(),0.0f,clusterHeight);
-      glRotatef(visSettings.outerBranchTilt,0.0f,1.0f,0.0f);
-      drawSubtreeA(desc,desc_rot);
-      glRotatef(-visSettings.outerBranchTilt,0.0f,1.0f,0.0f);
-      glTranslatef(-root->getBaseRadius(),0.0f,-clusterHeight);
-      
-      float theta = rad_to_deg(atan(root->getBaseRadius()/clusterHeight));
-      glRotatef(theta,0.0f,1.0f,0.0f);
-
-      float height = sqrt(clusterHeight*clusterHeight +
-                          root->getBaseRadius()*root->getBaseRadius());
-      GLfloat M[16];
-      glGetFloatv(GL_MODELVIEW_MATRIX,M);
-      GLuint displist = glGenLists(1);
-      glNewList(displist,GL_COMPILE);
-      	glPushMatrix();
-      	glMultMatrixf(M);
-      	drawCylinder(0.1f,0.1f,height,visSettings.interpolateColor1,
-                     visSettings.interpolateColor1,true,false,false);
-      	glPopMatrix();
-      glEndList();
-
-      Primitive* p = new Primitive;
-      glPushMatrix();
-      	glTranslatef(0.0f,0.0f,0.5f*height);
-      	glGetFloatv(GL_MODELVIEW_MATRIX,M);
-      glPopMatrix();
-      p->worldCoordinate.x = M[12];
-      p->worldCoordinate.y = M[13];
-      p->worldCoordinate.z = M[14];
-      p->displayList = displist;
-      primitives.push_back(p);
-      
-      glRotatef(-theta,0.0f,1.0f,0.0f);
-      glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
-    }
-  }
-  
-  GLfloat M[16];
-  glGetFloatv(GL_MODELVIEW_MATRIX,M);
-  GLuint displist = glGenLists(1);
-  glNewList(displist,GL_COMPILE);
-    glPushMatrix();
-    glMultMatrixf(M);
-    glColor4ub(visSettings.interpolateColor2.r,visSettings.interpolateColor2.g,
-              visSettings.interpolateColor2.b,visSettings.alpha);
-    
-    float r = pow(root->getTopRadius()*root->getTopRadius()*0.1,0.33);
-    float h = visSettings.ellipsoidThreshold*clusterHeight;
-    if (r > h) {
-      drawEllipsoid(sqrt(r*r*r/h),h);
-    }
-    else {
-      drawSphere(r);
-    }
-    glPopMatrix();
-  glEndList();
-
-  Primitive* p = new Primitive;
-  p->worldCoordinate.x = M[12];
-  p->worldCoordinate.y = M[13];
-  p->worldCoordinate.z = M[14];
-  p->displayList = displist;
-  primitives.push_back(p);
-}
-
-void Visualizer::drawSubtreeAMark(Cluster* root,int rot) {
-  int desc_rot = rot + visSettings.branchRotation;
-  if (desc_rot < 0) desc_rot += 360;
-  else if (desc_rot >= 360) desc_rot -= 360;
-    
-  for (int i=0; i<root->getNumberOfDescendants(); ++i) {
-    Cluster* desc = root->getDescendant(i);
-    if (desc->getPosition() < -0.9f) {
-      glTranslatef(0.0f,0.0f,clusterHeight);
-      drawSubtreeAMark(desc,(root->getNumberOfDescendants()>1)?desc_rot:rot);
-      glTranslatef(0.0f,0.0f,-clusterHeight);
-      
-      GLfloat M[16];
-      glGetFloatv(GL_MODELVIEW_MATRIX,M);
-      GLuint displist = glGenLists(1);
-      glNewList(displist,GL_COMPILE);
-      	glPushMatrix();
-      	glMultMatrixf(M);
-      	drawCylinder(0.1f,0.1f,clusterHeight,RGB_WHITE,RGB_WHITE,true,false,
-                     false);
-      	glPopMatrix();
-      glEndList();
-
-      Primitive* p = new Primitive;
-      glPushMatrix();
-      	glTranslatef(0.0f,0.0f,0.5f*clusterHeight);
-      	glGetFloatv(GL_MODELVIEW_MATRIX,M);
-      glPopMatrix();
-      p->worldCoordinate.x = M[12];
-      p->worldCoordinate.y = M[13];
-      p->worldCoordinate.z = M[14];
-      p->displayList = displist;
-      primitives.push_back(p);
-    }
-    else {
-      glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
-      glTranslatef(root->getBaseRadius(),0.0f,clusterHeight);
-      glRotatef(visSettings.outerBranchTilt,0.0f,1.0f,0.0f);
-      drawSubtreeAMark(desc,desc_rot);
-      glRotatef(-visSettings.outerBranchTilt,0.0f,1.0f,0.0f);
-      glTranslatef(-root->getBaseRadius(),0.0f,-clusterHeight);
-
-      float theta = rad_to_deg(atan(root->getBaseRadius()/clusterHeight));
-      glRotatef(theta,0.0f,1.0f,0.0f);
-
-      float height = sqrt(clusterHeight*clusterHeight +
-	                        root->getBaseRadius()*root->getBaseRadius());
-      GLfloat M[16];
-      glGetFloatv(GL_MODELVIEW_MATRIX,M);
-      GLuint displist = glGenLists(1);
-      glNewList(displist,GL_COMPILE);
-      	glPushMatrix();
-      	glMultMatrixf(M);
-      	drawCylinder(0.1f,0.1f,height,RGB_WHITE,RGB_WHITE,true,false,false);
-      	glPopMatrix();
-      glEndList();
-
-      Primitive* p = new Primitive;
-      glPushMatrix();
-      	glTranslatef(0.0f,0.0f,0.5f*height);
-      	glGetFloatv(GL_MODELVIEW_MATRIX,M);
-      glPopMatrix();
-      p->worldCoordinate.x = M[12];
-      p->worldCoordinate.y = M[13];
-      p->worldCoordinate.z = M[14];
-      p->displayList = displist;
-      primitives.push_back(p);
-      
-      glRotatef(-theta,0.0f,1.0f,0.0f);
-      glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
-    }
-  }
-  
-  GLfloat M[16];
-  glGetFloatv(GL_MODELVIEW_MATRIX,M);
-  GLuint displist = glGenLists(1);
-  glNewList(displist,GL_COMPILE);
-    glPushMatrix();
-    glMultMatrixf(M);
-    if (isMarked(root)) {
-      glColor4ub(visSettings.markedColor.r,visSettings.markedColor.g,
-                visSettings.markedColor.b,visSettings.alpha);
-    }
-    else {
-      glColor4ub(255,255,255,visSettings.alpha);
-    }
-
-    float r = pow(root->getTopRadius()*root->getTopRadius()*0.1,0.33);
-    float h = visSettings.ellipsoidThreshold*clusterHeight;
-    if (r > h) {
-      drawEllipsoid(pow(r*r*r/h,0.33f),h);
-    }
-    else {
-      drawSphere(r);
-    }
-    glPopMatrix();
-  glEndList();
-
-  Primitive* p = new Primitive;
-  p->worldCoordinate.x = M[12];
-  p->worldCoordinate.y = M[13];
-  p->worldCoordinate.z = M[14];
-  p->displayList = displist;
-  primitives.push_back(p);
-}
-
-// ------------- TUBES -------------------------------------------------------
-
-void Visualizer::drawSubtreeT(Cluster* root,HSV_Color col,int rot) {
-  if (root == lts->getInitialState()->getCluster()) {
-    RGB_Color col_rgb = HSV_to_RGB(col);
-    glRotatef(180.0f,1.0f,0.0f,0.0f);
-    GLfloat M[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX,M);
-    GLuint displist = glGenLists(1);
-    glNewList(displist,GL_COMPILE);
-      glPushMatrix();
-      glMultMatrixf(M);
-      glColor4ub(col_rgb.r,col_rgb.g,col_rgb.b,visSettings.alpha);
-      drawHemisphere(root->getTopRadius()); 
-      glPopMatrix();
-    glEndList();
-
-    Primitive* p = new Primitive;
-    glPushMatrix();
-      glTranslatef(0.0f,0.0f,0.5f*root->getTopRadius());
-      glGetFloatv(GL_MODELVIEW_MATRIX,M);
-    glPopMatrix();
-    p->worldCoordinate.x = M[12];
-    p->worldCoordinate.y = M[13];
-    p->worldCoordinate.z = M[14];
-    p->displayList = displist;
-    primitives.push_back(p);
-    glRotatef(-180.0f,1.0f,0.0f,0.0f);
-  }
-  
-  if (!root->hasDescendants()) {
-    RGB_Color col_rgb = HSV_to_RGB(col);
-    GLfloat M[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX,M);
-    GLuint displist = glGenLists(1);
-    glNewList(displist,GL_COMPILE);
-      glPushMatrix();
-      glMultMatrixf(M);
-      glColor4ub(col_rgb.r,col_rgb.g,col_rgb.b,visSettings.alpha);
-      drawHemisphere(root->getTopRadius()); 
-      glPopMatrix();
-    glEndList();
-
-    Primitive* p = new Primitive;
-    glPushMatrix();
-      glTranslatef(0.0f,0.0f,0.5f*root->getTopRadius());
-      glGetFloatv(GL_MODELVIEW_MATRIX,M);
-    glPopMatrix();
-    p->worldCoordinate.x = M[12];
-    p->worldCoordinate.y = M[13];
-    p->worldCoordinate.z = M[14];
-    p->displayList = displist;
-    primitives.push_back(p);
-  }
-  else {
-    HSV_Color desccol = col + delta_col;
-
-    int desc_rot = rot + visSettings.branchRotation;
-    if (desc_rot < 0) desc_rot += 360;
-    else if (desc_rot >= 360) desc_rot -= 360;
-    
-    for (int i=0; i<root->getNumberOfDescendants(); ++i) {
-      Cluster* desc = root->getDescendant(i);
-      if (desc->getPosition() < -0.9f) {
-      	glTranslatef(0.0f,0.0f,clusterHeight);
-      	drawSubtreeT(desc,desccol,
-                     (root->getNumberOfDescendants()>1)?desc_rot:rot);
-      	glTranslatef(0.0f,0.0f,-clusterHeight);
-      	
-      	GLfloat M[16];
-      	glGetFloatv(GL_MODELVIEW_MATRIX,M);
-      	GLuint displist = glGenLists(1);
-      	glNewList(displist,GL_COMPILE);
-      	  glPushMatrix();
-      	  glMultMatrixf(M);
-	        drawCylinder(root->getTopRadius(),desc->getTopRadius(),clusterHeight,
-	               HSV_to_RGB(col),HSV_to_RGB(desccol),true,false,false);
-      	  glPopMatrix();
-      	glEndList();
-      
-      	Primitive* p = new Primitive;
-      	glPushMatrix();
-      	  glTranslatef(0.0f,0.0f,0.5f*clusterHeight);
-      	  glGetFloatv(GL_MODELVIEW_MATRIX,M);
-      	glPopMatrix();
-      	p->worldCoordinate.x = M[12];
-      	p->worldCoordinate.y = M[13];
-      	p->worldCoordinate.z = M[14];
-      	p->displayList = displist;
-      	primitives.push_back(p);
-      }
-      else {
-      	glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
-      	glTranslatef(root->getBaseRadius(),0.0f,clusterHeight);
-      	glRotatef(visSettings.outerBranchTilt,0.0f,1.0f,0.0f);
-        drawSubtreeT(desc,desccol,desc_rot);
-      	glRotatef(-visSettings.outerBranchTilt,0.0f,1.0f,0.0f);
-      	glTranslatef(-root->getBaseRadius(),0.0f,-clusterHeight);
-        
-        Point3D b1 = {0.5f*clusterHeight*sin_ibt,0.0f,
-                      0.5f*clusterHeight*cos_ibt};
-        Point3D b2 = {root->getBaseRadius() - 0.5f*clusterHeight*sin_obt,0.0f,
-                      clusterHeight - 0.5f*clusterHeight*cos_obt};
-        Point3D b3 = {root->getBaseRadius(),0.0f,clusterHeight};
-        Point3D center;
-        GLfloat M[16];
-      	glGetFloatv(GL_MODELVIEW_MATRIX,M);
-      	GLuint displist = glGenLists(1);
-      	glNewList(displist,GL_COMPILE);
-      	  glPushMatrix();
-      	  glMultMatrixf(M);
-      	  drawTube(root->getTopRadius(),desc->getTopRadius(),HSV_to_RGB(col),
-                   HSV_to_RGB(desccol),true,b1,b2,b3,center);
-      	  glPopMatrix();
-      	glEndList();
-        
-        Primitive* p = new Primitive;
-      	glPushMatrix();
-      	  glTranslatef(center.x,center.y,center.z);
-      	  glGetFloatv(GL_MODELVIEW_MATRIX,M);
-      	glPopMatrix();
-      	p->worldCoordinate.x = M[12];
-      	p->worldCoordinate.y = M[13];
-      	p->worldCoordinate.z = M[14];
-      	p->displayList = displist;
-      	primitives.push_back(p);
-        
-        glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
-      }
-    }
-  }
-}
-
-void Visualizer::drawSubtreeTMark(Cluster* root,int rot) {
-  RGB_Color color = (isMarked(root)) ? visSettings.markedColor : RGB_WHITE;
-  if (root == lts->getInitialState()->getCluster()) {
-    glRotatef(180.0f,1.0f,0.0f,0.0f);
-    GLfloat M[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX,M);
-    GLuint displist = glGenLists(1);
-    glNewList(displist,GL_COMPILE);
-      glPushMatrix();
-      glMultMatrixf(M);
-      glColor4ub(color.r,color.g,color.b,visSettings.alpha);
-      drawHemisphere(root->getTopRadius()); 
-      glPopMatrix();
-    glEndList();
-
-    Primitive* p = new Primitive;
-    glPushMatrix();
-      glTranslatef(0.0f,0.0f,0.5f*root->getTopRadius());
-      glGetFloatv(GL_MODELVIEW_MATRIX,M);
-    glPopMatrix();
-    p->worldCoordinate.x = M[12];
-    p->worldCoordinate.y = M[13];
-    p->worldCoordinate.z = M[14];
-    p->displayList = displist;
-    primitives.push_back(p);
-    glRotatef(-180.0f,1.0f,0.0f,0.0f);
-  }
-  
-  if (!root->hasDescendants()) {
-    GLfloat M[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX,M);
-    GLuint displist = glGenLists(1);
-    glNewList(displist,GL_COMPILE);
-      glPushMatrix();
-      glMultMatrixf(M);
-      glColor4ub(color.r,color.g,color.b,visSettings.alpha);
-      drawHemisphere(root->getTopRadius()); 
-      glPopMatrix();
-    glEndList();
-
-    Primitive* p = new Primitive;
-    glPushMatrix();
-      glTranslatef(0.0f,0.0f,0.5f*root->getTopRadius());
-      glGetFloatv(GL_MODELVIEW_MATRIX,M);
-    glPopMatrix();
-    p->worldCoordinate.x = M[12];
-    p->worldCoordinate.y = M[13];
-    p->worldCoordinate.z = M[14];
-    p->displayList = displist;
-    primitives.push_back(p);
-  }
-  else {
-    int desc_rot = rot + visSettings.branchRotation;
-    if (desc_rot < 0) desc_rot += 360;
-    else if (desc_rot >= 360) desc_rot -= 360;
-    
-    for (int i=0; i<root->getNumberOfDescendants(); ++i) {
-      Cluster* desc = root->getDescendant(i);
-      if (desc->getPosition() < -0.9f) {
-      	glTranslatef(0.0f,0.0f,clusterHeight);
-      	drawSubtreeTMark(desc,(root->getNumberOfDescendants()>1)?desc_rot:rot);
-      	glTranslatef(0.0f,0.0f,-clusterHeight);
-      
-      	GLfloat M[16];
-      	glGetFloatv(GL_MODELVIEW_MATRIX,M);
-      	GLuint displist = glGenLists(1);
-      	glNewList(displist,GL_COMPILE);
-      	  glPushMatrix();
-      	  glMultMatrixf(M);
-	  drawCylinder(root->getTopRadius(),desc->getTopRadius(),clusterHeight,
-	               color,(isMarked(desc))?visSettings.markedColor:RGB_WHITE,
-		       false,false,false);
-      	  glPopMatrix();
-      	glEndList();
-      
-      	Primitive* p = new Primitive;
-      	glPushMatrix();
-      	  glTranslatef(0.0f,0.0f,0.5f*clusterHeight);
-      	  glGetFloatv(GL_MODELVIEW_MATRIX,M);
-      	glPopMatrix();
-      	p->worldCoordinate.x = M[12];
-      	p->worldCoordinate.y = M[13];
-      	p->worldCoordinate.z = M[14];
-      	p->displayList = displist;
-      	primitives.push_back(p);
-      }
-      else {
-      	glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
-      	glTranslatef(root->getBaseRadius(),0.0f,clusterHeight);
-      	glRotatef(visSettings.outerBranchTilt,0.0f,1.0f,0.0f);
-        drawSubtreeTMark(desc,desc_rot);
-      	glRotatef(-visSettings.outerBranchTilt,0.0f,1.0f,0.0f);
-      	glTranslatef(-root->getBaseRadius(),0.0f,-clusterHeight);
-      	
-        Point3D b1 = {0.5f*clusterHeight*sin_ibt,0.0f,
-                      0.5f*clusterHeight*cos_ibt};
-        Point3D b2 = {root->getBaseRadius() - 0.5f*clusterHeight*sin_obt,0.0f,
-                      clusterHeight - 0.5f*clusterHeight*cos_obt};
-        Point3D b3 = {root->getBaseRadius(),0.0f,clusterHeight};
-        Point3D center;
-        GLfloat M[16];
-      	glGetFloatv(GL_MODELVIEW_MATRIX,M);
-      	GLuint displist = glGenLists(1);
-      	glNewList(displist,GL_COMPILE);
-      	  glPushMatrix();
-      	  glMultMatrixf(M);
-      	  drawTube(root->getTopRadius(),desc->getTopRadius(),color,
-                   (isMarked(desc))?visSettings.markedColor:RGB_WHITE,false,b1,
-                   b2,b3,center);
-      	  glPopMatrix();
-      	glEndList();
-      
-      	Primitive* p = new Primitive;
-      	glPushMatrix();
-      	  glTranslatef(center.x,center.y,center.z);
-      	  glGetFloatv(GL_MODELVIEW_MATRIX,M);
-      	glPopMatrix();
-      	p->worldCoordinate.x = M[12];
-      	p->worldCoordinate.y = M[13];
-      	p->worldCoordinate.z = M[14];
-      	p->displayList = displist;
-      	primitives.push_back(p);
-        
-        glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
-      }
-    }
-  }
-}
-*/
-/*
-void Visualizer::drawSphereState() {
-  float ex,ey,ez,px,py,pz;
-  float r = visSettings.nodeSize;
-  for (int j=0; j<4; ++j) {
-    glBegin(GL_QUAD_STRIP);
-    for (int i=0; i<=4; ++i) {
-      ex = cos_theta2_s[j+1]*cos_theta1_s[i];
-      ey = cos_theta2_s[j+1]*sin_theta1_s[i];
-      ez = sin_theta2_s[j+1];
-      px = r*ex;
-      py = r*ey;
-      pz = r*ez;
-      glNormal3f(ex,ey,ez);
-      glVertex3f(px,py,pz);
-      
-      ex = cos_theta2_s[j]*cos_theta1_s[i];
-      ey = cos_theta2_s[j]*sin_theta1_s[i];
-      ez = sin_theta2_s[j];
-      px = r*ex;
-      py = r*ey;
-      pz = r*ez;
-      glNormal3f(ex,ey,ez);
-      glVertex3f(px,py,pz);
-    }
-    glEnd();
-  }
-}
-*/
-/*
-// Draws a tube around a cubic Bezier curve of which begin point b0 is in the
-// origin. The coordinates of the other points are given as parameters, as are
-// the base radius, top radius, base color and top color. The center of the tube
-// will be stored in the center parameter. Coordinates of b1, b2, b3 and center
-// are relative to the current origin (not world coordinates) and b1, b2 and b3
-// are all assumed to be in the (x,z)-plane.
-// If interpolate is true, the color of the tube is interpolated between basecol 
-// and topcol over the length of the tube; otherwise the bottom half of the tube
-// is basecol and the top half topcol.
-void Visualizer::drawTube(float baserad,float toprad,RGB_Color basecol,
-                          RGB_Color topcol,bool interpolate,Point3D b1,
-                          Point3D b2,Point3D b3,Point3D &center) {
-  int M = visSettings.quality;
-  
-  // compute the coordinates of the center of the tube (i.e. at t = 0.5)
-  center = (0.375f*b1) + (0.375f*b2) + (0.125f*b3);
-  
-  // We know that the curve lies completely in the (x,z)-plane, so the Frenet 
-  // frame can be computed easily:
-  // T(i) is the tangent vector (first derivative of the curve)
-  // N(i) is the principal normal vector and equals (-T(i).z, 0, T(i).x)
-  // B(i) is the binormal vector and equals (0,1,0) for all i
-  // Because the contour of the tube always lies in the local (N,B)-plane, we 
-  // won't be needing the tangent vectors T(i) and only have to compute the N(i) 
-
-  vector< Point3D > N(M+1); // Frenet frame principal normals
-  
-  float t,it;
-  for (int i=0; i<=M; ++i) {
-      t = float(i) / float(M);
-      it = 1-t;
-      
-      // compute b'(t)
-      Point3D dbt = (3*it*it)*b1 + (6*t*it)*(b2-b1) + (3*t*t)*(b3-b2);
-      normalize(dbt);
-      N[i].x = -dbt.z;
-      N[i].y = 0;
-      N[i].z = dbt.x;   
-  }
-  
-  Point3D mesh_vs[M+1][M+1]; // vertices of the mesh
-  
-  float f1,f2,f3;
-  for (int i=0; i<=M; ++i) {
-    t = float(i) / float(M);
-    it = 1-t;
-    f1 = 3*t*it*it;
-    f2 = 3*t*t*it;
-    f3 = t*t*t;
-    Point3D F0 = { it*baserad*N[i].x, -it*baserad, it*baserad*N[i].z };
-    Point3D F1 = { t*toprad*N[i].x, -t*toprad, t*toprad*N[i].z };
-    
-    for (int j=0; j<=M; ++j) {
-      mesh_vs[i][j].x = f1*b1.x + f2*b2.x + f3*b3.x
-                      + F0.x*cos_theta1[j] + F1.x*cos_theta1[j];
-      mesh_vs[i][j].y = f1*b1.y + f2*b2.y + f3*b3.y
-                      + F0.y*sin_theta1[j] + F1.y*sin_theta1[j];
-      mesh_vs[i][j].z = f1*b1.z + f2*b2.z + f3*b3.z
-                      + F0.z*cos_theta1[j] + F1.z*cos_theta1[j];
-    }
-  }
-
-  Point3D mesh_ns[M+1][M+1]; // normals of the mesh vertices
-
-  for (int i=1; i<=M+1; ++i) {
-    if (i == 1) {
-      for (int j=0; j<M; ++j) {
-        Point3D v1 = mesh_vs[i][j] - mesh_vs[i-1][j];
-        Point3D v2 = mesh_vs[i-1][(j==0)?M-1:j-1] - mesh_vs[i-1][j];
-        Point3D v4 = mesh_vs[i-1][j+1] - mesh_vs[i-1][j];
-        Point3D n1 = cross_product(v1,v2);
-        Point3D n4 = cross_product(v4,v1);
-        mesh_ns[i-1][j].x = n1.x + n4.x;
-        mesh_ns[i-1][j].y = n1.y + n4.y;
-        mesh_ns[i-1][j].z = n1.z + n4.z;
-        normalize(mesh_ns[i-1][j]);
-      }
-    }
-    else if (i == M+1) {
-      for (int j=0; j<M; ++j) {
-        Point3D v2 = mesh_vs[i-1][(j==0)?M-1:j-1] - mesh_vs[i-1][j];
-        Point3D v3 = mesh_vs[i-2][j] - mesh_vs[i-1][j];
-        Point3D v4 = mesh_vs[i-1][j+1] - mesh_vs[i-1][j];
-        Point3D n2 = cross_product(v2,v3);
-        Point3D n3 = cross_product(v3,v4);
-        mesh_ns[i-1][j].x = n2.x + n3.x;
-        mesh_ns[i-1][j].y = n2.y + n3.y;
-        mesh_ns[i-1][j].z = n2.z + n3.z;
-        normalize(mesh_ns[i-1][j]);
-      }
-    }
-    else {
-      for (int j=0; j<M; ++j) {
-        Point3D v1 = mesh_vs[i][j] - mesh_vs[i-1][j];
-        Point3D v2 = mesh_vs[i-1][(j==0)?M-1:j-1] - mesh_vs[i-1][j];
-        Point3D v3 = mesh_vs[i-2][j] - mesh_vs[i-1][j];
-        Point3D v4 = mesh_vs[i-1][j+1] - mesh_vs[i-1][j];
-        Point3D n1 = cross_product(v1,v2);
-        Point3D n2 = cross_product(v2,v3);
-        Point3D n3 = cross_product(v3,v4);
-        Point3D n4 = cross_product(v4,v1);
-        mesh_ns[i-1][j].x = n1.x + n2.x + n3.x + n4.x;
-        mesh_ns[i-1][j].y = n1.y + n2.y + n3.y + n4.y;
-        mesh_ns[i-1][j].z = n1.z + n2.z + n3.z + n4.z;
-        normalize(mesh_ns[i-1][j]);
-      }
-    }
-    mesh_ns[i-1][M] = mesh_ns[i-1][0];
-  }
-  
-  float t1,it1;
-  if (interpolate) {
-    for (int i=0; i<M; ++i) {
-      t1 = float(i+1) / float(M);
-      it1 = 1-t1;
-      t = float(i) / float(M);
-      it = 1-t;
-      glBegin(GL_QUAD_STRIP);
-      for (int j=0; j<=M; ++j) {
-        glNormal3f(mesh_ns[i+1][j].x,mesh_ns[i+1][j].y,mesh_ns[i+1][j].z);
-        glColor4ub(
-            static_cast<unsigned char>(it1*basecol.r+t1*topcol.r),
-            static_cast<unsigned char>(it1*basecol.g+t1*topcol.g),
-	          static_cast<unsigned char>(it1*basecol.b+t1*topcol.b),
-            visSettings.alpha);
-        glVertex3f(mesh_vs[i+1][j].x,mesh_vs[i+1][j].y,mesh_vs[i+1][j].z);
-        
-        glNormal3f(mesh_ns[i][j].x,mesh_ns[i][j].y,mesh_ns[i][j].z);
-        glColor4ub(
-            static_cast<unsigned char>(it*basecol.r+t*topcol.r),
-            static_cast<unsigned char>(it*basecol.g+t*topcol.g),
-		        static_cast<unsigned char>(it*basecol.b+t*topcol.b),
-            visSettings.alpha);
-        glVertex3f(mesh_vs[i][j].x,mesh_vs[i][j].y,mesh_vs[i][j].z);
-      }
-      glEnd();
-    }
-  }
-  else {
-    glColor4ub(basecol.r,basecol.g,basecol.b,visSettings.alpha);
-    for (int i=0; i<M; ++i) {
-      if (i == M/2) {
-	      glColor4ub(topcol.r,topcol.g,topcol.b,visSettings.alpha);
-      }
-      glBegin(GL_QUAD_STRIP);
-      for (int j=0; j<=M; ++j) {
-        glNormal3f(mesh_ns[i+1][j].x,mesh_ns[i+1][j].y,mesh_ns[i+1][j].z);
-        glVertex3f(mesh_vs[i+1][j].x,mesh_vs[i+1][j].y,mesh_vs[i+1][j].z);
-        
-        glNormal3f(mesh_ns[i][j].x,mesh_ns[i][j].y,mesh_ns[i][j].z);
-        glVertex3f(mesh_vs[i][j].x,mesh_vs[i][j].y,mesh_vs[i][j].z);
-      }
-      glEnd();
-    }
-  }
-}
-
-RankStyle Visualizer::getRankStyle() const {
-  return rankStyle;
-}
-
-void Visualizer::setRankStyle(RankStyle rs) {
-  rankStyle = rs;
-  fillClusters();
-}
-*/
