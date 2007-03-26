@@ -1,4 +1,5 @@
 #include <string>
+#include <boost/cstdint.hpp>
 #include <boost/lexical_cast.hpp>
 #include "libnextstate.h"
 #include "librewrite.h"
@@ -284,16 +285,23 @@ bool squadt_lps2lts::perform_task(sip::configuration &configuration)
   string max_states_str(boost::any_cast <string> (configuration.get_option_argument(option_max_states)));
   if ( max_states_str != "" )
   {
-    lgopts.max_states = boost::lexical_cast < unsigned long long > (max_states_str);
+    lgopts.max_states = boost::lexical_cast < uint64_t > (max_states_str);
   } else {
     lgopts.max_states = DEFAULT_MAX_STATES;
   }
 
   lgopts.bithashing = boost::any_cast <bool> (configuration.get_option_argument(option_bithashing));
-  lgopts.bithashsize = boost::lexical_cast < unsigned long long > (
-      (boost::any_cast <string> (configuration.get_option_argument(option_bithashsize))));
+
+  std::string bithashsize_as_string = boost::any_cast< std::string > (configuration.get_option_argument(option_bithashsize));
+
+  if (!bithashsize_as_string.empty()) {
+    lgopts.bithashsize = boost::lexical_cast < uint64_t > (bithashsize_as_string);
+  }
+  else {
+    lgopts.bithashsize = 0;
+  }
   
-  lgopts.initial_table_size = strtoul((boost::any_cast <string> (configuration.get_option_argument(option_init_tsize))).c_str(),NULL,0);
+  lgopts.initial_table_size = strtoul((boost::any_cast <string> (configuration.get_option_argument(option_init_tsize))).c_str(),0,0);
 
   config = &configuration;
   config_changed = false;

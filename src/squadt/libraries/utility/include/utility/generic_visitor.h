@@ -194,7 +194,7 @@ namespace utility {
         }
   
         bool operator<(type_info_wrapper const& o) const {
-          return (m_info->before(*o.m_info));
+          return (m_info->before(*o.m_info) != 0);
         };
     };
 

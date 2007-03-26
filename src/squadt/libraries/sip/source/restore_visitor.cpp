@@ -136,7 +136,7 @@ namespace utility {
   void visitor< sip::restore_visitor_impl >::visit(sip::datatype::boolean& e, std::string& s) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "boolean");
 
-    s = tree->GetAttributeValue("value");
+    s = tree->GetAttributeValue("value", false);
 
     if (s != sip::datatype::boolean::true_string) {
       s = sip::datatype::boolean::false_string;
@@ -474,8 +474,10 @@ namespace utility {
   void visitor< sip::restore_visitor_impl >::visit(sip::layout::elements::text_field& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "text-field");
 
-    if (!tree->NoChildren()) {
-      c.m_text = tree->GetText();
+    for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
+      if (e->Value() == "text") {
+        c.m_text = e->GetText();
+      }
     }
 
     c.m_event_handler->process(&c);
