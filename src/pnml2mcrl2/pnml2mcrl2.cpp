@@ -2809,7 +2809,7 @@ static ATermList pn2gsGetActionLists(unsigned int n, ATermList ActList){
   }
 
 static ATermAppl pn2gsMakeMultiAction(ATermList ActionList, ATermList ParamList){
-  assert(!ParamList || ATgetLength(ActionList)==ATgetLength(PAramList));
+  assert(!ParamList || ATgetLength(ActionList)==ATgetLength(ParamList));
   //Make a process term a_1|...|a_n
   //input : list of action names
   ATermAppl Res=NULL;
