@@ -171,9 +171,15 @@ namespace sip {
      * \param[in] e pointer to a sip layout element of which the data is to be sent
      **/
     void communicator::send_display_data(layout::element const* e) {
-      message m(sip::visitors::store(*e), sip::message_display_update);
+      std::string        c;
 
-      impl->send_message(m);
+      {
+        sip::store_visitor v(c);
+
+        v.visit(*e,reinterpret_cast < sip::layout::element_identifier> (e));
+      }
+
+      impl->send_message(sip::message(c, sip::message_display_update));
     }
 
     void communicator::await_configuration() const {

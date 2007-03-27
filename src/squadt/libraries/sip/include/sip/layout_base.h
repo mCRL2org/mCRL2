@@ -6,8 +6,9 @@
 
 #include <boost/function.hpp>
 
+#include <utility/generic_visitor.h>
+
 #include <sip/detail/layout_mediator.h>
-#include <sip/visitors.h>
 
 namespace sip {
   namespace tool {
@@ -22,6 +23,7 @@ namespace sip {
 
     /** \brief Abstract base class for layout elements */
     class element : public utility::visitable {
+
       template < typename R, typename S >
       friend class ::utility::visitor;
 
