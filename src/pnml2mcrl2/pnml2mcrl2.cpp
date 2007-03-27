@@ -667,7 +667,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 
           ATermAppl Name = parse_data_expr(iss);
           if(!Name) {gsErrorMsg("Parsing of the name of arc %T failed\n", Aid); return NULL;} 
-          Arc_name = Name;
+          Arc_name = ATAgetArgument(Name,0); // get rid of Id(_).
         }
         else {
 	  // the name should be omitted
@@ -898,16 +898,22 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     Ids = ATconcat(Ids, ATtableKeys(context.arc_reset));
     while (ATisEmpty(Ids) == ATfalse) {
       // make the action: arcID
-      CurrentAction = ATmakeAppl0(ATgetAFun(ATgetFirst(Ids)));
-      ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
+      ATermAppl Id=ATAgetFirst(Ids);
+      ATermList SortList=ATmakeList0();
+      ATermAppl Type=ATAtableGet(context.arc_type_mcrl2,(ATerm)Id);
+      if(Type && !ATisEqual(Type,Appl0)) 
+	SortList=ATmakeList1((ATerm)Type);
+      
+      CurrentAction = Id;
+      ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, SortList));
       gsDebugMsg("Action: %T created.\n", CurrentAction);
       // make the action: _arcID
-      CurrentAction = ATmakeAppl0(ATprependAFun("_", ATgetAFun(ATgetFirst(Ids))));
-      ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
+      CurrentAction = ATmakeAppl0(ATprependAFun("_", ATgetAFun(Id)));
+      ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, SortList));
       gsDebugMsg("Action: %T created.\n", CurrentAction);
       // make the action: __arcID
-      CurrentAction = ATmakeAppl0(ATprependAFun("__", ATgetAFun(ATgetFirst(Ids))));
-      ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
+      CurrentAction = ATmakeAppl0(ATprependAFun("__", ATgetAFun(Id)));
+      ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, SortList));
       gsDebugMsg("Action: %T created.\n", CurrentAction);
       
       Ids = ATgetNext(Ids);
@@ -2042,7 +2048,6 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 
 	ATermAppl ArcName=ATAtableGet(context.arc_name,(ATerm)Arc);
 	if(!ArcName || ATisEqual(ArcName,Appl0)) continue;
-        ArcName=ATAgetArgument(ArcName,0); //to get rid of Id()	
 
 	if(ATAtableGet(Vars,(ATerm)ArcName)){
 	  ATtableDestroy(Vars);
@@ -2091,18 +2096,26 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     gsDebugMsg("Conversion Succesful!");
     gsDebugMsg("\n\n====================\n\n");
 
-    return
-      gsMakeSpecV1(
-        gsMakeDataSpec(
-          gsMakeSortSpec(ATmakeList0()),
-          gsMakeConsSpec(ATmakeList0()),
-          gsMakeMapSpec(ATmakeList0()),
-          gsMakeDataEqnSpec(ATmakeList0())
-        ),
-        gsMakeActSpec(Actions),
-        gsMakeProcEqnSpec(ProcEqns),
-        gsMakeProcessInit(ATmakeList0(),gsMakeParamId(ATAgetArgument(Spec, 3), ATmakeList0()))
-      );
+    ATermAppl Result=ATAgetArgument(Spec, 4); // prelude
+    if(ATisEqual(Result,Appl0)){
+      Result=gsMakeSpecV1(
+			  gsMakeDataSpec(
+					 gsMakeSortSpec(ATmakeList0()),
+					 gsMakeConsSpec(ATmakeList0()),
+					 gsMakeMapSpec(ATmakeList0()),
+					 gsMakeDataEqnSpec(ATmakeList0())
+					 ),
+			  gsMakeActSpec(Actions),
+			  gsMakeProcEqnSpec(ProcEqns),
+			  gsMakeProcessInit(ATmakeList0(),gsMakeParamId(ATAgetArgument(Spec, 3), ATmakeList0()))
+			  );
+    }
+    else {
+      Result=ATsetArgument(Result,(ATerm)gsMakeActSpec(ATconcat(ATLgetArgument(ATAgetArgument(Result,1),0),Actions)),1);
+      Result=ATsetArgument(Result,(ATerm)gsMakeProcEqnSpec(ATconcat(ATLgetArgument(ATAgetArgument(Result,2),0),ProcEqns)),2);
+      Result=ATsetArgument(Result,(ATerm)gsMakeProcessInit(ATmakeList0(),gsMakeParamId(ATAgetArgument(Spec, 3), ATmakeList0())),3);
+    }
+    return Result;
   }
 
   /*               */
@@ -2229,7 +2242,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     
     gsDebugMsg("The result of conversion is: %T\n",Spec);
    
-    Spec = type_check_spec(Spec);
+    //Spec = type_check_spec(Spec);
    
     if(Spec){
       PrintPart_C(OutStream, (ATerm) Spec, ppDefault);
@@ -2313,7 +2326,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   // Added by Yarick: alternative generation of Places:
 //  static ATermAppl pn2gsGenerateP_pi_a(ATermList InActionLists, ATermList OutActionLists, ATermList ResetActionLists);
   static ATermList pn2gsGetActionLists(unsigned int n, ATermList ActList);
-  static ATermAppl pn2gsMakeMultiAction(ATermList ActionList);
+static ATermAppl pn2gsMakeMultiAction(ATermList ActionList, ATermList ParamList=NULL);
   static ATermList pn2gsMakeSendActions(ATermList ReadActions);
 
   //==================================================
@@ -2795,20 +2808,21 @@ static ATermList pn2gsGetActionLists(unsigned int n, ATermList ActList){
     return ATconcat(RestN1,RestN);
   }
 
-  static ATermAppl pn2gsMakeMultiAction(ATermList ActionList){
-    //Make a process term a_1|...|a_n
-    //input : list of action names
-    ATermAppl Res=NULL;
-    for(;!ATisEmpty(ActionList);ActionList=ATgetNext(ActionList)){
-      ATermAppl CurAct=gsMakeParamId(ATAgetFirst(ActionList),ATmakeList0());
-      if(Res) Res=gsMakeSync(CurAct,Res);
-      else Res=CurAct;
-    }
-
-    if(!Res) Res=gsMakeTau();
-
-    return Res;
+static ATermAppl pn2gsMakeMultiAction(ATermList ActionList, ATermList ParamList){
+  assert(!ParamList || ATgetLength(ActionList)==ATgetLength(PAramList));
+  //Make a process term a_1|...|a_n
+  //input : list of action names
+  ATermAppl Res=NULL;
+  for(;!ATisEmpty(ActionList);ActionList=ATgetNext(ActionList),ParamList=(ParamList)?ATgetNext(ParamList):NULL){
+    ATermAppl CurAct=gsMakeParamId(ATAgetFirst(ActionList),(ParamList)?ATLgetFirst(ParamList):ATmakeList0());
+    if(Res) Res=gsMakeSync(CurAct,Res);
+    else Res=CurAct;
   }
+  
+  if(!Res) Res=gsMakeTau();
+  
+  return Res;
+}
  
   static ATermList pn2gsListNNats(int n){
     ATermList Res=ATmakeList0();
@@ -2848,16 +2862,73 @@ static ATermList pn2gsGetActionLists(unsigned int n, ATermList ActList){
     //==================================================
     // generate the processes
     //==================================================
-    ATermList Actions = ATmakeList1((ATerm)ATmakeAppl0(ATappendAFun(ATprependAFun("t_",CurrentTransId),"_mon"))); //MonitorAction
+    ATermList Arcs    = ATmakeList0();
+    ATermList Actions = ATmakeList0();
     {
       ATermList MoreActions=ATLtableGet(context.trans_in, TransID);
-      if(MoreActions) Actions=ATconcat(Actions,MoreActions);
+      if(MoreActions){ 
+	Actions=ATconcat(Actions,MoreActions);
+	Arcs=ATconcat(Arcs,MoreActions);
+      }
 
       MoreActions=ATLtableGet(context.trans_out, TransID);
-      if(MoreActions) Actions=ATconcat(Actions,pn2gsMakeSendActions(MoreActions));
+      if(MoreActions) {
+	Actions=ATconcat(Actions,pn2gsMakeSendActions(MoreActions));
+	Arcs=ATconcat(Arcs,MoreActions);
+      }
     }
 
-    return ATmakeList1((ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), pn2gsMakeMultiAction(Actions)));    
+    //taking care of the colors
+    //need to 
+    //1) add parameters to actions (variables)
+    //after adding the monitor action
+    //2) add predicate (if any)
+    //3) add sums
+
+    //1) add parameters to actions (variables)
+    ATermList ParamList=ATmakeList0();
+    ATermList SumList=ATmakeList0();
+    int n=0;
+    for(ATermList l=Arcs;!ATisEmpty(l);l=ATgetNext(l)){
+      ATermAppl Arc=ATAgetFirst(l);
+      ATermAppl Type=ATAtableGet(context.arc_type_mcrl2,(ATerm)Arc);
+      if(!Type || ATisEqual(Type,Appl0)){
+	//not colored
+	ParamList=ATinsert(ParamList,(ATerm)ATmakeList0());
+      }
+      else {
+	ATermAppl VarName=ATAtableGet(context.arc_name,(ATerm)Arc);
+	if(!VarName || ATisEqual(VarName,Appl0)){
+	  //generate a fresh variable
+	  VarName=ATmakeAppl0(ATappendAFun(ATappendAFun(ATprependAFun("vt_",CurrentTransId),"_"),ATgetName(ATmakeAFunInt0(n))));
+	  n++;
+	}
+	ParamList=ATinsert(ParamList,(ATerm)ATmakeList1((ATerm)gsMakeId(VarName)));
+	SumList=ATinsert(SumList,(ATerm)gsMakeDataVarId(VarName,Type));
+      }
+    }
+    ParamList=ATreverse(ParamList);
+    SumList=ATreverse(SumList);
+    
+    //add the monitor action
+    Actions=ATinsert(Actions,(ATerm)ATmakeAppl0(ATappendAFun(ATprependAFun("t_",CurrentTransId),"_mon"))); //MonitorAction
+    ParamList=ATinsert(ParamList,(ATerm)ATmakeList0());
+
+    //make the multiaction
+    ATermAppl Body=pn2gsMakeMultiAction(Actions,ParamList);
+    // 2) add predicate (if any)
+    ATermAppl Predicate=ATAtableGet(context.trans_predicate,(ATerm)TransID);
+    if(!ATisEqual(Predicate,Appl0)){
+      Body=gsMakeIfThen(Predicate,Body);
+    }
+    // 3) add sums if any
+    if(ATgetLength(SumList)){
+      Body=gsMakeSum(SumList,Body);
+    }
+
+    //gsVerboseMsg("Body: %T\n\n",Body);
+
+    return ATmakeList1((ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Body));    
   }
 
   static ATermList pn2gsMakeSendActions(ATermList ReadActions){
