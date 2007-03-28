@@ -261,7 +261,7 @@ namespace utility {
 
     o.m_mime_type = sip::mime_type(tree->GetAttributeValue("mime-type"));
     
-    tree->GetAttribute("location", &o.m_location);
+    tree->GetAttribute("location", &o.m_location, false);
   }
 
   template <>
