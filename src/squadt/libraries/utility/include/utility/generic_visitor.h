@@ -397,7 +397,8 @@ namespace utility {
       inline void initialise() {
         static const bool initialised(visitor< S, R >::initialise());
        
-        assert(initialised);
+        if (initialised) {
+        }
       }
 
     public:

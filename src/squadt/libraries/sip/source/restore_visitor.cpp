@@ -403,6 +403,11 @@ namespace utility {
     c.m_event_handler->process(&c);
   }
 
+  template < typename T >
+  std::istream& operator>>(std::istream& i, T** t) {
+    return (i >> *t);
+  }
+
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::layout::elements::radio_button& c, sip::display::element_for_id& element_by_id) {
@@ -412,11 +417,15 @@ namespace utility {
 
     tree->GetAttribute("label", &c.m_label);
 
-    tree->GetAttributeOrDefault("connected", reinterpret_cast < void** > (&c.m_connection), reinterpret_cast < void* > (&c));
+    sip::layout::element_identifier id;
+
+    tree->GetAttributeOrDefault("connected", &id, 0);
     tree->GetAttributeOrDefault("first", &c.m_first, false);
     tree->GetAttributeOrDefault("selected", &c.m_selected, false);
 
-    if (c.m_connection != &c) {
+    c.m_connection = reinterpret_cast < sip::layout::elements::radio_button* > (id);
+
+    if (c.m_connection != 0) {
       if (0 < element_by_id.count(reinterpret_cast < sip::layout::element_identifier > (c.m_connection))) {
         radio_button* i = &c;
 
