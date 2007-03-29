@@ -1,5 +1,6 @@
 #include <liblowlevel.h>
 #include <lts/liblts.h>
+#include <libprint_c.h>
 
 using namespace std;
 
@@ -43,8 +44,8 @@ void p_lts::tau_star_reduce()
             {
               p_add_transition(state,transitions[u].label,transitions[u].to);
             }
+            u++;
           }
-          u++;
         }
       }
       t++;
@@ -151,7 +152,6 @@ void p_lts::tau_star_reduce()
     if ( !taus[i] )
     {
       label_map[i] = new_nlabels;
-      taus[new_nlabels] = false;
       if ( label_info )
       {
         label_values[new_nlabels] = label_values[i];
@@ -164,7 +164,7 @@ void p_lts::tau_star_reduce()
   for (unsigned int i=0; i < ntransitions; i++)
   {
     if ( (reachable[transitions[i].from] != unknown) &&
-         !taus[label_map[transitions[i].label]] )
+         !taus[transitions[i].label] )
     {
       transition t = transitions[i];
       t.from = state_map[t.from];
@@ -173,6 +173,11 @@ void p_lts::tau_star_reduce()
       transitions[new_ntransitions] = t;
       new_ntransitions++;
     }
+  }
+
+  for ( unsigned int i=0; i < nlabels; i++)
+  {
+    taus[i] = false;
   }
   
   FREE_A(label_map);

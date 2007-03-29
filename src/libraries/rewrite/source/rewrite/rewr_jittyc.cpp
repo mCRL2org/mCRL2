@@ -2648,13 +2648,6 @@ void RewriterCompilingJitty::CompileRewriteSystem(lps::data_specification DataSp
   free(s);
 }
 
-RewriterCompilingJitty::RewriterCompilingJitty(lps::data_specification DataSpec)
-{
-  term2int = ATtableCreate(100,75);
-  initialise_common();
-  CompileRewriteSystem(DataSpec);
-}
-
 static void cleanup_file(char *f)
 {
   if ( unlink(f) )
@@ -2664,13 +2657,33 @@ static void cleanup_file(char *f)
   free(f);
 }
 
+RewriterCompilingJitty::RewriterCompilingJitty(lps::data_specification DataSpec)
+{
+  term2int = ATtableCreate(100,75);
+  initialise_common();
+  CompileRewriteSystem(DataSpec);
+#ifdef NDEBUG
+  cleanup_file(file_c);
+  free(file_c);
+  cleanup_file(file_o);
+  free(file_o);
+  cleanup_file(file_so);
+  free(file_so);
+#endif
+}
+
 RewriterCompilingJitty::~RewriterCompilingJitty()
 {
   finalise_common();
   ATtableDestroy(term2int);
+#ifndef NDEBUG
   cleanup_file(file_c);
+  free(file_c);
   cleanup_file(file_o);
+  free(file_o);
   cleanup_file(file_so);
+  free(file_so);
+#endif
 }
 
 ATermList RewriterCompilingJitty::rewriteInternalList(ATermList l)
