@@ -2664,11 +2664,8 @@ RewriterCompilingJitty::RewriterCompilingJitty(lps::data_specification DataSpec)
   CompileRewriteSystem(DataSpec);
 #ifdef NDEBUG
   cleanup_file(file_c);
-  free(file_c);
   cleanup_file(file_o);
-  free(file_o);
   cleanup_file(file_so);
-  free(file_so);
 #endif
 }
 
@@ -2678,11 +2675,8 @@ RewriterCompilingJitty::~RewriterCompilingJitty()
   ATtableDestroy(term2int);
 #ifndef NDEBUG
   cleanup_file(file_c);
-  free(file_c);
   cleanup_file(file_o);
-  free(file_o);
   cleanup_file(file_so);
-  free(file_so);
 #endif
 }
 

@@ -2196,11 +2196,8 @@ RewriterCompilingInnermost::RewriterCompilingInnermost(lps::data_specification D
   CompileRewriteSystem(DataSpec);
 #ifdef NDEBUG
   cleanup_file(file_c);
-  free(file_c);
   cleanup_file(file_o);
-  free(file_o);
   cleanup_file(file_so);
-  free(file_so);
 #endif
 }
 
@@ -2210,11 +2207,8 @@ RewriterCompilingInnermost::~RewriterCompilingInnermost()
   ATtableDestroy(term2int);
 #ifndef NDEBUG
   cleanup_file(file_c);
-  free(file_c);
   cleanup_file(file_o);
-  free(file_o);
   cleanup_file(file_so);
-  free(file_so);
 #endif
 }
 
