@@ -404,8 +404,8 @@ namespace utility {
   }
 
   template < typename T >
-  std::istream& operator>>(std::istream& i, T** t) {
-    return (i >> *t);
+  std::istream& operator>>(std::istream& i, T*& t) {
+    return (i >> reinterpret_cast < void*& > (t));
   }
 
   template <>
@@ -417,15 +417,11 @@ namespace utility {
 
     tree->GetAttribute("label", &c.m_label);
 
-    sip::layout::element_identifier id;
-
-    tree->GetAttributeOrDefault("connected", &id, 0);
+    tree->GetAttributeOrDefault("connected", &c.m_connection, &c);
     tree->GetAttributeOrDefault("first", &c.m_first, false);
     tree->GetAttributeOrDefault("selected", &c.m_selected, false);
 
-    c.m_connection = reinterpret_cast < sip::layout::elements::radio_button* > (id);
-
-    if (c.m_connection != 0) {
+    if (c.m_connection != &c) {
       if (0 < element_by_id.count(reinterpret_cast < sip::layout::element_identifier > (c.m_connection))) {
         radio_button* i = &c;
 
