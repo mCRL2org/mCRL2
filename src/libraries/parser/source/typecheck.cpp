@@ -59,7 +59,7 @@ static ATbool gstcInTypesL(ATermList, ATermList);
 static ATbool gstcEqTypesL(ATermList, ATermList);
 
 static ATbool gstcIsSortDeclared(ATermAppl SortName);
-static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr);
+static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr, bool high_level=true);
 static ATbool gstcIsSortExprListDeclared(ATermList SortExprList);
 static ATbool gstcReadInSortStruct(ATermAppl);
 static ATbool gstcAddConstant(ATermAppl, ATermAppl, const char*, bool high_level=true);
@@ -508,24 +508,33 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, lps::specification &lps_spec
   gsDebugMsg ("type checking of state formulas read-in phase started\n");
 
   //XXX read-in from LPS (not finished)
-  if(gstcReadInSorts((ATermList) lps_spec.data().sorts(),false)
-       && gstcReadInConstructors()
-       && gstcReadInFuncs(ATconcat((ATermList) lps_spec.data().constructors(),(ATermList) lps_spec.data().mappings()),false)
-    ){
+  if(gstcReadInSorts((ATermList) lps_spec.data().sorts(),false)){
+    if(gstcReadInConstructors()){
+       if(gstcReadInFuncs(ATconcat((ATermList) lps_spec.data().constructors(),(ATermList) lps_spec.data().mappings()),false)){
+         if(!gstcReadInActs((ATermList) lps_spec.action_labels()))
+           gsWarningMsg("Ignoring the previous error(s), the formula will be typechecked without action label information.\n");
+         gsDebugMsg ("type checking of state formulas read-in phase finished\n");
 
-    if(!gstcReadInActs((ATermList) lps_spec.action_labels()))
-      gsWarningMsg("Ignoring the previous error(s), the formula will be typechecked without action label information.\n");
-    gsDebugMsg ("type checking of state formulas read-in phase finished\n");
+         ATermTable Vars=ATtableCreate(63,50);
+         ATermTable StateVars=ATtableCreate(63,50);
 
-    ATermTable Vars=ATtableCreate(63,50);
-    ATermTable StateVars=ATtableCreate(63,50);
+         //add LPS params as data vars??
 
-    //add LPS params as data vars??
+         Result=gstcTraverseStateFrm(Vars,StateVars,state_frm);
 
-    Result=gstcTraverseStateFrm(Vars,StateVars,state_frm);
-
-    ATtableDestroy(Vars);
-    ATtableDestroy(StateVars);
+         ATtableDestroy(Vars);
+         ATtableDestroy(StateVars);
+       }
+       else {
+         gsErrorMsg("Reading functions from LPS failed.\n");
+       }
+    }
+    else {
+      gsErrorMsg("Reading structure constructors from LPS failed.\n");
+    }
+  }  
+  else {
+    gsErrorMsg("Reading sorts from LPS failed.\n");
   }
 	
   gstcDataDestroy();
@@ -1016,7 +1025,7 @@ static ATbool gstcReadInFuncs(ATermList Funcs, bool high_level){
     ATermAppl FuncName=ATAgetArgument(Func,0);
     ATermAppl FuncType=ATAgetArgument(Func,1);
     
-    if(!gstcIsSortExprDeclared(FuncType)) { return ATfalse; }
+    if(!gstcIsSortExprDeclared(FuncType,high_level)) { return ATfalse; }
     //if FuncType is a defined function sort, unwind it
     { ATermAppl NewFuncType;
       if(gsIsSortId(FuncType) 
@@ -1249,9 +1258,7 @@ static ATbool gstcIsSortDeclared(ATermAppl SortName){
   return ATfalse;
 }
 
-static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr){
-  ATbool Result=ATtrue;
-
+static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr, bool high_level){
   if(gsIsSortId(SortExpr)){ 
     ATermAppl SortName=ATAgetArgument(SortExpr,0);
     if(!gstcIsSortDeclared(SortName))
@@ -1260,10 +1267,10 @@ static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr){
   }
 
   if(gsIsSortCons(SortExpr))
-    return gstcIsSortExprDeclared(ATAgetArgument(SortExpr, 1));
+    return gstcIsSortExprDeclared(ATAgetArgument(SortExpr, 1),high_level);
   
   if(gsIsSortArrowProd(SortExpr)){
-    if(!gstcIsSortExprDeclared(ATAgetArgument(SortExpr,1))) return ATfalse;
+    if(!gstcIsSortExprDeclared(ATAgetArgument(SortExpr,1),high_level)) return ATfalse;
     if(!gstcIsSortExprListDeclared(ATLgetArgument(SortExpr,0))) return ATfalse;
     return ATtrue;
   }
@@ -1278,14 +1285,21 @@ static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr){
 	ATermAppl ProjSort=ATAgetArgument(Proj,1);
 	
 	// not to forget, recursive call for ProjSort ;-)
-	if(!gstcIsSortExprDeclared(ProjSort)) {return ATfalse;}
+	if(!gstcIsSortExprDeclared(ProjSort,high_level)) {return ATfalse;}
       }
     }
     return ATtrue;
   }
-  
+
+  if(!high_level && gsIsSortArrow(SortExpr)){
+    if(!gstcIsSortExprDeclared(ATAgetArgument(SortExpr,1),high_level)) return ATfalse;
+    if(!gstcIsSortExprDeclared(ATAgetArgument(SortExpr,0),high_level)) return ATfalse;
+    return ATtrue;
+  }
+
   assert(0);
-  return Result;
+  gsErrorMsg("this is not a sort expression %T\n",SortExpr);
+  return ATfalse;
 }
 
 static ATbool gstcIsSortExprListDeclared(ATermList SortExprList){
@@ -1536,7 +1550,7 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm){
 
     ATermAppl NewPosType=gstcTraverseVarConsTypeD(Vars,Vars,&Par,gstcExpandNumTypesDown(PosType));
 
-    if(!NewPosType) {return NULL;}
+    if(!NewPosType) {gsErrorMsg("Cannot typecheck %P as type %P (while typechecking %P)\n",Par,gstcExpandNumTypesDown(PosType),ProcTerm);return NULL;}
     NewPars=ATinsert(NewPars,(ATerm)Par);
     NewPosTypeList=ATinsert(NewPosTypeList,(ATerm)NewPosType);
   }
