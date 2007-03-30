@@ -182,6 +182,9 @@ namespace squadt {
           }
         }
       }
+
+      /* Hack to avoid lockups on wxGTK */
+      object_view->Enable(true);
     }
 
     void project::build() {
@@ -359,7 +362,7 @@ namespace squadt {
 
       context_menu.Append(cmID_DETAILS, wxT("Details"));
 
-      PopupMenu(&context_menu);
+      object_view->PopupMenu(&context_menu);
     }
 
     /**

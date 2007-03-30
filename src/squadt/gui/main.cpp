@@ -23,7 +23,7 @@ namespace squadt {
       about_dialog.ShowModal();
     }
 
-    main::main() : wxFrame(0, wxID_ANY, default_title, wxDefaultPosition, wxDefaultSize),
+    main::main() : wxFrame(0, wxID_ANY, default_title, wxDefaultPosition, wxDefaultSize,wxDEFAULT_FRAME_STYLE|wxWS_EX_PROCESS_UI_UPDATES),
                                        project_view(0) {
 
       /* Add widgets */

@@ -608,9 +608,13 @@ namespace utility {
         visitor< sip::restore_visitor_impl >(e).visit(p, element_by_id);
 
         if (p.get() != 0) {
+          sip::layout::properties cn = current_properties;
+
           element_by_id[id] = p.get();
 
-          c.m_children.push_back(sip::layout::manager::layout_descriptor(p.release(), current_properties, id));
+          cn.set_growth(p->get_grow());
+
+          c.m_children.push_back(sip::layout::manager::layout_descriptor(p.release(), cn, id));
         }
       }
     }

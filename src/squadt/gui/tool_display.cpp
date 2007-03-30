@@ -733,7 +733,7 @@ namespace squadt {
 
             GetSizer()->Insert(1, content, 1, wxALL|wxALIGN_LEFT, 2);
 
-            content->Layout();
+            Layout();
 
             Show(current_layout->get_visibility());
           }

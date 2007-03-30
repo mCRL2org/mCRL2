@@ -385,7 +385,7 @@ namespace sip {
      * \param[in] c the layout properties to observe
      **/
     inline element* box::add(element* e, properties const& c) {
-      properties cn;
+      properties cn = c;
 
       cn.set_growth(e->get_grow());
 
