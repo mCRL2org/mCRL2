@@ -42,9 +42,9 @@ static Body body;
 // Static function declarations
 static void gstcDataInit(void);
 static void gstcDataDestroy(void);
-static ATbool gstcReadInSorts (ATermList);
+static ATbool gstcReadInSorts (ATermList, bool high_level=true);
 static ATbool gstcReadInConstructors();
-static ATbool gstcReadInFuncs(ATermList);
+static ATbool gstcReadInFuncs(ATermList, bool high_level=true);
 static ATbool gstcReadInActs (ATermList);
 static ATbool gstcReadInProcsAndInit (ATermList, ATermAppl);
 
@@ -62,8 +62,9 @@ static ATbool gstcIsSortDeclared(ATermAppl SortName);
 static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr);
 static ATbool gstcIsSortExprListDeclared(ATermList SortExprList);
 static ATbool gstcReadInSortStruct(ATermAppl);
-static ATbool gstcAddConstant(ATermAppl, ATermAppl, const char*);
-static ATbool gstcAddFunction(ATermAppl, ATermAppl, const char*);
+static ATbool gstcAddConstant(ATermAppl, ATermAppl, const char*, bool high_level=true);
+static ATbool gstcAddFunction(ATermAppl, ATermAppl, const char*, bool high_level=true);
+
 static void gstcAddSystemConstant(ATermAppl, ATermAppl);
 static void gstcAddSystemFunctionProd(ATermAppl, ATermAppl);
 
@@ -359,7 +360,7 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, lps::specification &lps_spec
   gsDebugMsg ("type checking of sort expressions read-in phase started\n");
 
   //XXX read-in from LPS (not finished)
-  if(/* gstcReadInSorts((ATermList) lps_spec.sorts())  &&  gstcReadInActs((ATermList) lps_spec.action_labels() )*/1){
+  if(gstcReadInSorts((ATermList) lps_spec.data().sorts()),false){
     gsDebugMsg ("type checking of sort expressions read-in phase finished\n");
 
     if(!gsIsNotInferred(sort_expr)){
@@ -393,7 +394,11 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
   gsDebugMsg ("type checking of data expressions read-in phase started\n");
 
   //XXX read-in from LPS (not finished)
-  if(/* gstcReadInSorts((ATermList) lps_spec.sorts())  &&  gstcReadInActs((ATermList) lps_spec.action_labels() )*/1){
+  if(gstcReadInSorts((ATermList) lps_spec.data().sorts(),false) 
+       && gstcReadInConstructors() 
+       && gstcReadInFuncs(ATconcat((ATermList) lps_spec.data().constructors(),(ATermList) lps_spec.data().mappings()),false)
+       && gstcReadInActs((ATermList) lps_spec.action_labels())
+    ){
     gsDebugMsg ("type checking of data expressions read-in phase finished\n");
 
     if(gsIsNotInferred(sort_expr)){
@@ -418,7 +423,7 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
     }
   }
   else {
-      gsErrorMsg("Reading Sorts from LPS failed.\n\n");
+      gsErrorMsg("Reading from LPS failed.\n\n");
   }
 
   failed:
@@ -439,7 +444,11 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec)
   gsDebugMsg ("type checking of multiactions read-in phase started\n");
 
   //XXX read-in from LPS (not finished)
-  if(/* gstcReadInSorts((ATermList) lps_spec.sorts())  && */ gstcReadInActs((ATermList) lps_spec.action_labels())){
+    if(gstcReadInSorts((ATermList) lps_spec.data().sorts(),false)
+       && gstcReadInConstructors()
+       && gstcReadInFuncs(ATconcat((ATermList) lps_spec.data().constructors(),(ATermList) lps_spec.data().mappings()),false)
+       && gstcReadInActs((ATermList) lps_spec.action_labels())
+      ){
     gsDebugMsg ("type checking of multiactions read-in phase finished\n");
 
     if(gsIsMultAct(mult_act)){
@@ -463,7 +472,7 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec)
     }
   }
   else {
-      gsErrorMsg("Reading Sorts from LPS failed.\n\n");
+      gsErrorMsg("Reading from LPS failed.\n\n");
   }
     
   gstcDataDestroy();
@@ -499,7 +508,11 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, lps::specification &lps_spec
   gsDebugMsg ("type checking of state formulas read-in phase started\n");
 
   //XXX read-in from LPS (not finished)
-  if(/* gstcReadInSorts((ATermList) lps_spec.sorts()) &&  gstcReadInActs((ATermList) lps_spec.action_labels() */ true){
+  if(gstcReadInSorts((ATermList) lps_spec.data().sorts(),false)
+       && gstcReadInConstructors()
+       && gstcReadInFuncs(ATconcat((ATermList) lps_spec.data().constructors(),(ATermList) lps_spec.data().mappings()),false)
+    ){
+
     if(!gstcReadInActs((ATermList) lps_spec.action_labels()))
       gsWarningMsg("Ignoring the previous error(s), the formula will be typechecked without action label information.\n");
     gsDebugMsg ("type checking of state formulas read-in phase finished\n");
@@ -942,29 +955,29 @@ void gstcDataDestroy(void){
   ATunprotectList(&body.equations);
 }
  
-static ATbool gstcReadInSorts (ATermList Sorts){
+static ATbool gstcReadInSorts (ATermList Sorts, bool high_level){
   ATbool nnew;
   ATbool Result=ATtrue;
   for(;!ATisEmpty(Sorts);Sorts=ATgetNext(Sorts)){
     ATermAppl Sort=ATAgetFirst(Sorts);
     ATermAppl SortName=ATAgetArgument(Sort,0);
-    if(ATisEqual(gsMakeSortIdBool(),gsMakeSortId(SortName))){
+    if(high_level && ATisEqual(gsMakeSortIdBool(),gsMakeSortId(SortName))){
       gsErrorMsg("attempt to redeclare sort Bool\n");
       return ATfalse;
     }				
-    if(ATisEqual(gsMakeSortIdPos(),gsMakeSortId(SortName))){
+    if(high_level && ATisEqual(gsMakeSortIdPos(),gsMakeSortId(SortName))){
       gsErrorMsg("attempt to redeclare sort Pos\n");
       return ATfalse;
     }				
-    if(ATisEqual(gsMakeSortIdNat(),gsMakeSortId(SortName))){
+    if(high_level && ATisEqual(gsMakeSortIdNat(),gsMakeSortId(SortName))){
       gsErrorMsg("attempt to redeclare sort Nat\n");
       return ATfalse;
     }				
-    if(ATisEqual(gsMakeSortIdInt(),gsMakeSortId(SortName))){
+    if(high_level && ATisEqual(gsMakeSortIdInt(),gsMakeSortId(SortName))){
       gsErrorMsg("attempt to redeclare sort Int\n");
       return ATfalse;
     }				
-    if(ATisEqual(gsMakeSortIdReal(),gsMakeSortId(SortName))){
+    if(high_level && ATisEqual(gsMakeSortIdReal(),gsMakeSortId(SortName))){
       gsErrorMsg("attempt to redeclare sort Real\n");
       return ATfalse;
     }				
@@ -995,7 +1008,7 @@ static ATbool gstcReadInConstructors(){
   return ATtrue;
 } 
 
-static ATbool gstcReadInFuncs(ATermList Funcs){
+static ATbool gstcReadInFuncs(ATermList Funcs, bool high_level){
   gsDebugMsg("Start Read-in Func\n");    
   ATbool Result=ATtrue;
   for(;!ATisEmpty(Funcs);Funcs=ATgetNext(Funcs)){
@@ -1012,11 +1025,11 @@ static ATbool gstcReadInFuncs(ATermList Funcs){
 	FuncType=NewFuncType;
     }
     
-    if(gsIsSortArrowProd(FuncType)){
-      if(!gstcAddFunction(FuncName,FuncType,"function")) { return ATfalse; }
+    if((high_level && gsIsSortArrowProd(FuncType)) || (!high_level && gsIsSortArrow(FuncType))){
+      if(!gstcAddFunction(FuncName,FuncType,"function",high_level)) { return ATfalse; }
     }
     else{
-      if(!gstcAddConstant(FuncName,FuncType,"constant")) { gsErrorMsg("could not add constant\n"); return ATfalse; }
+      if(!gstcAddConstant(FuncName,FuncType,"constant",high_level)) { gsErrorMsg("could not add constant\n"); return ATfalse; }
     }
     gsDebugMsg("Read-in Func %T, Types %T\n",FuncName,FuncType);    
   }
@@ -1342,7 +1355,7 @@ static ATbool gstcReadInSortStruct(ATermAppl SortExpr){
   return Result;
 }
 
-static ATbool gstcAddConstant(ATermAppl Name, ATermAppl Sort, const char* msg){
+static ATbool gstcAddConstant(ATermAppl Name, ATermAppl Sort, const char* msg, bool high_level){
   ATbool Result=ATtrue;
 
   if(ATAtableGet(context.constants, (ATerm)Name) || ATLtableGet(context.functions, (ATerm)Name)){
@@ -1350,7 +1363,7 @@ static ATbool gstcAddConstant(ATermAppl Name, ATermAppl Sort, const char* msg){
     return ATfalse;
   }
 
-  if(ATAtableGet(gssystem.constants, (ATerm)Name) || ATLtableGet(gssystem.functions, (ATerm)Name)){
+  if(high_level && (ATAtableGet(gssystem.constants, (ATerm)Name) || ATLtableGet(gssystem.functions, (ATerm)Name))){
     gsErrorMsg("attempt to redeclare the system identifier with %s %P\n", msg, Name);
     return ATfalse;
   }
@@ -1359,7 +1372,7 @@ static ATbool gstcAddConstant(ATermAppl Name, ATermAppl Sort, const char* msg){
   return Result;
 }
 
-static ATbool gstcAddFunction(ATermAppl Name, ATermAppl Sort, const char *msg){
+static ATbool gstcAddFunction(ATermAppl Name, ATermAppl Sort, const char *msg, bool high_level){
   ATbool Result=ATtrue;
 
   //constants and functions can have the same names
@@ -1367,7 +1380,7 @@ static ATbool gstcAddFunction(ATermAppl Name, ATermAppl Sort, const char *msg){
   //    ThrowMF("Double declaration of constant and %s %T\n", msg, Name);
   //  }
 
-  if(ATAtableGet(gssystem.constants, (ATerm)Name) || ATLtableGet(gssystem.functions, (ATerm)Name)){
+  if(high_level && (ATAtableGet(gssystem.constants, (ATerm)Name) || ATLtableGet(gssystem.functions, (ATerm)Name))){
     gsErrorMsg("attempt to redeclare the system identifier with %s %P\n", msg, Name);
     return ATfalse;
   }
