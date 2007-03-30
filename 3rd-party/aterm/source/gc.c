@@ -9,7 +9,9 @@
 
 #ifndef WIN32
 #include <unistd.h>
+#ifndef __MINGW32__
 #include <sys/times.h>
+#endif
 #endif
 
 #include "_aterm.h"
