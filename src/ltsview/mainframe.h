@@ -7,7 +7,6 @@
 #include <wx/filename.h>
 #include <wx/listctrl.h>
 #include <wx/progdlg.h>
-#include "aterm1.h"
 #include "settingsdialog.h"
 #include "glcanvas.h"
 #include "mediator.h"
@@ -51,7 +50,7 @@ class MainFrame : public wxFrame {
 
     void	replaceMarkRule(int index, wxString str);
     void	resetMarkRules();
-    void	setActionLabels(std::vector< ATerm > &labels);
+    void	setActionLabels(std::vector< std::string > &labels);
     void	setFileInfo(wxFileName fn);
     void	setMarkedStatesInfo(int number);
     void	setMarkedTransitionsInfo(int number);

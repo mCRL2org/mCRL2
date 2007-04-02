@@ -5,7 +5,6 @@
 #include <wx/notebook.h>
 #include <wx/sysopt.h>
 //#include <time.h>
-#include "aterm2.h"
 #include "ids.h"
 #include "savepicdialog.h"
 #include "icons/main_window.xpm"
@@ -631,11 +630,11 @@ void MainFrame::resetMarkRules() {
   Layout();
 }
 
-void MainFrame::setActionLabels(vector< ATerm > &labels) {
+void MainFrame::setActionLabels(vector< string > &labels) {
   wxArrayString strLabels;
   strLabels.Alloc(labels.size());
-  for (vector< ATerm >::iterator it=labels.begin(); it!=labels.end(); ++it) {
-    strLabels.Add(wxString(ATwriteToString(*it),wxConvLocal));
+  for (vector<string>::iterator it = labels.begin(); it != labels.end(); ++it) {
+    strLabels.Add(wxString(it->c_str(),wxConvLocal));
   }
   strLabels.Sort();
   markTransitionsListBox->Set(strLabels);

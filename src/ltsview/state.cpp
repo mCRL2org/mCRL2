@@ -1,23 +1,14 @@
 #include "state.h"
-#include "liblowlevel.h"
 using namespace std;
 using namespace Utils;
 
-State::State( ATermList sv )
-{
-  stateVectorAT = sv;
-  ATprotectList( &stateVectorAT );
-  while ( !ATisEmpty( sv ) )
-  {
-    stateVector.push_back( ATgetFirst( sv ) );
-    sv = ATgetNext( sv );
-  }
+State::State() {
   cluster = NULL;
   rank = 0;
   position = -1.0f;
   marked = false;
-  outTransitions = vector<Transition*> ();
   visitState = DFS_WHITE;
+	id = 0;
 
   // Simulation initialisation
   selected = false;
@@ -25,9 +16,7 @@ State::State( ATermList sv )
   visitedAt = 0;
 }
 
-State::~State()
-{
-  ATunprotectList( &stateVectorAT );
+State::~State() {
 }
 
 void State::addSuperior( State* s )
@@ -58,6 +47,10 @@ void State::addOutTransition( Transition* trans )
 void State::addLoop( Transition* trans )
 {
   loops.push_back( trans );
+}
+
+void State::addParameterValue(int valindex) {
+	stateVector.push_back(valindex);
 }
 
 bool State::isDeadlock() const
@@ -95,6 +88,15 @@ void State::deselect()
   selected = false;
 }
 */
+
+int State::getID() {
+	return id;
+}
+
+void State::setID(int i) {
+	id = i;
+}
+
 int State::getRank() const
 {
   return rank;
@@ -224,9 +226,8 @@ DFSState State::getVisitState() const {
   return visitState;
 }
 
-int State::getValueIndexOfParam( int paramIndex )
-{
-  return ATgetInt((ATermInt)ATgetArgument((ATermAppl)stateVector[paramIndex],1));
+int State::getParameterValue(int parindex) {
+  return stateVector[parindex];
 }
 
 // Methods for simulation, implementation

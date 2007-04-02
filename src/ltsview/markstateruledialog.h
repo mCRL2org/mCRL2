@@ -4,25 +4,25 @@
 #include <wx/wx.h>
 #include <wx/checklst.h>
 #include "mediator.h"
-#include "aterm2.h"
+#include "lts.h"
 #include "utils.h"
 
 class MarkStateRuleDialog : public wxDialog { 
   public:
-    MarkStateRuleDialog(wxWindow* parent,Mediator* owner,ATermList svspec);
+    MarkStateRuleDialog(wxWindow* parent,Mediator* owner,LTS* alts);
     ~MarkStateRuleDialog();
-    void      onParameterChoice(wxCommandEvent& event);
-    Utils::MarkRule* getMarkRule();
-    wxString  getMarkRuleString();
-    void      setMarkRule(Utils::MarkRule* mr,ATermList svspec);
+    Utils::MarkRule*	getMarkRule();
+    wxString	getMarkRuleString();
+    void	onParameterChoice(wxCommandEvent& event);
+    void	setMarkRule(Utils::MarkRule* mr);
   private:
-    Mediator*			mediator;
+    Mediator*	mediator;
     std::map< wxString, int >	parameterIndices;
-    wxListBox*			parameterListBox;
-    std::map< wxString, ATermAppl >	parameterTypes;
-    wxListBox*			relationListBox;
+    wxListBox*	parameterListBox;
+    wxListBox*	relationListBox;
     std::map< wxString, int >	valueIndices;
-    wxCheckListBox*		valuesListBox;
+    wxCheckListBox*	valuesListBox;
+		LTS*	lts;
 
     void loadValues(wxString paramName);
 

@@ -8,39 +8,33 @@ bool command_line = false;
 std::string lts_file_argument;
 
 class squadt_interactor: public mcrl2_squadt::tool_interface {
-  
   private:
-
     static const char*  fsm_file_for_input;  ///< file containing an LTS that can be imported
- 
     // Wrapper for wxEntry invocation
     squadt_utility::entry_wrapper& starter;
 
   public:
     // Constructor
     squadt_interactor(squadt_utility::entry_wrapper&);
-
     // Configures tool capabilities.
     void set_capabilities(sip::tool::capabilities&) const;
-
     // Queries the user via SQuADt if needed to obtain configuration information
     void user_interactive_configuration(sip::configuration&);
-
     // Check an existing configuration object to see if it is usable
     bool check_configuration(sip::configuration const&) const;
-
     // Performs the task specified by a configuration
     bool perform_task(sip::configuration&);
 };
 
-const char* squadt_interactor::fsm_file_for_input  = "fsm_in";
+const char* squadt_interactor::fsm_file_for_input = "fsm_in";
 
 squadt_interactor::squadt_interactor(squadt_utility::entry_wrapper& w): starter(w) {
   // skip 
 }
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(fsm_file_for_input, sip::mime_type("fsm", sip::mime_type::text), sip::tool::category::visualisation);
+  c.add_input_combination(fsm_file_for_input,sip::mime_type("fsm",
+				sip::mime_type::text),sip::tool::category::visualisation);
 }
 
 void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
@@ -49,40 +43,33 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
 bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   if (c.input_exists(fsm_file_for_input)) {
-    /* The input object is present, verify whether the specified format is supported */
+		/* The input object is present, verify whether the specified format is
+		 * supported */
     sip::object input_object(c.get_input(fsm_file_for_input));
     lts_file_argument = input_object.get_location();
-
-
     /* lts_type t = lts::parse_format(input_object.get_format().c_str());
-
     if (t == lts_none) {
-      send_error(boost::str(boost::format("Invalid configuration: unsupported type `%s' for main input") % lts::string_for_type(t)));
+      send_error(boost::str(boost::format(
+				"Invalid configuration: unsupported type `%s' for main input") 
+				% lts::string_for_type(t)));
       return false;
     }*/
   }
-
   else {
     return false;
   }
-
-  
   return true;
-  
 }
 
 bool squadt_interactor::perform_task(sip::configuration&) {
-
   return starter.perform_entry();
-
 }
-
 #endif
+
 #include <wx/cmdline.h>
 #include <wx/filename.h>
 #include <wx/image.h>
 #include "ltsviewapp.h"
-#include "aterm1.h"
 #include "markstateruledialog.h"
 #include "fileloader.h"
 #include "settings.h"
@@ -142,10 +129,6 @@ bool LTSViewApp::OnInit() {
 
 extern "C" int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,
                               wxCmdLineArgType lpCmdLine,int nCmdShow) {
-  // initialise the ATerm library
-  ATerm stackbot;
-  ATinit(0,0,&stackbot); // XXX args?
-
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   squadt_utility::entry_wrapper starter(hInstance,hPrevInstance,lpCmdLine,
       nCmdShow);
@@ -162,10 +145,6 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,
 }
 #else
 int main(int argc, char **argv) {
-  // initialise the ATerm library
-  ATerm stackbot;
-  ATinit(argc,argv,&stackbot);
-
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   squadt_utility::entry_wrapper starter(argc, argv);
   squadt_interactor c(starter);
@@ -238,7 +217,7 @@ void LTSViewApp::openFile(string fileName) {
       lts->getNumberOfRanks());
   mainFrame->resetMarkRules();
   
-  vector< ATerm > ls;
+  vector< string > ls;
   lts->getActionLabels(ls);
   mainFrame->setActionLabels(ls);
 
@@ -307,21 +286,17 @@ void LTSViewApp::setVisStyle(VisStyle vs) {
   }
 }
 
-void LTSViewApp::addMarkRule()
-{
-  if ( lts != NULL )
-  {
-    MarkStateRuleDialog* msrDialog = new MarkStateRuleDialog( mainFrame, this,
-	lts->getStateVectorSpec() );
+void LTSViewApp::addMarkRule() {
+  if (lts != NULL) {
+    MarkStateRuleDialog* msrDialog = new MarkStateRuleDialog(mainFrame,this,
+				lts);
     msrDialog->CentreOnParent();
-    if ( msrDialog->ShowModal() == wxID_OK )
-    {
+    if (msrDialog->ShowModal() == wxID_OK) {
       MarkRule* markrule = msrDialog->getMarkRule();
-      if ( markrule != NULL )
-      {
-	lts->addMarkRule( markrule );
-	mainFrame->addMarkRule( msrDialog->getMarkRuleString() );
-	applyMarkStyle( MARK_STATES );
+      if (markrule != NULL) {
+				lts->addMarkRule(markrule);
+				mainFrame->addMarkRule(msrDialog->getMarkRuleString());
+				applyMarkStyle(MARK_STATES);
       }
     }
     msrDialog->Close();
@@ -329,30 +304,25 @@ void LTSViewApp::addMarkRule()
   }
 }
 
-void LTSViewApp::removeMarkRule( const int index )
-{
-  lts->removeMarkRule( index );
-  applyMarkStyle( MARK_STATES );
+void LTSViewApp::removeMarkRule(const int index) {
+  lts->removeMarkRule(index);
+  applyMarkStyle(MARK_STATES);
 }
 
-void LTSViewApp::editMarkRule( const int index )
-{
-  if ( lts != NULL )
-  {
-    MarkStateRuleDialog* msrDialog = new MarkStateRuleDialog( mainFrame, this,
-	lts->getStateVectorSpec() );
-    bool oldActivated = lts->getMarkRule( index )->isActivated;
-    msrDialog->setMarkRule( lts->getMarkRule( index ), lts->getStateVectorSpec() );
+void LTSViewApp::editMarkRule(const int index) {
+  if (lts != NULL) {
+    MarkStateRuleDialog* msrDialog = new MarkStateRuleDialog(mainFrame,this,
+				lts);
+		bool oldActivated = lts->getMarkRule(index)->isActivated;
+    msrDialog->setMarkRule(lts->getMarkRule(index));
     msrDialog->CentreOnParent();
-    if ( msrDialog->ShowModal() == wxID_OK )
-    {
+    if (msrDialog->ShowModal() == wxID_OK) {
       MarkRule* markrule = msrDialog->getMarkRule();
-      if ( markrule != NULL )
-      {
-	markrule->isActivated = oldActivated;
-	lts->replaceMarkRule( index, markrule );
-	mainFrame->replaceMarkRule( index, msrDialog->getMarkRuleString() );
-	applyMarkStyle( MARK_STATES );
+      if (markrule != NULL) {
+				markrule->isActivated = oldActivated;
+				lts->replaceMarkRule(index,markrule);
+				mainFrame->replaceMarkRule(index,msrDialog->getMarkRuleString());
+				applyMarkStyle(MARK_STATES);
       }
     }
     msrDialog->Close();
@@ -360,12 +330,10 @@ void LTSViewApp::editMarkRule( const int index )
   }
 }
 
-void LTSViewApp::activateMarkRule( const int index, const bool activate )
-{
-  if ( lts != NULL )
-  {
-    lts->activateMarkRule( index, activate );
-    applyMarkStyle( MARK_STATES );
+void LTSViewApp::activateMarkRule( const int index, const bool activate ) {
+  if (lts != NULL) {
+    lts->activateMarkRule(index,activate);
+    applyMarkStyle(MARK_STATES);
   }
 }
 

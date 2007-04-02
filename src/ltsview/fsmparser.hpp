@@ -47,9 +47,9 @@
      FANOUT = 263,
      NODENR = 264,
      ARROW = 265,
-     NUMBER = 266,
-     ID = 267,
-     QUOTED = 268
+     ID = 266,
+     QUOTED = 267,
+     NUMBER = 268
    };
 #endif
 /* Tokens.  */
@@ -61,19 +61,19 @@
 #define FANOUT 263
 #define NODENR 264
 #define ARROW 265
-#define NUMBER 266
-#define ID 267
-#define QUOTED 268
+#define ID 266
+#define QUOTED 267
+#define NUMBER 268
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 36 "fsmparser.yy"
+#line 26 "fsmparser.yy"
 {
-  ATermAppl aterm;
-  int number;
+	char *str;
+	int num;
 }
 /* Line 1529 of yacc.c.  */
 #line 80 "fsmparser.hpp"

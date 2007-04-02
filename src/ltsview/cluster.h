@@ -3,7 +3,6 @@
 #include <vector>
 #include <map>
 #include "utils.h"
-#include "aterm1.h"
 
 #ifndef STATE_H
   #include "state.h"
@@ -22,7 +21,7 @@ class Comp_ClusterVolume {
 
 class Cluster {
   private:
-    std::map< ATerm, int >	actionLabelCounts;
+    std::map< int, int >	actionLabelCounts;
     Cluster*	ancestor;
     float			baseRadius;
     bool			deadlock;
@@ -38,8 +37,8 @@ class Cluster {
     float			volume;
     std::vector< Utils::Slot* > slots;
 
-    float *matrix;
-    int primitive;
+		float *matrix;
+		int primitive;
 
   public:
     // Constructor & destructor.
@@ -73,10 +72,10 @@ class Cluster {
     void         spreadSlots();
 
     // Methods on transitions
-    void      addActionLabel( ATerm l );
+    void      addActionLabel(int l);
     bool      hasMarkedTransition() const;
-    int	      markActionLabel( ATerm l );
-    int       unmarkActionLabel( ATerm l );
+    int	      markActionLabel(int l);
+    int       unmarkActionLabel(int l);
     
     // General cluster information
     void      computeSizeAndDescendantPositions();
@@ -87,7 +86,7 @@ class Cluster {
     float     getSize() const;
     float     getVolume() const;
     void      setPosition(float p);
-    
+
     // Methods for visualization
     int    getPrimitive() const;
     void   setPrimitive(int p);

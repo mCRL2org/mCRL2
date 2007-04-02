@@ -1,18 +1,15 @@
 #include "lts.h"
-#include "liblowlevel.h"
-
 #include <algorithm>
 
 using namespace Utils;
-using namespace std; 
-LTS::LTS( Mediator* owner)
-{
+using namespace std;
+
+LTS::LTS(Mediator* owner) {
   mediator = owner;
   initialState = NULL;
   matchAny = true;
   deadlockCount = -1;
   markedTransitionCount = 0;
-  stateVectorSpec = NULL;
 
   // Initialisation of simulation variables
   simulation = false;
@@ -23,64 +20,85 @@ LTS::LTS( Mediator* owner)
 
 LTS::~LTS()
 {
-  if ( stateVectorSpec != NULL ) ATunprotectList( &stateVectorSpec );
-  
-  for ( unsigned int i = 0 ; i < unmarkedStates.size() ; ++i )
-  {
+	unsigned int i,r;
+  for (i = 0; i < unmarkedStates.size(); ++i) {
     delete unmarkedStates[i];
   }
   unmarkedStates.clear();
-  for ( unsigned int i = 0 ; i < markedStates.size() ; ++i )
-  {
+  for (i = 0; i < markedStates.size(); ++i) {
     delete markedStates[i];
   }
   markedStates.clear();
   statesInRank.clear();
   initialState = NULL;
   
-  for ( map< ATerm, bool* >::iterator it = actionLabelMarkings.begin() ;
-	it != actionLabelMarkings.end() ; ++it )
-  {
-    delete it->second;
+  for (i = 0; i < label_marks.size(); ++i) {
+    delete label_marks[i];
   }
-  actionLabelMarkings.clear();
+  label_marks.clear();
   
-  for ( vector< Transition* >::iterator t_it = transitions.begin() ;
-	t_it != transitions.end() ; ++t_it )
-  {
-    delete *t_it;
+  for (i = 0; i < transitions.size(); ++i) {
+    delete transitions[i];
   }
   transitions.clear();
 
-  for ( unsigned int r = 0 ; r < clustersInRank.size() ; ++r )
-  {
-    for ( unsigned int i = 0 ; i < clustersInRank[r].size() ; ++i )
-    {
+  for (r = 0; r < clustersInRank.size(); ++r) {
+    for (i = 0; i < clustersInRank[r].size(); ++i) {
       delete clustersInRank[r][i];
     }
   }
   clustersInRank.clear();
 
-  for ( unsigned int i = 0 ; i < markRules.size() ; ++i )
-  {
+  for (i = 0; i < markRules.size(); ++i) {
     delete markRules[i];
   }
   markRules.clear();
 }
 
-void LTS::setStateVectorSpec( ATermList spec )
-{
-  stateVectorSpec = spec;
-  ATprotectList( &stateVectorSpec );
+int LTS::addParameter(string parname,string partype) {
+	parameterNames.push_back(parname);
+	parameterTypes.push_back(partype);
+	vector< string > v;
+	valueTable.push_back(v);
+	return parameterNames.size()-1;
 }
 
-ATermList LTS::getStateVectorSpec()
-{
-  return stateVectorSpec;
+void LTS::addParameterValue(int parindex,string parvalue) {
+	valueTable[parindex].push_back(parvalue);
 }
-  
-void LTS::setInitialState( State* s )
-{
+
+string LTS::getParameterName(int parindex) {
+	return parameterNames[parindex];
+}
+
+string LTS::getParameterType(int parindex) {
+	return parameterTypes[parindex];
+}
+
+string LTS::getParameterValue(int parindex,int valindex) {
+	return valueTable[parindex][valindex];
+}
+
+int LTS::getNumParameters() const {
+	return parameterNames.size();
+}
+
+int LTS::getNumParameterValues(int parindex) const {
+	return valueTable[parindex].size();
+}
+
+string LTS::getLabel(int labindex) {
+	return labels[labindex];
+}
+
+int LTS::addLabel(string label) {
+	labels.push_back(label);
+	label_marks.push_back(new bool(false));
+	labels_inv[label] = labels.size()-1;
+	return labels.size()-1;
+}
+
+void LTS::setInitialState(State* s) {
   initialState = s;
 }
 
@@ -89,29 +107,13 @@ void LTS::addState( State* s )
   unmarkedStates.push_back( s );
 }
 
-void LTS::addTransition( Transition* t )
-{
-  transitions.push_back( t );
-  ATerm lab = t->getLabel();
-  if ( actionLabelMarkings.find( lab ) == actionLabelMarkings.end() )
-  {
-    bool* b = new bool( false );
-    actionLabelMarkings[lab] = b;
-    t->setMarkedPointer( b );
-  }
-  else
-  {
-    t->setMarkedPointer( actionLabelMarkings[lab] );
-  }
+void LTS::addTransition(Transition* t) {
+  transitions.push_back(t);
+	t->setMarkedPointer(label_marks[t->getLabel()]);
 }
 
-void LTS::getActionLabels( vector< ATerm > &ls ) const
-{
-  for ( map< ATerm, bool* >::const_iterator it = actionLabelMarkings.begin() ;
-	it != actionLabelMarkings.end() ; ++it )
-  {
-    ls.push_back( it->first );
-  }
+void LTS::getActionLabels(vector< string > &ls) const {
+	ls = labels;
 }
 
 State* LTS::getInitialState() const
@@ -767,64 +769,51 @@ void LTS::edgeLengthTopDown(vector< State* > &ss)
   ss.swap(undecided);
 }
 
-
-
-
-void LTS::addMarkRule( MarkRule* r, int index )
-{
-  if ( index == -1 ) 
-    markRules.push_back( r );
-  else
-    markRules.insert( markRules.begin() + index, r );
-  if ( r->isActivated )
-  {
-    processAddedMarkRule( r );
+void LTS::addMarkRule(MarkRule* r,int index) {
+  if (index == -1) {
+    markRules.push_back(r);
+	} else {
+    markRules.insert(markRules.begin()+index,r);
+	}
+  if (r->isActivated) {
+    processAddedMarkRule(r);
   }
 }
 
-void LTS::processAddedMarkRule( MarkRule* r )
-{
-  if ( matchAny )
-  {
+void LTS::processAddedMarkRule(MarkRule* r) {
+  if (matchAny) {
     vector< State* > newunmarked;
     State* s;
-    for ( vector< State* >::iterator s_it = unmarkedStates.begin() ;
-	  s_it != unmarkedStates.end() ; ++s_it )
-    {
+    for (vector< State* >::iterator s_it = unmarkedStates.begin();
+				s_it != unmarkedStates.end(); ++s_it) {
       s = *s_it;
-      if ( r->valueSet[ s->getValueIndexOfParam( r->paramIndex ) ] )
-      {
-	s->mark();
-	s->getCluster()->markState();
-	markedStates.push_back( s );
+      if (r->valueSet[s->getParameterValue(r->paramIndex)]) {
+				s->mark();
+				s->getCluster()->markState();
+				markedStates.push_back(s);
       }
-      else
-      {
-	newunmarked.push_back( s );
+      else {
+				newunmarked.push_back(s);
       }
     }
-    unmarkedStates.swap( newunmarked );
+    unmarkedStates.swap(newunmarked);
   }
-  else
-  {
+  else {
     vector< State* > newmarked;
     State* s;
-    for ( vector< State* >::iterator s_it = markedStates.begin() ;
-	  s_it != markedStates.end() ; ++s_it )
-    {
+    for (vector< State* >::iterator s_it = markedStates.begin();
+				s_it != markedStates.end(); ++s_it) {
       s = *s_it;
-      if ( !r->valueSet[ s->getValueIndexOfParam( r->paramIndex ) ] )
-      {
-	s->unmark();
-	s->getCluster()->unmarkState();
-	unmarkedStates.push_back( s );
+      if (!r->valueSet[s->getParameterValue(r->paramIndex)]) {
+				s->unmark();
+				s->getCluster()->unmarkState();
+				unmarkedStates.push_back(s);
       }
-      else
-      {
-	newmarked.push_back( s );
+      else {
+				newmarked.push_back(s);
       }
     }
-    markedStates.swap( newmarked );
+    markedStates.swap(newmarked);
   }
 }
 
@@ -872,14 +861,14 @@ void LTS::processRemovedMarkRule( MarkRule* r )
 	  s_it != markedStates.end() ; ++s_it )
     {
       s = *s_it;
-      if ( r->valueSet[ s->getValueIndexOfParam( r->paramIndex ) ] )
+      if ( r->valueSet[ s->getParameterValue( r->paramIndex ) ] )
       {
 	unsigned int i = 0;
 	s->unmark();
 	while ( i < activeMarkRules.size() && !s->isMarked() )
 	{
 	  MarkRule* r_i = activeMarkRules[i];
-	  if ( r_i->valueSet[s->getValueIndexOfParam(r_i->paramIndex)] )
+	  if ( r_i->valueSet[s->getParameterValue(r_i->paramIndex)] )
 	  {
 	    s->mark();
 	  }
@@ -910,14 +899,14 @@ void LTS::processRemovedMarkRule( MarkRule* r )
 	  s_it != unmarkedStates.end() ; ++s_it )
     {
       s = *s_it;
-      if ( !r->valueSet[ s->getValueIndexOfParam( r->paramIndex ) ] )
+      if ( !r->valueSet[ s->getParameterValue( r->paramIndex ) ] )
       {
 	unsigned int i = 0;
 	s->mark();
 	while ( i < activeMarkRules.size() && s->isMarked() )
 	{
 	  MarkRule* r_i = activeMarkRules[i];
-	  if ( !r_i->valueSet[s->getValueIndexOfParam(r_i->paramIndex)] )
+	  if ( !r_i->valueSet[s->getParameterValue(r_i->paramIndex)] )
 	  {
 	    s->unmark();
 	  }
@@ -952,154 +941,127 @@ bool LTS::getMatchAnyMarkRule() const
   return matchAny;
 }
 
-void LTS::setMatchAnyMarkRule( bool b )
-{
-  if ( matchAny == b ) return;
+void LTS::setMatchAnyMarkRule(bool b) {
+  if (matchAny == b) {
+		return;
+	}
   
   matchAny = b;
   
   vector< MarkRule* > activeMarkRules;
-  for ( vector< MarkRule* >::iterator mr_it = markRules.begin() ; mr_it !=
-      markRules.end() ; ++mr_it )
-  {
-    if ( (**mr_it).isActivated ) activeMarkRules.push_back( *mr_it );
+  for (vector< MarkRule* >::iterator mr_it = markRules.begin();
+			mr_it != markRules.end(); ++mr_it) {
+    if ((**mr_it).isActivated) {
+			activeMarkRules.push_back(*mr_it);
+		}
   }
   
-  if ( activeMarkRules.size() == 0 )
-  {
-    markedStates.swap( unmarkedStates );
-    if ( matchAny )
-    {
-      for ( unsigned int r = 0 ; r < clustersInRank.size() ; ++r )
-	for ( unsigned int c = 0; c < clustersInRank[r].size() ; ++c )
-	  clustersInRank[r][c]->unmarkState();
+  if (activeMarkRules.size() == 0) {
+    markedStates.swap(unmarkedStates);
+    if (matchAny) {
+      for (unsigned int r = 0; r < clustersInRank.size(); ++r) {
+				for (unsigned int c = 0; c < clustersInRank[r].size(); ++c) {
+					clustersInRank[r][c]->unmarkState();
+				}
+			}
     }
-    else 
-    {
-      for ( unsigned int r = 0 ; r < clustersInRank.size() ; ++r )
-	for ( unsigned int c = 0; c < clustersInRank[r].size() ; ++c )
-	  clustersInRank[r][c]->markState();
+    else {
+      for (unsigned int r = 0; r < clustersInRank.size(); ++r) {
+				for (unsigned int c = 0; c < clustersInRank[r].size(); ++c) {
+					clustersInRank[r][c]->markState();
+				}
+			}
     }
   }
-  else if ( activeMarkRules.size() == 1 )
+  else if (activeMarkRules.size() == 1) {
     return;
-  else
-  {
-    if ( matchAny )
-    {
+	}
+  else {
+    if (matchAny) {
       State* s;
       vector< State* > newunmarked;
-      for ( vector< State* >::iterator s_it = unmarkedStates.begin() ;
-	  s_it != unmarkedStates.end() ; ++s_it )
-      {
-	s = *s_it;
-	unsigned int i = 0;
-	while ( i < activeMarkRules.size() && !s->isMarked() )
-	{
-	  MarkRule* markRule = activeMarkRules[i];
-	  if ( markRule->valueSet[ s->getValueIndexOfParam(
-		markRule->paramIndex) ] )
-	  {
-	    s->mark();
-	    s->getCluster()->markState();
-	    markedStates.push_back( s );
-	  }
-	  ++i;
-	}
-	if ( !s->isMarked() )
-	{
-	  newunmarked.push_back( s );
-	}
+      for (vector< State* >::iterator s_it = unmarkedStates.begin();
+					s_it != unmarkedStates.end(); ++s_it) {
+				s = *s_it;
+				unsigned int i = 0;
+				while (i < activeMarkRules.size() && !s->isMarked()) {
+					MarkRule* markRule = activeMarkRules[i];
+					if (markRule->valueSet[s->getParameterValue(markRule->paramIndex)])	{
+						s->mark();
+						s->getCluster()->markState();
+						markedStates.push_back(s);
+					}
+					++i;
+				}
+				if (!s->isMarked()) {
+					newunmarked.push_back(s);
+				}
       }
-      unmarkedStates.swap( newunmarked );
+      unmarkedStates.swap(newunmarked);
     }
-    else
-    {
+    else {
       State* s;
       vector< State* > newmarked;
-      for ( vector< State* >::iterator s_it = markedStates.begin() ;
-	  s_it != markedStates.end() ; ++s_it )
-      {
-	s = *s_it;
-	unsigned int i = 0;
-	while ( i < activeMarkRules.size() && s->isMarked() )
-	{
-	  MarkRule* markRule = activeMarkRules[i];
-	  if ( !markRule->valueSet[ s->getValueIndexOfParam(
-		markRule->paramIndex) ] )
-	  {
-	    s->unmark();
-	    s->getCluster()->unmarkState();
-	    unmarkedStates.push_back( s );
-	  }
-	  ++i;
-	}
-	if ( s->isMarked() )
-	{
-	  newmarked.push_back( s );
-	}
+      for (vector< State* >::iterator s_it = markedStates.begin();
+					s_it != markedStates.end(); ++s_it) {
+				s = *s_it;
+				unsigned int i = 0;
+				while (i < activeMarkRules.size() && s->isMarked())	{
+					MarkRule* markRule = activeMarkRules[i];
+					if (!markRule->valueSet[s->getParameterValue(markRule->paramIndex)]) {
+						s->unmark();
+						s->getCluster()->unmarkState();
+						unmarkedStates.push_back(s);
+					}
+					++i;
+				}
+				if (s->isMarked()) {
+					newmarked.push_back(s);
+				}
       }
-      markedStates.swap( newmarked );
+      markedStates.swap(newmarked);
     }
   }
 }
 
-void LTS::markClusters()
-{
+void LTS::markClusters() {
   // recompute the markings of clusters (after applying a different rank style)
   // process marked states
   State* s;
-  for ( vector< State* >::iterator s_it = markedStates.begin() ;
-      s_it != markedStates.end() ; ++s_it )
-  {
+  for (vector< State* >::iterator s_it = markedStates.begin();
+			s_it != markedStates.end(); ++s_it) {
     s = *s_it;
-    if ( s->isMarked() )
-    {
+    if (s->isMarked()) {
       s->getCluster()->markState();
     }
   }
-
-  /* process marked transitions
-  for ( vector< ATerm >::iterator at_it = markedActionLabels.begin() ;
-	at_it != markedActionLabels.end() ; ++at_it )
-  {
-    vector< Transition* > tobeMarked = transitions[*at_it];
-    for ( vector< Transition* >::iterator t_it = tobeMarked.begin() ;
-	  t_it != tobeMarked.end() ; ++t_it )
-    {
-      (**t_it).getBeginState()->getCluster()->markTransition();
-    }
-  }
-  */
 }
 
-void LTS::markAction( string label )
-{
-  ATerm atLabel = (ATerm)ATmakeAppl0( ATmakeAFun( label.c_str(), 0, ATfalse ) );
-  *( actionLabelMarkings[atLabel] ) = true;
+void LTS::markAction(string label) {
+	int l = labels_inv[label];
+  *(label_marks[l]) = true;
 
   markedTransitionCount = 0;
-  for ( vector< vector< Cluster* > >::iterator cs_it = clustersInRank.begin() ;
-	cs_it != clustersInRank.end() ; ++cs_it )
-  {
-    for ( vector< Cluster* >::iterator c_it = cs_it->begin() ;
-	  c_it != cs_it->end() ; ++c_it )
-      markedTransitionCount += (**c_it).markActionLabel( atLabel );
+  for (vector< vector< Cluster* > >::iterator cs_it = clustersInRank.begin();
+			cs_it != clustersInRank.end(); ++cs_it) {
+    for (vector< Cluster* >::iterator c_it = cs_it->begin();
+				c_it != cs_it->end(); ++c_it) {
+      markedTransitionCount += (**c_it).markActionLabel(l);
+		}
   }
 }
 
-void LTS::unmarkAction( string label )
-{
-  ATerm atLabel = (ATerm)ATmakeAppl0( ATmakeAFun( label.c_str(), 0, ATfalse ) );
-  *( actionLabelMarkings[atLabel] ) = false;
+void LTS::unmarkAction(string label) {
+	int l = labels_inv[label];
+  *(label_marks[l]) = false;
 
   markedTransitionCount = 0;
-  for ( vector< vector< Cluster* > >::iterator cs_it = clustersInRank.begin() ;
-	cs_it != clustersInRank.end() ; ++cs_it )
-  {
-    for ( vector< Cluster* >::iterator c_it = cs_it->begin() ;
-	  c_it != cs_it->end() ; ++c_it )
-      markedTransitionCount += (**c_it).unmarkActionLabel( atLabel );
+  for (vector< vector< Cluster* > >::iterator cs_it = clustersInRank.begin();
+			cs_it != clustersInRank.end(); ++cs_it) {
+    for (vector< Cluster* >::iterator c_it = cs_it->begin();
+				c_it != cs_it->end(); ++c_it) {
+			markedTransitionCount += (**c_it).unmarkActionLabel(l);
+		}
   }
 }
 

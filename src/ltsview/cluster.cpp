@@ -35,11 +35,12 @@ void Cluster::addState(State* s) {
   states.push_back(s);
 }
 
-void Cluster::addActionLabel(ATerm l) {
-  if (actionLabelCounts.find(l) == actionLabelCounts.end())
+void Cluster::addActionLabel(int l) {
+  if (actionLabelCounts.find(l) == actionLabelCounts.end()) {
     actionLabelCounts[l] = 1;
-  else
+	} else {
     ++actionLabelCounts[l];
+	}
 }
 
 void Cluster::setAncestor(Cluster* c) {
@@ -596,14 +597,14 @@ void Cluster::unmarkState() {
   --markedState;
 }
 
-int Cluster::markActionLabel(ATerm l) {
+int Cluster::markActionLabel(int l) {
   if (actionLabelCounts.find(l) != actionLabelCounts.end()) {
     markedTransitionCount += actionLabelCounts[l];
   }
   return markedTransitionCount;
 }
 
-int Cluster::unmarkActionLabel(ATerm l) {
+int Cluster::unmarkActionLabel(int l) {
   if (actionLabelCounts.find(l) != actionLabelCounts.end()) {
     markedTransitionCount -= actionLabelCounts[l];
   }

@@ -3,12 +3,10 @@ using namespace Utils;
 
 // Constructor and Destructor
 
-Transition::Transition(State* bs, State* es, ATerm lbl )
-{
+Transition::Transition(State* bs,State* es,int lbl) {
   beginState = bs;
   endState = es;
   label = lbl;
-  ATprotect( &label );
   backpointer = false;
   marked = NULL;
 
@@ -18,9 +16,7 @@ Transition::Transition(State* bs, State* es, ATerm lbl )
   visitedAt = 0;
 }
 
-Transition::~Transition()
-{
-  ATunprotect( &label );
+Transition::~Transition() {
 }
 
 State* Transition::getBeginState() const
@@ -33,7 +29,7 @@ State* Transition::getEndState() const
   return endState;
 }
 
-ATerm Transition::getLabel() const
+int Transition::getLabel() const
 {
   return label;
 }

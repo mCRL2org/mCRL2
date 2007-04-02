@@ -1,59 +1,43 @@
 %{
 #include "fsmparser.h"
 #include "fsmlexer.cpp"
-#include <vector>
+#include <map>
 #include <ostream>
 #include <sstream>
-#include "aterm2.h"
+#include "lts.h"
 #include "state.h"
 #include "transition.h"
-#include "liblowlevel.h"
 
 // Global variables
-
 LTS* fsmparserlts = NULL;
-
-ATermList stateVector;
-ATermList valueTable;
-ATermList stateId;
-ATermList typeValues;
-ATermAppl typeId;
-
-std::vector< State* > states;
-
-AFun const_ATtypeid;
-AFun const_ATparmid;
-AFun const_ATvalue;
-AFun const_ATstate;
-AFun const_ATparam;
+std::map< int,State* > states;
+std::map< std::string,int > labels;
+std::string par_name;
+int par_index, nodenr_index, fanin_index, fanout_index, N;
+State *state = NULL;
 
 // Function declarations
-
 void fsmerror(const char* c);
 char* intToCString(int i);
 %}
 
-%union {
-  ATermAppl aterm;
-  int number;
-}
-
 %start fsm_file
 
+%union {
+	char *str;
+	int num;
+}
+
 %token EOLN SECSEP LPAR RPAR FANIN FANOUT NODENR ARROW
-%token <number> NUMBER
-%token <aterm> ID QUOTED
-%type  <aterm> type_name type_name1 action
+%token <str> ID QUOTED
+%token <num> NUMBER
+%type <str> type_name type_name1 action
 
 %%
 
 fsm_file : 
+	{ N = 0; nodenr_index = 0; fanin_index = 0; fanout_index = 0 }
 	params
-	  { 
-	    valueTable = ATreverse( valueTable );
-	    stateId = ATreverse( stateId );
-	    fsmparserlts->setStateVectorSpec( stateId )
-	  }
 	SECSEP EOLN
 	states
 	SECSEP EOLN transitions
@@ -64,22 +48,18 @@ fsm_file :
 params : 
 	/* empty */
 	|
-	params param EOLN
+	params { N++ } param EOLN
 	;
 
 param :
-	ID
+	ID { par_name = static_cast<std::string>($1) }
 	cardinality type_def
-	  {
-	    stateId = ATinsert( stateId, (ATerm)ATmakeAppl2( const_ATparmid,
-	      (ATerm)$1, (ATerm)typeId ) )
-	  }
 	|
-	FANIN cardinality type_def_ignore
+	FANIN { fanin_index = N-1 } cardinality type_def_ignore
 	|
-	FANOUT cardinality type_def_ignore
+	FANOUT { fanout_index = N-1 } cardinality type_def_ignore
 	|
-	NODENR cardinality type_def_ignore
+	NODENR { nodenr_index = N-1 } cardinality type_def_ignore
 	;
 
 cardinality :
@@ -87,30 +67,21 @@ cardinality :
 	;
 	
 type_def : 
-	type_name
-	  { 
-	    typeValues = ATempty
-	  }
+	type_name { par_index = fsmparserlts->addParameter(par_name,static_cast<std::string>($1)) }
 	type_values
-	  { 
-	    typeValues = ATreverse( typeValues );
-	    typeId = ATmakeAppl2( const_ATtypeid, (ATerm)$1, (ATerm)typeValues );
-	    valueTable = ATinsert( valueTable, (ATerm)typeValues )
-	  }
 	;
 
 type_name :
 	/* empty */
-	  { $$ = ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) ) }
+	  { $$ = "" }
 	|
 	type_name1
 	  { $$ = $1 }
 	| 
 	type_name ARROW type_name1
 	  {
-	    std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-	      + "->" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
-	    $$ = ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) )
+	    std::string result = static_cast<std::string>($1) + "->" + static_cast<std::string>($3);
+	    $$ = strdup(result.c_str())
 	  }
 	;
 
@@ -120,9 +91,8 @@ type_name1 :
 	|
 	LPAR type_name RPAR
 	  {
-	    std::string result = "(" + static_cast<std::string> ( ATwriteToString(
-	      (ATerm)$2) ) + ")";
-	    $$ = ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) )
+	    std::string result = "(" + static_cast<std::string> ($2) + ")";
+	    $$ = strdup(result.c_str())
 	  }
 	;
 
@@ -135,8 +105,7 @@ type_values :
 
 type_value :
 	QUOTED
-	  { typeValues = ATinsert( typeValues, (ATerm)ATmakeAppl2(
-	      const_ATvalue, (ATerm)$1, (ATerm)ATmakeInt( ATgetLength( typeValues ) ) ) ) }
+	  { fsmparserlts->addParameterValue(par_index,static_cast<std::string>($1)) }
 	;
 
 type_def_ignore : 
@@ -170,15 +139,13 @@ states :
 	/* empty */
 	|
 	states
+		{ state = new State(); fsmparserlts->addState(state); N = 0 }
 	state
 	  {
-	    stateVector = ATreverse( stateVector ); 
-	    State* s = new State( stateVector );
-	    fsmparserlts->addState( s );
-	    states.push_back( s );
-	    if ( states.size() == 1 ) 
-	      fsmparserlts->setInitialState( s );
-	    stateVector = ATempty
+	    //states.push_back( s );
+	    //if ( states.size() == 1 ) 
+	    //  fsmparserlts->setInitialState( s );
+	    //stateVector = ATempty
 	  }
 	EOLN
 	;
@@ -188,12 +155,18 @@ state :
 	|
 	state NUMBER
 	  { 
-	    unsigned int paramNo = ATgetLength( stateVector );
-	    if ( paramNo < ATgetLength( valueTable ) )
-	    {
-	      stateVector = ATinsert( stateVector, ATelementAt(
-		(ATermList)ATelementAt( valueTable, paramNo ), $2 ) );
-	    }
+			if (N != fanin_index && N != fanout_index) {
+				if (N == nodenr_index) {
+					state->setID($2);
+					states[$2] = state;
+					if ($2 == 1) {
+						fsmparserlts->setInitialState(state);
+					}
+				} else {
+					state->addParameterValue($2);
+				}
+			}
+			N++
 	  }
 	;
 
@@ -209,25 +182,31 @@ transitions:
 transition:
 	NUMBER NUMBER action
 	  {
-	    State* frState = states[$1-1];
-	    State* toState = states[$2-1];
-	    Transition* t = new Transition( frState, toState, (ATerm)$3 );
-	    fsmparserlts->addTransition( t );
-	    if ( $1 != $2 )
-	    {
-	      frState->addOutTransition( t );
-	      toState->addInTransition( t );
-	    }
-	    else
-	    {
-	      frState->addLoop( t );
+	    State* s1 = states[$1];
+	    State* s2 = states[$2];
+			std::string labstr = static_cast<std::string>($3);
+			std::map< std::string,int >::iterator p = labels.find(labstr);
+			int l;
+			if (p == labels.end()) {
+				l = fsmparserlts->addLabel(labstr);
+				labels[labstr] = l;
+			} else {
+				l = p->second;
+			}
+	    Transition* t = new Transition(s1,s2,l);
+	    fsmparserlts->addTransition(t);
+	    if ($1 != $2) {
+	      s1->addOutTransition(t);
+	      s2->addInTransition(t);
+	    } else {
+	      s1->addLoop(t);
 	    }
 	  }
 	;
 
 action :
 	/* empty */
-	  { $$ = ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) ) }
+	  { $$ = "" }
 	|
 	QUOTED
 	  { $$ = $1 }
@@ -235,78 +214,41 @@ action :
 
 %%
 
-int fsmwrap()
-{
+int fsmwrap() {
   return 1;
 }
 
-void fsmerror(const char *str)
-{
-  throw std::string( "Parse error: " + std::string(str) + " token \"" + std::string(fsmtext) +
-    "\" at line " + std::string(intToCString( lineNo )) + " position " +
-    std::string(intToCString( posNo )) );
+void fsmerror(const char *str) {
+  throw std::string("Parse error: " + std::string(str) + " token \"" + std::string(fsmtext) +
+    "\" at line " + std::string(intToCString(lineNo)) + " position " +
+    std::string(intToCString(posNo)) );
 }
  
-void parseFSMfile( std::string fileName, LTS* const lts )
-{
+void parseFSMfile( std::string fileName, LTS* const lts ) {
   // reset the lexer position variables
-  lineNo=1;
-  posNo=1;
+  lineNo = 1;
+  posNo = 1;
   
   FILE* infile = fopen(fileName.c_str(),"r");
-  if ( infile == NULL )
-    throw std::string( "Cannot open file for reading:\n" + fileName );
-  else
-  {
+  if (infile == NULL) {
+		throw std::string("Cannot open file for reading:\n" + fileName);
+	}
+  else {
     // INITIALISE
     fsmparserlts = lts;
-    fsmrestart( infile );
-    
-    const_ATtypeid = ATmakeAFun( "TypeId", 2, ATfalse );
-    ATprotectAFun( const_ATtypeid );
-    const_ATparmid = ATmakeAFun( "ParamId", 2, ATfalse );
-    ATprotectAFun( const_ATparmid );
-    const_ATvalue = ATmakeAFun( "Value", 2, ATfalse );
-    ATprotectAFun( const_ATvalue );
-    const_ATstate = ATmakeAFun( "State", 2, ATfalse );
-    ATprotectAFun( const_ATstate );
-    const_ATparam = ATmakeAFun( "Param", 2, ATfalse );
-    ATprotectAFun( const_ATparam );
-    stateVector = ATempty;
-    ATprotectList( &stateVector );
-    valueTable = ATempty;
-    ATprotectList( &valueTable );
-    stateId = ATempty;
-    ATprotectList( &stateId );
-    typeValues = NULL;
-    ATprotectList( &typeValues );
-    typeId = NULL;
-    ATprotectAppl( &typeId );
-    
+    fsmrestart(infile);
 
-    // PARSE
     fsmparse();
     
-    // CLEAN UP
-    ATunprotectAFun( const_ATtypeid );
-    ATunprotectAFun( const_ATparmid );
-    ATunprotectAFun( const_ATvalue );
-    ATunprotectAFun( const_ATstate );
-    ATunprotectAFun( const_ATparam );
-    ATunprotectList( &stateVector );
-    ATunprotectList( &valueTable );
-    ATunprotectList( &stateId );
-    ATunprotectList( &typeValues );
-    ATunprotectAppl( &typeId );
-    
     states.clear();
+		labels.clear();
     fsmparserlts = NULL;
+		state = NULL;
   }
 } 
 
-char* intToCString( int i )
-{
-    std::ostringstream oss;
-    oss << i;
-    return (char*)oss.str().c_str();
+char* intToCString(int i) {
+	std::ostringstream oss;
+	oss << i;
+	return (char*)oss.str().c_str();
 }

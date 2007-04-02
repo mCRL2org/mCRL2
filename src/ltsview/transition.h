@@ -1,6 +1,5 @@
 #ifndef TRANSITION_H
 #define TRANSITION_H
-#include "aterm1.h"
 #ifndef STATE_H
   #include "state.h"
 #else
@@ -10,15 +9,15 @@
 class Transition
 {
   public:
-    Transition( State* bs, State* es, ATerm lbl );
+    Transition(State* bs,State* es,int label);
     ~Transition();
-    State*    getBeginState() const;
-    State*    getEndState() const;
-    ATerm     getLabel() const;
-    bool      isBackpointer() const;
-    bool      isMarked() const;
-    void      setBackpointer( bool b );
-    void      setMarkedPointer( bool* bp );
+    State*	getBeginState() const;
+    State*	getEndState() const;
+    int			getLabel() const;
+    bool		isBackpointer() const;
+    bool		isMarked() const;
+    void		setBackpointer(bool b);
+    void		setMarkedPointer(bool* bp);
 
     // Methods for simulation
     // Getters
@@ -47,19 +46,17 @@ class Transition
     // PRE:   0 <= va
     // POST:  visitedAt = va
 
-
   private:
     bool    backpointer;
     State*  beginState;
     State*  endState;
-    ATerm   label;
+    int   label;
     bool*   marked;
 
     // Variables used for simulation.
     bool      selected;
     Utils::SimState  simulationState;
     int       visitedAt; // Used to calculate transparency
-
 };
 
 #endif

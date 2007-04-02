@@ -82,9 +82,9 @@
      FANOUT = 263,
      NODENR = 264,
      ARROW = 265,
-     NUMBER = 266,
-     ID = 267,
-     QUOTED = 268
+     ID = 266,
+     QUOTED = 267,
+     NUMBER = 268
    };
 #endif
 /* Tokens.  */
@@ -96,9 +96,9 @@
 #define FANOUT 263
 #define NODENR 264
 #define ARROW 265
-#define NUMBER 266
-#define ID 267
-#define QUOTED 268
+#define ID 266
+#define QUOTED 267
+#define NUMBER 268
 
 
 
@@ -108,34 +108,22 @@
 
 #include "fsmparser.h"
 #include "fsmlexer.cpp"
-#include <vector>
+#include <map>
 #include <ostream>
 #include <sstream>
-#include "aterm2.h"
+#include "lts.h"
 #include "state.h"
 #include "transition.h"
-#include "liblowlevel.h"
 
 // Global variables
-
 LTS* fsmparserlts = NULL;
-
-ATermList stateVector;
-ATermList valueTable;
-ATermList stateId;
-ATermList typeValues;
-ATermAppl typeId;
-
-std::vector< State* > states;
-
-AFun const_ATtypeid;
-AFun const_ATparmid;
-AFun const_ATvalue;
-AFun const_ATstate;
-AFun const_ATparam;
+std::map< int,State* > states;
+std::map< std::string,int > labels;
+std::string par_name;
+int par_index, nodenr_index, fanin_index, fanout_index, N;
+State *state = NULL;
 
 // Function declarations
-
 void fsmerror(const char* c);
 char* intToCString(int i);
 
@@ -160,13 +148,13 @@ char* intToCString(int i);
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 36 "fsmparser.yy"
+#line 26 "fsmparser.yy"
 {
-  ATermAppl aterm;
-  int number;
+	char *str;
+	int num;
 }
 /* Line 193 of yacc.c.  */
-#line 170 "fsmparser.cpp"
+#line 158 "fsmparser.cpp"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -179,7 +167,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 183 "fsmparser.cpp"
+#line 171 "fsmparser.cpp"
 
 #ifdef short
 # undef short
@@ -394,16 +382,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  3
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   42
+#define YYLAST   39
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  14
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  23
+#define YYNNTS  29
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  39
+#define YYNRULES  45
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  61
+#define YYNSTATES  67
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
@@ -449,35 +437,38 @@ static const yytype_uint8 yytranslate[] =
    YYRHS.  */
 static const yytype_uint8 yyprhs[] =
 {
-       0,     0,     3,     4,    13,    14,    18,    22,    26,    30,
-      34,    38,    39,    43,    44,    46,    50,    52,    56,    57,
-      60,    62,    65,    66,    68,    72,    74,    78,    79,    82,
-      84,    85,    86,    91,    92,    95,    96,   100,   104,   105
+       0,     0,     3,     4,    13,    14,    15,    20,    21,    26,
+      27,    32,    33,    38,    39,    44,    48,    49,    53,    54,
+      56,    60,    62,    66,    67,    70,    72,    75,    76,    78,
+      82,    84,    88,    89,    92,    94,    95,    96,    97,   103,
+     104,   107,   108,   112,   116,   117
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
-      15,     0,    -1,    -1,    17,    16,     4,     3,    31,     4,
-       3,    34,    -1,    -1,    17,    18,     3,    -1,    12,    19,
-      20,    -1,     7,    19,    26,    -1,     8,    19,    26,    -1,
-       9,    19,    26,    -1,     5,    11,     6,    -1,    -1,    22,
-      21,    24,    -1,    -1,    23,    -1,    22,    10,    23,    -1,
-      12,    -1,     5,    22,     6,    -1,    -1,    24,    25,    -1,
-      13,    -1,    27,    29,    -1,    -1,    28,    -1,    27,    10,
-      28,    -1,    12,    -1,     5,    27,     6,    -1,    -1,    29,
-      30,    -1,    13,    -1,    -1,    -1,    31,    33,    32,     3,
-      -1,    -1,    33,    11,    -1,    -1,    34,    35,     3,    -1,
-      11,    11,    36,    -1,    -1,    13,    -1
+      15,     0,    -1,    -1,    16,    17,     4,     3,    36,     4,
+       3,    40,    -1,    -1,    -1,    17,    18,    19,     3,    -1,
+      -1,    11,    20,    24,    25,    -1,    -1,     7,    21,    24,
+      31,    -1,    -1,     8,    22,    24,    31,    -1,    -1,     9,
+      23,    24,    31,    -1,     5,    13,     6,    -1,    -1,    27,
+      26,    29,    -1,    -1,    28,    -1,    27,    10,    28,    -1,
+      11,    -1,     5,    27,     6,    -1,    -1,    29,    30,    -1,
+      12,    -1,    32,    34,    -1,    -1,    33,    -1,    32,    10,
+      33,    -1,    11,    -1,     5,    32,     6,    -1,    -1,    34,
+      35,    -1,    12,    -1,    -1,    -1,    -1,    36,    37,    39,
+      38,     3,    -1,    -1,    39,    13,    -1,    -1,    40,    41,
+       3,    -1,    13,    13,    42,    -1,    -1,    12,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    52,    52,    51,    64,    67,    71,    78,    80,    82,
-      86,    91,    90,   104,   106,   109,   118,   121,   130,   133,
-     137,   143,   147,   149,   150,   154,   155,   158,   160,   164,
-     169,   174,   172,   186,   189,   202,   205,   210,   230,   232
+       0,    39,    39,    39,    48,    51,    51,    55,    55,    58,
+      58,    60,    60,    62,    62,    66,    70,    70,    76,    78,
+      81,    89,    92,   100,   103,   107,   112,   116,   118,   119,
+     123,   124,   127,   129,   133,   138,   142,   144,   141,   153,
+     156,   175,   178,   183,   209,   211
 };
 #endif
 
@@ -487,12 +478,12 @@ static const yytype_uint8 yyrline[] =
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "EOLN", "SECSEP", "LPAR", "RPAR",
-  "FANIN", "FANOUT", "NODENR", "ARROW", "NUMBER", "ID", "QUOTED",
-  "$accept", "fsm_file", "@1", "params", "param", "cardinality",
-  "type_def", "@2", "type_name", "type_name1", "type_values", "type_value",
-  "type_def_ignore", "type_name_ignore", "type_name_ignore1",
-  "type_values_ignore", "type_value_ignore", "states", "@3", "state",
-  "transitions", "transition", "action", 0
+  "FANIN", "FANOUT", "NODENR", "ARROW", "ID", "QUOTED", "NUMBER",
+  "$accept", "fsm_file", "@1", "params", "@2", "param", "@3", "@4", "@5",
+  "@6", "cardinality", "type_def", "@7", "type_name", "type_name1",
+  "type_values", "type_value", "type_def_ignore", "type_name_ignore",
+  "type_name_ignore1", "type_values_ignore", "type_value_ignore", "states",
+  "@8", "@9", "state", "transitions", "transition", "action", 0
 };
 #endif
 
@@ -509,19 +500,21 @@ static const yytype_uint16 yytoknum[] =
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    14,    16,    15,    17,    17,    18,    18,    18,    18,
-      19,    21,    20,    22,    22,    22,    23,    23,    24,    24,
-      25,    26,    27,    27,    27,    28,    28,    29,    29,    30,
-      31,    32,    31,    33,    33,    34,    34,    35,    36,    36
+       0,    14,    16,    15,    17,    18,    17,    20,    19,    21,
+      19,    22,    19,    23,    19,    24,    26,    25,    27,    27,
+      27,    28,    28,    29,    29,    30,    31,    32,    32,    32,
+      33,    33,    34,    34,    35,    36,    37,    38,    36,    39,
+      39,    40,    40,    41,    42,    42
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     0,     8,     0,     3,     3,     3,     3,     3,
-       3,     0,     3,     0,     1,     3,     1,     3,     0,     2,
-       1,     2,     0,     1,     3,     1,     3,     0,     2,     1,
-       0,     0,     4,     0,     2,     0,     3,     3,     0,     1
+       0,     2,     0,     8,     0,     0,     4,     0,     4,     0,
+       4,     0,     4,     0,     4,     3,     0,     3,     0,     1,
+       3,     1,     3,     0,     2,     1,     2,     0,     1,     3,
+       1,     3,     0,     2,     1,     0,     0,     0,     5,     0,
+       2,     0,     3,     3,     0,     1
 };
 
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
@@ -529,43 +522,43 @@ static const yytype_uint8 yyr2[] =
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       4,     0,     2,     1,     0,     0,     0,     0,     0,     0,
-       0,    22,    22,    22,    13,     0,     5,     0,    22,    25,
-       7,    27,    23,     8,     9,    13,    16,     6,    11,    14,
-      30,    10,     0,     0,    21,     0,     0,    18,    33,    26,
-      24,    29,    28,    17,    15,    12,     0,    31,    20,    19,
-      35,    34,     0,     3,    32,     0,     0,    38,    36,    39,
-      37
+       2,     0,     4,     1,     5,     0,     0,    35,     9,    11,
+      13,     7,     0,    36,     0,     0,     0,     0,     6,     0,
+      39,     0,    27,    27,    27,    18,    41,    37,     0,    27,
+      30,    10,    32,    28,    12,    14,    18,    21,     8,    16,
+      19,     3,    40,     0,    15,     0,     0,    26,     0,     0,
+      23,     0,     0,    38,    31,    29,    34,    33,    22,    20,
+      17,    44,    42,    25,    24,    45,    43
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     1,     8,     2,     9,    11,    27,    37,    28,    29,
-      45,    49,    20,    21,    22,    34,    42,    38,    52,    47,
-      53,    56,    60
+      -1,     1,     2,     4,     6,    12,    17,    14,    15,    16,
+      22,    38,    50,    39,    40,    60,    64,    31,    32,    33,
+      47,    57,    13,    20,    43,    27,    41,    52,    66
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -11
+#define YYPACT_NINF -17
 static const yytype_int8 yypact[] =
 {
-     -11,    12,    -3,   -11,     8,     8,     8,     8,    15,    17,
-      10,    -5,    -5,    -5,    -4,    19,   -11,    18,    -5,   -11,
-     -11,    13,   -11,   -11,   -11,    -4,   -11,   -11,    16,   -11,
-     -11,   -11,     4,    -5,    14,     5,    -4,   -11,    21,   -11,
-     -11,   -11,   -11,   -11,   -11,    20,    25,    23,   -11,   -11,
-     -11,   -11,    26,    24,   -11,    27,    28,    29,   -11,   -11,
-     -11
+     -17,    14,   -17,   -17,    12,     2,     1,   -17,   -17,   -17,
+     -17,   -17,    15,    18,    19,    19,    19,    19,   -17,    16,
+     -17,    10,    -5,    -5,    -5,    -4,   -17,    13,    21,    -5,
+     -17,   -17,    20,   -17,   -17,   -17,    -4,   -17,   -17,    22,
+     -17,    23,   -17,    25,   -17,     5,    -5,    17,     7,    -4,
+     -17,    24,    28,   -17,   -17,   -17,   -17,   -17,   -17,   -17,
+      26,    27,   -17,   -17,   -17,   -17,   -17
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -11,   -11,   -11,   -11,   -11,    11,   -11,   -11,     7,    -6,
-     -11,   -11,   -10,    22,     3,   -11,   -11,   -11,   -11,   -11,
-     -11,   -11,   -11
+     -17,   -17,   -17,   -17,   -17,   -17,   -17,   -17,   -17,   -17,
+     -13,   -17,   -17,   -11,   -16,   -17,   -17,    -3,     6,   -12,
+     -17,   -17,   -17,   -17,   -17,   -17,   -17,   -17,   -17
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -575,33 +568,31 @@ static const yytype_int8 yypgoto[] =
 #define YYTABLE_NINF -1
 static const yytype_uint8 yytable[] =
 {
-      18,    25,    23,    24,     4,     5,     6,    19,    26,     7,
-      39,    43,     3,    10,    33,    36,    12,    13,    14,    15,
-      16,    17,    30,    33,    31,    46,    36,    41,    50,    54,
-      44,    58,    35,    48,    51,    55,    40,     0,    57,     0,
-      32,     0,    59
+      29,    36,    23,    24,    25,     7,    30,    37,     8,     9,
+      10,    54,    11,    58,     3,    46,     5,    49,    18,    26,
+      34,    35,    19,    28,    21,    48,    42,    44,    53,    56,
+      46,    62,    49,    59,    55,    45,    51,    61,    63,    65
 };
 
-static const yytype_int8 yycheck[] =
+static const yytype_uint8 yycheck[] =
 {
-       5,     5,    12,    13,     7,     8,     9,    12,    12,    12,
-       6,     6,     0,     5,    10,    10,     5,     6,     7,     4,
-       3,    11,     3,    10,     6,     4,    10,    13,     3,     3,
-      36,     3,    25,    13,    11,    11,    33,    -1,    11,    -1,
-      18,    -1,    13
+       5,     5,    15,    16,    17,     3,    11,    11,     7,     8,
+       9,     6,    11,     6,     0,    10,     4,    10,     3,     3,
+      23,    24,     4,    13,     5,    36,    13,     6,     3,    12,
+      10,     3,    10,    49,    46,    29,    13,    13,    12,    12
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,    15,    17,     0,     7,     8,     9,    12,    16,    18,
-       5,    19,    19,    19,    19,     4,     3,    11,     5,    12,
-      26,    27,    28,    26,    26,     5,    12,    20,    22,    23,
-       3,     6,    27,    10,    29,    22,    10,    21,    31,     6,
-      28,    13,    30,     6,    23,    24,     4,    33,    13,    25,
-       3,    11,    32,    34,     3,    11,    35,    11,     3,    13,
-      36
+       0,    15,    16,     0,    17,     4,    18,     3,     7,     8,
+       9,    11,    19,    36,    21,    22,    23,    20,     3,     4,
+      37,     5,    24,    24,    24,    24,     3,    39,    13,     5,
+      11,    31,    32,    33,    31,    31,     5,    11,    25,    27,
+      28,    40,    13,    38,     6,    32,    10,    34,    27,    10,
+      26,    13,    41,     3,     6,    33,    12,    35,     6,    28,
+      29,    13,     3,    12,    30,    12,    42
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1416,134 +1407,147 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 52 "fsmparser.yy"
-    { 
-	    valueTable = ATreverse( valueTable );
-	    stateId = ATreverse( stateId );
-	    fsmparserlts->setStateVectorSpec( stateId )
-	  ;}
+#line 39 "fsmparser.yy"
+    { N = 0; nodenr_index = 0; fanin_index = 0; fanout_index = 0 ;}
     break;
 
-  case 6:
-#line 73 "fsmparser.yy"
-    {
-	    stateId = ATinsert( stateId, (ATerm)ATmakeAppl2( const_ATparmid,
-	      (ATerm)(yyvsp[(1) - (3)].aterm), (ATerm)typeId ) )
-	  ;}
+  case 5:
+#line 51 "fsmparser.yy"
+    { N++ ;}
+    break;
+
+  case 7:
+#line 55 "fsmparser.yy"
+    { par_name = static_cast<std::string>((yyvsp[(1) - (1)].str)) ;}
+    break;
+
+  case 9:
+#line 58 "fsmparser.yy"
+    { fanin_index = N-1 ;}
     break;
 
   case 11:
-#line 91 "fsmparser.yy"
-    { 
-	    typeValues = ATempty
-	  ;}
-    break;
-
-  case 12:
-#line 95 "fsmparser.yy"
-    { 
-	    typeValues = ATreverse( typeValues );
-	    typeId = ATmakeAppl2( const_ATtypeid, (ATerm)(yyvsp[(1) - (3)].aterm), (ATerm)typeValues );
-	    valueTable = ATinsert( valueTable, (ATerm)typeValues )
-	  ;}
+#line 60 "fsmparser.yy"
+    { fanout_index = N-1 ;}
     break;
 
   case 13:
-#line 104 "fsmparser.yy"
-    { (yyval.aterm) = ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) ) ;}
-    break;
-
-  case 14:
-#line 107 "fsmparser.yy"
-    { (yyval.aterm) = (yyvsp[(1) - (1)].aterm) ;}
-    break;
-
-  case 15:
-#line 110 "fsmparser.yy"
-    {
-	    std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(1) - (3)].aterm) ) )
-	      + "->" + static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(3) - (3)].aterm) ) );
-	    (yyval.aterm) = ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) )
-	  ;}
+#line 62 "fsmparser.yy"
+    { nodenr_index = N-1 ;}
     break;
 
   case 16:
-#line 119 "fsmparser.yy"
-    { (yyval.aterm) = (yyvsp[(1) - (1)].aterm) ;}
+#line 70 "fsmparser.yy"
+    { par_index = fsmparserlts->addParameter(par_name,static_cast<std::string>((yyvsp[(1) - (1)].str))) ;}
     break;
 
-  case 17:
-#line 122 "fsmparser.yy"
-    {
-	    std::string result = "(" + static_cast<std::string> ( ATwriteToString(
-	      (ATerm)(yyvsp[(2) - (3)].aterm)) ) + ")";
-	    (yyval.aterm) = ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) )
-	  ;}
+  case 18:
+#line 76 "fsmparser.yy"
+    { (yyval.str) = "" ;}
+    break;
+
+  case 19:
+#line 79 "fsmparser.yy"
+    { (yyval.str) = (yyvsp[(1) - (1)].str) ;}
     break;
 
   case 20:
-#line 138 "fsmparser.yy"
-    { typeValues = ATinsert( typeValues, (ATerm)ATmakeAppl2(
-	      const_ATvalue, (ATerm)(yyvsp[(1) - (1)].aterm), (ATerm)ATmakeInt( ATgetLength( typeValues ) ) ) ) ;}
-    break;
-
-  case 31:
-#line 174 "fsmparser.yy"
+#line 82 "fsmparser.yy"
     {
-	    stateVector = ATreverse( stateVector ); 
-	    State* s = new State( stateVector );
-	    fsmparserlts->addState( s );
-	    states.push_back( s );
-	    if ( states.size() == 1 ) 
-	      fsmparserlts->setInitialState( s );
-	    stateVector = ATempty
+	    std::string result = static_cast<std::string>((yyvsp[(1) - (3)].str)) + "->" + static_cast<std::string>((yyvsp[(3) - (3)].str));
+	    (yyval.str) = strdup(result.c_str())
 	  ;}
     break;
 
-  case 34:
-#line 190 "fsmparser.yy"
-    { 
-	    unsigned int paramNo = ATgetLength( stateVector );
-	    if ( paramNo < ATgetLength( valueTable ) )
-	    {
-	      stateVector = ATinsert( stateVector, ATelementAt(
-		(ATermList)ATelementAt( valueTable, paramNo ), (yyvsp[(2) - (2)].number) ) );
-	    }
+  case 21:
+#line 90 "fsmparser.yy"
+    { (yyval.str) = (yyvsp[(1) - (1)].str) ;}
+    break;
+
+  case 22:
+#line 93 "fsmparser.yy"
+    {
+	    std::string result = "(" + static_cast<std::string> ((yyvsp[(2) - (3)].str)) + ")";
+	    (yyval.str) = strdup(result.c_str())
 	  ;}
+    break;
+
+  case 25:
+#line 108 "fsmparser.yy"
+    { fsmparserlts->addParameterValue(par_index,static_cast<std::string>((yyvsp[(1) - (1)].str))) ;}
+    break;
+
+  case 36:
+#line 142 "fsmparser.yy"
+    { state = new State(); fsmparserlts->addState(state); N = 0 ;}
     break;
 
   case 37:
-#line 211 "fsmparser.yy"
+#line 144 "fsmparser.yy"
     {
-	    State* frState = states[(yyvsp[(1) - (3)].number)-1];
-	    State* toState = states[(yyvsp[(2) - (3)].number)-1];
-	    Transition* t = new Transition( frState, toState, (ATerm)(yyvsp[(3) - (3)].aterm) );
-	    fsmparserlts->addTransition( t );
-	    if ( (yyvsp[(1) - (3)].number) != (yyvsp[(2) - (3)].number) )
-	    {
-	      frState->addOutTransition( t );
-	      toState->addInTransition( t );
-	    }
-	    else
-	    {
-	      frState->addLoop( t );
+	    //states.push_back( s );
+	    //if ( states.size() == 1 ) 
+	    //  fsmparserlts->setInitialState( s );
+	    //stateVector = ATempty
+	  ;}
+    break;
+
+  case 40:
+#line 157 "fsmparser.yy"
+    { 
+			if (N != fanin_index && N != fanout_index) {
+				if (N == nodenr_index) {
+					state->setID((yyvsp[(2) - (2)].num));
+					states[(yyvsp[(2) - (2)].num)] = state;
+					if ((yyvsp[(2) - (2)].num) == 1) {
+						fsmparserlts->setInitialState(state);
+					}
+				} else {
+					state->addParameterValue((yyvsp[(2) - (2)].num));
+				}
+			}
+			N++
+	  ;}
+    break;
+
+  case 43:
+#line 184 "fsmparser.yy"
+    {
+	    State* s1 = states[(yyvsp[(1) - (3)].num)];
+	    State* s2 = states[(yyvsp[(2) - (3)].num)];
+			std::string labstr = static_cast<std::string>((yyvsp[(3) - (3)].str));
+			std::map< std::string,int >::iterator p = labels.find(labstr);
+			int l;
+			if (p == labels.end()) {
+				l = fsmparserlts->addLabel(labstr);
+				labels[labstr] = l;
+			} else {
+				l = p->second;
+			}
+	    Transition* t = new Transition(s1,s2,l);
+	    fsmparserlts->addTransition(t);
+	    if ((yyvsp[(1) - (3)].num) != (yyvsp[(2) - (3)].num)) {
+	      s1->addOutTransition(t);
+	      s2->addInTransition(t);
+	    } else {
+	      s1->addLoop(t);
 	    }
 	  ;}
     break;
 
-  case 38:
-#line 230 "fsmparser.yy"
-    { (yyval.aterm) = ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) ) ;}
+  case 44:
+#line 209 "fsmparser.yy"
+    { (yyval.str) = "" ;}
     break;
 
-  case 39:
-#line 233 "fsmparser.yy"
-    { (yyval.aterm) = (yyvsp[(1) - (1)].aterm) ;}
+  case 45:
+#line 212 "fsmparser.yy"
+    { (yyval.str) = (yyvsp[(1) - (1)].str) ;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1547 "fsmparser.cpp"
+#line 1551 "fsmparser.cpp"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1757,82 +1761,45 @@ yyreturn:
 }
 
 
-#line 236 "fsmparser.yy"
+#line 215 "fsmparser.yy"
 
 
-int fsmwrap()
-{
+int fsmwrap() {
   return 1;
 }
 
-void fsmerror(const char *str)
-{
-  throw std::string( "Parse error: " + std::string(str) + " token \"" + std::string(fsmtext) +
-    "\" at line " + std::string(intToCString( lineNo )) + " position " +
-    std::string(intToCString( posNo )) );
+void fsmerror(const char *str) {
+  throw std::string("Parse error: " + std::string(str) + " token \"" + std::string(fsmtext) +
+    "\" at line " + std::string(intToCString(lineNo)) + " position " +
+    std::string(intToCString(posNo)) );
 }
  
-void parseFSMfile( std::string fileName, LTS* const lts )
-{
+void parseFSMfile( std::string fileName, LTS* const lts ) {
   // reset the lexer position variables
-  lineNo=1;
-  posNo=1;
+  lineNo = 1;
+  posNo = 1;
   
   FILE* infile = fopen(fileName.c_str(),"r");
-  if ( infile == NULL )
-    throw std::string( "Cannot open file for reading:\n" + fileName );
-  else
-  {
+  if (infile == NULL) {
+		throw std::string("Cannot open file for reading:\n" + fileName);
+	}
+  else {
     // INITIALISE
     fsmparserlts = lts;
-    fsmrestart( infile );
-    
-    const_ATtypeid = ATmakeAFun( "TypeId", 2, ATfalse );
-    ATprotectAFun( const_ATtypeid );
-    const_ATparmid = ATmakeAFun( "ParamId", 2, ATfalse );
-    ATprotectAFun( const_ATparmid );
-    const_ATvalue = ATmakeAFun( "Value", 2, ATfalse );
-    ATprotectAFun( const_ATvalue );
-    const_ATstate = ATmakeAFun( "State", 2, ATfalse );
-    ATprotectAFun( const_ATstate );
-    const_ATparam = ATmakeAFun( "Param", 2, ATfalse );
-    ATprotectAFun( const_ATparam );
-    stateVector = ATempty;
-    ATprotectList( &stateVector );
-    valueTable = ATempty;
-    ATprotectList( &valueTable );
-    stateId = ATempty;
-    ATprotectList( &stateId );
-    typeValues = NULL;
-    ATprotectList( &typeValues );
-    typeId = NULL;
-    ATprotectAppl( &typeId );
-    
+    fsmrestart(infile);
 
-    // PARSE
     fsmparse();
     
-    // CLEAN UP
-    ATunprotectAFun( const_ATtypeid );
-    ATunprotectAFun( const_ATparmid );
-    ATunprotectAFun( const_ATvalue );
-    ATunprotectAFun( const_ATstate );
-    ATunprotectAFun( const_ATparam );
-    ATunprotectList( &stateVector );
-    ATunprotectList( &valueTable );
-    ATunprotectList( &stateId );
-    ATunprotectList( &typeValues );
-    ATunprotectAppl( &typeId );
-    
     states.clear();
+		labels.clear();
     fsmparserlts = NULL;
+		state = NULL;
   }
 } 
 
-char* intToCString( int i )
-{
-    std::ostringstream oss;
-    oss << i;
-    return (char*)oss.str().c_str();
+char* intToCString(int i) {
+	std::ostringstream oss;
+	oss << i;
+	return (char*)oss.str().c_str();
 }
 
