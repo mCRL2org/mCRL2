@@ -263,8 +263,19 @@ def generate_constructor_functions(rules, filename, ignored_phases = []):
         ptext = ptext + 'ATermAppl construct%s();\n' % f.name()
         name  = f.name()
         arity = f.arity()
-        args = map(lambda x: 'reinterpret_cast<ATerm>(construct%s())' % x.name() if x.repetitions == '' else 'reinterpret_cast<ATerm>(constructList())', f.arguments)
-        arguments = ', ' + ', '.join(args) if len(args) > 0 else ''
+#        args = map(lambda x: 'reinterpret_cast<ATerm>(construct%s())' % x.name() if x.repetitions == '' else 'reinterpret_cast<ATerm>(constructList())', f.arguments)
+        args = []
+        for x in f.arguments:
+            if x.repetitions == '':
+                args.append('reinterpret_cast<ATerm>(construct%s())' % x.name())
+            else:
+                args.append('reinterpret_cast<ATerm>(constructList())')
+
+#        arguments = ', ' + ', '.join(args) if len(args) > 0 else ''
+        if len(args) > 0:
+            arguments = ', ' + ', '.join(args) 
+        else:
+            arguments = ''
         text = text + CONSTRUCTOR_FUNCTIONS % {
             'name'       : name,
             'name'       : name,
