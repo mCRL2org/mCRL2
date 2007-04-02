@@ -14,14 +14,8 @@ namespace sip {
     }
 
     /**
-     * The following connection options are recognised and extracted from the command line arguments:
-     *
-     *  - --si-connect=\<scheme\>, where \<scheme\> is one of
-     *    - socket://\<host\>:\<port\> (for a socket connection)
-     *    - traditional:// (for standard input/output communication)
-     *
-     * \param argc the number of command line arguments
-     * \param argv a pointer to the list of command line arguments
+     * \param[in,out] argc the number of command line arguments
+     * \param[in,out] argv a pointer to the list of command line arguments
      * \attention the specific command line options are removed, so and argc and argv are modified
      * \return whether options were found and whether a connection is being opened with a controller
      **/

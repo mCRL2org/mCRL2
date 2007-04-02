@@ -410,6 +410,21 @@ namespace utility {
 
   template <>
   template <>
+  void visitor< sip::restore_visitor_impl >::visit(sip::layout::elements::radio_button& c) {
+    using sip::layout::elements::radio_button;
+
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "radio-button");
+
+    tree->GetAttribute("label", &c.m_label);
+    tree->GetAttributeOrDefault("selected", &c.m_selected, false);
+
+    if (c.m_selected) {
+      c.set_selected(true);
+    }
+  }
+
+  template <>
+  template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::layout::elements::radio_button& c, sip::display::element_for_id& element_by_id) {
     using sip::layout::elements::radio_button;
 
@@ -702,7 +717,7 @@ namespace utility {
           sip::layout::element const* t = c.find(boost::lexical_cast < sip::layout::element_identifier > (e->GetAttributeValue("id")));
 
           if (t != 0) {
-            sip::visitors::restore(*t, *e);
+            visitor< sip::restore_visitor_impl >(e).do_visit(*t);
 
             elements.push_back(t);
           }
@@ -733,6 +748,7 @@ namespace utility {
     register_visit_method< sip::layout::elements::checkbox >();
     register_visit_method< sip::layout::elements::label >();
     register_visit_method< sip::layout::elements::progress_bar >();
+    register_visit_method< sip::layout::elements::radio_button >();
     register_visit_method< sip::layout::elements::radio_button, sip::display::element_for_id >();
     register_visit_method< sip::layout::elements::text_field >();
     register_visit_method< sip::layout::horizontal_box, sip::display::element_for_id >();
