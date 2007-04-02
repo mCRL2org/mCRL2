@@ -707,12 +707,24 @@ namespace squadt {
 
       if (g.get() != 0) {
         if (content != 0) {
+          /* Forcibly refresh display to prevent a crash on Mac OS X */
+          Refresh();
+          Update();
+          wxTheApp->Yield();
+
           /* Delete controls */
           content->Clear(true);
 
           GetSizer()->Detach(content);
 
           delete content;
+
+          Layout();
+
+          /* Forcibly refresh display to remove display artifacts on Mac OS X and Windows */
+          GetParent()->Refresh();
+          GetParent()->Update();
+          wxTheApp->Yield();
         }
 
         current_layout = l;
