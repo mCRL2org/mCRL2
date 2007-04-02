@@ -558,6 +558,8 @@ namespace squadt {
       object_view->SetItemData(item, new tool_data(*this, t));
 #ifndef __WXMAC__ // Causes crashes on Mac OS X (2.8.3 and before) through ScrollTo()
       object_view->EnsureVisible(item);
+#else
+      object_view->Expand(s);
 #endif
     }
 
