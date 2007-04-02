@@ -491,7 +491,7 @@ string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variables)
 	if (pbes_expr::is_true(p))
 		// PBESTrue => T
 		result = "T";
-	else if (pbes_expr::is_true(p))
+	else if (pbes_expr::is_false(p))
 		// PBESFalse => F
 		result = "F";
 	else if (pbes_expr::is_and(p))
