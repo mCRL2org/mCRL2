@@ -2182,7 +2182,7 @@ reg_frm_primary:
       safe_assign($$, gsMakeRegNil());
       gsDebugMsg("parsed primary regular formula\n  %T\n", $$);
     }
-  | LPAR reg_frm RPAR
+  | LPAR reg_frm_alt_naf RPAR
     {
       safe_assign($$, $2);
     }
