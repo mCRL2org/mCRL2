@@ -43,6 +43,7 @@
 #include "lps/identifier_string.h"
 #include "atermpp/utility.h"
 #include "atermpp/indexed_set.h"
+#include "atermpp/table.h"
 
 //Tool-specific
 #include "pbes_rewrite.h"		// PBES rewriter
@@ -64,10 +65,10 @@ typedef struct{
 } t_tool_options;
 
 typedef struct {
-	data_variable_list finite_var;		// List of all infinite sorts
-	data_variable_list infinite_var;	// List of all infinite sorts
-	data_expression_list finite_exp;	// List of all finite sorts
-	data_expression_list infinite_exp;	// List of all finite sorts
+	data_variable_list finite_var;		// List of all finite variables
+	data_variable_list infinite_var;	// List of all infinite variables
+	data_expression_list finite_exp;	// List of all finite expressions
+	data_expression_list infinite_exp;	// List of all infinite expressions
 } t_instantiations;
 
 //Function declarations used by main program
@@ -101,7 +102,7 @@ string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variables);
 pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options);
 //
 
-propositional_variable_instantiation create_naive_propositional_variable_instantiation(propositional_variable_instantiation propvarinst, map<lps::sort, bool> is_finite_sort_list);
+propositional_variable_instantiation create_naive_propositional_variable_instantiation(propositional_variable_instantiation propvarinst, atermpp::table *enumerated_sorts);
 // Create a propositional variable instantiation with the checks needed in the naive algorithm
 
 identifier_string create_propvar_name(identifier_string propvar_name, data_expression_list finite_exp);
@@ -156,174 +157,170 @@ pbes create_bes(pbes pbes_spec, t_tool_options tool_options)
 //---------------------------
 pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 {
-	// All PBES elements: initial state, equation system, data specification
+	// Get all parts from the PBES (data specification, equation system, initial state)
 	propositional_variable_instantiation initial_state = pbes_spec.initial_state();
 	equation_system eqsys = pbes_spec.equations();
 	data_specification data = pbes_spec.data();
 
-	pbes result;					// The resulting PBES
-	equation_system result_es;		// The resulting Equation system
-	
-	// Create rewriter with data
-	Rewriter *rewriter = createRewriter(data);
+	// Needed variables in the whole function
+	equation_system result_eqsys;				// resulting equation system
+	bool is_bes_system = true;					// True if resulting eqsys is a BES
+	int nr_of_equations = 0;					// Nr of equations computed
+	Rewriter *rewriter = createRewriter(data); 	// Data rewriter
 
-	bool is_bes_system = true;		// True if the resulting equation system is a BES, false otherwise
-	int nr_of_equations = 0;		// Number of equations computed
+	// Empty data_variable_list and data_expression_list
+	data_variable_list empty_data_variable_list;
+	data_expression_list empty_data_expression_list;
 
-	// map which contains pairs of each data sort of the LHS of the equation system and a boolean value if it is finite.
-	map<lps::sort, bool> is_finite_sort_list;
-	// is_finite_sort_list is populated with the sort, bool pairs
+	atermpp::table *sort_enumerations = new atermpp::table(10,50);
+
+	//Populate sort_enumerations with all enumerations for finite sorts
 	for (equation_system::iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
 	{
-		for (data_variable_list::iterator p = eq_i->variable().parameters().begin(); p != eq_i->variable().parameters().end(); p++)
+		data_variable_list parameters = eq_i->variable().parameters();
+		for (data_variable_list::iterator p = parameters.begin(); p != parameters.end(); p++)
 		{
-			lps::sort cur_sort = p->sort();
-			if (is_finite_sort_list.find(cur_sort) == is_finite_sort_list.end())
-			{ // If the data sort isn't in the map yet, add it.
-				bool finite;
-				check_finite(data.constructors(), cur_sort)?finite = true:finite = false;
-				is_finite_sort_list.insert(pair<lps::sort,bool>(cur_sort, finite));
+			lps::sort current_sort = p->sort();
+			if (sort_enumerations->get(current_sort) == NULL)
+			{ // If the sort is not in the enumerated_sorts
+				if (check_finite(data.constructors(), current_sort))
+				{ // If the sort is finite
+					data_expression_list enumerations_from_sort = enumerate_constructors(data.constructors(), current_sort);
+					sort_enumerations->put(current_sort, enumerations_from_sort);
+				}
 			}
 		}
 	}
 
-	// Create a t_instantiation for each possible instantiation for each parameter.
+	// Create the rewritten equation system
 	for (equation_system::iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
 	{
-		//Get needed data out of the equation
-		propositional_variable propvar = eq_i->variable();
-		identifier_string propvar_name = propvar.name();
-		data_variable_list parameters = propvar.parameters();
-	
-		// Empty data variable list and empty data expression list	
-		data_variable_list empty_data_variable_list;
-		data_expression_list empty_data_expression_list;
+		// Get current equation
+		pbes_equation equation = *eq_i;
+		// Get all parts from the PBES_EQUATION (propositional_variable, formula)
+		propositional_variable propvar = equation.variable();
+		pbes_expression formula = equation.formula();
 
-		string propvar_name_print = propvar_name;
-		gsVerboseMsg("Rewriting PBES equation with propositional variable %t\n", propvar_name_print.c_str());
-		
+		// Get the name and parameters of the propvar
+		identifier_string propvar_name = propvar.name();
+		data_variable_list propvar_parameters = propvar.parameters();
+
+		// Verbose print the equation which is currently done
+		string propvar_name_string = propvar_name;
+		gsVerboseMsg("Rewriting PBES equation with propositional variable %s\n", propvar_name_string.c_str());
+
+		// Vector of instantiations
 		vector< t_instantiations > instantiation_list;
-		t_instantiations instantiation;
-		
-		// Initialise all instantiations to the empty list and add it to the vector
+		t_instantiations instantiation;			// Needed?
+		t_instantiations current_values;		// Current results
+
+		// Add empty instantiation to the list
 		instantiation_list.push_back(instantiation);
-		
-		// struct in which current results are stored.
-		t_instantiations new_values;
-		
-		// For each variable of the equation...
-		for (data_variable_list::iterator p = parameters.begin(); p != parameters.end(); p++)
+
+		// For each variable of the equation
+		for (data_variable_list::iterator p = propvar_parameters.begin(); p != propvar_parameters.end(); p++)
 		{
-			// Vector for storing intermediate results
-			vector< t_instantiations > current_instantiation_list;
-			if (is_finite_sort_list.find(p->sort())->second)
-			{ // Data sort is finite, enumerate it
-				// new_values.finite_var will be extended with p
-				new_values.finite_var = push_back(new_values.finite_var, *p);
-				
-				// Get all possible values for p
-				data_expression_list enumerations = enumerate_constructors(data.constructors(), p->sort());
-				// For each (partial) instantiation generated so far
+			// Vector of instantiations for intermediate results
+			vector< t_instantiations > intermediate_instantiation_list;
+			if (sort_enumerations->get(p->sort()) == NULL)
+			{ // The sort is infinite
+				is_bes_system = false;		// Resulting system is not a BES
+				current_values.infinite_var = push_back(current_values.infinite_var, *p);
 				for (vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
 				{
-					// For each value of p
-					for (data_expression_list::iterator e = enumerations.begin(); e != enumerations.end(); e++)
-					{	
-						// change the appropriate values
-						new_values.finite_exp = push_back(inst_i->finite_exp, *e);
-						// Add the struct in the current instantiation list
-						current_instantiation_list.push_back(new_values);
-					}
+					// Add current_values to intermediate_instantiation_list
+					intermediate_instantiation_list.push_back(current_values);
 				}
 			}
 			else
-			{ // Data sort is infinite don't enumerate; resulting system is a PBES
-				new_values.infinite_var = push_back(new_values.infinite_var, *p);
-				// System is not a BES
-				is_bes_system = false;
-				// For each instantiation generated so far
+			{ // The sort is finite
+				current_values.finite_var = push_back(current_values.finite_var, *p);
+				data_expression_list enumerations = sort_enumerations->get(p->sort());
+
 				for (vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
 				{
-					// Change appropriate values
-					// Add the struct in the current instantiation list
-					current_instantiation_list.push_back(new_values);
+					for (data_expression_list::iterator e = enumerations.begin(); e != enumerations.end(); e++)
+					{
+						current_values.finite_exp = push_back(inst_i->finite_exp, *e);
+						intermediate_instantiation_list.push_back(current_values);
+					}
 				}
 			}
-			// The intermediate result is stored in instantiation_list
-			instantiation_list = current_instantiation_list;
+			instantiation_list = intermediate_instantiation_list;
 		}
 
-
+		// All instantiations for the current equation are computed. Now make equations out of them
 		for (vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
 		{
-			// Create the correct propositional variable for the left hand side of the equation
-			propositional_variable current_propvar = propositional_variable(create_propvar_name(propvar.name(), inst_i->finite_exp), inst_i->infinite_var);
-			
-			// Get current equation 
-			pbes_equation current_eq = *eq_i;
-			
-			// Get current expression and substitute finite_variables by their instantiations
-			pbes_expression current_exp = pbes_expression_rewrite(current_eq.formula().substitute(make_list_substitution(inst_i->finite_var, inst_i->finite_exp)), data, rewriter);
-			
-			// oldpropvarinst_list and newpropvarinst_list are used to replace the variables in the right hand side
+			// Create the needed propvar
+			propositional_variable propvar_current = propositional_variable(create_propvar_name(propvar_name, inst_i->finite_exp), inst_i->infinite_var);
+
+			pbes_expression current_expression = formula;	// Current expression
+			// Substitute all variables which are instantiated
+			current_expression = current_expression.substitute(make_list_substitution(inst_i->finite_var, inst_i->finite_exp));
+			// Rewrite the rhs as far as possible
+			current_expression = pbes_expression_rewrite(current_expression, data, rewriter);
+			// Lists to replace variables in the rhs
 			propositional_variable_instantiation_list oldpropvarinst_list;
 			propositional_variable_instantiation_list newpropvarinst_list;
-			// Get all propositional_variables of the right hand side
-			set< propositional_variable_instantiation > propvarinst_set = find_propositional_variable_instantiations(current_exp);
-			// For each propositional variable instantiation
+			// Get all propvarinst of the rhs
+			set< propositional_variable_instantiation > propvarinst_set = find_propositional_variable_instantiations(current_expression);
+
+			// For each propvarinst in the set
 			for (set< propositional_variable_instantiation >::iterator pvi = propvarinst_set.begin(); pvi != propvarinst_set.end(); pvi++)
 			{
-				// Put it in the oldpropvarinst_list
+				// Put the propvarinst in the old list
 				oldpropvarinst_list = push_front(oldpropvarinst_list, *pvi);
-				
-				// Create the new propositional variable instantiation
-				propositional_variable_instantiation newpropvarinst = create_naive_propositional_variable_instantiation(*pvi, is_finite_sort_list);
-				
-				// Add the new propvarinst in the newpropvarinst_list
+				// Create the new propvarinst
+				propositional_variable_instantiation newpropvarinst = create_naive_propositional_variable_instantiation(*pvi, sort_enumerations);
+				// Add the new propvarinst in the new list
 				newpropvarinst_list = push_front(newpropvarinst_list, newpropvarinst);
 			}
-			// replace the propvarinsts with the newpropvarinst
-			current_exp = current_exp.substitute(make_list_substitution(oldpropvarinst_list, newpropvarinst_list));
 
-			// Add the new equation with the current_provar and the current_exp
-			result_es.push_back(pbes_equation(eq_i->symbol(), current_propvar, current_exp));
-			// Verbose message at each 100 equations generated
+			// Replace the propvarinsts with the new ones
+			current_expression = current_expression.substitute(make_list_substitution(oldpropvarinst_list, newpropvarinst_list));
+
+			// Add the new pequation tin the resulting system
+			result_eqsys.push_back(pbes_equation(eq_i->symbol(), propvar_current, current_expression));
+
+			// Verbose messages after each 100 equations
 			if (++nr_of_equations % 100 == 0)
 				gsVerboseMsg("At Boolean equation %d\n", nr_of_equations);
+
 		}
 	}
 
 	// rewrite initial state
-	propositional_variable_instantiation new_initial_state = create_naive_propositional_variable_instantiation(initial_state, is_finite_sort_list);
-	
-	// Create resulting PBES
-	result = pbes(data, result_es, new_initial_state);
+	propositional_variable_instantiation new_initial_state = create_naive_propositional_variable_instantiation(initial_state, sort_enumerations);
 
-	gsVerboseMsg("Number of Boolean equations generated: %d\n", nr_of_equations);
-	
+	// create resulting pbes
+	pbes result = pbes(data, result_eqsys, new_initial_state);
+
+	gsVerboseMsg("Number of Boolean equation systems computed: %d\n", nr_of_equations);
+
 	delete rewriter;
-	
+
 	return result;
 }
 
 
-//function create_naive_propositional_variable_instantiation 
+//function create_naive_propositional_variable_instantiation
 //----------------------------------------------------------
-propositional_variable_instantiation create_naive_propositional_variable_instantiation(propositional_variable_instantiation propvarinst, map<lps::sort, bool> is_finite_sort_list)
+propositional_variable_instantiation create_naive_propositional_variable_instantiation(propositional_variable_instantiation propvarinst, atermpp::table *enumerated_sorts)
 {
 	data_expression_list finite_expression;
 	data_expression_list infinite_expression;
 	//For each parameter:
 	for (data_expression_list::iterator p = propvarinst.parameters().begin(); p != propvarinst.parameters().end(); p++)
 	{
-		if (is_finite_sort_list.find(p->sort())->second)
+		if (enumerated_sorts->get(p->sort()) != NULL)
 		{
-			//If it is of finite sort, add it to the list of finite expressions of the propvarinst 
+			//If it is of finite sort, add it to the list of finite expressions of the propvarinst
 			if (is_data_operation(*p))
 			{ // If p is a correct data operation
 				finite_expression = push_back(finite_expression, *p);
 			}
-			else if (is_data_operation(*p))
+			else if (is_data_variable(*p))
 			{ // If p is a freevar
 				gsErrorMsg("The PBES contains a free variable in the propositional variable instantiation.\n");
 				gsErrorMsg("Try using mcrl22lps with the flag -f or --no-freevars to solve this.\n");
@@ -332,12 +329,12 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
 		}
 		else
 		{
-			//If it is of infinite sort, add it to the list of infinite expressions of the propvarinst 
+			//If it is of infinite sort, add it to the list of infinite expressions of the propvarinst
 			infinite_expression = push_back(infinite_expression, *p);
 		}
 	}
-	
-	return propositional_variable_instantiation(create_propvar_name(propvarinst.name(), finite_expression), infinite_expression);						
+
+	return propositional_variable_instantiation(create_propvar_name(propvarinst.name(), finite_expression), infinite_expression);
 }
 
 //function create_propvar_name
@@ -424,7 +421,7 @@ void save_pbes(pbes pbes_spec, t_tool_options tool_options)
 				gsErrorMsg("Could not save PBES to %s\n", outfilename.c_str());
 				exit(1);
 			}
-				
+
 		}
 	}
 }
@@ -441,7 +438,7 @@ void save_pbes_in_cwi_format(pbes pbes_spec, string outfilename)
 	{
 		variables->put(eq->variable());
 	} // because pbes is closed, all variables are done at this point
-	
+
 	ofstream outputfile;
    	outputfile.open(outfilename.c_str(), ios::trunc);
 	// Rewrite all equations to CWI format
@@ -452,13 +449,13 @@ void save_pbes_in_cwi_format(pbes pbes_spec, string outfilename)
 		// 	nu => max
 		string fp;
 		(eq->symbol().is_mu())?fp = "min":fp = "max";
-		// Check if the 
+		// Check if the
 		//if (eq->variable().parameters().size() != 0)
 		//{
 		//	gsErrorMsg("The used equation system is not a BES. Could not save this in CWI-format.\n");
 		//	exit(1);
 		//}
-		
+
 		// variable:
 		// 	Integer representation of the propositional variable of the left hand side
 	    string variable;
@@ -471,7 +468,7 @@ void save_pbes_in_cwi_format(pbes pbes_spec, string outfilename)
 
 		// Create the equation
 		string equation = fp + " " + variable + " = " + rhs + "\n";
-		
+
 		if (outputfile.is_open())
 			outputfile << equation;
 		else
@@ -564,8 +561,6 @@ t_tool_options parse_command_line(int argc, char** argv)
 	desc.add_options()
 			("output,o",	po::value<string>(&opt_outputformat)->default_value("binary"), "use outputformat arg (default 'binary');"
 			 				"available outputformats are binary, external and cwi")
-			("external,e",	"return the result in external format")
-			("cwi,c", 		"return the result in the format used at CWI")
 			("verbose,v",	"turn on the display of short intermediate messages")
 			("debug,d",		"turn on the display of detailed intermediate messages")
 			("version",		"display version information")
@@ -618,7 +613,7 @@ t_tool_options parse_command_line(int argc, char** argv)
 		gsSetVerboseMsg();
 	}
 
-	if (vm.count("output")) // Pretty printed version
+	if (vm.count("output")) // Output format
 	{
 		opt_outputformat = vm["output"].as< string >();
 		if (!((opt_outputformat == "external") || (opt_outputformat == "binary") || (opt_outputformat == "cwi")))
@@ -664,4 +659,5 @@ t_tool_options parse_command_line(int argc, char** argv)
 	tool_options.outfilename = outfilename;
 	return tool_options;
 }
+
 
