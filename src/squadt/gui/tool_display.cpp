@@ -712,6 +712,8 @@ namespace squadt {
           Update();
           wxTheApp->Yield();
 
+          Freeze();
+
           /* Delete controls */
           content->Clear(true);
 
@@ -719,7 +721,11 @@ namespace squadt {
 
           delete content;
 
+          content = 0;
+
           Layout();
+
+          Thaw();
 
           /* Forcibly refresh display to remove display artifacts on Mac OS X and Windows */
           GetParent()->Refresh();

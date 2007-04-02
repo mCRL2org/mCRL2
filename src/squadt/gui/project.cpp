@@ -556,7 +556,9 @@ namespace squadt {
       wxTreeItemId item = object_view->AppendItem(s, wxString(boost::filesystem::path(t->location).leaf().c_str(), wxConvLocal), t->status);
 
       object_view->SetItemData(item, new tool_data(*this, t));
+#ifndef __WXMAC__ // Causes crashes on Mac OS X (2.8.3 and before) through ScrollTo()
       object_view->EnsureVisible(item);
+#endif
     }
 
     wxString project::get_name() const {
