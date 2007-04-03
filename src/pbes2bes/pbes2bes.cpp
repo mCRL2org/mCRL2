@@ -157,6 +157,9 @@ pbes create_bes(pbes pbes_spec, t_tool_options tool_options)
 //---------------------------
 pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 {
+	// Verbose msg: doing naive algorithm
+	gsVerboseMsg("Computing BES from PBES using naive algorithm...\n");
+	
 	// Get all parts from the PBES (data specification, equation system, initial state)
 	propositional_variable_instantiation initial_state = pbes_spec.initial_state();
 	equation_system eqsys = pbes_spec.equations();
@@ -175,6 +178,7 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 	atermpp::table *sort_enumerations = new atermpp::table(10,50);
 
 	//Populate sort_enumerations with all enumerations for finite sorts
+	gsVerboseMsg("Enumerating finite data types...\n");
 	for (equation_system::iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
 	{
 		data_variable_list parameters = eq_i->variable().parameters();
@@ -193,6 +197,7 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 	}
 
 	// Create the rewritten equation system
+	gsVerboseMsg("Computing BES...\n");
 	for (equation_system::iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
 	{
 		// Get current equation
@@ -207,7 +212,7 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 
 		// Verbose print the equation which is currently done
 		string propvar_name_string = propvar_name;
-		gsVerboseMsg("Rewriting PBES equation with propositional variable %s\n", propvar_name_string.c_str());
+		gsVerboseMsg("Rewriting PBES equation with propositional variable %s...\n", propvar_name_string.c_str());
 
 		// Vector of instantiations
 		vector< t_instantiations > instantiation_list;
@@ -218,6 +223,7 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 		instantiation_list.push_back(instantiation);
 
 		// For each variable of the equation
+		gsVerboseMsg("Creating all possible instantiations for propositional variable %s...\n", propvar_name_string.c_str());
 		for (data_variable_list::iterator p = propvar_parameters.begin(); p != propvar_parameters.end(); p++)
 		{
 			// Vector of instantiations for intermediate results
@@ -248,8 +254,9 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 			}
 			instantiation_list = intermediate_instantiation_list;
 		}
-
+		
 		// All instantiations for the current equation are computed. Now make equations out of them
+		gsVerboseMsg("Computing Boolean equations for each instantiation of propositional variable %s...\n", propvar_name_string.c_str());
 		for (vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
 		{
 			// Create the needed propvar
@@ -284,7 +291,7 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 			result_eqsys.push_back(pbes_equation(eq_i->symbol(), propvar_current, current_expression));
 
 			// Verbose messages after each 100 equations
-			if (++nr_of_equations % 100 == 0)
+			if (++nr_of_equations % 1000 == 0)
 				gsVerboseMsg("At Boolean equation %d\n", nr_of_equations);
 
 		}
@@ -322,7 +329,7 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
 			}
 			else if (is_data_variable(*p))
 			{ // If p is a freevar
-				gsErrorMsg("The PBES contains a free variable in the propositional variable instantiation.\n");
+				gsErrorMsg("The PBES contains one or more free variables in a propositional variable instantiation.\n");
 				gsErrorMsg("Try using mcrl22lps with the flag -f or --no-freevars to solve this.\n");
 				exit(1);
 			}
@@ -389,7 +396,15 @@ void save_pbes(pbes pbes_spec, t_tool_options tool_options)
 {
 	//Outfile string
 	string outfilename = tool_options.outfilename;
+	gsVerboseMsg("Saving result...\n");
 
+	bool is_bes = true;
+	if ( (!pbes_spec.equations().is_bes()) && (!pbes_spec.initial_state().parameters().empty() ) )
+	{
+		is_bes = false;
+		gsWarningMsg("The result is a PBES.\n");
+	}
+	
 	//Write PBES
 	if (tool_options.opt_outputformat == "external")
 	{ // In external format
@@ -409,13 +424,13 @@ void save_pbes(pbes pbes_spec, t_tool_options tool_options)
 	}
 	else if (tool_options.opt_outputformat == "cwi")
 	{ // in CWI format only if the result is a BES, otherwise Binary
-		if (pbes_spec.equations().is_bes())
+		if (is_bes)
 		{
 			save_pbes_in_cwi_format(pbes_spec, outfilename);
 		}
 		else
 		{
-			gsWarningMsg("Result is not a BES. Result is written in binary format.\n");
+			gsWarningMsg("Saving result in binary format.\n");
 			if (!pbes_spec.save(outfilename, true))
 			{
 				gsErrorMsg("Could not save PBES to %s\n", outfilename.c_str());
@@ -430,6 +445,7 @@ void save_pbes(pbes pbes_spec, t_tool_options tool_options)
 //--------------------------------
 void save_pbes_in_cwi_format(pbes pbes_spec, string outfilename)
 {
+	gsVerboseMsg("Converting result to CWI-format...\n");
 	// Use an indexed set to keep track of the variables and their cwi-representations
 	equation_system eqsys = pbes_spec.equations();
 	atermpp::indexed_set *variables = new atermpp::indexed_set(2*eqsys.size(), 50);
@@ -449,12 +465,6 @@ void save_pbes_in_cwi_format(pbes pbes_spec, string outfilename)
 		// 	nu => max
 		string fp;
 		(eq->symbol().is_mu())?fp = "min":fp = "max";
-		// Check if the
-		//if (eq->variable().parameters().size() != 0)
-		//{
-		//	gsErrorMsg("The used equation system is not a BES. Could not save this in CWI-format.\n");
-		//	exit(1);
-		//}
 
 		// variable:
 		// 	Integer representation of the propositional variable of the left hand side
