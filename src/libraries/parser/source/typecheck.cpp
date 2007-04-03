@@ -3508,14 +3508,14 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
     for(ATermList l=ATLgetArgument(StateFrm,1);!ATisEmpty(l);l=ATgetNext(l)){
       ATermAppl o=ATAgetFirst(l);
       
-      ATermAppl VarName=ATAgetArgument(o,0);
+      ATermAppl VarName=ATAgetArgument(ATAgetArgument(o,0),0);
       if(ATAtableGet(FormPars,(ATerm)VarName)){
         gsErrorMsg("Non-unique formal parameter %P (typechecking %P)\n",VarName,StateFrm);
         success=ATfalse;
         break;
       }
       
-      ATermAppl VarType=ATAgetArgument(o,1); 
+      ATermAppl VarType=ATAgetArgument(ATAgetArgument(o,0),1); 
       if(!gstcIsSortExprDeclared(VarType)){
         gsErrorMsg("The previous type error occurred while typechecking %P\n",StateFrm);
         success=ATfalse;
@@ -3524,7 +3524,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
 
       ATtablePut(FormPars,(ATerm)VarName, (ATerm)VarType);
 
-      ATermAppl VarInit=ATAgetArgument(o,2);
+      ATermAppl VarInit=ATAgetArgument(o,1);
       ATermAppl VarInitType=gstcTraverseVarConsTypeD(Vars,Vars,&VarInit,gstcExpandNumTypesDown(VarType));
       if(!VarInitType){
         gsErrorMsg("typechecking %P\n",StateFrm);
