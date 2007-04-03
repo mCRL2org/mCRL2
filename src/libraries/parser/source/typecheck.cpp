@@ -1297,7 +1297,7 @@ static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr, bool high_level){
     return ATtrue;
   }
 
-  assert(0);
+  
   gsErrorMsg("this is not a sort expression %T\n",SortExpr);
   return ATfalse;
 }
