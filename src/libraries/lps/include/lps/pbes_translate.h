@@ -8,6 +8,8 @@
 #include <string>
 #include <iostream>
 #include <stdexcept>
+#include <utility>
+#include <algorithm>
 
 #include "atermpp/aterm_access.h"
 #include "atermpp/vector.h"
@@ -16,10 +18,10 @@
 #include "lps/data_functional.h"
 #include "lps/data_utility.h"
 #include "lps/data_operators.h"
+#include "lps/data_expression.h"
 #include "lps/mucalculus.h"
 #include "lps/pbes.h"
 #include "lps/specification.h"
-#include "lps/data_utility.h"
 #include "lps/lps_algorithm.h"
 
 namespace lps {
@@ -27,68 +29,189 @@ namespace lps {
 using atermpp::aterm_appl;
 using atermpp::make_substitution;
 
-inline
-bool equal_name(action a, action b)
+/// Precondition: The range [first, last[ contains sorted arrays.
+/// Visits all permutations of the arrays, and calls f for
+/// each instance.
+template <typename Iter, typename Function>
+void forall_permutations(Iter first, Iter last, Function f)
 {
-  return a.name() == b.name();
+  if (first == last)
+  {
+    f();
+    return;
+  }
+  Iter next = first;
+  ++next;
+  forall_permutations(next, last, f);
+  while (std::next_permutation(first->first, first->second))
+  {
+    forall_permutations(next, last, f);
+  }
 }
 
-// TODO: sort a and b first!
+// TODO: check if this assumption is correct: Precondition: a and b are sorted
 inline
-bool equal_names(action_list a, action_list b)
+bool equal_names(const std::vector<action>& a, const std::vector<action>& b)
 {
-  assert(a.size() == b.size());
-  action_list::iterator i, j;
+  if(a.size() != b.size())
+  {
+    return false;
+  }
+  std::vector<action>::const_iterator i, j;
   for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
   {
-    if (!equal_name(*i, *j))
+    if (i->name() != j->name())
       return false;
   }
   return true;
 }
 
+struct compare_action_name
+{
+  bool operator()(const action& a, const action& b) const
+  {
+    return a.name() < b.name();
+  }
+};
+
+/// Used for building an expression for the comparison of data parameters.
+struct equal_data_parameters_builder
+{
+  const std::vector<action>& a;
+  const std::vector<action>& b;
+  std::vector<pbes_expression>& result;
+  
+  equal_data_parameters_builder(const std::vector<action>& a_,
+                                const std::vector<action>& b_,
+                                std::vector<pbes_expression>& result_
+                               )
+    : a(a_),
+      b(b_),
+      result(result_)
+  {}
+
+  /// Adds the expression 'a == b' to result.
+  void operator()()
+  {
+    namespace d = lps::data_expr;
+    namespace p = lps::pbes_expr;
+
+    atermpp::vector<pbes_expression> v;
+    std::vector<action>::const_iterator i, j;
+    for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
+    {
+      data_expression_list d1 = i->arguments();
+      data_expression_list d2 = j->arguments();
+      assert(d1.size() == d2.size());
+      data_expression_list::iterator i1, i2;
+      for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
+      {
+        v.push_back(p::val(equal_to(*i1, *i2)));
+      }
+    }
+    result.push_back(p::multi_and(v.begin(), v.end()));
+  }
+};
+
 inline
 pbes_expression equal_data_parameters(action_list a, action_list b)
 {
   namespace p = lps::pbes_expr;
-  atermpp::vector<pbes_expression> v;
 
-  assert(a.size() == b.size());
-  action_list::iterator i, j;
-  for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
+  // make copies of a and b and sort them
+  std::vector<action> va(a.begin(), a.end());
+  std::vector<action> vb(b.begin(), b.end());
+  std::sort(va.begin(), va.end(), compare_action_name());
+  std::sort(vb.begin(), vb.end(), compare_action_name());
+
+  if (!equal_names(va, vb))
+    return p::false_();
+
+  // compute the intervals of a with equal names
+  typedef std::vector<action>::iterator action_iterator;
+  std::vector<std::pair<action_iterator, action_iterator> > intervals;
+  action_iterator first = va.begin();
+  while (first != va.end())
   {
-    data_expression_list d1 = i->arguments();
-    data_expression_list d2 = j->arguments();
-    assert(d1.size() == d2.size());
-    data_expression_list::iterator i1, i2;
-    for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
-    {
-      v.push_back(p::val(equal_to(*i1, *i2)));
-    }
+    action_iterator next = std::upper_bound(first, va.end(), *first, compare_action_name());
+    intervals.push_back(std::make_pair(first, next));
+    first = next;
   }
-  return p::multi_and(v.begin(), v.end());
+  std::vector<pbes_expression> z;
+  equal_data_parameters_builder f(va, vb, z);
+  forall_permutations(intervals.begin(), intervals.end(), f); 
+  pbes_expression result = p::multi_or(z.begin(), z.end());
+  return result;
 }
+
+/// Used for building an expression for the comparison of data parameters.
+struct not_equal_data_parameters_builder
+{
+  const std::vector<action>& a;
+  const std::vector<action>& b;
+  std::vector<pbes_expression>& result;
+  
+  not_equal_data_parameters_builder(const std::vector<action>& a_,
+                                    const std::vector<action>& b_,
+                                    std::vector<pbes_expression>& result_
+                                   )
+    : a(a_),
+      b(b_),
+      result(result_)
+  {}
+  
+  /// Adds the expression 'a == b' to result.
+  void operator()()
+  {
+    namespace d = lps::data_expr;
+    namespace p = lps::pbes_expr;
+
+    atermpp::vector<pbes_expression> v;
+    std::vector<action>::const_iterator i, j;
+    for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
+    {
+      data_expression_list d1 = i->arguments();
+      data_expression_list d2 = j->arguments();
+      assert(d1.size() == d2.size());
+      data_expression_list::iterator i1, i2;
+      for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
+      {
+        v.push_back(p::val(not_equal_to(*i1, *i2)));
+      }
+    }
+    result.push_back(p::multi_or(v.begin(), v.end()));
+  }
+};
 
 inline
 pbes_expression not_equal_data_parameters(action_list a, action_list b)
 {
   namespace p = lps::pbes_expr;
-  atermpp::vector<pbes_expression> v;
 
-  assert(a.size() == b.size());
-  action_list::iterator i, j;
-  for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
+  // make copies of a and b and sort them
+  std::vector<action> va(a.begin(), a.end());
+  std::vector<action> vb(b.begin(), b.end());
+  std::sort(va.begin(), va.end(), compare_action_name());
+  std::sort(vb.begin(), vb.end(), compare_action_name());
+
+  if (!equal_names(va, vb))
+    return p::true_();
+
+  // compute the intervals of a with equal names
+  typedef std::vector<action>::iterator action_iterator;
+  std::vector<std::pair<action_iterator, action_iterator> > intervals;
+  action_iterator first = va.begin();
+  while (first != va.end())
   {
-    data_expression_list d1 = i->arguments();
-    data_expression_list d2 = j->arguments();
-    assert(d1.size() == d2.size());
-    data_expression_list::iterator i1, i2;
-    for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
-    {
-      v.push_back(p::val(equal_to(*i1, *i2)));
-    }
+    action_iterator next = std::upper_bound(first, va.end(), *first, compare_action_name());
+    intervals.push_back(std::make_pair(first, next));
+    first = next;
   }
-  return p::multi_or(v.begin(), v.end());
+  std::vector<pbes_expression> z;
+  not_equal_data_parameters_builder f(va, vb, z);
+  forall_permutations(intervals.begin(), intervals.end(), f); 
+  pbes_expression result = p::multi_and(z.begin(), z.end());
+  return result;
 }
 
 inline
@@ -150,11 +273,7 @@ namespace pbes_timed
   
     if (is_mult_act(b)) {
       action_list b_actions = mult_params(b);
-      if (equal_names(a.actions(), b_actions)) {
-        return not_equal_data_parameters(a.actions(), b_actions);
-      }
-      else
-        return p::true_();
+      return not_equal_data_parameters(a.actions(), b_actions);
     } else if (is_true(b)) {
       return p::false_();
     } else if (is_at(b)) {
@@ -171,13 +290,13 @@ namespace pbes_timed
       assert(x.size() > 0);
       action_formula alpha = quant_form(b);
       data_variable_list y = fresh_variables(x, find_variable_names(make_list(a.actions(), a.time(), b)));
-      return p::exists(y, sat_bot(a, alpha.substitute(make_substitution(x, y))));
+      return p::exists(y, sat_bot(a, alpha.substitute(make_list_substitution(x, y))));
     } else if (is_exists(b)) {
       data_variable_list x = quant_vars(b);
       assert(x.size() > 0);
       action_formula alpha = quant_form(b);
       data_variable_list y = fresh_variables(x, find_variable_names(make_list(a.actions(), a.time(), b)));
-      return p::forall(y, sat_bot(a, alpha.substitute(make_substitution(x, y))));
+      return p::forall(y, sat_bot(a, alpha.substitute(make_list_substitution(x, y))));
     }
     throw std::runtime_error(std::string("sat_bot[timed] error: unknown action formula ") + b.to_string());
     return pbes_expression();
@@ -191,11 +310,7 @@ namespace pbes_timed
   
     if (is_mult_act(b)) {
       action_list b_actions = mult_params(b);
-      if (equal_names(a.actions(), b_actions)) {
-        return equal_data_parameters(a.actions(), b_actions);
-      }
-      else
-        return p::false_();
+      return equal_data_parameters(a.actions(), b_actions);
     } else if (is_true(b)) {
       return p::true_();
     } else if (is_at(b)) {
@@ -212,13 +327,13 @@ namespace pbes_timed
       assert(x.size() > 0);
       action_formula alpha = quant_form(b);
       data_variable_list y = fresh_variables(x, find_variable_names(make_list(a.actions(), a.time(), b)));
-      return p::forall(y, sat_top(a, alpha.substitute(make_substitution(x, y))));
+      return p::forall(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
     } else if (is_exists(b)) {
       data_variable_list x = quant_vars(b);
       assert(x.size() > 0);
       action_formula alpha = quant_form(b);
       data_variable_list y = fresh_variables(x, find_variable_names(make_list(a.actions(), a.time(), b)));
-      return p::exists(y, sat_top(a, alpha.substitute(make_substitution(x, y))));
+      return p::exists(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
     }
     throw std::runtime_error(std::string("sat_top[timed] error: unknown action formula ") + b.to_string());
     return pbes_expression();
@@ -422,11 +537,7 @@ namespace pbes_untimed
   
     if (is_mult_act(b)) {
       action_list b_actions = mult_params(b);
-      if (equal_names(a, b_actions)) {
-        return not_equal_data_parameters(a, b_actions);
-      }
-      else
-        return p::true_();
+      return not_equal_data_parameters(a, b_actions);
     } else if (is_true(b)) {
       return p::false_();
     } else if (is_not(b)) {
@@ -439,7 +550,7 @@ namespace pbes_untimed
       if (x.size() > 0)
       {
         data_variable_list y = fresh_variables(x, find_variable_names(make_list(a, b)));
-        return p::exists(y, sat_bot(a, alpha.substitute(make_substitution(x, y))));
+        return p::exists(y, sat_bot(a, alpha.substitute(make_list_substitution(x, y))));
       }
       else
         return sat_bot(a, alpha);
@@ -449,7 +560,7 @@ namespace pbes_untimed
       if (x.size() > 0)
       {
         data_variable_list y = fresh_variables(x, find_variable_names(make_list(a, b)));
-        return p::forall(y, sat_bot(a, alpha.substitute(make_substitution(x, y))));
+        return p::forall(y, sat_bot(a, alpha.substitute(make_list_substitution(x, y))));
       }
       else
         return sat_bot(a, alpha);
@@ -466,11 +577,7 @@ namespace pbes_untimed
   
     if (is_mult_act(b)) {
       action_list b_actions = mult_params(b);
-      if (equal_names(a, b_actions)) {
-        return equal_data_parameters(a, b_actions);
-      }
-      else
-        return p::false_();
+      return equal_data_parameters(a, b_actions);
     } else if (is_true(b)) {
       return p::true_();
     } else if (is_not(b)) {
@@ -483,7 +590,7 @@ namespace pbes_untimed
       if (x.size() > 0)
       {
         data_variable_list y = fresh_variables(x, find_variable_names(make_list(a, b)));
-        return p::forall(y, sat_top(a, alpha.substitute(make_substitution(x, y))));
+        return p::forall(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
       }
       else
         return sat_top(a, alpha);
@@ -493,7 +600,7 @@ namespace pbes_untimed
       if (x.size() > 0)
       {
         data_variable_list y = fresh_variables(x, find_variable_names(make_list(a, b)));
-        return p::exists(y, sat_top(a, alpha.substitute(make_substitution(x, y))));
+        return p::exists(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
       }
       else
         return sat_top(a, alpha);
@@ -690,7 +797,7 @@ state_formula remove_name_clashes(specification spec, state_formula f)
   return f.substitute(make_list_substitution(x, y));
 }
 
-// translate a state_formula and an LPS to a pbes
+// Translates a state_formula and an LPS to a pbes.
 inline
 pbes pbes_translate(state_formula f, specification spec, bool timed = false)
 {

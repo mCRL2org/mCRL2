@@ -234,6 +234,16 @@ class timed_action
     }     
 };
 
+inline
+std::ostream& operator<<(std::ostream& to, const timed_action& a)
+{
+  to << "TimedAction(" << a.actions();
+  if (a.has_time())
+    to << "," << a.time();
+  to << ")";
+  return to;
+}
+
 } // namespace lps
 
 /// INTERNAL ONLY

@@ -77,10 +77,12 @@ class sort: public aterm_appl
 
     /// Returns the domain sorts of the sort.
     ///
-    /// domain_sorts(A)                    = []
-    /// domain_sorts(A -> (B -> C)       ) = [A,B]
-    /// domain_sorts((A -> B) -> C       ) = [A->B]
-    /// domain_sorts((A -> B) -> (C -> D)) = [A->B,C]
+    /// <ul>
+    /// <li>domain_sorts(A)                    = []      </li>
+    /// <li>domain_sorts(A -> (B -> C)       ) = [A,B]   </li>
+    /// <li>domain_sorts((A -> B) -> C       ) = [A->B]  </li>
+    /// <li>domain_sorts((A -> B) -> (C -> D)) = [A->B,C]</li>
+    /// </ul>
     lps::sort_list domain_sorts() const
     {
       return gsGetSortExprDomain(*this);
@@ -88,10 +90,12 @@ class sort: public aterm_appl
 
     /// Returns the range of the sort.
     ///
-    /// range(A)                    = A
-    /// range(A -> (B -> C)       ) = C
-    /// range((A -> B) -> C       ) = C
-    /// range((A -> B) -> (C -> D)) = D
+    /// <ul>
+    /// <li>range(A)                    = A</li>
+    /// <li>range(A -> (B -> C)       ) = C</li>
+    /// <li>range((A -> B) -> C       ) = C</li>
+    /// <li>range((A -> B) -> (C -> D)) = D</li>
+    /// </ul>
     lps::sort range_sort() const
     {
       return gsGetSortExprResult(*this);
