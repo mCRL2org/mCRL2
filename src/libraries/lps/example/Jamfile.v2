@@ -10,6 +10,7 @@ project libraries/lps/example
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
    ;
 
+exe garbage         : garbage.cpp : ;
 exe constructors    : constructors.cpp    ../../../mcrl22lps/lin_std.cpp ../../../mcrl22lps/lin_alt.cpp : ;
 exe spec            : spec.cpp            ../../../mcrl22lps/lin_std.cpp ../../../mcrl22lps/lin_alt.cpp : ;
 exe filter_template : filter_template.cpp                                                               : ;
@@ -19,6 +20,7 @@ exe pbes_test       : pbes_test.cpp       ../../../mcrl22lps/lin_std.cpp ../../.
 
 install dist
    :
+     garbage
      constructors
      spec
      filter_template
