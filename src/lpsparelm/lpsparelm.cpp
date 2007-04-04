@@ -453,10 +453,10 @@ inline void lpsParElm::output() {
   data_expression_list             rebuild_initial_state;
   data_expression_list::iterator   j = p_spec.initial_process().state().begin();
 
-  data_variable_list initial_variables = p_spec.initial_process().free_variables();
-  for(data_variable_list::iterator i = initial_variables.begin() ; i != initial_variables.end() ; i++){
-    if (p_usedVars.find(*i) != p_usedVars.end()){
-      rebuild_initial_variables = push_front(rebuild_initial_variables, *i);
+  data_assignment_list initial_variables = p_spec.initial_process().assignments();
+  for(data_assignment_list::iterator i = initial_variables.begin() ; i != initial_variables.end() ; ++i){
+    if (p_usedVars.find(i->lhs()) != p_usedVars.end()){
+      rebuild_initial_variables = push_front(rebuild_initial_variables, i->lhs());
       rebuild_initial_state = push_front(rebuild_initial_state, *j);
     }
     j++;
