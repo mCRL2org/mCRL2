@@ -8,6 +8,7 @@
 #include <boost/foreach.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/convenience.hpp>
 #include <boost/ref.hpp>
 
 #include "main.h"
@@ -274,21 +275,55 @@ namespace squadt {
       }
     }
 
+    void project::on_object_temporary_name_edited(wxTreeEvent& e) {
+      if (e.GetLabel().IsEmpty() || (e.GetLabel().Cmp(wxT("new.unknown")) == 0)) {
+        object_view->Delete(e.GetItem());
+      }
+      else {
+        boost::filesystem::path name(std::string(e.GetLabel().fn_str()));
+
+        if (boost::filesystem::exists(boost::filesystem::path(manager->get_project_store()) / name)) {
+          wxMessageDialog dialog(0, wxT("A file with this name is already part of the project!"), wxT("Error"), wxOK|wxCANCEL);
+
+          if (dialog.ShowModal() == wxID_CANCEL) {
+            return;
+          }
+          else {
+            object_view->Delete(e.GetItem());
+          }
+        }
+        else {
+          build_system::mime_type type(boost::filesystem::extension(name).empty() ? "unknown" : extension(name).substr(1));
+         
+          processor* p = manager->add();
+         
+          p->append_output(type, "authentic", std::string(e.GetLabel().fn_str()), processor::object_descriptor::original);
+         
+          object_view->SetItemData(e.GetItem(), new tool_data(*this, p->get_output_iterator().pointer()));
+
+          std::ofstream f((boost::filesystem::path(manager->get_project_store()) / name).string().c_str(), std::ios::out);
+
+          f.close();
+         
+          manager->store();
+        }
+      }
+
+      object_view->Disconnect(wxEVT_COMMAND_TREE_END_LABEL_EDIT, wxTreeEventHandler(project::on_object_temporary_name_edited), 0, this);
+    }
+
     void project::add_new_file() {
       /* Add to the new project */
       wxTreeItemId i = object_view->AppendItem(object_view->GetRootItem(), wxEmptyString, processor::object_descriptor::original);
 
       object_view->Refresh();
       object_view->Update();
+      object_view->SetItemText(i, wxT("new.unknown"));
       object_view->EnsureVisible(i);
-      object_view->EditLabel(i);
 
-      if (object_view->GetItemText(i) == wxEmptyString) {
-        object_view->Delete(i);
-      }
-      else {
-        manager->store();
-      }
+      object_view->Connect(wxEVT_COMMAND_TREE_END_LABEL_EDIT, wxTreeEventHandler(project::on_object_temporary_name_edited), 0, this);
+
+      object_view->EditLabel(i);
     }
 
     /* Helper function */

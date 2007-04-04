@@ -95,6 +95,16 @@ namespace squadt {
     }
   }
 
+  processor* project_manager_impl::add() {
+    boost::mutex::scoped_lock l(list_lock);
+
+    boost::shared_ptr < processor > p(processor::create(m_interface.lock()));
+
+    processors.push_back(p);
+
+    return p.get();
+  }
+
   /**
    * \param p a reference to the processor to add
    **/
@@ -556,6 +566,10 @@ namespace squadt {
 
   project_manager::processor_iterator project_manager::get_processor_iterator() const {
     return (processor_iterator(impl->processors));
+  }
+
+  processor* project_manager::add() {
+    return impl->add();
   }
 
   void project_manager::add(processor::ptr const& p) {

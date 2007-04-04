@@ -104,6 +104,9 @@ namespace squadt {
       /** \brief Writes project configuration to the project file */
       void store() const;
 
+      /** \brief Add a new processor to the project */
+      processor* add();
+
       /** \brief Add a new processor to the project, if it is not already */
       void add(processor::ptr const&);
 

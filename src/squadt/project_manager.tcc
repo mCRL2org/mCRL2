@@ -70,6 +70,9 @@ namespace squadt {
       /** \brief Sorts the processor list */
       void sort_processors();
 
+      /** \brief Add a new processor to the project */
+      processor* add();
+
       /** \brief Add a new processor to the project, if it is not already */
       void add(processor::ptr const&);
 
