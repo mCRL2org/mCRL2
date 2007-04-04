@@ -5,7 +5,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <utility/generic_visitor.h>
+#include <utilities/generic_visitor.h>
 
 #include <sip/configuration.h>
 

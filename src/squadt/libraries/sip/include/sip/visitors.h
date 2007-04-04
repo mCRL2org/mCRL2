@@ -10,7 +10,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#include <utility/generic_visitor.h>
+#include <utilities/generic_visitor.h>
 
 namespace sip {
 

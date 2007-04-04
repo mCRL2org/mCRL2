@@ -6,7 +6,7 @@
 
 #include <sip/tool/capabilities.h>
 
-#include <utility/generic_visitor.h>
+#include <utilities/generic_visitor.h>
 
 #include "build_system.h"
 

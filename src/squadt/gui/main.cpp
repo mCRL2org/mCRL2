@@ -1,5 +1,6 @@
 #include "main.h"
 #include "about.h"
+#include "manual.h"
 #include "project.h"
 #include "resources.h"
 #include "dialog/project_settings.h"
@@ -9,8 +10,11 @@
 #include <wx/menu.h>
 
 /* Some custom identifiers for use with event handlers */
-#define cmID_UPDATE      (wxID_HIGHEST)
-#define cmID_PREFERENCES (wxID_HIGHEST + 1)
+#define cmID_UPDATE             (wxID_HIGHEST)
+#define cmID_ADD_EXISTING_FILE  (wxID_HIGHEST + 1)
+#define cmID_ADD_NEW_FILE       (wxID_HIGHEST + 2)
+#define cmID_NEW_DATA_SOURCE    (wxID_HIGHEST + 2)
+#define cmID_PREFERENCES        (wxID_HIGHEST + 3)
 
 namespace squadt {
   namespace GUI {
@@ -21,6 +25,12 @@ namespace squadt {
       squadt::GUI::about about_dialog(this);
       
       about_dialog.ShowModal();
+    }
+
+    void main::manual() {
+      static squadt::GUI::manual manual_window(this);
+
+      manual_window.Show();
     }
 
     main::main() : wxFrame(0, wxID_ANY, default_title, wxDefaultPosition, wxDefaultSize,wxDEFAULT_FRAME_STYLE|wxWS_EX_PROCESS_UI_UPDATES),
@@ -35,7 +45,6 @@ namespace squadt {
       /* Reposition the window */
       CentreOnScreen();
 
-      /* Now show the window in all its marvel */
       Show(true);
     }
 
@@ -44,11 +53,12 @@ namespace squadt {
       Connect(wxID_NEW, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_new));
       Connect(wxID_OPEN, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_open));
       Connect(cmID_UPDATE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_update));
-      Connect(wxID_ADD, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_add_file));
+      Connect(cmID_ADD_EXISTING_FILE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_add_existing_file));
+      Connect(cmID_ADD_NEW_FILE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_add_new_file));
       Connect(wxID_CLOSE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_close));
       Connect(wxID_PREFERENCES, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_preferences));
       Connect(cmID_PREFERENCES, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_preferences));
-      Connect(wxID_ABOUT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_about));
+      Connect(wxID_HELP, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_manual));
       Connect(wxID_EXIT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_quit));
       Connect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(main::on_window_close));
 
@@ -86,7 +96,10 @@ namespace squadt {
       project_menu->Append(cmID_UPDATE, wxT("&Update...\tCTRL-f"))->Enable(false);
       project_menu->Append(wxID_CLOSE, wxT("&Close\tCTRL-F4"))->Enable(false);
       project_menu->AppendSeparator();
-      project_menu->Append(wxID_ADD, wxT("&Add file...\tCTRL-f"))->Enable(false);
+      wxMenu* new_data_source_menu = new wxMenu();
+      new_data_source_menu->Append(cmID_ADD_EXISTING_FILE, wxT("&Existing File..."));
+      new_data_source_menu->Append(cmID_ADD_NEW_FILE, wxT("&New File"));
+      project_menu->Append(cmID_NEW_DATA_SOURCE, wxT("New &Model..."), new_data_source_menu)->Enable(false);
       project_menu->AppendSeparator();
       project_menu->Append(wxID_EXIT, wxT("&Quit"));
       menu->Append(project_menu, wxT("&Project"));
@@ -156,8 +169,12 @@ namespace squadt {
       }
     }
 
-    void main::project_add_file() {
-      project_view->add();
+    void main::project_add_existing_file() {
+      project_view->add_existing_file();
+    }
+
+    void main::project_add_new_file() {
+      project_view->add_new_file();
     }
 
     /**
@@ -198,7 +215,7 @@ namespace squadt {
       menu_bar.Enable(wxID_OPEN, false);
       menu_bar.Enable(cmID_UPDATE, true);
       menu_bar.Enable(wxID_CLOSE, true);
-      menu_bar.Enable(wxID_ADD, true);
+      menu_bar.Enable(cmID_NEW_DATA_SOURCE, true);
     }
 
     /**
@@ -228,7 +245,7 @@ namespace squadt {
       menu_bar.Enable(wxID_OPEN, true);
       menu_bar.Enable(cmID_UPDATE, false);
       menu_bar.Enable(wxID_CLOSE, false);
-      menu_bar.Enable(wxID_ADD, false);
+      menu_bar.Enable(cmID_NEW_DATA_SOURCE, false);
     }
 
     void main::show_preferences() {

@@ -11,7 +11,7 @@ bool command_line = false;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 // SQuADT protocol interface
-# include <utility/mcrl2_squadt.h>
+# include <utilities/mcrl2_squadt.h>
 
 class squadt_interactor: public mcrl2_squadt::tool_interface {
   

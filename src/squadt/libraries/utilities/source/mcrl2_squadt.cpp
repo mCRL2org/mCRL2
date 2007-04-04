@@ -1,5 +1,5 @@
-#include <utility/logger.h>
-#include <utility/mcrl2_squadt.h>
+#include <utilities/logger.h>
+#include <utilities/mcrl2_squadt.h>
 
 namespace mcrl2_squadt {
   std::auto_ptr < printer_helper > postman;

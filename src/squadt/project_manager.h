@@ -6,7 +6,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/noncopyable.hpp>
 
-#include "utility/indirect_iterator.h"
+#include "utilities/indirect_iterator.h"
 #include "processor.h"
 
 namespace squadt {

@@ -1,6 +1,6 @@
 #include <boost/tuple/tuple.hpp>
 
-#include <utility/generic_visitor.tcc>
+#include <utilities/generic_visitor.tcc>
 
 #include <sip/visitors.h>
 #include <sip/report.h>

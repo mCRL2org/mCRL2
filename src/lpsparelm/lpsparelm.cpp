@@ -14,7 +14,7 @@
 
 #if BOOST_BUILD_PCH_ENABLED
 # ifdef ENABLE_SQUADT_CONNECTIVITY
-#  include <utility/mcrl2_squadt.h>
+#  include <utilities/mcrl2_squadt.h>
 #  include "lps/specification.h"
 # else
 #  include "specification.h"
@@ -78,7 +78,7 @@ class lpsParElm {
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utility/mcrl2_squadt.h>
+#include <utilities/mcrl2_squadt.h>
 
 class squadt_interactor : public mcrl2_squadt::tool_interface {
 

@@ -8,7 +8,7 @@
 #include <boost/shared_array.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <utility/logger.h>
+#include <utilities/logger.h>
 
 #include <sip/detail/command_line_interface.h>
 #include <sip/detail/tool.tcc>

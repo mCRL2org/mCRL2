@@ -9,7 +9,7 @@
 using namespace std;
     
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utility/squadt_utility.h>
+#include <utilities/squadt_utility.h>
 
 const char*  option_out_info             = "out_info";
 

@@ -99,6 +99,7 @@ boost_library filesystem ;
 boost_library program_options ;
 boost_library regex ;
 boost_library thread ;
+boost_library signals : local ;
 boost_library test : : system ;
 boost_library system : local ;
 

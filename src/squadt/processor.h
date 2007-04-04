@@ -9,7 +9,7 @@
 
 #include <md5pp/md5pp.h>
 
-#include "utility/indirect_iterator.h"
+#include "utilities/indirect_iterator.h"
 #include "task_monitor.h"
 #include "tool.h"
 

@@ -63,7 +63,7 @@ typedef struct
 
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utility/mcrl2_squadt.h>
+#include <utilities/mcrl2_squadt.h>
 
 //Forward declaration because do_binary() is called within squadt_interactor class
 int do_binary(const tool_options& options);

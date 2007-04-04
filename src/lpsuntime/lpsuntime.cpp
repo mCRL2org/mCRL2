@@ -50,7 +50,7 @@ typedef struct
 
 //Squadt connectivity
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utility/mcrl2_squadt.h>
+#include <utilities/mcrl2_squadt.h>
 
 //Forward declaration needed for use within squadt_interactor class
 int do_untime(const tool_options& options);

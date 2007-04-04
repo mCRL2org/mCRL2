@@ -7,7 +7,7 @@
 #include <boost/filesystem/convenience.hpp>
 #include <boost/foreach.hpp>
 
-#include <utility/generic_visitor.h>
+#include <utilities/generic_visitor.h>
 
 #include <sip/detail/controller.tcc>
 

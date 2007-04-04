@@ -34,7 +34,7 @@ static void PrintHelp(char *Name);
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utility/mcrl2_squadt.h>
+#include <utilities/mcrl2_squadt.h>
 
 class squadt_interactor : public mcrl2_squadt::tool_interface {
 

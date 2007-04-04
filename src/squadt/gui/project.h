@@ -118,7 +118,10 @@ namespace squadt {
         void build();
 
         /** \brief Add a file to the project */
-        void add();
+        void add_existing_file();
+
+        /** \brief Add a new file to the project */
+        void add_new_file();
 
         /** \brief Builds or rebuilds objects such that all objects in the project are up to date */
         void update();

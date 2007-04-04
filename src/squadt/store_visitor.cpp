@@ -15,7 +15,7 @@
 #include "executor.tcc"
 #include "processor.tcc"
 
-#include <utility/generic_visitor.tcc>
+#include <utilities/generic_visitor.tcc>
 
 namespace squadt {
 

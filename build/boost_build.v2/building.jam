@@ -22,7 +22,7 @@ if ! squadt in [ MATCH "^--disable-(squadt)-support" : [ modules.peek : ARGV ] $
   feature.compose <squadt_support>enable
         : <define>ENABLE_SQUADT_CONNECTIVITY
           <threading>multi
-          <library>/libraries/utility//mcrl2_squadt
+          <library>/libraries/utilities//mcrl2_squadt
         ;
 }
 

@@ -12,7 +12,7 @@
 #include <sip/configuration.h>
 #include <sip/mime_type.h>
 
-#include <utility/generic_visitor.h>
+#include <utilities/generic_visitor.h>
 
 #include "build_system.h"
 

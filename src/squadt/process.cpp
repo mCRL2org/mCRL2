@@ -213,7 +213,7 @@ namespace squadt {
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
       LPTSTR command = _tcsdup(TEXT(c.as_string().c_str()));
 
-      int identifier  = CreateProcess(0,command,0,0,false,0,0,c.working_directory.c_str(),&si,&pi);
+      int identifier  = CreateProcess(0,command,0,0,false,CREATE_NO_WINDOW,0,c.working_directory.c_str(),&si,&pi);
 #else
       boost::shared_array < char const* > arguments(c.get_array());
 

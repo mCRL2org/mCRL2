@@ -14,7 +14,7 @@
 
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utility/mcrl2_squadt.h>
+#include <utilities/mcrl2_squadt.h>
 #endif
 
 //C++

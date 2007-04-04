@@ -7,7 +7,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/range/iterator_range.hpp>
 
-#include <utility/generic_visitor.h>
+#include <utilities/generic_visitor.h>
 
 #include <sip/configuration.h>
 #include <sip/mime_type.h>

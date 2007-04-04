@@ -15,7 +15,7 @@
 #include <wx/sizer.h>
 
 #include <sip/controller.h>
-#include <utility/logger.h>
+#include <utilities/logger.h>
 
 // Compatibility with wx 2.6.*
 #if (wxMAJOR_VERSION <= 2) && (wxMINOR_VERSION < 8)
@@ -149,9 +149,9 @@ namespace squadt {
          
           if (command_dialog.ShowModal() == wxID_OK) {
             formats_and_actions->SetItem(selected, 1, command_dialog.GetValue());
-         
+
             get_wxlist_value(s, formats_and_actions, selected, 0);
-         
+
             global_build_system.get_type_registry()->register_command(
                             mime_type(std::string(s.GetText().fn_str())), std::string(command_dialog.GetValue().fn_str()));
           }

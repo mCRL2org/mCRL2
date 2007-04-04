@@ -3,7 +3,7 @@
 
 #include <set>
 
-#include <utility/logger.h>
+#include <utilities/logger.h>
 
 #include <sip/detail/layout_tool_display.h>
 #include <sip/detail/layout_elements.h>

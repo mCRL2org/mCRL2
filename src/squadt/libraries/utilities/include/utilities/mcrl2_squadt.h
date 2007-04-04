@@ -3,7 +3,7 @@
 
 #include <sip/tool.h>
 
-#include <utility/squadt_utility.h>
+#include <utilities/squadt_utility.h>
 
 #include "liblowlevel.h"
 

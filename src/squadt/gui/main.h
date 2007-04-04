@@ -39,22 +39,28 @@ namespace squadt {
         void build();
 
         /** \brief Shows a project creation dialog and switches the active view to the new project */
-        inline void on_menu_new(wxCommandEvent& /* event */);
+        inline void on_menu_new(wxCommandEvent&);
 
         /** \brief Shows a project open dialog and switches the active view to the new project */
-        inline void on_menu_open(wxCommandEvent& /* event */);
+        inline void on_menu_open(wxCommandEvent&);
 
         /** \brief Closes the active project view */
-        inline void on_menu_close(wxCommandEvent& /* event */);
+        inline void on_menu_close(wxCommandEvent&);
 
         /** \brief Triggers project update */
-        inline void on_menu_update(wxCommandEvent& /* event */);
+        inline void on_menu_update(wxCommandEvent&);
 
         /** \brief Closes the active project view */
-        inline void on_menu_add_file(wxCommandEvent& /* event */);
+        inline void on_menu_add_existing_file(wxCommandEvent&);
+
+        /** \brief Closes the active project view */
+        inline void on_menu_add_new_file(wxCommandEvent&);
 
         /** \brief Creates, shows and eventually removes the about window */
         inline void on_menu_about(wxCommandEvent&);
+
+        /** \brief Creates, shows and eventually removes the user manual window */
+        inline void on_menu_manual(wxCommandEvent&);
 
         /** \brief Cleans up and closes the window */
         inline void on_menu_quit(wxCommandEvent&);
@@ -86,7 +92,10 @@ namespace squadt {
         void project_close();
 
         /** \brief Add a file to the project */
-        void project_add_file();
+        void project_add_existing_file();
+
+        /** \brief Add a new file to the project */
+        void project_add_new_file();
 
         /** \brief Adds a project view and sets widget properties to enable access to project level functionality */
         void add_project_view(project*);
@@ -99,6 +108,9 @@ namespace squadt {
 
         /** \brief Creates, shows and eventually removes the about window */
         void about();
+
+        /** \brief Creates, shows and eventually removes the help window */
+        void manual();
 
         /** \brief Helper function for setting the menu bar */
         void set_menu_bar();
@@ -118,8 +130,12 @@ namespace squadt {
       project_open();
     }
 
-    inline void main::on_menu_add_file(wxCommandEvent&) {
-      project_add_file();
+    inline void main::on_menu_add_existing_file(wxCommandEvent&) {
+      project_add_existing_file();
+    }
+
+    inline void main::on_menu_add_new_file(wxCommandEvent&) {
+      project_add_new_file();
     }
 
     inline void main::on_menu_update(wxCommandEvent&) {
@@ -134,6 +150,10 @@ namespace squadt {
 
     inline void main::on_menu_about(wxCommandEvent&) {
       about();
+    }
+
+    inline void main::on_menu_manual(wxCommandEvent&) {
+      manual();
     }
 
     inline void main::on_menu_quit(wxCommandEvent&) {

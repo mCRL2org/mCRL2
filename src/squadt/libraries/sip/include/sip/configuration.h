@@ -9,7 +9,7 @@
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/range/iterator_range.hpp>
 
-#include <utility/generic_visitor.h>
+#include <utilities/generic_visitor.h>
 
 #include <sip/option.h>
 #include <sip/object.h>

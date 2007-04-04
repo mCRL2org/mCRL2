@@ -235,7 +235,7 @@ namespace squadt {
         spawn_context_menu(*(static_cast < tool_data* > (object_view->GetItemData(e.GetItem()))));
       }
       else {
-        project::add();
+        project::add_existing_file();
       }
     }
 
@@ -243,11 +243,11 @@ namespace squadt {
      * \param e a reference to a tree event object
      **/
     void project::on_object_name_edited(wxTreeEvent& e) {
-      wxTreeItemId                       s = e.GetItem();
-      processor::sptr                    p = reinterpret_cast < tool_data* > (object_view->GetItemData(s))->get_processor();
-      processor::object_descriptor::sptr t = reinterpret_cast < tool_data* > (object_view->GetItemData(s))->get_object();
-
       if (!e.GetLabel().IsEmpty()) {
+        wxTreeItemId                       s = e.GetItem();
+        processor::sptr                    p = reinterpret_cast < tool_data* > (object_view->GetItemData(s))->get_processor();
+        processor::object_descriptor::sptr t = reinterpret_cast < tool_data* > (object_view->GetItemData(s))->get_object();
+
         p->rename_output(t->location, std::string(e.GetLabel().fn_str()));
       }
       else {
@@ -255,7 +255,7 @@ namespace squadt {
       }
     }
 
-    void project::add() {
+    void project::add_existing_file() {
       dialog::add_to_project dialog(this, wxString(manager->get_project_store().c_str(), wxConvLocal));
 
       if (dialog.ShowModal()) {
@@ -270,6 +270,23 @@ namespace squadt {
         object_view->SetItemData(i, new tool_data(*this, p->get_output_iterator().pointer()));
         object_view->EnsureVisible(i);
 
+        manager->store();
+      }
+    }
+
+    void project::add_new_file() {
+      /* Add to the new project */
+      wxTreeItemId i = object_view->AppendItem(object_view->GetRootItem(), wxEmptyString, processor::object_descriptor::original);
+
+      object_view->Refresh();
+      object_view->Update();
+      object_view->EnsureVisible(i);
+      object_view->EditLabel(i);
+
+      if (object_view->GetItemText(i) == wxEmptyString) {
+        object_view->Delete(i);
+      }
+      else {
         manager->store();
       }
     }
@@ -556,11 +573,8 @@ namespace squadt {
       wxTreeItemId item = object_view->AppendItem(s, wxString(boost::filesystem::path(t->location).leaf().c_str(), wxConvLocal), t->status);
 
       object_view->SetItemData(item, new tool_data(*this, t));
-#ifndef __WXMAC__ // Causes crashes on Mac OS X (2.8.3 and before) through ScrollTo()
-      object_view->EnsureVisible(item);
-#else
+
       object_view->Expand(s);
-#endif
     }
 
     wxString project::get_name() const {
