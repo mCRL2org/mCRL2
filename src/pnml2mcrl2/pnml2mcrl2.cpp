@@ -46,7 +46,6 @@ typedef struct {
   
   // needed for the creation of general mCRL2 processes
   ATermList transitions;      // store all the mCRL2 processes (involving transitions) needed for the Trans-process
-  ATermList places;           // store all the mCRL2 processes (involving places) needed for the PetriNet-process
   ATermTable place_process_name; // place_id -> name of the corresponding process
 } Context;
 static Context context;
@@ -61,10 +60,15 @@ static ATermAppl Appl0;
 
 static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID);
 static ATermList pn2gsGenerateTransitionAlternative(ATerm TransID);
-static ATermList pn2gsListNNats(int n);
 static inline ATermAppl pn2gsMakeDataApplProd2(ATermAppl Op, ATermAppl Left, ATermAppl Right){
   return gsMakeDataApplProd(Op,ATmakeList2((ATerm)Left,(ATerm)Right));
 }
+
+static ATermList pn2gsMakeIds(ATermList l);
+static ATermList pn2gsMakeDataVarIds(ATermList l, ATermAppl Type);
+static ATermAppl pn2gsMakeBagVars(ATermList l);
+static ATermList pn2gsMakeListOfLists(ATermList l);
+
 static char *pn2gsGetText(ticpp::Element* cur);
 
 
@@ -1102,28 +1106,14 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   }
 
   //==================================================
-  // pn2gsPlaceParameterNat generates the parameter for a given place, of type Nat
+  // pn2gsPlaceParameter generates the parameter for a given place
   //==================================================
-  static ATermAppl pn2gsPlaceParameterNat(char * PlaceName) {
-    // input: the name of a place
-    // output: the parameter of that place, or type Nat
-    //         named: pm_PlaceName
-
-    AFun CurrentParameter = ATprependAFun("pm_", ATmakeAFun(PlaceName, 0, ATtrue));
-    return gsMakeDataVarId(ATmakeAppl0(CurrentParameter), gsMakeSortIdNat());
-  }
-
-  //==================================================
-  // pn2gsPlaceParameterPos generates the parameter for a given place, of type Pos
-  //==================================================
-  static ATermAppl pn2gsPlaceParameterPos(char * PlaceName) {
-    // input: the name of a place
-    // output: the parameter of that place, or type Pos
-    //         named: pm_PlaceName
-
-    AFun CurrentParameter = ATprependAFun("pm_", ATmakeAFun(PlaceName, 0, ATtrue));
-    return gsMakeDataVarId(ATmakeAppl0(CurrentParameter), gsMakeSortIdPos());
-  }
+static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
+  // input: the name of a place
+  // output: the parameter of that place, or type Nat
+  //         named: pm_PlaceName
+  return ATmakeAppl0(ATprependAFun("pm_", ATgetAFun(Place)));
+}
 
   //==================================================
   // pn2gsGeneratePlace generates the mCRL2 Process Equations belonging to one place
@@ -1169,14 +1159,8 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
       CurrentPlaceOut = ATmakeAppl0(ATprependAFun("P_", ATappendAFun(CurrentPlaceId, "_out")));
     }
 
-    // insert the name of the process P_pi into context.places
-    // this is needed for the generation of the general process PetriNet
-    context.places = ATinsert(context.places, (ATerm)CurrentPlace);
-
     //added by Yarick: we need a table to relate PlaceId and CurrentPlace.
     ATtablePut(context.place_process_name,PlaceID,(ATerm)CurrentPlace);
-
-    gsDebugMsg("context.places now contains the following places: %T\n", context.places);
 
     //==================================================
     // retrieve the maximum concurrency
@@ -1245,7 +1229,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
       gsDebugMsg("Parameter %T is %d a DataVarId\n", SumVar1, gsIsDataVarId(SumVar1));
 
       // create P_pi parameter
-      ProcVar = pn2gsPlaceParameterNat(gsATermAppl2String(CurrentPlace));
+      ProcVar = gsMakeDataVarId(pn2gsPlaceParameter(CurrentPlace),gsMakeSortIdNat());
       gsDebugMsg("Parameter %T is %d a DataVarId\n", ProcVar, gsIsDataVarId(ProcVar));
 
       // create first sum-sub-process
@@ -1277,7 +1261,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 
     {
       /* Creation of P_pi_add */
-      ATermAppl ProcVar = pn2gsPlaceParameterPos(gsATermAppl2String(CurrentPlaceAdd));
+      ATermAppl ProcVar = gsMakeDataVarId(pn2gsPlaceParameter(CurrentPlaceAdd),gsMakeSortIdPos());
       ATermAppl CondIf = pn2gsMakeDataApplProd2(OpGT,ProcVar, Number1);
       ATermAppl CondThan = gsMakeSync(gsMakeParamId(CurrentPlaceIn, ATmakeList0()), gsMakeParamId(CurrentPlaceAdd, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax,Number1, pn2gsMakeDataApplProd2(OpSubt,ProcVar, Number1)))));
       ATermAppl CondElse = gsMakeParamId(CurrentPlaceIn, ATmakeList0());
@@ -1300,7 +1284,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 
     {
       /* Creation of P_pi_rem */
-      ATermAppl ProcVar = pn2gsPlaceParameterPos(gsATermAppl2String(CurrentPlaceRem));
+      ATermAppl ProcVar = gsMakeDataVarId(pn2gsPlaceParameter(CurrentPlaceRem),gsMakeSortIdPos());
       ATermAppl CondIf = pn2gsMakeDataApplProd2(OpGT,ProcVar, Number1);
       ATermAppl CondThan = gsMakeSync(gsMakeParamId(CurrentPlaceOut, ATmakeList0()), gsMakeParamId(CurrentPlaceRem, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax, Number1, pn2gsMakeDataApplProd2(OpSubt,ProcVar, Number1)))));
       ATermAppl CondElse = gsMakeParamId(CurrentPlaceOut, ATmakeList0());
@@ -1391,8 +1375,38 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     //         are preceded by "pm_"
 
     ATermList ReturnList = ATmakeList0();
+    while (ATisEmpty(Places) == ATfalse){
+      ATermAppl Place=ATAgetFirst(Places);
+      ATermAppl PlaceName=ATAtableGet(context.place_process_name,(ATerm)ATAgetFirst(Places));
+      ATermAppl PlaceParameter=gsMakeDataVarId(pn2gsPlaceParameter(PlaceName),gsMakeSortIdNat());
+      //colored
+      ATermAppl Type=ATAtableGet(context.place_type_mcrl2,(ATerm)Place);
+      if(Type && !ATisEqual(Type,Appl0)){
+	Type=gsMakeSortExprBag(Type);
+	PlaceParameter=ATsetArgument(PlaceParameter,(ATerm)Type,1);
+      }
+      ReturnList = ATinsert(ReturnList, (ATerm)PlaceParameter);
+      Places = ATgetNext(Places);
+    }
+    return ATreverse(ReturnList);
+  }
+
+  static ATermList pn2gsPlacesParameterTypes(ATermList Places) {
+    // input: a list containg all the places
+    // output: a list of types for these places
+
+    ATermList ReturnList = ATmakeList0();
     while (ATisEmpty(Places) == ATfalse) {
-      ReturnList = ATinsert(ReturnList, (ATerm)pn2gsPlaceParameterNat(ATgetName(ATgetAFun(ATgetFirst(Places)))));
+      ATermAppl Place=ATAgetFirst(Places);
+      //colored
+      ATermAppl Type=ATAtableGet(context.place_type_mcrl2,(ATerm)Place);
+      if(Type && !ATisEqual(Type,Appl0)){
+	Type=gsMakeSortExprBag(Type);
+      }
+      else{
+	Type=gsMakeSortIdNat();
+      }
+      ReturnList = ATinsert(ReturnList, (ATerm)Type);
       Places = ATgetNext(Places);
     }
     return ReturnList;
@@ -1403,15 +1417,15 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   //==================================================
   static ATermAppl pn2gsMerge(ATermList Ids) {
     // input: a not-empty list with the ID's
-    // output: an AtermAppl that is the MERGE of all the ID's in the input-list, each with its parameter!
+    // output: an ATermAppl that is the MERGE of all the ID's in the input-list, each with its parameter!
 
     ATermAppl merge;
-    char * CurrentElement = ATgetName(ATgetAFun(ATgetFirst(Ids)));
+    ATermAppl Id=ATAtableGet(context.place_process_name,(ATerm)ATAgetFirst(Ids));
     if (ATgetLength(Ids) > 1) {
-      merge = gsMakeMerge(gsMakeParamId(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList1((ATerm)pn2gsPlaceParameterNat(CurrentElement))), pn2gsMerge(ATgetNext(Ids)));
+      merge = gsMakeMerge(gsMakeParamId(Id, ATmakeList1((ATerm)gsMakeId(pn2gsPlaceParameter(Id)))), pn2gsMerge(ATgetNext(Ids)));
     } else {
       // ATgetLength(Ids) == 1, since the input-list is not-empty!
-      merge = gsMakeParamId(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList1((ATerm)pn2gsPlaceParameterNat(CurrentElement)));
+      merge = gsMakeParamId(Id, ATmakeList1((ATerm)gsMakeId(pn2gsPlaceParameter(Id))));
     }
     return merge;
   }
@@ -1419,14 +1433,25 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   //==================================================
   // pn2gsInitialMarkings creates a list with all the initial markings
   //==================================================
-  static ATermList pn2gsInitialMarkings(ATermList Places, ATermTable Markings) {
+  static ATermList pn2gsInitialMarkings(ATermList Places) {
     // input: a list with the places and a table with the markings
     // output: a list which contains all the initial markings of the places
 
     ATermList ReturnList = ATmakeList0();
     while (ATisEmpty(Places) == ATfalse) {
-      ATermAppl Marking = ATAtableGet(Markings, ATgetFirst(Places));
+      ATermAppl Place=ATAgetFirst(Places);
+      ATermAppl Marking = ATAtableGet(context.place_mark, (ATerm)Place);
+      if(!Marking) Marking = gsMakeId(gsString2ATermAppl("0"));
+
       gsDebugMsg("Initial Marking = %T\n", Marking);
+
+      //colored
+      ATermAppl Type=ATAtableGet(context.place_type_mcrl2,(ATerm)Place);
+      if(Type && !ATisEqual(Type,Appl0)){
+	Marking = ATAtableGet(context.place_mark_mcrl2, (ATerm)Place);
+	if(!Marking || ATisEqual(Marking,Appl0)) Marking = gsMakeId(gsMakeOpIdNameEmptyBag());
+      }
+      
       ReturnList = ATinsert(ReturnList,(ATerm)Marking);
       Places = ATgetNext(Places);
     }
@@ -1540,7 +1565,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 					  gsMakeComm(pn2gsCommList(AllArcs),
 						     gsMakeMerge(
 							     gsMakeParamId(gsString2ATermAppl("Trans"),ATmakeList0()),
-							     pn2gsMerge(context.places) 
+							     pn2gsMerge(ATtableKeys(context.place_process_name)) 
 								 ))));
     }
     else{
@@ -1552,7 +1577,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
       for(ATermList Places=ATtableKeys(context.place_process_name);!ATisEmpty(Places);Places=ATgetNext(Places)){
 	ATermAppl PlaceID=ATAgetFirst(Places);
 	ATermAppl Place=ATAtableGet(context.place_process_name,(ATerm)PlaceID);
-	Process=gsMakeMerge(Process,gsMakeParamId(Place,ATmakeList1((ATerm)pn2gsPlaceParameterNat(ATgetName(ATgetAFun(Place))))));
+	Process=gsMakeMerge(Process,gsMakeParamId(Place,ATmakeList1((ATerm)gsMakeId(pn2gsPlaceParameter(Place)))));
 
 	ATermList AssocArcs=ATmakeList0(); // in and out arcs of the place
 	{
@@ -1578,8 +1603,14 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
       }
     }
 
-    ATermList ParameterList = pn2gsPlacesParameters(context.places);
-    ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(),gsMakeProcVarId(gsString2ATermAppl("PetriNet"),pn2gsListNNats(ATgetLength(ParameterList))), ParameterList, Process));
+    ProcessList = 
+      ATinsert(ProcessList, 
+	       (ATerm)gsMakeProcEqn(ATmakeList0(),
+				    gsMakeProcVarId(gsString2ATermAppl("PetriNet"),
+						    pn2gsPlacesParameterTypes(ATtableKeys(context.place_process_name))), 
+				    pn2gsPlacesParameters(ATtableKeys(context.place_process_name)), 
+				    Process)
+	       );
     gsDebugMsg("Process PetriNet created.\n");
 
     // reminder: NetID == "Net_'ID of the Petri net'"
@@ -1588,7 +1619,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     // NetID = PetriNet("...")
     // "..." is the initial marking of all places
 
-    Process = gsMakeParamId(gsString2ATermAppl("PetriNet"), pn2gsInitialMarkings(ATtableKeys(context.place_mark), context.place_mark));
+    Process = gsMakeParamId(gsString2ATermAppl("PetriNet"), pn2gsInitialMarkings(ATtableKeys(context.place_process_name)));
     ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(NetID, ATmakeList0()), ATmakeList0(), Process));
     gsDebugMsg("Process %T created.\n", NetID);
 
@@ -2206,7 +2237,6 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     context.arc_type_mcrl2=ATtableCreate(63,50);
    
     context.transitions=ATmakeList0();
-    context.places=ATmakeList0();
     context.place_process_name=ATtableCreate(63,50);  
    
     //ATprintf("Spec %t\n\n", Spec);
@@ -2242,7 +2272,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     
     gsDebugMsg("The result of conversion is: %T\n",Spec);
    
-    //Spec = type_check_spec(Spec);
+    Spec = type_check_spec(Spec);
    
     if(Spec){
       PrintPart_C(OutStream, (ATerm) Spec, ppDefault);
@@ -2323,50 +2353,50 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     return 0;
   }
 
-  // Added by Yarick: alternative generation of Places:
+// Added by Yarick: alternative generation of Places:
 //  static ATermAppl pn2gsGenerateP_pi_a(ATermList InActionLists, ATermList OutActionLists, ATermList ResetActionLists);
-  static ATermList pn2gsGetActionLists(unsigned int n, ATermList ActList);
+static ATermList pn2gsGetActionLists(unsigned int n, ATermList ActList);
 static ATermAppl pn2gsMakeMultiAction(ATermList ActionList, ATermList ParamList=NULL);
-  static ATermList pn2gsMakeSendActions(ATermList ReadActions);
+static ATermList pn2gsMakeSendActions(ATermList ReadActions);
 
+//==================================================
+// pn2gsGeneratePlaceAlternative generates the mCRL2 Process Equations belonging to one place
+// without recursive parallelism
+//==================================================
+static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
+  // input: access to the context; ID of the place
+  // output: an updated list of the processes: the processes belonging to the place added to the list
+  
   //==================================================
-  // pn2gsGeneratePlaceAlternative generates the mCRL2 Process Equations belonging to one place
-  // without recursive parallelism
+  // retrieve the maximum concurrency
   //==================================================
-  static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
-    // input: access to the context; ID of the place
-    // output: an updated list of the processes: the processes belonging to the place added to the list
+  ATermList ActsIn=ATLtableGet(context.place_in, PlaceID);
+  if(!ActsIn) ActsIn=ATmakeList0();
+  int n=ATgetLength(ActsIn);
+  
+  ATermList ActsOut=ATLtableGet(context.place_out, PlaceID);
+  if(!ActsOut) ActsOut=ATmakeList0();
+  else ActsOut=pn2gsMakeSendActions(ActsOut);
+  int m=ATgetLength(ActsOut);
+  
+  ATermList ActsInhibit=ATLtableGet(context.place_inhibit, PlaceID);
+  if(!ActsInhibit) ActsInhibit=ATmakeList0();
+  else ActsInhibit=pn2gsMakeSendActions(ActsInhibit);
+  int k=ATgetLength(ActsInhibit);
 
-    //==================================================
-    // retrieve the maximum concurrency
-    //==================================================
-    ATermList ActsIn=ATLtableGet(context.place_in, PlaceID);
-    if(!ActsIn) ActsIn=ATmakeList0();
-    int n=ATgetLength(ActsIn);
-
-    ATermList ActsOut=ATLtableGet(context.place_out, PlaceID);
-    if(!ActsOut) ActsOut=ATmakeList0();
-    else ActsOut=pn2gsMakeSendActions(ActsOut);
-    int m=ATgetLength(ActsOut);
-
-    ATermList ActsInhibit=ATLtableGet(context.place_inhibit, PlaceID);
-    if(!ActsInhibit) ActsInhibit=ATmakeList0();
-    else ActsInhibit=pn2gsMakeSendActions(ActsInhibit);
-    int k=ATgetLength(ActsInhibit);
-
-    ATermList ActsReset=ATLtableGet(context.place_reset, PlaceID);
-    if(!ActsReset) ActsReset=ATmakeList0();
-    int l=ATgetLength(ActsReset);
-
-    gsDebugMsg("Place %T has maximum concurrency in: '%d', out: '%d', inhibit: '%d', and reset: '%d'\n", PlaceID, n,m,k,l);
-    
-    //==================================================
-    // generate the processes
-    //==================================================
-
-    //==================================================
-    // second, we generate the place processes.
-    //==================================================
+  ATermList ActsReset=ATLtableGet(context.place_reset, PlaceID);
+  if(!ActsReset) ActsReset=ATmakeList0();
+  int l=ATgetLength(ActsReset);
+  
+  gsDebugMsg("Place %T has maximum concurrency in: '%d', out: '%d', inhibit: '%d', and reset: '%d'\n", PlaceID, n,m,k,l);
+  
+  //==================================================
+  // generate the processes
+  //==================================================
+  
+  //==================================================
+  // second, we generate the place processes.
+  //==================================================
     
     // In the comment below, pi will refer to 'placeid' or to 'placeid_placename'.
     // This depends on whether or not a place has a name, and if it does, if it's not too long.
@@ -2416,157 +2446,214 @@ static ATermAppl pn2gsMakeMultiAction(ATermList ActionList, ATermList ParamList=
 
 
     //Calculate the name of the process 
-    AFun CurrentPlaceId = ATgetAFun(PlaceID);
+  AFun CurrentPlaceId = ATgetAFun(PlaceID);
+  
+  {
+    char * CurrentPlaceName = ATgetName(ATgetAFun(ATtableGet(context.place_name, PlaceID)));
+    
+    if(strcmp(CurrentPlaceName, "default_name"))
+      // name of the place is not "default_name"
+      // name of the place may be used
+      CurrentPlaceId=ATappendAFun(ATappendAFun(CurrentPlaceId,"_"),CurrentPlaceName);
+    
+    //Prepend "P_"
+    CurrentPlaceId=ATprependAFun("P_",CurrentPlaceId);
+  }
+  // variables to store the process names
+  ATermAppl CurrentPlace=ATmakeAppl0(CurrentPlaceId);
+  //ATermAppl CurrentPlaceAdd=ATmakeAppl0(ATappendAFun(CurrentPlaceId,"_add"));
+  //ATermAppl CurrentPlaceIn=ATmakeAppl0(ATappendAFun(CurrentPlaceId,"_in"));
+  //ATermAppl CurrentPlaceRem=ATmakeAppl0(ATappendAFun(CurrentPlaceId,"_rem"));
+  //ATermAppl CurrentPlaceOut=ATmakeAppl0(ATappendAFun(CurrentPlaceId,"_out"));
+  
+  //added by Yarick: we need a table to relate PlaceId and CurrentPlace.
+  ATtablePut(context.place_process_name,PlaceID,(ATerm)CurrentPlace);
+    
+  ATermList EquationList=ATmakeList0(); //the result
+  ATermAppl Body=NULL;                  //the body of the main equation
+  
+  // ++++++++++++++++++ begin generation of minimal number of summands
+  // This is yet another alternative method. We try to only generate 
+  // the full multiactions between a place and a transition.
+  
+  //colored: Type
+  ATermAppl Type=ATAtableGet(context.place_type_mcrl2,(ATerm)PlaceID);
+  if(Type && ATisEqual(Type,Appl0)) Type=NULL;
 
-    {
-      char * CurrentPlaceName = ATgetName(ATgetAFun(ATtableGet(context.place_name, PlaceID)));
-      
-      if(strcmp(CurrentPlaceName, "default_name"))
-	// name of the place is not "default_name"
-	// name of the place may be used
-	CurrentPlaceId=ATappendAFun(ATappendAFun(CurrentPlaceId,"_"),CurrentPlaceName);
+  // foreach transition t : find all arks between p and t
+  // calculate its value n input arcs - m out arcs, take into account the inhibitor and reset arcs.
+  ATermAppl VarX=gsMakeDataVarId(ATmakeAppl0(ATmakeAFunId("x")),(Type)?gsMakeSortExprBag(Type):gsMakeSortIdNat());;
+  ATermAppl Number0=gsMakeId(gsString2ATermAppl("0"));
+  ATermAppl OpAdd=gsMakeId(gsMakeOpIdNameAdd());
+  ATermAppl OpSubt=gsMakeId(gsMakeOpIdNameSubt());
+  ATermAppl OpAnd=gsMakeId(gsMakeOpIdNameAnd());
+  //ATermAppl OpMax=gsMakeId(gsMakeOpIdNameMax());
+  ATermAppl OpLTE=gsMakeId(gsMakeOpIdNameLTE());
+  ATermAppl OpEq=gsMakeId(gsMakeOpIdNameEq());
+  ATermAppl OpInt2Nat=gsMakeId(gsMakeOpIdNameInt2Nat());
+  ATermAppl EmptyBag=gsMakeId(gsMakeOpIdNameEmptyBag());
 
-      //Prepend "P_"
-      CurrentPlaceId=ATprependAFun("P_",CurrentPlaceId);
+  for(ATermList Lt=ATtableKeys(context.trans_name);!ATisEmpty(Lt);Lt=ATgetNext(Lt)){
+    ATermAppl TransID=ATAgetFirst(Lt);
+    
+    //find all arcs connecting PlaceId and TransId
+    ATermList mult_c=ATmakeList0(); //current multiactions
+    for(ATermList La=ATLtableGet(context.place_in,(ATerm)PlaceID);La && !ATisEmpty(La);La=ATgetNext(La)){
+      ATermAppl ArcID=ATAgetFirst(La);
+      ATermAppl Arc=ATAtableGet(context.arc_in,(ATerm)ArcID);
+      if(!ATisEqual(ATAgetArgument(Arc,1),PlaceID)) continue;
+      if(!ATisEqual(ATAgetArgument(Arc,0),TransID)) continue;
+      mult_c=ATinsert(mult_c,(ATerm)ArcID);
     }
-    // variables to store the process names
-    ATermAppl CurrentPlace=ATmakeAppl0(CurrentPlaceId);
-    //ATermAppl CurrentPlaceAdd=ATmakeAppl0(ATappendAFun(CurrentPlaceId,"_add"));
-    //ATermAppl CurrentPlaceIn=ATmakeAppl0(ATappendAFun(CurrentPlaceId,"_in"));
-    //ATermAppl CurrentPlaceRem=ATmakeAppl0(ATappendAFun(CurrentPlaceId,"_rem"));
-    //ATermAppl CurrentPlaceOut=ATmakeAppl0(ATappendAFun(CurrentPlaceId,"_out"));
+    int nIn=ATgetLength(mult_c); //the number of tokens that adds/removes
+    ATermList mult=ATreverse(mult_c); //the resulting list of actions (in,_out,inhibit,_reset)
+
+    mult_c=ATmakeList0();
+    for(ATermList La=ATLtableGet(context.place_out,(ATerm)PlaceID);La && !ATisEmpty(La);La=ATgetNext(La)){
+      ATermAppl ArcID=ATAgetFirst(La);
+      ATermAppl Arc=ATAtableGet(context.arc_out,(ATerm)ArcID);
+      if(!ATisEqual(ATAgetArgument(Arc,0),PlaceID)) continue;
+      if(!ATisEqual(ATAgetArgument(Arc,1),TransID)) continue;
+      mult_c=ATinsert(mult_c,(ATerm)ArcID);
+    }
+    int nOut=ATgetLength(mult_c);
+    mult=ATconcat(mult,pn2gsMakeSendActions(ATreverse(mult_c)));
     
-    // insert the name of the process P_pi into context.places
-    // this is needed for the generation of the general process PetriNet
-    context.places = ATinsert(context.places, (ATerm)CurrentPlace);
-    gsDebugMsg("context.places now contains the following places: %T\n", context.places);
-
-    //added by Yarick: we need a table to relate PlaceId and CurrentPlace.
-    ATtablePut(context.place_process_name,PlaceID,(ATerm)CurrentPlace);
+    mult_c=ATmakeList0();
+    bool inhib=false;
+    for(ATermList La=ATLtableGet(context.place_inhibit,(ATerm)PlaceID);La && !ATisEmpty(La);La=ATgetNext(La)){
+      ATermAppl ArcID=ATAgetFirst(La);
+      ATermAppl Arc=ATAtableGet(context.arc_inhibit,(ATerm)ArcID);
+      if(!ATisEqual(ATAgetArgument(Arc,0),PlaceID)) continue;
+      if(!ATisEqual(ATAgetArgument(Arc,1),TransID)) continue;
+      mult_c=ATinsert(mult_c,(ATerm)ArcID);
+      inhib=true;
+    }
+    mult=ATconcat(mult,ATreverse(mult_c));
     
-    ATermList EquationList=ATmakeList0(); //the result
-    ATermAppl Body=NULL;                  //the body of the main equation
+    mult_c=ATmakeList0();
+    bool reset=false;
+    for(ATermList La=ATLtableGet(context.place_reset,(ATerm)PlaceID);La && !ATisEmpty(La);La=ATgetNext(La)){
+      ATermAppl ArcID=ATAgetFirst(La);
+      ATermAppl Arc=ATAtableGet(context.arc_reset,(ATerm)ArcID);
+      if(!ATisEqual(ATAgetArgument(Arc,1),PlaceID)) continue;
+      if(!ATisEqual(ATAgetArgument(Arc,0),TransID)) continue;
+      mult_c=ATinsert(mult_c,(ATerm)ArcID);
+      reset=true;
+    }
+    mult=ATconcat(mult,pn2gsMakeSendActions(ATreverse(mult_c)));
+    
+    if(!nIn && !nOut && !inhib && !reset) continue;
+    
+    if(nOut>0 && inhib){
+      gsWarningMsg("Both output and inhibitor arcs connect place %T with transition %T. This transition can never fire.\n");
+      continue;
+    }
+    
+    //summand
+    AFun AR=ATappendAFun(CurrentPlaceId,"_ar_");
+    if(inhib && reset) AR=ATappendAFun(CurrentPlaceId,"_air_");
+    else{
+      if(inhib) AR=ATappendAFun(CurrentPlaceId,"_ai_");
+      else if(reset) AR=ATappendAFun(CurrentPlaceId,"_arr_");
+    }
+    
+    ATermAppl LeftName=ATmakeAppl0(ATappendAFun(AR,ATgetName(ATgetAFun(TransID))));
+    
+    //colored (make variables list)
+    ATermList VarNames=ATmakeList0();
+    if(Type){
+      for(int i=0; i<nIn+nOut; i++){
+	ATermAppl Name=ATmakeAppl0(ATappendAFun(ATappendAFun(ATprependAFun("vp_",ATgetAFun(PlaceID)),"_"),ATgetName(ATmakeAFunInt0(i))));
+	VarNames=ATinsert(VarNames,(ATerm)Name);
+      }
+      VarNames=ATreverse(VarNames);
+    }
 
-    // ++++++++++++++++++ begin generation of minimal number of summands
-    // This is yet another alternative method. We try to only generate 
-    // the full multiactions between a place and a transition.
+    ATermAppl Left=gsMakeParamId(LeftName,pn2gsMakeIds(VarNames)); //make name P_pi_ar_i_j
+    ATermAppl RightExpr=VarX;  //x;
+    int d=nIn-nOut;
+    if(!reset) {
+      if(d>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(d))));//RightExpr=x+d;
+      else if(d<0) RightExpr=gsMakeDataApplProd(OpInt2Nat,ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpSubt,RightExpr,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(-d))))));//RightExpr=Int2Nat(x-d);
+    }
+    else
+      RightExpr=gsMakeId(ATmakeAppl0(ATmakeAFunInt0(nIn)));//RightExpr=nIn;
 
-    // foreach transition t : find all arks between p and t
-    // calculate its value n input arcs - m out arcs, take into account the inhibitor and reset arcs.
-    ATermAppl VarX=gsMakeDataVarId(ATmakeAppl0(ATmakeAFunId("x")),gsMakeSortIdNat());;
-    ATermAppl Number0=gsMakeId(gsString2ATermAppl("0"));
-    ATermAppl OpAdd=gsMakeId(gsMakeOpIdNameAdd());
-    ATermAppl OpSubt=gsMakeId(gsMakeOpIdNameSubt());
-    //ATermAppl OpMax=gsMakeId(gsMakeOpIdNameMax());
-    ATermAppl OpLTE=gsMakeId(gsMakeOpIdNameLTE());
-    ATermAppl OpEq=gsMakeId(gsMakeOpIdNameEq());
-    ATermAppl OpInt2Nat=gsMakeId(gsMakeOpIdNameInt2Nat());
-    for(ATermList Lt=ATtableKeys(context.trans_name);!ATisEmpty(Lt);Lt=ATgetNext(Lt)){
-      ATermAppl TransID=ATAgetFirst(Lt);
-      
-      //find all arcs connecting PlaceId and TransId
-      ATermList mult_i=ATmakeList0(); //current multiactions
-      ATermList mult_o=ATmakeList0(); //current multiactions
-      for(ATermList La=ATLtableGet(context.place_in,(ATerm)PlaceID);La && !ATisEmpty(La);La=ATgetNext(La)){
-	ATermAppl ArcID=ATAgetFirst(La);
-	ATermAppl Arc=ATAtableGet(context.arc_in,(ATerm)ArcID);
-	if(!ATisEqual(ATAgetArgument(Arc,1),PlaceID)) continue;
-	if(!ATisEqual(ATAgetArgument(Arc,0),TransID)) continue;
-	mult_i=ATinsert(mult_i,(ATerm)ArcID);
+    //colored
+    if(Type){
+      RightExpr=VarX;
+      if(!reset){
+	if(nIn)
+	  RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,pn2gsMakeBagVars(pn2gsMakeIds(ATgetSlice(VarNames,0,nIn))));//RightExpr+={|in|};
+	if(nOut)
+	  RightExpr=pn2gsMakeDataApplProd2(OpSubt,RightExpr,pn2gsMakeBagVars(pn2gsMakeIds(ATgetTail(VarNames,nIn))));//RightExpr-={|out|};
       }
-      int nIn=ATgetLength(mult_i); //the number of tokens that adds/removes
-      
-      for(ATermList La=ATLtableGet(context.place_out,(ATerm)PlaceID);La && !ATisEmpty(La);La=ATgetNext(La)){
-	ATermAppl ArcID=ATAgetFirst(La);
-	ATermAppl Arc=ATAtableGet(context.arc_out,(ATerm)ArcID);
-	if(!ATisEqual(ATAgetArgument(Arc,0),PlaceID)) continue;
-	if(!ATisEqual(ATAgetArgument(Arc,1),TransID)) continue;
-	mult_o=ATinsert(mult_o,(ATerm)ArcID);
-      }
-      int nOut=ATgetLength(mult_o);
-      
-      bool inhib=false;
-      for(ATermList La=ATLtableGet(context.place_inhibit,(ATerm)PlaceID);La && !ATisEmpty(La);La=ATgetNext(La)){
-	ATermAppl ArcID=ATAgetFirst(La);
-	ATermAppl Arc=ATAtableGet(context.arc_inhibit,(ATerm)ArcID);
-	if(!ATisEqual(ATAgetArgument(Arc,0),PlaceID)) continue;
-	if(!ATisEqual(ATAgetArgument(Arc,1),TransID)) continue;
-	mult_o=ATinsert(mult_o,(ATerm)ArcID);
-	inhib=true;
-      }
-      
-      bool reset=false;
-      for(ATermList La=ATLtableGet(context.place_reset,(ATerm)PlaceID);La && !ATisEmpty(La);La=ATgetNext(La)){
-	ATermAppl ArcID=ATAgetFirst(La);
-	ATermAppl Arc=ATAtableGet(context.arc_reset,(ATerm)ArcID);
-	if(!ATisEqual(ATAgetArgument(Arc,1),PlaceID)) continue;
-	if(!ATisEqual(ATAgetArgument(Arc,0),TransID)) continue;
-	mult_i=ATinsert(mult_i,(ATerm)ArcID);
-	reset=true;
-      }
-      
-      mult_i=ATreverse(mult_i);
-      mult_o=ATreverse(mult_o);
-
-      if(!nIn && !nOut && !inhib && !reset) continue;
-
-      if(nOut>0 && inhib){
-	gsWarningMsg("Both output and inhibitor arcs connect place %T with transition %T. This transition can never fire.\n");
-	continue;
-      }
-
-      mult_i=ATreverse(mult_i);
-      mult_o=ATreverse(mult_o);
-
-      ATermList mult=ATconcat(mult_i,pn2gsMakeSendActions(mult_o));
-      
-      //summand
-      AFun AR=ATappendAFun(CurrentPlaceId,"_ar_");
-      if(inhib && reset) AR=ATappendAFun(CurrentPlaceId,"_air_");
-      else{
-	if(inhib) AR=ATappendAFun(CurrentPlaceId,"_ai_");
-	else if(reset) AR=ATappendAFun(CurrentPlaceId,"_arr_");
-      }
-      
-      ATermAppl LeftName=ATmakeAppl0(ATappendAFun(AR,ATgetName(ATgetAFun(TransID))));
-      ATermAppl Left=gsMakeParamId(LeftName,ATmakeList0());//make name P_pi_ar_i_j
-      ATermAppl RightExpr=VarX;  //x;
-      int d=nIn-nOut;
-      if(!reset) {
-	if(d>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(d))));//RightExpr=RightExpr+d;
-	else if(d<0) RightExpr=gsMakeDataApplProd(OpInt2Nat,ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpSubt,RightExpr,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(-d))))));//RightExpr=max(RightExpr-d,0);
-      }
-      else {
-	if(d>0) RightExpr=gsMakeId(ATmakeAppl0(ATmakeAFunInt0(d)));//RightExpr=d;
-	else RightExpr=Number0;
-      }
-
-      ATermAppl Right=gsMakeParamId(CurrentPlace,ATmakeList1((ATerm)RightExpr));//make P_pi(max(x+i-j,0))
-      ATermAppl Summand=gsMakeSeq(Left,Right);
-      
-      //condition
+      else 
+	RightExpr=pn2gsMakeBagVars(ATgetTail(VarNames,nIn));//RightExpr={|in|};
+    }
+    
+    ATermAppl Right=gsMakeParamId(CurrentPlace,ATmakeList1((ATerm)RightExpr));//make P_pi(max(x+i-j,0))
+    ATermAppl Summand=gsMakeSeq(Left,Right);
+    
+    //condition
+    ATermAppl Cond=NULL;
+    if(nOut>0){
+      Cond=pn2gsMakeDataApplProd2(OpLTE,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(nOut))),VarX);//make nOut<=x
+    }
+    if(inhib){
+      ATermAppl Cond1=pn2gsMakeDataApplProd2(OpEq,VarX,Number0);//make x==0
+      if(Cond) Cond=pn2gsMakeDataApplProd2(OpAnd,Cond,Cond1);
+      else Cond=Cond1;
+    }
+    
+    //colored
+    if(Type){
+      Cond=NULL;
       if(nOut>0){
-	ATermAppl Cond=pn2gsMakeDataApplProd2(OpLTE,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(nOut))),VarX);//make nOut<=x
-	Summand=gsMakeIfThen(Cond,Summand);
+	Cond=pn2gsMakeDataApplProd2(OpLTE,pn2gsMakeBagVars(ATgetSlice(VarNames,0,nIn)),VarX);//make nOut <= x
       }
-      else /*never together */ if(inhib){
-	ATermAppl Cond=pn2gsMakeDataApplProd2(OpEq,VarX,Number0);//make x==0
-	Summand=gsMakeIfThen(Cond,Summand);
+      if(inhib){
+	ATermAppl Cond1=pn2gsMakeDataApplProd2(OpEq,VarX,EmptyBag);//make x=={}
+	if(Cond) Cond=pn2gsMakeDataApplProd2(OpAnd,Cond,Cond1);
+	else Cond=Cond1;
       }	
-      
-      if(Body) Body=gsMakeChoice(Summand,Body);
-      else Body=Summand; 
+    }
+
+    if(Cond)
+      Summand=gsMakeIfThen(Cond,Summand);
+
+    //colored (sums)
+    if(Type){
+      ATermList SumList=ATmakeList0();
+      for(ATermList l=VarNames; !ATisEmpty(l); l=ATgetNext(l)){
+	SumList=ATinsert(SumList,(ATerm)gsMakeDataVarId(ATAgetFirst(l),Type));
+      }
+      Summand=gsMakeSum(ATreverse(SumList),Summand);
+    }
     
-      // extra equation
-      EquationList = ATinsert(EquationList, 
-			      (ATerm)gsMakeProcEqn(ATmakeList0(), 
-						   gsMakeProcVarId(LeftName, ATmakeList0()), 
-						   ATmakeList0(), 
-						   pn2gsMakeMultiAction(mult)));
-    } //For loop
-
+    if(Body) Body=gsMakeChoice(Summand,Body);
+    else Body=Summand; 
+    
+    // colored:
+    ATermList LeftType=ATmakeList0();
+    if(Type && nIn+nOut>0) {
+      // all input and output parameters (not reset and inhibitor)
+      for(int i=0; i<nIn+nOut; i++) 
+	LeftType=ATinsert(LeftType,(ATerm)Type);
+    }
+    
+    // extra equation
+    EquationList = ATinsert(EquationList, 
+			    (ATerm)gsMakeProcEqn(ATmakeList0(), 
+						 gsMakeProcVarId(LeftName, LeftType), 
+						 (Type)?pn2gsMakeDataVarIds(VarNames,Type):ATmakeList0(), 
+						 pn2gsMakeMultiAction(mult,pn2gsMakeListOfLists(pn2gsMakeIds(VarNames)))));
+    
+  } //For loop
+  
     // ++++++++++++++++++ end generation of minimal number of summands
-
+  
 
 //     // +++++++++++++++++ begin normal alternative generation 
    
@@ -2717,19 +2804,19 @@ static ATermAppl pn2gsMakeMultiAction(ATermList ActionList, ATermList ParamList=
 //     // +++++++++++++++++ end normal alternative generation 
     
 
-    // handle the case m+n+k+l=0.
-    if(!Body) Body=gsMakeDelta();
-    
-    //make process P_pi and add it
-    EquationList = ATinsert(EquationList, 
-			    (ATerm)gsMakeProcEqn(ATmakeList0(), 
-						 gsMakeProcVarId(CurrentPlace, 
-								 ATmakeList1((ATerm)gsMakeSortIdNat())), 
-						 ATmakeList1((ATerm)VarX), 
-						 Body));
-    
-    return EquationList;
-  }
+  // handle the case m+n+k+l=0.
+  if(!Body) Body=gsMakeDelta();
+  
+  //make process P_pi and add it
+  EquationList = ATinsert(EquationList, 
+			  (ATerm)gsMakeProcEqn(ATmakeList0(),
+					       gsMakeProcVarId(CurrentPlace, 
+							       ATmakeList1((ATerm)((Type)?gsMakeSortExprBag(Type):gsMakeSortIdNat()))), 
+					       ATmakeList1((ATerm)VarX), 
+					       Body));
+  
+  return EquationList;
+}
 
 // static ATermList concat_lists(ATermList l, ATermList m){
 //   //concats the elements of the lists of lists
@@ -2809,14 +2896,17 @@ static ATermList pn2gsGetActionLists(unsigned int n, ATermList ActList){
   }
 
 static ATermAppl pn2gsMakeMultiAction(ATermList ActionList, ATermList ParamList){
-  assert(!ParamList || ATgetLength(ActionList)==ATgetLength(ParamList));
-  //Make a process term a_1|...|a_n
-  //input : list of action names
+  //Make a process term a_1(p_1)|...|a_n(p_n)
+  //input : list of action names, parameters
+  //if the list of parameters is shorter, empty parameter lists are used.
   ATermAppl Res=NULL;
-  for(;!ATisEmpty(ActionList);ActionList=ATgetNext(ActionList),ParamList=(ParamList)?ATgetNext(ParamList):NULL){
+  for(;!ATisEmpty(ActionList);ActionList=ATgetNext(ActionList)){
+    if(ATisEmpty(ParamList)) ParamList=NULL;
     ATermAppl CurAct=gsMakeParamId(ATAgetFirst(ActionList),(ParamList)?ATLgetFirst(ParamList):ATmakeList0());
     if(Res) Res=gsMakeSync(CurAct,Res);
     else Res=CurAct;
+    if(ParamList)
+      ParamList=ATgetNext(ParamList);
   }
   
   if(!Res) Res=gsMakeTau();
@@ -2824,14 +2914,6 @@ static ATermAppl pn2gsMakeMultiAction(ATermList ActionList, ATermList ParamList)
   return Res;
 }
  
-  static ATermList pn2gsListNNats(int n){
-    ATermList Res=ATmakeList0();
-    ATermAppl SortNat=gsMakeSortIdNat();
-
-    for(int i=0;i<n;i++) Res=ATinsert(Res,(ATerm)SortNat);
-    return Res;
-  }
-
   //==================================================
   // pn2gsGenerateTransitionAlternative generates the mCRL2 Process Equations belonging to one transition
   //==================================================
@@ -2896,6 +2978,10 @@ static ATermAppl pn2gsMakeMultiAction(ATermList ActionList, ATermList ParamList)
 	//not colored
 	ParamList=ATinsert(ParamList,(ATerm)ATmakeList0());
       }
+      else if(ATAtableGet(context.arc_inhibit,(ATerm)Arc) || ATAtableGet(context.arc_reset,(ATerm)Arc)) {
+	//inhibitor and reset arcs : no parameters
+	ParamList=ATinsert(ParamList,(ATerm)ATmakeList0());
+      }
       else {
 	ATermAppl VarName=ATAtableGet(context.arc_name,(ATerm)Arc);
 	if(!VarName || ATisEqual(VarName,Appl0)){
@@ -2931,13 +3017,58 @@ static ATermAppl pn2gsMakeMultiAction(ATermList ActionList, ATermList ParamList)
     return ATmakeList1((ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Body));    
   }
 
-  static ATermList pn2gsMakeSendActions(ATermList ReadActions){
-    //prepend all of these actions with "_".
-    ATermList SendActions=ATmakeList0();
-    for(;!ATisEmpty(ReadActions);ReadActions=ATgetNext(ReadActions)){
-      ATermAppl Act=ATAgetFirst(ReadActions);
-      Act=ATmakeAppl0(ATprependAFun("_",ATgetAFun(Act)));
-      SendActions=ATinsert(SendActions,(ATerm)Act);
-    }
-    return ATreverse(SendActions);
+static ATermList pn2gsMakeSendActions(ATermList ReadActions){
+  //prepend all of these actions with "_".
+  ATermList SendActions=ATmakeList0();
+  for(;!ATisEmpty(ReadActions);ReadActions=ATgetNext(ReadActions)){
+    ATermAppl Act=ATAgetFirst(ReadActions);
+    Act=ATmakeAppl0(ATprependAFun("_",ATgetAFun(Act)));
+    SendActions=ATinsert(SendActions,(ATerm)Act);
   }
+  return ATreverse(SendActions);
+}
+
+static ATermList pn2gsMakeIds(ATermList l){
+  ATermList r=ATmakeList0();
+  for(;!ATisEmpty(l);l=ATgetNext(l))
+    r=ATinsert(r,(ATerm)gsMakeId(ATAgetFirst(l)));
+  return ATreverse(r);
+}
+
+static ATermAppl pn2gsMakeBagVars(ATermList l){
+  //makes a bag from the list of variables.
+  if(ATisEmpty(l)) 
+    return gsMakeId(gsMakeOpIdNameEmptyBag());
+  
+  ATermAppl OpBagEnum=gsMakeId(gsMakeOpIdNameBagEnum());
+  ATermAppl Number1=gsMakeId(gsString2ATermAppl("1"));
+  //ATermAppl OpAdd=gsMakeId(gsMakeOpIdNameAdd());
+  
+  //ATermAppl r=pn2gsMakeDataApplProd2(OpBagComp,ATAgetFirst(l),Number1);//make {first(l):1}
+  ATermList l1=ATmakeList0();
+  //l=ATgetNext(l);
+  for(l=ATreverse(l);!ATisEmpty(l);l=ATgetNext(l)){
+    //ATermAppl n=pn2gsMakeDataApplProd2(OpBagComp,ATAgetFirst(l),Number1);//make {first(l):1}
+    //r=pn2gsMakeDataApplProd2(OpAdd,n,r);
+    l1=ATinsert(l1,(ATerm)ATAgetFirst(l));
+    l1=ATinsert(l1,(ATerm)Number1);
+  }
+
+  return gsMakeDataApplProd(OpBagEnum,l1);
+}
+
+static ATermList pn2gsMakeListOfLists(ATermList l){
+  //for [e_1,...,e_n] returns the [[e_1],...,[e_n]]
+  ATermList r=ATmakeList0();
+  for(;!ATisEmpty(l);l=ATgetNext(l))
+    r=ATinsert(r,(ATerm)ATmakeList1(ATgetFirst(l)));
+  return ATreverse(r);
+}
+
+static ATermList pn2gsMakeDataVarIds(ATermList l, ATermAppl Type){
+  //for [e_1,...,e_n],t returns the [DataVarId(e_1,t),...,DataVarId(e_n,t)]
+  ATermList r=ATmakeList0();
+  for(;!ATisEmpty(l);l=ATgetNext(l))
+    r=ATinsert(r,(ATerm)gsMakeDataVarId(ATAgetFirst(l),Type));
+  return ATreverse(r);
+}

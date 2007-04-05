@@ -2004,7 +2004,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
         for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
           ATermAppl Argument=ATAgetFirst(Arguments);
           ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars);
-          if(!Type0) return NULL;
+          if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %T)\n", "element", Type,Argument);  return NULL;}
           NewArguments=ATinsert(NewArguments,(ATerm)Argument);
           Type=Type0;
         }
@@ -2015,18 +2015,19 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       }
       if(Name == gsMakeOpIdNameBagEnum()) {
         ATermAppl Type=gstcUnBag(PosType);
+        if(!Type) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "bag", PosType,Arguments);  return NULL;}
         ATermList NewArguments=ATmakeList0();
         for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
           ATermAppl Argument0=ATAgetFirst(Arguments);
           Arguments=ATgetNext(Arguments);
           ATermAppl Argument1=ATAgetFirst(Arguments);
-          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,Type,FreeVars);
-          if(!Type0) return NULL;
-          ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,gsMakeSortIdNat(),FreeVars);
-          if(!Type1) return NULL;
+          ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,Type,FreeVars);
+          if(!Type1) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "element", Type,Argument1);  return NULL;}
+          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,gsMakeSortIdNat(),FreeVars);
+          if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "number", gsMakeSortIdNat(),Argument1);  return NULL;}
           NewArguments=ATinsert(NewArguments,(ATerm)Argument0);
           NewArguments=ATinsert(NewArguments,(ATerm)Argument1);
-          Type=Type0;
+          Type=Type1;
         }
         Arguments=ATreverse(NewArguments);
         Type=gsMakeSortExprBag(Type);
