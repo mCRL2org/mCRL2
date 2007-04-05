@@ -2145,6 +2145,7 @@ ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, unsigned int n)
     /* Delay masking until after AT_allocate */
     hnr &= table_mask;
     cur->header = appl->header;
+    SET_AGE(cur->header,0);
     CHECK_HEADER(cur->header);
     for (i=0; i<arity; i++) {
       if (i!=n)
