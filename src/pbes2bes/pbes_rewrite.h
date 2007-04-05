@@ -21,4 +21,6 @@ lps::pbes_expression_list get_and_expressions(lps::pbes_expression_list and_list
 // - a list with only non-false elements out of the or_list if all expressions are !true
 lps::pbes_expression_list get_or_expressions(lps::pbes_expression_list or_list, lps::data_specification data, Rewriter *rewriter);
 
+bool element_in_propvarinstlist(lps::data_variable_list vars, std::set< lps::propositional_variable_instantiation > pvilist);
+
 bool occurs_in(atermpp::aterm_appl l, lps::data_variable v);

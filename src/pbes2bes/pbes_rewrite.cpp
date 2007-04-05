@@ -1,4 +1,5 @@
 #include "pbes_rewrite.h"
+#include "lps/pbes_utility.h"
 #include "atermpp/substitute.h"
 
 #include "sort_functions.h"
@@ -84,7 +85,13 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 				pbes_expression_list and_list = get_and_expressions(get_all_possible_expressions(data_vars, expr, data), data, rewriter);
 				result = multi_and(and_list.begin(), and_list.end());
 			}
-			else
+/*			else if (element_in_propvarinstlist(occured_data_vars, find_propositional_variable_instantiations(expr)))
+			{
+				gsErrorMsg("The propositional_variable_instantiation cannot be replaced\n");
+				gsErrorMsg("Aborting\n");
+				exit(1);
+			}
+*/			else
 				//Probably some advanced stuff is needed here to check finiteness...
 				result = forall(data_vars, expr);
 		}
@@ -116,7 +123,13 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 				pbes_expression_list or_list = get_or_expressions(get_all_possible_expressions(data_vars, expr, data), data, rewriter);
 				result = multi_or(or_list.begin(), or_list.end());
 			}
-			else 
+/*			else if (element_in_propvarinstlist(occured_data_vars, find_propositional_variable_instantiations(expr)))
+			{
+				gsErrorMsg("The propositional_variable_instantiation cannot be replaced\n");
+				gsErrorMsg("Aborting\n");
+				exit(1);
+			}
+*/			else 
 				//Probably some advanced stuff is needed here to check finiteness...
 				result = exists(data_vars, expr);
 		}
@@ -139,6 +152,22 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 			result = val(d);
 	}
 	
+	return result;
+}
+
+bool element_in_propvarinstlist(data_variable_list vars, std::set< propositional_variable_instantiation > pvilist)
+{
+	bool result = false;
+ 	for (std::set< propositional_variable_instantiation >::iterator pvi = pvilist.begin(); pvi != pvilist.end(); pvi++)
+	{
+		for (data_variable_list::iterator dvl = vars.begin(); dvl != vars.end(); dvl++)
+		{
+			if (occurs_in(*dvl, *pvi))
+			{
+				result = true;
+			}
+		} 
+	}
 	return result;
 }
 
