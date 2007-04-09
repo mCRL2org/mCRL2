@@ -208,6 +208,11 @@ namespace squadt {
       object_view->Connect(wxEVT_COMMAND_TREE_ITEM_ACTIVATED, wxTreeEventHandler(project::on_tree_item_activate), 0, this);
       object_view->Connect(wxEVT_COMMAND_TREE_END_LABEL_EDIT, wxTreeEventHandler(project::on_object_name_edited), 0, this);
 
+      /* Disable dragging */
+      object_view->Connect(wxEVT_COMMAND_TREE_BEGIN_DRAG, wxTreeEventHandler(project::on_object_drag), 0, this);
+      object_view->Connect(wxEVT_COMMAND_TREE_BEGIN_RDRAG, wxTreeEventHandler(project::on_object_drag), 0, this);
+      object_view->Connect(wxEVT_COMMAND_TREE_END_DRAG, wxTreeEventHandler(project::on_object_drag), 0, this);
+
       Connect(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(project::on_context_menu_select));
     }
 
@@ -254,6 +259,13 @@ namespace squadt {
       else {
         e.Veto();
       }
+    }
+
+    /**
+     * \param e a reference to a tree event object
+     **/
+    void project::on_object_drag(wxTreeEvent& e) {
+      e.Veto();
     }
 
     void project::add_existing_file() {

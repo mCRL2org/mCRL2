@@ -189,7 +189,6 @@ namespace squadt {
 
       current_status = (WIFEXITED(exit_code)) ? process::completed : process::aborted;
 #endif
-
       signal_status();
 
       signal_termination(interface_pointer);
@@ -236,17 +235,15 @@ namespace squadt {
 
       current_status = (identifier < 0) ? process::aborted : process::running;
 
+      signal_status();
+
       if (current_status == process::running) {
         using namespace boost;
-
-        signal_status();
 
         /* Wait for the process to terminate */
         thread t(bind(&process_impl::termination_handler, this, identifier));
       }
       else {
-        signal_status();
-
         signal_termination(interface_pointer);
       }
     }

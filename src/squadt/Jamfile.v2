@@ -17,3 +17,9 @@ exe squadt
         <include>$(SETUP)
         <threading>multi
       ;
+
+
+install-data user-manual
+      : gui/manual.html
+      : squadt
+      ;

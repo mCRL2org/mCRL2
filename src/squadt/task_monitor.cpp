@@ -31,7 +31,7 @@ namespace squadt {
     }
 
     /**
-     * @param[in] b whether the function should block untill the process has registered or not
+     * @param[in] b whether the function should block until the process has registered or not
      *
      * \return A pointer to the associated process, or 0 on program failure
      **/

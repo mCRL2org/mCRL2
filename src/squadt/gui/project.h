@@ -138,6 +138,9 @@ namespace squadt {
         /** \brief Handler for the event that an item has been edited by the user */
         void on_object_name_edited(wxTreeEvent& e);
 
+        /** \brief Handler for the event that objects are being dragged by the user */
+        void on_object_drag(wxTreeEvent& e);
+
         /** \brief Handler for the event that an item has been edited by the user */
         void on_object_temporary_name_edited(wxTreeEvent& e);
 

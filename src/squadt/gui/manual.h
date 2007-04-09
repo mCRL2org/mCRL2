@@ -5,6 +5,8 @@
 #include <wx/sizer.h>
 #include <iostream>
 
+#include "../settings_manager.h"
+
 namespace squadt {
   namespace GUI {
 
@@ -47,7 +49,7 @@ namespace squadt {
 
       wxHtmlWindow* w = new wxHtmlWindow(this);
 
-      w->SetPage(wxT("<html><body>This is where the manual will be added!</body></html>"));
+      w->LoadPage(wxString(global_build_system.get_settings_manager()->path_to_system_settings("squadt/manual.html").c_str(), wxConvLocal));
 
       s->Add(w, 1, wxEXPAND);
     }
