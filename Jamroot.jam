@@ -8,6 +8,7 @@ path-constant SETUP           : ./src ;                  # Header file for run-t
 modules.poke : HCACHEFILE : $(BUILD_TOP)/.jamdeps ;
 
 include $(BUILD_TOOLS)/building.jam ;
+include $(BUILD_TOOLS)/installing.jam ;
 
 # The known sub projects
 use-project /site-config               : build ;
@@ -86,8 +87,6 @@ if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
           ;
 }
 else {
-  include $(BUILD_TOOLS)/installing.jam ;
-
   feature.set-default install : yes ;
 
   if $(targets) {
