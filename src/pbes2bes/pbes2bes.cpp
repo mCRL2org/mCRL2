@@ -44,6 +44,8 @@
 #include "atermpp/utility.h"
 #include "atermpp/indexed_set.h"
 #include "atermpp/table.h"
+#include "atermpp/vector.h"
+#include "atermpp/set.h"
 
 //Tool-specific
 #include "pbes_rewrite.h"		// PBES rewriter
@@ -179,10 +181,10 @@ pbes do_improved_algorithm(pbes pbes_spec, t_tool_options tool_options)
 	equation_system new_equation_system;
 	
 	// Variable in which the states which has to be done are stored
-	set< propositional_variable_instantiation > states_todo;
+	atermpp::set< propositional_variable_instantiation > states_todo;
 
 	// Iterator used for the set of equations which has to be done
-	set< propositional_variable_instantiation >::iterator current_state;
+	atermpp::set< propositional_variable_instantiation >::iterator current_state;
 
 	// Variables used in whole function
 	int nr_of_equations = 0;
@@ -339,7 +341,7 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 		gsVerboseMsg("Rewriting PBES equation with propositional variable %s...\n", propvar_name_string.c_str());
 
 		// Vector of instantiations
-		vector< t_instantiations > instantiation_list;
+		atermpp::vector< t_instantiations > instantiation_list;
 		t_instantiations instantiation;			// Needed?
 		t_instantiations current_values;		// Current results
 
@@ -351,11 +353,11 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 		for (data_variable_list::iterator p = propvar_parameters.begin(); p != propvar_parameters.end(); p++)
 		{
 			// Vector of instantiations for intermediate results
-			vector< t_instantiations > intermediate_instantiation_list;
+			atermpp::vector< t_instantiations > intermediate_instantiation_list;
 			if (sort_enumerations->get(p->sort()) == NULL)
 			{ // The sort is infinite
 				current_values.infinite_var = push_back(current_values.infinite_var, *p);
-				for (vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
+				for (atermpp::vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
 				{
 					// Add current_values to intermediate_instantiation_list
 					intermediate_instantiation_list.push_back(current_values);
@@ -366,7 +368,7 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 				current_values.finite_var = push_back(current_values.finite_var, *p);
 				data_expression_list enumerations = sort_enumerations->get(p->sort());
 
-				for (vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
+				for (atermpp::vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
 				{
 					for (data_expression_list::iterator e = enumerations.begin(); e != enumerations.end(); e++)
 					{
@@ -380,7 +382,7 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 		
 		// All instantiations for the current equation are computed. Now make equations out of them
 		gsVerboseMsg("Computing Boolean equations for each instantiation of propositional variable %s...\n", propvar_name_string.c_str());
-		for (vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
+		for (atermpp::vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
 		{
 			// Create the needed propvar
 			propositional_variable propvar_current = propositional_variable(create_propvar_name(propvar_name, inst_i->finite_exp), inst_i->infinite_var);
@@ -697,8 +699,8 @@ t_tool_options parse_command_line(int argc, char** argv)
 	desc.add_options()
 			("strategy,s",	po::value<string>(&opt_strategy)->default_value("lazy"), "use strategy arg (default 'lazy');\n"
 							"The following strategies are available:\n"
-							"finite \t\t Compute all possible boolean equations\n"
-							"lazy \t Compute only boolean equations which can be reached from the initial state\n")
+							"finite  Compute all possible boolean equations\n"
+							"lazy    Compute only boolean equations which can be reached from the initial state\n")
 			("output,o",	po::value<string>(&opt_outputformat)->default_value("binary"), "use outputformat arg (default 'binary');\n"
 			 				"available outputformats are binary, external and cwi")
 			("verbose,v",	"turn on the display of short intermediate messages")
