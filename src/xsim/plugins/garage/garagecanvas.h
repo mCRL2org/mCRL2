@@ -58,7 +58,7 @@ public:
   void OnEvtPaint( wxPaintEvent& event );
   void OnEvtSize( wxSizeEvent& event );
 protected:
-  // Macro declaring the begining of event table
+  // Macro declaring the beginning of event table
   DECLARE_EVENT_TABLE()
 private:
   void DrawGarage();

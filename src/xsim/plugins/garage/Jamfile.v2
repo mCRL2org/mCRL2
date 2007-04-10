@@ -22,7 +22,8 @@ exe garageframe
          garageframe.cpp
          garagecanvas.cpp
          visutils.cpp
-       : <site-library>wx_gl
+       : <library>/libraries//nextstate
+         <site-library>wx_gl
        ;
 
 explicit garageframe ;

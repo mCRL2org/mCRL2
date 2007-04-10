@@ -205,20 +205,22 @@ void GarageCanvas::OnEvtSize( wxSizeEvent& event )
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 {
   wxGLCanvas::OnSize(event);
+
   // Gets size of GarageCanvas
   int width;
   int height;
-  this->GetSize( &width, &height );
+  GetSize( &width, &height );
 
   // Set this tocurrent GL context
-  this->SetCurrent();
+  SetCurrent();
 
   // Set up viewport to match canvas size
-  glMatrixMode( GL_MODELVIEW );
+  glViewport(0, 0, width, height);
   glLoadIdentity();
-  glViewport( 0, 0, width, height );
+  glMatrixMode(GL_MODELVIEW);
+
   //Force redraw because the paint event is not triggered in Windows
-  Draw();
+//  Draw();
 }
 
 
