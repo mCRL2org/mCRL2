@@ -407,8 +407,6 @@ namespace sip {
             /* Part of a start message tag was matched */
             j = std::mismatch(k, tag_open.end(), i).first;
 
-            assert (j == tag_open.end());
-
             if (j == tag_open.end()) {
               i = data.begin() + tag_open.size() - partially_matched;
 

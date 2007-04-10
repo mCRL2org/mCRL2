@@ -17,7 +17,7 @@ clean:
 	$(RM) -rf build/web
 
 distclean: clean
-	$(RM) -r config.log config.status build/config.jam src/setup.h
+	@$(RM) -r build/Makefile config.log config.status build/config.jam src/setup.h
 	$(RM) -rf build/bin
 
 parsers:
@@ -32,10 +32,10 @@ parsers:
 	flex -Pmcrl2 -omcrl2lexer.cpp mcrl2lexer.ll; \
 	bison -p mcrl2 -d -o mcrl2parser.cpp mcrl2parser.yy; \
 	mv mcrl2parser.hpp ../include
-	cp /usr/include/FlexLexer.h build/workarounds
+	cp /usr/include/FlexLexer.h build/workarounds/all
 
 configure: build/autoconf/configure.ac
 	autoconf -o $@ -W all $<
 
 tags:
-	ctags --extra=+q --fields=+i --totals=yes `find . -iname '*.c' -or -iname '*.cpp' -or -iname '*.h' -or -iname '*.hpp' | grep -v "\.svn"`
+	ctags --languages=C,C++ --recurse=yes --extra=+q --fields=+i --totals=yes .
