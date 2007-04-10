@@ -46,6 +46,7 @@
 #include "atermpp/table.h"
 #include "atermpp/vector.h"
 #include "atermpp/set.h"
+#include "gc.h"
 
 //Tool-specific
 #include "pbes_rewrite.h"		// PBES rewriter
@@ -184,7 +185,7 @@ pbes do_improved_algorithm(pbes pbes_spec, t_tool_options tool_options)
 	atermpp::set< propositional_variable_instantiation > states_todo;
 
 	// Iterator used for the set of equations which has to be done
-	atermpp::set< propositional_variable_instantiation >::iterator current_state;
+	atermpp::set< propositional_variable_instantiation >::iterator current_state_it;
 
 	// Variables used in whole function
 	int nr_of_equations = 0;
@@ -213,17 +214,18 @@ pbes do_improved_algorithm(pbes pbes_spec, t_tool_options tool_options)
 	while (states_todo.size() != 0)
 	{
 		// Get the first element of the set
-		current_state = states_todo.begin();
-		states_todo.erase(*current_state);
+		current_state_it = states_todo.begin();
+		propositional_variable_instantiation current_state = *current_state_it;
+		states_todo.erase(current_state);
 		//if (states_done->get(*current_state) == NULL)
 		//{
 			// Get equation which belongs to the current propvarinst and their needed parts
-			pbes_equation current_pbeq = pbes_equation(pbes_equations->get(current_state->name()));
+			pbes_equation current_pbeq = pbes_equation(pbes_equations->get(current_state.name()));
 			propositional_variable current_variable = current_pbeq.variable();
 			pbes_expression current_pbes_expression = current_pbeq.formula();
 
 			// Create new variable and variable instantiation
-			identifier_string new_propvar_name = create_propvar_name(current_variable.name(), current_state->parameters());
+			identifier_string new_propvar_name = create_propvar_name(current_variable.name(), current_state.parameters());
 			propositional_variable new_variable = propositional_variable(new_propvar_name, empty_data_variable_list);
 			propositional_variable_instantiation new_propvarinst = propositional_variable_instantiation(new_propvar_name, empty_data_expression_list);
 
@@ -232,7 +234,7 @@ pbes do_improved_algorithm(pbes pbes_spec, t_tool_options tool_options)
 
 			// Replace all occurrences in the right hand side and rewrite the expression
 			pbes_expression new_pbes_expression;
-			new_pbes_expression = current_pbes_expression.substitute(make_list_substitution(current_variable.parameters(), current_state->parameters()));
+			new_pbes_expression = current_pbes_expression.substitute(make_list_substitution(current_variable.parameters(), current_state.parameters()));
 			new_pbes_expression = pbes_expression_rewrite(new_pbes_expression, data, rewriter);
 	
 			// Lists to replace variables in the rhs
@@ -258,14 +260,6 @@ pbes do_improved_algorithm(pbes pbes_spec, t_tool_options tool_options)
 			// Replace the propvarinsts with the new ones
 			new_pbes_expression = new_pbes_expression.substitute(make_list_substitution(oldpropvarinst_list, newpropvarinst_list));
 
-			// Make the substitution in all earlier equations. This must be replaced with the substitution function out of equation_system
-/*			equation_system temp;
-			for (equation_system::iterator eq_i = new_equation_system.begin(); eq_i != new_equation_system.end(); eq_i++)
-			{
-				temp.push_back(pbes_equation(eq_i->symbol(), eq_i->variable(), eq_i->formula().substitute(make_substitution(current_variable.parameters(),current_state->parameters()))));
-			}
-			new_equation_system = temp;
-*/			
 			// Create resulting pbes_equation and add it to equation system 
 			// TODO: Make this correct order
 			new_equation_system.push_back(pbes_equation(current_pbeq.symbol(), new_variable, new_pbes_expression));
@@ -473,7 +467,7 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
 //----------------------------
 identifier_string create_propvar_name(identifier_string propvar_name, data_expression_list del)
 {
-	// string representation of the original propvar_name
+// string representation of the original propvar_name
 	string propvar_name_current = propvar_name;
 	// Only add data to the string if the finite_exp list is non-empty. Currently "_" is used as seperator
 	if (!del.empty())
