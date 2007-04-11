@@ -2010,7 +2010,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
         }
         Arguments=ATreverse(NewArguments);
         Type=gsMakeSortExprSet(Type);
-        *DataTerm=gsMakeDataExprListEnum(Arguments,Type);
+        *DataTerm=gsMakeDataExprSetEnum(Arguments,Type);
         return Type;
       }
       if(Name == gsMakeOpIdNameBagEnum()) {

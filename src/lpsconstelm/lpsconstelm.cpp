@@ -483,7 +483,7 @@ void lpsConstElm::findSingleton() {
     for(sort_list::iterator i = p_spec.data().sorts().begin(); i != p_spec.data().sorts().end() ; i++){
       int b = 1;
       //if p_countSort[*i] == 0 then there are sorts declared which are never used!!!!
-        assert(p_countSort[*i] != 0);
+//      assert(p_countSort[*i] != 0);
 
       if (p_countSort[*i] == 1){
         for(function_list::iterator j = p_spec.data().constructors().begin() ; j != p_spec.data().constructors().end() ;j++){
@@ -494,11 +494,12 @@ void lpsConstElm::findSingleton() {
             }
           }
         }
-      if (b!=1) {p_singletonSort.erase(*i); p_countSort[*i] = b;}        
+        if (b!=1) {
+          p_singletonSort.erase(*i); p_countSort[*i] = b;
+        }
       } else {
         p_singletonSort.erase(*i);
       }
-      ;    
     }
   }
   //p_singletonSort = result;
