@@ -115,6 +115,8 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
 identifier_string create_propvar_name(identifier_string propvar_name, data_expression_list finite_exp);
 // Create a identifier string containing the name for use in the propositional_variable(_instantiation)
 
+equation_system sort_names(vector< identifier_string > names_order, equation_system to_sort);
+
 //Main Program
 //------------
 int main(int argc, char** argv)
@@ -168,7 +170,6 @@ pbes create_bes(pbes pbes_spec, t_tool_options tool_options)
 //------------------------------
 pbes do_improved_algorithm(pbes pbes_spec, t_tool_options tool_options)
 {
-	gsWarningMsg("Sorting of resulting expression is not yet implemented\n");
 	// Verbose msg: doing naive algorithm
 	gsVerboseMsg("Computing BES from PBES using lazy algorithm...\n");
 	
@@ -198,13 +199,16 @@ pbes do_improved_algorithm(pbes pbes_spec, t_tool_options tool_options)
 	// Needed hashtables
 	atermpp::table *pbes_equations = new atermpp::table(2*eqsys.size(), 50); 			// (propvarname, pbes_equation)
 	atermpp::indexed_set *states_done = new atermpp::indexed_set(10000, 50); 	// (propvarinst)
-//	atermpp::table *propvar_insts = new atermpp::table(10000,50);						// (propvarinst, propvarinst)
+
+	// Vector with the order of the variable names used for sorting the result
+	vector< identifier_string > names_order;
 
 	// Fill the pbes_equations table
 	gsVerboseMsg("Retrieving pbes_equations from equation system...\n");
 	for (equation_system::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
 	{
 		pbes_equations->put(eqi->variable().name(), *eqi);
+		names_order.push_back(eqi->variable().name());
 	}
 
 	states_todo.insert(initial_state);
@@ -217,59 +221,93 @@ pbes do_improved_algorithm(pbes pbes_spec, t_tool_options tool_options)
 		current_state_it = states_todo.begin();
 		propositional_variable_instantiation current_state = *current_state_it;
 		states_todo.erase(current_state);
-		//if (states_done->get(*current_state) == NULL)
-		//{
-			// Get equation which belongs to the current propvarinst and their needed parts
-			pbes_equation current_pbeq = pbes_equation(pbes_equations->get(current_state.name()));
-			propositional_variable current_variable = current_pbeq.variable();
-			pbes_expression current_pbes_expression = current_pbeq.formula();
+		// Get equation which belongs to the current propvarinst and their needed parts
+		pbes_equation current_pbeq = pbes_equation(pbes_equations->get(current_state.name()));
+		propositional_variable current_variable = current_pbeq.variable();
+		pbes_expression current_pbes_expression = current_pbeq.formula();
 
-			// Create new variable and variable instantiation
-			identifier_string new_propvar_name = create_propvar_name(current_variable.name(), current_state.parameters());
-			propositional_variable new_variable = propositional_variable(new_propvar_name, empty_data_variable_list);
-			propositional_variable_instantiation new_propvarinst = propositional_variable_instantiation(new_propvar_name, empty_data_expression_list);
+		// Create new variable and variable instantiation
+		identifier_string new_propvar_name = create_propvar_name(current_variable.name(), current_state.parameters());
+		propositional_variable new_variable = propositional_variable(new_propvar_name, empty_data_variable_list);
+		propositional_variable_instantiation new_propvarinst = propositional_variable_instantiation(new_propvar_name, empty_data_expression_list);
 
-			// Add the new instantiation to the table
-			states_done->put(new_propvarinst);
+		// Add the new instantiation to the table
+		states_done->put(new_propvarinst);
 
-			// Replace all occurrences in the right hand side and rewrite the expression
-			pbes_expression new_pbes_expression;
-			new_pbes_expression = current_pbes_expression.substitute(make_list_substitution(current_variable.parameters(), current_state.parameters()));
-			new_pbes_expression = pbes_expression_rewrite(new_pbes_expression, data, rewriter);
-	
-			// Lists to replace variables in the rhs
-			propositional_variable_instantiation_list oldpropvarinst_list;
-			propositional_variable_instantiation_list newpropvarinst_list;
-			// Get all propvarinst of the rhs
-			set< propositional_variable_instantiation > propvarinst_set = find_propositional_variable_instantiations(new_pbes_expression);
+		// Replace all occurrences in the right hand side and rewrite the expression
+		pbes_expression new_pbes_expression;
+		new_pbes_expression = current_pbes_expression.substitute(make_list_substitution(current_variable.parameters(), current_state.parameters()));
+		new_pbes_expression = pbes_expression_rewrite(new_pbes_expression, data, rewriter);
 
-			// For each propvarinst in the set
-			for (set< propositional_variable_instantiation >::iterator pvi = propvarinst_set.begin(); pvi != propvarinst_set.end(); pvi++)
+		// Lists to replace variables in the rhs
+		propositional_variable_instantiation_list oldpropvarinst_list;
+		propositional_variable_instantiation_list newpropvarinst_list;
+		// Get all propvarinst of the rhs
+		set< propositional_variable_instantiation > propvarinst_set = find_propositional_variable_instantiations(new_pbes_expression);
+
+		// For each propvarinst in the set
+		for (set< propositional_variable_instantiation >::iterator pvi = propvarinst_set.begin(); pvi != propvarinst_set.end(); pvi++)
+		{
+			propositional_variable_instantiation temp_pvi = propositional_variable_instantiation(create_propvar_name(pvi->name(), pvi->parameters()), empty_data_expression_list);
+			// Put the propvarinst in the old list
+			oldpropvarinst_list = push_front(oldpropvarinst_list, *pvi);
+			if (states_done->index(temp_pvi) < 0)
 			{
-				propositional_variable_instantiation temp_pvi = propositional_variable_instantiation(create_propvar_name(pvi->name(), pvi->parameters()), empty_data_expression_list);
-				// Put the propvarinst in the old list
-				oldpropvarinst_list = push_front(oldpropvarinst_list, *pvi);
-				if (states_done->index(temp_pvi) < 0)
-				{
-					// Add it to the todo list
-					states_todo.insert(*pvi);
-				}
-				newpropvarinst_list = push_front(newpropvarinst_list, temp_pvi);
+				// Add it to the todo list
+				states_todo.insert(*pvi);
 			}
-			
-			// Replace the propvarinsts with the new ones
-			new_pbes_expression = new_pbes_expression.substitute(make_list_substitution(oldpropvarinst_list, newpropvarinst_list));
+			newpropvarinst_list = push_front(newpropvarinst_list, temp_pvi);
+		}
+		
+		// Replace the propvarinsts with the new ones
+		new_pbes_expression = new_pbes_expression.substitute(make_list_substitution(oldpropvarinst_list, newpropvarinst_list));
 
-			// Create resulting pbes_equation and add it to equation system 
-			// TODO: Make this correct order
-			new_equation_system.push_back(pbes_equation(current_pbeq.symbol(), new_variable, new_pbes_expression));
-	//	}
+		// Create resulting pbes_equation and add it to equation system 
+		// TODO: Make this correct order
+		new_equation_system.push_back(pbes_equation(current_pbeq.symbol(), new_variable, new_pbes_expression));
 	}
+
+	// Sort the new equation system
+	new_equation_system = sort_names(names_order, new_equation_system);
 
 	// Rewrite initial state
 	new_initial_state = propositional_variable_instantiation(create_propvar_name(initial_state.name(), initial_state.parameters()), empty_data_expression_list);
 	
 	pbes result = pbes(data, new_equation_system, new_initial_state);
+
+	return result;
+}
+
+equation_system sort_names(vector< identifier_string > names_order, equation_system to_sort)
+{
+	equation_system result;
+	if (names_order.size() == 1)
+	{
+		result = to_sort;
+	}
+	else
+	{
+		equation_system todo;
+		for (vector< identifier_string >::iterator on = names_order.begin(); on != names_order.end(); on++)
+		{
+			for (equation_system::iterator eqi = to_sort.begin(); eqi != to_sort.end(); eqi++)
+			{
+				string name = eqi->variable().name();
+				name = name.substr(0, name.find("@"));
+				string ons = *on;
+				if (name == ons)
+				{
+					result.push_back(*eqi);
+				}
+				else
+				{
+					todo.push_back(*eqi);
+				}
+			}
+			to_sort = todo;
+		}
+	}
+
 
 	return result;
 }
