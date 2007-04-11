@@ -3543,7 +3543,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
         }
       }
 
-      r=ATinsert(r,(ATerm)ATsetArgument(o,(ATerm)VarInit,2));
+      r=ATinsert(r,(ATerm)ATsetArgument(o,(ATerm)VarInit,1));
       t=ATinsert(t,(ATerm)VarType);
     }
     
