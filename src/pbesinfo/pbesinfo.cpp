@@ -1,14 +1,14 @@
 // ======================================================================
 //
 // file          : pbesinfo 
-// date          : 01-12-2006
-// version       : 0.0.6
+// date          : 11-04-2007
+// version       : 0.1.0
 //
 // author(s)     : Alexander van Dam <avandam@damdonk.nl>
 //
 // ======================================================================
 #define NAME "pbesinfo"
-#define VERSION "0.0.6"
+#define VERSION "0.1.0"
 #define AUTHOR "Alexander van Dam"
 
 //C++
@@ -29,18 +29,25 @@ using namespace lps;
 
 namespace po = boost::program_options;
 
+typedef struct{
+	bool opt_full;
+} t_tool_options;
+
 // Name of the file to read input from
 string file_name;
 
-void parse_command_line(int argc, char** argv)
+t_tool_options parse_command_line(int argc, char** argv)
 {
 	po::options_description desc;
-	
+	t_tool_options tool_options;
+	bool opt_full = false;
+
 	desc.add_options()
 			("help,h",		"display this help")
 			("verbose,v",	"turn on the display of short intermediate messages")
 			("debug,d",		"turn on the display of detailed intermediate messages")
 			("version",		"display version information")
+			("full,f",		"display full information on the PBES")
 			;
 	
 	po::options_description hidden("Hidden options");
@@ -77,6 +84,11 @@ void parse_command_line(int argc, char** argv)
 		
 		exit(0);
 	}
+
+	if (vm.count("full"))
+	{
+		opt_full = true;
+	}
 	
 	if (vm.count("debug"))
 	{
@@ -89,6 +101,9 @@ void parse_command_line(int argc, char** argv)
 	}
 	
 	file_name = (0 < vm.count("INFILE")) ? vm["INFILE"].as<string>() : "-";	
+
+	tool_options.opt_full = opt_full;
+	return tool_options;
 }
 
 int main(int argc, char** argv)
@@ -98,7 +113,7 @@ int main(int argc, char** argv)
 
 	gsEnableConstructorFunctions();
 
-	parse_command_line(argc, argv);
+	t_tool_options tool_options = parse_command_line(argc, argv);
 
 	pbes pbes_specification;
 
@@ -142,7 +157,8 @@ int main(int argc, char** argv)
 				// - Store predicate variable in mu-list and common list
 				// - Store data_variables
 				mu++;
-				predvar_mu.push_back(fp_i->variable().name());
+				if (tool_options.opt_full)
+					predvar_mu.push_back(fp_i->variable().name());
 				
 			}
 			else if (fp_i->symbol().is_nu())
@@ -151,7 +167,8 @@ int main(int argc, char** argv)
 				// - Increase #nu's
 				// - Store predicate variable in nu-list and common list
 				nu++;
-				predvar_nu.push_back(fp_i->variable().name());
+				if (tool_options.opt_full)
+					predvar_nu.push_back(fp_i->variable().name());
 			}
 			else
 			{
@@ -209,29 +226,32 @@ int main(int argc, char** argv)
 		cout << endl;
 		
 		// Show binding variables with their signature
-		int nr_predvar = 1;
-		string sort_bool = "Bool";
-		for (vector<propositional_variable>::iterator pv_i = predvar_data.begin(); pv_i != predvar_data.end(); pv_i++)
+		if (tool_options.opt_full)
 		{
-			int bv_size = pv_i->parameters().size();
-			int nr_sorts = 1;
-			if (nr_predvar == 1)
-				cout << "Predicate variables: " << pv_i->name() << " :: ";
-			else
-				cout << "                     " << pv_i->name() << " :: ";
-			for (term_list<data_variable>::iterator dv_i = pv_i->parameters().begin(); dv_i != pv_i->parameters().end(); dv_i++)
+			int nr_predvar = 1;
+			string sort_bool = "Bool";
+			for (vector<propositional_variable>::iterator pv_i = predvar_data.begin(); pv_i != predvar_data.end(); pv_i++)
 			{
-				cout << dv_i->sort();
-				if (nr_sorts < bv_size)
-				{
-					cout << " x ";
-					nr_sorts++;
-				}
+				int bv_size = pv_i->parameters().size();
+				int nr_sorts = 1;
+				if (nr_predvar == 1)
+					cout << "Predicate variables: " << pv_i->name() << " :: ";
 				else
-					cout << " -> "<< lps::sort(sort_bool);
+					cout << "                     " << pv_i->name() << " :: ";
+				for (term_list<data_variable>::iterator dv_i = pv_i->parameters().begin(); dv_i != pv_i->parameters().end(); dv_i++)
+				{
+					cout << dv_i->sort();
+					if (nr_sorts < bv_size)
+					{
+						cout << " x ";
+						nr_sorts++;
+					}
+					else
+						cout << " -> "<< lps::sort(sort_bool);
+				}
+				cout << endl;
+				nr_predvar++;
 			}
-			cout << endl;
-			nr_predvar++;
 		}
 	}
 	return 0;

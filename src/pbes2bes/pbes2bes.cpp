@@ -1,8 +1,8 @@
 // ======================================================================
 //
 // file          : pbes2bes
-// date          : 03-04-2007
-// version       : 0.1.1
+// date          : 11-04-2007
+// version       : 0.1.2
 //
 // author(s)     : Alexander van Dam <avandam@damdonk.nl>
 //
@@ -10,7 +10,7 @@
 
 
 #define NAME "pbes2bes"
-#define VERSION "0.1.1"
+#define VERSION "0.1.2"
 #define AUTHOR "Alexander van Dam"
 
 
@@ -263,11 +263,14 @@ pbes do_improved_algorithm(pbes pbes_spec, t_tool_options tool_options)
 		new_pbes_expression = new_pbes_expression.substitute(make_list_substitution(oldpropvarinst_list, newpropvarinst_list));
 
 		// Create resulting pbes_equation and add it to equation system 
-		// TODO: Make this correct order
 		new_equation_system.push_back(pbes_equation(current_pbeq.symbol(), new_variable, new_pbes_expression));
+		// Verbose messages after each 1000 equations
+		if (++nr_of_equations % 1000 == 0)
+			gsVerboseMsg("At Boolean equation %d\n", nr_of_equations);
 	}
 
 	// Sort the new equation system
+	gsVerboseMsg("Sorting result...\n");
 	new_equation_system = sort_names(names_order, new_equation_system);
 
 	// Rewrite initial state
@@ -419,9 +422,10 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 			// Create the needed propvar
 			propositional_variable propvar_current = propositional_variable(create_propvar_name(propvar_name, inst_i->finite_exp), inst_i->infinite_var);
 
-			pbes_expression current_expression = formula;	// Current expression
+			pbes_expression current_expression;	// Current expression
 			// Substitute all variables which are instantiated
-			current_expression = current_expression.substitute(make_list_substitution(inst_i->finite_var, inst_i->finite_exp));
+
+			current_expression = formula.substitute(make_list_substitution(inst_i->finite_var, inst_i->finite_exp));
 			// Rewrite the rhs as far as possible
 			current_expression = pbes_expression_rewrite(current_expression, data, rewriter);
 			// Lists to replace variables in the rhs
@@ -447,7 +451,7 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 			// Add the new pequation tin the resulting system
 			result_eqsys.push_back(pbes_equation(eq_i->symbol(), propvar_current, current_expression));
 
-			// Verbose messages after each 100 equations
+			// Verbose messages after each 1000 equations
 			if (++nr_of_equations % 1000 == 0)
 				gsVerboseMsg("At Boolean equation %d\n", nr_of_equations);
 
