@@ -194,23 +194,30 @@ bool occurs_in(aterm_appl l, data_variable v)
 pbes_expression_list get_all_possible_expressions(data_variable_list data_vars, pbes_expression pbexp, data_specification data)
 {
 	// Create a pbes_expression for each possible instantiations of the variables and put those in a list.
-	pbes_expression_list result;	
-	result = push_front(result, pbexp);
+	atermpp::set< pbes_expression > set_result;
+	set_result.insert(pbexp);
 	for (data_variable_list::iterator vars = data_vars.begin(); vars != data_vars.end(); vars++)
 	{
-		pbes_expression_list intermediate;
-		for (pbes_expression_list::iterator exp = result.begin(); exp != result.end(); exp++)
+		atermpp::set< pbes_expression > intermediate;
+		for (atermpp::set< pbes_expression >::iterator exp = set_result.begin(); exp != set_result.end(); exp++)
 		{
 			data_expression_list enumerations = enumerate_constructors(data.constructors(), vars->sort());
 			for (data_expression_list::iterator enums = enumerations.begin(); enums != enumerations.end(); enums++)
 			{
-				pbes_expression toAdd = pbexp.substitute(make_substitution(*vars, *enums));
-				intermediate = push_front(intermediate, toAdd);
+				pbes_expression toAdd = *exp;
+				toAdd = toAdd.substitute(make_substitution(*vars, *enums));
+				intermediate.insert(toAdd);
 			}
 		}
-		result = reverse(intermediate);
+		set_result = intermediate;
 	}
-	return result;
+	pbes_expression_list result;
+	for (atermpp::set< pbes_expression >::iterator exp = set_result.begin(); exp != set_result.end(); exp++)
+	{
+		result = push_front(result, *exp);
+	}
+	
+	return reverse(result);
 }
 
 pbes_expression_list get_and_expressions(pbes_expression_list and_list, data_specification data, Rewriter *rewriter)

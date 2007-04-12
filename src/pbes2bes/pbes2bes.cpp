@@ -73,7 +73,43 @@ typedef struct {
 	data_variable_list infinite_var;	// List of all infinite variables
 	data_expression_list finite_exp;	// List of all finite expressions
 	data_expression_list infinite_exp;	// List of all infinite expressions
+
+	void protect()
+	{
+		finite_var.protect();
+		infinite_var.protect();
+		finite_exp.protect();
+		infinite_exp.protect();
+	}
+	
+	void unprotect()
+	{
+		finite_var.unprotect();
+		infinite_var.unprotect();
+		finite_exp.unprotect();
+		infinite_exp.unprotect();
+	}
+	void mark()
+	{
+		finite_var.mark();
+		infinite_var.mark();
+		finite_exp.mark();
+		infinite_exp.mark();
+	}
 } t_instantiations;
+
+
+// Specify how the ATerms in t_instantiations need to be protected using a traits class
+namespace atermpp
+{
+	template<>
+	struct aterm_traits<t_instantiations>
+	{
+		static void protect(t_instantiations t) { t.protect(); }
+		static void unprotect(t_instantiations t) { t.unprotect(); }
+		static void mark(t_instantiations t) { t.mark(); }
+	};
+} // namespace atermpp
 
 //Function declarations used by main program
 //------------------------------------------
@@ -532,6 +568,7 @@ identifier_string create_propvar_name(identifier_string propvar_name, data_expre
 			else
 			{
 				gsErrorMsg("Can't rewrite the name of the propositional_variable\n");
+			//	gsErrorMsg("Problematic term: %t\n", *del_i);
 				exit(1);
 			}
 			
