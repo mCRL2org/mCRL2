@@ -326,9 +326,10 @@ equation_system sort_names(vector< identifier_string > names_order, equation_sys
 	}
 	else
 	{
-		equation_system todo;
+		//equation_system todo;
 		for (vector< identifier_string >::iterator on = names_order.begin(); on != names_order.end(); on++)
 		{
+			equation_system todo;
 			for (equation_system::iterator eqi = to_sort.begin(); eqi != to_sort.end(); eqi++)
 			{
 				string name = eqi->variable().name();
