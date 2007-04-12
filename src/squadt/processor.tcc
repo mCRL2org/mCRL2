@@ -184,7 +184,7 @@ namespace squadt {
   inline void processor_impl::update(interface_ptr const& t, boost::function < void () > h, boost::shared_ptr < sip::configuration > c, bool b) {
     current_monitor->once_on_completion(h);
 
-    run(t, c, b);
+    update(t, c, b);
   }
 
   /**
@@ -607,6 +607,8 @@ namespace squadt {
     if (b || 0 < inputs.size()) {
       boost::shared_ptr < project_manager > g(manager);
 
+      assert(t->impl.get() == this && g.get());
+
       /* Check that dependent files exist and rebuild if this is not the case */
       BOOST_FOREACH(input_list::value_type i, inputs) {
         if (!i->present_in_store(*g)) {
@@ -647,6 +649,7 @@ namespace squadt {
    **/
   inline void processor_impl::update(interface_ptr const& t, boost::shared_ptr < sip::configuration > c, bool b) {
     if (b || 0 < inputs.size()) {
+
       /* Check that dependent files exist and rebuild if this is not the case */
       BOOST_FOREACH(input_list::value_type i, inputs) {
         processor::sptr p(i->generator.lock());
@@ -664,7 +667,7 @@ namespace squadt {
           throw std::runtime_error("Do not know how to (re)create " + i->location);
         }
       }
-    
+
       current_monitor->start_tool_operation(t, c);
 
       global_build_system.get_tool_manager()->impl->execute(*tool_descriptor, make_output_path(output_directory),

@@ -501,7 +501,13 @@ namespace squadt {
   void processor::update(boost::function < void () > h, bool b) {
     assert(impl->interface_object.lock().get() == this);
 
-    impl->run(impl->interface_object.lock(), h, impl->current_monitor->get_configuration(), b);
+    impl->update(impl->interface_object.lock(), h, impl->current_monitor->get_configuration(), b);
+  }
+
+  void processor::update(bool b) {
+    assert(impl->interface_object.lock().get() == this);
+
+    impl->update(impl->interface_object.lock(), impl->current_monitor->get_configuration(), b);
   }
 
   /**
@@ -520,12 +526,6 @@ namespace squadt {
     assert(impl->interface_object.lock().get() == this);
 
     impl->run(impl->interface_object.lock(), impl->current_monitor->get_configuration(), b);
-  }
-
-  void processor::update(bool b) {
-    assert(impl->interface_object.lock().get() == this);
-
-    impl->update(impl->interface_object.lock(), impl->current_monitor->get_configuration(), b);
   }
 
   const size_t processor::number_of_inputs() const {
