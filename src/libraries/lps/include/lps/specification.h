@@ -7,7 +7,6 @@
 #define LPS_SPECIFICATION_H
 
 #include <iostream>
-#include <vector>
 #include <utility>
 #include <cassert>
 #include <iterator>

@@ -16,7 +16,7 @@ namespace detail {
   inline
   data_variable_list compute_initial_variables(data_assignment_list assignments)
   {
-    std::vector<data_variable> variables;
+    std::vector<data_variable> variables; // protection not needed
     variables.reserve(assignments.size());
     for (data_assignment_list::iterator i = assignments.begin(); i != assignments.end(); ++i)
     {
@@ -30,7 +30,7 @@ namespace detail {
   inline
   data_expression_list compute_initial_state(data_assignment_list assignments)
   {
-    std::vector<data_expression> expressions;
+    std::vector<data_expression> expressions; // protection not needed
     expressions.reserve(assignments.size());
     for (data_assignment_list::iterator i = assignments.begin(); i != assignments.end(); ++i)
     {
@@ -44,7 +44,7 @@ namespace detail {
   inline
   data_assignment_list compute_initial_assignments(data_variable_list variables, data_expression_list initial_state)
   {
-    std::vector<data_assignment> assignments;
+    std::vector<data_assignment> assignments; // protection not needed
     assignments.reserve(variables.size());
     data_expression_list::iterator j = initial_state.begin();
     for (data_variable_list::iterator i = variables.begin(); i != variables.end(); ++i, ++j)

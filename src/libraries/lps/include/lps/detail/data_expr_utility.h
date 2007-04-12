@@ -1,7 +1,6 @@
 #ifndef LPS_DETAIL_DATA_EXPR_UTILITY_H
 #define LPS_DETAIL_DATA_EXPR_UTILITY_H
 
-#include <vector>
 #include <string>
 #include <utility>
 #include <boost/algorithm/string.hpp>
