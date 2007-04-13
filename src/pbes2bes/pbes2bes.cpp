@@ -672,8 +672,7 @@ void save_pbes_in_cwi_format(pbes pbes_spec, string outfilename)
 		variables->put(eq->variable());
 	} // because pbes is closed, all variables are done at this point
 
-	ofstream outputfile;
-   	outputfile.open(outfilename.c_str(), ios::trunc);
+	vector< string > result;
 	// Rewrite all equations to CWI format
 	for (equation_system::iterator eq = eqsys.begin(); eq != eqsys.end(); eq++)
 	{
@@ -696,15 +695,34 @@ void save_pbes_in_cwi_format(pbes pbes_spec, string outfilename)
 		// Create the equation
 		string equation = fp + " " + variable + " = " + rhs + "\n";
 
-		if (outputfile.is_open())
-			outputfile << equation;
-		else
+		result.push_back(equation);
+	}
+
+	gsVerboseMsg("Saving result...\n");
+	if (outfilename != "-")
+	{
+		ofstream outputfile;
+   		outputfile.open(outfilename.c_str(), ios::trunc);
+	
+		for (vector< string >::iterator res = result.begin(); res != result.end(); res++)
 		{
-			gsErrorMsg("Could not save PBES to %s\n", outfilename.c_str());
-			exit(1);
+			if (outputfile.is_open())
+				outputfile << *res;
+			else
+			{
+				gsErrorMsg("Could not save PBES to %s\n", outfilename.c_str());
+				exit(1);
+			}
+		}
+		outputfile.close();
+	}
+	else
+	{
+		for (vector< string >::iterator res = result.begin(); res != result.end(); res++)
+		{
+			cout << *res ;
 		}
 	}
-	outputfile.close();
 }
 
 //function convert_rhs_to_cwi
@@ -785,7 +803,7 @@ t_tool_options parse_command_line(int argc, char** argv)
 
 	po::options_description hidden("Hidden options");
 	hidden.add_options()
-			("file_names",		po::value< vector< string > >(), "input/output files")
+			("file_names",	po::value< vector< string > >(), "input/output files")
 			;
 
 	po::options_description cmdline_options;
@@ -848,24 +866,23 @@ t_tool_options parse_command_line(int argc, char** argv)
 			exit(1);
 		}
 	}
-
+	
 	if (vm.count("file_names"))
 	{
 		file_names = vm["file_names"].as< vector< string > >();
 	}
 
-	// Check for number of arguments and infilename/outfile
 	string infilename;
 	string outfilename;
 	if (file_names.size() == 0)
 	{
-		/* Read from standard input */
+		// Read from and write to stdin
 		infilename = "-";
 		outfilename = "-";
 	}
-	else if (2 < file_names.size())
+	else if ( 2 < file_names.size())
 	{
-		cerr << NAME <<": Too many arguments" << endl;
+		cerr << NAME << ": Too many arguments" << endl;
 		exit(1);
 	}
 	else
@@ -880,10 +897,12 @@ t_tool_options parse_command_line(int argc, char** argv)
 			outfilename = "-";
 		}
 	}
-	tool_options.opt_outputformat = opt_outputformat;
-	tool_options.opt_strategy = opt_strategy;
+	
 	tool_options.infilename = infilename;
 	tool_options.outfilename = outfilename;
+	
+	tool_options.opt_outputformat = opt_outputformat;
+	tool_options.opt_strategy = opt_strategy;
 	return tool_options;
 }
 
