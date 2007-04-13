@@ -1,7 +1,9 @@
 #ifndef SQUADT_GUI_HELP_H__
 #define SQUADT_GUI_HELP_H__
 
+#include <wx/wx.h>
 #include <wx/html/htmlwin.h>
+#include <wx/dialog.h>
 #include <wx/sizer.h>
 #include <iostream>
 
@@ -13,7 +15,7 @@ namespace squadt {
     /**
      * \brief The HTML manual browser
      **/
-    class manual : protected wxFrame {
+    class manual : public wxFrame {
 
       private:
 
@@ -24,8 +26,6 @@ namespace squadt {
       public:
 
         manual(wxWindow* p);
-
-        using wxWindow::Show;
     };
 
     manual::manual(wxWindow* p) : wxFrame(p, wxID_ANY, wxT("Manual"), wxDefaultPosition, wxDefaultSize,wxDEFAULT_FRAME_STYLE & ~(wxMAXIMIZE_BOX)) {
