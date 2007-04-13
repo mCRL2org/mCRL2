@@ -786,6 +786,12 @@ int main(int argc, char *argv[])
       if (result == NULL) {
         return 1;
       }
+
+      //initialise spec to check if it well-typed
+      if (lin_options.opt_end_phase == phNone) {
+        lps::specification spec(result);
+      }
+
       if (lin_options.opt_check_only) {
         if (lin_options.infilename == "") {
           fprintf(stdout, "stdin");

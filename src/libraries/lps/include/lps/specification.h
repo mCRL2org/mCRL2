@@ -129,6 +129,7 @@ class specification: public aterm_appl
       if (!t)
         return false;
       init_term(t);
+      assert(is_well_typed());
       return true;
     }
 
