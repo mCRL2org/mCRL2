@@ -53,6 +53,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_BUTTON(myID_SIM_STOP_BUTTON, MainFrame::onSimStopButton)
   EVT_LIST_ITEM_SELECTED(myID_SIM_TRANSITIONS_VIEW, 
                          MainFrame::onSimTransitionSelected)
+  EVT_LIST_ITEM_ACTIVATED(myID_SIM_TRANSITIONS_VIEW, 
+                          MainFrame::onSimTransitionActivated)
   EVT_BUTTON(myID_SIM_TRIGGER_BUTTON, MainFrame::onSimTriggerButton)
   EVT_BUTTON(myID_SIM_UNDO_BUTTON, MainFrame::onSimUndoButton)
   EVT_LIST_ITEM_SELECTED(myID_SIM_STATE_VIEW, MainFrame::onSimStateSelected)
@@ -60,7 +62,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 END_EVENT_TABLE()
 
 MainFrame::MainFrame(Mediator* owner,Settings* ss)
-  : wxFrame(NULL,wxID_ANY,wxT("LTSView")) {
+  : wxFrame(NULL,wxID_ANY,wxT("LTSView")), simReader(NULL) {
 //  previousTime = 0.0;
 //  frameCount = 0;
   mediator = owner;
@@ -300,13 +302,15 @@ void MainFrame::setupSimPanel(wxPanel* panel) {
   simButtonSizer->AddGrowableCol(1);
   simButtonSizer->AddGrowableCol(2);
 
-  wxButton* simStartButton = new wxButton(panel, myID_SIM_START_BUTTON,
+  simStartButton = new wxButton(panel, myID_SIM_START_BUTTON,
                                           wxT("Start"));
-  wxButton* simResetButton = new wxButton(panel, myID_SIM_RESET_BUTTON,
+  simStartButton->Disable();
+
+  simResetButton = new wxButton(panel, myID_SIM_RESET_BUTTON,
                                           wxT("Reset"));
   simResetButton->Disable();
 
-  wxButton* simStopButton  = new wxButton(panel, myID_SIM_STOP_BUTTON,
+  simStopButton  = new wxButton(panel, myID_SIM_STOP_BUTTON,
                                           wxT("Stop"));
   simStopButton->Disable();
 
@@ -323,24 +327,24 @@ void MainFrame::setupSimPanel(wxPanel* panel) {
   int listViewStyle = wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES|
                       wxLC_SINGLE_SEL;
 
-  wxListView* transView = new wxListView(panel, myID_SIM_TRANSITIONS_VIEW, 
+  simTransView = new wxListView(panel, myID_SIM_TRANSITIONS_VIEW, 
     wxDefaultPosition, wxSize(200, 100), listViewStyle);
 
-  transView->InsertColumn(0, wxT("Action"), wxLIST_FORMAT_LEFT, 120);
-  transView->InsertColumn(1, wxT("State change"), wxLIST_FORMAT_LEFT);
-  transView->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
+  simTransView->InsertColumn(0, wxT("Action"), wxLIST_FORMAT_LEFT, 120);
+  simTransView->InsertColumn(1, wxT("State change"), wxLIST_FORMAT_LEFT);
+  simTransView->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
 
-  simTransSizer->Add(transView, 1, flags|wxEXPAND, border);
+  simTransSizer->Add(simTransView, 1, flags|wxEXPAND, border);
 
   wxBoxSizer* triggerUndoSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxButton* triggerButton = new wxButton(panel, myID_SIM_TRIGGER_BUTTON,
+  simTriggerButton = new wxButton(panel, myID_SIM_TRIGGER_BUTTON,
                                          wxT("Trigger"));
-  triggerButton->Disable();
-  triggerUndoSizer->Add(triggerButton, 0, flags, border);
+  simTriggerButton->Disable();
+  triggerUndoSizer->Add(simTriggerButton, 0, flags, border);
 
-  wxButton* undoButton = new wxButton(panel, myID_SIM_UNDO_BUTTON, wxT("Undo"));
-  undoButton->Disable();
-  triggerUndoSizer->Add(undoButton, 0, flags, border);
+  simUndoButton = new wxButton(panel, myID_SIM_UNDO_BUTTON, wxT("Undo"));
+  simUndoButton->Disable();
+  triggerUndoSizer->Add(simUndoButton, 0, flags, border);
   simTransSizer->Add(triggerUndoSizer, 0, flags, border);
 
   simSizer->Add(simTransSizer, 0, wxEXPAND|wxALL, border);
@@ -349,14 +353,14 @@ void MainFrame::setupSimPanel(wxPanel* panel) {
   // Information about current state
   wxStaticBoxSizer* simStateSizer = new wxStaticBoxSizer(wxVERTICAL, panel, 
                                                          wxT("Current state"));
-  wxListView* stateView = new wxListView(panel, myID_SIM_STATE_VIEW, 
+  simStateView = new wxListView(panel, myID_SIM_STATE_VIEW, 
                                          wxDefaultPosition, wxSize(200, 100), 
                                          listViewStyle);
-  stateView->InsertColumn(0, wxT("Parameter"), wxLIST_FORMAT_LEFT, 120);
-  stateView->InsertColumn(1, wxT("Value"), wxLIST_FORMAT_LEFT);
-  stateView->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
+  simStateView->InsertColumn(0, wxT("Parameter"), wxLIST_FORMAT_LEFT, 120);
+  simStateView->InsertColumn(1, wxT("Value"), wxLIST_FORMAT_LEFT);
+  simStateView->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
 
-  simStateSizer->Add(stateView, 1, flags|wxEXPAND, border);
+  simStateSizer->Add(simStateView, 1, flags|wxEXPAND, border);
   simSizer->Add(simStateSizer, 0, wxEXPAND|wxALL, border);
   
   panel->SetSizer(simSizer);
@@ -364,10 +368,10 @@ void MainFrame::setupSimPanel(wxPanel* panel) {
   panel->Layout();
 
   // Now the panel has been laid out, we can get fill up the columns
-  transView->SetColumnWidth(1, transView->GetClientSize().GetWidth() - 
-                               transView->GetColumnWidth(0));
-  stateView->SetColumnWidth(1, stateView->GetClientSize().GetWidth() - 
-                               stateView->GetColumnWidth(0));
+  simTransView->SetColumnWidth(1, simTransView->GetClientSize().GetWidth() - 
+                               simTransView->GetColumnWidth(0));
+  simStateView->SetColumnWidth(1, simStateView->GetClientSize().GetWidth() - 
+                               simStateView->GetColumnWidth(0));
 }
 
 GLCanvas* MainFrame::getGLCanvas() const {
@@ -525,31 +529,42 @@ void MainFrame::onMarkTransition(wxCommandEvent& event) {
 
 // Simulation event handlers implementations
 void MainFrame::onSimStartButton(wxCommandEvent& event) {
-  //TODO
+  mediator->startSim();
 }
 
 void MainFrame::onSimResetButton(wxCommandEvent& event) {
-  //TODO
+  sim->resetSim();
 }
 
 void MainFrame::onSimStopButton(wxCommandEvent& event) {
-  //TODO
+  sim->stop();
 }
 
 void MainFrame::onSimTransitionSelected(wxListEvent& event) {
-  //TODO
+  // Get index of transition that was selected
+  int trans = event.GetIndex();
+
+  // Choost trans to be the next transition
+  sim->chooseTrans(trans);
+
+  
 }
 
+void MainFrame::onSimTransitionActivated(wxListEvent& event) {
+  onSimTransitionSelected(event);
+  
+  sim->followTrans();
+}
 void MainFrame::onSimTriggerButton(wxCommandEvent& event) {
-  //TODO
+  sim->followTrans();
 }
 
 void MainFrame::onSimUndoButton(wxCommandEvent& event) {
-  //TODO
+  sim->undoStep();
 }
 
 void MainFrame::onSimStateSelected(wxListEvent& event) {
-  //TODO
+  // Is this one necessary?
 }
 
 void MainFrame::createProgressDialog(const string title,const string text) {
@@ -658,4 +673,117 @@ void MainFrame::stopRendering() {
   }*/
   SetStatusText(wxT(""),0);
   GetStatusBar()->Update();
+}
+
+void MainFrame::refresh() {
+  if (sim != NULL) {
+    // There is a simulation, so we can request information from it.
+    if (!sim->getStarted()) {
+      // The simulation has not yet been started, enable the start button.
+      simStartButton->Enable();
+      simResetButton->Disable();
+      simStopButton->Disable();
+
+      // Clear the list view
+      simTransView->DeleteAllItems();
+    }
+    else {
+      // The simluation has been started, disable start button, enable stop and 
+      // reset buttons
+      simStartButton->Disable();
+
+      simResetButton->Enable();
+      simStopButton->Enable();
+
+
+      // Refresh the transition list
+      simTransView->DeleteAllItems();
+
+      vector<Transition*> posTrans = sim->getPosTrans();
+      
+      State* currState = sim->getCurrState();
+      
+      // Get the possible transitions
+      for(size_t i = 0; i < posTrans.size(); ++i) {
+        int labelId = posTrans[i]->getLabel();
+        string label = mediator->getActionLabel(labelId);
+
+        simTransView->InsertItem(i, wxString(label.c_str(), wxConvLocal));
+
+        // Determine the state change this action will effectuate.
+        State* nextState = posTrans[i]->getEndState();
+        
+        wxString stateChange = wxT("");
+        if ((nextState != NULL) && (currState != NULL)) {
+          for(int j = 0; j < mediator->getNumberOfParams(); ++j) {
+            string nextVal = mediator->getParValue(j, 
+                                       nextState->getParameterValue(j));
+            if (mediator->getParValue(j, currState->getParameterValue(j)) !=
+                nextVal) {
+              stateChange += wxString(mediator->getParName(j).c_str(), 
+                               wxConvLocal) +  
+                            wxT(":=") + 
+                            wxString(nextVal.c_str(), wxConvLocal) +
+                            wxT(",");
+            }
+          }
+          // Remove last comma. There always is one since an empty transition 
+          // does not exist
+          stateChange.RemoveLast();
+        }
+        // Add stateChange value to the list
+        simTransView->SetItem(i, 1, stateChange);
+      }
+      
+      // Display selected transition
+      int chosenTrans = sim->getChosenTrans();
+
+      if(chosenTrans != -1) {
+        simTransView->Select(chosenTrans);
+      }
+      
+      // Trigger and undo buttons
+      if(sim->getChosenTrans() != -1) {
+        simTriggerButton->Enable();
+      }
+      else {
+        simTriggerButton->Disable();
+      }
+
+      if(sim->getTransHis().size() != 0) {
+        simUndoButton->Enable();
+      }
+      else {
+        simUndoButton->Disable();
+      }
+
+
+      // Refresh the state list with the information about the current state
+      simStateView->DeleteAllItems();
+      
+      if (currState != NULL) {
+        for(int i = 0; i < mediator->getNumberOfParams(); ++i) {
+          // Parameter name
+          simStateView->InsertItem(i, wxString(mediator->getParName(i).c_str(),
+                                               wxConvLocal));
+
+          // Parameter value
+          simStateView->SetItem(i, 1, wxString(
+            mediator->getParValue(i, currState->getParameterValue(i)).c_str(), 
+              wxConvLocal));
+        }
+      }
+    }
+  }
+  Layout();
+}
+
+void MainFrame::selChange() {
+  // There always is a simulation to inform us of a selection change.
+  if(sim->getChosenTrans() != -1) {
+    simTriggerButton->Enable();
+  }
+  else {
+    simTriggerButton->Disable();
+  }
 }

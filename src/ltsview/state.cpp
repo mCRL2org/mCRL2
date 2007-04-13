@@ -203,6 +203,20 @@ int State::getNumberOfOutTransitions( ) const
   return outTransitions.size();
 }
 
+void State::getLoops( vector< Transition* > & ls ) const
+{
+  ls = loops;
+}
+
+Transition* State::getLoopi(int i) const 
+{
+  return loops[i];
+}
+
+int State::getNumberOfLoops() const
+{
+  return loops.size();
+}
 void State::clearHierarchyInfo()
 {
   superiors.clear();

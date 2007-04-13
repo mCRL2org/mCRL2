@@ -11,8 +11,9 @@
 #include "glcanvas.h"
 #include "mediator.h"
 #include "settings.h"
+#include "simreader.h"
 
-class MainFrame : public wxFrame {
+class MainFrame : public wxFrame, public simReader {
   public:
     MainFrame(Mediator* owner,Settings* ss);
     void	addMarkRule(wxString str);
@@ -44,9 +45,11 @@ class MainFrame : public wxFrame {
     void        onSimResetButton(wxCommandEvent& event);
     void        onSimStopButton(wxCommandEvent& event);
     void        onSimTransitionSelected(wxListEvent& event);
+    void        onSimTransitionActivated(wxListEvent& event);
     void        onSimTriggerButton(wxCommandEvent& event);
     void        onSimUndoButton(wxCommandEvent& event);
     void        onSimStateSelected(wxListEvent& event);
+  
 
     void	replaceMarkRule(int index, wxString str);
     void	resetMarkRules();
@@ -59,6 +62,10 @@ class MainFrame : public wxFrame {
     void	startRendering();
     void	stopRendering();
     void	updateProgressDialog(int val,std::string msg);
+
+    // Implemented for simReader interface
+    virtual void refresh();
+    virtual void selChange();
 //    void  onIdle(wxIdleEvent &event);/* needed for computing the frame rate */
   private:
 //    double previousTime; /* needed for computing the frame rate (FPS) */
@@ -82,6 +89,17 @@ class MainFrame : public wxFrame {
     wxProgressDialog* progDialog;
     SettingsDialog*   settingsDialog;
     Settings*         settings;
+
+    // Buttons for simulation
+    wxButton* simStartButton;
+    wxButton* simResetButton;
+    wxButton* simStopButton;
+    wxButton* simTriggerButton;
+    wxButton* simUndoButton;
+
+    // List views used in simulation
+    wxListView* simTransView; // Transition information
+    wxListView* simStateView; // State information
 
     void setupMainArea();
     void setupMenuBar();

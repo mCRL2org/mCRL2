@@ -37,11 +37,16 @@ class State {
     Utils::DFSState  getVisitState() const;
     Cluster*  getCluster() const;
     void      getComrades( std::set< State* > &ss ) const;
-		int				getID();
+    int       getID();
     void      getInTransitions( std::vector< Transition* > &ts ) const;
     void      getOutTransitions( std::vector< Transition* > &ts ) const;
     Transition* getOutTransitioni( int i) const;
     int       getNumberOfOutTransitions() const;
+
+    void      getLoops( std::vector< Transition* > &ls ) const;
+    Transition* getLoopi( int i ) const;
+    int       getNumberOfLoops() const;
+
     float     getPosition() const;
     Utils::Point3D getPositionAbs() const;
     Utils::Point3D getOutgoingControl() const;
@@ -119,7 +124,7 @@ class State {
     Utils::Point3D        incomingControl;
     int			  rank;
     int                   slot; // The slot this state occupies
-    std::vector< int >  stateVector;
+    std::vector< int >    stateVector;
     std::set< State* >	  subordinates;
     std::set< State* >	  superiors;
     Utils::DFSState       visitState;

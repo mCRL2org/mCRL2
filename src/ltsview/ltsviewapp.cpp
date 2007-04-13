@@ -219,6 +219,8 @@ void LTSViewApp::openFile(string fileName) {
   
   vector< string > ls;
   lts->getActionLabels(ls);
+
+  mainFrame->setSim(lts->getSimulation());
   mainFrame->setActionLabels(ls);
 
   mainFrame->setMarkedStatesInfo(0);
@@ -391,4 +393,24 @@ void LTSViewApp::notifyRenderingStarted() {
 
 void LTSViewApp::notifyRenderingFinished() {
   mainFrame->stopRendering();
+}
+
+void LTSViewApp::startSim() {
+  State* firstState = lts->getInitialState();
+  lts->getSimulation()->start(firstState);
+}
+
+int LTSViewApp::getNumberOfParams() const {
+  return lts->getNumParameters();
+}
+string LTSViewApp::getActionLabel(const int i) const {
+  return lts->getLabel(i);
+}
+
+string LTSViewApp::getParName(const int i) const {
+  return lts->getParameterName(i);
+}
+
+string LTSViewApp::getParValue(const int i, const int j) const {
+  return lts->getParameterValue(i, j);
 }

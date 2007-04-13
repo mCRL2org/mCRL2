@@ -7,16 +7,17 @@
 #include "transition.h"
 #include "cluster.h"
 #include "utils.h"
+#include "simreader.h"
 
 class LTS {
   public:
     LTS( Mediator* owner );
     ~LTS();
     void	activateMarkRule(const int index,const bool activate);
-		int		addLabel(std::string label);
+    int		addLabel(std::string label);
     void	addMarkRule(Utils::MarkRule* r,int index=-1);
-		int		addParameter(std::string parname,std::string partype);
-		void	addParameterValue(int parindex,std::string parvalue);
+    int		addParameter(std::string parname,std::string partype);
+    void	addParameterValue(int parindex,std::string parvalue);
     void	addState(State* s);
     void	addTransition(Transition* t);
     void	applyIterativeRanking();
@@ -25,7 +26,7 @@ class LTS {
     void	computeClusterLabelInfo();
     void	getActionLabels(std::vector<std::string> &ls) const;
     State*	getInitialState() const;
-		std::string getLabel(int labindex);
+    std::string getLabel(int labindex);
     bool	getMatchAnyMarkRule() const;
     Utils::MarkRule*	getMarkRule(const int index) const;
     int		getNumberOfClusters() const;
@@ -35,11 +36,11 @@ class LTS {
     int		getNumberOfRanks() const;
     int		getNumberOfStates() const;
     int		getNumberOfTransitions() const;
-		int		getNumParameters() const;
-		int		getNumParameterValues(int parindex) const;
-		std::string getParameterName(int parindex);
-		std::string getParameterType(int parindex);
-		std::string getParameterValue(int parindex,int valindex);
+    int		getNumParameters() const;
+    int		getNumParameterValues(int parindex) const;
+    std::string getParameterName(int parindex);
+    std::string getParameterType(int parindex);
+    std::string getParameterValue(int parindex,int valindex);
     void	markAction(std::string label);
     void	markClusters();
     void	mergeSuperiorClusters();
@@ -53,30 +54,9 @@ class LTS {
     void	setMatchAnyMarkRule(bool b);
     void	unmarkAction(std::string label);
 
-    // Methods for simulation
-    void        startSimulation(State* initialState);
-    // Starts simulation 
-    // PRE:   initialState != NULL && simulation = false
-    // POST:  simulation = true && currSimLevel = 0 && 
-    //        currSimState = initialState && initialSimState = initialState &&
-    //        initialState->
-    
-    void        resetSimulation();
-    // Resets simulation
-    // PRE:   simulation = true
-    // POST:  currSimLevel = 0 && currSimState = initialSimState
+    // Method for simulation
+    Simulation* getSimulation() const;
 
-    void        stopSimulation();
-    // Stops simulation
-    // PRE:   simulation = true
-    // POST:  simulation = false
-
-    void        triggerTransition(Transition* transition);
-    // Triggers transition, leading to a new state of the simulation
-    // PRE:   speccon a = currState && simulation = true && b = currSimLevel &&
-    //        transition in (Set i: 0 <= i < a->getNumberOfOutTransitions():
-    //                          a->getOutTransitioni(i))
-    // POST:  currState = transition->getEndState() && currSimLevel = b + 1
   private:
     // Variables
     std::vector< std::vector< Cluster* > >	clustersInRank;
@@ -90,24 +70,17 @@ class LTS {
     std::vector< std::vector< State* > >	statesInRank;
     std::vector< Transition* >	transitions;
     std::vector< State* >	unmarkedStates;
+    Simulation*                 simulation;
 
-		// State vector info
-		std::vector< std::string > parameterNames;
-		std::vector< std::string > parameterTypes;
-		std::vector< std::vector< std::string > > valueTable;
+    // State vector info
+    std::vector< std::string > parameterNames;
+    std::vector< std::string > parameterTypes;
+    std::vector< std::vector< std::string > > valueTable;
 
-		// Labels
-		std::vector< std::string > labels;
-		std::map< std::string,int > labels_inv;
-		std::vector< bool* > label_marks;
-
-    // Variables used for simulation
-    bool    simulation; // triggers whether or not we are simulating.
-    int     currSimLevel;  // Number of steps made in simulation this far.
-    State*  currSimState;  // Current state of simulation.
-    State*  initialSimState; // Initial simulation state, for reset
-    std::vector< Transition* > futurePaths; 
-    // The transitions leaving currSimState
+    // Labels
+    std::vector< std::string > labels;
+    std::map< std::string,int > labels_inv;
+    std::vector< bool* > label_marks;
 
     // Methods
     void addComradesToCluster( Cluster* c, State* s );
@@ -117,7 +90,8 @@ class LTS {
     void updateMarksAll();  //Not implemented (?)
     void updateMarksAny();  //Not implemented (?)
 
-    // Functions for positioning states based on Frank van Ham's heuristics
+
+    // Methods for positioning states based on Frank van Ham's heuristics
     void edgeLengthBottomUp(std::vector< State* > &undecided); 
     //Phase 1: Processes states bottom-up, keeping edges as short as possible.
     //Pre:  statesInRank is correctly sorted by rank. 

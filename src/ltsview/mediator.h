@@ -19,6 +19,24 @@ class Mediator {
     virtual void      setRankStyle(Utils::RankStyle rs) = 0;
     virtual void      setVisStyle(Utils::VisStyle vs) = 0;
     virtual void      unmarkAction(std::string label) = 0;
+
+
+    // Simulation start. 
+    virtual void      startSim() = 0;
+
+    // Returns action label of transition with index i
+    virtual std::string getActionLabel(const int i) const = 0;
+  
+    // Returns number of parameters
+    virtual int getNumberOfParams() const = 0;
+    
+    // Returns the name of parameter with index i
+    virtual std::string getParName(const int i) const = 0;
+
+    // Returns the value of the parameter with index i in the state with index 
+    // j.
+    virtual std::string getParValue(const int i, const int j) const = 0;
+    
 };
 
 #endif

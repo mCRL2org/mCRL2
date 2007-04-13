@@ -17,12 +17,15 @@ exe ltsview
         savepicdialog.cpp
         settings.cpp
         settingsdialog.cpp
+        simulation.cpp
+        simreader.cpp
         state.cpp
         transition.cpp
         utils.cpp
         visualizer.cpp
         /libraries/wxe//colorbutton.o
         /libraries//mcrl2_basic
+        /site-config//boost_signals
       : <site-library>wx_gl
       : <squadt_support>enable
       ;

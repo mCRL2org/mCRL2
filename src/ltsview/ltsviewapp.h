@@ -5,6 +5,7 @@
 #include "mediator.h"
 #include "mainframe.h"
 #include "glcanvas.h"
+#include "lts.h"
 #include "visualizer.h"
 #include "utils.h"
 
@@ -34,6 +35,12 @@ class LTSViewApp : public wxApp, public Mediator {
     void	  setRankStyle(Utils::RankStyle rs);
     void	  setVisStyle(Utils::VisStyle vs);
     void	  unmarkAction(std::string label);
+    void          startSim();
+    int           getNumberOfParams() const;
+    std::string   getActionLabel(const int i) const;
+    std::string   getParName(const int i) const;
+    std::string   getParValue(const int i, const int j) const;
+    
 };
 
 DECLARE_APP(LTSViewApp)
