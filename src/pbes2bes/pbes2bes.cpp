@@ -1,8 +1,8 @@
 // ======================================================================
 //
 // file          : pbes2bes
-// date          : 11-04-2007
-// version       : 0.1.2
+// date          : 15-04-2007
+// version       : 0.1.3
 //
 // author(s)     : Alexander van Dam <avandam@damdonk.nl>
 //
@@ -10,7 +10,7 @@
 
 
 #define NAME "pbes2bes"
-#define VERSION "0.1.2"
+#define VERSION "0.1.3"
 #define AUTHOR "Alexander van Dam"
 
 
@@ -36,20 +36,15 @@
 #include "lps/pbes_utility.h"
 #include "lps/data_operators.h"
 #include "lps/sort.h"
-//#include "lps/sort_utility.h"
 
 //ATERM-specific
 #include "atermpp/substitute.h"
-#include "lps/identifier_string.h"
 #include "atermpp/utility.h"
 #include "atermpp/indexed_set.h"
 #include "atermpp/table.h"
-#include "atermpp/vector.h"
-#include "atermpp/set.h"
-#include "gc.h"
 
 //Tool-specific
-#include "pbes_rewrite.h"		// PBES rewriter
+#include "pbes_rewrite.h"
 #include "sort_functions.h"
 
 using namespace std;
@@ -139,10 +134,10 @@ void save_pbes_in_cwi_format(pbes pbes_spec, string outfilename);
 string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variables);
 // Function used to convert a pbes_expression to the variant used by the cwi-output
 
-pbes do_improved_algorithm(pbes pbes_spec, t_tool_options tool_options);
+pbes do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options);
 //
 
-pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options);
+pbes do_finite_algorithm(pbes pbes_spec, t_tool_options tool_options);
 //
 
 propositional_variable_instantiation create_naive_propositional_variable_instantiation(propositional_variable_instantiation propvarinst, atermpp::table *enumerated_sorts);
@@ -181,30 +176,29 @@ int main(int argc, char** argv)
 //-------------------
 pbes create_bes(pbes pbes_spec, t_tool_options tool_options)
 {
-	//Do naive algorithm. In later stage a check for naive or improved is added.
 	if (!pbes_spec.is_well_formed())
 	{
-		gsErrorMsg("The PBES is not well formed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.");
+		gsErrorMsg("The PBES is not well formed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
 		exit(1);
 	}
 	if (!pbes_spec.is_closed())
 	{
-		gsErrorMsg("The PBES is not closed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.");
+		gsErrorMsg("The PBES is not closed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
 		exit(1);
 	}
 
 	if (tool_options.opt_strategy == "finite")
-		pbes_spec = do_naive_algorithm(pbes_spec, tool_options);
+		pbes_spec = do_finite_algorithm(pbes_spec, tool_options);
 	else if (tool_options.opt_strategy == "lazy")
-		pbes_spec = do_improved_algorithm(pbes_spec, tool_options);
+		pbes_spec = do_lazy_algorithm(pbes_spec, tool_options);
 
 	//return new pbes
 	return pbes_spec;
 }
 
-//function do_improved_algorithm
+//function do_lazy_algorithm
 //------------------------------
-pbes do_improved_algorithm(pbes pbes_spec, t_tool_options tool_options)
+pbes do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
 {
 	// Verbose msg: doing naive algorithm
 	gsVerboseMsg("Computing BES from PBES using lazy algorithm...\n");
@@ -233,8 +227,8 @@ pbes do_improved_algorithm(pbes pbes_spec, t_tool_options tool_options)
 	Rewriter *rewriter = createRewriter(data);
 
 	// Needed hashtables
-	atermpp::table *pbes_equations = new atermpp::table(2*eqsys.size(), 50); 			// (propvarname, pbes_equation)
-	atermpp::indexed_set *states_done = new atermpp::indexed_set(10000, 50); 	// (propvarinst)
+	atermpp::table pbes_equations(2*eqsys.size(), 50); 	// (propvarname, pbes_equation)
+	atermpp::indexed_set states_done(10000, 50); 		// (propvarinst)
 
 	// Vector with the order of the variable names used for sorting the result
 	vector< identifier_string > names_order;
@@ -243,7 +237,7 @@ pbes do_improved_algorithm(pbes pbes_spec, t_tool_options tool_options)
 	gsVerboseMsg("Retrieving pbes_equations from equation system...\n");
 	for (equation_system::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
 	{
-		pbes_equations->put(eqi->variable().name(), *eqi);
+		pbes_equations.put(eqi->variable().name(), *eqi);
 		names_order.push_back(eqi->variable().name());
 	}
 
@@ -258,7 +252,7 @@ pbes do_improved_algorithm(pbes pbes_spec, t_tool_options tool_options)
 		propositional_variable_instantiation current_state = *current_state_it;
 		states_todo.erase(current_state);
 		// Get equation which belongs to the current propvarinst and their needed parts
-		pbes_equation current_pbeq = pbes_equation(pbes_equations->get(current_state.name()));
+		pbes_equation current_pbeq = pbes_equation(pbes_equations.get(current_state.name()));
 		propositional_variable current_variable = current_pbeq.variable();
 		pbes_expression current_pbes_expression = current_pbeq.formula();
 
@@ -268,7 +262,7 @@ pbes do_improved_algorithm(pbes pbes_spec, t_tool_options tool_options)
 		propositional_variable_instantiation new_propvarinst = propositional_variable_instantiation(new_propvar_name, empty_data_expression_list);
 
 		// Add the new instantiation to the table
-		states_done->put(new_propvarinst);
+		states_done.put(new_propvarinst);
 
 		// Replace all occurrences in the right hand side and rewrite the expression
 		pbes_expression new_pbes_expression;
@@ -287,7 +281,7 @@ pbes do_improved_algorithm(pbes pbes_spec, t_tool_options tool_options)
 			propositional_variable_instantiation temp_pvi = propositional_variable_instantiation(create_propvar_name(pvi->name(), pvi->parameters()), empty_data_expression_list);
 			// Put the propvarinst in the old list
 			oldpropvarinst_list = push_front(oldpropvarinst_list, *pvi);
-			if (states_done->index(temp_pvi) < 0)
+			if (states_done.index(temp_pvi) < 0)
 			{
 				// Add it to the todo list
 				states_todo.insert(*pvi);
@@ -348,13 +342,12 @@ equation_system sort_names(vector< identifier_string > names_order, equation_sys
 		}
 	}
 
-
 	return result;
 }
 
-//function do_naive_algorithm
+//function do_finite_algorithm
 //---------------------------
-pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
+pbes do_finite_algorithm(pbes pbes_spec, t_tool_options tool_options)
 {
 	// Verbose msg: doing naive algorithm
 	gsVerboseMsg("Computing BES from PBES using finite algorithm...\n");
@@ -373,7 +366,7 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 	data_variable_list empty_data_variable_list;
 	data_expression_list empty_data_expression_list;
 
-	atermpp::table *sort_enumerations = new atermpp::table(10,50);
+	atermpp::table sort_enumerations(10,50);
 
 	//Populate sort_enumerations with all enumerations for finite sorts
 	gsVerboseMsg("Enumerating finite data types...\n");
@@ -383,12 +376,12 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 		for (data_variable_list::iterator p = parameters.begin(); p != parameters.end(); p++)
 		{
 			lps::sort current_sort = p->sort();
-			if (sort_enumerations->get(current_sort) == NULL)
+			if (sort_enumerations.get(current_sort) == NULL)
 			{ // If the sort is not in the enumerated_sorts
 				if (check_finite(data.constructors(), current_sort))
 				{ // If the sort is finite
 					data_expression_list enumerations_from_sort = enumerate_constructors(data.constructors(), current_sort);
-					sort_enumerations->put(current_sort, enumerations_from_sort);
+					sort_enumerations.put(current_sort, enumerations_from_sort);
 				}
 			}
 		}
@@ -426,7 +419,7 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 		{
 			// Vector of instantiations for intermediate results
 			atermpp::vector< t_instantiations > intermediate_instantiation_list;
-			if (sort_enumerations->get(p->sort()) == NULL)
+			if (sort_enumerations.get(p->sort()) == NULL)
 			{ // The sort is infinite
 				current_values.infinite_var = push_back(current_values.infinite_var, *p);
 				for (atermpp::vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
@@ -438,7 +431,7 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 			else
 			{ // The sort is finite
 				current_values.finite_var = push_back(current_values.finite_var, *p);
-				data_expression_list enumerations = sort_enumerations->get(p->sort());
+				data_expression_list enumerations = sort_enumerations.get(p->sort());
 
 				for (atermpp::vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
 				{
@@ -477,7 +470,7 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 				// Put the propvarinst in the old list
 				oldpropvarinst_list = push_front(oldpropvarinst_list, *pvi);
 				// Create the new propvarinst
-				propositional_variable_instantiation newpropvarinst = create_naive_propositional_variable_instantiation(*pvi, sort_enumerations);
+				propositional_variable_instantiation newpropvarinst = create_naive_propositional_variable_instantiation(*pvi, &sort_enumerations);
 				// Add the new propvarinst in the new list
 				newpropvarinst_list = push_front(newpropvarinst_list, newpropvarinst);
 			}
@@ -496,7 +489,7 @@ pbes do_naive_algorithm(pbes pbes_spec, t_tool_options tool_options)
 	}
 
 	// rewrite initial state
-	propositional_variable_instantiation new_initial_state = create_naive_propositional_variable_instantiation(initial_state, sort_enumerations);
+	propositional_variable_instantiation new_initial_state = create_naive_propositional_variable_instantiation(initial_state, &sort_enumerations);
 
 	// create resulting pbes
 	pbes result = pbes(data, result_eqsys, new_initial_state);
@@ -623,7 +616,7 @@ void save_pbes(pbes pbes_spec, t_tool_options tool_options)
 	}
 	
 	//Write PBES
-	if (tool_options.opt_outputformat == "external")
+	if (tool_options.opt_outputformat == "textual")
 	{ // In external format
 		if (!pbes_spec.save(outfilename, false))
 		{
@@ -794,7 +787,7 @@ t_tool_options parse_command_line(int argc, char** argv)
 							"finite  Compute all possible boolean equations\n"
 							"lazy    Compute only boolean equations which can be reached from the initial state\n")
 			("output,o",	po::value<string>(&opt_outputformat)->default_value("binary"), "use outputformat arg (default 'binary');\n"
-			 				"available outputformats are binary, external and cwi")
+			 				"available outputformats are binary, textual and cwi")
 			("verbose,v",	"turn on the display of short intermediate messages")
 			("debug,d",		"turn on the display of detailed intermediate messages")
 			("version",		"display version information")
@@ -850,7 +843,7 @@ t_tool_options parse_command_line(int argc, char** argv)
 	if (vm.count("output")) // Output format
 	{
 		opt_outputformat = vm["output"].as< string >();
-		if (!((opt_outputformat == "external") || (opt_outputformat == "binary") || (opt_outputformat == "cwi")))
+		if (!((opt_outputformat == "textual") || (opt_outputformat == "binary") || (opt_outputformat == "cwi")))
 		{
 			gsErrorMsg("Unknown outputformat specified. Available outputformats are binary, external and cwi\n");
 			exit(1);
