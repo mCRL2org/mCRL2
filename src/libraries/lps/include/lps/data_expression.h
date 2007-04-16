@@ -104,12 +104,6 @@ class data_expression: public aterm_appl
     }     
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// data_expression_list
-/// \brief singly linked list of data expressions
-///
-typedef term_list<data_expression> data_expression_list;
-
 inline
 bool is_data_expression(aterm_appl t)
 {

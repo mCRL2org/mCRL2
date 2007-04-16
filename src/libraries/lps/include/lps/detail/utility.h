@@ -115,14 +115,21 @@ bool check_assignment_variables(data_assignment_list assignments, data_variable_
   return true;
 }
 
-/// Returns true if the sorts of the given variables are contained in sorts.
+/// Returns true if the domain sorts and the range sort of the given variables are contained
+/// in sorts.
 inline
 bool check_variable_sorts(data_variable_list variables, const std::set<lps::sort>& sorts)
 {
   for (data_variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
   {
-    if (sorts.find(i->sort()) == sorts.end())
+    if (sorts.find(i->sort().range_sort()) == sorts.end())
       return false;
+    sort_list domain_sorts = i->sort().domain_sorts();
+    for (sort_list::iterator j = domain_sorts.begin(); j != domain_sorts.end(); ++j)
+    {
+      if (sorts.find(*j) == sorts.end())
+        return false;
+    }
   }
   return true;
 }
