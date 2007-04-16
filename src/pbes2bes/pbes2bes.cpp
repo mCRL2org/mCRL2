@@ -551,7 +551,7 @@ identifier_string create_propvar_name(identifier_string propvar_name, data_expre
 			{
 				// HIER MAG HET
 				propvar_name_current += "@";
-				propvar_name_current += data_operation(del_i->head()).name();
+				propvar_name_current += pp(*del_i);
 			}
 			else if (is_data_variable(*del_i))
 			{ // If p is a freevar
@@ -559,10 +559,16 @@ identifier_string create_propvar_name(identifier_string propvar_name, data_expre
 				gsErrorMsg("Try using mcrl22lps with the flag -f or --no-freevars to solve this.\n");
 				exit(1);
 			}
+			else if (is_data_application(*del_i))
+			{ // If p is a data application
+				propvar_name_current += "@";
+				propvar_name_current += pp(*del_i);
+			}
 			else
 			{
-				gsErrorMsg("Can't rewrite the name of the propositional_variable\n");
-			//	gsErrorMsg("Problematic term: %t\n", *del_i);
+				gsErrorMsg("Can not rewrite the name of the propositional_variable\n");
+				cout << "Problematic Term: " << pp(*del_i) << endl;
+				//gsErrorMsg("Problematic term: %t\n", *del_i);
 				exit(1);
 			}
 			
