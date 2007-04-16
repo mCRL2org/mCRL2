@@ -101,21 +101,19 @@ class data_specification: public aterm_appl
     /// </ul>
     bool is_well_typed() const
     {
-      std::set<lps::sort> sorts;
-      for (sort_list::iterator i = m_sorts.begin(); i != m_sorts.end(); ++i)
-      {
-        sorts.insert(*i);
-      }
+      std::set<lps::sort> sorts = detail::make_set(m_sorts);
 
       // check 1)
       if (!detail::check_data_spec_sorts(constructors(), sorts))
       {
+        std::cerr << "data_specification::is_well_typed() failed: not all of the sorts appearing in the constructors " << pp(constructors()) << " are declared in " << m_sorts << std::endl;
         return false;
       }
 
       // check 2)
       if (!detail::check_data_spec_sorts(mappings(), sorts))
       {
+        std::cerr << "data_specification::is_well_typed() failed: not all of the sorts appearing in the mappings " << pp(mappings()) << " are declared in " << m_sorts << std::endl;
         return false;
       }
       
@@ -172,5 +170,23 @@ data_specification set_equations(data_specification s, data_equation_list equati
 }
 
 } // namespace lps
+
+/// INTERNAL ONLY
+namespace atermpp
+{
+using lps::data_specification;
+
+template<>
+struct aterm_traits<data_specification>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(data_specification t)   { t.protect(); }
+  static void unprotect(data_specification t) { t.unprotect(); }
+  static void mark(data_specification t)      { t.mark(); }
+  static ATerm term(data_specification t)     { return t.term(); }
+  static ATerm* ptr(data_specification& t)    { return &t.term(); }
+};
+
+} // namespace atermpp
 
 #endif // LPS_DATA_SPECIFICATION_H

@@ -209,18 +209,21 @@ class summand: public aterm_appl
       // check 2)
       if (has_time() && !data_expr::is_real(m_time))
       {
+        std::cerr << "summand::is_well_typed() failed: time " << pp(m_time) << " doesn't have type real." << std::endl;
         return false;
       }
 
       // check 3)
       if (!data_expr::is_bool(m_condition))
       {
+        std::cerr << "summand::is_well_typed() failed: condition " << pp(m_condition) << " doesn't have type bool." << std::endl;
         return false;
       }
 
       // check 4)
       if (!detail::unique_names(m_summation_variables))
       {
+        std::cerr << "summand::is_well_typed() failed: summation variables " << pp(m_summation_variables) << " don't have unique names." << std::endl;
         return false;
       }
 
@@ -431,12 +434,14 @@ class linear_process: public aterm_appl
       // check 2)
       if (!detail::unique_names(m_process_parameters))
       {
+        std::cerr << "linear_process::is_well_typed() failed: process parameters " << pp(m_process_parameters) << " don't have unique names." << std::endl;
         return false;
       }
 
       // check 3)
       if (!detail::unique_names(m_free_variables))
       {
+        std::cerr << "linear_process::is_well_typed() failed: free variables " << pp(m_process_parameters) << " don't have unique names." << std::endl;
         return false;
       }
 
@@ -449,14 +454,20 @@ class linear_process: public aterm_appl
       for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
       {
         if (!detail::check_variable_names(i->summation_variables(), names))
+        {
+          std::cerr << "linear_process::is_well_typed() failed: some of the names of the summation variables " << pp(i->summation_variables()) << " also appear as process parameters." << std::endl;
           return false;
+        }
       }
 
       // check 5)
       for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
       {
         if (!detail::check_assignment_variables(i->assignments(), m_process_parameters))
+        {
+          std::cerr << "linear_process::is_well_typed() failed: some left hand sides of the assignments " << pp(i->assignments()) << " do not appear as process parameters." << std::endl;
           return false;
+        }
       }
 
       return true;

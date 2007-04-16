@@ -263,6 +263,7 @@ class data_equation: public aterm_appl
       // check 1)
       if (m_lhs.sort() != m_rhs.sort())
       {
+        std::cerr << "data_equation::is_well_typed() failed: the left and right hand sides " << pp(m_lhs) << " and " << pp(m_rhs) << " have different types." << std::endl;
         return false;
       }
       
@@ -316,10 +317,16 @@ class data_assignment: public aterm_appl
     {
     }
 
-    /// Returns true if the types of the left and right hand side are equal.
+    /// Returns true if the sorts of the left and right hand side are equal.
     bool is_well_typed() const
     {
-      return gsGetSort(m_lhs) == gsGetSort(m_rhs);
+      bool result = gsGetSort(m_lhs) == gsGetSort(m_rhs);
+      if (!result)
+      {
+        std::cerr << "data_assignment::is_well_typed() failed: the left and right hand sides " << pp(m_lhs) << " and " << pp(m_rhs) << " have different sorts." << std::endl;
+        return false;
+      }
+      return true;
     }
 
     /// Applies the assignment to t and returns the result.

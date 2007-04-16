@@ -61,8 +61,7 @@ The mCRL2 tool set contains tools to automatically:
 
 The LPS library is a =C++= class library that is used for the implementation of the tool set.
 It contains classes for manipulating linear processes and parameterised boolean equation
-systems. Note that there are no classes available that represent general processes as they
-appear in an mCRL2 specification.
+systems.
 
 The LPS library uses the __atermlib__ internally, which is a term library that has maximal
 sharing of subterms as the most important feature. Since programming with the ATerm Library
@@ -85,7 +84,7 @@ where
 
 * /d/ is a vector of data variables, called the /process parameters/. The corresponding vector of sorts /D/ models the states of the process.
 * __si is a linear process term, called a /summand/
-* __Ei is a sort, and the elements /e/ of __Ei are called /summation variables/. [footnote The tool set requires that the condition __ci is chosen such that there are only finitely many values /e/ for which __ci has the value true. ]
+* __Ei is a sort, and the elements /e/ of __Ei are called /summation variables/. [footnote The tool set requires that there are only finitely many values /e/ for which __ci has the value true. ]
 * __ci is a boolean term, called the /condition/
 * __ai is a term called the /action/
 * __ti is a real valued term, called the /time/
@@ -101,9 +100,8 @@ can have /free variables/, i.e. variables that do not appear in either /d/ or th
 This section describes the classes that correspond to a linear process.
 
 [section: class =specification=]
-The mCRL2 tool set contains a tool (mcrl22lps) that converts an mCRL2 specification
-into a linearised process specification. Such a linearised specification is represented
-by the class [classref lps::specification]. This specification consists of
+The class [classref lps::specification] represents a linearized process specification.
+It consists of
 
 * a [classref lps::linear_process linear process]
 * a [classref lps::data_specification data specification], i.e. a specification of the sorts, constructors, mappings and equations
@@ -145,6 +143,11 @@ init
     )
   );
 ]
+
+There are no classes available that represent such a general specification
+containing parallel and communication operators. The mCRL2 tool set contains a
+tool (mcrl22lps) that converts an mCRL2 specification into a linearized process
+specification.
 
 A specification can be stored in binary or ascii format. The [memberref lps::specification::load]
 and [memberref lps::specification::save] methods are available for this. An example of loading
