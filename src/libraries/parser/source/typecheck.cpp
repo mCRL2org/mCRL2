@@ -3583,7 +3583,7 @@ static ATermAppl gstcTraverseRegFrm(ATermTable Vars, ATermAppl RegFrm){
     return RegFrm;
   }
 
-  if(gsIsSeq(RegFrm) || gsIsRegAlt(RegFrm)){
+  if(gsIsRegSeq(RegFrm) || gsIsRegAlt(RegFrm)){
     ATermAppl NewArg1=gstcTraverseRegFrm(Vars,ATAgetArgument(RegFrm,0));
     if(!NewArg1) return NULL;
     ATermAppl NewArg2=gstcTraverseRegFrm(Vars,ATAgetArgument(RegFrm,1));
