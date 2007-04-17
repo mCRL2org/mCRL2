@@ -270,7 +270,7 @@ namespace squadt {
         p_stack.pop();
 
         BOOST_FOREACH(dependency_map::value_type i, range) {
-          if (i.second->check_status(false)) {
+          if (i.second->check_status(true)) {
             p_stack.push(i.second);
           }
         }

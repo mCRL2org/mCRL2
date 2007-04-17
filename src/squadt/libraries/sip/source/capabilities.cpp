@@ -78,17 +78,13 @@ namespace sip {
     capabilities::input_combination const*
               capabilities::find_input_combination(const mime_type& f, const tool::category& t) const {
  
-      input_combination p(t, f, "");
-
-      input_combination_list::const_iterator i = std::find_if(m_input_combinations.begin(),
-                      m_input_combinations.end(), boost::bind(&input_combination::equal, _1, p));
-
-      if (i == m_input_combinations.end()) {
-        return (0);
+      for (input_combination_list::const_iterator i = m_input_combinations.begin(); i != m_input_combinations.end(); ++i) {
+        if (i->m_category == t && i->m_mime_type == f) {
+          return (&(*i));
+        }
       }
-      else {
-        return (&(*i));
-      }
+
+      return (0);
     }
   }
 }

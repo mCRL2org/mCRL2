@@ -61,7 +61,7 @@ namespace squadt {
       typedef boost::iterator_range < tools_for_category::const_iterator >  tool_sequence;
 
       /** \brief Map that associates commands to mime-types */
-      typedef std::map < mime_type, std::string >                            actions_for_type;
+      typedef std::map < mime_type, std::string >                           actions_for_type;
 
     public:
 

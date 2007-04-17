@@ -2,6 +2,7 @@
 #define MIME_TYPE_H__
 
 #include <string>
+#include <iostream>
 
 namespace sip {
 
@@ -102,7 +103,7 @@ namespace sip {
   }
 
   inline bool mime_type::operator<(mime_type const& r) const {
-    return (m_main < r.m_main || (m_main == r.m_main && m_sub < r.m_sub));
+    return (m_sub < r.m_sub || (m_sub == r.m_sub && m_main < r.m_main));
   }
 }
 

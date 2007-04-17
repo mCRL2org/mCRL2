@@ -231,8 +231,9 @@ namespace squadt {
         std::auto_ptr < command > command_line = registry->get_registered_command(f, "$");
 
         formats_and_actions->InsertItem(row, wxString(f.as_string().c_str(), wxConvLocal));
-
         formats_and_actions->SetItem(row++, 1, command_line.get() ? wxString(command_line->as_string().c_str(), wxConvLocal) : no_action);
+
+//        global_build_system.get_type_registry()->register_command(f, *command_line);
       }
 
       known_formats->AddSpacer(5);

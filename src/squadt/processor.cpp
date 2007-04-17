@@ -31,6 +31,10 @@ namespace squadt {
     return (stream);
   }
 
+  /**
+   * \param[in] o an object descriptor
+   * \param[in] t the new status
+   **/
   bool processor_impl::try_change_status(processor::object_descriptor& o, processor::object_descriptor::t_status s) {
     if (s < o.status) {
       o.status = s;
@@ -92,7 +96,7 @@ namespace squadt {
       /* Input exists, get timestamp */ 
       time_t stamp = last_write_time(l);
     
-      if (last_write_time(l) < t) {
+      if (stamp < t) {
         return (processor_impl::try_change_status(*this, reproducible_out_of_date));
       }
       else if (timestamp < stamp) {
@@ -100,9 +104,9 @@ namespace squadt {
         md5pp::compact_digest old = checksum;
     
         checksum  = md5pp::MD5::MD5_sum(l);
-    
+
         if (timestamp != 0 && !checksum.is_zero() && old != checksum) {
-          return (processor_impl::try_change_status(*this, reproducible_out_of_date));
+          return processor_impl::try_change_status(*this, reproducible_up_to_date);
         }
 
         timestamp = stamp;
@@ -153,12 +157,13 @@ namespace squadt {
   void processor::monitor::signal_change(const execution::process::status s) {
     using namespace execution;
 
-    task_monitor::signal_change(s);
-
     switch (s) {
       case process::stopped:
         break;
       case process::running:
+        for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
+          (*i)->status = object_descriptor::generation_in_progress;
+        }
         break;
       case process::completed:
         for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
@@ -173,6 +178,8 @@ namespace squadt {
         }
         break;
     }
+
+    task_monitor::signal_change(s);
 
     /* Update status for known processor outputs */
     status_change_handler();

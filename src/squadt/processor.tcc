@@ -240,6 +240,23 @@ namespace squadt {
 
     boost::shared_ptr < project_manager > g(manager.lock());
 
+    if (r) {
+      /* Check recursively */
+      BOOST_FOREACH(object_descriptor::wptr i, inputs) {
+        object_descriptor::sptr d = i.lock();
+    
+        if (d.get() == 0) {
+          throw std::runtime_error("dependency on a missing object");
+        }
+    
+        processor::sptr p(d->generator);
+    
+        if (p.get() != 0) {
+          result |= p->check_status(true);
+        }
+      }
+    }
+     
     if (g.get()) {
       /* Find the maximum timestamp of the inputs */
       BOOST_FOREACH(object_descriptor::wptr i, inputs) {
@@ -250,34 +267,17 @@ namespace squadt {
         }
       
         d->self_check(*g);
-     
-        result |= (d->status != object_descriptor::original) && (d->status != object_descriptor::reproducible_up_to_date);
-      
+
         maximum_input_timestamp = std::max(maximum_input_timestamp, d->timestamp);
+
+        result |= (d->status != object_descriptor::original) && (d->status != object_descriptor::reproducible_up_to_date);
       }
      
       /* Check whether outputs all exist and find the minimum timestamp of the inputs */
-      BOOST_FOREACH(object_descriptor::sptr i, outputs) {
-        i->self_check(*g, static_cast < const long int > (maximum_input_timestamp));
-     
-        result |= (i->status != object_descriptor::original) && (i->status != object_descriptor::reproducible_up_to_date);
-      }
-     
-      if (!result && r) {
-        /* Status can still be okay, check recursively */
-        BOOST_FOREACH(object_descriptor::wptr i, inputs) {
-          object_descriptor::sptr d = i.lock();
-      
-          if (d.get() == 0) {
-            throw std::runtime_error("dependency on a missing object");
-          }
-     
-          processor::sptr p(d->generator);
-     
-          if (p.get() != 0) {
-            result |= p->check_status(true);
-          }
-        }
+      BOOST_FOREACH(object_descriptor::sptr o, outputs) {
+        o->self_check(*g, static_cast < const long int > (maximum_input_timestamp));
+
+        result |= (o->status != object_descriptor::original) && (o->status != object_descriptor::reproducible_up_to_date);
       }
      
       if (result) {

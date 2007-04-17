@@ -147,14 +147,17 @@ namespace squadt {
 
     if (i == command_for_type.end()) {
       i = std::find_if(command_for_type.begin(), command_for_type.end(),
-                boost::bind(&mime_type::operator==, t, boost::bind(&actions_for_type::value_type::first, _1)));
+                boost::bind(&mime_type::operator==, mime_type("text/" + t.get_sub_type()), boost::bind(&actions_for_type::value_type::first, _1)));
+    }
+    if (i == command_for_type.end()) {
+      i = std::find_if(command_for_type.begin(), command_for_type.end(),
+                boost::bind(&mime_type::operator==, mime_type("application/" + t.get_sub_type()), boost::bind(&actions_for_type::value_type::first, _1)));
+    }
 
-      if (i == command_for_type.end()) {
-        result = (global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal)) != 0);
-      }
-      else {
-        result = ((*i).second != command_none);
-      }
+    if (i == command_for_type.end()) {
+      wxFileType* wxt = global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal));
+
+      result = wxt != 0;
     }
     else {
       result = ((*i).second != command_none);
