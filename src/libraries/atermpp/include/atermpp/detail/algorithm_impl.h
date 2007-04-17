@@ -22,6 +22,7 @@
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_appl.h"
 #include "atermpp/aterm_list.h"
+#include "workarounds.h" // DECL_A
 
 namespace atermpp {
 
@@ -46,22 +47,50 @@ namespace detail {
   ///
   /// Applies the function f to all children of a and returns the result.
   ///
+  // template <typename Term, typename Function>
+  // aterm_appl appl_apply(term_appl<Term> a, const Function f)
+  // {
+  //   aterm_appl t = a;
+  //   unsigned int n = t.size();
+  //   if (n > 0)
+  //   {
+  //     for (unsigned int i = 0; i < n; i++)
+  //     {
+  //       aterm ti = t(i);
+  //       aterm fi = f(ti);
+  //       if (fi != ti)
+  //         t = t.set_argument(fi, i);
+  //     }
+  //   }
+  //   return t;
+  // }
+
+  ///
+  /// Applies the function f to all children of a and returns the result.
+  ///
   template <typename Term, typename Function>
   aterm_appl appl_apply(term_appl<Term> a, const Function f)
   {
-    aterm_appl t = a;
-    unsigned int n = t.size();
+    unsigned int n = a.size();
     if (n > 0)
     {
+      bool term_changed = false;
+      DECL_A(t, ATerm, n);
       for (unsigned int i = 0; i < n; i++)
       {
-        aterm ti = t(i);
-        aterm fi = f(ti);
-        if (fi != ti)
-          t = t.set_argument(fi, i);
+        t[i] = f(a(i));
+        if (t[i] != a(i))
+        {
+          term_changed = true;
+        }
       }
+      if (term_changed)
+      {
+        a = ATmakeApplArray(a.function(), t);
+      }
+      FREE_A(t);
     }
-    return t;
+    return a;
   }
 
 //--- find ----------------------------------------------------------------//
@@ -156,13 +185,13 @@ namespace detail {
 
   template <typename ReplaceFunction>
   aterm replace_impl(aterm t, ReplaceFunction replace);
- 
+
   template <typename ReplaceFunction>
-  struct replace_helpsr
+  struct replace_helper
   {
     ReplaceFunction m_replace;
   
-    replace_helpsr(ReplaceFunction replace)
+    replace_helper(ReplaceFunction replace)
       : m_replace(replace)
     {}
   
@@ -182,12 +211,12 @@ namespace detail {
     {
       aterm_appl a(t);
       aterm_appl fa = f(a);
-      result = (a == fa) ? appl_apply(f(a), replace_helpsr<ReplaceFunction>(f)) : fa;
+      result = (a == fa) ? appl_apply(f(a), replace_helper<ReplaceFunction>(f)) : fa;
     }
     else if (t.type() == AT_LIST)
     {
       aterm_list l(t);
-      result = list_apply(l, replace_helpsr<ReplaceFunction>(f));
+      result = list_apply(l, replace_helper<ReplaceFunction>(f));
     }
     return result;
   }

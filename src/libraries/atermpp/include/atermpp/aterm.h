@@ -316,6 +316,24 @@ namespace atermpp
     return ATisEqual(x, y) == ATtrue;
   }
 
+  inline
+  bool operator!=(const aterm& x, const aterm& y)
+  {
+    return ATisEqual(x, y) == ATfalse;
+  }
+  
+  inline
+  bool operator!=(const aterm& x, ATerm y)
+  {
+    return ATisEqual(x, y) == ATfalse;
+  }
+  
+  inline
+  bool operator!=(const ATerm& x, aterm y)
+  {
+    return ATisEqual(x, y) == ATfalse;
+  }
+
 } // namespace atermpp
 
 #include "atermpp/aterm_make_match.h"

@@ -355,6 +355,24 @@ namespace atermpp {
     return ATisEqual(x, aterm_traits<term_list<Term> >::term(y)) == ATtrue;
   }
 
+  template <typename Term>
+  bool operator!=(const term_list<Term>& x, const term_list<Term>& y)
+  {
+    return ATisEqual(aterm_traits<term_list<Term> >::term(x), aterm_traits<term_list<Term> >::term(y)) == ATfalse;
+  }
+  
+  template <typename Term>
+  bool operator!=(const term_list<Term>& x, ATermList y)
+  {
+    return ATisEqual(aterm_traits<term_list<Term> >::term(x), y) == ATfalse;
+  }
+  
+  template <typename Term>
+  bool operator!=(ATermList x, const term_list<Term>& y)
+  {
+    return ATisEqual(x, aterm_traits<term_list<Term> >::term(y)) == ATfalse;
+  }
+
   // implementation
   template <typename Term>
   term_list<Term>::term_list(const term_list<aterm>& t)

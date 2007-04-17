@@ -59,6 +59,23 @@ int test_main(int, char*[])
   t == l;
   l == a;
 
+  // inequality
+  t != t;
+  t != T;
+  T != t;
+
+  a != a;
+  a != A;
+  A != a;
+
+  l != l;
+  l != L;
+  L != l;
+
+  t != a;
+  t != l;
+  l != a;
+
   // operator<
   bool b;
   b = t < t;

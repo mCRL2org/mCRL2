@@ -239,6 +239,24 @@ namespace atermpp
     return ATisEqual(x, aterm_traits<term_appl<Term> >::term(y)) == ATtrue;
   }
 
+  template <typename Term>
+  bool operator!=(const term_appl<Term>& x, const term_appl<Term>& y)
+  {
+    return ATisEqual(aterm_traits<term_appl<Term> >::term(x), aterm_traits<term_appl<Term> >::term(y)) == ATfalse;
+  }
+  
+  template <typename Term>
+  bool operator!=(const term_appl<Term>& x, ATermAppl y)
+  {
+    return ATisEqual(aterm_traits<term_appl<Term> >::term(x), y) == ATfalse;
+  }
+  
+  template <typename Term>
+  bool operator!=(ATermAppl x, const term_appl<Term>& y)
+  {
+    return ATisEqual(x, aterm_traits<term_appl<Term> >::term(y)) == ATfalse;
+  }
+
 } // namespace atermpp
 
 #endif // ATERM_APPL_H
