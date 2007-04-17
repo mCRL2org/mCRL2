@@ -42,6 +42,11 @@ namespace squadt {
           tools_for_category temporary;
 
           categories_for_format.insert(std::make_pair(j.m_mime_type,temporary));
+
+          /* Make sure a command is registered */
+          if (!has_registered_command(j.m_mime_type,false)) {
+            register_command(j.m_mime_type, command_system);
+          }
         }
 
         categories_for_format[j.m_mime_type].insert(std::make_pair(j.m_category, *t));
@@ -139,15 +144,18 @@ namespace squadt {
     return (formats);
   }
 
-  /** \brief Whether or not a command is associated with this type */
-  bool type_registry::has_registered_command(mime_type const& t) const {
-    bool result = true;
-
+  /**
+   * \brief Whether or not a command is associated with this type
+   * \param[in] t mime type for which to search
+   * \param[in] c whether or not to consult the system mime-database
+   **/
+  bool type_registry::has_registered_command(mime_type const& t, const bool c) const {
     actions_for_type::const_iterator i = command_for_type.find(t);
 
     if (i == command_for_type.end()) {
       i = std::find_if(command_for_type.begin(), command_for_type.end(),
                 boost::bind(&mime_type::operator==, mime_type("text/" + t.get_sub_type()), boost::bind(&actions_for_type::value_type::first, _1)));
+
     }
     if (i == command_for_type.end()) {
       i = std::find_if(command_for_type.begin(), command_for_type.end(),
@@ -155,15 +163,15 @@ namespace squadt {
     }
 
     if (i == command_for_type.end()) {
-      wxFileType* wxt = global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal));
-
-      result = wxt != 0;
+      if (t.known_main_type() && c) {
+        return global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.as_string().c_str(), wxConvLocal)) != 0;
+      }
     }
     else {
-      result = ((*i).second != command_none);
+      return (*i).second != command_none;
     }
 
-    return (result);
+    return false;
   }
 
   /**
@@ -177,10 +185,10 @@ namespace squadt {
 
     if (&c == &command_system) {
       if (global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal)) != 0) {
-        command_for_type[t] = c;
+        command_for_type[t] = global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal))->GetOpenCommand(wxT("$")).fn_str();
       }
       else {
-        command_for_type[t] = global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal))->GetOpenCommand(wxT("$")).fn_str();
+        command_for_type[t] = c;
       }
     }
     else if (c.empty()) {

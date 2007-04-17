@@ -94,7 +94,7 @@ namespace squadt {
 
       project_menu->Append(wxID_NEW, wxT("&New...\tCTRL-n"));
       project_menu->Append(wxID_OPEN, wxT("&Open...\tCTRL-o"));
-      project_menu->Append(cmID_UPDATE, wxT("&Update...\tCTRL-f"))->Enable(false);
+      project_menu->Append(cmID_UPDATE, wxT("&Update...\tCTRL-u"))->Enable(false);
       project_menu->Append(wxID_CLOSE, wxT("&Close\tCTRL-F4"))->Enable(false);
       project_menu->AppendSeparator();
       wxMenu* new_data_source_menu = new wxMenu();

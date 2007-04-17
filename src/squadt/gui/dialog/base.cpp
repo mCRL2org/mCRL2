@@ -39,8 +39,8 @@ namespace squadt {
         button_accept = new wxButton(this, wxID_OK);
         button_cancel = new wxButton(this, wxID_CANCEL);
 
-        ss->Add(button_accept, 0, wxRIGHT, 5);
-        ss->Add(button_cancel, 0, wxLEFT|wxRIGHT, 5);
+        ss->Add(button_cancel, 0, wxRIGHT, 5);
+        ss->Add(button_accept, 0, wxLEFT|wxRIGHT, 5);
         s->Add(main_panel, 1, wxEXPAND|wxALL, 4);
         s->Add(new wxStaticLine(this, wxID_ANY), 0, wxEXPAND|wxALL, 2);
         s->Add(ss, 0, wxALIGN_RIGHT|wxALL, 5);

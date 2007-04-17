@@ -49,6 +49,9 @@ namespace sip {
       /** \brief Constructor */
       mime_type(std::string const&, main_type s);
 
+      /** \brief Whether the main type is known */
+      bool known_main_type() const;
+
       /** \brief Gets the main type */
       std::string get_main_type() const;
 
@@ -76,6 +79,10 @@ namespace sip {
     o << t.as_string();
 
     return (o);
+  }
+
+  inline bool mime_type::known_main_type() const {
+    return (m_main != unknown);
   }
 
   inline std::string mime_type::get_main_type() const {
