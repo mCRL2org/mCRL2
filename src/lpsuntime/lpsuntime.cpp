@@ -86,7 +86,9 @@ void squadt_interactor::set_capabilities(sip::tool::capabilities& capabilities) 
 
 void squadt_interactor::user_interactive_configuration(sip::configuration& configuration)
 {
-  configuration.add_output(lps_file_for_output, sip::mime_type("lps"), configuration.get_output_name(".lps"));
+  if (!configuration.output_exists(lps_file_for_output)) {
+    configuration.add_output(lps_file_for_output, sip::mime_type("lps"), configuration.get_output_name(".lps"));
+  }
 }
 
 bool squadt_interactor::check_configuration(sip::configuration const& configuration) const

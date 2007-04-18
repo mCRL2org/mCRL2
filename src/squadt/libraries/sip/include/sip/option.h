@@ -100,9 +100,13 @@ namespace sip {
       template < typename S, typename T >
       void append_argument(T const&);
 
+      /** \brief Special function to set/replace the value first argument ... */
+      template < unsigned int n, typename S, typename T >
+      void set_argument_value(T const&, bool = true);
+
       /** \brief Replace an argument (type and instance) ... */
       template < typename T >
-      void replace_argument(const size_t i, datatype::basic_datatype::sptr, T const&);
+      void replace_argument(unsigned int const& n, datatype::basic_datatype::sptr, T const&);
 
       /** \brief Assigns a value to the n-th argument of the option */
       void bind_argument(const size_t n, std::string const&);
@@ -207,15 +211,32 @@ namespace sip {
   }
 
   /**
+   * \param[in] t pointer to the data type definition
+   * \param[in] b whether or not to add if the argument is specified
+   **/
+  template < unsigned int n, typename S, typename T >
+  void option::set_argument_value(T const& t, bool b) {
+    if (n < m_arguments.size()) {
+      if (b) {
+        m_arguments[n].first.reset(new S);
+        m_arguments[n].second = S::convert(t);
+      }
+    }
+    else {
+      append_argument< S >(t);
+    }
+  }
+
+  /**
    * \param[in] i the index of the element to replace
    * \param[in] t pointer to the data type definition
    * \param[in] d data that is valid w.r.t. the data type
    **/
   template < typename T >
-  inline void option::replace_argument(const size_t i, datatype::basic_datatype::sptr t, T const& d) {
+  inline void option::replace_argument(unsigned int const& n, datatype::basic_datatype::sptr t, T const& d) {
     assert(t.get() != 0);
 
-    replace_argument(i, t, t.get()->convert(d));
+    replace_argument(n, t, t->convert(d));
   }
 
   /**
@@ -224,12 +245,12 @@ namespace sip {
    * \param[in] d data that is valid w.r.t. the data type
    **/
   template < >
-  inline void option::replace_argument(const size_t i, datatype::basic_datatype::sptr t, std::string const& d) {
+  inline void option::replace_argument(unsigned int const& n, datatype::basic_datatype::sptr t, std::string const& d) {
     assert(t.get() != 0);
-    assert(0 <= i && i < m_arguments.size());
+    assert(0 <= n && n < m_arguments.size());
     assert(t->validate(d));
 
-    m_arguments[i] = std::make_pair(t, d);
+    m_arguments[n] = std::make_pair(t, d);
   }
 
   /**

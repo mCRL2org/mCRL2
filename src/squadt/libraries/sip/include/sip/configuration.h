@@ -211,6 +211,10 @@ namespace sip {
       /** \brief Get the value of an option argument */
       boost::any get_option_argument(parameter_identifier const& id, size_t const& n = 0) const;
 
+      /** \brief Get the value of an option argument */
+      template < typename T >
+      T const& get_option_argument(parameter_identifier const& id, size_t const& n = 0) const;
+
       /** \brief Establishes whether an input object is known by this identifier (by identifier) */
       bool input_exists(parameter_identifier const&) const;
 
@@ -493,6 +497,18 @@ namespace sip {
 
   inline size_t configuration::number_of_outputs() const {
     return (m_output_objects.size());
+  }
+
+  /**
+   * \param[in] id an identifier for the option
+   * \param[in] n an optional identifier for the option
+   * \pre option must take at least one argument and n must be smaller than the number of arguments
+   * \pre option with this identifier must be part of the configuration, use
+   *      option_exists member to establish this
+   **/
+  template < typename T >
+  inline T const& configuration::get_option_argument(std::string const& id, size_t const& n) const {
+    return boost::any_cast < T const& > (get_option_argument(id, n));
   }
 }
 

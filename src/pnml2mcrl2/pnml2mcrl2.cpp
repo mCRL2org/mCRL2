@@ -134,7 +134,9 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
    * the same parameters
    */
   if (c.is_fresh()) {
-    c.add_output(mcrl2_file_for_output, sip::mime_type("mcrl2", sip::mime_type::text), c.get_output_name(".mcrl2"));
+    if (!c.output_exists(mcrl2_file_for_output)) {
+      c.add_output(mcrl2_file_for_output, sip::mime_type("mcrl2", sip::mime_type::text), c.get_output_name(".mcrl2"));
+    }
   }
 }
 

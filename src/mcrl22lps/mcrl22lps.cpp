@@ -128,18 +128,6 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
   layout::manager::aptr top(layout::vertical_box::create());
 
-  // box to select the output file
-//  layout::manager* current_box      = new horizontal_box();
-//  text_field*      outfilenamefield = new text_field(suggestedoutfilename);
-
-//  std::string suggestedoutfilename(infilename + ".lps", 0 , infilename.size()-6);
-
-//  current_box->add(new label("Output file name: "),middle);
-//  current_box->add(outfilenamefield,middle);
-
-//  top->add(new label(" "));
-//  top->add(current_box,layout::left);
-
   // Linearisation method selection
   layout::manager* current_box      = new horizontal_box();
 

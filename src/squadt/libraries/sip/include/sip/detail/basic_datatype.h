@@ -13,6 +13,8 @@
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/utility/enable_if.hpp>
+#include <boost/type_traits/is_enum.hpp>
 
 #include <sip/visitors.h>
 
@@ -344,6 +346,15 @@ namespace sip {
     inline basic_datatype::~basic_datatype() {
     }
 
+    template < typename T >
+    inline std::string basic_datatype::convert(T const& s) {
+      if (boost::is_enum< T >::value) {
+        return (enumeration::convert(s));
+      }
+
+      return integer::convert(s);
+    }
+
     /** \brief Converts a boolean */
     template <>
     inline std::string basic_datatype::convert(bool const& s) {
@@ -366,6 +377,12 @@ namespace sip {
     template <>
     inline std::string basic_datatype::convert(std::string const& s) {
       return (s);
+    }
+
+    /** \brief Converts a string */
+    template <>
+    inline std::string basic_datatype::convert(char* const& s) {
+      return (std::string(s));
     }
 
     /************************************************************************

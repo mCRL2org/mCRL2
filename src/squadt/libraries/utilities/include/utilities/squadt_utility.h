@@ -84,6 +84,9 @@ namespace squadt_utility {
       template < typename M >
       radio_button* associate(M const&, T const&, std::string const&, bool = false);
 
+      /** \brief sets the selection for the group of radio buttons */
+      void set_selection(T const&);
+
       /** \brief get the value for the selected radio button */
       T get_selection();
 
@@ -143,6 +146,15 @@ namespace squadt_utility {
     selector[button] = v;
 
     return (button);
+  }
+
+  template < typename T >
+  inline void radio_button_helper< T >::set_selection(T const& t) {
+    for (typename std::map < radio_button const*, T >::iterator i = selector.begin(); i != selector.end(); ++i) {
+      if (i->second == t) {
+        const_cast < radio_button* > (i->first)->set_selected();
+      }
+    }
   }
 
   template < typename T >

@@ -137,7 +137,7 @@ namespace sip {
    * \param r whether or not to replace an existing option with the same id
    **/
   option& configuration::add_option(std::string const& id, bool r) {
-    assert(m_parameter_by_id.count(id) == 0);
+    assert(m_parameter_by_id.count(id) == 0 || r);
 
     boost::shared_ptr < option > new_option(new sip::option);
 
@@ -159,7 +159,7 @@ namespace sip {
    * \param r whether or not to replace an existing option with the same id
    **/
   option& configuration::add_option(std::string const& id, boost::shared_ptr < option >& o, bool r) {
-    assert(m_parameter_by_id.count(id) == 0);
+    assert(m_parameter_by_id.count(id) == 0 || r);
 
     if (m_parameter_by_id.count(id) == 0) {
       m_parameter_by_id[id] = m_positions.size();

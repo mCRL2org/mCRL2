@@ -128,7 +128,7 @@ namespace sip {
           radio_button(std::string const&, radio_button*, bool = false);
 
           /** \brief Set state of the radio button */
-          void set_selected(bool);
+          void set_selected(bool = true);
 
           /** \brief Set state of the radio button, and send update */
           void set_selected(tool::communicator*);

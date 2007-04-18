@@ -117,6 +117,21 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& confi
   using namespace sip::datatype;
   using namespace sip::layout::elements;
 
+  /* Set defaults where the supplied configuration does not have values */
+  if (!configuration.output_exists(lps_file_for_output)) {
+    configuration.add_output(lps_file_for_output, sip::mime_type("lps"), configuration.get_output_name(".lps"));
+  }
+
+  if (!configuration.option_exists(option_rewrite_strategy)) {
+    configuration.add_option(option_rewrite_strategy).append_argument(rewrite_strategy_enumeration, 0);
+  }
+
+  if (!configuration.option_exists(option_finite_only)) {
+    configuration.add_option(option_finite_only).
+       set_argument_value< 0, sip::datatype::boolean >(true, false);
+  }
+
+  /* Prepare user interaction */
   layout::manager::aptr top(layout::vertical_box::create());
   layout::manager* current_box = new horizontal_box();
 
@@ -125,12 +140,19 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& confi
   strategy_selector.associate(current_box, GS_REWR_INNERC, "Innerc");
   strategy_selector.associate(current_box, GS_REWR_JITTY,  "Jitty");
   strategy_selector.associate(current_box, GS_REWR_JITTYC, "Jittyc");
+
+  if (configuration.option_exists(option_rewrite_strategy)) {
+    strategy_selector.set_selection(static_cast < RewriteStrategy > (
+        configuration.get_option_argument< size_t >(option_rewrite_strategy, 0)));
+  }
   
   top->add(new label("Rewrite strategy"));
   top->add(current_box);
 
   current_box = new horizontal_box();
-  checkbox* finite_only = new checkbox("Only decluster variables of finite sorts");
+  checkbox* finite_only = new checkbox("Only decluster variables of finite sorts", 
+        configuration.get_option_argument< bool >(option_finite_only));
+  
   current_box->add(finite_only, layout::left);
   top->add(new label(" "));
   top->add(current_box);
@@ -143,14 +165,11 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& confi
 
   okay_button->await_change();
   
-  configuration.add_output(lps_file_for_output, sip::mime_type("lps"), configuration.get_output_name(".lps"));
-  if (finite_only->get_status())
-  {
-    configuration.add_option(option_finite_only);
-  }
-  
-  configuration.add_option(option_rewrite_strategy).append_argument(rewrite_strategy_enumeration, strategy_selector.get_selection());
-
+  /* Update configuration */
+  configuration.get_option(option_finite_only).
+     set_argument_value< 0, sip::datatype::boolean >(finite_only->get_status());
+std::cerr << "status " <<  finite_only->get_status() << std::endl;
+  configuration.get_option(option_rewrite_strategy).replace_argument(0, rewrite_strategy_enumeration, strategy_selector.get_selection());
 }
 
 bool squadt_interactor::check_configuration(sip::configuration const& configuration) const

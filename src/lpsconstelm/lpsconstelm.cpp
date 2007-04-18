@@ -182,15 +182,37 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   using namespace sip::layout;
   using namespace sip::layout::elements;
 
+  /* Set defaults where the supplied configuration does not have values */
+  if (!c.output_exists(lps_file_for_output)) {
+    /* Add output file to the configuration */
+    c.add_output(lps_file_for_output, sip::mime_type("lps"), c.get_output_name(".lps"));
+  }
+
+  if (!c.option_exists(option_remove_single_element_sorts)) {
+    c.add_option(option_remove_single_element_sorts, false).
+        set_argument_value< 0, sip::datatype::boolean >(true, false);
+  }
+  if (!c.option_exists(option_remove_unvisited_summands)) {
+    c.add_option(option_remove_unvisited_summands, false).
+        set_argument_value< 0, sip::datatype::boolean >(true, false);
+  }
+  if (!c.option_exists(option_ignore_summand_conditions)) {
+    c.add_option(option_ignore_summand_conditions, false).
+        set_argument_value< 0, sip::datatype::boolean >(true, false);
+  }
+
   /* Create and add the top layout manager */
   layout::manager::aptr top(layout::horizontal_box::create());
 
   /* First column */
   layout::vertical_box* column = new layout::vertical_box();
 
-  checkbox* remove_single_element_sorts = new checkbox("remove single element sorts", true);
-  checkbox* remove_unvisited_summands   = new checkbox("remove summands that are not visited", true);
-  checkbox* ignore_summand_conditions   = new checkbox("take summand conditions into account", true);
+  checkbox* remove_single_element_sorts = new checkbox("remove single element sorts",
+        c.get_option_argument< bool >(option_remove_single_element_sorts));
+  checkbox* remove_unvisited_summands   = new checkbox("remove summands that are not visited",
+        c.get_option_argument< bool >(option_remove_unvisited_summands));
+  checkbox* ignore_summand_conditions   = new checkbox("take summand conditions into account",
+        c.get_option_argument< bool >(option_ignore_summand_conditions));
 
   column->add(remove_single_element_sorts, layout::left);
   column->add(remove_unvisited_summands, layout::left);
@@ -208,23 +230,13 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   /* Wait until the ok button was pressed */
   okay_button->await_change();
 
-  if (c.is_fresh()) {
-    if (!c.output_exists(lps_file_for_output)) {
-      /* Add output file to the configuration */
-      c.add_output(lps_file_for_output, sip::mime_type("lps"), c.get_output_name(".lps"));
-    }
-
-    /* Values for the options */
-    if (remove_single_element_sorts->get_status()) {
-      c.add_option(option_remove_single_element_sorts);
-    }
-    if (remove_unvisited_summands->get_status()) {
-      c.add_option(option_remove_unvisited_summands);
-    }
-    if (ignore_summand_conditions->get_status()) {
-      c.add_option(option_ignore_summand_conditions);
-    }
-  }
+  /* Update configuration */
+  c.get_option(option_remove_single_element_sorts).
+      set_argument_value< 0, sip::datatype::boolean >(remove_single_element_sorts->get_status());
+  c.get_option(option_remove_unvisited_summands).
+      set_argument_value< 0, sip::datatype::boolean >(remove_unvisited_summands->get_status());
+  c.get_option(option_ignore_summand_conditions).
+      set_argument_value< 0, sip::datatype::boolean >(ignore_summand_conditions->get_status());
 }
 
 bool squadt_interactor::check_configuration(sip::configuration const& c) const {
