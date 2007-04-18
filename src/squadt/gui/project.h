@@ -171,6 +171,9 @@ namespace squadt {
         /** \brief Updates the status of files in the object view */
         void set_object_status(processor::wptr const&, const wxTreeItemId);
 
+        /** \brief Updates the status of files in the object view */
+        void update_object_status(processor::wptr const&, const wxTreeItemId);
+
       public:
 
         /** \brief Constructor, with project description */

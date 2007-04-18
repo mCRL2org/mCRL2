@@ -327,16 +327,16 @@ namespace squadt {
    * \param[in] h a function that is called that is called just before a processor is updated
    **/
   void project_manager_impl::update(boost::function < void (processor*) > h) {
-    bool update_active = false;
+    static bool update_active = false;
 
     if (!update_active) {
       update_active = true;
 
       BOOST_FOREACH(processor_list::value_type i, processors) {
-        if (i->get_tool()) {
+        if (i->get_tool() && reverse_depends.count(i.get()) == 0) {
           h(i.get());
 
-          update_single(i);
+          i->update();
         }
       }
 

@@ -96,22 +96,31 @@ namespace squadt {
       build();
     }
 
-    /* Updates the status of files in the object view */
-    void project::set_object_status(processor::wptr const& w, const wxTreeItemId s) {
+    void project::update_object_status(processor::wptr const& w, const wxTreeItemId s) {
       processor::sptr g = w.lock();
 
       if (g.get() != 0) {
         wxTreeItemIdValue cookie; // For wxTreeCtrl traversal
-
+       
         for (wxTreeItemId j = object_view->GetFirstChild(s, cookie); j.IsOk(); j = object_view->GetNextChild(s, cookie)) {
           project::tool_data* instance_data = static_cast < project::tool_data* > (object_view->GetItemData(j));
-
+       
           if (instance_data->get_processor().get() == g.get()) {
             object_view->SetItemImage(j, instance_data->get_object()->status);
           }
         }
 
-        gui_builder.schedule_update(boost::bind(&wxTreeCtrl::Update, object_view));
+        object_view->Refresh();
+        object_view->Update();
+      }
+    }
+
+    /* Updates the status of files in the object view */
+    void project::set_object_status(processor::wptr const& w, const wxTreeItemId s) {
+      processor::sptr g = w.lock();
+
+      if (g.get() != 0) {
+        gui_builder.schedule_update(boost::bind(&project::update_object_status, this, w, s));
       }
     }
 
