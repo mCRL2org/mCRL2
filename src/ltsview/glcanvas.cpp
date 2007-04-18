@@ -236,14 +236,17 @@ void GLCanvas::display(bool coll_caller) {
 }
 
 void GLCanvas::reshape() {
-	SetCurrent();
   int width,height;
   GetClientSize(&width,&height);
-  glViewport(0,0,width,height);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(60.0f,(GLfloat)(width)/(GLfloat)(height),nearPlane,farPlane);
-  glMatrixMode(GL_MODELVIEW);
+
+  if (GetContext()) {
+    SetCurrent();
+    glViewport(0,0,width,height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(60.0f,(GLfloat)(width)/(GLfloat)(height),nearPlane,farPlane);
+    glMatrixMode(GL_MODELVIEW);
+  }
 }
 
 void GLCanvas::onPaint(wxPaintEvent& /*event*/) {

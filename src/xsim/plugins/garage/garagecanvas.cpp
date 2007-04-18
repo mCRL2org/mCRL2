@@ -212,15 +212,17 @@ void GarageCanvas::OnEvtSize( wxSizeEvent& event )
   GetSize( &width, &height );
 
   // Set this tocurrent GL context
-  SetCurrent();
+  if (GetContext()) {
+    SetCurrent();
 
-  // Set up viewport to match canvas size
-  glViewport(0, 0, width, height);
-  glLoadIdentity();
-  glMatrixMode(GL_MODELVIEW);
-
-  //Force redraw because the paint event is not triggered in Windows
+    // Set up viewport to match canvas size
+    glViewport(0, 0, width, height);
+    glLoadIdentity();
+    glMatrixMode(GL_MODELVIEW);
+ 
+    //Force redraw because the paint event is not triggered in Windows
 //  Draw();
+  }
 }
 
 
