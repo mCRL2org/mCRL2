@@ -154,6 +154,18 @@ ATermAppl removeUnusedData(ATermAppl ATSpec, bool keep_basis)
 		}
 	}
 
+	action_label_list::iterator ab = spec.action_labels().begin();
+	action_label_list::iterator ae = spec.action_labels().end();
+	for (; ab != ae; ab++)
+	{
+		sort_list::iterator sb = ab->sorts().begin();
+		sort_list::iterator se = ab->sorts().end();
+		for (; sb != se; sb++)
+		{
+			add_used_sort((ATermAppl) *sb,used_data);
+		}
+	}
+
 	add_used(spec.initial_process().state(),used_data);
 
 	data_variable_list::iterator vb = spec.initial_process().free_variables().begin();
