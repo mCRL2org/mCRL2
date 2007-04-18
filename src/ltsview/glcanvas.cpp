@@ -236,6 +236,7 @@ void GLCanvas::display(bool coll_caller) {
 }
 
 void GLCanvas::reshape() {
+	SetCurrent();
   int width,height;
   GetClientSize(&width,&height);
   glViewport(0,0,width,height);

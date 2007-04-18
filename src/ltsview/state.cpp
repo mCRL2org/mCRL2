@@ -198,7 +198,7 @@ Transition* State::getOutTransitioni( int i ) const
   return outTransitions[i];
 }
 
-int State::getNumberOfOutTransitions( ) const 
+int State::getNumOutTransitions( ) const 
 {
   return outTransitions.size();
 }

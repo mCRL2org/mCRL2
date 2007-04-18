@@ -114,28 +114,32 @@ void LTS::getActionLabels(vector< string > &ls) const {
 	ls = labels;
 }
 
-State* LTS::getInitialState() const
-{
+State* LTS::getInitialState() const {
   return initialState;
 }
 
-int LTS::getNumberOfRanks() const
-{
+Cluster* LTS::getClusterAtRank(int r,int i) const {
+	return clustersInRank[r][i];
+}
+
+int LTS::getNumRanks() const {
   return clustersInRank.size();
 }
 
-int LTS::getNumberOfClusters() const
-{
+int LTS::getNumClusters() const {
   int result = 0;
-  for ( unsigned int i = 0 ; i < clustersInRank.size() ; ++i )
+  for (unsigned int i = 0; i < clustersInRank.size(); ++i) {
     result += clustersInRank[i].size();
+	}
   return result;
 }
 
-int LTS::getNumberOfDeadlocks()
-{
-  if ( deadlockCount == -1 )
-  {
+int LTS::getNumClustersAtRank(int r) const {
+	return clustersInRank[r].size();
+}
+
+int LTS::getNumDeadlocks() {
+  if (deadlockCount == -1) {
     // a value of -1 indicates that we have to compute it
     deadlockCount = 0;
     for ( vector< State* >::iterator state_it = unmarkedStates.begin() ;
@@ -154,23 +158,19 @@ int LTS::getNumberOfDeadlocks()
   return deadlockCount;
 }
 
-int LTS::getNumberOfMarkedStates() const
-{
+int LTS::getNumMarkedStates() const {
   return markedStates.size();
 }
 
-int LTS::getNumberOfMarkedTransitions() const
-{
+int LTS::getNumMarkedTransitions() const {
   return markedTransitionCount;
 }
 
-int LTS::getNumberOfStates() const
-{
-  return ( unmarkedStates.size() + markedStates.size() );
+int LTS::getNumStates() const {
+  return (unmarkedStates.size() + markedStates.size());
 }
 
-int LTS::getNumberOfTransitions() const
-{
+int LTS::getNumTransitions() const {
   return transitions.size();
 }
 
@@ -387,7 +387,7 @@ void LTS::mergeSuperiorClusters() {
       set< Cluster* > mergeSet;
       
       // iterate over the states in this cluster
-      for (int i = 0; i < (**clusit).getNumberOfStates(); ++i) {
+      for (int i = 0; i < (**clusit).getNumStates(); ++i) {
         s = (**clusit).getState(i);
 	      // set deadlock information
 	      (**clusit).setDeadlock((**clusit).hasDeadlock() || s->isDeadlock());
@@ -410,7 +410,7 @@ void LTS::mergeSuperiorClusters() {
 	      set< Cluster* >::iterator clusit1;
 	      for (clusit1=mergeSet.begin(); clusit1!=mergeSet.end(); ++clusit1) {
           // add the cluster's states to c
-          for (int i=0; i < (**clusit1).getNumberOfStates(); ++i) {
+          for (int i=0; i < (**clusit1).getNumStates(); ++i) {
             s = (**clusit1).getState(i);
             c->addState(s);
             s->setCluster(c);
@@ -551,11 +551,11 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided)
       // Compute the position of the states, based on number and position of 
       // descendants of their cluster.
       //
-      if (currCluster->getNumberOfStates() == 1) {
+      if (currCluster->getNumStates() == 1) {
         (*state_it)->setPosition(-1.0f);
       }
       else {
-        switch (currCluster->getNumberOfDescendants()) {
+        switch (currCluster->getNumDescendants()) {
           case 0:
           {
             // Case three: No descendant clusters.

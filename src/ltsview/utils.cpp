@@ -65,43 +65,6 @@ Utils::HSV_Color operator+(HSV_Color c1,HSV_Color c2) {
   return result;
 }
 
-Utils::HSV_Color interpolate(HSV_Color hsv1,HSV_Color hsv2,float r,bool l) {
-  HSV_Color result;
-  int delta_h1 = hsv2.h - hsv1.h;
-  int delta_h2 = 360 - abs(delta_h1);
-  if (delta_h1 >= 0) {
-    delta_h2 = delta_h1 - 360;
-  }
-  else {
-    delta_h2 = delta_h1 + 360;
-  }
-  if (l) {
-    if (abs(delta_h1) < abs(delta_h2)) {
-      result.h = round_to_int(hsv1.h + r*delta_h2);
-    }
-    else {
-      result.h = round_to_int(hsv1.h + r*delta_h1);
-    }
-  }
-  else {
-    if (fabs(static_cast<float>(delta_h1)) < fabs(static_cast<float>(delta_h2))) {
-      result.h = round_to_int(hsv1.h + r*delta_h1);
-    }
-    else {
-      result.h = round_to_int(hsv1.h + r*delta_h2);
-    }
-  }
-  while (result.h < 0) {
-    result.h += 360;
-  } 
-  while (result.h >= 360) {
-    result.h -= 360;
-  }
-  result.s = round_to_int(hsv1.s + r*(hsv2.s-hsv1.s));
-  result.v = round_to_int(hsv1.v + r*(hsv2.v-hsv1.v));
-  return result;
-}
-
 float deg_to_rad(float deg) {
   return deg * Utils::PI / 180.0f;
 }
@@ -219,6 +182,59 @@ Utils::Vect ang_to_vec( float phi) {
 
 float vec_length( Vect v) {
   return sqrt(v.x*v.x + v.y *  v.y);
+}
+
+Interpolater::Interpolater(RGB_Color rgb1,RGB_Color rgb2,int n,bool l) {
+  base = RGB_to_HSV(rgb1);
+  HSV_Color col2 = RGB_to_HSV(rgb2);
+  if (rgb1.r == rgb1.g  &&  rgb1.g == rgb1.b) {
+    base.h = col2.h;
+  }
+  if (rgb2.r == rgb2.g  &&  rgb2.g == rgb2.b) {
+    col2.h = base.h;
+  }
+  delta_h1 = col2.h - base.h;
+  delta_h2 = 360 - abs(delta_h1);
+  if (delta_h1 >= 0) {
+    delta_h2 = delta_h1 - 360;
+  }
+  else {
+    delta_h2 = delta_h1 + 360;
+  }
+  N = n-1;
+  is_long = l;
+  delta_s = col2.s - base.s;
+  delta_v = col2.v - base.v;
+}
+
+Utils::RGB_Color Interpolater::getColor(int i) {
+	float r = float(i);
+	if (N > 1) {
+  	r /= float(N);
+	}
+  HSV_Color result;
+  if (is_long) {
+    if (abs(delta_h1) < abs(delta_h2)) {
+      result.h = round_to_int(base.h + r*delta_h2);
+    } else {
+      result.h = round_to_int(base.h + r*delta_h1);
+    }
+  } else {
+    if (fabs(float(delta_h1)) < fabs(float(delta_h2))) {
+      result.h = round_to_int(base.h + r*delta_h1);
+    } else {
+      result.h = round_to_int(base.h + r*delta_h2);
+    }
+  }
+  while (result.h < 0) {
+    result.h += 360;
+  } 
+  while (result.h >= 360) {
+    result.h -= 360;
+  }
+  result.s = round_to_int(base.s + r*delta_s);
+  result.v = round_to_int(base.v + r*delta_v);
+  return HSV_to_RGB(result);
 }
 
 }

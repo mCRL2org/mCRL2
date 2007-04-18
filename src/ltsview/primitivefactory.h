@@ -11,13 +11,15 @@ class PrimitiveFactory: public Subscriber {
     ~PrimitiveFactory();
     void drawPrimitive(int p);
     void drawSimpleSphere();
-    int  makeCone(float r,bool topClosed,bool bottomClosed);
-    int  makeHemisphere();
-    int  makeSphere();
+    int makeHemisphere();
+		int makeObliqueCone(float a,float r,float s);
+		int makeSphere();
+    int makeTruncatedCone(float r,bool topClosed,bool bottomClosed);
     //int  makeTube();
     void notify(SettingID s);
   private:
     std::vector<Primitive*> primitives;
+		std::vector<P_ObliqueCone*> oblq_cones;
     ConeDB  *coneDB;
     Settings *settings;
     int     disc;
@@ -30,8 +32,8 @@ class PrimitiveFactory: public Subscriber {
     int  make_ring(float r);
     void make_disc();
     void make_simple_sphere();
-    int  map_cone_radius(float r);
     void update_geom_tables();
-    void update_primitives();
+    void update_oblique_cones();
+		void update_primitives();
 };
 #endif

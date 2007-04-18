@@ -1,6 +1,5 @@
 #include "primitivefactory.h"
 #include <cmath>
-#include "utils.h"
 
 using namespace Utils;
 
@@ -13,16 +12,17 @@ PrimitiveFactory::PrimitiveFactory(Settings* ss) {
   simple_sphere = -1;
   settings = ss;
   settings->subscribe(Quality,this);
+	settings->subscribe(BranchTilt,this);
   
   cos_theta = NULL;
   sin_theta = NULL;
-  coneDB = new ConeDB(6,25);
+  coneDB = new ConeDB();
   update_geom_tables();
 }
 
 PrimitiveFactory::~PrimitiveFactory() {
   delete coneDB;
-  for (unsigned int i=0; i<primitives.size(); ++i) {
+  for (unsigned int i = 0; i < primitives.size(); ++i) {
     delete primitives[i];
   }
   primitives.clear();
@@ -45,33 +45,39 @@ void PrimitiveFactory::drawSimpleSphere() {
   primitives[simple_sphere]->draw();
 }
 
-int PrimitiveFactory::makeCone(float r,bool topClosed,bool bottomClosed) {
+int PrimitiveFactory::makeTruncatedCone(float r,bool topClosed,bool bottomClosed) {
   int result = make_ring(r);
-  unsigned char top_bot = 0;
-  if (bottomClosed) {
-    top_bot |= BOT_BIT;
-  }
-  if (topClosed) {
-    top_bot |= TOP_BIT;
-  }
-  if (top_bot != 0) {
+  if (topClosed || bottomClosed) {
     P_Ring *ring = dynamic_cast<P_Ring*>(primitives[result]);
-    int key = map_cone_radius(r);
-    result = coneDB->findCone(key,top_bot);
+    result = coneDB->findTruncatedCone(r,topClosed,bottomClosed);
     if (result == -1) {
       make_disc();
-      P_Cone *p = new P_Cone(ring,dynamic_cast<P_Disc*>(primitives[disc]),
-          top_bot);
+      P_TruncatedCone *p = new P_TruncatedCone(ring,
+					dynamic_cast<P_Disc*>(primitives[disc]),topClosed,bottomClosed);
       result = primitives.size();
-      coneDB->addCone(key,top_bot,result);
+      coneDB->addTruncatedCone(r,topClosed,bottomClosed,result);
       primitives.push_back(p);
     }
   }
   return result;
 }
 
+int PrimitiveFactory::makeObliqueCone(float a,float r,float s) {
+	int result = coneDB->findObliqueCone(a,r,s);
+	if (result == -1) {
+		P_ObliqueCone *p = new P_ObliqueCone(a,r,s);
+	  p->reshape(settings->getInt(Quality),cos_theta,sin_theta,
+							 deg_to_rad(float(settings->getInt(BranchTilt))));
+		result = primitives.size();
+		primitives.push_back(p);
+		oblq_cones.push_back(p);
+		coneDB->addObliqueCone(a,r,s,result);
+	}
+	return result;
+}
+
 int PrimitiveFactory::makeHemisphere() {
-  if (hemisphere==-1) {
+  if (hemisphere == -1) {
     P_Hemisphere *p = new P_Hemisphere();
     p->reshape(settings->getInt(Quality),cos_theta,sin_theta);
     hemisphere = primitives.size();
@@ -81,7 +87,7 @@ int PrimitiveFactory::makeHemisphere() {
 }
 
 int PrimitiveFactory::makeSphere() {
-  if (sphere==-1) {
+  if (sphere == -1) {
     P_Sphere *p = new P_Sphere();
     p->reshape(settings->getInt(Quality),cos_theta,sin_theta);
     sphere = primitives.size();
@@ -89,26 +95,30 @@ int PrimitiveFactory::makeSphere() {
   }
   return sphere;
 }
-/*
-int PrimitiveFactory::makeTube() {
-  return -1;
-}
-*/
+
 void PrimitiveFactory::notify(SettingID s) {
-  if (s == Quality) {
-    update_geom_tables();
-    update_primitives();
-  }
+	switch (s) {
+		case Quality:
+			update_geom_tables();
+			update_primitives();
+			update_oblique_cones();
+			break;
+		case BranchTilt:
+			update_oblique_cones();
+			break;
+		default:
+			break;
+	}
 }
   
 void PrimitiveFactory::update_geom_tables() {
-  int accuracy = settings->getInt(Quality);
-  cos_theta = (float*)realloc(cos_theta,2*accuracy*sizeof(float));
-  sin_theta = (float*)realloc(sin_theta,2*accuracy*sizeof(float));
+  int qlt = settings->getInt(Quality);
+  cos_theta = (float*)realloc(cos_theta,2*qlt*sizeof(float));
+  sin_theta = (float*)realloc(sin_theta,2*qlt*sizeof(float));
   
-  float d_theta = PI / accuracy;
+  float d_theta = PI / qlt;
   float theta = 0.0f;
-  for (int i=0; i<2*accuracy; ++i) {
+  for (int i = 0; i < 2*qlt; ++i) {
     cos_theta[i] = cos(theta);
     sin_theta[i] = sin(theta);
     theta += d_theta;
@@ -116,21 +126,28 @@ void PrimitiveFactory::update_geom_tables() {
 }
 
 void PrimitiveFactory::update_primitives() {
-  int accuracy = settings->getInt(Quality);
-  for (unsigned int i=0; i<primitives.size(); ++i) {
-    primitives[i]->reshape(accuracy,cos_theta,sin_theta);
+  int qlt = settings->getInt(Quality);
+  for (unsigned int i = 0; i < primitives.size(); ++i) {
+    primitives[i]->reshape(qlt,cos_theta,sin_theta);
   }
 }
 
+void PrimitiveFactory::update_oblique_cones() {
+	int qlt = settings->getInt(Quality);
+	float obt = deg_to_rad(float(settings->getInt(BranchTilt)));
+	for (unsigned int i = 0; i < oblq_cones.size(); ++i) {
+		oblq_cones[i]->reshape(qlt,cos_theta,sin_theta,obt);
+	}
+}
+
 int PrimitiveFactory::make_ring(float r) {
-  int key = map_cone_radius(r);
-  int result = coneDB->findCone(key,0);
+  int result = coneDB->findTruncatedCone(r,false,false);
   if (result == -1) {
     P_Ring *p = new P_Ring(r);
     p->reshape(settings->getInt(Quality),cos_theta,sin_theta);
     result = primitives.size();
     primitives.push_back(p);
-    coneDB->addCone(key,0,result);
+    coneDB->addTruncatedCone(r,false,false,result);
   }
   return result;
 }
@@ -150,8 +167,4 @@ void PrimitiveFactory::make_simple_sphere() {
     simple_sphere = primitives.size();
     primitives.push_back(p);
   }
-}
-
-int PrimitiveFactory::map_cone_radius(float r) {
-  return round_to_int(r * 100.0);
 }

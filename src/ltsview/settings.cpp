@@ -210,11 +210,10 @@ void Setting_RGB::reset() {
 
 Settings::Settings() {
   settings.assign(NUM_OF_SETTINGID,NULL);
-  settings[EllipsoidThreshold]  = new Setting_Float(EllipsoidThreshold,1.0f);
   settings[NodeSize]            = new Setting_Float(NodeSize,0.1f);
   settings[BranchRotation]      = new Setting_Int(BranchRotation,111);
-  settings[InnerBranchTilt]     = new Setting_Int(InnerBranchTilt,0);
-  settings[OuterBranchTilt]     = new Setting_Int(OuterBranchTilt,30);
+  settings[ClusterHeight]       = new Setting_Float(ClusterHeight,0.0f);
+  settings[BranchTilt]          = new Setting_Int(BranchTilt,30);
   settings[Quality]             = new Setting_Int(Quality,12);
   settings[Alpha]               = new Setting_UByte(Alpha,178);
   settings[LongInterpolation]   = new Setting_Bool(LongInterpolation,false);
@@ -234,7 +233,7 @@ Settings::Settings() {
   settings[MarkedColor]         = new Setting_RGB(MarkedColor,RGB_RED);
   settings[StateColor]          = new Setting_RGB(StateColor,RGB_WHITE);
   settings[UpEdgeColor]         = new Setting_RGB(UpEdgeColor,RGB_BLUE);
-  RGB_Color bg = {100,100,100};
+  RGB_Color bg = {200,200,200};
   settings[BackgroundColor]     = new Setting_RGB(BackgroundColor,bg);
 }
 

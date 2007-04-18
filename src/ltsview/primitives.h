@@ -14,9 +14,6 @@ extern "C" {
 #endif
 }
 
-#define BOT_BIT 1
-#define TOP_BIT 2
-
 /* Abstract base class */
 
 class Primitive {
@@ -80,16 +77,35 @@ class P_Ring : public Primitive {
     float r_top;
 };
 
-// a cone is a ring with a top surface, a bottom surface or both
-class P_Cone : public Primitive {
+// a truncated cone is a ring with a top surface, a bottom surface or both
+class P_TruncatedCone : public Primitive {
   public:
-    P_Cone(P_Ring *a_ring,P_Disc *a_disc,unsigned char tb);
-    ~P_Cone();
+    P_TruncatedCone(P_Ring *a_ring,P_Disc *a_disc,bool t,bool b);
+    ~P_TruncatedCone();
     void draw();
     void reshape(int N,float *coss,float *sins);
   private:
     P_Ring *ring;
     P_Disc *disc;
-    unsigned char top_bot;
+    bool top;
+		bool bot;
+};
+
+// an oblique cone is a cone of which the apex is not necessarily located at a
+// right angle to the center of the base.
+// creating a P_ObliqueCone with parameter x produces a cone with the base in
+// the (x,y)-plane, base radius 1 and apex located at (x,0,1)
+class P_ObliqueCone : public Primitive {
+  public:
+    P_ObliqueCone(float a,float r,float s);
+    ~P_ObliqueCone();
+    void draw();
+    void reshape(int N,float *coss,float *sins);
+		void reshape(int N,float *coss,float *sins,float obt);
+  private:
+		GLuint disp_list;
+		float alpha;
+		float radius;
+		float sign;
 };
 #endif

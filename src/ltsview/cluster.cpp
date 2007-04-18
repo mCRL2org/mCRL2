@@ -16,13 +16,13 @@ Cluster::Cluster(int r) {
   topRadius = 0.0f;
   deadlock = false;
   markedState = 0;
+	visObject = -1;
+	visObjectTop = -1;
   markedTransitionCount = 0;
   rank = r;
-  matrix = (float*)malloc(16*sizeof(float));
 }
 
 Cluster::~Cluster() {
-  free(matrix);
   actionLabelCounts.clear();
   descendants.clear();
   states.clear();
@@ -59,7 +59,7 @@ State* Cluster::getState(int i) const {
   return states[i];
 }
 
-int Cluster::getNumberOfStates() const {
+int Cluster::getNumStates() const {
   return states.size();
 }
 
@@ -67,7 +67,7 @@ Cluster* Cluster::getAncestor() const {
   return ancestor;
 }
 
-int Cluster::getNumberOfDescendants() const {
+int Cluster::getNumDescendants() const {
   return descendants.size();
 }
 
@@ -95,7 +95,7 @@ int Cluster::getRank() const {
   return rank;
 }
 
-int Cluster::getNumberOfSlots() {
+int Cluster::getNumSlots() {
   return slots.size();
 }
 
@@ -326,8 +326,8 @@ void Cluster::computeSizeAndDescendantPositions() {
     // Assign as much slots as there are nodes, to provide the best  
     // possible spacing
     // The position of the nodes is by the index as follows:
-    // 0 -- getNumberOfStates + 1: The rim slots.
-    for(int i = 0; i < getNumberOfStates(); ++i) {
+    // 0 -- getNumStates + 1: The rim slots.
+    for(int i = 0; i < getNumStates(); ++i) {
       Slot* toAdd = new Slot;
       toAdd->occupying = 0;
       toAdd->under_consideration = 0;
@@ -347,7 +347,7 @@ void Cluster::computeSizeAndDescendantPositions() {
 
     // The number of slots is double that of the descendant's slots, capped to
     // 32.
-    int numSlots = desc->getNumberOfSlots() * 2;
+    int numSlots = desc->getNumSlots() * 2;
 
     numSlots = (numSlots > 32 ? 32 
                               : numSlots);
@@ -524,7 +524,7 @@ void Cluster::computeSizeAndDescendantPositions() {
     int numSlots;
     if (uniqueLargest) {
       // There is a unique centered descendant, the largest cluster.
-      numSlots = largest->getNumberOfSlots() * 2;
+      numSlots = largest->getNumSlots() * 2;
       numSlots = (numSlots > 32 ? 32 
                                 : numSlots);
 
@@ -539,7 +539,7 @@ void Cluster::computeSizeAndDescendantPositions() {
     }
     else if (uniqueSmallest) {
       // There is a unique centered descendant, the smallest cluster.
-      numSlots = smallest->getNumberOfSlots() * 2;      
+      numSlots = smallest->getNumSlots() * 2;      
       
       numSlots = (numSlots > 32 ? 32 
                                 : numSlots);
@@ -556,7 +556,7 @@ void Cluster::computeSizeAndDescendantPositions() {
     else {
       // There is no unique, centered descendant. All clusters are placed on
       // the rim.
-      numSlots = getNumberOfDescendants() * 2;
+      numSlots = getNumDescendants() * 2;
       
       numSlots = (numSlots > 32 ? 32
                                 : numSlots);
@@ -619,19 +619,22 @@ void Cluster::setDeadlock(bool b) {
   deadlock = b;
 }
 
-int Cluster::getPrimitive() const {
-  return primitive;
+int Cluster::getVisObject() const {
+  return visObject;
 }
 
-void Cluster::setPrimitive(int p) {
-  primitive = p;
+void Cluster::setVisObject(int vo) {
+  visObject = vo;
 }
 
-float* Cluster::getMatrix() const {
-  return matrix;
+int Cluster::getVisObjectTop() const {
+  return visObjectTop;
 }
 
-Point3D Cluster::getCoordinates() const {
-  Point3D result = { matrix[12],matrix[13],matrix[14] };
-  return result;
+bool Cluster::hasVisObjectTop() const {
+  return (visObjectTop >= 0);
+}
+
+void Cluster::setVisObjectTop(int vo) {
+  visObjectTop = vo;
 }

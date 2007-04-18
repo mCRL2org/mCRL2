@@ -212,9 +212,9 @@ void LTSViewApp::openFile(string fileName) {
   glCanvas->resetView();
   
   mainFrame->loadTitle();
-  mainFrame->setNumberInfo(lts->getNumberOfStates(),
-      lts->getNumberOfTransitions(),lts->getNumberOfClusters(),
-      lts->getNumberOfRanks());
+  mainFrame->setNumberInfo(lts->getNumStates(),
+      lts->getNumTransitions(),lts->getNumClusters(),
+      lts->getNumRanks());
   mainFrame->resetMarkRules();
   
   vector< string > ls;
@@ -274,9 +274,9 @@ void LTSViewApp::setRankStyle(RankStyle rs) {
       glCanvas->enableDisplay();
       glCanvas->resetView();
 
-      mainFrame->setNumberInfo(lts->getNumberOfStates(),
-        lts->getNumberOfTransitions(),lts->getNumberOfClusters(),
-        lts->getNumberOfRanks());
+      mainFrame->setNumberInfo(lts->getNumStates(),
+        lts->getNumTransitions(),lts->getNumClusters(),
+        lts->getNumRanks());
     }
   }
 }
@@ -339,51 +339,47 @@ void LTSViewApp::activateMarkRule( const int index, const bool activate ) {
   }
 }
 
-void LTSViewApp::setMatchAnyMarkRule( bool b )
-{
-  if ( lts != NULL )
-  {
-    lts->setMatchAnyMarkRule( b );
-    applyMarkStyle( MARK_STATES );
+void LTSViewApp::setMatchAnyMarkRule(bool b) {
+  if (lts != NULL) {
+    lts->setMatchAnyMarkRule(b);
+    applyMarkStyle(MARK_STATES);
   }
 }
 
-void LTSViewApp::markAction( string label )
-{
-  lts->markAction( label );
-  applyMarkStyle( MARK_TRANSITIONS );
+void LTSViewApp::markAction(string label) {
+  lts->markAction(label);
+  applyMarkStyle(MARK_TRANSITIONS);
 }
 
-void LTSViewApp::unmarkAction( string label )
-{
-  lts->unmarkAction( label );
-  applyMarkStyle( MARK_TRANSITIONS );
+void LTSViewApp::unmarkAction(string label) {
+  lts->unmarkAction(label);
+  applyMarkStyle(MARK_TRANSITIONS);
 }
 
-void LTSViewApp::applyMarkStyle( MarkStyle ms )
-{
-  if ( lts == NULL ) return;
-  switch( ms )
-  {
+void LTSViewApp::applyMarkStyle(MarkStyle ms) {
+  if (lts == NULL) {
+		return;
+	}
+  switch (ms) {
     case MARK_DEADLOCKS:
-      mainFrame->setMarkedStatesInfo( lts->getNumberOfDeadlocks() );
-      mainFrame->setMarkedTransitionsInfo( 0 );
+      mainFrame->setMarkedStatesInfo(lts->getNumDeadlocks());
+      mainFrame->setMarkedTransitionsInfo(0);
       break;
     case MARK_STATES:
-      mainFrame->setMarkedStatesInfo( lts->getNumberOfMarkedStates() );
-      mainFrame->setMarkedTransitionsInfo( 0 );
+      mainFrame->setMarkedStatesInfo(lts->getNumMarkedStates());
+      mainFrame->setMarkedTransitionsInfo(0);
       break;
     case MARK_TRANSITIONS:
-      mainFrame->setMarkedStatesInfo( 0 );
-      mainFrame->setMarkedTransitionsInfo( lts->getNumberOfMarkedTransitions() );
+      mainFrame->setMarkedStatesInfo(0);
+      mainFrame->setMarkedTransitionsInfo(lts->getNumMarkedTransitions());
       break;
     case NO_MARKS:
     default:
-      mainFrame->setMarkedStatesInfo( 0 );
-      mainFrame->setMarkedTransitionsInfo( 0 );
+      mainFrame->setMarkedStatesInfo(0);
+      mainFrame->setMarkedTransitionsInfo(0);
       break;
   }
-  visualizer->setMarkStyle( ms );
+  visualizer->setMarkStyle(ms);
   glCanvas->display();
 }
 

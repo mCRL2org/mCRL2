@@ -41,7 +41,7 @@ class State {
     void      getInTransitions( std::vector< Transition* > &ts ) const;
     void      getOutTransitions( std::vector< Transition* > &ts ) const;
     Transition* getOutTransitioni( int i) const;
-    int       getNumberOfOutTransitions() const;
+    int       getNumOutTransitions() const;
 
     void      getLoops( std::vector< Transition* > &ls ) const;
     Transition* getLoopi( int i ) const;

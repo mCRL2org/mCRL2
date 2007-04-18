@@ -9,7 +9,7 @@ namespace Utils {
 
   enum RankStyle      {ITERATIVE,CYCLIC};
   enum MarkStyle      {NO_MARKS,MARK_DEADLOCKS,MARK_STATES,MARK_TRANSITIONS};
-  enum VisStyle	      {CONES,TUBES,ATOMIUM};
+  enum VisStyle	      {CONES,TUBES};
   enum DFSState       {DFS_WHITE,DFS_GREY,DFS_BLACK};
   enum SimState       {UNSEEN, HISTORY, NOW, FUTURE};
 
@@ -65,7 +65,6 @@ namespace Utils {
   HSV_Color operator+(HSV_Color c1,HSV_Color c2);
   HSV_Color RGB_to_HSV(RGB_Color c);
   RGB_Color HSV_to_RGB(HSV_Color c);
-  HSV_Color interpolate(HSV_Color hsv1,HSV_Color hsv2,float r,bool l);
 
   Point3D operator+(Point3D p1,Point3D p2);
   Point3D operator-(Point3D p1,Point3D p2);
@@ -78,6 +77,21 @@ namespace Utils {
   float vec_to_ang(Vect v); //RET: atan2f(Vect.y, Vect.x)
   Vect ang_to_vec(float phi); //RET: V, such that V.x = cos(phi) /\ V.y = sin(phi)
   float vec_length(Vect v); //RET: || v ||
+  
+  class Interpolater {
+    private:
+      bool is_long;
+      HSV_Color base;
+      int delta_h1;
+      int delta_h2;
+      int delta_s;
+      int delta_v;
+      int N;
+    public:
+      Interpolater(RGB_Color hsv1,RGB_Color hsv2,int n,bool l);
+      ~Interpolater() {}
+      RGB_Color getColor(int i);
+  };
 
 }
 #endif

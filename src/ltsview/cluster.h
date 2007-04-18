@@ -16,7 +16,7 @@ class Cluster;
 // class for cluster comparison based on cluster volumes
 class Comp_ClusterVolume {
   public:
-    bool operator()( const Cluster*, const Cluster* ) const;
+    bool operator()(const Cluster*,const Cluster*) const;
 };
 
 class Cluster {
@@ -37,8 +37,8 @@ class Cluster {
     float			volume;
     std::vector< Utils::Slot* > slots;
 
-		float *matrix;
-		int primitive;
+		int visObject;
+		int visObjectTop;
 
   public:
     // Constructor & destructor.
@@ -48,7 +48,7 @@ class Cluster {
     // Methods on descendants and ancestors.
     void      addDescendant(Cluster* c);
     Cluster*  getDescendant(int i) const;
-    int	      getNumberOfDescendants() const;
+    int	      getNumDescendants() const;
     bool      hasDescendants() const;
 
     void      setAncestor(Cluster* c);
@@ -58,13 +58,13 @@ class Cluster {
     void         addState(State* s);
     void         addUndecidedState(State* s);
     State*       getState(int i) const;
-    int          getNumberOfStates() const;
+    int          getNumStates() const;
     bool         hasDeadlock() const;
     bool         hasMarkedState() const;
     void         markState();
     void         setDeadlock( bool b );
     void         unmarkState();
-    int          getNumberOfSlots();
+    int          getNumSlots();
     Utils::Slot*  getSlot(int index) const;
     int          occupySlot(float pos);
     void         resolveSlots();
@@ -88,10 +88,11 @@ class Cluster {
     void      setPosition(float p);
 
     // Methods for visualization
-    int    getPrimitive() const;
-    void   setPrimitive(int p);
-    float* getMatrix() const;
-    Utils::Point3D getCoordinates() const;
+    int   getVisObject() const;
+    int   getVisObjectTop() const;
+    bool  hasVisObjectTop() const;
+    void	setVisObject(int vo);
+    void	setVisObjectTop(int vo);
 };
 
 #endif

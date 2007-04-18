@@ -38,7 +38,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU  (myID_CYCLIC,MainFrame::onRankStyle)
   EVT_MENU  (myID_CONES_STYLE,MainFrame::onVisStyle)
   EVT_MENU  (myID_TUBES_STYLE,MainFrame::onVisStyle)
-  EVT_MENU  (myID_ATOMIUM_STYLE,MainFrame::onVisStyle)
   EVT_BUTTON(wxID_RESET, MainFrame::onResetButton)
   EVT_RADIOBUTTON(myID_MARK_RADIOBUTTON, MainFrame::onMarkRadio)
   EVT_CHOICE(myID_MARK_ANYALL, MainFrame::onMarkAnyAll)
@@ -116,8 +115,6 @@ void MainFrame::setupMenuBar() {
     wxT("Cones visualization style"));
   viewMenu->AppendRadioItem(myID_TUBES_STYLE,wxT("Tubes"),
     wxT("Tubes visualization style"));
-  viewMenu->AppendRadioItem(myID_ATOMIUM_STYLE,wxT("Atomium"),
-    wxT("Atomium visualization style"));
   viewMenu->AppendSeparator();
   viewMenu->Append(wxID_PREFERENCES,wxT("S&ettings..."),
     wxT("Show the settings panel"));
@@ -129,8 +126,6 @@ void MainFrame::setupMenuBar() {
     settings->getBool(DisplayBackpointers));
   viewMenu->Check(myID_DISPLAY_WIREFRAME,
     settings->getBool(DisplayWireframe));
-  viewMenu->Enable(myID_TUBES_STYLE,false);
-  viewMenu->Enable(myID_ATOMIUM_STYLE,false);
 
   toolMenu->AppendRadioItem(myID_SELECT,wxT("&Select\tS"),wxT("Select tool"));
   toolMenu->AppendRadioItem(myID_PAN,wxT("&Pan\tP"),wxT("Pan tool"));
@@ -441,8 +436,6 @@ void MainFrame::onVisStyle(wxCommandEvent& event){
     mediator->setVisStyle(CONES);
   } else if (event.GetId() == myID_TUBES_STYLE) {
     mediator->setVisStyle(TUBES);
-  } else if (event.GetId() == myID_ATOMIUM_STYLE) {
-    mediator->setVisStyle(ATOMIUM);
   }
 }
 

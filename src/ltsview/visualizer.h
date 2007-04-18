@@ -1,37 +1,28 @@
 #ifndef VISUALIZER_H
 #define VISUALIZER_H
-
 #include <vector>
 #include "mediator.h"
 #include "utils.h"
 #include "lts.h"
 #include "primitivefactory.h"
 #include "settings.h"
-
-// class for primitive comparison based on distance
-class Distance_greater {
-  private:
-    Utils::Point3D viewpoint;
-  public:
-    explicit Distance_greater(const Utils::Point3D vp) : viewpoint(vp) {}
-    bool operator()(const Cluster*,const Cluster*) const;
-};
+#include "visobjectfactory.h"
 
 class Visualizer: public Subscriber {
   private:
-    float clusterHeight;
-    float cos_ibt;
     float cos_obt;
-    float sin_ibt;
     float sin_obt;
     LTS* lts;
-    std::vector< Cluster* > clusters;
+    VisObjectFactory *visObjectFactory;
     Utils::MarkStyle markStyle;
     Mediator* mediator;
     PrimitiveFactory *primitiveFactory;
     Settings* settings;
     Utils::VisStyle visStyle;
-    
+		bool create_objects;
+		bool update_colors;
+		bool update_matrices;
+
     void clearDFSStates(State* root);
     void computeStateAbsPos(State* root,int rot,Utils::Point3D init);
     void computeSubtreeBounds(Cluster* root,float &boundWidth,
@@ -44,10 +35,11 @@ class Visualizer: public Subscriber {
     bool isMarked(Cluster* c);
     bool isMarked(State* s);
 
-    void fillClusters();
-    void initClusterData(Cluster *root,bool topClosed,int rot);
-    void updateClusterPrimitives();
-    void updateClusterMatrices(Cluster *root,int rot);
+    void traverseTree(bool co);
+    void traverseTreeC(Cluster *root,bool topClosed,int rot);
+    void traverseTreeT(Cluster *root,int rot);
+		void updateColors();
+		float compute_cone_scale_x(float phi,float r,float x);
   
   public:
     Visualizer(Mediator* owner,Settings* ss);

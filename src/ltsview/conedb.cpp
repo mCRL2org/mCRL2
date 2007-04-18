@@ -1,88 +1,132 @@
 #include "conedb.h"
-#include <stdlib.h>
-#include <iostream>
-#include <iomanip>
-using namespace std;
+#include "utils.h"
+using namespace Utils;
 
-#define hash(k,tb,m) ((k*11408669 + tb*97416181) & m)
+#define ohash(k1,k2,b,m) ((k1*11408669 + k2*97416181 + b*71053447) & m)
+#define thash(k,tb,m) ((k*11408669 + tb*97416181) & m)
+#define BOT_BIT 1
+#define TOP_BIT 2
 
-ConeDB::ConeDB(int hashclass,int blocksize) {
-  hashmask = (1 << hashclass) - 1;
-  hashtable = (int*)malloc((hashmask+1)*sizeof(int));
-  for (int i=0; i<=hashmask; ++i) {
-    hashtable[i] = -1;
-  }
-  bucket_block = blocksize;
-  bucket_size = blocksize;
-  bucket_next = 0;
-  buckets = (cone_bucket*)malloc(bucket_size*sizeof(cone_bucket));
+ConeDB::ConeDB() {
+	int hashclass = 6;
+  ohashtable.assign((1 << hashclass),-1);
+  thashtable.assign((1 << hashclass),-1);
 }
 
 ConeDB::~ConeDB() {
-  if (hashtable!=NULL) {
-    free(hashtable);
-    hashtable = NULL;
-  }
-  if (buckets!=NULL) {
-    free(buckets);
-    buckets = NULL;
-  }
 }
 
-void ConeDB::addCone(int k,unsigned char tb,int c) {
-  int i = find_bucket(k,tb);
-  if (i!=-1) {
+void ConeDB::addTruncatedCone(float r,bool t,bool b,int c) {
+	int k = compute_key(r);
+	unsigned char tb = combine_top_bot(t,b);
+  int i = find_tbucket(k,tb);
+  if (i != -1) {
     // c will be the new cone belonging to k and tb
-    buckets[i].cone = c;
-  }
-  else {
-    check_buckets();
-    i = hash(k,tb,hashmask);
-    buckets[bucket_next].key = k;
-    buckets[bucket_next].top_bot = tb;
-    buckets[bucket_next].cone = c;
-    buckets[bucket_next].next = hashtable[i];
-    hashtable[i] = bucket_next;
-    ++bucket_next;
+    tbuckets[i].cone = c;
+  } else {
+    check_thashtable();
+    i = thash(k,tb,thashtable.size()-1);
+		tcone_bucket cb = { k, c, thashtable[i], tb };
+    thashtable[i] = tbuckets.size();
+    tbuckets.push_back(cb);
   }
 }
 
-int ConeDB::findCone(int k,unsigned char tb) {
-  int i = find_bucket(k,tb);
-  if (i==-1) {
+int ConeDB::findTruncatedCone(float r,bool t,bool b) {
+	int k = compute_key(r);
+	unsigned char tb = combine_top_bot(t,b);
+  int i = find_tbucket(k,tb);
+  if (i == -1) {
     return -1;
-  }
-  else {
-    return buckets[i].cone;
+  } else {
+    return tbuckets[i].cone;
   }
 }
 
-void ConeDB::check_buckets() {
-  if (bucket_next >= bucket_size) {
-    bucket_size += bucket_block;
-    buckets = (cone_bucket*)realloc(buckets,bucket_size*sizeof(cone_bucket));
-  }
-  if (4*bucket_next >= 3*hashmask) {
-    hashmask = hashmask + hashmask + 1;
-    hashtable = (int*)realloc(hashtable,(hashmask+1)*sizeof(int));
-    int i,h;
-    for (i=0; i<=hashmask; ++i) {
-      hashtable[i] = -1;
-    }
-    for (i=0; i<bucket_next; ++i) {
-      h = hash(buckets[i].key,buckets[i].top_bot,hashmask);
-      buckets[i].next = hashtable[h];
-      hashtable[h] = i;
+void ConeDB::check_thashtable() {
+  if (4*tbuckets.size() >= 3*thashtable.size()) {
+		// hash table has become too full; double its capacity and rehash
+		thashtable.assign(2*thashtable.size(),-1);
+		unsigned int i,h;
+    for (i = 0; i < tbuckets.size(); ++i) {
+      h = thash(tbuckets[i].key,tbuckets[i].top_bot,thashtable.size()-1);
+      tbuckets[i].next = thashtable[h];
+      thashtable[h] = i;
     }
   }
 }
 
-int ConeDB::find_bucket(int k,unsigned char tb) {
-  int h = hash(k,tb,hashmask);
-  for (h=hashtable[h]; h!=-1; h=buckets[h].next) {
-    if (buckets[h].key==k && buckets[h].top_bot==tb) {
+int ConeDB::find_tbucket(int k,unsigned char tb) {
+  int h = thash(k,tb,thashtable.size()-1);
+  for (h = thashtable[h]; h != -1; h = tbuckets[h].next) {
+    if (tbuckets[h].key == k  &&  tbuckets[h].top_bot == tb) {
       return h;
     }
   }
   return -1;
+}
+
+void ConeDB::addObliqueCone(float a,float r,float s,int c) {
+	int k1 = compute_key(a);
+	int k2 = compute_key(r);
+	bool b = s > 0.0f;
+  int i = find_obucket(k1,k2,b);
+  if (i != -1) {
+    // c will be the new cone belonging to k and tb
+    obuckets[i].cone = c;
+  } else {
+    check_ohashtable();
+    i = ohash(k1,k2,b,ohashtable.size()-1);
+		ocone_bucket cb = { k1, k2, b, c, ohashtable[i] };
+    ohashtable[i] = obuckets.size();
+    obuckets.push_back(cb);
+  }
+}
+
+int ConeDB::findObliqueCone(float a,float r,float s) {
+	int i = find_obucket(compute_key(a),compute_key(r),s > 0.0f);
+  if (i == -1) {
+    return -1;
+  } else {
+    return obuckets[i].cone;
+  }
+}
+
+void ConeDB::check_ohashtable() {
+  if (4*obuckets.size() >= 3*ohashtable.size()) {
+		// hash table has become too full; double its capacity and rehash
+		ohashtable.assign(2*ohashtable.size(),-1);
+		unsigned int i,h;
+    for (i = 0; i < obuckets.size(); ++i) {
+      h = ohash(obuckets[i].alpha,obuckets[i].radius,obuckets[i].sign,
+      					ohashtable.size()-1);
+      obuckets[i].next = ohashtable[h];
+      ohashtable[h] = i;
+    }
+  }
+}
+
+int ConeDB::find_obucket(int k1,int k2,bool b) {
+  int h = ohash(k1,k2,b,ohashtable.size()-1);
+  for (h = ohashtable[h]; h != -1; h = obuckets[h].next) {
+    if (obuckets[h].alpha == k1 && obuckets[h].radius == k2 && obuckets[h].sign == b) {
+      return h;
+    }
+  }
+  return -1;
+}
+
+int ConeDB::compute_key(float r) {
+  return round_to_int(r * 100.0);
+}
+
+unsigned char ConeDB::combine_top_bot(bool t,bool b) {
+	unsigned char result = 0;
+	if (t) {
+		result |= TOP_BIT;
+	}
+	if (b) {
+		result |= BOT_BIT;
+	}
+	return result;
 }

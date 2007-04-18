@@ -144,12 +144,12 @@ void P_Hemisphere::draw() {
 }
 
 void P_Hemisphere::reshape(int N,float *coss,float *sins) {
-  int Ndiv2 = N/2;
+  int Ndiv2 = N / 2;
   int i,j,k;
-  GLfloat* vertices = (GLfloat*)malloc(3*(N*Ndiv2+1)*sizeof(GLfloat));
+  GLfloat* vertices = (GLfloat*)malloc(3 * (N * Ndiv2 + 1) * sizeof(GLfloat));
   k = 0;
-  for (j=0; j<Ndiv2; ++j) {
-    for (i=0; i<2*N; i+=2) {
+  for (j = 0; j < Ndiv2; ++j) {
+    for (i = 0; i < 2*N; i += 2) {
       vertices[k]   = coss[j] * coss[i];
       vertices[k+1] = coss[j] * sins[i];
       vertices[k+2] = sins[j];
@@ -162,8 +162,8 @@ void P_Hemisphere::reshape(int N,float *coss,float *sins) {
 
   GLuint* is_mid = (GLuint*)malloc((N*N+N)*sizeof(GLuint));
   i = 0;
-  for (j=N; j<N+Ndiv2-1; ++j) {
-    for (k=0; k<N; ++k) {
+  for (j = N; j < N*Ndiv2; j += N) {
+    for (k = 0; k < N; ++k) {
       is_mid[i] = j + k;
       is_mid[i+1] = is_mid[i] - N;
       i += 2;
@@ -177,7 +177,7 @@ void P_Hemisphere::reshape(int N,float *coss,float *sins) {
   is_top[0] = N*Ndiv2;
   i = 1;
   j = (Ndiv2-1)*N;
-  for (int k=j; k<j+N; ++k) {
+  for (k = j; k < j+N; ++k) {
     is_top[i] = k;
     ++i;
   }
@@ -193,7 +193,7 @@ void P_Hemisphere::reshape(int N,float *coss,float *sins) {
   int M = 2*N + 2;
   glNewList(disp_list,GL_COMPILE);
     glDrawElements(GL_TRIANGLE_FAN,N+2,GL_UNSIGNED_INT,is_top);
-    for (int i=0; i<Ndiv2-1; ++i) {
+    for (i = 0; i < Ndiv2-1; ++i) {
       glDrawElements(GL_QUAD_STRIP,M,GL_UNSIGNED_INT,is_mid + i*M);
     }
   glEndList();
@@ -311,26 +311,27 @@ float P_Ring::getTopRadius() {
   return r_top;
 }
 
-/* -------- P_Cone ------------------------------------------------------ */
+/* -------- P_TruncatedCone ------------------------------------------------------ */
 
-P_Cone::P_Cone(P_Ring *a_ring,P_Disc *a_disc,unsigned char tb) {
+P_TruncatedCone::P_TruncatedCone(P_Ring *a_ring,P_Disc *a_disc,bool t,bool b) {
   ring = a_ring;
   disc = a_disc;
-  top_bot = tb;
+  top = t;
+  bot = b;
 }
 
-P_Cone::~P_Cone() {
+P_TruncatedCone::~P_TruncatedCone() {
 }
 
-void P_Cone::draw() {
-  if (top_bot & BOT_BIT) {
+void P_TruncatedCone::draw() {
+  if (bot) {
     glPushMatrix();
       glTranslatef(0.0f,0.0f,-0.5f);
       glRotatef(180,1.0f,0.0f,0.0f);
       disc->draw();
     glPopMatrix();
   }
-  if (top_bot & TOP_BIT) {
+  if (top) {
     glPushMatrix();
       glTranslatef(0.0f,0.0f,0.5f);
       glScalef(ring->getTopRadius(),ring->getTopRadius(),1.0f);
@@ -340,5 +341,76 @@ void P_Cone::draw() {
   ring->draw();
 }
 
-void P_Cone::reshape(int /*N*/,float* /*coss*/,float* /*sins*/) {
+void P_TruncatedCone::reshape(int /*N*/,float* /*coss*/,float* /*sins*/) {
+}
+
+/* -------- P_ObliqueCone -------------------------------------------------------- */
+
+P_ObliqueCone::P_ObliqueCone(float a,float r,float s) {
+  disp_list = 0;
+  alpha = a;
+	radius = r;
+	sign = s;
+}
+
+P_ObliqueCone::~P_ObliqueCone() {
+  glDeleteLists(disp_list,1);
+}
+
+void P_ObliqueCone::draw() {
+  glCallList(disp_list);
+}
+
+void P_ObliqueCone::reshape(int N,float *coss,float *sins) {
+}
+
+void P_ObliqueCone::reshape(int N,float *coss,float *sins,float obt) {
+	float sin_a = -sign*sin(0.5f*PI - alpha - sign*obt);
+	float cos_a = cos(0.5f*PI - alpha - sign*obt);
+	int i,j;
+	GLfloat* vertices = (GLfloat*)malloc(3 * (N+1) * sizeof(GLfloat));
+	vertices[0] = 0.0f;
+	vertices[1] = 0.0f;
+	vertices[2] = 0.0f;
+	j = 3;
+	for (i = 0; i < 2*N; i += 2) {
+		vertices[j]   = radius * coss[i] * cos_a;
+		vertices[j+1] = radius * sins[i];
+		vertices[j+2] = 1.0f - radius * coss[i] * sin_a;
+		j += 3;
+	}
+
+	GLfloat* normals = (GLfloat*)malloc(3 * (N+1) * sizeof(GLfloat));
+	normals[0] = 0.0f;
+	normals[1] = 0.0f;
+	normals[2] = -1.0f;
+	j = 3;
+	for (i = 0; i < 2*N ; i += 2) {
+		normals[j]   = coss[i] * cos_a + sin_a;
+		normals[j+1] = sins[i];
+		normals[j+2] = cos_a - coss[i] * sin_a;
+		j += 3;
+	}
+
+	GLuint* is = (GLuint*)malloc((N+2) * sizeof(GLuint));
+	is[0] = 0;
+	for (i = 1; i <= N; ++i) {
+		is[i] = N+1-i;
+	}
+	is[N+1] = N;
+
+	if (disp_list == 0) {
+		disp_list = glGenLists(1);
+	}
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glVertexPointer(3,GL_FLOAT,0,vertices);
+	glNormalPointer(GL_FLOAT,0,normals);
+	glNewList(disp_list,GL_COMPILE);
+		glDrawElements(GL_TRIANGLE_FAN,N+2,GL_UNSIGNED_INT,is);
+	glEndList();
+	free(vertices);
+	free(normals);
+  free(is);
 }

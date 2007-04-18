@@ -31,8 +31,6 @@ class SettingsDialog: public wxDialog {
     wxColorButton* ndButton;
     wxColorButton* ueButton;
     wxSpinCtrl*	   brSpin;
-    wxSpinCtrl*    elSpin;
-    wxSpinCtrl*	   ibSpin;
     wxSpinCtrl*    nsSpin;
     wxSpinCtrl*	   obSpin;
     wxSpinCtrl*	   qlSpin;

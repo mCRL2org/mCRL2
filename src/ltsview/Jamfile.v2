@@ -22,6 +22,7 @@ exe ltsview
         state.cpp
         transition.cpp
         utils.cpp
+				visobjectfactory.cpp
         visualizer.cpp
         /libraries/wxe//colorbutton.o
         /libraries//mcrl2_basic

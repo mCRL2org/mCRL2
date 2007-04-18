@@ -4,11 +4,10 @@
 #include "utils.h"
 
 enum SettingID {
-  EllipsoidThreshold,
   NodeSize,
   BranchRotation,
-  InnerBranchTilt,
-  OuterBranchTilt,
+  ClusterHeight,
+  BranchTilt,
   Quality,
   Alpha,
   LongInterpolation,

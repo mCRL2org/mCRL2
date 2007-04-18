@@ -56,25 +56,19 @@ void SettingsDialog::setupParPanel(wxPanel* panel) {
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("State size:")),0,lf,bd);
   sizer->Add(nsSpin,0,rf,bd);
   
-  brSpin = new wxSpinCtrl(panel,myID_ANY);
-  brSpin->SetRange(0,360);
+  brSpin = new wxSpinCtrl(panel,myID_ANY,wxEmptyString,wxDefaultPosition,
+													wxDefaultSize,wxSP_ARROW_KEYS|wxSP_WRAP);
+  brSpin->SetRange(0,359);
   brSpin->SetValue(settings->getInt(BranchRotation));
   brSpin->SetSizeHints(spinSize,spinSize);
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Branch rotation:")),0,lf,bd);
   sizer->Add(brSpin,0,rf,bd);
 
-  ibSpin = new wxSpinCtrl(panel,myID_ANY);
-  ibSpin->SetRange(0,90);
-  ibSpin->SetValue(settings->getInt(InnerBranchTilt));
-  ibSpin->SetSizeHints(spinSize,spinSize);
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Inner branch tilt:")),0,lf,bd);
-  sizer->Add(ibSpin,0,rf,bd);
-
   obSpin = new wxSpinCtrl(panel,myID_ANY);
   obSpin->SetRange(0,90);
-  obSpin->SetValue(settings->getInt(OuterBranchTilt));
+  obSpin->SetValue(settings->getInt(BranchTilt));
   obSpin->SetSizeHints(spinSize,spinSize);
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Outer branch tilt:")),0,lf,bd);
+  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Branch tilt:")),0,lf,bd);
   sizer->Add(obSpin,0,rf,bd);
   
   qlSpin = new wxSpinCtrl(panel,myID_ANY);
@@ -84,12 +78,6 @@ void SettingsDialog::setupParPanel(wxPanel* panel) {
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Accuracy:")),0,lf,bd);
   sizer->Add(qlSpin,0,rf,bd);
   
-  elSpin = new wxSpinCtrl(panel,myID_ANY);
-  elSpin->SetRange(1,100);
-  elSpin->SetValue(int(10*settings->getFloat(EllipsoidThreshold)));
-  elSpin->SetSizeHints(spinSize, spinSize);
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Ellipsoid threshold:")),0,lf,bd);
-  sizer->Add(elSpin,0,rf,bd);
   panel->SetSizer(sizer);
   panel->Fit();
   panel->Layout();
@@ -252,14 +240,10 @@ void SettingsDialog::onCheck(wxCommandEvent& event) {
 void SettingsDialog::onSpin(wxSpinEvent& event) {
   if (event.GetEventObject() == brSpin) {
     settings->setInt(BranchRotation,brSpin->GetValue());
-  } else if (event.GetEventObject() == elSpin) {
-    settings->setFloat(EllipsoidThreshold,elSpin->GetValue()/10.0f);
-  } else if (event.GetEventObject() == ibSpin) {
-    settings->setInt(InnerBranchTilt,ibSpin->GetValue());
   } else if (event.GetEventObject() == nsSpin) {
     settings->setFloat(NodeSize,nsSpin->GetValue()/10.0f);
   } else if (event.GetEventObject() == obSpin) {
-    settings->setInt(OuterBranchTilt,obSpin->GetValue());
+    settings->setInt(BranchTilt,obSpin->GetValue());
   } else if (event.GetEventObject() == qlSpin) {
     settings->setInt(Quality,2*qlSpin->GetValue());
   } else if (event.GetEventObject() == trSpin) {
