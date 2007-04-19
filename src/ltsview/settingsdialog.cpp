@@ -40,14 +40,11 @@ void SettingsDialog::setupParPanel(wxPanel* panel) {
   int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL; 
   int rf = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL; 
   int bd = 5;
-  wxSize spinSize(50,-1);
+  wxSize spinSize(65,-1);
 
-  wxFlexGridSizer* sizer = new wxFlexGridSizer(7,2,0,0);
+  wxFlexGridSizer* sizer = new wxFlexGridSizer(5,2,0,0);
   sizer->AddGrowableCol(0);
-  //for (int i=0; i<5; ++i) {
-  //  sizer->AddGrowableRow(i);
-  //}
-  sizer->AddGrowableRow(6);
+  sizer->AddGrowableRow(4);
 
   nsSpin = new wxSpinCtrl(panel,myID_ANY);
   nsSpin->SetRange(0,1000);
@@ -87,14 +84,11 @@ void SettingsDialog::setupClrPanel(wxPanel* panel) {
   int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL; 
   int rf = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL; 
   int bd = 5;
-  wxSize spinSize(50,-1);
+  wxSize spinSize(65,-1);
   wxSize btnSize(25,25);
 
   wxFlexGridSizer* sizer = new wxFlexGridSizer(9,3,0,0);
   sizer->AddGrowableCol(0);
-  //for (int i=0; i<8 ; ++i) {
-  //  sizer->AddGrowableRow(i);
-  //}
   sizer->AddGrowableRow(8);
   
   trSpin = new wxSpinCtrl(panel,myID_ANY);

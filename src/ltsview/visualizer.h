@@ -30,10 +30,10 @@ class Visualizer: public Subscriber {
     void drawBackPointer(State* startState,State* endState);
     void drawForwardPointer(State* startState,State* endState);
     void drawStates(Cluster* root,int rot);
-    void drawStatesMark(Cluster* root,int rot);
     void drawTransitions(State* root,bool disp_fp,bool disp_bp);
     bool isMarked(Cluster* c);
     bool isMarked(State* s);
+    bool isMarked(Transition* s);
 
     void traverseTree(bool co);
     void traverseTreeC(Cluster *root,bool topClosed,int rot);

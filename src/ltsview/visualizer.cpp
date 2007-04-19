@@ -412,16 +412,10 @@ bool Visualizer::isMarked(Cluster* c) {
 // ------------- STATES --------------------------------------------------------
 
 void Visualizer::drawStates() {
-  if (lts == NULL) return;
-
-  if (markStyle == NO_MARKS) {
-    RGB_Color sc = settings->getRGB(StateColor);
-    glColor4ub(sc.r,sc.g,sc.b,255);
-    drawStates(lts->getInitialState()->getCluster(),0);
+  if (lts == NULL) {
+  	return;
   }
-  else {
-    drawStatesMark(lts->getInitialState()->getCluster(),0);
-  }
+  drawStates(lts->getInitialState()->getCluster(),0);
 }
 
 void Visualizer::clearDFSStates(State* root) {
@@ -556,41 +550,39 @@ void Visualizer::computeStateAbsPos(State* root, int rot, Point3D initVect) {
 }
 
 void Visualizer::drawStates(Cluster* root,int rot) {
-  State *s;
   float ns = settings->getFloat(NodeSize);
   for (int i = 0; i < root->getNumStates(); ++i) {
-    s = root->getState(i);
-    if (s->getPosition() < -0.9f) {
-      //drawSphereState();
-
-      glPushMatrix();
-        glScalef(ns,ns,ns);
-        primitiveFactory->drawSimpleSphere();
-      glPopMatrix();
+    State *s = root->getState(i);
+    if (isMarked(s)) {
+      RGB_Color c = settings->getRGB(MarkedColor);
+      glColor4ub(c.r,c.g,c.b,255);
+    } else {
+			RGB_Color c = settings->getRGB(StateColor);
+			glColor4ub(c.r,c.g,c.b,255);
     }
-    else {
-      glPushMatrix();
-        glRotatef(-s->getPosition(),0.0f,0.0f,1.0f);
-        glTranslatef(root->getTopRadius(),0.0f,0.0f);
-        glScalef(ns,ns,ns);
-        primitiveFactory->drawSimpleSphere();
-      glPopMatrix();
+    glPushMatrix();
+    if (s->getPosition() >= -0.9f) {
+      glRotatef(-s->getPosition(),0.0f,0.0f,1.0f);
+      glTranslatef(root->getTopRadius(),0.0f,0.0f);  
     }
+    glScalef(ns,ns,ns);
+    primitiveFactory->drawSimpleSphere();
+    glPopMatrix();
   }
 
   int drot = rot + settings->getInt(BranchRotation);
-  if (drot < 0) drot += 360;
-  else if (drot >= 360) drot -= 360;
+	if (drot >= 360) { 
+		drot -= 360;
+	}
   Cluster *desc;
-  for (int i=0; i<root->getNumDescendants(); ++i) {
+  for (int i = 0; i < root->getNumDescendants(); ++i) {
     desc = root->getDescendant(i);
     if (desc->getPosition() < -0.9f) {
       // descendant is centered
       glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
       drawStates(desc,(root->getNumDescendants()>1)?drot:rot);
       glTranslatef(0.0f,0.0f,-settings->getFloat(ClusterHeight));
-    }
-    else {
+    } else {
       glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
       glTranslatef(root->getBaseRadius(),0.0f,settings->getFloat(ClusterHeight));
       glRotatef(settings->getInt(BranchTilt), 0.0f, 1.0f, 0.0f);
@@ -604,62 +596,7 @@ void Visualizer::drawStates(Cluster* root,int rot) {
 
 bool Visualizer::isMarked(State* s) {
   return ((markStyle == MARK_STATES && s->isMarked()) || 
-          (markStyle == MARK_DEADLOCKS && s->isDeadlock())/* ||
-          (markStyle == MARK_TRANSITIONS && s->hasMarkedTransition())*/);
-}
-
-void Visualizer::drawStatesMark(Cluster* root,int rot) {
-  State *s;
-  for (int i=0; i < root->getNumStates(); ++i) {
-    s = root->getState(i);
-    if (isMarked(s)) {
-      RGB_Color c = settings->getRGB(MarkedColor);
-      glColor4ub(c.r,c.g,c.b,255);
-    }
-    else {
-			RGB_Color c = settings->getRGB(StateColor);
-			glColor4ub(c.r,c.g,c.b,255);
-    }
-    float ns = settings->getFloat(NodeSize);
-    if (s->getPosition() < -0.9f) {
-      //drawSphereState();
-      glPushMatrix();
-        glScalef(ns,ns,ns);
-        primitiveFactory->drawSimpleSphere();
-      glPopMatrix();
-    }
-    else {
-      glPushMatrix();
-        glRotatef(-s->getPosition(),0.0f,0.0f,1.0f);
-        glTranslatef(root->getTopRadius(),0.0f,0.0f);
-        glScalef(ns,ns,ns);
-        primitiveFactory->drawSimpleSphere();
-      glPopMatrix();
-    }
-  }
-
-  int drot = rot + settings->getInt(BranchRotation);
-  if (drot < 0) drot += 360;
-  else if (drot >= 360) drot -= 360;
-  Cluster *desc;
-  for (int i=0; i<root->getNumDescendants(); ++i) {
-    desc = root->getDescendant(i);
-    if (desc->getPosition() < -0.9f) {
-      // descendant is centered
-      glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
-      drawStatesMark(desc,(root->getNumDescendants()>1)?drot:rot);
-      glTranslatef(0.0f,0.0f,-settings->getFloat(ClusterHeight));
-    }
-    else {
-      glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
-      glTranslatef(root->getBaseRadius(),0.0f,settings->getFloat(ClusterHeight));
-      glRotatef(settings->getInt(BranchTilt), 0.0f, 1.0f, 0.0f);
-      drawStatesMark(desc,drot);
-      glRotatef(-settings->getInt(BranchTilt), 0.0f, 1.0f, 0.0f);
-      glTranslatef(-root->getBaseRadius(),0.0f,-settings->getFloat(ClusterHeight));
-      glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
-    }
-  }
+          (markStyle == MARK_DEADLOCKS && s->isDeadlock()));
 }
 
 // ------------- TRANSITIONS ---------------------------------------------------
@@ -682,33 +619,41 @@ void Visualizer::drawTransitions(bool draw_fp,bool draw_bp) {
 
 void Visualizer::drawTransitions(State* root,bool disp_fp,bool disp_bp) {
   root->DFSvisit();
-  RGB_Color up_col = settings->getRGB(UpEdgeColor);
-  RGB_Color dn_col = settings->getRGB(DownEdgeColor);
-  for(int i = 0; i != root->getNumOutTransitions(); ++i) {
+
+  for (int i = 0; i != root->getNumOutTransitions(); ++i) {
     Transition* outTransition = root->getOutTransitioni(i);
 
     State* endState = outTransition->getEndState();
 
     // Draw transition from root to endState
     if (outTransition->isBackpointer() && disp_bp) {
-      
-      glColor4ub(up_col.r, up_col.g, up_col.b, 255);
-      drawBackPointer(root, endState);
+    	if (isMarked(outTransition)) {
+    		RGB_Color c = settings->getRGB(MarkedColor);
+      	glColor4ub(c.r,c.g,c.b,255);
+    	} else {
+    		RGB_Color c = settings->getRGB(UpEdgeColor);
+      	glColor4ub(c.r,c.g,c.b,255);
+    	}
+      drawBackPointer(root,endState);
     }
-    else if (!outTransition->isBackpointer() && disp_fp) {
-      glColor4ub(dn_col.r, dn_col.g, dn_col.b, 255);
-      drawForwardPointer(root, endState);
+    if (!outTransition->isBackpointer() && disp_fp) {
+    	if (isMarked(outTransition)) {
+    		RGB_Color c = settings->getRGB(MarkedColor);
+      	glColor4ub(c.r,c.g,c.b,255);
+    	} else {
+    		RGB_Color c = settings->getRGB(DownEdgeColor);
+      	glColor4ub(c.r,c.g,c.b,255);
+    	}
+      drawForwardPointer(root,endState);
     }
     
     // If we haven't visited endState before, do so now.
     if (endState->getVisitState() == DFS_WHITE && 
         !outTransition->isBackpointer()) {
-
       // Move to the next state
       drawTransitions(endState,disp_fp,disp_bp);
     }
   }
-
   // Finalize this node
   root->DFSfinish();
 }
@@ -729,8 +674,7 @@ void Visualizer::drawBackPointer(State* startState, State* endState) {
   Point3D endControl = endState->getIncomingControl();
   Point3D endPoint = endState->getPositionAbs();
 
-
-  if ( (startState->getPosition() < -0.9f) && (endState->getPosition() < -0.9f))
+  if ((startState->getPosition() < -0.9f) && (endState->getPosition() < -0.9f)) 
   {
     startControl.x = startPoint.x * 1.25;
     endControl.x = startControl.x;
@@ -740,40 +684,35 @@ void Visualizer::drawBackPointer(State* startState, State* endState) {
                              {startControl.x, startControl.y, startControl.z},
                              {endControl.x, endControl.y, endControl.z},
                              {endPoint.x, endPoint.y, endPoint.z} };
-  
-                             
+  float t,it,b0,b1,b2,b3,x,y,z;       
   glBegin(GL_LINE_STRIP);
     for (GLint k = 0; k < 50; ++k) {
-      float t  = (float)k / 49;
-      float it = 1.0f - t;
+      t  = (float)k / 49;
+      it = 1.0f - t;
+      b0 =      t *  t *  t;
+      b1 = 3 *  t *  t * it;
+      b2 = 3 *  t * it * it;
+      b3 =     it * it * it;
 
-      float b0 =      t *  t *  t;
-      float b1 = 3 *  t *  t * it;
-      float b2 = 3 *  t * it * it;
-      float b3 =     it * it * it;
+      x = b0 * ctrlPts[0][0] +
+          b1 * ctrlPts[1][0] + 
+          b2 * ctrlPts[2][0] +
+          b3 * ctrlPts[3][0];
 
-      float x = b0 * ctrlPts[0][0] +
-                b1 * ctrlPts[1][0] + 
-                b2 * ctrlPts[2][0] +
-                b3 * ctrlPts[3][0];
-
-      float y = b0 * ctrlPts[0][1] +
-                b1 * ctrlPts[1][1] +
-                b2 * ctrlPts[2][1] +
-                b3 * ctrlPts[3][1];
+      y = b0 * ctrlPts[0][1] +
+          b1 * ctrlPts[1][1] +
+          b2 * ctrlPts[2][1] +
+          b3 * ctrlPts[3][1];
                 
-      float z = b0 * ctrlPts[0][2] +
-                b1 * ctrlPts[1][2] +
-                b2 * ctrlPts[2][2] +
-                b3 * ctrlPts[3][2];
-
-      glVertex3f(x, y, z);
+      z = b0 * ctrlPts[0][2] +
+          b1 * ctrlPts[1][2] +
+          b2 * ctrlPts[2][2] +
+          b3 * ctrlPts[3][2];
+      glVertex3f(x,y,z);
     }
-  /*
-    glVertex3f(startPoint.x, startPoint.y, startPoint.z);
-    glVertex3f(startControl.x, startControl.y, startControl.z);
-    glVertex3f(endControl.x, endControl.y, endControl.z);
-    glVertex3f(endPoint.x, endPoint.y, endPoint.z);
-  */
   glEnd();
+}
+
+bool Visualizer::isMarked(Transition* t) {
+  return markStyle == MARK_TRANSITIONS && t->isMarked();
 }

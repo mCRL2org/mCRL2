@@ -100,10 +100,10 @@ P_SimpleSphere::P_SimpleSphere() {
     S,0, C, 0,-S, C, -S,0, C, 0,S, C,
     0,0,1 };
 
-  GLuint is_bot[] = { 0,1,4,3,2,1 };
-  GLuint is_mid1[] = { 5,1,6,2,7,3,8,4,5,1 };
-  GLuint is_mid2[] = { 9,5,10,6,11,7,12,8,9,5 };
-  GLuint is_top[] = { 13,9,10,11,12,9 };
+  GLuint is_bot[] = { 0,1,2,3,4,1 };
+  GLuint is_mid1[] = { 5,1,8,4,7,3,6,2,5,1 };
+  GLuint is_mid2[] = { 9,5,12,8,11,7,10,6,9,5 };
+  GLuint is_top[] = { 13,9,12,11,10,9 };
 
   disp_list = glGenLists(1);
   glEnableClientState(GL_VERTEX_ARRAY);
