@@ -392,10 +392,57 @@ data_expression_list data_assignment_expressions(data_assignment_list l)
   return atermpp::reverse(result);
 }
 
+/// INTERNAL ONLY
+/// Function object for comparing a data variable with the
+/// the left hand side of a data assignment.
+// TODO: move to detail directory
+struct compare_assignment_lhs
+{
+  data_variable m_variable;
+
+  compare_assignment_lhs(const data_variable& variable)
+    : m_variable(variable)
+  {}
+  
+  bool operator()(const data_assignment& a) const
+  {
+    return m_variable == a.lhs();
+  }
+};
+
+/// INTERNAL ONLY
+/// Utility class for applying a list of assignments to a term.
+// TODO: move to detail directory
+struct assignment_list_substitution_helper
+{
+  const data_assignment_list& l;
+  
+  assignment_list_substitution_helper(const data_assignment_list& l_)
+    : l(l_)
+  {}
+  
+  std::pair<aterm_appl, bool> operator()(aterm_appl t) const
+  {
+    if (!is_data_variable(t))
+    {
+      return std::make_pair(t, true); // continue the recursion
+    }
+    data_assignment_list::iterator i = std::find_if(l.begin(), l.end(), compare_assignment_lhs(t));
+    if (i == l.end())
+    {
+      return std::make_pair(t, false); // don't continue the recursion
+    }
+    else
+    {
+      return std::make_pair(i->rhs(), false); // don't continue the recursion
+    }
+  }
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // assignment_list_substitution
-/// Utility class for applying a sequence of data assignments.
-///
+/// Utility class for applying a sequence of data assignments. Can be used
+/// in the atermpp replace algorithms.
 struct assignment_list_substitution
 {
   const data_assignment_list& m_assignments;
@@ -406,11 +453,7 @@ struct assignment_list_substitution
   
   aterm operator()(aterm t) const
   {
-    for (data_assignment_list::iterator i = m_assignments.begin(); i != m_assignments.end(); ++i)
-    {
-      t = (*i)(t);
-    }
-    return t;
+    return partial_replace(t, assignment_list_substitution_helper(m_assignments));
   }
   private:
     assignment_list_substitution& operator=(const assignment_list_substitution&)
