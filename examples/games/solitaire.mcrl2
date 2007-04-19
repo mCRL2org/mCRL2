@@ -22,7 +22,7 @@
 %
 % can be reached. A move constists of capturing a pin by 
 % moving one pin over another to an empty place. These moves
-% can both be horizontally, and vertically, but not diagonally.
+% can both be horizontal, and vertical, but not diagonal.
 % So a typical first move in the game is:
 %
 %                  x x x
@@ -38,7 +38,10 @@
 % but is estimated to be approximately 160Mstate. Using a 3.5Gbyte
 % machine we can now generate 45Mstate of which appr. 12M are 
 % explored.  An upperbound of the number of states is 2^33, which is appr.
-% 9 10^9. 
+% 9 10^9. [added: 19/4/2007 the state space is much larger than
+% 160Mstate. At least 608Mstate have been reached in an exploration
+% attempt, but the state space is certainly twice at large, and
+% maybe even 10 times.].
 %
 % We currently use the following commands to explore the state
 % space:
