@@ -233,7 +233,7 @@ Settings::Settings() {
   settings[MarkedColor]         = new Setting_RGB(MarkedColor,RGB_RED);
   settings[StateColor]          = new Setting_RGB(StateColor,RGB_WHITE);
   settings[UpEdgeColor]         = new Setting_RGB(UpEdgeColor,RGB_BLUE);
-  RGB_Color bg = {200,200,200};
+  RGB_Color bg = {150,150,150};
   settings[BackgroundColor]     = new Setting_RGB(BackgroundColor,bg);
 }
 
