@@ -424,13 +424,15 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
     return;
   }
   // Compute absolute positions of nodes
+  clearDFSStates(lts->getInitialState());
   Point3D init = {0, 0, 0};
   glPushMatrix();
     glLoadIdentity();
     glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
     computeStateAbsPos(lts->getInitialState(), 0, init);
   glPopMatrix();
-  
+  clearDFSStates(lts->getInitialState());
+
   // We want to see marked states during simulation, so draw these first
   Cluster* root = lts->getInitialState()->getCluster();
   drawSimMarkedStates(root, 0);
@@ -764,7 +766,16 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
                                  vector<Transition*> transHis, 
                                  vector<Transition*> posTrans,
                                  Transition* chosenTrans) {
-  float ns = settings->getFloat(NodeSize);
+  float ns = settings->getFloat(NodeSize);  
+  
+  clearDFSStates(lts->getInitialState());
+  Point3D init = {0, 0, 0};
+  glPushMatrix();
+    glLoadIdentity();
+    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+    computeStateAbsPos(lts->getInitialState(), 0, init);
+  glPopMatrix();
+  clearDFSStates(lts->getInitialState());
   
   // Draw the historical transitions, in orange for the moment.
   for (size_t i = 0; i < transHis.size(); ++i) {
