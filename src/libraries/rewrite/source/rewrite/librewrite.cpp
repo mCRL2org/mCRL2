@@ -122,7 +122,10 @@ void Rewriter::clearSubstitution(ATermAppl Var)
 {
 	long n = ATgetAFun(ATgetArgument(Var,0));
 
-	substs[n] = NULL;
+	if ( n < substs_size )
+	{
+		substs[n] = NULL;
+	}
 }
 
 void Rewriter::clearSubstitutions()

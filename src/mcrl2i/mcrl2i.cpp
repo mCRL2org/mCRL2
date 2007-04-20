@@ -44,9 +44,12 @@ static Enumerator *e;
 static ATermTable variables;
 static ATermTable assignments;
             
-void clear_rewr_substs()
+void clear_rewr_substs(ATermList vars)
 {
-  ATermList vars = ATtableKeys(assignments);
+  if ( vars == NULL )
+  {
+    vars = ATtableKeys(assignments);
+  }
   for (; !ATisEmpty(vars); vars=ATgetNext(vars))
   {
     rewr->clearSubstitution(ATAgetFirst(vars));
@@ -443,8 +446,13 @@ int main(int argc, char **argv)
           ATermAppl term = parse_term(s,spec,vars);
           if ( term != NULL )
           {
+            if ( gsGetSort(term) != gsMakeSortExprBool() )
+            {
+              gsErrorMsg("expression is not of sort Bool\n");
+              break;
+            }
             static EnumeratorSolutions *sols = NULL;
-            clear_rewr_substs();
+            clear_rewr_substs(vars);
             sols = e->findSolutions(vars,rewr->toRewriteFormat(term),false,sols);
             ATermList sol;
             while ( sols->next(&sol) )
