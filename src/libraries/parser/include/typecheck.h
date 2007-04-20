@@ -54,10 +54,10 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
 /*Pre: data_expr represents an mCRL2 data expression that adheres to the
  *     initial internal ATerm structure.
  *     sort_expr represents an mCRL2 sort expression that adheres to the
- *     internal ATerm structure after type checking.
+ *     internal ATerm structure after type checking or is NULL.
  *     lps_spec represents an LPS specification
- *Post:data_expr is type checked as being of type sort_expr using the
-       declaration from lps_spec
+ *Post:data_expr is type checked using the declaration from lps_spec and, if
+ *     sort_expr is not NULL, it is type checked as being of type sort_expr
  *Ret: if type checking went ok, an equivalent version of data_expr is returned
  *     that adheres to the internal ATerm structure after type checking.
  *     if something went wrong, an appropriate error message is printed and

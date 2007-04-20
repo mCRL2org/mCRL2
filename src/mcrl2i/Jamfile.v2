@@ -1,0 +1,14 @@
+project toolset/mcrl2i
+       : build-dir $(BUILD_TOP)/mcrl2i
+       ;
+
+exe mcrl2i
+       : mcrl2i.cpp
+         /libraries//mcrl2_basic
+         /libraries//parser
+         /libraries//lps
+         /libraries//rewrite
+         /libraries//nextstate
+       : <toolset>msvc:<library>/libraries//getopt
+         <status>experimental
+       ;

@@ -360,7 +360,7 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, lps::specification &lps_spec
   gsDebugMsg ("type checking of sort expressions read-in phase started\n");
 
   //XXX read-in from LPS (not finished)
-  if(gstcReadInSorts((ATermList) lps_spec.data().sorts()),false){
+  if(gstcReadInSorts((ATermList) lps_spec.data().sorts(),false)){
     gsDebugMsg ("type checking of sort expressions read-in phase finished\n");
 
     if(!gsIsNotInferred(sort_expr)){
@@ -382,7 +382,7 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
 {
   //check correctness of the data expression in data_expr using
   //the LPS specification in lps_spec
-  assert(gsIsSortExpr(sort_expr));
+  assert((sort_expr == NULL) || gsIsSortExpr(sort_expr));
   gsWarningMsg("type checking of data expressions is partially implemented\n");
 
   ATermAppl Result=NULL;
@@ -401,12 +401,12 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
     ){
     gsDebugMsg ("type checking of data expressions read-in phase finished\n");
 
-    if(gsIsNotInferred(sort_expr)){
+    if( (sort_expr != NULL) && gsIsNotInferred(sort_expr)){
       gsErrorMsg("type checking of data expressions failed (%T is not a sort expressions)\n\n",sort_expr);
       goto failed;
     }
 
-    if(gstcIsSortExprDeclared(sort_expr)){
+    if( (sort_expr == NULL) || gstcIsSortExprDeclared(sort_expr)){
       if(!gsIsDataExpr(data_expr)){
         gsErrorMsg("type checking of data expressions failed (%T is not a data expressions)\n\n",data_expr);
         goto failed;
@@ -416,9 +416,9 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
       if(destroy_vars) Vars=ATtableCreate(63,50);
 
       ATermAppl data=data_expr;
-      ATermAppl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,sort_expr);
+      ATermAppl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,sort_expr==NULL?gsMakeSortUnknown():sort_expr);
       if(destroy_vars) ATtableDestroy(Vars);
-      if(Type) Result=data;
+      if(Type && !gsIsSortUnknown(Type)) Result=data;
       else gsErrorMsg("type checking of data expressions failed.\n\n");
     }
   }
