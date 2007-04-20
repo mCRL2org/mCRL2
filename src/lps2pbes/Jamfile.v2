@@ -9,5 +9,9 @@ exe lps2pbes
          /libraries//mcrl2_basic
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
-         <status>experimental
+       ;
+
+install-binaries install
+       : lps2pbes
+       : <status>experimental
        ;

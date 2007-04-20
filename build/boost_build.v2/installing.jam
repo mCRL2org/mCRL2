@@ -18,6 +18,28 @@ rule install-data ( name : files * : directories ? ) {
   }
 }
 
+rule install-binaries ( name : files * : condition ? ) {
+  if install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
+
+    alias $(name)
+          :
+          : <install>no
+          : $(condition)
+          ;
+   
+    stage $(name)
+          : $(files)
+          : <install-type>EXE
+            <dll-path>$(LIB_DIR)
+            <location>$(BIN_DIR)
+            <install>yes
+          : $(condition)
+          ;
+
+    explicit name ;
+  }
+}
+
 if [ modules.peek : OS ] = MACOSX {
   if install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
     import $(TOP)/build/macosx/mac-bundle ;
@@ -30,7 +52,7 @@ if [ modules.peek : OS ] = MACOSX {
              $(TOP)/src/$(bundle).plist
              $(TOP)/src/$(bundle).icns
            : <location>$(prefix)
-             <dependency>$(BIN_DIR)/$(bundle:B)
+             <dependency>/tools/$(bundle:P)//install
            ;
  
       explicit $(bundle:B).app ;
@@ -46,6 +68,8 @@ if [ modules.peek : OS ] = MACOSX {
 
 IMPORT $(__name__)
        : install-data
+         install-binaries
        : $(caller)
        : install-data
+         install-binaries
        ;

@@ -9,3 +9,6 @@ exe lpsrewr
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
        ;
+
+install-binaries install
+       : lpsrewr ;

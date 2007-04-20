@@ -10,5 +10,9 @@ exe mcrl2i
          /libraries//rewrite
          /libraries//nextstate
        : <toolset>msvc:<library>/libraries//getopt
-         <status>experimental
+       ;
+
+install-binaries install
+       : mcrl2i
+       : <status>experimental
        ;

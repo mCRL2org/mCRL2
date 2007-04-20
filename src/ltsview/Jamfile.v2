@@ -22,11 +22,15 @@ exe ltsview
         state.cpp
         transition.cpp
         utils.cpp
-				visobjectfactory.cpp
+        visobjectfactory.cpp
         visualizer.cpp
         /libraries/wxe//colorbutton.o
         /libraries//mcrl2_basic
         /site-config//boost_signals
       : <site-library>wx_gl
       : <squadt_support>enable
+      ;
+
+install-binaries install
+      : ltsview
       ;

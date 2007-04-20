@@ -11,3 +11,6 @@ exe pnml2mcrl2
          <toolset>msvc:<library>/libraries//getopt
          <squadt_support>enable
        ;
+
+install-binaries install
+       : pnml2mcrl2 ;

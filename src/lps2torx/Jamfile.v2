@@ -10,3 +10,7 @@ exe lps2torx
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
        ;
+
+install-binaries install
+       : lps2torx
+       ;

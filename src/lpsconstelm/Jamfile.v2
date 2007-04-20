@@ -12,3 +12,5 @@ exe lpsconstelm
          <include>.
        ;
 
+install-binaries install
+       : lpsconstelm ;

@@ -9,3 +9,6 @@ exe lpspp
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
        ;
+
+install-binaries install
+       : lpspp ;

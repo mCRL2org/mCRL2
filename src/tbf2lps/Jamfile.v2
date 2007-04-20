@@ -9,3 +9,6 @@ exe tbf2lps
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
        ;
+
+install-binaries install
+       : tbf2lps ;

@@ -8,6 +8,8 @@ obj lin_alt.o
          /libraries//rewrite
        ;
 
+explicit lin_alt.o ;
+
 exe mcrl22lps
        : mcrl22lps.cpp
          lin_alt.o
@@ -28,7 +30,6 @@ exe lin
          /libraries//rewrite
          /libraries/parser//alpha
        : <toolset>msvc:<library>/libraries//getopt
-         <status>experimental
        ;
 
 exe alpha
@@ -38,8 +39,13 @@ exe alpha
          /libraries//mcrl2_basic
          /libraries//rewrite
        : <toolset>msvc:<library>/libraries//getopt
-         <status>experimental
        ;
 
-explicit lin_alt.o ;
+install-binaries install
+       : mcrl22lps experimental-install
+       ;
 
+install-binaries experimental-install
+       : lin alpha
+       : <status>experimental
+       ;

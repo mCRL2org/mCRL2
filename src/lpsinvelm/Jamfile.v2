@@ -9,3 +9,6 @@ exe lpsinvelm
          <toolset>msvc:<library>/libraries//getopt
 #         <toolset>gcc:<define>CVC_LITE_LIB
        ;
+
+install-binaries install
+       : lpsinvelm ;

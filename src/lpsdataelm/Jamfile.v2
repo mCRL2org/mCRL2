@@ -9,3 +9,6 @@ exe lpsdataelm
          /site-config//boost_program_options
        :
        ;
+
+install-binaries install
+       : lpsdataelm ;

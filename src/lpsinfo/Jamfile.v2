@@ -10,3 +10,7 @@ exe lpsinfo
        : <include>.
        : <squadt_support>enable
        ;
+
+install-binaries install
+       : lpsinfo
+       ;

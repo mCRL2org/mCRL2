@@ -8,3 +8,6 @@ exe pbespp
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
        ;
+
+install-binaries install
+       : pbespp ;

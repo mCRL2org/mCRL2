@@ -10,3 +10,7 @@ exe ltsgraph
        : <site-library>wx_base
        : <squadt_support>enable
        ;
+
+install-binaries install
+       : ltsgraph
+       ;

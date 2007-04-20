@@ -7,9 +7,6 @@ path-constant SETUP           : ./src ;                  # Header file for run-t
 # Activate header cache
 modules.poke : HCACHEFILE : $(BUILD_TOP)/.jamdeps ;
 
-include $(BUILD_TOOLS)/building.jam ;
-include $(BUILD_TOOLS)/installing.jam ;
-
 # The known sub projects
 use-project /site-config               : build ;
 use-project /boost                     : 3rd-party/boost ;
@@ -17,6 +14,8 @@ use-project /libraries                 : src/libraries ;
 use-project /libraries/sip             : src/squadt/libraries/sip/build ;
 use-project /libraries/utilities       : src/squadt/libraries/utilities/build ;
 use-project /workarounds               : build/workarounds ;
+
+include $(BUILD_TOOLS)/building.jam ;
 
 project toolset
        : build-dir $(BUILD_TOP)
@@ -32,6 +31,8 @@ project toolset
           $(BUILD_OPTIONS)
           <pch>off
        ;
+
+include $(BUILD_TOOLS)/installing.jam ;
 
 import path ;
 
@@ -97,7 +98,7 @@ else {
     }
    
     alias install
-            : install-binaries
+            : /tools/$(targets)//install
               install-shared-libraries
             ;
 
@@ -106,9 +107,8 @@ else {
   else {
     # Complete install
     alias install
-            :
+            : /tools/$(targets)//install
               install-shared-libraries
-              install-binaries
               install-plugins
               install-examples
               install-headers
@@ -129,13 +129,6 @@ else {
           : /libraries/aterm//headers
           : <location>$(INCLUDE_DIR)/aterm
             <install-source-root>3rd-party/aterm/include
-          ;
-
-  stage install-binaries
-          : $(targets)
-          : <location>$(BIN_DIR)
-            <dll-path>$(LIB_DIR)
-            <install-dependencies>on <install-type>EXE
           ;
 
 #  stage install-static-libraries

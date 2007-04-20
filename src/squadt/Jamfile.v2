@@ -24,3 +24,7 @@ install-data user-manual
       : gui/manual.html
       : squadt
       ;
+
+install-binaries install
+      : squadt
+      ;

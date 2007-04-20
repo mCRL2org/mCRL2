@@ -10,3 +10,6 @@ exe lpsparelm
        : <squadt_support>enable
          <include>.
        ;
+
+install-binaries install
+       : lpsparelm ;

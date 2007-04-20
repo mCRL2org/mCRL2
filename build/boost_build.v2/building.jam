@@ -13,7 +13,19 @@ if ! $(REVISION) {
 }
 
 # Feature to mark tools as basic experimental or deprecated
-feature.feature status : basic experimental deprecated : incidental ;
+feature.feature status : basic experimental deprecated : composite ;
+
+if ! experimental in [ MATCH "^--enable-(experimental)" : [ modules.peek : ARGV ] $(BUILD_EXTRA) ] {
+  feature.compose <status>experimental
+        : <install>no
+        ;
+}
+
+if ! deprecated in [ MATCH "^--enable-(deprecated)" : [ modules.peek : ARGV ] $(BUILD_EXTRA) ] {
+  feature.compose <status>deprecated
+        : <install>no
+        ;
+}
 
 feature.feature squadt_support : disable enable : composite ;
 

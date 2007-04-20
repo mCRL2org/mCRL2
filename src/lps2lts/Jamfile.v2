@@ -15,3 +15,6 @@ exe lps2lts
        : <toolset>msvc:<library>/libraries//getopt
          <squadt_support>enable
        ;
+
+install-binaries install
+       : lps2lts ;

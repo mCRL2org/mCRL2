@@ -9,3 +9,6 @@ exe tracepp
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
        ;
+
+install-binaries install
+       : tracepp ;

@@ -24,3 +24,6 @@ exe sim
        : <toolset>msvc:<library>/libraries//getopt
        ;
 
+install-binaries install
+       : xsim sim
+       ;

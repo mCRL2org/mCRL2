@@ -9,5 +9,9 @@ exe ltsmin
          /libraries//mcrl2_basic
          /libraries//svc
        : <toolset>msvc:<library>/libraries//getopt
-         <status>deprecated
+       ;
+
+install-binaries install
+       : ltsmin
+       : <status>deprecated
        ;

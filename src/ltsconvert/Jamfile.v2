@@ -11,3 +11,7 @@ exe ltsconvert
          <toolset>msvc:<library>/libraries//getopt
          <squadt_support>enable
        ;
+
+install-binaries install
+       : ltsconvert
+       ;

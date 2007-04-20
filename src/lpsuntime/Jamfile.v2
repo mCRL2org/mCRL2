@@ -10,3 +10,6 @@ exe lpsuntime
        : <squadt_support>enable
          <include>.
        ;
+
+install-binaries install
+       : lpsuntime ;
