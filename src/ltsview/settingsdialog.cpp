@@ -87,10 +87,10 @@ void SettingsDialog::setupClrPanel(wxPanel* panel) {
   wxSize spinSize(65,-1);
   wxSize btnSize(25,25);
 
-  wxFlexGridSizer* sizer = new wxFlexGridSizer(9,3,0,0);
+  wxFlexGridSizer* sizer = new wxFlexGridSizer(20,3,0,0);
   sizer->AddGrowableCol(0);
-  sizer->AddGrowableRow(8);
-  
+  sizer->AddGrowableRow(19);
+ 
   trSpin = new wxSpinCtrl(panel,myID_ANY);
   trSpin->SetRange(0,100);
   trSpin->SetValue(static_cast<int>((255-settings->getUByte(Alpha))/2.55f));
@@ -127,6 +127,8 @@ void SettingsDialog::setupClrPanel(wxPanel* panel) {
   sizer->AddSpacer(0);
   sizer->Add(ueButton,0,rf,bd);
 
+
+  
   mkButton = new wxColorButton(panel,this,myID_ANY);
   mkButton->SetSizeHints(btnSize,btnSize);
   mkButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(MarkedColor)));
@@ -147,10 +149,70 @@ void SettingsDialog::setupClrPanel(wxPanel* panel) {
   liCheck = new wxCheckBox(panel,myID_ANY,wxT("Long interpolation"));
   liCheck->SetValue(settings->getBool(LongInterpolation));
   sizer->Add(liCheck,0,lf,bd);
+  sizer->AddSpacer(0);
+  sizer->AddSpacer(0);
 
+  scsButton = new wxColorButton(panel,this,myID_ANY);
+  scsButton->SetSizeHints(btnSize,btnSize);
+  scsButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimCurrStateColor)));
+  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Current state of simulation:")),0,lf,bd);
+  sizer->AddSpacer(0);
+  sizer->Add(scsButton, 0, rf, bd);
+
+  spsButton = new wxColorButton(panel,this,myID_ANY);
+  spsButton->SetSizeHints(btnSize,btnSize);
+  spsButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimPosStateColor)));
+  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Possible state of simulation:")),0,lf,bd);
+  sizer->AddSpacer(0);
+  sizer->Add(spsButton,0,rf,bd);
+
+  sssButton = new wxColorButton(panel,this,myID_ANY);
+  sssButton->SetSizeHints(btnSize,btnSize);
+  sssButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimSelStateColor)));
+  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Selected state of simulation:")),0,lf,bd);
+  sizer->AddSpacer(0);
+  sizer->Add(sssButton,0,rf,bd);
+ 
+  shsButton = new wxColorButton(panel,this,myID_ANY);
+  shsButton->SetSizeHints(btnSize,btnSize);
+  shsButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimStateColor)));
+  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Previous states of simulation:")),0,lf,bd);
+  sizer->AddSpacer(0);
+  sizer->Add(shsButton,0,rf,bd); 
+
+  sdeButton = new wxColorButton(panel,this,myID_ANY);
+  sdeButton->SetSizeHints(btnSize,btnSize);
+  sdeButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimDownEdgeColor)));
+  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Previous transitions of simulation:")),0,lf,bd);
+  sizer->AddSpacer(0);
+  sizer->Add(sdeButton,0,rf,bd);
+  
+  sueButton = new wxColorButton(panel,this,myID_ANY);
+  sueButton->SetSizeHints(btnSize,btnSize);
+  sueButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimUpEdgeColor)));
+  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Previous backpointers of simulation:")),0,lf,bd);
+  sizer->AddSpacer(0);
+  sizer->Add(sueButton,0,rf,bd);
+  
+  speButton = new wxColorButton(panel,this,myID_ANY);
+  speButton->SetSizeHints(btnSize,btnSize);
+  speButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimPosEdgeColor)));
+  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Possible transition of simulation:")),0,lf,bd);
+  sizer->AddSpacer(0);
+  sizer->Add(speButton,0,rf,bd);
+  
+  sseButton = new wxColorButton(panel,this,myID_ANY);
+  sseButton->SetSizeHints(btnSize,btnSize);
+  sseButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimSelEdgeColor)));
+  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Selected transition of simulation:")),0,lf,bd);
+  sizer->AddSpacer(0);
+  sizer->Add(sseButton,0,rf,bd);
+ 
+  
   panel->SetSizer(sizer);
   panel->Fit();
   panel->Layout();
+  
 }
 
 void SettingsDialog::setupPfmPanel(wxPanel* panel) {
@@ -206,6 +268,30 @@ void SettingsDialog::onButton(wxCommandEvent& event) {
   } else if (event.GetEventObject() == ueButton) {
     settings->setRGB(UpEdgeColor,
       wxC_to_RGB(ueButton->GetBackgroundColour()));
+  } else if (event.GetEventObject() == scsButton) {
+    settings->setRGB(SimCurrStateColor,
+      wxC_to_RGB(scsButton->GetBackgroundColour()));
+  } else if (event.GetEventObject() == spsButton) {
+    settings->setRGB(SimPosStateColor,
+      wxC_to_RGB(spsButton->GetBackgroundColour()));
+  } else if (event.GetEventObject() == sssButton) {
+    settings->setRGB(SimSelStateColor,
+      wxC_to_RGB(sssButton->GetBackgroundColour()));
+  } else if (event.GetEventObject() == shsButton) {
+    settings->setRGB(SimStateColor,
+      wxC_to_RGB(shsButton->GetBackgroundColour()));
+  } else if (event.GetEventObject() == sdeButton) {
+    settings->setRGB(SimDownEdgeColor,
+      wxC_to_RGB(sdeButton->GetBackgroundColour()));
+  } else if (event.GetEventObject() == sueButton) {
+    settings->setRGB(SimUpEdgeColor,
+      wxC_to_RGB(sueButton->GetBackgroundColour()));
+  } else if (event.GetEventObject() == speButton) {
+    settings->setRGB(SimPosEdgeColor,
+      wxC_to_RGB(speButton->GetBackgroundColour()));
+  } else if (event.GetEventObject() == sseButton) {
+    settings->setRGB(SimSelEdgeColor,
+      wxC_to_RGB(sseButton->GetBackgroundColour()));
   } else {
     return;
   }

@@ -23,13 +23,21 @@ class SettingsDialog: public wxDialog {
     wxCheckBox*	   nshCheck;
     wxCheckBox*	   nliCheck;
     wxCheckBox*	   ntrCheck;
-    wxColorButton* bgButton;
-    wxColorButton* deButton;
-    wxColorButton* i1Button;
-    wxColorButton* i2Button;
-    wxColorButton* mkButton;
-    wxColorButton* ndButton;
-    wxColorButton* ueButton;
+    wxColorButton* bgButton;  // Background colour
+    wxColorButton* deButton;  // Down edge (transition) colour
+    wxColorButton* i1Button;  // First interpolation colour
+    wxColorButton* i2Button;  // Second interpolation colour
+    wxColorButton* mkButton;  // Mark colour
+    wxColorButton* ndButton;  // Node (state) colour
+    wxColorButton* ueButton;  // Up edge (backpointer) colour
+    wxColorButton* scsButton; // Simulation Current State colour
+    wxColorButton* spsButton; // Simulation Possible State colour
+    wxColorButton* sssButton; // Simulation Selected State colour
+    wxColorButton* shsButton; // Simulation Historic State colour
+    wxColorButton* sdeButton; // Simulation historic Downedge colour
+    wxColorButton* sueButton; // Simulation historic Upedge colour
+    wxColorButton* speButton; // Simulation Possible Edge colour
+    wxColorButton* sseButton; // Simulation Selected Edge colour
     wxSpinCtrl*	   brSpin;
     wxSpinCtrl*    nsSpin;
     wxSpinCtrl*	   obSpin;
