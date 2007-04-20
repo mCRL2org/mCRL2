@@ -1,7 +1,7 @@
 #include <cmath>
 #include <cstdlib>
 #include "visualizer.h"
-
+#include <iostream>
 using namespace std;
 using namespace Utils;
 
@@ -418,6 +418,107 @@ void Visualizer::drawStates() {
   drawStates(lts->getInitialState()->getCluster(),0);
 }
 
+void Visualizer::drawSimStates(vector<State*> historicStates, 
+                               State* currState) {
+  if (lts == NULL) {
+    return;
+  }
+  // Compute absolute positions of nodes
+  Point3D init = {0, 0, 0};
+  glPushMatrix();
+    glLoadIdentity();
+    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+    computeStateAbsPos(lts->getInitialState(), 0, init);
+  glPopMatrix();
+  
+  // We want to see marked states during simulation, so draw these first
+  Cluster* root = lts->getInitialState()->getCluster();
+  drawSimMarkedStates(root, 0);
+    
+  // Draw previous states of the simulation, in the colour specified in the
+  // settings (default: white)
+  float ns = settings->getFloat(NodeSize);
+  RGB_Color hisStateColor = settings->getRGB(SimStateColor);
+  glColor4ub(hisStateColor.r, hisStateColor.g, hisStateColor.b, 255);
+  
+  for (size_t i = 0; i < historicStates.size() - 1; ++i) {
+    State* s = historicStates[i];
+    if (!isMarked(s)) {
+      Point3D p = s->getPositionAbs();
+      glPushMatrix(); 
+      glTranslatef(p.x, p.y, p.z);
+      glScalef(ns, ns, ns);
+      primitiveFactory->drawSimpleSphere();
+      glPopMatrix();
+    }
+  }
+ 
+  // Draw the current state.
+  //RGB_Color hisStateColor = settings->getRGB(SimStateColor);
+  RGB_Color currStateColor = settings->getRGB(SimCurrStateColor);
+  glColor4ub(currStateColor.r, currStateColor.g, currStateColor.b, 255);
+  Point3D currentPos = currState->getPositionAbs();
+  glPushMatrix();
+  glTranslatef(currentPos.x, currentPos.y, currentPos.z);
+
+  // Make the current state a bit larger, to make it easier to find it in the
+  // simulation
+  glScalef(1.5 *ns, 1.5* ns, 1.5 * ns);
+  primitiveFactory->drawSimpleSphere();
+  glPopMatrix();
+
+}
+
+void Visualizer::drawSimMarkedStates(Cluster* root, int rot) {
+  float ns = settings->getFloat(NodeSize);
+
+  for (int i = 0; i < root->getNumStates(); ++i) {
+    State* s = root->getState(i);
+    
+    if(isMarked(s)) {
+      RGB_Color c = settings->getRGB(MarkedColor);
+      glColor4ub(c.r, c.g, c.b, 255);
+      
+      glPushMatrix();
+      if (s->getPosition() >= -0.9f) {
+        glRotatef(-s->getPosition(), 0.0f, 0.0f, 1.0f);
+        glTranslatef(root->getTopRadius(), 0.0f, 0.0f);
+      }
+      glScalef(ns, ns, ns);
+      primitiveFactory->drawSimpleSphere();
+      glPopMatrix();
+    }
+  }
+
+  int drot = rot + settings->getInt(BranchRotation);
+  if (drot >= 360) {
+    drot -= 360;
+  }
+
+  Cluster* desc;
+
+  for (int i = 0; i < root->getNumDescendants(); ++i) {
+    desc = root->getDescendant(i);
+    if (desc->getPosition() < -0.9f){
+      // Descendant is centered
+      glTranslatef(0.0f, 0.0f, settings->getFloat(ClusterHeight));
+      drawSimMarkedStates(desc, (root->getNumDescendants() > 1)?drot:rot);
+      glTranslatef(0.0f, 0.0f, -settings->getFloat(ClusterHeight));
+    }
+    else {
+      glRotatef(-desc->getPosition() - rot, 0.0f, 0.0f, 1.0f);
+      glTranslatef(root->getBaseRadius(), 0.0f,
+                   settings->getFloat(ClusterHeight));
+      glRotatef(settings->getInt(BranchTilt), 0.0f, 1.0f, 0.0f);
+      drawSimMarkedStates(desc, drot);
+      glRotatef(-settings->getInt(BranchTilt), 0.0f, 1.0f, 0.0f);
+      glTranslatef(-root->getBaseRadius(), 0.0f, 
+                   -settings->getFloat(ClusterHeight));
+      glRotatef(desc->getPosition() + rot, 0.0f, 0.0f, 1.0f);
+    }
+  }
+}
+
 void Visualizer::clearDFSStates(State* root) {
   root->DFSclear();
   for(int i=0; i!=root->getNumOutTransitions(); ++i) {
@@ -526,7 +627,7 @@ void Visualizer::computeStateAbsPos(State* root, int rot, Point3D initVect) {
       if (endState->getRank() != root->getRank()) {
         
         if (endCluster->getPosition() < -0.9f) {
-          //endCluster is centered, only descen)d
+          //endCluster is centered, only descend
           glTranslatef(0.0f, 0.0f, settings->getFloat(ClusterHeight));
           computeStateAbsPos(endState, 
             (startCluster->getNumDescendants()>1)?drot: rot,
@@ -556,9 +657,10 @@ void Visualizer::drawStates(Cluster* root,int rot) {
     if (isMarked(s)) {
       RGB_Color c = settings->getRGB(MarkedColor);
       glColor4ub(c.r,c.g,c.b,255);
-    } else {
-			RGB_Color c = settings->getRGB(StateColor);
-			glColor4ub(c.r,c.g,c.b,255);
+    } 
+    else {
+      RGB_Color c = settings->getRGB(StateColor);
+      glColor4ub(c.r,c.g,c.b,255);
     }
     glPushMatrix();
     if (s->getPosition() >= -0.9f) {
@@ -658,6 +760,113 @@ void Visualizer::drawTransitions(State* root,bool disp_fp,bool disp_bp) {
   root->DFSfinish();
 }
 
+void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp, 
+                                 vector<Transition*> transHis, 
+                                 vector<Transition*> posTrans,
+                                 Transition* chosenTrans) {
+  float ns = settings->getFloat(NodeSize);
+  
+  // Draw the historical transitions, in orange for the moment.
+  for (size_t i = 0; i < transHis.size(); ++i) {
+    Transition* currTrans = transHis[i];
+    State* beginState = currTrans->getBeginState();
+    State* endState = currTrans->getEndState();
+
+    // Draw transition from beginState to endState
+    if (currTrans->isBackpointer() && draw_bp) {
+      if (isMarked(currTrans)) {
+        RGB_Color c = settings->getRGB(MarkedColor);
+        glColor4ub(c.r, c.g, c.b, 255);
+      }
+      else {
+        RGB_Color transColor = settings->getRGB(SimUpEdgeColor);
+        glColor4ub(transColor.r, transColor.g, transColor.b, 255);
+      }
+      drawBackPointer(beginState, endState);
+    }
+    if (!currTrans->isBackpointer() && draw_fp) {
+      if (isMarked(currTrans)) {
+        RGB_Color c = settings->getRGB(MarkedColor);
+        glColor4ub(c.r, c.g, c.b, 255);
+      }
+      else {
+        RGB_Color transColor = settings->getRGB(SimDownEdgeColor);
+        glColor4ub(transColor.r, transColor.g, transColor.b, 255);
+      }
+      drawForwardPointer(beginState, endState);
+    }
+  }
+
+  // Draw the possible transitions from the current state, as well as the state 
+  // they lead into
+  for (size_t i = 0; i < posTrans.size(); ++i) {
+    Transition* currTrans = posTrans[i];
+    State* beginState = currTrans->getBeginState();
+    State* endState = currTrans->getEndState();
+    
+    
+    // Draw transition from beginState to endState
+    if (currTrans->isBackpointer() && draw_bp) {
+      if (currTrans == chosenTrans) {
+        RGB_Color c = settings->getRGB(SimSelEdgeColor);
+        glColor4ub(c.r, c.g, c.b, 255);
+        glLineWidth(2.0);
+      }
+      else {
+        RGB_Color c = settings->getRGB(SimPosEdgeColor);
+        glColor4ub(c.r, c.g, c.b, 255);
+      }
+      if (isMarked(currTrans)) {
+        RGB_Color c = settings->getRGB(MarkedColor);
+        glColor4ub(c.r, c.g, c.b, 255);
+      }
+      drawBackPointer(beginState, endState);
+      glLineWidth(1.0);
+    }
+    if (!currTrans->isBackpointer() && draw_fp) {
+      if (currTrans == chosenTrans) {
+        RGB_Color c  = settings->getRGB(SimSelEdgeColor);
+        glColor4ub(c.r, c.g, c.b, 255);
+        glLineWidth(2.0);
+      }
+      else {
+        RGB_Color c = settings->getRGB(SimPosEdgeColor);
+        glColor4ub(c.r, c.g, c.b, 255);
+      }
+      if (isMarked(currTrans)) {
+        RGB_Color c = settings->getRGB(MarkedColor);
+        glColor4ub(c.r, c.g, c.b, 255);
+      }
+      drawForwardPointer(beginState, endState);
+      glLineWidth(1.0);
+    }
+    
+    if (!isMarked(endState)) {
+      if (currTrans != chosenTrans) {
+        RGB_Color c = settings->getRGB(SimPosStateColor);
+        glColor4ub(c.r, c.g, c.b, 255);
+        Point3D p = endState->getPositionAbs();
+        glPushMatrix();
+        glTranslatef(p.x, p.y, p.z);
+        glScalef(ns, ns, ns);
+        primitiveFactory->drawSimpleSphere();
+        glPopMatrix();
+      }
+      else {
+        // Draw the chosen state bigger and in another colour.
+        RGB_Color c = settings->getRGB(SimSelStateColor);
+        glColor4ub(c.r, c.g, c.b, 255);
+        Point3D p = endState->getPositionAbs();
+        glPushMatrix();
+        glTranslatef(p.x, p.y, p.z);
+        glScalef(1.5 * ns, 1.5 * ns, 1.5* ns);
+        primitiveFactory->drawSimpleSphere();
+        glPopMatrix();
+      }
+    }
+  }
+}
+  
 void Visualizer::drawForwardPointer(State* startState, State* endState) {
   Point3D startPoint = startState->getPositionAbs();
   Point3D endPoint = endState->getPositionAbs();

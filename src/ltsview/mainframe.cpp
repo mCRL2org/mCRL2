@@ -537,7 +537,7 @@ void MainFrame::onSimTransitionSelected(wxListEvent& event) {
   // Get index of transition that was selected
   int trans = event.GetIndex();
 
-  // Choost trans to be the next transition
+  // Choose trans to be the next transition
   sim->chooseTrans(trans);
 
   
@@ -729,14 +729,14 @@ void MainFrame::refresh() {
       }
       
       // Display selected transition
-      int chosenTrans = sim->getChosenTrans();
+      int chosenTrans = sim->getChosenTransi();
 
       if(chosenTrans != -1) {
         simTransView->Select(chosenTrans);
       }
       
       // Trigger and undo buttons
-      if(sim->getChosenTrans() != -1) {
+      if(sim->getChosenTransi() != -1) {
         simTriggerButton->Enable();
       }
       else {
@@ -773,7 +773,7 @@ void MainFrame::refresh() {
 
 void MainFrame::selChange() {
   // There always is a simulation to inform us of a selection change.
-  if(sim->getChosenTrans() != -1) {
+  if(sim->getChosenTransi() != -1) {
     simTriggerButton->Enable();
   }
   else {

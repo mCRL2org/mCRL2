@@ -19,9 +19,9 @@ class Visualizer: public Subscriber {
     PrimitiveFactory *primitiveFactory;
     Settings* settings;
     Utils::VisStyle visStyle;
-		bool create_objects;
-		bool update_colors;
-		bool update_matrices;
+    bool create_objects;
+    bool update_colors;
+    bool update_matrices;
 
     void clearDFSStates(State* root);
     void computeStateAbsPos(State* root,int rot,Utils::Point3D init);
@@ -38,8 +38,8 @@ class Visualizer: public Subscriber {
     void traverseTree(bool co);
     void traverseTreeC(Cluster *root,bool topClosed,int rot);
     void traverseTreeT(Cluster *root,int rot);
-		void updateColors();
-		float compute_cone_scale_x(float phi,float r,float x);
+    void updateColors();
+    float compute_cone_scale_x(float phi,float r,float x);
   
   public:
     Visualizer(Mediator* owner,Settings* ss);
@@ -54,9 +54,20 @@ class Visualizer: public Subscriber {
     void setVisStyle(Utils::VisStyle vs);
 
     void drawStates();
+    void drawSimStates(std::vector<State*> historicStates, State* currState);
+    void drawSimMarkedStates(Cluster* root, int rot);
+    
     void drawTransitions(bool draw_fp,bool draw_bp);
+    void drawSimTransitions(bool draw_fp, bool draw_bp, 
+                            std::vector<Transition*> historicTrans,
+                            std::vector<Transition*> posTrans, 
+                            Transition* chosenTrans);
+
     void drawStructure();
     void sortClusters(Utils::Point3D viewpoint);
+
+    
+    
 };
 
 #endif

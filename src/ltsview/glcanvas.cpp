@@ -29,7 +29,7 @@ END_EVENT_TABLE()
 GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
     const wxSize &size,int* attribList)
 	: wxGLCanvas(parent,wxID_ANY,wxDefaultPosition,size,wxSUNKEN_BORDER,
-		     wxT(""),attribList) {
+		     wxT(""),attribList), simReader(NULL) {
   mediator = owner;
   settings = ss;
   settings->subscribe(BackgroundColor,this);
@@ -44,7 +44,7 @@ GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
   farPlane = 0.0f;
   nearPlane = 1.0f;
   lightRenderMode = false;
-
+  simulating      = false;
   setActiveTool(myID_SELECT);
 }
 
@@ -188,17 +188,36 @@ void GLCanvas::display(bool coll_caller) {
       float halfHeight = visualizer->getHalfStructureHeight();
       glTranslatef(0.0f,0.0f,-halfHeight);
       
-      if (settings->getBool(DisplayStates) &&
-          (!lightRenderMode || settings->getBool(NavShowStates))) {
-        visualizer->drawStates();
+      if (simulating) {
+        visualizer->drawSimStates(sim->getStateHis(), sim->getCurrState());
+      }
+      if (!lightRenderMode || settings->getBool(NavShowStates)) {
+
+        if (settings->getBool(DisplayStates) && !simulating) {         
+          visualizer->drawStates();
+        }
+        /*else if (simulating) {
+          // Draw the states that were visited in simulation, and the current 
+          // state
+          visualizer->drawSimStates(sim->getStateHis(), sim->getCurrState());
+        }*/
       }
       
-      visualizer->drawTransitions(
-        settings->getBool(DisplayTransitions)
-          && (!lightRenderMode || settings->getBool(NavShowTransitions)),
-        settings->getBool(DisplayBackpointers)
-          && (!lightRenderMode || settings->getBool(NavShowBackpointers)));
-      
+      if (!simulating) {
+        visualizer->drawTransitions(
+          settings->getBool(DisplayTransitions)
+            && (!lightRenderMode || settings->getBool(NavShowTransitions)),
+          settings->getBool(DisplayBackpointers)
+            && (!lightRenderMode || settings->getBool(NavShowBackpointers)));
+      }
+      else {
+        // Draw transitions followed during simulation and the possible
+        // transitions going out of the current state.
+        visualizer->drawSimTransitions(
+          !lightRenderMode || settings->getBool(NavShowTransitions),
+          !lightRenderMode || settings->getBool(NavShowBackpointers),
+          sim->getTransHis(), sim->getPosTrans(), sim->getChosenTrans());
+      }  
       if (!lightRenderMode || settings->getBool(NavTransparency)) {
         // determine current viewpoint in world coordinates
         glPushMatrix();
@@ -236,10 +255,9 @@ void GLCanvas::display(bool coll_caller) {
 }
 
 void GLCanvas::reshape() {
-  int width,height;
-  GetClientSize(&width,&height);
-
   if (GetContext()) {
+    int width,height;
+    GetClientSize(&width,&height);
     SetCurrent();
     glViewport(0,0,width,height);
     glMatrixMode(GL_PROJECTION);
@@ -481,4 +499,32 @@ unsigned char* GLCanvas::getPictureData(int w_res,int h_res) {
   }
   free(pixel_ptrs);
   return pixels;
+}
+
+// Implementation of simulation header
+void GLCanvas::refresh() {
+  if (sim != NULL) {
+    if (sim->getStarted()) {
+
+      simulating = true;
+      display();
+    }
+    else {
+      simulating = false;
+      display();
+    } 
+  }
+}
+
+void GLCanvas::selChange() {
+  if (sim != NULL) {
+    if (sim->getStarted()) {
+      simulating = true;
+      display();
+    }
+    else {
+      simulating = false;
+      display();
+    }
+  }
 }

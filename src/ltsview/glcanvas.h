@@ -7,7 +7,7 @@
 #include "utils.h"
 #include "settings.h"
 
-class GLCanvas: public wxGLCanvas,public Subscriber {
+class GLCanvas: public wxGLCanvas, public Subscriber, public simReader {
   public:
     GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
       const wxSize &size=wxDefaultSize, int* attribList=NULL);
@@ -33,6 +33,10 @@ class GLCanvas: public wxGLCanvas,public Subscriber {
     void      onSize(wxSizeEvent& event);
     void      OnEraseBackground(wxEraseEvent& event);
 
+    // Implemented for simReader interface
+    void      refresh();
+    void      selChange();
+
   private:
     int	      activeTool;
     float     angleX;
@@ -54,6 +58,9 @@ class GLCanvas: public wxGLCanvas,public Subscriber {
     
     void      determineCurrentTool(wxMouseEvent& event);
     void      setMouseCursor();
+
+    // Boolean determining if simulation is on.
+    bool      simulating;
 
     DECLARE_EVENT_TABLE()
 };

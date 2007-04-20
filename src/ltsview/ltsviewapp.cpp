@@ -223,6 +223,8 @@ void LTSViewApp::openFile(string fileName) {
   mainFrame->setSim(lts->getSimulation());
   mainFrame->setActionLabels(ls);
 
+  glCanvas->setSim(lts->getSimulation());
+
   mainFrame->setMarkedStatesInfo(0);
   mainFrame->setMarkedTransitionsInfo(0);
 }

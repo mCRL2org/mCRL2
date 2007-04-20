@@ -32,10 +32,15 @@ void Simulation::start(State* initialState) {
 }
 void Simulation::stop()
 {
+  // Set started to false
   started = false;
 
+  // Clear history
+  stateHis.clear();
+  transHis.clear();
   // Fire signal
   signal();
+  
 }
   
 Simulation::~Simulation() {
@@ -47,7 +52,7 @@ Simulation::~Simulation() {
   posTrans.clear();
 }
 
-vector< int > const& Simulation::getTransHis() const {
+vector< Transition* > const& Simulation::getTransHis() const {
   return transHis;
 }
 
@@ -63,10 +68,13 @@ vector< Transition* > const& Simulation::getPosTrans() const {
   return posTrans;
 }
 
-int Simulation::getChosenTrans() const {
-  return chosenTrans;
+Transition* Simulation::getChosenTrans() const {
+  return posTrans[chosenTrans];
 }
 
+int Simulation::getChosenTransi() const {
+  return chosenTrans;
+}
 bool Simulation::getStarted() const {
   return started;
 }
@@ -76,7 +84,7 @@ void Simulation::followTrans() {
   State* nextState = toFollow->getEndState();
   vector< Transition* > selfLoops;
   
-  transHis.push_back(chosenTrans);
+  transHis.push_back(posTrans[chosenTrans]);
   stateHis.push_back(nextState);
   currState = nextState;
   
@@ -103,7 +111,6 @@ void Simulation::chooseTrans(int i) {
 }
 
 void Simulation::undoStep() {
-  int lastTrans = transHis.back();
   State* lastState;
   vector< Transition* > selfLoops;
   
@@ -124,7 +131,7 @@ void Simulation::undoStep() {
                                                      selfLoops.begin(),
                                                      selfLoops.end()); 
   
-  chosenTrans = lastTrans;
+  chosenTrans = -1;
 
   // Fire signal
   signal();

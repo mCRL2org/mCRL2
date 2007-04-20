@@ -29,15 +29,16 @@ class Simulation {
     void start(State* initialState);
     void stop();
 
-    std::vector< int > const&   getTransHis()         const;
+    std::vector< Transition* > const&   getTransHis()         const;
     std::vector< State*>       const&   getStateHis()         const;
     State*                              getCurrState()        const;
     std::vector< Transition* > const&   getPosTrans()         const;
-    int                                 getChosenTrans()      const;
+    Transition*                         getChosenTrans()      const;
+    int                                 getChosenTransi()     const;
     bool                                getStarted()          const;
     
     
-    void                                chooseTrans( int );
+    void                                chooseTrans( int i );
     void                                followTrans();
     void                                undoStep();
     void                                resetSim();
@@ -52,7 +53,7 @@ class Simulation {
     State*                      currState;
     std::vector< Transition* >  posTrans;
     std::vector< State* >       stateHis;
-    std::vector< int >          transHis;
+    std::vector< Transition* >  transHis;
     simulationSignal            signal;  
     simulationSignal            selChangeSignal;
 };

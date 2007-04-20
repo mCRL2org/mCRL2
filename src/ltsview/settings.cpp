@@ -228,11 +228,22 @@ Settings::Settings() {
   settings[NavLighting]         = new Setting_Bool(NavLighting,true);
   settings[NavTransparency]     = new Setting_Bool(NavTransparency,true);
   settings[DownEdgeColor]       = new Setting_RGB(DownEdgeColor,RGB_WHITE);
+  settings[SimDownEdgeColor]    = new Setting_RGB(SimDownEdgeColor, RGB_WHITE);
   settings[InterpolateColor1]   = new Setting_RGB(InterpolateColor1,RGB_WHITE);
   settings[InterpolateColor2]   = new Setting_RGB(InterpolateColor2,RGB_BLUE);
   settings[MarkedColor]         = new Setting_RGB(MarkedColor,RGB_RED);
   settings[StateColor]          = new Setting_RGB(StateColor,RGB_WHITE);
+  settings[SimStateColor]       = new Setting_RGB(SimStateColor, RGB_WHITE);
+  RGB_Color cur = {0, 255, 0};
+  settings[SimCurrStateColor]    = new Setting_RGB(SimCurrStateColor, cur);
+  RGB_Color sel = {255, 255, 0};
+  settings[SimSelStateColor]    = new Setting_RGB(SimSelStateColor, sel);
+  RGB_Color pos = {0, 255, 255};
+  settings[SimPosStateColor]    = new Setting_RGB(SimPosStateColor, pos); 
   settings[UpEdgeColor]         = new Setting_RGB(UpEdgeColor,RGB_BLUE);
+  settings[SimUpEdgeColor]      = new Setting_RGB(SimUpEdgeColor, RGB_BLUE);
+  settings[SimSelEdgeColor]     = new Setting_RGB(SimSelEdgeColor, sel);
+  settings[SimPosEdgeColor]     = new Setting_RGB(SimPosEdgeColor, pos);
   RGB_Color bg = {150,150,150};
   settings[BackgroundColor]     = new Setting_RGB(BackgroundColor,bg);
 }
