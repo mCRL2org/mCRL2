@@ -45,7 +45,7 @@ namespace squadt {
 
           /* Make sure a command is registered */
           if (!has_registered_command(j.m_mime_type,false)) {
-            register_command(j.m_mime_type, command_system);
+            register_command(j.m_mime_type, command_none);
           }
         }
 
