@@ -217,9 +217,7 @@ namespace utility {
     tree->GetAttributeOrDefault("minimum", &e.m_minimum_length, 0);
     tree->GetAttributeOrDefault("maximum", &e.m_maximum_length, sip::datatype::string::implementation_maximum_length);
 
-    if ((tree = tree->FirstChildElement(false))) {
-      s = tree->GetText();
-    }
+    s = tree->GetText(false);
 
     assert(e.validate(s));
   }
@@ -378,7 +376,7 @@ namespace utility {
 
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
       if (e->Value() == "description") {
-        c.description += e->GetText();
+        c.description += e->GetText(false);
       }
     }
   }
@@ -388,7 +386,7 @@ namespace utility {
   void visitor< sip::restore_visitor_impl >::visit(sip::layout::elements::label& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "label");
     
-    c.m_text = tree->GetText();
+    c.m_text = tree->GetText(false);
 
     c.m_event_handler->process(&c);
   }
@@ -496,7 +494,7 @@ namespace utility {
 
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
       if (e->Value() == "text") {
-        c.m_text = e->GetText();
+        c.m_text = e->GetText(false);
       }
     }
 

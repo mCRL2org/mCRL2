@@ -132,12 +132,24 @@ namespace sip {
         /** \brief Adds a new element to the box */
         virtual element* add(element*) = 0;
 
-        /** Adds a new element to the box */
+        /** \brief Adds a new element to the box */
         virtual element* add(element*, margins const&,
                                   visibility const& = manager::default_visibility) = 0;
 
-        /** Adds a new element to the box */
+        /** \brief Adds a new element to the box */
         virtual element* add(element*, visibility const&) = 0;
+
+        /** \brief Enables an element visible */ 
+        virtual void enable(element*, bool = true) = 0;
+
+        /** \brief Disables an element invisible */ 
+        virtual void disable(element*) = 0;
+
+        /** \brief Makes an element visible */ 
+        virtual void show(element*, bool = true) = 0;
+
+        /** \brief Makes an element invisible */ 
+        virtual void hide(element*) = 0;
 
         /** \brief Instantiate a layout element, through a mediator */
         virtual mediator::wrapper_aptr instantiate(layout::mediator*) = 0;
@@ -158,7 +170,7 @@ namespace sip {
       protected:
 
         /** \brief The type of the list with the element managed by this manager */
-        typedef std::vector< layout_descriptor >                  children_list;
+        typedef std::vector< layout_descriptor > children_list;
 
       protected:
 
@@ -178,18 +190,30 @@ namespace sip {
         /** \brief Constructor */
         inline box();
 
-        /** Adds a new element to the box */
+        /** \brief Adds a new element to the box */
         inline element* add(element*);
 
-        /** Adds a new element to the box */
+        /** \brief Adds a new element to the box */
         inline element* add(element*, properties const&);
 
-        /** Adds a new element to the box */
+        /** \brief Adds a new element to the box */
         inline element* add(element*, margins const&,
                                   visibility const& = manager::default_visibility);
 
-        /** Adds a new element to the box */
+        /** \brief Adds a new element to the box */
         inline element* add(element*, visibility const&);
+
+        /** \brief Enables an element visible */ 
+        void enable(element*, bool = true);
+
+        /** \brief Disables an element invisible */ 
+        void disable(element*);
+
+        /** \brief Makes an element */ 
+        void show(element*, bool = true);
+
+        /** \brief Makes an element invisible */ 
+        void hide(element*);
 
         /** \brief Instantiate a layout element, through a mediator */
         virtual mediator::wrapper_aptr instantiate(layout::mediator*) = 0;
@@ -392,6 +416,34 @@ namespace sip {
       m_children.push_back(layout_descriptor(e,cn,reinterpret_cast < element_identifier > (e)));
 
       return (e);
+    }
+
+    inline void box::enable(element* e, bool b) {
+      for (children_list::iterator i = m_children.begin(); i != m_children.end(); ++i) {
+        if (i->layout_element == e) {
+          i->layout_properties.m_enabled = b;
+        }
+      }
+
+      activate_handlers();
+    }
+
+    inline void box::disable(element* e) {
+      enable(e, false);
+    }
+
+    inline void box::show(element* e, bool b) {
+      for (children_list::iterator i = m_children.begin(); i != m_children.end(); ++i) {
+        if (i->layout_element == e) {
+          i->layout_properties.m_visible = b ? visible : hidden;
+        }
+      }
+
+      activate_handlers();
+    }
+
+    inline void box::hide(element* e) {
+      show(e, false);
     }
 
     /**

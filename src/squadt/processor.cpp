@@ -217,6 +217,15 @@ namespace squadt {
   void processor::monitor::tool_configuration(processor::sptr t, boost::shared_ptr < sip::configuration > const& c) {
     assert(t.get() == &owner);
 
+    /* collect set of output arguments of the existing configuration */
+    std::set < sip::object const* > old_outputs;
+
+    sip::configuration::const_iterator_output_range ir(c->get_output_objects());
+
+    for (sip::configuration::const_iterator_output_range::const_iterator i = ir.begin(); i != ir.end(); ++i) {
+      old_outputs.insert(static_cast < sip::object const* > (&*i));
+    }
+
     /* Wait until the tool has connected and identified itself */
     await_connection();
 
@@ -228,6 +237,9 @@ namespace squadt {
       if (await_message(sip::message_accept_configuration).get() != 0) {
         /* End tool execution */
         finish();
+
+        /* Operation completed successfully */
+        t->impl->process_configuration(get_configuration(), old_outputs, false);
        
         /* Now run the tool */
         t->run(true);
@@ -241,6 +253,15 @@ namespace squadt {
 
   void processor::monitor::tool_operation(processor::sptr t, boost::shared_ptr < sip::configuration > const& c) {
     assert(t.get() == &owner);
+
+    /* collect set of output arguments of the existing configuration */
+    std::set < sip::object const* > old_outputs;
+
+    sip::configuration::const_iterator_output_range ir(c->get_output_objects());
+
+    for (sip::configuration::const_iterator_output_range::const_iterator i = ir.begin(); i != ir.end(); ++i) {
+      old_outputs.insert(static_cast < sip::object const* > (&*i));
+    }
 
     /* Wait until the tool has connected and identified itself */
     await_connection();
@@ -262,7 +283,7 @@ namespace squadt {
           }
 
           /* Operation completed successfully */
-          t->impl->process_configuration(get_configuration());
+          t->impl->process_configuration(get_configuration(), old_outputs);
         }
         else {
           /* Successful, set new status */

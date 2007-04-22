@@ -113,9 +113,9 @@ namespace squadt {
         dc.DrawBitmap(image, 0, 0, false);
         dc.SetTextForeground(*wxBLACK);
         dc.SetBackgroundMode(wxTRANSPARENT);
-        dc.SetFont(wxFont(13, wxFONTFAMILY_DECORATIVE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
-        dc.DrawText(wxString(s.category.c_str(), wxConvLocal), 380, 30);
-        dc.SetFont(wxFont(11, wxFONTFAMILY_DECORATIVE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+        dc.SetFont(wxFont(13, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+        dc.DrawText(wxString(s.category.c_str(), wxConvLocal), 400, 40);
+        dc.SetFont(wxFont(12, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
      
         wxString o = wxString(s.operation.c_str(), wxConvLocal);
 
@@ -125,7 +125,7 @@ namespace squadt {
 
         o.Append(wxString(s.operand.c_str(), wxConvLocal));
 
-        dc.DrawText(o, 395, 70);
+        dc.DrawText(o, 415, 70);
       }
     }
     /// \endcond

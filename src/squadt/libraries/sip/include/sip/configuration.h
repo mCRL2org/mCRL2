@@ -349,8 +349,6 @@ namespace sip {
    * \pre no object or option is known by this identifier
    **/
   inline object& configuration::add_input(std::string const& id, mime_type const& m, uri const& l) {
-    assert(m_parameter_by_id.count(id) == 0);
-
     boost::shared_ptr < object > new_object(new object(m, l));
 
     return (add_input(id, new_object));
@@ -368,31 +366,12 @@ namespace sip {
   }
 
   /**
-   * \param[in] id unique identifier for the input object
-   * \param[in] o shared pointer to object
-   * \pre no object or option is known by this identifier
-   **/
-  inline object& configuration::add_input(std::string const& id, boost::shared_ptr < object >& o) {
-    assert(m_parameter_by_id.count(id)== 0);
-
-    if (m_parameter_by_id.count(id) == 0) {
-      m_parameter_by_id[id] = m_positions.size();
-      m_positions.push_back(boost::dynamic_pointer_cast< sip::parameter >(o));
-      m_input_objects.insert(o.get());
-    }
-
-    return (*o);
-  }
-
-  /**
    * \param[in] id unique identifier for the output object
    * \param[in] m the storage format the object uses
    * \param[in] l the location for the object (optional)
    * \pre no object or option is known by this identifier
    **/
   inline object& configuration::add_output(std::string const& id, mime_type const& m, uri const& l) {
-    assert(m_parameter_by_id.count(id) == 0);
-
     boost::shared_ptr < object > new_object(new object(m, l));
 
     return (add_output(id, new_object));
@@ -407,23 +386,6 @@ namespace sip {
     boost::shared_ptr < object > new_object(new object(o));
 
     return (add_output(id, new_object));
-  }
-
-  /**
-   * \param[in] id unique identifier for the output object
-   * \param[in] o shared pointer to object
-   * \pre no object or option is known by this identifier
-   **/
-  inline object& configuration::add_output(std::string const& id, boost::shared_ptr < object >& o) {
-    assert(m_parameter_by_id.count(id) == 0);
-
-    if (m_parameter_by_id.count(id) == 0) {
-      m_parameter_by_id[id] = m_positions.size();
-      m_positions.push_back(boost::dynamic_pointer_cast< sip::parameter >(o));
-      m_output_objects.insert(o.get());
-    }
-
-    return (*o);
   }
 
   /**

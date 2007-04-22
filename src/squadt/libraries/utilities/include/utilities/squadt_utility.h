@@ -51,6 +51,30 @@ namespace squadt_utility {
   };
 #endif
 
+  /** Helper function for  */
+//  template < typename T >
+//  void change_visibility_on_toggle(T& r, sip::layout::manager* m, sip::layout::element* c);
+
+//  template <>
+  inline void change_visibility_on_toggle(sip::layout::elements::radio_button& r, sip::layout::manager* m, sip::layout::element* c) {
+    if (r.is_selected()) {
+      m->show(c);
+    }
+    else {
+      m->hide(c);
+    }
+  }
+
+//  template <>
+//  inline void change_visibility_on_toggle(sip::layout::elements::checkbox& r, sip::layout::manager* m, sip::layout::element* c) {
+//    if (r.get_status()) {
+//      m->show(c);
+//    }
+//    else {
+//      m->hide(c);
+//    }
+//  }
+
   /** Helper class to project the selected radio button in a group to instances of a type T */
   template < typename T >
   class radio_button_helper {
@@ -82,7 +106,10 @@ namespace squadt_utility {
 
       /** \brief associate a radio button with a layout manager and a value */
       template < typename M >
-      radio_button* associate(M const&, T const&, std::string const&, bool = false);
+      radio_button& associate(M const&, T const&, std::string const&, bool = false);
+
+      /** \brief gets the button associated with a value */
+      radio_button& get_button(T const&);
 
       /** \brief sets the selection for the group of radio buttons */
       void set_selection(T const&);
@@ -138,14 +165,23 @@ namespace squadt_utility {
    **/
   template < typename T >
   template < typename M >
-  inline sip::layout::elements::radio_button* radio_button_helper< T >::associate(M const& l, T const& v, std::string const& s, bool b) {
+  inline sip::layout::elements::radio_button& radio_button_helper< T >::associate(M const& l, T const& v, std::string const& s, bool b) {
     radio_button* button = new radio_button(s, first, b);
 
     l->add(button);
 
     selector[button] = v;
 
-    return (button);
+    return (*button);
+  }
+
+  template < typename T >
+  inline sip::layout::elements::radio_button& radio_button_helper< T >::get_button(T const& t) {
+    for (typename std::map < radio_button const*, T >::iterator i = selector.begin(); i != selector.end(); ++i) {
+      if (i->second == t) {
+        return const_cast < radio_button& > (*(i->first));
+      }
+    }
   }
 
   template < typename T >

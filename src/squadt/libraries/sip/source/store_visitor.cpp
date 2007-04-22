@@ -172,18 +172,18 @@ namespace utility {
     out << " category=\"" << c.m_category << "\">";
 
     for (sip::configuration::position_list::const_iterator i = c.m_positions.begin(); i != c.m_positions.end(); ++i) {
-      if (c.is_option(*(*i))) {
+      if (c.is_option(**i)) {
         out << "<option id=\"" << c.get_identifier(**i) << "\"";
     
-        do_visit(static_cast < sip::option const& >(*(*i)));
+        do_visit(static_cast < sip::option const& >(**i));
 
         out << "</option>";
       }
       else {
-        out << "<object id=\"" << c.get_identifier(*(*i)) << "\" type=\""
-            << std::string((c.is_input(*(*i))) ? "in" : "out") << "put\"";
+        out << "<object id=\"" << c.get_identifier(**i) << "\" type=\""
+            << std::string((c.is_input(**i)) ? "in" : "out") << "put\"";
      
-        do_visit(static_cast < sip::object const& >(*(*i)));
+        do_visit(static_cast < sip::object const& >(**i));
      
         out << "/>";
       }

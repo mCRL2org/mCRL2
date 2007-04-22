@@ -58,6 +58,7 @@ class squadt_interactor : public mcrl2_squadt::tool_interface {
   private:
 
     boost::shared_ptr < sip::datatype::enumeration > transformation_method_enumeration;
+    boost::shared_ptr < sip::datatype::enumeration > output_format_enumeration;
 
   public:
 
@@ -96,14 +97,24 @@ squadt_interactor::squadt_interactor() {
   transformation_method_enumeration->add_value("modulo_trace_equivalence");
   transformation_method_enumeration->add_value("modulo_weak_trace_equivalence");
   transformation_method_enumeration->add_value("determinise");
+
+  output_format_enumeration.reset(new sip::datatype::enumeration("Aldebaran"));
+
+  output_format_enumeration->add_value("SVC_mCRL");
+  output_format_enumeration->add_value("SVC_mCRL2");
+  output_format_enumeration->add_value("BCG");
+  output_format_enumeration->add_value("FSM");
+  output_format_enumeration->add_value("dot");
 }
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
   c.add_input_combination(lts_file_for_input, sip::mime_type("aut", sip::mime_type::text), sip::tool::category::conversion);
-  c.add_input_combination(lts_file_for_input, sip::mime_type("svc"), sip::tool::category::conversion);
+  c.add_input_combination(lts_file_for_input, sip::mime_type("svc+mcrl2", sip::mime_type::application), sip::tool::category::conversion);
+  c.add_input_combination(lts_file_for_input, sip::mime_type("svc+mcrl", sip::mime_type::application), sip::tool::category::conversion);
+  c.add_input_combination(lts_file_for_input, sip::mime_type("svc", sip::mime_type::application), sip::tool::category::conversion);
   c.add_input_combination(lts_file_for_input, sip::mime_type("fsm", sip::mime_type::text), sip::tool::category::conversion);
 #ifdef MCRL2_BCG
-  c.add_input_combination(lts_file_for_input, sip::mime_type("bcg"), sip::tool::category::conversion);
+  c.add_input_combination(lts_file_for_input, sip::mime_type("bcg", sip::mime_type::application), sip::tool::category::conversion);
 #endif
 }
 
@@ -133,6 +144,11 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   format_selector.associate(h, fsm, "FSM");
   format_selector.associate(h, dot, "dot");
 
+  if (c.option_exists(option_selected_output_format)) {
+    format_selector.set_selection(static_cast < lts_output_format > (
+        c.get_option_argument< size_t >(option_selected_output_format, 0)));
+  }
+  
   /* Attach row */
   top->add(h, margins(0,5,0,5));
 
@@ -142,14 +158,16 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   text_field* lps_file_field = static_cast < text_field* > (h->add(new text_field("")));
   top->add(h);
 
-  checkbox* do_not_check_reachability = new checkbox("Do not check reachability of input LTS");
+  checkbox* do_not_check_reachability = new checkbox("Perform reachability check", true);
   top->add(do_not_check_reachability);
 
-  checkbox* for_dot_omit_state_information = new checkbox("Omit state information (dot only)");
-  top->add(for_dot_omit_state_information);
+  checkbox* omit_state_information = new checkbox("Add state information)", true);
+  top->add(omit_state_information);
+//squadt_utility::change_visibility_on_toggle(format_selector.get_button(dot), top.get(), omit_state_information);
+//  format_selector.get_button(dot).on_change(boost::function< void () > (boost::bind(change_visibility_on_toggle, format_selector.get_button(dot), top.get(), omit_state_information)));
 
-  label* text_minimise = new label("LTS transformation:");
-  top->add(text_minimise);
+  top->add(new label("LTS transformation:"));
+
   squadt_utility::radio_button_helper < transformation_options >
         transformation_selector(top, no_transformation, "none");
 
@@ -158,14 +176,48 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   transformation_selector.associate(top, minimisation_modulo_trace_equivalence, "reduction modulo trace equivalence");
   transformation_selector.associate(top, minimisation_modulo_weak_trace_equivalence, "reduction modulo weak trace equivalence");
   transformation_selector.associate(top, determinisation, "determinisation");
+
+  if (c.option_exists(option_selected_transformation)) {
+    transformation_selector.set_selection(static_cast < transformation_options > (
+        c.get_option_argument< size_t >(option_selected_transformation, 0)));
+  }
   
-  checkbox* bisimulation_add_eq_classes = new checkbox("Add equivalence classes to state instead of reducing LTS (bisimulation only)");
+  checkbox* bisimulation_add_eq_classes = new checkbox("Add equivalence classes to state instead of reducing LTS");
+
+  if (c.option_exists(option_no_reachability_check)) {
+    do_not_check_reachability->set_status(c.get_option_argument< bool >(option_no_reachability_check));
+  }
+  if (c.option_exists(option_no_state_information)) {
+    omit_state_information->set_status(c.get_option_argument< bool >(option_no_state_information));
+  }
+  if (c.option_exists(option_add_bisimulation_equivalence_class)) {
+    bisimulation_add_eq_classes->set_status(c.get_option_argument< bool >(option_no_reachability_check));
+  }
+
   top->add(bisimulation_add_eq_classes);
 
   h = new layout::horizontal_box();
   h->add(new label("Internal (tau) actions : "));
-  text_field* tau_field = static_cast < text_field* > (h->add(new text_field("tau")));
+
+  text_field* tau_field = new text_field("tau");
+
+  if (c.option_exists(option_tau_actions)) {
+    tau_field->set_text(c.get_option_argument< std::string >(option_tau_actions));
+  }
+
+  h->add(tau_field);
   top->add(h);
+
+  /* Attach events */
+//  transformation_selector.get_button(no_transformation).
+//        on_change(boost::bind(squadt_utility::change_visibility_on_toggle,
+//              transformation_selector.get_button(no_transformation), top.get(), tau_field));
+//  transformation_selector.get_button(minimisation_modulo_strong_bisimulation).
+//        on_change(boost::bind(squadt_utility::change_visibility_on_toggle,
+//              transformation_selector.get_button(minimisation_modulo_strong_bisimulation), top.get(), bisimulation_add_eq_classes));
+//  transformation_selector.get_button(minimisation_modulo_branching_bisimulation).
+//        on_change(boost::bind(squadt_utility::change_visibility_on_toggle,
+//              transformation_selector.get_button(minimisation_modulo_branching_bisimulation), top.get(), bisimulation_add_eq_classes));
 
   button* okay_button = new button("OK");
 
@@ -178,47 +230,78 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   /* Wait until the ok button was pressed */
   okay_button->await_change();
 
-  std::string lts_input_file_name = c.get_input(lts_file_for_input).get_location();
-
-  if (c.is_fresh()) {
-    if (!c.output_exists(lts_file_for_output)) {
-      static char const* extensions[6] = {
-        lts::extension_for_type(lts_aut),
-        lts::extension_for_type(lts_mcrl),
-        lts::extension_for_type(lts_mcrl2),
+  static char const* extensions[6] = {
+    lts::extension_for_type(lts_aut),
+    lts::extension_for_type(lts_mcrl),
+    lts::extension_for_type(lts_mcrl2),
 #ifdef MCRL2_BCG
-        lts::extension_for_type(lts_bcg),
+    lts::extension_for_type(lts_bcg),
 #endif
-        lts::extension_for_type(lts_fsm),
-        lts::extension_for_type(lts_dot)
-      };
+    lts::extension_for_type(lts_fsm),
+    lts::extension_for_type(lts_dot)
+  };
 
-      /* Add output file to the configuration */
-      std::string extension = extensions[format_selector.get_selection()];
+  /* Add output file to the configuration */
+  if (c.output_exists(lts_file_for_output)) {
+    std::string  extension(extensions[format_selector.get_selection()]);
+    sip::object& output_file = c.get_output(lts_file_for_output);
+ 
+    output_file.set_mime_type(sip::mime_type(extension));
+    output_file.set_location(c.get_output_name("." + extension));
+  }
+  else {
+    std::string  extension(extensions[format_selector.get_selection()]);
 
-      c.add_output(lts_file_for_output, sip::mime_type(extension), c.get_output_name("." + extension));
+    c.add_output(lts_file_for_output, sip::mime_type(extension), c.get_output_name("." + extension));
+  }
 
-      c.add_input(lps_file_auxiliary, sip::mime_type("lps"), lps_file_field->get_text());
+  /* Add lps file when output is FSM format or when the output is mCRL2 and the input is Aldebaran or mCRL */
+  if (format_selector.get_selection() == fsm || (format_selector.get_selection() == svc_mcrl2 && (
+      c.get_input(lts_file_for_input).get_mime_type().get_sub_type() == "aut" ||
+      c.get_input(lts_file_for_input).get_mime_type().get_sub_type() == "svc" ||
+      c.get_input(lts_file_for_input).get_mime_type().get_sub_type() == "svc-mcrl"))) {
 
-      transformation_options trans_opt = static_cast < transformation_options > (transformation_selector.get_selection());
-      c.add_option(option_selected_transformation).append_argument(transformation_method_enumeration, trans_opt);
-
-      if (do_not_check_reachability->get_status()) {
-        c.add_option(option_no_reachability_check);
-      }
-
-      if (format_selector.get_selection() == dot && for_dot_omit_state_information->get_status()) {
-        c.add_option(option_no_state_information);
-      }
-
-      c.add_option(option_tau_actions).append_argument< sip::datatype::string >(tau_field->get_text());
-      
-      if ((trans_opt == minimisation_modulo_strong_bisimulation ||
-           trans_opt == minimisation_modulo_branching_bisimulation) &&
-          bisimulation_add_eq_classes->get_status()) {
-        c.add_option(option_add_bisimulation_equivalence_class);
-      }
+    if (c.input_exists(lps_file_auxiliary)) {
+      c.get_input(lps_file_auxiliary).set_location(lps_file_field->get_text());
     }
+    else {
+      c.add_input(lps_file_auxiliary, sip::mime_type("lps", sip::mime_type::application), lps_file_field->get_text());
+    }
+  }
+  else {
+    c.remove_input(lps_file_auxiliary);
+  }
+
+  transformation_options selected_transformation = static_cast < transformation_options > (transformation_selector.get_selection());
+
+  c.add_option(option_selected_transformation).append_argument(transformation_method_enumeration, selected_transformation);
+  c.add_option(option_selected_output_format).append_argument(output_format_enumeration, static_cast < lts_output_format > (format_selector.get_selection()));
+  
+  if ((selected_transformation == minimisation_modulo_strong_bisimulation ||
+       selected_transformation == minimisation_modulo_branching_bisimulation)) {
+
+    c.add_option(option_add_bisimulation_equivalence_class).
+        set_argument_value< 0, sip::datatype::boolean >(bisimulation_add_eq_classes->get_status());
+  }
+  else {
+    c.remove_option(option_add_bisimulation_equivalence_class);
+  }
+
+  c.add_option(option_no_reachability_check).set_argument_value< 0, sip::datatype::boolean >(do_not_check_reachability->get_status());
+
+  if (format_selector.get_selection() == dot) {
+    c.add_option(option_no_state_information).
+       set_argument_value< 0, sip::datatype::boolean >(omit_state_information->get_status());
+  }
+  else {
+    c.remove_option(option_no_state_information);
+  }
+
+  if (!tau_field->get_text().empty()) {
+    c.add_option(option_tau_actions).set_argument_value< 0, sip::datatype::string >(tau_field->get_text());
+  }
+  else {
+    c.remove_option(option_tau_actions);
   }
 }
 

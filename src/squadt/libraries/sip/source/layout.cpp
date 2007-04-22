@@ -33,10 +33,22 @@ namespace sip {
 
     const properties    manager::default_properties(middle, left, manager::default_margins, manager::default_visibility);
 
+    void element::on_change(layout::basic_event_handler::handler_function h) const {
+      m_event_handler->connect(this, h);
+    }
+
+    void element::on_change(boost::function < void (element*) > h) const {
+      boost::function < void () > f(boost::bind(boost::ref(h), const_cast < element* > (this)));
+
+      m_event_handler->connect(this, f);
+    }
+
+    void element::activate_handlers() {
+      m_event_handler->process(this);
+    }
+
     /**
      * Blocks until the next change event or when the object is destroyed
-     *
-     * \return Whether there was a change, otherwise the object was destroyed
      **/
     void element::await_change() const {
       m_event_handler->await_change(this);

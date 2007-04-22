@@ -553,6 +553,7 @@ namespace squadt {
         if (add_outputs_as_objects(s, tp)) {
           processor::monitor& m = *(tp->get_monitor());
 
+          /* Schedule GUI update */
           m.set_status_handler(boost::bind(&project::set_object_status, this, tp, s));
         }
       }
@@ -565,8 +566,7 @@ namespace squadt {
      * \return whether or not there were no conflicts
      **/
     bool project::add_outputs_as_objects(wxTreeItemId s, processor::sptr tp) {
-      std::set < wxString >                                      existing;
-      std::map < wxString, processor::object_descriptor::sptr >  string_to_object;
+      std::set < std::string > existing;
 
       /* Gather existing objects */
       wxTreeItemIdValue cookie;   // For wxTreeCtrl traversal
@@ -575,9 +575,11 @@ namespace squadt {
         processor::object_descriptor::sptr object = static_cast < tool_data* > (object_view->GetItemData(j))->get_object();
 
         if (object.get() != 0) {
-          string_to_object[object_view->GetItemText(j)] = object;
-
-          existing.insert(object_view->GetItemText(j));
+          existing.insert(std::string(object_view->GetItemText(j).fn_str()));
+        }
+        else {
+          /* Remove from view */
+          object_view->DeleteChildren(j);
         }
       }
 
@@ -604,9 +606,7 @@ namespace squadt {
       }
       else {
         for (processor::output_object_iterator j = tp->get_output_iterator(); j.valid(); ++j) {
-          wxString new_object = wxString(boost::filesystem::path((*j)->location).leaf().c_str(), wxConvLocal);
-       
-          if (existing.find(new_object) == existing.end()) {
+          if (existing.find(boost::filesystem::path((*j)->location).leaf()) == existing.end()) {
             add_to_object_view(s, j.pointer());
           }
         }
@@ -629,7 +629,6 @@ namespace squadt {
       wxTreeItemId item = object_view->AppendItem(s, wxString(boost::filesystem::path(t->location).leaf().c_str(), wxConvLocal), t->status);
 
       object_view->SetItemData(item, new tool_data(*this, t));
-
       object_view->Expand(s);
     }
 

@@ -168,7 +168,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& confi
   /* Update configuration */
   configuration.get_option(option_finite_only).
      set_argument_value< 0, sip::datatype::boolean >(finite_only->get_status());
-std::cerr << "status " <<  finite_only->get_status() << std::endl;
+
   configuration.get_option(option_rewrite_strategy).replace_argument(0, rewrite_strategy_enumeration, strategy_selector.get_selection());
 }
 

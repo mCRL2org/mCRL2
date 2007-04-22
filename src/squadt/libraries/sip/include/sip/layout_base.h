@@ -51,6 +51,11 @@ namespace sip {
         /** \brief Whether or not the element is active */
         bool                        m_enabled;
 
+      protected:
+
+        /** \brief Activate all handlers */
+        void activate_handlers();
+
       public:
 
         /** \brief Constructor */
@@ -79,6 +84,12 @@ namespace sip {
 
         /** \brief Awaits the next change event */
         void await_change() const;
+
+        /** \brief Awaits the next change event */
+        void on_change(boost::function < void () >) const;
+
+        /** \brief Awaits the next change event */
+        void on_change(boost::function < void (element*) >) const;
 
         /** \brief Set the event handler object that will dispatch the events for this object */
         void set_event_handler(basic_event_handler* e);

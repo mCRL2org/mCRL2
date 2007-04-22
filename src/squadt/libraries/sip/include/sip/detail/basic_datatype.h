@@ -331,7 +331,7 @@ namespace sip {
         void set_maximum_length(unsigned int);
 
         /** \brief Converts a string to a string representation (copy) */
-        std::string convert(std::string const& s);
+        static std::string convert(std::string const& s);
 
         /** \brief Converts a string to a string representation (copy) */
         boost::any evaluate(std::string const&);

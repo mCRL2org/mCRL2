@@ -46,9 +46,11 @@ squadt_interactor::squadt_interactor(squadt_utility::entry_wrapper& w): starter(
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
   c.add_input_combination(lts_file_for_input, sip::mime_type("aut", sip::mime_type::text), sip::tool::category::visualisation);
-  c.add_input_combination(lts_file_for_input, sip::mime_type("svc"), sip::tool::category::visualisation);
+  c.add_input_combination(lts_file_for_input, sip::mime_type("svc", sip::mime_type::application), sip::tool::category::visualisation);
+  c.add_input_combination(lts_file_for_input, sip::mime_type("svc+mcrl", sip::mime_type::application), sip::tool::category::visualisation);
+  c.add_input_combination(lts_file_for_input, sip::mime_type("svc+mcrl2", sip::mime_type::application), sip::tool::category::visualisation);
 #ifdef MCRL2_BCG
-  c.add_input_combination(lts_file_for_input, sip::mime_type("bcg"), sip::tool::category::visualisation);
+  c.add_input_combination(lts_file_for_input, sip::mime_type("bcg", sip::mime_type::application), sip::tool::category::visualisation);
 #endif  
 }
 

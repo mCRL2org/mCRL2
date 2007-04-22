@@ -102,7 +102,7 @@ namespace squadt {
       void edit(execution::command*);
 
       /** \brief Extracts useful information from a configuration object */
-      void process_configuration(boost::shared_ptr < sip::configuration > const& c);
+      void process_configuration(boost::shared_ptr < sip::configuration > const&, std::set < sip::object const* >&, bool = true);
 
       /** \brief Find an object descriptor for a given pointer to an object */
       const object_descriptor::sptr find_output(object_descriptor*) const;
@@ -463,9 +463,13 @@ namespace squadt {
   }
 
   /**
-   * \param[in] c a reference to a configuration object
+   * \param[in] c a reference to the new configuration object
+   * \param[in] p the previous set of output objects part of the old configuration
+   * \param[in] check whether or not to check for existence of concrete outputs
    **/
-  inline void processor_impl::process_configuration(boost::shared_ptr < sip::configuration > const& c) {
+  inline void processor_impl::process_configuration(boost::shared_ptr < sip::configuration > const& c,
+                                                    std::set < sip::object const* >& p, bool check) {
+
     boost::shared_ptr < project_manager > g(manager.lock());
 
     if (g.get() != 0) {
@@ -491,17 +495,28 @@ namespace squadt {
           replace_output(o, id, object);
         }
        
-        if (!boost::filesystem::exists(g->get_path_for_name(object.get_location()))) {
-          /* TODO Signal error with exception */
-          std::cerr << "Critical error, output file with name: " << object.get_location() << " does not exist!" << std::endl;
+        if (!boost::filesystem::exists(g->get_path_for_name(object.get_location())) && check) {
+          throw std::runtime_error("Critical error, output file with name: " + object.get_location() + " does not exist!\n");
         }
+
+        /* Remove object from p if it is part of the new configuration too */
+        for (std::set< sip::object const* >::iterator j = p.begin(); j != p.end(); ++j) {
+          if ((*j)->get_location() == object.get_location()) {
+            p.erase(j);
+            break;
+          }
+        }
+      }
+
+      /* Remove files from the old configuration that do not appear in the new one */
+      for (std::set< sip::object const* >::const_iterator i = p.begin(); i != p.end(); ++i) {
+        remove(g->get_path_for_name((*i)->get_location()));
       }
 
       if (0 < outputs.size()) {
         g->add(interface_object.lock());
       }
     }
-    /* TODO Adjust status for outputs that are not produced with a changed configuration */
   }
 
   /*
@@ -655,7 +670,9 @@ namespace squadt {
         processor::sptr p(i->generator.lock());
          
         if (p.get() != 0) {
-          if (p->check_status(true)) {
+          if (p->check_status(true) && boost::filesystem::exists(
+                        boost::filesystem::path(manager.lock()->get_path_for_name(i->location)))) {
+
             /* Reschedule process operation after process p has completed */
             p->update(boost::bind(&processor_impl::update, this, t, c, false));
      

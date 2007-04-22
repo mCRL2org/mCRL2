@@ -197,7 +197,7 @@ void squadt_lps2lts::user_interactive_configuration(sip::configuration& c)
   {
     std::string input_file_name = c.get_input(lps_file_for_input_lts).get_location();
     /* Add output file to the configuration */
-    c.add_output(lts_file_for_output, sip::mime_type(cb_aut->get_status()?"aut":"svc"), c.get_output_name(cb_aut->get_status()?".aut":".svc"));
+    c.add_output(lts_file_for_output, sip::mime_type(cb_aut->get_status()?"aut":"svc+mcrl2", sip::mime_type::application), c.get_output_name(cb_aut->get_status()?".aut":".svc"));
   }
   c.add_option(option_out_info).append_argument< sip::datatype::boolean >(cb_out_info->get_status());
 
