@@ -485,6 +485,8 @@ namespace squadt {
       mediator::wrapper_aptr tool_display_mediator::build_progress_bar(layout::element const* e, unsigned int const& min, unsigned int const& max, unsigned int const& c) {
         wxGauge* t = new wxGauge(current_window, wxID_ANY, max - min, wxDefaultPosition, wxDefaultSize, wxGA_HORIZONTAL);
      
+        // SetRange() avoids a bug with range setting in the constructor (wx-2.8)
+        t->SetRange(max - min);
         t->SetValue(c - min);
      
         /* Connect change event */

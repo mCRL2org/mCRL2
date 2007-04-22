@@ -304,6 +304,7 @@ namespace squadt {
 
         logger->log(1, boost::str(boost::format("termination request sent to %s pid(%u)\n")
                   % associated_process->get_executable_name() % associated_process->get_identifier()));
+
         await_message(sip::message_signal_termination, 1);
 
         sip::controller::communicator_impl::disconnect();

@@ -90,6 +90,9 @@ namespace squadt {
       /** \brief Helper function for adjusting status */
       static bool try_change_status(processor::object_descriptor&, object_status);
 
+      /** \brief Update if object is up-to-date */
+      void update_on_success(boost::shared_ptr < object_descriptor >, interface_ptr const&, boost::shared_ptr < sip::configuration >, bool);
+
     private:
 
       /** \brief Basic constructor */
@@ -487,6 +490,9 @@ namespace squadt {
           append_output(object, id, object_descriptor::reproducible_nonexistent);
         }
         else {
+          /* Check status */
+          o->self_check(*g);
+       
           if (object.get_location() != o->location) {
             /* Output already known, but filenames do not match */
             remove(g->get_path_for_name(o->location));
@@ -494,7 +500,7 @@ namespace squadt {
        
           replace_output(o, id, object);
         }
-       
+
         if (!boost::filesystem::exists(g->get_path_for_name(object.get_location())) && check) {
           throw std::runtime_error("Critical error, output file with name: " + object.get_location() + " does not exist!\n");
         }
@@ -654,15 +660,29 @@ namespace squadt {
   }
 
   /**
+   * \param[in] o object that is checked to be up-to-date
    * \param[in] t shared pointer to the interface object
-   * \param[in] b whether or not to run when there are no input objects are specified
    * \param[in] c the configuration object to use
+   * \param[in] b whether or not to run when there are no input objects are specified
+   **/
+  inline void processor_impl::update_on_success(boost::shared_ptr < object_descriptor > o, interface_ptr const& t, boost::shared_ptr < sip::configuration > c, bool b) {
+    if (o->is_up_to_date()) {
+      update(t, c, b);
+    }
+  }
+
+  /**
+   * \param[in] t shared pointer to the interface object
+   * \param[in] c the configuration object to use
+   * \param[in] b whether or not to run when there are no input objects are specified
    *
    * \attention This function is non-blocking
    *
    * \pre !is_active() and t.get() == this
    **/
   inline void processor_impl::update(interface_ptr const& t, boost::shared_ptr < sip::configuration > c, bool b) {
+    assert(t->impl.get() == this);
+
     if (b || 0 < inputs.size()) {
 
       /* Check that dependent files exist and rebuild if this is not the case */
@@ -670,11 +690,10 @@ namespace squadt {
         processor::sptr p(i->generator.lock());
          
         if (p.get() != 0) {
-          if (p->check_status(true) && boost::filesystem::exists(
-                        boost::filesystem::path(manager.lock()->get_path_for_name(i->location)))) {
+          if (p->check_status(true)) {
 
             /* Reschedule process operation after process p has completed */
-            p->update(boost::bind(&processor_impl::update, this, t, c, false));
+            p->update(boost::bind(&processor_impl::update_on_success, this, i, t, c, false));
      
             return;
           }

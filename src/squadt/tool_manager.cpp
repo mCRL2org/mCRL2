@@ -54,8 +54,8 @@ namespace squadt {
 
   /**
    * \param[in] c the command to run
-   * \param[in] b whether or not to circumvent the executor restriction mechanism
    * \param[in] p pointer to the associated monitor
+   * \param[in] b whether or not to circumvent the executor restriction mechanism
    **/
   void tool_manager_impl::execute(execution::command const* c, execution::task_monitor::sptr p, bool b) {
     global_build_system.get_executor()->execute(*c, p, b);

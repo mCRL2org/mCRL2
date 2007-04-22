@@ -112,6 +112,7 @@ namespace squadt {
     }
 
     inline void process_impl::initialise() {
+      identifier = 0;
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
       ZeroMemory(&si, sizeof(STARTUPINFO));
       si.cb = sizeof(STARTUPINFO);
@@ -176,7 +177,7 @@ namespace squadt {
         WaitForSingleObject(pi.hProcess, INFINITE);
 
         if (GetExitCodeProcess(pi.hProcess, &exit_code)) {
-          current_status = (exit_code) ? process::completed : process::aborted;
+          current_status = (exit_code == 0) ? process::completed : process::aborted;
         }
         else {
           current_status = process::aborted;
@@ -282,7 +283,12 @@ namespace squadt {
     std::string process::get_executable_name() const {
       assert(impl.get() != 0);
 
-      return (impl->m_command->get_executable());
+      if (impl->m_command.get()) {
+        return impl->m_command->get_executable();
+      }
+      else {
+        return "unregistered";
+      }
     }
 
     command const& process::get_command() const {

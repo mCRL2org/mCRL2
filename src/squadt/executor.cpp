@@ -74,7 +74,7 @@ namespace squadt {
      **/
     inline void executor_impl::execute(const command& c, boost::shared_ptr < task_monitor >& l, bool b, boost::shared_ptr < executor_impl >& w) {
       if (b || processes.size() < maximum_instance_count) {
-        start_process(c, l, w);
+        boost::thread t(boost::bind(&executor_impl::start_process, this, c, l, w));
       }
       else {
         /* queue command for later execution */
@@ -90,7 +90,7 @@ namespace squadt {
       boost::shared_ptr < task_monitor > p;
 
       if (b || processes.size() < maximum_instance_count) {
-        start_process(c, p, w);
+        boost::thread t(boost::bind(&executor_impl::start_process, this, c, p, w));
       }
       else {
         /* queue command for later execution */
