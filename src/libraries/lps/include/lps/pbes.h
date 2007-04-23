@@ -70,6 +70,16 @@ class pbes_fixpoint_symbol: public aterm_appl
       return *this;
     }
 
+    static pbes_fixpoint_symbol mu()
+    {
+      return pbes_fixpoint_symbol(gsMakeMu());
+    }
+
+    static pbes_fixpoint_symbol nu()
+    {
+      return pbes_fixpoint_symbol(gsMakeNu());
+    }
+
     /// Returns true if the symbol is mu.
     bool is_mu() const
     {
@@ -95,11 +105,13 @@ class pbes_equation: public aterm_appl
     pbes_expression        m_formula;  // the right hand side
 
   public:
+    /// DEPRECATED
     static pbes_fixpoint_symbol mu()
     {
       return pbes_fixpoint_symbol(gsMakeMu());
     }
 
+    /// DEPRECATED
     static pbes_fixpoint_symbol nu()
     {
       return pbes_fixpoint_symbol(gsMakeNu());
