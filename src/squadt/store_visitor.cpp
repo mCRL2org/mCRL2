@@ -19,6 +19,7 @@
 
 namespace squadt {
 
+  /// \cond PRIVATE_PART
   class store_visitor_impl {
 
     friend class visitors;
@@ -67,27 +68,6 @@ namespace squadt {
       ~store_visitor_string_impl();
   };
 
-  /**
-   * \param[in] s a string to write to
-   **/
-  store_visitor::store_visitor(std::string& s) :
-        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < utility::visitor< store_visitor_impl > > (new store_visitor_string_impl(s))) {
-  }
-
-  /**
-   * \param[in] p a path to the file to write to
-   **/
-  store_visitor::store_visitor(boost::filesystem::path const& p) :
-        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < utility::visitor< store_visitor_impl > > (new store_visitor_path_impl(p))) {
-  }
-
-  /**
-   * \param[in] s a stream to write to
-   **/
-  store_visitor::store_visitor(std::ostream& o) :
-        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < utility::visitor< store_visitor_impl > > (new utility::visitor < store_visitor_impl >(o))) {
-  }
-
   inline store_visitor_string_impl::store_visitor_string_impl(std::string& s) :
                                 utility::visitor< store_visitor_impl >(m_help_stream),
                                 m_target_string(s) {
@@ -108,11 +88,36 @@ namespace squadt {
 
   inline store_visitor_impl::store_visitor_impl(std::ostream& o) : out(o) {
   }
+  /// \endcond
+
+  /**
+   * \param[in] s a string to write to
+   **/
+  store_visitor::store_visitor(std::string& s) :
+        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < utility::visitor< store_visitor_impl > > (new store_visitor_string_impl(s))) {
+  }
+
+  /**
+   * \param[in] p a path to the file to write to
+   **/
+  store_visitor::store_visitor(boost::filesystem::path const& p) :
+        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < utility::visitor< store_visitor_impl > > (new store_visitor_path_impl(p))) {
+  }
+
+  /**
+   * \param[in] o a stream to write to
+   **/
+  store_visitor::store_visitor(std::ostream& o) :
+        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < utility::visitor< store_visitor_impl > > (new utility::visitor < store_visitor_impl >(o))) {
+  }
 }
 
 namespace utility {
   using namespace squadt;
 
+  /**
+   * \param[in] t the tool object to store
+   **/
   template <>
   template <>
   void visitor< squadt::store_visitor_impl >::visit(tool const& t) {
@@ -120,12 +125,19 @@ namespace utility {
                     << "\" location=\"" << t.get_location() << "\"/>\n";
   }
 
+  /**
+   * \param[in] t the tool manager to store
+   **/
   template <>
   template <>
   void visitor< squadt::store_visitor_impl >::visit(tool_manager const& t) {
     do_visit(*t.impl);
   }
 
+  /// \cond PRIVATE_PART
+  /**
+   * \param[in] t the tool manager object to store
+   **/
   template <>
   template <>
   void visitor< squadt::store_visitor_impl >::visit(tool_manager_impl const& tm) {
@@ -141,17 +153,24 @@ namespace utility {
     /* Write footer */
     out << "</tool-catalog>\n";
   }
+  /// \endcond
 
+  /**
+   * \param[in] t the executor object to store
+   **/
   template <>
   template <>
   void visitor< squadt::store_visitor_impl >::visit(execution::executor const& t) {
     do_visit(*t.impl);
   }
 
+  /// \cond PRIVATE_PART
+  /**
+   * \param[in] t the executor object to store
+   **/
   template <>
   template <>
   void visitor< squadt::store_visitor_impl >::visit(executor_impl const& e) {
-    /** FIXME temporary measure until xml2pp is phased out */
     out << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
         << "<squadt-preferences xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" version=\"1.0\">\n";
 
@@ -160,7 +179,12 @@ namespace utility {
                     << e.get_maximum_instance_count() << "\"/>\n"
                     << "</execution-settings>\n";
   }
+  /// \endcond
 
+  /// \cond PRIVATE_PART
+  /**
+   * \param[in] t the type_registry object to store
+   **/
   template <>
   template <>
   void visitor< squadt::store_visitor_impl >::visit(type_registry const& r) {
@@ -190,13 +214,21 @@ namespace utility {
     /** FIXME temporary measure until xml2pp is phased out */
     out << "</squadt-preferences>";
   }
+  /// \endcond
 
+  /**
+   * \param[in] p the processor object to store
+   **/
   template <>
   template <>
   void visitor< squadt::store_visitor_impl >::visit(processor const& p) {
     do_visit(*p.impl);
   }
 
+  /// \cond PRIVATE_PART
+  /**
+   * \param[in] p the processor object to store
+   **/
   template <>
   template <>
   void visitor< squadt::store_visitor_impl >::visit(processor_impl const& p) {
@@ -251,13 +283,21 @@ namespace utility {
 
     out << "</processor>\n";
   }
+  /// \endcond
 
+  /**
+   * \param[in] p the project_manager object stored
+   **/
   template <>
   template <>
   void visitor< squadt::store_visitor_impl >::visit(squadt::project_manager const& p) {
     do_visit(*p.impl);
   }
 
+  /// \cond PRIVATE_PART
+  /**
+   * \param[in] p the processor implementation object to store
+   **/
   template <>
   template <>
   void visitor< squadt::store_visitor_impl >::visit(squadt::project_manager_impl const& p) {
@@ -293,5 +333,6 @@ namespace utility {
 
     return true;
   }
+  /// \endcond
 }
 

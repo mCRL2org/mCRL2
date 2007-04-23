@@ -36,12 +36,16 @@ namespace squadt {
 
     private:
 
+      /** \brief Central storage component for configuration settings (paths & constants) */
       std::auto_ptr < settings_manager > m_settings_manager;
 
+      /** \brief Central tool manager component */
       std::auto_ptr < tool_manager >     m_tool_manager;
 
+      /** \brief Central executor component */
       std::auto_ptr < executor >         m_executor;
 
+      /** \brief Central type registry for runtime mime-type/format/command information */
       std::auto_ptr < type_registry >    m_type_registry;
 
     private:

@@ -16,6 +16,7 @@
 namespace squadt {
   namespace execution {
 
+    /// \cond PRIVATE_PART
     inline executor_impl::executor_impl(unsigned int m) : maximum_instance_count(m) {
     }
     
@@ -99,7 +100,7 @@ namespace squadt {
     }
 
     /**
-     * The queue with commands for to be started processes is also cleared by this function.
+     * \note the queue with commands for to be started processes is also cleared by this function.
      **/
     inline void executor_impl::terminate_all() {
     
@@ -146,6 +147,13 @@ namespace squadt {
       }
     }
 
+    /// \endcond
+
+    /**
+     * Default constructor
+     *
+     * \param[in] m the maximum number of allowed concurrent processes
+     **/
     executor::executor(unsigned int const& m) : impl(new executor_impl(m)) {
     }
     

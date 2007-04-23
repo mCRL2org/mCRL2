@@ -37,9 +37,10 @@ namespace squadt {
   /** \brief Identifier option scheme for easy command generation */
   const char* log_filter_level_pattern  = "--si-log-filter-level=%s";
 
-  const long tool_manager_impl::default_port = 10947;
-
   const boost::shared_ptr < sip::tool::capabilities > tool::no_capabilities(new sip::tool::capabilities());
+
+  /// \cond PRIVATE_PART
+  const long tool_manager_impl::default_port = 10947;
 
   char const* tool_manager_impl::default_tools[] = {"lpsbinary", "lpsconstelm", "lpsdecluster", "lpsinfo", "lpsparelm", "lpsuntime", "lps2lts",                                                     "lpssumelm", "ltsconvert", "ltsinfo", "ltsgraph", "ltsview", "mcrl22lps", "pnml2mcrl2", "xsim", 0};
 
@@ -221,7 +222,11 @@ namespace squadt {
 
     instances.erase(id);
   }
+  /// \endcond
 
+  /**
+   * Default constructor
+   **/
   tool_manager::tool_manager() : impl(new tool_manager_impl) {
   }
 

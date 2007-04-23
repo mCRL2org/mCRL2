@@ -19,7 +19,8 @@
 
 namespace sip {
 
-    class store_visitor_impl : private boost::noncopyable {
+  /// \cond PRIVATE_PART
+  class store_visitor_impl : private boost::noncopyable {
 
     friend class visitors;
     friend class store_visitor;
@@ -66,24 +67,6 @@ namespace sip {
       /** \brief Destructor */
       ~store_visitor_string_impl();
   };
-  
-  /** \brief Maps alignment to a string */
-  static const char* alignment_to_text[6] = {"top","middle","bottom","left","center","right"};
-
-  /** \brief Maps visibility to a string */
-  static const char* visibility_to_text[3] = {"visible","hidden","none"};
-
-  store_visitor::store_visitor(std::string& s) :
-        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < utility::visitor< store_visitor_impl > > (new store_visitor_string_impl(s))) {
-  }
-
-  store_visitor::store_visitor(boost::filesystem::path const& p) :
-        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < utility::visitor< store_visitor_impl > > (new store_visitor_path_impl(p))) {
-  }
-
-  store_visitor::store_visitor(std::ostream& o) :
-        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < utility::visitor< store_visitor_impl > > (new utility::visitor< store_visitor_impl >(o))) {
-  }
 
   inline store_visitor_string_impl::store_visitor_string_impl(std::string& s) :
                                 utility::visitor< store_visitor_impl >(m_help_stream),
@@ -101,6 +84,25 @@ namespace sip {
   }
 
   inline store_visitor_impl::store_visitor_impl(std::ostream& o) : out(o) {
+  }
+  /// \endcond
+  
+  /** \brief Maps alignment to a string */
+  static const char* alignment_to_text[6] = {"top","middle","bottom","left","center","right"};
+
+  /** \brief Maps visibility to a string */
+  static const char* visibility_to_text[3] = {"visible","hidden","none"};
+
+  store_visitor::store_visitor(std::string& s) :
+        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < utility::visitor< store_visitor_impl > > (new store_visitor_string_impl(s))) {
+  }
+
+  store_visitor::store_visitor(boost::filesystem::path const& p) :
+        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < utility::visitor< store_visitor_impl > > (new store_visitor_path_impl(p))) {
+  }
+
+  store_visitor::store_visitor(std::ostream& o) :
+        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < utility::visitor< store_visitor_impl > > (new utility::visitor< store_visitor_impl >(o))) {
   }
 }
 

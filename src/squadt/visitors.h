@@ -27,6 +27,7 @@ namespace squadt {
       /** \brief Constructor to writes to stream */
       store_visitor(std::ostream&);
 
+      /** \brief Stores elements using the visitor */
       template < typename T >
       void store(T const&);
   };
@@ -50,6 +51,7 @@ namespace squadt {
       template < typename T >
       restore_visitor(T&);
 
+      /** \brief Restores elements using the visitor */
       template < typename T >
       void restore(T&);
   };

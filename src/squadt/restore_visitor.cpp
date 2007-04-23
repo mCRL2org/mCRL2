@@ -22,6 +22,7 @@
 
 namespace squadt {
 
+  /// \cond PRIVATE_PART
   class restore_visitor_impl {
 
     protected:
@@ -83,7 +84,12 @@ namespace squadt {
 
     tree = in.FirstChildElement();
   }
+  /// \endcond
 
+  /**
+   * \brief Constructor for reading directly from parse tree
+   * \param[in] s parse tree from which to read
+   **/
   template < >
   restore_visitor::restore_visitor(ticpp::Element& s) :
         utility::visitor_interface< squadt::restore_visitor_impl >(
@@ -91,7 +97,7 @@ namespace squadt {
   }
 
   /**
-   * \param[in] p a string from which to read
+   * \param[in] s a string from which to read
    **/
   restore_visitor::restore_visitor(std::string const& s) :
         utility::visitor_interface< squadt::restore_visitor_impl >(
@@ -110,6 +116,9 @@ namespace squadt {
 namespace utility {
   using namespace squadt;
 
+  /**
+   * \param[in] t the tool object to restore
+   **/
   template <>
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(tool& t) {
@@ -131,12 +140,16 @@ namespace utility {
     }
   }
 
+  /**
+   * \param[in] t the tool_manager object to restore
+   **/
   template <>
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(tool_manager& t) {
     do_visit(*t.impl);
   }
 
+  /// \cond PRIVATE_PART
   template <>
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(tool_manager_impl& tm) {
@@ -152,13 +165,18 @@ namespace utility {
       tm.add_tool(new_tool);
     }
   }
+  /// \endcond
 
+  /**
+   * \param[in] e the executor object to restore
+   **/
   template <>
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(executor& e) {
     do_visit(*e.impl);
   }
 
+  /// \cond PRIVATE_PART
   template <>
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(executor_impl& o) {
@@ -187,7 +205,11 @@ namespace utility {
 
     tree = tree->NextSiblingElement(false);
   }
+  /// \endcond
 
+  /**
+   * \param[in] r the type_registry object to restore
+   **/
   template <>
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(type_registry& r) {
@@ -216,6 +238,7 @@ namespace utility {
     }
   }
 
+  /// \cond PRIVATE_PART
   typedef std::map < unsigned long, processor::object_descriptor::sptr > id_conversion_map;
 
   struct id_helper {
@@ -225,13 +248,19 @@ namespace utility {
     inline id_helper(ticpp::Element* t) : tree(t) {
     }
   };
+  /// \endcond
 
+  /**
+   * \param[in] p the processor object to restore
+   * \param[in] h a helper map for resolving getting a processor by a unique identifier
+   **/
   template <>
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(processor& p, id_helper& h) {
     do_visit(*p.impl, h);
   }
 
+  /// \cond PRIVATE_PART
   /**
    * \attention the same map m must be used to read back all processor instances that were written with write()
    **/
@@ -302,13 +331,18 @@ namespace utility {
       }
     }
   }
+  /// \endcond
 
+  /**
+   * \param[in] p the project_manager object to restore
+   **/
   template <>
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(squadt::project_manager& p) {
     do_visit(*p.impl);
   }
 
+  /// \cond PRIVATE_PART
   template <>
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(squadt::project_manager_impl& p) {
@@ -335,7 +369,9 @@ namespace utility {
 
     p.sort_processors();
   }
+  /// \endcond
 
+  /// \cond PRIVATE_PART
   template <>
   bool visitor< squadt::restore_visitor_impl >::initialise() {
     register_visit_method< squadt::tool >();
@@ -351,4 +387,5 @@ namespace utility {
 
     return true;
   }
+  /// \endcond
 }

@@ -8,7 +8,6 @@
 #include <iostream>
 
 using namespace std;
-using namespace redi;
 
 // Class SMT_Solver_Ario --------------------------------------------------------------------------
   // Class SMT_Solver_Ario - Functions declared public --------------------------------------------
@@ -16,7 +15,7 @@ using namespace redi;
     SMT_Solver_Ario::SMT_Solver_Ario() {
       string v_string_err;
 
-      pstream v_pstream("ario", pstreams::pstdin | pstreams::pstderr | pstreams::pstdout);
+      redi::pstream v_pstream("ario", redi::pstreams::pstdin | redi::pstreams::pstderr | redi::pstreams::pstdout);
       getline(v_pstream.err(), v_string_err);
       if (v_string_err == "....................................") {
         gsVerboseMsg("The SMT solver Ario is available.\n");
@@ -35,8 +34,8 @@ using namespace redi;
     bool SMT_Solver_Ario::is_satisfiable(ATermList a_formula) {
       translate(a_formula);
 
-      pstream v_pstream("ario", pstreams::pstdin | pstreams::pstdout | pstreams::pstderr);
-      v_pstream << f_benchmark << endl << peof;
+      redi::pstream v_pstream("ario", redi::pstreams::pstdin | redi::pstreams::pstdout | redi::pstreams::pstderr);
+      v_pstream << f_benchmark << endl << redi::peof;
 
       string v_string_out;
       getline(v_pstream.out(), v_string_out);
@@ -50,8 +49,8 @@ using namespace redi;
       } else {
         gsErrorMsg("Ario reported an error while solving the formula.\n");
 
-        pstream v_pstream("ario", pstreams::pstdin | pstreams::pstdout | pstreams::pstderr);
-        v_pstream << f_benchmark << endl << peof;
+        redi::pstream v_pstream("ario", redi::pstreams::pstdin | redi::pstreams::pstdout | redi::pstreams::pstderr);
+        v_pstream << f_benchmark << endl << redi::peof;
         while (getline(v_pstream.out(), v_string_out)) {
           v_string_out = "Ario: " + v_string_out + "\n";
           gsErrorMsg((char*) v_string_out.c_str());

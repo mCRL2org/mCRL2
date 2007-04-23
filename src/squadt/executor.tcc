@@ -5,6 +5,7 @@ namespace squadt {
 
   namespace execution {
 
+    /** \brief Implementation class with the executor class (handle-body idiom) */
     class executor_impl : public utility::visitable {
       friend class executor;
 

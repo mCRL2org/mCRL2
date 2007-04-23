@@ -117,7 +117,7 @@ namespace squadt {
       void register_command(mime_type const&, std::string const&);
 
       /** \brief Whether or not a command is associated with this type */
-      bool has_registered_command(mime_type const&, const bool = true) const;
+      bool has_registered_command(mime_type const& t, const bool c = true) const;
   };
 
   inline type_registry::type_registry() {

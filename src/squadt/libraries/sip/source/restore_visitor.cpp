@@ -20,7 +20,7 @@
 #include <ticpp.h>
 
 namespace sip {
-
+  /// \cond PRIVATE_PART
   class restore_visitor_impl : private boost::noncopyable {
 
     friend class visitors;
@@ -59,19 +59,6 @@ namespace sip {
       restore_visitor_impl_frontend(boost::filesystem::path const&);
   };
 
-  template < >
-  restore_visitor::restore_visitor(ticpp::Element& s) :
-        utility::visitor_interface< restore_visitor_impl >(boost::shared_ptr < utility::visitor< restore_visitor_impl > > (new utility::visitor< restore_visitor_impl >(&s))) {
-  }
-
-  restore_visitor::restore_visitor(std::string const& s) :
-        utility::visitor_interface< restore_visitor_impl >(boost::shared_ptr < utility::visitor< restore_visitor_impl > > (new restore_visitor_impl_frontend(s))) {
-  }
-
-  restore_visitor::restore_visitor(boost::filesystem::path const& p) :
-        utility::visitor_interface< restore_visitor_impl >(boost::shared_ptr < utility::visitor< restore_visitor_impl > > (new restore_visitor_impl_frontend(p))) {
-  }
-
   inline restore_visitor_impl::restore_visitor_impl() {
   }
 
@@ -108,6 +95,20 @@ namespace sip {
     id = static_cast < sip::message::type_identifier_t > (t);
 
     return (s);
+  }
+  /// \endcond
+
+  template < >
+  restore_visitor::restore_visitor(ticpp::Element& s) :
+        utility::visitor_interface< restore_visitor_impl >(boost::shared_ptr < utility::visitor< restore_visitor_impl > > (new utility::visitor< restore_visitor_impl >(&s))) {
+  }
+
+  restore_visitor::restore_visitor(std::string const& s) :
+        utility::visitor_interface< restore_visitor_impl >(boost::shared_ptr < utility::visitor< restore_visitor_impl > > (new restore_visitor_impl_frontend(s))) {
+  }
+
+  restore_visitor::restore_visitor(boost::filesystem::path const& p) :
+        utility::visitor_interface< restore_visitor_impl >(boost::shared_ptr < utility::visitor< restore_visitor_impl > > (new restore_visitor_impl_frontend(p))) {
   }
 }
 

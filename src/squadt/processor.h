@@ -81,6 +81,7 @@ namespace squadt {
         std::time_t                              timestamp;      ///< The last time the file was modified just before the last checksum was computed
         t_status                                 status;         ///< The status of this object
 
+        /** \brief Construction with a mime type */
         object_descriptor(sip::mime_type const&);
 
         /** \brief Whether or not the generator points to an existing object */

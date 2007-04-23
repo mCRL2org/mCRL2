@@ -29,12 +29,13 @@ namespace utility {
 
     public:
 
+      /** \brief Virtual destructor */
       virtual ~visitable() {
       }
   };
 
+  /// \cond PRIVATE_PART
   namespace detail {
-    /// \cond PRIVATE_PART
 
     /** \brief Implements a primitive map using std::vector */
     template < typename S >
@@ -49,9 +50,8 @@ namespace utility {
 
     /** \brief Wrapper around std::type_info and a callback function */
     class type_info_callback_wrapper;
-
-    /// \endcond
   }
+  /// \endcond
 
   /**
    * Because virtual template member functions do not exist in C++, and there
@@ -71,12 +71,16 @@ namespace utility {
 
     private:
 
+      /** \brief Helper function to get a map for looking up a methods by the type_id of the arguments */
       virtual visitable_type_tree& get_visitable_type_tree() const = 0;
 
     protected:
 
+      /** \brief caller function that resolves types of the first to arguments and executes visit */
       static R call_visit(abstract_visitor< R >& v, visitable const& t);
 
+
+      /** \brief caller function that resolves types of the first to arguments and executes visit with an additional argument */
       template < typename U >
       static R call_visit(abstract_visitor< R >& v, visitable const& t, U& u);
 
@@ -106,6 +110,7 @@ namespace utility {
         return abstract_visitor< R >::call_visit(*this, static_cast < visitable& > (t), u);
       }
 
+      /** \brief Virtual destructor */
       virtual ~abstract_visitor() {
       }
   };
@@ -274,6 +279,7 @@ namespace utility {
 
     private:
 
+      /** \brief Map for looking up visit methods */
       static typename abstract_visitor< R >::visitable_type_tree  visitable_types;
 
     private:
@@ -287,6 +293,9 @@ namespace utility {
 
     protected:
 
+      /**
+       * Registers a visit method for objects of type T
+       **/
       template < class T >
       static void register_visit_method() {
         struct local {
@@ -303,6 +312,9 @@ namespace utility {
             set(detail::visit_method_wrapper< R, abstract_visitor< R >, visitable, void >(&local::trampoline));
       }
 
+      /**
+       * Registers a visit method for objects of type T and an additional argument of type U
+       **/
       template < class T, class U >
       static void register_visit_method() {
         struct local {
@@ -394,6 +406,7 @@ namespace utility {
 
     private:
 
+      /** \brief Method that is used for automated registration of visit functions */
       inline void initialise() {
         static const bool initialised(visitor< S, R >::initialise());
        

@@ -21,6 +21,12 @@ namespace squadt {
 
   using namespace boost::filesystem;
 
+  /// \cond PRIVATE_PART
+  /**
+   * \brief Helper function for writing object status to stream
+   * \param[in] s stream to read from
+   * \param[in] t the status to write
+   **/
   std::istream& operator >> (std::istream& stream, processor::object_descriptor::t_status& s) {
     size_t t;
 
@@ -47,9 +53,49 @@ namespace squadt {
     return (false);
   }
 
+  /**
+   * \param[in] o a sip::object object that describes an output object
+   * \param[in] id the unique identifier for this object in the configuration
+   * \param[in] s the status of the new object
+   **/
+  void processor_impl::append_output(sip::object const& o, parameter_identifier const& id, object_descriptor::t_status const& s) {
+    object_descriptor::sptr p = object_descriptor::sptr(new object_descriptor(o.get_mime_type()));
+
+    p->generator  = interface_object;
+    p->location   = o.get_location();
+    p->identifier = id;
+    p->status     = s;
+    p->timestamp  = time(0);
+    p->checksum.zero_out();
+
+    append_output(p);
+  }
+
+  /**
+   * \param[in] p the object descriptor that should be replaced
+   * \param[in] id the unique identifier for this object in the configuration
+   * \param[in] o a sip::object object that describes an output object
+   * \param[in] s the new status of the object
+   **/
+  void processor_impl::replace_output(object_descriptor::sptr p, parameter_identifier const& id, sip::object const& o, object_descriptor::t_status const& s) {
+    p->mime_type  = o.get_mime_type();
+    p->location   = o.get_location();
+    p->identifier = id;
+    p->status     = s;
+    p->timestamp  = time(0);
+    p->checksum.zero_out();
+  }
+  /// \endcond
+
+  /**
+   * \param[in] m the mime type of the object
+   **/
   processor::object_descriptor::object_descriptor(sip::mime_type const& m) : mime_type(m) {
   }
 
+  /**
+   * \param[in] m the associated project manager
+   **/
   bool processor::object_descriptor::present_in_store(project_manager const& m) {
     path l(m.get_path_for_name(location));
 
@@ -470,7 +516,7 @@ namespace squadt {
   }
 
   /**
-   * \param[in] f the storage format that l uses
+   * \param[in] m the mime type of l
    * \param[in] id the unique identifier for this object in the configuration
    * \param[in] l a URI (local path) to where the file is stored
    * \param[in] s the status of the new object
@@ -486,39 +532,6 @@ namespace squadt {
     p->checksum.zero_out();
 
     impl->append_output(p);
-  }
-
-  /**
-   * \param[in] o a sip::object object that describes an output object
-   * \param[in] id the unique identifier for this object in the configuration
-   * \param[in] s the status of the new object
-   **/
-  void processor_impl::append_output(sip::object const& o, parameter_identifier const& id, object_descriptor::t_status const& s) {
-    object_descriptor::sptr p = object_descriptor::sptr(new object_descriptor(o.get_mime_type()));
-
-    p->generator  = interface_object;
-    p->location   = o.get_location();
-    p->identifier = id;
-    p->status     = s;
-    p->timestamp  = time(0);
-    p->checksum.zero_out();
-
-    append_output(p);
-  }
-
-  /**
-   * \param[in] p the object descriptor that should be replaced
-   * \param[in] id the unique identifier for this object in the configuration
-   * \param[in] o a sip::object object that describes an output object
-   * \param[in] s the new status of the object
-   **/
-  void processor_impl::replace_output(object_descriptor::sptr p, parameter_identifier const& id, sip::object const& o, object_descriptor::t_status const& s) {
-    p->mime_type  = o.get_mime_type();
-    p->location   = o.get_location();
-    p->identifier = id;
-    p->status     = s;
-    p->timestamp  = time(0);
-    p->checksum.zero_out();
   }
 
   void processor::configure(std::string const& w) {
