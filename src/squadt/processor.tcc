@@ -174,6 +174,11 @@ namespace squadt {
 
       /** \brief Terminates running processes and deactivates monitor */
       void shutdown();
+
+    public:
+
+      /** \brief Destructor */
+      ~processor_impl();
   };
 
   /**
@@ -235,72 +240,75 @@ namespace squadt {
   /**
    * \param[in] r whether to check recursively or not
    *
-   * \return whether or not the outputs this processor can produce exist and are up to date
+   * \return whether or not the cached status has been changed or is being changed
    **/
   inline bool processor_impl::check_status(const bool r) {
-    bool   result                   = false;
-    time_t maximum_input_timestamp  = 0;
+    bool   result = false;
 
-    boost::shared_ptr < project_manager > g(manager.lock());
-
-    if (r) {
-      /* Check recursively */
-      BOOST_FOREACH(object_descriptor::wptr i, inputs) {
-        object_descriptor::sptr d = i.lock();
-    
-        if (d.get() == 0) {
-          throw std::runtime_error("dependency on a missing object");
-        }
-    
-        processor::sptr p(d->generator);
-    
-        if (p.get() != 0) {
-          result |= p->check_status(true);
-        }
-      }
-    }
+    if (!is_active()) {
+      time_t maximum_input_timestamp  = 0;
      
-    if (g.get()) {
-      /* Find the maximum timestamp of the inputs */
-      BOOST_FOREACH(object_descriptor::wptr i, inputs) {
-        object_descriptor::sptr d = i.lock();
+      boost::shared_ptr < project_manager > g(manager.lock());
+     
+      if (r) {
+        /* Check recursively */
+        BOOST_FOREACH(object_descriptor::wptr i, inputs) {
+          object_descriptor::sptr d = i.lock();
       
-        if (d.get() == 0) {
-          throw std::runtime_error("dependency on a missing object");
-        }
+          if (d.get() == 0) {
+            throw std::runtime_error("dependency on a missing object");
+          }
       
-        d->self_check(*g);
-
-        maximum_input_timestamp = std::max(maximum_input_timestamp, d->timestamp);
-
-        result |= (d->status != object_descriptor::original) && (d->status != object_descriptor::reproducible_up_to_date);
-      }
-     
-      /* Check whether outputs all exist and find the minimum timestamp of the inputs */
-      BOOST_FOREACH(object_descriptor::sptr o, outputs) {
-        o->self_check(*g, static_cast < const long int > (maximum_input_timestamp));
-
-        result |= (o->status != object_descriptor::original) && (o->status != object_descriptor::reproducible_up_to_date);
-      }
-     
-      if (result) {
-        if (0 < inputs.size()) {
-          BOOST_FOREACH(object_descriptor::sptr i, outputs) {
-            if (i->status == object_descriptor::reproducible_up_to_date) {
-              try_change_status(*i, object_descriptor::reproducible_out_of_date);
-            }
+          processor::sptr p(d->generator);
+      
+          if (p.get() != 0) {
+            result |= p->check_status(true);
           }
         }
-        else {
-          /* User added files are always up to date */
-          g->demote_status(interface_object.lock().get());
+      }
+       
+      if (g.get()) {
+        /* Find the maximum timestamp of the inputs */
+        BOOST_FOREACH(object_descriptor::wptr i, inputs) {
+          object_descriptor::sptr d = i.lock();
+        
+          if (d.get() == 0) {
+            throw std::runtime_error("dependency on a missing object");
+          }
+        
+          d->self_check(*g);
+     
+          maximum_input_timestamp = std::max(maximum_input_timestamp, d->timestamp);
+     
+          result |= (d->status != object_descriptor::original) && (d->status != object_descriptor::reproducible_up_to_date);
+        }
+       
+        /* Check whether outputs all exist and find the minimum timestamp of the inputs */
+        BOOST_FOREACH(object_descriptor::sptr o, outputs) {
+          o->self_check(*g, static_cast < const long int > (maximum_input_timestamp));
+     
+          result |= (o->status != object_descriptor::original) && (o->status != object_descriptor::reproducible_up_to_date);
+        }
+       
+        if (result) {
+          if (0 < inputs.size()) {
+            BOOST_FOREACH(object_descriptor::sptr i, outputs) {
+              if (i->status == object_descriptor::reproducible_up_to_date) {
+                try_change_status(*i, object_descriptor::reproducible_out_of_date);
+              }
+            }
+          }
+          else {
+            /* User added files are always up to date */
+            g->demote_status(interface_object.lock().get());
+          }
         }
       }
-
+     
       return (result);
     }
 
-    return (false);
+    return (true);
   }
 
   inline bool processor_impl::demote_status() {
@@ -317,6 +325,10 @@ namespace squadt {
 
   inline bool processor_impl::is_active() const {
     return (current_monitor->get_status() == execution::process::running);
+  }
+
+  inline processor_impl::~processor_impl() {
+    shutdown();
   }
 
   inline void processor_impl::shutdown() {
@@ -624,37 +636,39 @@ namespace squadt {
    * \pre !is_active() and t.get() == this
    **/
   inline void processor_impl::run(interface_ptr const& t, boost::shared_ptr < sip::configuration > c, bool b) {
-    if (b || 0 < inputs.size()) {
-      boost::shared_ptr < project_manager > g(manager);
+    if (!is_active()) {
+      if (b || 0 < inputs.size()) {
+        boost::shared_ptr < project_manager > g(manager);
 
-      assert(t->impl.get() == this && g.get());
+        assert(t->impl.get() == this && g.get());
 
-      /* Check that dependent files exist and rebuild if this is not the case */
-      BOOST_FOREACH(input_list::value_type i, inputs) {
-        if (!i->present_in_store(*g)) {
-          processor::sptr p(i->generator.lock());
+        /* Check that dependent files exist and rebuild if this is not the case */
+        BOOST_FOREACH(input_list::value_type i, inputs) {
+          if (!i->present_in_store(*g)) {
+            processor::sptr p(i->generator.lock());
 
-          if (p.get() != 0) {
-            /* Reschedule process operation after process p has completed */
-            p->run(boost::bind(&processor_impl::run, this, t, c, false));
-
-            return;
-          }
-          else {
-            /* Should signal an error via the monitor ... */
-            throw std::runtime_error("Do not know how to (re)create " + i->location);
+            if (p.get() != 0) {
+              /* Reschedule process operation after process p has completed */
+              p->run(boost::bind(&processor_impl::run, this, t, c, false));
+     
+              return;
+            }
+            else {
+              /* Should signal an error via the monitor ... */
+              throw std::runtime_error("Do not know how to (re)create " + i->location);
+            }
           }
         }
-      }
-    
-      current_monitor->start_tool_operation(t, c);
 
-      global_build_system.get_tool_manager()->impl->execute(*tool_descriptor, make_output_path(output_directory),
-         boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), false);
-    }
-    else {
-      /* Signal completion to environment via monitor */
-      current_monitor->signal_change(execution::process::aborted);
+        current_monitor->start_tool_operation(t, c);
+
+        global_build_system.get_tool_manager()->impl->execute(*tool_descriptor, make_output_path(output_directory),
+           boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), false);
+      }
+      else {
+        /* Signal completion to environment via monitor */
+        current_monitor->signal_change(execution::process::aborted);
+      }
     }
   }
 
@@ -682,35 +696,37 @@ namespace squadt {
   inline void processor_impl::update(interface_ptr const& t, boost::shared_ptr < sip::configuration > c, bool b) {
     assert(t->impl.get() == this);
 
-    if (b || 0 < inputs.size()) {
+    if (!is_active()) {
+      if (b || 0 < inputs.size()) {
 
-      /* Check that dependent files exist and rebuild if this is not the case */
-      BOOST_FOREACH(input_list::value_type i, inputs) {
-        processor::sptr p(i->generator.lock());
-         
-        if (p.get() != 0) {
-          if (p->check_status(true)) {
+        /* Check that dependent files exist and rebuild if this is not the case */
+        BOOST_FOREACH(input_list::value_type i, inputs) {
+          processor::sptr p(i->generator.lock());
 
-            /* Reschedule process operation after process p has completed */
-            p->update(boost::bind(&processor_impl::update_on_success, this, i, t, c, false));
-     
-            return;
+          if (p.get() != 0) {
+            if (p->check_status(true)) {
+
+              /* Reschedule process operation after process p has completed */
+              p->update(boost::bind(&processor_impl::update_on_success, this, i, t, c, false));
+
+              return;
+            }
+          }
+          else {
+            /* Should signal an error via the monitor ... */
+            throw std::runtime_error("Do not know how to (re)create " + i->location);
           }
         }
-        else {
-          /* Should signal an error via the monitor ... */
-          throw std::runtime_error("Do not know how to (re)create " + i->location);
-        }
+
+        current_monitor->start_tool_operation(t, c);
+
+        global_build_system.get_tool_manager()->impl->execute(*tool_descriptor, make_output_path(output_directory),
+           boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), false);
       }
-
-      current_monitor->start_tool_operation(t, c);
-
-      global_build_system.get_tool_manager()->impl->execute(*tool_descriptor, make_output_path(output_directory),
-         boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), false);
-    }
-    else {
-      /* Signal completion to environment via monitor */
-      current_monitor->signal_change(execution::process::aborted);
+      else {
+        /* Signal completion to environment via monitor */
+        current_monitor->signal_change(execution::process::aborted);
+      }
     }
   }
 

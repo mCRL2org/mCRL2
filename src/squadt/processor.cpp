@@ -40,9 +40,13 @@ namespace squadt {
   /**
    * \param[in] o an object descriptor
    * \param[in] t the new status
+   *
+   * \pre s != generation_in_progress
    **/
   bool processor_impl::try_change_status(processor::object_descriptor& o, processor::object_descriptor::t_status s) {
-    if (s < o.status) {
+    assert(o.status != object_descriptor::generation_in_progress);
+
+    if (o.status != object_descriptor::generation_in_progress && s < o.status) {
       o.status = s;
 
       o.generator.lock()->get_monitor()->status_change_handler();
@@ -136,30 +140,32 @@ namespace squadt {
   bool processor::object_descriptor::self_check(project_manager const& m, long int const& t) {
     using namespace boost::filesystem;
 
-    path l(m.get_path_for_name(location));
-    
-    if (exists(l)) {
-      /* Input exists, get timestamp */ 
-      time_t stamp = last_write_time(l);
-    
-      if (stamp < t) {
-        return (processor_impl::try_change_status(*this, reproducible_out_of_date));
-      }
-      else if (timestamp < stamp) {
-        /* Compare checksums and update recorded checksum */
-        boost::md5::digest_type old = checksum;
-    
-        checksum = boost::md5(l).digest();
-
-        if (timestamp != 0 && old != checksum) {
-          return processor_impl::try_change_status(*this, reproducible_up_to_date);
+    if (!generator.lock()->is_active()) {
+      path l(m.get_path_for_name(location));
+      
+      if (exists(l)) {
+        /* Input exists, get timestamp */ 
+        time_t stamp = last_write_time(l);
+      
+        if (stamp < t) {
+          return (processor_impl::try_change_status(*this, reproducible_out_of_date));
         }
-
-        timestamp = stamp;
+        else if (timestamp < stamp) {
+          /* Compare checksums and update recorded checksum */
+          boost::md5::digest_type old = checksum;
+      
+          checksum = boost::md5(l).digest();
+    
+          if (timestamp != 0 && old != checksum) {
+            return processor_impl::try_change_status(*this, reproducible_up_to_date);
+          }
+    
+          timestamp = stamp;
+        }
       }
-    }
-    else {
-      return (processor_impl::try_change_status(*this, reproducible_nonexistent));
+      else {
+        return (processor_impl::try_change_status(*this, reproducible_nonexistent));
+      }
     }
 
     return (false);
@@ -213,6 +219,7 @@ namespace squadt {
           }
           break;
         case process::completed:
+          break;
         default: /* aborted... */
           for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
             (*i)->status = object_descriptor::original;
@@ -230,9 +237,6 @@ namespace squadt {
           }
           break;
         case process::completed:
-          for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
-            (*i)->status = object_descriptor::reproducible_up_to_date;
-          }
           break;
         default: /* aborted... */
           for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
