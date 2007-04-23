@@ -1,0 +1,78 @@
+\documentclass[a4paper,10pt]{article}
+
+\title{Implementation notes for the LPS library}
+\author{Wieger Wesselink}
+
+% packages
+% --------
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{graphicx,theorem,ifthen,float}
+\usepackage[english]{babel}
+\usepackage{multicol}
+\usepackage{array}
+\usepackage{stmaryrd}
+
+\begin{document}
+
+\maketitle
+
+\section{state formulas}
+
+A state formula $\varphi$ is a formula that satisfies the following grammar:
+
+\[
+\begin{array}{lc}
+\varphi ::= &
+c
+~|~ true
+~|~ false
+~|~ \neg \varphi
+~|~ \varphi \wedge \varphi
+~|~ \varphi \vee \varphi
+~|~ \varphi \Rightarrow \varphi
+~|~ \forall x{:}D .\varphi
+~|~ \exists x{:}D .\varphi
+~|~ \langle\alpha\rangle \varphi \\ &
+~|~ [\alpha] \varphi
+~|~ \Delta
+~|~ \Delta(t)
+~|~ \nabla
+~|~ \nabla(t)
+~|~ X(d)
+~|~ \nu  X(x{:}D:=d).~\varphi
+~|~ \mu  X(x{:}D:=d).~\varphi
+\end{array}
+\]
+
+Here, $\alpha$ is an action formula, $X$ is a (parameterised) propositional variable, $D$ is a
+sort, $x$ is a data variable of sort $D$, and $c$, $t$ and $d$ are data expressions of sort
+$bool$, $real$ and $D$, respectively. The following table gives the correspondence between
+state formulas and their internal ATerm format.
+
+%--- state formula ---%
+\[
+\begin{array}{ll}
+\mathtt{<DataExpr>                                        } & c                              \\
+\mathtt{StateTrue                                         } & true                           \\
+\mathtt{StateFalse                                        } & false                          \\
+\mathtt{StateNot(<StateFrm>)                              } & \neg \varphi                   \\
+\mathtt{StateAnd(<StateFrm>, <StateFrm>)                  } & \varphi \wedge \varphi         \\
+\mathtt{StateOr(<StateFrm>, <StateFrm>)                   } & \varphi \vee \varphi           \\
+\mathtt{StateImp(<StateFrm>, <StateFrm>)                  } & \varphi \Rightarrow \varphi    \\
+\mathtt{StateForall(<DataVarId>+, <StateFrm>)             } & \forall x{:}D .\varphi         \\
+\mathtt{StateExists(<DataVarId>+, <StateFrm>)             } & \exists x{:}D .\varphi         \\
+\mathtt{StateMust(<RegFrm>, <StateFrm>)                   } & \langle\alpha\rangle \varphi   \\
+\mathtt{StateMay(<RegFrm>, <StateFrm>)                    } & [\alpha] \varphi               \\
+\mathtt{StateYaled                                        } & \nabla                         \\
+\mathtt{StateYaledTimed(<DataExpr>)                       } & \nabla(t)                      \\
+\mathtt{StateDelay                                        } & \Delta                         \\
+\mathtt{StateDelayTimed(<DataExpr>)                       } & \Delta(t)                      \\
+\mathtt{StateVar(<String>, <DataExpr>\ast)                } & X(d)                           \\
+\mathtt{StateNu(<String>, <DataVarIdInit>\ast, <StateFrm>)} & \nu  X(x{:}D:=d).~\varphi      \\
+\mathtt{StateMu(<String>, <DataVarIdInit>\ast, <StateFrm>)} & \mu  X(x{:}D:=d).~\varphi
+\end{array}
+\]
+
+\end{document}
