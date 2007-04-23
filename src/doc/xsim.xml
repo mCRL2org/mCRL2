@@ -136,7 +136,7 @@
     <term>&opt_rewriter;=&name;</term>
     <listitem>
       <para>
-	Use rewriter &name;. Default is &inner;
+        Use rewriter &name; (see &rewriter-lnk; manual page).
       </para>
     </listitem>
   </varlistentry>

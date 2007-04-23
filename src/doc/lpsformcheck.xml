@@ -170,30 +170,8 @@
     <listitem>
       <para>
         Use the specified &strategy; as rewrite
-        strategy:
-        <itemizedlist spacing='compact'>
-          <listitem>
-            <para>
-              &strat_inner_string; for the innermost rewrite strategy
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              &strat_innerc_string; for the compiled innermost rewrite strategy
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              &strat_jitty_string; for the jitty rewrite strategy
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              &strat_jittyc_string; for the compiled jitty rewrite strategy
-            </para>
-          </listitem>
-        </itemizedlist>
-        By default, the jitty rewrite strategy is used
+        strategy (see &rewriter-lnk; manual page).
+        By default, &strat_jitty_string; is used
       </para>
     </listitem>
   </varlistentry>

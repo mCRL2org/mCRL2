@@ -323,6 +323,9 @@
 <!ENTITY strat_innerc_string "<constant>'innerc'</constant>">
 <!ENTITY strat_inner_string "<constant>'inner'</constant>">
 <!ENTITY stratINNERstring "<constant>inner</constant>">
+<!ENTITY stratINNERCstring "<constant>innerc</constant>">
+<!ENTITY stratJITTYstring "<constant>jitty</constant>">
+<!ENTITY stratJITTYCstring "<constant>jittyc</constant>">
 <!ENTITY stratINVALID "<constant>GS_REWR_INVALID</constant>">
 <!ENTITY stratJITTYC "<constant>GS_REWR_JITTYC</constant>">
 <!ENTITY strat_jitty "<constant>GS_REWR_JITTY</constant>">
@@ -408,6 +411,7 @@
 <!ENTITY tbf2lps "<command>tbf2lps</command>">
 <!ENTITY tracepp "<command>tracepp</command>">
 <!ENTITY xsim "<command>xsim</command>">
+<!ENTITY rewriter "<command>rewriter</command>">
 <!-- tools with link -->
 <!ENTITY lps2lts-lnk "<link linkend='lps2lts'>&lps2lts;</link>">
 <!ENTITY sim-lnk "<link linkend='sim'>&sim;</link>">
@@ -437,6 +441,7 @@
 <!ENTITY tbf2lps-lnk "<link linkend='tbf2lps'>&tbf2lps;</link>">
 <!ENTITY tracepp-lnk "<link linkend='tracepp'>&tracepp;</link>">
 <!ENTITY xsim-lnk "<link linkend='xsim'>&xsim;</link>">
+<!ENTITY rewriter-lnk "<link linkend='rewriter'>&rewriter;</link>">
 <!-- list of source files to be included -->
 <!ENTITY fbdd2dot SYSTEM "bdd2dot.xml">
 <!ENTITY fbdd_path_eliminator SYSTEM "bdd_path_eliminator.xml">
@@ -447,7 +452,7 @@
 <!ENTITY fformula_checker SYSTEM "formula_checker.xml">
 <!ENTITY finvariant_checker SYSTEM "invariant_checker.xml">
 <!ENTITY finvariant_eliminator SYSTEM "invariant_eliminator.xml">
-<!ENTITY flibrewrite SYSTEM "librewrite.xml">
+<!ENTITY frewriter SYSTEM "rewriter.xml">
 <!ENTITY flps2lts SYSTEM "lps2lts.xml">
 <!ENTITY flps2torx SYSTEM "lps2torx.xml">
 <!ENTITY flpsbinary SYSTEM "lpsbinary.xml">
@@ -527,6 +532,9 @@
     &ftbf2lps;
     &flps2torx;
   </chapter>
+  <chapter><title>Miscellaneous</title>
+    &frewriter;
+  </chapter>
 </part>
 <part><title>Libraries</title>
   <chapter><title>Prover</title>
@@ -544,9 +552,6 @@
     &fsmt_solver_ario;
     &fsmt_solver_cvc_lite;
     &fsmt_solver;
-  </chapter>
-  <chapter><title>Rewriter</title>
-    &flibrewrite;
   </chapter>
 </part>
 </book>

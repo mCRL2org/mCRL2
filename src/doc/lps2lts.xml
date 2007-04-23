@@ -303,10 +303,10 @@ Mandatory arguments to long options are also mandatory to short options.
     <term>&opt_rewriter;=&name;</term>
     <listitem>
       <para>
-         Use rewriter &name; (default 'inner'). &lps2lts; makes heavy use of a
-         term rewriting engine to manipulate with the data term of the LPS and
-         therefore the choice of the rewriter can heavily influence
-         performance.
+         Use rewriter &name; (see &rewriter-lnk; manual page). &lps2lts; makes
+         heavy use of a term rewriting engine to manipulate with the data term
+         of the LPS and therefore the choice of the rewriter can heavily
+         influence performance.
       </para>
     </listitem>
   </varlistentry>

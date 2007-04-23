@@ -1,0 +1,59 @@
+<refentry id="rewriter">
+ <info>
+  <date>2005-2007</date>
+ </info>
+
+<refmeta>
+ <refentrytitle>rewriter</refentrytitle>
+ <manvolnum>7</manvolnum>
+ <refmiscinfo class="source">rewriter</refmiscinfo>
+ <refmiscinfo class="version"></refmiscinfo>
+ <refmiscinfo class="manual">Generic Information</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>rewriter</refname>
+<refpurpose>a rewriter for mCRL2 data expressions</refpurpose>
+</refnamediv>
+
+<refsect1>
+<title>Rewriting Strategies</title>
+<para>
+  Tools that use the mCRL2 rewriter allow the user the specify the rewrite
+  strategy that the rewriter should use. For command-line tools this is done
+  with the option &opt_R;/&opt_rewriter;. The default strategy is
+  &stratINNERstring;.
+</para>
+<para>
+  Currently, there are four different rewriting strategies available in the
+  rewrite. A standard innermost rewriting strategy is available under the name
+  &stratINNERstring;. This strategy will fit most non critical rewriting uses,
+  such as simulation, (simple) LPS manipulation and generation of (very) small
+  state spaces. For time critical uses, there is a compiling innermost
+  rewriting strategy &stratINNERCstring;. With this strategy, a specialised
+  rewriter is generated for the supplied specification. This strategy might
+  need a while to initialise itself, but it is many times faster then the
+  standard innermost rewriting strategy and thus suited for generating large
+  state-spaces (for example). It does require that gcc and the appropriate
+  headers and libraries must be available. (At the moment this is not possible
+  for Windows.)
+</para>
+<para>
+  An alternative to &stratINNERstring; is the JITty rewriter
+  &stratJITTYstring;.  This strategy can avoid a lot of unnecessary rewriting
+  in certain cases and can handle some rewrite rules that cause the innermost
+  rewriters to rewrite infinitely. There is also a compiling variant
+  &stratJITTYCstring;. This compiling JITty rewriter is in general the best
+  choice if one needs to generate large state spaces.
+</para>
+<para>
+  For each of the interpreting rewriters (&stratINNERstring; and
+  &stratJITTYstring;) there is also a variant that uses a prover for boolean
+  expressions. This can be useful in cases where the default rewriters cannot
+  reduce a term any further while the expression is, for example, always
+  equivalent to &false;. To use the prover with the rewriter one simply appends
+  a 'p' to the name of the strategy.
+</para>
+</refsect1>
+
+</refentry>
