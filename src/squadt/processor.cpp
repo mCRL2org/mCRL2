@@ -66,7 +66,7 @@ namespace squadt {
     p->identifier = id;
     p->status     = s;
     p->timestamp  = time(0);
-    p->checksum.zero_out();
+    p->checksum;
 
     append_output(p);
   }
@@ -83,7 +83,7 @@ namespace squadt {
     p->identifier = id;
     p->status     = s;
     p->timestamp  = time(0);
-    p->checksum.zero_out();
+    p->checksum;
   }
   /// \endcond
 
@@ -147,11 +147,11 @@ namespace squadt {
       }
       else if (timestamp < stamp) {
         /* Compare checksums and update recorded checksum */
-        md5pp::compact_digest old = checksum;
+        boost::md5::digest_type old = checksum;
     
-        checksum  = md5pp::MD5::MD5_sum(l);
+        checksum = boost::md5(l).digest();
 
-        if (timestamp != 0 && !checksum.is_zero() && old != checksum) {
+        if (timestamp != 0 && old != checksum) {
           return processor_impl::try_change_status(*this, reproducible_up_to_date);
         }
 
@@ -529,7 +529,7 @@ namespace squadt {
     p->identifier = "";
     p->status     = s;
     p->timestamp  = time(0);
-    p->checksum.zero_out();
+    p->checksum;
 
     impl->append_output(p);
   }

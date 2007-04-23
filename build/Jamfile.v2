@@ -102,6 +102,7 @@ boost_library thread ;
 boost_library signals : local ;
 boost_library test : : system ;
 boost_library system : local ;
+boost_library md5 : local ;
 
 lib z  : : <name>"z" ;
 lib m  : : <name>"m" ;

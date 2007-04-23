@@ -272,13 +272,9 @@ namespace utility {
         out << "\" identifier=\"" << std::dec << (*i)->identifier;
       }
 
-      out << "\" status=\"" << (*i)->status;
-
-      if (!(*i)->checksum.is_zero()) {
-        out << "\" digest=\"" << (*i)->checksum;
-      }
-
-      out << "\" timestamp=\"" << std::dec << (*i)->timestamp << "\"/>\n";
+      out << "\" status=\"" << (*i)->status
+          << "\" digest=\"" << (*i)->checksum
+          << "\" timestamp=\"" << std::dec << (*i)->timestamp << "\"/>\n";
     }
 
     out << "</processor>\n";

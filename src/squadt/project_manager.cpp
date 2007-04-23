@@ -334,9 +334,17 @@ namespace squadt {
 
       BOOST_FOREACH(processor_list::value_type i, processors) {
         if (i->get_tool() && reverse_depends.count(i.get()) == 0) {
-          h(i.get());
+          i->check_status(true);
 
-          i->update();
+          for (processor::output_object_iterator j = i->get_output_iterator(); j.valid(); ++j) {
+            if (!(*j)->is_up_to_date()) {
+              h(i.get());
+
+              i->update();
+
+              break;
+            }
+          }
         }
       }
 

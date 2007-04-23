@@ -6,8 +6,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
-
-#include <md5pp/md5pp.h>
+#include <boost/md5.hpp>
 
 #include "utilities/indirect_iterator.h"
 #include "task_monitor.h"
@@ -77,7 +76,7 @@ namespace squadt {
         build_system::storage_format             mime_type;      ///< The used storage format
         std::string                              location;       ///< The location of the object
         sip::configuration::parameter_identifier identifier;     ///< The identifier of the associated output object in a configuration
-        md5pp::compact_digest                    checksum;       ///< The digest for the completed object
+        boost::md5::digest_type                  checksum;       ///< The digest for the completed object
         std::time_t                              timestamp;      ///< The last time the file was modified just before the last checksum was computed
         t_status                                 status;         ///< The status of this object
 

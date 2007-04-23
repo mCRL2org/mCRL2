@@ -318,7 +318,7 @@ namespace utility {
           new_descriptor.status = processor::object_descriptor::reproducible_out_of_date;
         }
         
-        e->GetAttributeOrDefault("digest", &new_descriptor.checksum, md5pp::zero_digest);
+        e->GetAttribute("digest", &new_descriptor.checksum, false);
 
         new_descriptor.generator = boost::weak_ptr < processor > (p.interface_object);
       }

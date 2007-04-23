@@ -1,0 +1,6 @@
+project boost/md5
+    : source-location ../src
+    ;
+
+lib boost_md5 : ../src/md5.cpp ;
+

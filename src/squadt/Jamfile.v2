@@ -8,9 +8,9 @@ source_files = [ glob *.cpp gui/*.cpp gui/dialog/*.cpp ] ;
 
 exe squadt
       : [ sequence.insertion-sort $(source_files) ]
-        /libraries//md5pp
-        /libraries/sip//sip_controller
-      : <site-library>wx_base
+      : <library>/site-config//boost_md5
+        <library>/libraries/sip//sip_controller
+        <site-library>wx_base
         <use>/libraries/utilities//headers
         <library>/libraries//ticpp
         <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
