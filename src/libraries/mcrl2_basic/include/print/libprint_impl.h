@@ -760,7 +760,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(fprints)(OutStream, " ");
     PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1),
       pp_format, ShowSorts, PrecLevel);
-    PRINT_FUNC(fprints)(OutStream, " = ");
+    PRINT_FUNC(fprints)(OutStream, " =\n       ");
     PRINT_FUNC(PrintPBExpr)(OutStream, ATAgetArgument(Part, 2),
       pp_format, ShowSorts, PrecLevel);
   } else if (gsIsFixpoint(Part)) {
