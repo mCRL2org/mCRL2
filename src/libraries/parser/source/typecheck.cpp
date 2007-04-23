@@ -76,8 +76,8 @@ static ATbool gstcVarsUnique(ATermList VarDecls);
 static ATermAppl gstcRewrActProc(ATermTable, ATermAppl);
 static inline ATermAppl gstcMakeActionOrProc(ATbool, ATermAppl, ATermList, ATermList);
 static ATermAppl gstcTraverseActProcVarConstP(ATermTable, ATermAppl);
-static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl *, ATermAppl, ATermTable FreeVars=NULL);
-static ATermAppl gstcTraverseVarConsTypeDN(unsigned int, ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl* , ATermAppl, ATermTable FreeVars=NULL);
+static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl *, ATermAppl, ATermTable FreeVars=NULL, bool strict_ambiguous=true);
+static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl* , ATermAppl, ATermTable FreeVars=NULL, bool strict_ambiguous=true, int nPars = -1);
 
 static ATermList gstcInsertType(ATermList TypeList, ATermAppl Type);
 
@@ -1157,13 +1157,13 @@ static ATbool gstcTransformVarConsTypeData(void){
     DeclaredVars=gstcAddVars2Table(DeclaredVars,VarList);
     if(!DeclaredVars){ b = false; break; }
     ATermAppl Left=ATAgetArgument(Eqn,2);
-    ATermAppl LeftType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Left,gsMakeSortUnknown(),FreeVars);
+    ATermAppl LeftType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Left,gsMakeSortUnknown(),FreeVars,false);
     if(!LeftType){ b = false; gsErrorMsg("the previous error occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn); break;}
     
     ATermAppl Cond=ATAgetArgument(Eqn,1);
     if(!gsIsNil(Cond) && !(gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,&Cond,gsMakeSortIdBool()))){ b = false; break; }
     ATermAppl Right=ATAgetArgument(Eqn,3);
-    ATermAppl RightType=gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,&Right,LeftType);
+    ATermAppl RightType=gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,&Right,LeftType,false);
     if(!RightType){ b = false; gsErrorMsg("the previous error occurred while typechecking %P as right hand side of equation %P\n",Right,Eqn); break; }
 
     //If the types are not uniquly the same now: do once more:
@@ -1171,19 +1171,23 @@ static ATbool gstcTransformVarConsTypeData(void){
       gsDebugMsg("Doing again for the equation %P, LeftType: %P, RightType: %P\n",Eqn,LeftType,RightType);
       ATermAppl Type=gstcTypeMatchA(LeftType,RightType);
       if(!Type){gsErrorMsg("types of the left- (%P) and right- (%P) hand-sides of the equation %P do not match\n",LeftType,RightType,Eqn); b = false; break; }
-      
+      gsVerboseMsg("Type: %T\n\n",Type);     
+ 
       Left=ATAgetArgument(Eqn,2);
       ATtableReset(FreeVars);
       LeftType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Left,Type,FreeVars);
       if(!LeftType){ b = false; gsErrorMsg("types of the left- (%P) and right- (%P) hand-sides of the equation %P do not match\n",LeftType,RightType,Eqn); break; }
+      gsVerboseMsg("LeftType: %T; Left: %P\n\n",LeftType,Left);
     
       Right=ATAgetArgument(Eqn,3);
       RightType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Right,LeftType,FreeVars);
       if(!RightType){ b = false; gsErrorMsg("types of the left- (%P) and right- (%P) hand-sides of the equation %P do not match\n",LeftType,RightType,Eqn); break; }
+      gsVerboseMsg("RightType: %T; Right: %P\n\n",RightType,Right);
       
       Type=gstcTypeMatchA(LeftType,RightType);
       if(!Type){gsErrorMsg("types of the left- (%P) and right- (%P) hand-sides of the equation %P do not match\n",LeftType,RightType,Eqn); b = false; break; }
       if(gstcHasUnknown(Type)){gsErrorMsg("types of the left- (%P) and right- (%P) hand-sides of the equation %P cannot be uniquely determined\n",LeftType,RightType,Eqn); b = false; break; }
+      gsVerboseMsg("Type: %T\n\n",Type);
     }
     ATtableReset(DeclaredVars);
     NewEqns=ATinsert(NewEqns,(ATerm)gsMakeDataEqn(VarList,Cond,Left,Right));
@@ -1820,7 +1824,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
   return Result;
 }
 
-static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl *DataTerm, ATermAppl PosType, ATermTable FreeVars){
+static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl *DataTerm, ATermAppl PosType, ATermTable FreeVars, bool strict_ambiguous){
   //Type checks and transforms *DataTerm replacing Unknown datatype with other ones.
   //Returns the type of the term
   //which should match the PosType
@@ -1863,7 +1867,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       if(!NewDeclaredVars) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
       ATermAppl Data=ATAgetArgument(*DataTerm,2);
     
-      ATermAppl ResType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,gsMakeSortUnknown(),FreeVars);
+      ATermAppl ResType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,gsMakeSortUnknown(),FreeVars,strict_ambiguous);
       ATtableDestroy(CopyAllowedVars); 
       ATtableDestroy(CopyDeclaredVars); 
 
@@ -1896,7 +1900,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
 
       ATermAppl Data=ATAgetArgument(*DataTerm,2);
       if(!gstcTypeMatchA(gsMakeSortIdBool(),PosType)) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
-      ATermAppl NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,gsMakeSortIdBool(),FreeVars);
+      ATermAppl NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,gsMakeSortIdBool(),FreeVars,strict_ambiguous);
       ATtableDestroy(CopyAllowedVars); 
       ATtableDestroy(CopyDeclaredVars); 
 
@@ -1920,7 +1924,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       ATermAppl NewType=gstcUnArrowProd(ArgTypes,PosType);
       if(!NewType) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); gsErrorMsg("no functions with arguments %P among %P (while typechecking %P)\n", ArgTypes,PosType,*DataTerm);return NULL;}
       ATermAppl Data=ATAgetArgument(*DataTerm,2);
-      NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,NewType,FreeVars);
+      NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,NewType,FreeVars,strict_ambiguous);
       ATtableDestroy(CopyAllowedVars); 
       ATtableDestroy(CopyDeclaredVars); 
 
@@ -1938,7 +1942,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
     for(ATermList WhereList=ATLgetArgument(*DataTerm,1);!ATisEmpty(WhereList);WhereList=ATgetNext(WhereList)){
       ATermAppl WhereElem=ATAgetFirst(WhereList);
       ATermAppl WhereTerm=ATAgetArgument(WhereElem,1);
-      ATermAppl WhereType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&WhereTerm,gsMakeSortUnknown(),FreeVars);
+      ATermAppl WhereType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&WhereTerm,gsMakeSortUnknown(),FreeVars,strict_ambiguous);
       if(!WhereType) {return NULL;}
       ATermAppl NewWhereVar=gsMakeDataVarId(ATAgetArgument(WhereElem,0),WhereType);
       WhereVarList=ATinsert(WhereVarList,(ATerm)NewWhereVar);
@@ -1959,7 +1963,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
     if(!NewDeclaredVars) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
 
     ATermAppl Data=ATAgetArgument(*DataTerm,0);
-    ATermAppl NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,PosType,FreeVars);
+    ATermAppl NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,PosType,FreeVars,strict_ambiguous);
     ATtableDestroy(CopyAllowedVars); 
     ATtableDestroy(CopyDeclaredVars); 
 
@@ -1969,8 +1973,6 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
     *DataTerm=gsMakeWhr(Data,NewWhereList);
     return NewType;
   }
-
-
 
   if(gsIsDataApplProd(*DataTerm)){
     //arguments
@@ -1987,7 +1989,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
         ATermList NewArguments=ATmakeList0();
         for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
           ATermAppl Argument=ATAgetFirst(Arguments);
-          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars);
+          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous);
           if(!Type0) return NULL;
           NewArguments=ATinsert(NewArguments,(ATerm)Argument);
           Type=Type0;
@@ -2003,7 +2005,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
         ATermList NewArguments=ATmakeList0();
         for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
           ATermAppl Argument=ATAgetFirst(Arguments);
-          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars);
+          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous);
           if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %T)\n", "element", Type,Argument);  return NULL;}
           NewArguments=ATinsert(NewArguments,(ATerm)Argument);
           Type=Type0;
@@ -2021,9 +2023,9 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
           ATermAppl Argument0=ATAgetFirst(Arguments);
           Arguments=ATgetNext(Arguments);
           ATermAppl Argument1=ATAgetFirst(Arguments);
-          ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,Type,FreeVars);
+          ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,Type,FreeVars,strict_ambiguous);
           if(!Type1) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "element", Type,Argument1);  return NULL;}
-          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,gsMakeSortIdNat(),FreeVars);
+          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,gsMakeSortIdNat(),FreeVars,strict_ambiguous);
           if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "number", gsMakeSortIdNat(),Argument1);  return NULL;}
           NewArguments=ATinsert(NewArguments,(ATerm)Argument0);
           NewArguments=ATinsert(NewArguments,(ATerm)Argument1);
@@ -2041,7 +2043,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
 
     for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
       ATermAppl Arg=ATAgetFirst(Arguments);
-      ATermAppl Type=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,gsMakeSortUnknown(),FreeVars);
+      ATermAppl Type=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,gsMakeSortUnknown(),FreeVars,strict_ambiguous);
       if(!Type) {return NULL;}
       NewArguments=ATinsert(NewArguments,(ATerm)Arg);
       NewArgumentTypes=ATinsert(NewArgumentTypes,(ATerm)Type);
@@ -2051,8 +2053,8 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
 
     //function
     ATermAppl Data=ATAgetArgument(*DataTerm,0);
-    ATermAppl NewType=gstcTraverseVarConsTypeDN(nArguments,DeclaredVars,AllowedVars,
-						&Data,gsMakeSortArrowProd(ArgumentTypes,PosType),FreeVars);
+    ATermAppl NewType=gstcTraverseVarConsTypeDN(DeclaredVars,AllowedVars,
+						&Data,gsMakeSortArrowProd(ArgumentTypes,PosType),FreeVars,strict_ambiguous,nArguments);
     if(!NewType) {gsErrorMsg("type error while trying to cast %P to type %P\n",gsMakeDataApplProd(Data,Arguments),PosType);return NULL;}
     
     //it is possible that:
@@ -2082,7 +2084,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
 	    if(!NewType) NewType=gstcTypeMatchA(NeededType,gstcExpandNumTypesUp(Type));
 	    if(!NewType) {gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
 	    Type=NewType;
-	    Type=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,Type,FreeVars);
+	    Type=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,Type,FreeVars,strict_ambiguous);
 	    if(!Type) {return NULL;}
 	  }
 	}
@@ -2170,7 +2172,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
 	return Type;
       }
       else{
-	//gsWarningMsg("ambiguous system constant %T\n",Name);    
+	//gsWarningMsg("ambiguous system constant %T\n",Name);
 	*DataTerm=gsMakeOpId(Name,gsMakeSortUnknown());
 	return gsMakeSortUnknown();
       }
@@ -2192,9 +2194,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       return Type;
     }
     else{
-      gsWarningMsg("unknown operation %P\n",Name);    
-      *DataTerm=gsMakeOpId(Name,gsMakeSortUnknown());
-      return gsMakeSortUnknown();
+      return gstcTraverseVarConsTypeDN(DeclaredVars, AllowedVars, DataTerm, PosType, FreeVars, strict_ambiguous, -1);
     }
   }
 
@@ -2206,7 +2206,8 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
   return Result;
 }
     
-static ATermAppl gstcTraverseVarConsTypeDN(unsigned int nFactPars, ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl *DataTerm, ATermAppl PosType, ATermTable FreeVars){
+static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl *DataTerm, ATermAppl PosType, ATermTable FreeVars, bool strict_ambiguous, int nFactPars){
+  // -1 means the number of arguments is not known.
   gsDebugMsg("gstcTraverseVarConsTypeDN: DataTerm %T with PosType %T, nFactPars %d\n",*DataTerm,PosType,nFactPars);    
   if(gsIsId(*DataTerm)||gsIsOpId(*DataTerm)){
     ATermAppl Name=ATAgetArgument(*DataTerm,0);
@@ -2230,7 +2231,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(unsigned int nFactPars, ATermTable De
     }
     ATermList ParList;
     
-    if(!nFactPars){
+    if(nFactPars==0){
       if((Type=ATAtableGet(context.constants,(ATerm)Name))) return gsMakeOpId(Name,Type);
       else{
 	if((ParList=ATLtableGet(gssystem.constants,(ATerm)Name))){
@@ -2264,14 +2265,17 @@ static ATermAppl gstcTraverseVarConsTypeDN(unsigned int nFactPars, ATermTable De
     gsDebugMsg("Possible types for Op %T with %d arguments are (ParList: %T; PosType: %T)\n",Name,nFactPars,ParList,PosType);
 
     { // filter ParList keeping only functions A_0#...#A_nFactPars->A
-      ATermList NewParList=ATmakeList0(); 
-      for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
-	ATermAppl Par=ATAgetFirst(ParList);
-	if(!gsIsSortArrowProd(Par)) continue;
-	if(!(ATgetLength(ATLgetArgument(Par,0))==nFactPars)) continue; 
-	NewParList=ATinsert(NewParList,(ATerm)Par);
+      ATermList NewParList;
+      if(nFactPars>=0){
+        NewParList=ATmakeList0(); 
+        for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
+	  ATermAppl Par=ATAgetFirst(ParList);
+	  if(!gsIsSortArrowProd(Par)) continue;
+	  if(!(ATgetLength(ATLgetArgument(Par,0))==(unsigned int)nFactPars)) continue; 
+	  NewParList=ATinsert(NewParList,(ATerm)Par);
+        }
+        ParList=ATreverse(NewParList);
       }
-      ParList=ATreverse(NewParList);
 
       // filter ParList keeping only functions of the right type
       ATermList BackupParList=ParList;
@@ -2497,13 +2501,17 @@ static ATermAppl gstcTraverseVarConsTypeDN(unsigned int nFactPars, ATermTable De
       return Type;
     }
     else{
-      gsErrorMsg("ambiguous operation %P with %d parameters\n",Name,nFactPars);    
-      *DataTerm=gsMakeOpId(Name,gsMakeSortUnknown());
-      return NULL; //gsMakeSortUnknown();
+      if(strict_ambiguous){
+	gsErrorMsg("ambiguous operation %P with %d parameters\n",Name,nFactPars); return NULL;
+      }
+      else{
+	*DataTerm=gsMakeOpId(Name,gsMakeSortUnknown());
+	return gsMakeSortUnknown();
+      }
     }
   }
   else {
-    return gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,DataTerm,PosType,FreeVars);
+    return gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,DataTerm,PosType,FreeVars,strict_ambiguous);
   }
 }
 
