@@ -1,10 +1,12 @@
+// This test cannot be combined with other tests, due to limitations of the mcrl22lps code.
+
 #include <iostream>
 #include <iterator>
 #include <utility>
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include "lps/pbes.h"
-#include "lps/pbes_utility.h"
+#include "lps/pbes_translate.h"
 #include "lps/detail/tools.h"
 
 using namespace std;
@@ -27,20 +29,15 @@ const std::string SPECIFICATION =
 const std::string FORMULA  = "nu X(n:Nat = 1). [forall m:Nat. a(m)](val(n < 10)  && X(n+2))";
 const std::string FORMULA2 = "forall m:Nat. [a(m)]false";
 
-void test_pbes()
+void test_state_formula()
 {
   specification spec    = mcrl22lps(SPECIFICATION);
-  state_formula formula = mcf2statefrm(FORMULA2, spec);
-  bool timed = false;
-  pbes p = lps2pbes(spec, formula, timed);
-  pbes_expression e = p.equations().front().formula();
-
-  BOOST_CHECK(!p.equations().is_bes());
-  BOOST_CHECK(!e.is_bes());
-  
-  data_expression d  = pbes2data(e, spec);
-  // pbes_expression e1 = data2pbes(d);
-  // BOOST_CHECK(e == e1);
+  state_formula formula = mcf2statefrm("mu X. mu X. X", spec);
+  std::map<identifier_string, identifier_string> replacements;
+  fresh_identifier_generator generator(make_list(formula, spec));
+  formula = remove_name_clashes_impl(formula, generator, replacements);
+  std::cout << "formula: " << pp(formula) << std::endl;
+  BOOST_CHECK(pp(formula) == "mu X. mu X00. X00");
 }
 
 int test_main(int argc, char* argv[])
@@ -49,7 +46,7 @@ int test_main(int argc, char* argv[])
   aterm_init(bottom_of_stack);
   gsEnableConstructorFunctions();
 
-  test_pbes();
+  test_state_formula();
 
   return 0;
 }

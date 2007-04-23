@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <utility>
 #include <algorithm>
+#include <map>
 
 #include "atermpp/aterm_access.h"
 #include "atermpp/vector.h"
@@ -21,6 +22,7 @@
 #include "lps/data_expression.h"
 #include "lps/mucalculus.h"
 #include "lps/pbes.h"
+#include "lps/pbes_utility.h"
 #include "lps/specification.h"
 #include "lps/lps_algorithm.h"
 
@@ -763,6 +765,59 @@ namespace pbes_untimed
   }
 } // namespace pbes_untimed
 
+/// Removes name clashes in nested fix point variables like in the formula mu X. mu X. ...
+/// @param generator Generates names for fresh variables.
+/// @param replacements replacements for previous occurrences of propositional variables.
+inline
+state_formula remove_name_clashes_impl(state_formula f, fresh_identifier_generator& generator, std::map<identifier_string, identifier_string>& replacements)
+{
+  using namespace lps::state_frm;
+
+  if (is_data(f)) {
+    return f;
+  } else if (is_true(f)) {
+    return f;
+  } else if (is_false(f)) {
+    return f;
+  } else if (is_not(f)) {
+    return not_(remove_name_clashes_impl(not_arg(f), generator, replacements));
+  } else if (is_and(f)) {
+    return and_(remove_name_clashes_impl(lhs(f), generator, replacements), remove_name_clashes_impl(rhs(f), generator, replacements));
+  } else if (is_or(f)) {
+    return or_(remove_name_clashes_impl(lhs(f), generator, replacements), remove_name_clashes_impl(rhs(f), generator, replacements));
+  } else if (is_imp(f)) {
+    return imp(remove_name_clashes_impl(lhs(f), generator, replacements), remove_name_clashes_impl(rhs(f), generator, replacements));
+  } else if (is_forall(f)) {
+    return forall(quant_vars(f), remove_name_clashes_impl(quant_form(f), generator, replacements));
+  } else if (is_exists(f)) {
+    return exists(quant_vars(f), remove_name_clashes_impl(quant_form(f), generator, replacements));
+  } else if (is_must(f)) {
+    return must(mod_act(f), remove_name_clashes_impl(mod_form(f), generator, replacements));
+  } else if (is_may(f)) {
+    return may(mod_act(f), remove_name_clashes_impl(mod_form(f), generator, replacements));
+  } else if (is_yaled(f)) {
+    return f;
+  } else if (is_delay(f)) {
+    return f;
+  } else if (is_yaled_timed(f)) {
+    return f;
+  } else if (is_delay_timed(f)) {
+    return f;
+  } else if (is_var(f)) {
+    assert(replacements.find(var_name(f)) != replacements.end());
+    return var(replacements[var_name(f)], var_val(f));
+  } else if (is_mu(f) || is_nu(f)) {
+    identifier_string X = mu_name(f);
+    identifier_string X1 = (replacements.find(X) == replacements.end() ? X : generator(X));
+    replacements[X] = X1;
+    state_formula f1 = remove_name_clashes_impl(mu_form(f), generator, replacements);
+    data_assignment_list p1 = mu_params(f);
+    return is_mu(f) ? mu(X1, p1, f1) : nu(X1, p1, f1);
+  }
+  assert(false);
+  return f;  
+}
+
 /// Returns a formula that is equivalent to f and uses no variables occurring in spec.
 inline
 state_formula remove_name_clashes(specification spec, state_formula f)
@@ -797,8 +852,11 @@ state_formula remove_name_clashes(specification spec, state_formula f)
   {
     y.push_back(generator(*i));
   }
-  
-  return f.substitute(make_list_substitution(x, y));
+
+  state_formula formula = f.substitute(make_list_substitution(x, y));
+  std::map<identifier_string, identifier_string> replacements;
+  fresh_identifier_generator generator1(make_list(formula, spec));
+  return remove_name_clashes_impl(formula, generator1, replacements);
 }
 
 // Translates a state_formula and an LPS to a pbes.

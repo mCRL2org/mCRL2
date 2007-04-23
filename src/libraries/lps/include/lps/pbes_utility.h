@@ -5,6 +5,7 @@
 #define LPS_PBES_UTILITY_H
 
 #include "lps/pbes.h"
+#include "lps/mucalculus.h"
 #include "lps/specification.h"
 #include "lps/data.h"
 #include "lps/data_utility.h"
