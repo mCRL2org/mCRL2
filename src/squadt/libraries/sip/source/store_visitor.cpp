@@ -108,6 +108,9 @@ namespace sip {
 
 namespace utility {
 
+  /**
+   * \param[in] o the sip::message object to store
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::message const& o) {
@@ -132,6 +135,9 @@ namespace utility {
     out << o.m_content.substr(i) << "]]></message-meta>";
   }
 
+  /**
+   * \param[in] o the sip::object object to store
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::object const& o) {
@@ -142,6 +148,9 @@ namespace utility {
     out << " mime-type=\"" << o.m_mime_type << "\"";
   }
 
+  /**
+   * \param[in] o the sip::option object to store
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::option const& o) {
@@ -155,7 +164,7 @@ namespace utility {
   }
 
   /**
-   * \param[in,out] o the stream to which the output is written
+   * \param[in] c the configuration object to store
    **/
   template <>
   template <>
@@ -194,6 +203,10 @@ namespace utility {
     out << "</configuration>";
   }
 
+  /**
+   * \param[in] e the sip::datatype::boolean object to store
+   * \param[in] s an instance of the data type in text representation
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::datatype::boolean const& e, std::string const& s) {
@@ -206,6 +219,10 @@ namespace utility {
     out << "/>";
   }
 
+  /**
+   * \param[in] e the sip::datatype::integer object to store
+   * \param[in] s an instance of the data type in text representation
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::datatype::integer const& e, std::string const& s) {
@@ -230,6 +247,10 @@ namespace utility {
     out << "/>";
   }
 
+  /**
+   * \param[in] e the sip::datatype::real object to store
+   * \param[in] s an instance of the data type in text representation
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::datatype::real const& e, std::string const& s) {
@@ -254,6 +275,10 @@ namespace utility {
     out << "/>";
   }
 
+  /**
+   * \param[in] e the sip::datatype::enumeration object to store
+   * \param[in] s an instance of the data type in text representation
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::datatype::enumeration const& e, std::string const& s) {
@@ -272,6 +297,10 @@ namespace utility {
     out << "</enumeration>";
   }
 
+  /**
+   * \param[in] e the sip::datatype::string object to store
+   * \param[in] s an instance of the data type in text representation
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::datatype::string const& e, std::string const& s) {
@@ -298,6 +327,9 @@ namespace utility {
     }
   }
 
+  /**
+   * \param[in] c the sip::tool::capabilities object to store
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::tool::capabilities const& c) {
@@ -319,6 +351,9 @@ namespace utility {
     out << "</capabilities>";
   }
 
+  /**
+   * \param[in] c the sip::report object to store
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::report const& c) {
@@ -339,6 +374,9 @@ namespace utility {
     out << "</report>";
   }
 
+  /**
+   * \param[in] c the sip::controller::capabilities object to store
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::controller::capabilities const& c) {
@@ -351,18 +389,30 @@ namespace utility {
         << "</capabilities>";
   }
 
+  /**
+   * \param[in] c the sip::layout::elements::label object to store
+   * \param[in] id the identifier for the label
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::layout::elements::label const& c, sip::layout::element_identifier const& id) {
     out << "<label id=\"" << id << "\"><![CDATA[" << c.m_text << "]]></label>";
   }
 
+  /**
+   * \param[in] c the sip::layout::elements::button object to store
+   * \param[in] id the identifier for the button
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::layout::elements::button const& c, sip::layout::element_identifier const& id) {
     out << "<button id=\"" << id << "\" label=\"" << c.m_label << "\"/>";
   }
 
+  /**
+   * \param[in] c the sip::layout::elements::radio_button object to store
+   * \param[in] id the identifier for the radio_button
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::layout::elements::radio_button const& c, sip::layout::element_identifier const& id) {
@@ -379,12 +429,20 @@ namespace utility {
     out << "\"/>";
   }
 
+  /**
+   * \param[in] c the sip::layout::elements::checkbox object to store
+   * \param[in] id the identifier for the checkbox
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::layout::elements::checkbox const& c, sip::layout::element_identifier const& id) {
     out << "<checkbox id=\"" << id << "\" label=\"" << c.m_label << "\" status=\"" << c.m_status << "\"/>";
   }
 
+  /**
+   * \param[in] c the sip::layout::elements::progress_bar object to store
+   * \param[in] id the identifier for the progress bar
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::layout::elements::progress_bar const& c, sip::layout::element_identifier const& id) {
@@ -392,17 +450,24 @@ namespace utility {
         << "\" maximum=\"" << c.m_maximum << "\" current=\"" << c.m_current <<  "\"/>";
   }
 
+  /**
+   * \param[in] c the sip::layout::elements::text_field object to store
+   * \param[in] id the identifier for the text field
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::layout::elements::text_field const& c, sip::layout::element_identifier const& id) {
     out << "<text-field id=\"" << id << "\">"
         << "<text><![CDATA[" << c.m_text << "]]></text>";
 
-//    type->write(o, text);
+    do_visit(*c.m_type, c.m_text);
 
     out << "</text-field>";
   }
 
+  /**
+   * \param[in] c the sip::layout::properties object to store
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::layout::properties const& c) {
@@ -425,6 +490,10 @@ namespace utility {
     out << "\" visibility=\"" << sip::visibility_to_text[c.m_visible] << "\"/>";
   }
 
+  /**
+   * \param[in] c0 a sip::layout::properties object as reference
+   * \param[in] c1 a sip::layout::properties object to store the differences with the reference of
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::layout::properties const& c0, sip::layout::properties const& c1) {
@@ -461,6 +530,9 @@ namespace utility {
     out << "/>";
   }
 
+  /**
+   * \param[in] c a sip::layout::box object as reference
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::layout::box const& c) {
@@ -477,6 +549,10 @@ namespace utility {
     }
   }
 
+  /**
+   * \param[in] c a sip::layout::vertical_box object as reference
+   * \param[in] id the identifier for the manager
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::layout::vertical_box const& c, sip::layout::element_identifier const& id) {
@@ -487,6 +563,10 @@ namespace utility {
     out << "</box-layout-manager>";
   }
 
+  /**
+   * \param[in] c a sip::layout::vertical_box object to store
+   * \param[in] id the identifier for the manager
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::layout::horizontal_box const& c, sip::layout::element_identifier const& id) {
@@ -497,6 +577,9 @@ namespace utility {
     out << "</box-layout-manager>";
   }
 
+  /**
+   * \param[in] c a sip::layout::tool_display object to store
+   **/
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::layout::tool_display const& c) {
@@ -511,7 +594,7 @@ namespace utility {
         << "</display-layout>";
   }
 
-  
+  /** Registers all available visit methods */
   template <>
   bool visitor< sip::store_visitor_impl >::initialise() {
     register_visit_method< const sip::message >();

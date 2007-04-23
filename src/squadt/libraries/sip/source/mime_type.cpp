@@ -1,7 +1,7 @@
-#include "sip/mime_type.h"
-
 #include <boost/foreach.hpp>
 #include <boost/regex.hpp>
+
+#include "sip/mime_type.h"
 
 namespace sip {
   char* const       mime_type::main_type_as_string[] = { "application", "audio", "image", "message", "multipart", "text", "video", "unknown", 0 };

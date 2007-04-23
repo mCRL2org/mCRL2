@@ -98,15 +98,25 @@ namespace sip {
   }
   /// \endcond
 
+  /**
+   * \brief Constructor for reading from a ticpp parse tree
+   * \param[in] s the parse tree to read from
+   **/
   template < >
   restore_visitor::restore_visitor(ticpp::Element& s) :
         utility::visitor_interface< restore_visitor_impl >(boost::shared_ptr < utility::visitor< restore_visitor_impl > > (new utility::visitor< restore_visitor_impl >(&s))) {
   }
 
+  /**
+   * \param[in] s the string to read from
+   **/
   restore_visitor::restore_visitor(std::string const& s) :
         utility::visitor_interface< restore_visitor_impl >(boost::shared_ptr < utility::visitor< restore_visitor_impl > > (new restore_visitor_impl_frontend(s))) {
   }
 
+  /**
+   * \param[in] p the path of the file to read from
+   **/
   restore_visitor::restore_visitor(boost::filesystem::path const& p) :
         utility::visitor_interface< restore_visitor_impl >(boost::shared_ptr < utility::visitor< restore_visitor_impl > > (new restore_visitor_impl_frontend(p))) {
   }
@@ -114,6 +124,9 @@ namespace sip {
 
 namespace utility {
 
+  /**
+   * \param[in] o the sip::message object to restore
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::message& o) {
@@ -132,6 +145,10 @@ namespace utility {
     }
   }
 
+  /**
+   * \param[in] e the sip::datatype::boolean object to restore
+   * \param[in] s the textual representation of an instance
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::datatype::boolean& e, std::string& s) {
@@ -151,6 +168,10 @@ namespace utility {
     }
   }
 
+  /**
+   * \param[in] e the sip::datatype::integer object to restore
+   * \param[in] s the textual representation of an instance
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::datatype::integer& e, std::string& s) {
@@ -170,6 +191,10 @@ namespace utility {
     }
   }
 
+  /**
+   * \param[in] e the sip::datatype::real object to restore
+   * \param[in] s the textual representation of an instance
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::datatype::real& e, std::string& s) {
@@ -189,6 +214,10 @@ namespace utility {
     }
   }
 
+  /**
+   * \param[in] e the sip::datatype::enumeration object to restore
+   * \param[in] s the textual representation of an instance
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::datatype::enumeration& e, std::string& s) {
@@ -208,6 +237,10 @@ namespace utility {
     assert(e.validate(s));
   }
 
+  /**
+   * \param[in] e the sip::datatype::string object to restore
+   * \param[in] s the textual representation of an instance
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::datatype::string& e, std::string& s) {
@@ -223,6 +256,10 @@ namespace utility {
     assert(e.validate(s));
   }
 
+  /**
+   * \param[in,out] c a shared pointer to a sip::basic_datatype object to restore
+   * \param[in] v the textual representation of an instance
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(boost::shared_ptr < sip::datatype::basic_datatype >& c, std::string& v) {
@@ -253,6 +290,9 @@ namespace utility {
     do_visit(*c, v);
   }
 
+  /**
+   * \param[in] o a sip::object object to restore
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::object& o) {
@@ -263,6 +303,9 @@ namespace utility {
     tree->GetAttribute("location", &o.m_location, false);
   }
 
+  /**
+   * \param[in] o a sip::option object to restore
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::option& o) {
@@ -278,6 +321,9 @@ namespace utility {
     }
   }
 
+  /**
+   * \param[in] c a sip::configuration object to restore
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::configuration& c) {
@@ -319,6 +365,9 @@ namespace utility {
     }
   }
 
+  /**
+   * \param[in] c a sip::tool::capabilities object to restore
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::tool::capabilities& c) {
@@ -346,6 +395,9 @@ namespace utility {
     }
   }
 
+  /**
+   * \param[in] c a sip::controller::capabilities object to restore
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::controller::capabilities& c) {
@@ -366,6 +418,9 @@ namespace utility {
     }
   }  
 
+  /**
+   * \param[in] c a sip::report object to restore
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::report& c) {
@@ -382,6 +437,9 @@ namespace utility {
     }
   }
 
+  /**
+   * \param[in] c a sip::layout::elements::label object to restore
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::layout::elements::label& c) {
@@ -392,6 +450,9 @@ namespace utility {
     c.m_event_handler->process(&c);
   }
 
+  /**
+   * \param[in] c a sip::layout::elements::button object to restore
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::layout::elements::button& c) {
@@ -402,11 +463,16 @@ namespace utility {
     c.m_event_handler->process(&c);
   }
 
+  /// \cond PRIVATE_PART
   template < typename T >
   std::istream& operator>>(std::istream& i, T*& t) {
     return (i >> reinterpret_cast < void*& > (t));
   }
+  /// \endcond
 
+  /**
+   * \param[in] c a sip::layout::elements::radio_button object to restore
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::layout::elements::radio_button& c) {
@@ -422,6 +488,10 @@ namespace utility {
     }
   }
 
+  /**
+   * \param[in] c a sip::layout::elements::radio_button object to restore
+   * \param[in,out] element_by_id map for resolving radio_button identifiers to pointers to actual corresponding objects of type radio_button
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::layout::elements::radio_button& c, sip::display::element_for_id& element_by_id) {
@@ -465,6 +535,9 @@ namespace utility {
     c.m_event_handler->process(&c);
   }
 
+  /**
+   * \param[in] c a sip::layout::elements::checkbox object to restore
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::layout::elements::checkbox& c) {
@@ -476,6 +549,9 @@ namespace utility {
     c.m_event_handler->process(&c);
   }
 
+  /**
+   * \param[in] c a sip::layout::elements::progress_bar object to restore
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::layout::elements::progress_bar& c) {
@@ -488,6 +564,9 @@ namespace utility {
     c.m_event_handler->process(&c);
   }
 
+  /**
+   * \param[in] c a sip::layout::elements::text_field object to restore
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::layout::elements::text_field& c) {
@@ -502,6 +581,7 @@ namespace utility {
     c.m_event_handler->process(&c);
   }
 
+  /// \cond PRIVATE_PART
   /** \brief Finds a member of the visibility domain for a string */
   static sip::layout::visibility text_to_visibility(std::string const& s) {
     if (s == "visible") {
@@ -540,7 +620,11 @@ namespace utility {
       return (sip::layout::right);
     }
   }
+  /// \endcond
 
+  /**
+   * \param[in] c a sip::layout::properties object to restore
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::layout::properties& c) {
@@ -562,6 +646,10 @@ namespace utility {
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::layout::box&, sip::display::element_for_id&);
 
+  /**
+   * \param[in] c an STL auto pointer to a sip::layout::manager object to restore
+   * \param[in,out] element_by_id map for resolving radio_button identifiers to pointers to actual corresponding objects of type radio_button
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(std::auto_ptr < sip::layout::manager >& c, sip::display::element_for_id& element_by_id) {
@@ -583,12 +671,20 @@ namespace utility {
     }
   }
 
+  /**
+   * \param[in] c a sip::layout::horizontal_box object to restore
+   * \param[in,out] element_by_id map for resolving radio_button identifiers to pointers to actual corresponding objects of type radio_button
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::layout::horizontal_box& c, sip::display::element_for_id& element_by_id) {
     visit(static_cast < sip::layout::box& > (c), element_by_id);
   }
 
+  /**
+   * \param[in] c a sip::layout::vertical_box object to restore
+   * \param[in,out] element_by_id map for resolving radio_button identifiers to pointers to actual corresponding objects of type radio_button
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::layout::vertical_box& c, sip::display::element_for_id& element_by_id) {
@@ -599,6 +695,10 @@ namespace utility {
   template <>
   void visitor< sip::restore_visitor_impl >::visit(std::auto_ptr < sip::layout::element >& c, sip::display::element_for_id& element_by_id);
 
+  /**
+   * \param[in] c a sip::layout::box object to restore
+   * \param[in,out] element_by_id map for resolving radio_button identifiers to pointers to actual corresponding objects of type radio_button
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::layout::box& c, sip::display::element_for_id& element_by_id) {
@@ -634,6 +734,10 @@ namespace utility {
     }
   }
 
+  /**
+   * \param[in] c an STL auto pointer to a sip::layout::element object to restore
+   * \param[in,out] element_by_id map for resolving radio_button identifiers to pointers to actual corresponding objects of type radio_button
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(std::auto_ptr < sip::layout::element >& c, sip::display::element_for_id& element_by_id) {
@@ -687,6 +791,9 @@ namespace utility {
     }
   }
 
+  /**
+   * \param[in] c a sip::layout::tool_display object to restore
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::layout::tool_display& c) {
@@ -705,7 +812,11 @@ namespace utility {
     }
   }
 
-  /** \todo create and move to mediator / update visitors */
+  /**
+   * \param[in] c a sip::layout::tool_display object to restore
+   * \param[in,out] elements the list of sip::layout::element objects that has been modified
+   * \todo create and move this functionality to mediator / update visitors
+   **/
   template <>
   template <>
   void visitor< sip::restore_visitor_impl >::visit(sip::layout::tool_display& c, std::vector < sip::layout::element const* >& elements) {
@@ -727,6 +838,7 @@ namespace utility {
     }
   }
 
+  /** Registers all available visit methods */
   template <>
   bool visitor< sip::restore_visitor_impl >::initialise() {
     register_visit_method< sip::message >();

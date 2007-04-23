@@ -284,7 +284,7 @@ namespace utility {
 
     private:
 
-      /** \brief Initialise handler map */
+      /** \brief Initialise handler map; registers available visit methods */
       static bool initialise();
 
       virtual inline typename abstract_visitor< R >::visitable_type_tree& get_visitable_type_tree() const {

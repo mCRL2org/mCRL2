@@ -14,8 +14,11 @@
 
 namespace sip {
 
+  /// \cond PRIVATE_PART
   class store_visitor_impl;
+  /// \endcond
 
+  /** \brief Visitor type for storing object hierarchies */
   class store_visitor : public utility::visitor_interface< sip::store_visitor_impl > {
 
     public:
@@ -30,8 +33,11 @@ namespace sip {
       store_visitor(std::ostream&);
   };
 
+  /// \cond PRIVATE_PART
   class restore_visitor_impl;
+  /// \endcond
 
+  /** \brief Visitor type for restoring object hierarchies */
   class restore_visitor : public utility::visitor_interface< sip::restore_visitor_impl > {
 
     public:
@@ -47,8 +53,11 @@ namespace sip {
       restore_visitor(T&);
   };
 
+  /// \cond PRIVATE_PART
   class search_visitor_impl;
+  /// \endcond
 
+  /** \brief Visitor type for searching within object hierarchies */
   class search_visitor : public utility::visitor_interface< sip::search_visitor_impl, bool > {
 
     public:

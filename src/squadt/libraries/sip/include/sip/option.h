@@ -200,7 +200,6 @@ namespace sip {
   }
 
   /**
-   * \param[in] t pointer to the data type definition
    * \param[in] d data that must be an instance of the chosen data type
    **/
   template < typename S, typename T >
@@ -228,7 +227,7 @@ namespace sip {
   }
 
   /**
-   * \param[in] i the index of the element to replace
+   * \param[in] n the index of the element to replace
    * \param[in] t pointer to the data type definition
    * \param[in] d data that is valid w.r.t. the data type
    **/
@@ -240,7 +239,7 @@ namespace sip {
   }
 
   /**
-   * \param[in] i the index of the element to replace
+   * \param[in] n the index of the element to replace
    * \param[in] t pointer to the data type definition
    * \param[in] d data that is valid w.r.t. the data type
    **/

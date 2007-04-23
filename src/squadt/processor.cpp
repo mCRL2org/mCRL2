@@ -332,7 +332,7 @@ namespace squadt {
           t->impl->process_configuration(get_configuration(), old_outputs);
         }
         else {
-          /* Successful, set new status */
+          /* Task completed unsuccessfully, set new status */
           for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
             (*i)->status = object_descriptor::reproducible_out_of_date;
           }

@@ -469,7 +469,8 @@ INPUT                  = ../../src/libraries/atermpp/include \
                          ../../src/libraries/rewrite/include \
                          ../../src/libraries/rewrite/source \
                          ../../src/squadt/libraries/sip/include \
-                         ../../src/squadt/libraries/sip/source
+                         ../../src/squadt/libraries/sip/source \
+                         ../../src/squadt/libraries/utilities/include/utilities/generic_visitor.h
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
@@ -478,7 +479,7 @@ INPUT                  = ../../src/libraries/atermpp/include \
 # *.c *.cc *.cxx *.cpp *.c++ *.java *.ii *.ixx *.ipp *.i++ *.inl *.h *.hh *.hxx 
 # *.hpp *.h++ *.idl *.odl *.cs *.php *.php3 *.inc *.m *.mm *.py
 
-FILE_PATTERNS          =  *.c *.cc *.cxx *.cpp *.c++ *.h *.hh *.hxx *.hpp *.h++
+FILE_PATTERNS          =  *.c *.cc *.cxx *.cpp *.tcc *.c++ *.h *.hh *.hxx *.hpp *.h++
 
 # The RECURSIVE tag can be used to turn specify whether or not subdirectories 
 # should be searched for input files as well. Possible values are YES and NO. 
@@ -1005,14 +1006,19 @@ SEARCH_INCLUDES        = YES
 # contain include files that are not input files but should be processed by 
 # the preprocessor.
 
-INCLUDE_PATH           = 
+INCLUDE_PATH           = ../../src/libraries/atermpp/include \
+                         ../../src/libraries/lps/include \
+                         ../../src/libraries/nextstate/include \
+                         ../../src/libraries/prover/include \
+                         ../../src/libraries/rewrite/include \
+                         ../../src/squadt/libraries/sip/include
 
 # You can use the INCLUDE_FILE_PATTERNS tag to specify one or more wildcard 
 # patterns (like *.h and *.hpp) to filter out the header-files in the 
 # directories. If left blank, the patterns specified with FILE_PATTERNS will 
 # be used.
 
-INCLUDE_FILE_PATTERNS  = 
+INCLUDE_FILE_PATTERNS  =
 
 # The PREDEFINED tag can be used to specify one or more macro names that 
 # are defined before the preprocessor is started (similar to the -D option of 

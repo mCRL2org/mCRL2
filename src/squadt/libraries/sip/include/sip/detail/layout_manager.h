@@ -101,10 +101,11 @@ namespace sip {
       public:
 
         struct layout_descriptor {
-          element*           layout_element;
-          properties         layout_properties;
-          element_identifier identifier;
+          element*           layout_element;    ///< the element
+          properties         layout_properties; ///< the current layout properties
+          element_identifier identifier;        ///< identifier for the element
 
+          /** \brief Constructor for an element, identifier and layout properties */
           layout_descriptor(element* e, properties const& p, element_identifier const& id) : layout_element(e), layout_properties(p), identifier(id) { }
         };
 

@@ -15,17 +15,23 @@
 
 namespace sip {
 
+  /// \cond PRIVATE_PART
   class search_visitor_impl : private boost::noncopyable {
     friend class visitors;
     friend class find_visitor;
   };
+  /// \endcond
 
+  /** Default constructor */
   search_visitor::search_visitor() {
   }
 }
 
 namespace utility {
 
+  /**
+   * \param o the sip::object object to search in
+   **/
   template <>
   template <>
   bool visitor< sip::search_visitor_impl, bool >::visit(sip::object& o) {
@@ -35,6 +41,9 @@ namespace utility {
     return true;
   }
 
+  /**
+   * \param o the sip::option object to search in
+   **/
   template <>
   template <>
   bool visitor< sip::search_visitor_impl, bool >::visit(sip::option& o) {
@@ -44,6 +53,9 @@ namespace utility {
     return true;
   }
 
+  /**
+   * \param c the sip::configuration object to search in
+   **/
   template <>
   template <>
   bool visitor< sip::search_visitor_impl, bool >::visit(sip::configuration& c) {
@@ -53,9 +65,16 @@ namespace utility {
     return true;
   }
 
+  /** \brief tuple type for searching an element by its identifier */
   typedef boost::tuple< sip::layout::element const*, sip::layout::element_identifier const& > element_by_id_tuple;
+
+  /** \brief tuple type for searching the identifier for an element */
   typedef boost::tuple< sip::layout::element_identifier, sip::layout::element const* >        id_by_element_tuple;
 
+  /**
+   * \param[in] c the sip::layout::box object to search in
+   * \param[in] t tuple to hold the potential result and the identifier of the element to look for
+   **/
   template <>
   template <>
   bool visitor< sip::search_visitor_impl, bool >::visit(sip::layout::box& c, element_by_id_tuple& t) {
@@ -83,6 +102,10 @@ namespace utility {
     return false;
   }
 
+  /**
+   * \param[in] c the sip::layout::box object to search in
+   * \param[in] t tuple to hold the potential result and the element to look for
+   **/
   template <>
   template <>
   bool visitor< sip::search_visitor_impl, bool >::visit(sip::layout::box& c, id_by_element_tuple& t) {
@@ -110,30 +133,50 @@ namespace utility {
     return false;
   }
 
+  /**
+   * \param[in] c the sip::layout::box object to search in
+   * \param[in] t tuple to hold the potential result and the element to look for
+   **/
   template <>
   template <>
   bool visitor< sip::search_visitor_impl, bool >::visit(sip::layout::horizontal_box& c, element_by_id_tuple& t) {
     return visit(static_cast < sip::layout::box& > (c), t);
   }
 
+  /**
+   * \param[in] c the sip::layout::box object to search in
+   * \param[in] t tuple to hold the potential result and the identifier of the element to look for
+   **/
   template <>
   template <>
   bool visitor< sip::search_visitor_impl, bool >::visit(sip::layout::horizontal_box& c, id_by_element_tuple& t) {
     return visit(static_cast < sip::layout::box& > (c), t);
   }
 
+  /**
+   * \param[in] c the sip::layout::box object to search in
+   * \param[in] t tuple to hold the potential result and the element to look for
+   **/
   template <>
   template <>
   bool visitor< sip::search_visitor_impl, bool >::visit(sip::layout::vertical_box& c, element_by_id_tuple& t) {
     return visit(static_cast < sip::layout::box& > (c), t);
   }
 
+  /**
+   * \param[in] c the sip::layout::box object to search in
+   * \param[in] t tuple to hold the potential result and the identifier of the element to look for
+   **/
   template <>
   template <>
   bool visitor< sip::search_visitor_impl, bool >::visit(sip::layout::vertical_box& c, id_by_element_tuple& t) {
     return visit(static_cast < sip::layout::box& > (c), t);
   }
 
+  /**
+   * \param[in] c the sip::layout::tool_display object to search in
+   * \param[in] t tuple to hold the potential result and the element to look for
+   **/
   template <>
   template <>
   bool visitor< sip::search_visitor_impl, bool >::visit(sip::layout::tool_display& c, element_by_id_tuple& t) {
@@ -144,6 +187,10 @@ namespace utility {
     return false;
   }
 
+  /**
+   * \param[in] c the sip::layout::tool_display object to search in
+   * \param[in] t tuple to hold the potential result and the identifier of the element to look for
+   **/
   template <>
   template <>
   bool visitor< sip::search_visitor_impl, bool >::visit(sip::layout::tool_display& c, id_by_element_tuple& t) {
@@ -154,6 +201,7 @@ namespace utility {
     return false;
   }
 
+  /** Registers all available visit methods */
   template <>
   bool visitor< sip::search_visitor_impl, bool >::initialise() {
     register_visit_method< sip::object >();

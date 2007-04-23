@@ -472,7 +472,6 @@ namespace squadt {
    **/
   inline void processor_impl::process_configuration(boost::shared_ptr < sip::configuration > const& c,
                                                     std::set < sip::object const* >& p, bool check) {
-
     boost::shared_ptr < project_manager > g(manager.lock());
 
     if (g.get() != 0) {
@@ -490,15 +489,15 @@ namespace squadt {
           append_output(object, id, object_descriptor::reproducible_nonexistent);
         }
         else {
-          /* Check status */
-          o->self_check(*g);
-       
           if (object.get_location() != o->location) {
             /* Output already known, but filenames do not match */
             remove(g->get_path_for_name(o->location));
           }
        
           replace_output(o, id, object);
+
+          /* Check status */
+          o->self_check(*g);
         }
 
         if (!boost::filesystem::exists(g->get_path_for_name(object.get_location())) && check) {

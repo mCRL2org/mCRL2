@@ -14,6 +14,7 @@ namespace sip {
     template < >
     boost::shared_ptr < utility::logger > basic_messenger_impl< sip::message >::standard_logger(new utility::print_logger(std::clog));
 
+    /** Default constructor */
     template < >
     basic_messenger< sip::message >::basic_messenger() : impl(new basic_messenger_impl< sip::message >) {
     }
@@ -32,21 +33,25 @@ namespace sip {
     basic_messenger< sip::message >::basic_messenger(basic_messenger_impl< sip::message >* i) : impl(i) {
     }
  
+    /** Get the current logger */
     template < >
     utility::logger* basic_messenger< sip::message >::get_logger() {
       return (impl->logger.get());
     }
 
+    /** Returns the standard logger */
     template < >
     utility::logger* basic_messenger< sip::message >::get_standard_logger() {
       return (basic_messenger_impl< sip::message >::standard_logger.get());
     }
 
+    /** Sets the standard logger */
     template < >
     void basic_messenger< sip::message >::set_standard_logger(boost::shared_ptr < utility::logger > l) {
       basic_messenger_impl< sip::message >::standard_logger = l;
     }
 
+    /** Disconnects from all peers */
     template < >
     void basic_messenger< sip::message >::disconnect() {
       impl->disconnect();

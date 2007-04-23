@@ -82,7 +82,7 @@ namespace sip {
       /** \brief Type for option iteration */
       typedef boost::filter_iterator < type_filter_predicate, indirect_position_iterator >       option_iterator;
 
-      /* \brief Type for input iteration */
+      /** \brief Type for input iteration */
       typedef boost::filter_iterator < type_filter_predicate, const_indirect_position_iterator > const_input_iterator;
 
       /** \brief Type for input iteration */

@@ -4,6 +4,7 @@ project squadt/libraries/sip
     : build-dir $(BUILD_TOP)
     : requirements
        <use>/boost//headers
+       <use>/libraries/utilities//headers
        <include>../include
     : usage-requirements
        <use>/boost//headers
@@ -35,8 +36,7 @@ alias transport
 
 obj restore_visitor.o
     : restore_visitor.cpp
-    : <use>/libraries/utilities//headers
-      <use>/libraries//ticpp
+    : <use>/libraries//ticpp
       <use>/site-config//boost_filesystem
     :
     : <library>/libraries//ticpp
@@ -44,10 +44,11 @@ obj restore_visitor.o
     ;
 
 alias messenger
-    : # no sources
+    :
+      [ obj tool_capabilities.o : tool/capabilities.cpp ]
+      [ obj controller_capabilities.o : controller/capabilities.cpp ]
       basic_datatype.cpp
       basic_messenger.cpp
-      capabilities.cpp
       common.cpp
       command_line_interface.cpp
       configuration.cpp
@@ -69,24 +70,26 @@ alias messenger
       <library>/libraries/utilities//logger
     ;
 
+obj tool_communicator.o : tool/communicator.cpp ;
+obj controller_communicator.o : controller/communicator.cpp ;
+
 lib sip-controller
-    : controller.cpp
-      tool.cpp
+    : controller_communicator.o
       messenger
     : <threading>multi
       <link>static
     ;
 
 lib sip
-    : controller.cpp
-      tool.cpp
+    : controller_communicator.o
+      tool_communicator.o
       messenger
     : <threading>multi
       <link>shared
     ;
 
 lib sip-tool
-    : tool.cpp
+    : tool_communicator.o
       messenger
     : <threading>multi
       <link>static

@@ -39,6 +39,7 @@ namespace sip {
         static const category visualisation;  ///< visualisation of objects
         static const category simulation;     ///< simulation
 
+        /** \brief The standard available tool categories */
         static const boost::array < category const*, 6 > categories;
 
       private:

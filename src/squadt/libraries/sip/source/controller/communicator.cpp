@@ -80,6 +80,7 @@ namespace sip {
 
     /**
      * \param[in] e a sip layout element of which the data is to be sent
+     * \param[in] display the associated sip::display element
      **/
     void communicator::send_display_update(sip::layout::element const& e, boost::shared_ptr < sip::display const >& display) {
       std::string        c;
