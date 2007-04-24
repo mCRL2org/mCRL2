@@ -1171,24 +1171,16 @@ static ATbool gstcTransformVarConsTypeData(void){
       gsDebugMsg("Doing again for the equation %P, LeftType: %P, RightType: %P\n",Eqn,LeftType,RightType);
       ATermAppl Type=gstcTypeMatchA(LeftType,RightType);
       if(!Type){gsErrorMsg("types of the left- (%P) and right- (%P) hand-sides of the equation %P do not match\n",LeftType,RightType,Eqn); b = false; break; }
-      gsVerboseMsg("Type: %T\n\n",Type);     
- 
       Left=ATAgetArgument(Eqn,2);
       ATtableReset(FreeVars);
       LeftType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Left,Type,FreeVars);
       if(!LeftType){ b = false; gsErrorMsg("types of the left- (%P) and right- (%P) hand-sides of the equation %P do not match\n",LeftType,RightType,Eqn); break; }
-      gsVerboseMsg("LeftType: %T; Left: %P\n\n",LeftType,Left);
-    
       Right=ATAgetArgument(Eqn,3);
       RightType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Right,LeftType,FreeVars);
       if(!RightType){ b = false; gsErrorMsg("types of the left- (%P) and right- (%P) hand-sides of the equation %P do not match\n",LeftType,RightType,Eqn); break; }
-      gsVerboseMsg("RightType: %T; Right: %P\n\n",RightType,Right);
-      
       Type=gstcTypeMatchA(LeftType,RightType);
       if(!Type){gsErrorMsg("types of the left- (%P) and right- (%P) hand-sides of the equation %P do not match\n",LeftType,RightType,Eqn); b = false; break; }
       if(gstcHasUnknown(Type)){gsErrorMsg("types of the left- (%P) and right- (%P) hand-sides of the equation %P cannot be uniquely determined\n",LeftType,RightType,Eqn); b = false; break; }
-      gsVerboseMsg("Type: %T\n\n",Type);
-    }
     ATtableReset(DeclaredVars);
     NewEqns=ATinsert(NewEqns,(ATerm)gsMakeDataEqn(VarList,Cond,Left,Right));
   }
@@ -2025,8 +2017,8 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
           ATermAppl Argument1=ATAgetFirst(Arguments);
           ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,Type,FreeVars,strict_ambiguous);
           if(!Type1) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "element", Type,Argument1);  return NULL;}
-          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,gsMakeSortIdNat(),FreeVars,strict_ambiguous);
-          if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "number", gsMakeSortIdNat(),Argument1);  return NULL;}
+          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,gsMakeSortIdPos(),FreeVars,strict_ambiguous);
+          if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "number", gsMakeSortIdPos(),Argument1);  return NULL;}
           NewArguments=ATinsert(NewArguments,(ATerm)Argument0);
           NewArguments=ATinsert(NewArguments,(ATerm)Argument1);
           Type=Type1;
@@ -2671,12 +2663,12 @@ static ATbool gstcIsTypeAllowedA(ATermAppl Type, ATermAppl PosType){
 
 static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType){
   //Checks if Type is allowed by PosType and returns the matching subtype of Type
-  //we assume that Type has no NotInferred
   
   gsDebugMsg("gstcTypeMatchA Type: %T;    PosType: %T \n",Type,PosType);
 
   if(gsIsSortUnknown(Type)) return PosType;
   if(gsIsSortUnknown(PosType) || gstcEqTypesA(Type,PosType)) return Type;
+  if(gsIsSortsPossible(Type) && !gsIsSortsPossible(PosType)) {ATermAppl TmpType=PosType; PosType=Type; Type=TmpType; }
   if(gsIsSortsPossible(PosType)){
     for(ATermList PosTypeList=ATLgetArgument(PosType,0);!ATisEmpty(PosTypeList);PosTypeList=ATgetNext(PosTypeList)){
       ATermAppl NewPosType=ATAgetFirst(PosTypeList);
