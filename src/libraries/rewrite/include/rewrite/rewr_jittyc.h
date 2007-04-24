@@ -2,6 +2,8 @@
 #define __REWR_JITTYC_H
 
 //#define _JITTYC_STORE_TREES
+#include <utility>
+#include <string>
 #include "librewrite.h"
 
 class RewriterCompilingJitty: public Rewriter
@@ -52,6 +54,9 @@ class RewriterCompilingJitty: public Rewriter
 		ATermList create_strategy(ATermList rules, int opid);
 #endif
 
+                bool opid_is_nf(ATermInt opid, unsigned int num_args);
+                std::pair<unsigned int,std::string> calc_inner_terms(ATermList args, int startarg, ATermList nnfvars, bool rewr);
+                std::pair<bool,std::string> calc_inner_term(ATerm t, int startarg, ATermList nnfvars, bool rewr = true);
 		void calcTerm(FILE *f, ATerm t, int startarg, ATermList nnfvars, bool rewr = true);
 		void implement_tree_aux(FILE *f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity, bool *used, ATermList nnfvars);
 		void implement_tree(FILE *f, ATermAppl tree, int arity, int d, int opid, bool *used);
