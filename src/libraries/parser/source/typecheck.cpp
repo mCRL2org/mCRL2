@@ -1181,6 +1181,7 @@ static ATbool gstcTransformVarConsTypeData(void){
       Type=gstcTypeMatchA(LeftType,RightType);
       if(!Type){gsErrorMsg("types of the left- (%P) and right- (%P) hand-sides of the equation %P do not match\n",LeftType,RightType,Eqn); b = false; break; }
       if(gstcHasUnknown(Type)){gsErrorMsg("types of the left- (%P) and right- (%P) hand-sides of the equation %P cannot be uniquely determined\n",LeftType,RightType,Eqn); b = false; break; }
+    }
     ATtableReset(DeclaredVars);
     NewEqns=ATinsert(NewEqns,(ATerm)gsMakeDataEqn(VarList,Cond,Left,Right));
   }
