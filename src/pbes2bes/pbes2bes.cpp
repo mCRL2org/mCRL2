@@ -568,12 +568,9 @@ identifier_string create_propvar_name(identifier_string propvar_name, data_expre
 			{
 				gsErrorMsg("Can not rewrite the name of the propositional_variable\n");
 				cout << "Problematic Term: " << pp(*del_i) << endl;
-				//gsErrorMsg("Problematic term: %t\n", *del_i);
 				exit(1);
 			}
 			
-//				propvar_name_current += "@";
-//				propvar_name_current += data_operation(del_i->head()).name();
 		}
 	}
 
@@ -622,8 +619,8 @@ void save_pbes(pbes pbes_spec, t_tool_options tool_options)
 	}
 	
 	//Write PBES
-	if (tool_options.opt_outputformat == "textual")
-	{ // In external format
+	if (tool_options.opt_outputformat == "internal")
+	{ // In internal format
 		if (!pbes_spec.save(outfilename, false))
 		{
 			gsErrorMsg("Could not save PBES to %s\n", outfilename.c_str());
@@ -793,7 +790,7 @@ t_tool_options parse_command_line(int argc, char** argv)
 							"finite  Compute all possible boolean equations\n"
 							"lazy    Compute only boolean equations which can be reached from the initial state\n")
 			("output,o",	po::value<string>(&opt_outputformat)->default_value("binary"), "use outputformat arg (default 'binary');\n"
-			 				"available outputformats are binary, textual and cwi")
+			 				"available outputformats are binary, internal and cwi")
 			("verbose,v",	"turn on the display of short intermediate messages")
 			("debug,d",		"turn on the display of detailed intermediate messages")
 			("version",		"display version information")
@@ -849,7 +846,7 @@ t_tool_options parse_command_line(int argc, char** argv)
 	if (vm.count("output")) // Output format
 	{
 		opt_outputformat = vm["output"].as< string >();
-		if (!((opt_outputformat == "textual") || (opt_outputformat == "binary") || (opt_outputformat == "cwi")))
+		if (!((opt_outputformat == "internal") || (opt_outputformat == "binary") || (opt_outputformat == "cwi")))
 		{
 			gsErrorMsg("Unknown outputformat specified. Available outputformats are binary, external and cwi\n");
 			exit(1);

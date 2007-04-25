@@ -43,9 +43,6 @@
       <listitem>
         <para>number of nu's</para>
       </listitem>
-      <listitem>
-        <para>predicate variables and their signature</para>
-      </listitem>
     </itemizedlist>
   </para>
 </refsect1>
@@ -83,6 +80,14 @@
         <term>&opt_debug;</term>
         <listitem>
           <para>displays detailed intermediate information during the run of the program.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_f;</term>
+        <term>&opt_full;</term>
+        <listitem>
+          <para>displays the predicate variables and their signature.</para>
         </listitem>
       </varlistentry>
 

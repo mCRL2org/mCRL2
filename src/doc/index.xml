@@ -147,6 +147,7 @@
 <!ENTITY opt_formats "<option>--formats</option>">
 <!ENTITY opt_formulas "<option>--formulas</option>">
 <!ENTITY opt_freevar "<option>--freevar</option>">
+<!ENTITY opt_full "<option>--full</option>">
 <!ENTITY opt_generate_invariants "<option>--generate-invariants</option>">
 <!ENTITY opt_g "<option>-g</option>">
 <!ENTITY opt_help "<option>--help</option>">
@@ -187,6 +188,7 @@
 <!ENTITY opt_nosumelm "<option>--no-sumelm</option>">
 <!ENTITY opt_o "<option>-o</option>">
 <!ENTITY opt_out "<option>--out</option>">
+<!ENTITY opt_output "<option>--output</option>">
 <!ENTITY opt_plain "<option>--plain</option>">
 <!ENTITY opt_p "<option>-p</option>">
 <!ENTITY opt_print_dot "<option>--print-dot</option>">
@@ -405,6 +407,7 @@
 <!ENTITY ltsmin "<command>ltsmin</command>">
 <!ENTITY ltsview "<command>ltsview</command>">
 <!ENTITY mcrl22lps "<command>mcrl22lps</command>">
+<!ENTITY pbes2bes "<command>pbes2bes</command>">
 <!ENTITY pbesinfo "<command>pbesinfo</command>">
 <!ENTITY pnml2mcrl2 "<command>pnml2mcrl2</command>">
 <!ENTITY sim "<command>sim</command>">
@@ -436,6 +439,7 @@
 <!ENTITY ltsmin-lnk "<link linkend='ltsmin'>&ltsmin;</link>">
 <!ENTITY ltsview-lnk "<link linkend='ltsview'>&ltsview;</link>">
 <!ENTITY mcrl22lps-lnk "<link linkend='mcrl22lps'>&mcrl22lps;</link>">
+<!ENTITY pbes2bes-lnk "<link linkend='pbes2bes'>&pbes2bes;</link>">
 <!ENTITY pbesinfo-lnk "<link linkend='pbesinfo'>&pbesinfo;</link>">
 <!ENTITY pnml2mcrl2-lnk "<link linkend='pnml2mcrl2'>&pnml2mcrl2;</link>">
 <!ENTITY tbf2lps-lnk "<link linkend='tbf2lps'>&tbf2lps;</link>">
@@ -475,6 +479,7 @@
 <!ENTITY fltsmin SYSTEM "ltsmin.xml">
 <!ENTITY fltsview SYSTEM "ltsview.xml">
 <!ENTITY fmcrl22lps SYSTEM "mcrl22lps.xml">
+<!ENTITY fpbes2bes SYSTEM "pbes2bes.xml">
 <!ENTITY fpbesinfo SYSTEM "pbesinfo.xml">
 <!ENTITY fpnml2mcrl2 SYSTEM "pnml2mcrl2.xml">
 <!ENTITY fprover SYSTEM "prover.xml">
@@ -516,6 +521,7 @@
     &fxsim;
   </chapter>
   <chapter><title>Parameterised Boolean Equation Systems</title>
+    &fpbes2bes;
     &fpbesinfo;
   </chapter>
   <chapter><title>Labelled Transition Systems</title>
