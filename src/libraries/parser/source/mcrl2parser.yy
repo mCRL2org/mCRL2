@@ -847,7 +847,7 @@ bag_enum_elts_cs:
     }
   | bag_enum_elts_cs COMMA bag_enum_elt
     {
-      safe_assign($$, ATconcat($1, $3));
+      safe_assign($$, ATconcat($3, $1));
       gsDebugMsg("parsed bag enumeration elements\n  %T\n", $$);
     }
   ;
@@ -856,7 +856,7 @@ bag_enum_elts_cs:
 bag_enum_elt:
   data_expr COLON data_expr
     {
-      safe_assign($$, ATmakeList2((ATerm) $1, (ATerm) $3));
+      safe_assign($$, ATmakeList2((ATerm) $3, (ATerm) $1));
       gsDebugMsg("parsed bag enumeration element\n  %T\n", $$);
     }
   ;
