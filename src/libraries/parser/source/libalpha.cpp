@@ -1865,13 +1865,23 @@ ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a){
   return NULL; //to suppress warnings  
 }
 
-ATermAppl gsaGenNInst(ATermAppl number, ATermAppl P){
+static ATermAppl gsaGenNInst(ATermAppl number, ATermAppl P, bool add_number=true, ATermList ExtraParams=NULL){
   //return a || composition of n processes P
   unsigned long n=atol(ATgetName(ATgetAFun(number)));
-  ATermAppl r=gsMakeProcess(P,ATmakeList1((ATerm)gsMakeOpId(ATmakeAppl0(ATmakeAFunInt0(1)),gsMakeSortIdPos())));
-  for(unsigned long i=2; i<=n; i++){
-    r=gsMakeMerge(r,gsMakeProcess(P,ATmakeList1((ATerm)gsMakeOpId(ATmakeAppl0(ATmakeAFunInt0(i)),gsMakeSortIdPos()))));
-  }
+  unsigned long i=1;
+  ATermAppl r=NULL;  
+  ExtraParams=(ExtraParams)?ExtraParams:ATmakeList0();
+
+  do{
+    ATermList Params=ExtraParams;
+    if(add_number) Params=ATinsert(Params,(ATerm)gsMakeOpId(ATmakeAppl0(ATmakeAFunInt0(i)),gsMakeSortIdPos()));
+    ATermAppl r1=gsMakeProcess(P,Params);
+    if(r)
+      r=gsMakeMerge(r,r1);
+    else 
+      r=r1;
+    i++;
+  } while (i<=n);
 
   return r;
 }
@@ -1988,11 +1998,13 @@ ATermAppl gsAlpha(ATermAppl Spec){
     if(ATisEqual(ATAtableGet(props,(ATerm)p),npCRL)){
       //check if this is really npCRL.
       //what we currently recognize is this:
-      //<nP>(p:Pos)=(p>1)-><P>(p)||<nP>(max(p-1,1)),<P>(1)
+      //<nP>(p:Pos,...) = (p>1) -> <P>([p],...)||<nP>(Int2Pos(p-1),...) <> <P>([1],...)
       //where <nP> and <P> are process names parameterized by Pos;
       //the rest a literal; <P> does not depend on <nP>
+      //[.] means that an optional parameter
+      //means any parameter, copied to the the rhs
       //
-      //all calls of <nP> should be of the form <nP>(<m>), where <m>:->Pos is a map
+      //all calls of <nP> should be of the form <nP>(<m>,...), where <m>:->Pos is a map
       //and an equation <m>=<p> for some positive <p>
       //
       //later we can add more (For sort Nat, P(n)||nP(max(n-1,1)) in diff. order, P(n) instead of P(1))
@@ -2001,14 +2013,22 @@ ATermAppl gsAlpha(ATermAppl Spec){
       //lets learn what <P> is
       ATermAppl P=NULL;
       ATermAppl body=ATAtableGet(procs,(ATerm)p);
+      
       if(gsIsIfThenElse(body)){
 	ATermAppl p1=ATAgetArgument(body,2);
 	if(gsIsProcess(p1))
 	  P=ATAgetArgument(p1,0);
       }
-      
+
+      ATermAppl Number1=gsString2ATermAppl("1");
       bool good=false;
       if(P){
+	ATermAppl Cond=ATAgetArgument(body,0);
+	if(!gsIsDataApplProd(Cond)) goto nP_checked;
+	ATermAppl Right=ATAgetArgument(body,2);
+        if(!ATisEqual(P,ATAgetArgument(Right,0))) goto nP_checked;  
+        int m=ATgetLength(ATLgetArgument(Right,1)); //number of parameters of P
+        
         ATermAppl parallel=ATAgetArgument(body,1);
 	if(!gsIsMerge(parallel)) goto nP_checked;
         ATermAppl parallel_left=ATAgetArgument(parallel,0);    
@@ -2016,6 +2036,10 @@ ATermAppl gsAlpha(ATermAppl Spec){
         ATermAppl parallel_right=ATAgetArgument(parallel,1);
         if(!gsIsProcess(parallel_right)) goto nP_checked;
         if(!ATisEqual(P,ATAgetArgument(parallel_left,0))) goto nP_checked;
+        if(!ATisEqual(p,ATAgetArgument(parallel_right,0))) goto nP_checked;	
+        int n=ATgetLength(ATLgetArgument(parallel_right,1));
+        if(!(n==m || n==m+1)) goto nP_checked;
+        if(n==m && !ATisEqual(Number1,ATAgetArgument(ATAgetFirst(ATLgetArgument(Right,1)),0))) goto nP_checked;	
         //more checks
 	good=true;
       }
@@ -2023,12 +2047,12 @@ ATermAppl gsAlpha(ATermAppl Spec){
       nP_checked:
 
       if(good){
-        gsVerboseMsg("proc: %T is a recursive parallel process in n-parallel pCRL format\n\n", p);
+        gsVerboseMsg("proc: %P is a recursive parallel process in n-parallel pCRL format\n", p);
 	ATtablePut(props,(ATerm)p,(ATerm)ATmakeAppl2(props_afun,(ATerm)npCRL_aterm,(ATerm)rec_aterm));
 	ATtablePut(subs_npCRL,(ATerm)p,(ATerm)ATmakeList0());
       }
       else{
-	gsWarningMsg("proc: %T is a recursive parallel process not in n-parallel pCRL format\n in this case alphabet reductions may not stop, or may not be performed completely\n\n", p);
+	gsWarningMsg("proc: %P is a recursive parallel process not in n-parallel pCRL format\n in this case alphabet reductions may not stop, or may not be performed completely\n\n", p);
       }
     }
   }
@@ -2082,7 +2106,11 @@ ATermAppl gsAlpha(ATermAppl Spec){
     for(ATermList l=ATLtableGet(subs_npCRL,(ATerm)nP);!ATisEmpty(l);l=ATgetNext(l)){
       ATermAppl pair=ATAgetFirst(l);
       ATermAppl name=ATAgetArgument(pair,1);
-      ATtablePut(procs,(ATerm)name,(ATerm)gsaGenNInst(ATAgetArgument(pair,0),P));
+
+      int n=ATgetLength(ATLgetArgument(nP,1)); //number of parameters of nP
+      int m=ATgetLength(ATLgetArgument(P,1));  //number of parameters of P
+
+      ATtablePut(procs,(ATerm)name,(ATerm)gsaGenNInst(ATAgetArgument(pair,0),P,n==m));
       ATtablePut(props,(ATerm)name,(ATerm)ATmakeAppl2(props_afun,(ATerm)mCRL_aterm,(ATerm)nrec_aterm));
       ATtablePut(deps,(ATerm)name,(ATerm)merge_list(ATmakeList1((ATerm)P),ATLtableGet(deps,(ATerm)P)));
     }
