@@ -13,3 +13,8 @@ exe pbessolve
        : <squadt_support>disable
 		 <status>experimental
        ;
+
+install-binaries install
+       : pbessolve
+       : <status>experimental
+       ;

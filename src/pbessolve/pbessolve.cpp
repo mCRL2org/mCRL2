@@ -191,9 +191,9 @@ t_tool_options parse_command_line(int argc, char** argv)
   po::notify(vm);
   
   if (vm.count("help")) {
-    cerr << "Usage: " << argv[0] << " [OPTION]... [INFILE [OUTFILE]]" << endl;
+    cerr << "Usage: " << argv[0] << " [OPTION]... [INFILE]" << endl;
     cerr << "Solves the PBES from stdin or INFILE." << endl;
-    cerr << "By default the result is written to stdout, otherwise to OUTFILE." << endl;
+    cerr << "The result is written to stdout." << endl;
     cerr << endl;
     cerr << desc;
     exit(0);
