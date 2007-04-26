@@ -1,0 +1,15 @@
+project toolset/pbessolve
+       : build-dir $(BUILD_TOP)/pbessolve
+       ;
+
+exe pbessolve
+       : pbessolve.cpp
+		 gauss.cpp
+         /libraries//mcrl2_basic
+		 /libraries//lps
+		 /libraries//rewrite
+         /site-config//boost_program_options
+       : <include>.
+       : <squadt_support>disable
+		 <status>experimental
+       ;
