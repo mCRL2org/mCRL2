@@ -12,12 +12,11 @@ project squadt/libraries/utilities
 
 lib mcrl2_squadt
     : source/mcrl2_squadt.cpp
-    : <use>/libraries//mcrl2_basic
-      <use>/libraries/sip//sip_tool
-      <threading>multi
+      /libraries/sip//sip_tool
+      /libraries//mcrl2_basic
+    : <threading>multi
     :
-    : <library>/libraries/sip//sip_tool
-      <define>ENABLE_SQUADT_CONNECTIVITY
+    : <define>ENABLE_SQUADT_CONNECTIVITY
       <threading>multi
     ;
 
