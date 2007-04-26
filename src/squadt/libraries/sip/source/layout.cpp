@@ -55,14 +55,6 @@ namespace sip {
     }
 
     /**
-     * \param[in] t the tool communicator object to use
-     * \param[in] e the layout element of which to send the state
-     **/
-    void element::update(tool::communicator* t, layout::element const* e) {
-      t->send_display_data(e);
-    }
-
-    /**
      * \param[in] e event handler object that will dispatch events for this object
      **/
     void element::set_event_handler(basic_event_handler* e) {

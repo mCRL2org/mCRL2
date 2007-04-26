@@ -42,10 +42,12 @@ exe alpha
        ;
 
 install-binaries install
-       : mcrl22lps experimental-install
+       : mcrl22lps
+       : <dependency>experimental-install
        ;
 
 install-binaries experimental-install
        : lin alpha
+       :
        : <status>experimental
        ;

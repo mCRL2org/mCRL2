@@ -6,10 +6,10 @@ project svc
           <toolset>gcc:<cflags>-std=c99
           <include>../include/svc
        : usage-requirements
-          <include>../include
+          <include>../include/svc
        ;
 
-lib svc
+alias svc.main
        : blocklist.c
          code.c
          compress.c
@@ -19,7 +19,28 @@ lib svc
          ptable.c
          svc1.c
          svc2.c
-         /libraries//aterm
        : <toolset>darwin:<cflags>"-fno-common"
+         <use>/libraries/aterm//headers
          <threading>single
        ;
+
+lib svc
+       : svc.main
+       : <link>static
+       :
+       : <library>/libraries//aterm
+       ;
+
+alias svc
+       : /libraries//mcrl2
+       : <link>shared
+       ;
+
+alias svc.alias
+       : svc.main
+       : <use>headers
+       ;
+
+alias headers : : : : <include>../include <use>/libraries/aterm//headers ;
+
+explicit svc.main svc.alias ;

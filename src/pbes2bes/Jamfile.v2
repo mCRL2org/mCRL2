@@ -8,11 +8,13 @@ exe pbes2bes
          sort_functions.cpp
          /libraries//lps
          /libraries//rewrite
+         /libraries//parser
          /site-config//boost_program_options
        : <include>.
        ;
 
 install-binaries install
        : pbes2bes
+       :
        : <status>experimental
        ;

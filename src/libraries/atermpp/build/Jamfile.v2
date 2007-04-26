@@ -3,10 +3,34 @@ project aterm
        : build-dir $(BUILD_TOP)
        ;
 
-alias atermpp
+alias atermpp.main
        :
        : <use>/boost//headers
+         <use>/libraries/aterm//headers
        :
        : <use>/boost//headers
-         <dependency>/libraries//aterm
        ;
+
+alias atermpp
+       : atermpp.main
+       : <link>static
+       :
+       : <dependency>/libraries//aterm
+       ;
+
+alias atermpp
+       : /libraries//mcrl2
+       : <link>shared
+       :
+       : <include>../include
+       ;
+
+alias headers
+       :
+       :
+       :
+       : <include>../include
+         <use>/libraries/aterm//headers
+       ;
+
+explicit atermpp.main ;

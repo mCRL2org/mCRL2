@@ -7,33 +7,40 @@ project aterm
           <include>../include
        ;
 
-lib aterm
-       : afun.c
-         aterm.c
-         bafio.c
-         byteio.c
-         gc.c
-         hash.c
-         list.c
-         make.c
-         md5c.c
-         memory.c
-         tafio.c
-         version.c
+alias aterm.main
+       : [ glob *.c ]
          protaterm.cpp
        : <address-model>64:<define>AT_64BIT
-         <toolset>darwin,<link>shared:<cflags>"-fPIC -fno-common"
-         <toolset>darwin,<link>shared:<cxxflags>"-fPIC -fno-common"
-         <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
-         <toolset>gcc,<os>NT,<link>shared:<cflags>""
-         <toolset>gcc,<os>LINUX,<link>shared:<cflags>-fPIC
          <threading>single
        :
        : <address-model>64:<define>AT_64BIT
          <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
        ;
 
-alias headers
-       : [ glob ../include/*.h ]
+lib aterm
+       : aterm.main
+       : <link>static
        ;
 
+alias aterm
+       : /libraries//mcrl2
+       : <link>shared
+       ;
+
+alias aterm.alias
+       : aterm.main
+       : <toolset>darwin:<cflags>"-fPIC -fno-common"
+         <toolset>darwin:<cxxflags>"-fPIC -fno-common"
+         <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
+         <toolset>gcc,<os>NT:<cflags>""
+         <toolset>gcc,<os>LINUX:<cflags>-fPIC
+       ;
+
+alias headers
+       : [ glob ../include/*.h ]
+       :
+       :
+       :  <include>../include
+       ;
+
+explicit aterm.main aterm.alias ;

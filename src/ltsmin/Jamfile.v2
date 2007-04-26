@@ -13,5 +13,6 @@ exe ltsmin
 
 install-binaries install
        : ltsmin
+       :
        : <status>deprecated
        ;

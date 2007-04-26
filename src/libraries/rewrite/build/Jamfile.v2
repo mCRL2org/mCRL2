@@ -4,9 +4,11 @@ project libraries/rewrite
        : requirements
           <include>../include
           <os>NT:<define>NO_DYNLOAD
+          <include>$(SETUP)
        : usage-requirements
           <include>../include
           <os>NT:<define>NO_DYNLOAD
+          <include>$(SETUP)
        ;
 
 alias auxiliary
@@ -16,22 +18,46 @@ alias auxiliary
        : <include>../include/auxiliary
        ;
 
-lib rewrite
+alias rewrite.main
        : [ glob ../source/rewrite/*.cpp ]
          [ glob ../source/prover/*.cpp ]
          [ glob ../source/auxiliary/*.cpp ]
-       : <library>/libraries//mcrl2_basic
-         <library>/libraries/lps//data-specification
+       : <use>/libraries/mcrl2_basic//headers
+         <use>/libraries/lps//headers
          <include>../include/rewrite
          <include>../include/prover
-         <include>$(SETUP)
-         <threading>single
-       :
-       : <include>../include/rewrite
-         <include>../include/prover
+       : <threading>single
+       : <use>headers
          <os>LINUX:<library>/site-config//m
          <os>CYGWIN:<library>/site-config//m
          <os>LINUX:<library>/site-config//dl
-         <link>static,<toolset>gcc:<linkflags>-Wl,-export-dynamic
        ;
 
+lib rewrite
+       : rewrite.main
+       : <link>static
+       :
+       : <library>/libraries//mcrl2_basic
+         <toolset>gcc:<linkflags>-Wl,-export-dynamic
+       ;
+
+alias rewrite
+       : /libraries//mcrl2
+       : <link>shared
+       ;
+
+alias rewrite.alias
+       : rewrite.main
+       : <use>headers
+       ;
+
+alias headers
+       :
+       :
+       :
+       : <use>/libraries/mcrl2_basic//headers
+         <use>/libraries/lps//headers
+         <include>../include/rewrite
+       ;
+
+explicit rewrite.main rewrite.alias ;

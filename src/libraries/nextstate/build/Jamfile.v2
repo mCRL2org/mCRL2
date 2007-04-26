@@ -3,25 +3,46 @@ project libraries/nextstate
        : build-dir $(BUILD_TOP)
        : requirements
           <include>../include
+       : usage-requirements
+          <include>../include
        ;
 
-alias enum
+alias enum.main
        : libenum.cpp
          enum_standard.cpp
-       : <use>/libraries//mcrl2_basic
-         <use>/libraries//rewrite
-       :
-       :
-         <library>/libraries//mcrl2_basic
-         <library>/libraries//rewrite
+       : <use>/libraries/mcrl2_basic//headers
+         <use>/libraries/rewrite//headers
+       ;
+
+alias nextstate.main
+       : libnextstate.cpp
+         nextstate_standard.cpp
+       : <use>/libraries/mcrl2_basic//headers
+         <use>/libraries/rewrite//headers
+       : <threading>single
        ;
 
 lib nextstate
-       : libnextstate.cpp
-         nextstate_standard.cpp
-         enum
-       : <threading>single
+       : nextstate.main
+         enum.main
+       : <link>static
        :
-       : <library>enum
+       : <library>/libraries//mcrl2_basic
+         <library>/libraries//rewrite
        ;
 
+alias nextstate
+       : /libraries//mcrl2
+       : <link>shared
+       ;
+
+alias nextstate.alias
+       : nextstate.main
+         enum.main
+       :
+       :
+       : <use>/libraries/mcrl2_basic//headers
+         <use>/libraries/rewrite//headers
+       ;
+
+explicit nextstate.main nextstate.alias ;

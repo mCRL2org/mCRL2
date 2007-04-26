@@ -27,15 +27,16 @@ if ! deprecated in [ MATCH "^--enable-(deprecated)" : [ modules.peek : ARGV ] $(
         ;
 }
 
-feature.feature squadt_support : disable enable : composite ;
-
 # Disable squadt support in tools
 if ! squadt in [ MATCH "^--disable-(squadt)-support" : [ modules.peek : ARGV ] $(BUILD_EXTRA) ] {
+  feature.feature squadt_support : disable enable : incidental composite ;
+
   feature.compose <squadt_support>enable
-        : <define>ENABLE_SQUADT_CONNECTIVITY
-          <threading>multi
-          <library>/libraries/utilities//mcrl2_squadt
+        : <library>/libraries/utilities//mcrl2_squadt
         ;
+}
+else {
+  feature.feature squadt_support : disable enable : incidental ;
 }
 
 # Feature for linking to the opengl library
@@ -46,8 +47,10 @@ if $(OPENGL_NAME) {
 }
 
 # Feature for linking to wx widget libraries
-feature.feature wx : no yes ;
-
 if $(WX_CPPFLAGS) {
-  feature.set-default wx : yes ;
+  feature.feature wx : yes no : ;
 }
+else {
+  feature.feature wx : no yes : ;
+}
+

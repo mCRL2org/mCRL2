@@ -56,30 +56,61 @@ for object in $(MCRL2_BASIC_SOURCES) {
         <include>../include/print
         <include>../include/lowlevel
         <include>../include/struct
-        <dependency>/libraries//aterm
+        <use>/libraries/aterm//headers
       ;
 }
 
-lib mcrl2_basic
+alias mcrl2_basic.main
        : $(MCRL2_BASIC_SOURCES).o
          [ glob ../source/auxiliary/*.cpp ]
        : <include>../include/print
          <include>../include/struct
          <include>../include/lowlevel
-         <toolset>gcc:<library>/libraries//pstream
-         <toolset>darwin:<library>/libraries//pstream
-         <os>NT,<link>shared:<library>/libraries//aterm
-         <os>CYGWIN,<link>shared:<library>/libraries//aterm
-         <threading>single
-       : <include>$(SETUP)
-       : <library>/libraries//aterm
-         <os>LINUX:<library>/site-config//m
+         <toolset>gcc:<use>/libraries//pstream
+         <toolset>darwin:<use>/libraries//pstream
+         <include>$(SETUP)
+       : <threading>single
+       : <os>LINUX:<library>/site-config//m
+         <os>LINUX:<library>/site-config//dl
          <os>CYGWIN:<library>/site-config//m
          <include>../include/print
          <include>../include/rewrite
          <include>../include/lowlevel
          <include>../include/auxiliary
          <include>../include/struct
-         <os>LINUX:<library>/site-config//dl
-         <link>static,<toolset>gcc:<linkflags>-Wl,-export-dynamic
        ;
+
+lib mcrl2_basic
+       : mcrl2_basic.main
+       : <link>static
+       :
+       : <library>/libraries//aterm
+         <toolset>gcc:<linkflags>-Wl,-export-dynamic
+       ;
+
+alias mcrl2_basic
+       : /libraries//mcrl2
+       : <link>shared
+       ;
+
+alias mcrl2_basic.alias
+       : mcrl2_basic.main
+       :
+       :
+       : <use>/libraries/aterm//headers
+       ;
+
+alias headers
+       :
+       :
+       :
+       : <use>/libraries/aterm//headers
+         <toolset>gcc:<use>/libraries//pstream
+         <toolset>darwin:<use>/libraries//pstream
+         <include>../include/print
+         <include>../include/lowlevel
+         <include>../include/auxiliary
+         <include>../include/struct
+       ;
+
+explicit mcrl2_basic.main mcrl2_basic.alias ;

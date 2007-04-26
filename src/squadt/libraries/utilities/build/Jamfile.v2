@@ -10,20 +10,15 @@ project squadt/libraries/utilities
        <include>../include
     ;
 
-cpp-pch mcrl2_squadt.h
-    : include/utilities/mcrl2_squadt.h
-    : <use>/libraries/sip//sip_tool
-      <use>/libraries//mcrl2_basic
-    ;
-
 lib mcrl2_squadt
     : source/mcrl2_squadt.cpp
-      mcrl2_squadt.h
     : <use>/libraries//mcrl2_basic
       <use>/libraries/sip//sip_tool
       <threading>multi
     :
     : <library>/libraries/sip//sip_tool
+      <define>ENABLE_SQUADT_CONNECTIVITY
+      <threading>multi
     ;
 
 obj logger.o

@@ -7,7 +7,7 @@ project parser
           <include>../include
        ;
 
-lib parser
+alias parser.main
        : mcrl2parser.cpp
          mcrl2lexer.cpp
          libparse.cpp
@@ -15,17 +15,58 @@ lib parser
          dataimpl.cpp
          regfrmtrans.cpp
        : <use>/libraries/lps//headers
-         <use>/libraries//mcrl2_basic
-         <threading>single
+         <use>/libraries/mcrl2_basic//headers
+       : <threading>single
+       : <use>/libraries/lps//headers
+         <use>/libraries/mcrl2_basic//headers
+       ;
+
+lib parser
+       : parser.main
+       : <link>static
        :
        : <library>/libraries//mcrl2_basic
        ;
 
-lib alpha
-       : libalpha.cpp
-         /libraries//mcrl2_basic
-       : <threading>single
-       :
-       : <library>/libraries//aterm
-         <library>/libraries//mcrl2_basic
+alias parser
+       : /libraries//mcrl2
+       : <link>shared
+         <use>/libraries/lps//headers
+         <use>/libraries/mcrl2_basic//headers
        ;
+
+alias parser.alias
+       : parser.main
+       ;
+
+alias alpha.main
+       : libalpha.cpp
+       : <use>/libraries/mcrl2_basic//headers
+       : <threading>single
+       ;
+
+lib alpha
+       : alpha.main
+       : <link>static
+       :
+       : <library>/libraries//mcrl2_basic
+       ;
+
+alias alpha
+       : /libraries//mcrl2
+       : <link>shared
+       ;
+
+alias alpha.alias
+       : alpha.main
+       :
+       :
+       : <use>/libraries/mcrl2_basic//headers
+       ;
+
+alias headers
+       :
+       : <use>/libraries/mcrl2_basic//headers
+       ;
+
+explicit parser.main parser.alias alpha.main alpha.alias ;

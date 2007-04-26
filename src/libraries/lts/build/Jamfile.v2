@@ -6,32 +6,44 @@ project lts
           <include>$(SETUP)
        : usage-requirements
           <include>$(SETUP)
+          <include>../include
+       ;
+
+alias lts.main
+       : [ glob *.cpp ]
+       : <use>/libraries/parser//headers
+         <use>/libraries/svc//headers
+         <use>/libraries/lps//headers
+         <use>/site-config//BCG
+       : <threading>single
+       : <dependency>/site-config//BCG
        ;
 
 lib lts
-       : liblts.cpp
-         liblts_svc.cpp
-         liblts_aut.cpp
-         liblts_fsm.cpp
-         fsmlexer.cpp
-         fsmparser.cpp
-         tree_set.cpp
-         liblts_det.cpp
-         liblts_dot.cpp
-         liblts_bcg.cpp
-         liblts_eq.cpp
-         bsimdata.cpp
-         bsimkernel.cpp
-         liblts_bisim.cpp
-         liblts_tau_star.cpp
-         /libraries//mcrl2_basic
-         /libraries//parser
-         /libraries//svc
-         /libraries/atermpp
-         /libraries//lps
-         /site-config//BCG
-       : <threading>single
+       : lts.main
+       : <link>static
        :
        : <library>/libraries//parser
          <library>/libraries//svc
        ;
+
+alias lts
+       : /libraries//mcrl2
+       : <link>shared
+       ;
+
+alias lts.alias
+       : lts.main
+       : <use>headers
+       ;
+
+alias headers
+       :
+       :
+       :
+       : <use>/libraries/parser//headers
+         <use>/libraries/svc//headers
+       ;
+
+explicit lts.main lts.alias ;
+

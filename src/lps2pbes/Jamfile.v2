@@ -13,5 +13,6 @@ exe lps2pbes
 
 install-binaries install
        : lps2pbes
+       :
        : <status>experimental
        ;

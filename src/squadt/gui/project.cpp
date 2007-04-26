@@ -229,17 +229,17 @@ namespace squadt {
      * \param[in] p the processor::monitor that is connected to the associated tool process
      * \param[in] t the title for the tool display
      **/
-    GUI::tool_display* project::add_tool_display(boost::shared_ptr < processor::monitor > p, std::string const& t) {
+    GUI::tool_display* project::install_tool_display(boost::shared_ptr < processor::monitor > p, std::string const& t) {
       wxSizer* s = process_display_view->GetSizer();
-
+       
       GUI::tool_display* display = new GUI::tool_display(process_display_view, this, p);
-
+       
       s->Insert(0, display, 0, wxEXPAND|wxALL, 2);
       s->Layout();
-
+       
       display->set_title(wxString(t.c_str(), wxConvLocal));
-
-      return (display);
+       
+      return display;
     }
             
     /**
@@ -351,7 +351,7 @@ namespace squadt {
     void project::prepare_tool_display(processor* p) {
       processor::output_object_iterator t = p->get_output_iterator();
 
-      add_tool_display(p->get_monitor(), p->get_tool()->get_name() + " : " + boost::filesystem::path((*t)->location).leaf());
+      install_tool_display(p->get_monitor(), p->get_tool()->get_name() + " : " + boost::filesystem::path((*t)->location).leaf());
     }
 
     void project::update() {
@@ -464,7 +464,7 @@ namespace squadt {
           p->flush_outputs();
 
           /* Attach tool display */
-          add_tool_display(p->get_monitor(), p->get_tool()->get_name() + " : " + boost::filesystem::path(t->location).leaf());
+          install_tool_display(p->get_monitor(), p->get_tool()->get_name() + " : " + boost::filesystem::path(t->location).leaf());
 
           p->update();
           break;
@@ -513,7 +513,7 @@ namespace squadt {
           break;
         case cmID_CONFIGURE:
             /* Attach tool display */
-            add_tool_display(p->get_monitor(), p->get_tool()->get_name() + " : " + boost::filesystem::path(t->location).leaf());
+            install_tool_display(p->get_monitor(), p->get_tool()->get_name() + " : " + boost::filesystem::path(t->location).leaf());
 
             /* Start tool configuration phase */
             p->reconfigure();
@@ -530,7 +530,7 @@ namespace squadt {
             tp->append_input(t);
 
             /* Attach tool display */
-            add_tool_display(tp->get_monitor(), menu_item->the_tool->get_name() + " : " + boost::filesystem::path(t->location).leaf());
+            install_tool_display(tp->get_monitor(), menu_item->the_tool->get_name() + " : " + boost::filesystem::path(t->location).leaf());
 
             /* Register handler to on update the object view after process termination */
             tp->get_monitor()->on_completion(boost::bind(&project::process_configuration, this, s, tp));

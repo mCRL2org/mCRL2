@@ -2,13 +2,16 @@ project toolset/ltsgraph
        : build-dir $(BUILD_TOP)/ltsgraph
        ;
 
+alias ltsgraph : : <wx>no ;
+
 exe ltsgraph
        : [ glob *.cpp ]
          /libraries/wxe//spinctrlfloat.o
          /libraries//mcrl2_basic
          /libraries//lts
-       : <site-library>wx_base
-       : <squadt_support>enable
+         /site-config//wx_base
+       : <wx>yes
+         <squadt_support>enable
        ;
 
 install-binaries install

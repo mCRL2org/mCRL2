@@ -6,16 +6,18 @@ import sequence ;
 
 source_files = [ glob *.cpp gui/*.cpp gui/dialog/*.cpp ] ;
 
+alias squadt : : <wx>no ;
+
 exe squadt
       : [ sequence.insertion-sort $(source_files) ]
-      : <library>/site-config//boost_md5
+        /site-config//wx_base
+      : <wx>yes
+        <library>/site-config//boost_md5
         <library>/libraries/sip//sip_controller
-        <site-library>wx_base
         <use>/libraries/utilities//headers
         <library>/libraries//ticpp
         <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
         <include>$(SETUP)
-        <threading>multi
       :
       : <install>yes:<dependency>install-user-manual-data
       ;

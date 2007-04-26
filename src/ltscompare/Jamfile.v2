@@ -4,9 +4,7 @@ project toolset/ltscompare
 
 exe ltscompare
        : ltscompare.cpp
-         /libraries//mcrl2_basic
          /libraries//lts
-         /libraries//svc
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
        ;

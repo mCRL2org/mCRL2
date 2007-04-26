@@ -14,5 +14,6 @@ exe lpsdecluster
 
 install-binaries install
        : lpsdecluster
+       :
        : <status>experimental
        ;

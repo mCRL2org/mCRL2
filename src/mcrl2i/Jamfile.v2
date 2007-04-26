@@ -14,5 +14,6 @@ exe mcrl2i
 
 install-binaries install
        : mcrl2i
+       :
        : <status>experimental
        ;

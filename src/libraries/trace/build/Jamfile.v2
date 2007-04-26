@@ -1,14 +1,40 @@
 project libraries/trace
        : source-location ../source
        : build-dir $(BUILD_TOP)
-       : requirements <include>../include
+       : requirements
+          <include>../include
+       : usage-requirements
+          <include>../include
+       ;
+
+alias trace.main
+       : libtrace.cpp
+       : <use>/libraries/mcrl2_basic//headers
+       : <threading>single
        ;
 
 lib trace
-       : libtrace.cpp
-         /libraries//mcrl2_basic
-       : <threading>single
+       : trace.main
+       : <link>static
        :
-       :
+       : <library>/libraries//mcrl2_basic
        ;
 
+alias trace
+       : /libraries//mcrl2
+       : <link>shared
+       ;
+
+alias trace.alias
+       : trace.main
+       :
+       :
+       : <use>/libraries/mcrl2_basic//headers
+       ;
+
+alias headers 
+       :
+       : <use>/libraries/mcrl2_basic//headers
+       ;
+
+explicit trace.main trace.alias ;

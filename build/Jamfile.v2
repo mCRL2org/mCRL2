@@ -4,10 +4,6 @@ project site-config
 
 include $(TOP)/build/config.jam ;
 
-import feature : feature compose ;
-
-feature site-library : opengl wx_base wx_gl : free incidental optional composite ;
-
 # OpenGL library
 if $(OPENGL_NAME) {
   lib GLU : : <os>NT <name>glu32 ;
@@ -27,11 +23,6 @@ if $(OPENGL_NAME) {
       lib opengl : : <name>$(OPENGL_NAME) : : <os>NT:<library>GLU <os>CYGWIN:<library>GLU ;
     }
   }
-
-  feature.compose <site-library>opengl : <dependency>opengl ;
-}
-else {
-  feature.compose <site-library>opengl : <build>no ;
 }
 
 if $(WX_CPPFLAGS) {
@@ -41,6 +32,7 @@ if $(WX_CPPFLAGS) {
          :
          : <linkflags>"$(WX_BASE_LDFLAGS)"
            <cxxflags>"$(WX_CPPFLAGS)"
+           <wx>yes
          ;
 
   if $(OPENGL_NAME) {
@@ -51,19 +43,13 @@ if $(WX_CPPFLAGS) {
            : <linkflags>"$(WX_GL_LDFLAGS)"
              <cxxflags>"$(WX_CPPFLAGS)"
              <library>/site-config//opengl
+             <wx>yes
            ;
-
-    feature.compose <site-library>wx_gl : <dependency>/site-config//wx_gl <user-interface>gui ;
   }
-  else {
-    feature.compose <site-library>wx_gl : <build>no ;
-  }
-
-  feature.compose <site-library>wx_base : <dependency>/site-config//wx_base <user-interface>gui ;
 }
 else {
-  feature.compose <site-library>wx_base : <build>no ;
-  feature.compose <site-library>wx_gl   : <build>no ;
+  alias wx_base : : : : <wx>no ;
+  alias wx_gl : : : : <wx>no ;
 }
 
 if $(BOOST_LIBRARY_PATH) {

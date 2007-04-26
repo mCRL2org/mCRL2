@@ -7,21 +7,38 @@ project libraries/prover
           <include>../include
        ;
 
-lib prover
+alias prover.main
        : confluence_checker.cpp
          disjointness_checker.cpp
          invariant_checker.cpp
          invariant_eliminator.cpp
          formula_checker.cpp
-       : <use>/libraries//mcrl2_basic
-         <use>/libraries//rewrite
-         <use>/libraries/lps//data-specification
-#         <dependency>/libraries//cvclite
+       : <use>headers
+#         <use>/libraries//cvclite
 #         <toolset>gcc:<define>HAVE___GNU_CXX__EXT_HASH_MAP
 #         <toolset>gcc:<define>HAVE___GNU_CXX__EXT_HASH_SET
 #         <toolset>gcc:<define>CVC_LITE_LIB
        :
-       : <library>/libraries//mcrl2_basic
-         <library>/libraries//rewrite
-#         <library>/libraries//cvclite
+#       :  <library>/libraries//cvclite
        ;
+
+lib prover
+       : prover.main
+       : <link>static
+       :
+       : <library>/libraries//rewrite
+       ;
+
+alias prover
+       : /libraries//mcrl2
+       : <link>shared
+       ;
+
+alias prover.alias
+       : prover.main
+       : <use>headers
+       ;
+
+alias headers : : : : <use>/libraries/rewrite//headers ;
+
+explicit prover.main prover.alias ;

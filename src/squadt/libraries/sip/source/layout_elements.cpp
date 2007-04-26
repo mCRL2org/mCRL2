@@ -22,16 +22,6 @@ namespace sip {
       }
      
       /**
-       * \param[in] t the text of the label
-       * \param[in] c the tool communicator to use for sending the update
-       **/
-      void label::set_text(std::string const& t, tool::communicator* c) {
-        set_text(t);
-
-        element::update(c, this);
-      }
-     
-      /**
        * \param[in] m the mediator object to use
        **/
       layout::mediator::wrapper_aptr label::instantiate(layout::mediator* m) {
@@ -62,16 +52,6 @@ namespace sip {
        **/
       void button::set_label(std::string const& l) {
         m_label = l;
-      }
-
-      /**
-       * \param[in] l the label for the button
-       * \param[in] t the tool communicator to use for sending the update
-       **/
-      void button::set_label(std::string const& l, tool::communicator* t) {
-        set_label(l);
-
-        element::update(t, this);
       }
 
       /**
@@ -153,15 +133,6 @@ namespace sip {
         return (m_first);
       }
 
-      /**
-       * \param[in] t the tool communicator to use for sending the update
-       **/
-      void radio_button::set_selected(tool::communicator* t) {
-        set_selected(true);
-
-        element::update(t, this);
-      }
-     
       bool radio_button::is_selected() const {
         return (m_selected);
       }
@@ -196,16 +167,6 @@ namespace sip {
        **/
       void checkbox::set_status(bool b) {
         m_status = b;
-      }
-
-      /**
-       * \param[in] b the new status
-       * \param[in] t the tool communicator to use for sending the update
-       **/
-      void checkbox::set_status(bool b, tool::communicator* t) {
-        set_status(b);
-
-        element::update(t, this);
       }
 
       bool checkbox::get_status() const {
@@ -250,48 +211,15 @@ namespace sip {
 
       /**
        * \param[in] v the new value
-       * \param[in] t the tool communicator to use for sending the update
-       *
-       * \pre minimum <= v <= maximum
-       **/
-      void progress_bar::set_value(unsigned int v, tool::communicator* t) {
-        set_value(v);
-
-        element::update(t, this);
-      }
-
-      /**
-       * \param[in] v the new value
        **/
       void progress_bar::set_minimum(unsigned int v) {
         m_minimum = v;
       }
-
-      /**
-       * \param[in] v the new value
-       * \param[in] t the tool communicator to use for sending the update
-       **/
-      void progress_bar::set_minimum(unsigned int v, tool::communicator* t) {
-        set_minimum(v);
-
-        element::update(t, this);
-      }
-
       /**
        * \param[in] v the new value
        **/
       void progress_bar::set_maximum(unsigned int v) {
         m_maximum = v;
-      }
-
-      /**
-       * \param[in] v the new value
-       * \param[in] t the tool communicator to use for sending the update
-       **/
-      void progress_bar::set_maximum(unsigned int v, tool::communicator* t) {
-        set_maximum(v);
-
-        element::update(t, this);
       }
 
       unsigned int progress_bar::get_value() const {
@@ -331,16 +259,6 @@ namespace sip {
        **/
       void text_field::set_text(std::string const& s) {
         m_text = s;
-      }
-
-      /**
-       * \param[in] s the new text
-       * \param[in] t the tool communicator to use for sending the update
-       **/
-      void text_field::set_text(std::string const& s, tool::communicator* t) {
-        set_text(s);
-
-        element::update(t, this);
       }
 
       std::string text_field::get_text() const {

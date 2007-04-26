@@ -14,5 +14,6 @@ exe lpsbinary
 
 install-binaries install
        : lpsbinary
+       :
        : <status>experimental
        ;

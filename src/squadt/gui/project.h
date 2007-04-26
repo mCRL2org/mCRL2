@@ -157,9 +157,9 @@ namespace squadt {
         void add_to_object_view(wxTreeItemId& s, processor::object_descriptor::sptr);
 
         /** \brief Add a new tool display to the process_display_view */
-        GUI::tool_display* add_tool_display(boost::shared_ptr < processor::monitor >, std::string const&);
+        GUI::tool_display* install_tool_display(boost::shared_ptr < processor::monitor >, std::string const&);
 
-        /** \brief Helper function that extracts the information out of a processor and calls add_tool_display() */
+        /** \brief Helper function that extracts the information out of a processor and calls install_tool_display() */
         void prepare_tool_display(processor* p);
 
         /** \brief Resolves conflicts, through user interaction, between processors that generate same output objects with the same name */

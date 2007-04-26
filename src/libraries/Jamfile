@@ -26,3 +26,19 @@ for library in aterm cvc_lite pstream svc ticpp getopt {
         ;
 }
 
+lib mcrl2
+        : /libraries/lps//dataelm.alias
+          /libraries/lps//lps.alias
+          /libraries/lts//lts.alias
+          /libraries/svc//svc.alias
+          /libraries/aterm//aterm.alias
+          /libraries/parser//parser.alias
+          /libraries/parser//alpha.alias
+          /libraries/mcrl2_basic//mcrl2_basic.alias
+          /libraries/prover//prover.alias
+          /libraries/rewrite//rewrite.alias
+          /libraries/trace//trace.alias
+          /libraries/nextstate//nextstate.alias
+        : <threading>multi
+        ;
+

@@ -4,9 +4,7 @@ project ltsconvert
 
 exe ltsconvert
        : ltsconvert.cpp
-         /libraries//mcrl2_basic
          /libraries//lts
-         /libraries//svc
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
          <squadt_support>enable

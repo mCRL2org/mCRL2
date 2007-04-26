@@ -29,7 +29,6 @@ project toolset
           $(OPTIMISATIONS)
           <link>$(LINK_VARIANT)
           $(BUILD_OPTIONS)
-          <pch>off
        ;
 
 include $(BUILD_TOOLS)/installing.jam ;
@@ -48,7 +47,6 @@ import set ;
 import regex ;
 
 local targets  = [ set.intersection [ MATCH "^([0-9a-zA-Z]+)$" : [ modules.peek : ARGV ] ] : $(tools) ] ;
-local plugins  = [ MATCH $(root)/(src/.*/plugins/.*)/Jamfile.v2 : [ glob $(root)/src/*/plugins/*/Jamfile.v2 ] ] ;
 local disabled = [ MATCH "^--disable-tools=([,0-9a-zA-Z]+)$" : [ modules.peek : ARGV ] ] ;
 
 if ! $(targets) {
@@ -109,7 +107,6 @@ else {
     alias install
             : /tools/$(targets)//install
               install-shared-libraries
-              install-plugins
               install-examples
               install-headers
             : <os>MACOSX:<source>install-mac-bundles
@@ -158,11 +155,5 @@ else {
             <os>CYGWIN
             <dll-path>$(BIN_DIR)
             <install-dependencies>on <install-type>SHARED_LIB
-          ;
-
-  stage install-plugins
-          : $(plugins)
-          : <location>$(LIB_DIR)/plugins
-            <install-type>SHARED_LIB
           ;
 }
