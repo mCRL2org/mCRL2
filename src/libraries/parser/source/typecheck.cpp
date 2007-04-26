@@ -2016,10 +2016,10 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
           ATermAppl Argument0=ATAgetFirst(Arguments);
           Arguments=ATgetNext(Arguments);
           ATermAppl Argument1=ATAgetFirst(Arguments);
-          ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,Type,FreeVars,strict_ambiguous);
-          if(!Type1) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "element", Type,Argument1);  return NULL;}
-          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,gsMakeSortIdPos(),FreeVars,strict_ambiguous);
-          if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "number", gsMakeSortIdPos(),Argument1);  return NULL;}
+          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,Type,FreeVars,strict_ambiguous);
+          if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "element", Type,Argument0);  return NULL;}
+          ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,gsMakeSortIdNat(),FreeVars,strict_ambiguous);
+          if(!Type1) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "number", gsMakeSortIdNat(),Argument1);  return NULL;}
           NewArguments=ATinsert(NewArguments,(ATerm)Argument0);
           NewArguments=ATinsert(NewArguments,(ATerm)Argument1);
           Type=Type1;
