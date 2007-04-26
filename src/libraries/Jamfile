@@ -40,5 +40,8 @@ lib mcrl2
           /libraries/trace//trace.alias
           /libraries/nextstate//nextstate.alias
         : <threading>multi
+          <toolset>darwin:<cflags>"-fPIC -fno-common"
+          <toolset>darwin:<cxxflags>"-fPIC -fno-common"
+          <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
         ;
 

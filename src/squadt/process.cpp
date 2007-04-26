@@ -112,11 +112,12 @@ namespace squadt {
     }
 
     inline void process_impl::initialise() {
-      identifier = 0;
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
       ZeroMemory(&si, sizeof(STARTUPINFO));
       si.cb = sizeof(STARTUPINFO);
       ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
+#else
+      identifier = 0;
 #endif
     }
  
