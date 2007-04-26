@@ -1795,7 +1795,6 @@ ATermAppl gsaGetProp(ATermAppl a, ATermAppl context){
 }
 
 ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a){
-  //returns the type of the term.
   if ( gsIsDelta(a) || gsIsTau(a) || gsIsAction(a) ){
     return a;
   } 
@@ -1805,7 +1804,6 @@ ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a){
     if(!l) return a; //not an npCRL process call.
     
     //determine the value of the parameter.
-    assert(ATgetLength(ATLgetArgument(a,1))==1); 
     ATermAppl par=ATAgetFirst(ATLgetArgument(a,1));
     ATermAppl k=NULL;
     if(gsIsDataExprNumber(par) && ATisEqual(ATAgetArgument(par,1),gsMakeSortIdPos())){
@@ -1825,21 +1823,22 @@ ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a){
       ATermList l1=l;
       for(;!ATisEmpty(l);l=ATgetNext(l)){
 	ATermAppl pair=ATAgetFirst(l);
-	if(ATisEqual(ATAgetArgument(pair,0),k))
-	  return ATAgetArgument(pair,1);
+	if(ATisEqual(ATAgetArgument(pair,0),k)){
+	  return gsMakeProcess(ATAgetArgument(pair,1),ATgetNext(ATLgetArgument(a,1)));
+	}
       }
       l=l1;
     }
 
     //create a new entry and add
     //process name with type pn, add _k 
-    ATermAppl new_pn=ATsetArgument(pn,(ATerm)ATmakeList0(),1);
+    ATermAppl new_pn=ATsetArgument(pn,(ATerm)ATgetNext(ATLgetArgument(pn,1)),1);
     do{
       new_pn=ATsetArgument(new_pn,(ATerm)ATmakeAppl0(ATappendAFun(ATappendAFun(ATgetAFun(ATAgetArgument(new_pn,0)),"_"),ATgetName(ATgetAFun(k)))),0);  
     } while(ATAtableGet(procs,(ATerm)new_pn));
     
     ATtablePut(subs_npCRL,(ATerm)pn,(ATerm)ATinsert(l,(ATerm)Pair((ATerm)k,(ATerm)new_pn)));
-    return gsMakeProcess(new_pn,ATmakeList0());
+    return gsMakeProcess(new_pn,ATgetNext(ATLgetArgument(a,1)));
   }
   else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsSeq(a) 
 	    || gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsAllow(a) || gsIsComm(a)
@@ -2101,7 +2100,9 @@ ATermAppl gsAlpha(ATermAppl Spec){
   todo=ATtableKeys(subs_npCRL);
   for(; !ATisEmpty(todo); todo=ATgetNext(todo)){
     ATermAppl nP=ATAgetFirst(todo);
-    ATermAppl P=ATAgetArgument(ATAgetArgument(ATAtableGet(procs,(ATerm)nP),2),0);
+    ATermAppl Body=ATAtableGet(procs,(ATerm)nP);
+    ATermAppl P=ATAgetArgument(ATAgetArgument(Body,2),0);
+    ATermList ParamsP=ATLgetArgument(ATAgetArgument(Body,2),1);
     //get the list of substitutions and generate the process for each
     for(ATermList l=ATLtableGet(subs_npCRL,(ATerm)nP);!ATisEmpty(l);l=ATgetNext(l)){
       ATermAppl pair=ATAgetFirst(l);
@@ -2110,7 +2111,8 @@ ATermAppl gsAlpha(ATermAppl Spec){
       int n=ATgetLength(ATLgetArgument(nP,1)); //number of parameters of nP
       int m=ATgetLength(ATLgetArgument(P,1));  //number of parameters of P
 
-      ATtablePut(procs,(ATerm)name,(ATerm)gsaGenNInst(ATAgetArgument(pair,0),P,n==m));
+      ATtablePut(procs,(ATerm)name,(ATerm)gsaGenNInst(ATAgetArgument(pair,0),P,n==m,(n==m)?ATgetNext(ParamsP):ParamsP));
+      ATtablePut(form_pars,(ATerm)name,(ATerm)((n==m)?ATgetNext(ParamsP):ParamsP));
       ATtablePut(props,(ATerm)name,(ATerm)ATmakeAppl2(props_afun,(ATerm)mCRL_aterm,(ATerm)nrec_aterm));
       ATtablePut(deps,(ATerm)name,(ATerm)merge_list(ATmakeList1((ATerm)P),ATLtableGet(deps,(ATerm)P)));
     }
@@ -2247,6 +2249,9 @@ ATermAppl gsAlpha(ATermAppl Spec){
     ATermAppl res=ATAtableGet(procs,(ATerm)pn);
     if(res){
       ATermList fpars=ATmakeList0();
+      ATermList fpars1=ATLtableGet(form_pars,(ATerm)pn);
+      if(fpars1) fpars = fpars1;
+      
       //if generated during the alpha substitutions
       ATermAppl old_pn=ATAtableGet(subs_alpha_rev,(ATerm)pn);
       if(old_pn){
