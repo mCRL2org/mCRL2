@@ -43,6 +43,20 @@ void test_pbes()
   // BOOST_CHECK(e == e1);
 }
 
+void test_normalize()
+{
+  using namespace state_frm;
+
+  state_formula x = var(identifier_string("X"), data_expression_list());
+  state_formula y = var(identifier_string("Y"), data_expression_list());
+  state_formula f = imp(not_(x), y);
+  state_formula f1 = normalize(f);
+  state_formula f2 = or_(x, y);
+  std::cout << "f  = " << pp(f) << std::endl;
+  std::cout << "f1 = " << pp(f1) << std::endl;
+  BOOST_CHECK(f1 == f2);
+}
+
 int test_main(int argc, char* argv[])
 {
   aterm bottom_of_stack;
@@ -50,6 +64,7 @@ int test_main(int argc, char* argv[])
   gsEnableConstructorFunctions();
 
   test_pbes();
+  test_normalize();
 
   return 0;
 }

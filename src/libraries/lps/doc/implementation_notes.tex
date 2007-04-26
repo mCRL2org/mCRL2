@@ -3,76 +3,353 @@
 \title{Implementation notes for the LPS library}
 \author{Wieger Wesselink}
 
-% packages
-% --------
-
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{graphicx,theorem,ifthen,float}
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
 \usepackage[english]{babel}
+%\usepackage{algorithm}
+%\usepackage{algorithmic}
 \usepackage{multicol}
 \usepackage{array}
 \usepackage{stmaryrd}
+
+%--- From tcilatex.tex ---%
+\def\dsum{\mathop{\displaystyle \sum }}%
+\def\dprod{\mathop{\displaystyle \prod }}%
+\def\dbigcap{\mathop{\displaystyle \bigcap }}%
+\def\dbigwedge{\mathop{\displaystyle \bigwedge }}%
+\def\dbigoplus{\mathop{\displaystyle \bigoplus }}%
+\def\dbigodot{\mathop{\displaystyle \bigodot }}%
+\def\dbigsqcup{\mathop{\displaystyle \bigsqcup }}%
+\def\dcoprod{\mathop{\displaystyle \coprod }}%
+\def\dbigcup{\mathop{\displaystyle \bigcup }}%
+\def\dbigvee{\mathop{\displaystyle \bigvee }}%
+\def\dbigotimes{\mathop{\displaystyle \bigotimes }}%
+\def\dbiguplus{\mathop{\displaystyle \biguplus }}%
+%--------------------------%
+
+% column types that change column types l,c,r from math mode to LR
+% and the other way round
+\newcolumntype{L}{>{$}l<{$}}%stopzone%stopzone%stopzone
+\newcolumntype{C}{>{$}c<{$}}%stopzone%stopzone%stopzone
+\newcolumntype{R}{>{$}r<{$}}%stopzone%stopzone%stopzone
+
+
+% commands
+% --------
+
+
+% List operator
+\newcommand{\conc}{{\fontsize{8pt}{0pt} + \!\!\!\! +}}
+
+% mathematical constant
+\newcommand{\f}[1]{\ensuremath{\mathit{#1}}}
+
+% definition font
+\newcommand{\deffont}[1]{{\bf #1}}
+
+% interpretation of a sort in a data algebra
+\newcommand{\meansrt}[2]{
+  {#1}^{#2}
+}
+
+% interpretation of an operation in a data algebra
+\newcommand{\meanop}[2]{
+  {#1}^{#2}
+}
+
+% interpretation of a data term in a data environment and a data algebra
+\newcommand{\meandta}[3]{
+  \llbracket  #1 \rrbracket_{#2}^{#3}
+}
+
+% interpretation of a data term in a data environment
+\newcommand{\meandt}[2]{
+  \llbracket  #1 \rrbracket_{#2}
+}
+
+\newcommand{\lbanana}{{\langle\hspace{-.465ex}\mid}}
+\newcommand{\rbanana}{{\mid\hspace{-.465ex}\rangle}}
+
+\newcommand{\banana}[3]{{\lbanana #1 \rbanana_{#2}^{#3}}}
+
+
+% interpretation of an action in a data environment and a data algebra
+\newcommand{\meanacta}[3]{
+  \llbracket  #1 \rrbracket_{#2}^{#3}
+}
+
+% interpretation of an action in a data environment
+\newcommand{\meanact}[2]{
+  \llbracket  #1 \rrbracket_{#2}
+}
+
+% interpretation of an action formula in a data environment and a data algebra
+\newcommand{\meanafa}[3]{
+  \llbracket  #1 \rrbracket_{#2}^{#3}
+}
+
+% interpretation of an action formula in a data environment
+\newcommand{\meanaf}[2]{
+  \llbracket  #1 \rrbracket_{#2}
+}
+
+% interpretation of a state formula in a data environment and a propositional
+% environment
+\newcommand{\meansf}[3]{
+  \llbracket  #1 \rrbracket_{{#2}{#3}}
+}
+% solution of a PBES in the context of a data environment and a propositional
+% environment
+\newcommand{\pbessol}[3]{
+  [  #1 ]_{{#2}{#3}}
+}
+
+% boolean sort: B
+\newcommand{\sbool}{\ensuremath{\mathsf{B}}}
+\newcommand{\strue}{\ensuremath{\mathsf{true}}}
+\newcommand{\sfalse}{\ensuremath{\mathsf{false}}}
+
+% booleans
+\newcommand{\bool}{\ensuremath{\mathbb{B}}}
+
+% natural sort: N
+\newcommand{\snat}{\ensuremath{\mathsf{N}}}
+
+% positive sort: N^+
+\newcommand{\spos}{\ensuremath{\snat^{+}}}
+
+% integral sort: Z
+\newcommand{\sint}{\ensuremath{\mathsf{Z}}}
+
+% non-negative real sort: R^{>=0}
+%\newcommand{\snnreal}{\ensuremath{\mathsf{R}^{\scriptscriptstyle\geq 0}}}
+\newcommand{\snnreal}{\ensuremath{\mathsf{R}_{\scriptscriptstyle 0}}}
+
+% non-negative reals
+\newcommand{\nnreal}{\ensuremath{\mathbb{R}_{\scriptscriptstyle 0}}}
+
+%tuple
+\newcommand{\tuple}[1]{\ensuremath{\langle {#1} \rangle}}
+
+%set of all transitions
+\newcommand{\strans}{\ensuremath{\f{Tr}}}
+
+%transition
+\newcommand{\trans}[1]{\,{}^{\underrightarrow{\ #1 \ }}\,}
+
+%subset or equal on functions
+\newcommand{\subseteqfun}{\,{\dot\subseteq}\,}
+
+% environments
+% ------------
+
+% proof: proof of a theorem
+\newenvironment{proof}
+  {\textbf{Proof}}%
+  %{\frm{\Box}%
+  % \vspace{1ex}%
+  %}
+
+% tightarray: array with no outcolumn spacing and tighter intercolumn spacing
+\newenvironment{tightarray}[1]
+  {\setlength{\arraycolsep}{2pt}%
+   \begin{array}{@{}#1@{}}%
+  }
+  {\end{array}%
+  }
+
+% theorems
+% --------
+
+\newtheorem{thdefinition}{Definition}[section]
+\newenvironment{definition}
+  {\begin{thdefinition}\em}
+  {\end{thdefinition}}
+
+\newtheorem{ththeorem}[thdefinition]{Theorem}
+\newenvironment{theorem}
+  {\begin{ththeorem}\em}
+  {\end{ththeorem}}
+
+\newtheorem{thcorollary}[thdefinition]{Corollary}
+\newenvironment{corollary}
+  {\begin{thcorollary}\em}
+  {\end{thcorollary}}
+
+\newtheorem{thlemma}[thdefinition]{Lemma}
+\newenvironment{lemma}
+  {\begin{thlemma}\em}
+  {\end{thlemma}}
+
+\newtheorem{thproperty}[thdefinition]{Property}
+\newenvironment{property}
+  {\begin{thproperty}\em}
+  {\end{thproperty}}
+
+\newtheorem{thexample}[thdefinition]{Example}
+\newenvironment{example}
+  {\begin{thexample}\em}
+  {\end{thexample}}
+
+\newtheorem{thremark}[thdefinition]{Remark}
+\newenvironment{remark}
+  {\begin{thremark}\em}
+  {\end{thremark}}
+
+\newtheorem{thconvention}[thdefinition]{Convention}
+\newenvironment{convention}
+  {\begin{thconvention}\em}
+  {\end{thconvention}}
+
+\newtheorem{thconjecture}[thdefinition]{Conjecture}
+\newenvironment{conjecture}
+  {\begin{thconjecture}\em}
+  {\end{thconjecture}}
+
+\newtheorem{thspecification}[thdefinition]{Specification}
+\newenvironment{specification}
+  {\begin{thspecification}\em}
+  {\end{thspecification}}
+
+\newtheorem{thdeclaration}[thdefinition]{Declaration}
+\newenvironment{declaration}
+  {\begin{thdeclaration}\em}
+  {\end{thdeclaration}}
+
+% sets
+% ----
+
+% set of elements: {e}
+\newcommand{\set}[1]{\ensuremath{\{\,#1\,\}}}
+
+% bag of elements: {e}
+\newcommand{\bag}[1]{\ensuremath{\set{#1}}}
+
+% set difference: s \ t
+\newcommand{\sdiff}[2]{\ensuremath{#1\ \backslash\ #2}}
+
+% set comprehension: { e | c }, where e is an expression or a binding and c is
+% a condition
+\newcommand{\scompr}[2]{\ensuremath{\set{#1\ |\ #2}}}
+
+% lists
+% -----
+
+% list of a certain type: L(t)
+\newcommand{\List}[1]{\ensuremath{\mathcal{L}{\I{#1}}}}
+
+% list of elements: [e]
+\newcommand{\lst}[1]{\ensuremath{[\,#1\,]}}
+
+% empty list
+\newcommand{\el}{\ensuremath{[\,]}}
+
+% cons: |>
+\newcommand{\cons}{\ensuremath{\hspace{0.12em}\triangleright\hspace{0.08em}}}
+
+% snoc: <|
+\newcommand{\snoc}{\ensuremath{\hspace{0.08em}\triangleleft\hspace{0.12em}}}
+
+% concatenation: ++
+\newcommand{\concat}{\ensuremath{\hspace{0.12em}\raisebox{0.2ex}
+{\text{\footnotesize+}\!\text{\footnotesize+}}\hspace{0.12em}}}
+
+% process algebra
+% ---------------
+
+% sequential composition .
+\newcommand{\seq}{\mathbin{\cdot}}
+
+% alternative composition +
+\newcommand{\alt}{\mathbin{+}}
+
+% parallel merge ||
+\newcommand{\pmerge}{\mathbin{\parallel}}
+
+% left merge ||_
+\newcommand{\lmerge}{\mathbin{\llfloor}}
+
+% synchronisation |
+\newcommand{\sync}{\mathbin{\!\mid\!}}
+
+% block
+\newcommand{\block}[1]{\partial_{#1}}
+
+% hide
+\newcommand{\hide}[1]{\tau_{#1}}
+
+% rename
+\newcommand{\ren}[1]{\rho_{#1}}
+
+% allow
+\newcommand{\allow}[1]{\nabla_{#1}}
+
+% communication
+\newcommand{\comm}[1]{\Gamma_{#1}}
+
+% at
+\font \aap cmmi10
+\newcommand{\at}[1]{\mbox{\aap ,} #1}
+
+% ???
+\newcommand{\ap}{{:}}
+
+% Logic
+% -----
+
+% true
+\newcommand{\true}{\ensuremath{\f{true}}}
+
+% false
+\newcommand{\false}{\ensuremath{\f{false}}}
+
+% implies: =>
+\newcommand{\limp}{\ensuremath{\Rightarrow}}
+
+% logical iff
+\newcommand{\liff}{\ensuremath{\Leftrightarrow}}
+
+% lquant: \forall or \exists
+\newcommand{\lquant}{\ensuremath{Q}}
+
+% Misc definitions
+% ----------------
+
+% simple bold math
+\newcommand{\mb}[1]{\text{\boldmath$#1$}}
+
+% mCRL2 keywords
+\newcommand{\kwsort}{{\bf sort}}
+\newcommand{\kwcons}{{\bf cons}}
+\newcommand{\kwmap}{{\bf map}}
+\newcommand{\kwvar}{{\bf var}}
+\newcommand{\kweqn}{{\bf eqn}}
+\newcommand{\kwact}{{\bf act}}
+\newcommand{\kwstruct}{{\bf struct}}
+\newcommand{\kwwhr}{{\bf whr}}
+\newcommand{\kwend}{{\bf end}}
+\newcommand{\kwdiv}{{\bf div}}
+\newcommand{\kwmod}{{\bf mod}}
+\newcommand{\kwproc}{{\bf proc}}
+\newcommand{\kwinit}{{\bf init}}
+
+
+% Abbreviations
+
+\newcommand{\isdef}{\ensuremath{=_{\textit{def}}}}
+
+% document
+% --------
 
 \begin{document}
 
 \maketitle
 
-\section{state formulas}
+\input{definitions.tex}
 
-A state formula $\varphi$ is a formula that satisfies the following grammar:
-
-\[
-\begin{array}{lc}
-\varphi ::= &
-c
-~|~ true
-~|~ false
-~|~ \neg \varphi
-~|~ \varphi \wedge \varphi
-~|~ \varphi \vee \varphi
-~|~ \varphi \Rightarrow \varphi
-~|~ \forall x{:}D .\varphi
-~|~ \exists x{:}D .\varphi
-~|~ \langle\alpha\rangle \varphi \\ &
-~|~ [\alpha] \varphi
-~|~ \Delta
-~|~ \Delta(t)
-~|~ \nabla
-~|~ \nabla(t)
-~|~ X(d)
-~|~ \nu  X(x{:}D:=d).~\varphi
-~|~ \mu  X(x{:}D:=d).~\varphi
-\end{array}
-\]
-
-Here, $\alpha$ is an action formula, $X$ is a (parameterised) propositional variable, $D$ is a
-sort, $x$ is a data variable of sort $D$, and $c$, $t$ and $d$ are data expressions of sort
-$bool$, $real$ and $D$, respectively. The following table gives the correspondence between
-state formulas and their internal ATerm format.
-
-%--- state formula ---%
-\[
-\begin{array}{ll}
-\mathtt{<DataExpr>                                        } & c                              \\
-\mathtt{StateTrue                                         } & true                           \\
-\mathtt{StateFalse                                        } & false                          \\
-\mathtt{StateNot(<StateFrm>)                              } & \neg \varphi                   \\
-\mathtt{StateAnd(<StateFrm>, <StateFrm>)                  } & \varphi \wedge \varphi         \\
-\mathtt{StateOr(<StateFrm>, <StateFrm>)                   } & \varphi \vee \varphi           \\
-\mathtt{StateImp(<StateFrm>, <StateFrm>)                  } & \varphi \Rightarrow \varphi    \\
-\mathtt{StateForall(<DataVarId>+, <StateFrm>)             } & \forall x{:}D .\varphi         \\
-\mathtt{StateExists(<DataVarId>+, <StateFrm>)             } & \exists x{:}D .\varphi         \\
-\mathtt{StateMust(<RegFrm>, <StateFrm>)                   } & \langle\alpha\rangle \varphi   \\
-\mathtt{StateMay(<RegFrm>, <StateFrm>)                    } & [\alpha] \varphi               \\
-\mathtt{StateYaled                                        } & \nabla                         \\
-\mathtt{StateYaledTimed(<DataExpr>)                       } & \nabla(t)                      \\
-\mathtt{StateDelay                                        } & \Delta                         \\
-\mathtt{StateDelayTimed(<DataExpr>)                       } & \Delta(t)                      \\
-\mathtt{StateVar(<String>, <DataExpr>\ast)                } & X(d)                           \\
-\mathtt{StateNu(<String>, <DataVarIdInit>\ast, <StateFrm>)} & \nu  X(x{:}D:=d).~\varphi      \\
-\mathtt{StateMu(<String>, <DataVarIdInit>\ast, <StateFrm>)} & \mu  X(x{:}D:=d).~\varphi
-\end{array}
-\]
+\input{pbes_translate.tex}
 
 \end{document}

@@ -483,6 +483,18 @@ using atermpp::list_arg2;
   }
 
   inline
+  state_formula yaled()
+  {
+    return state_formula(gsMakeStateYaled());
+  }
+
+  inline
+  state_formula yaled_timed(data_expression t)
+  {
+    return state_formula(gsMakeStateYaledTimed(t));
+  }
+
+  inline
   state_formula delay()
   {
     return state_formula(gsMakeStateDelay());

@@ -321,4 +321,4 @@ code fragment illustrates this.
 
 [endsect] [/ Programming with terms]
 
-[/ xinclude autodoc.boostbook]
+[xinclude autodoc.boostbook]
