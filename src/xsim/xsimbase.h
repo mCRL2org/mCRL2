@@ -249,9 +249,6 @@ class SimulatorViewDLLInterface: public SimulatorViewInterface
 class XSimViewsDLL
 {
 public:
-	XSimViewsDLL();
-	/* Constructor */
-
 	~XSimViewsDLL();
 	/* Destructor
 	 * Unregisters every View in views if it is linked to a

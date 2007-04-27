@@ -35,6 +35,7 @@ alias configuration : : <toolset>darwin :
          <include>$(TOP)/build/workarounds
          <cxxflags>"-std=c++98 -ansi"
          <debug-symbols>on:<cxxflags>"-ggdb"
+         <linkflags>-mmacosx_version_min=10.3
        ;
 
 # Default gcc (known to work on Linux)

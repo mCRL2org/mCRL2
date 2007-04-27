@@ -40,10 +40,6 @@ void SimulatorViewDLLInterface::SetXSimViewsDLL(XSimViewsDLL *dll)
 	xsimdll = dll;
 }
 
-XSimViewsDLL::XSimViewsDLL()
-{
-}
-
 XSimViewsDLL::~XSimViewsDLL()
 {
 	list<SimulatorInterface *>::iterator j = sims.begin();
