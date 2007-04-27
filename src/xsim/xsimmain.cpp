@@ -913,7 +913,16 @@ void XSimMain::OnTrace( wxCommandEvent& /* event */ )
 
 void XSimMain::OnLoadView( wxCommandEvent& /* event */ )
 {
-    wxFileDialog dialog( this, wxT("Select a View Plugin..."), wxT(""), wxT(""), wxT("Dynamic Libraries (*.so,*.dll)|*.so;*.dll|All Files|*.*"));
+#if defined(__WINDOWS__)
+    static wxString filter("Dynamic Libraries (*.dll)|*.so;*.dll;|All Files|*.*", wxConvLocal);
+#else
+# if defined(__WXMAC__)
+    static wxString filter("Dynamic Libraries (*.dylib)|*.dylib|All Files|*.*", wxConvLocal);
+# endif
+    static wxString filter("Dynamic Libraries (*.so)|*.so|All Files|*.*", wxConvLocal);
+#endif
+
+    wxFileDialog dialog( this, wxT("Select a View Plugin..."), wxT(""), wxT(""), filter);
 
     dialog.SetDirectory(wxString(wxT(PLUGIN_DIRECTORY), wxConvLocal));
 

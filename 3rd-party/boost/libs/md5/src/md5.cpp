@@ -271,9 +271,9 @@ void md5::digest_type::reset(const hex_str_value_type& a_hex_str_value)
     {
         unsigned int value;
 
-        int n = sscanf(&a_hex_str_value[i*2], "%02x", &value);
-
-        assert(n == 1 && value <= 0xff);
+        if (sscanf(&a_hex_str_value[i*2], "%02x", &value) != 1) {
+          assert(value <= 0xff);
+        }
 
         the_value[i] = static_cast<uint8_t>(value);
     }
