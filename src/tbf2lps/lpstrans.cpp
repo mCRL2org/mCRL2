@@ -297,7 +297,7 @@ static ATermAppl convert_lps(ATermAppl spec, ATermList typelist, ATermList *ids)
 			ATermAppl val = dataterm2ATermAppl(ATAgetFirst(l),o,typelist);
 			if ( !ATisEqual(par,val) )
 			{
-				n = ATinsert(n,(ATerm) gsMakeDataVarId(par,val));
+				n = ATinsert(n,(ATerm) gsMakeDataVarIdInit(par,val));
 			}
 		}
 		n = ATreverse(n);
@@ -320,7 +320,7 @@ static ATermList convert_init(ATermAppl spec, ATermList typelist, ATermList * /*
 	{
 		ATermAppl v = ATAgetFirst(vars);
 		l = ATinsert(l,
-			(ATerm) gsMakeDataVarId(
+			(ATerm) gsMakeDataVarIdInit(
 				gsMakeDataVarId(ATAgetArgument(v,0),gsMakeSortId(ATAgetArgument(v,1))),
 				dataterm2ATermAppl(ATAgetFirst(vals),ATmakeList0(),typelist)
 			)

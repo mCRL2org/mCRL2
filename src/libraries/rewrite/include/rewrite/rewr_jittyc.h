@@ -36,6 +36,16 @@ class RewriterCompilingJitty: public Rewriter
 		ATermAppl *int2term;
 		ATermList *jittyc_eqns;
 
+		ATermTable int2ar_idx;
+		unsigned int ar_size;
+		ATermAppl *ar;
+		ATermAppl build_ar_expr(ATerm expr, ATermAppl var);
+		ATermAppl build_ar_expr_aux(ATermList eqn, unsigned int arg, unsigned int arity);
+		ATermAppl build_ar_expr(ATermList eqns, unsigned int arg, unsigned int arity);
+		bool always_rewrite_argument(ATermInt opid, unsigned int arity, unsigned int arg);
+		bool calc_ar(ATermAppl expr);
+		void fill_always_rewrite_array();
+
 		char *file_c;
 		char *file_o;
 		char *file_so;
@@ -51,12 +61,16 @@ class RewriterCompilingJitty: public Rewriter
 		int write_tree(FILE *f, ATermAppl tree, int *num_states);
 		void tree2dot(ATermAppl tree, char *name, char *filename);
 		ATermAppl create_tree(ATermList rules, int opid, int arity);
-		ATermList create_strategy(ATermList rules, int opid);
+		ATermList create_strategy(ATermList rules, int opid, unsigned int arity, unsigned int nfs);
 #endif
 
-                bool opid_is_nf(ATermInt opid, unsigned int num_args);
-                std::pair<unsigned int,std::string> calc_inner_terms(ATermList args, int startarg, ATermList nnfvars, bool rewr);
-                std::pair<bool,std::string> calc_inner_term(ATerm t, int startarg, ATermList nnfvars, bool rewr = true);
+		unsigned int get_base_nfs(ATermInt opid, unsigned int arity);
+		unsigned int extend_nfs(unsigned int nfs, ATermInt opid, unsigned int arity);
+		bool opid_is_nf(ATermInt opid, unsigned int num_args);
+		unsigned int calc_nfs_list(ATermList args, int startarg, ATermList nnfvars);
+		bool calc_nfs(ATerm t, int startarg, ATermList nnfvars);
+		std::pair<unsigned int,std::string> calc_inner_terms(ATermList args, int startarg, ATermList nnfvars, unsigned int rewr);
+		std::pair<bool,std::string> calc_inner_term(ATerm t, int startarg, ATermList nnfvars, bool rewr = true);
 		void calcTerm(FILE *f, ATerm t, int startarg, ATermList nnfvars, bool rewr = true);
 		void implement_tree_aux(FILE *f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity, bool *used, ATermList nnfvars);
 		void implement_tree(FILE *f, ATermAppl tree, int arity, int d, int opid, bool *used);

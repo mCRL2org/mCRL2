@@ -641,7 +641,7 @@ static ATerm add_to_full_queue(ATerm state)
    * Let N be the size of the queue and M the number of states from which
    * we can choose. (Note that N <= M; otherwise every state is simply in
    * the queue. We show that addition of state i, with N < i <= M, should
-   * be done with chance i/N and at random in the queue. With induction
+   * be done with chance N/i and at random in the queue. With induction
    * on the difference between M-N we show that doing so leads to a
    * uniform distribution (i.e. every state has chance N/M of being in the
    * queue):
