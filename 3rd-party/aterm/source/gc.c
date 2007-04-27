@@ -211,7 +211,7 @@ VOIDCDECL mark_phase()
   ATerm *start, *stop;
   ProtEntry *prot;
 
-#ifdef _MSC_VER && WIN32
+#if defined(_MSC_VER) && defined(WIN32)
 
   unsigned int r_eax, r_ebx, r_ecx, r_edx, \
     r_esi, r_edi, r_esp, r_ebp;
@@ -324,7 +324,7 @@ VOIDCDECL mark_phase_young()
   ATerm *start, *stop;
   ProtEntry *prot;
 
-#ifdef _MSC_VER && WIN32
+#if defined(_MSC_VER) && defined(WIN32)
 
   unsigned int r_eax, r_ebx, r_ecx, r_edx, \
     r_esi, r_edi, r_esp, r_ebp;
