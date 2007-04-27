@@ -918,8 +918,9 @@ void XSimMain::OnLoadView( wxCommandEvent& /* event */ )
 #else
 # if defined(__WXMAC__)
     static wxString filter("Dynamic Libraries (*.dylib)|*.dylib|All Files|*.*", wxConvLocal);
-# endif
+# else
     static wxString filter("Dynamic Libraries (*.so)|*.so|All Files|*.*", wxConvLocal);
+# endif
 #endif
 
     wxFileDialog dialog( this, wxT("Select a View Plugin..."), wxT(""), wxT(""), filter);
