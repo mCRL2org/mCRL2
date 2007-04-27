@@ -7,6 +7,7 @@ alias xsim_trace_view : : <wx>no ;
 lib xsim_trace_view
        : xsimtracedll.cpp
          /libraries//nextstate
+         /tools/xsim//xsim_base
          /site-config//wx_base
        : <include>../..
          <toolset>darwin:<bundle>yes
