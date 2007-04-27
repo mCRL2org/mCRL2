@@ -30,14 +30,10 @@ class SettingsDialog: public wxDialog {
     wxColorButton* mkButton;  // Mark colour
     wxColorButton* ndButton;  // Node (state) colour
     wxColorButton* ueButton;  // Up edge (backpointer) colour
-    wxColorButton* scsButton; // Simulation Current State colour
-    wxColorButton* spsButton; // Simulation Possible State colour
-    wxColorButton* sssButton; // Simulation Selected State colour
-    wxColorButton* shsButton; // Simulation Historic State colour
-    wxColorButton* sdeButton; // Simulation historic Downedge colour
-    wxColorButton* sueButton; // Simulation historic Upedge colour
-    wxColorButton* speButton; // Simulation Possible Edge colour
-    wxColorButton* sseButton; // Simulation Selected Edge colour
+    wxColorButton* scButton;  // Simulation Current colour
+    wxColorButton* spButton;  // Simulation Possible colour
+    wxColorButton* ssButton;  // Simulation Selected colour
+    wxColorButton* shButton;  // Simulation History colour
     wxSpinCtrl*	   brSpin;
     wxSpinCtrl*    nsSpin;
     wxSpinCtrl*	   obSpin;
@@ -45,6 +41,7 @@ class SettingsDialog: public wxDialog {
     wxSpinCtrl*	   trSpin;
     void setupClrPanel(wxPanel* panel);
     void setupParPanel(wxPanel* panel);
+    void setupSimPanel(wxPanel* panel);
     void setupPfmPanel(wxPanel* panel);
     wxColour RGB_to_wxC(Utils::RGB_Color c) const;
     Utils::RGB_Color wxC_to_RGB(wxColour c) const;

@@ -440,7 +440,7 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
   // Draw previous states of the simulation, in the colour specified in the
   // settings (default: white)
   float ns = settings->getFloat(NodeSize);
-  RGB_Color hisStateColor = settings->getRGB(SimStateColor);
+  RGB_Color hisStateColor = settings->getRGB(SimPrevColor);
   glColor4ub(hisStateColor.r, hisStateColor.g, hisStateColor.b, 255);
   
   for (size_t i = 0; i < historicStates.size() - 1; ++i) {
@@ -457,7 +457,7 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
  
   // Draw the current state.
   //RGB_Color hisStateColor = settings->getRGB(SimStateColor);
-  RGB_Color currStateColor = settings->getRGB(SimCurrStateColor);
+  RGB_Color currStateColor = settings->getRGB(SimCurrColor);
   glColor4ub(currStateColor.r, currStateColor.g, currStateColor.b, 255);
   Point3D currentPos = currState->getPositionAbs();
   glPushMatrix();
@@ -790,7 +790,7 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
         glColor4ub(c.r, c.g, c.b, 255);
       }
       else {
-        RGB_Color transColor = settings->getRGB(SimUpEdgeColor);
+        RGB_Color transColor = settings->getRGB(SimPrevColor);
         glColor4ub(transColor.r, transColor.g, transColor.b, 255);
       }
       drawBackPointer(beginState, endState);
@@ -801,7 +801,7 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
         glColor4ub(c.r, c.g, c.b, 255);
       }
       else {
-        RGB_Color transColor = settings->getRGB(SimDownEdgeColor);
+        RGB_Color transColor = settings->getRGB(SimPrevColor);
         glColor4ub(transColor.r, transColor.g, transColor.b, 255);
       }
       drawForwardPointer(beginState, endState);
@@ -819,12 +819,12 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
     // Draw transition from beginState to endState
     if (currTrans->isBackpointer() && draw_bp) {
       if (currTrans == chosenTrans) {
-        RGB_Color c = settings->getRGB(SimSelEdgeColor);
+        RGB_Color c = settings->getRGB(SimSelColor);
         glColor4ub(c.r, c.g, c.b, 255);
         glLineWidth(2.0);
       }
       else {
-        RGB_Color c = settings->getRGB(SimPosEdgeColor);
+        RGB_Color c = settings->getRGB(SimPosColor);
         glColor4ub(c.r, c.g, c.b, 255);
       }
       if (isMarked(currTrans)) {
@@ -836,12 +836,12 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
     }
     if (!currTrans->isBackpointer() && draw_fp) {
       if (currTrans == chosenTrans) {
-        RGB_Color c  = settings->getRGB(SimSelEdgeColor);
+        RGB_Color c  = settings->getRGB(SimSelColor);
         glColor4ub(c.r, c.g, c.b, 255);
         glLineWidth(2.0);
       }
       else {
-        RGB_Color c = settings->getRGB(SimPosEdgeColor);
+        RGB_Color c = settings->getRGB(SimPosColor);
         glColor4ub(c.r, c.g, c.b, 255);
       }
       if (isMarked(currTrans)) {
@@ -854,7 +854,7 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
     
     if (!isMarked(endState)) {
       if (currTrans != chosenTrans) {
-        RGB_Color c = settings->getRGB(SimPosStateColor);
+        RGB_Color c = settings->getRGB(SimPosColor);
         glColor4ub(c.r, c.g, c.b, 255);
         Point3D p = endState->getPositionAbs();
         glPushMatrix();
@@ -865,7 +865,7 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
       }
       else {
         // Draw the chosen state bigger and in another colour.
-        RGB_Color c = settings->getRGB(SimSelStateColor);
+        RGB_Color c = settings->getRGB(SimSelColor);
         glColor4ub(c.r, c.g, c.b, 255);
         Point3D p = endState->getPositionAbs();
         glPushMatrix();
