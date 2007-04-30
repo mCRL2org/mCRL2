@@ -5,7 +5,7 @@
 // ----------------------------------------------------------------------
 //
 // file          : atermpp/table.h
-// date          : 25-10-2005
+// date          : 30-4-2007
 // version       : 1.0
 //
 // author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
@@ -19,6 +19,7 @@
 #ifndef ATERM_TABLE_H
 #define ATERM_TABLE_H
 
+#include <boost/utility.hpp>
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
 
@@ -27,7 +28,7 @@ namespace atermpp
   //---------------------------------------------------------//
   //                     table
   //---------------------------------------------------------//
-  class table
+  class table: boost::noncopyable
   {
    protected:
       ATermTable m_table;
