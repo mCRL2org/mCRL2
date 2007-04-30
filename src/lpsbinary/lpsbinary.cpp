@@ -644,8 +644,10 @@ specification binary(const lps::specification& spec,
   gsVerboseMsg("Executing binary...\n");
   gsVerboseMsg("Using rewrite strategy %d\n", options.strategy);
   specification result = spec;
-  table new_parameters_table = table(128, 50);
-  table enumerated_elements_table = table(128,50);
+  // table new_parameters_table = table(128, 50); Table is non copyable since 30/4/2007.
+  // table enumerated_elements_table = table(128,50);
+  table new_parameters_table(128, 50);
+  table enumerated_elements_table(128,50);
   
   Rewriter* rewriter = createRewriter(spec.data(), options.strategy);
   EnumeratorStandard enumerator = EnumeratorStandard(spec, rewriter);
