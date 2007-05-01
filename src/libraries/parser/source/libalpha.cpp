@@ -1195,6 +1195,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     
     l = filter_comm_list(l,C);
     a = ATsetArgument(a,(ATerm)p,1);
+    a = gsApplyAlpha(a);
     ATtablePut(alphas,(ATerm) a,(ATerm)l);
 
     {
@@ -1205,7 +1206,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     
     V = optimize_allow_list(V,untypeMAL(l));
     a = gsMakeAllow(V,a);
-    ATtablePut(alphas,(ATerm) a,(ATerm)filter_comm_list(l,C));
+    ATtablePut(alphas,(ATerm) a,(ATerm)filter_allow_list(l,V));
     return a;
   } 
   else if ( gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) ){
@@ -1250,7 +1251,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     return a;
   }
   else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsSeq(a) 
-	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
+	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsBInit(a)){
     // all distributing rules together
     short ia1=0,ia2=1,args=2;
     if(gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSum(a)) { ia1=1; ia2=2; }
@@ -1410,7 +1411,7 @@ static ATermAppl PushComm(ATermList C, ATermAppl a){
     }
   } 
   else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsSeq(a)
-	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
+	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsBInit(a)){
     // all distributing rules together
     short ia1=0,ia2=1,args=2;
     if(gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSum(a)) { ia1=1; ia2=2; }
