@@ -680,6 +680,7 @@ namespace squadt {
       s->Show(this, false, true);
       s->Detach(this);
       s->Layout();
+      GetParent()->Refresh();
 
       toggle_scrollbar_helper();
 
