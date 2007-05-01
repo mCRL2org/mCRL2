@@ -426,7 +426,7 @@ void GarageFrame::OnMoveWindow( wxMoveEvent & )
 #ifdef GARAGEFRAMEDLL
 static XSimViewsDLL *xsvdll;
 
-void SimulatorViewDLLAddView(SimulatorInterface *Simulator)
+extern "C" void SimulatorViewDLLAddView(SimulatorInterface *Simulator)
 {
           GarageFrame *v;
           v = new GarageFrame(
@@ -436,12 +436,12 @@ void SimulatorViewDLLAddView(SimulatorInterface *Simulator)
           xsvdll->Add(v,Simulator);
 }
 
-void SimulatorViewDLLInit()
+extern "C" __attribute__((constructor)) void SimulatorViewDLLInit()
 {
           xsvdll = new XSimViewsDLL;
 }
 
-void SimulatorViewDLLCleanUp()
+extern "C" __attribute__((destructor)) void SimulatorViewDLLCleanUp()
 {
           delete xsvdll;
 }

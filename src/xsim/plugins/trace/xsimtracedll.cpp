@@ -217,7 +217,7 @@ void XSimTraceDLL::OnListItemActivated( wxListEvent &event )
 
 static XSimViewsDLL *xsimdll;
 
-void SimulatorViewDLLAddView(SimulatorInterface *Simulator)
+extern "C" void SimulatorViewDLLAddView(SimulatorInterface *Simulator)
 {
 	XSimTraceDLL *v;
 	v = new XSimTraceDLL(Simulator->MainWindow());
@@ -226,13 +226,13 @@ void SimulatorViewDLLAddView(SimulatorInterface *Simulator)
 	xsimdll->Add(v,Simulator);
 }
 
-void SimulatorViewDLLInit()
+extern "C" __attribute__((constructor)) void SimulatorViewDLLInit()
 {
 	gsEnableConstructorFunctions();
 	xsimdll = new XSimViewsDLL;
 }
 
-void SimulatorViewDLLCleanUp()
+extern "C" __attribute__((destructor)) void SimulatorViewDLLCleanUp()
 {
 	delete xsimdll;
 }
