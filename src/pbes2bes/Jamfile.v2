@@ -11,6 +11,7 @@ exe pbes2bes
          /libraries//parser
          /site-config//boost_program_options
        : <include>.
+         <squadt_support>enable
        ;
 
 install-binaries install

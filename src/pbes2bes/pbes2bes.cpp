@@ -56,14 +56,14 @@ namespace po = boost::program_options;
 
 //Type definitions
 //----------------
-typedef struct{
+struct t_tool_options {
 	string opt_outputformat;
 	string opt_strategy;
 	string infilename;
 	string outfilename;
-} t_tool_options;
+};
 
-typedef struct {
+struct t_instantiations {
 	data_variable_list finite_var;		// List of all finite variables
 	data_variable_list infinite_var;	// List of all infinite variables
 	data_expression_list finite_exp;	// List of all finite expressions
@@ -91,7 +91,7 @@ typedef struct {
 		finite_exp.mark();
 		infinite_exp.mark();
 	}
-} t_instantiations;
+};
 
 
 // Specify how the ATerms in t_instantiations need to be protected using a traits class
@@ -148,28 +148,210 @@ identifier_string create_propvar_name(identifier_string propvar_name, data_expre
 
 equation_system sort_names(vector< identifier_string > names_order, equation_system to_sort);
 
+bool process(t_tool_options const& tool_options) {
+  //Load PBES
+  pbes pbes_spec = load_pbes(tool_options);
+
+  //Process the pbes
+  pbes_spec = create_bes(pbes_spec, tool_options);
+
+  //Save PBES
+  save_pbes(pbes_spec, tool_options);
+
+  return true;
+}
+
+// SQuADT protocol interface
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+#include <utilities/mcrl2_squadt.h>
+
+class squadt_interactor : public mcrl2_squadt::tool_interface {
+
+  private:
+
+    static const char*  pbes_file_for_input;  ///< file containing an LPS
+    static const char*  pbes_file_for_output; ///< file used to write the output to
+
+    enum pbes_output_format {
+      binary,
+      internal,
+      cwi
+    };
+
+    enum transformation_strategy {
+      lazy,
+      finite
+    };
+
+    static const char* option_transformation_strategy;
+    static const char* option_selected_output_format;
+
+  private:
+
+    boost::shared_ptr < sip::datatype::enumeration > transformation_method_enumeration;
+    boost::shared_ptr < sip::datatype::enumeration > output_format_enumeration;
+
+  public:
+
+    /** \brief constructor */
+    squadt_interactor();
+
+    /** \brief configures tool capabilities */
+    void set_capabilities(sip::tool::capabilities&) const;
+
+    /** \brief queries the user via SQuADT if needed to obtain configuration information */
+    void user_interactive_configuration(sip::configuration&);
+
+    /** \brief check an existing configuration object to see if it is usable */
+    bool check_configuration(sip::configuration const&) const;
+
+    /** \brief performs the task specified by a configuration */
+    bool perform_task(sip::configuration&);
+};
+
+const char* squadt_interactor::pbes_file_for_input  = "pbes_in";
+const char* squadt_interactor::pbes_file_for_output = "pbes_out";
+
+const char* squadt_interactor::option_transformation_strategy = "transformation_strategy";
+const char* squadt_interactor::option_selected_output_format  = "selected_output_format";
+
+squadt_interactor::squadt_interactor() {
+  transformation_method_enumeration.reset(new sip::datatype::enumeration("lazy"));
+
+  transformation_method_enumeration->add_value("finite");
+
+  output_format_enumeration.reset(new sip::datatype::enumeration("binary"));
+
+  output_format_enumeration->add_value("internal");
+  output_format_enumeration->add_value("cwi");
+}
+
+void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
+  c.add_input_combination(pbes_file_for_input, sip::mime_type("pbes", sip::mime_type::application), sip::tool::category::transformation);
+}
+
+void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
+  using namespace sip;
+  using namespace sip::layout;
+  using namespace sip::layout::elements;
+
+  layout::tool_display::sptr display(new layout::tool_display);
+
+  /* Create and add the top layout manager */
+  layout::vertical_box::aptr top(new layout::vertical_box);
+
+  /* First column */
+  layout::manager* h = new layout::horizontal_box();
+
+  h->add(new label("Output format : "));
+  
+  squadt_utility::radio_button_helper < pbes_output_format >
+        format_selector(h, binary, "binary");
+
+  format_selector.associate(h, internal, "internal");
+  format_selector.associate(h, cwi, "cwi");
+
+  if (c.option_exists(option_selected_output_format)) {
+    format_selector.set_selection(static_cast < pbes_output_format > (
+        c.get_option_argument< size_t >(option_selected_output_format, 0)));
+  }
+  
+  /* Attach row */
+  top->add(h, margins(0,5,0,5));
+
+  h = new layout::horizontal_box();
+
+  top->add(new label("LTS transformation:"));
+
+  squadt_utility::radio_button_helper < transformation_strategy >
+        transformation_selector(top, lazy, "lazy: only boolean equations reachable from the initial state");
+
+  transformation_selector.associate(top, finite, "all possible boolean equations");
+
+  if (c.option_exists(option_transformation_strategy)) {
+    transformation_selector.set_selection(static_cast < transformation_strategy > (
+        c.get_option_argument< size_t >(option_transformation_strategy, 0)));
+  }
+  
+  button* okay_button = new button("OK");
+
+  top->add(okay_button, layout::top);
+
+  display->set_manager(top);
+
+  m_communicator.send_display_layout(display);
+
+  /* Wait until the ok button was pressed */
+  okay_button->await_change();
+
+  /* Add output file to the configuration */
+  if (c.output_exists(pbes_file_for_output)) {
+    sip::object& output_file = c.get_output(pbes_file_for_output);
+ 
+    output_file.set_location(c.get_output_name(".pbes"));
+  }
+  else {
+    c.add_output(pbes_file_for_output, sip::mime_type("pbes", sip::mime_type::application), c.get_output_name(".pbes"));
+  }
+
+  /* Add lps file when output is FSM format or when the output is mCRL2 and the input is Aldebaran or mCRL */
+  c.add_option(option_transformation_strategy).append_argument(transformation_method_enumeration,
+                                static_cast < transformation_strategy > (transformation_selector.get_selection()));
+  c.add_option(option_selected_output_format).append_argument(output_format_enumeration,
+                                static_cast < pbes_output_format > (format_selector.get_selection()));
+}
+
+bool squadt_interactor::check_configuration(sip::configuration const& c) const {
+  bool result = true;
+
+  result &= c.input_exists(pbes_file_for_input);
+  result &= c.output_exists(pbes_file_for_output);
+  result &= c.option_exists(option_transformation_strategy);
+  result &= c.option_exists(option_selected_output_format);
+
+  return (result);
+}
+
+bool squadt_interactor::perform_task(sip::configuration& c) {
+  static std::string strategies[] = { "lazy", "finite" };
+  static std::string formats[]    = { "binary", "internal", "cwi" };
+
+  t_tool_options tool_options;
+
+  tool_options.opt_outputformat = strategies[c.get_option_argument< size_t >(option_transformation_strategy)];
+  tool_options.opt_strategy     = formats[c.get_option_argument< size_t >(option_selected_output_format)];
+  tool_options.infilename       = c.get_input(pbes_file_for_input).get_location();
+  tool_options.outfilename      = c.get_output(pbes_file_for_output).get_location();
+
+  bool result = process(tool_options);
+ 
+  send_hide_display();
+
+  return (result);
+}
+#endif
+
 //Main Program
 //------------
 int main(int argc, char** argv)
 {
-	//Initialise ATerm library and lowlevel-functions
-	ATerm bottom;
-	ATinit(argc, argv, &bottom);
-	gsEnableConstructorFunctions();
+  //Initialise ATerm library and lowlevel-functions
+  ATerm bottom;
+  ATinit(argc, argv, &bottom);
+  gsEnableConstructorFunctions();
 
-	//Parse command line
-	t_tool_options tool_options = parse_command_line(argc, argv);
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  if (!mcrl2_squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+#endif
+    //parse command line
+    if (!process(parse_command_line(argc, argv))) {
+      return 1;
+    }
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  }
+#endif
 
-	//Load PBES
-	pbes pbes_spec = load_pbes(tool_options);
-
-	//Process the pbes
-	pbes_spec = create_bes(pbes_spec, tool_options);
-
-	//Save PBES
-	save_pbes(pbes_spec, tool_options);
-
-	return 0;
+  return 0;
 }
 
 //function create_bes

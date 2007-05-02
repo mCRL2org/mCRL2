@@ -82,7 +82,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   return starter.perform_entry();
 }
 
-squadt_interactor* interactor;
+std::auto_ptr < squadt_interactor > interactor;
 #endif
 
 #define PROGRAM_NAME "xsim"
@@ -276,7 +276,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   squadt_utility::entry_wrapper starter(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 
-  interactor = new squadt_interactor(starter);
+  interactor.reset(new squadt_interactor(starter));
 
   if (!interactor->try_interaction(lpCmdLine)) {
 #endif
@@ -297,7 +297,7 @@ int main(int argc, char **argv) {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   squadt_utility::entry_wrapper starter(argc, argv);
 
-  interactor = new squadt_interactor(starter);
+  interactor.reset(new squadt_interactor(starter));
 
   if(!interactor->try_interaction(argc, argv)) {
 #endif
