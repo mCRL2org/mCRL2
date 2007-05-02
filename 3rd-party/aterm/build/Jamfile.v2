@@ -40,7 +40,8 @@ alias headers
        : [ glob ../include/*.h ]
        :
        :
-       :  <include>../include
+       : <include>../include
+         <address-model>64:<define>AT_64BIT
        ;
 
 explicit aterm.main aterm.alias ;
