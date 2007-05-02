@@ -1,0 +1,75 @@
+// --- bundle.h -----------------------------------------------------
+// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// ---------------------------  *  ----------------------------------
+
+#ifndef BUNDLE_H
+#define BUNDLE_H
+
+#include <cstddef>
+#include <map>
+#include <vector>
+using namespace std;
+#include "edge.h"
+#include "cluster.h"
+
+//class Cluster;
+
+class Bundle
+{
+public:
+	// -- constructors and destructors ------------------------------
+    Bundle();
+    Bundle( const int &idx );
+    Bundle( const Bundle &bdl );
+    virtual ~Bundle();
+	
+    // -- set functions ---------------------------------------------
+    void setIndex( const int &idx );
+    void setParent( Bundle* p );
+    void addChild( Bundle* c );
+    void setInCluster( Cluster* in );
+    void setOutCluster( Cluster* out );
+    void addEdge( Edge* e );
+    void setEdges( const vector< Edge* > &e );
+    void updateLabel(
+        const string &lbl,
+        const string &status );
+    
+    // -- get functions ---------------------------------------------
+    int getIndex();
+    Bundle* getParent();
+    int getSizeChildren();
+    Bundle* getChild( const int &idx );
+    Cluster* getInCluster();
+    Cluster* getOutCluster();
+    int getSizeEdges();
+    Edge* getEdge( const int &idx );
+    void getLabels( vector< string > &lbls );
+    void getLabels( 
+        vector< string > &lbls,
+        vector< string > &status );
+    void getLabels( 
+        string &separator,
+        string &lbls );
+    
+    // -- clear functions -------------------------------------------
+    void clearParent();
+    void clearChildren();
+    void clearInCluster();
+    void clearOutCluster();
+    void clearEdges();
+
+protected:
+    // -- data members ----------------------------------------------
+	int index;
+    Bundle* parent;
+    vector< Bundle* > children; // association
+    Cluster* inCluster;         // association
+	Cluster* outCluster;        // association
+    vector< Edge* > edges;      // association
+    map< string, string > labels;
+};
+
+#endif
+
+// -- end -----------------------------------------------------------

@@ -1,0 +1,131 @@
+// --- settingsframe.h ----------------------------------------------
+// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// ---------------------------  *  ----------------------------------
+
+#ifndef SETTINGSFRAME_H
+#define SETTINGSFRAME_H
+
+#include <vector>
+using namespace std;
+
+#include <wx/wx.h>
+#include <wx/notebook.h>
+#include "colorbutton.h"
+#include "glcanvas.h"
+#include "popupframe.h"
+#include "spinctrlfloat.h"
+
+class SettingsFrame : public PopupFrame
+{
+public:
+    // -- constructors and desctructor ------------------------------
+    SettingsFrame(
+        Mediator* m,
+        wxWindow* parent,
+        wxWindowID id,
+        wxString title,
+        wxPoint position,
+        wxSize size );
+    virtual ~SettingsFrame();
+
+    // -- set functions ---------------------------------------------
+    void setGeneral();
+    void setClustTree();
+    void setBarTree();
+    void setArcDiagram();
+    void setSimulator();
+    void setDgrmEditor();
+
+protected:
+    // -- event handlers --------------------------------------------
+    void onButton( wxCommandEvent &e );
+    void onCheckBox( wxCommandEvent &e );
+    void onComboBox( wxCommandEvent &e );
+    void onSpinCtrl( wxSpinEvent &e );
+    
+private:
+    // -- utility functions -----------------------------------------
+    void updateSettingsGeneral();
+    void updateSettingsClustTree();
+    void updateSettingsBarTree();
+    void updateSettingsArcDiagram();
+    void updateSettingsSimulator();
+    void updateSettingsDgrmEditor();
+
+    // -- GUI initialization ----------------------------------------
+    void initFrame();
+    void initPanelGeneral();
+    void initPanelClustTree();
+    void initPanelBarTree();
+    void initPanelArcDiagram();
+    void initPanelSimulator();
+    void initPanelDgrmEditor();
+
+    wxBoxSizer*       sizerFrame;
+    wxScrolledWindow* panelNotebook;
+    wxBoxSizer*       sizerNotebook;
+    wxNotebook*       notebook;
+    
+    wxScrolledWindow* panelGeneral;
+    wxColorButton*    buttonColorBG;
+    wxColorButton*    buttonColorTxt;
+    wxComboBox*       comboBoxSizeTxt;
+    wxSpinCtrlFloat*  spinCtrlAnimSpd;
+    
+    wxScrolledWindow* panelClustTree;
+    wxCheckBox*       checkBoxShowCT;
+    wxCheckBox*       checkBoxAnnotateCT;
+    wxComboBox*       comboBoxColMap;
+
+    wxScrolledWindow* panelBarTree;
+    wxCheckBox*       checkBoxShowBT;
+    wxSpinCtrlFloat*  spinCtrlMagnBT;
+    
+    wxScrolledWindow* panelArcDiagram;
+    wxCheckBox*       checkBoxShowNodes;
+    wxCheckBox*       checkBoxShowArcs;
+    wxColorButton*    buttonColorArcs;
+    wxSpinCtrlFloat*  spinCtrlTrspArcs;
+
+    wxScrolledWindow* panelSimulator;
+    wxComboBox*       comboBoxBlendType;
+
+    wxScrolledWindow* panelDgrmEditor;
+
+    // -- ID's ------------------------------------------------------
+    enum
+    {
+        ID_PANEL_GENERAL,
+        ID_BUTTON_COL_BG,
+        ID_BUTTON_COL_TXT,
+        ID_COMBO_BOX_SIZE_TXT,
+        ID_SPIN_CTRL_ANIM_SPD,
+        
+        ID_PANEL_CLUST_TREE,
+        ID_CHECK_BOX_SHOW_CT,
+        ID_CHECK_BOX_ANNOTATE_CT,
+        ID_COMBO_BOX_COL_MAP,
+        
+        ID_PANEL_BAR_TREE,
+        ID_CHECK_BOX_SHOW_BT,
+        ID_SPIN_CTRL_MAGN_BT,
+        
+        ID_PANEL_ARC_DIAGRAM,
+        ID_CHECK_BOX_SHOW_NODES,
+        ID_CHECK_BOX_SHOW_ARCS,
+        ID_BUTTON_COL_ARCS,
+        ID_SPIN_CTRL_TRSP_ARCS,
+
+        ID_PANEL_SIMULATOR,
+        ID_COMBO_BOX_BLEND_TYPE,
+        
+        ID_PANEL_DGRM_EDITOR,
+    };
+    
+    // -- declare event table ---------------------------------------
+    DECLARE_EVENT_TABLE()
+};
+
+#endif
+
+// -- end -----------------------------------------------------------

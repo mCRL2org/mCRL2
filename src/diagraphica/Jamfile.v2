@@ -1,0 +1,17 @@
+project toolset/diagraphica
+  : build-dir $(BUILD_TOP)/diagraphica
+  ;
+
+alias diagraphica : : <wx>no ;
+
+exe diagraphica
+      : [ glob *.cpp ]
+        /libraries//mcrl2_basic
+        /site-config//wx_gl
+      : <squadt_support>enable
+        <wx>yes
+      ;
+
+install-binaries install
+      : diagraphica
+      ;
