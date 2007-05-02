@@ -1,6 +1,7 @@
 #include <sip/detail/basic_datatype.h>
 
 #include <boost/regex.hpp>
+//#include <boost/xpressive/xpressive_static.hpp>
 
 namespace sip {
 
@@ -43,6 +44,12 @@ namespace sip {
      **/
     enumeration::enumeration(std::string const& s) : m_default_value(0) {
       assert(boost::regex_search(s, boost::regex("\\`[A-Za-z0-9_\\-]+\\'")));
+
+/// \todo
+//using namespace boost;
+//using namespace boost::xpressive;
+
+//      assert(regex_match(s, + (set[ range('A','Z') | range('a','z') | range('0','9') | '_' | '\\' | '-' ])));
 
       m_values.push_back(s);
     }

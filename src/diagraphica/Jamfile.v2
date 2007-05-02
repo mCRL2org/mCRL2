@@ -7,6 +7,8 @@ alias diagraphica : : <wx>no ;
 exe diagraphica
       : [ glob *.cpp ]
         /libraries//mcrl2_basic
+        /libraries/wxe//spinctrlfloat.o
+        /libraries//ticpp
         /site-config//wx_gl
       : <squadt_support>enable
         <wx>yes

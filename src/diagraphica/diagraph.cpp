@@ -139,7 +139,6 @@ bool parse_command_line(int argc, wxChar** argv,
 bool DiaGraph::OnInit()
 // --------------------
 {
-   cerr << "blaat1 \n";
    #ifdef ENABLE_SQUADT_CONNECTIVITY
    if (interactor->is_active()) {
      // set mode
@@ -151,7 +150,6 @@ bool DiaGraph::OnInit()
      // -*- //
      critSect = false;
 
-     cerr << "blaat" << "\n";
      return true;
    }
    #endif
@@ -2855,10 +2853,9 @@ void DiaGraph::clearAttrDomain()
 // implement wxApp
 IMPLEMENT_APP( DiaGraph )
 #else
-
 IMPLEMENT_APP_NO_MAIN( DiaGraph )
 
-#ifdef __WINDOWS__
+# ifdef __WINDOWS__
 extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
                                   HINSTANCE hPrevInstance,                
                                   wxCmdLineArgType lpCmdLine,             
@@ -2875,20 +2872,18 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 
   return (0);
 }
-#else
+# else
 int main(int argc, char **argv) {
   squadt_utility::entry_wrapper starter(argc, argv);
 
   interactor = new squadt_interactor(starter);
 
   if(!interactor->try_interaction(argc, argv)) {
-   cerr << "blaat1 \n";
-  return wxEntry(argc, argv);
+    return wxEntry(argc, argv);
   }
-   cerr << "blaat2 \n";
 
   return 0;
 }
-#endif
+# endif
 #endif
 // -- end -----------------------------------------------------------

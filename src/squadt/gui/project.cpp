@@ -99,7 +99,7 @@ namespace squadt {
     void project::update_object_status(processor::wptr const& w, const wxTreeItemId s) {
       processor::sptr g = w.lock();
 
-      if (g.get() != 0) {
+      if (g.get() != 0 && s.IsOk()) {
         wxTreeItemIdValue cookie; // For wxTreeCtrl traversal
        
         for (wxTreeItemId j = object_view->GetFirstChild(s, cookie); j.IsOk(); j = object_view->GetNextChild(s, cookie)) {

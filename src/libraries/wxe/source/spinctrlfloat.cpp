@@ -1,3 +1,7 @@
+// --- spinctrlfloat.cpp ----------------------------------------------
+// (c) 2006 -  S.W.C. Ploeger, D. Reniers  - Eindhoven Univ. Technology
+// ---------------------------  *  ------------------------------------
+
 #include "spinctrlfloat.h"
 #include <cmath>
 
@@ -10,11 +14,23 @@ int roundToInt( double f )
   return static_cast< int > ( intpart );
 }
 
-wxSpinCtrlFloat::wxSpinCtrlFloat(wxWindow* parent, wxWindowID id, float p_Min, float
-    p_Max, float p_Rate, float p_Init, const wxPoint& pos, const wxSize&
-    size)
-  : wxPanel(parent, -1, pos, size, wxNO_BORDER ), 
-  m_Rate(p_Rate) , m_ID(id)
+wxSpinCtrlFloat::wxSpinCtrlFloat(
+    wxWindow* parent, 
+    wxWindowID id, 
+    double p_Min, 
+    double p_Max, 
+    double p_Rate, 
+    double p_Init, 
+    const wxPoint& pos, 
+    const wxSize&  size)
+    : wxPanel(
+        parent, 
+        wxID_ANY, 
+        pos, 
+        size, 
+        wxNO_BORDER ), 
+      m_Rate(p_Rate), 
+      m_ID(id)
 {
   wxBoxSizer* Sizer = new wxBoxSizer( wxHORIZONTAL );
   m_TextCtrl = new wxTextCtrl( this, 0, wxEmptyString, wxDefaultPosition,
@@ -50,7 +66,7 @@ void wxSpinCtrlFloat::OnEnter( wxCommandEvent& event )
   float f;
   sscanf( str.c_str(), "%f", &f );
 
-  f = min( m_SpinButton->GetMax() * m_Rate, max( f, m_SpinButton->GetMin() * m_Rate ) );
+  f = (std::min)( m_SpinButton->GetMax() * m_Rate, (std::max)( static_cast < double > (f), m_SpinButton->GetMin() * m_Rate ) );
   SetValue( f );
 
   // Create new event with the user specified event id m_ID
@@ -70,7 +86,7 @@ void wxSpinCtrlFloat::OnSpin( wxSpinEvent& event )
   GetParent()->ProcessEvent( NewEvent );
 }
 
-float wxSpinCtrlFloat::GetValue()
+double wxSpinCtrlFloat::GetValue()
 {
   return m_Rate * m_SpinButton->GetValue();
 }
@@ -80,3 +96,5 @@ void wxSpinCtrlFloat::SetValue( float v )
   m_TextCtrl->SetValue( wxString::Format( wxT("%2.1f"), v ) );
   m_SpinButton->SetValue( roundToInt( v/m_Rate ) );
 }
+
+// -- end -----------------------------------------------------------

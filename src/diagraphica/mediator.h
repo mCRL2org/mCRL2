@@ -325,6 +325,8 @@ public:
         CLUST_COMBN_PLOT,
     };
 
+    virtual ~Mediator() {}
+
 protected:
     // -- init colleagues -------------------------------------------
     virtual void initColleagues() = 0;

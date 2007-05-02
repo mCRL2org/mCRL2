@@ -5,6 +5,10 @@
 
 #include "frame.h"
 
+// For compatibility with older wxWidgets versions (pre 2.8)
+#if (wxMINOR_VERSION < 8)
+# define wxFD_OPEN wxOPEN
+#endif
 
 // -- constructors and destructor -----------------------------------
 

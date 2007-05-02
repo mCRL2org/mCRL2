@@ -1,17 +1,31 @@
+// --- spinctrlfloat.h ------------------------------------------------
+// (c) 2006 -  S.W.C. Ploeger, D. Reniers  - Eindhoven Univ Technology
+// ---------------------------  *  ------------------------------------
+
+
 #ifndef SPINCTRLFLOAT_H
 #define SPINCTRLFLOAT_H
+
+#include <cmath>
 #include <string>
 #include <wx/wx.h>
 #include <wx/spinbutt.h>
+#include <wx/spinctrl.h>
 
 class wxSpinCtrlFloat : public wxPanel
 {
   public:
-    wxSpinCtrlFloat(wxWindow* parent, wxWindowID id, float p_Min, float p_Max,
-	float p_Rate, float p_Init, const wxPoint& pos = wxDefaultPosition,
-	const wxSize& size = wxDefaultSize);
+    wxSpinCtrlFloat(
+        wxWindow* parent, 
+        wxWindowID id, 
+        double p_Min, 
+        double p_Max,
+        double p_Rate, 
+        double p_Init, 
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize );
 
-    float GetValue();
+    double GetValue();
     void SetValue(float v);
 protected:
     void OnEnter(wxCommandEvent & event);
@@ -19,7 +33,7 @@ protected:
     wxTextCtrl* m_TextCtrl;
     wxSpinButton* m_SpinButton;
 	
-    float m_Rate;
+    double m_Rate;
     int m_Min;
     int m_Max;
     int m_ID;

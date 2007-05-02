@@ -30,6 +30,7 @@ namespace squadt {
     void main::manual() {
       squadt::GUI::manual* manual_window = new squadt::GUI::manual(this);
 
+      manual_window->CentreOnParent();
       manual_window->Show();
     }
 
