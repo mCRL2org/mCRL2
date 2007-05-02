@@ -8,6 +8,8 @@
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
 # define wxFD_OPEN wxOPEN
+# define wxFD_SAVE wxSAVE
+# define wxFD_OVERWRITE_PROMPT wxOVERWRITE_PROMPT
 #endif
 
 // -- constructors and destructor -----------------------------------
