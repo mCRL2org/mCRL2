@@ -248,9 +248,9 @@ static ATermAppl make_ar_and(ATermAppl x, ATermAppl y)
   } else if ( is_ar_false(x) || is_ar_false(y) )
   {
     return make_ar_false();
-  } else {
-    return ATmakeAppl2(afunARand,(ATerm) x,(ATerm) y);
   }
+
+  return ATmakeAppl2(afunARand,(ATerm) x,(ATerm) y);
 }
 
 static ATermAppl make_ar_or(ATermAppl x, ATermAppl y)
@@ -264,9 +264,9 @@ static ATermAppl make_ar_or(ATermAppl x, ATermAppl y)
   } else if ( is_ar_true(x) || is_ar_true(y) )
   {
     return make_ar_true();
-  } else {
-    return ATmakeAppl2(afunARor,(ATerm) x,(ATerm) y);
   }
+
+  return ATmakeAppl2(afunARor,(ATerm) x,(ATerm) y);
 }
 
 static ATermAppl make_ar_var(int var)
