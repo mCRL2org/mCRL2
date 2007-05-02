@@ -7,12 +7,12 @@
 
 
 #ifdef __APPLE__
-    #include <OpenGL/glut.h>
+# include <GLUT/glut.h>
 #else
-	#ifdef WIN32
-		#include <windows.h>
-	#endif
-    #include <GL/glu.h>
+# ifdef WIN32
+#  include <windows.h>
+# endif
+#  include <GL/glu.h>
 #endif
 #include <string>
 using namespace std;

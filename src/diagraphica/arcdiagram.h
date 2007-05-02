@@ -10,7 +10,7 @@
 #include <cmath>
 #include <map>
 #include <vector>
-using namespace std;
+
 #include <wx/timer.h>
 #include "diagram.h"
 #include "graph.h"

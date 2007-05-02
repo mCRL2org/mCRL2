@@ -2,9 +2,9 @@
 // (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
-
-#include "diagraph.h"
 #include <iostream>
+#include <string>
+#include <wx/wx.h>
 #include <wx/cmdline.h>
 #include <wx/msgdlg.h>
 #include <wx/string.h>
@@ -76,6 +76,8 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 
 squadt_interactor* interactor;
 #endif
+
+#include "diagraph.h"
 
 // Parse command line 
 bool parse_command_line(int argc, wxChar** argv,
