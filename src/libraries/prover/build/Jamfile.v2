@@ -24,6 +24,7 @@ alias prover.main
 
 lib prover
        : prover.main
+         /libraries//rewrite
        : <link>static
        :
        : <library>/libraries//rewrite

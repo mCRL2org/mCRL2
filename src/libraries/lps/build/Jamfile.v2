@@ -48,6 +48,8 @@ alias dataelm.main
 
 lib dataelm
        : dataelm.main
+         /libraries//parser
+         /libraries//rewrite
        : <link>static
        :
        : <library>/libraries//parser

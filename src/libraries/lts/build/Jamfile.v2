@@ -21,6 +21,8 @@ alias lts.main
 
 lib lts
        : lts.main
+         /libraries//parser
+         /libraries//svc
        : <link>static
        :
        : <library>/libraries//parser
