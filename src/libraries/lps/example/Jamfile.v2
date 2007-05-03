@@ -16,16 +16,16 @@ exe spec            : spec.cpp            ../../../mcrl22lps/lin_std.cpp ../../.
 exe filter_template : filter_template.cpp                                                               : ;
 exe find            : find.cpp            ../../../mcrl22lps/lin_std.cpp ../../../mcrl22lps/lin_alt.cpp : ;
 exe pbes_test       : pbes_test.cpp       ../../../mcrl22lps/lin_std.cpp ../../../mcrl22lps/lin_alt.cpp : ;
-#exe pbes2data       : pbes2data.cpp       ../../../mcrl22lps/lin_std.cpp ../../../mcrl22lps/lin_alt.cpp : ;
+exe term_replace    : term_replace.cpp : ;
 
 install dist
    :
+     term_replace
      garbage
      constructors
      spec
      filter_template
      find
      pbes_test
-#     pbes2data
    :
    ;
