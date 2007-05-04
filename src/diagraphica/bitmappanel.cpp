@@ -13,7 +13,7 @@
 BitmapPanel::BitmapPanel( 
     wxWindow* parent,
     wxSize size,
-    wxString path )
+    const char* const* image)
     : wxPanel(
         parent,
         wxID_ANY )
@@ -25,16 +25,7 @@ BitmapPanel::BitmapPanel(
     this->SetMaxSize( this->GetSize() );
 
     // load image
-    bitmap = new wxBitmap( 
-        path, 
-        wxBITMAP_TYPE_BMP );
-    if ( bitmap->Ok() != true )
-    {
-        wxString msg;
-        msg.Append( wxT("Error opening file: " ));
-        msg.Append( path );
-        wxLogError( msg );
-    }
+    bitmap = new wxBitmap(image); 
 }
 
 

@@ -3,6 +3,7 @@
 // ---------------------------  *  ----------------------------------
 
 
+#include "figures.xpm"
 #include "frame.h"
 
 // For compatibility with older wxWidgets versions (pre 2.8)
@@ -883,11 +884,7 @@ void Frame::initIcon()
 {
     try
     {
-        wxBitmap bmp( 
-            wxT("Figures/icon_16x16.bmp"),
-            wxBITMAP_TYPE_BMP );
-        wxIcon icon;
-        icon.CopyFromBitmap( bmp );
+        wxIcon icon(icon_16x16);
         SetIcon( icon );
     }
     catch ( ... )
@@ -1563,42 +1560,42 @@ void Frame::initToolbarEdit()
 
     // add tools
     // selection
-    wxBitmap selectBmp( wxT("Figures/select.bmp"), wxBITMAP_TYPE_BMP );
+    wxBitmap selectBmp(select_icon);
     toolBarEdit->AddRadioTool( ID_TOOL_SELECT, wxString( wxT("Selection") ), selectBmp );
     // edit DOF
-    wxBitmap dofBmp( wxT("Figures/dof.bmp"), wxBITMAP_TYPE_BMP );
+    wxBitmap dofBmp(dof);
     toolBarEdit->AddRadioTool( ID_TOOL_DOF, wxString( wxT("Edit DOF") ), dofBmp );
     // rectangle
-    wxBitmap rectBmp( wxT("Figures/rectangle.bmp"), wxBITMAP_TYPE_BMP );
+    wxBitmap rectBmp(rectangle);
     toolBarEdit->AddRadioTool( ID_TOOL_RECT, wxString( wxT("Rectangle") ), rectBmp );
     // ellipse
-    wxBitmap ellipseBmp( wxT("Figures/ellipse.bmp"), wxBITMAP_TYPE_BMP );
+    wxBitmap ellipseBmp(ellipse);
     toolBarEdit->AddRadioTool( ID_TOOL_ELLIPSE, wxString( wxT("Ellipse") ), ellipseBmp );
     // line
-    wxBitmap lineBmp( wxT("Figures/line.bmp"), wxBITMAP_TYPE_BMP );
+    wxBitmap lineBmp(line);
     toolBarEdit->AddRadioTool( ID_TOOL_LINE, wxString( wxT("Line") ), lineBmp );
     // arrow
-    wxBitmap arrowBmp( wxT("Figures/arrow.bmp"), wxBITMAP_TYPE_BMP );
+    wxBitmap arrowBmp(arrow);
     toolBarEdit->AddRadioTool( ID_TOOL_ARROW, wxString( wxT("Arrow") ), arrowBmp );
     // double arrow
-    wxBitmap darrowBmp( wxT("Figures/darrow.bmp"), wxBITMAP_TYPE_BMP );
+    wxBitmap darrowBmp(darrow);
     toolBarEdit->AddRadioTool( ID_TOOL_DARROW, wxString( wxT("Double arrow") ), darrowBmp );
     
     toolBarEdit->AddSeparator();
     // fill color
-    wxBitmap fillColBmp( wxT("Figures/fillcol.bmp"), wxBITMAP_TYPE_BMP );
+    wxBitmap fillColBmp(fillcol);
     toolBarEdit->AddTool( ID_TOOL_FILL_COL, wxString( wxT("Fill color") ), fillColBmp );
     // line color
-    wxBitmap lineColBmp( wxT("Figures/linecol.bmp"), wxBITMAP_TYPE_BMP  );
+    wxBitmap lineColBmp(linecol);
     toolBarEdit->AddTool( ID_TOOL_LINE_COL, wxString( wxT("Line color") ), lineColBmp );
 
     toolBarEdit->AddSeparator();
     // show grid
-    wxBitmap showGridBmp( wxT("Figures/showgrid.bmp"), wxBITMAP_TYPE_BMP );
+    wxBitmap showGridBmp(showgrid);
     toolBarEdit->AddCheckTool( ID_TOOL_SHOW_GRID, wxString( wxT("Show grid") ), showGridBmp );
     toolBarEdit->ToggleTool( ID_TOOL_SHOW_GRID, true );
     // snap grid
-    wxBitmap snapGridBmp( wxT("Figures/snapgrid.bmp"), wxBITMAP_TYPE_BMP );
+    wxBitmap snapGridBmp(snapgrid);
     toolBarEdit->AddCheckTool( ID_TOOL_SNAP_GRID, wxString( wxT("Snap grid") ), snapGridBmp );
     toolBarEdit->ToggleTool( ID_TOOL_SNAP_GRID, true );
     
@@ -1739,11 +1736,7 @@ void Frame::initAboutFrame()
     // icon
     try
     {
-        wxBitmap bmp( 
-            wxT("Figures/icon_16x16.bmp"),
-            wxBITMAP_TYPE_BMP );
-        wxIcon icon;
-        icon.CopyFromBitmap( bmp );
+        wxIcon icon(icon_16x16);
         frameAbout->SetIcon( icon );
     }
     catch ( ... )
@@ -1756,7 +1749,7 @@ void Frame::initAboutFrame()
     BitmapPanel* bitmap = new BitmapPanel( 
         frameAbout,
         wxSize( 400, 111 ),
-        wxString( wxT("Figures/logo.bmp") ) );
+        logo) ;
     sizerFrame->Add( bitmap, 0 );
 
     wxPanel* panel = new wxPanel( frameAbout );

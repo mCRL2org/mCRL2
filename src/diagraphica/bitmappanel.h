@@ -18,7 +18,7 @@ public:
     BitmapPanel( 
         wxWindow* parent,
         wxSize size,
-        wxString path );
+        const char* const* );
     virtual ~BitmapPanel();
     
 protected:
