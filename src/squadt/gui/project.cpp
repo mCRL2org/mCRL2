@@ -453,10 +453,8 @@ namespace squadt {
           p->edit(registry->get_registered_command(t->mime_type, t->location).get());
           break;
         case cmID_REMOVE:
-          wxMessageDialog dialog(this, wxT("This operation will remove files from the project store do you wish to continue?"),
-                           wxT("Warning: irreversable operation"), wxNO_DEFAULT);
-                           
-          if (dialog.ShowModal() = wxID_YES) {
+          if (wxMessageDialog(this, wxT("This operation will remove files from the project store do you wish to continue?"),
+                           wxT("Warning: irreversable operation"), wxNO_DEFAULT).ShowModal() == wxID_YES) {
             manager->remove(p.get());
 
             object_view->Delete(s);

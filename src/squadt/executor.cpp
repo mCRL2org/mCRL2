@@ -24,10 +24,6 @@ namespace squadt {
      * \param[in] p the process to remove
      **/
     inline void executor_impl::remove(process* p) {
-      static boost::mutex lock;
-
-      boost::mutex::scoped_lock w(lock);
-
       std::list < process::sptr >::iterator i = std::find_if(processes.begin(), processes.end(),
                               boost::bind(std::equal_to < process* >(), p,
                                       boost::bind(&process::sptr::get, _1)));
