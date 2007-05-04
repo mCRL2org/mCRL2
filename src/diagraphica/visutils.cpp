@@ -4,6 +4,7 @@
 
 
 #include "visutils.h"
+#include "character_set.xpm"
 
 
 // -- init static variables -----------------------------------------
@@ -2810,8 +2811,6 @@ void VisUtils::genCharTextures(
 // -----------------------------------------------------
 {
     // vars
-    string    path   = "";
-    wxBitmap* bitmap = NULL;
     int red          = 0;
     int green        = 0;
     int blue         = 0;
@@ -2822,51 +2821,35 @@ void VisUtils::genCharTextures(
     // create textures
     for ( int i = 0; i < CHARSETSIZE; ++i )
     {
-        // load bitmap
-        path = CHARPATH + Utils::intToStr( i ) + ".bmp";
-        bitmap = new wxBitmap( wxString( path.c_str(), wxConvUTF8 ), wxBITMAP_TYPE_BMP );
-
-        if ( bitmap->Ok() == true )
+        // bind textures
+        glBindTexture( GL_TEXTURE_2D, texCharId[i] );
+        // create image
+        wxImage image(characters[i]);
+        
+        // read in texture
+        int count = 0;
+        for ( int h = 0; h < CHARHEIGHT; ++h )
         {
-            // bind textures
-            glBindTexture( GL_TEXTURE_2D, texCharId[i] );
-            // create image
-            wxImage image = bitmap->ConvertToImage();
-            
-            // read in texture
-            int count = 0;
-            for ( int h = 0; h < CHARHEIGHT; ++h )
+            for ( int w = 0; w < CHARWIDTH; ++w )
             {
-                for ( int w = 0; w < CHARWIDTH; ++w )
-                {
-                    red   = (GLubyte)image.GetRed( w, h );
-                    green = (GLubyte)image.GetGreen( w, h );
-                    blue  = (GLubyte)image.GetBlue( w, h );
+                red   = (GLubyte)image.GetRed( w, h );
+                green = (GLubyte)image.GetGreen( w, h );
+                blue  = (GLubyte)image.GetBlue( w, h );
 
-                    texChar[i][count] = (GLubyte)(255.0-( red+green+blue )/3.0);
-                   
-                    ++count;
-                }
+                texChar[i][count] = (GLubyte)(255.0-( red+green+blue )/3.0);
+               
+                ++count;
             }
-
-            gluBuild2DMipmaps(
-                GL_TEXTURE_2D, 
-                GL_ALPHA, 
-                16, 
-                32, 
-                GL_ALPHA, 
-                GL_UNSIGNED_BYTE, 
-                texChar[i] );
         }
-        else
-            throw new string( "Error loading fonts." );
 
-
-        if ( bitmap != NULL )
-        {
-            delete bitmap;
-            bitmap = NULL;
-        }
+        gluBuild2DMipmaps(
+            GL_TEXTURE_2D, 
+            GL_ALPHA, 
+            16, 
+            32, 
+            GL_ALPHA, 
+            GL_UNSIGNED_BYTE, 
+            texChar[i] );
     }
 }
 

@@ -467,14 +467,16 @@ void GLCanvas::onEvtSize( wxSizeEvent &event )
         */
 
         // get size of canvas
-        int width, height;
-        this->SetCurrent();
-    
-        // set up viewport to match canvas size
-        this->GetClientSize( &width, &height );
-        glMatrixMode( GL_MODELVIEW );
-        glLoadIdentity();
-        glViewport( 0, 0, width, height );
+        if (GetContext()) {
+          int width, height;
+          this->SetCurrent();
+         
+          // set up viewport to match canvas size
+          this->GetClientSize( &width, &height );
+          glMatrixMode( GL_MODELVIEW );
+          glLoadIdentity();
+          glViewport( 0, 0, width, height );
+        }
     }
 }
 
