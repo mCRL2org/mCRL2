@@ -18,8 +18,8 @@ lib mcrl2_squadt
     :
     : <define>ENABLE_SQUADT_CONNECTIVITY
       <threading>multi
-      <use>/libraries/sip//sip_tool
-      <use>/libraries//mcrl2_basic
+      <library>/libraries/sip//sip_tool
+      <library>/libraries//mcrl2_basic
     ;
 
 obj logger.o
