@@ -55,8 +55,26 @@ static ATbool colored=ATfalse;
 static ATbool with_colors=ATtrue;
 static ATbool reset_arcs=ATfalse;
 static ATbool inhibitor_arcs=ATfalse;
-static ATermAppl Appl0;
+static unsigned long error=0;
+static ATbool hide=ATfalse;
 
+static ATermAppl Appl0;                //=gsString2ATermAppl("_");
+static ATermAppl IdX;                  //=gsMakeId(gsString2ATermAppl("x"));
+static ATermAppl Number0;              //=gsMakeId(gsString2ATermAppl("0"));
+static ATermAppl Number1;              //=gsMakeId(gsString2ATermAppl("1"));
+static ATermAppl OpAnd;                //=gsMakeId(gsMakeOpIdNameAnd());
+static ATermAppl OpAdd;                //=gsMakeId(gsMakeOpIdNameAdd());
+static ATermAppl OpSubt;               //=gsMakeId(gsMakeOpIdNameSubt());
+static ATermAppl OpMax;                //=gsMakeId(gsMakeOpIdNameMax());
+static ATermAppl OpMin;                //=gsMakeId(gsMakeOpIdNameMin());
+static ATermAppl OpGT;                 //=gsMakeId(gsMakeOpIdNameGT());
+static ATermAppl OpLTE;                //=gsMakeId(gsMakeOpIdNameLTE());
+static ATermAppl OpEq;                 //=gsMakeId(gsMakeOpIdNameEq());
+static ATermAppl OpInt2Nat;            //=gsMakeId(gsMakeOpIdNameInt2Nat());
+static ATermAppl EmptyBag;             //=gsMakeId(gsMakeOpIdNameEmptyBag());
+static ATermAppl OpBagEnum;            //=gsMakeId(gsMakeOpIdNameBagEnum());
+static ATermAppl nMaxTokens;           //=gsMakeId(gsString2ATermAppl("nMaxTokens"));
+static ATermAppl ErrorAction;          //=gsMakeParamId(ATmakeAppl0(ATmakeAFunId("_error")), ATmakeList0());
 
 static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID);
 static ATermList pn2gsGenerateTransitionAlternative(ATerm TransID);
@@ -626,7 +644,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     // third, we want to verify the arc needs translation (thus is of the correct type)
     
     // temporary variables that contain data of the current arctype
-    ATermAppl Atype = gsString2ATermAppl("some_strange`type=that n0b0dy u5e5...");
+    ATermAppl Atype = Appl0;
     
     ATermAppl Arc_name=Appl0;
 
@@ -641,7 +659,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 	// the arc contains a <type> element
 	// this element contains a childelement <text> which contains the type of the transition
 	if (!(Atype=pn2gsRetrieveText(cur))) {
-	  Atype = gsString2ATermAppl("some_strange`type=that n0b0dy u5e5...");
+	  Atype = Appl0;
 	}
 	if (ATisEqual(Atype, gsString2ATermAppl("inhibitor"))) {
 	  // the type should be omitted
@@ -655,7 +673,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 	  // gsWarningMsg("Arc with id '%T' has type '%T' and will not be translated.\n", Aid, Atype);
           reset_arcs=ATtrue;
 	}	
-	else if (!ATisEqual(Atype, gsString2ATermAppl("some_strange`type=that n0b0dy u5e5..."))) {
+	else if (!ATisEqual(Atype, Appl0)) {
 	  // the type should be omitted
 	  // otherwise the arc does not need to be translated!
 	  gsWarningMsg("Arc with id '%T' has type '%T' and will not be translated.\n", Aid, Atype);
@@ -690,7 +708,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     }
     
     // argument order of returnvalue is id - source - target
-    return ATmakeAppl5(ATmakeAFun("arc", 5, ATfalse), (ATerm)Aid, (ATerm)Asource, (ATerm)Atarget, (ATerm)gsString2ATermAppl("default"), (ATerm)Arc_name);
+    return ATmakeAppl5(ATmakeAFun("arc", 5, ATfalse), (ATerm)Aid, (ATerm)Asource, (ATerm)Atarget, (ATerm)Atype, (ATerm)Arc_name);
   }
   
   /*                        */
@@ -858,22 +876,33 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   //==================================================
   // pn2gsGenerateAction_trans generates the action t_..._mon for a given transition
   //==================================================
-  static ATermAppl pn2gsGenerateAction_trans(AFun CurrentId, AFun CurrentName){
-    // input: access to the context + id and name of the transition
-    // output: the action t_transid_mon or t_transid_transname_mon
-
-    AFun ResAFun=ATprependAFun("t_",CurrentId);
-    char * CurrentNameString=ATgetName(CurrentName);
-
-    if (strcmp(CurrentNameString, "default_name")){
+static ATermAppl pn2gsGenerateAction_trans(AFun CurrentId, AFun CurrentName){
+  // input: access to the context + id and name of the transition
+  // output: the action t_transid_mon or t_transid_transname_mon
+  
+  AFun ResAFun=ATprependAFun("t_",CurrentId);
+  char * CurrentNameString=ATgetName(CurrentName);
+  
+    if(strcmp(CurrentNameString, "default_name")){
       // name of the transition is not "default_name" 
       // name of the transition may be used 
       ResAFun=ATappendAFun(ATappendAFun(ResAFun,"_"),CurrentNameString);
     }
-
+    
     return ATmakeAppl0(ATappendAFun(ResAFun,"_mon"));
-  }
+}
   
+
+static ATermList pn2gsGenerateActionsTrans(){
+  //returns names of all actions representing the firings of the transitions.
+  ATermList r=ATmakeList0();
+  for(ATermList l=ATtableKeys(context.trans_name); !ATisEmpty(l); l=ATgetNext(l)){
+    ATermAppl e=ATAgetFirst(l);
+    r=ATinsert(r,(ATerm)pn2gsGenerateAction_trans(ATgetAFun(e),ATgetAFun(ATtableGet(context.trans_name,(ATerm)e))));
+  }
+  return ATreverse(r);
+}
+
   //==================================================
   // pn2gsGenerateActions generates all the mCRL2 actions
   //==================================================
@@ -902,6 +931,13 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     Ids = ATconcat(ATtableKeys(context.arc_in), ATtableKeys(context.arc_out));
     Ids = ATconcat(Ids, ATtableKeys(context.arc_inhibit));
     Ids = ATconcat(Ids, ATtableKeys(context.arc_reset));
+
+    // ***** Changed by Yarick 29.05.2006 to add error action ****
+
+    if(error) Ids = ATinsert(Ids,(ATerm)gsString2ATermAppl("error"));
+
+    // ***** end changed by Yarick.
+
     while (ATisEmpty(Ids) == ATfalse) {
       // make the action: arcID
       ATermAppl Id=ATAgetFirst(Ids);
@@ -929,11 +965,11 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     // create actions from the transitions
     //==================================================
     // All transitions have a name. If no name is defined in PNML, it is "default_name"
-    Ids = ATtableKeys(context.trans_name);
+    Ids = pn2gsGenerateActionsTrans();
     while (ATisEmpty(Ids) == ATfalse) {
       
-      CurrentAction = pn2gsGenerateAction_trans(ATgetAFun(ATgetFirst(Ids)), ATgetAFun(ATtableGet(context.trans_name, ATgetFirst(Ids))));
-      ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
+      CurrentAction = ATAgetFirst(Ids);
+      ActionsList = ATinsert(ActionsList,(ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
       gsDebugMsg("Action: %T created.\n", CurrentAction);
       Ids = ATgetNext(Ids);
     }
@@ -1201,16 +1237,6 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     // generate the processes
     //==================================================
  
-    ATermAppl OpAdd=gsMakeId(gsMakeOpIdNameAdd());
-    ATermAppl OpSubt=gsMakeId(gsMakeOpIdNameSubt());
-    ATermAppl OpMax=gsMakeId(gsMakeOpIdNameMax());
-    ATermAppl OpMin=gsMakeId(gsMakeOpIdNameMin());
-    ATermAppl OpGT=gsMakeId(gsMakeOpIdNameGT());
-    ATermAppl OpLTE=gsMakeId(gsMakeOpIdNameLTE());
-    ATermAppl OpAnd=gsMakeId(gsMakeOpIdNameAnd());
-    ATermAppl Number0=gsMakeId(gsString2ATermAppl("0"));
-    ATermAppl Number1=gsMakeId(gsString2ATermAppl("1"));
-    
     {
       /* Creation of P_pi */
       ATermAppl ProcVar;
@@ -1325,7 +1351,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       ReturnList = ATinsert(ReturnList, (ATerm)ATmakeAppl0(CurrentId));
       List = ATgetNext(List);
     }
-    return ReturnList;
+    return ATreverse(ReturnList);
   }
 
   //==================================================
@@ -1345,7 +1371,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       ReturnList = ATinsert(ReturnList, (ATerm)ATmakeAppl0(CurrentId));
       List = ATgetNext(List);
     }
-    return ReturnList;
+    return ATreverse(ReturnList);
   }
 
   //==================================================
@@ -1365,7 +1391,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       ReturnList = ATinsert(ReturnList, (ATerm)CommExpr);
       List = ATgetNext(List);
     }
-    return ReturnList;
+    return ATreverse(ReturnList);
   }
 
   //==================================================
@@ -1451,7 +1477,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       ATermAppl Type=ATAtableGet(context.place_type_mcrl2,(ATerm)Place);
       if(Type && !ATisEqual(Type,Appl0)){
 	Marking = ATAtableGet(context.place_mark_mcrl2, (ATerm)Place);
-	if(!Marking || ATisEqual(Marking,Appl0)) Marking = gsMakeId(gsMakeOpIdNameEmptyBag());
+	if(!Marking || ATisEqual(Marking,Appl0)) Marking = EmptyBag;
       }
       
       ReturnList = ATinsert(ReturnList,(ATerm)Marking);
@@ -1550,7 +1576,17 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(gsString2ATermAppl("Trans"), ATmakeList0()), ATmakeList0(), gsMakeDelta()));
     } else {
       // there are transitions
-      ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(gsString2ATermAppl("Trans"), ATmakeList0()), ATmakeList0(), gsMakeSeq(pn2gsChoiceIn(context.transitions), gsMakeParamId(gsString2ATermAppl("Trans"), ATmakeList0()))));
+
+
+
+      // ***** Changed by Yarick 29.05.2006 to add error action ****
+      if(!error){
+	ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(gsString2ATermAppl("Trans"), ATmakeList0()), ATmakeList0(), gsMakeSeq(pn2gsChoiceIn(context.transitions), gsMakeParamId(gsString2ATermAppl("Trans"), ATmakeList0()))));
+      }
+      else {
+	ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(gsString2ATermAppl("Trans"), ATmakeList0()), ATmakeList0(), gsMakeSeq(pn2gsChoiceIn(ATinsert(context.transitions,(ATerm)gsString2ATermAppl("error"))), gsMakeParamId(gsString2ATermAppl("Trans"), ATmakeList0()))));
+      }
+      // ***** end changed by Yarick.
     }
     gsDebugMsg("Process Trans created.\n");
     
@@ -1598,11 +1634,27 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
 
 	if(ATisEmpty(AssocArcs)) continue;
 
-	Process=gsMakeHide(pn2gsHideList(AssocArcs), 
-			   gsMakeBlock(pn2gsBlockList(AssocArcs), 
-					  gsMakeComm(pn2gsCommList(AssocArcs), 
-						     Process)));
+	// ***** Changed by Yarick 29.05.2006 to add error action ****
+	if(!error){
+	  Process=gsMakeHide(pn2gsHideList(AssocArcs), 
+			     gsMakeBlock(pn2gsBlockList(AssocArcs), 
+					 gsMakeComm(pn2gsCommList(AssocArcs), 
+						    Process)));
+	}
+	else {
+	  Process=gsMakeHide(pn2gsHideList(AssocArcs), 
+			     gsMakeBlock(ATinsert(pn2gsBlockList(AssocArcs),(ATerm)gsString2ATermAppl("_error")), 
+					 gsMakeComm(pn2gsCommList(ATinsert(AssocArcs,(ATerm)gsString2ATermAppl("error"))), 
+						    Process)));
+	}
+	// ***** end changed by Yarick.
       }
+      // ***** Changed by Yarick 29.05.2006 to add error action + hide all actions ****
+      if(error)
+	Process=gsMakeBlock(ATmakeList1((ATerm)gsString2ATermAppl("error")),Process);
+      if(hide)
+	Process=gsMakeHide(pn2gsGenerateActionsTrans(),Process);
+      // ***** end changed by Yarick.
     }
 
     ProcessList = 
@@ -1784,7 +1836,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
 	ATermAppl CurrentTarget = ATAgetArgument(ATAgetFirst(AArcs),2);
 	ATermAppl CurrentType = ATAgetArgument(ATAgetFirst(AArcs),3);
 	if (ATtableGet(context.place_name, (ATerm)CurrentSource) && ATtableGet(context.trans_name, (ATerm)CurrentTarget)) {
-	  if(ATisEqual(CurrentType,gsString2ATermAppl("default"))){
+	  if(ATisEqual(CurrentType,Appl0)){
 	    // The arc is an arc_out; it goes from a place to a transition
 	    // insert the data into context.arc_out
 	    // key = id
@@ -1808,7 +1860,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
 	  }
 	} 
 	else if (ATtableGet(context.place_name, (ATerm)CurrentTarget) && ATtableGet(context.trans_name, (ATerm)CurrentSource)) {
-	  if(ATisEqual(CurrentType,gsString2ATermAppl("default"))){
+	  if(ATisEqual(CurrentType,Appl0)){
 	    // The arc is an arc_in; it goes from a transition to a place
 	    // insert the data into context.arc_in
 	    // key = id
@@ -2148,6 +2200,24 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       Result=ATsetArgument(Result,(ATerm)gsMakeProcEqnSpec(ATconcat(ATLgetArgument(ATAgetArgument(Result,2),0),ProcEqns)),2);
       Result=ATsetArgument(Result,(ATerm)gsMakeProcessInit(ATmakeList0(),gsMakeParamId(ATAgetArgument(Spec, 3), ATmakeList0())),3);
     }
+
+    // ***** Changed by Yarick 29.05.2006 to add error action ****
+
+    if(error) {
+      //add nMaxTockens
+      ATermAppl ExtraMap=gsMakeOpId(ATAgetArgument(nMaxTokens,0),gsMakeSortIdPos());
+      ATermAppl ExtraEqn=gsMakeDataEqn(ATmakeList0(),gsMakeNil(),nMaxTokens,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(error))));
+      ATermAppl DataSpec=ATAgetArgument(Result,0);
+      ATermAppl NewMapSpec=gsMakeMapSpec(ATinsert(ATLgetArgument(ATAgetArgument(DataSpec,2),0),(ATerm)ExtraMap));
+      ATermAppl NewDataEqnSpec=gsMakeDataEqnSpec(ATinsert(ATLgetArgument(ATAgetArgument(DataSpec,3),0),(ATerm)ExtraEqn));
+      DataSpec=ATsetArgument(DataSpec,(ATerm)NewMapSpec,2);
+      DataSpec=ATsetArgument(DataSpec,(ATerm)NewDataEqnSpec,3);
+      Result=ATsetArgument(Result,(ATerm)DataSpec,0);
+    }
+
+    // ***** end changed by Yarick.
+ 
+
     return Result;
   }
 
@@ -2175,14 +2245,18 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
 	    "not taken into account.\n"
 	    "With the -p option turned on, more functionality is supported.\n"
 	    "\n"
-	    "  -h, --help            display help information\n"
-	    "  -q, --quiet           do not display warning messages\n"
-	    "  -d, --debug           turn on the display of detailed intermediate messages\n"
-	    "  -p, --no_rec_par      generate places in which the result is non-recursive\n"
-	    "                        with this flag turned on, inhibitor and reset arcs\n"
-	    "                        are translated!\n"
-	    "  -v, --verbose         turn on the display of short intermediate messages\n"
-	    "      --version         display version information\n",
+    
+	    "  -h, --help             display help information\n"
+	    "  -q, --quiet            do not display warning messages\n"
+	    "  -d, --debug            turn on the display of detailed intermediate messages\n"
+            "  -e[NUM], --error [NUM] __error action will happen if a place gets NUM or more tokens (default is 2)\n"
+            "  -i, --hide             hide (rename to tau) all transition monitoring actions\n"
+            "                         to hide all but one action edit the generated file and remove that action from the hide list\n"                              
+	    "  -p, --no_rec_par       generate places in which the result is non-recursive\n"
+	    "                         with this flag turned on, inhibitor and reset arcs\n"
+	    "                         are translated!\n"
+	    "  -v, --verbose          turn on the display of short intermediate messages\n"
+	    "      --version          display version information\n",
 	    Name);
   }
 
@@ -2190,8 +2264,24 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
   // PrintHelp performs actual conversion by calling more specialised functions
   //==================================================
   bool perform_task(char const* InFileName, FILE* OutStream) {
+    ATprotectList(&(context.transitions));
     ATprotectAppl(&Appl0);
-    Appl0=gsString2ATermAppl("_");
+    ATprotectAppl(&IdX);
+    ATprotectAppl(&Number0);
+    ATprotectAppl(&Number1);
+    ATprotectAppl(&OpAnd);
+    ATprotectAppl(&OpAdd);
+    ATprotectAppl(&OpSubt);
+    ATprotectAppl(&OpMax);
+    ATprotectAppl(&OpMin);
+    ATprotectAppl(&OpGT);
+    ATprotectAppl(&OpLTE);
+    ATprotectAppl(&OpEq);
+    ATprotectAppl(&OpInt2Nat);
+    ATprotectAppl(&EmptyBag);
+    ATprotectAppl(&OpBagEnum);
+    ATprotectAppl(&nMaxTokens);
+    ATprotectAppl(&ErrorAction);
 
     ticpp::Document doc(InFileName);
    
@@ -2210,6 +2300,24 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     }
    
     gsEnableConstructorFunctions();
+
+    Appl0=gsString2ATermAppl("_");
+    IdX=gsMakeId(gsString2ATermAppl("x"));
+    Number0=gsMakeId(gsString2ATermAppl("0"));
+    Number1=gsMakeId(gsString2ATermAppl("1"));
+    OpAnd=gsMakeId(gsMakeOpIdNameAnd());
+    OpAdd=gsMakeId(gsMakeOpIdNameAdd());
+    OpSubt=gsMakeId(gsMakeOpIdNameSubt());
+    OpMax=gsMakeId(gsMakeOpIdNameMax());
+    OpMin=gsMakeId(gsMakeOpIdNameMin());
+    OpGT=gsMakeId(gsMakeOpIdNameGT());
+    OpLTE=gsMakeId(gsMakeOpIdNameLTE());
+    OpEq=gsMakeId(gsMakeOpIdNameEq());
+    OpInt2Nat=gsMakeId(gsMakeOpIdNameInt2Nat());
+    EmptyBag=gsMakeId(gsMakeOpIdNameEmptyBag());
+    OpBagEnum=gsMakeId(gsMakeOpIdNameBagEnum());
+    nMaxTokens=gsMakeId(gsString2ATermAppl("nMaxTokens"));
+    ErrorAction=gsMakeParamId(ATmakeAppl0(ATmakeAFunId("_error")), ATmakeList0());
     
     ATermAppl Spec=pn2gsAterm(doc);
     
@@ -2244,8 +2352,24 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     //ATprintf("Spec %t\n\n", Spec);
     Spec=pn2gsTranslate(Spec);
     
-
+    ATunprotectList(&(context.transitions));
     ATunprotectAppl(&Appl0);
+    ATunprotectAppl(&IdX);
+    ATunprotectAppl(&Number0);
+    ATunprotectAppl(&Number1);
+    ATunprotectAppl(&OpAnd);
+    ATunprotectAppl(&OpAdd);
+    ATunprotectAppl(&OpSubt);
+    ATunprotectAppl(&OpMax);
+    ATunprotectAppl(&OpMin);
+    ATunprotectAppl(&OpGT);
+    ATunprotectAppl(&OpLTE);
+    ATunprotectAppl(&OpEq);
+    ATunprotectAppl(&OpInt2Nat);
+    ATunprotectAppl(&EmptyBag);
+    ATunprotectAppl(&OpBagEnum);
+    ATunprotectAppl(&nMaxTokens);
+    ATunprotectAppl(&ErrorAction);
     ATtableDestroy(context.place_name);
     ATtableDestroy(context.place_mark); 
     ATtableDestroy(context.place_mark_mcrl2);
@@ -2294,8 +2418,10 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     if (!mcrl2_squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
 #endif
 
-      #define sopts "adhpqv"
+      #define sopts "eiadhpqv"
       struct option lopts[] = {
+        {"error"       , optional_argument,NULL, 'e'},
+        {"hide"        , no_argument,      NULL, 'i'},
         {"read-aterm"  , no_argument,      NULL, 'a'},
         {"debug"       , no_argument,      NULL, 'd'},
         {"help"        , no_argument,      NULL, 'h'},
@@ -2309,6 +2435,22 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       
       while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 ){
         switch ( opt ){
+        case 'i': /* hide */
+          hide = ATtrue;
+          break;
+        case 'e': /* error */
+	  error = 2;
+	  if ( optarg != NULL )
+	    {
+	      if ( (optarg[0] >= '0') && (optarg[0] <= '9') )
+		{
+		  error = strtoul(optarg,NULL,0);
+		} else {
+		gsErrorMsg("invalid argument to -e/--error\n",optarg);
+		return 1;
+	      }
+	    }
+          break;
         case 'd': /* debug */
           gsSetDebugMsg();
           break;
@@ -2484,17 +2626,6 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
 
   // foreach transition t : find all arks between p and t
   // calculate its value n input arcs - m out arcs, take into account the inhibitor and reset arcs.
-  ATermAppl VarX=gsMakeDataVarId(ATmakeAppl0(ATmakeAFunId("x")),(Type)?gsMakeSortExprBag(Type):gsMakeSortIdNat());;
-  ATermAppl Number0=gsMakeId(gsString2ATermAppl("0"));
-  ATermAppl OpAdd=gsMakeId(gsMakeOpIdNameAdd());
-  ATermAppl OpSubt=gsMakeId(gsMakeOpIdNameSubt());
-  ATermAppl OpAnd=gsMakeId(gsMakeOpIdNameAnd());
-  //ATermAppl OpMax=gsMakeId(gsMakeOpIdNameMax());
-  ATermAppl OpLTE=gsMakeId(gsMakeOpIdNameLTE());
-  ATermAppl OpEq=gsMakeId(gsMakeOpIdNameEq());
-  ATermAppl OpInt2Nat=gsMakeId(gsMakeOpIdNameInt2Nat());
-  ATermAppl EmptyBag=gsMakeId(gsMakeOpIdNameEmptyBag());
-
   for(ATermList Lt=ATtableKeys(context.trans_name);!ATisEmpty(Lt);Lt=ATgetNext(Lt)){
     ATermAppl TransID=ATAgetFirst(Lt);
     
@@ -2531,7 +2662,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
       mult_c=ATinsert(mult_c,(ATerm)ArcID);
       inhib=true;
     }
-    mult=ATconcat(mult,ATreverse(mult_c));
+    mult=ATconcat(mult,pn2gsMakeSendActions(ATreverse(mult_c)));
     
     mult_c=ATmakeList0();
     bool reset=false;
@@ -2543,8 +2674,8 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
       mult_c=ATinsert(mult_c,(ATerm)ArcID);
       reset=true;
     }
-    mult=ATconcat(mult,pn2gsMakeSendActions(ATreverse(mult_c)));
-    
+    mult=ATconcat(mult,ATreverse(mult_c));
+
     if(!nIn && !nOut && !inhib && !reset) continue;
     
     if(nOut>0 && inhib){
@@ -2554,9 +2685,9 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
     
     //summand
     AFun AR=ATappendAFun(CurrentPlaceId,"_ar_");
-    if(inhib && reset) AR=ATappendAFun(CurrentPlaceId,"_air_");
+    if(inhib && reset) AR=ATappendAFun(CurrentPlaceId,"_arir_");
     else{
-      if(inhib) AR=ATappendAFun(CurrentPlaceId,"_ai_");
+      if(inhib) AR=ATappendAFun(CurrentPlaceId,"_ari_");
       else if(reset) AR=ATappendAFun(CurrentPlaceId,"_arr_");
     }
     
@@ -2573,7 +2704,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
     }
 
     ATermAppl Left=gsMakeParamId(LeftName,pn2gsMakeIds(VarNames)); //make name P_pi_ar_i_j
-    ATermAppl RightExpr=VarX;  //x;
+    ATermAppl RightExpr=IdX;  //x;
     int d=nIn-nOut;
     if(!reset) {
       if(d>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(d))));//RightExpr=x+d;
@@ -2584,7 +2715,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
 
     //colored
     if(Type){
-      RightExpr=VarX;
+      RightExpr=IdX;
       if(!reset){
 	if(nIn)
 	  RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,pn2gsMakeBagVars(pn2gsMakeIds(ATgetSlice(VarNames,0,nIn))));//RightExpr+={|in|};
@@ -2601,10 +2732,10 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
     //condition
     ATermAppl Cond=NULL;
     if(nOut>0){
-      Cond=pn2gsMakeDataApplProd2(OpLTE,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(nOut))),VarX);//make nOut<=x
+      Cond=pn2gsMakeDataApplProd2(OpLTE,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(nOut))),IdX);//make nOut<=x
     }
     if(inhib){
-      ATermAppl Cond1=pn2gsMakeDataApplProd2(OpEq,VarX,Number0);//make x==0
+      ATermAppl Cond1=pn2gsMakeDataApplProd2(OpEq,IdX,Number0);//make x==0
       if(Cond) Cond=pn2gsMakeDataApplProd2(OpAnd,Cond,Cond1);
       else Cond=Cond1;
     }
@@ -2613,10 +2744,10 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
     if(Type){
       Cond=NULL;
       if(nOut>0){
-	Cond=pn2gsMakeDataApplProd2(OpLTE,pn2gsMakeBagVars(ATgetSlice(VarNames,0,nIn)),VarX);//make nOut <= x
+	Cond=pn2gsMakeDataApplProd2(OpLTE,pn2gsMakeBagVars(ATgetSlice(VarNames,0,nIn)),IdX);//make nOut <= x
       }
       if(inhib){
-	ATermAppl Cond1=pn2gsMakeDataApplProd2(OpEq,VarX,EmptyBag);//make x=={}
+	ATermAppl Cond1=pn2gsMakeDataApplProd2(OpEq,IdX,EmptyBag);//make x=={}
 	if(Cond) Cond=pn2gsMakeDataApplProd2(OpAnd,Cond,Cond1);
 	else Cond=Cond1;
       }	
@@ -2650,7 +2781,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
 			    (ATerm)gsMakeProcEqn(ATmakeList0(), 
 						 gsMakeProcVarId(LeftName, LeftType), 
 						 (Type)?pn2gsMakeDataVarIds(VarNames,Type):ATmakeList0(), 
-						 pn2gsMakeMultiAction(mult,pn2gsMakeListOfLists(pn2gsMakeIds(VarNames)))));
+						 pn2gsMakeMultiAction(mult,(Type)?pn2gsMakeListOfLists(pn2gsMakeIds(VarNames)):ATmakeList0())));
     
   } //For loop
   
@@ -2806,10 +2937,33 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
 //     // +++++++++++++++++ end normal alternative generation 
     
 
-  // handle the case m+n+k+l=0.
-  if(!Body) Body=gsMakeDelta();
   
+  // ***** Changed by Yarick 29.05.2006 to add error action ****
+  
+  // handle the case m+n+k+l=0.
+  if(!error){
+    if(!Body) Body=gsMakeDelta();
+  }
+  else {
+    ATermAppl ErrorCond=pn2gsMakeDataApplProd2(OpLTE,nMaxTokens,IdX);   
+
+    //colored
+    //not possible because the cardinality of bags is not built-in 
+    //if(Type) ErrorCond=pn2gsMakeDataApplProd2(OpLTE,nMaxTokens,pn2gsMakeDataApplProd(OpCard(IdX)));
+
+    ATermAppl ExtraSummand=gsMakeIfThenElse(ErrorCond,
+				      gsMakeSeq(ErrorAction,
+						gsMakeParamId(CurrentPlace,ATmakeList1((ATerm)IdX))),
+				      gsMakeDelta());
+    if(Body)
+      Body=gsMakeChoice(ExtraSummand,Body);
+    else Body=ExtraSummand;	
+  }
+  // ***** end changed by Yarick.
+
+
   //make process P_pi and add it
+  ATermAppl VarX=gsMakeDataVarId(ATAgetArgument(IdX,0),(Type)?gsMakeSortExprBag(Type):gsMakeSortIdNat());
   EquationList = ATinsert(EquationList, 
 			  (ATerm)gsMakeProcEqn(ATmakeList0(),
 					       gsMakeProcVarId(CurrentPlace, 
@@ -2903,7 +3057,7 @@ static ATermAppl pn2gsMakeMultiAction(ATermList ActionList, ATermList ParamList)
   //if the list of parameters is shorter, empty parameter lists are used.
   ATermAppl Res=NULL;
   for(;!ATisEmpty(ActionList);ActionList=ATgetNext(ActionList)){
-    if(ATisEmpty(ParamList)) ParamList=NULL;
+    if(ParamList && ATisEmpty(ParamList)) ParamList=NULL;
     ATermAppl CurAct=gsMakeParamId(ATAgetFirst(ActionList),(ParamList)?ATLgetFirst(ParamList):ATmakeList0());
     if(Res) Res=gsMakeSync(CurAct,Res);
     else Res=CurAct;
@@ -3040,20 +3194,12 @@ static ATermList pn2gsMakeIds(ATermList l){
 static ATermAppl pn2gsMakeBagVars(ATermList l){
   //makes a bag from the list of variables.
   if(ATisEmpty(l)) 
-    return gsMakeId(gsMakeOpIdNameEmptyBag());
+    return EmptyBag;
   
-  ATermAppl OpBagEnum=gsMakeId(gsMakeOpIdNameBagEnum());
-  ATermAppl Number1=gsMakeId(gsString2ATermAppl("1"));
-  //ATermAppl OpAdd=gsMakeId(gsMakeOpIdNameAdd());
-  
-  //ATermAppl r=pn2gsMakeDataApplProd2(OpBagComp,ATAgetFirst(l),Number1);//make {first(l):1}
   ATermList l1=ATmakeList0();
-  //l=ATgetNext(l);
   for(l=ATreverse(l);!ATisEmpty(l);l=ATgetNext(l)){
-    //ATermAppl n=pn2gsMakeDataApplProd2(OpBagComp,ATAgetFirst(l),Number1);//make {first(l):1}
-    //r=pn2gsMakeDataApplProd2(OpAdd,n,r);
-    l1=ATinsert(l1,(ATerm)ATAgetFirst(l));
     l1=ATinsert(l1,(ATerm)Number1);
+    l1=ATinsert(l1,(ATerm)ATAgetFirst(l));
   }
 
   return gsMakeDataApplProd(OpBagEnum,l1);
