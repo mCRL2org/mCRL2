@@ -60,7 +60,7 @@ squadt_interactor::squadt_interactor(squadt_utility::entry_wrapper& w): starter(
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
   /* The tool has only one main input combination it takes an LPS and then behaves as a reporter */
-  c.add_input_combination(lps_file_for_input, sip::mime_type("lps"), sip::tool::category::simulation);
+  c.add_input_combination(lps_file_for_input, sip::mime_type("lps", sip::mime_type::application), sip::tool::category::simulation);
 }
 
 void squadt_interactor::user_interactive_configuration(sip::configuration& c) {

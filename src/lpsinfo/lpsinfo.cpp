@@ -130,7 +130,7 @@ class squadt_interactor : public mcrl2_squadt::tool_interface {
 const char* squadt_interactor::lps_file_for_input  = "lps_in";
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(lps_file_for_input, sip::mime_type("lps"), sip::tool::category::reporting);
+  c.add_input_combination(lps_file_for_input, sip::mime_type("lps", sip::mime_type::application), sip::tool::category::reporting);
 }
 
 void squadt_interactor::user_interactive_configuration(sip::configuration& c) {

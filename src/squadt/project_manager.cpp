@@ -307,19 +307,19 @@ namespace squadt {
   /**
    * \param[in] p the processor that selects the targets
    **/
-  void project_manager_impl::update_single(processor::sptr p) {
+  void project_manager_impl::update(processor::sptr p, boost::function < void (processor*) > h) {
 
     /* Recursively update inputs */
-    for (processor::input_object_iterator j = p->get_input_iterator(); j.valid(); ++j) {
-      processor::sptr dependency((*j)->generator.lock());
+    p->check_status(true);
 
-      if (dependency.get() != 0) {
-        update_single(dependency);
+    for (processor::output_object_iterator j = p->get_output_iterator(); j.valid(); ++j) {
+      if (!(*j)->is_up_to_date()) {
+        h(p.get());
+
+        p->update();
+
+        break;
       }
-    }
-
-    if (p->check_status(true)) {
-      p->update(boost::bind(&project_manager_impl::update_single, this, p));
     }
   }
 
@@ -596,8 +596,8 @@ namespace squadt {
     impl->update_status(p);
   }
 
-  void project_manager::update_single(processor::sptr p) {
-    impl->update_single(p);
+  void project_manager::update(processor::sptr p, boost::function < void (processor*) > h) {
+    impl->update(p, h);
   }
 
   void project_manager::update(boost::function < void (processor*) > h) {

@@ -83,7 +83,7 @@ void squadt_interactor::set_capabilities(sip::tool::capabilities& capabilities) 
 {
   // The tool has only one main input combination
   gsDebugMsg("squadt_interactor: Setting capabilities\n");
-  capabilities.add_input_combination(lps_file_for_input, sip::mime_type("lps"), sip::tool::category::transformation);
+  capabilities.add_input_combination(lps_file_for_input, sip::mime_type("lps", sip::mime_type::application), sip::tool::category::transformation);
 }
 
 void squadt_interactor::user_interactive_configuration(sip::configuration& configuration)
@@ -92,7 +92,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& confi
 
   if (configuration.is_fresh()) {
     if (!configuration.output_exists(lps_file_for_output)) {
-      configuration.add_output(lps_file_for_output, sip::mime_type("lps"), configuration.get_output_name(".lps"));
+      configuration.add_output(lps_file_for_output, sip::mime_type("lps", sip::mime_type::application), configuration.get_output_name(".lps"));
     }
   }
 }

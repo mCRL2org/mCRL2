@@ -303,6 +303,8 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   else {
     c.remove_option(option_tau_actions);
   }
+
+  send_clear_display();
 }
 
 bool squadt_interactor::check_configuration(sip::configuration const& c) const {
@@ -338,7 +340,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     return (false);
   }
  
-  transformation_options method = static_cast < transformation_options > (boost::any_cast < size_t > (c.get_option_argument(option_selected_transformation)));
+  transformation_options method = static_cast < transformation_options > (c.get_option_argument< size_t >(option_selected_transformation));
 
   if (method != no_transformation) {
     lts_equivalence equivalence = lts_eq_none;

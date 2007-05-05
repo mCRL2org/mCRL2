@@ -214,7 +214,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
    * the same parameters
    */
   if (c.is_fresh()) {
-    c.add_output(lps_file_for_output, sip::mime_type("lps"), c.get_output_name(".lps"));
+    c.add_output(lps_file_for_output, sip::mime_type("lps", sip::mime_type::application), c.get_output_name(".lps"));
 
     c.add_option(option_linearisation_method).
           append_argument(linearisation_method_enumeration, method_selector.get_selection());

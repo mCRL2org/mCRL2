@@ -454,7 +454,7 @@ namespace squadt {
           break;
         case cmID_REMOVE:
           if (wxMessageDialog(this, wxT("This operation will remove files from the project store do you wish to continue?"),
-                           wxT("Warning: irreversable operation"), wxNO_DEFAULT).ShowModal() == wxID_YES) {
+                           wxT("Warning: irreversable operation"), wxYES_NO|wxNO_DEFAULT).ShowModal() == wxID_YES) {
             manager->remove(p.get());
 
             object_view->Delete(s);
@@ -467,9 +467,7 @@ namespace squadt {
           p->flush_outputs();
 
           /* Attach tool display */
-          install_tool_display(p->get_monitor(), p->get_tool()->get_name() + " : " + boost::filesystem::path(t->location).leaf());
-
-          p->update();
+          manager->update(p, boost::bind(&project::prepare_tool_display, this, _1));
           break;
         case cmID_CLEAN:
           p->flush_outputs();

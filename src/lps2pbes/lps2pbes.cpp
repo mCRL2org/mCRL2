@@ -66,25 +66,13 @@ static void print_help(char *name);
 static void print_version(void);
 static void print_more_info(char *name);
 
-//Main program
-//------------
-
-int main(int argc, char **argv)
-{
-  //parse command line
-  t_tool_options tool_options = parse_command_line(argc, argv);
-
-  //initialise ATerm library
-  ATerm stackbot;
-  ATinit(argc,argv,&stackbot);
-  gsEnableConstructorFunctions();
-
+bool process(t_tool_options const& tool_options) {
   //process state formula
   ATermAppl result = create_pbes(tool_options);
-  if (result == NULL) {
-    return 1;
+  if (result == 0) {
+    return false;
   }
-
+ 
   //store the result
   string outfilename = tool_options.outfilename;
   bool opt_pretty = tool_options.pretty;
@@ -97,11 +85,233 @@ int main(int argc, char **argv)
     ofstream outstream(outfilename.c_str(), ofstream::out|ofstream::binary);
     if (!outstream.is_open()) {
       gsErrorMsg("cannot open output file '%s'\n", outfilename.c_str());
-      return 1;
+      return false;
     }
     PrintPart_CXX(outstream, (ATerm) result, opt_pretty?ppDefault:ppInternal);
     outstream.close();
   }
+
+  return true;
+}
+
+// SQuADT protocol interface
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+#include <utilities/mcrl2_squadt.h>
+
+class squadt_interactor : public mcrl2_squadt::tool_interface {
+
+  private:
+
+    static const char*  lps_file_for_input;      ///< file containing an LPS
+    static const char*  formula_file_for_input;  ///< file containing a formula
+    static const char*  pbes_file_for_output;    ///< file used to write the output to
+
+    enum pbes_output_format {
+      normal,
+      readable
+    };
+
+    static const char* option_selected_output_format;
+    static const char* option_end_phase;
+    static const char* option_special_untimed_conversion;
+
+  private:
+
+    boost::shared_ptr < sip::datatype::enumeration > output_format_enumeration;
+
+  public:
+
+    /** \brief constructor */
+    squadt_interactor();
+
+    /** \brief configures tool capabilities */
+    void set_capabilities(sip::tool::capabilities&) const;
+
+    /** \brief queries the user via SQuADT if needed to obtain configuration information */
+    void user_interactive_configuration(sip::configuration&);
+
+    /** \brief check an existing configuration object to see if it is usable */
+    bool check_configuration(sip::configuration const&) const;
+
+    /** \brief performs the task specified by a configuration */
+    bool perform_task(sip::configuration&);
+};
+
+const char* squadt_interactor::lps_file_for_input     = "lps_in";
+const char* squadt_interactor::formula_file_for_input = "formula_in";
+const char* squadt_interactor::pbes_file_for_output   = "pbes_out";
+
+const char* squadt_interactor::option_selected_output_format     = "selected_output_format";
+const char* squadt_interactor::option_end_phase                  = "stop_after_phase";
+const char* squadt_interactor::option_special_untimed_conversion = "special_untimed_conversion";
+
+squadt_interactor::squadt_interactor() {
+  output_format_enumeration.reset(new sip::datatype::enumeration("normal"));
+
+  output_format_enumeration->add_value("readable");
+}
+
+void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
+  c.add_input_combination(lps_file_for_input, sip::mime_type("lps", sip::mime_type::application), sip::tool::category::transformation);
+}
+
+void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
+  using namespace sip;
+  using namespace sip::layout;
+  using namespace sip::layout::elements;
+
+  if (!c.option_exists(option_special_untimed_conversion)) {
+    c.add_option(option_special_untimed_conversion, false).
+        set_argument_value< 0, sip::datatype::boolean >(false, false);
+  }
+
+  layout::tool_display::sptr display(new layout::tool_display);
+
+  /* Create and add the top layout manager */
+  layout::vertical_box::aptr top(new layout::vertical_box);
+
+  layout::manager* h = new layout::horizontal_box();
+
+  top->add(new label("Phase after which to stop: "), margins(0,5,0,5));
+
+  squadt_utility::radio_button_helper < t_phase > phase_selector(h, PH_NONE, "none");
+
+  phase_selector.associate(h, PH_PARSE, "parsing");
+  phase_selector.associate(h, PH_TYPE_CHECK, "type checking");
+  phase_selector.associate(h, PH_DATA_IMPL, "data implementation");
+  phase_selector.associate(h, PH_REG_FRM_TRANS, "formula translation");
+
+  if (c.option_exists(option_end_phase)) {
+    phase_selector.set_selection(static_cast < t_phase > (
+        c.get_option_argument< size_t >(option_end_phase, 0)));
+  }
+
+  /* Attach row */
+  top->add(h, margins(0,5,0,5));
+
+  top->add(new label("Output format : "), margins(0,5,0,5));
+
+  h = new layout::horizontal_box();
+
+  squadt_utility::radio_button_helper < pbes_output_format > format_selector(h, normal, "normal");
+
+  format_selector.associate(h, readable, "readable");
+
+  if (c.option_exists(option_selected_output_format)) {
+    format_selector.set_selection(static_cast < pbes_output_format > (
+        c.get_option_argument< size_t >(option_selected_output_format, 0)));
+  }
+
+  /* Attach row */
+  top->add(h, margins(0,5,0,5));
+
+  h = new layout::horizontal_box();
+
+  h->add(new label("Formula file name : "));
+  text_field* formula_field = static_cast < text_field* > (h->add(new text_field("")));
+  top->add(h);
+
+  if (c.input_exists(formula_file_for_input)) {
+    formula_field->set_text(c.get_input(formula_file_for_input).get_location());
+  }
+
+  checkbox* special_untimed_conversion = new checkbox("special untimed conversion",
+      c.get_option_argument< bool >(option_special_untimed_conversion));
+
+  top->add(special_untimed_conversion, margins(0,5,0,5));
+  
+  button* okay_button = new button("OK");
+
+  top->add(okay_button, layout::top);
+
+  display->set_manager(top);
+
+  m_communicator.send_display_layout(display);
+
+  /* Wait until the ok button was pressed */
+  okay_button->await_change();
+
+  c.add_input(formula_file_for_input, sip::mime_type("mf", sip::mime_type::text), formula_field->get_text());
+
+  /* Add output file to the configuration */
+  if (c.output_exists(pbes_file_for_output)) {
+    sip::object& output_file = c.get_output(pbes_file_for_output);
+ 
+    output_file.set_location(c.get_output_name(".pbes"));
+  }
+  else {
+    if (format_selector.get_selection() == normal) {
+      c.add_output(pbes_file_for_output, sip::mime_type("pbes", sip::mime_type::application), c.get_output_name(".pbes"));
+    }
+    else {
+      c.add_output(pbes_file_for_output, sip::mime_type("pbes", sip::mime_type::text), c.get_output_name(".pbes"));
+    }
+  }
+
+  c.add_option(option_special_untimed_conversion).set_argument_value< 0, sip::datatype::boolean >(special_untimed_conversion->get_status());
+  c.add_option(option_selected_output_format).append_argument(output_format_enumeration,
+                                static_cast < pbes_output_format > (format_selector.get_selection()));
+  c.add_option(option_end_phase).set_argument_value< 0, sip::datatype::integer >(static_cast < t_phase > (format_selector.get_selection()));
+
+  send_clear_display();
+}
+
+bool squadt_interactor::check_configuration(sip::configuration const& c) const {
+  bool result = true;
+
+  result &= c.input_exists(lps_file_for_input);
+  result &= c.input_exists(formula_file_for_input);
+  result &= c.output_exists(pbes_file_for_output);
+  result &= c.option_exists(option_end_phase);
+  result &= c.option_exists(option_special_untimed_conversion);
+
+  return (result);
+}
+
+bool squadt_interactor::perform_task(sip::configuration& c) {
+  t_tool_options tool_options;
+
+  tool_options.pretty           = static_cast < pbes_output_format > (c.get_option_argument< size_t >(option_selected_output_format)) == normal;
+  tool_options.untimed          = c.get_option_argument< bool >(option_special_untimed_conversion);
+  tool_options.end_phase        = static_cast < t_phase > (c.get_option_argument< long int >(option_end_phase));
+  tool_options.formfilename     = c.get_input(formula_file_for_input).get_location();
+  tool_options.infilename       = c.get_input(lps_file_for_input).get_location();
+  tool_options.outfilename      = c.get_output(pbes_file_for_output).get_location();
+
+  bool result = process(tool_options);
+
+  if (result) {
+    send_clear_display();
+  }
+
+  return (result);
+}
+#endif
+
+//Main program
+//------------
+
+int main(int argc, char **argv)
+{
+  ATerm stackbot;
+
+  //initialise ATerm library
+  ATinit(argc,argv,&stackbot);
+  gsEnableConstructorFunctions();
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  if (!mcrl2_squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+#endif
+    //parse command line
+    t_tool_options tool_options = parse_command_line(argc, argv);
+
+    if (!process(tool_options)) {
+      return 1;
+    }
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  }
+#endif
+
   return 0;
 }
 

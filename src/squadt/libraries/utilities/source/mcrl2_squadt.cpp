@@ -63,46 +63,58 @@ namespace mcrl2_squadt {
 
       initialise();
 
-      while (!termination_requested) {
-        switch (m_communicator.await_message(sip::message_any)->get_type()) {
-          case sip::message_offer_configuration: {
-              sip::configuration& configuration = m_communicator.get_configuration();
-
-              /* Insert configuration in tool communicator object */
-              valid_configuration_present = check_configuration(configuration);
-
-              if (configuration.is_fresh()) {
-                do {
-                  user_interactive_configuration(configuration);
-
-                  /* Insert configuration in tool communicator object */
-                  valid_configuration_present = check_configuration(configuration);
-             
-                } while (!valid_configuration_present);
+      try {
+        while (!termination_requested) {
+          switch (m_communicator.await_message(sip::message_any)->get_type()) {
+            case sip::message_offer_configuration: {
+                sip::configuration& configuration = m_communicator.get_configuration();
+       
+                /* Insert configuration in tool communicator object */
+                valid_configuration_present = check_configuration(configuration);
+       
+                if (configuration.is_fresh()) {
+                  do {
+                    user_interactive_configuration(configuration);
+       
+                    /* Insert configuration in tool communicator object */
+                    valid_configuration_present = check_configuration(configuration);
+               
+                  } while (!valid_configuration_present);
+                }
+       
+                /* Signal that the configuration is acceptable */
+                m_communicator.send_accept_configuration();
               }
+              break;
+            case sip::message_signal_start:
+              if (valid_configuration_present) {
+                /* Signal that the job is finished */
+                bool result = perform_task(m_communicator.get_configuration());
 
-              /* Signal that the configuration is acceptable */
-              m_communicator.send_accept_configuration();
-            }
-            break;
-          case sip::message_signal_start:
-            if (valid_configuration_present) {
-              /* Signal that the job is finished */
-              m_communicator.send_signal_done(perform_task(m_communicator.get_configuration()));
-            }
-            else {
-              send_error("Start signal received without valid configuration!");
-            }
-            break;
-          case sip::message_request_termination:
+                if (!result) {
+                  send_error("Operation failed; tool may have crashed!");
+                }
 
-            termination_requested = true;
-
-            break;
-          default:
-            /* Messages with a type that do not need to be handled */
-            break;
+                m_communicator.send_signal_done(result);
+              }
+              else {
+                send_error("Start signal received without valid configuration!");
+              }
+              break;
+            case sip::message_request_termination:
+       
+              termination_requested = true;
+       
+              break;
+            default:
+              /* Messages with a type that do not need to be handled */
+              break;
+          }
         }
+      }
+      catch (std::exception& e) {
+        /* Handle standard exceptions */
+        send_error(std::string("Caught exception: ") + e.what());
       }
 
       finalise();

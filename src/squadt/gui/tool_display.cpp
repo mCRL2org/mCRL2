@@ -600,8 +600,6 @@ namespace squadt {
 
       build();
 
-      Show(false);
-
       /* Connect event handlers */
       s->set_display_layout_handler(boost::bind(&GUI::tool_display::schedule_layout_change, this, _1));
       s->set_status_message_handler(boost::bind(&GUI::tool_display::schedule_log_update, this, _1));
@@ -625,6 +623,9 @@ namespace squadt {
 
       titlepanel->SetSizer(control_bar);
       root->Add(titlepanel, 0, wxEXPAND);
+
+      // Set state to minimised
+      root->SetMinSize(GetClientSize().GetWidth(), root->GetItem((size_t) 0)->GetSize().GetHeight());
 
       SetSizer(root);
 
@@ -663,7 +664,9 @@ namespace squadt {
         }
       }
       else {
-        remove();
+        GetParent()->GetSizer()->Show(this, false, true);
+
+        context->gui_builder.schedule_update(boost::bind(&tool_display::remove, this));
       }
     }
 
@@ -756,12 +759,17 @@ namespace squadt {
 
             Layout();
 
-            Show(current_layout->get_visibility());
+            if (!current_layout->get_visibility()) {
+              // Show minimised
+              root->SetMinSize(GetClientSize().GetWidth(), root->GetItem((size_t) 0)->GetSize().GetHeight());
+            }
+
+            Show(true);
           }
           else {
-            content = 0;
-
             Show(log != 0);
+
+            content = 0;
           }
 
           GetParent()->Layout();
@@ -828,6 +836,9 @@ namespace squadt {
           size_event.SetEventObject(GetParent());
 
           GetParent()->GetParent()->ProcessEvent(size_event);
+
+          /* Show the log */
+          log->Show(true);
         }
         else {
           log->AppendText(stamp + wxString(l->get_description().c_str(), wxConvLocal));

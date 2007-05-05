@@ -40,12 +40,8 @@ namespace squadt {
   /**
    * \param[in] o an object descriptor
    * \param[in] t the new status
-   *
-   * \pre s != generation_in_progress
    **/
   bool processor_impl::try_change_status(processor::object_descriptor& o, processor::object_descriptor::t_status s) {
-    assert(o.status != object_descriptor::generation_in_progress);
-
     if (o.status != object_descriptor::generation_in_progress && s < o.status) {
       o.status = s;
 
@@ -212,6 +208,9 @@ namespace squadt {
     if (owner.number_of_inputs() == 0) {
       switch (s) {
         case process::stopped:
+          for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
+            (*i)->status = object_descriptor::reproducible_out_of_date;
+          }
           break;
         case process::running:
           for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
@@ -219,6 +218,9 @@ namespace squadt {
           }
           break;
         case process::completed:
+          for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
+            (*i)->status = object_descriptor::reproducible_up_to_date;
+          }
           break;
         default: /* aborted... */
           for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
@@ -230,6 +232,9 @@ namespace squadt {
     else {
       switch (s) {
         case process::stopped:
+          for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
+            (*i)->status = object_descriptor::reproducible_out_of_date;
+          }
           break;
         case process::running:
           for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
@@ -237,6 +242,9 @@ namespace squadt {
           }
           break;
         case process::completed:
+          for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
+            (*i)->status = object_descriptor::reproducible_up_to_date;
+          }
           break;
         default: /* aborted... */
           for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
@@ -247,6 +255,8 @@ namespace squadt {
           break;
       }
     }
+
+    owner.check_status(false);
 
     task_monitor::signal_change(s);
 

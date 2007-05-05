@@ -174,7 +174,7 @@ const char* squadt_interactor::option_remove_unvisited_summands   = "remove_unvi
 const char* squadt_interactor::option_ignore_summand_conditions   = "ignore_summand_conditions";
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(lps_file_for_input, sip::mime_type("lps"), sip::tool::category::transformation);
+  c.add_input_combination(lps_file_for_input, sip::mime_type("lps", sip::mime_type::application), sip::tool::category::transformation);
 }
 
 void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
@@ -185,7 +185,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   /* Set defaults where the supplied configuration does not have values */
   if (!c.output_exists(lps_file_for_output)) {
     /* Add output file to the configuration */
-    c.add_output(lps_file_for_output, sip::mime_type("lps"), c.get_output_name(".lps"));
+    c.add_output(lps_file_for_output, sip::mime_type("lps", sip::mime_type::application), c.get_output_name(".lps"));
   }
 
   if (!c.option_exists(option_remove_single_element_sorts)) {

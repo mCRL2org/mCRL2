@@ -49,8 +49,8 @@ void squadt_lps2lts::initialise()
 void squadt_lps2lts::set_capabilities(sip::tool::capabilities &cp) const
 {
   /* The tool has only one main input combination it takes an LPS and then behaves as a reporter */
-  cp.add_input_combination(lps_file_for_input_no_lts, sip::mime_type("lps"), sip::tool::category::reporting);
-  cp.add_input_combination(lps_file_for_input_lts, sip::mime_type("lps"), sip::tool::category::transformation);
+  cp.add_input_combination(lps_file_for_input_no_lts, sip::mime_type("lps", sip::mime_type::application), sip::tool::category::reporting);
+  cp.add_input_combination(lps_file_for_input_lts, sip::mime_type("lps", sip::mime_type::application), sip::tool::category::transformation);
 }
 
 void squadt_lps2lts::user_interactive_configuration(sip::configuration& c)

@@ -259,9 +259,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   /* Attach row */
   top->add(h, margins(0,5,0,5));
 
-  h = new layout::horizontal_box();
-
-  top->add(new label("LTS transformation:"));
+  top->add(new label("Transformation strategy :"));
 
   squadt_utility::radio_button_helper < transformation_strategy >
         transformation_selector(top, lazy, "lazy: only boolean equations reachable from the initial state");
@@ -294,11 +292,12 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
     c.add_output(pbes_file_for_output, sip::mime_type("pbes", sip::mime_type::application), c.get_output_name(".pbes"));
   }
 
-  /* Add lps file when output is FSM format or when the output is mCRL2 and the input is Aldebaran or mCRL */
   c.add_option(option_transformation_strategy).append_argument(transformation_method_enumeration,
                                 static_cast < transformation_strategy > (transformation_selector.get_selection()));
   c.add_option(option_selected_output_format).append_argument(output_format_enumeration,
                                 static_cast < pbes_output_format > (format_selector.get_selection()));
+
+  send_clear_display();
 }
 
 bool squadt_interactor::check_configuration(sip::configuration const& c) const {
@@ -318,8 +317,8 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 
   t_tool_options tool_options;
 
-  tool_options.opt_outputformat = strategies[c.get_option_argument< size_t >(option_transformation_strategy)];
-  tool_options.opt_strategy     = formats[c.get_option_argument< size_t >(option_selected_output_format)];
+  tool_options.opt_outputformat = formats[c.get_option_argument< size_t >(option_selected_output_format)];
+  tool_options.opt_strategy     = strategies[c.get_option_argument< size_t >(option_transformation_strategy)];
   tool_options.infilename       = c.get_input(pbes_file_for_input).get_location();
   tool_options.outfilename      = c.get_output(pbes_file_for_output).get_location();
 

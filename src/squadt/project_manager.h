@@ -126,7 +126,7 @@ namespace squadt {
       void clean_store(processor* p, bool b);
 
       /** \brief Make objects in the project up to date */
-      void update_single(processor::sptr);
+      void update(processor::sptr, boost::function< void (processor*) >);
 
       /** \brief Make objects in the project up to date */
       void update(boost::function< void (processor*) >);
