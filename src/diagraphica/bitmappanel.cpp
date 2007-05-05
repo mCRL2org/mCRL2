@@ -24,8 +24,8 @@ BitmapPanel::BitmapPanel(
     this->SetMinSize( this->GetSize() );
     this->SetMaxSize( this->GetSize() );
 
-    // load image
-    bitmap = new wxBitmap(image); 
+    // load image (cast is for wxWidgets 2.6 compatibility)
+    bitmap = new wxBitmap(const_cast < const char** > (image)); 
 }
 
 
