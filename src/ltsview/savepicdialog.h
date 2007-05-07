@@ -4,6 +4,7 @@
 #include <wx/wx.h>
 #include <wx/slider.h>
 #include <wx/filename.h>
+#include <wx/statusbr.h>
 #include <vector>
 #include "glcanvas.h"
 
@@ -13,8 +14,8 @@ const int myID_FT_CHOICE = myID_R_SLIDER + 1;
 
 class SavePicDialog : public wxDialog {
   public:
-    SavePicDialog(wxWindow* parent,GLCanvas* glc,wxString filename,
-      wxString dir);
+    SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
+        wxFileName filename);
     ~SavePicDialog();
     int  getImageWidth();
     int  getImageHeight();
@@ -25,14 +26,15 @@ class SavePicDialog : public wxDialog {
     void onChoice(wxCommandEvent& event);
     void OnOK(wxCommandEvent& event);
   private:
-    float	  ar;
+    float ar;
     GLCanvas*     glcanvas;
+    wxStatusBar*  statusbar;
     wxSlider*     r_slider;
     wxStaticText* r_text;
     wxChoice*     ft_choice;
     wxStaticText* f_text;
-    wxButton*	  f_button;
-    wxFileName	  f_name;
+    wxButton*     f_button;
+    wxFileName    f_name;
     wxArrayString f_exts;
     std::vector<long>  f_types;
 

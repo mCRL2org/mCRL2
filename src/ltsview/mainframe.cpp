@@ -6,7 +6,6 @@
 #include <wx/sysopt.h>
 //#include <time.h>
 #include "ids.h"
-#include "savepicdialog.h"
 #include "icons/main_window.xpm"
 
 // For compatibility with older wxWidgets versions (pre 2.8)
@@ -67,6 +66,7 @@ MainFrame::MainFrame(Mediator* owner,Settings* ss)
   mediator = owner;
   settings = ss;
   progDialog = NULL;
+  savePicDialog = NULL;
 
   SetIcon(wxIcon(main_window));
 
@@ -410,8 +410,10 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/) {
 }
 
 void MainFrame::onSavePic(wxCommandEvent& /*event*/) {
-  SavePicDialog sp_dlg(this,glCanvas,filename.GetFullName(),filename.GetPath());
-  sp_dlg.ShowModal();
+  if (savePicDialog == NULL) {
+    savePicDialog = new SavePicDialog(this,GetStatusBar(),glCanvas,filename);
+  }
+  savePicDialog->ShowModal();
 }
 
 void MainFrame::onExit(wxCommandEvent& /*event*/) {
@@ -581,7 +583,7 @@ void MainFrame::updateProgressDialog(int val,string msg) {
 
 void MainFrame::showMessage(string title,string text) {
   wxMessageDialog* msgDialog = new wxMessageDialog(this,
-      wxString(text.c_str(),wxConvUTF8),wxString(title.c_str(),wxConvUTF8),
+      wxString(text.c_str(),wxConvLocal),wxString(title.c_str(),wxConvLocal),
       wxOK);
   msgDialog->ShowModal();
   msgDialog->Close();
@@ -590,10 +592,11 @@ void MainFrame::showMessage(string title,string text) {
 
 void MainFrame::loadTitle() {
   wxString fn = filename.GetFullName();
-  if (fn != wxEmptyString)
+  if (fn != wxEmptyString) {
     SetTitle(fn + wxT(" - LTSView"));
-  else
+  } else {
     SetTitle(wxT("LTSView"));
+  }
 }
 
 void MainFrame::setNumberInfo(int ns,int nt,int nc,int nr) {

@@ -143,7 +143,9 @@ void GLCanvas::display(bool coll_caller) {
   // happened on the Mac during startup of the application
   if (displayAllowed) {
     displayAllowed = false;
-    mediator->notifyRenderingStarted();
+    if (!collectingData) {
+      mediator->notifyRenderingStarted();
+    }
 
     SetCurrent();
     
@@ -249,7 +251,9 @@ void GLCanvas::display(bool coll_caller) {
       }
     glPopMatrix();
 
-    mediator->notifyRenderingFinished();
+    if (!collectingData) {
+      mediator->notifyRenderingFinished();
+    }
     displayAllowed = true;
   }
 }

@@ -14,9 +14,10 @@ BEGIN_EVENT_TABLE(SavePicDialog,wxDialog)
   EVT_BUTTON(wxID_OK,SavePicDialog::OnOK)
 END_EVENT_TABLE()
 
-SavePicDialog::SavePicDialog(wxWindow* parent,GLCanvas* glc,wxString filename,
-  wxString dir)
-:wxDialog(parent,-1,wxT("Save Picture"),wxDefaultPosition) {
+SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
+    wxFileName filename)
+: wxDialog(parent,-1,wxT("Save Picture"),wxDefaultPosition) {
+  statusbar = sb;
   glcanvas = glc;
   int w,h,w_max,h_max;
   glcanvas->GetClientSize(&w,&h);
@@ -33,19 +34,19 @@ SavePicDialog::SavePicDialog(wxWindow* parent,GLCanvas* glc,wxString filename,
   while (node != NULL) {
     wxImageHandler* h = (wxImageHandler*)node->GetData();
     // ignore useless file types
-    if (h->GetExtension()!=wxT("ani") && h->GetExtension()!=wxT("cur") && 
-	      h->GetExtension()!=wxT("ico")) {
+    if (h->GetExtension() != wxT("ani") && h->GetExtension() != wxT("cur") &&
+        h->GetExtension() != wxT("ico")) {
       if (h->GetExtension() == wxT("jpg")) {
-	      fts.Add(h->GetName()+wxT(" (.jpg .jpeg)"));
+        fts.Add(h->GetName() + wxT(" (.jpg .jpeg)"));
       }
       else if (h->GetExtension() == wxT("tif")) {
-	      fts.Add(h->GetName()+wxT(" (.tif .tiff)"));
+        fts.Add(h->GetName() + wxT(" (.tif .tiff)"));
       }
       else {
-	      fts.Add(h->GetName()+wxT(" (.")+h->GetExtension()+wxT(")"));
+        fts.Add(h->GetName() + wxT(" (.") + h->GetExtension() + wxT(")"));
       }
       if (h->GetExtension() == wxT("png")) {
-	      png_id = f_exts.Count();
+        png_id = f_exts.Count();
       }
       f_exts.Add(h->GetExtension());
       f_types.push_back(h->GetType());
@@ -56,7 +57,8 @@ SavePicDialog::SavePicDialog(wxWindow* parent,GLCanvas* glc,wxString filename,
     fts);
   ft_choice->SetSelection(png_id);
   
-  if (dir == wxEmptyString) {
+  f_name.Assign(filename);
+  /*if (dir == wxEmptyString) {
     f_name.AssignHomeDir();
   }
   else {
@@ -67,10 +69,9 @@ SavePicDialog::SavePicDialog(wxWindow* parent,GLCanvas* glc,wxString filename,
   }
   else {
     f_name.SetFullName(filename);
-  }
+  }*/
   f_name.SetExt(f_exts.Item(ft_choice->GetSelection()));
-  f_text = new wxStaticText(this,-1,wxT(""),wxDefaultPosition,wxSize(300,-1),
-    wxST_NO_AUTORESIZE);
+  f_text = new wxStaticText(this,-1,wxT(""),wxDefaultPosition,wxSize(300,-1));
   f_text->SetLabel(f_name.GetFullPath());
   
   f_button = new wxButton(this,myID_F_BUTTON,wxT("Change..."));
@@ -109,8 +110,8 @@ void SavePicDialog::onSlider(wxScrollEvent& /*event*/) {
 
 void SavePicDialog::onChangeFile(wxCommandEvent& /*event*/) {
   wxString new_file = wxFileSelector(wxT("Select a file"),f_name.GetPath(),
-    f_name.GetFullName(),wxEmptyString,wxT("*.*"),wxFD_SAVE,this);
-  if (new_file != wxEmptyString) {
+    f_name.GetFullName(),wxT(""),wxT("*.*"),wxSAVE,this);
+  if (!new_file.empty()) {
     f_name.Assign(new_file);
     // if extension of new filename indicates a supported file type, set the
     // choice control to that file type (the user apparently wants that file
@@ -141,9 +142,9 @@ void SavePicDialog::onChangeFile(wxCommandEvent& /*event*/) {
 void SavePicDialog::onChoice(wxCommandEvent& event) {
   wxString newext = f_exts.Item(event.GetSelection());
   wxString oldext = f_name.GetExt().Lower();
-  if (newext != oldext
-      && !(newext==wxT("jpg") && oldext==wxT("jpeg"))
-      && !(newext==wxT("tif") && oldext==wxT("tiff"))) {
+  if (newext != oldext &&
+      !(newext == wxT("jpg") && oldext == wxT("jpeg")) &&
+      !(newext == wxT("tif") && oldext == wxT("tiff"))) {
     f_name.SetExt(newext);
     f_text->SetLabel(f_name.GetFullPath());
   }
@@ -167,15 +168,38 @@ long SavePicDialog::getFileType() {
 
 void SavePicDialog::OnOK(wxCommandEvent& /*event*/) {
   Hide();
+  GetParent()->SetCursor(wxCursor(wxCURSOR_WAIT));
+  GetParent()->Disable();
+  GetParent()->Refresh();
+  GetParent()->Update();
+  glcanvas->display();
+
   int w = r_slider->GetValue();
   int h = int(w/ar);
   
+  statusbar->SetStatusText(wxT("Collecting picture data..."));
+  statusbar->Update();
   unsigned char* data = glcanvas->getPictureData(w,h);
   wxImage img(w,h,data);
+  
   // order of image pixels is row major from bottom to top, but wxWidgets
   // assumes it to be from top to bottom, so we mirror the image vertically
+  statusbar->SetStatusText(wxT("Mirroring image..."));
+  statusbar->Update();
   img = img.Mirror(false);
+
+  statusbar->SetStatusText(wxT("Saving image to file..."));
+  statusbar->Update();
   img.SaveFile(f_name.GetFullPath(),f_types[ft_choice->GetSelection()]);
-  //AM removed to prevent EndModal from being called twice
-  //EndModal(wxID_OK);
+  
+  statusbar->SetStatusText(wxT("Done"));
+  statusbar->Update();
+  GetParent()->Enable();
+  GetParent()->SetCursor(wxNullCursor);
+  wxMessageDialog msgDialog(GetParent(),wxT("The picture was saved to file:\n\n") + 
+      f_name.GetFullPath(),wxT("Picture saved"),wxOK|wxICON_INFORMATION);
+  msgDialog.ShowModal();
+  
+  statusbar->SetStatusText(wxT(""));
+  statusbar->Update();
 }

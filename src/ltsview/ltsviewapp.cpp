@@ -94,10 +94,9 @@ bool LTSViewApp::OnInit() {
 
   wxInitAllImageHandlers();
 
+  wxString lts_file_argument;
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if (command_line) {
-#else
-    std::string lts_file_argument;
 #endif
     // parse command line and check for specified input file
     wxCmdLineEntryDesc cmdLineDesc[] = {
@@ -105,20 +104,18 @@ bool LTSViewApp::OnInit() {
         wxCMD_LINE_PARAM_OPTIONAL},
       {wxCMD_LINE_NONE,NULL,NULL,NULL,wxCMD_LINE_VAL_NONE,0}
     };
-    wxCmdLineParser cmdParser(cmdLineDesc, argc,argv);
+    wxCmdLineParser cmdParser(cmdLineDesc,argc,argv);
     if (cmdParser.Parse() == 0) {
       if (cmdParser.GetParamCount() > 0) {
-        lts_file_argument = std::string(cmdParser.GetParam(0).fn_str());
+        lts_file_argument = cmdParser.GetParam(0);
       }
     }
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }
 #endif
-  wxString wx_file_string(lts_file_argument.c_str(),wxConvLocal);
-  if (!wx_file_string.IsEmpty()) {
-    wxFileName fileName(wx_file_string);
-    fileName.Normalize(wxPATH_NORM_LONG | wxPATH_NORM_DOTS |
-        wxPATH_NORM_TILDE | wxPATH_NORM_ABSOLUTE);
+  if (!lts_file_argument.empty()) {
+    wxFileName fileName(lts_file_argument);
+    fileName.Normalize();
     mainFrame->setFileInfo(fileName);
     openFile(static_cast< string >(fileName.GetFullPath().fn_str()));
   }
