@@ -20,6 +20,16 @@ enum SMT_Solver_Type {
 };
 
   /// \brief The class BDD_Path_Eliminator is a base class for classes that eliminate inconsistent paths from BDDs.
+  /// The class BDD_Path_Eliminator inherits from the class BDD_Simplifier. It uses an SMT solver to eliminate
+  /// inconsistent paths from BDDs. The parameter a_solver_type of the constructor BDD_Path_Eliminator::BDD_Path_Eliminator
+  /// is used to indicate which SMT solver should be used for this task. A path in a BDD is constructed by selecting a set
+  /// of guards as follows: starting at the root node, one of the two edges at each guard is followed until a leaf is
+  /// reached. Each time the true-edge is chosen, the guard is added to the set. Each time the false-edge is chosen, the
+  /// negation of the guard is added to the set. If the conjunction of all elements in this set is a contradiction, the path
+  /// is inconsistent.
+
+  /// The method BDD_Path_Eliminator::simplify receives a BDD as parameter a_bdd and returns the equivalent BDD from which
+  /// all inconsistent paths have been removed. 
 
 class BDD_Path_Eliminator: public BDD_Simplifier {
   private:
@@ -49,6 +59,10 @@ class BDD_Path_Eliminator: public BDD_Simplifier {
     BDD_Path_Eliminator(SMT_Solver_Type a_solver_type);
 
     /// \brief Returns a BDD without inconsistent paths, equivalent to a_bdd.
+    /// precondition: The argument passed as parameter a_bdd is a data expression in internal mCRL2 format with the
+    /// following restrictions: It either represents the constant true or the constant false, or it is an if-then-else
+    /// expression with an expression of sort Bool  as guard, and a then-branch and an else-branch that again follow
+    /// these restrictions
     virtual ATermAppl simplify(ATermAppl a_bdd);
 };
 

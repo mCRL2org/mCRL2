@@ -16,6 +16,31 @@
   /// \brief A class based on the Prover class that takes an expression of sort Bool in internal mCRL2 format
   /// \brief and creates the corresponding EQ-BDD. Using this EQ-BDD, the class can determine if the original
   /// \brief formula is a tautology or a contradiction.
+  ///  The term "formula" in the following text denotes arbitrary expressions of sort Bool in the mCRL2 format.
+  ///
+  /// A prover uses a rewriter to rewrite parts of the formulas it manipulates. The constructor BDD_Prover::BDD_Prover
+  /// initializes the prover's rewriter with the data equations in internal mCRL2 format contained in the LPS passed as
+  /// parameter a_lps and the rewrite strategy passed as parameter a_rewrite_strategy. The parameter a_rewrite_strategy
+  /// can be set to either GS_REWR_INNER, GS_REWR_INNERC, GS_REWR_JITTY or GS_REWR_JITTYC. To limit the number of seconds
+  /// spent on proving a single formula, a time limit can be set. If the time limit is set to 0, no time limit will be
+  /// enforced. The parameter a_apply_induction indicates whether or induction on lists is applied. The constructor
+  /// BDD_Prover::BDD_Prover has two additional parameters, a_path_eliminator and a_solver_type. The parameter
+  /// a_path_eliminator can be used to enable the use of an instance of the class BDD_Path_Eliminator. Instances of this
+  /// class use an SMT solver to eliminate inconsistent paths from BDDs. The parameter a_solver_type can be used to indicate
+  /// which SMT solver should be used for this task. Either the SMT solver ario (http://www.eecs.umich.edu/~ario/) or
+  /// cvc-lite (http://www.cs.nyu.edu/acsys/cvcl/) can be used. To use one of these solvers, the directory containing the
+  /// corresponding executable must be in the path. If the parameter a_path_eliminator is set to false, the parameter
+  /// a_solver_type is ignored and no instance of the class BDD_Path_Eliminator is initialized.
+  ///
+  /// The formula to be handled is set using the method Prover::set_formula inherited from the class Prover. An entity of
+  /// the class BDD_Prover uses binary decision diagrams to determine if a given formula is a tautology or a contradiction.
+  /// The resulting BDD can be retreived using the method BDD_Prover::get_bdd.
+  ///
+  /// The methods BDD_Prover::is_tautology and BDD_Prover::is_contradiction indicate whether or not a formula is a
+  /// tautology or a contradiction. These methods will return answer_yes, answer_no or answer_undefined.
+  /// If a formula is neither a tautology nor a contradiction according to the prover, a so called witness or counter
+  ///  example can be returned by the methods BDD_Prover::get_witness and BDD_Prover::get_counter_example. A witness is a
+  /// valuation for which the formula holds, a counter example is a valuation for which it does not hold. 
 
 class BDD_Prover: public Prover {
   private:
@@ -83,6 +108,9 @@ class BDD_Prover: public Prover {
 
     /// \brief Constructor that initializes the attributes BDD_Prover::f_data_spec, Prover::f_time_limit and
     /// \brief BDD_Prover::f_bdd_simplifier.
+    /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
+    /// to 0, no time limit will be enforced
+    /// precondition: the argument passed as parameter a_lps is an LPS
     BDD_Prover(
       lps::data_specification data_spec,
       RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,

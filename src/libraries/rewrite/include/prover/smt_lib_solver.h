@@ -10,6 +10,14 @@
 #include "auxiliary/sort_info.h"
 #include <string>
 
+  /// The class SMT_LIB_Solver is a base class for SMT solvers that read the SMT-LIB format
+  /// [Silvio Ranise and Cesare Tinelli. The SMT-LIB Standard: Version 1.1. Technical Report, Department of Computer
+  /// Science, The University of Iowa, 2005. (Available at http://goedel.cs.uiowa.edu/smtlib)]. It inherits from the class
+  /// SMT_Solver.
+  ///
+  /// The method SMT_LIB_Solver::translate receives an expression of sort Bool in conjunctive normal form as parameter
+  /// a_formula and translates it to a benchmark in SMT-LIB format. The result is saved as field std::string f_benchmark.
+
 class SMT_LIB_Solver: public SMT_Solver {
   private:
     Expression_Info f_expression_info;
@@ -71,6 +79,10 @@ class SMT_LIB_Solver: public SMT_Solver {
     void add_pos_clauses();
   protected:
     std::string f_benchmark;
+
+    /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
+    /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
+    /// clauses
     void translate(ATermList a_formula);
   public:
     SMT_LIB_Solver();

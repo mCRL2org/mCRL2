@@ -13,6 +13,105 @@
 
     /// \brief A class that takes a linear process specification and checks all tau-summands of that LPS for confluence.
     /// \brief The tau actions of all confluent tau-summands are renamed to ctau.
+    ///
+    ///  Given an LPS,
+    ///
+    ///    P(d: D) = ...
+    ///            + sum ei: Ei. ci(d, ei) -> ai(fi(d, ei)) . P(gi(d, ei))
+    ///            + ...
+    ///            + sum ej: Ej. cj(d, ej) -> tau . P(gj(d, ej))
+    ///            + ...;
+    ///  
+    ///
+    /// tau-summand j is confluent with summand i if the following condition holds for all d: D, for all ei: Ei and for all
+    ///  ej: Ej:
+    ///
+    ///    (inv(d) /\ ci(d, ei) /\ cj(d, ej))
+    ///    =>
+    ///    (
+    ///     ci(gj(d, ej), ei) /\ 
+    ///     cj(gi(d, ei), ej) /\ 
+    ///     fi(d, ei) == fi(gj(d, ej), ei) /\ 
+    ///     gi(gj(d, ej), ei) == gj(gi(d, ei), ej)
+    ///    )
+    ///
+    /// where inv() is the invariant specified using the parameter a_invariant of the function
+    /// Confluence_Checker::check_confluence_and_mark. In case ai is also a tau-action, the formula above can be weakened to
+    /// the following:
+    ///
+    ///    (inv(d) /\ ci(d, ei) /\ cj(d, ej))
+    ///    =>
+    ///    (
+    ///     gi(d, ei) == gj(d, ej) \/
+    ///     (
+    ///      ci(gj(d, ej), ei) /\
+    ///      cj(gi(d, ei), ej) /\
+    ///      gi(gj(d, ej), ei) == gj(gi(d, ei), ej)
+    ///     )
+    ///    )
+    ///
+    /// The class Confluence_Checker can determine whether two summands are confluent in three ways and will indicate which
+    /// of the methods was used while proving confluence. The three ways of determining confluence are as follows:
+    ///
+    ///      If summand number 1 has been proven confluent with summand number 2, summand number 2 is obviously confluent
+    /// with summand number 1. This method of checking confluence is called checking confluence by symmetry. If two summands
+    /// are confluent by symmetry, the class Confluence_Checker indicates this by printing a dot ('.').
+    ///
+    ///      Another way of checking the confluence of two summands is determining whether the two summands are
+    /// syntactically disjoint. Two summands are syntactically disjoint if the following holds:
+    /// - The set of variables used by one summand is disjoint from the set of variables changed by the other summand and
+    ///   vice versa.
+    /// - The set of variables changed by one summand is disjoint from the set of variables changed by the other summand. 
+    /// If two summands are confluent because of syntactic disjointness, the class Confluence_Checker indicates this by
+    /// printing a colon (':').
+    ///
+    ///      The most time consuming way of checking the confluence of two summands is generating the confluence condition
+    /// and then checking if this condition is a tautology using a prover for expressions of sort Bool. If two summands are
+    /// proven confluent using the prover, the class Confluence_Checker indicates this by printing a plus sign ('+'). If the
+    /// parameter a_generate_invariants is set to true, the class Confluence_Checker will try to prove that the reduced
+    /// confluence condition is an invariant of the LPS, in case the confluence condition is not a tautology. If the reduced
+    /// confluence condition is indeed an invariant, the two summands are proven confluent. The class Confluence_Checker
+    /// indicates this by printing an 'i'. 
+    ///
+    /// The class Confluence_Checker uses an instance of the class BDD_Prover, an instance of the class Disjointness_Checker
+    /// and an instance of the class Invariant_Checker to determine which tau-summands of an mCRL2 LPS are confluent.
+    /// Confluent tau-summands will be marked by renaming their tau-actions to ctau. The constructor
+    /// Confluence_Checker::Confluence_Checker initializes the BDD based prover with the parameters a_rewrite_strategy,
+    /// a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction and a_lps. The parameter a_rewrite_strategy
+    /// specifies which rewrite strategy is used by the prover's rewriter. It can be set to either GS_REWR_INNER,
+    /// GS_REWR_INNERC, GS_REWR_JITTY or GS_REWR_JITTYC. The parameter a_time_limit specifies the maximum amount of time in
+    /// seconds to be spent by the prover on proving a single expression. If a_time_limit is set to 0, no time limit will be
+    /// enforced. The parameter a_path_eliminator specifies whether or not path elimination is applied. When path
+    /// elimination is applied, the prover uses an SMT solver to remove inconsistent paths from BDDs. The parameter
+    /// a_solver_type specifies which SMT solver is used for path elimination. Either the SMT solver ario
+    /// (http://www.eecs.umich.edu/~ario/) or cvc-lite (http://www.cs.nyu.edu/acsys/cvcl/) can be used. To use one of these
+    /// solvers, the directory containing the corresponding executable must be in the path. If the parameter
+    /// a_path_eliminator is set to false, the parameter a_solver_type is ignored. The parameter a_apply_induction indicates
+    /// whether or not induction on list will be applied.
+    ///
+    /// The parameter a_dot_file_name specifies whether a file in dot format of the resulting BDD is saved each time the
+    /// prover cannot determine whether an expression of sort Bool is a contradiction or a tautology. If the parameter is
+    /// set to 0, no .dot files are saved. If a string is passed as parameter a_dot_file_name, this string will be used as
+    /// the prefix of the filenames. An instance of the class BDD2Dot is used to save these files in dot format.
+    ///
+    /// If the parameter a_counter_example is set to true, a so called counter example is printed to stderr each time the
+    /// prover indicates that two summands are not confluent. A counter example is a valuation for which the confluence
+    /// condition to be proven does not hold.
+    ///
+    /// If the parameter a_check_all is set to true, the confluence of the tau-summands regarding all other summands will be
+    /// checked. If the parameter is set to false, Confluence_Checker continues with the next tau-summand as soon as a
+    /// summand is encountered that is not confluent with the current tau-summand.
+    ///
+    /// If the parameter a_generate_invariants is set, an invariant checker is used to check if the reduced confluence
+    /// condition is an invariant of the LPS passed as parameter a_lps. If the reduced confluence condition is an invariant,
+    /// the two summands are confluent.
+    ///
+    /// The function Confluence_Checker::check_confluence_and_mark returns an LPS with all tau-actions of confluent
+    /// tau-summands renamed to ctau, unless the parameter a_no_marking is set to true. In case the parameter a_no_marking
+    /// was set to true, the confluent tau-summands will not be marked, only the results of the confluence checking will be
+    /// displayed.
+    ///
+    /// If there already is an action named ctau present in the LPS passed as parameter a_lps, an error will be reported. 
 
 class Confluence_Checker {
   private:
@@ -68,6 +167,9 @@ class Confluence_Checker {
   public:
     /// \brief Constructor that initializes Confluence_Checker::f_lps, Confluence_Checker::f_bdd_prover,
     /// \brief Confluence_Checker::f_generate_invariants and Confluence_Checker::f_dot_file_name.
+    /// precondition: the argument passed as parameter a_lps is a valid mCRL2 LPS
+    /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
+    /// to 0, no time limit will be enforced
     Confluence_Checker(
       ATermAppl a_lps,
       RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
@@ -86,6 +188,9 @@ class Confluence_Checker {
     ~Confluence_Checker();
 
     /// \brief Check the confluence of the LPS Confluence_Checker::f_lps.
+    /// precondition: the argument passed as parameter a_invariant is an expression of sort Bool in internal mCRL2 format
+    /// precondition: the argument passed as parameter a_summand_number corresponds with a summands of the LPS passed as
+    /// parameter a_lps. It lies in the interval from and including 1 upto and including the highest summand number 
     ATermAppl check_confluence_and_mark(ATermAppl a_invariant, int a_summand_number);
 };
 

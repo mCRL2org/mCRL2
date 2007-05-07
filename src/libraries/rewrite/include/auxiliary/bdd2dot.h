@@ -7,7 +7,9 @@
 #include "aterm2.h"
 #include "bdd_info.h"
 
-  /// The class BDD2Dot writes binary decision diagrams to files in dot format.
+  /// \brief The class BDD2Dot offers the ability to write binary decision diagrams to dot files.
+  /// The method BDD2Dot::output_bdd receives a binary decision diagram as parameter a_bdd and writes it to a file in dot
+  /// format with the name passed as parameter a_file_name.
 
 class BDD2Dot {
   private:
@@ -24,10 +26,18 @@ class BDD2Dot {
     BDD_Info f_bdd_info;
 
     /// \brief Writes the BDD it receives to BDD2Dot::f_dot_file.
+    /// precondition: The argument passed as parameter a_bdd is a data expression in internal mCRL2 format with the
+    /// following restrictions: It either represents the constant true or the constant false, or it is an if-then-else
+    /// expression with an expression of Bool as guard, and a then-branch and an else-branch that again follow these
+    /// restrictions
     void aux_output_bdd(ATermAppl a_bdd);
   public:
     /// \brief Writes the BDD it receives as input to a file
     /// \brief in dot format with the name received as input.
+    /// precondition: The argument passed as parameter a_bdd is a data expression in internal mCRL2 format with the
+    /// following restrictions: It either represents the constant true or the constant false, or it is an if-then-else
+    /// expression with an expression of Bool as guard, and a then-branch and an else-branch that again follow these
+    /// restrictions
     void output_bdd(ATermAppl a_bdd, char* a_file_name);
 };
 

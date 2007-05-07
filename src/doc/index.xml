@@ -8,16 +8,6 @@
 <!ENTITY answer_yes "<constant>answer_yes</constant>">
 <!ENTITY aterm "<acronym>ATerm</acronym>">
 <!ENTITY basic "<parameter>basic</parameter>">
-<!ENTITY bdd2dot_output_bdd "<function>BDD2Dot::output_bdd</function>">
-<!ENTITY bdd_path_eliminator_constructor "<function>BDD_Path_Eliminator::BDD_Path_Eliminator</function>">
-<!ENTITY bdd_path_eliminator_simplify "<function>BDD_Path_Eliminator::simplify</function>">
-<!ENTITY bdd_prover_constructor "<function>BDD_Prover::BDD_Prover</function>">
-<!ENTITY bdd_prover_get_bdd "<function>BDD_Prover::get_bdd</function>">
-<!ENTITY bdd_prover_get_counter_example "<function>BDD_Prover::get_counter_example</function>">
-<!ENTITY bdd_prover_get_witness "<function>BDD_Prover::get_witness</function>">
-<!ENTITY bdd_prover_is_contradiction "<function>BDD_Prover::is_contradiction</function>">
-<!ENTITY bdd_prover_is_tautology "<function>BDD_Prover::is_tautology</function>">
-<!ENTITY bdd_simplifier_simplify "<function>BDD_Simplifier::simplify</function>">
 <!ENTITY Bool_and2 "<constant>&amp;&amp;</constant>">
 <!ENTITY Bool_and "<constant>and</constant>">
 <!ENTITY Bool "<constant>Bool</constant>">
@@ -27,23 +17,7 @@
 <!ENTITY Bool_or2 "<constant>||</constant>">
 <!ENTITY Bool_or "<constant>or</constant>">
 <!ENTITY Bool_T "<constant>T</constant>">
-<!ENTITY class_bdd2dot "<classname>BDD2Dot</classname>">
-<!ENTITY class_bdd_path_eliminator "<classname>BDD_Path_Eliminator</classname>">
-<!ENTITY class_bdd_prover "<classname>BDD_Prover</classname>">
-<!ENTITY class_bdd_simplifier "<classname>BDD_Simplifier</classname>">
-<!ENTITY class_confluence_checker "<classname>Confluence_Checker</classname>">
-<!ENTITY class_disjointness_checker "<classname>Disjointness_Checker</classname>">
-<!ENTITY class_formula_checker "<classname>Formula_Checker</classname>">
-<!ENTITY class_invariant_checker "<classname>Invariant_Checker</classname>">
-<!ENTITY class_invariant_eliminator "<classname>Invariant_Eliminator</classname>">
-<!ENTITY class_prover "<classname>Prover</classname>">
-<!ENTITY class_smt_lib_solver "<classname>SMT_LIB_Solver</classname>">
-<!ENTITY class_smt_solver_ario "<classname>SMT_Solver_Ario</classname>">
-<!ENTITY class_smt_solver "<classname>SMT_Solver</classname>">
-<!ENTITY class_smt_solver_cvc_lite "<classname>SMT_Solver_CVC_Lite</classname>">
 <!ENTITY cnull "<constant>NULL</constant>">
-<!ENTITY confluence_checker_check_confluence_and_mark "<function>Confluence_Checker::check_confluence_and_mark</function>">
-<!ENTITY confluence_checker_constructor "<function>Confluence_Checker::Confluence_Checker</function>">
 <!ENTITY const_false "<constant>false</constant>">
 <!ENTITY const_solver_type_ario "<constant>solver_type_ario</constant>">
 <!ENTITY const_strat_innerc "<constant>GS_REWR_INNERC</constant>">
@@ -60,15 +34,11 @@
 <!ENTITY cwi "<acronym>CWI</acronym>">
 <!ENTITY debug "<parameter>debug</parameter>">
 <!ENTITY default "<parameter>default</parameter>">
-<!ENTITY disjointness_checker_constructor "<function>Disjointness_Checker::Disjointness_Checker</function>">
-<!ENTITY disjointness_checker_disjoint "<function>Disjointness_Checker::disjoint</function>">
 <!ENTITY dot "<constant>dot</constant>">
 <!ENTITY false "<constant>false</constant>">
 <!ENTITY file "<parameter>FILE</parameter>">
 <!ENTITY fmcparsemodalformula "<function>MCparseModalFormula</function>">
 <!ENTITY format "<parameter>FORMAT</parameter>">
-<!ENTITY formula_checker_check_formulas "<function>Formula_Checker::check_formulas</function>">
-<!ENTITY formula_checker_constructor "<function>Formula_Checker::Formula_Checker</function>">
 <!ENTITY formulas "<parameter>FORMULAS</parameter>">
 <!ENTITY fsm "<constant>fsm</constant>">
 <!ENTITY func_eq "<function>==</function>">
@@ -81,10 +51,6 @@
 <!ENTITY infile "<parameter>INFILE</parameter>">
 <!ENTITY inner "<parameter>inner</parameter>">
 <!ENTITY internal "<parameter>internal</parameter>">
-<!ENTITY invariant_checker_check_invariant "<function>Invariant_Checker::check_invariant</function>">
-<!ENTITY invariant_checker_constructor "<function>Invariant_Checker::Invariant_Checker</function>">
-<!ENTITY invariant_eliminator_constructor "<function>Invariant_Eliminator::Invariant_Eliminator</function>">
-<!ENTITY invariant_eliminator_simplify "<function>Invariant_Eliminator::simplify</function>">
 <!ENTITY invariant "<parameter>INVARIANT</parameter>">
 <!ENTITY inv "<literal>inv()</literal>">
 <!ENTITY isValidRewriteRule "<function>isValidRewriteRule</function>">
@@ -273,13 +239,6 @@
 <!ENTITY preduce "<parameter>reduce</parameter>">
 <!ENTITY prefix "<parameter>PREFIX</parameter>">
 <!ENTITY PrintRewriteStrategy "<function>PrintRewriteStrategy</function>">
-<!ENTITY prover_constructor "<function>Prover::Prover</function>">
-<!ENTITY prover_get_counter_example "<function>Prover::get_counter_example</function>">
-<!ENTITY prover_get_witness "<function>Prover::get_witness</function>">
-<!ENTITY prover_is_contradiction "<function>Prover::is_contradiction</function>">
-<!ENTITY prover_is_tautology "<function>Prover::is_tautology</function>">
-<!ENTITY prover_set_formula "<function>Prover::set_formula</function>">
-<!ENTITY prover_set_time_limit "<function>Prover::set_time_limit</function>">
 <!ENTITY psavetomcrlformat "<parameter>saveToMCRLFormat</parameter>">
 <!ENTITY pvblevel "<parameter>vbLevel</parameter>">
 <!ENTITY refmucalculus "<literal>mucalculus(7)</literal>">
@@ -300,12 +259,6 @@
 <!ENTITY RewriteStrategyFromString "<function>RewriteStrategyFromString</function>">
 <!ENTITY sbool '<literal>"Bool"</literal>'>
 <!ENTITY seconds "<parameter>SECONDS</parameter>">
-<!ENTITY smt_lib_solver_translate "<function>SMT_LIB_Solver::translate</function>">
-<!ENTITY smt_solver_ario_constructor "<function>SMT_Solver_Ario::SMT_Solver_Ario</function>">
-<!ENTITY smt_solver_ario_is_satisfiable "<function>SMT_Solver_Ario::is_satisfiable</function>">
-<!ENTITY smt_solver_cvc_lite_constructor "<function>SMT_Solver_CVC_Lite::SMT_Solver_CVC_Lite</function>">
-<!ENTITY smt_solver_cvc_lite_is_satisfiable "<function>SMT_Solver_CVC_Lite::is_satisfiable</function>">
-<!ENTITY smt_solver_is_satisfiable "<function>SMT_Solver::is_satisfiable</function>">
 <!ENTITY solver_ario "<constant>ario</constant>">
 <!ENTITY solver_ario_string "<constant>'ario'</constant>">
 <!ENTITY solver_ario-url "<ulink url='http://www.eecs.umich.edu/~ario/'/>">
@@ -447,15 +400,6 @@
 <!ENTITY xsim-lnk "<link linkend='xsim'>&xsim;</link>">
 <!ENTITY rewriter-lnk "<link linkend='rewriter'>&rewriter;</link>">
 <!-- list of source files to be included -->
-<!ENTITY fbdd2dot SYSTEM "bdd2dot.xml">
-<!ENTITY fbdd_path_eliminator SYSTEM "bdd_path_eliminator.xml">
-<!ENTITY fbdd_prover SYSTEM "bdd_prover.xml">
-<!ENTITY fbdd_simplifier SYSTEM "bdd_simplifier.xml">
-<!ENTITY fconfluence_checker SYSTEM "confluence_checker.xml">
-<!ENTITY fdisjointness_checker SYSTEM "disjointness_checker.xml">
-<!ENTITY fformula_checker SYSTEM "formula_checker.xml">
-<!ENTITY finvariant_checker SYSTEM "invariant_checker.xml">
-<!ENTITY finvariant_eliminator SYSTEM "invariant_eliminator.xml">
 <!ENTITY frewriter SYSTEM "rewriter.xml">
 <!ENTITY flps2lts SYSTEM "lps2lts.xml">
 <!ENTITY flps2torx SYSTEM "lps2torx.xml">
@@ -482,21 +426,15 @@
 <!ENTITY fpbes2bes SYSTEM "pbes2bes.xml">
 <!ENTITY fpbesinfo SYSTEM "pbesinfo.xml">
 <!ENTITY fpnml2mcrl2 SYSTEM "pnml2mcrl2.xml">
-<!ENTITY fprover SYSTEM "prover.xml">
 <!ENTITY fsim SYSTEM "sim.xml">
-<!ENTITY fsmt_lib_solver SYSTEM "smt_lib_solver.xml">
-<!ENTITY fsmt_solver_ario SYSTEM "smt_solver_ario.xml">
-<!ENTITY fsmt_solver_cvc_lite SYSTEM "smt_solver_cvc_lite.xml">
-<!ENTITY fsmt_solver SYSTEM "smt_solver.xml">
 <!ENTITY ftbf2lps SYSTEM "tbf2lps.xml">
 <!ENTITY ftracepp SYSTEM "tracepp.xml">
 <!ENTITY fxsim SYSTEM "xsim.xml">
 ]>
 <book xmlns="http://docbook.org/ns/docbook">
-<info>
-  <title>mCRL2 Manual Pages</title>
-</info>
-<part><title>Tools</title>
+  <info>
+    <title>mCRL2 Manual Pages</title>
+  </info>
   <chapter><title>Linearisation</title>
     &fmcrl22lps;
   </chapter>
@@ -541,23 +479,4 @@
   <chapter><title>Miscellaneous</title>
     &frewriter;
   </chapter>
-</part>
-<part><title>Libraries</title>
-  <chapter><title>Prover</title>
-    &fbdd2dot;
-    &fbdd_path_eliminator;
-    &fbdd_prover;
-    &fbdd_simplifier;
-    &fconfluence_checker;
-    &fdisjointness_checker;
-    &fformula_checker;
-    &finvariant_checker;
-    &finvariant_eliminator;
-    &fprover;
-    &fsmt_lib_solver;
-    &fsmt_solver_ario;
-    &fsmt_solver_cvc_lite;
-    &fsmt_solver;
-  </chapter>
-</part>
 </book>

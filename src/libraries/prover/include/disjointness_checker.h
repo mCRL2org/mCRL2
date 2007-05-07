@@ -8,6 +8,15 @@
 #include "stdlib.h"
 
    /// \brief Class that can determine if two summands are syntactically disjoint.
+   /// Two summands are syntactically disjoint if the following conditions hold:
+   /// - The set of variables used by one summand is disjoint from the set of variables changed by the other summand and
+   ///   vice versa.
+   /// - The set of variables changed by one summand is disjoint from the set of variables changed by the other summand. 
+   ///
+   /// An instance of the class Disjointness_Checker is created using the constructor
+   /// Disjointness_Checker::Disjointness_Checker. The parameter a_process_equations is used to pass the summands to be
+   /// checked for disjointness. The function Disjointness_Checker::disjoint indicates whether the two summands with numbers
+   /// a_summand_number_1 and a_summand_number_2 are syntactically disjoint. 
 
 class Disjointness_Checker {
   private:
@@ -42,6 +51,11 @@ class Disjointness_Checker {
     /// \brief Constructor that initializes the sets Disjointness_Checker::f_used_parameters_per_summand and
     /// \brief Disjointness_Checker::f_changed_parameters_per_summand, and the indexed set
     /// \brief Disjointness_Checker::f_parameter_set.
+    /// precondition: the argument passed as parameter a_process_equations is a specification of process equations in mCRL2
+    /// format
+    /// precondition: the arguments passed as parameters a_summand_number_1 and a_summand_number_2 correspond to summands in
+    /// the proces equations passed as parameter a_process_equations. They lie in the interval from and including 1 upto and
+    /// including the highest summand number 
     Disjointness_Checker(ATermAppl a_process_equation);
 
     /// \brief Destructor that frees the memory used by Disjointness_Checker::f_used_parameters_per_summand,
