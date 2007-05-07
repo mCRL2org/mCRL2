@@ -166,8 +166,25 @@ ATermAppl NextStateStandard::makeStateVector(ATerm state)
 	return ATmakeApplArray(info.stateAFun,stateargs);
 }
 
+//Prototype
+static bool statearg_match(ATermAppl arg, ATermAppl pat, ATermTable vars = NULL);
 
-static bool statearg_match(ATermAppl arg, ATermAppl pat, ATermTable vars = NULL)
+static bool statearg_match_list(ATermList arg, ATermList pat, ATermTable vars)
+{
+        assert(ATgetLength(arg) == ATgetLength(pat)); 
+        bool r = true;
+
+        while (!ATisEmpty(arg) && r)
+        {
+                r = r && statearg_match(ATAgetFirst(arg), ATAgetFirst(pat), vars);
+                arg = ATgetNext(arg);
+                pat = ATgetNext(pat);
+        }
+
+        return r;
+}
+
+static bool statearg_match(ATermAppl arg, ATermAppl pat, ATermTable vars)
 {
 	ATermTable tmp_vars = vars;
 	if ( vars == NULL )
@@ -177,14 +194,14 @@ static bool statearg_match(ATermAppl arg, ATermAppl pat, ATermTable vars = NULL)
 
 
 	bool r;
-	if ( gsIsDataAppl(pat) )
+	if ( gsIsDataApplProd(pat) )
 	{
-		if ( !gsIsDataAppl(arg) )
+		if ( !gsIsDataApplProd(arg) )
 		{
 			r = false;
 		} else {
 			r = statearg_match(ATAgetArgument(arg,0),ATAgetArgument(pat,0),tmp_vars)
-			 && statearg_match(ATAgetArgument(arg,1),ATAgetArgument(pat,1),tmp_vars);
+			 && statearg_match_list(ATLgetArgument(arg,1),ATLgetArgument(pat,1),tmp_vars);
 		}
 	} else if  ( gsIsDataVarId(pat) )
 	{
@@ -265,9 +282,12 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
 
 	no_dummy = ATinsert(no_dummy,(ATerm) sort);
 
-	if ( gsIsSortArrow(sort) )
+	if ( gsIsSortArrowProd(sort) )
 	{
+                // Take dataspec from current_spec, then take the consspec from the dataspec
+                // and take the list of opids (l) from this consspec
 		l = ATLgetArgument(ATAgetArgument(ATAgetArgument(current_spec,0),1),0);
+                
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			ATermAppl conssort = ATAgetArgument(ATAgetFirst(l),1);
@@ -277,6 +297,8 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
 			}
 		}
 
+                // Take dataspec from current_spec, then take the mapspec from the dataspec
+                // and take the list of opids (l) from this mapspec
 		l = ATLgetArgument(ATAgetArgument(ATAgetArgument(current_spec,0),2),0);
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
@@ -293,18 +315,25 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
 			ATermAppl conssort = ATAgetArgument(ATAgetFirst(l),1);
 			if ( ATisEqual(gsGetSortExprResult(conssort),sort) )
 			{
-				ATermList domain = gsGetSortExprDomain(conssort);
+				ATermList domains = gsGetSortExprDomains(conssort);
 				ATermAppl t = ATAgetFirst(l);
 	
 				bool found = true;
-				for (; !ATisEmpty(domain); domain=ATgetNext(domain))
+				for (; !ATisEmpty(domains); domains=ATgetNext(domains))
 				{
-					if ( ATindexOf(no_dummy,ATgetFirst(domain),0) >= 0 )
-					{
-						found = false;
-						break;
-					}
-					t = gsMakeDataAppl(t,FindDummy(ATAgetFirst(domain),no_dummy));
+                                        ATermList domain = ATLgetFirst(domains);
+                                        ATermList dummies = ATmakeList0();
+                                        for (; !ATisEmpty(domain); domain=ATgetNext(domain))
+                                        {
+					        if ( ATindexOf(no_dummy,ATgetFirst(domain),0) >= 0 )
+					        {
+					  	        found = false;
+						        break;
+					        }
+                                                dummies = ATinsert(dummies, (ATerm) FindDummy(ATAgetFirst(domain),no_dummy));
+                                        }
+                                        dummies = ATreverse(dummies);
+					t = gsMakeDataApplProd(t,dummies);
 				}
 	
 				if ( found )
@@ -331,7 +360,7 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
 						found = false;
 						break;
 					}
-					t = gsMakeDataAppl(t,FindDummy(ATAgetFirst(domain),no_dummy));
+					t = gsMakeDataAppl1(t,FindDummy(ATAgetFirst(domain),no_dummy));
 				}
 	
 				if ( found )
@@ -372,9 +401,9 @@ ATerm NextStateStandard::SetVars(ATerm a, ATermList free_vars)
 		} else {
 			return a;
 		}
-	} else if ( gsIsDataAppl((ATermAppl) a) )
+	} else if ( gsIsDataApplProd((ATermAppl) a) )
 	{
-		return (ATerm) gsMakeDataAppl((ATermAppl) SetVars(ATgetArgument((ATermAppl) a,0),free_vars),(ATermAppl) SetVars(ATgetArgument((ATermAppl) a,1),free_vars));
+		return (ATerm) gsMakeDataApplProd((ATermAppl) SetVars(ATgetArgument((ATermAppl) a,0),free_vars),(ATermList) SetVars(ATgetArgument((ATermAppl) a,1),free_vars));
 	} else {
 		return a;
 	}

@@ -77,7 +77,9 @@ data_expression_list create_data_expression_list(function f, vector< data_expres
 				// *j is a data expression
 				//  apply *j to *k
 				//  One of the constructor values is applied to f
-				tmp = push_front(tmp, data_expression(data_application(*j, *k)));
+                                data_expression_list l;
+                                l = push_front(l, *k);
+				tmp = push_front(tmp, data_expression(data_application(*j, l)));
 			}
 		}
 		// Next iteration replace all values which are created in tmp

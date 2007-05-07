@@ -72,7 +72,7 @@ class sort: public aterm_appl
     /// Returns true if it is a sort of type A -> B
     bool is_arrow() const
     {
-      return gsIsSortArrow(*this);
+      return gsIsSortArrowProd(*this);
     }
 
     /// Returns the domain sorts of the sort.
@@ -105,14 +105,14 @@ class sort: public aterm_appl
 inline
 bool is_sort(aterm_appl t)
 {
-  return gsIsSortId(t) || gsIsSortArrow(t);
+  return gsIsSortId(t) || gsIsSortArrowProd(t);
 }
 
 /// Returns the sort 'domain -> range'.
 inline
-sort arrow(sort domain, sort range)
+sort arrow(sort_list domain, sort range)
 {
-  return gsMakeSortArrow(domain, range);
+  return gsMakeSortArrowProd(domain, range);
 }
 
 namespace sort_expr {

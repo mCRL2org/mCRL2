@@ -10,7 +10,6 @@
   // Class BDD_Info - Functions declared public ---------------------------------------------------
 
     BDD_Info::BDD_Info() {
-      f_if_then_else = gsMakeOpIdIf(gsMakeSortExprBool());
     }
 
     // --------------------------------------------------------------------------------------------
@@ -47,7 +46,7 @@
     ///         False, if the BDD does not equal true.
 
     bool BDD_Info::is_true(ATermAppl a_bdd) {
-      return a_bdd == gsMakeOpIdTrue();
+      return gsIsDataExprTrue(a_bdd);
     }
 
     // --------------------------------------------------------------------------------------------
@@ -57,7 +56,7 @@
     ///         False, if the BDD does not equal true.
 
     bool BDD_Info::is_false(ATermAppl a_bdd) {
-      return a_bdd == gsMakeOpIdFalse();
+      return gsIsDataExprFalse(a_bdd);;
     }
 
     // --------------------------------------------------------------------------------------------
@@ -67,17 +66,5 @@
     ///         False, if the BDD equals true or if the BDD equals false.
 
     bool BDD_Info::is_if_then_else(ATermAppl a_bdd) {
-      ATermAppl v_term;
-
-      if (gsIsDataAppl(a_bdd)) {
-        v_term = ATAgetArgument(a_bdd, 0);
-        if (gsIsDataAppl(v_term)) {
-          v_term = ATAgetArgument(v_term, 0);
-          if (gsIsDataAppl(v_term)) {
-            v_term = ATAgetArgument(v_term, 0);
-            return v_term == f_if_then_else;
-          }
-        }
-      }
-      return false;
+      return gsIsDataExprIf(a_bdd); 
     }

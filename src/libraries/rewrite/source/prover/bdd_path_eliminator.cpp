@@ -106,12 +106,12 @@
       ATermAppl v_subexpression;
       bool v_result;
 
-      if (f_expression_info.is_constant(a_expression_1)) {
+      if (gsIsOpId(a_expression_1)) {
         return false;
-      } else if (f_expression_info.is_variable(a_expression_1)) {
+      } else if (gsIsDataVarId(a_expression_1)) {
         return gsOccurs((ATerm) a_expression_1, (ATerm) a_expression_2);
       } else {
-        v_number_of_arguments = f_expression_info.get_number_of_arguments(a_expression_1);
+        v_number_of_arguments = ATgetLength(gsGetDataExprArgs(a_expression_1));
         v_result = false;
         for (int i = 0; (i < v_number_of_arguments) && !v_result; i++) {
           v_subexpression = f_expression_info.get_argument(a_expression_1, i);

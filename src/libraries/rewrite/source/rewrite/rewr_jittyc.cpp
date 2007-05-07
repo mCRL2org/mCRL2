@@ -279,10 +279,11 @@ static int getArity(ATermAppl op)
   ATermAppl sort = ATAgetArgument(op,1);
   int arity = 0;
 
-  while ( gsIsSortArrow(sort) )
+  while ( gsIsSortArrowProd(sort) )
   {
-    sort = ATAgetArgument(sort,1);
-    arity++;
+    ATermList sort_dom = ATLgetArgument(sort, 0);
+    arity += ATgetLength(sort_dom);
+    sort = ATAgetArgument(sort, 1);
   }
 
   return arity;
@@ -320,7 +321,7 @@ ATerm RewriterCompilingJitty::toInner(ATermAppl Term, bool add_opids)
 {
         ATermList l;
 
-        if ( !gsIsDataAppl(Term) )
+        if ( !gsIsDataApplProd(Term) )
         {
                 if ( gsIsOpId(Term) )
                 {
@@ -331,16 +332,25 @@ ATerm RewriterCompilingJitty::toInner(ATermAppl Term, bool add_opids)
         }
 
         l = ATmakeList0();
-        while ( gsIsDataAppl(Term) )
+
+        if ( gsIsDataApplProd(Term) )
         {
-                l = ATinsert(l,(ATerm) toInner(ATAgetArgument((ATermAppl) Term,1),add_opids));
-                Term = ATAgetArgument(Term,0);
-        }
-        if ( gsIsOpId(Term) )
-        {
-                l = ATinsert(l,(ATerm) OpId2Int(Term,add_opids));
-        } else {
-                l = ATinsert(l,(ATerm) Term);
+                for ( ATermList args = ATLgetArgument((ATermAppl) Term, 1) ; !ATisEmpty(args) ; args = ATgetNext(args))
+                {
+                        l = ATinsert(l,(ATerm) toInner((ATermAppl) ATgetFirst(args),add_opids));
+                }
+                
+                l = ATreverse(l);
+
+                ATerm arg0 = toInner(ATAgetArgument((ATermAppl) Term, 0), add_opids);
+                if ( ATisList(arg0) )
+                {
+                        l = ATconcat((ATermList) arg0, l);
+                }
+                else
+                {
+                        l = ATinsert(l, arg0);
+                }
         }
 
         return (ATerm) l;
@@ -349,6 +359,7 @@ ATerm RewriterCompilingJitty::toInner(ATermAppl Term, bool add_opids)
 ATermAppl RewriterCompilingJitty::fromInner(ATerm Term)
 {
         ATermList l;
+        ATermList list;
         ATerm t;
         ATermAppl a;
 
@@ -377,10 +388,26 @@ ATermAppl RewriterCompilingJitty::fromInner(ATerm Term)
         } else {
                 a = (ATermAppl) t;
         }
+
         l = ATgetNext(l);
-        for (; !ATisEmpty(l); l=ATgetNext(l))
+
+        if(gsIsOpId(a) || gsIsDataVarId(a))
         {
-                a = gsMakeDataAppl(a,fromInner(ATgetFirst(l)));
+                ATermAppl sort = ATAgetArgument(a, 1);
+                while(gsIsSortArrowProd(sort) && !ATisEmpty(l))
+                {
+                        ATermList sort_dom = ATLgetArgument(sort, 0);
+                        list = ATmakeList0();
+                        while (!ATisEmpty(sort_dom))
+                        {
+                                list = ATinsert(list, (ATerm) fromInner(ATgetFirst(l)));
+                                sort_dom = ATgetNext(sort_dom);
+                                l = ATgetNext(l);
+                        }
+                        list = ATreverse(list);
+                        a = gsMakeDataApplProd(a, list);
+                        sort = ATAgetArgument(sort, 1);
+                }
         }
 
         return a;
@@ -579,15 +606,31 @@ ATermAppl RewriterCompilingJitty::fromRewriteFormat(ATerm t)
 	} else if ( gsIsDataVarId((ATermAppl) t) )
 	{
 		return (ATermAppl) t;
-	} else {
-		int arity = ATgetArity(ATgetAFun((ATermAppl) t));
-		ATermAppl a = fromRewriteFormat(ATgetArgument((ATermAppl) t,0));
-		for (int i=1; i<arity; i++)
-		{
-			a = gsMakeDataAppl(a,fromRewriteFormat(ATgetArgument((ATermAppl) t,i)));
-		}
-		return a;
 	}
+
+	ATermAppl a = fromRewriteFormat(ATgetArgument((ATermAppl) t, 0));
+	assert(gsIsOpId(a) || gsIsDataVarId(a));
+
+	int i = 1;
+	int arity = ATgetArity(ATgetAFun((ATermAppl) t));
+	ATermAppl sort = ATAgetArgument(a, 1);
+	while(gsIsSortArrowProd(sort) && (i < arity))
+	{
+		ATermList sort_dom = ATLgetArgument(sort, 0);
+		ATermList list = ATmakeList0();
+		while(!ATisEmpty(sort_dom))
+		{
+			assert(i < arity);
+			list = ATinsert(list, (ATerm) fromRewriteFormat(ATgetArgument((ATermAppl) t,i)));
+			sort_dom = ATgetNext(sort_dom);
+			++i;
+		}
+		list = ATreverse(list);
+		a = gsMakeDataApplProd(a, list);
+		sort = ATAgetArgument(sort, 1);
+	}
+
+	return a;
 }
 
 static char *whitespace_str = NULL;
@@ -3550,6 +3593,9 @@ ATermList RewriterCompilingJitty::rewriteInternalList(ATermList l)
 
 ATermAppl RewriterCompilingJitty::rewrite(ATermAppl Term)
 {
+        /*gsVerboseMsg("Rewriting term: %T\n\n", Term);
+        gsVerboseMsg("toRewriteFormat(Term): %T\n\n", toRewriteFormat(Term));
+        gsVerboseMsg("fromInner(toRewriteFormat(Term)): %T\n\n\n", fromRewriteFormat(toRewriteFormat(Term)));*/
   return fromRewriteFormat((ATerm) so_rewr((ATermAppl) toRewriteFormat(Term)));
 }
 

@@ -22,7 +22,7 @@ class RewriterInnermost: public Rewriter
 		bool addRewriteRule(ATermAppl Rule);
 		bool removeRewriteRule(ATermAppl Rule);
 
-	public:
+	private:
 		int num_opids;
 		int max_vars;
 

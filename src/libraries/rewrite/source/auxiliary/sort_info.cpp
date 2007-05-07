@@ -26,8 +26,8 @@
 
     // --------------------------------------------------------------------------------------------
 
-    bool Sort_Info::is_sort_arrow(ATermAppl a_sort_expression) {
-      return gsIsSortArrow(a_sort_expression);
+    bool Sort_Info::is_sort_arrow_prod(ATermAppl a_sort_expression) {
+      return gsIsSortArrowProd(a_sort_expression);
     }
 
     // --------------------------------------------------------------------------------------------
@@ -85,24 +85,23 @@
 
     // --------------------------------------------------------------------------------------------
 
-    ATermAppl Sort_Info::get_domain(ATermAppl a_sort_expression) {
-      return ATAgetArgument(a_sort_expression, 0);
+    ATermList Sort_Info::get_domain(ATermAppl a_sort_expression) {
+      return gsGetSortExprDomain(a_sort_expression);
     }
 
     // --------------------------------------------------------------------------------------------
 
     ATermAppl Sort_Info::get_range(ATermAppl a_sort_expression) {
-      return ATAgetArgument(a_sort_expression, 1);
+      return gsGetSortExprResult(a_sort_expression);
     }
 
     // --------------------------------------------------------------------------------------------
 
     int Sort_Info::get_number_of_arguments(ATermAppl a_sort_expression) {
       int v_result = 0;
-
-      while (is_sort_arrow(a_sort_expression)) {
-        a_sort_expression = get_range(a_sort_expression);
-        ++v_result;
+      if (is_sort_arrow_prod(a_sort_expression)) {
+        ATermList args = ATLgetArgument(a_sort_expression, 0);
+        v_result = ATgetLength(args);
       }
       return v_result;
     }
@@ -110,18 +109,12 @@
     // --------------------------------------------------------------------------------------------
 
     ATermAppl Sort_Info::get_type_of_argument(ATermAppl a_sort_expression, int a_number) {
-      while (a_number != 0) {
-        a_sort_expression = get_range(a_sort_expression);
-        --a_number;
-      }
-      return get_domain(a_sort_expression);
+      ATermList sort_expressions = get_domain(a_sort_expression);
+      return ATAelementAt(sort_expressions, a_number);
     }
 
     // --------------------------------------------------------------------------------------------
 
     ATermAppl Sort_Info::get_result_type(ATermAppl a_sort_expression) {
-      while (is_sort_arrow(a_sort_expression)) {
-        a_sort_expression = get_range(a_sort_expression);
-      }
-      return a_sort_expression;
+      return ATAgetArgument(a_sort_expression, 1);
     }

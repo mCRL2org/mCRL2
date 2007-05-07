@@ -22,6 +22,7 @@
 
     void Disjointness_Checker::process_data_expression(int a_summand_number, ATermAppl a_expression) {
       ATermAppl v_expression_1, v_expression_2;
+      ATermList v_expressions_2;
       int v_variable_index;
 
       if (gsIsDataVarId(a_expression)) {
@@ -30,10 +31,22 @@
           f_used_parameters_per_summand[(a_summand_number * f_number_of_parameters) + v_variable_index] = true;
         }
       } else if (!gsIsOpId(a_expression)) {
-        v_expression_1 = ATAgetArgument(a_expression, 0);
-        v_expression_2 = ATAgetArgument(a_expression, 1);
-        process_data_expression(a_summand_number, v_expression_1);
-        process_data_expression(a_summand_number, v_expression_2);
+        if(gsIsDataApplProd(a_expression)) {
+          v_expression_1 = ATAgetArgument(a_expression, 0);
+          v_expressions_2 = ATLgetArgument(a_expression, 1);
+          process_data_expression(a_summand_number, v_expression_1);
+          while(!ATisEmpty(v_expressions_2)) {
+            v_expression_2 = ATAgetFirst(v_expressions_2);
+            process_data_expression(a_summand_number, v_expression_2);
+            v_expressions_2 = ATgetNext(v_expressions_2);
+          }
+        }
+        else {
+          v_expression_1 = ATAgetArgument(a_expression, 0);
+          v_expression_2 = ATAgetArgument(a_expression, 1);
+          process_data_expression(a_summand_number, v_expression_1);
+          process_data_expression(a_summand_number, v_expression_2);
+        }
       }
     }
 

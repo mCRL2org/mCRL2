@@ -244,51 +244,17 @@ static void newobject(int n)
 
 }
 
-static int gsIsDataExprAnd(ATermAppl t)
-{ 
-  if (gsIsDataAppl(t))
-  { ATermAppl t1=ATAgetArgument(t,0);
-    if (gsIsDataAppl(t1))
-    { if (ATAgetArgument(t1,0)==gsMakeOpIdAnd())
-      { 
-       return 1;
-      };
-    }
-  } 
-  return 0;
-}
-
-static int gsIsDataExprOr(ATermAppl t)
-{ 
-  if (gsIsDataAppl(t))
-  { ATermAppl t1=ATAgetArgument(t,0);
-    if (gsIsDataAppl(t1))
-    { return ATAgetArgument(t1,0)==gsMakeOpIdOr();
-    }
-  } 
-  return 0;
-}
-
-static int gsIsDataExprTrue(ATermAppl t)
-{
-  return t==gsMakeOpIdTrue();
-}
-
-static int gsIsDataExprFalse(ATermAppl t)
-{
-  return t==gsMakeOpIdFalse();
-}
-
 static ATermAppl gsMakeDeltaAtZero(void)
 { return gsMakeAtTime(gsMakeDelta(),gsMakeDataExprNat2Real(gsMakeDataExprNat_int(0)));
 }
 
 static bool isDeltaAtZero(ATermAppl t)
-{ 
+{
   if (!gsIsAtTime(t)) return 0;
   if (!gsIsDelta(ATAgetArgument(t,0))) return 0;
   ATermAppl time=ATAgetArgument(t,1);
-  if (gsNatValue_int(ATAgetArgument(time,1))!=0) return 0;
+  ATermList timeval=ATLgetArgument(time,1);
+  if (gsNatValue_int(ATAgetFirst(timeval))!=0) return 0;
   /* BETTER: if (gsRealValue(time)!=0) return 0;  awaiting the availability of gsRealValue */
   return 1;
 }
@@ -399,7 +365,7 @@ static ATermAppl getTargetSort(ATermAppl sortterm)
       (gsIsSortId(sortterm)))
   { return sortterm;
   }
-  if (gsIsSortArrow(sortterm))
+  if (gsIsSortArrowProd(sortterm))
   { return getTargetSort(ATAgetArgument(sortterm,1));
   }
 
@@ -415,16 +381,22 @@ static ATermList linGetSorts(ATermList l)
                    gsGetSort(ATAgetFirst(l)));
 }
 
+#ifndef NDEBUG
+/* these functions are only used in an assert or in #ifndef NDEBUG */
+
+//Prototype
+static int existsorts(ATermList sorts);
+
 static int existsort(ATermAppl sortterm)
-/* Delivers 0 if sort does not exists. Otherwise 1 
+/* Delivers 0 if sort does not exist. Otherwise 1 
    indicating that the sort exists */
 { 
   /* if (sortterm==gsMakeSortExprBool()) return 1;
      if (sortterm==gsMakeSortExprInt()) return 1;
      if (sortterm==gsMakeSortExprNat()) return 1;
      if (sortterm==gsMakeSortExprPos()) return 1; */
-  if (gsIsSortArrow(sortterm))
-  { return existsort(ATAgetArgument(sortterm,0)) && 
+  if (gsIsSortArrowProd(sortterm))
+  { return existsorts(ATLgetArgument(sortterm,0)) && 
              existsort(ATAgetArgument(sortterm,1));
   }
   if (gsIsSortId(sortterm)) 
@@ -445,9 +417,6 @@ static int existsort(ATermAppl sortterm)
   return 0;
 }
 
-#ifndef NDEBUG
-/* this function is only used in an assert */
-
 static int existsorts(ATermList sorts)
    { for( ; (!ATisEmpty(sorts)) ; sorts=ATgetNext(sorts))
      { if (!existsort(ATAgetFirst(sorts)))
@@ -456,6 +425,18 @@ static int existsorts(ATermList sorts)
      return 1;
    }
 #endif
+
+//prototype
+static void insertsort(ATermAppl sorts, specificationbasictype *spec); 
+
+static void insertsorts(ATermList sorts, specificationbasictype *spec)
+{
+  for( ; !ATisEmpty(sorts) ; sorts=ATgetNext(sorts))
+  {
+    insertsort(ATAgetFirst(sorts),spec);
+  }
+  return;
+}
 
 static void insertsort(ATermAppl sortterm, specificationbasictype *spec)
 { 
@@ -466,8 +447,8 @@ static void insertsort(ATermAppl sortterm, specificationbasictype *spec)
      if (sortterm==gsMakeSortExprInt()) return;
      if (sortterm==gsMakeSortExprNat()) return;
      if (sortterm==gsMakeSortExprPos()) return; */
-  if (gsIsSortArrow(sortterm))
-  { insertsort(ATAgetArgument(sortterm,0),spec);
+  if (gsIsSortArrowProd(sortterm))
+  { insertsorts(ATLgetArgument(sortterm,0),spec);
     insertsort(ATAgetArgument(sortterm,1),spec);
     return;
   }
@@ -1577,10 +1558,10 @@ static int occursinterm(ATermAppl var, ATermAppl t)
   if (gsIsOpId(t))
   { return 0; }
 
-  assert(gsIsDataAppl(t));
+  assert(gsIsDataApplProd(t));
 
   return occursinterm(var,ATAgetArgument(t,0))||
-         occursinterm(var,ATAgetArgument(t,1));
+         occursintermlist(var,ATLgetArgument(t,1));
 }
 
 
@@ -1772,15 +1753,16 @@ static ATermAppl substitute_data_rec(
   { return t;
   } */
 
-  if (gsIsDataAppl(t))
+  if (gsIsDataApplProd(t))
   { 
-    return gsMakeDataAppl(
+    return gsMakeDataApplProd(
                substitute_data_rec(terms,vars,ATAgetArgument(t,0)),
-               substitute_data_rec(terms,vars,ATAgetArgument(t,1)));
+               substitute_datalist_rec(terms,vars,ATLgetArgument(t,1)));
   }
 
   if ( gsIsDataVarId(t))
-  { return substitute_variable_rec(terms,vars,t);
+  { 
+    return substitute_variable_rec(terms,vars,t);
   }
 
   /* Exists en forall do not occur in terms.
@@ -3494,14 +3476,6 @@ static ATermAppl makenewsort(
 
 /****************  Declare local datatypes  ******************************/
 
-static ATermAppl makeApplTerm(ATermAppl s, ATermList l)
-{ ATermAppl result=s;
-  for( ; l!=ATempty ; l=ATgetNext(l))
-  { result=gsMakeDataAppl(result,ATAgetFirst(l));
-  }
-  return result;
-}
-
 static ATermList localequationvariables=NULL;
 
 static void declare_equation_variables(ATermList t1)
@@ -3618,7 +3592,7 @@ static void makepushargsvars(
   v=ATinsertA(ATempty,stack->stackvar);
 
   makepushargsvarsrec(&t,&v,stack->opns->sorts);
-  *t1=makeApplTerm(stack->opns->push,ATinsertA(t,var0));
+  *t1=gsMakeDataApplProd(stack->opns->push,ATinsertA(t,var0));
   *t2=ATinsertA(v,var0);
 }
 
@@ -3773,7 +3747,7 @@ static stacklisttype *new_stack(
         snprintf(scratch1,STRINGLENGTH,"get%s",ATSgetArgument(par,0));
 
         getmap=gsMakeOpId(fresh_name(scratch1),
-                   gsMakeSortArrow(stack->opns->stacksort,sort));
+                   gsMakeSortArrow1(stack->opns->stacksort,sort));
         insertmapping(getmap,spec);
         stack->opns->get=ATinsertA(stack->opns->get,getmap);
       }
@@ -3782,13 +3756,17 @@ static stacklisttype *new_stack(
 
       /* construct the sort of the push operator */
       walker=ATreverse(stack->opns->sorts);
-      for (tempsorts=gsMakeSortArrow(stack->opns->stacksort,stack->opns->stacksort); 
-           walker!=ATempty ; walker=ATgetNext(walker))
-      { tempsorts=gsMakeSortArrow(ATAgetFirst(walker),tempsorts);
+      ATermList tempsort_domain = ATmakeList0();
+      tempsort_domain = ATinsert(tempsort_domain, (ATerm) stack->opns->stacksort);
+
+      while(!ATisEmpty(walker))
+      {
+        tempsort_domain = ATinsert(tempsort_domain, ATgetFirst(walker));
+        walker = ATgetNext(walker);
       }
 
       if (oldstate)
-      { tempsorts=gsMakeSortArrow(gsMakeSortExprPos(),tempsorts);
+      { tempsort_domain=ATinsert(tempsort_domain, (ATerm) gsMakeSortExprPos());
       }
       else if (binary)
       { gsErrorMsg("Cannot combine stacks with binary\n");
@@ -3799,12 +3777,14 @@ static stacklisttype *new_stack(
         stop();
       }
 
+      tempsorts=gsMakeSortArrowProd(tempsort_domain, stack->opns->stacksort);
+
       /* XX insert equations for get mappings */
 
       if (oldstate)
       { stack->opns->getstate=
              gsMakeOpId(fresh_name("getstate"),
-                        gsMakeSortArrow(
+                        gsMakeSortArrow1(
                            stack->opns->stacksort,
                            gsMakeSortExprPos())); 
         insertmapping(stack->opns->getstate,spec);
@@ -3829,13 +3809,13 @@ static stacklisttype *new_stack(
       stack->opns->empty=
               gsMakeOpId(
                  fresh_name("isempty"),
-                 gsMakeSortArrow(stack->opns->stacksort,gsMakeSortExprBool()));
+                 gsMakeSortArrow1(stack->opns->stacksort,gsMakeSortExprBool()));
       insertmapping(stack->opns->empty,spec);
 
       stack->opns->pop=
            gsMakeOpId(
                fresh_name("pop"),
-               gsMakeSortArrow(stack->opns->stacksort,
+               gsMakeSortArrow1(stack->opns->stacksort,
                                stack->opns->stacksort));
       insertmapping(stack->opns->pop,spec);
 
@@ -3846,24 +3826,24 @@ static stacklisttype *new_stack(
       declare_equation_variables(t2);
       newequation(
               NULL,
-              gsMakeDataAppl(stack->opns->empty,stack->opns->emptystack),
+              gsMakeDataAppl1(stack->opns->empty,stack->opns->emptystack),
               gsMakeDataExprTrue(),
               spec);
       /* t1 contains push(var0,v1,..,vn,stackvar), t2 the list of variables
          state, var0,v1,...,vn,stackvar*/
       newequation(
               NULL,
-              gsMakeDataAppl(stack->opns->empty,t1),
+              gsMakeDataAppl1(stack->opns->empty,t1),
               gsMakeDataExprFalse(),
               spec);
       newequation(
               NULL,
-              gsMakeDataAppl(stack->opns->pop,t1),
+              gsMakeDataAppl1(stack->opns->pop,t1),
               stack->stackvar,
               spec);
       newequation(
               NULL,
-              gsMakeDataAppl(stack->opns->getstate,t1),
+              gsMakeDataAppl1(stack->opns->getstate,t1),
               var0,
               spec);
 
@@ -3874,7 +3854,7 @@ static stacklisttype *new_stack(
       { 
         newequation(
               NULL,
-              gsMakeDataAppl(ATAgetFirst(walker),t1), 
+              gsMakeDataAppl1(ATAgetFirst(walker),t1), 
               ATAgetFirst(t2),
               spec);
         t2=ATgetNext(t2);
@@ -3905,7 +3885,7 @@ static ATermAppl getvar(ATermAppl var,stacklisttype *stack, specificationbasicty
   for(walker=stack->parameterlist ;
         walker!=ATempty ; walker=ATgetNext(walker))
   { if (ATAgetFirst(walker)==var)
-    { return gsMakeDataAppl(ATAgetFirst(getmappings),stack->stackvar); 
+    { return gsMakeDataAppl1(ATAgetFirst(getmappings),stack->stackvar); 
     }
     assert(getmappings!=ATempty);
     getmappings=ATgetNext(getmappings);
@@ -3980,7 +3960,7 @@ static ATermAppl correctstatecond(
                ATAgetFirst(processencoding(i,ATempty,spec,stack)));
     }
     return gsMakeDataExprEq(
-             gsMakeDataAppl(stack->opns->getstate,stack->stackvar),
+             gsMakeDataAppl1(stack->opns->getstate,stack->stackvar),
              ATAgetFirst(processencoding(i,ATempty,spec,stack)));
   } 
 
@@ -3993,7 +3973,7 @@ static ATermAppl correctstatecond(
                   ATAgetFirst(processencoding(i,ATempty,spec,stack)));
     }
     return gsMakeDataExprEq(
-             gsMakeDataAppl(stack->opns->getstate, stack->stackvar),
+             gsMakeDataAppl1(stack->opns->getstate, stack->stackvar),
              ATAgetFirst(processencoding(i,ATempty,spec,stack)));
   }
   
@@ -4030,6 +4010,12 @@ static ATermAppl correctstatecond(
   return t3;
 }
 
+// Forward declaration
+static ATermList adapt_termlist_to_stack(ATermList tl, 
+                  stacklisttype *stack, 
+                  ATermList vars,
+                  specificationbasictype *spec);
+
 static ATermAppl adapt_term_to_stack(
                  ATermAppl t, 
                  stacklisttype *stack,
@@ -4046,10 +4032,10 @@ static ATermAppl adapt_term_to_stack(
     }
     else return getvar(t,stack,spec); }
 
-  if (gsIsDataAppl(t))
-  { return gsMakeDataAppl(
+  if (gsIsDataApplProd(t))
+  { return gsMakeDataApplProd(
             adapt_term_to_stack(ATAgetArgument(t,0),stack,vars,spec),
-            adapt_term_to_stack(ATAgetArgument(t,1),stack,vars,spec));
+            adapt_termlist_to_stack(ATLgetArgument(t,1),stack,vars,spec));
   }
               
   gsErrorMsg("Expect a term\n");
@@ -4201,7 +4187,7 @@ static ATermList push(
   }
 
   return ATinsertA(
-            ATempty,makeApplTerm(
+            ATempty,gsMakeDataApplProd(
                         stack->opns->push,
                         processencoding(i,t,spec,stack))); 
 }
@@ -4266,7 +4252,7 @@ static ATermList make_procargs(
     { t3=push(procId,
               t1,
               ATinsertA(ATempty,
-                        gsMakeDataAppl(stack->opns->pop,stack->stackvar)),
+                        gsMakeDataAppl1(stack->opns->pop,stack->stackvar)),
               stack,
               pcrlprcs,
               vars,
@@ -4700,15 +4686,15 @@ static void add_summands(
 
             
   if (canterminate==1)
-  { emptypops=gsMakeDataAppl(stack->opns->empty,
-                   gsMakeDataAppl(stack->opns->pop,stack->stackvar));
+  { emptypops=gsMakeDataAppl1(stack->opns->empty,
+                   gsMakeDataAppl1(stack->opns->pop,stack->stackvar));
     notemptypops=gsMakeDataExprNot(emptypops);
     condition2=gsMakeDataExprAnd(notemptypops,condition1); 
   }
   else condition2=condition1;
 
   multiAction=adapt_multiaction_to_stack(multiAction,stack,sumvars,spec);
-  procargs=ATinsertA(ATempty,gsMakeDataAppl(stack->opns->pop,stack->stackvar));
+  procargs=ATinsertA(ATempty,gsMakeDataAppl1(stack->opns->pop,stack->stackvar));
 
   sumlist=insert_summand(sumlist,
                     sumvars,
@@ -4863,12 +4849,14 @@ static enumeratedtype *create_enumeratedtype
 static ATermAppl find_case_function(enumeratedtype *e, ATermAppl sort)
 { 
   for(ATermList w=e->functions; w!=ATempty; w=ATgetNext(w))
-  { 
+  {
     ATermAppl w1=ATAgetFirst(w);
-    ATermAppl wsort=
-               ATAgetArgument(
-                 ATAgetArgument(ATAgetArgument(w1,1),1),0);
-    if (wsort==sort)
+    assert(gsIsOpId(w1));
+    ATermAppl w1sort=gsGetSort(w1);
+    assert(gsIsSortArrowProd(w1sort));
+    ATermList w1sort_domain = ATLgetArgument(w1sort,0);
+    assert(ATgetLength(w1sort_domain) >= 2);
+    if (ATisEqual(ATAelementAt(w1sort_domain,1), sort))
     { return w1;
     }
   };
@@ -4904,7 +4892,7 @@ static void define_equations_for_case_function(
   v=getfreshvariable("e",e->sortId);
   declare_equation_variables( ATinsertA(ATinsertA(ATempty,v),v1));
   newequation(NULL,
-              makeApplTerm(functionname,ATinsertA(xxxterm,v)),
+              gsMakeDataApplProd(functionname,ATinsertA(xxxterm,v)),
               v1,
               spec);
   end_equation_section();
@@ -4916,7 +4904,7 @@ static void define_equations_for_case_function(
   { 
     newequation(
            NULL,
-           makeApplTerm(functionname,ATinsertA(args,ATAgetFirst(w))),
+           gsMakeDataApplProd(functionname,ATinsertA(args,ATAgetFirst(w))),
            ATAgetFirst(auxvars),
            spec);
     
@@ -4940,11 +4928,13 @@ static void create_case_function_on_enumeratedtype(
   for(ATermList w=e->functions; w!=ATempty; w=ATgetNext(w))
   {
     ATermAppl w1=ATAgetFirst(w);
-    ATermAppl wsort=
-               ATAgetArgument(
-                 ATAgetArgument(ATAgetArgument(w1,1),1),0);
-    if (wsort==sort)
-    { return; /* the case function does already exist !!! */
+    assert(gsIsOpId(w1));
+    ATermAppl w1sort=gsGetSort(w1);
+    assert(gsIsSortArrowProd(w1sort));
+    ATermList w1sort_domain = ATLgetArgument(w1sort,0);
+    assert(ATgetLength(w1sort_domain) >= 2);
+    if (ATisEqual(ATAelementAt(w1sort_domain,1), sort))
+    { return; /* The case function does already exist */
     }
   };
 
@@ -4963,18 +4953,21 @@ static void create_case_function_on_enumeratedtype(
     e->functions=ATinsertA(e->functions,gsMakeOpIdIf(sort));
     return;
   }
-  // else 
-  ATermAppl newsort=sort;
+  // else
+  ATermAppl newsort;
+  ATermList newsortlist=ATmakeList0();
   ATermAppl casefunction=NULL;
   w=ATempty;
   for(j=0; (j<e->size) ; j++)
   {
-    newsort=gsMakeSortArrow(sort,newsort);
+    newsortlist=ATinsert(newsortlist, (ATerm) sort);
   }
+  newsortlist=ATinsert(newsortlist, (ATerm) e->sortId);
 
-  newsort=gsMakeSortArrow(e->sortId,newsort);
+  newsort=gsMakeSortArrowProd(newsortlist,sort);
+
   snprintf(scratch1,STRINGLENGTH,"C%d_%s",e->size,
-         ((gsIsSortArrow(newsort))?"fun":ATSgetArgument(sort,0)));
+         ((gsIsSortArrowProd(newsort))?"fun":ATSgetArgument(sort,0)));
   casefunction=gsMakeOpId(
                       fresh_name(scratch1),
                       newsort);
@@ -5274,7 +5267,7 @@ static ATermAppl construct_binary_case_tree_rec(
   if (t==t1)
   { return t; 
   }
-  return gsMakeDataAppl(gsMakeDataAppl(gsMakeDataAppl(
+  return gsMakeDataAppl1(gsMakeDataAppl1(gsMakeDataAppl1(
               getcasefunction(termsort,e),casevar),t),t1);
 }
 
@@ -6034,34 +6027,6 @@ static ATermAppl hidecomposition(ATermList hidelist, ATermAppl ips)
 
 /**************** allow  *************************************/
 
-static int gsIsDataExprEquality(ATermAppl t)
-{
-  if (gsIsDataAppl(t))
-  { ATermAppl t1=ATAgetArgument(t,0);
-    if (gsIsDataAppl(t1))
-    { ATermAppl f=ATAgetArgument(t1,0);
-      if (!gsIsOpId(f))
-      { /* This is not a functionsymbol */
-        return 0;
-      }
-      ATermAppl functionsort=ATAgetArgument(f,1);
-      if (!gsIsSortArrow(functionsort))
-      { return 0;
-      }
-      ATermAppl sort=ATAgetArgument(functionsort,0);
-      if (!existsort(sort))
-      { return 0;
-      }
-      if (ATAgetArgument(t1,0)==gsMakeOpIdEq(sort))
-      { 
-        return 1;
-      };
-    }
-  }
-  return 0;
-}
-
-
 static int implies_condition(ATermAppl c1, ATermAppl c2)
 {
   if (gsIsDataExprTrue(c2))
@@ -6090,23 +6055,31 @@ static int implies_condition(ATermAppl c1, ATermAppl c2)
      bit protocol, with --regular. */
 
   if (gsIsDataExprAnd(c2))
-  { return implies_condition(c1,ATAgetArgument(ATAgetArgument(c2,0),1)) &&
-           implies_condition(c1,ATAgetArgument(c2,1));
+  { 
+    ATermList args = ATLgetArgument(c2,1);
+    return implies_condition(c1,ATAelementAt(args,0)) &&
+           implies_condition(c1,ATAelementAt(args,1));
   }
 
   if (gsIsDataExprOr(c1))
-  { return implies_condition(ATAgetArgument(ATAgetArgument(c1,0),1),c2) &&
-           implies_condition(ATAgetArgument(c1,1),c2);
+  {
+    ATermList args = ATLgetArgument(c1,1);
+    return implies_condition(ATAelementAt(args,0),c2) &&
+           implies_condition(ATAelementAt(args,1),c2);
   }
 
   if (gsIsDataExprAnd(c1))
-  { return implies_condition(ATAgetArgument(ATAgetArgument(c1,0),1),c2) || 
-           implies_condition(ATAgetArgument(c1,1),c2);
+  { 
+    ATermList args = ATLgetArgument(c1,1);
+    return implies_condition(ATAelementAt(args,0),c2) || 
+           implies_condition(ATAelementAt(args,1),c2);
   }
 
   if (gsIsDataExprOr(c2))
-  { return implies_condition(c1,ATAgetArgument(ATAgetArgument(c2,0),1)) ||
-           implies_condition(c1,ATAgetArgument(c2,1));
+  { 
+    ATermList args = ATLgetArgument(c2,1);
+    return implies_condition(c1,ATAelementAt(args,0)) ||
+           implies_condition(c1,ATAelementAt(args,1));
   }
   
   return 0;
@@ -7040,10 +7013,18 @@ static bool xi(ATermList alpha, ATermList beta)
 }
 
 static ATermAppl makeNegatedConjunction(ATermList S)
-{ ATermAppl result=gsMakeDataExprTrue();
+{
+  ATermAppl result=gsMakeDataExprTrue();
   for( ; S!=ATempty ; S=ATgetNext(S) )
-  { result=gsMakeDataExprAnd(
-             gsMakeDataExprNot(ATAgetArgument(ATAgetFirst(S),1)),result);
+  {
+    //first(S) is of the form DataApplProd(BoolxBool->Bool, [true, expr1])
+    ATermAppl conjunction = ATAgetFirst(S);
+    assert(gsIsDataExprAnd(conjunction));
+
+    ATermList args = ATLgetArgument(conjunction,1);
+    ATermAppl arg2 = ATAgetFirst(ATgetNext(args)); 
+    result=gsMakeDataExprAnd(
+             gsMakeDataExprNot(arg2),result);
   }
   return result; 
 }
@@ -7082,7 +7063,8 @@ static ATermList makeMultiActionConditionList_aux(
      Communication with open terms [1]. */
 
   if (multiaction==ATempty)
-  {  return ATinsertA(ATempty,linMakeTuple(ATempty,(r==NULL)?gsMakeDataExprTrue():makeNegatedConjunction(psi(r))));
+  {
+    return ATinsertA(ATempty,linMakeTuple(ATempty,(r==NULL)?gsMakeDataExprTrue():makeNegatedConjunction(psi(r))));
   }
 
   ATermAppl firstaction=ATAgetFirst(multiaction);
@@ -7172,28 +7154,30 @@ static void ApplySumElimination(ATermList *sumvars,
   }
    
   if (gsIsDataExprAnd(communicationcondition))
-  { ApplySumElimination(sumvars,
+  {
+    ATermList args=ATLgetArgument(communicationcondition,1);
+    ApplySumElimination(sumvars,
                         condition,
                         multiaction,
                         actiontime,
                         nextstate,
-                        ATAgetArgument(ATAgetArgument(communicationcondition,0),1),
+                        ATAelementAt(args,0),
                         (gsIsDataExprTrue(remainingcommunicationcondition)?
-                                    ATAgetArgument(communicationcondition,1):
+                                    ATAelementAt(args,1):
                                     gsMakeDataExprAnd(
-                                        ATAgetArgument(communicationcondition,1),
+                                        ATAelementAt(args,1),
                                         remainingcommunicationcondition)),
                         parameters);
     return;
   }
                           
-  if (gsIsDataExprEquality(communicationcondition))
+  if (gsIsDataExprEq(communicationcondition))
   { /* Try to see whether left or right hand side of the 
        equality is a data variable that occurs in sumvars and
        apply sum elimination */
-    ATermAppl lefthandside=ATAgetArgument(
-                              ATAgetArgument(communicationcondition,0),1);
-    ATermAppl righthandside=ATAgetArgument(communicationcondition,1);
+    ATermList args=ATLgetArgument(communicationcondition,1);
+    ATermAppl lefthandside=ATAelementAt(args,0);
+    ATermAppl righthandside=ATAelementAt(args,1);
 
     if (gsIsDataVarId(righthandside) &&
            occursin(righthandside,*sumvars))
@@ -7454,28 +7438,33 @@ static ATermAppl makesingleultimatedelaycondition(
     }
   }
 
-  for ( ; sumvars!=ATempty ; sumvars=ATgetNext(sumvars) )
-  { ATermAppl sumvar=ATAgetFirst(sumvars);
+  ATermList used_sumvars = ATmakeList0();
+  for ( ; sumvars != ATempty ; sumvars=ATgetNext(sumvars))
+  {
+    ATermAppl sumvar=ATAgetFirst(sumvars);
     if (occursinterm(sumvar,result))
-    { /* make a new process equation */
-      ATermList extendedvariables=ATappend(
-                                    ATconcat(variables,ATgetNext(sumvars)),
-                                    (ATerm)sumvar);
-
-      ATermAppl newfunction=gsMakeOpId(fresh_name("ExistsFun"),
-              gsMakeSortArrowList(getsorts(extendedvariables),gsMakeSortExprBool()));
-      
-      insertmapping(newfunction,spec);
-      declare_equation_variables(extendedvariables); 
-      newequation(NULL,gsMakeDataApplList(newfunction,extendedvariables),result,spec);
-      end_equation_section();
-      result=gsMakeDataExprExists(
-               gsMakeDataApplList(
-                 newfunction,
-                 ATconcat(variables,ATgetNext(sumvars))));
+    {
+      used_sumvars = ATinsertA(used_sumvars, sumvar);
     }
-  } 
- 
+  }
+  used_sumvars = ATreverse(used_sumvars);
+
+  if(!ATisEmpty(used_sumvars)) {
+    // Make a new process equation
+    ATermAppl newopid = gsMakeOpId(fresh_name("ExistsFun"),
+      gsMakeSortArrowList(getsorts(variables), 
+                          gsMakeSortArrowList(getsorts(used_sumvars), 
+                                              gsMakeSortExprBool())));
+    insertmapping(newopid,spec);
+    ATermList extendedvariables=ATconcat(variables, used_sumvars);
+    declare_equation_variables(extendedvariables);
+    ATermAppl eqn = gsMakeDataApplList(newopid,variables);
+    ATermAppl neweqn = gsMakeDataApplList(eqn, used_sumvars);
+    newequation(NULL,neweqn,result,spec);
+    end_equation_section();
+    result=gsMakeDataExprExists(eqn);
+  }
+
   return result;
 }
 

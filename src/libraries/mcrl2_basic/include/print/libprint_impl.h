@@ -987,16 +987,6 @@ static void PRINT_FUNC(PrintSortExpr)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(dbg_prints)("printing standard sort identifier\n");
     PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(SortExpr, 0),
       pp_format, ShowSorts, PrecLevel);
-  } else if (gsIsSortArrow(SortExpr)) {
-    //print arrow sort
-    PRINT_FUNC(dbg_prints)("printing arrow sort\n");
-    if (PrecLevel > 0) PRINT_FUNC(fprints)(OutStream, "(");
-    PRINT_FUNC(PrintSortExpr)(OutStream, ATAgetArgument(SortExpr, 0),
-      pp_format, ShowSorts, 1);
-    PRINT_FUNC(fprints)(OutStream, " -> ");
-    PRINT_FUNC(PrintSortExpr)(OutStream, ATAgetArgument(SortExpr, 1),
-      pp_format, ShowSorts, 0);
-    if (PrecLevel > 0) PRINT_FUNC(fprints)(OutStream, ")");
   } else if (gsIsSortArrowProd(SortExpr)) {
     //print product arrow sort
     PRINT_FUNC(dbg_prints)("printing product arrow sort\n");
@@ -1055,19 +1045,15 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
 {
   assert(gsIsDataExpr(DataExpr));
   if (gsIsId(DataExpr) || gsIsOpId(DataExpr) || gsIsDataVarId(DataExpr) ||
-    gsIsDataAppl(DataExpr) || gsIsDataApplProd(DataExpr)) {
+    gsIsDataApplProd(DataExpr)) {
     if (pp_format == ppDebug) {
       PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(DataExpr, 0),
         pp_format, ShowSorts, 0);
-      if (gsIsDataAppl(DataExpr) || gsIsDataApplProd(DataExpr)) {
+      if (gsIsDataApplProd(DataExpr)) {
         PRINT_FUNC(fprints)(OutStream, "(");
-        if (gsIsDataAppl(DataExpr)) {
-          PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(DataExpr, 1),
-            pp_format, ShowSorts, 0);
-        } else { //gsIsDataApplProd(DataExpr)
-          PRINT_FUNC(PrintPart_List)(OutStream, ATLgetArgument(DataExpr, 1),
-            pp_format, ShowSorts, 0, NULL, ", ");
-        }
+        //gsIsDataApplProd(DataExpr)
+        PRINT_FUNC(PrintPart_List)(OutStream, ATLgetArgument(DataExpr, 1),
+          pp_format, ShowSorts, 0, NULL, ", ");
         PRINT_FUNC(fprints)(OutStream, ")");
       }
     } else { //pp_format == ppDefault
@@ -1110,15 +1096,18 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(fprints)(OutStream, "}");
       } else if (gsIsOpIdSetBagComp(Head) && ArgsLength == 1) {
         //set/bag comprehension
+        PRINT_FUNC(dbg_prints)("printing set/bag comprehension\n");
         PRINT_FUNC(fprints)(OutStream, "{ ");
         ATermAppl Body = ATAelementAt(Args, 0);
+        // it should be safe to do the assignment to Var!
+        assert(ATgetLength(ATLgetArgument(gsGetSort(Body), 0)) == 1);
         ATermAppl Var =
           gsMakeDataVarId(gsFreshString2ATermAppl("x", (ATerm) Body, true),
-            ATAgetArgument(gsGetSort(Body), 0)
+            ATAgetFirst(ATLgetArgument(gsGetSort(Body), 0))
           );
         PRINT_FUNC(PrintDecl)(OutStream, Var, pp_format, true);
         PRINT_FUNC(fprints)(OutStream, " | ");        
-        Body = gsMakeDataAppl(Body, Var);
+        Body = gsMakeDataAppl1(Body, Var);
         PRINT_FUNC(PrintDataExpr)(OutStream, Body, pp_format, ShowSorts, 0);
         PRINT_FUNC(fprints)(OutStream, " }");
       } else if (gsIsOpIdQuant(Head) && ArgsLength == 1) {
@@ -1128,13 +1117,21 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
           pp_format, ShowSorts, PrecLevel);
         PRINT_FUNC(fprints)(OutStream, " ");
         ATermAppl Body = ATAelementAt(Args, 0);
-        ATermAppl Var =
-          gsMakeDataVarId(gsFreshString2ATermAppl("x", (ATerm) Body, true),
-            ATAgetArgument(gsGetSort(Body), 0)
-          );
-        PRINT_FUNC(PrintDecl)(OutStream, Var, pp_format, true);
+        ATermList Sorts = ATLgetArgument(gsGetSort(Body), 0);
+        ATermList Vars = ATmakeList0();
+        ATermList Context = ATmakeList1((ATerm) Body);
+        while (!ATisEmpty(Sorts))
+        {
+          ATermAppl Var = gsMakeDataVarId(gsFreshString2ATermAppl("x", (ATerm) Context, true),
+              ATAgetFirst(Sorts));
+          Context = ATinsert(Context, (ATerm) Var);
+          Vars = ATinsert(Vars, (ATerm) Var); 
+          Sorts = ATgetNext(Sorts);
+        }
+        Vars = ATreverse(Vars);
+        PRINT_FUNC(PrintDecls)(OutStream, Vars, pp_format, NULL, ", ");
         PRINT_FUNC(fprints)(OutStream, ". ");        
-        Body = gsMakeDataAppl(Body, Var);
+        Body = gsMakeDataApplProd(Body, Vars);
         PRINT_FUNC(PrintDataExpr)(OutStream, Body, pp_format, ShowSorts, 1);
         if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, ")");
       } else if (gsIsOpIdPrefix(Head) && ArgsLength == 1) {
@@ -1211,14 +1208,16 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
       }
     }
   } else if (gsIsBinder(DataExpr)) {
+    PRINT_FUNC(dbg_prints)("printing binder\n");
     ATermAppl BindingOperator = ATAgetArgument(DataExpr, 0);
     if (gsIsSetBagComp(BindingOperator) || gsIsSetComp(BindingOperator)
         || gsIsBagComp(BindingOperator)) {
       //print set/bag comprehension
       PRINT_FUNC(dbg_prints)("printing set/bag comprehension\n");
       PRINT_FUNC(fprints)(OutStream, "{ ");
-      PRINT_FUNC(PrintDecl)(OutStream, ATAgetArgument(DataExpr, 1),
-        pp_format, true);
+      assert(!ATisEmpty(ATLgetArgument(DataExpr,1)));
+      PRINT_FUNC(PrintDecls)(OutStream, ATLgetArgument(DataExpr, 1),
+        pp_format, NULL, ", ");
       PRINT_FUNC(fprints)(OutStream, " | ");
       PRINT_FUNC(PrintDataExpr)(OutStream, ATAgetArgument(DataExpr, 2),
         pp_format, ShowSorts, 0);
@@ -1907,7 +1906,7 @@ bool gsHasConsistentContextList(const ATermTable DataVarDecls,
 
 bool gsIsListEnumImpl(ATermAppl DataExpr)
 {
-  if (!gsIsDataAppl(DataExpr) && !gsIsOpId(DataExpr)) return false;
+  if (!gsIsDataApplProd(DataExpr) && !gsIsOpId(DataExpr)) return false;
   ATermAppl HeadName = ATAgetArgument(gsGetDataExprHead(DataExpr), 0);
   if (ATisEqual(HeadName, gsMakeOpIdNameCons())) {
     ATermList Args = gsGetDataExprArgs(DataExpr);

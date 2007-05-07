@@ -91,22 +91,22 @@ bool is_data_variable(aterm_appl t)
 // data_application
 /// \brief data application.
 ///
-// DataAppl(<DataExpr>, <DataExpr>)
+// DataApplProd(<DataExpr>, <DataExpr>+)
 class data_application: public data_expression
 {
   public:
     data_application()
-      : data_expression(detail::constructDataAppl())
+      : data_expression(detail::constructDataApplProd())
     {}
 
     data_application(aterm_appl t)
      : data_expression(t)
     {
-      assert(detail::check_term_DataAppl(m_term));
+      assert(detail::check_term_DataApplProd(m_term));
     }
 
-    data_application(data_expression expr, data_expression arg)
-     : data_expression(gsMakeDataAppl(expr, arg))
+    data_application(data_expression expr, data_expression_list args)
+     : data_expression(gsMakeDataApplProd(expr, args))
     {}
   };
                                                             
@@ -119,7 +119,7 @@ typedef term_list<data_application> data_application_list;
 inline
 bool is_data_application(aterm_appl t)
 {
-  return gsIsDataAppl(t);
+  return gsIsDataApplProd(t);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

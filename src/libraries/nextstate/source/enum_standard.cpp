@@ -416,7 +416,7 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
 		ATermAppl var = (ATermAppl) ATgetFirst(e.vars);
 		ATermAppl sort = (ATermAppl) ATgetArgument(var,1);
 
-		if ( gsIsSortArrow(sort) )
+		if ( gsIsSortArrowProd(sort) )
 		{
 			gsErrorMsg("cannot enumerate all elements of functions sorts\n");
 			error = true;
@@ -426,38 +426,43 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
 			{
 				ATermAppl cons_tup = (ATermAppl) ATgetFirst(l);
 				ATermAppl cons_term = (ATermAppl) ATgetArgument(cons_tup,0);
-				ATermList dom_sorts = (ATermList) ATgetArgument(cons_tup,1);
+				ATermList rdom_sorts = (ATermList) ATgetArgument(cons_tup,1);
 			
 				ATermList uvars = ATreverse(e.vars);
 			
-				for (; !ATisEmpty(dom_sorts); dom_sorts=ATgetNext(dom_sorts))
+				for (; !ATisEmpty(rdom_sorts); rdom_sorts=ATgetNext(rdom_sorts))
 				{
-					ATermAppl fv = gsMakeDataVarId(gsFreshString2ATermAppl("@enum@",(ATerm) uvars,false),ATAgetFirst(dom_sorts));
+                                        ATermList rev_dom_sorts1 = ATLgetFirst(rdom_sorts);
+                                        ATermList var_list = ATmakeList0();
+                                        for (; !ATisEmpty(rev_dom_sorts1); rev_dom_sorts1=ATgetNext(rev_dom_sorts1))
+                                        {
+					        ATermAppl fv = gsMakeDataVarId(gsFreshString2ATermAppl("@enum@",(ATerm) uvars,false),ATAgetFirst(rev_dom_sorts1));
+				                var_list = ATinsert(var_list,(ATerm) fv);
+					        uvars = ATinsert(uvars,(ATerm) fv);
 				
-					uvars = ATinsert(uvars,(ATerm) fv);
-					cons_term = gsMakeDataAppl(cons_term,fv);
-				
-					used_vars++;
-					if ( used_vars > *info.max_vars )
-					{
-						stringstream msg;
-						msg << "need more than " << *info.max_vars << " variables to find all valuations of ";
-						for (ATermList k=enum_vars; !ATisEmpty(k); k=ATgetNext(k))
-						{
-							if ( k != enum_vars )
-							{
-								msg << ", ";
-							}
-							PrintPart_CXX(msg,ATgetFirst(k),ppDefault);
-							msg << ": ";
-							PrintPart_CXX(msg,ATgetArgument((ATermAppl) ATgetFirst(k),1),ppDefault);
-						}
-						msg << " that satisfy ";
-						PrintPart_CXX(msg,(ATerm) info.rewr_obj->fromRewriteFormat(info.rewr_obj->rewriteInternal(enum_expr)),ppDefault);
-						msg << endl;
-						gsWarningMsg("%s",msg.str().c_str());
-						*info.max_vars *= MAX_VARS_FACTOR;
-					}
+					        used_vars++;
+					        if ( used_vars > *info.max_vars )
+  					        {
+						        stringstream msg;
+						        msg << "need more than " << *info.max_vars << " variables to find all valuations of ";
+						        for (ATermList k=enum_vars; !ATisEmpty(k); k=ATgetNext(k))
+						        {
+							        if ( k != enum_vars )
+							        {
+								        msg << ", ";
+							        }
+							        PrintPart_CXX(msg,ATgetFirst(k),ppDefault);
+							        msg << ": ";
+							        PrintPart_CXX(msg,ATgetArgument((ATermAppl) ATgetFirst(k),1),ppDefault);
+						        }
+						        msg << " that satisfy ";
+						        PrintPart_CXX(msg,(ATerm) info.rewr_obj->fromRewriteFormat(info.rewr_obj->rewriteInternal(enum_expr)),ppDefault);
+						        msg << endl;
+						        gsWarningMsg("%s",msg.str().c_str());
+						        *info.max_vars *= MAX_VARS_FACTOR;
+					        }
+                                        }
+                                        cons_term = gsMakeDataApplProd(cons_term, var_list);
 				}
 				ATerm term_rf = info.rewr_obj->rewriteInternal(info.rewr_obj->toRewriteFormat(cons_term));
 			
@@ -578,6 +583,15 @@ EnumeratorSolutionsStandard::~EnumeratorSolutionsStandard()
 
 
 
+static ATermList map_ATreverse(ATermList l)
+{
+  if ( ATisEmpty(l) )
+  {
+    return l;
+  } else {
+    return ATinsert( map_ATreverse(ATgetNext(l)), (ATerm) ATreverse((ATermList) ATgetFirst(l)) );
+  }
+}
 
 EnumeratorStandard::EnumeratorStandard(ATermAppl spec, Rewriter *r, bool clean_up_rewriter)
 {
@@ -622,7 +636,7 @@ EnumeratorStandard::EnumeratorStandard(ATermAppl spec, Rewriter *r, bool clean_u
 	{
 		ATermAppl cons = ATAgetFirst(conss);
 		ATerm sort = (ATerm) gsGetSortExprResult(ATAgetArgument(cons,1));
-		ATtablePut(info.constructors,sort,(ATerm) ATinsert((ATermList) ATtableGet(info.constructors,sort),(ATerm) ATmakeAppl2(info.tupAFun,(ATerm) cons,(ATerm) gsGetSortExprDomain(ATAgetArgument(cons,1)))));
+		ATtablePut(info.constructors,sort,(ATerm) ATinsert((ATermList) ATtableGet(info.constructors,sort),(ATerm) ATmakeAppl2(info.tupAFun,(ATerm) cons,(ATerm) map_ATreverse(gsGetSortExprDomains(ATAgetArgument(cons,1))))));
 	}
 }
 

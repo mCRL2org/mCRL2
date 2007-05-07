@@ -221,7 +221,7 @@ ATermAppl GarageFrame::MakeFloorPos( int row,
   if (has_part) {
     fpSort = gsMakeSortArrow2(sCol, sPart, MakeSortId("FloorPos"));
   } else {
-    fpSort = gsMakeSortArrow(sCol, MakeSortId("FloorPos"));
+    fpSort = gsMakeSortArrow1(sCol, MakeSortId("FloorPos"));
   }
   ATermAppl oPos = MakeOpId("pos_r" + intToString(row), fpSort);
   ATermAppl tCol = MakeOpId("c" + intToString(col), sCol);
@@ -229,7 +229,7 @@ ATermAppl GarageFrame::MakeFloorPos( int row,
     ATermAppl tPart = MakeOpId((part == 0)?"pa":"pb", sPart);
     return gsMakeDataAppl2(oPos, tCol, tPart);
   } else {
-    return gsMakeDataAppl(oPos, tCol);
+    return gsMakeDataAppl1(oPos, tCol);
   }
 }
 
@@ -307,7 +307,7 @@ void GarageFrame::UpdateState( ATerm State )
         for (int j = 1; j <= 10; ++j) {
           for (int k = 0; k <= 1; ++k) {
             ATermAppl fp = MakeFloorPos(i, j, i == 1, k);
-            ATermAppl state = rewriter->rewrite(gsMakeDataAppl(fs, fp));
+            ATermAppl state = rewriter->rewrite(gsMakeDataAppl1(fs, fp));
             if (ATisEqual(state, tFree)) {
               floorState[i-1][(j-1)*2+k] = 0;
             } else if (ATisEqual(state, tOccupied)) {

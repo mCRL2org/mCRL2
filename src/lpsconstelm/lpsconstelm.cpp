@@ -104,6 +104,7 @@ class lpsConstElm {
     bool cmpCurrToNext();
     bool conditionTest(lps::data_expression x);
     void detectVar(int n);
+    bool recDetectVarList(lps::data_expression_list l, std::set<data_expression> &S); 
     bool recDetectVar(lps::data_expression t, std::set<lps::data_expression> &S);
     template <typename Term>
     atermpp::term_list<Term> vectorToList(std::vector<Term> y);
@@ -436,16 +437,26 @@ void lpsConstElm::detectVar(int n) {
  }
 }
 
+// Return whether or not a summation variable occurs in a data term list
+bool lpsConstElm::recDetectVarList(lps::data_expression_list l, std::set<data_expression> &S) {
+  gsVerboseMsg("list: %s\n", l.to_string().c_str());
+  bool b = false;
+  for(data_expression_list::iterator i = l.begin(); i != l.end() && !(b); ++i) {
+    b = b || recDetectVar(aterm_appl(*i), S);
+  }
+  return b;
+}
+
 // Return whether or not a summation variable occurs in a data term
 bool lpsConstElm::recDetectVar(lps::data_expression t, std::set<data_expression> &S) {
+  gsVerboseMsg("expr: %s\n", t.to_string().c_str());
    bool b = false;
    if( gsIsDataVarId(t) && (S.find(t) != S.end()) ){
      b = true;
    }
-   if ( gsIsDataAppl(t) ) {
-     for(aterm_appl::iterator i = aterm_appl(t).begin(); i!= aterm_appl(t).end();i++) {
-       b = b || recDetectVar(aterm_appl(*i), S);
-     }
+   if ( gsIsDataApplProd(t) ) {
+     b = b || recDetectVar(data_expression(t.argument(0)), S);
+     b = b || recDetectVarList(data_expression_list(t.argument(1)), S);
    }
    return b;
 }

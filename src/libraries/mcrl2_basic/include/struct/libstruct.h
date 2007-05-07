@@ -111,6 +111,10 @@ bool gsIsSortExprBag(ATermAppl Term);
 
 //Auxiliary functions concerning sort expressions
 
+ATermAppl gsMakeSortArrow1(ATermAppl SortExprDom, ATermAppl SortExprResult);
+//Pre: SortExprDom and SortExprResult are sort expressions
+//Ret: Internal representation of the sort expression SortExprDom -> SortExprResult
+
 ATermAppl gsMakeSortArrow2(ATermAppl SortExprDom1, ATermAppl SortExprDom2,
   ATermAppl SortExprResult);
 //Pre: SortExprDom1, SortExprDom2 and SortExprResult are sort expressions
@@ -134,13 +138,9 @@ ATermAppl gsMakeSortArrow4(ATermAppl SortExprDom1, ATermAppl SortExprDom2,
 //     SortExprDom1 -> SortExprDom2 -> SortExprDom3 -> SortExprDom4 ->
 //       SortExprResult, where -> is right associative.
 
-ATermAppl gsMakeSortArrowList(ATermList SortExprDomain,
-  ATermAppl SortExprResult);
-//Pre: SortExprDomain is of the form [e_0, ..., e_n], where n is a natural
-//     number and each e_i, 0 <= i <= n, is a sort expression.
-//     SortExprResult is a sort expression, which we denote by e.
-//Ret: Internal representation of the sort expression e_0 -> ... -> e_n -> e,
-//     where -> is right associative.
+ATermAppl gsMakeSortArrowList(ATermList SortExprs, ATermAppl SortExprResult);
+//Pre SortExprs is a list of sort expressions, SortExpr is a sort expression
+//Ret: Internal representation of the sort expression.
 
 ATermAppl gsGetSortExprResult(ATermAppl SortExpr);
 //Pre: SortExpr is a sort expression
@@ -150,6 +150,11 @@ ATermList gsGetSortExprDomain(ATermAppl SortExpr);
 //Pre: SortExpr is a sort expression
 //Ret: the domain of the sort expression
 
+ATermList gsGetSortExprDomains(ATermAppl SortExpr);
+//Pre: SortExpr is a sort expression
+//Ret: A list with the domains of the sort expression,
+//     so if we have a sort expression of the form
+//     AxB->(CxD->E), we return [[A,B],[C,D]]
 
 //Data expressions
 //----------------
@@ -163,6 +168,10 @@ ATermAppl gsGetSort(ATermAppl DataExpr);
 //Ret: the sort of DataExpr, if the sort can be inferred from the sort
 //     information in DataExpr
 //     Unknown, otherwise
+
+ATermList gsGetSorts(ATermList DataExprs);
+//Pre: DataExprs is a list of data expressions
+//Ret: the list of sorts belonging to DataExprs
 
 ATermAppl gsGetDataExprHead(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
@@ -1091,6 +1100,11 @@ ATermAppl gsMakeDataExprSet2Bag(ATermAppl DataExpr, ATermAppl SortExpr);
 //Ret: Data expression for Set2Bag(DataExpr) of sort SortExpr
 
 //Auxiliary functions concerning data expressions 
+ATermAppl gsMakeDataAppl1(ATermAppl DataExpr, ATermAppl DataExprArg1);
+//Pre: DataExpr and DataExprArg1 are data expressions
+//Ret: Internal representation of the data expression
+//     DataExpr(DataExprArg1)
+
 ATermAppl gsMakeDataAppl2(ATermAppl DataExpr, ATermAppl DataExprArg1,
   ATermAppl DataExprArg2);
 //Pre: DataExpr, DataExprArg1 and DataExprArg2 are data expressions
@@ -1178,6 +1192,118 @@ char *gsIntValue(const ATermAppl IntConstant);
 int gsIntValue_int(const ATermAppl IntConstant);
 //Pre: IntConstant is a data expression of sort Int built from constructors only
 //Ret: The value of IntExpr
+
+bool gsIsDataExprTrue(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is true
+//
+bool gsIsDataExprFalse(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is false
+
+bool gsIsDataExprNot(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a not
+
+bool gsIsDataExprAnd(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is an conjunction
+
+bool gsIsDataExprOr(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a disjunction
+
+bool gsIsDataExprImp(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is an implication
+
+bool gsIsDataExprEq(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is an equality
+
+bool gsIsDataExprNeq(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is an inequality
+
+bool gsIsDataExprIf(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is an if then else
+
+bool gsIsDataExprCNat(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a CInt
+
+bool gsIsDataExprCInt(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a CInt
+
+bool gsIsDataExprCReal(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a CReal
+
+bool gsIsDataExprLTE(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a less then or equal
+
+bool gsIsDataExprLT(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a less then
+
+bool gsIsDataExprGTE(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a greater then or equal
+
+bool gsIsDataExprGT(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a greater then
+
+bool gsIsDataExprMax(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a max
+
+bool gsIsDataExprMin(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a min
+
+bool gsIsDataExprAbs(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a abs
+
+bool gsIsDataExprNeg(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a negation (unary minus)
+
+bool gsIsDataExprSucc(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a successor
+
+bool gsIsDataExprPred(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a predecessor
+
+bool gsIsDataExprAdd(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is an addition
+
+bool gsIsDataExprAddC(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is an addition with carry
+
+bool gsIsDataExprSubt(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a substraction
+
+bool gsIsDataExprMult(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a multiplication
+
+bool gsIsDataExprDiv(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a div
+
+bool gsIsDataExprMod(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a mod
 
 bool gsIsDataExprNumber(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression

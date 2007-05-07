@@ -6,7 +6,6 @@
 #include "lps/sort.h"
 #include "lps/pretty_print.h"
 #include "lps/detail/soundness_checks.h"
-#include "lps/detail/data_expr_utility.h"
 #include "libstruct.h"
 
 namespace lps {
@@ -111,16 +110,11 @@ bool is_data_expression(aterm_appl t)
 }
 
 namespace data_expr {
-  using detail::has_expression_type_level_0;
-  using detail::has_expression_type_level_1;
-  using detail::has_expression_type_level_2;
-
   // //data expression
   // <DataExpr>     ::= Id(<String>)                                          (- tc)
   //                  | <DataVarId>                                           (+ tc)
   //                  | <OpId>                                                (+ tc)
-  //                  | DataApplProd(<DataExpr>, <DataExpr>+)                 (- di)
-  //                  | DataAppl(<DataExpr>, <DataExpr>)                      (+ di)
+  //                  | DataApplProd(<DataExpr>, <DataExpr>+)
   //                  | Number(<NumberString>, <SortExprOrUnknown>)           (- di)
   //                  | ListEnum(<DataExpr>+, <SortExprOrUnknown>)            (- di)
   //                  | SetEnum(<DataExpr>+, <SortExprOrUnknown>)             (- di)
@@ -128,12 +122,12 @@ namespace data_expr {
   //                  | Binder(<BindingOperator>, <DataVarId>+, <DataExpr>)   (- di)
   //                  | Whr(<DataExpr>, <WhrDecl>+)                           (- di)
 
-  inline bool is_true   (aterm_appl t) { return has_expression_type_level_0(t, gsMakeOpIdNameTrue ); }
-  inline bool is_false  (aterm_appl t) { return has_expression_type_level_0(t, gsMakeOpIdNameFalse); }
-  inline bool is_not    (aterm_appl t) { return has_expression_type_level_1(t, gsMakeOpIdNameNot  ); }
-  inline bool is_and    (aterm_appl t) { return has_expression_type_level_2(t, gsMakeOpIdNameAnd  ); }
-  inline bool is_or     (aterm_appl t) { return has_expression_type_level_2(t, gsMakeOpIdNameOr   ); }
-  inline bool is_implies(aterm_appl t) { return has_expression_type_level_2(t, gsMakeOpIdNameImp  ); }
+  inline bool is_true   (aterm_appl t) { return gsIsDataExprTrue(t); }
+  inline bool is_false  (aterm_appl t) { return gsIsDataExprFalse(t); }
+  inline bool is_not    (aterm_appl t) { return gsIsDataExprNot(t); }
+  inline bool is_and    (aterm_appl t) { return gsIsDataExprAnd(t); }
+  inline bool is_or     (aterm_appl t) { return gsIsDataExprOr(t); }
+  inline bool is_implies(aterm_appl t) { return gsIsDataExprImp(t); }
   inline bool is_binder (aterm_appl t) { return gsIsBinder       (t); }
   inline bool is_where  (aterm_appl t) { return gsIsWhr          (t); }                                 
   inline bool is_real   (aterm_appl t) { return sort_expr::is_real(data_expression(t).sort()); }
@@ -152,7 +146,6 @@ namespace data_expr {
   // inline bool is_id            (data_expression t) { return gsIsId           (t); }
   // inline bool is_op_id         (data_expression t) { return gsIsOpId         (t); }
   // inline bool is_data_appl_prod(data_expression t) { return gsIsDataApplProd (t); }
-  // inline bool is_data_appl     (data_expression t) { return gsIsDataAppl     (t); }
   // inline bool is_number        (data_expression t) { return gsIsDataExprNumber(t); }
   // inline bool is_list_enum     (data_expression t) { return gsIsListEnum     (t); }
   // inline bool is_set_enum      (data_expression t) { return gsIsSetEnum      (t); }

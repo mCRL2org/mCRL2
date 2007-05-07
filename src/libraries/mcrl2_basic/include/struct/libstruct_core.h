@@ -507,28 +507,6 @@ bool gsIsConsSpec(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunConsSpec();
 }
 
-// DataAppl
-inline
-AFun initAFunDataAppl(AFun& f)
-{
-  f = ATmakeAFun("DataAppl", 2, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunDataAppl()
-{
-  static AFun AFunDataAppl = initAFunDataAppl(AFunDataAppl);
-  return AFunDataAppl;
-}
-
-inline
-bool gsIsDataAppl(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunDataAppl();
-}
-
 // DataApplProd
 inline
 AFun initAFunDataApplProd(AFun& f)
@@ -1673,28 +1651,6 @@ bool gsIsSetComp(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunSetComp();
 }
 
-// SortArrow
-inline
-AFun initAFunSortArrow(AFun& f)
-{
-  f = ATmakeAFun("SortArrow", 2, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunSortArrow()
-{
-  static AFun AFunSortArrow = initAFunSortArrow(AFunSortArrow);
-  return AFunSortArrow;
-}
-
-inline
-bool gsIsSortArrow(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSortArrow();
-}
-
 // SortArrowProd
 inline
 AFun initAFunSortArrowProd(AFun& f)
@@ -2620,12 +2576,6 @@ ATermAppl gsMakeConsSpec(ATermList OpId_0)
 }
 
 inline
-ATermAppl gsMakeDataAppl(ATermAppl DataExpr_0, ATermAppl DataExpr_1)
-{
-  return ATmakeAppl2(gsAFunDataAppl(), (ATerm) DataExpr_0, (ATerm) DataExpr_1);
-}
-
-inline
 ATermAppl gsMakeDataApplProd(ATermAppl DataExpr_0, ATermList DataExpr_1)
 {
   return ATmakeAppl2(gsAFunDataApplProd(), (ATerm) DataExpr_0, (ATerm) DataExpr_1);
@@ -2935,12 +2885,6 @@ inline
 ATermAppl gsMakeSetComp()
 {
   return ATmakeAppl0(gsAFunSetComp());
-}
-
-inline
-ATermAppl gsMakeSortArrow(ATermAppl SortExpr_0, ATermAppl SortExpr_1)
-{
-  return ATmakeAppl2(gsAFunSortArrow(), (ATerm) SortExpr_0, (ATerm) SortExpr_1);
 }
 
 inline

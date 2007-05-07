@@ -26,17 +26,17 @@ using namespace std;
         while (!ATisEmpty(v_variables)) {
           v_variable = ATAgetFirst(v_variables);
           v_variables = ATgetNext(v_variables);
-          v_variable_string = f_expression_info.get_name_of_variable(v_variable);
-          if (f_sort_info.is_sort_real(f_expression_info.get_sort_of_variable(v_variable))) {
+          v_variable_string = gsATermAppl2String(ATAgetArgument(v_variable, 0));
+          if (f_sort_info.is_sort_real(gsGetSort(v_variable))) {
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Real)";
-          } else if (f_sort_info.is_sort_int(f_expression_info.get_sort_of_variable(v_variable))) {
+          } else if (f_sort_info.is_sort_int(gsGetSort(v_variable))) {
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
-          } else if (f_sort_info.is_sort_nat(f_expression_info.get_sort_of_variable(v_variable))) {
+          } else if (f_sort_info.is_sort_nat(gsGetSort(v_variable))) {
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
-          } else if (f_sort_info.is_sort_pos(f_expression_info.get_sort_of_variable(v_variable))) {
+          } else if (f_sort_info.is_sort_pos(gsGetSort(v_variable))) {
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
           } else {
-            v_sort = f_expression_info.get_sort_of_variable(v_variable);
+            v_sort = gsGetSort(v_variable);
             v_sort_number = ATindexedSetPut(f_sorts, (ATerm) v_sort, 0);
             v_sort_string = (char*) malloc((number_of_digits(v_sort_number) + 5) * sizeof(char));
             sprintf(v_sort_string, "sort%d", v_sort_number);
@@ -55,7 +55,8 @@ using namespace std;
       ATermList v_operators;
       ATermAppl v_operator;
       ATermAppl v_sort;
-      ATermAppl v_sort_domain;
+      ATermAppl v_sort_domain_elt;
+      ATermList v_sort_domain_list;
       int v_sort_number;
       char* v_sort_string;
       int v_operator_number;
@@ -76,32 +77,36 @@ using namespace std;
           v_operator_string = 0;
           v_sort = f_expression_info.get_sort_of_operator(v_operator);
           do {
-            if (f_sort_info.is_sort_arrow(v_sort)) {
-              v_sort_domain = f_sort_info.get_domain(v_sort);
+            if (f_sort_info.is_sort_arrow_prod(v_sort)) {
+              v_sort_domain_list = f_sort_info.get_domain(v_sort);
               v_sort = f_sort_info.get_range(v_sort);
             } else {
-              v_sort_domain = v_sort;
+              v_sort_domain_list = ATmakeList1((ATerm) v_sort);
               v_sort = 0;
             }
-            if (f_sort_info.is_sort_arrow(v_sort_domain)) {
-              gsErrorMsg("Function %P cannot be translated to the SMT-LIB format.\n", v_operator);
-              exit(1);
-            }
-            if (f_sort_info.is_sort_int(v_sort_domain)) {
-              f_operators_extrafuns = f_operators_extrafuns + " Int";
-            } else if (f_sort_info.is_sort_nat(v_sort_domain)) {
-              f_operators_extrafuns = f_operators_extrafuns + " Int";
-            } else if (f_sort_info.is_sort_pos(v_sort_domain)) {
-              f_operators_extrafuns = f_operators_extrafuns + " Int";
-            } else if (f_sort_info.is_sort_real(v_sort_domain)) {
-              f_operators_extrafuns = f_operators_extrafuns + " Real";
-            } else {
-              v_sort_number = ATindexedSetPut(f_sorts, (ATerm) v_sort_domain, 0);
-              v_sort_string = (char*) malloc((number_of_digits(v_sort_number) + 5) * sizeof(char));
-              sprintf(v_sort_string, "sort%d", v_sort_number);
-              f_operators_extrafuns = f_operators_extrafuns + " " + v_sort_string;
-              free(v_sort_string);
-              v_sort_string = 0;
+            for(ATermList l = v_sort_domain_list; !ATisEmpty(l) ; l = ATgetNext(l))
+            {
+              v_sort_domain_elt = ATAgetFirst(l);
+              if (f_sort_info.is_sort_arrow_prod(v_sort_domain_elt)) {
+                gsErrorMsg("Function %P cannot be translated to the SMT-LIB format.\n", v_operator);
+                exit(1);
+              }
+              if (f_sort_info.is_sort_int(v_sort_domain_elt)) {
+                f_operators_extrafuns = f_operators_extrafuns + " Int";
+              } else if (f_sort_info.is_sort_nat(v_sort_domain_elt)) {
+                f_operators_extrafuns = f_operators_extrafuns + " Int";
+              } else if (f_sort_info.is_sort_pos(v_sort_domain_elt)) {
+                f_operators_extrafuns = f_operators_extrafuns + " Int";
+              } else if (f_sort_info.is_sort_real(v_sort_domain_elt)) {
+                f_operators_extrafuns = f_operators_extrafuns + " Real";
+              } else {
+                v_sort_number = ATindexedSetPut(f_sorts, (ATerm) v_sort_domain_elt, 0);
+                v_sort_string = (char*) malloc((number_of_digits(v_sort_number) + 5) * sizeof(char));
+                sprintf(v_sort_string, "sort%d", v_sort_number);
+                f_operators_extrafuns = f_operators_extrafuns + " " + v_sort_string;
+                free(v_sort_string);
+                v_sort_string = 0;
+              }
             }
           } while (v_sort != 0);
           f_operators_extrafuns = f_operators_extrafuns + ")";
@@ -205,7 +210,7 @@ using namespace std;
           v_operator_number = ATindexedSetGetIndex(f_operators, (ATerm) v_operator);
           v_operator_string = (char*) malloc((number_of_digits(v_operator_number) + 3) * sizeof(char));
           sprintf(v_operator_string, "op%d", v_operator_number);
-          v_operator_original_id = f_expression_info.get_name_of_operator(v_operator);
+          v_operator_original_id = gsATermAppl2String(ATAgetArgument(v_operator, 0));
           f_operators_notes = f_operators_notes + "(" + v_operator_string + " = " + v_operator_original_id + ")";
           free(v_operator_string);
           v_operator_string = 0;
@@ -511,7 +516,7 @@ using namespace std;
       f_formula = f_formula + "(" + v_operator_string;
       free(v_operator_string);
       v_operator_string = 0;
-      v_number_of_arguments = f_expression_info.get_number_of_arguments(a_clause);
+      v_number_of_arguments = ATgetLength(gsGetDataExprArgs(a_clause));
       for (int i = 0; i < v_number_of_arguments; i++) {
         v_clause = f_expression_info.get_argument(a_clause, i);
         f_formula = f_formula + " ";
@@ -525,7 +530,7 @@ using namespace std;
     void SMT_LIB_Solver::translate_variable(ATermAppl a_clause) {
       char* v_string;
 
-      v_string = f_expression_info.get_name_of_variable(a_clause);
+      v_string = gsATermAppl2String(ATAgetArgument(a_clause, 0));
       f_formula = f_formula + v_string;
 
       ATindexedSetPut(f_variables, (ATerm) a_clause, 0);
@@ -536,7 +541,7 @@ using namespace std;
     void SMT_LIB_Solver::translate_nat_variable(ATermAppl a_clause) {
       char* v_string;
 
-      v_string = f_expression_info.get_name_of_variable(a_clause);
+      v_string = gsATermAppl2String(ATAgetArgument(a_clause, 0));
       f_formula = f_formula + v_string;
 
       ATindexedSetPut(f_variables, (ATerm) a_clause, 0);
@@ -548,7 +553,7 @@ using namespace std;
     void SMT_LIB_Solver::translate_pos_variable(ATermAppl a_clause) {
       char* v_string;
 
-      v_string = f_expression_info.get_name_of_variable(a_clause);
+      v_string = gsATermAppl2String(ATAgetArgument(a_clause, 0));
       f_formula = f_formula + v_string;
 
       ATindexedSetPut(f_variables, (ATerm) a_clause, 0);
@@ -633,62 +638,62 @@ using namespace std;
     // --------------------------------------------------------------------------------------------
 
     void SMT_LIB_Solver::translate_clause(ATermAppl a_clause, bool a_expecting_predicate) {
-      if (f_expression_info.is_not(a_clause)) {
+      if (gsIsDataExprNot(a_clause)) {
         translate_not(a_clause);
-      } else if (f_expression_info.is_equality(a_clause)) {
+      } else if (gsIsDataExprEq(a_clause)) {
         translate_equality(a_clause);
-      } else if (f_expression_info.is_inequality(a_clause)) {
+      } else if (gsIsDataExprNeq(a_clause)) {
         translate_inequality(a_clause);
-      } else if (f_expression_info.is_greater_than(a_clause)) {
+      } else if (gsIsDataExprGT(a_clause)) {
         translate_greater_than(a_clause);
-      } else if (f_expression_info.is_greater_than_or_equal(a_clause)) {
+      } else if (gsIsDataExprGTE(a_clause)) {
         translate_greater_than_or_equal(a_clause);
-      } else if (f_expression_info.is_less_than(a_clause)) {
+      } else if (gsIsDataExprLT(a_clause)) {
         translate_less_than(a_clause);
-      } else if (f_expression_info.is_less_than_or_equal(a_clause)) {
+      } else if (gsIsDataExprLTE(a_clause)) {
         translate_less_than_or_equal(a_clause);
-      } else if (f_expression_info.is_plus(a_clause)) {
+      } else if (gsIsDataExprAdd(a_clause)) {
         translate_plus(a_clause);
-      } else if (f_expression_info.is_unary_minus(a_clause)) {
+      } else if (gsIsDataExprNeg(a_clause)) {
         translate_unary_minus(a_clause);
-      } else if (f_expression_info.is_binary_minus(a_clause)) {
+      } else if (gsIsDataExprSubt(a_clause)) {
         translate_binary_minus(a_clause);
-      } else if (f_expression_info.is_multiplication(a_clause)) {
+      } else if (gsIsDataExprMult(a_clause)) {
         translate_multiplication(a_clause);
-      } else if (f_expression_info.is_max(a_clause)) {
+      } else if (gsIsDataExprMax(a_clause)) {
         translate_max(a_clause);
-      } else if (f_expression_info.is_min(a_clause)) {
+      } else if (gsIsDataExprMin(a_clause)) {
         translate_min(a_clause);
-      } else if (f_expression_info.is_abs(a_clause)) {
+      } else if (gsIsDataExprAbs(a_clause)) {
         translate_abs(a_clause);
-      } else if (f_expression_info.is_succ(a_clause)) {
+      } else if (gsIsDataExprSucc(a_clause)) {
         translate_succ(a_clause);
-      } else if (f_expression_info.is_pred(a_clause)) {
+      } else if (gsIsDataExprPred(a_clause)) {
         translate_pred(a_clause);
-      } else if (f_expression_info.is_add_c(a_clause)) {
+      } else if (gsIsDataExprAddC(a_clause)) {
         translate_add_c(a_clause);
-      } else if (f_expression_info.is_c_nat(a_clause)) {
+      } else if (gsIsDataExprCNat(a_clause)) {
         translate_c_nat(a_clause);
-      } else if (f_expression_info.is_c_int(a_clause)) {
+      } else if (gsIsDataExprCInt(a_clause)) {
         translate_c_int(a_clause);
-      } else if (f_expression_info.is_c_real(a_clause)) {
+      } else if (gsIsDataExprCReal(a_clause)) {
         translate_c_real(a_clause);
-      } else if (f_expression_info.is_int_constant(a_clause)) {
+      } else if (gsIsIntConstant(a_clause)) {
         translate_int_constant(a_clause);
-      } else if (f_expression_info.is_nat_constant(a_clause)) {
+      } else if (gsIsNatConstant(a_clause)) {
         translate_nat_constant(a_clause);
-      } else if (f_expression_info.is_pos_constant(a_clause)) {
+      } else if (gsIsPosConstant(a_clause)) {
         translate_pos_constant(a_clause);
-      } else if (f_expression_info.is_true(a_clause) && a_expecting_predicate) {
+      } else if (gsIsDataExprTrue(a_clause) && a_expecting_predicate) {
         translate_true();
-      } else if (f_expression_info.is_false(a_clause) && a_expecting_predicate) {
+      } else if (gsIsDataExprFalse(a_clause) && a_expecting_predicate) {
         translate_false();
-      } else if (f_expression_info.is_variable(a_clause)) {
+      } else if (gsIsDataVarId(a_clause)) {
         if (a_expecting_predicate) {
           add_bool2pred_and_translate_clause(a_clause);
-        } else if (f_sort_info.is_sort_nat(f_expression_info.get_sort_of_variable(a_clause))) {
+        } else if (f_sort_info.is_sort_nat(gsGetSort(a_clause))) {
           translate_nat_variable(a_clause);
-        } else if (f_sort_info.is_sort_pos(f_expression_info.get_sort_of_variable(a_clause))) {
+        } else if (f_sort_info.is_sort_pos(gsGetSort(a_clause))) {
           translate_pos_variable(a_clause);
         } else {
           translate_variable(a_clause);
@@ -699,7 +704,7 @@ using namespace std;
         } else {
           translate_unknown_operator(a_clause);
         }
-      } else if (f_expression_info.is_constant(a_clause)) {
+      } else if (gsIsOpId(a_clause)) {
         translate_constant(a_clause);
       } else {
         gsErrorMsg("Unable to handle the current clause (%T).\n", a_clause);
@@ -719,7 +724,7 @@ using namespace std;
         while (!ATisEmpty(v_variables)) {
           v_variable = ATAgetFirst(v_variables);
           v_variables = ATgetNext(v_variables);
-          v_variable_string = f_expression_info.get_name_of_variable(v_variable);
+          v_variable_string = gsATermAppl2String(ATAgetArgument(v_variable, 0));
           f_formula = f_formula + " (>= " + v_variable_string + " 0)";
         }
       }
@@ -737,7 +742,7 @@ using namespace std;
         while (!ATisEmpty(v_variables)) {
           v_variable = ATAgetFirst(v_variables);
           v_variables = ATgetNext(v_variables);
-          v_variable_string = f_expression_info.get_name_of_variable(v_variable);
+          v_variable_string = gsATermAppl2String(ATAgetArgument(v_variable, 0));
           f_formula = f_formula + " (>= " + v_variable_string + " 1)";
         }
       }

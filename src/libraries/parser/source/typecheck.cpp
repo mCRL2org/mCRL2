@@ -600,7 +600,7 @@ ATermAppl gstcFoldSortRefs(ATermAppl Spec)
     //add substitution for SortRef
     ATermAppl LHS = gsMakeSortId(ATAgetArgument(SortRef, 0));
     ATermAppl RHS = ATAgetArgument(SortRef, 1);
-    if (gsIsSortId(RHS) || gsIsSortArrowProd(RHS) || gsIsSortArrow(RHS)) {
+    if (gsIsSortId(RHS) || gsIsSortArrowProd(RHS)) {
       //add forward substitution
       ATtablePut(Substs, (ATerm) LHS, (ATerm) RHS);
     } else {
@@ -642,7 +642,7 @@ ATermList gstcFoldSortRefsInSortRefs(ATermList SortRefs)
       ATermAppl LHS = gsMakeSortId(ATAgetArgument(SortRef, 0));
       ATermAppl RHS = ATAgetArgument(SortRef, 1);
       ATermAppl Subst;
-      if (gsIsSortId(RHS) || gsIsSortArrowProd(RHS) || gsIsSortArrow(RHS)) {
+      if (gsIsSortId(RHS) || gsIsSortArrowProd(RHS)) {
         //make forward substitution
         Subst = gsMakeSubst_Appl(LHS, RHS);
       } else {
@@ -1034,7 +1034,7 @@ static ATbool gstcReadInFuncs(ATermList Funcs, bool high_level){
 	FuncType=NewFuncType;
     }
     
-    if((high_level && gsIsSortArrowProd(FuncType)) || (!high_level && gsIsSortArrow(FuncType))){
+    if((gsIsSortArrowProd(FuncType))){
       if(!gstcAddFunction(FuncName,FuncType,"function",high_level)) { return ATfalse; }
     }
     else{
@@ -1288,13 +1288,6 @@ static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr, bool high_level){
     return ATtrue;
   }
 
-  if(!high_level && gsIsSortArrow(SortExpr)){
-    if(!gstcIsSortExprDeclared(ATAgetArgument(SortExpr,1),high_level)) return ATfalse;
-    if(!gstcIsSortExprDeclared(ATAgetArgument(SortExpr,0),high_level)) return ATfalse;
-    return ATtrue;
-  }
-
-  
   gsErrorMsg("this is not a sort expression %T\n",SortExpr);
   return ATfalse;
 }

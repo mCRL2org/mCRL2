@@ -557,7 +557,16 @@ static ATermList get_vars(ATermAppl a)
 		return ATmakeList0();
 	}
 	else
-	if ( gsIsDataAppl(a) || gsIsSync(a) || gsIsSeq(a) ||  gsIsMerge(a) || gsIsLMerge(a) || gsIsChoice(a) || gsIsIfThen(a) )
+        if ( gsIsDataApplProd(a) )
+        {
+                l = get_vars(ATAgetArgument(a,0));
+                for (m=ATLgetArgument(a,1);!ATisEmpty(m);m=ATgetNext(m))
+                {
+                        l = merge_list(l,get_vars(ATAgetFirst(m)));
+                }
+        }
+        else
+	if ( gsIsSync(a) || gsIsSeq(a) ||  gsIsMerge(a) || gsIsLMerge(a) || gsIsChoice(a) || gsIsIfThen(a) )
 	{
 		return merge_list(get_vars(ATAgetArgument(a,0)),get_vars(ATAgetArgument(a,1)));
 	}
@@ -643,14 +652,29 @@ static int add_process_eqn(ATermAppl e)
 	return ATgetLength(processes)-1;
 }
 
+//Prototype
+static ATbool has_bounded_var(ATermAppl a);
+
+static ATbool has_bounded_var(ATermList l)
+{
+        for ( ; !ATisEmpty(l); l = ATgetNext(l))
+        {
+                if(has_bounded_var(ATAgetFirst(l)))
+                {
+                        return ATtrue;
+                }
+        }
+        return ATfalse;
+}
+
 static ATbool has_bounded_var(ATermAppl a) //XXX
 {
 	if ( gsIsDataVarId(a) )
 	{
 		return ATisAnnotated((ATerm) a);
-	} else if ( gsIsDataAppl(a) )
+	} else if ( gsIsDataApplProd(a) )
 	{
-		return (ATbool) (has_bounded_var(ATAgetArgument(a,0)) || has_bounded_var(ATAgetArgument(a,1)));
+		return (ATbool) (has_bounded_var(ATAgetArgument(a,0)) || has_bounded_var(ATLgetArgument(a,1)));
 	} else if ( gsIsOpId(a) )
 	{
 		return ATfalse;
@@ -666,36 +690,22 @@ ATerm replace_data_with_vars_gen(ATerm a, ATermList *v, ATermList *d, ATermAppl 
 
 	if ( ATisAppl(a) )
 	{
-		if ( gsIsDataAppl((ATermAppl) a) || gsIsOpId((ATermAppl) a) || gsIsDataVarId((ATermAppl) a) )
+		if ( gsIsDataApplProd((ATermAppl) a) || gsIsOpId((ATermAppl) a) || gsIsDataVarId((ATermAppl) a) )
 		{
-/*			if ( ATindexOf(*d,a,0) >= 0 )
-			{
-				return ATelementAt(*v,ATindexOf(*d,a,0));
-			} else {*/
 //gsfprintf(stderr,"\nhas_bounded_var(%T) = %i\n",a,has_bounded_var((ATermAppl) a));
-				if ( /*gsIsDataAppl((ATermAppl) a) &&*/ has_bounded_var((ATermAppl) a) )
+			if ( has_bounded_var((ATermAppl) a) )
+			{
+				return a;
+			} else {
+				if ( namebase == NULL )
 				{
-/*					if ( gsIsOpId(ATAgetArgument((ATermAppl) a,0)) )
-					{
-						return (ATerm) gsMakeDataAppl(ATAgetArgument(a,0),replace_data_with_vars_gen(ATgetArgument(a,1),v,d));
-					} else {
-						return (ATerm) gsMakeDataAppl(replace_data_with_vars_gen(ATgetArgument(a,0),v,d),replace_data_with_vars_gen(ATgetArgument(a,1),v,d));
-					}*/
-					return a;
+					var = get_new_var(gsMakeDataVarId(gsString2ATermAppl("d"),gsGetSort((ATermAppl) a)),v);
 				} else {
-					if ( namebase == NULL )
-					{
-						var = get_new_var(gsMakeDataVarId(gsString2ATermAppl("d"),gsGetSort((ATermAppl) a)),v);
-					} else {
-						var = get_new_var(namebase,v);
-					}
-					*d = ATappend(*d,a);
-					return (ATerm) var;
+					var = get_new_var(namebase,v);
 				}
-/*			}*/
-/*		} else if ( gsIsDataVarId((ATermAppl) a) && has_bounded_var(a) )
-		{
-			return a;*/
+				*d = ATappend(*d,a);
+				return (ATerm) var;
+			}
 		} else {
 			if ( gsIsProcess((ATermAppl) a) && (proc_id((ATermAppl) a) >= 0) )
 			{
@@ -1414,6 +1424,23 @@ static ATermList list_minus(ATermList l1, ATermList l2)
 
 
 /* Matching functions */
+//Prototype
+static ATbool match_data(ATermAppl a, ATermAppl m, ATermList l, ATermTable r);
+
+static ATbool match_data_list(ATermList a, ATermList m, ATermList l, ATermTable r)
+{
+        assert(ATgetLength(a) == ATgetLength(m));
+
+	for (; !ATisEmpty(a); a=ATgetNext(a),m=ATgetNext(m))
+	{
+		if ( !match_data(ATAgetFirst(a),ATAgetFirst(m),l,r) )
+		{
+			return ATfalse;
+		}
+	}
+
+        return ATtrue;
+}
 
 static ATbool match_data(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 {
@@ -1438,13 +1465,13 @@ static ATbool match_data(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 		return ATisEqual((ATerm) a,(ATerm) m);
 	}
 	else
-	if ( gsIsDataAppl(a) )
+	if ( gsIsDataApplProd(a) )
 	{
-		if ( gsIsDataAppl(m) )
+		if ( gsIsDataApplProd(m) )
 		{
 			if ( match_data(ATAgetArgument(a,0),ATAgetArgument(m,0),l,r) )
 			{
-				return match_data(ATAgetArgument(a,1),ATAgetArgument(m,1),l,r);
+				return match_data_list(ATLgetArgument(a,1),ATLgetArgument(m,1),l,r);
 			} else {
 				return ATfalse;
 			}
@@ -1472,14 +1499,7 @@ static ATbool match_data(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 			n = (ATermList) a;
 			o = (ATermList) m;
 		}
-		for (; !ATisEmpty(n); n=ATgetNext(n),o=ATgetNext(o))
-		{
-			if ( !match_data(ATAgetFirst(n),ATAgetFirst(o),l,r) )
-			{
-				return ATfalse;
-			}
-		}
-		return ATtrue;
+                return match_data_list(n, o, l, r);
 	}
 	
 	gsWarningMsg("unknown data expression (%T)\n",a);

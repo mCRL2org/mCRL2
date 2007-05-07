@@ -201,7 +201,7 @@ ATerm RewriterCompilingInnermost::toInner(ATermAppl Term, bool add_opids)
 {
         ATermList l;
 
-        if ( !gsIsDataAppl(Term) )
+        if ( !gsIsDataApplProd(Term) )
         {
                 if ( gsIsOpId(Term) )
                 {
@@ -212,16 +212,22 @@ ATerm RewriterCompilingInnermost::toInner(ATermAppl Term, bool add_opids)
         }
 
         l = ATmakeList0();
-        while ( gsIsDataAppl(Term) )
+        if (gsIsDataApplProd(Term))
         {
-                l = ATinsert(l,(ATerm) toInner(ATAgetArgument((ATermAppl) Term,1),add_opids));
-                Term = ATAgetArgument(Term,0);
-        }
-        if ( gsIsOpId(Term) )
-        {
-                l = ATinsert(l,(ATerm) OpId2Int(Term,add_opids));
-        } else {
-                l = ATinsert(l,(ATerm) Term);
+                for(ATermList args = ATLgetArgument((ATermAppl) Term, 1); !ATisEmpty(args); args = ATgetNext(args))
+                {
+                        l = ATinsert(l,(ATerm) toInner((ATermAppl) ATgetFirst(args),add_opids));
+                }
+                l = ATreverse(l);
+
+                ATerm arg0 = toInner(ATAgetArgument((ATermAppl) Term, 0), add_opids);
+
+                if(ATisList(arg0))
+                {
+                        l = ATconcat((ATermList) arg0, l);
+                } else {                                        
+                        l = ATinsert(l, arg0);
+                }
         }
 
         return (ATerm) l;
@@ -229,43 +235,61 @@ ATerm RewriterCompilingInnermost::toInner(ATermAppl Term, bool add_opids)
 
 ATermAppl RewriterCompilingInnermost::fromInner(ATerm Term)
 {
-        ATermList l;
-        ATerm t;
-        ATermAppl a;
+	ATermList l;
+        ATermList list;
+	ATerm t;
+	ATermAppl a;
 
-        if ( !ATisList(Term) )
+	if ( !ATisList(Term) )
+	{
+		if ( ATisInt(Term) )
+		{
+			return int2term[ATgetInt((ATermInt) Term)];
+		} else {
+			return (ATermAppl) Term;
+		}
+	}
+
+	if ( ATisEmpty((ATermList) Term) )
+	{
+		gsfprintf(stderr,"%s: invalid inner format term (%T)\n",NAME,Term);
+		exit(1);
+	}
+	
+        //Reconstruct term structure 
+	l = (ATermList) Term;
+	t = ATgetFirst(l);
+	if ( ATisInt(t) )
+	{
+		a = int2term[ATgetInt((ATermInt) t)];
+	} else {
+		a = (ATermAppl) t;
+	}
+
+        
+	l = ATgetNext(l);
+        if(gsIsOpId(a) || gsIsDataVarId(a))
         {
-                if ( ATisInt(Term) )
+                ATermAppl sort = ATAgetArgument(a, 1);
+                while(gsIsSortArrowProd(sort) && !(ATisEmpty(l)))
                 {
-//gsfprintf(stderr,"%i -> %p (%T)\n\n",ATgetInt((ATermInt) Term),int2term[ATgetInt((ATermInt) Term)],int2term[ATgetInt((ATermInt) Term)]);
-                        return int2term[ATgetInt((ATermInt) Term)];
-                } else {
-                        return (ATermAppl) Term;
+                        ATermList sort_dom = ATLgetArgument(sort, 0);
+                        list = ATmakeList0();
+                        while (!ATisEmpty(sort_dom))
+                        {
+                                list = ATinsert(list, (ATerm) fromInner(ATgetFirst(l)));
+                                sort_dom = ATgetNext(sort_dom);
+                                l = ATgetNext(l);
+                        }
+                        list = ATreverse(list);
+                        a = gsMakeDataApplProd(a, list);
+                        sort = ATAgetArgument(sort, 1);
                 }
         }
 
-        if ( ATisEmpty((ATermList) Term) )
-        {
-                gsfprintf(stderr,"%s: invalid inner format term (%T)\n",NAME,Term);
-                exit(1);
-        }
-
-        l = (ATermList) Term;
-        t = ATgetFirst(l);
-        if ( ATisInt(t) )
-        {
-                a = int2term[ATgetInt((ATermInt) t)];
-        } else {
-                a = (ATermAppl) t;
-        }
-        l = ATgetNext(l);
-        for (; !ATisEmpty(l); l=ATgetNext(l))
-        {
-                a = gsMakeDataAppl(a,fromInner(ATgetFirst(l)));
-        }
-
-        return a;
+	return a;
 }
+
 
 static ATerm Apply(ATermList l)
 {
@@ -358,15 +382,31 @@ ATermAppl RewriterCompilingInnermost::fromRewriteFormat(ATerm t)
 	} else if ( gsIsDataVarId((ATermAppl) t) )
 	{
 		return (ATermAppl) t;
-	} else {
-		int arity = ATgetArity(ATgetAFun((ATermAppl) t));
-		ATermAppl a = fromRewriteFormat(ATgetArgument((ATermAppl) t,0));
-		for (int i=1; i<arity; i++)
-		{
-			a = gsMakeDataAppl(a,fromRewriteFormat(ATgetArgument((ATermAppl) t,i)));
-		}
-		return a;
 	}
+
+	ATermAppl a = fromRewriteFormat(ATgetArgument((ATermAppl) t, 0));
+	assert(gsIsOpId(a) || gsIsDataVarId(a));
+
+	int i = 1;
+	int arity = ATgetArity(ATgetAFun((ATermAppl) t));
+	ATermAppl sort = ATAgetArgument(a, 1);
+	while(gsIsSortArrowProd(sort) && (i < arity))
+	{
+		ATermList sort_dom = ATLgetArgument(sort, 0);
+		ATermList list = ATmakeList0();
+		while(!ATisEmpty(sort_dom))
+		{
+			assert(i < arity);
+			list = ATinsert(list, (ATerm) fromRewriteFormat(ATgetArgument((ATermAppl) t,i)));
+			sort_dom = ATgetNext(sort_dom);
+			++i;
+		}
+		list = ATreverse(list);
+		a = gsMakeDataApplProd(a, list);
+		sort = ATAgetArgument(sort, 1);
+	}
+
+	return a;
 }
 
 static char *whitespace_str = NULL;
@@ -1458,15 +1498,7 @@ gsfprintf(IT_DEBUG_FILE "implement_tree %P (%i)\n",int2term[opid],opid);
 static int getArity(ATermAppl op)
 {
   ATermAppl sort = ATAgetArgument(op,1);
-  int arity = 0;
-
-  while ( gsIsSortArrow(sort) )
-  {
-    sort = ATAgetArgument(sort,1);
-    arity++;
-  }
-
-  return arity;
+  return ATgetLength(gsGetSortExprDomain(sort));
 }
 
 void RewriterCompilingInnermost::CompileRewriteSystem(lps::data_specification DataSpec)

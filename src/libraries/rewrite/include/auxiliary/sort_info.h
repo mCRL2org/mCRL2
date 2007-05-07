@@ -31,8 +31,8 @@ class Sort_Info {
     /// \brief Indicates whether or not a sort expression is a base type.
     bool is_sort_id(ATermAppl a_sort_expression);
 
-    /// \brief Indicates whether or not the main operator of a sort expression is an arrow.
-    bool is_sort_arrow(ATermAppl a_sort_expression);
+    /// \brief Indicates whether or not the main operator of a sort expression is an arrow product.
+    bool is_sort_arrow_prod(ATermAppl a_sort_expression);
 
     /// \brief Indicates whether or not a sort expression represents the sort Int.
     bool is_sort_int(ATermAppl a_sort_expression);
@@ -59,7 +59,7 @@ class Sort_Info {
     char* get_sort_id(ATermAppl a_sort_expression);
 
     /// \brief Returns the domain of a sort expression.
-    ATermAppl get_domain(ATermAppl a_sort_expression);
+    ATermList get_domain(ATermAppl a_sort_expression);
 
     /// \brief Returns the range of a sort expression.
     ATermAppl get_range(ATermAppl a_sort_expression);

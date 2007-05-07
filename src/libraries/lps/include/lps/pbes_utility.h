@@ -173,7 +173,10 @@ data_expression pbes2data(const pbes_expression& p, specification& spec)
     identifier_string vname = var_name(p);
     data_expression_list parameters = var_val(p);
     sort_list sorts = apply(parameters, gsGetSort);
-    lps::sort vsort = gsMakeSortArrowList(sorts, s::bool_());
+    // In order to use gsMakeSortArrowProd sorts must be non-empty
+    // else an extra case should be added to just make vsort == s::bool_();
+    assert(!sorts.empty());
+    lps::sort vsort = gsMakeSortArrowProd(sorts, s::bool_());
     data_variable v(gsMakeDataVarId(vname, vsort));
     return gsMakeDataApplList(v, parameters);
   }

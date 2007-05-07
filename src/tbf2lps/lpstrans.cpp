@@ -98,10 +98,8 @@ static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args, ATermList typel
 			m = ATappend(m,(ATerm) dataterm2ATermAppl(ATAgetFirst(l),args,typelist));
 		}
 		r = gsMakeOpId(t2,find_type(t,m,typelist));
-		for (; !ATisEmpty(m); m=ATgetNext(m))
-		{
-			r = gsMakeDataAppl(r,ATAgetFirst(m));
-		}
+                
+                r = gsMakeDataApplProd(r,m);
 	}
 	
 	return r;
@@ -173,7 +171,7 @@ static ATermList convert_sorts(ATermAppl spec, ATermList *ids)
 
 static ATermList convert_funcs(ATermList funcs, ATermList *ids)
 {
-	ATermList r,l,m;
+	ATermList r,l,m, sorts;
 	ATermAppl sort;
 
 	r = ATmakeList0();
@@ -183,11 +181,13 @@ static ATermList convert_funcs(ATermList funcs, ATermList *ids)
 
 		m = ATmakeList0();
 		l = ATreverse(ATLgetArgument(ATAgetFirst(funcs),1));
+                sorts = ATmakeList0();
 		sort = gsMakeSortId(ATAgetArgument(ATAgetFirst(funcs),2));
-		for (; !ATisEmpty(l); l=ATgetNext(l))
+                for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
-			sort = gsMakeSortArrow(gsMakeSortId(ATAgetFirst(l)),sort);
+			sorts = ATinsert(sorts, (ATerm) gsMakeSortId(ATAgetFirst(l)));
 		}
+                sort = gsMakeSortArrowProd(sorts, sort);
 
 		r = ATappend(r,(ATerm) gsMakeOpId(ATAgetArgument(ATAgetFirst(funcs),0),sort));
 	}
@@ -417,7 +417,7 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 		{
 			ATermAppl s = ATAgetFirst(l);
 			substs = ATinsert(substs,(ATerm) gsMakeSubst(
-						(ATerm) gsMakeOpId(eq_str,gsMakeSortArrow(s,gsMakeSortArrow(s,s_bool))),
+						(ATerm) gsMakeOpId(eq_str,gsMakeSortArrow2(s,s,s_bool)),
 						(ATerm) gsMakeOpIdEq(s)
 						));
 		}

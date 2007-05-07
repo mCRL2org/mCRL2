@@ -9,9 +9,6 @@
   /// The class BDD_Info provides information about the structure of binary decision diagrams.
 
 class BDD_Info {
-  protected:
-    /// \brief ATermAppl representing the \c if-then-else function with type Bool -> Bool -> Bool -> Bool.
-    ATermAppl f_if_then_else;
   public:
     /// \brief Constructor that initializes the field BDD_Info::f_if_then_else.
     BDD_Info();

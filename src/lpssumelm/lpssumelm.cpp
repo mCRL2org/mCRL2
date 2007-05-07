@@ -152,7 +152,7 @@ inline
 data_expression lhs(data_expression t)
 {
   assert(is_and(t) || is_equal_to(t));
-  return data_expression(ATAgetArgument(ATAgetArgument(t, 0), 1));  
+  return data_expression(ATAelementAt(ATLgetArgument(t, 1), 0));  
 }
 
 ///pre: is_and(t) || is_equal_to(t)
@@ -161,7 +161,7 @@ inline
 data_expression rhs(data_expression t)
 {
   assert(is_and(t) || is_equal_to(t));
-  return data_expression(ATAgetArgument(t, 1));
+  return data_expression(ATAelementAt(ATLgetArgument(t, 1), 1));
 }
 
 ///pre: is_equal_to(t); t is of form a == b

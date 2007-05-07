@@ -16,13 +16,13 @@
       ATermAppl v_sort;
       int v_number_of_arguments;
 
-      if (f_expression_info.is_variable(a_expression)) {
-        v_sort = f_expression_info.get_sort_of_variable(a_expression);
+      if (gsIsDataVarId(a_expression)) {
+        v_sort = gsGetSort(a_expression);
         if (f_sort_info.is_sort_list(v_sort)) {
           ATindexedSetPut(f_list_variables, (ATerm) a_expression, 0);
         }
       } else if (f_expression_info.is_operator(a_expression)) {
-        v_number_of_arguments = f_expression_info.get_number_of_arguments(a_expression);
+        v_number_of_arguments = ATgetLength(gsGetDataExprArgs(a_expression));
         for (int i = 0; i < v_number_of_arguments; ++i) {
           v_argument = f_expression_info.get_argument(a_expression, i);
           recurse_expression_for_lists(v_argument);
@@ -58,16 +58,15 @@
       ATermAppl v_result = 0;
 
       v_constructors = ATLgetArgument(f_constructors, 0);
-      v_list_sort = f_expression_info.get_sort_of_variable(a_list_variable);
+      v_list_sort = gsGetSort(a_list_variable);
       while (!ATisEmpty(v_constructors)) {
         v_constructor = ATAgetFirst(v_constructors);
         v_constructors = ATgetNext(v_constructors);
         v_constructor_name = ATAgetArgument(v_constructor, 0);
         if (v_constructor_name == f_cons_name) {
           v_constructor_sort = f_expression_info.get_sort_of_operator(v_constructor);
-          v_constructor_element_sort = f_sort_info.get_domain(v_constructor_sort);
-          v_constructor_sort = f_sort_info.get_range(v_constructor_sort);
-          v_constructor_sort = f_sort_info.get_domain(v_constructor_sort);
+          v_constructor_element_sort = ATAelementAt(f_sort_info.get_domain(v_constructor_sort),0);
+          v_constructor_sort = ATAelementAt(f_sort_info.get_domain(v_constructor_sort),1);
           if (v_constructor_sort == v_list_sort) {
             v_result = v_constructor_element_sort;
           }
@@ -150,7 +149,7 @@
       ATermAppl v_result;
 
       v_induction_variable = ATAgetFirst(ATindexedSetElements(f_list_variables));
-      v_induction_variable_sort = f_expression_info.get_sort_of_variable(v_induction_variable);
+      v_induction_variable_sort = gsGetSort(v_induction_variable);
 
       v_dummy_sort = get_sort_of_list_elements(v_induction_variable);
       v_dummy_variable = get_fresh_dummy(v_dummy_sort);
@@ -185,7 +184,7 @@
         if (ATgetLength(a_list_of_variables) > 1) {
           while (!ATisEmpty(a_list_of_variables)) {
             v_variable = ATAgetFirst(a_list_of_variables);
-            v_variable_sort = f_expression_info.get_sort_of_variable(v_variable);
+            v_variable_sort = gsGetSort(v_variable);
             a_list_of_variables = ATgetNext(a_list_of_variables);
             v_dummy = ATAgetFirst(a_list_of_dummies);
             a_list_of_dummies = ATgetNext(a_list_of_dummies);
@@ -220,7 +219,7 @@
       ATermList v_result;
 
       v_variable = (ATermAppl) ATindexedSetGetElem(f_list_variables, a_variable_number);
-      v_variable_sort = f_expression_info.get_sort_of_variable(v_variable);
+      v_variable_sort = gsGetSort(v_variable);
       v_list_of_variables = ATinsert(a_list_of_variables, (ATerm) v_variable);
       v_dummy_sort = get_sort_of_list_elements(v_variable);
       v_dummy = get_fresh_dummy(v_dummy_sort);

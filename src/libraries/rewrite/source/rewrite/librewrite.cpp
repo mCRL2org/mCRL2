@@ -181,16 +181,32 @@ Rewriter *createRewriter(data_specification DataSpec, RewriteStrategy Strategy)
 	}
 }
 
-static bool checkVars(ATermAppl Expr, ATermList Vars, ATermList *UsedVars = NULL)
+//Prototype
+static bool checkVars(ATermAppl Expr, ATermList Vars, ATermList *UsedVars = NULL);
+
+static bool checkVars(ATermList Exprs, ATermList Vars, ATermList *UsedVars = NULL)
+{
+        assert(ATgetType(Exprs) == AT_LIST);
+        bool result = true;
+
+        for( ; !ATisEmpty(Exprs) && result ; Exprs = ATgetNext(Exprs))
+        {
+                result = result && checkVars((ATermAppl) ATAgetFirst(Exprs),Vars,UsedVars);
+        }
+
+        return result;
+}
+
+static bool checkVars(ATermAppl Expr, ATermList Vars, ATermList *UsedVars)
 {
 	assert(ATgetType(Expr) == AT_APPL);
 
 	if ( gsIsNil(Expr) || gsIsOpId(Expr) )
 	{
 		return true;
-	} else if ( gsIsDataAppl(Expr) )
+	} else if ( gsIsDataApplProd(Expr) )
 	{
-		return checkVars((ATermAppl) ATgetArgument(Expr,0),Vars,UsedVars) && checkVars((ATermAppl) ATgetArgument(Expr,1),Vars,UsedVars);
+		return checkVars((ATermAppl) ATgetArgument(Expr,0),Vars,UsedVars) && checkVars((ATermList) ATLgetArgument(Expr,1),Vars,UsedVars);
 	} else { // gsIsDataVarId(Expr)
 		assert(gsIsDataVarId(Expr));
 
@@ -203,15 +219,28 @@ static bool checkVars(ATermAppl Expr, ATermList Vars, ATermList *UsedVars = NULL
 	}
 }
 
+//Prototype
+static bool checkPattern(ATermAppl p);
+
+static bool checkPattern(ATermList l)
+{
+        bool result = true;
+        for( ; !ATisEmpty(l) && result; l = ATgetNext(l) )
+        {
+                result = result && checkPattern(ATAgetFirst(l));
+        }
+        return result;
+}
+
 static bool checkPattern(ATermAppl p)
 {
 	if ( gsIsDataVarId(p) || gsIsOpId(p) )
 	{
 		return true;
-	} else { // gsIsDataAppl(p)
+	} else { // gsIsDataApplProd(p)
 		return !gsIsDataVarId(ATAgetArgument(p,0)) &&
 		       checkPattern(ATAgetArgument(p,0))   &&
-		       checkPattern(ATAgetArgument(p,1));
+		       checkPattern(ATLgetArgument(p,1));
 	}
 }
 

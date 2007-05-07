@@ -206,7 +206,11 @@ def generate_soundness_check_functions(rules, filename, ignored_phases = []):
                     body = body + '  if (!check_list_argument(a(%d), %s<aterm>, 0))\n' % (i, arg.check_name())
                 elif arg.repetitions == '+':
                     body = body + '  if (!check_list_argument(a(%d), %s<aterm>, 1))\n' % (i, arg.check_name())
-                body = body + '    return false;\n'
+                body = body + '    {\n'
+                body = body + '      std::cerr << "%s" << std::endl;\n'                % (arg.check_name())
+#                body = body + '      std::cerr << a(%d).to_string() << std::endl;\n'   % (i)
+                body = body + '      return false;\n'
+                body = body + '    }\n'
             body = body + '#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS\n'
 
         text = text + CHECK_TERM % {

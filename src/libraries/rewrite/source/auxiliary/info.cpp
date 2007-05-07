@@ -269,7 +269,7 @@
         ATerm v_term;
 
         v_term = ATgetArgument(a_term, 1);
-        return (v_term == (ATerm) gsMakeSortIdBool());
+        return (ATisEqual(v_term, (ATerm) gsMakeSortIdBool()));
       }
 
       int v_number_of_arguments;
@@ -281,23 +281,23 @@
         v_term = (ATerm) f_rewriter->fromRewriteFormat(a_term);
         if (gsIsDataVarId((ATermAppl) v_term) || gsIsOpId((ATermAppl) v_term)) {
           v_term = ATgetArgument(v_term, 1);
-          return (v_term == (ATerm) gsMakeSortIdBool());
+          return (ATisEqual(v_term, (ATerm) gsMakeSortIdBool()));
         } else {
           return false;
         }
       } else {
+        assert(v_number_of_arguments > 0);
         ATerm v_term;
 
         v_term = ATgetArgument(a_term, 0);
         v_term = (ATerm) ATmakeAppl1(ATmakeAFun("wrap", 1, ATfalse), v_term);
         v_term = (ATerm) f_rewriter->fromRewriteFormat(v_term);
+
         if (gsIsOpId((ATermAppl) v_term)) {
           v_term = ATgetArgument(v_term, 1);
-          while (v_number_of_arguments != 0) {
-            v_term = ATgetArgument(v_term, 1);
-            v_number_of_arguments--;
-          }
-          return (v_term == (ATerm) gsMakeSortIdBool());
+          assert (gsIsSortExpr((ATermAppl) v_term));
+          v_term = (ATerm) gsGetSortExprResult((ATermAppl) v_term);
+          return (ATisEqual(v_term, (ATerm) gsMakeSortIdBool()));
         } else {
           return false;
         }

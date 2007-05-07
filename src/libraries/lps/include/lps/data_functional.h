@@ -11,25 +11,22 @@
 namespace lps {
 
 // namespace data {
-  using detail::has_expression_type_level_0;
-  using detail::has_expression_type_level_1;
-  using detail::has_expression_type_level_2;
-  
-  inline bool is_negate       (data_expression t) { return has_expression_type_level_1(t, gsMakeOpIdNameNeg); }
-  inline bool is_plus         (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameAdd); }
-  inline bool is_minus        (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameSubt); }
-  inline bool is_multiplies   (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameMult); }
-  inline bool is_divides      (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameDiv); }
-  inline bool is_modulus      (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameMod); }
-  inline bool is_equal_to     (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameEq); }
-  inline bool is_not_equal_to (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameNeq); }
-  inline bool is_less         (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameLT); }
-  inline bool is_greater      (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameGT); }
-  inline bool is_less_equal   (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameLTE); }
-  inline bool is_greater_equal(data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameGTE); }
-  inline bool is_min          (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameMin); }
-  inline bool is_max          (data_expression t) { return has_expression_type_level_2(t, gsMakeOpIdNameMax); }
-  inline bool is_abs          (data_expression t) { return has_expression_type_level_1(t, gsMakeOpIdNameAbs); }
+
+  inline bool is_negate       (data_expression t) { return gsIsDataExprNeg(t); }
+  inline bool is_plus         (data_expression t) { return gsIsDataExprAdd(t); }
+  inline bool is_minus        (data_expression t) { return gsIsDataExprSubt(t); }
+  inline bool is_multiplies   (data_expression t) { return gsIsDataExprMult(t); }
+  inline bool is_divides      (data_expression t) { return gsIsDataExprDiv(t); }
+  inline bool is_modulus      (data_expression t) { return gsIsDataExprMod(t); }
+  inline bool is_equal_to     (data_expression t) { return gsIsDataExprEq(t); }
+  inline bool is_not_equal_to (data_expression t) { return gsIsDataExprNeq(t); }
+  inline bool is_less         (data_expression t) { return gsIsDataExprLT(t); }
+  inline bool is_greater      (data_expression t) { return gsIsDataExprGT(t); }
+  inline bool is_less_equal   (data_expression t) { return gsIsDataExprLTE(t); }
+  inline bool is_greater_equal(data_expression t) { return gsIsDataExprGTE(t); }
+  inline bool is_min          (data_expression t) { return gsIsDataExprMin(t); }
+  inline bool is_max          (data_expression t) { return gsIsDataExprMax(t); }
+  inline bool is_abs          (data_expression t) { return gsIsDataExprAbs(t); }
   
   inline
   data_expression negate(data_expression d)

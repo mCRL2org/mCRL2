@@ -20,6 +20,22 @@
 
 using namespace lps;
 
+//Prototype
+static bool add_used_sort(ATermAppl expr, ATermIndexedSet s);
+
+static bool add_used_sorts(ATermList exprs, ATermIndexedSet s)
+{
+        bool result = false;
+        for(ATermList l = exprs; !ATisEmpty(l); l = ATgetNext(l))
+        {
+                //First add_used_sort because of potential conditional
+                //evaluation of second argument of ||
+                bool b = add_used_sort(ATAgetFirst(l), s);
+                result = result || b;
+        }
+        return result;
+}
+
 static bool add_used_sort(ATermAppl expr, ATermIndexedSet s)
 {
 	if ( gsIsSortId(expr) )
@@ -27,12 +43,15 @@ static bool add_used_sort(ATermAppl expr, ATermIndexedSet s)
 		ATbool n;
 		ATindexedSetPut(s,(ATerm) expr,&n);
 		return (n == ATtrue);
-	} else { // gsIsSortArrow(expr)
-		bool b = add_used_sort(ATAgetArgument(expr,0),s);
+	} else { // gsIsSortArrowProd(expr)
+                bool b = add_used_sorts(ATLgetArgument(expr,0),s);
 		bool c = add_used_sort(ATAgetArgument(expr,1),s);
 		return b || c;
 	}
 }
+
+//Prototype
+static bool add_used(data_expression_list l, ATermIndexedSet s);
 
 static bool add_used(ATermAppl expr, ATermIndexedSet s)
 {
@@ -42,10 +61,10 @@ static bool add_used(ATermAppl expr, ATermIndexedSet s)
 		ATindexedSetPut(s,(ATerm) expr,&n);
 		bool b = add_used_sort(ATAgetArgument(expr,1),s);
 		return (n == ATtrue) || b;
-	} else if ( gsIsDataAppl(expr) )
+	} else if ( gsIsDataApplProd(expr) )
 	{
 		bool b = add_used(ATAgetArgument(expr,0),s);
-		bool c = add_used(ATAgetArgument(expr,1),s);
+		bool c = add_used(ATLgetArgument(expr,1),s);
 		return b || c;
 	} else if ( gsIsDataVarId(expr) )
 	{
@@ -68,11 +87,26 @@ static bool add_used(data_expression_list l, ATermIndexedSet s)
 	return b;
 }
 
+//Prototype
+static bool add_sort(ATermAppl s, ATermIndexedSet used_data, ATermIndexedSet used_sorts, function_list constructors);
+
+static bool add_sorts(ATermList l, ATermIndexedSet used_data, ATermIndexedSet used_sorts, function_list constructors)
+{
+        bool result = false;
+        for(ATermList l1 = l; !ATisEmpty(l1); l1=ATgetNext(l))
+        {
+                //First add_sort (because of potential conditional execution of second argument ||)
+                bool b = add_sort(ATAgetFirst(l1),used_data,used_sorts,constructors);
+                result = result || b;
+        }
+        return result;
+}
+
 static bool add_sort(ATermAppl s, ATermIndexedSet used_data, ATermIndexedSet used_sorts, function_list constructors)
 {
-	if ( gsIsSortArrow(s) )
+	if ( gsIsSortArrowProd(s) )
 	{
-		bool b = add_sort(ATAgetArgument(s,0),used_data,used_sorts,constructors);
+		bool b = add_sorts(ATLgetArgument(s,0),used_data,used_sorts,constructors);
 		bool c = add_sort(ATAgetArgument(s,1),used_data,used_sorts,constructors);
 		return b || c;
 	} else { // gsIsSortId(s)
@@ -112,14 +146,28 @@ static bool add_sort(ATermAppl s, ATermIndexedSet used_data, ATermIndexedSet use
 	}
 }
 
+//Prototype
+static bool is_used(ATermAppl exprs, ATermIndexedSet s);
+
+static bool is_used(ATermList exprs, ATermIndexedSet s)
+{
+        bool result = true;
+        for( ; !ATisEmpty(exprs) && result ; exprs=ATgetNext(exprs))
+        {
+                result = result && is_used(ATAgetFirst(exprs), s);
+        }
+
+        return result;
+}
+
 static bool is_used(ATermAppl expr, ATermIndexedSet s)
 {
 	if ( gsIsOpId(expr) )
 	{
 		return (ATindexedSetGetIndex(s,(ATerm) expr) >= 0);
-	} else if ( gsIsDataAppl(expr) )
+	} else if ( gsIsDataApplProd(expr) )
 	{
-		return is_used(ATAgetArgument(expr,0),s) && is_used(ATAgetArgument(expr,1),s);
+		return is_used(ATAgetArgument(expr,0),s) && is_used(ATLgetArgument(expr,1),s);
 	}
 
 	return true;
