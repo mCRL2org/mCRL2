@@ -1,4 +1,4 @@
-// Date: 31-03-2007
+// Date: 07-05-2007
 // This document describes the internal format of the mCRL2 language and the
 // corresponding mu-calculus formulas. Here:
 // - the following phases of implementation are distinguised:
