@@ -33,6 +33,8 @@ static ATermAppl pCRL_aterm, npCRL_aterm, mCRL_aterm, rec_aterm, nrec_aterm;
 static ATermTable props;
 static ATermTable deps;
 
+static bool push_comm_through_allow=true; //at some point is set to false to avoid infinite recursion. 
+
   //from pnml2mcrl2
   //==================================================
   // ATappendAFun functions as ATmakeAFun
@@ -306,8 +308,8 @@ static ATermList list_minus(ATermList l, ATermList m){
 
 static ATermList list_minus_ignore_type(ATermList l, ATermList m){
   ATermList n = ATmakeList0();
-  for (; !ATisEmpty(l); l=ATgetNext(l)){
-    if ( ATindexOf(m,(ATerm)ATAgetArgument(ATAgetFirst(l),0),0) < 0 ){
+  for(; !ATisEmpty(l); l=ATgetNext(l)){
+    if(ATindexOf(m,(ATerm)ATAgetArgument(ATAgetFirst(l),0),0) < 0){
       n = ATinsert(n,ATgetFirst(l));
     }
   }
@@ -612,6 +614,16 @@ static ATermList apply_unrename(ATermList l, ATermList R){
   return m;
 }
 
+static ATermList gsaMakeMultActNameL(ATermList l){
+  // turns list of lists l to a list of multiactions
+  assert(l);
+  ATermList r=ATmakeList0();
+  for(; !ATisEmpty(l); l=ATgetNext(l))
+    r=ATinsert(r,(ATerm)gsMakeMultActName(ATLgetFirst(l)));
+  
+  return ATreverse(r);
+}
+
 static ATermList apply_unrename_allow_list(ATermList V, ATermList R){
   //applies R^{-1} to a multiaction V, returns a list V1 -- also allow-list.
 
@@ -624,17 +636,13 @@ static ATermList apply_unrename_allow_list(ATermList V, ATermList R){
     m=merge_list(m,apply_unrename(ma,R));  //add it to m
   }
 
-  ATermList r=ATmakeList0();
-  for (; !ATisEmpty(m); m=ATgetNext(m))
-    r=ATinsert(r,(ATerm)gsMakeMultActName(ATLgetFirst(m)));
-  
-  return ATreverse(r);
+  return gsaMakeMultActNameL(m);   
 }
 
 static ATermList apply_comms(ATermList l, ATermList C, ATermList lhs){
   //can be optimized 
   //filter out actions nor in lhs of C;
-  //split the rest f l to a composition of subactions of a similar type
+  //split the rest of l to a composition of subactions of a similar type
   //to those apply a simplified procedure??
 
   //gsWarningMsg("apply_comms: C: %P\n l: %d, %T;\n\n",C,ATgetLength(l),l);
@@ -719,9 +727,10 @@ static ATermList apply_comms(ATermList l, ATermList C, ATermList lhs){
 }
 
 static ATermList extend_allow_comm_with_alpha(ATermList V, ATermList C, ATermList l){
-  //Extend V to contain communications of L with C
-  //gsWarningMsg("extend_comm: V: %T; C: %P; l: %d\n",V,C,ATgetLength(l));
-  ATermList r=ATreverse(V);
+  //Extend V to V1 so that \allow_V(\com_C(x))=\allow_V(\com_C(\allow_V1(x))) where l is the set of multiactions of x
+  //the result is between l and empty set of multiactions. Only those ma in l are kept that C(ma)\cap V != {}
+  //gsWarningMsg("extend_comm_with_alpha: V: %T; C: %P; l: %d\n",V,C,ATgetLength(l));
+  ATermList r=ATmakeList0();
 
   {
     //make V a list of multiactions actions
@@ -748,11 +757,12 @@ static ATermList extend_allow_comm_with_alpha(ATermList V, ATermList C, ATermLis
 }
 
 static ATermList extend_allow_comm(ATermList V, ATermList C){
-  //Extend V to allow communications the results of communications C 
+  //Extend V to V1 so that \allow_V(\com_C(x))=\allow_V(\com_C(\allow_V1(x))) 
+  //the result is between l and empty set of multiactions. Only those ma in l are kept that C(ma) in V
   
   //gsWarningMsg("extend_allow_comm: V: %T; C: %P\n",V,C);
   
-  //create a table with the reverse mappings of the actions in C
+  //create a table with the reverse mappings of the actions in ran(C)
   ATermTable rev=ATtableCreate(10000,80);
   
   for (; !ATisEmpty(C); C=ATgetNext(C) ){
@@ -760,8 +770,8 @@ static ATermList extend_allow_comm(ATermList V, ATermList C){
     ATermAppl target=ATAgetArgument(c,1);
     if(gsIsNil(target)) continue;
     ATermList cur=ATLtableGet(rev,(ATerm)target);
-    ATtablePut(rev,(ATerm)target,(cur)?(ATerm)ATinsert(cur,(ATerm)ATLgetArgument(ATAgetArgument(c,0),0)):
-	       (ATerm)ATmakeList1((ATerm)ATLgetArgument(ATAgetArgument(c,0),0)));
+    if(!cur) cur=ATmakeList0();
+    ATtablePut(rev,(ATerm)target,(ATerm)ATinsert(cur,(ATerm)ATLgetArgument(ATAgetArgument(c,0),0)));
   }
 
   // for all elements of V get a set of multiactions using the reverse mapping.
@@ -786,15 +796,10 @@ static ATermList extend_allow_comm(ATermList V, ATermList C){
   }
    
   ATtableDestroy(rev);
-  ATermList r=ATmakeList0();
   ATermList l=ATindexedSetElements(m);
   ATindexedSetDestroy(m);
-  for ( ;!ATisEmpty(l); l=ATgetNext(l) ){
-    r=ATinsert(r,(ATerm)gsMakeMultActName(ATLgetFirst(l)));
-  }
-  
-  //gsWarningMsg("extend_allow_comm done: r: %T;\n\n",ATreverse(r));
-  return ATreverse(r);
+
+  return gsaMakeMultActNameL(l);
 }
 
 static ATermList get_comm_ignore_list(ATermList C){
@@ -1116,7 +1121,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     else{
       if(ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),1),nrec_aterm) &&
          ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),0),pCRL_aterm) ){
-        gsWarningMsg("could have pushed a non-trivial allow operation with the argument %P\ninside non-recursive pCRL process %P.\nNot doing this to prevent possible linearization problems. This could also indicate a forgotten action in this allow operation\n\n",V,pn);
+        gsWarningMsg("could have pushed a non-trivial allow operation with the argument %P\ninside non-recursive pCRL process %P.\n This could also indicate a forgotten action in this allow operation\n\n",V,pn);
       }
 
       a = gsMakeAllow(V,a);
@@ -1205,7 +1210,14 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     }
     
     V = optimize_allow_list(V,untypeMAL(l));
-    a = gsMakeAllow(V,a);
+    if(gsIsAllow(a)){
+      push_comm_through_allow=false;
+      a = gsMakeAllow(V,a);
+      a = gsApplyAlpha(a);
+    }
+    else
+      a = gsMakeAllow(V,a);
+
     ATtablePut(alphas,(ATerm) a,(ATerm)filter_allow_list(l,V));
     return a;
   } 
@@ -1326,8 +1338,26 @@ static ATermAppl PushComm(ATermList C, ATermAppl a){
   } else if ( gsIsAllow(a) ){
     a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    a = gsMakeComm(C,a);
-    ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
+    ATermList V = ATLgetArgument(a,0); 
+    
+    ATermList V2=extend_allow_comm(V,C);
+    if(push_comm_through_allow && ATisEqual(V,V2)){
+      
+      ATermList lhs=comm_lhs(C); 
+      for (ATermList lt=l; !ATisEmpty(lt); lt=ATgetNext(lt) ){
+	ATermList mas=untypeMAL(apply_comms(ATLgetFirst(lt),C,lhs));
+	V2=merge_list(V2,gsaMakeMultActNameL(mas));
+      }
+      ATermAppl p=ATAgetArgument(a,1);
+      p=PushComm(C,p);
+      ATermList l1=ATLtableGet(alphas,(ATerm) p);
+      a=gsMakeAllow(V2,p);
+      ATtablePut(alphas,(ATerm) a,(ATerm) filter_allow_list(l1,V2));
+    }
+    else{
+      a = gsMakeComm(C,a);
+      ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
+    }
     return a;
   } 
   else if ( gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) ){
