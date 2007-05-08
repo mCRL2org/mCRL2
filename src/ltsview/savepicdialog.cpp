@@ -110,7 +110,7 @@ void SavePicDialog::onSlider(wxScrollEvent& /*event*/) {
 
 void SavePicDialog::onChangeFile(wxCommandEvent& /*event*/) {
   wxString new_file = wxFileSelector(wxT("Select a file"),f_name.GetPath(),
-    f_name.GetFullName(),wxT(""),wxT("*.*"),wxSAVE,this);
+    f_name.GetFullName(),wxT(""),wxT("*.*"),wxFD_SAVE,this);
   if (!new_file.empty()) {
     f_name.Assign(new_file);
     // if extension of new filename indicates a supported file type, set the
