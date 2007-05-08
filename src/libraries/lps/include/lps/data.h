@@ -9,6 +9,7 @@
 
 #include <string>
 #include <cassert>
+#include <algorithm>
 #include "atermpp/atermpp.h"
 #include "atermpp/algorithm.h"
 #include "atermpp/aterm_access.h"
