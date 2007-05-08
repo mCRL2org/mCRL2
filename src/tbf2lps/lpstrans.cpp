@@ -36,19 +36,22 @@ static void add_id(ATermList *ids, ATermAppl id)
 
 static ATbool is_domain(ATermList args, ATermAppl sort)
 {
-	while ( !gsIsSortId(sort) )
+	if ( !gsIsSortId(sort) )
 	{
-		if ( ATisEmpty(args) )
+		ATermList dom = ATLgetArgument(sort,0);
+		if ( ATgetLength(args) != ATgetLength(dom) )
 		{
 			return ATfalse;
 		} else {
-			if ( !ATisEqual(gsGetSort(ATAgetFirst(args)),ATgetArgument(sort,0)) )
+			for (; !ATisEmpty(dom); dom=ATgetNext(dom),args=ATgetNext(args))
 			{
-				return ATfalse;
+				if ( !ATisEqual(gsGetSort(ATAgetFirst(args)),ATgetFirst(dom)) )
+				{
+					return ATfalse;
+				}
 			}
+			return ATtrue;
 		}
-		sort = ATAgetArgument(sort,1);
-		args = ATgetNext(args);
 	}
 	if ( ATisEmpty(args) )
 	{
@@ -98,7 +101,7 @@ static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args, ATermList typel
 			m = ATappend(m,(ATerm) dataterm2ATermAppl(ATAgetFirst(l),args,typelist));
 		}
 		r = gsMakeOpId(t2,find_type(t,m,typelist));
-                
+
                 r = gsMakeDataApplProd(r,m);
 	}
 	
@@ -187,7 +190,10 @@ static ATermList convert_funcs(ATermList funcs, ATermList *ids)
 		{
 			sorts = ATinsert(sorts, (ATerm) gsMakeSortId(ATAgetFirst(l)));
 		}
-                sort = gsMakeSortArrowProd(sorts, sort);
+		if ( !ATisEmpty(sorts) )
+		{
+			sort = gsMakeSortArrowProd(sorts, sort);
+		}
 
 		r = ATappend(r,(ATerm) gsMakeOpId(ATAgetArgument(ATAgetFirst(funcs),0),sort));
 	}
