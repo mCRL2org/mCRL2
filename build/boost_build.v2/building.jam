@@ -12,23 +12,25 @@ if ! $(REVISION) {
   }
 }
 
+FULL_COMMAND_LINE = [ modules.peek : ARGV ] $(BUILD_EXTRA) ;
+
 # Feature to mark tools as basic experimental or deprecated
 feature.feature status : basic experimental deprecated : composite ;
 
-if ! experimental in [ MATCH "^--enable-(experimental)" : [ modules.peek : ARGV ] $(BUILD_EXTRA) ] {
+if ! experimental in [ MATCH "--enable-(experimental)" : $(FULL_COMMAND_LINE) ] {
   feature.compose <status>experimental
         : <install>no
         ;
 }
 
-if ! deprecated in [ MATCH "^--enable-(deprecated)" : [ modules.peek : ARGV ] $(BUILD_EXTRA) ] {
+if ! deprecated in [ MATCH "--enable-(deprecated)" : $(FULL_COMMAND_LINE) ] {
   feature.compose <status>deprecated
         : <install>no
         ;
 }
 
 # Disable squadt support in tools
-if ! squadt in [ MATCH "^--disable-(squadt)-support" : [ modules.peek : ARGV ] $(BUILD_EXTRA) ] {
+if ! squadt in [ MATCH "--disable-(squadt)-support" : $(FULL_COMMAND_LINE) ] {
   feature.feature squadt_support : disable enable : incidental composite ;
 
   feature.compose <squadt_support>enable

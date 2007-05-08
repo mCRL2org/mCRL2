@@ -8,7 +8,6 @@ exe pbesinfo
          /libraries//lps
          /site-config//boost_program_options
        : <include>.
-       : <squadt_support>disable
        ;
 
 install-binaries install
