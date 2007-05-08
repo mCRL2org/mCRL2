@@ -345,7 +345,7 @@ void XSimMain::LoadFile(const wxString &filename)
     ATermAppl Spec = (ATermAppl) ATreadFromFile(f);
     fclose(f);
 
-    if ( Spec == NULL )
+    if ( (Spec == NULL) || !gsIsSpecV1(Spec) )
     {
 	    wxMessageDialog msg(this, wxT("Invalid file."),
 		wxT("Error"), wxOK|wxICON_ERROR);
@@ -1209,6 +1209,19 @@ void XSimMain::UpdateTransitions(bool update_next_states)
 	wxArrayString actions;
 	wxArrayString statechanges;
 	wxArrayInt indices;
+	
+	ATermAppl trace_next_transition;
+	ATermAppl trace_next_state;
+	wxArrayInt trace_next;
+	if ( ATisEmpty(ecart) )
+	{
+		trace_next_transition = NULL;
+		trace_next_state = NULL;
+	} else {
+		ATermList hd = ATLgetFirst(ecart);
+		trace_next_transition = ATAgetFirst(hd);
+		trace_next_state = nextstate->makeStateVector(ATgetFirst(ATgetNext(hd)));
+	}
 
 	if ( update_next_states )
 	{
@@ -1233,6 +1246,14 @@ void XSimMain::UpdateTransitions(bool update_next_states)
 	{
 		actions.Add(wxConvLocal.cMB2WX(PrintPart_CXX(ATgetFirst(ATLgetFirst(l)), ppDefault).c_str()));
 		indices.Add(i);
+		if ( (trace_next_state != NULL) &&
+			ATisEqual(ATgetFirst(ATLgetFirst(l)),trace_next_transition) &&
+			(nextstate->parseStateVector(trace_next_state,ATgetFirst(ATgetNext(ATLgetFirst(l)))) != NULL) )
+		{
+			trace_next.Add(1);
+		} else {
+			trace_next.Add(0);
+		}
 //		transview->SetItemData(i,i);
 		stringstream ss;
 		ATerm m = current_state;
@@ -1269,16 +1290,26 @@ void XSimMain::UpdateTransitions(bool update_next_states)
 	}
 
 	sort_transitions(actions,statechanges,indices);
+	int next = -1;
 	for (unsigned int i=0; i<indices.GetCount(); i++)
 	{
 		transview->InsertItem(i,actions[i]);
 		transview->SetItem(i,1,statechanges[i]);
 		transview->SetItemData(i,indices[i]);
+		if ( (next < 0) && (trace_next[indices[i]] == 1) )
+		{
+			next = i;
+		}
 	}
 
 	if ( !ATisEmpty(next_states) )
 	{
-		transview->Select(0);
+		if ( next < 0 )
+		{
+			transview->Select(0);
+		} else {
+			transview->Select(next);
+		}
 	}
 
         /* Adapt column width */
