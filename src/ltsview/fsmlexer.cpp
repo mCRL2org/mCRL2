@@ -415,18 +415,16 @@ char *yytext;
 #line 1 "fsmlexer.ll"
 #define INITIAL 0
 #line 2 "fsmlexer.ll"
-#include <string>
+#include <string.h>
 #include "fsmparser.hpp"
 
 int lineNo=1, posNo=1;
-std::string strval;
-int intval;
+char str_buf[128];
 extern void fsmerror(const char* s);
 void processId();
-void processQuoted();
 void processNumber();
 #define YY_NO_UNPUT 1
-#line 430 "fsmlexer.cpp"
+#line 428 "fsmlexer.cpp"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -577,10 +575,10 @@ YY_DECL
 	register char *yy_cp = NULL, *yy_bp = NULL;
 	register int yy_act;
 
-#line 18 "fsmlexer.ll"
+#line 16 "fsmlexer.ll"
 
 
-#line 584 "fsmlexer.cpp"
+#line 582 "fsmlexer.cpp"
 
 	if ( yy_init )
 		{
@@ -665,75 +663,75 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 20 "fsmlexer.ll"
+#line 18 "fsmlexer.ll"
 { posNo += fsmleng; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 21 "fsmlexer.ll"
+#line 19 "fsmlexer.ll"
 { lineNo++; posNo=1; return EOLN; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 22 "fsmlexer.ll"
+#line 20 "fsmlexer.ll"
 { posNo += fsmleng; return SECSEP; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 23 "fsmlexer.ll"
+#line 21 "fsmlexer.ll"
 { posNo += fsmleng; return LPAR; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 24 "fsmlexer.ll"
+#line 22 "fsmlexer.ll"
 { posNo += fsmleng; return RPAR; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 25 "fsmlexer.ll"
+#line 23 "fsmlexer.ll"
 { posNo += fsmleng; return ARROW; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 26 "fsmlexer.ll"
+#line 24 "fsmlexer.ll"
 { posNo += fsmleng; return FANIN; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 27 "fsmlexer.ll"
+#line 25 "fsmlexer.ll"
 { posNo += fsmleng; return FANOUT; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 28 "fsmlexer.ll"
+#line 26 "fsmlexer.ll"
 { posNo += fsmleng; return NODENR; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 29 "fsmlexer.ll"
+#line 27 "fsmlexer.ll"
 { processId(); return ID; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 30 "fsmlexer.ll"
-{ processQuoted(); return QUOTED; }
+#line 28 "fsmlexer.ll"
+{ processId(); return QUOTED; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 31 "fsmlexer.ll"
+#line 29 "fsmlexer.ll"
 { processNumber(); return NUMBER; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 32 "fsmlexer.ll"
+#line 30 "fsmlexer.ll"
 { posNo += fsmleng; fsmerror("unknown character"); }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 34 "fsmlexer.ll"
+#line 32 "fsmlexer.ll"
 ECHO;
 	YY_BREAK
-#line 737 "fsmlexer.cpp"
+#line 735 "fsmlexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1615,20 +1613,13 @@ int main()
 	return 0;
 	}
 #endif
-#line 34 "fsmlexer.ll"
+#line 32 "fsmlexer.ll"
 
 
 void processId() {
 	posNo += fsmleng;
-	fsmlval.str = strdup(fsmtext);
+  fsmlval.str = strcpy(str_buf,fsmtext);
 }
-
-void processQuoted() {
-	posNo += fsmleng;
-	std::string val = static_cast<std::string>(fsmtext);
-	val = val.substr(1,val.length()-2);
-	fsmlval.str = strdup(val.c_str());
-} 
 
 void processNumber() {
 	posNo += fsmleng;

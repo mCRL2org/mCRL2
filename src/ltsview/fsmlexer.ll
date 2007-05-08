@@ -1,13 +1,11 @@
 %{
-#include <string>
+#include <string.h>
 #include "fsmparser.hpp"
 
 int lineNo=1, posNo=1;
-std::string strval;
-int intval;
+char str_buf[128];
 extern void fsmerror(const char* s);
 void processId();
-void processQuoted();
 void processNumber();
 %}
 %option nounput
@@ -27,7 +25,7 @@ Number	[0]|([1-9][0-9]*)
 "fan_out"	{ posNo += fsmleng; return FANOUT; }
 "node_nr"	{ posNo += fsmleng; return NODENR; }
 {Id}			{ processId(); return ID; }
-{Quoted}	{ processQuoted(); return QUOTED; }
+{Quoted}	{ processId(); return QUOTED; }
 {Number}	{ processNumber(); return NUMBER; }
 .					{ posNo += fsmleng; fsmerror("unknown character"); }
 
@@ -35,15 +33,8 @@ Number	[0]|([1-9][0-9]*)
 
 void processId() {
 	posNo += fsmleng;
-	fsmlval.str = strdup(fsmtext);
+  fsmlval.str = strcpy(str_buf,fsmtext);
 }
-
-void processQuoted() {
-	posNo += fsmleng;
-	std::string val = static_cast<std::string>(fsmtext);
-	val = val.substr(1,val.length()-2);
-	fsmlval.str = strdup(val.c_str());
-} 
 
 void processNumber() {
 	posNo += fsmleng;

@@ -125,7 +125,7 @@ State *state = NULL;
 
 // Function declarations
 void fsmerror(const char* c);
-char* intToCString(int i);
+std::string unquote(char *str);
 
 
 /* Enabling traces.  */
@@ -1474,7 +1474,7 @@ yyreduce:
 
   case 25:
 #line 108 "fsmparser.yy"
-    { fsmparserlts->addParameterValue(par_index,static_cast<std::string>((yyvsp[(1) - (1)].str))) ;}
+    { fsmparserlts->addParameterValue(par_index,unquote((yyvsp[(1) - (1)].str))) ;}
     break;
 
   case 36:
@@ -1515,7 +1515,7 @@ yyreduce:
     {
 	    State* s1 = states[(yyvsp[(1) - (3)].num)];
 	    State* s2 = states[(yyvsp[(2) - (3)].num)];
-			std::string labstr = static_cast<std::string>((yyvsp[(3) - (3)].str));
+			std::string labstr = unquote((yyvsp[(3) - (3)].str));
 			std::map< std::string,int >::iterator p = labels.find(labstr);
 			int l;
 			if (p == labels.end()) {
@@ -1769,22 +1769,23 @@ int fsmwrap() {
 }
 
 void fsmerror(const char *str) {
-  throw std::string("Parse error: " + std::string(str) + " token \"" + std::string(fsmtext) +
-    "\" at line " + std::string(intToCString(lineNo)) + " position " +
-    std::string(intToCString(posNo)) );
+	std::ostringstream oss;
+	oss << "Parse error: " << str << " token \"" << fsmtext << "\" at line " <<
+      lineNo << " position " << posNo;
+	throw oss.str();
 }
  
 void parseFSMfile( std::string fileName, LTS* const lts ) {
-  // reset the lexer position variables
-  lineNo = 1;
-  posNo = 1;
-  
   FILE* infile = fopen(fileName.c_str(),"r");
   if (infile == NULL) {
 		throw std::string("Cannot open file for reading:\n" + fileName);
 	}
   else {
     // INITIALISE
+    // reset the lexer position variables
+    lineNo = 1;
+    posNo = 1;
+  
     fsmparserlts = lts;
     fsmrestart(infile);
 
@@ -1795,11 +1796,10 @@ void parseFSMfile( std::string fileName, LTS* const lts ) {
     fsmparserlts = NULL;
 		state = NULL;
   }
-} 
+}
 
-char* intToCString(int i) {
-	std::ostringstream oss;
-	oss << i;
-	return (char*)oss.str().c_str();
+std::string unquote(char *str) {
+  std::string result(str);
+	return result.substr(1,result.length()-2);
 }
 

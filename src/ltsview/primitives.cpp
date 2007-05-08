@@ -85,6 +85,7 @@ void P_Sphere::reshape(int N,float *coss,float *sins) {
     }
   glEndList();
   free(vertices);
+  free(is_bot);
   free(is_mid);
   free(is_top);
 }
