@@ -115,6 +115,21 @@ bool check_assignment_variables(data_assignment_list assignments, data_variable_
   return true;
 }
 
+/// Returns true if the domain sorts and the range sort of the given sort s are
+/// contained in sorts.
+inline bool check_sort(lps::sort s, const std::set<lps::sort>& sorts)
+{
+  if (sorts.find(s.range_sort()) == sorts.end())
+    return false;
+  sort_list domain_sorts = s.domain_sorts();
+  for (sort_list::iterator i = domain_sorts.begin(); i != domain_sorts.end(); ++i)
+  {
+    if (sorts.find(*i) == sorts.end())
+      return false;
+  }
+  return true;
+}
+
 /// Returns true if the domain sorts and the range sort of the given variables are contained
 /// in sorts.
 inline
@@ -122,14 +137,8 @@ bool check_variable_sorts(data_variable_list variables, const std::set<lps::sort
 {
   for (data_variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
   {
-    if (sorts.find(i->sort().range_sort()) == sorts.end())
+    if (!check_sort(i->sort(), sorts))
       return false;
-    sort_list domain_sorts = i->sort().domain_sorts();
-    for (sort_list::iterator j = domain_sorts.begin(); j != domain_sorts.end(); ++j)
-    {
-      if (sorts.find(*j) == sorts.end())
-        return false;
-    }
   }
   return true;
 }
@@ -142,7 +151,7 @@ bool check_action_sorts(action_list actions, const std::set<lps::sort>& sorts)
   {
     for (sort_list::iterator j = i->sorts().begin(); j != i->sorts().end(); ++j)
     {
-      if (sorts.find(*j) == sorts.end())
+      if (!check_sort(*j, sorts))
         return false;
     }
   }
@@ -169,7 +178,7 @@ bool check_action_label_sorts(action_label_list action_labels, const std::set<lp
   {
     for (sort_list::iterator j = i->sorts().begin(); j != i->sorts().end(); ++j)
     {
-      if (sorts.find(*j) == sorts.end())
+      if (!check_sort(*j, sorts))
         return false;
     }
   }
@@ -195,17 +204,9 @@ bool check_data_spec_sorts(function_list functions, const std::set<lps::sort>& s
 {
   for (function_list::iterator i = functions.begin(); i != functions.end(); ++i)
   {
-    sort_list ds = i->domain_sorts();
-    lps::sort rs = i->range_sort();
-    for (sort_list::iterator j = ds.begin(); j != ds.end(); ++j)
-    {
-      if (sorts.find(*j) == sorts.end())
-        return false;
-    }
-    if (sorts.find(rs) == sorts.end())
+    if (!check_sort(i->type(), sorts))
       return false;
   }
-
   return true;
 }
 

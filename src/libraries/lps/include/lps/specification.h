@@ -196,7 +196,7 @@ class specification: public aterm_appl
       {
         if (!(detail::check_variable_sorts(i->summation_variables(), sorts)))
         {
-          std::cerr << "specification::is_well_typed() failed: some of the sorts of the summation variables " << pp(i->summation_variables()) << " are not declared in the data specification " << pp(data()) << std::endl;
+          std::cerr << "specification::is_well_typed() failed: some of the sorts of the summation variables " << pp(i->summation_variables()) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
           return false;
         }
       }
@@ -204,21 +204,21 @@ class specification: public aterm_appl
       // check 3)
       if (!(detail::check_variable_sorts(process().process_parameters(), sorts)))
       {
-        std::cerr << "specification::is_well_typed() failed: some of the sorts of the process parameters " << pp(process().process_parameters()) << " are not declared in the data specification " << pp(data()) << std::endl;
+        std::cerr << "specification::is_well_typed() failed: some of the sorts of the process parameters " << pp(process().process_parameters()) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
         return false;
       }
 
       // check 4)
       if (!(detail::check_variable_sorts(process().free_variables(), sorts)))
       {
-        std::cerr << "specification::is_well_typed() failed: some of the sorts of the free variables " << pp(process().free_variables()) << " are not declared in the data specification " << pp(data()) << std::endl;
+        std::cerr << "specification::is_well_typed() failed: some of the sorts of the free variables " << pp(process().free_variables()) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
         return false;
       }
 
       // check 5)
       if (!(detail::check_action_label_sorts(action_labels(), sorts)))
       {
-        std::cerr << "specification::is_well_typed() failed: some of the sorts occurring in the action labels " << pp(action_labels()) << " are not declared in the data specification " << pp(data()) << std::endl;
+        std::cerr << "specification::is_well_typed() failed: some of the sorts occurring in the action labels " << pp(action_labels()) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
         return false;
       }
 
