@@ -860,6 +860,7 @@ void XSimMain::OnLoadTrace( wxCommandEvent& /* event */ )
 	    {
 		    (*i)->TraceChanged(newtrace,0);
 	    }
+            UpdateTransitions(false);
 
 	    Stopper_Exit();
 	    //SetInteractiveness(true);
