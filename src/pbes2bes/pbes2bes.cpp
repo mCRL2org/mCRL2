@@ -936,7 +936,7 @@ string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variables)
 		long variable = variables->index(propvar);
 		if (variable < 0)
 		{
-			gsErrorMsg("Error: The BES is not closed. Write to cwi-format failed.");
+			gsErrorMsg("Error: The BES is not closed. Write to cwi-format failed.\n");
 			exit(1);
 		}
 		else

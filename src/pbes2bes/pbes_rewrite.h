@@ -24,3 +24,5 @@ lps::pbes_expression_list get_or_expressions(lps::pbes_expression_list or_list, 
 bool element_in_propvarinstlist(lps::data_variable_list vars, std::set< lps::propositional_variable_instantiation > pvilist);
 
 bool occurs_in(atermpp::aterm_appl l, lps::data_variable v);
+
+bool has_propvarinsts(std::set< lps::propositional_variable_instantiation > propvars, lps::data_variable_list data_vars);

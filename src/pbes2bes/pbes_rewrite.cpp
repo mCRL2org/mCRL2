@@ -85,13 +85,14 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 				pbes_expression_list and_list = get_and_expressions(get_all_possible_expressions(data_vars, expr, data), data, rewriter);
 				result = multi_and(and_list.begin(), and_list.end());
 			}
-/*			else if (element_in_propvarinstlist(occured_data_vars, find_propositional_variable_instantiations(expr)))
+			else if (has_propvarinsts(find_propositional_variable_instantiations(expr), data_vars))
 			{
-				gsErrorMsg("The propositional_variable_instantiation cannot be replaced\n");
+				gsErrorMsg("Quantor expression contains a data variable of the quantor in a propositional variable instantiation\n");
+				gsErrorMsg("Cannot rewrite such an expression\n");
 				gsErrorMsg("Aborting\n");
 				exit(1);
 			}
-*/			else
+			else
 				//Probably some advanced stuff is needed here to check finiteness...
 				result = forall(data_vars, expr);
 		}
@@ -123,6 +124,13 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 				pbes_expression_list or_list = get_or_expressions(get_all_possible_expressions(data_vars, expr, data), data, rewriter);
 				result = multi_or(or_list.begin(), or_list.end());
 			}
+			else if (has_propvarinsts(find_propositional_variable_instantiations(expr), data_vars))
+			{
+				gsErrorMsg("Quantor expression contains a data variable of the quantor in a propositional variable instantiation\n");
+				gsErrorMsg("Cannot rewrite such an expression\n");
+				gsErrorMsg("Aborting\n");
+				exit(1);
+			}
 /*			else if (element_in_propvarinstlist(occured_data_vars, find_propositional_variable_instantiations(expr)))
 			{
 				gsErrorMsg("The propositional_variable_instantiation cannot be replaced\n");
@@ -152,6 +160,26 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 			result = val(d);
 	}
 	
+	return result;
+}
+
+bool has_propvarinsts(std::set< propositional_variable_instantiation > propvars, data_variable_list data_vars)
+{
+	bool result = false;
+	for (std::set< propositional_variable_instantiation >::iterator pvi = propvars.begin(); pvi != propvars.end(); pvi++)
+	{
+		for (data_expression_list::iterator del = pvi->parameters().begin(); del != pvi->parameters().end(); del++)
+		{
+			for (data_variable_list::iterator dvl = data_vars.begin(); dvl != data_vars.end(); dvl++)
+			{
+				if (is_data_variable(*del))
+				{
+					if (data_variable(*del) == *dvl)
+						result = true;
+				}
+			}
+		}
+	}
 	return result;
 }
 
