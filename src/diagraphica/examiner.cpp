@@ -299,9 +299,13 @@ void Examiner::clearData()
 void Examiner::handleSendDgrmSglToSiml()
 // -------------------------------------
 {
-    mediator->initSimulator(
+    if (focusFrameIdx >= 0){
+	  mediator->initSimulator(
         framesHist[focusFrameIdx],
         attrsHist[focusFrameIdx] );
+	} else {
+      cerr << "Index out of bounds" << endl; 
+	}
 }
 
 
