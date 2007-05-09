@@ -82,7 +82,7 @@ namespace sip {
 
         /** \brief Converts to a string representation */
         template < typename T >
-        std::string convert(T const&);
+        std::string convert(T const&) const;
 
         /** \brief Converts a string to an index representation */
         boost::any evaluate(std::string const&) const;
@@ -349,32 +349,32 @@ namespace sip {
     }
 
     template < typename T, bool e >
-    inline std::string convert(basic_datatype const* t, T const& s, boost::integral_constant< bool, e > const&) {
+    inline std::string convert(basic_datatype const* const t, T const& s, boost::integral_constant< bool, e > const&) {
       return static_cast < enumeration const* > (t)->convert(s);
     }
 
     template < typename T >
-    inline std::string convert(basic_datatype const* t, T const& s, boost::false_type const&) {
+    inline std::string convert(basic_datatype const* const t, T const& s, boost::false_type const&) {
       return convertr(t, s, boost::is_floating_point< T >());
     }
 
     template < typename T, bool e >
-    inline std::string convertr(basic_datatype const* t, T const& s, boost::integral_constant< bool, e > const&) {
+    inline std::string convertr(basic_datatype const* const t, T const& s, boost::integral_constant< bool, e > const&) {
       return static_cast < real const* > (t)->convert(s);
     }
 
     template < typename T >
-    inline std::string convertr(basic_datatype const* t, T const& s, boost::false_type const&) {
+    inline std::string convertr(basic_datatype const* const t, T const& s, boost::false_type const&) {
       return converti(t, s, boost::is_integral< T >());
     }
 
     template < typename T, bool e >
-    inline std::string converti(basic_datatype const* t, T const& s, boost::integral_constant< bool, e > const&) {
+    inline std::string converti(basic_datatype const* const t, T const& s, boost::integral_constant< bool, e > const&) {
       return static_cast < integer const* > (t)->convert(s);
     }
 
     template < typename T >
-    inline std::string converti(basic_datatype const* t, T const& s, boost::false_type const&) {
+    inline std::string converti(basic_datatype const* const t, T const& s, boost::false_type const&) {
       return static_cast < string const* > (t)->convert(s);
     }
 
@@ -579,7 +579,7 @@ namespace sip {
      * \param[in] s the string to convert (value must be in the domain)
      **/
     template < typename T >
-    inline std::string enumeration::convert(T const& s) {
+    inline std::string enumeration::convert(T const& s) const {
       return (0 < s && static_cast < size_t > (s) < m_values.size()) ? m_values[s] : m_values[m_default_value];
     }
 
