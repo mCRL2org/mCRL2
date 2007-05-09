@@ -18,9 +18,11 @@ static ofstream aut;
 static SVCfile svcf;
 static SVCfile *svc = &svcf;
 static SVCparameterIndex svcparam = 0;
+static const char *lts_filename;
 
 void open_lts(const char *filename, lts_options &opts)
 {
+  lts_filename = filename;
   if ( term_nil == NULL )
   {
     term_nil = gsMakeNil();
@@ -146,4 +148,26 @@ void close_lts(unsigned long long num_states, unsigned long long num_trans)
     default:
       break;
   }
+}
+
+void remove_lts()
+{
+  switch ( lts_opts.outformat )
+  {
+    case OF_AUT:
+      aut.close();
+      break;
+    case OF_SVC:
+//      {
+//        int e = SVCclose(svc);
+//        if ( e )
+//        {
+//          gsErrorMsg("svcerror: %s\n",SVCerror(e)); 
+//        }
+//      }
+      break;
+    default:
+      break;
+  }
+  remove(lts_filename);
 }

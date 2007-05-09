@@ -1109,5 +1109,10 @@ bool generate_lts()
     }
   }
   
+  if ( lg_error )
+  {
+    remove_lts();
+  }
+
   return !lg_error;
 }

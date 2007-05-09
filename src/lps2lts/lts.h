@@ -18,5 +18,6 @@ void open_lts(const char *filename, lts_options &opts);
 void save_initial_state(unsigned long long idx, ATerm state);
 void save_transition(unsigned long long idx_from, ATerm from, ATermAppl action, unsigned long long idx_to, ATerm to);
 void close_lts(unsigned long long num_states, unsigned long long num_trans);
+void remove_lts();
 
 #endif
