@@ -2666,8 +2666,8 @@ void DiaGraph::initColleagues()
         this,
         wxT("DiaGraphica") );
     // show frame
-    frame->Show( TRUE );
     this->SetTopWindow( frame );
+    frame->Show( TRUE );
 
     *frame << "Welcome to DiaGraphica.\n";
     

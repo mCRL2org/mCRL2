@@ -303,9 +303,7 @@ void Examiner::handleSendDgrmSglToSiml()
 	  mediator->initSimulator(
         framesHist[focusFrameIdx],
         attrsHist[focusFrameIdx] );
-	} else {
-      cerr << "Index out of bounds" << endl; 
-	}
+	};
 }
 
 
