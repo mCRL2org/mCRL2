@@ -63,7 +63,7 @@ namespace mcrl2_squadt {
 
       initialise();
 
-//      try {
+      try {
         while (!termination_requested) {
           switch (m_communicator.await_message(sip::message_any)->get_type()) {
             case sip::message_offer_configuration: {
@@ -111,11 +111,11 @@ namespace mcrl2_squadt {
               break;
           }
         }
-//      }
-//      catch (std::exception& e) {
+      }
+      catch (std::exception& e) {
         /* Handle standard exceptions */
-//        send_error(std::string("Caught exception: ") + e.what());
-//      }
+        send_error(std::string("Caught exception: ") + e.what());
+      }
 
       finalise();
 

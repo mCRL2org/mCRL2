@@ -218,9 +218,6 @@ namespace squadt {
           }
           break;
         case process::completed:
-          for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
-            (*i)->status = object_descriptor::reproducible_up_to_date;
-          }
           break;
         default: /* aborted... */
           for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
@@ -242,9 +239,6 @@ namespace squadt {
           }
           break;
         case process::completed:
-          for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
-            (*i)->status = object_descriptor::reproducible_up_to_date;
-          }
           break;
         default: /* aborted... */
           for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
