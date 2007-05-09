@@ -13,6 +13,19 @@
 using namespace std;
 using namespace mcrl2::lts;
 
+static const char *equivalent_string(lts_equivalence eq)
+{
+  switch ( eq )
+  {
+    case lts_eq_strong:
+      return "strongly bisimilar";
+    case lts_eq_branch:
+      return "branching bisimilar";
+    default:
+      return "equivalent";
+  }
+}
+
 static void print_formats(FILE *f)
 {
   fprintf(f,
@@ -50,7 +63,7 @@ static void print_help(FILE *f, char *Name)
     "  -f, --formats         list accepted formats\n"
     "  -i, --in1=FORMAT      use FORMAT as the format for INFILE1 (or stdin)\n"
     "  -j, --in2=FORMAT      use FORMAT as the format for INFILE2\n"
-    "  -s, --strong          use strong bisimulation equivalence\n"
+    "  -s, --strong          use strong bisimulation equivalence (default)\n"
     "  -b, --branching       use branching bisimulation equivalence\n"
     "      --tau=ACTNAMES    consider actions with a name in the comma separated\n"
     "                        list ACTNAMES to be a internal (tau) actions in\n"
@@ -238,10 +251,10 @@ int main(int argc, char **argv)
   gsVerboseMsg("comparing LTSs...\n");
   if ( l1.compare(l2,equivalence,eq_opts) )
   {
-    gsMessage("LTSs are equivalent\n");
+    gsMessage("LTSs are %s\n",equivalent_string(equivalence));
     return 0;
   } else {
-    gsMessage("LTSs are not equivalent\n");
+    gsMessage("LTSs are not %s\n",equivalent_string(equivalence));
     return 2;
   }
 }
