@@ -13,16 +13,7 @@
 // ======================================================================
 
 //LPS framework
-#ifdef BOOST_BUILD_PCH_ENABLED
-# ifdef ENABLE_SQUADT_CONNECTIVITY
-#  include <utilities/mcrl2_squadt.h>
 #  include "lps/specification.h"
-# else
-#  include "specification.h"
-# endif
-#else
-# include "lps/specification.h"
-#endif
 
 //C++
 #include <iostream>

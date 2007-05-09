@@ -4,7 +4,6 @@ project lps2lts
 
 exe lps2lts
        : lps2lts.cpp
-         squadt_lps2lts.cpp
          exploration.cpp
 	 lts.cpp
          /libraries/lps//dataelm

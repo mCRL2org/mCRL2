@@ -61,12 +61,17 @@ namespace sip {
     void enumeration::add_value(std::string const& s, bool b) {
       assert(boost::regex_search(s, boost::regex("\\`[A-Za-z0-9_\\-]+\\'")));
 
-      if (std::find(m_values.begin(), m_values.end(), s) == m_values.end()) {
-        m_values.push_back(s);
+      std::vector< std::string >::iterator i = std::lower_bound(m_values.begin(), m_values.end(), s);
 
-        if (b) {
-          m_default_value = m_values.size() - 1;
-        }
+      if (b) {
+        m_default_value = i - m_values.begin();
+      }
+      else if (static_cast < size_t > (i - m_values.begin()) <= m_default_value) {
+        ++m_default_value;
+      }
+
+      if (i == m_values.end() || *i != s) {
+        m_values.insert(i, s);
       }
     }
 

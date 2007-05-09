@@ -1,5 +1,5 @@
 #include <aterm2.h>
-#include <assert.h>
+#include <cassert>
 #include <time.h>
 #include <sstream>
 #include "liblowlevel.h"
@@ -13,6 +13,8 @@
 #include "libtrace.h"
 #include "exploration.h"
 #include "lts.h"
+
+#include "squadt_interactor.h"
 
 using namespace std;
 
@@ -271,15 +273,11 @@ static bool savetrace(string const &info, ATerm state, ATermTable backpointers, 
     trace.setState(nstate->makeStateVector(ATgetFirst(e)));
   }
 
-  string filename;
-  if ( lgopts->squadt->is_active() )
-  {
-    filename = lgopts->squadt->add_output_file(info,"trc");
-  } else {
-    filename = basefilename;
-    filename += "_"+info+".trc";
-  }
-  return trace.save(filename);
+  return trace.save(lgopts->generate_filename_for_trace(info, "trc"));
+}
+
+std::string lts_generation_options::generate_trace_file_name(std::string const& info, std::string const& extension) {
+  return basefilename + std::string("_") + info + std::string(".") + extension;
 }
 
 static void check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewState)
@@ -811,9 +809,9 @@ bool generate_lts()
   bool new_state;
   initial_state = add_state(state,&new_state);
   current_state = 0;
-  num_states++;
+  ++num_states;
 
-  lgopts->squadt->update_status_display(level,current_state,num_states,0,trans);
+  lgopts->display_status(level,current_state,num_states, static_cast < unsigned long long > (0),trans);
 
   if ( lgopts->max_states != 0 )
   {
@@ -875,7 +873,7 @@ bool generate_lts()
 
         current_state++;
         if ( (current_state%200) == 0 ) {
-          lgopts->squadt->update_status_display(level,current_state,num_states,num_found_same,trans);
+          lgopts->display_status(level,current_state,num_states,num_found_same,trans);
         }
         if ( gsVerbose && ((current_state%1000) == 0) )
         {
@@ -947,7 +945,7 @@ bool generate_lts()
   
         current_state++;
         if ( (current_state%200) == 0 ) {
-          lgopts->squadt->update_status_display(level,current_state,num_states,num_found_same,trans);
+          lgopts->display_status(level,current_state,num_states,num_found_same,trans);
         }
         if ( gsVerbose && ((current_state%1000) == 0) )
         {
@@ -969,7 +967,7 @@ bool generate_lts()
             swap_queues();
           }
           current_state = current_state+statestobeskipped;
-          lgopts->squadt->update_status_display(level,current_state,num_states,num_found_same,trans);
+          lgopts->display_status(level,current_state,num_states,num_found_same,trans);
           if ( gsVerbose )
           {
             gsVerboseMsg(
@@ -1086,7 +1084,7 @@ bool generate_lts()
         {
           current_state++;
           if ( (current_state%200) == 0 ) {
-            lgopts->squadt->update_status_display(level,current_state,num_states,num_found_same,trans);
+            lgopts->display_status(level,current_state,num_states,num_found_same,trans);
           }
           if ( gsVerbose && ((current_state%1000) == 0) )
           {
@@ -1100,7 +1098,7 @@ bool generate_lts()
           }
         }
       }
-      lgopts->squadt->update_status_display(level,current_state,num_states,num_found_same,trans);
+      lgopts->display_status(level,current_state,num_states,num_found_same,trans);
 
       for (unsigned long i=0; i<nsgens_size; i++)
       {

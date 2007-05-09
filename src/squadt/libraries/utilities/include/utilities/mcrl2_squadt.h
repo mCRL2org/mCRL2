@@ -1,6 +1,8 @@
 #ifndef MCRL2_SQUADT_INTERFACE_H_
 #define MCRL2_SQUADT_INTERFACE_H_
 
+#include <boost/cstdint.hpp>
+
 #include <sip/tool.h>
 
 #include <utilities/squadt_utility.h>
@@ -139,6 +141,31 @@ namespace mcrl2_squadt {
   }
 
   inline tool_interface::~tool_interface() {
+  }
+
+  /* Standard type for input validation */
+  extern boost::shared_ptr < sip::datatype::enumeration > rewrite_strategy_enumeration;
+
+  // Helper function for unsigned long to string conversion
+  inline std::ostream& operator<<(std::ostream& o, unsigned long const& t) {
+    char buf[21];
+ 
+    sprintf(buf,"%lu",t);
+ 
+    o << buf;
+ 
+    return o;
+  }
+
+  // Helper function for unsigned long long to string conversion
+  inline std::ostream& operator<<(std::ostream& o, unsigned long long const& t) {
+    char buf[21];
+ 
+    sprintf(buf,"%llu",t);
+ 
+    o << buf;
+ 
+    return o;
   }
 }
 

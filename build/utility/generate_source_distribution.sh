@@ -82,7 +82,6 @@ if (! test -e "${archive_name}.bz2"); then
 
   # Find directories to filter out
   find -L mcrl2 -type d \
-       -name 'html' \
        -or -name 'latex' \
        -or -wholename '*build/bin' \
        -or -wholename '*mcrl2/build/utility' \

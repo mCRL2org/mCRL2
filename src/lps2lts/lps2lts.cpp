@@ -1,14 +1,15 @@
 #include <string>
 #include <getopt.h>
 #include <aterm2.h>
-#include <assert.h>
+#include <cassert>
 #include <boost/lexical_cast.hpp>
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "lps2lts.h"
-#include "squadt_lps2lts.h"
 #include "exploration.h"
 #include "lts.h"
+
+#include "squadt_interactor.tcc"
 
 using namespace std;
 
@@ -157,16 +158,13 @@ int main(int argc, char **argv)
   gsEnableConstructorFunctions();
 
   // Start 
-  squadt_lps2lts sl;
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if ( sl.try_interaction(argc, argv) )
-  {
+  if (mcrl2_squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
     return 0;
   }
 #endif
 
   lts_generation_options lgopts;
-  lgopts.squadt = &sl;
 
   #define sopts "hqvdfyucrb::l:Da:t::C::R:s:"
   struct option lopts[] = {

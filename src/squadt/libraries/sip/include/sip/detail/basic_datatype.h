@@ -15,6 +15,8 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_enum.hpp>
+#include <boost/type_traits/is_integral.hpp>
+#include <boost/type_traits/is_floating_point.hpp>
 
 #include <sip/visitors.h>
 
@@ -33,10 +35,10 @@ namespace sip {
 
         /** \brief Converts a boolean to a string representation */
         template < typename U >
-        static std::string convert(U const&);
+        std::string convert(U const&) const;
 
         /** \brief Converts to underlying type */
-        virtual boost::any evaluate(std::string const&) = 0;
+        virtual boost::any evaluate(std::string const&) const = 0;
 
         /** \brief Establishes whether value is valid for an element of this type */
         virtual bool validate(std::string const& value) const = 0;
@@ -80,10 +82,10 @@ namespace sip {
 
         /** \brief Converts to a string representation */
         template < typename T >
-        static std::string convert(T const&);
+        std::string convert(T const&);
 
-        /** \brief Converts a string to a long int representation */
-        boost::any evaluate(std::string const&);
+        /** \brief Converts a string to an index representation */
+        boost::any evaluate(std::string const&) const;
 
         /** \brief Establishes whether value is valid for an element of this type */
         inline bool validate(std::string const& value) const;
@@ -136,7 +138,7 @@ namespace sip {
         static std::string convert(long int const&);
 
         /** \brief Converts a string to a long int representation */
-        boost::any evaluate(std::string const&);
+        boost::any evaluate(std::string const&) const;
 
         /** \brief Establishes whether value is valid for an element of this type */
         inline bool validate(std::string const& value) const;
@@ -228,7 +230,7 @@ namespace sip {
         static std::string convert(double const&);
 
         /** \brief Converts a string to a long int representation */
-        boost::any evaluate(std::string const&);
+        boost::any evaluate(std::string const&) const;
 
         /** \brief Establishes whether value is valid for an element of this type */
         inline bool validate(std::string const& value) const;
@@ -284,7 +286,7 @@ namespace sip {
         static std::string convert(bool const&);
 
         /** \brief Converts a string to a boolean representation */
-        boost::any evaluate(std::string const&);
+        boost::any evaluate(std::string const&) const;
 
         /** \brief Establishes whether value is valid for an element of this type */
         inline bool validate(std::string const& value) const;
@@ -334,7 +336,7 @@ namespace sip {
         static std::string convert(std::string const& s);
 
         /** \brief Converts a string to a string representation (copy) */
-        boost::any evaluate(std::string const&);
+        boost::any evaluate(std::string const&) const;
 
         /** \brief Establishes whether value is valid for an element of this type */
         bool validate(std::string const& value) const;
@@ -346,42 +348,68 @@ namespace sip {
     inline basic_datatype::~basic_datatype() {
     }
 
-    template < typename T >
-    inline std::string basic_datatype::convert(T const& s) {
-      if (boost::is_enum< T >::value) {
-        return (enumeration::convert(s));
-      }
+    template < typename T, bool e >
+    inline std::string convert(basic_datatype const* t, T const& s, boost::integral_constant< bool, e > const&) {
+      return static_cast < enumeration const* > (t)->convert(s);
+    }
 
-      return integer::convert(s);
+    template < typename T >
+    inline std::string convert(basic_datatype const* t, T const& s, boost::false_type const&) {
+      return convertr(t, s, boost::is_floating_point< T >());
+    }
+
+    template < typename T, bool e >
+    inline std::string convertr(basic_datatype const* t, T const& s, boost::integral_constant< bool, e > const&) {
+      return static_cast < real const* > (t)->convert(s);
+    }
+
+    template < typename T >
+    inline std::string convertr(basic_datatype const* t, T const& s, boost::false_type const&) {
+      return converti(t, s, boost::is_integral< T >());
+    }
+
+    template < typename T, bool e >
+    inline std::string converti(basic_datatype const* t, T const& s, boost::integral_constant< bool, e > const&) {
+      return static_cast < integer const* > (t)->convert(s);
+    }
+
+    template < typename T >
+    inline std::string converti(basic_datatype const* t, T const& s, boost::false_type const&) {
+      return static_cast < string const* > (t)->convert(s);
+    }
+
+    template < typename T >
+    inline std::string basic_datatype::convert(T const& s) const {
+      return datatype::convert(this, s, boost::is_enum< T >());
     }
 
     /** \brief Converts a boolean */
     template <>
-    inline std::string basic_datatype::convert(bool const& s) {
+    inline std::string basic_datatype::convert(bool const& s) const {
       return (boolean::convert(s));
     }
 
     /** \brief Converts a long int */
     template <>
-    inline std::string basic_datatype::convert(long int const& s) {
+    inline std::string basic_datatype::convert(long int const& s) const {
       return (integer::convert(s));
     }
 
     /** \brief Converts a double */
     template <>
-    inline std::string basic_datatype::convert(double const& s) {
+    inline std::string basic_datatype::convert(double const& s) const {
       return (real::convert(s));
     }
 
     /** \brief Converts a string */
     template <>
-    inline std::string basic_datatype::convert(std::string const& s) {
+    inline std::string basic_datatype::convert(std::string const& s) const {
       return (s);
     }
 
     /** \brief Converts a string */
     template <>
-    inline std::string basic_datatype::convert(char* const& s) {
+    inline std::string basic_datatype::convert(const char* const& s) const {
       return (std::string(s));
     }
 
@@ -402,7 +430,7 @@ namespace sip {
     /**
      * \param[in] s the string to convert
      **/
-    inline boost::any boolean::evaluate(std::string const& s) {
+    inline boost::any boolean::evaluate(std::string const& s) const {
       return (boost::any(s == boolean::true_string));
     }
 
@@ -448,7 +476,7 @@ namespace sip {
      *
      * \pre the string should be parsable as long int
      **/
-    inline boost::any integer::evaluate(std::string const& s) {
+    inline boost::any integer::evaluate(std::string const& s) const {
       long int b;
 
       sscanf(s.c_str(), "%ld", &b);
@@ -514,7 +542,7 @@ namespace sip {
      *
      * \pre the string should be parsable as long int
      **/
-    inline boost::any real::evaluate(std::string const& s) {
+    inline boost::any real::evaluate(std::string const& s) const {
       double b;
 
       sscanf(s.c_str(), "%lf", &b);
@@ -552,7 +580,7 @@ namespace sip {
      **/
     template < typename T >
     inline std::string enumeration::convert(T const& s) {
-      return (boost::lexical_cast < std::string > (s));
+      return (0 < s && static_cast < size_t > (s) < m_values.size()) ? m_values[s] : m_values[m_default_value];
     }
 
     /**
@@ -560,15 +588,17 @@ namespace sip {
      *
      * \pre the string should be parsable as one of the values
      **/
-    inline boost::any enumeration::evaluate(std::string const& s) {
-      return (boost::lexical_cast < size_t > (s));
+    inline boost::any enumeration::evaluate(std::string const& s) const {
+      std::vector< std::string >::const_iterator i = std::lower_bound(m_values.begin(), m_values.end(), s);
+
+      return static_cast < size_t > (i == m_values.end() ? m_default_value : i - m_values.begin());
     }
 
     /**
      * \param[in] s any string
      **/
     inline bool enumeration::validate(std::string const& s) const {
-      return (boost::lexical_cast < size_t > (s) < m_values.size());
+      return boost::any_cast < size_t > (evaluate(s)) < m_values.size();
     }
 
     /************************************************************************
@@ -605,7 +635,7 @@ namespace sip {
     /**
      * \param[in] s the string to convert
      **/
-    inline boost::any string::evaluate(std::string const& s) {
+    inline boost::any string::evaluate(std::string const& s) const {
       return (s);
     }
 

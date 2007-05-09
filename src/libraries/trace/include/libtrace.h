@@ -9,7 +9,7 @@ class Trace
 	public:
 		Trace();
 		Trace(std::istream &is, TraceFormat tf = tfUnknown);
-		Trace(std::string &filename, TraceFormat tf = tfUnknown);
+		Trace(std::string const& filename, TraceFormat tf = tfUnknown);
 		~Trace();
 
 		void resetPosition();
@@ -32,9 +32,9 @@ class Trace
 		ATermAppl getTime();
 
 		void load(std::istream &is, TraceFormat tf = tfUnknown);
-		bool load(std::string &filename, TraceFormat tf = tfUnknown);
+		bool load(std::string const& filename, TraceFormat tf = tfUnknown);
 		void save(std::ostream &os, TraceFormat tf = tfMcrl2);
-		bool save(std::string &filename, TraceFormat tf = tfMcrl2);
+		bool save(std::string const& filename, TraceFormat tf = tfMcrl2);
 
 	private:
 		ATermAppl *states;

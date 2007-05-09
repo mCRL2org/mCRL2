@@ -94,7 +94,7 @@ Trace::Trace(istream &is, TraceFormat tf)
 	load(is,tf);
 }
 
-Trace::Trace(string &filename, TraceFormat tf)
+Trace::Trace(string const& filename, TraceFormat tf)
 {
 	init();
 	load(filename,tf);
@@ -350,7 +350,7 @@ void Trace::load(istream &is, TraceFormat tf)
 	}
 }
 
-bool Trace::load(string &filename, TraceFormat tf)
+bool Trace::load(string const& filename, TraceFormat tf)
 {
 	ifstream is(filename.c_str(),ifstream::binary|ifstream::in);
 
@@ -426,7 +426,7 @@ void Trace::save(ostream &os, TraceFormat tf)
 	}
 }
 
-bool Trace::save(string &filename, TraceFormat tf)
+bool Trace::save(string const& filename, TraceFormat tf)
 {
 	ofstream os(filename.c_str(),ofstream::binary|ofstream::out|ofstream::trunc);
 	if ( !os.is_open() )

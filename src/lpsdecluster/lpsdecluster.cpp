@@ -72,13 +72,7 @@ class squadt_interactor: public mcrl2_squadt::tool_interface
     static const char*  option_finite_only;
     static const char*  option_rewrite_strategy;
 
-  private:
-    boost::shared_ptr < sip::datatype::enumeration > rewrite_strategy_enumeration;
-    
   public:
-    
-    /** \brief constructor */
-    squadt_interactor();
     
     /** \brief configures tool capabilities */
     void set_capabilities(sip::tool::capabilities&) const;
@@ -99,11 +93,6 @@ const char* squadt_interactor::lps_file_for_output = "lps_out";
 const char* squadt_interactor::option_finite_only      = "finite_only";
 const char* squadt_interactor::option_rewrite_strategy = "rewrite_strategy";
 
-squadt_interactor::squadt_interactor() {
-  rewrite_strategy_enumeration.reset(new sip::datatype::enumeration("inner"));
-  *rewrite_strategy_enumeration % "innerc" % "jitty" % "jittyc";
-}
-
 void squadt_interactor::set_capabilities(sip::tool::capabilities& capabilities) const
 {
   // The tool has only one main input combination
@@ -123,7 +112,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& confi
   }
 
   if (!configuration.option_exists(option_rewrite_strategy)) {
-    configuration.add_option(option_rewrite_strategy).append_argument(rewrite_strategy_enumeration, 0);
+    configuration.add_option(option_rewrite_strategy).append_argument(mcrl2_squadt::rewrite_strategy_enumeration, 0);
   }
 
   if (!configuration.option_exists(option_finite_only)) {
@@ -169,7 +158,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& confi
   configuration.get_option(option_finite_only).
      set_argument_value< 0, sip::datatype::boolean >(finite_only->get_status());
 
-  configuration.get_option(option_rewrite_strategy).replace_argument(0, rewrite_strategy_enumeration, strategy_selector.get_selection());
+  configuration.get_option(option_rewrite_strategy).replace_argument(0, mcrl2_squadt::rewrite_strategy_enumeration, strategy_selector.get_selection());
 }
 
 bool squadt_interactor::check_configuration(sip::configuration const& configuration) const

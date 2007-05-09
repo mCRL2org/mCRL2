@@ -224,7 +224,7 @@ namespace utility {
     /* Current element must be <enumeration> */
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "enumeration");
 
-    tree->GetAttribute("default", &e.m_default_value, false);
+    tree->GetAttributeOrDefault("default", &e.m_default_value, 0);
 
     for (ticpp::Element* ae = tree->FirstChildElement(false); ae != 0; ae = ae->NextSiblingElement(false)) {
       if (ae->Value() == "element") {

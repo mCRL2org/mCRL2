@@ -11,6 +11,10 @@
 #include <sip/detail/basic_datatype.h>
 #include <sip/parameter.h>
 
+#ifndef NDEBUG
+# include <typeinfo>
+#endif
+
 namespace sip {
 
   class configuration;
@@ -211,14 +215,15 @@ namespace sip {
 
   /**
    * \param[in] t pointer to the data type definition
-   * \param[in] b whether or not to add if the argument is specified
+   * \param[in] b whether or not to add if the argument is already present
    **/
   template < unsigned int n, typename S, typename T >
   void option::set_argument_value(T const& t, bool b) {
     if (n < m_arguments.size()) {
       if (b) {
-        m_arguments[n].first.reset(new S);
-        m_arguments[n].second = S::convert(t);
+        assert(typeid(S) == typeid(*m_arguments[n].first));
+
+        m_arguments[n].second = m_arguments[n].first->convert(t);
       }
     }
     else {
