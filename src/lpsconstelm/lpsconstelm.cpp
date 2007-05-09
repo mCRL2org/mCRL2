@@ -712,17 +712,8 @@ inline void lpsConstElm::output() {
       rebuild_summandlist_no_cp = push_front(rebuild_summandlist_no_cp, tmp); 
   }
   
-   std::set< lps::data_variable > usedFreeVars;
-   std::set< lps::data_variable > foundVars;
-   for(lps::summand_list::iterator currentSummand = rebuild_summandlist_no_cp.begin(); currentSummand != rebuild_summandlist_no_cp.end(); currentSummand++){ 
-     for(lps::data_assignment_list::iterator i = currentSummand->assignments().begin(); i !=  currentSummand->assignments().end() ;i++){
-       foundVars = getUsedFreeVars(aterm_appl(i->rhs()));
-       for(std::set< lps::data_variable >::iterator k = foundVars.begin(); k != foundVars.end(); k++){
-         usedFreeVars.insert(*k);
-      }
-     }
-   }
-
+   
+  std::set< lps::data_variable > usedFreeVars = p_process.find_free_variables();
   //construct new specfication
   //
   //linear_process(data_variable_list free_variables, data_variable_list process_parameters, 
@@ -733,9 +724,11 @@ inline void lpsConstElm::output() {
     vectorToList(variablePPvar), 
     atermpp::reverse(rebuild_summandlist_no_cp)
   );
-   
+  
+ 
    //gsDebugMsg("%s\n", p_spec.initial_process().free_variables().to_string().c_str());
-   
+  
+  std::set< lps::data_variable > foundVars;
   std::set< lps::data_variable > initial_free_variables;
   usedFreeVars.empty();
   for(std::vector< lps::data_expression >::iterator i = variablePPexpr.begin(); i != variablePPexpr.end(); i++){
@@ -744,6 +737,7 @@ inline void lpsConstElm::output() {
          initial_free_variables.insert(*k); 
        }           
   }
+
 
   // Rebuild spec
   //
