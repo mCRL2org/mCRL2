@@ -191,7 +191,7 @@ transition:
 	    ATerm label = ATtableGet(fsm_lexer_obj->labelTable,(ATerm)$3);
 	    if ( label == NULL )
 	    {
-	    	unsigned int i = fsm_lexer_obj->fsm_lts->add_label((ATerm)$3);
+	    	unsigned int i = fsm_lexer_obj->fsm_lts->add_label((ATerm)$3,!strcmp("tau",ATgetName(ATgetAFun($3))));
 		label = (ATerm) ATmakeInt(i);
 		ATtablePut(fsm_lexer_obj->labelTable,(ATerm)$3,label);
 	    }

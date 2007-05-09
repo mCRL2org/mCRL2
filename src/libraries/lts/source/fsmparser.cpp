@@ -146,7 +146,7 @@ typedef union YYSTYPE
   ATermAppl aterm;
   int number;
 }
-/* Line 193 of yacc.c.  */
+/* Line 187 of yacc.c.  */
 #line 151 "fsmparser.cpp"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -1490,7 +1490,7 @@ yyreduce:
 	    ATerm label = ATtableGet(fsm_lexer_obj->labelTable,(ATerm)(yyvsp[(3) - (3)].aterm));
 	    if ( label == NULL )
 	    {
-	    	unsigned int i = fsm_lexer_obj->fsm_lts->add_label((ATerm)(yyvsp[(3) - (3)].aterm));
+	    	unsigned int i = fsm_lexer_obj->fsm_lts->add_label((ATerm)(yyvsp[(3) - (3)].aterm),!strcmp("tau",ATgetName(ATgetAFun((yyvsp[(3) - (3)].aterm)))));
 		label = (ATerm) ATmakeInt(i);
 		ATtablePut(fsm_lexer_obj->labelTable,(ATerm)(yyvsp[(3) - (3)].aterm),label);
 	    }
