@@ -4,7 +4,7 @@
 //SQuADT protocol interface
 #include <utilities/mcrl2_squadt.h>
 
-bool command_line = false;
+bool        command_line = false;
 std::string lts_file_argument;
 
 class squadt_interactor: public mcrl2_squadt::tool_interface {
@@ -43,22 +43,14 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
 bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   if (c.input_exists(fsm_file_for_input)) {
-		/* The input object is present, verify whether the specified format is
-		 * supported */
+
     sip::object input_object(c.get_input(fsm_file_for_input));
     lts_file_argument = input_object.get_location();
-    /* lts_type t = lts::parse_format(input_object.get_format().c_str());
-    if (t == lts_none) {
-      send_error(boost::str(boost::format(
-				"Invalid configuration: unsupported type `%s' for main input") 
-				% lts::string_for_type(t)));
-      return false;
-    }*/
+
+    return true;
   }
-  else {
-    return false;
-  }
-  return true;
+
+  return false;
 }
 
 bool squadt_interactor::perform_task(sip::configuration&) {
@@ -94,9 +86,11 @@ bool LTSViewApp::OnInit() {
 
   wxInitAllImageHandlers();
 
-  wxString lts_file_argument;
 #ifdef ENABLE_SQUADT_CONNECTIVITY
+
   if (command_line) {
+#else
+  std::string lts_file_argument;
 #endif
     // parse command line and check for specified input file
     wxCmdLineEntryDesc cmdLineDesc[] = {
@@ -107,14 +101,14 @@ bool LTSViewApp::OnInit() {
     wxCmdLineParser cmdParser(cmdLineDesc,argc,argv);
     if (cmdParser.Parse() == 0) {
       if (cmdParser.GetParamCount() > 0) {
-        lts_file_argument = cmdParser.GetParam(0);
+        lts_file_argument = std::string(cmdParser.GetParam(0).fn_str());
       }
     }
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }
 #endif
   if (!lts_file_argument.empty()) {
-    wxFileName fileName(lts_file_argument);
+    wxFileName fileName(wxString(lts_file_argument.c_str(), wxConvLocal));
     fileName.Normalize();
     mainFrame->setFileInfo(fileName);
     openFile(static_cast< string >(fileName.GetFullPath().fn_str()));
