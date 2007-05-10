@@ -164,24 +164,24 @@ bool DiaGraph::OnInit()
 
    if (!parse_command_line(argc, argv, fsm_file_argument)) {
      return (false);
-   };
+   }
 	
-    // windows debugging
-    //_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-    //_CrtSetBreakAlloc( 7032 );
+   // windows debugging
+   //_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+   //_CrtSetBreakAlloc( 7032 );
 
-    // init colleagues
-    initColleagues();
-	
-    if (!fsm_file_argument.empty()){
-      openFile(fsm_file_argument);
-    }; 
+   // init colleagues
+   initColleagues();
+       
+   if (!fsm_file_argument.empty()){
+     openFile(fsm_file_argument);
+   }; 
 
-    // -*- //
-    critSect = false;
+   // -*- //
+   critSect = false;
 
-    // start event loop
-    return true;
+   // start event loop
+   return true;
 }
 
 
@@ -735,7 +735,7 @@ void DiaGraph::handleAttributeDelete( const vector< int > &indcs )
     }
 
     // delete attributes
-    for ( int i = 0; i < indcs.size(); ++i )
+    for ( size_t i = 0; i < indcs.size(); ++i )
     {
         editor->clearLinkAttrDOF( indcs[i] );
         graph->deleteAttribute( indcs[i] );
@@ -767,7 +767,7 @@ void DiaGraph::handleAttributeCluster( const vector< int > &indcs )
 {
     bool zeroCard = false;
 
-    for ( int i = 0; i < indcs.size() && zeroCard == false; ++i )
+    for ( size_t i = 0; i < indcs.size() && zeroCard == false; ++i )
     {
         if ( graph->getAttribute( indcs[i] )->getSizeCurValues() == 0 )    
             zeroCard = true;
@@ -891,7 +891,7 @@ void DiaGraph::getAttributeNames(
 // ------------------------------
 {
     names.clear();
-    for ( int i = 0; i < indcs.size(); ++i )
+    for ( size_t i = 0; i < indcs.size(); ++i )
     {
         if ( 0 <= indcs[i] && indcs[i] < graph->getSizeAttributes() )
             names.push_back( 
@@ -949,7 +949,6 @@ void DiaGraph::handleAttributePlot(
         corrlPlot->setDiagram( editor->getDiagram() );
     }
     
-    int numValues1        = 0 ;
     vector< int > indices;
     vector< string > vals1;
     vector< vector< int > > corrlMap;
@@ -1493,7 +1492,7 @@ void DiaGraph::handleEditDOF(
     // init attrIndcs
     vector< string > attributes;
     {
-    for ( int i = 0; i < attrIndcs.size(); ++i )
+    for ( size_t i = 0; i < attrIndcs.size(); ++i )
     {
         if ( attrIndcs[i] < 0 )
             attributes.push_back( "" );
@@ -1809,7 +1808,7 @@ void DiaGraph::addToExaminer(
 {
     if ( examiner != NULL )
     {
-        for ( int i = 0; i < frames.size(); ++i )
+        for ( size_t i = 0; i < frames.size(); ++i )
             examiner->addFrameHist( frames[i], attrs );
 
         if ( mode == MODE_ANALYSIS && canvasExnr != NULL )
