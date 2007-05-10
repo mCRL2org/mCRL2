@@ -68,6 +68,10 @@ static ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls);
 //     arbitary phase
 //Ret: spec in which the data declarations from data_decls are added
 
+static bool data_decls_equal(t_data_decls data_decls1,
+  t_data_decls data_decls2);
+//Ret: data_decls1 is equal to data_decls2
+
 static t_data_decls get_data_decls(lps::specification &lps_spec);
 //Ret: data declarations of lps_spec
 
@@ -560,6 +564,16 @@ ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls)
   return spec;
 }
 
+static bool data_decls_equal(t_data_decls data_decls1,
+  t_data_decls data_decls2)
+{
+  return
+    ATisEqual(data_decls1.sorts, data_decls2.sorts) &&
+    ATisEqual(data_decls1.cons_ops, data_decls2.cons_ops) &&
+    ATisEqual(data_decls1.ops, data_decls2.ops) &&
+    ATisEqual(data_decls1.data_eqns, data_decls2.data_eqns);
+}
+
 static t_data_decls get_data_decls(lps::specification &lps_spec)
 {
   t_data_decls data_decls;
@@ -573,8 +587,10 @@ static t_data_decls get_data_decls(lps::specification &lps_spec)
 static void set_data_decls(lps::specification &lps_spec, t_data_decls data_decls)
 {
   assert(data_decls_is_initialised(data_decls));
-  lps::data_specification data(data_decls.sorts, data_decls.cons_ops, data_decls.ops, data_decls.data_eqns);
-  lps_spec = lps::set_data_specification(lps_spec, data);
+  if (!data_decls_equal(data_decls, get_data_decls(lps_spec))) {
+    lps::data_specification data(data_decls.sorts, data_decls.cons_ops, data_decls.ops, data_decls.data_eqns);
+    lps_spec = lps::set_data_specification(lps_spec, data);
+  }
 }
 
 ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
