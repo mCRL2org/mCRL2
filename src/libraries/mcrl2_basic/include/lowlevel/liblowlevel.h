@@ -80,6 +80,14 @@ void      ATunprotectList(ATermList *PList);
 void      ATunprotectInt(ATermInt *PInt);
 #endif
 
+inline ATermList ATinsertUnique(ATermList list, ATerm el)
+//Ret: el ++ list if not el in list,
+//     list if el in list
+{
+  if (ATindexOf(list, el, 0) == -1) return ATinsert(list, el);
+  else return list;
+}
+
 inline bool ATisApplOrNull(ATerm t)
 //Ret: t is NULL or an ATermAppl
 {

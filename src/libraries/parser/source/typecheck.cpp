@@ -2268,8 +2268,9 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
       NewParList=ATmakeList0();
       for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
 	ATermAppl Par=ATAgetFirst(ParList);
-	if((Par=gstcTypeMatchA(Par,PosType)))
-	  NewParList=ATinsert(NewParList,(ATerm)Par);
+	if((Par=gstcTypeMatchA(Par,PosType))) {
+	  NewParList=ATinsertUnique(NewParList,(ATerm)Par);
+        }
       }
       NewParList=ATreverse(NewParList);
 
@@ -2281,7 +2282,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	//and get the list. Then we take the min of the list.
 	
 	ParList=BackupParList;
-	gsDebugMsg("Trying casting for Op %T with %d arguments (ParList: %T; PosType: %T)\n",Name,nFactPars,ParList,PosType);
+        gsDebugMsg("Trying casting for Op %T with %d arguments (ParList: %T; PosType: %T)\n",Name,nFactPars,ParList,PosType);
 	PosType=gstcExpandNumTypesUp(PosType);
 	for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
 	  ATermAppl Par=ATAgetFirst(ParList);
@@ -2289,7 +2290,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	    NewParList=ATinsert(NewParList,(ATerm)Par);
 	}
 	NewParList=ATreverse(NewParList);
-	gsDebugMsg("The result of casting is %T\n",NewParList);
+        gsDebugMsg("The result of casting is %T\n",NewParList);
 	if(ATgetLength(NewParList)>1) NewParList=ATmakeList1((ATerm)gstcMinType(NewParList));
       }
 
