@@ -349,7 +349,7 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, lps::specification &lps_spec
   //check correctness of the sort expression in sort_expr using
   //the LPS specification in lps_spec
   assert(gsIsSortExpr(sort_expr));
-  gsWarningMsg("type checking of sort expressions is partially implemented\n");
+  //gsWarningMsg("type checking of sort expressions is partially implemented\n");
   
   ATermAppl Result=NULL;
 
@@ -383,7 +383,7 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
   //check correctness of the data expression in data_expr using
   //the LPS specification in lps_spec
   assert((sort_expr == NULL) || gsIsSortExpr(sort_expr));
-  gsWarningMsg("type checking of data expressions is partially implemented\n");
+  //gsWarningMsg("type checking of data expressions is partially implemented\n");
 
   ATermAppl Result=NULL;
 
@@ -435,7 +435,7 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec)
 {
   //check correctness of the multi-action in mult_act using
   //the LPS specification in lps_spec
-  gsWarningMsg("type checking of multiactions is partially implemented\n");
+  //gsWarningMsg("type checking of multiactions is partially implemented\n");
   ATermAppl Result=NULL;
 
   gsDebugMsg ("type checking phase started\n");
@@ -483,7 +483,7 @@ ATermAppl type_check_proc_expr(ATermAppl proc_expr, lps::specification &lps_spec
 {
   //check correctness of the process expression in proc_expr using
   //the LPS specification in lps_spec
-  gsWarningMsg("type checking of process expressions is not yet implemented\n");
+  //gsWarningMsg("type checking of process expressions is not yet implemented\n");
   return proc_expr;
 }
 
@@ -499,7 +499,7 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, lps::specification &lps_spec
   //   forall, exists, mu and nu quantifiers
   //4) check for monotonicity of fixpoint variables
   //TODO in decreasing order of urgency: 1 & 2 => 3 & 4.
-  gsWarningMsg("type checking of state formulas is partially implemented\n");
+  //gsWarningMsg("type checking of state formulas is partially implemented\n");
 
   ATermAppl Result=NULL;
   gsDebugMsg ("type checking phase started\n");

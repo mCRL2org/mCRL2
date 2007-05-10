@@ -104,10 +104,10 @@ bool gsIsSortExprList(ATermAppl Term);
 //Ret: Term is a SortExprList
 
 bool gsIsSortExprSet(ATermAppl Term);
-//Ret: Term is a SortExprBag
+//Ret: Term is a SortExprSet
 
 bool gsIsSortExprBag(ATermAppl Term);
-//Ret: Term is a SortExprSet
+//Ret: Term is a SortExprBag
 
 //Auxiliary functions concerning sort expressions
 
