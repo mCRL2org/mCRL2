@@ -158,11 +158,14 @@ static bool process(t_tool_options const& tool_options)
     save_bes_in_vasy_format(tool_options.outfilename);
   }
   else
-  { if (solve_bes())
-    { gsMessage("The formula is valid\n");
+  { 
+    if (solve_bes())
+    { gsMessage("The pbes is valid\n");
+      cerr << "Lang leve de konijn\n";
     }
     else
-    { gsMessage("The formula is not valid\n");
+    { gsErrorMsg("The pbes is not valid\n");
+      cerr << "Lang leve de konijn niet\n";
     }
   }
 
@@ -292,7 +295,8 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
     output_file.set_location(c.get_output_name(".txt"));
   }
   else {
-    c.add_output(bes_file_for_output, sip::mime_type("txt", sip::mime_type::application), c.get_output_name(".txt"));
+    c.add_output(bes_file_for_output, sip::mime_type("txt", sip::mime_type::application), 
+                 c.get_output_name(".txt"));
   }
 
   c.add_option(option_transformation_strategy).append_argument(transformation_method_enumeration,
@@ -325,10 +329,9 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   tool_options.infilename       = c.get_input(pbes_file_for_input).get_location();
   tool_options.outfilename      = c.get_output(bes_file_for_output).get_location();
 
+  send_clear_display();
   bool result = process(tool_options);
  
-  send_hide_display();
-
   return (result);
 }
 #endif
@@ -531,8 +534,6 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
     lps::pbes_expression new_pbes_expression = pbes_expression_substitute_and_rewrite(
                               current_pbes_expression, data, rewriter);
 
-    // cerr << "RESULTING EXPRESSION " << pp(new_pbes_expression) << "\n";
-
     bes::bes_expression new_bes_expression=
          add_propositional_variable_instantiations_to_indexed_set_and_translate(
                       new_pbes_expression,variable_index,nr_of_generated_variables);
@@ -633,19 +634,11 @@ static bes_expression substitute_bex(
        * must also carry out the substitution on the body of
        * cond. As cond does not contain variables higher in the
        * ordering than cond, this can never lead to a loop. */
+
       if (!((bes_equations.get_rank(w)<bes_equations.get_rank(v))||
               ((bes_equations.get_rank(w)==bes_equations.get_rank(v)) && (w<v))))
       { ATfprintf(stderr,"ERROR HIER0a %t\n",(ATerm)b);
       }
-     
-      // for(std::set <bes::variable_type>::iterator i=variable_occurrence_set[v].begin();
-      //     i!=variable_occurrence_set[v].end(); i++)
-      // { 
-      //   if ((bes_equations.get_rank(*i)<bes_equations.get_rank(w))||
-      //       ((bes_equations.get_rank(*i)==bes_equations.get_rank(w))&&(*i<w)))
-      //   { variable_occurrence_set[*i].insert(w);
-      //   }
-      // }
       add_variables_to_set(w,bes_equations.get_rhs(v),variable_occurrence_set);
       return BDDif(bes_equations.get_rhs(v),then_branch(b),else_branch(b));
     }
@@ -683,8 +676,6 @@ static bool solve_bes()
     { if (v % 100==0)
       { gsVerboseMsg("Solving BES. Currently at variable %d\n",v);
       } 
-      // cerr <<  current_rank << "curr_rank" << v << endl;
-      // ATfprintf(stderr,"EQUATION1: %d  %t\n",v,(ATerm)bes_equations.get_rhs(v));
       if (bes_equations.get_rank(v)==current_rank)
       { bes_equations.set_rhs(v,substitute_fp(bes_equations.get_rhs(v),v));
         for(std::set <bes::variable_type>:: iterator w=variable_occurrence_set[v].begin();
@@ -693,13 +684,11 @@ static bool solve_bes()
           ATfprintf(stderr,".");
           bes_equations.set_rhs(*w,substitute_bex(v,*w,bes_equations.get_rhs(*w),variable_occurrence_set));
           variable_occurrence_set[*w].erase(v);
-          // ATfprintf(stderr,"EQUATION4: %d  %t\n",*w,(ATerm)bes_equations.get_rhs(*w));
         }
         /* We do not need v anymore, because is has been substituted away everywhere */
         variable_occurrence_set[v].clear();
         /* reset rhs of bes equation to true, except
          * if it is the initial equation */
-        // ATfprintf(stderr,"EQUATION2: %d  %t\n",v,(ATerm)bes_equations.get_rhs(v));
         if (v>1)
         { bes_equations.set_rhs(v,bes::true_()); 
         }
@@ -707,7 +696,8 @@ static bool solve_bes()
     }
   }
 
-  ATfprintf(stderr,"RESULT %t\n",(ATerm)bes_equations.get_rhs(1));
+  assert(bes::is_true(bes_equations.get_rhs(1))||
+         bes::is_true(bes_equations.get_rhs(1)));
   return bes::is_true(bes_equations.get_rhs(1)); /* 1 is the index of the initial variable */
 }
 
@@ -889,7 +879,7 @@ t_tool_options parse_command_line(int argc, char** argv)
       ("strategy,s",  po::value<string>(&opt_strategy)->default_value("lazy"), "use strategy arg (default 'lazy');\n"
        "The following strategies are available:\n"
        "lazy    Compute only boolean equations which can be reached from the initial state\n")
-      ("output,o",  po::value<string>(&opt_outputformat)->default_value("binary"), "use outputformat arg (default 'none');\n"
+      ("output,o",  po::value<string>(&opt_outputformat)->default_value("none"), "use outputformat arg (default 'none');\n"
                "available outputformats are none, vasy and cwi")
       ("verbose,v",  "turn on the display of short intermediate messages")
       ("debug,d",    "turn on the display of detailed intermediate messages")
