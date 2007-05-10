@@ -271,7 +271,7 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
 bool squadt_interactor::perform_task(sip::configuration& c) {
   t_tool_options tool_options;
 
-  tool_options.pretty           = static_cast < pbes_output_format > (c.get_option_argument< size_t >(option_selected_output_format)) == normal;
+  tool_options.pretty           = static_cast < pbes_output_format > (c.get_option_argument< size_t >(option_selected_output_format)) != normal;
   tool_options.untimed          = c.get_option_argument< bool >(option_special_untimed_conversion);
   tool_options.end_phase        = static_cast < t_phase > (c.get_option_argument< long int >(option_end_phase));
   tool_options.formfilename     = c.get_input(formula_file_for_input).get_location();
