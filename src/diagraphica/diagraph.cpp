@@ -151,6 +151,10 @@ bool DiaGraph::OnInit()
      // init colleagues
      initColleagues();
 
+     if (!fsm_file_argument.empty()){
+       openFile(fsm_file_argument);
+     }; 
+
      // -*- //
      critSect = false;
 

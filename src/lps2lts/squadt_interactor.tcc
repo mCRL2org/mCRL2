@@ -75,7 +75,7 @@ class squadt_interactor::storage_configuration {
 
       /* Set default configuration, for unspecified options */
       if (!c.option_exists(option_out_info)) {
-        c.add_option(option_out_info).set_argument_value< 0, sip::datatype::boolean >(false);
+        c.add_option(option_out_info).set_argument_value< 0, sip::datatype::boolean >(true);
       }
       if (!c.option_exists(option_usedummies)) {
         c.add_option(option_usedummies).set_argument_value< 0, sip::datatype::boolean >(true);

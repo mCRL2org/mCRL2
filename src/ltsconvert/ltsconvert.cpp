@@ -443,9 +443,10 @@ static lts_extra get_extra(lts_type type, string const &lps_file, bool print_dot
     opts.print_states = print_dot_states;
     return lts_extra(opts);
   } else {
-    if ( lps_file != "" )
+    if ( !lps_file.empty() )
     {
       ATermAppl spec = get_lps(lps_file);
+
       if ( spec != NULL )
       {
         if ( gsIsSpecV1(spec) )
