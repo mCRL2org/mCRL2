@@ -253,10 +253,7 @@
 
     int AI_Jitty::get_number_of_arguments(ATerm a_term) {
       if (!is_true(a_term) && !is_false(a_term) && !is_variable(a_term)) {
-        Symbol v_symbol;
-
-        v_symbol = ATgetSymbol(a_term);
-        return ATgetArity(v_symbol) - 1;
+        return ATgetArity(ATgetAFun(a_term)) - 1;
       } else {
         return 0;
       }
@@ -293,10 +290,12 @@
         v_term = (ATerm) ATmakeAppl1(ATmakeAFun("wrap", 1, ATfalse), v_term);
         v_term = (ATerm) f_rewriter->fromRewriteFormat(v_term);
 
-        if (gsIsOpId((ATermAppl) v_term)) {
+        if (gsIsOpId((ATermAppl) v_term)) { // XXX why is a variable not allowed?
           v_term = ATgetArgument(v_term, 1);
-          assert (gsIsSortExpr((ATermAppl) v_term));
-          v_term = (ATerm) gsGetSortExprResult((ATermAppl) v_term);
+          while (v_number_of_arguments != 0) {
+            v_number_of_arguments -= ATgetLength(ATLgetArgument((ATermAppl) v_term, 0));
+            v_term = ATgetArgument(v_term, 1);
+          }
           return (ATisEqual(v_term, (ATerm) gsMakeSortIdBool()));
         } else {
           return false;
@@ -374,7 +373,7 @@
     // --------------------------------------------------------------------------------------------
 
     ATerm AI_Inner::get_operator(ATerm a_term) {
-      return ATelementAt((ATermList) a_term, 0);
+      return ATgetFirst((ATermList) a_term);
     }
 
     // --------------------------------------------------------------------------------------------
@@ -390,7 +389,7 @@
     ///         The number of arguments of the main operator, otherwise.
 
     int AI_Inner::get_number_of_arguments(ATerm a_term) {
-      if (!is_true(a_term) && !is_false(a_term) && !is_variable(a_term) && ATgetType(a_term) == AT_LIST) {
+      if (ATgetType(a_term) == AT_LIST) {
         return ATgetLength((ATermList) a_term) - 1;
       } else {
         return 0;
@@ -425,11 +424,11 @@
 
         v_term = ATgetFirst((ATermList) a_term);
         v_term = (ATerm) f_rewriter->fromRewriteFormat(v_term);
-        if (gsIsOpId((ATermAppl) v_term)) {
+        if (gsIsOpId((ATermAppl) v_term)) { // XXX why is a variable not allowed?
           v_term = ATgetArgument(v_term, 1);
           while (v_number_of_arguments != 0) {
+            v_number_of_arguments -= ATgetLength(ATLgetArgument((ATermAppl) v_term, 0));
             v_term = ATgetArgument(v_term, 1);
-            v_number_of_arguments--;
           }
           return (v_term == (ATerm) gsMakeSortIdBool());
         } else {
