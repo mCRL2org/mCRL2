@@ -7,21 +7,24 @@
 #include "libprint_c.h" // contains gs..Msg family
 
 
-
-
 #include "atermpp/algorithm.h"     // replace
 #include "atermpp/make_list.h"
 #include "lps/data.h"
 #include "lps/data_functional.h"
 #include "lps/specification.h"
 
-#include "librewrite.h" // rewriter
 
 
 using namespace lps;
 using namespace pbes_expr;
 
-Rewriter *rewriter;
+
+static void addrule__b_and_not_b(Rewriter *rewriter);
+
+static bool identical_pbes_expressions
+(pbes_expression p, pbes_expression q, BDD_Prover *prover);
+
+
 
 
 //======================================================================
@@ -37,7 +40,13 @@ equation_system solve_pbes(pbes pbes_spec, bool interactive, int bound)
  equation_system es_problem = pbes_spec.equations();
  equation_system es_solution;
  
- rewriter = createRewriter(pbes_spec.data());
+ Rewriter* rewriter = createRewriter(pbes_spec.data(), GS_REWR_INNER);
+ addrule__b_and_not_b(rewriter);
+
+ lps::data_specification ds = pbes_spec.data();
+ SMT_Solver_Type sol = solver_type_cvc_lite_fast;
+ BDD_Prover* prover = new BDD_Prover(ds, GS_REWR_INNER, 0, false, sol, false);
+
 
  // Is using a reverse_iterator correct? inefficient??
  for (equation_system::reverse_iterator eqcrt = 
@@ -47,13 +56,16 @@ equation_system solve_pbes(pbes pbes_spec, bool interactive, int bound)
 	 update_equation(*eqcrt, es_solution);
 	 
 	 // solve this equation
-	 pbes_equation e_solution = solve_equation(*eqcrt, interactive, bound);
+	 pbes_equation e_solution = 
+	   solve_equation(*eqcrt, interactive, bound, rewriter, prover);
    
 	 // add solution of this equation to the already known solutions
 	 es_solution = equation_system(e_solution) + es_solution;
 	}
  
- delete rewriter; // ok??
+ delete rewriter; 
+ // ~BDD_Prover(prover);
+
  return es_solution;
 }
 //======================================================================
@@ -71,7 +83,8 @@ equation_system solve_pbes(pbes pbes_spec, bool interactive, int bound)
 // If _interactive_ is turned on, then, after _bound_ approximation steps,
 // the control will be given to the user.
 
-pbes_equation solve_equation(pbes_equation e, bool interactive, int bound)
+pbes_equation solve_equation
+(pbes_equation e, bool interactive, int bound,Rewriter* rewriter,BDD_Prover* prover)
 //==========================
  
 {
@@ -95,14 +108,17 @@ pbes_equation solve_equation(pbes_equation e, bool interactive, int bound)
 				 no_iterations,pp(approx).c_str());
    
 	 // substitute approx for X in defX, store result in approx_
+	 gsVerboseMsg("SUBSTITUTE in %s\n",pp(defX).c_str());
 	 approx_ = defX;
 	 approx_ = substitute(approx_, X, approx);  
-	 
+	 gsVerboseMsg("SUBSTITUTE result %s\n",pp(approx_).c_str());	 	 
+
 	 // rewrite approx_...
-	 rewrite_pbes_expression(approx_);
-   
-	 // decide whether it's stable. TODO: rewrite pbes to eqbdd normal forms.
-	 stable = (approx_ == approx);
+	 approx_ = rewrite_pbes_expression(approx_,rewriter);
+	 gsVerboseMsg("REWRITTEN: %s\n",pp(approx_).c_str());
+
+	 // decide whether it's stable.
+	 stable = identical_pbes_expressions(approx_,approx,prover);
    
 	 // continue
 	 approx = approx_;
@@ -159,8 +175,6 @@ pbes_expression substitute(pbes_expression expr,
 		       propositional_variable X, pbes_expression solX)
 //=============
 {
- gsVerboseMsg("SUBSTITUTE in %s\n",pp(expr).c_str());
- 
  if (is_and(expr))	 
 	//substitute in lhs and rhs
 	return(and_(substitute(lhs(expr),X,solX), substitute(rhs(expr),X,solX)));	
@@ -374,7 +388,7 @@ static pbes_expression data_to_pbes_greedy(data_expression d)
 // Rewrites (simplifies) e according to the
 // rewriting rules of first-order logic.
 
-pbes_expression rewrite_pbes_expression(pbes_expression e)
+pbes_expression rewrite_pbes_expression(pbes_expression e, Rewriter* rewriter)
 //=====================================
 
 {
@@ -402,6 +416,24 @@ pbes_expression rewrite_pbes_expression(pbes_expression e)
 
 
 
+//======================================================================
+static bool identical_pbes_expressions
+(pbes_expression p, pbes_expression q, BDD_Prover* prover)
+{
+  data_expression dp = pbes_to_data(p);
+  data_expression dq = pbes_to_data(q);
+  
+  ATermAppl formula = gsMakeDataExprEq(p,q);
+
+  prover->set_formula(formula);
+//  return prover->is_tautology();
+return false;
+}
+//======================================================================
+
+
+
+
 
 
 //======================================================================
@@ -417,3 +449,22 @@ void solve_equation_interactive(propositional_variable X,
 
 
 
+
+//======================================================================
+//  EXTRA REWRITE RULES
+//======================================================================
+static void addrule__b_and_not_b(Rewriter* rewriter){
+  gsVerboseMsg("adding rule b && !b == false\n");  
+  ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"),gsMakeSortExprBool());
+  ATermAppl lhs = gsMakeDataExprAnd(b,gsMakeDataExprNot(b));
+  ATermAppl rule = gsMakeDataEqn(ATmakeList1((ATerm) b), 
+				 gsMakeNil(), 
+				 lhs, 
+				 gsMakeDataExprFalse());
+  if (rewriter->addRewriteRule(rule) == false)
+    gsErrorMsg("could not add rewrite rule b&&!b==false");
+  gsVerboseMsg("Added rule: %s\n",pp(rule).c_str());
+}
+
+
+//======================================================================
