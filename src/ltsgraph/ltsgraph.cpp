@@ -180,7 +180,6 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
         }
         return 0;
 #endif
-
     }
 #else
 int main(int argc, char **argv)

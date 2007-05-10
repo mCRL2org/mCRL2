@@ -1,6 +1,7 @@
 import testing ;
 
 project libraries/parser/test
+   : source-location .
    : requirements
        <use>/boost//headers
        <source>/libraries//parser
@@ -10,4 +11,5 @@ project libraries/parser/test
 test-suite parser
     :
       [ run test_lib.cpp ]
+      [ run_tool_on_examples /tools/mcrl22lps//mcrl22lps mcrl22lps lps : : . : mcrl2 ]
     ;

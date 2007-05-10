@@ -87,7 +87,6 @@ bool LTSViewApp::OnInit() {
   wxInitAllImageHandlers();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-
   if (command_line) {
 #else
   std::string lts_file_argument;
@@ -125,14 +124,13 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,
       nCmdShow);
   squadt_interactor c(starter);
   if (!c.try_interaction(lpCmdLine)) {
-#endif
     return wxEntry(hInstance,hPrevInstance,lpCmdLine,nCmdShow);    
-
-#ifdef ENABLE_SQUADT_CONNECTIVITY
   }
+
   return 0;
-#endif
+#else
   return wxEntry(hInstance,hPrevInstance,lpCmdLine,nCmdShow);
+#endif
 }
 #else
 int main(int argc, char **argv) {

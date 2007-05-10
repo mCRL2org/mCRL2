@@ -74,7 +74,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   return starter.perform_entry();
 }
 
-squadt_interactor* interactor;
+std::auto_ptr < squadt_interactor > interactor;
 #endif
 
 #include "diagraph.h"
@@ -141,11 +141,13 @@ bool parse_command_line(int argc, wxChar** argv,
 bool DiaGraph::OnInit()
 // --------------------
 {
+   wxInitAllImageHandlers();
+
+   // set mode
+   mode = MODE_ANALYSIS;
+
    #ifdef ENABLE_SQUADT_CONNECTIVITY
    if (interactor->is_active()) {
-     // set mode
-     mode = MODE_ANALYSIS;
-
      // init colleagues
      initColleagues();
 
@@ -164,21 +166,18 @@ bool DiaGraph::OnInit()
     //_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
     //_CrtSetBreakAlloc( 7032 );
 
-    // set mode
-    mode = MODE_ANALYSIS;
-
     // init colleagues
     initColleagues();
 	
-	if (!fsm_file_argument.empty()){
-		openFile(fsm_file_argument);
-	}; 
-
-    // start event loop
-    return true;
+    if (!fsm_file_argument.empty()){
+      openFile(fsm_file_argument);
+    }; 
 
     // -*- //
     critSect = false;
+
+    // start event loop
+    return true;
 }
 
 
@@ -2662,12 +2661,11 @@ void DiaGraph::initColleagues()
     graph = NULL;
 
     // init frame
-    frame = new Frame(
-        this,
-        wxT("DiaGraphica") );
+    frame = new Frame(this,wxT("DiaGraphica") );
+    frame->Show(true);
+
     // show frame
-    this->SetTopWindow( frame );
-    frame->Show( TRUE );
+    SetTopWindow( frame );
 
     *frame << "Welcome to DiaGraphica.\n";
     
@@ -2865,11 +2863,10 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 
   squadt_utility::entry_wrapper starter(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 
-  interactor = new squadt_interactor(starter);
+  interactor.reset(new squadt_interactor(starter));
 
   if (!interactor->try_interaction(lpCmdLine)) {
-  
-  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+    return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
   }
 
   return (0);
@@ -2878,7 +2875,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 int main(int argc, char **argv) {
   squadt_utility::entry_wrapper starter(argc, argv);
 
-  interactor = new squadt_interactor(starter);
+  interactor.reset(new squadt_interactor(starter));
 
   if(!interactor->try_interaction(argc, argv)) {
     return wxEntry(argc, argv);
