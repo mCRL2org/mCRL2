@@ -615,6 +615,12 @@ bool gsIsDataExpr(ATermAppl Term)
     gsIsDataApplProd(Term) || gsIsBinder(Term)     || gsIsWhr(Term);
 }
 
+ATermAppl gsGetName(ATermAppl DataExpr)
+{
+  assert(gsIsOpId(DataExpr));
+  return ATAgetArgument(DataExpr, 0);
+}
+
 ATermAppl gsGetSort(ATermAppl DataExpr)
 {
   ATermAppl Result;
@@ -625,8 +631,8 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
   } else if (gsIsDataApplProd(DataExpr)) {
     //DataExpr is a product data application; return the result sort of the
     //first argument
-    ATermAppl Op = ATAgetArgument(DataExpr, 0);
-    ATermAppl HeadSort = gsGetSort(Op);
+    ATermAppl Expr = ATAgetArgument(DataExpr, 0);
+    ATermAppl HeadSort = gsGetSort(Expr);
     if (gsIsSortArrowProd(HeadSort))
       Result = ATAgetArgument(HeadSort, 1);
     else

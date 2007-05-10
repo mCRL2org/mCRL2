@@ -163,6 +163,10 @@ bool gsIsDataExpr(ATermAppl Term);
 //Pre: Term is not NULL
 //Ret: Term is a data expression
 
+ATermAppl gsGetName(ATermAppl DataExpr);
+//Pre: DataExpr is an OpId
+//Ret: The name of the OpId
+
 ATermAppl gsGetSort(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: the sort of DataExpr, if the sort can be inferred from the sort
