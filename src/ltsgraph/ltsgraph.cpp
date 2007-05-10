@@ -58,36 +58,29 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   //skip
 }
 
-
 bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   if (c.input_exists(lts_file_for_input)) {
     /* The input object is present, verify whether the specified format is supported */
     sip::object input_object(c.get_input(lts_file_for_input));
+
     lts_file_argument = input_object.get_location();
 
-    lts_type t = lts::parse_format(input_object.get_mime_type().get_sub_type().c_str());
-
-    if (t == lts_none) {
-      send_error(boost::str(boost::format("Invalid configuration: unsupported type `%s' for main input") % lts::string_for_type(t)));
+    if (lts::parse_format(input_object.get_mime_type().get_sub_type().c_str()) == lts_none) {
+      send_error(boost::str(boost::format("Invalid configuration: unsupported type `%s' for main input") % input_object.get_mime_type().get_sub_type().c_str()));
       return false;
     }
   }
-
   else {
     return false;
   }
-
   
   return true;
-  
 }
 
 bool squadt_interactor::perform_task(sip::configuration&) {
   return starter.perform_entry();
 }
-
 #endif
-
 
 void print_help() {
   cout << "Usage: ltsgraph [INFILE]\n"

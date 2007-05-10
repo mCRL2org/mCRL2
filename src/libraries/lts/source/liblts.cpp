@@ -1419,10 +1419,10 @@ lts_type lts::parse_format(char const* s) {
   if ( !strcmp(s,"aut") )
   {
     return lts_aut;
-  } else if ( !strcmp(s,"mcrl") )
+  } else if ( !strcmp(s,"mcrl") || !strcmp(s,"svc+mcrl"))
   {
     return lts_mcrl;
-  } else if ( !strcmp(s,"mcrl2") )
+  } else if ( !strcmp(s,"mcrl2") || !strcmp(s,"svc+mcrl2"))
   {
     return lts_mcrl2;
   } else if ( !strcmp(s,"svc") )
