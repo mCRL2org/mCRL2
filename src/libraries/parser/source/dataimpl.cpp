@@ -849,7 +849,6 @@ ATermAppl impl_bag_enum(ATermList elts, ATermAppl sort_expr)
     gsMakeDataVarId(gsFreshString2ATermAppl("x", (ATerm) elts, true),
       gsGetSort(ATAgetFirst(elts)));
   //make body for the lambda abstraction
-  elts = ATreverse(elts);
   ATermAppl elt = ATAgetFirst(elts);
   elts = ATgetNext(elts);
   ATermAppl amt = ATAgetFirst(elts);
