@@ -1305,7 +1305,7 @@ ATermAppl impl_sort_struct(ATermAppl sort_struct, ATermList *p_substs,
       (ATerm) gsMakeDataEqn(bxl, nil, gsMakeDataExprIf(b, x, x),x)
     ), op_eqns);
   //Add op_eqns to data_eqns
-  p_data_decls->data_eqns = ATconcat(p_data_decls->data_eqns,op_eqns);
+  p_data_decls->data_eqns = ATconcat(op_eqns, p_data_decls->data_eqns);
 
   return sort_id;
 }

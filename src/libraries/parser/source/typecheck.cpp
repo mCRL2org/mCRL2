@@ -2287,7 +2287,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
 	  ATermAppl Par=ATAgetFirst(ParList);
 	  if((Par=gstcTypeMatchA(Par,PosType)))
-	    NewParList=ATinsert(NewParList,(ATerm)Par);
+	    NewParList=ATinsertUnique(NewParList,(ATerm)Par);
 	}
 	NewParList=ATreverse(NewParList);
         gsDebugMsg("The result of casting is %T\n",NewParList);
@@ -2304,7 +2304,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
 	  ATermAppl Par=ATAgetFirst(ParList);
 	  if((Par=gstcTypeMatchA(Par,PosType)))
-	    NewParList=ATinsert(NewParList,(ATerm)Par);
+	    NewParList=ATinsertUnique(NewParList,(ATerm)Par);
 	}
 	NewParList=ATreverse(NewParList);
 	gsDebugMsg("The result of casting is %T\n",NewParList);
@@ -2858,7 +2858,7 @@ static ATermAppl gstcUnArrowProd(ATermList ArgTypes, ATermAppl PosType){
 	if(gstcEqTypesL(PosArgTypes,ArgTypes)) NewPosType=ATAgetArgument(NewPosType,1);
       }
       else if(!gsIsSortUnknown(NewPosType)) continue;
-      NewPosTypes=ATinsert(NewPosTypes,(ATerm)NewPosType);
+      NewPosTypes=ATinsertUnique(NewPosTypes,(ATerm)NewPosType);
     }
     NewPosTypes=ATreverse(NewPosTypes);
     return gsMakeSortsPossible(NewPosTypes);
