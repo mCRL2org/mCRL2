@@ -333,6 +333,7 @@ namespace squadt {
 
   inline void processor_impl::shutdown() {
     current_monitor->shutdown();
+    current_monitor->reset_handlers();
     current_monitor->finish();
   }
 

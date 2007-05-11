@@ -444,9 +444,12 @@ namespace squadt {
 
     processor_list::iterator j = processors.begin();
 
-    /** Actually remove the processor */
+    // Actually remove the processor
     while (j != processors.end()) {
       if (obsolete.find((*j).get()) != obsolete.end()) {
+        // Deactivate events, before delete
+        (*j)->shutdown();
+
         j = processors.erase(j);
       }
       else {

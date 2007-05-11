@@ -82,11 +82,20 @@ namespace sip {
         /** \brief Get the current (perhaps partial) configuration */
         boost::shared_ptr < configuration > get_configuration() const;
 
+        /** \brief Clears handlers for display change messages */
+        void deactivate_display_layout_handler();
+
         /** \brief Sets a handler for layout messages using a handler function */
         void activate_display_layout_handler(display_layout_handler_function);
 
+        /** \brief Clears handlers for display update messages */
+        void deactivate_display_update_handler();
+
         /** \brief Sets a handler for layout messages using a handler function */
         void activate_display_update_handler(sip::layout::tool_display::sptr, display_update_handler_function);
+
+        /** \brief Clears handlers for status messages */
+        void deactivate_status_message_handler();
 
         /** \brief Sets a handler for layout messages using a handler function */
         void activate_status_message_handler(status_message_handler_function);

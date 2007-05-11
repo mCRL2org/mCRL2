@@ -167,36 +167,10 @@ namespace squadt {
     return (false);
   }
 
-  void processor::monitor::status_change_dummy() {
-    get_logger()->log(2, "No custom status change event handler connected!\n");
-  }
-
-  void processor::monitor::display_layout_change_dummy(sip::layout::tool_display::sptr) {
-    get_logger()->log(2, "No custom display change event handler connected!\n");
-  }
-
-  void processor::monitor::display_update_change_dummy(sip::layout::tool_display::constant_elements const&) {
-    get_logger()->log(2, "No custom display state change event handler connected!");
-  }
-
-  void processor::monitor::status_message_change_dummy(sip::report::sptr) {
-    get_logger()->log(2, "Incoming report lost!");
-  }
-
   /**
    * \param[in] o the processor that owns of this object
    **/
   processor::monitor::monitor(processor& o) : owner(o) {
-    status_change_handler  = boost::bind(&processor::monitor::status_change_dummy, this);
-    layout_change_handler  = boost::bind(&processor::monitor::display_layout_change_dummy, this, _1);
-    state_change_handler   = boost::bind(&processor::monitor::display_update_change_dummy, this, _1);
-    message_change_handler = boost::bind(&processor::monitor::status_message_change_dummy, this, _1);
-
-    /* Set the handler for incoming layout messages */
-    activate_display_layout_handler(layout_change_handler);
-
-    /* Set the handler for incoming layout messages */
-    activate_display_update_handler(sip::layout::tool_display::sptr(), state_change_handler);
   }
 
   /**
@@ -218,6 +192,9 @@ namespace squadt {
           }
           break;
         case process::completed:
+          for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
+            (*i)->status = object_descriptor::reproducible_up_to_date;
+          }
           break;
         default: /* aborted... */
           for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
@@ -239,6 +216,9 @@ namespace squadt {
           }
           break;
         case process::completed:
+          for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
+            (*i)->status = object_descriptor::reproducible_up_to_date;
+          }
           break;
         default: /* aborted... */
           for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
@@ -255,7 +235,9 @@ namespace squadt {
     task_monitor::signal_change(s);
 
     /* Update status for known processor outputs */
-    status_change_handler();
+    if (!status_change_handler.empty()) {
+      status_change_handler();
+    }
   }
 
   execution::process::status processor::monitor::get_status() {
@@ -330,6 +312,9 @@ namespace squadt {
 
         sip::message_ptr m(await_message(sip::message_signal_done));
 
+        /* Do not let process status influence return status */
+        reset_status_message_handler();
+
         if (m.get() && !m->is_empty()) {
           /* Successful, set new status */
           for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
@@ -385,24 +370,26 @@ namespace squadt {
   }
 
   void processor::monitor::reset_display_layout_handler() {
-    layout_change_handler  = boost::bind(&processor::monitor::display_layout_change_dummy, this, _1);
-
     /* Set the handler for incoming layout messages */
-    activate_display_layout_handler(layout_change_handler);
+    deactivate_display_layout_handler();
   }
 
   void processor::monitor::reset_display_update_handler() {
     /* Set the handler for incoming layout messages */
-    state_change_handler = boost::bind(&processor::monitor::display_update_change_dummy, this, _1);
-
-    activate_display_update_handler(sip::layout::tool_display::sptr(), state_change_handler);
+    deactivate_display_update_handler();
   }
 
   void processor::monitor::reset_status_message_handler() {
     /* Set the handler for incoming layout messages */
-    message_change_handler = boost::bind(&processor::monitor::status_message_change_dummy, this, _1);
+    deactivate_status_message_handler();
+  }
 
-    activate_status_message_handler(message_change_handler);
+  void processor::monitor::reset_handlers() {
+    /* Set the handler for incoming layout messages */
+    deactivate_status_message_handler();
+    deactivate_display_layout_handler();
+    deactivate_display_update_handler();
+    status_change_handler.clear();
   }
 
   void processor::monitor::set_status_handler(status_callback_function h) {

@@ -174,11 +174,12 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
         squadt_interactor c(starter);
 
         if (!c.try_interaction(lpCmdLine)) {
-#endif
           return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
-#ifdef ENABLE_SQUADT_CONNECTIVITY
         }
+
         return 0;
+#else
+        return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
 #endif
     }
 #else
@@ -193,14 +194,14 @@ int main(int argc, char **argv)
 
   if(!c.try_interaction(argc, argv)) {
     command_line = true;
-#endif
     /* On purpose we do not catch exceptions */
 
     return wxEntry(argc, argv);
-#ifdef ENABLE_SQUADT_CONNECTIVITY
   }
-#endif
 
   return 0;
+#else
+  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
+#endif
 }
 #endif

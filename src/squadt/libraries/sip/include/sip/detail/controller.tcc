@@ -50,22 +50,25 @@ namespace sip {
         /** \brief The current configuration of a tool (may be limited to a main input configuration) */
         boost::shared_ptr < configuration >  m_configuration;
 
-        /** \brief The current handler for layout change events */
-        display_layout_handler_function      m_layout_handler;
-
-        /** \brief The current handler for layout state change events */
-        display_update_handler_function      m_data_handler;
- 
       public:
 
         /** \brief Default constructor */
         communicator_impl();
 
+        /** \brief Clears handlers for display change messages */
+        void deactivate_display_layout_handler();
+
         /** \brief Sets a handler for layout messages using a handler function */
         void activate_display_layout_handler(display_layout_handler_function);
 
+        /** \brief Clears handlers for display update messages */
+        void deactivate_display_update_handler();
+
         /** \brief Sets a handler for layout messages using a handler function */
         void activate_display_update_handler(sip::layout::tool_display::sptr, display_update_handler_function);
+
+        /** \brief Clears handlers for status messages */
+        void deactivate_status_message_handler();
 
         /** \brief Sets a handler for layout messages using a handler function */
         void activate_status_message_handler(status_message_handler_function);
@@ -79,16 +82,25 @@ namespace sip {
       add_handler(sip::message_accept_configuration, bind(&communicator_impl::tool_configuration_handler, this, _1));
     }
     
+    inline void communicator_impl::deactivate_display_layout_handler() {
+      clear_handlers(sip::message_display_layout);
+    }
+
     /**
      * \param h the function that is called when a new layout for the display has been received
+     *
+     * \note deactivates event handling if h.empty()
      **/
     inline void communicator_impl::activate_display_layout_handler(display_layout_handler_function h) {
       /* Remove any previous handlers */
       clear_handlers(sip::message_display_layout);
 
+      
       add_handler(sip::message_display_layout, boost::bind(&communicator_impl::display_layout_handler, this, _1, h));
+    }
 
-      m_layout_handler = h;
+    inline void communicator_impl::deactivate_display_update_handler() {
+      clear_handlers(sip::message_display_update);
     }
 
     /**
@@ -96,24 +108,33 @@ namespace sip {
      * \param h the function that is called when a new layout for the display has been received
      *
      * \pre d.get() != 0
+     * \note deactivates event handling if h.empty()
      **/
     inline void communicator_impl::activate_display_update_handler(sip::layout::tool_display::sptr d, display_update_handler_function h) {
       /* Remove any previous handlers */
       clear_handlers(sip::message_display_update);
 
-      add_handler(sip::message_display_update, boost::bind(&communicator_impl::display_update_handler, this, _1, d, h));
+      if (!h.empty()) {
+        add_handler(sip::message_display_update, boost::bind(&communicator_impl::display_update_handler, this, _1, d, h));
+      }
+    }
 
-      m_data_handler = h;
+    inline void communicator_impl::deactivate_status_message_handler() {
+      clear_handlers(sip::message_report);
     }
 
     /**
      * \param h the function that is called when a new layout for the display has been received
+     *
+     * \note deactivates event handling if h.empty()
      **/
     inline void communicator_impl::activate_status_message_handler(status_message_handler_function h) {
       /* Remove any previous handlers */
       clear_handlers(sip::message_report);
 
-      add_handler(sip::message_report, boost::bind(&communicator_impl::status_message_handler, this, _1, h));
+      if (!h.empty()) {
+        add_handler(sip::message_report, boost::bind(&communicator_impl::status_message_handler, this, _1, h));
+      }
     }
 
     /**

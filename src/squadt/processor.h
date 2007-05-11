@@ -285,18 +285,6 @@ namespace squadt {
       /** \brief Handler function that is called when an associated process changes state */
       void signal_change(const execution::process::status);
 
-      /** \brief The default callback function that does nothing */
-      void status_change_dummy();
-
-      /** \brief The default callback function that does nothing */
-      void display_layout_change_dummy(sip::layout::tool_display::sptr);
-
-      /** \brief The default callback function that does nothing */
-      void display_update_change_dummy(sip::layout::tool_display::constant_elements const&);
-
-      /** \brief The default callback function that does nothing */
-      void status_message_change_dummy(sip::report::sptr);
-
       /** \brief Helper function for communication with a tool, starts a new thread with tool_configuration() */
       void start_tool_configuration(processor::sptr const&, boost::shared_ptr < sip::configuration > const& c);
 
@@ -334,6 +322,9 @@ namespace squadt {
 
       /** \brief Set the callback handler for incoming status messages */
       void reset_status_message_handler();
+
+      /** \brief Set all callback handlers to default */
+      void reset_handlers();
 
       /** \brief Gets the status of the associated process, if there is one */
       execution::process::status get_status();

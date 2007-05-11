@@ -54,11 +54,19 @@ namespace sip {
       impl->send_message(sip::message_signal_start);
     }
 
+    void communicator::deactivate_display_layout_handler() {
+      boost::dynamic_pointer_cast < communicator_impl > (impl)->deactivate_display_layout_handler();
+    }
+
     /**
      * \param h the function that is called when a new layout for the display has been received
      **/
     void communicator::activate_display_layout_handler(display_layout_handler_function h) {
       boost::dynamic_pointer_cast < communicator_impl > (impl)->activate_display_layout_handler(h);
+    }
+
+    void communicator::deactivate_display_update_handler() {
+      boost::dynamic_pointer_cast < communicator_impl > (impl)->deactivate_display_update_handler();
     }
 
     /**
@@ -69,6 +77,10 @@ namespace sip {
      **/
     void communicator::activate_display_update_handler(sip::layout::tool_display::sptr d, display_update_handler_function h) {
       boost::dynamic_pointer_cast < communicator_impl > (impl)->activate_display_update_handler(d, h);
+    }
+
+    void communicator::deactivate_status_message_handler() {
+      boost::dynamic_pointer_cast < communicator_impl > (impl)->deactivate_status_message_handler();
     }
 
     /**
