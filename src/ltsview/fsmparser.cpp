@@ -122,6 +122,8 @@ std::map< std::string,int > labels;
 std::string par_name;
 int par_index, nodenr_index, fanin_index, fanout_index, N;
 State *state = NULL;
+char *string_buffer = NULL;
+unsigned int string_buffer_size = 0;
 
 // Function declarations
 void fsmerror(const char* c);
@@ -148,13 +150,13 @@ std::string unquote(char *str);
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 26 "fsmparser.yy"
+#line 28 "fsmparser.yy"
 {
 	char *str;
 	int num;
 }
-/* Line 187 of yacc.c.  */
-#line 158 "fsmparser.cpp"
+/* Line 193 of yacc.c.  */
+#line 160 "fsmparser.cpp"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -167,7 +169,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 171 "fsmparser.cpp"
+#line 173 "fsmparser.cpp"
 
 #ifdef short
 # undef short
@@ -464,11 +466,11 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    39,    39,    39,    48,    51,    51,    55,    55,    58,
-      58,    60,    60,    62,    62,    66,    70,    70,    76,    78,
-      81,    89,    92,   100,   103,   107,   112,   116,   118,   119,
-     123,   124,   127,   129,   133,   138,   142,   144,   141,   153,
-     156,   175,   178,   183,   209,   211
+       0,    41,    41,    41,    50,    53,    53,    57,    57,    60,
+      60,    62,    62,    64,    64,    68,    72,    72,    78,    80,
+      83,    91,    94,   102,   105,   109,   114,   118,   120,   121,
+     125,   126,   129,   131,   135,   140,   144,   146,   143,   155,
+     158,   177,   180,   185,   211,   213
 };
 #endif
 
@@ -1407,52 +1409,52 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 39 "fsmparser.yy"
+#line 41 "fsmparser.yy"
     { N = 0; nodenr_index = 0; fanin_index = 0; fanout_index = 0 ;}
     break;
 
   case 5:
-#line 51 "fsmparser.yy"
+#line 53 "fsmparser.yy"
     { N++ ;}
     break;
 
   case 7:
-#line 55 "fsmparser.yy"
+#line 57 "fsmparser.yy"
     { par_name = static_cast<std::string>((yyvsp[(1) - (1)].str)) ;}
     break;
 
   case 9:
-#line 58 "fsmparser.yy"
+#line 60 "fsmparser.yy"
     { fanin_index = N-1 ;}
     break;
 
   case 11:
-#line 60 "fsmparser.yy"
+#line 62 "fsmparser.yy"
     { fanout_index = N-1 ;}
     break;
 
   case 13:
-#line 62 "fsmparser.yy"
+#line 64 "fsmparser.yy"
     { nodenr_index = N-1 ;}
     break;
 
   case 16:
-#line 70 "fsmparser.yy"
+#line 72 "fsmparser.yy"
     { par_index = fsmparserlts->addParameter(par_name,static_cast<std::string>((yyvsp[(1) - (1)].str))) ;}
     break;
 
   case 18:
-#line 76 "fsmparser.yy"
+#line 78 "fsmparser.yy"
     { (yyval.str) = "" ;}
     break;
 
   case 19:
-#line 79 "fsmparser.yy"
+#line 81 "fsmparser.yy"
     { (yyval.str) = (yyvsp[(1) - (1)].str) ;}
     break;
 
   case 20:
-#line 82 "fsmparser.yy"
+#line 84 "fsmparser.yy"
     {
 	    std::string result = static_cast<std::string>((yyvsp[(1) - (3)].str)) + "->" + static_cast<std::string>((yyvsp[(3) - (3)].str));
 	    (yyval.str) = strdup(result.c_str())
@@ -1460,12 +1462,12 @@ yyreduce:
     break;
 
   case 21:
-#line 90 "fsmparser.yy"
+#line 92 "fsmparser.yy"
     { (yyval.str) = (yyvsp[(1) - (1)].str) ;}
     break;
 
   case 22:
-#line 93 "fsmparser.yy"
+#line 95 "fsmparser.yy"
     {
 	    std::string result = "(" + static_cast<std::string> ((yyvsp[(2) - (3)].str)) + ")";
 	    (yyval.str) = strdup(result.c_str())
@@ -1473,17 +1475,17 @@ yyreduce:
     break;
 
   case 25:
-#line 108 "fsmparser.yy"
+#line 110 "fsmparser.yy"
     { fsmparserlts->addParameterValue(par_index,unquote((yyvsp[(1) - (1)].str))) ;}
     break;
 
   case 36:
-#line 142 "fsmparser.yy"
+#line 144 "fsmparser.yy"
     { state = new State(); fsmparserlts->addState(state); N = 0 ;}
     break;
 
   case 37:
-#line 144 "fsmparser.yy"
+#line 146 "fsmparser.yy"
     {
 	    //states.push_back( s );
 	    //if ( states.size() == 1 ) 
@@ -1493,7 +1495,7 @@ yyreduce:
     break;
 
   case 40:
-#line 157 "fsmparser.yy"
+#line 159 "fsmparser.yy"
     { 
 			if (N != fanin_index && N != fanout_index) {
 				if (N == nodenr_index) {
@@ -1511,7 +1513,7 @@ yyreduce:
     break;
 
   case 43:
-#line 184 "fsmparser.yy"
+#line 186 "fsmparser.yy"
     {
 	    State* s1 = states[(yyvsp[(1) - (3)].num)];
 	    State* s2 = states[(yyvsp[(2) - (3)].num)];
@@ -1536,18 +1538,18 @@ yyreduce:
     break;
 
   case 44:
-#line 209 "fsmparser.yy"
+#line 211 "fsmparser.yy"
     { (yyval.str) = "" ;}
     break;
 
   case 45:
-#line 212 "fsmparser.yy"
+#line 214 "fsmparser.yy"
     { (yyval.str) = (yyvsp[(1) - (1)].str) ;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1551 "fsmparser.cpp"
+#line 1553 "fsmparser.cpp"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1761,7 +1763,7 @@ yyreturn:
 }
 
 
-#line 215 "fsmparser.yy"
+#line 217 "fsmparser.yy"
 
 
 int fsmwrap() {
@@ -1785,6 +1787,9 @@ void parseFSMfile( std::string fileName, LTS* const lts ) {
     // reset the lexer position variables
     lineNo = 1;
     posNo = 1;
+    // initialize the string buffer for read string-valued tokens
+    string_buffer_size = 128;
+    string_buffer = (char*)malloc(string_buffer_size*sizeof(char));
   
     fsmparserlts = lts;
     fsmrestart(infile);
@@ -1795,6 +1800,9 @@ void parseFSMfile( std::string fileName, LTS* const lts ) {
 		labels.clear();
     fsmparserlts = NULL;
 		state = NULL;
+    free(string_buffer);
+    string_buffer = NULL;
+    string_buffer_size = 0;
   }
 }
 

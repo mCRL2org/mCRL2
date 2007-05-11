@@ -5,7 +5,7 @@ ifeq (${MAKECMDGOALS},)
 include build/Makefile
 endif
 
-.PHONY: tags clean distclean parsers
+.PHONY: tags clean distclean parsers mcrl2parser ltsview-fsmparser liblts-fsmparser
 
 build/Makefile:
 	$(error Please run configure first)
@@ -20,14 +20,20 @@ distclean: clean
 	@$(RM) -r build/Makefile config.log config.status build/config.jam src/setup.h
 	$(RM) -rf build/bin
 
-parsers:
+parsers: mcrl2parser ltsview-fsmparser liblts-fsmparser
+
+liblts-fsmparser:
 	cd src/libraries/lts/source; \
 	flex -Pfsm -ofsmlexer.cpp fsmlexer.ll; \
 	bison -p fsm -d -o fsmparser.cpp fsmparser.yy; \
 	mv fsmparser.hpp ../include
+
+ltsview-fsmparser:
 	cd src/ltsview; \
 	flex -Pfsm -ofsmlexer.cpp fsmlexer.ll; \
 	bison -p fsm -d -o fsmparser.cpp fsmparser.yy
+
+mcrl2parser:
 	cd src/libraries/parser/source; \
 	flex -Pmcrl2 -omcrl2lexer.cpp mcrl2lexer.ll; \
 	bison -p mcrl2 -d -o mcrl2parser.cpp mcrl2parser.yy; \

@@ -3,8 +3,9 @@
 #include "fsmparser.hpp"
 
 int lineNo=1, posNo=1;
-char str_buf[128];
 extern void fsmerror(const char* s);
+extern char* string_buffer;
+extern unsigned int string_buffer_size;
 void processId();
 void processNumber();
 %}
@@ -33,7 +34,14 @@ Number	[0]|([1-9][0-9]*)
 
 void processId() {
 	posNo += fsmleng;
-  fsmlval.str = strcpy(str_buf,fsmtext);
+  if (string_buffer_size < strlen(fsmtext)+1) {
+    string_buffer_size = strlen(fsmtext)+1;
+    string_buffer = (char*)realloc(string_buffer,string_buffer_size*sizeof(char));
+    if (string_buffer == NULL) {
+      fsmerror("out of memory");
+    }
+  }
+  fsmlval.str = strcpy(string_buffer,fsmtext);
 }
 
 void processNumber() {

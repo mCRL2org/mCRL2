@@ -15,6 +15,8 @@ std::map< std::string,int > labels;
 std::string par_name;
 int par_index, nodenr_index, fanin_index, fanout_index, N;
 State *state = NULL;
+char *string_buffer = NULL;
+unsigned int string_buffer_size = 0;
 
 // Function declarations
 void fsmerror(const char* c);
@@ -235,6 +237,9 @@ void parseFSMfile( std::string fileName, LTS* const lts ) {
     // reset the lexer position variables
     lineNo = 1;
     posNo = 1;
+    // initialize the string buffer for read string-valued tokens
+    string_buffer_size = 128;
+    string_buffer = (char*)malloc(string_buffer_size*sizeof(char));
   
     fsmparserlts = lts;
     fsmrestart(infile);
@@ -245,6 +250,9 @@ void parseFSMfile( std::string fileName, LTS* const lts ) {
 		labels.clear();
     fsmparserlts = NULL;
 		state = NULL;
+    free(string_buffer);
+    string_buffer = NULL;
+    string_buffer_size = 0;
   }
 }
 
