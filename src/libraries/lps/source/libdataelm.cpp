@@ -93,7 +93,7 @@ static bool add_sort(ATermAppl s, ATermIndexedSet used_data, ATermIndexedSet use
 static bool add_sorts(ATermList l, ATermIndexedSet used_data, ATermIndexedSet used_sorts, function_list constructors)
 {
         bool result = false;
-        for(ATermList l1 = l; !ATisEmpty(l1); l1=ATgetNext(l))
+        for(ATermList l1 = l; !ATisEmpty(l1); l1=ATgetNext(l1))
         {
                 //First add_sort (because of potential conditional execution of second argument ||)
                 bool b = add_sort(ATAgetFirst(l1),used_data,used_sorts,constructors);
