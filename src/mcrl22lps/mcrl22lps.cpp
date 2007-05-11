@@ -126,6 +126,41 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
   std::string infilename = c.get_input(mcrl2_file_for_input).get_location();
 
+  // Set defaults for options
+  if (!c.option_exists(option_final_cluster)) {
+    c.add_option(option_final_cluster).set_argument_value< 0, sip::datatype::boolean >(false);
+  }
+  if (!c.option_exists(option_no_intermediate_cluster)) {
+    c.add_option(option_no_intermediate_cluster).set_argument_value< 0, sip::datatype::boolean >(false);
+  }
+  if (!c.option_exists(option_no_alpha)) {
+    c.add_option(option_no_alpha).set_argument_value< 0, sip::datatype::boolean >(false);
+  }
+  if (!c.option_exists(option_newstate)) {
+    c.add_option(option_newstate).set_argument_value< 0, sip::datatype::boolean >(false);
+  }
+  if (!c.option_exists(option_binary)) {
+    c.add_option(option_binary).set_argument_value< 0, sip::datatype::boolean >(false);
+  }
+  if (!c.option_exists(option_statenames)) {
+    c.add_option(option_statenames).set_argument_value< 0, sip::datatype::boolean >(false);
+  }
+  if (!c.option_exists(option_no_rewrite)) {
+    c.add_option(option_no_rewrite).set_argument_value< 0, sip::datatype::boolean >(false);
+  }
+  if (!c.option_exists(option_no_freevars)) {
+    c.add_option(option_no_freevars).set_argument_value< 0, sip::datatype::boolean >(false);
+  }
+  if (!c.option_exists(option_no_sumelm)) {
+    c.add_option(option_no_sumelm).set_argument_value< 0, sip::datatype::boolean >(false);
+  }
+  if (!c.option_exists(option_no_deltaelm)) {
+    c.add_option(option_no_deltaelm).set_argument_value< 0, sip::datatype::boolean >(false);
+  }
+  if (!c.option_exists(option_add_delta)) {
+    c.add_option(option_add_delta).set_argument_value< 0, sip::datatype::boolean >(false);
+  }
+
   layout::manager::aptr top(layout::vertical_box::create());
 
   // Linearisation method selection
@@ -138,6 +173,11 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   method_selector.associate(current_box, lmRegular2, "Regular2");
   method_selector.associate(current_box, lmAlternative, "Expansion");
 
+  if (c.option_exists(option_linearisation_method)) {
+    method_selector.set_selection(static_cast < t_lin_method > (
+        c.get_option_argument< size_t >(option_linearisation_method, 0)));
+  }
+
   top->add(new label(" "));
   top->add(current_box);
 
@@ -147,12 +187,12 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   // left option column
   current_box = new vertical_box();
 
-  checkbox* noclusterintermediate = new checkbox("No intermediate clustering");
-  checkbox* clusterfinal          = new checkbox("Final clustering");
-  checkbox* newstate              = new checkbox("Use enumerated states");
-  checkbox* binary                = new checkbox("Encode enumerated types by booleans  ");
-  checkbox* statenames            = new checkbox("Use informative state names ");
-  checkbox* add_delta             = new checkbox("Add delta summands");
+  checkbox* noclusterintermediate = new checkbox("Try intermediate clustering", !c.get_option_argument< bool >(option_no_intermediate_cluster));
+  checkbox* clusterfinal          = new checkbox("Final clustering", c.get_option_argument< bool >(option_final_cluster));
+  checkbox* newstate              = new checkbox("Use enumerated states", c.get_option_argument< bool >(option_newstate));
+  checkbox* binary                = new checkbox("Encode enumerated types by booleans  ", c.get_option_argument< bool >(option_binary));
+  checkbox* statenames            = new checkbox("Use informative state names ", c.get_option_argument< bool >(option_statenames));
+  checkbox* add_delta             = new checkbox("Add delta summands", c.get_option_argument< bool >(option_add_delta));
 
   current_box->add(noclusterintermediate);
   current_box->add(clusterfinal);
@@ -166,11 +206,11 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   // right option column
   current_box = new vertical_box();
 
-  checkbox* norewrite  = new checkbox("Do not rewrite");
-  checkbox* noalpha    = new checkbox("Do not apply alphabet axioms");
-  checkbox* nosumelm   = new checkbox("Do not apply sum elimination");
-  checkbox* nodeltaelm = new checkbox("Do not apply delta elimination");
-  checkbox* nofreevars = new checkbox("Suppress generating free variables");
+  checkbox* norewrite  = new checkbox("Try rewriting", !c.get_option_argument< bool >(option_no_rewrite));
+  checkbox* noalpha    = new checkbox("Apply alphabet axioms", !c.get_option_argument< bool >(option_no_alpha));
+  checkbox* nosumelm   = new checkbox("Apply sum elimination", !c.get_option_argument< bool >(option_no_sumelm));
+  checkbox* nodeltaelm = new checkbox("Apply delta elimination", !c.get_option_argument< bool >(option_no_deltaelm));
+  checkbox* nofreevars = new checkbox("Generate free variables", !c.get_option_argument< bool >(option_no_freevars));
 
   current_box->add(norewrite,layout::left);
   current_box->add(noalpha,layout::left);
@@ -194,6 +234,11 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   phase_selector.associate(current_box, phAlphaRed, "Alphabet reduction");
   phase_selector.associate(current_box, phNone, "Linearisation", true);
 
+  if (c.option_exists(option_end_phase)) {
+    phase_selector.set_selection(static_cast < t_phase > (
+        c.get_option_argument< size_t >(option_end_phase, 0)));
+  }
+
   top->add(new label(" "));
   top->add(new label("Stop after"),layout::left);
   top->add(current_box);
@@ -213,49 +258,27 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
    * that mcrl22lps can be restarted later with exactly
    * the same parameters
    */
-  if (c.is_fresh()) {
+  if (!c.output_exists(lps_file_for_output)) {
     c.add_output(lps_file_for_output, sip::mime_type("lps", sip::mime_type::application), c.get_output_name(".lps"));
+  }
 
-    c.add_option(option_linearisation_method).
+  c.add_option(option_linearisation_method).
           append_argument(linearisation_method_enumeration, method_selector.get_selection());
-      
-    c.add_option(option_end_phase).
+
+  c.add_option(option_end_phase).
           append_argument(linearisation_phase_enumeration, phase_selector.get_selection());
 
-    if (clusterfinal->get_status())  {
-      c.add_option(option_final_cluster);
-    }
-    if (noclusterintermediate->get_status()) {
-      c.add_option(option_no_intermediate_cluster);
-    }
-    if (noalpha->get_status()) {
-      c.add_option(option_no_alpha);
-    }
-    if (newstate->get_status()) {
-      c.add_option(option_newstate);
-    }
-    if (binary->get_status()) {
-      c.add_option(option_binary);
-    }
-    if (statenames->get_status()) {
-      c.add_option(option_statenames);
-    }
-    if (norewrite->get_status()) {
-      c.add_option(option_no_rewrite);
-    }
-    if (nofreevars->get_status()) {
-      c.add_option(option_no_freevars);
-    }
-    if (nosumelm->get_status()) {
-      c.add_option(option_no_sumelm);
-    }
-    if (nodeltaelm->get_status()) {
-      c.add_option(option_no_deltaelm);
-    }
-    if (add_delta->get_status()) {
-      c.add_option(option_add_delta);
-    }
-  }
+  c.get_option(option_final_cluster).set_argument_value< 0, sip::datatype::boolean >(clusterfinal->get_status());
+  c.get_option(option_no_intermediate_cluster).set_argument_value< 0, sip::datatype::boolean >(!noclusterintermediate->get_status());
+  c.get_option(option_no_alpha).set_argument_value< 0, sip::datatype::boolean >(!noalpha->get_status());
+  c.get_option(option_newstate).set_argument_value< 0, sip::datatype::boolean >(newstate->get_status());
+  c.get_option(option_binary).set_argument_value< 0, sip::datatype::boolean >(binary->get_status());
+  c.get_option(option_statenames).set_argument_value< 0, sip::datatype::boolean >(statenames->get_status());
+  c.get_option(option_no_rewrite).set_argument_value< 0, sip::datatype::boolean >(!norewrite->get_status());
+  c.get_option(option_no_freevars).set_argument_value< 0, sip::datatype::boolean >(!nofreevars->get_status());
+  c.get_option(option_no_sumelm).set_argument_value< 0, sip::datatype::boolean >(!nosumelm->get_status());
+  c.get_option(option_no_deltaelm).set_argument_value< 0, sip::datatype::boolean >(!nodeltaelm->get_status());
+  c.get_option(option_add_delta).set_argument_value< 0, sip::datatype::boolean >(add_delta->get_status());
 
   m_communicator.send_clear_display();
 }

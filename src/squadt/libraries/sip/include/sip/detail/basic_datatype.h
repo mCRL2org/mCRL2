@@ -589,7 +589,7 @@ namespace sip {
      * \pre the string should be parsable as one of the values
      **/
     inline boost::any enumeration::evaluate(std::string const& s) const {
-      std::vector< std::string >::const_iterator i = std::lower_bound(m_values.begin(), m_values.end(), s);
+      std::vector< std::string >::const_iterator i = std::find(m_values.begin(), m_values.end(), s);
 
       return static_cast < size_t > (i == m_values.end() ? m_default_value : i - m_values.begin());
     }

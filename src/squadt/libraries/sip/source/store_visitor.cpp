@@ -282,13 +282,16 @@ namespace utility {
   template <>
   template <>
   void visitor< sip::store_visitor_impl >::visit(sip::datatype::enumeration const& e, std::string const& s) {
-    out << "<enumeration value=\"" << s;
-
-    if (e.m_default_value != 0) {
-      out << "\" default=\"" << e.m_default_value;
+    out << "<enumeration";
+   
+    if (!s.empty()) {
+      out << " value=\"" << s << "\"";;
+    }
+    else if (e.m_default_value != 0) {
+      out << " default=\"" << e.m_default_value << "\"";
     }
 
-    out << "\">";
+    out << ">";
 
     for (std::vector < std::string >::const_iterator i = e.m_values.begin(); i != e.m_values.end(); ++i) {
       out << "<element value=\"" << *i << "\"/>";

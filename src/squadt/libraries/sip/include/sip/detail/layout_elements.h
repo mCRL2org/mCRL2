@@ -39,9 +39,6 @@ namespace sip {
           /** \brief Change the text */
           void set_text(std::string const&);
      
-          /** \brief Change the text, and send update */
-          void set_text(std::string const&, tool::communicator* t);
-     
           /** \brief Instantiate a layout element, through a mediator */
           layout::mediator::wrapper_aptr instantiate(layout::mediator*);
 
@@ -73,9 +70,6 @@ namespace sip {
 
           /** \brief Change the label */
           void set_label(std::string const&);
-     
-          /** \brief Change the label, and send update */
-          void set_label(std::string const&, tool::communicator* t);
      
           /** \brief Instantiate a layout element, through a mediator */
           layout::mediator::wrapper_aptr instantiate(layout::mediator*);
@@ -130,9 +124,6 @@ namespace sip {
           /** \brief Set state of the radio button */
           void set_selected(bool = true);
 
-          /** \brief Set state of the radio button, and send update */
-          void set_selected(tool::communicator*);
-
           /** \brief Returns the current label */
           std::string get_label() const;
 
@@ -182,9 +173,6 @@ namespace sip {
           /** \brief Set the status */
           void set_status(bool);
 
-          /** \brief Set the status, and send an update */
-          void set_status(bool, tool::communicator* t);
-
           /** \brief Gets the status */
           bool get_status() const;
      
@@ -226,20 +214,11 @@ namespace sip {
           /** \brief Sets the current value of the progress bar */
           void set_value(unsigned int);
      
-          /** \brief Sets the current value of the progress bar, and sends an update */
-          void set_value(unsigned int, tool::communicator*);
-     
           /** \brief Sets the minimum value of the progress bar */
           void set_minimum(unsigned int);
      
-          /** \brief Sets the minimum value of the progress bar , and sends an update*/
-          void set_minimum(unsigned int, tool::communicator*);
-     
           /** \brief Sets the minimum value of the progress bar */
           void set_maximum(unsigned int);
-     
-          /** \brief Sets the minimum value of the progress bar , and sends an update*/
-          void set_maximum(unsigned int, tool::communicator*);
      
           /** \brief Gets the current value of the progress bar */
           unsigned int get_value() const;
@@ -286,9 +265,6 @@ namespace sip {
 
           /** \brief Set the text */
           void set_text(std::string const&);
-     
-          /** \brief Set the text, and sends an update */
-          void set_text(std::string const&, tool::communicator*);
      
           /** \brief Get the text */
           std::string get_text() const;

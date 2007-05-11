@@ -53,11 +53,11 @@ namespace squadt_utility {
 
   /** \brief Helper function for showing/hiding an element based on widget state changes */
   template < typename T >
-  void change_visibility_on_toggle(T& r, sip::layout::manager* m, sip::layout::element* c);
+  void change_visibility_on_toggle(T& r, sip::layout::manager* m, sip::layout::element*& c);
 
   /** \brief Helper function for showing/hiding an element based on radio_button widget state changes */
   template <>
-  inline void change_visibility_on_toggle(sip::layout::elements::radio_button& r, sip::layout::manager* m, sip::layout::element* c) {
+  inline void change_visibility_on_toggle(sip::layout::elements::radio_button& r, sip::layout::manager* m, sip::layout::element*& c) {
     if (r.is_selected()) {
       m->show(c);
     }
@@ -68,7 +68,7 @@ namespace squadt_utility {
 
   /** \brief Helper function for showing/hiding an element based on checkbox widget state changes */
   template <>
-  inline void change_visibility_on_toggle(sip::layout::elements::checkbox& r, sip::layout::manager* m, sip::layout::element* c) {
+  inline void change_visibility_on_toggle(sip::layout::elements::checkbox& r, sip::layout::manager* m, sip::layout::element*& c) {
     if (r.get_status()) {
       m->show(c);
     }
@@ -184,6 +184,8 @@ namespace squadt_utility {
         return const_cast < radio_button& > (*(i->first));
       }
     }
+
+    return *this;
   }
 
   template < typename T >

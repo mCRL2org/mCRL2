@@ -163,8 +163,9 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
   checkbox* omit_state_information = new checkbox("Add state information)", true);
   top->add(omit_state_information);
-//squadt_utility::change_visibility_on_toggle(format_selector.get_button(dot), top.get(), omit_state_information);
-//  format_selector.get_button(dot).on_change(boost::function< void () > (boost::bind(change_visibility_on_toggle, format_selector.get_button(dot), top.get(), omit_state_information)));
+
+//  squadt_utility::change_visibility_on_toggle(format_selector.get_button(dot), top.get(), omit_state_information);
+//  format_selector.get_button(dot).on_change(boost::bind(::squadt_utility::change_visibility_on_toggle, format_selector.get_button(dot), top.get(), omit_state_information));
 
   top->add(new label("LTS transformation:"));
 
@@ -369,6 +370,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
       default:
         break;
     }
+
     if (c.option_exists(option_add_bisimulation_equivalence_class)) {
       eq_opts.reduce.add_class_to_state = true;
     }

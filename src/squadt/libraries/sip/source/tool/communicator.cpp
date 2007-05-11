@@ -3,6 +3,7 @@
 #include <sip/tool/category.h>
 #include <sip/controller/capabilities.h>
 #include <sip/detail/tool.tcc>
+#include <sip/detail/event_handlers.h>
 
 namespace sip {
   namespace tool {
@@ -123,6 +124,24 @@ namespace sip {
      * accordingly when data is received.
      **/
     void communicator::send_display_layout(layout::tool_display::sptr d) {
+      struct trampoline {
+        inline static void send_display_data(boost::shared_ptr< communicator_impl > impl, void const* e) {
+          std::string c;
+
+          {
+            sip::store_visitor v(c);
+
+            v.visit(*reinterpret_cast < sip::layout::element const* > (e), reinterpret_cast < sip::layout::element_identifier > (e));
+          }
+
+          impl->send_message(sip::message(c, sip::message_display_update));
+        }
+      };
+
+      if (d->get_manager()) {
+        d->get_manager()->get_event_handler()->connect(boost::bind(trampoline::send_display_data, boost::dynamic_pointer_cast < communicator_impl > (impl), _1));
+      }
+
       boost::dynamic_pointer_cast < communicator_impl > (impl)->send_display_layout(d);
     }
 
@@ -178,101 +197,6 @@ namespace sip {
 
     void communicator::await_configuration() const {
       impl->await_message(sip::message_offer_configuration);
-    }
-  }
-
-  namespace layout {
-
-    /**
-     * \param[in] t the tool communicator object to use
-     * \param[in] e the layout element of which to send the state
-     **/
-    void element::update(tool::communicator* t, layout::element const* e) {
-      t->send_display_data(e);
-    }
-
-    namespace elements {
-
-      /**
-       * \param[in] b the new status
-       * \param[in] t the tool communicator to use for sending the update
-       **/
-      void checkbox::set_status(bool b, tool::communicator* t) {
-        set_status(b);
-
-        element::update(t, this);
-      }
-
-      /**
-       * \param[in] v the new value
-       * \param[in] t the tool communicator to use for sending the update
-       *
-       * \pre minimum <= v <= maximum
-       **/
-      void progress_bar::set_value(unsigned int v, tool::communicator* t) {
-        set_value(v);
-
-        element::update(t, this);
-      }
-
-      /**
-       * \param[in] v the new value
-       * \param[in] t the tool communicator to use for sending the update
-       **/
-      void progress_bar::set_minimum(unsigned int v, tool::communicator* t) {
-        set_minimum(v);
-
-        element::update(t, this);
-      }
-
-      /**
-       * \param[in] v the new value
-       * \param[in] t the tool communicator to use for sending the update
-       **/
-      void progress_bar::set_maximum(unsigned int v, tool::communicator* t) {
-        set_maximum(v);
-
-        element::update(t, this);
-      }
-
-      /**
-       * \param[in] s the new text
-       * \param[in] t the tool communicator to use for sending the update
-       **/
-      void text_field::set_text(std::string const& s, tool::communicator* t) {
-        set_text(s);
-
-        element::update(t, this);
-      }
-
-      /**
-       * \param[in] t the text of the label
-       * \param[in] c the tool communicator to use for sending the update
-       **/
-      void label::set_text(std::string const& t, tool::communicator* c) {
-        set_text(t);
-
-        element::update(c, this);
-      }
-
-      /**
-       * \param[in] l the label for the button
-       * \param[in] t the tool communicator to use for sending the update
-       **/
-      void button::set_label(std::string const& l, tool::communicator* t) {
-        set_label(l);
-
-        element::update(t, this);
-      }
-
-      /**
-       * \param[in] t the tool communicator to use for sending the update
-       **/
-      void radio_button::set_selected(tool::communicator* t) {
-        set_selected(true);
-
-        element::update(t, this);
-      }
     }
   }
 }

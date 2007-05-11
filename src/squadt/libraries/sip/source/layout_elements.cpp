@@ -19,6 +19,8 @@ namespace sip {
        **/
       void label::set_text(std::string const& t) {
         m_text = t;
+
+        activate_handlers();
       }
      
       /**
@@ -52,6 +54,8 @@ namespace sip {
        **/
       void button::set_label(std::string const& l) {
         m_label = l;
+
+        activate_handlers();
       }
 
       /**
@@ -117,6 +121,8 @@ namespace sip {
         }
 
         m_selected = true;
+
+        activate_handlers();
       }
 
       radio_button const* radio_button::get_selected() const {
@@ -167,6 +173,8 @@ namespace sip {
        **/
       void checkbox::set_status(bool b) {
         m_status = b;
+
+        activate_handlers();
       }
 
       bool checkbox::get_status() const {
@@ -207,6 +215,8 @@ namespace sip {
        **/
       void progress_bar::set_value(unsigned int v) {
         m_current = v;
+
+        activate_handlers();
       }
 
       /**
@@ -214,12 +224,16 @@ namespace sip {
        **/
       void progress_bar::set_minimum(unsigned int v) {
         m_minimum = v;
+
+        activate_handlers();
       }
       /**
        * \param[in] v the new value
        **/
       void progress_bar::set_maximum(unsigned int v) {
         m_maximum = v;
+
+        activate_handlers();
       }
 
       unsigned int progress_bar::get_value() const {
@@ -259,6 +273,8 @@ namespace sip {
        **/
       void text_field::set_text(std::string const& s) {
         m_text = s;
+
+        activate_handlers();
       }
 
       std::string text_field::get_text() const {

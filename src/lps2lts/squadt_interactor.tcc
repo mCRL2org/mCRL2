@@ -380,10 +380,10 @@ squadt_interactor::status_display::status_display(squadt_interactor& c, lts_gene
 void squadt_interactor::status_display::update(unsigned long& level, unsigned long long& explored,
     unsigned long long& seen, unsigned long long const& num_found_same, unsigned long long const& transitions) {
 
-  lb_level->set_text(boost::lexical_cast < std::string > (level),&m_communicator.m_communicator);
-  lb_explored->set_text(boost::lexical_cast < std::string > (explored),&m_communicator.m_communicator);
-  lb_seen->set_text(boost::lexical_cast < std::string > (seen),&m_communicator.m_communicator);
-  lb_transitions->set_text(boost::lexical_cast < std::string > (transitions),&m_communicator.m_communicator);
+  lb_level->set_text(boost::lexical_cast < std::string > (level));
+  lb_explored->set_text(boost::lexical_cast < std::string > (explored));
+  lb_seen->set_text(boost::lexical_cast < std::string > (seen));
+  lb_transitions->set_text(boost::lexical_cast < std::string > (transitions));
   if ( seen > 1000000ULL )
   {
     explored = explored/(seen/1000000);
@@ -394,7 +394,7 @@ void squadt_interactor::status_display::update(unsigned long& level, unsigned lo
     seen = explored;
   }
   progbar->set_maximum(seen);
-  progbar->set_value(explored,&m_communicator.m_communicator);
+  progbar->set_value(explored);
 }
 
 std::string add_output_file(sip::configuration& c, const char* identifier, std::string const& info, std::string const& ext) {

@@ -128,6 +128,9 @@ namespace sip {
         /** \brief Attaches a layout element to a manager, using layout properties */
         inline void attach(layout::mediator*, mediator::wrapper_aptr, properties const*) const;
 
+        /** \brief Attaches an even handler to an element */
+        inline void associate_event_handler(element* e) const;
+
       public:
 
         /** \brief Adds a new element to the box */
@@ -377,6 +380,10 @@ namespace sip {
               m_grow != c.m_grow || m_enabled != c.m_enabled);
     }
 
+    inline void manager::associate_event_handler(element* e) const {
+      e->set_event_handler(m_event_handler);
+    }
+
     inline box::box() {
     }
 
@@ -402,7 +409,7 @@ namespace sip {
      * \param[in] e a pointer to a layout element
      **/
     inline element* box::add(element* e) {
-      return (add(e, manager::default_properties));
+      return add(e, manager::default_properties);
     }
 
     /**
@@ -416,7 +423,9 @@ namespace sip {
 
       m_children.push_back(layout_descriptor(e,cn,reinterpret_cast < element_identifier > (e)));
 
-      return (e);
+      associate_event_handler(e);
+
+      return e;
     }
 
     inline void box::enable(element* e, bool b) {

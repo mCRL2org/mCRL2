@@ -26,7 +26,7 @@ namespace sip {
       public:
    
         /** \brief Basic type of event handler functions */
-        typedef boost::function < void () > handler_function;
+        typedef boost::function < void (const void*) > handler_function;
    
       private:
    
@@ -39,13 +39,16 @@ namespace sip {
       private:
    
         /** \brief For waiter events, and for processing events in a mutual exclusive manner */
-        boost::mutex  lock;
+        boost::mutex      lock;
+
+        /** \brief The list of functions that are to be executed  */
+        handler_function  global_handler;
    
         /** \brief The list of functions that are to be executed  */
-        handler_map   handlers;
+        handler_map       handlers;
    
         /** \brief The synchronisation constructs for waking up waiters */
-        waiter_map    waiters;
+        waiter_map        waiters;
    
       private:
    
@@ -56,9 +59,11 @@ namespace sip {
         void execute_handlers(const void*);
    
       public:
+
+        void connect(handler_function);
    
         /** \brief Register an arbitrary handler for a specific object */
-        void connect(const void*, handler_function&);
+        void connect(const void*, handler_function);
 
         /** \brief Moves registered event handlers that match the id to another object */
         void transfer(basic_event_handler&, const void* = 0);
@@ -95,7 +100,17 @@ namespace sip {
      * @param[in] id a pointer that serves as an identifier for the originator of the event
      * @param[in] h a function object that is to be invoked at an event
      **/
-    inline void basic_event_handler::connect(const void* id, handler_function& h) {
+    inline void basic_event_handler::connect(handler_function h) {
+      boost::mutex::scoped_lock l(lock);
+   
+      global_handler = h;
+    }
+   
+    /**
+     * @param[in] id a pointer that serves as an identifier for the originator of the event
+     * @param[in] h a function object that is to be invoked at an event
+     **/
+    inline void basic_event_handler::connect(const void* id, handler_function h) {
       boost::mutex::scoped_lock l(lock);
    
       handlers.insert(std::make_pair(id, h));
@@ -106,22 +121,24 @@ namespace sip {
      * @param[in] id a pointer that serves as an identifier for the originator of the event
      **/
     inline void basic_event_handler::transfer(basic_event_handler& e, const void* id) {
-      boost::mutex::scoped_lock l(lock);
-      boost::mutex::scoped_lock k(e.lock);
-
-      std::pair < handler_map::iterator, handler_map::iterator > p = handlers.equal_range(id);
- 
-      e.handlers.insert(p.first, p.second);
-
-      handlers.erase(p.first, p.second);
-
-      waiter_map::iterator w = waiters.find(id);
-
-      if (w != waiters.end()) {
-        /* Transfer waiters */
-        e.waiters.insert(*w);
-
-        waiters.erase(w);
+      if (&e != this) {
+        boost::mutex::scoped_lock l(lock);
+        boost::mutex::scoped_lock k(e.lock);
+      
+        std::pair < handler_map::iterator, handler_map::iterator > p = handlers.equal_range(id);
+      
+        e.handlers.insert(p.first, p.second);
+      
+        handlers.erase(p.first, p.second);
+      
+        waiter_map::iterator w = waiters.find(id);
+      
+        if (w != waiters.end()) {
+          /* Transfer waiters */
+          e.waiters.insert(*w);
+      
+          waiters.erase(w);
+        }
       }
     }
    
@@ -129,11 +146,10 @@ namespace sip {
      * @param[in] id a pointer that serves as an identifier for the originator of the event
      **/
     inline void basic_event_handler::process(const void* id) {
-      if (0 < handlers.count(id)) {
+      if (0 < handlers.count(id) || !global_handler.empty()) {
         boost::thread t(boost::bind(&basic_event_handler::execute_handlers, this, id));
       }
-   
-      if (0 < waiters.size()) {
+      else if (0 < waiters.size()) {
         boost::mutex::scoped_lock l(lock);
 
         wake(id);
@@ -145,11 +161,19 @@ namespace sip {
      **/
     inline void basic_event_handler::execute_handlers(const void* id) {
       boost::mutex::scoped_lock l(lock);
+
+      if (!global_handler.empty()) {
+        global_handler(id);
+      }
    
-      std::pair < handler_map::const_iterator, handler_map::const_iterator > p = handlers.equal_range(id);
+      std::pair < handler_map::const_iterator, handler_map::const_iterator > range(handlers.equal_range(id));
    
-      BOOST_FOREACH(handler_map::value_type p, handlers.equal_range(id)) {
-        p.second();
+      BOOST_FOREACH(handler_map::value_type p, range) {
+        p.second(id);
+      }
+   
+      if (0 < waiters.size()) {
+        wake(id);
       }
     }
    

@@ -27,6 +27,9 @@ namespace sip {
       template < typename R, typename S >
       friend class ::utility::visitor;
 
+      friend class ::sip::tool::communicator;
+      friend class ::sip::layout::manager;
+
       public:
 
         /** \brief Function type for event handlers */
@@ -56,6 +59,12 @@ namespace sip {
         /** \brief Activate all handlers */
         void activate_handlers();
 
+        /** \brief Set the event handler object that will dispatch the events for this object */
+        void set_event_handler(basic_event_handler* e);
+
+        /** \brief Get the event handler object that will dispatch the events for this object */
+        basic_event_handler* get_event_handler() const;
+
       public:
 
         /** \brief Constructor */
@@ -79,20 +88,11 @@ namespace sip {
         /** \brief Synchronise with instantiation that is part of a (G)UI */
         virtual void update(layout::mediator*, mediator::wrapper*) const;
 
-        /** \brief Immediately send an update using a tool communicator */
-        static void update(tool::communicator*, layout::element const*);
-
         /** \brief Awaits the next change event */
         void await_change() const;
 
         /** \brief Awaits the next change event */
-        void on_change(boost::function < void () >) const;
-
-        /** \brief Awaits the next change event */
-        void on_change(boost::function < void (element*) >) const;
-
-        /** \brief Set the event handler object that will dispatch the events for this object */
-        void set_event_handler(basic_event_handler* e);
+        void on_change(boost::function < void (const void*) >) const;
 
         /** \brief Abstract destructor */
         virtual ~element() = 0;
