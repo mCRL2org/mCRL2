@@ -45,7 +45,11 @@ namespace squadt {
     if (o.status != object_descriptor::generation_in_progress && s < o.status) {
       o.status = s;
 
-      o.generator.lock()->get_monitor()->status_change_handler();
+      boost::shared_ptr < processor::monitor > m(o.generator.lock()->get_monitor());
+
+      if (!m->status_change_handler.empty()) {
+        m->status_change_handler();
+      }
 
       return (true);
     }

@@ -192,7 +192,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
     omit_state_information->set_status(c.get_option_argument< bool >(option_no_state_information));
   }
   if (c.option_exists(option_add_bisimulation_equivalence_class)) {
-    bisimulation_add_eq_classes->set_status(c.get_option_argument< bool >(option_no_reachability_check));
+    bisimulation_add_eq_classes->set_status(c.get_option_argument< bool >(option_add_bisimulation_equivalence_class));
   }
 
   top->add(bisimulation_add_eq_classes);
@@ -372,11 +372,11 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
     }
 
     if (c.option_exists(option_add_bisimulation_equivalence_class)) {
-      eq_opts.reduce.add_class_to_state = true;
+      eq_opts.reduce.add_class_to_state = c.get_option_argument< bool >(option_add_bisimulation_equivalence_class);
     }
 
     if (c.option_exists(option_tau_actions)) {
-      lts_reduce_add_tau_actions(eq_opts, (boost::any_cast < std::string > (c.get_option_argument(option_tau_actions)).c_str()));
+      lts_reduce_add_tau_actions(eq_opts, c.get_option_argument< std::string >(option_tau_actions).c_str());
     }
 
     if ( determinise )
@@ -402,7 +402,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   result = write_lts_to_file(l, c.get_output(lts_file_for_output).get_location(),
                  lts::parse_format(c.get_output(lts_file_for_output).get_mime_type().get_sub_type().c_str()), lps_path, c.option_exists(option_no_state_information));
 
-  send_hide_display();
+  send_clear_display();
 
   return (result);
 }
