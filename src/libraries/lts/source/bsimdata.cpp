@@ -357,23 +357,6 @@ int ReadData(lts &l)
    return l.initial_state(); 
    }
    
-static int recode_num_lab2 = 0; // set by ReadCompareData
-static void Recode(int lts_label, int label) {
-     static int *newlabel = NULL;
-     int i;
-
-     if (!newlabel) { 
-          if (!(newlabel = (int *) calloc(recode_num_lab2, sizeof(int))))
-               ATerror("No allocation of newlabel (%d)",recode_num_lab2);
-          for (i=0;i<recode_num_lab2;i++) newlabel[i] = -1;
-          } 
-     if (lts_label == -1) {free(newlabel);}
-
-     if (newlabel[lts_label]>=0) return;
-
-        newlabel[lts_label] = label;
-     } 
-
 static void pp_lts(lts &l)
 {
   for (unsigned int i=0; i<l.num_labels(); i++)
@@ -395,12 +378,10 @@ void ReadCompareData(lts &l1, int *init1, lts &l2, int *init2)
        }
      }
 
-   recode_num_lab2 = l2.num_labels();
-
    second_lts_states_offset = l1.num_states();
    int offset = second_lts_states_offset;
    
-   nstate = l1.num_states()+l1.num_states(); 
+   nstate = l1.num_states()+l2.num_states(); 
    nlabel = l1.num_labels()+l2.num_labels()+1; 
    AllocData();
    label_tau = nlabel-1;
@@ -429,12 +410,10 @@ void ReadCompareData(lts &l1, int *init1, lts &l2, int *init2)
    for (transition_iterator i(&l2); i.more(); ++i)
       {
       int label = get_label_index(l2,i.label(),label_tau,l1.num_labels());
-      Recode(i.label(),label); 
       UpdateLabArray(i.to() + offset, label);
       UpdateTable(lab_src_tgt[label], i.from() +offset, i.to() + offset);
       UpdateTable(lab_tgt_src[label], i.to() + offset, i.from() +offset);
       }
-   Recode(-1,-1);
    *init2 = l2.initial_state() + offset;
    } 
      
