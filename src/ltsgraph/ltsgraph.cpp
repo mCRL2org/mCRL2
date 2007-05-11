@@ -163,31 +163,30 @@ IMPLEMENT_WX_THEME_SUPPORT
 extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
                                   HINSTANCE hPrevInstance,                
                                   wxCmdLineArgType lpCmdLine,             
-                                  int nCmdShow)                           
-    {                                                                     
-        ATerm bot;
+                                  int nCmdShow) {
+    ATerm bot;
 
-        ATinit(0,0,&bot); // XXX args?
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-        squadt_utility::entry_wrapper starter(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+    ATinit(0,0,&bot); // XXX args?
+# ifdef ENABLE_SQUADT_CONNECTIVITY
+    squadt_utility::entry_wrapper starter(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 
-        squadt_interactor c(starter);
+    squadt_interactor c(starter);
 
-        if (!c.try_interaction(lpCmdLine)) {
-          return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
-        }
-
-        return 0;
-#else
-        return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
-#endif
+    if (!c.try_interaction(lpCmdLine)) {
+      return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
     }
+
+    return 0;
+# else
+    return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
+# endif
+}
 #else
 int main(int argc, char **argv)
 {
   ATerm bot;
   ATinit(argc,argv,&bot);
-#ifdef ENABLE_SQUADT_CONNECTIVITY
+# ifdef ENABLE_SQUADT_CONNECTIVITY
   squadt_utility::entry_wrapper starter(argc, argv);
 
   squadt_interactor c(starter);
@@ -200,8 +199,8 @@ int main(int argc, char **argv)
   }
 
   return 0;
-#else
-  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
-#endif
+# else
+  return wxEntry(argc, argv);
+# endif
 }
 #endif

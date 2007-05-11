@@ -119,7 +119,7 @@ bool LTSViewApp::OnInit() {
 
 extern "C" int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,
                               wxCmdLineArgType lpCmdLine,int nCmdShow) {
-#ifdef ENABLE_SQUADT_CONNECTIVITY
+# ifdef ENABLE_SQUADT_CONNECTIVITY
   squadt_utility::entry_wrapper starter(hInstance,hPrevInstance,lpCmdLine,
       nCmdShow);
   squadt_interactor c(starter);
@@ -128,24 +128,24 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,
   }
 
   return 0;
-#else
+# else
   return wxEntry(hInstance,hPrevInstance,lpCmdLine,nCmdShow);
-#endif
+# endif
 }
 #else
 int main(int argc, char **argv) {
-#ifdef ENABLE_SQUADT_CONNECTIVITY
+# ifdef ENABLE_SQUADT_CONNECTIVITY
   squadt_utility::entry_wrapper starter(argc, argv);
   squadt_interactor c(starter);
   if(!c.try_interaction(argc, argv)) {
     command_line = true;
-#endif
-  return wxEntry(argc, argv);
+    return wxEntry(argc, argv);
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
   }
-#endif
   return 0;
+# else
+  return wxEntry(argc, argv);
+# endif
 }
 #endif
 
