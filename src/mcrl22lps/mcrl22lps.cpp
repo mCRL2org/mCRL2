@@ -187,11 +187,11 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   // left option column
   current_box = new vertical_box();
 
-  checkbox* noclusterintermediate = new checkbox("Try intermediate clustering", !c.get_option_argument< bool >(option_no_intermediate_cluster));
+  checkbox* noclusterintermediate = new checkbox("Intermediate clustering", !c.get_option_argument< bool >(option_no_intermediate_cluster));
   checkbox* clusterfinal          = new checkbox("Final clustering", c.get_option_argument< bool >(option_final_cluster));
-  checkbox* newstate              = new checkbox("Use enumerated states", c.get_option_argument< bool >(option_newstate));
-  checkbox* binary                = new checkbox("Encode enumerated types by booleans  ", c.get_option_argument< bool >(option_binary));
-  checkbox* statenames            = new checkbox("Use informative state names ", c.get_option_argument< bool >(option_statenames));
+  checkbox* newstate              = new checkbox("Use enumerations for state variables", c.get_option_argument< bool >(option_newstate));
+  checkbox* binary                = new checkbox("Encode enumerations by booleans", c.get_option_argument< bool >(option_binary));
+  checkbox* statenames            = new checkbox("Derive state names from specification  ", c.get_option_argument< bool >(option_statenames));
   checkbox* add_delta             = new checkbox("Add delta summands", c.get_option_argument< bool >(option_add_delta));
 
   current_box->add(noclusterintermediate);
@@ -206,7 +206,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   // right option column
   current_box = new vertical_box();
 
-  checkbox* norewrite  = new checkbox("Try rewriting", !c.get_option_argument< bool >(option_no_rewrite));
+  checkbox* norewrite  = new checkbox("Use rewriting", !c.get_option_argument< bool >(option_no_rewrite));
   checkbox* noalpha    = new checkbox("Apply alphabet axioms", !c.get_option_argument< bool >(option_no_alpha));
   checkbox* nosumelm   = new checkbox("Apply sum elimination", !c.get_option_argument< bool >(option_no_sumelm));
   checkbox* nodeltaelm = new checkbox("Apply delta elimination", !c.get_option_argument< bool >(option_no_deltaelm));
