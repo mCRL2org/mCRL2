@@ -131,8 +131,8 @@ static void save_bes_in_vasy_format(string outfilename);
 //Post: pbes_spec is saved in cwi-format
 //Ret: -
 
-static void convert_rhs_to_cwi_form(ofstream &outputfile, bes_expression p);
-static void convert_rhs_to_vasy_form(ofstream &outputfile, bes_expression p);
+static void convert_rhs_to_cwi_form(ostream &outputfile, bes_expression p);
+static void convert_rhs_to_vasy_form(ostream &outputfile, bes_expression p);
 // Function used to convert a pbes_expression to the variant used by the cwi-output
 
 static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options);
@@ -161,11 +161,9 @@ static bool process(t_tool_options const& tool_options)
   { 
     if (solve_bes())
     { gsMessage("The pbes is valid\n");
-      cerr << "Lang leve de konijn\n";
     }
     else
-    { gsErrorMsg("The pbes is not valid\n");
-      cerr << "Lang leve de konijn niet\n";
+    { gsMessage("The pbes is not valid\n");
     }
   }
 
@@ -288,32 +286,40 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   /* Wait until the ok button was pressed */
   okay_button->await_change();
 
-  /* Add output file to the configuration */
-  if (c.output_exists(bes_file_for_output)) {
-    sip::object& output_file = c.get_output(bes_file_for_output);
- 
-    output_file.set_location(c.get_output_name(".txt"));
-  }
-  else {
-    c.add_output(bes_file_for_output, sip::mime_type("txt", sip::mime_type::application), 
-                 c.get_output_name(".txt"));
-  }
 
   c.add_option(option_transformation_strategy).append_argument(transformation_method_enumeration,
                                 static_cast < transformation_strategy > (transformation_selector.get_selection()));
   c.add_option(option_selected_output_format).append_argument(output_format_enumeration,
                                 static_cast < bes_output_format > (format_selector.get_selection()));
 
-  // send_clear_display();
+  if (c.get_option_argument< size_t >(option_selected_output_format)!=none)
+  {
+    /* Add output file to the configuration */
+    if (c.output_exists(bes_file_for_output)) {
+      sip::object& output_file = c.get_output(bes_file_for_output);
+   
+      output_file.set_location(c.get_output_name(".txt"));
+    }
+    else {
+      c.add_output(bes_file_for_output, sip::mime_type("txt", sip::mime_type::application), 
+                   c.get_output_name(".txt"));
+    }
+  }
+
+  send_clear_display();
 }
 
 bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   bool result = true;
 
   result &= c.input_exists(pbes_file_for_input);
-  result &= c.output_exists(bes_file_for_output);
   result &= c.option_exists(option_transformation_strategy);
   result &= c.option_exists(option_selected_output_format);
+  if (result && (c.get_option_argument< size_t >(option_selected_output_format)!=none))
+  { /* only check for the existence of an outputfile if the output format does
+       not equal none */
+    result &= c.output_exists(bes_file_for_output);
+  }
 
   return (result);
 }
@@ -388,23 +394,29 @@ void calculate_bes(pbes pbes_spec, t_tool_options tool_options)
 static bes::bes_expression add_propositional_variable_instantiations_to_indexed_set_and_translate(
                    const lps::pbes_expression p,
                    atermpp::indexed_set &variable_index,
-                   unsigned long &nr_of_generated_variables)
+                   unsigned long &nr_of_generated_variables,
+                   const bool to_bdd)
 { 
   if (is_propositional_variable_instantiation(p))
   { pair<unsigned long,bool> pr=variable_index.put(p);
     if (pr.second) /* add p to indexed set */
     { nr_of_generated_variables++;
     }
-    return bes::if_(bes::variable(pr.first),bes::true_(),bes::false_());
+    if (to_bdd)
+    { return bes::if_(bes::variable(pr.first),bes::true_(),bes::false_());
+    }
+    else 
+    { return bes::variable(pr.first);
+    }
   }
   else if (pbes_expr::is_and(p))
   { bes::bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            pbes_expr::lhs(p),variable_index,nr_of_generated_variables);
+                            pbes_expr::lhs(p),variable_index,nr_of_generated_variables,to_bdd);
     if (is_false(b1))
     { return b1;
     }
     bes::bes_expression b2=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            pbes_expr::rhs(p),variable_index,nr_of_generated_variables);
+                            pbes_expr::rhs(p),variable_index,nr_of_generated_variables,to_bdd);
     if (is_false(b2))
     { return b2;
     }
@@ -414,18 +426,22 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
     if (is_true(b2))
     { return b1;
     }
-
-    return BDDif(b1,b2,bes::false_());
+    if (to_bdd)
+    { return BDDif(b1,b2,bes::false_());
+    }
+    else
+    { return and_(b1,b2);
+    }
   }
   else if (pbes_expr::is_or(p))
   { bes::bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            pbes_expr::lhs(p),variable_index,nr_of_generated_variables);
+                            pbes_expr::lhs(p),variable_index,nr_of_generated_variables,to_bdd);
     if (bes::is_true(b1))
     { return b1;
     }
 
     bes::bes_expression b2=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            pbes_expr::rhs(p),variable_index,nr_of_generated_variables);
+                            pbes_expr::rhs(p),variable_index,nr_of_generated_variables,to_bdd);
     if (bes::is_true(b2))
     { return b2;
     }
@@ -436,7 +452,12 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
     { return b1;
     }
 
-    return BDDif(b1,bes::true_(),b2);
+    if (to_bdd)
+    { return BDDif(b1,bes::true_(),b2);
+    }
+    else
+    { return or_(b1,b2);
+    }
   }
   else if (pbes_expr::is_true(p))
   { return bes::true_();
@@ -536,7 +557,8 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
 
     bes::bes_expression new_bes_expression=
          add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                      new_pbes_expression,variable_index,nr_of_generated_variables);
+                      new_pbes_expression,variable_index,nr_of_generated_variables,
+                      tool_options.opt_outputformat=="none");
     
     // ATfprintf(stderr,"BES: %t\n",(ATerm)new_bes_expression);
 
@@ -583,7 +605,7 @@ static bes_expression substitute_fp(
       return br;
     }
   }
-  assert(0);
+  assert(is_true(b)||is_false(b));
   return b;
 }
 
@@ -653,9 +675,7 @@ static bes_expression substitute_bex(
       return br;
     }
   }
-  if (!((bes::is_true(b)||bes::is_false(b))))
-  { ATfprintf(stderr,"WHO %t\n",(ATerm)b);
-  }
+
   assert(bes::is_true(b)||bes::is_false(b));
   return b;
 }
@@ -697,10 +717,9 @@ static bool solve_bes()
   }
 
   assert(bes::is_true(bes_equations.get_rhs(1))||
-         bes::is_true(bes_equations.get_rhs(1)));
+         bes::is_false(bes_equations.get_rhs(1)));
   return bes::is_true(bes_equations.get_rhs(1)); /* 1 is the index of the initial variable */
 }
-
 
 //function load_pbes
 //------------------
@@ -736,18 +755,21 @@ static void save_bes_in_vasy_format(string outfilename)
   // Use an indexed set to keep track of the variables and their vasy-representations
 
   ofstream outputfile;
-  outputfile.open(outfilename.c_str(), ios::trunc);
-  if (!outputfile.is_open())
-  { gsErrorMsg("Could not save BES to %s\n", outfilename.c_str());
-    exit(1);
+  if (outfilename!="-")
+  { outputfile.open(outfilename.c_str(), ios::trunc);
+    if (!outputfile.is_open())
+    { gsErrorMsg("Could not save BES to %s\n", outfilename.c_str());
+      exit(1);
+    }
   }
 
   for(unsigned long r=1 ; r<=bes_equations.max_rank ; r++)
   { for(unsigned long i=1; i<=bes_equations.nr_of_equations() ; i++)
     { if (bes_equations.get_rank(i)==r)
-      { outputfile << ((bes_equations.get_fixpoint_symbol(i)==pbes_fixpoint_symbol::mu()) ? "min X" : "max X") << i << "=";
-        convert_rhs_to_vasy_form(outputfile,bes_equations.get_rhs(i));
-        outputfile << endl;
+      { ((outfilename=="-")?cout:outputfile) << 
+              ((bes_equations.get_fixpoint_symbol(i)==pbes_fixpoint_symbol::mu()) ? "min X" : "max X") << i << "=";
+        convert_rhs_to_vasy_form(((outfilename=="-")?cout:outputfile),bes_equations.get_rhs(i));
+        ((outfilename=="-")?cout:outputfile) << endl;
       }
     }
   }
@@ -757,36 +779,36 @@ static void save_bes_in_vasy_format(string outfilename)
 
 //function convert_rhs_to_vasy
 //---------------------------
-static void convert_rhs_to_vasy_form(ofstream &outputfile, bes_expression p)
+static void convert_rhs_to_vasy_form(ostream &outputfile, bes_expression b)
 {
-  if (bes::is_true(p))
+  if (bes::is_true(b))
   { outputfile << "T";
   }
-  else if (bes::is_false(p))
+  else if (bes::is_false(b))
   { outputfile << "F";
   }
-  else if (bes::is_and(p))
+  else if (bes::is_and(b))
   {
     //BESAnd(a,b) => (a & b)
     outputfile << "(";
-    convert_rhs_to_vasy_form(outputfile,lhs(p));
+    convert_rhs_to_vasy_form(outputfile,lhs(b));
     outputfile << "&";
-    convert_rhs_to_vasy_form(outputfile,rhs(p));
+    convert_rhs_to_vasy_form(outputfile,rhs(b));
     outputfile << ")";
   }
-  else if (bes::is_or(p))
+  else if (bes::is_or(b))
   {
     //BESOr(a,b) => (a | b)
     outputfile << "(";
-    convert_rhs_to_vasy_form(outputfile,lhs(p));
+    convert_rhs_to_vasy_form(outputfile,lhs(b));
     outputfile << "|";
-    convert_rhs_to_vasy_form(outputfile,rhs(p));
+    convert_rhs_to_vasy_form(outputfile,rhs(b));
     outputfile << ")";
   }
-  else if (bes::is_variable(p))
+  else if (bes::is_variable(b))
   {
     // PropVar => <Int>
-    outputfile << "X" << get_variable(p);
+    outputfile << "X" << get_variable(b);
   }
   else
   {
@@ -800,22 +822,27 @@ static void convert_rhs_to_vasy_form(ofstream &outputfile, bes_expression p)
 //--------------------------------
 static void save_bes_in_cwi_format(string outfilename)
 {
+  cerr << "Converting result to ...CWI format " << outfilename << endl;
   gsVerboseMsg("Converting result to CWI-format...\n");
   // Use an indexed set to keep track of the variables and their cwi-representations
 
   ofstream outputfile;
-  outputfile.open(outfilename.c_str(), ios::trunc);
-  if (!outputfile.is_open())
-  { gsErrorMsg("Could not save BES to %s\n", outfilename.c_str());
-    exit(1);
+  cerr << outfilename << endl;
+  if (outfilename!="-")
+  { outputfile.open(outfilename.c_str(), ios::trunc);
+    if (!outputfile.is_open())
+    { gsErrorMsg("Could not save BES to %s\n", outfilename.c_str());
+      exit(1);
+    }
   }
 
   for(unsigned long r=1 ; r<=bes_equations.max_rank ; r++)
   { for(unsigned long i=1; i<=bes_equations.nr_of_equations() ; i++)
     { if (bes_equations.get_rank(i)==r)
-      { outputfile << ((bes_equations.get_fixpoint_symbol(i)==pbes_fixpoint_symbol::mu()) ? "min X" : "max X") << i << "=";
-        convert_rhs_to_cwi_form(outputfile,bes_equations.get_rhs(i));
-        outputfile << endl;
+      { ((outfilename=="-")?cout:outputfile) << 
+              ((bes_equations.get_fixpoint_symbol(i)==pbes_fixpoint_symbol::mu()) ? "min X" : "max X") << i << "=";
+        convert_rhs_to_cwi_form(((outfilename=="-")?cout:outputfile),bes_equations.get_rhs(i));
+        ((outfilename=="-")?cout:outputfile) << endl;
       }
     }
   }
@@ -825,39 +852,39 @@ static void save_bes_in_cwi_format(string outfilename)
 
 //function convert_rhs_to_cwi
 //---------------------------
-static void convert_rhs_to_cwi_form(ofstream &outputfile, bes_expression p)
+static void convert_rhs_to_cwi_form(ostream &outputfile, bes_expression b)
 {
-  if (bes::is_true(p))
+  if (bes::is_true(b))
   { outputfile << "T";
   }
-  else if (bes::is_false(p))
+  else if (bes::is_false(b))
   { outputfile << "F";
   }
-  else if (bes::is_and(p))
+  else if (bes::is_and(b))
   {
     //BESAnd(a,b) => (a & b)
     outputfile << "(";
-    convert_rhs_to_cwi_form(outputfile,lhs(p));
+    convert_rhs_to_cwi_form(outputfile,lhs(b));
     outputfile << "&";
-    convert_rhs_to_cwi_form(outputfile,rhs(p));
+    convert_rhs_to_cwi_form(outputfile,rhs(b));
     outputfile << ")";
   }
-  else if (bes::is_or(p))
+  else if (bes::is_or(b))
   {
     //BESOr(a,b) => (a | b)
     outputfile << "(";
-    convert_rhs_to_cwi_form(outputfile,lhs(p));
+    convert_rhs_to_cwi_form(outputfile,lhs(b));
     outputfile << "|";
-    convert_rhs_to_cwi_form(outputfile,rhs(p));
+    convert_rhs_to_cwi_form(outputfile,rhs(b));
     outputfile << ")";
   }
-  else if (bes::is_variable(p))
+  else if (bes::is_variable(b))
   {
     // PropVar => <Int>
-    outputfile << "X" << get_variable(p);
+    outputfile << "X" << get_variable(b);
   }
   else
-  {
+  { ATfprintf(stderr,"AAA %t\n",(ATerm)b);
     gsErrorMsg("The generated equation system is not a BES. It cannot be saved in CWI-format.\n");
     exit(1);
   }
