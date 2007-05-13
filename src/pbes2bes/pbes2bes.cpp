@@ -324,7 +324,7 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
 
   bool result = process(tool_options);
  
-  send_hide_display();
+  send_clear_display();
 
   return (result);
 }

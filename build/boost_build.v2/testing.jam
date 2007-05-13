@@ -29,14 +29,13 @@ rule run_tool_on_examples ( tool prefix suffix ? : options * : paths + : extensi
       }
  
       results += [
- 
         run $(tool)
                : $(options)
                  "\"$(file)\""
                  $(output)
                : # input files
                : # requirements
-               : $(prefix)-$(target)
+               : $(target)-$(suffix)
       ] ;
     }
   }

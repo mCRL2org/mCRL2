@@ -1,5 +1,3 @@
-import testing ;
-
 project libraries/parser/test
    : source-location .
    : requirements
@@ -9,7 +7,6 @@ project libraries/parser/test
    ;
 
 test-suite parser
-    :
-      [ run test_lib.cpp ]
-      [ run_tool_on_examples /tools/mcrl22lps//mcrl22lps mcrl22lps lps : : . : mcrl2 ]
+    : [ run test_lib.cpp ]
+      [ run_tool_on_examples $(TOP)/src/mcrl22lps/test//mcrl22lps-test-tool parser : : . : mcrl2 ]
     ;
