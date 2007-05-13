@@ -159,12 +159,7 @@ static bool process(t_tool_options const& tool_options)
   }
   else
   { 
-    if (solve_bes())
-    { gsMessage("The pbes is valid\n");
-    }
-    else
-    { gsMessage("The pbes is not valid\n");
-    }
+    gsMessage("The pbes is %s valid\n", solve_bes() ? "" : "not");
   }
 
   return true;
@@ -333,9 +328,13 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   tool_options.opt_outputformat = formats[c.get_option_argument< size_t >(option_selected_output_format)];
   tool_options.opt_strategy     = strategies[c.get_option_argument< size_t >(option_transformation_strategy)];
   tool_options.infilename       = c.get_input(pbes_file_for_input).get_location();
-  tool_options.outfilename      = c.get_output(bes_file_for_output).get_location();
+
+  if (c.output_exists(bes_file_for_output)) {
+    tool_options.outfilename      = c.get_output(bes_file_for_output).get_location();
+  }
 
   send_clear_display();
+
   bool result = process(tool_options);
  
   return (result);
@@ -354,18 +353,12 @@ int main(int argc, char** argv)
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-    if (!mcrl2_squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
-#endif
-
-  //parse command line
-  if (!process(parse_command_line(argc, argv))) 
-  { return 1;
-  }
-#ifdef ENABLE_SQUADT_CONNECTIVITY
+  if (mcrl2_squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+    return 0;
   }
 #endif
 
-  return 0;
+  return process(parse_command_line(argc, argv));
 }
 
 //function calculate_bes
