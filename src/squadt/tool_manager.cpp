@@ -42,7 +42,7 @@ namespace squadt {
   /// \cond PRIVATE_PART
   const long tool_manager_impl::default_port = 10947;
 
-  char const* tool_manager_impl::default_tools[] = {"diagraphica", "lps2pbes", "lpsbinary", "lpsconstelm", "lpsdecluster", "lpsinfo", "lpsparelm", "lpsuntime", "lps2lts",                                                     "lpssumelm", "ltsconvert", "ltsinfo", "ltsgraph", "ltsview", "mcrl22lps", "pbes2bes", "pnml2mcrl2", "xsim", 0};
+  char const* tool_manager_impl::default_tools[] = {"diagraphica", "lps2pbes", "lpsbinary", "lpsconstelm", "lpsdecluster", "lpsinfo", "lpsparelm", "lpsuntime", "lps2lts",                                                     "lpssumelm", "ltsconvert", "ltsinfo", "ltsgraph", "ltsview", "mcrl22lps", "pbes2bes", "pbes2bool", "pnml2mcrl2", "xsim", 0};
 
 
   tool_manager_impl::tool_manager_impl() : sip::controller::communicator(), free_identifier(0) {
