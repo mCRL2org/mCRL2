@@ -45,6 +45,7 @@ void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
   c.add_input_combination(lts_file_for_input, sip::mime_type("bcg", sip::mime_type::application), sip::tool::category::reporting);
 #endif
   c.add_input_combination(lts_file_for_input, sip::mime_type("svc", sip::mime_type::application), sip::tool::category::reporting);
+  c.add_input_combination(lts_file_for_input, sip::mime_type("fsm", sip::mime_type::text), sip::tool::category::reporting);
   c.add_input_combination(lts_file_for_input, sip::mime_type("svc+mcrl2", sip::mime_type::application), sip::tool::category::reporting);
   c.add_input_combination(lts_file_for_input, sip::mime_type("svc+mcrl", sip::mime_type::application), sip::tool::category::reporting);
 }
@@ -145,6 +146,7 @@ static void print_formats(FILE *f)
 #ifdef MCRL2_BCG
     "  bcg     .bcg  Binary Coded Graph format (CADP)\n"
 #endif
+    "  fsm     .fsm  Finite State Machine format\n"
     "  mcrl    .svc  mCRL SVC format\n"
     "  mcrl2   .svc  mCRL2 SVC format                  default\n"
     "\n"
