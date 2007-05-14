@@ -123,7 +123,7 @@
 
   // Class BDD_Path_Eliminator - functions declared public ----------------------------------------
 
-    /// \param a_solver_type An value of an enumerated type, representing an SMT solver.
+    /// \param a_solver_type A value of an enumerated type, representing an SMT solver.
 
     BDD_Path_Eliminator::BDD_Path_Eliminator(SMT_Solver_Type a_solver_type) {
 #if !(defined(_MSC_VER) || defined(__MINGW32__))

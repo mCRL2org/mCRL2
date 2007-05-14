@@ -18,7 +18,7 @@
     /// \return The guard at the root of the BDD.
 
     ATermAppl BDD_Info::get_guard(ATermAppl a_bdd) {
-      return ATAgetArgument(ATAgetArgument(ATAgetArgument(a_bdd, 0), 0), 1);
+      return ATAgetFirst(ATLgetArgument(a_bdd, 1));
     }
 
     // --------------------------------------------------------------------------------------------
@@ -27,7 +27,7 @@
     /// \return The true-branch of the BDD.
 
     ATermAppl BDD_Info::get_true_branch(ATermAppl a_bdd) {
-      return ATAgetArgument(ATAgetArgument(a_bdd, 0), 1);
+      return ATAgetFirst(ATgetNext(ATLgetArgument(a_bdd, 1)));
     }
 
     // --------------------------------------------------------------------------------------------
@@ -36,7 +36,7 @@
     /// \return The false-branch of the BDD.
 
     ATermAppl BDD_Info::get_false_branch(ATermAppl a_bdd) {
-      return ATAgetArgument(a_bdd, 1);
+      return ATAgetFirst(ATgetNext(ATgetNext(ATLgetArgument(a_bdd, 1))));
     }
 
     // --------------------------------------------------------------------------------------------

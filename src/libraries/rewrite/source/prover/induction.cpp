@@ -14,7 +14,7 @@
     void Induction::recurse_expression_for_lists(ATermAppl a_expression) {
       ATermAppl v_argument;
       ATermAppl v_sort;
-      int v_number_of_arguments;
+      ATermList v_arguments;
 
       if (gsIsDataVarId(a_expression)) {
         v_sort = gsGetSort(a_expression);
@@ -22,9 +22,10 @@
           ATindexedSetPut(f_list_variables, (ATerm) a_expression, 0);
         }
       } else if (f_expression_info.is_operator(a_expression)) {
-        v_number_of_arguments = ATgetLength(gsGetDataExprArgs(a_expression));
-        for (int i = 0; i < v_number_of_arguments; ++i) {
-          v_argument = f_expression_info.get_argument(a_expression, i);
+        v_arguments = gsGetDataExprArgs(a_expression);
+        while (!ATisEmpty(v_arguments)) {
+          v_argument = ATAgetFirst(v_arguments);
+          v_arguments = ATgetNext(v_arguments);
           recurse_expression_for_lists(v_argument);
         }
       }
@@ -64,7 +65,7 @@
         v_constructors = ATgetNext(v_constructors);
         v_constructor_name = ATAgetArgument(v_constructor, 0);
         if (v_constructor_name == f_cons_name) {
-          v_constructor_sort = f_expression_info.get_sort_of_operator(v_constructor);
+          v_constructor_sort = gsGetSort(v_constructor);
           v_constructor_element_sort = ATAelementAt(f_sort_info.get_domain(v_constructor_sort),0);
           v_constructor_sort = ATAelementAt(f_sort_info.get_domain(v_constructor_sort),1);
           if (v_constructor_sort == v_list_sort) {
@@ -154,7 +155,7 @@
       v_dummy_sort = get_sort_of_list_elements(v_induction_variable);
       v_dummy_variable = get_fresh_dummy(v_dummy_sort);
 
-      v_substitution = gsMakeSubst_Appl(v_induction_variable, gsMakeOpIdListEnum(v_induction_variable_sort));
+      v_substitution = gsMakeSubst_Appl(v_induction_variable, gsMakeOpIdEmptyList(v_induction_variable_sort));
       v_substitution_list = ATmakeList1((ATerm) v_substitution);
       v_base_case = gsSubstValues_Appl(v_substitution_list, f_formula, true);
 
@@ -227,7 +228,7 @@
       v_substitution = gsMakeSubst_Appl(v_variable, gsMakeDataExprCons(v_dummy, v_variable));
       v_substitution_list = ATmakeList1((ATerm) v_substitution);
       v_formula_1 = gsSubstValues_Appl(v_substitution_list, a_formula, true);
-      v_substitution = gsMakeSubst_Appl(v_variable, gsMakeOpIdListEnum(v_variable_sort));
+      v_substitution = gsMakeSubst_Appl(v_variable, gsMakeOpIdEmptyList(v_variable_sort));
       v_substitution_list = ATmakeList1((ATerm) v_substitution);
       v_formula_2 = gsSubstValues_Appl(v_substitution_list, a_formula, true);
       v_hypothesis = gsSubstValues_Appl(v_substitution_list, a_hypothesis, true);

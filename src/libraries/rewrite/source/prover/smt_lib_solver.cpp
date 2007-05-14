@@ -75,7 +75,7 @@ using namespace std;
           f_operators_extrafuns = f_operators_extrafuns + "(" + v_operator_string;
           free(v_operator_string);
           v_operator_string = 0;
-          v_sort = f_expression_info.get_sort_of_operator(v_operator);
+          v_sort = gsGetSort(v_operator);
           do {
             if (f_sort_info.is_sort_arrow_prod(v_sort)) {
               v_sort_domain_list = f_sort_info.get_domain(v_sort);

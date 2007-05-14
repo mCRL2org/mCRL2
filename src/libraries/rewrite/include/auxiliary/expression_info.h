@@ -16,9 +16,6 @@ class Expression_Info {
     /// \brief Indicates whether or not the expression has a main operator.
     bool is_operator(ATermAppl a_expression);
 
-    /// \brief Returns the sort of the main operator of an expression.
-    ATermAppl get_sort_of_operator(ATermAppl a_expression);
-
     /// \brief Returns an argument of the main operator of an expression.
     ATermAppl get_argument(ATermAppl a_expression, int a_number);
 

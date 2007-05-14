@@ -3,28 +3,17 @@
 % and q2 of sort List(D). q1 == q2 holds as an invariant for this
 % specification.
 %
-%
-% lpsinvelm takes an invariant in internal mCRL2 format as input. The
-% representation of q1 == q2 in internal mCRL2 format is as follows:
-%
-% DataAppl(
-%   DataAppl(
-%     OpId("==",SortArrow(SortId("List@0"),SortArrow(SortId("List@0"),SortId("Bool")))),
-%     DataVarId("q1",SortId("List@0"))
-%   ),
-%   DataVarId("q2",SortId("List@0")))
-% )
-% 
-%
-% After storing this invariant in a file called "inv", it can be used to
-% simplify an lps as follows:
-%
+% The following commands simplify this lps using the given invariant: 
 % mcrl22lps -n double-queue.mcrl2 double-queue.lps
-% lpsinvelm -i inv double-queue.lps double-queue-elm.lps
+% lpsinvelm -i double-queue.inv double-queue.lps double-queue-elm.lps
 
 
 sort
   D = struct D1 | D2;
+
+var
+  q1: List(D);
+  q2: List(D);
 
 act
   r, s, r', s', c: D;

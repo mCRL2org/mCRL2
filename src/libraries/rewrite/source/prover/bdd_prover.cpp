@@ -135,7 +135,6 @@
         v_small = smallest(f_info->get_argument(a_formula, i));
         if (v_small) {
           if (v_result) {
-//            if (f_info->compare_guard(v_small, v_result) == compare_result_smaller) {
             if (f_info->lpo1(v_result, v_small)) {
               v_result = v_small;
             }
