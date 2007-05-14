@@ -416,13 +416,15 @@ bool squadt_interactor::perform_task(sip::configuration &configuration)
 
   if (configuration.get_category() == sip::tool::category::transformation) {
     lgopts.lts = configuration.get_output(lts_file_for_output).get_location();
+
+    lgopts.outinfo = configuration.get_option_argument< bool >(option_out_info);
+ 
+    lgopts.outformat = (configuration.get_option_argument< bool >(option_as_aut)) ? OF_AUT : OF_SVC ;
+ 
+    lgopts.usedummies   = configuration.get_option_argument< bool >(option_usedummies);
+    lgopts.stateformat  = (configuration.get_option_argument< bool >(option_state_format_tree))?GS_STATE_TREE:GS_STATE_VECTOR;
+    lgopts.removeunused = configuration.get_option_argument< bool >(option_removeunused);
   }
-
-  lgopts.outinfo = configuration.get_option_argument< bool >(option_out_info);
-
-  lgopts.usedummies   = configuration.get_option_argument< bool >(option_usedummies);
-  lgopts.stateformat  = (configuration.get_option_argument< bool >(option_state_format_tree))?GS_STATE_TREE:GS_STATE_VECTOR;
-  lgopts.removeunused = configuration.get_option_argument< bool >(option_removeunused);
   
   lgopts.strat      = static_cast < RewriteStrategy > (configuration.get_option_argument< size_t >(option_rewrite_strategy));
   lgopts.expl_strat = static_cast < exploration_strategy > (configuration.get_option_argument< size_t >(option_exploration_strategy));
