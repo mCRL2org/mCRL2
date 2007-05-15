@@ -640,7 +640,8 @@ static bes_expression substitute_bex(
       /* first check whether v and cond refer to the same variable, as
        * cond can then be substituted by true (for nu) or false (for mu) */
       if (w==v)
-      { cerr << "ERROR\n";
+      { assert(0); // Variables that are equal at the left and right
+                   // have been replaced by true and false. 
       }
 
       /* if the variable cond has a higher rank than v, or if 
@@ -652,7 +653,7 @@ static bes_expression substitute_bex(
 
       if (!((bes_equations.get_rank(w)<bes_equations.get_rank(v))||
               ((bes_equations.get_rank(w)==bes_equations.get_rank(v)) && (w<v))))
-      { ATfprintf(stderr,"ERROR HIER0a %t\n",(ATerm)b);
+      { assert(0);
       }
       add_variables_to_set(w,bes_equations.get_rhs(v),variable_occurrence_set);
       return BDDif(bes_equations.get_rhs(v),then_branch(b),else_branch(b));
@@ -757,14 +758,23 @@ static void save_bes_in_vasy_format(string outfilename)
   }
 
   for(unsigned long r=1 ; r<=bes_equations.max_rank ; r++)
-  { for(unsigned long i=1; i<=bes_equations.nr_of_equations() ; i++)
+  { bool first=true;
+    for(unsigned long i=1; i<=bes_equations.nr_of_equations() ; i++)
     { if (bes_equations.get_rank(i)==r)
-      { ((outfilename=="-")?cout:outputfile) << 
-              ((bes_equations.get_fixpoint_symbol(i)==pbes_fixpoint_symbol::mu()) ? "min X" : "max X") << i << "=";
+      { if (first)
+        { ((outfilename=="-")?cout:outputfile) << 
+             "block " << 
+             ((bes_equations.get_fixpoint_symbol(i)==pbes_fixpoint_symbol::mu()) ? "mu  B" : "nu B") <<
+             bes_equations.max_rank-r+1 <<
+             "is " << endl;
+           first=false;
+        }
+        ((outfilename=="-")?cout:outputfile) << "X" << i << " = ";
         convert_rhs_to_vasy_form(((outfilename=="-")?cout:outputfile),bes_equations.get_rhs(i));
         ((outfilename=="-")?cout:outputfile) << endl;
       }
     }
+    ((outfilename=="-")?cout:outputfile) << "end block" << endl;
   }
 
   outputfile.close();
@@ -775,28 +785,24 @@ static void save_bes_in_vasy_format(string outfilename)
 static void convert_rhs_to_vasy_form(ostream &outputfile, bes_expression b)
 {
   if (bes::is_true(b))
-  { outputfile << "T";
+  { outputfile << "true";
   }
   else if (bes::is_false(b))
-  { outputfile << "F";
+  { outputfile << "false";
   }
   else if (bes::is_and(b))
   {
-    //BESAnd(a,b) => (a & b)
-    outputfile << "(";
+    //BESAnd(a,b) => a and b
     convert_rhs_to_vasy_form(outputfile,lhs(b));
-    outputfile << "&";
+    outputfile << " and ";
     convert_rhs_to_vasy_form(outputfile,rhs(b));
-    outputfile << ")";
   }
   else if (bes::is_or(b))
   {
-    //BESOr(a,b) => (a | b)
-    outputfile << "(";
+    //BESOr(a,b) => a or b
     convert_rhs_to_vasy_form(outputfile,lhs(b));
-    outputfile << "|";
+    outputfile << " or ";
     convert_rhs_to_vasy_form(outputfile,rhs(b));
-    outputfile << ")";
   }
   else if (bes::is_variable(b))
   {
@@ -815,12 +821,10 @@ static void convert_rhs_to_vasy_form(ostream &outputfile, bes_expression b)
 //--------------------------------
 static void save_bes_in_cwi_format(string outfilename)
 {
-  cerr << "Converting result to ...CWI format " << outfilename << endl;
   gsVerboseMsg("Converting result to CWI-format...\n");
   // Use an indexed set to keep track of the variables and their cwi-representations
 
   ofstream outputfile;
-  cerr << outfilename << endl;
   if (outfilename!="-")
   { outputfile.open(outfilename.c_str(), ios::trunc);
     if (!outputfile.is_open())
