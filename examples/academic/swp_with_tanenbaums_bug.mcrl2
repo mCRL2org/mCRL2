@@ -1,7 +1,8 @@
 % This file describes the third sliding window protocol in Computer Networks
 % by A.S. Tanenbaum, Prentice Hall, 1988. In earlier editions of this book
 % (up till the fourth edition) the most complex sliding window protocol 
-% (i.e. the protocol using selective repeat, section 4.4.3)
+% (i.e. the protocol using selective repeat, section 4.2.3 (first edition),
+% 4.4.3 (second editions) and section 3.4.3 (fourth edition))
 % exhibits a nasty livelock. This livelock occurs when the acknowledgement
 % timer is switched off, after a first acknowledgement is lost in transmission.
 % The comment in the code says in Tanenbaum's enjoyable writing style
