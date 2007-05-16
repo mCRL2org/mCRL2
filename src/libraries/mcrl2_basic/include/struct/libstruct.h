@@ -164,8 +164,8 @@ bool gsIsDataExpr(ATermAppl Term);
 //Ret: Term is a data expression
 
 ATermAppl gsGetName(ATermAppl DataExpr);
-//Pre: DataExpr is an OpId
-//Ret: The name of the OpId
+//Pre: DataExpr is an OpId or a DataVarId
+//Ret: The name of the data expression
 
 ATermAppl gsGetSort(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression

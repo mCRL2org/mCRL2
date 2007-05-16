@@ -617,7 +617,7 @@ bool gsIsDataExpr(ATermAppl Term)
 
 ATermAppl gsGetName(ATermAppl DataExpr)
 {
-  assert(gsIsOpId(DataExpr));
+  assert(gsIsOpId(DataExpr) || gsIsDataVarId(DataExpr));
   return ATAgetArgument(DataExpr, 0);
 }
 
