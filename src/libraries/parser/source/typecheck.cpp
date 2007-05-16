@@ -84,18 +84,6 @@ static ATermList gstcInsertType(ATermList TypeList, ATermAppl Type);
 static inline ATbool gstcIsPos(ATermAppl Number) {char c=gsATermAppl2String(Number)[0]; return (ATbool) (isdigit(c) && c>'0');}
 static inline ATbool gstcIsNat(ATermAppl Number) {return (ATbool) isdigit(gsATermAppl2String(Number)[0]);}
 
-static inline ATermAppl gstcMakeSortArrowProd1(ATermAppl Source, ATermAppl Target){
-  return gsMakeSortArrowProd(ATmakeList1((ATerm)Source),Target);
-}
-
-static inline ATermAppl gstcMakeSortArrowProd2(ATermAppl Source1, ATermAppl Source2, ATermAppl Target){
-  return gsMakeSortArrowProd(ATmakeList2((ATerm)Source1,(ATerm)Source2),Target);
-}
-
-static inline ATermAppl gstcMakeSortArrowProd3(ATermAppl Source1, ATermAppl Source2,ATermAppl Source3, ATermAppl Target){
-  return gsMakeSortArrowProd(ATmakeList3((ATerm)Source1,(ATerm)Source2,(ATerm)Source3),Target);
-}
-
 static inline ATermAppl INIT_KEY(void){return gsMakeProcVarId(gsString2ATermAppl("init"),ATmakeList0());}
 
 static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATermAppl *Par);
