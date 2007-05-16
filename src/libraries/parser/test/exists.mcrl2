@@ -1,0 +1,7 @@
+% This is a simple test case for existential quantificiation
+proc P = (exists x:Pos . true) -> tau . P
+       + (exists x,y:Pos . true) -> tau . P
+       + (exists x,y,z:Pos . true) -> tau . P
+       + (exists x,y:Pos . x+y > 0) -> tau . P;
+
+init P;
