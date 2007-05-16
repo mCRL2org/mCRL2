@@ -429,6 +429,7 @@ data_expression replace_enumerated_parameters_in_data_expression(data_expression
                                                                  table& new_parameters_table,
                                                                  table& enumerated_elements_table)
 {
+  gsDebugMsg("replace enumerated parameters in data expression\n");
   data_variable_list orig_parameters = data_variable_list(new_parameters_table.table_keys());
   for (data_variable_list::iterator i = orig_parameters.begin(); i != orig_parameters.end(); ++i)
   { 
@@ -443,6 +444,7 @@ data_variable_list replace_enumerated_parameters_in_data_variables(const data_va
                                                                    table& new_parameters_table,
                                                                    table& enumerated_elements_table)
 {
+  gsDebugMsg("replace enumerated parameters in data variables\n");
   data_variable_list result;
   for (data_variable_list::iterator i = list.begin(); i != list.end(); ++i)
   {
@@ -468,6 +470,7 @@ data_assignment_list replace_enumerated_parameter_in_data_assignment(const data_
                                                                      data_variable_list new_parameters,
                                                                      const data_expression_list& enumerated_elements)
 {
+  gsDebugMsg("replace enumerated parameter %s in data assigment %s\n", parameter.to_string().c_str(), argument.to_string().c_str());
   data_assignment_list result;
   data_expression arg = argument.rhs();
   
@@ -513,6 +516,7 @@ data_assignment_list replace_enumerated_parameter_in_data_assignments(const data
                                                                       const data_variable_list& new_parameters,
                                                                       const data_expression_list& enumerated_elements)
 {
+  gsDebugMsg("replace enumerated parameter %s in data assignments %s\n", parameter.to_string().c_str(), list.to_string().c_str());
   data_assignment_list result;
 
   for (data_assignment_list::iterator i = list.begin(); i != list.end(); ++i)
@@ -535,6 +539,7 @@ data_assignment_list replace_enumerated_parameters_in_data_assignments(const dat
                                                                        table& new_parameters_table,
                                                                        table& enumerated_elements_table)
 {
+  gsDebugMsg("replace_enumerated_parameters_in_data_assignments %s\n", list.to_string().c_str());
   data_assignment_list result, temp;
   // First replace right-hand-sides
   for (data_assignment_list::iterator i = list.begin(); i != list.end(); ++i)
@@ -558,6 +563,7 @@ action_list replace_enumerated_parameters_in_actions(action_list list,
                                                      table& new_parameters_table,
                                                      table& enumerated_elements_table)
 {
+  gsDebugMsg("replace enumerated parameters in action labels\n");
   data_variable_list orig_parms = data_variable_list(new_parameters_table.table_keys());
   for (data_variable_list::iterator i = orig_parms.begin(); i != orig_parms.end(); ++i)
   {
@@ -571,10 +577,9 @@ summand replace_enumerated_parameters_in_summand(const summand& summand_,
                                                      table& new_parameters_table,
                                                      table& enumerated_elements_table)
 {
+  gsDebugMsg("replace enumerated parameters in summand %s\n", summand_.to_string().c_str());
   summand result;
 
-  gsDebugMsg("Summand: %s\n\n", summand_.to_string().c_str());
-  
   gsDebugMsg("\nOriginal condition: %s\n\n New condition: %s\n\n", summand_.condition().to_string().c_str(), replace_enumerated_parameters_in_data_expression(summand_.condition(), new_parameters_table, enumerated_elements_table).to_string().c_str());
 
   result = summand(summand_.summation_variables(),
@@ -592,6 +597,7 @@ summand_list replace_enumerated_parameters_in_summands(const summand_list& list,
                                                        table& new_parameters_table,
                                                        table& enumerated_elements_table)
 {
+  gsDebugMsg("replace enumerated parameters in summands\n");
   summand_list result;
   for (summand_list::iterator i = list.begin(); i != list.end(); ++i)
   {
@@ -607,6 +613,7 @@ linear_process replace_enumerated_parameters_in_lps(const lps::linear_process& l
                                          table& new_parameters_table,
                                          table& enumerated_elements_table)
 {
+  gsDebugMsg("replace enumerated parameters in linear process\n");
   linear_process result;
 
   result = linear_process(lps.free_variables(),
@@ -621,6 +628,7 @@ specification replace_enumerated_parameters_in_specification(const lps::specific
                                                              table& new_parameters_table,
                                                              table& enumerated_elements_table)
 {
+  gsDebugMsg("replace enumerated parameters in specification\n");
   lps::specification result;
 
   // Compute new initial assignments
@@ -651,10 +659,13 @@ specification binary(const lps::specification& spec,
   
   Rewriter* rewriter = createRewriter(spec.data(), options.strategy);
   EnumeratorStandard enumerator = EnumeratorStandard(spec, rewriter);
-  
-  result = set_lps(result, set_process_parameters(result.process(), replace_enumerated_parameters(result, enumerator, new_parameters_table, enumerated_elements_table)));
 
+  // This needs to be done in a counter-intuitive order because of the well-typedness checks
+  // (they make sure we can't build up an intermediate result!)
+  data_variable_list new_process_parameters = replace_enumerated_parameters(result, enumerator, new_parameters_table, enumerated_elements_table);
   result = replace_enumerated_parameters_in_specification(result, new_parameters_table, enumerated_elements_table);
+  result = set_lps(result, set_process_parameters(result.process(), new_process_parameters));
+  gsDebugMsg("Finished processing\n");
   
   return result; 
 }
