@@ -1,6 +1,6 @@
 // ======================================================================
 //
-// file          : pbes2bes
+// file          : pbes2bool
 // date          : 15-04-2007
 // version       : 0.1.3
 //
@@ -10,7 +10,7 @@
 // ======================================================================
 
 
-#define NAME "pbes2bes"
+#define NAME "pbes2bool"
 #define VERSION "0.1.3"
 #define AUTHOR "Alexander van Dam and Jan Friso Groote"
 
@@ -131,8 +131,11 @@ static void save_bes_in_vasy_format(string outfilename);
 //Post: pbes_spec is saved in cwi-format
 //Ret: -
 
-static void convert_rhs_to_cwi_form(ostream &outputfile, bes_expression p);
-static void convert_rhs_to_vasy_form(ostream &outputfile, bes_expression p);
+static void save_rhs_in_cwi_form(ostream &outputfile, bes_expression p);
+static void save_rhs_in_vasy_form(ostream &outputfile, 
+                                     bes_expression p,
+                                     vector<unsigned long> &variable_index,
+                                     const unsigned long current_rank);
 // Function used to convert a pbes_expression to the variant used by the cwi-output
 
 static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options);
@@ -743,10 +746,98 @@ pbes load_pbes(t_tool_options tool_options)
 
 //function save_bes_in_vasy_format
 //--------------------------------
+
+typedef enum { both, and_form, or_form} expression_sort;
+
+static bes_expression translate_equation_for_vasy(const unsigned long i,
+                                        const bes_expression b,
+                                        const expression_sort s)
+{
+  if (bes::is_true(b))
+  { return b;
+  }
+  else if (bes::is_false(b))
+  { return b;
+  }
+  else if (bes::is_and(b))
+  { 
+    if (s==or_form)
+    { /* make a new equation B=b, and return B */
+      bes::variable_type v=bes_equations.nr_of_equations()+1;
+      bes_equations.add_equation(v,
+                                 bes_equations.get_fixpoint_symbol(i),
+                                 bes_equations.get_rank(i),
+                                 b);
+      return bes::variable(v);
+    }
+    else
+    {
+      bes_expression b1=translate_equation_for_vasy(i,lhs(b),and_form);
+      bes_expression b2=translate_equation_for_vasy(i,rhs(b),and_form);
+      return and_(b1,b2);
+    }
+  }
+  else if (bes::is_or(b))
+  { 
+    if (s==and_form)
+    { /* make a new equation B=b, and return B */
+      bes::variable_type v=bes_equations.nr_of_equations()+1;
+      bes_equations.add_equation(v,
+                                 bes_equations.get_fixpoint_symbol(i),
+                                 bes_equations.get_rank(i),
+                                 b);
+      return bes::variable(v);
+    }
+    else
+    {
+      bes_expression b1=translate_equation_for_vasy(i,lhs(b),or_form);
+      bes_expression b2=translate_equation_for_vasy(i,rhs(b),or_form);
+      return or_(b1,b2);
+    }
+  }
+  else if (bes::is_variable(b))
+  {
+    return b;
+  }
+  else
+  {
+    gsErrorMsg("The generated equation system is not a BES. It cannot be saved in VASY-format.\n");
+    exit(1);
+  }
+  return b;
+}
+
+
 static void save_bes_in_vasy_format(string outfilename)
 {
   gsVerboseMsg("Converting result to VASY-format...\n");
   // Use an indexed set to keep track of the variables and their vasy-representations
+
+  /* First translate the right hand sides of the equations such that they only 
+     contain only conjunctions of disjunctions. Note that dynamically new
+     equations are added during the translation process in "translate_equation_for_vasy" 
+     that must alos be translated. */
+
+  for(unsigned long i=1; i<=bes_equations.nr_of_equations() ; i++)
+    { 
+        bes_equations.set_rhs(i,translate_equation_for_vasy(i,bes_equations.get_rhs(i),both));
+    }
+
+  /* Second give a consecutive index to each variable of a particular rank */
+
+  std::vector<unsigned long> variable_index(bes_equations.nr_of_equations()+1);
+  for(unsigned long r=1 ; r<=bes_equations.max_rank ; r++)
+  { unsigned long index=0;
+    for(unsigned long i=1; i<=bes_equations.nr_of_equations() ; i++)
+    { if (bes_equations.get_rank(i)==r)
+      { 
+        variable_index[i]=index;
+        index++;
+      }
+    }
+  }
+
+  /* Third save the equations in the forms of blocks of equal rank */
 
   ofstream outputfile;
   if (outfilename!="-")
@@ -765,24 +856,30 @@ static void save_bes_in_vasy_format(string outfilename)
         { ((outfilename=="-")?cout:outputfile) << 
              "block " << 
              ((bes_equations.get_fixpoint_symbol(i)==pbes_fixpoint_symbol::mu()) ? "mu  B" : "nu B") <<
-             bes_equations.max_rank-r+1 <<
-             "is " << endl;
+             r-1 <<
+             " is " << endl;
            first=false;
         }
-        ((outfilename=="-")?cout:outputfile) << "X" << i << " = ";
-        convert_rhs_to_vasy_form(((outfilename=="-")?cout:outputfile),bes_equations.get_rhs(i));
+        ((outfilename=="-")?cout:outputfile) << "  X" << variable_index[i] << " = ";
+        save_rhs_in_vasy_form(((outfilename=="-")?cout:outputfile),
+                                 bes_equations.get_rhs(i),
+                                 variable_index,
+                                 r);
         ((outfilename=="-")?cout:outputfile) << endl;
       }
     }
-    ((outfilename=="-")?cout:outputfile) << "end block" << endl;
+    ((outfilename=="-")?cout:outputfile) << "end block" << endl << endl;
   }
 
   outputfile.close();
 }
 
-//function convert_rhs_to_vasy
+//function save_rhs_in_vasy_form
 //---------------------------
-static void convert_rhs_to_vasy_form(ostream &outputfile, bes_expression b)
+static void save_rhs_in_vasy_form(ostream &outputfile, 
+                                     bes_expression b,
+                                     std::vector<unsigned long> &variable_index,
+                                     const unsigned long current_rank)
 {
   if (bes::is_true(b))
   { outputfile << "true";
@@ -793,21 +890,24 @@ static void convert_rhs_to_vasy_form(ostream &outputfile, bes_expression b)
   else if (bes::is_and(b))
   {
     //BESAnd(a,b) => a and b
-    convert_rhs_to_vasy_form(outputfile,lhs(b));
+    save_rhs_in_vasy_form(outputfile,lhs(b),variable_index,current_rank);
     outputfile << " and ";
-    convert_rhs_to_vasy_form(outputfile,rhs(b));
+    save_rhs_in_vasy_form(outputfile,rhs(b),variable_index,current_rank);
   }
   else if (bes::is_or(b))
   {
     //BESOr(a,b) => a or b
-    convert_rhs_to_vasy_form(outputfile,lhs(b));
+    save_rhs_in_vasy_form(outputfile,lhs(b),variable_index,current_rank);
     outputfile << " or ";
-    convert_rhs_to_vasy_form(outputfile,rhs(b));
+    save_rhs_in_vasy_form(outputfile,rhs(b),variable_index,current_rank);
   }
   else if (bes::is_variable(b))
   {
     // PropVar => <Int>
-    outputfile << "X" << get_variable(b);
+    outputfile << "X" << variable_index[get_variable(b)];
+    if (bes_equations.get_rank(get_variable(b))!=current_rank)
+    { outputfile << "_" << bes_equations.get_rank(get_variable(b))-1;
+    }
   }
   else
   {
@@ -838,7 +938,7 @@ static void save_bes_in_cwi_format(string outfilename)
     { if (bes_equations.get_rank(i)==r)
       { ((outfilename=="-")?cout:outputfile) << 
               ((bes_equations.get_fixpoint_symbol(i)==pbes_fixpoint_symbol::mu()) ? "min X" : "max X") << i << "=";
-        convert_rhs_to_cwi_form(((outfilename=="-")?cout:outputfile),bes_equations.get_rhs(i));
+        save_rhs_in_cwi_form(((outfilename=="-")?cout:outputfile),bes_equations.get_rhs(i));
         ((outfilename=="-")?cout:outputfile) << endl;
       }
     }
@@ -847,9 +947,9 @@ static void save_bes_in_cwi_format(string outfilename)
   outputfile.close();
 }
 
-//function convert_rhs_to_cwi
+//function save_rhs_in_cwi
 //---------------------------
-static void convert_rhs_to_cwi_form(ostream &outputfile, bes_expression b)
+static void save_rhs_in_cwi_form(ostream &outputfile, bes_expression b)
 {
   if (bes::is_true(b))
   { outputfile << "T";
@@ -861,18 +961,18 @@ static void convert_rhs_to_cwi_form(ostream &outputfile, bes_expression b)
   {
     //BESAnd(a,b) => (a & b)
     outputfile << "(";
-    convert_rhs_to_cwi_form(outputfile,lhs(b));
+    save_rhs_in_cwi_form(outputfile,lhs(b));
     outputfile << "&";
-    convert_rhs_to_cwi_form(outputfile,rhs(b));
+    save_rhs_in_cwi_form(outputfile,rhs(b));
     outputfile << ")";
   }
   else if (bes::is_or(b))
   {
     //BESOr(a,b) => (a | b)
     outputfile << "(";
-    convert_rhs_to_cwi_form(outputfile,lhs(b));
+    save_rhs_in_cwi_form(outputfile,lhs(b));
     outputfile << "|";
-    convert_rhs_to_cwi_form(outputfile,rhs(b));
+    save_rhs_in_cwi_form(outputfile,rhs(b));
     outputfile << ")";
   }
   else if (bes::is_variable(b))
