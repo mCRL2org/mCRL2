@@ -3737,7 +3737,7 @@ static stacklisttype *new_stack(
       for( walker=parameterlist ; 
            walker!=ATempty ; 
            walker=ATgetNext(walker)) 
-      { ATermAppl par=ATAgetFirst(parameterlist);
+      { ATermAppl par=ATAgetFirst(walker);
         ATermAppl sort=ATAgetArgument(par,1);
         ATermAppl getmap=NULL;
         assert(gsIsDataVarId(par));
@@ -7699,7 +7699,7 @@ static ATermList combinesumlist(
       ATermAppl actiontime2=linGetActionTime(summand2);
       ATermAppl condition2=linGetCondition(summand2);
       ATermList nextstate2=linGetNextState(summand2);
-
+      
       rename2_list=construct_renaming(
                ATconcat(sumvars1new,allpars),
                sumvars2,&sumvars2new,&sums2renaming);
@@ -7717,6 +7717,7 @@ static ATermList combinesumlist(
                                              rename2_list,
                                              sums2renaming,
                                              multiaction2)));
+
         }
         ATermList allsums=ATconcat(sumvars1new,sumvars2new);
         actiontime2=substitute_time(rename_list,par2,
@@ -7767,7 +7768,8 @@ static ATermList combinesumlist(
         
         condition3=RewriteTerm(condition3);
         if ((condition3!=gsMakeDataExprFalse()) && (!gsIsDelta(multiaction3)))
-        { resultsumlist=
+        { 
+          resultsumlist=
             ATinsertA(
               resultsumlist,
               gsMakeLinearProcessSummand(
