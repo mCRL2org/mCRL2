@@ -11,11 +11,12 @@ LTS::LTS(Mediator* owner) {
   deadlockCount = -1;
   markedTransitionCount = 0;
   simulation = new Simulation();
+  selectedState = NULL;
 }
 
 LTS::~LTS()
 {
-	unsigned int i,r;
+  unsigned int i,r;
   for (i = 0; i < unmarkedStates.size(); ++i) {
     delete unmarkedStates[i];
   }
@@ -77,6 +78,61 @@ string LTS::getParameterValue(int parindex,int valindex) {
 	return valueTable[parindex][valindex];
 }
 
+void LTS::selectStateByID(int id) {
+  // FIXME Naive implementation
+  for(size_t i = 0; i < unmarkedStates.size(); ++i) {
+    if ( unmarkedStates[i]->getID() == id) {
+      unmarkedStates[i]->select();
+      // For fast deselection
+      selectedState = unmarkedStates[i];
+
+      // If we are simulating, see if this is a state we can select.
+      if ((simulation != NULL) && (simulation->getStarted()))
+      { 
+        vector< Transition* > posTrans = simulation->getPosTrans();
+
+        for (size_t i = 0; i < posTrans.size(); ++i)
+        {
+          if (posTrans[i]->getEndState()->getID() == selectedState->getID())
+          {
+            simulation->chooseTrans(i);
+          }
+        }
+      }
+
+      // Escape from function
+      return;
+    }
+  }
+
+  for(size_t i = 0; i < markedStates.size(); ++i) {
+    if (markedStates[i]->getID() == id) {
+      markedStates[i]->select();
+      // For fast deselection
+      selectedState = markedStates[i];
+
+      if ((simulation != NULL) && (simulation->getStarted()))
+      { 
+        vector< Transition* > posTrans = simulation->getPosTrans();
+
+        for (size_t i = 0; i < posTrans.size(); ++i)
+        {
+          if (posTrans[i]->getEndState()->getID() == selectedState->getID())
+          {
+            simulation->chooseTrans(i);
+          }
+        }
+      }
+    }
+  }
+}
+
+void LTS::deselect() {
+  if (selectedState != NULL) {
+    selectedState->deselect();
+    selectedState = NULL;
+  }
+}
 int LTS::getNumParameters() const {
 	return parameterNames.size();
 }
@@ -932,6 +988,11 @@ void LTS::processRemovedMarkRule( MarkRule* r )
 MarkRule* LTS::getMarkRule( const int index ) const
 {
   return markRules[ index ];
+}
+
+State* LTS::getMarkedState(const int index) const
+{
+  return markedStates[ index ];
 }
 
 bool LTS::getMatchAnyMarkRule() const

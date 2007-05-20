@@ -776,10 +776,15 @@ void MainFrame::refresh() {
 
 void MainFrame::selChange() {
   // There always is a simulation to inform us of a selection change.
-  if(sim->getChosenTransi() != -1) {
+  int j = sim->getChosenTransi();
+
+  if(j != -1) 
+  {
+    simTransView->Select(j);
     simTriggerButton->Enable();
   }
-  else {
+  else 
+  {
     simTriggerButton->Disable();
   }
 }

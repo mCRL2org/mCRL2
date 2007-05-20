@@ -401,3 +401,18 @@ string LTSViewApp::getParName(const int i) const {
 string LTSViewApp::getParValue(const int i, const int j) const {
   return lts->getParameterValue(i, j);
 }
+
+
+void LTSViewApp::selectStateByID(const int id) {
+  lts->selectStateByID(id);
+}
+void LTSViewApp::deselect() {
+  lts->deselect();
+}
+
+int LTSViewApp::getNumberOfObjects() {
+  int result = 0;
+  result += lts->getNumClusters();
+  result += lts->getNumStates();
+  return result;
+}

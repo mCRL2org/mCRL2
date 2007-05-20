@@ -16,6 +16,7 @@ BEGIN_EVENT_TABLE(GLCanvas,wxGLCanvas)
     EVT_ENTER_WINDOW(GLCanvas::onMouseEnter)
     EVT_LEFT_DOWN(GLCanvas::onMouseDown)
     EVT_LEFT_UP(GLCanvas::onMouseUp)
+    EVT_LEFT_DCLICK(GLCanvas::onMouseDClick)
     EVT_RIGHT_DOWN(GLCanvas::onMouseDown)
     EVT_RIGHT_UP(GLCanvas::onMouseUp)
     EVT_MIDDLE_DOWN(GLCanvas::onMouseDown)
@@ -191,12 +192,16 @@ void GLCanvas::display(bool coll_caller) {
       glTranslatef(0.0f,0.0f,-halfHeight);
       
       if (simulating) {
-        visualizer->drawSimStates(sim->getStateHis(), sim->getCurrState());
-      }
+        visualizer->drawSimStates(sim->getStateHis(), sim->getCurrState(), 
+          sim->getChosenTrans());
+      } 
       if (!lightRenderMode || settings->getBool(NavShowStates)) {
 
         if (settings->getBool(DisplayStates) && !simulating) {         
+          // Identify that we are drawing states
+          glPushName(STATE);
           visualizer->drawStates();
+          glPopName();
         }
         /*else if (simulating) {
           // Draw the states that were visited in simulation, and the current 
@@ -215,10 +220,13 @@ void GLCanvas::display(bool coll_caller) {
       else {
         // Draw transitions followed during simulation and the possible
         // transitions going out of the current state.
+        // Identify that we are drawing selectable sim states in this mode.
+        glPushName(SIMSTATE);
         visualizer->drawSimTransitions(
           !lightRenderMode || settings->getBool(NavShowTransitions),
           !lightRenderMode || settings->getBool(NavShowBackpointers),
           sim->getTransHis(), sim->getPosTrans(), sim->getChosenTrans());
+        glPopName();
       }  
       if (!lightRenderMode || settings->getBool(NavTransparency)) {
         // determine current viewpoint in world coordinates
@@ -241,7 +249,10 @@ void GLCanvas::display(bool coll_caller) {
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
       glDepthMask(GL_FALSE);
+      // Identify that we are drawing clusters
+      glPushName(CLUSTER);
       visualizer->drawStructure();
+      glPopName();
       glDepthMask(GL_TRUE);
       glDisable(GL_BLEND);
       
@@ -340,8 +351,14 @@ void GLCanvas::onMouseDown(wxMouseEvent& event) {
   determineCurrentTool(event);
   if (currentTool==myID_ZOOM || currentTool==myID_PAN ||
       currentTool==myID_ROTATE) {
+    // Movement tools
     oldMouseX = event.GetX();
     oldMouseY = event.GetY();
+  }
+  else if (event.LeftDown()) {
+    // currentTool == myID_SELECT, selection tool
+    // Delegate x and y coordinates to picking function.
+    pickObjects(event.GetX(), event.GetY(), false);
   }
   display();
 }
@@ -349,6 +366,15 @@ void GLCanvas::onMouseDown(wxMouseEvent& event) {
 void GLCanvas::onMouseUp(wxMouseEvent& event) {
   lightRenderMode = false;
   determineCurrentTool(event);
+  display();
+}
+
+void GLCanvas::onMouseDClick(wxMouseEvent& event) {
+  lightRenderMode = true;
+  if (currentTool == myID_SELECT) 
+  {
+    pickObjects(event.GetX(), event.GetY(), true);
+  }
   display();
 }
 
@@ -530,5 +556,128 @@ void GLCanvas::selChange() {
       simulating = false;
       display();
     }
+  }
+}
+
+
+void GLCanvas::processHits(const GLint hits, GLuint buffer[], bool doubleC) {
+  // This method selects the object clicked.
+  //
+  // The buffer content per hit is encoded as follows:
+  // buffer[0]: The number of names on the name stack at the moment of the hit
+  // buffer[1]: The minimal depth of the object hit
+  // buffer[2]: The maximal depth of the object. We are certainly not interested
+  //            in this.
+  // buffer[3]: The type of the object picked, as defined in utils.h
+  // buffer[4]: The first identifier of the object picked.
+  // (buffer[5]: The second identifier of the object picked.)
+
+  int selectedObject[3];  // Objects are identified by at most 3 integers
+  float curMinDepth = 2000000;
+  float minDepth = 0;
+  GLuint names;
+  bool stateSelected = false; // Gives the selection of states precedence over 
+                              // the selection of clusters.
+
+  // Choose the nearest object and store it.
+  for(GLint j=0; j < hits; ++j) 
+  {
+    names = *buffer;
+    buffer++; // buffer points to the minimal z value of the hit.
+    minDepth = static_cast<float>(*buffer)/0x7fffffff;
+    buffer++; // skip maximal z value of his (no interest)
+    buffer++; // buffer points to the first name on the stack
+    GLuint objType = *buffer;
+   
+    for (unsigned int j = 0; j < names; j++) 
+    {
+      if (minDepth < curMinDepth && (!stateSelected || objType == STATE || 
+          objType == SIMSTATE))
+      {
+        selectedObject[j] = *buffer;
+      }
+
+      buffer++;
+    }
+  
+    if (minDepth < curMinDepth && (!stateSelected || objType == STATE ||
+        objType == SIMSTATE))
+    {
+      curMinDepth = minDepth;
+    }
+    stateSelected = (objType == STATE) || (objType == SIMSTATE) ;
+  }
+
+  switch (selectedObject[0]) {
+    case STATE: 
+      {
+        mediator->selectStateByID(selectedObject[1]);
+        break;
+      }
+    case CLUSTER: 
+      printf("Cluster selected \n");
+      break;
+    case TRANSITION:
+      printf("Transition selected \n");
+      break;
+    case SIMSTATE:
+      mediator->selectStateByID(selectedObject[1]);
+      // As part of selectStateByID, a simulation follow-up state was selected
+      // if we caught a double click, follow to this state.
+      if (doubleC) 
+      {
+        sim->followTrans();
+      }
+      break;
+    default:
+      printf("Nothing selected.\n");
+      mediator->deselect();
+      break;
+  }
+}
+
+
+void GLCanvas::pickObjects(int x, int y, bool doubleC) {
+  // In the worst case, all the objects in the frame are hit. These objects are
+  // given by the mediator. For each hit, the following needs to be recorded:
+  // * The number of names on the stack
+  // * The minimal depth of the hit object
+  // * The maximal depth of the hit object
+  // * The identifier of the type of object clicked
+  // * Up to two numbers indicating the object selected
+  GLsizei bufsize = mediator->getNumberOfObjects() * 6; 
+  if(GetContext()) {
+    GLuint selectBuf[bufsize];
+    GLint  hits;
+    GLint viewport[4];
+
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    glSelectBuffer(bufsize, selectBuf);
+    // Swith to selection mode
+    glRenderMode(GL_SELECT);
+    glInitNames();
+    // Create new projection transformation
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    // Create 3x3 pixel picking region near cursor location
+    gluPickMatrix((GLdouble) x, (GLdouble)  viewport[3] - y, 
+                  3.0, 3.0, viewport);
+
+    int width,height;
+    GetClientSize(&width,&height);
+    gluPerspective(60.0f,(GLfloat)(width)/(GLfloat)(height),0.1, 1000);
+    glMatrixMode(GL_MODELVIEW); // Switch to Modelview matrix in order to 
+                                // calculate rotations etc.
+    display();
+    glPopMatrix();
+    glFlush();
+
+    hits = glRenderMode(GL_RENDER);
+    reshape();
+    display();
+    mediator->deselect();
+    processHits(hits, selectBuf, doubleC);
   }
 }

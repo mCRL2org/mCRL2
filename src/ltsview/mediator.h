@@ -19,6 +19,9 @@ class Mediator {
     virtual void      setRankStyle(Utils::RankStyle rs) = 0;
     virtual void      setVisStyle(Utils::VisStyle vs) = 0;
     virtual void      unmarkAction(std::string label) = 0;
+    virtual void      selectStateByID(const int id) = 0;
+    virtual void      deselect() = 0;
+    virtual int       getNumberOfObjects() = 0;
 
 
     // Simulation start. 

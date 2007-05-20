@@ -25,13 +25,14 @@ class LTS {
     void	clusterComrades();
     void	computeClusterLabelInfo();
     void	getActionLabels(std::vector<std::string> &ls) const;
-		Cluster* getClusterAtRank(int r, int c) const;
+    Cluster*    getClusterAtRank(int r, int c) const;
     State*	getInitialState() const;
     std::string getLabel(int labindex);
     bool	getMatchAnyMarkRule() const;
     Utils::MarkRule*	getMarkRule(const int index) const;
+    State*      getMarkedState(const int index) const;
     int		getNumClusters() const;
-		int		getNumClustersAtRank(int r) const;
+    int		getNumClustersAtRank(int r) const;
     int		getNumDeadlocks();
     int		getNumMarkedStates() const;
     int		getNumMarkedTransitions() const;
@@ -43,6 +44,8 @@ class LTS {
     std::string getParameterName(int parindex);
     std::string getParameterType(int parindex);
     std::string getParameterValue(int parindex,int valindex);
+    void        selectStateByID(int id);
+    void        deselect();
     void	markAction(std::string label);
     void	markClusters();
     void	mergeSuperiorClusters();
@@ -64,6 +67,7 @@ class LTS {
     std::vector< std::vector< Cluster* > >	clustersInRank;
     int	deadlockCount;
     State*	initialState;
+    State*      selectedState;
     std::vector< State* >	markedStates;
     int	markedTransitionCount;
     std::vector< Utils::MarkRule* >	markRules;

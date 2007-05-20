@@ -29,6 +29,7 @@ class GLCanvas: public wxGLCanvas, public Subscriber, public simReader {
     void      onMouseMove(wxMouseEvent& event);
     void      onMouseUp(wxMouseEvent& event);
     void      onMouseWheel(wxMouseEvent& event);
+    void      onMouseDClick(wxMouseEvent& event);
     void      onPaint(wxPaintEvent& event);
     void      onSize(wxSizeEvent& event);
     void      OnEraseBackground(wxEraseEvent& event);
@@ -62,6 +63,10 @@ class GLCanvas: public wxGLCanvas, public Subscriber, public simReader {
     // Boolean determining if simulation is on.
     bool      simulating;
 
+    // Functions for processing hits
+    void processHits(const GLint hits, GLuint buffer[], bool doubleC);
+    void pickObjects(int x, int y, bool doubleC);
+    
     DECLARE_EVENT_TABLE()
 };
 

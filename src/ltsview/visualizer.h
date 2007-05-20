@@ -22,6 +22,7 @@ class Visualizer: public Subscriber {
     bool create_objects;
     bool update_colors;
     bool update_matrices;
+    bool update_abs;
 
     void clearDFSStates(State* root);
     void computeStateAbsPos(State* root,int rot,Utils::Point3D init);
@@ -54,7 +55,8 @@ class Visualizer: public Subscriber {
     void setVisStyle(Utils::VisStyle vs);
 
     void drawStates();
-    void drawSimStates(std::vector<State*> historicStates, State* currState);
+    void drawSimStates(std::vector<State*> historicStates, State* currState,
+                       Transition* chosenTrans);
     void drawSimMarkedStates(Cluster* root, int rot);
     
     void drawTransitions(bool draw_fp,bool draw_bp);

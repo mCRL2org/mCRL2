@@ -38,7 +38,7 @@ class Simulation {
     bool                                getStarted()          const;
     
     
-    void                                chooseTrans( int i );
+    void                                chooseTrans(int i);
     void                                followTrans();
     void                                undoStep();
     void                                resetSim();
