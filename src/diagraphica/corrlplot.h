@@ -1,5 +1,5 @@
 // --- corrlplot.h --------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 #ifndef CORRLPLOT_H

@@ -1,5 +1,5 @@
 // --- colleague.h --------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 // ------------------------------------------------------------------
@@ -21,7 +21,7 @@ class Colleague
 public:
     // -- contstructors and destructors -----------------------------
     Colleague( Mediator* m );
-    // -- !declaring destructor as virtual causes access violation! -
+    Colleague( const Colleague &colleague );
     ~Colleague();
     
 protected:

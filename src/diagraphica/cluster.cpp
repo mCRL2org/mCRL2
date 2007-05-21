@@ -1,5 +1,5 @@
 // --- cluster.cpp --------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 

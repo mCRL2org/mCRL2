@@ -1,5 +1,5 @@
 // --- diagrameditor.h ----------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 #ifndef DIAGRAMEDITOR_H
@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <cmath>
 #include "colorchooser.h"
+#include "dof.h"
 #include "diagram.h"
 #include "graph.h"
 #include "visualizer.h"
@@ -41,6 +42,10 @@ public:
     void setLineCol();
 
     void handleDOFSel( const int &DOFIdx );
+    void handleDOFSetTextStatus(
+        const int &DOFIdx,
+        const int &status );
+    int handleDOFGetTextStatus( const int &DOFIdx );
     void handleDOFColAdd(
         const double &hue,
         const double &y );
@@ -68,7 +73,7 @@ public:
     // -- get functions ---------------------------------------------
     Diagram* getDiagram();
     int getEditMode();
-
+    
     // -- visualization functions  ----------------------------------
     void visualize( const bool &inSelectMode );
 

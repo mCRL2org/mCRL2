@@ -1,5 +1,5 @@
 // --- arcdiagram.h -------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 #ifndef ARCDIAGRAM_H
@@ -10,7 +10,7 @@
 #include <cmath>
 #include <map>
 #include <vector>
-
+using namespace std;
 #include <wx/timer.h>
 #include "diagram.h"
 #include "graph.h"
@@ -43,6 +43,8 @@ public:
     static ColorRGB getColorBundles();
     static double getTrspBundles();
 
+    void getAttrsTree( vector< int > &idcs );
+
     // -- set functions ---------------------------------------------
     static void setColorClr( const ColorRGB &col );
     static void setColorTxt( const ColorRGB &col );
@@ -58,20 +60,21 @@ public:
     static void setColorBundles( const ColorRGB &col );
     static void setTrspBundles( const double &trsp );
 
-    // -*- //
     void setAttrsTree( const vector< int > idcs );
 
     void setDiagram( Diagram *dgrm );
     void hideAllDiagrams();
     
-    // -*- //
     void markLeaf(
         const int &leafIdx,
         ColorRGB &col );
     void unmarkLeaves();
-    // -*- //
-
+    void markBundle( const int &idx );
+    void unmarkBundles();
+    
     void handleSendDgrmSglToSiml();
+    void handleSendDgrmSglToTrace();
+    void handleSendDgrmSetToTrace();
     void handleSendDgrmSglToExnr();
     void handleSendDgrmSetToExnr();
     
@@ -221,11 +224,9 @@ protected:
     int                            currIdxDgrm;
     
     // simulator
-    // -*- //
     int prevFrameIdxClust;
     int currFrameIdxClust;
     int nextFrameIdxClust;
-    // -*- //
     map< int, vector< ColorRGB > > markLeaves;
     
     // animation

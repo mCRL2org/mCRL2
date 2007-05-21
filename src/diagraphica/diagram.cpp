@@ -1,5 +1,5 @@
 // --- diagram.cpp --------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -229,6 +229,9 @@ void Diagram::visualize(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // ------------------------------------------------
+// ------------------------------------------------------------------
+// Used by diagram editor.
+// ------------------------------------------------------------------
 {
     drawBorder( inSelectMode, canvas );
     if ( showGrid == true )
@@ -242,8 +245,11 @@ void Diagram::visualize(
     const bool &inSelectMode,
     GLCanvas* canvas,
     const vector< Attribute* > attrs,
-    const vector< int > attrValIdcs )
+    const vector< double > attrValIdcs )
 // ----------------------------------
+// ------------------------------------------------------------------
+// Used by visualizers.
+// ------------------------------------------------------------------
 {
     if ( inSelectMode == true )
         drawBorderFlush( inSelectMode, canvas );
@@ -262,8 +268,11 @@ void Diagram::visualize(
     GLCanvas* canvas,
     const double &opacity,
     const vector< Attribute* > attrs,
-    const vector< int > attrValIdcs )
+    const vector< double > attrValIdcs )
 // ----------------------------------
+// ------------------------------------------------------------------
+// Used by visualizers.
+// ------------------------------------------------------------------
 {
     if ( inSelectMode == true )
         drawBorderFlush( inSelectMode, canvas );

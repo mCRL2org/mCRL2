@@ -1,5 +1,5 @@
 // --- arcdiagram.cpp -----------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -10,7 +10,8 @@
 
 
 // general
-ColorRGB ArcDiagram::colClr = { 1.0, 1.0, 0.93, 1.0 };
+//ColorRGB ArcDiagram::colClr = { 1.0, 1.0, 0.93, 1.0 };
+ColorRGB ArcDiagram::colClr = { 1.0, 1.0, 1.0, 1.0 };
 ColorRGB ArcDiagram::colTxt = { 0.0, 0.0, 0.0, 1.0 };
 int ArcDiagram::szeTxt = 12;
 // cluster tree
@@ -174,6 +175,16 @@ double ArcDiagram::getTrspBundles()
     return colBundles.a;
 }
     
+
+// -------------------------------------------------
+void ArcDiagram::getAttrsTree( vector< int > &idcs )
+// -------------------------------------------------
+{
+    idcs.clear();
+    for ( int i = 0; i < attrsTree.size(); ++i )
+        idcs.push_back( attrsTree[i]->getIndex() );
+}
+
 
 // -- set functions -------------------------------------------------
 
@@ -356,6 +367,24 @@ void ArcDiagram::unmarkLeaves()
 }
 
 
+// ------------------------------------------
+void ArcDiagram::markBundle( const int &idx )
+// ------------------------------------------
+{
+    if ( 0 <= idx && idx < markBundles.size() )
+        markBundles[idx] = true;
+}
+
+
+// -----------------------------
+void ArcDiagram::unmarkBundles()
+// -----------------------------
+{
+    for ( int i = 0; i < markBundles.size(); ++i )
+        markBundles[i] = false;
+}
+
+
 // ---------------------------------------
 void ArcDiagram::handleSendDgrmSglToSiml()
 // ---------------------------------------
@@ -363,6 +392,22 @@ void ArcDiagram::handleSendDgrmSglToSiml()
     mediator->initSimulator(
         framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
         attrsDgrm[currIdxDgrm] );
+}
+
+
+// ----------------------------------------
+void ArcDiagram::handleSendDgrmSglToTrace()
+// ----------------------------------------
+{
+    mediator->markTimeSeries( this, framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]] );
+}
+
+
+// ----------------------------------------
+void ArcDiagram::handleSendDgrmSetToTrace()
+// ----------------------------------------
+{
+    mediator->markTimeSeries( this, framesDgrm[currIdxDgrm] );
 }
 
 
@@ -413,7 +458,9 @@ void ArcDiagram::visualize( const bool &inSelectMode )
         GLuint selectBuf[512];
         startSelectMode(
             hits,
-            selectBuf );
+            selectBuf,
+            2.0,
+            2.0 );
         
         glPushName( ID_CANVAS );
         VisUtils::fillRect( -0.5*wth, 0.5*wth, 0.5*hgt, -0.5*hgt );
@@ -544,7 +591,6 @@ void ArcDiagram::drawBundles( const bool &inSelectMode )
         
             for ( int i = 0; i < posBundles.size(); ++i )
             {
-                // -*- //
                 if ( markBundles[i] == true )
                     VisUtils::mapColorDkCoolBlue( colFill );
                 else
@@ -1039,12 +1085,31 @@ void ArcDiagram::drawDiagrams( const bool &inSelectMode )
                 glTranslatef( x, y, 0.0 );
                 glScalef( 0.2f, 0.2f, 0.2f );
                 
-                vector< int > vals;
+                vector< double > vals;
+                /*
                 for ( int j = 0; j < attrsDgrm[i].size(); ++j )
                     vals.push_back(
                         attrsDgrm[i][j]->mapToValue(
                             framesDgrm[i][frameIdxDgrm[i]]->getNode(0)->getTupleVal(
                                 attrsDgrm[i][j]->getIndex() ) )->getIndex() );
+                */
+                Attribute* attr;
+                Node* node;
+                for ( int j = 0; j < attrsDgrm[i].size(); ++j )
+                {
+                    attr = attrsDgrm[i][j];
+                    node = framesDgrm[i][frameIdxDgrm[i]]->getNode(0);
+                    if ( attr->getSizeCurValues() > 0 )
+                        vals.push_back( attr->mapToValue( node->getTupleVal( attr->getIndex() ) )->getIndex() );
+                    else
+                    {
+                        double val = node->getTupleVal( attr->getIndex() );
+                        vals.push_back( val );
+                    }
+                }
+                attr = NULL;
+                node = NULL;
+
                 diagram->visualize(
                     inSelectMode,
                     canvas,
@@ -1146,12 +1211,31 @@ void ArcDiagram::drawDiagrams( const bool &inSelectMode )
 
                 if ( i == animIdxDgrm )
                 {
-                    vector< int > vals;
+                    vector< double > vals;
+                    /*
                     for ( int j = 0; j < attrsDgrm[i].size(); ++j )
                         vals.push_back(
                             attrsDgrm[i][j]->mapToValue(
                                 framesDgrm[i][frameIdxDgrm[i]]->getNode(0)->getTupleVal(
                                     attrsDgrm[i][j]->getIndex() ) )->getIndex() );
+                    */
+                    Attribute* attr;
+                    Node* node;
+                    for ( int j = 0; j < attrsDgrm[i].size(); ++j )
+                    {
+                        attr = attrsDgrm[i][j];
+                        node = framesDgrm[i][frameIdxDgrm[i]]->getNode(0);
+                        if ( attr->getSizeCurValues() > 0 )
+                            vals.push_back( attr->mapToValue( node->getTupleVal( attr->getIndex() ) )->getIndex() );
+                        else
+                        {
+                            double val = node->getTupleVal( attr->getIndex() );
+                            vals.push_back( val );
+                        }
+                    }
+                    attr = NULL;
+                    node = NULL;
+
                     diagram->visualize(
                         inSelectMode,
                         canvas,
@@ -1161,12 +1245,31 @@ void ArcDiagram::drawDiagrams( const bool &inSelectMode )
                 }
                 else
                 {
-                    vector< int > vals;
+                    vector< double > vals;
+                    /*
                     for ( int j = 0; j < attrsDgrm[i].size(); ++j )
                         vals.push_back(
                             attrsDgrm[i][j]->mapToValue(
                                 framesDgrm[i][frameIdxDgrm[i]]->getNode(0)->getTupleVal(
                                     attrsDgrm[i][j]->getIndex() ) )->getIndex() );
+                    */
+                    Attribute* attr;
+                    Node* node;
+                    for ( int j = 0; j < attrsDgrm[i].size(); ++j )
+                    {
+                        attr = attrsDgrm[i][j];
+                        node = framesDgrm[i][frameIdxDgrm[i]]->getNode(0);
+                        if ( attr->getSizeCurValues() > 0 )
+                            vals.push_back( attr->mapToValue( node->getTupleVal( attr->getIndex() ) )->getIndex() );
+                        else
+                        {
+                            double val = node->getTupleVal( attr->getIndex() );
+                            vals.push_back( val );
+                        }
+                    }
+                    attr = NULL;
+                    node = NULL;
+
                     diagram->visualize(
                         inSelectMode,
                         canvas,
@@ -2128,6 +2231,15 @@ void ArcDiagram::handleHits( const vector< int > &ids )
                  mouseDrag == MSE_DRAG_FALSE && 
                  mouseSide == MSE_SIDE_LFT )
             {
+                if ( mediator->getView() == Mediator::VIEW_TRACE )
+                {
+                    mediator->markTimeSeries( this, graph->getLeaf( ids[2] ) );
+                }
+            }
+            else if ( mouseClick == MSE_CLICK_DOUBLE &&
+                      mouseDrag == MSE_DRAG_FALSE &&
+                      mouseSide == MSE_SIDE_LFT )
+            {
                 handleShowDiagram( ids[2] );
             }
             /*
@@ -2176,11 +2288,10 @@ void ArcDiagram::handleHits( const vector< int > &ids )
                     else if ( ids[3] == ID_DIAGRAM_MORE )
                     {
                         // show menu
-                        mediator->handleSendDgrm(
-                            this,
-                            true,
-                            true,
-                            true );
+                        if ( mediator->getView() == Mediator::VIEW_SIM )
+                            mediator->handleSendDgrm( this, true, false, false, true, true );
+                        else if ( mediator->getView() == Mediator::VIEW_TRACE )
+                            mediator->handleSendDgrm( this, false, true, true, true, true );
 
                         showMenu = true;
 
@@ -2206,11 +2317,10 @@ void ArcDiagram::handleHits( const vector< int > &ids )
                       mouseDrag   == MSE_DRAG_FALSE*/ )
             {
                 // show menu
-                mediator->handleSendDgrm(
-                    this,
-                    true,
-                    true,
-                    true );
+                if ( mediator->getView() == Mediator::VIEW_SIM )
+                    mediator->handleSendDgrm( this, true, false, false, true, true );
+                else if ( mediator->getView() == Mediator::VIEW_TRACE )
+                    mediator->handleSendDgrm( this, false, true, true, true, true );
 
                 showMenu = true;
 
@@ -2258,6 +2368,15 @@ void ArcDiagram::handleHoverCluster(
             Cluster* clust;
             clust = mapPosToClust[i][j];
             msg = clust->getAttribute()->getCurValue( clust->getAttrValIdx() )->getValue();
+            /* -*-
+            Value* val;
+            val = clust->getAttribute()->mapToValue( clust->getAttrValIdx() );
+            if ( val != NULL )
+                msg = val->getValue();
+            else
+                msg = "";
+            val = NULL;
+            */
             clust = NULL;
         }
 
@@ -2313,8 +2432,6 @@ void ArcDiagram::handleShowDiagram( const int &dgrmIdx )
         if ( showDgrm[dgrmIdx] != true )
         {
             showDiagram( dgrmIdx );
-            // -*- //
-            //currIdxDgrm = dgrmIdx;
             updateMarkBundles();
         }
         else
@@ -2324,7 +2441,6 @@ void ArcDiagram::handleShowDiagram( const int &dgrmIdx )
             currIdxDgrm = -1;
             updateMarkBundles();
 
-            // -*- //
             mediator->handleUnshowFrame();
         }
     }
@@ -2360,15 +2476,13 @@ void ArcDiagram::handleRwndDiagram( const int &dgrmIdx )
         animIdxDgrm = dgrmIdx;
     frameIdxDgrm[dgrmIdx] = 0;
 
-    // -*- //
     ColorRGB col;
     VisUtils::mapColorCoolBlue( col );
     mediator->handleShowFrame(
         framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
         attrsDgrm[currIdxDgrm],
         col );
-    // -*- //
-
+    
     updateMarkBundles();
 }
 
@@ -2387,15 +2501,13 @@ void ArcDiagram::handlePrevDiagram( const int &dgrmIdx )
     if ( frameIdxDgrm[dgrmIdx] < 0 )
         frameIdxDgrm[dgrmIdx] = framesDgrm[dgrmIdx].size()-1;
 
-    // -*- //
     ColorRGB col;
     VisUtils::mapColorCoolBlue( col );
     mediator->handleShowFrame(
         framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
         attrsDgrm[currIdxDgrm],
         col );
-    // -*- //
-
+    
     updateMarkBundles();
 }
 
@@ -2410,15 +2522,12 @@ void ArcDiagram::handlePlayDiagram( const int &dgrmIdx )
         {
             timerAnim->Stop();
                 
-            // -*- //
             ColorRGB col;
             VisUtils::mapColorCoolBlue( col );
             mediator->handleShowFrame(
                 framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
                 attrsDgrm[currIdxDgrm],
                 col );
-            // -*- //
-
         }
         else
             timerAnim->Start( itvAnim );
@@ -2445,15 +2554,13 @@ void ArcDiagram::handleNextDiagram( const int &dgrmIdx )
     if ( frameIdxDgrm[dgrmIdx] >= framesDgrm[dgrmIdx].size() )
         frameIdxDgrm[dgrmIdx] = 0;
 
-     // -*- //
     ColorRGB col;
     VisUtils::mapColorCoolBlue( col );
     mediator->handleShowFrame(
         framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
         attrsDgrm[currIdxDgrm],
         col );
-    // -*- //
-
+    
     updateMarkBundles();
 }
 

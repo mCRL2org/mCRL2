@@ -1,5 +1,5 @@
 // --- diagrameditor.cpp --------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -287,6 +287,95 @@ void DiagramEditor::handleDOFSel( const int &DOFIdx )
 
         canvas->Refresh();
     }
+}
+
+
+// ----------------------------------------
+void DiagramEditor::handleDOFSetTextStatus(
+    const int &DOFIdx,
+    const int &status )
+// ----------------------------------------
+{
+    Shape* s = NULL;
+    int sizeShapes = diagram->getSizeShapes();
+    for ( int i = 0; i < sizeShapes; ++i )    
+    {
+        if ( diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_XCTR || 
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_YCTR ||
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_HGT  ||
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_WTH  ||
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_AGL  ||
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_COL  ||
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_OPA )
+        {
+            s = diagram->getShape( i );
+            break;
+        }
+    }
+
+    if ( s != NULL )
+    {
+        if ( DOFIdx == s->getDOFXCtr()->getIndex() )
+            s->getDOFXCtr()->setTextStatus( status );
+        else if ( DOFIdx == s->getDOFYCtr()->getIndex() )
+            s->getDOFYCtr()->setTextStatus( status );
+        else if ( DOFIdx == s->getDOFHgt()->getIndex() )
+            s->getDOFHgt()->setTextStatus( status );
+        else if ( DOFIdx == s->getDOFWth()->getIndex() )
+            s->getDOFWth()->setTextStatus( status );
+        else if ( DOFIdx == s->getDOFAgl()->getIndex() )
+            s->getDOFAgl()->setTextStatus( status );
+        else if ( DOFIdx == s->getDOFCol()->getIndex() )
+            s->getDOFCol()->setTextStatus( status );
+        else if ( DOFIdx == s->getDOFOpa()->getIndex() )
+            s->getDOFOpa()->setTextStatus( status );
+        s = NULL;
+    }
+}
+
+
+// -----------------------------------------------------------
+int DiagramEditor::handleDOFGetTextStatus( const int &DOFIdx )
+// -----------------------------------------------------------
+{
+    int result = -1;
+
+    Shape* s = NULL;
+    int sizeShapes = diagram->getSizeShapes();
+    for ( int i = 0; i < sizeShapes; ++i )    
+    {
+        if ( diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_XCTR || 
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_YCTR ||
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_HGT  ||
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_WTH  ||
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_AGL  ||
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_COL  ||
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_OPA )
+        {
+            s = diagram->getShape( i );
+            break;
+        }
+    }
+
+    if ( s != NULL )
+    {
+        if ( DOFIdx == s->getDOFXCtr()->getIndex() )
+            result = s->getDOFXCtr()->getTextStatus();
+        else if ( DOFIdx == s->getDOFYCtr()->getIndex() )
+            result = s->getDOFYCtr()->getTextStatus();
+        else if ( DOFIdx == s->getDOFHgt()->getIndex() )
+            result = s->getDOFHgt()->getTextStatus();
+        else if ( DOFIdx == s->getDOFWth()->getIndex() )
+            result = s->getDOFWth()->getTextStatus();
+        else if ( DOFIdx == s->getDOFAgl()->getIndex() )
+            result = s->getDOFAgl()->getTextStatus();            
+        else if ( DOFIdx == s->getDOFCol()->getIndex() )
+            result = s->getDOFCol()->getTextStatus();            
+        else if ( DOFIdx == s->getDOFOpa()->getIndex() )
+            result = s->getDOFOpa()->getTextStatus();
+    }
+
+    return result;
 }
 
 
@@ -683,7 +772,9 @@ void DiagramEditor::visualize( const bool &inSelectMode )
             GLuint selectBuf[512];
             startSelectMode(
                 hits,
-                selectBuf );
+                selectBuf,
+                2.0,
+                2.0 );
 
             // render in select mode
             glPushName( 0 );

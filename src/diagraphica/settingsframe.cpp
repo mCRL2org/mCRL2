@@ -1,5 +1,5 @@
 // --- settingsframe.cpp --------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -69,6 +69,7 @@ void SettingsFrame::initFrame()
     initPanelBarTree();
     initPanelArcDiagram();
     initPanelSimulator();
+    initPanelTrace();
     initPanelDgrmEditor();
 }
 
@@ -93,7 +94,7 @@ void SettingsFrame::initPanelGeneral()
     panelGeneral->SetScrollRate( 10, 10 );
     notebook->AddPage(
         panelGeneral,
-        wxString( wxT("General") ) );
+        wxString( wxT( "General") ) );
 
     wxFlexGridSizer* sizer = new wxFlexGridSizer( 2 );
     sizer->AddGrowableCol( 1 );
@@ -117,7 +118,7 @@ void SettingsFrame::initPanelGeneral()
         new wxStaticText( 
             panelGeneral,
             wxID_ANY,
-            wxString( wxT("Background color") ) ),
+            wxString( wxT( "Background color") ) ),
         1,
         wxEXPAND | 
         wxALL,
@@ -147,7 +148,7 @@ void SettingsFrame::initPanelGeneral()
         new wxStaticText( 
             panelGeneral,
             wxID_ANY,
-            wxString( wxT("Text color") ) ),
+            wxString( wxT( "Text color")  ) ),
         1,
         wxEXPAND | 
         wxLEFT | wxRIGHT | wxBOTTOM,
@@ -161,17 +162,17 @@ void SettingsFrame::initPanelGeneral()
 
     // text size
     wxArrayString sizeVals;
-    sizeVals.Add( wxString( wxT("8") ) );
-    sizeVals.Add( wxString( wxT("10") ) );
-    sizeVals.Add( wxString( wxT("12") ) );
-    sizeVals.Add( wxString( wxT("14") ) );
-    sizeVals.Add( wxString( wxT("16") ) );
-    sizeVals.Add( wxString( wxT("18") ) );
-    sizeVals.Add( wxString( wxT("20") ) );
-    sizeVals.Add( wxString( wxT("24") ) );
-    sizeVals.Add( wxString( wxT("28") ) );
-    sizeVals.Add( wxString( wxT("30") ) );
-    sizeVals.Add( wxString( wxT("32") ) );
+    sizeVals.Add( wxString( wxT( "8" ) ) );
+    sizeVals.Add( wxString( wxT( "10" ) ) );
+    sizeVals.Add( wxString( wxT( "12" ) ) );
+    sizeVals.Add( wxString( wxT( "14" ) ) );
+    sizeVals.Add( wxString( wxT( "16" ) ) );
+    sizeVals.Add( wxString( wxT( "18" ) ) );
+    sizeVals.Add( wxString( wxT( "20" ) ) );
+    sizeVals.Add( wxString( wxT( "24" ) ) );
+    sizeVals.Add( wxString( wxT( "28" ) ) );
+    sizeVals.Add( wxString( wxT( "30" ) ) );
+    sizeVals.Add( wxString( wxT( "32" ) ) );
     comboBoxSizeTxt = new wxComboBox(
         panelGeneral,
         ID_COMBO_BOX_SIZE_TXT,
@@ -211,7 +212,7 @@ void SettingsFrame::initPanelGeneral()
         new wxStaticText( 
             panelGeneral,
             wxID_ANY,
-            wxString( wxT("Animation speed") ) ),
+            wxString( wxT( "Animation speed")  ) ),
         1,
         wxEXPAND | 
         wxLEFT | wxRIGHT | wxBOTTOM,
@@ -238,21 +239,21 @@ void SettingsFrame::initPanelClustTree()
     wxString colVal;
     mediator->getSettingsClustTree( show, annotate, colMap );
     if ( colMap == VisUtils::COL_MAP_QUAL_PAST_1 )
-        colVal = wxT("Pastel 1 (Qual)");
+        colVal = wxT( "Pastel 1 (Qual)" );
     else if ( colMap == VisUtils::COL_MAP_QUAL_PAST_2 )
-        colVal = wxT("Pastel 2 (Qual)");
+        colVal = wxT( "Pastel 2 (Qual)" );
     else if ( colMap == VisUtils::COL_MAP_QUAL_SET_1 )
-        colVal = wxT("Set 1 (Qual)");
+        colVal = wxT( "Set 1 (Qual)");
     else if ( colMap == VisUtils::COL_MAP_QUAL_SET_2 )
-        colVal = wxT("Set 2 (Qual)");
+        colVal = wxT( "Set 2 (Qual)");
     else if ( colMap == VisUtils::COL_MAP_QUAL_SET_3 )
-        colVal = wxT("Set 3 (Qual)");
+        colVal = wxT( "Set 3 (Qual)");
     else if ( colMap == VisUtils::COL_MAP_QUAL_PAIR )
-        colVal = wxT("Paired (Qual)");
+        colVal = wxT( "Paired (Qual)");
     else if ( colMap == VisUtils::COL_MAP_QUAL_DARK )
-        colVal = wxT("Dark (Qual)");
+        colVal = wxT( "Dark (Qual)");
     else if ( colMap == VisUtils::COL_MAP_QUAL_ACCENT )
-        colVal = wxT("Accents (Qual)");
+        colVal = wxT( "Accents (Qual)");
 
     // init panel
     panelClustTree = new wxScrolledWindow(
@@ -261,7 +262,7 @@ void SettingsFrame::initPanelClustTree()
     panelClustTree->SetScrollRate( 10, 10 );
     notebook->AddPage(
         panelClustTree,
-        wxString( wxT("Cluster tree") ) );
+        wxString( wxT( "Cluster tree" ) ) );
 
     wxFlexGridSizer* sizer = new wxFlexGridSizer( 2 );
     sizer->AddGrowableCol( 1 );
@@ -277,7 +278,7 @@ void SettingsFrame::initPanelClustTree()
         new wxStaticText( 
             panelClustTree,
             wxID_ANY,
-            wxString( wxT("Show") ) ),
+            wxString( wxT( "Show") ) ),
         1,
         wxEXPAND | 
         wxALL,
@@ -299,7 +300,7 @@ void SettingsFrame::initPanelClustTree()
         new wxStaticText( 
             panelClustTree,
             wxID_ANY,
-            wxString( wxT("Annotate") ) ),
+            wxString( wxT( "Annotate" ) ) ),
         1,
         wxEXPAND | 
         wxLEFT | wxRIGHT | wxBOTTOM,
@@ -313,18 +314,18 @@ void SettingsFrame::initPanelClustTree()
 
     // color map
     wxArrayString colVals;
-    colVals.Add( wxString( wxT("Pastel 1 (Qual)") ) );
-    colVals.Add( wxString( wxT("Pastel 2 (Qual)") ) );
-    colVals.Add( wxString( wxT("Set 1 (Qual)") ) );
-    colVals.Add( wxString( wxT("Set 2 (Qual)") ) );
-    colVals.Add( wxString( wxT("Set 3 (Qual)") ) );
-    colVals.Add( wxString( wxT("Paired (Qual)") ) );
-    colVals.Add( wxString( wxT("Dark (Qual)") ) );
-    colVals.Add( wxString( wxT("Accents (Qual)") ) );
+    colVals.Add( wxString( wxT( "Pastel 1 (Qual)") ) );
+    colVals.Add( wxString( wxT( "Pastel 2 (Qual)") ) );
+    colVals.Add( wxString( wxT( "Set 1 (Qual)") ) );
+    colVals.Add( wxString( wxT( "Set 2 (Qual)") ) );
+    colVals.Add( wxString( wxT( "Set 3 (Qual)") ) );
+    colVals.Add( wxString( wxT( "Paired (Qual)") ) );
+    colVals.Add( wxString( wxT( "Dark (Qual)") ) );
+    colVals.Add( wxString( wxT( "Accents (Qual)") ) );
     comboBoxColMap = new wxComboBox(
         panelClustTree,
         ID_COMBO_BOX_COL_MAP,
-        wxString( wxT("") ),
+        wxString( wxT( "") ),
         wxDefaultPosition,
         wxDefaultSize,
         colVals );
@@ -333,7 +334,7 @@ void SettingsFrame::initPanelClustTree()
         new wxStaticText( 
             panelClustTree,
             wxID_ANY,
-            wxString( wxT("Color mapping") ) ),
+            wxString( wxT("Color mapping" ) ) ),
         1,
         wxEXPAND | 
         wxLEFT | wxRIGHT | wxBOTTOM,
@@ -365,7 +366,7 @@ void SettingsFrame::initPanelBarTree()
     panelBarTree->SetScrollRate( 10, 10 );
     notebook->AddPage(
         panelBarTree,
-        wxString( wxT("Bar tree") ) );
+        wxString( wxT( "Bar tree" ) ) );
 
     wxFlexGridSizer* sizer = new wxFlexGridSizer( 2 );
     sizer->AddGrowableCol( 1 );
@@ -381,7 +382,7 @@ void SettingsFrame::initPanelBarTree()
         new wxStaticText( 
             panelBarTree,
             wxID_ANY,
-            wxString( wxT("Show") ) ),
+            wxString( wxT( "Show" ) ) ),
         1,
         wxEXPAND | 
         wxALL,
@@ -408,7 +409,7 @@ void SettingsFrame::initPanelBarTree()
         new wxStaticText( 
             panelBarTree,
             wxID_ANY,
-            wxString( wxT("Magnification") ) ),
+            wxString( wxT( "Magnification" ) ) ),
         1,
         wxEXPAND | 
         wxLEFT | wxRIGHT | wxBOTTOM,
@@ -446,7 +447,7 @@ void SettingsFrame::initPanelArcDiagram()
     panelArcDiagram->SetScrollRate( 10, 10 );
     notebook->AddPage(
         panelArcDiagram,
-        wxString( wxT("Arc diagram") ) );
+        wxString( wxT( "Arc diagram") ) );
 
     wxFlexGridSizer* sizer = new wxFlexGridSizer( 2 );
     sizer->AddGrowableCol( 1 );
@@ -456,13 +457,13 @@ void SettingsFrame::initPanelArcDiagram()
     checkBoxShowNodes = new wxCheckBox(
         panelArcDiagram,
         ID_CHECK_BOX_SHOW_NODES,
-        wxString( wxT("") ) );
+        wxString( wxT( "" ) ) );
     checkBoxShowNodes->SetValue( showNodes );
     sizer->Add(
         new wxStaticText( 
             panelArcDiagram,
             wxID_ANY,
-            wxString( wxT("Show nodes") ) ),
+            wxString( wxT( "Show nodes" ) ) ),
         1,
         wxEXPAND | 
         wxALL,
@@ -478,13 +479,13 @@ void SettingsFrame::initPanelArcDiagram()
     checkBoxShowArcs = new wxCheckBox(
         panelArcDiagram,
         ID_CHECK_BOX_SHOW_ARCS,
-        wxString( wxT("") ) );
+        wxString( wxT( "" ) ) );
     checkBoxShowArcs->SetValue( showArcs );
     sizer->Add(
         new wxStaticText( 
             panelArcDiagram,
             wxID_ANY,
-            wxString( wxT("Show arcs") ) ),
+            wxString( wxT( "Show arcs") ) ),
         1,
         wxEXPAND | 
         wxLEFT | wxRIGHT | wxBOTTOM,
@@ -583,7 +584,7 @@ void SettingsFrame::initPanelSimulator()
     panelSimulator->SetScrollRate( 10, 10 );
     notebook->AddPage(
         panelSimulator,
-        wxString( wxT("Simulation") ) );
+        wxString( wxT( "Simulation" ) ) );
 
     wxFlexGridSizer* sizer = new wxFlexGridSizer( 2 );
     sizer->AddGrowableCol( 1 );
@@ -591,16 +592,16 @@ void SettingsFrame::initPanelSimulator()
     
     // blend mode
     wxArrayString blendVals;
-    blendVals.Add( wxString( wxT("Hard transition") ) );
-    blendVals.Add( wxString( wxT("Linear") ) );
-    blendVals.Add( wxString( wxT("Concave") ) );
-    blendVals.Add( wxString( wxT("Convex") ) );
-    blendVals.Add( wxString( wxT("Oscillate") ) );
+    blendVals.Add( wxString( wxT( "Hard transition" ) ) );
+    blendVals.Add( wxString( wxT( "Linear" ) ) );
+    blendVals.Add( wxString( wxT( "Concave" ) ) );
+    blendVals.Add( wxString( wxT( "Convex") ) );
+    blendVals.Add( wxString( wxT( "Oscillate") ) );
     
     comboBoxBlendType = new wxComboBox(
         panelSimulator,
         ID_COMBO_BOX_BLEND_TYPE,
-        wxString( wxT("") ),
+        wxString( wxT ("") ),
         wxDefaultPosition,
         wxDefaultSize,
         blendVals );
@@ -609,7 +610,7 @@ void SettingsFrame::initPanelSimulator()
         new wxStaticText( 
             panelSimulator,
             wxID_ANY,
-            wxString( wxT("Blend type") ) ),
+            wxString( wxT( "Blend type") ) ),
         1,
         wxEXPAND | 
         wxALL,
@@ -625,6 +626,51 @@ void SettingsFrame::initPanelSimulator()
 }
 
 
+// ---------------------------------
+void SettingsFrame::initPanelTrace()
+// ---------------------------------
+{
+    bool useShading;
+    mediator->getSettingsTrace( useShading );
+
+    panelTrace = new wxScrolledWindow(
+        notebook,
+        ID_PANEL_TRACE );
+    panelTrace->SetScrollRate( 10, 10 );
+    notebook->AddPage(
+        panelTrace,
+        wxString( wxT( "Trace" ) ) );
+
+    wxFlexGridSizer* sizer = new wxFlexGridSizer( 2 );
+    sizer->AddGrowableCol( 1 );
+    panelTrace->SetSizer( sizer );
+
+    // use shading
+    /*
+    checkBoxUseShading = new wxCheckBox(
+        panelTrace,
+        ID_CHECK_BOX_USE_SHADING,
+        wxString( "" ) );
+    checkBoxUseShading->SetValue( useShading );
+    sizer->Add(
+        new wxStaticText( 
+            panelTrace,
+            wxID_ANY,
+            wxString( "Use shading" ) ),
+        1,
+        wxEXPAND | 
+        wxALL,
+        10 );
+    sizer->Add(
+        checkBoxUseShading,
+        1,
+        wxEXPAND  | 
+        wxALL,
+        10 );
+    */
+}
+
+
 // --------------------------------------
 void SettingsFrame::initPanelDgrmEditor()
 // --------------------------------------
@@ -635,7 +681,7 @@ void SettingsFrame::initPanelDgrmEditor()
     panelDgrmEditor->SetScrollRate( 10, 10 );
     notebook->AddPage(
         panelDgrmEditor,
-        wxString( wxT("Diagram editor") ) );
+        wxString( wxT( "Diagram editor" ) ) );
 }
 
 
@@ -682,11 +728,19 @@ void SettingsFrame::setSimulator()
 }
 
 
+// ---------------------------
+void SettingsFrame::setTrace()
+// ---------------------------
+{
+    notebook->SetSelection( 5 );
+}
+
+
 // --------------------------------
 void SettingsFrame::setDgrmEditor()
 // --------------------------------
 {
-    notebook->SetSelection( 5 );
+    notebook->SetSelection( 6 );
 }
 
 
@@ -720,6 +774,8 @@ void SettingsFrame::onCheckBox( wxCommandEvent &e )
         updateSettingsArcDiagram();
     else if ( e.GetId() == ID_CHECK_BOX_SHOW_NODES )
         updateSettingsArcDiagram();
+    else if ( e.GetId() == ID_CHECK_BOX_USE_SHADING )
+        updateSettingsTrace();
 }
 
 
@@ -774,21 +830,21 @@ void SettingsFrame::updateSettingsClustTree()
     wxString colVal   = comboBoxColMap->GetValue();
     int      colMap   = 0;
 
-    if ( colVal == wxT("Pastel 1 (Qual)") )
+    if ( colVal == wxT( "Pastel 1 (Qual)") )
         colMap = VisUtils::COL_MAP_QUAL_PAST_1;
-    else if ( colVal == wxT("Pastel 2 (Qual)") )
+    else if ( colVal == wxT( "Pastel 2 (Qual)") )
         colMap = VisUtils::COL_MAP_QUAL_PAST_2;
-    else if ( colVal == wxT("Set 1 (Qual)") )
+    else if ( colVal == wxT( "Set 1 (Qual)") )
         colMap = VisUtils::COL_MAP_QUAL_SET_1;
-    else if ( colVal == wxT("Set 2 (Qual)") )
+    else if ( colVal == wxT( "Set 2 (Qual)") )
         colMap = VisUtils::COL_MAP_QUAL_SET_2;
-    else if ( colVal == wxT("Set 3 (Qual)") )
+    else if ( colVal == wxT( "Set 3 (Qual)") )
         colMap = VisUtils::COL_MAP_QUAL_SET_3;
-    else if ( colVal == wxT("Paired (Qual)") )
+    else if ( colVal == wxT( "Paired (Qual)") )
         colMap = VisUtils::COL_MAP_QUAL_PAIR;
-    else if ( colVal == wxT("Dark (Qual)") )
+    else if ( colVal == wxT( "Dark (Qual)") )
         colMap = VisUtils::COL_MAP_QUAL_DARK;
-    else if ( colVal == wxT("Accents (Qual)") )
+    else if ( colVal == wxT( "Accents (Qual)") )
         colMap = VisUtils::COL_MAP_QUAL_ACCENT;
 
     mediator->setSettingsClustTree( show, annotate, colMap );
@@ -834,16 +890,26 @@ void SettingsFrame::updateSettingsSimulator()
     
     if ( blendVal == wxT("Hard transition") )
         blendType = VisUtils::BLEND_HARD;
-    else if ( blendVal == wxT("Linear") )
+    else if ( blendVal == wxT( "Linear") )
         blendType = VisUtils::BLEND_LINEAR;
-    else if ( blendVal == wxT("Concave") )
+    else if ( blendVal == wxT( "Concave" ) )
         blendType = VisUtils::BLEND_CONCAVE;
-    else if ( blendVal == wxT("Convex") )
+    else if ( blendVal == wxT ("Convex" ) )
         blendType = VisUtils::BLEND_CONVEX;
-    else if ( blendVal == wxT("Oscillate") )
+    else if ( blendVal == wxT( "Oscillate" ) )
         blendType = VisUtils::BLEND_OSCILLATE;
 
     mediator->setSettingsSimulator( blendType );
+}
+
+
+// --------------------------------------
+void SettingsFrame::updateSettingsTrace()
+// --------------------------------------
+{
+    bool useShading;
+    useShading = checkBoxUseShading->GetValue();
+    mediator->setSettingsTrace( useShading );
 }
 
 
@@ -870,6 +936,7 @@ EVT_BUTTON( ID_BUTTON_COL_BG, SettingsFrame::onButton )
     EVT_CHECKBOX( ID_CHECK_BOX_SHOW_ARCS, SettingsFrame::onCheckBox )
     EVT_BUTTON( ID_BUTTON_COL_ARCS, SettingsFrame::onButton )
     EVT_SPINCTRL( ID_SPIN_CTRL_TRSP_ARCS, SettingsFrame::onSpinCtrl )
+    EVT_CHECKBOX( ID_CHECK_BOX_USE_SHADING, SettingsFrame::onCheckBox )
     EVT_COMBOBOX( ID_COMBO_BOX_BLEND_TYPE, SettingsFrame::onComboBox )
 END_EVENT_TABLE()
 

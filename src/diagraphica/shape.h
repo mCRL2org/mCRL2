@@ -1,5 +1,5 @@
 // --- shape.h ------------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 #ifndef SHAPE_H
@@ -123,12 +123,12 @@ public:
     void visualize(
         GLCanvas* canvas,
         const vector< Attribute* > attrs,
-        const vector< int > attrValIdcs );
+        const vector< double > attrValIdcs );
     void visualize(
         GLCanvas* canvas,
         const double &opacity,
         const vector< Attribute* > attrs,
-        const vector< int > attrValIdcs );
+        const vector< double > attrValIdcs );
     
     void setTransf();
     void clrTransf();

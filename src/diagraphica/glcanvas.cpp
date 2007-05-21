@@ -1,5 +1,5 @@
 // --- glcanvas.cpp -------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -39,7 +39,7 @@ GLCanvas::GLCanvas(
     // IMPORTANT can only set style once, otherwise its overridden
     // I.e. when a new style is set somewhere else, 
     //      arrow keys are NO LONGER intercepted
-    this->SetWindowStyle( wxWANTS_CHARS | wxSUNKEN_BORDER );
+    this->SetWindowStyle( wxWANTS_CHARS /*| wxSUNKEN_BORDER*/ );
 
 	wxToolTip::Enable( true );
     wxToolTip::SetDelay( 0 );
@@ -414,7 +414,7 @@ void GLCanvas::display()
 void GLCanvas::showToolTip( const string &msg )
 // --------------------------------------------
 {
-    tooltip = wxString(msg.c_str(),wxConvLocal);
+    tooltip = wxString(msg.c_str(), wxConvLocal);
 }
 
 
@@ -462,20 +462,19 @@ void GLCanvas::onEvtSize( wxSizeEvent &event )
     {
         // update visualizers using this canvas
         mediator->handleSizeEvent( this );
-        /*
-        event.Skip();
-        */
 
-        // get size of canvas
-        if (GetContext()) {
-          int width, height;
-          this->SetCurrent();
-         
-          // set up viewport to match canvas size
-          this->GetClientSize( &width, &height );
-          glMatrixMode( GL_MODELVIEW );
-          glLoadIdentity();
-          glViewport( 0, 0, width, height );
+        // call to GetContext() necessary for some Linux distributions
+        if ( this->GetContext() )
+        {
+            // get size of canvas
+            int width, height;
+            this->SetCurrent();
+        
+            // set up viewport to match canvas size
+            this->GetClientSize( &width, &height );
+            glMatrixMode( GL_MODELVIEW );
+            glLoadIdentity();
+            glViewport( 0, 0, width, height );
         }
     }
 }

@@ -1,5 +1,5 @@
 // --- node.cpp -----------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -21,7 +21,7 @@ Node::Node( const int &idx )
 // ---------------------------
 Node::Node( 
     const int &idx,
-    const vector< int > &tpl )
+    const vector< double > &tpl )
 // ---------------------------
 {
     index   = idx;
@@ -51,7 +51,7 @@ void Node::swapTupleVal(
     if ( ( 0 <= idx1 && idx1 < tuple.size() ) &&
          ( 0 <= idx2 && idx2 < tuple.size() ) )
     {
-        int temp = tuple[idx1];
+        double temp = tuple[idx1];
         tuple[idx1] = tuple[idx2];
         tuple[idx2] = temp;
     }
@@ -69,7 +69,7 @@ void Node::moveTupleVal(
     if ( ( 0 <= idxFr && idxFr < tuple.size() ) &&
          ( 0 <= idxTo && idxTo < tuple.size() ) )
     {
-        int temp = tuple[idxFr];
+        double temp = tuple[idxFr];
 
         // 2 cases to consider
         if ( idxFr < idxTo )
@@ -102,7 +102,7 @@ void Node::moveTupleVals( map< int, int > &idcsFrTo )
     {
         try
         {
-            vector< int > tupleNew;
+            vector< double > tupleNew;
         
             // init new tuple
             {
@@ -134,7 +134,7 @@ void Node::moveTupleVals( map< int, int > &idcsFrTo )
 // --------------------
 void Node::addTupleVal( 
     const int &idx,
-    const int &val )
+    const double &val )
 // --------------------
 {
     tuple.insert( 
@@ -213,7 +213,7 @@ int Node::getSizeTuple()
 
 
 // ------------------------------------
-int Node::getTupleVal( const int &idx )
+double Node::getTupleVal( const int &idx )
 // ------------------------------------
 {
     if ( 0 <= idx && idx < tuple.size() )

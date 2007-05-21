@@ -1,5 +1,5 @@
 // --- utils.cpp ----------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -16,6 +16,7 @@ string Utils::dblToStr( const double &d )
     ostringstream oss;
     string result;
 
+    oss.precision(3); // set precision
     oss << d;
     result = oss.str();
 
@@ -270,6 +271,249 @@ double Utils::fishEye(
 }
 
 
+// -- statistics functions --------------------------------------
+
+
+// ----------------------------------------------
+double Utils::mean( const vector< double > vals )
+// ----------------------------------------------
+{
+    double result = 0;
+    if ( vals.size() > 0 )
+    {
+        for ( int i = 0; i < vals.size(); ++i )
+            result += vals[i];
+        result = result/(double)vals.size();
+    }
+    return result;
+}
+
+
+// --------------------------------------------------
+double Utils::variance( const vector< double > vals )
+// --------------------------------------------------
+{
+    double result = 0;
+    double mean = Utils::mean( vals );
+
+    if ( vals.size() > 1 )
+    {
+        for ( int i = 0; i < vals.size(); ++i )
+            result += (vals[i]-mean)*(vals[i]-mean);
+        result = result/(double)(vals.size()-1);
+    }
+    
+    return result;
+}
+
+
+// ------------------------------------------------
+double Utils::stdDev( const vector< double > vals )
+// ------------------------------------------------
+{
+    double result = 0;
+    result = sqrt( Utils::variance( vals ) );
+    return result;
+}
+
+
+// -- classification (binning ) -------------------------------------
+
+
+// --------------------------------------
+void Utils::classEqualIntervals(
+    const int &numClasses,
+    const vector< double > &values,
+    vector< string > &legendClasses,
+    map< double, int > &valuesToClasses )
+// --------------------------------------
+{
+    if ( ( 0 < values.size() ) && 
+         ( 0 < numClasses && numClasses < values.size() ) )
+    {
+        double low, high;
+        double range;
+        double itv;
+
+        // first clear return results
+        legendClasses.clear();
+        valuesToClasses.clear();
+        
+        // init low, high and range
+        low = high = values[0];
+        for ( int i = 0; i < values.size(); ++i )
+        {
+            if ( values[i] < low )
+                low = values[i];
+            else if ( high < values[i] )
+                high = values[i];
+        }
+        range = high-low;
+
+        // calc size of interval
+        itv = range/(double)numClasses;
+
+        // init legend
+        string lbl;
+        for ( int i = 0; i < numClasses; ++i )
+        {
+            lbl  = "[";
+            lbl += dblToStr( low + i*itv );
+            lbl += " ,";
+            lbl += dblToStr( low + (i+1)*itv );
+            if ( i == numClasses-1 )
+                lbl += "]";
+            else
+                lbl += ")";
+
+            legendClasses.push_back( lbl );
+        }
+        
+        // calc mapping of values to classes
+        int idx;
+        for ( int i = 0; i < values.size(); ++i )
+        {
+            if ( values[i] == high )
+                idx = numClasses-1;
+            else
+                idx = (int)floor( (values[i]-low)/itv );
+
+            valuesToClasses.insert( pair< double, int >( values[i], idx ) );
+        }
+    }
+}
+
+
+// --------------------------------------
+void Utils::classifyQuantiles(
+    const int &numClasses,
+    set< double > &values,
+    vector< string > &legendClasses,
+    map< double, int > &valuesToClasses )
+// --------------------------------------
+{
+    if ( ( 0 < values.size() ) && 
+         ( 0 < numClasses && numClasses < values.size() ) )
+    {
+        double numInClass;
+
+        // first clear return results
+        legendClasses.clear();
+        valuesToClasses.clear();
+
+        // calc number in class
+        numInClass = (double)values.size()/(double)(numClasses);
+
+        // calc mapping of values to classes, init legend
+        int idx = 0;
+        int ctr = 0;
+        double min, max;
+        string lbl;
+        set< double >::iterator it;
+        for ( it = values.begin(); it != values.end(); ++it )
+        {
+            if ( it == values.begin() )
+                min = max = *it;
+            
+            if ( ctr > (idx+1)*numInClass )
+            {
+                ++idx;
+                
+                lbl  = "[";
+                lbl += Utils::dblToStr( min );
+                lbl += " ,";
+                lbl += Utils::dblToStr( max );
+                if ( idx == numClasses )
+                    lbl += "]";
+                else
+                    lbl += ")";
+                legendClasses.push_back( lbl );
+                
+                min = max = *it;
+            }
+            else if ( ctr == values.size()-1 )
+            {
+                lbl  = "[";
+                lbl += Utils::dblToStr( min );
+                lbl += " ,";
+                lbl += Utils::dblToStr( max );
+                if ( idx == numClasses-1 )
+                    lbl += "]";
+                else
+                    lbl += ")";
+                legendClasses.push_back( lbl );
+            }
+
+            if ( *it < min )
+                min = *it;
+            else if ( *it > max )
+                max = *it;
+
+            valuesToClasses.insert( pair< double, int >( *it, idx ) );
+            ++ctr;
+        }
+    }
+}
+
+
+// ---------------------------------------
+void Utils::classifyMeanStandardDeviation(
+    const int &numClasses,
+    const vector< double > &values,
+    vector< string > &legendClasses,
+    map< double, int > &valuesToClasses )
+// ---------------------------------------
+{
+    if ( ( 0 < values.size() ) && 
+         ( 0 < numClasses && numClasses < values.size() ) )
+    {
+        // first clear return results
+        legendClasses.clear();
+        valuesToClasses.clear();
+
+        // calc mean and std deviation
+        double mean = Utils::mean( values );
+        double sdev = Utils::stdDev( values );
+
+        // calc mapping of values to classes
+        int idx;
+        for ( int i = 0; i < values.size(); ++i )
+        {
+            idx  = floor( (values[i]-mean)/sdev );
+            idx += numClasses/2;
+
+            if ( idx < 0 )
+                idx = 0;
+            else if ( idx > numClasses-1 )
+                idx = numClasses-1;
+            
+            valuesToClasses.insert( pair< double, int >( values[i], idx ) );
+        }
+
+        // init legend
+        string lbl;
+        for ( int i = 0; i < numClasses; ++i )
+        {
+            if ( i == 0 )
+                lbl = "(-inf";
+            else
+            {
+                lbl  = "[";
+                lbl += dblToStr( mean + ( i-(numClasses/2) )*sdev );
+            }
+            lbl += " ,";
+            if ( i == numClasses-1 )
+                lbl += "+inf)";
+            else
+            {
+                lbl += dblToStr(  mean + ( (i+1)-(numClasses/2) )*sdev  );
+                lbl += ")";
+            }
+
+            legendClasses.push_back( lbl );
+        }
+    }
+}
 
 
 

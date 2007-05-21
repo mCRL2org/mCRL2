@@ -1,5 +1,5 @@
 // --- combnplot.h --------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 #ifndef COMBNPLOT_H
@@ -112,7 +112,7 @@ protected:
     double        scaleDgrm;       // scale factor for diagram
     Position2D    posDgrm;         // positions of diagram
     bool          showDgrm;        // show or hide diagram
-    vector< int > attrValIdcsDgrm; // value idx of attribute associated with diagram
+    vector< double > attrValIdcsDgrm; // value idx of attribute associated with diagram
     string        msgDgrm;         // message to show with diagram
 };
 

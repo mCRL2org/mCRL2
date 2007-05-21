@@ -1,5 +1,5 @@
 // --- dof.h --------------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 #ifndef DOF_H
@@ -35,6 +35,7 @@ public:
     void clearValue( const int &idx );
     void setDir( const int &dr );
     void setAttribute( Attribute* a );
+    void setTextStatus( const int &status );
     
     // -- get functions ---------------------------------------------
     int getIndex();
@@ -46,6 +47,16 @@ public:
     void getValues( vector< double > &vals );
     int getDir();
     Attribute* getAttribute();
+    int getTextStatus();
+
+    // -- public constants ------------------------------------------
+    enum
+    {
+        ID_TEXT_NONE,
+        ID_TEXT_ALL,
+        ID_TEXT_ATTR,
+        ID_TEXT_VAL,
+    };
     
 protected:
     // -- data members ----------------------------------------------
@@ -58,6 +69,7 @@ protected:
     vector< double > values;
     int    dir;
     Attribute* attr; // association
+    int    textStatus;
 };
 
 #endif

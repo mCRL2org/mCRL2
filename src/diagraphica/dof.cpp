@@ -1,5 +1,5 @@
 // --- dof.cpp ------------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -25,6 +25,7 @@ DOF::DOF(
     values.push_back( 0.0 ); // init max
     dir   = 1;
     attr  = NULL;
+    textStatus = ID_TEXT_NONE;
 }
 
 
@@ -153,6 +154,20 @@ void DOF::setAttribute( Attribute* a )
 }
 
 
+// -----------------------------------------
+void DOF::setTextStatus( const int &status )
+// -----------------------------------------
+{
+    if ( status == ID_TEXT_NONE || 
+         status == ID_TEXT_ALL  ||
+         status == ID_TEXT_ATTR ||
+         status == ID_TEXT_VAL )
+        textStatus =  status;
+    else
+        textStatus = ID_TEXT_NONE;
+}
+
+
 // -- get functions -------------------------------------------------
     
 
@@ -230,6 +245,14 @@ Attribute* DOF::getAttribute()
 // ---------------------------
 {
     return attr;
+}
+
+
+// ---------------------
+int DOF::getTextStatus()
+// ---------------------
+{
+    return textStatus;
 }
 
 

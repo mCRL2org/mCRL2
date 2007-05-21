@@ -1,5 +1,5 @@
 // --- settingsframe.h ----------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 #ifndef SETTINGSFRAME_H
@@ -34,6 +34,7 @@ public:
     void setBarTree();
     void setArcDiagram();
     void setSimulator();
+    void setTrace();
     void setDgrmEditor();
 
 protected:
@@ -50,6 +51,7 @@ private:
     void updateSettingsBarTree();
     void updateSettingsArcDiagram();
     void updateSettingsSimulator();
+    void updateSettingsTrace();
     void updateSettingsDgrmEditor();
 
     // -- GUI initialization ----------------------------------------
@@ -59,6 +61,7 @@ private:
     void initPanelBarTree();
     void initPanelArcDiagram();
     void initPanelSimulator();
+    void initPanelTrace();
     void initPanelDgrmEditor();
 
     wxBoxSizer*       sizerFrame;
@@ -90,6 +93,9 @@ private:
     wxScrolledWindow* panelSimulator;
     wxComboBox*       comboBoxBlendType;
 
+    wxScrolledWindow* panelTrace;
+    wxCheckBox*       checkBoxUseShading;
+
     wxScrolledWindow* panelDgrmEditor;
 
     // -- ID's ------------------------------------------------------
@@ -118,6 +124,9 @@ private:
 
         ID_PANEL_SIMULATOR,
         ID_COMBO_BOX_BLEND_TYPE,
+
+        ID_PANEL_TRACE,
+        ID_CHECK_BOX_USE_SHADING,
         
         ID_PANEL_DGRM_EDITOR,
     };

@@ -1,5 +1,5 @@
 // --- node.h -------------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 #ifndef NODE_H
@@ -21,7 +21,7 @@ public:
     Node( const int &idx );
     Node( 
         const int &idx,
-        const vector< int > &tpl );
+        const vector< double > &tpl );
 	virtual ~Node();
 	
     // -- set functions ---------------------------------------------
@@ -34,7 +34,7 @@ public:
     void moveTupleVals( map< int, int > &idcsFrTo );
     void addTupleVal( 
         const int &idx,
-        const int &val );
+        const double &val );
     void delTupleVal( const int &idx );
     void addInEdge( Edge* e );
     void setInEdges( const vector< Edge* > e );
@@ -45,7 +45,7 @@ public:
     // -- get functions ---------------------------------------------
     int getIndex();
     int getSizeTuple();
-    int getTupleVal( const int &idx );
+    double getTupleVal( const int &idx );
     int getSizeInEdges();
     Edge* getInEdge( const int &idx );
     int getSizeOutEdges();
@@ -60,7 +60,7 @@ public:
 protected:
     // -- data members ----------------------------------------------
     int index; // index in list of graph nodes
-    vector< int >   tuple;
+    vector< double >   tuple;
     vector< Edge* > inEdges;  // association
 	vector< Edge* > outEdges; // association
     Cluster* cluster;

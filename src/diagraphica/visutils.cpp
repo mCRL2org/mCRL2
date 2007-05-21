@@ -1,5 +1,5 @@
 // --- visutils.cpp -------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -120,6 +120,19 @@ void VisUtils::setColorCoolGreen()
     col.r = 0.42;//0.45;
     col.g = 0.80;//0.85;
     col.b = 0.32;//0.35;
+    col.a = 1.0;
+    setColor( col );
+}
+
+
+// ---------------------------------
+void VisUtils::setColorLtCoolGreen()
+// ---------------------------------
+{
+    ColorRGB col;
+    col.r = 0.73;
+    col.g = 0.95;
+    col.b = 0.67;
     col.a = 1.0;
     setColor( col );
 }
@@ -328,6 +341,17 @@ void VisUtils::mapColorCoolGreen( ColorRGB &col )
     col.r = 0.42;//0.45;
     col.g = 0.80;//0.85;
     col.b = 0.32;//0.35;
+    col.a = 1.0;
+}
+
+
+// ------------------------------------------------
+void VisUtils::mapColorLtCoolGreen( ColorRGB &col )
+// ------------------------------------------------
+{
+    col.r = 0.73;
+    col.g = 0.95;
+    col.b = 0.67;
     col.a = 1.0;
 }
 
@@ -822,6 +846,242 @@ void VisUtils::mapColorQualAccent(
     colRGB.a = 1.0;
 }
 
+
+// ----------------------------
+void VisUtils::mapColorSeqOrRd(
+    const int &iter,
+    const int &numr,
+    ColorRGB &colRGB )
+// ----------------------------
+// ------------------------------------------------------------------
+// www.colorbrewer.org
+// ------------------------------------------------------------------
+{
+    // 9 ref colors
+    double red[] = { 255, 254, 253, 253, 252, 239, 215, 179, 127 };
+    double grn[] = { 247, 232, 212, 187, 141, 101,  48,   0,   0 };
+    double blu[] = { 236, 200, 158, 132, 89,   72,  31,   0,   0 };
+
+    if ( numr <= 8 )
+    {
+        colRGB.r = red[iter]/255.0;
+        colRGB.g = grn[iter]/255.0;
+        colRGB.b = blu[iter]/255.0;
+    }
+    else
+    {
+        double frac = (double)iter/(double)numr;
+        double intPtVal;
+        double dblPtVal;
+
+        dblPtVal = modf( frac*7.0, &intPtVal );
+                
+        colRGB.r = ( (1.0-dblPtVal)*red[(int)intPtVal] 
+                         + dblPtVal*red[(int)intPtVal+1] )/255.0;
+
+        colRGB.g = ( (1.0-dblPtVal)*grn[(int)intPtVal]
+                         + dblPtVal*grn[(int)intPtVal+1] )/255.0;
+
+        colRGB.b = ( (1.0-dblPtVal)*blu[(int)intPtVal]
+                         + dblPtVal*blu[(int)intPtVal+1] )/255.0;
+    }
+
+    colRGB.a = 1.0;
+}
+
+
+// ----------------------------
+void VisUtils::mapColorSeqGnBu(
+    const int &iter,
+    const int &numr,
+    ColorRGB &colRGB )
+// ----------------------------
+// ------------------------------------------------------------------
+// www.colorbrewer.org
+// ------------------------------------------------------------------
+{
+    // 9 ref colors
+    double red[] = { 247, 224, 204, 168, 123,  78,  43,   8,   8 };
+    double grn[] = { 252, 243, 235, 221, 204, 179, 140, 104,  64 };
+    double blu[] = { 240, 219, 197, 181, 196, 211, 190, 172, 129 };
+
+    if ( numr <= 8 )
+    {
+        colRGB.r = red[iter]/255.0;
+        colRGB.g = grn[iter]/255.0;
+        colRGB.b = blu[iter]/255.0;
+    }
+    else
+    {
+        double frac = (double)iter/(double)numr;
+        double intPtVal;
+        double dblPtVal;
+
+        dblPtVal = modf( frac*7.0, &intPtVal );
+                
+        colRGB.r = ( (1.0-dblPtVal)*red[(int)intPtVal] 
+                         + dblPtVal*red[(int)intPtVal+1] )/255.0;
+
+        colRGB.g = ( (1.0-dblPtVal)*grn[(int)intPtVal]
+                         + dblPtVal*grn[(int)intPtVal+1] )/255.0;
+
+        colRGB.b = ( (1.0-dblPtVal)*blu[(int)intPtVal]
+                         + dblPtVal*blu[(int)intPtVal+1] )/255.0;
+    }
+
+    colRGB.a = 1.0;
+}
+
+
+// -----------------------------
+void VisUtils::mapColorSeqGreen(
+    const int &iter,
+    const int &numr,
+    ColorRGB &colRGB )
+// -----------------------------
+// ------------------------------------------------------------------
+// www.colorbrewer.org
+// ------------------------------------------------------------------
+{
+    // 9 ref colors
+    double red[] = { 247, 229, 199, 161, 116,  65,  35,   0,   0 };
+    double grn[] = { 252, 245, 233, 217, 196, 171, 139, 109,  68 };
+    double blu[] = { 245, 224, 192, 155, 118,  93,  69,  44,  27 };
+
+    if ( numr <= 8 )
+    {
+        colRGB.r = red[iter]/255.0;
+        colRGB.g = grn[iter]/255.0;
+        colRGB.b = blu[iter]/255.0;
+    }
+    else
+    {
+        double frac = (double)iter/(double)numr;
+        double intPtVal;
+        double dblPtVal;
+
+        dblPtVal = modf( frac*7.0, &intPtVal );
+                
+        colRGB.r = ( (1.0-dblPtVal)*red[(int)intPtVal] 
+                         + dblPtVal*red[(int)intPtVal+1] )/255.0;
+
+        colRGB.g = ( (1.0-dblPtVal)*grn[(int)intPtVal]
+                         + dblPtVal*grn[(int)intPtVal+1] )/255.0;
+
+        colRGB.b = ( (1.0-dblPtVal)*blu[(int)intPtVal]
+                         + dblPtVal*blu[(int)intPtVal+1] )/255.0;
+    }
+
+    colRGB.a = 1.0;
+}
+
+
+// -----------------------------
+void VisUtils::mapColorSeqGreen(
+    const double &alpha,
+    ColorRGB &colRGB )
+// -----------------------------
+// ------------------------------------------------------------------
+// www.colorbrewer.org
+// ------------------------------------------------------------------
+{
+    // 9 ref colors
+    double red[] = { 247, 229, 199, 161, 116,  65,  35,   0,   0 };
+    double grn[] = { 252, 245, 233, 217, 196, 171, 139, 109,  68 };
+    double blu[] = { 245, 224, 192, 155, 118,  93,  69,  44,  27 };
+
+    double frac = alpha;
+    double intPtVal;
+    double dblPtVal;
+
+    dblPtVal = modf( frac*7.0, &intPtVal );
+            
+    colRGB.r = ( (1.0-dblPtVal)*red[(int)intPtVal] 
+                     + dblPtVal*red[(int)intPtVal+1] )/255.0;
+
+    colRGB.g = ( (1.0-dblPtVal)*grn[(int)intPtVal]
+                     + dblPtVal*grn[(int)intPtVal+1] )/255.0;
+
+    colRGB.b = ( (1.0-dblPtVal)*blu[(int)intPtVal]
+                     + dblPtVal*blu[(int)intPtVal+1] )/255.0;
+    colRGB.a = 1.0;
+}
+
+
+// ---------------------------
+void VisUtils::mapColorSeqRed(
+    const int &iter,
+    const int &numr,
+    ColorRGB &colRGB )
+// ---------------------------
+// ------------------------------------------------------------------
+// www.colorbrewer.org
+// ------------------------------------------------------------------
+{
+    // 9 ref colors
+    double red[] = { 255, 254, 252, 252, 251, 239, 203, 165, 103 };
+    double grn[] = { 245, 224, 187, 146, 106,  59,  24,  15,   0 };
+    double blu[] = { 240, 210, 161, 114,  74,  44,  29,  21,  13 };
+
+    if ( numr <= 8 )
+    {
+        colRGB.r = red[iter]/255.0;
+        colRGB.g = grn[iter]/255.0;
+        colRGB.b = blu[iter]/255.0;
+    }
+    else
+    {
+        double frac = (double)iter/(double)numr;
+        double intPtVal;
+        double dblPtVal;
+
+        dblPtVal = modf( frac*7.0, &intPtVal );
+                
+        colRGB.r = ( (1.0-dblPtVal)*red[(int)intPtVal] 
+                         + dblPtVal*red[(int)intPtVal+1] )/255.0;
+
+        colRGB.g = ( (1.0-dblPtVal)*grn[(int)intPtVal]
+                         + dblPtVal*grn[(int)intPtVal+1] )/255.0;
+
+        colRGB.b = ( (1.0-dblPtVal)*blu[(int)intPtVal]
+                         + dblPtVal*blu[(int)intPtVal+1] )/255.0;
+    }
+
+    colRGB.a = 1.0;
+}
+    
+
+// ---------------------------
+void VisUtils::mapColorSeqRed(
+    const double &alpha,
+    ColorRGB &colRGB )
+// ---------------------------
+// ------------------------------------------------------------------
+// www.colorbrewer.org
+// ------------------------------------------------------------------
+{
+    // 9 ref colors
+    double red[] = { 255, 254, 252, 252, 251, 239, 203, 165, 103 };
+    double grn[] = { 245, 224, 187, 146, 106,  59,  24,  15,   0 };
+    double blu[] = { 240, 210, 161, 114,  74,  44,  29,  21,  13 };
+
+    double frac = alpha;
+    double intPtVal;
+    double dblPtVal;
+
+    dblPtVal = modf( frac*7.0, &intPtVal );
+            
+    colRGB.r = ( (1.0-dblPtVal)*red[(int)intPtVal] 
+                     + dblPtVal*red[(int)intPtVal+1] )/255.0;
+
+    colRGB.g = ( (1.0-dblPtVal)*grn[(int)intPtVal]
+                     + dblPtVal*grn[(int)intPtVal+1] )/255.0;
+
+    colRGB.b = ( (1.0-dblPtVal)*blu[(int)intPtVal]
+                     + dblPtVal*blu[(int)intPtVal+1] )/255.0;
+    colRGB.a = 1.0;
+}
+    
 
 // ----------------------------------
 void VisUtils::hlsToRgb( 
@@ -2811,9 +3071,9 @@ void VisUtils::genCharTextures(
 // -----------------------------------------------------
 {
     // vars
-    int red          = 0;
-    int green        = 0;
-    int blue         = 0;
+    int red = 0;
+    int green = 0;
+    int blue = 0;
 
     // allocate memory
     glGenTextures( CHARSETSIZE, texCharId );
@@ -2824,7 +3084,7 @@ void VisUtils::genCharTextures(
         // bind textures
         glBindTexture( GL_TEXTURE_2D, texCharId[i] );
         // create image
-        wxImage image(characters[i]);
+        wxImage image( characters[i] );
         
         // read in texture
         int count = 0;
@@ -2950,6 +3210,10 @@ void VisUtils::drawLabel(
             glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
             glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
             glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+            /*           
+            glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+            glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+            */
             glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
             glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
  

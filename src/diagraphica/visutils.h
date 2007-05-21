@@ -1,5 +1,5 @@
 // --- visutils.h ---------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 #ifndef VISUTILS_H
@@ -7,12 +7,12 @@
 
 
 #ifdef __APPLE__
-# include <GLUT/glut.h>
+    #include <GLUT/glut.h>
 #else
-# ifdef WIN32
-#  include <windows.h>
-# endif
-#  include <GL/glu.h>
+	#ifdef WIN32
+		#include <windows.h>
+	#endif
+    #include <GL/glu.h>
 #endif
 #include <string>
 using namespace std;
@@ -95,6 +95,7 @@ public:
     static void setColorDkCoolBlue();
     static void setColorGreen();
     static void setColorCoolGreen();
+    static void setColorLtCoolGreen();
     static void setColorLtLtGray();
     static void setColorLtGray();
     static void setColorMdGray();
@@ -112,6 +113,7 @@ public:
     static void mapColorDkCoolBlue( ColorRGB &col );
     static void mapColorGreen( ColorRGB &col );
     static void mapColorCoolGreen( ColorRGB &col );
+    static void mapColorLtCoolGreen( ColorRGB &col );
     static void mapColorLtLtGray( ColorRGB &col );
     static void mapColorLtGray( ColorRGB &col );
     static void mapColorMdGray( ColorRGB &col );
@@ -162,6 +164,29 @@ public:
     static void mapColorQualAccent(
         const int &iter,
         const int &numr,
+        ColorRGB &colRGB );
+
+    static void mapColorSeqOrRd(
+        const int &iter,
+        const int &numr,
+        ColorRGB &colRGB );
+    static void mapColorSeqGnBu(
+        const int &iter,
+        const int &numr,
+        ColorRGB &colRGB );
+    static void mapColorSeqGreen(
+        const int &iter,
+        const int &numr,
+        ColorRGB &colRGB );
+    static void mapColorSeqGreen(
+        const double &alpha,
+        ColorRGB &colRGB );
+    static void mapColorSeqRed(
+        const int &iter,
+        const int &numr,
+        ColorRGB &colRGB );
+    static void mapColorSeqRed(
+        const double &alpha,
         ColorRGB &colRGB );
     
     static void hlsToRgb( 

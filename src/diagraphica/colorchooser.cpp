@@ -1,5 +1,5 @@
 // --- colorchooser.cpp ---------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -81,7 +81,9 @@ void ColorChooser::visualize( const bool &inSelectMode )
         GLuint selectBuf[512];
         startSelectMode(
             hits,
-            selectBuf );
+            selectBuf,
+            2.0,
+            2.0 );
         
         drawPoints( inSelectMode );
 

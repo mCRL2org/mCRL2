@@ -1,5 +1,5 @@
 // --- examiner.h ---------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 #ifndef EXAMINER_H
@@ -66,6 +66,8 @@ public:
     void clearData();
 
     void handleSendDgrmSglToSiml();
+    void handleSendDgrmSglToTrace();
+    void handleSendDgrmSetToTrace();
 
     // -- visualization functions  ----------------------------------
     void visualize( const bool &inSelectMode );

@@ -1,5 +1,5 @@
 // --- colorbutton.cpp ----------------------------------------------
-// (c) 2006  -  S.C.W. Ploeger  -  Eindhoven University of Technology
+// (c) 2007  -  S.C.W. Ploeger  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 

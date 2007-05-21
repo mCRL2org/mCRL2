@@ -1,5 +1,5 @@
 // --- visualizer.cpp -----------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -208,6 +208,7 @@ void Visualizer::handleMouseMotionEvent(
 {
     if ( mouseButton == MSE_BUTTON_DOWN )
         mouseDrag = MSE_DRAG_TRUE;
+    mouseClick = MSE_CLICK_SINGLE;
     
     xMouseCur = x;
     yMouseCur = y;
@@ -256,7 +257,7 @@ void Visualizer::handleKeyDownEvent( const int &keyCode )
 void Visualizer::handleKeyUpEvent( const int &keyCode )
 // ----------------------------------------------------
 {
-    keyCodeDown = keyCode;
+    keyCodeDown = -1;
 }
 
 
@@ -290,7 +291,9 @@ void Visualizer::initMouse()
 // ------------------------------
 void Visualizer::startSelectMode(
     GLint hits,
-    GLuint selectBuf[] )
+    GLuint selectBuf[],
+    double pickWth,
+    double pickHgt )
 // ------------------------------
 {
     GLint viewport[4];
@@ -311,8 +314,8 @@ void Visualizer::startSelectMode(
     gluPickMatrix(
         (GLdouble) xMouseCur,
         (GLdouble) ( viewport[3]-yMouseCur ),
-        2.0,    // picking width
-        2.0,    // picking height
+        pickWth,    // picking width
+        pickHgt,    // picking height
         viewport );
 
     // get current size of canvas

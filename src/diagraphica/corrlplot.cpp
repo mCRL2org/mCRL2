@@ -1,5 +1,5 @@
 // --- corrlplot.cpp ------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -105,7 +105,9 @@ void CorrlPlot::visualize( const bool &inSelectMode )
         GLuint selectBuf[512];
         startSelectMode(
             hits,
-            selectBuf );
+            selectBuf,
+            2.0,
+            2.0 );
         
         //setScalingTransf();
         //drawNumberPlot( inSelectMode );
@@ -288,7 +290,8 @@ void CorrlPlot::drawDiagram( const bool &inSelectMode )
     vector< Attribute* > attrs;
     attrs.push_back( graph->getAttribute( attrIdx1 ) );
     attrs.push_back( graph->getAttribute( attrIdx2 ) );
-    vector< int > vals;
+    
+    vector< double > vals;
     vals.push_back( attrValIdx1Dgrm );
     vals.push_back( attrValIdx2Dgrm );
 

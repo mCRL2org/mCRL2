@@ -1,5 +1,5 @@
 // --- diagraph.h ---------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 // ------------------------------------------------------------------
@@ -13,8 +13,10 @@
 #include <cstddef>
 #include <wx/wx.h>
 #include <wx/busyinfo.h>
+#include <wx/cmdline.h>
 #include <wx/colordlg.h>
 #include <wx/progdlg.h>
+#include "attribute.h"
 #include "arcdiagram.h"
 #include "colorchooser.h"
 #include "combnplot.h"
@@ -28,6 +30,7 @@
 #include "opacitychooser.h"
 #include "parser.h"
 #include "simulator.h"
+#include "timeseries.h"
 
 class DiaGraph : public wxApp, public Mediator
 {
@@ -66,11 +69,30 @@ public:
         const int &idxFr,
         const int &idxTo );
     void handleAttributeDuplicate( const vector< int > &indcs );
+    /*
     void handleAttributeDelete( const vector< int > &indcs );
+    */
+    void handleAttributeDelete( const int &idx );
     void handleAttributeRename( 
         const int &idx,
         const string &name );
     void handleAttributeCluster( const vector< int > &indcs );
+
+    // -*- //
+    void handleAttrPartition( const int &attrIdx );
+    void handleAttrPartition(
+        const int &numParts,
+        const int &method );
+    void handleAttrDepartition( const int &attrIdx );
+    void handleAttrPartitionCloseFrame();
+
+    void getAttrValues(
+        const int &attrIdx,
+        vector< double > &vals );
+    void getAttrValues(
+        const int &attrIdx,
+        set< double > &vals );
+    // -*- //
     
     void handleMoveDomVal(
         const int &idxAttr,
@@ -85,6 +107,8 @@ public:
     void getAttributeNames( 
         const vector< int > &indcs,
         vector< wxString > &names );
+    int getAttributeType( const int &idx );
+    int getAttrSizeCurDomain( const int &idx );
 
     // -- attribute plots -------------------------------------------
     void handleAttributePlot( const int &idx );
@@ -108,6 +132,9 @@ public:
     void handleSetModeAnalysis();
     void handleSetModeEdit();
     int getMode();
+    void handleSetViewSim();
+    void handleSetViewTrace();
+    int getView();
 
     // -- diagram editor --------------------------------------------
     void handleEditModeSelect();
@@ -148,6 +175,11 @@ public:
         const vector< int > &attrIndcs,
         const int &selIdx );
     void handleDOFSel( const int &DOFIdx );
+
+    void handleSetDOFTextStatus( 
+        const int &DOFIdx,
+        const int &status );
+    int handleGetDOFTextStatus( const int &DOFIdx );
     
     void handleDOFColActivate();
     void handleDOFColDeactivate();
@@ -186,10 +218,19 @@ public:
     void handleDOFFrameDestroy();
     void handleDOFDeselect();
 
-    // -- simulator & examiner --------------------------------------
+    // -- simulator, time series & examiner -------------------------
     void initSimulator(
         Cluster* currFrame,
         const vector< Attribute* > &attrs );
+    
+    void initTimeSeries( const vector< int > attrIdcs );
+    void markTimeSeries( 
+        Colleague* sender,
+        Cluster* currFrame );
+    void markTimeSeries( 
+        Colleague* sender,
+        const vector< Cluster* > frames );
+    
     void addToExaminer(
         Cluster* currFrame,
         const vector< Attribute* > &attrs );
@@ -200,9 +241,13 @@ public:
     void handleSendDgrm(
         Colleague* sender,
         const bool &sendSglToSiml,
+        const bool &sendSglToTrace,
+        const bool &sendSetToTrace,
         const bool &sendSglToExnr,
         const bool &sendSetToExnr );
     void handleSendDgrmSglToSiml();
+    void handleSendDgrmSglToTrace();
+    void handleSendDgrmSetToTrace();
     void handleSendDgrmSglToExnr();
     void handleSendDgrmSetToExnr();
 
@@ -210,6 +255,9 @@ public:
     void handleClearExnr( Colleague* sender );
     void handleClearExnrCur( Colleague* sender );
 
+    //void handleAnimFrameBundl( Colleague* sender );
+    void handleAnimFrameClust( Colleague* sender );
+    
     void handleMarkFrameClust( Colleague* sender );
     void handleUnmarkFrameClusts( Colleague* sender );
 
@@ -233,6 +281,7 @@ public:
         const bool &show,
         const double &magn );
     void setSettingsSimulator( const int &blendType );
+    void setSettingsTrace( const bool &useShading );
     void setSettingsArcDiagram( 
         const bool &showNodes,
         const bool &showArcs,
@@ -252,6 +301,7 @@ public:
         bool &show,
         double &magn );
     void getSettingsSimulator( int &blendType );
+    void getSettingsTrace( bool &useShading );
     void getSettingsArcDiagram( 
         bool &showNodes,
         bool &showArcs,
@@ -328,6 +378,7 @@ protected:
     void clearColleagues();
     
     void displAttributes();
+    void displAttributes( const int &selAttrIdx );
     void displAttrDomain( const int &attrIdx );
     void clearAttrDomain();
 
@@ -337,9 +388,8 @@ private:
     Frame*            frame;          // composition
     wxProgressDialog* progressDialog; // composition
     int               mode;
-
-    // -*- //
-    bool critSect;
+    int               view;
+    bool              critSect;
     
     // -- visualization ---------------------------------------------
     GLCanvas* canvasArcD;  // association
@@ -347,6 +397,9 @@ private:
     
     GLCanvas* canvasSiml;  // association
     Simulator* simulator;  // composition
+
+    GLCanvas* canvasTrace; // association
+    TimeSeries* timeSeries;// composition
     
     GLCanvas* canvasExnr;  // association
     Examiner* examiner;    // composition
@@ -375,6 +428,9 @@ private:
     // -- attribute plots -------------------------------------------
     Cluster* tempClust;
     int      clustMode;
+
+    // -- attribute to partition ------------------------------------
+    Attribute* tempAttr;
 };
 
 // declare wxApp

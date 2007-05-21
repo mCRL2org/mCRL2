@@ -1,5 +1,5 @@
 // --- shape.cpp ----------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -764,7 +764,7 @@ void Shape::visualize(
 void Shape::visualize(
     GLCanvas* canvas,
     const vector< Attribute* > attrs,
-    const vector< int > attrValIdcs )
+    const vector< double > attrValIdcs )
 // ----------------------------------
 {
     double xC, yC; // center, [-1,1]
@@ -786,7 +786,15 @@ void Shape::visualize(
     
     for ( int i = 0; i < attrs.size(); ++i )
     {
+        /*
         if ( attrs[i]->getSizeCurValues() == 1 )
+            alpha = 0.0;
+        else
+            alpha = (double)attrValIdcs[i]/( (double)attrs[i]->getSizeCurValues() - 1.0 );
+        */
+        if ( attrs[i]->getSizeCurValues() == 0 && attrs[i]->getAttrType() == Attribute::ATTR_TYPE_CONTI )
+            alpha = ( attrValIdcs[i] - attrs[i]->getLowerBound() )/( attrs[i]->getUpperBound() - attrs[i]->getLowerBound() );
+        else if ( attrs[i]->getSizeCurValues() == 1 )
             alpha = 0.0;
         else
             alpha = (double)attrValIdcs[i]/( (double)attrs[i]->getSizeCurValues() - 1.0 );
@@ -938,7 +946,7 @@ void Shape::visualize(
     GLCanvas* canvas,
     const double &opacity,
     const vector< Attribute* > attrs,
-    const vector< int > attrValIdcs )
+    const vector< double > attrValIdcs )
 // ----------------------------------
 {
     double xC, yC; // center, [-1,1]
@@ -960,10 +968,28 @@ void Shape::visualize(
     
     for ( int i = 0; i < attrs.size(); ++i )
     {
+        /*
         if ( attrs[i]->getSizeCurValues() == 1 )
             alpha = 0.0;
         else
             alpha = (double)attrValIdcs[i]/( (double)attrs[i]->getSizeCurValues() - 1.0 );
+        */
+        if ( attrs[i]->getAttrType() == Attribute::ATTR_TYPE_DISCR )
+        {
+            if ( attrs[i]->getSizeCurValues() == 1 )
+                alpha = 0.0;
+            else
+                alpha = (double)attrValIdcs[i]/( (double)attrs[i]->getSizeCurValues() - 1.0 );
+        }
+        else if ( attrs[i]->getAttrType() == Attribute::ATTR_TYPE_CONTI )
+        {
+            if ( attrs[i]->getSizeCurValues() == 0 )
+                alpha = ( attrValIdcs[i] - attrs[i]->getLowerBound() )/( attrs[i]->getUpperBound() - attrs[i]->getLowerBound() );
+            else if ( attrs[i]->getSizeCurValues() == 1 )
+                alpha = 0.0;
+            else
+                alpha = (double)attrValIdcs[i]/( (double)attrs[i]->getSizeCurValues() - 1.0 );
+        }
 
         if ( attrs[i] == xCtrDOF->getAttribute() )
             xC = xCtr + (1-alpha)*xCtrDOF->getMin() + alpha*xCtrDOF->getMax();

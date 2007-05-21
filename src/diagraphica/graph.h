@@ -1,5 +1,5 @@
 // --- graph.h ------------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 #ifndef GRAPH_H
@@ -11,6 +11,8 @@
 #include <vector>
 using namespace std;
 #include "attribute.h"
+#include "attrconti.h"
+#include "attrdiscr.h"
 #include "bundle.h"
 #include "cluster.h"
 #include "colleague.h"
@@ -28,11 +30,31 @@ public:
 
     // -- set functions ---------------------------------------------
     void setFileName( const string &fn );
+/*
     void addAttribute(
         const string &name,
         const string &type,
         const int &idx,
         const vector< string > &vals );
+    void addAttribute(
+        const string &name,
+        const string &type,
+        const int &idx,
+        const double &lwrBnd,
+        const double &uprBnd );
+*/
+    void addAttrDiscr(
+        const string &name,
+        const string &type,
+        const int &idx,
+        const vector< string > &vals );
+    void addAttrConti(
+        const string &name,
+        const string &type,
+        const int &idx,
+        const double &lwrBnd,
+        const double &uprBnd );
+
     void swapAttributes(
         const int &idx1,
         const int &idx2 );
@@ -46,7 +68,7 @@ public:
     void duplAttributes( const vector< int > &idcs );
     void deleteAttribute( const int &idx );
     
-    void addNode( const vector< int > &tpl );
+    void addNode( const vector< double > &tpl );
     void addEdge(
         const string &lbl,
         const int &inNodeIdx,
@@ -107,7 +129,6 @@ public:
         Cluster* clust,
         const vector< int > &attrIndcs,
         vector< vector< int > > &combs );
-    // -*- //
     void calcAttrCombn(
         Cluster* clust,
         const vector< int > &attrIndcs,
@@ -116,7 +137,6 @@ public:
         Cluster* clust,
         const vector< Attribute* > &attrs,
         vector< Cluster* > &combs );
-    // -*- //
     
     bool hasMultAttrCombns(
         Cluster* clust,

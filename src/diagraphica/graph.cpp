@@ -1,5 +1,5 @@
 // --- graph.cpp ----------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -46,7 +46,7 @@ void Graph::setFileName( const string &fn )
     fileName = fn;
 }
 
-
+/*
 // -------------------------------
 void Graph::addAttribute(
     const string &name,
@@ -62,6 +62,66 @@ void Graph::addAttribute(
         vals );
     attributes.push_back( attribute );
     attribute = NULL;
+}
+
+
+// -----------------------
+void Graph::addAttribute(
+    const string &name,
+    const string &type,
+    const int &idx,
+    const double &lwrBnd,
+    const double &uprBnd )
+// -----------------------
+{
+    Attribute* attribute = new Attribute(
+        name,
+        type,
+        idx,
+        lwrBnd,
+        uprBnd );
+    attributes.push_back( attribute );
+    attribute = NULL;
+}
+*/
+
+// -------------------------------
+void Graph::addAttrDiscr(
+    const string &name,
+    const string &type,
+    const int &idx,
+    const vector< string > &vals )
+// -------------------------------
+{
+    AttrDiscr* attr = new AttrDiscr(
+        mediator,
+        name,
+        type,
+        idx,
+        vals );
+    attributes.push_back( attr );
+    attr = NULL;
+}
+
+
+// ----------------------
+void Graph::addAttrConti(
+    const string &name,
+    const string &type,
+    const int &idx,
+    const double &lwrBnd,
+    const double &uprBnd )
+// ----------------------
+{
+    AttrConti* attr = new AttrConti(
+        mediator,
+        name,
+        type,
+        idx,
+        lwrBnd,
+        uprBnd );
+    attributes.push_back( attr );
+    attr = NULL;
 }
 
 
@@ -233,9 +293,20 @@ void Graph::duplAttributes( const vector< int > &idcs )
     for( int i = 0; i < idcs.size(); ++i )
     {
         // add new attribute
-        attributes.insert( 
-            attributes.begin() + insIdx + i,
-            new Attribute( *attributes[ idcs[i] ] ) );
+        // -*-
+        if ( attributes[idcs[i]]->getAttrType() == Attribute::ATTR_TYPE_DISCR )
+        {
+            attributes.insert( 
+                attributes.begin() + insIdx + i,
+                new AttrDiscr( *((AttrDiscr*)attributes[ idcs[i] ]) ) );
+        }
+        else if ( attributes[idcs[i]]->getAttrType() == Attribute::ATTR_TYPE_CONTI )
+        {
+            attributes.insert( 
+                attributes.begin() + insIdx + i,
+                new AttrConti( *((AttrConti*)attributes[ idcs[i] ]) ) );
+        }
+        
         attributes[ insIdx + i ]->setIndex( insIdx + i );
         attributes[ insIdx + i ]->setName( 
             "Copy_of_" + attributes[ idcs[i] ]->getName() );
@@ -305,7 +376,7 @@ void Graph::deleteAttribute( const int &idx )
 
 
 // --------------------------------------------
-void Graph::addNode( const vector< int > &tpl )
+void Graph::addNode( const vector< double > &tpl )
 // --------------------------------------------
 {
     Node* n = new Node(
@@ -331,6 +402,11 @@ void Graph::addEdge(
     e->setOutNode( nodes[outNodeIdx] );
     nodes[inNodeIdx]->addOutEdge( e );
     nodes[outNodeIdx]->addInEdge( e );
+
+    Bundle* b = getBundle( 0 );
+    b->addEdge( e );
+    e->setBundle( b );
+    b = NULL;
 
     addEdge( e );
     e = NULL;
@@ -583,6 +659,7 @@ void Graph::calcAttrDistr(
     if ( sizeDomain > 0  )
     {
         for ( int i = 0; i < sizeNodes; ++i )
+            /*distr[ attribute->mapToValue( (int)clustNodes[i]->getTupleVal( attrIdx ) )->getIndex() ] += 1;*/
             distr[ attribute->mapToValue( clustNodes[i]->getTupleVal( attrIdx ) )->getIndex() ] += 1;
     }
 
@@ -645,6 +722,14 @@ void Graph::calcAttrCorrl(
         for ( int i = 0; i < sizeNodes; ++i )
         {
             node    = nodes[i];
+            /*
+            domIdx1 = attr1->mapToValue( 
+                (int)node->getTupleVal( 
+                    attrIdx1 ) )->getIndex();
+            domIdx2 = attr2->mapToValue(
+                (int)node->getTupleVal(
+                    attrIdx2 ) )->getIndex();
+            */
             domIdx1 = attr1->mapToValue( 
                 node->getTupleVal( 
                     attrIdx1 ) )->getIndex();
@@ -756,12 +841,21 @@ void Graph::calcAttrCorrl(
         for ( int i = 0; i < sizeNodes; ++i )
         {
             node    = clustNodes[i];
+            /*
+            domIdx1 = attr1->mapToValue( 
+                (int)node->getTupleVal( 
+                    attrIdx1 ) )->getIndex();
+            domIdx2 = attr2->mapToValue(
+                (int)node->getTupleVal(
+                    attrIdx2 ) )->getIndex();
+            */
             domIdx1 = attr1->mapToValue( 
                 node->getTupleVal( 
                     attrIdx1 ) )->getIndex();
             domIdx2 = attr2->mapToValue(
                 node->getTupleVal(
                     attrIdx2 ) )->getIndex();
+
 
             number[domIdx1][domIdx2] += 1;
         }
@@ -851,6 +945,10 @@ void Graph::calcAttrCombn(
             attr = getAttribute( attrIndcs[j] );
             card = attr->getSizeCurValues();
             if ( card > 0 )
+                /*
+                summand = attr->mapToValue(
+                    (int)node->getTupleVal( attrIndcs[j] ) )->getIndex();
+                */
                 summand = attr->mapToValue(
                     node->getTupleVal( attrIndcs[j] ) )->getIndex();
             else
@@ -878,6 +976,10 @@ void Graph::calcAttrCombn(
                 card = attr->getSizeCurValues();
 
                 if ( card > 0 )
+                    /*
+                    v.push_back( attr->mapToValue(
+                        (int)node->getTupleVal( attrIndcs[j] ) )->getIndex() );
+                    */
                     v.push_back( attr->mapToValue(
                         node->getTupleVal( attrIndcs[j] ) )->getIndex() );
             }
@@ -950,6 +1052,10 @@ void Graph::calcAttrCombn(
             attr = getAttribute( attrIndcs[j] );
             card = attr->getSizeCurValues();
             if ( card > 0 )
+                /*
+                summand = attr->mapToValue(
+                    (int)node->getTupleVal( attrIndcs[j] ) )->getIndex();
+                */
                 summand = attr->mapToValue(
                     node->getTupleVal( attrIndcs[j] ) )->getIndex();
             else
@@ -977,6 +1083,10 @@ void Graph::calcAttrCombn(
                 card = attr->getSizeCurValues();
 
                 if ( card > 0 )
+                    /*
+                    v.push_back( attr->mapToValue(
+                        (int)node->getTupleVal( attrIndcs[j] ) )->getIndex() );
+                    */
                     v.push_back( attr->mapToValue(
                         node->getTupleVal( attrIndcs[j] ) )->getIndex() );
             }
@@ -1031,6 +1141,10 @@ void Graph::calcAttrCombn(
             attr = getAttribute( attrIndcs[j] );
             card = attr->getSizeCurValues();
             if ( card > 0 )
+                /*
+                summand = attr->mapToValue(
+                    (int)node->getTupleVal( attrIndcs[j] ) )->getIndex();
+                */
                 summand = attr->mapToValue(
                     node->getTupleVal( attrIndcs[j] ) )->getIndex();
             else
@@ -1109,7 +1223,7 @@ void Graph::calcAttrCombn(
             if ( card > 0 )
                 /*
                 summand = attr->mapToValue(
-                    node->getTupleVal( attrIndcs[j] ) )->getIndex();
+                    (int)node->getTupleVal( attr->getIndex() ) )->getIndex();
                 */
                 summand = attr->mapToValue(
                     node->getTupleVal( attr->getIndex() ) )->getIndex();
@@ -1200,6 +1314,10 @@ bool Graph::hasMultAttrCombns(
             cardAttr  = attribute->getSizeCurValues();
             if ( cardAttr > 0 )
             {
+                /*
+                summand = attribute->mapToValue( 
+                    (int)node->getTupleVal( attrIndcs[j] ) )->getIndex();
+                */
                 summand = attribute->mapToValue( 
                     node->getTupleVal( attrIndcs[j] ) )->getIndex();
             }
@@ -1266,9 +1384,6 @@ void Graph::clustNodesOnAttr( const vector< int > &attrIdcs )
     mediator->closeProgress();
     
     idcs.clear();
-
-    //printClusters();
-    //printBundles();
 }
 
 
@@ -1459,6 +1574,10 @@ void Graph::initRoot()
     rootCoord.push_back( 0 );
 
     root = new Cluster( rootCoord );
+    
+    Bundle* bndl = new Bundle( 0 );
+    bundles.push_back( bndl );
+    bndl = NULL;
 }
 
 
@@ -1551,6 +1670,10 @@ void Graph::clustClusterOnAttr(
     {
         node = clust->getNode( i );
 
+        /*
+        clstIdxTmp = attr->mapToValue( 
+            (int)node->getTupleVal(attrIdx) )->getIndex();
+        */
         clstIdxTmp = attr->mapToValue( 
             node->getTupleVal(attrIdx) )->getIndex();
 

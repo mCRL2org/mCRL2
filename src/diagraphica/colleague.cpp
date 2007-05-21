@@ -1,5 +1,5 @@
 // --- colleague.cpp ------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -14,6 +14,14 @@ Colleague::Colleague( Mediator* m )
 // --------------------------------
 {
     mediator = m;
+}
+
+
+// -----------------------------------------------
+Colleague::Colleague( const Colleague &colleague )
+// -----------------------------------------------
+{
+    mediator = colleague.mediator;
 }
 
 

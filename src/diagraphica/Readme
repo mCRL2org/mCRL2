@@ -1,0 +1,6 @@
+DiaGraphica Installation Instructions
+-------------------------------------
+
+1. Download and install wxWidgets GUI library. The library is available from http://www.wxwidgets.org. The tool was tested with wx-2.6.3 but should also run under later versions.
+
+2. Compile the tool. Navigate to the directory where 'diagraphica.tgz' was unpacked. Run Make by typing 'make' on the command line.

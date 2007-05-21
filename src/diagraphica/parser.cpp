@@ -1,5 +1,5 @@
 // --- parser.cpp ---------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -214,14 +214,25 @@ void Parser::writeFSMFile(
             line.append( graph->getAttribute( i )->getType() );
             line.append( " " );
 
-            for ( int j = 0; j < graph->getAttribute( i )->getSizeCurValues(); ++j )
+            if ( graph->getAttribute(i)->getSizeOrigValues() != 0 )
             {
-                line.append( "\"" );
-                line.append( graph->getAttribute( i )->getCurValue( j )->getValue() );
-                line.append( "\"" );
+                for ( int j = 0; j < graph->getAttribute( i )->getSizeCurValues(); ++j )
+                {
+                    line.append( "\"" );
+                    line.append( graph->getAttribute( i )->getCurValue( j )->getValue() );
+                    line.append( "\"" );
 
-                if ( j < graph->getAttribute( i )->getSizeCurValues()-1 )
-                    line.append( " " );
+                    if ( j < graph->getAttribute( i )->getSizeCurValues()-1 )
+                        line.append( " " );
+                }
+            }
+            else
+            {
+                line.append( "[" );
+                line.append( Utils::dblToStr( graph->getAttribute( i )->getLowerBound() ) );
+                line.append( ", " );
+                line.append( Utils::dblToStr( graph->getAttribute( i )->getUpperBound() ) );
+                line.append( "]" );
             }
 
             line.append( "\n" );
@@ -245,7 +256,7 @@ void Parser::writeFSMFile(
             
             for ( int j = 0; j < graph->getNode(i)->getSizeTuple(); ++j )
             {
-                line.append( Utils::intToStr( graph->getNode(i)->getTupleVal(j) ) );
+                line.append( Utils::dblToStr( graph->getNode(i)->getTupleVal(j) ) );
                 
                 if ( j < graph->getNode( i )->getSizeTuple()-1 )
                     line.append( " " );
@@ -965,6 +976,7 @@ void Parser::parseStateVarDescr(
 {
     string token;
     string name;
+    string card;
     string type;
     vector< string > values;
     try
@@ -984,8 +996,8 @@ void Parser::parseStateVarDescr(
         // cardinality
         begIdx = nextLine.find_first_not_of( delims, endIdx );
         endIdx = nextLine.find_first_of( delims, begIdx );
-        //token = nextLine.substr( begIdx, endIdx-begIdx );
-        //card = token;
+        token = nextLine.substr( begIdx, endIdx-begIdx );
+        card = token;
         
         // type
         begIdx = nextLine.find_first_not_of( "() ", endIdx );
@@ -1004,23 +1016,60 @@ void Parser::parseStateVarDescr(
             type = token;
         
         // domain
-        begIdx = nextLine.find_first_not_of( " \"", endIdx );
-        endIdx = nextLine.find_first_of( "\"", begIdx );
-        while ( endIdx != string::npos )
+        if ( card != "0" )
         {
-            token = nextLine.substr( begIdx, endIdx-begIdx );
-            if( token != "\n" )
-                  values.push_back( token );
+            // all domain values are specified
             begIdx = nextLine.find_first_not_of( " \"", endIdx );
             endIdx = nextLine.find_first_of( "\"", begIdx );
-        }
+        
+            while ( endIdx != string::npos )
+            {
+                token = nextLine.substr( begIdx, endIdx-begIdx );
+                if( token != "\n" )
+                      values.push_back( token );
+                begIdx = nextLine.find_first_not_of( " \"", endIdx );
+                endIdx = nextLine.find_first_of( "\"", begIdx );
+            }
 
-        // add new attribute to graph
-        graph->addAttribute(
-            name,
-            type,
-            graph->getSizeAttributes(),
-            values );
+            // add new discrete attribute to graph
+            graph->addAttrDiscr(
+                name,
+                type,
+                graph->getSizeAttributes(),
+                values );
+        }
+        else
+        {
+            // range of domain values are specified
+            double lwrBnd = 0.0;
+            double uprBnd = 0.0;
+
+            // lower bound
+            begIdx = nextLine.find_first_not_of( " [", endIdx );
+            endIdx = nextLine.find_first_of( " ,", begIdx );
+            if ( endIdx != string::npos )
+            {
+                token  = nextLine.substr( begIdx, endIdx-begIdx );
+                lwrBnd = Utils::strToDbl( token );
+
+                // upper bound
+                begIdx = nextLine.find_first_not_of( " ,", endIdx );
+                endIdx = nextLine.find_first_of( "]", begIdx );
+                if ( endIdx != string::npos )
+                {
+                    token  = nextLine.substr( begIdx, endIdx-begIdx );
+                    uprBnd = Utils::strToDbl( token );
+                }
+            }
+
+            // add new continuous attribute to graph
+            graph->addAttrConti(
+                name,
+                type,
+                graph->getSizeAttributes(),
+                lwrBnd,
+                uprBnd );
+        }
     }
     catch ( ... )
     {
@@ -1042,7 +1091,7 @@ void Parser::parseStates(
 // (second) part of an fsm file.
 // -----------------------------------------------------------------------
 {
-    vector< int > stateVector;
+    vector< double > stateVector;
     try
     {
         string token = "";
@@ -1056,7 +1105,7 @@ void Parser::parseStates(
         {
             token = nextLine.substr( begIdx, endIdx-begIdx );
             if( token != "\n" )
-                stateVector.push_back( Utils::strToInt( token ) );
+                stateVector.push_back( Utils::strToDbl( token ) );
             begIdx = nextLine.find_first_not_of( delims, endIdx );
             endIdx = nextLine.find_first_of( delims, begIdx );
         }

@@ -1,104 +1,142 @@
 // --- diagraph.cpp -------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
-#include <iostream>
-#include <string>
-#include <wx/wx.h>
-#include <wx/cmdline.h>
-#include <wx/msgdlg.h>
-#include <wx/string.h>
-
-#define PROGRAM_NAME "DiaGraph"
-
-/* The optional input file that should contain an FSM */
-std::string fsm_file_argument;
-
-// Squadt protocol interface
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utilities/mcrl2_squadt.h>
-
-class squadt_interactor: public mcrl2_squadt::tool_interface {
-  
-  private:
-    // Wrapper for wxEntry invocation
-    squadt_utility::entry_wrapper& starter;
-	
-    // Identifier for main input file that contains an LTS
-    static const char* fsm_file_for_input;
- 
-  public:
-
-    // Constructor
-    squadt_interactor(squadt_utility::entry_wrapper&);
-
-    // Configures tool capabilities.
-    void set_capabilities(sip::tool::capabilities&) const;
-
-    // Queries the user via SQuADt if needed to obtain configuration information
-    void user_interactive_configuration(sip::configuration&);
-
-    // Check an existing configuration object to see if it is usable
-    bool check_configuration(sip::configuration const&) const;
-
-    // Performs the task specified by a configuration
-    bool perform_task(sip::configuration&);
-};
-
-const char* squadt_interactor::fsm_file_for_input = "fsm_in";
-
-squadt_interactor::squadt_interactor(squadt_utility::entry_wrapper& w): starter(w) {
-}
-
-void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  /* The tool has only one main input combination it takes an LPS and then behaves as a reporter */
-  c.add_input_combination(fsm_file_for_input, sip::mime_type("fsm", sip::mime_type::text), sip::tool::category::visualisation);
-}
-
-void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
-}
-
-bool squadt_interactor::check_configuration(sip::configuration const& c) const {
-  bool valid = c.input_exists(fsm_file_for_input);
-
-  if (!valid) {
-    send_error("Invalid input combination!");
-  }
-
-  return valid;
-}
-
-bool squadt_interactor::perform_task(sip::configuration& c) {
-  fsm_file_argument = c.get_input(fsm_file_for_input).get_location();
-
-  return starter.perform_entry();
-}
-
-std::auto_ptr < squadt_interactor > interactor;
-#endif
 
 #include "diagraph.h"
 
-// Parse command line 
-bool parse_command_line(int argc, wxChar** argv,
-                        std::string& fsm_file_argument) {
-  wxCmdLineParser cmdln(argc,argv);
 
-  cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("displays this message"));
-  cmdln.AddSwitch(wxT("q"),wxT("quiet"),wxT("do not display any unrequested information"));
-  cmdln.AddSwitch(wxT("v"),wxT("verbose"),wxT("display concise intermediate messages"));
-  cmdln.AddSwitch(wxT("d"),wxT("debug"),wxT("display detailed intermediate messages"));
-  cmdln.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
-  cmdln.SetLogo(wxT("Graphical interactive analyser for FSMs."));
+// windows debug libraries
+#ifdef WIN32
+  #define _CRTDBG_MAP_ALLOC
+  #include <stdlib.h>
+  #include <crtdbg.h>
+#endif
 
-  if (cmdln.Parse()) {
+// -- Squadt protocol interface -------------------------------------
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+    #include <utilities/mcrl2_squadt.h>
+
+    class squadt_interactor: public mcrl2_squadt::tool_interface 
+    {
+        private:
+            // Wrapper for wxEntry invocation
+            squadt_utility::entry_wrapper& starter;
+    	    // Identifier for main input file that contains an LTS
+            static const char* fsm_file_for_input;
+     
+        public:
+            // Constructor
+            squadt_interactor(squadt_utility::entry_wrapper&);
+            // Configures tool capabilities.
+            void set_capabilities(sip::tool::capabilities&) const;
+            // Queries the user via SQuADt if needed to obtain configuration information
+            void user_interactive_configuration(sip::configuration&);
+            // Check an existing configuration object to see if it is usable
+            bool check_configuration(sip::configuration const&) const;
+            // Performs the task specified by a configuration
+            bool perform_task(sip::configuration&);
+    };
+
+    const char* squadt_interactor::fsm_file_for_input = "fsm_in";
+    squadt_interactor::squadt_interactor(squadt_utility::entry_wrapper& w): starter(w) 
+    {}
+
+    void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const 
+    {
+        /* The tool has only one main input combination it takes an LPS and then behaves as a reporter */
+        c.add_input_combination(fsm_file_for_input, sip::mime_type("fsm", sip::mime_type::text), sip::tool::category::visualisation);
+    }
+
+    void squadt_interactor::user_interactive_configuration(sip::configuration& c)
+    {}
+
+    bool squadt_interactor::check_configuration(sip::configuration const& c) const 
+    {
+        bool valid = c.input_exists(fsm_file_for_input);
+        if (!valid) 
+        {
+            send_error("Invalid input combination!");
+        }
+        return valid;
+    }
+
+    bool squadt_interactor::perform_task(sip::configuration& c)
+    {
+        fsm_file_argument = c.get_input(fsm_file_for_input).get_location();
+        return starter.perform_entry();
+    }
+
+    std::auto_ptr < squadt_interactor > interactor;
+#endif
+
+
+#ifndef ENABLE_SQUADT_CONNECTIVITY
+    // implement wxApp
+    IMPLEMENT_APP( DiaGraph )
+#else
+    IMPLEMENT_APP_NO_MAIN( DiaGraph )
+
+    # ifdef __WINDOWS__
+        extern "C" int WINAPI WinMain(
+            HINSTANCE hInstance,                    
+            HINSTANCE hPrevInstance,                
+            wxCmdLineArgType lpCmdLine,             
+            int nCmdShow) 
+        {                                                                     
+            squadt_utility::entry_wrapper starter(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+            interactor.reset(new squadt_interactor(starter));
+        
+            if (!interactor->try_interaction(lpCmdLine)) {
+                return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+            }
+            return (0);
+        }
+    # else
+        int main(int argc, char **argv) 
+        {
+            squadt_utility::entry_wrapper starter(argc, argv);
+            interactor.reset(new squadt_interactor(starter));
+
+            if(!interactor->try_interaction(argc, argv)) {
+                return wxEntry(argc, argv);
+            }
+            return 0;
+        }
+    # endif
+#endif
+// -- * -------------------------------------------------------------
+
+
+// -- command line --------------------------------------------------
+
+// optional input file that should contain an FSM
+std::string fsm_file_argument;
+#define PROGRAM_NAME "DiaGraph"
+
+// parse command line 
+bool parse_command_line(
+    int argc, wxChar** argv,
+    std::string& fsm_file_argument ) 
+{
+    wxCmdLineParser cmdln(argc,argv);
+
+    cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("displays this message"));
+    cmdln.AddSwitch(wxT("q"),wxT("quiet"),wxT("do not display any unrequested information"));
+    cmdln.AddSwitch(wxT("v"),wxT("verbose"),wxT("display concise intermediate messages"));
+    cmdln.AddSwitch(wxT("d"),wxT("debug"),wxT("display detailed intermediate messages"));
+    cmdln.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
+    cmdln.SetLogo(wxT("Graphical interactive analyser for FSMs."));
+
+    if (cmdln.Parse()) 
+    {
     return false;
-  }
+    }
 
-  if (cmdln.Found(wxT("h"))) {
+    if (cmdln.Found(wxT("h"))) {
     std::cout << "Usage: " << PROGRAM_NAME << " [OPTION]... [INFILE]\n"
               << "DiaGrahica is a prototype for the interactive visual analysis of multivariate\n" 
-			  << "state transition graphs. If INFILE is supplied it will be\n"
+	          << "state transition graphs. If INFILE is supplied it will be\n"
               << "loaded into DiaGraphica.\n"
               << "\n"
               << "Options:\n"
@@ -106,82 +144,98 @@ bool parse_command_line(int argc, wxChar** argv,
               << "  -q, --quiet              do not display any unrequested information\n"
               << "  -v, --verbose            display concise intermediate messages\n"
               << "  -d, --debug              display detailed intermediate messages\n";
-
     return false;
-  }
+    }
 
-  if (cmdln.Found(wxT("q")) && cmdln.Found(wxT("v"))) {
-    //gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
-    return false;
-  }
-  if (cmdln.Found(wxT("q")) && cmdln.Found(wxT("d"))) {
-    //gsErrorMsg("options -q/--quiet and -d/--debug cannot be used together\n");
-    return false;
-  }
-  if (cmdln.Found(wxT("q"))) {
-    //gsSetQuietMsg();
-  }
-  if (cmdln.Found(wxT("v"))) {
-    //gsSetVerboseMsg();
-  }
-  if (cmdln.Found(wxT("d"))) {
-    //gsSetDebugMsg();
-  }
+    if (cmdln.Found(wxT("q")) && cmdln.Found(wxT("v"))) 
+    {
+        //gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
+        return false;
+    }
 
-  if ( cmdln.GetParamCount() > 0 ) {
-    fsm_file_argument = std::string(cmdln.GetParam(0).fn_str());
-  }
+    if (cmdln.Found(wxT("q")) && cmdln.Found(wxT("d"))) 
+    {
+        //gsErrorMsg("options -q/--quiet and -d/--debug cannot be used together\n");
+        return false;
+    }
 
-  return (true);
+    if (cmdln.Found(wxT("q"))) 
+    {
+        //gsSetQuietMsg();
+    }
+
+    if (cmdln.Found(wxT("v"))) 
+    {
+        //gsSetVerboseMsg();
+    }
+
+    if (cmdln.Found(wxT("d"))) 
+    {
+        //gsSetDebugMsg();
+    }
+
+    if ( cmdln.GetParamCount() > 0 ) 
+    {
+        fsm_file_argument = std::string(cmdln.GetParam(0).fn_str());
+	}
+
+    return (true);
 }
+// -- * -------------------------------------------------------------
+
 
 // -- functions inherited from wxApp --------------------------------
+
 
 // --------------------
 bool DiaGraph::OnInit()
 // --------------------
 {
-   wxInitAllImageHandlers();
+    // windows debugging
+    #ifdef WIN32
+	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+    #endif
+	//_CrtSetBreakAlloc( 4271 );
 
-   // set mode
-   mode = MODE_ANALYSIS;
+    // squadt
+    #ifdef ENABLE_SQUADT_CONNECTIVITY
+        if (interactor->is_active()) 
+        {
+            // init colleagues
+            initColleagues();
 
-   #ifdef ENABLE_SQUADT_CONNECTIVITY
-   if (interactor->is_active()) {
-     // init colleagues
-     initColleagues();
+            if (!fsm_file_argument.empty())
+            {
+                openFile(fsm_file_argument);
+            }; 
 
-     if (!fsm_file_argument.empty()){
-       openFile(fsm_file_argument);
-     }; 
+            critSect = false;
 
-     // -*- //
-     critSect = false;
+            return true;
+        }
+    #endif
 
-     return true;
-   }
-   #endif
+    // command line
+    if (!parse_command_line(argc, argv, fsm_file_argument)) 
+    {
+        return (false);
+    };
 
-   if (!parse_command_line(argc, argv, fsm_file_argument)) {
-     return (false);
-   }
-	
-   // windows debugging
-   //_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-   //_CrtSetBreakAlloc( 7032 );
+    // set mode
+    mode = MODE_ANALYSIS;
+    // set view
+    view = VIEW_SIM;
 
-   // init colleagues
-   initColleagues();
-       
-   if (!fsm_file_argument.empty()){
-     openFile(fsm_file_argument);
-   }; 
+    // init colleagues
+    initColleagues();
+    critSect = false;
+   
+    if (!fsm_file_argument.empty()){
+      openFile(fsm_file_argument);
+    }; 
 
-   // -*- //
-   critSect = false;
-
-   // start event loop
-   return true;
+    // start event loop
+    return true;
 }
 
 
@@ -236,7 +290,6 @@ void DiaGraph::openFile( const string &path )
 
     try
     {
-        // -*- //
         critSect = true;
 
         // delete visualizers
@@ -252,7 +305,16 @@ void DiaGraph::openFile( const string &path )
             delete simulator;
             simulator = NULL;
         }
-        canvasSiml->Refresh();
+        if ( view == VIEW_SIM )
+            canvasSiml->Refresh();
+
+        if ( timeSeries != NULL )
+        {
+            delete timeSeries;
+            timeSeries = NULL;
+        }
+        if ( view == VIEW_TRACE )
+            canvasTrace->Refresh();
 
         if ( examiner != NULL )
         {
@@ -318,6 +380,11 @@ void DiaGraph::openFile( const string &path )
             graph,
             canvasSiml );
 
+        timeSeries = new TimeSeries(
+            this,
+            graph,
+            canvasTrace );
+
         examiner = new Examiner(
             this,
             graph,
@@ -332,9 +399,9 @@ void DiaGraph::openFile( const string &path )
 
         arcDgrm->setDiagram( editor->getDiagram() );
         simulator->setDiagram( editor->getDiagram() );
+        timeSeries->setDiagram( editor->getDiagram() );
         examiner->setDiagram( editor->getDiagram() );
 
-        // -*- //
         critSect = false;
     }
     catch ( const string* msg )
@@ -346,7 +413,6 @@ void DiaGraph::openFile( const string &path )
         delete msg;
         msg = NULL;
 
-        // -*- //
         critSect = false;
     }
 
@@ -482,6 +548,9 @@ void DiaGraph::handleLoadDiagram( const string &path )
         
         simulator->clearData();
         simulator->setDiagram( dgrmNew );
+
+        timeSeries->clearData();
+        timeSeries->setDiagram( dgrmNew );
         
         examiner->clearData();
         examiner->setDiagram( dgrmNew );
@@ -710,19 +779,28 @@ void DiaGraph::handleAttributeDuplicate( const vector< int > &indcs )
     displAttributes();
 }
 
-
+/*
 // ---------------------------------------------------------------
 void DiaGraph::handleAttributeDelete( const vector< int > &indcs )
 // ---------------------------------------------------------------
 {
-    // reset simulator & examiner
+    // reset simulator, timeSeries & examiner
     if ( simulator != NULL )
     {
         simulator->clearData();
         simulator->setDiagram( editor->getDiagram() );
 
-        if ( mode == MODE_ANALYSIS && canvasSiml != NULL )
+        if ( mode == MODE_ANALYSIS && ( view == VIEW_SIM && canvasSiml != NULL ) )
             canvasSiml->Refresh();
+    }
+
+    if ( timeSeries != NULL )
+    {
+        timeSeries->clearData();
+        timeSeries->setDiagram( editor->getDiagram() );
+        
+        if ( mode == MODE_ANALYSIS && ( view == VIEW_TRACE && canvasSiml != NULL ) )
+            canvasTrace->Refresh();
     }
 
     if ( examiner != NULL )
@@ -735,12 +813,101 @@ void DiaGraph::handleAttributeDelete( const vector< int > &indcs )
     }
 
     // delete attributes
-    for ( size_t i = 0; i < indcs.size(); ++i )
+    for ( int i = 0; i < indcs.size(); ++i )
     {
         editor->clearLinkAttrDOF( indcs[i] );
         graph->deleteAttribute( indcs[i] );
     }
 
+    // display attributes
+    displAttributes();
+    clearAttrDomain();
+}
+*/
+
+// ---------------------------------------------------
+void DiaGraph::handleAttributeDelete( const int &idx )
+// ---------------------------------------------------
+{
+    // reset simulator, timeSeries & examiner
+    if ( simulator != NULL )
+    {
+        simulator->clearData();
+        simulator->setDiagram( editor->getDiagram() );
+
+        if ( mode == MODE_ANALYSIS && ( view == VIEW_SIM && canvasSiml != NULL ) )
+            canvasSiml->Refresh();
+    }
+
+    if ( timeSeries != NULL )
+    {
+        timeSeries->clearData();
+        timeSeries->setDiagram( editor->getDiagram() );
+        
+        if ( mode == MODE_ANALYSIS && ( view == VIEW_TRACE && canvasSiml != NULL ) )
+            canvasTrace->Refresh();
+    }
+
+    if ( examiner != NULL )
+    {
+        examiner->clearData();
+        examiner->setDiagram( editor->getDiagram() );
+
+        if ( mode == MODE_ANALYSIS && canvasExnr != NULL )
+            canvasExnr->Refresh();
+    }
+
+    // update cluster and time series if necessary
+    Attribute* attr = graph->getAttribute( idx );
+    // get attributes currently clustered on
+    int posFoundClust = -1;
+    vector< int > attrsClust;
+    arcDgrm->getAttrsTree( attrsClust );
+    for ( int i = 0; i < attrsClust.size(); ++i )
+    {
+        if ( attrsClust[i] == attr->getIndex() )
+        {
+            posFoundClust = i;
+            break;
+        }
+    }
+
+    // recluster if necessary
+    if ( posFoundClust >= 0 )
+    {
+        attrsClust.erase( attrsClust.begin() + posFoundClust );
+        handleAttributeCluster( attrsClust );
+    }
+    
+    // get attributes currently in time series
+    int posFoundTimeSeries = -1;
+    vector< int > attrsTimeSeries;
+    timeSeries->getAttrIdcs( attrsTimeSeries );
+    for ( int i = 0; i < attrsTimeSeries.size(); ++i )
+    {
+        if ( attrsTimeSeries[i] == attr->getIndex() )
+        {
+            posFoundTimeSeries = i;
+            break;
+        }
+    }
+    
+    // re-initiate time series if necessary
+    if ( posFoundTimeSeries >= 0 )
+    {
+        attrsTimeSeries.erase( attrsTimeSeries.begin() + posFoundTimeSeries );
+        initTimeSeries( attrsTimeSeries );
+    }
+    
+    // display results
+    displAttributes();
+    displAttrDomain( attr->getIndex() );
+    attr = NULL;
+
+    // delete attribute
+    editor->clearLinkAttrDOF( idx );
+    graph->deleteAttribute( idx );
+    
     // display attributes
     displAttributes();
     clearAttrDomain();
@@ -767,7 +934,7 @@ void DiaGraph::handleAttributeCluster( const vector< int > &indcs )
 {
     bool zeroCard = false;
 
-    for ( size_t i = 0; i < indcs.size() && zeroCard == false; ++i )
+    for ( int i = 0; i < indcs.size() && zeroCard == false; ++i )
     {
         if ( graph->getAttribute( indcs[i] )->getSizeCurValues() == 0 )    
             zeroCard = true;
@@ -778,19 +945,18 @@ void DiaGraph::handleAttributeCluster( const vector< int > &indcs )
         if ( zeroCard == true )
         {
             wxLogError( 
-                wxString( wxT("Error clustering.\nAt least one attribute has no domain defined." )) );
+                wxString( wxT("Error clustering.\nAt least one attribute has no domain defined.") ) );
         }
         else
         {
-            // -*- //
             critSect = true;
 
             graph->clustNodesOnAttr( indcs );
             arcDgrm->setAttrsTree( indcs );
             
             arcDgrm->setDataChanged( true );
-
-            // -*- //
+            handleMarkFrameClust( timeSeries );    
+        
             critSect = false;
 
             if ( canvasArcD != NULL && mode == MODE_ANALYSIS )
@@ -802,17 +968,195 @@ void DiaGraph::handleAttributeCluster( const vector< int > &indcs )
         vector< int > coord;
         coord.push_back( 0 );
         
-        // -*- //
         critSect = true;
 
         graph->clearSubClusters( coord );
+        vector< int > empty;
+        arcDgrm->setAttrsTree( empty );
         arcDgrm->setDataChanged( true );
         
-        // -*- //
         critSect = false;
 
         if ( canvasArcD != NULL && mode == MODE_ANALYSIS )
             canvasArcD->Refresh();
+    }
+}
+
+
+// -----------------------------------------------------
+void DiaGraph::handleAttrPartition( const int &attrIdx )
+// -----------------------------------------------------
+{
+    if ( 0 <= attrIdx && attrIdx < graph->getSizeAttributes() )
+    {
+        Attribute* attr  = graph->getAttribute( attrIdx );
+        if ( attr != NULL )
+        {
+            tempAttr = attr;
+            frame->displAttrInfoPart( 
+                tempAttr->getName(),
+                0,
+                graph->getSizeNodes(),
+                attr->getSizeCurValues() );
+
+            attr = NULL;
+        }
+    }
+}
+
+
+// --------------------------------
+void DiaGraph::handleAttrPartition(
+    const int &numParts,
+    const int &method )
+// --------------------------------
+{
+    if ( tempAttr != NULL )
+    {
+        if ( tempAttr->getAttrType() == Attribute::ATTR_TYPE_CONTI )
+        {
+            // get attributes currently clustered on
+            int posFound;
+            vector< int > attrsClust;
+            
+            posFound = -1;
+            arcDgrm->getAttrsTree( attrsClust );
+            for ( int i = 0; i < attrsClust.size(); ++i )
+            {
+                if ( attrsClust[i] == tempAttr->getIndex() )
+                {
+                    posFound = i;
+                    break;
+                }
+            }
+
+            // get attributes currently in time series
+            vector< int > attrsTimeSeries;
+            timeSeries->getAttrIdcs( attrsTimeSeries );
+            
+            // perform partitioning
+            if ( method == Attribute::PART_METH_EQUAL_INTERVALS )
+                tempAttr->classifyEqualIntervals( numParts );
+            else if ( method == Attribute::PART_METH_QUANTILES )
+                tempAttr->classifyQuantiles( numParts );
+            else if ( method == Attribute::PART_METH_MEAN_STANDARD_DEVIATION )
+                tempAttr->classifyMeanStandardDeviation( numParts );
+            
+            // recluster if necessary
+            if ( posFound >= 0 )
+            {
+                if ( tempAttr->getSizeCurValues() == 0 )
+                    attrsClust.erase( attrsClust.begin() + posFound );
+                handleAttributeCluster( attrsClust );
+            }
+
+            // re-initiate time series if necessary
+            if ( attrsTimeSeries.size() > 0 )
+                initTimeSeries( attrsTimeSeries );
+            
+            // display results
+            displAttributes( tempAttr->getIndex() );
+            displAttrDomain( tempAttr->getIndex() );
+        }
+        tempAttr = NULL;
+    }
+}
+
+
+// -------------------------------------------------------
+void DiaGraph::handleAttrDepartition( const int &attrIdx )
+// -------------------------------------------------------
+{
+    if ( 0 <= attrIdx && attrIdx < graph->getSizeAttributes() )
+    {
+        Attribute* attr = graph->getAttribute( attrIdx );
+        if ( attr->getAttrType() == Attribute::ATTR_TYPE_CONTI )
+        {
+            // get attributes currently clustered on
+            int posFound;
+            vector< int > attrsClust;
+            
+            posFound = -1;
+            arcDgrm->getAttrsTree( attrsClust );
+            for ( int i = 0; i < attrsClust.size(); ++i )
+            {
+                if ( attrsClust[i] == attr->getIndex() )
+                {
+                    posFound = i;
+                    break;
+                }
+            }
+
+            // get attributes currently in time series
+            vector< int > attrsTimeSeries;
+            timeSeries->getAttrIdcs( attrsTimeSeries );
+            
+            // perform departitioning
+            attr->removeClassification();
+
+            // recluster if necessary
+            if ( posFound >= 0 )
+            {
+                attrsClust.erase( attrsClust.begin() + posFound );
+                handleAttributeCluster( attrsClust );
+            }
+            
+            // re-initiate time series if necessary
+            if ( attrsTimeSeries.size() > 0 )
+                initTimeSeries( attrsTimeSeries );
+            
+            // display results
+            displAttributes();
+            displAttrDomain( attr->getIndex() );
+        }
+        attr = NULL;
+    }
+}
+
+// -------------------------------------------
+void DiaGraph::handleAttrPartitionCloseFrame()
+// -------------------------------------------
+{
+    tempAttr = NULL;
+}
+
+
+// --------------------------
+void DiaGraph::getAttrValues(
+    const int &attrIdx,
+    vector< double > &vals )
+// --------------------------
+{
+    if ( 0 <= attrIdx && attrIdx < graph->getSizeAttributes() )
+    {
+        vals.clear();
+        Node* node;
+        for ( int i = 0; i < graph->getSizeNodes(); ++i )
+        {
+            node = graph->getNode( i );
+            vals.push_back( node->getTupleVal( attrIdx ) );
+        }
+        node = NULL;
+    }
+}
+
+
+// --------------------------
+void DiaGraph::getAttrValues(
+    const int &attrIdx,
+    set< double > &vals )
+// --------------------------
+{
+    if ( 0 <= attrIdx && attrIdx < graph->getSizeAttributes() )
+    {
+        vals.clear();
+        Node* node;
+        for ( int i = 0; i < graph->getSizeNodes(); ++i )
+        {
+            node = graph->getNode( i );
+            vals.insert( node->getTupleVal( attrIdx ) );
+        }
+        node = NULL;
     }
 }
 
@@ -828,12 +1172,28 @@ void DiaGraph::handleMoveDomVal(
     {
         Attribute* attr = graph->getAttribute( idxAttr );
         
-        if ( 0 <= idxFr && idxFr < attr->getSizeCurValues() &&
-             0 <= idxTo && idxTo < attr->getSizeCurValues() )
+        if ( attr->getAttrType() == Attribute::ATTR_TYPE_DISCR )
         {
-            attr->moveValue( idxFr, idxTo );
-            displAttrDomain( idxAttr );
-            frame->selectDomainVal( idxTo );
+            if ( 0 <= idxFr && idxFr < attr->getSizeCurValues() &&
+                 0 <= idxTo && idxTo < attr->getSizeCurValues() )
+            {
+                attr->moveValue( idxFr, idxTo );
+                displAttrDomain( idxAttr );
+                frame->selectDomainVal( idxTo );
+            }
+        }
+        else if ( attr->getAttrType() == Attribute::ATTR_TYPE_CONTI )
+        {
+            if ( attr->getSizeCurValues() > 0 )
+            {
+                if ( 0 <= idxFr && idxFr < attr->getSizeCurValues() &&
+                     0 <= idxTo && idxTo < attr->getSizeCurValues() )
+                {
+                    attr->moveValue( idxFr, idxTo );
+                    displAttrDomain( idxAttr );
+                    frame->selectDomainVal( idxTo );
+                }
+            }
         }
 
         attr = NULL;
@@ -891,7 +1251,7 @@ void DiaGraph::getAttributeNames(
 // ------------------------------
 {
     names.clear();
-    for ( size_t i = 0; i < indcs.size(); ++i )
+    for ( int i = 0; i < indcs.size(); ++i )
     {
         if ( 0 <= indcs[i] && indcs[i] < graph->getSizeAttributes() )
             names.push_back( 
@@ -899,6 +1259,28 @@ void DiaGraph::getAttributeNames(
 					graph->getAttribute( indcs[i] )->getName().c_str(), 
 					wxConvUTF8 ) );
     }
+}
+
+
+// ---------------------------------------------
+int DiaGraph::getAttributeType( const int &idx )
+// ---------------------------------------------
+{
+    int result = -1;
+    if ( 0 <= idx && idx < graph->getSizeAttributes() )
+        result = graph->getAttribute( idx )->getAttrType();
+    return result;
+}
+
+
+// -------------------------------------------------
+int DiaGraph::getAttrSizeCurDomain( const int &idx )
+// -------------------------------------------------
+{
+    int result = 0;
+    if ( 0 <= idx && idx < graph->getSizeAttributes() )
+        result = graph->getAttribute( idx )->getSizeCurValues();
+    return result;
 }
 
 
@@ -949,6 +1331,7 @@ void DiaGraph::handleAttributePlot(
         corrlPlot->setDiagram( editor->getDiagram() );
     }
     
+    int numValues1        = 0 ;
     vector< int > indices;
     vector< string > vals1;
     vector< vector< int > > corrlMap;
@@ -973,7 +1356,7 @@ void DiaGraph::handleAttributePlot(
 void DiaGraph::handleAttributePlot( const vector< int > &indcs )
 // -------------------------------------------------------------
 {
-    if ( canvasCombn == NULL )
+   if ( canvasCombn == NULL )
     {
         canvasCombn = frame->getCanvasCombn();
         combnPlot = new CombnPlot(
@@ -1229,6 +1612,9 @@ void DiaGraph::handleSetModeAnalysis()
 
     if ( arcDgrm != NULL )
         arcDgrm->updateDiagramData();
+
+    if ( canvasExnr != NULL )
+        canvasExnr->Refresh();
 }
 
 
@@ -1237,6 +1623,9 @@ void DiaGraph::handleSetModeEdit()
 // -------------------------------
 {
     mode = MODE_EDIT;
+    
+    if ( canvasExnr != NULL )
+        canvasExnr->Refresh();
 }
 
 
@@ -1245,6 +1634,35 @@ int DiaGraph::getMode()
 // --------------------
 {
     return mode;
+}
+
+
+// ------------------------------
+void DiaGraph::handleSetViewSim()
+// ------------------------------
+{
+    view = VIEW_SIM;
+    if ( arcDgrm != NULL )
+        arcDgrm->unmarkLeaves();
+    canvasArcD->Refresh();
+}
+
+
+// --------------------------------
+void DiaGraph::handleSetViewTrace()
+// --------------------------------
+{
+    view = VIEW_TRACE;
+    handleMarkFrameClust( timeSeries );
+    canvasArcD->Refresh();
+}
+
+
+// --------------------
+int DiaGraph::getView()
+// --------------------
+{
+    return view;
 }
 
 
@@ -1492,7 +1910,7 @@ void DiaGraph::handleEditDOF(
     // init attrIndcs
     vector< string > attributes;
     {
-    for ( size_t i = 0; i < attrIndcs.size(); ++i )
+    for ( int i = 0; i < attrIndcs.size(); ++i )
     {
         if ( attrIndcs[i] < 0 )
             attributes.push_back( "" );
@@ -1541,6 +1959,28 @@ void DiaGraph::handleDOFSel( const int &DOFIdx )
 {
     if ( mode == MODE_EDIT && editor != NULL )
         editor->handleDOFSel( DOFIdx );
+}
+
+
+// -----------------------------------
+void DiaGraph::handleSetDOFTextStatus( 
+    const int &DOFIdx,
+    const int &status )
+// -----------------------------------
+{
+    if ( mode == MODE_EDIT && editor != NULL )
+        editor->handleDOFSetTextStatus( DOFIdx, status );
+}
+
+
+// ------------------------------------------------------
+int DiaGraph::handleGetDOFTextStatus( const int &DOFIdx )
+// ------------------------------------------------------
+{
+    int result = -1;
+    if ( mode == MODE_EDIT && editor != NULL )
+        result = editor->handleDOFGetTextStatus( DOFIdx );
+    return result;
 }
 
 
@@ -1699,7 +2139,18 @@ void DiaGraph::handleLinkDOFAttr(
 // ------------------------------
 {
     if ( mode == MODE_EDIT && editor != NULL )
-        editor->setLinkDOFAttr( DOFIdx, attrIdx );
+    {
+        
+        bool zeroCard = false;
+
+        /*
+        if ( graph->getAttribute( attrIdx )->getSizeCurValues() == 0 )
+            wxLogError( 
+                wxString( "Error linking DOF.\nAt least one attribute has an undefined or real-valued domain." ) );
+        else
+        */
+            editor->setLinkDOFAttr( DOFIdx, attrIdx );
+    }
 }
 
 
@@ -1743,7 +2194,7 @@ void DiaGraph::handleDOFDeselect()
 }
 
 
-// -- simulator -----------------------------------------------------
+// -- simulator, time series & examiner -----------------------------
 
 /*
 // ------------------------------------
@@ -1784,6 +2235,55 @@ void DiaGraph::initSimulator(
 }
 
 
+// ----------------------------------------------------------
+void DiaGraph::initTimeSeries( const vector< int > attrIdcs )
+// ----------------------------------------------------------
+{
+    if ( timeSeries != NULL )
+        timeSeries->initAttributes( attrIdcs );
+
+    if ( view == VIEW_TRACE && ( mode == MODE_ANALYSIS && canvasTrace != NULL ) )
+            canvasTrace->Refresh();
+}
+
+
+// ---------------------------
+void DiaGraph::markTimeSeries(
+    Colleague* sender,
+    Cluster* currFrame )
+// ---------------------------
+{
+    if ( timeSeries != NULL )
+    {
+        timeSeries->markItems( currFrame );
+        handleMarkFrameClust( timeSeries );
+
+        if ( mode == MODE_ANALYSIS && ( view == VIEW_TRACE && canvasTrace != NULL ) )
+        {
+            canvasArcD->Refresh();
+            canvasTrace->Refresh();
+        }
+    }
+}
+
+
+// ----------------------------------
+void DiaGraph::markTimeSeries( 
+    Colleague* sender,
+    const vector< Cluster* > frames )
+// ----------------------------------
+{
+    if ( timeSeries != NULL )
+    {
+        timeSeries->markItems( frames );
+        handleMarkFrameClust( timeSeries );
+
+        if ( mode == MODE_ANALYSIS && ( view == VIEW_TRACE && canvasTrace != NULL ) )
+            canvasTrace->Refresh();
+    }
+}
+
+
 // ------------------------------------
 void DiaGraph::addToExaminer(
     Cluster* currFrame,
@@ -1808,7 +2308,7 @@ void DiaGraph::addToExaminer(
 {
     if ( examiner != NULL )
     {
-        for ( size_t i = 0; i < frames.size(); ++i )
+        for ( int i = 0; i < frames.size(); ++i )
             examiner->addFrameHist( frames[i], attrs );
 
         if ( mode == MODE_ANALYSIS && canvasExnr != NULL )
@@ -1821,6 +2321,8 @@ void DiaGraph::addToExaminer(
 void DiaGraph::handleSendDgrm(
     Colleague* sender,
     const bool &sendSglToSiml,
+    const bool &sendSglToTrace,
+    const bool &sendSetToTrace,
     const bool &sendSglToExnr,
     const bool &sendSetToExnr )
 // ----------------------------
@@ -1829,8 +2331,10 @@ void DiaGraph::handleSendDgrm(
 
     frame->displDgrmMenu(
         sendSglToSiml,
+        sendSglToTrace,
+        sendSetToTrace,
         sendSglToExnr,
-        sendSetToExnr );    
+        sendSetToExnr );
 }
 
 
@@ -1847,6 +2351,28 @@ void DiaGraph::handleSendDgrmSglToSiml()
 }
 
 
+// --------------------------------------
+void DiaGraph::handleSendDgrmSglToTrace()
+// --------------------------------------
+{
+    if ( dgrmSender == arcDgrm )
+        arcDgrm->handleSendDgrmSglToTrace();
+    else if ( dgrmSender == examiner )
+        examiner->handleSendDgrmSglToTrace();
+}
+
+
+// --------------------------------------
+void DiaGraph::handleSendDgrmSetToTrace()
+// --------------------------------------
+{
+    if ( dgrmSender == arcDgrm )
+        arcDgrm->handleSendDgrmSetToTrace();
+    else if ( dgrmSender == examiner )
+        examiner->handleSendDgrmSetToTrace();
+}
+
+
 // -------------------------------------
 void DiaGraph::handleSendDgrmSglToExnr()
 // -------------------------------------
@@ -1855,6 +2381,8 @@ void DiaGraph::handleSendDgrmSglToExnr()
         arcDgrm->handleSendDgrmSglToExnr();
     else if ( dgrmSender == simulator )
         simulator->handleSendDgrmSglToExnr();
+    else if ( dgrmSender == timeSeries )
+        timeSeries->handleSendDgrmSglToExnr();
 }
 
 
@@ -1937,6 +2465,57 @@ void DiaGraph::handleClearExnrCur( Colleague* sender )
     }
 }
 
+/*
+// -----------------------------------------------------
+void DiaGraph::handleAnimFrameBundl( Colleague* sender )
+// -----------------------------------------------------
+{
+    if ( arcDgrm != NULL && canvasArcD != NULL )
+    {
+        arcDgrm->unmarkLeaves();
+        if ( sender == timeSeries )
+        {
+            int idx;
+            set< int > idcs;
+            ColorRGB col;
+            
+            timeSeries->getAnimIdxDgrm( idxLeaf, idxBndl, col );
+ 
+//            arcDgrm->unmarkLeaves();
+//            arcDgrm->unmarkBundles();
+//            arcDgrm->markBundle( idxBndl );
+//            canvasArcD->Refresh();
+        }
+    }
+}
+*/
+
+// -----------------------------------------------------
+void DiaGraph::handleAnimFrameClust( Colleague* sender )
+// -----------------------------------------------------
+{
+    if ( arcDgrm != NULL && canvasArcD != NULL )
+    {
+        arcDgrm->unmarkLeaves();
+        if ( sender == timeSeries )
+        {
+            int idx;
+            set< int > idcs;
+            ColorRGB col;
+            
+            timeSeries->getAnimIdxDgrm( idx, idcs, col );
+            
+            arcDgrm->unmarkBundles();
+            arcDgrm->unmarkLeaves();
+            for ( set< int >::iterator it = idcs.begin(); it != idcs.end(); ++it )
+                arcDgrm->markBundle( *it );
+            arcDgrm->markLeaf( idx, col );
+            
+            canvasArcD->Refresh();
+        }
+    }
+}
+
 
 // ------------------------------------------------------
 void DiaGraph::handleMarkFrameClust( Colleague* sender  )
@@ -1952,11 +2531,64 @@ void DiaGraph::handleMarkFrameClust( Colleague* sender  )
         
             arcDgrm->markLeaf( idx, col );
         }
+        else if ( sender == timeSeries )
+        {
+            ColorRGB col;
+            set< int > idcs;
+            int idx;
+
+            // clear bundles
+            arcDgrm->unmarkBundles();
+
+            // marked nodes
+            timeSeries->getIdcsClstMarked( idcs, col );
+            for ( set< int >::iterator it = idcs.begin(); it != idcs.end(); ++it )
+                arcDgrm->markLeaf( *it, col );
+
+            // mouse over
+            timeSeries->getIdxMseOver( idx, idcs, col );
+            if ( idx >= 0 )
+            {
+                arcDgrm->markLeaf( idx, col );
+                for ( set< int >::iterator it = idcs.begin(); it != idcs.end(); ++it )
+                    arcDgrm->markBundle( *it );
+            }
+            
+            // current diagram
+            timeSeries->getCurrIdxDgrm( idx, idcs, col );
+            if ( idx >= 0 )
+            {
+                arcDgrm->markLeaf( idx, col );
+                for ( set< int >::iterator it = idcs.begin(); it != idcs.end(); ++it )
+                    arcDgrm->markBundle( *it );
+            }
+
+            // examiner view
+            idx = examiner->getIdxClstSel();
+            if ( idx >= 0 )
+            {
+                col = examiner->getColorSel();
+                arcDgrm->markLeaf( idx, col );
+            }
+            
+        }
         else if ( sender == examiner )
         {
-            ColorRGB col = examiner->getColorSel();
-            int      idx = examiner->getIdxClstSel();
-        
+            ColorRGB col;
+            int      idx;
+
+            // trace view
+            if ( view == VIEW_TRACE )
+            {
+                set< int > idcs;
+                timeSeries->getIdcsClstMarked( idcs, col );
+                for ( set< int >::iterator it = idcs.begin(); it != idcs.end(); ++it )
+                    arcDgrm->markLeaf( *it, col );
+            }
+                    
+            // examiner view
+            col = examiner->getColorSel();
+            idx = examiner->getIdxClstSel();
             arcDgrm->markLeaf( idx, col );
         }
     }
@@ -1977,6 +2609,19 @@ void DiaGraph::handleUnmarkFrameClusts( Colleague* sender )
         
             arcDgrm->markLeaf( idx, col );
         }
+        else if ( sender == examiner )
+        {
+            // trace view
+            if ( view == VIEW_TRACE )
+            {
+                ColorRGB col;
+                set< int > idcs;
+                timeSeries->getIdcsClstMarked( idcs, col );
+                
+                for ( set< int >::iterator it = idcs.begin(); it != idcs.end(); ++it )
+                    arcDgrm->markLeaf( *it, col );
+            }
+        }
 
         if ( mode == MODE_ANALYSIS && canvasArcD != NULL )
             canvasArcD->Refresh();
@@ -1993,8 +2638,8 @@ void DiaGraph::handleShowFrame(
     if ( examiner != NULL )
     {
         examiner->setFrame( frame, attrs, col );
-        //if ( mode == MODE_ANALYSIS && canvasExnr != NULL )
-        //    canvasExnr->Refresh();
+        if ( mode == MODE_ANALYSIS && canvasExnr != NULL )
+            canvasExnr->Refresh();
     }
 }
 
@@ -2006,8 +2651,8 @@ void DiaGraph::handleUnshowFrame()
     if ( examiner != NULL )
     {
         examiner->clrFrame();
-        //if ( mode == MODE_ANALYSIS && canvasExnr != NULL )
-        //    canvasExnr->Refresh();
+        if ( mode == MODE_ANALYSIS && canvasExnr != NULL )
+            canvasExnr->Refresh();
     }    
 }
 
@@ -2031,6 +2676,7 @@ void DiaGraph::setSettingsGeneral(
     colTmp.a = 1.0;
     ArcDiagram::setColorClr( colTmp );
     Simulator::setColorClr( colTmp );
+    TimeSeries::setColorClr( colTmp );
     Examiner::setColorClr( colTmp );
 
     colTmp.r = colTxt.Red()/255.0;
@@ -2039,10 +2685,12 @@ void DiaGraph::setSettingsGeneral(
     colTmp.a = 1.0;
     ArcDiagram::setColorTxt( colTmp );
     Simulator::setColorTxt( colTmp );
+    TimeSeries::setColorTxt( colTmp );
     Examiner::setColorTxt( colTmp );
 
     ArcDiagram::setSizeTxt( szeTxt );
     Simulator::setSizeTxt( szeTxt );
+    TimeSeries::setSizeTxt( szeTxt );
     Examiner::setSizeTxt( szeTxt );
 
     ArcDiagram::setIntervAnim( (int)(1000.0/spdAnim) );
@@ -2110,7 +2758,18 @@ void DiaGraph::setSettingsSimulator( const int &blendType )
 {
     Simulator::setBlendType( blendType );
 }
-    
+ 
+
+// ------------------------------------------------------
+void DiaGraph::setSettingsTrace( const bool &useShading )
+// ------------------------------------------------------
+{
+    TimeSeries::setUseShading( useShading );
+
+    if ( canvasTrace != NULL && view == VIEW_TRACE )
+        canvasTrace->Refresh();
+}
+
 
 // ----------------------------------
 void DiaGraph::setSettingsArcDiagram( 
@@ -2194,6 +2853,14 @@ void DiaGraph::getSettingsSimulator( int &blendType )
 }
 
 
+// ------------------------------------------------
+void DiaGraph::getSettingsTrace( bool &useShading )
+// ------------------------------------------------
+{
+    useShading = TimeSeries::getUseShading();
+}
+
+
 // ----------------------------------
 void DiaGraph::getSettingsArcDiagram( 
     bool &showNodes,
@@ -2238,8 +2905,10 @@ void DiaGraph::handlePaintEvent( GLCanvas* c )
             // draw in render mode
             if ( c == canvasArcD && arcDgrm != NULL )
                 arcDgrm->visualize( false );
-            else if ( c == canvasSiml && simulator != NULL )
+            else if ( view == VIEW_SIM && ( c == canvasSiml && simulator != NULL ) )
                 simulator->visualize( false );
+            else if ( view == VIEW_TRACE && ( c == canvasTrace && timeSeries != NULL ) )
+                timeSeries->visualize( false );
             else if ( c == canvasExnr && examiner != NULL )
                 examiner->visualize( false );
             else if ( c == canvasDistr && distrPlot != NULL )
@@ -2270,8 +2939,10 @@ void DiaGraph::handleSizeEvent( GLCanvas* c )
         // draw in render mode
         if ( c == canvasArcD && arcDgrm != NULL )
             arcDgrm->handleSizeEvent();
-        else if ( c == canvasSiml && simulator != NULL )
+        else if ( view == VIEW_SIM && ( c == canvasSiml && simulator != NULL ) )
             simulator->handleSizeEvent();
+        else if ( view == VIEW_TRACE && ( c == canvasTrace && timeSeries != NULL ) )
+            timeSeries->handleSizeEvent();
         else if ( c == canvasExnr && examiner != NULL )
             examiner->handleSizeEvent();
         else if ( c == canvasDistr && distrPlot != NULL )
@@ -2340,9 +3011,15 @@ void DiaGraph::handleMouseLftDownEvent(
             arcDgrm->handleMouseLftDownEvent( x, y );
             canvasExnr->Refresh();
         }
-        else if ( c == canvasSiml && simulator != NULL )
+        else if ( view == VIEW_SIM && ( c == canvasSiml && simulator != NULL ) )
         {
             simulator->handleMouseLftDownEvent( x, y );
+            canvasArcD->Refresh();
+            canvasExnr->Refresh();
+        }
+        else if ( view == VIEW_TRACE && ( c == canvasTrace && timeSeries != NULL ) )
+        {
+            timeSeries->handleMouseLftDownEvent( x, y );
             canvasArcD->Refresh();
             canvasExnr->Refresh();
         }
@@ -2383,8 +3060,10 @@ void DiaGraph::handleMouseLftUpEvent(
     {
         if ( c == canvasArcD && arcDgrm != NULL )
             arcDgrm->handleMouseLftUpEvent( x, y );
-        else if ( c == canvasSiml && simulator != NULL )
+        else if ( view == VIEW_SIM && ( c == canvasSiml && simulator != NULL ) )
             simulator->handleMouseLftUpEvent( x, y );
+        else if ( view == VIEW_TRACE && ( c == canvasTrace && timeSeries != NULL ) )
+            timeSeries->handleMouseLftUpEvent( x, y );
         else if ( c == canvasExnr && examiner != NULL )
             examiner->handleMouseLftUpEvent( x, y );
     }
@@ -2410,8 +3089,10 @@ void DiaGraph::handleMouseLftDClickEvent(
             arcDgrm->handleMouseLftDClickEvent( x, y );
             canvasExnr->Refresh();
         }
-        else if ( c == canvasSiml && simulator != NULL )
+        else if ( view == VIEW_SIM && ( c == canvasSiml && simulator != NULL ) )
             simulator->handleMouseLftDClickEvent( x, y );
+        else if ( view == VIEW_TRACE && ( c == canvasTrace && timeSeries != NULL ) )
+            timeSeries->handleMouseLftDClickEvent( x, y );
         else if ( c == canvasExnr && examiner != NULL )
             examiner->handleMouseLftDClickEvent( x, y );
     }
@@ -2438,8 +3119,10 @@ void DiaGraph::handleMouseRgtDownEvent(
     {
         if ( c == canvasArcD && arcDgrm != NULL )
             arcDgrm->handleMouseRgtDownEvent( x, y );
-        else if ( c == canvasSiml && simulator != NULL )
+        else if ( view == VIEW_SIM && ( c == canvasSiml && simulator != NULL  ) )
             simulator->handleMouseRgtDownEvent( x, y );
+        else if ( view == VIEW_TRACE && ( c == canvasTrace && timeSeries != NULL  ) )
+            timeSeries->handleMouseRgtDownEvent( x, y );
         else if ( c == canvasExnr && examiner != NULL )
             examiner->handleMouseRgtDownEvent( x, y );
     }
@@ -2466,8 +3149,10 @@ void DiaGraph::handleMouseRgtUpEvent(
     {
         if ( c == canvasArcD && arcDgrm != NULL )
             arcDgrm->handleMouseRgtUpEvent( x, y );
-        else if ( c == canvasSiml && simulator != NULL )
+        else if ( view == VIEW_SIM && ( c == canvasSiml && simulator != NULL ) )
             simulator->handleMouseRgtUpEvent( x, y );
+        else if ( view == VIEW_TRACE && ( c == canvasTrace && timeSeries != NULL ) )
+            timeSeries->handleMouseRgtUpEvent( x, y );
         else if ( c == canvasExnr && examiner != NULL )
             examiner->handleMouseRgtUpEvent( x, y );
     }
@@ -2512,9 +3197,15 @@ void DiaGraph::handleMouseMotionEvent(
             arcDgrm->handleMouseMotionEvent( x, y );
             canvasExnr->Refresh();
         }
-        else if ( c == canvasSiml && simulator != NULL )
+        else if ( view == VIEW_SIM && ( c == canvasSiml && simulator != NULL ) )
         {
             simulator->handleMouseMotionEvent( x, y );
+            canvasArcD->Refresh();
+            canvasExnr->Refresh();
+        }
+        else if ( view == VIEW_TRACE && ( c == canvasTrace && timeSeries != NULL ) )
+        {
+            timeSeries->handleMouseMotionEvent( x, y );
             canvasArcD->Refresh();
             canvasExnr->Refresh();
         }
@@ -2541,6 +3232,11 @@ void DiaGraph::handleMouseWheelIncEvent(
         if ( c == canvasEdit && editor != NULL )
             editor->handleMouseWheelIncEvent( x, y );
     }
+    else if ( mode == MODE_ANALYSIS )
+    {
+        if ( view == VIEW_TRACE && ( c == canvasTrace && timeSeries != NULL ) )
+            timeSeries->handleMouseWheelIncEvent( x, y );
+    }
 }
 
 
@@ -2555,6 +3251,11 @@ void DiaGraph::handleMouseWheelDecEvent(
     {
         if ( c == canvasEdit && editor != NULL )
             editor->handleMouseWheelDecEvent( x, y );
+    }
+    else if ( mode == MODE_ANALYSIS )
+    {
+        if ( view == VIEW_TRACE && ( c == canvasTrace && timeSeries != NULL ) )
+            timeSeries->handleMouseWheelDecEvent( x, y );
     }
 }
   
@@ -2579,8 +3280,10 @@ void DiaGraph::handleMouseLeaveEvent( GLCanvas* c )
     {
         if ( c == canvasArcD && arcDgrm != NULL )
             arcDgrm->handleMouseLeaveEvent();
-        else if ( c == canvasSiml && simulator != NULL )
+        else if ( view == VIEW_SIM && ( c == canvasSiml && simulator != NULL ) )
             simulator->handleMouseLeaveEvent();
+        else if ( view == VIEW_TRACE && ( c == canvasTrace && timeSeries != NULL ) )
+            timeSeries->handleMouseLeaveEvent();
         else if ( c == canvasExnr && examiner != NULL )
             examiner->handleMouseLeaveEvent();
     }
@@ -2605,9 +3308,15 @@ void DiaGraph::handleKeyDownEvent(
     }
     else if ( mode == MODE_ANALYSIS )
     {
-        if ( c == canvasSiml && simulator != NULL )
+        if ( view == VIEW_SIM && ( c == canvasSiml && simulator != NULL ) )
         {
             simulator->handleKeyDownEvent( keyCode );
+            canvasArcD->Refresh();
+            canvasExnr->Refresh();
+        }
+        else if ( view == VIEW_TRACE && ( c == canvasTrace && timeSeries != NULL ) )
+        {
+            timeSeries->handleKeyDownEvent( keyCode );
             canvasArcD->Refresh();
             canvasExnr->Refresh();
         }
@@ -2630,6 +3339,11 @@ void DiaGraph::handleKeyUpEvent(
     {
         if ( c == canvasEdit && editor != NULL )
             editor->handleKeyUpEvent( keyCode );
+    }
+    else if ( mode == MODE_ANALYSIS )
+    {
+        if ( c == canvasTrace && timeSeries != NULL )
+            timeSeries->handleKeyUpEvent( keyCode );
     }
 }
 
@@ -2664,11 +3378,12 @@ void DiaGraph::initColleagues()
     graph = NULL;
 
     // init frame
-    frame = new Frame(this,wxT("DiaGraphica") );
-    frame->Show(true);
-
+    frame = new Frame(
+        this,
+        wxT("DiaGraphica") );
     // show frame
-    SetTopWindow( frame );
+    frame->Show( TRUE );
+    this->SetTopWindow( frame );
 
     *frame << "Welcome to DiaGraphica.\n";
     
@@ -2681,6 +3396,9 @@ void DiaGraph::initColleagues()
 
     canvasSiml  = frame->getCanvasSiml();
     simulator   = NULL;
+
+    canvasTrace = frame->getCanvasTrace();
+    timeSeries  = NULL;
 
     canvasExnr  = frame->getCanvasExnr();
     examiner    = NULL;
@@ -2701,6 +3419,8 @@ void DiaGraph::initColleagues()
     opaChooser       = NULL;
 
     dgrmSender = NULL;
+
+    tempAttr = NULL;
 }
 
 
@@ -2724,6 +3444,7 @@ void DiaGraph::clearColleagues()
 
     // association
     canvasArcD = NULL;
+    // composition
     if ( arcDgrm != NULL )
     {
         delete arcDgrm;
@@ -2732,14 +3453,25 @@ void DiaGraph::clearColleagues()
 
     // association
     canvasSiml = NULL;
+    // composition
     if ( simulator != NULL )
     {
         delete simulator;
         simulator = NULL;
     }
 
+    // association
+    canvasTrace = NULL;
+    // composition
+    if ( timeSeries != NULL )
+    {
+        delete timeSeries;
+        timeSeries = NULL;
+    }
+
     // associatioin
     canvasExnr = NULL;
+    // composition
     if ( examiner != NULL )
     {
         delete examiner;
@@ -2788,18 +3520,101 @@ void DiaGraph::clearColleagues()
 void DiaGraph::displAttributes()
 // -----------------------------
 {
+    Attribute*       attr;
     vector< int >    indcs;
     vector< string > names;
     vector< string > types;
     vector< int >    cards;
+    vector< string > range;
     for ( int i = 0; i < graph->getSizeAttributes(); ++i )
     {
-        indcs.push_back( graph->getAttribute(i)->getIndex() );
-        names.push_back( graph->getAttribute(i)->getName() );
-        types.push_back( graph->getAttribute(i)->getType() );
-        cards.push_back( graph->getAttribute(i)->getSizeCurValues() );
+        attr = graph->getAttribute( i );
+        
+        indcs.push_back( attr->getIndex() );
+        names.push_back( attr->getName() );
+        types.push_back( attr->getType() );
+        cards.push_back( attr->getSizeCurValues() );
+        /* -*-
+        if ( attr->getSizeCurValues() != 0 )
+            range.push_back( "" );
+        else
+        {
+            string rge = "[";
+            rge += Utils::dblToStr( attr->getLowerBound() );
+            rge += ", ";
+            rge += Utils::dblToStr( attr->getUpperBound() );
+            rge += "]";
+
+            range.push_back( rge );
+        }
+        */
+        if ( attr->getAttrType() == Attribute::ATTR_TYPE_DISCR )
+            range.push_back( "" );
+        else
+        {
+            string rge = "[";
+            rge += Utils::dblToStr( attr->getLowerBound() );
+            rge += ", ";
+            rge += Utils::dblToStr( attr->getUpperBound() );
+            rge += "]";
+
+            range.push_back( rge );
+        }
     }
-    frame->displAttrInfo( indcs, names, types, cards );
+    frame->displAttrInfo( indcs, names, types, cards, range );
+
+    attr = NULL;
+}
+
+
+// ----------------------------------------------------
+void DiaGraph::displAttributes( const int &selAttrIdx )
+// ----------------------------------------------------
+{
+    Attribute*       attr;
+    vector< int >    indcs;
+    vector< string > names;
+    vector< string > types;
+    vector< int >    cards;
+    vector< string > range;
+    for ( int i = 0; i < graph->getSizeAttributes(); ++i )
+    {
+        attr = graph->getAttribute( i );
+        
+        indcs.push_back( attr->getIndex() );
+        names.push_back( attr->getName() );
+        types.push_back( attr->getType() );
+        cards.push_back( attr->getSizeCurValues() );
+        /* -*-
+        if ( attr->getSizeCurValues() != 0 )
+            range.push_back( "" );
+        else
+        {
+            string rge = "[";
+            rge += Utils::dblToStr( attr->getLowerBound() );
+            rge += ", ";
+            rge += Utils::dblToStr( attr->getUpperBound() );
+            rge += "]";
+
+            range.push_back( rge );
+        }
+        */
+        if ( attr->getAttrType() == Attribute::ATTR_TYPE_DISCR )
+            range.push_back( "" );
+        else
+        {
+            string rge = "[";
+            rge += Utils::dblToStr( attr->getLowerBound() );
+            rge += ", ";
+            rge += Utils::dblToStr( attr->getUpperBound() );
+            rge += "]";
+
+            range.push_back( rge );
+        }
+    }
+    frame->displAttrInfo( selAttrIdx, indcs, names, types, cards, range );
+
+    attr = NULL;
 }
 
 
@@ -2852,40 +3667,5 @@ void DiaGraph::clearAttrDomain()
 // -----------------------------
 {}
 
-#ifndef ENABLE_SQUADT_CONNECTIVITY
-// implement wxApp
-IMPLEMENT_APP( DiaGraph )
-#else
-IMPLEMENT_APP_NO_MAIN( DiaGraph )
 
-# ifdef __WINDOWS__
-extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
-                                  HINSTANCE hPrevInstance,                
-                                  wxCmdLineArgType lpCmdLine,             
-                                  int nCmdShow) {                                                                     
-
-  squadt_utility::entry_wrapper starter(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
-
-  interactor.reset(new squadt_interactor(starter));
-
-  if (!interactor->try_interaction(lpCmdLine)) {
-    return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
-  }
-
-  return (0);
-}
-# else
-int main(int argc, char **argv) {
-  squadt_utility::entry_wrapper starter(argc, argv);
-
-  interactor.reset(new squadt_interactor(starter));
-
-  if(!interactor->try_interaction(argc, argv)) {
-    return wxEntry(argc, argv);
-  }
-
-  return 0;
-}
-# endif
-#endif
 // -- end -----------------------------------------------------------

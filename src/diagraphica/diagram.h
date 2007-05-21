@@ -1,5 +1,5 @@
 // --- diagram.h ----------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 #ifndef DIAGRAM_H
@@ -50,13 +50,13 @@ public:
         const bool &inSelectMode,
         GLCanvas* canvas,
         const vector< Attribute* > attrs,
-        const vector< int > attrValIdcs );
+        const vector< double > attrValIdcs );
     void visualize(
         const bool &inSelectMode,
         GLCanvas* canvas,
         const double &opacity,
         const vector< Attribute* > attrs,
-        const vector< int > attrValIdcs );
+        const vector< double > attrValIdcs );
 
 protected:
     // -- private utility functions ---------------------------------

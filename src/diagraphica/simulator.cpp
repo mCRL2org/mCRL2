@@ -1,5 +1,5 @@
 // --- simulator.cpp ------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -9,7 +9,8 @@
 // -- static variables ----------------------------------------------
 
 
-ColorRGB Simulator::colClr = { 1.0, 1.0, 0.93, 1.0 };
+//ColorRGB Simulator::colClr = { 1.0, 1.0, 0.93, 1.0 };
+ColorRGB Simulator::colClr = { 1.0, 1.0, 1.0, 1.0 };
 ColorRGB Simulator::colTxt = { 0.0, 0.0, 0.0, 1.0 };
 int Simulator::szeTxt = 12;
 ColorRGB Simulator::colBdl = { 0.0, 0.0, 0.0, 0.3 };
@@ -62,7 +63,6 @@ Simulator::~Simulator()
     clearFrames();    
     clearBundles();
 
-    // -*- //
     delete timerAnim;
     timerAnim = NULL;
 };
@@ -348,7 +348,9 @@ void Simulator::visualize( const bool &inSelectMode )
             GLuint selectBuf[512];
             startSelectMode(
                 hits,
-                selectBuf );
+                selectBuf,
+                2.0,
+                2.0 );
         
             glPushName( ID_CANVAS );
             VisUtils::fillRect( -0.5*wth, 0.5*wth, 0.5*hgt, -0.5*hgt );
@@ -519,13 +521,13 @@ void Simulator::handleKeyDownEvent( const int &keyCode )
     {
         Visualizer::handleKeyDownEvent( keyCode );
     
-        if ( keyCodeDown == WXK_UP  || keyCodeDown == WXK_NUMPAD8 )
+        if ( keyCodeDown == WXK_UP  || keyCodeDown == WXK_NUMPAD_UP )
             handleKeyUp();
-        else if ( keyCodeDown == WXK_RIGHT || keyCodeDown == WXK_NUMPAD6 )
+        else if ( keyCodeDown == WXK_RIGHT || keyCodeDown == WXK_NUMPAD_RIGHT )
             handleKeyRgt();
-        else if ( keyCodeDown == WXK_DOWN || keyCodeDown == WXK_NUMPAD2 )
+        else if ( keyCodeDown == WXK_DOWN || keyCodeDown == WXK_NUMPAD_DOWN )
             handleKeyDwn();
-        else if ( keyCodeDown == WXK_LEFT || keyCodeDown == WXK_NUMPAD4 )
+        else if ( keyCodeDown == WXK_LEFT || keyCodeDown == WXK_NUMPAD_LEFT )
             handleKeyLft();
         else if ( keyCodeDown == WXK_ESCAPE )
         {
@@ -645,7 +647,6 @@ void Simulator::initBundles()
     set< Node* >           currNodes;
     map< string, Bundle* > bdls;
     Bundle*                bdl;
-    // -*- //
     map< string, Bundle* > lbls;
     Bundle *               bdlLbls;
 
@@ -656,7 +657,6 @@ void Simulator::initBundles()
     }
     
     // get all edges from previous frames to current frame
-    // -*- //
     lbls.clear();
     {
     for ( int i = 0; i < framesPrev.size(); ++i )
@@ -675,7 +675,6 @@ void Simulator::initBundles()
                 {
                     map< string, Bundle* >::iterator pos;
 
-                    // -*- //
                     pos = lbls.find( edge->getLabel() );
                     if ( pos == lbls.end() )
                     {
@@ -685,7 +684,6 @@ void Simulator::initBundles()
                     }
                     else
                         bdlLbls = pos->second;
-                    // -*- //
                     
                     // bundles
                     pos = bdls.find( edge->getLabel() );
@@ -702,10 +700,8 @@ void Simulator::initBundles()
                         bdl->setInCluster( clst );
                         bdl->setOutCluster( frameCurr );
 
-                        // -*- //
                         bdl->setParent( bdlLbls );
                         bdlLbls->addChild( bdl );
-                        // -*- //
                     }
                     else
                         bdl = pos->second;
@@ -715,7 +711,7 @@ void Simulator::initBundles()
         }
     }
     }
-    // -*- //
+    
     map< string, Bundle* >::iterator it;
     for ( it = lbls.begin(); it != lbls.end(); ++it )
     {
@@ -723,8 +719,7 @@ void Simulator::initBundles()
         bdlLbls->setIndex( bundlesPrevByLbl.size() );
         bundlesPrevByLbl.push_back( bdlLbls );
     }
-    // -*- //
-
+    
     // get all edges from current frame to next frames
     lbls.clear();
     {
@@ -743,7 +738,6 @@ void Simulator::initBundles()
                 {
                     map< string, Bundle* >::iterator pos;
                     
-                    // -*- //
                     pos = lbls.find( edge->getLabel() );
                     if ( pos == lbls.end() )
                     {
@@ -753,7 +747,6 @@ void Simulator::initBundles()
                     }
                     else
                         bdlLbls = pos->second;
-                    // -*- //
                     
                     pos = bdls.find( edge->getLabel() );
                     if ( pos == bdls.end() )
@@ -769,10 +762,8 @@ void Simulator::initBundles()
                         bdl->setInCluster( frameCurr );
                         bdl->setOutCluster( clst );
 
-                        // -*- //
                         bdl->setParent( bdlLbls );
                         bdlLbls->addChild( bdl );
-                        // -*- //
                     }
                     else
                         bdl = pos->second;
@@ -782,16 +773,14 @@ void Simulator::initBundles()
         }
     }
     }
-    // -*- //
+    
     for ( it = lbls.begin(); it != lbls.end(); ++it )
     {
         bdlLbls = it->second;
         bdlLbls->setIndex( bundlesNextByLbl.size() );
         bundlesNextByLbl.push_back( bdlLbls );
     }
-    // -*- //
-
-    // -*- //
+    
     lbls.clear();
     {
     for ( int i = 0; i < bundlesPrevByLbl.size(); ++i )
@@ -845,8 +834,7 @@ void Simulator::initBundles()
         bdlLbls->setIndex( bundlesByLbl.size() );
         bundlesByLbl.push_back( bdlLbls );
     }
-    // -*- //
-
+    
     // clear memory
     clst = NULL;
     edge = NULL;
@@ -854,7 +842,6 @@ void Simulator::initBundles()
     bdls.clear();
     bdl = NULL;
 
-    // -*- //
     lbls.clear();
     bdlLbls = NULL;
 }
@@ -1517,11 +1504,7 @@ void Simulator::handleHits( const vector< int > &ids )
                 if ( ids[3] == ID_DIAGRAM_MORE )
                 {
                     showMenu = true;
-                    mediator->handleSendDgrm(
-                        this,
-                        false,
-                        true,
-                        false );
+                    mediator->handleSendDgrm( this, false, false, false, true, false );
                     
                     // no mouseup event is generated reset manually
                     mouseButton = MSE_BUTTON_UP;
@@ -1534,11 +1517,7 @@ void Simulator::handleHits( const vector< int > &ids )
             else if ( mouseSide == MSE_SIDE_RGT && mouseButton == MSE_BUTTON_DOWN )
             {
                 showMenu = true;
-                mediator->handleSendDgrm(
-                    this,
-                    false,
-                    true,
-                    false );
+                mediator->handleSendDgrm( this, false, false, false, true, false );
                 
                 // no mouseup event is generated reset manually
                 mouseButton = MSE_BUTTON_UP;
@@ -1561,11 +1540,7 @@ void Simulator::handleHits( const vector< int > &ids )
                 if ( ids[3] == ID_DIAGRAM_MORE )
                 {
                     showMenu = true;
-                    mediator->handleSendDgrm(
-                        this,
-                        false,
-                        true,
-                        false );
+                    mediator->handleSendDgrm( this, false, false, false, true, false );
                     
                     // no mouseup event is generated reset manually
                     mouseButton = MSE_BUTTON_UP;
@@ -1578,11 +1553,7 @@ void Simulator::handleHits( const vector< int > &ids )
             else if ( mouseSide == MSE_SIDE_RGT && mouseButton == MSE_BUTTON_DOWN )
             {
                 showMenu = true;
-                mediator->handleSendDgrm(
-                    this,
-                    false,
-                    true,
-                    false );
+                mediator->handleSendDgrm( this, false, false, false, true, false );
                 
                 // no mouseup event is generated reset manually
                 mouseButton = MSE_BUTTON_UP;
@@ -1605,11 +1576,7 @@ void Simulator::handleHits( const vector< int > &ids )
                 if ( ids[3] == ID_DIAGRAM_MORE )
                 {
                     showMenu = true;
-                    mediator->handleSendDgrm(
-                        this,
-                        false,
-                        true,
-                        false );
+                    mediator->handleSendDgrm( this, false, false, false, true, false );
                     
                     // no mouseup event is generated reset manually
                     mouseButton = MSE_BUTTON_UP;
@@ -1622,12 +1589,8 @@ void Simulator::handleHits( const vector< int > &ids )
             else if ( mouseSide == MSE_SIDE_RGT && mouseButton == MSE_BUTTON_DOWN )
             {
                 showMenu = true;
-                mediator->handleSendDgrm(
-                    this,
-                    false,
-                    true,
-                    false );
-                
+                mediator->handleSendDgrm( this, false, false, false, true, false );
+
                 // no mouseup event is generated reset manually
                 mouseButton = MSE_BUTTON_UP;
                 mouseSide   = MSE_SIDE_RGT;
@@ -1816,18 +1779,35 @@ void Simulator::drawFrameCurr( const bool &inSelectMode )
     {
         double x, y;
         double pix = canvas->getPixelSize();
-        vector< int > valsFrame;
+        vector< double > valsFrame;
 
         if ( frameCurr != NULL )
         {
             x = posFrameCurr.x;
             y = posFrameCurr.y;
-                
+            /*                
             for ( int j = 0; j < attributes.size(); ++j )
                 valsFrame.push_back(
                     attributes[j]->mapToValue(
                         frameCurr->getNode(0)->getTupleVal(
                             attributes[j]->getIndex() ) )->getIndex() );
+            */
+            Attribute* attr;
+            Node* node;
+            for ( int j = 0; j < attributes.size(); ++j )
+            {
+                attr = attributes[j];
+                node = frameCurr->getNode(0);
+                if ( attr->getSizeCurValues() > 0 )
+                    valsFrame.push_back( attr->mapToValue( node->getTupleVal( attr->getIndex() ) )->getIndex() );
+                else
+                {
+                    double val = node->getTupleVal( attr->getIndex() );
+                    valsFrame.push_back( val );
+                }
+            }
+            attr = NULL;
+            node = NULL;
             
             glPushMatrix();
             glTranslatef( x, y, 0.0 );
@@ -1917,7 +1897,7 @@ void Simulator::drawFramesPrev( const bool &inSelectMode )
     {
         double x, y;
         double pix = canvas->getPixelSize();
-        vector< int > valsFrame;
+        vector< double > valsFrame;
 
         for ( int i = 0; i < posFramesPrev.size(); ++i )
         {
@@ -1937,11 +1917,29 @@ void Simulator::drawFramesPrev( const bool &inSelectMode )
 
                 if ( 2.0*scaleDgrmVert > 30.0*pix )
                 {
+                    /*
                     for ( int j = 0; j < attributes.size(); ++j )
                         valsFrame.push_back(
                             attributes[j]->mapToValue(
                                 framesPrev[i]->getNode(0)->getTupleVal(
                                     attributes[j]->getIndex() ) )->getIndex() );
+                    */
+                    Attribute* attr;
+                    Node* node;
+                    for ( int j = 0; j < attributes.size(); ++j )
+                    {
+                        attr = attributes[j];
+                        node = framesPrev[i]->getNode(0);
+                        if ( attr->getSizeCurValues() > 0 )
+                            valsFrame.push_back( attr->mapToValue( node->getTupleVal( attr->getIndex() ) )->getIndex() );
+                        else
+                        {
+                            double val = node->getTupleVal( attr->getIndex() );
+                            valsFrame.push_back( val );
+                        }
+                    }
+                    attr = NULL;
+                    node = NULL;
             
                     diagram->visualize(
                         inSelectMode,
@@ -1967,12 +1965,30 @@ void Simulator::drawFramesPrev( const bool &inSelectMode )
         {
             if ( 0 <= focusFrameIdx && focusFrameIdx < posFramesPrev.size() )
             {
+                /*
                 for ( int j = 0; j < attributes.size(); ++j )
                     valsFrame.push_back(
                         attributes[j]->mapToValue(
                             framesPrev[focusFrameIdx]->getNode(0)->getTupleVal(
                                 attributes[j]->getIndex() ) )->getIndex() );
-            
+                */
+                Attribute* attr;
+                Node* node;
+                for ( int j = 0; j < attributes.size(); ++j )
+                {
+                    attr = attributes[j];
+                    node = framesPrev[focusFrameIdx]->getNode(0);
+                    if ( attr->getSizeCurValues() > 0 )
+                        valsFrame.push_back( attr->mapToValue( node->getTupleVal( attr->getIndex() ) )->getIndex() );
+                    else
+                    {
+                        double val = node->getTupleVal( attr->getIndex() );
+                        valsFrame.push_back( val );
+                    }
+                }
+                attr = NULL;
+                node = NULL;
+
                 glPushMatrix();
                 glTranslatef( 
                     posFramesPrev[focusFrameIdx].x, 
@@ -2049,7 +2065,7 @@ void Simulator::drawFramesNext( const bool &inSelectMode )
     {        
         double x, y;
         double pix = canvas->getPixelSize();
-        vector< int > valsFrame;
+        vector< double > valsFrame;
 
         for ( int i = 0; i < posFramesNext.size(); ++i )
         {
@@ -2069,12 +2085,30 @@ void Simulator::drawFramesNext( const bool &inSelectMode )
 
                 if ( 2.0*scaleDgrmVert > 30.0*pix )
                 {
+                    /*
                     for ( int j = 0; j < attributes.size(); ++j )
                         valsFrame.push_back(
                             attributes[j]->mapToValue(
                                 framesNext[i]->getNode(0)->getTupleVal(
                                     attributes[j]->getIndex() ) )->getIndex() );
-            
+                    */
+                    Attribute* attr;
+                    Node* node;
+                    for ( int j = 0; j < attributes.size(); ++j )
+                    {
+                        attr = attributes[j];
+                        node = framesNext[i]->getNode(0);
+                        if ( attr->getSizeCurValues() > 0 )
+                            valsFrame.push_back( attr->mapToValue( node->getTupleVal( attr->getIndex() ) )->getIndex() );
+                        else
+                        {
+                            double val = node->getTupleVal( attr->getIndex() );
+                            valsFrame.push_back( val );
+                        }
+                    }
+                    attr = NULL;
+                    node = NULL;
+
                     diagram->visualize(
                         inSelectMode,
                         canvas,
@@ -2099,12 +2133,30 @@ void Simulator::drawFramesNext( const bool &inSelectMode )
         {
             if ( 0 <= focusFrameIdx && focusFrameIdx < posFramesNext.size() )
             {
+                /*
                 for ( int j = 0; j < attributes.size(); ++j )
                     valsFrame.push_back(
                         attributes[j]->mapToValue(
                             framesNext[focusFrameIdx]->getNode(0)->getTupleVal(
                                 attributes[j]->getIndex() ) )->getIndex() );
-            
+                */
+                Attribute* attr;
+                Node* node;
+                for ( int j = 0; j < attributes.size(); ++j )
+                {
+                    attr = attributes[j];
+                    node = framesNext[focusFrameIdx]->getNode(0);
+                    if ( attr->getSizeCurValues() > 0 )
+                        valsFrame.push_back( attr->mapToValue( node->getTupleVal( attr->getIndex() ) )->getIndex() );
+                    else
+                    {
+                        double val = node->getTupleVal( attr->getIndex() );
+                        valsFrame.push_back( val );
+                    }
+                }
+                attr = NULL;
+                node = NULL;
+
                 glPushMatrix();
                 glTranslatef( 
                     posFramesNext[focusFrameIdx].x, 
@@ -2909,7 +2961,7 @@ void Simulator::animate()
 {
     double x, y;
     double pix = canvas->getPixelSize();
-    vector< int > valsFrame;
+    vector< double > valsFrame;
 
     if ( keyFrameFr != NULL )
     {
@@ -2918,7 +2970,7 @@ void Simulator::animate()
             // 'new' current frame
             x = posTweenFrame.x;
             y = posTweenFrame.y;
-            
+            /*            
             {
             for ( int j = 0; j < attributes.size(); ++j )
                 valsFrame.push_back(
@@ -2926,6 +2978,23 @@ void Simulator::animate()
                         keyFrameFr->getNode(0)->getTupleVal(
                             attributes[j]->getIndex() ) )->getIndex() );
             }
+            */
+            Attribute* attr;
+            Node* node;
+            for ( int j = 0; j < attributes.size(); ++j )
+            {
+                attr = attributes[j];
+                node = keyFrameFr->getNode(0);
+                if ( attr->getSizeCurValues() > 0 )
+                    valsFrame.push_back( attr->mapToValue( node->getTupleVal( attr->getIndex() ) )->getIndex() );
+                else
+                {
+                    double val = node->getTupleVal( attr->getIndex() );
+                    valsFrame.push_back( val );
+                }
+            }
+            attr = NULL;
+            node = NULL;
         
             glPushMatrix();
             glTranslatef( x, y, 0.0 );
@@ -2944,6 +3013,7 @@ void Simulator::animate()
             y = posKeyFrameTo.y;
         
             valsFrame.clear();
+            /*
             {
             for ( int j = 0; j < attributes.size(); ++j )
                 valsFrame.push_back(
@@ -2951,6 +3021,21 @@ void Simulator::animate()
                         keyFrameTo->getNode(0)->getTupleVal(
                             attributes[j]->getIndex() ) )->getIndex() );
             }
+            */
+            for ( int j = 0; j < attributes.size(); ++j )
+            {
+                attr = attributes[j];
+                node = keyFrameTo->getNode(0);
+                if ( attr->getSizeCurValues() > 0 )
+                    valsFrame.push_back( attr->mapToValue( node->getTupleVal( attr->getIndex() ) )->getIndex() );
+                else
+                {
+                    double val = node->getTupleVal( attr->getIndex() );
+                    valsFrame.push_back( val );
+                }
+            }
+            attr = NULL;
+            node = NULL;
         
             glPushMatrix();
             glTranslatef( x, y, 0.0 );
@@ -2969,7 +3054,7 @@ void Simulator::animate()
             // 'new' current frame
             x = posTweenFrame.x;
             y = posTweenFrame.y;
-            
+            /*
             {
             for ( int j = 0; j < attributes.size(); ++j )
                 valsFrame.push_back(
@@ -2977,6 +3062,23 @@ void Simulator::animate()
                         keyFrameFr->getNode(0)->getTupleVal(
                             attributes[j]->getIndex() ) )->getIndex() );
             }
+            */
+            Attribute* attr;
+            Node* node;
+            for ( int j = 0; j < attributes.size(); ++j )
+            {
+                attr = attributes[j];
+                node = keyFrameFr->getNode(0);
+                if ( attr->getSizeCurValues() > 0 )
+                    valsFrame.push_back( attr->mapToValue( node->getTupleVal( attr->getIndex() ) )->getIndex() );
+                else
+                {
+                    double val = node->getTupleVal( attr->getIndex() );
+                    valsFrame.push_back( val );
+                }
+            }
+            attr = NULL;
+            node = NULL;
         
             glPushMatrix();
             glTranslatef( x, y, 0.0 );
@@ -2996,6 +3098,7 @@ void Simulator::animate()
             y = posKeyFrameTo.y;
         
             valsFrame.clear();
+            /*
             {
             for ( int j = 0; j < attributes.size(); ++j )
                 valsFrame.push_back(
@@ -3003,6 +3106,21 @@ void Simulator::animate()
                         keyFrameTo->getNode(0)->getTupleVal(
                             attributes[j]->getIndex() ) )->getIndex() );
             }
+            */
+            for ( int j = 0; j < attributes.size(); ++j )
+            {
+                attr = attributes[j];
+                node = keyFrameTo->getNode(0);
+                if ( attr->getSizeCurValues() > 0 )
+                    valsFrame.push_back( attr->mapToValue( node->getTupleVal( attr->getIndex() ) )->getIndex() );
+                else
+                {
+                    double val = node->getTupleVal( attr->getIndex() );
+                    valsFrame.push_back( val );
+                }
+            }
+            attr = NULL;
+            node = NULL;
         
             glPushMatrix();
             glTranslatef( x, y, 0.0 );
@@ -3136,7 +3254,7 @@ void Simulator::onTimer( wxTimerEvent &e )
 
 
 BEGIN_EVENT_TABLE( Simulator, wxEvtHandler )
-EVT_TIMER( ID_TIMER, Simulator::onTimer )
+    EVT_TIMER( ID_TIMER, Simulator::onTimer )
 END_EVENT_TABLE()
 
 

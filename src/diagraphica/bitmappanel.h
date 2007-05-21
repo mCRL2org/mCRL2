@@ -1,5 +1,5 @@
 // --- bitmappanel.h ------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 #ifndef BITMAPPANEL_H
@@ -18,7 +18,7 @@ public:
     BitmapPanel( 
         wxWindow* parent,
         wxSize size,
-        const char* const* );
+        const char* const* image );
     virtual ~BitmapPanel();
     
 protected:

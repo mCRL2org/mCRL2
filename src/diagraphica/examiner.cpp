@@ -1,5 +1,5 @@
 // --- examiner.cpp -------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -9,7 +9,8 @@
 // -- static variables ----------------------------------------------
 
 
-ColorRGB Examiner::colClr = { 1.0, 1.0, 0.93, 1.0 };
+//ColorRGB Examiner::colClr = { 1.0, 1.0, 0.93, 1.0 };
+ColorRGB Examiner::colClr = { 1.0, 1.0, 1.0, 1.0 };
 ColorRGB Examiner::colTxt = { 0.0, 0.0, 0.0, 1.0 };
 int Examiner::szeTxt = 12;
 ColorRGB Examiner::colBdl = { 0.0, 0.0, 0.0, 0.3 };
@@ -299,11 +300,25 @@ void Examiner::clearData()
 void Examiner::handleSendDgrmSglToSiml()
 // -------------------------------------
 {
-    if (focusFrameIdx >= 0){
-	  mediator->initSimulator(
+    mediator->initSimulator(
         framesHist[focusFrameIdx],
         attrsHist[focusFrameIdx] );
-	};
+}
+
+
+// --------------------------------------
+void Examiner::handleSendDgrmSglToTrace()
+// --------------------------------------
+{
+    mediator->markTimeSeries( this, frame );
+}
+
+
+// --------------------------------------
+void Examiner::handleSendDgrmSetToTrace()
+// --------------------------------------
+{
+    mediator->markTimeSeries( this, framesHist );
 }
 
 
@@ -328,7 +343,9 @@ void Examiner::visualize( const bool &inSelectMode )
         GLuint selectBuf[512];
         startSelectMode(
             hits,
-            selectBuf );
+            selectBuf,
+            2.0,
+            2.0 );
 
         if ( diagram != NULL )
         {
@@ -488,9 +505,9 @@ void Examiner::handleKeyDownEvent( const int &keyCode )
 {
     Visualizer::handleKeyDownEvent( keyCode );
     
-    if ( keyCodeDown == WXK_RIGHT || keyCodeDown == WXK_NUMPAD6 )
+    if ( keyCodeDown == WXK_RIGHT || keyCodeDown == WXK_NUMPAD_RIGHT )
         handleIconRgt();
-    else if ( keyCodeDown == WXK_LEFT || keyCodeDown == WXK_NUMPAD4 )
+    else if ( keyCodeDown == WXK_LEFT || keyCodeDown == WXK_NUMPAD_LEFT )
         handleIconLft();
 
     // redraw in render mode
@@ -632,11 +649,20 @@ void Examiner::handleHits( const vector< int > &ids )
             {
                 if ( ids.size() == 2 && ids[1] == ID_ICON_MORE )
                 {
-                    mediator->handleSendDgrm(
-                        this,
-                        true,
-                        false,
-                        false );
+                    if ( mediator->getView() == Mediator::VIEW_SIM )
+                    {
+                        if ( frame != NULL )
+                            mediator->handleSendDgrm( this, true, false, false, false, false );
+                        else
+                            mediator->handleSendDgrm( this, false, false, false, false, false );
+                    }
+                    else if ( mediator->getView() == Mediator::VIEW_TRACE )
+                    {
+                        if ( frame != NULL )
+                            mediator->handleSendDgrm( this, false, true, true, false, false );
+                        else
+                            mediator->handleSendDgrm( this, false, false, false, false, false );
+                    }
 
                     // no mouseup event is generated reset manually
                     mouseButton = MSE_BUTTON_UP;
@@ -679,11 +705,19 @@ void Examiner::handleHits( const vector< int > &ids )
         {
             if ( ids[0] == ID_FRAME )
             {
-                mediator->handleSendDgrm(
-                    this,
-                    true,
-                    false,
-                    false );
+                if ( mediator->getView() == Mediator::VIEW_SIM )
+                {
+                    if ( frame != NULL )
+                    {
+                        mediator->handleSendDgrm( this, true, false, false, false, false );
+                    }
+                    else
+                    {
+                        mediator->handleSendDgrm( this, false, false, false, false, false );
+                    }
+                }
+                else if ( mediator->getView() == Mediator::VIEW_TRACE )
+                    mediator->handleSendDgrm( this, false, true, true, false, false );
 
                 // no mouseup event is generated reset manually
                 mouseButton = MSE_BUTTON_UP;
@@ -940,13 +974,31 @@ void Examiner::drawFrame( const bool &inSelectMode )
             -1.0 + 4*pix/scaleFrame,  1.0 + 4*pix/scaleFrame, 
              1.0 - 4*pix/scaleFrame, -1.0 - 4*pix/scaleFrame );
         
-        vector< int > valsFrame;
+        vector< double > valsFrame;
+        /*
         for ( int i = 0; i < attributes.size(); ++i )
             valsFrame.push_back(
-                attributes[i]->mapToValue(
+               attributes[i]->mapToValue(
                     frame->getNode(0)->getTupleVal(
                         attributes[i]->getIndex() ) )->getIndex() );
-        
+        */
+        Attribute* attr;
+        Node* node;
+        for ( int i = 0; i < attributes.size(); ++i )
+        {
+            attr = attributes[i];
+            node = frame->getNode(0);
+            if ( attr->getSizeCurValues() > 0 )
+                valsFrame.push_back( attr->mapToValue( node->getTupleVal( attr->getIndex() ) )->getIndex() );
+            else
+            {
+                double val = node->getTupleVal( attr->getIndex() );
+                valsFrame.push_back( val );
+            }
+        }
+        attr = NULL;
+        node = NULL;
+                
         diagram->visualize(
             false,
             canvas,
@@ -997,17 +1049,35 @@ void Examiner::drawFramesHist( const bool &inSelectMode )
     else
     {
         pix = canvas->getPixelSize();
-        vector< int > valsFrame;
+        vector< double > valsFrame;
 
         //for ( int i = 0; i < framesHist.size(); ++i )
         for ( int i = vsblHistIdxLft; i <= vsblHistIdxRgt; ++i )
         {
             valsFrame.clear();
+            /*
             for ( int j = 0; j < attrsHist[i].size(); ++j )
                 valsFrame.push_back(
                     attrsHist[i][j]->mapToValue(
                         framesHist[i]->getNode(0)->getTupleVal(
                             attrsHist[i][j]->getIndex() ) )->getIndex() );
+            */
+            Attribute* attr;
+            Node* node;
+            for ( int j = 0; j < attrsHist[i].size(); ++j )
+            {
+                attr = attrsHist[i][j];
+                node = framesHist[i]->getNode(0);
+                if ( attr->getSizeCurValues() > 0 )
+                    valsFrame.push_back( attr->mapToValue( node->getTupleVal( attr->getIndex() ) )->getIndex() );
+                else
+                {
+                    double val = node->getTupleVal( attr->getIndex() );
+                    valsFrame.push_back( val );
+                }
+            }
+            attr = NULL;
+            node = NULL;
             
             glPushMatrix();
             glTranslatef( posFramesHist[i].x, posFramesHist[i].y, 0.0 );
@@ -1245,7 +1315,8 @@ void Examiner::drawControls( const bool &inSelectMode )
         glTranslatef( 6*pix, -0.5*hgt + itvHist*pix, 0.0 );
 
         VisUtils::enableLineAntiAlias();
-        VisUtils::setColorCoolRed();
+        //VisUtils::setColorCoolRed();
+        VisUtils::setColorMdGray();
         VisUtils::fillPlayIcon(
             -5.0*pix,  5.0*pix,
              5.0*pix, -5.0*pix );

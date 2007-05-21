@@ -1,5 +1,5 @@
 // --- simulator.h --------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 #ifndef SIMULATOR_H
@@ -183,11 +183,9 @@ protected:
     vector< Cluster* > framesNext; // composition
     vector< Bundle* >  bundles;    // composition
     
-    // -*- //
     vector< Bundle* >  bundlesByLbl;
     vector< Bundle* >  bundlesPrevByLbl;
     vector< Bundle* >  bundlesNextByLbl;
-    // -*- //
     
     static int itvLblPixVert;
     double scaleDgrmHori;

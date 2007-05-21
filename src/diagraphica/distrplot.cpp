@@ -1,5 +1,5 @@
 // --- distrplot.cpp ------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -96,7 +96,9 @@ void DistrPlot::visualize( const bool &inSelectMode )
         GLuint selectBuf[512];
         startSelectMode(
             hits,
-            selectBuf );
+            selectBuf,
+            2.0,
+            2.0 );
         
         //setScalingTransf();
         drawPlot( inSelectMode );
@@ -271,7 +273,7 @@ void DistrPlot::drawDiagram( const bool &inSelectMode )
 
         vector< Attribute* > attrs;
         attrs.push_back( graph->getAttribute( attrIdx ) );
-        vector< int > vals;
+        vector< double > vals;
         vals.push_back( attrValIdxDgrm );
 
         glPushMatrix();

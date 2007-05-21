@@ -1,5 +1,5 @@
 // --- mediator.h ---------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 // ------------------------------------------------------------------
@@ -14,6 +14,7 @@
 #define MEDIATOR_H
 
 #include <cstddef>
+#include <set>
 #include <string>
 #include <vector>
 using namespace std;
@@ -30,6 +31,9 @@ class PopupFrame;
 class Mediator
 {
 public:
+    // -- destructor ------------------------------------------------
+    virtual ~Mediator() {}
+
     // -- load & save data ------------------------------------------
     virtual void openFile( const string &path ) = 0;
     virtual void saveFile( const string &path ) = 0;
@@ -60,11 +64,31 @@ public:
         const int &idxFr,
         const int &idxTo ) = 0;
     virtual void handleAttributeDuplicate( const vector< int > &indcs ) = 0;
+    /*
     virtual void handleAttributeDelete( const vector< int > &indcs ) = 0;
+    */
+    virtual void handleAttributeDelete( const int &idx ) = 0;
     virtual void handleAttributeRename( 
         const int &idx,
         const string &name ) = 0;
     virtual void handleAttributeCluster( const vector< int > &indcs ) = 0;
+
+    // -*- //
+    virtual void handleAttrPartition( const int &attrIdx ) = 0;
+    virtual void handleAttrPartition(
+        const int &numParts,
+        const int &method ) = 0;
+    virtual void handleAttrDepartition( const int &attrIdx ) = 0;
+    virtual void handleAttrPartitionCloseFrame() = 0;
+
+    virtual void getAttrValues(
+        const int &attrIdx,
+        vector< double > &vals ) = 0;
+    virtual void getAttrValues(
+        const int &attrIdx,
+        set< double > &vals ) = 0;
+
+    // -*- //
     
     virtual void handleMoveDomVal(
         const int &idxAttr,
@@ -79,6 +103,8 @@ public:
     virtual void getAttributeNames( 
         const vector< int > &indcs,
         vector< wxString > &names ) = 0;
+    virtual int getAttributeType( const int &idx ) = 0;
+    virtual int getAttrSizeCurDomain( const int &idx ) = 0;
 
     // -- attribute plots -------------------------------------------
     virtual void handleAttributePlot( const int &idx ) = 0;
@@ -102,6 +128,9 @@ public:
     virtual void handleSetModeAnalysis() = 0;
     virtual void handleSetModeEdit() = 0;
     virtual int getMode() = 0;
+    virtual void handleSetViewSim() = 0;
+    virtual void handleSetViewTrace() = 0;
+    virtual int getView() = 0;
 
     // -- diagram editor --------------------------------------------
     virtual void handleEditModeSelect() = 0;
@@ -143,6 +172,11 @@ public:
         const int &selIdx ) = 0;
     virtual void handleDOFSel( const int &DOFIdx ) = 0;
     
+    virtual void handleSetDOFTextStatus( 
+        const int &DOFIdx,
+        const int &status ) = 0;
+    virtual int handleGetDOFTextStatus( const int &DOFIdx ) = 0;
+
     virtual void handleDOFColActivate() = 0;
     virtual void handleDOFColDeactivate() = 0;
     virtual void handleDOFColAdd(
@@ -180,10 +214,19 @@ public:
     virtual void handleDOFFrameDestroy() = 0;
     virtual void handleDOFDeselect() = 0;
     
-    // -- simulator & examiner --------------------------------------
+    // -- simulator, time series & examiner -------------------------
     virtual void initSimulator(
         Cluster* currFrame,
         const vector< Attribute* > &attrs ) = 0;
+    
+    virtual void initTimeSeries( const vector< int > attrIdcs ) = 0;
+    virtual void markTimeSeries( 
+        Colleague* sender,
+        Cluster* currFrame ) = 0;
+    virtual void markTimeSeries( 
+        Colleague* sender,
+        const vector< Cluster* > frames ) = 0;
+
     virtual void addToExaminer(
         Cluster* currFrame,
         const vector< Attribute* > &attrs ) = 0;
@@ -194,15 +237,22 @@ public:
     virtual void handleSendDgrm(
         Colleague* sender,
         const bool &sendSglToSiml,
+        const bool &sendSglToTrace,
+        const bool &sendSetToTrace,
         const bool &sendSglToExnr,
         const bool &sendSetToExnr ) = 0;
     virtual void handleSendDgrmSglToSiml() = 0;
+    virtual void handleSendDgrmSglToTrace() = 0;
+    virtual void handleSendDgrmSetToTrace() = 0;
     virtual void handleSendDgrmSglToExnr() = 0;
     virtual void handleSendDgrmSetToExnr() = 0;
     
     virtual void handleClearSim( Colleague* sender ) = 0;
     virtual void handleClearExnr( Colleague* sender ) = 0;
     virtual void handleClearExnrCur( Colleague* sender ) = 0;
+    
+//    virtual void handleAnimFrameBundl( Colleague* sender ) = 0;
+    virtual void handleAnimFrameClust( Colleague* sender ) = 0;
     
     virtual void handleMarkFrameClust( Colleague* sender ) = 0;
     virtual void handleUnmarkFrameClusts( Colleague* sender ) = 0;
@@ -212,7 +262,7 @@ public:
         const vector< Attribute* > &attrs,
         ColorRGB &col ) = 0;
     virtual void handleUnshowFrame() = 0;
-    
+
     // -- visualization settings ------------------------------------
     virtual void setSettingsGeneral( 
         const wxColour &colClr,
@@ -227,6 +277,7 @@ public:
         const bool &show,
         const double &magn ) = 0;
     virtual void setSettingsSimulator( const int &blendType ) = 0;
+    virtual void setSettingsTrace( const bool &useShading ) = 0;
     virtual void setSettingsArcDiagram( 
         const bool &showNodes,
         const bool &showArcs,
@@ -246,6 +297,7 @@ public:
         bool &show,
         double &magn ) = 0;
     virtual void getSettingsSimulator( int &blendType ) = 0;
+    virtual void getSettingsTrace( bool &useShading ) = 0;
     virtual void getSettingsArcDiagram( 
         bool &showNodes,
         bool &showArcs,
@@ -320,12 +372,12 @@ public:
     {
         MODE_ANALYSIS,
         MODE_EDIT,
+        VIEW_SIM,
+        VIEW_TRACE,
         CLUST_DISTR_PLOT,
         CLUST_CORRL_PLOT,
         CLUST_COMBN_PLOT,
     };
-
-    virtual ~Mediator() {}
 
 protected:
     // -- init colleagues -------------------------------------------

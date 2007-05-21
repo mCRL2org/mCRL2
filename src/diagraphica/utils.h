@@ -1,5 +1,5 @@
 // --- utils.h ------------------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 #ifndef UTILS_H
@@ -10,6 +10,9 @@
 #include <cmath>
 #include <sstream>
 #include <string>
+#include <map>
+#include <set>
+#include <vector>
 using namespace std;
 
 const double PI = 3.14159265;
@@ -62,6 +65,35 @@ public:
     static double fishEye( 
         const double &distortion,
         const double &value );
+
+    // -- statistics functions --------------------------------------
+    static double mean( const vector< double > vals );
+    static double variance( const vector< double > vals );
+    static double stdDev( const vector< double > vals );
+
+    // -- classification (binning ) ---------------------------------
+    static void classEqualIntervals(
+        const int &numClasses,
+        const vector< double > &values,
+        vector< string > &legendClasses,
+        map< double, int > &valuesToClasses );
+    static void classifyQuantiles(
+        const int &numClasses,
+        set< double > &values,
+        vector< string > &legendClasses,
+        map< double, int > &valuesToClasses );
+    static void classifyMeanStandardDeviation(
+        const int &numClasses,
+        const vector< double > &values,
+        vector< string > &legendClasses,
+        map< double, int > &valuesToClasses );
+    /*
+    static void classifyOptimal(
+        const int &numClasses,
+        const vector< double > &values,
+        vector< string > &legendClasses,
+        map< double, int > &valuesToClasses );
+    */
 };
 
 #endif

@@ -1,5 +1,5 @@
 // --- bitmappanel.cpp ----------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -13,7 +13,7 @@
 BitmapPanel::BitmapPanel( 
     wxWindow* parent,
     wxSize size,
-    const char* const* image)
+    const char* const* image )
     : wxPanel(
         parent,
         wxID_ANY )
@@ -24,8 +24,21 @@ BitmapPanel::BitmapPanel(
     this->SetMinSize( this->GetSize() );
     this->SetMaxSize( this->GetSize() );
 
-    // load image (cast is for wxWidgets 2.6 compatibility)
-    bitmap = new wxBitmap(const_cast < const char** > (image)); 
+    /*
+    // load image
+    bitmap = new wxBitmap( 
+        path, 
+        wxBITMAP_TYPE_BMP );
+    if ( bitmap->Ok() != true )
+    {
+        wxString msg;
+        msg.Append( "Error opening file: " );
+        msg.Append( path );
+        wxLogError( msg );
+    }
+    */
+    // load image, cast for wxWidgets 2.6 compatibility
+    bitmap = new wxBitmap( const_cast< const char** >( image ) );
 }
 
 

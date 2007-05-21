@@ -1,5 +1,5 @@
 // --- droptarget.cpp -----------------------------------------------
-// (c) 2006  -  A.J. Pretorius  -  Eindhoven University of Technology
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
 
@@ -53,7 +53,7 @@ bool DropTarget::OnDropText(
         srcId = Utils::strToInt( string(tokens[0].fn_str()) );
     // get remaining data
     for ( int i = 1; i < tokens.size(); ++i )
-        data.push_back( Utils::strToInt( string(tokens[i].fn_str()) ) );
+        data.push_back( Utils::strToInt( string(tokens[i].fn_str()) ));
  
     mediator->handleDragDrop(
         srcId,
