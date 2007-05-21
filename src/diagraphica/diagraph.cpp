@@ -12,6 +12,7 @@
   #include <stdlib.h>
   #include <crtdbg.h>
 #endif
+std::string fsm_file_argument;
 
 // -- Squadt protocol interface -------------------------------------
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -111,7 +112,6 @@
 // -- command line --------------------------------------------------
 
 // optional input file that should contain an FSM
-std::string fsm_file_argument;
 #define PROGRAM_NAME "DiaGraph"
 
 // parse command line 
