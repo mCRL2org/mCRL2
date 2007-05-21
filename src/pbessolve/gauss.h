@@ -22,7 +22,7 @@ pbes_expression substitute(pbes_expression expr,
 
 void update_equation(pbes_equation e, equation_system es_solution);
 
-pbes_expression rewrite_pbes_expression(pbes_expression e, Rewriter* r);
+pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* p);
   
 
 void solve_equation_interactive(propositional_variable X, 

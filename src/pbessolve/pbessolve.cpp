@@ -1,17 +1,13 @@
-// ======================================================================
+//======================================================================
 //
-// file          : pbessolve
-// date          : 19-04-2007
-// version       : 0.0.1
+// 
 //
-// author(s)     : Simona Orzan
-//
-// ======================================================================
+//======================================================================
 
 
 #define NAME "pbessolve"
 #define VERSION "0.0.1"
-#define AUTHOR "Simona Orzan"
+
 
 
 //C++
@@ -200,7 +196,7 @@ t_tool_options parse_command_line(int argc, char** argv)
   }
   
   if (vm.count("version")) {
-    cerr << NAME << " " << VERSION <<  " (revision " << REVISION << ")" << endl;
+    cerr << NAME << " " << VERSION  << endl;
     exit(0);
   }
   

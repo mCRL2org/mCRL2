@@ -4,16 +4,17 @@ project toolset/pbessolve
 
 exe pbessolve
        : pbessolve.cpp
-	 gauss.cpp
+		 gauss.cpp
          /libraries//mcrl2_basic
-	 /libraries//lps
-	 /libraries//rewrite
+		 /libraries//lps
+		 /libraries//rewrite
          /site-config//boost_program_options
        : <include>.
+       : <squadt_support>disable
+		 <status>experimental
        ;
 
 install-binaries install
        : pbessolve
-       :
        : <status>experimental
        ;

@@ -21,9 +21,18 @@ using namespace pbes_expr;
 
 static void addrule__b_and_not_b(Rewriter *rewriter);
 
-static bool identical_pbes_expressions
+static bool pbes_expression_compare
 (pbes_expression p, pbes_expression q, BDD_Prover *prover);
 
+
+static pbes_expression pbes_expression_simplify
+(pbes_expression p, int *nq, data_variable_list *fv, BDD_Prover *prover);
+
+
+// some extra needed functions on data_variable_lists
+static bool var_in_list(data_variable vx, data_variable_list y);
+static data_variable_list intersect(data_variable_list x, data_variable_list y);
+static data_variable_list dunion(data_variable_list x, data_variable_list y);
 
 
 
@@ -41,7 +50,7 @@ equation_system solve_pbes(pbes pbes_spec, bool interactive, int bound)
  equation_system es_solution;
  
  Rewriter* rewriter = createRewriter(pbes_spec.data(), GS_REWR_INNER);
- addrule__b_and_not_b(rewriter);
+ // addrule__b_and_not_b(rewriter);
 
  lps::data_specification ds = pbes_spec.data();
  SMT_Solver_Type sol = solver_type_cvc_lite_fast;
@@ -104,22 +113,28 @@ pbes_equation solve_equation
  // iteration
  while ( (!stable) && (bound - no_iterations != 0) )
 	{
-	 gsVerboseMsg("\n=====\nApproximation %d: %s\n=====\n",
+	 gsVerboseMsg("\n\n=====\nApproximation %d: %s\n=====\n\n",
 				 no_iterations,pp(approx).c_str());
    
 	 // substitute approx for X in defX, store result in approx_
-	 gsVerboseMsg("SUBSTITUTE in %s\n",pp(defX).c_str());
+	 //	 	 gsVerboseMsg("SUBSTITUTE in %s\n",pp(defX).c_str());
 	 approx_ = defX;
 	 approx_ = substitute(approx_, X, approx);  
 	 gsVerboseMsg("SUBSTITUTE result %s\n",pp(approx_).c_str());	 	 
 
 	 // rewrite approx_...
-	 approx_ = rewrite_pbes_expression(approx_,rewriter);
-	 gsVerboseMsg("REWRITTEN: %s\n",pp(approx_).c_str());
+	 //	 approx_ = rewrite_pbes_expression(approx_,rewriter,prover);
+	 int nq = 0;
+	 data_variable_list fv;
+	 approx_ = pbes_expression_simplify(approx_, &nq, &fv, prover);
+	 
+	 if (nq == 0)
+	   approx_ = rewrite_pbes_expression(approx_,prover);
+	 gsVerboseMsg("REWRITTEN: %s\n%d quantifiers left\n",pp(approx_).c_str(),nq);
 
 	 // decide whether it's stable.
-	 stable = identical_pbes_expressions(approx_,approx,prover);
-   
+	 stable = pbes_expression_compare(approx_,approx,prover);
+	 if (!stable) gsVerboseMsg("Not"); gsVerboseMsg(" stable\n");
 	 // continue
 	 approx = approx_;
 	 no_iterations++;
@@ -147,15 +162,16 @@ static pbes_expression pbes_expression_instantiate(pbes_expression solX,
 						   data_expression_list actual_parameters)
 //================================================
 {
+  /*
  gsVerboseMsg("PBES_EXPRESSION_INSTANTIATE\n");
  gsVerboseMsg("  solX: %s\n  generic parameters: %s\n  actual parameters:  %s\n",
 						pp(solX).c_str(), pp(generic_parameters).c_str(), 
 						pp(actual_parameters).c_str());
- 
+  */
  pbes_expression result = 
 	solX.substitute(make_list_substitution(generic_parameters, actual_parameters));
  
- gsVerboseMsg("  Result: %s\n", pp(result).c_str());
+// gsVerboseMsg("  Result: %s\n", pp(result).c_str());
  
  return result;
 } 
@@ -202,7 +218,6 @@ pbes_expression substitute(pbes_expression expr,
 		}
 	}
  //  else // expr is true, false or data
- gsVerboseMsg(" Return T/F/data: %s\n",pp(expr).c_str());
  return expr; 
 
  // TO DO later: resolve harmful name clashes
@@ -241,6 +256,7 @@ void update_equation(pbes_equation e, equation_system es_solution)
 // All operators become data operators.
 // Predicate variables become data variables, with 
 // the same arguments but a marked name (+PREDVAR_MARK at the end)
+// It doesn't work (WHY not??) for quantifiers.
 static data_expression pbes_to_data(pbes_expression e)
 {
  using namespace pbes_expr;
@@ -256,19 +272,15 @@ static data_expression pbes_to_data(pbes_expression e)
 	return dname::or_(pbes_to_data(lhs(e)),pbes_to_data(rhs(e)));
  else if (is_forall(e))
 	{
-	 aterm_appl x = gsMakeBinder(gsMakeForall(), 
-															 quant_vars(e), 
-															 pbes_to_data(quant_expr(e)));
-	 return data_expression(x);
+	 aterm_appl x = gsMakeBinder(gsMakeForall(),quant_vars(e),pbes_to_data(quant_expr(e)));
+	 return (gsMakeDataExprExists(x));
 		//implement_data_data_expr(x,spec); 
 		// (if implement, then there is no way back!)
   } 
  else if (is_exists(e)) 
 	{
-	 aterm_appl x = gsMakeBinder(gsMakeExists(), 
-															 quant_vars(e), 
-															 pbes_to_data(quant_expr(e)));
-	 return data_expression(x);
+	 aterm_appl x = gsMakeBinder(gsMakeExists(),quant_vars(e),pbes_to_data(quant_expr(e)));
+	 return (gsMakeDataExprExists(x));
   } 
  else if (is_propositional_variable_instantiation(e)) 
 	{
@@ -387,31 +399,190 @@ static pbes_expression data_to_pbes_greedy(data_expression d)
 //======================================================================
 // Rewrites (simplifies) e according to the
 // rewriting rules of first-order logic.
-
-pbes_expression rewrite_pbes_expression(pbes_expression e, Rewriter* rewriter)
+// only works for quantifier-free expressions.
+pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* prover)
 //=====================================
 
 {
- gsVerboseMsg("REWRITE_PBES_EXPRESSION %s\n", pp(e).c_str());
+
+  //gsVerboseMsg("REWRITE_PBES_EXPRESSION %s\n", pp(e).c_str());
  
  // translate e to a data_expression
- gsVerboseMsg(" ->pbes_to_data: %s\n",pp(e).c_str());
+ //gsVerboseMsg(" ->pbes_to_data: %s\n",pp(e).c_str());
  data_expression de = pbes_to_data(e); 
- gsVerboseMsg(" <-pbes_to_data: %s\n",pp(de).c_str());
+ //gsVerboseMsg(" <-pbes_to_data: %s\n",pp(de).c_str());
  
+ /* THIS DOESN'T SIMPLIFY ENOUGH
  // rewrite it with Muck's data rewriter
  gsVerboseMsg(" ->rewriter: %s\n",pp(de).c_str());
  data_expression d = rewriter->rewrite(de);
  gsVerboseMsg(" <-rewriter: %s\n",pp(d).c_str());
+ */
+
+ // simplify using the prover
+ //gsVerboseMsg(" ->prover: %s\n",pp(de).c_str());
+ prover->set_formula(de); 
+ //gsVerboseMsg(" <--Bdd from prover: %P\n", prover->get_bdd());
+
+ data_expression d = prover->get_bdd();
+ //gsVerboseMsg(" <--simplifier: %s\n",pp(d).c_str());
 
  // translate back to a pbes_expression
- gsVerboseMsg(" ->data_to_pbes %s\n",pp(d).c_str());
+ //gsVerboseMsg(" ->data_to_pbes %s\n",pp(d).c_str());
  e = data_to_pbes_lazy(d);
- gsVerboseMsg(" <-data_to_pbes %s\n",pp(e).c_str());
+ //gsVerboseMsg(" <-data_to_pbes %s\n",pp(e).c_str());
  
  return e;
 }
 //======================================================================
+
+
+
+
+
+
+//======================================================================
+
+
+
+//======================================================================
+// eliminates some quantifiers
+// nq  := the number of quantifiers left in expr after simplification
+// fv := the set of names of the data variables occuring FREE in expr, 
+//        after simplification
+static pbes_expression pbes_expression_simplify
+(pbes_expression expr, int* nq, data_variable_list *fv, BDD_Prover* prover)
+{
+  *fv = data_variable_list();
+  *nq = 0;
+  if (is_and(expr))
+    {
+      // simplify left and right
+      int nqlhs, nqrhs;
+      data_variable_list fvlhs,fvrhs;
+      pbes_expression slhs = pbes_expression_simplify(lhs(expr),&nqlhs,&fvlhs,prover);
+      pbes_expression srhs = pbes_expression_simplify(rhs(expr),&nqrhs,&fvrhs,prover);
+      if ((is_false(slhs))||(is_false(srhs))){ return (false_());};
+      if (is_true(slhs)) { *nq = nqrhs; *fv = fvrhs; return srhs; };
+      if (is_true(srhs)) { *nq = nqlhs; *fv = fvlhs; return slhs; };      
+      *nq = nqlhs + nqrhs;
+      *fv = dunion(fvlhs,fvrhs);
+      return(and_(slhs,srhs));	
+    }
+  else if (is_or(expr)) 
+    {
+      // simplify left and right
+      int nqlhs, nqrhs;
+      data_variable_list fvlhs,fvrhs;
+      pbes_expression slhs = pbes_expression_simplify(lhs(expr),&nqlhs,&fvlhs,prover);
+      pbes_expression srhs = pbes_expression_simplify(rhs(expr),&nqrhs,&fvrhs,prover);
+      if ((is_true(slhs))||(is_true(srhs))){ *nq = 0; return (true_());};
+      if (is_false(slhs)) { *nq = nqrhs; *fv = fvrhs; return srhs; };
+      if (is_false(srhs)) { *nq = nqlhs; *fv = fvlhs; return slhs; };      
+      *nq = nqlhs + nqrhs;
+      *fv = dunion(fvlhs,fvrhs);     
+      return(or_(slhs,srhs));	
+    }      
+  else if (is_forall(expr) || is_exists(expr))
+    {
+      // simlify under quantifier
+      int nq_under;
+      data_variable_list fv_under;
+      pbes_expression s_under = 
+	pbes_expression_simplify(quant_expr(expr),&nq_under,&fv_under,prover);
+      if (nq_under==0)
+	s_under = rewrite_pbes_expression(s_under,prover);
+      // lose quantifier if variables are not free in s_under
+      data_variable_list new_quant_vars = intersect(quant_vars(expr),fv_under);
+      if (new_quant_vars.empty()) return s_under;
+      // else, keep it
+      if (is_forall(expr))
+	return (forall(new_quant_vars, s_under));
+      else 
+	return (exists(new_quant_vars, s_under));
+    }
+  //  else // expr is a predicate variable, true, false or data
+  return expr; 
+}
+//======================================================================
+
+
+
+//======================================================================
+static bool var_in_list(data_variable vx, data_variable_list y)
+//======================================================================
+{
+  // which one is correct?? comparing the whole data var or only the name?
+  /*
+    std::vector<std::string> ynames = variable_strings(y);
+    return (std::find(ynames.begin(), ynames.end(), vx.name()) != ynames.end());
+  */
+  return (std::find(y.begin(), y.end(), vx) != y.end());
+}
+
+
+
+//======================================================================
+static data_variable_list intersect(data_variable_list x, data_variable_list y)
+//======================================================================
+{
+  data_variable_list result;
+  for (data_variable_list::iterator vx = x.begin(); vx != x.end(); vx++)
+    if (var_in_list(*vx,y))
+      result = push_back(result,*vx);
+  return result;
+}
+
+
+//======================================================================
+// disjoint union
+static data_variable_list dunion(data_variable_list x, data_variable_list y)
+//======================================================================
+{
+  data_variable_list result(y);
+  for (data_variable_list::iterator vx = x.begin(); vx != x.end(); vx++)
+    if (!var_in_list(*vx,y))
+      result = push_back(result,*vx);    
+  return result;
+}
+//======================================================================
+
+
+//======================================================================
+// !! Doesn't work when quantifiers are involved. 
+// !! It seems difficult to properly translate pbes quantifiers to data quantifiers (??)
+// !! The prover can't use quantifiers anyway.
+static bool pbes_expression_compare
+(pbes_expression p, pbes_expression q, BDD_Prover* prover)
+{
+  // if no quantifiers and no predicates, call the prover
+  if ((is_bes(p))&&(is_bes(q)))
+    {
+      data_expression dp = pbes_to_data(p);
+      data_expression dq = pbes_to_data(q);
+      ATermAppl formula = gsMakeDataExprEq((ATermAppl)dp,(ATermAppl)dq);
+      
+      //      gsVerboseMsg(" -->prover: %s\n",pp(formula).c_str());
+      prover->set_formula(formula);  
+      Answer a = prover->is_tautology();
+      gsVerboseMsg(" <--prover: %s\n",((a==answer_yes)?"YES":((a==answer_no)?"NO":"DON'T KNOW")));  
+      return ((a == answer_yes)?true:false);      
+    }
+  
+  // else, improvise
+  return false;
+}
+//======================================================================
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -422,14 +593,29 @@ static bool identical_pbes_expressions
 {
   data_expression dp = pbes_to_data(p);
   data_expression dq = pbes_to_data(q);
-  
-  ATermAppl formula = gsMakeDataExprEq(p,q);
+  ATermAppl formula = gsMakeDataExprEq((ATermAppl)dp,(ATermAppl)dq);
 
-  prover->set_formula(formula);
-//  return prover->is_tautology();
-return false;
+  gsVerboseMsg(" -->prover: %s\n",pp(formula).c_str());
+  prover->set_formula(formula);  
+  Answer a = prover->is_tautology();
+  gsVerboseMsg(" <--prover: %s\n",((a==answer_yes)?"YES":((a==answer_no)?"NO":"DON'T KNOW")));  
+  return ((a == answer_yes)?true:false);
+  //return false;
 }
 //======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
