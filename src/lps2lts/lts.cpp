@@ -158,13 +158,13 @@ void remove_lts()
       aut.close();
       break;
     case OF_SVC:
-//      {
-//        int e = SVCclose(svc);
-//        if ( e )
-//        {
-//          gsErrorMsg("svcerror: %s\n",SVCerror(e)); 
-//        }
-//      }
+      {
+        int e = SVCclose(svc);
+        if ( e )
+        {
+          gsErrorMsg("svcerror: %s\n",SVCerror(e)); 
+        }
+      }
       break;
     default:
       break;

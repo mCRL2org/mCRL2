@@ -192,7 +192,12 @@ bool finalise_lts_generation()
   delete nstate;
   free(basefilename);
 
-  close_lts(num_states,trans);
+  if ( lg_error )
+  {
+    remove_lts();
+  } else {
+    close_lts(num_states,trans);
+  }
 
   if ( !lg_error && gsVerbose )
   {
@@ -1109,10 +1114,5 @@ bool generate_lts()
     }
   }
   
-  if ( lg_error )
-  {
-    remove_lts();
-  }
-
   return !lg_error;
 }
