@@ -2,9 +2,8 @@
 // (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
-
-#include "diagraph.h"
-
+#include <string>
+#include <wx/wx.h>
 
 // windows debug libraries
 #ifdef WIN32
@@ -12,6 +11,7 @@
   #include <stdlib.h>
   #include <crtdbg.h>
 #endif
+
 std::string fsm_file_argument;
 
 // -- Squadt protocol interface -------------------------------------
@@ -71,6 +71,7 @@ std::string fsm_file_argument;
     std::auto_ptr < squadt_interactor > interactor;
 #endif
 
+#include "diagraph.h"
 
 #ifndef ENABLE_SQUADT_CONNECTIVITY
     // implement wxApp
@@ -197,6 +198,12 @@ bool DiaGraph::OnInit()
     #endif
 	//_CrtSetBreakAlloc( 4271 );
 
+    // set mode
+    mode = MODE_ANALYSIS;
+
+    // set view
+    view = VIEW_SIM;
+
     // squadt
     #ifdef ENABLE_SQUADT_CONNECTIVITY
         if (interactor->is_active()) 
@@ -220,11 +227,6 @@ bool DiaGraph::OnInit()
     {
         return (false);
     };
-
-    // set mode
-    mode = MODE_ANALYSIS;
-    // set view
-    view = VIEW_SIM;
 
     // init colleagues
     initColleagues();

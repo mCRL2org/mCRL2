@@ -2,17 +2,15 @@
 // (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
+#include "frame.h"
+#include "figures.xpm"
+
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
 # define wxFD_OPEN wxOPEN
 # define wxFD_SAVE wxSAVE
 # define wxFD_OVERWRITE_PROMPT wxOVERWRITE_PROMPT
 #endif
-
-
-#include "frame.h"
-#include "figures.xpm"
-
 
 // -- constructors and destructor -----------------------------------
 

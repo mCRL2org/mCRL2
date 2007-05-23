@@ -8,6 +8,7 @@ exe diagraphica
       : [ glob *.cpp ]
         /libraries//mcrl2_basic
         /libraries//ticpp
+        /libraries/wxe//spinctrlfloat.o
         /site-config//wx_gl
       : <squadt_support>enable
         <wx>yes
