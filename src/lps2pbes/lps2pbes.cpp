@@ -183,7 +183,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
   if (c.option_exists(option_end_phase)) {
     phase_selector.set_selection(static_cast < t_phase > (
-        c.get_option_argument< size_t >(option_end_phase, 0)));
+        c.get_option_argument< long int >(option_end_phase)));
   }
 
   /* Attach row */
