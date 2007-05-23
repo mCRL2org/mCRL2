@@ -160,7 +160,7 @@ static bool process(t_tool_options const& tool_options)
   { //Save resulting bes if necessary.
     save_bes_in_vasy_format(tool_options.outfilename);
   }
-  else
+  else 
   { 
     gsMessage("The pbes is %s valid\n", solve_bes() ? "" : "not");
   }
@@ -283,7 +283,6 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
   /* Wait until the ok button was pressed */
   okay_button->await_change();
-
 
   c.add_option(option_transformation_strategy).append_argument(transformation_method_enumeration,
                                 static_cast < transformation_strategy > (transformation_selector.get_selection()));
@@ -677,19 +676,101 @@ static bes_expression substitute_bex(
   return b;
 }
 
+/* substitute boolean equation expression */
+static bes_expression evaluate_bex(
+                const bes_expression b,
+                const atermpp::vector<bes_expression> &approximation,
+                const unsigned long rank)
+{ /* substitute the approximation for variables in b, given
+     by approximation, for all those variables that have a 
+     rank higher or equal to the variable rank */
+
+  // ATfprintf(stderr,"Evaluate_bex %t\n",(ATerm)b);
+  
+  if (is_if(b))
+  { 
+    bes::variable_type v=bes::get_variable(condition(b));
+    if (bes_equations.get_rank(v)>=rank)
+    { // cerr << "HIER1\n";
+      bes_expression b1=evaluate_bex(then_branch(b),approximation,rank);
+      bes_expression b2=evaluate_bex(else_branch(b),approximation,rank);
+      return BDDif(approximation[v],b1,b2);
+    }
+    else
+    { /* the condition has lower rank than the variable rank,
+         leave it untouched */
+      // cerr << "HIER2\n";
+      bes_expression b1=evaluate_bex(then_branch(b),approximation,rank);
+      bes_expression b2=evaluate_bex(else_branch(b),approximation,rank);
+      if ((b1==then_branch(b)) && (b2==else_branch(b)))
+      { return b;
+      }
+      bes_expression br=BDDif(bes::if_(condition(b),bes::true_(),bes::false_()),b1,b2);
+      return br;
+    }
+  }
+
+  assert(bes::is_true(b)||bes::is_false(b));
+  return b;
+}
+
 static bool solve_bes()
 { 
   gsVerboseMsg("Solving BES...\n");
   std::vector<std::set <bes::variable_type> > variable_occurrence_set(bes_equations.nr_of_equations()+1);
+  atermpp::vector<bes_expression> approximation(bes_equations.nr_of_equations()+1,bes::true_());
+  set <bes::variable_type> todo;
 
   for(bes::variable_type v=bes_equations.nr_of_equations(); v>0; v--)
   { add_variables_to_set(v,bes_equations.get_rhs(v),variable_occurrence_set);
   }
 
+  /* Set the approximation to its initial value */
+  for(bes::variable_type v=bes_equations.nr_of_equations(); v>0; v--)
+  { if (bes_equations.get_fixpoint_symbol(v)==pbes_fixpoint_symbol::mu())
+    { approximation[v]=bes::false_();
+      /* otherwise true, but this is automatically guaranteed due to the initialisation
+         of approximation */
+    } 
+  }
 
   for(unsigned long current_rank=bes_equations.max_rank;
       current_rank>0 ; current_rank--)
-  { for(bes::variable_type v=bes_equations.nr_of_equations(); v>0; v--)
+  { 
+    // cerr << "Current_rank " << current_rank << endl;
+    /* Put all variables of current_rank in todo, because these are
+       involved in the current iteration process.  */
+    for(bes::variable_type v=bes_equations.nr_of_equations(); v>0; v--)
+    { if (bes_equations.get_rank(v)==current_rank)
+      { todo.insert(v);
+      } 
+    }
+
+    for( ; todo.size()>0 ; )
+    { set<bes::variable_type>::iterator w= todo.begin();
+      todo.erase(w);
+      // cerr << "Evaluate " << *w << "  " << bes_equations.get_rank(*w) << endl;
+      for(set <bes::variable_type>::iterator u=variable_occurrence_set[*w].begin();
+          u!=variable_occurrence_set[*w].end(); u++)
+      { bes_expression t=evaluate_bex(bes_equations.get_rhs(*u),approximation,current_rank);
+        
+        // cerr << "AAAA " << *w << endl;
+        if ((bes_equations.get_rank(*u)==current_rank) && (t!=approximation[*u]))
+        { approximation[*u]=t;
+          todo.insert(*u);
+          // cerr << "Insert " << *u << endl;
+        }
+      }
+    }
+  }
+
+  assert(bes::is_true(approximation[1])||
+         bes::is_false(approximation[1]));
+  return bes::is_true(approximation[1]);  /* 1 is the index of the initial variable */
+}
+
+
+/* (bes::variable_type v=bes_equations.nr_of_equations(); v>0; v--)
     { if (v % 100==0)
       { gsVerboseMsg("Solving BES. Currently at variable %d\n",v);
       } 
@@ -702,10 +783,10 @@ static bool solve_bes()
           bes_equations.set_rhs(*w,substitute_bex(v,*w,bes_equations.get_rhs(*w),variable_occurrence_set));
           variable_occurrence_set[*w].erase(v);
         }
-        /* We do not need v anymore, because is has been substituted away everywhere */
+        / * We do not need v anymore, because is has been substituted away everywhere * /
         variable_occurrence_set[v].clear();
-        /* reset rhs of bes equation to true, except
-         * if it is the initial equation */
+        / * reset rhs of bes equation to true, except
+         * if it is the initial equation  * /
         if (v>1)
         { bes_equations.set_rhs(v,bes::true_()); 
         }
@@ -715,8 +796,8 @@ static bool solve_bes()
 
   assert(bes::is_true(bes_equations.get_rhs(1))||
          bes::is_false(bes_equations.get_rhs(1)));
-  return bes::is_true(bes_equations.get_rhs(1)); /* 1 is the index of the initial variable */
-}
+  return bes::is_true(bes_equations.get_rhs(1)); / * 1 is the index of the initial variable * /
+} */
 
 //function load_pbes
 //------------------
@@ -742,7 +823,7 @@ pbes load_pbes(t_tool_options tool_options)
     }
   }
   return pbes_spec;
-}
+} 
 
 //function save_bes_in_vasy_format
 //--------------------------------
