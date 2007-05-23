@@ -2296,8 +2296,10 @@ static unsigned int remove_unused(unsigned int init, ATbool *init_used)
 		p++;
 	}
 
-	for (p=ATgetLength(processes)-1; p>=0; p--)
+	p = ATgetLength(processes);
+	while ( p > 0 )
 	{
+		p--;
 		if ( ATindexOf(used,(ATerm) ATmakeInt(p),0) == -1 )
 		{
 			processes = ATremoveElementAt(processes,p);
