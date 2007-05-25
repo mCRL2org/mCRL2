@@ -117,7 +117,7 @@ else {
 
   # General examples
   stage install-examples
-          : [ path.glob-tree $(TOP)/examples : *.txt *.mcrl2 *.pnml *.fsm *.trc : .svn ]
+          : [ path.glob-tree $(TOP)/examples : *.txt *.mcrl2 *.pnml *.mcf *.fsm *.trc : .svn ]
           : <location>$(DATA_DIR)
             <install-source-root>.
           ;
