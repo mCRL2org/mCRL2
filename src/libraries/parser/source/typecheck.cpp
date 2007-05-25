@@ -62,8 +62,8 @@ static ATbool gstcIsSortDeclared(ATermAppl SortName);
 static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr, bool high_level=true);
 static ATbool gstcIsSortExprListDeclared(ATermList SortExprList);
 static ATbool gstcReadInSortStruct(ATermAppl);
-static ATbool gstcAddConstant(ATermAppl, ATermAppl, const char*, bool high_level=true);
-static ATbool gstcAddFunction(ATermAppl, ATermAppl, const char*, bool high_level=true);
+static ATbool gstcAddConstant(ATermAppl, const char*, bool high_level=true);
+static ATbool gstcAddFunction(ATermAppl, const char*, bool high_level=true);
 
 static void gstcAddSystemConstant(ATermAppl);
 static void gstcAddSystemFunction(ATermAppl);
@@ -880,10 +880,10 @@ static ATbool gstcReadInFuncs(ATermList Funcs, bool high_level){
     }
     
     if((gsIsSortArrowProd(FuncType))){
-      if(!gstcAddFunction(FuncName,FuncType,"function",high_level)) { return ATfalse; }
+      if(!gstcAddFunction(gsMakeOpId(FuncName,FuncType),"function",high_level)) { return ATfalse; }
     }
     else{
-      if(!gstcAddConstant(FuncName,FuncType,"constant",high_level)) { gsErrorMsg("could not add constant\n"); return ATfalse; }
+      if(!gstcAddConstant(gsMakeOpId(FuncName,FuncType),"constant",high_level)) { gsErrorMsg("could not add constant\n"); return ATfalse; }
     }
     gsDebugMsg("Read-in Func %T, Types %T\n",FuncName,FuncType);    
   }
@@ -1172,13 +1172,13 @@ static ATbool gstcReadInSortStruct(ATermAppl SortExpr){
       // recognizer -- if present -- a function from SortExpr to Bool
       ATermAppl Name=ATAgetArgument(Constr,2);
       if(!gsIsNil(Name) && 
-	 !gstcAddFunction(Name,gsMakeSortArrowProd(ATmakeList1((ATerm)SortExpr),gsMakeSortExprBool()),"recognizer")) {return ATfalse;}
+	 !gstcAddFunction(gsMakeOpId(Name,gsMakeSortArrowProd(ATmakeList1((ATerm)SortExpr),gsMakeSortExprBool())),"recognizer")) {return ATfalse;}
       
       // constructor type and projections
       ATermList Projs=ATLgetArgument(Constr,1);
       Name=ATAgetArgument(Constr,0);
       if(ATisEmpty(Projs)){
-	if(!gstcAddConstant(Name,SortExpr,"constructor constant")){return ATfalse;}
+	if(!gstcAddConstant(gsMakeOpId(Name,SortExpr),"constructor constant")){return ATfalse;}
 	else continue;
       }
       
@@ -1192,10 +1192,10 @@ static ATbool gstcReadInSortStruct(ATermAppl SortExpr){
 
 	ATermAppl ProjName=ATAgetArgument(Proj,0);
 	if(!gsIsNil(ProjName) &&
-	   !gstcAddFunction(ProjName,gsMakeSortArrowProd(ATmakeList1((ATerm)SortExpr),ProjSort),"projection")) {return ATfalse;}
+	   !gstcAddFunction(gsMakeOpId(ProjName,gsMakeSortArrowProd(ATmakeList1((ATerm)SortExpr),ProjSort)),"projection")) {return ATfalse;}
 	ConstructorType=ATinsert(ConstructorType,(ATerm)ProjSort);
       }
-      if(!gstcAddFunction(Name,gsMakeSortArrowProd(ATreverse(ConstructorType),SortExpr),"constructor")) {return ATfalse;}
+      if(!gstcAddFunction(gsMakeOpId(Name,gsMakeSortArrowProd(ATreverse(ConstructorType),SortExpr)),"constructor")) {return ATfalse;}
     }
     return ATtrue;
   }
@@ -1204,8 +1204,12 @@ static ATbool gstcReadInSortStruct(ATermAppl SortExpr){
   return Result;
 }
 
-static ATbool gstcAddConstant(ATermAppl Name, ATermAppl Sort, const char* msg, bool high_level){
+static ATbool gstcAddConstant(ATermAppl OpId, const char* msg, bool high_level){
+  assert(gsIsOpId(OpId));
   ATbool Result=ATtrue;
+
+  ATermAppl Name = gsGetName(OpId);
+  ATermAppl Sort = gsGetSort(OpId);
 
   if(ATAtableGet(context.constants, (ATerm)Name) || ATLtableGet(context.functions, (ATerm)Name)){
     gsErrorMsg("double declaration of %s %P\n", msg, Name);
@@ -1221,8 +1225,11 @@ static ATbool gstcAddConstant(ATermAppl Name, ATermAppl Sort, const char* msg, b
   return Result;
 }
 
-static ATbool gstcAddFunction(ATermAppl Name, ATermAppl Sort, const char *msg, bool high_level){
+static ATbool gstcAddFunction(ATermAppl OpId, const char *msg, bool high_level){
+  assert(gsIsOpId(OpId));
   ATbool Result=ATtrue;
+  ATermAppl Name = gsGetName(OpId);
+  ATermAppl Sort = gsGetSort(OpId);
 
   //constants and functions can have the same names
   //  if(ATAtableGet(context.constants, (ATerm)Name)){
