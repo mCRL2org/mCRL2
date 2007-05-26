@@ -173,7 +173,7 @@ toolset darwin cc :  "-o " : -D
 ## GCC 2.x, 3.x, 4.x
 toolset gcc gcc : "-o " : -D
     : -pedantic
-    [ opt --release : [ opt --symbols : -g : -s ] -O3 ]
+    [ opt --release : [ opt --symbols : -g : -s ] -O3 -fno-strict-aliasing ]
     [ opt --debug : -g -O0 -fno-inline ]
     -I$(--python-include) -I$(--extra-include) -Wno-long-long
     : -L$(--python-lib[1]) -l$(--python-lib[2]) ;
