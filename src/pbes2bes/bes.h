@@ -112,7 +112,7 @@ namespace bes
     return BESIf;
   }
 
-  inline bes_expression false_()
+  /* inline bes_expression false_()
   { static bes_expression BESfalse=initBESfalse(BESfalse);
     return BESfalse;
   }
@@ -120,6 +120,17 @@ namespace bes
   inline bes_expression true_()
   { static bes_expression BEStrue=initBEStrue(BEStrue);
     return BEStrue;
+  } */
+
+  bes_expression BESfalse;
+  inline bes_expression false_()
+  { return (BESfalse?BESfalse:BESfalse=initBESfalse(BESfalse));
+  }
+
+  bes_expression BEStrue;
+  inline bes_expression true_()
+  {
+    return (BEStrue?BEStrue:BEStrue=initBEStrue(BEStrue));
   }
 
   inline bes_expression and_(bes_expression b1,bes_expression b2)
@@ -224,7 +235,7 @@ namespace bes
     // ATfprintf(stderr,"BDD b3 %t\n",(ATerm)b3);
 
     bes_expression b=BDDif_rec(b1,b2,b3,hashtable);
-    hashtable.reset();
+    // hashtable.reset(); This costs a lot of time, currently.
     // ATfprintf(stderr,"Result b %t\n",(ATerm)b);
     return b;
   }

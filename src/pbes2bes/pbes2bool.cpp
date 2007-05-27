@@ -608,62 +608,51 @@ static bes_expression substitute_fp(
 static void add_variables_to_set(
                 bes::variable_type v,
                 bes_expression b,
-                std::vector<std::set <bes::variable_type> > &variable_occurrence_set)
+                std::vector<std::set <bes::variable_type> > &variable_occurrence_set,
+                const unsigned long current_rank)
 { 
   if (bes::is_true(b)||bes::is_false(b))
   { return;
   }
   assert(is_if(b));
-  if ((bes_equations.get_rank(v)<bes_equations.get_rank(get_variable(condition(b))))||
-      ((bes_equations.get_rank(v)==bes_equations.get_rank(get_variable(condition(b))))&&
-        (v<get_variable(condition(b)))))
+  if (current_rank==bes_equations.get_rank(get_variable(condition(b))))
   { variable_occurrence_set[get_variable(condition(b))].insert(v);
   }
   // Using hash tables this can be made more efficient, by employing
   // sharing of the aterm representing b.
-  add_variables_to_set(v,then_branch(b),variable_occurrence_set);
-  add_variables_to_set(v,else_branch(b),variable_occurrence_set);
+  add_variables_to_set(v,then_branch(b),variable_occurrence_set,current_rank);
+  add_variables_to_set(v,else_branch(b),variable_occurrence_set,current_rank);
 }
 
 
 /* substitute boolean equation expression */
-static bes_expression substitute_bex(
-                const bes::variable_type v,
-                const bes::variable_type w,
+static bes_expression substitute_rank(
                 const bes_expression b,
-                std::vector<std::set <bes::variable_type> > &variable_occurrence_set)
-{ /* substitute the rhs of v in b, which is (part) of
-     the rhs for w, and normalize the result into a BDD */
-  
+                const unsigned long current_rank,
+                const atermpp::vector<bes_expression> &approximation)
+{ /* substitute variables with rank larger and equal
+     than current_rank with their approximations. */
+     
   if (is_if(b))
   { 
-    if (v==bes::get_variable(condition(b)))
+    bes::variable_type v=bes::get_variable(condition(b));
+    if (bes_equations.get_rank(v)==current_rank)
     {
-      /* first check whether v and cond refer to the same variable, as
-       * cond can then be substituted by true (for nu) or false (for mu) */
-      if (w==v)
-      { assert(0); // Variables that are equal at the left and right
-                   // have been replaced by true and false. 
+      if (bes::is_true(approximation[v]))
+      { return substitute_rank(then_branch(b),current_rank,approximation);
+      }
+      if (bes::is_false(approximation[v]))
+      { return substitute_rank(else_branch(b),current_rank,approximation);
       }
 
-      /* if the variable cond has a higher rank than v, or if 
-       * cond has an equal rank, but the index of cond is higher,
-       * we can substitute the rhs of cond for cond. Note that we
-       * must also carry out the substitution on the body of
-       * cond. As cond does not contain variables higher in the
-       * ordering than cond, this can never lead to a loop. */
-
-      if (!((bes_equations.get_rank(w)<bes_equations.get_rank(v))||
-              ((bes_equations.get_rank(w)==bes_equations.get_rank(v)) && (w<v))))
-      { assert(0);
-      }
-      add_variables_to_set(w,bes_equations.get_rhs(v),variable_occurrence_set);
-      return BDDif(bes_equations.get_rhs(v),then_branch(b),else_branch(b));
+      bes_expression b1=substitute_rank(then_branch(b),current_rank,approximation);
+      bes_expression b2=substitute_rank(else_branch(b),current_rank,approximation);
+      return BDDif(approximation[v],b1,b2);
     }
     else
     { /* the condition is not equal to v */
-      bes_expression b1=substitute_bex(v,w,then_branch(b),variable_occurrence_set);
-      bes_expression b2=substitute_bex(v,w,else_branch(b),variable_occurrence_set);
+      bes_expression b1=substitute_rank(then_branch(b),current_rank,approximation);
+      bes_expression b2=substitute_rank(else_branch(b),current_rank,approximation);
       if ((b1==then_branch(b)) && (b2==else_branch(b)))
       { return b;
       }
@@ -717,35 +706,38 @@ static bes_expression evaluate_bex(
 static bool solve_bes()
 { 
   gsVerboseMsg("Solving BES...\n");
-  std::vector<std::set <bes::variable_type> > variable_occurrence_set(bes_equations.nr_of_equations()+1);
-  atermpp::vector<bes_expression> approximation(bes_equations.nr_of_equations()+1,bes::true_());
-  set <bes::variable_type> todo;
-
-  for(bes::variable_type v=bes_equations.nr_of_equations(); v>0; v--)
-  { add_variables_to_set(v,bes_equations.get_rhs(v),variable_occurrence_set);
-  }
+  atermpp::vector<bes_expression> approximation(bes_equations.nr_of_equations()+1);
 
   /* Set the approximation to its initial value */
   for(bes::variable_type v=bes_equations.nr_of_equations(); v>0; v--)
   { if (bes_equations.get_fixpoint_symbol(v)==pbes_fixpoint_symbol::mu())
     { approximation[v]=bes::false_();
-      /* otherwise true, but this is automatically guaranteed due to the initialisation
-         of approximation */
     } 
+    else
+    { approximation[v]=bes::true_();
+    }
   }
 
   for(unsigned long current_rank=bes_equations.max_rank;
       current_rank>0 ; current_rank--)
   { 
-    // cerr << "Current_rank " << current_rank << endl;
-    /* Put all variables of current_rank in todo, because these are
+    std::vector<std::set <bes::variable_type> > variable_occurrence_set(bes_equations.nr_of_equations()+1);
+    set <bes::variable_type> todo;
+
+    /* put all variables of equations in the variable occurrence set, provided
+       the rank of these variables have the current rank. A variable v is put
+       in the set at index w, if w occurs in the rhs of v.
+       Moreover, put all variables of current_rank in todo, because these are
        involved in the current iteration process.  */
+
     for(bes::variable_type v=bes_equations.nr_of_equations(); v>0; v--)
     { if (bes_equations.get_rank(v)==current_rank)
       { todo.insert(v);
-      } 
+        add_variables_to_set(v,bes_equations.get_rhs(v),variable_occurrence_set,current_rank);
+      }
     }
-
+  
+    /* Calculate the stable solution for the current rank */
     for( ; todo.size()>0 ; )
     { set<bes::variable_type>::iterator w= todo.begin();
       todo.erase(w);
@@ -755,11 +747,24 @@ static bool solve_bes()
       { bes_expression t=evaluate_bex(bes_equations.get_rhs(*u),approximation,current_rank);
         
         // cerr << "AAAA " << *w << endl;
-        if ((bes_equations.get_rank(*u)==current_rank) && (t!=approximation[*u]))
+        assert(bes_equations.get_rank(*u)==current_rank);
+        if (t!=approximation[*u])
         { approximation[*u]=t;
           todo.insert(*u);
           // cerr << "Insert " << *u << endl;
         }
+      }
+    }
+
+    /* substitute the stable solution for the current rank in all other
+       equations. */
+ 
+    for(bes::variable_type v=bes_equations.nr_of_equations(); v>0; v--)
+    { if (bes_equations.get_rank(v)==current_rank)
+      { bes_equations.set_rhs(v,approximation[v]);
+      }
+      else 
+      { bes_equations.set_rhs(v,substitute_rank(bes_equations.get_rhs(v),current_rank,approximation));
       }
     }
   }
@@ -768,36 +773,6 @@ static bool solve_bes()
          bes::is_false(approximation[1]));
   return bes::is_true(approximation[1]);  /* 1 is the index of the initial variable */
 }
-
-
-/* (bes::variable_type v=bes_equations.nr_of_equations(); v>0; v--)
-    { if (v % 100==0)
-      { gsVerboseMsg("Solving BES. Currently at variable %d\n",v);
-      } 
-      if (bes_equations.get_rank(v)==current_rank)
-      { bes_equations.set_rhs(v,substitute_fp(bes_equations.get_rhs(v),v));
-        for(std::set <bes::variable_type>:: iterator w=variable_occurrence_set[v].begin();
-            w!=variable_occurrence_set[v].end() ; w++)
-        { 
-          ATfprintf(stderr,".");
-          bes_equations.set_rhs(*w,substitute_bex(v,*w,bes_equations.get_rhs(*w),variable_occurrence_set));
-          variable_occurrence_set[*w].erase(v);
-        }
-        / * We do not need v anymore, because is has been substituted away everywhere * /
-        variable_occurrence_set[v].clear();
-        / * reset rhs of bes equation to true, except
-         * if it is the initial equation  * /
-        if (v>1)
-        { bes_equations.set_rhs(v,bes::true_()); 
-        }
-      }
-    }
-  }
-
-  assert(bes::is_true(bes_equations.get_rhs(1))||
-         bes::is_false(bes_equations.get_rhs(1)));
-  return bes::is_true(bes_equations.get_rhs(1)); / * 1 is the index of the initial variable * /
-} */
 
 //function load_pbes
 //------------------

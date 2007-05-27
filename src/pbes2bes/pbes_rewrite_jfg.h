@@ -14,8 +14,8 @@ lps::pbes_expression pbes_expression_rewrite_and_simplify(
 /// while simultaneously applying substitutions. The substituted terms
 //  are assumed to be in normal form, and are not rewritten.
 lps::pbes_expression pbes_expression_substitute_and_rewrite(
-              lps::pbes_expression p, 
-              lps::data_specification data, 
+              const lps::pbes_expression &p, 
+              const lps::data_specification &data, 
               Rewriter *rewriter);
 
 // Pre: p is a pbes_expression

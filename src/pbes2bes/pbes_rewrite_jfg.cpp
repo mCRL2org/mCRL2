@@ -19,8 +19,8 @@ using namespace pbes_expr;
 //                 | <PropVarInst>
 
 pbes_expression pbes_expression_substitute_and_rewrite(
-                       pbes_expression p,
-                       data_specification data,
+                       const pbes_expression &p,
+                       const data_specification &data,
                        Rewriter *rewriter);
 
 bool element_in_propvarinstlist(data_variable_list vars, std::set< propositional_variable_instantiation > pvilist)
@@ -263,8 +263,8 @@ pbes_expression pbes_expression_rewrite_and_simplify(
 
 
 pbes_expression pbes_expression_substitute_and_rewrite(
-                   pbes_expression p, 
-                   data_specification data, 
+                   const pbes_expression &p, 
+                   const data_specification &data, 
                    Rewriter *rewriter)
 { 
   pbes_expression result;
@@ -325,7 +325,7 @@ pbes_expression pbes_expression_substitute_and_rewrite(
     result = p;
   }
   else if (is_forall(p))
-  { // p = forall(data_expression_list, pbes_expression)
+  { // p == forall(data_expression_list, pbes_expression)
     data_variable_list data_vars = quant_vars(p);
     pbes_expression expr = pbes_expression_substitute_and_rewrite(quant_expr(p), data, rewriter);
     //Remove data_vars which do not occur in expr
@@ -333,7 +333,7 @@ pbes_expression pbes_expression_substitute_and_rewrite(
     for (data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
     {
       if (occurs_in(expr, *i)) // The var occurs in expr
-      { occurred_data_vars = push_back(occurred_data_vars, *i);
+      { occurred_data_vars = push_front(occurred_data_vars, *i);
       }
     }
 
