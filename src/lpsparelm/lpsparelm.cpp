@@ -266,9 +266,8 @@ void lpsParElm::findDataVariablesInDataExpression(lps::data_expression const& in
     } else {
 	  if (!input.arguments().empty()){
         for(lps::data_expression_list::iterator i= input.arguments().begin(); i != input.arguments().end(); ++i){
-	      if(is_data_variable(i->head())){p_usedVars.insert(i->head());
+	      findDataVariablesInDataExpression( *i );
 	      }
- 	    }
       } else 
       {return;}
   }
@@ -394,7 +393,7 @@ void lpsParElm::filter() {
 
 inline void lpsParElm::output() {
   using namespace lps;
-
+   
   linear_process lps = p_spec.process();
   summand_list rebuild_summandlist;
   data_variable_list rebuild_process_parameters;
