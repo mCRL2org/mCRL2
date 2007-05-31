@@ -258,7 +258,6 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
   /* Add lps file when output is FSM format or when the output is mCRL2 and the input is Aldebaran or mCRL */
   if (format_selector.get_selection() == fsm || (format_selector.get_selection() == svc_mcrl2 && (
-      c.get_input(lts_file_for_input).get_mime_type().get_sub_type() == "aut" ||
       c.get_input(lts_file_for_input).get_mime_type().get_sub_type() == "svc" ||
       c.get_input(lts_file_for_input).get_mime_type().get_sub_type() == "svc+mcrl"))) {
 

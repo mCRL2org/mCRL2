@@ -1,5 +1,5 @@
 /* XPM */
-static char * file_generation_in_progress_xpm[] = {
+static const char * file_generation_in_progress_xpm[] = {
 "24 24 80 1",
 " 	c None",
 ".	c #999400",

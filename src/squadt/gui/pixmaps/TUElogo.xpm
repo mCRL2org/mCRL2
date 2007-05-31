@@ -1,5 +1,5 @@
 /* XPM */
-static char * TUElogo_xpm[] = {
+static const char * TUElogo_xpm[] = {
 "218 32 9 1",
 " 	c None",
 ".	c #FFFFFF",

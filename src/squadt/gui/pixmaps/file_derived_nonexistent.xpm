@@ -1,5 +1,5 @@
 /* XPM */
-static char * file_derived_nonexistent_xpm[] = {
+static const char * file_derived_nonexistent_xpm[] = {
 "24 24 102 2",
 "  	c None",
 ". 	c #800000",

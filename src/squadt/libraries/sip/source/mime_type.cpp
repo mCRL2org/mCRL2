@@ -4,7 +4,7 @@
 #include "sip/mime_type.h"
 
 namespace sip {
-  char* const       mime_type::main_type_as_string[] = { "application", "audio", "image", "message", "multipart", "text", "video", "unknown", 0 };
+  const char* const       mime_type::main_type_as_string[] = { "application", "audio", "image", "message", "multipart", "text", "video", "unknown", 0 };
 
   /**
    * \param[in] s a string that represents a mime type
@@ -18,7 +18,7 @@ namespace sip {
       if (matches.size() == 3 && !matches[2].str().empty()) {
         m_sub = matches[2];
 
-        char* const* x = &main_type_as_string[0];
+        const char* const* x = &main_type_as_string[0];
 
         while (*x != 0) {
           if (*x == matches[1]) {

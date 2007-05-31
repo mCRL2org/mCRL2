@@ -31,7 +31,7 @@ namespace sip {
     private:
 
       /** \brief Strings for conversion of main types */
-      static char* const main_type_as_string[];
+      static const char* const main_type_as_string[];
 
     private:
 
