@@ -558,7 +558,6 @@ static bool check_type(lts_type type, ATerm lps)
     {
       return true;
     } else {
-      gsVerboseMsg("supplied LPS cannot be used with LTS\n");
       return false;
     }
   }
@@ -606,27 +605,51 @@ bool p_lts::read_from_fsm(std::istream &is, lps::specification &spec)
 bool p_lts::write_to_fsm(std::string const& filename, ATerm lps)
 {
   lts_type tmp = fsm_get_lts_type();
-  return check_type(tmp,lps) && write_to_fsm(filename,tmp,get_lps_params(lps));
+  if ( (lps != NULL) && !check_type(tmp,lps) )
+  {
+    gsWarningMsg("supplied LPS cannot be used with LTS; ignoring it\n");
+    return write_to_fsm(filename,tmp,NULL);
+  } else {
+    return write_to_fsm(filename,tmp,get_lps_params(lps));
+  }
 }
 
 bool p_lts::write_to_fsm(std::string const& filename, lps::specification &spec)
 {
   lts_type tmp = fsm_get_lts_type();
   lps::linear_process lps = spec.process();
-  return check_type(tmp,lps) && write_to_fsm(filename,tmp,get_lps_params(lps));
+  if ( !check_type(tmp,lps) )
+  {
+    gsWarningMsg("supplied LPS cannot be used with LTS; ignoring it\n");
+    return write_to_fsm(filename,tmp,NULL);
+  } else {
+    return write_to_fsm(filename,tmp,get_lps_params(lps));
+  }
 }
 
 bool p_lts::write_to_fsm(std::ostream &os, ATerm lps)
 {
   lts_type tmp = fsm_get_lts_type();
-  return check_type(tmp,lps) && write_to_fsm(os,tmp,get_lps_params(lps));
+  if ( (lps != NULL) && !check_type(tmp,lps) )
+  {
+    gsWarningMsg("supplied LPS cannot be used with LTS; ignoring it\n");
+    return write_to_fsm(os,tmp,NULL);
+  } else {
+    return write_to_fsm(os,tmp,get_lps_params(lps));
+  }
 }
 
 bool p_lts::write_to_fsm(std::ostream &os, lps::specification &spec)
 {
   lts_type tmp = fsm_get_lts_type();
   lps::linear_process lps = spec.process();
-  return check_type(tmp,lps) && write_to_fsm(os,tmp,get_lps_params(lps));
+  if ( !check_type(tmp,lps) )
+  {
+    gsWarningMsg("supplied LPS cannot be used with LTS; ignoring it\n");
+    return write_to_fsm(os,tmp,NULL);
+  } else {
+    return write_to_fsm(os,tmp,get_lps_params(lps));
+  }
 }
 
 }

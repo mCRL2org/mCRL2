@@ -108,11 +108,11 @@ class squadt_interactor::storage_configuration {
       if (c.output_exists(squadt_interactor::lts_file_for_output)) {
         sip::object& o = c.get_output(lts_file_for_output);
       
-        o.set_mime_type(sip::mime_type(cb_aut->get_status()?"application/aut":"application/svc+mcrl2"));
+        o.set_mime_type(sip::mime_type(cb_aut->get_status()?"text/aut":"application/svc+mcrl2"));
         o.set_location(c.get_output_name(cb_aut->get_status()?".aut":".svc"));
       }
       else {
-        c.add_output(lts_file_for_output, sip::mime_type(cb_aut->get_status()?"application/aut":"application/svc+mcrl2"), c.get_output_name(cb_aut->get_status()?".aut":".svc"));
+        c.add_output(lts_file_for_output, sip::mime_type(cb_aut->get_status()?"text/aut":"application/svc+mcrl2"), c.get_output_name(cb_aut->get_status()?".aut":".svc"));
       }
       
       c.add_option(option_as_aut).set_argument_value< 0, sip::datatype::boolean >(cb_aut->get_status());
