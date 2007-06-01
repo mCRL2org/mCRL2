@@ -10,3 +10,7 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options);
 //      lin_options
 //Ret:  the linearised specification is everything went ok,
 //      NULL, otherwise
+
+/// \brief Function to initialize the global variables in the file lin_std.cpp.
+/// Needed when the linearization algorithm is called more than once.
+void lin_std_initialize_global_variables();

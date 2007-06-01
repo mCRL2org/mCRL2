@@ -71,6 +71,17 @@ void test_xyz_generator()
   x = generator(); BOOST_CHECK(std::string(x) == "Y1"); // X1 should be skipped
 }
 
+void test_state_formula()
+{
+  specification spec    = mcrl22lps(SPECIFICATION);
+  state_formula formula = mcf2statefrm("mu X. mu X. X", spec);
+  std::map<identifier_string, identifier_string> replacements;
+  fresh_identifier_generator generator(make_list(formula, spec));
+  formula = remove_name_clashes_impl(formula, generator, replacements);
+  std::cout << "formula: " << pp(formula) << std::endl;
+  BOOST_CHECK(pp(formula) == "mu X. mu X00. X00");
+}
+
 int test_main(int argc, char* argv[])
 {
   aterm bottom_of_stack;
@@ -79,6 +90,7 @@ int test_main(int argc, char* argv[])
 
   test_pbes();
   test_normalize();
+  test_state_formula();
   test_xyz_generator();
 
   return 0;

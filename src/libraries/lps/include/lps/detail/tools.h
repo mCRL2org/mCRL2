@@ -32,17 +32,18 @@ namespace detail {
   /// N.B. this function may only be called once!
   inline
   specification mcrl22lps(const std::string& spec, t_lin_options options = t_lin_options())
-  {
-    static bool first_time_called = true;
-    if (first_time_called)
-    {
-      first_time_called = false;
-    }
-    else
-    {
-      throw std::runtime_error("mcrl22lps may only be called once!");
-    }
-   
+  {   
+//    static bool first_time_called = true;
+//    if (first_time_called)
+//    {
+//      first_time_called = false;
+//    }
+//    else
+//    {
+//      throw std::runtime_error("mcrl22lps may only be called once!");
+//    }
+    lin_std_initialize_global_variables();
+    
     // the lineariser expects data from a stream...
     std::stringstream spec_stream;
     spec_stream << spec;

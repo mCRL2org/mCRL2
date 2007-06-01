@@ -8698,3 +8698,52 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
 
   return result;
 }
+
+/// \brief Function to initialize the global variables in this file.
+/// Needed when the linearization algorithm is called more than once.
+void lin_std_initialize_global_variables()
+{
+  timeIsBeingUsed = false;
+  regular = false;
+  regular2 = false;
+  cluster = false;
+  nocluster = false;
+  oldstate = false;
+  binary = false;
+  nosumelm = false;
+  statenames = false;
+  mayrewrite = false;
+  allowFreeDataVariablesInProcesses = false;
+  nodeltaelimination = false;
+  add_delta = false;
+  rewr = NULL;
+  time_operators_used=0;
+  seq_varnames=NULL;
+  // char scratch1[STRINGLENGTH];
+  objectIndexTable=NULL;
+  stringTable=NULL;
+  freshstringIndices=NULL;
+  realsort=NULL;
+  enumeratedtypelist=NULL;
+  objectdata=NULL;
+  maxobject=0;
+  emptystringlist =NULL;
+  initprocspec_symbol=0;
+  tuple_symbol=0;
+  terminationAction=NULL;
+  terminatedProcId=NULL;
+  pcrlprocesses=NULL;
+  localpcrlprocesses=NULL;
+  numberOfNewProcesses=0;
+  warningNumber=1000;
+  tau_process=NULL;
+  delta_process=NULL;
+  LocalpCRLprocs=NULL;
+  localequationvariables=NULL;
+  stacklist=NULL;
+  sumlist=NULL;
+  enumeratedtypes=NULL;
+  comm_table = NULL;
+  comm_table_size = 0;
+  comm_table_num = 0; 
+}
