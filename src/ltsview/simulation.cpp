@@ -6,6 +6,7 @@ Simulation::Simulation()
 {
   //currState = NULL;
   started=false;
+  chosenTrans = -1;
 }
   
 void Simulation::start(State* initialState) {

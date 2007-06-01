@@ -25,7 +25,7 @@ class State {
     void      addInTransition( Transition* trans );
     void      addLoop( Transition* trans );
     void      addOutTransition( Transition* trans );
-		void			addParameterValue(int valindex);
+    void      addParameterValue(int valindex);
     void      addSubordinate( State* s );
     void      addSuperior( State* s );
     void      clearHierarchyInfo();
