@@ -48,23 +48,20 @@ class action_label: public aterm_appl
        m_sorts(sorts)
     {}
 
-    /// Returns the name of the action label.
-    ///
+    /// \brief Returns the name of the action label
     identifier_string name() const
     {
       return m_name;
     }
 
-    /// Returns the sorts of the action label.
-    ///
+    /// \brief Returns the sorts of the action label
     sort_list sorts() const
     {
       return m_sorts;
     }
 
-    /// Applies a substitution to this action label and returns the result.
+    /// \brief Applies a substitution to this action label and returns the result
     /// The Substitution object must supply the method aterm operator()(aterm).
-    ///
     template <typename Substitution>
     action_label substitute(Substitution f)
     {
@@ -75,9 +72,9 @@ class action_label: public aterm_appl
 ///////////////////////////////////////////////////////////////////////////////
 // action_label_list
 /// \brief singly linked list of actions
-///
 typedef term_list<action_label> action_label_list;
 
+/// \brief Returns true if the term t is an action label
 inline
 bool is_action_label(aterm_appl t)
 {
@@ -86,7 +83,7 @@ bool is_action_label(aterm_appl t)
 
 ///////////////////////////////////////////////////////////////////////////////
 // action
-/// \brief Represents an action.
+/// \brief Represents an action
 ///
 // <Action>       ::= Action(<ActId>, <DataExpr>*)
 class action: public aterm_appl
@@ -123,39 +120,20 @@ class action: public aterm_appl
       m_label = action_label(*begin());
     }
 
-    /// Returns the label of the action.
-    ///
+    /// \brief Returns the label of the action
     action_label label() const
     {
       return m_label;
     }
 
-    /// Returns the sequence of arguments.
-    ///
+    /// \brief Returns the arguments of the action
     data_expression_list arguments() const
     {
       return m_arguments;
     }
 
-    /// DEPRECATED (This method will disappear).
-    /// Returns the name of the action.
-    ///
-    identifier_string name() const
-    {
-      return m_label.name();
-    }
-
-    /// DEPRECATED (This method will disappear).
-    /// Returns the sorts of the action.
-    ///
-    sort_list sorts() const
-    {
-      return m_label.sorts();
-    }
-
-    /// Applies a substitution to this action and returns the result.
+    /// \brief Applies a substitution to this action and returns the result
     /// The Substitution object must supply the method aterm operator()(aterm).
-    ///
     template <typename Substitution>
     action substitute(Substitution f)
     {
@@ -166,82 +144,13 @@ class action: public aterm_appl
 ///////////////////////////////////////////////////////////////////////////////
 // action_list
 /// \brief singly linked list of actions
-///
 typedef term_list<action> action_list;
 
+/// \brief Returns true if the term t is an action
 inline
 bool is_action(aterm_appl t)
 {
   return gsIsAction(t);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// timed_action
-/// \brief multi action with time
-///
-class timed_action
-{
-  protected:
-    action_list     m_actions;
-    data_expression m_time;
-
-  public:
-    timed_action(action_list actions, data_expression time)
-      : m_actions(actions), m_time(time)
-    {}
-
-    /// Returns true if time is available.
-    ///
-    bool has_time() const
-    {
-      return !m_time.is_nil();
-    }
-
-    /// Returns the sequence of actions. Returns an empty list if is_delta() holds.
-    ///
-    action_list actions() const
-    {
-      return m_actions;
-    }
-
-    /// Returns the time expression.
-    ///
-    data_expression time() const
-    {
-      return m_time;
-    }
-    
-    /// Returns a term representing the name of the first action.
-    ///
-    identifier_string name() const
-    {
-      return front(m_actions).name();
-    }
-    
-    /// Returns the argument of the multi action.
-    data_expression_list arguments() const
-    {
-      return front(m_actions).arguments();
-    }
-
-    /// Applies a substitution to this action and returns the result.
-    /// The Substitution object must supply the method aterm operator()(aterm).
-    ///
-    template <typename Substitution>
-    timed_action substitute(Substitution f)
-    {
-      return timed_action(m_actions.substitute(f), m_time.substitute(f));
-    }     
-};
-
-inline
-std::ostream& operator<<(std::ostream& to, const timed_action& a)
-{
-  to << "TimedAction(" << a.actions();
-  if (a.has_time())
-    to << "," << a.time();
-  to << ")";
-  return to;
 }
 
 } // namespace lps

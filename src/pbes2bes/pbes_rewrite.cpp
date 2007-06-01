@@ -34,11 +34,11 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 		pbes_expression left = pbes_expression_rewrite(lhs(p), data, rewriter);
 		pbes_expression right = pbes_expression_rewrite(rhs(p), data, rewriter);
 		//Options for left and right
-		if (left.is_false() || right.is_false())
+		if (is_false(left) || is_false(right))
 			result = false_();
-		else if (left.is_true())
+		else if (is_true(left))
 			result = right;
-		else if (right.is_true())
+		else if (is_true(right))
 			result = left;
 		else 
 			result = and_(left,right);
@@ -49,11 +49,11 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 		pbes_expression left = pbes_expression_rewrite(lhs(p), data, rewriter);
 		pbes_expression right = pbes_expression_rewrite(rhs(p), data, rewriter);
 		//Options for left and right
-		if (left.is_true() || right.is_true())
+		if (is_true(left) || is_true(right))
 			result = true_();
-		else if (left.is_false())
+		else if (is_false(left))
 			result = right;
-		else if (right.is_false())
+		else if (is_false(right))
 			result = left;
 		else 
 			result = or_(left,right);
@@ -77,7 +77,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 		{
 			data_vars = occured_data_vars;
 			//If expression is true or false -> return it
-			if (expr.is_true() || expr.is_false())
+			if (is_true(expr) || is_false(expr))
 				result = expr;
 			//If the forall  has only finite data variables, make a conjunction out of it.
 			else if (check_finite_list(data.constructors(), get_sorts(data_vars)))
@@ -116,7 +116,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 		{
 			data_vars = occured_data_vars;
 			//If expression is true or false -> return it
-			if (expr.is_true() || expr.is_false())
+			if (is_true(expr) || is_false(expr))
 				result = expr;
 			//If the exists  has only finite data variables, make a conjunction out of it.
 			else if (check_finite_list(data.constructors(), get_sorts(data_vars)))
@@ -152,9 +152,9 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 	else
 	{ // p is a data_expression
 		data_expression d = rewriter->rewrite(p);
-		if (d.is_true())
+		if (is_true(d))
 			result = true_();
-		else if (d.is_false())
+		else if (is_false(d))
 			result = false_();
 		else
 			result = val(d);

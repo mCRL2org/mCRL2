@@ -8,8 +8,16 @@
 
 namespace lps {
 
-/// String type of the LPS library.
-typedef atermpp::aterm_string identifier_string;
+  /// \brief String type of the LPS library
+  /// Identifier strings are represented internally as ATerms.
+  typedef atermpp::aterm_string identifier_string;
+  
+  /// Test if a term is an identifier string.
+  inline
+  bool is_identifier_string(atermpp::aterm t)
+  {
+    return t.type() == AT_APPL && atermpp::aterm_appl(t).size() == 0;
+  }
 
 } // namespace lps
 

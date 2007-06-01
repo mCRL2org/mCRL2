@@ -13,6 +13,8 @@
 #include "lps/data_utility.h"
 
 namespace lps {
+  
+namespace detail {
 
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
@@ -48,6 +50,8 @@ linear_process make_timed_lps(linear_process lps, aterm context)
   summand_list new_summands = apply(lps.summands(), make_timed_lps_summand(generator));
   return set_summands(lps, new_summands);
 }
+
+} // namespace detail
 
 } // namespace lps
 

@@ -8,6 +8,7 @@ exe pbessolve
          /libraries//mcrl2_basic
 	 /libraries//lps
 	 /libraries//rewrite
+         /libraries//parser
          /site-config//boost_program_options
        : <include>.
        ;

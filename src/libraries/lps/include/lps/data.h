@@ -31,7 +31,7 @@ using atermpp::arg3;
 
 ///////////////////////////////////////////////////////////////////////////////
 // data_variable
-/// \brief data variable.
+/// \brief data variable
 ///
 // DataVarId(<String>, <SortExpr>)
 class data_variable: public data_expression
@@ -47,7 +47,8 @@ class data_variable: public data_expression
       assert(detail::check_rule_DataVarId(m_term));
     }
 
-    /// Very incomplete implementation for initialization using strings like "d:D".
+    /// \brief Constructor for strings like "d:D"
+    /// Only works for constant sorts.
     data_variable(const std::string& s)
     {
       std::string::size_type idx = s.find(':');
@@ -57,22 +58,18 @@ class data_variable: public data_expression
       m_term = reinterpret_cast<ATerm>(gsMakeDataVarId(gsString2ATermAppl(name.c_str()), lps::sort(type)));
     }
 
+    data_variable(identifier_string name, const lps::sort& s)
+     : data_expression(gsMakeDataVarId(name, s))
+    {}
+
     data_variable(const std::string& name, const lps::sort& s)
      : data_expression(gsMakeDataVarId(gsString2ATermAppl(name.c_str()), s))
     {}
 
-    /// Returns the name of the data_variable.
-    ///
+    /// \brief Returns the name of the data_variable
     identifier_string name() const
     {
       return arg1(*this);
-    }
-
-    /// Returns the sort of the data_variable.
-    ///
-    lps::sort sort() const
-    {
-      return gsGetSort(*this);
     }
   };
                                                             
@@ -82,6 +79,7 @@ class data_variable: public data_expression
 ///
 typedef term_list<data_variable> data_variable_list;
 
+/// \brief Returns true if the term t is a data variable
 inline
 bool is_data_variable(aterm_appl t)
 {
@@ -117,6 +115,7 @@ class data_application: public data_expression
 ///
 typedef term_list<data_application> data_application_list;
 
+/// \brief Returns true if the term t is a data application
 inline
 bool is_data_application(aterm_appl t)
 {
@@ -144,18 +143,10 @@ class data_operation: public data_expression
      : data_expression(gsMakeOpId(name, s))
     {}
 
-    /// Returns the name of the data_operation.
-    ///
+    /// \brief Returns the name of the data_operation
     identifier_string name() const
     {
       return arg1(*this);
-    }
-
-    /// Returns the sort of the data_operation.
-    ///
-    lps::sort sort() const
-    {
-      return gsGetSort(*this);
     }
   };
                                                             
@@ -165,6 +156,7 @@ class data_operation: public data_expression
 ///
 typedef term_list<data_operation> data_operation_list;
 
+/// \brief Returns true if the term t is a data operation
 inline
 bool is_data_operation(aterm_appl t)
 {
@@ -201,7 +193,7 @@ class data_equation: public aterm_appl
       m_condition = data_expression(*i++);
       m_lhs       = data_expression(*i++);
       m_rhs       = data_expression(*i);
-      assert(m_condition.is_nil() || data_expr::is_bool(m_condition));
+      assert(data_expr::is_nil(m_condition) || data_expr::is_bool(m_condition));
     } 
 
     data_equation(data_variable_list variables,
@@ -215,47 +207,42 @@ class data_equation: public aterm_appl
        m_lhs(lhs),
        m_rhs(rhs)     
     {
-      assert(m_condition.is_nil() || data_expr::is_bool(m_condition));
+      assert(data_expr::is_nil(m_condition) || data_expr::is_bool(m_condition));
     }
 
-    /// Returns the sequence of variables.
-    ///
+    /// \brief Returns the variables of the equation
     data_variable_list variables() const
     {
       return m_variables;
     }
 
-    /// Returns the condition of the summand (must be of type bool).
-    ///
+    /// \brief Returns the condition of the equation
     data_expression condition() const
     {
       return m_condition;
     }
 
-    /// Returns the left hand side of the Assignment.
-    ///
+    /// \brief Returns the left hand side of the equation
     data_expression lhs() const
     {
       return m_lhs;
     }
 
-    /// Returns the right hand side of the Assignment.
-    ///
+    /// \brief Returns the right hand side of the equation
     data_expression rhs() const
     {
       return m_rhs;
     }
 
-    /// Applies a substitution to this data_equation and returns the result.
+    /// \brief Applies a substitution to this data equation and returns the result
     /// The Substitution object must supply the method aterm operator()(aterm).
-    ///
     template <typename Substitution>
     data_equation substitute(Substitution f) const
     {
       return data_equation(f(aterm(*this)));
     }
     
-    /// Returns true if
+    /// \brief Returns true if
     /// <ul>
     /// <li>the types of the left and right hand side are equal</li>
     /// </ul>
@@ -278,6 +265,7 @@ class data_equation: public aterm_appl
 ///
 typedef term_list<data_equation> data_equation_list;
 
+/// \brief Returns true if the term t is a data equation
 inline
 bool is_data_equation(aterm_appl t)
 {
@@ -318,7 +306,7 @@ class data_assignment: public aterm_appl
     {
     }
 
-    /// Returns true if the sorts of the left and right hand side are equal.
+    /// \brief Returns true if the sorts of the left and right hand side are equal
     bool is_well_typed() const
     {
       bool result = gsGetSort(m_lhs) == gsGetSort(m_rhs);
@@ -330,22 +318,19 @@ class data_assignment: public aterm_appl
       return true;
     }
 
-    /// Applies the assignment to t and returns the result.
-    ///
+    /// \brief Applies the assignment to t and returns the result
     aterm operator()(aterm t) const
     {
       return atermpp::replace(t, aterm(m_lhs), aterm(m_rhs));
     }
 
-    /// Returns the left hand side of the data_assignment.
-    ///
+    /// \brief Returns the left hand side of the assignment
     data_variable lhs() const
     {
       return m_lhs;
     }
 
-    /// Returns the right hand side of the data_assignment.
-    ///
+    /// \brief Returns the right hand side of the assignment
     data_expression rhs() const
     {
       return m_rhs;
@@ -358,6 +343,7 @@ class data_assignment: public aterm_appl
 ///
 typedef term_list<data_assignment> data_assignment_list;
 
+/// \brief Returns true if the term t is a data assignment
 inline
 bool is_data_assignment(aterm_appl t)
 {
@@ -365,7 +351,7 @@ bool is_data_assignment(aterm_appl t)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// \brief Returns the right hand sides of the assignments.
+/// \brief Makes a data_assignment_list from lhs and rhs
 inline
 data_assignment_list make_assignment_list(data_variable_list lhs, data_expression_list rhs)
 {
@@ -381,7 +367,7 @@ data_assignment_list make_assignment_list(data_variable_list lhs, data_expressio
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// \brief Returns the right hand sides of the assignments.
+/// \brief Returns the right hand sides of the assignments
 inline
 data_expression_list data_assignment_expressions(data_assignment_list l)
 {
@@ -393,69 +379,67 @@ data_expression_list data_assignment_expressions(data_assignment_list l)
   return atermpp::reverse(result);
 }
 
-/// INTERNAL ONLY
-/// Function object for comparing a data variable with the
-/// the left hand side of a data assignment.
-// TODO: move to detail directory
-struct compare_assignment_lhs
-{
-  data_variable m_variable;
-
-  compare_assignment_lhs(const data_variable& variable)
-    : m_variable(variable)
-  {}
-  
-  bool operator()(const data_assignment& a) const
-  {
-    return m_variable == a.lhs();
-  }
-};
-
-/// INTERNAL ONLY
-/// Utility class for applying a list of assignments to a term.
-// TODO: move to detail directory
-struct assignment_list_substitution_helper
-{
-  const data_assignment_list& l;
-  
-  assignment_list_substitution_helper(const data_assignment_list& l_)
-    : l(l_)
-  {}
-  
-  std::pair<aterm_appl, bool> operator()(aterm_appl t) const
-  {
-    if (!is_data_variable(t))
-    {
-      return std::make_pair(t, true); // continue the recursion
-    }
-    data_assignment_list::iterator i = std::find_if(l.begin(), l.end(), compare_assignment_lhs(t));
-    if (i == l.end())
-    {
-      return std::make_pair(t, false); // don't continue the recursion
-    }
-    else
-    {
-      return std::make_pair(i->rhs(), false); // don't continue the recursion
-    }
-  }
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 // assignment_list_substitution
-/// Utility class for applying a sequence of data assignments. Can be used
-/// in the atermpp replace algorithms.
+/// \brief Utility class for applying a sequence of data assignments
+/// Can be used in the replace algorithms of the atermpp library.
+//
+// A linear search is done in the list of assignments.
+// Note that a data_assigment_list doesn't allow for an efficient implementation.
 struct assignment_list_substitution
 {
   const data_assignment_list& m_assignments;
+
+  struct compare_assignment_lhs
+  {
+    data_variable m_variable;
+  
+    compare_assignment_lhs(const data_variable& variable)
+      : m_variable(variable)
+    {}
+    
+    bool operator()(const data_assignment& a) const
+    {
+      return m_variable == a.lhs();
+    }
+  };
+
+  struct assignment_list_substitution_helper
+  {
+    const data_assignment_list& l;
+    
+    assignment_list_substitution_helper(const data_assignment_list& l_)
+      : l(l_)
+    {}
+    
+    std::pair<aterm_appl, bool> operator()(aterm_appl t) const
+    {
+      if (!is_data_variable(t))
+      {
+        return std::make_pair(t, true); // continue the recursion
+      }
+      data_assignment_list::iterator i = std::find_if(l.begin(), l.end(), compare_assignment_lhs(t));
+      if (i == l.end())
+      {
+        return std::make_pair(t, false); // don't continue the recursion
+      }
+      else
+      {
+        return std::make_pair(i->rhs(), false); // don't continue the recursion
+      }
+    }
+  };
   
   assignment_list_substitution(const data_assignment_list& assignments)
     : m_assignments(assignments)
   {}
   
+  /// \brief Applies the assignments to the term t and returns the result
   aterm operator()(aterm t) const
   {
     return partial_replace(t, assignment_list_substitution_helper(m_assignments));
   }
+
   private:
     assignment_list_substitution& operator=(const assignment_list_substitution&)
     {

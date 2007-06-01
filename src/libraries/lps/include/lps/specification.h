@@ -133,8 +133,10 @@ class specification: public aterm_appl
       return true;
     }
 
-    /// Writes the LPS to file. Returns true if the operation succeeded.
-    ///
+    /// \brief Writes the linear process to file and returns true if the operation succeeded.
+    /// \param binary If binary is true the linear process is saved in compressed binary format.
+    /// Otherwise an ascii representation is saved. In general the binary format is
+    /// much more compact than the ascii representation.
     bool save(const std::string& filename, bool binary = true)
     {
       if (binary)

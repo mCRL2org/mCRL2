@@ -159,19 +159,19 @@ pbes_expression pbes_expression_rewrite_and_simplify(
   { // p = and(left, right)
     //Rewrite left and right as far as possible
     pbes_expression left = pbes_expression_rewrite_and_simplify(lhs(p),rewriter);
-    if (left.is_false())
+    if (is_false(left))
     { result = false_();
     }
     else
     { pbes_expression right = pbes_expression_rewrite_and_simplify(rhs(p),rewriter);
       //Options for left and right
-      if (right.is_false())
+      if (is_false(right))
       { result = false_();
       }
-      else if (left.is_true())
+      else if (is_true(left))
       { result = right;
       }
-      else if (right.is_true())
+      else if (is_true(right))
       { result = left;
       }
       else result = and_(left,right);
@@ -181,18 +181,18 @@ pbes_expression pbes_expression_rewrite_and_simplify(
   { // p = or(left, right)
     //Rewrite left and right as far as possible
     pbes_expression left = pbes_expression_rewrite_and_simplify(lhs(p),rewriter);
-    if (left.is_true())
+    if (is_true(left))
     { result = true_();
     }
     else 
     { pbes_expression right = pbes_expression_rewrite_and_simplify(rhs(p),rewriter);
-      if (right.is_true())
+      if (is_true(right))
       { result = true_();
       }
-      else if (left.is_false())
+      else if (is_false(left))
       { result = right;
       }
-      else if (right.is_false())
+      else if (is_false(right))
       { result = left;
       }
       else result = or_(left,right);
@@ -249,9 +249,9 @@ pbes_expression pbes_expression_rewrite_and_simplify(
   else
   { // p is a data_expression
     data_expression d = rewriter->rewrite(p);
-    if (d.is_true())
+    if (is_true(d))
       result = true_();
-    else if (d.is_false())
+    else if (is_false(d))
       result = false_();
     else
       result = val(d);
@@ -274,20 +274,20 @@ pbes_expression pbes_expression_substitute_and_rewrite(
     //Rewrite left and right as far as possible
     pbes_expression left = pbes_expression_substitute_and_rewrite(lhs(p), 
                                data, rewriter);
-    if (left.is_false())
+    if (is_false(left))
     { result = false_();
     }
     else
     { pbes_expression right = pbes_expression_substitute_and_rewrite(rhs(p), 
                  data, rewriter);
       //Options for left and right
-      if (right.is_false())
+      if (is_false(right))
       { result = false_();
       }
-      else if (left.is_true())
+      else if (is_true(left))
       { result = right;
       }
-      else if (right.is_true())
+      else if (is_true(right))
       { result = left;
       }
       else result = and_(left,right);
@@ -298,19 +298,19 @@ pbes_expression pbes_expression_substitute_and_rewrite(
     //Rewrite left and right as far as possible
     pbes_expression left = pbes_expression_substitute_and_rewrite(lhs(p), 
                  data, rewriter);
-    if (left.is_true())
+    if (is_true(left))
     { result = true_();
     }
     else 
     { pbes_expression right = pbes_expression_substitute_and_rewrite(rhs(p), 
                  data, rewriter);
-      if (right.is_true())
+      if (is_true(right))
       { result = true_();
       }
-      else if (left.is_false())
+      else if (is_false(left))
       { result = right;
       }
-      else if (right.is_false())
+      else if (is_false(right))
       { result = left;
       }
       else result = or_(left,right);
@@ -377,7 +377,7 @@ pbes_expression pbes_expression_substitute_and_rewrite(
     {
       data_vars = occurred_data_vars;
       //If expression is true or false -> return it
-      if (expr.is_true() || expr.is_false())
+      if (is_true(expr) || is_false(expr))
         result = expr;
       //If the exists  has only finite data variables, make a conjunction out of it.
       else if (check_finite_list(data.constructors(), get_sorts(data_vars)))
@@ -403,9 +403,9 @@ pbes_expression pbes_expression_substitute_and_rewrite(
   else
   { // p is a data_expression
     data_expression d = rewriter->rewrite(p);
-    if (d.is_true())
+    if (is_true(d))
       result = true_();
-    else if (d.is_false())
+    else if (is_false(d))
       result = false_();
     else
       result = val(d);

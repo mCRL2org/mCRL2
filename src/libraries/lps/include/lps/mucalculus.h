@@ -60,25 +60,22 @@ class action_formula: public aterm_appl
       assert(detail::check_rule_ActFrm(m_term));
     }
 
-    /// Returns true if the action formula equals 'true'.
+    /// \brief Returns true if the action formula equals 'true'
     /// Note that the term will not be rewritten first.
-    ///
     bool is_true() const
     {
       return gsIsActTrue(*this);
     }     
 
-    /// Returns true if the action formula equals 'false'.
+    /// \brief Returns true if the action formula equals 'false'
     /// Note that the term will not be rewritten first.
-    ///
     bool is_false() const
     {
       return gsIsActFalse(*this);
     }
 
-    /// Applies a substitution to this action_formula and returns the result.
+    /// \brief Applies a substitution to this action_formula and returns the result
     /// The Substitution object must supply the method aterm operator()(aterm).
-    ///
     template <typename Substitution>
     action_formula substitute(Substitution f) const
     {
@@ -102,141 +99,172 @@ using atermpp::arg3;
 using atermpp::list_arg1;
 using atermpp::list_arg2;
 
+  /// \brief Returns the expression d
   inline
   action_formula data(data_expression d)
   {
     return action_formula(aterm_appl(d));
   }
   
+  /// \brief Returns the expression true
   inline
   action_formula true_()
   {
     return action_formula(gsMakeActTrue());
   }
   
+  /// \brief Returns the expression false
   inline
   action_formula false_()
   {
     return action_formula(gsMakeActFalse());
   }
   
+  /// \brief Returns not applied to p
   inline
   action_formula not_(action_formula p)
   {
     return action_formula(gsMakeActNot(p));
   }
   
+  /// \brief Returns and applied to p and q
   inline
   action_formula and_(action_formula p, action_formula q)
   {
     return action_formula(gsMakeActAnd(p,q));
   }
   
+  /// \brief Returns or applied to p and q
   inline
   action_formula or_(action_formula p, action_formula q)
   {
     return action_formula(gsMakeActOr(p,q));
   }
   
+  /// \brief Returns imp applied to p and q
   inline
   action_formula imp(action_formula p, action_formula q)
   {
     return action_formula(gsMakeActImp(p,q));
   }
   
+  /// \brief Returns the universal quantification of the formula p over the variables in l
   inline
   action_formula forall(data_variable_list l, action_formula p)
   {
     return action_formula(gsMakeActExists(l, p));
   }
 
+  /// \brief Returns the existential quantification of the formula p over the variables in l
   inline
   action_formula exists(data_variable_list l, action_formula p)
   {
     return action_formula(gsMakeActExists(l, p));
   }
 
+  /// \brief Returns the 'p at d'
   inline
   action_formula at(action_formula p, data_expression d)
   {
     return action_formula(gsMakeActAt(p,d));
   }
 
-  inline bool is_mult_act   (action_formula t) { return gsIsMultAct  (t); }
-  inline bool is_data       (action_formula t) { return gsIsDataExpr (t); }
-  inline bool is_true       (action_formula t) { return gsIsActTrue  (t); }
-  inline bool is_false      (action_formula t) { return gsIsActFalse (t); }
-  inline bool is_not        (action_formula t) { return gsIsActNot   (t); }
-  inline bool is_and        (action_formula t) { return gsIsActAnd   (t); }
-  inline bool is_or         (action_formula t) { return gsIsActOr    (t); }
-  inline bool is_imp        (action_formula t) { return gsIsActImp   (t); }
-  inline bool is_forall     (action_formula t) { return gsIsActForall(t); }
-  inline bool is_exists     (action_formula t) { return gsIsActExists(t); }
-  inline bool is_at         (action_formula t) { return gsIsActAt    (t); }
+  /// \brief Returns true if the term t is a multi action
+  inline bool is_mult_act(action_formula t) { return gsIsMultAct(t); }
 
-/// Returns the parameters of a multi action.
-inline
-action_list mult_params(action_formula t)
-{
-  assert(gsIsMultAct(t));
-  return list_arg1(t);
-}
+  /// \brief Returns true if the term t is a data expression
+  inline bool is_data(action_formula t) { return gsIsDataExpr(t); }
 
-/// Returns the argument of a unary operator of type not.
-inline
-action_formula not_arg(action_formula t)
-{
-  assert(gsIsActNot(t));
-  return arg1(t);
-}
+  /// \brief Returns true if the term t is equal to true
+  inline bool is_true(action_formula t) { return gsIsActTrue(t); }
 
-/// Returns the left hand side of a binary operator of type and/or/imp.
-inline
-action_formula lhs(action_formula t)
-{
-  assert(gsIsActAnd(t) || gsIsActOr(t) || gsIsActImp(t));
-  return arg1(t);
-}
+  /// \brief Returns true if the term t is equal to false
+  inline bool is_false(action_formula t) { return gsIsActFalse(t); }
 
-/// Returns the right hand side of a binary operator of type and/or/imp.
-inline
-action_formula rhs(action_formula t)
-{
-  assert(gsIsActAnd(t) || gsIsActOr(t) || gsIsActImp(t));
-  return arg2(t);
-}
+  /// \brief Returns true if the term t is a not expression
+  inline bool is_not(action_formula t) { return gsIsActNot(t); }
 
-/// Returns the quantifier variables of a state formula of type exists/forall.
-inline
-data_variable_list quant_vars(action_formula t)
-{
-  assert(gsIsActExists(t) || gsIsActForall(t));
-  return list_arg1(t);
-}
+  /// \brief Returns true if the term t is an and expression
+  inline bool is_and(action_formula t) { return gsIsActAnd(t); }
 
-/// Returns the action formula argument of a state formula of type exists/forall.
-inline
-action_formula quant_form(action_formula t)
-{
-  assert(gsIsActExists(t) || gsIsActForall(t));
-  return arg2(t);
-}
+  /// \brief Returns true if the term t is an or expression
+  inline bool is_or(action_formula t) { return gsIsActOr(t); }
 
-/// Returns the action formula argument of a state formula of type at.
-inline
-action_formula at_form(action_formula t)
-{
-  assert(gsIsActAt(t));
-  return arg1(t);
-}
+  /// \brief Returns true if the term t is an implication expression
+  inline bool is_imp(action_formula t) { return gsIsActImp(t); }
 
-/// Returns the time of a state formula of type at.
-inline
-data_expression at_time(action_formula t)
-{
-  assert(gsIsActAt(t));
-  return arg2(t);
-}
+  /// \brief Returns true if the term t is a universal quantification
+  inline bool is_forall(action_formula t) { return gsIsActForall(t); }
+
+  /// \brief Returns true if the term t is an existential quantification
+  inline bool is_exists(action_formula t) { return gsIsActExists(t); }
+
+  /// \brief Returns true if the term t is an at expression
+  inline bool is_at(action_formula t) { return gsIsActAt(t); }
+
+  /// \brief Returns the parameters of an action formula
+  inline
+  action_list mult_params(action_formula t)
+  {
+    assert(gsIsMultAct(t));
+    return list_arg1(t);
+  }
+  
+  /// \brief Returns the argument of a not expression
+  inline
+  action_formula not_arg(action_formula t)
+  {
+    assert(gsIsActNot(t));
+    return arg1(t);
+  }
+  
+  /// \brief Returns the left hand side of an expression of type and/or/imp
+  inline
+  action_formula lhs(action_formula t)
+  {
+    assert(gsIsActAnd(t) || gsIsActOr(t) || gsIsActImp(t));
+    return arg1(t);
+  }
+  
+  /// \brief Returns the right hand side of an expression of type and/or/imp.
+  inline
+  action_formula rhs(action_formula t)
+  {
+    assert(gsIsActAnd(t) || gsIsActOr(t) || gsIsActImp(t));
+    return arg2(t);
+  }
+  
+  /// \brief Returns the variables of a quantification expression
+  inline
+  data_variable_list quant_vars(action_formula t)
+  {
+    assert(gsIsActExists(t) || gsIsActForall(t));
+    return list_arg1(t);
+  }
+  
+  /// \brief Returns the formula of a quantification expression
+  inline
+  action_formula quant_form(action_formula t)
+  {
+    assert(gsIsActExists(t) || gsIsActForall(t));
+    return arg2(t);
+  }
+  
+  /// \brief Returns the formula of an at expression
+  inline
+  action_formula at_form(action_formula t)
+  {
+    assert(gsIsActAt(t));
+    return arg1(t);
+  }
+  
+  /// \brief Returns the time of an at expression
+  inline
+  data_expression at_time(action_formula t)
+  {
+    assert(gsIsActAt(t));
+    return arg2(t);
+  }
 
 } // namespace act_frm
 
@@ -263,9 +291,8 @@ class regular_formula: public aterm_appl
       assert(detail::check_rule_RegFrm(m_term));
     }
 
-    /// Applies a substitution to this regular_formula and returns the result.
+    /// \brief Applies a substitution to this regular formula and returns the result
     /// The Substitution object must supply the method aterm operator()(aterm).
-    ///
     template <typename Substitution>
     regular_formula substitute(Substitution f) const
     {
@@ -275,18 +302,13 @@ class regular_formula: public aterm_appl
 
 ///////////////////////////////////////////////////////////////////////////////
 // regular_formula_list
-/// \brief singly linked list of data expressions
+/// \brief singly linked list of regular expressions
 ///
 typedef term_list<regular_formula> regular_formula_list;
 
+/*
 namespace reg_frm {
 
-  inline
-  regular_formula nil_()
-  {
-    return regular_formula(gsMakeRegNil());
-  }
-  
   inline
   regular_formula seq(regular_formula p, regular_formula q)
   {
@@ -311,18 +333,19 @@ namespace reg_frm {
     return regular_formula(gsMakeRegTransOrNil(p));
   }
 
-  inline bool is_act         (regular_formula t) { return gsIsActFrm       (t); }
-  inline bool is_nil         (regular_formula t) { return gsIsRegNil       (t); }
-  inline bool is_seq         (regular_formula t) { return gsIsRegSeq       (t); }
-  inline bool is_alt         (regular_formula t) { return gsIsRegAlt       (t); }
-  inline bool is_trans       (regular_formula t) { return gsIsRegTrans     (t); }
+  inline bool is_act(regular_formula t) { return gsIsActFrm(t); }
+  inline bool is_nil(regular_formula t) { return gsIsRegNil(t); }
+  inline bool is_seq(regular_formula t) { return gsIsRegSeq(t); }
+  inline bool is_alt(regular_formula t) { return gsIsRegAlt(t); }
+  inline bool is_trans(regular_formula t) { return gsIsRegTrans(t); }
   inline bool is_trans_or_nil(regular_formula t) { return gsIsRegTransOrNil(t); }
 
 } // namespace reg_frm
+*/
 
 ///////////////////////////////////////////////////////////////////////////////
 // state_formula
-/// \brief state formula expression.
+/// \brief state formula
 ///
 //<StateFrm>     ::= <DataExpr>
 //                 | StateTrue
@@ -342,7 +365,6 @@ namespace reg_frm {
 //                 | StateVar(<String>, <DataExpr>*)
 //                 | StateNu(<String>, <DataVarIdInit>*, <StateFrm>)
 //                 | StateMu(<String>, <DataVarIdInit>*, <StateFrm>)
-
 class state_formula: public aterm_appl
 {
   public:
@@ -362,43 +384,26 @@ class state_formula: public aterm_appl
       assert(detail::check_rule_StateFrm(m_term));
     }
 
-    // example: "X(d:D,e:E)"
+    /// \brief Constructor for state variables like "X(d:D,e:E)"
+    /// Only works for constant sorts.
     state_formula(std::string s)
     {
       std::pair<std::string, data_expression_list> p = parse_variable(s);
       m_term = reinterpret_cast<ATerm>(gsMakeStateVar(identifier_string(p.first), p.second));
     }
 
-    /// Returns true if every propositional variable occurring in the formula
+    /// \brief Returns true if every propositional variable occurring in the formula
     /// is bound by a 'nu' and every data variable occurring in the formula is
     /// bound by a 'forall'.
     /// TODO: NOT YET IMPLEMENTED
-    ///
     bool is_closed() const
     {
       assert(false);
       return true;
     }     
 
-    /// Returns true if the state formula equals 'true'.
-    /// Note that the term will not be rewritten first.
-    ///
-    bool is_true() const
-    {
-      return gsIsStateTrue(*this);
-    }     
-
-    /// Returns true if the state formula equals 'false'.
-    /// Note that the term will not be rewritten first.
-    ///
-    bool is_false() const
-    {
-      return gsIsStateFalse(*this);
-    }
-
-    /// Applies a substitution to this state_formula and returns the result.
+    /// \brief Applies a substitution to this state formula and returns the result
     /// The Substitution object must supply the method aterm operator()(aterm).
-    ///
     template <typename Substitution>
     state_formula substitute(Substitution f) const
     {
@@ -408,7 +413,7 @@ class state_formula: public aterm_appl
 
 ///////////////////////////////////////////////////////////////////////////////
 // state_formula_list
-/// \brief singly linked list of data expressions
+/// \brief singly linked list of state formulas
 ///
 typedef term_list<state_formula> state_formula_list;
 
@@ -422,258 +427,282 @@ using atermpp::arg3;
 using atermpp::list_arg1;
 using atermpp::list_arg2;
 
+  /// \brief Returns the expression false
   inline
   state_formula false_()
   {
     return state_formula(gsMakeStateFalse());
   }
   
+  /// \brief Returns the expression true
   inline
   state_formula true_()
   {
     return state_formula(gsMakeStateTrue());
   }
   
+  /// \brief Returns not applied to p
   inline
   state_formula not_(state_formula p)
   {
     return state_formula(gsMakeStateNot(p));
   }
   
+  /// \brief Returns and applied to p and q
   inline
   state_formula and_(state_formula p, state_formula q)
   {
     return state_formula(gsMakeStateAnd(p,q));
   }
   
+  /// \brief Returns or applied to p and q
   inline
   state_formula or_(state_formula p, state_formula q)
   {
     return state_formula(gsMakeStateOr(p,q));
   }
   
+  /// \brief Returns imp applied to p and q
   inline
   state_formula imp(state_formula p, state_formula q)
   {
     return state_formula(gsMakeStateImp(p,q));
   }
   
+  /// \brief Returns the existential quantification of the formula p over the variables in l
   inline
   state_formula exists(data_variable_list l, state_formula p)
   {
     return state_formula(gsMakeStateExists(l, p));
   }
   
+  /// \brief Returns the universal quantification of the formula p over the variables in l
   inline
   state_formula forall(data_variable_list l, state_formula p)
   {
     return state_formula(gsMakeStateExists(l, p));
   }
 
+  /// \brief Returns must applied to r and p
   inline
   state_formula must(regular_formula r, state_formula p)
   {
     return state_formula(gsMakeStateMust(r, p));
   }
 
+  /// \brief Returns may applied to r and p
   inline
   state_formula may(regular_formula r, state_formula p)
   {
     return state_formula(gsMakeStateMay(r, p));
   }
 
+  /// \brief Returns yaled
   inline
   state_formula yaled()
   {
     return state_formula(gsMakeStateYaled());
   }
 
+  /// \brief Returns yaled(t)
   inline
   state_formula yaled_timed(data_expression t)
   {
     return state_formula(gsMakeStateYaledTimed(t));
   }
 
+  /// \brief Returns delay
   inline
   state_formula delay()
   {
     return state_formula(gsMakeStateDelay());
   }
 
+  /// \brief Returns delay(t)
   inline
   state_formula delay_timed(data_expression t)
   {
     return state_formula(gsMakeStateDelayTimed(t));
   }
 
+  /// \brief Returns a variable with the given name and arguments
   inline
   state_formula var(identifier_string name, data_expression_list l)
   {
     return state_formula(gsMakeStateVar(name, l));
   }
 
+  /// \brief Returns a mu expression
   inline
   state_formula mu(identifier_string name, data_assignment_list l, state_formula p)
   {
     return state_formula(gsMakeStateMu(name, l, p));
   }
 
+  /// \brief Returns a nu expression
   inline
   state_formula nu(identifier_string name, data_assignment_list l, state_formula p)
   {
     return state_formula(gsMakeStateNu(name, l, p));
   }
 
-  inline bool is_data       (state_formula t) { return gsIsDataExpr       (t); }
-  inline bool is_true       (state_formula t) { return gsIsStateTrue      (t); }
-  inline bool is_false      (state_formula t) { return gsIsStateFalse     (t); }
-  inline bool is_not        (state_formula t) { return gsIsStateNot       (t); }
-  inline bool is_and        (state_formula t) { return gsIsStateAnd       (t); }
-  inline bool is_or         (state_formula t) { return gsIsStateOr        (t); }
-  inline bool is_imp        (state_formula t) { return gsIsStateImp       (t); }
-  inline bool is_forall     (state_formula t) { return gsIsStateForall    (t); }
-  inline bool is_exists     (state_formula t) { return gsIsStateExists    (t); }
-  inline bool is_must       (state_formula t) { return gsIsStateMust      (t); }
-  inline bool is_may        (state_formula t) { return gsIsStateMay       (t); }
-  inline bool is_delay      (state_formula t) { return gsIsStateDelay     (t); }
-  inline bool is_delay_timed(state_formula t) { return gsIsStateDelayTimed(t); }
-  inline bool is_yaled      (state_formula t) { return gsIsStateYaled     (t); }
-  inline bool is_yaled_timed(state_formula t) { return gsIsStateYaledTimed(t); }
-  inline bool is_var        (state_formula t) { return gsIsStateVar       (t); }
-  inline bool is_nu         (state_formula t) { return gsIsStateNu        (t); }
-  inline bool is_mu         (state_formula t) { return gsIsStateMu        (t); }
+  /// \brief Returns true if the term t is a data expression
+  inline bool is_data(aterm_appl t) { return gsIsDataExpr(t); }
 
-/// Returns the argument of a unary operator of type not.
-inline
-state_formula not_arg(state_formula t)
-{
-  assert(gsIsStateNot(t));
-  return arg1(t);
-}
+  /// \brief Returns true if the term t is equal to true
+  inline bool is_true(aterm_appl t) { return gsIsStateTrue(t); }
 
-/// Returns the left hand side of a binary operator of type and/or/imp.
-inline
-state_formula lhs(state_formula t)
-{
-  assert(gsIsStateAnd(t) || gsIsStateOr(t) || gsIsStateImp(t));
-  return arg1(t);
-}
+  /// \brief Returns true if the term t is equal to false
+  inline bool is_false(aterm_appl t) { return gsIsStateFalse(t); }
 
-/// Returns the right hand side of a binary operator of type and/or/imp.
-inline
-state_formula rhs(state_formula t)
-{
-  assert(gsIsStateAnd(t) || gsIsStateOr(t) || gsIsStateImp(t));
-  return arg2(t);
-}
+  /// \brief Returns true if the term t is a not expression
+  inline bool is_not(aterm_appl t) { return gsIsStateNot(t); }
 
-/// Returns the quantifier variables of a state formula of type exists/forall.
-inline
-data_variable_list quant_vars(state_formula t)
-{
-  assert(gsIsStateExists(t) || gsIsStateForall(t));
-  return list_arg1(t);
-}
+  /// \brief Returns true if the term t is an and expression
+  inline bool is_and(aterm_appl t) { return gsIsStateAnd(t); }
 
-/// Returns the state formula argument of a state formula of type exists/forall.
-inline
-state_formula quant_form(state_formula t)
-{
-  assert(gsIsStateExists(t) || gsIsStateForall(t));
-  return arg2(t);
-}
+  /// \brief Returns true if the term t is an or expression
+  inline bool is_or(aterm_appl t) { return gsIsStateOr(t); }
 
-/// Returns the time of a state formula of type delay/yaled.
-inline
-data_expression time(state_formula t)
-{
-  assert(gsIsStateDelayTimed(t) || gsIsStateYaledTimed(t));
-  return arg1(t);
-}
+  /// \brief Returns true if the term t is an implication expression
+  inline bool is_imp(aterm_appl t) { return gsIsStateImp(t); }
 
-/// Returns the name of a variable.
-inline
-identifier_string var_name(state_formula t)
-{
-  assert(gsIsStateVar(t));
-  return arg1(t);
-}
+  /// \brief Returns true if the term t is a universal quantification
+  inline bool is_forall(aterm_appl t) { return gsIsStateForall(t); }
 
-/// Returns the value of a variable.
-inline
-data_expression_list var_val(state_formula t)
-{
-  assert(gsIsStateVar(t));
-  return list_arg2(t);
-}
+  /// \brief Returns true if the term t is an existential quantification
+  inline bool is_exists(aterm_appl t) { return gsIsStateExists(t); }
 
-/// Returns the name of a mu-operator expression.
-inline
-identifier_string mu_name(state_formula t)
-{
-  assert(gsIsStateMu(t) || gsIsStateNu(t));
-  return arg1(t);
-}
+  /// \brief Returns true if the term t is a must expression
+  inline bool is_must(aterm_appl t) { return gsIsStateMust(t); }
 
-/// Returns the parameters of a mu-operator expression.
-inline
-data_assignment_list mu_params(state_formula t)
-{
-  assert(gsIsStateMu(t) || gsIsStateNu(t));
-  return list_arg2(t);
-}
+  /// \brief Returns true if the term t is a must expression
+  inline bool is_may(aterm_appl t) { return gsIsStateMay(t); }
 
-/// Returns the variables corresponding to mu_params(f).
-inline
-data_variable_list mu_variables(state_formula f)
-{
-  assert(gsIsStateMu(f) || gsIsStateNu(f));
-  data_assignment_list l = mu_params(f);
-  data_variable_list result;
-  for (data_assignment_list::iterator i = l.begin(); i != l.end(); ++i)
+  /// \brief Returns true if the term t is a delay expression
+  inline bool is_delay(aterm_appl t) { return gsIsStateDelay(t); }
+
+  /// \brief Returns true if the term t is a timed delay expression
+  inline bool is_delay_timed(aterm_appl t) { return gsIsStateDelayTimed(t); }
+
+  /// \brief Returns true if the term t is a yaled expression
+  inline bool is_yaled(aterm_appl t) { return gsIsStateYaled(t); }
+
+  /// \brief Returns true if the term t is a timed yaled expression
+  inline bool is_yaled_timed(aterm_appl t) { return gsIsStateYaledTimed(t); }
+
+  /// \brief Returns true if the term t is a variable expression
+  inline bool is_var(aterm_appl t) { return gsIsStateVar(t); }
+
+  /// \brief Returns true if the term t is a nu expression
+  inline bool is_nu(aterm_appl t) { return gsIsStateNu(t); }
+
+  /// \brief Returns true if the term t is a mu expression
+  inline bool is_mu(aterm_appl t) { return gsIsStateMu(t); }
+
+  /// \brief Returns the argument of a not expression
+  inline
+  state_formula not_arg(state_formula t)
   {
-    result = push_front(result, i->lhs());
+    assert(gsIsStateNot(t));
+    return arg1(t);
   }
-  return atermpp::reverse(result);
-}
-
-/// Returns the data expressions corresponding to mu_params(f).
-inline
-data_expression_list mu_expressions(state_formula f)
-{
-  assert(gsIsStateMu(f) || gsIsStateNu(f));
-  data_assignment_list l = mu_params(f);
-  data_expression_list result;
-  for (data_assignment_list::iterator i = l.begin(); i != l.end(); ++i)
+  
+  /// \brief Returns the left hand side of an expression of type and/or/imp
+  inline
+  state_formula lhs(state_formula t)
   {
-    result = push_front(result, i->rhs());
+    assert(gsIsStateAnd(t) || gsIsStateOr(t) || gsIsStateImp(t));
+    return arg1(t);
   }
-  return atermpp::reverse(result);
-}
-
-/// Returns the state formula argument of a mu-operator expression.
-inline
-state_formula mu_form(state_formula t)
-{
-  assert(gsIsStateMu(t) || gsIsStateNu(t));
-  return arg3(t);
-}
-
-/// Returns the action formula argument of a modal operator of type must/may.
-inline
-action_formula mod_act(state_formula t)
-{
-  assert(gsIsStateMust(t) || gsIsStateMay(t));
-  return arg1(t);
-}
-
-/// Returns the state formula argument of a modal operator of type must/may.
-inline
-state_formula mod_form(state_formula t)
-{
-  assert(gsIsStateMust(t) || gsIsStateMay(t));
-  return arg2(t);
-}
+  
+  /// \brief Returns the right hand side of an expression of type and/or/imp.
+  inline
+  state_formula rhs(state_formula t)
+  {
+    assert(gsIsStateAnd(t) || gsIsStateOr(t) || gsIsStateImp(t));
+    return arg2(t);
+  }
+  
+  /// \brief Returns the variables of a quantification expression
+  inline
+  data_variable_list quant_vars(state_formula t)
+  {
+    assert(gsIsStateExists(t) || gsIsStateForall(t));
+    return list_arg1(t);
+  }
+  
+  /// \brief Returns the formula of a quantification expression
+  inline
+  state_formula quant_form(state_formula t)
+  {
+    assert(gsIsStateExists(t) || gsIsStateForall(t));
+    return arg2(t);
+  }
+  
+  /// \brief Returns the time of delay or yaled expression
+  inline
+  data_expression time(state_formula t)
+  {
+    assert(gsIsStateDelayTimed(t) || gsIsStateYaledTimed(t));
+    return arg1(t);
+  }
+  
+  /// \brief Returns the name of a variable expression
+  inline
+  identifier_string var_name(state_formula t)
+  {
+    assert(gsIsStateVar(t));
+    return arg1(t);
+  }
+  
+  /// \brief Returns the value of a variable expression
+  inline
+  data_expression_list var_val(state_formula t)
+  {
+    assert(gsIsStateVar(t));
+    return list_arg2(t);
+  }
+  
+  /// \brief Returns the name of a mu or nu expression
+  inline
+  identifier_string mu_name(state_formula t)
+  {
+    assert(gsIsStateMu(t) || gsIsStateNu(t));
+    return arg1(t);
+  }
+  
+  /// \brief Returns the parameters of a mu or nu expression
+  inline
+  data_assignment_list mu_params(state_formula t)
+  {
+    assert(gsIsStateMu(t) || gsIsStateNu(t));
+    return list_arg2(t);
+  }
+  
+  /// \brief Returns the formula of a mu or nu expression
+  inline
+  state_formula mu_form(state_formula t)
+  {
+    assert(gsIsStateMu(t) || gsIsStateNu(t));
+    return arg3(t);
+  }
+  
+  /// \brief Returns the action formula of a must or may expression
+  inline
+  action_formula mod_act(state_formula t)
+  {
+    assert(gsIsStateMust(t) || gsIsStateMay(t));
+    return arg1(t);
+  }
+  
+  /// \brief Returns the state formula of a must or may expression
+  inline
+  state_formula mod_form(state_formula t)
+  {
+    assert(gsIsStateMust(t) || gsIsStateMay(t));
+    return arg2(t);
+  }
 
 } // namespace state_frm
 
@@ -722,4 +751,3 @@ struct aterm_traits<regular_formula>
 } // namespace atermpp
 
 #endif // LPS_CALCULUS_H
-

@@ -366,7 +366,7 @@ inline bool lpsConstElm::conditionTest(data_expression x) {
   //gsDebugMsg("\033[33m %s\n", pp(x).c_str());
   //gsDebugMsg("\033[30m %s\033[0m\n", pp(data_expression(rewrite(data_expression(p_substitute(x, p_currentState))))).c_str());
   //----------          Debug
-  return (!(data_expression(rewrite(data_expression(p_substitute(x, p_currentState)))).is_false()));
+  return (!(data_expr::is_false(data_expression(rewrite(data_expression(p_substitute(x, p_currentState)))))));
 }
 
 // returns whether the currentState and NextState differ
@@ -488,7 +488,7 @@ void lpsConstElm::findSingleton() {
   }
   
   for(lps::function_list::iterator i= p_spec.data().constructors().begin() ; i != p_spec.data().constructors().end() ; i++){
-    p_countSort[i->range_sort()]++;
+    p_countSort[i->sort().range_sort()]++;
   }
 
   unsigned int n = p_singletonSort.size()+1;
@@ -501,8 +501,8 @@ void lpsConstElm::findSingleton() {
 
       if (p_countSort[*i] == 1){
         for(function_list::iterator j = p_spec.data().constructors().begin() ; j != p_spec.data().constructors().end() ;j++){
-          if (j->range_sort() == *i){
-            sort_list sorts = j->domain_sorts();
+          if (j->sort().range_sort() == *i){
+            sort_list sorts = j->sort().domain_sorts();
             for(sort_list::iterator k = sorts.begin() ; k != sorts.end() ; k++ ){
               b = std::max(p_countSort[*k], b);
             }
@@ -680,7 +680,7 @@ inline void lpsConstElm::output() {
       for(data_expression_list::iterator j = (i->arguments().begin()); j != i->arguments().end(); j++){
         argumentList = push_front(argumentList, data_expression(p_substitute(*j, constantPP)));
       }
-      rebuild_actions = push_front(rebuild_actions, action( i -> name(), atermpp::reverse(argumentList)));
+      rebuild_actions = push_front(rebuild_actions, action( i -> label().name(), atermpp::reverse(argumentList)));
     };
     
     //Rewrite condition

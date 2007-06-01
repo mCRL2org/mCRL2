@@ -40,12 +40,6 @@ int test_main(int, char*[])
   BOOST_CHECK(ids.find(identifier_string("!="))   != ids.end());
   BOOST_CHECK(ids.find(identifier_string("&&"))   != ids.end());
 
-  data_variable_list l = fresh_variable_list(3, e, "e", lps::sort("E"));
-  data_variable_list::iterator i = l.begin();
-  BOOST_CHECK(*i++ == data_variable("e:E"));
-  BOOST_CHECK(*i++ == data_variable("e00:E"));
-  BOOST_CHECK(*i   == data_variable("e01:E"));
-
   data_variable f("f:F");
   x = generator(f);
   BOOST_CHECK(x == data_variable("f:F"));

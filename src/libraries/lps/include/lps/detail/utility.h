@@ -149,7 +149,8 @@ bool check_action_sorts(action_list actions, const std::set<lps::sort>& sorts)
 {
   for (action_list::iterator i = actions.begin(); i != actions.end(); ++i)
   {
-    for (sort_list::iterator j = i->sorts().begin(); j != i->sorts().end(); ++j)
+    const sort_list& s = i->label().sorts();
+    for (sort_list::iterator j = s.begin(); j != s.end(); ++j)
     {
       if (!check_sort(*j, sorts))
         return false;
@@ -204,10 +205,20 @@ bool check_data_spec_sorts(function_list functions, const std::set<lps::sort>& s
 {
   for (function_list::iterator i = functions.begin(); i != functions.end(); ++i)
   {
-    if (!check_sort(i->type(), sorts))
+    if (!check_sort(i->sort(), sorts))
       return false;
   }
   return true;
+}
+
+/// \brief Returns the names of the variables in t
+inline
+std::vector<std::string> variable_strings(data_variable_list t)
+{
+  std::vector<std::string> result;
+  for (data_variable_list::iterator i = t.begin(); i != t.end(); ++i)
+    result.push_back(i->name());
+  return result;
 }
 
 } // namespace detail

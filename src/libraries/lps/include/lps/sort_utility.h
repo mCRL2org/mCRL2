@@ -38,7 +38,7 @@ function_list get_constructors(const function_list& fl, const lps::sort& s)
   function_list result;
   for(function_list::iterator i = fl.begin(); i != fl.end(); ++i)
   {
-    if (i->range_sort() == s)
+    if (i->sort().range_sort() == s)
     {
       result = push_front(result, *i);
     }
@@ -99,7 +99,7 @@ bool is_finite(const function_list& fl, const lps::sort& s, const lps::sort_list
   //it may not occur in a constructor anymore.
   for (function_list::iterator i = cl.begin(); i != cl.end(); ++i)
   {
-    result = result && (!(has_arguments(*i)) || is_finite(fl, i->domain_sorts(), push_front(visited, s)));
+    result = result && (!(has_arguments(*i)) || is_finite(fl, i->sort().domain_sorts(), push_front(visited, s)));
   }
 
   return result;

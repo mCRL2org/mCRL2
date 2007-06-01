@@ -19,7 +19,7 @@ using atermpp::aterm_list;
 
 ///////////////////////////////////////////////////////////////////////////////
 // data_specification
-/// \brief a data declaration of a mCRL specification.
+/// \brief data specification
 ///
 // <DataSpec>     ::= DataSpec(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
 //                      MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*))
@@ -66,35 +66,32 @@ class data_specification: public aterm_appl
         m_equations(equations)
     {}
 
-    /// Returns the list of sorts.
+    /// \brief Returns the sorts of the data specification
     ///
     sort_list sorts() const
     {
       return m_sorts;
     }
 
-    /// Returns the list of constructors.
-    ///
+    /// \brief Returns the constructors of the data specification
     function_list constructors() const
     {
       return m_constructors;
     }
 
-    /// Returns the list of mappings.
-    ///
+    /// \brief Returns the mappings of the data specification
     function_list mappings() const
     {
       return m_mappings;
     }
 
-    /// Returns the list of equations.
-    ///
+    /// \brief Returns the equations of the data specification
     data_equation_list equations() const
     {
       return m_equations;
     }
 
-    /// Returns true if
+    /// \brief Returns true if
     /// <ul>
     /// <li>the domain and range sorts of constructors are contained in the list of sorts</li>
     /// <li>the domain and range sorts of mappings are contained in the list of sorts</li>
@@ -121,8 +118,7 @@ class data_specification: public aterm_appl
     }
 };
 
-/// Sets the sequence of sorts.
-///
+/// \brief Sets the sequence of sorts
 inline
 data_specification set_sorts(data_specification s, sort_list sorts)
 {
@@ -133,8 +129,7 @@ data_specification set_sorts(data_specification s, sort_list sorts)
                            );
 }
 
-/// Sets the sequence of constructors.
-///
+/// \brief Sets the sequence of constructors
 inline
 data_specification set_constructors(data_specification s, function_list constructors)
 {
@@ -145,8 +140,7 @@ data_specification set_constructors(data_specification s, function_list construc
                            );
 }
 
-/// Sets the sequence of mappings.
-///
+/// \brief Sets the sequence of mappings
 inline
 data_specification set_mappings(data_specification s, function_list mappings)
 {
@@ -157,8 +151,7 @@ data_specification set_mappings(data_specification s, function_list mappings)
                            );
 }
 
-/// Sets the sequence of data equations.
-///
+/// \brief Sets the sequence of data equations
 inline
 data_specification set_equations(data_specification s, data_equation_list equations)
 {

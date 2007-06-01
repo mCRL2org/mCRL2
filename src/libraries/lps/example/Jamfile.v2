@@ -10,22 +10,24 @@ project libraries/lps/example
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
    ;
 
-exe garbage         : garbage.cpp : ;
-exe constructors    : constructors.cpp    ../../../mcrl22lps/lin_std.cpp ../../../mcrl22lps/lin_alt.cpp : ;
-exe spec            : spec.cpp            ../../../mcrl22lps/lin_std.cpp ../../../mcrl22lps/lin_alt.cpp : ;
-exe filter_template : filter_template.cpp                                                               : ;
-exe find            : find.cpp            ../../../mcrl22lps/lin_std.cpp ../../../mcrl22lps/lin_alt.cpp : ;
-exe pbes_test       : pbes_test.cpp       ../../../mcrl22lps/lin_std.cpp ../../../mcrl22lps/lin_alt.cpp : ;
-exe term_replace    : term_replace.cpp : ;
+exe sort            : sort.cpp : ;
+#exe garbage         : garbage.cpp : ;
+#exe constructors    : constructors.cpp    ../../../mcrl22lps/lin_std.cpp ../../../mcrl22lps/lin_alt.cpp : ;
+#exe spec            : spec.cpp            ../../../mcrl22lps/lin_std.cpp ../../../mcrl22lps/lin_alt.cpp : ;
+#exe filter_template : filter_template.cpp                                                               : ;
+#exe find            : find.cpp            ../../../mcrl22lps/lin_std.cpp ../../../mcrl22lps/lin_alt.cpp : ;
+#exe pbes_test       : pbes_test.cpp       ../../../mcrl22lps/lin_std.cpp ../../../mcrl22lps/lin_alt.cpp : ;
+#exe term_replace    : term_replace.cpp : ;
 
 install dist
    :
-     term_replace
-     garbage
-     constructors
-     spec
-     filter_template
-     find
-     pbes_test
+     sort
+     #term_replace
+     #garbage
+     #constructors
+     #spec
+     #filter_template
+     #find
+     #pbes_test
    :
    ;

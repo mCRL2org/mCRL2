@@ -18,8 +18,8 @@ int test_main(int, char*[])
   ATermAppl F = gsMakeDataExprFalse();
   data_expression d(T);
 
-  BOOST_CHECK(d.is_true());
-  BOOST_CHECK(!d.is_false());
+  BOOST_CHECK(data_expr::is_true(d));
+  BOOST_CHECK(!data_expr::is_false(d));
   
   data_variable v("d:D");
   data_expression e(v);

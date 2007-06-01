@@ -15,6 +15,7 @@
 #include "lps/data.h"
 #include "lps/sort.h"
 #include "lps/identifier_string.h"
+#include "lps/detail/utility.h"
 #include "atermpp/algorithm.h"
 #include "atermpp/aterm.h"
 #include "atermpp/set.h"
@@ -25,52 +26,21 @@ namespace lps {
 using atermpp::aterm;
 using atermpp::aterm_traits;
 
-/// Test if a term is an identifier.
-struct is_identifier
-{
-  bool operator()(aterm t) const
-  {
-    return t.type() == AT_APPL && aterm_appl(t).size() == 0;
-  }
-};
-
-/// Returns the set of all identifiers occurring in the term t.
+/// \brief Returns the set of all identifier strings occurring in the term t
 template <typename Term>
 std::set<identifier_string> identifiers(Term t)
 {
   std::set<identifier_string> result;
-  find_all_if(aterm_traits<Term>::term(t), is_identifier(), std::inserter(result, result.end()));
-  return result;
-}
-
-/// Returns the set of all identifiers occurring in the term t.
-template <typename Term>
-std::set<std::string> identifier_strings(Term t)
-{
-  std::set<identifier_string> s = identifiers(t);
-  std::set<std::string> result;
-  for (std::set<identifier_string>::iterator i = s.begin(); i != s.end(); ++i)
-    result.insert(*i);
-  return result;
-}
-
-/// Returns the names of the variables in t.
-inline
-std::vector<std::string> variable_strings(data_variable_list t)
-{
-  std::vector<std::string> result;
-  for (data_variable_list::iterator i = t.begin(); i != t.end(); ++i)
-    result.push_back(i->name());
+  find_all_if(aterm_traits<Term>::term(t), is_identifier_string, std::inserter(result, result.end()));
   return result;
 }
 
 /// Returns a copy of t, but with a common postfix added to each variable name,
 /// and such that the new names do not appear in context.
-///
 inline
 data_variable_list fresh_variables(data_variable_list t, const std::set<std::string>& context, std::string postfix_format = "_%02d")
 {
-  std::vector<std::string> ids = variable_strings(t);
+  std::vector<std::string> ids = detail::variable_strings(t);
   std::string postfix;
   for (int i = 0; ; i++)
   {
@@ -93,7 +63,7 @@ data_variable_list fresh_variables(data_variable_list t, const std::set<std::str
   return atermpp::reverse(result);
 }
 
-/// Returns an identifier that doesn't appear in the term context.
+/// \brief Returns an identifier that doesn't appear in the term context
 template <typename Term>
 identifier_string fresh_identifier(std::string hint, Term context)
 {
@@ -108,7 +78,7 @@ identifier_string fresh_identifier(std::string hint, Term context)
   return s;
 }
 
-/// Returns a variable that doesn't appear in context.
+/// \brief Returns a variable that doesn't appear in context
 template <typename Term>
 data_variable fresh_variable(std::string hint, Term context, lps::sort s = sort_expr::real())
 {
@@ -116,7 +86,7 @@ data_variable fresh_variable(std::string hint, Term context, lps::sort s = sort_
   return data_variable(gsMakeDataVarId(id, s));
 }
 
-/// Returns all data variables that occur in the term t.
+/// \brief Returns all data variables that occur in the term t
 template <typename Term>
 std::set<data_variable> find_variables(Term t)
 {
@@ -126,7 +96,7 @@ std::set<data_variable> find_variables(Term t)
   return variables;
 }
 
-/// Returns all names data variables that occur in the term t.
+/// \brief Returns all names data variables that occur in the term t
 template <typename Term>
 std::set<std::string> find_variable_names(Term t)
 {
@@ -311,19 +281,6 @@ class fresh_variable_generator
       return data_variable(gsMakeDataVarId(id, v.sort()));
     }
 };
-
-/// Returns a variable list that doesn't contain terms that appear in context.
-template <typename Term>
-data_variable_list fresh_variable_list(unsigned int size, Term context, std::string hint, lps::sort s = sort_expr::real())
-{
-  data_variable_list result;
-  fresh_variable_generator generator(context, hint, s);
-  for (unsigned int i = 0; i < size; i++)
-  {
-    result = push_front(result, generator());
-  }
-  return data_variable_list(atermpp::reverse(result));
-}
 
 } // namespace lps
 

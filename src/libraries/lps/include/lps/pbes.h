@@ -24,6 +24,7 @@
 #include "lps/data.h"
 #include "lps/data_specification.h"
 #include "lps/pbes_expression.h"
+#include "lps/mucalculus.h"
 #include "lps/pretty_print.h"
 #include "lps/detail/utility.h"
 #include "libstruct.h"
@@ -36,17 +37,9 @@ using atermpp::aterm_appl;
 using atermpp::read_from_named_file;
 using lps::detail::parse_variable;
 
-    struct is_state_variable
-    {
-      bool operator()(aterm_appl t) const
-      {
-        return gsIsStateVar(t);
-      }
-    };
-
 ///////////////////////////////////////////////////////////////////////////////
 // pbes_fixpoint_symbol
-/// \brief pbes fixpoint symbol (mu or nu).
+/// \brief pbes fixpoint symbol (mu or nu)
 ///
 // <FixPoint>     ::= Mu
 //                  | Nu
@@ -70,23 +63,25 @@ class pbes_fixpoint_symbol: public aterm_appl
       return *this;
     }
 
+    /// \brief Returns the mu symbol
     static pbes_fixpoint_symbol mu()
     {
       return pbes_fixpoint_symbol(gsMakeMu());
     }
 
+    /// \brief Returns the nu symbol
     static pbes_fixpoint_symbol nu()
     {
       return pbes_fixpoint_symbol(gsMakeNu());
     }
 
-    /// Returns true if the symbol is mu.
+    /// \brief Returns true if the symbol is mu
     bool is_mu() const
     {
       return gsIsMu(*this);
     }
 
-    /// Returns true if the symbol is nu.
+    /// \brief Returns true if the symbol is nu
     bool is_nu() const
     {
       return gsIsNu(*this);
@@ -105,18 +100,6 @@ class pbes_equation: public aterm_appl
     pbes_expression        m_formula;  // the right hand side
 
   public:
-    /// DEPRECATED
-    static pbes_fixpoint_symbol mu()
-    {
-      return pbes_fixpoint_symbol(gsMakeMu());
-    }
-
-    /// DEPRECATED
-    static pbes_fixpoint_symbol nu()
-    {
-      return pbes_fixpoint_symbol(gsMakeNu());
-    }
-
     pbes_equation()
       : aterm_appl(detail::constructPBEqn())
     {}
@@ -146,33 +129,33 @@ class pbes_equation: public aterm_appl
       return *this;
     }
 
-    /// Returns the fixpoint symbol of the equation.
+    /// \brief Returns the fixpoint symbol of the equation
     pbes_fixpoint_symbol symbol() const
     {
       return m_symbol;
     }
 
-    /// Returns the pbes variable of the equation.
+    /// \brief Returns the pbes variable of the equation
     propositional_variable variable() const
     {
       return m_variable;
     }
 
-    /// Returns the predicate formula on the right hand side of the equation.
+    /// \brief Returns the predicate formula on the right hand side of the equation
     pbes_expression formula() const
     {
       return m_formula;
     }
     
-    /// Returns true if the predicate formula on the right hand side contains no
-    /// predicate variables. (COMMENT Wieger: is_const would be a better name)
+    /// \brief Returns true if the predicate formula on the right hand side contains no predicate variables.
+    /// (Comment Wieger: is_const would be a better name)
     bool is_solved() const
     {
-      aterm t = atermpp::find_if(ATermAppl(m_formula), is_state_variable());
+      aterm t = atermpp::find_if(ATermAppl(m_formula), state_frm::is_var);
       return t == aterm(); // true if nothing was found
     }
 
-    /// Returns true if the equation is a BES (boolean equation system).
+    /// \brief Returns true if the equation is a BES (boolean equation system)
     bool is_bes() const
     {
       return variable().parameters().empty() && formula().is_bes();
@@ -195,7 +178,7 @@ class equation_system: public atermpp::vector<pbes_equation>
     equation_system()
     {}
 
-    /// Returns a equation_system containing equation e.
+    /// \brief Constructs an equation_system containing equation e
     equation_system(pbes_equation e)
     {
       push_back(e);
@@ -205,19 +188,16 @@ class equation_system: public atermpp::vector<pbes_equation>
       : atermpp::vector<pbes_equation>(l.begin(), l.end())
     {}
   
-    /// Applies a substitution to this LPS and returns the result.
+    /// \brief Applies a substitution to this equation system.
     /// The Substitution object must supply the method aterm operator()(aterm).
-    ///
     template <typename Substitution>
-    equation_system substitute(Substitution f)
+    void substitute(Substitution f)
     {
-      // todo: implement substitution
-      assert(false);
-      return *this;
+      std::transform(begin(), end(), begin(), f);
     }     
 
-    /// Returns a equation_system which is the concatenation of the equations of this equation_system and
-    /// the other.
+    /// \brief Returns a equation_system which is the concatenation of the equations
+    /// of this equation_system and the other
     equation_system operator+(equation_system other) const
     {
       equation_system result(*this);
@@ -225,8 +205,8 @@ class equation_system: public atermpp::vector<pbes_equation>
       return result;
     }
 
-    /// Returns a equation_system which is the concatenation of the equations of this equation_system and
-    /// the equation e.
+    /// \brief Returns a equation_system which is the concatenation of the equations
+    /// of this equation_system and the equation e
     equation_system operator+(pbes_equation e) const
     {
       equation_system result(*this);
@@ -234,8 +214,8 @@ class equation_system: public atermpp::vector<pbes_equation>
       return result;
     }
 
-    /// Returns the set of binding variables of the equation_system, i.e. the variables that
-    /// occur on the left hand side of an equation.
+    /// \brief Returns the set of binding variables of the equation_system, i.e. the
+    /// variables that occur on the left hand side of an equation
     atermpp::set<propositional_variable> binding_variables() const
     {
       atermpp::set<propositional_variable> result;
@@ -246,19 +226,19 @@ class equation_system: public atermpp::vector<pbes_equation>
       return result;
     }
 
-    /// Returns the set of occurring variables of the equation_system, i.e. the variables that
-    /// occur in the right hand side of an equation.
+    /// \brief Returns the set of occurring variables of the equation_system, i.e. the
+    /// variables that occur in the right hand side of an equation
     atermpp::set<propositional_variable> occurring_variables() const
     {
       atermpp::set<propositional_variable> result;
       for (const_iterator i = begin(); i != end(); ++i)
       {
-//        atermpp::find_all_if(i->formula(), is_state_variable(), std::inserter(result, result.end()));
+        atermpp::find_all_if(i->formula(), state_frm::is_var, std::inserter(result, result.end()));
       }
       return result;
     }
 
-    /// Returns true if all occurring variables are binding variables.
+    /// \brief Returns true if all occurring variables are binding variables
     bool is_closed() const
     {
       atermpp::set<propositional_variable> bnd = binding_variables();
@@ -266,7 +246,7 @@ class equation_system: public atermpp::vector<pbes_equation>
       return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end());
     }
 
-    /// Returns true if all binding predicate variables of the equation_system are unique.
+    /// \brief Returns true if all binding predicate variables of the equation_system are unique.
     /// Note that this does not imply that the names of the binding predicate
     /// variables are unique.
     bool is_well_formed() const
@@ -283,15 +263,13 @@ class equation_system: public atermpp::vector<pbes_equation>
       return true;
     }
 
-    /// Returns a representation of the term.
-    ///
+    /// \brief Returns an ascii representation of the equation system
     std::string to_string() const
     {
-      pbes_equation_list eqn(begin(), end());
-      return "jammer!";
+      return pbes_equation_list(begin(), end()).to_string();
     }
 
-    /// Returns true if the equation is a BES (boolean equation system).
+    /// \brief Returns true if the equation is a BES (boolean equation system)
     bool is_bes() const
     {
       for (const_iterator i = begin(); i != end(); ++i)
@@ -305,7 +283,7 @@ class equation_system: public atermpp::vector<pbes_equation>
 
 ///////////////////////////////////////////////////////////////////////////////
 // pbes
-/// \brief pbes.
+/// \brief parameterized boolean equation system
 ///
 // <PBES>         ::= PBES(<DataSpec>, <PBEqn>*, <PropVarInst>)
 class pbes
@@ -349,7 +327,7 @@ class pbes
       return m_initial_state;
     }
 
-    /// Reads the pbes from file. Returns true if the operation succeeded.
+    /// \brief Reads the pbes from file. Returns true if the operation succeeded.
     ///
     bool load(const std::string& filename)
     {
@@ -364,8 +342,10 @@ class pbes
       return true;
     }
 
-    /// Writes the pbes to file. Returns true if the operation succeeded.
-    ///
+    /// \brief Writes the pbes to file and returns true if the operation succeeded.
+    /// \param binary If binary is true the pbes is saved in compressed binary format.
+    /// Otherwise an ascii representation is saved. In general the binary format is
+    /// much more compact than the ascii representation.
     bool save(const std::string& filename, bool binary = true)
     {
       aterm t = ATermAppl(*this);
@@ -379,47 +359,46 @@ class pbes
       }
     }
 
-    /// Returns the equations.
-    ///
+    /// \brief Returns the equations
     const equation_system& equations() const
     {
       return m_equations;
     }
 
-    /// Returns the equations.
-    ///
+    /// \brief Returns the equations
     equation_system& equations()
     {
       return m_equations;
     }
 
+    /// \brief Conversion to ATermAppl
     operator ATermAppl() const
     {
       pbes_equation_list l(m_equations.begin(), m_equations.end());
       return gsMakePBES(m_data, l, m_initial_state);
     }
 
-    /// Returns the set of binding variables of the pbes, i.e. the variables that
-    /// occur on the left hand side of an equation.
+    /// \brief Returns the set of binding variables of the pbes, i.e. the
+    /// variables that occur on the left hand side of an equation
     atermpp::set<propositional_variable> binding_variables() const
     {
       return m_equations.binding_variables();
     }
 
-    /// Returns the set of occurring variables of the pbes, i.e. the variables that
-    /// occur in the right hand side of an equation.
+    /// \brief Returns the set of occurring variables of the pbes, i.e.
+    /// the variables that occur in the right hand side of an equation.
     atermpp::set<propositional_variable> occurring_variables() const
     {
       return m_equations.occurring_variables();
     }
 
-    /// Returns true if all occurring variables are binding variables.
+    /// \brief Returns true if all occurring variables are binding variables
     bool is_closed() const
     {
       return m_equations.is_closed();
     }
 
-    /// Returns true if all binding predicate variables of the pbes are unique.
+    /// \brief Returns true if all binding predicate variables of the pbes are unique.
     /// Note that this does not imply that the names of the binding predicate
     /// variables are unique.
     bool is_well_formed() const
@@ -427,50 +406,38 @@ class pbes
       return m_equations.is_well_formed();
     }
 
-    /// Returns a representation of the term.
-    ///
-    std::string to_string() const
-    {
-      // TODO: implement to_string
-      return "pbes::to_string";
-    }
-
-    /// Protect the term.
-    /// Protects the term from being freed at garbage collection.
-    ///
+    /// \brief Protects the term from being freed during garbage collection.
     void protect()
     {
       m_initial_state.protect();
     }
 
-    /// Unprotect the term.
+    /// \brief Unprotect the term.
     /// Releases protection of the term which has previously been protected through a
     /// call to protect.
-    ///
     void unprotect()
     {
       m_initial_state.unprotect();
     }
 
-    /// Mark the term for not being garbage collected.
-    ///
+    /// \brief Mark the term for not being garbage collected.
     void mark()
     {
       m_initial_state.mark();
     }
 };
 
-inline
-std::ostream& operator<<(std::ostream& to, const equation_system& p)
-{
-  // return to << p.to_string();
-  to << "# equations: " << p.size() << std::endl;
-  for (atermpp::vector<pbes_equation>::const_iterator i = p.begin(); i != p.end(); ++i)
-  {
-    to << "(" << *i << ")" << std::endl;
-  }
-  return to;
-}
+// inline
+// std::ostream& operator<<(std::ostream& to, const equation_system& p)
+// {
+//   // return to << p.to_string();
+//   to << "# equations: " << p.size() << std::endl;
+//   for (atermpp::vector<pbes_equation>::const_iterator i = p.begin(); i != p.end(); ++i)
+//   {
+//     to << "(" << *i << ")" << std::endl;
+//   }
+//   return to;
+// }
 
 } // namespace lps
 

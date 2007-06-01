@@ -121,7 +121,7 @@ static bool add_sort(ATermAppl s, ATermIndexedSet used_data, ATermIndexedSet use
 			function_list::iterator fe = constructors.end();
 			for (; fb != fe; fb++)
 			{
-				lps::sort range = fb->range_sort();
+				lps::sort range = fb->sort().range_sort();
 	
 				if ( range == s )
 				{
@@ -129,7 +129,7 @@ static bool add_sort(ATermAppl s, ATermIndexedSet used_data, ATermIndexedSet use
 				
 					ATindexedSetPut(used_data,(ATerm) ((ATermAppl) (*fb)),&n);
 	
-					sort_list domain = fb->domain_sorts();
+					sort_list domain = fb->sort().domain_sorts();
 					sort_list::iterator db = domain.begin();
 					sort_list::iterator de = domain.end();
 					for (; db != de; db++)

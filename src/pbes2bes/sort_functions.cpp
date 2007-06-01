@@ -37,7 +37,7 @@ data_expression_list enumerate_constructors(function_list fl, lps::sort s)
 	for (function_list::iterator i = cl.begin(); i != cl.end(); i++)
 	{
 		// Get all domains of the constructor
-		sort_list domains = i->domain_sorts();
+		sort_list domains = i->sort().domain_sorts();
 		// Vector for all enumerated constructors
 		vector< data_expression_list > argumentss;
 		// For each sort of the constructor...

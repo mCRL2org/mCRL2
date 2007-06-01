@@ -5,6 +5,7 @@
 #include <boost/algorithm/string.hpp>
 #include "lps/pbes.h"
 #include "lps/pbes_utility.h"
+#include "lps/pbes_translate.h"
 #include "lps/detail/tools.h"
 
 using namespace std;
@@ -57,6 +58,19 @@ void test_normalize()
   BOOST_CHECK(f1 == f2);
 }
 
+void test_xyz_generator()
+{
+  XYZ_identifier_generator generator(propositional_variable("X1(d:D)"));
+  identifier_string x;
+  x = generator(); BOOST_CHECK(std::string(x) == "X");
+  x = generator(); BOOST_CHECK(std::string(x) == "Y");
+  x = generator(); BOOST_CHECK(std::string(x) == "Z");
+  x = generator(); BOOST_CHECK(std::string(x) == "X0");
+  x = generator(); BOOST_CHECK(std::string(x) == "Y0");
+  x = generator(); BOOST_CHECK(std::string(x) == "Z0");
+  x = generator(); BOOST_CHECK(std::string(x) == "Y1"); // X1 should be skipped
+}
+
 int test_main(int argc, char* argv[])
 {
   aterm bottom_of_stack;
@@ -65,6 +79,7 @@ int test_main(int argc, char* argv[])
 
   test_pbes();
   test_normalize();
+  test_xyz_generator();
 
   return 0;
 }

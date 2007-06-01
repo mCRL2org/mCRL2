@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 /// \file linear_process.h
-/// Contains LPS data structures for the LPS Library.
+/// Contains linear process data structures for the LPS Library.
 
 #ifndef LPS_LPS_H
 #define LPS_LPS_H
@@ -78,8 +78,7 @@ class summand: public aterm_appl
       m_assignments         = data_assignment_list(*i);
     }
 
-    /// Constructs an summand with a multi-action.
-    ///
+    /// \brief Constructs an untimed summand
     summand(data_variable_list   summation_variables,
                 data_expression      condition,
                 bool                 delta,
@@ -100,8 +99,7 @@ class summand: public aterm_appl
         m_assignments        (assignments)
     {}
 
-    /// Constructs an summand with a multi-action.
-    ///
+    /// \brief Constructs a timed summand
     summand(data_variable_list   summation_variables,
                 data_expression      condition,
                 bool                 delta,
@@ -123,59 +121,52 @@ class summand: public aterm_appl
         m_assignments        (assignments)
     {}
 
-    /// Returns the sequence of summation variables.
-    ///
+    /// \brief Returns the sequence of summation variables
     data_variable_list summation_variables() const
     {
       return m_summation_variables;
     }
 
-    /// Returns true if the multi-action corresponding to this summand is 
+    /// \brief Returns true if the multi-action corresponding to this summand is 
     /// equal to delta.
-    ///
     bool is_delta() const
     {
       return m_delta;
     }
 
-    /// Returns true if time is available.
-    ///
+    /// \brief Returns true if time is available
     bool has_time() const
     {
-      return !m_time.is_nil();
+      return !data_expr::is_nil(m_time);
     }
 
-    /// Returns the condition expression.
-    ///
+    /// \brief Returns the condition expression
     data_expression condition() const
     {
       return m_condition;
     }
 
-    /// Returns the sequence of actions. Returns an empty list if is_delta() holds.
-    ///
+    /// \brief Returns the sequence of actions
+    /// Returns an empty list if is_delta() holds.
     action_list actions() const
     {
       return m_actions;
     }
 
-    /// Returns the time expression.
-    ///
+    /// \brief Returns the time
     data_expression time() const
     {
       return m_time;
     }
 
-    /// Returns the sequence of assignments.
-    ///
+    /// \brief Returns the sequence of assignments
     data_assignment_list assignments() const
     {
       return m_assignments;
     }
 
-    /// Applies a substitution to this summand and returns the result.
+    /// \brief Applies a substitution to this summand and returns the result
     /// The Substitution object must supply the method aterm operator()(aterm).
-    ///
     template <typename Substitution>
     summand substitute(Substitution f) const
     {
@@ -190,7 +181,7 @@ class summand: public aterm_appl
       return summand(m_summation_variables, condition, m_delta, actions, time, m_assignments);
     }     
 
-    /// Returns true if
+    /// \brief Returns true if
     /// <ul>
     /// <li>the data assignments are well typed</li>
     /// <li>the (optional) time has sort Real</li>
@@ -231,6 +222,7 @@ class summand: public aterm_appl
     }
 };
 
+/// \brief Sets the summation variables of s and returns the result
 inline
 summand set_summation_variables(summand s, data_variable_list summation_variables)
 {
@@ -243,42 +235,46 @@ summand set_summation_variables(summand s, data_variable_list summation_variable
                     );
 }
 
+/// \brief Sets the condition of s and returns the result
 inline
 summand set_condition(summand s, data_expression condition)
 {
   return summand(s.summation_variables(),
-                     condition,
-                     s.is_delta           (),
-                     s.actions            (),
-                     s.time               (),
-                     s.assignments        () 
-                    );
+                 condition,
+                 s.is_delta           (),
+                 s.actions            (),
+                 s.time               (),
+                 s.assignments        () 
+                );
 }
 
+/// \brief Sets the actions of s to delta and returns the result
 inline
-summand set_delta(summand s, bool delta)
+summand set_delta(summand s)
 {
   return summand(s.summation_variables(),
-                     s.condition          (),
-                     delta,
-                     s.actions            (),
-                     s.time               (),
-                     s.assignments        () 
-                    );
+                 s.condition          (),
+                 false,
+                 s.actions            (),
+                 s.time               (),
+                 s.assignments        () 
+                );
 }
 
+/// \brief Sets the actions of s and returns the result
 inline
 summand set_actions(summand s, action_list actions)
 {
   return summand(s.summation_variables(),
-                     s.condition          (),
-                     s.is_delta           (),
-                     actions,
-                     s.time               (),
-                     s.assignments        () 
-                    );
+                 s.condition          (),
+                 s.is_delta           (),
+                 actions,
+                 s.time               (),
+                 s.assignments        () 
+                );
 }
 
+/// \brief Sets the time of s and returns the result
 inline
 summand set_time(summand s, data_expression time)
 {
@@ -291,18 +287,22 @@ summand set_time(summand s, data_expression time)
                     );
 }
 
+/// \brief Sets the assignments of s and returns the result
 inline
 summand set_assignments(summand s, data_assignment_list assignments)
 {
   return summand(s.summation_variables(),
-                     s.condition          (),
-                     s.is_delta           (),
-                     s.actions            (),
-                     s.time               (),
-                     assignments 
-                    );
+                 s.condition          (),
+                 s.is_delta           (),
+                 s.actions            (),
+                 s.time               (),
+                 assignments 
+                );
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// summand_list
+/// \brief singly linked list of summands
 typedef term_list<summand> summand_list;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -343,29 +343,25 @@ class linear_process: public aterm_appl
       m_summands           = summand_list(*i);
     }
 
-    /// Returns the sequence of LPS summands.
-    ///
+    /// \brief Returns the sequence of LPS summands
     summand_list summands() const
     {
       return m_summands;
     }
 
-    /// Returns the sequence of free variables.
-    ///
+    /// \brief Returns the sequence of free variables
     data_variable_list free_variables() const
     {
       return m_free_variables;
     }
 
-    /// Returns the sequence of process parameters.
-    ///
+    /// \brief Returns the sequence of process parameters
     data_variable_list process_parameters() const
     {
       return m_process_parameters;
     }
 
-    /// Returns true if time is available in at least one of the summands.
-    ///
+    /// \brief Returns true if time is available in at least one of the summands
     bool has_time() const
     {
       for (summand_list::iterator i = summands().begin(); i != summands().end(); ++i)
@@ -375,9 +371,8 @@ class linear_process: public aterm_appl
       return false;
     }
 
-    /// Applies a substitution to this LPS and returns the result.
+    /// \brief Applies a substitution to this LPS and returns the result
     /// The Substitution object must supply the method aterm operator()(aterm).
-    ///
     template <typename Substitution>
     linear_process substitute(Substitution f)
     {
@@ -387,18 +382,8 @@ class linear_process: public aterm_appl
       return linear_process(d, p, s);
     }     
 
-    /// Returns a representation of the term.
-    ///
-    std::string to_string() const
-    {
-      std::string s1 = m_free_variables    .to_string();
-      std::string s2 = m_process_parameters.to_string();
-      std::string s3 = m_summands          .to_string();
-      return s1 + "\n" + s2 + "\n" + s3;
-    }
-
-    /// Returns the set of free variables that appear in the process. This set
-    /// is a subset of <tt>free_variables()</tt>.
+    /// \brief Returns the set of free variables that appear in the process
+    /// This set is a subset of <tt>free_variables()</tt>.
     std::set<data_variable> find_free_variables()
     {
       // TODO: the efficiency of this implementation is not optimal
@@ -414,7 +399,8 @@ class linear_process: public aterm_appl
       }
       return result;
     }
-    /// Returns true if
+
+    /// \brief Returns true if
     /// <ul>
     /// <li>the summands are well typed</li>
     /// <li>the process parameters have unique names</li>
@@ -474,6 +460,7 @@ class linear_process: public aterm_appl
     }
   };
 
+/// \brief Sets the free variables of l and returns the result
 inline
 linear_process set_free_variables(linear_process l, data_variable_list free_variables)
 {
@@ -483,6 +470,7 @@ linear_process set_free_variables(linear_process l, data_variable_list free_vari
             );
 }
 
+/// \brief Sets the process parameters of l and returns the result
 inline
 linear_process set_process_parameters(linear_process l, data_variable_list process_parameters)
 {
@@ -492,6 +480,7 @@ linear_process set_process_parameters(linear_process l, data_variable_list proce
             );
 }
 
+/// \brief Sets the summands of l and returns the result
 inline
 linear_process set_summands(linear_process l, summand_list summands)
 {
@@ -501,7 +490,7 @@ linear_process set_summands(linear_process l, summand_list summands)
             );
 }
 
-/// \brief initial linear process
+/// \brief initial state of a linear process
 // LinearProcessInit(<DataVarId>*, <DataVarIdInit>*)
 class process_initializer: public aterm_appl
 {
@@ -532,30 +521,26 @@ class process_initializer: public aterm_appl
       m_assignments    = *i;
     }
 
-    /// Returns the sequence of free variables.
-    ///
+    /// \brief Returns the sequence of free variables
     data_variable_list free_variables() const
     {
       return m_free_variables;
     }
 
-    /// Returns the sequence of assignments.
-    ///
+    /// \brief Returns the sequence of assignments
     data_assignment_list assignments() const
     {
       return m_assignments;
     }
 
-    /// Returns the initial state of the LPS.
-    ///
+    /// \brief Returns the initial state of the LPS
     data_expression_list state() const
     {
       return detail::compute_initial_state(m_assignments);
     }
 
-    /// Applies a substitution to this LPS and returns the result.
+    /// \brief Applies a substitution to this process initializer and returns the result
     /// The Substitution object must supply the method aterm operator()(aterm).
-    ///
     template <typename Substitution>
     process_initializer substitute(Substitution f)
     {
