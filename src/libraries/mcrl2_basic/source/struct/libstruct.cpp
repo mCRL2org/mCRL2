@@ -373,7 +373,7 @@ bool gsIsSortExpr(ATermAppl Term)
 {
   return
     gsIsSortId(Term)        || gsIsSortCons(Term)     || 
-    gsIsSortStruct(Term)    || gsIsSortArrowProd(Term) || 
+    gsIsSortStruct(Term)    || gsIsSortArrow(Term) || 
     gsIsSortUnknown(Term)   || gsIsSortsPossible(Term);
 }
 
@@ -530,13 +530,13 @@ bool gsIsSortExprBag(ATermAppl Term)
 //Auxiliary functions concerning sort expressions
 ATermAppl gsMakeSortArrow1(ATermAppl SortExprDom, ATermAppl SortExprResult)
 {
-  return gsMakeSortArrowProd(ATmakeList1((ATerm) SortExprDom), SortExprResult);
+  return gsMakeSortArrow(ATmakeList1((ATerm) SortExprDom), SortExprResult);
 }
 
 ATermAppl gsMakeSortArrow2(ATermAppl SortExprDom1, ATermAppl SortExprDom2,
   ATermAppl SortExprResult)
 {
-  return gsMakeSortArrowProd(
+  return gsMakeSortArrow(
     ATmakeList2((ATerm) SortExprDom1, (ATerm) SortExprDom2),
     SortExprResult);
 }
@@ -544,7 +544,7 @@ ATermAppl gsMakeSortArrow2(ATermAppl SortExprDom1, ATermAppl SortExprDom2,
 ATermAppl gsMakeSortArrow3(ATermAppl SortExprDom1, ATermAppl SortExprDom2,
   ATermAppl SortExprDom3, ATermAppl SortExprResult)
 {
-  return gsMakeSortArrowProd(
+  return gsMakeSortArrow(
     ATmakeList3((ATerm) SortExprDom1, (ATerm) SortExprDom2,
       (ATerm) SortExprDom3),
     SortExprResult);
@@ -553,7 +553,7 @@ ATermAppl gsMakeSortArrow3(ATermAppl SortExprDom1, ATermAppl SortExprDom2,
 ATermAppl gsMakeSortArrow4(ATermAppl SortExprDom1, ATermAppl SortExprDom2,
   ATermAppl SortExprDom3, ATermAppl SortExprDom4, ATermAppl SortExprResult)
 {
-  return gsMakeSortArrowProd(
+  return gsMakeSortArrow(
     ATmakeList4((ATerm) SortExprDom1, (ATerm) SortExprDom2,
       (ATerm) SortExprDom3, (ATerm) SortExprDom4),
     SortExprResult);
@@ -564,13 +564,13 @@ ATermAppl gsMakeSortArrowList(ATermList SortExprs, ATermAppl SortExprResult)
   if(ATisEmpty(SortExprs))
     return SortExprResult;
   else
-    return gsMakeSortArrowProd(SortExprs, SortExprResult);
+    return gsMakeSortArrow(SortExprs, SortExprResult);
 }
 
 ATermAppl gsGetSortExprResult(ATermAppl SortExpr)
 {
   assert(gsIsSortExpr(SortExpr));
-  while (gsIsSortArrowProd(SortExpr)) {
+  while (gsIsSortArrow(SortExpr)) {
     SortExpr = ATAgetArgument(SortExpr, 1);
   }
   return SortExpr;
@@ -580,7 +580,7 @@ ATermList gsGetSortExprDomain(ATermAppl SortExpr)
 {
   assert(gsIsSortExpr(SortExpr));
   ATermList l = ATmakeList0();
-  while (gsIsSortArrowProd(SortExpr)) {
+  while (gsIsSortArrow(SortExpr)) {
     ATermList m = ATLgetArgument(SortExpr, 0);
     while (!ATisEmpty(m)) {
       l = ATinsert(l, ATgetFirst(m));
@@ -596,7 +596,7 @@ ATermList gsGetSortExprDomains(ATermAppl SortExpr)
 {
   assert(gsIsSortExpr(SortExpr));
   ATermList l = ATmakeList0();
-  while (gsIsSortArrowProd(SortExpr)) {
+  while (gsIsSortArrow(SortExpr)) {
     ATermList dom = ATLgetArgument(SortExpr,0);
     l = ATinsert(l, (ATerm) dom);
     SortExpr = ATAgetArgument(SortExpr,1);
@@ -612,7 +612,7 @@ ATermList gsGetSortExprDomains(ATermAppl SortExpr)
 bool gsIsDataExpr(ATermAppl Term)
 {
   return gsIsId(Term)    || gsIsDataVarId(Term)    || gsIsOpId(Term)    ||
-    gsIsDataApplProd(Term) || gsIsBinder(Term)     || gsIsWhr(Term);
+    gsIsDataAppl(Term) || gsIsBinder(Term)     || gsIsWhr(Term);
 }
 
 ATermAppl gsGetName(ATermAppl DataExpr)
@@ -628,12 +628,12 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
     //DataExpr is a data variable, an operation identifier or an
     //enumeration; return its sort
     Result = ATAgetArgument(DataExpr, 1);
-  } else if (gsIsDataApplProd(DataExpr)) {
+  } else if (gsIsDataAppl(DataExpr)) {
     //DataExpr is a product data application; return the result sort of the
     //first argument
     ATermAppl Expr = ATAgetArgument(DataExpr, 0);
     ATermAppl HeadSort = gsGetSort(Expr);
-    if (gsIsSortArrowProd(HeadSort))
+    if (gsIsSortArrow(HeadSort))
       Result = ATAgetArgument(HeadSort, 1);
     else
       Result = gsMakeSortUnknown();
@@ -668,7 +668,7 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
       //  lambda x0: S0, ..., xn: Sn. e
       //return S0 -> ... -> Sn -> gsGetSort(e)
       Result = gsGetSort(ATAgetArgument(DataExpr, 2));
-      Result = gsMakeSortArrowProd(gsGetSorts(ATLgetArgument(DataExpr, 1)), Result);
+      Result = gsMakeSortArrow(gsGetSorts(ATLgetArgument(DataExpr, 1)), Result);
     } else {
       Result = gsMakeSortUnknown();
     }
@@ -699,7 +699,7 @@ ATermList gsGetSorts(ATermList DataExprs)
 
 ATermAppl gsGetDataExprHead(ATermAppl DataExpr)
 {
-  while (gsIsDataApplProd(DataExpr)) {
+  while (gsIsDataAppl(DataExpr)) {
    DataExpr = ATAgetArgument(DataExpr, 0);
   }
   return DataExpr;
@@ -708,7 +708,7 @@ ATermAppl gsGetDataExprHead(ATermAppl DataExpr)
 ATermList gsGetDataExprArgs(ATermAppl DataExpr)
 {
   ATermList l = ATmakeList0();
-  while (gsIsDataApplProd(DataExpr)) {
+  while (gsIsDataAppl(DataExpr)) {
     l = ATconcat(ATLgetArgument(DataExpr, 1), l);
     DataExpr = ATAgetArgument(DataExpr, 0);
   }
@@ -1896,7 +1896,7 @@ ATermAppl gsMakeDataExprImp(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 ATermAppl gsMakeDataExprForall(ATermAppl DataExpr)
 {
   ATermAppl ExprSort = gsGetSort(DataExpr);
-  assert(gsIsSortArrowProd(ExprSort));
+  assert(gsIsSortArrow(ExprSort));
   assert(ATisEqual(gsGetSortExprResult(ExprSort), gsMakeSortExprBool()));
   // ExprSort is of the form S->Bool
   return gsMakeDataAppl1(gsMakeOpIdForall(ExprSort),DataExpr);
@@ -1905,7 +1905,7 @@ ATermAppl gsMakeDataExprForall(ATermAppl DataExpr)
 ATermAppl gsMakeDataExprExists(ATermAppl DataExpr)
 {
   ATermAppl ExprSort = gsGetSort(DataExpr);
-  assert(gsIsSortArrowProd(ExprSort));
+  assert(gsIsSortArrow(ExprSort));
   assert(ATisEqual(gsGetSortExprResult(ExprSort), gsMakeSortExprBool()));
   // ExprSort is of the form S->Bool
   return gsMakeDataAppl1(gsMakeOpIdExists(ExprSort), DataExpr);
@@ -2269,9 +2269,9 @@ ATermAppl gsMakeDataExprListEnum(ATermList DataExprs, ATermAppl SortExpr)
     {
       DomSort=ATinsert(DomSort,(ATerm) EltSort);
     }
-    SortExpr=gsMakeSortArrowProd(DomSort, SortExpr);
+    SortExpr=gsMakeSortArrow(DomSort, SortExpr);
     assert(ATisEqual(ATgetLength(DomSort),ATgetLength(DataExprs)));
-    return gsMakeDataApplProd(gsMakeOpIdListEnum(SortExpr), DataExprs);
+    return gsMakeDataAppl(gsMakeOpIdListEnum(SortExpr), DataExprs);
   } // If the list of data expressions is empty, we just use SortExpr
   return gsMakeOpIdListEnum(SortExpr);
 }
@@ -2345,7 +2345,7 @@ ATermAppl gsMakeDataExprSetComp(ATermAppl DataExpr, ATermAppl SortExprResult)
 {
   ATermAppl ExprSort = gsGetSort(DataExpr);
   assert(!gsIsSortUnknown(ExprSort));
-  assert(gsIsSortArrowProd(ExprSort));
+  assert(gsIsSortArrow(ExprSort));
   assert(ATisEqual(gsGetSortExprResult(ExprSort), gsMakeSortExprBool()));
   assert(ATgetLength(ATLgetArgument(ExprSort, 0)) == 1);
   //ExprSort is of the form S -> Bool
@@ -2370,9 +2370,9 @@ ATermAppl gsMakeDataExprSetEnum(ATermList DataExprs, ATermAppl SortExpr)
     {
       DomSort=ATinsert(DomSort,(ATerm) EltSort);
     }
-    SortExpr=gsMakeSortArrowProd(DomSort, SortExpr);
+    SortExpr=gsMakeSortArrow(DomSort, SortExpr);
     assert(ATisEqual(ATgetLength(DomSort),ATgetLength(DataExprs)));
-    return gsMakeDataApplProd(gsMakeOpIdSetEnum(SortExpr), DataExprs);
+    return gsMakeDataAppl(gsMakeOpIdSetEnum(SortExpr), DataExprs);
   } // If the list of data expressions is empty, we just use SortExpr
   return gsMakeOpIdSetEnum(SortExpr);
 }
@@ -2421,7 +2421,7 @@ ATermAppl gsMakeDataExprBagComp(ATermAppl DataExpr, ATermAppl SortExprResult)
 {
   ATermAppl ExprSort = gsGetSort(DataExpr);
   assert(!gsIsSortUnknown(ExprSort));
-  assert(gsIsSortArrowProd(ExprSort));
+  assert(gsIsSortArrow(ExprSort));
   assert(ATisEqual(gsGetSortExprResult(ExprSort), gsMakeSortExprNat()));
   assert(ATgetLength(ATLgetArgument(ExprSort, 0)) == 1);
   //ExprSort is of the form S -> Nat
@@ -2451,9 +2451,9 @@ ATermAppl gsMakeDataExprBagEnum(ATermList DataExprs, ATermAppl SortExpr)
       DomSort=ATinsert(DomSort,(ATerm) NatSort);
     }
     assert(ATgetLength(DomSort)==ATgetLength(DataExprs));
-    SortExpr=gsMakeSortArrowProd(DomSort, SortExpr);
+    SortExpr=gsMakeSortArrow(DomSort, SortExpr);
     assert(ATisEqual(ATgetLength(DomSort),ATgetLength(DataExprs)));
-    return gsMakeDataApplProd(gsMakeOpIdBagEnum(SortExpr), DataExprs);
+    return gsMakeDataAppl(gsMakeOpIdBagEnum(SortExpr), DataExprs);
   } // If the list of data expressions is empty, we just use SortExpr
   return gsMakeOpIdBagEnum(SortExpr);
 }
@@ -2516,20 +2516,20 @@ ATermAppl gsMakeDataExprSet2Bag(ATermAppl DataExpr, ATermAppl SortExpr)
 //Auxiliary functions to create data expressions
 ATermAppl gsMakeDataAppl1(ATermAppl DataExpr, ATermAppl DataExprArg1)
 {
-  return gsMakeDataApplProd(DataExpr, ATmakeList1((ATerm) DataExprArg1));
+  return gsMakeDataAppl(DataExpr, ATmakeList1((ATerm) DataExprArg1));
 }
 
 ATermAppl gsMakeDataAppl2(ATermAppl DataExpr, ATermAppl DataExprArg1,
   ATermAppl DataExprArg2)
 {
-  return gsMakeDataApplProd(DataExpr,
+  return gsMakeDataAppl(DataExpr,
     ATmakeList2((ATerm) DataExprArg1, (ATerm) DataExprArg2));
 }
 
 ATermAppl gsMakeDataAppl3(ATermAppl DataExpr, ATermAppl DataExprArg1,
   ATermAppl DataExprArg2, ATermAppl DataExprArg3)
 {
-  return gsMakeDataApplProd(DataExpr,
+  return gsMakeDataAppl(DataExpr,
     ATmakeList3((ATerm) DataExprArg1, (ATerm) DataExprArg2,
       (ATerm) DataExprArg3));
 }
@@ -2537,7 +2537,7 @@ ATermAppl gsMakeDataAppl3(ATermAppl DataExpr, ATermAppl DataExprArg1,
 ATermAppl gsMakeDataAppl4(ATermAppl DataExpr, ATermAppl DataExprArg1,
   ATermAppl DataExprArg2, ATermAppl DataExprArg3, ATermAppl DataExprArg4)
 {
-  return gsMakeDataApplProd(DataExpr,
+  return gsMakeDataAppl(DataExpr,
     ATmakeList4((ATerm) DataExprArg1, (ATerm) DataExprArg2,
       (ATerm) DataExprArg3, (ATerm) DataExprArg4));
 }
@@ -2548,7 +2548,7 @@ ATermAppl gsMakeDataApplList(ATermAppl DataExpr,
   if (ATisEmpty(DataExprArgs))
     return DataExpr;
   else
-    return gsMakeDataApplProd(DataExpr, DataExprArgs);
+    return gsMakeDataAppl(DataExpr, DataExprArgs);
 }
 
 ATermAppl gsMakeDataExprPos(char *p)
@@ -2620,7 +2620,7 @@ bool gsIsPosConstant(const ATermAppl PosExpr)
 {
   if (gsIsOpId(PosExpr)) {
     return ATisEqual(PosExpr, gsMakeOpIdC1());
-  } else if (gsIsDataApplProd(PosExpr))  {
+  } else if (gsIsDataAppl(PosExpr))  {
     ATermAppl Head = gsGetDataExprHead(PosExpr);
     ATermList Args = gsGetDataExprArgs(PosExpr);
     if (ATisEqual(Head, gsMakeOpIdCDub()) && ATgetLength(Args) == 2) {
@@ -2637,7 +2637,7 @@ bool gsIsNatConstant(const ATermAppl NatExpr)
 {
   if (gsIsOpId(NatExpr)) {
     return ATisEqual(NatExpr, gsMakeOpIdC0());
-  } else if (gsIsDataApplProd(NatExpr)) {
+  } else if (gsIsDataAppl(NatExpr)) {
     ATermAppl Head = gsGetDataExprHead(NatExpr);
     ATermList Args = gsGetDataExprArgs(NatExpr);
     if (ATisEqual(Head, gsMakeOpIdCNat()) && ATgetLength(Args) == 1) {
@@ -2648,7 +2648,7 @@ bool gsIsNatConstant(const ATermAppl NatExpr)
 
 bool gsIsIntConstant(const ATermAppl IntExpr)
 {
-  if (gsIsDataApplProd(IntExpr)) {
+  if (gsIsDataAppl(IntExpr)) {
     ATermAppl Head = gsGetDataExprHead(IntExpr);
     ATermList Args = gsGetDataExprArgs(IntExpr);
     if (ATgetLength(Args) == 1) {
@@ -2750,7 +2750,7 @@ bool gsIsDataExprFalse(ATermAppl DataExpr)
 
 bool gsIsDataExprNot(ATermAppl DataExpr)
 {
-  if (gsIsDataApplProd(DataExpr)) {
+  if (gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if (t==gsMakeOpIdNot())
       return true;
@@ -2760,7 +2760,7 @@ bool gsIsDataExprNot(ATermAppl DataExpr)
 
 bool gsIsDataExprAnd(ATermAppl DataExpr)
 {
-  if (gsIsDataApplProd(DataExpr)) { 
+  if (gsIsDataAppl(DataExpr)) { 
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if (t==gsMakeOpIdAnd())
       return true;
@@ -2770,7 +2770,7 @@ bool gsIsDataExprAnd(ATermAppl DataExpr)
 
 bool gsIsDataExprOr(ATermAppl DataExpr)
 {
-  if (gsIsDataApplProd(DataExpr)) { 
+  if (gsIsDataAppl(DataExpr)) { 
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if (t==gsMakeOpIdOr())
       return true;
@@ -2780,7 +2780,7 @@ bool gsIsDataExprOr(ATermAppl DataExpr)
 
 bool gsIsDataExprImp(ATermAppl DataExpr)
 {
-  if (gsIsDataApplProd(DataExpr)) { 
+  if (gsIsDataAppl(DataExpr)) { 
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if (t==gsMakeOpIdImp())
       return true;
@@ -2790,7 +2790,7 @@ bool gsIsDataExprImp(ATermAppl DataExpr)
 
 bool gsIsDataExprEq(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t)) 
       return ATAgetArgument(t,0) == gsMakeOpIdNameEq();
@@ -2800,7 +2800,7 @@ bool gsIsDataExprEq(ATermAppl DataExpr)
 
 bool gsIsDataExprNeq(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t)) 
       return ATAgetArgument(t,0) == gsMakeOpIdNameNeq();
@@ -2810,7 +2810,7 @@ bool gsIsDataExprNeq(ATermAppl DataExpr)
 
 bool gsIsDataExprIf(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t)) 
       return ATAgetArgument(t,0) == gsMakeOpIdNameIf();
@@ -2821,7 +2821,7 @@ bool gsIsDataExprIf(ATermAppl DataExpr)
 
 bool gsIsDataExprCNat(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t)) 
       return ATAgetArgument(t,0) == gsMakeOpIdNameCNat();
@@ -2831,7 +2831,7 @@ bool gsIsDataExprCNat(ATermAppl DataExpr)
 
 bool gsIsDataExprCInt(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t)) 
       return ATAgetArgument(t,0) == gsMakeOpIdNameCInt();
@@ -2841,7 +2841,7 @@ bool gsIsDataExprCInt(ATermAppl DataExpr)
 
 bool gsIsDataExprCReal(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t)) 
       return ATAgetArgument(t,0) == gsMakeOpIdNameCReal();
@@ -2851,7 +2851,7 @@ bool gsIsDataExprCReal(ATermAppl DataExpr)
 
 bool gsIsDataExprLTE(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t))
       return ATAgetArgument(t,0) == gsMakeOpIdNameLTE();
@@ -2861,7 +2861,7 @@ bool gsIsDataExprLTE(ATermAppl DataExpr)
 
 bool gsIsDataExprLT(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t))
       return ATAgetArgument(t,0) == gsMakeOpIdNameLT();
@@ -2871,7 +2871,7 @@ bool gsIsDataExprLT(ATermAppl DataExpr)
 
 bool gsIsDataExprGTE(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t))
       return ATAgetArgument(t,0) == gsMakeOpIdNameGTE();
@@ -2881,7 +2881,7 @@ bool gsIsDataExprGTE(ATermAppl DataExpr)
 
 bool gsIsDataExprGT(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t))
       return ATAgetArgument(t,0) == gsMakeOpIdNameGT();
@@ -2891,7 +2891,7 @@ bool gsIsDataExprGT(ATermAppl DataExpr)
 
 bool gsIsDataExprMax(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t))
       return ATAgetArgument(t,0) == gsMakeOpIdNameMax();
@@ -2901,7 +2901,7 @@ bool gsIsDataExprMax(ATermAppl DataExpr)
 
 bool gsIsDataExprMin(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t))
       return ATAgetArgument(t,0) == gsMakeOpIdNameMin();
@@ -2911,7 +2911,7 @@ bool gsIsDataExprMin(ATermAppl DataExpr)
 
 bool gsIsDataExprAbs(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t))
       return ATAgetArgument(t,0) == gsMakeOpIdNameAbs();
@@ -2921,7 +2921,7 @@ bool gsIsDataExprAbs(ATermAppl DataExpr)
 
 bool gsIsDataExprNeg(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t))
       return ATAgetArgument(t,0) == gsMakeOpIdNameNeg();
@@ -2931,7 +2931,7 @@ bool gsIsDataExprNeg(ATermAppl DataExpr)
 
 bool gsIsDataExprSucc(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t))
       return ATAgetArgument(t,0) == gsMakeOpIdNameSucc();
@@ -2941,7 +2941,7 @@ bool gsIsDataExprSucc(ATermAppl DataExpr)
 
 bool gsIsDataExprPred(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t))
       return ATAgetArgument(t,0) == gsMakeOpIdNamePred();
@@ -2951,7 +2951,7 @@ bool gsIsDataExprPred(ATermAppl DataExpr)
 
 bool gsIsDataExprAdd(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t))
       return ATAgetArgument(t,0) == gsMakeOpIdNameAdd();
@@ -2961,7 +2961,7 @@ bool gsIsDataExprAdd(ATermAppl DataExpr)
 
 bool gsIsDataExprAddC(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t))
       return ATAgetArgument(t,0) == gsMakeOpIdNameAddC();
@@ -2971,7 +2971,7 @@ bool gsIsDataExprAddC(ATermAppl DataExpr)
 
 bool gsIsDataExprSubt(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t))
       return ATAgetArgument(t,0) == gsMakeOpIdNameSubt();
@@ -2981,7 +2981,7 @@ bool gsIsDataExprSubt(ATermAppl DataExpr)
 
 bool gsIsDataExprMult(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t))
       return ATAgetArgument(t,0) == gsMakeOpIdNameMult();
@@ -2991,7 +2991,7 @@ bool gsIsDataExprMult(ATermAppl DataExpr)
 
 bool gsIsDataExprDiv(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t))
       return ATAgetArgument(t,0) == gsMakeOpIdNameDiv();
@@ -3001,7 +3001,7 @@ bool gsIsDataExprDiv(ATermAppl DataExpr)
 
 bool gsIsDataExprMod(ATermAppl DataExpr)
 {
-  if(gsIsDataApplProd(DataExpr)) {
+  if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t))
       return ATAgetArgument(t,0) == gsMakeOpIdNameMod();
@@ -3021,7 +3021,7 @@ bool gsIsDataExprNumber(ATermAppl DataExpr)
 bool gsIsDataExprListEnum(ATermAppl DataExpr)
 {
   assert(gsIsDataExpr(DataExpr));
-  if (gsIsDataApplProd(DataExpr)) {
+  if (gsIsDataAppl(DataExpr)) {
     DataExpr = ATAgetArgument(DataExpr, 0);
   }
   if (gsIsOpId(DataExpr)) {
@@ -3034,7 +3034,7 @@ bool gsIsDataExprListEnum(ATermAppl DataExpr)
 bool gsIsDataExprSetEnum(ATermAppl DataExpr)
 {
   assert(gsIsDataExpr(DataExpr));
-  if (gsIsDataApplProd(DataExpr)) {
+  if (gsIsDataAppl(DataExpr)) {
     DataExpr = ATAgetArgument(DataExpr, 0);
   }
   if (gsIsOpId(DataExpr)) {
@@ -3047,7 +3047,7 @@ bool gsIsDataExprSetEnum(ATermAppl DataExpr)
 bool gsIsDataExprBagEnum(ATermAppl DataExpr)
 {
   assert(gsIsDataExpr(DataExpr));
-  if (gsIsDataApplProd(DataExpr)) {
+  if (gsIsDataAppl(DataExpr)) {
     DataExpr = ATAgetArgument(DataExpr, 0);
   }
   if (gsIsOpId(DataExpr)) {

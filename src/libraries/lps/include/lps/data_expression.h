@@ -88,7 +88,7 @@ namespace data_expr {
   // <DataExpr>     ::= Id(<String>)                                          (- tc)
   //                  | <DataVarId>                                           (+ tc)
   //                  | <OpId>                                                (+ tc)
-  //                  | DataApplProd(<DataExpr>, <DataExpr>+)
+  //                  | DataAppl(<DataExpr>, <DataExpr>+)
   //                  | Number(<NumberString>, <SortExprOrUnknown>)           (- di)
   //                  | ListEnum(<DataExpr>+, <SortExprOrUnknown>)            (- di)
   //                  | SetEnum(<DataExpr>+, <SortExprOrUnknown>)             (- di)

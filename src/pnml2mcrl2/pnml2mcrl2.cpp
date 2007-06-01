@@ -79,7 +79,7 @@ static ATermAppl ErrorAction;          //=gsMakeParamId(ATmakeAppl0(ATmakeAFunId
 static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID);
 static ATermList pn2gsGenerateTransitionAlternative(ATerm TransID);
 static inline ATermAppl pn2gsMakeDataApplProd2(ATermAppl Op, ATermAppl Left, ATermAppl Right){
-  return gsMakeDataApplProd(Op,ATmakeList2((ATerm)Left,(ATerm)Right));
+  return gsMakeDataAppl(Op,ATmakeList2((ATerm)Left,(ATerm)Right));
 }
 
 static ATermList pn2gsMakeIds(ATermList l);
@@ -2708,7 +2708,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
     int d=nIn-nOut;
     if(!reset) {
       if(d>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(d))));//RightExpr=x+d;
-      else if(d<0) RightExpr=gsMakeDataApplProd(OpInt2Nat,ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpSubt,RightExpr,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(-d))))));//RightExpr=Int2Nat(x-d);
+      else if(d<0) RightExpr=gsMakeDataAppl(OpInt2Nat,ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpSubt,RightExpr,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(-d))))));//RightExpr=Int2Nat(x-d);
     }
     else
       RightExpr=gsMakeId(ATmakeAppl0(ATmakeAFunInt0(nIn)));//RightExpr=nIn;
@@ -2835,7 +2835,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
 // 	{
 // 	  int d=i-j;
 // 	  if(d>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(d))));//RightExpr=RightExpr+d;
-// 	  else if(d<0) RightExpr=gsMakeDataApplProd(OpInt2Nat,ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpSubt,RightExpr,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(-d))))));//RightExpr=max(RightExpr-d,0);
+// 	  else if(d<0) RightExpr=gsMakeDataAppl(OpInt2Nat,ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpSubt,RightExpr,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(-d))))));//RightExpr=max(RightExpr-d,0);
 // 	}
 // 	ATermAppl Right=gsMakeParamId(CurrentPlace,ATmakeList1((ATerm)RightExpr));//make P_pi(max(x+i-j,0))
 // 	ATermAppl RightResets=gsMakeParamId(CurrentPlace,ATmakeList1((ATerm)Number0));//make P_pi(0)
@@ -2949,7 +2949,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
 
     //colored
     //not possible because the cardinality of bags is not built-in 
-    //if(Type) ErrorCond=pn2gsMakeDataApplProd2(OpLTE,nMaxTokens,pn2gsMakeDataApplProd(OpCard(IdX)));
+    //if(Type) ErrorCond=pn2gsMakeDataApplProd2(OpLTE,nMaxTokens,pn2gsMakeDataAppl(OpCard(IdX)));
 
     ATermAppl ExtraSummand=gsMakeIfThenElse(ErrorCond,
 				      gsMakeSeq(ErrorAction,
@@ -3202,7 +3202,7 @@ static ATermAppl pn2gsMakeBagVars(ATermList l){
     l1=ATinsert(l1,(ATerm)ATAgetFirst(l));
   }
 
-  return gsMakeDataApplProd(OpBagEnum,l1);
+  return gsMakeDataAppl(OpBagEnum,l1);
 }
 
 static ATermList pn2gsMakeListOfLists(ATermList l){

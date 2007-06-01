@@ -43,7 +43,7 @@ static bool add_used_sort(ATermAppl expr, ATermIndexedSet s)
 		ATbool n;
 		ATindexedSetPut(s,(ATerm) expr,&n);
 		return (n == ATtrue);
-	} else { // gsIsSortArrowProd(expr)
+	} else { // gsIsSortArrow(expr)
                 bool b = add_used_sorts(ATLgetArgument(expr,0),s);
 		bool c = add_used_sort(ATAgetArgument(expr,1),s);
 		return b || c;
@@ -61,7 +61,7 @@ static bool add_used(ATermAppl expr, ATermIndexedSet s)
 		ATindexedSetPut(s,(ATerm) expr,&n);
 		bool b = add_used_sort(ATAgetArgument(expr,1),s);
 		return (n == ATtrue) || b;
-	} else if ( gsIsDataApplProd(expr) )
+	} else if ( gsIsDataAppl(expr) )
 	{
 		bool b = add_used(ATAgetArgument(expr,0),s);
 		bool c = add_used(ATLgetArgument(expr,1),s);
@@ -104,7 +104,7 @@ static bool add_sorts(ATermList l, ATermIndexedSet used_data, ATermIndexedSet us
 
 static bool add_sort(ATermAppl s, ATermIndexedSet used_data, ATermIndexedSet used_sorts, function_list constructors)
 {
-	if ( gsIsSortArrowProd(s) )
+	if ( gsIsSortArrow(s) )
 	{
 		bool b = add_sorts(ATLgetArgument(s,0),used_data,used_sorts,constructors);
 		bool c = add_sort(ATAgetArgument(s,1),used_data,used_sorts,constructors);
@@ -165,7 +165,7 @@ static bool is_used(ATermAppl expr, ATermIndexedSet s)
 	if ( gsIsOpId(expr) )
 	{
 		return (ATindexedSetGetIndex(s,(ATerm) expr) >= 0);
-	} else if ( gsIsDataApplProd(expr) )
+	} else if ( gsIsDataAppl(expr) )
 	{
 		return is_used(ATAgetArgument(expr,0),s) && is_used(ATLgetArgument(expr,1),s);
 	}

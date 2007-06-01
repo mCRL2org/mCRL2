@@ -987,7 +987,7 @@ static void PRINT_FUNC(PrintSortExpr)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(dbg_prints)("printing standard sort identifier\n");
     PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(SortExpr, 0),
       pp_format, ShowSorts, PrecLevel);
-  } else if (gsIsSortArrowProd(SortExpr)) {
+  } else if (gsIsSortArrow(SortExpr)) {
     //print product arrow sort
     PRINT_FUNC(dbg_prints)("printing product arrow sort\n");
     if (PrecLevel > 0) PRINT_FUNC(fprints)(OutStream, "(");
@@ -1045,13 +1045,13 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
 {
   assert(gsIsDataExpr(DataExpr));
   if (gsIsId(DataExpr) || gsIsOpId(DataExpr) || gsIsDataVarId(DataExpr) ||
-    gsIsDataApplProd(DataExpr)) {
+    gsIsDataAppl(DataExpr)) {
     if (pp_format == ppDebug) {
       PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(DataExpr, 0),
         pp_format, ShowSorts, 0);
-      if (gsIsDataApplProd(DataExpr)) {
+      if (gsIsDataAppl(DataExpr)) {
         PRINT_FUNC(fprints)(OutStream, "(");
-        //gsIsDataApplProd(DataExpr)
+        //gsIsDataAppl(DataExpr)
         PRINT_FUNC(PrintPart_List)(OutStream, ATLgetArgument(DataExpr, 1),
           pp_format, ShowSorts, 0, NULL, ", ");
         PRINT_FUNC(fprints)(OutStream, ")");
@@ -1060,7 +1060,7 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
       //print data expression in the external format, if possible
       ATermAppl Head;
       ATermList Args;
-      if (!gsIsDataApplProd(DataExpr)) {
+      if (!gsIsDataAppl(DataExpr)) {
         Head = gsGetDataExprHead(DataExpr);
         Args = gsGetDataExprArgs(DataExpr);
       } else {
@@ -1131,7 +1131,7 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         Vars = ATreverse(Vars);
         PRINT_FUNC(PrintDecls)(OutStream, Vars, pp_format, NULL, ", ");
         PRINT_FUNC(fprints)(OutStream, ". ");        
-        Body = gsMakeDataApplProd(Body, Vars);
+        Body = gsMakeDataAppl(Body, Vars);
         PRINT_FUNC(PrintDataExpr)(OutStream, Body, pp_format, ShowSorts, 1);
         if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, ")");
       } else if (gsIsOpIdPrefix(Head) && ArgsLength == 1) {
@@ -1906,7 +1906,7 @@ bool gsHasConsistentContextList(const ATermTable DataVarDecls,
 
 bool gsIsListEnumImpl(ATermAppl DataExpr)
 {
-  if (!gsIsDataApplProd(DataExpr) && !gsIsOpId(DataExpr)) return false;
+  if (!gsIsDataAppl(DataExpr) && !gsIsOpId(DataExpr)) return false;
   ATermAppl HeadName = ATAgetArgument(gsGetDataExprHead(DataExpr), 0);
   if (ATisEqual(HeadName, gsMakeOpIdNameCons())) {
     ATermList Args = gsGetDataExprArgs(DataExpr);

@@ -27,7 +27,7 @@
     // --------------------------------------------------------------------------------------------
 
     bool Sort_Info::is_sort_arrow_prod(ATermAppl a_sort_expression) {
-      return gsIsSortArrowProd(a_sort_expression);
+      return gsIsSortArrow(a_sort_expression);
     }
 
     // --------------------------------------------------------------------------------------------

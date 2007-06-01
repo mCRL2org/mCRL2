@@ -365,7 +365,7 @@ static ATermAppl getTargetSort(ATermAppl sortterm)
       (gsIsSortId(sortterm)))
   { return sortterm;
   }
-  if (gsIsSortArrowProd(sortterm))
+  if (gsIsSortArrow(sortterm))
   { return getTargetSort(ATAgetArgument(sortterm,1));
   }
 
@@ -395,7 +395,7 @@ static int existsort(ATermAppl sortterm)
      if (sortterm==gsMakeSortExprInt()) return 1;
      if (sortterm==gsMakeSortExprNat()) return 1;
      if (sortterm==gsMakeSortExprPos()) return 1; */
-  if (gsIsSortArrowProd(sortterm))
+  if (gsIsSortArrow(sortterm))
   { return existsorts(ATLgetArgument(sortterm,0)) && 
              existsort(ATAgetArgument(sortterm,1));
   }
@@ -447,7 +447,7 @@ static void insertsort(ATermAppl sortterm, specificationbasictype *spec)
      if (sortterm==gsMakeSortExprInt()) return;
      if (sortterm==gsMakeSortExprNat()) return;
      if (sortterm==gsMakeSortExprPos()) return; */
-  if (gsIsSortArrowProd(sortterm))
+  if (gsIsSortArrow(sortterm))
   { insertsorts(ATLgetArgument(sortterm,0),spec);
     insertsort(ATAgetArgument(sortterm,1),spec);
     return;
@@ -1558,7 +1558,7 @@ static int occursinterm(ATermAppl var, ATermAppl t)
   if (gsIsOpId(t))
   { return 0; }
 
-  assert(gsIsDataApplProd(t));
+  assert(gsIsDataAppl(t));
 
   return occursinterm(var,ATAgetArgument(t,0))||
          occursintermlist(var,ATLgetArgument(t,1));
@@ -1753,9 +1753,9 @@ static ATermAppl substitute_data_rec(
   { return t;
   } */
 
-  if (gsIsDataApplProd(t))
+  if (gsIsDataAppl(t))
   { 
-    return gsMakeDataApplProd(
+    return gsMakeDataAppl(
                substitute_data_rec(terms,vars,ATAgetArgument(t,0)),
                substitute_datalist_rec(terms,vars,ATLgetArgument(t,1)));
   }
@@ -3592,7 +3592,7 @@ static void makepushargsvars(
   v=ATinsertA(ATempty,stack->stackvar);
 
   makepushargsvarsrec(&t,&v,stack->opns->sorts);
-  *t1=gsMakeDataApplProd(stack->opns->push,ATinsertA(t,var0));
+  *t1=gsMakeDataAppl(stack->opns->push,ATinsertA(t,var0));
   *t2=ATinsertA(v,var0);
 }
 
@@ -3777,7 +3777,7 @@ static stacklisttype *new_stack(
         stop();
       }
 
-      tempsorts=gsMakeSortArrowProd(tempsort_domain, stack->opns->stacksort);
+      tempsorts=gsMakeSortArrow(tempsort_domain, stack->opns->stacksort);
 
       /* XX insert equations for get mappings */
 
@@ -4032,8 +4032,8 @@ static ATermAppl adapt_term_to_stack(
     }
     else return getvar(t,stack,spec); }
 
-  if (gsIsDataApplProd(t))
-  { return gsMakeDataApplProd(
+  if (gsIsDataAppl(t))
+  { return gsMakeDataAppl(
             adapt_term_to_stack(ATAgetArgument(t,0),stack,vars,spec),
             adapt_termlist_to_stack(ATLgetArgument(t,1),stack,vars,spec));
   }
@@ -4187,7 +4187,7 @@ static ATermList push(
   }
 
   return ATinsertA(
-            ATempty,gsMakeDataApplProd(
+            ATempty,gsMakeDataAppl(
                         stack->opns->push,
                         processencoding(i,t,spec,stack))); 
 }
@@ -4853,7 +4853,7 @@ static ATermAppl find_case_function(enumeratedtype *e, ATermAppl sort)
     ATermAppl w1=ATAgetFirst(w);
     assert(gsIsOpId(w1));
     ATermAppl w1sort=gsGetSort(w1);
-    assert(gsIsSortArrowProd(w1sort));
+    assert(gsIsSortArrow(w1sort));
     ATermList w1sort_domain = ATLgetArgument(w1sort,0);
     assert(ATgetLength(w1sort_domain) >= 2);
     if (ATisEqual(ATAelementAt(w1sort_domain,1), sort))
@@ -4892,7 +4892,7 @@ static void define_equations_for_case_function(
   v=getfreshvariable("e",e->sortId);
   declare_equation_variables( ATinsertA(ATinsertA(ATempty,v),v1));
   newequation(NULL,
-              gsMakeDataApplProd(functionname,ATinsertA(xxxterm,v)),
+              gsMakeDataAppl(functionname,ATinsertA(xxxterm,v)),
               v1,
               spec);
   end_equation_section();
@@ -4904,7 +4904,7 @@ static void define_equations_for_case_function(
   { 
     newequation(
            NULL,
-           gsMakeDataApplProd(functionname,ATinsertA(args,ATAgetFirst(w))),
+           gsMakeDataAppl(functionname,ATinsertA(args,ATAgetFirst(w))),
            ATAgetFirst(auxvars),
            spec);
     
@@ -4930,7 +4930,7 @@ static void create_case_function_on_enumeratedtype(
     ATermAppl w1=ATAgetFirst(w);
     assert(gsIsOpId(w1));
     ATermAppl w1sort=gsGetSort(w1);
-    assert(gsIsSortArrowProd(w1sort));
+    assert(gsIsSortArrow(w1sort));
     ATermList w1sort_domain = ATLgetArgument(w1sort,0);
     assert(ATgetLength(w1sort_domain) >= 2);
     if (ATisEqual(ATAelementAt(w1sort_domain,1), sort))
@@ -4964,10 +4964,10 @@ static void create_case_function_on_enumeratedtype(
   }
   newsortlist=ATinsert(newsortlist, (ATerm) e->sortId);
 
-  newsort=gsMakeSortArrowProd(newsortlist,sort);
+  newsort=gsMakeSortArrow(newsortlist,sort);
 
   snprintf(scratch1,STRINGLENGTH,"C%d_%s",e->size,
-         ((gsIsSortArrowProd(newsort))?"fun":ATSgetArgument(sort,0)));
+         ((gsIsSortArrow(newsort))?"fun":ATSgetArgument(sort,0)));
   casefunction=gsMakeOpId(
                       fresh_name(scratch1),
                       newsort);
@@ -7017,7 +7017,7 @@ static ATermAppl makeNegatedConjunction(ATermList S)
   ATermAppl result=gsMakeDataExprTrue();
   for( ; S!=ATempty ; S=ATgetNext(S) )
   {
-    //first(S) is of the form DataApplProd(BoolxBool->Bool, [true, expr1])
+    //first(S) is of the form DataAppl(BoolxBool->Bool, [true, expr1])
     ATermAppl conjunction = ATAgetFirst(S);
     assert(gsIsDataExprAnd(conjunction));
 

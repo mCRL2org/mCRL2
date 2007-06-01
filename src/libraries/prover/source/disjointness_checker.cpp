@@ -31,7 +31,7 @@
           f_used_parameters_per_summand[(a_summand_number * f_number_of_parameters) + v_variable_index] = true;
         }
       } else if (!gsIsOpId(a_expression)) {
-        if(gsIsDataApplProd(a_expression)) {
+        if(gsIsDataAppl(a_expression)) {
           v_expression_1 = ATAgetArgument(a_expression, 0);
           v_expressions_2 = ATLgetArgument(a_expression, 1);
           process_data_expression(a_summand_number, v_expression_1);

@@ -507,26 +507,26 @@ bool gsIsConsSpec(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunConsSpec();
 }
 
-// DataApplProd
+// DataAppl
 inline
-AFun initAFunDataApplProd(AFun& f)
+AFun initAFunDataAppl(AFun& f)
 {
-  f = ATmakeAFun("DataApplProd", 2, ATfalse);
+  f = ATmakeAFun("DataAppl", 2, ATfalse);
   ATprotectAFun(f);
   return f;
 }
 
 inline
-AFun gsAFunDataApplProd()
+AFun gsAFunDataAppl()
 {
-  static AFun AFunDataApplProd = initAFunDataApplProd(AFunDataApplProd);
-  return AFunDataApplProd;
+  static AFun AFunDataAppl = initAFunDataAppl(AFunDataAppl);
+  return AFunDataAppl;
 }
 
 inline
-bool gsIsDataApplProd(ATermAppl Term)
+bool gsIsDataAppl(ATermAppl Term)
 {
-  return ATgetAFun(Term) == gsAFunDataApplProd();
+  return ATgetAFun(Term) == gsAFunDataAppl();
 }
 
 // DataEqn
@@ -1651,26 +1651,26 @@ bool gsIsSetComp(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunSetComp();
 }
 
-// SortArrowProd
+// SortArrow
 inline
-AFun initAFunSortArrowProd(AFun& f)
+AFun initAFunSortArrow(AFun& f)
 {
-  f = ATmakeAFun("SortArrowProd", 2, ATfalse);
+  f = ATmakeAFun("SortArrow", 2, ATfalse);
   ATprotectAFun(f);
   return f;
 }
 
 inline
-AFun gsAFunSortArrowProd()
+AFun gsAFunSortArrow()
 {
-  static AFun AFunSortArrowProd = initAFunSortArrowProd(AFunSortArrowProd);
-  return AFunSortArrowProd;
+  static AFun AFunSortArrow = initAFunSortArrow(AFunSortArrow);
+  return AFunSortArrow;
 }
 
 inline
-bool gsIsSortArrowProd(ATermAppl Term)
+bool gsIsSortArrow(ATermAppl Term)
 {
-  return ATgetAFun(Term) == gsAFunSortArrowProd();
+  return ATgetAFun(Term) == gsAFunSortArrow();
 }
 
 // SortBag
@@ -2576,9 +2576,9 @@ ATermAppl gsMakeConsSpec(ATermList OpId_0)
 }
 
 inline
-ATermAppl gsMakeDataApplProd(ATermAppl DataExpr_0, ATermList DataExpr_1)
+ATermAppl gsMakeDataAppl(ATermAppl DataExpr_0, ATermList DataExpr_1)
 {
-  return ATmakeAppl2(gsAFunDataApplProd(), (ATerm) DataExpr_0, (ATerm) DataExpr_1);
+  return ATmakeAppl2(gsAFunDataAppl(), (ATerm) DataExpr_0, (ATerm) DataExpr_1);
 }
 
 inline
@@ -2888,9 +2888,9 @@ ATermAppl gsMakeSetComp()
 }
 
 inline
-ATermAppl gsMakeSortArrowProd(ATermList SortExpr_0, ATermAppl SortExpr_1)
+ATermAppl gsMakeSortArrow(ATermList SortExpr_0, ATermAppl SortExpr_1)
 {
-  return ATmakeAppl2(gsAFunSortArrowProd(), (ATerm) SortExpr_0, (ATerm) SortExpr_1);
+  return ATmakeAppl2(gsAFunSortArrow(), (ATerm) SortExpr_0, (ATerm) SortExpr_1);
 }
 
 inline

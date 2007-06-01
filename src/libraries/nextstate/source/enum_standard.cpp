@@ -416,7 +416,7 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
 		ATermAppl var = (ATermAppl) ATgetFirst(e.vars);
 		ATermAppl sort = (ATermAppl) ATgetArgument(var,1);
 
-		if ( gsIsSortArrowProd(sort) )
+		if ( gsIsSortArrow(sort) )
 		{
 			gsErrorMsg("cannot enumerate all elements of functions sorts\n");
 			error = true;
@@ -462,7 +462,7 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
 						        *info.max_vars *= MAX_VARS_FACTOR;
 					        }
                                         }
-                                        cons_term = gsMakeDataApplProd(cons_term, var_list);
+                                        cons_term = gsMakeDataAppl(cons_term, var_list);
 				}
 				ATerm term_rf = info.rewr_obj->rewriteInternal(info.rewr_obj->toRewriteFormat(cons_term));
 			

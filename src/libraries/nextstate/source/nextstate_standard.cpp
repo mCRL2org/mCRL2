@@ -194,9 +194,9 @@ static bool statearg_match(ATermAppl arg, ATermAppl pat, ATermTable vars)
 
 
 	bool r;
-	if ( gsIsDataApplProd(pat) )
+	if ( gsIsDataAppl(pat) )
 	{
-		if ( !gsIsDataApplProd(arg) )
+		if ( !gsIsDataAppl(arg) )
 		{
 			r = false;
 		} else {
@@ -282,7 +282,7 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
 
 	no_dummy = ATinsert(no_dummy,(ATerm) sort);
 
-	if ( gsIsSortArrowProd(sort) )
+	if ( gsIsSortArrow(sort) )
 	{
                 // Take dataspec from current_spec, then take the consspec from the dataspec
                 // and take the list of opids (l) from this consspec
@@ -333,7 +333,7 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
                                                 dummies = ATinsert(dummies, (ATerm) FindDummy(ATAgetFirst(domain),no_dummy));
                                         }
                                         dummies = ATreverse(dummies);
-					t = gsMakeDataApplProd(t,dummies);
+					t = gsMakeDataAppl(t,dummies);
 				}
 	
 				if ( found )
@@ -401,9 +401,9 @@ ATerm NextStateStandard::SetVars(ATerm a, ATermList free_vars)
 		} else {
 			return a;
 		}
-	} else if ( gsIsDataApplProd((ATermAppl) a) )
+	} else if ( gsIsDataAppl((ATermAppl) a) )
 	{
-		return (ATerm) gsMakeDataApplProd((ATermAppl) SetVars(ATgetArgument((ATermAppl) a,0),free_vars),(ATermList) SetVars(ATgetArgument((ATermAppl) a,1),free_vars));
+		return (ATerm) gsMakeDataAppl((ATermAppl) SetVars(ATgetArgument((ATermAppl) a,0),free_vars),(ATermList) SetVars(ATgetArgument((ATermAppl) a,1),free_vars));
 	} else {
 		return a;
 	}

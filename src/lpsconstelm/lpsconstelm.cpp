@@ -445,7 +445,7 @@ bool lpsConstElm::recDetectVar(lps::data_expression t, std::set<data_expression>
    if( gsIsDataVarId(t) && (S.find(t) != S.end()) ){
      b = true;
    }
-   if ( gsIsDataApplProd(t) ) {
+   if ( gsIsDataAppl(t) ) {
      b = b || recDetectVar(data_expression(t.argument(0)), S);
      b = b || recDetectVarList(data_expression_list(t.argument(1)), S);
    }

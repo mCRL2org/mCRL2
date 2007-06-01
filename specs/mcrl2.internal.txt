@@ -1,4 +1,4 @@
-// Date: 07-05-2007
+// Date: 01-06-2007
 // This document describes the internal format of the mCRL2 language and the
 // corresponding mu-calculus formulas. Here:
 // - the following phases of implementation are distinguised:
@@ -42,7 +42,7 @@
 <SortExpr>    ::= <SortId>
                 | SortCons(<SortConsType>, <SortExpr>)                   [- di]
                 | SortStruct(<StructCons>+)                              [- di]
-                | SortArrowProd(<SortExpr>+, <SortExpr>)                
+                | SortArrow(<SortExpr>+, <SortExpr>)                
                 | SortUnknown                                            [. tc]
                 | SortsPossible(<SortExpr>+)                             [. tc]
 
@@ -72,7 +72,7 @@
 <DataExpr>     ::= Id(<String>)                                          [- tc]
                  | <DataVarId>                                           [+ tc]
                  | <OpId>                                                [+ tc]
-                 | DataApplProd(<DataExpr>, <DataExpr>+)
+                 | DataAppl(<DataExpr>, <DataExpr>+)
                  | Binder(<BindingOperator>, <DataVarId>+, <DataExpr>)   [- di]
                  | Whr(<DataExpr>, <WhrDecl>+)                           [- di]
 

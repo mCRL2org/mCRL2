@@ -119,7 +119,7 @@ ATermAppl RewriterJitty::toInner(ATermAppl Term, bool add_opids)
 
 	l = ATmakeList0();
 
-        if (!gsIsDataApplProd(Term))
+        if (!gsIsDataAppl(Term))
         {
                 if ( gsIsOpId(Term) )
 	        {
@@ -178,7 +178,7 @@ ATermAppl RewriterJitty::fromInner(ATermAppl Term)
         {
                 int i = 1;
                 ATermAppl sort = ATAgetArgument(a, 1);
-                while(gsIsSortArrowProd(sort) && (i < arity))
+                while(gsIsSortArrow(sort) && (i < arity))
                 {
                         ATermList sort_dom = ATLgetArgument(sort, 0);
                         list = ATmakeList0();
@@ -190,7 +190,7 @@ ATermAppl RewriterJitty::fromInner(ATermAppl Term)
                                 ++i;
                         }
                         list = ATreverse(list);
-                        a = gsMakeDataApplProd(a, list);
+                        a = gsMakeDataAppl(a, list);
                         sort = ATAgetArgument(sort, 1);
                 }
         }

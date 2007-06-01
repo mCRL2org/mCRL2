@@ -33,6 +33,7 @@ ATermList constructList()
 //--- begin generated code
 ATermAppl constructProcEqn();
 ATermAppl constructHide();
+ATermAppl constructSortArrow();
 ATermAppl constructForall();
 ATermAppl constructCommExpr();
 ATermAppl constructStateNot();
@@ -82,11 +83,11 @@ ATermAppl constructActExists();
 ATermAppl constructStateMu();
 ATermAppl constructStateFalse();
 ATermAppl constructPBESForall();
-ATermAppl constructSortArrowProd();
 ATermAppl constructStateTrue();
 ATermAppl constructBInit();
 ATermAppl constructPBESFalse();
 ATermAppl constructWhrDecl();
+ATermAppl constructDataAppl();
 ATermAppl constructRegTrans();
 ATermAppl constructStateDelayTimed();
 ATermAppl constructNu();
@@ -116,7 +117,6 @@ ATermAppl constructLinearProcess();
 ATermAppl constructActAt();
 ATermAppl constructDataEqn();
 ATermAppl constructStateExists();
-ATermAppl constructDataApplProd();
 ATermAppl constructStateMay();
 ATermAppl constructParamId();
 ATermAppl constructPBESTrue();
@@ -188,6 +188,22 @@ inline
 ATermAppl constructHide()
 {
   static ATermAppl t = initConstructHide(t);
+  return t;
+}
+
+// SortArrow
+inline
+ATermAppl initConstructSortArrow(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunSortArrow(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructSortExpr()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructSortArrow()
+{
+  static ATermAppl t = initConstructSortArrow(t);
   return t;
 }
 
@@ -975,22 +991,6 @@ ATermAppl constructPBESForall()
   return t;
 }
 
-// SortArrowProd
-inline
-ATermAppl initConstructSortArrowProd(ATermAppl& t)
-{
-  t = ATmakeAppl2(gsAFunSortArrowProd(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructSortExpr()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructSortArrowProd()
-{
-  static ATermAppl t = initConstructSortArrowProd(t);
-  return t;
-}
-
 // StateTrue
 inline
 ATermAppl initConstructStateTrue(ATermAppl& t)
@@ -1052,6 +1052,22 @@ inline
 ATermAppl constructWhrDecl()
 {
   static ATermAppl t = initConstructWhrDecl(t);
+  return t;
+}
+
+// DataAppl
+inline
+ATermAppl initConstructDataAppl(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunDataAppl(), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructList()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructDataAppl()
+{
+  static ATermAppl t = initConstructDataAppl(t);
   return t;
 }
 
@@ -1516,22 +1532,6 @@ inline
 ATermAppl constructStateExists()
 {
   static ATermAppl t = initConstructStateExists(t);
-  return t;
-}
-
-// DataApplProd
-inline
-ATermAppl initConstructDataApplProd(ATermAppl& t)
-{
-  t = ATmakeAppl2(gsAFunDataApplProd(), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructList()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructDataApplProd()
-{
-  static ATermAppl t = initConstructDataApplProd(t);
   return t;
 }
 

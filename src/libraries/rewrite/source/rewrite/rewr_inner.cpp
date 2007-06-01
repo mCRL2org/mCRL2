@@ -999,7 +999,7 @@ ATerm RewriterInnermost::toInner(ATermAppl Term, bool add_opids)
 {
 	ATermList l;
 
-	if ( !gsIsDataApplProd(Term) )
+	if ( !gsIsDataAppl(Term) )
 	{
 		if ( gsIsOpId(Term) )
 		{
@@ -1010,7 +1010,7 @@ ATerm RewriterInnermost::toInner(ATermAppl Term, bool add_opids)
 	}
 
 	l = ATmakeList0();
-        if ( gsIsDataApplProd(Term) )
+        if ( gsIsDataAppl(Term) )
         {
                 for ( ATermList args = ATLgetArgument((ATermAppl) Term,1) ; !ATisEmpty(args) ; args = ATgetNext(args))
                 {
@@ -1073,7 +1073,7 @@ ATermAppl RewriterInnermost::fromInner(ATerm Term)
         if(gsIsOpId(a) || gsIsDataVarId(a))
         {
                 ATermAppl sort = ATAgetArgument(a, 1);
-                while(gsIsSortArrowProd(sort) && !ATisEmpty(l))
+                while(gsIsSortArrow(sort) && !ATisEmpty(l))
                 {
                         ATermList sort_dom = ATLgetArgument(sort, 0);
                         list = ATmakeList0();
@@ -1084,7 +1084,7 @@ ATermAppl RewriterInnermost::fromInner(ATerm Term)
                                 l = ATgetNext(l);
                         }
                         list = ATreverse(list);
-                        a = gsMakeDataApplProd(a, list);
+                        a = gsMakeDataAppl(a, list);
                         sort = ATAgetArgument(sort, 1);
                 }
         }

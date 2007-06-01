@@ -1,7 +1,7 @@
 % lpssumelm Test Case 2 -- A simple constructor sort (1 level) only occurs in
 % a summand in various places
 %
-% The sum d:D can be unfolded, where in each unfolded summand d is replaces with
+% The sum d:D can be unfolded, where in each unfolded summand d is replaced with
 % a constructor of D
 sort D = struct d1|d2;
 

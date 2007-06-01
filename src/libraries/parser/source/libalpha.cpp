@@ -2054,7 +2054,7 @@ ATermAppl gsAlpha(ATermAppl Spec){
       bool good=false;
       if(P){
 	ATermAppl Cond=ATAgetArgument(body,0);
-	if(!gsIsDataApplProd(Cond)) goto nP_checked;
+	if(!gsIsDataAppl(Cond)) goto nP_checked;
 	ATermAppl Right=ATAgetArgument(body,2);
         if(!ATisEqual(P,ATAgetArgument(Right,0))) goto nP_checked;  
         int m=ATgetLength(ATLgetArgument(Right,1)); //number of parameters of P

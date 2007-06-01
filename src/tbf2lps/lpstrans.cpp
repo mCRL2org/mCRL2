@@ -102,7 +102,7 @@ static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args, ATermList typel
 		}
 		r = gsMakeOpId(t2,find_type(t,m,typelist));
 
-                r = gsMakeDataApplProd(r,m);
+                r = gsMakeDataAppl(r,m);
 	}
 	
 	return r;
@@ -192,7 +192,7 @@ static ATermList convert_funcs(ATermList funcs, ATermList *ids)
 		}
 		if ( !ATisEmpty(sorts) )
 		{
-			sort = gsMakeSortArrowProd(sorts, sort);
+			sort = gsMakeSortArrow(sorts, sort);
 		}
 
 		r = ATappend(r,(ATerm) gsMakeOpId(ATAgetArgument(ATAgetFirst(funcs),0),sort));

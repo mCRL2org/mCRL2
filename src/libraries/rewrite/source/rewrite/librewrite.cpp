@@ -204,7 +204,7 @@ static bool checkVars(ATermAppl Expr, ATermList Vars, ATermList *UsedVars)
 	if ( gsIsNil(Expr) || gsIsOpId(Expr) )
 	{
 		return true;
-	} else if ( gsIsDataApplProd(Expr) )
+	} else if ( gsIsDataAppl(Expr) )
 	{
 		return checkVars((ATermAppl) ATgetArgument(Expr,0),Vars,UsedVars) && checkVars((ATermList) ATLgetArgument(Expr,1),Vars,UsedVars);
 	} else { // gsIsDataVarId(Expr)
@@ -237,7 +237,7 @@ static bool checkPattern(ATermAppl p)
 	if ( gsIsDataVarId(p) || gsIsOpId(p) )
 	{
 		return true;
-	} else { // gsIsDataApplProd(p)
+	} else { // gsIsDataAppl(p)
 		return !gsIsDataVarId(ATAgetArgument(p,0)) &&
 		       checkPattern(ATAgetArgument(p,0))   &&
 		       checkPattern(ATLgetArgument(p,1));

@@ -1,1 +1,1 @@
-DataApplProd(OpId("==",SortArrowProd([SortId("List@0"),SortId("List@0")],SortId("Bool"))),[DataVarId("q1",SortId("List@0")),DataVarId("q2",SortId("List@0"))]),
+DataAppl(OpId("==",SortArrow([SortId("List@0"),SortId("List@0")],SortId("Bool"))),[DataVarId("q1",SortId("List@0")),DataVarId("q2",SortId("List@0"))]),

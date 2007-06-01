@@ -39,7 +39,7 @@ typedef term_list<sort> sort_list;
 //                | SortSet(<SortExpr>)                                    (- di)
 //                | SortBag(<SortExpr>)                                    (- di)
 //                | SortStruct(<StructCons>+)                              (- di)
-//                | SortArrowProd(<SortExpr>+, <SortExpr>)                 (- di)
+//                | SortArrow(<SortExpr>+, <SortExpr>)                 (- di)
 //                | SortArrow(<SortExpr>, <SortExpr>)                      (+ di)
 //
 //<SortId>       ::= SortId(<String>)
@@ -72,7 +72,7 @@ class sort: public aterm_appl
     /// Returns true if it is a sort of type A -> B
     bool is_arrow() const
     {
-      return gsIsSortArrowProd(*this);
+      return gsIsSortArrow(*this);
     }
 
     /// Returns the domain sorts of the sort.
@@ -105,14 +105,14 @@ class sort: public aterm_appl
 inline
 bool is_sort(aterm_appl t)
 {
-  return gsIsSortId(t) || gsIsSortArrowProd(t);
+  return gsIsSortId(t) || gsIsSortArrow(t);
 }
 
 /// Returns the sort 'domain -> range'.
 inline
 sort arrow(sort_list domain, sort range)
 {
-  return gsMakeSortArrowProd(domain, range);
+  return gsMakeSortArrow(domain, range);
 }
 
 namespace sort_expr {

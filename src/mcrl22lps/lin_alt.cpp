@@ -557,7 +557,7 @@ static ATermList get_vars(ATermAppl a)
 		return ATmakeList0();
 	}
 	else
-        if ( gsIsDataApplProd(a) )
+        if ( gsIsDataAppl(a) )
         {
                 l = get_vars(ATAgetArgument(a,0));
                 for (m=ATLgetArgument(a,1);!ATisEmpty(m);m=ATgetNext(m))
@@ -672,7 +672,7 @@ static ATbool has_bounded_var(ATermAppl a) //XXX
 	if ( gsIsDataVarId(a) )
 	{
 		return ATisAnnotated((ATerm) a);
-	} else if ( gsIsDataApplProd(a) )
+	} else if ( gsIsDataAppl(a) )
 	{
 		return (ATbool) (has_bounded_var(ATAgetArgument(a,0)) || has_bounded_var(ATLgetArgument(a,1)));
 	} else if ( gsIsOpId(a) )
@@ -690,7 +690,7 @@ ATerm replace_data_with_vars_gen(ATerm a, ATermList *v, ATermList *d, ATermAppl 
 
 	if ( ATisAppl(a) )
 	{
-		if ( gsIsDataApplProd((ATermAppl) a) || gsIsOpId((ATermAppl) a) || gsIsDataVarId((ATermAppl) a) )
+		if ( gsIsDataAppl((ATermAppl) a) || gsIsOpId((ATermAppl) a) || gsIsDataVarId((ATermAppl) a) )
 		{
 //gsfprintf(stderr,"\nhas_bounded_var(%T) = %i\n",a,has_bounded_var((ATermAppl) a));
 			if ( has_bounded_var((ATermAppl) a) )
@@ -1465,9 +1465,9 @@ static ATbool match_data(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 		return ATisEqual((ATerm) a,(ATerm) m);
 	}
 	else
-	if ( gsIsDataApplProd(a) )
+	if ( gsIsDataAppl(a) )
 	{
-		if ( gsIsDataApplProd(m) )
+		if ( gsIsDataAppl(m) )
 		{
 			if ( match_data(ATAgetArgument(a,0),ATAgetArgument(m,0),l,r) )
 			{
