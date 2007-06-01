@@ -35,30 +35,33 @@ int test_main(int argc, char* argv[])
     if ( fs::is_regular( dir_itr->status() ) )
     {
       std::string filename = dir_itr->path().file_string();
-      if (boost::ends_with(filename, ".form"))
+      if (boost::ends_with(filename, std::string(".form")))
       {       
-        std::string timed_result_file   = filename.substr(0, filename.find_last_of('.') + 1) + ".expected_timed_result";
-        std::string untimed_result_file = filename.substr(0, filename.find_last_of('.') + 1) + ".expected_untimed_result";
+        std::string timed_result_file   = filename.substr(0, filename.find_last_of('.') + 1) + "expected_timed_result";
+        std::string untimed_result_file = filename.substr(0, filename.find_last_of('.') + 1) + "expected_untimed_result";
         std::string formula = read_text(filename);
         if (fs::exists(timed_result_file))
         {
           pbes result = lps2pbes(SPEC1, formula, true);
           pbes expected_result;
           expected_result.load(timed_result_file);
-          cerr << "checking " << timed_result_file << endl;
-          BOOST_CHECK(result == expected_result);
+          bool cmp = (result == expected_result);
+          if (!cmp)
+            cerr << "ERROR: test " << timed_result_file << " failed!" << endl;
+          BOOST_CHECK(cmp);
         }
         if (fs::exists(untimed_result_file))
         {
           pbes result = lps2pbes(SPEC1, formula, false);
           pbes expected_result;
           expected_result.load(untimed_result_file);
-          cerr << "checking " << untimed_result_file << endl;
-          BOOST_CHECK(result == expected_result);
+          bool cmp = (result == expected_result);
+          if (!cmp)
+            cerr << "ERROR: test " << untimed_result_file << " failed!" << endl;
+          BOOST_CHECK(cmp);
         }
       }
     }
   }
-
   return 0;
 }
