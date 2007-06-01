@@ -421,11 +421,11 @@ bool Visualizer::isMarked(Cluster* c) {
 
 // ------------- STATES --------------------------------------------------------
 
-void Visualizer::drawStates() {
+void Visualizer::drawStates(bool simulating) {
   if (lts == NULL) {
   	return;
   }
-  drawStates(lts->getInitialState()->getCluster(),0);
+  drawStates(lts->getInitialState()->getCluster(),0, simulating);
 }
 
 void Visualizer::drawSimStates(vector<State*> historicStates, 
@@ -449,14 +449,14 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
   }
 
    // We want to see marked states during simulation, so draw these first
-  Cluster* root = lts->getInitialState()->getCluster();
-  drawSimMarkedStates(root, 0);
+/*  Cluster* root = lts->getInitialState()->getCluster();
+  drawSimMarkedStates(root, 0); */
     
   // Draw previous states of the simulation, in the colour specified in the
   // settings (default: white)
   float ns = settings->getFloat(NodeSize);
   RGB_Color hisStateColor = settings->getRGB(SimPrevColor);
-  glColor4ub(hisStateColor.r, hisStateColor.g, hisStateColor.b, 255);
+  RGB_Color markStateColor = settings->getRGB(MarkedColor);
   
   vector<Transition*> transs;
   currState->getOutTransitions(transs);
@@ -479,8 +479,17 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
     for (size_t j = 0; j < posStates.size(); ++j) {
       isPossible = (s == posStates[j]);
     }
-
-    if (!isMarked(s) && !isPossible) {
+    
+    if (isMarked(s))
+    {
+      glColor4ub(markStateColor.r, markStateColor.g, markStateColor.b, 255);
+    }
+  
+    else
+    {
+      glColor4ub(hisStateColor.r, hisStateColor.g, hisStateColor.b, 255);
+    }
+    if (!isPossible) {
       Point3D p = s->getPositionAbs();
       glPushMatrix(); 
       glTranslatef(p.x, p.y, p.z);
@@ -492,7 +501,17 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
  
   // Draw the current state.
   //RGB_Color hisStateColor = settings->getRGB(SimStateColor);
-  RGB_Color currStateColor = settings->getRGB(SimCurrColor);
+  RGB_Color currStateColor;
+  
+  if(isMarked(currState))
+  {
+    currStateColor = settings->getRGB(MarkedColor);
+  }
+  else
+  {
+    currStateColor = settings->getRGB(SimCurrColor);
+  }
+
   glColor4ub(currStateColor.r, currStateColor.g, currStateColor.b, 255);
   Point3D currentPos = currState->getPositionAbs();
   glPushMatrix();
@@ -512,6 +531,7 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
   {
     State* endState = transs[i]->getEndState();
     glPushName(SIMSTATE);
+
     glPushName(endState->getID());
 
     if (transs[i] != chosenTrans) {
@@ -708,34 +728,38 @@ void Visualizer::computeStateAbsPos(State* root, int rot, Point3D initVect) {
   root->DFSfinish();
 }
 
-void Visualizer::drawStates(Cluster* root,int rot) {
-  float ns = settings->getFloat(NodeSize);
+void Visualizer::drawStates(Cluster* root, int rot, bool simulating) {
+  float ns = settings->getFloat(NodeSize); 
   for (int i = 0; i < root->getNumStates(); ++i) {
     State *s = root->getState(i);
-    if (isMarked(s)) 
+    if(!(simulating && s->isSimulated()))
     {
-      RGB_Color c = settings->getRGB(MarkedColor);
-      glColor4ub(c.r,c.g,c.b,255);
-    } 
-    else if (s->isSelected()) 
-    {
-      glColor4ub(0, 0, 0, 255);
-    } 
-    else
-    {
-      RGB_Color c = settings->getRGB(StateColor);
-      glColor4ub(c.r,c.g,c.b,255);
+      if (isMarked(s)) 
+      {
+        RGB_Color c = settings->getRGB(MarkedColor);
+        glColor4ub(c.r,c.g,c.b,255);
+      } 
+      else if (s->isSelected()) 
+      {
+        glColor4ub(0, 0, 0, 255);
+      } 
+      else 
+      {
+        RGB_Color c = settings->getRGB(StateColor);
+        glColor4ub(c.r,c.g,c.b,255);
+      }
+      glPushMatrix();
+      if (s->getPosition() >= -0.9f) {
+        glRotatef(-s->getPosition(),0.0f,0.0f,1.0f);
+        glTranslatef(root->getTopRadius(),0.0f,0.0f);  
+      }
+      glScalef(ns,ns,ns);
+     
+      glPushName(s->getID());
+      primitiveFactory->drawSimpleSphere();
+      glPopName();
+      glPopMatrix();
     }
-    glPushMatrix();
-    if (s->getPosition() >= -0.9f) {
-      glRotatef(-s->getPosition(),0.0f,0.0f,1.0f);
-      glTranslatef(root->getTopRadius(),0.0f,0.0f);  
-    }
-    glScalef(ns,ns,ns);
-    glPushName(s->getID());
-    primitiveFactory->drawSimpleSphere();
-    glPopName();
-    glPopMatrix();
   }
 
   int drot = rot + settings->getInt(BranchRotation);
@@ -748,13 +772,13 @@ void Visualizer::drawStates(Cluster* root,int rot) {
     if (desc->getPosition() < -0.9f) {
       // descendant is centered
       glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
-      drawStates(desc,(root->getNumDescendants()>1)?drot:rot);
+      drawStates(desc,(root->getNumDescendants()>1)?drot:rot, simulating);
       glTranslatef(0.0f,0.0f,-settings->getFloat(ClusterHeight));
     } else {
       glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
       glTranslatef(root->getBaseRadius(),0.0f,settings->getFloat(ClusterHeight));
       glRotatef(settings->getInt(BranchTilt), 0.0f, 1.0f, 0.0f);
-      drawStates(desc,drot);
+      drawStates(desc,drot, simulating);
       glRotatef(-settings->getInt(BranchTilt), 0.0f, 1.0f, 0.0f);
       glTranslatef(-root->getBaseRadius(),0.0f,-settings->getFloat(ClusterHeight));
       glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
@@ -917,32 +941,6 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
       drawForwardPointer(beginState, endState);
       glLineWidth(1.0);
     }
-   
-/*    glPushName(endState->getID());
-    if (!isMarked(endState)) {
-      if (currTrans != chosenTrans) {
-        RGB_Color c = settings->getRGB(SimPosColor);
-        glColor4ub(c.r, c.g, c.b, 255);
-        Point3D p = endState->getPositionAbs();
-        glPushMatrix();
-        glTranslatef(p.x, p.y, p.z);
-        glScalef(ns, ns, ns);
-        primitiveFactory->drawSimpleSphere();
-        glPopMatrix();
-      }
-      else {
-        // Draw the chosen state bigger and in another colour.
-        RGB_Color c = settings->getRGB(SimSelColor);
-        glColor4ub(c.r, c.g, c.b, 255);
-        Point3D p = endState->getPositionAbs();
-        glPushMatrix();
-        glTranslatef(p.x, p.y, p.z);
-        glScalef(1.5 * ns, 1.5 * ns, 1.5* ns);
-        primitiveFactory->drawSimpleSphere();
-        glPopMatrix();
-      }
-    }
-    glPopName();*/
   }
 }
   

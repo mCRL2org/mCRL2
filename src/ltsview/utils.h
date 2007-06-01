@@ -13,7 +13,7 @@ namespace Utils {
   enum DFSState       {DFS_WHITE,DFS_GREY,DFS_BLACK};
   enum SimState       {UNSEEN, HISTORY, NOW, FUTURE};
   // Allows picking processor to identify type of item picked.
-  enum PickState      {STATE, CLUSTER, TRANSITION, SIMSTATE}; 
+  enum PickState      {STATE, CLUSTER, SIMSTATE, PICKNONE}; 
 
   struct RGB_Color {
     unsigned char r;

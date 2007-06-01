@@ -56,6 +56,7 @@ class GLCanvas: public wxGLCanvas, public Subscriber, public simReader {
     int	      oldMouseY;
     Settings  *settings;
     Visualizer *visualizer;
+    Utils::PickState selectedType;
     
     void      determineCurrentTool(wxMouseEvent& event);
     void      setMouseCursor();

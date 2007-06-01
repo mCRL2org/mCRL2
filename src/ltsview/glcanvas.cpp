@@ -47,6 +47,7 @@ GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
   lightRenderMode = false;
   simulating      = false;
   setActiveTool(myID_SELECT);
+  selectedType = PICKNONE;
 }
 
 GLCanvas::~GLCanvas() {
@@ -197,37 +198,38 @@ void GLCanvas::display(bool coll_caller) {
       } 
       if (!lightRenderMode || settings->getBool(NavShowStates)) {
 
-        if (settings->getBool(DisplayStates) && !simulating) {         
-          // Identify that we are drawing states
-          glPushName(STATE);
-          visualizer->drawStates();
-          glPopName();
+        if (settings->getBool(DisplayStates)) {         
+          if (!simulating)
+          {
+            // Identify that we are drawing states
+            glPushName(STATE);
+          }
+
+          visualizer->drawStates(simulating);
+          if (!simulating) 
+          {
+            glPopName();
+          }
         }
-        /*else if (simulating) {
-          // Draw the states that were visited in simulation, and the current 
-          // state
-          visualizer->drawSimStates(sim->getStateHis(), sim->getCurrState());
-        }*/
       }
       
-      if (!simulating) {
-        visualizer->drawTransitions(
+      visualizer->drawTransitions(
           settings->getBool(DisplayTransitions)
             && (!lightRenderMode || settings->getBool(NavShowTransitions)),
           settings->getBool(DisplayBackpointers)
             && (!lightRenderMode || settings->getBool(NavShowBackpointers)));
-      }
-      else {
+      
+      if (simulating) 
+      {
         // Draw transitions followed during simulation and the possible
         // transitions going out of the current state.
         // Identify that we are drawing selectable sim states in this mode.
-        glPushName(SIMSTATE);
         visualizer->drawSimTransitions(
           !lightRenderMode || settings->getBool(NavShowTransitions),
           !lightRenderMode || settings->getBool(NavShowBackpointers),
           sim->getTransHis(), sim->getPosTrans(), sim->getChosenTrans());
-        glPopName();
       }  
+      
       if (!lightRenderMode || settings->getBool(NavTransparency)) {
         // determine current viewpoint in world coordinates
         glPushMatrix();
@@ -536,10 +538,22 @@ void GLCanvas::refresh() {
   if (sim != NULL) {
     if (sim->getStarted()) {
 
+      if (selectedType != SIMSTATE) 
+      {
+        // Removed all selections that are not states of the simulation.
+        mediator->deselect();
+      }
+      
       simulating = true;
       display();
     }
     else {
+      if (selectedType == SIMSTATE)
+      {
+        // Remove selections made in simulation
+        mediator->deselect();
+      }
+
       simulating = false;
       display();
     } 
@@ -573,6 +587,7 @@ void GLCanvas::processHits(const GLint hits, GLuint buffer[], bool doubleC) {
   // (buffer[5]: The second identifier of the object picked.)
 
   int selectedObject[3];  // Objects are identified by at most 3 integers
+  selectedObject[0] = PICKNONE;
   float curMinDepth = 2000000;
   float minDepth = 0;
   GLuint names;
@@ -587,38 +602,35 @@ void GLCanvas::processHits(const GLint hits, GLuint buffer[], bool doubleC) {
     minDepth = static_cast<float>(*buffer)/0x7fffffff;
     buffer++; // skip maximal z value of his (no interest)
     buffer++; // buffer points to the first name on the stack
+  
     GLuint objType = *buffer;
-   
-    for (unsigned int j = 0; j < names; j++) 
+
+    for (unsigned int k = 0; k < names; k++) 
     {
       if (minDepth < curMinDepth && (!stateSelected || objType == STATE || 
           objType == SIMSTATE))
       {
-        selectedObject[j] = *buffer;
+        selectedObject[k] = *buffer;
       }
-
       buffer++;
     }
-  
+
     if (minDepth < curMinDepth && (!stateSelected || objType == STATE ||
-        objType == SIMSTATE))
+        objType == SIMSTATE) && names > 0)
     {
+      stateSelected = true;
       curMinDepth = minDepth;
     }
-    stateSelected = (objType == STATE) || (objType == SIMSTATE) ;
+    
   }
 
-  switch (selectedObject[0]) {
+  selectedType = static_cast<PickState>(selectedObject[0]);
+  switch (selectedType) {
     case STATE: 
-      {
-        mediator->selectStateByID(selectedObject[1]);
-        break;
-      }
+      mediator->selectStateByID(selectedObject[1]);
+      break;
     case CLUSTER: 
       printf("Cluster selected \n");
-      break;
-    case TRANSITION:
-      printf("Transition selected \n");
       break;
     case SIMSTATE:
       mediator->selectStateByID(selectedObject[1]);
@@ -631,6 +643,7 @@ void GLCanvas::processHits(const GLint hits, GLuint buffer[], bool doubleC) {
       break;
     default:
       printf("Nothing selected.\n");
+      selectedType = PICKNONE;
       mediator->deselect();
       break;
   }

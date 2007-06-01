@@ -9,6 +9,7 @@ State::State() {
   marked = false;
   visitState = DFS_WHITE;
   id = 0;
+  simulated = false;
   selected = false;
 }
 
@@ -238,4 +239,14 @@ DFSState State::getVisitState() const {
 
 int State::getParameterValue(int parindex) {
   return stateVector[parindex];
+}
+
+void State::setSimulated(bool simulated)
+{
+  this->simulated = simulated;
+}
+
+bool State::isSimulated() const
+{
+  return simulated;
 }

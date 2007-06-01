@@ -30,7 +30,7 @@ class Visualizer: public Subscriber {
                               float &boundHeight);
     void drawBackPointer(State* startState,State* endState);
     void drawForwardPointer(State* startState,State* endState);
-    void drawStates(Cluster* root,int rot);
+    void drawStates(Cluster* root,int rot, bool simulating);
     void drawTransitions(State* root,bool disp_fp,bool disp_bp);
     bool isMarked(Cluster* c);
     bool isMarked(State* s);
@@ -54,7 +54,7 @@ class Visualizer: public Subscriber {
     void setMarkStyle(Utils::MarkStyle ms);
     void setVisStyle(Utils::VisStyle vs);
 
-    void drawStates();
+    void drawStates(bool simulating);
     void drawSimStates(std::vector<State*> historicStates, State* currState,
                        Transition* chosenTrans);
     void drawSimMarkedStates(Cluster* root, int rot);

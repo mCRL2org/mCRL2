@@ -51,6 +51,7 @@ class State {
     Utils::Point3D getOutgoingControl() const;
     Utils::Point3D getIncomingControl() const;
     int	      getRank() const;
+    bool      isSimulated() const;
     int       getSlot() const;
     void      getSubordinates( std::set< State* > &ss ) const;
     void      getSuperiors( std::set< State* > &ss ) const;
@@ -68,6 +69,7 @@ class State {
     void      setID(int id);
     void      setRank( int r );
     void      setSlot( int s );
+    void      setSimulated(bool simulated);
     void      unmark();
    
   private:
@@ -85,6 +87,7 @@ class State {
     Utils::Point3D        outgoingControl;
     Utils::Point3D        incomingControl;
     int			  rank;
+    bool                  simulated;
     int                   slot; // The slot this state occupies
     std::vector< int >    stateVector;
     std::set< State* >	  subordinates;
