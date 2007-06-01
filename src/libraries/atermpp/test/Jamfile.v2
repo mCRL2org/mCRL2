@@ -5,7 +5,6 @@ project libraries/aterm/test
        <dependency>/boost//headers
        <dependency>/libraries//atermpp
        <source>/libraries//aterm
-       <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
    ;
 
 test-suite aterm

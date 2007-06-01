@@ -130,6 +130,27 @@ namespace detail {
       : t(t_)
     {}
   };
+
+  template <typename UnaryFunction>
+  UnaryFunction for_each_impl(aterm t, UnaryFunction op)
+  {
+    if (t.type() == AT_LIST) {
+      for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
+      {
+        for_each_impl(*i, op);
+      }
+    }
+    else if (t.type() == AT_APPL) {
+      if (op(t))
+      {
+        for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
+        {
+          for_each_impl(*i, op);
+        }
+      }
+    }
+    return op;
+  }
   
   template <typename UnaryPredicate>
   void find_if_impl(aterm t, UnaryPredicate op)

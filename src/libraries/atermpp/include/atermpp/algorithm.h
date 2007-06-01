@@ -26,6 +26,16 @@
 
 namespace atermpp
 {
+  /// \brief Calls op(elem) for subterms of the term t.
+  /// \ret a copy of the (internally modified) op.
+  /// The function op must have the signature bool op(aterm_appl t).
+  /// When op(t) is false, the children of t are skipped.
+  template <typename UnaryFunction, typename Term>
+  UnaryFunction for_each(Term t, UnaryFunction op)
+  {
+    return detail::for_each_impl(t, op);
+  }
+
   /// Finds a subterm of t that matches the predicate op. If no matching subterm is found,
   /// aterm() is returned.
   template <typename Term, typename UnaryPredicate>
