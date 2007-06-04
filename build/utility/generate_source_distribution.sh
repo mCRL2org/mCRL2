@@ -88,7 +88,7 @@ if (! test -e "${archive_name}.bz2"); then
        -or -wholename '*3rd-party/boost/tools/jam/bootstrap' >> excludes
 
   # Append revision number to template configuration file
-  echo "REVISION        = \"${revision}\" ;" >> ${SOURCE_BASE}/build/config.jam.in
+  echo "REVISION        = \"${revision}\" ;" >> ${SOURCE_BASE}/build/autoconf/config.jam.in
 
   tar cf ${archive_name} \
            --exclude '.svn' \
@@ -103,7 +103,7 @@ if (! test -e "${archive_name}.bz2"); then
            --exclude '*.so' \
            --exclude-from excludes ${source_files}
 
-  svn revert ${SOURCE_BASE}/build/config.jam.in
+  svn revert ${SOURCE_BASE}/build/autoconf/config.jam.in
 
   unlink mcrl2
 
