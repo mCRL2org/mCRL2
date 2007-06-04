@@ -3,7 +3,7 @@
 #include <sip/configuration.h>
 #include <sip/tool/category.h>
 #include <sip/detail/basic_messenger.h>
-#include <sip/detail/common.h>
+#include <sip/common.h>
 
 namespace sip {
   namespace messaging {

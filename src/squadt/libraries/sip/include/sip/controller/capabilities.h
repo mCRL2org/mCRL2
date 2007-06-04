@@ -4,7 +4,7 @@
 #include <ostream>
 #include <sstream>
 
-#include <sip/detail/common.h>
+#include <sip/common.h>
 
 #include <utilities/generic_visitor.h>
 

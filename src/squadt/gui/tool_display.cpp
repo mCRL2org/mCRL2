@@ -509,6 +509,28 @@ namespace squadt {
       }
 
       /**
+       * Helper class for associating objects of sip::layout::element with
+       * their wxWidgets counterpart
+       *
+       * This class would not have been necessary if wxWidgets provided
+       * functionality to register function objects as event handlers
+       **/
+      template < typename S >
+      class event_helper : public wxClientData {
+
+        protected:
+
+          S& sip_element;
+
+        protected:
+
+          virtual void do_changes(wxCommandEvent&) = 0;
+
+          event_helper(sip::layout::element& s) : sip_element(static_cast < S& > (s)) {
+          }
+      };
+
+      /**
        * \param[in] e the element that is associated with the new control
        * \param[in] s the text of the label
        **/
@@ -518,8 +540,21 @@ namespace squadt {
         /* Connect change event */
         change_event_handler->associate(t, e);
 
-        current_window->Connect(t->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
-                  wxCommandEventHandler(state_change_handler::text_field_changed), 0, change_event_handler);
+        class local : public wxEvtHandler, public event_helper< layout::elements::text_field > {
+
+          public:
+
+            local(sip::layout::element& s) : event_helper< layout::elements::text_field >(s) {
+            }
+
+            void do_changes(wxCommandEvent& e) {
+              sip_element.set_text(std::string(static_cast < wxTextCtrl* > (e.GetEventObject())->GetValue().fn_str()));
+            }
+        };
+
+        t->Connect(t->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
+                  wxCommandEventHandler(local::do_changes),
+                  new local(const_cast < sip::layout::element& > (*e)), change_event_handler);
      
         return (mediator::wrapper_aptr(new wrapper(t)));
       }
@@ -542,7 +577,7 @@ namespace squadt {
 
         send_display_update(*b);
       }
-     
+
       void state_change_handler::radio_button_selected(wxCommandEvent& e) {
         wxRadioButton*                  wxr = static_cast < wxRadioButton* > (e.GetEventObject());
         layout::elements::radio_button* r   = const_cast < layout::elements::radio_button* >
@@ -552,7 +587,7 @@ namespace squadt {
 
         send_display_update(*r);
       }
-     
+
       void state_change_handler::checkbox_clicked(wxCommandEvent& e) {
         wxCheckBox*                 wxc = static_cast < wxCheckBox* > (e.GetEventObject());
         layout::elements::checkbox* c   = const_cast < layout::elements::checkbox* >
@@ -578,13 +613,12 @@ namespace squadt {
        * \param[in] e pointer to the element of which the status was changed
        **/
       void state_change_handler::update(sip::layout::mediator* m, sip::layout::element const* e) {
-        element_for_window_map::const_iterator i = std::find_if(element_for_window.begin(), element_for_window.end(), 
-                boost::bind(std::equal_to< sip::layout::element const* >(), e, boost::bind(&element_for_window_map::value_type::second, _1)));
-
-        if (i != element_for_window.end()) {
-          tool_display_mediator::wrapper w(static_cast < wxWindow* > ((*i).first));
-
-          (*i).second->update(m, &w);
+        for (element_for_window_map::const_iterator i = element_for_window.begin(); i != element_for_window.end(); ++i) {
+          if (i->second == e) {
+            tool_display_mediator::wrapper w(static_cast < wxWindow* > ((*i).first));
+         
+            (*i).second->update(m, &w);
+          }
         }
       }
     }
@@ -663,7 +697,7 @@ namespace squadt {
           GetParent()->Layout();
         }
       }
-      else {
+      else if (e.GetId() == cmID_CLOSE) {
         GetParent()->GetSizer()->Show(this, false, true);
 
         context->gui_builder.schedule_update(boost::bind(&tool_display::remove, this));
@@ -672,11 +706,12 @@ namespace squadt {
 
     void tool_display::remove() {
       /* Ignore all scheduled updates to the tool display */
+      current_layout.reset();
+
+  std::cerr << " resetting handlers\n";
       event_handler.get_monitor()->reset_display_update_handler();
       event_handler.get_monitor()->reset_display_layout_handler();
       event_handler.get_monitor()->reset_status_message_handler();
-
-      current_layout.reset();
 
       wxSizer* s = GetParent()->GetSizer();
       
@@ -797,15 +832,13 @@ namespace squadt {
     void tool_display::update(boost::weak_ptr < sip::layout::tool_display > w, std::vector < sip::layout::element const* > l) {
       using namespace detail;
 
-      boost::shared_ptr < sip::layout::tool_display > g(w.lock());
+      tool_display_mediator m(this, &event_handler);
 
-      if (g.get() != 0) {
-        tool_display_mediator m(this, &event_handler);
+      BOOST_FOREACH(sip::layout::element const* i, l) {
+        event_handler.update(&m, i);
+      }
 
-        BOOST_FOREACH(sip::layout::element const* i, l) {
-          event_handler.update(&m, i);
-        }
-
+      if (w.lock().get()) {
         GetParent()->Layout();
       }
     }
@@ -852,6 +885,7 @@ namespace squadt {
      * \param[in] l the layout specification
      **/
     void tool_display::schedule_log_update(sip::report::sptr l) {
+  std::cerr << " writing to log window\n";
       context->gui_builder.schedule_update(boost::bind(&tool_display::update_log, this, current_layout, l));
     }
 

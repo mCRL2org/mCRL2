@@ -1,5 +1,5 @@
 #include <sip/detail/basic_messenger.tcc>
-#include <sip/detail/common.h>
+#include <sip/common.h>
 
 namespace sip {
 

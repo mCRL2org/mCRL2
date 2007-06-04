@@ -15,7 +15,7 @@
 #include <sip/detail/layout_elements.h>
 #include <sip/detail/layout_manager.h>
 #include <sip/detail/layout_tool_display.h>
-#include <sip/detail/common.h>
+#include <sip/common.h>
 
 namespace sip {
 

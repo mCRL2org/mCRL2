@@ -67,6 +67,9 @@ namespace squadt {
         /** \brief Waits until a connection has been established with the running process */
         inline void await_connection();
 
+        /** \brief Waits until the current task has been completed */
+        inline bool await_completion();
+
         /** \brief Signals that a new connection has been established */
         inline void signal_connection(boost::shared_ptr < task_monitor_impl >&, sip::message::end_point);
 
@@ -163,12 +166,33 @@ namespace squadt {
     inline void task_monitor_impl::await_connection() {
       boost::mutex::scoped_lock l(register_lock);
  
-      if (!connected) {
-        while (associated_process.get() == 0 || !connected) {
-          /* Other side has not connected and the process has not been registered as terminated */
-          register_condition.wait(l);
-        }
+      while (!connected || associated_process.get() == 0) {
+        /* Other side has not connected and the process has not been registered as terminated */
+        register_condition.wait(l);
       }
+    }
+
+    static void handle_task_completion(boost::shared_ptr < sip::message > const& m, bool& b) {
+      b = m.get() && !m->is_empty();
+    }
+
+    /**
+     * Waits until a connection has been established, or the process has terminated
+     * \return whether the task has been completed successfully
+     **/
+    inline bool task_monitor_impl::await_completion() {
+      bool result = false;
+ 
+      boost::mutex::scoped_lock l(register_lock);
+
+      add_handler(sip::message_signal_done, boost::bind(handle_task_completion, _1, result));
+
+      while (!done || associated_process.get() == 0) {
+        /* Other side has not connected and the process has not been registered as terminated */
+        register_condition.wait(l);
+      }
+
+      return result;
     }
 
     /**
@@ -192,6 +216,9 @@ namespace squadt {
       boost::mutex::scoped_lock l(register_lock);
 
       handlers.clear();
+
+      /* Signal completion to waiters */
+      register_condition.notify_all();
     }
 
     /**
@@ -206,7 +233,7 @@ namespace squadt {
         task_monitor_impl::service_handlers(m, change);
       }
 
-      if ((s == execution::process::completed || s == execution::process::aborted)) {
+      if (s == execution::process::completed || s == execution::process::aborted) {
         /* Unblock any remaining waiters */
         done = true;
  
@@ -227,13 +254,9 @@ namespace squadt {
     inline void task_monitor_impl::service_handlers(boost::shared_ptr < task_monitor_impl >& m, const event_type e) {
       std::pair < handler_map::iterator, handler_map::iterator > p = m->handlers.equal_range(e);
       
-      while (p.first != p.second) {
-        handler_map::iterator c = p.first;
-      
-        ++(p.first);
-      
-        if ((*(c)).second()) {
-          m->handlers.erase(c);
+      for (handler_map::iterator i = p.first; i != p.second; ++i) {
+        if (i->second()) {
+          m->handlers.erase(i);
         }
       }
     }

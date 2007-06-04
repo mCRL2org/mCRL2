@@ -19,7 +19,7 @@
 #include <transport/transporter.h>
 
 #include <sip/detail/basic_messenger.h>
-#include <sip/detail/common.h>
+#include <sip/common.h>
 
 namespace sip {
 
@@ -466,13 +466,10 @@ namespace sip {
         }
       }
       else {
-        typename message_queue_t::iterator i = std::find_if(message_queue.begin(),
-                        message_queue.end(),
-                        bind(std::equal_to<typename M::type_identifier_t>(), t,
-                                bind(&M::get_type, bind(&boost::shared_ptr < M >::get, _1))));
-
-        if (i != message_queue.end()) {
-          p = *i;
+        for (typename message_queue_t::iterator i = message_queue.begin(); i != message_queue.end(); ++i) {
+          if ((*i)->get_type() == t) {
+            p = *i;
+          }
         }
       }
 
@@ -603,13 +600,13 @@ namespace sip {
 
       mutex::scoped_lock l(mutex);
 
-      h();
-
       xtime time;
 
       xtime_get(&time, boost::TIME_UTC);
 
       time.sec += ts;
+
+      h();
 
       condition.timed_wait(l, time);
     }

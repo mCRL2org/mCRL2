@@ -6,7 +6,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <sip/controller.h>
-#include <sip/detail/common.h>
+#include <sip/common.h>
 
 #include "process.h"
 
@@ -39,6 +39,9 @@ namespace squadt {
 
         /** \brief Waits until a connection has been established with the running process */
         void await_connection();
+
+        /** \brief Waits until the current task has been completed */
+        bool await_completion();
 
         /** \brief Signals that a new connection has been established */
         void signal_connection(sip::message::end_point);

@@ -66,6 +66,10 @@ namespace squadt {
       boost::dynamic_pointer_cast < task_monitor_impl > (impl)->await_connection();
     }
 
+    bool task_monitor::await_completion() {
+      return boost::dynamic_pointer_cast < task_monitor_impl > (impl)->await_completion();
+    }
+
     /**
      * @param[in] e the other end point of the connection
      **/

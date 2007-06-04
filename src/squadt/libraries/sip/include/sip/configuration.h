@@ -13,7 +13,7 @@
 
 #include <sip/option.h>
 #include <sip/object.h>
-#include <sip/detail/common.h>
+#include <sip/common.h>
 #include <sip/mime_type.h>
 #include <sip/tool/category.h>
 

@@ -10,12 +10,12 @@
 #include <sip/report.h>
 #include <sip/tool/capabilities.h>
 #include <sip/controller/capabilities.h>
-#include <sip/detail/basic_datatype.h>
+#include <sip/basic_datatype.h>
 #include <sip/detail/layout_elements.h>
 #include <sip/detail/layout_manager.h>
 #include <sip/detail/layout_tool_display.h>
 #include <sip/detail/event_handlers.h>
-#include <sip/detail/common.h>
+#include <sip/common.h>
 
 #include <ticpp.h>
 

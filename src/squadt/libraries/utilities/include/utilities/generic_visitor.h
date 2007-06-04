@@ -256,7 +256,7 @@ namespace utility {
   R abstract_visitor< R >::call_visit(abstract_visitor& v, visitable const& t) {
     detail::basic_visit_method_wrapper& visit_method = v.get_visitable_type_tree().find(typeid(t)).find(typeid(void)).get();
 
-    return (static_cast < detail::visit_method_wrapper< R, abstract_visitor, const visitable, void >& > (visit_method).callback)(v, t);
+    return static_cast < detail::visit_method_wrapper< R, abstract_visitor, const visitable, void >& > (visit_method).callback(v, t);
   }
 
   template < typename R >
@@ -264,7 +264,7 @@ namespace utility {
   R abstract_visitor< R >::call_visit(abstract_visitor& v, visitable const& t, U& u) {
     detail::basic_visit_method_wrapper& visit_method = v.get_visitable_type_tree().find(typeid(t)).find(typeid(U)).get();
 
-    return (static_cast < detail::visit_method_wrapper< R, abstract_visitor, const visitable, U >& > (visit_method).callback)(v, t, u);
+    return static_cast < detail::visit_method_wrapper< R, abstract_visitor, const visitable, U >& > (visit_method).callback(v, t, u);
   }
 
   /**

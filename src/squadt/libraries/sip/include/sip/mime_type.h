@@ -102,7 +102,7 @@ namespace sip {
   }
 
   inline bool mime_type::operator==(mime_type const& r) const {
-    return ((m_main == unknown || r.m_main == unknown || m_main == r.m_main) && m_sub == r.m_sub);
+    return (m_sub == r.m_sub);
   }
 
   inline bool mime_type::operator!=(mime_type const& r) const {

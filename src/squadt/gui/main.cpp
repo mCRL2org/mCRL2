@@ -231,25 +231,29 @@ namespace squadt {
 
       assert(project_view != 0);
 
-      GetSizer()->Detach(project_view);
-      GetSizer()->RecalcSizes();
+      if (project_view != 0) {
+        project_view->store();
 
-      Layout();
+        GetSizer()->Detach(project_view);
+        GetSizer()->RecalcSizes();
 
-      project_view->Destroy();
-      project_view = 0;
+        Layout();
 
-      /* Adjust title */
-      SetTitle(default_title);
+        project_view->Destroy();
+        project_view = 0;
 
-      /* Disable or enable controls, if appropriate */
-      wxMenuBar& menu_bar = *GetMenuBar();
+        /* Adjust title */
+        SetTitle(default_title);
 
-      menu_bar.Enable(wxID_NEW, true);
-      menu_bar.Enable(wxID_OPEN, true);
-      menu_bar.Enable(cmID_UPDATE, false);
-      menu_bar.Enable(wxID_CLOSE, false);
-      menu_bar.Enable(cmID_NEW_DATA_SOURCE, false);
+        /* Disable or enable controls, if appropriate */
+        wxMenuBar& menu_bar = *GetMenuBar();
+
+        menu_bar.Enable(wxID_NEW, true);
+        menu_bar.Enable(wxID_OPEN, true);
+        menu_bar.Enable(cmID_UPDATE, false);
+        menu_bar.Enable(wxID_CLOSE, false);
+        menu_bar.Enable(cmID_NEW_DATA_SOURCE, false);
+      }
     }
 
     void main::show_preferences() {
@@ -260,7 +264,7 @@ namespace squadt {
 
     void main::quit() {
       if (project_view != 0) {
-        project_view->store();
+        remove_project_view(project_view);
       }
 
       global_build_system.shutdown();

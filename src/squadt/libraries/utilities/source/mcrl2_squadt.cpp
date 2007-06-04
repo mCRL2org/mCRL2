@@ -34,6 +34,8 @@ namespace mcrl2_squadt {
 
     utility::logger::log_level l = utility::logger::get_default_filter_level();
 
+    gsSetNormalMsg();
+
     if (1 < l) {
       gsSetVerboseMsg();
 

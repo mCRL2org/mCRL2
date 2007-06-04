@@ -5,7 +5,7 @@
 #include <sip/configuration.h>
 #include <sip/controller/capabilities.h>
 #include <sip/detail/basic_messenger.tcc>
-#include <sip/detail/common.h>
+#include <sip/common.h>
 #include <sip/visitors.h>
 
 namespace sip {

@@ -314,12 +314,10 @@ namespace squadt {
       if (await_message(sip::message_accept_configuration).get() != 0) {
         send_start_signal();
 
-        sip::message_ptr m(await_message(sip::message_signal_done));
-
         /* Do not let process status influence return status */
-        reset_status_message_handler();
+        clear_handlers(sip::message_signal_done);
 
-        if (m.get() && !m->is_empty()) {
+        if (await_completion()) {
           /* Successful, set new status */
           for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
             (*i)->status = object_descriptor::reproducible_up_to_date;

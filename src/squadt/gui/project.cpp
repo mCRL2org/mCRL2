@@ -68,6 +68,7 @@ namespace squadt {
     }
         
     project::~project() {
+      manager->store();
       manager.reset();
     }
 
@@ -193,7 +194,7 @@ namespace squadt {
         }
       }
 
-      /* Hack to avoid lockups on wxGTK */
+      /* Workaround for lockups on wxGTK */
       object_view->Enable(true);
     }
 

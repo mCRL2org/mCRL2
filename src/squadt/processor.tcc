@@ -573,11 +573,11 @@ namespace squadt {
     using namespace boost;
     using namespace boost::filesystem;
 
-    assert(ic != 0);
-
     boost::shared_ptr < project_manager > g(manager.lock());
 
     if (g.get()) {
+      assert(ic != 0);
+
       selected_input_combination = const_cast < tool::input_combination* > (ic);
 
       boost::shared_ptr < sip::configuration > c(sip::controller::communicator::new_configuration(*selected_input_combination));

@@ -1,4 +1,4 @@
-#include <sip/detail/common.h>
+#include <sip/common.h>
 #include <sip/detail/basic_messenger.tcc>
 #include <sip/tool.h>
 #include <sip/tool/capabilities.h>
