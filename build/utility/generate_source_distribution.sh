@@ -41,7 +41,6 @@ source_files="mcrl2/articles \
               mcrl2/3rd-party \
               mcrl2/boost-build.jam \
               mcrl2/conventions \
-              mcrl2/documentation \
               mcrl2/COPYING \
               mcrl2/INSTALL \
               mcrl2/README \
@@ -74,15 +73,16 @@ if (! test -e "${archive_name}.bz2"); then
        -not -name '*.*' \
        -not -name 'PkgInfo' \
        -not -name 'Makefile' \
-       -not -name 'doxyfile' \
+       -not -name 'Doxyfile' \
        -not -name 'Jamfile' \
+       -not -name 'Jambase' \
        -not -wholename '*/examples/*' \
        -not -wholename '*/build*' \
        -not -wholename '*/3rd-party*' > excludes
 
   # Find directories to filter out
   find -L mcrl2 -type d \
-       -or -name 'latex' \
+       -name 'latex' \
        -or -wholename '*build/bin' \
        -or -wholename '*mcrl2/build/utility' \
        -or -wholename '*3rd-party/boost/tools/jam/bootstrap' >> excludes
