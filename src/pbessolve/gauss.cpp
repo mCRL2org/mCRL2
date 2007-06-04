@@ -19,20 +19,20 @@ using namespace lps;
 using namespace pbes_expr;
 
 
-static void addrule__b_and_not_b(Rewriter *rewriter);
+ void addrule__b_and_not_b(Rewriter *rewriter);
 
-static bool pbes_expression_compare
+ bool pbes_expression_compare
 (pbes_expression p, pbes_expression q, BDD_Prover *prover);
 
 
-static pbes_expression pbes_expression_simplify
+ pbes_expression pbes_expression_simplify
 (pbes_expression p, int *nq, data_variable_list *fv, BDD_Prover *prover);
 
 
 // some extra needed functions on data_variable_lists
-static bool var_in_list(data_variable vx, data_variable_list y);
-static data_variable_list intersect(data_variable_list x, data_variable_list y);
-static data_variable_list dunion(data_variable_list x, data_variable_list y);
+ bool var_in_list(data_variable vx, data_variable_list y);
+ data_variable_list intersect(data_variable_list x, data_variable_list y);
+ data_variable_list dunion(data_variable_list x, data_variable_list y);
 
 
 
@@ -57,12 +57,20 @@ equation_system solve_pbes(pbes pbes_spec, bool interactive, int bound)
  BDD_Prover* prover = new BDD_Prover(ds, GS_REWR_INNER, 0, false, sol, false);
 
 
+gsVerboseMsg("starting loop\n"); 
  // Is using a reverse_iterator correct? inefficient??
  for (equation_system::reverse_iterator eqcrt = 
 			 es_problem.rbegin(); eqcrt != es_problem.rend(); eqcrt++)
 	{
+//check!
+//gsVerboseMsg("checking");gsVerboseMsg(" %s\n",pp(eqcrt->formula()).c_str());
+//if (detail::check_rule_PBExpr(eqcrt->formula()))	
+//gsVerboseMsg("checked!\n");
+
 	 // replace already solved variables with their solutions
-	 update_equation(*eqcrt, es_solution);
+	 pbes_expression newrhs = update_expression(eqcrt->formula(), es_solution);
+	 *eqcrt = pbes_equation(eqcrt->symbol(), eqcrt->variable(), newrhs);
+	 gsVerboseMsg("Equation to solve: %s\n\n",pp(*eqcrt).c_str());
 	 
 	 // solve this equation
 	 pbes_equation e_solution = 
@@ -133,7 +141,8 @@ pbes_equation solve_equation
 	 gsVerboseMsg("REWRITTEN: %s\n%d quantifiers left\n",pp(approx_).c_str(),nq);
 
 	 // decide whether it's stable.
-	 stable = pbes_expression_compare(approx_,approx,prover);
+	 //	 stable = pbes_expression_compare(approx_,approx,prover);
+	 stable = (approx_ == approx);
 	 if (!stable) gsVerboseMsg("Not"); gsVerboseMsg(" stable\n");
 	 // continue
 	 approx = approx_;
@@ -144,7 +153,7 @@ pbes_equation solve_equation
  if (interactive) solve_equation_interactive(X,defX,approx);
  
  // make solution and return it
- return pbes_equation(e.symbol(), X, defX);
+ return pbes_equation(e.symbol(), X, approx);
 }
 //======================================================================
 
@@ -157,7 +166,7 @@ pbes_equation solve_equation
 // Replaces, in solX, all occurrences of variables 
 // from generic_parameters with the corresponding data expressions 
 // from actual_parameters
-static pbes_expression pbes_expression_instantiate(pbes_expression solX, 
+ pbes_expression pbes_expression_instantiate(pbes_expression solX, 
 						   data_variable_list generic_parameters, 
 						   data_expression_list actual_parameters)
 //================================================
@@ -233,16 +242,26 @@ pbes_expression substitute(pbes_expression expr,
 
 
 //======================================================================
-// Replaces, in the RHS of e,
+// Replaces, in e,
 // all occurences of binding variables from es_solution
 // with their solutions (i.e., corresponding equations from es_solution)
 
-void update_equation(pbes_equation e, equation_system es_solution)
+pbes_expression update_expression(pbes_expression e, equation_system es_solution)
 //==================
 
 {
-  // To implement.
-  // Simultaneous substitution possible? maybe more efficient??
+
+ // !!todo: implement simultaneous substitutions, probably more efficient 
+ pbes_expression ee = e;
+gsVerboseMsg("update_expression: in expression %s\n",pp(e).c_str());
+ for (equation_system::reverse_iterator s = 
+			 es_solution.rbegin(); s != es_solution.rend(); s++)	
+{
+gsVerboseMsg("update_expression: substituting equation %s\n",pp(*s).c_str());
+	ee = substitute(ee, s->variable(), s->formula());
+gsVerboseMsg("update_expression: result is %s\n",pp(ee).c_str());
+ }
+ return ee; 
 }
 //======================================================================
 
@@ -257,7 +276,7 @@ void update_equation(pbes_equation e, equation_system es_solution)
 // Predicate variables become data variables, with 
 // the same arguments but a marked name (+PREDVAR_MARK at the end)
 // It doesn't work (WHY not??) for quantifiers.
-static data_expression pbes_to_data(pbes_expression e)
+ data_expression pbes_to_data(pbes_expression e)
 {
  using namespace pbes_expr;
  namespace dname = lps::data_expr;
@@ -306,7 +325,7 @@ static data_expression pbes_to_data(pbes_expression e)
 // It keeps the logical operators in the data world,
 // unless there is an obvious need to translate them to pbes operators.
 
-static pbes_expression data_to_pbes_lazy(data_expression d)
+ pbes_expression data_to_pbes_lazy(data_expression d)
 {
  
  // if d doesn't contain any predicate variables, 
@@ -350,7 +369,7 @@ static pbes_expression data_to_pbes_lazy(data_expression d)
 // This translates as much as possible of the logical operators
 // to pbes operators. Unfinished.
 
-static pbes_expression data_to_pbes_greedy(data_expression d)
+ pbes_expression data_to_pbes_greedy(data_expression d)
 {
  
  namespace dname = lps::data_expr;
@@ -450,7 +469,7 @@ pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* prover)
 // nq  := the number of quantifiers left in expr after simplification
 // fv := the set of names of the data variables occuring FREE in expr, 
 //        after simplification
-static pbes_expression pbes_expression_simplify
+ pbes_expression pbes_expression_simplify
 (pbes_expression expr, int* nq, data_variable_list *fv, BDD_Prover* prover)
 {
   *fv = data_variable_list();
@@ -494,8 +513,13 @@ static pbes_expression pbes_expression_simplify
 	s_under = rewrite_pbes_expression(s_under,prover);
       // lose quantifier if variables are not free in s_under
       data_variable_list new_quant_vars = intersect(quant_vars(expr),fv_under);
-      if (new_quant_vars.empty()) return s_under;
+      if (new_quant_vars.empty()) 
+	{
+	  *nq = nq_under;
+	  return s_under;
+	}
       // else, keep it
+      *nq = nq_under + 1;
       if (is_forall(expr))
 	return (forall(new_quant_vars, s_under));
       else 
@@ -509,21 +533,22 @@ static pbes_expression pbes_expression_simplify
 
 
 //======================================================================
-static bool var_in_list(data_variable vx, data_variable_list y)
+bool var_in_list(data_variable vx, data_variable_list y)
 //======================================================================
 {
   // which one is correct?? comparing the whole data var or only the name?
-  /*
+
     std::vector<std::string> ynames = variable_strings(y);
     return (std::find(ynames.begin(), ynames.end(), vx.name()) != ynames.end());
-  */
+    /*
   return (std::find(y.begin(), y.end(), vx) != y.end());
+    */
 }
 
 
 
 //======================================================================
-static data_variable_list intersect(data_variable_list x, data_variable_list y)
+data_variable_list intersect(data_variable_list x, data_variable_list y)
 //======================================================================
 {
   data_variable_list result;
@@ -536,7 +561,7 @@ static data_variable_list intersect(data_variable_list x, data_variable_list y)
 
 //======================================================================
 // disjoint union
-static data_variable_list dunion(data_variable_list x, data_variable_list y)
+ data_variable_list dunion(data_variable_list x, data_variable_list y)
 //======================================================================
 {
   data_variable_list result(y);
@@ -552,10 +577,11 @@ static data_variable_list dunion(data_variable_list x, data_variable_list y)
 // !! Doesn't work when quantifiers are involved. 
 // !! It seems difficult to properly translate pbes quantifiers to data quantifiers (??)
 // !! The prover can't use quantifiers anyway.
-static bool pbes_expression_compare
+bool pbes_expression_compare
 (pbes_expression p, pbes_expression q, BDD_Prover* prover)
 {
   // if no quantifiers and no predicates, call the prover
+gsVerboseMsg("Comparing %s (%d) and %s (%d)\n",pp(p).c_str(),p.is_bes(),pp(q).c_str(),is_bes(q));
   if ((is_bes(p))&&(is_bes(q)))
     {
       data_expression dp = pbes_to_data(p);
@@ -575,34 +601,6 @@ static bool pbes_expression_compare
 //======================================================================
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-//======================================================================
-static bool identical_pbes_expressions
-(pbes_expression p, pbes_expression q, BDD_Prover* prover)
-{
-  data_expression dp = pbes_to_data(p);
-  data_expression dq = pbes_to_data(q);
-  ATermAppl formula = gsMakeDataExprEq((ATermAppl)dp,(ATermAppl)dq);
-
-  gsVerboseMsg(" -->prover: %s\n",pp(formula).c_str());
-  prover->set_formula(formula);  
-  Answer a = prover->is_tautology();
-  gsVerboseMsg(" <--prover: %s\n",((a==answer_yes)?"YES":((a==answer_no)?"NO":"DON'T KNOW")));  
-  return ((a == answer_yes)?true:false);
-  //return false;
-}
-//======================================================================
 
 
 
@@ -639,7 +637,7 @@ void solve_equation_interactive(propositional_variable X,
 //======================================================================
 //  EXTRA REWRITE RULES
 //======================================================================
-static void addrule__b_and_not_b(Rewriter* rewriter){
+ void addrule__b_and_not_b(Rewriter* rewriter){
   gsVerboseMsg("adding rule b && !b == false\n");  
   ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"),gsMakeSortExprBool());
   ATermAppl lhs = gsMakeDataExprAnd(b,gsMakeDataExprNot(b));

@@ -20,7 +20,7 @@ pbes_equation solve_equation(pbes_equation e, bool interactive, int bound, Rewri
 pbes_expression substitute(pbes_expression expr, 
 			     propositional_variable X, pbes_expression solX);
 
-void update_equation(pbes_equation e, equation_system es_solution);
+pbes_expression update_expression(pbes_expression e, equation_system es_solution);
 
 pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* p);
   
@@ -28,3 +28,6 @@ pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* p);
 void solve_equation_interactive(propositional_variable X, 
 				pbes_expression defX, 
 				pbes_expression approx);
+
+//bool operator==(data_expression d, data_expression e);
+//bool operator==(pbes_expression p, pbes_expression q);
