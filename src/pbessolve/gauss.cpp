@@ -538,7 +538,7 @@ bool var_in_list(data_variable vx, data_variable_list y)
 {
   // which one is correct?? comparing the whole data var or only the name?
 
-    std::vector<std::string> ynames = variable_strings(y);
+    std::vector<std::string> ynames = detail::variable_strings(y);
     return (std::find(ynames.begin(), ynames.end(), vx.name()) != ynames.end());
     /*
   return (std::find(y.begin(), y.end(), vx) != y.end());
