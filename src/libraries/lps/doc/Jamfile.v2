@@ -1,14 +1,27 @@
-import boostbook : boostbook ;
-using quickbook ;
+import doxygen ;
+import quickbook ;
 
 doxygen autodoc
      : [ glob ../include/lps/*.h ]
      : <prefix>lps
+       <doxygen:param>EXTRACT_ALL=YES
+       <doxygen:param>HIDE_UNDOC_MEMBERS=NO
+       <doxygen:param>EXTRACT_PRIVATE=NO
+       <doxygen:param>ENABLE_PREPROCESSING=YES
+       <doxygen:param>MACRO_EXPANSION=YES
+       <doxygen:param>EXPAND_ONLY_PREDEF=YES
+       <doxygen:param>SEARCH_INCLUDES=YES
+       <doxygen:param>INCLUDE_PATH=$(BOOST_ROOT)
      ;
 
-boostbook lps
+xml manual
     :
-      manual.qbk
+        manual.qbk
+    ;
+
+boostbook standalone
+    :
+        manual
     :
         <xsl:param>nav.layout=none
         <xsl:param>boost.image.src=images/mcrl2.png
@@ -19,4 +32,5 @@ boostbook lps
         <xsl:param>toc.max.depth=3
         <xsl:param>toc.section.depth=3
         <xsl:param>chunk.section.depth=3
+        <dependency>autodoc
     ;
