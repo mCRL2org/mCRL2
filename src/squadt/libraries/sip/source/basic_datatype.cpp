@@ -1,4 +1,4 @@
-#include <sip/detail/basic_datatype.h>
+#include <sip/basic_datatype.h>
 
 #include <boost/regex.hpp>
 
