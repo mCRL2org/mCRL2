@@ -66,36 +66,40 @@ class data_specification: public aterm_appl
         m_equations(equations)
     {}
 
-    /// \brief Returns the sorts of the data specification
+    /// Returns the sorts of the data specification.
     ///
     sort_list sorts() const
     {
       return m_sorts;
     }
 
-    /// \brief Returns the constructors of the data specification
+    /// Returns the constructors of the data specification.
+    ///
     function_list constructors() const
     {
       return m_constructors;
     }
 
-    /// \brief Returns the mappings of the data specification
+    /// Returns the mappings of the data specification.
+    ///
     function_list mappings() const
     {
       return m_mappings;
     }
 
-    /// \brief Returns the equations of the data specification
+    /// Returns the equations of the data specification.
+    ///
     data_equation_list equations() const
     {
       return m_equations;
     }
 
-    /// \brief Returns true if
+    /// Returns true if
     /// <ul>
     /// <li>the domain and range sorts of constructors are contained in the list of sorts</li>
     /// <li>the domain and range sorts of mappings are contained in the list of sorts</li>
     /// </ul>
+    ///
     bool is_well_typed() const
     {
       std::set<lps::sort> sorts = detail::make_set(m_sorts);

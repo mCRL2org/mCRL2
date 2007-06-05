@@ -65,11 +65,13 @@ class sort: public aterm_appl
     }
 
     /// Constructs a sort from a string.
+    ///
     sort(std::string s)
       : aterm_appl(gsMakeSortId(gsString2ATermAppl(s.c_str())))
     {}
     
-    /// Returns true if it is a sort of type A -> B
+    /// Returns true if it is a sort of type A -> B.
+    ///
     bool is_arrow() const
     {
       return gsIsSortArrow(*this);
@@ -83,6 +85,7 @@ class sort: public aterm_appl
     /// <li>domain_sorts((A -> B) -> C       ) = [A->B]  </li>
     /// <li>domain_sorts((A -> B) -> (C -> D)) = [A->B,C]</li>
     /// </ul>
+    ///
     lps::sort_list domain_sorts() const
     {
       return gsGetSortExprDomain(*this);
@@ -96,12 +99,14 @@ class sort: public aterm_appl
     /// <li>range((A -> B) -> C       ) = C</li>
     /// <li>range((A -> B) -> (C -> D)) = D</li>
     /// </ul>
+    ///
     lps::sort range_sort() const
     {
       return gsGetSortExprResult(*this);
     }
 };
 
+/// \brief Returns true if the term t is a sort
 inline
 bool is_sort(aterm_appl t)
 {
@@ -152,10 +157,19 @@ namespace sort_expr {
     return gsMakeSortExprBool();
   }
 
+  /// \brief Returns true if the term t equals the sort real
   inline bool is_real(aterm_appl t) { return t == real(); }
+
+  /// \brief Returns true if the term t equals the sort int
   inline bool is_int (aterm_appl t) { return t == int_(); }
+
+  /// \brief Returns true if the term t equals the sort pos
   inline bool is_pos (aterm_appl t) { return t == pos(); }
+
+  /// \brief Returns true if the term t equals the sort nat
   inline bool is_nat (aterm_appl t) { return t == nat(); }                                 
+
+  /// \brief Returns true if the term t equals the sort bool
   inline bool is_bool(aterm_appl t) { return t == bool_(); }                                 
 
 } // namespace sort_expr

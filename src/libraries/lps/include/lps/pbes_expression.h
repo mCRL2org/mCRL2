@@ -51,15 +51,17 @@ class pbes_expression: public aterm_appl
       return *this;
     }
 
-    /// \brief Applies a substitution to this pbes expression and returns the result
+    /// Applies a substitution to this pbes expression and returns the result.
     /// The Substitution object must supply the method aterm operator()(aterm).
+    ///
     template <typename Substitution>
     pbes_expression substitute(Substitution f)
     {
       return pbes_expression(f(*this));
     }     
 
-    /// \brief Returns true if the expression is a boolean expression
+    /// Returns true if the expression is a boolean expression.
+    ///
     bool is_bes() const
     {
       return lps::is_bes(*this);

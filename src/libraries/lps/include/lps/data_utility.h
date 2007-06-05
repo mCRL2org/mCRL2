@@ -212,18 +212,21 @@ class fresh_variable_generator
     }
 
     /// Set a new hint.
+    ///
     void set_hint(std::string hint)
     {
       m_hint = hint;
     }
 
     /// Returns the current hint.
+    ///
     std::string hint() const
     {
       return m_hint;
     }
 
     /// Set a new context.
+    ///
     template <typename Term>
     void set_context(Term context)
     {
@@ -231,18 +234,21 @@ class fresh_variable_generator
     }
 
     /// Set a new sort.
+    ///
     void set_sort(lps::sort s)
     {
       m_sort = s;
     }
 
     /// Returns the current sort.
+    ///
     lps::sort sort() const
     {
       return m_sort;
     }
 
     /// Add term t to the context.
+    ///
     template <typename Term>
     void add_to_context(Term t)
     {
@@ -252,6 +258,7 @@ class fresh_variable_generator
 
     /// Returns a unique variable of the given sort, with the given hint as prefix.
     /// The returned variable is added to the context.
+    ///
     data_variable operator()()
     {
       identifier_string id(m_hint);
@@ -267,6 +274,7 @@ class fresh_variable_generator
 
     /// Returns a unique variable with the same sort as the variable v, and with
     /// the same prefix. The returned variable is added to the context.
+    ///
     data_variable operator()(data_variable v)
     {
       std::string hint = v.name();

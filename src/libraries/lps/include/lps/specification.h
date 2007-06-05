@@ -54,6 +54,7 @@ class specification: public aterm_appl
     //data_assignment_list m_initial_assignments;   
 
     /// Returns true if the action labels in the specification are included in m_action_labels.
+    ///
     bool has_proper_action_labels() const
     {
       // find all action labels that occur in the LPS
@@ -137,6 +138,7 @@ class specification: public aterm_appl
     /// \param binary If binary is true the linear process is saved in compressed binary format.
     /// Otherwise an ascii representation is saved. In general the binary format is
     /// much more compact than the ascii representation.
+    ///
     bool save(const std::string& filename, bool binary = true)
     {
       if (binary)
@@ -183,6 +185,7 @@ class specification: public aterm_appl
     /// <li>the sorts occurring in the action labels are declared in the data specification</li>
     /// <li>the labels occurring in the actions of the summands are contained in the action labels</li>
     /// </ul>
+    ///
     bool is_well_typed() const
     {
       // check 1)
@@ -241,6 +244,7 @@ class specification: public aterm_appl
 };
 
 
+/// \brief Sets the data specification of spec and returns the result
 inline
 specification set_data_specification(specification spec, data_specification data)
 {
@@ -251,6 +255,7 @@ specification set_data_specification(specification spec, data_specification data
                       );
 }
 
+/// \brief Sets the action labels of spec and returns the result
 inline
 specification set_action_labels(specification spec, action_label_list action_labels)
 {
@@ -261,6 +266,7 @@ specification set_action_labels(specification spec, action_label_list action_lab
                       );
 }
 
+/// \brief Sets the linear process of spec and returns the result
 inline
 specification set_lps(specification spec, linear_process lps)
 {
@@ -271,6 +277,7 @@ specification set_lps(specification spec, linear_process lps)
                       );
 }
 
+/// \brief Sets the initial process of spec and returns the result
 inline
 specification set_initial_process(specification spec, process_initializer initial_process)
 {

@@ -48,20 +48,23 @@ class action_label: public aterm_appl
        m_sorts(sorts)
     {}
 
-    /// \brief Returns the name of the action label
+    /// Returns the name of the action label.
+    ///
     identifier_string name() const
     {
       return m_name;
     }
 
-    /// \brief Returns the sorts of the action label
+    /// Returns the sorts of the action label
+    ///
     sort_list sorts() const
     {
       return m_sorts;
     }
 
-    /// \brief Applies a substitution to this action label and returns the result
+    /// Applies a substitution to this action label and returns the result
     /// The Substitution object must supply the method aterm operator()(aterm).
+    ///
     template <typename Substitution>
     action_label substitute(Substitution f)
     {
@@ -71,7 +74,7 @@ class action_label: public aterm_appl
 
 ///////////////////////////////////////////////////////////////////////////////
 // action_label_list
-/// \brief singly linked list of actions
+/// \brief singly linked list of action labels
 typedef term_list<action_label> action_label_list;
 
 /// \brief Returns true if the term t is an action label
@@ -120,19 +123,21 @@ class action: public aterm_appl
       m_label = action_label(*begin());
     }
 
-    /// \brief Returns the label of the action
+    /// Returns the label of the action.
+    ///
     action_label label() const
     {
       return m_label;
     }
 
-    /// \brief Returns the arguments of the action
+    /// Returns the arguments of the action.
+    ///
     data_expression_list arguments() const
     {
       return m_arguments;
     }
 
-    /// \brief Applies a substitution to this action and returns the result
+    /// Applies a substitution to this action and returns the result.
     /// The Substitution object must supply the method aterm operator()(aterm).
     template <typename Substitution>
     action substitute(Substitution f)
@@ -146,7 +151,7 @@ class action: public aterm_appl
 /// \brief singly linked list of actions
 typedef term_list<action> action_list;
 
-/// \brief Returns true if the term t is an action
+/// Returns true if the term t is an action
 inline
 bool is_action(aterm_appl t)
 {

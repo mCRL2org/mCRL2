@@ -47,8 +47,9 @@ class data_variable: public data_expression
       assert(detail::check_rule_DataVarId(m_term));
     }
 
-    /// \brief Constructor for strings like "d:D"
+    /// Constructor for strings like "d:D".
     /// Only works for constant sorts.
+    ///
     data_variable(const std::string& s)
     {
       std::string::size_type idx = s.find(':');
@@ -66,7 +67,8 @@ class data_variable: public data_expression
      : data_expression(gsMakeDataVarId(gsString2ATermAppl(name.c_str()), s))
     {}
 
-    /// \brief Returns the name of the data_variable
+    /// Returns the name of the data_variable.
+    ///
     identifier_string name() const
     {
       return arg1(*this);
@@ -143,7 +145,8 @@ class data_operation: public data_expression
      : data_expression(gsMakeOpId(name, s))
     {}
 
-    /// \brief Returns the name of the data_operation
+    /// Returns the name of the data_operation.
+    ///
     identifier_string name() const
     {
       return arg1(*this);
@@ -210,42 +213,48 @@ class data_equation: public aterm_appl
       assert(data_expr::is_nil(m_condition) || data_expr::is_bool(m_condition));
     }
 
-    /// \brief Returns the variables of the equation
+    /// Returns the variables of the equation.
+    ///
     data_variable_list variables() const
     {
       return m_variables;
     }
 
-    /// \brief Returns the condition of the equation
+    /// Returns the condition of the equation.
+    ///
     data_expression condition() const
     {
       return m_condition;
     }
 
-    /// \brief Returns the left hand side of the equation
+    /// Returns the left hand side of the equation.
+    ///
     data_expression lhs() const
     {
       return m_lhs;
     }
 
-    /// \brief Returns the right hand side of the equation
+    /// Returns the right hand side of the equation.
+    ///
     data_expression rhs() const
     {
       return m_rhs;
     }
 
-    /// \brief Applies a substitution to this data equation and returns the result
+    /// Applies a substitution to this data equation and returns the result.
     /// The Substitution object must supply the method aterm operator()(aterm).
+    ///
     template <typename Substitution>
     data_equation substitute(Substitution f) const
     {
       return data_equation(f(aterm(*this)));
     }
     
-    /// \brief Returns true if
+    /// Returns true if
     /// <ul>
     /// <li>the types of the left and right hand side are equal</li>
     /// </ul>
+    ///
     bool is_well_typed() const
     {
       // check 1)
@@ -306,7 +315,8 @@ class data_assignment: public aterm_appl
     {
     }
 
-    /// \brief Returns true if the sorts of the left and right hand side are equal
+    /// Returns true if the sorts of the left and right hand side are equal.
+    ///
     bool is_well_typed() const
     {
       bool result = gsGetSort(m_lhs) == gsGetSort(m_rhs);
@@ -318,19 +328,22 @@ class data_assignment: public aterm_appl
       return true;
     }
 
-    /// \brief Applies the assignment to t and returns the result
+    /// Applies the assignment to t and returns the result.
+    ///
     aterm operator()(aterm t) const
     {
       return atermpp::replace(t, aterm(m_lhs), aterm(m_rhs));
     }
 
-    /// \brief Returns the left hand side of the assignment
+    /// Returns the left hand side of the assignment.
+    ///
     data_variable lhs() const
     {
       return m_lhs;
     }
 
-    /// \brief Returns the right hand side of the assignment
+    /// Returns the right hand side of the assignment.
+    ///
     data_expression rhs() const
     {
       return m_rhs;
@@ -434,7 +447,8 @@ struct assignment_list_substitution
     : m_assignments(assignments)
   {}
   
-  /// \brief Applies the assignments to the term t and returns the result
+  /// Applies the assignments to the term t and returns the result.
+  ///
   aterm operator()(aterm t) const
   {
     return partial_replace(t, assignment_list_substitution_helper(m_assignments));

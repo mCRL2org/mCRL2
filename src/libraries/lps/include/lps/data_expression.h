@@ -47,7 +47,8 @@ class data_expression: public aterm_appl
       assert(detail::check_rule_DataExprOrNil(m_term));
     }
 
-    /// \brief Returns the sort of the data expression
+    /// Returns the sort of the data expression.
+    ///
     lps::sort sort() const
     {
       ATermAppl result = gsGetSort(*this);
@@ -55,20 +56,23 @@ class data_expression: public aterm_appl
       return lps::sort(result);
     }     
 
-    /// \brief Returns the head of the data expression
+    /// Returns the head of the data expression.
+    ///
     data_expression head() const
     {
       return gsGetDataExprHead(*this);
     }
 
-    /// \brief Returns the arguments of the data expression
+    /// Returns the arguments of the data expression.
+    ///
     data_expression_list arguments() const
     {
       return gsGetDataExprArgs(*this);
     }  
   
-    /// \brief Applies a substitution to this data expression and returns the result
+    /// Applies a substitution to this data expression and returns the result.
     /// The Substitution object must supply the method aterm operator()(aterm).
+    ///
     template <typename Substitution>
     data_expression substitute(Substitution f) const
     {

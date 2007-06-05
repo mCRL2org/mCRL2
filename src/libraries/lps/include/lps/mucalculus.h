@@ -60,22 +60,9 @@ class action_formula: public aterm_appl
       assert(detail::check_rule_ActFrm(m_term));
     }
 
-    /// \brief Returns true if the action formula equals 'true'
-    /// Note that the term will not be rewritten first.
-    bool is_true() const
-    {
-      return gsIsActTrue(*this);
-    }     
-
-    /// \brief Returns true if the action formula equals 'false'
-    /// Note that the term will not be rewritten first.
-    bool is_false() const
-    {
-      return gsIsActFalse(*this);
-    }
-
     /// \brief Applies a substitution to this action_formula and returns the result
     /// The Substitution object must supply the method aterm operator()(aterm).
+    ///
     template <typename Substitution>
     action_formula substitute(Substitution f) const
     {
@@ -291,8 +278,9 @@ class regular_formula: public aterm_appl
       assert(detail::check_rule_RegFrm(m_term));
     }
 
-    /// \brief Applies a substitution to this regular formula and returns the result
+    /// Applies a substitution to this regular formula and returns the result.
     /// The Substitution object must supply the method aterm operator()(aterm).
+    ///
     template <typename Substitution>
     regular_formula substitute(Substitution f) const
     {

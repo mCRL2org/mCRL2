@@ -9,10 +9,10 @@
 
 namespace lps {
 
-/// \brief data_operation and function are the same
+/// \brief Note that data_operation and function are the same.
 typedef data_operation function;
 
-/// \brief data_operation and function are the same
+/// \brief Note that data_operation and function are the same.
 typedef data_operation_list function_list;
 
 /// \brief Returns true if the term t is a function

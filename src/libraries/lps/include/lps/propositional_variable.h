@@ -63,12 +63,14 @@ class propositional_variable: public aterm_appl
     }
 
     /// Returns the term containing the name of the propositional variable.
+    ///
     identifier_string name() const
     {
       return m_name;
     }
 
     /// Returns the parameters of the propositional variable.
+    ///
     data_variable_list parameters() const
     {
       return m_parameters;
@@ -77,10 +79,11 @@ class propositional_variable: public aterm_appl
 
 ///////////////////////////////////////////////////////////////////////////////
 // propositional_variable_list
-/// \brief singly linked list of propositional variables
+/// \brief singly linked list of propositional variable declarations
 ///
 typedef term_list<propositional_variable> propositional_variable_list;
 
+/// \brief Returns true if the term t is a propositional variable declaration
 inline
 bool is_propositional_variable(aterm_appl t)
 {
@@ -127,18 +130,15 @@ class propositional_variable_instantiation: public aterm_appl
     {
     }
 
-//    operator pbes_expression() const
-//    {
-//      return pbes_expression(m_term);
-//    }
-
     /// Returns the term containing the name of the propositional variable.
+    ///
     identifier_string name() const
     {
       return m_name;
     }
 
     /// Returns the parameters of the propositional variable.
+    ///
     data_expression_list parameters() const
     {
       return m_parameters;
@@ -151,6 +151,7 @@ class propositional_variable_instantiation: public aterm_appl
 ///
 typedef term_list<propositional_variable_instantiation> propositional_variable_instantiation_list;
 
+/// \brief Returns true if the term t is a propositional variable instantiation
 inline
 bool is_propositional_variable_instantiation(aterm_appl t)
 {
