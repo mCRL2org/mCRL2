@@ -30,6 +30,7 @@ class Cluster {
     int				markedTransitionCount;
     float			position;
     int       rank;
+    int       positionInRank;
     float			size;
     std::vector< State* >	states;
     std::vector< State* > undecidedStates;
@@ -37,8 +38,10 @@ class Cluster {
     float			volume;
     std::vector< Utils::Slot* > slots;
 
-		int visObject;
-		int visObjectTop;
+    int visObject;
+    int visObjectTop;
+
+    bool selected;
 
   public:
     // Constructor & destructor.
@@ -82,6 +85,8 @@ class Cluster {
     float     getBaseRadius() const;
     float     getPosition() const;
     int       getRank() const;
+    int       getPositionInRank() const;
+    void      setPositionInRank(int p);
     float     getTopRadius() const;
     float     getSize() const;
     float     getVolume() const;
@@ -91,8 +96,13 @@ class Cluster {
     int   getVisObject() const;
     int   getVisObjectTop() const;
     bool  hasVisObjectTop() const;
-    void	setVisObject(int vo);
-    void	setVisObjectTop(int vo);
+    void  setVisObject(int vo);
+    void  setVisObjectTop(int vo);
+    
+    // Methods for selection
+    void  select();
+    void  deselect();
+    bool  isSelected() const;
 };
 
 #endif

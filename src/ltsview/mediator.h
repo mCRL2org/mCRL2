@@ -20,6 +20,7 @@ class Mediator {
     virtual void      setVisStyle(Utils::VisStyle vs) = 0;
     virtual void      unmarkAction(std::string label) = 0;
     virtual void      selectStateByID(const int id) = 0;
+    virtual void      selectCluster(const int rank, const int pos) = 0;
     virtual void      deselect() = 0;
     virtual int       getNumberOfObjects() = 0;
 

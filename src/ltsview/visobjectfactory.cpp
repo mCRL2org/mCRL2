@@ -4,21 +4,25 @@
 using namespace std;
 using namespace Utils;
 
-class VisObject {
-	public:
-		VisObject();
-		~VisObject();
-		float* getMatrixP() const;
-		RGB_Color getColor() const;
-		Point3D getCoordinates() const;
-		int getPrimitive() const;
-		void setColor(Utils::RGB_Color c);
-		void setPrimitive(int p);
-		void draw(PrimitiveFactory *pf,unsigned char alpha);
-	private:
-		float* matrix;
-		RGB_Color color;
-		int primitive;
+class VisObject 
+{
+  public:
+    VisObject();
+    ~VisObject();
+    float* getMatrixP() const;
+    RGB_Color getColor() const;
+    Point3D getCoordinates() const;
+    int getPrimitive() const;
+    void setColor(Utils::RGB_Color c);
+    void setPrimitive(int p);
+    void draw(PrimitiveFactory *pf,unsigned char alpha);
+    void addIdentifier(int id);
+  private:
+    float* matrix;
+    RGB_Color color;
+    int primitive;
+    vector<int> identifiers;
+                
 };
 
 VisObject::VisObject() {
@@ -60,11 +64,27 @@ void VisObject::setPrimitive(int p) {
 void VisObject::draw(PrimitiveFactory *pf,unsigned char alpha) {
 	glColor4ub(color.r,color.g,color.b,alpha);
 	glPushMatrix();
-		glMultMatrixf(matrix);
-		pf->drawPrimitive(primitive);
+        
+	glMultMatrixf(matrix);
+
+        for(size_t i = 0; i < identifiers.size(); ++i)
+        {
+          glPushName(identifiers[i]);
+        }
+        
+	pf->drawPrimitive(primitive);
+
+        for(size_t i = 0; i < identifiers.size(); ++i)
+        {
+          glPopName();
+        }
 	glPopMatrix();
 }
 
+void VisObject::addIdentifier(int id)
+{
+  identifiers.push_back(id);
+}
 /* -------------------- Distance -------------------------------------------- */
 
 class Distance {
@@ -108,10 +128,16 @@ void VisObjectFactory::clear() {
 	objects_sorted.clear();
 }
 
-int VisObjectFactory::makeObject(int primitive) {
+int VisObjectFactory::makeObject(int primitive, vector<int> ids) {
 	VisObject *vo = new VisObject();
 	glGetFloatv(GL_MODELVIEW_MATRIX,(GLfloat*)vo->getMatrixP());
 	vo->setPrimitive(primitive);
+        
+        for(size_t i = 0; i < ids.size(); ++i)
+        {
+          vo->addIdentifier(ids[i]);
+        }
+        
 	objects.push_back(vo);
 	objects_sorted.push_back(vo);
 	return objects.size()-1;

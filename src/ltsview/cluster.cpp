@@ -20,6 +20,8 @@ Cluster::Cluster(int r) {
 	visObjectTop = -1;
   markedTransitionCount = 0;
   rank = r;
+
+  selected = false;
 }
 
 Cluster::~Cluster() {
@@ -93,6 +95,16 @@ float Cluster::getPosition() const {
 
 int Cluster::getRank() const {
   return rank;
+}
+
+int Cluster::getPositionInRank() const 
+{
+  return positionInRank;
+}
+
+void Cluster::setPositionInRank(int p)
+{
+  positionInRank = p;
 }
 
 int Cluster::getNumSlots() {
@@ -637,4 +649,19 @@ bool Cluster::hasVisObjectTop() const {
 
 void Cluster::setVisObjectTop(int vo) {
   visObjectTop = vo;
+}
+
+void Cluster::select()
+{
+  selected = true;
+}
+
+void Cluster::deselect()
+{
+  selected = false;
+}
+
+bool Cluster::isSelected() const
+{
+  return selected;
 }

@@ -406,6 +406,12 @@ string LTSViewApp::getParValue(const int i, const int j) const {
 void LTSViewApp::selectStateByID(const int id) {
   lts->selectStateByID(id);
 }
+
+void LTSViewApp::selectCluster(const int rank, const int pos) 
+{
+  lts->selectCluster(rank, pos);
+}
+
 void LTSViewApp::deselect() {
   lts->deselect();
 }

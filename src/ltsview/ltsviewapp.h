@@ -41,6 +41,7 @@ class LTSViewApp : public wxApp, public Mediator {
     std::string   getParName(const int i) const;
     std::string   getParValue(const int i, const int j) const;
     void          selectStateByID(const int id);
+    void          selectCluster(const int rank, const int pos);
     void          deselect();
     int           getNumberOfObjects();
 };

@@ -45,6 +45,7 @@ class LTS {
     std::string getParameterType(int parindex);
     std::string getParameterValue(int parindex,int valindex);
     void        selectStateByID(int id);
+    void        selectCluster(const int rank, const int pos);
     void        deselect();
     void	markAction(std::string label);
     void	markClusters();
@@ -68,6 +69,7 @@ class LTS {
     int	deadlockCount;
     State*	initialState;
     State*      selectedState;
+    Cluster*    selectedCluster;
     std::vector< State* >	markedStates;
     int	markedTransitionCount;
     std::vector< Utils::MarkRule* >	markRules;

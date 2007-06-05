@@ -631,6 +631,9 @@ void GLCanvas::processHits(const GLint hits, GLuint buffer[], bool doubleC) {
       break;
     case CLUSTER: 
       printf("Cluster selected \n");
+      std::cerr << "Rank: " << selectedObject[1] << std::endl;
+      std::cerr << "Position in rank: " << selectedObject[2] << std::endl;
+      mediator->selectCluster(selectedObject[1], selectedObject[2]);
       break;
     case SIMSTATE:
       mediator->selectStateByID(selectedObject[1]);
