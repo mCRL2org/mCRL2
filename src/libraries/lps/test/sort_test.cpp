@@ -30,31 +30,50 @@ int test_main(int, char*[])
   sort s;
   sort_list domain;
   sort range;
+  sort_list source;
+  sort target;
   
-  s      = arrow(lA, BC);     // A->(B->C)
+  s      = arrow(lA, BC);    // A->(B->C)
   domain = s.domain_sorts(); // [A,B]
-  range  = s.range_sort();        // C
+  range  = s.range_sort();   // C
+  source = s.source();       // [A]
+  target = s.target();       // B->C
   BOOST_CHECK(domain.size() == 2);
   BOOST_CHECK(std::find(domain.begin(), domain.end(), A) != domain.end());
   BOOST_CHECK(std::find(domain.begin(), domain.end(), B) != domain.end());
   BOOST_CHECK(range == C);
+  BOOST_CHECK(source.size() == 1);
+  BOOST_CHECK(std::find(source.begin(), source.end(), A) != source.end());
+  BOOST_CHECK(target == BC);
 
-  s      = arrow(lAB, C);     // (AxB)->C
+  s      = arrow(lAB, C);    // (AxB)->C
   domain = s.domain_sorts(); // [A,B]
-  range  = s.range_sort();        // C
+  range  = s.range_sort();   // C
+  source = s.source();       // [A,B]
+  target = s.target();       // C
   BOOST_CHECK(domain.size() == 2);
   BOOST_CHECK(std::find(domain.begin(), domain.end(), A) != domain.end());
   BOOST_CHECK(std::find(domain.begin(), domain.end(), B) != domain.end());
   BOOST_CHECK(range == C);
+  BOOST_CHECK(source.size() == 2);
+  BOOST_CHECK(std::find(source.begin(), source.end(), A) != source.end());
+  BOOST_CHECK(std::find(source.begin(), source.end(), B) != source.end());
+  BOOST_CHECK(target == C);
 
-  s      = arrow(lAB, CD);    // (AxB)->(C->D)
+  s      = arrow(lAB, CD);   // (AxB)->(C->D)
   domain = s.domain_sorts(); // [A,B,C]
-  range  = s.range_sort();        // D
+  range  = s.range_sort();   // D
+  source = s.source();       // [A,B]
+  target = s.target();       // C->D
   BOOST_CHECK(domain.size() == 3);
   BOOST_CHECK(std::find(domain.begin(), domain.end(), A) != domain.end());
   BOOST_CHECK(std::find(domain.begin(), domain.end(), B) != domain.end());
   BOOST_CHECK(std::find(domain.begin(), domain.end(), C) != domain.end());
   BOOST_CHECK(range == D);
+  BOOST_CHECK(source.size() == 2);
+  BOOST_CHECK(std::find(source.begin(), source.end(), A) != source.end());
+  BOOST_CHECK(std::find(source.begin(), source.end(), B) != source.end());
+  BOOST_CHECK(target == CD);
 
   return 0;
 }

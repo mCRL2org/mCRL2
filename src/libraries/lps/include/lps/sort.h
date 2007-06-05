@@ -8,6 +8,8 @@
 #include <cassert>
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
+#include "atermpp/aterm_access.h"
+#include "atermpp/make_list.h"
 #include "lps/pretty_print.h"
 #include "lps/detail/soundness_checks.h"
 #include "lps/detail/constructors.h"
@@ -103,6 +105,34 @@ class sort: public aterm_appl
     lps::sort range_sort() const
     {
       return gsGetSortExprResult(*this);
+    }
+    
+    /// Returns the source of the sort.
+    /// <ul>
+    /// <li>source(A) = []</li>
+    /// <li>source(A->B) = A</li>
+    /// </ul>
+    ///
+    sort_list source() const
+    {
+      if (is_arrow())
+        return list_arg1(*this);
+      else
+        return make_list(*this);
+    }
+
+    /// Returns the target of the sort.
+    /// <ul>
+    /// <li>target(A) = A</li>
+    /// <li>target(A->B) = B</li>
+    /// </ul>
+    ///
+    lps::sort target() const
+    {
+      if (is_arrow())
+        return arg2(*this);
+      else
+        return *this;
     }
 };
 
