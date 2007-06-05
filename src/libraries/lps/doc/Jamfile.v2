@@ -17,6 +17,7 @@ doxygen autodoc
 xml manual
     :
         manual.qbk
+    :   <catalog>$(TOP)/3rd-party/docbook/xsl/catalog.xml
     ;
 
 boostbook standalone

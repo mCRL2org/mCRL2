@@ -32,7 +32,7 @@ rule init ( xsltproc ? )
   if ! $(.initialized) 
   {
     $(.initialized) = true ;
-    .xsltproc = $(xsltproc) -nonet ;
+    .xsltproc = $(xsltproc) ;
   }
 }
 
