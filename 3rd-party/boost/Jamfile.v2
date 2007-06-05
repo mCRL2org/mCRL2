@@ -4,7 +4,7 @@ import set ;
 import package ;
 import common ;
 
-constant BOOST_VERSION : 1.33.1 ;
+constant BOOST_VERSION : 1.35 ;
 
 project boost
        : build-dir $(BUILD_TOP)

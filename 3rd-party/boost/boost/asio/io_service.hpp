@@ -61,7 +61,40 @@ namespace asio {
  * @par Concepts:
  * Dispatcher.
  *
- * @sa @ref io_service_handler_exception
+ * @par Effect of exceptions thrown from handlers
+ *
+ * If an exception is thrown from a handler, the exception is allowed to
+ * propagate through the throwing thread's invocation of
+ * boost::asio::io_service::run(), boost::asio::io_service::run_one(),
+ * boost::asio::io_service::poll() or boost::asio::io_service::poll_one().
+ * No other threads that are calling any of these functions are affected. It is
+ * then the responsibility of the application to catch the exception.
+ *
+ * After the exception has been caught, the
+ * boost::asio::io_service::run(), boost::asio::io_service::run_one(),
+ * boost::asio::io_service::poll() or boost::asio::io_service::poll_one()
+ * call may be restarted @em without the need for an intervening call to
+ * boost::asio::io_service::reset(). This allows the thread to rejoin the
+ * io_service's thread pool without impacting any other threads in the pool.
+ *
+ * For example:
+ *
+ * @code
+ * boost::asio::io_service io_service;
+ * ...
+ * for (;;)
+ * {
+ *   try
+ *   {
+ *     io_service.run();
+ *     break; // run() exited normally
+ *   }
+ *   catch (my_exception& e)
+ *   {
+ *     // Deal with exception as appropriate.
+ *   }
+ * }
+ * @endcode
  */
 class io_service
   : private noncopyable
@@ -109,7 +142,9 @@ public:
    * more handlers to be dispatched, or until the io_service has been stopped.
    *
    * Multiple threads may call the run() function to set up a pool of threads
-   * from which the io_service may execute handlers.
+   * from which the io_service may execute handlers. All threads that are
+   * waiting in the pool are equivalent and the io_service may choose any one
+   * of them to invoke a handler.
    *
    * The run() function may be safely called again once it has completed only
    * after a call to reset().
@@ -126,7 +161,9 @@ public:
    * more handlers to be dispatched, or until the io_service has been stopped.
    *
    * Multiple threads may call the run() function to set up a pool of threads
-   * from which the io_service may execute handlers.
+   * from which the io_service may execute handlers. All threads that are
+   * waiting in the pool are equivalent and the io_service may choose any one
+   * of them to invoke a handler.
    *
    * The run() function may be safely called again once it has completed only
    * after a call to reset().
@@ -456,42 +493,6 @@ public:
   {
   }
 };
-
-/**
- * @page io_service_handler_exception Effect of exceptions thrown from handlers
- *
- * If an exception is thrown from a handler, the exception is allowed to
- * propagate through the throwing thread's invocation of
- * boost::asio::io_service::run(), boost::asio::io_service::run_one(),
- * boost::asio::io_service::poll() or boost::asio::io_service::poll_one().
- * No other threads that are calling any of these functions are affected. It is
- * then the responsibility of the application to catch the exception.
- *
- * After the exception has been caught, the
- * boost::asio::io_service::run(), boost::asio::io_service::run_one(),
- * boost::asio::io_service::poll() or boost::asio::io_service::poll_one()
- * call may be restarted @em without the need for an intervening call to
- * boost::asio::io_service::reset(). This allows the thread to rejoin the
- * io_service's thread pool without impacting any other threads in the pool.
- *
- * @par Example
- * @code
- * boost::asio::io_service io_service;
- * ...
- * for (;;)
- * {
- *   try
- *   {
- *     io_service.run();
- *     break; // run() exited normally
- *   }
- *   catch (my_exception& e)
- *   {
- *     // Deal with exception as appropriate.
- *   }
- * }
- * @endcode
- */
 
 } // namespace asio
 } // namespace boost

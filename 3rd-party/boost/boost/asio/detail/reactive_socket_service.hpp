@@ -351,6 +351,22 @@ public:
       socket_ops::setsockopt(impl.socket_,
           option.level(impl.protocol_), option.name(impl.protocol_),
           option.data(impl.protocol_), option.size(impl.protocol_), ec);
+
+#if defined(__MACH__) && defined(__APPLE__) \
+|| defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__)
+      // To implement portable behaviour for SO_REUSEADDR with UDP sockets we
+      // need to also set SO_REUSEPORT on BSD-based platforms.
+      if (!ec && impl.protocol_.type() == SOCK_DGRAM
+          && option.level(impl.protocol_) == SOL_SOCKET
+          && option.name(impl.protocol_) == SO_REUSEADDR)
+      {
+        boost::system::error_code ignored_ec;
+        socket_ops::setsockopt(impl.socket_, SOL_SOCKET, SO_REUSEPORT,
+            option.data(impl.protocol_), option.size(impl.protocol_),
+            ignored_ec);
+      }
+#endif
+
       return ec;
     }
   }
@@ -505,6 +521,18 @@ public:
     {
       ec = boost::system::error_code();
       return 0;
+    }
+
+    // Make socket non-blocking if user wants non-blocking.
+    if (impl.flags_ & implementation_type::user_set_non_blocking)
+    {
+      if (!(impl.flags_ & implementation_type::internal_non_blocking))
+      {
+        ioctl_arg_type non_blocking = 1;
+        if (socket_ops::ioctl(impl.socket_, FIONBIO, &non_blocking, ec))
+          return 0;
+        impl.flags_ |= implementation_type::internal_non_blocking;
+      }
     }
 
     // Send the data.
@@ -669,6 +697,18 @@ public:
           boost::asio::buffer_size(buffer));
     }
 
+    // Make socket non-blocking if user wants non-blocking.
+    if (impl.flags_ & implementation_type::user_set_non_blocking)
+    {
+      if (!(impl.flags_ & implementation_type::internal_non_blocking))
+      {
+        ioctl_arg_type non_blocking = 1;
+        if (socket_ops::ioctl(impl.socket_, FIONBIO, &non_blocking, ec))
+          return 0;
+        impl.flags_ |= implementation_type::internal_non_blocking;
+      }
+    }
+
     // Send the data.
     for (;;)
     {
@@ -822,6 +862,18 @@ public:
     {
       ec = boost::system::error_code();
       return 0;
+    }
+
+    // Make socket non-blocking if user wants non-blocking.
+    if (impl.flags_ & implementation_type::user_set_non_blocking)
+    {
+      if (!(impl.flags_ & implementation_type::internal_non_blocking))
+      {
+        ioctl_arg_type non_blocking = 1;
+        if (socket_ops::ioctl(impl.socket_, FIONBIO, &non_blocking, ec))
+          return 0;
+        impl.flags_ |= implementation_type::internal_non_blocking;
+      }
     }
 
     // Receive some data.
@@ -1006,6 +1058,18 @@ public:
           boost::asio::buffer_size(buffer));
     }
 
+    // Make socket non-blocking if user wants non-blocking.
+    if (impl.flags_ & implementation_type::user_set_non_blocking)
+    {
+      if (!(impl.flags_ & implementation_type::internal_non_blocking))
+      {
+        ioctl_arg_type non_blocking = 1;
+        if (socket_ops::ioctl(impl.socket_, FIONBIO, &non_blocking, ec))
+          return 0;
+        impl.flags_ |= implementation_type::internal_non_blocking;
+      }
+    }
+
     // Receive some data.
     for (;;)
     {
@@ -1161,6 +1225,18 @@ public:
       return ec;
     }
 
+    // Make socket non-blocking if user wants non-blocking.
+    if (impl.flags_ & implementation_type::user_set_non_blocking)
+    {
+      if (!(impl.flags_ & implementation_type::internal_non_blocking))
+      {
+        ioctl_arg_type non_blocking = 1;
+        if (socket_ops::ioctl(impl.socket_, FIONBIO, &non_blocking, ec))
+          return ec;
+        impl.flags_ |= implementation_type::internal_non_blocking;
+      }
+    }
+
     // Accept a socket.
     for (;;)
     {
@@ -1204,6 +1280,14 @@ public:
           return ec;
         // Fall through to retry operation.
       }
+#if defined(EPROTO)
+      else if (ec.value() == EPROTO)
+      {
+        if (impl.flags_ & implementation_type::enable_connection_aborted)
+          return ec;
+        // Fall through to retry operation.
+      }
+#endif // defined(EPROTO)
       else
         return ec;
 
@@ -1263,6 +1347,10 @@ public:
       if (ec == boost::asio::error::connection_aborted
           && !enable_connection_aborted_)
         return false;
+#if defined(EPROTO)
+      if (ec.value() == EPROTO && !enable_connection_aborted_)
+        return false;
+#endif // defined(EPROTO)
 
       // Transfer ownership of the new socket to the peer object.
       if (!ec)
