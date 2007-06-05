@@ -19,6 +19,7 @@
 #include "atermpp/aterm_list.h"
 #include "atermpp/aterm_traits.h"
 #include "atermpp/set.h"
+#include "atermpp/algorithm.h"
 #include "atermpp/vector.h"
 #include "lps/action.h"
 #include "lps/data.h"
@@ -164,6 +165,7 @@ class pbes_equation: public aterm_appl
     }
 
     /// Returns true if the equation is a BES (boolean equation system).
+    ///
     bool is_bes() const
     {
       return variable().parameters().empty() && formula().is_bes();
@@ -175,6 +177,44 @@ class pbes_equation: public aterm_appl
 /// \brief singly linked list of data expressions
 ///
 typedef term_list<pbes_equation> pbes_equation_list;
+
+/// INTERNAL ONLY
+struct data_variable_collector
+{
+  atermpp::set<data_variable>& m_variables;
+  const data_variable_list& m_parameters;
+    
+  data_variable_collector(atermpp::set<data_variable>& variables, const data_variable_list& parameters)
+    : m_variables(variables), m_parameters(parameters)
+  {}
+  
+  bool operator()(aterm_appl t)
+  {
+    if (is_data_variable(t))
+    {
+      if (std::find(m_parameters.begin(), m_parameters.end(), t) == m_parameters.end())
+      {
+        m_variables.insert(data_variable(t));
+      }
+      return true;
+    }
+    return false;
+  }
+};
+
+/// INTERNAL ONLY
+/// Computes the free variables in the sequence of pbes equations [first, last[.
+///
+template <typename EquationIterator>
+atermpp::set<data_variable> free_pbes_variables(EquationIterator first, EquationIterator last)
+{
+  atermpp::set<data_variable> result;
+  for (EquationIterator i = first; i != last; ++i)
+  {
+    atermpp::for_each(i->formula(), data_variable_collector(result, i->variable().parameters()));
+  }
+  return result;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // equation_system
@@ -295,6 +335,13 @@ class equation_system: public atermpp::vector<pbes_equation>
           return false;
       }
       return true;
+    }
+    
+    /// Computes the set of free variables.
+    ///
+    atermpp::set<data_variable> free_variables() const
+    {
+      return free_pbes_variables(begin(), end());
     }
 };
 
@@ -429,6 +476,13 @@ class pbes
     bool is_well_formed() const
     {
       return m_equations.is_well_formed();
+    }
+
+    /// Computes the set of free variables.
+    ///
+    atermpp::set<data_variable> free_variables() const
+    {
+      return m_equations.free_variables();
     }
 
     /// Protects the term from being freed during garbage collection.
