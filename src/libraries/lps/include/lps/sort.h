@@ -110,7 +110,7 @@ class sort: public aterm_appl
     /// Returns the source of the sort.
     /// <ul>
     /// <li>source(A) = []</li>
-    /// <li>source(A->B) = A</li>
+    /// <li>source(A->B) = [A]</li>
     /// </ul>
     ///
     sort_list source() const
