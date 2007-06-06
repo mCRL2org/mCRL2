@@ -53,7 +53,8 @@ source_files="mcrl2/articles \
               mcrl2/tests \
               mcrl2/specs \
               mcrl2/.vim \
-              mcrl2/src"
+              mcrl2/libraries
+              mcrl2/tools"
 
 svn_update="$(svn update --non-interactive ${SOURCE_BASE} 2>&1 | tail -n 1)"
 
