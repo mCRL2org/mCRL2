@@ -801,8 +801,6 @@ namespace squadt {
             Show(true);
           }
           else {
-            Show(log != 0);
-
             content = 0;
           }
 
