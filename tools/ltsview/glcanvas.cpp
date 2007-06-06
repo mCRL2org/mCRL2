@@ -35,7 +35,7 @@ GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
   mediator = owner;
   settings = ss;
   settings->subscribe(BackgroundColor,this);
-  displayAllowed = true;
+  displayAllowed = false;
   collectingData = false;
   angleX = 0.0f;
   angleY = 0.0f;
@@ -84,6 +84,7 @@ void GLCanvas::initialize() {
   glClearDepth(1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   SwapBuffers();
+  displayAllowed = true;
 }
 
 void GLCanvas::getMaxViewportDims(int *w,int* h) {
