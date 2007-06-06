@@ -459,18 +459,18 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = ../../src/libraries/atermpp/include \
-                         ../../src/libraries/lps/include \
-                         ../../src/libraries/lps/source \
-                         ../../src/libraries/nextstate/include \
-                         ../../src/libraries/nextstate/source \
-                         ../../src/libraries/prover/include \
-                         ../../src/libraries/prover/source \
-                         ../../src/libraries/rewrite/include \
-                         ../../src/libraries/rewrite/source \
-                         ../../src/squadt/libraries/sip/include \
-                         ../../src/squadt/libraries/sip/source \
-                         ../../src/squadt/libraries/utilities/include/utilities/generic_visitor.h
+INPUT                  = ../../libraries/atermpp/include \
+                         ../../libraries/lps/include \
+                         ../../libraries/lps/source \
+                         ../../libraries/nextstate/include \
+                         ../../libraries/nextstate/source \
+                         ../../libraries/prover/include \
+                         ../../libraries/prover/source \
+                         ../../libraries/rewrite/include \
+                         ../../libraries/rewrite/source \
+                         ../../tools/squadt/libraries/sip/include \
+                         ../../tools/squadt/libraries/sip/source \
+                         ../../tools/squadt/libraries/utilities/include/utilities/generic_visitor.h
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
