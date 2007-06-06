@@ -2,7 +2,7 @@ path-constant TOP             : . ;
 path-constant BUILD_TOOLS     : ./build/boost_build.v2 ; # Common build directory
 path-constant BUILD_TOP       : ./build/bin ;            # Common build directory
 path-constant BOOST_ROOT      : ./3rd-party/boost ;      # Boost prefix (packaged sources)
-path-constant SETUP           : ./src ;                  # Header file for run-time configuration
+path-constant SETUP           : ./tools ;                  # Header file for run-time configuration
 
 # Activate header cache
 modules.poke : HCACHEFILE : $(BUILD_TOP)/.jamdeps ;
@@ -10,9 +10,9 @@ modules.poke : HCACHEFILE : $(BUILD_TOP)/.jamdeps ;
 # The known sub projects
 use-project /site-config               : build ;
 use-project /boost                     : 3rd-party/boost ;
-use-project /libraries                 : src/libraries ;
-use-project /libraries/sip             : src/squadt/libraries/sip/build ;
-use-project /libraries/utilities       : src/squadt/libraries/utilities/build ;
+use-project /libraries                 : libraries ;
+use-project /libraries/sip             : tools/squadt/libraries/sip/build ;
+use-project /libraries/utilities       : tools/squadt/libraries/utilities/build ;
 use-project /workarounds               : build/workarounds ;
 
 include $(BUILD_TOOLS)/building.jam ;
@@ -36,11 +36,11 @@ include $(BUILD_TOOLS)/installing.jam ;
 import path ;
 
 root  = [ path.make $(TOP) ] ; 
-tools = [ MATCH $(root)/src/(.*)/.* : [ glob $(TOP)/src/*/Jamfile.v2 ] ] ;
+tools = [ MATCH $(root)/tools/(.*)/.* : [ glob $(TOP)/tools/*/Jamfile.v2 ] ] ;
 
 # Register tool projects
 for tool in $(tools) {
-  use-project /tools/$(tool) : src/$(tool) ;
+  use-project /tools/$(tool) : tools/$(tool) ;
 }
 
 import set ;

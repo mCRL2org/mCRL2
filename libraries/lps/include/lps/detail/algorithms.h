@@ -21,9 +21,9 @@
 #include "regfrmtrans.h"
 #include "lps/specification.h"
 #include "lps/pbes.h"
-#include "../../../../../mcrl22lps/lin_types.h"
-#include "../../../../../mcrl22lps/lin_std.h"
-#include "../../../../../mcrl22lps/lin_alt.h"
+#include "../../../../../tools/mcrl22lps/lin_types.h"
+#include "../../../../../tools/mcrl22lps/lin_std.h"
+#include "../../../../../tools/mcrl22lps/lin_alt.h"
 
 namespace lps {
 

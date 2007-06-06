@@ -282,8 +282,8 @@ if test $with_aterm; then
   fi;
   AC_CHECK_HEADERS([aterm2.h], , [AC_MSG_ERROR([cannot find ATerm headers])])
 else
-  ATERM_CPPFLAGS="-I\\\"$PWD/src/aterm\\\""
-  ATERM_LDFLAGS="-L\\\"$PWD/src/aterm\\\""
+  ATERM_CPPFLAGS="-I\\\"$PWD/3rd-party/aterm/include\\\""
+  ATERM_LDFLAGS="-L\\\"$PWD/3rd-party/aterm/include\\\""
   ATERM_NAME="ATerm"
   BUILD_ATERM="builtin"
 
@@ -577,6 +577,6 @@ fi
 
 AC_CONFIG_FILES([build/Makefile:build/autoconf/Makefile.in
                  build/config.jam:build/autoconf/config.jam.in
-                 src/setup.h:build/autoconf/setup.h.in])
+                 tools/setup.h:build/autoconf/setup.h.in])
 AC_OUTPUT
 
