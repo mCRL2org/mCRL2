@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iostream>
 #include <wx/image.h>
 #include "glcanvas.h"
 #include "ids.h"
