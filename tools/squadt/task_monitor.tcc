@@ -70,6 +70,9 @@ namespace squadt {
         /** \brief Waits until the current task has been completed */
         inline bool await_completion();
 
+        /** \brief Helper method used for unblocking the await_completion member */
+        void handle_task_completion(boost::shared_ptr < sip::message > const&, bool&, bool&);
+
         /** \brief Signals that a new connection has been established */
         inline void signal_connection(boost::shared_ptr < task_monitor_impl >&, sip::message::end_point);
 
@@ -172,8 +175,15 @@ namespace squadt {
       }
     }
 
-    static void handle_task_completion(boost::shared_ptr < sip::message > const& m, bool& b) {
-      b = m.get() && !m->is_empty();
+    // Declaring this function inline produces unexpected results (at least on Linux with gcc 4)
+    void task_monitor_impl::handle_task_completion(boost::shared_ptr < sip::message > const& m, bool& result, bool& changed) {
+      changed = true;
+
+      result = m.get() && !m->is_empty();
+
+      boost::mutex::scoped_lock l(register_lock);
+
+      register_condition.notify_all();
     }
 
     /**
@@ -181,13 +191,14 @@ namespace squadt {
      * \return whether the task has been completed successfully
      **/
     inline bool task_monitor_impl::await_completion() {
-      bool result = false;
+      bool result  = false;
+      bool changed = false;
  
       boost::mutex::scoped_lock l(register_lock);
 
-      add_handler(sip::message_signal_done, boost::bind(handle_task_completion, _1, result));
+      add_handler(sip::message_signal_done, boost::bind(&task_monitor_impl::handle_task_completion, this, _1, boost::ref(result), boost::ref(changed)));
 
-      while (!done || associated_process.get() == 0) {
+      while (!changed) {
         /* Other side has not connected and the process has not been registered as terminated */
         register_condition.wait(l);
       }

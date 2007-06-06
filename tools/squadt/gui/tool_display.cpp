@@ -708,7 +708,6 @@ namespace squadt {
       /* Ignore all scheduled updates to the tool display */
       current_layout.reset();
 
-  std::cerr << " resetting handlers\n";
       event_handler.get_monitor()->reset_display_update_handler();
       event_handler.get_monitor()->reset_display_layout_handler();
       event_handler.get_monitor()->reset_status_message_handler();
@@ -885,7 +884,6 @@ namespace squadt {
      * \param[in] l the layout specification
      **/
     void tool_display::schedule_log_update(sip::report::sptr l) {
-  std::cerr << " writing to log window\n";
       context->gui_builder.schedule_update(boost::bind(&tool_display::update_log, this, current_layout, l));
     }
 
