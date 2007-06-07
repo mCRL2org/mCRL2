@@ -7,10 +7,10 @@
 #include <set>
 
 #include "atermpp/aterm.h"
-#include "lps/sort.h"
-#include "lps/function.h"
-#include "lps/data.h"
-#include "lps/detail/utility.h"
+#include "mcrl2/lps/sort.h"
+#include "mcrl2/lps/function.h"
+#include "mcrl2/lps/data.h"
+#include "mcrl2/lps/detail/utility.h"
 
 namespace lps {
 

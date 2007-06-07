@@ -28,15 +28,15 @@
 #include "libprint_c.h"
 
 //LPS-Framework
-#include "lps/pbes.h"
-#include "lps/pbes_utility.h"
-#include "lps/data_operators.h"
-#include "lps/sort.h"
-//#include "lps/sort_utility.h"
+#include "mcrl2/lps/pbes.h"
+#include "mcrl2/lps/pbes_utility.h"
+#include "mcrl2/lps/data_operators.h"
+#include "mcrl2/lps/sort.h"
+//#include "mcrl2/lps/sort_utility.h"
 
 //ATERM-specific
 #include "atermpp/substitute.h"
-#include "lps/identifier_string.h"
+#include "mcrl2/lps/identifier_string.h"
 #include "atermpp/utility.h"
 #include "atermpp/indexed_set.h"
 #include "atermpp/table.h"

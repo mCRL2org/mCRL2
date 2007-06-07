@@ -8,7 +8,7 @@
 #include <liblowlevel.h>
 #include <libstruct.h>
 #include <libprint_c.h>
-#include <lps/data_specification.h>
+#include <mcrl2/lps/data_specification.h>
 #include <prover/bdd_prover.h>
 #include "librewrite.h"
 #include "rewr_prover.h"

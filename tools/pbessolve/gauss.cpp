@@ -1,17 +1,17 @@
 
 #include "gauss.h"
-#include "lps/pbes_utility.h"
+#include "mcrl2/lps/pbes_utility.h"
 #include "atermpp/substitute.h"
 
-#include "lps/pretty_print.h"
+#include "mcrl2/lps/pretty_print.h"
 #include "libprint_c.h" // contains gs..Msg family
 
 
 #include "atermpp/algorithm.h"     // replace
 #include "atermpp/make_list.h"
-#include "lps/data.h"
-#include "lps/data_functional.h"
-#include "lps/specification.h"
+#include "mcrl2/lps/data.h"
+#include "mcrl2/lps/data_functional.h"
+#include "mcrl2/lps/specification.h"
 
 
 

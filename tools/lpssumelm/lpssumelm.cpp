@@ -29,10 +29,10 @@
 #include <atermpp/algorithm.h>
 
 //LPS Framework
-#include <lps/linear_process.h>
-#include <lps/specification.h>
-#include <lps/data_functional.h>
-#include <lps/data.h>
+#include <mcrl2/lps/linear_process.h>
+#include <mcrl2/lps/specification.h>
+#include <mcrl2/lps/data_functional.h>
+#include <mcrl2/lps/data.h>
 
 using namespace std;
 using namespace atermpp;

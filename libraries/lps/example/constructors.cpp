@@ -1,6 +1,6 @@
 #include <iostream>
-#include "lps/specification.h"
-#include "lps/detail/tools.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/detail/tools.h"
 #include "test_specifications.h"
 
 using namespace std;

@@ -1,7 +1,7 @@
 // Implementation of class Prover
 // file: prover.cpp
 
-#include "lps/data_specification.h"
+#include "mcrl2/lps/data_specification.h"
 #include "prover/prover.h"
 #include "auxiliary/manipulator.h"
 #include "auxiliary/info.h"

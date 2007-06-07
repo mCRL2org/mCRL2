@@ -3,10 +3,10 @@
 #include <utility>
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
-#include "lps/pbes.h"
-#include "lps/pbes_utility.h"
-#include "lps/pbes_translate.h"
-#include "lps/detail/tools.h"
+#include "mcrl2/lps/pbes.h"
+#include "mcrl2/lps/pbes_utility.h"
+#include "mcrl2/lps/pbes_translate.h"
+#include "mcrl2/lps/detail/tools.h"
 
 using namespace std;
 using namespace lps;

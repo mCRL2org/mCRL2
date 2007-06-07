@@ -5,8 +5,8 @@
 #define LPS_DATA_FUNCTIONAL_H
 
 #include <boost/config.hpp>
-#include "lps/data.h"
-#include "lps/detail/utility.h"
+#include "mcrl2/lps/data.h"
+#include "mcrl2/lps/detail/utility.h"
 
 namespace lps {
 

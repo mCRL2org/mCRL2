@@ -1,7 +1,7 @@
-//#include "lps/data.h"
-#include "lps/pbes.h"
+//#include "mcrl2/lps/data.h"
+#include "mcrl2/lps/pbes.h"
 
-//#include "lps/sort.h"
+//#include "mcrl2/lps/sort.h"
 //using namespace lps;
 //using namespace std;
 

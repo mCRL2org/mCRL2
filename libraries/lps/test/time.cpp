@@ -2,8 +2,8 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include "atermpp/aterm.h"
-#include "lps/linear_process.h"
-#include "lps/detail/tools.h"
+#include "mcrl2/lps/linear_process.h"
+#include "mcrl2/lps/detail/tools.h"
 
 using namespace std;
 using namespace atermpp;

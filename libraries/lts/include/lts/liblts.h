@@ -5,7 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <aterm2.h>
-#include "lps/specification.h"
+#include "mcrl2/lps/specification.h"
 #include "setup.h"
 
 #ifdef MCRL2_BCG

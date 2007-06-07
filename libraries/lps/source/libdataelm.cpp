@@ -12,9 +12,9 @@
 //
 // ======================================================================
 
-#include "lps/specification.h"
-#include "lps/data_specification.h"
-#include "lps/detail/tools.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/data_specification.h"
+#include "mcrl2/lps/detail/tools.h"
 #include "liblowlevel.h"
 #include "libstruct.h"
 

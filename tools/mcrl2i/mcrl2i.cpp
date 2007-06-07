@@ -17,7 +17,7 @@
 #include "libprint_c.h"
 #include "librewrite.h"
 #include "libenum.h"
-#include "lps/specification.h"
+#include "mcrl2/lps/specification.h"
 #include "libparse.h"
 #include "typecheck.h"
 #include "dataimpl.h"

@@ -11,7 +11,7 @@
 #include "libprint_c.h"
 #include "libprint.h"
 #include "lts/liblts.h"
-#include "lps/specification.h"
+#include "mcrl2/lps/specification.h"
 #include "fsmparser.h"
 
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)

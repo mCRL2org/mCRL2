@@ -1,5 +1,5 @@
 #include "librewrite.h"
-#include "lps/pbes.h"
+#include "mcrl2/lps/pbes.h"
 #include "libprint_c.h"
 
 /// pbes_expression_rewrite rewrites a pbes_expression p as far as possible.

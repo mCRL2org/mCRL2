@@ -3,9 +3,9 @@
 
 #include <iostream>
 #include <string>
-#include "lps/pbes.h"
-#include "lps/detail/tools.h"
-#include "lps/detail/read_text.h"
+#include "mcrl2/lps/pbes.h"
+#include "mcrl2/lps/detail/tools.h"
+#include "mcrl2/lps/detail/read_text.h"
 
 using namespace atermpp;
 using namespace lps;

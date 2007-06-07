@@ -25,7 +25,7 @@
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "libdataelm.h"
-#include "lps/specification.h"
+#include "mcrl2/lps/specification.h"
 
 using namespace std;
 using namespace lps;

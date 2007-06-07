@@ -4,7 +4,7 @@
 #ifndef LPS_DATA_OPERATORS_H
 #define LPS_DATA_OPERATORS_H
 
-#include "lps/data.h"
+#include "mcrl2/lps/data.h"
 
 namespace lps {
 

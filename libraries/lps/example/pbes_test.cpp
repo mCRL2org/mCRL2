@@ -1,9 +1,9 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
-#include "lps/pbes.h"
-#include "lps/detail/tools.h"
-#include "lps/detail/read_text.h"
+#include "mcrl2/lps/pbes.h"
+#include "mcrl2/lps/detail/tools.h"
+#include "mcrl2/lps/detail/read_text.h"
 
 using namespace std;
 using namespace lps;

@@ -27,10 +27,10 @@
 #include <atermpp/algorithm.h>
 
 //LPS Framework
-#include <lps/function.h>
-#include <lps/linear_process.h>
-#include <lps/specification.h>
-#include <lps/sort_utility.h>
+#include <mcrl2/lps/function.h>
+#include <mcrl2/lps/linear_process.h>
+#include <mcrl2/lps/specification.h>
+#include <mcrl2/lps/sort_utility.h>
 
 //Enumerator
 #include <libnextstate.h>

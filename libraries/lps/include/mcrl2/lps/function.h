@@ -5,7 +5,7 @@
 #ifndef LPS_FUNCTION_H
 #define LPS_FUNCTION_H
 
-#include "lps/data.h"
+#include "mcrl2/lps/data.h"
 
 namespace lps {
 

@@ -13,11 +13,11 @@
 #include <algorithm>
 
 #include "atermpp/aterm.h"
-#include "lps/function.h"
-#include "lps/linear_process.h"
-#include "lps/pretty_print.h"
-#include "lps/data_specification.h"
-#include "lps/detail/utility.h"
+#include "mcrl2/lps/function.h"
+#include "mcrl2/lps/linear_process.h"
+#include "mcrl2/lps/pretty_print.h"
+#include "mcrl2/lps/data_specification.h"
+#include "mcrl2/lps/detail/utility.h"
 
 namespace lps {
 

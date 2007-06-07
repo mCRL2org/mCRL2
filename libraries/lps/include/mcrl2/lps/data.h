@@ -14,9 +14,9 @@
 #include "atermpp/algorithm.h"
 #include "atermpp/aterm_access.h"
 #include "atermpp/utility.h"
-#include "lps/identifier_string.h"
-#include "lps/data_expression.h"
-#include "lps/detail/soundness_checks.h"
+#include "mcrl2/lps/identifier_string.h"
+#include "mcrl2/lps/data_expression.h"
+#include "mcrl2/lps/detail/soundness_checks.h"
 #include "libstruct.h"
 
 namespace lps {

@@ -11,11 +11,11 @@
 #include <cassert>
 #include "atermpp/aterm_traits.h"
 #include "atermpp/atermpp.h"
-#include "lps/identifier_string.h"
-#include "lps/detail/utility.h"
-#include "lps/sort.h"
-#include "lps/action.h"
-#include "lps/data.h"
+#include "mcrl2/lps/identifier_string.h"
+#include "mcrl2/lps/detail/utility.h"
+#include "mcrl2/lps/sort.h"
+#include "mcrl2/lps/action.h"
+#include "mcrl2/lps/data.h"
 #include "libstruct.h"
 
 namespace lps {

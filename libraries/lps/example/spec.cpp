@@ -5,9 +5,9 @@
 #include <boost/format.hpp>
 
 #include "atermpp/utility.h"
-#include "lps/specification.h"
-#include "lps/sort.h"
-#include "lps/detail/tools.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/sort.h"
+#include "mcrl2/lps/detail/tools.h"
 #include "test_specifications.h"
 
 using namespace std;
@@ -107,7 +107,7 @@ int main()
   for (action_list::iterator i = s.actions().begin(); i != s.actions().end(); ++i)
   {
     action a = *i;
-    action b(i->name(), i->arguments());
+    action b(i->label().name(), i->arguments());
     cout << i->to_string() << endl;
     cout << "b == " << b << endl;
   }

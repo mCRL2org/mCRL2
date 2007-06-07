@@ -2,7 +2,7 @@
 #define PARSER_DATAIMPL_H
 
 #include <aterm2.h>
-#include "lps/specification.h"
+#include "mcrl2/lps/specification.h"
 
 //Global preconditions:
 //- the ATerm library has been initialised

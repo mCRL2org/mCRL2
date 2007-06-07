@@ -3,11 +3,11 @@
 #include <boost/test/minimal.hpp>
 #include "atermpp/atermpp.h"
 #include "atermpp/algorithm.h"
-#include "lps/data.h"
-#include "lps/data_utility.h"
-#include "lps/sort.h"
-#include "lps/specification.h"
-#include "lps/detail/tools.h"
+#include "mcrl2/lps/data.h"
+#include "mcrl2/lps/data_utility.h"
+#include "mcrl2/lps/sort.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/detail/tools.h"
 
 using namespace std;
 using namespace atermpp;

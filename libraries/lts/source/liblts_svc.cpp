@@ -3,7 +3,7 @@
 #include "libprint_c.h"
 #include "libstruct.h"
 #include "lts/liblts.h"
-#include "lps/specification.h"
+#include "mcrl2/lps/specification.h"
 #include "libparse.h"
 #include "typecheck.h"
 #include "dataimpl.h"

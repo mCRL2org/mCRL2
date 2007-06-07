@@ -13,7 +13,7 @@
 // ======================================================================
 
 //LPS framework
-#  include "lps/specification.h"
+#include "mcrl2/lps/specification.h"
 
 //C++
 #include <iostream>

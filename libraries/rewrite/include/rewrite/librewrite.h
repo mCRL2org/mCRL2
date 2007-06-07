@@ -1,7 +1,7 @@
 #ifndef __LIBREWRITE_H
 #define __LIBREWRITE_H
 
-#include <lps/data_specification.h>
+#include <mcrl2/lps/data_specification.h>
 #include <aterm2.h>
 
 /** \brief Rewrite strategies. */

@@ -8,7 +8,7 @@
 #include <string>
 #include <cstdio>
 #include <boost/algorithm/string.hpp>
-#include "lps/specification.h"
+#include "mcrl2/lps/specification.h"
 
 namespace lps {
 

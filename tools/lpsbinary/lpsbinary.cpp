@@ -29,14 +29,14 @@
 #include <atermpp/table.h>
 
 //LPS Framework
-#include <lps/data.h>
-#include <lps/data_functional.h>
-#include <lps/data_utility.h>
-#include <lps/function.h>
-#include <lps/linear_process.h>
-#include <lps/sort_utility.h>
-#include <lps/specification.h>
-#include <lps/detail/specification_utility.h>
+#include <mcrl2/lps/data.h>
+#include <mcrl2/lps/data_functional.h>
+#include <mcrl2/lps/data_utility.h>
+#include <mcrl2/lps/function.h>
+#include <mcrl2/lps/linear_process.h>
+#include <mcrl2/lps/sort_utility.h>
+#include <mcrl2/lps/specification.h>
+#include <mcrl2/lps/detail/specification_utility.h>
 
 //Enumerator
 #include <enum_standard.h>

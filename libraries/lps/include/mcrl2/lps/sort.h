@@ -10,9 +10,9 @@
 #include "atermpp/aterm_list.h"
 #include "atermpp/aterm_access.h"
 #include "atermpp/make_list.h"
-#include "lps/pretty_print.h"
-#include "lps/detail/soundness_checks.h"
-#include "lps/detail/constructors.h"
+#include "mcrl2/lps/pretty_print.h"
+#include "mcrl2/lps/detail/soundness_checks.h"
+#include "mcrl2/lps/detail/constructors.h"
 #include "libstruct.h"
 
 namespace lps {

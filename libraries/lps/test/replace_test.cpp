@@ -19,8 +19,8 @@
 
 #include "atermpp/atermpp.h"
 #include "atermpp/algorithm.h"
-#include "lps/data.h"
-#include "lps/data_functional.h"
+#include "mcrl2/lps/data.h"
+#include "mcrl2/lps/data_functional.h"
 
 using namespace atermpp;
 using namespace lps;

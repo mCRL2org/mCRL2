@@ -13,8 +13,8 @@ project libraries/lps/test
    ;
 
 # these files should become available as part of a library
-obj lin_std.o : ../../../mcrl22lps/lin_std.cpp ;
-obj lin_alt.o : ../../../mcrl22lps/lin_alt.cpp ;
+obj lin_std.o : ../../../tools/mcrl22lps/lin_std.cpp ;
+obj lin_alt.o : ../../../tools/mcrl22lps/lin_alt.cpp ;
 
 exe generate_lps2pbes_result : generate_lps2pbes_result.cpp lin_std.o lin_alt.o ;
 

@@ -1,11 +1,11 @@
 #ifndef LPS_PBES_TRANSLATE_H
 #define LPS_PBES_TRANSLATE_H
 
-#include "lps/mucalculus.h"
-#include "lps/specification.h"
-#include "lps/pbes.h"
-#include "lps/detail/lps_algorithm.h"
-#include "lps/detail/pbes_translate_impl.h"
+#include "mcrl2/lps/mucalculus.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/pbes.h"
+#include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/detail/pbes_translate_impl.h"
 
 namespace lps {
   

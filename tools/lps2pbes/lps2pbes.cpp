@@ -19,10 +19,10 @@
 #include "typecheck.h"
 #include "dataimpl.h"
 #include "regfrmtrans.h"
-#include "lps/specification.h"
-#include "lps/mucalculus.h"
-#include "lps/pbes_translate.h"
-#include "lps/pbes.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/mucalculus.h"
+#include "mcrl2/lps/pbes_translate.h"
+#include "mcrl2/lps/pbes.h"
 
 using namespace std;
 using namespace lps;

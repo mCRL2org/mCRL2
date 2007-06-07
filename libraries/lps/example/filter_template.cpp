@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <cstdlib> // EXIT_SUCCESS
 #include <boost/program_options.hpp>
-#include "lps/detail/filter_program.h"
+#include "mcrl2/lps/detail/filter_program.h"
 
 using namespace std;
 using namespace lps;

@@ -1,7 +1,7 @@
 #include <string>
 
-#include "lps/pbes.h"
-#include "lps/pbes_expression.h"
+#include "mcrl2/lps/pbes.h"
+#include "mcrl2/lps/pbes_expression.h"
 #include "librewrite.h" // rewriter
 #include "prover/bdd_prover.h" // prover
 

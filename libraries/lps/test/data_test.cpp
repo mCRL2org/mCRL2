@@ -4,9 +4,9 @@
 
 #include "atermpp/vector.h"
 #include "atermpp/aterm_access.h"
-#include "lps/data_functional.h"
-#include "lps/data_operators.h"
-#include "lps/data.h"
+#include "mcrl2/lps/data_functional.h"
+#include "mcrl2/lps/data_operators.h"
+#include "mcrl2/lps/data.h"
 
 using namespace lps;
 using namespace atermpp;

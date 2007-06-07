@@ -27,12 +27,12 @@
 
 //mCRL2
 #include <atermpp/aterm.h>
-#include <lps/linear_process.h>
-#include <lps/specification.h>
+#include <mcrl2/lps/linear_process.h>
+#include <mcrl2/lps/specification.h>
 #include "liblowlevel.h"
 
 //LPS framework
-#include "lps/specification.h"
+#include "mcrl2/lps/specification.h"
 
 using namespace std;
 using namespace atermpp;
