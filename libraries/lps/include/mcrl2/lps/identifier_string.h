@@ -1,5 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////
-/// \file identifier_string.h
+/// \file mcrl2/lps/identifier_string.h
+/// Add your file description here.
+//
+//  Copyright 2007 Wieger Wesselink. Distributed under the Boost
+//  Software License, Version 1.0. (See accompanying file
+//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef LPS_IDENTIFIER_STRING_H
 #define LPS_IDENTIFIER_STRING_H

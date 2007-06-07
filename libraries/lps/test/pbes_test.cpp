@@ -82,6 +82,20 @@ void test_state_formula()
   BOOST_CHECK(pp(formula) == "mu X. mu X00. X00");
 }
 
+void test_free_variables()
+{
+  pbes p;
+  if (p.load("abp_fv.pbes"))
+  {
+    atermpp::set< data_variable > freevars = p.free_variables();
+    cout << freevars.size() << endl;
+    for (atermpp::set< data_variable >::iterator i = freevars.begin(); i != freevars.end(); ++i)
+    {
+      cout << "<var>" << pp(*i) << endl;
+    }
+  }
+}
+
 int test_main(int argc, char* argv[])
 {
   aterm bottom_of_stack;
@@ -92,6 +106,7 @@ int test_main(int argc, char* argv[])
   test_normalize();
   test_state_formula();
   test_xyz_generator();
-
+  // test_free_variables();
+  
   return 0;
 }

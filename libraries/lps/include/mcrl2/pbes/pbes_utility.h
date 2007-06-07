@@ -1,5 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////
-/// \file pbes_utility.h
+/// \file mcrl2/pbes/pbes_utility.h
+/// Add your file description here.
+//
+//  Copyright 2007 Wieger Wesselink. Distributed under the Boost
+//  Software License, Version 1.0. (See accompanying file
+//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef LPS_PBES_UTILITY_H
 #define LPS_PBES_UTILITY_H

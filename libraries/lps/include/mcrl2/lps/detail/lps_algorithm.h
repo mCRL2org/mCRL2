@@ -1,6 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////
-/// \file lps_algorithm.h
-/// Contains algorithms on LPSs.
+/// \file mcrl2/lps/detail/lps_algorithm.h
+/// Add your file description here.
+//
+//  Copyright 2007 Wieger Wesselink. Distributed under the Boost
+//  Software License, Version 1.0. (See accompanying file
+//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef LPS_ALGORITHM_H
 #define LPS_ALGORITHM_H

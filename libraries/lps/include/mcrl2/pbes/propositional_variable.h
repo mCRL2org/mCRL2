@@ -1,6 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////
-/// \file propositional_variable.h
-/// Contains definitions of propositional variables.
+/// \file mcrl2/pbes/propositional_variable.h
+/// Add your file description here.
+//
+//  Copyright 2007 Wieger Wesselink. Distributed under the Boost
+//  Software License, Version 1.0. (See accompanying file
+//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef LPS_PROPOSITIONAL_VARIABLE
 #define LPS_PROPOSITIONAL_VARIABLE

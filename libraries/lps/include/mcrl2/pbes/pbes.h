@@ -1,6 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////
-/// \file pbes.h
-/// Contains pbes data structures for the LPS Library.
+/// \file mcrl2/pbes/pbes.h
+/// Add your file description here.
+//
+//  Copyright 2007 Wieger Wesselink. Distributed under the Boost
+//  Software License, Version 1.0. (See accompanying file
+//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef LPS_PBES_H
 #define LPS_PBES_H
@@ -196,9 +200,9 @@ struct data_variable_collector
       {
         m_variables.insert(data_variable(t));
       }
-      return true;
+      return false;
     }
-    return false;
+    return true;
   }
 };
 
@@ -482,7 +486,13 @@ class pbes
     ///
     atermpp::set<data_variable> free_variables() const
     {
-      return m_equations.free_variables();
+      // collect the free variables of the equations
+      atermpp::set<data_variable> result = m_equations.free_variables();
+        
+      // add the (free) variables appearing in the initial state
+      data_variable_collector(result, data_variable_list())(m_initial_state);
+
+      return result;
     }
 
     /// Protects the term from being freed during garbage collection.
@@ -538,10 +548,8 @@ struct term_list_iterator_traits<pbes_equation>
 /// INTERNAL ONLY
 namespace atermpp
 {
-using lps::pbes_expression;
 using lps::fixpoint_symbol;
 using lps::pbes_equation;
-using lps::equation_system;
 using lps::pbes;
 
 template<>
