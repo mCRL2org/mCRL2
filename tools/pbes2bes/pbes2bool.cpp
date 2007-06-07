@@ -508,7 +508,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
   gsVerboseMsg("Retrieving pbes_equations from equation system...\n");
 
   assert(eqsys.size()>0); // There should be at least one equation
-  pbes_fixpoint_symbol current_fixpoint_symbol=eqsys.begin()->symbol();
+  fixpoint_symbol current_fixpoint_symbol=eqsys.begin()->symbol();
 
   unsigned long rank=1;
 
@@ -582,7 +582,7 @@ static bes_expression substitute_fp(
     {
       /* first check whether v and cond refer to the same variable, as
        * cond can then be substituted by true (for nu) or false (for mu) */
-      if (bes_equations.get_fixpoint_symbol(v)==pbes_fixpoint_symbol::mu())
+      if (bes_equations.get_fixpoint_symbol(v)==fixpoint_symbol::mu())
       { return else_branch(b); // substitute_bex(v,w,else_branch(b));
       }
       else
@@ -710,7 +710,7 @@ static bool solve_bes()
 
   /* Set the approximation to its initial value */
   for(bes::variable_type v=bes_equations.nr_of_equations(); v>0; v--)
-  { if (bes_equations.get_fixpoint_symbol(v)==pbes_fixpoint_symbol::mu())
+  { if (bes_equations.get_fixpoint_symbol(v)==fixpoint_symbol::mu())
     { approximation[v]=bes::false_();
     } 
     else
@@ -911,7 +911,7 @@ static void save_bes_in_vasy_format(string outfilename)
       { if (first)
         { ((outfilename=="-")?cout:outputfile) << 
              "block " << 
-             ((bes_equations.get_fixpoint_symbol(i)==pbes_fixpoint_symbol::mu()) ? "mu  B" : "nu B") <<
+             ((bes_equations.get_fixpoint_symbol(i)==fixpoint_symbol::mu()) ? "mu  B" : "nu B") <<
              r-1 <<
              " is " << endl;
            first=false;
@@ -993,7 +993,7 @@ static void save_bes_in_cwi_format(string outfilename)
   { for(unsigned long i=1; i<=bes_equations.nr_of_equations() ; i++)
     { if (bes_equations.get_rank(i)==r)
       { ((outfilename=="-")?cout:outputfile) << 
-              ((bes_equations.get_fixpoint_symbol(i)==pbes_fixpoint_symbol::mu()) ? "min X" : "max X") << i << "=";
+              ((bes_equations.get_fixpoint_symbol(i)==fixpoint_symbol::mu()) ? "min X" : "max X") << i << "=";
         save_rhs_in_cwi_form(((outfilename=="-")?cout:outputfile),bes_equations.get_rhs(i));
         ((outfilename=="-")?cout:outputfile) << endl;
       }

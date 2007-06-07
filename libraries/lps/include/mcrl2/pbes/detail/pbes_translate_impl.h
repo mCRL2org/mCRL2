@@ -808,7 +808,7 @@ namespace pbes_timed
       data_variable_list xf = mu_variables(f);
       data_variable_list xp = lps.process_parameters();
       state_formula g = mu_form(f);
-      pbes_fixpoint_symbol sigma = is_mu(f) ? pbes_fixpoint_symbol::mu() : pbes_fixpoint_symbol::nu();
+      fixpoint_symbol sigma = is_mu(f) ? fixpoint_symbol::mu() : fixpoint_symbol::nu();
       propositional_variable v(X, T + xf + xp + Par(X, f0));
       std::set<std::string> context;
       pbes_expression expr = RHS(f0, g, lps, T, context);
@@ -1046,7 +1046,7 @@ namespace pbes_untimed
       data_variable_list xf = mu_variables(f);
       data_variable_list xp = lps.process_parameters();
       state_formula g = mu_form(f);
-      pbes_fixpoint_symbol sigma = is_mu(f) ? pbes_fixpoint_symbol::mu() : pbes_fixpoint_symbol::nu();
+      fixpoint_symbol sigma = is_mu(f) ? fixpoint_symbol::mu() : fixpoint_symbol::nu();
       propositional_variable v(X, xf + xp + Par(X, f0));
       std::set<std::string> context;
       pbes_expression expr = RHS(f0, g, lps, context);

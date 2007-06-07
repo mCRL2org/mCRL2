@@ -20,7 +20,7 @@ namespace bes
   using atermpp::aterm_appl;
   using atermpp::arg1;
   using atermpp::arg2;
-  using lps::pbes_fixpoint_symbol;
+  using lps::fixpoint_symbol;
 
 
 // a bes variable_type is an unsigned long. 
@@ -432,7 +432,7 @@ namespace bes
       {}
 
       void add_equation(variable_type v, 
-                        pbes_fixpoint_symbol sigma,
+                        fixpoint_symbol sigma,
                         unsigned long rank,
                         bes_expression rhs)
       { assert(rank>0);  // rank must be positive.
@@ -458,13 +458,13 @@ namespace bes
       { return control_info.size()-1; /* there is no equation at position 0 */
       }
 
-      inline pbes_fixpoint_symbol get_fixpoint_symbol(variable_type v)
+      inline fixpoint_symbol get_fixpoint_symbol(variable_type v)
       {
         assert(v>0); /* variable indices start at 1. 0 is used as an indicator of error */
         assert(v<=nr_of_equations());
         assert(control_info[v]>0);
 
-        return (((control_info[v] % 2)==0) ? pbes_fixpoint_symbol::nu() : pbes_fixpoint_symbol::mu());
+        return (((control_info[v] % 2)==0) ? fixpoint_symbol::nu() : fixpoint_symbol::mu());
       }
 
 

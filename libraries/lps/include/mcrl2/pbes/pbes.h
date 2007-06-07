@@ -39,26 +39,26 @@ using atermpp::read_from_named_file;
 using lps::detail::parse_variable;
 
 ///////////////////////////////////////////////////////////////////////////////
-// pbes_fixpoint_symbol
+// fixpoint_symbol
 /// \brief pbes fixpoint symbol (mu or nu)
 ///
 // <FixPoint>     ::= Mu
 //                  | Nu
-class pbes_fixpoint_symbol: public aterm_appl
+class fixpoint_symbol: public aterm_appl
 {
   public:
-    pbes_fixpoint_symbol()
+    fixpoint_symbol()
       : aterm_appl(detail::constructFixPoint())
     {}
 
-    pbes_fixpoint_symbol(aterm_appl t)
+    fixpoint_symbol(aterm_appl t)
       : aterm_appl(t)
     {
       assert(detail::check_rule_FixPoint(m_term));
     }
     
     // allow assignment to aterms
-    pbes_fixpoint_symbol& operator=(aterm t)
+    fixpoint_symbol& operator=(aterm t)
     {
       m_term = t;
       return *this;
@@ -66,16 +66,16 @@ class pbes_fixpoint_symbol: public aterm_appl
 
     /// Returns the mu symbol.
     ///
-    static pbes_fixpoint_symbol mu()
+    static fixpoint_symbol mu()
     {
-      return pbes_fixpoint_symbol(gsMakeMu());
+      return fixpoint_symbol(gsMakeMu());
     }
 
     /// Returns the nu symbol.
     ///
-    static pbes_fixpoint_symbol nu()
+    static fixpoint_symbol nu()
     {
-      return pbes_fixpoint_symbol(gsMakeNu());
+      return fixpoint_symbol(gsMakeNu());
     }
 
     /// Returns true if the symbol is mu.
@@ -100,7 +100,7 @@ class pbes_fixpoint_symbol: public aterm_appl
 class pbes_equation: public aterm_appl
 {
   protected:
-    pbes_fixpoint_symbol   m_symbol;
+    fixpoint_symbol   m_symbol;
     propositional_variable m_variable;
     pbes_expression        m_formula;  // the right hand side
 
@@ -114,12 +114,12 @@ class pbes_equation: public aterm_appl
     {
       assert(detail::check_rule_PBEqn(m_term));
       iterator i = t.begin();
-      m_symbol   = pbes_fixpoint_symbol(*i++);
+      m_symbol   = fixpoint_symbol(*i++);
       m_variable = propositional_variable(*i++);
       m_formula  = pbes_expression(*i);
     }
 
-    pbes_equation(pbes_fixpoint_symbol symbol, propositional_variable variable, pbes_expression expr)
+    pbes_equation(fixpoint_symbol symbol, propositional_variable variable, pbes_expression expr)
       : aterm_appl(gsMakePBEqn(symbol, variable, expr)),
         m_symbol(symbol),
         m_variable(variable),
@@ -136,7 +136,7 @@ class pbes_equation: public aterm_appl
 
     /// Returns the fixpoint symbol of the equation.
     ///
-    pbes_fixpoint_symbol symbol() const
+    fixpoint_symbol symbol() const
     {
       return m_symbol;
     }
@@ -539,20 +539,20 @@ struct term_list_iterator_traits<pbes_equation>
 namespace atermpp
 {
 using lps::pbes_expression;
-using lps::pbes_fixpoint_symbol;
+using lps::fixpoint_symbol;
 using lps::pbes_equation;
 using lps::equation_system;
 using lps::pbes;
 
 template<>
-struct aterm_traits<pbes_fixpoint_symbol>
+struct aterm_traits<fixpoint_symbol>
 {
   typedef ATermAppl aterm_type;
-  static void protect(lps::pbes_fixpoint_symbol t)   { t.protect(); }
-  static void unprotect(lps::pbes_fixpoint_symbol t) { t.unprotect(); }
-  static void mark(lps::pbes_fixpoint_symbol t)      { t.mark(); }
-  static ATerm term(lps::pbes_fixpoint_symbol t)     { return t.term(); }
-  static ATerm* ptr(lps::pbes_fixpoint_symbol& t)    { return &t.term(); }
+  static void protect(lps::fixpoint_symbol t)   { t.protect(); }
+  static void unprotect(lps::fixpoint_symbol t) { t.unprotect(); }
+  static void mark(lps::fixpoint_symbol t)      { t.mark(); }
+  static ATerm term(lps::fixpoint_symbol t)     { return t.term(); }
+  static ATerm* ptr(lps::fixpoint_symbol& t)    { return &t.term(); }
 };
 
 template<>
