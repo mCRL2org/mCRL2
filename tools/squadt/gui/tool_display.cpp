@@ -552,9 +552,10 @@ namespace squadt {
             }
         };
 
+        local* l = new local(const_cast < sip::layout::element& > (*e));
+
         t->Connect(t->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
-                  wxCommandEventHandler(local::do_changes),
-                  new local(const_cast < sip::layout::element& > (*e)), change_event_handler);
+                  wxCommandEventHandler(local::do_changes), l, l);
      
         return (mediator::wrapper_aptr(new wrapper(t)));
       }

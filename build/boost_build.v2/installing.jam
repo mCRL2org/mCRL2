@@ -69,13 +69,13 @@ if [ modules.peek : OS ] = MACOSX {
   if $(install_requested) {
     import $(TOP)/build/macosx/mac-bundle ;
  
-    local mac_application_bundles = [ MATCH $(TOP)/src/(.*/.*).plist : [ glob $(TOP)/src/*/*.plist ] ] ;
+    local mac_application_bundles = [ MATCH $(TOP)/tools/(.*/.*).plist : [ glob $(TOP)/tools/*/*.plist ] ] ;
  
     for bundle in $(mac_application_bundles) {
       mac-bundle $(bundle:B).app
            : /tools/$(bundle:P)//$(bundle:B)
-             $(TOP)/src/$(bundle).plist
-             $(TOP)/src/$(bundle).icns
+             $(TOP)/tools/$(bundle).plist
+             $(TOP)/tools/$(bundle).icns
            : <location>$(prefix)
              <dependency>/tools/$(bundle:P)//install
            ;

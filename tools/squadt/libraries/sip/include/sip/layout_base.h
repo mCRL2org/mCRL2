@@ -14,6 +14,9 @@ namespace sip {
   namespace tool {
     class communicator;
   }
+  namespace controller {
+    class communicator_impl;
+  }
 
   namespace layout {
 
@@ -28,6 +31,7 @@ namespace sip {
       friend class ::utility::visitor;
 
       friend class ::sip::tool::communicator;
+      friend class ::sip::controller::communicator_impl;
       friend class ::sip::layout::manager;
 
       public:

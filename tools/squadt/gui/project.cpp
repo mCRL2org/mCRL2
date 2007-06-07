@@ -350,7 +350,7 @@ namespace squadt {
 
     /* Helper function */
     void project::prepare_tool_display(processor* p) {
-      processor::output_object_iterator t = p->get_output_iterator();
+      processor::output_object_iterator t = p->get_input_iterator();
 
       install_tool_display(p->get_monitor(), p->get_tool()->get_name() + " : " + boost::filesystem::path((*t)->location).leaf());
     }

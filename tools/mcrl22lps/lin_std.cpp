@@ -8747,3 +8747,4 @@ void lin_std_initialize_global_variables()
   comm_table_size = 0;
   comm_table_num = 0; 
 }
+

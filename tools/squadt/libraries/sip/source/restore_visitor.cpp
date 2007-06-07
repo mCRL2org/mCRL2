@@ -447,7 +447,7 @@ namespace utility {
     
     c.m_text = tree->GetText(false);
 
-    c.m_event_handler->process(&c);
+    c.m_event_handler->process(&c, false);
   }
 
   /**
@@ -460,7 +460,7 @@ namespace utility {
 
     tree->GetAttribute("label", &c.m_label);
 
-    c.m_event_handler->process(&c);
+    c.m_event_handler->process(&c, false);
   }
 
   /// \cond PRIVATE_PART
@@ -532,7 +532,7 @@ namespace utility {
       }
     }
      
-    c.m_event_handler->process(&c);
+    c.m_event_handler->process(&c, false);
   }
 
   /**
@@ -546,7 +546,7 @@ namespace utility {
     tree->GetAttribute("label", &c.m_label);
     tree->GetAttributeOrDefault("status", &c.m_status, false);
 
-    c.m_event_handler->process(&c);
+    c.m_event_handler->process(&c, false);
   }
 
   /**
@@ -561,7 +561,7 @@ namespace utility {
     tree->GetAttribute("maximum", &c.m_maximum);
     tree->GetAttribute("current", &c.m_current);
 
-    c.m_event_handler->process(&c);
+    c.m_event_handler->process(&c, false);
   }
 
   /**
@@ -578,7 +578,7 @@ namespace utility {
       }
     }
 
-    c.m_event_handler->process(&c);
+    c.m_event_handler->process(&c, false);
   }
 
   /// \cond PRIVATE_PART
