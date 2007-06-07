@@ -6,7 +6,7 @@
 #include "executor.h"
 
 namespace squadt {
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
 
   class tool_manager_impl : public sip::controller::communicator, public utility::visitable {
     friend class tool_manager;

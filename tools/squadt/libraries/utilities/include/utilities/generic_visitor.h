@@ -34,7 +34,7 @@ namespace utility {
       }
   };
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   namespace detail {
 
     /** \brief Implements a primitive map using std::vector */
@@ -116,7 +116,7 @@ namespace utility {
   };
 
   namespace detail {
-    /// \cond PRIVATE_PART
+    /// \cond INTERNAL_DOCS
 
     template < typename S >
     class vector_map {

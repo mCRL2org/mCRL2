@@ -14,7 +14,7 @@
 
 namespace sip {
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   class store_visitor_impl;
   /// \endcond
 
@@ -33,7 +33,7 @@ namespace sip {
       store_visitor(std::ostream&);
   };
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   class restore_visitor_impl;
   /// \endcond
 
@@ -53,7 +53,7 @@ namespace sip {
       restore_visitor(T&);
   };
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   class search_visitor_impl;
   /// \endcond
 

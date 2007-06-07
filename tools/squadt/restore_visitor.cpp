@@ -22,7 +22,7 @@
 
 namespace squadt {
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   class restore_visitor_impl {
 
     protected:
@@ -149,7 +149,7 @@ namespace utility {
     do_visit(*t.impl);
   }
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   template <>
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(tool_manager_impl& tm) {
@@ -176,7 +176,7 @@ namespace utility {
     do_visit(*e.impl);
   }
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   template <>
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(executor_impl& o) {
@@ -238,7 +238,7 @@ namespace utility {
     }
   }
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   typedef std::map < unsigned long, processor::object_descriptor::sptr > id_conversion_map;
 
   struct id_helper {
@@ -260,7 +260,7 @@ namespace utility {
     do_visit(*p.impl, h);
   }
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   /**
    * \attention the same map m must be used to read back all processor instances that were written with write()
    **/
@@ -342,7 +342,7 @@ namespace utility {
     do_visit(*p.impl);
   }
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   template <>
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(squadt::project_manager_impl& p) {
@@ -371,7 +371,7 @@ namespace utility {
   }
   /// \endcond
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   template <>
   bool visitor< squadt::restore_visitor_impl >::initialise() {
     register_visit_method< squadt::tool >();

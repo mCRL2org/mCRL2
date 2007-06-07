@@ -4,7 +4,7 @@
 
 namespace squadt {
   namespace execution {
-    /// \cond PRIVATE_PART
+    /// \cond INTERNAL_DOCS
 
     class task_monitor_impl : public sip::controller::communicator_impl {
       friend class task_monitor;

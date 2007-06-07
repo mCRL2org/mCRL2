@@ -15,7 +15,7 @@
 
 namespace squadt {
   namespace GUI {
-    /// \cond PRIVATE_PART
+    /// \cond INTERNAL_DOCS
     namespace detail {
 
       /**
@@ -92,7 +92,7 @@ namespace squadt {
         inline void update();
     };
  
-    /// \cond PRIVATE_PART
+    /// \cond INTERNAL_DOCS
     namespace detail {
 
       /**

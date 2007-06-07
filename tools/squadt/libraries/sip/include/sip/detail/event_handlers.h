@@ -97,7 +97,6 @@ namespace sip {
     }
    
     /**
-     * @param[in] id a pointer that serves as an identifier for the originator of the event
      * @param[in] h a function object that is to be invoked at an event
      **/
     inline void basic_event_handler::connect(handler_function h) {
@@ -144,7 +143,7 @@ namespace sip {
    
     /**
      * @param[in] id a pointer that serves as an identifier for the originator of the event
-     * \param[in] whether or not to execute the global handler
+     * \param[in] b whether or not to execute the global handler
      **/
     inline void basic_event_handler::process(const void* id, bool b) {
       if (0 < handlers.count(id) || !global_handler.empty()) {
@@ -158,8 +157,8 @@ namespace sip {
     }
 
     /**
-     * @param[in] id a pointer that serves as an identifier for the originator of the event
-     * \param[in] whether or not to execute the global handler
+     * \param[in] id a pointer that serves as an identifier for the originator of the event
+     * \param[in] b whether or not to execute the global handler
      **/
     inline void basic_event_handler::execute_handlers(const void* id, bool b) {
       boost::mutex::scoped_lock l(lock);

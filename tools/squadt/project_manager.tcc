@@ -5,7 +5,7 @@
 
 namespace squadt {
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
 
   class project_manager_impl : public utility::visitable {
     friend class project_manager;

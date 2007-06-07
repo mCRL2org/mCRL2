@@ -19,7 +19,7 @@
 
 namespace sip {
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   class store_visitor_impl : private boost::noncopyable {
 
     friend class visitors;

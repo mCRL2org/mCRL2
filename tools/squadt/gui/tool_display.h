@@ -18,7 +18,7 @@ namespace squadt {
 
     class project;
 
-    /// \cond PRIVATE_PART
+    /// \cond INTERNAL_DOCS
     namespace detail {
 
       class tool_display;

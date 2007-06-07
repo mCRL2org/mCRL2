@@ -39,7 +39,7 @@ namespace squadt {
 
   const boost::shared_ptr < sip::tool::capabilities > tool::no_capabilities(new sip::tool::capabilities());
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   const long tool_manager_impl::default_port = 10947;
 
   char const* tool_manager_impl::default_tools[] = {"diagraphica", "lps2pbes", "lpsbinary", "lpsconstelm", "lpsdecluster", "lpsinfo", "lpsparelm", "lpsuntime", "lps2lts",                                                     "lpssumelm", "ltsconvert", "ltsinfo", "ltsgraph", "ltsview", "mcrl22lps", "pbes2bes", "pbes2bool", "pnml2mcrl2", "xsim", 0};

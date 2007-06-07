@@ -21,7 +21,7 @@ namespace squadt {
 
   using namespace boost::filesystem;
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   /**
    * \brief Helper function for writing object status to stream
    * \param[in] s stream to read from

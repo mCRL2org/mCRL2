@@ -19,7 +19,7 @@
 
 namespace squadt {
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   class store_visitor_impl {
 
     friend class visitors;
@@ -134,7 +134,7 @@ namespace utility {
     do_visit(*t.impl);
   }
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   /**
    * \param[in] t the tool manager object to store
    **/
@@ -164,7 +164,7 @@ namespace utility {
     do_visit(*t.impl);
   }
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   /**
    * \param[in] t the executor object to store
    **/
@@ -181,7 +181,7 @@ namespace utility {
   }
   /// \endcond
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   /**
    * \param[in] t the type_registry object to store
    **/
@@ -225,7 +225,7 @@ namespace utility {
     do_visit(*p.impl);
   }
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   /**
    * \param[in] p the processor object to store
    **/
@@ -290,7 +290,7 @@ namespace utility {
     do_visit(*p.impl);
   }
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   /**
    * \param[in] p the processor implementation object to store
    **/

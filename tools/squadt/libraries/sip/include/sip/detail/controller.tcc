@@ -90,7 +90,8 @@ namespace sip {
     }
 
     /**
-     * \param h the function that is called when a new layout for the display has been received
+     * \param[in] impl a weak pointer to this object (for lifetime check)
+     * \param[in] h the function that is called when a new layout for the display has been received
      *
      * \note deactivates event handling if h.empty()
      **/
@@ -110,8 +111,9 @@ namespace sip {
     }
 
     /**
-     * \param d pointer to a tool display
-     * \param h the function that is called when a new layout for the display has been received
+     * \param[in] impl a weak pointer to this object (for lifetime check)
+     * \param[in,out] d pointer to a tool display
+     * \param[in] h the function that is called when a new layout for the display has been received
      *
      * \pre d.get() != 0
      * \note deactivates event handling if h.empty()
@@ -134,6 +136,7 @@ namespace sip {
     }
 
     /**
+     * \param[in] impl a weak pointer to this object (for lifetime check)
      * \param h the function that is called when a new layout for the display has been received
      *
      * \note deactivates event handling if h.empty()

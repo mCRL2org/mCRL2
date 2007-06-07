@@ -16,7 +16,7 @@
 namespace squadt {
   namespace execution {
 
-    /// \cond PRIVATE_PART
+    /// \cond INTERNAL_DOCS
     inline executor_impl::executor_impl(unsigned int m) : maximum_instance_count(m) {
     }
     

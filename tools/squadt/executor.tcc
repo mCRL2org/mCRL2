@@ -1,7 +1,7 @@
 #include "executor.h"
 
 namespace squadt {
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
 
   namespace execution {
 

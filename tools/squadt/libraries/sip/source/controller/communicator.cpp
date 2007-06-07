@@ -111,8 +111,9 @@ namespace sip {
     }
 
     /**
-     * \param m pointer to the message
-     * \param h the function that is called when a new layout for the display has been received
+     * \param[in] impl weak pointer to this object (for life check)
+     * \param[in] m pointer to the message
+     * \param[in] h the function that is called when a new layout for the display has been received
      * \pre impl.get() == this
      **/
     void communicator_impl::display_layout_handler(boost::weak_ptr < communicator_impl > impl, messenger::message_ptr const& m, display_layout_handler_function h) {

@@ -348,36 +348,57 @@ namespace sip {
     inline basic_datatype::~basic_datatype() {
     }
 
+    /**
+     * Specialisation for choosing conversion to enumeration
+     **/
     template < typename T, bool e >
     inline std::string convert(basic_datatype const* const t, T const& s, boost::integral_constant< bool, e > const&) {
       return static_cast < enumeration const* > (t)->convert(s);
     }
 
+    /**
+     * Specialisation for choosing conversion to real
+     **/
     template < typename T >
     inline std::string convert(basic_datatype const* const t, T const& s, boost::false_type const&) {
       return convertr(t, s, boost::is_floating_point< T >());
     }
 
+    /**
+     * Specialisation for doing conversion to real
+     **/
     template < typename T, bool e >
     inline std::string convertr(basic_datatype const* const t, T const& s, boost::integral_constant< bool, e > const&) {
       return static_cast < real const* > (t)->convert(s);
     }
 
+    /**
+     * Specialisation for choosing conversion to integer
+     **/
     template < typename T >
     inline std::string convertr(basic_datatype const* const t, T const& s, boost::false_type const&) {
       return converti(t, s, boost::is_integral< T >());
     }
 
+    /**
+     * Specialisation for doing conversion to integer
+     **/
     template < typename T, bool e >
     inline std::string converti(basic_datatype const* const t, T const& s, boost::integral_constant< bool, e > const&) {
       return static_cast < integer const* > (t)->convert(s);
     }
 
+    /**
+     * Specialisation for doing conversion to string
+     **/
     template < typename T >
     inline std::string converti(basic_datatype const* const t, T const& s, boost::false_type const&) {
       return static_cast < string const* > (t)->convert(s);
     }
 
+    /**
+     * Specialisation for doing conversion to enumeration
+     **/
     template < typename T >
     inline std::string basic_datatype::convert(T const& s) const {
       return datatype::convert(this, s, boost::is_enum< T >());

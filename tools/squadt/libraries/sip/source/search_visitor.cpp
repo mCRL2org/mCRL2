@@ -15,7 +15,7 @@
 
 namespace sip {
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   class search_visitor_impl : private boost::noncopyable {
     friend class visitors;
     friend class find_visitor;

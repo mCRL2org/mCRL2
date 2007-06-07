@@ -17,7 +17,7 @@
 #include "tool_manager.tcc"
 
 namespace squadt {
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
 
   class processor_impl : public utility::visitable {
     friend class processor;

@@ -20,7 +20,7 @@
 #include <ticpp.h>
 
 namespace sip {
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   class restore_visitor_impl : private boost::noncopyable {
 
     friend class visitors;
@@ -463,7 +463,7 @@ namespace utility {
     c.m_event_handler->process(&c, false);
   }
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   template < typename T >
   std::istream& operator>>(std::istream& i, T*& t) {
     return (i >> reinterpret_cast < void*& > (t));
@@ -581,7 +581,7 @@ namespace utility {
     c.m_event_handler->process(&c, false);
   }
 
-  /// \cond PRIVATE_PART
+  /// \cond INTERNAL_DOCS
   /** \brief Finds a member of the visibility domain for a string */
   static sip::layout::visibility text_to_visibility(std::string const& s) {
     if (s == "visible") {
