@@ -43,21 +43,21 @@ tools:
 test: $(BJAM)
 	$(BJAM) ./status --preserve-test-targets
 
-$(MAN_MANIFEST): tools/doc/*.xml
-	cd ./tools/doc; $(XSLTPROC) --stringparam man.output.subdirs.enabled 1 \
+$(MAN_MANIFEST): doc/*.xml
+	cd doc; $(XSLTPROC) --stringparam man.output.subdirs.enabled 1 \
 	             --stringparam man.output.manifest.enabled 1 \
-	             --stringparam man.output.manifest.filename ../../$(MAN_MANIFEST) \
+	             --stringparam man.output.manifest.filename ../$(MAN_MANIFEST) \
 	             --stringparam man.output.in.separate.dir 1 \
-	             --stringparam man.output.base.dir ../../build/man/ \
+	             --stringparam man.output.base.dir ../build/man/ \
 		     $(DOCBOOK_XSL_PREFIX)/manpages/docbook.xsl index.xml
 
 man: $(MAN_MANIFEST)
 
 web: 
-	cd ./tools/doc; $(XSLTPROC) --stringparam base.dir ../../build/web/ \
+	cd doc; $(XSLTPROC) --stringparam base.dir ../build/web/ \
 	             --stringparam html.stylesheet man.css \
 		     $(DOCBOOK_XSL_PREFIX)/html/chunk.xsl index.xml; \
-	 install -m 0644 man.css ../../build/web/
+	 install -m 0644 man.css ../build/web/
 
 # Build boost build tool
 bjam: $(BJAM)
