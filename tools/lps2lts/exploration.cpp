@@ -6,7 +6,7 @@
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "mcrl2/lps/data_specification.h"
-#include "libdataelm.h"
+#include "mcrl2/libdataelm.h"
 #include "libnextstate.h"
 #include "libenum.h"
 #include "librewrite.h"

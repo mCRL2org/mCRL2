@@ -24,7 +24,7 @@
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lps/data.h"
 #include "mcrl2/lps/data_specification.h"
-#include "mcrl2/lps/pbes_expression.h"
+#include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/lps/mucalculus.h"
 #include "mcrl2/lps/pretty_print.h"
 #include "mcrl2/lps/detail/utility.h"

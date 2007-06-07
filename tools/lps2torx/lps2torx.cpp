@@ -18,7 +18,7 @@
 #include "libnextstate.h"
 #include "libenum.h"
 #include "librewrite.h"
-#include "libdataelm.h"
+#include "mcrl2/libdataelm.h"
 
 using namespace std;
 

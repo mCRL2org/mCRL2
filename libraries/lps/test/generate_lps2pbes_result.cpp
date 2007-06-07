@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <string>
-#include "mcrl2/lps/pbes.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/lps/detail/tools.h"
 #include "mcrl2/lps/detail/read_text.h"
 

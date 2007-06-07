@@ -3,9 +3,9 @@
 
 #include "mcrl2/lps/mucalculus.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/pbes.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
-#include "mcrl2/lps/detail/pbes_translate_impl.h"
+#include "mcrl2/pbes/detail/pbes_translate_impl.h"
 
 namespace lps {
   

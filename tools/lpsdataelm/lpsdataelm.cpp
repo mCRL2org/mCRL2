@@ -24,7 +24,7 @@
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
-#include "libdataelm.h"
+#include "mcrl2/libdataelm.h"
 #include "mcrl2/lps/specification.h"
 
 using namespace std;

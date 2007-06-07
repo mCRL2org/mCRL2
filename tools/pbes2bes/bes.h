@@ -11,7 +11,7 @@
 #include "atermpp/aterm_appl.h"
 #include "atermpp/aterm_int.h"
 #include "atermpp/table.h"
-#include "mcrl2/lps/pbes.h"
+#include "mcrl2/pbes/pbes.h"
 
 namespace bes 
 {

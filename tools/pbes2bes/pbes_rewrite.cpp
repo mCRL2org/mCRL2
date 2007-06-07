@@ -1,5 +1,5 @@
 #include "pbes_rewrite.h"
-#include "mcrl2/lps/pbes_utility.h"
+#include "mcrl2/pbes/pbes_utility.h"
 #include "atermpp/substitute.h"
 
 #include "sort_functions.h"

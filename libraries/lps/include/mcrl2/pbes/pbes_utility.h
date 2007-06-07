@@ -4,7 +4,7 @@
 #ifndef LPS_PBES_UTILITY_H
 #define LPS_PBES_UTILITY_H
 
-#include "mcrl2/lps/pbes.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/lps/mucalculus.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/data.h"

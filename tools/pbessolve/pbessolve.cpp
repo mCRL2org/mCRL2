@@ -28,8 +28,8 @@
 #include "libprint_c.h"
 
 //LPS-Framework
-#include "mcrl2/lps/pbes.h"
-#include "mcrl2/lps/pbes_utility.h"
+#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/pbes_utility.h"
 #include "mcrl2/lps/data_operators.h"
 #include "mcrl2/lps/sort.h"
 //#include "mcrl2/lps/sort_utility.h"

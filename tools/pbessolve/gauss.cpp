@@ -1,6 +1,6 @@
 
 #include "gauss.h"
-#include "mcrl2/lps/pbes_utility.h"
+#include "mcrl2/pbes/pbes_utility.h"
 #include "atermpp/substitute.h"
 
 #include "mcrl2/lps/pretty_print.h"

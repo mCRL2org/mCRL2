@@ -17,8 +17,8 @@
 #include "mcrl2/lps/data_operators.h"
 #include "mcrl2/lps/data_expression.h"
 #include "mcrl2/lps/mucalculus.h"
-#include "mcrl2/lps/pbes.h"
-#include "mcrl2/lps/pbes_utility.h"
+#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/pbes_utility.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 

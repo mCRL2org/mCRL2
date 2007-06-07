@@ -5,7 +5,7 @@
 #include "atermpp/aterm_traits.h"
 #include "atermpp/aterm_access.h"
 #include "mcrl2/lps/detail/soundness_checks.h"
-#include "mcrl2/lps/propositional_variable.h"
+#include "mcrl2/pbes/propositional_variable.h"
 
 namespace lps {
 

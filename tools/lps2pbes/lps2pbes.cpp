@@ -21,8 +21,8 @@
 #include "regfrmtrans.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/mucalculus.h"
-#include "mcrl2/lps/pbes_translate.h"
-#include "mcrl2/lps/pbes.h"
+#include "mcrl2/pbes/pbes_translate.h"
+#include "mcrl2/pbes/pbes.h"
 
 using namespace std;
 using namespace lps;

@@ -22,7 +22,7 @@
 
 //MCRL-specific
 #include "liblowlevel.h"
-#include "mcrl2/lps/pbes.h"
+#include "mcrl2/pbes/pbes.h"
 
 using namespace std;
 using namespace lps;

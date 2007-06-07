@@ -1,5 +1,5 @@
 //#include "mcrl2/lps/data.h"
-#include "mcrl2/lps/pbes.h"
+#include "mcrl2/pbes/pbes.h"
 
 //#include "mcrl2/lps/sort.h"
 //using namespace lps;

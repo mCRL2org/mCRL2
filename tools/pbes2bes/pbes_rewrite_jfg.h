@@ -1,5 +1,5 @@
 #include "librewrite.h"
-#include "mcrl2/lps/pbes.h"
+#include "mcrl2/pbes/pbes.h"
 #include "libprint_c.h"
 #include "atermpp/indexed_set.h"
 #include "bes.h"

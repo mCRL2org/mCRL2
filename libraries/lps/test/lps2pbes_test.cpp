@@ -6,7 +6,7 @@
 #include <boost/algorithm/string.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
-#include "mcrl2/lps/pbes.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/lps/detail/tools.h"
 #include "mcrl2/lps/detail/read_text.h"
 #include "test_specifications.h"
