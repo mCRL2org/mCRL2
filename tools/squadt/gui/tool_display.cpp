@@ -516,19 +516,24 @@ namespace squadt {
        * functionality to register function objects as event handlers
        **/
       template < typename S >
-      class event_helper : public wxClientData {
+      class event_helper : public wxEvtHandler, public wxClientData {
 
         protected:
 
           S& sip_element;
 
-        protected:
-
-          virtual void do_changes(wxCommandEvent&) = 0;
+        public:
 
           event_helper(sip::layout::element& s) : sip_element(static_cast < S& > (s)) {
           }
+
+          void do_changes(wxCommandEvent&);
       };
+
+      template <>
+      void event_helper< layout::elements::text_field >::do_changes(wxCommandEvent& e) {
+        sip_element.set_text(std::string(static_cast < wxTextCtrl* > (e.GetEventObject())->GetValue().fn_str()));
+      }
 
       /**
        * \param[in] e the element that is associated with the new control
@@ -540,22 +545,10 @@ namespace squadt {
         /* Connect change event */
         change_event_handler->associate(t, e);
 
-        class local : public wxEvtHandler, public event_helper< layout::elements::text_field > {
-
-          public:
-
-            local(sip::layout::element& s) : event_helper< layout::elements::text_field >(s) {
-            }
-
-            void do_changes(wxCommandEvent& e) {
-              sip_element.set_text(std::string(static_cast < wxTextCtrl* > (e.GetEventObject())->GetValue().fn_str()));
-            }
-        };
-
-        local* l = new local(const_cast < sip::layout::element& > (*e));
+        event_helper< layout::elements::text_field >* l = new event_helper< layout::elements::text_field >(const_cast < sip::layout::element& > (*e));
 
         t->Connect(t->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
-                  wxCommandEventHandler(local::do_changes), l, l);
+                  wxCommandEventHandler(event_helper< layout::elements::text_field >::do_changes), l, l);
      
         return (mediator::wrapper_aptr(new wrapper(t)));
       }

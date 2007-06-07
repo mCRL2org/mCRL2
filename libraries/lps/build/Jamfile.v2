@@ -1,7 +1,7 @@
 project lps
        : source-location ..
        : build-dir $(BUILD_TOP)
-       : usage-requirements
+       : requirements
           <include>../include
        : usage-requirements
           <include>../include
