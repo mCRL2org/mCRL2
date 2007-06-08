@@ -321,4 +321,5 @@ code fragment illustrates this.
 
 [endsect] [/ Programming with terms]
 
-[xinclude autodoc.xml]
+[xinclude lpsdoc.xml]
+[xinclude pbesdoc.xml]
