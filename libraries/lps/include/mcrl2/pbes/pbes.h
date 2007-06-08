@@ -216,6 +216,7 @@ struct data_variable_collector
 /// INTERNAL ONLY
 /// Computes the free variables in the pbes expression t.
 ///
+inline
 void collect_free_pbes_variables(pbes_expression t,
                                  const data_variable_list& bound_variables,
                                  atermpp::vector<data_variable>& quantifier_stack,
