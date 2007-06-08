@@ -1,13 +1,14 @@
-///////////////////////////////////////////////////////////////////////////////
-/// \file mcrl2/lps/linear_process.h
-/// Add your file description here.
+// Copyright (c) 2007 Wieger Wesselink
 //
-//  Copyright 2007 Wieger Wesselink. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef LPS_LPS_H
-#define LPS_LPS_H
+/// \file mcrl2/lps/linear_process.h
+/// \brief Add your file description here.
+
+#ifndef MCRL2_LPS_LINEAR_PROCESS_H
+#define MCRL2_LPS_LINEAR_PROCESS_H
 
 #include <functional>
 #include <iostream>
@@ -618,4 +619,4 @@ struct aterm_traits<process_initializer>
 
 } // namespace atermpp
 
-#endif // LPS_LPS_H
+#endif // MCRL2_LPS_LINEAR_PROCESS_H

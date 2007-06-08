@@ -1,13 +1,14 @@
-///////////////////////////////////////////////////////////////////////////////
-/// \file mcrl2/lps/detail/read_text.h
-/// Add your file description here.
+// Copyright (c) 2007 Wieger Wesselink
 //
-//  Copyright 2007 Wieger Wesselink. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef LPS_DETAIL_READ_TEXT_H
-#define LPS_DETAIL_READ_TEXT_H
+/// \file mcrl2/lps/detail/read_text.h
+/// \brief Add your file description here.
+
+#ifndef MCRL2_LPS_DETAIL_READ_TEXT_H
+#define MCRL2_LPS_DETAIL_READ_TEXT_H
 
 #include <iostream>
 #include <fstream>
@@ -46,4 +47,4 @@ std::string read_text(const std::string& filename, bool warn=false)
 
 } // namespace lps
 
-#endif // LPS_DETAIL_READ_TEXT_H
+#endif // MCRL2_LPS_DETAIL_READ_TEXT_H

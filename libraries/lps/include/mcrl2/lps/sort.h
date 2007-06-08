@@ -1,13 +1,14 @@
-///////////////////////////////////////////////////////////////////////////////
-/// \file mcrl2/lps/sort.h
-/// Add your file description here.
+// Copyright (c) 2007 Wieger Wesselink
 //
-//  Copyright 2007 Wieger Wesselink. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef LPS_SORT_H
-#define LPS_SORT_H
+/// \file mcrl2/lps/sort.h
+/// \brief Add your file description here.
+
+#ifndef MCRL2_LPS_SORT_H
+#define MCRL2_LPS_SORT_H
 
 #include <cassert>
 #include "atermpp/aterm.h"
@@ -228,4 +229,4 @@ struct aterm_traits<sort>
 
 } // namespace atermpp
 
-#endif // LPS_SORT_H
+#endif // MCRL2_LPS_SORT_H

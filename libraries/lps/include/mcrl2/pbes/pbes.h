@@ -1,13 +1,14 @@
-///////////////////////////////////////////////////////////////////////////////
-/// \file mcrl2/pbes/pbes.h
-/// Add your file description here.
+// Copyright (c) 2007 Wieger Wesselink
 //
-//  Copyright 2007 Wieger Wesselink. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef LPS_PBES_H
-#define LPS_PBES_H
+/// \file mcrl2/pbes/pbes.h
+/// \brief Add your file description here.
+
+#ifndef MCRL2_PBES_PBES_H
+#define MCRL2_PBES_PBES_H
 
 #include <functional>
 #include <iostream>
@@ -18,21 +19,15 @@
 #include <iterator>
 #include <algorithm>
 #include <iterator>
-#include <sstream>
-#include "atermpp/aterm.h"
+
 #include "atermpp/aterm_list.h"
-#include "atermpp/aterm_traits.h"
 #include "atermpp/set.h"
-#include "atermpp/algorithm.h"
 #include "atermpp/vector.h"
-#include "mcrl2/lps/action.h"
 #include "mcrl2/lps/data.h"
 #include "mcrl2/lps/data_specification.h"
-#include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/lps/mucalculus.h"
 #include "mcrl2/lps/pretty_print.h"
 #include "mcrl2/lps/detail/utility.h"
-#include "libstruct.h"
+#include "mcrl2/pbes/pbes_equation.h"
 
 namespace lps {
 
@@ -40,147 +35,6 @@ using namespace std::rel_ops; // for definition of operator!= in terms of operat
 using atermpp::aterm;
 using atermpp::aterm_appl;
 using atermpp::read_from_named_file;
-using lps::detail::parse_variable;
-
-///////////////////////////////////////////////////////////////////////////////
-// fixpoint_symbol
-/// \brief pbes fixpoint symbol (mu or nu)
-///
-// <FixPoint>     ::= Mu
-//                  | Nu
-class fixpoint_symbol: public aterm_appl
-{
-  public:
-    fixpoint_symbol()
-      : aterm_appl(detail::constructFixPoint())
-    {}
-
-    fixpoint_symbol(aterm_appl t)
-      : aterm_appl(t)
-    {
-      assert(detail::check_rule_FixPoint(m_term));
-    }
-    
-    // allow assignment to aterms
-    fixpoint_symbol& operator=(aterm t)
-    {
-      m_term = t;
-      return *this;
-    }
-
-    /// Returns the mu symbol.
-    ///
-    static fixpoint_symbol mu()
-    {
-      return fixpoint_symbol(gsMakeMu());
-    }
-
-    /// Returns the nu symbol.
-    ///
-    static fixpoint_symbol nu()
-    {
-      return fixpoint_symbol(gsMakeNu());
-    }
-
-    /// Returns true if the symbol is mu.
-    ///
-    bool is_mu() const
-    {
-      return gsIsMu(*this);
-    }
-
-    /// Returns true if the symbol is nu.
-    ///
-    bool is_nu() const
-    {
-      return gsIsNu(*this);
-    }
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// pbes_equation
-/// \brief pbes equation.
-///
-class pbes_equation: public aterm_appl
-{
-  protected:
-    fixpoint_symbol   m_symbol;
-    propositional_variable m_variable;
-    pbes_expression        m_formula;  // the right hand side
-
-  public:
-    pbes_equation()
-      : aterm_appl(detail::constructPBEqn())
-    {}
-
-    pbes_equation(aterm_appl t)
-      : aterm_appl(t)
-    {
-      assert(detail::check_rule_PBEqn(m_term));
-      iterator i = t.begin();
-      m_symbol   = fixpoint_symbol(*i++);
-      m_variable = propositional_variable(*i++);
-      m_formula  = pbes_expression(*i);
-    }
-
-    pbes_equation(fixpoint_symbol symbol, propositional_variable variable, pbes_expression expr)
-      : aterm_appl(gsMakePBEqn(symbol, variable, expr)),
-        m_symbol(symbol),
-        m_variable(variable),
-        m_formula(expr)
-    {
-    }
-
-    // allow assignment to aterms
-    pbes_equation& operator=(aterm t)
-    {
-      m_term = t;
-      return *this;
-    }
-
-    /// Returns the fixpoint symbol of the equation.
-    ///
-    fixpoint_symbol symbol() const
-    {
-      return m_symbol;
-    }
-
-    /// Returns the pbes variable of the equation.
-    ///
-    propositional_variable variable() const
-    {
-      return m_variable;
-    }
-
-    /// Returns the predicate formula on the right hand side of the equation.
-    ///
-    pbes_expression formula() const
-    {
-      return m_formula;
-    }
-    
-    /// Returns true if the predicate formula on the right hand side contains no predicate variables.
-    /// (Comment Wieger: is_const would be a better name)
-    ///
-    bool is_solved() const
-    {
-      aterm t = atermpp::find_if(ATermAppl(m_formula), state_frm::is_var);
-      return t == aterm(); // true if nothing was found
-    }
-
-    /// Returns true if the equation is a BES (boolean equation system).
-    ///
-    bool is_bes() const
-    {
-      return variable().parameters().empty() && formula().is_bes();
-    }
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// pbes_equation_list
-/// \brief singly linked list of data expressions
-///
-typedef term_list<pbes_equation> pbes_equation_list;
 
 /// INTERNAL ONLY
 /// Computes the free variables in a data expression.
@@ -574,60 +428,12 @@ class pbes
     }
 };
 
-// inline
-// std::ostream& operator<<(std::ostream& to, const equation_system& p)
-// {
-//   // return to << p.to_string();
-//   to << "# equations: " << p.size() << std::endl;
-//   for (atermpp::vector<pbes_equation>::const_iterator i = p.begin(); i != p.end(); ++i)
-//   {
-//     to << "(" << *i << ")" << std::endl;
-//   }
-//   return to;
-// }
-
 } // namespace lps
-
-namespace atermpp {
-
-using lps::pbes_equation;
-
-template <>
-struct term_list_iterator_traits<pbes_equation>
-{
-  typedef ATermAppl value_type;
-};
-
-} // namespace atermpp
 
 /// INTERNAL ONLY
 namespace atermpp
 {
-using lps::fixpoint_symbol;
-using lps::pbes_equation;
 using lps::pbes;
-
-template<>
-struct aterm_traits<fixpoint_symbol>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(lps::fixpoint_symbol t)   { t.protect(); }
-  static void unprotect(lps::fixpoint_symbol t) { t.unprotect(); }
-  static void mark(lps::fixpoint_symbol t)      { t.mark(); }
-  static ATerm term(lps::fixpoint_symbol t)     { return t.term(); }
-  static ATerm* ptr(lps::fixpoint_symbol& t)    { return &t.term(); }
-};
-
-template<>
-struct aterm_traits<pbes_equation>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(pbes_equation t)   { t.protect(); }
-  static void unprotect(pbes_equation t) { t.unprotect(); }
-  static void mark(pbes_equation t)      { t.mark(); }
-  static ATerm term(pbes_equation t)     { return t.term(); }
-  static ATerm* ptr(pbes_equation& t)    { return &t.term(); }
-};
 
 template<>
 struct aterm_traits<pbes>
@@ -642,4 +448,4 @@ struct aterm_traits<pbes>
 
 } // namespace atermpp
 
-#endif // LPS_PBES_H
+#endif // MCRL2_PBES_PBES_H

@@ -1,13 +1,14 @@
-///////////////////////////////////////////////////////////////////////////////
-/// \file mcrl2/lps/data_operators.h
-/// Add your file description here.
+// Copyright (c) 2007 Wieger Wesselink
 //
-//  Copyright 2007 Wieger Wesselink. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef LPS_DATA_OPERATORS_H
-#define LPS_DATA_OPERATORS_H
+/// \file mcrl2/lps/data_operators.h
+/// \brief Add your file description here.
+
+#ifndef MCRL2_LPS_DATA_OPERATORS_H
+#define MCRL2_LPS_DATA_OPERATORS_H
 
 #include "mcrl2/lps/data.h"
 
@@ -39,4 +40,4 @@ data_expression_list operator+(data_expression_list l, data_variable v)
 
 } // namespace lps
 
-#endif // LPS_DATA_OPERATORS_H
+#endif // MCRL2_LPS_DATA_OPERATORS_H

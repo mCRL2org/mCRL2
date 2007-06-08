@@ -1,13 +1,14 @@
-///////////////////////////////////////////////////////////////////////////////
-/// \file mcrl2/pbes/pbes_expression.h
-/// Add your file description here.
+// Copyright (c) 2007 Wieger Wesselink
 //
-//  Copyright 2007 Wieger Wesselink. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef LPS_PBES_EXPRESSION_H
-#define LPS_PBES_EXPRESSION_H
+/// \file mcrl2/pbes/pbes_expression.h
+/// \brief Add your file description here.
+
+#ifndef MCRL2_PBES_PBES_EXPRESSION_H
+#define MCRL2_PBES_PBES_EXPRESSION_H
 
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_traits.h"
@@ -309,4 +310,4 @@ struct aterm_traits<pbes_expression>
 
 } // namespace atermpp
 
-#endif // LPS_PBES_EXPRESSION_H
+#endif // MCRL2_PBES_PBES_EXPRESSION_H

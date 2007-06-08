@@ -1,13 +1,14 @@
-///////////////////////////////////////////////////////////////////////////////
-/// \file mcrl2/lps/data_functional.h
-/// Add your file description here.
+// Copyright (c) 2007 Wieger Wesselink
 //
-//  Copyright 2007 Wieger Wesselink. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef LPS_DATA_FUNCTIONAL_H
-#define LPS_DATA_FUNCTIONAL_H
+/// \file mcrl2/lps/data_functional.h
+/// \brief Add your file description here.
+
+#ifndef MCRL2_LPS_DATA_FUNCTIONAL_H
+#define MCRL2_LPS_DATA_FUNCTIONAL_H
 
 #include <boost/config.hpp>
 #include "mcrl2/lps/data.h"
@@ -174,4 +175,4 @@ namespace lps {
 
 } // namespace lps
 
-#endif // LPS_DATA_FUNCTIONAL_H
+#endif // MCRL2_LPS_DATA_FUNCTIONAL_H

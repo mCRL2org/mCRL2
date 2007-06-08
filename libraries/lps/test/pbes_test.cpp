@@ -4,7 +4,7 @@
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/pbes_utility.h"
+#include "mcrl2/pbes/utility.h"
 #include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/lps/detail/tools.h"
 

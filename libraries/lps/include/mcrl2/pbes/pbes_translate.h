@@ -1,13 +1,14 @@
-///////////////////////////////////////////////////////////////////////////////
-/// \file mcrl2/pbes/pbes_translate.h
-/// Add your file description here.
+// Copyright (c) 2007 Wieger Wesselink
 //
-//  Copyright 2007 Wieger Wesselink. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef LPS_PBES_TRANSLATE_H
-#define LPS_PBES_TRANSLATE_H
+/// \file mcrl2/pbes/pbes_translate.h
+/// \brief Add your file description here.
+
+#ifndef MCRL2_PBES_PBES_TRANSLATE_H
+#define MCRL2_PBES_PBES_TRANSLATE_H
 
 #include "mcrl2/lps/mucalculus.h"
 #include "mcrl2/lps/specification.h"
@@ -81,4 +82,4 @@ pbes pbes_translate(const state_formula& formula, const specification& spec, boo
 
 } // namespace lps
 
-#endif // LPS_PBES_TRANSLATE_H
+#endif // MCRL2_PBES_PBES_TRANSLATE_H

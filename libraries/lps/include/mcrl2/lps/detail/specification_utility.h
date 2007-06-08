@@ -1,13 +1,14 @@
-///////////////////////////////////////////////////////////////////////////////
-/// \file mcrl2/lps/detail/specification_utility.h
-/// Add your file description here.
+// Copyright (c) 2007 Wieger Wesselink
 //
-//  Copyright 2007 Wieger Wesselink. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef LPS_SPECIFICATION_UTILITY_H
-#define LPS_SPECIFICATION_UTILITY_H
+/// \file mcrl2/lps/detail/specification_utility.h
+/// \brief Add your file description here.
+
+#ifndef MCRL2_LPS_DETAIL_SPECIFICATION_UTILITY_H
+#define MCRL2_LPS_DETAIL_SPECIFICATION_UTILITY_H
 
 #include <vector>
 #include "mcrl2/lps/data.h"
@@ -63,4 +64,4 @@ namespace detail {
 
 } // namespace lps
 
-#endif // LPS_SPECIFICATION_UTILITY_H
+#endif // MCRL2_LPS_DETAIL_SPECIFICATION_UTILITY_H
