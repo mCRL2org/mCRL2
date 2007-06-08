@@ -183,28 +183,80 @@ class pbes_equation: public aterm_appl
 typedef term_list<pbes_equation> pbes_equation_list;
 
 /// INTERNAL ONLY
+/// Computes the free variables in a data expression.
 struct data_variable_collector
 {
-  atermpp::set<data_variable>& m_variables;
-  const data_variable_list& m_parameters;
+  const data_variable_list& m_bound_variables;
+  const atermpp::vector<data_variable>& m_quantifier_stack;
+  atermpp::set<data_variable>& m_result;
     
-  data_variable_collector(atermpp::set<data_variable>& variables, const data_variable_list& parameters)
-    : m_variables(variables), m_parameters(parameters)
+  data_variable_collector(const data_variable_list& bound_variables,
+                          const atermpp::vector<data_variable>& quantifier_stack,
+                          atermpp::set<data_variable>& result
+                         )
+    : m_bound_variables(bound_variables), m_quantifier_stack(quantifier_stack), m_result(result)
   {}
   
   bool operator()(aterm_appl t)
   {
     if (is_data_variable(t))
     {
-      if (std::find(m_parameters.begin(), m_parameters.end(), t) == m_parameters.end())
+      if (std::find(m_bound_variables.begin(), m_bound_variables.end(), t) == m_bound_variables.end()
+          && std::find(m_quantifier_stack.begin(), m_quantifier_stack.end(), t) == m_quantifier_stack.end()
+         )
       {
-        m_variables.insert(data_variable(t));
+        m_result.insert(data_variable(t));
       }
       return false;
     }
     return true;
   }
 };
+
+/// INTERNAL ONLY
+/// Computes the free variables in the pbes expression t.
+///
+void collect_free_pbes_variables(pbes_expression t,
+                                 const data_variable_list& bound_variables,
+                                 atermpp::vector<data_variable>& quantifier_stack,
+                                 atermpp::set<data_variable>& result
+                                )
+{
+  using namespace lps::pbes_expr;
+
+  if(is_and(t)) {
+    collect_free_pbes_variables(lhs(t), bound_variables, quantifier_stack, result);
+    collect_free_pbes_variables(rhs(t), bound_variables, quantifier_stack, result);
+  }
+  else if(is_or(t)) {
+    collect_free_pbes_variables(lhs(t), bound_variables, quantifier_stack, result);
+    collect_free_pbes_variables(rhs(t), bound_variables, quantifier_stack, result);
+  }
+  else if(is_forall(t)) {
+    data_variable_list vars = quant_vars(t);   
+    std::copy(vars.begin(), vars.end(), std::back_inserter(quantifier_stack));
+    collect_free_pbes_variables(quant_expr(t), bound_variables, quantifier_stack, result);
+    quantifier_stack.erase(quantifier_stack.end() - vars.size(), quantifier_stack.end());
+  }
+  else if(is_exists(t)) {
+    data_variable_list vars = quant_vars(t);   
+    std::copy(vars.begin(), vars.end(), std::back_inserter(quantifier_stack));
+    collect_free_pbes_variables(quant_expr(t), bound_variables, quantifier_stack, result);
+    quantifier_stack.erase(quantifier_stack.end() - vars.size(), quantifier_stack.end());
+  }
+  else if(is_propositional_variable_instantiation(t)) {
+    data_expression_list l = propositional_variable_instantiation(t).parameters();
+    for (data_expression_list::iterator i = l.begin(); i != l.end(); ++i)
+      atermpp::for_each(*i, data_variable_collector(bound_variables, quantifier_stack, result));
+  }
+  else if(is_true(t)) {
+  }
+  else if(is_false(t)) {
+  }
+  else if(is_data(t)) {
+    atermpp::for_each(t, data_variable_collector(bound_variables, quantifier_stack, result));
+  }
+}
 
 /// INTERNAL ONLY
 /// Computes the free variables in the sequence of pbes equations [first, last[.
@@ -215,7 +267,8 @@ atermpp::set<data_variable> free_pbes_variables(EquationIterator first, Equation
   atermpp::set<data_variable> result;
   for (EquationIterator i = first; i != last; ++i)
   {
-    atermpp::for_each(i->formula(), data_variable_collector(result, i->variable().parameters()));
+    atermpp::vector<data_variable> quantifier_stack;
+    collect_free_pbes_variables(i->formula(), i->variable().parameters(), quantifier_stack, result);
   }
   return result;
 }
@@ -490,7 +543,8 @@ class pbes
       atermpp::set<data_variable> result = m_equations.free_variables();
         
       // add the (free) variables appearing in the initial state
-      data_variable_collector(result, data_variable_list())(m_initial_state);
+      for (data_expression_list::iterator i = m_initial_state.parameters().begin(); i != m_initial_state.parameters().end(); ++i)
+        atermpp::for_each(*i, data_variable_collector(data_variable_list(), atermpp::vector<data_variable>(), result));
 
       return result;
     }

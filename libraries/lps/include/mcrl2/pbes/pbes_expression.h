@@ -263,7 +263,6 @@ inline
 bool is_bes(aterm_appl t)
 {
   using namespace pbes_expr;
-  using namespace pbes_expr;
 
   if(is_and(t)) {
     return is_bes(lhs(t)) && is_bes(rhs(t));
