@@ -37,10 +37,9 @@ if [[ ! -d ${TARGET_BASE} ]]; then
   echo "Error: <target-directory> must exist and be a directory!";
 fi
 
-source_files="mcrl2/articles \
-              mcrl2/3rd-party \
+source_files="mcrl2/3rd-party \
               mcrl2/boost-build.jam \
-              mcrl2/conventions \
+              mcrl2/doc \
               mcrl2/COPYING \
               mcrl2/INSTALL \
               mcrl2/README \
@@ -51,9 +50,8 @@ source_files="mcrl2/articles \
               mcrl2/status \
               mcrl2/examples \
               mcrl2/tests \
-              mcrl2/specs \
               mcrl2/.vim \
-              mcrl2/libraries
+              mcrl2/libraries \
               mcrl2/tools"
 
 svn_update="$(svn update --non-interactive ${SOURCE_BASE} 2>&1 | tail -n 1)"
