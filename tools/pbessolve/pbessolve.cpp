@@ -36,7 +36,7 @@
 
 //ATERM-specific
 #include "atermpp/substitute.h"
-#include "mcrl2/data/identifier_string.h"
+#include "mcrl2/basic/identifier_string.h"
 #include "atermpp/utility.h"
 #include "atermpp/indexed_set.h"
 #include "atermpp/table.h"

@@ -3,12 +3,12 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-
-/// \file mcrl2/lps/detail/read_text.h
+//
+/// \file mcrl2/basic/detail/read_text.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_LPS_DETAIL_READ_TEXT_H
-#define MCRL2_LPS_DETAIL_READ_TEXT_H
+#ifndef MCRL2_BASIC_DETAIL_READ_TEXT_H
+#define MCRL2_BASIC_DETAIL_READ_TEXT_H
 
 #include <iostream>
 #include <fstream>
@@ -47,4 +47,4 @@ std::string read_text(const std::string& filename, bool warn=false)
 
 } // namespace lps
 
-#endif // MCRL2_LPS_DETAIL_READ_TEXT_H
+#endif // MCRL2_BASIC_DETAIL_READ_TEXT_H

@@ -3,12 +3,12 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-
+//
 /// \file mcrl2/data/function.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_LPS_FUNCTION_H
-#define MCRL2_LPS_FUNCTION_H
+#ifndef MCRL2_DATA_FUNCTION_H
+#define MCRL2_DATA_FUNCTION_H
 
 #include "mcrl2/data/data.h"
 
@@ -29,4 +29,4 @@ bool is_function(aterm_appl t)
 
 } // namespace lps
 
-#endif // MCRL2_LPS_FUNCTION_H
+#endif // MCRL2_DATA_FUNCTION_H

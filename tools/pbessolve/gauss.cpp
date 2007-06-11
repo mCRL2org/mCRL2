@@ -3,7 +3,7 @@
 #include "mcrl2/pbes/utility.h"
 #include "atermpp/substitute.h"
 
-#include "mcrl2/data/pretty_print.h"
+#include "mcrl2/basic/pretty_print.h"
 #include "libprint_c.h" // contains gs..Msg family
 
 

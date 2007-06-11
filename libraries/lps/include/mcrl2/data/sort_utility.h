@@ -3,12 +3,12 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-
+//
 /// \file mcrl2/data/sort_utility.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_LPS_SORT_UTILITY_H
-#define MCRL2_LPS_SORT_UTILITY_H
+#ifndef MCRL2_DATA_SORT_UTILITY_H
+#define MCRL2_DATA_SORT_UTILITY_H
 
 #include "mcrl2/data/data.h"
 #include "mcrl2/lps/specification.h"
@@ -113,4 +113,4 @@ bool is_finite(const function_list& fl, const lps::sort& s, const lps::sort_list
 
 } // namespace lps
 
-#endif // MCRL2_LPS_SORT_UTILITY_H
+#endif // MCRL2_DATA_SORT_UTILITY_H

@@ -3,17 +3,17 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-
+//
 /// \file mcrl2/pbes/pbes_translate.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_PBES_PBES_TRANSLATE_H
 #define MCRL2_PBES_PBES_TRANSLATE_H
 
-#include "mcrl2/lps/mucalculus.h"
+#include "mcrl2/basic/mucalculus.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
 
 namespace lps {

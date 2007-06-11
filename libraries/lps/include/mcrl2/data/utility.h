@@ -3,12 +3,12 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-
-/// \file mcrl2/data/data_utility.h
+//
+/// \file mcrl2/data/utility.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_LPS_DATA_UTILITY_H
-#define MCRL2_LPS_DATA_UTILITY_H
+#ifndef MCRL2_DATA_UTILITY_H
+#define MCRL2_DATA_UTILITY_H
 
 #include <string>
 #include <utility>
@@ -20,7 +20,7 @@
 #include "boost/format.hpp"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/sort.h"
-#include "mcrl2/data/identifier_string.h"
+#include "mcrl2/basic/identifier_string.h"
 #include "mcrl2/lps/detail/utility.h"
 #include "atermpp/algorithm.h"
 #include "atermpp/aterm.h"
@@ -298,4 +298,4 @@ class fresh_variable_generator
 
 } // namespace lps
 
-#endif // MCRL2_LPS_DATA_UTILITY_H
+#endif // MCRL2_DATA_UTILITY_H

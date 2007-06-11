@@ -3,7 +3,7 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-
+//
 /// \file mcrl2/pbes/pbes.h
 /// \brief Add your file description here.
 
@@ -25,7 +25,7 @@
 #include "atermpp/vector.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/pretty_print.h"
+#include "mcrl2/basic/pretty_print.h"
 #include "mcrl2/lps/detail/utility.h"
 #include "mcrl2/pbes/pbes_equation.h"
 

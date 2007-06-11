@@ -1,6 +1,7 @@
 #define NAME "mcrl2i"
 
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <cctype>
 

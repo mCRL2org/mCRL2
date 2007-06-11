@@ -3,19 +3,19 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-
-/// \file mcrl2/lps/detail/lps_algorithm.h
+//
+/// \file mcrl2/lps/detail/algorithm.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_LPS_DETAIL_LPS_ALGORITHM_H
-#define MCRL2_LPS_DETAIL_LPS_ALGORITHM_H
+#ifndef MCRL2_LPS_DETAIL_ALGORITHM_H
+#define MCRL2_LPS_DETAIL_ALGORITHM_H
 
 #include <string>
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/data/data.h"
-#include "mcrl2/data/data_utility.h"
+#include "mcrl2/data/utility.h"
 
 namespace lps {
   
@@ -60,4 +60,4 @@ linear_process make_timed_lps(linear_process lps, aterm context)
 
 } // namespace lps
 
-#endif // MCRL2_LPS_DETAIL_LPS_ALGORITHM_H
+#endif // MCRL2_LPS_DETAIL_ALGORITHM_H

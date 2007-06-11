@@ -1,4 +1,5 @@
 #include <string>
+#include <sstream>
 #include <svc/svc.h>
 #include "libprint_c.h"
 #include "libstruct.h"

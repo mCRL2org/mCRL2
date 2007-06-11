@@ -3,7 +3,7 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-
+//
 /// \file mcrl2/pbes/pbes_expression.h
 /// \brief Add your file description here.
 
@@ -13,7 +13,7 @@
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_traits.h"
 #include "atermpp/aterm_access.h"
-#include "mcrl2/lps/detail/soundness_checks.h"
+#include "mcrl2/basic/detail/soundness_checks.h"
 #include "mcrl2/pbes/propositional_variable.h"
 
 namespace lps {

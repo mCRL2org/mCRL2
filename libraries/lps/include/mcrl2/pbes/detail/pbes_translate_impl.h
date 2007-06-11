@@ -3,7 +3,7 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-
+//
 /// \file mcrl2/pbes/detail/pbes_translate_impl.h
 /// \brief Add your file description here.
 
@@ -22,14 +22,14 @@
 #include "atermpp/algorithm.h"
 #include "atermpp/substitute.h"
 #include "mcrl2/data/data_functional.h"
-#include "mcrl2/data/data_utility.h"
+#include "mcrl2/data/utility.h"
 #include "mcrl2/data/data_operators.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/lps/mucalculus.h"
+#include "mcrl2/basic/mucalculus.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/detail/algorithm.h"
 
 namespace lps {
   

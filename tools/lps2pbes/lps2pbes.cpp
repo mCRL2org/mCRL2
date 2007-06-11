@@ -20,7 +20,7 @@
 #include "dataimpl.h"
 #include "regfrmtrans.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/mucalculus.h"
+#include "mcrl2/basic/mucalculus.h"
 #include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/pbes/pbes.h"
 

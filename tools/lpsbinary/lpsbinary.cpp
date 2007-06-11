@@ -31,7 +31,7 @@
 //LPS Framework
 #include <mcrl2/data/data.h>
 #include <mcrl2/data/data_functional.h>
-#include <mcrl2/data/data_utility.h>
+#include <mcrl2/data/utility.h>
 #include <mcrl2/data/function.h>
 #include <mcrl2/lps/linear_process.h>
 #include <mcrl2/data/sort_utility.h>

@@ -3,12 +3,12 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-
-/// \file mcrl2/data/pretty_print.h
+//
+/// \file mcrl2/basic/pretty_print.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_LPS_PRETTY_PRINT_H
-#define MCRL2_LPS_PRETTY_PRINT_H
+#ifndef MCRL2_BASIC_PRETTY_PRINT_H
+#define MCRL2_BASIC_PRETTY_PRINT_H
 
 #include "atermpp/atermpp.h"
 #include "libprint.h"
@@ -30,4 +30,4 @@ namespace lps {
 
 } // namespace mcrl
 
-#endif // MCRL2_LPS_PRETTY_PRINT_H
+#endif // MCRL2_BASIC_PRETTY_PRINT_H

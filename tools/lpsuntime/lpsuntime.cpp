@@ -31,7 +31,7 @@
 #include <mcrl2/lps/linear_process.h>
 #include <mcrl2/data/data.h>
 #include <mcrl2/data/data_functional.h>
-#include <mcrl2/data/data_utility.h>
+#include <mcrl2/data/utility.h>
 
 using namespace std;
 using namespace atermpp;

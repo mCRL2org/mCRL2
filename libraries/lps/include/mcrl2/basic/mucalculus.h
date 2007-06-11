@@ -3,12 +3,12 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-
-/// \file mcrl2/lps/mucalculus.h
+//
+/// \file mcrl2/basic/mucalculus.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_LPS_MUCALCULUS_H
-#define MCRL2_LPS_MUCALCULUS_H
+#ifndef MCRL2_BASIC_MUCALCULUS_H
+#define MCRL2_BASIC_MUCALCULUS_H
 
 #include <iostream> // for debugging
 
@@ -16,7 +16,7 @@
 #include <cassert>
 #include "atermpp/aterm_traits.h"
 #include "atermpp/atermpp.h"
-#include "mcrl2/data/identifier_string.h"
+#include "mcrl2/basic/identifier_string.h"
 #include "mcrl2/lps/detail/utility.h"
 #include "mcrl2/data/sort.h"
 #include "mcrl2/lps/action.h"
@@ -743,4 +743,4 @@ struct aterm_traits<regular_formula>
 
 } // namespace atermpp
 
-#endif // MCRL2_LPS_MUCALCULUS_H
+#endif // MCRL2_BASIC_MUCALCULUS_H

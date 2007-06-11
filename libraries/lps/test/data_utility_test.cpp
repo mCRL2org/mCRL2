@@ -6,7 +6,7 @@
 #include "atermpp/atermpp.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/data_functional.h"
-#include "mcrl2/data/data_utility.h"
+#include "mcrl2/data/utility.h"
 
 using namespace atermpp;
 using namespace lps;

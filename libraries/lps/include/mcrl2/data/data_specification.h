@@ -3,12 +3,12 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-
+//
 /// \file mcrl2/data/data_specification.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_LPS_DATA_SPECIFICATION_H
-#define MCRL2_LPS_DATA_SPECIFICATION_H
+#ifndef MCRL2_DATA_DATA_SPECIFICATION_H
+#define MCRL2_DATA_DATA_SPECIFICATION_H
 
 #include <set>
 
@@ -192,4 +192,4 @@ struct aterm_traits<data_specification>
 
 } // namespace atermpp
 
-#endif // MCRL2_LPS_DATA_SPECIFICATION_H
+#endif // MCRL2_DATA_DATA_SPECIFICATION_H

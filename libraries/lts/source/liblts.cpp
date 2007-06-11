@@ -1,8 +1,9 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <assert.h>
-#include <stdlib.h>
+#include <sstream>
+#include <cassert>
+#include <cstdlib>
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "lts/liblts.h"

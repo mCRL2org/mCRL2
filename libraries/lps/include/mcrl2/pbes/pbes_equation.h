@@ -3,7 +3,7 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-
+//
 /// \file mcrl2/pbes/pbes_equation.h
 /// \brief Add your file description here.
 
@@ -11,7 +11,7 @@
 #define MCRL2_PBES_PBES_EQUATION_H
 
 #include "atermpp/algorithm.h"
-#include "mcrl2/lps/mucalculus.h"
+#include "mcrl2/basic/mucalculus.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/propositional_variable.h"

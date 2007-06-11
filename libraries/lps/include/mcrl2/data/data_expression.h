@@ -3,18 +3,18 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-
+//
 /// \file mcrl2/data/data_expression.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_LPS_DATA_EXPRESSION_H
-#define MCRL2_LPS_DATA_EXPRESSION_H
+#ifndef MCRL2_DATA_DATA_EXPRESSION_H
+#define MCRL2_DATA_DATA_EXPRESSION_H
 
 #include <string>
 #include <cassert>
 #include "mcrl2/data/sort.h"
-#include "mcrl2/data/pretty_print.h"
-#include "mcrl2/lps/detail/soundness_checks.h"
+#include "mcrl2/basic/pretty_print.h"
+#include "mcrl2/basic/detail/soundness_checks.h"
 #include "libstruct.h"
 
 namespace lps {
@@ -313,4 +313,4 @@ struct aterm_traits<data_expression>
 
 } // namespace atermpp
 
-#endif // MCRL2_LPS_DATA_EXPRESSION_H
+#endif // MCRL2_DATA_DATA_EXPRESSION_H

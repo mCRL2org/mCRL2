@@ -3,18 +3,18 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-
-/// \file mcrl2/pbes/pbes_utility.h
+//
+/// \file mcrl2/pbes/utility.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_PBES_PBES_UTILITY_H
-#define MCRL2_PBES_PBES_UTILITY_H
+#ifndef MCRL2_PBES_UTILITY_H
+#define MCRL2_PBES_UTILITY_H
 
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/lps/mucalculus.h"
+#include "mcrl2/basic/mucalculus.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/data.h"
-#include "mcrl2/data/data_utility.h"
+#include "mcrl2/data/utility.h"
 #include "mcrl2/data/sort.h"
 #include "atermpp/algorithm.h"
 #include "dataimpl.h" // implement_data_data_expr
@@ -114,4 +114,4 @@ pbes_expression data2pbes(data_expression q)
 
 } // namespace lps
 
-#endif // MCRL2_PBES_PBES_UTILITY_H
+#endif // MCRL2_PBES_UTILITY_H
