@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/lps/data.h"
+#include "mcrl2/data/data.h"
 #include "libstruct.h"
 
 using namespace std;

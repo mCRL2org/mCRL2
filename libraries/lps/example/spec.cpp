@@ -6,7 +6,7 @@
 
 #include "atermpp/utility.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/sort.h"
+#include "mcrl2/data/sort.h"
 #include "mcrl2/lps/detail/tools.h"
 #include "test_specifications.h"
 

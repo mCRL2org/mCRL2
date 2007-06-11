@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-/// \file mcrl2/lps/data_expression.h
+/// \file mcrl2/data/data_expression.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_LPS_DATA_EXPRESSION_H
@@ -12,8 +12,8 @@
 
 #include <string>
 #include <cassert>
-#include "mcrl2/lps/sort.h"
-#include "mcrl2/lps/pretty_print.h"
+#include "mcrl2/data/sort.h"
+#include "mcrl2/data/pretty_print.h"
 #include "mcrl2/lps/detail/soundness_checks.h"
 #include "libstruct.h"
 

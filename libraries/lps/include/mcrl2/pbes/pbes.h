@@ -23,9 +23,9 @@
 #include "atermpp/aterm_list.h"
 #include "atermpp/set.h"
 #include "atermpp/vector.h"
-#include "mcrl2/lps/data.h"
-#include "mcrl2/lps/data_specification.h"
-#include "mcrl2/lps/pretty_print.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/pretty_print.h"
 #include "mcrl2/lps/detail/utility.h"
 #include "mcrl2/pbes/pbes_equation.h"
 

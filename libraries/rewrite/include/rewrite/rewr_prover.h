@@ -2,7 +2,7 @@
 #define __REWR_PROVER_H
 
 #include <aterm2.h>
-#include <mcrl2/lps/data_specification.h>
+#include <mcrl2/data/data_specification.h>
 #include <prover/bdd_prover.h>
 #include "librewrite.h"
 

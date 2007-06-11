@@ -17,10 +17,10 @@
 #include <algorithm>
 
 #include "atermpp/aterm.h"
-#include "mcrl2/lps/function.h"
+#include "mcrl2/data/function.h"
 #include "mcrl2/lps/linear_process.h"
-#include "mcrl2/lps/pretty_print.h"
-#include "mcrl2/lps/data_specification.h"
+#include "mcrl2/data/pretty_print.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/detail/utility.h"
 
 namespace lps {

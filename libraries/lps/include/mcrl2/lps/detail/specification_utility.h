@@ -11,7 +11,7 @@
 #define MCRL2_LPS_DETAIL_SPECIFICATION_UTILITY_H
 
 #include <vector>
-#include "mcrl2/lps/data.h"
+#include "mcrl2/data/data.h"
 
 namespace lps {
 

@@ -1,6 +1,6 @@
 #include "sort_functions.h"
 
-#include "mcrl2/lps/sort_utility.h"
+#include "mcrl2/data/sort_utility.h"
 
 using namespace lps;
 using namespace std;

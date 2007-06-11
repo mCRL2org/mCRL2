@@ -3,9 +3,9 @@
 #include <boost/test/minimal.hpp>
 #include "atermpp/atermpp.h"
 #include "atermpp/algorithm.h"
-#include "mcrl2/lps/data.h"
-#include "mcrl2/lps/data_utility.h"
-#include "mcrl2/lps/sort.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/data_utility.h"
+#include "mcrl2/data/sort.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/tools.h"
 

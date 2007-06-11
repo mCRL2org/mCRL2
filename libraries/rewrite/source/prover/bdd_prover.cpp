@@ -3,7 +3,7 @@
 
 #include "aterm2.h"
 #include "librewrite.h"
-#include "mcrl2/lps/data_specification.h"
+#include "mcrl2/data/data_specification.h"
 #include "prover/prover.h"
 #include "prover/bdd_prover.h"
 #include "auxiliary/utilities.h"

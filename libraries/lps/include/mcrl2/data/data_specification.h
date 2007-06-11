@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-/// \file mcrl2/lps/data_specification.h
+/// \file mcrl2/data/data_specification.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_LPS_DATA_SPECIFICATION_H
@@ -13,9 +13,9 @@
 #include <set>
 
 #include "atermpp/aterm.h"
-#include "mcrl2/lps/sort.h"
-#include "mcrl2/lps/function.h"
-#include "mcrl2/lps/data.h"
+#include "mcrl2/data/sort.h"
+#include "mcrl2/data/function.h"
+#include "mcrl2/data/data.h"
 #include "mcrl2/lps/detail/utility.h"
 
 namespace lps {

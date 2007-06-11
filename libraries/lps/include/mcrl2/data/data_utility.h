@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-/// \file mcrl2/lps/data_utility.h
+/// \file mcrl2/data/data_utility.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_LPS_DATA_UTILITY_H
@@ -18,9 +18,9 @@
 #include <algorithm>
 
 #include "boost/format.hpp"
-#include "mcrl2/lps/data.h"
-#include "mcrl2/lps/sort.h"
-#include "mcrl2/lps/identifier_string.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/sort.h"
+#include "mcrl2/data/identifier_string.h"
 #include "mcrl2/lps/detail/utility.h"
 #include "atermpp/algorithm.h"
 #include "atermpp/aterm.h"

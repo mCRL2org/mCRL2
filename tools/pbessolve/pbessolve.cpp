@@ -30,13 +30,13 @@
 //LPS-Framework
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/utility.h"
-#include "mcrl2/lps/data_operators.h"
-#include "mcrl2/lps/sort.h"
-//#include "mcrl2/lps/sort_utility.h"
+#include "mcrl2/data/data_operators.h"
+#include "mcrl2/data/sort.h"
+//#include "mcrl2/data/sort_utility.h"
 
 //ATERM-specific
 #include "atermpp/substitute.h"
-#include "mcrl2/lps/identifier_string.h"
+#include "mcrl2/data/identifier_string.h"
 #include "atermpp/utility.h"
 #include "atermpp/indexed_set.h"
 #include "atermpp/table.h"

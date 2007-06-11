@@ -19,9 +19,9 @@
 #include <boost/algorithm/string/split.hpp>
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
-#include "mcrl2/lps/data.h"
+#include "mcrl2/data/data.h"
 #include "mcrl2/lps/action.h"
-#include "mcrl2/lps/function.h"
+#include "mcrl2/data/function.h"
 #include "libstruct.h"
 
 namespace lps {

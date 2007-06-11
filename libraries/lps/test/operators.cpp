@@ -2,8 +2,8 @@
 #include <set>
 #include <boost/test/minimal.hpp>
 #include "atermpp/atermpp.h"
-#include "mcrl2/lps/data.h"
-#include "mcrl2/lps/function.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/function.h"
 
 using namespace std;
 using namespace atermpp;

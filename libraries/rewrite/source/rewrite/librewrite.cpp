@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <libprint_c.h>
 #include <libstruct.h>
-#include <mcrl2/lps/data_specification.h>
+#include <mcrl2/data/data_specification.h>
 #include "librewrite.h"
 #include "rewr_inner.h"
 #include "rewr_jitty.h"

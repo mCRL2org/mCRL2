@@ -14,8 +14,8 @@
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
 #include "mcrl2/lps/linear_process.h"
-#include "mcrl2/lps/data.h"
-#include "mcrl2/lps/data_utility.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/data_utility.h"
 
 namespace lps {
   

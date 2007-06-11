@@ -4,9 +4,9 @@
 #include <algorithm>
 #include <boost/test/minimal.hpp>
 #include "atermpp/atermpp.h"
-#include "mcrl2/lps/data.h"
-#include "mcrl2/lps/data_functional.h"
-#include "mcrl2/lps/data_utility.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/data_functional.h"
+#include "mcrl2/data/data_utility.h"
 
 using namespace atermpp;
 using namespace lps;

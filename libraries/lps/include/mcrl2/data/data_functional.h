@@ -4,14 +4,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-/// \file mcrl2/lps/data_functional.h
+/// \file mcrl2/data/data_functional.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_LPS_DATA_FUNCTIONAL_H
 #define MCRL2_LPS_DATA_FUNCTIONAL_H
 
 #include <boost/config.hpp>
-#include "mcrl2/lps/data.h"
+#include "mcrl2/data/data.h"
 #include "mcrl2/lps/detail/utility.h"
 
 namespace lps {

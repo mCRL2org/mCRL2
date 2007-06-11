@@ -14,9 +14,9 @@
 #include <string>
 #include <utility>
 #include "atermpp/aterm_appl.h"
-#include "mcrl2/lps/identifier_string.h"
-#include "mcrl2/lps/data.h"
-#include "mcrl2/lps/pretty_print.h"
+#include "mcrl2/data/identifier_string.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/pretty_print.h"
 #include "mcrl2/lps/detail/utility.h"
 #include "libstruct.h"
 

@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-/// \file mcrl2/lps/sort.h
+/// \file mcrl2/data/sort.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_LPS_SORT_H
@@ -15,7 +15,7 @@
 #include "atermpp/aterm_list.h"
 #include "atermpp/aterm_access.h"
 #include "atermpp/make_list.h"
-#include "mcrl2/lps/pretty_print.h"
+#include "mcrl2/data/pretty_print.h"
 #include "mcrl2/lps/detail/soundness_checks.h"
 #include "mcrl2/lps/detail/constructors.h"
 #include "libstruct.h"

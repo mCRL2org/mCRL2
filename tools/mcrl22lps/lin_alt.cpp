@@ -7,7 +7,7 @@
 #include "liblowlevel.h"
 #include "libprint_c.h"
 #include "librewrite.h"
-#include "mcrl2/lps/data_specification.h" 
+#include "mcrl2/data/data_specification.h" 
 
 /* Global variables */
 

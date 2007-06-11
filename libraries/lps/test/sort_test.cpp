@@ -4,7 +4,7 @@
 #include <boost/test/minimal.hpp>
 #include "atermpp/atermpp.h"
 #include "atermpp/make_list.h"
-#include "mcrl2/lps/function.h"
+#include "mcrl2/data/function.h"
 
 using namespace atermpp;
 using namespace lps;

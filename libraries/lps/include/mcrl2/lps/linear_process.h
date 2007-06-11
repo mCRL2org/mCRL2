@@ -25,10 +25,10 @@
 #include "atermpp/algorithm.h"
 #include "atermpp/utility.h"
 #include "mcrl2/lps/action.h"
-#include "mcrl2/lps/data.h"
-#include "mcrl2/lps/data_specification.h"
-#include "mcrl2/lps/data_utility.h"
-#include "mcrl2/lps/pretty_print.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/data_utility.h"
+#include "mcrl2/data/pretty_print.h"
 #include "mcrl2/lps/detail/specification_utility.h"
 #include "mcrl2/lps/detail/utility.h" // unique_names
 

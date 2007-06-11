@@ -31,8 +31,8 @@
 //LPS Framework
 #include <mcrl2/lps/linear_process.h>
 #include <mcrl2/lps/specification.h>
-#include <mcrl2/lps/data_functional.h>
-#include <mcrl2/lps/data.h>
+#include <mcrl2/data/data_functional.h>
+#include <mcrl2/data/data.h>
 
 using namespace std;
 using namespace atermpp;

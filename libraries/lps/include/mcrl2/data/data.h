@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-/// \file mcrl2/lps/data.h
+/// \file mcrl2/data/data.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_LPS_DATA_H
@@ -19,8 +19,8 @@
 #include "atermpp/algorithm.h"
 #include "atermpp/aterm_access.h"
 #include "atermpp/utility.h"
-#include "mcrl2/lps/identifier_string.h"
-#include "mcrl2/lps/data_expression.h"
+#include "mcrl2/data/identifier_string.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/lps/detail/soundness_checks.h"
 #include "libstruct.h"
 

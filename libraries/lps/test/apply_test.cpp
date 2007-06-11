@@ -4,8 +4,8 @@
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_appl.h"
 #include "atermpp/make_list.h"
-#include "mcrl2/lps/data.h"
-#include "mcrl2/lps/data_functional.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/data_functional.h"
 
 using namespace std;
 using namespace atermpp;

@@ -5,7 +5,7 @@
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
-#include "mcrl2/lps/data_specification.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/libdataelm.h"
 #include "libnextstate.h"
 #include "libenum.h"

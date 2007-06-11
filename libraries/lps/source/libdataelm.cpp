@@ -13,7 +13,7 @@
 // ======================================================================
 
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/data_specification.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/detail/tools.h"
 #include "liblowlevel.h"
 #include "libstruct.h"
