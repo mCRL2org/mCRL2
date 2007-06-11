@@ -321,5 +321,7 @@ code fragment illustrates this.
 
 [endsect] [/ Programming with terms]
 
+[xinclude basicdoc.xml]
+[xinclude datadoc.xml]
 [xinclude lpsdoc.xml]
 [xinclude pbesdoc.xml]
