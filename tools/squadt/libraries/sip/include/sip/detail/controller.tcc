@@ -81,8 +81,8 @@ namespace sip {
       using namespace boost;
 
       /* set default handlers for delivery events */
-      add_handler(sip::message_request_controller_capabilities, bind(&communicator_impl::request_controller_capabilities_handler, this));
-      add_handler(sip::message_accept_configuration, bind(&communicator_impl::tool_configuration_handler, this, _1));
+      add_handler(sip::message_controller_capabilities, bind(&communicator_impl::request_controller_capabilities_handler, this));
+      add_handler(sip::message_configuration, bind(&communicator_impl::tool_configuration_handler, this, _1));
     }
     
     inline void communicator_impl::deactivate_display_layout_handler() {
@@ -183,7 +183,7 @@ namespace sip {
 
     /* Reply details about the amount of reserved display space */
     inline void communicator_impl::request_controller_capabilities_handler() {
-      message m(visitors::store(communicator::m_controller_capabilities), sip::message_response_controller_capabilities);
+      message m(visitors::store(communicator::m_controller_capabilities), sip::message_controller_capabilities);
 
       send_message(m);
     }

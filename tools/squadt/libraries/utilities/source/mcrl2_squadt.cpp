@@ -68,7 +68,7 @@ namespace mcrl2_squadt {
       try {
         while (!termination_requested) {
           switch (m_communicator.await_message(sip::message_any)->get_type()) {
-            case sip::message_offer_configuration: {
+            case sip::message_configuration: {
                 sip::configuration& configuration = m_communicator.get_configuration();
        
                 /* Insert configuration in tool communicator object */
@@ -88,7 +88,7 @@ namespace mcrl2_squadt {
                 m_communicator.send_accept_configuration();
               }
               break;
-            case sip::message_signal_start:
+            case sip::message_task_start:
               if (valid_configuration_present) {
                 /* Signal that the job is finished */
                 bool result = perform_task(m_communicator.get_configuration());
@@ -103,7 +103,7 @@ namespace mcrl2_squadt {
                 send_error("Start signal received without valid configuration!");
               }
               break;
-            case sip::message_request_termination:
+            case sip::message_termination:
        
               termination_requested = true;
        

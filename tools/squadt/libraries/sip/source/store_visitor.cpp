@@ -386,9 +386,6 @@ namespace utility {
     out << "<capabilities>"
         << "<protocol-version major=\"" << (unsigned short) c.m_protocol_version.major
         << "\" minor=\"" << (unsigned short) c.m_protocol_version.minor << "\"/>"
-        << "<display-dimensions x=\"" << c.m_dimensions.x
-        << "\" y=\"" << c.m_dimensions.y
-        << "\" z=\"" << c.m_dimensions.z << "\"/>"
         << "</capabilities>";
   }
 

@@ -274,7 +274,7 @@ namespace squadt {
       send_configuration(c);
 
       /* Wait until configuration is accepted, or the tool has terminated */
-      if (await_message(sip::message_accept_configuration).get() != 0) {
+      if (await_message(sip::message_configuration).get() != 0) {
         /* End tool execution */
         finish();
 
@@ -311,11 +311,11 @@ namespace squadt {
       send_configuration(c);
 
       /* Wait until configuration is accepted, or the tool has terminated */
-      if (await_message(sip::message_accept_configuration).get() != 0) {
+      if (await_message(sip::message_configuration).get() != 0) {
         send_start_signal();
 
         /* Do not let process status influence return status */
-        clear_handlers(sip::message_signal_done);
+        clear_handlers(sip::message_task_done);
 
         if (await_completion()) {
           /* Successful, set new status */

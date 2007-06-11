@@ -73,13 +73,13 @@ namespace sip {
  
     /* Request details about the amount of space that the controller currently has reserved for this tool */
     void communicator::request_controller_capabilities() {
-      message m(sip::message_request_controller_capabilities);
+      message m(sip::message_controller_capabilities);
  
       impl->send_message(m);
  
       /* Await the reply */
       do {
-        message_ptr p = await_message(sip::message_response_controller_capabilities);
+        message_ptr p = await_message(sip::message_controller_capabilities);
  
         if (p.get() != 0) {
           boost::shared_ptr < controller::capabilities > n(new controller::capabilities);
@@ -99,7 +99,7 @@ namespace sip {
 
       c->set_fresh(false);
 
-      message m(sip::visitors::store(*c), sip::message_accept_configuration);
+      message m(sip::visitors::store(*c), sip::message_configuration);
  
       impl->send_message(m);
     }
@@ -110,7 +110,7 @@ namespace sip {
     void communicator::send_accept_configuration(sip::configuration& c) {
       c.set_fresh(false);
 
-      message m(sip::visitors::store(c), sip::message_accept_configuration);
+      message m(sip::visitors::store(c), sip::message_configuration);
  
       impl->send_message(m);
     }
@@ -151,14 +151,14 @@ namespace sip {
 
     /* Send a signal that the tool is about to terminate */
     void communicator::send_signal_done(bool b) {
-      message m((b) ? "success" : "", sip::message_signal_done);
+      message m((b) ? "success" : "", sip::message_task_done);
  
       impl->send_message(m);
     }
 
     /* Send a signal that the tool is about to terminate */
     void communicator::send_signal_termination() {
-      message m(sip::message_signal_termination);
+      message m(sip::message_termination);
  
       impl->send_message(m);
     }
@@ -196,7 +196,8 @@ namespace sip {
     }
 
     void communicator::await_configuration() const {
-      impl->await_message(sip::message_offer_configuration);
+      // wait for configuration offer
+      impl->await_message(sip::message_configuration);
     }
   }
 }

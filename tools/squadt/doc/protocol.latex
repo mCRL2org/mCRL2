@@ -12,21 +12,68 @@
 \newcommand{\msg}[1]{\texttt{#1}}
 
 \begin{document}
- \section{Messages} \label{MessageDefinitions}
 
-  \subsection{Controller Capabilities}
+ \section{Background}
 
-   The controller has reserved a rectangular area of the display for a tool.
-   If a tool sends a layout that uses more space than this, then scrollbars
-   ensure that everything is still displayed.  This is often undesirable
-   behaviour. A tool can request the dimensions of the rectangular area
-   reserved for it and adapt a layout accordingly. The message to request the
-   dimensions of the reserved space:
+ The purpose of the communication protocol described in this document is to
+ have a simple means of connecting a tool to our system. The system 
+ provides a number of facilities that can be used by tools, but the tools are
+ themselves services that are made accessible to the user of the system. The
+ system acts as a controller for multiple tools at the same and therefore the
+ system will be referred to as controller in the remainder of this document. 
+ \\[4pt]
+ A tool is a software program or some hardware wrapped by a program. In modern
+ operating systems programs are started as a process, a in-memory instance of
+ the program. From here on we talk about a tool as a communication partner of
+ the controller.
+ \\[4pt]
+ The protocol described in this document allows future extension. All messages
+ are typed and message content is based on the type, and direction only. No
+ unnecessary restrictions have been put on the order of messages. A message
+ context represents the ordered list of sent and received messages. This
+ document describes version 1.0 of the protocol.
+
+ \section{Messages} \label{s:message_definitions}
+
+  \subsection{Instance identification}
+
+   When the controller starts a tool this tool will build a connection back to
+   the controller across the network. On an new incoming connection the
+   controller has no way of knowing what lives on the other side of the
+   connection. The tool should identify itself by presenting a secret. The
+   first message after a connection has been established must be structured as
+   follows.
+   
+   \begin{figure}[H]
+    \begin{tabular}{|ll|}
+     \hline
+     message type:    & \msg{instance\_identification} \\
+     \hline
+     direction:       & tool to controller \\
+     data:            & token \\
+     \hline
+    \end{tabular}
+   \end{figure}
+
+   When started the tool is given a token which it should sent as part of this
+   message. If the controller does not receive a such a message as first
+   message or the token inside the message does not match one of the expected
+   tokens, then the connection must be severed. Messages of this type must be
+   ignored if they are not the first message after the connection has been
+   established.
+
+  \subsection{Capabilities}
+
+   The controller provides facilities for tools. A tool must have been
+   programmed to use a specific facility. We want to allow differences between
+   the set of available services between different versions or configurations
+   of the controller. To this end we introduce a message type for communicating
+   this kind of information. From any context a message:
 
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-     message:         & \msg{request\_controller\_capabilities} \\
+     message type:    & \msg{controller\_capabilities} \\
      \hline
      direction:       & tool to controller \\
      data:            & none \\
@@ -34,172 +81,248 @@
     \end{tabular}
    \end{figure}
 
-   \noindent and the reply, that is subsequently sent by the controller:
+   \noindent represents a request for capabilities. The controller must respond
+   to this message with the following message.
 
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message:        & \msg{controller\_capabilities} \\
+      message type:   & \msg{controller\_capabilities} \\
      \hline
       direction:      & controller to tool \\
       data:           & Version $\times$ Dimensions \\
                       & Version    = struct major : Nat $|$ minor : Nat \\
-                      & Dimensions = Nat $\times$ Nat $\times$ Nat \\
      \hline
     \end{tabular}
    \end{figure}
 
-  \subsection{Tool Description}
-
-   The controller must be able to select an appropriate set of tools that can
-   operate on a particular input. The inputs of a tool are not clear in
-   advance. The following message serves as a request to a tool for the
-   possible formats for its main input.
-
+   The only facility available to tools with the first version of the protocol
+   is the tool display. The controller creates and associates a display with
+   every tool. The tool can use the display to communicate with the user. This
+   facility is assumed to be always present, so the only information carried by
+   the response message sent to a tool is the version of the protocol used by
+   controller.
+   \\[4pt]
+   A similar information need exists on the side of the controller. The idea is
+   that every connected tool offers its services to a controller.  Simply put,
+   in order to make use of such a service there must be an indication of what
+   is required for, and what is obtained by making use of the service. From any
+   context a message:
+   
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message:        & \msg{request\_tool\_capabilities} \\
+      message type:   & \msg{tool\_capabilities} \\
      \hline
       direction:      & controller to tool \\
       data:           & none \\
      \hline
     \end{tabular}
    \end{figure}
-   
-   \noindent A tool must respond with the following message that must describe exactly a
-   name that can be used to characterise the functionality of the tool and the
-   format of the main input.
+
+   \noindent serves as a request for such information. A tool must respond to
+   this message with  the following message.
 
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message:        & \msg{tool\_capabilities} \\
+      message type:   & \msg{tool\_capabilities} \\
      \hline
       direction:      & tool to controller \\
-      data:           & Version $\times$ List (InputCombination) \\
-                      &  Version          = struct major : Nat $|$ minor : Nat \\
-                      &  InputCombination = Id $\times$ Catagory $\times$ Format \\
-                      &  Category         = String,   a name that characterises the function of the tool \\
-                      &  Format           = String,   storage format specifier for the tools main input \\
+      data:           & version $\times$ List (input-combination) \\
+                      &  version          = struct major : Nat $|$ minor : Nat \\
+                      &  input-combination = category $\times$ List (data-source) \\
+                      &  category         = String,   a name that characterises the function of the tool \\
+                      &  data-source      = id $\times$ format \\
+                      &  format           = mime-type, storage format specifier for the tools main input \\
      \hline
     \end{tabular}
    \end{figure}
 
-   \noindent An input combination is a tuple of an identifier, a category name and a
-   storage format. The identifier uniquely identifies the main input in a
-   tool's configuration. The category name is used to partition the tools that
-   have an input combination where the main input has the same storage format.
+   The information communicated with this message is the protocol version used
+   by the tool and a list of so-called input combinations. An input combination
+   represents a specific configuration of the tool. It consists of a category,
+   which is a name that can be used by the controller to categorise tools based
+   on functionality, and a list of identifiers for data sources. The data
+   sources are typically files that reside somewhere on local or network
+   storage but can also be unbounded data streams. The format is a string that
+   follows the syntax defined in RFC2822 and describes the format used for
+   storing the data.
 
   \subsection{Tool Configuration}
 
+   The controller uses services provided by a tool by configuring the tool to
+   perform a task within the range of services it provides. Configuration and
+   task execution are separated and the latter is discussed in the next subsection.
+   \\[4pt]
    Tool configuration is performed in two steps. First the controller sends a
-   partial configuration. The controller can use a previously stored
-   configuration for this tool, or it can use one of the input combinations
-   obtained via \msg{tool\_capabilities}.
-
+   configuration, the tool inspects this configuration and responds with a
+   verdict on whether or not the configuration can be used to successfully
+   configure the tool (i.e. it is deemed acceptable). Such a message may be
+   sent from any context and has the following structure:
+   
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
       message:        & \msg{configuration} \\
      \hline
       direction       & controller to tool \\
-      data:           & Options $\times$ InputObjects $\times$ OutputObjects \\
-                      & \ Options = List (Option) \\
-                      & \ Objects = List (Object) \\
-                      & \ Option  = Id $\times$ Values \\
-                      & \ Object  = Id $\times$ Format $\times$ URI \\
-                      & \ Values  = List(String) \\
+      data:           & fresh $\times$ category $\times$ List (option) $\times$ inputs $\times$ outputs \\
+                      & \ inputs  = List (object) \\
+                      & \ outputs = List (object) \\
+                      & \ fresh   = Bool, whether the configuration is fresh \\
+                      & \ option  = id $\times$ data-type $\times$ values \\
+                      & \ object  = id $\times$ format $\times$ URI \\
+                      & \ values  = List(String) \\
      \hline
     \end{tabular}
    \end{figure}
 
-   \noindent Every option is uniquely identified, and so is every object. An option
-   represents an atomic unit in the configurable behaviour of a tool. An object
-   is a file associated with a storage format and a location.
-   \\[8pt]
-   A tool can accept or reject a configuration. If a configuration is rejected,
-   then the tool must resort to querying a user through the controller, which
-   is treated later. To keep the protocol generic and applicable for many tools
-   the controller knows next to nothing about the details of tool
-   configuration. It can only store a configuration received from a tool, or
-   generate a minimal configuration using an input combination, as described above.
-   \\[8pt]
-   To let the controller know that a configuration is accepted the following
-   message is used. Embedded is the accepted configuration.
+   \noindent To sent a message of this type the controller must have a
+   configuration, which consists of a category name that specifies the kind of
+   functionality the configuration will provide, the inputs and outputs to the
+   tool as well as options and values for these options. The controller can
+   obtain configurations in two ways. It can cast a single input combination as
+   received from a previous \msg{tool\_capabilities} message into a
+   configuration, in which case the configuration is marked as fresh. On the
+   other hand the controller can use a configuration that was previously
+   accepted by a tool.
+   \\[4pt]
+   Often before sending a response the tool will communicate with the user (see
+   subsection \ref{ss:user_interaction}) to get additional configuration
+   parameters. A response message has the same structure structure as the request. 
 
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message:        & \msg{accept\_configuration} \\
+      message:        & \msg{configuration} \\
      \hline
-      direction       & controller to tool \\
-      data:           & Options $\times$ InputObjects $\times$ OutputObjects \\
-                      & \ Options = List (Option) \\
-                      & \ Objects = List (Object) \\
-                      & \ Option  = Id $\times$ Values \\
-                      & \ Object  = Id $\times$ Format $\times$ URI \\
-                      & \ Values  = List(String) \\
+      direction       & tool to controller \\
+      data:           & fresh $\times$ category $\times$ List (option) $\times$ inputs $\times$ outputs \\
+                      & \ inputs  = List (object) \\
+                      & \ outputs = List (object) \\
+                      & \ fresh   = Bool, whether the configuration is fresh \\
+                      & \ option  = id $\times$ data-type $\times$ values \\
+                      & \ object  = id $\times$ format $\times$ URI \\
+                      & \ values  = List(String) \\
      \hline
     \end{tabular}
    \end{figure}
- 
-   \noindent Once the controller has received an accepted configuration using this
-   message, the tool may be given the signal to start its designated task. A
-   tool may not start processing before this signal is received.
+
+   \noindent For the response message the freshness attribute is interpreted
+   differently.  When fresh then the configuration is rejected, otherwise it is
+   accepted meaning that tool configuration is complete and task execution may
+   start.  The tool can freely modify and extend any configuration information
+   except for the category and other information present in the
+   input-combination on which the configuration was originally based.
+   \\[4pt]
+   \noindent About the configuration specifications: every option is uniquely
+   identified, and so is every object. An option represents an atomic unit in
+   the configurable behaviour of a tool. For validation purposes a data type
+   can be specified against which the values for the option are matched. An
+   object is a file associated with a format (again specified by a mime-type)
+   and a location.
+
+  \subsection{Task Execution}
+
+   \noindent When tool configuration is complete the controller may start task
+   execution by sending a message with the following structure.
 
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message:        & \msg{start\_signal} \\
+      message:        & \msg{task\_start} \\
      \hline
       direction       & controller to tool \\
      \hline
     \end{tabular}
    \end{figure}
 
-   \noindent This setup effectively separates a tool's configuration and its task
-   execution.  Note that the configuration is still allowed to change once the
-   tool is processing.  The reason to want this behaviour is to be able to plan
-   ahead of execution. With nice behaving tools it is possible to obtain
-   configurations for tools that need input that does not exist yet or is being
-   generated by another tool.
-   \\[8pt]
-   The controller typically has to ensure that the input objects in a
-   configuration exist before a tool is started. Otherwise the tool will fail
-   for obvious reasons.
+   \noindent The controller has to ensure that the input objects in a configuration exist
+   before a tool is started. And that the output objects can be created or
+   modified.
+   \\[4pt]
+   When a task has been completed the tool must send a response to the
+   controller that signals this fact. From a context where a \msg{task\_start}
+   has been received and no subsequent \msg{task\_done} has been sent a tool
+   may send a message with the following structure:
 
-  \subsection{Tool Progress and Queries}
+   \begin{figure}[H]
+    \begin{tabular}{|ll|}
+     \hline
+      message:        & \msg{task\_done} \\
+     \hline
+      direction       & tool to controller \\
+      data            & result : Bool \\
+     \hline
+    \end{tabular}
+   \end{figure}
+
+   \noindent which signifies that execution of the task has finished. In addition it also
+   tells whether or not the task has been completed successfully or not.
+
+  \subsection{Tool Report}
+
+   From any context a tool can sent a report that signifies a warning, error or
+   just some information.
+
+   \begin{figure}[H]
+    \begin{tabular}{|ll|}
+     \hline
+      message:        & \msg{report} \\
+     \hline
+      direction:      & tool to controller \\
+      data:           & description $\times$ struct notice $|$ warning $|$ error \\
+     \hline
+    \end{tabular}
+   \end{figure}
+
+   \noindent The controller will probably pass it through to the user but
+   it has no effect on protocol state. Before termination a tool can report to
+   the controller about what has been done. This report can contain anything
+   from general information to errors as well as all the outputs produced by
+   the tool.
+
+  \subsection{User interaction} \label{ss:user_interaction}
 
    For user interaction a tool depends on the controller. The controller offers
-   a display to the user on behalf of a tool. It is the responsibility of a
-   tool to fill in this display, which starts with the following message.
-
+   a display to the user on behalf of a tool. Using the display is a two step
+   process. First the contents of the display is created from a layout
+   specification that consists of controls and layout constraints. This step
+   can be repeated to change the content of the display. Then updates are sent
+   to the tool based on user interaction with the display and a tool can send
+   updates to change the state of controls on the display.
+   \\[4pt]
+   A minimal set of controls is available for constructing layouts\footnote{It
+   would be nice if these controls are not part of the protocol but added
+   through the extension mechanism (because they are highly implementation
+   specific)}. From any context the following message:
+   
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
       message:        & \msg{display\_layout} \\
      \hline
       direction:      & tool to controller \\
-      data:           & List (LayoutElement) Where :\\
-                      & \ LayoutElement :  ElementType \\
-                      & \ \ ElementType   : VerticalBox $|$ HorizontalBox $|$ ProgressBar $|$ RadioButton $|$ Button $|$ Label $|$ TextField \\
-                      & \ \ VerticalBox   = List(LayoutElement $\times$ HorizontalAlignment) \\
-                      & \ \ HorizontalBox = List(LayoutElement $\times$ VerticalAlignment) \\
-                      & \ \ ProgressBar   = Nat $\times$ Nat $\times$ Nat \\
-                      & \ \ RadioButton   = Id $\times$ Boolean \\
-                      & \ \ Button        = Id $\times$ String \\
-                      & \ \ Label         = Id $\times$ String \\
-                      & \ \ TextField     = Id $\times$ Type $\times$ String \\
-                      & \ \ \ Type        = Integer $|$ Real $|$ Enumeration $|$ String \\
+      data:           & List (layout\_element) Where :\\
+                      & \ layout\_element :  element\_type \\
+                      & \ \ element\_type   : VerticalBox $|$ HorizontalBox $|$ ProgressBar $|$ \\
+                      & \ \ \ \ RadioButton $|$ Button $|$ Label $|$ TextField \\
+                      & \ \ vertical\_box   = List(layout\_element $\times$ horizontal\_alignment) \\
+                      & \ \ horizontal\_box = List(layout\_element $\times$ vertical\_alignment) \\
+                      & \ \ progress\_bar = Nat $\times$ Nat $\times$ Nat \\
+                      & \ \ radio\_button = id $\times$ Bool \\
+                      & \ \ button        = id $\times$ string \\
+                      & \ \ label         = id $\times$ string \\
+                      & \ \ text\_field   = id $\times$ type $\times$ String \\
+                      & \ \ \ type        = bool $|$ integer $|$ real $|$ enumeration $|$ string \\
      \hline
     \end{tabular}
    \end{figure}
 
-   \noindent The data of this message is a layout specification for the display. The
-   display will be cleared, and the new layout will be applied upon receipt of
-   this message. A user can interact with the display, and changes are
-   communicated back to a tool using the following message.
+   \noindent containing a layout specification can be sent. A user can interact
+   with the display, and results are communicated back to a tool with a message
+   with the following structure.
 
    \begin{figure}[H]
     \begin{tabular}{|ll|}
@@ -212,10 +335,8 @@
     \end{tabular}
    \end{figure}
 
-   \noindent The data in this message is effectively a map from a widget to a set of data
-   items that reflect the state of the widget on the display. A tool might also
-   want to update the state of widgets on the display, without sending a whole
-   new layout. For this purpose the next message is added.
+   \noindent A tool can sent updates to controls on a display by their
+   identifier using a message with the following structure:
 
    \begin{figure}[H]
     \begin{tabular}{|ll|}
@@ -230,16 +351,14 @@
 
   \subsection{Tool Termination}
 
-   The controller can ask a tool to terminate itself, in order to allow it to
-   clean up properly before it terminates. This hopefully allows tools to leave
-   behind any external resources it might have had in use,in a consistent
-   state. Of course, if a tool does not respond to such a request it will
-   eventually be terminated anyway with other means.
+   \noindent The controller can request a tool to terminate. This facility is present to
+   allow tools tools to free resources and remove outputs or leave them in a
+   consistent state.
 
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message:         & \msg{request\_termination} \\
+      message:         & \msg{termination} \\
      \hline
       direction:       & controller to tool \\
       data:            & none \\
@@ -247,13 +366,13 @@
     \end{tabular}
    \end{figure}
 
-   \noindent In reply a tool must send the following message, or risk being
-   terminated after a timeout period.
+   \noindent As a response the tool should sent a message with the following
+   structure, or risk being terminated after a timeout period.
 
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message:        & \msg{signal\_termination} \\
+      message:        & \msg{termination} \\
      \hline
       direction:      & tool to controller \\
       data:           & none \\
@@ -261,28 +380,4 @@
     \end{tabular}
    \end{figure}
 
-  \subsection{Tool Report}
-
-   Before termination a tool can report to the controller about what has been
-   done. This report can contain anything from general information to errors as
-   well as all the outputs produced by the tool.
-
-   \begin{figure}[H]
-    \begin{tabular}{|ll|}
-     \hline
-      message:        & \msg{report} \\
-     \hline
-      direction:      & tool to controller \\
-      data:           & List (ReportElement) \\
-                      & \ ReportElement = struct Error $|$ Output $|$ Configuration $|$ AnyText \\
-                      & \ \ Error = String \\
-                      & \ \ Output = String $\times$ String : a URI and a file format \\
-                      & \ \ Configuration = List (Id $\times$ List(String)) \\
-                      & \ \ AnyText = String (anything about a tool's operation in plain text) \\
-     \hline
-    \end{tabular}
-   \end{figure}
-
-   \noindent Reports can really be sent at any time, as they are also the means to
-   communicate errors to the controller and possibly the user.
 \end{document}

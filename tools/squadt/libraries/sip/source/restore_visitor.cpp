@@ -409,11 +409,6 @@ namespace utility {
           tree->GetAttribute("major", &c.m_protocol_version.major);
           tree->GetAttribute("minor", &c.m_protocol_version.minor);
         }
-        else if (e->Value() == "display-dimensions") {
-          tree->GetAttribute("x", &c.m_dimensions.x, false);
-          tree->GetAttribute("y", &c.m_dimensions.y, false);
-          tree->GetAttribute("z", &c.m_dimensions.z, false);
-        }
       }
     }
   }  

@@ -38,21 +38,21 @@ namespace sip {
 
     /* Request a tool what input configurations it has available */
     void communicator::request_tool_capabilities() {
-      impl->send_message(sip::message_request_tool_capabilities);
+      impl->send_message(sip::message_tool_capabilities);
     }
  
     /* Send the selected input configuration */
     void communicator::send_configuration(boost::shared_ptr < sip::configuration > const& c) {
-      impl->send_message(sip::message(visitors::store(*c), sip::message_offer_configuration));
+      impl->send_message(sip::message(visitors::store(*c), sip::message_configuration));
     }
  
     /* Request a tool to terminate */
     void communicator::request_termination() {
-      impl->send_message(sip::message_request_termination);
+      impl->send_message(sip::message_termination);
     }
  
     void communicator::send_start_signal() {
-      impl->send_message(sip::message_signal_start);
+      impl->send_message(sip::message_task_start);
     }
 
     void communicator::deactivate_display_layout_handler() {

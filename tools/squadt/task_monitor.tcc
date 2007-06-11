@@ -196,7 +196,7 @@ namespace squadt {
  
       boost::mutex::scoped_lock l(register_lock);
 
-      add_handler(sip::message_signal_done, boost::bind(&task_monitor_impl::handle_task_completion, this, _1, boost::ref(result), boost::ref(changed)));
+      add_handler(sip::message_task_done, boost::bind(&task_monitor_impl::handle_task_completion, this, _1, boost::ref(result), boost::ref(changed)));
 
       while (!changed) {
         /* Other side has not connected and the process has not been registered as terminated */
@@ -334,12 +334,13 @@ namespace squadt {
 
     inline void task_monitor_impl::disconnect() {
       if (associated_process.get() && associated_process->get_status() == process::running && connected) {
-        send_message(sip::message_request_termination);
+        // request termination
+        send_message(sip::message_termination);
 
         logger->log(1, boost::str(boost::format("termination request sent to %s pid(%u)\n")
                   % associated_process->get_executable_name() % associated_process->get_identifier()));
 
-        await_message(sip::message_signal_termination, 1);
+        await_message(sip::message_termination, 1);
 
         sip::controller::communicator_impl::disconnect();
       }

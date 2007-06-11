@@ -66,8 +66,8 @@ namespace sip {
     inline communicator_impl::communicator_impl() : current_tool_capabilities() {
  
       /* Register event handlers for some message types */
-      add_handler(sip::message_request_tool_capabilities, boost::bind(&communicator_impl::request_tool_capabilities_handler, this));
-      add_handler(sip::message_offer_configuration, boost::bind(&communicator_impl::receive_configuration_handler, this, _1));
+      add_handler(sip::message_tool_capabilities, boost::bind(&communicator_impl::request_tool_capabilities_handler, this));
+      add_handler(sip::message_configuration, boost::bind(&communicator_impl::receive_configuration_handler, this, _1));
     }
  
     /**
@@ -130,7 +130,7 @@ namespace sip {
 
     /* Send a specification of the tools capabilities */
     inline void communicator_impl::request_tool_capabilities_handler() {
-      sip::message m(sip::visitors::store(current_tool_capabilities), sip::message_response_tool_capabilities);
+      sip::message m(sip::visitors::store(current_tool_capabilities), sip::message_tool_capabilities);
  
       send_message(m);
     }
@@ -149,7 +149,7 @@ namespace sip {
      * \param[in] m shared pointer reference to an offer_configuration message
      **/
     inline void communicator_impl::receive_configuration_handler(const sip::messenger::message_ptr& m) {
-      assert(m->get_type() == sip::message_offer_configuration);
+      assert(m->get_type() == sip::message_configuration);
 
       if (m.get() != 0) {
         boost::shared_ptr < configuration > c(new configuration);

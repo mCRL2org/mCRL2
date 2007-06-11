@@ -12,7 +12,7 @@ namespace squadt {
    * \param[in] t reference to the tool object to use for storage
    **/
   extractor::extractor(tool& t) : task_monitor() {
-    add_handler(sip::message_response_tool_capabilities, bind(&extractor::handle_store_tool_capabilities, this, _1, boost::ref(t)));
+    add_handler(sip::message_tool_capabilities, bind(&extractor::handle_store_tool_capabilities, this, _1, boost::ref(t)));
   }
 
   /**
@@ -26,7 +26,7 @@ namespace squadt {
     if (is_connected()) {
       request_tool_capabilities();
 
-      await_message(sip::message_response_tool_capabilities, 1);
+      await_message(sip::message_tool_capabilities, 1);
     }
   }
 
