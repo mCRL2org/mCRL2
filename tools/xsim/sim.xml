@@ -158,8 +158,7 @@ For a simulator that uses a graphical user interface, see the &xsim-lnk; tool.
 <refsect1>
 <title>Author</title>
 <para>
-  Written by Muck van Weerdenburg. Please send all complaints, comments and bug
-  reports to &bugmail;.
+  Written by Muck van Weerdenburg. &bugreport;
 </para>
 </refsect1>
 

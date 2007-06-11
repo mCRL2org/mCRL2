@@ -155,8 +155,7 @@ For a simulator that uses a command-line interface, see the &sim-lnk; tool.
 <refsect1>
 <title>Author</title>
 <para>
-  Written by Muck van Weerdenburg and Jeroen van der Wulp. Please send all
-  complaints, comments and bug reports to &bugmail;.
+  Written by Muck van Weerdenburg and Jeroen van der Wulp. &bugreport;
 </para>
 </refsect1>
 

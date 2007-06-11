@@ -335,8 +335,8 @@
 <!ENTITY type_void "<type>void</type>">
 <!ENTITY var_benchmark "<varname>f_benchmark</varname>">
 <!ENTITY virtual "<type>virtual</type>">
-<!-- bug mail address -->
-<!ENTITY bugmail "<email>bug@mcrl2.org</email>">
+<!-- bug report -->
+<!ENTITY bugreport "Please report bugs at <ulink url='http://www.mcrl2.org/issuetracker'/>.">
 <!-- tools -->
 <!ENTITY lps2lts "<command>lps2lts</command>">
 <!ENTITY lps2torx "<command>lps2torx</command>">
@@ -435,10 +435,10 @@
   <info>
     <title>mCRL2 Manual Pages</title>
   </info>
-  <chapter><title>Linearisation</title>
+  <chapter id="chap-lin"><title>Linearisation</title>
     &fmcrl22lps;
   </chapter>
-  <chapter><title>Linear Process Specifications</title>
+  <chapter id="chap-lps"><title>Linear Process Specifications</title>
     &flps2lts;
     &flpsbinary;
     &flpsconfcheck;
@@ -454,15 +454,15 @@
     &flpssumelm;
     &flpsuntime;
   </chapter>
-  <chapter><title>Simulation</title>
+  <chapter id="chap-sim"><title>Simulation</title>
     &fsim;
     &fxsim;
   </chapter>
-  <chapter><title>Parameterised Boolean Equation Systems</title>
+  <chapter id="chap-pbes"><title>Parameterised Boolean Equation Systems</title>
     &fpbes2bes;
     &fpbesinfo;
   </chapter>
-  <chapter><title>Labelled Transition Systems</title>
+  <chapter id="chap-lts"><title>Labelled Transition Systems</title>
     &fltscompare;
     &fltsconvert;
     &fltsgraph;
@@ -471,12 +471,12 @@
     &fltsview;
     &ftracepp;
   </chapter>
-  <chapter><title>Import/Export</title>
+  <chapter id="chap-imp-exp"><title>Import/Export</title>
     &fpnml2mcrl2;
     &ftbf2lps;
     &flps2torx;
   </chapter>
-  <chapter><title>Miscellaneous</title>
+  <chapter id="chap-misc"><title>Miscellaneous</title>
     &frewriter;
   </chapter>
 </book>
