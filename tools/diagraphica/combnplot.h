@@ -69,7 +69,7 @@ protected:
     // ***
     //void clear();
     void setScalingTransf();
-    void displTooltip( const int &posIdx );
+    void displTooltip( const size_t &posIdx );
 
     void calcPositions();
     void calcPosBC();
@@ -105,7 +105,7 @@ protected:
     vector< vector< Position2D > > posRgtBot;
 
     bool   mouseInside;
-    int    mouseCombnIdx;
+    size_t    mouseCombnIdx;
 
   	// diagram
 	Diagram*      diagram;         // association, user-defined diagram

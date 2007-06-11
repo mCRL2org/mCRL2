@@ -39,11 +39,11 @@ public:
     int getIndex();
     Bundle* getParent();
     int getSizeChildren();
-    Bundle* getChild( const int &idx );
+    Bundle* getChild( const size_t &idx );
     Cluster* getInCluster();
     Cluster* getOutCluster();
     int getSizeEdges();
-    Edge* getEdge( const int &idx );
+    Edge* getEdge( const size_t &idx );
     void getLabels( vector< string > &lbls );
     void getLabels( 
         vector< string > &lbls,

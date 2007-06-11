@@ -34,7 +34,7 @@ AttrConti::AttrConti( const AttrConti &attr )
     :Attribute( attr )
 // ------------------------------------------
 {
-    for ( int i = 0; i < attr.curValues.size(); ++i )
+    for ( size_t i = 0; i < attr.curValues.size(); ++i )
         curValues.push_back( new Value( *attr.curValues[i] ) );
    
     map< double, Value* >::const_iterator it;
@@ -83,7 +83,7 @@ void AttrConti::clusterValues(
 
     // make sure all indices are within bounds
     valid = true;
-    for ( int i = 0; i < indices.size(); ++i )
+    for ( size_t i = 0; i < indices.size(); ++i )
     {
         if ( indices[i] < 0 || indices[i] > curValues.size() )
         {
@@ -102,7 +102,7 @@ void AttrConti::clusterValues(
         
         for ( it = curMap.begin(); it != curMap.end(); ++it )
         {
-            for ( int j = 0; j < sorted.size(); ++j )
+            for ( size_t j = 0; j < sorted.size(); ++j )
             {
                 if ( it->second == curValues[sorted[j]] )
                     it->second = value;
@@ -112,7 +112,7 @@ void AttrConti::clusterValues(
         // update current domain
         // get iterators to values to delete
         {
-        for ( int i = 0; i < sorted.size(); ++i )
+        for ( size_t i = 0; i < sorted.size(); ++i )
         {
             toRemove.push_back( curValues.begin() + sorted[i] );
         }
@@ -120,7 +120,7 @@ void AttrConti::clusterValues(
 
         // delete these values
         {
-        for ( int i = 0; i < toRemove.size(); ++i )
+        for ( size_t i = 0; i < toRemove.size(); ++i )
         {
             // delete object
             delete *(toRemove[i]);
@@ -141,7 +141,7 @@ void AttrConti::clusterValues(
 
         // update value indices after new one
         {
-        for ( int i = sorted[0]; i < curValues.size(); ++i )
+        for ( size_t i = sorted[0]; i < curValues.size(); ++i )
             curValues[i]->setIndex( i );
         }
 
@@ -152,8 +152,8 @@ void AttrConti::clusterValues(
 
 // -----------------------
 void AttrConti::moveValue(
-    const int &idxFr,
-    const int &idxTo )
+    const size_t &idxFr,
+    const size_t &idxTo )
 // -----------------------
 {
     if ( ( 0 <= idxFr && idxFr < curValues.size() ) && 
@@ -165,7 +165,7 @@ void AttrConti::moveValue(
         if ( idxFr < idxTo )
         {
             // move all values after idxFr 1 pos up
-            for ( int i = idxFr; i < idxTo; ++i )
+            for ( size_t i = idxFr; i < idxTo; ++i )
             {
                 curValues[i] = curValues[i+1];
                 curValues[i]->setIndex( i );
@@ -177,7 +177,7 @@ void AttrConti::moveValue(
         else if ( idxTo < idxFr )
         {
             // move all values before idxFr 1 pos down
-            for ( int i = idxFr; i > idxTo; --i )
+            for ( size_t i = idxFr; i > idxTo; --i )
             {
                 curValues[i] = curValues[i-1];
                 curValues[i]->setIndex( i );
@@ -222,7 +222,7 @@ void AttrConti::classifyEqualIntervals( const int &number )
 
         // init new values
         Value* value;
-        for ( int i = 0; i < legend.size(); ++i )
+        for ( size_t i = 0; i < legend.size(); ++i )
         {
             value = new Value( i, legend[i] );
             curValues.push_back( value );
@@ -268,7 +268,7 @@ void AttrConti::classifyQuantiles( const int &number )
 
         // init new values
         Value* value;
-        for ( int i = 0; i < legend.size(); ++i )
+        for ( size_t i = 0; i < legend.size(); ++i )
         {
             value = new Value( i, legend[i] );
             curValues.push_back( value );
@@ -313,7 +313,7 @@ void AttrConti::classifyMeanStandardDeviation( const int &number )
 
         // init new values
         Value* value;
-        for ( int i = 0; i < legend.size(); ++i )
+        for ( size_t i = 0; i < legend.size(); ++i )
         {
             value = new Value( i, legend[i] );
             curValues.push_back( value );
@@ -428,7 +428,7 @@ int AttrConti::getSizeCurValues()
 
 
 // -------------------------------------
-Value* AttrConti::getCurValue( int idx )
+Value* AttrConti::getCurValue( size_t idx )
 // -------------------------------------
 {
     Value* result = NULL;
@@ -477,7 +477,7 @@ void AttrConti::clearClusters()
 void AttrConti::deleteCurValues()
 // ------------------------------
 {
-    for ( int i = 0; i < curValues.size(); ++i )
+    for ( size_t i = 0; i < curValues.size(); ++i )
     {
         delete curValues[i];
         curValues[i] = NULL;

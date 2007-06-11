@@ -26,11 +26,11 @@ public:
 	
     // -- set functions ---------------------------------------------
     void swapTupleVal( 
-        const int &idx1,
-        const int &idx2 );
+        const size_t &idx1,
+        const size_t &idx2 );
     void moveTupleVal( 
-        const int &idxFr,
-        const int &idxTo );
+        const size_t &idxFr,
+        const size_t &idxTo );
     void moveTupleVals( map< int, int > &idcsFrTo );
     void addTupleVal( 
         const int &idx,
@@ -45,11 +45,11 @@ public:
     // -- get functions ---------------------------------------------
     int getIndex();
     int getSizeTuple();
-    double getTupleVal( const int &idx );
+    double getTupleVal( const size_t &idx );
     int getSizeInEdges();
-    Edge* getInEdge( const int &idx );
+    Edge* getInEdge( const size_t &idx );
     int getSizeOutEdges();
-    Edge* getOutEdge( const int &idx );
+    Edge* getOutEdge( const size_t &idx );
 	Cluster* getCluster();
 
     // -- clear functions -------------------------------------------

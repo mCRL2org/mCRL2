@@ -221,10 +221,10 @@ void CorrlPlot::drawPlot( const bool &inSelectMode )
     // selection mode
     if ( inSelectMode == true )
     {
-        for ( int i = 0; i < positions.size(); ++i )
+        for ( size_t i = 0; i < positions.size(); ++i )
         {
             glPushName( i );
-            for ( int j = 0; j < positions[i].size(); ++j )
+            for ( size_t j = 0; j < positions[i].size(); ++j )
             {
                 x   = positions[i][j].x;
                 y   = positions[i][j].y;
@@ -244,9 +244,9 @@ void CorrlPlot::drawPlot( const bool &inSelectMode )
         ColorRGB col;
         pix   = canvas->getPixelSize();
     
-        for ( int i = 0; i < positions.size(); ++i )
+        for ( size_t i = 0; i < positions.size(); ++i )
         {
-            for ( int j = 0; j < positions[i].size(); ++j )
+            for ( size_t j = 0; j < positions[i].size(); ++j )
             {
                 x   = positions[i][j].x;
                 y   = positions[i][j].y;
@@ -398,9 +398,9 @@ void CorrlPlot::calcMaxNumber()
 
     // calc max
     {
-    for ( int i = 0; i < number.size(); ++i )
+    for ( size_t i = 0; i < number.size(); ++i )
     {
-        for ( int j = 0; j < number[i].size(); ++j )
+        for ( size_t j = 0; j < number[i].size(); ++j )
         {
             if ( number[i][j] > maxNumber )
                 maxNumber = number[i][j];
@@ -414,11 +414,11 @@ void CorrlPlot::calcMaxNumber()
 
     // calc totals
     {
-    for ( int i = 0; i < maxNumX.size(); ++i )
+    for ( size_t i = 0; i < maxNumX.size(); ++i )
         sumMaxNumX += maxNumX[i];
     }
     {
-    for ( int i = 0; i < maxNumY.size(); ++i )
+    for ( size_t i = 0; i < maxNumY.size(); ++i )
         sumMaxNumY += maxNumY[i];
     }
 }
@@ -570,14 +570,14 @@ void CorrlPlot::calcPositions()
                 fracY = 1.0;
         }
         
-        for ( int i = 0; i < mapXToY.size(); ++i )
+        for ( size_t i = 0; i < mapXToY.size(); ++i )
         {
             vector< Position2D > tempPos;
             positions.push_back( tempPos );
             vector< double > tempRad;
             radii.push_back( tempRad );
 
-            for ( int j = 0; j < mapXToY[i].size(); ++j )
+            for ( size_t j = 0; j < mapXToY[i].size(); ++j )
             {
                 // fraction of total number
                 frac = (double)number[i][j]/(double)maxNumber;

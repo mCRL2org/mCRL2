@@ -29,7 +29,7 @@ Diagram::~Diagram()
 // ----------------
 {
     // composition
-    for ( int i = 0; i < shapes.size(); ++i )
+    for ( size_t i = 0; i < shapes.size(); ++i )
     {
         delete shapes[i];
         shapes[i] = NULL;
@@ -50,13 +50,13 @@ void Diagram::addShape( Shape *s )
 
 
 // ---------------------------------------------
-void Diagram::moveShapeToFront( const int &idx )
+void Diagram::moveShapeToFront( const size_t &idx )
 // ---------------------------------------------
 {
     if ( 0 <= idx && idx < shapes.size() )
     {
         Shape* tmp = shapes[idx];
-        for ( int i = idx; i > 0; --i )
+        for ( size_t i = idx; i > 0; --i )
         {
             shapes[i] = shapes[i-1];
             shapes[i]->setIndex(i);
@@ -69,13 +69,13 @@ void Diagram::moveShapeToFront( const int &idx )
 
 
 // --------------------------------------------
-void Diagram::moveShapeToBack( const int &idx )
+void Diagram::moveShapeToBack( const size_t &idx )
 // --------------------------------------------
 {
     if ( 0 <= idx && idx < shapes.size() )
     {
         Shape* tmp = shapes[idx];
-        for ( int i = idx; i < shapes.size()-1; ++i )
+        for ( size_t i = idx; i < shapes.size()-1; ++i )
         {
             shapes[i] = shapes[i+1];
             shapes[i]->setIndex(i);
@@ -88,7 +88,7 @@ void Diagram::moveShapeToBack( const int &idx )
 
 
 // ---------------------------------------------
-void Diagram::moveShapeForward( const int &idx )
+void Diagram::moveShapeForward( const size_t &idx )
 // ---------------------------------------------
 {
     if ( 0 < idx && idx < shapes.size() )
@@ -107,7 +107,7 @@ void Diagram::moveShapeForward( const int &idx )
 
 
 // ----------------------------------------------
-void Diagram::moveShapeBackward( const int &idx )
+void Diagram::moveShapeBackward( const size_t &idx )
 // ----------------------------------------------
 {
     if ( 0 <= idx && idx < shapes.size()-1 )
@@ -153,7 +153,7 @@ int Diagram::getSizeShapes()
 
 
 // ---------------------------------------
-Shape* Diagram::getShape( const int &idx )
+Shape* Diagram::getShape( const size_t &idx )
 // ---------------------------------------
 {
     Shape* result = NULL;
@@ -203,7 +203,7 @@ double Diagram::getAngleInterval()
 
 
 // ----------------------------------------
-void Diagram::deleteShape( const int &idx )
+void Diagram::deleteShape( const size_t &idx )
 // ----------------------------------------
 {
     if ( 0 <= idx && idx < shapes.size() )
@@ -215,7 +215,7 @@ void Diagram::deleteShape( const int &idx )
         s = NULL;
 
         // update indices
-        for ( int i = idx; i < shapes.size(); ++i )
+        for ( size_t i = idx; i < shapes.size(); ++i )
             shapes[i]->setIndex( i );
     }
 }
@@ -256,7 +256,7 @@ void Diagram::visualize(
     else
     {
         drawBorderFlush( inSelectMode, canvas );
-        for ( int i = 0; i < shapes.size(); ++i )
+        for ( size_t i = 0; i < shapes.size(); ++i )
             shapes[i]->visualize( canvas, attrs, attrValIdcs );
     }
 }
@@ -279,7 +279,7 @@ void Diagram::visualize(
     else
     {
         drawBorderFlush( inSelectMode, canvas, opacity );
-        for ( int i = 0; i < shapes.size(); ++i )
+        for ( size_t i = 0; i < shapes.size(); ++i )
             shapes[i]->visualize( canvas, opacity, attrs, attrValIdcs );
     }
 }
@@ -471,7 +471,7 @@ void Diagram::drawShapes(
 {
     if ( inSelectMode == true )
     {
-        for ( int i = 0; i < shapes.size(); ++i )
+        for ( size_t i = 0; i < shapes.size(); ++i )
         {
             glPushName( i );
             shapes[i]->visualize( inSelectMode, canvas );
@@ -480,7 +480,7 @@ void Diagram::drawShapes(
     }
     else
     {
-        for ( int i = 0; i < shapes.size(); ++i )
+        for ( size_t i = 0; i < shapes.size(); ++i )
             shapes[i]->visualize( inSelectMode, canvas );
     }
 }

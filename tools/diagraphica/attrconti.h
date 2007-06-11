@@ -34,8 +34,8 @@ public:
         const vector< int > &indices,
         const string &newValue );
     void moveValue(
-        const int &idxFr,
-        const int &idxTo );
+        const size_t &idxFr,
+        const size_t &idxTo );
 
     void classifyEqualIntervals( const int &number );
     void classifyQuantiles( const int &number );
@@ -55,7 +55,7 @@ public:
         double &uprBnd );
 
     int getSizeCurValues();
-    Value* getCurValue( int idx );
+    Value* getCurValue( size_t idx );
     int getSizeMap();
     Value* mapToValue( double key );
 

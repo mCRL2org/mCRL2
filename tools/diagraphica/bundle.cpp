@@ -115,7 +115,7 @@ void Bundle::setEdges( const vector< Edge* > &e )
     edges = e;
 
     labels.clear();
-    for( int i = 0; i < edges.size(); ++i )
+    for( size_t i = 0; i < edges.size(); ++i )
         labels.insert( pair< string, string >( edges[i]->getLabel(), "MAY" ) );
 }
     
@@ -158,7 +158,7 @@ int Bundle::getSizeChildren()
 
 
 // ---------------------------------------
-Bundle* Bundle::getChild( const int &idx )
+Bundle* Bundle::getChild( const size_t &idx )
 // ---------------------------------------
 {
     Bundle* result = NULL;
@@ -193,7 +193,7 @@ int Bundle::getSizeEdges()
 
 
 // ------------------------------------
-Edge* Bundle::getEdge( const int &idx )
+Edge* Bundle::getEdge( const size_t &idx )
 // ------------------------------------
 {
     if ( 0 <= idx && idx < edges.size() )
@@ -279,7 +279,7 @@ void Bundle::clearParent()
 void Bundle::clearChildren()
 // -------------------------
 {
-    for ( int i = 0; i < children.size(); ++i )
+    for ( size_t i = 0; i < children.size(); ++i )
         children[i] = NULL;
     children.clear();
 }
@@ -305,7 +305,7 @@ void Bundle::clearOutCluster()
 void Bundle::clearEdges()
 // ----------------------
 {
-    for ( int i = 0; i < edges.size(); ++i )
+    for ( size_t i = 0; i < edges.size(); ++i )
         edges[i] = NULL;
     edges.clear();
 

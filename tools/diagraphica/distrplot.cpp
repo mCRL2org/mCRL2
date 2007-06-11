@@ -340,7 +340,7 @@ void DistrPlot::calcMaxNumber()
 // ----------------------------
 {
     maxNumber = 0;
-    for ( int i = 0; i < number.size(); ++i )
+    for ( size_t i = 0; i < number.size(); ++i )
     {
         if ( number[i] > maxNumber )
             maxNumber = number[i];
@@ -377,7 +377,7 @@ void DistrPlot::setScalingTransf()
 
 
 // ----------------------------------------------
-void DistrPlot::displTooltip( const int &posIdx )
+void DistrPlot::displTooltip( const size_t &posIdx )
 // ----------------------------------------------
 {
     if ( 0 <= posIdx && posIdx < number.size() )
@@ -385,7 +385,7 @@ void DistrPlot::displTooltip( const int &posIdx )
         Attribute* attr = graph->getAttribute( attrIdx );
         string xLabel   = attr->getName();
         string value    = "";
-        if ( posIdx < attr->getSizeCurValues() )
+        if ( posIdx < static_cast <size_t> (attr->getSizeCurValues()) )
             value = attr->getCurValue( posIdx )->getValue();
         
         msgDgrm.clear();
@@ -485,7 +485,7 @@ void DistrPlot::calcPositions()
         
         // calc positions
         positions.clear();
-        for ( int i = 0; i < number.size(); ++i )
+        for ( size_t i = 0; i < number.size(); ++i )
         {
             // calc ratio
             ratio = (double)number[i]/(double)maxNumber;

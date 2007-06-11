@@ -865,7 +865,7 @@ void DiaGraph::handleAttributeDelete( const int &idx )
     int posFoundClust = -1;
     vector< int > attrsClust;
     arcDgrm->getAttrsTree( attrsClust );
-    for ( int i = 0; i < attrsClust.size(); ++i )
+    for ( size_t i = 0; i < attrsClust.size(); ++i )
     {
         if ( attrsClust[i] == attr->getIndex() )
         {
@@ -885,7 +885,7 @@ void DiaGraph::handleAttributeDelete( const int &idx )
     int posFoundTimeSeries = -1;
     vector< int > attrsTimeSeries;
     timeSeries->getAttrIdcs( attrsTimeSeries );
-    for ( int i = 0; i < attrsTimeSeries.size(); ++i )
+    for ( size_t i = 0; i < attrsTimeSeries.size(); ++i )
     {
         if ( attrsTimeSeries[i] == attr->getIndex() )
         {
@@ -936,7 +936,7 @@ void DiaGraph::handleAttributeCluster( const vector< int > &indcs )
 {
     bool zeroCard = false;
 
-    for ( int i = 0; i < indcs.size() && zeroCard == false; ++i )
+    for ( size_t i = 0; i < indcs.size() && zeroCard == false; ++i )
     {
         if ( graph->getAttribute( indcs[i] )->getSizeCurValues() == 0 )    
             zeroCard = true;
@@ -1023,7 +1023,7 @@ void DiaGraph::handleAttrPartition(
             
             posFound = -1;
             arcDgrm->getAttrsTree( attrsClust );
-            for ( int i = 0; i < attrsClust.size(); ++i )
+            for ( size_t i = 0; i < attrsClust.size(); ++i )
             {
                 if ( attrsClust[i] == tempAttr->getIndex() )
                 {
@@ -1080,7 +1080,7 @@ void DiaGraph::handleAttrDepartition( const int &attrIdx )
             
             posFound = -1;
             arcDgrm->getAttrsTree( attrsClust );
-            for ( int i = 0; i < attrsClust.size(); ++i )
+            for ( size_t i = 0; i < attrsClust.size(); ++i )
             {
                 if ( attrsClust[i] == attr->getIndex() )
                 {
@@ -1253,7 +1253,7 @@ void DiaGraph::getAttributeNames(
 // ------------------------------
 {
     names.clear();
-    for ( int i = 0; i < indcs.size(); ++i )
+    for ( size_t i = 0; i < indcs.size(); ++i )
     {
         if ( 0 <= indcs[i] && indcs[i] < graph->getSizeAttributes() )
             names.push_back( 
@@ -1333,7 +1333,6 @@ void DiaGraph::handleAttributePlot(
         corrlPlot->setDiagram( editor->getDiagram() );
     }
     
-    int numValues1        = 0 ;
     vector< int > indices;
     vector< string > vals1;
     vector< vector< int > > corrlMap;
@@ -1912,7 +1911,7 @@ void DiaGraph::handleEditDOF(
     // init attrIndcs
     vector< string > attributes;
     {
-    for ( int i = 0; i < attrIndcs.size(); ++i )
+    for ( size_t i = 0; i < attrIndcs.size(); ++i )
     {
         if ( attrIndcs[i] < 0 )
             attributes.push_back( "" );
@@ -2142,9 +2141,6 @@ void DiaGraph::handleLinkDOFAttr(
 {
     if ( mode == MODE_EDIT && editor != NULL )
     {
-        
-        bool zeroCard = false;
-
         /*
         if ( graph->getAttribute( attrIdx )->getSizeCurValues() == 0 )
             wxLogError( 
@@ -2310,7 +2306,7 @@ void DiaGraph::addToExaminer(
 {
     if ( examiner != NULL )
     {
-        for ( int i = 0; i < frames.size(); ++i )
+        for ( size_t i = 0; i < frames.size(); ++i )
             examiner->addFrameHist( frames[i], attrs );
 
         if ( mode == MODE_ANALYSIS && canvasExnr != NULL )

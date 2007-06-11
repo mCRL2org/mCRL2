@@ -181,7 +181,7 @@ void ArcDiagram::getAttrsTree( vector< int > &idcs )
 // -------------------------------------------------
 {
     idcs.clear();
-    for ( int i = 0; i < attrsTree.size(); ++i )
+    for ( size_t i = 0; i < attrsTree.size(); ++i )
         idcs.push_back( attrsTree[i]->getIndex() );
 }
 
@@ -297,7 +297,7 @@ void ArcDiagram::setAttrsTree( const vector< int > idcs )
 // ------------------------------------------------------
 {
     attrsTree.clear();
-    for ( int i = 0; i < idcs.size(); ++i )
+    for ( size_t i = 0; i < idcs.size(); ++i )
         attrsTree.push_back( graph->getAttribute( idcs[i] ) );
 }
 
@@ -315,12 +315,12 @@ void ArcDiagram::hideAllDiagrams()
 // -------------------------------
 {
     {
-    for ( int i = 0; i < showDgrm.size(); ++i )
+    for ( size_t i = 0; i < showDgrm.size(); ++i )
         showDgrm[i] = false;
     }
 
     {
-    for ( int i = 0; i < markBundles.size(); ++i )
+    for ( size_t i = 0; i < markBundles.size(); ++i )
         markBundles[i] = false;
     }
 }
@@ -368,7 +368,7 @@ void ArcDiagram::unmarkLeaves()
 
 
 // ------------------------------------------
-void ArcDiagram::markBundle( const int &idx )
+void ArcDiagram::markBundle( const size_t &idx )
 // ------------------------------------------
 {
     if ( 0 <= idx && idx < markBundles.size() )
@@ -380,7 +380,7 @@ void ArcDiagram::markBundle( const int &idx )
 void ArcDiagram::unmarkBundles()
 // -----------------------------
 {
-    for ( int i = 0; i < markBundles.size(); ++i )
+    for ( size_t i = 0; i < markBundles.size(); ++i )
         markBundles[i] = false;
 }
 
@@ -526,12 +526,10 @@ void ArcDiagram::drawBundles( const bool &inSelectMode )
     // selection mode
     if ( inSelectMode == true )
     {
-        Cluster* clust = NULL;
-
         segs = SEGM_HINT_HQ;
 
         glPushName( ID_BUNDLES );
-        for ( int i = 0; i < posBundles.size(); ++i )
+        for ( size_t i = 0; i < posBundles.size(); ++i )
         {
             x      = posBundles[i].x;
             y      = posBundles[i].y;
@@ -565,8 +563,6 @@ void ArcDiagram::drawBundles( const bool &inSelectMode )
         // render high quality
         if ( mouseDrag == MSE_DRAG_FALSE )
         {
-            Cluster* clust = NULL;
-
             ColorRGB colFill;
             ColorRGB colFade;
             ColorRGB colBrdrFill;
@@ -589,7 +585,7 @@ void ArcDiagram::drawBundles( const bool &inSelectMode )
             VisUtils::enableLineAntiAlias();
             VisUtils::enableBlending();
         
-            for ( int i = 0; i < posBundles.size(); ++i )
+            for ( size_t i = 0; i < posBundles.size(); ++i )
             {
                 if ( markBundles[i] == true )
                     VisUtils::mapColorDkCoolBlue( colFill );
@@ -634,7 +630,7 @@ void ArcDiagram::drawBundles( const bool &inSelectMode )
             
             segs = SEGM_HINT_HQ;
 
-            for ( int i = 0; i < posBundles.size(); ++i )
+            for ( size_t i = 0; i < posBundles.size(); ++i )
             {
                 x      = posBundles[i].x;
                 y      = posBundles[i].y;
@@ -668,7 +664,7 @@ void ArcDiagram::drawLeaves( const bool &inSelectMode )
     if ( inSelectMode == true )
     {
         glPushName( ID_LEAF_NODE );
-        for ( int i = 0; i < posLeaves.size(); ++i )
+        for ( size_t i = 0; i < posLeaves.size(); ++i )
         {
             x = posLeaves[i].x;
             y = posLeaves[i].y;
@@ -690,7 +686,7 @@ void ArcDiagram::drawLeaves( const bool &inSelectMode )
             ColorRGB colFill;
 
             VisUtils::enableLineAntiAlias();
-            for ( int i = 0; i < posLeaves.size(); ++i )
+            for ( size_t i = 0; i < posLeaves.size(); ++i )
             {
                 // position
                 x = posLeaves[i].x;
@@ -741,7 +737,7 @@ void ArcDiagram::drawLeaves( const bool &inSelectMode )
         {
             segs = SEGM_HINT_LQ;
 
-            for ( int i = 0; i < posLeaves.size(); ++i )
+            for ( size_t i = 0; i < posLeaves.size(); ++i )
             {
                 x = posLeaves[i].x;
                 y = posLeaves[i].y;
@@ -771,10 +767,10 @@ void ArcDiagram::drawTree( const bool &inSelectMode )
     if ( inSelectMode == true )
     {
         glPushName( ID_TREE_NODE );
-        for ( int i = 0; i < posTreeTopLft.size()-1; ++i )
+        for ( size_t i = 0; i < posTreeTopLft.size()-1; ++i )
         {
             glPushName( i );
-            for ( int j = 0; j < posTreeTopLft[i].size(); ++j )
+            for ( size_t j = 0; j < posTreeTopLft[i].size(); ++j )
             {
                 xLft = posTreeTopLft[i][j].x;
                 xRgt = posTreeBotRgt[i][j].x;
@@ -805,9 +801,9 @@ void ArcDiagram::drawTree( const bool &inSelectMode )
             
             VisUtils::enableLineAntiAlias();
             VisUtils::enableBlending();
-            for ( int i = 0; i < posTreeTopLft.size()-1; ++i )
+            for ( size_t i = 0; i < posTreeTopLft.size()-1; ++i )
             {
-                for ( int j = 0; j < posTreeTopLft[i].size(); ++j )
+                for ( size_t j = 0; j < posTreeTopLft[i].size(); ++j )
                 {
                     xLft = posTreeTopLft[i][j].x;
                     xRgt = posTreeBotRgt[i][j].x;
@@ -856,9 +852,9 @@ void ArcDiagram::drawTree( const bool &inSelectMode )
         {
             segs = SEGM_HINT_LQ;
 
-            for ( int i = 0; i < posTreeTopLft.size()-1; ++i )
+            for ( size_t i = 0; i < posTreeTopLft.size()-1; ++i )
             {
-                for ( int j = 0; j < posTreeTopLft[i].size(); ++j )
+                for ( size_t j = 0; j < posTreeTopLft[i].size(); ++j )
                 {
                     xLft = posTreeTopLft[i][j].x;
                     xRgt = posTreeBotRgt[i][j].x;
@@ -907,7 +903,7 @@ void ArcDiagram::drawTreeLvls( const bool &inSelectMode )
            
             ColorRGB colText = colTxt;
             
-			for ( int i = 0; i < posTreeTopLft.size()-1; ++i )
+			for ( size_t i = 0; i < posTreeTopLft.size()-1; ++i )
             {
                 if ( posTreeTopLft[i].size() > 0 )
                 {
@@ -955,10 +951,10 @@ void ArcDiagram::drawBarTree( const bool &inSelectMode )
         if ( posBarTreeTopLft.size() > 1 )
         {
             glPushName( ID_BAR_TREE );
-            for ( int i = 0; i < posBarTreeTopLft.size(); ++i )
+            for ( size_t i = 0; i < posBarTreeTopLft.size(); ++i )
             {
                 glPushName( i );
-                for ( int j = 0; j < posBarTreeTopLft[i].size(); ++j )
+                for ( size_t j = 0; j < posBarTreeTopLft[i].size(); ++j )
                 {
                     xLft = posBarTreeTopLft[i][j].x;
                     xRgt = posBarTreeBotRgt[i][j].x;
@@ -996,9 +992,9 @@ void ArcDiagram::drawBarTree( const bool &inSelectMode )
                 VisUtils::enableLineAntiAlias();
                 VisUtils::enableBlending();
             
-                for ( int i = 0; i < posBarTreeTopLft.size(); ++i )
+                for ( size_t i = 0; i < posBarTreeTopLft.size(); ++i )
                 {
-                    for ( int j = 0; j < posBarTreeTopLft[i].size(); ++j )
+                    for ( size_t j = 0; j < posBarTreeTopLft[i].size(); ++j )
                     {
                         // position
                         xLft = posBarTreeTopLft[i][j].x;
@@ -1040,9 +1036,9 @@ void ArcDiagram::drawBarTree( const bool &inSelectMode )
             // render low quality
             else
             {
-                for ( int i = 0; i < posBarTreeTopLft.size(); ++i )
+                for ( size_t i = 0; i < posBarTreeTopLft.size(); ++i )
                 {
-                    for ( int j = 0; j < posBarTreeTopLft[i].size(); ++j )
+                    for ( size_t j = 0; j < posBarTreeTopLft[i].size(); ++j )
                     {
                         xLft = posBarTreeTopLft[i][j].x;
                         xRgt = posBarTreeBotRgt[i][j].x;
@@ -1072,7 +1068,7 @@ void ArcDiagram::drawDiagrams( const bool &inSelectMode )
         double pix;
         
         glPushName( ID_DIAGRAM );
-        for ( int i = 0; i < posDgrm.size(); ++i )
+        for ( size_t i = 0; i < posDgrm.size(); ++i )
         {
             if ( showDgrm[i] == true )
             {
@@ -1095,7 +1091,7 @@ void ArcDiagram::drawDiagrams( const bool &inSelectMode )
                 */
                 Attribute* attr;
                 Node* node;
-                for ( int j = 0; j < attrsDgrm[i].size(); ++j )
+                for ( size_t j = 0; j < attrsDgrm[i].size(); ++j )
                 {
                     attr = attrsDgrm[i][j];
                     node = framesDgrm[i][frameIdxDgrm[i]]->getNode(0);
@@ -1162,7 +1158,7 @@ void ArcDiagram::drawDiagrams( const bool &inSelectMode )
         double pix;
         string msg;
         
-        for ( int i = 0; i < posDgrm.size(); ++i )
+        for ( size_t i = 0; i < posDgrm.size(); ++i )
         {
             if ( showDgrm[i] == true )
             {
@@ -1221,7 +1217,7 @@ void ArcDiagram::drawDiagrams( const bool &inSelectMode )
                     */
                     Attribute* attr;
                     Node* node;
-                    for ( int j = 0; j < attrsDgrm[i].size(); ++j )
+                    for ( size_t j = 0; j < attrsDgrm[i].size(); ++j )
                     {
                         attr = attrsDgrm[i][j];
                         node = framesDgrm[i][frameIdxDgrm[i]]->getNode(0);
@@ -1255,7 +1251,7 @@ void ArcDiagram::drawDiagrams( const bool &inSelectMode )
                     */
                     Attribute* attr;
                     Node* node;
-                    for ( int j = 0; j < attrsDgrm[i].size(); ++j )
+                    for ( size_t j = 0; j < attrsDgrm[i].size(); ++j )
                     {
                         attr = attrsDgrm[i][j];
                         node = framesDgrm[i][frameIdxDgrm[i]]->getNode(0);
@@ -1381,7 +1377,7 @@ void ArcDiagram::drawMarkedLeaves( const bool &inSelectMode )
             pix  = canvas->getPixelSize();
             segs = SEGM_HINT_HQ;
         
-            for ( int i = 0; i < posLeaves.size(); ++i )
+            for ( size_t i = 0; i < posLeaves.size(); ++i )
             {
                 map< int, vector< ColorRGB > >::iterator it;
                 it = markLeaves.find( i );
@@ -1392,7 +1388,7 @@ void ArcDiagram::drawMarkedLeaves( const bool &inSelectMode )
                     y = posLeaves[i].y;
 
                     frac = 1.0/(double)it->second.size();
-                    for ( int j = 0; j < it->second.size(); ++j )
+                    for ( size_t j = 0; j < it->second.size(); ++j )
                     {
                         aglBeg = j*frac*360.0;
                         aglEnd = (j+1)*frac*360.0;
@@ -1533,7 +1529,7 @@ void ArcDiagram::handleMouseMotionEvent(
 void ArcDiagram::updateDiagramData()
 // ---------------------------------
 {
-    for ( int i = 0; i < attrsDgrm.size(); ++i )
+    for ( size_t i = 0; i < attrsDgrm.size(); ++i )
     {
         // diagram is showing
         if ( showDgrm[i] == true )
@@ -1985,7 +1981,7 @@ void ArcDiagram::calcSettingsDiagram()
 // -----------------------------------
 {
     clearSettingsDiagram();
-    for ( int i = 0; i < posLeaves.size(); ++i )
+    for ( size_t i = 0; i < posLeaves.size(); ++i )
     {
         showDgrm.push_back( false );
 
@@ -2011,7 +2007,7 @@ void ArcDiagram::calcSettingsDiagram()
 void ArcDiagram::updateMarkBundles()
 // ---------------------------------
 {
-    for ( int i = 0; i < markBundles.size(); ++i )
+    for ( size_t i = 0; i < markBundles.size(); ++i )
         markBundles[i] = false;
     
     if ( currIdxDgrm >= 0 )
@@ -2085,7 +2081,7 @@ void ArcDiagram::clearSettingsBundles()
 void ArcDiagram::clearSettingsTree()
 // ---------------------------------
 {
-    for ( int i = 0; i < posTreeTopLft.size(); ++i )
+    for ( size_t i = 0; i < posTreeTopLft.size(); ++i )
     {
         posTreeTopLft[i].clear();
         posTreeBotRgt[i].clear();
@@ -2102,7 +2098,7 @@ void ArcDiagram::clearSettingsTree()
 void ArcDiagram::clearSettingsBarTree()
 // ------------------------------------
 {
-    for ( int i = 0; i < posBarTreeTopLft.size(); ++i )
+    for ( size_t i = 0; i < posBarTreeTopLft.size(); ++i )
     {
         posBarTreeTopLft[i].clear();
         posBarTreeBotRgt[i].clear();
@@ -2120,15 +2116,15 @@ void ArcDiagram::clearSettingsDiagram()
     showDgrm.clear();
 
     {
-    for ( int i = 0; i < attrsDgrm.size(); ++i )
+    for ( size_t i = 0; i < attrsDgrm.size(); ++i )
         attrsDgrm[i].clear();
     }
     attrsDgrm.clear();
 
     {
-    for ( int i = 0; i < framesDgrm.size(); ++i )
+    for ( size_t i = 0; i < framesDgrm.size(); ++i )
     {
-        for( int j = 0; j < framesDgrm[i].size(); ++j )
+        for( size_t j = 0; j < framesDgrm[i].size(); ++j )
             delete framesDgrm[i][j];
         framesDgrm[i].clear();
     }
@@ -2154,7 +2150,7 @@ void ArcDiagram::onTimer( wxTimerEvent &e )
     }
     
     frameIdxDgrm[animIdxDgrm] += 1;
-    if ( frameIdxDgrm[animIdxDgrm] >= framesDgrm[animIdxDgrm].size() )
+    if ( static_cast <size_t> (frameIdxDgrm[animIdxDgrm]) >= framesDgrm[animIdxDgrm].size() )
         frameIdxDgrm[animIdxDgrm] = 0;
     updateMarkBundles();
 
@@ -2356,8 +2352,8 @@ void ArcDiagram::handleHoverCluster(
     const int &j )
 // ---------------------------------
 {
-    if ( ( 0 <= i && i < mapPosToClust.size()    ) &&
-         ( 0 <= j && j < mapPosToClust[i].size() ) )
+    if ( ( 0 <= i && static_cast <size_t> (i)  < mapPosToClust.size()    ) &&
+         ( 0 <= j && static_cast <size_t> (j) < mapPosToClust[i].size() ) )
     {
         string msg;
 
@@ -2407,8 +2403,8 @@ void ArcDiagram::handleHoverBarTree(
     const int &j )
 // ---------------------------------
 {
-    if ( ( 0 <= i && i < mapPosToClust.size()    ) &&
-         ( 0 <= j && j < mapPosToClust[i].size() ) )
+    if ( ( 0 <= i && static_cast <size_t> (i) < mapPosToClust.size()    ) &&
+         ( 0 <= j && static_cast <size_t> (j) < mapPosToClust[i].size() ) )
     {
         string   msg;
         Cluster* clust;
@@ -2451,7 +2447,7 @@ void ArcDiagram::handleShowDiagram( const int &dgrmIdx )
 void ArcDiagram::handleDragDiagram()
 // ---------------------------------
 {
-    if ( 0 <= dragIdxDgrm && dragIdxDgrm < posDgrm.size() )
+    if ( 0 <= dragIdxDgrm && static_cast <size_t> (dragIdxDgrm) < posDgrm.size() )
     {
         double x1, y1;
         double x2, y2;
@@ -2466,7 +2462,7 @@ void ArcDiagram::handleDragDiagram()
 
 
 // -----------------------------------------------------
-void ArcDiagram::handleRwndDiagram( const int &dgrmIdx )
+void ArcDiagram::handleRwndDiagram( const size_t &dgrmIdx )
 // -----------------------------------------------------
 {
     if ( timerAnim->IsRunning() )
@@ -2488,7 +2484,7 @@ void ArcDiagram::handleRwndDiagram( const int &dgrmIdx )
 
 
 // -----------------------------------------------------
-void ArcDiagram::handlePrevDiagram( const int &dgrmIdx )
+void ArcDiagram::handlePrevDiagram( const size_t &dgrmIdx )
 // -----------------------------------------------------
 {
     if ( timerAnim->IsRunning() )
@@ -2513,7 +2509,7 @@ void ArcDiagram::handlePrevDiagram( const int &dgrmIdx )
 
 
 // -----------------------------------------------------
-void ArcDiagram::handlePlayDiagram( const int &dgrmIdx )
+void ArcDiagram::handlePlayDiagram( const size_t &dgrmIdx )
 // -----------------------------------------------------
 {
     if ( dgrmIdx == animIdxDgrm )
@@ -2541,7 +2537,7 @@ void ArcDiagram::handlePlayDiagram( const int &dgrmIdx )
 
 
 // -----------------------------------------------------
-void ArcDiagram::handleNextDiagram( const int &dgrmIdx )
+void ArcDiagram::handleNextDiagram( const size_t &dgrmIdx )
 // -----------------------------------------------------
 {
     if ( timerAnim->IsRunning() )
@@ -2551,7 +2547,7 @@ void ArcDiagram::handleNextDiagram( const int &dgrmIdx )
         animIdxDgrm = dgrmIdx;
 
     frameIdxDgrm[dgrmIdx] += 1;
-    if ( frameIdxDgrm[dgrmIdx] >= framesDgrm[dgrmIdx].size() )
+    if ( static_cast <size_t> (frameIdxDgrm[dgrmIdx]) >= framesDgrm[dgrmIdx].size() )
         frameIdxDgrm[dgrmIdx] = 0;
 
     ColorRGB col;
@@ -2629,7 +2625,7 @@ void ArcDiagram::showDiagram( const int &dgrmIdx )
 
         // clear framesDgrm
         {
-        for ( int i = 0; i < framesDgrm[dgrmIdx].size(); ++i )
+        for ( size_t i = 0; i < framesDgrm[dgrmIdx].size(); ++i )
             delete framesDgrm[dgrmIdx][i];
         }
         framesDgrm[dgrmIdx].clear();
@@ -2658,7 +2654,7 @@ void ArcDiagram::showDiagram( const int &dgrmIdx )
 
 
 // -----------------------------------------------
-void ArcDiagram::hideDiagram( const int &dgrmIdx )
+void ArcDiagram::hideDiagram( const size_t &dgrmIdx )
 // -----------------------------------------------
 {
     Cluster* clust = graph->getLeaf( dgrmIdx );

@@ -157,7 +157,7 @@ void Shape::addDOFColYValue( const double &y )
 void Shape::setDOFColYValue( const int &idx, const double &y )
 // -----------------------------------------------------------
 {
-    if ( 0 <= idx && idx < colYValues.size() )
+    if ( 0 <= idx && static_cast <size_t> (idx) < colYValues.size() )
         colYValues[idx] = y;
 }
 
@@ -166,7 +166,7 @@ void Shape::setDOFColYValue( const int &idx, const double &y )
 void Shape::clearDOFColYValue( const int &idx )
 // --------------------------------------------
 {
-    if ( 0 <= idx && idx < colYValues.size() )
+    if ( 0 <= idx && static_cast <size_t> (idx) < colYValues.size() )
         colYValues.erase( colYValues.begin() + idx );
 }
 
@@ -183,7 +183,7 @@ void Shape::addDOFOpaYValue( const double &y )
 void Shape::setDOFOpaYValue( const int &idx, const double &y )
 // -----------------------------------------------------------
 {
-    if ( 0 <= idx && idx < opaYValues.size() )
+    if ( 0 <= idx && static_cast <size_t> (idx) < opaYValues.size() )
         opaYValues[idx] = y;
 }
 
@@ -192,7 +192,7 @@ void Shape::setDOFOpaYValue( const int &idx, const double &y )
 void Shape::clearDOFOpaYValue( const int &idx )
 // --------------------------------------------
 {
-    if ( 0 <= idx && idx < opaYValues.size() )
+    if ( 0 <= idx && static_cast <size_t> (idx) < opaYValues.size() )
         opaYValues.erase( opaYValues.begin() + idx );
 }
 
@@ -784,7 +784,7 @@ void Shape::visualize(
     colHLS.l   = 0.5;
     colHLS.s   = 1.0;
     
-    for ( int i = 0; i < attrs.size(); ++i )
+    for ( size_t i = 0; i < attrs.size(); ++i )
     {
         /*
         if ( attrs[i]->getSizeCurValues() == 1 )
@@ -955,7 +955,7 @@ void Shape::visualize(
     ColorHLS colHLS;
     ColorRGB colRGB;
 
-    double alpha;
+    double alpha = 0.0;
     
     xC         = xCtr;
     yC         = yCtr;
@@ -966,7 +966,7 @@ void Shape::visualize(
     colHLS.l   = 0.5;
     colHLS.s   = 1.0;
     
-    for ( int i = 0; i < attrs.size(); ++i )
+    for ( size_t i = 0; i < attrs.size(); ++i )
     {
         /*
         if ( attrs[i]->getSizeCurValues() == 1 )
@@ -1545,9 +1545,6 @@ void Shape::drawEditDOF(
     GLCanvas* canvas )
 // ------------------------------------------------
 {
-    double pix      = canvas->getPixelSize();
-    double hdlDelta = hdlSze*pix;
-
     if ( inSelectMode == true )
     {
         // draw shape

@@ -52,7 +52,7 @@ bool DropTarget::OnDropText(
     if ( tokens.size() > 0 )
         srcId = Utils::strToInt( string(tokens[0].fn_str()) );
     // get remaining data
-    for ( int i = 1; i < tokens.size(); ++i )
+    for ( size_t i = 1; i < tokens.size(); ++i )
         data.push_back( Utils::strToInt( string(tokens[i].fn_str()) ));
  
     mediator->handleDragDrop(

@@ -230,7 +230,7 @@ void CombnPlot::drawAxesCP( const bool &inSelectMode )
             VisUtils::setColorMdGray();
             xLft += pix;
             xRgt -= pix;
-            for ( int i = 0; i < posRgtBot[0].size()-1; ++i )
+            for ( size_t i = 0; i < posRgtBot[0].size()-1; ++i )
             {
                 yTop = posRgtBot[0][i].y;
                 yBot = yTop;
@@ -345,7 +345,7 @@ void CombnPlot::drawLabelsCP( const bool &inSelectMode )
         xLft = -0.5*w+3*pix;
         xRgt = -0.5*w+12*pix;
            
-        for ( int i = 0; i < attributeLabels.size(); ++i )
+        for ( size_t i = 0; i < attributeLabels.size(); ++i )
         {
             if ( i > 0 )
                 yTop = posRgtBot[0][i-1].y;
@@ -454,7 +454,7 @@ void CombnPlot::drawPlotCP( const bool &inSelectMode )
     // selection mode
     if ( inSelectMode == true )
     {
-        for ( int i = 0; i < posLftTop.size(); ++i )
+        for ( size_t i = 0; i < posLftTop.size(); ++i )
         {
             // name per collumn
             glPushName( i );
@@ -473,9 +473,9 @@ void CombnPlot::drawPlotCP( const bool &inSelectMode )
     // rendering mode
     else
     {
-        for ( int i = 0; i < posLftTop.size(); ++i )
+        for ( size_t i = 0; i < posLftTop.size(); ++i )
         {
-            for ( int j = 0; j < posLftTop[i].size(); ++j )
+            for ( size_t j = 0; j < posLftTop[i].size(); ++j )
             {
                 xLft = posLftTop[i][j].x;
                 yTop = posLftTop[i][j].y;
@@ -545,7 +545,7 @@ void CombnPlot::drawDiagram( const bool &inSelectMode )
         double scaleTxt = (( 12*pix )/(double)CHARHEIGHT)/scaleDgrm;
 
         vector< Attribute* > attrs;
-        for ( int i = 0; i < attributeIndcs.size(); ++i )
+        for ( size_t i = 0; i < attributeIndcs.size(); ++i )
             attrs.push_back( graph->getAttribute( attributeIndcs[i] ) );
 
         glPushMatrix();
@@ -617,7 +617,7 @@ void CombnPlot::initLabels()
 // -------------------------
 {
     attributeLabels.clear();
-    for ( int i = 0; i < attributeIndcs.size(); ++i )
+    for ( size_t i = 0; i < attributeIndcs.size(); ++i )
         attributeLabels.push_back( 
             graph->getAttribute( attributeIndcs[i] )->getName() );
 }
@@ -628,7 +628,7 @@ void CombnPlot::calcMaxAttrCard()
 // ------------------------------
 {
     maxAttrCard = 0;
-    for ( int i = 0; i < attributeIndcs.size(); ++i )
+    for ( size_t i = 0; i < attributeIndcs.size(); ++i )
     {
         if ( graph->getAttribute( 
                 attributeIndcs[i] )->getSizeCurValues() > maxAttrCard )
@@ -643,7 +643,7 @@ void CombnPlot::calcMaxNumberPerComb()
 // -----------------------------------
 {
     maxNumberPerComb = 0;
-    for ( int i = 0; i < numberPerComb.size(); ++i )
+    for ( size_t i = 0; i < numberPerComb.size(); ++i )
     {
         if ( numberPerComb[i] > maxNumberPerComb )
             maxNumberPerComb = numberPerComb[i];
@@ -679,12 +679,11 @@ void CombnPlot::setScalingTransf()
 
 
 // ----------------------------------------------
-void CombnPlot::displTooltip( const int &posIdx )
+void CombnPlot::displTooltip( const size_t &posIdx )
 // ----------------------------------------------
 {
     if ( 0 <= posIdx && posIdx < combinations.size() )
     {
-        int numAttrs    = attributeIndcs.size();
         Attribute* attr = NULL;
         Value* val      = NULL;
         
@@ -743,7 +742,7 @@ void CombnPlot::displTooltip( const int &posIdx )
             showDgrm = true;
 
             attrValIdcsDgrm.clear();
-            for ( int i = 0; i < attributeIndcs.size(); ++i )
+            for ( size_t i = 0; i < attributeIndcs.size(); ++i )
                 attrValIdcsDgrm.push_back( combinations[posIdx][i] );
         }
 
@@ -817,7 +816,7 @@ void CombnPlot::calcPosBC()
         
     // calc positions
     posBC.clear();
-    for ( int i = 0; i < numberPerComb.size(); ++i )
+    for ( size_t i = 0; i < numberPerComb.size(); ++i )
     {
         // calc ratio
         ratio = (double)numberPerComb[i]/(double)maxNumberPerComb;
@@ -886,13 +885,13 @@ void CombnPlot::calcPosCP()
     // calc positions
     posLftTop.clear();
     posRgtBot.clear();
-    for ( int i = 0; i < combinations.size(); ++i )
+    for ( size_t i = 0; i < combinations.size(); ++i )
     {
         vector< Position2D > temp;
         posLftTop.push_back( temp );
         posRgtBot.push_back( temp );
 
-        for ( int j = 0; j < combinations[i].size(); ++j )
+        for ( size_t j = 0; j < combinations[i].size(); ++j )
         {
             // calc ratio
             attribute = graph->getAttribute( attributeIndcs[j] );

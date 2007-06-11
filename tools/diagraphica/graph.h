@@ -56,11 +56,11 @@ public:
         const double &uprBnd );
 
     void swapAttributes(
-        const int &idx1,
-        const int &idx2 );
+        const size_t &idx1,
+        const size_t &idx2 );
     void moveAttribute(
-        const int &idxFr,
-        const int &idxTo );
+        const size_t &idxFr,
+        const size_t &idxTo );
     void configAttributes( 
         map< int, int > &idcsFrTo,
         map< int, vector< string > > &attrCurDomains,
@@ -79,17 +79,17 @@ public:
     // -- get functions  --------------------------------------------
     string getFileName();
     int getSizeAttributes();
-    Attribute* getAttribute( const int &idx );
+    Attribute* getAttribute( const size_t &idx );
     Attribute* getAttribute( const string &name );
     int getSizeNodes();
-    Node* getNode( const int &idx );
+    Node* getNode( const size_t &idx );
     int getSizeEdges();
-    Edge* getEdge( const int &idx );
+    Edge* getEdge( const size_t &idx );
     Cluster* getRoot();
     Cluster* getCluster( const vector< int > coord );
-    Cluster* getLeaf( const int &idx );
+    Cluster* getLeaf( const size_t &idx );
     int getSizeLeaves();
-    Bundle* getBundle( const int &idx );
+    Bundle* getBundle( const size_t &idx );
     int getSizeBundles();
     
     // -- calculation functions -------------------------------------

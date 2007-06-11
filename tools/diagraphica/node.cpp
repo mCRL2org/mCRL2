@@ -44,8 +44,8 @@ Node::~Node()
 
 // ---------------------
 void Node::swapTupleVal( 
-    const int &idx1,
-    const int &idx2 )
+    const size_t &idx1,
+    const size_t &idx2 )
 // ---------------------
 {
     if ( ( 0 <= idx1 && idx1 < tuple.size() ) &&
@@ -62,8 +62,8 @@ void Node::swapTupleVal(
 
 // ---------------------
 void Node::moveTupleVal( 
-    const int &idxFr,
-    const int &idxTo )
+    const size_t &idxFr,
+    const size_t &idxTo )
 // ---------------------
 {
     if ( ( 0 <= idxFr && idxFr < tuple.size() ) &&
@@ -75,7 +75,7 @@ void Node::moveTupleVal(
         if ( idxFr < idxTo )
         {
             // move all values after idxFr 1 pos up
-            for ( int i = idxFr; i < idxTo; ++i )
+            for ( size_t i = idxFr; i < idxTo; ++i )
                 tuple[i] = tuple[i+1];
             // update idxTo
             tuple[idxTo] = temp;
@@ -83,7 +83,7 @@ void Node::moveTupleVal(
         else if ( idxTo < idxFr )
         {
             // move all values before idxFr 1 pos down
-            for ( int i = idxFr; i > idxTo; --i )
+            for ( size_t i = idxFr; i > idxTo; --i )
                 tuple[i] = tuple[i-1];
             // update idxTo
             tuple[idxTo] = temp;
@@ -106,13 +106,13 @@ void Node::moveTupleVals( map< int, int > &idcsFrTo )
         
             // init new tuple
             {
-            for ( int i = 0; i < idcsFrTo.size(); ++i )
+            for ( size_t i = 0; i < idcsFrTo.size(); ++i )
                 tupleNew.push_back( -1 );
             }
 
             // update new tuple
             {
-            for( int i = 0; i < idcsFrTo.size(); ++i )
+            for( size_t i = 0; i < idcsFrTo.size(); ++i )
                 tupleNew[ idcsFrTo[i] ] = tuple[i];
             }
 
@@ -213,7 +213,7 @@ int Node::getSizeTuple()
 
 
 // ------------------------------------
-double Node::getTupleVal( const int &idx )
+double Node::getTupleVal( const size_t &idx )
 // ------------------------------------
 {
     if ( 0 <= idx && idx < tuple.size() )
@@ -232,7 +232,7 @@ int Node::getSizeInEdges()
 
 
 // ------------------------------------
-Edge* Node::getInEdge( const int &idx )
+Edge* Node::getInEdge( const size_t &idx )
 // ------------------------------------
 {
 	if ( 0 <= idx && idx < inEdges.size() )
@@ -251,7 +251,7 @@ int Node::getSizeOutEdges()
 
 
 // -------------------------------------
-Edge* Node::getOutEdge( const int &idx )
+Edge* Node::getOutEdge( const size_t &idx )
 // -------------------------------------
 {
 	if ( 0 <= idx && idx < outEdges.size() )
@@ -276,7 +276,7 @@ Cluster* Node::getCluster()
 void Node::clearInEdges()
 // ----------------------
 {
-	for ( int i = 0; i < inEdges.size(); ++i )
+	for ( size_t i = 0; i < inEdges.size(); ++i )
 		inEdges[i] = NULL;
     inEdges.clear();
 }
@@ -286,7 +286,7 @@ void Node::clearInEdges()
 void Node::clearOutEdges()
 // -----------------------
 {
-	for ( int i = 0; i < outEdges.size(); ++i )
+	for ( size_t i = 0; i < outEdges.size(); ++i )
 		outEdges[i] = NULL;
     outEdges.clear();
 }

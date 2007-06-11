@@ -54,7 +54,7 @@ void OpacityChooser::setPoints(
 // -----------------------------
 {
     positionsX.clear();
-    for ( int i = 0; i < opa.size(); ++i )
+    for ( size_t i = 0; i < opa.size(); ++i )
         positionsX.push_back( (2.0*opa[i])-1.0 );
     
     positionsY = y;
@@ -501,12 +501,12 @@ void OpacityChooser::handleHits( const vector< int > &ids )
 {
     if ( mouseSide == MSE_SIDE_LFT )
     {
-        if ( 0 <= ids[0] && ids[0] < positionsX.size() )
+        if ( 0 <= ids[0] && static_cast <size_t> (ids[0]) < positionsX.size() )
             dragIdx = ids[0];
     }
     else if ( mouseSide == MSE_SIDE_RGT )
     {
-        if ( 0 <= ids[0] && ids[0] < positionsX.size() )
+        if ( 0 <= ids[0] && static_cast <size_t> (ids[0]) < positionsX.size() )
         {
             /*
             positionsX.erase( positionsX.begin()+ids[0] );
@@ -523,7 +523,7 @@ void OpacityChooser::handleHits( const vector< int > &ids )
 void OpacityChooser::handleDrag()
 // ------------------------------
 {
-    if ( 0 <= dragIdx && dragIdx < positionsX.size() )
+    if ( 0 <= dragIdx && static_cast <size_t> (dragIdx) < positionsX.size() )
     {
         double w, h;
         double xLft, xRgt;

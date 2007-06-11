@@ -129,7 +129,7 @@ int Simulator::getIdxClstSel()
 
     if ( focusDepthIdx == ID_FRAME_PREV )
     {
-        if ( 0 <= focusFrameIdx && focusFrameIdx < framesPrev.size() ) 
+        if ( 0 <= focusFrameIdx && static_cast <size_t> (focusFrameIdx) < framesPrev.size() ) 
             result = framesPrev[focusFrameIdx]->getNode(0)->getCluster()->getIndex();
     }
     else if ( focusDepthIdx == ID_FRAME_CURR )
@@ -139,7 +139,7 @@ int Simulator::getIdxClstSel()
     }
     else if ( focusDepthIdx == ID_FRAME_NEXT )
     {
-        if ( 0 <= focusFrameIdx && focusFrameIdx < framesNext.size() ) 
+        if ( 0 <= focusFrameIdx && static_cast <size_t> (focusFrameIdx) < framesNext.size() ) 
             result = framesNext[focusFrameIdx]->getNode(0)->getCluster()->getIndex();
     }
 
@@ -296,7 +296,7 @@ void Simulator::handleSendDgrmSglToExnr()
 {
     if ( focusDepthIdx == ID_FRAME_PREV )
     {
-        if ( 0 <= focusFrameIdx && focusFrameIdx < framesPrev.size() )
+        if ( 0 <= focusFrameIdx && static_cast <size_t> (focusFrameIdx) < framesPrev.size() )
             mediator->addToExaminer(
                 framesPrev[focusFrameIdx],
                 attributes );
@@ -310,7 +310,7 @@ void Simulator::handleSendDgrmSglToExnr()
     }
     else if ( focusDepthIdx == ID_FRAME_NEXT )
     {
-        if ( 0 <= focusFrameIdx && focusFrameIdx < framesNext.size() )
+        if ( 0 <= focusFrameIdx && static_cast <size_t> (focusFrameIdx) < framesNext.size() )
             mediator->addToExaminer(
                 framesNext[focusFrameIdx],
                 attributes );
@@ -659,7 +659,7 @@ void Simulator::initBundles()
     // get all edges from previous frames to current frame
     lbls.clear();
     {
-    for ( int i = 0; i < framesPrev.size(); ++i )
+    for ( size_t i = 0; i < framesPrev.size(); ++i )
     {
         bdls.clear();
         
@@ -723,7 +723,7 @@ void Simulator::initBundles()
     // get all edges from current frame to next frames
     lbls.clear();
     {
-    for ( int i = 0; i < framesNext.size(); ++i )
+    for ( size_t i = 0; i < framesNext.size(); ++i )
     {
         bdls.clear();
         clst = framesNext[i];
@@ -783,7 +783,7 @@ void Simulator::initBundles()
     
     lbls.clear();
     {
-    for ( int i = 0; i < bundlesPrevByLbl.size(); ++i )
+    for ( size_t i = 0; i < bundlesPrevByLbl.size(); ++i )
     {
         bdl = bundlesPrevByLbl[i];
 
@@ -806,7 +806,7 @@ void Simulator::initBundles()
     }
 
     {
-    for ( int i = 0; i < bundlesNextByLbl.size(); ++i )
+    for ( size_t i = 0; i < bundlesNextByLbl.size(); ++i )
     {
         bdl = bundlesNextByLbl[i];
 
@@ -856,7 +856,7 @@ void Simulator::sortFramesPrevNext()
 
     // sort previous frames
     {
-    for ( int i = 0; i < framesPrev.size(); ++i )
+    for ( size_t i = 0; i < framesPrev.size(); ++i )
     {
         key = 0;
         for ( int j = 0; j < framesPrev[i]->getSizeOutBundles(); ++j )
@@ -875,7 +875,7 @@ void Simulator::sortFramesPrevNext()
     sorted.clear();
 
     // sort previous frames
-    for ( int i = 0; i < framesNext.size(); ++i )
+    for ( size_t i = 0; i < framesNext.size(); ++i )
     {
         key = 0;
         for ( int j = 0; j < framesNext[i]->getSizeInBundles(); ++j )
@@ -945,7 +945,7 @@ void Simulator::calcPosFrames()
     pos.x = -0.5*wthCvs + 0.5*itvHori + 4.0*pix;
     pos.y = 0.5*framesPrev.size()*itvVert - 0.5*itvVert;
     {
-    for ( int i = 0; i < framesPrev.size(); ++i )
+    for ( size_t i = 0; i < framesPrev.size(); ++i )
     {
         posFramesPrev.push_back( pos );
         pos.y -= itvVert;
@@ -955,7 +955,7 @@ void Simulator::calcPosFrames()
     pos.x = 0.5*wthCvs - 0.5*itvHori - 4.0*pix;
     pos.y = 0.5*framesNext.size()*itvVert - 0.5*itvVert;
     {
-    for ( int i = 0; i < framesNext.size(); ++i )
+    for ( size_t i = 0; i < framesNext.size(); ++i )
     {
         posFramesNext.push_back( pos );
         pos.y -= itvVert;
@@ -1008,7 +1008,7 @@ void Simulator::calcPosBundles()
         itvGrid = ( 1.5*itvHori )/(bundlesPrevByLbl.size()+1);
 
         {
-        for ( int i = 0; i < bundlesPrevByLbl.size(); ++i )
+        for ( size_t i = 0; i < bundlesPrevByLbl.size(); ++i )
         {
             posTopLft.x = -2.0*itvHori + (i+1)*itvGrid;
             posTopLft.y =  0.5*hgtCvs - itvLblPixVert*pix;
@@ -1022,7 +1022,7 @@ void Simulator::calcPosBundles()
 
         // bundles prev
         {
-        for( int i = 0; i < framesPrev.size(); ++i )
+        for( size_t i = 0; i < framesPrev.size(); ++i )
         {
             vector< Position2D > v;
         
@@ -1080,7 +1080,7 @@ void Simulator::calcPosBundles()
         itvGrid = ( 1.5*itvHori )/(bundlesNextByLbl.size()+1);
 
         {
-        for ( int i = 0; i < bundlesNextByLbl.size(); ++i )
+        for ( size_t i = 0; i < bundlesNextByLbl.size(); ++i )
         {
             posTopLft.x = 2.0*itvHori - (bundlesNextByLbl.size()-i)*itvGrid;
             posTopLft.y =  0.5*hgtCvs - itvLblPixVert*pix;
@@ -1094,7 +1094,7 @@ void Simulator::calcPosBundles()
 
         // bundles next
         {
-        for( int i = 0; i < framesNext.size(); ++i )
+        for( size_t i = 0; i < framesNext.size(); ++i )
         {
             vector< Position2D > v;
         
@@ -1158,7 +1158,7 @@ void Simulator::handleKeyRgt()
             
             if ( focusDepthIdx == ID_FRAME_PREV )
             {
-                if ( 0 <= focusFrameIdxPrevLast && focusFrameIdxPrevLast < framesPrev.size() )
+                if ( 0 <= focusFrameIdxPrevLast && static_cast <size_t> (focusFrameIdxPrevLast) < framesPrev.size() )
                     focusFrameIdx = focusFrameIdxPrevLast;
                 else
                     focusFrameIdx = 0;
@@ -1169,7 +1169,7 @@ void Simulator::handleKeyRgt()
             }
             else if ( focusDepthIdx == ID_FRAME_NEXT )
             {
-                if ( 0 <= focusFrameIdxNextLast && focusFrameIdxNextLast < framesNext.size() )
+                if ( 0 <= focusFrameIdxNextLast && static_cast <size_t> (focusFrameIdxNextLast) < framesNext.size() )
                     focusFrameIdx = focusFrameIdxNextLast;
                 else
                     focusFrameIdx = 0;
@@ -1192,7 +1192,7 @@ void Simulator::handleKeyRgt()
         {
             focusDepthIdx = ID_FRAME_NEXT;
 
-            if ( 0 <= focusFrameIdxNextLast && focusFrameIdxNextLast < framesNext.size() )
+            if ( 0 <= focusFrameIdxNextLast && static_cast <size_t> (focusFrameIdxNextLast) < framesNext.size() )
                 focusFrameIdx = focusFrameIdxNextLast;
             else
                 focusFrameIdx = 0;
@@ -1218,14 +1218,14 @@ void Simulator::handleKeyDwn()
 {
     if ( focusDepthIdx == ID_FRAME_PREV )
     {
-        if ( focusFrameIdx < framesPrev.size()-1 )
+        if ( static_cast <size_t> (focusFrameIdx) < framesPrev.size()-1 )
             ++focusFrameIdx;
 
         focusFrameIdxPrevLast = focusFrameIdx;
     }
     else if ( focusDepthIdx == ID_FRAME_NEXT )
     {
-        if ( focusFrameIdx < framesNext.size()-1 )
+        if ( static_cast <size_t> (focusFrameIdx) < framesNext.size()-1 )
             ++focusFrameIdx;
 
         focusFrameIdxNextLast = focusFrameIdx;
@@ -1245,7 +1245,7 @@ void Simulator::handleKeyLft()
             
             if ( focusDepthIdx == ID_FRAME_PREV )
             {
-                if ( 0 <= focusFrameIdxPrevLast && focusFrameIdxPrevLast < framesPrev.size() )
+                if ( 0 <= focusFrameIdxPrevLast && static_cast <size_t> (focusFrameIdxPrevLast) < framesPrev.size() )
                     focusFrameIdx = focusFrameIdxPrevLast;
                 else
                     focusFrameIdx = 0;
@@ -1256,7 +1256,7 @@ void Simulator::handleKeyLft()
             }
             else if ( focusDepthIdx == ID_FRAME_NEXT )
             {
-                if ( 0 <= focusFrameIdxNextLast && focusFrameIdxNextLast < framesNext.size() )
+                if ( 0 <= focusFrameIdxNextLast && static_cast <size_t> (focusFrameIdxNextLast) < framesNext.size() )
                     focusFrameIdx = focusFrameIdxNextLast;
                 else
                     focusFrameIdx = 0;
@@ -1283,7 +1283,7 @@ void Simulator::handleKeyLft()
         {
             focusDepthIdx = ID_FRAME_PREV;
 
-            if ( 0 <= focusFrameIdxPrevLast && focusFrameIdxPrevLast < framesPrev.size() )
+            if ( 0 <= focusFrameIdxPrevLast && static_cast <size_t> (focusFrameIdxPrevLast) < framesPrev.size() )
                 focusFrameIdx = focusFrameIdxPrevLast;
             else
                 focusFrameIdx = 0;
@@ -1305,7 +1305,7 @@ void Simulator::markFrameClusts()
 {
     if ( focusDepthIdx == ID_FRAME_PREV )
     {
-        if ( 0 <= focusFrameIdx && focusFrameIdx < framesPrev.size() ) 
+        if ( 0 <= focusFrameIdx && static_cast <size_t> (focusFrameIdx) < framesPrev.size() ) 
         {
             /*
             mediator->handleUnmarkFrameClusts();
@@ -1339,7 +1339,7 @@ void Simulator::markFrameClusts()
     }
     else if ( focusDepthIdx == ID_FRAME_NEXT )
     {
-        if ( 0 <= focusFrameIdx && focusFrameIdx < framesNext.size() ) 
+        if ( 0 <= focusFrameIdx && static_cast <size_t> (focusFrameIdx) < framesNext.size() ) 
         {
             /*
             mediator->handleUnmarkFrameClusts();
@@ -1384,13 +1384,13 @@ void Simulator::clearFrames()
     }
 
     {
-    for ( int i = 0; i < framesPrev.size(); ++i )
+    for ( size_t i = 0; i < framesPrev.size(); ++i )
         delete framesPrev[i];
     }
     framesPrev.clear();
 
     {
-    for ( int i = 0; i < framesNext.size(); ++i )
+    for ( size_t i = 0; i < framesNext.size(); ++i )
         delete framesNext[i];
     }
     framesNext.clear();
@@ -1405,25 +1405,25 @@ void Simulator::clearBundles()
 // ---------------------------
 {
     {
-    for ( int i = 0; i < bundles.size(); ++i )
+    for ( size_t i = 0; i < bundles.size(); ++i )
         delete bundles[i];
     bundles.clear();
     }
     
     {
-    for ( int i = 0; i < bundlesPrevByLbl.size(); ++i )
+    for ( size_t i = 0; i < bundlesPrevByLbl.size(); ++i )
         delete bundlesPrevByLbl[i];
     }
     bundlesPrevByLbl.clear();
     
     {
-    for ( int i = 0; i < bundlesNextByLbl.size(); ++i )
+    for ( size_t i = 0; i < bundlesNextByLbl.size(); ++i )
         delete bundlesNextByLbl[i];
     }
     bundlesNextByLbl.clear();
 
     {
-    for ( int i = 0; i < bundlesByLbl.size(); ++i )
+    for ( size_t i = 0; i < bundlesByLbl.size(); ++i )
         delete bundlesByLbl[i];
     }
     bundlesByLbl.clear();
@@ -1745,7 +1745,6 @@ void Simulator::drawFrameCurr( const bool &inSelectMode )
     if ( inSelectMode == true )
     {
         double x, y;
-        double pix = canvas->getPixelSize();
         
         if ( frameCurr != NULL )
         {
@@ -1794,7 +1793,7 @@ void Simulator::drawFrameCurr( const bool &inSelectMode )
             */
             Attribute* attr;
             Node* node;
-            for ( int j = 0; j < attributes.size(); ++j )
+            for ( size_t j = 0; j < attributes.size(); ++j )
             {
                 attr = attributes[j];
                 node = frameCurr->getNode(0);
@@ -1859,10 +1858,9 @@ void Simulator::drawFramesPrev( const bool &inSelectMode )
     if ( inSelectMode == true )
     {
         double x, y;
-        double pix = canvas->getPixelSize();
         
         glPushName( ID_FRAME_PREV );
-        for ( int i = 0; i < posFramesPrev.size(); ++i )
+        for ( size_t i = 0; i < posFramesPrev.size(); ++i )
         {
             x = posFramesPrev[i].x;
             y = posFramesPrev[i].y;
@@ -1870,7 +1868,7 @@ void Simulator::drawFramesPrev( const bool &inSelectMode )
             glPushMatrix();
             glTranslatef( x, y, 0.0 );
 
-            if ( focusDepthIdx == ID_FRAME_PREV && focusFrameIdx == i )
+            if ( focusDepthIdx == ID_FRAME_PREV &&  static_cast <size_t> (focusFrameIdx) == i )
                 glScalef( scaleDgrmHori, scaleDgrmHori, scaleDgrmHori );
             else
                 glScalef( scaleDgrmVert, scaleDgrmVert, scaleDgrmVert );
@@ -1880,7 +1878,7 @@ void Simulator::drawFramesPrev( const bool &inSelectMode )
                 -1.0,  1.0,
                  1.0, -1.0 );
             
-            if ( focusDepthIdx == ID_FRAME_PREV && focusFrameIdx == i )
+            if ( focusDepthIdx == ID_FRAME_PREV &&  static_cast <size_t> (focusFrameIdx) == i )
             {
                 glPushName( ID_DIAGRAM_MORE );
                 VisUtils::fillRect( -0.98, -0.8, -0.8, -0.98 );
@@ -1899,9 +1897,9 @@ void Simulator::drawFramesPrev( const bool &inSelectMode )
         double pix = canvas->getPixelSize();
         vector< double > valsFrame;
 
-        for ( int i = 0; i < posFramesPrev.size(); ++i )
+        for ( size_t i = 0; i < posFramesPrev.size(); ++i )
         {
-            if ( focusDepthIdx != ID_FRAME_PREV || i != focusFrameIdx )
+            if ( focusDepthIdx != ID_FRAME_PREV ||  static_cast <size_t> (i) != focusFrameIdx )
             {
                 x = posFramesPrev[i].x;
                 y = posFramesPrev[i].y;
@@ -1926,7 +1924,7 @@ void Simulator::drawFramesPrev( const bool &inSelectMode )
                     */
                     Attribute* attr;
                     Node* node;
-                    for ( int j = 0; j < attributes.size(); ++j )
+                    for ( size_t j = 0; j < attributes.size(); ++j )
                     {
                         attr = attributes[j];
                         node = framesPrev[i]->getNode(0);
@@ -1963,7 +1961,7 @@ void Simulator::drawFramesPrev( const bool &inSelectMode )
 
         if ( focusDepthIdx == ID_FRAME_PREV )
         {
-            if ( 0 <= focusFrameIdx && focusFrameIdx < posFramesPrev.size() )
+            if ( 0 <= focusFrameIdx &&  static_cast <size_t> (focusFrameIdx) < posFramesPrev.size() )
             {
                 /*
                 for ( int j = 0; j < attributes.size(); ++j )
@@ -1974,7 +1972,7 @@ void Simulator::drawFramesPrev( const bool &inSelectMode )
                 */
                 Attribute* attr;
                 Node* node;
-                for ( int j = 0; j < attributes.size(); ++j )
+                for ( size_t j = 0; j < attributes.size(); ++j )
                 {
                     attr = attributes[j];
                     node = framesPrev[focusFrameIdx]->getNode(0);
@@ -2029,10 +2027,9 @@ void Simulator::drawFramesNext( const bool &inSelectMode )
     if ( inSelectMode == true )
     {
         double x, y;
-        double pix = canvas->getPixelSize();
         
         glPushName( ID_FRAME_NEXT );
-        for ( int i = 0; i < posFramesNext.size(); ++i )
+        for ( size_t i = 0; i < posFramesNext.size(); ++i )
         {
             x = posFramesNext[i].x;
             y = posFramesNext[i].y;
@@ -2040,7 +2037,7 @@ void Simulator::drawFramesNext( const bool &inSelectMode )
             glPushMatrix();
             glTranslatef( x, y, 0.0 );
 
-            if ( focusDepthIdx == ID_FRAME_NEXT && focusFrameIdx == i )
+            if ( focusDepthIdx == ID_FRAME_NEXT &&  static_cast <size_t> (focusFrameIdx) == i )
                 glScalef( scaleDgrmHori, scaleDgrmHori, scaleDgrmHori );
             else
                 glScalef( scaleDgrmVert, scaleDgrmVert, scaleDgrmVert );
@@ -2048,7 +2045,7 @@ void Simulator::drawFramesNext( const bool &inSelectMode )
             glPushName( i );
             VisUtils::fillRect( -1.0, 1.0, 1.0, -1.0 );
 
-            if ( focusDepthIdx == ID_FRAME_NEXT && focusFrameIdx == i )
+            if ( focusDepthIdx == ID_FRAME_NEXT &&  static_cast <size_t> (focusFrameIdx) == i )
             {
                 glPushName( ID_DIAGRAM_MORE );
                 VisUtils::fillRect( -0.98, -0.8, -0.8, -0.98 );
@@ -2067,9 +2064,9 @@ void Simulator::drawFramesNext( const bool &inSelectMode )
         double pix = canvas->getPixelSize();
         vector< double > valsFrame;
 
-        for ( int i = 0; i < posFramesNext.size(); ++i )
+        for ( size_t i = 0; i < posFramesNext.size(); ++i )
         {
-            if ( focusDepthIdx != ID_FRAME_NEXT || i != focusFrameIdx )
+            if ( focusDepthIdx != ID_FRAME_NEXT || i !=  static_cast <size_t> (focusFrameIdx) )
             {
                 x = posFramesNext[i].x;
                 y = posFramesNext[i].y;
@@ -2094,7 +2091,7 @@ void Simulator::drawFramesNext( const bool &inSelectMode )
                     */
                     Attribute* attr;
                     Node* node;
-                    for ( int j = 0; j < attributes.size(); ++j )
+                    for ( size_t j = 0; j < attributes.size(); ++j )
                     {
                         attr = attributes[j];
                         node = framesNext[i]->getNode(0);
@@ -2131,7 +2128,7 @@ void Simulator::drawFramesNext( const bool &inSelectMode )
 
         if ( focusDepthIdx == ID_FRAME_NEXT )
         {
-            if ( 0 <= focusFrameIdx && focusFrameIdx < posFramesNext.size() )
+            if ( 0 <= focusFrameIdx &&  static_cast <size_t> (focusFrameIdx) < posFramesNext.size() )
             {
                 /*
                 for ( int j = 0; j < attributes.size(); ++j )
@@ -2142,7 +2139,7 @@ void Simulator::drawFramesNext( const bool &inSelectMode )
                 */
                 Attribute* attr;
                 Node* node;
-                for ( int j = 0; j < attributes.size(); ++j )
+                for ( size_t j = 0; j < attributes.size(); ++j )
                 {
                     attr = attributes[j];
                     node = framesNext[focusFrameIdx]->getNode(0);
@@ -2200,7 +2197,7 @@ void Simulator::drawBdlLblGridPrev( const bool &inSelectMode )
         string lbl;
         
         glPushName( ID_BUNDLE_LBL );
-        for ( int i = 0; i < posBdlLblGridPrevTopLft.size(); ++i )
+        for ( size_t i = 0; i < posBdlLblGridPrevTopLft.size(); ++i )
         {
             lbl = bundlesPrevByLbl[i]->getChild(0)->getEdge(0)->getLabel();
             
@@ -2252,7 +2249,7 @@ void Simulator::drawBdlLblGridPrev( const bool &inSelectMode )
 
         VisUtils::mapColorLtGray( colLne );
         
-        for ( int i = 0; i < posBdlLblGridPrevTopLft.size(); ++i )
+        for ( size_t i = 0; i < posBdlLblGridPrevTopLft.size(); ++i )
         {
             if ( bundlesPrevByLbl[i]->getParent()->getIndex() == fcsLblPrevIdx )
                 idxHiLite = i;
@@ -2305,7 +2302,7 @@ void Simulator::drawBdlLblGridPrev( const bool &inSelectMode )
             }
         }
 
-        if ( 0 <= idxHiLite && idxHiLite < posBdlLblGridPrevTopLft.size() )
+        if ( 0 <= idxHiLite &&  static_cast <size_t> (idxHiLite) < posBdlLblGridPrevTopLft.size() )
         {
             lbl = bundlesPrevByLbl[idxHiLite]->getChild(0)->getEdge(0)->getLabel();
 
@@ -2394,7 +2391,7 @@ void Simulator::drawBdlLblGridNext( const bool &inSelectMode )
         string lbl;
         
         glPushName( ID_BUNDLE_LBL );
-        for ( int i = 0; i < posBdlLblGridNextTopLft.size(); ++i )
+        for ( size_t i = 0; i < posBdlLblGridNextTopLft.size(); ++i )
         {
             lbl = bundlesNextByLbl[i]->getChild(0)->getEdge(0)->getLabel();
             
@@ -2446,7 +2443,7 @@ void Simulator::drawBdlLblGridNext( const bool &inSelectMode )
 
         VisUtils::mapColorLtGray( colLne );
         
-        for ( int i = 0; i < posBdlLblGridNextTopLft.size(); ++i )
+        for ( size_t i = 0; i < posBdlLblGridNextTopLft.size(); ++i )
         {
             if ( bundlesNextByLbl[i]->getParent()->getIndex() == fcsLblNextIdx )
                 idxHiLite = i;
@@ -2499,7 +2496,7 @@ void Simulator::drawBdlLblGridNext( const bool &inSelectMode )
             }
         }
 
-        if ( 0 <= idxHiLite && idxHiLite < posBdlLblGridNextTopLft.size() )
+        if ( 0 <= idxHiLite &&  static_cast <size_t> (idxHiLite) < posBdlLblGridNextTopLft.size() )
         {
             lbl = bundlesNextByLbl[idxHiLite]->getChild(0)->getEdge(0)->getLabel();
 
@@ -2589,9 +2586,9 @@ void Simulator::drawBundlesPrev( const bool &inSelectMode )
         double arrowItv;
         
         glPushName( ID_BUNDLE_LBL );
-        for ( int i = 0; i < posBundlesPrevTopLft.size(); ++i )
+        for ( size_t i = 0; i < posBundlesPrevTopLft.size(); ++i )
         {
-            for ( int j = 0; j < posBundlesPrevBotRgt[i].size(); ++j )
+            for ( size_t j = 0; j < posBundlesPrevBotRgt[i].size(); ++j )
             {
                 glPushName( framesPrev[i]->getOutBundle(j)->getParent()->getParent()->getIndex()  );
                 // arrow interval
@@ -2621,10 +2618,10 @@ void Simulator::drawBundlesPrev( const bool &inSelectMode )
         VisUtils::enableLineAntiAlias();
         //VisUtils::mapColorMdGray( colFill );
         
-        for ( int i = 0; i < posBundlesPrevTopLft.size(); ++i )
+        for ( size_t i = 0; i < posBundlesPrevTopLft.size(); ++i )
         {
             idxHiLite = -1;
-            for ( int j = 0; j < posBundlesPrevBotRgt[i].size(); ++j )
+            for ( size_t j = 0; j < posBundlesPrevBotRgt[i].size(); ++j )
             {
                 // fade color
                 if ( framesPrev[i]->getOutBundle(j)->getParent()->getParent()->getIndex() == fcsLblPrevIdx )
@@ -2661,7 +2658,7 @@ void Simulator::drawBundlesPrev( const bool &inSelectMode )
                 }
             }
             
-            if ( 0 <= idxHiLite && idxHiLite < posBundlesPrevBotRgt[i].size() )
+            if ( 0 <= idxHiLite &&  static_cast <size_t> (idxHiLite) < posBundlesPrevBotRgt[i].size() )
             {
                 // fill color
                 calcColor( 
@@ -2710,9 +2707,9 @@ void Simulator::drawBundlesNext( const bool &inSelectMode )
         double arrowItv;
         
         glPushName( ID_BUNDLE_LBL );
-        for ( int i = 0; i < posBundlesNextTopLft.size(); ++i )
+        for ( size_t i = 0; i < posBundlesNextTopLft.size(); ++i )
         {
-            for ( int j = 0; j < posBundlesNextBotRgt[i].size(); ++j )
+            for ( size_t j = 0; j < posBundlesNextBotRgt[i].size(); ++j )
             {
                 glPushName( framesNext[i]->getInBundle(j)->getParent()->getParent()->getIndex()  );
                 // arrow interval
@@ -2742,11 +2739,11 @@ void Simulator::drawBundlesNext( const bool &inSelectMode )
         VisUtils::enableLineAntiAlias();
         //VisUtils::mapColorMdGray( colFill );
         
-        for ( int i = 0; i < posBundlesNextTopLft.size(); ++i )
+        for ( size_t i = 0; i < posBundlesNextTopLft.size(); ++i )
         {
             idxHiLite = -1;
 
-            for ( int j = 0; j < posBundlesNextBotRgt[i].size(); ++j )
+            for ( size_t j = 0; j < posBundlesNextBotRgt[i].size(); ++j )
             {
                 // fade color
                 if ( framesNext[i]->getInBundle(j)->getParent()->getParent()->getIndex() == fcsLblNextIdx )
@@ -2786,7 +2783,7 @@ void Simulator::drawBundlesNext( const bool &inSelectMode )
                 }
             }
 
-            if ( 0 <= idxHiLite && idxHiLite < posBundlesNextBotRgt[i].size() )
+            if ( 0 <= idxHiLite &&  static_cast <size_t> (idxHiLite) < posBundlesNextBotRgt[i].size() )
             {
                 // fill color
                 calcColor( 
@@ -2960,7 +2957,6 @@ void Simulator::animate()
 // ----------------------
 {
     double x, y;
-    double pix = canvas->getPixelSize();
     vector< double > valsFrame;
 
     if ( keyFrameFr != NULL )
@@ -2981,7 +2977,7 @@ void Simulator::animate()
             */
             Attribute* attr;
             Node* node;
-            for ( int j = 0; j < attributes.size(); ++j )
+            for ( size_t j = 0; j < attributes.size(); ++j )
             {
                 attr = attributes[j];
                 node = keyFrameFr->getNode(0);
@@ -3022,7 +3018,7 @@ void Simulator::animate()
                             attributes[j]->getIndex() ) )->getIndex() );
             }
             */
-            for ( int j = 0; j < attributes.size(); ++j )
+            for ( size_t j = 0; j < attributes.size(); ++j )
             {
                 attr = attributes[j];
                 node = keyFrameTo->getNode(0);
@@ -3065,7 +3061,7 @@ void Simulator::animate()
             */
             Attribute* attr;
             Node* node;
-            for ( int j = 0; j < attributes.size(); ++j )
+            for ( size_t j = 0; j < attributes.size(); ++j )
             {
                 attr = attributes[j];
                 node = keyFrameFr->getNode(0);
@@ -3107,7 +3103,7 @@ void Simulator::animate()
                             attributes[j]->getIndex() ) )->getIndex() );
             }
             */
-            for ( int j = 0; j < attributes.size(); ++j )
+            for ( size_t j = 0; j < attributes.size(); ++j )
             {
                 attr = attributes[j];
                 node = keyFrameTo->getNode(0);

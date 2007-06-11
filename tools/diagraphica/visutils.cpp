@@ -2134,7 +2134,8 @@ void VisUtils::drawArrowArcCW(
     const double &wHead,    const double &lHead )
 // ------------------------------------------------
 {
-    double xCur, yCur;
+    double xCur = 0.0;
+    double yCur = 0.0;
     double slice;
    
     // draw arc
@@ -2174,7 +2175,8 @@ void VisUtils::fillArrowArcCW(
     const double &wHead,    const double &lHead )
 // ------------------------------------------------
 {
-    double xCur, yCur;
+    double xCur = 0.0;
+    double yCur = 0.0;
     double slice;
    
     // draw arc
@@ -2214,7 +2216,8 @@ void VisUtils::drawArrowArcCCW(
     const double &wHead,    const double &lHead )
 // ------------------------------------------------
 {
-    double xCur, yCur;
+    double xCur = 0.0;
+    double yCur = 0.0;
     double slice;
    
     // draw arc
@@ -2254,7 +2257,8 @@ void VisUtils::fillArrowArcCCW(
     const double &wHead,    const double &lHead )
 // ------------------------------------------------
 {
-    double xCur, yCur;
+    double xCur = 0.0;
+    double yCur = 0.0;
     double slice;
    
     // draw arc
@@ -3196,7 +3200,7 @@ void VisUtils::drawLabel(
         // enable texture mapping
         glEnable( GL_TEXTURE_2D );
 
-        for ( int i = 0; i < label.length(); ++i )
+        for ( size_t i = 0; i < label.length(); ++i )
         {
             double xLft = xCoord + i*scaling*CHARWIDTH;
             double xRgt = xCoord + (i+1)*scaling*CHARWIDTH;
@@ -3305,7 +3309,7 @@ void VisUtils::drawLabelVert(
         // enable texture mapping
         glEnable( GL_TEXTURE_2D );
 
-        for ( int i = 0; i < label.length(); ++i )
+        for ( size_t i = 0; i < label.length(); ++i )
         {
             double xLft = xCoord - 0.5*scaling*CHARHEIGHT;
             double xRgt = xCoord + 0.5*scaling*CHARHEIGHT;
@@ -3419,7 +3423,7 @@ void VisUtils::drawLabelInBoundBox(
     if ( r >= 1.0 ) // longer than tall or short label
     {
         numToCrop = (int)ceil( ( lblLength-w )/charWidth );
-        if ( 0 < numToCrop && numToCrop < cropLbl.size() )
+        if ( 0 < numToCrop && static_cast <size_t> (numToCrop) < cropLbl.size() )
         {
             cropLbl.erase( cropLbl.size() - numToCrop );
             cropLbl.append( "." );
@@ -3435,7 +3439,7 @@ void VisUtils::drawLabelInBoundBox(
     else // taller than long
     {
         numToCrop = (int)ceil( ( lblLength-h )/charWidth );
-        if ( 0 < numToCrop && numToCrop < cropLbl.size() )
+        if ( 0 < numToCrop && static_cast  <size_t> (numToCrop) < cropLbl.size() )
         {
             cropLbl.erase( cropLbl.size() - numToCrop - 2 );
             cropLbl.append( ".." );

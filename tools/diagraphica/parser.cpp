@@ -40,7 +40,6 @@ int Parser::getFileSize( const string &path )
     
     int begin  = 0;
     int end    = 0;
-    int offset = 0;
     
     file.open( path.c_str() );
     if ( !file.is_open() )
@@ -164,7 +163,7 @@ void Parser::writeFSMFile(
     Graph* graph )
 // ---------------------------
 {
-    int begIdx, endIdx;
+    size_t begIdx, endIdx;
     string fileName;
     string delims    = "\\/";
     
@@ -891,7 +890,7 @@ void Parser::writeDiagram(
             vector< double > yValsCol;
             diagram->getShape(i)->getDOFColYValues( yValsCol );
             {
-            for ( int j = 0; j < yValsCol.size(); ++j )
+            for ( size_t j = 0; j < yValsCol.size(); ++j )
             {
                 subp = new TiXmlElement( "AuxilaryValue" );
                 prop->LinkEndChild( subp );
@@ -930,7 +929,7 @@ void Parser::writeDiagram(
             vector< double > yValsOpa;
             diagram->getShape(i)->getDOFOpaYValues( yValsOpa );
             {
-            for ( int j = 0; j < yValsOpa.size(); ++j )
+            for ( size_t j = 0; j < yValsOpa.size(); ++j )
             {
                 subp = new TiXmlElement( "AuxilaryValue" );
                 prop->LinkEndChild( subp );

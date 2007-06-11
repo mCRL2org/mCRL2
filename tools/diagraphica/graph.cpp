@@ -127,8 +127,8 @@ void Graph::addAttrConti(
 
 // ------------------------
 void Graph::swapAttributes(
-    const int &idx1,
-    const int &idx2 )
+    const size_t &idx1,
+    const size_t &idx2 )
 // ------------------------
 {
     if ( ( 0 <= idx1 && idx1 < attributes.size() ) &&
@@ -144,7 +144,7 @@ void Graph::swapAttributes(
         attributes[idx2]->setIndex( idx2 );
             
         // swap node tuple values
-        for ( int i = 0; i < nodes.size(); ++i )
+        for ( size_t i = 0; i < nodes.size(); ++i )
             nodes[i]->swapTupleVal( idx1, idx2 );
     }
     else
@@ -154,8 +154,8 @@ void Graph::swapAttributes(
 
 // -----------------------
 void Graph::moveAttribute(
-    const int &idxFr,
-    const int &idxTo )
+    const size_t &idxFr,
+    const size_t &idxTo )
 // -----------------------
 {
     if ( ( 0 <= idxFr && idxFr < attributes.size() ) &&
@@ -168,7 +168,7 @@ void Graph::moveAttribute(
         if ( idxFr < idxTo )
         {
             // move all values after idxFr 1 pos up
-            for ( int i = idxFr; i < idxTo; ++i )
+            for ( size_t i = idxFr; i < idxTo; ++i )
             {
                 attributes[i] = attributes[i+1];
                 attributes[i]->setIndex( i );
@@ -180,7 +180,7 @@ void Graph::moveAttribute(
         else if ( idxTo < idxFr )
         {
             // move all values before idxFr 1 pos down
-            for ( int i = idxFr; i > idxTo; --i )
+            for ( size_t i = idxFr; i > idxTo; --i )
             {
                 attributes[i] = attributes[i-1];
                 attributes[i]->setIndex( i );
@@ -193,7 +193,7 @@ void Graph::moveAttribute(
         temp = NULL;
 
         // move node tuple values
-        for ( int i = 0; i < nodes.size(); ++i )
+        for ( size_t i = 0; i < nodes.size(); ++i )
             nodes[i]->moveTupleVal( idxFr, idxTo );
     }
     else 
@@ -208,7 +208,7 @@ void Graph::configAttributes(
     map< int, map< int, int  > > &attrOrigToCurDomains )
 // -----------------------------------------------------
 {
-    int sizeAttrs = attributes.size();
+    size_t sizeAttrs = attributes.size();
 
     if ( idcsFrTo.size()             == sizeAttrs &&
          attrCurDomains.size()       == sizeAttrs && 
@@ -220,13 +220,13 @@ void Graph::configAttributes(
         
             // init new list of attributes
             {
-            for ( int i = 0; i < idcsFrTo.size(); ++i )
+            for ( size_t i = 0; i < idcsFrTo.size(); ++i )
                 attrsNew.push_back( NULL );
             }
 
             // update new list of attributes
             {
-            for( int i = 0; i < idcsFrTo.size(); ++i )
+            for( size_t i = 0; i < idcsFrTo.size(); ++i )
             {
                 attrsNew[ idcsFrTo[i] ] = attributes[i];
                 attrsNew[ idcsFrTo[i] ]->setIndex( idcsFrTo[i] );
@@ -235,7 +235,7 @@ void Graph::configAttributes(
 
             // update attribute domains
             {
-            for ( int i = 0; i < idcsFrTo.size(); ++i )
+            for ( size_t i = 0; i < idcsFrTo.size(); ++i )
                 attrsNew[ idcsFrTo[i] ]->configValues(
                     attrCurDomains[i],
                     attrOrigToCurDomains[i] );
@@ -248,7 +248,7 @@ void Graph::configAttributes(
             
             // update nodes
             {
-            for ( int i = 0; i < nodes.size(); ++i )
+            for ( size_t i = 0; i < nodes.size(); ++i )
                 nodes[i]->moveTupleVals( idcsFrTo );
             }
         }
@@ -280,7 +280,7 @@ void Graph::duplAttributes( const vector< int > &idcs )
 
     // get insertion index
     {
-    for( int i = 0; i < idcs.size(); ++i )
+    for( size_t i = 0; i < idcs.size(); ++i )
     {
         if ( idcs[i] > insIdx )
             insIdx = idcs[i];
@@ -290,7 +290,7 @@ void Graph::duplAttributes( const vector< int > &idcs )
     
     // add attributes at insertion index
     {
-    for( int i = 0; i < idcs.size(); ++i )
+    for( size_t i = 0; i < idcs.size(); ++i )
     {
         // add new attribute
         // -*-
@@ -311,13 +311,13 @@ void Graph::duplAttributes( const vector< int > &idcs )
         attributes[ insIdx + i ]->setName( 
             "Copy_of_" + attributes[ idcs[i] ]->getName() );
         {
-        for ( int j = insIdx + i + 1; j < attributes.size(); ++j )
+        for ( size_t j = insIdx + i + 1; j < attributes.size(); ++j )
             attributes[j]->setIndex( j );
         }
         
         // update nodes
         {
-        for ( int j = 0; j < nodes.size(); ++j )
+        for ( size_t j = 0; j < nodes.size(); ++j )
             nodes[j]->addTupleVal( 
                 insIdx + i,
                 nodes[j]->getTupleVal( idcs[i] ) );
@@ -346,7 +346,7 @@ void Graph::deleteAttribute( const int &idx )
     
     // get intersection of idcsToDelete & idcsCurClust
     {
-    for ( int i = 0; i < idcsCurClust.size(); ++i )
+    for ( size_t i = 0; i < idcsCurClust.size(); ++i )
     {
         // if not found, insert into new clustering
         if ( idx != idcsCurClust[i] )
@@ -363,13 +363,13 @@ void Graph::deleteAttribute( const int &idx )
     attributes[idx] = NULL;
     attributes.erase( attributes.begin() + idx );
     {
-    for ( int i = idx; i < attributes.size(); ++i )
+    for ( size_t i = idx; i < attributes.size(); ++i )
         attributes[i]->setIndex(i);
     }
         
     // update nodes
     {
-    for ( int i = 0; i < nodes.size(); ++i )
+    for ( size_t i = 0; i < nodes.size(); ++i )
         nodes[i]->delTupleVal( idx );
     }
 }
@@ -447,7 +447,7 @@ int Graph::getSizeAttributes()
 
 
 // ---------------------------------------------
-Attribute* Graph::getAttribute( const int &idx )
+Attribute* Graph::getAttribute( const size_t &idx )
 // ---------------------------------------------
 {
     if ( 0 <= idx && idx < attributes.size() )
@@ -463,7 +463,7 @@ Attribute* Graph::getAttribute( const string &name )
 {
     Attribute* result = NULL;
 
-    for ( int i = 0; i < attributes.size() && result == NULL; ++i )
+    for ( size_t i = 0; i < attributes.size() && result == NULL; ++i )
     {
         if ( attributes[i]->getName() == name )
             result = attributes[i];
@@ -482,7 +482,7 @@ int Graph::getSizeNodes()
 
 
 // -----------------------------------
-Node* Graph::getNode( const int &idx )
+Node* Graph::getNode( const size_t &idx )
 // -----------------------------------
 {
     if ( 0 <= idx && idx < nodes.size() )
@@ -501,7 +501,7 @@ int Graph::getSizeEdges()
 
 
 // -----------------------------------
-Edge* Graph::getEdge( const int &idx )
+Edge* Graph::getEdge( const size_t &idx )
 // -----------------------------------
 {
     if ( 0 <= idx && idx < edges.size() )
@@ -529,7 +529,7 @@ Cluster* Graph::getCluster( const vector< int > coord )
     {
         Cluster* temp = root;
 
-        for ( int i = 1; i < coord.size(); ++i )
+        for ( size_t i = 1; i < coord.size(); ++i )
         {
             if ( 0 <= coord[i] && coord[i] < temp->getSizeChildren() )
                 temp = temp->getChild( coord[i] );
@@ -551,7 +551,7 @@ Cluster* Graph::getCluster( const vector< int > coord )
 
 
 // --------------------------------------
-Cluster* Graph::getLeaf( const int &idx )
+Cluster* Graph::getLeaf( const size_t &idx )
 // --------------------------------------
 {
     Cluster* result = NULL;
@@ -570,7 +570,7 @@ int Graph::getSizeLeaves()
 
 
 // ---------------------------------------
-Bundle* Graph::getBundle( const int &idx )
+Bundle* Graph::getBundle( const size_t &idx )
 // ---------------------------------------
 {
     Bundle* result = NULL;
@@ -687,7 +687,6 @@ void Graph::calcAttrCorrl(
     int sizeNodes    = 0;
     int domIdx1      = 0;
     int domIdx2      = 0;
-    int count        = 0;
     vector< int >::iterator it;
     vector< int > toErase;
 
@@ -769,7 +768,7 @@ void Graph::calcAttrCorrl(
             }
 
             {
-            for ( int j = 0; j < toErase.size(); ++j )
+            for ( size_t j = 0; j < toErase.size(); ++j )
 			{
 				// brackets around (toErase[j] - j) REALLY important
                 number[i].erase( number[i].begin() + (toErase[j] - j) );
@@ -888,7 +887,7 @@ void Graph::calcAttrCorrl(
                 ++count;
             }
 
-            for ( int j = 0; j < toErase.size(); ++j )
+            for ( size_t j = 0; j < toErase.size(); ++j )
                 number[i].erase( number[i].begin() + toErase[j] - j );
         }
     }
@@ -934,13 +933,13 @@ void Graph::calcAttrCombn(
     getDescNodesInCluster( clust, nodesInClst );
 
     // calc results
-    for ( int i = 0; i < nodesInClst.size(); ++i )
+    for ( size_t i = 0; i < nodesInClst.size(); ++i )
     {
         key  = 0;
         node = nodesInClst[i];
 
         // calc key
-        for ( int j = 0; j < attrIndcs.size(); ++j )
+        for ( size_t j = 0; j < attrIndcs.size(); ++j )
         {
             attr = getAttribute( attrIndcs[j] );
             card = attr->getSizeCurValues();
@@ -954,7 +953,7 @@ void Graph::calcAttrCombn(
             else
                 summand = 0;
 
-            for ( int k = j+1; k < attrIndcs.size(); ++k )
+            for ( size_t k = j+1; k < attrIndcs.size(); ++k )
             {
                 attr = getAttribute( attrIndcs[k] );
                 card = attr->getSizeCurValues();
@@ -970,7 +969,7 @@ void Graph::calcAttrCombn(
         if ( keyToCombn.find( key ) == keyToCombn.end() )
         {
             vector< int > v;
-            for ( int j = 0; j < attrIndcs.size(); ++j )
+            for ( size_t j = 0; j < attrIndcs.size(); ++j )
             {
                 attr = getAttribute( attrIndcs[j] );
                 card = attr->getSizeCurValues();
@@ -1041,13 +1040,13 @@ void Graph::calcAttrCombn(
     getDescNodesInCluster( clust, nodesInClst );
 
     // calc results
-    for ( int i = 0; i < nodesInClst.size(); ++i )
+    for ( size_t i = 0; i < nodesInClst.size(); ++i )
     {
         key  = 0;
         node = nodesInClst[i];
 
         // calc key
-        for ( int j = 0; j < attrIndcs.size(); ++j )
+        for ( size_t j = 0; j < attrIndcs.size(); ++j )
         {
             attr = getAttribute( attrIndcs[j] );
             card = attr->getSizeCurValues();
@@ -1061,7 +1060,7 @@ void Graph::calcAttrCombn(
             else
                 summand = 0;
 
-            for ( int k = j+1; k < attrIndcs.size(); ++k )
+            for ( size_t k = j+1; k < attrIndcs.size(); ++k )
             {
                 attr = getAttribute( attrIndcs[k] );
                 card = attr->getSizeCurValues();
@@ -1077,7 +1076,7 @@ void Graph::calcAttrCombn(
         if ( keyToCombn.find( key ) == keyToCombn.end() )
         {
             vector< int > v;
-            for ( int j = 0; j < attrIndcs.size(); ++j )
+            for ( size_t j = 0; j < attrIndcs.size(); ++j )
             {
                 attr = getAttribute( attrIndcs[j] );
                 card = attr->getSizeCurValues();
@@ -1130,13 +1129,13 @@ void Graph::calcAttrCombn(
     getDescNodesInCluster( clust, nodesInClst );
 
     // calc results
-    for ( int i = 0; i < nodesInClst.size(); ++i )
+    for ( size_t i = 0; i < nodesInClst.size(); ++i )
     {
         key  = 0;
         node = nodesInClst[i];
 
         // calc key
-        for ( int j = 0; j < attrIndcs.size(); ++j )
+        for ( size_t j = 0; j < attrIndcs.size(); ++j )
         {
             attr = getAttribute( attrIndcs[j] );
             card = attr->getSizeCurValues();
@@ -1150,7 +1149,7 @@ void Graph::calcAttrCombn(
             else
                 summand = 0;
 
-            for ( int k = j+1; k < attrIndcs.size(); ++k )
+            for ( size_t k = j+1; k < attrIndcs.size(); ++k )
             {
                 attr = getAttribute( attrIndcs[k] );
                 card = attr->getSizeCurValues();
@@ -1210,13 +1209,13 @@ void Graph::calcAttrCombn(
     getDescNodesInCluster( clust, nodesInClst );
 
     // calc results
-    for ( int i = 0; i < nodesInClst.size(); ++i )
+    for ( size_t i = 0; i < nodesInClst.size(); ++i )
     {
         key  = 0;
         node = nodesInClst[i];
 
         // calc key
-        for ( int j = 0; j < attrs.size(); ++j )
+        for ( size_t j = 0; j < attrs.size(); ++j )
         {
             attr = attrs[j];
             card = attr->getSizeCurValues();
@@ -1230,7 +1229,7 @@ void Graph::calcAttrCombn(
             else
                 summand = 0;
 
-            for ( int k = j+1; k < attrs.size(); ++k )
+            for ( size_t k = j+1; k < attrs.size(); ++k )
             {
                 attr = attrs[k];
                 card = attr->getSizeCurValues();
@@ -1283,12 +1282,9 @@ bool Graph::hasMultAttrCombns(
 // ------------------------------------------------------------------
 {
     bool result = false;
-    int  combns = 1;
-
     int  numAttrs  = 0;
     int  cardAttr  = 0;
     int  sizeNodes = 0;
-    int  posCombns = 1;
     int  mapFirst  = 0;
     int  map       = 0;
     int  summand   = 0;
@@ -1492,7 +1488,7 @@ int Graph::calcMaxNumCombns( const vector< int > &attrIdcs )
     Attribute* attribute = NULL;
     int cardinality      = 0;
 
-    for ( int i = 0; i < attrIdcs.size(); ++i )
+    for ( size_t i = 0; i < attrIdcs.size(); ++i )
     {
         attribute   = getAttribute( attrIdcs[i] );
         cardinality = attribute->getSizeCurValues();
@@ -1512,7 +1508,7 @@ int Graph::calcMaxNumCombns( const vector< int > &attrIdcs )
 void Graph::deleteAttributes()
 // ---------------------------
 {
-    for ( int i = 0; i < attributes.size(); ++i )
+    for ( size_t i = 0; i < attributes.size(); ++i )
     {
         delete attributes[i];
         attributes[i] = NULL;
@@ -1536,7 +1532,7 @@ void Graph::addNode( Node* n )
 void Graph::deleteNodes()
 // ----------------------
 {
-	for ( int i = 0; i < nodes.size(); ++i )
+	for ( size_t i = 0; i < nodes.size(); ++i )
     {
 		delete nodes[i];
         nodes[i] = NULL;
@@ -1557,7 +1553,7 @@ void Graph::addEdge( Edge* e )
 void Graph::deleteEdges()
 // ----------------------
 {
-	for ( int i = 0; i < edges.size(); ++i )
+	for ( size_t i = 0; i < edges.size(); ++i )
     {
 		delete edges[i];
         edges[i] = NULL;
@@ -1685,7 +1681,7 @@ void Graph::clustClusterOnAttr(
 
     // update clust
     {
-    for ( int i = 0; i < clstTmp.size(); ++i )
+    for ( size_t i = 0; i < clstTmp.size(); ++i )
     {
         if ( clstTmp[i]->getSizeNodes() > 0 )
         {
@@ -1825,7 +1821,7 @@ void Graph::updateLeaves( vector< Cluster* > &clusts )
 void Graph::clearLeaves()
 // ----------------------
 {
-    for ( int i = 0; i < leaves.size(); ++i )
+    for ( size_t i = 0; i < leaves.size(); ++i )
         leaves[i] = NULL;
     leaves.clear();
 }
@@ -1862,7 +1858,7 @@ void Graph::printClusters()
     *mediator << "Leaves:\n";
     vector< int > coord;
     {
-    for ( int i = 0; i < leaves.size(); ++i )
+    for ( size_t i = 0; i < leaves.size(); ++i )
     {
         clst = leaves[i];
         coord.clear();
@@ -1870,7 +1866,7 @@ void Graph::printClusters()
         
         *mediator << "[";
         {
-        for ( int j = 0; j < coord.size(); ++j )
+        for ( size_t j = 0; j < coord.size(); ++j )
         {
             *mediator << coord[j];
             *mediator << " ";
@@ -1907,7 +1903,7 @@ void Graph::printClusters( vector< Cluster* > &clusts )
         c->getCoord( coord );
         *mediator << "[";
         {
-        for ( int i = 0; i < coord.size(); ++i )
+        for ( size_t i = 0; i < coord.size(); ++i )
         {
             *mediator << coord[i];
             *mediator << " ";
@@ -1959,19 +1955,19 @@ void Graph::updateBundles( int &progress )
 
     // init temp data struct
     {
-    for ( int i = 0; i < leaves.size(); ++i )
+    for ( size_t i = 0; i < leaves.size(); ++i )
     {
         vector< Bundle* > v;
         temp.push_back( v );
 
-        for ( int j = 0; j < leaves.size(); ++j )
+        for ( size_t j = 0; j < leaves.size(); ++j )
             temp[i].push_back( NULL );
     }
     }
 
     // iterate over edges & update temp data struct
     {
-    for ( int i = 0; i < edges.size(); ++i )
+    for ( size_t i = 0; i < edges.size(); ++i )
     {
         idxFr = edges[i]->getInNode()->getCluster()->getIndex();
         idxTo = edges[i]->getOutNode()->getCluster()->getIndex();
@@ -2002,9 +1998,9 @@ void Graph::updateBundles( int &progress )
     // iterate over temp data struct & update bundles
     idxBdl = 0;
     {
-    for ( int i = 0; i < leaves.size(); ++i )
+    for ( size_t i = 0; i < leaves.size(); ++i )
     {
-        for ( int j = 0; j < leaves.size(); ++j )
+        for ( size_t j = 0; j < leaves.size(); ++j )
         {
             if ( temp[i][j] != NULL )
             {
@@ -2026,14 +2022,14 @@ void Graph::updateBundles( int &progress )
     bool     hasLbl;
     bool     must;
     {
-    for ( int i = 0; i < bundles.size(); ++i )
+    for ( size_t i = 0; i < bundles.size(); ++i )
     {
         labels.clear();
         bundles[i]->getLabels( labels );
         inClust  = bundles[i]->getInCluster();
         outClust = bundles[i]->getOutCluster(); 
 
-        for ( int j = 0; j < labels.size(); ++j )
+        for ( size_t j = 0; j < labels.size(); ++j )
         {
             must = true;
             for ( int k = 0; k < inClust->getSizeNodes() && must == true; ++k )
@@ -2081,19 +2077,19 @@ void Graph::updateBundles()
 
     // init temp data struct
     {
-    for ( int i = 0; i < leaves.size(); ++i )
+    for ( size_t i = 0; i < leaves.size(); ++i )
     {
         vector< Bundle* > v;
         temp.push_back( v );
 
-        for ( int j = 0; j < leaves.size(); ++j )
+        for ( size_t j = 0; j < leaves.size(); ++j )
             temp[i].push_back( NULL );
     }
     }
 
     // iterate over edges & update temp data struct
     {
-    for ( int i = 0; i < edges.size(); ++i )
+    for ( size_t i = 0; i < edges.size(); ++i )
     {
         idxFr = edges[i]->getInNode()->getCluster()->getIndex();
         idxTo = edges[i]->getOutNode()->getCluster()->getIndex();
@@ -2118,9 +2114,9 @@ void Graph::updateBundles()
     // iterate over temp data struct & update bundles
     idxBdl = 0;
     {
-    for ( int i = 0; i < leaves.size(); ++i )
+    for ( size_t i = 0; i < leaves.size(); ++i )
     {
-        for ( int j = 0; j < leaves.size(); ++j )
+        for ( size_t j = 0; j < leaves.size(); ++j )
         {
             if ( temp[i][j] != NULL )
             {
@@ -2141,7 +2137,7 @@ void Graph::updateBundles()
 void Graph::deleteBundles()
 // ------------------------
 {
-	for ( int i = 0; i < bundles.size(); ++i )
+	for ( size_t i = 0; i < bundles.size(); ++i )
     {
 		delete bundles[i];
         bundles[i] = NULL;
@@ -2155,7 +2151,7 @@ void Graph::printBundles()
 // -----------------------
 {
     *mediator << "Bundles:\n";
-    for ( int i = 0; i < bundles.size(); ++i )
+    for ( size_t i = 0; i < bundles.size(); ++i )
     {
         *mediator << bundles[i]->getIndex();
         *mediator << ") ";

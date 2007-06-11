@@ -167,14 +167,14 @@ protected:
     Position2D posFrame;
     vector< Position2D > posFramesHist;
 
-    int focusFrameIdx;
+    size_t focusFrameIdx;
 
     double scaleFrame;
     double scaleFramesHist;
 
     double offset;
-    int vsblHistIdxLft;
-    int vsblHistIdxRgt;
+    size_t vsblHistIdxLft;
+    size_t vsblHistIdxRgt;
 
     // -- declare event table ---------------------------------------
     DECLARE_EVENT_TABLE();

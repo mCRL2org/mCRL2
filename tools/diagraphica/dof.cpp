@@ -113,7 +113,7 @@ void DOF::setValue(
     const double &val )
 // --------------------
 {
-    if ( 0 <= idx && idx < values.size() )
+    if ( 0 <= idx && static_cast <size_t> (idx) < values.size() )
         values[idx] = val;
 }
 
@@ -131,7 +131,7 @@ void DOF::clearValue( const int &idx )
 // -----------------------------------
 {
     if ( values.size() > 2 &&
-         ( 0 <= idx && idx < values.size() ) )
+         ( 0 <= idx && static_cast <size_t> (idx) < values.size() ) )
     {
         values.erase( values.begin() + idx );    
     }
@@ -218,7 +218,7 @@ double DOF::getValue( const int &idx )
 // -----------------------------------
 {
     double result = -1;
-    if ( 0 <= idx && idx < values.size() )
+    if ( 0 <= idx && static_cast <size_t> (idx) < values.size() )
         result = values[idx];
     return result;
 }

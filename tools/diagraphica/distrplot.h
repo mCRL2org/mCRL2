@@ -57,7 +57,7 @@ protected:
     // ***
     //void clear();
     void setScalingTransf();
-    void displTooltip( const int &posIdx );
+    void displTooltip( const size_t &posIdx );
 
     void calcPositions();
     void clearPositions();

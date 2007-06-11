@@ -188,7 +188,7 @@ int Cluster::getCoord( const int &idx )
 // ------------------------------------
 {
     int result = -1;
-    if ( 0 <= idx && idx < coord.size() )
+    if ( 0 <= idx && static_cast <size_t> (idx) < coord.size() )
         result = coord[idx];
     return result;
 }   
@@ -230,7 +230,7 @@ int Cluster::getSizeChildren()
 Cluster* Cluster::getChild( const int &idx )
 // -----------------------------------------
 {
-    if ( 0 <= idx && idx < children.size() )
+    if ( 0 <= idx && static_cast <size_t> (idx) < children.size() )
         return children[idx];
     else
         throw new string( "Error retrieving cluster child." );
@@ -249,7 +249,7 @@ int Cluster::getSizeNodes()
 Node* Cluster::getNode( const int &idx )
 // -------------------------------------
 {
-    if ( 0 <= idx && idx < nodes.size() )
+    if ( 0 <= idx && static_cast <size_t> (idx) < nodes.size() )
         return nodes[idx];
     else
         throw new string( "Error retrieving cluster node." );
@@ -294,7 +294,7 @@ int Cluster::getSizeInBundles()
 Bundle* Cluster::getInBundle( const int &idx )
 // -------------------------------------------
 {
-	if ( 0 <= idx && idx < inBundles.size() )
+	if ( 0 <= idx && static_cast <size_t> (idx) < inBundles.size() )
 		return inBundles[idx];
 	else
         throw new string( "Error retrieving cluster incoming bundle." );
@@ -313,7 +313,7 @@ int Cluster::getSizeOutBundles()
 Bundle* Cluster::getOutBundle( const int &idx )
 // --------------------------------------------
 {
-	if ( 0 <= idx && idx < outBundles.size() )
+	if ( 0 <= idx && static_cast <size_t> (idx) < outBundles.size() )
 		return outBundles[idx];
 	else
         throw new string( "Error retrieving cluster outgoing bundle." );
@@ -335,7 +335,7 @@ void Cluster::clearParent()
 void Cluster::clearChildren()
 // --------------------------
 {
-    for ( int i = 0; i < children.size(); ++i )
+    for ( size_t i = 0; i < children.size(); ++i )
         children[i] = NULL;
     children.clear();
 }
@@ -345,7 +345,7 @@ void Cluster::clearChildren()
 void Cluster::clearNodes()
 // -----------------------
 {
-    for ( int i = 0; i < nodes.size(); ++i )
+    for ( size_t i = 0; i < nodes.size(); ++i )
         nodes[i] = NULL;
     nodes.clear();
 }
@@ -364,7 +364,7 @@ void Cluster::clearAttribute()
 void Cluster::clearInBundles()
 // ---------------------------
 {
-	for ( int i = 0; i < inBundles.size(); ++i )
+	for ( size_t i = 0; i < inBundles.size(); ++i )
 		inBundles[i] = NULL;
     inBundles.clear();
 }
@@ -374,7 +374,7 @@ void Cluster::clearInBundles()
 void Cluster::clearOutBundles()
 // ----------------------------
 {
-	for ( int i = 0; i < outBundles.size(); ++i )
+	for ( size_t i = 0; i < outBundles.size(); ++i )
 		outBundles[i] = NULL;
     outBundles.clear();
 }

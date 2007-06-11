@@ -69,7 +69,7 @@ public:
         const int &leafIdx,
         ColorRGB &col );
     void unmarkLeaves();
-    void markBundle( const int &idx );
+    void markBundle( const size_t &idx );
     void unmarkBundles();
     
     void handleSendDgrmSglToSiml();
@@ -157,13 +157,13 @@ protected:
 
     void handleShowDiagram( const int &dgrmIdx );
     void handleDragDiagram();
-    void handleRwndDiagram( const int &dgrmIdx );
-    void handlePrevDiagram( const int &dgrmIdx );
-    void handlePlayDiagram( const int &dgrmIdx );
-    void handleNextDiagram( const int &dgrmIdx );
+    void handleRwndDiagram( const size_t &dgrmIdx );
+    void handlePrevDiagram( const size_t &dgrmIdx );
+    void handlePlayDiagram( const size_t &dgrmIdx );
+    void handleNextDiagram( const size_t &dgrmIdx );
 
     void showDiagram( const int &dgrmIdx );
-    void hideDiagram( const int &dgrmIdx );
+    void hideDiagram( const size_t &dgrmIdx );
     
     // -- hit detection ---------------------------------------------
     void processHits(  
@@ -220,8 +220,8 @@ protected:
     vector< int >                  frameIdxDgrm;    // current index into framesDgrm
     vector< Position2D >           posDgrm;         // positions of diagrams
     int                            dragIdxDgrm;     // diagram currently being dragged
-    int                            animIdxDgrm;     // diagram currently being animated
-    int                            currIdxDgrm;
+    size_t                         animIdxDgrm;     // diagram currently being animated
+    size_t                         currIdxDgrm;
     
     // simulator
     int prevFrameIdxClust;

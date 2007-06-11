@@ -73,17 +73,17 @@ public:
 
     // -- classification (binning ) ---------------------------------
     static void classEqualIntervals(
-        const int &numClasses,
+        const size_t &numClasses,
         const vector< double > &values,
         vector< string > &legendClasses,
         map< double, int > &valuesToClasses );
     static void classifyQuantiles(
-        const int &numClasses,
+        const size_t &numClasses,
         set< double > &values,
         vector< string > &legendClasses,
         map< double, int > &valuesToClasses );
     static void classifyMeanStandardDeviation(
-        const int &numClasses,
+        const size_t &numClasses,
         const vector< double > &values,
         vector< string > &legendClasses,
         map< double, int > &valuesToClasses );

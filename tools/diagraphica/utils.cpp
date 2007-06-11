@@ -281,7 +281,7 @@ double Utils::mean( const vector< double > vals )
     double result = 0;
     if ( vals.size() > 0 )
     {
-        for ( int i = 0; i < vals.size(); ++i )
+        for ( size_t i = 0; i < vals.size(); ++i )
             result += vals[i];
         result = result/(double)vals.size();
     }
@@ -298,7 +298,7 @@ double Utils::variance( const vector< double > vals )
 
     if ( vals.size() > 1 )
     {
-        for ( int i = 0; i < vals.size(); ++i )
+        for ( size_t i = 0; i < vals.size(); ++i )
             result += (vals[i]-mean)*(vals[i]-mean);
         result = result/(double)(vals.size()-1);
     }
@@ -322,7 +322,7 @@ double Utils::stdDev( const vector< double > vals )
 
 // --------------------------------------
 void Utils::classEqualIntervals(
-    const int &numClasses,
+    const size_t &numClasses,
     const vector< double > &values,
     vector< string > &legendClasses,
     map< double, int > &valuesToClasses )
@@ -341,7 +341,7 @@ void Utils::classEqualIntervals(
         
         // init low, high and range
         low = high = values[0];
-        for ( int i = 0; i < values.size(); ++i )
+        for ( size_t i = 0; i < values.size(); ++i )
         {
             if ( values[i] < low )
                 low = values[i];
@@ -355,7 +355,7 @@ void Utils::classEqualIntervals(
 
         // init legend
         string lbl;
-        for ( int i = 0; i < numClasses; ++i )
+        for ( size_t i = 0; i < numClasses; ++i )
         {
             lbl  = "[";
             lbl += dblToStr( low + i*itv );
@@ -371,7 +371,7 @@ void Utils::classEqualIntervals(
         
         // calc mapping of values to classes
         int idx;
-        for ( int i = 0; i < values.size(); ++i )
+        for ( size_t i = 0; i < values.size(); ++i )
         {
             if ( values[i] == high )
                 idx = numClasses-1;
@@ -386,7 +386,7 @@ void Utils::classEqualIntervals(
 
 // --------------------------------------
 void Utils::classifyQuantiles(
-    const int &numClasses,
+    const size_t &numClasses,
     set< double > &values,
     vector< string > &legendClasses,
     map< double, int > &valuesToClasses )
@@ -405,8 +405,8 @@ void Utils::classifyQuantiles(
         numInClass = (double)values.size()/(double)(numClasses);
 
         // calc mapping of values to classes, init legend
-        int idx = 0;
-        int ctr = 0;
+        size_t idx = 0;
+        size_t ctr = 0;
         double min, max;
         string lbl;
         set< double >::iterator it;
@@ -458,7 +458,7 @@ void Utils::classifyQuantiles(
 
 // ---------------------------------------
 void Utils::classifyMeanStandardDeviation(
-    const int &numClasses,
+    const size_t &numClasses,
     const vector< double > &values,
     vector< string > &legendClasses,
     map< double, int > &valuesToClasses )
@@ -476,10 +476,10 @@ void Utils::classifyMeanStandardDeviation(
         double sdev = Utils::stdDev( values );
 
         // calc mapping of values to classes
-        int idx;
-        for ( int i = 0; i < values.size(); ++i )
+        size_t idx;
+        for ( size_t i = 0; i < values.size(); ++i )
         {
-            idx  = floor( (values[i]-mean)/sdev );
+            idx  = static_cast <size_t> (floor( (values[i]-mean)/sdev ));
             idx += numClasses/2;
 
             if ( idx < 0 )
@@ -492,7 +492,7 @@ void Utils::classifyMeanStandardDeviation(
 
         // init legend
         string lbl;
-        for ( int i = 0; i < numClasses; ++i )
+        for ( size_t i = 0; i < numClasses; ++i )
         {
             if ( i == 0 )
                 lbl = "(-inf";

@@ -23,24 +23,24 @@ public:
 	
     // -- set functions ---------------------------------------------
     void addShape( Shape *s );
-    void moveShapeToFront( const int &idx );
-    void moveShapeToBack( const int &idx );
-    void moveShapeForward( const int &idx );
-    void moveShapeBackward( const int &idx );
+    void moveShapeToFront( const size_t &idx );
+    void moveShapeToBack( const size_t &idx );
+    void moveShapeForward( const size_t &idx );
+    void moveShapeBackward( const size_t &idx );
 
     void setShowGrid( const bool &flag );
     void setSnapGrid( const bool &flag );
     
     // -- get functions ---------------------------------------------
     int getSizeShapes();
-    Shape* getShape( const int &idx );
+    Shape* getShape( const size_t &idx );
 
     bool getSnapGrid();
     double getGridInterval( GLCanvas* canvas );
     double getAngleInterval();
 
     // -- clear functions -------------------------------------------
-    void deleteShape( const int &idx );
+    void deleteShape( const size_t &idx );
 
     // -- vis functions ---------------------------------------------
     void visualize( 

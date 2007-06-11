@@ -136,7 +136,7 @@ void Frame::displAttrInfo(
     listCtrlAttr->DeleteAllItems();
 
     // display new items
-    for ( int i = 0; i < names.size(); ++i )
+    for ( size_t i = 0; i < names.size(); ++i )
     {
         // add row
         listCtrlAttr->InsertItem( i, wxString( wxT("") ) );
@@ -213,7 +213,7 @@ void Frame::displDomainInfo(
     listCtrlDomain->DeleteAllItems();
 
     // display new items
-    for ( int i = 0; i < values.size(); ++i )
+    for ( size_t i = 0; i < values.size(); ++i )
     {
         // add row
         listCtrlDomain->InsertItem( indices[i], wxString( wxT("") ) );
@@ -275,7 +275,7 @@ void Frame::displDOFInfo(
     listCtrlDOF->DeleteAllItems();
 
     // display items
-    for ( int i = 0; i < degsOfFrdmIndcs.size(); ++i )
+    for ( size_t i = 0; i < degsOfFrdmIndcs.size(); ++i )
     {
         // add row
         listCtrlDOF->InsertItem( i, wxString( wxT("") ) );
@@ -527,7 +527,7 @@ void Frame::displAttrInfoClust(
         listCtrlClust->DeleteAllItems();
 
         // display new items
-        for ( int i = 0; i < indices.size(); ++i )
+        for ( size_t i = 0; i < indices.size(); ++i )
         {
             // add row
             listCtrlClust->InsertItem( indices[i], wxString( wxT("") ) );
@@ -932,7 +932,7 @@ void Frame::initFrame()
 {
     int wMax = GetMaxSize().GetWidth();
     int hMax = GetMaxSize().GetHeight();
-    int wCur, hCur;
+    size_t hCur;
     
     // set min and max size
     SetSizeHints(
@@ -2846,7 +2846,7 @@ void Frame::onListCtrlSelect( wxListEvent &e )
                 wxLIST_STATE_SELECTED );
             while( item != -1 )
             {
-                if ( listCtrlAttr->GetItemData( item ) != e.GetData() )
+                if ( listCtrlAttr->GetItemData( item ) != static_cast < size_t > (e.GetData()) )
                 {
                     listCtrlAttr->SetItemState(
                         item, 
@@ -3003,9 +3003,6 @@ void Frame::onListCtrlSelect( wxListEvent &e )
     {
         if ( mediator->getClustMode() == Mediator::CLUST_DISTR_PLOT )
         {
-            // get idx of last selected item
-            int attrIdx = e.GetData();
-            
             // deselect all other items
             long item = -1;
             item = listCtrlClust->GetNextItem(
@@ -3014,7 +3011,7 @@ void Frame::onListCtrlSelect( wxListEvent &e )
                 wxLIST_STATE_SELECTED );
             while( item != -1 )
             {
-                if ( listCtrlClust->GetItemData( item ) != e.GetData() )
+                if ( listCtrlClust->GetItemData( item ) != static_cast < size_t > (e.GetData()) )
                 {
                     listCtrlClust->SetItemState(
                         item, 
@@ -3032,7 +3029,6 @@ void Frame::onListCtrlSelect( wxListEvent &e )
         else if ( mediator->getClustMode() == Mediator::CLUST_CORRL_PLOT )
         {
             // get idx of last selected item
-            int attrIdx1 = e.GetData();
             int attrIdx2 = -1;
             
             // deselect all but second last item & get its idx
@@ -3044,7 +3040,7 @@ void Frame::onListCtrlSelect( wxListEvent &e )
                 wxLIST_STATE_SELECTED );
             while( item != -1 )
             {
-                if ( listCtrlClust->GetItemData( item ) != e.GetData() )
+                if ( listCtrlClust->GetItemData( item ) != static_cast < size_t > (e.GetData()) )
                 {
                     if ( selCount > 2 )
                     {
@@ -3092,7 +3088,7 @@ void Frame::onListCtrlBeginDrag( wxListEvent &e )
         // drag start
         wxDropSource source( listCtrlAttr );
         source.SetData( data );
-        wxDragResult result = source.DoDragDrop( wxDrag_DefaultMove );
+        source.DoDragDrop( wxDrag_DefaultMove );
     }
     else if ( e.GetId() == ID_LIST_CTRL_DOMAIN )
     {
@@ -3121,7 +3117,7 @@ void Frame::onListCtrlBeginDrag( wxListEvent &e )
         // drag start
         wxDropSource source( listCtrlDomain );
         source.SetData( data );
-        wxDragResult result = source.DoDragDrop( wxDrag_DefaultMove );
+        source.DoDragDrop( wxDrag_DefaultMove );
     }
 }
 
@@ -3447,8 +3443,6 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         int    attrIdx = -1;
         string name    = "";
 
-        wxTextEntryDialog* dlg = NULL;
-        
         // get attribute index
         item = listCtrlAttr->GetNextItem(
             item,
@@ -3503,7 +3497,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         mediator->getAttributeNames( indcs, names );
 
         wxString msg( wxT("Are you sure you want to delete \'") );
-        for ( int i = 0; i < names.size(); ++i )
+        for ( size_t i = 0; i < names.size(); ++i )
         {
             msg.Append( names[i] );
             if ( i < names.size()-1 )
@@ -3602,9 +3596,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         long   item    = -1;
         int    attrIdx = -1;
         string name    = "";
-        int    selCnt  = listCtrlDomain->GetSelectedItemCount();
         vector< int > domIdcs;
-        wxTextEntryDialog* dlg = NULL;
         
         // get attribute index
         item = listCtrlAttr->GetNextItem(
@@ -3680,8 +3672,6 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         string name    = "";
         vector< int > domIdcs;
         
-        wxTextEntryDialog* dlg = NULL;
-        
         // get attribute index
         item = listCtrlAttr->GetNextItem(
             item,
@@ -3726,7 +3716,6 @@ void Frame::onPopupMenu( wxCommandEvent &e )
     {
         long item   = -1;
         int  idDOF  = -1;
-        int  flag   = wxLIST_HITTEST_ONITEM;
         
         item = listCtrlDOF->GetNextItem(
             item,
