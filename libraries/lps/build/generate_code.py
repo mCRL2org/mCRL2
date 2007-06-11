@@ -385,12 +385,12 @@ def main():
     parser.add_option("-c", "--constructors", action="store_true", help="generate constructor functions from internal mcrl2 format")
     (options, args) = parser.parse_args()
 
-    filename = '../../../../specs/mcrl2.internal.txt'
+    filename = '../../../specs/mcrl2.internal.txt'
     rules = parse_ebnf(filename)
 
     if options.soundness_checks:
         ignored_phases = ['-tc', '-lin', '-di', '-rft', '.tc']
-        filename = '../include/lps/detail/soundness_checks.h'
+        filename = '../include/mcrl2/basic/detail/soundness_checks.h'
         generate_soundness_check_functions(rules, filename, ignored_phases)
 
     if options.libstruct:
@@ -400,7 +400,7 @@ def main():
 
     if options.constructors:
         ignored_phases = []
-        filename = '../include/lps/detail/constructors.h'
+        filename = '../include/mcrl2/basic/detail/constructors.h'
         generate_constructor_functions(rules, filename, ignored_phases)
 
 if __name__ == "__main__":
