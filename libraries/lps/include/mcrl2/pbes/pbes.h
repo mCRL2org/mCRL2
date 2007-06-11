@@ -308,9 +308,9 @@ class pbes
     bool load(const std::string& filename)
     {
       aterm_appl t = atermpp::read_from_named_file(filename);
-      assert(gsIsPBES(t));
       if (!t)
         return false;
+      assert(gsIsPBES(t));
       aterm_appl::iterator i = t.begin();
       m_data          = data_specification(*i++);
       m_equations     = equation_system(pbes_equation_list(*i++));
