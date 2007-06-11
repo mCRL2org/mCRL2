@@ -429,7 +429,8 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
     }
   }
   else if (pbes_expr::is_or(p))
-  { bes::bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
+  { 
+    bes::bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
                             pbes_expr::lhs(p),variable_index,nr_of_generated_variables,to_bdd);
     if (bes::is_true(b1))
     { return b1;
@@ -542,7 +543,6 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
            vlist!=current_variable.parameters().end() ; vlist++)
     { 
       assert(elist!=current_variable_instantiation.parameters().end());
-      // ATfprintf(stderr,"ASS %t\n%t\n",(ATermAppl)*vlist,*elist);
       rewriter->setSubstitution(*vlist,rewriter->toRewriteFormat(*elist));
       elist++;
     }
@@ -555,7 +555,6 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
                       new_pbes_expression,variable_index,nr_of_generated_variables,
                       tool_options.opt_outputformat=="none");
     
-    // ATfprintf(stderr,"BES: %t\n",(ATerm)new_bes_expression);
 
     bes_equations.add_equation(
               nr_of_processed_variables+1,
@@ -674,8 +673,6 @@ static bes_expression evaluate_bex(
      by approximation, for all those variables that have a 
      rank higher or equal to the variable rank */
 
-  // ATfprintf(stderr,"Evaluate_bex %t\n",(ATerm)b);
-  
   if (is_if(b))
   { 
     bes::variable_type v=bes::get_variable(condition(b));
@@ -710,7 +707,13 @@ static bool solve_bes()
 
   /* Set the approximation to its initial value */
   for(bes::variable_type v=bes_equations.nr_of_equations(); v>0; v--)
-  { if (bes_equations.get_fixpoint_symbol(v)==fixpoint_symbol::mu())
+  { if (bes::is_true(bes_equations.get_rhs(v)))
+    { approximation[v]=bes::true_();
+    }
+    else if (bes::is_false(bes_equations.get_rhs(v)))
+    { approximation[v]=bes::false_();
+    }
+    else if (bes_equations.get_fixpoint_symbol(v)==fixpoint_symbol::mu())
     { approximation[v]=bes::false_();
     } 
     else
@@ -721,7 +724,8 @@ static bool solve_bes()
   for(unsigned long current_rank=bes_equations.max_rank;
       current_rank>0 ; current_rank--)
   { 
-    std::vector<std::set <bes::variable_type> > variable_occurrence_set(bes_equations.nr_of_equations()+1);
+    std::vector<std::set <bes::variable_type> > 
+              variable_occurrence_set(bes_equations.nr_of_equations()+1);
     set <bes::variable_type> todo;
 
     /* put all variables of equations in the variable occurrence set, provided
@@ -740,18 +744,17 @@ static bool solve_bes()
     /* Calculate the stable solution for the current rank */
     for( ; todo.size()>0 ; )
     { set<bes::variable_type>::iterator w= todo.begin();
+      bes::variable_type w_value=*w;
       todo.erase(w);
-      // cerr << "Evaluate " << *w << "  " << bes_equations.get_rank(*w) << endl;
-      for(set <bes::variable_type>::iterator u=variable_occurrence_set[*w].begin();
-          u!=variable_occurrence_set[*w].end(); u++)
-      { bes_expression t=evaluate_bex(bes_equations.get_rhs(*u),approximation,current_rank);
+      for(set <bes::variable_type>::iterator u=variable_occurrence_set[w_value].begin();
+          u!=variable_occurrence_set[w_value].end(); u++)
+      { 
+        bes_expression t=evaluate_bex(bes_equations.get_rhs(*u),approximation,current_rank);
         
-        // cerr << "AAAA " << *w << endl;
         assert(bes_equations.get_rank(*u)==current_rank);
         if (t!=approximation[*u])
         { approximation[*u]=t;
           todo.insert(*u);
-          // cerr << "Insert " << *u << endl;
         }
       }
     }
@@ -1037,7 +1040,7 @@ static void save_rhs_in_cwi_form(ostream &outputfile, bes_expression b)
     outputfile << "X" << get_variable(b);
   }
   else
-  { ATfprintf(stderr,"AAA %t\n",(ATerm)b);
+  { 
     gsErrorMsg("The generated equation system is not a BES. It cannot be saved in CWI-format.\n");
     exit(1);
   }

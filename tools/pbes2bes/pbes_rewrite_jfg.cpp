@@ -403,12 +403,13 @@ pbes_expression pbes_expression_substitute_and_rewrite(
   else
   { // p is a data_expression
     data_expression d = rewriter->rewrite(p);
-    if (is_true(d))
-      result = true_();
-    else if (is_false(d))
-      result = false_();
+    if (data_expr::is_true(d))
+      result = pbes_expr::true_();
+    else if (data_expr::is_false(d))
+      result = pbes_expr::false_();
     else
       result = val(d);
+    // ATfprintf(stderr," DATAEXPRESSION: %t    %t\n",(void *)d,(void *)result);
   }
   
   return result;
