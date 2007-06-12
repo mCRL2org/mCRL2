@@ -156,9 +156,9 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 	else
 	{ // p is a data_expression
 		data_expression d = rewriter->rewrite(p);
-		if (is_true(d))
+		if (data_expr::is_true(d))
 			result = true_();
-		else if (is_false(d))
+		else if (data_expr::is_false(d))
 			result = false_();
 		else
 			result = val(d);

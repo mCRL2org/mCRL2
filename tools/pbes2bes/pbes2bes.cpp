@@ -148,6 +148,8 @@ identifier_string create_propvar_name(identifier_string propvar_name, data_expre
 
 equation_system sort_names(vector< identifier_string > names_order, equation_system to_sort);
 
+ATermAppl FindDummy(ATermAppl sort, lps::pbes current_spec, ATermList no_dummy);
+
 bool process(t_tool_options const& tool_options) {
   //Load PBES
   pbes pbes_spec = load_pbes(tool_options);
@@ -368,6 +370,33 @@ pbes create_bes(pbes pbes_spec, t_tool_options tool_options)
 		exit(1);
 	}
 
+	// Instantiate free variables in the system
+	atermpp::set< data_variable > freevars = pbes_spec.free_variables();
+	if (freevars.size() > 0)
+	{
+		gsVerboseMsg("Instantiating free variables\n");
+	}
+	pbes_expression_list replace_freevars;
+	for (atermpp::set< data_variable >::iterator i = freevars.begin(); i != freevars.end(); i++)
+	{
+		pbes_expression freevar_inst = pbes_expression(FindDummy(i->sort(),pbes_spec, ATempty));
+		replace_freevars = push_front(replace_freevars, freevar_inst);
+	}
+	replace_freevars = reverse(replace_freevars);
+	// Do the replace
+	equation_system es = pbes_spec.equations();
+	equation_system instantiated_es;
+	for (equation_system::iterator i = es.begin(); i != es.end(); i++)
+	{
+		pbes_expression expr = i->formula().substitute(make_list_substitution(freevars, replace_freevars));
+		instantiated_es.push_back(pbes_equation(i->symbol(), i->variable(), expr));
+	}
+
+	pbes_expression instantiated_is_pbe = pbes_expression(pbes_spec.initial_state());
+	propositional_variable_instantiation instantiated_is = propositional_variable_instantiation(instantiated_is_pbe.substitute(make_list_substitution(freevars, replace_freevars)));
+
+	pbes_spec = pbes(pbes_spec.data(), instantiated_es, instantiated_is);
+	
 	if (tool_options.opt_strategy == "finite")
 		pbes_spec = do_finite_algorithm(pbes_spec, tool_options);
 	else if (tool_options.opt_strategy == "lazy")
@@ -375,6 +404,105 @@ pbes create_bes(pbes pbes_spec, t_tool_options tool_options)
 
 	//return new pbes
 	return pbes_spec;
+}
+
+ATermAppl FindDummy(ATermAppl sort, pbes current_spec, ATermList no_dummy)
+{
+	ATermList l;
+
+	no_dummy = ATinsert(no_dummy,(ATerm) sort);
+
+	if ( gsIsSortArrow(sort) )
+	{
+                // Take dataspec from current_spec, then take the consspec from the dataspec
+                // and take the list of opids (l) from this consspec
+		l = ATLgetArgument(ATAgetArgument(ATAgetArgument(current_spec,0),1),0);
+                
+		for (; !ATisEmpty(l); l=ATgetNext(l))
+		{
+			ATermAppl conssort = ATAgetArgument(ATAgetFirst(l),1);
+			if ( ATisEqual(conssort,sort) )
+			{
+				return ATAgetFirst(l);
+			}
+		}
+
+                // Take dataspec from current_spec, then take the mapspec from the dataspec
+                // and take the list of opids (l) from this mapspec
+		l = ATLgetArgument(ATAgetArgument(ATAgetArgument(current_spec,0),2),0);
+		for (; !ATisEmpty(l); l=ATgetNext(l))
+		{
+			ATermAppl mapsort = ATAgetArgument(ATAgetFirst(l),1);
+			if ( ATisEqual(mapsort,sort) )
+			{
+				return ATAgetFirst(l);
+			}
+		}
+	} else {
+		l = ATLgetArgument(ATAgetArgument(ATAgetArgument(current_spec,0),1),0);
+		for (; !ATisEmpty(l); l=ATgetNext(l))
+		{
+			ATermAppl conssort = ATAgetArgument(ATAgetFirst(l),1);
+			if ( ATisEqual(gsGetSortExprResult(conssort),sort) )
+			{
+				ATermList domains = gsGetSortExprDomains(conssort);
+				ATermAppl t = ATAgetFirst(l);
+	
+				bool found = true;
+				for (; !ATisEmpty(domains); domains=ATgetNext(domains))
+				{
+                                        ATermList domain = ATLgetFirst(domains);
+                                        ATermList dummies = ATmakeList0();
+                                        for (; !ATisEmpty(domain); domain=ATgetNext(domain))
+                                        {
+					        if ( ATindexOf(no_dummy,ATgetFirst(domain),0) >= 0 )
+					        {
+					  	        found = false;
+						        break;
+					        }
+                                                dummies = ATinsert(dummies, (ATerm) FindDummy(ATAgetFirst(domain), current_spec, no_dummy));
+                                        }
+                                        dummies = ATreverse(dummies);
+					t = gsMakeDataAppl(t,dummies);
+				}
+	
+				if ( found )
+				{
+					return t;
+				}
+			}
+		}
+	
+		l = ATLgetArgument(ATAgetArgument(ATAgetArgument(current_spec,0),2),0);
+		for (; !ATisEmpty(l); l=ATgetNext(l))
+		{
+			ATermAppl mapsort = ATAgetArgument(ATAgetFirst(l),1);
+			if ( ATisEqual(gsGetSortExprResult(mapsort),sort) )
+			{
+				ATermList domain = gsGetSortExprDomain(mapsort);
+				ATermAppl t = ATAgetFirst(l);
+	
+				bool found = true;
+				for (; !ATisEmpty(domain); domain=ATgetNext(domain))
+				{
+					if ( ATindexOf(no_dummy,ATgetFirst(domain),0) >= 0 )
+					{
+						found = false;
+						break;
+					}
+					t = gsMakeDataAppl1(t,FindDummy(ATAgetFirst(domain),current_spec, no_dummy));
+				}
+	
+				if ( found )
+				{
+					return t;
+				}
+			}
+		}
+	}
+
+	gsErrorMsg("could not find dummy of type %T\n",sort);
+	exit(1);
 }
 
 //function do_lazy_algorithm
