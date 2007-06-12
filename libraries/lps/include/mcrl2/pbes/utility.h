@@ -95,7 +95,7 @@ pbes_expression data2pbes(data_expression q)
   }
   else // head must be an operation id
   {
-    assert(is_data_operation(head));
+    assert(is_function(head));
     if (d::is_true(head)) {
       return p::true_();
     } else if (d::is_false(head)) {

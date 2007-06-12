@@ -10,23 +10,79 @@
 #ifndef MCRL2_DATA_FUNCTION_H
 #define MCRL2_DATA_FUNCTION_H
 
-#include "mcrl2/data/data.h"
+#include <cassert>
+#include "atermpp/aterm_appl.h"
+#include "atermpp/aterm_traits.h"
+#include "mcrl2/basic/identifier_string.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/basic/detail/soundness_checks.h"
 
 namespace lps {
 
-/// \brief Note that data_operation and function are the same.
-typedef data_operation function;
+using atermpp::aterm_appl;
+using atermpp::term_list;
+using atermpp::arg1;
 
-/// \brief Note that data_operation and function are the same.
-typedef data_operation_list function_list;
+///////////////////////////////////////////////////////////////////////////////
+// function
+/// \brief operation on data.
+///
+class function: public data_expression
+{
+  public:
+    function()
+      : data_expression(detail::constructOpId())
+    {}
 
-/// \brief Returns true if the term t is a function
+    function(aterm_appl t)
+     : data_expression(t)
+    {
+      assert(detail::check_rule_OpId(m_term));
+    }
+
+    function(identifier_string name, lps::sort s)
+     : data_expression(gsMakeOpId(name, s))
+    {}
+
+    /// Returns the name of the function.
+    ///
+    identifier_string name() const
+    {
+      return arg1(*this);
+    }
+  };
+                                                            
+///////////////////////////////////////////////////////////////////////////////
+// function_list
+/// \brief singly linked list of data operations
+///
+typedef term_list<function> function_list;
+
+/// \brief Returns true if the term t is a data operation
 inline
 bool is_function(aterm_appl t)
 {
-  return is_data_operation(t);
+  return gsIsOpId(t);
 }
 
 } // namespace lps
+
+/// INTERNAL ONLY
+namespace atermpp
+{
+using lps::function;
+
+template<>
+struct aterm_traits<function>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(function t)   { t.protect(); }
+  static void unprotect(function t) { t.unprotect(); }
+  static void mark(function t)      { t.mark(); }
+  static ATerm term(function t)     { return t.term(); }
+  static ATerm* ptr(function& t)    { return &t.term(); }
+};
+
+} // namespace atermpp
 
 #endif // MCRL2_DATA_FUNCTION_H
