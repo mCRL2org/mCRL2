@@ -695,7 +695,7 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
 		if (enumerated_sorts->get(p->sort()) != NULL)
 		{
 			//If it is of finite sort, add it to the list of finite expressions of the propvarinst
-			if (is_data_operation(*p))
+			if (is_function(*p))
 			{ // If p is a correct data operation
 				finite_expression = push_back(finite_expression, *p);
 			}
@@ -703,6 +703,7 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
 			{ // If p is a freevar
 				gsErrorMsg("The PBES contains one or more free variables in a propositional variable instantiation.\n");
 				gsErrorMsg("Try using mcrl22lps with the flag -f or --no-freevars to solve this.\n");
+				cout << "Problematic Term: " << pp(*p) << endl;
 				exit(1);
 			}
 		}
@@ -728,7 +729,7 @@ identifier_string create_propvar_name(identifier_string propvar_name, data_expre
 		// Add each parameter
 		for (data_expression_list::iterator del_i = del.begin(); del_i != del.end(); del_i++)
 		{
-			if (is_data_operation(*del_i))
+			if (is_function(*del_i))
 			{
 				// HIER MAG HET
 				propvar_name_current += "@";
@@ -738,6 +739,7 @@ identifier_string create_propvar_name(identifier_string propvar_name, data_expre
 			{ // If p is a freevar
 				gsErrorMsg("The PBES contains one or more free variables in a propositional variable instantiation.\n");
 				gsErrorMsg("Try using mcrl22lps with the flag -f or --no-freevars to solve this.\n");
+				cout << "Problematic Term: " << pp(*del_i) << endl;
 				exit(1);
 			}
 			else if (is_data_application(*del_i))

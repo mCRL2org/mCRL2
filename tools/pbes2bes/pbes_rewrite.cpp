@@ -40,6 +40,8 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 			result = right;
 		else if (is_true(right))
 			result = left;
+		else if (left == right)
+			result = left;
 		else 
 			result = and_(left,right);
 	}
@@ -55,6 +57,8 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 			result = right;
 		else if (is_false(right))
 			result = left;
+		else if (left == right)
+			result = right;
 		else 
 			result = or_(left,right);
 	}
