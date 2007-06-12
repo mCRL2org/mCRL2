@@ -1,6 +1,6 @@
 
 #include "gauss.h"
-#include "mcrl2/pbes/utility.h"
+#include "lps/pbes_utility.h"
 #include "atermpp/substitute.h"
 
 #include "mcrl2/basic/pretty_print.h"
@@ -25,14 +25,21 @@ using namespace pbes_expr;
 (pbes_expression p, pbes_expression q, BDD_Prover *prover);
 
 
- pbes_expression pbes_expression_simplify
+pbes_expression pbes_expression_simplify
 (pbes_expression p, int *nq, data_variable_list *fv, BDD_Prover *prover);
 
 
-// some extra needed functions on data_variable_lists
+data_expression data_expression_simplify
+(data_expression d, int *nq, data_variable_list *fv, BDD_Prover *prover);
+
+
+// some extra needed functions on data_variable_lists and data_expressions
  bool var_in_list(data_variable vx, data_variable_list y);
  data_variable_list intersect(data_variable_list x, data_variable_list y);
+ data_variable_list substract(data_variable_list x, data_variable_list y);
  data_variable_list dunion(data_variable_list x, data_variable_list y);
+
+void free_vars_and_no_quants(data_expression d, int* nq, data_variable_list *fv);
 
 
 
@@ -338,7 +345,7 @@ gsVerboseMsg("update_expression: result is %s\n",pp(ee).c_str());
  namespace sname = lps::sort_expr;
  
  gsVerboseMsg("Data_to_pbes_lazy: Head is %s, args are %s\n", 
-							pp(d.head()).c_str(), pp(d.arguments()).c_str());
+			pp(d.head()).c_str(), pp(d.arguments()).c_str());
  
  if (is_data_variable(d.head()))
 	// d is either a predicate or a data variable
@@ -424,8 +431,10 @@ pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* prover)
 
 {
 
-  //gsVerboseMsg("REWRITE_PBES_EXPRESSION %s\n", pp(e).c_str());
- 
+  gsVerboseMsg("REWRITE_PBES_EXPRESSION %s\n", pp(e).c_str());
+  if (is_data(e)) gsVerboseMsg("data expression already!");
+
+
  // translate e to a data_expression
  //gsVerboseMsg(" ->pbes_to_data: %s\n",pp(e).c_str());
  data_expression de = pbes_to_data(e); 
@@ -450,6 +459,7 @@ pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* prover)
  //gsVerboseMsg(" ->data_to_pbes %s\n",pp(d).c_str());
  e = data_to_pbes_lazy(d);
  //gsVerboseMsg(" <-data_to_pbes %s\n",pp(e).c_str());
+  if (is_data(e)) gsVerboseMsg("data expression!");
  
  return e;
 }
@@ -458,22 +468,44 @@ pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* prover)
 
 
 
-
-
 //======================================================================
+// Rewrites (simplifies) e according to the
+// rewriting rules of first-order logic.
+// only works for quantifier-free expressions.
+data_expression rewrite_data_expression(data_expression e, BDD_Prover* prover)
+//=====================================
+
+{
+  gsVerboseMsg("REWRITE_DATA_EXPRESSION %s\n", pp(e).c_str());
+ // simplify using the prover
+ //gsVerboseMsg(" ->prover: %s\n",pp(de).c_str());
+ prover->set_formula(e); 
+ //gsVerboseMsg(" <--Bdd from prover: %P\n", prover->get_bdd());
+
+ data_expression d = prover->get_bdd();
+ 
+ return d;
+}
+//======================================================================
+
+
+
+
 
 
 
 //======================================================================
 // eliminates some quantifiers
-// nq  := the number of quantifiers left in expr after simplification
-// fv := the set of names of the data variables occuring FREE in expr, 
+// OUT nq  := the number of quantifiers left in expr after simplification
+// OUT fv := the set of names of the data variables occuring FREE in expr, 
 //        after simplification
  pbes_expression pbes_expression_simplify
 (pbes_expression expr, int* nq, data_variable_list *fv, BDD_Prover* prover)
 {
+  gsVerboseMsg("PBES_EXPRESSION_SIMPLIFY %s\n",pp(expr).c_str());
   *fv = data_variable_list();
   *nq = 0;
+  pbes_expression expr_simplified;
   if (is_and(expr))
     {
       // simplify left and right
@@ -481,12 +513,9 @@ pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* prover)
       data_variable_list fvlhs,fvrhs;
       pbes_expression slhs = pbes_expression_simplify(lhs(expr),&nqlhs,&fvlhs,prover);
       pbes_expression srhs = pbes_expression_simplify(rhs(expr),&nqrhs,&fvrhs,prover);
-      if ((is_false(slhs))||(is_false(srhs))){ return (false_());};
-      if (is_true(slhs)) { *nq = nqrhs; *fv = fvrhs; return srhs; };
-      if (is_true(srhs)) { *nq = nqlhs; *fv = fvlhs; return slhs; };      
       *nq = nqlhs + nqrhs;
       *fv = dunion(fvlhs,fvrhs);
-      return(and_(slhs,srhs));	
+      expr_simplified = and_(slhs,srhs);	
     }
   else if (is_or(expr)) 
     {
@@ -495,12 +524,9 @@ pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* prover)
       data_variable_list fvlhs,fvrhs;
       pbes_expression slhs = pbes_expression_simplify(lhs(expr),&nqlhs,&fvlhs,prover);
       pbes_expression srhs = pbes_expression_simplify(rhs(expr),&nqrhs,&fvrhs,prover);
-      if ((is_true(slhs))||(is_true(srhs))){ *nq = 0; return (true_());};
-      if (is_false(slhs)) { *nq = nqrhs; *fv = fvrhs; return srhs; };
-      if (is_false(srhs)) { *nq = nqlhs; *fv = fvlhs; return slhs; };      
       *nq = nqlhs + nqrhs;
       *fv = dunion(fvlhs,fvrhs);     
-      return(or_(slhs,srhs));	
+      expr_simplified = or_(slhs,srhs);	
     }      
   else if (is_forall(expr) || is_exists(expr))
     {
@@ -516,19 +542,91 @@ pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* prover)
       if (new_quant_vars.empty()) 
 	{
 	  *nq = nq_under;
-	  return s_under;
+	  expr_simplified = s_under;
 	}
       // else, keep it
-      *nq = nq_under + 1;
-      if (is_forall(expr))
-	return (forall(new_quant_vars, s_under));
-      else 
-	return (exists(new_quant_vars, s_under));
+      else
+	{
+	  *nq = nq_under + 1;
+	  if (is_forall(expr))
+	    expr_simplified = forall(new_quant_vars, s_under);
+	  else 
+	    expr_simplified = exists(new_quant_vars, s_under);
+	}
     }
-  //  else // expr is a predicate variable, true, false or data
-  return expr; 
+  else if (is_data(expr))
+    {
+      // Sending to the prover.
+      // !! don't know what happens if expr contains quantifiers.
+      expr_simplified = val(rewrite_data_expression
+			    (data_expression(aterm_appl(expr)), prover));
+      free_vars_and_no_quants(expr,nq,fv);
+    }
+  //  else // expr is probably variable
+  else
+    {
+      gsVerboseMsg("UNKNOWN pbes_expr: %s\n", pp(expr).c_str());
+      expr_simplified = expr;
+    }
+  gsVerboseMsg("Simplified: %s\n%d free vars\n",pp(expr_simplified).c_str(),fv->size());
+  return expr_simplified; 
 }
 //======================================================================
+
+
+
+
+//======================================================================
+void free_vars_and_no_quants(data_expression d, int* nq, data_variable_list *fv)
+// fills in the number of quantifiers and the list of free vars in expression d  
+//======================================================================
+{
+  data_expression head = d.head();
+  data_expression_list args = d.arguments();
+  
+  gsVerboseMsg("FREE_VARS_AND_NO_QUANTS: head is %s, args are %s\n",pp(head).c_str(),pp(args).c_str());
+  
+  if (is_data_variable(head)) {
+    *fv = push_back((*fv),(data_variable)head);
+    *nq = 0;
+  } 
+  else if (gsIsOpId(head)) 
+    {
+      // simplify left (and right)
+      int nqlhs, nqrhs;
+      data_variable_list fvlhs,fvrhs;
+      free_vars_and_no_quants(args.front(),&nqlhs,&fvlhs);
+      args = pop_front(args);
+      if (!args.empty())
+	free_vars_and_no_quants(args.front(),&nqrhs,&fvrhs);
+      else nqrhs = 0;
+      *nq = nqlhs + nqrhs;
+      *fv = dunion(fvlhs,fvrhs);     
+    }
+  else if (gsIsBinder(head))
+    {
+      int nq_under;
+      data_variable_list fv_under;
+      data_variable_list qvars = list_arg1(head);
+      free_vars_and_no_quants(arg2(d),&nq_under, &fv_under);
+      *nq = nq_under + 1;
+      *fv = substract(fv_under,qvars);
+    }
+  else
+    {
+      gsVerboseMsg("DON'T KNOW what this is");
+      *nq = 0;
+    }
+  gsVerboseMsg("FREE_VARS_AND_NO_QUANTS:      %d quantifiers, free vars: %s\n",*nq, pp(*fv).c_str());
+}
+
+
+  
+
+
+
+
+
 
 
 
@@ -570,6 +668,24 @@ data_variable_list intersect(data_variable_list x, data_variable_list y)
       result = push_back(result,*vx);    
   return result;
 }
+
+
+
+//======================================================================
+data_variable_list substract(data_variable_list x, data_variable_list y)
+//======================================================================
+{
+  data_variable_list result;
+  for (data_variable_list::iterator vx = x.begin(); vx != x.end(); vx++)
+    if (!var_in_list(*vx,y))
+      result = push_back(result,*vx);
+  return result;
+}
+
+
+
+
+
 //======================================================================
 
 
