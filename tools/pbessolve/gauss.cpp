@@ -11,7 +11,6 @@
 #include "atermpp/make_list.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/data_functional.h"
 #include "mcrl2/lps/specification.h"
 
 
@@ -598,8 +597,8 @@ void free_vars_and_no_quants(data_expression d, int* nq, data_variable_list *fv)
     *nq = 0;
   } 
   // operator?
-  else if (is_data_operation(d))
-    //if ((is_data_operation(d))||(is_not(d))||(is_and(d))||(is_or(d))||(is_implies(d))) 
+  else if (is_function(d))
+    //if ((is_function(d))||(is_not(d))||(is_and(d))||(is_or(d))||(is_implies(d))) 
     {
       gsVerboseMsg("-----head is an OPid!\n");
       // simplify left (and right)

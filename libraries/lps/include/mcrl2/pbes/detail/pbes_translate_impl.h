@@ -21,7 +21,6 @@
 #include "atermpp/vector.h"
 #include "atermpp/algorithm.h"
 #include "atermpp/substitute.h"
-#include "mcrl2/data/data_functional.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/data_operators.h"
 #include "mcrl2/data/data_expression.h"
@@ -335,7 +334,7 @@ struct equal_data_parameters_builder
       data_expression_list::iterator i1, i2;
       for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
       {
-        v.push_back(p::val(equal_to(*i1, *i2)));
+        v.push_back(p::val(d::equal_to(*i1, *i2)));
       }
     }
     result.push_back(p::multi_and(v.begin(), v.end()));
@@ -405,7 +404,7 @@ struct not_equal_data_parameters_builder
       data_expression_list::iterator i1, i2;
       for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
       {
-        v.push_back(p::val(not_equal_to(*i1, *i2)));
+        v.push_back(p::val(d::not_equal_to(*i1, *i2)));
       }
     }
     result.push_back(p::multi_or(v.begin(), v.end()));
@@ -577,6 +576,7 @@ namespace pbes_timed
   pbes_expression sat_bot(timed_action a, action_formula b)
   {
     using namespace lps::act_frm;
+    namespace d = lps::data_expr;
     namespace p = lps::pbes_expr;
   
     if (is_mult_act(b)) {
@@ -588,7 +588,7 @@ namespace pbes_timed
       data_expression t = a.time();
       action_formula alpha = at_form(b);
       data_expression t1 = at_time(b);
-      return p::or_(sat_bot(a, alpha), p::val(not_equal_to(t, t1)));
+      return p::or_(sat_bot(a, alpha), p::val(d::not_equal_to(t, t1)));
     } else if (is_not(b)) {
       return sat_top(a, not_arg(b));
     } else if (is_and(b)) {
@@ -614,6 +614,7 @@ namespace pbes_timed
   pbes_expression sat_top(timed_action a, action_formula b)
   {
     using namespace lps::act_frm;
+    namespace d = lps::data_expr;
     namespace p = lps::pbes_expr;
   
     if (is_mult_act(b)) {
@@ -625,7 +626,7 @@ namespace pbes_timed
       data_expression t = a.time();
       action_formula alpha = at_form(b);
       data_expression t1 = at_time(b);
-      return p::and_(sat_top(a, alpha), p::val(equal_to(t, t1)));
+      return p::and_(sat_top(a, alpha), p::val(d::equal_to(t, t1)));
     } else if (is_not(b)) {
       return sat_bot(a, not_arg(b));
     } else if (is_and(b)) {
@@ -654,6 +655,7 @@ namespace pbes_timed
     using namespace lps::pbes_expr;
     using lps::summand_list;
     namespace s = lps::state_frm;
+    namespace d = lps::data_expr;
   
     if (s::is_data(f)) {
       return pbes_expression(f);
@@ -698,8 +700,8 @@ namespace pbes_timed
         gi = gi.substitute(make_list_substitution(yi, y));
 
         pbes_expression p1 = sat_bot(ai, alpha);
-        pbes_expression p2 = val(data_expr::not_(ci));
-        pbes_expression p3 = val(less_equal(ti, T));
+        pbes_expression p2 = val(d::not_(ci));
+        pbes_expression p3 = val(d::less_equal(ti, T));
         rhs = rhs.substitute(make_substitution(T, ti));
         rhs = rhs.substitute(assignment_list_substitution(gi));
 
@@ -736,7 +738,7 @@ namespace pbes_timed
 
         pbes_expression p1 = sat_top(ai, alpha);
         pbes_expression p2 = val(ci);
-        pbes_expression p3 = val(greater(ti, T));
+        pbes_expression p3 = val(d::greater(ti, T));
         rhs = rhs.substitute(make_substitution(T, ti));
         rhs = rhs.substitute(assignment_list_substitution(gi));
 
@@ -755,10 +757,10 @@ namespace pbes_timed
         data_expression ck(i->condition());
         data_expression tk(i->time());
         data_variable_list yk = i->summation_variables();
-        pbes_expression p = exists(yk, and_(val(ck), val(less_equal(t, tk))));
+        pbes_expression p = exists(yk, and_(val(ck), val(d::less_equal(t, tk))));
         v.push_back(p);
       }
-      return or_(multi_or(v.begin(), v.end()), val(less_equal(t, T)));
+      return or_(multi_or(v.begin(), v.end()), val(d::less_equal(t, T)));
     } else if (s::is_yaled_timed(f)) {
       data_expression t = s::time(f);
       atermpp::vector<pbes_expression> v;
@@ -767,10 +769,10 @@ namespace pbes_timed
         data_expression ck(i->condition());
         data_expression tk(i->time());
         data_variable_list yk = i->summation_variables();
-        pbes_expression p = exists(yk, and_(val(data_expr::not_(ck)), val(greater(t, tk))));
+        pbes_expression p = exists(yk, and_(val(d::not_(ck)), val(d::greater(t, tk))));
         v.push_back(p);
       }
-      return and_(multi_or(v.begin(), v.end()), val(greater(t, T)));
+      return and_(multi_or(v.begin(), v.end()), val(d::greater(t, T)));
     } else if (s::is_var(f)) {
       identifier_string X = s::var_name(f);
       data_expression_list d = s::var_val(f);

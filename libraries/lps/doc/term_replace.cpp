@@ -2,7 +2,6 @@
 #include "atermpp/algorithm.h"     // replace
 #include "atermpp/make_list.h"
 #include "mcrl2/data/data.h"
-#include "mcrl2/data/data_functional.h"
 
 using namespace lps;
 using namespace atermpp;

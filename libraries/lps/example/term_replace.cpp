@@ -3,10 +3,10 @@
 #include "atermpp/make_list.h"
 #include "atermpp/substitute.h"
 #include "mcrl2/data/data.h"
-#include "mcrl2/data/data_functional.h"
 
-using namespace lps;
 using namespace atermpp;
+using namespace lps;
+using namespace lps::data_expr;
 
 // replace d with d0
 aterm_appl replace_d_d0(aterm_appl t)

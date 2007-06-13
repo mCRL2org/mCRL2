@@ -31,7 +31,6 @@
 //LPS Framework
 #include <mcrl2/lps/linear_process.h>
 #include <mcrl2/lps/specification.h>
-#include <mcrl2/data/data_functional.h>
 #include <mcrl2/data/data.h>
 
 using namespace std;
@@ -170,7 +169,7 @@ inline
 data_expression swap_equality(data_expression t)
 {
   assert(is_equal_to(t));
-  return lps::equal_to(rhs(t), lhs(t));
+  return lps::data_expr::equal_to(rhs(t), lhs(t));
 }
 
 ///Apply substitution to the righthand sides of the assignments in dl

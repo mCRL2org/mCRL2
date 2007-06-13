@@ -30,7 +30,6 @@
 
 //LPS Framework
 #include <mcrl2/data/data.h>
-#include <mcrl2/data/data_functional.h>
 #include <mcrl2/data/utility.h>
 #include <mcrl2/data/function.h>
 #include <mcrl2/lps/linear_process.h>
@@ -497,7 +496,7 @@ data_assignment_list replace_enumerated_parameter_in_data_assignment(const data_
       {
         if (!elts.empty())
         {
-          r = or_(r, lps::equal_to(arg, elts.front()));
+          r = or_(r, lps::data_expr::equal_to(arg, elts.front()));
           elts = pop_front(elts);
         }
       }

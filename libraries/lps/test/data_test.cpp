@@ -4,7 +4,6 @@
 
 #include "atermpp/vector.h"
 #include "atermpp/aterm_access.h"
-#include "mcrl2/data/data_functional.h"
 #include "mcrl2/data/data_operators.h"
 #include "mcrl2/data/data.h"
 
