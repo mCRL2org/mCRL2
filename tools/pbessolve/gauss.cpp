@@ -1,6 +1,6 @@
 
 #include "gauss.h"
-#include "lps/pbes_utility.h"
+#include "mcrl2/pbes/utility.h"
 #include "atermpp/substitute.h"
 
 #include "mcrl2/basic/pretty_print.h"
@@ -10,6 +10,7 @@
 #include "atermpp/algorithm.h"     // replace
 #include "atermpp/make_list.h"
 #include "mcrl2/data/data.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_functional.h"
 #include "mcrl2/lps/specification.h"
 
@@ -135,7 +136,7 @@ pbes_equation solve_equation
 	 //	 	 gsVerboseMsg("SUBSTITUTE in %s\n",pp(defX).c_str());
 	 approx_ = defX;
 	 approx_ = substitute(approx_, X, approx);  
-	 gsVerboseMsg("SUBSTITUTE result %s\n",pp(approx_).c_str());	 	 
+	 gsVerboseMsg("SUBSTITUTE result %s\n\n",pp(approx_).c_str());	 	 
 
 	 // rewrite approx_...
 	 //	 approx_ = rewrite_pbes_expression(approx_,rewriter,prover);
@@ -260,13 +261,13 @@ pbes_expression update_expression(pbes_expression e, equation_system es_solution
 
  // !!todo: implement simultaneous substitutions, probably more efficient 
  pbes_expression ee = e;
-gsVerboseMsg("update_expression: in expression %s\n",pp(e).c_str());
+ gsVerboseMsg("update_expression.\n\n");
  for (equation_system::reverse_iterator s = 
 			 es_solution.rbegin(); s != es_solution.rend(); s++)	
 {
-gsVerboseMsg("update_expression: substituting equation %s\n",pp(*s).c_str());
+  //gsVerboseMsg("update_expression: substituting equation %s\n",pp(*s).c_str());
 	ee = substitute(ee, s->variable(), s->formula());
-gsVerboseMsg("update_expression: result is %s\n",pp(ee).c_str());
+	//gsVerboseMsg("update_expression: result is %s\n",pp(ee).c_str());
  }
  return ee; 
 }
@@ -581,17 +582,26 @@ void free_vars_and_no_quants(data_expression d, int* nq, data_variable_list *fv)
 // fills in the number of quantifiers and the list of free vars in expression d  
 //======================================================================
 {
+
+  using namespace data_expr;
+
   data_expression head = d.head();
   data_expression_list args = d.arguments();
   
-  gsVerboseMsg("FREE_VARS_AND_NO_QUANTS: head is %s, args are %s\n",pp(head).c_str(),pp(args).c_str());
+  gsVerboseMsg("FREE_VARS_AND_NO_QUANTS: data expr is %s, head is %s, args are %s\n",
+	       pp(d).c_str(),pp(head).c_str(),pp(args).c_str());
   
-  if (is_data_variable(head)) {
+  // data variable?
+  if (is_data_variable(d)) {
+    gsVerboseMsg("-----data var!\n");
     *fv = push_back((*fv),(data_variable)head);
     *nq = 0;
   } 
-  else if (gsIsOpId(head)) 
+  // operator?
+  else 
+%if ((is_data_operation(d))||(is_not(d))||(is_and(d))||(is_or(d))||(is_implies(d))) 
     {
+      gsVerboseMsg("-----head is an OPid!\n");
       // simplify left (and right)
       int nqlhs, nqrhs;
       data_variable_list fvlhs,fvrhs;
@@ -603,6 +613,7 @@ void free_vars_and_no_quants(data_expression d, int* nq, data_variable_list *fv)
       *nq = nqlhs + nqrhs;
       *fv = dunion(fvlhs,fvrhs);     
     }
+  // quantifier? (This is not yet the case!)
   else if (gsIsBinder(head))
     {
       int nq_under;
@@ -612,9 +623,10 @@ void free_vars_and_no_quants(data_expression d, int* nq, data_variable_list *fv)
       *nq = nq_under + 1;
       *fv = substract(fv_under,qvars);
     }
+  // number, boolean
   else
     {
-      gsVerboseMsg("DON'T KNOW what this is");
+      gsVerboseMsg("-----DON'T KNOW\n");
       *nq = 0;
     }
   gsVerboseMsg("FREE_VARS_AND_NO_QUANTS:      %d quantifiers, free vars: %s\n",*nq, pp(*fv).c_str());
