@@ -139,7 +139,7 @@ namespace sip {
       };
 
       if (d->get_manager()) {
-        d->get_manager()->get_event_handler()->connect(boost::bind(trampoline::send_display_data, boost::dynamic_pointer_cast < communicator_impl > (impl), _1));
+        d->get_manager()->get_event_handler()->add(boost::bind(trampoline::send_display_data, boost::dynamic_pointer_cast < communicator_impl > (impl), _1));
       }
 
       boost::dynamic_pointer_cast < communicator_impl > (impl)->send_display_layout(d);

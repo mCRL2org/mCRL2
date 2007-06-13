@@ -36,10 +36,10 @@ int gsvfprintf(FILE *stream, const char *format, va_list args);
 //- '%F' for the printing of AFun's
 
 // The default message handler (defined in lowlevel.cpp)
-extern void (*custom_message_handler)(gsMessageType, char*);
+extern void (*custom_message_handler)(gsMessageType, const char*);
 
 // Helper function (wrapper around gsvfprintf) for printing to string
-static void handler_wrapper(gsMessageType t, char *Format, va_list args) {
+static void handler_wrapper(gsMessageType t, const char* Format, va_list args) {
   FILE* stream = tmpfile();
 
   assert(stream);
@@ -69,7 +69,7 @@ static void handler_wrapper(gsMessageType t, char *Format, va_list args) {
   free(output);
 }
 
-inline static void gsMessage(char *Format, ...)
+inline static void gsMessage(const char *Format, ...)
 //Post: Format is printed to stderr where the remaining parameters are used as
 //      gsprintf arguments to Format.
 //
@@ -96,7 +96,7 @@ inline static void gsMessage(char *Format, ...)
   }
 }
 
-inline static void gsErrorMsg(char *Format, ...)
+inline static void gsErrorMsg(const char *Format, ...)
 //Post: "error: " is printed to stderr followed by Format, where the remaining
 //      parameters are used as gsprintf arguments to Format.
 {
@@ -114,7 +114,7 @@ inline static void gsErrorMsg(char *Format, ...)
   va_end(Args);
 }
 
-inline static void gsWarningMsg(char *Format, ...)
+inline static void gsWarningMsg(const char *Format, ...)
 //Post: If the printing of warning messages is enabled, "warning: " is printed
 //      to stderr followed by Format, where the remaining parameters are used
 //      as gsprintf arguments to Format.
@@ -135,7 +135,7 @@ inline static void gsWarningMsg(char *Format, ...)
   }
 }
 
-inline static void gsVerboseMsg(char *Format, ...)
+inline static void gsVerboseMsg(const char *Format, ...)
 //Post: If the printing of verbose information is enabled, Format is printed to
 //      stderr, where the remaining parameters are used as gsprintf arguments
 //      to Format.
@@ -165,7 +165,7 @@ inline static void gsVerboseMsg(char *Format, ...)
   }
 
 #ifdef _MSC_VER
-inline static void gsDebugMsg(char *Format,...)
+inline static void gsDebugMsg(const char *Format,...)
 {
 	GS_DEBUG_MSG_FUNC("unknown",Format)
 }
@@ -176,7 +176,7 @@ inline static void gsDebugMsg(char *Format,...)
 //      function is printed to stderr, followed by the first parameter with the
 //      remaining parameters as gsprintf arguments.
 
-inline static void gsDebugMsgFunc(const char *FuncName, char *Format, ...)
+inline static void gsDebugMsgFunc(const char *FuncName, const char *Format, ...)
 //Post: If the printing of debug messages is enabled, the name of FuncName is
 //      printed to stderr, followed by Format where  the remaining parameters
 //      are used as gsprintf arguments to Format.

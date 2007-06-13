@@ -126,8 +126,9 @@ namespace sip {
 
             { 
               sip::store_visitor v(c); 
-	  
-              v.visit(*reinterpret_cast < sip::layout::element const* > (e), display->find(reinterpret_cast < sip::layout::element const* > (e))); 
+
+              v.visit(*reinterpret_cast < sip::layout::element const* > (e),
+                display->find(reinterpret_cast < sip::layout::element const* > (e))); 
             } 
 
             g->send_message(sip::message(c, sip::message_display_update)); 
@@ -139,14 +140,17 @@ namespace sip {
 
       if (g.get() != 0) {
         sip::layout::tool_display::sptr d(new layout::tool_display);
+ 
+        // Make sure the global event handler (the default event handler) does not have a global event is empty
+        sip::layout::element::global_event_handler.remove();
 
         visitors::restore(*d, m->to_string());
 
-        if (d->get_manager()) { 
-          d->get_manager()->get_event_handler()->connect(boost::bind(&trampoline::send_display_data, impl, _1, d)); 
-        } 
+        if (d->get_manager()) {
+          d->get_manager()->get_event_handler()->add(boost::bind(&trampoline::send_display_data, impl, _1, d)); 
 
-        h(d);
+          h(d);
+        }
       }
     }
   }

@@ -6,7 +6,7 @@
 
 #include <sip/detail/layout_manager.h>
 #include <sip/detail/layout_elements.h>
-#include <sip/detail/layout_tool_display.h>
+#include <sip/display.h>
 #include <sip/object.h>
 #include <sip/tool.h>
 

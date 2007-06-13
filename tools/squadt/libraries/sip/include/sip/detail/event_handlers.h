@@ -18,7 +18,7 @@ namespace sip {
     /**
      * \brief A basic event handler that executes other event handlers that can be registered
      *
-     * Handlers are invoked in the opposite order in which they were connected (LIFO).
+     * Multiple handlers for the same id are invoked in arbitrary order.
      *
      * \attention The event handler should always outlive execution of all event handlers.
      **/
@@ -60,13 +60,17 @@ namespace sip {
    
       public:
 
-        void connect(handler_function);
+        /** \brief Set a global handler */
+        void add(handler_function);
    
         /** \brief Register an arbitrary handler for a specific object */
-        void connect(const void*, handler_function);
+        void add(const void*, handler_function);
 
         /** \brief Moves registered event handlers that match the id to another object */
         void transfer(basic_event_handler&, const void* = 0);
+
+        /** \brief Remove the global handler */
+        void remove();
 
         /** \brief Remove the handlers for a specific object */
         void remove(const void*);
@@ -99,7 +103,7 @@ namespace sip {
     /**
      * @param[in] h a function object that is to be invoked at an event
      **/
-    inline void basic_event_handler::connect(handler_function h) {
+    inline void basic_event_handler::add(handler_function h) {
       boost::mutex::scoped_lock l(lock);
    
       global_handler = h;
@@ -109,7 +113,7 @@ namespace sip {
      * @param[in] id a pointer that serves as an identifier for the originator of the event
      * @param[in] h a function object that is to be invoked at an event
      **/
-    inline void basic_event_handler::connect(const void* id, handler_function h) {
+    inline void basic_event_handler::add(const void* id, handler_function h) {
       boost::mutex::scoped_lock l(lock);
    
       handlers.insert(std::make_pair(id, h));
@@ -178,6 +182,15 @@ namespace sip {
       }
     }
    
+    /**
+     * @param[in] id a pointer that serves as an identifier for the originator of the event
+     **/
+    inline void basic_event_handler::remove() {
+      boost::mutex::scoped_lock l(lock);
+   
+      global_handler.clear();
+    }
+
     /**
      * @param[in] id a pointer that serves as an identifier for the originator of the event
      **/

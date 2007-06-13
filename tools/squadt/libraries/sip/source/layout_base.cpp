@@ -24,7 +24,7 @@ namespace sip {
     }
 
     void element::on_change(layout::basic_event_handler::handler_function h) const {
-      m_event_handler->connect(this, h);
+      m_event_handler->add(this, h);
     }
 
     void element::activate_handlers() {

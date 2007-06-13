@@ -20,7 +20,19 @@
        separate refentry element for the enum. -->
   <xsl:param name="boost.compact.enum">1</xsl:param>
 
+  <!-- When true, the stylesheet will emit compact definitions of
+       typedefs when the typedef does not have any detailed
+       description. -->
+  <xsl:param name="boost.compact.typedef">1</xsl:param>
+
   <xsl:template match="class|struct|union" mode="generate.id">
+    <xsl:call-template name="fully-qualified-name">
+      <xsl:with-param name="node" select="."/>
+      <xsl:with-param name="separator" select="'.'"/>
+    </xsl:call-template>
+  </xsl:template>
+
+  <xsl:template match="typedef" mode="generate.id">
     <xsl:call-template name="fully-qualified-name">
       <xsl:with-param name="node" select="."/>
       <xsl:with-param name="separator" select="'.'"/>
@@ -193,9 +205,37 @@ Unknown type element "<xsl:value-of select="local-name(.)"/>" in type.display.na
 
   <!-- Emit a typedef synopsis -->
   <xsl:template name="type.typedef.display.aligned">
+    <xsl:param name="compact"/>
     <xsl:param name="indentation"/>
+    <xsl:param name="is-reference"/>
     <xsl:param name="max-type-length"/>
     <xsl:param name="max-name-length"/>
+
+    <!-- What type of link the typedef name should have. This shall
+         be one of 'anchor' (the typedef output will be the target of
+         links), 'link' (the typedef output will link to a definition), or
+         'none' (the typedef output will not be either a link or a link
+         target) -->
+    <xsl:param name="link-type">
+      <xsl:choose>
+        <xsl:when test="$is-reference">
+          <xsl:text>anchor</xsl:text>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:text>link</xsl:text>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:param>
+
+    <!-- The id we should link to or anchor as -->
+    <xsl:param name="link-to">
+      <xsl:call-template name="generate.id"/>
+    </xsl:param>
+
+    <!-- The id we should link to or anchor as -->
+    <xsl:param name="typedef-name">
+      <xsl:value-of select="@name"/>
+    </xsl:param>
 
     <!-- Padding for the typedef types -->
     <xsl:variable name="type-padding">
@@ -280,11 +320,18 @@ Unknown type element "<xsl:value-of select="local-name(.)"/>" in type.display.na
                                             1, $max-name-length)"/>
           </xsl:when>
           <xsl:otherwise>
-            <xsl:value-of select="concat(' ',@name,';')"/>
+            <xsl:text> </xsl:text>
+            <xsl:call-template name="link-or-anchor">
+              <xsl:with-param name="to" select="$link-to"/>
+              <xsl:with-param name="text" select="$typedef-name"/>
+              <xsl:with-param name="link-type" select="$link-type"/>
+              <xsl:with-param name="highlight" select="true()"/>
+            </xsl:call-template>
+            <xsl:text>;</xsl:text>
           </xsl:otherwise>
         </xsl:choose>
 
-        <xsl:if test="purpose">
+        <xsl:if test="$compact and purpose">
           <xsl:text>  </xsl:text>
           <xsl:call-template name="highlight-comment">
             <xsl:with-param name="text">
@@ -302,20 +349,68 @@ Unknown type element "<xsl:value-of select="local-name(.)"/>" in type.display.na
     <xsl:param name="max-type-length" select="0"/>
     <xsl:param name="max-name-length" select="0"/>
     
-    <!-- Spacing -->
-    <xsl:if test="not (local-name(preceding-sibling::*[position()=1])=local-name(.)) and (position() &gt; 1)">
-      <xsl:text>&#10;</xsl:text>
-    </xsl:if>
+    <!-- True if we should compact this typedef -->
+    <xsl:variable name="compact"
+      select="not (para|description) and ($boost.compact.typedef='1')"/>
 
-    <xsl:call-template name="type.typedef.display.aligned">
-      <xsl:with-param name="indentation" select="$indentation"/>
-      <xsl:with-param name="max-type-length" select="$max-type-length"/>
-      <xsl:with-param name="max-name-length" select="$max-name-length"/>
-    </xsl:call-template>
+    <xsl:choose>
+      <xsl:when test="$compact">
+        <!-- Spacing -->
+        <xsl:if test="not (local-name(preceding-sibling::*[position()=1])=local-name(.)) and (position() &gt; 1)">
+          <xsl:text>&#10;</xsl:text>
+        </xsl:if>
+
+        <xsl:call-template name="type.typedef.display.aligned">
+          <xsl:with-param name="compact" select="$compact"/>
+          <xsl:with-param name="indentation" select="$indentation"/>
+          <xsl:with-param name="is-reference" select="true()"/>
+          <xsl:with-param name="max-type-length" select="$max-type-length"/>
+          <xsl:with-param name="max-name-length" select="$max-name-length"/>
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:call-template name="type.typedef.display.aligned">
+          <xsl:with-param name="compact" select="$compact"/>
+          <xsl:with-param name="indentation" select="$indentation"/>
+          <xsl:with-param name="is-reference" select="false()"/>
+        </xsl:call-template>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
-  <!-- TBD: Implement this -->
-  <xsl:template match="typedef" mode="reference"/>
+  <!-- Emit a typedef reference entry -->
+  <xsl:template match="typedef" mode="reference">
+    <!-- True if this typedef was compacted -->
+    <xsl:variable name="compact"
+      select="not (para|description) and ($boost.compact.typedef='1')"/>
+
+    <xsl:if test="not ($compact)">
+      <xsl:call-template name="reference-documentation">
+        <xsl:with-param name="refname" select="@name"/>
+        <xsl:with-param name="purpose" select="purpose/*|purpose/text()"/>
+        <xsl:with-param name="anchor">
+          <xsl:call-template name="generate.id"/>
+        </xsl:with-param>
+        <xsl:with-param name="name">
+          <xsl:text>Type definition </xsl:text>
+          <xsl:call-template name="monospaced">
+            <xsl:with-param name="text" select="@name"/>
+          </xsl:call-template>
+        </xsl:with-param>
+        <xsl:with-param name="synopsis">
+          <xsl:call-template name="type.typedef.display.aligned">
+            <xsl:with-param name="compact" select="false()"/>
+            <xsl:with-param name="indentation" select="0"/>
+            <xsl:with-param name="is-reference" select="true()"/>
+            <xsl:with-param name="link-type" select="'none'"/>
+          </xsl:call-template>
+        </xsl:with-param>
+        <xsl:with-param name="text">
+          <xsl:apply-templates select="description"/>
+        </xsl:with-param>
+      </xsl:call-template>
+    </xsl:if>
+  </xsl:template>
 
   <!-- Emit a list of static constants -->
   <xsl:template match="static-constant" mode="synopsis">
@@ -720,24 +815,29 @@ Unknown type element "<xsl:value-of select="local-name(.)"/>" in type.display.na
       mode="reference">
       <xsl:with-param name="indentation" select="$indentation + 2"/>
     </xsl:apply-templates>
-    
+
+    <!-- Enums -->
+    <xsl:apply-templates select="enum" mode="synopsis">
+      <xsl:with-param name="indentation" select="$indentation + 2"/>
+    </xsl:apply-templates>
+
     <!-- Construct/Copy/Destruct -->
     <xsl:call-template name="construct-copy-destruct-synopsis">
       <xsl:with-param name="indentation" select="$indentation + 2"/>
     </xsl:call-template>
-    
+
     <!-- Member functions -->
     <xsl:apply-templates 
       select="method-group|method|overloaded-method" 
       mode="synopsis">
       <xsl:with-param name="indentation" select="$indentation + 2"/>
     </xsl:apply-templates>
-    
+
     <!-- Data members -->
     <xsl:apply-templates select="data-member" mode="synopsis">
       <xsl:with-param name="indentation" select="$indentation + 2"/>
     </xsl:apply-templates>
-    
+
     <!-- Closing brace -->
     <xsl:text>&#10;</xsl:text>
     <xsl:call-template name="indent">
@@ -769,7 +869,6 @@ Unknown type element "<xsl:value-of select="local-name(.)"/>" in type.display.na
         <xsl:call-template name="fully-qualified-name">
           <xsl:with-param name="node" select="."/>
         </xsl:call-template>
-        <xsl:apply-templates select="specialization"/>
       </xsl:with-param>
       <xsl:with-param name="purpose" select="purpose/*|purpose/text()"/>
       <xsl:with-param name="anchor">
@@ -803,9 +902,23 @@ Unknown type element "<xsl:value-of select="local-name(.)"/>" in type.display.na
         <xsl:apply-templates select="description"/>
         
         <xsl:call-template name="construct-copy-destruct-reference"/>
+        
         <xsl:apply-templates 
           select="method-group|method|overloaded-method"
           mode="reference"/>
+        
+        <!-- Emit reference docs for nested classes -->
+        <xsl:apply-templates 
+          select="class|class-specialization|
+                  struct|struct-specialization|
+                  union|union-specialization"
+          mode="namespace-reference"/>
+        
+        <!-- Emit reference docs for nested enums -->
+        <xsl:apply-templates 
+          select="enum"
+          mode="namespace-reference"/>
+        
         <xsl:apply-templates select="free-function-group" mode="reference">
           <xsl:with-param name="class" select="@name"/>
         </xsl:apply-templates>

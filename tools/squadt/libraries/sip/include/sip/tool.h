@@ -5,7 +5,7 @@
 
 #include <utilities/logger.h>
 
-#include <sip/detail/layout_tool_display.h>
+#include <sip/display.h>
 #include <sip/detail/layout_elements.h>
 #include <sip/report.h>
 #include <sip/tool/capabilities.h>

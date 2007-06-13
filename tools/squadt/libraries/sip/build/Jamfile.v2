@@ -52,7 +52,7 @@ alias messenger
       common.cpp
       command_line_interface.cpp
       configuration.cpp
-      layout.cpp
+      display.cpp
       layout_base.cpp
       layout_elements.cpp
       mime_type.cpp

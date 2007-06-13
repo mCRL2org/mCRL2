@@ -9,7 +9,7 @@
 #include <sip/basic_datatype.h>
 #include <sip/detail/layout_elements.h>
 #include <sip/detail/layout_manager.h>
-#include <sip/detail/layout_tool_display.h>
+#include <sip/display.h>
 #include <sip/detail/event_handlers.h>
 #include <sip/common.h>
 
