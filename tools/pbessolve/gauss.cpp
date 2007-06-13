@@ -598,8 +598,8 @@ void free_vars_and_no_quants(data_expression d, int* nq, data_variable_list *fv)
     *nq = 0;
   } 
   // operator?
-  else 
-%if ((is_data_operation(d))||(is_not(d))||(is_and(d))||(is_or(d))||(is_implies(d))) 
+  else if (is_data_operation(d))
+    //if ((is_data_operation(d))||(is_not(d))||(is_and(d))||(is_or(d))||(is_implies(d))) 
     {
       gsVerboseMsg("-----head is an OPid!\n");
       // simplify left (and right)
