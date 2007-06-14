@@ -11,8 +11,9 @@
 #define MCRL2_DATA_DATA_SPECIFICATION_H
 
 #include <set>
-
+#include <boost/iterator/filter_iterator.hpp>
 #include "atermpp/aterm.h"
+#include "atermpp/vector.h"
 #include "mcrl2/data/sort.h"
 #include "mcrl2/data/function.h"
 #include "mcrl2/data/data.h"
@@ -22,6 +23,21 @@ namespace lps {
 
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
+
+/// INTERNAL ONLY
+struct has_target_sort
+{
+  lps::sort m_target;
+
+  has_target_sort(lps::sort target)
+    : m_target(target)
+  {}
+
+  bool operator()(function f)
+  {
+    return f.sort().target() == m_target;
+  }
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 // data_specification
@@ -84,6 +100,19 @@ class data_specification: public aterm_appl
     function_list constructors() const
     {
       return m_constructors;
+    }
+
+    /// Returns the constructors of the data specification that have s as their target.
+    function_list constructors(lps::sort s)
+    {
+      atermpp::vector<lps::function> result;
+
+      typedef boost::filter_iterator<has_target_sort, function_list::iterator> FilterIter;  
+      has_target_sort predicate(s);
+      FilterIter first(predicate, m_constructors.begin(), m_constructors.end());
+      FilterIter last(predicate, m_constructors.end(), m_constructors.end());
+      std::copy(first, last, std::back_inserter(result));
+      return function_list(result.begin(), result.end());
     }
 
     /// Returns the mappings of the data specification.
