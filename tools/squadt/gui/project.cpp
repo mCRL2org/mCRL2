@@ -45,10 +45,8 @@ namespace squadt {
     }
     
     void project::builder::process(wxTimerEvent&) {
-      static volatile bool r = false;
-      
-      if (!r) {
-        r = true;
+      if (0 < tasks.size()) {
+        timer.Stop();
 
         while (0 < tasks.size()) {
           boost::function < void () > task = tasks.front();
@@ -56,10 +54,12 @@ namespace squadt {
           tasks.pop_front();
        
           /* Execute task */
-          task();
+          if (!task.empty()) {
+            task();
+          }
         }
 
-        r = false;
+        timer.Start(50);
       }
     }
     

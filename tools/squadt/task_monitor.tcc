@@ -329,7 +329,7 @@ namespace squadt {
 
     inline void task_monitor_impl::finish() {
       /* Let the tool know that it should prepare for termination */
-      terminate_process();
+      boost::thread t(boost::bind(&task_monitor_impl::terminate_process, this));
     }
 
     inline void task_monitor_impl::disconnect() {

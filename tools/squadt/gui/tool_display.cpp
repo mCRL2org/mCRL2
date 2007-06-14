@@ -712,9 +712,6 @@ namespace squadt {
 
           display->toggle_scrollbar_helper();
 
-          /* End tool execution, if it was still running */
-          display->event_handler.get_monitor()->finish();
-
           display->Destroy();
         }
       };
@@ -725,6 +722,8 @@ namespace squadt {
       event_handler.get_monitor()->reset_status_message_handler();
 
       context->gui_builder.schedule_update(boost::bind(&local::trampoline, this));
+      /* End tool execution, if it was still running */
+      event_handler.get_monitor()->finish();
     }
 
       /* Toggle scrollbar availability on demand */
