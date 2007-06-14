@@ -44,7 +44,7 @@ test: $(BJAM)
 	$(BJAM) ./status --preserve-test-targets
 
 $(MAN_MANIFEST): doc/*.xml
-	cd doc; $(XSLTPROC) --stringparam man.output.subdirs.enabled 1 \
+	@cd doc; $(XSLTPROC) --stringparam man.output.subdirs.enabled 1 \
 	             --stringparam man.output.manifest.enabled 1 \
 	             --stringparam man.output.manifest.filename ../$(MAN_MANIFEST) \
 	             --stringparam man.output.in.separate.dir 1 \
