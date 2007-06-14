@@ -385,7 +385,7 @@ def main():
     parser.add_option("-c", "--constructors", action="store_true", help="generate constructor functions from internal mcrl2 format")
     (options, args) = parser.parse_args()
 
-    filename = '../../../specs/mcrl2.internal.txt'
+    filename = '../../../doc/specs/mcrl2.internal.txt'
     rules = parse_ebnf(filename)
 
     if options.soundness_checks:
