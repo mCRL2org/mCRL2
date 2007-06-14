@@ -17,6 +17,7 @@ exe filter_template : filter_template.cpp                                       
 exe find            : find.cpp            ../../../tools/mcrl22lps/lin_std.cpp ../../../tools/mcrl22lps/lin_alt.cpp : ;
 exe pbes_test       : pbes_test.cpp       ../../../tools/mcrl22lps/lin_std.cpp ../../../tools/mcrl22lps/lin_alt.cpp : ;
 exe term_replace    : term_replace.cpp : ;
+exe mcrl22lps       : mcrl22lps.cpp       ../../../tools/mcrl22lps/lin_std.cpp ../../../tools/mcrl22lps/lin_alt.cpp : ;
 
 install dist
    :
@@ -27,5 +28,6 @@ install dist
      filter_template
      find
      pbes_test
+     mcrl22lps
    :
    ;
