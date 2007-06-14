@@ -3633,12 +3633,12 @@ void DiaGraph::displAttrDomain( const int &attrIdx )
     numNodes  = graph->getSizeNodes();
 
     // update indices and values    
-    {
     for ( int i = 0; i < numValues; ++i )
     {
-        indices.push_back( attribute->getCurValue(i)->getIndex() );
-        values.push_back( attribute->getCurValue(i)->getValue() );
-    }
+       if (Value* v = attribute->getCurValue(i)) {
+         indices.push_back( v->getIndex() );
+         values.push_back( v->getValue() );
+       }
     }
 
     // get number of nodes

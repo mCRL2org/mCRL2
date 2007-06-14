@@ -2,7 +2,7 @@
 // (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
-
+#include <limits>
 #include "arcdiagram.h"
 
 
@@ -2010,12 +2010,12 @@ void ArcDiagram::updateMarkBundles()
     for ( size_t i = 0; i < markBundles.size(); ++i )
         markBundles[i] = false;
     
-    if ( currIdxDgrm >= 0 )
+    if ( currIdxDgrm != std::numeric_limits< size_t >::max() )
     {
         Cluster* clst;
         Node* node;
         Edge* edge;
-        
+
         clst = framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]];
         for ( int j = 0; j < clst->getSizeNodes(); ++j )
         {
@@ -2166,7 +2166,7 @@ void ArcDiagram::handleHits( const vector< int > &ids )
     // leaves
     if ( ids.size() == 1 )
     {
-        if ( currIdxDgrm != -1 )
+        if ( currIdxDgrm != std::numeric_limits< size_t >::max() )
         {
             currIdxDgrm = -1;
             updateMarkBundles();
@@ -2361,9 +2361,12 @@ void ArcDiagram::handleHoverCluster(
             msg = "All states";
         else
         {
-            Cluster* clust;
-            clust = mapPosToClust[i][j];
-            msg = clust->getAttribute()->getCurValue( clust->getAttrValIdx() )->getValue();
+            Cluster* clust = mapPosToClust[i][j];
+
+            if (Value* value = clust->getAttribute()->getCurValue( clust->getAttrValIdx() )) {
+              msg = value->getValue();
+            }
+
             /* -*-
             Value* val;
             val = clust->getAttribute()->mapToValue( clust->getAttrValIdx() );
@@ -2373,7 +2376,6 @@ void ArcDiagram::handleHoverCluster(
                 msg = "";
             val = NULL;
             */
-            clust = NULL;
         }
 
         canvas->showToolTip( msg );

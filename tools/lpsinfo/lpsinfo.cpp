@@ -258,7 +258,7 @@ int main(int argc, char** argv) {
       cout << "Number of used versus declared actions: " << get_number_of_used_actions(lps) << "/"<< lps_specification.action_labels().size() << endl;
       //cout << "Number of used versus declared multi-actions: " << "" << endl;
       cout << "Number of used sorts                  : " << lps_specification.data().sorts().size() << endl;
-      cout << "Number of \u03C4-summands                : " << get_number_of_tau_summands(lps) << endl; 
+      cout << "Number of \u03C4-summands                  : " << get_number_of_tau_summands(lps) << endl; 
     }
     else {
       std::cerr << "Error: Unable to load LPS from `" + file_name + "'\n";
