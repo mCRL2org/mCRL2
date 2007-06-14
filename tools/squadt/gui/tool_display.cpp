@@ -694,31 +694,37 @@ namespace squadt {
       else if (e.GetId() == cmID_CLOSE) {
         GetParent()->GetSizer()->Show(this, false, true);
 
-        context->gui_builder.schedule_update(boost::bind(&tool_display::remove, this));
+        remove();
       }
     }
 
     void tool_display::remove() {
-      /* Ignore all scheduled updates to the tool display */
-      current_layout.reset();
+      struct local {
+        static void trampoline(tool_display* display) {
+          display->current_layout.reset();
 
+          wxSizer* s = display->GetParent()->GetSizer();
+
+          s->Show(display, false, true);
+          s->Detach(display);
+          s->Layout();
+          display->GetParent()->Refresh();
+
+          display->toggle_scrollbar_helper();
+
+          /* End tool execution, if it was still running */
+          display->event_handler.get_monitor()->finish();
+
+          display->Destroy();
+        }
+      };
+
+      /* Ignore all scheduled updates to the tool display */
       event_handler.get_monitor()->reset_display_update_handler();
       event_handler.get_monitor()->reset_display_layout_handler();
       event_handler.get_monitor()->reset_status_message_handler();
 
-      wxSizer* s = GetParent()->GetSizer();
-      
-      s->Show(this, false, true);
-      s->Detach(this);
-      s->Layout();
-      GetParent()->Refresh();
-
-      toggle_scrollbar_helper();
-
-      /* End tool execution, if it was still running */
-      event_handler.get_monitor()->finish();
-
-      Destroy();
+      context->gui_builder.schedule_update(boost::bind(&local::trampoline, this));
     }
 
       /* Toggle scrollbar availability on demand */
