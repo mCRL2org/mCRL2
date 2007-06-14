@@ -12,7 +12,7 @@ extern "C" {
 //String manipulation
 //-------------------
 
-#if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
+#if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER || defined __FreeBSD__)
 char *strdup(const char *s)
 {
     size_t len;
