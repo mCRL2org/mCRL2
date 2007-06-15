@@ -81,7 +81,7 @@ class action_formula: public aterm_appl
 ///
 typedef term_list<action_formula> action_formula_list;
 
-/// Functions for accessing attributes of action formulas.
+/// Accessor functions and predicates for action formulas.
 namespace act_frm
 { 
 
@@ -410,7 +410,7 @@ class state_formula: public aterm_appl
 ///
 typedef term_list<state_formula> state_formula_list;
 
-/// Functions for accessing attributes of state formulas.
+/// Accessor functions and predicates for state formulas.
 namespace state_frm
 { 
 

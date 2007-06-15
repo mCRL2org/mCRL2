@@ -66,6 +66,7 @@ class data_expression: public aterm_appl
     }     
 
     /// Returns the head of the data expression.
+    /// DEPRECATED
     ///
     data_expression head() const
     {
@@ -96,6 +97,7 @@ bool is_data_expression(aterm_appl t)
   return gsIsDataExpr(t);
 }
 
+/// Accessor functions and predicates for data expressions.
 namespace data_expr {
   // //data expression
   // <DataExpr>     ::= Id(<String>)                                          (- tc)

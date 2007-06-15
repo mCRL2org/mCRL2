@@ -83,7 +83,7 @@ class pbes_expression: public aterm_appl
 ///
 typedef term_list<pbes_expression> pbes_expression_list;
 
-/// Functions for accessing attributes of pbes expressions.
+/// Accessor functions and predicates for pbes expressions.
 namespace pbes_expr {
 
   /// \brief Returns true if the term t is a data expression

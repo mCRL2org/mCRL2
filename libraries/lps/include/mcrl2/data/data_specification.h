@@ -49,10 +49,10 @@ class data_specification: public aterm_appl
 {
 
   protected:
-    sort_list          m_sorts;       
+    sort_list          m_sorts;
     function_list      m_constructors;
-    function_list      m_mappings;    
-    data_equation_list m_equations;   
+    function_list      m_mappings;
+    data_equation_list m_equations;
 
   public:
     typedef sort_list::iterator          sort_iterator;
@@ -103,11 +103,11 @@ class data_specification: public aterm_appl
     }
 
     /// Returns the constructors of the data specification that have s as their target.
-    function_list constructors(lps::sort s)
+    function_list constructors(lps::sort s) const
     {
       atermpp::vector<lps::function> result;
 
-      typedef boost::filter_iterator<has_target_sort, function_list::iterator> FilterIter;  
+      typedef boost::filter_iterator<has_target_sort, function_list::iterator> FilterIter;
       has_target_sort predicate(s);
       FilterIter first(predicate, m_constructors.begin(), m_constructors.end());
       FilterIter last(predicate, m_constructors.end(), m_constructors.end());
@@ -152,7 +152,7 @@ class data_specification: public aterm_appl
         std::cerr << "data_specification::is_well_typed() failed: not all of the sorts appearing in the mappings " << pp(mappings()) << " are declared in " << m_sorts << std::endl;
         return false;
       }
-      
+
       return true;
     }
 };

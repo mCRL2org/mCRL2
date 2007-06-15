@@ -20,6 +20,7 @@
 #include "mcrl2/basic/detail/constructors.h"
 #include "libstruct.h"
 
+/// The namespace of the mCRL2 tool set (will be renamed to mcrl2).
 namespace lps {
 
 using atermpp::aterm;
@@ -155,6 +156,7 @@ sort arrow(sort_list domain, sort range)
   return gsMakeSortArrow(domain, range);
 }
 
+/// Accessor functions and predicates for sorts.
 namespace sort_expr {
 
   /// Returns the predefined sort real.
