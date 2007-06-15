@@ -1319,11 +1319,11 @@ bool gsIsDataExprListEnum(ATermAppl DataExpr);
 
 bool gsIsDataExprSetEnum(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
-//Ret: the data expression is a list enumeration
+//Ret: the data expression is a set enumeration
 
 bool gsIsDataExprBagEnum(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
-//Ret: the data expression is a list enumeration
+//Ret: the data expression is a bag enumeration
 
 //Multiactions
 //------------
