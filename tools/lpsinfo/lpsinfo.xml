@@ -43,6 +43,15 @@
       <listitem>
         <para>number of actions</para>
       </listitem>
+      <listitem>
+        <para>number of used versus the number of declared actions</para>
+      </listitem>
+      <listitem>
+        <para>number of sorts</para>
+      </listitem>
+      <listitem>
+        <para>number of tau-summands</para>
+      </listitem>
     </itemizedlist>
   </para>
 </refsect1>
