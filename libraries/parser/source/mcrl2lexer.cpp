@@ -480,6 +480,7 @@ static yyconst short int yy_chk[315] =
 #line 1 "mcrl2lexer.ll"
 #define INITIAL 0
 #line 2 "mcrl2lexer.ll"
+#include <cstdio>
 #include <cstring>
 #include "mcrl2lexer.h"
 #include "mcrl2parser.hpp"
@@ -505,9 +506,6 @@ using std::cout;
 //external declarations
 int mcrl2yyparse(void);          /* declared in mcrl2parser.cpp */
 extern YYSTYPE mcrl2yylval;      /* declared in mcrl2parser.cpp */
-#if !defined(_MSC_VER) && !defined(__MINGW32__)
-extern int fileno(FILE *stream); /* declared in stdio.h (forgotten by flex) */
-#endif
 
 //global declarations, used by mcrl2parser.cpp
 int  mcrl2yylex(void);           /* lexer function */

@@ -1,5 +1,6 @@
 %{
 #include <cstring>
+#include <cstdio>
 #include "mcrl2lexer.h"
 #include "mcrl2parser.hpp"
 #include "libstruct.h"
@@ -24,9 +25,6 @@ using std::cout;
 //external declarations
 int mcrl2yyparse(void);          /* declared in mcrl2parser.cpp */
 extern YYSTYPE mcrl2yylval;      /* declared in mcrl2parser.cpp */
-#if !defined(_MSC_VER) && !defined(__MINGW32__)
-extern int fileno(FILE *stream); /* declared in stdio.h (forgotten by flex) */
-#endif
 
 //global declarations, used by mcrl2parser.cpp
 int  mcrl2yylex(void);           /* lexer function */

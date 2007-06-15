@@ -24,7 +24,7 @@
 
 #ifdef __cplusplus
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <iostream>
 
 /* Use prototypes in function declarations. */
@@ -358,6 +358,7 @@ static yyconst short int yy_chk[78] =
 #line 1 "fsmlexer.ll"
 #define INITIAL 0
 #line 2 "fsmlexer.ll"
+#include <cstdio>
 #include <string>
 #include <aterm2.h>
 #include <liblowlevel.h>
@@ -386,9 +387,6 @@ using namespace mcrl2::lts;
 //external declarations
 int fsmyyparse(void);          /* declared in fsmparser.cpp */
 extern YYSTYPE fsmyylval;      /* declared in fsmparser.cpp */
-#if !defined(_MSC_VER) && !defined(__MINGW32__)
-extern int fileno(FILE *stream); /* declared in stdio.h (forgotten by flex) */
-#endif
 
 //global declarations, used by fsmparser.cpp
 int  fsmyylex(void);           /* lexer function */
