@@ -677,10 +677,10 @@ inline void lpsConstElm::output() {
     action_list rebuild_actions;
     for(action_list::iterator i = currentSummand->actions().begin(); i != currentSummand->actions().end() ; i++){
       data_expression_list argumentList;
-      for(data_expression_list::iterator j = (i->arguments().begin()); j != i->arguments().end(); j++){
+	  for(data_expression_list::iterator j = (i->arguments().begin()); j != i->arguments().end(); j++){
         argumentList = push_front(argumentList, data_expression(p_substitute(*j, constantPP)));
       }
-      rebuild_actions = push_front(rebuild_actions, action( i -> label().name(), atermpp::reverse(argumentList)));
+      rebuild_actions = push_front(rebuild_actions, action( i -> label(), atermpp::reverse(argumentList)));
     };
     
     //Rewrite condition
