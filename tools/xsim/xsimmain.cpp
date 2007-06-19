@@ -787,6 +787,7 @@ void XSimMain::OnLoadTrace( wxCommandEvent& /* event */ )
 		    if ( state == NULL )
 		    {
 			    Reset();
+                            state = current_state;
 		    } else {
 			    Reset(state);
 		    }
