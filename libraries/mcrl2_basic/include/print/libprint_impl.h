@@ -24,7 +24,13 @@
 #include <aterm2.h>
 #include "libprint_types.h"
 #include "libstruct.h"
-#include "liblowlevel.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/numeric_string.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 //declarations
 //------------

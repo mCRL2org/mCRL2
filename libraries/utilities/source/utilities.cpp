@@ -1,17 +1,18 @@
 // Implementation of utilities
 // file: utilities.cpp
 
-#include "stdlib.h"
-#include "auxiliary/utilities.h"
-#include "libprint_c.h"
-#include "libstruct.h"
+#include <cstdlib>
 #include <string>
+#include "libstruct.h"
+#include "mcrl2/utilities/utilities.h"
+#include "print/messaging.h"
 
+using namespace ::mcrl2::utilities;
 using namespace std;
 
 // General functions and classes ------------------------------------------------------------------
 
-  char* bool_to_char_string(bool a_bool) {
+  const char* bool_to_char_string(bool a_bool) {
     if (a_bool) {
       return "true";
     } else {

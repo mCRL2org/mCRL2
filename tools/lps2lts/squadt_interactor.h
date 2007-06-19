@@ -2,9 +2,9 @@
 #define _SQUADT_LPS2LTS_H
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include "utilities/mcrl2_squadt.h"
+#include "mcrl2/utilities/squadt_interface.h"
 
-class squadt_interactor: public mcrl2_squadt::tool_interface {
+class squadt_interactor: public mcrl2::utilities::squadt::tool_interface {
   friend class status_display;
   friend class storage_configuration;
 
@@ -58,6 +58,7 @@ class squadt_interactor: public mcrl2_squadt::tool_interface {
 
     bool perform_task(sip::configuration &configuration);
 };
+
 #endif
 
 #endif

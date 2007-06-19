@@ -8,7 +8,10 @@
 #include "lps2lts.h"
 #include "lts.h"
 
+#include "print/messaging.h"
+
 using namespace std;
+using namespace mcrl2::utilities;
 
 static lts_options lts_opts;
 static ATermAppl term_nil;

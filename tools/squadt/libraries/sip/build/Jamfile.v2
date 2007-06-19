@@ -60,8 +60,9 @@ alias messenger
       store_visitor.cpp
       search_visitor.cpp
       restore_visitor.o
-      /libraries/utilities//logger
+      utility/logger.cpp
     : <threading>multi
+      <use>/libraries/utilities//headers
       <dependency>/site-config//boost_regex
       <dependency>/site-config//boost_filesystem
     : # no default build

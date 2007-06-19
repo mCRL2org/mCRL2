@@ -6,14 +6,13 @@
 #include <boost/foreach.hpp>
 #include <boost/regex.hpp>
 
-#include <utilities/generic_visitor.tcc>
-
 #include <sip/visitors.h>
 #include <sip/report.h>
 #include <sip/controller/capabilities.h>
 #include <sip/tool/capabilities.h>
 #include <sip/detail/layout_elements.h>
 #include <sip/detail/layout_manager.h>
+#include <sip/utility/generic_visitor.tcc>
 #include <sip/display.h>
 #include <sip/common.h>
 

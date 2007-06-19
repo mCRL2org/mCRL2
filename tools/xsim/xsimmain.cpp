@@ -17,13 +17,13 @@
 #include <aterm2.h>
 #include "xsimbase.h"
 #include "xsimmain.h"
-#include "liblowlevel.h"
 #include "libstruct.h"
 #include "libnextstate.h"
 #include "librewrite.h"
 #include "libprint_types.h"
 #include "libprint.h"
 #include "libtrace.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 // For PLUGIN_DIRECTORY
 #include <setup.h>
@@ -34,6 +34,7 @@
 #endif
 
 using namespace std;
+using namespace ::mcrl2::utilities;
 
 //------------------------------------------------------------------------------
 // XSimMain

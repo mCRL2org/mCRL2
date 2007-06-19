@@ -11,15 +11,16 @@
 #include <assert.h>
 #include <iostream>
 #include <sstream>
-#include "liblowlevel.h"
 #include "libstruct.h"
-#include "libprint_c.h"
 #include "libprint.h"
 #include "libnextstate.h"
 #include "libenum.h"
 #include "librewrite.h"
 #include "mcrl2/libdataelm.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
+using namespace ::mcrl2::utilities;
 using namespace std;
 
 #define is_tau(x) ATisEmpty((ATermList) ATgetArgument(x,0))

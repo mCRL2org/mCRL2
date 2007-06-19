@@ -11,7 +11,6 @@
 #include <fstream>
 #include <getopt.h>
 #include <aterm2.h>
-#include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint.h"
 #include "libprint_c.h"
@@ -23,9 +22,11 @@
 #include "mcrl2/basic/mucalculus.h"
 #include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/pbes/pbes.h"
+#include "print/messaging.h"
 
 using namespace std;
 using namespace lps;
+using namespace ::mcrl2::utilities;
 
 //Type definitions
 //----------------
@@ -96,9 +97,9 @@ bool process(t_tool_options const& tool_options) {
 
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utilities/mcrl2_squadt.h>
+#include "mcrl2/utilities/squadt_interface.h"
 
-class squadt_interactor : public mcrl2_squadt::tool_interface {
+class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
 
   private:
 
@@ -174,7 +175,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
   top->add(new label("Phase after which to stop: "), margins(0,5,0,5));
 
-  squadt_utility::radio_button_helper < t_phase > phase_selector(h, PH_NONE, "none");
+  mcrl2::utilities::squadt::radio_button_helper < t_phase > phase_selector(h, PH_NONE, "none");
 
   phase_selector.associate(h, PH_PARSE, "parsing");
   phase_selector.associate(h, PH_TYPE_CHECK, "type checking");
@@ -193,7 +194,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
   h = new layout::horizontal_box();
 
-  squadt_utility::radio_button_helper < pbes_output_format > format_selector(h, normal, "normal");
+  mcrl2::utilities::squadt::radio_button_helper < pbes_output_format > format_selector(h, normal, "normal");
 
   format_selector.associate(h, readable, "readable");
 
@@ -300,7 +301,7 @@ int main(int argc, char **argv)
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (!mcrl2_squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+  if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
 #endif
     //parse command line
     t_tool_options tool_options = parse_command_line(argc, argv);

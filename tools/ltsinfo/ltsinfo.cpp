@@ -1,22 +1,23 @@
 #include <string>
 #include <getopt.h>
 #include "aterm2.h"
-#include "liblowlevel.h"
 #include "libstruct.h"
-#include "libprint_c.h"
 #include "lts/liblts.h"
 #include "setup.h"
+#include "print/messaging.h"
 
 #include <boost/lexical_cast.hpp>
+
+using namespace mcrl2::utilities;
 
 #define NAME "ltsinfo"
 #define VERSION "0.1"
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utilities/mcrl2_squadt.h>
+#include <mcrl2/utilities/squadt_interface.h>
 
-class squadt_interactor : public mcrl2_squadt::tool_interface {
+class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
 
   private:
 
@@ -317,7 +318,7 @@ int main(int argc, char **argv) {
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (!mcrl2_squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+  if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
 #endif
     using namespace std;
     using namespace mcrl2::lts;

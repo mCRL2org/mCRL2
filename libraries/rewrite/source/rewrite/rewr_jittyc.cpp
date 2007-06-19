@@ -11,11 +11,10 @@
 #include "rewr_jittyc.h"
 
 #include <cstdlib>
-#include <libprint_c.h>
 
 RewriterCompilingJitty::RewriterCompilingJitty(lps::data_specification DataSpec)
 {
-	gsfprintf(stderr,"error: compiling JITty rewriter is not available\n");
+	gsMessage("error: compiling JITty rewriter is not available\n");
 	exit(1);
 }
 
@@ -81,13 +80,15 @@ void RewriterCompilingJitty::clearSubstitutions()
 #include <dlfcn.h>
 #include <assert.h>
 #include <aterm2.h>
-#include <liblowlevel.h>
 #include <libstruct.h>
 #include <libprint_c.h>
+#include <print/messaging.h>
+#include <mcrl2/utilities/aterm_ext.h>
 #include <mcrl2/data/data_specification.h>
 #include "setup.h"
 #include "rewr_jittyc.h"
 
+using namespace ::mcrl2::utilities;
 using namespace std;
 
 #define JITTYC_COMPILE_COMMAND (CC " -c " CFLAGS " " SCFLAGS " " CPPFLAGS " " ATERM_CPPFLAGS " %s.c")
@@ -376,7 +377,7 @@ ATermAppl RewriterCompilingJitty::fromInner(ATerm Term)
 
         if ( ATisEmpty((ATermList) Term) )
         {
-                gsfprintf(stderr,"%s: invalid jitty format term (%T)\n",NAME,Term);
+                gsMessage("%s: invalid jitty format term (%T)\n",NAME,Term);
                 exit(1);
         }
 
@@ -555,7 +556,7 @@ static ATerm toInnerc(ATerm Term)
   }
   l=ATreverse(l);
   ATerm r=Apply((ATermList) l);
-  // gsfprintf(stderr,"RESULT: %T\n%T\n%T\n\n",Term,r,l);
+  // gsMessage("RESULT: %T\n%T\n%T\n\n",Term,r,l);
   return r;
 }
 

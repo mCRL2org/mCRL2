@@ -24,8 +24,13 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/detail/tools.h"
-#include "liblowlevel.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "libstruct.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 using namespace lps;
 

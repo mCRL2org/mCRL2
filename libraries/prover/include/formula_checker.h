@@ -7,7 +7,7 @@
 #include "aterm2.h"
 #include "librewrite.h"
 #include "prover/bdd_prover.h"
-#include "auxiliary/bdd2dot.h"
+#include "mcrl2/utilities/bdd2dot.h"
 
   /// \brief The class formula checker takes a data specification in mCRL2 format and a list of expressions
   /// \brief of sort Bool in the mCRL2 format and determines whether or not these expersions are tautologies or

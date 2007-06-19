@@ -2,20 +2,20 @@
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <wx/wx.h>
 //SQuADT protocol interface
-#include <utilities/mcrl2_squadt.h>
+#include <mcrl2/utilities/squadt_interface.h>
 
 bool        command_line = false;
 std::string lts_file_argument;
 
-class squadt_interactor: public mcrl2_squadt::tool_interface {
+class squadt_interactor: public mcrl2::utilities::squadt::tool_interface {
   private:
     static const char*  fsm_file_for_input;  ///< file containing an LTS that can be imported
     // Wrapper for wxEntry invocation
-    squadt_utility::entry_wrapper& starter;
+    mcrl2::utilities::squadt::entry_wrapper& starter;
 
   public:
     // Constructor
-    squadt_interactor(squadt_utility::entry_wrapper&);
+    squadt_interactor(mcrl2::utilities::squadt::entry_wrapper&);
     // Configures tool capabilities.
     void set_capabilities(sip::tool::capabilities&) const;
     // Queries the user via SQuADt if needed to obtain configuration information
@@ -28,7 +28,7 @@ class squadt_interactor: public mcrl2_squadt::tool_interface {
 
 const char* squadt_interactor::fsm_file_for_input = "fsm_in";
 
-squadt_interactor::squadt_interactor(squadt_utility::entry_wrapper& w): starter(w) {
+squadt_interactor::squadt_interactor(mcrl2::utilities::squadt::entry_wrapper& w): starter(w) {
   // skip 
 }
 
@@ -120,7 +120,7 @@ bool LTSViewApp::OnInit() {
 extern "C" int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,
                               wxCmdLineArgType lpCmdLine,int nCmdShow) {
 # ifdef ENABLE_SQUADT_CONNECTIVITY
-  squadt_utility::entry_wrapper starter(hInstance,hPrevInstance,lpCmdLine,
+  mcrl2::utilities::squadt::entry_wrapper starter(hInstance,hPrevInstance,lpCmdLine,
       nCmdShow);
   squadt_interactor c(starter);
   if (!c.try_interaction(lpCmdLine)) {
@@ -135,7 +135,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,
 #else
 int main(int argc, char **argv) {
 # ifdef ENABLE_SQUADT_CONNECTIVITY
-  squadt_utility::entry_wrapper starter(argc, argv);
+  mcrl2::utilities::squadt::entry_wrapper starter(argc, argv);
   squadt_interactor c(starter);
   if(!c.try_interaction(argc, argv)) {
     command_line = true;

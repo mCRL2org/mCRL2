@@ -2,12 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <aterm2.h>
-#include "liblowlevel.h"
 #include "libstruct.h"
-#include "libprint_c.h"
 #include "libenum.h"
 #include "librewrite.h"
 #include "nextstate_standard.h"
+#include "print/messaging.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 #define ATAgetFirst(x) ((ATermAppl) ATgetFirst(x))
 #define ATLgetFirst(x) ((ATermList) ATgetFirst(x))

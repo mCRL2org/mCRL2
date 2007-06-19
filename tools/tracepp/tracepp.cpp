@@ -6,13 +6,13 @@
 #include <getopt.h>
 #include <assert.h>
 #include <aterm2.h>
-#include "liblowlevel.h"
 #include "libstruct.h"
-#include "libprint_c.h"
 #include "libprint.h"
 #include "libtrace.h"
+#include "print/messaging.h"
 
 using namespace std;
+using namespace mcrl2::utilities;;
 
 enum output_type { otPlain, otMcrl2, otDot, otAut, /*otSvc,*/ otNone };
 

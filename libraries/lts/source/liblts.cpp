@@ -5,10 +5,14 @@
 #include <cassert>
 #include <cstdlib>
 #include "libstruct.h"
-#include "libprint_c.h"
 #include "lts/liblts.h"
+#include "print/messaging.h"
 #include "mcrl2/lps/specification.h"
 #include "setup.h"
+
+#ifdef __cplusplus
+using namespace mcrl2::utilities;
+#endif
 
 #ifdef MCRL2_BCG
 #include <bcg_user.h>

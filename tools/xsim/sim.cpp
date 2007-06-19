@@ -12,13 +12,14 @@
 #include <aterm2.h>
 #include <assert.h>
 
-#include "liblowlevel.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "libstruct.h"
-#include "libprint_c.h"
 #include "libnextstate.h"
 #include "librewrite.h"
 
 using namespace std;
+using namespace ::mcrl2::utilities;
 
 static void PrintState(ATerm state, NextState *ns)
 {
@@ -26,22 +27,22 @@ static void PrintState(ATerm state, NextState *ns)
 	{
 		if ( i > 0 )
 		{
-			gsprintf(", ");
+			gsMessage(", ");
 		}
 
 		ATermAppl a = ns->getStateArgument(state,i);
 		if ( gsIsDataVarId(a) )
 		{
-			gsprintf("_");
+			gsMessage("_");
 		} else {
-			gsprintf("%P",a);
+			gsMessage("%P",a);
 		}
 	}
 }
 
-char help_message[] = "During the simulation the following commands are accepted:\n"
+char help_gsMessage[] = "During the simulation the following commands are accepted:\n"
 		      "   N - take transition N to the corresponding state (where N is a number)\n"
-		      "   h - print this help message\n"
+		      "   h - print this help gsMessage\n"
 		      "   q - quit\n";
 
 void print_help(FILE *f, char *Name)
@@ -53,14 +54,14 @@ void print_help(FILE *f, char *Name)
     "%s"
     "\n"
     "The following command line options are available.\n"
-    "  -h, --help               display this help message\n"
+    "  -h, --help               display this help gsMessage\n"
     "  -q, --quiet              do not display any unrequested information\n"
-    "  -v, --verbose            display consise intermediate messages\n"
-    "  -d, --debug              display detailed intermediate messages\n"
+    "  -v, --verbose            display consise intermediate gsMessages\n"
+    "  -d, --debug              display detailed intermediate gsMessages\n"
     "  -y, --dummy              replace free variables in the LPS with dummy values\n"
     "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'inner')\n",
     Name,
-    help_message
+    help_gsMessage
   );
 }
 
@@ -177,9 +178,9 @@ int main(int argc, char **argv)
 	NextState *nstate = createNextState(Spec,!usedummy,GS_STATE_VECTOR,strat);
 	state = nstate->getInitialState();
 
-	gsprintf("initial state: [ ");
+	gsMessage("initial state: [ ");
 	PrintState(state,nstate);
-	gsprintf(" ]\n\n");
+	gsMessage(" ]\n\n");
 
 	NextStateGenerator *nsgen = NULL;
 	bool notdone = true;
@@ -193,9 +194,9 @@ int main(int argc, char **argv)
 		int i = 0;
 		while ( nsgen->next(&Transition,&NewState) )
 		{
-			gsprintf("%i: %P  ->  [ ",i,Transition);
+			gsMessage("%i: %P  ->  [ ",i,Transition);
 			PrintState(NewState,nstate);
-			gsprintf(" ]\n\n");
+			gsMessage(" ]\n\n");
 
 			states = ATinsert(states,(ATerm) ATmakeList2((ATerm) Transition,NewState));
 			i++;
@@ -221,17 +222,17 @@ int main(int argc, char **argv)
 				notdone = false;
 				break;
 			} else if ( (s == "h") || (s == "help") ) {
-				cout << help_message;
+				cout << help_gsMessage;
 			} else if ( isdigit(s[0]) ) {
 				unsigned int idx;
 				sscanf(s.c_str(),"%i",&idx);
 				if ( idx < (unsigned int) ATgetLength(states) )
 				{
-					gsprintf("\ntransition: %P\n\n",ATAgetFirst(ATLelementAt(states,idx)));
+					gsMessage("\ntransition: %P\n\n",ATAgetFirst(ATLelementAt(states,idx)));
 					state = ATgetFirst(ATgetNext(ATLelementAt(states,idx)));
-					gsprintf("current state: [ ");
+					gsMessage("current state: [ ");
 					PrintState(state,nstate);
-					gsprintf(" ]\n\n");
+					gsMessage(" ]\n\n");
 					break;
 				} else {
 					cout << "invalid transition index " << idx << " (maximum is " << ATgetLength(states)-1 << ")" << endl;

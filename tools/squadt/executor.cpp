@@ -9,7 +9,7 @@
 #include <boost/weak_ptr.hpp>
 #include <boost/foreach.hpp>
 
-#include <utilities/generic_visitor.h>
+#include <sip/utility/generic_visitor.h>
 
 #include "executor.tcc"
 

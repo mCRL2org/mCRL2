@@ -6,13 +6,17 @@
 #include "mcrl2/data/data_specification.h"
 #include "prover/prover.h"
 #include "prover/bdd_prover.h"
-#include "auxiliary/utilities.h"
-#include "liblowlevel.h"
-#include "libprint_c.h"
+#include "mcrl2/utilities/utilities.h"
 #include "libstruct.h"
 #include "time.h"
 #include "cstdlib"
 #include "prover/induction.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 // Class BDD_Prover -------------------------------------------------------------------------------
   // Class BDD_Prover - Functions declared private ------------------------------------------------

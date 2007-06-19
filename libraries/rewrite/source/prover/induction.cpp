@@ -2,10 +2,17 @@
 // file: induction.cpp
 
 #include "prover/induction.h"
-#include "liblowlevel.h"
 #include "libstruct.h"
-#include "libprint_c.h"
-#include "auxiliary/utilities.h"
+
+#include "malloc.h"
+
+#include "mcrl2/utilities/utilities.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 // Class Induction --------------------------------------------------------------------------------
 

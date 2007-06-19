@@ -11,7 +11,7 @@
 #include "prover/bdd_simplifier.h"
 #include "prover/bdd_path_eliminator.h"
 #include "prover/induction.h"
-#include "auxiliary/utilities.h"
+#include "mcrl2/utilities/utilities.h"
 
   /// \brief A class based on the Prover class that takes an expression of sort Bool in internal mCRL2 format
   /// \brief and creates the corresponding EQ-BDD. Using this EQ-BDD, the class can determine if the original

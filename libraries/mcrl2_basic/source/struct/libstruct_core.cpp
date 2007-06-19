@@ -4,7 +4,13 @@
 #include <limits.h>
 
 #include "libstruct_core.h"
-#include "liblowlevel.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/numeric_string.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 extern "C" {
 

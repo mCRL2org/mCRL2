@@ -17,7 +17,8 @@
 #include <sstream>
 #include <fstream>
 #include "aterm2.h"
-#include "liblowlevel.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "libparse.h"

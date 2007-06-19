@@ -20,8 +20,7 @@
 //Boost
 #include <boost/program_options.hpp>
 
-//Lowlevel library for gsErrorMsg
-#include <libprint_c.h>
+#include "print/messaging.h"
 
 //Aterms
 #include <atermpp/algorithm.h>
@@ -45,6 +44,7 @@ using namespace std;
 using namespace atermpp;
 using namespace lps;
 using namespace lps::data_expr;
+using namespace mcrl2::utilities;
 
 namespace po = boost::program_options;
 
@@ -62,12 +62,12 @@ typedef struct
 
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utilities/mcrl2_squadt.h>
+#include <mcrl2/utilities/squadt_interface.h>
 
 //Forward declaration because do_binary() is called within squadt_interactor class
 int do_binary(const tool_options& options);
 
-class squadt_interactor: public mcrl2_squadt::tool_interface
+class squadt_interactor: public mcrl2::utilities::squadt::tool_interface
 {
   private:
 
@@ -131,7 +131,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& confi
   layout::manager::aptr top(layout::vertical_box::create());
   layout::manager* current_box = new horizontal_box();
 
-  squadt_utility::radio_button_helper < RewriteStrategy >
+  mcrl2::utilities::squadt::radio_button_helper < RewriteStrategy >
                                         strategy_selector(current_box, GS_REWR_INNER, "Inner");
   strategy_selector.associate(current_box, GS_REWR_INNERC, "Innerc");
   strategy_selector.associate(current_box, GS_REWR_JITTY,  "Jitty");
@@ -768,7 +768,7 @@ int main(int ac, char** av) {
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (mcrl2_squadt::interactor< squadt_interactor >::free_activation(ac, av)) {
+  if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(ac, av)) {
     return 0;
   }
 #endif

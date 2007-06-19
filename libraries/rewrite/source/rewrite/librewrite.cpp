@@ -1,15 +1,20 @@
 #include <stdlib.h>
 #include <aterm2.h>
 #include <assert.h>
-#include <libprint_c.h>
 #include <libstruct.h>
-#include <mcrl2/data/data_specification.h>
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/data/data_specification.h"
 #include "librewrite.h"
 #include "rewr_inner.h"
 #include "rewr_jitty.h"
 #include "rewr_innerc.h"
 #include "rewr_jittyc.h"
 #include "rewr_prover.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 using namespace lps;
 

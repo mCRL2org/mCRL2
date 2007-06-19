@@ -4,18 +4,28 @@ project toolset/mcrl22lps
 
 obj lin_alt.o
        : lin_alt.cpp
-         /libraries//mcrl2_basic
-         /libraries//rewrite
+       : <use>/libraries/rewrite//headers
+         <use>/libraries/mcrl2_basic//headers
+         <use>/libraries/utilities//headers
+         <use>/libraries/parser//headers # for libalpha
        ;
 
-explicit lin_alt.o ;
+obj lin_std.o
+       : lin_std.cpp
+       : <use>/libraries/rewrite//headers
+         <use>/libraries/mcrl2_basic//headers
+         <use>/libraries/utilities//headers
+         <use>/libraries/parser//headers # for libalpha
+       ;
+
+explicit lin_std.o lin_alt.o ;
 
 exe mcrl22lps
        : mcrl22lps.cpp
          lin_alt.o
-         lin_std.cpp
+         lin_std.o
          /libraries//parser
-         /libraries//mcrl2_basic
+         /libraries//utilities
          /libraries//rewrite
          /libraries/parser//alpha
        : <toolset>msvc:<library>/libraries//getopt
@@ -36,7 +46,7 @@ exe alpha
        : alpha.cpp
          /libraries//parser
          /libraries/parser//alpha
-         /libraries//mcrl2_basic
+         /libraries//utilities
          /libraries//rewrite
        : <toolset>msvc:<library>/libraries//getopt
        ;

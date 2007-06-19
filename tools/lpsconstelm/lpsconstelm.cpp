@@ -28,10 +28,8 @@
 //Boost
 #include <boost/program_options.hpp>
 
-//Lowlevel
-#include <libprint_c.h>
 #include "libstruct.h"
-#include "liblowlevel.h"
+#include "print/messaging.h"
 
 //Rewriter
 #include "librewrite.h"
@@ -41,6 +39,7 @@
 
 using namespace lps;
 using namespace atermpp;
+using namespace mcrl2::utilities;
 
 const char* version = "0.5.2";
 
@@ -130,9 +129,9 @@ class lpsConstElm {
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 // Squadt protocol interface and utility pseudo-library
-#include <utilities/mcrl2_squadt.h>
+#include <mcrl2/utilities/squadt_interface.h>
 
-class squadt_interactor : public mcrl2_squadt::tool_interface {
+class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
 
   private:
 
@@ -1150,7 +1149,7 @@ int main(int argc, char** argv) {
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (!mcrl2_squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+  if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
 #endif
     lpsConstElm constelm;
 

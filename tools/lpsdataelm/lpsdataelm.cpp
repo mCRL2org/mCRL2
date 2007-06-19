@@ -21,14 +21,14 @@
 #include <boost/program_options.hpp>
 
 //mCRL2
-#include "liblowlevel.h"
 #include "libstruct.h"
-#include "libprint_c.h"
+#include "print/messaging.h"
 #include "mcrl2/libdataelm.h"
 #include "mcrl2/lps/specification.h"
 
 using namespace std;
 using namespace lps;
+using namespace mcrl2::utilities;
 
 namespace po = boost::program_options;
 

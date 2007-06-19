@@ -2,8 +2,12 @@
 // file: formula_checker.cpp
 
 #include "formula_checker.h"
-#include "liblowlevel.h"
-#include "libprint_c.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 // Class Formula_Checker --------------------------------------------------------------------------
   // Class Formula_Checker - Functions declared private -------------------------------------------
@@ -20,7 +24,7 @@
           );
           exit(1);
         } else {
-          gsfprintf(stderr, "  Counter-example: %P\n", v_counter_example);
+          gsMessage("  Counter-example: %P\n", v_counter_example);
         }
       }
     }
@@ -39,7 +43,7 @@
           );
           exit(1);
         } else {
-          gsfprintf(stderr, "  Witness: %P\n", v_witness);
+          gsMessage("  Witness: %P\n", v_witness);
         }
       }
     }
@@ -95,16 +99,16 @@
 
       while (!ATisEmpty(a_formulas)) {
         v_formula = ATAgetFirst(a_formulas);
-        gsfprintf(stderr, "'%P': ", v_formula);
+        gsMessage("'%P': ", v_formula);
         f_bdd_prover.set_formula(v_formula);
         Answer v_is_tautology = f_bdd_prover.is_tautology();
         Answer v_is_contradiction = f_bdd_prover.is_contradiction();
         if (v_is_tautology == answer_yes) {
-          gsfprintf(stderr, "Tautology\n");
+          gsMessage("Tautology\n");
         } else if (v_is_contradiction == answer_yes) {
-          gsfprintf(stderr, "Contradiction\n");
+          gsMessage("Contradiction\n");
         } else {
-          gsfprintf(stderr, "Undeterminable\n");
+          gsMessage("Undeterminable\n");
           print_counter_example();
           print_witness();
           save_dot_file(v_formula_number);

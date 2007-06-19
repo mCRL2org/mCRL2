@@ -20,9 +20,6 @@
 //Boost
 #include <boost/program_options.hpp>
 
-//Lowlevel library for gsErrorMsg
-#include <libprint_c.h>
-
 //Aterms
 #include <atermpp/aterm.h>
 #include <atermpp/aterm_list.h>
@@ -32,11 +29,14 @@
 #include <mcrl2/lps/linear_process.h>
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/data/data.h>
+#include <print/messaging.h>
+#include <mcrl2/utilities/aterm_ext.h>
 
 using namespace std;
 using namespace atermpp;
 using namespace lps;
 using namespace lps::data_expr;
+using namespace ::mcrl2::utilities;
 
 namespace po = boost::program_options;
 
@@ -49,12 +49,12 @@ typedef struct{
   
 //Squadt connectivity
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utilities/mcrl2_squadt.h>
+#include <mcrl2/utilities/squadt_interface.h>
 
 //Forward declaration because do_sumelm() is called within squadt_interactor class
 int do_sumelm(const tool_options& options);
 
-class squadt_interactor: public mcrl2_squadt::tool_interface
+class squadt_interactor: public mcrl2::utilities::squadt::tool_interface
 {
   private:
 
@@ -456,7 +456,7 @@ int main(int ac, char** av) {
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (mcrl2_squadt::interactor< squadt_interactor >::free_activation(ac, av)) {
+  if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(ac, av)) {
     return 0;
   }
 #endif

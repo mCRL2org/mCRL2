@@ -3,10 +3,9 @@
 
 #include <set>
 
-#include <utilities/logger.h>
-
 #include <sip/display.h>
 #include <sip/detail/layout_elements.h>
+#include <sip/utility/logger.h>
 #include <sip/report.h>
 #include <sip/tool/capabilities.h>
 #include <sip/tool/category.h>

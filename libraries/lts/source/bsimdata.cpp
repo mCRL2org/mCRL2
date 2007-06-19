@@ -22,15 +22,16 @@
 
 #include <algorithm>
 #include <string>
-#include "libprint_c.h"
 #include "libprint.h"
 #include "libstruct.h"
 #include "lts/detail/bsim.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 #define ATisAppl(t) (ATgetType(t) == AT_APPL)
 
 using namespace std;
 using namespace mcrl2::lts;
+using namespace mcrl2::utilities;
 
 /* Data definition */
 

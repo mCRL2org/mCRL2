@@ -7,15 +7,16 @@
 #include <aterm2.h>
 #include <fstream>
 #include "libstruct.h"
-#include "liblowlevel.h"
 #include "libprint_types.h"
 #include "libprint_c.h"
 #include "libparse.h"
 #include "typecheck.h"
 #include "dataimpl.h"
 #include "lin_alt.h"
+#include "print/messaging.h"
 
 using namespace std;
+using namespace ::mcrl2::utilities;
 
 void print_help(FILE *f, char *Name)
 {

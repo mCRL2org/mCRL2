@@ -6,7 +6,10 @@
 #include "pstream.h"
 #include "libprint_c.h"
 #include <iostream>
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
+using namespace ::mcrl2::utilities;
 using namespace std;
 
 // Class SMT_Solver_Ario --------------------------------------------------------------------------

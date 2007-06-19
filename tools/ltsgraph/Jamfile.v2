@@ -6,7 +6,7 @@ alias ltsgraph : : <wx>no ;
 
 exe ltsgraph
        : [ glob *.cpp ]
-         /libraries/wxe//spinctrlfloat.o
+         /libraries/utilities//spinctrlfloat
          /libraries//mcrl2_basic
          /libraries//lts
          /site-config//wx_base

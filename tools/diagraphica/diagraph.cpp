@@ -16,19 +16,19 @@ std::string fsm_file_argument;
 
 // -- Squadt protocol interface -------------------------------------
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-    #include <utilities/mcrl2_squadt.h>
+    #include <mcrl2/utilities/squadt_interface.h>
 
-    class squadt_interactor: public mcrl2_squadt::tool_interface 
+    class squadt_interactor: public mcrl2::utilities::squadt::tool_interface 
     {
         private:
             // Wrapper for wxEntry invocation
-            squadt_utility::entry_wrapper& starter;
+            mcrl2::utilities::squadt::entry_wrapper& starter;
     	    // Identifier for main input file that contains an LTS
             static const char* fsm_file_for_input;
      
         public:
             // Constructor
-            squadt_interactor(squadt_utility::entry_wrapper&);
+            squadt_interactor(mcrl2::utilities::squadt::entry_wrapper&);
             // Configures tool capabilities.
             void set_capabilities(sip::tool::capabilities&) const;
             // Queries the user via SQuADt if needed to obtain configuration information
@@ -40,7 +40,7 @@ std::string fsm_file_argument;
     };
 
     const char* squadt_interactor::fsm_file_for_input = "fsm_in";
-    squadt_interactor::squadt_interactor(squadt_utility::entry_wrapper& w): starter(w) 
+    squadt_interactor::squadt_interactor(mcrl2::utilities::squadt::entry_wrapper& w): starter(w) 
     {}
 
     void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const 
@@ -86,7 +86,7 @@ std::string fsm_file_argument;
             wxCmdLineArgType lpCmdLine,             
             int nCmdShow) 
         {                                                                     
-            squadt_utility::entry_wrapper starter(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+            mcrl2::utilities::squadt::entry_wrapper starter(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
             interactor.reset(new squadt_interactor(starter));
         
             if (!interactor->try_interaction(lpCmdLine)) {
@@ -97,7 +97,7 @@ std::string fsm_file_argument;
     # else
         int main(int argc, char **argv) 
         {
-            squadt_utility::entry_wrapper starter(argc, argv);
+            mcrl2::utilities::squadt::entry_wrapper starter(argc, argv);
             interactor.reset(new squadt_interactor(starter));
 
             if(!interactor->try_interaction(argc, argv)) {

@@ -6,7 +6,7 @@
 
 #include <boost/function.hpp>
 
-#include <utilities/generic_visitor.h>
+#include <sip/utility/generic_visitor.h>
 
 #include <sip/detail/layout_mediator.h>
 

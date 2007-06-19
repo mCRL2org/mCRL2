@@ -11,36 +11,36 @@
 
 #include "squadt_interactor.h"
 
-const char*  squadt_interactor::option_as_aut               = "as_aut";
-const char*  squadt_interactor::option_out_info             = "out_info";
+const char*  ::squadt_interactor::option_as_aut               = "as_aut";
+const char*  ::squadt_interactor::option_out_info             = "out_info";
 
-const char*  squadt_interactor::option_usedummies           = "use_dummies";
-const char*  squadt_interactor::option_state_format_tree    = "state_format_tree";
-const char*  squadt_interactor::option_removeunused         = "remove_unused";
+const char*  ::squadt_interactor::option_usedummies           = "use_dummies";
+const char*  ::squadt_interactor::option_state_format_tree    = "state_format_tree";
+const char*  ::squadt_interactor::option_removeunused         = "remove_unused";
 
-const char*  squadt_interactor::option_rewrite_strategy     = "rewrite_strategy";
+const char*  ::squadt_interactor::option_rewrite_strategy     = "rewrite_strategy";
 
-const char*  squadt_interactor::option_exploration_strategy = "expl_strat";
+const char*  ::squadt_interactor::option_exploration_strategy = "expl_strat";
   
-const char*  squadt_interactor::option_detect_deadlock      = "detect_deadlock";
-const char*  squadt_interactor::option_detect_actions       = "detect_actions";
-const char*  squadt_interactor::option_trace                = "trace";
-const char*  squadt_interactor::option_max_traces           = "max_traces";
-const char*  squadt_interactor::option_error_trace          = "error_trace";
+const char*  ::squadt_interactor::option_detect_deadlock      = "detect_deadlock";
+const char*  ::squadt_interactor::option_detect_actions       = "detect_actions";
+const char*  ::squadt_interactor::option_trace                = "trace";
+const char*  ::squadt_interactor::option_max_traces           = "max_traces";
+const char*  ::squadt_interactor::option_error_trace          = "error_trace";
   
-const char*  squadt_interactor::option_confluence_reduction = "confluence_reduction";
-const char*  squadt_interactor::option_confluent_tau        = "confluent_tau";
+const char*  ::squadt_interactor::option_confluence_reduction = "confluence_reduction";
+const char*  ::squadt_interactor::option_confluent_tau        = "confluent_tau";
   
-const char*  squadt_interactor::option_max_states           = "max_states";
+const char*  ::squadt_interactor::option_max_states           = "max_states";
   
-const char*  squadt_interactor::option_bithashing           = "bithashing";
-const char*  squadt_interactor::option_bithashsize          = "bithash_size";
+const char*  ::squadt_interactor::option_bithashing           = "bithashing";
+const char*  ::squadt_interactor::option_bithashsize          = "bithash_size";
   
-const char*  squadt_interactor::option_init_tsize           = "init_tsize";
+const char*  ::squadt_interactor::option_init_tsize           = "init_tsize";
 
-const char*  squadt_interactor::lps_file_for_input          = "lps_in";
-const char*  squadt_interactor::lts_file_for_output         = "lts_out";
-const char*  squadt_interactor::trc_file_for_output         = "trc_out";
+const char*  ::squadt_interactor::lps_file_for_input          = "lps_in";
+const char*  ::squadt_interactor::lts_file_for_output         = "lts_out";
+const char*  ::squadt_interactor::trc_file_for_output         = "trc_out";
 
 static boost::shared_ptr < sip::datatype::enumeration > exploration_strategy_enumeration; 
 
@@ -130,6 +130,8 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c)
   using namespace sip::layout;
   using namespace sip::layout::elements;
   
+  using mcrl2::utilities::squadt::rewrite_strategy_enumeration;
+
   bool make_lts = c.get_category() == sip::tool::category::transformation;
 
   /* Set default configuration, for unspecified options */
@@ -179,7 +181,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c)
 
   manager* rewrbox = static_cast < manager* > (column->add(new horizontal_box(),layout::left));
   rewrbox->add(new label("Rewriter:"));
-  squadt_utility::radio_button_helper<RewriteStrategy>
+  mcrl2::utilities::squadt::radio_button_helper<RewriteStrategy>
     rewrite_strategy_selector(rewrbox,GS_REWR_INNER,"innermost");
   rewrite_strategy_selector.associate(rewrbox,GS_REWR_JITTY,"JITty");
   rewrite_strategy_selector.associate(rewrbox,GS_REWR_INNERC,"compiling innermost");
@@ -194,7 +196,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c)
 
   manager* explbox = static_cast < manager* > (column->add(new horizontal_box(),layout::left));
   explbox->add(new label("Strategy:"));
-  squadt_utility::radio_button_helper< exploration_strategy >
+  mcrl2::utilities::squadt::radio_button_helper< exploration_strategy >
     exploration_selector(explbox,es_breadth, "breadth-first");
   exploration_selector.associate(explbox,es_depth, "depth-first");
   exploration_selector.associate(explbox,es_random, "random");
@@ -281,7 +283,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c)
     c.get_option(option_rewrite_strategy).set_argument_value< 0, sip::datatype::enumeration >(rewrite_strategy_selector.get_selection());
   }
   else {
-    c.add_option(option_rewrite_strategy).append_argument(mcrl2_squadt::rewrite_strategy_enumeration, rewrite_strategy_selector.get_selection());
+    c.add_option(option_rewrite_strategy).append_argument(rewrite_strategy_enumeration, rewrite_strategy_selector.get_selection());
   }
 
   if (c.option_exists(option_exploration_strategy)) {

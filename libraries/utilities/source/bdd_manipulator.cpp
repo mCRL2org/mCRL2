@@ -3,7 +3,7 @@
 
 #include "aterm2.h"
 #include "libstruct.h"
-#include "auxiliary/bdd_manipulator.h"
+#include "mcrl2/utilities/bdd_manipulator.h"
 
 // Class BDD_Manipulator --------------------------------------------------------------------------
   // Class BDD_Manipulator - Functions declared public --------------------------------------------

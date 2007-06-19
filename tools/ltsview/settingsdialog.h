@@ -2,7 +2,7 @@
 #define SETTINGSDIALOG_H
 #include <wx/wx.h>
 #include <wx/spinctrl.h>
-#include "colorbutton.h"
+#include "mcrl2/utilities/colorbutton.h"
 #include "glcanvas.h"
 #include "settings.h"
 #include "utils.h"

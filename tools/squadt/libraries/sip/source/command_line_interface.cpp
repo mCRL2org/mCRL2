@@ -8,11 +8,10 @@
 #include <boost/shared_array.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <utilities/logger.h>
-
 #include <sip/detail/command_line_interface.h>
 #include <sip/detail/tool.tcc>
 #include <sip/detail/schemes.tcc>
+#include <sip/utility/logger.h>
 
 namespace sip {
 

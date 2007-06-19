@@ -14,7 +14,7 @@
 
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utilities/mcrl2_squadt.h>
+#include <mcrl2/utilities/squadt_interface.h>
 #endif
 
 //C++
@@ -30,13 +30,15 @@
 #include <atermpp/aterm.h>
 #include <mcrl2/lps/linear_process.h>
 #include <mcrl2/lps/specification.h>
-#include "liblowlevel.h"
+#include <print/messaging.h>
+#include <mcrl2/utilities/aterm_ext.h>
 
 //LPS framework
 #include "mcrl2/lps/specification.h"
 
 using namespace std;
 using namespace atermpp;
+using namespace ::mcrl2::utilities;
 
 namespace po = boost::program_options;
 
@@ -137,7 +139,7 @@ void parse_command_line(int ac, char** av) {
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 
-class squadt_interactor : public mcrl2_squadt::tool_interface {
+class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
 
   private:
 
@@ -240,7 +242,7 @@ int main(int argc, char** argv) {
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (!mcrl2_squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+  if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
 #endif
     parse_command_line(argc,argv);
 

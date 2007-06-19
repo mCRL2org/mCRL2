@@ -25,10 +25,13 @@
 #define VERSION  "0.1"
 
 #include <getopt.h>
-#include "liblowlevel.h"
 #include "libstruct.h"
-#include "libprint_c.h"
 #include "ltsmin.h"
+#include "print/messaging.h"
+
+#ifdef __cplusplus
+using namespace mcrl2::utilities;
+#endif
 
 int traceLevel = 0, optimal = 0, classes = 0, add_state_parameter = 0; 
 

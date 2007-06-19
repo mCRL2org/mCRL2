@@ -4,7 +4,7 @@
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <utilities/print_logger.h>
+#include <sip/utility/print_logger.h>
 
 #include <sip/detail/message.h>
 

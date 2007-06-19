@@ -6,7 +6,7 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
-#include <utilities/print_logger.h>
+#include <sip/utility/print_logger.h>
 
 #include "../settings_manager.h"
 #include "../tool_manager.h"

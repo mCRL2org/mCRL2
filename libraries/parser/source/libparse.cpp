@@ -2,7 +2,7 @@
 #include <string>
 #include <sstream>
 #include "mcrl2lexer.h"
-#include "liblowlevel.h"
+#include "print/messaging.h"
 
 using namespace std;
 

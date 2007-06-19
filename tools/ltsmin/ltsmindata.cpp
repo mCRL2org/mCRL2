@@ -23,6 +23,10 @@
 #include "libprint_c.h"
 #include "libstruct.h"
 #include "ltsmin.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
+
+using namespace mcrl2::utilities;
 
 /* Data definition */
 

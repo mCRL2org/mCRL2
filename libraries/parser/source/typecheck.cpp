@@ -5,9 +5,12 @@
 
 #include "typecheck.h"
 #include "libstruct.h"
-#include "liblowlevel.h"
-#include "libprint_c.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 // Static data 
 // system constants and functions 

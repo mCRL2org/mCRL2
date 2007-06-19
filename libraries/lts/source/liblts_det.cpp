@@ -1,10 +1,11 @@
 #include <vector>
-#include "libprint_c.h"
+#include "print/messaging.h"
 #include "lts/liblts.h"
 #include "lts/detail/tree_set.h"
 //#include "lts/detail/liblts_private.h"
 
 using namespace std;
+using namespace mcrl2::utilities;
 
 namespace mcrl2
 {

@@ -1,10 +1,13 @@
 // Implementation of class Expression_Info
 // file: expression_info.cpp
 
-#include "auxiliary/expression_info.h"
 #include "libstruct.h"
-#include "liblowlevel.h"
-#include "libprint_c.h"
+#include "mcrl2/utilities/expression_info.h"
+#include "mcrl2/utilities/aterm_ext.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 // Class Expression_Info --------------------------------------------------------------------------
   // Class Expression_Info - Functions declared public --------------------------------------------

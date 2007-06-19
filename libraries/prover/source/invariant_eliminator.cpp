@@ -2,10 +2,14 @@
 // file: invariant_eliminator.cpp
 
 #include "invariant_eliminator.h"
-#include "liblowlevel.h"
-#include "libprint_c.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "libstruct.h"
 #include "prover/bdd_prover.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 // Class Invariant_Eliminator ---------------------------------------------------------------------
   // Class Invariant_Eliminator - Functions declared private --------------------------------------
@@ -20,7 +24,7 @@
       } else {
         if (f_simplify_all) {
           a_summand = ATsetArgument(a_summand, (ATerm) f_bdd_prover.get_bdd(), 1);
-          gsfprintf(stderr, "Summand number %d is simplified.\n", a_summand_number);
+          gsMessage("Summand number %d is simplified.\n", a_summand_number);
         }
         return a_summand;
        }
@@ -61,7 +65,7 @@
           gsVerboseMsg("Summand number %d could not be eliminated.\n", v_summand_number);
           v_simplified_summands = ATinsert(v_simplified_summands, (ATerm) v_summand);
         } else {
-          gsfprintf(stderr, "Summand number %d is eliminated.\n", v_summand_number);
+          gsMessage("Summand number %d is eliminated.\n", v_summand_number);
         }
         v_summands = ATgetNext(v_summands);
         v_summand_number++;

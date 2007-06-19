@@ -4,9 +4,13 @@
 #include "aterm2.h"
 #include "librewrite.h"
 #include "libstruct.h"
-#include "liblowlevel.h"
-#include "auxiliary/info.h"
-#include "auxiliary/utilities.h"
+#include "mcrl2/utilities/info.h"
+#include "mcrl2/utilities/utilities.h"
+#include "mcrl2/utilities/aterm_ext.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 // Class ATerm_Info -------------------------------------------------------------------------------
   // Class ATerm_Info - Functions declared public -------------------------------------------------

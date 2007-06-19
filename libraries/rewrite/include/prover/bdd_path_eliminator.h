@@ -9,8 +9,8 @@
 #include "prover/smt_solver_ario.h"
 #include "prover/smt_solver_cvc_lite.h"
 #include "prover/smt_solver_cvc_lite_fast.h"
-#include "auxiliary/bdd_manipulator.h"
-#include "auxiliary/bdd_info.h"
+#include "mcrl2/utilities/bdd_manipulator.h"
+#include "mcrl2/utilities/bdd_info.h"
 
   /// \brief The enumaration type SMT_Solver_Type enumerates all available SMT solvers. 
 enum SMT_Solver_Type {

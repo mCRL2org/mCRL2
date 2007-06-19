@@ -13,9 +13,11 @@
 
 #include <aterm2.h>
 #include "libstruct.h"
-#include "liblowlevel.h"
 #include "libprint_types.h"
 #include "libprint_c.h"
+#include "print/messaging.h"
+
+using namespace mcrl2::utilities;
 
 //local declarations
 

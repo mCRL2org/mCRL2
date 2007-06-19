@@ -2,10 +2,14 @@
 // file: invariant_checker.cpp
 
 #include "invariant_checker.h"
-#include "liblowlevel.h"
-#include "libprint_c.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "libstruct.h"
 #include "prover/bdd_prover.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 // Class Invariant_Checker ------------------------------------------------------------------------
   // Class Invariant_Checker - Functions declared private -----------------------------------------
@@ -22,7 +26,7 @@
           );
           exit(1);
         } else {
-          gsfprintf(stderr, "  Counter example: %P\n", v_counter_example);
+          gsMessage("  Counter example: %P\n", v_counter_example);
         }
       }
     }
@@ -112,7 +116,7 @@
         gsVerboseMsg("The invariant holds for summand %d.\n", a_summand_number);
         return true;
       } else {
-        gsfprintf(stderr, "The invariant does not hold for summand %d.\n", a_summand_number);
+        gsMessage("The invariant does not hold for summand %d.\n", a_summand_number);
         if (f_bdd_prover.is_contradiction() != answer_yes) {
           print_counter_example();
           save_dot_file(a_summand_number);
@@ -171,21 +175,21 @@
       if (check_init(a_invariant)) {
         gsVerboseMsg("The invariant holds for the initial state.\n");
       } else {
-        gsfprintf(stderr, "The invariant does not hold for the initial state.\n");
+        gsMessage("The invariant does not hold for the initial state.\n");
         v_result = false;
       }
       if ((f_all_violations || v_result)) {
         if (check_summands(a_invariant)) {
           gsVerboseMsg("The invariant holds for all summands.\n");
         } else {
-          gsfprintf(stderr, "The invariant does not hold for all summands.\n");
+          gsMessage("The invariant does not hold for all summands.\n");
           v_result = false;
         }
       }
       if (v_result) {
-        gsfprintf(stderr, "The invariant holds for this LPS.\n");
+        gsMessage("The invariant holds for this LPS.\n");
       } else {
-        gsfprintf(stderr, "The invariant does not hold for this LPS.\n");
+        gsMessage("The invariant does not hold for this LPS.\n");
       }
 
       return v_result;

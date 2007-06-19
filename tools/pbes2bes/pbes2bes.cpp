@@ -28,8 +28,8 @@
 #include <boost/program_options.hpp>
 
 //MCRL-specific
-#include "liblowlevel.h"
-#include "libprint_c.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 //LPS-Framework
 #include "mcrl2/pbes/pbes.h"
@@ -49,6 +49,7 @@
 
 using namespace std;
 using namespace lps;
+using namespace mcrl2::utilities;
 
 using atermpp::make_substitution;
 
@@ -165,9 +166,9 @@ bool process(t_tool_options const& tool_options) {
 
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utilities/mcrl2_squadt.h>
+#include <mcrl2/utilities/squadt_interface.h>
 
-class squadt_interactor : public mcrl2_squadt::tool_interface {
+class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
 
   private:
 
@@ -247,7 +248,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
   h->add(new label("Output format : "));
   
-  squadt_utility::radio_button_helper < pbes_output_format >
+  mcrl2::utilities::squadt::radio_button_helper < pbes_output_format >
         format_selector(h, binary, "binary");
 
   format_selector.associate(h, internal, "internal");
@@ -263,7 +264,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
   top->add(new label("Transformation strategy :"));
 
-  squadt_utility::radio_button_helper < transformation_strategy >
+  mcrl2::utilities::squadt::radio_button_helper < transformation_strategy >
         transformation_selector(top, lazy, "lazy: only boolean equations reachable from the initial state");
 
   transformation_selector.associate(top, finite, "all possible boolean equations");
@@ -342,7 +343,7 @@ int main(int argc, char** argv)
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (!mcrl2_squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+  if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
 #endif
     //parse command line
     if (!process(parse_command_line(argc, argv))) {

@@ -10,15 +10,16 @@
 #include <limits.h>
 #include <getopt.h>
 #include <aterm2.h>
-#include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_types.h"
 #include "libprint_c.h"
 #include "libparse.h"
 #include "typecheck.h"
 #include "libalpha.h"
+#include "print/messaging.h"
 
 using namespace std;
+using namespace ::mcrl2::utilities;
 
 void PrintUsage(FILE *f, char *Name)
 {

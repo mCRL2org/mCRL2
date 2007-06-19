@@ -13,25 +13,27 @@
 #include <aterm2.h>
 #include <assert.h>
 
-#include "liblowlevel.h"
 #include "libstruct.h"
-#include "libprint_c.h"
 #include "librewrite.h"
 #include "libenum.h"
+#include "libprint_c.h"
 #include "mcrl2/lps/specification.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "libparse.h"
 #include "typecheck.h"
 #include "dataimpl.h"
 
 using namespace std;
 using namespace lps;
+using namespace mcrl2::utilities;
 
-char help_message[] = "At the prompt any mCRL2 data expression can be given. This term will be\n"
+char help_gsMessage[] = "At the prompt any mCRL2 data expression can be given. This term will be\n"
                       "rewritten to normal form and printed. Also, one can assign values to declared\n"
                       "variables by writing x := v, for variable x and value v. These variables can\n"
                       "then be used in expressions. Besides this, the prompt accepts the following\n"
                       "commands:\n"
-                      "  :h[elp]                         print this help message\n"
+                      "  :h[elp]                         print this help gsMessage\n"
                       "  :q[uit]                         quit\n"
                       "  :t[ype] EXPRESSION              print type of EXPRESSION\n"
                       "  :v[ar] VARLIST                  declare variables in VARLIST\n"
@@ -243,14 +245,14 @@ void print_help(FILE *f, char *Name)
     "%s"
     "\n"
     "The following command line options are available.\n"
-    "  -h, --help               display this help message\n"
+    "  -h, --help               display this help gsMessage\n"
     "  -q, --quiet              do not display any unrequested information\n"
-    "  -v, --verbose            display consise intermediate messages\n"
-    "  -d, --debug              display detailed intermediate messages\n"
+    "  -v, --verbose            display consise intermediate gsMessages\n"
+    "  -d, --debug              display detailed intermediate gsMessages\n"
     "  -y, --dummy              replace free variables in the LPS with dummy values\n"
     "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'inner')\n",
     Name,
-    help_message
+    help_gsMessage
   );
 }
 
@@ -399,7 +401,7 @@ int main(int argc, char **argv)
           break;
         } else if ( (s == "h") || (s == "help") )
         {
-          cout << help_message;
+          cout << help_gsMessage;
         } else if ( (s.substr(0,2) == "r ") || (s.substr(0,9) == "rewriter ") ) 
         {
           if ( s.substr(0,2) == "r " )

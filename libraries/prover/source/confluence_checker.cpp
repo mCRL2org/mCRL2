@@ -2,12 +2,16 @@
 // file: confluence_checker.cpp
 
 #include "confluence_checker.h"
-#include "liblowlevel.h"
-#include "libprint_c.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "libstruct.h"
 #include "prover/bdd_prover.h"
-#include "cstdlib"
+#include <cstdlib>
 #include <string>
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 // Auxiliary functions ----------------------------------------------------------------------------
 
@@ -271,7 +275,7 @@
           );
           exit(1);
         } else {
-          gsfprintf(stderr, "  Counter example: %P\n", v_counter_example);
+          gsMessage("  Counter example: %P\n", v_counter_example);
         }
       }
     }
@@ -285,27 +289,27 @@
       bool v_is_confluent = true;
 
       if (f_disjointness_checker.disjoint(a_summand_number_1, a_summand_number_2)) {
-        gsfprintf(stderr, ":");
+        gsMessage(":");
       } else {
         if (!is_delta_summand(a_summand_2)) {
           v_condition = get_confluence_condition(a_invariant, a_summand_1, a_summand_2, v_variables);
           f_bdd_prover.set_formula(v_condition);
           if (f_bdd_prover.is_tautology() == answer_yes) {
-            gsfprintf(stderr, "+");
+            gsMessage("+");
           } else {
             if (f_generate_invariants) {
               v_new_invariant = f_bdd_prover.get_bdd();
               gsVerboseMsg("\nChecking invariant: %P\n", v_new_invariant);
               if (f_invariant_checker.check_invariant(v_new_invariant)) {
                 gsVerboseMsg("Invariant holds\n");
-                gsfprintf(stderr, "i");
+                gsMessage("i");
               } else {
                 gsVerboseMsg("Invariant doesn't hold\n");
                 v_is_confluent = false;
                 if (f_check_all) {
-                  gsfprintf(stderr, "-");
+                  gsMessage("-");
                 } else {
-                  gsfprintf(stderr, "Not confluent with summand %d.", a_summand_number_2);
+                  gsMessage("Not confluent with summand %d.", a_summand_number_2);
                 }
                 print_counter_example();
                 save_dot_file(a_summand_number_1, a_summand_number_2);
@@ -313,16 +317,16 @@
             } else {
               v_is_confluent = false;
               if (f_check_all) {
-                gsfprintf(stderr, "-");
+                gsMessage("-");
               } else {
-                gsfprintf(stderr, "Not confluent with summand %d.", a_summand_number_2);
+                gsMessage("Not confluent with summand %d.", a_summand_number_2);
               }
               print_counter_example();
               save_dot_file(a_summand_number_1, a_summand_number_2);
             }
           }
         } else {
-          gsfprintf(stderr, "!");
+          gsMessage("!");
         }
       }
       return v_is_confluent;
@@ -344,14 +348,14 @@
 
         if (v_summand_number < a_summand_number) {
           if (f_intermediate[v_summand_number] > a_summand_number) {
-            gsfprintf(stderr, ".");
+            gsMessage(".");
             v_summand_number++;
           } else {
             if (f_intermediate[v_summand_number] == a_summand_number) {
               if (f_check_all) {
-                gsfprintf(stderr, "-");
+                gsMessage("-");
               } else {
-                gsfprintf(stderr, "Not confluent with summand %d.", v_summand_number);
+                gsMessage("Not confluent with summand %d.", v_summand_number);
               }
               v_is_confluent = false;
             } else {
@@ -378,7 +382,7 @@
       }
 
       if (v_is_confluent) {
-        gsfprintf(stderr, "Confluent with all summands.");
+        gsMessage("Confluent with all summands.");
         a_is_marked = true;
         v_marked_summand = ATsetArgument(a_summand, (ATerm) gsMakeMultAct(ATmakeList1((ATerm) make_ctau_action())), 2);
         return v_marked_summand;
@@ -446,9 +450,9 @@
           if (is_tau_summand(v_summand)) {
             v_multi_actions_or_delta = ATAgetArgument(v_summand, 2);
             v_multi_actions = ATLgetArgument(v_multi_actions_or_delta, 0);
-            gsfprintf(stderr, "tau-summand %2d: ", v_summand_number);
+            gsMessage("tau-summand %2d: ", v_summand_number);
             v_marked_summand = check_confluence_and_mark_summand(a_invariant, v_summand, v_summand_number, v_is_marked);
-            gsfprintf(stderr, "\n");
+            gsMessage("\n");
           }
         }
         v_marked_summands = ATinsert(v_marked_summands, (ATerm) v_marked_summand);

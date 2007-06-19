@@ -16,6 +16,7 @@ alias parser.main
          regfrmtrans.cpp
        : <use>/libraries/lps//headers
          <use>/libraries/mcrl2_basic//headers
+         <use>/libraries/utilities//headers
        : <threading>single
        : <use>/libraries/lps//headers
          <use>/libraries/mcrl2_basic//headers
@@ -42,6 +43,7 @@ alias parser.alias
 alias alpha.main
        : libalpha.cpp
        : <use>/libraries/mcrl2_basic//headers
+         <use>/libraries/utilities//headers
        : <threading>single
        ;
 

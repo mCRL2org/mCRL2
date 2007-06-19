@@ -13,9 +13,13 @@
 #include <string.h>
 
 #include <aterm2.h>
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "libstruct.h"
-#include "liblowlevel.h"
-#include "libprint_c.h"
+
+#ifdef __cplusplus
+using namespace mcrl2::utilities;
+#endif
 
 //Global precondition: the ATerm library has been initialised
 

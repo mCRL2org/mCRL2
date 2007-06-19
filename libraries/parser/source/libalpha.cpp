@@ -5,10 +5,15 @@
 #include <string.h>
 #include <assert.h>
 #include <aterm2.h>
-#include "liblowlevel.h"
 #include "libstruct.h"
-#include "libprint_c.h"
 #include "libalpha.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/numeric_string.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 static ATermAppl gsApplyAlpha(ATermAppl a);
 static ATermList gsaGetAlpha(ATermAppl a, unsigned length=0, ATermList allowed=ATmakeList0(), ATermList ignore=ATmakeList0());

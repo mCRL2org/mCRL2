@@ -19,9 +19,6 @@
 //Boost
 #include <boost/program_options.hpp>
 
-//Lowlevel library for gsErrorMsg
-#include <libprint_c.h>
-
 //Aterms
 #include <atermpp/aterm.h>
 #include <atermpp/algorithm.h>
@@ -31,6 +28,7 @@
 #include <mcrl2/lps/linear_process.h>
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/data/sort_utility.h>
+#include <print/messaging.h>
 
 //Enumerator
 #include <libnextstate.h>
@@ -39,6 +37,7 @@
 using namespace std;
 using namespace atermpp;
 using namespace lps;
+using namespace ::mcrl2::utilities;
 
 namespace po = boost::program_options;
 
@@ -57,12 +56,12 @@ typedef struct
 
 //Squadt connectivity
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utilities/mcrl2_squadt.h>
+#include <mcrl2/utilities/squadt_interface.h>
 
 //Forward declaration because do_decluster() is called within squadt_interactor class
 int do_decluster(const tool_options& options);
 
-class squadt_interactor: public mcrl2_squadt::tool_interface
+class squadt_interactor: public mcrl2::utilities::squadt::tool_interface
 {
   private:
 
@@ -112,7 +111,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& confi
   }
 
   if (!configuration.option_exists(option_rewrite_strategy)) {
-    configuration.add_option(option_rewrite_strategy).append_argument(mcrl2_squadt::rewrite_strategy_enumeration, 0);
+    configuration.add_option(option_rewrite_strategy).append_argument(mcrl2::utilities::squadt::rewrite_strategy_enumeration, 0);
   }
 
   if (!configuration.option_exists(option_finite_only)) {
@@ -124,7 +123,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& confi
   layout::manager::aptr top(layout::vertical_box::create());
   layout::manager* current_box = new horizontal_box();
 
-  squadt_utility::radio_button_helper < RewriteStrategy >
+  mcrl2::utilities::squadt::radio_button_helper < RewriteStrategy >
                                         strategy_selector(current_box, GS_REWR_INNER, "Inner");
   strategy_selector.associate(current_box, GS_REWR_INNERC, "Innerc");
   strategy_selector.associate(current_box, GS_REWR_JITTY,  "Jitty");
@@ -158,7 +157,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& confi
   configuration.get_option(option_finite_only).
      set_argument_value< 0, sip::datatype::boolean >(finite_only->get_status());
 
-  configuration.get_option(option_rewrite_strategy).replace_argument(0, mcrl2_squadt::rewrite_strategy_enumeration, strategy_selector.get_selection());
+  configuration.get_option(option_rewrite_strategy).replace_argument(0, mcrl2::utilities::squadt::rewrite_strategy_enumeration, strategy_selector.get_selection());
 }
 
 bool squadt_interactor::check_configuration(sip::configuration const& configuration) const
@@ -540,7 +539,7 @@ int main(int ac, char** av) {
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (mcrl2_squadt::interactor< squadt_interactor >::free_activation(ac, av)) {
+  if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(ac, av)) {
     return 0;
   }
 #endif

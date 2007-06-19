@@ -29,8 +29,7 @@
 #include <boost/program_options.hpp>
 
 //MCRL-specific
-#include "liblowlevel.h"
-#include "libprint_c.h"
+#include "print/messaging.h"
 
 //LPS-Framework
 #include "mcrl2/pbes/pbes.h"
@@ -51,6 +50,7 @@
 
 using namespace std;
 using namespace lps;
+using namespace mcrl2::utilities;
 using bes::bes_expression;
 
 using atermpp::make_substitution;
@@ -170,9 +170,9 @@ static bool process(t_tool_options const& tool_options)
 
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utilities/mcrl2_squadt.h>
+#include <mcrl2/utilities/squadt_interface.h>
 
-class squadt_interactor : public mcrl2_squadt::tool_interface {
+class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
 
   private:
 
@@ -249,7 +249,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
   h->add(new label("Output format : "));
   
-  squadt_utility::radio_button_helper < bes_output_format >
+  mcrl2::utilities::squadt::radio_button_helper < bes_output_format >
         format_selector(h, none, "none");
 
   format_selector.associate(h, vasy, "vasy");
@@ -265,7 +265,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
   top->add(new label("Transformation strategy :"));
 
-  squadt_utility::radio_button_helper < transformation_strategy >
+  mcrl2::utilities::squadt::radio_button_helper < transformation_strategy >
         transformation_selector(top, lazy, "lazy: only boolean equations reachable from the initial state");
 
   if (c.option_exists(option_transformation_strategy)) {
@@ -355,7 +355,7 @@ int main(int argc, char** argv)
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (mcrl2_squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+  if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
     return 0;
   }
 #endif
@@ -1064,8 +1064,8 @@ t_tool_options parse_command_line(int argc, char** argv)
        "lazy    Compute only boolean equations which can be reached from the initial state\n")
       ("output,o",  po::value<string>(&opt_outputformat)->default_value("none"), "use outputformat arg (default 'none');\n"
                "available outputformats are none, vasy and cwi")
-      ("verbose,v",  "turn on the display of short intermediate messages")
-      ("debug,d",    "turn on the display of detailed intermediate messages")
+      ("verbose,v",  "turn on the display of short intermediate gsMessages")
+      ("debug,d",    "turn on the display of detailed intermediate gsMessages")
       ("version",    "display version information")
       ("help,h",    "display this help")
       ;

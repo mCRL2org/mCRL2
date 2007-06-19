@@ -3,14 +3,18 @@
 
 #include "mcrl2/data/data_specification.h"
 #include "prover/prover.h"
-#include "auxiliary/manipulator.h"
-#include "auxiliary/info.h"
+#include "mcrl2/utilities/manipulator.h"
+#include "mcrl2/utilities/info.h"
 #include "libstruct.h"
 #include "librewrite.h"
-#include "cstdlib"
-#include "auxiliary/utilities.h"
-#include "liblowlevel.h"
-#include "libprint_c.h"
+#include <cstdlib>
+#include "mcrl2/utilities/utilities.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 // Class Prover -----------------------------------------------------------------------------------
   // Class Prover - Functions declared public -----------------------------------------------------

@@ -34,7 +34,7 @@ if ! squadt in [ MATCH "--disable-(squadt)-support" : $(FULL_COMMAND_LINE) ] {
   feature.feature squadt_support : disable enable : incidental composite ;
 
   feature.compose <squadt_support>enable
-        : <library>/libraries/utilities//mcrl2_squadt
+        : <library>/libraries/utilities//squadt_interface
         ;
 }
 else {

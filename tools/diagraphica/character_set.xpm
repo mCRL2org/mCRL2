@@ -1,5 +1,5 @@
 /* XPM */
-static char* character_0[] = {
+static const char* character_0[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 51 1",
 "  c black",
@@ -88,7 +88,7 @@ static char* character_0[] = {
 "vvvvvvvvvvvvvvvv"
 };
 /* XPM */
-static char* character_1[] = {
+static const char* character_1[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 51 1",
 "  c black",
@@ -177,7 +177,7 @@ static char* character_1[] = {
 "vvvvvvvvvvvvvvvv"
 };
 /* XPM */
-static char* character_2[] = {
+static const char* character_2[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 48 1",
 "  c black",
@@ -263,7 +263,7 @@ static char* character_2[] = {
 "zzzzzzzzzzzzzzzz"
 };
 /* XPM */
-static char* character_3[] = {
+static const char* character_3[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 54 1",
 "  c black",
@@ -355,7 +355,7 @@ static char* character_3[] = {
 "mmmmmmmmmmmmmmmm"
 };
 /* XPM */
-static char* character_4[] = {
+static const char* character_4[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 53 1",
 "  c black",
@@ -446,7 +446,7 @@ static char* character_4[] = {
 "nnnnnnnnnnnnnnnn"
 };
 /* XPM */
-static char* character_5[] = {
+static const char* character_5[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 23 1",
 "  c black",
@@ -507,7 +507,7 @@ static char* character_5[] = {
 "4444444444444444"
 };
 /* XPM */
-static char* character_6[] = {
+static const char* character_6[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 69 1",
 "  c black",
@@ -614,7 +614,7 @@ static char* character_6[] = {
 "LLLLLLLLLLLLLLLL"
 };
 /* XPM */
-static char* character_7[] = {
+static const char* character_7[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 25 1",
 "  c black",
@@ -677,7 +677,7 @@ static char* character_7[] = {
 "6666666666666666"
 };
 /* XPM */
-static char* character_8[] = {
+static const char* character_8[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 17 1",
 "  c black",
@@ -732,7 +732,7 @@ static char* character_8[] = {
 ">>>>>>>>>>>>>>>>"
 };
 /* XPM */
-static char* character_9[] = {
+static const char* character_9[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 27 1",
 "  c black",
@@ -797,7 +797,7 @@ static char* character_9[] = {
 "8888888888888888"
 };
 /* XPM */
-static char* character_10[] = {
+static const char* character_10[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 41 1",
 "  c black",
@@ -876,7 +876,7 @@ static char* character_10[] = {
 "dddddddddddddddd"
 };
 /* XPM */
-static char* character_11[] = {
+static const char* character_11[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 14 1",
 "  c black",
@@ -928,7 +928,7 @@ static char* character_11[] = {
 "----------------"
 };
 /* XPM */
-static char* character_12[] = {
+static const char* character_12[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 35 1",
 "  c black",
@@ -1001,7 +1001,7 @@ static char* character_12[] = {
 "yyyyyyyyyyyyyyyy"
 };
 /* XPM */
-static char* character_13[] = {
+static const char* character_13[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 25 1",
 "  c black",
@@ -1064,7 +1064,7 @@ static char* character_13[] = {
 "6666666666666666"
 };
 /* XPM */
-static char* character_14[] = {
+static const char* character_14[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 55 1",
 "  c black",
@@ -1157,7 +1157,7 @@ static char* character_14[] = {
 "MMMMMMMMMMMMMMMM"
 };
 /* XPM */
-static char* character_15[] = {
+static const char* character_15[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 57 1",
 "  c black",
@@ -1252,7 +1252,7 @@ static char* character_15[] = {
 "BBBBBBBBBBBBBBBB"
 };
 /* XPM */
-static char* character_16[] = {
+static const char* character_16[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 51 1",
 "  c black",
@@ -1341,7 +1341,7 @@ static char* character_16[] = {
 "vvvvvvvvvvvvvvvv"
 };
 /* XPM */
-static char* character_17[] = {
+static const char* character_17[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 22 1",
 "  c black",
@@ -1401,7 +1401,7 @@ static char* character_17[] = {
 "3333333333333333"
 };
 /* XPM */
-static char* character_18[] = {
+static const char* character_18[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 52 1",
 "  c black",
@@ -1491,7 +1491,7 @@ static char* character_18[] = {
 "bbbbbbbbbbbbbbbb"
 };
 /* XPM */
-static char* character_19[] = {
+static const char* character_19[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 28 1",
 "  c black",
@@ -1557,7 +1557,7 @@ static char* character_19[] = {
 "9999999999999999"
 };
 /* XPM */
-static char* character_20[] = {
+static const char* character_20[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 28 1",
 "  c black",
@@ -1623,7 +1623,7 @@ static char* character_20[] = {
 "9999999999999999"
 };
 /* XPM */
-static char* character_21[] = {
+static const char* character_21[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 46 1",
 "  c black",
@@ -1707,7 +1707,7 @@ static char* character_21[] = {
 "kkkkkkkkkkkkkkkk"
 };
 /* XPM */
-static char* character_22[] = {
+static const char* character_22[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 55 1",
 "  c black",
@@ -1800,7 +1800,7 @@ static char* character_22[] = {
 "MMMMMMMMMMMMMMMM"
 };
 /* XPM */
-static char* character_23[] = {
+static const char* character_23[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 48 1",
 "  c black",
@@ -1886,7 +1886,7 @@ static char* character_23[] = {
 "zzzzzzzzzzzzzzzz"
 };
 /* XPM */
-static char* character_24[] = {
+static const char* character_24[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 58 1",
 "  c black",
@@ -1982,7 +1982,7 @@ static char* character_24[] = {
 "VVVVVVVVVVVVVVVV"
 };
 /* XPM */
-static char* character_25[] = {
+static const char* character_25[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 36 1",
 "  c black",
@@ -2056,7 +2056,7 @@ static char* character_25[] = {
 "uuuuuuuuuuuuuuuu"
 };
 /* XPM */
-static char* character_26[] = {
+static const char* character_26[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 51 1",
 "  c black",
@@ -2145,7 +2145,7 @@ static char* character_26[] = {
 "vvvvvvvvvvvvvvvv"
 };
 /* XPM */
-static char* character_27[] = {
+static const char* character_27[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 45 1",
 "  c black",
@@ -2228,7 +2228,7 @@ static char* character_27[] = {
 "jjjjjjjjjjjjjjjj"
 };
 /* XPM */
-static char* character_28[] = {
+static const char* character_28[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 54 1",
 "  c black",
@@ -2320,7 +2320,7 @@ static char* character_28[] = {
 "mmmmmmmmmmmmmmmm"
 };
 /* XPM */
-static char* character_29[] = {
+static const char* character_29[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 40 1",
 "  c black",
@@ -2398,7 +2398,7 @@ static char* character_29[] = {
 "ssssssssssssssss"
 };
 /* XPM */
-static char* character_30[] = {
+static const char* character_30[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 15 1",
 "  c black",
@@ -2451,7 +2451,7 @@ static char* character_30[] = {
 ";;;;;;;;;;;;;;;;"
 };
 /* XPM */
-static char* character_31[] = {
+static const char* character_31[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 15 1",
 "  c black",
@@ -2504,7 +2504,7 @@ static char* character_31[] = {
 ";;;;;;;;;;;;;;;;"
 };
 /* XPM */
-static char* character_32[] = {
+static const char* character_32[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 60 1",
 "  c black",
@@ -2602,7 +2602,7 @@ static char* character_32[] = {
 "ZZZZZZZZZZZZZZZZ"
 };
 /* XPM */
-static char* character_33[] = {
+static const char* character_33[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 9 1",
 "  c black",
@@ -2649,7 +2649,7 @@ static char* character_33[] = {
 "$$$$$$$$$$$$$$$$"
 };
 /* XPM */
-static char* character_34[] = {
+static const char* character_34[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 9 1",
 "  c black",
@@ -2696,7 +2696,7 @@ static char* character_34[] = {
 "$$$$$$$$$$$$$$$$"
 };
 /* XPM */
-static char* character_35[] = {
+static const char* character_35[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 24 1",
 "  c black",
@@ -2758,7 +2758,7 @@ static char* character_35[] = {
 "5555555555555555"
 };
 /* XPM */
-static char* character_36[] = {
+static const char* character_36[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 48 1",
 "  c black",
@@ -2844,7 +2844,7 @@ static char* character_36[] = {
 "zzzzzzzzzzzzzzzz"
 };
 /* XPM */
-static char* character_37[] = {
+static const char* character_37[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 11 1",
 "  c black",
@@ -2893,7 +2893,7 @@ static char* character_37[] = {
 "&&&&&&&&&&&&&&&&"
 };
 /* XPM */
-static char* character_38[] = {
+static const char* character_38[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 61 1",
 "  c black",
@@ -2992,7 +2992,7 @@ static char* character_38[] = {
 "AAAAAAAAAAAAAAAA"
 };
 /* XPM */
-static char* character_39[] = {
+static const char* character_39[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 29 1",
 "  c black",
@@ -3059,7 +3059,7 @@ static char* character_39[] = {
 "0000000000000000"
 };
 /* XPM */
-static char* character_40[] = {
+static const char* character_40[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 66 1",
 "  c black",
@@ -3163,7 +3163,7 @@ static char* character_40[] = {
 "HHHHHHHHHHHHHHHH"
 };
 /* XPM */
-static char* character_41[] = {
+static const char* character_41[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 30 1",
 "  c black",
@@ -3231,7 +3231,7 @@ static char* character_41[] = {
 "qqqqqqqqqqqqqqqq"
 };
 /* XPM */
-static char* character_42[] = {
+static const char* character_42[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 76 1",
 "  c black",
@@ -3345,7 +3345,7 @@ static char* character_42[] = {
 "EEEEEEEEEEEEnhEE"
 };
 /* XPM */
-static char* character_43[] = {
+static const char* character_43[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 38 1",
 "  c black",
@@ -3421,7 +3421,7 @@ static char* character_43[] = {
 "pppppppppppppppp"
 };
 /* XPM */
-static char* character_44[] = {
+static const char* character_44[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 55 1",
 "  c black",
@@ -3514,7 +3514,7 @@ static char* character_44[] = {
 "MMMMMMMMMMMMMMMM"
 };
 /* XPM */
-static char* character_45[] = {
+static const char* character_45[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 11 1",
 "  c black",
@@ -3563,7 +3563,7 @@ static char* character_45[] = {
 "&&&&&&&&&&&&&&&&"
 };
 /* XPM */
-static char* character_46[] = {
+static const char* character_46[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 34 1",
 "  c black",
@@ -3635,7 +3635,7 @@ static char* character_46[] = {
 "tttttttttttttttt"
 };
 /* XPM */
-static char* character_47[] = {
+static const char* character_47[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 52 1",
 "  c black",
@@ -3725,7 +3725,7 @@ static char* character_47[] = {
 "bbbbbbbbbbbbbbbb"
 };
 /* XPM */
-static char* character_48[] = {
+static const char* character_48[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 69 1",
 "  c black",
@@ -3832,7 +3832,7 @@ static char* character_48[] = {
 "LLLLLLLLLLLLLLLL"
 };
 /* XPM */
-static char* character_49[] = {
+static const char* character_49[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 50 1",
 "  c black",
@@ -3920,7 +3920,7 @@ static char* character_49[] = {
 "cccccccccccccccc"
 };
 /* XPM */
-static char* character_50[] = {
+static const char* character_50[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 40 1",
 "  c black",
@@ -3998,7 +3998,7 @@ static char* character_50[] = {
 "ssssssssssssssss"
 };
 /* XPM */
-static char* character_51[] = {
+static const char* character_51[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 31 1",
 "  c black",
@@ -4067,7 +4067,7 @@ static char* character_51[] = {
 "wwwwwwwwwwwwwwww"
 };
 /* XPM */
-static char* character_52[] = {
+static const char* character_52[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 67 1",
 "  c black",
@@ -4172,7 +4172,7 @@ static char* character_52[] = {
 "JJJJJJJJJJJJJJJJ"
 };
 /* XPM */
-static char* character_53[] = {
+static const char* character_53[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 20 1",
 "  c black",
@@ -4230,7 +4230,7 @@ static char* character_53[] = {
 "1111111111111111"
 };
 /* XPM */
-static char* character_54[] = {
+static const char* character_54[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 47 1",
 "  c black",
@@ -4315,7 +4315,7 @@ static char* character_54[] = {
 "llllllllllllllll"
 };
 /* XPM */
-static char* character_55[] = {
+static const char* character_55[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 59 1",
 "  c black",
@@ -4412,7 +4412,7 @@ static char* character_55[] = {
 "CCCCCCCCCCCCCCCC"
 };
 /* XPM */
-static char* character_56[] = {
+static const char* character_56[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 36 1",
 "  c black",
@@ -4486,7 +4486,7 @@ static char* character_56[] = {
 "uuuuuuuuuuuuuuuu"
 };
 /* XPM */
-static char* character_57[] = {
+static const char* character_57[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 41 1",
 "  c black",
@@ -4565,7 +4565,7 @@ static char* character_57[] = {
 "dddddddddddddddd"
 };
 /* XPM */
-static char* character_58[] = {
+static const char* character_58[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 69 1",
 "  c black",
@@ -4672,7 +4672,7 @@ static char* character_58[] = {
 "LLLLLLLLLLLLLLLL"
 };
 /* XPM */
-static char* character_59[] = {
+static const char* character_59[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 40 1",
 "  c black",
@@ -4750,7 +4750,7 @@ static char* character_59[] = {
 "ssssssssssssssss"
 };
 /* XPM */
-static char* character_60[] = {
+static const char* character_60[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 78 1",
 "  c black",
@@ -4866,7 +4866,7 @@ static char* character_60[] = {
 "QQQQQQQQQQQQQQQQ"
 };
 /* XPM */
-static char* character_61[] = {
+static const char* character_61[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 67 1",
 "  c black",
@@ -4971,7 +4971,7 @@ static char* character_61[] = {
 "JJJJJJJJJJJJJJJJ"
 };
 /* XPM */
-static char* character_62[] = {
+static const char* character_62[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 1 1",
 "  c gray100",
@@ -5010,7 +5010,7 @@ static char* character_62[] = {
 "                "
 };
 /* XPM */
-static char* character_63[] = {
+static const char* character_63[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 5 1",
 "  c black",
@@ -5053,7 +5053,7 @@ static char* character_63[] = {
 "O              ."
 };
 /* XPM */
-static char* character_64[] = {
+static const char* character_64[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 4 1",
 "  c black",
@@ -5095,7 +5095,7 @@ static char* character_64[] = {
 "oooooooooooooooo"
 };
 /* XPM */
-static char* character_65[] = {
+static const char* character_65[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 7 1",
 "  c black",
@@ -5140,7 +5140,7 @@ static char* character_65[] = {
 "@@@@@@@oX@@@@@@@"
 };
 /* XPM */
-static char* character_66[] = {
+static const char* character_66[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 37 1",
 "  c black",
@@ -5215,7 +5215,7 @@ static char* character_66[] = {
 "iiiiiiiiiiiiiiii"
 };
 /* XPM */
-static char* character_67[] = {
+static const char* character_67[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 42 1",
 "  c black",
@@ -5295,7 +5295,7 @@ static char* character_67[] = {
 "ffffffffffffffff"
 };
 /* XPM */
-static char* character_68[] = {
+static const char* character_68[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 25 1",
 "  c black",
@@ -5358,7 +5358,7 @@ static char* character_68[] = {
 "6666666666666666"
 };
 /* XPM */
-static char* character_69[] = {
+static const char* character_69[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 12 1",
 "  c black",
@@ -5408,7 +5408,7 @@ static char* character_69[] = {
 "****************"
 };
 /* XPM */
-static char* character_70[] = {
+static const char* character_70[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 18 1",
 "  c black",
@@ -5464,7 +5464,7 @@ static char* character_70[] = {
 ",,,,,,,,,,,,,,,,"
 };
 /* XPM */
-static char* character_71[] = {
+static const char* character_71[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 25 1",
 "  c black",
@@ -5527,7 +5527,7 @@ static char* character_71[] = {
 "6666666666666666"
 };
 /* XPM */
-static char* character_72[] = {
+static const char* character_72[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 13 1",
 "  c black",
@@ -5578,7 +5578,7 @@ static char* character_72[] = {
 "================"
 };
 /* XPM */
-static char* character_73[] = {
+static const char* character_73[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 19 1",
 "  c black",
@@ -5635,7 +5635,7 @@ static char* character_73[] = {
 "<<<<<<<<<<<<<<<<"
 };
 /* XPM */
-static char* character_74[] = {
+static const char* character_74[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 43 1",
 "  c black",
@@ -5716,7 +5716,7 @@ static char* character_74[] = {
 "gggggggggggggggg"
 };
 /* XPM */
-static char* character_75[] = {
+static const char* character_75[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 44 1",
 "  c black",
@@ -5798,7 +5798,7 @@ static char* character_75[] = {
 "hhhhhhhhhhhhhhhh"
 };
 /* XPM */
-static char* character_76[] = {
+static const char* character_76[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 13 1",
 "  c black",
@@ -5849,7 +5849,7 @@ static char* character_76[] = {
 "================"
 };
 /* XPM */
-static char* character_77[] = {
+static const char* character_77[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 14 1",
 "  c black",
@@ -5901,7 +5901,7 @@ static char* character_77[] = {
 "----------------"
 };
 /* XPM */
-static char* character_78[] = {
+static const char* character_78[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 45 1",
 "  c black",
@@ -5984,7 +5984,7 @@ static char* character_78[] = {
 "jjjjjjjjjjjjjjjj"
 };
 /* XPM */
-static char* character_79[] = {
+static const char* character_79[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 39 1",
 "  c black",
@@ -6061,7 +6061,7 @@ static char* character_79[] = {
 "aaaaaaaaaaaaaaaa"
 };
 /* XPM */
-static char* character_80[] = {
+static const char* character_80[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 50 1",
 "  c black",
@@ -6149,7 +6149,7 @@ static char* character_80[] = {
 "cccccccccccccccc"
 };
 /* XPM */
-static char* character_81[] = {
+static const char* character_81[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 39 1",
 "  c black",
@@ -6226,7 +6226,7 @@ static char* character_81[] = {
 "aaaaaaaaaaaaaaaa"
 };
 /* XPM */
-static char* character_82[] = {
+static const char* character_82[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 37 1",
 "  c black",
@@ -6301,7 +6301,7 @@ static char* character_82[] = {
 "iiiiiiiiiiiiiiii"
 };
 /* XPM */
-static char* character_83[] = {
+static const char* character_83[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 14 1",
 "  c black",
@@ -6353,7 +6353,7 @@ static char* character_83[] = {
 "----------------"
 };
 /* XPM */
-static char* character_84[] = {
+static const char* character_84[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 10 1",
 "  c black",
@@ -6401,7 +6401,7 @@ static char* character_84[] = {
 "%%%%%%%%%%%%%%%%"
 };
 /* XPM */
-static char* character_85[] = {
+static const char* character_85[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 36 1",
 "  c black",
@@ -6475,7 +6475,7 @@ static char* character_85[] = {
 "uuuuuuuuuuuuuuuu"
 };
 /* XPM */
-static char* character_86[] = {
+static const char* character_86[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 85 1",
 "  c black",
@@ -6598,7 +6598,7 @@ static char* character_86[] = {
 "________________"
 };
 /* XPM */
-static char* character_87[] = {
+static const char* character_87[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 45 1",
 "  c black",
@@ -6681,7 +6681,7 @@ static char* character_87[] = {
 "jjjjjjjjjjjjjjjj"
 };
 /* XPM */
-static char* character_88[] = {
+static const char* character_88[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 73 1",
 "  c black",
@@ -6792,7 +6792,7 @@ static char* character_88[] = {
 "YYYYYYYYYYYYYYYY"
 };
 /* XPM */
-static char* character_89[] = {
+static const char* character_89[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 51 1",
 "  c black",
@@ -6881,7 +6881,7 @@ static char* character_89[] = {
 "vvvvvvvvvvvvvvvv"
 };
 /* XPM */
-static char* character_90[] = {
+static const char* character_90[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 53 1",
 "  c black",
@@ -6972,7 +6972,7 @@ static char* character_90[] = {
 "nnnnnnnnnnnnnnnn"
 };
 /* XPM */
-static char* character_91[] = {
+static const char* character_91[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 93 2",
 "   c black",
@@ -7103,7 +7103,7 @@ static char* character_91[] = {
 " . . . . . . . . . . . . . . . ."
 };
 /* XPM */
-static char* character_92[] = {
+static const char* character_92[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 25 1",
 "  c black",
@@ -7166,7 +7166,7 @@ static char* character_92[] = {
 "6666666666666666"
 };
 /* XPM */
-static char* character_93[] = {
+static const char* character_93[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 15 1",
 "  c black",
@@ -7219,7 +7219,7 @@ static char* character_93[] = {
 ";;;;;;;;;;;;;;;;"
 };
 /* XPM */
-static char* character_94[] = {
+static const char* character_94[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 29 1",
 "  c black",
@@ -7286,7 +7286,7 @@ static char* character_94[] = {
 "0000000000000000"
 };
 /* XPM */
-static char* character_95[] = {
+static const char* character_95[] = {
 /* columns rows colors chars-per-pixel */
 "16 32 29 1",
 "  c black",
@@ -7353,7 +7353,7 @@ static char* character_95[] = {
 "0000000000000000"
 };
 
-static char** characters[96] = {
+static const char** characters[96] = {
   character_0, character_1, character_2, character_3, character_4,
   character_5, character_6, character_7, character_8, character_9,
   character_10, character_11, character_12, character_13, character_14,

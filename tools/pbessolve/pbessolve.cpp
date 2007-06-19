@@ -24,8 +24,7 @@
 #include <boost/program_options.hpp>
 
 //MCRL-specific
-#include "liblowlevel.h"
-#include "libprint_c.h"
+#include "print/messaging.h"
 
 //LPS-Framework
 #include "mcrl2/pbes/pbes.h"
@@ -52,6 +51,7 @@
 
 using namespace std;
 using namespace lps;
+using namespace ::mcrl2::utilities;
 
 using atermpp::make_substitution;
 

@@ -8,9 +8,10 @@
 #include <aterm2.h>
 #include <assert.h>
 #include "libstruct.h"
-#include "liblowlevel.h"
-#include "libprint_c.h"
 #include "lpstrans.h"
+#include "print/messaging.h"
+
+using namespace ::mcrl2::utilities;
 
 static void print_help(FILE *f, char *Name)
 {

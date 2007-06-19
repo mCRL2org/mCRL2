@@ -9,7 +9,7 @@
 #include "prover/bdd_prover.h"
 #include "disjointness_checker.h"
 #include "invariant_checker.h"
-#include "auxiliary/bdd2dot.h"
+#include "mcrl2/utilities/bdd2dot.h"
 
     /** \brief A class that takes a linear process specification and checks all tau-summands of that LPS for confluence.
         \brief The tau actions of all confluent tau-summands are renamed to ctau.

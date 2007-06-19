@@ -5,8 +5,7 @@
 #include <sstream>
 
 #include <sip/common.h>
-
-#include <utilities/generic_visitor.h>
+#include <sip/utility/generic_visitor.h>
 
 namespace sip {
   namespace tool {

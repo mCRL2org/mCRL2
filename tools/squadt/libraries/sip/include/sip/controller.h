@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include <utilities/logger.h>
+#include <sip/utility/logger.h>
 
 #include <sip/common.h>
 #include <sip/tool/capabilities.h>

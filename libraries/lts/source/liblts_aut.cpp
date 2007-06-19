@@ -3,9 +3,10 @@
 #include <fstream>
 #include <assert.h>
 #include <aterm2.h>
-#include "libprint_c.h"
 #include "lts/liblts.h"
+#include "print/messaging.h"
 
+using namespace mcrl2::utilities;
 using namespace std;
 
 namespace mcrl2

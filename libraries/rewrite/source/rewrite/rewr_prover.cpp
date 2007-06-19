@@ -5,13 +5,14 @@
 #include <aterm2.h>
 #include <memory.h>
 #include <assert.h>
-#include <liblowlevel.h>
 #include <libstruct.h>
-#include <libprint_c.h>
-#include <mcrl2/data/data_specification.h>
+#include "print/messaging.h"
+#include "mcrl2/data/data_specification.h"
 #include <prover/bdd_prover.h>
 #include "librewrite.h"
 #include "rewr_prover.h"
+
+using namespace ::mcrl2::utilities;
 
 RewriterProver::RewriterProver(lps::data_specification DataSpec, RewriteStrategy strat)
 {

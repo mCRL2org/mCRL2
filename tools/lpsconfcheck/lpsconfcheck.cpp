@@ -5,9 +5,11 @@
 #include "confluence_checker.h"
 #include "invariant_checker.h"
 #include "getopt.h"
-#include "libprint_c.h"
+#include "print/messaging.h"
 #include "libstruct.h"
 #include <string>
+
+using namespace ::mcrl2::utilities;
 
   /// \mainpage lpsconfcheck
   /// \section section_introduction Introduction

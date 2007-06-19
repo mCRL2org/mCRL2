@@ -2,10 +2,12 @@
 // file: smt_lib_solver.cpp
 
 #include "prover/smt_lib_solver.h"
-#include "libprint_c.h"
 #include "libstruct.h"
-#include "auxiliary/utilities.h"
+#include "mcrl2/utilities/utilities.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
+using namespace ::mcrl2::utilities;
 using namespace std;
 
 // Class SMT_LIB_Solver ---------------------------------------------------------------------------

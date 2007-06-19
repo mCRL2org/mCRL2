@@ -12,7 +12,7 @@ enum Compare_Result {
   compare_result_bigger
 };
 
-char* bool_to_char_string(bool a_bool);
+const char* bool_to_char_string(bool a_bool);
 
 class Indent {
   private:

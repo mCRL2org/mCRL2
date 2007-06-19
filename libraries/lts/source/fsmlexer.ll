@@ -2,10 +2,15 @@
 #include <string>
 #include <cstdio>
 #include <aterm2.h>
-#include <liblowlevel.h>
+#include "print/messaging.h"
 #include <lts/liblts.h>
 #include "fsmlexer.h"
 #include "fsmparser.hpp"
+
+#ifdef __cplusplus
+using namespace mcrl2::utilities;
+#endif
+
 //using namespace std;
 
 //fix for the broken cygwin versions of flex

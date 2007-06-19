@@ -1,17 +1,17 @@
 #include <string>
 #include <getopt.h>
 #include "aterm2.h"
-#include "liblowlevel.h"
 #include "libstruct.h"
-#include "libprint_c.h"
 #include "lts/liblts.h"
 #include "setup.h"
+#include "print/messaging.h"
 
 #define NAME "ltscompare"
 #define VERSION "0.1"
 
 using namespace std;
-using namespace mcrl2::lts;
+using namespace ::mcrl2::lts;
+using namespace ::mcrl2::utilities;
 
 static const char *equivalent_string(lts_equivalence eq)
 {
@@ -56,10 +56,10 @@ static void print_help(FILE *f, char *Name)
     "INFILE2, respectively.\n"
     "\n"
     "Mandatory arguments to long options are mandatory for short options too.\n"
-    "  -h, --help            display this help message and terminate\n"
+    "  -h, --help            display this help gsMessage and terminate\n"
     "      --version         display version information and terminate\n"
-    "  -q, --quiet           do not display warning messages\n"
-    "  -v, --verbose         display concise intermediate messages\n"
+    "  -q, --quiet           do not display warning gsMessages\n"
+    "  -v, --verbose         display concise intermediate gsMessages\n"
     "  -f, --formats         list accepted formats\n"
     "  -i, --in1=FORMAT      use FORMAT as the format for INFILE1 (or stdin)\n"
     "  -j, --in2=FORMAT      use FORMAT as the format for INFILE2\n"

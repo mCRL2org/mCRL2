@@ -5,9 +5,9 @@
 #define INDUCTION_H
 
 #include "aterm2.h"
-#include "auxiliary/bdd_info.h"
-#include "auxiliary/expression_info.h"
-#include "auxiliary/sort_info.h"
+#include "mcrl2/utilities/bdd_info.h"
+#include "mcrl2/utilities/expression_info.h"
+#include "mcrl2/utilities/sort_info.h"
 
   /// The class Induction generates statements corresponding to 
 

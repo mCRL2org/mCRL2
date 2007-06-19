@@ -13,6 +13,12 @@
 
 \begin{document}
 
+ \section{Concepts}
+
+  \subsection{Tool}
+  \subsection{Configuration}
+  \subsection{Tool Display}
+
  \section{Background}
 
  The purpose of the communication protocol described in this document is to
@@ -55,7 +61,7 @@
     \end{tabular}
    \end{figure}
 
-   When started the tool is given a token which it should sent as part of this
+   \noindent When started the tool is given a token which it should sent as part of this
    message. If the controller does not receive a such a message as first
    message or the token inside the message does not match one of the expected
    tokens, then the connection must be severed. Messages of this type must be
@@ -379,5 +385,23 @@
      \hline
     \end{tabular}
    \end{figure}
+
+ \section{Implementation} \label{s:message_definitions}
+
+  The messages are structured using XML and the communication medium is a TCP
+  connection. The choice for XML is obvious there is wide support in many
+  programming languages and it makes the messages readable, making it easy to
+  print and verify the structure and contents.
+  
+  Straightforward alternatives for the communication medium are pipes (standard
+  input/output) or UDP. TCP was chosen over pipes because it allows
+  non-blocking input/output; it is not known which side will send the next
+  message. UDP also supports non-blocking input/output but it is connectionless
+  and does not support sequencing, meaning that the order in packets are
+  delivered is not guaranteed to be the same as the order in which they were
+  offered to a sender. The protocol assigns meaning to the order in which
+  messages are delivered so UDP is not an option.
+
+  \subsection{XML Structure}
 
 \end{document}

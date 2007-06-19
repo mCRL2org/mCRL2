@@ -8,7 +8,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/md5.hpp>
 
-#include "utilities/indirect_iterator.h"
+#include "sip/utility/indirect_iterator.h"
 #include "task_monitor.h"
 #include "tool.h"
 
@@ -94,6 +94,9 @@ namespace squadt {
 
         /** \brief Verifies whether or not the object is physically available and not changed */
         bool self_check(project_manager const&, long int const& = 0);
+
+        /** \brief Synchronises timestamp and checksum with files on disk */
+        void synchronise(project_manager const&);
       };
 
       class monitor;

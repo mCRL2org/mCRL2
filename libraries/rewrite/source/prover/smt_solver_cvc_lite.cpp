@@ -5,9 +5,10 @@
 
 #include "prover/smt_solver_cvc_lite.h"
 #include "pstream.h"
-#include "libprint_c.h"
+#include "print/messaging.h"
 #include <iostream>
 
+using namespace ::mcrl2::utilities;
 using namespace std;
 
 // Class SMT_Solver_CVC_Lite ----------------------------------------------------------------------

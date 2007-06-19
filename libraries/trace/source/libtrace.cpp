@@ -5,8 +5,13 @@
 #include <string>
 #include "libstruct.h"
 #include "libprint.h"
-#include "libprint_c.h"
 #include "libtrace.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 
 /* mCRL2 Trace Format

@@ -12,7 +12,7 @@
 #include <boost/foreach.hpp>
 
 #include <sip/controller.h>
-#include <utilities/logger.h>
+#include <sip/utility/logger.h>
 
 #include "processor.tcc"
 #include "task_monitor.h"

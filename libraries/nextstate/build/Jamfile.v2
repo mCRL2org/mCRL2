@@ -19,6 +19,7 @@ alias nextstate.main
          nextstate_standard.cpp
        : <use>/libraries/mcrl2_basic//headers
          <use>/libraries/rewrite//headers
+         <use>/libraries/utilities//headers
        : <threading>single
        ;
 

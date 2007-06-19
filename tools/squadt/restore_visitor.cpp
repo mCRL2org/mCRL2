@@ -12,7 +12,7 @@
 #include "executor.tcc"
 #include "processor.tcc"
 
-#include <utilities/generic_visitor.tcc>
+#include <sip/utility/generic_visitor.tcc>
 
 #include "visitors.h"
 

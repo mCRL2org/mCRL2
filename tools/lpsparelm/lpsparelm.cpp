@@ -21,10 +21,12 @@
 #include <boost/program_options.hpp>
 
 //Lowlevel library for messages
-#include <libprint_c.h>
+#include <print/messaging.h>
 
 //mCRL2
 #include "atermpp/aterm.h"
+
+using namespace ::mcrl2::utilities;
 
 class lpsParElm {
 
@@ -70,9 +72,9 @@ class lpsParElm {
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utilities/mcrl2_squadt.h>
+#include <mcrl2/utilities/squadt_interface.h>
 
-class squadt_interactor : public mcrl2_squadt::tool_interface {
+class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
 
   private:
 
@@ -589,7 +591,7 @@ int main(int argc, char** argv) {
   gsEnableConstructorFunctions();
   
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (!mcrl2_squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+  if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
 #endif
     lpsParElm parelm;
 

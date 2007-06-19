@@ -1,5 +1,5 @@
 /* XPM */
-static char *arrow[] = {
+static const char *arrow[] = {
 /* columns rows colors chars-per-pixel */
 "16 15 62 1",
 "  c #3365B7",
@@ -82,7 +82,7 @@ static char *arrow[] = {
 " -cAAAAAAAAAAAAA"
 };
 /* XPM */
-static char *darrow[] = {
+static const char *darrow[] = {
 /* columns rows colors chars-per-pixel */
 "16 15 78 1",
 "  c #3365B7",
@@ -181,7 +181,7 @@ static char *darrow[] = {
 "*       SEEEEEEE"
 };
 /* XPM */
-static char *dof[] = {
+static const char *dof[] = {
 /* columns rows colors chars-per-pixel */
 "16 15 48 1",
 "  c #4774BE",
@@ -250,7 +250,7 @@ static char *dof[] = {
 "lllll5 Oslllllll"
 };
 /* XPM */
-static char *ellipse[] = {
+static const char *ellipse[] = {
 /* columns rows colors chars-per-pixel */
 "16 15 201 2",
 "   c #3466B8",
@@ -472,7 +472,7 @@ static char *ellipse[] = {
 "K.K.K.K.T s , + o < k } K.K.K.K."
 };
 /* XPM */
-static char *fillcol[] = {
+static const char *fillcol[] = {
 /* columns rows colors chars-per-pixel */
 "16 15 48 1",
 "  c #4774BE",
@@ -541,7 +541,7 @@ static char *fillcol[] = {
 "ggggggggy.#egggg"
 };
 /* XPM */
-static char *icon_16x16[] = {
+static const char *icon_16x16[] = {
 /* columns rows colors chars-per-pixel */
 "16 16 6 1",
 "  c #388C2B",
@@ -569,7 +569,7 @@ static char *icon_16x16[] = {
 "           OOOOO"
 };
 /* XPM */
-static char *linecol[] = {
+static const char *linecol[] = {
 /* columns rows colors chars-per-pixel */
 "16 15 58 1",
 "  c #4774BE",
@@ -648,7 +648,7 @@ static char *linecol[] = {
 "                "
 };
 /* XPM */
-static char *line[] = {
+static const char *line[] = {
 /* columns rows colors chars-per-pixel */
 "16 15 40 1",
 "  c #3365B7",
@@ -709,7 +709,7 @@ static char *line[] = {
 " &yassssssssssss"
 };
 /* XPM */
-static char *logo[] = {
+static const char *logo[] = {
 /* columns rows colors chars-per-pixel */
 "400 111 201 2",
 "   c #333940",
@@ -1027,7 +1027,7 @@ static char *logo[] = {
 ">X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X:X>X>X>X>X>X>X>X>X>X>X>X>X>X:X>X:X>X>X>X:X>X>X>X:X>X:X>X:X:X>X>X:X:X>X:X:X>X:X:X:X>X:X:X:X>X:X:X:X:X>X:X:X:X>X:X:X:X:X:X:X:X:X;X:X:X;X:X;X;X;X;X;X;X;X-X;X;X;X;X-X;X=X;X-X-X=X;X;X;X-X-X-X-X-X-X-X=X-X-X*X-X*X*X-X*X*X*X-X*X*X*X*X*X*X*X*X*X*X&X*X*X&X*X*X*X&X*X&X&X&X&X&X&X&X&X&X&X&X&X&X&X&X&X#X&X&X#X&X#X&X&X#X#X#X&X#X#X#X#X#X&X#X#X#X#X#X#X#X@X#X#X#X#X@X#X#X@X@X@X#X%X@X@X@X#X@X@X.X@X@X@X@X@X@X.X@X@X.X@X@X.X.X@X.X.X@X.X.X.X.X.X.X.X.X.X|..X.X.X.X.X{..X|.|.|..X|..X|.{..X{.{.|.|.{.|.{.|.{.{.{.|.{.{.{.{.[.[.{.{.{.{.{.{.[.{.{.{.[.{.[.[.{.[.{.[.[.[.[.[.[.[.[.[.[./.[./.[.]."
 };
 /* XPM */
-static char *rectangle[] = {
+static const char *rectangle[] = {
 /* columns rows colors chars-per-pixel */
 "16 15 147 2",
 "   c #3365B7",
@@ -1195,7 +1195,7 @@ static char *rectangle[] = {
 "                                "
 };
 /* XPM */
-static char *select_icon[] = {
+static const char *select_icon[] = {
 /* columns rows colors chars-per-pixel */
 "16 15 51 1",
 "  c #4774BE",
@@ -1267,7 +1267,7 @@ static char *select_icon[] = {
 "cccccc5 $ccccccc"
 };
 /* XPM */
-static char *showgrid[] = {
+static const char *showgrid[] = {
 /* columns rows colors chars-per-pixel */
 "16 15 2 1",
 "  c #4774BE",
@@ -1290,7 +1290,7 @@ static char *showgrid[] = {
 "... ... ... ...."
 };
 /* XPM */
-static char *snapgrid[] = {
+static const char *snapgrid[] = {
 /* columns rows colors chars-per-pixel */
 "16 15 10 1",
 "  c #4774BE",

@@ -2,9 +2,13 @@
 // file: disjointness_checker.cpp
 
 #include "disjointness_checker.h"
-#include "liblowlevel.h"
 #include "libstruct.h"
-#include "libprint_c.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 // Auxiliary functions ----------------------------------------------------------------------------
 

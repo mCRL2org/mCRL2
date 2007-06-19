@@ -10,10 +10,10 @@ using namespace std;
 
 #include <wx/wx.h>
 #include <wx/notebook.h>
-#include "colorbutton.h"
 #include "glcanvas.h"
 #include "popupframe.h"
-#include "spinctrlfloat.h"
+#include "mcrl2/utilities/colorbutton.h"
+#include "mcrl2/utilities/spinctrlfloat.h"
 
 class SettingsFrame : public PopupFrame
 {

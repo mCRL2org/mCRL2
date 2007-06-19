@@ -9,10 +9,12 @@
 #include <aterm2.h>
 #include <assert.h>
 #include <limits.h>
-#include "liblowlevel.h"
 #include "libstruct.h"
-#include "libprint_c.h"
 #include "librewrite.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
+
+using namespace ::mcrl2::utilities;
 
 //Functions used by the main program
 static void print_help(char *Name);

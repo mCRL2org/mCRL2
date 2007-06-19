@@ -6,8 +6,8 @@
 
 #include "aterm2.h"
 #include "prover/smt_solver.h"
-#include "auxiliary/expression_info.h"
-#include "auxiliary/sort_info.h"
+#include "mcrl2/utilities/expression_info.h"
+#include "mcrl2/utilities/sort_info.h"
 #include <string>
 
   /// The class SMT_LIB_Solver is a base class for SMT solvers that read the SMT-LIB format

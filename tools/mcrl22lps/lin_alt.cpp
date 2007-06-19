@@ -4,10 +4,16 @@
 #include <limits.h>
 #include "lin_alt.h"
 #include "libstruct.h"
-#include "liblowlevel.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "libprint_c.h"
 #include "librewrite.h"
 #include "mcrl2/data/data_specification.h" 
+
+// For Aterm library extension functions
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 /* Global variables */
 

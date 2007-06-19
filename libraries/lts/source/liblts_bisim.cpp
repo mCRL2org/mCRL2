@@ -21,13 +21,15 @@
 
    $Id: bsim.c,v 1.1.1.1 2004/09/07 15:06:33 uid523 Exp $ */
 
-#include "liblowlevel.h"
+#include "print/messaging.h"
 #include "libstruct.h"
-#include "libprint_c.h"
 #include "lts/liblts.h"
 #include "lts/detail/bsim.h"
 
+#ifdef __cplusplus
+using namespace mcrl2::utilities;
 using namespace std;
+#endif
 
 int traceLevel = 0, optimal = 0, classes = 0; 
 

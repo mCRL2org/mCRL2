@@ -33,7 +33,7 @@
 #include "lts/liblts.h"
 #include "libstruct.h"
 
-#include "spinctrlfloat.h"
+#include "mcrl2/utilities/spinctrlfloat.h"
 
 #include "node.h"
 #include "edge.h"

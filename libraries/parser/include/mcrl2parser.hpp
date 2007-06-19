@@ -136,9 +136,13 @@
 #include <string.h>
 
 #include <aterm2.h>
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "libstruct.h"
-#include "liblowlevel.h"
-#include "libprint_c.h"
+
+#ifdef __cplusplus
+using namespace mcrl2::utilities;
+#endif
 
 //Global precondition: the ATerm library has been initialised
 
@@ -168,13 +172,13 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE 
-#line 46 "mcrl2parser.yy"
+#line 50 "mcrl2parser.yy"
 {
   ATermAppl appl;
   ATermList list;
 }
 /* Line 2604 of glr.c.  */
-#line 178 "mcrl2parser.hpp"
+#line 182 "mcrl2parser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

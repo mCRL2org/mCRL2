@@ -1,7 +1,11 @@
-#include <stdlib.h>
+#include <cstdlib>
 #include <vector>
-#include "libprint_c.h"
+#include "print/messaging.h"
 #include "lts/detail/tree_set.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 #define EMPTY_SET (-1)
 #define EMPTY_LIST (-1)

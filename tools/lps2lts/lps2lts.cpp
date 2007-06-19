@@ -4,14 +4,16 @@
 #include <cassert>
 #include <boost/lexical_cast.hpp>
 #include "libstruct.h"
-#include "libprint_c.h"
 #include "lps2lts.h"
 #include "exploration.h"
 #include "lts.h"
 
+#include "print/messaging.h"
+
 #include "squadt_interactor.tcc"
 
 using namespace std;
+using namespace ::mcrl2::utilities;
 
 ATermAppl *parse_action_list(const char *s, int *len)
 {
@@ -159,7 +161,7 @@ int main(int argc, char **argv)
 
   // Start 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (mcrl2_squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+  if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
     return 0;
   }
 #endif

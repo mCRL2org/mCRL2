@@ -11,20 +11,20 @@ bool command_line = false;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 // SQuADT protocol interface
-# include <utilities/mcrl2_squadt.h>
+# include <mcrl2/utilities/squadt_interface.h>
 
-class squadt_interactor: public mcrl2_squadt::tool_interface {
+class squadt_interactor: public mcrl2::utilities::squadt::tool_interface {
   
   private:
 
     static const char*  lts_file_for_input;  ///< file containing an LTS that can be imported
  
     // Wrapper for wxEntry invocation
-    squadt_utility::entry_wrapper& starter;
+    mcrl2::utilities::squadt::entry_wrapper& starter;
 
   public:
     // Constructor
-    squadt_interactor(squadt_utility::entry_wrapper&);
+    squadt_interactor(mcrl2::utilities::squadt::entry_wrapper&);
 
     // Configures tool capabilities.
     void set_capabilities(sip::tool::capabilities&) const;
@@ -41,7 +41,7 @@ class squadt_interactor: public mcrl2_squadt::tool_interface {
 
 const char* squadt_interactor::lts_file_for_input  = "lts_in";
 
-squadt_interactor::squadt_interactor(squadt_utility::entry_wrapper& w): starter(w) {
+squadt_interactor::squadt_interactor(mcrl2::utilities::squadt::entry_wrapper& w): starter(w) {
 }
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
@@ -168,7 +168,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 
     ATinit(0,0,&bot); // XXX args?
 # ifdef ENABLE_SQUADT_CONNECTIVITY
-    squadt_utility::entry_wrapper starter(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+    mcrl2::utilities::squadt::entry_wrapper starter(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 
     squadt_interactor c(starter);
 
@@ -187,7 +187,7 @@ int main(int argc, char **argv)
   ATerm bot;
   ATinit(argc,argv,&bot);
 # ifdef ENABLE_SQUADT_CONNECTIVITY
-  squadt_utility::entry_wrapper starter(argc, argv);
+  mcrl2::utilities::squadt::entry_wrapper starter(argc, argv);
 
   squadt_interactor c(starter);
 

@@ -39,6 +39,7 @@ lib mcrl2
           /libraries/rewrite//rewrite.alias
           /libraries/trace//trace.alias
           /libraries/nextstate//nextstate.alias
+          /libraries/utilities//utilities.alias
         : <threading>multi
           <toolset>darwin:<cflags>"-fPIC -fno-common"
           <toolset>darwin:<cxxflags>"-fPIC -fno-common"

@@ -5,11 +5,12 @@
 #include "invariant_eliminator.h"
 #include "invariant_checker.h"
 #include "getopt.h"
-#include "libprint_c.h"
-#include "liblowlevel.h"
 #include "libstruct.h"
 #include "prover/bdd_path_eliminator.h"
+#include "print/messaging.h"
 #include <string>
+
+using namespace ::mcrl2::utilities;
 
   /// \mainpage lpsinvelm
   /// \section section_introduction Introduction

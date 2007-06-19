@@ -26,7 +26,7 @@ exe ltsview
         utils.cpp
         visobjectfactory.cpp
         visualizer.cpp
-        /libraries/wxe//colorbutton.o
+        /libraries/utilities//colorbutton
         /site-config//boost_signals
         /site-config//wx_gl
       : <squadt_support>enable

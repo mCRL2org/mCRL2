@@ -1,10 +1,13 @@
 // Implementation of class BDD_Info
 // file: bdd_info.cpp
 
-#include "auxiliary/bdd_info.h"
 #include "libstruct.h"
-#include "liblowlevel.h"
-#include "libprint_c.h"
+#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/bdd_info.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 // Class BDD_Info ---------------------------------------------------------------------------------
   // Class BDD_Info - Functions declared public ---------------------------------------------------

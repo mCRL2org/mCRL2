@@ -11,13 +11,14 @@
 #include <sstream>
 #include <aterm2.h>
 #include "xsimtracedll.h"
-#include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_types.h"
 #include "libprint.h"
 #include "libnextstate.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 using namespace std;
+using namespace mcrl2::utilities;
 
 //------------------------------------------------------------------------------
 // XSimMain

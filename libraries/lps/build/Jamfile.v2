@@ -38,8 +38,8 @@ alias data-specification
 # The functionality provided by this library belongs in the LPS framework
 alias dataelm.main
        : source/libdataelm.cpp
-         ../../tools/mcrl22lps/lin_alt.cpp
-         ../../tools/mcrl22lps/lin_std.cpp
+         /tools/mcrl22lps//lin_alt.o
+         /tools/mcrl22lps//lin_std.o
        : <use>/libraries/parser//headers
          <use>/libraries/rewrite//headers
          <use>/libraries/lps//headers

@@ -14,6 +14,7 @@ alias prover.main
          invariant_eliminator.cpp
          formula_checker.cpp
        : <use>headers
+         <use>/libraries/utilities//headers
 #         <use>/libraries//cvclite
 #         <toolset>gcc:<define>HAVE___GNU_CXX__EXT_HASH_MAP
 #         <toolset>gcc:<define>HAVE___GNU_CXX__EXT_HASH_SET
@@ -28,6 +29,7 @@ lib prover
        : <link>static
        :
        : <library>/libraries//rewrite
+         <library>/libraries//utilities
        ;
 
 alias prover

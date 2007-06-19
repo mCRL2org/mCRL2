@@ -3,11 +3,10 @@
 #include "rewr_innerc.h"
 
 #include <cstdlib>
-#include <libprint_c.h>
 
 RewriterCompilingInnermost::RewriterCompilingInnermost(lps::data_specification DataSpec)
 {
-	gsfprintf(stderr,"error: compiling Innermost rewriter is not available\n");
+	gsMessage("error: compiling Innermost rewriter is not available\n");
 	exit(1);
 }
 
@@ -70,12 +69,15 @@ void RewriterCompilingInnermost::clearSubstitutions()
 #include <dlfcn.h>
 #include <assert.h>
 #include <aterm2.h>
-#include <liblowlevel.h>
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include <libstruct.h>
 #include <libprint_c.h>
 #include <mcrl2/data/data_specification.h>
 #include "setup.h"
 #include "rewr_innerc.h"
+
+using namespace ::mcrl2::utilities;
 
 #define INNERC_COMPILE_COMMAND (CC " -c " CFLAGS " " SCFLAGS " " CPPFLAGS " " ATERM_CPPFLAGS " %s.c")
 #define INNERC_LINK_COMMAND (CC " " LDFLAGS " " SLDFLAGS " -o %s.so %s.o")

@@ -13,16 +13,6 @@ rule prepend ( prefix : elements * ) {
   return $(prefix)$(elements) ;
 }
 
-local LOWLEVEL_SOURCES = [ prepend lowlevel/ : liblowlevel ] ; 
-
-lib lowlevel
-       : $(LOWLEVEL_SOURCES).o
-         /libraries//aterm
-       : <include>../include/lowlevel
-       :
-       : <include>../include/lowlevel
-       ;
-
 local STRUCT_SOURCES = [ prepend struct/ : libstruct libstruct_core ] ; 
 
 lib struct
@@ -31,15 +21,15 @@ lib struct
        : <include>../include/struct
        :
        : <include>../include/struct
-         <library>lowlevel
+         <dependency>/libraries/utilities//aterm-extension
        ;
 
-local PRINT_SOURCES = [ prepend print/ : libprint libprint_c ] ;
+local PRINT_SOURCES = [ prepend print/ : libprint libprint_c messaging ] ;
 
 lib print
        : $(PRINT_SOURCES).o
        : <use>/libraries//prover
-         <dependency>lowlevel
+         <dependency>/libraries/utilities//aterm-extension
          <dependency>rewrite
          <dependency>struct
        :
@@ -54,9 +44,9 @@ for object in $(MCRL2_BASIC_SOURCES) {
       : $(object).cpp
       : <include>$(SETUP)
         <include>../include/print
-        <include>../include/lowlevel
         <include>../include/struct
         <use>/libraries/aterm//headers
+        <use>/libraries/utilities//headers
       ;
 }
 
@@ -65,7 +55,6 @@ alias mcrl2_basic.main
          [ glob ../source/auxiliary/*.cpp ]
        : <include>../include/print
          <include>../include/struct
-         <include>../include/lowlevel
          <toolset>gcc:<use>/libraries//pstream
          <toolset>darwin:<use>/libraries//pstream
          <include>$(SETUP)
@@ -74,9 +63,6 @@ alias mcrl2_basic.main
          <os>LINUX:<library>/site-config//dl
          <os>CYGWIN:<library>/site-config//m
          <include>../include/print
-         <include>../include/rewrite
-         <include>../include/lowlevel
-         <include>../include/auxiliary
          <include>../include/struct
        ;
 
@@ -85,6 +71,7 @@ lib mcrl2_basic
        : <link>static
        :
        : <library>/libraries//aterm
+         <library>/libraries//utilities
          <toolset>gcc:<linkflags>-Wl,-export-dynamic
        ;
 
@@ -108,8 +95,6 @@ alias headers
          <toolset>gcc:<use>/libraries//pstream
          <toolset>darwin:<use>/libraries//pstream
          <include>../include/print
-         <include>../include/lowlevel
-         <include>../include/auxiliary
          <include>../include/struct
        ;
 

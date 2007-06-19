@@ -2,9 +2,9 @@
 #include <cassert>
 #include <time.h>
 #include <sstream>
-#include "liblowlevel.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "libstruct.h"
-#include "libprint_c.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/libdataelm.h"
 #include "libnextstate.h"
@@ -16,6 +16,7 @@
 #include "lts.h"
 
 using namespace std;
+using namespace ::mcrl2::utilities;
 
 exploration_strategy str_to_expl_strat(const char *s)
 {

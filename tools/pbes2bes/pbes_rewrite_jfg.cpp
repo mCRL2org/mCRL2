@@ -1,5 +1,6 @@
 #include "pbes_rewrite.h"
 #include "mcrl2/pbes/utility.h"
+#include "print/messaging.h"
 #include "atermpp/substitute.h"
 #include "atermpp/indexed_set.h"
 
@@ -7,6 +8,7 @@
 
 using namespace lps;
 using namespace pbes_expr;
+using namespace mcrl2::utilities;
 
 // parameterized boolean expression
 //<PBExpr>       ::= <DataExpr>

@@ -3,8 +3,11 @@
 
 #include "prover/bdd_path_eliminator.h"
 #include "libstruct.h"
-#include "libprint_c.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "time.h"
+
+using namespace ::mcrl2::utilities;
 
 // Class BDD_Path_Eliminator ----------------------------------------------------------------------
   // Class BDD_Path_Eliminator - functions declared private ---------------------------------------

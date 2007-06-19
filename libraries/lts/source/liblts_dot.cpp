@@ -1,11 +1,15 @@
 #include <ostream>
 #include <fstream>
 #include <string>
-#include "liblowlevel.h"
 #include "libstruct.h"
-#include "libprint_c.h"
 #include "libprint.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "lts/liblts.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)
 #define ATisList(x) (ATgetType(x) == AT_LIST)

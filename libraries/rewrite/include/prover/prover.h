@@ -7,9 +7,9 @@
 #include "aterm2.h"
 #include "librewrite.h"
 #include "mcrl2/data/data_specification.h"
-#include "auxiliary/manipulator.h"
-#include "auxiliary/info.h"
-#include "auxiliary/utilities.h"
+#include "mcrl2/utilities/manipulator.h"
+#include "mcrl2/utilities/info.h"
+#include "mcrl2/utilities/utilities.h"
 #include "time.h"
 
   /// \brief An enumerated type respresenting the answers "yes", "no" and "undefined".

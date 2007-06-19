@@ -7,9 +7,13 @@
 #include <cstring>
 #include <cassert>
 #include <aterm2.h>
-#include <liblowlevel.h>
+#include <print/messaging.h>
+#include <mcrl2/utilities/aterm_ext.h>
 #include <libstruct.h>
-#include <libprint_c.h>
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 static AFun nilAFun;
 static AFun opidAFun;
@@ -219,7 +223,7 @@ static ATermList create_strategy(ATermList rules)
 	ATermList strat = ATmakeList0();
 	unsigned int arity;
 
-//gsfprintf(stderr,"rules: %T\n\n",rules);
+//gsMessage("rules: %T\n\n",rules);
 	unsigned int max_arity = 0;
 	for (ATermList l=rules; !ATisEmpty(l); l=ATgetNext(l))
 	{
@@ -489,7 +493,7 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
 				return vals[i];
 			}
 		}
-		gsfprintf(stderr,"%s: variable %T not assigned\n",NAME,t);
+		gsMessage("%s: variable %T not assigned\n",NAME,t);
 		exit(1);
 	} else {
 		unsigned int arity = ATgetArity(ATgetAFun((ATermAppl) t));

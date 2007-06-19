@@ -1,10 +1,14 @@
 // Implementation of class BDD2Dot
 // file: bdd2dot.cpp
 
-#include "auxiliary/bdd2dot.h"
 #include "libstruct.h"
-#include "liblowlevel.h"
 #include "libprint_c.h"
+#include "mcrl2/utilities/bdd2dot.h"
+#include "print/messaging.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 // Class BDD2Dot --------------------------------------------------------------------------------
   // Class BDD2Dot - Functions declared private -------------------------------------------------

@@ -5,8 +5,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <utilities/generic_visitor.h>
-
+#include <sip/utility/generic_visitor.h>
 #include <sip/configuration.h>
 
 namespace sip {

@@ -21,11 +21,12 @@
 #include <boost/program_options.hpp>
 
 //MCRL-specific
-#include "liblowlevel.h"
 #include "mcrl2/pbes/pbes.h"
+#include "print/messaging.h"
 
 using namespace std;
 using namespace lps;
+using namespace ::mcrl2::utilities;
 
 namespace po = boost::program_options;
 

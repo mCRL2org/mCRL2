@@ -8,24 +8,25 @@
     #pragma hdrstop
 #endif
 
+#include <cstring>
 #include <iostream>
 #include <wx/cmdline.h>
 #include <wx/msgdlg.h>
 #include <wx/string.h>
 #include <aterm2.h>
 #include "xsimmain.h"
-#include "libprint_c.h"
 #include "libstruct.h"
 #include "librewrite.h"
+#include "print/messaging.h"
 
 /* The optional input file that should contain an LPS */
 std::string lps_file_argument;
  
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utilities/mcrl2_squadt.h>
+#include <mcrl2/utilities/squadt_interface.h>
 
-class squadt_interactor: public mcrl2_squadt::tool_interface {
+class squadt_interactor: public mcrl2::utilities::squadt::tool_interface {
   
   private:
 
@@ -33,12 +34,12 @@ class squadt_interactor: public mcrl2_squadt::tool_interface {
     static const char* lps_file_for_input;
  
     // Wrapper for wxEntry invocation
-    squadt_utility::entry_wrapper& starter;
+    mcrl2::utilities::squadt::entry_wrapper& starter;
 
   public:
 
     // Constructor
-    squadt_interactor(squadt_utility::entry_wrapper&);
+    squadt_interactor(mcrl2::utilities::squadt::entry_wrapper&);
 
     // Configures tool capabilities.
     void set_capabilities(sip::tool::capabilities&) const;
@@ -55,7 +56,7 @@ class squadt_interactor: public mcrl2_squadt::tool_interface {
 
 const char* squadt_interactor::lps_file_for_input = "lps_in";
 
-squadt_interactor::squadt_interactor(squadt_utility::entry_wrapper& w): starter(w) {
+squadt_interactor::squadt_interactor(mcrl2::utilities::squadt::entry_wrapper& w): starter(w) {
 }
 
 void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
@@ -99,6 +100,9 @@ public:
 
 bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strategy,
                         bool& dummies, std::string& lps_file_argument) {
+
+  using namespace ::mcrl2::utilities;
+
   wxCmdLineParser cmdln(argc,argv);
 
   cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("displays this message"));
@@ -172,24 +176,21 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
 }
 
 static XSim *this_xsim = NULL;
-void xsim_message_handler(gsMessageType msg_type, char *msg)
+void xsim_message_handler(mcrl2::utilities::messageType msg_type, const char *msg)
 {
+  using namespace ::mcrl2::utilities;
+
   if ( this_xsim == NULL )
   {
     fprintf(stderr,msg);
     fprintf(stderr,"this message was brought to you by XSim (all rights reserved)\n");
   } else {
-    char *msg_end = msg+strlen(msg)-1;
+    const char *msg_end = msg+std::strlen(msg)-1;
     while ( (msg <= msg_end) && ((*msg == '\r') || (*msg == '\n')) )
     {
-      *msg = '\0';
-      msg--;
+      --msg_end;
     }
-    wxString wx_msg(msg
-#ifdef wxUSE_UNICODE
-                   ,wxConvLocal
-#endif
-                   );
+    wxString wx_msg(msg,wxConvLocal, msg_end - msg);
     switch (msg_type)
     {
       case gs_warning:
@@ -223,35 +224,30 @@ bool XSim::OnInit()
   this_xsim = this;
   gsSetCustomMessageHandler(xsim_message_handler);
 
+  /* Whether to replace free variables in the LPS with dummies */
+  bool dummies = false;
+ 
+  /* The rewrite strategy that will be used */
+  RewriteStrategy rewrite_strategy = GS_REWR_INNER;
+ 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (interactor->is_active()) {
-    XSimMain *frame = new XSimMain( 0, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
-    frame->Show(true);
-    frame->LoadFile(wxString(lps_file_argument.c_str(), wxConvLocal));
-  }
-  else {
+  if (!interactor->is_active()) {
 #endif
-    /* Whether to replace free variables in the LPS with dummies */
-    bool dummies = false;
- 
-    /* The rewrite strategy that will be used */
-    RewriteStrategy rewrite_strategy = GS_REWR_INNER;
- 
     if (!parse_command_line(argc, argv, rewrite_strategy, dummies, lps_file_argument)) {
       return (false);
     }
- 
-    XSimMain *frame = new XSimMain( 0, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
-    frame->use_dummies = dummies;
-    frame->rewr_strat  = rewrite_strategy;
-    frame->Show(true);
-     
-    if (!lps_file_argument.empty()) {
-      frame->LoadFile(wxString(lps_file_argument.c_str(), wxConvLocal));
-    }
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }
 #endif
+ 
+  XSimMain *frame = new XSimMain( 0, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
+  frame->use_dummies = dummies;
+  frame->rewr_strat  = rewrite_strategy;
+  frame->Show(true);
+   
+  if (!lps_file_argument.empty()) {
+    frame->LoadFile(wxString(lps_file_argument.c_str(), wxConvLocal));
+  }
 
   return true;
 }
@@ -274,7 +270,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
   ATinit(0,0,&bot); // XXX args?
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  squadt_utility::entry_wrapper starter(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+  mcrl2::utilities::squadt::entry_wrapper starter(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 
   interactor.reset(new squadt_interactor(starter));
 
@@ -295,7 +291,7 @@ int main(int argc, char **argv) {
   ATinit(argc,argv,&bot);
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  squadt_utility::entry_wrapper starter(argc, argv);
+  mcrl2::utilities::squadt::entry_wrapper starter(argc, argv);
 
   interactor.reset(new squadt_interactor(starter));
 

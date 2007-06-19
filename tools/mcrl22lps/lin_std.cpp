@@ -19,11 +19,16 @@
 #include <string.h>
 #include "lin_std.h"
 #include "libstruct.h"
-#include "liblowlevel.h"
 #include "libprint_c.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "librewrite.h"
 #include "libalpha.h"
 
+// For Aterm library extension functions
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 #define STRINGLENGTH 256
 

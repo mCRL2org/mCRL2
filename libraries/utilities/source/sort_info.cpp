@@ -1,11 +1,14 @@
 // Implementation of class Sort_Info
 // file: sort_info.cpp
 
-#include "auxiliary/sort_info.h"
+#include "mcrl2/utilities/sort_info.h"
 #include "libstruct.h"
-#include "liblowlevel.h"
-#include "libprint_c.h"
-#include "string.h"
+#include <cstring>
+#include "mcrl2/utilities/aterm_ext.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 // Class Sort_Info --------------------------------------------------------------------------------
   // Class Sort_Info - Functions declared public --------------------------------------------------

@@ -1,8 +1,8 @@
-#ifndef __LOWLEVEL_H
-#define __LOWLEVEL_H
+#ifndef __ATERM_EXT_H__
+#define __ATERM_EXT_H__
 
 #ifndef __cplusplus
-#include <stdbool.h>
+# include <stdbool.h>
 #endif
 #include <stdarg.h>
 #include <assert.h>
@@ -11,41 +11,12 @@
 #include <workarounds.h>
 
 #ifdef __cplusplus
-extern "C" {
+namespace mcrl2 {
+  namespace utilities {
+    extern "C" {
 #endif
 
 //Global precondition: the ATerm library has been initialised
-
-//Message printing options
-//------------------------
-
-void gsSetQuietMsg(void);
-//Post: Printing of warnings, verbose information and extended debugging
-//      information during program execution is disabled.
-
-void gsSetNormalMsg(void);
-//Post: Printing of warnings during program execution is enabled. Printing of
-//      verbose information and extended debugging information is disabled.
-
-void gsSetVerboseMsg(void);
-//Post: Printing of warnings and verbose information during program execution
-//      is enabled. Printing of extended debugging information is disabled.
-
-void gsSetDebugMsg(void);
-//Post: Printing of warnings, verbose information and extended debugging
-//      information during program execution is enabled.
-
-extern bool gsQuiet;
-extern bool gsWarning;
-extern bool gsVerbose;
-extern bool gsDebug;
-
-// Type for message distinction (by purpose)
-enum gsMessageType {gs_notice, gs_warning, gs_error};
-
-// Replaces message_handler by the function pointer passed as argument
-void gsSetCustomMessageHandler(void (*)(gsMessageType, char*));
-
 //ATerm library workarounds
 //--------------------------
 //
@@ -257,28 +228,9 @@ int gsCount(ATerm Elt, ATerm Term);
 //Pre: Term is an ATerm containing ATermAppl's and ATermList's only
 //Ret: the number of times Elt occurs in Term
 
-//String representations of numbers
-//---------------------------------
-
-char *gsStringDiv2(const char *n);
-//Pre: n is of the form "0 | [1-9][0-9]*"
-//Ret: the smallest string representation of n div 2
-//     Note that the result is created with malloc, so it has to be freed
-     
-int gsStringMod2(const char *n);
-//Pre: n is of the form "0 | [1-9][0-9]*"
-//Ret: the value of n mod 2
-
-char *gsStringDub(const char *n, const int inc);
-//Pre: n is of the form "0 | [1-9][0-9]*"
-//     0 <= inc <= 1
-//Ret: the smallest string representation of 2*n + inc,
-//     Note that the result is created with malloc, so it has to be freed
-
-int NrOfChars(int n);
-//Ret: the number of characters of the decimal representation of n
-
 #ifdef __cplusplus
+    }
+  }
 }
 #endif
 

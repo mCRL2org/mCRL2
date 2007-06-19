@@ -4,8 +4,8 @@
 #include "aterm2.h"
 #include "librewrite.h"
 #include "libstruct.h"
-#include "auxiliary/manipulator.h"
-#include "auxiliary/info.h"
+#include "mcrl2/utilities/manipulator.h"
+#include "mcrl2/utilities/info.h"
 
 // Class ATerm_Manipulator ------------------------------------------------------------------------
   // Class ATerm_Manipulator - Functions declared public ------------------------------------------

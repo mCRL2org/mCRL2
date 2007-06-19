@@ -35,8 +35,10 @@
 #include "libprint_types.h"
 #include "libprint.h"
 #include "libnextstate.h"
-#include "liblowlevel.h"
 #include "libstruct.h"
+#include "mcrl2/utilities/aterm_ext.h"
+
+using namespace mcrl2::utilities;
 
 #ifndef GARAGEFRAMEDLL
 class GarageFrame : public wxFrame, public SimulatorViewInterface

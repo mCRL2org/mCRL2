@@ -2,11 +2,12 @@
 #include <set>
 #include <stack>
 #include <string>
-#include "libprint_c.h"
+#include "print/messaging.h"
 #include "lts/liblts.h"
 #include "lts/detail/liblts_bisim.h"
 
 using namespace std;
+using namespace ::mcrl2::utilities;
 
 namespace mcrl2
 {

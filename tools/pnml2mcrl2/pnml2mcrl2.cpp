@@ -9,11 +9,15 @@
 #include <getopt.h>
 #include <ticpp.h>
 #include <aterm2.h>
-#include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "libparse.h"
 #include "typecheck.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/numeric_string.h"
+
+using namespace ::mcrl2::utilities;
 
 typedef struct {
   ATbool Abort;                 // if an element has no ID, this boolean is used to grant abortion of the conversion
@@ -109,9 +113,9 @@ bool perform_task(char const* InFileName, char const* OutFileName) {
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utilities/mcrl2_squadt.h>
+#include <mcrl2/utilities/squadt_interface.h>
 
-class squadt_interactor : public mcrl2_squadt::tool_interface {
+class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
 
   private:
 
@@ -2415,7 +2419,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     ATinit(0,NULL,&stackbot);
     
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-    if (!mcrl2_squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+    if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
 #endif
 
       #define sopts "eiadhpqv"

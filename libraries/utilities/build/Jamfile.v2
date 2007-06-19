@@ -1,0 +1,80 @@
+project libraries/utilities
+       : source-location ../source
+       : build-dir $(BUILD_TOP)
+       : requirements
+          <include>../include
+       : usage-requirements
+          <include>../include
+       ;
+
+include $(TOP)/build/config.jam ;
+
+alias spinctrlfloat : utilities ;
+alias colorbutton   : utilities ;
+
+obj spinctrlfloat.o : spinctrlfloat.cpp : <cxxflags>"$(WX_CPPFLAGS)" <include>../include/mcrl2/utilities ;
+obj colorbutton.o   : colorbutton.cpp   : <cxxflags>"$(WX_CPPFLAGS)" <include>../include/mcrl2/utilities ;
+
+# Dummy for when squadt support is not desired
+alias squadt_interface.main
+      : squadt_interface.cpp
+      : <threading>multi
+        <use>/libraries/sip//sip_tool
+        <use>/libraries/mcrl2_basic//headers
+      :
+      : <define>ENABLE_SQUADT_CONNECTIVITY
+        <library>/libraries/sip//sip_tool
+      ;
+
+lib squadt_interface
+      : squadt_interface.main 
+      : <link>static
+        <library>/libraries//mcrl2_basic
+      ;
+
+alias squadt_interface
+      : /libraries//utilities
+      : <link>shared
+      ;
+
+alias squadt_interface.alias
+      : squadt_interface.main
+      : <use>headers
+      ;
+
+alias utilities.main
+      : aterm_ext.cpp
+        numeric_string.cpp
+        expression_info.cpp # Temporary?
+        sort_info.cpp       # Temporary?
+        info.cpp            # Temporary?
+        bdd2dot.cpp         # Temporary?
+        bdd_info.cpp        # Temporary?
+        bdd_manipulator.cpp # Temporary?
+        manipulator.cpp     # Temporary?
+        utilities.cpp       # Temporary?
+      : <use>/libraries/aterm//headers
+        <use>/libraries/mcrl2_basic//headers
+        <use>/libraries/rewrite//headers
+        <squadt_support>enable:<source>squadt_interface.alias
+        <wx>yes:<source>spinctrlfloat.o
+        <wx>yes:<source>colorbutton.o
+        <wx>yes:<library>/site-config//wx_base
+      ;
+
+lib utilities
+      : utilities.main 
+      : <link>static
+        <library>/libraries//aterm
+      ;
+
+alias utilities
+      : /libraries//mcrl2
+      : <link>shared
+      ;
+
+alias utilities.alias
+      : utilities.main
+      ;
+
+alias headers : : <use>/boost//headers : : <use>/boost//headers ;

@@ -11,9 +11,9 @@
 #include "lin_types.h"
 #include "lin_std.h"
 #include "lin_alt.h"
-#include "liblowlevel.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "libstruct.h"
-#include "libprint_c.h"
 #include "libparse.h"
 #include "typecheck.h"
 #include "libalpha.h"
@@ -23,6 +23,10 @@
 #define VERSION "0.2.1"
 #define INFILEEXT ".mcrl2"
 #define OUTFILEEXT ".lps"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 //Functions used by the main program
 static ATermAppl linearise_file(t_lin_options &lin_options);
@@ -34,9 +38,9 @@ static void PrintHelp(char *Name);
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utilities/mcrl2_squadt.h>
+#include "mcrl2/utilities/squadt_interface.h"
 
-class squadt_interactor : public mcrl2_squadt::tool_interface {
+class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
 
   private:
 
@@ -166,7 +170,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   // Linearisation method selection
   layout::manager* current_box      = new horizontal_box();
 
-  squadt_utility::radio_button_helper < t_lin_method >
+  mcrl2::utilities::squadt::radio_button_helper < t_lin_method >
                                         method_selector(current_box, lmStack, "Stack");
 
   method_selector.associate(current_box, lmRegular, "Regular", true);
@@ -226,7 +230,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   // Determine which phases the linearizer will go through. Default is all.
   current_box = new horizontal_box();
 
-  squadt_utility::radio_button_helper < t_phase >
+  mcrl2::utilities::squadt::radio_button_helper < t_phase >
                                         phase_selector(current_box, phParse, "Parsing");
 
   phase_selector.associate(current_box, phTypeCheck, "Type checking");
@@ -788,7 +792,7 @@ int main(int argc, char *argv[])
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (!mcrl2_squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+  if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
 #endif
     if (parse_command_line(argc,argv,lin_options)) {
       //linearise infilename with options lin_options

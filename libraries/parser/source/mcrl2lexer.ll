@@ -4,8 +4,7 @@
 #include "mcrl2lexer.h"
 #include "mcrl2parser.hpp"
 #include "libstruct.h"
-#include "liblowlevel.h"
-#include "libprint_c.h"
+#include "print/messaging.h"
 
 //fix for the broken cygwin versions of flex
 #ifdef __CYGWIN__
@@ -13,6 +12,10 @@
 using std::cerr;
 using std::cin;
 using std::cout;
+#endif
+
+#ifdef __cplusplus
+using namespace mcrl2::utilities;
 #endif
 
 //fix for newer versions of flex (>= 2.5.31)

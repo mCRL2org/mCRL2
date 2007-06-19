@@ -17,9 +17,8 @@
 #include <sstream>
 #include <fstream>
 #include "aterm2.h"
-#include "liblowlevel.h"
+#include "print/messaging.h"
 #include "libstruct.h"
-#include "libprint_c.h"
 #include "libparse.h"
 #include "typecheck.h"
 #include "libalpha.h"

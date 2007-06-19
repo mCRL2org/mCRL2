@@ -1,16 +1,16 @@
 #include <string>
 #include <getopt.h>
 #include "aterm2.h"
-#include "liblowlevel.h"
 #include "libstruct.h"
-#include "libprint_c.h"
 #include "lts/liblts.h"
 #include "setup.h"
+#include "print/messaging.h"
 
 #define NAME "ltsconvert"
 #define VERSION "0.1"
 
-using namespace mcrl2::lts;
+using namespace ::mcrl2::lts;
+using namespace ::mcrl2::utilities;
 
 bool read_lts_from_file(lts&, std::string const&, lts_type, std::string const&, bool perform_reachability_check);
 bool write_lts_to_stdout(lts&, lts_type outtype, std::string const&, bool);
@@ -18,9 +18,9 @@ bool write_lts_to_file(lts&, std::string const&, lts_type outtype, std::string c
 
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <utilities/mcrl2_squadt.h>
+#include <mcrl2/utilities/squadt_interface.h>
 
-class squadt_interactor : public mcrl2_squadt::tool_interface {
+class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
 
   private:
 
@@ -133,7 +133,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
   h->add(new label("Output format : "));
   
-  squadt_utility::radio_button_helper < lts_output_format >
+  mcrl2::utilities::squadt::radio_button_helper < lts_output_format >
         format_selector(h, aldebaran, "Aldebaran");
 
   format_selector.associate(h, svc_mcrl, "SVC/mCRL");
@@ -164,12 +164,12 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   checkbox* omit_state_information = new checkbox("Add state information)", true);
   top->add(omit_state_information);
 
-//  squadt_utility::change_visibility_on_toggle(format_selector.get_button(dot), top.get(), omit_state_information);
-//  format_selector.get_button(dot).on_change(boost::bind(::squadt_utility::change_visibility_on_toggle, format_selector.get_button(dot), top.get(), omit_state_information));
+//  mcrl2::utilities::squadt::change_visibility_on_toggle(format_selector.get_button(dot), top.get(), omit_state_information);
+//  format_selector.get_button(dot).on_change(boost::bind(::mcrl2::utilities::squadt::change_visibility_on_toggle, format_selector.get_button(dot), top.get(), omit_state_information));
 
   top->add(new label("LTS transformation:"));
 
-  squadt_utility::radio_button_helper < transformation_options >
+  mcrl2::utilities::squadt::radio_button_helper < transformation_options >
         transformation_selector(top, no_transformation, "none");
 
   transformation_selector.associate(top, minimisation_modulo_strong_bisimulation, "reduction modulo strong bisimulation");
@@ -211,13 +211,13 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
   /* Attach events */
 //  transformation_selector.get_button(no_transformation).
-//        on_change(boost::bind(squadt_utility::change_visibility_on_toggle,
+//        on_change(boost::bind(mcrl2::utilities::squadt::change_visibility_on_toggle,
 //              transformation_selector.get_button(no_transformation), top.get(), tau_field));
 //  transformation_selector.get_button(minimisation_modulo_strong_bisimulation).
-//        on_change(boost::bind(squadt_utility::change_visibility_on_toggle,
+//        on_change(boost::bind(mcrl2::utilities::squadt::change_visibility_on_toggle,
 //              transformation_selector.get_button(minimisation_modulo_strong_bisimulation), top.get(), bisimulation_add_eq_classes));
 //  transformation_selector.get_button(minimisation_modulo_branching_bisimulation).
-//        on_change(boost::bind(squadt_utility::change_visibility_on_toggle,
+//        on_change(boost::bind(mcrl2::utilities::squadt::change_visibility_on_toggle,
 //              transformation_selector.get_button(minimisation_modulo_branching_bisimulation), top.get(), bisimulation_add_eq_classes));
 
   button* okay_button = new button("OK");
@@ -696,7 +696,7 @@ int main(int argc, char **argv)
   bool check_reach = true;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (!mcrl2_squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+  if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
 #endif
     while ( (opt = getopt_long(argc, argv, ShortOptions, LongOptions, NULL)) != -1 )
     {

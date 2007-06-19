@@ -4,19 +4,17 @@
 #include "atermpp/substitute.h"
 
 #include "mcrl2/basic/pretty_print.h"
-#include "libprint_c.h" // contains gs..Msg family
-
 
 #include "atermpp/algorithm.h"     // replace
 #include "atermpp/make_list.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/lps/specification.h"
-
-
+#include "print/messaging.h"
 
 using namespace lps;
 using namespace pbes_expr;
+using namespace mcrl2::utilities;
 
 
  void addrule__b_and_not_b(Rewriter *rewriter);
