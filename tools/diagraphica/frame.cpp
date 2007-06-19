@@ -930,16 +930,15 @@ void Frame::operator<<( const string &msg )
 void Frame::initFrame()
 // --------------------
 {
-    int wMax = GetMaxSize().GetWidth();
-    int hMax = GetMaxSize().GetHeight();
+    wxSize maximum_size = wxGetClientDisplayRect().GetSize();
     size_t hCur;
     
     // set min and max size
     SetSizeHints(
         800, 
         600, 
-        wMax, 
-        hMax );
+        maximum_size.GetWidth(), 
+        maximum_size.GetHeight() );
     
     // init sizer for frame
     sizerFrame = new wxBoxSizer( wxVERTICAL );
@@ -1222,7 +1221,7 @@ void Frame::initSplitterFrame()
     // init splitter window
     splitterFrame = new wxSplitterWindow(
         this,
-        ID_SPLITTER_FRAME );
+        ID_SPLITTER_FRAME, wxDefaultPosition, wxDefaultSize, wxSP_3D|wxSP_LIVE_UPDATE );
     splitterFrame->SetSashGravity( 0.0 );
     splitterFrame->SetMinimumPaneSize( 20 );
     sizerFrame->Add(
@@ -1248,7 +1247,7 @@ void Frame::initSplitterLft()
     // init splitter window
     splitterLft = new wxSplitterWindow(
         splitterFrame,
-        ID_SPLITTER_LFT );
+        ID_SPLITTER_LFT, wxDefaultPosition, wxDefaultSize, wxSP_3D|wxSP_LIVE_UPDATE );
     splitterLft->SetSashGravity( 1.0 );
     splitterLft->SetMinimumPaneSize( 20 );
 	
@@ -1270,7 +1269,7 @@ void Frame::initSplitterTopLft()
     // init splitter window
     splitterTopLft = new wxSplitterWindow(
         splitterLft,
-        ID_SPLITTER_TOP_LFT );
+        ID_SPLITTER_TOP_LFT, wxDefaultPosition, wxDefaultSize, wxSP_3D|wxSP_LIVE_UPDATE );
     splitterTopLft->SetSashGravity( 0.0 );
     splitterTopLft->SetMinimumPaneSize( 20 );
 
@@ -1447,22 +1446,22 @@ void Frame::initListCtrlAttr()
     colItem.SetText( wxT( "Name" ) );
     colItem.SetAlign( wxLIST_FORMAT_LEFT );
     listCtrlAttr->InsertColumn( 2, colItem );
-    listCtrlAttr->SetColumnWidth( 2, wxLIST_AUTOSIZE_USEHEADER );
+//    listCtrlAttr->SetColumnWidth( 2, wxLIST_AUTOSIZE_USEHEADER );
     // column 3
     colItem.SetText( wxT( "Type" ) );
     colItem.SetAlign( wxLIST_FORMAT_LEFT );
     listCtrlAttr->InsertColumn( 3, colItem );
-    listCtrlAttr->SetColumnWidth( 3, wxLIST_AUTOSIZE_USEHEADER );
+//    listCtrlAttr->SetColumnWidth( 3, wxLIST_AUTOSIZE_USEHEADER );
     // column 4
     colItem.SetText( wxT( "Cardinality" ) );
     colItem.SetAlign( wxLIST_FORMAT_RIGHT );
     listCtrlAttr->InsertColumn( 4, colItem );
-    listCtrlAttr->SetColumnWidth( 4, wxLIST_AUTOSIZE_USEHEADER );
+//    listCtrlAttr->SetColumnWidth( 4, wxLIST_AUTOSIZE_USEHEADER );
     // column 5
     colItem.SetText( wxT( "[ Range ]") );
     colItem.SetAlign( wxLIST_FORMAT_LEFT );
     listCtrlAttr->InsertColumn( 5, colItem );
-    listCtrlAttr->SetColumnWidth( 5, wxLIST_AUTOSIZE_USEHEADER );
+//    listCtrlAttr->SetColumnWidth( 5, wxLIST_AUTOSIZE_USEHEADER );
 
     // reset ptr
     lbl = NULL;
@@ -1649,7 +1648,7 @@ void Frame::initSplitterRgt()
     // init splitter window
     splitterRgt = new wxSplitterWindow(
         splitterFrame,
-        ID_SPLITTER_RGT );
+        ID_SPLITTER_RGT, wxDefaultPosition, wxDefaultSize, wxSP_3D|wxSP_LIVE_UPDATE );
     splitterRgt->SetSashGravity( 1.0 );
     splitterRgt->SetMinimumPaneSize( 20 );
 
@@ -1779,7 +1778,7 @@ void Frame::initSplitterBotRgt()
     // init splitter window
     splitterBotRgt = new wxSplitterWindow(
         splitterRgt,
-        ID_SPLITTER_BOT_RGT );
+        ID_SPLITTER_BOT_RGT, wxDefaultPosition, wxDefaultSize, wxSP_3D|wxSP_LIVE_UPDATE );
     splitterBotRgt->SetSashGravity( 0.0 );
     splitterBotRgt->SetMinimumPaneSize( 20 );
     

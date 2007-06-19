@@ -82,7 +82,7 @@ namespace squadt {
 
       SetSizer(new wxBoxSizer(wxVERTICAL));
 
-      wxSize maximum_size = wxGetDisplaySize();
+      wxSize maximum_size = wxGetClientDisplayRect().GetSize();
 
       SetSize((std::min)(maximum_size.GetWidth(),1024), (std::min)(maximum_size.GetWidth(),768));
 

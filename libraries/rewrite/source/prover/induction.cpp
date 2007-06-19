@@ -4,7 +4,7 @@
 #include "prover/induction.h"
 #include "libstruct.h"
 
-#include "malloc.h"
+#include <cstdlib>
 
 #include "mcrl2/utilities/utilities.h"
 #include "print/messaging.h"
