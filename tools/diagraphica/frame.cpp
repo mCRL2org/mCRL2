@@ -62,7 +62,7 @@ void Frame::setStatusText( const string &msg )
 void Frame::setOutputText( const string &msg )
 // -------------------------------------------
 {
-    //textCtrl->SetValue( wxString( msg.c_str(), wxConvUTF8 ) );
+    textCtrl->SetValue( wxString( msg.c_str(), wxConvUTF8 ) );
 }
 
 
@@ -70,7 +70,7 @@ void Frame::setOutputText( const string &msg )
 void Frame::appOutputText( const string &msg )
 // -------------------------------------------
 {
-    //textCtrl->AppendText( wxString( msg.c_str(), wxConvUTF8 ) );
+    textCtrl->AppendText( wxString( msg.c_str(), wxConvUTF8 ) );
 }
 
 
@@ -308,7 +308,7 @@ void Frame::displDOFInfo(
                 wxLIST_STATE_SELECTED,
                 wxLIST_STATE_SELECTED );
 
-            int textStatus = mediator->handleGetDOFTextStatus( selIdx );
+            /* int textStatus = mediator->handleGetDOFTextStatus( selIdx );
             if ( textStatus == DOF::ID_TEXT_NONE )
                 radioBoxTextDOF->SetSelection( 0 );
             else if ( textStatus == DOF::ID_TEXT_ALL )
@@ -317,6 +317,7 @@ void Frame::displDOFInfo(
                 radioBoxTextDOF->SetSelection( 2 );
             else if ( textStatus == DOF::ID_TEXT_VAL )
                 radioBoxTextDOF->SetSelection( 3 );
+			*/
         }
     }
 }
@@ -335,76 +336,74 @@ void Frame::displShapeMenu(
     const bool &editDOF )
 // ---------------------------
 {
-    wxMenu* menu = new wxMenu();
+    wxMenu menu;
 
-    menu->Append( 
+    menu.Append( 
         ID_MENU_ITEM_SHAPE_CUT,
         wxT( "Cut" ),
         wxT( "Cut this shape" ) );
-    menu->Append( 
+    menu.Append( 
         ID_MENU_ITEM_SHAPE_COPY,
         wxT( "Copy" ),
         wxT( "Copy this shape" ) );
-    menu->Append( 
+    menu.Append( 
         ID_MENU_ITEM_SHAPE_PASTE,
         wxT( "Paste" ),
         wxT( "Paste shape" ) );
 
-    menu->AppendSeparator();
-    menu->Append( 
+    menu.AppendSeparator();
+    menu.Append( 
         ID_MENU_ITEM_SHAPE_DELETE,
         wxT( "Delete" ),
         wxT( "Delete this shape" ) );
     
-    menu->AppendSeparator();
-    menu->Append(
+    menu.AppendSeparator();
+    menu.Append(
         ID_MENU_ITEM_SHAPE_BRING_TO_FRONT, 
         wxT( "Bring to front" ),
         wxT( "Bring this shape to front" ) );
-    menu->Append(
+    menu.Append(
         ID_MENU_ITEM_SHAPE_SEND_TO_BACK, 
         wxT( "Send to back" ),
         wxT( "Send this shape to back" ) );
-    menu->Append(
+    menu.Append(
         ID_MENU_ITEM_SHAPE_BRING_FORWARD,
         wxT( "Bring forward" ),
         wxT( "Bring this shape forward" ) );
-    menu->Append(
+    menu.Append(
         ID_MENU_ITEM_SHAPE_SEND_BACKWARD,
         wxT( "Send backward" ),
         wxT( "Send this shape backward" ) );
-    menu->AppendSeparator();
-    menu->Append(
+    menu.AppendSeparator();
+    menu.Append(
         ID_MENU_ITEM_SHAPE_EDIT_DOF, 
         wxT( "Edit DOF" ),
         wxT( "Edit this shape's degrees of freedom" ) );
 
     if ( cut != true )
-        menu->Enable( ID_MENU_ITEM_SHAPE_CUT, false );
+        menu.Enable( ID_MENU_ITEM_SHAPE_CUT, false );
     if ( copy != true )
-        menu->Enable( ID_MENU_ITEM_SHAPE_COPY, false );
+        menu.Enable( ID_MENU_ITEM_SHAPE_COPY, false );
     if ( paste != true )
-        menu->Enable( ID_MENU_ITEM_SHAPE_PASTE, false );
+        menu.Enable( ID_MENU_ITEM_SHAPE_PASTE, false );
     
     if ( clear != true )
-        menu->Enable( ID_MENU_ITEM_SHAPE_DELETE, false );
+        menu.Enable( ID_MENU_ITEM_SHAPE_DELETE, false );
 
     if ( bringToFront != true )
-        menu->Enable( ID_MENU_ITEM_SHAPE_BRING_TO_FRONT, false );
+        menu.Enable( ID_MENU_ITEM_SHAPE_BRING_TO_FRONT, false );
     if ( sendToBack != true )
-        menu->Enable( ID_MENU_ITEM_SHAPE_SEND_TO_BACK, false );
+        menu.Enable( ID_MENU_ITEM_SHAPE_SEND_TO_BACK, false );
     if ( bringForward != true )
-        menu->Enable( ID_MENU_ITEM_SHAPE_BRING_FORWARD, false );
+        menu.Enable( ID_MENU_ITEM_SHAPE_BRING_FORWARD, false );
     if ( sendBackward != true )
-        menu->Enable( ID_MENU_ITEM_SHAPE_SEND_BACKWARD, false );
+        menu.Enable( ID_MENU_ITEM_SHAPE_SEND_BACKWARD, false );
 
     if ( editDOF != true )
-        menu->Enable( ID_MENU_ITEM_SHAPE_EDIT_DOF, false );
+        menu.Enable( ID_MENU_ITEM_SHAPE_EDIT_DOF, false );
         
-    PopupMenu( menu );
+    PopupMenu( &menu );
         
-    delete menu;
-    menu = NULL;
 }
 
 
@@ -417,50 +416,47 @@ void Frame::displDgrmMenu(
     const bool &sentSetToExnr )
 // ----------------------------
 {
-    wxMenu* menu = new wxMenu();
+    wxMenu menu;
 
-    menu->Append( 
+    menu.Append( 
         ID_MENU_ITEM_DGRM_SGL_TO_SIML,
         wxT( "Send this to simulator" ),
         wxT( "Send this diagram to simulator" ) );
     
-    menu->AppendSeparator();
+    menu.AppendSeparator();
 
-    menu->Append( 
+    menu.Append( 
         ID_MENU_ITEM_DGRM_SGL_TO_TRACE,
         wxT( "Mark this in trace" ),
         wxT( "Mark this diagram in trace view" ) );
-    menu->Append( 
+    menu.Append( 
         ID_MENU_ITEM_DGRM_SET_TO_TRACE,
         wxT( "Mark all in trace" ),
         wxT( "Mark set of diagrams in trace view" ) );
 
-    menu->AppendSeparator();
+    menu.AppendSeparator();
 
-    menu->Append( 
+    menu.Append( 
         ID_MENU_ITEM_DGRM_SGL_TO_EXNR,
         wxT( "Send this to examiner" ),
         wxT( "Send this diagram to examiner" ) );
-    menu->Append( 
+    menu.Append( 
         ID_MENU_ITEM_DGRM_SET_TO_EXNR,
         wxT( "Send all to examiner" ),
         wxT( "Send set of diagrams to examiner" ) );
     
     if ( sendSglToSiml != true )
-        menu->Enable( ID_MENU_ITEM_DGRM_SGL_TO_SIML, false );
+        menu.Enable( ID_MENU_ITEM_DGRM_SGL_TO_SIML, false );
     if ( sendSglToTrace != true )
-            menu->Enable( ID_MENU_ITEM_DGRM_SGL_TO_TRACE, false );
+            menu.Enable( ID_MENU_ITEM_DGRM_SGL_TO_TRACE, false );
     if ( sendSetToTrace != true )
-            menu->Enable( ID_MENU_ITEM_DGRM_SET_TO_TRACE, false );
+            menu.Enable( ID_MENU_ITEM_DGRM_SET_TO_TRACE, false );
     if ( sendSglToExnr != true )
-        menu->Enable( ID_MENU_ITEM_DGRM_SGL_TO_EXNR, false );
+        menu.Enable( ID_MENU_ITEM_DGRM_SGL_TO_EXNR, false );
     if ( sentSetToExnr != true )
-        menu->Enable( ID_MENU_ITEM_DGRM_SET_TO_EXNR, false );
+        menu.Enable( ID_MENU_ITEM_DGRM_SET_TO_EXNR, false );
 
-    PopupMenu( menu );
-        
-    delete menu;
-    menu = NULL;
+    PopupMenu( &menu );
 }
     
 
@@ -480,38 +476,36 @@ void Frame::clearDOFInfo()
 void Frame::displClustMenu()
 // -------------------------
 {
-    wxMenu* menu = new wxMenu();
+    wxMenu menu;
 
     // group & ungroup
-    menu->Append( 
+    menu.Append( 
         ID_MENU_ITEM_CLUST_DISTR_PLOT,
         wxT( "Distribution plot" ),
         wxT( "Visualize the distribution of values" ) );
-    menu->Append( 
+    menu.Append( 
         ID_MENU_ITEM_CLUST_CORRL_PLOT,
         wxT( "Correlation plot" ),
         wxT( "Visualize the correlation of values" ) );
-    menu->Append(
+    menu.Append(
         ID_MENU_ITEM_CLUST_COMBN_PLOT,
         wxT( "Combination plot" ),
         wxT( "Visualize the combinations of values" ) );
         
-    menu->AppendSeparator();
-    menu->Append(
+    menu.AppendSeparator();
+    menu.Append(
         ID_MENU_ITEM_CLUST_SUBCLUST, 
         wxT( "Cluster" ),
         wxT( "Subcluster this cluster based on selected attributes" ) );
-    menu->Enable( ID_MENU_ITEM_CLUST_SUBCLUST, false );
-    menu->Append(
+    menu.Enable( ID_MENU_ITEM_CLUST_SUBCLUST, false );
+    menu.Append(
         ID_MENU_ITEM_CLUST_UNCLUST, 
         wxT( "Uncluster" ),
         wxT( "Remove this cluster" ) );
-    menu->Enable( ID_MENU_ITEM_CLUST_UNCLUST, false );
+    menu.Enable( ID_MENU_ITEM_CLUST_UNCLUST, false );
         
-    PopupMenu( menu );
+    PopupMenu( &menu );
         
-    delete menu;
-    menu = NULL;
 }
 
 
@@ -713,7 +707,8 @@ void Frame::handleDragDrop(
         int flag = wxLIST_HITTEST_ONITEM;
 
         idxAttr = data[0];
-        idxDOF = listCtrlDOF->HitTest( wxPoint( tgtX, tgtY ), flag );
+
+		idxDOF = listCtrlDOF->HitTest( wxPoint( tgtX, tgtY ), flag );
 
         long item = -1;
         for ( int i = 0; i < listCtrlDOF->GetItemCount(); ++i )
@@ -906,9 +901,9 @@ void Frame::clearOuput()
     listCtrlAttr->DeleteAllItems();
     listCtrlDomain->DeleteAllItems();
 
-    /*
+    
     textCtrl->Clear();
-    */
+   
 }
 
 
@@ -1784,14 +1779,12 @@ void Frame::initSplitterBotRgt()
     
     // init children
     initPanelLftBotRgt();
-    /*
     initPanelRgtBotRgt();
     // split window
     splitterBotRgt->SplitVertically(
         panelLftBotRgt,
         panelRgtBotRgt );
-    */
-    splitterBotRgt->Initialize( panelLftBotRgt );
+    //splitterBotRgt->Initialize( panelLftBotRgt );
 }
 
 
@@ -1928,7 +1921,7 @@ void Frame::initAboutFrame()
 
     // message
     wxString msg;
-    msg.Append( wxT( "DiaGraphica Version 2.07\n" ) );
+    msg.Append( wxT( "DiaGraphica Version 3.01\n" ) );
     msg.Append( wxT( "Copyright (c) 2007, "  ) );
     msg.Append( wxT( "A. Johannes Pretorius, TU/e, "  ) );
     msg.Append( wxT( "All rights reserved.\n"  ) );
@@ -2073,7 +2066,7 @@ void Frame::initPanelDOF()
 
     // init children
     initListCtrlDOF();
-    initTextOptionsDOF();
+    //initTextOptionsDOF();
     initCanvasColDOF();
     initCanvasOpaDOF();
 }
@@ -2129,7 +2122,7 @@ void Frame::initListCtrlDOF()
     listCtrlDOF->SetColumnWidth( 3, wxLIST_AUTOSIZE_USEHEADER );
 }
 
-
+/*
 // -----------------------------
 void Frame::initTextOptionsDOF()
 // -----------------------------
@@ -2158,7 +2151,7 @@ void Frame::initTextOptionsDOF()
         wxBOTTOM,
         5 );
 }
-
+*/
 
 // ---------------------------
 void Frame::initCanvasColDOF()
@@ -2833,7 +2826,7 @@ void Frame::onListCtrlSelect( wxListEvent &e )
         if ( mediator->getMode() == Mediator::MODE_EDIT )
         {
             // get idx of last selected item
-            int attrIdx = e.GetData();
+            int attrIdx = e.GetIndex();
             // handle selection
             mediator->handleAttributeSel( attrIdx );
 
@@ -2845,7 +2838,7 @@ void Frame::onListCtrlSelect( wxListEvent &e )
                 wxLIST_STATE_SELECTED );
             while( item != -1 )
             {
-                if ( listCtrlAttr->GetItemData( item ) != static_cast < size_t > (e.GetData()) )
+                if ( listCtrlAttr->GetItemData( item ) != static_cast < size_t > (e.GetIndex()) )
                 {
                     listCtrlAttr->SetItemState(
                         item, 
@@ -2896,7 +2889,7 @@ void Frame::onListCtrlSelect( wxListEvent &e )
             else if ( listCtrlAttr->GetSelectedItemCount() == 1 )
             {
                 // get idx of last selected item
-                int attrIdx = e.GetData();
+                int attrIdx = e.GetIndex();
                 // handle selection
                 mediator->handleAttributeSel( attrIdx );
 
@@ -2981,10 +2974,10 @@ void Frame::onListCtrlSelect( wxListEvent &e )
             domainMenu->Enable( ID_MENU_ITEM_DOM_RENAME, false );
         }
     }
-    else if ( e.GetId() == ID_LIST_CTRL_DOF )
+    /* else if ( e.GetId() == ID_LIST_CTRL_DOF )
     {
         // get idx of selected item
-        int id = e.GetData();
+        int id = e.GetIndex();
         // handle selection
         mediator->handleDOFSel( id );
 
@@ -2997,7 +2990,7 @@ void Frame::onListCtrlSelect( wxListEvent &e )
             radioBoxTextDOF->SetSelection( 2 );
         else if ( textStatus == DOF::ID_TEXT_VAL )
             radioBoxTextDOF->SetSelection( 3 );
-    }
+    } */
     else if ( e.GetId() == ID_LIST_CTRL_CLUST )
     {
         if ( mediator->getClustMode() == Mediator::CLUST_DISTR_PLOT )
@@ -3010,7 +3003,7 @@ void Frame::onListCtrlSelect( wxListEvent &e )
                 wxLIST_STATE_SELECTED );
             while( item != -1 )
             {
-                if ( listCtrlClust->GetItemData( item ) != static_cast < size_t > (e.GetData()) )
+                if ( listCtrlClust->GetItemData( item ) != static_cast < size_t > (e.GetIndex()) )
                 {
                     listCtrlClust->SetItemState(
                         item, 
@@ -3039,7 +3032,7 @@ void Frame::onListCtrlSelect( wxListEvent &e )
                 wxLIST_STATE_SELECTED );
             while( item != -1 )
             {
-                if ( listCtrlClust->GetItemData( item ) != static_cast < size_t > (e.GetData()) )
+                if ( listCtrlClust->GetItemData( item ) != static_cast < size_t > (e.GetIndex()) )
                 {
                     if ( selCount > 2 )
                     {
@@ -3076,13 +3069,10 @@ void Frame::onListCtrlBeginDrag( wxListEvent &e )
         
         // prepare data
         srcId  = ID_LIST_CTRL_ATTR;
-        attrIdx = e.GetData();
-        msg.append( Utils::intToStr( srcId ) );
-        msg.append( " " );
-        msg.append( Utils::intToStr( attrIdx ) );
-
-        // init data
-        wxTextDataObject data( wxString( msg.c_str(), wxConvUTF8 ) );
+        attrIdx = e.GetIndex();
+        
+		// init data
+        wxTextDataObject data( wxString::Format(wxT("%d %d"), srcId, attrIdx));
 
         // drag start
         wxDropSource source( listCtrlAttr );
@@ -3102,7 +3092,7 @@ void Frame::onListCtrlBeginDrag( wxListEvent &e )
             attrIdx,
             wxLIST_NEXT_ALL,
             wxLIST_STATE_SELECTED );;
-        domIdx = e.GetData();
+        domIdx = e.GetIndex();
         
         msg.append( Utils::intToStr( srcId ) );
         msg.append( " " );
@@ -4021,7 +4011,7 @@ void Frame::onButton( wxCommandEvent &e )
     }
 }
 
-
+/*
 // ----------------------------------------
 void Frame::onRadioBox( wxCommandEvent &e )
 // ----------------------------------------
@@ -4055,7 +4045,7 @@ void Frame::onRadioBox( wxCommandEvent &e )
         }
     }
 }
-
+*/
 
 // -- implement event table -----------------------------------------
 
@@ -4130,7 +4120,7 @@ BEGIN_EVENT_TABLE( Frame, wxFrame )
     // dof frame
     EVT_LIST_ITEM_SELECTED( ID_LIST_CTRL_DOF, Frame::onListCtrlSelect )
     EVT_LIST_ITEM_RIGHT_CLICK( ID_LIST_CTRL_DOF, Frame::onListCtrlRgtClick )
-    EVT_RADIOBOX( ID_RADIO_BOX_TEXT_DOF, Frame::onRadioBox )
+    //EVT_RADIOBOX( ID_RADIO_BOX_TEXT_DOF, Frame::onRadioBox )
     EVT_MENU( ID_MENU_ITEM_DOF_UNLINK, Frame::onPopupMenu )
     // interaction with clusters
     EVT_MENU( ID_MENU_ITEM_CLUST_DISTR_PLOT, Frame::onPopupMenu )

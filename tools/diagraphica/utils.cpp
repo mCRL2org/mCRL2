@@ -54,6 +54,7 @@ int Utils::strToInt( const string &s )
 // -----------------------------------
 {
     int result;
+
     result = atoi( s.c_str() );
 
     return result;
