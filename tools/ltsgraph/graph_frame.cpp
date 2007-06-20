@@ -963,32 +963,32 @@ void GraphFrame::FindNode(wxPoint pt) {
   bool show_labels = ckEdgeLabels->IsChecked();
 
   leftPanel->selection = none_t;
-  
-  for (size_t n = 0; n < vectEdge.size(); n++) {
-      if (curve_edges && vectEdge[n]->get_x_control() > pt.x-ctrl_radius && vectEdge[n]->get_x_control() < pt.x+ctrl_radius &&
-          vectEdge[n]->get_y_control() > pt.y-ctrl_radius && vectEdge[n]->get_y_control() < pt.y+ctrl_radius) {
-        leftPanel->selection = edge_t;
-        leftPanel->selected_edge = vectEdge[n];
+
+  for (size_t n = 0; n < vectNode.size(); n++) {
+    double radius = vectNode[n]->get_radius();
+    double node_x = vectNode[n]->GetX();
+    double node_y = vectNode[n]->GetY();
+
+    if (node_x > pt.x-radius && node_x < pt.x + radius) {
+      if (node_y > pt.y- radius && node_y < pt.y+ radius) {
+        leftPanel->selection = node_t;
+        leftPanel->selected_node = vectNode[n];
       }
-      else if (show_labels && vectEdge[n]->get_label_lower_x() < pt.x && pt.x < vectEdge[n]->get_label_higher_x() &&
-                              vectEdge[n]->get_label_lower_y() < pt.y && pt.y < vectEdge[n]->get_label_higher_y()) {
-        leftPanel->selection = edge_label_t;
-        leftPanel->selected_edge = vectEdge[n];
-      }
+    }
   }
-
+  
   if (leftPanel->selection == none_t) { 
-    for (size_t n = 0; n < vectNode.size(); n++) {
-      double radius = vectNode[n]->get_radius();
-      double node_x = vectNode[n]->GetX();
-      double node_y = vectNode[n]->GetY();
-
-      if (node_x > pt.x-radius && node_x < pt.x + radius) {
-        if (node_y > pt.y- radius && node_y < pt.y+ radius) {
-          leftPanel->selection = node_t;
-          leftPanel->selected_node = vectNode[n];
+    for (size_t n = 0; n < vectEdge.size(); n++) {
+        if (curve_edges && vectEdge[n]->get_x_control() > pt.x-ctrl_radius && vectEdge[n]->get_x_control() < pt.x+ctrl_radius &&
+            vectEdge[n]->get_y_control() > pt.y-ctrl_radius && vectEdge[n]->get_y_control() < pt.y+ctrl_radius) {
+          leftPanel->selection = edge_t;
+          leftPanel->selected_edge = vectEdge[n];
         }
-      }
+        else if (show_labels && vectEdge[n]->get_label_lower_x() < pt.x && pt.x < vectEdge[n]->get_label_higher_x() &&
+                                vectEdge[n]->get_label_lower_y() < pt.y && pt.y < vectEdge[n]->get_label_higher_y()) {
+          leftPanel->selection = edge_label_t;
+          leftPanel->selected_edge = vectEdge[n];
+        }
     }
   }
 

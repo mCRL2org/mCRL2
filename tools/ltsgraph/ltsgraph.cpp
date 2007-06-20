@@ -7,7 +7,7 @@
 #include "lts/liblts.h"
 
 std::string lts_file_argument;
-bool command_line = false;
+bool command_line = true;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 // SQuADT protocol interface
@@ -187,6 +187,7 @@ int main(int argc, char **argv)
   ATerm bot;
   ATinit(argc,argv,&bot);
 # ifdef ENABLE_SQUADT_CONNECTIVITY
+  command_line = false;
   mcrl2::utilities::squadt::entry_wrapper starter(argc, argv);
 
   squadt_interactor c(starter);

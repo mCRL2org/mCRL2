@@ -97,8 +97,6 @@ bool LtsgraphBackup::Backup(wxString Bfilename) {
 		BckpFile.AddLine(lbl);
   }
 
-	BckpFile.AddLine(wxT(""));
-	
 	if (!BckpFile.Write())
 		return false;
 
@@ -132,13 +130,16 @@ bool LtsgraphBackup::Restore(wxString Rfilename) {
 	if (!RtrFile.GetNextLine().ToDouble(&NaturalLength))
 		return false;
 
-	if (!RtrFile.GetNextLine().ToULong((long unsigned int*)&StateRadius))
+        long int tmp;
+	if (!RtrFile.GetNextLine().ToLong(&tmp))
 		return false;
-	if (!RtrFile.GetNextLine().ToULong((long unsigned int*)&StateLabel))
+        StateRadius = tmp;
+	if (!RtrFile.GetNextLine().ToLong(&tmp))
 		return false;
-	if (!RtrFile.GetNextLine().ToULong((long unsigned int*)&TransitionLabel))
+        StateLabel = tmp;
+	if (!RtrFile.GetNextLine().ToLong(&tmp))
 		return false;
-
+        TransitionLabel = tmp;
 
 	map<unsigned int, Node*> NodeMap;
 	wxString wxstr = RtrFile.GetNextLine();
