@@ -1069,10 +1069,15 @@ void XSimMain::Stopper_Exit()
 	}
 }
 
-void XSimMain::OnStop( wxCommandEvent& /* event */ )
+void XSimMain::StopAutomation()
 {
 	stopper_cnt = 0;
 	Stopper_Exit();
+}
+
+void XSimMain::OnStop( wxCommandEvent& /* event */ )
+{
+	StopAutomation();
 }
 
 void XSimMain::OnAbout( wxCommandEvent& /* event */ )
@@ -1240,6 +1245,7 @@ void XSimMain::UpdateTransitions(bool update_next_states)
 		{
 			wxMessageDialog msg(this,wxT("An error occurred while calculating the transitions from this state. This likely means that not all possible transitions are shown."),wxT("Error while calculating transitions"),wxOK|wxICON_ERROR);
 			msg.ShowModal();
+			StopAutomation();
 		}
 	}
 

@@ -86,6 +86,7 @@ private:
     ATermList traceRedo();
     void Stopper_Enter();
     void Stopper_Exit();
+    void StopAutomation();
     void SetInteractiveness(bool interactive);
     
 private:
