@@ -1,0 +1,47 @@
+[section: Parameterised Boolean Equation Systems]
+A Parameterised Boolean Equation System (PBES) is a sequence of equations of the form
+
+__pbes__
+
+where
+
+* __sigmai is either a least fixpoint symbol __mu or a greatest fixpoint symbol __nu
+* __fi is a propositional formula
+* __di is a data variable of sort __Di
+* __phii is a predicate formula
+
+[section: Classes]
+
+This section describes the classes that correspond to parameterised boolean equation systems.
+
+[section: class =equation_system=]
+
+A PBES is represented by the class [classref lps::equation_system]. There is also
+a class [classref lps::pbes] that contains an equation system together with an initial state,
+and a data specification for the data __Di.
+
+[endsect] [/ =equation_system=]
+
+[section: class =propositional_variable=]
+
+propositional_variable
+
+[endsect] [/ =propositional_variable=]
+
+A PBES can be constructed from a linear process and a modal formula using the
+function [funcref lps::pbes_translate]. There is no other convenient way to
+create a PBES.
+
+[tip A parser that can parse an equation system like
+
+    ``
+      X(d0:D, d1:D) = f(X, Y)
+      Y(d0:D, d1:D) = g(X, Y)
+    ``
+
+    would be very useful.
+]
+
+[endsect] [/ Creating a PBES]
+
+[endsect] [/ Parameterised Boolean Equation Systems]

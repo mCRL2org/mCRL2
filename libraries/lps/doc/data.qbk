@@ -1,0 +1,18 @@
+[section: Data types]
+
+[section: Introduction]
+The mCRL2 library contains classes that represent data expressions, sorts etc.
+Currently there is no documentation available for this other than the reference.
+[endsect]
+
+A data variable is represented by the class [classref lps::data_variable], and a vector
+of data variables is represented by [classref lps::data_variable_list]. A data variable
+has a name and a sort as attributes.
+
+An instance of a data variable is modeled by the class [classref lps::data_expression].
+There are three different types of data expressions: data applications, data variables
+and functions. 
+
+The operations on data in the namespace `data_expr`.
+
+[endsect]

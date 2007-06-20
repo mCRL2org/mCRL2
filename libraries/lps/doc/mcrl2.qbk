@@ -1,0 +1,52 @@
+[library mCRL2
+    [quickbook 1.4]
+    [authors [Wesselink, Wieger]]
+    [copyright 2005-2007 Technische Universiteit Eindhoven]
+    [category string-text]
+    [purpose
+        The mCRL2 library contains data structures and algorithms
+        for the mCRL2 toolset.
+    ]
+    [license
+        Distributed under the Boost Software License, Version 1.0.
+    ]
+]
+
+[/  Images   ]
+
+[def __note__              [$images/note.png]]
+[def __alert__             [$images/caution.png]]
+[def __detail__            [$images/note.png]]
+[def __tip__               [$images/tip.png]]
+[def __pbes__              [$images/pbes.gif]]
+[def __summand__           [$images/summand.gif]]
+[def __linear_process__    [$images/linear_process.gif]]
+
+[def __mu     [' '''&mu;''']]
+[def __nu     [' '''&nu;''']]
+[def __sigmai [' '''&sigma;<subscript>i</subscript>''']]
+[def __phii   [' '''&#x03C6;<subscript>i</subscript>''']]
+[def __ai     [' '''a<subscript>i</subscript>''']]
+[def __ci     [' '''c<subscript>i</subscript>''']]
+[def __di     [' '''d<subscript>i</subscript>''']]
+[def __fi     [' '''f<subscript>i</subscript>''']]
+[def __gi     [' '''g<subscript>i</subscript>''']]
+[def __si     [' '''s<subscript>i</subscript>''']]
+[def __ti     [' '''t<subscript>i</subscript>''']]
+[def __Di     [' '''D<subscript>i</subscript>''']]
+[def __d0     [' '''d<subscript>0</subscript>''']]
+[def __D0     [' '''D<subscript>0</subscript>''']]
+[def __Ei     [' '''E<subscript>i</subscript>''']]
+
+[/  Links   ]
+[def __boost__                 [@http://www.boost.org www.boost.org]]
+[def __mcrllib__               [@http://www.cwi.nl/~mcrl mCRL]]
+[def __mcrl2__                 [@http://mcrl2.org mCRL2]]
+[def __mcrl__                  mCRL]
+[def __atermlib__               [@http://www.cwi.nl/htbin/sen1/twiki/bin/view/Meta-Environment/ATerms ATerm Library]]
+
+[include introduction.qbk]
+[include atermpp.qbk]
+[include data.qbk]
+[include lps.qbk]
+[include pbes.qbk]
