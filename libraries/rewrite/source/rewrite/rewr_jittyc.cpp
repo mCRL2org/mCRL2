@@ -11,10 +11,11 @@
 #include "rewr_jittyc.h"
 
 #include <cstdlib>
+#include <print/messaging.h>
 
 RewriterCompilingJitty::RewriterCompilingJitty(lps::data_specification DataSpec)
 {
-	gsMessage("error: compiling JITty rewriter is not available\n");
+	gsErrorMsg("compiling JITty rewriter is not available\n");
 	exit(1);
 }
 
@@ -377,7 +378,7 @@ ATermAppl RewriterCompilingJitty::fromInner(ATerm Term)
 
         if ( ATisEmpty((ATermList) Term) )
         {
-                gsMessage("%s: invalid jitty format term (%T)\n",NAME,Term);
+                gsErrorMsg("%s: invalid jitty format term (%T)\n",NAME,Term);
                 exit(1);
         }
 
@@ -556,7 +557,6 @@ static ATerm toInnerc(ATerm Term)
   }
   l=ATreverse(l);
   ATerm r=Apply((ATermList) l);
-  // gsMessage("RESULT: %T\n%T\n%T\n\n",Term,r,l);
   return r;
 }
 
@@ -1797,6 +1797,10 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
           args_nfs = extend_nfs( args_nfs | get_base_nfs((ATermInt) ATgetFirst((ATermList) t),arity) , (ATermInt) ATgetFirst((ATermList) t) , arity );
 #endif
         }
+        if ( arity > NF_MAX_ARITY )
+        {
+          args_nfs = 0;
+        }
         if ( (args_nfs == 0) || b || rewr || (arity > NF_MAX_ARITY) )
         {
 #ifdef USE_INT2ATERM_VALUE
@@ -1814,7 +1818,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
           ss << (ATgetInt((ATermInt) ATgetFirst((ATermList) t))+((1 << arity)-arity-1)+args_nfs);
         }
         pair<unsigned int,string> args = calc_inner_terms(ATgetNext((ATermList) t),startarg,nnfvars,(rewr && b)?((1 << arity)-1):args_nfs);
-        assert( !rewr || b || (args.first == args_nfs) );
+        assert( !rewr || b || (arity > NF_MAX_ARITY) || (args.first == args_nfs) );
         if ( rewr && !b )
         {
           ss << "_" << arity << "_";
@@ -1968,6 +1972,7 @@ void RewriterCompilingJitty::calcTerm(FILE *f, ATerm t, int startarg, ATermList 
       if ( rewr && (nnfvars != NULL) && (ATindexOf(nnfvars,ATgetFirst((ATermList) t),0) >= 0) ) 
       {
         fprintf(f,")):rewrite(");
+        rewr = false;
       } else {
         fprintf(f,")):(");
       }
@@ -1978,12 +1983,11 @@ void RewriterCompilingJitty::calcTerm(FILE *f, ATerm t, int startarg, ATermList 
     {
         b = rewr;
 	b2 = true;
-	rewr = false;
     }
 
+    unsigned int nfs = 0;
     if ( b )
     {
-      unsigned int nfs = 0;
       if ( arity <= NF_MAX_ARITY )
       {
 	      int i = 0;
@@ -1995,6 +1999,9 @@ void RewriterCompilingJitty::calcTerm(FILE *f, ATerm t, int startarg, ATermList 
 		      }
 		      i++;
 	      }
+#ifdef EXTEND_NFS
+          nfs = extend_nfs( nfs | get_base_nfs((ATermInt) ATgetFirst((ATermList) t),arity) , (ATermInt) ATgetFirst((ATermList) t) , arity );
+#endif
       }
       fprintf(f,"rewr_%i_%i_%u(",ATgetInt((ATermInt) ATgetFirst((ATermList) t)),arity,nfs);
     } else {
@@ -2077,14 +2084,14 @@ void RewriterCompilingJitty::calcTerm(FILE *f, ATerm t, int startarg, ATermList 
       }
       if ( ATisAppl(ATgetFirst(l)) && gsIsNil(ATAgetFirst(l)) )
       {
-        if ( b || (ATindexOf(nnfvars,(ATerm) ATmakeInt(i),0) == -1) )
+        if ( !((rewr && !b) || !((nfs&(1<<(i-startarg))) == 0)) || (ATindexOf(nnfvars,(ATerm) ATmakeInt(i),0) == -1) )
 	{
           fprintf(f,"arg%i",i);
 	} else {
           fprintf(f,"rewrite(arg%i)",i);
 	}
       } else {
-        calcTerm(f,ATgetFirst(l),0,nnfvars,rewr);
+        calcTerm(f,ATgetFirst(l),0,nnfvars,(rewr && !b) || ((nfs&(1<<(i-startarg))) != 0));
       }
       i++;
     }
@@ -2696,7 +2703,7 @@ ATermAppl RewriterCompilingJitty::build_ar_expr(ATermList eqns, unsigned int arg
 
 bool RewriterCompilingJitty::always_rewrite_argument(ATermInt opid, unsigned int arity, unsigned int arg)
 {
-  return is_ar_true(ar[ATgetInt((ATermInt) ATtableGet(int2ar_idx,(ATerm) opid))+((arity-1)*arity)/2+arg]);
+  return !is_ar_false(ar[ATgetInt((ATermInt) ATtableGet(int2ar_idx,(ATerm) opid))+((arity-1)*arity)/2+arg]);
 }
 
 bool RewriterCompilingJitty::calc_ar(ATermAppl expr)
@@ -2844,7 +2851,9 @@ void RewriterCompilingJitty::CompileRewriteSystem(lps::data_specification DataSp
 
   ATtableDestroy(tmp_eqns);
 
+#ifdef EXTEND_NFS
   fill_always_rewrite_array();
+#endif
 
   s = (char *) malloc(20);
   sprintf(s,"jittyc_%i",getpid());
@@ -3284,7 +3293,12 @@ void RewriterCompilingJitty::CompileRewriteSystem(lps::data_specification DataSp
       {
             implement_strategy(f,create_strategy(jittyc_eqns[j],j,a,nfs),a,1,j,nfs);
       } else {
-	finish_function(f,a,j,NULL);
+	bool used[a];
+	for (int k=0; k<a; k++)
+	{
+		used[k] = ((nfs & (1 << k)) != 0);
+	}
+	finish_function(f,a,j,used);
       }
 
       
