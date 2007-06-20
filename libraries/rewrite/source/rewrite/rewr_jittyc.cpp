@@ -2529,7 +2529,7 @@ static void finish_function(FILE *f, int arity, int opid, bool *used)
                                    "(ATerm) int2ATerm%i",
 #endif
 #ifdef USE_APPL_VALUE
-      get_appl_afun_value(arity),
+      (long int) get_appl_afun_value(arity),
 #else
       arity,
 #endif
@@ -2553,7 +2553,7 @@ static void finish_function(FILE *f, int arity, int opid, bool *used)
 #endif
       arity+1,
 #ifdef USE_APPL_VALUE
-      get_appl_afun_value(arity),
+      (long int) get_appl_afun_value(arity),
 #else
       arity,
 #endif
@@ -2959,7 +2959,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(lps::data_specification DataSp
       "#define ATisInt(x) (ATgetType(x) == AT_INT)\n"
 #ifdef USE_VARAFUN_VALUE
       "#define isAppl(x) (ATgetAFun(x) != %li)\n"
-      "\n", ATgetAFun(gsMakeDataVarId(gsString2ATermAppl("x"),gsMakeSortExprBool()))
+      "\n", (long int) ATgetAFun(gsMakeDataVarId(gsString2ATermAppl("x"),gsMakeSortExprBool()))
 #else
       "#define isAppl(x) (ATgetAFun(x) != varAFun)\n"
       "\n"
@@ -3162,7 +3162,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(lps::data_specification DataSp
       "    else\n"
       "    {\n"*/
 #ifdef USE_APPL_VALUE
-      "      return ATmakeAppl(%li,ATgetArgument(a,0)", get_appl_afun_value(i));
+      "      return ATmakeAppl(%li,ATgetArgument(a,0)", (long int) get_appl_afun_value(i));
 #else
       "      return ATmakeAppl(appl%i,ATgetArgument(a,0)", i);
 #endif
