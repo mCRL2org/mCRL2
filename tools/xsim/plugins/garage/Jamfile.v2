@@ -5,6 +5,7 @@ project toolset/xsim/plugins/garage
        ;
 
 alias xsim_garage_view : : <wx>no ;
+alias xsim_garage_view : : <link>static ;
 
 lib xsim_garage_view
        : garageframe.cpp

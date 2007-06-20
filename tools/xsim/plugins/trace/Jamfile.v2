@@ -4,6 +4,8 @@ project toolset/xsim/plugins/trace
 
 alias xsim_trace_view : : <wx>no ;
 
+alias xsim_trace_view : : <link>static ;
+
 lib xsim_trace_view
        : xsimtracedll.cpp
          /libraries//nextstate
