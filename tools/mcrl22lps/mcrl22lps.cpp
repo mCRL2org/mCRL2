@@ -10,7 +10,6 @@
 #include "aterm2.h"
 #include "lin_types.h"
 #include "lin_std.h"
-#include "lin_alt.h"
 #include "print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "libstruct.h"
@@ -31,7 +30,6 @@ using namespace ::mcrl2::utilities;
 //Functions used by the main program
 static ATermAppl linearise_file(t_lin_options &lin_options);
 static char const* lin_method_to_string(t_lin_method lin_method);
-static void AltIllegalOptWarning(char opt);
 static void PrintMoreInfo(char *Name);
 static void PrintVersion(void);
 static void PrintHelp(char *Name);
@@ -175,7 +173,6 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
   method_selector.associate(current_box, lmRegular, "Regular", true);
   method_selector.associate(current_box, lmRegular2, "Regular2");
-  method_selector.associate(current_box, lmAlternative, "Expansion");
 
   if (c.option_exists(option_linearisation_method)) {
     method_selector.set_selection(static_cast < t_lin_method > (
@@ -431,7 +428,6 @@ static bool parse_command_line(int argc, char *argv[],t_lin_options &lin_options
     { "stack",       no_argument,       NULL, '0' },
     { "regular",     no_argument,       NULL, '1' },
     { "regular2",    no_argument,       NULL, '2' },
-    { "alternative", no_argument,       NULL, '3' },
     { "cluster",     no_argument,       NULL, 'c' },
     { "no-cluster",  no_argument,       NULL, 'n' },
     { "no-alpha",    no_argument,       NULL, 'r' },
@@ -480,14 +476,6 @@ static bool parse_command_line(int argc, char *argv[],t_lin_options &lin_options
         }
         lm_chosen = true;
         opt_lin_method = lmRegular2;
-        break;
-      case '3': /* alternative */
-        if (lm_chosen && opt_lin_method != lmAlternative) {
-          gsErrorMsg("only one method of linearisation is allowed\n");
-          return false;
-        }
-        lm_chosen = true;
-        opt_lin_method = lmAlternative;
         break;
       case 'c': /* cluster */ 
         opt_final_cluster = true;
@@ -573,15 +561,6 @@ static bool parse_command_line(int argc, char *argv[],t_lin_options &lin_options
   if (opt_noalpha && (opt_end_phase == phAlphaRed)) {
     gsErrorMsg("options -r and -p ar may not be used in conjunction\n");
     return false;
-  }
-  if (opt_lin_method == lmAlternative) {
-    if (opt_final_cluster)           AltIllegalOptWarning('c');
-    if (opt_no_intermediate_cluster) AltIllegalOptWarning('n');
-    if (opt_newstate)                AltIllegalOptWarning('w');
-    if (opt_binary)                  AltIllegalOptWarning('b');
-    if (opt_statenames)              AltIllegalOptWarning('a');
-    if (opt_norewrite)               AltIllegalOptWarning('n');
-    if (opt_nofreevars)              AltIllegalOptWarning('f');
   }
   //check for wrong number of arguments
   string infilename;
@@ -690,11 +669,7 @@ ATermAppl linearise_file(t_lin_options &lin_options)
   //linearise the result
   gsVerboseMsg("linearising processes using the %s method\n", lin_method_to_string(lin_options.lin_method));
 
-  if (lin_options.lin_method != lmAlternative) {
-    result = linearise_std(result, lin_options);
-  } else { //lin_options.lin_method == lmAlternative
-    result = linearise_alt(result, lin_options);
-  }
+  result = linearise_std(result, lin_options);
   if (result == NULL) 
   {
     gsErrorMsg("linearisation failed\n");
@@ -705,15 +680,9 @@ ATermAppl linearise_file(t_lin_options &lin_options)
 
 inline char const* lin_method_to_string(t_lin_method lin_method)
 {
-  static const char* method[] = {"stack","regular","regular2","alternative"};
+  static const char* method[] = {"stack","regular","regular2"};
 
   return (method[lin_method]);
-}
-
-void AltIllegalOptWarning(char opt)
-{
-  gsWarningMsg(
-    "option -%c is not supported by linearisation method -3, ignored\n", opt);
 }
 
 void PrintMoreInfo(char *Name)
@@ -740,9 +709,6 @@ void PrintHelp(char *Name)
     "                        in regular form (default)\n"
     "  -2, --regular2        a variant of regular that uses more data variables;\n"
     "                        sometimes successful when -1 leads to non-termination\n"
-    "  -3, --alternative     more general method of linearisation that can handle\n"
-    "                        a wider range of specifications; currently it is unable\n"
-    "                        to handle time and does not accept the -c to -f options\n"
     "  -c, --cluster         all actions in the final LPS are clustered\n"
     "  -n, --no-cluster      the actions in intermediate LPSs are not clustered\n"
     "                        (default behaviour is that intermediate LPSs are\n"

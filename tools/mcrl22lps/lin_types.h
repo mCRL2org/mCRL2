@@ -9,7 +9,7 @@ using namespace std;
 //Type definitions for all linearisers
 
 //t_lin_method represents the available linearisation methods
-typedef enum { lmStack, lmRegular, lmRegular2, lmAlternative } t_lin_method;
+typedef enum { lmStack, lmRegular, lmRegular2 } t_lin_method;
 
 //t_phase represents the phases at which the program should be able to stop
 typedef enum { phNone, phParse, phTypeCheck, phAlphaRed, phDataImpl } t_phase;

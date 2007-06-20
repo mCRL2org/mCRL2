@@ -28,7 +28,6 @@
 #include "mcrl2/pbes/pbes.h"
 #include "../../../../../../tools/mcrl22lps/lin_types.h"
 #include "../../../../../../tools/mcrl22lps/lin_std.h"
-#include "../../../../../../tools/mcrl22lps/lin_alt.h"
 
 namespace lps {
 
@@ -71,9 +70,9 @@ namespace detail {
   }
   
   inline
-  specification linearise(ATermAppl spec, t_lin_options options, bool standard = true)
+  specification linearise(ATermAppl spec, t_lin_options options)
   {
-    ATermAppl result = standard ? linearise_std(spec, options) : linearise_alt(spec, options);
+    ATermAppl result = linearise_std(spec, options);
     if (result == NULL)
       throw std::runtime_error("linearisation error");
     return aterm_appl(result);

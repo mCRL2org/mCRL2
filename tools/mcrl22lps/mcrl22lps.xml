@@ -161,26 +161,6 @@
   </varlistentry>
 
   <varlistentry>
-    <term>&opt_3;</term>
-    <term>&opt_alternative;</term>
-    <listitem>
-      <para>
-        This option causes the use of a classical method of linearisation that can handle
-        a wider range of specifications than &opt_regular;. 
-        In essence it calculates Milner's expansion and introduces new
-        processes for the process expression after the initial actions.
-        These are in turn expanded again. 
-      </para> 
-      <para>
-        This technique can handle any mCRL2 specification
-        as long as there are only a finite number of processes involved.
-        It cannot handle time and does not accept the &opt_cluster; and
-        &opt_no-freevars; options.
-      </para>
-    </listitem>
-  </varlistentry>
-
-  <varlistentry>
     <term>&opt_c;</term>
     <term>&opt_cluster;</term>
     <listitem>

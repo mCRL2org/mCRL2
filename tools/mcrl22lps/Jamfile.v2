@@ -2,14 +2,6 @@ project toolset/mcrl22lps
        : build-dir $(BUILD_TOP)/mcrl22lps
        ;
 
-obj lin_alt.o
-       : lin_alt.cpp
-       : <use>/libraries/rewrite//headers
-         <use>/libraries/mcrl2_basic//headers
-         <use>/libraries/utilities//headers
-         <use>/libraries/parser//headers # for libalpha
-       ;
-
 obj lin_std.o
        : lin_std.cpp
        : <use>/libraries/rewrite//headers
@@ -18,11 +10,10 @@ obj lin_std.o
          <use>/libraries/parser//headers # for libalpha
        ;
 
-explicit lin_std.o lin_alt.o ;
+explicit lin_std.o ;
 
 exe mcrl22lps
        : mcrl22lps.cpp
-         lin_alt.o
          lin_std.o
          /libraries//parser
          /libraries//utilities
@@ -30,16 +21,6 @@ exe mcrl22lps
          /libraries/parser//alpha
        : <toolset>msvc:<library>/libraries//getopt
        : <squadt_support>enable
-       ;
-
-exe lin
-       : lin.cpp
-         lin_alt.o
-         /libraries//parser
-         /libraries//mcrl2_basic
-         /libraries//rewrite
-         /libraries/parser//alpha
-       : <toolset>msvc:<library>/libraries//getopt
        ;
 
 exe alpha
@@ -57,7 +38,7 @@ install-binaries install
        ;
 
 install-binaries experimental-install
-       : lin alpha
+       : alpha
        :
        : <status>experimental
        ;

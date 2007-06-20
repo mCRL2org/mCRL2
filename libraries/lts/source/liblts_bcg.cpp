@@ -1,7 +1,12 @@
 #include <string>
-#include "libprint_c.h"
+#include "print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "lts/liblts.h"
 #include "setup.h"
+
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
 
 #ifdef MCRL2_BCG
 
