@@ -11,7 +11,9 @@
 #include "rewr_jittyc.h"
 
 #include <cstdlib>
-#include <print/messaging.h>
+#include "print/messaging.h"
+
+using namespace mcrl2::utilities;
 
 RewriterCompilingJitty::RewriterCompilingJitty(lps::data_specification DataSpec)
 {

@@ -3,6 +3,9 @@
 #include "rewr_innerc.h"
 
 #include <cstdlib>
+#include "print/messaging.h"
+
+using namespace mcrl2::utilities;
 
 RewriterCompilingInnermost::RewriterCompilingInnermost(lps::data_specification DataSpec)
 {

@@ -45,7 +45,7 @@ alias squadt_interface.alias
 
 alias utilities.main
       : squadt_interface.main
-		aterm_ext.cpp
+        aterm_ext.cpp
         numeric_string.cpp
         expression_info.cpp # Temporary?
         sort_info.cpp       # Temporary?
