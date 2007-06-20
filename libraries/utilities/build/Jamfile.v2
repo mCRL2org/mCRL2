@@ -22,14 +22,15 @@ alias squadt_interface.main
         <use>/libraries/sip//sip_tool
         <use>/libraries/mcrl2_basic//headers
       :
-      : <define>ENABLE_SQUADT_CONNECTIVITY
-        <library>/libraries/sip//sip_tool
+      : <library>/libraries/sip//sip_tool
       ;
 
 lib squadt_interface
       : squadt_interface.main 
       : <link>static
         <library>/libraries//mcrl2_basic
+      :
+      : <define>ENABLE_SQUADT_CONNECTIVITY
       ;
 
 alias squadt_interface
@@ -60,6 +61,8 @@ alias utilities.main
         <wx>yes:<source>spinctrlfloat.o
         <wx>yes:<source>colorbutton.o
         <wx>yes:<library>/site-config//wx_base
+      :
+      : <define>ENABLE_SQUADT_CONNECTIVITY
       ;
 
 lib utilities
