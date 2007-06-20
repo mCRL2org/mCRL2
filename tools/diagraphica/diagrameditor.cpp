@@ -1116,6 +1116,7 @@ void DiagramEditor::handleHitShape( const int &shapeIdx )
                             drgBegIdx2 = -1;
                         }
                         displDOFInfo( s );
+					
 
                         for ( int i = 0; i < sizeShapes; ++i )
                             if ( i != shapeIdx )
@@ -1137,9 +1138,14 @@ void DiagramEditor::handleHitShape( const int &shapeIdx )
                 } // side
             } // button
         } // click
-        
-        canvas->Refresh();
+	    
+		canvas->Refresh();
         s = NULL;
+		
+		//Clear mouse input 
+		mouseClick  = -1;
+		mouseButton = -1;
+		mouseSide   = -1; 
     }
 }
 
@@ -1156,7 +1162,7 @@ void DiagramEditor::handleHitShapeHandle(
 
     if ( 0 <= shapeIdx && shapeIdx < sizeShapes )
     {
-        Shape* s = diagram->getShape( shapeIdx );
+		Shape* s = diagram->getShape( shapeIdx );
 
         if ( mouseClick == MSE_CLICK_SINGLE )
         {
@@ -1225,7 +1231,11 @@ void DiagramEditor::handleHitShapeHandle(
                 }
             }
         }
-        
+       
+		//Clear mouse input 
+		mouseClick  = -1;
+		mouseButton = -1;
+		mouseSide   = -1; 
         s = NULL;
     }
 }
@@ -1598,7 +1608,7 @@ void DiagramEditor::displShapeEdtOptions( Shape *s )
             true,      // bring forward
             true,      // send backward
             true );    // edit DOF
-    }
+	}
 }
 
 

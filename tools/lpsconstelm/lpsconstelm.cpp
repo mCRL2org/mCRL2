@@ -429,7 +429,7 @@ void lpsConstElm::detectVar(int n) {
 
 // Return whether or not a summation variable occurs in a data term list
 bool lpsConstElm::recDetectVarList(lps::data_expression_list l, std::set<data_expression> &S) {
-  gsVerboseMsg("list: %s\n", l.to_string().c_str());
+  //gsVerboseMsg("list: %s\n", l.to_string().c_str());
   bool b = false;
   for(data_expression_list::iterator i = l.begin(); i != l.end() && !(b); ++i) {
     b = b || recDetectVar(aterm_appl(*i), S);
@@ -439,7 +439,7 @@ bool lpsConstElm::recDetectVarList(lps::data_expression_list l, std::set<data_ex
 
 // Return whether or not a summation variable occurs in a data term
 bool lpsConstElm::recDetectVar(lps::data_expression t, std::set<data_expression> &S) {
-  gsVerboseMsg("expr: %s\n", t.to_string().c_str());
+   //gsVerboseMsg("expr: %s\n", t.to_string().c_str());
    bool b = false;
    if( gsIsDataVarId(t) && (S.find(t) != S.end()) ){
      b = true;

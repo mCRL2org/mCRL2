@@ -44,7 +44,8 @@ alias squadt_interface.alias
       ;
 
 alias utilities.main
-      : aterm_ext.cpp
+      : squadt_interface.main
+		aterm_ext.cpp
         numeric_string.cpp
         expression_info.cpp # Temporary?
         sort_info.cpp       # Temporary?
@@ -57,7 +58,6 @@ alias utilities.main
       : <use>/libraries/aterm//headers
         <use>/libraries/mcrl2_basic//headers
         <use>/libraries/rewrite//headers
-        <squadt_support>enable:<source>squadt_interface.alias
         <wx>yes:<source>spinctrlfloat.o
         <wx>yes:<source>colorbutton.o
         <wx>yes:<library>/site-config//wx_base

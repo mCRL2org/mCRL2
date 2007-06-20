@@ -207,9 +207,14 @@ void Visualizer::handleMouseMotionEvent(
 // -------------------------------------
 {
     if ( mouseButton == MSE_BUTTON_DOWN )
-        mouseDrag = MSE_DRAG_TRUE;
-    mouseClick = MSE_CLICK_SINGLE;
-    
+      {  mouseDrag  = MSE_DRAG_TRUE;
+         mouseClick = MSE_CLICK_SINGLE; 
+      }
+	else {
+		mouseDrag  = MSE_DRAG_FALSE;
+		mouseClick = -1;
+    }    
+
     xMouseCur = x;
     yMouseCur = y;
 }

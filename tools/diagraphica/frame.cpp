@@ -1265,7 +1265,7 @@ void Frame::initSplitterTopLft()
     splitterTopLft = new wxSplitterWindow(
         splitterLft,
         ID_SPLITTER_TOP_LFT, wxDefaultPosition, wxDefaultSize, wxSP_3D|wxSP_LIVE_UPDATE );
-    splitterTopLft->SetSashGravity( 0.0 );
+    splitterTopLft->SetSashGravity( 0.6 );
     splitterTopLft->SetMinimumPaneSize( 20 );
 
     // init children
@@ -1441,22 +1441,22 @@ void Frame::initListCtrlAttr()
     colItem.SetText( wxT( "Name" ) );
     colItem.SetAlign( wxLIST_FORMAT_LEFT );
     listCtrlAttr->InsertColumn( 2, colItem );
-//    listCtrlAttr->SetColumnWidth( 2, wxLIST_AUTOSIZE_USEHEADER );
+    listCtrlAttr->SetColumnWidth( 2, wxLIST_AUTOSIZE_USEHEADER );
     // column 3
     colItem.SetText( wxT( "Type" ) );
     colItem.SetAlign( wxLIST_FORMAT_LEFT );
     listCtrlAttr->InsertColumn( 3, colItem );
-//    listCtrlAttr->SetColumnWidth( 3, wxLIST_AUTOSIZE_USEHEADER );
+    listCtrlAttr->SetColumnWidth( 3, wxLIST_AUTOSIZE_USEHEADER );
     // column 4
     colItem.SetText( wxT( "Cardinality" ) );
     colItem.SetAlign( wxLIST_FORMAT_RIGHT );
     listCtrlAttr->InsertColumn( 4, colItem );
-//    listCtrlAttr->SetColumnWidth( 4, wxLIST_AUTOSIZE_USEHEADER );
+    listCtrlAttr->SetColumnWidth( 4, wxLIST_AUTOSIZE_USEHEADER );
     // column 5
     colItem.SetText( wxT( "[ Range ]") );
     colItem.SetAlign( wxLIST_FORMAT_LEFT );
     listCtrlAttr->InsertColumn( 5, colItem );
-//    listCtrlAttr->SetColumnWidth( 5, wxLIST_AUTOSIZE_USEHEADER );
+    listCtrlAttr->SetColumnWidth( 5, wxLIST_AUTOSIZE_USEHEADER );
 
     // reset ptr
     lbl = NULL;
@@ -1781,10 +1781,12 @@ void Frame::initSplitterBotRgt()
     initPanelLftBotRgt();
     initPanelRgtBotRgt();
     // split window
+    /*
     splitterBotRgt->SplitVertically(
         panelLftBotRgt,
         panelRgtBotRgt );
-    //splitterBotRgt->Initialize( panelLftBotRgt );
+    */
+    splitterBotRgt->Initialize( panelLftBotRgt );
 }
 
 
@@ -3119,68 +3121,68 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
     {
         if ( mediator->getMode() == Mediator::MODE_ANALYSIS )
         {
-            wxMenu* menu = new wxMenu();
+            wxMenu menu;
         
             // group & ungroup
-            menu->Append( 
+            menu.Append( 
                 ID_MENU_ITEM_ATTR_DISTR_PLOT,
                 wxT( "Distribution plot" ),
                 wxT( "Visualize the distribution of values" ) );
-            menu->Append( 
+            menu.Append( 
                 ID_MENU_ITEM_ATTR_CORRL_PLOT,
                 wxT( "Correlation plot" ),
                 wxT( "Visualize the correlation of values" ) );
-            menu->Append(
+            menu.Append(
                 ID_MENU_ITEM_ATTR_COMBN_PLOT,
                 wxT( "Combination plot" ),
                 wxT( "Visualize the combinations of values" ) );
-            menu->AppendSeparator();
-            menu->Append(
+            menu.AppendSeparator();
+            menu.Append(
                 ID_MENU_ITEM_ATTR_DUPL, 
                 wxT( "Duplicate" ),
                 wxT( "Duplicate attribute" ) );
-            menu->Append(
+            menu.Append(
                 ID_MENU_ITEM_ATTR_RENAME, 
                 wxT( "Rename" ),
                 wxT( "Rename attribute" ) );
-            menu->Append(
+            menu.Append(
                 ID_MENU_ITEM_ATTR_DELETE, 
                 wxT( "Delete" ),
                 wxT( "Delete attribute" ) );
-            menu->AppendSeparator();
-            menu->Append(
+            menu.AppendSeparator();
+            menu.Append(
                 ID_MENU_ITEM_ATTR_CLUST, 
                 wxT( "Cluster nodes" ),
                 wxT( "Cluster nodes based on selected attributes" ) );
-            menu->Append(
+            menu.Append(
                 ID_MENU_ITEM_ATTR_TRACE, 
                 wxT( "View trace" ),
                 wxT( "View trace based on selected attributes" ) );
-            menu->AppendSeparator();
-            menu->Append(
+            menu.AppendSeparator();
+            menu.Append(
                 ID_MENU_ITEM_ATTR_PARTITION,
                 wxString( wxT( "Partition" ) ),
                 wxString( wxT( "Partition continuous domain into discrete classes" ) ) );
-            menu->Enable( ID_MENU_ITEM_ATTR_PARTITION, false );
-            menu->Append(
+            menu.Enable( ID_MENU_ITEM_ATTR_PARTITION, false );
+            menu.Append(
                 ID_MENU_ITEM_ATTR_DEPARTITION,
                 wxString( wxT( "Remove partitioning" ) ),
                 wxString( wxT( "Remove current partitioning of continuous domain" ) ) );
-            menu->Enable( ID_MENU_ITEM_ATTR_DEPARTITION, false );
+            menu.Enable( ID_MENU_ITEM_ATTR_DEPARTITION, false );
             
             int selCnt = listCtrlAttr->GetSelectedItemCount();
             if ( selCnt == 0 )
             {
-                menu->Enable( ID_MENU_ITEM_ATTR_DISTR_PLOT, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_CORRL_PLOT, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_COMBN_PLOT, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_DUPL, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_RENAME, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_DELETE, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_CLUST, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_TRACE, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_PARTITION, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_DEPARTITION, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_DISTR_PLOT, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_CORRL_PLOT, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_COMBN_PLOT, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_DUPL, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_RENAME, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_DELETE, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_CLUST, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_TRACE, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_PARTITION, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_DEPARTITION, false );
             }
             else if ( selCnt == 1 )
             {
@@ -3191,85 +3193,83 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
                     wxLIST_NEXT_ALL,
                     wxLIST_STATE_SELECTED );
      
-                menu->Enable( ID_MENU_ITEM_ATTR_DISTR_PLOT, true );
-                menu->Enable( ID_MENU_ITEM_ATTR_CORRL_PLOT, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_COMBN_PLOT, true );
-                menu->Enable( ID_MENU_ITEM_ATTR_DUPL, true );
-                menu->Enable( ID_MENU_ITEM_ATTR_RENAME, true );
-                menu->Enable( ID_MENU_ITEM_ATTR_DELETE, true );
-                menu->Enable( ID_MENU_ITEM_ATTR_CLUST, true );
+                menu.Enable( ID_MENU_ITEM_ATTR_DISTR_PLOT, true );
+                menu.Enable( ID_MENU_ITEM_ATTR_CORRL_PLOT, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_COMBN_PLOT, true );
+                menu.Enable( ID_MENU_ITEM_ATTR_DUPL, true );
+                menu.Enable( ID_MENU_ITEM_ATTR_RENAME, true );
+                menu.Enable( ID_MENU_ITEM_ATTR_DELETE, true );
+                menu.Enable( ID_MENU_ITEM_ATTR_CLUST, true );
                 if ( mediator->getView() == Mediator::VIEW_TRACE )
-                    menu->Enable( ID_MENU_ITEM_ATTR_TRACE, true );
+                    menu.Enable( ID_MENU_ITEM_ATTR_TRACE, true );
                 else
-                    menu->Enable( ID_MENU_ITEM_ATTR_TRACE, false );
+                    menu.Enable( ID_MENU_ITEM_ATTR_TRACE, false );
                 if ( mediator->getAttributeType( listCtrlAttr->GetItemData( item ) ) == Attribute::ATTR_TYPE_CONTI )
                 {
-                    menu->Enable( ID_MENU_ITEM_ATTR_PARTITION, true );
+                    menu.Enable( ID_MENU_ITEM_ATTR_PARTITION, true );
                     if ( mediator->getAttrSizeCurDomain( listCtrlAttr->GetItemData( item ) ) > 0 )
-                        menu->Enable( ID_MENU_ITEM_ATTR_DEPARTITION, true );
+                        menu.Enable( ID_MENU_ITEM_ATTR_DEPARTITION, true );
                     else
-                        menu->Enable( ID_MENU_ITEM_ATTR_DEPARTITION, false );
+                        menu.Enable( ID_MENU_ITEM_ATTR_DEPARTITION, false );
                 }
                 else
                 {
-                    menu->Enable( ID_MENU_ITEM_ATTR_PARTITION, false );
-                    menu->Enable( ID_MENU_ITEM_ATTR_DEPARTITION, false );
+                    menu.Enable( ID_MENU_ITEM_ATTR_PARTITION, false );
+                    menu.Enable( ID_MENU_ITEM_ATTR_DEPARTITION, false );
                 }
             }
             else if ( selCnt == 2 )
             {
-                menu->Enable( ID_MENU_ITEM_ATTR_DISTR_PLOT, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_CORRL_PLOT, true );
-                menu->Enable( ID_MENU_ITEM_ATTR_COMBN_PLOT, true );
-                menu->Enable( ID_MENU_ITEM_ATTR_DUPL, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_RENAME, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_DELETE, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_CLUST, true );
+                menu.Enable( ID_MENU_ITEM_ATTR_DISTR_PLOT, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_CORRL_PLOT, true );
+                menu.Enable( ID_MENU_ITEM_ATTR_COMBN_PLOT, true );
+                menu.Enable( ID_MENU_ITEM_ATTR_DUPL, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_RENAME, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_DELETE, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_CLUST, true );
                 if ( mediator->getView() == Mediator::VIEW_TRACE )
-                    menu->Enable( ID_MENU_ITEM_ATTR_TRACE, true );
+                    menu.Enable( ID_MENU_ITEM_ATTR_TRACE, true );
                 else
-                    menu->Enable( ID_MENU_ITEM_ATTR_TRACE, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_PARTITION, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_DEPARTITION, false );
+                    menu.Enable( ID_MENU_ITEM_ATTR_TRACE, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_PARTITION, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_DEPARTITION, false );
             }
             else
             {
-                menu->Enable( ID_MENU_ITEM_ATTR_DISTR_PLOT, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_CORRL_PLOT, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_COMBN_PLOT, true );
-                menu->Enable( ID_MENU_ITEM_ATTR_DUPL, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_RENAME, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_DELETE, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_CLUST, true );
+                menu.Enable( ID_MENU_ITEM_ATTR_DISTR_PLOT, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_CORRL_PLOT, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_COMBN_PLOT, true );
+                menu.Enable( ID_MENU_ITEM_ATTR_DUPL, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_RENAME, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_DELETE, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_CLUST, true );
                 if ( mediator->getView() == Mediator::VIEW_TRACE )
-                    menu->Enable( ID_MENU_ITEM_ATTR_TRACE, true );
+                    menu.Enable( ID_MENU_ITEM_ATTR_TRACE, true );
                 else
-                    menu->Enable( ID_MENU_ITEM_ATTR_TRACE, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_PARTITION, false );
-                menu->Enable( ID_MENU_ITEM_ATTR_DEPARTITION, false );
+                    menu.Enable( ID_MENU_ITEM_ATTR_TRACE, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_PARTITION, false );
+                menu.Enable( ID_MENU_ITEM_ATTR_DEPARTITION, false );
             }
         
-            PopupMenu( menu );
+            PopupMenu( &menu );
         
-            delete menu;
-            menu = NULL;
         }
     }
     else if ( e.GetId() == ID_LIST_CTRL_DOMAIN )
     {
-        wxMenu* menu = new wxMenu();
+        wxMenu menu;
         
         // group & ungroup
-        menu->Append( 
+        menu.Append( 
             ID_MENU_ITEM_DOM_GROUP, 
             wxT( "Group" ),
             wxT( "Group selected domain values") );
-        menu->Append( 
+        menu.Append( 
             ID_MENU_ITEM_DOM_UNGROUP,
             wxT( "Ungroup"),
             wxT( "Ungroup domain values") );
         // rename
-        menu->Append( 
+        menu.Append( 
             ID_MENU_ITEM_DOM_RENAME, 
             wxT( "Rename"),
             wxT( "Rename selected domain value") );
@@ -3277,18 +3277,16 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
         int selCnt = listCtrlDomain->GetSelectedItemCount();
         if ( selCnt == 0 )
         {
-            menu->Enable( ID_MENU_ITEM_DOM_GROUP, false );
-            menu->Enable( ID_MENU_ITEM_DOM_RENAME, false );
+            menu.Enable( ID_MENU_ITEM_DOM_GROUP, false );
+            menu.Enable( ID_MENU_ITEM_DOM_RENAME, false );
         }
         else if ( selCnt == 1 )
-            menu->Enable( ID_MENU_ITEM_DOM_GROUP, false );
+            menu.Enable( ID_MENU_ITEM_DOM_GROUP, false );
         else
-            menu->Enable( ID_MENU_ITEM_DOM_RENAME, false );
+            menu.Enable( ID_MENU_ITEM_DOM_RENAME, false );
         
-        PopupMenu( menu );
+        PopupMenu( &menu );
 
-        delete menu;
-        menu = NULL;
     }
     else if ( e.GetId() == ID_LIST_CTRL_DOF )
     {
@@ -3298,9 +3296,9 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
         
         if ( 0 <= idxDOF && idxDOF < listCtrlDOF->GetItemCount() )
         {
-            wxMenu* menu = new wxMenu();
+            wxMenu menu;
 
-            menu->Append(
+            menu.Append(
                 ID_MENU_ITEM_DOF_UNLINK,
                 wxT( "Remove attribute" ),
                 wxT( "Remove attribute" ) );
@@ -3322,12 +3320,10 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
 
             // if no attribute, no option
             if( celInfo == wxT("") )
-                menu->Enable( ID_MENU_ITEM_DOF_UNLINK, false );
+                menu.Enable( ID_MENU_ITEM_DOF_UNLINK, false );
 
-            PopupMenu( menu );
+            PopupMenu( &menu );
             
-            delete menu;
-            menu = NULL;
         }
     }
 }
