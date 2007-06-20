@@ -2,10 +2,18 @@ project toolset/pbessolve
        : build-dir $(BUILD_TOP)/pbessolve
        ;
 
+obj gauss.o
+       : gauss.cpp
+         /libraries//lps
+         /libraries//rewrite
+         /libraries//parser
+         /site-config//boost_program_options
+       : <include>.
+       ;
+
 exe pbessolve
        : pbessolve.cpp
-	 gauss.cpp
-         /libraries//mcrl2_basic
+	 gauss.o
 	 /libraries//lps
 	 /libraries//rewrite
          /libraries//parser
