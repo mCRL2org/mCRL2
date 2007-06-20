@@ -1,6 +1,48 @@
 import doxygen ;
 import quickbook ;
 
+doxygen atermppdoc
+     :
+       ../../atermpp/include/atermpp/algorithm.h
+       ../../atermpp/include/atermpp/aterm.h
+       ../../atermpp/include/atermpp/aterm_access.h
+       ../../atermpp/include/atermpp/aterm_allocator.h
+       ../../atermpp/include/atermpp/aterm_appl.h
+       ../../atermpp/include/atermpp/aterm_appl_iterator.h
+       ../../atermpp/include/atermpp/aterm_blob.h
+       ../../atermpp/include/atermpp/aterm_int.h
+       ../../atermpp/include/atermpp/aterm_list.h
+       ../../atermpp/include/atermpp/aterm_list_iterator.h
+       ../../atermpp/include/atermpp/aterm_place_holder.h
+       ../../atermpp/include/atermpp/aterm_real.h
+       ../../atermpp/include/atermpp/aterm_string.h
+       ../../atermpp/include/atermpp/aterm_traits.h
+       ../../atermpp/include/atermpp/atermpp.h
+       ../../atermpp/include/atermpp/deque.h
+       ../../atermpp/include/atermpp/dictionary.h
+       ../../atermpp/include/atermpp/function_symbol.h
+       ../../atermpp/include/atermpp/indexed_set.h
+       ../../atermpp/include/atermpp/list.h
+       ../../atermpp/include/atermpp/make_list.h
+       ../../atermpp/include/atermpp/map.h
+       ../../atermpp/include/atermpp/set.h
+       ../../atermpp/include/atermpp/substitute.h
+       ../../atermpp/include/atermpp/table.h
+       ../../atermpp/include/atermpp/transform.h
+       ../../atermpp/include/atermpp/utility.h
+       ../../atermpp/include/atermpp/vector.h
+     :
+       <prefix>atermpp
+       <doxygen:param>EXTRACT_ALL=YES
+       <doxygen:param>HIDE_UNDOC_MEMBERS=NO
+       <doxygen:param>EXTRACT_PRIVATE=NO
+       <doxygen:param>ENABLE_PREPROCESSING=YES
+       <doxygen:param>MACRO_EXPANSION=YES
+       <doxygen:param>EXPAND_ONLY_PREDEF=YES
+       <doxygen:param>SEARCH_INCLUDES=YES
+       <doxygen:param>INCLUDE_PATH=$(BOOST_ROOT)
+     ;
+
 doxygen basicdoc
      : [ glob ../include/mcrl2/basic/*.h ]
      : <prefix>mcrl2
@@ -56,7 +98,6 @@ doxygen pbesdoc
 xml manual
     :
         manual.qbk
-    :   <catalog>$(TOP)/3rd-party/docbook/xsl/catalog.xml
     ;
 
 boostbook standalone
@@ -72,6 +113,7 @@ boostbook standalone
         <xsl:param>toc.max.depth=3
         <xsl:param>toc.section.depth=3
         <xsl:param>chunk.section.depth=3
+        <dependency>atermppdoc
         <dependency>basicdoc
         <dependency>datadoc
         <dependency>lpsdoc
