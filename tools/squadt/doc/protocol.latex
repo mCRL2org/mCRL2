@@ -15,29 +15,83 @@
 
  \section{Concepts}
 
+  \subsection{System}
+
+   The protocol described in this document is designed for the purpose of
+   developing a desktop application for interactive tool integration. The
+   protocol forms the abstraction layer between the tools and this application
+   we simply call system in this document.
+
   \subsection{Tool}
+
+   A tool is a software program that can be executed multiple times
+   concurrently on the same or different computer. The tool offers services to
+   its environment. The end-user that is part of the environment has particular
+   goals in mind and using the right combination of tools can help to achieve
+   these goals.
+
+   So a tool can be any computer program. Existing tools with a command line
+   interface or more complex programs with graphical user interfaces. Note that
+   there can be a large difference between required the degree of user
+   interactivity to get the tool to perform the task that the user wants it to do.
+
   \subsection{Configuration}
+
+   Tools may offer different services to the environment, but an end-user is
+   interested in it only completing the task at hand. Most tools are
+   configurable, by which we mean that it can be configured to perform a
+   certain task within the functionality provided by the tool. For instance we
+   want to configure a tool that computes prime numbers to compute the first
+   1000 prime numbers and then terminate execution.
+
+   The process of configuration is to bring the tool in a state where it will
+   perform the desired task. A formalism is needed to capture this state such
+   that it can be reproduced later. For our purposes a \textit{configuration}
+   is a concrete specification that can be used to bring a tool into a state
+   where it will perform the desired task.
+
+% Implementation specific?
+   This is not a novelty, programs with command line interfaces take arguments
+   that are used to (re)produce this state non-interactively. The model behind
+   this method of expressing a configuration is based on the idea that tasks
+   consist of a sequence of operations that themselves are parametrised. A
+   configuration is a selection between available operations and values for the
+   parameters of each of these operations. On the command line such a
+   configuration is represented as a string that consists of so-called options
+   followed by values for the arguments of this option.
+
   \subsection{Tool Display}
+
+   A tool offers services and the system offers a tool facilities for
+   communication with the user and possibly also other tools. One of the
+   facilities that is available for this purpose is the tool display. Any tool
+   instance is associated with a graphical display through which it can
+   communicate with a user, that exists as long as the tool is running.
+   
+   The extend to which the display can be manipulated will not be described in
+   this document. The original idea was that the protocol provides the means
+   for putting user interface controls on the display and to support
+   interaction with these controls.
 
  \section{Background}
 
- The purpose of the communication protocol described in this document is to
- have a simple means of connecting a tool to our system. The system 
- provides a number of facilities that can be used by tools, but the tools are
- themselves services that are made accessible to the user of the system. The
- system acts as a controller for multiple tools at the same and therefore the
- system will be referred to as controller in the remainder of this document. 
- \\[4pt]
- A tool is a software program or some hardware wrapped by a program. In modern
- operating systems programs are started as a process, a in-memory instance of
- the program. From here on we talk about a tool as a communication partner of
- the controller.
- \\[4pt]
- The protocol described in this document allows future extension. All messages
- are typed and message content is based on the type, and direction only. No
- unnecessary restrictions have been put on the order of messages. A message
- context represents the ordered list of sent and received messages. This
- document describes version 1.0 of the protocol.
+  The purpose of the communication protocol described in this document is to
+  have a simple means of connecting a tool to our system. The system 
+  provides a number of facilities that can be used by tools, but the tools are
+  themselves services that are made accessible to the user of the system. The
+  system acts as a controller for multiple tools at the same and therefore the
+  system will be referred to as controller in the remainder of this document. 
+  \\[4pt]
+  A tool is a software program or some hardware wrapped by a program. In modern
+  operating systems programs are started as a process, a in-memory instance of
+  the program. From here on we talk about a tool as a communication partner of
+  the controller.
+  \\[4pt]
+  The protocol described in this document is designed to be minimal and to
+  allow future extension. All messages are typed and message content is based
+  on the type, and direction only. No unnecessary restrictions have been put on
+  the order of messages. A message context represents the ordered list of sent
+  and received messages. This document describes version 1.0 of the protocol.
 
  \section{Messages} \label{s:message_definitions}
 

@@ -23,6 +23,7 @@ alias squadt_interface.main
         <use>/libraries/mcrl2_basic//headers
       :
       : <library>/libraries/sip//sip_tool
+        <define>ENABLE_SQUADT_CONNECTIVITY
       ;
 
 lib squadt_interface
@@ -30,7 +31,6 @@ lib squadt_interface
       : <link>static
         <library>/libraries//mcrl2_basic
       :
-      : <define>ENABLE_SQUADT_CONNECTIVITY
       ;
 
 alias squadt_interface
@@ -41,11 +41,12 @@ alias squadt_interface
 alias squadt_interface.alias
       : squadt_interface.main
       : <use>headers
+      :
+      : <use>/libraries/sip//sip_tool
       ;
 
 alias utilities.main
-      : squadt_interface.main
-        aterm_ext.cpp
+      : aterm_ext.cpp
         numeric_string.cpp
         expression_info.cpp # Temporary?
         sort_info.cpp       # Temporary?
@@ -58,11 +59,10 @@ alias utilities.main
       : <use>/libraries/aterm//headers
         <use>/libraries/mcrl2_basic//headers
         <use>/libraries/rewrite//headers
+        <squadt_support>enable:<source>squadt_interface
         <wx>yes:<source>spinctrlfloat.o
         <wx>yes:<source>colorbutton.o
         <wx>yes:<library>/site-config//wx_base
-      :
-      : <define>ENABLE_SQUADT_CONNECTIVITY
       ;
 
 lib utilities
