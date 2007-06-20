@@ -1,5 +1,14 @@
-#ifndef ATERM_DEQUE_H
-#define ATERM_DEQUE_H
+// Author(s): Wieger Wesselink
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file atermpp/deque.h
+/// \brief Add your file description here.
+
+#ifndef MCRL2_ATERMPP_DEQUE_H
+#define MCRL2_ATERMPP_DEQUE_H
 
 #include <memory>
 #include <deque>
@@ -80,4 +89,4 @@ std::cout << "atermpp::deque.ATprotectTerms() : protecting " << deque<T>::size()
 
 } // namespace atermpp
 
-#endif // ATERM_DEQUE_H
+#endif // MCRL2_ATERMPP_DEQUE_H

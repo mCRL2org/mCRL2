@@ -1,5 +1,14 @@
-#ifndef ATERM_TRAITS_H
-#define ATERM_TRAITS_H
+// Author(s): Wieger Wesselink
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file atermpp/aterm_traits.h
+/// \brief Add your file description here.
+
+#ifndef MCRL2_ATERMPP_ATERM_TRAITS_H
+#define MCRL2_ATERMPP_ATERM_TRAITS_H
 
 #include "aterm2.h"
 
@@ -85,4 +94,4 @@ struct aterm_traits<ATermInt>
                                       
 } // namespace atermpp
 
-#endif // ATERM_TRAITS_H
+#endif // MCRL2_ATERMPP_ATERM_TRAITS_H

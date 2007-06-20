@@ -1,23 +1,14 @@
-// ======================================================================
+// Author(s): Wieger Wesselink
 //
-// Copyright (c) 2004, 2005 Wieger Wesselink
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
-// ----------------------------------------------------------------------
-//
-// file          : atermpp/table.h
-// date          : 30-4-2007
-// version       : 1.0
-//
-// author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
-//
-// ======================================================================
+/// \file atermpp/table.h
+/// \brief Add your file description here.
 
-///////////////////////////////////////////////////////////////////////////////
-/// \file aterm_table.h
-/// Contains the definition of the aterm_table class.
-
-#ifndef ATERM_TABLE_H
-#define ATERM_TABLE_H
+#ifndef MCRL2_ATERMPP_TABLE_H
+#define MCRL2_ATERMPP_TABLE_H
 
 #include <boost/utility.hpp>
 #include "atermpp/aterm.h"
@@ -109,4 +100,4 @@ namespace atermpp
 
 } // namespace atermpp
 
-#endif // ATERM_TABLE_H
+#endif // MCRL2_ATERMPP_TABLE_H

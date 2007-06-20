@@ -1,23 +1,14 @@
-// ======================================================================
+// Author(s): Wieger Wesselink
 //
-// Copyright (c) 2004, 2005 Wieger Wesselink
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
-// ----------------------------------------------------------------------
-//
-// file          : atermpp/transform.h
-// date          : 15-11-2005
-// version       : 1.0
-//
-// author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
-//
-// ======================================================================
+/// \file atermpp/transform.h
+/// \brief Add your file description here.
 
-///////////////////////////////////////////////////////////////////////////////
-/// \file aterm_transform.h
-/// Contains the definition of the transform algorithm.
-
-#ifndef ATERM_TRANSFORM_H
-#define ATERM_TRANSFORM_H
+#ifndef MCRL2_ATERMPP_TRANSFORM_H
+#define MCRL2_ATERMPP_TRANSFORM_H
 
 #include "atermpp/aterm.h"
 
@@ -38,4 +29,4 @@ namespace atermpp
   
 } // namespace atermpp
 
-#endif // ATERM_TRANSFORM_H
+#endif // MCRL2_ATERMPP_TRANSFORM_H

@@ -1,23 +1,14 @@
-// ======================================================================
+// Author(s): Wieger Wesselink
 //
-// Copyright (c) 2004, 2005 Wieger Wesselink
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
-// ----------------------------------------------------------------------
-//
-// file          : atermpp/aterm.h
-// date          : 25-10-2005
-// version       : 1.0
-//
-// author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
-//
-// ======================================================================
+/// \file atermpp/aterm.h
+/// \brief Add your file description here.
 
-///////////////////////////////////////////////////////////////////////////////
-/// \file aterm.h
-/// Contains the definition of the aterm class and a few aterm functions.
-
-#ifndef ATERM_ATERM_H
-#define ATERM_ATERM_H
+#ifndef MCRL2_ATERMPP_ATERM_H
+#define MCRL2_ATERMPP_ATERM_H
 
 #include <string>
 #include <iostream>
@@ -338,4 +329,4 @@ namespace atermpp
 
 #include "atermpp/aterm_make_match.h"
 
-#endif // ATERM_ATERM_H
+#endif // MCRL2_ATERMPP_ATERM_H

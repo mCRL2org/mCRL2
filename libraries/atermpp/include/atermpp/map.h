@@ -1,5 +1,14 @@
-#ifndef ATERM_MAP_H
-#define ATERM_MAP_H
+// Author(s): Wieger Wesselink
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file atermpp/map.h
+/// \brief Add your file description here.
+
+#ifndef MCRL2_ATERMPP_MAP_H
+#define MCRL2_ATERMPP_MAP_H
 
 #include <functional>
 #include <memory>
@@ -143,4 +152,4 @@ std::cout << "atermpp::multimap.ATprotectTerms() : protecting " << multimap<Key,
 
 } // namespace atermpp
 
-#endif // ATERM_MAP_H
+#endif // MCRL2_ATERMPP_MAP_H

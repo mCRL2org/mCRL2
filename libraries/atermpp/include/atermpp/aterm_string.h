@@ -1,23 +1,14 @@
-// ======================================================================
+// Author(s): Wieger Wesselink
 //
-// Copyright (c) 2004, 2005 Wieger Wesselink
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
-// ----------------------------------------------------------------------
-//
-// file          : atermpp/aterm_string.h
-// date          : 18-09-2006
-// version       : 1.0
-//
-// author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
-//
-// ======================================================================
+/// \file atermpp/aterm_string.h
+/// \brief Add your file description here.
 
-///////////////////////////////////////////////////////////////////////////////
-/// \file aterm_string.h
-/// Contains the definition of the aterm_string class.
-
-#ifndef ATERM_STRING_H
-#define ATERM_STRING_H
+#ifndef MCRL2_ATERMPP_ATERM_STRING_H
+#define MCRL2_ATERMPP_ATERM_STRING_H
 
 #include <string>
 #include "atermpp/aterm.h"
@@ -94,4 +85,4 @@ namespace atermpp
 
 } // namespace atermpp
 
-#endif // ATERM_STRING_H
+#endif // MCRL2_ATERMPP_ATERM_STRING_H

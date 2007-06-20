@@ -1,23 +1,14 @@
-// ======================================================================
+// Author(s): Wieger Wesselink
 //
-// Copyright (c) 2004, 2005, 2006 Wieger Wesselink
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
-// ----------------------------------------------------------------------
-//
-// file          : atermpp/make_list.h
-// date          : 22-9-2006
-// version       : 1.0
-//
-// author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
-//
-// ======================================================================
+/// \file atermpp/make_list.h
+/// \brief Add your file description here.
 
-///////////////////////////////////////////////////////////////////////////////
-/// \file make_list.h
-/// Contains functions for initializing a list.
-
-#ifndef ATERM_MAKE_LIST_H
-#define ATERM_MAKE_LIST_H
+#ifndef MCRL2_ATERMPP_MAKE_LIST_H
+#define MCRL2_ATERMPP_MAKE_LIST_H
 
 #include "atermpp/aterm.h"
 
@@ -49,4 +40,4 @@ namespace atermpp
 
 } // namespace atermpp
 
-#endif // ATERM_MAKE_LIST_H
+#endif // MCRL2_ATERMPP_MAKE_LIST_H

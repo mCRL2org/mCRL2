@@ -1,23 +1,14 @@
-// ======================================================================
+// Author(s): Wieger Wesselink
 //
-// Copyright (c) 2004, 2005 Wieger Wesselink
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
-// ----------------------------------------------------------------------
-//
-// file          : atermpp/aterm_appl_iterator.h
-// date          : 20-11-2006
-// version       : 1.0
-//
-// author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
-//
-// ======================================================================
-
-///////////////////////////////////////////////////////////////////////////////
 /// \file atermpp/aterm_appl_iterator.h
-/// Contains a general term_list iterator.
+/// \brief Add your file description here.
 
-#ifndef ATERMPP_TERM_APPL_ITERATOR_H
-#define ATERMPP_TERM_APPL_ITERATOR_H
+#ifndef MCRL2_ATERMPP_ATERM_APPL_ITERATOR_H
+#define MCRL2_ATERMPP_ATERM_APPL_ITERATOR_H
 
 #include <boost/iterator/iterator_facade.hpp>
 #include "atermpp/aterm.h"
@@ -69,4 +60,4 @@ class term_appl_iterator: public boost::iterator_facade<
 
 } // namespace atermpp
 
-#endif // ATERMPP_TERM_APPL_ITERATOR_H
+#endif // MCRL2_ATERMPP_ATERM_APPL_ITERATOR_H

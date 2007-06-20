@@ -1,23 +1,14 @@
-// ======================================================================
+// Author(s): Wieger Wesselink
 //
-// Copyright (c) 2006 Wieger Wesselink
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
-// ----------------------------------------------------------------------
-//
-// file          : atermpp/detail/algorithm_impl.h
-// date          : 29-09-2006
-// version       : 1.0
-//
-// author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
-//
-// ======================================================================
+/// \file atermpp/detail/algorithm_impl.h
+/// \brief Add your file description here.
 
-///////////////////////////////////////////////////////////////////////////////
-/// \file algorithm_impl.h
-/// Contains algorithms on aterm_lists and aterm_appls.
-
-#ifndef ATERM_ALGORITHM_IMPL_H
-#define ATERM_ALGORITHM_IMPL_H
+#ifndef MCRL2_ATERMPP_DETAIL_ALGORITHM_IMPL_H
+#define MCRL2_ATERMPP_DETAIL_ALGORITHM_IMPL_H
 
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_appl.h"
@@ -360,4 +351,4 @@ namespace detail {
 
 } // namespace atermpp
 
-#endif // ATERM_ALGORITHM_IMPL_H
+#endif // MCRL2_ATERMPP_DETAIL_ALGORITHM_IMPL_H

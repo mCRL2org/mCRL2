@@ -1,23 +1,14 @@
-// ======================================================================
+// Author(s): Wieger Wesselink
 //
-// Copyright (c) 2004, 2005, 2006 Wieger Wesselink
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
-// ----------------------------------------------------------------------
-//
-// file          : atermpp/aterm_make_match.h
-// date          : 28-11-2006
-// version       : 1.0
-//
-// author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
-//
-// ======================================================================
-
-///////////////////////////////////////////////////////////////////////////////
 /// \file atermpp/aterm_make_match.h
-/// This file contains implementations for aterm_make and aterm_match.
+/// \brief Add your file description here.
 
-#ifndef ATERM_MAKE_MATCH_H
-#define ATERM_MAKE_MATCH_H
+#ifndef MCRL2_ATERMPP_ATERM_MAKE_MATCH_H
+#define MCRL2_ATERMPP_ATERM_MAKE_MATCH_H
 
 #include "atermpp/aterm.h"
 
@@ -38,4 +29,4 @@ namespace atermpp
 
 } // namespace atermpp
 
-#endif // ATERM_MAKE_MATCH_H
+#endif // MCRL2_ATERMPP_ATERM_MAKE_MATCH_H

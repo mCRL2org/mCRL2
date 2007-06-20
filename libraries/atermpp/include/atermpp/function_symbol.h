@@ -1,23 +1,14 @@
-// ======================================================================
+// Author(s): Wieger Wesselink
 //
-// Copyright (c) 2004, 2005 Wieger Wesselink
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
-// ----------------------------------------------------------------------
-//
-// file          : atermpp/function_symbol.h
-// date          : 25-10-2005
-// version       : 1.0
-//
-// author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
-//
-// ======================================================================
+/// \file atermpp/function_symbol.h
+/// \brief Add your file description here.
 
-///////////////////////////////////////////////////////////////////////////////
-/// \file aterm_function_symbol.h
-/// Contains the definition of the aterm_function_symbol class.
-
-#ifndef ATERM_FUNCTION_SYMBOL_H
-#define ATERM_FUNCTION_SYMBOL_H
+#ifndef MCRL2_ATERMPP_FUNCTION_SYMBOL_H
+#define MCRL2_ATERMPP_FUNCTION_SYMBOL_H
 
 #include <string>
 #include "aterm2.h"
@@ -105,4 +96,4 @@ namespace atermpp
   
 } // namespace atermpp
 
-#endif // ATERM_FUNCTION_SYMBOL_H
+#endif // MCRL2_ATERMPP_FUNCTION_SYMBOL_H

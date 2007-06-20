@@ -1,23 +1,14 @@
-// ======================================================================
+// Author(s): Wieger Wesselink
 //
-// Copyright (c) 2006 Wieger Wesselink
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
-// ----------------------------------------------------------------------
-//
-// file          : atermpp/aterm_access.h
-// date          : 05-10-2006
-// version       : 1.0
-//
-// author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
-//
-// ======================================================================
+/// \file atermpp/aterm_access.h
+/// \brief Add your file description here.
 
-///////////////////////////////////////////////////////////////////////////////
-/// \file aterm_access.h
-/// Contains utility functions for retrieving subterms of aterm_appl's.
-
-#ifndef ATERM_ACCESS_H
-#define ATERM_ACCESS_H
+#ifndef MCRL2_ATERMPP_ATERM_ACCESS_H
+#define MCRL2_ATERMPP_ATERM_ACCESS_H
 
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_appl.h"
@@ -72,4 +63,4 @@ namespace atermpp
 
 } // namespace atermpp
 
-#endif // ATERM_ACCESS_H
+#endif // MCRL2_ATERMPP_ATERM_ACCESS_H

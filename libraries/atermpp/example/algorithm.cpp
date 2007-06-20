@@ -1,3 +1,12 @@
+// Author(s): Wieger Wesselink
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file algorithm.cpp
+/// \brief Add your file description here.
+
 // ======================================================================
 //
 // Copyright (c) 2004, 2005 Wieger Wesselink
@@ -61,12 +70,8 @@ void test_replace()
   aterm_appl a = make_term("f(f(x))");
   aterm_appl b = replace(a, make_term("f(x)"), make_term("x"));
   assert(b == make_term("f(x)"));
-  aterm_appl c = replace(a, make_term("f(x)"), make_term("x"), true);
+  aterm_appl c = replace(a, make_term("f(x)"), make_term("x"));
   assert(c == make_term("x"));
-
-  aterm d = make_term("h(g(b),f(a),p(a(x,y),q(a(a))))");
-  aterm_appl e = replace_if(d, is_a_or_b(), make_term("u"));
-  assert(e == make_term("h(g(u),f(u),p(u,q(u)))"));
 }
 
 int main()

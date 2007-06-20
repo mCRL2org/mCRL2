@@ -1,5 +1,14 @@
-#ifndef ATERM_VECTOR_H
-#define ATERM_VECTOR_H
+// Author(s): Wieger Wesselink
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file atermpp/vector.h
+/// \brief Add your file description here.
+
+#ifndef MCRL2_ATERMPP_VECTOR_H
+#define MCRL2_ATERMPP_VECTOR_H
 
 #include <memory>
 #include <vector>
@@ -80,4 +89,4 @@ std::cout << "atermpp::vector.ATprotectTerms() : protecting " << vector<T>::size
 
 } // namespace atermpp
 
-#endif // ATERM_VECTOR_H
+#endif // MCRL2_ATERMPP_VECTOR_H

@@ -1,5 +1,14 @@
-#ifndef ATERM_ALLOCATOR_H
-#define ATERM_ALLOCATOR_H
+// Author(s): Wieger Wesselink
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file atermpp/aterm_allocator.h
+/// \brief Add your file description here.
+
+#ifndef MCRL2_ATERMPP_ATERM_ALLOCATOR_H
+#define MCRL2_ATERMPP_ATERM_ALLOCATOR_H
 
 #include <algorithm>
 #include <cassert>
@@ -161,4 +170,4 @@ std::cout << "aterm_allocator.deallocate(" << num << ") " << n << " elements dea
 
 } // namespace atermpp
 
-#endif // ATERM_ALLOCATOR_H
+#endif // MCRL2_ATERMPP_ATERM_ALLOCATOR_H

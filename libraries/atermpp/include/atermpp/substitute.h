@@ -1,22 +1,14 @@
-// ======================================================================
+// Author(s): Wieger Wesselink
 //
-// Copyright (c) 2004, 2005, 2006 Wieger Wesselink
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
-// ----------------------------------------------------------------------
-//
-// file          : atermpp/substitute.h
-// date          : 01-10-2006
-// version       : 1.0
-//
-// author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
-//
-// ======================================================================
+/// \file atermpp/substitute.h
+/// \brief Add your file description here.
 
-///////////////////////////////////////////////////////////////////////////////
-/// \file substitute.h
-
-#ifndef ATERM_SUBSTITUTE_H
-#define ATERM_SUBSTITUTE_H
+#ifndef MCRL2_ATERMPP_SUBSTITUTE_H
+#define MCRL2_ATERMPP_SUBSTITUTE_H
 
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_appl.h"
@@ -84,4 +76,4 @@ list_substitution<Src, Dest> make_list_substitution(Src src, Dest dest)
 
 } // namespace atermpp
 
-#endif // ATERM_SUBSTITUTE_H
+#endif // MCRL2_ATERMPP_SUBSTITUTE_H

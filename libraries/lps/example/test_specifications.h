@@ -1,5 +1,14 @@
-#ifndef LPS_TEST_SPECIFICATIONS_H
-#define LPS_TEST_SPECIFICATIONS_H
+// Author(s): Wieger Wesselink
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file test_specifications.h
+/// \brief Add your file description here.
+
+#ifndef MCRL2_TEST_SPECIFICATIONS_H
+#define MCRL2_TEST_SPECIFICATIONS_H
 
 #include <string>
 
@@ -42,4 +51,4 @@ const std::string ABP_SPECIFICATION =
 "    )                                                                      \n"
 "  );                                                                       \n";
 
-#endif // LPS_TEST_SPECIFICATIONS_H
+#endif // MCRL2_TEST_SPECIFICATIONS_H

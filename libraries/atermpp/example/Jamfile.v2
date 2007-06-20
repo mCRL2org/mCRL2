@@ -9,11 +9,13 @@ project libraries/aterm/example
 exe allocator : allocator.cpp : ;
 exe std_container : std_container.cpp : ;
 exe algorithm : algorithm.cpp : ;
+exe example : example.cpp : ;
 
 install dist
    :
      allocator
      std_container
      algorithm
+     example
    :
    ;
