@@ -289,6 +289,7 @@ void XSimMain::UpdateSizes(wxCommandEvent& event) {
   }
 
   /* hack to avoid unnecessary scrollbars */
+#if defined(__WXGTK__)
   int w,h;
   transview->GetClientSize(&w,&h);
   transview->SetClientSize(0,0);
@@ -296,6 +297,7 @@ void XSimMain::UpdateSizes(wxCommandEvent& event) {
   stateview->GetClientSize(&w,&h);
   stateview->SetClientSize(0,0);
   stateview->SetClientSize(w,h);
+#endif
 }
 
 void XSimMain::SetInteractiveness(bool interactive)
@@ -924,9 +926,11 @@ void XSimMain::OnFitCurrentState( wxCommandEvent& /* event */ )
       newpos = 1;
     /* reposition splitter */
     split->SetSashPosition(newpos);
+#if defined(__WXGTK__)
     /* hack to avoid unnecessary scrollbars */
     stateview->SetClientSize(0,n);
     stateview->SetClientSize(w,n);
+#endif
 }
 
 void XSimMain::OnTrace( wxCommandEvent& /* event */ )

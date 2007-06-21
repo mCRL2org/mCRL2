@@ -58,7 +58,7 @@ XSimTrace::XSimTrace( wxWindow *parent ) :
     wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
     wxStaticBox *box = new wxStaticBox(panel,-1,wxT("Transitions"));
     wxStaticBoxSizer *boxsizer = new wxStaticBoxSizer(box,wxVERTICAL);
-    traceview = new wxListView(panel,ID_LISTVIEW,wxDefaultPosition,wxSize(0,0),wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES|wxLC_SINGLE_SEL|wxLC_SORT_ASCENDING);
+    traceview = new wxListView(panel,ID_LISTVIEW,wxDefaultPosition,wxSize(0,0),wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES|wxLC_SINGLE_SEL);
     traceview->InsertColumn(0,wxT("#"));
     traceview->InsertColumn(1,wxT("Action"));
     traceview->InsertColumn(2,wxT("State"));
@@ -98,20 +98,21 @@ void XSimTrace::AddState(ATermAppl Transition, ATerm State, bool enabled)
 	{
 		stringstream ss;
 		unsigned int l = traceview->GetItemCount();
+                unsigned int real_l;
 
-		traceview->InsertItem(l,wxString::Format(wxT("%u"),l));
-                traceview->SetItemData(l,l);
-		traceview->SetItem(l,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) Transition, ppDefault).c_str()));
+		real_l = traceview->InsertItem(l,wxString::Format(wxT("%u"),l));
+                traceview->SetItemData(real_l,l);
+		traceview->SetItem(real_l,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) Transition, ppDefault).c_str()));
 		PrintState(ss,State,simulator->GetNextState());
-		traceview->SetItem(l,2,wxConvLocal.cMB2WX(ss.str().c_str()));
+		traceview->SetItem(real_l,2,wxConvLocal.cMB2WX(ss.str().c_str()));
 		traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);
 		if ( enabled )
 		{
 			wxColor col(255,255,255);
-			traceview->SetItemBackgroundColour(l,col);
+			traceview->SetItemBackgroundColour(real_l,col);
 		} else {
 			wxColor col(245,245,245);
-			traceview->SetItemBackgroundColour(l,col);
+			traceview->SetItemBackgroundColour(real_l,col);
 		}
                 traceview->SortItems(compare_items,0);
 	}

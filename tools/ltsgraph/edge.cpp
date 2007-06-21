@@ -60,8 +60,10 @@ void edge::on_paint(wxDC * ptrDC)
     /* Adjust the start and end point of the arrow to allow self-referring loops */
 
     if (start_x == end_x && start_y == end_y) {
-      start_x += node_radius;
-      start_y += node_radius;
+      start_x -= (node_radius/2)*sin(-control_point_alpha);
+      start_y -= (node_radius/2)*cos(control_point_alpha);
+      end_x += (node_radius/2)*sin(-control_point_alpha);
+      end_y += (node_radius/2)*cos(control_point_alpha);
     }
     double control_x = get_x_control();
     double control_y = get_y_control();
@@ -274,7 +276,7 @@ void edge::set_control(double new_x, double new_y) {
   double beta = 0.0;
 
 
-  /*if (x_2 == x_1) {
+  /*if (x_2 == x_1 && y_2 == y_1) {
     beta = PI / 2;
   }
   else {*/
@@ -299,10 +301,10 @@ void edge::set_control(double new_x, double new_y) {
   control_point_dist = sqrt( (x_1 - new_x) * (x_1 - new_x) + (y_1 - new_y) * (y_1 - new_y) );
   double node_dist = sqrt( ( x_1 - x_2) * (x_1 - x_2) + (y_1 - y_2) * (y_1 - y_2) );
   
-  if (node_dist == 0) {
+  if ((node_dist == 0) && (control_point_dist < 2*N1->get_radius())) {
     control_point_dist = N1->get_radius() * 2;
-  }
-  else {
+  } else if ( node_dist != 0 )
+  {
     control_point_dist = control_point_dist / node_dist;
   }
 
