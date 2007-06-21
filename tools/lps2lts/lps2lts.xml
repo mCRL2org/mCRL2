@@ -289,7 +289,7 @@ Mandatory arguments to long options are also mandatory to short options.
              <term>r, random</term>
              <listitem>
                <para>
-                 random search
+                 random simulation
                </para>
              </listitem>
            </varlistentry>

@@ -1609,6 +1609,7 @@ void RewriterCompilingInnermost::CompileRewriteSystem(lps::data_specification Da
   if ( f == NULL )
   {
 	  perror("fopen");
+          gsErrorMsg("could not create temporary file for rewriter\n");
 	  exit(1);
   }
 

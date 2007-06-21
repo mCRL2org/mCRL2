@@ -2872,6 +2872,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(lps::data_specification DataSp
   if ( f == NULL )
   {
 	  perror("fopen");
+          gsErrorMsg("could not create temporary file for rewriter\n");
 	  exit(1);
   }
 

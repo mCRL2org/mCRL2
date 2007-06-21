@@ -112,7 +112,7 @@ static void print_help(FILE *f, const char *Name)
     "                           the following strategies are available:\n"
     "                             b, breadth   breadth-first search (default)\n"
     "                             d, depth     depth-first search\n"
-    "                             r, random    random search\n"
+    "                             r, random    random simulation\n"
     "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'inner');\n"
     "                           available rewriters are inner, jitty, innerc and\n"
     "                           jittyc\n"
