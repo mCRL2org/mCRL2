@@ -49,9 +49,52 @@ bool export_to_svg::generate() {
 
     /* Draw the arrowheads of the edges */
     /* Calculate angle that the arrow needs to make (in radians) */
-    double alpha = 0;
-    double end_y = edges[i].end_y;
+    /* Code taken from edge.cpp */
     double end_x = edges[i].end_x;
+    double end_y = edges[i].end_y;
+    double dist_cp_ed = sqrt( (spline_control_x - end_x) * (spline_control_x - end_x) + (spline_control_y - end_y) * (spline_control_y - end_y));
+    double arrow_ratio = 0.0;
+    if ( dist_cp_ed != 0) {
+      arrow_ratio = edges[i].end_radius / dist_cp_ed;
+    }
+    else {
+      arrow_ratio = 0;
+    }
+    double triangle_x = end_x - (end_x - spline_control_x) * arrow_ratio;
+    double triangle_y = end_y - (end_y - spline_control_y) * arrow_ratio;
+    double base_ratio = 0.0;
+    if ( dist_cp_ed != 0) {
+      base_ratio = (edges[i].end_radius + triangle_height) / dist_cp_ed;
+    }
+    else {
+      base_ratio = 0;
+    }
+    const double triangle_base = 2.0;
+    const double triangle_height = 7.0;
+    double base_x = end_x - base_ratio * (end_x - spline_control_x);
+    double base_y = end_y - base_ratio * (end_y - spline_control_y);
+    double sinus_alpha = end_y;
+    double cosinus_alpha = end_x;
+    if (triangle_height != 0) {
+      sinus_alpha = (base_y - end_y) / triangle_height;
+      cosinus_alpha = (base_x - end_x) / triangle_height;
+    }
+    int arrow_base_high_x = (int) round(end_x + (cosinus_alpha * triangle_height -  .5 * triangle_base * sinus_alpha));
+    int arrow_base_high_y = (int) round(end_y + (sinus_alpha * triangle_height + .5 * triangle_base * cosinus_alpha));
+    int arrow_base_low_x  = (int) round(end_x + (cosinus_alpha * triangle_height +  .5 * triangle_base * sinus_alpha));
+    int arrow_base_low_y  = (int) round(end_y + (sinus_alpha * triangle_height - .5 * triangle_base * cosinus_alpha));
+    boost::format arrow_f("<polygon points=\"%1% %2% %3% %4% %5% %6%\" fill=\"black\" stroke=\"black\"/>\n");
+    arrow_f%triangle_x
+           %triangle_y
+           %arrow_base_high_x
+           %arrow_base_high_y
+           %arrow_base_low_x
+           %arrow_base_low_y;
+
+
+/*    double alpha = 0;
+    double end_y = edges[i].start_y;
+    double end_x = edges[i].start_x;
     if (spline_control_x != end_x) {
       alpha = atan( (spline_control_y - end_y) / (spline_control_x - end_x));
     }
@@ -60,9 +103,9 @@ bool export_to_svg::generate() {
     }
     if (spline_control_x >= end_x) {
       alpha = alpha + PI;
-    }
+    }*/
     /* Draw the arrowhead, rotated over alpha */
-    boost::format arrow_f("<polygon points=\"%1% %2% %3% %4% %3% %5%\" fill=\"black\" stroke=\"black\" transform=\"rotate(%6% %7% %8%)\"/>\n");
+/*    boost::format arrow_f("<polygon points=\"%1% %2% %3% %4% %3% %5%\" fill=\"black\" stroke=\"black\" transform=\"rotate(%6% %7% %8%)\"/>\n");
     arrow_f%(end_x - edges[i].end_radius)
            %end_y
            %(end_x - edges[i].end_radius - triangle_height)
@@ -70,7 +113,7 @@ bool export_to_svg::generate() {
            %(end_y + triangle_width / 2)
            %(alpha * (180 / PI)) 
            %end_x
-           %end_y;
+           %end_y;*/
 
     svg_code += boost::str(arrow_f);
     
