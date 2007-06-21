@@ -18,7 +18,7 @@ called the same on other systems. Only top-level packages are mentioned; lower
 level packages are (usually) automatically installed. Furthermore, the status
 of the packages is mentioned (required, recommended or optional):
 - make >= 3.80: package make [required]
-- wxWidgets >= 2.6.2: package libwxgtk2.6-dev or libwxgtk2.6-dbg [recommended]
+- wxWidgets >= 2.8.0: package libwxgtk2.8-dev or libwxgtk2.8-dbg [recommended]
    + for the ltsview tool wxWidgets must be build with OpenGL support (--with-opengl)
 - xsltproc: package xsltproc [recommended]
 - default icon locations: package gnome-themes, gnome-themes-extras or
