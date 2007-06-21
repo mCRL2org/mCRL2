@@ -36,6 +36,8 @@ lib squadt_interface
 alias squadt_interface
       : /libraries//utilities
       : <link>shared
+      :
+      : <library>/libraries/sip//sip_tool
       ;
 
 alias squadt_interface.alias
