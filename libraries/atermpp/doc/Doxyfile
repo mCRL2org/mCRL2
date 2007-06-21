@@ -3,6 +3,6 @@
 PROJECT_NAME           = ATerm++
 OUTPUT_DIRECTORY       = ../../../build/doxy
 HTML_OUTPUT            = atermpp
-INPUT                  = ../include ../source
+INPUT                  = ../include
 HTML_HEADER            = ../../../doc/doxy/Doxyheader.html
 HTML_FOOTER            = ../../../doc/doxy/Doxyfooter.html
