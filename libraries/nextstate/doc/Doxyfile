@@ -1,0 +1,8 @@
+@INCLUDE_PATH = ../../../doc/doxy
+@INCLUDE = Doxymaster
+PROJECT_NAME           = "Next State"
+OUTPUT_DIRECTORY       = ../../../build/doxy
+HTML_OUTPUT            = nextstate
+INPUT                  = ../include ../source
+HTML_HEADER            = ../../../doc/doxy/Doxyheader.html
+HTML_FOOTER            = ../../../doc/doxy/Doxyfooter.html

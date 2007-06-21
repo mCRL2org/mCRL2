@@ -5,7 +5,7 @@ ifeq (${MAKECMDGOALS},)
 include build/Makefile
 endif
 
-.PHONY: tags clean distclean parsers mcrl2parser ltsview-fsmparser liblts-fsmparser
+.PHONY: tags clean distclean parsers mcrl2parser ltsview-fsmparser liblts-fsmparser doxy
 
 build/Makefile:
 	$(error Please run configure first)
@@ -45,3 +45,18 @@ configure: build/autoconf/configure.ac
 
 tags:
 	ctags --languages=C,C++ --recurse=yes --extra=+q --fields=+i --totals=yes .
+
+doxy:
+	@cd libraries/atermpp/doc; doxygen
+	@cd libraries/lps/doc; doxygen
+	@cd libraries/lts/doc; doxygen
+	@cd libraries/mcrl2_basic/doc; doxygen
+	@cd libraries/nextstate/doc; doxygen
+	@cd libraries/parser/doc; doxygen
+	@cd libraries/prover/doc; doxygen
+	@cd libraries/rewrite/doc; doxygen
+	@cd libraries/trace/doc; doxygen
+	@cd libraries/utilities/doc; doxygen
+	@cd tools/squadt/libraries/sip/doc; doxygen
+	@cp doc/doxy/index.html build/doxy/
+	@cp doc/doxy/doxystyle.css build/doxy/
