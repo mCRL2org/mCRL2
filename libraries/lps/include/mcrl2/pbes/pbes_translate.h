@@ -39,7 +39,7 @@ pbes pbes_translate(const state_formula& formula, const specification& spec, boo
   if (!is_mu(f) && !is_nu(f))
   {
     aterm_list context = make_list(f, spec);
-    identifier_string X = fresh_identifier("X", context);
+    identifier_string X = fresh_identifier(context, "X");
     f = nu(X, data_assignment_list(), f);
   }  
   linear_process lps = spec.process();
@@ -53,7 +53,7 @@ pbes pbes_translate(const state_formula& formula, const specification& spec, boo
   else
   {
     using namespace pbes_timed;
-    data_variable T = fresh_variable("T", make_list(f, lps));
+    data_variable T = fresh_variable(make_list(f, lps), sort_expr::real(), "T");
     aterm_list context = make_list(T, spec.initial_process(), lps, f);
     lps = detail::make_timed_lps(lps, context);
     e = E(f, f, lps, T);

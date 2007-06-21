@@ -31,11 +31,14 @@ int test_main(int, char*[])
   data_variable d00("d00:D");
   data_expression e = and_(equal_to(d, d0), not_equal_to(d0, d00));
 
-  fresh_variable_generator generator(e, "d", d.sort());
+  fresh_variable_generator generator(e, d.sort(), "d");
   data_variable x = generator();
   BOOST_CHECK(x == data_variable("d01:D"));
   x = generator();
   BOOST_CHECK(x == data_variable("d02:D"));
+
+  data_variable a = fresh_variable(e, lps::sort("D"), "d");
+  BOOST_CHECK(a == data_variable("d01:D")); 
 
   std::set<identifier_string> ids = identifiers(e);
   BOOST_CHECK(ids.size() == 8);

@@ -71,7 +71,7 @@ data_variable_list fresh_variables(data_variable_list t, const std::set<std::str
 
 /// \brief Returns an identifier that doesn't appear in the term context
 template <typename Term>
-identifier_string fresh_identifier(std::string hint, Term context)
+identifier_string fresh_identifier(Term context, std::string hint)
 {
   std::set<identifier_string> ids = identifiers(context);
   identifier_string s(hint);
@@ -86,9 +86,9 @@ identifier_string fresh_identifier(std::string hint, Term context)
 
 /// \brief Returns a variable that doesn't appear in context
 template <typename Term>
-data_variable fresh_variable(std::string hint, Term context, lps::sort s = sort_expr::real())
+data_variable fresh_variable(Term context, lps::sort s, std::string hint)
 {
-  identifier_string id = fresh_identifier(hint, context);
+  identifier_string id = fresh_identifier(context, hint);
   return data_variable(gsMakeDataVarId(id, s));
 }
 
@@ -201,16 +201,16 @@ class fresh_variable_generator
 {
   protected:
     atermpp::set<identifier_string> m_identifiers;
-    std::string m_hint;                  // used as a hint for operator()()
     lps::sort m_sort;                    // used for operator()()
+    std::string m_hint;                  // used as a hint for operator()()
 
   public:
     fresh_variable_generator()
-     : m_hint("t"), m_sort(sort_expr::real())
+     : m_sort(sort_expr::real()), m_hint("t")
     { }
 
     template <typename Term>
-    fresh_variable_generator(Term context, std::string hint = "t", lps::sort s = sort_expr::real())
+    fresh_variable_generator(Term context, lps::sort s = sort_expr::real(), std::string hint = "t")
     {
       m_identifiers = identifiers(context);
       m_hint = hint;
