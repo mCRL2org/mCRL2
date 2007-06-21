@@ -264,16 +264,15 @@ void lpsParElm::writeStream(lps::specification newSpec)  {
 void lpsParElm::findDataVariablesInDataExpression(lps::data_expression const& input){
 	if (is_data_variable(input.head())){ 
       p_usedVars.insert(input.head());
-      return;   
-    } else {
-	  if (!input.arguments().empty()){
-        for(lps::data_expression_list::iterator i= input.arguments().begin(); i != input.arguments().end(); ++i){
-	      findDataVariablesInDataExpression( *i );
-	      }
-      } else 
-      {return;}
-  }
+	  gsDebugMsg("Found Var: %s\n", input.head().to_string().c_str() );
+	  }   
+	if (!input.arguments().empty()){
+ 		for(lps::data_expression_list::iterator i= input.arguments().begin(); i != input.arguments().end(); ++i){
+	    findDataVariablesInDataExpression( *i );
+	  }
+    } 
 }
+
 
 // The lpsparelm filter
 //  
@@ -282,7 +281,7 @@ void lpsParElm::filter() {
 
   linear_process lps = p_spec.process();
 
-  std::vector< aterm_appl >          foundParameters;
+  std::vector< aterm_appl >     foundParameters;
   std::set< data_variable >     T;
   std::set< data_variable >     foundVariables;
   
@@ -306,30 +305,29 @@ void lpsParElm::filter() {
     //Condition
     //
    	findDataVariablesInDataExpression(currentSummand->condition());
+	gsDebugMsg("Condition: %s\n", currentSummand->condition().to_string().c_str());
+	
 
     //Time
     //
 	if (currentSummand->has_time()){
       findDataVariablesInDataExpression(currentSummand->time());
+	  gsDebugMsg("Time:     %s\n ", currentSummand->time().to_string().c_str());
     }
     
     //Actions
     //
-	for(lps::action_list::iterator i = currentSummand->actions().begin(); i != currentSummand->actions().end(); i++){
-      for(lps::data_expression_list::iterator j = i->arguments().begin(); j != i->arguments().end(); j++){
-        foundVariables = getDataVarIDs(aterm_appl(*j));
-        gsDebugMsg("%s\n", i->to_string().c_str());
-        gsDebugMsg("\033[31m%s\033[0m\n", setToList(foundVariables).to_string().c_str());  
-        for(std::set< lps::data_variable >::iterator k = foundVariables.begin(); k != foundVariables.end(); k++){
-	         p_usedVars.insert(*k);
-	      };
-      };  
-    };
+	//std::cout << "A:" << currentSummand->actions() << std::endl;
+    for(lps::action_list::iterator i = currentSummand->actions().begin(); i != currentSummand->actions().end(); i++){
+       for(lps::data_expression_list::iterator j = i->arguments().begin(); j != i->arguments().end(); j++){
+        findDataVariablesInDataExpression(*j);   
+	    gsDebugMsg("Action Arg: %s\n",  j->to_string().c_str());
+      };
+    }; 
+    
     gsDebugMsg("\033[32m%s\033[0m\n", setToList(p_usedVars).to_string().c_str());
   }
   gsVerboseMsg("\n");
-  
-
   
   // Needed all process parameters which are not marked have to be eliminated
   //
@@ -395,7 +393,7 @@ void lpsParElm::filter() {
 
 inline void lpsParElm::output() {
   using namespace lps;
-   
+
   linear_process lps = p_spec.process();
   summand_list rebuild_summandlist;
   data_variable_list rebuild_process_parameters;
