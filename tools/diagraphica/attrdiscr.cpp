@@ -267,10 +267,10 @@ int AttrDiscr::getSizeOrigValues()
 
 
 // --------------------------------------
-Value* AttrDiscr::getOrigValue( size_t idx )
+Value* AttrDiscr::getOrigValue( int idx )
 // --------------------------------------
 {
-    if ( 0 <= idx && idx < origValues.size() )
+    if ( 0 <= idx && idx < (int)origValues.size() )
         return origValues[idx];
     else
         throw new string(
@@ -287,10 +287,10 @@ int AttrDiscr::getSizeCurValues()
 
 
 // -------------------------------------
-Value* AttrDiscr::getCurValue( size_t idx )
+Value* AttrDiscr::getCurValue( int idx )
 // -------------------------------------
 {
-    if ( 0 <= idx && idx < curValues.size() )
+    if ( 0 <= idx && idx < (int)curValues.size() )
         return curValues[idx];
     else
         throw new string(

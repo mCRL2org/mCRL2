@@ -85,7 +85,7 @@ void AttrConti::clusterValues(
     valid = true;
     for ( size_t i = 0; i < indices.size(); ++i )
     {
-        if ( indices[i] < 0 || indices[i] > curValues.size() )
+        if ( indices[i] < 0 || indices[i] > (int) curValues.size() )
         {
             valid = false;
             break;
@@ -428,11 +428,11 @@ int AttrConti::getSizeCurValues()
 
 
 // -------------------------------------
-Value* AttrConti::getCurValue( size_t idx )
+Value* AttrConti::getCurValue( int idx )
 // -------------------------------------
 {
     Value* result = NULL;
-    if ( 0 <= idx && idx < curValues.size() )
+    if ( 0 <= idx && idx < (int) curValues.size() )
         result = curValues[idx];
     return result;
 }

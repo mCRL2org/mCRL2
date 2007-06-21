@@ -42,9 +42,9 @@ public:
     int getAttrType();
 
     int getSizeOrigValues();
-    Value* getOrigValue( size_t idx );
+    Value* getOrigValue( int idx );
     int getSizeCurValues();
-    Value* getCurValue( size_t idx );
+    Value* getCurValue( int idx );
     int getSizeMap();
     Value* mapToValue( double key );
 

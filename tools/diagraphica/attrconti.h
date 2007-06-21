@@ -55,7 +55,7 @@ public:
         double &uprBnd );
 
     int getSizeCurValues();
-    Value* getCurValue( size_t idx );
+    Value* getCurValue( int idx );
     int getSizeMap();
     Value* mapToValue( double key );
 

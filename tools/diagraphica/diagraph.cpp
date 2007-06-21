@@ -3635,10 +3635,8 @@ void DiaGraph::displAttrDomain( const int &attrIdx )
     // update indices and values    
     for ( int i = 0; i < numValues; ++i )
     {
-       if (Value* v = attribute->getCurValue(i)) {
-         indices.push_back( v->getIndex() );
-         values.push_back( v->getValue() );
-       }
+         indices.push_back( attribute->getCurValue(i)->getIndex() );
+         values.push_back( attribute->getCurValue(i)->getValue() );
     }
 
     // get number of nodes

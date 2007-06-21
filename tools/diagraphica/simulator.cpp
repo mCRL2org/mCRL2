@@ -1897,9 +1897,9 @@ void Simulator::drawFramesPrev( const bool &inSelectMode )
         double pix = canvas->getPixelSize();
         vector< double > valsFrame;
 
-        for ( size_t i = 0; i < posFramesPrev.size(); ++i )
+        for ( int i = 0; i < (int) posFramesPrev.size(); ++i )
         {
-            if ( focusDepthIdx != ID_FRAME_PREV ||  static_cast <size_t> (i) != focusFrameIdx )
+            if ( focusDepthIdx != ID_FRAME_PREV ||  i != focusFrameIdx )
             {
                 x = posFramesPrev[i].x;
                 y = posFramesPrev[i].y;

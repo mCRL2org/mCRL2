@@ -1470,7 +1470,7 @@ void DiagramEditor::handleDelete()
     
     // delete shapes
     {
-    for ( int i = 0; i < toDelete.size(); ++i )
+    for ( size_t i = 0; i < toDelete.size(); ++i )
         diagram->deleteShape( toDelete[i]-i );
     }
 }

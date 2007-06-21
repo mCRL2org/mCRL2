@@ -62,7 +62,7 @@ void Frame::setStatusText( const string &msg )
 void Frame::setOutputText( const string &msg )
 // -------------------------------------------
 {
-    textCtrl->SetValue( wxString( msg.c_str(), wxConvUTF8 ) );
+    //textCtrl->SetValue( wxString( msg.c_str(), wxConvUTF8 ) );
 }
 
 
@@ -70,7 +70,7 @@ void Frame::setOutputText( const string &msg )
 void Frame::appOutputText( const string &msg )
 // -------------------------------------------
 {
-    textCtrl->AppendText( wxString( msg.c_str(), wxConvUTF8 ) );
+    //textCtrl->AppendText( wxString( msg.c_str(), wxConvUTF8 ) );
 }
 
 
@@ -902,7 +902,7 @@ void Frame::clearOuput()
     listCtrlDomain->DeleteAllItems();
 
     
-    textCtrl->Clear();
+    //textCtrl->Clear();
    
 }
 
@@ -1779,7 +1779,7 @@ void Frame::initSplitterBotRgt()
     
     // init children
     initPanelLftBotRgt();
-    initPanelRgtBotRgt();
+    //initPanelRgtBotRgt();
     // split window
     /*
     splitterBotRgt->SplitVertically(

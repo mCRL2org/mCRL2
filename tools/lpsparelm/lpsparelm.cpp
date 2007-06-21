@@ -317,7 +317,6 @@ void lpsParElm::filter() {
     
     //Actions
     //
-	//std::cout << "A:" << currentSummand->actions() << std::endl;
     for(lps::action_list::iterator i = currentSummand->actions().begin(); i != currentSummand->actions().end(); i++){
        for(lps::data_expression_list::iterator j = i->arguments().begin(); j != i->arguments().end(); j++){
         findDataVariablesInDataExpression(*j);   
@@ -369,10 +368,6 @@ void lpsParElm::filter() {
   };
   set_difference(T.begin(), T.end(),  p_usedVars.begin(),  p_usedVars.end(), inserter(p_S, p_S.begin()));
 
-  //if (p_S.size() ==0){
-  //  assert(test());
-  //}
-
   if (p_verbose) {
     gsVerboseMsg("lpsparelm: Number of removed process parameters: %d\n", p_S.size());
     if (p_S.size() !=0){
@@ -386,9 +381,7 @@ void lpsParElm::filter() {
 
       gsVerboseMsg(" ]");
     }
-  }// else {  
-  // gsVerboseMsg("Number of removed process parameters : %d\n", p_S.size();
-  //}
+  }
 }
 
 inline void lpsParElm::output() {
@@ -406,7 +399,7 @@ inline void lpsParElm::output() {
   }
   
 
-  //Remove process parameters in summands which are not used
+  //Remove unused process parameters in summands
   //
   summand_list summands = lps.summands();
   for(lps::summand_list::iterator i = summands.begin(); i != summands.end(); i++){
@@ -487,10 +480,7 @@ inline void lpsParElm::output() {
   assert(gsIsSpecV1((ATermAppl) rebuild_spec));
  
   if (p_outputfile.size() == 0){
-    //if(!p_verbose){
-    //  assert(!p_verbose);
       writeStream(rebuild_spec);
-    //};
   } else {
     if(!rebuild_spec.save(p_outputfile)){
        gsErrorMsg("lpsparelm: Unsuccessfully written outputfile: %s\n", p_outputfile.c_str());
