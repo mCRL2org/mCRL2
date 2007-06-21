@@ -187,11 +187,7 @@ void XSimMain::CreateMenu()
     tau_prior = opts->Append( ID_TAU, wxT("Enable Tau Prioritisation"), wxT(""), wxITEM_CHECK );
     showdc = opts->Append( ID_SHOWDC, wxT("Show Don't Cares in State Changes"), wxT(""), wxITEM_CHECK );
     opts->Append( ID_DELAY, wxT("Set Play Delay"), wxT("") );
-#ifdef __WINDOWS__
-    opts->Append( ID_FITCS, wxT("F&it to Current State	CTRL-f"), wxT("") )->Enable(false);
-#else
     opts->Append( ID_FITCS, wxT("F&it to Current State	CTRL-f"), wxT("") );
-#endif
     menu->Append( opts, wxT("&Options") );
 
     wxMenu *views = new wxMenu;
@@ -238,6 +234,7 @@ void XSimMain::CreateContent()
 
     split->SplitHorizontally(bottompanel,toppanel);
     split->SetMinimumPaneSize(27);
+    split->SetSashGravity(1.0);
     mainsizer->Add(split, 1, wxEXPAND|wxALIGN_CENTER|wxALL, 5);
     
     SetMinSize(wxSize(240,160));
@@ -256,6 +253,14 @@ void XSimMain::CreateContent()
 
     stateview->SetColumnWidth(1,stateview->GetClientSize().GetWidth() - stateview->GetColumnWidth(0));
     transview->SetColumnWidth(1,transview->GetClientSize().GetWidth() - transview->GetColumnWidth(0));
+    
+    /* Obtain height information of stateview; needed for FitCurrentState() */
+    stateview->InsertItem(0,wxT("tmp"));
+    wxRect r;
+    stateview->GetItemRect(0,r);
+    stateview_header_height = r.y;
+    stateview_item_height = r.GetHeight();
+    stateview->DeleteAllItems();
 }
 
 void XSimMain::UpdateSizes(wxCommandEvent& event) {
@@ -283,9 +288,14 @@ void XSimMain::UpdateSizes(wxCommandEvent& event) {
     transview->SetColumnWidth(1, s);
   }
 
-  s = split->GetClientSize().GetHeight() >> 1;
-
-  split->SetSashPosition(s);
+  /* hack to avoid unnecessary scrollbars */
+  int w,h;
+  transview->GetClientSize(&w,&h);
+  transview->SetClientSize(0,0);
+  transview->SetClientSize(w,h);
+  stateview->GetClientSize(&w,&h);
+  stateview->SetClientSize(0,0);
+  stateview->SetClientSize(w,h);
 }
 
 void XSimMain::SetInteractiveness(bool interactive)
@@ -900,13 +910,23 @@ void XSimMain::OnSaveTrace( wxCommandEvent& /* event */ )
 
 void XSimMain::OnFitCurrentState( wxCommandEvent& /* event */ )
 {
-#if !defined(__WINDOWS__) && !defined(__WXMAC__)
-    int w,h,n;
+    int w,h,n,newpos;
 
-    n = stateview->GetViewRect().GetHeight()+stateview->m_headerHeight;
+    /* calculate desired height */
+    n = stateview_header_height+stateview->GetItemCount()*stateview_item_height;
+    /* get current size of stateview */
     stateview->GetClientSize(&w,&h);
-    split->SetSashPosition(split->GetSashPosition()-(n-h));
-#endif
+    /* position of splitter should be moved by the difference in the
+     * current height and the desired height */
+    newpos = split->GetSashPosition()-(n-h);
+    /* SetSashPosition doesn't seem to like non-positive numbers */
+    if ( newpos <= 0 )
+      newpos = 1;
+    /* reposition splitter */
+    split->SetSashPosition(newpos);
+    /* hack to avoid unnecessary scrollbars */
+    stateview->SetClientSize(0,n);
+    stateview->SetClientSize(w,n);
 }
 
 void XSimMain::OnTrace( wxCommandEvent& /* event */ )

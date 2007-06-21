@@ -120,6 +120,8 @@ private:
     wxBoxSizer *topsizer;
     wxBoxSizer *topboxsizer;
     wxListView *stateview;
+    int stateview_header_height;
+    int stateview_item_height;
     wxPanel *bottompanel;
     wxBoxSizer *bottomsizer;
     wxBoxSizer *bottomboxsizer;
