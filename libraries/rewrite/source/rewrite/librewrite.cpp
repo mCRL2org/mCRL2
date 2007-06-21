@@ -26,6 +26,10 @@ Rewriter::Rewriter()
 
 Rewriter::~Rewriter()
 {
+	if ( substs_size > 0 )
+	{
+		ATunprotectArray(substs);
+	}
 	free(substs);
 }
 
