@@ -97,11 +97,12 @@ void XSimTrace::AddState(ATermAppl Transition, ATerm State, bool enabled)
 	if ( Transition != NULL )
 	{
 		stringstream ss;
-		unsigned int l = traceview->GetItemCount();
-                unsigned int real_l;
+		long l = traceview->GetItemCount();
+                long real_l;
 
-		real_l = traceview->InsertItem(l,wxString::Format(wxT("%u"),l));
+		real_l = traceview->InsertItem(l,wxString::Format(wxT("%li"),l));
                 traceview->SetItemData(real_l,l);
+        	real_l = traceview->FindItem(-1,l);
 		traceview->SetItem(real_l,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) Transition, ppDefault).c_str()));
 		PrintState(ss,State,simulator->GetNextState());
 		traceview->SetItem(real_l,2,wxConvLocal.cMB2WX(ss.str().c_str()));
@@ -126,7 +127,7 @@ void XSimTrace::StateChanged(ATermAppl Transition, ATerm State, ATermList /* Nex
 
 		while ( l > current_pos )
 		{
-			traceview->DeleteItem(l);
+			traceview->DeleteItem(traceview->FindItem(-1,l));
 			l--;
 		}
 		AddState(Transition,State,true);
@@ -140,7 +141,7 @@ void XSimTrace::Reset(ATerm State)
 
 	traceview->DeleteAllItems();
 	traceview->InsertItem(0,wxT("0"));
-        traceview->SetItemData(0,0);
+	traceview->SetItemData(0,0);
 	traceview->SetItem(0,1,wxT(""));
 	PrintState(ss,State,simulator->GetNextState());
 	traceview->SetItem(0,2,wxConvLocal.cMB2WX(ss.str().c_str()));
@@ -153,10 +154,11 @@ void XSimTrace::Undo(unsigned int Count)
 	while ( Count > 0 )
 	{
 		wxColor col(245,245,245);
-		traceview->SetItemBackgroundColour(current_pos,col);
+		traceview->SetItemBackgroundColour(traceview->FindItem(-1,current_pos),col);
 		current_pos--;
 		Count--;
 	}
+        traceview->SortItems(compare_items,0);
 }
 
 void XSimTrace::Redo(unsigned int Count)
@@ -165,9 +167,10 @@ void XSimTrace::Redo(unsigned int Count)
 	{
 		wxColor col(255,255,255);
 		current_pos++;
-		traceview->SetItemBackgroundColour(current_pos,col);
+		traceview->SetItemBackgroundColour(traceview->FindItem(-1,current_pos),col);
 		Count--;
 	}
+        traceview->SortItems(compare_items,0);
 }
 
 void XSimTrace::TraceChanged(ATermList Trace, unsigned int From)
@@ -177,7 +180,7 @@ void XSimTrace::TraceChanged(ATermList Trace, unsigned int From)
 	while ( l > From )
 	{
 		l--;
-		traceview->DeleteItem(l);
+		traceview->DeleteItem(traceview->FindItem(-1,l));
 	}
 
 	for (; !ATisEmpty(Trace); Trace=ATgetNext(Trace))
@@ -220,6 +223,6 @@ void XSimTrace::OnListItemActivated( wxListEvent &event )
 {
 	if ( simulator != NULL )
 	{
-		simulator->SetTracePos(event.GetIndex());
+		simulator->SetTracePos(traceview->GetItemData(event.GetIndex()));
 	}
 }
