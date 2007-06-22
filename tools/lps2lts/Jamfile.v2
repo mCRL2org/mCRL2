@@ -12,7 +12,7 @@ exe lps2lts
          /libraries//trace
          /libraries//lts
        : <toolset>msvc:<library>/libraries//getopt
-         <squadt_support>enable
+         <squadt-connectivity>implemented
        ;
 
 install-binaries install

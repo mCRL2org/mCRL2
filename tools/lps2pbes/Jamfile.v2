@@ -9,7 +9,7 @@ exe lps2pbes
          /libraries//mcrl2_basic
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
-         <squadt_support>enable
+         <squadt-connectivity>implemented
        ;
 
 install-binaries install

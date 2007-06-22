@@ -7,7 +7,7 @@ exe ltsconvert
          /libraries//lts
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
-         <squadt_support>enable
+         <squadt-connectivity>implemented
        ;
 
 install-binaries install

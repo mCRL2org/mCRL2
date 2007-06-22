@@ -7,7 +7,7 @@ exe lpsuntime
          /libraries//mcrl2_basic
          /libraries//lps
          /site-config//boost_program_options
-       : <squadt_support>enable
+       : <squadt-connectivity>implemented
          <include>.
        ;
 

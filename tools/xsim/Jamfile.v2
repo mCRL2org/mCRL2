@@ -25,7 +25,7 @@ exe xsim
          /libraries//mcrl2_basic
          /site-config//wx_base
        : <toolset>gcc:<linkflags>"-Wl,-export-dynamic"
-         <squadt_support>enable
+         <squadt-connectivity>implemented
          <wx>yes
        ;
 

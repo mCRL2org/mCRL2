@@ -9,7 +9,7 @@ exe lpsdecluster
          /libraries//nextstate
          /site-config//boost_program_options
        : <include>.
-       : <squadt_support>enable
+       : <squadt-connectivity>implemented
        ;
 
 install-binaries install

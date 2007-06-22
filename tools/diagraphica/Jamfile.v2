@@ -10,7 +10,7 @@ exe diagraphica
         /libraries//ticpp
         /libraries/utilities//spinctrlfloat
         /site-config//wx_gl
-      : <squadt_support>enable
+      : <squadt-connectivity>implemented
         <wx>yes
       ;
 

@@ -8,7 +8,7 @@ exe lpsconstelm
          /libraries//rewrite
          /libraries//lps
          /site-config//boost_program_options
-       : <squadt_support>enable
+       : <squadt-connectivity>implemented
          <include>.
        ;
 

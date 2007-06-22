@@ -20,7 +20,7 @@ exe pbes2bes
          /libraries//parser
          /site-config//boost_program_options
        : <include>.
-         <squadt_support>enable
+         <squadt-connectivity>implemented
        ;
 
 exe pbes2bool
@@ -31,7 +31,7 @@ exe pbes2bool
          /libraries//rewrite
          /site-config//boost_program_options
        : <include>.
-         <squadt_support>enable
+         <squadt-connectivity>implemented
        ;
 
 install-binaries install

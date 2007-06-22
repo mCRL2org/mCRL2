@@ -29,7 +29,7 @@ exe ltsview
         /libraries/utilities//colorbutton
         /site-config//boost_signals
         /site-config//wx_gl
-      : <squadt_support>enable
+      : <squadt-connectivity>implemented
         <wx>yes
       ;
 

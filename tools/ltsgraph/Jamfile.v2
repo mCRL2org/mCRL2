@@ -11,7 +11,7 @@ exe ltsgraph
          /libraries//lts
          /site-config//wx_base
        : <wx>yes
-         <squadt_support>enable
+         <squadt-connectivity>implemented
        ;
 
 install-binaries install
