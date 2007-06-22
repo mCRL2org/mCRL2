@@ -442,10 +442,21 @@
 
  \section{Implementation} \label{s:message_definitions}
 
-  The messages are structured using XML and the communication medium is a TCP
-  connection. The choice for XML is obvious there is wide support in many
-  programming languages and it makes the messages readable, making it easy to
-  print and verify the structure and contents.
+  \subsection{Transport}
+
+   \noindent The TCP/IP protocol suite is chosen as the means of transport. It is
+   well-known and supported by a lot of programming languages. The protocol
+   requires connection-state a tool is authenticated once and on failure the
+   connection is terminated. In addition, because meaning is assigned to the
+   order of messages, the protocol requires that messages are delivered in the
+   same order as which they were offered to the sender.
+
+  \subsection{Message Structure}
+
+   The choice for XML is obvious we aim for extensibility and XML to some
+   extend allows changes to the format extensions to the format there is wide
+   support in many programming languages and it makes the messages readable,
+   making it easy to print and manually verify the structure and contents.
   
   Straightforward alternatives for the communication medium are pipes (standard
   input/output) or UDP. TCP was chosen over pipes because it allows

@@ -21,6 +21,10 @@ alias squadt_interface.main
       : <threading>multi
         <use>/libraries/sip//tool_interface
         <use>/libraries/mcrl2_basic//headers
+        <define>ENABLE_SQUADT_CONNECTIVITY
+      :
+      : <library>/libraries/sip//tool_interface
+        <define>ENABLE_SQUADT_CONNECTIVITY
       ;
 
 lib squadt_interface
@@ -67,7 +71,7 @@ lib utilities
 alias utilities
       : /libraries//mcrl2
       : <link>shared
-        <squadt_support>incorporate
+        <squadt-support>yes:<source>squadt_interface.main
       ;
 
 alias utilities.alias

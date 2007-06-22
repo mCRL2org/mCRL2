@@ -19,10 +19,10 @@ if ! [ MATCH (address-model).* : [ modules.peek : ARGV ] ] {
 }
 
 if ! ( "@OPTIMISATIONS@" = "disable" ) {
-  OPTIMISATIONS = <optimization>speed <inlining>full ;
+  OPTIMISATIONS = <optimization>speed ;
 }
 else {
-  OPTIMISATIONS = <optimization>off <inlining>off ;
+  OPTIMISATIONS = <optimization>off ;
 }
 
 BUILD_EXTRA = "@BUILD_EXTRA@" ;

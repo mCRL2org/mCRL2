@@ -20,7 +20,7 @@ exe mcrl22lps
          /libraries//rewrite
          /libraries/parser//alpha
        : <toolset>msvc:<library>/libraries//getopt
-       : <squadt_support>enable
+         <squadt-connectivity>implemented
        ;
 
 exe alpha
