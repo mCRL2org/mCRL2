@@ -1214,14 +1214,21 @@ static ATbool gstcAddConstant(ATermAppl OpId, const char* msg, bool high_level){
   ATermAppl Name = gsGetName(OpId);
   ATermAppl Sort = gsGetSort(OpId);
 
+  gsVerboseMsg("OpId: %T; Name: %T; Sort: %T \n",OpId, Name, Sort);
+
   if(ATAtableGet(context.constants, (ATerm)Name) || ATLtableGet(context.functions, (ATerm)Name)){
     gsErrorMsg("double declaration of %s %P\n", msg, Name);
     return ATfalse;
   }
 
-  if(high_level && (ATAtableGet(gssystem.constants, (ATerm)Name) || ATLtableGet(gssystem.functions, (ATerm)Name))){
-    gsErrorMsg("attempt to redeclare the system identifier with %s %P\n", msg, Name);
-    return ATfalse;
+  if(ATLtableGet(gssystem.constants, (ATerm)Name) || ATLtableGet(gssystem.functions, (ATerm)Name)){
+    if(high_level){
+      gsErrorMsg("attempt to redeclare the system identifier with %s %P\n", msg, Name);
+      return ATfalse;
+    } else {
+      // In this case we ignore the constant, i.e. don't add it to the context.constants
+      return Result;
+    }
   }
   
   ATtablePut(context.constants, (ATerm)Name, (ATerm)Sort);
