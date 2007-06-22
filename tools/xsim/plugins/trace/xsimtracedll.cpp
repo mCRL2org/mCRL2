@@ -224,7 +224,7 @@ void XSimTraceDLL::OnListItemActivated( wxListEvent &event )
 {
 	if ( simulator != NULL )
 	{
-		simulator->SetTracePos(traceview->GetItemData(event.GetIndex()));
+		simulator->SetTracePos(event.GetData());
 	}
 }
 
