@@ -19,32 +19,24 @@ obj colorbutton.o   : colorbutton.cpp   : <cxxflags>"$(WX_CPPFLAGS)" <include>..
 alias squadt_interface.main
       : squadt_interface.cpp
       : <threading>multi
-        <use>/libraries/sip//sip_tool
+        <use>/libraries/sip//tool_interface
         <use>/libraries/mcrl2_basic//headers
-      :
-      : <library>/libraries/sip//sip_tool
-        <define>ENABLE_SQUADT_CONNECTIVITY
       ;
 
 lib squadt_interface
       : squadt_interface.main 
       : <link>static
         <library>/libraries//mcrl2_basic
-      :
       ;
 
 alias squadt_interface
-      : /libraries//utilities
-      : <link>shared
       :
-      : <library>/libraries/sip//sip_tool
+      : <link>shared
       ;
 
 alias squadt_interface.alias
       : squadt_interface.main
       : <use>headers
-      :
-      : <use>/libraries/sip//sip_tool
       ;
 
 alias utilities.main
@@ -61,7 +53,6 @@ alias utilities.main
       : <use>/libraries/aterm//headers
         <use>/libraries/mcrl2_basic//headers
         <use>/libraries/rewrite//headers
-        <squadt_support>enable:<source>squadt_interface
         <wx>yes:<source>spinctrlfloat.o
         <wx>yes:<source>colorbutton.o
         <wx>yes:<library>/site-config//wx_base
@@ -76,6 +67,7 @@ lib utilities
 alias utilities
       : /libraries//mcrl2
       : <link>shared
+        <squadt_support>incorporate
       ;
 
 alias utilities.alias
