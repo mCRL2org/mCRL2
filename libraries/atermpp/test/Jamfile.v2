@@ -18,6 +18,8 @@ test-suite aterm
       [ run is_quoted.cpp ]
       [ run algorithm_test.cpp ]
       [ run operators.cpp ]
-      [ run table_test.cpp ]
       [ run replace_test.cpp ]
+      [ run table_test.cpp ]
+      [ run indexed_set_test.cpp ]
+      [ run dictionary_test.cpp ]
     ;

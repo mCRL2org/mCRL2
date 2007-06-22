@@ -29,41 +29,10 @@ void test_table()
   BOOST_CHECK(a = make_term("f(a)"));
 }
 
-void test_indexed_set()
-{
-  indexed_set t(100, 75);
-
-  std::pair<long, bool> p;
-  p = t.put(make_term("a"));
-  BOOST_CHECK(t.elements().size() == 1);
-  p = t.put(make_term("b"));
-  BOOST_CHECK(t.elements().size() == 2);
-
-  BOOST_CHECK(t.index(make_term("a")) == 0);
-  BOOST_CHECK(t.index(make_term("b")) == 1);
-
-  aterm a = t.get(0);
-  BOOST_CHECK(a == make_term("a"));
-
-  aterm b = t.get(1);
-  BOOST_CHECK(b == make_term("b"));
-  
-  t.remove(a);
-  BOOST_CHECK(t.elements().size() == 1);
-
-  p = t.put(make_term("c"));
-  BOOST_CHECK(t.elements().size() == 2);
-  BOOST_CHECK(p.first == 0);
-
-  t.reset();
-  BOOST_CHECK(t.elements().size() == 0);
-}
-
 int test_main( int, char*[] )
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
+  aterm bottom_of_stack;
+  aterm_init(bottom_of_stack);
   test_table();
-  test_indexed_set();
   return 0;
 }

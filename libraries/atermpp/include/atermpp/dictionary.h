@@ -10,6 +10,7 @@
 #ifndef MCRL2_ATERMPP_DICTIONARY_H
 #define MCRL2_ATERMPP_DICTIONARY_H
 
+#include <boost/utility.hpp>
 #include "atermpp/aterm.h"
 
 namespace atermpp
@@ -17,7 +18,7 @@ namespace atermpp
   //---------------------------------------------------------//
   //                     dictionary
   //---------------------------------------------------------//
-  class dictionary: public aterm
+  class dictionary: public aterm, boost::noncopyable
   {
    public:
       /// Create a new dictionary.
@@ -30,7 +31,7 @@ namespace atermpp
       ///
       aterm get(aterm key)
       {
-        return ATdictGet(to_ATerm(), key.to_ATerm());
+        return ATdictGet(*this, key);
       }
       
       /// Add / update a (key, value)-pair in a dictionary.
@@ -39,15 +40,15 @@ namespace atermpp
       ///
       void put(aterm key, aterm value)
       {
-        m_term = ATdictPut(to_ATerm(), key.to_ATerm(), value.to_ATerm());
+        m_term = ATdictPut(*this, key, value);
       }
       
       /// Remove the (key, value)-pair from the dictionary.
       /// This function can be used to remove an entry from the dictionary.
       ///
-      void dict_remove(aterm key)
+      void remove(aterm key)
       {
-        m_term = ATdictRemove(to_ATerm(), key.to_ATerm());
+        m_term = ATdictRemove(*this, key);
       }
   };
 

@@ -10,6 +10,7 @@
 #ifndef MCRL2_ATERMPP_INDEXED_SET_H
 #define MCRL2_ATERMPP_INDEXED_SET_H
 
+#include <boost/utility.hpp>
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
 
@@ -18,7 +19,7 @@ namespace atermpp
   //---------------------------------------------------------//
   //                     indexed_set
   //---------------------------------------------------------//
-  class indexed_set
+  class indexed_set: boost::noncopyable
   {
    protected:
       ATermIndexedSet m_set;
