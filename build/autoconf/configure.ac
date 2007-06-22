@@ -175,10 +175,9 @@ AC_ARG_ENABLE(
                  [disables compile-time optimisation])
 )
 if test "x$enable_optimisation" = xno; then
- OFLAGS=""
  OPTIMISATIONS="disable"
+ BUILD_EXTRA="optimization=speed $BUILD_EXTRA"
 else
- OFLAGS="-O2"
  OPTIMISATIONS="enable"
 fi
 AC_SUBST([OPTIMISATIONS],[])
@@ -194,6 +193,7 @@ if test "x$enable_debug" = xyes; then
   CXXFLAGS="$CXXFLAGS -g -Wall $OFLAGS -W"
   BFLAGS="-t $BFLAGS"
   BUILD_VARIANT="debug"
+  BUILD_EXTRA="debug-symbols=on runtime-debugging=on $BUILD_EXTRA"
 else
   CPPFLAGS="-DNDEBUG $CPPFLAGS"
   CFLAGS="$CFLAGS $OFLAGS -w"
@@ -208,6 +208,7 @@ AC_ARG_ENABLE(
 )
 if test "x$enable_profile" = xyes; then
   BUILD_VARIANT="profile"
+  BUILD_EXTRA="profiling=on $BUILD_EXTRA"
   CPPFLAGS="-pg $CPPFLAGS"
   LDFLAGS="-pg $LDFLAGS"
 fi
