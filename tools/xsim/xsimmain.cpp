@@ -31,6 +31,7 @@
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
 # define wxFD_SAVE wxSAVE
+# define wxFD_CHANGE_DIR wxCHANGE_DIR
 #endif
 
 using namespace std;
