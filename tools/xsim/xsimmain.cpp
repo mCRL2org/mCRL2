@@ -745,7 +745,7 @@ ATermList XSimMain::traceRedo()
 
 void XSimMain::OnOpen( wxCommandEvent& /* event */ )
 {
-  wxFileDialog dialog( this, wxT("Select a LPS file..."), wxT(""), wxT(""), wxT("LPSs (*.lps)|*.lps|All files|*"),wxCHANGE_DIR);
+  wxFileDialog dialog( this, wxT("Select a LPS file..."), wxT(""), wxT(""), wxT("LPSs (*.lps)|*.lps|All files|*"),wxFD_CHANGE_DIR);
   if ( dialog.ShowModal() == wxID_OK )
   {
     LoadFile(dialog.GetPath());
@@ -774,7 +774,7 @@ void XSimMain::OnReset( wxCommandEvent& /* event */ )
 
 void XSimMain::OnLoadTrace( wxCommandEvent& /* event */ )
 {
-    wxFileDialog dialog( this, wxT("Load trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"),wxCHANGE_DIR);
+    wxFileDialog dialog( this, wxT("Load trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"),wxFD_CHANGE_DIR);
     if ( dialog.ShowModal() == wxID_OK )
     {
 	    string fn(dialog.GetPath().fn_str());
@@ -883,7 +883,7 @@ void XSimMain::OnLoadTrace( wxCommandEvent& /* event */ )
 
 void XSimMain::OnSaveTrace( wxCommandEvent& /* event */ )
 {
-    wxFileDialog dialog( this, wxT("Save trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"),wxFD_SAVE|wxCHANGE_DIR);
+    wxFileDialog dialog( this, wxT("Save trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"),wxFD_SAVE|wxFD_CHANGE_DIR);
     if ( dialog.ShowModal() == wxID_OK )
     {
 	    Trace tr;

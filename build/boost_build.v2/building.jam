@@ -31,14 +31,22 @@ if ! deprecated in [ MATCH "--enable-(deprecated)" : $(FULL_COMMAND_LINE) ] {
 
 # Disable squadt support in tools
 if ! squadt in [ MATCH "--disable-(squadt)-support" : $(FULL_COMMAND_LINE) ] {
-  feature.feature squadt_support : disable enable : incidental composite ;
+  feature.feature squadt_support : disable enable incorporate : incidental composite ;
 
   feature.compose <squadt_support>enable
         : <library>/libraries/utilities//squadt_interface
+          <library>/libraries/sip//tool_interface
+          <define>ENABLE_SQUADT_CONNECTIVITY
+        ;
+
+  feature.compose <squadt_support>incorporate
+        : <source>/libraries/utilities//squadt_interface.main
+          <library>/libraries/sip//tool_interface
+          <define>ENABLE_SQUADT_CONNECTIVITY
         ;
 }
 else {
-  feature.feature squadt_support : disable enable : incidental ;
+  feature.feature squadt_support : disable enable incorporate : incidental ;
 }
 
 # Feature for linking to the opengl library

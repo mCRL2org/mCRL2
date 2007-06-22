@@ -95,8 +95,8 @@ lib sip-tool
       <link>static
     ;
 
-alias sip_tool       : sip            : <link>shared ;
-alias sip_tool       : sip-tool       : <link>static ;
-alias sip_controller : sip            : <link>shared ;
-alias sip_controller : sip-controller : <link>static ;
+alias tool_interface       : sip            : <link>shared ;
+alias tool_interface       : sip-tool       : <link>static ;
+alias controller_interface : sip            : <link>shared ;
+alias controller_interface : sip-controller : <link>static ;
 
