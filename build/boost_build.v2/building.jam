@@ -30,7 +30,7 @@ if ! deprecated in [ MATCH "--enable-(deprecated)" : $(FULL_COMMAND_LINE) ] {
 }
 
 # Enable/disable squadt connectivity code in tools
-feature.feature squadt-connectivity : none implemented : incidental composite ;
+feature.feature squadt-connectivity : none implemented : optional incidental composite ;
 
 if ! squadt in [ MATCH "--disable-(squadt)-support" : $(FULL_COMMAND_LINE) ] {
   feature.feature squadt-support : yes no ;

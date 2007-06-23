@@ -27,6 +27,7 @@ exe ltsview
         visobjectfactory.cpp
         visualizer.cpp
         /libraries/utilities//colorbutton
+        /libraries//lts
         /site-config//boost_signals
         /site-config//wx_gl
       : <squadt-connectivity>implemented

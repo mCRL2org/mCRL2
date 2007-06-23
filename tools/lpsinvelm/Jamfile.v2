@@ -4,6 +4,7 @@ project lpsinvelm
 
 exe lpsinvelm
        : lpsinvelm.cpp
+         /libraries//parser
          /libraries//prover
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
