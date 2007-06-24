@@ -47,8 +47,11 @@ namespace squadt {
       boost::dynamic_pointer_cast < task_monitor_impl > (impl)->await_process();
     }
 
-    void task_monitor::finish() {
-      boost::dynamic_pointer_cast < task_monitor_impl > (impl)->finish();
+    /**
+     * \param[in] b whether or not to wait for processes to finish
+     **/
+    void task_monitor::finish(bool b) {
+      boost::dynamic_pointer_cast < task_monitor_impl > (impl)->finish(b);
     }
 
     void task_monitor::shutdown() {

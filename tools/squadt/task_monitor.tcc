@@ -104,7 +104,7 @@ namespace squadt {
         inline void disconnect();
 
         /** \brief Unblocks waiters and requests a tool to prepare termination */
-        inline void finish();
+        inline void finish(bool = false);
 
         /** \brief Clears handlers and terminates processes */
         inline void shutdown();
@@ -149,12 +149,12 @@ namespace squadt {
       if (!connected) {
         boost::xtime time;
 
+        xtime_get(&time, boost::TIME_UTC);
+
+        time.sec += ts;
+
         while (associated_process.get() == 0 || !connected) {
           /* Other side has not connected and the process has not been registered as terminated */
-          xtime_get(&time, boost::TIME_UTC);
-
-          time.sec += ts;
-
           if (!register_condition.timed_wait(l, time)) {
             /* Timeout occurred */
             break;
@@ -327,9 +327,17 @@ namespace squadt {
       associated_process = p;
     }
 
-    inline void task_monitor_impl::finish() {
+    /**
+     * \param[in] b whether to wait for the process to terminate (whether or not to block)
+     **/
+    inline void task_monitor_impl::finish(bool b) {
       /* Let the tool know that it should prepare for termination */
-      boost::thread t(boost::bind(&task_monitor_impl::terminate_process, this));
+      if (b) {
+        terminate_process();
+      }
+      else {
+        boost::thread t(boost::bind(&task_monitor_impl::terminate_process, this));
+      }
     }
 
     inline void task_monitor_impl::disconnect() {

@@ -276,7 +276,7 @@ namespace squadt {
       /* Wait until configuration is accepted, or the tool has terminated */
       if (await_message(sip::message_configuration).get() != 0) {
         /* End tool execution */
-        finish();
+        finish(true);
 
         /* Operation completed successfully */
         t->impl->process_configuration(get_configuration(), old_outputs, false);
@@ -336,7 +336,7 @@ namespace squadt {
     }
 
     /* End tool execution */
-    finish();
+    finish(true);
 
     /* Force the project manager to do a status update */
     boost::shared_ptr < project_manager > g(t->impl->manager);
@@ -579,6 +579,11 @@ namespace squadt {
     impl->run(impl->interface_object.lock(), h, impl->current_monitor->get_configuration(), b);
   }
 
+  /**
+   * \param[in] b whether or not to run when there are no input objects defined
+   *
+   * \pre t.get() == this
+   **/
   void processor::run(bool b) {
     assert(impl->interface_object.lock().get() == this);
 

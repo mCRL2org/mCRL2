@@ -93,7 +93,7 @@ namespace squadt {
         void disconnect(execution::process*);
 
         /** \brief Unblocks waiters and requests a tool to prepare termination */
-        void finish();
+        void finish(bool = false);
 
         /** \brief Terminates running processes and deactivates monitor */
         void shutdown();
