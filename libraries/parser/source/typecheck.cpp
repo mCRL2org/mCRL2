@@ -536,11 +536,113 @@ failed:
 }
 
 ATermAppl type_check_action_rename(ATermAppl action_rename, lps::specification &lps_spec){
+  ATermAppl Result=NULL;
+  gsDebugMsg ("type checking phase started\n");
+  gstcDataInit();
 
-  return action_rename;
+  gsDebugMsg ("type checking of action renamings read-in phase started\n");
+
+  //XXX read-in from LPS (not finished)
+  if(gstcReadInSorts((ATermList) lps_spec.data().sorts(),false)){
+    if(gstcReadInConstructors()){
+       if(gstcReadInFuncs(ATconcat((ATermList) lps_spec.data().constructors(),(ATermList) lps_spec.data().mappings()),false)){
+         if(!gstcReadInActs((ATermList) lps_spec.action_labels()))
+           gsWarningMsg("Ignoring the previous error(s), the formula will be typechecked without action label information.\n");
+         gsDebugMsg ("type checking of action renamings read-in phase of LPS finished\n");
+
+	 assert(gsIsActionRename(action_rename));
+
+         ATermAppl data_spec = ATAgetArgument(action_rename, 0);
+         if(!gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
+	   goto failed;
+	 }
+         // Check sorts for loops
+         // Unwind sorts to enable equiv and subtype relations
+         if(!gstcReadInConstructors()) {
+           goto failed;
+         }
+         if(!gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(data_spec,1),0),
+                                     ATLgetArgument(ATAgetArgument(data_spec,2),0)))) {
+           goto failed;
+         }
+         body.equations=ATLgetArgument(ATAgetArgument(data_spec,3),0);
+         if(!gstcReadInActs(ATLgetArgument(ATAgetArgument(action_rename,1),0))) {
+           goto failed;
+         }
+         gsDebugMsg ("type checking action renamings read-in phase of the ActionRename finished\n");
+
+         if(!gstcTransformVarConsTypeData()){
+           goto failed;
+         }
+         gsDebugMsg ("type checking transform VarConstTypeData phase finished\n");
+
+         data_spec=ATsetArgument(data_spec, (ATerm) gsMakeDataEqnSpec(body.equations),3);
+         Result=ATsetArgument(action_rename,(ATerm)data_spec,0);
+         Result=gstcFoldSortRefs(Result);
+         
+          
+         // now the action renaming rules themselves.
+         ATermAppl ActionRenameRules=ATAgetArgument(action_rename, 2);
+	 ATermList NewRules=ATmakeList0();
+
+         ATermTable DeclaredVars=ATtableCreate(63,50);
+         ATermTable FreeVars=ATtableCreate(63,50);
+
+         bool b = true;
+
+         for(ATermList l=ATLgetArgument(ActionRenameRules,0);!ATisEmpty(l);l=ATgetNext(l)){
+           ATermAppl Rule=ATAgetFirst(l);
+           assert(gsIsActionRenameRule(Rule));
+
+           ATermList VarList=ATLgetArgument(Rule,0);
+           if(!gstcVarsUnique(VarList)){ b = false; gsErrorMsg("the variables in action rename rule %P are not unique\n",VarList,Rule); break;}
+
+           ATermTable NewDeclaredVars=gstcAddVars2Table(DeclaredVars,VarList);
+           if(!NewDeclaredVars){ b = false; break; }
+           else DeclaredVars=NewDeclaredVars;
+
+           ATermAppl Left=ATAgetArgument(Rule,2);
+	   assert(gsIsParamId(Left));
+	   Left=gstcTraverseActProcVarConstP(DeclaredVars,Left);
+	   if(!Left) { b = false; break; }
+
+           ATermAppl Cond=ATAgetArgument(Rule,1);
+           if(!gsIsNil(Cond) && !(gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Cond,gsMakeSortIdBool()))){ b = false; break; }
+
+           ATermAppl Right=ATAgetArgument(Rule,3);
+           assert(gsIsParamId(Right));
+           Right=gstcTraverseActProcVarConstP(DeclaredVars,Right);
+           if(!Right) { b = false; break; }
+
+	   NewRules=ATinsert(NewRules,(ATerm)gsMakeActionRenameRule(VarList,Cond,Left,Right));
+	 }
+         ATtableDestroy(FreeVars);
+         ATtableDestroy(DeclaredVars);
+	 if(!b){
+           goto failed;
+         }
+
+	 ActionRenameRules=ATsetArgument(ActionRenameRules,(ATerm)ATreverse(NewRules),0);
+         Result=ATsetArgument(Result,(ATerm)ActionRenameRules,2);
+         gsDebugMsg ("type checking phase finished\n");
+       }
+       else {
+         gsErrorMsg("Reading functions from LPS failed.\n");
+       }
+    }
+    else {
+      gsErrorMsg("Reading structure constructors from LPS failed.\n");
+    }
+  }
+  else {
+    gsErrorMsg("Reading sorts from LPS failed.\n");
+  }
+
+failed:
+  gstcDataDestroy();
+  gsDebugMsg("return NULL\n");
+  return Result;
 }
-
-
 
 //local functions
 //---------------
