@@ -411,6 +411,9 @@ using namespace ::mcrl2::utilities;
       gsVerboseMsg("parsing input file '%s'...\n", f_invariant_file_name);
       f_invariant = parse_data_expr(instream);
       instream.close();
+      if(!f_invariant){
+        exit(1);
+      }
 
       //f_invariant = (ATermAppl) read_ATerm_from_file(f_invariant_file_name, "invariant");
       f_lps = (ATermAppl) read_ATerm_from_file(f_lps_file_name, "LPS");

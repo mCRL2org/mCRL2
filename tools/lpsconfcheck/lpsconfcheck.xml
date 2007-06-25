@@ -149,7 +149,7 @@
     <term>&opt_invariant;=&invariant;</term>
     <listitem>
       <para>
-        Use the formula in internal mCRL2 format as
+        Use the formula in mCRL2 format as
         found in &invariant; as invariant
       </para>
     </listitem>

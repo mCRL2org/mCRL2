@@ -28,7 +28,7 @@
 <refsect1>
   <title>Description</title>
   <para>
-    The &lpsinvelm; tool checks whether the invariant in internal mCRL2 format as found in
+    The &lpsinvelm; tool checks whether the invariant (a boolean expression in mCRL2 format) as found in
     &invariant; holds for the mCRL2 LPS as found in &infile;. If the invariant holds, it will
     eliminate all summand of the LPS of which the condition violates the invariant.
     It can also be used to simplify the conditions of the summands of the given LPS.
@@ -110,7 +110,7 @@
     <term>&opt_invariant;=&invariant;</term>
     <listitem>
       <para>
-        Use the expression of sort &sort_bool; in internal mCRL2 format as
+        Use the expression of sort &sort_bool; in mCRL2 format as
         found in &invariant; as invariant
       </para>
     </listitem>

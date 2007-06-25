@@ -5,9 +5,13 @@
 #include "confluence_checker.h"
 #include "invariant_checker.h"
 #include "getopt.h"
+#include "libparse.h"
+#include "typecheck.h"
+#include "dataimpl.h"
 #include "print/messaging.h"
 #include "libstruct.h"
 #include <string>
+#include <fstream>
 
 using namespace ::mcrl2::utilities;
 
@@ -134,8 +138,8 @@ using namespace ::mcrl2::utilities;
         "specified, the resulting LPS is written to stdout.\n"
         "\n"
         "Mandatory arguments to long options are mandatory for short options too.\n"
-        "  -i, --invariant=INVARIANT       Use the formula in internal mCRL2 format as\n"
-        "                                  found in INVARIANT as invariant.\n"
+        "  -i, --invariant=INVARIANT       Use the formula (a boolean expression in mCRL2\n"
+        "                                  format) as found in INVARIANT as invariant.\n"
         "  -g. --generate-invariants       Try to prove that the reduced confluence\n"
         "                                  condition is an invariant of the LPS, in case\n"
         "                                  the confluence condition is not a tautology.\n"
@@ -387,17 +391,49 @@ using namespace ::mcrl2::utilities;
     /// LPS_Conf_Check::f_lps. If no input file name was specified, the LPS is read from stdin.
 
     void LPS_Conf_Check::read_input() {
+      gsEnableConstructorFunctions();
+      
       if (f_invariant_file_name != 0) {
-        f_invariant = (ATermAppl) read_ATerm_from_file(f_invariant_file_name, "invariant");
+        //f_invariant = (ATermAppl) read_ATerm_from_file(f_invariant_file_name, "invariant");
+        std::ifstream instream(f_invariant_file_name, std::ifstream::in|std::ifstream::binary);
+        if (!instream.is_open()) {
+          gsErrorMsg("cannot open input file '%s'\n", f_invariant_file_name);
+          exit(1);
+        }
+        gsVerboseMsg("parsing input file '%s'...\n", f_invariant_file_name);
+        f_invariant = parse_data_expr(instream);
+        instream.close();
+	if(!f_invariant){
+          exit(1);
+        }
       } else {
-        gsEnableConstructorFunctions();
         f_invariant = gsMakeOpIdTrue();
       }
       f_lps = (ATermAppl) read_ATerm_from_file(f_input_file_name, "LPS");
 
-      gsEnableConstructorFunctions();
-      if ((ATgetType(f_lps) != AT_APPL) || !gsIsSpecV1(f_lps)) {
+      //if ((ATgetType(f_lps) != AT_APPL) || !gsIsSpecV1(f_lps)) {
+      //  gsErrorMsg("The file '%s' does not contain an mCRL2 LPS.\n", f_lps_file_name);
+      //  exit(1);
+      //}
+
+      lps::specification lps_specification;
+      if (!lps_specification.load(f_input_file_name)) {
         gsErrorMsg("The file '%s' does not contain an mCRL2 LPS.\n", f_input_file_name);
+        exit(1);
+      }
+
+
+      //typecheck the invariant formula
+      f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), lps_specification, true);
+      if(!f_invariant){
+        gsErrorMsg("Typechecking of the invariant formula failed.\n");
+        exit(1);
+      }
+
+      //data implement the invariant formula
+      f_invariant = implement_data_data_expr(f_invariant,lps_specification);
+      if(!f_invariant){
+        gsErrorMsg("Data implementation of the invariant formula failed.\n");
         exit(1);
       }
     }
