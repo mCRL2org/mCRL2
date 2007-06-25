@@ -391,14 +391,14 @@ namespace squadt {
       bool   editable               = registry->has_registered_command(n.get_object()->mime_type);
       size_t separator_position     = 3;
 
-      context_menu.Append(cmID_EDIT, wxT("Edit"))->Enable(show_update_operations && editable);
-      context_menu.Append(cmID_RENAME, wxT("Rename"))->Enable(show_update_operations);
-      context_menu.Append(cmID_REMOVE, wxT("Remove"))->Enable(show_update_operations);
+      context_menu.Append(cmID_EDIT, wxT("edit"))->Enable(show_update_operations && editable);
+      context_menu.Append(cmID_RENAME, wxT("rename"))->Enable(show_update_operations);
+      context_menu.Append(cmID_REMOVE, wxT("remove"))->Enable(show_update_operations);
 
       if (generated) {
-        context_menu.Append(cmID_REFRESH, wxT("Refresh"))->Enable(show_update_operations);
-        context_menu.Append(cmID_CONFIGURE, wxT("Configure"))->Enable(show_update_operations);
-        context_menu.Append(cmID_CLEAN, wxT("Clean"))->Enable(show_update_operations);
+        context_menu.Append(cmID_REFRESH, wxT("refresh"))->Enable(show_update_operations);
+        context_menu.Append(cmID_CONFIGURE, wxT("configure"))->Enable(show_update_operations);
+        context_menu.Append(cmID_CLEAN, wxT("clean"))->Enable(show_update_operations);
 
         separator_position += 3;
       }
@@ -434,7 +434,7 @@ namespace squadt {
         context_menu.InsertSeparator(separator_position);
       }
 
-      context_menu.Append(cmID_DETAILS, wxT("Details"));
+      context_menu.Append(cmID_DETAILS, wxT("details"));
 
       object_view->PopupMenu(&context_menu);
     }

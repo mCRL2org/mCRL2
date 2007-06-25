@@ -224,7 +224,7 @@
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message:        & \msg{configuration} \\
+      message type:   & \msg{configuration} \\
      \hline
       direction       & controller to tool \\
       data:           & fresh $\times$ category $\times$ List (option) $\times$ inputs $\times$ outputs \\
@@ -255,7 +255,7 @@
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message:        & \msg{configuration} \\
+      message type:   & \msg{configuration} \\
      \hline
       direction       & tool to controller \\
       data:           & fresh $\times$ category $\times$ List (option) $\times$ inputs $\times$ outputs \\
@@ -291,7 +291,7 @@
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message:        & \msg{task\_start} \\
+      message type:   & \msg{task\_start} \\
      \hline
       direction       & controller to tool \\
      \hline
@@ -310,7 +310,7 @@
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message:        & \msg{task\_done} \\
+      message type:   & \msg{task\_done} \\
      \hline
       direction       & tool to controller \\
       data            & result : Bool \\
@@ -329,7 +329,7 @@
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message:        & \msg{report} \\
+      message type:   & \msg{report} \\
      \hline
       direction:      & tool to controller \\
       data:           & description $\times$ struct notice $|$ warning $|$ error \\
@@ -361,7 +361,7 @@
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message:        & \msg{display\_layout} \\
+      message type:   & \msg{display\_layout} \\
      \hline
       direction:      & tool to controller \\
       data:           & List (layout\_element) Where :\\
@@ -387,7 +387,7 @@
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message:        & \msg{interaction\_data} \\
+      message type:   & \msg{interaction\_data} \\
      \hline
       direction:      & controller to tool \\
       data:           & Id $\rightarrow$ State \\
@@ -401,7 +401,7 @@
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message:        & \msg{display\_data} \\
+      message type:   & \msg{display\_data} \\
      \hline
       direction:      & tool to controller \\
       data:           & Id $\rightarrow$ State \\
@@ -418,7 +418,7 @@
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message:         & \msg{termination} \\
+      message type:    & \msg{termination} \\
      \hline
       direction:       & controller to tool \\
       data:            & none \\
@@ -432,7 +432,7 @@
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message:        & \msg{termination} \\
+      message type:   & \msg{termination} \\
      \hline
       direction:      & tool to controller \\
       data:           & none \\
@@ -449,24 +449,29 @@
    requires connection-state a tool is authenticated once and on failure the
    connection is terminated. In addition, because meaning is assigned to the
    order of messages, the protocol requires that messages are delivered in the
-   same order as which they were offered to the sender.
+   same order as which they were offered to the sender. All requirements are
+   all supported by TCP/IP, note that for UDP/IP this is not the case.
 
   \subsection{Message Structure}
 
-   The choice for XML is obvious we aim for extensibility and XML to some
+   \noindent The choice for XML is obvious we aim for extensibility and XML to some
    extend allows changes to the format extensions to the format there is wide
    support in many programming languages and it makes the messages readable,
    making it easy to print and manually verify the structure and contents.
   
-  Straightforward alternatives for the communication medium are pipes (standard
-  input/output) or UDP. TCP was chosen over pipes because it allows
-  non-blocking input/output; it is not known which side will send the next
-  message. UDP also supports non-blocking input/output but it is connectionless
-  and does not support sequencing, meaning that the order in packets are
-  delivered is not guaranteed to be the same as the order in which they were
-  offered to a sender. The protocol assigns meaning to the order in which
-  messages are delivered so UDP is not an option.
-
   \subsection{XML Structure}
+
+   \noindent messages are wrapped in the <message> tag. The first child element
+   is the tag <message-meta>. The message meta tag has one mandatory attribute
+   \textit{type} that specifies the type of the message and occur only once. 
+   For example:
+
+   \begin{example}
+    <message>
+     <message-meta type="termination">
+      <![CDATA[message content]]>
+     </message-meta>
+    </message>
+   \end{example}
 
 \end{document}

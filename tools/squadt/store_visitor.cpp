@@ -192,21 +192,19 @@ namespace utility {
     out << "<default-actions>\n";
 
     BOOST_FOREACH(type_registry::actions_for_type::value_type c, r.command_for_type) {
-      out << " <associate-commands mime-type=\"" << c.first << "\">\n";
-      if (c.second == type_registry::command_system) {
-        /// Associated command is specified by the system
-        out << "  <command /";
-      }
-      else if (c.second == type_registry::command_none) {
-        /// No command is to be associated with this type
-        out << "  <no-command /";
-      }
-      else {
-        /// A custom command is associated with this type
-        out << "  <command><![CDATA[" << c.second << "]]></command";
-      }
+      if (c.second != type_registry::command_none) {
+        out << " <associate-commands mime-type=\"" << c.first << "\">\n";
+        if (c.second == type_registry::command_system) {
+          /// Associated command is specified by the system
+          out << "  <command /";
+        }
+        else {
+          /// A custom command is associated with this type
+          out << "  <command><![CDATA[" << c.second << "]]></command";
+        }
 
-      out << ">\n </associate-commands>\n";
+        out << ">\n </associate-commands>\n";
+      }
     }
 
     out << "</default-actions>\n";

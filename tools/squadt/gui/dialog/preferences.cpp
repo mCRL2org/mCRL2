@@ -153,7 +153,7 @@ namespace squadt {
             get_wxlist_value(s, formats_and_actions, selected, 0);
 
             global_build_system.get_type_registry()->register_command(
-                            mime_type(std::string(s.GetText().fn_str())), std::string(command_dialog.GetValue().fn_str()));
+                            mime_type(std::string(formats_and_actions->GetItemText(selected).fn_str())), std::string(command_dialog.GetValue().fn_str()));
           }
         }
         else {

@@ -28,8 +28,10 @@ namespace squadt {
         manual(wxWindow* p);
     };
 
-    manual::manual(wxWindow* p) : wxFrame(p, wxID_ANY, wxT("Manual"), wxDefaultPosition, wxDefaultSize,wxDEFAULT_FRAME_STYLE & ~(wxMAXIMIZE_BOX)) {
+    manual::manual(wxWindow* p) : wxFrame(p, wxID_ANY, wxT("Manual"), wxDefaultPosition, wxSize(800, 600), wxDEFAULT_FRAME_STYLE & ~(wxMAXIMIZE_BOX)) {
       build();
+
+      CenterOnParent();
 
       Connect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(manual::on_window_close));
     }

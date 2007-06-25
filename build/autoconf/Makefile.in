@@ -32,10 +32,8 @@ endif
 
 all: $(BJAM) tools man
 
-install: $(BJAM) man
+install: $(BJAM) install-man
 	$(BOOST_BUILD) --install
-	@install -d $(mandir)
-	@cp -rf build/man/* $(mandir)
 
 tools:
 	$(BOOST_BUILD)
@@ -52,6 +50,10 @@ $(MAN_MANIFEST): doc/*.xml
 		     $(DOCBOOK_XSL_PREFIX)/manpages/docbook.xsl index.xml
 
 man: $(MAN_MANIFEST)
+
+install-man: man
+	@install -d $(mandir)
+	@cp -rf build/man/* $(mandir)
 
 web: 
 	cd doc; $(XSLTPROC) --stringparam base.dir ../build/web/ \
