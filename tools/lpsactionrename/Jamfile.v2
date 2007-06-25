@@ -1,0 +1,18 @@
+project toolset/lpsactionrename
+       : build-dir $(BUILD_TOP)/lpsactionrename
+       ;
+
+exe lpsactionrename
+       : lpsactionrename.cpp
+         /libraries//lps
+         /libraries//parser
+         /libraries//mcrl2_basic
+       : <include>.
+         <toolset>msvc:<library>/libraries//getopt
+       ;
+
+install-binaries install
+       : lpsactionrename
+       :
+       : <status>experimental
+       ;

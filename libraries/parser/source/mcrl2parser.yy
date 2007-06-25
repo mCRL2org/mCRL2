@@ -44,6 +44,13 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 //Ret: specification containing one sort, constructor, operation, equation,
 //     action and process specification, and one initialisation, in that order.
 
+ATermAppl gsActionRenameEltsToActionRename(ATermList SpecElts);
+//Pre: ActionRenameElts contains zero or more occurrences of
+//     sort, constructor, operation, equation, action and action rename
+//     rules.
+//Ret: specification containing one sort, constructor, operation, equation,
+//     action and action rename rules in that order.
+
 #define safe_assign(lhs, rhs) { ATbool b; ATindexedSetPut(parser_protect_table, (ATerm) rhs, &b); lhs = rhs; }
 %}
 
@@ -65,7 +72,7 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 //---------
 
 %token <appl> TAG_SORT_EXPR TAG_DATA_EXPR TAG_MULT_ACT TAG_PROC_EXPR TAG_SPEC
-%token <appl> TAG_STATE_FRM
+%token <appl> TAG_STATE_FRM TAG_ACTION_RENAME
 %token <appl> LMERGE ARROW LTE GTE CONS SNOC CONCAT EQ NEQ AND BARS IMP BINIT
 %token <appl> ELSE
 %token <appl> STAR PLUS MINUS EQUALS DOT COMMA COLON SEMICOLON QMARK EXCLAM AT
@@ -120,6 +127,8 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %type <appl> act_frm act_frm_quant act_frm_imp act_frm_imp_rhs
 %type <appl> act_frm_and act_frm_and_rhs act_frm_at act_frm_prefix
 %type <appl> act_frm_quant_prefix act_frm_primary
+//action rename
+%type <appl> action_rename action_rename_elt action_rename_spec action_rename_rule 
 
 //sort expressions
 %type <list> domain_no_arrow domain_no_arrow_elts_hs struct_constructors_bs
@@ -138,6 +147,8 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %type <list> acts_decls_scs acts_decl proc_decls_scs data_vars_decls_cs
 //state formulas
 %type <list> fixpoint_params data_var_decl_inits_cs
+//action rename
+%type <list> action_rename_elts action_rename_rules_scs action_rename_sect
 
 %%
 
@@ -173,6 +184,11 @@ start:
       spec_tree = $$;
     }
   | TAG_STATE_FRM state_frm
+    {
+      safe_assign($$, $2);
+      spec_tree = $$;
+    }
+  | TAG_ACTION_RENAME action_rename
     {
       safe_assign($$, $2);
       spec_tree = $$;
@@ -2358,6 +2374,115 @@ act_frm_primary:
     }
   ;
 
+//Action rename
+//----------------
+action_rename:
+  action_rename_elts
+    {
+      safe_assign($$, gsActionRenameEltsToActionRename(ATreverse($1)));
+      gsDebugMsg("parsed action rename\n  %T\n", $$);
+    }
+  ;
+
+//action rename elements
+action_rename_elts:
+  action_rename_elt
+    {
+      safe_assign($$, ATmakeList1((ATerm) $1));
+      gsDebugMsg("parsed action rename element\n  %T\n", $$);
+    }
+   | action_rename_elts action_rename_elt
+    {
+      safe_assign($$, ATinsert($1, (ATerm) $2));
+      gsDebugMsg("parsed action rename element\n  %T\n", $$);
+    }
+   ;
+
+//specification element
+action_rename_elt:
+  sort_spec
+    {
+      safe_assign($$, $1);
+      gsDebugMsg("parsed action rename element\n  %T\n", $$);
+    } 
+  | cons_spec
+    {
+      safe_assign($$, $1);
+      gsDebugMsg("parsed action rename element\n  %T\n", $$);
+    }
+  | map_spec
+    {
+      safe_assign($$, $1);
+      gsDebugMsg("parsed action rename element\n  %T\n", $$);
+    }
+  | eqn_spec
+    {
+      safe_assign($$, $1);
+      gsDebugMsg("parsed action rename element\n  %T\n", $$);
+    }
+  | act_spec
+    {
+      safe_assign($$, $1);
+      gsDebugMsg("parsed action rename element\n  %T\n", $$);
+    }
+  | action_rename_spec
+    {
+      safe_assign($$, $1);
+      gsDebugMsg("parsed action rename element\n  %T\n", $$);
+    }
+  ;
+
+//action rename rules
+action_rename_spec:
+  action_rename_sect
+    {
+      safe_assign($$, gsMakeActionRenameRules($1));
+      gsDebugMsg("parsed comma separated rename rules\n  %T\n", $$);
+    }
+  ;
+
+//var section before action rename rules
+action_rename_sect:
+  RENAME action_rename_rules_scs
+    {
+      safe_assign($$, $2);
+      gsDebugMsg("parsed equation section\n  %T\n", $$);
+    }
+  | KWVAR data_vars_decls_scs RENAME action_rename_rules_scs
+    {
+      safe_assign($$, ATmakeList0());
+      int n = ATgetLength($4);
+      for (int i = 0; i < n; i++) {
+        ATermAppl ActionRenameRule = ATAelementAt($4, i);
+	$$ = ATinsert($$, (ATerm) gsMakeActionRenameRule($2, ATAgetArgument(ActionRenameRule, 1),
+          ATAgetArgument(ActionRenameRule, 2), ATAgetArgument(ActionRenameRule, 3)));
+      }
+      gsDebugMsg("parsed equation section\n  %T\n", $$);
+    }
+
+
+//action rename rules comma separated
+action_rename_rules_scs:
+  action_rename_rule SEMICOLON
+    {
+      safe_assign($$, ATmakeList1((ATerm) $1));
+      gsDebugMsg("parsed rename rule\n  %T\n", $$);
+    }
+  | action_rename_rules_scs action_rename_rule SEMICOLON
+    {
+      safe_assign($$, ATinsert($1, (ATerm) $2));
+      gsDebugMsg("parsed rename rule\n  %T\n", $$);
+    }
+  ;
+
+//action_rename_rule
+action_rename_rule:
+  data_expr ARROW data_var_decl IMP data_var_decl
+    {
+      safe_assign($$, gsMakeActionRenameRule(ATmakeList0(), $1, $3, $5));
+      gsDebugMsg("parsed rename assignement\n %T\n", $$);
+    }
+  ;
 
 %% 
 
@@ -2414,6 +2539,47 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts)
     gsMakeActSpec(ActDecls),
     gsMakeProcEqnSpec(ProcEqnDecls),
     Init
+  );
+  return Result;
+}
+
+ATermAppl gsActionRenameEltsToActionRename(ATermList ActionRenameElts)
+{
+  ATermAppl Result = NULL;
+  ATermList SortDecls = ATmakeList0();
+  ATermList ConsDecls = ATmakeList0();
+  ATermList MapDecls = ATmakeList0();
+  ATermList DataEqnDecls = ATmakeList0();
+  ATermList ActDecls = ATmakeList0();
+  ATermList ActionRenameRules = ATmakeList0();
+  int n = ATgetLength(ActionRenameElts);
+  for (int i = 0; i < n; i++) {
+    ATermAppl ActionRenameElt = ATAelementAt(ActionRenameElts, i);
+    ATermList ActionRenameEltArg0 = ATLgetArgument(ActionRenameElt, 0);
+    if (gsIsSortSpec(ActionRenameElt)) {
+      SortDecls = ATconcat(SortDecls, ActionRenameEltArg0);
+    } else if (gsIsConsSpec(ActionRenameElt)) {
+      ConsDecls = ATconcat(ConsDecls, ActionRenameEltArg0);
+    } else if (gsIsMapSpec(ActionRenameElt)) {
+      MapDecls = ATconcat(MapDecls, ActionRenameEltArg0);
+    } else if (gsIsDataEqnSpec(ActionRenameElt)) {
+      DataEqnDecls = ATconcat(DataEqnDecls, ActionRenameEltArg0);
+    } else if (gsIsActSpec(ActionRenameElt)) {
+      ActDecls = ATconcat(ActDecls, ActionRenameEltArg0);
+    } else if (gsIsActionRenameRule(ActionRenameElt)) {
+      ActionRenameRules = ATconcat(ActionRenameRules, ActionRenameEltArg0);
+    }
+  }
+
+  Result = gsMakeActionRename(
+    gsMakeDataSpec(
+      gsMakeSortSpec(SortDecls),
+      gsMakeConsSpec(ConsDecls),
+      gsMakeMapSpec(MapDecls),
+      gsMakeDataEqnSpec(DataEqnDecls)
+    ),
+    gsMakeActSpec(ActDecls),
+    gsMakeActionRenameRules(ActionRenameRules)
   );
   return Result;
 }

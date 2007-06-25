@@ -263,6 +263,20 @@
                  | ActExists(<DataVarId>+, <ActFrm>)
                  | ActAt(<ActFrm>, <DataExpr>)
 
+
+//LPS action rewrite specifications
+//---------------------------------
+
+//Action rename rules
+<ActionRenameRules>     ::= ActionRenameRules(<ActionRenameRule>*)
+
+// Action rename rule
+<ActionRenameRule>      ::= ActionRenameRule(<DataVarId>*, <DataExprOrNil>, <Action>, <Action>)
+
+// Action rename file specification
+<ActionRename>          ::= ActionRename(<DataSpec>, <ActSpec>, <ActionRenameRules>)
+
+
 //PBES's
 //------
 
@@ -291,3 +305,4 @@
                  | PBESForall(<DataVarId>+, <PBExpr>)
                  | PBESExists(<DataVarId>+, <PBExpr>)
                  | <PropVarInst>
+

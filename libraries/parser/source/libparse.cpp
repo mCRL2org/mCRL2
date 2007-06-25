@@ -39,6 +39,10 @@ ATermAppl parse_state_frm(istream &pe_stream) {
   return parse_tagged_stream("state_frm", pe_stream);
 }
 
+ATermAppl parse_action_rename(istream &pe_stream) {
+  return parse_tagged_stream("action_rename", pe_stream);
+}
+
 ATermAppl parse_tagged_stream(const string &tag, istream &stream) {
   vector<istream*> *streams = new vector<istream*>();
   istringstream *tag_stream = new istringstream(tag);

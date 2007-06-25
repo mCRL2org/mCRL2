@@ -82,6 +82,7 @@ Number     "0"|([1-9][0-9]*)
 "proc_expr" { process_string(); return TAG_PROC_EXPR; }
 "spec"      { process_string(); return TAG_SPEC; }
 "state_frm" { process_string(); return TAG_STATE_FRM; }
+"action_rename" { process_string(); return TAG_ACTION_RENAME; }
 
 "||_"      { process_string(); return LMERGE; }
 "->"       { process_string(); return ARROW; }
