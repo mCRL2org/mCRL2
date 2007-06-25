@@ -118,4 +118,17 @@ ATermAppl type_check_state_frm(ATermAppl state_formula, lps::specification &lps_
  *     NULL is returned.
  */
 
+ATermAppl type_check_action_rename(ATermAppl action_rename, lps::specification &lps_spec);
+/*Pre: state_formula represents an mCRL2 state formula that adheres to the
+ *     initial internal ATerm structure.
+ *     lps_spec represents an LPS specification
+ *Post:action_rename is type checked using the declarations from lps_speca and its own declarations
+ *Ret: if type checking went ok, an equivalent version of state_formula is
+ *     returned that adheres to the internal ATerm structure after type
+ *     checking.
+ *     if something went wrong, an appropriate error message is printed and
+ *     NULL is returned.
+ */
+
+
 #endif // PARSER_TYPECHECK_H

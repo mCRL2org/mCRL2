@@ -535,6 +535,13 @@ failed:
   return Result;
 }
 
+ATermAppl type_check_action_rename(ATermAppl action_rename, lps::specification &lps_spec){
+
+  return action_rename;
+}
+
+
+
 //local functions
 //---------------
 

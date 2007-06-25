@@ -258,7 +258,7 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
 
   //type check formula
   gsVerboseMsg("type checking...\n");
-  //lps_actren = type_action_rename(lps_actren, lps_spec);//TODO: typecheck
+  lps_actren = type_check_action_rename(lps_actren, lps_spec);
   if (lps_actren == NULL) {
     gsErrorMsg("type checking failed\n");
     return NULL;
