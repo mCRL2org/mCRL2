@@ -103,7 +103,7 @@ namespace squadt {
     };
 
     inline task_monitor::~task_monitor() {
-      terminate_process();
+      finish(true);
     }
   }
 }
