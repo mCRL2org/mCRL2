@@ -731,9 +731,11 @@ pbes do_finite_algorithm(pbes pbes_spec, t_tool_options tool_options)
 			atermpp::vector< t_instantiations > intermediate_instantiation_list;
 			if (sort_enumerations.get(p->sort()) == NULL)
 			{ // The sort is infinite
-				current_values.infinite_var = push_back(current_values.infinite_var, *p);
+				//current_values.infinite_var = push_back(current_values.infinite_var, *p);
 				for (atermpp::vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
 				{
+					current_values = *inst_i;
+					current_values.infinite_var = push_back(current_values.infinite_var, *p);
 					// Add current_values to intermediate_instantiation_list
 					intermediate_instantiation_list.push_back(current_values);
 				}
