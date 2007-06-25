@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<squadt-project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project.xsd" version="1.0" count="1">
-<processor><output id="22583376" format="unknown/mcrl2" location="abp.mcrl2" status="0" digest="00000000000000000000000000000000" timestamp="1182596057"/>
-</processor>
-<processor tool-name="mcrl22lps" format="text/mcrl2" category="transformation"><configuration output-prefix="abp0001" category="transformation"><object id="mcrl2_in" type="input" location="abp.mcrl2" mime-type="text/mcrl2"/><option id="final_cluster"><boolean/></option><option id="no_intermediate_cluster"><boolean/></option><option id="no_alpha"><boolean/></option><option id="newstate"><boolean/></option><option id="binary"><boolean/></option><option id="statenames"><boolean/></option><option id="no_rewrite"><boolean/></option><option id="no_freevars"><boolean/></option><option id="no_sumelm"><boolean/></option><option id="no_dataelm"><boolean/></option><option id="add_delta"><boolean/></option><object id="lps_out" type="output" location="abp0001.lps" mime-type="application/lps"/><option id="linearisation_method"><enumeration value="regular"><element value="stack"/><element value="regular"/><element value="regular2"/><element value="expansion"/></enumeration></option><option id="end_phase"><enumeration value="all"><element value="all"/><element value="parsing"/><element value="type-checking"/><element value="alphabet_reduction"/><element value="data_implementation"/></enumeration></option></configuration><input id="22583376"/>
-<output id="84158384" format="application/lps" location="abp0001.lps" identifier="lps_out" status="1" digest="00000000000000000000000000000000" timestamp="1182600667"/>
+<squadt-project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project.xsd" version="1.0" count="0">
+<processor><output id="69865168" format="unknown/mcrl2" location="abp.mcrl2" status="0" digest="00000000000000000000000000000000" timestamp="1182761299"/>
 </processor>
 </squadt-project>

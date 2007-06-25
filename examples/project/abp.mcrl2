@@ -30,7 +30,7 @@ proc
   L             = sum b:Bool. r5(b).(i.s6(b)+i.s6(e)).L;
 
 init
-  hide({c2,c3,c5,c6,i}),
+  hide({c2,c3,c5,c6,i},
     allow({r1,s4,c2,c3,c5,c6,i},
       comm({r2|s2->c2, r3|s3->c3, r5|s5->c5, r6|s6->c6},
         S(true) || K || L || R(true)
