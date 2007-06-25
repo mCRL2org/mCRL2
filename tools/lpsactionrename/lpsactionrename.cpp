@@ -220,18 +220,19 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
   string formfilename = tool_options.formfilename;
   t_phase end_phase = tool_options.end_phase;
 
-  lps::specification lps_spec = lps::specification();
+  lps::specification lps_oldspec = lps::specification();
   lps::specification lps_newspec = lps::specification();
   //ATermAppl rename_rules;
 
   //open infilename
+  gsVerboseMsg("loading lps...\n");
   if (infilename == "") {
-    if (!lps_spec.load("-")) {
+    if (!lps_oldspec.load("-")) {
       gsErrorMsg("cannot open LPS from stdin\n");
       return NULL;
     }
   } else {
-    if (!lps_spec.load(infilename)) {
+    if (!lps_oldspec.load(infilename)) {
       gsErrorMsg("cannot open LPS from '%s'\n", infilename.c_str());
       return NULL;
     }
@@ -245,56 +246,56 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
     gsErrorMsg("cannot open formula file '%s'\n", formfilename.c_str());
     return NULL;
   }
-  ATermAppl lps_actren = parse_action_rename(formstream);
+  ATermAppl action_rename = parse_action_rename(formstream);
   formstream.close();
-  if (lps_actren == NULL) {
+  if (action_rename == NULL) {
     gsErrorMsg("parsing failed\n");
     return NULL;
   }
   gsDebugMsg("parsing succeded\n");
   if (end_phase == PH_PARSE) {
-    return lps_actren;
+    return action_rename;
   }
 
   //type check formula
   gsVerboseMsg("type checking...\n");
-  lps_actren = type_check_action_rename(lps_actren, lps_spec);
-  if (lps_actren == NULL) {
+  action_rename = type_check_action_rename(action_rename, lps_oldspec);
+  if (action_rename == NULL) {
     gsErrorMsg("type checking failed\n");
     return NULL;
   }
   if (end_phase == PH_TYPE_CHECK) {
-    return lps_actren;
+    return action_rename;
   }
 
   //implement standard data types and type constructors on the result
   gsVerboseMsg("implementing standard data types and type constructors...\n");
-  //implement_data_state_frm
-  if (lps_spec == NULL) {
+  implement_data_action_rename(action_rename, lps_oldspec);
+  if (lps_oldspec == NULL) {
     gsErrorMsg("data implementation failed\n");
     return NULL;
   }
   if (end_phase == PH_DATA_IMPL) {
-    return lps_spec;
+    return lps_oldspec;
   }
 
   //rename all assigned actions
   gsVerboseMsg("renaming actions...\n");
-  //result = translate_reg_frms(result);//TODO: change function name, implement
-  if (lps_spec == NULL) {
+  //lps_newspec = translate_reg_frms(result);//TODO: change function name, implement
+  if (lps_oldspec == NULL) {
     return NULL;
   }
   if (end_phase == PH_DATA_IMPL) {
-    return lps_spec;
+    return lps_newspec;
   }
  
   //type check the new LPS
   gsVerboseMsg("type checking the new LPS...\n");
-  if (!lps_spec.is_well_typed()) {
+  if (!lps_newspec.is_well_typed()) {
     gsVerboseMsg("The newly formed LPS is not well typed!\n");
     return NULL;
   }
-  return lps_spec;
+  return lps_newspec;
 }
 
 

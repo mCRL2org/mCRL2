@@ -2588,9 +2588,9 @@ ATermAppl gsMakeActionRename(ATermAppl DataSpec_0, ATermAppl ActSpec_1, ATermApp
 }
 
 inline
-ATermAppl gsMakeActionRenameRule(ATermList DataVarId_0, ATermAppl DataExprOrNil_1, ATermAppl Action_2, ATermAppl Action_3)
+ATermAppl gsMakeActionRenameRule(ATermList DataVarId_0, ATermAppl DataExprOrNil_1, ATermAppl ParamId_2, ATermAppl ProcExpr_3)
 {
-  return ATmakeAppl4(gsAFunActionRenameRule(), (ATerm) DataVarId_0, (ATerm) DataExprOrNil_1, (ATerm) Action_2, (ATerm) Action_3);
+  return ATmakeAppl4(gsAFunActionRenameRule(), (ATerm) DataVarId_0, (ATerm) DataExprOrNil_1, (ATerm) ParamId_2, (ATerm) ProcExpr_3);
 }
 
 inline

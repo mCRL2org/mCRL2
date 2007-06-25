@@ -89,4 +89,19 @@ ATermAppl implement_data_state_frm(ATermAppl state_frm,
  *     NULL is returned.
  */
 
+ATermAppl implement_data_action_rename(ATermAppl action_rename,
+  lps::specification &lps_spec);
+/*Pre: action_rename represents a action rename file that adheres to the
+ *     internal ATerm structure after the type checking fase. lps_spec
+ *     represents an LPS specification
+ *Post:The datatypes in action_rename are implemented as higher-order
+ *     abstract data and the datatypes are merged with the datatypes in
+ *     lps_spec.
+ *Ret: if the data implementation went ok, an equivalent version of lps_spec
+ *     is returned that adheres to the internal ATerm structure containing
+ *     all the original data and all data from action_rename
+ *     If something went wrong, an appropriate error message is printed and
+ *     NULL is returned.
+ */
+
 #endif // PARSER_DATAIMPL_H

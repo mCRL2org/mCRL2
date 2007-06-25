@@ -2137,7 +2137,7 @@ bool check_term_StateAnd(Term t)
   return true;
 }
 
-// ActionRenameRule(DataVarId*, DataExprOrNil, Action, Action)
+// ActionRenameRule(DataVarId*, DataExprOrNil, ParamId, ProcExpr)
 template <typename Term>
 bool check_term_ActionRenameRule(Term t)
 {
@@ -2163,14 +2163,14 @@ bool check_term_ActionRenameRule(Term t)
       std::cerr << "check_rule_DataExprOrNil" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(2), check_rule_Action<aterm>))
+  if (!check_term_argument(a(2), check_rule_ParamId<aterm>))
     {
-      std::cerr << "check_rule_Action" << std::endl;
+      std::cerr << "check_rule_ParamId" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(3), check_rule_Action<aterm>))
+  if (!check_term_argument(a(3), check_rule_ProcExpr<aterm>))
     {
-      std::cerr << "check_rule_Action" << std::endl;
+      std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS

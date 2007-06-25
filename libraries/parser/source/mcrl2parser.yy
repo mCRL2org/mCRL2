@@ -2437,7 +2437,7 @@ action_rename_spec:
   action_rename_sect
     {
       safe_assign($$, gsMakeActionRenameRules($1));
-      gsDebugMsg("parsed comma separated rename rules\n  %T\n", $$);
+      gsDebugMsg("parsed rename specification\n  %T\n", $$);
     }
   ;
 
@@ -2446,7 +2446,7 @@ action_rename_sect:
   RENAME action_rename_rules_scs
     {
       safe_assign($$, $2);
-      gsDebugMsg("parsed equation section\n  %T\n", $$);
+      gsDebugMsg("parsed rename section\n  %T\n", $$);
     }
   | KWVAR data_vars_decls_scs RENAME action_rename_rules_scs
     {
@@ -2457,7 +2457,7 @@ action_rename_sect:
 	$$ = ATinsert($$, (ATerm) gsMakeActionRenameRule($2, ATAgetArgument(ActionRenameRule, 1),
           ATAgetArgument(ActionRenameRule, 2), ATAgetArgument(ActionRenameRule, 3)));
       }
-      gsDebugMsg("parsed equation section\n  %T\n", $$);
+      gsDebugMsg("parsed var and rename sections\n  %T\n", $$);
     }
 
 
@@ -2477,7 +2477,7 @@ action_rename_rules_scs:
 
 //action_rename_rule
 action_rename_rule:
-  data_expr ARROW data_var_decl IMP data_var_decl
+  data_expr ARROW param_id IMP proc_expr
     {
       safe_assign($$, gsMakeActionRenameRule(ATmakeList0(), $1, $3, $5));
       gsDebugMsg("parsed rename assignement\n %T\n", $$);

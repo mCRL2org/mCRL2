@@ -1519,7 +1519,7 @@ ATermAppl constructStateVar()
 inline
 ATermAppl initConstructActionRenameRule(ATermAppl& t)
 {
-  t = ATmakeAppl4(gsAFunActionRenameRule(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructDataExprOrNil()), reinterpret_cast<ATerm>(constructAction()), reinterpret_cast<ATerm>(constructAction()));
+  t = ATmakeAppl4(gsAFunActionRenameRule(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructDataExprOrNil()), reinterpret_cast<ATerm>(constructParamId()), reinterpret_cast<ATerm>(constructProcExpr()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
