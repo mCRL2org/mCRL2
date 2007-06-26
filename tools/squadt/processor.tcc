@@ -334,7 +334,7 @@ namespace squadt {
   inline void processor_impl::shutdown() {
     current_monitor->shutdown();
     current_monitor->reset_handlers();
-    current_monitor->finish();
+    current_monitor->finish(true);
   }
 
   inline void processor_impl::flush_outputs() {

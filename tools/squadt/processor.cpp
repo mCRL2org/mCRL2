@@ -287,7 +287,7 @@ namespace squadt {
     }
     else {
       /* End tool execution */
-      finish();
+      finish(true);
     }
   }
 
