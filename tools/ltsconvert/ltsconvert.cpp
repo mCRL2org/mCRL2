@@ -161,11 +161,11 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   checkbox* do_not_check_reachability = new checkbox("Perform reachability check", true);
   top->add(do_not_check_reachability);
 
-  checkbox* omit_state_information = new checkbox("Add state information)", true);
-  top->add(omit_state_information);
+  checkbox* do_not_omit_state_information = new checkbox("Add state information", true);
+  top->add(do_not_omit_state_information);
 
-//  mcrl2::utilities::squadt::change_visibility_on_toggle(format_selector.get_button(dot), top.get(), omit_state_information);
-//  format_selector.get_button(dot).on_change(boost::bind(::mcrl2::utilities::squadt::change_visibility_on_toggle, format_selector.get_button(dot), top.get(), omit_state_information));
+//  mcrl2::utilities::squadt::change_visibility_on_toggle(format_selector.get_button(dot), top.get(), do_not_omit_state_information);
+//  format_selector.get_button(dot).on_change(boost::bind(::mcrl2::utilities::squadt::change_visibility_on_toggle, format_selector.get_button(dot), top.get(), do_not_omit_state_information));
 
   top->add(new label("LTS transformation:"));
 
@@ -185,11 +185,14 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   
   checkbox* bisimulation_add_eq_classes = new checkbox("Add equivalence classes to state instead of reducing LTS");
 
+  if (c.input_exists(lps_file_auxiliary)) {
+      lps_file_field->set_text(c.get_input(lps_file_auxiliary).get_location());
+  }
   if (c.option_exists(option_no_reachability_check)) {
     do_not_check_reachability->set_status(c.get_option_argument< bool >(option_no_reachability_check));
   }
   if (c.option_exists(option_no_state_information)) {
-    omit_state_information->set_status(c.get_option_argument< bool >(option_no_state_information));
+    do_not_omit_state_information->set_status(c.get_option_argument< bool >(option_no_state_information));
   }
   if (c.option_exists(option_add_bisimulation_equivalence_class)) {
     bisimulation_add_eq_classes->set_status(c.get_option_argument< bool >(option_add_bisimulation_equivalence_class));
@@ -296,7 +299,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
   if (format_selector.get_selection() == dot) {
     c.add_option(option_no_state_information).
-       set_argument_value< 0, sip::datatype::boolean >(omit_state_information->get_status());
+       set_argument_value< 0, sip::datatype::boolean >(do_not_omit_state_information->get_status());
   }
   else {
     c.remove_option(option_no_state_information);

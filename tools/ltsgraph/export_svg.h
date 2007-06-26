@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <wx/string.h>
+#include <wx/gdicmn.h>
 using namespace std;
 
 typedef struct {
@@ -22,8 +23,10 @@ typedef struct {
 typedef struct {
   double start_x, start_y; // The position of the edge start
   double end_x, end_y; // The position of the edge end.
-  double control_x, control_y; // The position of the curve control
   double end_radius; // Radius of the node that forms the end of the edge
+
+  wxPoint spline_control_points[8];
+  wxPoint arrow_points[6];
 
   std::string lbl; // The edge's label.
   double lbl_x, lbl_y; // The position of the label.

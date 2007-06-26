@@ -252,6 +252,12 @@ void GraphFrame::OnOpen( wxCommandEvent& /* event */ ) {
 		vectEdge.clear();
 		vectNode.clear();
 		Init(dialog.GetPath());
+                if ( ck_curve_edges->IsChecked() )
+                {
+                  for (size_t i = 0; i < vectEdge.size(); i++) {
+                    vectEdge[i]->set_control_visible(curve_edges);
+                  }
+                }
                 update_coordinates();
 		Refresh();
 	}
@@ -844,8 +850,8 @@ void GraphFrame::export_svg(wxString export_file_name) {
     struct_edge_svg.end_x = vectEdge[n]->get_x_pos2();
     struct_edge_svg.end_y = vectEdge[n]->get_y_pos2();
     struct_edge_svg.end_radius = vectEdge[n]->get_n2()->get_radius();
-    struct_edge_svg.control_x = vectEdge[n]->get_x_control();
-    struct_edge_svg.control_y = vectEdge[n]->get_y_control();
+    vectEdge[n]->get_spline_control_points(struct_edge_svg.spline_control_points);
+    vectEdge[n]->get_arrow_points(struct_edge_svg.arrow_points);
     struct_edge_svg.lbl = vectEdge[n]->get_lbl();
     struct_edge_svg.lbl_x = vectEdge[n]->get_label_lower_x();
     struct_edge_svg.lbl_y = vectEdge[n]->get_label_lower_y();

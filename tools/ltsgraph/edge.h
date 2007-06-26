@@ -12,7 +12,7 @@
 
 #define FONT_SIZE 9
 #define POS_EDGE_LBL_X -10.0
-#define POS_EDGE_LBL_Y -10.0
+#define POS_EDGE_LBL_Y -15.0
 
 using namespace std;
 
@@ -74,6 +74,10 @@ public:
 
   void set_label_x(double new_value);
   void set_label_y(double new_value);
+
+  void get_spline_control_points(wxPoint *points);
+  void get_arrow_points(wxPoint *points); // should always be preceded by
+                                          // get_spline_control_points()
 private:
   // Start and end nodes.
   // TODO (CT): Coding standard
@@ -103,7 +107,7 @@ private:
   double label_higher_x;
   double label_higher_y;
     
-
+  double p1x,p1y,p2x,p2y,p3x,p3y,p4x,p4y;
 };
 
 #endif //edge_h

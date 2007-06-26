@@ -9,8 +9,60 @@
 #define PI 3.14159265
 const std::string default_border_colour = "black";
 const std::string init_border_colour = "red";
-const double triangle_height = 10;
-const double triangle_width = 5;
+
+std::string make_wx_spline(wxPoint *points)
+{
+    double cx1, cy1, cx2, cy2, cx3, cy3, cx4, cy4;
+    double x1, y1, x2, y2;
+    std::string r;
+
+    x1 = points[0].x;
+    y1 = points[0].y;
+    x2 = points[1].x;
+    y2 = points[1].y;
+    cx1 = (double)((x1 + x2) / 2);
+    cy1 = (double)((y1 + y2) / 2);
+    cx2 = (double)((cx1 + x2) / 2);
+    cy2 = (double)((cy1 + y2) / 2);
+
+    boost::format p1("M %1% %2% L %3% %4%");
+    p1 % points[0].x % points[0].y % cx1 % cy1;
+    r = boost::str(p1);
+
+    x1 = x2;
+    y1 = y2;
+    x2 = points[2].x;
+    y2 = points[2].y;
+    cx4 = (double)(x1 + x2) / 2;
+    cy4 = (double)(y1 + y2) / 2;
+    cx3 = (double)(x1 + cx4) / 2;
+    cy3 = (double)(y1 + cy4) / 2;
+    boost::format p2(" C %1% %2% %3% %4% %5% %6%");
+    p2 % cx2 % cy2 % cx3 % cy3 % cx4 % cy4;
+    r += boost::str(p2);
+
+    cx1 = cx4;
+    cy1 = cy4;
+    cx2 = (double)(cx1 + x2) / 2;
+    cy2 = (double)(cy1 + y2) / 2;
+    x1 = x2;
+    y1 = y2;
+    x2 = points[3].x;
+    y2 = points[3].y;
+    cx4 = (double)(x1 + x2) / 2;
+    cy4 = (double)(y1 + y2) / 2;
+    cx3 = (double)(x1 + cx4) / 2;
+    cy3 = (double)(y1 + cy4) / 2;
+    boost::format p3(" C %1% %2% %3% %4% %5% %6%");
+    p3 % cx2 % cy2 % cx3 % cy3 % cx4 % cy4;
+    r += boost::str(p3);
+
+    boost::format p4(" L %1% %2%");
+    p4 % points[3].x % points[3].y;
+    r += boost::str(p4);
+
+    return r;
+}
 
 export_to_svg::export_to_svg(wxString _filename, vector<node_svg> _nodes, vector<edge_svg> _edges, double _height, double _width) :
   filename(_filename) , nodes(_nodes), edges(_edges), height(_height), width(_width) {
@@ -31,89 +83,22 @@ bool export_to_svg::generate() {
 
   // Draw edges first (body and arrow heads)
   for (unsigned int i = 0; i < edges.size(); i++) {
-    /* Calculate spline control point from the given control point */
-    double spline_control_x = (8 * edges[i].control_x - 
-                             (edges[i].start_x + edges[i].end_x)) / 6;
-    double spline_control_y = (8 * edges[i].control_y - 
-                             (edges[i].start_y + edges[i].end_y)) / 6;
 
     /* Draw the splines that form the edge bodies */
-    boost::format f("<path d=\"M %1% %2% Q %3% %4% %5% %6%\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/>\n");
-    f%edges[i].start_x
-     %edges[i].start_y
-     %spline_control_x
-     %spline_control_y
-     %edges[i].end_x
-     %edges[i].end_y;
-    svg_code += boost::str(f);
+    svg_code += "<path d=\"";
+    svg_code += make_wx_spline(edges[i].spline_control_points);
+    svg_code += "\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/>\n";
 
     /* Draw the arrowheads of the edges */
-    /* Calculate angle that the arrow needs to make (in radians) */
-    /* Code taken from edge.cpp */
-    double end_x = edges[i].end_x;
-    double end_y = edges[i].end_y;
-    double dist_cp_ed = sqrt( (spline_control_x - end_x) * (spline_control_x - end_x) + (spline_control_y - end_y) * (spline_control_y - end_y));
-    double arrow_ratio = 0.0;
-    if ( dist_cp_ed != 0) {
-      arrow_ratio = edges[i].end_radius / dist_cp_ed;
-    }
-    else {
-      arrow_ratio = 0;
-    }
-    double triangle_x = end_x - (end_x - spline_control_x) * arrow_ratio;
-    double triangle_y = end_y - (end_y - spline_control_y) * arrow_ratio;
-    double base_ratio = 0.0;
-    if ( dist_cp_ed != 0) {
-      base_ratio = (edges[i].end_radius + triangle_height) / dist_cp_ed;
-    }
-    else {
-      base_ratio = 0;
-    }
-    const double triangle_base = 2.0;
-    const double triangle_height = 7.0;
-    double base_x = end_x - base_ratio * (end_x - spline_control_x);
-    double base_y = end_y - base_ratio * (end_y - spline_control_y);
-    double sinus_alpha = end_y;
-    double cosinus_alpha = end_x;
-    if (triangle_height != 0) {
-      sinus_alpha = (base_y - end_y) / triangle_height;
-      cosinus_alpha = (base_x - end_x) / triangle_height;
-    }
-    int arrow_base_high_x = (int) round(end_x + (cosinus_alpha * triangle_height -  .5 * triangle_base * sinus_alpha));
-    int arrow_base_high_y = (int) round(end_y + (sinus_alpha * triangle_height + .5 * triangle_base * cosinus_alpha));
-    int arrow_base_low_x  = (int) round(end_x + (cosinus_alpha * triangle_height +  .5 * triangle_base * sinus_alpha));
-    int arrow_base_low_y  = (int) round(end_y + (sinus_alpha * triangle_height - .5 * triangle_base * cosinus_alpha));
     boost::format arrow_f("<polygon points=\"%1% %2% %3% %4% %5% %6%\" fill=\"black\" stroke=\"black\"/>\n");
-    arrow_f%triangle_x
-           %triangle_y
-           %arrow_base_high_x
-           %arrow_base_high_y
-           %arrow_base_low_x
-           %arrow_base_low_y;
+    arrow_f%edges[i].arrow_points[0].x
+           %edges[i].arrow_points[0].y
+           %edges[i].arrow_points[1].x
+           %edges[i].arrow_points[1].y
+           %edges[i].arrow_points[2].x
+           %edges[i].arrow_points[2].y;
 
 
-/*    double alpha = 0;
-    double end_y = edges[i].start_y;
-    double end_x = edges[i].start_x;
-    if (spline_control_x != end_x) {
-      alpha = atan( (spline_control_y - end_y) / (spline_control_x - end_x));
-    }
-    else {
-      alpha = .5 * PI;
-    }
-    if (spline_control_x >= end_x) {
-      alpha = alpha + PI;
-    }*/
-    /* Draw the arrowhead, rotated over alpha */
-/*    boost::format arrow_f("<polygon points=\"%1% %2% %3% %4% %3% %5%\" fill=\"black\" stroke=\"black\" transform=\"rotate(%6% %7% %8%)\"/>\n");
-    arrow_f%(end_x - edges[i].end_radius)
-           %end_y
-           %(end_x - edges[i].end_radius - triangle_height)
-           %(end_y - triangle_width / 2)
-           %(end_y + triangle_width / 2)
-           %(alpha * (180 / PI)) 
-           %end_x
-           %end_y;*/
 
     svg_code += boost::str(arrow_f);
     

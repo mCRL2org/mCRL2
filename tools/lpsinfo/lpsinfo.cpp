@@ -199,24 +199,24 @@ bool squadt_interactor::perform_task(sip::configuration& c) {
   
     left_column->add(new label("Input read from:"), a);
     left_column->add(new label("Summands (#):"), a);
+    left_column->add(new label("Tau-summands (#):"), a);
     left_column->add(new label("Free variables (#):"), a);
     left_column->add(new label("Process parameters (#):"), a);
     left_column->add(new label("Action labels (#):"), a);
     left_column->add(new label("Used actions: (#):"), a);
     left_column->add(new label("Sorts (#):"), a);
-    left_column->add(new label("\u03C4-Summands (#):"), a);
   
     /* Second column */
     layout::vertical_box* right_column = new layout::vertical_box();
-  
-    right_column->add(new label(file_name), a);
+ 
+    right_column->add(new label(c.get_input(lps_file_for_input).get_location()), a);
     right_column->add(new label(boost::lexical_cast < std::string > (lps.summands().size())), a);
+    right_column->add(new label(boost::lexical_cast < std::string > (get_number_of_tau_summands(lps))), a);
     right_column->add(new label(boost::lexical_cast < std::string > ((lps_specification.initial_process().free_variables().size() + lps.free_variables().size()))), a);
     right_column->add(new label(boost::lexical_cast < std::string > (lps.process_parameters().size())), a);
     right_column->add(new label(boost::lexical_cast < std::string > (lps_specification.action_labels().size())), a);
     right_column->add(new label(boost::lexical_cast < std::string > (get_number_of_used_actions(lps))), a);
     right_column->add(new label(boost::lexical_cast < std::string > (lps_specification.data().sorts().size())), a);
-    right_column->add(new label(boost::lexical_cast < std::string > (get_number_of_tau_summands(lps))), a);
   
     /* Attach columns*/
     top->add(left_column, margins(0,5,0,5));
@@ -254,13 +254,13 @@ int main(int argc, char** argv) {
       cout << "Input read from " << ((file_name == "-") ? "standard input" : file_name) << endl << endl;
      
       cout << "Number of summands                    : " << lps.summands().size() << endl;
+      cout << "Number of tau-summands                  : " << get_number_of_tau_summands(lps) << endl; 
       cout << "Number of free variables              : " << lps_specification.initial_process().free_variables().size() + lps.free_variables().size() << endl;
       cout << "Number of process parameters          : " << lps.process_parameters().size() << endl; 
       cout << "Number of action labels               : " << lps_specification.action_labels().size() << endl;
       cout << "Number of used versus declared actions: " << get_number_of_used_actions(lps) << "/"<< lps_specification.action_labels().size() << endl;
       //cout << "Number of used versus declared multi-actions: " << "" << endl;
       cout << "Number of used sorts                  : " << lps_specification.data().sorts().size() << endl;
-      cout << "Number of \u03C4-summands                  : " << get_number_of_tau_summands(lps) << endl; 
     }
     else {
       std::cerr << "Error: Unable to load LPS from `" + file_name + "'\n";
