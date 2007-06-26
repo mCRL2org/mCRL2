@@ -116,7 +116,7 @@ static void print_help(FILE *f, char *Name)
     "\n"
     "  -p, --plain           write trace in plain format (default)\n"
     "  -m, --mcrl2           write trace in mCRL2 trace format\n"
-    "  -d, --dot             write trace in dot format\n"
+    "  -D, --dot             write trace in dot format\n"
     "  -a, --aut             write trace in aut format\n"
 /*    "  -s, --svc             write trace in svc format\n"*/,
     Name
