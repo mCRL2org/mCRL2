@@ -93,6 +93,9 @@ namespace squadt {
       /** \brief Update if object is up-to-date */
       void update_on_success(boost::shared_ptr < object_descriptor >, interface_ptr const&, boost::shared_ptr < sip::configuration >, bool);
 
+      /** \brief Handler that is executed when an edit operation is completed */
+      void edit_completed();
+
     private:
 
       /** \brief Basic constructor */
@@ -114,10 +117,16 @@ namespace squadt {
       const object_descriptor::sptr find_input(object_descriptor*) const;
  
       /** \brief Find an object descriptor for a given pointer to an object */
-      const object_descriptor::sptr find_output(parameter_identifier const&) const;
+      const object_descriptor::sptr find_output_by_id(parameter_identifier const&) const;
  
       /** \brief Find an object descriptor for a given pointer to an object */
-      const object_descriptor::sptr find_input(parameter_identifier const&) const;
+      const object_descriptor::sptr find_input_by_id(parameter_identifier const&) const;
+ 
+      /** \brief Find an object descriptor for a given pointer to an object */
+      const object_descriptor::sptr find_output(std::string const&) const;
+ 
+      /** \brief Find an object descriptor for a given pointer to an object */
+      const object_descriptor::sptr find_input(std::string const&) const;
  
       /** \brief Get the most original (main) input */
       const object_descriptor::sptr find_initial_object() const;
@@ -412,9 +421,9 @@ namespace squadt {
   }
 
   /**
-   * \param[in] id a pointer to the object to find
+   * \param[in] id the identifier of the object to find
    **/
-  inline const processor::object_descriptor::sptr processor_impl::find_output(parameter_identifier const& id) const {
+  inline const processor::object_descriptor::sptr processor_impl::find_output_by_id(parameter_identifier const& id) const {
     for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
       if ((*i)->identifier == id) {
 
@@ -428,13 +437,46 @@ namespace squadt {
   }
 
   /**
-   * \param[in] id the id of the object to find
+   * \param[in] id the identifier of the object to find
    **/
-  inline const processor::object_descriptor::sptr processor_impl::find_input(parameter_identifier const& id) const {
+  inline const processor::object_descriptor::sptr processor_impl::find_input_by_id(parameter_identifier const& id) const {
     for (input_list::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
       object_descriptor::sptr s = (*i);
 
       if (s.get() != 0 && s->identifier == id) {
+        return (s);
+      }
+    }
+                               
+    object_descriptor::sptr s;
+
+    return (s);
+  }
+
+  /**
+   * \param[in] id the name of the object to find
+   **/
+  inline const processor::object_descriptor::sptr processor_impl::find_output(std::string const& name) const {
+    for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
+      if ((*i)->location == name) {
+
+        return (*i);
+      }
+    }
+
+    object_descriptor::sptr s;
+
+    return (s);
+  }
+
+  /**
+   * \param[in] id the name of the object to find
+   **/
+  inline const processor::object_descriptor::sptr processor_impl::find_input(std::string const& name) const {
+    for (input_list::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
+      object_descriptor::sptr s = (*i);
+
+      if (s.get() != 0 && s->location == name) {
         return (s);
       }
     }
@@ -495,7 +537,7 @@ namespace squadt {
         sip::configuration::object const& object(static_cast < sip::configuration::object& > (*i));
 
         parameter_identifier    id = c->get_identifier(*i);
-        object_descriptor::sptr o  = find_output(id);
+        object_descriptor::sptr o  = find_output_by_id(id);
        
         if (o.get() == 0) {
           /* Output not registered yet */
@@ -731,6 +773,18 @@ namespace squadt {
     }
   }
 
+  inline void processor_impl::edit_completed() {
+    boost::shared_ptr < processor > p(interface_object.lock());
+
+    if (p.get()) {
+      boost::shared_ptr < project_manager > m(manager.lock());
+
+      if (m.get()) {
+        m->update_status(p.get(), inputs.size() == 0);
+      }
+    }
+  }
+
   /**
    * \param[in] c the edit command to execute
    **/
@@ -739,8 +793,9 @@ namespace squadt {
 
     c->set_working_directory(make_output_path(output_directory));
 
+    current_monitor->once_on_completion(boost::bind(&processor_impl::edit_completed, this));
+
     current_monitor->get_logger()->log(1, "executing command `" + c->as_string() + "'\n");
-    current_monitor->once_on_completion(boost::bind(&project_manager::update_status, manager.lock().get(), interface_object.lock().get()));
 
     global_build_system.get_tool_manager()->impl->execute(c, boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
   }

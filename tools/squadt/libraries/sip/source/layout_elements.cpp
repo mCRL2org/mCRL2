@@ -109,7 +109,7 @@ namespace sip {
       }
      
       /**
-       * \param[in] b whether or not to unselect connected radio buttons
+       * \param[in] b whether or not to send an event
        **/
       void radio_button::set_selected(bool b) {
         for (radio_button* r = m_connection; r != this; r = r->m_connection) {
@@ -122,7 +122,11 @@ namespace sip {
 
         m_selected = true;
 
-        activate_handlers();
+        activate_handlers(b);
+      }
+
+      void radio_button::select() {
+        set_selected(true);
       }
 
       radio_button const* radio_button::get_selected() const {

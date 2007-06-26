@@ -140,7 +140,7 @@ namespace squadt {
       /** \brief Execute an edit command on one of the outputs */
       void edit(execution::command*);
 
-      /** \brief Sets the status of the inputs to out-of-date if the processor is inactive */
+      /** \brief Sets the status of the outputs to out-of-date if the processor is inactive */
       bool demote_status();
 
       /** \brief Start tool configuration */
@@ -220,9 +220,6 @@ namespace squadt {
       void replace_output(object_descriptor::sptr, sip::object const&,
                 object_descriptor::t_status const& = object_descriptor::reproducible_up_to_date);
 
-      /** \brief Pretty prints the fields of the specification */
-      void print(std::ostream& stream = std::cerr) const;
- 
       /** \brief The number of input objects of this processor */
       const size_t number_of_inputs() const;
  

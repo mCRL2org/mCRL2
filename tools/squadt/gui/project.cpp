@@ -298,7 +298,7 @@ namespace squadt {
     }
 
     void project::on_object_temporary_name_edited(wxTreeEvent& e) {
-      if (e.GetLabel().IsEmpty() || (e.GetLabel().Cmp(wxT("new.unknown")) == 0)) {
+      if (e.IsEditCancelled() || (e.GetLabel().Cmp(wxT("new.unknown")) == 0)) {
         object_view->Delete(e.GetItem());
       }
       else {

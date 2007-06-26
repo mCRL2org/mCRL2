@@ -27,8 +27,11 @@ namespace sip {
       m_event_handler->add(this, h);
     }
 
-    void element::activate_handlers() {
-      m_event_handler->process(this);
+    /**
+     * \param[in] b whether or not to execute non-element-specific handlers
+     **/
+    void element::activate_handlers(bool b) {
+      m_event_handler->process(this, b);
     }
 
     /**

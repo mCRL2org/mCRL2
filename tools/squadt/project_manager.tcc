@@ -86,7 +86,7 @@ namespace squadt {
       processor::ptr import_file(const boost::filesystem::path&, const std::string& = "");
 
       /** \brief Updates the status of all outputs that depend on the argument */
-      void update_status(processor*);
+      void update_status(processor*, bool = false);
 
       /** \brief Updates the status of all outputs that depend on the argument, sets it to out-of-date (unless it does not exist) */
       void demote_status(processor*);

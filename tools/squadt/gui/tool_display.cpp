@@ -573,11 +573,10 @@ namespace squadt {
       }
 
       void state_change_handler::radio_button_selected(wxCommandEvent& e) {
-        wxRadioButton*                  wxr = static_cast < wxRadioButton* > (e.GetEventObject());
         layout::elements::radio_button* r   = const_cast < layout::elements::radio_button* >
                         (static_cast < layout::elements::radio_button const* > (element_for_window[e.GetEventObject()]));
 
-        r->set_selected(wxr->GetValue());
+        r->select();
 
         send_display_update(*r);
       }

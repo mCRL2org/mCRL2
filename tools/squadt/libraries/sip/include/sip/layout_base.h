@@ -61,7 +61,7 @@ namespace sip {
       protected:
 
         /** \brief Activate all handlers */
-        void activate_handlers();
+        void activate_handlers(bool = false);
 
         /** \brief Set the event handler object that will dispatch the events for this object */
         void set_event_handler(basic_event_handler* e);

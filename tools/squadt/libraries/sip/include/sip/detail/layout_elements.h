@@ -113,6 +113,9 @@ namespace sip {
           /** \brief Default constructor */
           radio_button();
      
+          /** \brief Set state of the radio button */
+          void set_selected(bool = false);
+
         public:
      
           /** \brief Alternative constructor for a radio button */
@@ -121,11 +124,11 @@ namespace sip {
           /** \brief Alternative constructor for a radio button */
           radio_button(std::string const&, radio_button*, bool = false);
 
-          /** \brief Set state of the radio button */
-          void set_selected(bool = true);
-
           /** \brief Returns the current label */
           std::string get_label() const;
+
+          /** \brief set radio button */
+          void select();
 
           /** \brief Gets a pointer to the radio button in the group that is selected */
           radio_button const* get_selected() const;

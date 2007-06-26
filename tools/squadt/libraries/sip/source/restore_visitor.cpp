@@ -478,7 +478,7 @@ namespace utility {
     tree->GetAttributeOrDefault("selected", &c.m_selected, false);
 
     if (c.m_selected) {
-      c.set_selected(true);
+      c.set_selected();
     }
   }
 
@@ -515,7 +515,7 @@ namespace utility {
 
             if (c.m_selected) {
               /* Make sure all associated radio buttons are unselected */
-//              c.set_selected(true);
+              c.set_selected();
             }
          
             break;

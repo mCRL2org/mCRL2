@@ -185,21 +185,13 @@ namespace squadt {
 
     if (owner.number_of_inputs() == 0) {
       switch (s) {
-        case process::stopped:
-          for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
-            (*i)->status = object_descriptor::reproducible_out_of_date;
-          }
-          break;
         case process::running:
           for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
             (*i)->status = object_descriptor::generation_in_progress;
           }
           break;
         case process::completed:
-          for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
-            (*i)->status = object_descriptor::reproducible_up_to_date;
-          }
-          break;
+        case process::stopped:
         default: /* aborted... */
           for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
             (*i)->status = object_descriptor::original;

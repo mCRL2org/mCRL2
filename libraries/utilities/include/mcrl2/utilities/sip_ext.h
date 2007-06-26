@@ -194,7 +194,7 @@ namespace mcrl2 {
       inline void radio_button_helper< T >::set_selection(T const& t) {
         for (typename std::map < radio_button const*, T >::iterator i = selector.begin(); i != selector.end(); ++i) {
           if (i->second == t) {
-            const_cast < radio_button* > (i->first)->set_selected();
+            const_cast < radio_button* > (i->first)->select();
           }
         }
       }

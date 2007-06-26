@@ -256,13 +256,25 @@ namespace squadt {
 
   /**
    * \param[in] p the processor that selects the targets
+   * \param[in] b whether or not to force an update for all processors that depend on p
    **/
-  void project_manager_impl::update_status(processor* p) {
+  void project_manager_impl::update_status(processor* p, bool u) {
     if (0 < reverse_depends.count(p)) {
 
       std::stack < processor* > p_stack;
 
-      p_stack.push(p);
+      if (u) {
+        std::pair < dependency_map::iterator, dependency_map::iterator > range = reverse_depends.equal_range(p);
+
+        BOOST_FOREACH(dependency_map::value_type i, range) {
+          i.second->demote_status();
+
+          p_stack.push(i.second);
+        }
+      }
+      else {
+        p_stack.push(p);
+      }
 
       while (0 < p_stack.size()) {
         std::pair < dependency_map::iterator, dependency_map::iterator > range = reverse_depends.equal_range(p_stack.top());
@@ -595,8 +607,8 @@ namespace squadt {
     impl->demote_status(p);
   }
 
-  void project_manager::update_status(processor* p) {
-    impl->update_status(p);
+  void project_manager::update_status(processor* p, bool u) {
+    impl->update_status(p, u);
   }
 
   void project_manager::update(processor::sptr p, boost::function < void (processor*) > h) {
