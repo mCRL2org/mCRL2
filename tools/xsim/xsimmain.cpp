@@ -975,7 +975,7 @@ void XSimMain::OnSetDelay( wxCommandEvent& /* event */ )
 		long new_value;
 		bool conv = dialog.GetValue().ToLong(&new_value);
 
-		if ( conv && (((int) new_value) >= 1) )
+		if ( conv && (((int) new_value) >= 0) )
 		{
 			timer_interval = new_value;
 			if ( timer.IsRunning() )
