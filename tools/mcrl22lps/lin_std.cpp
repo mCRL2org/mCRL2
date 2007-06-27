@@ -7194,7 +7194,12 @@ static void ApplySumElimination(ATermList *sumvars,
     }
 
     if (gsIsDataVarId(lefthandside) &&
-            occursin(lefthandside,*sumvars))
+            occursin(lefthandside,*sumvars) &&
+            !(occursinterm(lefthandside,righthandside))) // occur check, to prevent
+                                                     // that in an equation x==f(c,x)
+                                                     // x is replaced by f(c,x), as
+                                                     // this does not lead to elimination
+                                                     // of x.
     { /* replace the lefthandside by the righthandside in this
              summand and remove the lefthandside from the sumvars. */
       *sumvars=ATremoveElement(*sumvars,(ATerm)lefthandside);
@@ -7680,7 +7685,6 @@ static ATermList combinesumlist(
 
     rename1_list=construct_renaming(allpars,
                                     sumvars1,&sumvars1new,&sums1renaming);
-
     multiaction1=substitute_multiaction(
                            rename1_list,
                            sums1renaming,
@@ -7708,6 +7712,7 @@ static ATermList combinesumlist(
       rename2_list=construct_renaming(
                ATconcat(sumvars1new,allpars),
                sumvars2,&sumvars2new,&sums2renaming);
+
       
       if ((multiaction1==terminationAction)==(multiaction2==terminationAction))
       { ATermAppl multiaction3=NULL;
