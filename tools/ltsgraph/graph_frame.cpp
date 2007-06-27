@@ -679,8 +679,8 @@ bool GraphFrame::OptimizeDrawing(double precision) {
   return achieved_precision<precision;
 }
 
-void GraphFrame::Draw(wxPaintDC * myDC) {
-
+void GraphFrame::Draw(wxAutoBufferedPaintDC * myDC) {
+  myDC->Clear();
   
   //Call Edge and Node OnPaint() method (Edge 1st)
   for (size_t n = 0; n < vectEdge.size(); n++) {
@@ -1098,6 +1098,7 @@ ViewPort::ViewPort(wxWindow * parent, const wxPoint& pos, const wxSize& size, lo
   selected_node = NULL;
   selected_edge = NULL;
 
+  SetBackgroundStyle(wxBG_STYLE_CUSTOM);
 }
 
 Node * ViewPort::get_selected_node() {
@@ -1111,10 +1112,9 @@ edge * ViewPort::get_selected_edge() {
 void ViewPort::OnPaint(wxPaintEvent& /* event */) {
 		sz = GetClientSize();
 
-    //Draw the graph
-		wxPaintDC myDC(this);
-		GF->Draw(&myDC);
-
+  //Draw the graph
+  wxAutoBufferedPaintDC myDC(this);
+  GF->Draw(&myDC);
 }
 
 //Resizing Graph

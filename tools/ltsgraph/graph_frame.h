@@ -8,6 +8,7 @@
 #include <wx/msgdlg.h>
 #include <wx/gdicmn.h>
 #include <wx/dcps.h>
+#include <wx/dcbuffer.h>
 //#include <wx/cmndata.h>
 //layout
 #include <wx/splitter.h>
@@ -79,7 +80,7 @@ public:
   GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& size, long style = wxDEFAULT_FRAME_STYLE);
   void BuildLayout();
   void Init(wxString LTSfile);
-  void Draw(wxPaintDC * myDC);
+  void Draw(wxAutoBufferedPaintDC * myDC);
   void on_export (wxCommandEvent& event);
   void on_about (wxCommandEvent& event);
   void export_to_latex(wxString filename);
