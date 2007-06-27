@@ -44,37 +44,33 @@ void SettingsDialog::setupParPanel(wxPanel* panel) {
   int rf = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL; 
   int bd = 5;
   wxSize spinSize(65,-1);
+  long spinStyle = wxSP_ARROW_KEYS;
 
   wxFlexGridSizer* sizer = new wxFlexGridSizer(5,2,0,0);
   sizer->AddGrowableCol(0);
   sizer->AddGrowableRow(4);
 
-  nsSpin = new wxSpinCtrl(panel,myID_ANY);
-  nsSpin->SetRange(0,1000);
-  nsSpin->SetValue(int(10*settings->getFloat(NodeSize)));
-  nsSpin->SetSizeHints(spinSize,spinSize);
+  nsSpin = new wxSpinCtrl(panel,myID_ANY,wxEmptyString,wxDefaultPosition,
+      spinSize,spinStyle,0,1000,int(10*settings->getFloat(NodeSize)));
+  //nsSpin->SetSizeHints(spinSize,spinSize);
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("State size:")),0,lf,bd);
   sizer->Add(nsSpin,0,rf,bd);
   
   brSpin = new wxSpinCtrl(panel,myID_ANY,wxEmptyString,wxDefaultPosition,
-													wxDefaultSize,wxSP_ARROW_KEYS|wxSP_WRAP);
-  brSpin->SetRange(0,359);
-  brSpin->SetValue(settings->getInt(BranchRotation));
-  brSpin->SetSizeHints(spinSize,spinSize);
+      spinSize,spinStyle|wxSP_WRAP,0,359,settings->getInt(BranchRotation));
+  //brSpin->SetSizeHints(spinSize,spinSize);
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Branch rotation:")),0,lf,bd);
   sizer->Add(brSpin,0,rf,bd);
 
-  obSpin = new wxSpinCtrl(panel,myID_ANY);
-  obSpin->SetRange(0,90);
-  obSpin->SetValue(settings->getInt(BranchTilt));
-  obSpin->SetSizeHints(spinSize,spinSize);
+  obSpin = new wxSpinCtrl(panel,myID_ANY,wxEmptyString,wxDefaultPosition,
+      spinSize,spinStyle,0,90,settings->getInt(BranchTilt));
+  //obSpin->SetSizeHints(spinSize,spinSize);
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Branch tilt:")),0,lf,bd);
   sizer->Add(obSpin,0,rf,bd);
   
-  qlSpin = new wxSpinCtrl(panel,myID_ANY);
-  qlSpin->SetRange(2,50);
-  qlSpin->SetValue(settings->getInt(Quality)/2);
-  qlSpin->SetSizeHints(spinSize,spinSize);
+  qlSpin = new wxSpinCtrl(panel,myID_ANY,wxEmptyString,wxDefaultPosition,
+      spinSize,spinStyle,2,50,settings->getInt(Quality)/2);
+  //qlSpin->SetSizeHints(spinSize,spinSize);
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Accuracy:")),0,lf,bd);
   sizer->Add(qlSpin,0,rf,bd);
   
@@ -88,62 +84,61 @@ void SettingsDialog::setupClrPanel(wxPanel* panel) {
   int rf = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL; 
   int bd = 5;
   wxSize spinSize(65,-1);
+  long spinStyle = wxSP_ARROW_KEYS;
   wxSize btnSize(25,25);
 
-  wxFlexGridSizer* sizer = new wxFlexGridSizer(20,3,0,0);
+  wxFlexGridSizer* sizer = new wxFlexGridSizer(9,3,0,0);
   sizer->AddGrowableCol(0);
-  sizer->AddGrowableRow(19);
+  sizer->AddGrowableRow(8);
  
-  trSpin = new wxSpinCtrl(panel,myID_ANY);
-  trSpin->SetRange(0,100);
-  trSpin->SetValue(static_cast<int>((255-settings->getUByte(Alpha))/2.55f));
-  trSpin->SetSizeHints(spinSize,spinSize);
+  trSpin = new wxSpinCtrl(panel,myID_ANY,wxEmptyString,wxDefaultPosition,
+      spinSize,spinStyle,0,100,
+      static_cast<int>((255-settings->getUByte(Alpha))/2.55f));
+  //trSpin->SetSizeHints(spinSize,spinSize);
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Transparency:")),0,lf,bd);
   sizer->AddSpacer(0);
   sizer->Add(trSpin,0,rf,bd);
 
-  bgButton = new wxColorButton(panel,this,myID_ANY);
-  bgButton->SetSizeHints(btnSize,btnSize);
+  bgButton = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
+  //bgButton->SetSizeHints(btnSize,btnSize);
   bgButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(BackgroundColor)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Background:")),0,lf,bd);
   sizer->AddSpacer(0);
   sizer->Add(bgButton,0,rf,bd);
 
-  ndButton = new wxColorButton(panel,this,myID_ANY);
-  ndButton->SetSizeHints(btnSize,btnSize);
+  ndButton = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
+  //ndButton->SetSizeHints(btnSize,btnSize);
   ndButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(StateColor)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("State:")),0,lf,bd);
   sizer->AddSpacer(0);
   sizer->Add(ndButton,0,rf,bd);
 
-  deButton = new wxColorButton(panel,this,myID_ANY);
-  deButton->SetSizeHints(btnSize,btnSize);
+  deButton = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
+  //deButton->SetSizeHints(btnSize,btnSize);
   deButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(DownEdgeColor)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Transition:")),0,lf,bd);
   sizer->AddSpacer(0);
   sizer->Add(deButton,0,rf,bd);
 
-  ueButton = new wxColorButton(panel,this,myID_ANY);
-  ueButton->SetSizeHints(btnSize,btnSize);
+  ueButton = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
+  //ueButton->SetSizeHints(btnSize,btnSize);
   ueButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(UpEdgeColor)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Backpointer:")),0,lf,bd);
   sizer->AddSpacer(0);
   sizer->Add(ueButton,0,rf,bd);
-
-
   
-  mkButton = new wxColorButton(panel,this,myID_ANY);
-  mkButton->SetSizeHints(btnSize,btnSize);
+  mkButton = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
+  //mkButton->SetSizeHints(btnSize,btnSize);
   mkButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(MarkedColor)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Mark:")),0,lf,bd);
   sizer->AddSpacer(0);
   sizer->Add(mkButton,0,rf,bd);
 
-  i1Button = new wxColorButton(panel,this,myID_ANY);
-  i1Button->SetSizeHints(btnSize,btnSize);
+  i1Button = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
+  //i1Button->SetSizeHints(btnSize,btnSize);
   i1Button->SetBackgroundColour(RGB_to_wxC(settings->getRGB(InterpolateColor1)));
-  i2Button = new wxColorButton(panel,this,myID_ANY);
-  i2Button->SetSizeHints(btnSize,btnSize);
+  i2Button = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
+  //i2Button->SetSizeHints(btnSize,btnSize);
   i2Button->SetBackgroundColour(RGB_to_wxC(settings->getRGB(InterpolateColor2)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Interpolate:")),0,lf,bd);
   sizer->Add(i1Button,0,rf,bd);
@@ -154,12 +149,10 @@ void SettingsDialog::setupClrPanel(wxPanel* panel) {
   sizer->Add(liCheck,0,lf,bd);
   sizer->AddSpacer(0);
   sizer->AddSpacer(0);
-
   
   panel->SetSizer(sizer);
   panel->Fit();
   panel->Layout();
-  
 }
 
 void SettingsDialog::setupSimPanel(wxPanel* panel) {   
@@ -168,43 +161,37 @@ void SettingsDialog::setupSimPanel(wxPanel* panel) {
   int bd = 5;
 
   wxSize btnSize(25,25);
-  wxFlexGridSizer* sizer = new wxFlexGridSizer(20,3,0,0);
+  wxFlexGridSizer* sizer = new wxFlexGridSizer(5,2,0,0);
   sizer->AddGrowableCol(0);
-  sizer->AddGrowableRow(19);  
+  sizer->AddGrowableRow(4);  
    
-  shButton = new wxColorButton(panel,this,myID_ANY);
-  shButton->SetSizeHints(btnSize,btnSize);
+  shButton = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
+  //shButton->SetSizeHints(btnSize,btnSize);
   shButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimPrevColor)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Previous states/transitions:")),0,lf,bd);
-  sizer->AddSpacer(0);
   sizer->Add(shButton,0,rf,bd); 
-
   
-  scButton = new wxColorButton(panel,this,myID_ANY);
-  scButton->SetSizeHints(btnSize,btnSize);
+  scButton = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
+  //scButton->SetSizeHints(btnSize,btnSize);
   scButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimCurrColor)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Current state:")),0,lf,bd);
-  sizer->AddSpacer(0);
   sizer->Add(scButton,0,rf,bd);
   
-  ssButton = new wxColorButton(panel,this,myID_ANY);
-  ssButton->SetSizeHints(btnSize,btnSize);
+  ssButton = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
+  //ssButton->SetSizeHints(btnSize,btnSize);
   ssButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimSelColor)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Selected state/transition:")),0,lf,bd);
-  sizer->AddSpacer(0);
   sizer->Add(ssButton,0,rf,bd);
   
-  spButton = new wxColorButton(panel,this,myID_ANY);
-  spButton->SetSizeHints(btnSize,btnSize);
+  spButton = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
+  //spButton->SetSizeHints(btnSize,btnSize);
   spButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimPosColor)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Possible states/transitions:")),0,lf,bd);
-  sizer->AddSpacer(0);
   sizer->Add(spButton,0,rf,bd);
 
   panel->SetSizer(sizer);
   panel->Fit();
   panel->Layout();
-
 }
 
 void SettingsDialog::setupPfmPanel(wxPanel* panel) {

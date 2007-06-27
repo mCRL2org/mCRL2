@@ -67,13 +67,13 @@ MainFrame::MainFrame(Mediator* owner,Settings* ss)
   settings = ss;
   progDialog = NULL;
   savePicDialog = NULL;
+  settingsDialog = NULL;
 
   SetIcon(wxIcon(main_window));
 
   CreateStatusBar(2);
   setupMenuBar();
   setupMainArea();
-  settingsDialog = new SettingsDialog(this,glCanvas,ss);
   
   SetSize(800,600);
   CentreOnScreen();
@@ -417,7 +417,9 @@ void MainFrame::onSavePic(wxCommandEvent& /*event*/) {
 }
 
 void MainFrame::onExit(wxCommandEvent& /*event*/) {
-  settingsDialog->Destroy();
+  if (settingsDialog != NULL) {
+    settingsDialog->Destroy();
+  }
   Close();
 }
 
@@ -461,6 +463,9 @@ void MainFrame::onDisplay(wxCommandEvent& event) {
 }
 
 void MainFrame::onSettings(wxCommandEvent& /*event*/) {
+  if (settingsDialog == NULL) {
+    settingsDialog = new SettingsDialog(this,glCanvas,settings);
+  }
   settingsDialog->Show();
 }
 
