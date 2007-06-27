@@ -76,23 +76,25 @@ bool LtsgraphBackup::Backup(wxString Bfilename) {
 
 	//NODE(IsLocked?)(IsInitState?):num(IsVisible?):coordX-coordY
 	for (size_t n = 0; n < BackupVectNode.size(); n++) {
-		tmp.sprintf(wxT("NODE(%d)(%d):%d(%d):%f-%f"), BackupVectNode[n]->IsLocked(), 
-																									BackupVectNode[n]->IsInitState(),
-																		 					    BackupVectNode[n]->Get_num(), 
-																							    BackupVectNode[n]->LabelVisible(),
-																		 					    BackupVectNode[n]->GetX(),
-																		 					    BackupVectNode[n]->GetY()
-							 );				
-		BckpFile.AddLine(tmp);
+		tmp.sprintf(wxT("NODE(%d)(%d):%d(%d):%f-%f:%s%s"), BackupVectNode[n]->IsLocked(), 
+        BackupVectNode[n]->IsInitState(),
+        BackupVectNode[n]->Get_num(), 
+        BackupVectNode[n]->LabelVisible(),
+        BackupVectNode[n]->GetX(),
+        BackupVectNode[n]->GetY(),
+        BackupVectNode[n]->GetNodeColour().GetAsString(wxC2S_CSS_SYNTAX).c_str(),
+        BackupVectNode[n]->GetBorderColour().GetAsString(wxC2S_CSS_SYNTAX).c_str());
+
+           BckpFile.AddLine(tmp);
 	}
 
 	//EDGE:numNode1,numNode2,IsVisible?
 	//label
   for (size_t n = 0; n < BackupVectEdge.size(); n++) {
 		wxString lbl(BackupVectEdge[n]->get_lbl().c_str(), wxConvLocal);
-		tmp.sprintf(wxT("EDGE:%d,%d,%d,"),  
-                BackupVectEdge[n]->get_n1()->Get_num(),		 				BackupVectEdge[n]->get_n2()->Get_num(),						BackupVectEdge[n]->LabelVisible()
-							 );				
+		tmp.sprintf(wxT("EDGE:%d,%d,%d,%s"),  
+                BackupVectEdge[n]->get_n1()->Get_num(),BackupVectEdge[n]->get_n2()->Get_num(),BackupVectEdge[n]->LabelVisible(),
+		BackupVectEdge[n]->get_label_colour().GetAsString(wxC2S_CSS_SYNTAX).c_str());
 		BckpFile.AddLine(tmp);
 		BckpFile.AddLine(lbl);
   }
@@ -146,18 +148,33 @@ bool LtsgraphBackup::Restore(wxString Rfilename) {
 
 	for ( ;!RtrFile.Eof() ; wxstr = RtrFile.GetNextLine() ) {
 
+                struct rgb_colour {
+                  unsigned int red;
+                  unsigned int green;
+                  unsigned int blue;
+                };
+
 		if (wxstr.Left(4).IsSameAs(wxT("NODE"))) { //NODE(IsLocked?)(IsInitState?):num(IsVisible?):coordX-coordY
 			int IsLocked, IsInitState, IsVisible;
 			unsigned int numNode;
 			double coordX, coordY;
 
-			sscanf(wxstr.fn_str(),"NODE(%d)(%d):%d(%d):%lf-%lf", &IsLocked, &IsInitState, &numNode, &IsVisible, &coordX, &coordY );
+                        rgb_colour node_colour, border_colour;
+
+			sscanf(wxstr.fn_str(),"NODE(%d)(%d):%d(%d):%lf-%lf:rgb(%3d,%3d,%3d)rgb(%3d,%3d,%3d)", &IsLocked, &IsInitState, &numNode, &IsVisible, &coordX, &coordY,
+                           &node_colour.red, &node_colour.green, &node_colour.blue, &border_colour.red, &border_colour.green, &border_colour.blue);
 
 			wxString tmp_lbl;
 			tmp_lbl.sprintf(wxT("%d"), numNode);
 			wxString * Slbl_Node = new wxString(tmp_lbl);
 
 			NodeMap[numNode] = new Node(numNode, coordX, coordY, *Slbl_Node, (IsInitState == 1) );	
+                        NodeMap[numNode]->SetNodeColour(wxColour(static_cast< unsigned char > (node_colour.red),
+                                                                static_cast< unsigned char > (node_colour.green),
+                                                                static_cast< unsigned char > (node_colour.blue)));
+                        NodeMap[numNode]->SetBorderColour(wxColour(static_cast < unsigned char > (border_colour.red),
+                                                                  static_cast < unsigned char > (border_colour.green),
+                                                                  static_cast < unsigned char > (border_colour.blue)));
 
 			BackupVectNode.push_back( NodeMap[numNode] );
 
@@ -168,13 +185,18 @@ bool LtsgraphBackup::Restore(wxString Rfilename) {
 		else if (wxstr.Left(4).IsSameAs(wxT("EDGE"))) { 
 			int IsVisible;
 			unsigned int NumNode1, NumNode2;
+                        rgb_colour label_colour;
 
-			sscanf(wxstr.fn_str(),"EDGE:%d,%d,%d,", &NumNode1, &NumNode2, &IsVisible );
+			sscanf(wxstr.fn_str(),"EDGE:%d,%d,%d,rgb(%3d,%3d,%3d)", &NumNode1, &NumNode2, &IsVisible,
+                                &label_colour.red, &label_colour.green, &label_colour.blue);
 
 			if (!RtrFile.Eof())
 				wxstr = RtrFile.GetNextLine();
 			BackupVectEdge.push_back(new edge(NodeMap[NumNode1],NodeMap[NumNode2],wxstr));
 
+                        BackupVectEdge.back()->set_label_colour(wxColour(static_cast< unsigned char > (label_colour.red),
+                                                                         static_cast< unsigned char > (label_colour.green),
+                                                                         static_cast< unsigned char > (label_colour.blue)));
 		}
 		else 
 			return false;

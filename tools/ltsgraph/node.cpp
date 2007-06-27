@@ -80,6 +80,22 @@ double Node::GetY() {
     return posY;
 }
 
+wxColour Node::GetNodeColour() {
+    return node_colour;
+}
+
+void Node::SetNodeColour(wxColour const& c) {
+    node_colour = c;
+}
+
+void Node::SetBorderColour(wxColour const& c) {
+    border_colour = c;
+}
+
+wxColour Node::GetBorderColour() {
+    return border_colour;
+}
+
 string Node::Get_lbl() {
 	string st_lbl = string(lbl.fn_str());
 	return st_lbl;

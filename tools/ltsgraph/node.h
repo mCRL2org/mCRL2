@@ -26,6 +26,10 @@ public:
   unsigned int Get_num();
   double GetX(); 
   double GetY();
+  wxColour GetNodeColour();
+  void SetNodeColour(wxColour const&);
+  wxColour GetBorderColour();
+  void SetBorderColour(wxColour const&);
   int get_radius();
   string Get_lbl();
   void SetXY(double, double);
