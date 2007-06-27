@@ -1,3 +1,12 @@
+// Author(s): Alexander van Dam
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file pbes2bes/pbes_rewrite.cpp
+/// \brief Source file for the PBES rewriter.
+
 #include "pbes_rewrite.h"
 #include "mcrl2/pbes/utility.h"
 #include "print/messaging.h"
@@ -9,7 +18,7 @@ using namespace lps;
 using namespace pbes_expr;
 using namespace ::mcrl2::utilities;;
 
-// parameterized boolean expression
+// parameterised boolean expression
 //<PBExpr>       ::= <DataExpr>
 //                 | PBESTrue
 //                 | PBESFalse
@@ -68,6 +77,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 	{ // p = forall(data_expression_list, pbes_expression)
 		data_variable_list data_vars = quant_vars(p);
 		pbes_expression expr = pbes_expression_rewrite(quant_expr(p), data, rewriter);
+		
 		//Remove data_vars which does not occur in expr
 		data_variable_list occured_data_vars;
 		for (data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
@@ -82,9 +92,9 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 		else
 		{
 			data_vars = occured_data_vars;
-			//If expression is true or false -> return it
 			if (is_true(expr) || is_false(expr))
 				result = expr;
+			
 			//If the forall  has only finite data variables, make a conjunction out of it.
 			else if (check_finite_list(data.constructors(), get_sorts(data_vars)))
 			{
@@ -99,7 +109,6 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 				exit(1);
 			}
 			else
-				//Probably some advanced stuff is needed here to check finiteness...
 				result = forall(data_vars, expr);
 		}
 	}
@@ -107,6 +116,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 	{ // p = exists(data_expression_list, pbes_expression)
 		data_variable_list data_vars = quant_vars(p);
 		pbes_expression expr = pbes_expression_rewrite(quant_expr(p), data, rewriter);
+		
 		//Remove data_vars which does not occur in expr
 		data_variable_list occured_data_vars;
 		for (data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
@@ -121,7 +131,6 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 		else
 		{
 			data_vars = occured_data_vars;
-			//If expression is true or false -> return it
 			if (is_true(expr) || is_false(expr))
 				result = expr;
 			//If the exists  has only finite data variables, make a conjunction out of it.
@@ -137,14 +146,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 				gsErrorMsg("Aborting\n");
 				exit(1);
 			}
-/*			else if (element_in_propvarinstlist(occured_data_vars, find_propositional_variable_instantiations(expr)))
-			{
-				gsErrorMsg("The propositional_variable_instantiation cannot be replaced\n");
-				gsErrorMsg("Aborting\n");
-				exit(1);
-			}
-*/			else 
-				//Probably some advanced stuff is needed here to check finiteness...
+			else 
 				result = exists(data_vars, expr);
 		}
 	}

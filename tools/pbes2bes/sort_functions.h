@@ -1,9 +1,14 @@
-//#include "mcrl2/data/data.h"
+// Author(s): Alexander van Dam
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file pbes2bes/sort_functions.cpp
+/// \brief Header file for a number of functions on sorts.
+
 #include "mcrl2/pbes/pbes.h"
 
-//#include "mcrl2/data/sort.h"
-//using namespace lps;
-//using namespace std;
 
 lps::sort_list get_sorts(lps::data_variable_list v);
 

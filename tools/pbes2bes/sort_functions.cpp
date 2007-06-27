@@ -1,5 +1,13 @@
-#include "sort_functions.h"
+// Author(s): Alexander van Dam
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file pbes2bes/sort_functions.cpp
+/// \brief Source file for a number of functions on sorts.
 
+#include "sort_functions.h"
 #include "mcrl2/data/sort_utility.h"
 
 using namespace lps;
