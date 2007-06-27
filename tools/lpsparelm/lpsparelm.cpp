@@ -334,28 +334,18 @@ void lpsParElm::filter() {
   if(p_verbose){
     gsVerboseMsg("lpsparelm: Searching for dependent process parameters\n");
   } 
-  bool reset = true;
-  while (reset){
+  
+  unsigned int z = 0; 
+  while (z != p_usedVars.size()){
     gsVerboseMsg("lpsparelm:   Cycle %d: ", ++cycle);
-    reset = false;
-    //counter = 0; 
-    for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); currentSummand++){
+    z = p_usedVars.size();
+	for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); currentSummand++){
       gsDebugMsg("Summand :%d/%d\n", ++counter, n);    
       gsVerboseMsg(".");
       for(data_assignment_list::iterator i = currentSummand->assignments().begin(); i !=  currentSummand->assignments().end() ;i++){
         if (p_usedVars.find(i->lhs()) != p_usedVars.end()){
-          foundVariables = getDataVarIDs(aterm_appl(i->rhs()));
+		  findDataVariablesInDataExpression(i->rhs());
           gsDebugMsg("%s\n", pp(i->rhs()).c_str());
-          unsigned int  z = p_usedVars.size();
-          for(std::set< lps::data_variable >::iterator k = foundVariables.begin(); k != foundVariables.end(); k++){
-	          p_usedVars.insert(*k);
-	          gsDebugMsg("%s\n", pp(*k).c_str());
-	        }
-	        gsDebugMsg("%d----%d\n", z, p_usedVars.size());
-          if (p_usedVars.size() != z){
-            reset = true;
-            gsDebugMsg("\033[39m Match added: %s\033[0m\n", i->lhs().to_string().c_str()); 
-          };  
         }
       }
     }
