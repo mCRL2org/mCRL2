@@ -28,7 +28,7 @@ namespace tipi {
   class configuration;
 
   /** \brief This class models a tool configuration */
-  class configuration : public utility::visitable {
+  class configuration : public ::utility::visitable {
 
     friend class tipi::report;
     friend class tipi::tool::communicator_impl;
@@ -37,7 +37,7 @@ namespace tipi {
     friend class tipi::controller::communicator;
 
     template < typename R, typename S >
-    friend class utility::visitor;
+    friend class ::utility::visitor;
 
     public:
 

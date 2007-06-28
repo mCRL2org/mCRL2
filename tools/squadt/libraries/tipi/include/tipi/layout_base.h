@@ -31,7 +31,7 @@ namespace tipi {
     class element;
 
     /** \brief Abstract base class for layout elements */
-    class element : public utility::visitable {
+    class element : public ::utility::visitable {
 
       template < typename R, typename S >
       friend class ::utility::visitor;

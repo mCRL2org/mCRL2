@@ -121,8 +121,8 @@ namespace utility {
       }
   };
 
+  /// \cond INTERNAL_DOCS
   namespace detail {
-    /// \cond INTERNAL_DOCS
 
     template < typename S >
     class vector_map {
@@ -255,8 +255,8 @@ namespace utility {
         }
     };
 
-    /// \endcond
   }
+  /// \endcond
 
   template < typename R >
   R abstract_visitor< R >::call_visit(abstract_visitor& v, visitable const& t) {

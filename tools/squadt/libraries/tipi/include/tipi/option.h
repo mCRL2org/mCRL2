@@ -30,7 +30,7 @@ namespace tipi {
     friend class tipi::configuration;
 
     template < typename R, typename S >
-    friend class utility::visitor;
+    friend class ::utility::visitor;
 
     private:
 

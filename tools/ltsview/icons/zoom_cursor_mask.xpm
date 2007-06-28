@@ -1,5 +1,5 @@
 /* XPM */
-static char *zoom_cursor_mask[]={
+static const char *zoom_cursor_mask[]={
 "16 16 4 1",
 "# c #000000",
 "b c #1f1f1f",

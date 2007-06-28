@@ -45,7 +45,7 @@ namespace tipi {
       restore_visitor_impl(ticpp::Element* s);
   };
 
-  class restore_visitor_impl_frontend : public utility::visitor< restore_visitor_impl > {
+  class restore_visitor_impl_frontend : public ::utility::visitor< restore_visitor_impl > {
 
     private:
 
@@ -109,21 +109,21 @@ namespace tipi {
    **/
   template < >
   restore_visitor::restore_visitor(ticpp::Element& s) :
-        utility::visitor_interface< restore_visitor_impl >(boost::shared_ptr < utility::visitor< restore_visitor_impl > > (new utility::visitor< restore_visitor_impl >(&s))) {
+        ::utility::visitor_interface< restore_visitor_impl >(boost::shared_ptr < ::utility::visitor< restore_visitor_impl > > (new ::utility::visitor< restore_visitor_impl >(&s))) {
   }
 
   /**
    * \param[in] s the string to read from
    **/
   restore_visitor::restore_visitor(std::string const& s) :
-        utility::visitor_interface< restore_visitor_impl >(boost::shared_ptr < utility::visitor< restore_visitor_impl > > (new restore_visitor_impl_frontend(s))) {
+        ::utility::visitor_interface< restore_visitor_impl >(boost::shared_ptr < ::utility::visitor< restore_visitor_impl > > (new restore_visitor_impl_frontend(s))) {
   }
 
   /**
    * \param[in] p the path of the file to read from
    **/
   restore_visitor::restore_visitor(boost::filesystem::path const& p) :
-        utility::visitor_interface< restore_visitor_impl >(boost::shared_ptr < utility::visitor< restore_visitor_impl > > (new restore_visitor_impl_frontend(p))) {
+        ::utility::visitor_interface< restore_visitor_impl >(boost::shared_ptr < ::utility::visitor< restore_visitor_impl > > (new restore_visitor_impl_frontend(p))) {
   }
 }
 

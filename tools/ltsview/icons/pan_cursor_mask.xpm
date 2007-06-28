@@ -1,5 +1,5 @@
 /* XPM */
-static char *pan_cursor_mask[]={
+static const char *pan_cursor_mask[]={
 "16 16 4 1",
 "# c #000000",
 "a c #131313",

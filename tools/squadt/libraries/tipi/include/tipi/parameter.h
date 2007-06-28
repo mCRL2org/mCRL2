@@ -12,7 +12,7 @@
 namespace tipi {
 
   /** \brief Base class for elements of a tipi::configuration */
-  class parameter : public utility::visitable {
+  class parameter : public ::utility::visitable {
 
     public:
 

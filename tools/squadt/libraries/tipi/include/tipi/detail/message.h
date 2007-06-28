@@ -36,11 +36,11 @@ namespace tipi {
      *   a value A that is used as any (the wildcard) message type
      */
     template < class M, M D, M A >
-    class message : public utility::visitable {
+    class message : public ::utility::visitable {
       friend class basic_messenger_impl < message < M, D, A > >;
 
       template < typename R, typename S >
-      friend class utility::visitor;
+      friend class ::utility::visitor;
 
       public:
 

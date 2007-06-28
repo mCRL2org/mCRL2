@@ -251,7 +251,7 @@ namespace squadt {
 
     void debug_preferences::filter_level_changed(wxCommandEvent&) {
       tipi::controller::communicator::get_standard_logger()->
-                     set_filter_level(static_cast < utility::logger::log_level > (filter_level->GetValue()));
+                     set_filter_level(static_cast < tipi::utility::logger::log_level > (filter_level->GetValue()));
     }
 
     debug_preferences::debug_preferences(wxWindow* w) : wxPanel(w, wxID_ANY) {
@@ -263,7 +263,7 @@ namespace squadt {
       current_sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Filter level for diagnostic messages and warnings")), 0, wxEXPAND|wxLEFT|wxRIGHT, 4);
 
       filter_level = new wxSlider(this, wxID_ANY, std::max(tipi::controller::communicator::get_standard_logger()->get_filter_level(),
-                                  static_cast < utility::logger::log_level > (1)), 1, 5, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS|wxSL_BOTTOM);
+                                  static_cast < tipi::utility::logger::log_level > (1)), 1, 5, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS|wxSL_BOTTOM);
 
       Connect(wxEVT_SCROLL_CHANGED, wxCommandEventHandler(debug_preferences::filter_level_changed));
 

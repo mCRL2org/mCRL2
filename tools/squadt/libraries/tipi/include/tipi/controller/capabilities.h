@@ -35,12 +35,12 @@ namespace tipi {
      * As well as any information about the controller that might be interesting
      * for a tool developer.
      **/
-    class capabilities : public utility::visitable {
+    class capabilities : public ::utility::visitable {
       friend class tipi::tool::communicator;
       friend class tipi::controller::communicator;
 
       template < typename R, typename S >
-      friend class utility::visitor;
+      friend class ::utility::visitor;
  
       public:
 

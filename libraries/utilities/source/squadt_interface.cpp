@@ -38,7 +38,7 @@ namespace mcrl2 {
   
         gsSetCustomMessageHandler(relay_message);
   
-        ::utility::logger::log_level l = utility::logger::get_default_filter_level();
+        tipi::utility::logger::log_level l = tipi::utility::logger::get_default_filter_level();
   
         gsSetNormalMsg();
   

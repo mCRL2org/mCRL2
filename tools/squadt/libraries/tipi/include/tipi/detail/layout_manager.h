@@ -62,9 +62,9 @@ namespace tipi {
     typedef boost::uint_t< (sizeof(tipi::layout::element*) << 3) >::least  element_identifier;
 
     /** \brief Base class for layout constraint containers */
-    class properties : public utility::visitable {
+    class properties : public ::utility::visitable {
       template < typename R, typename S >
-      friend class utility::visitor;
+      friend class ::utility::visitor;
 
       public:
 
@@ -102,7 +102,7 @@ namespace tipi {
       friend class tipi::layout::element;
 
       template < typename R, typename S >
-      friend class utility::visitor;
+      friend class ::utility::visitor;
 
       public:
 
@@ -175,7 +175,7 @@ namespace tipi {
      **/
     class box : public manager {
       template < typename R, typename S >
-      friend class utility::visitor;
+      friend class ::utility::visitor;
 
       protected:
 
@@ -242,7 +242,7 @@ namespace tipi {
       friend class tipi::layout::element;
 
       template < typename R, typename S >
-      friend class utility::visitor;
+      friend class ::utility::visitor;
 
       public:
 
@@ -281,7 +281,7 @@ namespace tipi {
       friend class tipi::layout::element;
 
       template < typename R, typename S >
-      friend class utility::visitor;
+      friend class ::utility::visitor;
 
       public:
 

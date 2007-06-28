@@ -30,7 +30,7 @@ namespace tipi {
 
   namespace datatype {
 
-    class basic_datatype : public utility::visitable {
+    class basic_datatype : public ::utility::visitable {
 
       public:
 
@@ -60,7 +60,7 @@ namespace tipi {
      **/
     class enumeration : public basic_datatype {
       template < typename R, typename S >
-      friend class utility::visitor;
+      friend class ::utility::visitor;
 
       private:
         
@@ -109,7 +109,7 @@ namespace tipi {
      **/
     class integer : public basic_datatype {
       template < typename R, typename S >
-      friend class utility::visitor;
+      friend class ::utility::visitor;
 
       protected:
 
@@ -152,7 +152,7 @@ namespace tipi {
 
     class natural : public datatype::integer {
       template < typename R, typename S >
-      friend class utility::visitor;
+      friend class ::utility::visitor;
 
       public:
 
@@ -162,7 +162,7 @@ namespace tipi {
 
     class positive_integer : public datatype::integer {
       template < typename R, typename S >
-      friend class utility::visitor;
+      friend class ::utility::visitor;
 
       public:
 
@@ -172,7 +172,7 @@ namespace tipi {
 
     class negative_integer : public datatype::integer {
       template < typename R, typename S >
-      friend class utility::visitor;
+      friend class ::utility::visitor;
 
       public:
 
@@ -189,7 +189,7 @@ namespace tipi {
      **/
     class real : public basic_datatype {
       template < typename R, typename S >
-      friend class utility::visitor;
+      friend class ::utility::visitor;
 
       protected:
 
@@ -244,7 +244,7 @@ namespace tipi {
 
     class positive_real : public datatype::real {
       template < typename R, typename S >
-      friend class utility::visitor;
+      friend class ::utility::visitor;
 
       public:
 
@@ -254,7 +254,7 @@ namespace tipi {
 
     class negative_real : public datatype::real {
       template < typename R, typename S >
-      friend class utility::visitor;
+      friend class ::utility::visitor;
 
       public:
 
@@ -268,7 +268,7 @@ namespace tipi {
     /** \brief Derived data type specifier for booleans */
     class boolean : public basic_datatype {
       template < typename R, typename S >
-      friend class utility::visitor;
+      friend class ::utility::visitor;
 
       public:
 
@@ -301,7 +301,7 @@ namespace tipi {
     /** \brief Derived data type for strings */
     class string : public basic_datatype {
       template < typename R, typename S >
-      friend class utility::visitor;
+      friend class ::utility::visitor;
 
       protected:
 
@@ -354,6 +354,7 @@ namespace tipi {
     inline basic_datatype::~basic_datatype() {
     }
 
+/// \cond INTERNAL_DOCS
     /**
      * Specialisation for choosing conversion to enumeration
      **/
@@ -401,6 +402,7 @@ namespace tipi {
     inline std::string converti(basic_datatype const* const t, T const& s, boost::false_type const&) {
       return static_cast < string const* > (t)->convert(s);
     }
+/// \endcond
 
     /**
      * Specialisation for doing conversion to enumeration

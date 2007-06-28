@@ -1,5 +1,5 @@
 /* XPM */
-static char *rotate_cursor[]={
+static const char *rotate_cursor[]={
 "16 16 2 1",
 ". c None",
 "# c #000000",

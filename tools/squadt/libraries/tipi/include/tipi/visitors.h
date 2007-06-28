@@ -25,7 +25,7 @@ namespace tipi {
   /// \endcond
 
   /** \brief Visitor type for storing object hierarchies */
-  class store_visitor : public utility::visitor_interface< tipi::store_visitor_impl > {
+  class store_visitor : public ::utility::visitor_interface< tipi::store_visitor_impl > {
 
     public:
 
@@ -44,7 +44,7 @@ namespace tipi {
   /// \endcond
 
   /** \brief Visitor type for restoring object hierarchies */
-  class restore_visitor : public utility::visitor_interface< tipi::restore_visitor_impl > {
+  class restore_visitor : public ::utility::visitor_interface< tipi::restore_visitor_impl > {
 
     public:
 
@@ -64,7 +64,7 @@ namespace tipi {
   /// \endcond
 
   /** \brief Visitor type for searching within object hierarchies */
-  class search_visitor : public utility::visitor_interface< tipi::search_visitor_impl, bool > {
+  class search_visitor : public ::utility::visitor_interface< tipi::search_visitor_impl, bool > {
 
     public:
 

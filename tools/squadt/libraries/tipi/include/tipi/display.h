@@ -21,9 +21,9 @@
 namespace tipi {
 
   /** \brief Basic container class for layout elements */
-  class display : public utility::visitable {
+  class display : public ::utility::visitable {
     template < typename R, typename S >
-    friend class utility::visitor;
+    friend class ::utility::visitor;
 
     public:
 
@@ -69,7 +69,7 @@ namespace tipi {
     /** \brief Basic container class for controller-side layout definitions */
     class tool_display : public tipi::display {
       template < typename R, typename S >
-      friend class utility::visitor;
+      friend class ::utility::visitor;
 
       public:
 

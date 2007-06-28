@@ -16,7 +16,6 @@
 
 namespace tipi {
   namespace layout {
-    /** Contains the user interface controls that are available for use by tools */
     namespace elements {
 
       using namespace tipi::datatype;
@@ -26,7 +25,7 @@ namespace tipi {
         friend class layout::element;
 
         template < typename R, typename S >
-        friend class utility::visitor;
+        friend class ::utility::visitor;
      
         private:
      
@@ -58,7 +57,7 @@ namespace tipi {
         friend class layout::element;
 
         template < typename R, typename S >
-        friend class utility::visitor;
+        friend class ::utility::visitor;
      
         private:
 
@@ -100,7 +99,7 @@ namespace tipi {
         friend class layout::element;
      
         template < typename R, typename S >
-        friend class utility::visitor;
+        friend class ::utility::visitor;
 
         private:
           /** \brief The caption */
@@ -160,7 +159,7 @@ namespace tipi {
         friend class layout::element;
      
         template < typename R, typename S >
-        friend class utility::visitor;
+        friend class ::utility::visitor;
 
         private:
 
@@ -198,7 +197,7 @@ namespace tipi {
         friend class layout::element;
 
         template < typename R, typename S >
-        friend class utility::visitor;
+        friend class ::utility::visitor;
      
         private:
 
@@ -250,7 +249,7 @@ namespace tipi {
         friend class layout::element;
 
         template < typename R, typename S >
-        friend class utility::visitor;
+        friend class ::utility::visitor;
      
         private:
      

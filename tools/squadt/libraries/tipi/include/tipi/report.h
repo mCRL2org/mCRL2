@@ -19,9 +19,9 @@ namespace tipi {
   class report;
 
   /** \brief Describes a report of tool operation */
-  class report : public utility::visitable {
+  class report : public ::utility::visitable {
     template < typename R, typename S >
-    friend class utility::visitor;
+    friend class ::utility::visitor;
 
     public:
 

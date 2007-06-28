@@ -1,5 +1,5 @@
 /* XPM */
-static char *rotate_cursor_mask[]={
+static const char *rotate_cursor_mask[]={
 "16 16 2 1",
 "# c #000000",
 ". c #ff0000",

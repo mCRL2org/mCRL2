@@ -41,7 +41,7 @@ namespace tipi {
       store_visitor_impl(std::ostream&);
   };
 
-  class store_visitor_path_impl : public utility::visitor< store_visitor_impl > {
+  class store_visitor_path_impl : public ::utility::visitor< store_visitor_impl > {
 
     private:
 
@@ -54,7 +54,7 @@ namespace tipi {
       store_visitor_path_impl(boost::filesystem::path const&);
   };
 
-  class store_visitor_string_impl : public utility::visitor< store_visitor_impl > {
+  class store_visitor_string_impl : public ::utility::visitor< store_visitor_impl > {
 
     private:
 
@@ -74,7 +74,7 @@ namespace tipi {
   };
 
   inline store_visitor_string_impl::store_visitor_string_impl(std::string& s) :
-                                utility::visitor< store_visitor_impl >(m_help_stream),
+                                ::utility::visitor< store_visitor_impl >(m_help_stream),
                                 m_target_string(s) {
   }
 
@@ -83,7 +83,7 @@ namespace tipi {
   }
 
   inline store_visitor_path_impl::store_visitor_path_impl(boost::filesystem::path const& p) :
-                                utility::visitor< store_visitor_impl >(m_help_stream),
+                                ::utility::visitor< store_visitor_impl >(m_help_stream),
                                 m_help_stream(p.string().c_str(), std::ios_base::out) {
 
   }
@@ -99,15 +99,15 @@ namespace tipi {
   static const char* visibility_to_text[3] = {"visible","hidden","none"};
 
   store_visitor::store_visitor(std::string& s) :
-        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < utility::visitor< store_visitor_impl > > (new store_visitor_string_impl(s))) {
+        ::utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < ::utility::visitor< store_visitor_impl > > (new store_visitor_string_impl(s))) {
   }
 
   store_visitor::store_visitor(boost::filesystem::path const& p) :
-        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < utility::visitor< store_visitor_impl > > (new store_visitor_path_impl(p))) {
+        ::utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < ::utility::visitor< store_visitor_impl > > (new store_visitor_path_impl(p))) {
   }
 
   store_visitor::store_visitor(std::ostream& o) :
-        utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < utility::visitor< store_visitor_impl > > (new utility::visitor< store_visitor_impl >(o))) {
+        ::utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < ::utility::visitor< store_visitor_impl > > (new ::utility::visitor< store_visitor_impl >(o))) {
   }
 }
 
