@@ -18,7 +18,7 @@ exe find            : find.cpp            ../../../tools/mcrl22lps/lin_std.cpp :
 exe pbes_test       : pbes_test.cpp       ../../../tools/mcrl22lps/lin_std.cpp : ;
 exe term_replace    : term_replace.cpp : ;
 exe mcrl22lps       : mcrl22lps.cpp       ../../../tools/mcrl22lps/lin_std.cpp : ;
-exe utility         : utility.cpp : ;
+exe utility1        : utility1.cpp : ;
 exe bisimulation    : bisimulation.cpp : ;
 
 install dist
@@ -31,7 +31,7 @@ install dist
      find
      pbes_test
      mcrl22lps
-     utility
+     utility1
      bisimulation
    :
    ;
