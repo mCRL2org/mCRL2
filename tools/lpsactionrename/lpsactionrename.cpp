@@ -230,7 +230,7 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
     try
     {
       lps_oldspec.load("-");
-    {
+    }
     catch (std::runtime_error e)
     {
       gsErrorMsg("cannot open LPS from stdin\n");

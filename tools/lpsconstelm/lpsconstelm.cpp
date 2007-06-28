@@ -795,8 +795,9 @@ inline void lpsConstElm::printSet() {
 //
 inline bool lpsConstElm::loadFile(std::string const& filename) {
   p_filenamein = filename;
-  try {
-    p_spec.load(p_filenamein));
+  try
+  {
+    p_spec.load(p_filenamein);
   }
   catch (std::runtime_error e)
   {

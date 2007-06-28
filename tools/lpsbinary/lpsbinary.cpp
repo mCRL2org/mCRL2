@@ -676,7 +676,7 @@ int do_binary(const tool_options& options)
   specification lps_specification;
   try
   {
-    lps_specification.load(options.input_file));
+    lps_specification.load(options.input_file);
 
     // apply binary on lps_specification and save the output to a binary file
     if (!binary(lps_specification, options).save(options.output_file, true))

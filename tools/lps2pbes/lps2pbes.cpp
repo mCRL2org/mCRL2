@@ -438,9 +438,9 @@ ATermAppl create_pbes(t_tool_options tool_options)
   if (infilename == "") {
     try
     {
-      lps_spec.load("-"));
+      lps_spec.load("-");
     }
-    catch (std::runtime_exception e)
+    catch (std::runtime_error e)
     {
       gsErrorMsg("cannot open LPS from stdin\n");
       return NULL;
@@ -448,9 +448,9 @@ ATermAppl create_pbes(t_tool_options tool_options)
   } else {
     try
     {
-      lps_spec.load(infilename));
+      lps_spec.load(infilename);
     }
-    catch (std::runtime_exception e)
+    catch (std::runtime_error e)
     {
       gsErrorMsg("cannot open LPS from '%s'\n", infilename.c_str());
       return NULL;

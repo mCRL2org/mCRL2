@@ -445,7 +445,7 @@ int do_decluster(const tool_options& options)
 
   try
   {
-    lps_specification.load(options.input_file));
+    lps_specification.load(options.input_file);
 
     // decluster lps_specification and save the output to a binary file
     if (!decluster(lps_specification, options).save(options.output_file, true)) 
