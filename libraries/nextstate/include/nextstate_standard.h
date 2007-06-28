@@ -1,3 +1,11 @@
+// Author(s): Muck van Weerdenburg
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file nextstate_standard.h
+
 #ifndef _NEXTSTATE_STANDARD_H
 #define _NEXTSTATE_STANDARD_H
 

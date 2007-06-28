@@ -1,3 +1,11 @@
+// Author(s): Muck van Weerdenburg
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file rewr_jittyc.cpp
+
 #define USE_NEW_CALCTERM 1
 #define EXTEND_NFS 1
 #define F_DONT_TEST_ISAPPL 1

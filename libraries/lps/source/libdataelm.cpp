@@ -1,25 +1,10 @@
-// Copyright (c) 2007 Wieger Wesselink
+// Author(s): Muck van Weerdenburg 
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file libdataelm.cpp
-/// \brief Add your file description here.
-
-// ======================================================================
-//
-// Copyright (c) 2005 TU/e
-//
-// ----------------------------------------------------------------------
-//
-// file          : libdataelm 
-// date          : 06-12-2005
-// version       : 0.1
-//
-// author(s)     : Muck van Weerdenburg  <M.J.van.Weerdenburg@tue.nl>
-//
-// ======================================================================
 
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/data_specification.h"

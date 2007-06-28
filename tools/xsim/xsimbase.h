@@ -1,3 +1,11 @@
+// Author(s): Muck van Weerdenburg
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file xsimbase.h
+
 /* To make a new view one has to make a new class derived from
  * the SimulatorViewInterface below. Views are registered at
  * the actual Simulator with the Register(View) which will

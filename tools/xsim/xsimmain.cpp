@@ -1,3 +1,11 @@
+// Author(s): Muck van Weerdenburg
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file xsimmain.cpp
+
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
     #pragma implementation "xsimmain.h"
 #endif
@@ -1350,5 +1358,3 @@ void XSimMain::UpdateTransitions(bool update_next_states)
 	transview->SetColumnWidth(1,wxLIST_AUTOSIZE);
         transview->SetColumnWidth(1,transview->GetClientSize().GetWidth() - transview->GetColumnWidth(0));
 }
-
-
