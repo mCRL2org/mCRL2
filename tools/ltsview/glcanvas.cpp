@@ -351,7 +351,9 @@ void GLCanvas::onMouseEnter(wxMouseEvent& /*event*/) {
 }
 
 void GLCanvas::onMouseDown(wxMouseEvent& event) {
+
   lightRenderMode = true;
+  
   determineCurrentTool(event);
   if (currentTool==myID_ZOOM || currentTool==myID_PAN ||
       currentTool==myID_ROTATE) {
@@ -632,10 +634,10 @@ void GLCanvas::processHits(const GLint hits, GLuint buffer[], bool doubleC) {
       mediator->selectStateByID(selectedObject[1]);
       break;
     case CLUSTER: 
-      printf("Cluster selected \n");
-      std::cerr << "Rank: " << selectedObject[1] << std::endl;
-      std::cerr << "Position in rank: " << selectedObject[2] << std::endl;
-      mediator->selectCluster(selectedObject[1], selectedObject[2]);
+      //printf("Cluster selected \n");
+      //std::cerr << "Rank: " << selectedObject[1] << std::endl;
+      //std::cerr << "Position in rank: " << selectedObject[2] << std::endl;
+      //mediator->selectCluster(selectedObject[1], selectedObject[2]);
       break;
     case SIMSTATE:
       mediator->selectStateByID(selectedObject[1]);
@@ -647,7 +649,7 @@ void GLCanvas::processHits(const GLint hits, GLuint buffer[], bool doubleC) {
       }
       break;
     default:
-      printf("Nothing selected.\n");
+      //printf("Nothing selected.\n");
       selectedType = PICKNONE;
       mediator->deselect();
       break;

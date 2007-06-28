@@ -201,9 +201,9 @@ int LTS::getNumRanks() const {
 
 int LTS::getNumClusters() const {
   int result = 0;
-  for (unsigned int i = 0; i < clustersInRank.size(); ++i) {
+  for (size_t i = 0; i < clustersInRank.size(); ++i) {
     result += clustersInRank[i].size();
-	}
+  }
   return result;
 }
 

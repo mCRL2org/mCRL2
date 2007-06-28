@@ -404,21 +404,34 @@ string LTSViewApp::getParValue(const int i, const int j) const {
 
 
 void LTSViewApp::selectStateByID(const int id) {
-  lts->selectStateByID(id);
+  if (lts != NULL)
+  {
+    lts->selectStateByID(id);
+  }
 }
 
 void LTSViewApp::selectCluster(const int rank, const int pos) 
 {
-  lts->selectCluster(rank, pos);
+  if (lts != NULL) 
+  {
+    lts->selectCluster(rank, pos);
+  }
 }
 
 void LTSViewApp::deselect() {
-  lts->deselect();
+  if (lts != NULL)
+  {
+    lts->deselect();
+  }
 }
 
 int LTSViewApp::getNumberOfObjects() {
   int result = 0;
-  result += lts->getNumClusters();
-  result += lts->getNumStates();
+
+  if (lts != NULL) {
+    result += lts->getNumClusters();
+    result += lts->getNumStates();
+  }
+
   return result;
 }
