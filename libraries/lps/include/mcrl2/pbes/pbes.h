@@ -309,7 +309,7 @@ class pbes
     void load(const std::string& filename)
     {
       aterm t = atermpp::read_from_named_file(filename);
-      if (!t || t.type() == AT_APPL || !detail::check_rule_PBES(aterm_appl(t)))
+      if (!t || t.type() != AT_APPL || !detail::check_rule_PBES(aterm_appl(t)))
         throw std::runtime_error(std::string("Error in pbes::load(): could not read from file " + filename));
 
       aterm_appl::iterator i = aterm_appl(t).begin();

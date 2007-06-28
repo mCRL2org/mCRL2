@@ -132,7 +132,7 @@ class specification: public aterm_appl
     void load(const std::string& filename)
     {
       aterm t = atermpp::read_from_named_file(filename);
-      if (!t || t.type() == AT_APPL || !detail::check_rule_Spec(aterm_appl(t)))
+      if (!t || t.type() != AT_APPL || !detail::check_rule_Spec(aterm_appl(t)))
         throw std::runtime_error(std::string("Error in specification::load(): could not read from file " + filename));
       init_term(aterm_appl(t));
       if (!is_well_typed())
