@@ -4,7 +4,7 @@
 //
 // ----------------------------------------------------------------------
 //
-// file          : lpsbinary 
+// file          : lpsbinary
 // date          : 22-12-2006
 // version       : 0.25
 //
@@ -78,7 +78,7 @@ class squadt_interactor: public mcrl2::utilities::squadt::tool_interface
 
   private:
     boost::shared_ptr < tipi::datatype::enumeration > rewrite_strategy_enumeration;
-    
+
   public:
 
     /** \brief constructor */
@@ -141,7 +141,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
     strategy_selector.set_selection(static_cast < RewriteStrategy > (
         boost::any_cast < size_t > (configuration.get_option_argument(option_rewrite_strategy, 0))));
   }
-  
+
   top->add(new label("Rewrite strategy"));
   top->add(current_box);
 
@@ -152,11 +152,11 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
   send_display_layout(top);
 
   okay_button->await_change();
-  
+
   configuration.get_option(option_rewrite_strategy).replace_argument(0, rewrite_strategy_enumeration, strategy_selector.get_selection());
 }
 
-//bool squadt_interactor::extract_task_options(tipi::configuration const& configuration, 
+//bool squadt_interactor::extract_task_options(tipi::configuration const& configuration,
 
 bool squadt_interactor::check_configuration(tipi::configuration const& configuration) const
 {
@@ -175,16 +175,16 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
   using namespace tipi::layout;
   using namespace tipi::datatype;
   using namespace tipi::layout::elements;
-  
+
   bool result = true;
-  
+
   tool_options options;
   options.input_file = configuration.get_input(lps_file_for_input).get_location();
   options.output_file = configuration.get_output(lps_file_for_output).get_location();
   options.strategy = static_cast < RewriteStrategy > (boost::any_cast < size_t > (configuration.get_option_argument(option_rewrite_strategy, 0)));
 
   layout::manager::aptr top(layout::vertical_box::create());
-  
+
   top->add(new label("Binary in progress"), layout::left);
   send_display_layout(top);
 
@@ -202,7 +202,7 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
   }
 
   send_display_layout(top);
-  
+
   return result;
 }
 
@@ -222,10 +222,10 @@ int log2(int n)
     gsErrorMsg("Domain cannot be empty\n");
   }
 
-  --n; 
+  --n;
   //n is the maximal value to be represented
   for ( ; n>0; n = n/2)
-  { 
+  {
     result ++;
   }
   return result;
@@ -265,7 +265,7 @@ sort_list get_finite_sorts_not_bool(const function_list& cl, const sort_list& sl
 data_expression_list split_at(data_expression_list& list, unsigned int n)
 {
   assert (n <= list.size());
-  
+
   data_expression_list result;
   ///invariant: list.size() + result.size() == m
   for (unsigned int j = 0; j < n; ++j)
@@ -302,7 +302,7 @@ data_expression make_if_tree(const data_variable_list& new_parameters,
     n = enumerated_elements.size();
     m = powerof2(new_parameters.size() - 1);
     //m == 2^(new_parameters.size() - 1)
-     
+
     if (m > n)
     {
       m = n;
@@ -327,7 +327,7 @@ data_expression make_if_tree(const data_variable_list& new_parameters,
                               left_list)
                  );
   }
-  
+
   //gsDebugMsg("If tree: %s\n", result.to_string().c_str());
   return result;
 }
@@ -338,14 +338,14 @@ data_expression make_if_tree(const data_variable_list& new_parameters,
 /// \ret data variable list with the new process parameters (i.e. with all variables of a
 /// finite type != bool replaced by a vector of boolean variables.
 data_variable_list replace_enumerated_parameters(const lps::specification& specification,
-                                                 EnumeratorStandard& enumerator, 
+                                                 EnumeratorStandard& enumerator,
                                                  table& new_parameters_table,
                                                  table& enumerated_elements_table)
 {
   data_variable_list result;
   data_variable_list process_parameters = specification.process().process_parameters();
   gsDebugMsg("Original process parameters: %s\n", process_parameters.to_string().c_str());
-  
+
   fresh_variable_generator generator = fresh_variable_generator(aterm(specification));
   generator.set_sort(sort_expr::bool_());
 
@@ -375,18 +375,18 @@ data_variable_list replace_enumerated_parameters(const lps::specification& speci
           data_expression res = data_expression(aterm_appl(enumerator.getRewriter()->fromRewriteFormat(ATgetArgument(ATerm(*i),1))));
           enumerated_elements = push_front(enumerated_elements, res);
         }
-        
+
       }
       // j = enumerated_elements.size()
       enumerated_elements = reverse(enumerated_elements);
 
       enumerated_elements_table.put(par , enumerated_elements); // Store enumerated elements for easy retrieval later on.
-      
+
       //Calculate the number of booleans needed to encode par
       int n = log2(j);
       // n = ceil(log_2(j)), so also 2^n <= j
       gsVerboseMsg("Parameter `%s' has been replaced by %d parameters of type bool\n", par.to_string().c_str(), n);
- 
+
       //Set hint for fresh variable names
       generator.set_hint(par.name());
 
@@ -396,15 +396,15 @@ data_variable_list replace_enumerated_parameters(const lps::specification& speci
         new_pars = push_front(new_pars, generator());
       }
       // n = new_pars.size() && new_pars.size() = ceil(log_2(j)) && new_pars.size() = ceil(log_2(enumerated_elements.size()))
-      
-      new_pars = reverse(new_pars); 
-      
+
+      new_pars = reverse(new_pars);
+
       //Store new parameters in a hastable
       new_parameters_table.put(par, new_pars);
-      
+
       //Add new parameters to the result
       result = new_pars + result;
-    }   
+    }
     else
     {
       gsVerboseMsg("Parameter `%s' has not been replaced by parameters of type Bool\n", par.to_string().c_str());
@@ -431,7 +431,7 @@ data_expression replace_enumerated_parameters_in_data_expression(data_expression
   gsDebugMsg("replace enumerated parameters in data expression\n");
   data_variable_list orig_parameters = data_variable_list(new_parameters_table.table_keys());
   for (data_variable_list::iterator i = orig_parameters.begin(); i != orig_parameters.end(); ++i)
-  { 
+  {
     gsDebugMsg("Replacing data expression %s with tree %s\n", expression.to_string().c_str(), make_if_tree(new_parameters_table.get(*i), enumerated_elements_table.get(*i)).to_string().c_str());
     expression = data_expression(bottom_up_replace(expression, *i, make_if_tree(new_parameters_table.get(*i), enumerated_elements_table.get(*i))));
   }
@@ -472,7 +472,7 @@ data_assignment_list replace_enumerated_parameter_in_data_assignment(const data_
   gsDebugMsg("replace enumerated parameter %s in data assigment %s\n", parameter.to_string().c_str(), argument.to_string().c_str());
   data_assignment_list result;
   data_expression arg = argument.rhs();
-  
+
   // Iterate over the parameters, i.e. the bools in which we encode
   for (int i = new_parameters.size(); i > 0; --i)
   {
@@ -547,13 +547,13 @@ data_assignment_list replace_enumerated_parameters_in_data_assignments(const dat
   }
 
   result = reverse(result);
- 
+
   data_variable_list orig_parameters = data_variable_list(new_parameters_table.table_keys());
   for (data_variable_list::iterator i = orig_parameters.begin(); i != orig_parameters.end(); ++i)
   {
     result = replace_enumerated_parameter_in_data_assignments(result, *i, new_parameters_table.get(*i), enumerated_elements_table.get(*i));
   }
-  
+
   return result;
 }
 
@@ -586,7 +586,7 @@ summand replace_enumerated_parameters_in_summand(const summand& summand_,
                        summand_.is_delta(),
                        replace_enumerated_parameters_in_actions(summand_.actions(), new_parameters_table, enumerated_elements_table),
                        replace_enumerated_parameters_in_data_expression(summand_.time(), new_parameters_table, enumerated_elements_table),
-                       replace_enumerated_parameters_in_data_assignments(summand_.assignments(), new_parameters_table, enumerated_elements_table)); 
+                       replace_enumerated_parameters_in_data_assignments(summand_.assignments(), new_parameters_table, enumerated_elements_table));
 
   return result;
 }
@@ -618,7 +618,7 @@ linear_process replace_enumerated_parameters_in_lps(const lps::linear_process& l
   result = linear_process(lps.free_variables(),
                replace_enumerated_parameters_in_data_variables(lps.process_parameters(), new_parameters_table, enumerated_elements_table),
                replace_enumerated_parameters_in_summands(lps.summands(), new_parameters_table, enumerated_elements_table));
-  
+
   return result;
 }
 
@@ -645,7 +645,7 @@ specification replace_enumerated_parameters_in_specification(const lps::specific
 
 ///Takes the specification in specification, applies binary to it,
 ///and returns the new specification.
-specification binary(const lps::specification& spec, 
+specification binary(const lps::specification& spec,
                      const tool_options& options)
 {
   gsVerboseMsg("Executing binary...\n");
@@ -655,7 +655,7 @@ specification binary(const lps::specification& spec,
   // table enumerated_elements_table = table(128,50);
   table new_parameters_table(128, 50);
   table enumerated_elements_table(128,50);
-  
+
   Rewriter* rewriter = createRewriter(spec.data(), options.strategy);
   EnumeratorStandard enumerator = EnumeratorStandard(spec, rewriter);
 
@@ -665,25 +665,29 @@ specification binary(const lps::specification& spec,
   result = replace_enumerated_parameters_in_specification(result, new_parameters_table, enumerated_elements_table);
   result = set_lps(result, set_process_parameters(result.process(), new_process_parameters));
   gsDebugMsg("Finished processing\n");
-  
-  return result; 
+
+  return result;
 }
 
-///Reads a specification from input_file, 
+///Reads a specification from input_file,
 ///applies binary to it and writes the result to output_file.
 int do_binary(const tool_options& options)
 {
   specification lps_specification;
-  if (lps_specification.load(options.input_file)) {
+  try
+  {
+    lps_specification.load(options.input_file));
+
     // apply binary on lps_specification and save the output to a binary file
-    if (!binary(lps_specification, options).save(options.output_file, true)) 
+    if (!binary(lps_specification, options).save(options.output_file, true))
     {
       // An error occurred when saving
       gsErrorMsg("Could not save to '%s'\n", options.output_file.c_str());
       return (1);
     }
   }
-  else {
+  catch (std::runtime_error e)
+  {
     gsErrorMsg("lpsbinary: Unable to load LPS from `%s'\n", options.input_file.c_str());
     return (1);
   }
@@ -700,7 +704,7 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
       ("help,h",      "display this help")
       ("verbose,v",   "turn on the display of short intermediate messages")
       ("debug,d",     "turn on the display of detailed intermediate messages")
-      ("rewriter,R",   po::value<std::string>(&rewriter)->default_value("inner"), 
+      ("rewriter,R",   po::value<std::string>(&rewriter)->default_value("inner"),
                        "use rewriter arg (default 'inner');"
                       "available rewriters are inner, jitty, innerc and jittyc")
 
@@ -713,7 +717,7 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
   ;
   po::options_description cmdline_options;
   cmdline_options.add(desc).add(hidden);
-      
+
   po::options_description visible("Allowed options");
   visible.add(desc);
 
@@ -725,7 +729,7 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
   po::store(po::command_line_parser(ac, av).
     options(cmdline_options).positional(p).run(), vm);
   po::notify(vm);
-  
+
   if (vm.count("help")) {
     cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE] [OUTFILE]" << endl;
     cerr << "Apply binary to the LPS in INFILE and store the result to OUTFILE" << endl;
@@ -735,7 +739,7 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
 
     exit (0);
   }
-      
+
   if (vm.count("version")) {
     cerr << "lpsbinary " << VERSION << " (revision " << REVISION << ")" << endl;
 
@@ -756,7 +760,7 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
     cerr << rewriter << " is not a valid rewriter strategy" << endl;
     exit(EXIT_FAILURE);
   }
-  
+
   t_options.input_file = (0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-";
   t_options.output_file = (0 < vm.count("OUTFILE")) ? vm["OUTFILE"].as< string >() : "-";
 }

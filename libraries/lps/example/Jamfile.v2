@@ -32,5 +32,6 @@ install dist
      pbes_test
      mcrl22lps
      utility
+     bisimulation
    :
    ;

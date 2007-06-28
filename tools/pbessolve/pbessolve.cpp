@@ -125,21 +125,29 @@ pbes load_pbes()
 { 
   pbes pbes_spec; 
   if (infilename == "-") 
+  {
+    try
+    {
+      pbes_spec.load("-");
+    }
+    catch (std::runtime_error e)   
     { 
-      if (!pbes_spec.load("-")) 
-	{ 
-	  gsErrorMsg("Cannot open PBES from stdin\n"); 
-	  exit(1); 
-	} 
-    } 
+	    gsErrorMsg("Cannot open PBES from stdin\n"); 
+	    exit(1); 
+	  } 
+  } 
   else 
+  { 
+    try
+    {
+      pbes_spec.load(infilename);
+    }
+    catch (std::runtime_error e)
     { 
-      if (!pbes_spec.load(infilename)) 
-	{ 
-	  gsErrorMsg("Cannot open PBES from '%s'\n", infilename.c_str()); 
-	  exit(1); 
-	} 
+      gsErrorMsg("Cannot open PBES from '%s'\n", infilename.c_str()); 
+      exit(1); 
     } 
+  } 
   return pbes_spec; 
 } 
 //======================================== 

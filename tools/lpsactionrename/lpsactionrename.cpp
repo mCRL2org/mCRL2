@@ -227,12 +227,22 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
   //open infilename
   gsVerboseMsg("loading lps...\n");
   if (infilename == "") {
-    if (!lps_oldspec.load("-")) {
+    try
+    {
+      lps_oldspec.load("-");
+    {
+    catch (std::runtime_error e)
+    {
       gsErrorMsg("cannot open LPS from stdin\n");
       return NULL;
     }
   } else {
-    if (!lps_oldspec.load(infilename)) {
+    try
+    {
+      lps_oldspec.load(infilename);
+    }
+    catch (std::runtime_error e)
+    {
       gsErrorMsg("cannot open LPS from '%s'\n", infilename.c_str());
       return NULL;
     }

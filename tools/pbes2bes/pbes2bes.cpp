@@ -843,7 +843,11 @@ pbes load_pbes(t_tool_options tool_options)
 	pbes pbes_spec;
 	if (infilename == "-")
 	{
-		if (!pbes_spec.load("-"))
+	  try
+	  {
+		  pbes_spec.load("-");
+		}
+    catch (std::runtime_error e)
 		{
 			gsErrorMsg("Cannot open PBES from stdin\n");
 			exit(1);
@@ -851,7 +855,11 @@ pbes load_pbes(t_tool_options tool_options)
 	}
 	else
 	{
-		if (!pbes_spec.load(infilename))
+    try
+    {
+		  pbes_spec.load(infilename);
+		}
+    catch (std::runtime_error e)
 		{
 			gsErrorMsg("Cannot open PBES from '%s'\n", infilename.c_str());
 			exit(1);

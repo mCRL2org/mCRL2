@@ -126,8 +126,11 @@ int main(int argc, char** argv)
 	/// - Show predicate variables and their type
 	/// else 
 	/// - Give error
-	if (pbes_specification.load(file_name))
-	{
+
+  try
+  {
+	  pbes_specification.load(file_name);
+
 		// Get PBES equations. Makes a lot of function calls more readable.
 		equation_system eqsys;
 		eqsys = pbes_specification.equations();
@@ -255,5 +258,10 @@ int main(int argc, char** argv)
 			}
 		}
 	}
+  catch (std::runtime_error e)
+  {
+    std::cerr << e.what() << std::endl;
+  }
+
 	return 0;
 }

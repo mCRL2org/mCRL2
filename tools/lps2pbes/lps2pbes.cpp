@@ -34,7 +34,7 @@ using namespace ::mcrl2::utilities;
 //t_phase represents the phases at which the program should be able to stop
 typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL, PH_REG_FRM_TRANS } t_phase;
 
-//t_tool_options represents the options of the tool 
+//t_tool_options represents the options of the tool
 typedef struct {
   bool pretty;
   bool untimed;
@@ -73,7 +73,7 @@ bool process(t_tool_options const& tool_options) {
   if (result == 0) {
     return false;
   }
- 
+
   //store the result
   string outfilename = tool_options.outfilename;
   bool opt_pretty = tool_options.pretty;
@@ -220,7 +220,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
       c.get_option_argument< bool >(option_special_untimed_conversion));
 
   top->add(special_untimed_conversion, margins(0,5,0,5));
-  
+
   button* okay_button = new button("OK");
 
   top->add(okay_button, layout::top);
@@ -237,7 +237,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   /* Add output file to the configuration */
   if (c.output_exists(pbes_file_for_output)) {
     tipi::object& output_file = c.get_output(pbes_file_for_output);
- 
+
     output_file.set_location(c.get_output_name(".pbes"));
   }
   else {
@@ -414,7 +414,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
         gsErrorMsg("input and output files are the same\n");
         exit(1);
       }
-      */      
+      */
     }
   }
   tool_options.end_phase    = opt_end_phase;
@@ -436,12 +436,22 @@ ATermAppl create_pbes(t_tool_options tool_options)
   //open infilename
   lps::specification lps_spec = lps::specification();
   if (infilename == "") {
-    if (!lps_spec.load("-")) {
+    try
+    {
+      lps_spec.load("-"));
+    }
+    catch (std::runtime_exception e)
+    {
       gsErrorMsg("cannot open LPS from stdin\n");
       return NULL;
     }
   } else {
-    if (!lps_spec.load(infilename)) {
+    try
+    {
+      lps_spec.load(infilename));
+    }
+    catch (std::runtime_exception e)
+    {
       gsErrorMsg("cannot open LPS from '%s'\n", infilename.c_str());
       return NULL;
     }

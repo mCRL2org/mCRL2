@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
 
   string infile(argv[1]);
   specification spec = mcrl22lps(read_text(infile));
-  cout << "spec = " << pp(spec) << endl;
+  spec.save(argv[2]);
 
   return 0;
 }

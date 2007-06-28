@@ -426,7 +426,12 @@ using namespace ::mcrl2::utilities;
       //}
 
       lps::specification lps_specification;
-      if (!lps_specification.load(f_lps_file_name)) {
+      try
+      {
+        lps_specification.load(f_lps_file_name);
+      }
+      catch (std::runtime_error e)
+      {
         gsErrorMsg("The file '%s' does not contain an mCRL2 LPS.\n", f_lps_file_name);
         exit(1);
       }

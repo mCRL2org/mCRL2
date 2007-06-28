@@ -263,7 +263,10 @@ int do_untime(const tool_options& options)
 {
   lps::specification lps_specification;
 
-  if (lps_specification.load(options.input_file)) {
+  try
+  {
+    lps_specification.load(options.input_file);
+
     // Untime lps_specification and save the output to a binary file
     if (!untime(lps_specification).save(options.output_file, true)) 
     {
@@ -272,7 +275,8 @@ int do_untime(const tool_options& options)
       return (1);
     }
   }
-  else {
+  catch (std::runtime_error e)
+  {
     gsErrorMsg("lpsuntime: Unable to load LPS from `%s'\n", options.input_file.c_str());
     return (1);
   }

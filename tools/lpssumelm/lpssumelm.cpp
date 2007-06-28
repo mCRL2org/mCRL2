@@ -369,7 +369,10 @@ lps::specification sumelm(const lps::specification& specification)
 int do_sumelm(const tool_options& options)
 {
   lps::specification lps_specification;
-  if (lps_specification.load(options.input_file)) {
+  try
+  {
+    lps_specification.load(options.input_file);
+
     // Untime lps_specification and save the output to a binary file
     lps::specification new_spec = sumelm(lps_specification);
 
@@ -383,7 +386,8 @@ int do_sumelm(const tool_options& options)
       return (1);
     }
   }
-  else {
+  catch (std::runtime_error e)
+  {
     gsErrorMsg("lpssumelm: Unable to load LPS from `%s'\n", options.input_file.c_str());
     return (1);
   }

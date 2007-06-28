@@ -226,9 +226,14 @@ inline void lpsParElm::setSaveFile(std::string const& x) {
 //  
 inline bool lpsParElm::loadFile(std::string const& filename) {
   p_inputfile = filename;
-  if (!p_spec.load(p_inputfile)){
+  try
+  {
+    p_spec.load(p_inputfile);
+  }
+  catch (std::runtime_error e)
+  {
     gsErrorMsg("lpsparelm: error: could not read input file '%s'\n", filename.c_str());
-    return false;      
+    return false;
   };
   return true;   
 }

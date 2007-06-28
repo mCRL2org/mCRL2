@@ -182,7 +182,9 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   lps::specification lps_specification;
 
-  if (lps_specification.load(c.get_input(lps_file_for_input).get_location())) {
+  try
+  {
+    lps_specification.load(c.get_input(lps_file_for_input).get_location()));
     using namespace tipi;
     using namespace tipi::layout;
     using namespace tipi::layout::elements;
@@ -224,7 +226,8 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   
     send_display_layout(top);
   }
-  else {
+  catch (std::runtime_error e)
+  {
     send_error("Failure reading input from file: `" + file_name + "'\n");
 
     result = false;
@@ -248,7 +251,9 @@ int main(int argc, char** argv) {
 
     lps::specification lps_specification;
  
-    if (lps_specification.load(file_name)) {
+    try
+    {
+      lps_specification.load(file_name);
       lps::linear_process lps = lps_specification.process();
 		 
       cout << "Input read from " << ((file_name == "-") ? "standard input" : file_name) << endl << endl;
@@ -262,7 +267,8 @@ int main(int argc, char** argv) {
       //cout << "Number of used versus declared multi-actions: " << "" << endl;
       cout << "Number of used sorts                  : " << lps_specification.data().sorts().size() << endl;
     }
-    else {
+    catch (std::runtime_error e)
+    {
       std::cerr << "Error: Unable to load LPS from `" + file_name + "'\n";
     }
 #ifdef ENABLE_SQUADT_CONNECTIVITY

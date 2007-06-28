@@ -4,7 +4,7 @@
 //
 // ----------------------------------------------------------------------
 //
-// file          : lpsconstelm 
+// file          : lpsconstelm
 // date          : 16-11-2005
 // version       : 0.5.2
 //
@@ -54,27 +54,27 @@ class lpsConstElm {
     std::vector< lps::data_assignment >   p_initAssignments;
     std::map< lps::data_variable, int  >  p_lookupIndex;
     std::map< int, lps::data_variable >   p_lookupDataVarIndex;
-    std::set< lps::data_expression >      p_freeVarSet; 
-    std::set< int >                       p_V; 
+    std::set< lps::data_expression >      p_freeVarSet;
+    std::set< int >                       p_V;
     std::set< int >                       p_S;
     std::set< lps::summand >          p_visitedSummands;
-    std::set< lps::data_expression >      p_variableList; 
+    std::set< lps::data_expression >      p_variableList;
     int                                   p_newVarCounter;
     bool                                  p_verbose;
     bool                                  p_nosingleton;
     bool                                  p_alltrue;
-    bool                                  p_reachable; 
+    bool                                  p_reachable;
     std::string                           p_filenamein;
     lps::specification                    p_spec;
     std::set< lps::sort >                 p_singletonSort;
     Rewriter*                             rewr;
-    
-    //Only used by getDataVarIDs  
-    std::set< lps::data_variable >        p_foundFreeVars;       
- 
+
+    //Only used by getDataVarIDs
+    std::set< lps::data_variable >        p_foundFreeVars;
+
     //Only used by detectVar
     std::set< lps::data_expression >      sum_vars;
- 
+
   public:
 
     lpsConstElm();
@@ -94,7 +94,7 @@ class lpsConstElm {
     bool cmpCurrToNext();
     bool conditionTest(lps::data_expression x);
     void detectVar(int n);
-    bool recDetectVarList(lps::data_expression_list l, std::set<data_expression> &S); 
+    bool recDetectVarList(lps::data_expression_list l, std::set<data_expression> &S);
     bool recDetectVar(lps::data_expression t, std::set<lps::data_expression> &S);
     template <typename Term>
     atermpp::term_list<Term> vectorToList(std::vector<Term> y);
@@ -253,7 +253,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     constelm.setSaveFile(c.get_output(lps_file_for_output).get_location());
 
     constelm.filter();
-    constelm.output(); 
+    constelm.output();
 
     return (true);
   }
@@ -281,10 +281,10 @@ void lpsConstElm::getDatVarRec(aterm_appl t) {
 
   for(aterm_appl::iterator i = t.begin(); i!= t.end();i++) {
     getDatVarRec(aterm_appl(*i));
-  } 
-} 
+  }
+}
 
-// Returns a vector in which each element is a AtermsAppl (DataVarID)  
+// Returns a vector in which each element is a AtermsAppl (DataVarID)
 //
 inline std::set< lps::data_variable > lpsConstElm::getUsedFreeVars(aterm_appl input) {
   p_foundFreeVars.clear();
@@ -296,11 +296,11 @@ inline std::set< lps::data_variable > lpsConstElm::getUsedFreeVars(aterm_appl in
 //
 // pre : input is an AtermAppl
 // post: result is an ATermAppl in normal form
-inline ATermAppl lpsConstElm::rewrite(ATermAppl t) { 
+inline ATermAppl lpsConstElm::rewrite(ATermAppl t) {
   return rewr->rewrite(t);
 }
 
-// Subsitutes a vectorlist of data assignements to a ATermAppl 
+// Subsitutes a vectorlist of data assignements to a ATermAppl
 //
 inline ATermAppl lpsConstElm::p_substitute(ATermAppl t, std::vector< lps::data_assignment > &y ) {
   for(std::vector< lps::data_assignment >::iterator i = y.begin() ; i != y.end() ; i++){
@@ -312,14 +312,14 @@ inline ATermAppl lpsConstElm::p_substitute(ATermAppl t, std::vector< lps::data_a
   }
   return result;
 }
-// calculates a nextstate given the current 
-// stores the next state information in p_nextState 
-// 
+// calculates a nextstate given the current
+// stores the next state information in p_nextState
+//
 inline void lpsConstElm::calculateNextState(data_assignment_list assignments) {
   for(std::vector< lps::data_assignment >::iterator i = p_currentState.begin(); i != p_currentState.end(); i++ ){
     int index = p_lookupIndex[i->lhs()];
     if (p_V.find(index) == p_V.end()){
-      lps::data_expression tmp = i->lhs(); 
+      lps::data_expression tmp = i->lhs();
       for (lps::data_assignment_list::iterator j = assignments.begin(); j != assignments.end() ; j++){
         if (j->lhs() == i->lhs()){
           tmp = j->rhs();
@@ -334,13 +334,13 @@ inline void lpsConstElm::calculateNextState(data_assignment_list assignments) {
 }
 
 // returns whether a expression occurs in the list of free variables
-//  
+//
 inline bool lpsConstElm::inFreeVarList(data_expression dexpr) {
   return (p_freeVarSet.find(dexpr) != p_freeVarSet.end());
 }
 
 // Creates an unique expression:
-// these date_expressions are used to model that a process parameter has a 
+// these date_expressions are used to model that a process parameter has a
 // value which is not constant
 //
 inline lps::data_assignment lpsConstElm::newExpression(lps::data_assignment ass) {
@@ -358,10 +358,10 @@ inline bool lpsConstElm::compare(data_expression x, data_expression y) {
 }
 
 // returns whether the given data_expression is false
-//  
+//
 inline bool lpsConstElm::conditionTest(data_expression x) {
   if (p_alltrue){return true;};
-  //----------          Debug  
+  //----------          Debug
   //gsDebugMsg("\033[33m %s\n", pp(x).c_str());
   //gsDebugMsg("\033[30m %s\033[0m\n", pp(data_expression(rewrite(data_expression(p_substitute(x, p_currentState))))).c_str());
   //----------          Debug
@@ -373,15 +373,15 @@ inline bool lpsConstElm::conditionTest(data_expression x) {
 inline bool lpsConstElm::cmpCurrToNext() {
   bool differs = false;
   for(std::vector< lps::data_assignment>::iterator i= p_currentState.begin(); i != p_currentState.end() ;i++){
-    int index = p_lookupIndex[i->lhs()]; 
-    if (p_V.find(index) == p_V.end()) { 
-      if (inFreeVarList(i->rhs())) { 
+    int index = p_lookupIndex[i->lhs()];
+    if (p_V.find(index) == p_V.end()) {
+      if (inFreeVarList(i->rhs())) {
         if (!inFreeVarList( p_nextState.at(index).rhs() )){
           ATtablePut(safeguard,aterm(p_nextState.at(index)),aterm(p_nextState.at(index)));
           p_newCurrentState.at(index) = p_nextState.at(index) ;
-          p_currentState.at(index) = p_nextState.at(index);  
+          p_currentState.at(index) = p_nextState.at(index);
           if (p_variableList.find(p_nextState.at(index).rhs()) != p_variableList.end()){
-            p_V.insert(p_lookupIndex[i->lhs()]); 
+            p_V.insert(p_lookupIndex[i->lhs()]);
             //----------          Debug
             //gsDebugMsg("\033[34m OLD:    %s\n", pp(*i).c_str());
             //gsDebugMsg("\033[32m NEW:    %s\033[0m\n", pp(p_nextState.at(index)).c_str());
@@ -400,12 +400,12 @@ inline bool lpsConstElm::cmpCurrToNext() {
         	ATtablePut(safeguard,aterm(p_newCurrentState.at(index)),aterm(p_newCurrentState.at(index)));
               p_V.insert(index);
               p_variableList.insert(p_newCurrentState.at(index).rhs());
-              differs = true;  
+              differs = true;
            }
          }
        }
 
-    } 
+    }
   }
   return !differs;
 }
@@ -454,26 +454,26 @@ bool lpsConstElm::recDetectVar(lps::data_expression t, std::set<data_expression>
 // template for changing a vector into a list
 //
 template <typename Term>
-inline atermpp::term_list<Term> lpsConstElm::vectorToList(std::vector<Term> y) { 
+inline atermpp::term_list<Term> lpsConstElm::vectorToList(std::vector<Term> y) {
   term_list<Term> result;
   for(typename std::vector<Term>::iterator i = y.begin(); i != y.end() ; i++)
-    { 
-      result = push_front(result,*i); 
+    {
+      result = push_front(result,*i);
     }
-  return atermpp::reverse(result); 
-} 
+  return atermpp::reverse(result);
+}
 
 // template for changing a set into a list
-//  
+//
 template <typename Term>
-inline term_list<Term> lpsConstElm::setToList(std::set<Term> y) { 
+inline term_list<Term> lpsConstElm::setToList(std::set<Term> y) {
   term_list<Term> result;
   for(typename std::set<Term>::iterator i = y.begin(); i != y.end() ; i++)
-    { 
-      result = push_front(result,*i); 
+    {
+      result = push_front(result,*i);
     }
-  return atermpp::reverse(result); 
-} 
+  return atermpp::reverse(result);
+}
 
 // Find all sorts which have a singleton domain
 //
@@ -485,7 +485,7 @@ void lpsConstElm::findSingleton() {
     p_countSort[*i] = 0;
     p_singletonSort.insert(*i);
   }
-  
+
   for(lps::function_list::iterator i= p_spec.data().constructors().begin() ; i != p_spec.data().constructors().end() ; i++){
     p_countSort[i->sort().range_sort()]++;
   }
@@ -516,7 +516,7 @@ void lpsConstElm::findSingleton() {
     }
   }
   //p_singletonSort = result;
-  
+
   if (p_verbose){
     gsVerboseMsg("lpsconstelm: Sorts which have singleton constructors:\n");
     for(std::set<lps::sort>::iterator i = p_singletonSort.begin(); i != p_singletonSort.end(); i++){
@@ -526,13 +526,13 @@ void lpsConstElm::findSingleton() {
       gsVerboseMsg("lpsconstelm:   []\n");
     }
   }
-} 
+}
 
 //---------------------------------------------------------------
 //---------------------   Debug begin  --------------------------
 //---------------------------------------------------------------
 inline void lpsConstElm::printNextState() {
-// (JK: 16/1/2006: This function is never called)  
+// (JK: 16/1/2006: This function is never called)
   std::ostringstream result;
   for(std::vector< lps::data_assignment >::iterator i = p_nextState.begin(); i != p_nextState.end() ; i++ ){
     result << "[" << pp(*i) << "]";
@@ -541,7 +541,7 @@ inline void lpsConstElm::printNextState() {
 }
 
 inline void lpsConstElm::printVar() {
-// (JK: 16/1/2006: This function is never called)  
+// (JK: 16/1/2006: This function is never called)
   std::ostringstream result;
   result << "lpsconstelm: Variable indices : {";
   std::set< int >::iterator i = p_V.begin();
@@ -567,7 +567,7 @@ inline void lpsConstElm::printState() {
         result << pp(p_currentState[*i]);
       } else {
         result << pp(p_currentState[*i]) << pp(p_currentState[*i].lhs().sort());
-      }  
+      }
     }
     result << pp(p_currentState[*(--p_S.end())]) << " ]";
   }
@@ -575,7 +575,7 @@ inline void lpsConstElm::printState() {
 }
 
 inline void lpsConstElm::printCurrentState() {
-// (JK: 16/1/2006: This function is never called)  
+// (JK: 16/1/2006: This function is never called)
   std::ostringstream result;
   for(std::vector< lps::data_assignment >::iterator i = p_currentState.begin(); i != p_currentState.end() ; i++ ){
     result << "[" << pp(*i) << "]";
@@ -614,7 +614,7 @@ void lpsConstElm::removeSingleton(int n)
 
 // Writes an LPS to a file or sdtout
 // Substituting occurences of constant parameters with their constant value
-// and removing the constant process parameters from the list of process. 
+// and removing the constant process parameters from the list of process.
 // Constant parameters (stored in p_S)
 //
 inline void lpsConstElm::output() {
@@ -624,7 +624,7 @@ inline void lpsConstElm::output() {
   //Remove the summands that are never visited
   //
   if (p_reachable){
-    rebuild_summandlist = setToList(p_visitedSummands); 
+    rebuild_summandlist = setToList(p_visitedSummands);
   } else {
     rebuild_summandlist = p_process.summands();
   }
@@ -650,10 +650,10 @@ inline void lpsConstElm::output() {
   std::vector< lps::data_expression > variablePPexpr;
   for(std::set< int >::iterator i = p_V.begin(); i != p_V.end(); i++){
     variablePPexpr.push_back(p_initAssignments.at(*i).rhs());
-  }    
+  }
 
   //Remove process parameters in in summand
-  // 
+  //
   lps::summand_list rebuild_summandlist_no_cp;
 
   for(lps::summand_list::iterator currentSummand = rebuild_summandlist.begin(); currentSummand != rebuild_summandlist.end(); currentSummand++){
@@ -662,15 +662,15 @@ inline void lpsConstElm::output() {
     //
     lps::summand tmp;
 
-    //Remove constant process parameters from the summands assignments 
+    //Remove constant process parameters from the summands assignments
     //
-    lps::data_assignment_list rebuildAssignments; 
+    lps::data_assignment_list rebuildAssignments;
     for(lps::data_assignment_list::iterator currentAssignment = currentSummand->assignments().begin(); currentAssignment != currentSummand->assignments().end() ; currentAssignment++){
       if( constantVar.find(currentAssignment->lhs() ) == constantVar.end()){
         rebuildAssignments  = push_front(rebuildAssignments, data_assignment(currentAssignment->lhs(), data_expression(p_substitute(currentAssignment->rhs(), constantPP ))));
       }
-    } 
-    
+    }
+
     //Rebuild actions
     //
     action_list rebuild_actions;
@@ -681,7 +681,7 @@ inline void lpsConstElm::output() {
       }
       rebuild_actions = push_front(rebuild_actions, action( i -> label(), atermpp::reverse(argumentList)));
     };
-    
+
     //Rewrite condition
     //
     data_expression rebuild_condition = currentSummand->condition();
@@ -693,59 +693,59 @@ inline void lpsConstElm::output() {
             rebuild_time = data_expression(p_substitute(rebuild_time, constantPP));
     }
 
-    //LPS_summand(data_variable_list summation_variables, data_expression condition, 
-    //            bool delta, action_list actions, data_expression time, 
-    //            data_assignment_list assignments);    
-    tmp = summand(currentSummand->summation_variables(), rebuild_condition, 
-      currentSummand->is_delta(), atermpp::reverse(rebuild_actions) , rebuild_time, 
+    //LPS_summand(data_variable_list summation_variables, data_expression condition,
+    //            bool delta, action_list actions, data_expression time,
+    //            data_assignment_list assignments);
+    tmp = summand(currentSummand->summation_variables(), rebuild_condition,
+      currentSummand->is_delta(), atermpp::reverse(rebuild_actions) , rebuild_time,
             atermpp::reverse(rebuildAssignments));
-      rebuild_summandlist_no_cp = push_front(rebuild_summandlist_no_cp, tmp); 
+      rebuild_summandlist_no_cp = push_front(rebuild_summandlist_no_cp, tmp);
   }
-  
-   
+
+
   std::set< lps::data_variable > usedFreeVars = p_process.find_free_variables();
   //construct new specfication
   //
-  //linear_process(data_variable_list free_variables, data_variable_list process_parameters, 
+  //linear_process(data_variable_list free_variables, data_variable_list process_parameters,
   //  summand_list summands);
   lps::linear_process rebuild_process;
   rebuild_process = lps::linear_process(
     setToList(usedFreeVars),
-    vectorToList(variablePPvar), 
+    vectorToList(variablePPvar),
     atermpp::reverse(rebuild_summandlist_no_cp)
   );
-  
- 
+
+
    //gsDebugMsg("%s\n", p_spec.initial_process().free_variables().to_string().c_str());
-  
+
   std::set< lps::data_variable > foundVars;
   std::set< lps::data_variable > initial_free_variables;
   usedFreeVars.empty();
   for(std::vector< lps::data_expression >::iterator i = variablePPexpr.begin(); i != variablePPexpr.end(); i++){
        foundVars = getUsedFreeVars(aterm_appl(*i));
        for(std::set< lps::data_variable >::iterator k = foundVars.begin(); k != foundVars.end(); k++){
-         initial_free_variables.insert(*k); 
-       }           
+         initial_free_variables.insert(*k);
+       }
   }
 
 
   // Rebuild spec
   //
-  //specification(sort_list sorts, function_list constructors, 
-  //            function_list mappings, data_equation_list equations, 
-  //            action_label_list action_labels, LPS lps, 
-  //            data_variable_list initial_free_variables, 
-  //            data_variable_list initial_variables, 
+  //specification(sort_list sorts, function_list constructors,
+  //            function_list mappings, data_equation_list equations,
+  //            action_label_list action_labels, LPS lps,
+  //            data_variable_list initial_free_variables,
+  //            data_variable_list initial_variables,
   //            data_expression_list initial_state);
   //
 //data_assignment_expressions(data_assignment_list());
 //data_assignment_list xyz = make_assignment_list(data_variable_list(), data_expression_list());
   lps::specification rebuild_spec = lps::specification(
     p_spec.data(),
-    p_spec.action_labels(), 
+    p_spec.action_labels(),
     rebuild_process,
-    process_initializer(setToList(initial_free_variables), 
-                        make_assignment_list(vectorToList(variablePPvar), 
+    process_initializer(setToList(initial_free_variables),
+                        make_assignment_list(vectorToList(variablePPvar),
                                              vectorToList(variablePPexpr)
                                             )
                        )
@@ -763,7 +763,7 @@ inline void lpsConstElm::output() {
     if(!rebuild_spec.save(p_outputfile)) {
        gsErrorMsg("lpsconstelm: Unsuccessfully written outputfile: %s\n", p_outputfile.c_str());
     }
-  } 
+  }
 }
 
 // Set output file
@@ -792,15 +792,18 @@ inline void lpsConstElm::printSet() {
 
 // Loads an LPS from file
 // returns true if succeeds
-//  
+//
 inline bool lpsConstElm::loadFile(std::string const& filename) {
   p_filenamein = filename;
-  if (!p_spec.load(p_filenamein))
+  try {
+    p_spec.load(p_filenamein));
+  }
+  catch (std::runtime_error e)
   {
     gsErrorMsg("lpsconstelm: error: could not read input file '%s'\n", filename.c_str());
     return false;
-  } 
-  //LPS x = p_spec.process(); 
+  }
+  //LPS x = p_spec.process();
   //gsDebugMsg("%s\n", pp(x).c_str());
   //p_spec.save("/scratch/dump.lps");
   //assert(false);
@@ -809,7 +812,7 @@ inline bool lpsConstElm::loadFile(std::string const& filename) {
 
 // Reads an LPS from stdin
 // returns true if succeeds
-//  
+//
 inline bool lpsConstElm::readStream() {
   ATermAppl z = (ATermAppl) ATreadFromFile(stdin);
   if (z == NULL){
@@ -856,30 +859,30 @@ inline void lpsConstElm::setDebug(bool b) {
 
 // Sets no singleton option
 // Note: Has to be set
-//  
+//
 inline void lpsConstElm::setNoSingleton(bool b) {
   p_nosingleton = b;
 }
 
 // Sets all conditions to true
 // Note: Has to be set
-//  
+//
 inline void lpsConstElm::setAllTrue(bool b) {
   p_alltrue = b;
 }
 
-// Sets the option if not inspected summands have to removed 
+// Sets the option if not inspected summands have to removed
 // Note: Has to be set
-//  
+//
 inline void lpsConstElm::setReachable(bool b) {
   p_reachable = b;
 }
 
 // Prints the data_variable which are constant
-//  
+//
 void lpsConstElm::printSetVar() {
   printState();
-}  
+}
 
 // The constelm filter
 //
@@ -894,9 +897,9 @@ void lpsConstElm::filter() {
   int     counter  = 0;
   int     cycle    = 0;
   p_newVarCounter  = 0;
-  
+
   lps::linear_process p_process = p_spec.process();
-  rewr           = createRewriter(p_spec.data()); 
+  rewr           = createRewriter(p_spec.data());
 
   data_assignment_list initial_assignments = p_spec.initial_process().assignments();
   for(lps::data_assignment_list::iterator i = initial_assignments.begin(); i != initial_assignments.end() ; i++ ){
@@ -918,8 +921,8 @@ void lpsConstElm::filter() {
   }
   for (data_variable_list::iterator di = p_process.free_variables().begin(); di != p_process.free_variables().end(); di++){
     p_freeVarSet.insert(*di);
-  } 
-  
+  }
+
   // Make a set containing all summation variables (for detectVar)
   summand_list sums = p_spec.process().summands();
   summand_list::iterator sums_b = sums.begin();
@@ -943,9 +946,9 @@ void lpsConstElm::filter() {
 
     //---------------------------------------------------------------
     //---------------------   Body begin   --------------------------
-    //---------------------------------------------------------------  
+    //---------------------------------------------------------------
 
-    same = false;  
+    same = false;
     while (!same){
       same = true;
       gsVerboseMsg("lpsconstelm: Cycle %d: \n", cycle++);
@@ -953,13 +956,13 @@ void lpsConstElm::filter() {
       for(summand_list::iterator currentSummand = p_process.summands().begin(); currentSummand != p_process.summands().end() ;currentSummand++ ){
         if ( (p_visitedSummands.find(*currentSummand) != p_visitedSummands.end()) || (conditionTest(currentSummand->condition()))) {
           //gsDebugMsg(  "Summand: %d\n", summandnr++);
-          p_visitedSummands.insert(*currentSummand); 
+          p_visitedSummands.insert(*currentSummand);
           //----------          Debug
           // printCurrentState();
           calculateNextState(currentSummand->assignments());
-          //----------          Debug  
-          // printCurrentState(); 
-          same = cmpCurrToNext() && same ; 
+          //----------          Debug
+          // printCurrentState();
+          same = cmpCurrToNext() && same ;
           //ischanged = ischanged || !cmpCurrToNext();
           //if (!same) {break;}                                           //Break reduces time to complete; need to find out when to brake
         }
@@ -993,15 +996,15 @@ void lpsConstElm::filter() {
     // Covers:              V
     //   proc: P(a,b)  = (_,a)+
     //                   (1,8)
-    //                     
+    //
     //   init: P(_,_)
-    // 
+    //
     //                                Each _ is a unique FreeVariable
     // The arrow is detected with the FeeVar aftercheck
-  
+
     if(!p_freeVarSet.empty()){
       gsVerboseMsg("lpsconstelm: Free Variable checkup:\n");
-    
+
       int n = p_V.size();
       for(std::set< summand>::iterator i = p_visitedSummands.begin(); i != p_visitedSummands.end() ; i++){
         calculateNextState(i->assignments());
@@ -1012,12 +1015,12 @@ void lpsConstElm::filter() {
       if (p_verbose){
         gsVerboseMsg("lpsconstelm:   Detected %d fake constant process parameters\n", p_V.size() - n);
         foundFake = ((p_V.size() - n) != 0);
-      }         
+      }
 
     }
-    
+
   }
-  
+
   //---------------------------------------------------------------
 
   //Singleton sort process parameters
@@ -1033,26 +1036,26 @@ void lpsConstElm::filter() {
      {
        gsVerboseMsg("lpsconstelm: 1 constant parameter is not removed because its sort contains only one element\n");
      }
-  }    
-  
+  }
+
   //---------------------------------------------------------------
-  // Construct S    
+  // Construct S
   //
   std::set< int > S;
-  n = p_process.process_parameters().size(); 
+  n = p_process.process_parameters().size();
   for(int j=0; j < n ; j++){
     S.insert(j);
   };
   set_difference(S.begin(), S.end(), p_V.begin(), p_V.end(), inserter(p_S, p_S.begin()));
-  
+
   if (p_verbose){
     gsVerboseMsg("lpsconstelm: Number of removed process parameters: %d\n", p_S.size());
-    printSetVar();  
+    printSetVar();
   }
 }
 
 // Gets the version of the tool
-//    
+//
 inline std::string lpsConstElm::getVersion() {
   return (version);
 }
@@ -1074,26 +1077,26 @@ void parse_command_line(int ac, char** av, lpsConstElm& constelm) {
     ("version",      "display version information")
     ("help,h",       "display this help")
   ;
-        
+
   po::options_description hidden("Hidden options");
 
   hidden.add_options()
      ("file_names", po::value< std::vector< std::string > >(), "input/output files")
   ;
-        
+
   po::options_description cmdline_options;
   cmdline_options.add(description).add(hidden);
-        
+
   po::options_description visible("Allowed options");
   visible.add(description);
-        
+
   po::positional_options_description p;
   p.add("file_names", -1);
 
   po::variables_map vm;
   po::store(po::command_line_parser(ac, av).options(cmdline_options).positional(p).run(), vm);
   po::notify(vm);
-     
+
   if (vm.count("help")) {
     std::cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]] \n"
               << "Removes constant process parameters from the LPS read from standard input or INFILE." << std::endl
@@ -1102,7 +1105,7 @@ void parse_command_line(int ac, char** av, lpsConstElm& constelm) {
 
     exit (0);
   }
-        
+
   if (vm.count("version")) {
     std::cerr << version << " (revision " << REVISION << ")" << std::endl;
 
@@ -1145,7 +1148,7 @@ int main(int argc, char** argv) {
   ATerm       bottom;
 
   ATinit(argc,argv,&bottom);
-  
+
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -1156,7 +1159,7 @@ int main(int argc, char** argv) {
     parse_command_line(argc,argv,constelm);
 
     constelm.filter();
-    constelm.output(); 
+    constelm.output();
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }
 #endif
