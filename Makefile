@@ -57,6 +57,6 @@ doxy:
 	@cd libraries/rewrite/doc; doxygen
 	@cd libraries/trace/doc; doxygen
 	@cd libraries/utilities/doc; doxygen
-	@cd tools/squadt/libraries/sip/doc; doxygen
+	@cd tools/squadt/libraries/tipi/doc; doxygen
 	@cp doc/doxy/index.html build/doxy/
 	@cp doc/doxy/doxystyle.css build/doxy/

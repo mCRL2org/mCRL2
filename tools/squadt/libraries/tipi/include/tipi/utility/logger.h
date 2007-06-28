@@ -1,3 +1,9 @@
+//  Copyright 2007 Jeroen van der Wulp. Distributed under the Boost
+//  Software License, Version 1.0. (See accompanying file
+//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file include/tipi/utility/logger.h
+
 #ifndef LOGGER_H_
 #define LOGGER_H_
 
@@ -27,7 +33,7 @@ namespace utility {
     protected:
 
       /** \brief The default log level */
-      static log_level default_filter_level;
+      static logger::log_level default_filter_level;
 
     private:
      

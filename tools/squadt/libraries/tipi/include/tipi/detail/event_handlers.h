@@ -188,9 +188,6 @@ namespace tipi {
       }
     }
    
-    /**
-     * @param[in] id a pointer that serves as an identifier for the originator of the event
-     **/
     inline void basic_event_handler::remove() {
       boost::mutex::scoped_lock l(lock);
    

@@ -6,3 +6,4 @@ HTML_OUTPUT            = tipi
 INPUT                  = ../include ../source
 HTML_HEADER            = ../../../../../doc/doxy/Doxyheader.html
 HTML_FOOTER            = ../../../../../doc/doxy/Doxyfooter.html
+EXCLUDE_PATTERNS       = */.svn/*

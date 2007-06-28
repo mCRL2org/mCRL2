@@ -29,7 +29,7 @@ namespace tipi {
     element::~element() {
     }
 
-    void element::on_change(layout::basic_event_handler::handler_function h) const {
+    void element::on_change(boost::function < void (const void*) > h) const {
       m_event_handler->add(this, h);
     }
 
