@@ -19,6 +19,7 @@
 #include <iterator>
 #include <algorithm>
 #include <iterator>
+#include <stdexcept>
 
 #include "atermpp/aterm_list.h"
 #include "atermpp/set.h"
@@ -305,17 +306,19 @@ class pbes
 
     /// Reads the pbes from file. Returns true if the operation succeeded.
     ///
-    bool load(const std::string& filename)
+    void load(const std::string& filename)
     {
-      aterm_appl t = atermpp::read_from_named_file(filename);
-      if (!t)
-        return false;
-      assert(gsIsPBES(t));
-      aterm_appl::iterator i = t.begin();
+      aterm t = atermpp::read_from_named_file(filename);
+      if (!t || t.type() == AT_APPL || !detail::check_rule_PBES(aterm_appl(t)))
+        throw std::runtime_error(std::string("Error in pbes::load(): could not read from file " + filename));
+
+      aterm_appl::iterator i = aterm_appl(t).begin();
       m_data          = data_specification(*i++);
       m_equations     = equation_system(pbes_equation_list(*i++));
       m_initial_state = propositional_variable_instantiation(*i);
-      return true;
+
+      //if (!is_well_typed())
+      //  throw std::runtime_error("Error in pbes::load(): term is not well typed");
     }
 
     /// Writes the pbes to file and returns true if the operation succeeded.

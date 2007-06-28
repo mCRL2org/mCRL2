@@ -7,8 +7,6 @@
 /// \file table_test.cpp
 /// \brief Add your file description here.
 
-// very simple test for atermpp::table
-
 #include <iostream>
 #include <string>
 #include <boost/test/minimal.hpp>

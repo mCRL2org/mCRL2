@@ -83,10 +83,12 @@ and [memberref lps::specification::save] methods are available for this. An exam
 a linearised specification is:
 
     specification spec;
-    spec.load("abp.lps");
-    if (!spec) // check if load succeeded
+    try {
+      spec.load("abp.lps");
+    }
+    catch(std::runtime_error e) // check if load succeeded
     {
-      std::exit(EXIT_FAILURE);
+      std::cerr << e.what() << std::endl;
     }
 
 All sequences that occur in the classes of the LPS library have an iterator interface

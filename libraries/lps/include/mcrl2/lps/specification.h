@@ -15,6 +15,7 @@
 #include <cassert>
 #include <iterator>
 #include <algorithm>
+#include <stdexcept>
 
 #include "atermpp/aterm.h"
 #include "mcrl2/data/function.h"
@@ -128,14 +129,14 @@ class specification: public aterm_appl
 
     /// Reads the LPS from file. Returns true if the operation succeeded.
     ///
-    bool load(const std::string& filename)
+    void load(const std::string& filename)
     {
-      aterm_appl t = atermpp::read_from_named_file(filename);
-      if (!t)
-        return false;
-      init_term(t);
-      assert(is_well_typed());
-      return true;
+      aterm t = atermpp::read_from_named_file(filename);
+      if (!t || t.type() == AT_APPL || !detail::check_rule_Spec(aterm_appl(t)))
+        throw std::runtime_error(std::string("Error in specification::load(): could not read from file " + filename));
+      init_term(aterm_appl(t));
+      if (!is_well_typed())
+        throw std::runtime_error("Error in specification::load(): term is not well typed");
     }
 
     /// \brief Writes the linear process to file and returns true if the operation succeeded.

@@ -11,6 +11,7 @@
 #define MCRL2_ATERMPP_MAKE_LIST_H
 
 #include "atermpp/aterm.h"
+#include "atermpp/aterm_list.h"
 
 namespace atermpp
 {

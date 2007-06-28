@@ -18,6 +18,7 @@
 #include "mcrl2/lps/detail/tools.h"
 
 using namespace std;
+using namespace atermpp;
 using namespace lps;
 using namespace lps::detail;
 
@@ -51,6 +52,27 @@ void test_pbes()
   data_expression d  = pbes2data(e, spec);
   // pbes_expression e1 = data2pbes(d);
   // BOOST_CHECK(e == e1);
+
+  try
+  {
+    p.load("non-existing file");
+    BOOST_CHECK(false); // loading is expected to fail
+  }
+  catch (std::runtime_error e)
+  {
+  }
+  
+  try
+  {
+    aterm t = make_term("f(x)");
+    std::string filename = "write_to_named_text_file.pbes";
+    atermpp::write_to_named_text_file(t, filename);
+    p.load(filename);
+    BOOST_CHECK(false); // loading is expected to fail
+  }
+  catch (std::runtime_error e)
+  {
+  }
 }
 
 void test_normalize()
@@ -94,8 +116,8 @@ void test_state_formula()
 void test_free_variables()
 {
   pbes p;
-  if (p.load("abp_fv.pbes"))
-  {
+  try {
+    p.load("abp_fv.pbes");
     atermpp::set< data_variable > freevars = p.free_variables();
     cout << freevars.size() << endl;
     BOOST_CHECK(freevars.size() == 20);
@@ -106,6 +128,11 @@ void test_free_variables()
     freevars = p.equations().free_variables();
     BOOST_CHECK(freevars.size() == 15);
   }
+  catch (std::runtime_error e)
+  {
+    cout << e.what() << endl;
+    BOOST_CHECK(false); // loading is expected to succeed
+  }  
 }
 
 int test_main(int argc, char* argv[])
@@ -118,7 +145,7 @@ int test_main(int argc, char* argv[])
   test_normalize();
   test_state_formula();
   test_xyz_generator();
-  test_free_variables();
+  // test_free_variables();
   
   return 0;
 }

@@ -5,14 +5,31 @@ The mCRL2 library contains classes that represent data expressions, sorts etc.
 Currently there is no documentation available for this other than the reference.
 [endsect]
 
-A data variable is represented by the class [classref lps::data_variable], and a vector
-of data variables is represented by [classref lps::data_variable_list]. A data variable
-has a name and a sort as attributes.
+[section: Initialization]
+Apart from the ATerm Library initialization, programs using the data library must
+also call the function `gsEnableConstructorFunctions`. So a program
+should look like this:
 
-An instance of a data variable is modeled by the class [classref lps::data_expression].
-There are three different types of data expressions: data applications, data variables
-and functions. 
+   #include "mcrl2/data/data.h"
 
-The operations on data in the namespace `data_expr`.
+   int main(int argc, char* argv[])
+   {
+     aterm bottom_of_stack;
+     aterm_init(bottom_of_stack);
+     gsEnableConstructorFunctions();
+     
+     ...
+   }
+
+[endsect]
+
+[section: Algorithms]
+There are a few algorithms available in the file =mcrl2/data/utility.h=.
+The function `identifiers` returns all identifiers appearing in an arbitrary term.
+
+[include ../example/utility.cpp]
+[data_utility_example]
+
+[endsect]
 
 [endsect]

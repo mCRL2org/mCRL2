@@ -51,23 +51,35 @@ int test_main(int argc, char* argv[])
         std::string formula = read_text(filename);
         if (fs::exists(timed_result_file))
         {
-          pbes result = lps2pbes(SPEC1, formula, true);
-          pbes expected_result;
-          expected_result.load(timed_result_file);
-          bool cmp = (result == expected_result);
-          if (!cmp)
-            cerr << "ERROR: test " << timed_result_file << " failed!" << endl;
-          BOOST_CHECK(cmp);
+          try {
+            pbes result = lps2pbes(SPEC1, formula, true);
+            pbes expected_result;
+            expected_result.load(timed_result_file);
+            bool cmp = (result == expected_result);
+            if (!cmp)
+              cerr << "ERROR: test " << timed_result_file << " failed!" << endl;
+            BOOST_CHECK(cmp);
+          }
+          catch (std::runtime_error e)
+          {
+            cerr << e.what() << endl;
+          }
         }
         if (fs::exists(untimed_result_file))
         {
-          pbes result = lps2pbes(SPEC1, formula, false);
-          pbes expected_result;
-          expected_result.load(untimed_result_file);
-          bool cmp = (result == expected_result);
-          if (!cmp)
-            cerr << "ERROR: test " << untimed_result_file << " failed!" << endl;
-          BOOST_CHECK(cmp);
+          try {
+            pbes result = lps2pbes(SPEC1, formula, false);
+            pbes expected_result;
+            expected_result.load(untimed_result_file);
+            bool cmp = (result == expected_result);
+            if (!cmp)
+              cerr << "ERROR: test " << untimed_result_file << " failed!" << endl;
+            BOOST_CHECK(cmp);
+          }
+          catch (std::runtime_error e)
+          {
+            cerr << e.what() << endl;
+          }
         }
       }
     }
