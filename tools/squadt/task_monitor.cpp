@@ -7,7 +7,7 @@
 namespace squadt {
   namespace execution {
 
-    task_monitor::task_monitor() : sip::controller::communicator(new task_monitor_impl) {
+    task_monitor::task_monitor() : tipi::controller::communicator(new task_monitor_impl) {
     }
 
     void task_monitor::disconnect(execution::process*) {
@@ -76,7 +76,7 @@ namespace squadt {
     /**
      * @param[in] e the other end point of the connection
      **/
-    void task_monitor::signal_connection(sip::message::end_point e) {
+    void task_monitor::signal_connection(tipi::message::end_point e) {
       boost::shared_ptr < task_monitor_impl > m = boost::dynamic_pointer_cast < task_monitor_impl > (impl);
 
       m->signal_connection(m, e);

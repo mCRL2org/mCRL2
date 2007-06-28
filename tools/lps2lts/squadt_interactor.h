@@ -50,13 +50,13 @@ class squadt_interactor: public mcrl2::utilities::squadt::tool_interface {
 
   protected:
 
-    void set_capabilities(sip::tool::capabilities &capabilities) const;
+    void set_capabilities(tipi::tool::capabilities &capabilities) const;
 
-    void user_interactive_configuration(sip::configuration &configuration);
+    void user_interactive_configuration(tipi::configuration &configuration);
 
-    bool check_configuration(sip::configuration const &configuration) const;
+    bool check_configuration(tipi::configuration const &configuration) const;
 
-    bool perform_task(sip::configuration &configuration);
+    bool perform_task(tipi::configuration &configuration);
 };
 
 #endif

@@ -57,8 +57,8 @@ class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
 
   private:
 
-    boost::shared_ptr < sip::datatype::enumeration > transformation_method_enumeration;
-    boost::shared_ptr < sip::datatype::enumeration > output_format_enumeration;
+    boost::shared_ptr < tipi::datatype::enumeration > transformation_method_enumeration;
+    boost::shared_ptr < tipi::datatype::enumeration > output_format_enumeration;
 
   public:
 
@@ -66,16 +66,16 @@ class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
     squadt_interactor();
 
     /** \brief configures tool capabilities */
-    void set_capabilities(sip::tool::capabilities&) const;
+    void set_capabilities(tipi::tool::capabilities&) const;
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(sip::configuration&);
+    void user_interactive_configuration(tipi::configuration&);
 
     /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(sip::configuration const&) const;
+    bool check_configuration(tipi::configuration const&) const;
 
     /** \brief performs the task specified by a configuration */
-    bool perform_task(sip::configuration&);
+    bool perform_task(tipi::configuration&);
 };
 
 const char* squadt_interactor::lts_file_for_input  = "lts_in";
@@ -90,7 +90,7 @@ const char* squadt_interactor::option_tau_actions                        = "tau_
 const char* squadt_interactor::option_add_bisimulation_equivalence_class = "add_bisimulation_equivalence_class";
 
 squadt_interactor::squadt_interactor() {
-  transformation_method_enumeration.reset(new sip::datatype::enumeration("none"));
+  transformation_method_enumeration.reset(new tipi::datatype::enumeration("none"));
 
   transformation_method_enumeration->add_value("modulo_strong_bisimulation");
   transformation_method_enumeration->add_value("modulo_branching_bisimulation");
@@ -98,7 +98,7 @@ squadt_interactor::squadt_interactor() {
   transformation_method_enumeration->add_value("modulo_weak_trace_equivalence");
   transformation_method_enumeration->add_value("determinise");
 
-  output_format_enumeration.reset(new sip::datatype::enumeration("Aldebaran"));
+  output_format_enumeration.reset(new tipi::datatype::enumeration("Aldebaran"));
 
   output_format_enumeration->add_value("SVC_mCRL");
   output_format_enumeration->add_value("SVC_mCRL2");
@@ -107,21 +107,21 @@ squadt_interactor::squadt_interactor() {
   output_format_enumeration->add_value("dot");
 }
 
-void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(lts_file_for_input, sip::mime_type("aut", sip::mime_type::text), sip::tool::category::conversion);
-  c.add_input_combination(lts_file_for_input, sip::mime_type("svc+mcrl2", sip::mime_type::application), sip::tool::category::conversion);
-  c.add_input_combination(lts_file_for_input, sip::mime_type("svc+mcrl", sip::mime_type::application), sip::tool::category::conversion);
-  c.add_input_combination(lts_file_for_input, sip::mime_type("svc", sip::mime_type::application), sip::tool::category::conversion);
-  c.add_input_combination(lts_file_for_input, sip::mime_type("fsm", sip::mime_type::text), sip::tool::category::conversion);
+void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
+  c.add_input_combination(lts_file_for_input, tipi::mime_type("aut", tipi::mime_type::text), tipi::tool::category::conversion);
+  c.add_input_combination(lts_file_for_input, tipi::mime_type("svc+mcrl2", tipi::mime_type::application), tipi::tool::category::conversion);
+  c.add_input_combination(lts_file_for_input, tipi::mime_type("svc+mcrl", tipi::mime_type::application), tipi::tool::category::conversion);
+  c.add_input_combination(lts_file_for_input, tipi::mime_type("svc", tipi::mime_type::application), tipi::tool::category::conversion);
+  c.add_input_combination(lts_file_for_input, tipi::mime_type("fsm", tipi::mime_type::text), tipi::tool::category::conversion);
 #ifdef MCRL2_BCG
-  c.add_input_combination(lts_file_for_input, sip::mime_type("bcg", sip::mime_type::application), sip::tool::category::conversion);
+  c.add_input_combination(lts_file_for_input, tipi::mime_type("bcg", tipi::mime_type::application), tipi::tool::category::conversion);
 #endif
 }
 
-void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
-  using namespace sip;
-  using namespace sip::layout;
-  using namespace sip::layout::elements;
+void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
+  using namespace tipi;
+  using namespace tipi::layout;
+  using namespace tipi::layout::elements;
 
   layout::tool_display::sptr display(new layout::tool_display);
 
@@ -248,15 +248,15 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   /* Add output file to the configuration */
   if (c.output_exists(lts_file_for_output)) {
     std::string  extension(extensions[format_selector.get_selection()]);
-    sip::object& output_file = c.get_output(lts_file_for_output);
+    tipi::object& output_file = c.get_output(lts_file_for_output);
  
-    output_file.set_mime_type(sip::mime_type(extension));
+    output_file.set_mime_type(tipi::mime_type(extension));
     output_file.set_location(c.get_output_name("." + extension));
   }
   else {
     std::string  extension(extensions[format_selector.get_selection()]);
 
-    c.add_output(lts_file_for_output, sip::mime_type(extension), c.get_output_name("." + extension));
+    c.add_output(lts_file_for_output, tipi::mime_type(extension), c.get_output_name("." + extension));
   }
 
   /* Add lps file when output is FSM format or when the output is mCRL2 and the input is Aldebaran or mCRL */
@@ -273,7 +273,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
       c.get_input(lps_file_auxiliary).set_location(lps_file_field->get_text());
     }
     else {
-      c.add_input(lps_file_auxiliary, sip::mime_type("lps", sip::mime_type::application), lps_file_field->get_text());
+      c.add_input(lps_file_auxiliary, tipi::mime_type("lps", tipi::mime_type::application), lps_file_field->get_text());
     }
   }
   else {
@@ -289,24 +289,24 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
        selected_transformation == minimisation_modulo_branching_bisimulation)) {
 
     c.add_option(option_add_bisimulation_equivalence_class).
-        set_argument_value< 0, sip::datatype::boolean >(bisimulation_add_eq_classes->get_status());
+        set_argument_value< 0, tipi::datatype::boolean >(bisimulation_add_eq_classes->get_status());
   }
   else {
     c.remove_option(option_add_bisimulation_equivalence_class);
   }
 
-  c.add_option(option_no_reachability_check).set_argument_value< 0, sip::datatype::boolean >(do_not_check_reachability->get_status());
+  c.add_option(option_no_reachability_check).set_argument_value< 0, tipi::datatype::boolean >(do_not_check_reachability->get_status());
 
   if (format_selector.get_selection() == dot) {
     c.add_option(option_no_state_information).
-       set_argument_value< 0, sip::datatype::boolean >(do_not_omit_state_information->get_status());
+       set_argument_value< 0, tipi::datatype::boolean >(do_not_omit_state_information->get_status());
   }
   else {
     c.remove_option(option_no_state_information);
   }
 
   if (!tau_field->get_text().empty()) {
-    c.add_option(option_tau_actions).set_argument_value< 0, sip::datatype::string >(tau_field->get_text());
+    c.add_option(option_tau_actions).set_argument_value< 0, tipi::datatype::string >(tau_field->get_text());
   }
   else {
     c.remove_option(option_tau_actions);
@@ -315,7 +315,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   send_clear_display();
 }
 
-bool squadt_interactor::check_configuration(sip::configuration const& c) const {
+bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
   bool result = true;
 
   result &= c.input_exists(lts_file_for_input);
@@ -332,7 +332,7 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   return (result);
 }
 
-bool squadt_interactor::perform_task(sip::configuration& c) {
+bool squadt_interactor::perform_task(tipi::configuration& c) {
   lts l;
 
   std::string lps_path;

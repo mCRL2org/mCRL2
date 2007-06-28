@@ -1,0 +1,102 @@
+project squadt/libraries/tipi
+    : source-location
+       ../source
+    : build-dir $(BUILD_TOP)
+    : requirements
+       <use>/boost//headers
+       <use>/libraries/utilities//headers
+       <include>../include
+    : usage-requirements
+       <use>/boost//headers
+       <include>../include
+    ;
+
+transport_sources = [ glob ../source/transport/*.cpp ] ;
+
+alias transport
+    : $(transport_sources)
+    : <library>/site-config//boost_thread
+      <library>/site-config//boost_system
+      <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
+      <os>CYGWIN:<define>__USE_W32_SOCKETS
+      <os>CYGWIN:<define>_WIN32_WINNT=0x0500
+      <os>NT:<define>__USE_W32_SOCKETS
+      <os>NT:<define>_WIN32_WINNT=0x0500
+      <threading>multi
+    :
+    : <library>/site-config//boost_thread
+      <library>/site-config//boost_system
+      <os>NT:<library>/site-config//winsock
+      <os>CYGWIN:<library>/site-config//winsock
+      <os>CYGWIN:<define>__USE_W32_SOCKETS
+      <os>CYGWIN:<define>_WIN32_WINNT=0x0500
+      <os>NT:<define>__USE_W32_SOCKETS
+      <os>NT:<define>_WIN32_WINNT=0x0500
+    ;
+
+obj restore_visitor.o
+    : restore_visitor.cpp
+    : <use>/libraries//ticpp
+      <use>/site-config//boost_filesystem
+    :
+    : <library>/libraries//ticpp
+      <library>/site-config//boost_filesystem
+    ;
+
+alias messenger
+    :
+      [ obj tool_capabilities.o : tool/capabilities.cpp ]
+      [ obj controller_capabilities.o : controller/capabilities.cpp ]
+      basic_datatype.cpp
+      basic_messenger.cpp
+      common.cpp
+      command_line_interface.cpp
+      configuration.cpp
+      display.cpp
+      layout_base.cpp
+      layout_elements.cpp
+      mime_type.cpp
+      transport
+      store_visitor.cpp
+      search_visitor.cpp
+      restore_visitor.o
+      utility/logger.cpp
+    : <threading>multi
+      <use>/libraries/utilities//headers
+      <dependency>/site-config//boost_regex
+      <dependency>/site-config//boost_filesystem
+    : # no default build
+    : <library>/site-config//boost_regex
+      <library>/site-config//boost_filesystem
+    ;
+
+obj tool_communicator.o : tool/communicator.cpp ;
+obj controller_communicator.o : controller/communicator.cpp ;
+
+lib tipi-controller
+    : controller_communicator.o
+      messenger
+    : <threading>multi
+      <link>static
+    ;
+
+lib tipi
+    : controller_communicator.o
+      tool_communicator.o
+      messenger
+    : <threading>multi
+      <link>shared
+    ;
+
+lib tipi-tool
+    : tool_communicator.o
+      messenger
+    : <threading>multi
+      <link>static
+    ;
+
+alias tool_interface       : tipi            : <link>shared ;
+alias tool_interface       : tipi-tool       : <link>static ;
+alias controller_interface : tipi            : <link>shared ;
+alias controller_interface : tipi-controller : <link>static ;
+

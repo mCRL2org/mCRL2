@@ -6,7 +6,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/filesystem/path.hpp>
 
-#include <sip/utility/generic_visitor.h>
+#include <tipi/utility/generic_visitor.h>
 
 namespace squadt {
   class store_visitor_impl;

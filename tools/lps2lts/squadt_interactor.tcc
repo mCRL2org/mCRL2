@@ -42,20 +42,20 @@ const char*  ::squadt_interactor::lps_file_for_input          = "lps_in";
 const char*  ::squadt_interactor::lts_file_for_output         = "lts_out";
 const char*  ::squadt_interactor::trc_file_for_output         = "trc_out";
 
-static boost::shared_ptr < sip::datatype::enumeration > exploration_strategy_enumeration; 
+static boost::shared_ptr < tipi::datatype::enumeration > exploration_strategy_enumeration; 
 
 squadt_interactor::squadt_interactor() {
-  exploration_strategy_enumeration.reset(new sip::datatype::enumeration("breadth-first"));
+  exploration_strategy_enumeration.reset(new tipi::datatype::enumeration("breadth-first"));
   *exploration_strategy_enumeration % "depth-first" % "random";
 }
 
-void squadt_interactor::set_capabilities(sip::tool::capabilities &cp) const {
+void squadt_interactor::set_capabilities(tipi::tool::capabilities &cp) const {
   /* The tool has only one main input combination it takes an LPS and then behaves as a reporter */
-  cp.add_input_combination(lps_file_for_input, sip::mime_type("lps", sip::mime_type::application), sip::tool::category::reporting);
-  cp.add_input_combination(lps_file_for_input, sip::mime_type("lps", sip::mime_type::application), sip::tool::category::transformation);
+  cp.add_input_combination(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::reporting);
+  cp.add_input_combination(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
 }
 
-using sip::layout::elements::checkbox;
+using tipi::layout::elements::checkbox;
 
 class squadt_interactor::storage_configuration {
 
@@ -69,25 +69,25 @@ class squadt_interactor::storage_configuration {
 
   public:
 
-    storage_configuration(sip::configuration& c, sip::layout::manager* m) {
-      using namespace sip;
-      using namespace sip::layout;
+    storage_configuration(tipi::configuration& c, tipi::layout::manager* m) {
+      using namespace tipi;
+      using namespace tipi::layout;
 
       /* Set default configuration, for unspecified options */
       if (!c.option_exists(option_out_info)) {
-        c.add_option(option_out_info).set_argument_value< 0, sip::datatype::boolean >(true);
+        c.add_option(option_out_info).set_argument_value< 0, tipi::datatype::boolean >(true);
       }
       if (!c.option_exists(option_usedummies)) {
-        c.add_option(option_usedummies).set_argument_value< 0, sip::datatype::boolean >(true);
+        c.add_option(option_usedummies).set_argument_value< 0, tipi::datatype::boolean >(true);
       }
       if (!c.option_exists(option_state_format_tree)) {
-        c.add_option(option_state_format_tree).set_argument_value< 0, sip::datatype::boolean >(false);
+        c.add_option(option_state_format_tree).set_argument_value< 0, tipi::datatype::boolean >(false);
       }
       if (!c.option_exists(option_removeunused)) {
-        c.add_option(option_removeunused).set_argument_value< 0, sip::datatype::boolean >(true);
+        c.add_option(option_removeunused).set_argument_value< 0, tipi::datatype::boolean >(true);
       }
       if (!c.option_exists(option_as_aut)) {
-        c.add_option(option_as_aut).set_argument_value< 0, sip::datatype::boolean >(false);
+        c.add_option(option_as_aut).set_argument_value< 0, tipi::datatype::boolean >(false);
       }
 
       horizontal_box* cbsbox = static_cast < horizontal_box* > (m->add(new horizontal_box(), center));
@@ -103,64 +103,64 @@ class squadt_interactor::storage_configuration {
       cb_removeunused      = static_cast < checkbox* > (column->add(new checkbox("remove unused data", c.get_option_argument< bool >(option_removeunused)), layout::left));
     }
 
-    void update_configuration(boost::shared_ptr< squadt_interactor::storage_configuration >, sip::configuration& c) {
+    void update_configuration(boost::shared_ptr< squadt_interactor::storage_configuration >, tipi::configuration& c) {
       /* Add output file to the configuration */
       if (c.output_exists(squadt_interactor::lts_file_for_output)) {
-        sip::object& o = c.get_output(lts_file_for_output);
+        tipi::object& o = c.get_output(lts_file_for_output);
       
-        o.set_mime_type(sip::mime_type(cb_aut->get_status()?"text/aut":"application/svc+mcrl2"));
+        o.set_mime_type(tipi::mime_type(cb_aut->get_status()?"text/aut":"application/svc+mcrl2"));
         o.set_location(c.get_output_name(cb_aut->get_status()?".aut":".svc"));
       }
       else {
-        c.add_output(lts_file_for_output, sip::mime_type(cb_aut->get_status()?"text/aut":"application/svc+mcrl2"), c.get_output_name(cb_aut->get_status()?".aut":".svc"));
+        c.add_output(lts_file_for_output, tipi::mime_type(cb_aut->get_status()?"text/aut":"application/svc+mcrl2"), c.get_output_name(cb_aut->get_status()?".aut":".svc"));
       }
       
-      c.add_option(option_as_aut).set_argument_value< 0, sip::datatype::boolean >(cb_aut->get_status());
-      c.add_option(option_out_info).set_argument_value< 0, sip::datatype::boolean >(cb_out_info->get_status());
+      c.add_option(option_as_aut).set_argument_value< 0, tipi::datatype::boolean >(cb_aut->get_status());
+      c.add_option(option_out_info).set_argument_value< 0, tipi::datatype::boolean >(cb_out_info->get_status());
       
-      c.add_option(option_usedummies).set_argument_value< 0, sip::datatype::boolean >(cb_usedummies->get_status());
-      c.add_option(option_state_format_tree).set_argument_value< 0, sip::datatype::boolean >(cb_state_format_tree->get_status());
-      c.add_option(option_removeunused).set_argument_value< 0, sip::datatype::boolean >(cb_removeunused->get_status());
+      c.add_option(option_usedummies).set_argument_value< 0, tipi::datatype::boolean >(cb_usedummies->get_status());
+      c.add_option(option_state_format_tree).set_argument_value< 0, tipi::datatype::boolean >(cb_state_format_tree->get_status());
+      c.add_option(option_removeunused).set_argument_value< 0, tipi::datatype::boolean >(cb_removeunused->get_status());
     }
 };
 
-void squadt_interactor::user_interactive_configuration(sip::configuration& c)
+void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
 {
-  using namespace sip;
-  using namespace sip::layout;
-  using namespace sip::layout::elements;
+  using namespace tipi;
+  using namespace tipi::layout;
+  using namespace tipi::layout::elements;
   
   using mcrl2::utilities::squadt::rewrite_strategy_enumeration;
 
-  bool make_lts = c.get_category() == sip::tool::category::transformation;
+  bool make_lts = c.get_category() == tipi::tool::category::transformation;
 
   /* Set default configuration, for unspecified options */
   if (!c.option_exists(option_detect_deadlock)) {
-    c.add_option(option_detect_deadlock).set_argument_value< 0, sip::datatype::boolean >(false);
+    c.add_option(option_detect_deadlock).set_argument_value< 0, tipi::datatype::boolean >(false);
   }
   if (!c.option_exists(option_trace)) {
-    c.add_option(option_trace).set_argument_value< 0, sip::datatype::boolean >(false);
+    c.add_option(option_trace).set_argument_value< 0, tipi::datatype::boolean >(false);
   }
   if (!c.option_exists(option_max_traces)) {
-    c.add_option(option_max_traces).set_argument_value< 0, sip::datatype::string >(boost::lexical_cast< std::string > (DEFAULT_MAX_TRACES));
+    c.add_option(option_max_traces).set_argument_value< 0, tipi::datatype::string >(boost::lexical_cast< std::string > (DEFAULT_MAX_TRACES));
   }
   if (!c.option_exists(option_error_trace)) {
-    c.add_option(option_error_trace).set_argument_value< 0, sip::datatype::boolean >(false);
+    c.add_option(option_error_trace).set_argument_value< 0, tipi::datatype::boolean >(false);
   }
   if (!c.option_exists(option_confluence_reduction)) {
-    c.add_option(option_confluence_reduction).set_argument_value< 0, sip::datatype::boolean >(false);
+    c.add_option(option_confluence_reduction).set_argument_value< 0, tipi::datatype::boolean >(false);
   }
   if (!c.option_exists(option_confluent_tau)) {
-    c.add_option(option_confluent_tau).set_argument_value< 0, sip::datatype::string >("ctau");
+    c.add_option(option_confluent_tau).set_argument_value< 0, tipi::datatype::string >("ctau");
   }
   if (!c.option_exists(option_bithashing)) {
-    c.add_option(option_bithashing).set_argument_value< 0, sip::datatype::boolean >(false);
+    c.add_option(option_bithashing).set_argument_value< 0, tipi::datatype::boolean >(false);
   }
   if (!c.option_exists(option_bithashsize)) {
-    c.add_option(option_bithashsize).set_argument_value< 0, sip::datatype::string >(boost::lexical_cast< std::string > (DEFAULT_BITHASHSIZE));
+    c.add_option(option_bithashsize).set_argument_value< 0, tipi::datatype::string >(boost::lexical_cast< std::string > (DEFAULT_BITHASHSIZE));
   }
   if (!c.option_exists(option_init_tsize)) {
-    c.add_option(option_init_tsize).set_argument_value< 0, sip::datatype::string >(boost::lexical_cast< std::string > (DEFAULT_INIT_TSIZE));
+    c.add_option(option_init_tsize).set_argument_value< 0, tipi::datatype::string >(boost::lexical_cast< std::string > (DEFAULT_INIT_TSIZE));
   }
 
   /* Create and add the top layout manager */
@@ -169,7 +169,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c)
   vertical_box* column = static_cast < vertical_box* > (layout_manager->add(new vertical_box(), margins(0,5,0,5)));
 
   /* Function for updating the configuration that has to do with storage of the state space */
-  boost::function < void (sip::configuration&) > update_configuration;
+  boost::function < void (tipi::configuration&) > update_configuration;
   
   if (make_lts) {
     boost::shared_ptr < storage_configuration > storage_controls(new storage_configuration(c, column));
@@ -280,65 +280,65 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c)
   }
 
   if (c.option_exists(option_rewrite_strategy)) {
-    c.get_option(option_rewrite_strategy).set_argument_value< 0, sip::datatype::enumeration >(rewrite_strategy_selector.get_selection());
+    c.get_option(option_rewrite_strategy).set_argument_value< 0, tipi::datatype::enumeration >(rewrite_strategy_selector.get_selection());
   }
   else {
     c.add_option(option_rewrite_strategy).append_argument(rewrite_strategy_enumeration, rewrite_strategy_selector.get_selection());
   }
 
   if (c.option_exists(option_exploration_strategy)) {
-    c.get_option(option_exploration_strategy).set_argument_value< 0, sip::datatype::enumeration >(exploration_selector.get_selection());
+    c.get_option(option_exploration_strategy).set_argument_value< 0, tipi::datatype::enumeration >(exploration_selector.get_selection());
   }
   else {
     c.add_option(option_exploration_strategy).append_argument(exploration_strategy_enumeration, exploration_selector.get_selection());
   }
 
-  c.add_option(option_detect_deadlock).set_argument_value< 0, sip::datatype::boolean >(cb_deadlock->get_status());
+  c.add_option(option_detect_deadlock).set_argument_value< 0, tipi::datatype::boolean >(cb_deadlock->get_status());
 
   if (cb_actions->get_status() && !tf_actions->get_text().empty()) {
-    c.add_option(option_detect_actions).set_argument_value< 0, sip::datatype::string >(tf_actions->get_text());
+    c.add_option(option_detect_actions).set_argument_value< 0, tipi::datatype::string >(tf_actions->get_text());
   }
 
-  c.add_option(option_trace).set_argument_value< 0, sip::datatype::boolean >(cb_trace->get_status());
-  c.add_option(option_error_trace).set_argument_value< 0, sip::datatype::boolean >(cb_error_trace->get_status());
+  c.add_option(option_trace).set_argument_value< 0, tipi::datatype::boolean >(cb_trace->get_status());
+  c.add_option(option_error_trace).set_argument_value< 0, tipi::datatype::boolean >(cb_error_trace->get_status());
 
   if (cb_trace->get_status() || cb_error_trace->get_status()) {
-    c.add_option(option_max_traces).set_argument_value< 0, sip::datatype::string >(tf_max_traces->get_text());
+    c.add_option(option_max_traces).set_argument_value< 0, tipi::datatype::string >(tf_max_traces->get_text());
   }
   
-  c.add_option(option_confluence_reduction).set_argument_value< 0, sip::datatype::boolean >(cb_confluence->get_status());
+  c.add_option(option_confluence_reduction).set_argument_value< 0, tipi::datatype::boolean >(cb_confluence->get_status());
 
   if (cb_confluence->get_status()) {
-    c.add_option(option_confluent_tau).set_argument_value< 0, sip::datatype::string >(tf_conf_tau->get_text());
+    c.add_option(option_confluent_tau).set_argument_value< 0, tipi::datatype::string >(tf_conf_tau->get_text());
   }
   
   if (cb_max_states->get_status() && !tf_max_states->get_text().empty()) {
-    c.add_option(option_max_states).set_argument_value< 0, sip::datatype::string >(tf_max_states->get_text());
+    c.add_option(option_max_states).set_argument_value< 0, tipi::datatype::string >(tf_max_states->get_text());
   }
   
-  c.add_option(option_bithashing).set_argument_value< 0, sip::datatype::boolean >(cb_bithashing->get_status());
-  c.add_option(option_bithashsize).set_argument_value< 0, sip::datatype::string >(tf_bithashsize->get_text());
+  c.add_option(option_bithashing).set_argument_value< 0, tipi::datatype::boolean >(cb_bithashing->get_status());
+  c.add_option(option_bithashsize).set_argument_value< 0, tipi::datatype::string >(tf_bithashsize->get_text());
 
-  c.add_option(option_init_tsize).set_argument_value< 0, sip::datatype::string >(tf_init_tsize->get_text());
+  c.add_option(option_init_tsize).set_argument_value< 0, tipi::datatype::string >(tf_init_tsize->get_text());
   
   send_clear_display();
 }
 
-bool squadt_interactor::check_configuration(sip::configuration const &c) const
+bool squadt_interactor::check_configuration(tipi::configuration const &c) const
 {
   return c.input_exists(lps_file_for_input) &&
-       (!(c.get_category() == sip::tool::category::transformation) || c.output_exists(lts_file_for_output));
+       (!(c.get_category() == tipi::tool::category::transformation) || c.output_exists(lts_file_for_output));
 }
 
 class squadt_interactor::status_display {
 
   private:
 
-    sip::layout::elements::label        *lb_level;
-    sip::layout::elements::label        *lb_explored;
-    sip::layout::elements::label        *lb_seen;
-    sip::layout::elements::label        *lb_transitions;
-    sip::layout::elements::progress_bar *progbar;
+    tipi::layout::elements::label        *lb_level;
+    tipi::layout::elements::label        *lb_explored;
+    tipi::layout::elements::label        *lb_seen;
+    tipi::layout::elements::label        *lb_transitions;
+    tipi::layout::elements::progress_bar *progbar;
 
     squadt_interactor&  m_communicator;
 
@@ -351,9 +351,9 @@ class squadt_interactor::status_display {
 };
 
 squadt_interactor::status_display::status_display(squadt_interactor& c, lts_generation_options& lgopts) : m_communicator(c) {
-  using namespace sip;
-  using namespace sip::layout;
-  using namespace sip::layout::elements;
+  using namespace tipi;
+  using namespace tipi::layout;
+  using namespace tipi::layout::elements;
   
   /* Create and add the top layout manager */
   layout::manager::aptr top(layout::vertical_box::create());
@@ -399,7 +399,7 @@ void squadt_interactor::status_display::update(unsigned long& level, unsigned lo
   progbar->set_value(explored);
 }
 
-std::string add_output_file(sip::configuration& c, const char* identifier, std::string const& info, std::string const& ext) {
+std::string add_output_file(tipi::configuration& c, const char* identifier, std::string const& info, std::string const& ext) {
   static unsigned int output_count = 3;
 
   std::string s(c.get_output_name("_" + info + "." + ext));
@@ -409,14 +409,14 @@ std::string add_output_file(sip::configuration& c, const char* identifier, std::
   return s;
 }
 
-bool squadt_interactor::perform_task(sip::configuration &configuration)
+bool squadt_interactor::perform_task(tipi::configuration &configuration)
 {
   lts_generation_options lgopts;
   status_display         display(*this, lgopts);
 
   lgopts.specification = configuration.get_input(lps_file_for_input).get_location();
 
-  if (configuration.get_category() == sip::tool::category::transformation) {
+  if (configuration.get_category() == tipi::tool::category::transformation) {
     lgopts.lts = configuration.get_output(lts_file_for_output).get_location();
 
     lgopts.outinfo = configuration.get_option_argument< bool >(option_out_info);

@@ -7,10 +7,10 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <sip/utility/generic_visitor.h>
+#include <tipi/utility/generic_visitor.h>
 
-#include <sip/tool.h>
-#include <sip/mime_type.h>
+#include <tipi/tool.h>
+#include <tipi/mime_type.h>
 
 namespace squadt {
   class settings_manager;
@@ -71,13 +71,13 @@ namespace squadt {
     public:
 
       /** Follows the syntax defined in RFC 2045 */
-      typedef sip::mime_type         mime_type;
+      typedef tipi::mime_type         mime_type;
 
       /** \brief Convenience type alias */
-      typedef sip::mime_type         storage_format;
+      typedef tipi::mime_type         storage_format;
 
       /** \brief Convenience type alias */
-      typedef sip::tool::category    tool_category;
+      typedef tipi::tool::category    tool_category;
 
     public:
 

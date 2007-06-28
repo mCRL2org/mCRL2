@@ -13,7 +13,7 @@ exe squadt
         /site-config//wx_base
       : <wx>yes
         <library>/site-config//boost_md5
-        <library>/libraries/sip//controller_interface
+        <library>/libraries/tipi//controller_interface
         <use>/libraries/utilities//headers
         <library>/libraries//ticpp
         <toolset>darwin:<linkflags>"-undefined dynamic_lookup"

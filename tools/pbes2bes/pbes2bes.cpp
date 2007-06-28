@@ -161,8 +161,8 @@ class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
 
   private:
 
-    boost::shared_ptr < sip::datatype::enumeration > transformation_method_enumeration;
-    boost::shared_ptr < sip::datatype::enumeration > output_format_enumeration;
+    boost::shared_ptr < tipi::datatype::enumeration > transformation_method_enumeration;
+    boost::shared_ptr < tipi::datatype::enumeration > output_format_enumeration;
 
   public:
 
@@ -170,16 +170,16 @@ class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
     squadt_interactor();
 
     /** \brief configures tool capabilities */
-    void set_capabilities(sip::tool::capabilities&) const;
+    void set_capabilities(tipi::tool::capabilities&) const;
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(sip::configuration&);
+    void user_interactive_configuration(tipi::configuration&);
 
     /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(sip::configuration const&) const;
+    bool check_configuration(tipi::configuration const&) const;
 
     /** \brief performs the task specified by a configuration */
-    bool perform_task(sip::configuration&);
+    bool perform_task(tipi::configuration&);
 };
 
 const char* squadt_interactor::pbes_file_for_input  = "pbes_in";
@@ -189,24 +189,24 @@ const char* squadt_interactor::option_transformation_strategy = "transformation_
 const char* squadt_interactor::option_selected_output_format  = "selected_output_format";
 
 squadt_interactor::squadt_interactor() {
-  transformation_method_enumeration.reset(new sip::datatype::enumeration("lazy"));
+  transformation_method_enumeration.reset(new tipi::datatype::enumeration("lazy"));
 
   transformation_method_enumeration->add_value("finite");
 
-  output_format_enumeration.reset(new sip::datatype::enumeration("binary"));
+  output_format_enumeration.reset(new tipi::datatype::enumeration("binary"));
 
   output_format_enumeration->add_value("internal");
   output_format_enumeration->add_value("cwi");
 }
 
-void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(pbes_file_for_input, sip::mime_type("pbes", sip::mime_type::application), sip::tool::category::transformation);
+void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
+  c.add_input_combination(pbes_file_for_input, tipi::mime_type("pbes", tipi::mime_type::application), tipi::tool::category::transformation);
 }
 
-void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
-  using namespace sip;
-  using namespace sip::layout;
-  using namespace sip::layout::elements;
+void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
+  using namespace tipi;
+  using namespace tipi::layout;
+  using namespace tipi::layout::elements;
 
   layout::tool_display::sptr display(new layout::tool_display);
 
@@ -257,12 +257,12 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
   /* Add output file to the configuration */
   if (c.output_exists(pbes_file_for_output)) {
-    sip::object& output_file = c.get_output(pbes_file_for_output);
+    tipi::object& output_file = c.get_output(pbes_file_for_output);
  
     output_file.set_location(c.get_output_name(".pbes"));
   }
   else {
-    c.add_output(pbes_file_for_output, sip::mime_type("pbes", sip::mime_type::application), c.get_output_name(".pbes"));
+    c.add_output(pbes_file_for_output, tipi::mime_type("pbes", tipi::mime_type::application), c.get_output_name(".pbes"));
   }
 
   c.add_option(option_transformation_strategy).append_argument(transformation_method_enumeration,
@@ -273,7 +273,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   send_clear_display();
 }
 
-bool squadt_interactor::check_configuration(sip::configuration const& c) const {
+bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
   bool result = true;
 
   result &= c.input_exists(pbes_file_for_input);
@@ -284,7 +284,7 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   return (result);
 }
 
-bool squadt_interactor::perform_task(sip::configuration& c) {
+bool squadt_interactor::perform_task(tipi::configuration& c) {
   static std::string strategies[] = { "lazy", "finite" };
   static std::string formats[]    = { "binary", "internal", "cwi" };
 

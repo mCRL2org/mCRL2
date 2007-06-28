@@ -26,7 +26,7 @@ namespace squadt {
     private:
 
       /** \brief handler that accomplishes the actual task */
-      void handle_store_tool_capabilities(const sip::message_ptr& m, tool& t);
+      void handle_store_tool_capabilities(const tipi::message_ptr& m, tool& t);
 
       /** \brief terminates the associated process after a timeout period, if not already finished */
       void terminate_after_timeout(const boost::weak_ptr < void >);

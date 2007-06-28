@@ -11,7 +11,7 @@ modules.poke : HCACHEFILE : $(BUILD_TOP)/.jamdeps ;
 use-project /site-config               : build ;
 use-project /boost                     : 3rd-party/boost ;
 use-project /libraries                 : libraries ;
-use-project /libraries/sip             : tools/squadt/libraries/sip/build ;
+use-project /libraries/tipi            : tools/squadt/libraries/tipi/build ;
 use-project /workarounds               : build/workarounds ;
 
 include $(BUILD_TOOLS)/building.jam ;

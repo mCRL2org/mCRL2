@@ -8,7 +8,7 @@
 #include <boost/thread/thread.hpp>
 #include <boost/filesystem/convenience.hpp>
 
-#include <sip/visitors.h>
+#include <tipi/visitors.h>
 
 #include "task_monitor.h"
 #include "processor.h"
@@ -91,7 +91,7 @@ namespace squadt {
       static bool try_change_status(processor::object_descriptor&, object_status);
 
       /** \brief Update if object is up-to-date */
-      void update_on_success(boost::shared_ptr < object_descriptor >, interface_ptr const&, boost::shared_ptr < sip::configuration >, bool);
+      void update_on_success(boost::shared_ptr < object_descriptor >, interface_ptr const&, boost::shared_ptr < tipi::configuration >, bool);
 
       /** \brief Handler that is executed when an edit operation is completed */
       void edit_completed();
@@ -108,7 +108,7 @@ namespace squadt {
       void edit(execution::command*);
 
       /** \brief Extracts useful information from a configuration object */
-      void process_configuration(boost::shared_ptr < sip::configuration > const&, std::set < sip::object const* >&, bool = true);
+      void process_configuration(boost::shared_ptr < tipi::configuration > const&, std::set < tipi::object const* >&, bool = true);
 
       /** \brief Find an object descriptor for a given pointer to an object */
       const object_descriptor::sptr find_output(object_descriptor*) const;
@@ -147,32 +147,32 @@ namespace squadt {
       void configure(interface_ptr const&, const tool::input_combination*, const boost::filesystem::path&, std::string const& = "");
  
       /** \brief Start tool configuration */
-      void configure(interface_ptr const&, boost::shared_ptr < sip::configuration > const&, std::string const& = "");
+      void configure(interface_ptr const&, boost::shared_ptr < tipi::configuration > const&, std::string const& = "");
 
       /** \brief Start tool reconfiguration */
-      void reconfigure(interface_ptr const&, boost::shared_ptr < sip::configuration > const&, std::string const& = "");
+      void reconfigure(interface_ptr const&, boost::shared_ptr < tipi::configuration > const&, std::string const& = "");
  
       /** \brief Start processing: generate outputs from inputs */
-      void run(interface_ptr const&, boost::shared_ptr < sip::configuration > c, bool b = false);
+      void run(interface_ptr const&, boost::shared_ptr < tipi::configuration > c, bool b = false);
 
       /** \brief Start running and afterward execute a function */
-      void run(interface_ptr const&, boost::function < void () > h, boost::shared_ptr < sip::configuration > c, bool b = false);
+      void run(interface_ptr const&, boost::function < void () > h, boost::shared_ptr < tipi::configuration > c, bool b = false);
 
       /** \brief Start processing if not all outputs are up to date */
-      void update(interface_ptr const&, boost::shared_ptr < sip::configuration > c, bool b = false);
+      void update(interface_ptr const&, boost::shared_ptr < tipi::configuration > c, bool b = false);
  
       /** \brief Start updating and afterward execute a function */
-      void update(interface_ptr const&, boost::function < void () > h, boost::shared_ptr < sip::configuration > c, bool b = false);
+      void update(interface_ptr const&, boost::function < void () > h, boost::shared_ptr < tipi::configuration > c, bool b = false);
 
       /** \brief Add an output object */
       void append_output(object_descriptor::sptr&);
 
       /** \brief Add an output object */
-      void append_output(sip::object const&, parameter_identifier const&,
+      void append_output(tipi::object const&, parameter_identifier const&,
                 object_descriptor::t_status const& = object_descriptor::reproducible_nonexistent);
 
       /** \brief Replace an existing output object */
-      void replace_output(object_descriptor::sptr, parameter_identifier const&, sip::object const&,
+      void replace_output(object_descriptor::sptr, parameter_identifier const&, tipi::object const&,
                 object_descriptor::t_status const& = object_descriptor::reproducible_up_to_date);
 
       /** \brief Removes the outputs of this processor from storage */
@@ -198,7 +198,7 @@ namespace squadt {
    *
    * \pre t.get() == this
    **/
-  inline void processor_impl::update(interface_ptr const& t, boost::function < void () > h, boost::shared_ptr < sip::configuration > c, bool b) {
+  inline void processor_impl::update(interface_ptr const& t, boost::function < void () > h, boost::shared_ptr < tipi::configuration > c, bool b) {
     current_monitor->once_on_completion(h);
 
     update(t, c, b);
@@ -212,7 +212,7 @@ namespace squadt {
    *
    * \pre t.get() == this
    **/
-  inline void processor_impl::run(interface_ptr const& t, boost::function < void () > h, boost::shared_ptr < sip::configuration > c, bool b) {
+  inline void processor_impl::run(interface_ptr const& t, boost::function < void () > h, boost::shared_ptr < tipi::configuration > c, bool b) {
     current_monitor->once_on_completion(h);
 
     run(t, c, b);
@@ -510,10 +510,10 @@ namespace squadt {
       o->location = n;
 
       /* Update configuration */
-      boost::shared_ptr < sip::configuration > c = current_monitor->get_configuration();
+      boost::shared_ptr < tipi::configuration > c = current_monitor->get_configuration();
 
       if (c.get() != 0) {
-        sip::object& object(c->get_output(o->identifier));
+        tipi::object& object(c->get_output(o->identifier));
 
         object.set_location(n);
       }
@@ -525,16 +525,16 @@ namespace squadt {
    * \param[in] p the previous set of output objects part of the old configuration
    * \param[in] check whether or not to check for existence of concrete outputs
    **/
-  inline void processor_impl::process_configuration(boost::shared_ptr < sip::configuration > const& c,
-                                                    std::set < sip::object const* >& p, bool check) {
+  inline void processor_impl::process_configuration(boost::shared_ptr < tipi::configuration > const& c,
+                                                    std::set < tipi::object const* >& p, bool check) {
     boost::shared_ptr < project_manager > g(manager.lock());
 
     if (g.get() != 0) {
-      sip::configuration::const_iterator_output_range ir(c->get_output_objects());
+      tipi::configuration::const_iterator_output_range ir(c->get_output_objects());
 
       /* Extract information about output objects from the configuration */
-      for (sip::configuration::const_iterator_output_range::const_iterator i = ir.begin(); i != ir.end(); ++i) {
-        sip::configuration::object const& object(static_cast < sip::configuration::object& > (*i));
+      for (tipi::configuration::const_iterator_output_range::const_iterator i = ir.begin(); i != ir.end(); ++i) {
+        tipi::configuration::object const& object(static_cast < tipi::configuration::object& > (*i));
 
         parameter_identifier    id = c->get_identifier(*i);
         object_descriptor::sptr o  = find_output_by_id(id);
@@ -560,7 +560,7 @@ namespace squadt {
         }
 
         /* Remove object from p if it is part of the new configuration too */
-        for (std::set< sip::object const* >::iterator j = p.begin(); j != p.end(); ++j) {
+        for (std::set< tipi::object const* >::iterator j = p.begin(); j != p.end(); ++j) {
           if ((*j)->get_location() == object.get_location()) {
             p.erase(j);
             break;
@@ -569,7 +569,7 @@ namespace squadt {
       }
 
       /* Remove files from the old configuration that do not appear in the new one */
-      for (std::set< sip::object const* >::const_iterator i = p.begin(); i != p.end(); ++i) {
+      for (std::set< tipi::object const* >::const_iterator i = p.begin(); i != p.end(); ++i) {
         remove(g->get_path_for_name((*i)->get_location()));
       }
 
@@ -622,7 +622,7 @@ namespace squadt {
 
       selected_input_combination = const_cast < tool::input_combination* > (ic);
 
-      boost::shared_ptr < sip::configuration > c(sip::controller::communicator::new_configuration(*selected_input_combination));
+      boost::shared_ptr < tipi::configuration > c(tipi::controller::communicator::new_configuration(*selected_input_combination));
 
       c->set_output_prefix(str(format("%s%04X") % (basename(find_initial_object()->location)) % g->get_unique_count()));
 
@@ -642,7 +642,7 @@ namespace squadt {
    *
    * \attention This function is non-blocking
    **/
-  inline void processor_impl::configure(interface_ptr const& t, boost::shared_ptr < sip::configuration > const& c, std::string const& w) {
+  inline void processor_impl::configure(interface_ptr const& t, boost::shared_ptr < tipi::configuration > const& c, std::string const& w) {
     output_directory = w;
 
     global_build_system.get_tool_manager()->impl->execute(*tool_descriptor, make_output_path(w),
@@ -661,7 +661,7 @@ namespace squadt {
    *
    * \attention This function is non-blocking
    **/
-  inline void processor_impl::reconfigure(interface_ptr const& t, boost::shared_ptr < sip::configuration > const& c, std::string const& w) {
+  inline void processor_impl::reconfigure(interface_ptr const& t, boost::shared_ptr < tipi::configuration > const& c, std::string const& w) {
     assert(selected_input_combination != 0);
 
     c->set_fresh();
@@ -678,7 +678,7 @@ namespace squadt {
    *
    * \pre !is_active() and t.get() == this
    **/
-  inline void processor_impl::run(interface_ptr const& t, boost::shared_ptr < sip::configuration > c, bool b) {
+  inline void processor_impl::run(interface_ptr const& t, boost::shared_ptr < tipi::configuration > c, bool b) {
     if (!is_active()) {
       if (b || 0 < inputs.size()) {
         boost::shared_ptr < project_manager > g(manager);
@@ -721,7 +721,7 @@ namespace squadt {
    * \param[in] c the configuration object to use
    * \param[in] b whether or not to run when there are no input objects are specified
    **/
-  inline void processor_impl::update_on_success(boost::shared_ptr < object_descriptor > o, interface_ptr const& t, boost::shared_ptr < sip::configuration > c, bool b) {
+  inline void processor_impl::update_on_success(boost::shared_ptr < object_descriptor > o, interface_ptr const& t, boost::shared_ptr < tipi::configuration > c, bool b) {
     if (o->is_up_to_date()) {
       update(t, c, b);
     }
@@ -736,7 +736,7 @@ namespace squadt {
    *
    * \pre !is_active() and t.get() == this
    **/
-  inline void processor_impl::update(interface_ptr const& t, boost::shared_ptr < sip::configuration > c, bool b) {
+  inline void processor_impl::update(interface_ptr const& t, boost::shared_ptr < tipi::configuration > c, bool b) {
     assert(t->impl.get() == this);
 
     if (!is_active()) {

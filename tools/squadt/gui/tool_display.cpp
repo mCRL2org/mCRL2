@@ -16,22 +16,22 @@
 #include <wx/textctrl.h>
 #include <wx/datetime.h>
 
-#include <sip/detail/layout_mediator.h>
-#include <sip/detail/layout_manager.h>
+#include <tipi/detail/layout_mediator.h>
+#include <tipi/detail/layout_manager.h>
 
 namespace squadt {
   namespace GUI {
     namespace detail {
-      using ::sip::layout::mediator;
+      using ::tipi::layout::mediator;
 
-      using namespace sip;
-      using namespace sip::layout;
+      using namespace tipi;
+      using namespace tipi::layout;
 
       #define cmID_MINIMISE  (wxID_HIGHEST + 1)
       #define cmID_CLOSE     (wxID_HIGHEST + 2)
 
-      /** \brief Translates a sip layout to a functional wxWidgets layout */
-      class tool_display_mediator : public sip::layout::mediator {
+      /** \brief Translates a tipi layout to a functional wxWidgets layout */
+      class tool_display_mediator : public tipi::layout::mediator {
         
         public:
      
@@ -42,7 +42,7 @@ namespace squadt {
            * unless it was explicitly released with one of the `release_'
            * methods.
            **/
-          class wrapper : public sip::layout::mediator::wrapper {
+          class wrapper : public tipi::layout::mediator::wrapper {
             private:
      
               /** \brief A wxWindow or wxSizer derived object stored in the */
@@ -95,10 +95,10 @@ namespace squadt {
         private:
      
           /** \brief Helper function for layout managers to attach widgets */
-          void attach_to_vertical_box(mediator::wrapper_aptr, sip::layout::properties const*);
+          void attach_to_vertical_box(mediator::wrapper_aptr, tipi::layout::properties const*);
      
           /** \brief Helper function for layout managers to attach widgets */
-          void attach_to_horizontal_box(mediator::wrapper_aptr, sip::layout::properties const*);
+          void attach_to_horizontal_box(mediator::wrapper_aptr, tipi::layout::properties const*);
      
         public:
      
@@ -228,7 +228,7 @@ namespace squadt {
        * \param p pointer to the data that represent the window to be attached
        * \param c layout properties
        **/
-      void tool_display_mediator::attach_to_vertical_box(mediator::wrapper_aptr d, sip::layout::properties const* c) {
+      void tool_display_mediator::attach_to_vertical_box(mediator::wrapper_aptr d, tipi::layout::properties const* c) {
         wrapper* sd     = static_cast < wrapper* > (d.get());
         int      flags  = wxLEFT|wxRIGHT;
      
@@ -269,7 +269,7 @@ namespace squadt {
           sizer->AddSpacer(cr.m_margin.bottom);
         }
      
-        if (cr.m_visible == sip::layout::hidden) {
+        if (cr.m_visible == tipi::layout::hidden) {
           new_sizer_item->Show(false);
         }
       }
@@ -278,21 +278,21 @@ namespace squadt {
        * \param p pointer to the data that represent the window to be attached
        * \param c layout properties
        **/
-      void tool_display_mediator::attach_to_horizontal_box(mediator::wrapper_aptr d, sip::layout::properties const* c) {
+      void tool_display_mediator::attach_to_horizontal_box(mediator::wrapper_aptr d, tipi::layout::properties const* c) {
         wrapper* sd     = static_cast < wrapper* > (d.get());
         int      flags  = wxTOP|wxBOTTOM;
 
-        sip::layout::properties const& cr = *(static_cast < layout::properties const* > (c));
+        tipi::layout::properties const& cr = *(static_cast < layout::properties const* > (c));
 
         if (cr.m_grow) {
           flags |= wxEXPAND;
         }
 
         switch (cr.m_alignment_vertical) {
-          case sip::layout::top:
+          case tipi::layout::top:
             flags |= wxALIGN_TOP;
             break;
-          case sip::layout::bottom:
+          case tipi::layout::bottom:
             flags |= wxALIGN_BOTTOM;
             break;
           default: /* center */
@@ -319,7 +319,7 @@ namespace squadt {
           sizer->AddSpacer(cr.m_margin.right);
         }
 
-        if (cr.m_visible == sip::layout::hidden) {
+        if (cr.m_visible == tipi::layout::hidden) {
           new_sizer_item->Show(false);
         }
       }
@@ -330,7 +330,7 @@ namespace squadt {
       mediator::aptr tool_display_mediator::build_vertical_box() {
         wxSizer* t = new wxBoxSizer(wxVERTICAL);
      
-        sip::layout::mediator::aptr m(new tool_display_mediator(current_window, wrapper_aptr(new wrapper(t)), change_event_handler));
+        tipi::layout::mediator::aptr m(new tool_display_mediator(current_window, wrapper_aptr(new wrapper(t)), change_event_handler));
      
         m->set_attach(boost::bind(&tool_display_mediator::attach_to_vertical_box,
                                                   static_cast < tool_display_mediator* > (m.get()), _1, _2));
@@ -344,7 +344,7 @@ namespace squadt {
       mediator::aptr tool_display_mediator::build_horizontal_box() {
         wxSizer* t = new wxBoxSizer(wxHORIZONTAL);
      
-        sip::layout::mediator::aptr m(new tool_display_mediator(current_window, wrapper_aptr (new wrapper(t)), change_event_handler));
+        tipi::layout::mediator::aptr m(new tool_display_mediator(current_window, wrapper_aptr (new wrapper(t)), change_event_handler));
      
         m->set_attach(boost::bind(&tool_display_mediator::attach_to_horizontal_box,
                                                   static_cast < tool_display_mediator* > (m.get()), _1, _2));
@@ -509,7 +509,7 @@ namespace squadt {
       }
 
       /**
-       * Helper class for associating objects of sip::layout::element with
+       * Helper class for associating objects of tipi::layout::element with
        * their wxWidgets counterpart
        *
        * This class would not have been necessary if wxWidgets provided
@@ -520,11 +520,11 @@ namespace squadt {
 
         protected:
 
-          S& sip_element;
+          S& tipi_element;
 
         public:
 
-          event_helper(sip::layout::element& s) : sip_element(static_cast < S& > (s)) {
+          event_helper(tipi::layout::element& s) : tipi_element(static_cast < S& > (s)) {
           }
 
           void do_changes(wxCommandEvent&);
@@ -532,7 +532,7 @@ namespace squadt {
 
       template <>
       void event_helper< layout::elements::text_field >::do_changes(wxCommandEvent& e) {
-        sip_element.set_text(std::string(static_cast < wxTextCtrl* > (e.GetEventObject())->GetValue().fn_str()));
+        tipi_element.set_text(std::string(static_cast < wxTextCtrl* > (e.GetEventObject())->GetValue().fn_str()));
       }
 
       /**
@@ -545,7 +545,7 @@ namespace squadt {
         /* Connect change event */
         change_event_handler->associate(t, e);
 
-        event_helper< layout::elements::text_field >* l = new event_helper< layout::elements::text_field >(const_cast < sip::layout::element& > (*e));
+        event_helper< layout::elements::text_field >* l = new event_helper< layout::elements::text_field >(const_cast < tipi::layout::element& > (*e));
 
         t->Connect(t->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
                   wxCommandEventHandler(event_helper< layout::elements::text_field >::do_changes), l, l);
@@ -605,7 +605,7 @@ namespace squadt {
        * \param[in] m pointer to a mediator for translation to wxWidgets controls
        * \param[in] e pointer to the element of which the status was changed
        **/
-      void state_change_handler::update(sip::layout::mediator* m, sip::layout::element const* e) {
+      void state_change_handler::update(tipi::layout::mediator* m, tipi::layout::element const* e) {
         for (element_for_window_map::const_iterator i = element_for_window.begin(); i != element_for_window.end(); ++i) {
           if (i->second == e) {
             tool_display_mediator::wrapper w(static_cast < wxWindow* > ((*i).first));
@@ -623,14 +623,14 @@ namespace squadt {
      **/
     tool_display::tool_display(wxWindow* p, GUI::project* c, boost::shared_ptr < processor::monitor >& s) :
                                 wxPanel(p, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER),
-                                context(c), event_handler(s), current_layout(new sip::layout::tool_display), content(0), log(0) {
+                                context(c), event_handler(s), current_layout(new tipi::layout::tool_display), content(0), log(0) {
 
       build();
 
       /* Connect event handlers */
       s->set_display_layout_handler(boost::bind(&GUI::tool_display::schedule_layout_change, this, _1));
       s->set_status_message_handler(boost::bind(&GUI::tool_display::schedule_log_update, this, _1));
-      event_handler.send_display_update = boost::bind(&sip::controller::communicator::send_display_update, static_cast < sip::controller::communicator& > (*s), _1, boost::static_pointer_cast < sip::display const > (current_layout));
+      event_handler.send_display_update = boost::bind(&tipi::controller::communicator::send_display_update, static_cast < tipi::controller::communicator& > (*s), _1, boost::static_pointer_cast < tipi::display const > (current_layout));
     }
 
     void tool_display::build() {
@@ -738,10 +738,10 @@ namespace squadt {
      * \param[in] w weak pointer to the interface object
      * \param[in] l the new tool_display object
      **/
-    void tool_display::instantiate(boost::weak_ptr < sip::layout::tool_display > w, sip::layout::tool_display::sptr l) {
+    void tool_display::instantiate(boost::weak_ptr < tipi::layout::tool_display > w, tipi::layout::tool_display::sptr l) {
       using namespace detail;
 
-      boost::shared_ptr < sip::layout::tool_display > g(w.lock());
+      boost::shared_ptr < tipi::layout::tool_display > g(w.lock());
 
       if (g.get() != 0) {
         if (content != 0) {
@@ -774,8 +774,8 @@ namespace squadt {
         current_layout = l;
 
         // Tie handler to the new layout object
-        event_handler.send_display_update = boost::bind(&sip::controller::communicator::send_display_update,
-                static_cast < sip::controller::communicator& > (*event_handler.monitor), _1, boost::static_pointer_cast < sip::display const > (current_layout));
+        event_handler.send_display_update = boost::bind(&tipi::controller::communicator::send_display_update,
+                static_cast < tipi::controller::communicator& > (*event_handler.monitor), _1, boost::static_pointer_cast < tipi::display const > (current_layout));
 
         std::auto_ptr < wxSizer > root(new wxBoxSizer(wxVERTICAL));
 
@@ -824,12 +824,12 @@ namespace squadt {
      * \param[in] w weak pointer to this object
      * \param[in] l the layout elements that have changed
      **/
-    void tool_display::update(boost::weak_ptr < sip::layout::tool_display > w, std::vector < sip::layout::element const* > l) {
+    void tool_display::update(boost::weak_ptr < tipi::layout::tool_display > w, std::vector < tipi::layout::element const* > l) {
       using namespace detail;
 
       tool_display_mediator m(this, &event_handler);
 
-      BOOST_FOREACH(sip::layout::element const* i, l) {
+      BOOST_FOREACH(tipi::layout::element const* i, l) {
         event_handler.update(&m, i);
       }
 
@@ -842,8 +842,8 @@ namespace squadt {
      * \param[in] w weak pointer to this object
      * \param[in] l the layout elements that have changed
      **/
-    void tool_display::update_log(boost::weak_ptr < sip::layout::tool_display > w, sip::report::sptr l) {
-      boost::shared_ptr < sip::layout::tool_display > g(w.lock());
+    void tool_display::update_log(boost::weak_ptr < tipi::layout::tool_display > w, tipi::report::sptr l) {
+      boost::shared_ptr < tipi::layout::tool_display > g(w.lock());
 
       if (g.get() != 0) {
         wxString stamp = wxDateTime::Now().Format(wxT("%b %e %H:%M:%S "));
@@ -879,14 +879,14 @@ namespace squadt {
     /**
      * \param[in] l the layout specification
      **/
-    void tool_display::schedule_log_update(sip::report::sptr l) {
+    void tool_display::schedule_log_update(tipi::report::sptr l) {
       context->gui_builder.schedule_update(boost::bind(&tool_display::update_log, this, current_layout, l));
     }
 
     /**
      * \param[in] l the layout specification
      **/
-    void tool_display::schedule_layout_change(sip::layout::tool_display::sptr l) {
+    void tool_display::schedule_layout_change(tipi::layout::tool_display::sptr l) {
       /** Register handler for updates */
       event_handler.clear();
       event_handler.get_monitor()->set_display_update_handler(l, boost::bind(&GUI::tool_display::schedule_layout_update, this, _1));
@@ -894,7 +894,7 @@ namespace squadt {
       context->gui_builder.schedule_update(boost::bind(&tool_display::instantiate, this, current_layout, l));
     }
 
-    void tool_display::schedule_layout_update(std::vector < sip::layout::element const* > const& l) {
+    void tool_display::schedule_layout_update(std::vector < tipi::layout::element const* > const& l) {
       context->gui_builder.schedule_update(boost::bind(&tool_display::update, this, current_layout, l));
     }
   }

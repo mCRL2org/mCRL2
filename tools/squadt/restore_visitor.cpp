@@ -12,11 +12,11 @@
 #include "executor.tcc"
 #include "processor.tcc"
 
-#include <sip/utility/generic_visitor.tcc>
+#include <tipi/utility/generic_visitor.tcc>
 
 #include "visitors.h"
 
-#include <sip/visitors.h>
+#include <tipi/visitors.h>
 
 #include <ticpp.h>
 
@@ -128,12 +128,12 @@ namespace utility {
     tree->GetAttribute("location", &t.m_location);
 
     if (!tree->NoChildren()) {
-      t.m_capabilities.reset(new sip::tool::capabilities);
+      t.m_capabilities.reset(new tipi::tool::capabilities);
 
       try {
         tree->FirstChildElement("capabilities");
 
-        sip::visitors::restore(*t.m_capabilities, *tree);
+        tipi::visitors::restore(*t.m_capabilities, *tree);
       }
       catch (...) {
       }
@@ -273,8 +273,8 @@ namespace utility {
       p.tool_descriptor            = global_build_system.get_tool_manager()->
                                        get_tool_by_name(h.tree->GetAttributeValue("tool-name"));
       p.selected_input_combination = p.tool_descriptor->find_input_combination(
-                                       sip::tool::category::fit(h.tree->GetAttributeValue("category")),
-                                       sip::mime_type(h.tree->GetAttributeValue("format")));
+                                       tipi::tool::category::fit(h.tree->GetAttributeValue("category")),
+                                       tipi::mime_type(h.tree->GetAttributeValue("format")));
     }
     catch (...) {
     }
@@ -300,7 +300,7 @@ namespace utility {
 
         assert(h.cmap.find(id) == h.cmap.end());
        
-        h.cmap[id] = processor::object_descriptor::sptr(new processor::object_descriptor(sip::mime_type(e->GetAttributeValue("format"))));
+        h.cmap[id] = processor::object_descriptor::sptr(new processor::object_descriptor(tipi::mime_type(e->GetAttributeValue("format"))));
         
         p.outputs.push_back(h.cmap[id]);
        
@@ -323,9 +323,9 @@ namespace utility {
         new_descriptor.generator = boost::weak_ptr < processor > (p.interface_object);
       }
       else if (e->Value() == "configuration") {
-        boost::shared_ptr < sip::configuration > new_configuration(new sip::configuration);
+        boost::shared_ptr < tipi::configuration > new_configuration(new tipi::configuration);
 
-        sip::visitors::restore(*new_configuration, *e);
+        tipi::visitors::restore(*new_configuration, *e);
 
         p.current_monitor->set_configuration(new_configuration);
       }

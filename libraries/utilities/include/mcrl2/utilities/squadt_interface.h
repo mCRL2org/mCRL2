@@ -3,9 +3,9 @@
 
 #include <boost/cstdint.hpp>
 
-#include <sip/tool.h>
+#include <tipi/tool.h>
 
-#include "mcrl2/utilities/sip_ext.h"
+#include "mcrl2/utilities/tipi_ext.h"
 #include "print/messaging.h"
 
 /** \brief Helps relaying messages printed through the mcrl2_basic::print */
@@ -21,20 +21,20 @@ namespace mcrl2 {
         private:
    
           /* The communicator object to use */
-          sip::tool::communicator& tc;
+          tipi::tool::communicator& tc;
    
         public:
    
-          printer_helper(sip::tool::communicator& t) : tc(t) {
+          printer_helper(tipi::tool::communicator& t) : tc(t) {
           }
       };
   
-      void initialise(sip::tool::communicator& t);
-      void finalise(sip::tool::communicator& t);
+      void initialise(tipi::tool::communicator& t);
+      void finalise(tipi::tool::communicator& t);
   
       /**
        * \brief A convenient interface for tool developers to make use of the
-       * functionality provided by the sip tool-side library.
+       * functionality provided by the tipi tool-side library.
        *
        * \note this interface is focussed on tools in the mCRL2 toolset most
        * notably the gs message layer relay mechanism presented above is activated.
@@ -49,7 +49,7 @@ namespace mcrl2 {
         protected:
   
           /** \brief communicator object through which all communication with SQuADT will take place */
-          sip::tool::communicator m_communicator;
+          tipi::tool::communicator m_communicator;
   
         protected:
   
@@ -63,7 +63,7 @@ namespace mcrl2 {
           void send_error(std::string const&) const;
   
           /** \brief sends a layout for the tool display */
-          void send_display_layout(std::auto_ptr < sip::layout::manager >&);
+          void send_display_layout(std::auto_ptr < tipi::layout::manager >&);
   
           /** \brief sends a clear display layout signal */
           void send_clear_display();
@@ -77,16 +77,16 @@ namespace mcrl2 {
           virtual void initialise();
   
           /** \brief configures tool capabilities */
-          virtual void set_capabilities(sip::tool::capabilities&) const = 0;
+          virtual void set_capabilities(tipi::tool::capabilities&) const = 0;
   
           /** \brief queries the user via SQuADT if needed to obtain configuration information */
-          virtual void user_interactive_configuration(sip::configuration&) = 0;
+          virtual void user_interactive_configuration(tipi::configuration&) = 0;
   
           /** \brief check an existing configuration object to see if it is usable */
-          virtual bool check_configuration(sip::configuration const&) const = 0;
+          virtual bool check_configuration(tipi::configuration const&) const = 0;
   
           /** \brief performs the task specified by a configuration */
-          virtual bool perform_task(sip::configuration&) = 0;
+          virtual bool perform_task(tipi::configuration&) = 0;
   
           /** \brief finalisation after termination signal has been received */
           virtual void finalise();
@@ -147,7 +147,7 @@ namespace mcrl2 {
       }
   
       /* Standard type for input validation */
-      extern boost::shared_ptr < sip::datatype::enumeration > rewrite_strategy_enumeration;
+      extern boost::shared_ptr < tipi::datatype::enumeration > rewrite_strategy_enumeration;
   
       // Helper function for unsigned long to string conversion
       inline std::ostream& operator<<(std::ostream& o, unsigned long const& t) {

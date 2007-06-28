@@ -15,7 +15,7 @@
 #include "executor.tcc"
 #include "processor.tcc"
 
-#include <sip/utility/generic_visitor.tcc>
+#include <tipi/utility/generic_visitor.tcc>
 
 namespace squadt {
 
@@ -249,10 +249,10 @@ namespace utility {
     }
 
     /* The last received configuration from the tool */
-    boost::shared_ptr < sip::configuration > c = p.current_monitor->get_configuration();
+    boost::shared_ptr < tipi::configuration > c = p.current_monitor->get_configuration();
 
     if (c.get() != 0) {
-      sip::visitors::store(*c, out);
+      tipi::visitors::store(*c, out);
     }
 
     /* The inputs */

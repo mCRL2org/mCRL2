@@ -75,7 +75,7 @@ namespace squadt {
           void on_tool_selector_item_collapsed(wxTreeEvent& e);
 
           /** \brief Select a tool by its name */
-          void select_tool(sip::tool::capabilities::input_combination const*, std::string const&);
+          void select_tool(tipi::tool::capabilities::input_combination const*, std::string const&);
 
         public:
 

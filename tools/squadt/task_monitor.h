@@ -5,8 +5,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <sip/controller.h>
-#include <sip/common.h>
+#include <tipi/controller.h>
+#include <tipi/common.h>
 
 #include "process.h"
 
@@ -21,7 +21,7 @@ namespace squadt {
     /**
      * \brief Base class for task_monitors that provide tool execution via a tool manager
      **/
-    class task_monitor : public sip::controller::communicator {
+    class task_monitor : public tipi::controller::communicator {
       friend class processor;
       friend class process_impl;
       friend class executor_impl;
@@ -44,7 +44,7 @@ namespace squadt {
         bool await_completion();
 
         /** \brief Signals that a new connection has been established */
-        void signal_connection(sip::message::end_point);
+        void signal_connection(tipi::message::end_point);
 
         /** \brief Checks the process status and removes */
         virtual void signal_change(const execution::process::status);

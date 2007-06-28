@@ -4,9 +4,9 @@
 #include <string>
 #include <iostream>
 
-#include <sip/tool/capabilities.h>
+#include <tipi/tool/capabilities.h>
 
-#include <sip/utility/generic_visitor.h>
+#include <tipi/utility/generic_visitor.h>
 
 #include "build_system.h"
 
@@ -30,7 +30,7 @@ namespace squadt {
       typedef boost::shared_ptr < tool >             sptr;
 
       /** \brief Convenience type alias */
-      typedef sip::tool::capabilities::input_combination input_combination;
+      typedef tipi::tool::capabilities::input_combination input_combination;
 
     private:
 
@@ -41,17 +41,17 @@ namespace squadt {
       std::string                                    m_location;
 
       /** \brief Stores the tool capabilities object obtained through protocol implementation */
-      boost::shared_ptr < sip::tool::capabilities >  m_capabilities;
+      boost::shared_ptr < tipi::tool::capabilities >  m_capabilities;
 
     private:
 
       /** \brief The default capabilities descriptor; one that is empty */
-      static const boost::shared_ptr < sip::tool::capabilities > no_capabilities;
+      static const boost::shared_ptr < tipi::tool::capabilities > no_capabilities;
 
     private:
 
       /** \brief Constructor */
-      inline tool(std::string, std::string, boost::shared_ptr < sip::tool::capabilities > = tool::no_capabilities);
+      inline tool(std::string, std::string, boost::shared_ptr < tipi::tool::capabilities > = tool::no_capabilities);
 
       /** \brief Copy constructor */
       inline tool(tool const&);
@@ -62,10 +62,10 @@ namespace squadt {
     public:
 
       /** \brief Set capabilities object for this tool */
-      inline void set_capabilities(boost::shared_ptr < sip::tool::capabilities >);
+      inline void set_capabilities(boost::shared_ptr < tipi::tool::capabilities >);
 
       /** \brief Get capabilities object for this tool */
-      inline boost::shared_ptr < sip::tool::capabilities > get_capabilities() const;
+      inline boost::shared_ptr < tipi::tool::capabilities > get_capabilities() const;
 
       /** \brief Get the location to for this tool */
       inline std::string get_location() const;
@@ -82,7 +82,7 @@ namespace squadt {
    * \param[in] n a name for the tool
    * \param[in] c a tool::capabilities object for the tool
    **/
-  inline tool::tool(std::string n, std::string l, boost::shared_ptr < sip::tool::capabilities > c) : m_name(n), m_location(l), m_capabilities(c) {
+  inline tool::tool(std::string n, std::string l, boost::shared_ptr < tipi::tool::capabilities > c) : m_name(n), m_location(l), m_capabilities(c) {
   }
 
   inline tool::tool(tool const& t) : m_name(t.m_name), m_location(t.m_location), m_capabilities(t.m_capabilities) {
@@ -94,13 +94,13 @@ namespace squadt {
   /**
    * \param[in] c a shared pointer to a capabilities object
    **/
-  inline void tool::set_capabilities(boost::shared_ptr < sip::tool::capabilities > c) {
+  inline void tool::set_capabilities(boost::shared_ptr < tipi::tool::capabilities > c) {
     if (c.get() != 0) {
       m_capabilities = c;
     }
   }
 
-  inline boost::shared_ptr < sip::tool::capabilities > tool::get_capabilities() const {
+  inline boost::shared_ptr < tipi::tool::capabilities > tool::get_capabilities() const {
     return (m_capabilities);
   }
 

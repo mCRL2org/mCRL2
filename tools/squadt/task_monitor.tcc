@@ -1,12 +1,12 @@
 #include "task_monitor.h"
 
-#include "sip/detail/controller.tcc"
+#include "tipi/detail/controller.tcc"
 
 namespace squadt {
   namespace execution {
     /// \cond INTERNAL_DOCS
 
-    class task_monitor_impl : public sip::controller::communicator_impl {
+    class task_monitor_impl : public tipi::controller::communicator_impl {
       friend class task_monitor;
 
       template < typename S, typename T >
@@ -71,10 +71,10 @@ namespace squadt {
         inline bool await_completion();
 
         /** \brief Helper method used for unblocking the await_completion member */
-        void handle_task_completion(boost::shared_ptr < sip::message > const&, bool&, bool&);
+        void handle_task_completion(boost::shared_ptr < tipi::message > const&, bool&, bool&);
 
         /** \brief Signals that a new connection has been established */
-        inline void signal_connection(boost::shared_ptr < task_monitor_impl >&, sip::message::end_point);
+        inline void signal_connection(boost::shared_ptr < task_monitor_impl >&, tipi::message::end_point);
 
         /** \brief Checks the process status and removes */
         inline void signal_change(boost::shared_ptr < task_monitor_impl >&, const execution::process::status);
@@ -110,7 +110,7 @@ namespace squadt {
         inline void shutdown();
     };
 
-    task_monitor_impl::task_monitor_impl() : sip::controller::communicator_impl(), connected(false), done(false) {
+    task_monitor_impl::task_monitor_impl() : tipi::controller::communicator_impl(), connected(false), done(false) {
     }
 
     /**
@@ -176,7 +176,7 @@ namespace squadt {
     }
 
     // Declaring this function inline produces unexpected results (at least on Linux with gcc 4)
-    void task_monitor_impl::handle_task_completion(boost::shared_ptr < sip::message > const& m, bool& result, bool& changed) {
+    void task_monitor_impl::handle_task_completion(boost::shared_ptr < tipi::message > const& m, bool& result, bool& changed) {
       changed = true;
 
       result = m.get() && !m->is_empty();
@@ -196,7 +196,7 @@ namespace squadt {
  
       boost::mutex::scoped_lock l(register_lock);
 
-      add_handler(sip::message_task_done, boost::bind(&task_monitor_impl::handle_task_completion, this, _1, boost::ref(result), boost::ref(changed)));
+      add_handler(tipi::message_task_done, boost::bind(&task_monitor_impl::handle_task_completion, this, _1, boost::ref(result), boost::ref(changed)));
 
       while (!changed) {
         /* Other side has not connected and the process has not been registered as terminated */
@@ -209,7 +209,7 @@ namespace squadt {
     /**
      * \param[in] m a shared pointer to the current object
      **/
-    inline void task_monitor_impl::signal_connection(boost::shared_ptr < task_monitor_impl >& m, sip::message::end_point) {
+    inline void task_monitor_impl::signal_connection(boost::shared_ptr < task_monitor_impl >& m, tipi::message::end_point) {
       boost::mutex::scoped_lock l(register_lock);
  
       connected = true;
@@ -343,14 +343,14 @@ namespace squadt {
     inline void task_monitor_impl::disconnect() {
       if (associated_process.get() && associated_process->get_status() == process::running && connected) {
         // request termination
-        send_message(sip::message_termination);
+        send_message(tipi::message_termination);
 
         logger->log(1, boost::str(boost::format("termination request sent to %s pid(%u)\n")
                   % associated_process->get_executable_name() % associated_process->get_identifier()));
 
-        await_message(sip::message_termination, 1);
+        await_message(tipi::message_termination, 1);
 
-        sip::controller::communicator_impl::disconnect();
+        tipi::controller::communicator_impl::disconnect();
       }
 
       connected = false;

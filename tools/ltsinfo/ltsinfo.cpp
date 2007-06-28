@@ -26,35 +26,35 @@ class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
   public:
 
     /** \brief configures tool capabilities */
-    void set_capabilities(sip::tool::capabilities&) const;
+    void set_capabilities(tipi::tool::capabilities&) const;
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(sip::configuration&);
+    void user_interactive_configuration(tipi::configuration&);
 
     /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(sip::configuration const&) const;
+    bool check_configuration(tipi::configuration const&) const;
 
     /** \brief performs the task specified by a configuration */
-    bool perform_task(sip::configuration&);
+    bool perform_task(tipi::configuration&);
 };
 
 const char* squadt_interactor::lts_file_for_input  = "lts_in";
 
-void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(lts_file_for_input, sip::mime_type("aut", sip::mime_type::text), sip::tool::category::reporting);
+void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
+  c.add_input_combination(lts_file_for_input, tipi::mime_type("aut", tipi::mime_type::text), tipi::tool::category::reporting);
 #ifdef MCRL2_BCG
-  c.add_input_combination(lts_file_for_input, sip::mime_type("bcg", sip::mime_type::application), sip::tool::category::reporting);
+  c.add_input_combination(lts_file_for_input, tipi::mime_type("bcg", tipi::mime_type::application), tipi::tool::category::reporting);
 #endif
-  c.add_input_combination(lts_file_for_input, sip::mime_type("svc", sip::mime_type::application), sip::tool::category::reporting);
-  c.add_input_combination(lts_file_for_input, sip::mime_type("fsm", sip::mime_type::text), sip::tool::category::reporting);
-  c.add_input_combination(lts_file_for_input, sip::mime_type("svc+mcrl2", sip::mime_type::application), sip::tool::category::reporting);
-  c.add_input_combination(lts_file_for_input, sip::mime_type("svc+mcrl", sip::mime_type::application), sip::tool::category::reporting);
+  c.add_input_combination(lts_file_for_input, tipi::mime_type("svc", tipi::mime_type::application), tipi::tool::category::reporting);
+  c.add_input_combination(lts_file_for_input, tipi::mime_type("fsm", tipi::mime_type::text), tipi::tool::category::reporting);
+  c.add_input_combination(lts_file_for_input, tipi::mime_type("svc+mcrl2", tipi::mime_type::application), tipi::tool::category::reporting);
+  c.add_input_combination(lts_file_for_input, tipi::mime_type("svc+mcrl", tipi::mime_type::application), tipi::tool::category::reporting);
 }
 
-void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
+void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 }
 
-bool squadt_interactor::check_configuration(sip::configuration const& c) const {
+bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
   bool result = true;
 
   result &= c.input_exists(lts_file_for_input);
@@ -62,13 +62,13 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   return (result);
 }
 
-bool squadt_interactor::perform_task(sip::configuration& c) {
+bool squadt_interactor::perform_task(tipi::configuration& c) {
   using namespace mcrl2::lts;
-  using namespace sip;
-  using namespace sip::layout;
-  using namespace sip::layout::elements;
+  using namespace tipi;
+  using namespace tipi::layout;
+  using namespace tipi::layout::elements;
 
-  sip::object& input_object = c.get_input(lts_file_for_input);
+  tipi::object& input_object = c.get_input(lts_file_for_input);
 
   /* Create and add the top layout manager */
   layout::manager::aptr top(layout::vertical_box::create());

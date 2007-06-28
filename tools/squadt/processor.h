@@ -8,7 +8,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/md5.hpp>
 
-#include "sip/utility/indirect_iterator.h"
+#include "tipi/utility/indirect_iterator.h"
 #include "task_monitor.h"
 #include "tool.h"
 
@@ -52,7 +52,7 @@ namespace squadt {
       typedef boost::weak_ptr < processor >                                 wptr;
 
       /** \brief Convenient type alias */
-      typedef sip::configuration::parameter_identifier                      parameter_identifier;
+      typedef tipi::configuration::parameter_identifier                      parameter_identifier;
 
       /** \brief Type to hold information about output objects */
       struct object_descriptor {
@@ -75,13 +75,13 @@ namespace squadt {
         processor::wptr                          generator;      ///< The process responsible for generating this object
         build_system::storage_format             mime_type;      ///< The used storage format
         std::string                              location;       ///< The location of the object
-        sip::configuration::parameter_identifier identifier;     ///< The identifier of the associated output object in a configuration
+        tipi::configuration::parameter_identifier identifier;     ///< The identifier of the associated output object in a configuration
         boost::md5::digest_type                  checksum;       ///< The digest for the completed object
         std::time_t                              timestamp;      ///< The last time the file was modified just before the last checksum was computed
         t_status                                 status;         ///< The status of this object
 
         /** \brief Construction with a mime type */
-        object_descriptor(sip::mime_type const&);
+        object_descriptor(tipi::mime_type const&);
 
         /** \brief Whether or not the generator points to an existing object */
         bool generator_exists();
@@ -217,7 +217,7 @@ namespace squadt {
                 object_descriptor::t_status const& = object_descriptor::reproducible_nonexistent);
  
       /** \brief Add an output object */
-      void replace_output(object_descriptor::sptr, sip::object const&,
+      void replace_output(object_descriptor::sptr, tipi::object const&,
                 object_descriptor::t_status const& = object_descriptor::reproducible_up_to_date);
 
       /** \brief The number of input objects of this processor */
@@ -250,13 +250,13 @@ namespace squadt {
       typedef boost::function < void () >                                                    status_callback_function;
 
       /** \brief Type for functions that is used to handle incoming layout state changes */
-      typedef boost::function < void (sip::layout::tool_display::sptr) >                     display_layout_callback_function;
+      typedef boost::function < void (tipi::layout::tool_display::sptr) >                     display_layout_callback_function;
 
       /** \brief Type for functions that is used to handle incoming (G)UI state changes */
-      typedef boost::function < void (sip::layout::tool_display::constant_elements const&) > display_update_callback_function;
+      typedef boost::function < void (tipi::layout::tool_display::constant_elements const&) > display_update_callback_function;
 
       /** \brief Type for functions that is used to handle incoming layout state changes */
-      typedef boost::function < void (sip::report::sptr) >                                   status_message_callback_function;
+      typedef boost::function < void (tipi::report::sptr) >                                   status_message_callback_function;
 
       /** \brief Convenience type for hiding shared pointer implementation */
       typedef boost::shared_ptr < monitor >                                                  sptr;
@@ -286,16 +286,16 @@ namespace squadt {
       void signal_change(const execution::process::status);
 
       /** \brief Helper function for communication with a tool, starts a new thread with tool_configuration() */
-      void start_tool_configuration(processor::sptr const&, boost::shared_ptr < sip::configuration > const& c);
+      void start_tool_configuration(processor::sptr const&, boost::shared_ptr < tipi::configuration > const& c);
 
       /** \brief Helper function for communication with a tool, starts a new thread with tool_operation() */
-      void start_tool_operation(processor::sptr const&, boost::shared_ptr < sip::configuration > const&);
+      void start_tool_operation(processor::sptr const&, boost::shared_ptr < tipi::configuration > const&);
 
       /** \brief Actual tool configuration operation */
-      void tool_configuration(processor::sptr, boost::shared_ptr < sip::configuration > const&);
+      void tool_configuration(processor::sptr, boost::shared_ptr < tipi::configuration > const&);
 
       /** \brief Actual tool execution with a configuration */
-      void tool_operation(processor::sptr, boost::shared_ptr < sip::configuration > const&);
+      void tool_operation(processor::sptr, boost::shared_ptr < tipi::configuration > const&);
 
     public:
  
@@ -309,7 +309,7 @@ namespace squadt {
       void set_display_layout_handler(display_layout_callback_function);
 
       /** \brief Set the callback handler for display data changes */
-      void set_display_update_handler(sip::layout::tool_display::sptr, display_update_callback_function);
+      void set_display_update_handler(tipi::layout::tool_display::sptr, display_update_callback_function);
 
       /** \brief Set the callback handler for incoming status messages */
       void set_status_message_handler(status_message_callback_function);

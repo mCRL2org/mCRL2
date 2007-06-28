@@ -8,8 +8,8 @@
 #include <wx/event.h>
 #include <wx/textctrl.h>
 
-#include <sip/report.h>
-#include <sip/display.h>
+#include <tipi/report.h>
+#include <tipi/display.h>
 
 #include "../processor.h"
 
@@ -31,19 +31,19 @@ namespace squadt {
 
         private:
      
-          /** \brief Associates a sip layout element with a wxWidgets control */
-          typedef std::map < wxObject*, sip::layout::element const* > element_for_window_map;
+          /** \brief Associates a tipi layout element with a wxWidgets control */
+          typedef std::map < wxObject*, tipi::layout::element const* > element_for_window_map;
      
         private:
      
           /** \brief Associated processor */
           boost::shared_ptr < processor::monitor >               monitor;
 
-          /** \brief Associates a sip layout element with a wxWidgets control */
+          /** \brief Associates a tipi layout element with a wxWidgets control */
           element_for_window_map                                 element_for_window;
      
           /** \brief Delegate to actually send a display update */
-          boost::function < void (sip::layout::element const&) > send_display_update;
+          boost::function < void (tipi::layout::element const&) > send_display_update;
 
         private:
      
@@ -67,11 +67,11 @@ namespace squadt {
           /** \brief Clears the element_for_window map */
           inline void clear();
 
-          /** \brief Associate a sip layout element pointer with a wxWindow pointer */
-          inline void associate(wxObject*, sip::layout::element const*);
+          /** \brief Associate a tipi layout element pointer with a wxWindow pointer */
+          inline void associate(wxObject*, tipi::layout::element const*);
 
           /** \brief Update the (G)UI state for a specific element */
-          void update(sip::layout::mediator* m, sip::layout::element const*);
+          void update(tipi::layout::mediator* m, tipi::layout::element const*);
 
           /** \brief Gets the monitor for the associated process */
           boost::shared_ptr < processor::monitor >& get_monitor();
@@ -87,7 +87,7 @@ namespace squadt {
         element_for_window.clear();
       }
 
-      inline void state_change_handler::associate(wxObject* o, sip::layout::element const* e) {
+      inline void state_change_handler::associate(wxObject* o, tipi::layout::element const* e) {
         element_for_window[o] = e;
       }
 
@@ -113,7 +113,7 @@ namespace squadt {
         detail::state_change_handler    event_handler;
 
         /** \brief Abstract description of the layout of this panel */
-        sip::layout::tool_display::sptr current_layout;
+        tipi::layout::tool_display::sptr current_layout;
 
         /** \brief Sizer that contains the content part */
         wxSizer*                        content;
@@ -130,22 +130,22 @@ namespace squadt {
         void build();
 
         /** \brief Builds the specified layout within this window */
-        void instantiate(boost::weak_ptr < sip::layout::tool_display >, sip::layout::tool_display::sptr l);
+        void instantiate(boost::weak_ptr < tipi::layout::tool_display >, tipi::layout::tool_display::sptr l);
 
         /** \brief Update the (G)UI state for a list of elements */
-        void update(boost::weak_ptr < sip::layout::tool_display >, std::vector < sip::layout::element const* >);
+        void update(boost::weak_ptr < tipi::layout::tool_display >, std::vector < tipi::layout::element const* >);
 
         /** \brief Update the log with incoming status messages */
-        void update_log(boost::weak_ptr < sip::layout::tool_display >, sip::report::sptr l);
+        void update_log(boost::weak_ptr < tipi::layout::tool_display >, tipi::report::sptr l);
 
         /** \brief Set a new layout description */
-        void schedule_layout_change(sip::layout::tool_display::sptr);
+        void schedule_layout_change(tipi::layout::tool_display::sptr);
 
         /** \brief Set a new layout description */
-        void schedule_layout_update(std::vector < sip::layout::element const* > const&);
+        void schedule_layout_update(std::vector < tipi::layout::element const* > const&);
 
         /** \brief Set a new layout description */
-        void schedule_log_update(sip::report::sptr);
+        void schedule_log_update(tipi::report::sptr);
 
         /** \brief Handler for panel control button events */
         void on_panel_button_clicked(wxCommandEvent&);

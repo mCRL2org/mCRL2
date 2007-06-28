@@ -39,9 +39,9 @@ GLCanvas::GLCanvas(
     // IMPORTANT can only set style once, otherwise its overridden
     // I.e. when a new style is set somewhere else, 
     //      arrow keys are NO LONGER intercepted
-    this->SetWindowStyle( wxWANTS_CHARS /*| wxSUNKEN_BORDER*/ );
+    SetWindowStyle( wxWANTS_CHARS /*| wxSUNKEN_BORDER*/ );
 
-	wxToolTip::Enable( true );
+    wxToolTip::Enable( true );
     wxToolTip::SetDelay( 0 );
     
     scaleFactor  = 1.0;
@@ -271,7 +271,7 @@ double GLCanvas::getPixelSize()
     // get world sizes
     double widthWorld;
     double heightWorld;
-    this->getSize(
+    getSize(
         widthWorld,
         heightWorld );
 
@@ -289,11 +289,11 @@ void GLCanvas::getWorldCoords(
     double &worldY )
 // ---------------------------
 {
-    if ( this->IsShown() && 
-         this->GetParent()->IsShown() )
+    if ( IsShown() && 
+         GetParent()->IsShown() )
     {
         // this is current context
-        this->SetCurrent();
+        SetCurrent();
 
         GLint viewport[4];
         GLdouble modelviewMatrix[16];
@@ -329,11 +329,11 @@ void GLCanvas::clear()
 // been assigned to the canvas.
 // ------------------------------------------------------------------
 {
-    if ( this->IsShown() && 
-         this->GetParent()->IsShown() )
+    if ( IsShown() && 
+         GetParent()->IsShown() )
     {
         // this is current context
-        this->SetCurrent();
+        SetCurrent();
 
         glClearColor( 1.0, 1.0, 1.0, 1.0 );
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -369,7 +369,7 @@ void GLCanvas::display()
 {
     // get current size of canvas
     int width, height;
-    this->GetClientSize( &width, &height );
+    GetClientSize( &width, &height );
 
     // set up viewing volume
     glMatrixMode( GL_PROJECTION );
@@ -396,7 +396,7 @@ void GLCanvas::display()
 
     // swap buffers
     glFinish();
-    this->SwapBuffers();
+    SwapBuffers();
 
     // check for errors
     int error = glGetError();
@@ -435,15 +435,13 @@ void GLCanvas::onEvtPaint( wxPaintEvent &event )
 // be repainted and redraw.
 // ------------------------------------------------------------------
 {
-    if ( this->IsShown() && 
-         this->GetParent()->IsShown() )
-    {
+    if ( IsShown() ) {
         // this is current context
-        this->SetCurrent();
+        SetCurrent();
         wxPaintDC dc( this );
         display();
 
-		SetToolTip( tooltip );
+        SetToolTip( tooltip );
     }
 }
 
@@ -456,27 +454,24 @@ void GLCanvas::onEvtSize( wxSizeEvent &event )
 // is resized.
 // ------------------------------------------------------------------
 {
-    // set this as current context
-    if ( this->IsShown() && 
-         this->GetParent()->IsShown() )
-    {
-        // update visualizers using this canvas
-        mediator->handleSizeEvent( this );
+  // set this as current context
+  if (GetParent()->IsShown() ) {
+    // update visualizers using this canvas
+    mediator->handleSizeEvent( this );
 
-        // call to GetContext() necessary for some Linux distributions
-        if ( this->GetContext() )
-        {
-            // get size of canvas
-            int width, height;
-            this->SetCurrent();
-        
-            // set up viewport to match canvas size
-            this->GetClientSize( &width, &height );
-            glMatrixMode( GL_MODELVIEW );
-            glLoadIdentity();
-            glViewport( 0, 0, width, height );
-        }
+    // call to GetContext() necessary for some Linux distributions
+    if ( GetContext() ) {
+        // get size of canvas
+        int width, height;
+        SetCurrent();
+    
+        // set up viewport to match canvas size
+        GetClientSize( &width, &height );
+        glMatrixMode( GL_MODELVIEW );
+        glLoadIdentity();
+        glViewport( 0, 0, width, height );
     }
+  }
 }
 
 
@@ -494,12 +489,12 @@ void GLCanvas::OnEraseBackground( wxEraseEvent &event )
 void GLCanvas::onLftMouseDown( wxMouseEvent &event )
 // -------------------------------------------------
 {
-    this->SetCurrent();
+    SetCurrent();
     mediator->handleMouseLftDownEvent( 
         this, 
         event.GetX(), 
         event.GetY() );
-    this->Refresh();
+    Refresh();
 
     event.Skip();
 }
@@ -509,12 +504,12 @@ void GLCanvas::onLftMouseDown( wxMouseEvent &event )
 void GLCanvas::onLftMouseUp( wxMouseEvent &event )
 // -----------------------------------------------
 {
-    this->SetCurrent();
+    SetCurrent();
 	mediator->handleMouseLftUpEvent(
         this,
         event.GetX(),
         event.GetY() );
-	this->Refresh();
+	Refresh();
 
     event.Skip();
 }
@@ -524,12 +519,12 @@ void GLCanvas::onLftMouseUp( wxMouseEvent &event )
 void GLCanvas::onLftMouseDClick( wxMouseEvent &event )
 // ---------------------------------------------------
 {
-    this->SetCurrent();
+    SetCurrent();
     mediator->handleMouseLftDClickEvent(
         this,
         event.GetX(),
         event.GetY() );
-    this->Refresh();
+    Refresh();
 }
 
 
@@ -537,12 +532,12 @@ void GLCanvas::onLftMouseDClick( wxMouseEvent &event )
 void GLCanvas::onRgtMouseDown( wxMouseEvent &event )
 // -------------------------------------------------
 {
-    this->SetCurrent();
+    SetCurrent();
     mediator->handleMouseRgtDownEvent(
         this,
         event.GetX(),
         event.GetY() );
-    this->Refresh();
+    Refresh();
 }
 
 
@@ -550,12 +545,12 @@ void GLCanvas::onRgtMouseDown( wxMouseEvent &event )
 void GLCanvas::onRgtMouseUp( wxMouseEvent &event )
 // -----------------------------------------------
 {
-    this->SetCurrent();
+    SetCurrent();
 	mediator->handleMouseRgtUpEvent(
         this,
         event.GetX(),
         event.GetY() );
-	this->Refresh();
+	Refresh();
 }
 
 
@@ -563,12 +558,12 @@ void GLCanvas::onRgtMouseUp( wxMouseEvent &event )
 void GLCanvas::onRgtMouseDClick( wxMouseEvent &event )
 // ---------------------------------------------------
 {
-    this->SetCurrent();
+    SetCurrent();
     mediator->handleMouseRgtDClickEvent(
         this,
         event.GetX(),
         event.GetY() );
-    this->Refresh();
+    Refresh();
 }
 
 
@@ -578,13 +573,13 @@ void GLCanvas::onMouseMotion( wxMouseEvent &event )
 {
     if ( handleMouseMotion == true )
     {
-        this->SetCurrent();
+        SetCurrent();
         mediator->handleMouseMotionEvent(
             this,
             event.GetX(),
             event.GetY() );
-        this->Update();
-        this->Refresh();
+        Update();
+        Refresh();
     }
     else
         event.Skip();
@@ -603,7 +598,7 @@ void GLCanvas::onMouseWheel( wxMouseEvent &event )
             this,
             event.GetX(),
             event.GetY() );
-        this->Refresh();
+        Refresh();
     }
     else
     {
@@ -611,7 +606,7 @@ void GLCanvas::onMouseWheel( wxMouseEvent &event )
             this,
             event.GetX(),
             event.GetY() );
-        this->Refresh();
+        Refresh();
     }
 }
 
@@ -624,9 +619,9 @@ void GLCanvas:: onEnterMouse( wxMouseEvent &event )
 // events to be caught and handled.
 // -------------------------------------------------------------------
 {
-    this->SetFocus();
+    SetFocus();
     mediator->handleMouseEnterEvent( this );
-    this->Refresh();
+    Refresh();
 }
 
 
@@ -638,7 +633,7 @@ void GLCanvas:: onLeaveMouse( wxMouseEvent &event )
 // -------------------------------------------------------------------
 {
 	mediator->handleMouseLeaveEvent( this );
-    this->Refresh();
+    Refresh();
 }
 
 
@@ -651,13 +646,13 @@ void GLCanvas::onKeyDown( wxKeyEvent &event )
 // the focus to this canvas.
 // ------------------------------------------------------------------
 {
-	this->SetCurrent();
+	SetCurrent();
 	mediator->handleKeyDownEvent(
         this,
         event.GetKeyCode() );
 	event.Skip();
 	
-	this->Refresh();
+	Refresh();
 }
 
 
@@ -670,12 +665,10 @@ void GLCanvas::onKeyUp( wxKeyEvent &event )
 // the focus to this canvas.
 // ------------------------------------------------------------------
 {
-	mediator->handleKeyUpEvent(
-        this,
-        event.GetKeyCode() );
-	event.Skip();
+    mediator->handleKeyUpEvent(this,event.GetKeyCode() );
+    event.Skip();
 
-    this->Refresh();
+    Refresh();
 }
 
 

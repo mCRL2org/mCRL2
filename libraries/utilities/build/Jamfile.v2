@@ -19,11 +19,11 @@ obj colorbutton.o   : colorbutton.cpp   : <cxxflags>"$(WX_CPPFLAGS)" <include>..
 alias squadt_interface.main
       : squadt_interface.cpp
       : <threading>multi
-        <use>/libraries/sip//tool_interface
+        <use>/libraries/tipi//tool_interface
         <use>/libraries/mcrl2_basic//headers
         <define>ENABLE_SQUADT_CONNECTIVITY
       :
-      : <library>/libraries/sip//tool_interface
+      : <library>/libraries/tipi//tool_interface
         <define>ENABLE_SQUADT_CONNECTIVITY
       ;
 

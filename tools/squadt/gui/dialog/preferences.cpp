@@ -14,8 +14,8 @@
 #include <wx/slider.h>
 #include <wx/sizer.h>
 
-#include <sip/controller.h>
-#include <sip/utility/logger.h>
+#include <tipi/controller.h>
+#include <tipi/utility/logger.h>
 
 // Compatibility with wx 2.6.*
 #if (wxMAJOR_VERSION <= 2) && (wxMINOR_VERSION < 8)
@@ -250,7 +250,7 @@ namespace squadt {
     }
 
     void debug_preferences::filter_level_changed(wxCommandEvent&) {
-      sip::controller::communicator::get_standard_logger()->
+      tipi::controller::communicator::get_standard_logger()->
                      set_filter_level(static_cast < utility::logger::log_level > (filter_level->GetValue()));
     }
 
@@ -262,7 +262,7 @@ namespace squadt {
       current_sizer->AddStretchSpacer();
       current_sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Filter level for diagnostic messages and warnings")), 0, wxEXPAND|wxLEFT|wxRIGHT, 4);
 
-      filter_level = new wxSlider(this, wxID_ANY, std::max(sip::controller::communicator::get_standard_logger()->get_filter_level(),
+      filter_level = new wxSlider(this, wxID_ANY, std::max(tipi::controller::communicator::get_standard_logger()->get_filter_level(),
                                   static_cast < utility::logger::log_level > (1)), 1, 5, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS|wxSL_BOTTOM);
 
       Connect(wxEVT_SCROLL_CHANGED, wxCommandEventHandler(debug_preferences::filter_level_changed));

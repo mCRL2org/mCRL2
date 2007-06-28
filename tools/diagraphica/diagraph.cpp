@@ -12,7 +12,7 @@
   #include <crtdbg.h>
 #endif
 
-std::string fsm_file_argument;
+std::string fsm_file_argument("");
 
 // -- Squadt protocol interface -------------------------------------
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -30,29 +30,29 @@ std::string fsm_file_argument;
             // Constructor
             squadt_interactor(mcrl2::utilities::squadt::entry_wrapper&);
             // Configures tool capabilities.
-            void set_capabilities(sip::tool::capabilities&) const;
+            void set_capabilities(tipi::tool::capabilities&) const;
             // Queries the user via SQuADt if needed to obtain configuration information
-            void user_interactive_configuration(sip::configuration&);
+            void user_interactive_configuration(tipi::configuration&);
             // Check an existing configuration object to see if it is usable
-            bool check_configuration(sip::configuration const&) const;
+            bool check_configuration(tipi::configuration const&) const;
             // Performs the task specified by a configuration
-            bool perform_task(sip::configuration&);
+            bool perform_task(tipi::configuration&);
     };
 
     const char* squadt_interactor::fsm_file_for_input = "fsm_in";
     squadt_interactor::squadt_interactor(mcrl2::utilities::squadt::entry_wrapper& w): starter(w) 
     {}
 
-    void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const 
+    void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const 
     {
         /* The tool has only one main input combination it takes an LPS and then behaves as a reporter */
-        c.add_input_combination(fsm_file_for_input, sip::mime_type("fsm", sip::mime_type::text), sip::tool::category::visualisation);
+        c.add_input_combination(fsm_file_for_input, tipi::mime_type("fsm", tipi::mime_type::text), tipi::tool::category::visualisation);
     }
 
-    void squadt_interactor::user_interactive_configuration(sip::configuration& c)
+    void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
     {}
 
-    bool squadt_interactor::check_configuration(sip::configuration const& c) const 
+    bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
     {
         bool valid = c.input_exists(fsm_file_for_input);
         if (!valid) 
@@ -62,7 +62,7 @@ std::string fsm_file_argument;
         return valid;
     }
 
-    bool squadt_interactor::perform_task(sip::configuration& c)
+    bool squadt_interactor::perform_task(tipi::configuration& c)
     {
         fsm_file_argument = c.get_input(fsm_file_for_input).get_location();
         return starter.perform_entry();
@@ -175,10 +175,9 @@ bool parse_command_line(
         //gsSetDebugMsg();
     }
 
-    if ( cmdln.GetParamCount() > 0 ) 
-    {
-        fsm_file_argument = std::string(cmdln.GetParam(0).fn_str());
-	}
+    if ( cmdln.GetParamCount() > 0 && !cmdln.GetParam(0).IsEmpty()) {
+      fsm_file_argument = std::string(cmdln.GetParam(0).fn_str());
+    }
 
     return (true);
 }
@@ -222,6 +221,8 @@ bool DiaGraph::OnInit()
         }
     #endif
 
+    std::string fsm_file_argument;
+
     // command line
     if (!parse_command_line(argc, argv, fsm_file_argument)) 
     {
@@ -232,9 +233,9 @@ bool DiaGraph::OnInit()
     initColleagues();
     critSect = false;
    
-    if (!fsm_file_argument.empty()){
-      openFile(fsm_file_argument);
-    }; 
+    if (!fsm_file_argument.empty()) {
+//      openFile(fsm_file_argument);
+    }
 
     // start event loop
     return true;

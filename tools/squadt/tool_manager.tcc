@@ -8,7 +8,7 @@
 namespace squadt {
   /// \cond INTERNAL_DOCS
 
-  class tool_manager_impl : public sip::controller::communicator, public utility::visitable {
+  class tool_manager_impl : public tipi::controller::communicator, public utility::visitable {
     friend class tool_manager;
     friend class processor_impl;
 
@@ -63,7 +63,7 @@ namespace squadt {
       void execute(execution::command const*, execution::task_monitor::sptr, bool);
 
       /** \brief This is the event handler for incoming identification messages */
-      void handle_relay_connection(sip::message_ptr const&);
+      void handle_relay_connection(tipi::message_ptr const&);
 
     public:
 

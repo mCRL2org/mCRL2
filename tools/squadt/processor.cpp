@@ -11,8 +11,8 @@
 #include <boost/format.hpp>
 #include <boost/foreach.hpp>
 
-#include <sip/controller.h>
-#include <sip/utility/logger.h>
+#include <tipi/controller.h>
+#include <tipi/utility/logger.h>
 
 #include "processor.tcc"
 #include "task_monitor.h"
@@ -58,11 +58,11 @@ namespace squadt {
   }
 
   /**
-   * \param[in] o a sip::object object that describes an output object
+   * \param[in] o a tipi::object object that describes an output object
    * \param[in] id the unique identifier for this object in the configuration
    * \param[in] s the status of the new object
    **/
-  void processor_impl::append_output(sip::object const& o, parameter_identifier const& id, object_descriptor::t_status const& s) {
+  void processor_impl::append_output(tipi::object const& o, parameter_identifier const& id, object_descriptor::t_status const& s) {
     object_descriptor::sptr p = object_descriptor::sptr(new object_descriptor(o.get_mime_type()));
 
     p->generator  = interface_object;
@@ -78,10 +78,10 @@ namespace squadt {
   /**
    * \param[in] p the object descriptor that should be replaced
    * \param[in] id the unique identifier for this object in the configuration
-   * \param[in] o a sip::object object that describes an output object
+   * \param[in] o a tipi::object object that describes an output object
    * \param[in] s the new status of the object
    **/
-  void processor_impl::replace_output(object_descriptor::sptr p, parameter_identifier const& id, sip::object const& o, object_descriptor::t_status const& s) {
+  void processor_impl::replace_output(object_descriptor::sptr p, parameter_identifier const& id, tipi::object const& o, object_descriptor::t_status const& s) {
     p->mime_type  = o.get_mime_type();
     p->location   = o.get_location();
     p->identifier = id;
@@ -94,7 +94,7 @@ namespace squadt {
   /**
    * \param[in] m the mime type of the object
    **/
-  processor::object_descriptor::object_descriptor(sip::mime_type const& m) : mime_type(m) {
+  processor::object_descriptor::object_descriptor(tipi::mime_type const& m) : mime_type(m) {
   }
 
   /**
@@ -246,16 +246,16 @@ namespace squadt {
     return (execution::process::stopped);
   }
 
-  void processor::monitor::tool_configuration(processor::sptr t, boost::shared_ptr < sip::configuration > const& c) {
+  void processor::monitor::tool_configuration(processor::sptr t, boost::shared_ptr < tipi::configuration > const& c) {
     assert(t.get() == &owner);
 
     /* collect set of output arguments of the existing configuration */
-    std::set < sip::object const* > old_outputs;
+    std::set < tipi::object const* > old_outputs;
 
-    sip::configuration::const_iterator_output_range ir(c->get_output_objects());
+    tipi::configuration::const_iterator_output_range ir(c->get_output_objects());
 
-    for (sip::configuration::const_iterator_output_range::const_iterator i = ir.begin(); i != ir.end(); ++i) {
-      old_outputs.insert(static_cast < sip::object const* > (&*i));
+    for (tipi::configuration::const_iterator_output_range::const_iterator i = ir.begin(); i != ir.end(); ++i) {
+      old_outputs.insert(static_cast < tipi::object const* > (&*i));
     }
 
     /* Wait until the tool has connected and identified itself */
@@ -266,7 +266,7 @@ namespace squadt {
       send_configuration(c);
 
       /* Wait until configuration is accepted, or the tool has terminated */
-      if (await_message(sip::message_configuration).get() != 0) {
+      if (await_message(tipi::message_configuration).get() != 0) {
         /* End tool execution */
         finish(true);
 
@@ -283,16 +283,16 @@ namespace squadt {
     }
   }
 
-  void processor::monitor::tool_operation(processor::sptr t, boost::shared_ptr < sip::configuration > const& c) {
+  void processor::monitor::tool_operation(processor::sptr t, boost::shared_ptr < tipi::configuration > const& c) {
     assert(t.get() == &owner);
 
     /* collect set of output arguments of the existing configuration */
-    std::set < sip::object const* > old_outputs;
+    std::set < tipi::object const* > old_outputs;
 
-    sip::configuration::const_iterator_output_range ir(c->get_output_objects());
+    tipi::configuration::const_iterator_output_range ir(c->get_output_objects());
 
-    for (sip::configuration::const_iterator_output_range::const_iterator i = ir.begin(); i != ir.end(); ++i) {
-      old_outputs.insert(static_cast < sip::object const* > (&*i));
+    for (tipi::configuration::const_iterator_output_range::const_iterator i = ir.begin(); i != ir.end(); ++i) {
+      old_outputs.insert(static_cast < tipi::object const* > (&*i));
     }
 
     /* Wait until the tool has connected and identified itself */
@@ -303,11 +303,11 @@ namespace squadt {
       send_configuration(c);
 
       /* Wait until configuration is accepted, or the tool has terminated */
-      if (await_message(sip::message_configuration).get() != 0) {
+      if (await_message(tipi::message_configuration).get() != 0) {
         send_start_signal();
 
         /* Do not let process status influence return status */
-        clear_handlers(sip::message_task_done);
+        clear_handlers(tipi::message_task_done);
 
         if (await_completion()) {
           /* Successful, set new status */
@@ -350,7 +350,7 @@ namespace squadt {
    * \param[in] d the tool display associated with this monitor
    * \param[in] h the function or functor that is invoked at layout change
    **/
-  void processor::monitor::set_display_update_handler(sip::layout::tool_display::sptr d, display_update_callback_function h) {
+  void processor::monitor::set_display_update_handler(tipi::layout::tool_display::sptr d, display_update_callback_function h) {
     /* Set the handler for incoming layout messages */
     activate_display_update_handler(d, h);
   }
@@ -390,11 +390,11 @@ namespace squadt {
     status_change_handler = h;
   }
 
-  void processor::monitor::start_tool_configuration(processor::sptr const& t, boost::shared_ptr < sip::configuration > const& c) {
+  void processor::monitor::start_tool_configuration(processor::sptr const& t, boost::shared_ptr < tipi::configuration > const& c) {
     boost::thread thread(boost::bind(&processor::monitor::tool_configuration, this, t, c));
   }
 
-  void processor::monitor::start_tool_operation(processor::sptr const& t, boost::shared_ptr < sip::configuration > const& c) {
+  void processor::monitor::start_tool_operation(processor::sptr const& t, boost::shared_ptr < tipi::configuration > const& c) {
     boost::thread thread(boost::bind(&processor::monitor::tool_operation, this, t, c));
   }
 
@@ -538,7 +538,7 @@ namespace squadt {
   void processor::reconfigure(std::string const& w) {
     assert(impl->interface_object.lock().get() == this);
 
-    impl->reconfigure(impl->interface_object.lock(), boost::shared_ptr < sip::configuration > (new sip::configuration(*impl->current_monitor->get_configuration())), w);
+    impl->reconfigure(impl->interface_object.lock(), boost::shared_ptr < tipi::configuration > (new tipi::configuration(*impl->current_monitor->get_configuration())), w);
   }
 
   /**

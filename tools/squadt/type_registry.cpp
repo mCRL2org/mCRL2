@@ -7,7 +7,7 @@
 #include <boost/regex.hpp>
 #include <boost/bind.hpp>
 
-#include <sip/mime_type.h>
+#include <tipi/mime_type.h>
 
 #include <wx/mimetype.h>
 
@@ -36,7 +36,7 @@ namespace squadt {
 
     for (tool_manager::tool_const_sequence::const_iterator t = tools.begin(); t != tools.end(); ++t) {
 
-      BOOST_FOREACH(sip::tool::capabilities::input_combination j, (*t)->get_capabilities()->get_input_combinations()) {
+      BOOST_FOREACH(tipi::tool::capabilities::input_combination j, (*t)->get_capabilities()->get_input_combinations()) {
         if (categories_for_format.find(j.m_mime_type) == categories_for_format.end()) {
           /* Format unknown, create new map */
           tools_for_category temporary;
@@ -57,7 +57,7 @@ namespace squadt {
   /**
    * @param f the format for which to execute the action a
    **/
-  type_registry::tool_sequence type_registry::tools_by_mime_type(sip::mime_type const& f) const {
+  type_registry::tool_sequence type_registry::tools_by_mime_type(tipi::mime_type const& f) const {
 
     type_registry::tool_sequence range;
 
@@ -69,7 +69,7 @@ namespace squadt {
       range = boost::make_iterator_range(p.begin(), p.end());
     }
     else {
-      i = categories_for_format.find(sip::mime_type(f.get_sub_type(), sip::mime_type::text));
+      i = categories_for_format.find(tipi::mime_type(f.get_sub_type(), tipi::mime_type::text));
 
       if (i != categories_for_format.end()) { // for unknown main type
         tools_for_category const& p((*i).second);
@@ -77,7 +77,7 @@ namespace squadt {
         range = boost::make_iterator_range(p.begin(), p.end());
       }
       else {
-        i = categories_for_format.find(sip::mime_type(f.get_sub_type(), sip::mime_type::application));
+        i = categories_for_format.find(tipi::mime_type(f.get_sub_type(), tipi::mime_type::application));
 
         if (i != categories_for_format.end()) { // for unknown main type
           tools_for_category const& p((*i).second);
@@ -136,7 +136,7 @@ namespace squadt {
     }
 
     BOOST_FOREACH(tool::sptr t, global_build_system.get_tool_manager()->get_tools()) {
-      BOOST_FOREACH(sip::tool::capabilities::output_combination j, t->get_capabilities()->get_output_combinations()) {
+      BOOST_FOREACH(tipi::tool::capabilities::output_combination j, t->get_capabilities()->get_output_combinations()) {
         formats.insert(j.m_mime_type);
       }
     }

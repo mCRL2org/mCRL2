@@ -9,10 +9,10 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/range/iterator_range.hpp>
 
-#include <sip/configuration.h>
-#include <sip/mime_type.h>
+#include <tipi/configuration.h>
+#include <tipi/mime_type.h>
 
-#include <sip/utility/generic_visitor.h>
+#include <tipi/utility/generic_visitor.h>
 
 #include "build_system.h"
 
@@ -22,7 +22,7 @@ namespace squadt {
     class command;
   }
 
-  using sip::mime_type;
+  using tipi::mime_type;
   using execution::command;
 
   /**
@@ -46,7 +46,7 @@ namespace squadt {
     public:
 
       /** \brief Tool category type */
-      typedef sip::tool::category                                           tool_category;
+      typedef tipi::tool::category                                           tool_category;
 
       /** \brief Alias for convenient reference of shared pointer implementation */
       typedef boost::shared_ptr < type_registry >                           sptr;

@@ -128,16 +128,16 @@ class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
     squadt_interactor();
 
     /** \brief configures tool capabilities */
-    void set_capabilities(sip::tool::capabilities&) const;
+    void set_capabilities(tipi::tool::capabilities&) const;
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(sip::configuration&);
+    void user_interactive_configuration(tipi::configuration&);
 
     /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(sip::configuration const&) const;
+    bool check_configuration(tipi::configuration const&) const;
 
     /** \brief performs the task specified by a configuration */
-    bool perform_task(sip::configuration&);
+    bool perform_task(tipi::configuration&);
 };
 
 const char* squadt_interactor::pnml_file_for_input   = "pnml_in";
@@ -146,23 +146,23 @@ const char* squadt_interactor::mcrl2_file_for_output = "mcrl2_out";
 squadt_interactor::squadt_interactor() {
 }
 
-void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(pnml_file_for_input, sip::mime_type("pnml", sip::mime_type::text), sip::tool::category::transformation);
+void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
+  c.add_input_combination(pnml_file_for_input, tipi::mime_type("pnml", tipi::mime_type::text), tipi::tool::category::transformation);
 }
 
-void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
+void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   /* set the squadt configuration to be sent back, such
    * that mcrl22lps can be restarted later with exactly
    * the same parameters
    */
   if (c.is_fresh()) {
     if (!c.output_exists(mcrl2_file_for_output)) {
-      c.add_output(mcrl2_file_for_output, sip::mime_type("mcrl2", sip::mime_type::text), c.get_output_name(".mcrl2"));
+      c.add_output(mcrl2_file_for_output, tipi::mime_type("mcrl2", tipi::mime_type::text), c.get_output_name(".mcrl2"));
     }
   }
 }
 
-bool squadt_interactor::check_configuration(sip::configuration const& c) const {
+bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
   bool result = true;
 
   result |= c.input_exists(pnml_file_for_input);
@@ -171,12 +171,12 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   return (result);
 }
 
-bool squadt_interactor::perform_task(sip::configuration& c) {
+bool squadt_interactor::perform_task(tipi::configuration& c) {
   using namespace boost;
-  using namespace sip;
-  using namespace sip::layout;
-  using namespace sip::datatype;
-  using namespace sip::layout::elements;
+  using namespace tipi;
+  using namespace tipi::layout;
+  using namespace tipi::datatype;
+  using namespace tipi::layout::elements;
 
   bool result = true;
 

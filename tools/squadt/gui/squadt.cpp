@@ -6,7 +6,7 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
-#include <sip/utility/print_logger.h>
+#include <tipi/utility/print_logger.h>
 
 #include "../settings_manager.h"
 #include "../tool_manager.h"
@@ -89,10 +89,10 @@ bool parse_command_line(int argc, wxChar** argv, boost::function < void (squadt:
         action = boost::bind(&squadt::GUI::main::project_open, _1, std::string(parser.GetParam(0).fn_str()));
       }
       if (parser.Found(wxT("d"))) {
-        sip::controller::communicator::get_standard_logger()->set_filter_level(3);
+        tipi::controller::communicator::get_standard_logger()->set_filter_level(3);
       }
       if (parser.Found(wxT("v"))) {
-        sip::controller::communicator::get_standard_logger()->set_filter_level(2);
+        tipi::controller::communicator::get_standard_logger()->set_filter_level(2);
       }
       if (parser.Found(wxT("h"))) {
         std::cout << "Usage: " << program_name << " [OPTION] [PATH]\n"
@@ -111,7 +111,7 @@ bool parse_command_line(int argc, wxChar** argv, boost::function < void (squadt:
         return (false);
       }
       if (parser.Found(wxT("q"))) {
-        sip::controller::communicator::get_standard_logger()->set_filter_level(1);
+        tipi::controller::communicator::get_standard_logger()->set_filter_level(1);
       }
       if (parser.Found(wxT("version"))) {
         std::cerr << program_name << " " << program_version << " (revision " << REVISION << ")" << std::endl;

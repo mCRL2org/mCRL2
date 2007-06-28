@@ -7,9 +7,9 @@
 #include <boost/filesystem/convenience.hpp>
 #include <boost/foreach.hpp>
 
-#include <sip/utility/generic_visitor.h>
+#include <tipi/utility/generic_visitor.h>
 
-#include <sip/detail/controller.tcc>
+#include <tipi/detail/controller.tcc>
 
 #include "settings_manager.h"
 #include "tool_manager.tcc"
@@ -29,7 +29,7 @@ namespace squadt {
   namespace bf = boost::filesystem;
 
   /** \brief Socket connection option scheme for easy command generation */
-  const char* socket_connect_pattern    = "--si-connect=sip://%s:%s";
+  const char* socket_connect_pattern    = "--si-connect=tipi://%s:%s";
 
   /** \brief Identifier option scheme for easy command generation */
   const char* identifier_pattern        = "--si-identifier=%s";
@@ -37,7 +37,7 @@ namespace squadt {
   /** \brief Identifier option scheme for easy command generation */
   const char* log_filter_level_pattern  = "--si-log-filter-level=%s";
 
-  const boost::shared_ptr < sip::tool::capabilities > tool::no_capabilities(new sip::tool::capabilities());
+  const boost::shared_ptr < tipi::tool::capabilities > tool::no_capabilities(new tipi::tool::capabilities());
 
   /// \cond INTERNAL_DOCS
   const long tool_manager_impl::default_port = 10947;
@@ -45,12 +45,12 @@ namespace squadt {
   char const* tool_manager_impl::default_tools[] = {"diagraphica", "lps2pbes", "lpsbinary", "lpsconstelm", "lpsdecluster", "lpsinfo", "lpsparelm", "lpsuntime", "lps2lts",                                                     "lpssumelm", "ltsconvert", "ltsinfo", "ltsgraph", "ltsview", "mcrl22lps", "pbes2bes", "pbes2bool", "pnml2mcrl2", "xsim", 0};
 
 
-  tool_manager_impl::tool_manager_impl() : sip::controller::communicator(), free_identifier(0) {
+  tool_manager_impl::tool_manager_impl() : tipi::controller::communicator(), free_identifier(0) {
     /* Listen for incoming socket connections on the loopback interface with the default port */
     impl->add_listener(transport::ip_any, default_port);
 
     /* Set handler for incoming instance identification messages */
-    add_handler(sip::message_instance_identification, boost::bind(&tool_manager_impl::handle_relay_connection, this, _1));
+    add_handler(tipi::message_instance_identification, boost::bind(&tool_manager_impl::handle_relay_connection, this, _1));
   }
 
   /**
@@ -206,7 +206,7 @@ namespace squadt {
   /**
    * \param[in] m the message that was just delivered
    **/
-  void tool_manager_impl::handle_relay_connection(sip::message_ptr const& m) {
+  void tool_manager_impl::handle_relay_connection(tipi::message_ptr const& m) {
     instance_identifier id = atol(m->to_string().c_str());
 
     if (instances.find(id) == instances.end()) {

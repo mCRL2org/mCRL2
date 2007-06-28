@@ -2052,7 +2052,7 @@ static ATermAppl substitute_pCRLproc(
 
 /********************************************************************/
 /*                                                                  */
-/*   BELOW THE PROCEDURES ARE GIVEN TO TRANFORM PROCESSES TO        */
+/*   BELOW THE PROCEDURES ARE GIVEN TO TRANSFORM PROCESSES TO       */
 /*   LINEAR PROCESSES.                                              */
 /*                                                                  */
 /*                                                                  */

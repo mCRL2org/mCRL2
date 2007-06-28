@@ -145,16 +145,16 @@ class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
   public:
 
     /** \brief configures tool capabilities */
-    void set_capabilities(sip::tool::capabilities&) const;
+    void set_capabilities(tipi::tool::capabilities&) const;
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(sip::configuration&);
+    void user_interactive_configuration(tipi::configuration&);
 
     /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(sip::configuration const&) const;
+    bool check_configuration(tipi::configuration const&) const;
 
     /** \brief performs the task specified by a configuration */
-    bool perform_task(sip::configuration&);
+    bool perform_task(tipi::configuration&);
 };
 
 const char* squadt_interactor::lps_file_for_input  = "lps_in";
@@ -164,32 +164,32 @@ const char* squadt_interactor::option_remove_single_element_sorts = "remove_sing
 const char* squadt_interactor::option_remove_unvisited_summands   = "remove_unvisited_summands";
 const char* squadt_interactor::option_ignore_summand_conditions   = "ignore_summand_conditions";
 
-void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(lps_file_for_input, sip::mime_type("lps", sip::mime_type::application), sip::tool::category::transformation);
+void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
+  c.add_input_combination(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
 }
 
-void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
-  using namespace sip;
-  using namespace sip::layout;
-  using namespace sip::layout::elements;
+void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
+  using namespace tipi;
+  using namespace tipi::layout;
+  using namespace tipi::layout::elements;
 
   /* Set defaults where the supplied configuration does not have values */
   if (!c.output_exists(lps_file_for_output)) {
     /* Add output file to the configuration */
-    c.add_output(lps_file_for_output, sip::mime_type("lps", sip::mime_type::application), c.get_output_name(".lps"));
+    c.add_output(lps_file_for_output, tipi::mime_type("lps", tipi::mime_type::application), c.get_output_name(".lps"));
   }
 
   if (!c.option_exists(option_remove_single_element_sorts)) {
     c.add_option(option_remove_single_element_sorts, false).
-        set_argument_value< 0, sip::datatype::boolean >(true, false);
+        set_argument_value< 0, tipi::datatype::boolean >(true, false);
   }
   if (!c.option_exists(option_remove_unvisited_summands)) {
     c.add_option(option_remove_unvisited_summands, false).
-        set_argument_value< 0, sip::datatype::boolean >(true, false);
+        set_argument_value< 0, tipi::datatype::boolean >(true, false);
   }
   if (!c.option_exists(option_ignore_summand_conditions)) {
     c.add_option(option_ignore_summand_conditions, false).
-        set_argument_value< 0, sip::datatype::boolean >(true, false);
+        set_argument_value< 0, tipi::datatype::boolean >(true, false);
   }
 
   /* Create and add the top layout manager */
@@ -223,14 +223,14 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
 
   /* Update configuration */
   c.get_option(option_remove_single_element_sorts).
-      set_argument_value< 0, sip::datatype::boolean >(remove_single_element_sorts->get_status());
+      set_argument_value< 0, tipi::datatype::boolean >(remove_single_element_sorts->get_status());
   c.get_option(option_remove_unvisited_summands).
-      set_argument_value< 0, sip::datatype::boolean >(remove_unvisited_summands->get_status());
+      set_argument_value< 0, tipi::datatype::boolean >(remove_unvisited_summands->get_status());
   c.get_option(option_ignore_summand_conditions).
-      set_argument_value< 0, sip::datatype::boolean >(ignore_summand_conditions->get_status());
+      set_argument_value< 0, tipi::datatype::boolean >(ignore_summand_conditions->get_status());
 }
 
-bool squadt_interactor::check_configuration(sip::configuration const& c) const {
+bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
   bool result = true;
 
   result &= c.input_exists(lps_file_for_input);
@@ -239,7 +239,7 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   return (result);
 }
 
-bool squadt_interactor::perform_task(sip::configuration& c) {
+bool squadt_interactor::perform_task(tipi::configuration& c) {
   lpsConstElm constelm;
 
   /* Set with options from the current configuration object */

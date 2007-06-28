@@ -42,16 +42,16 @@ class squadt_interactor: public mcrl2::utilities::squadt::tool_interface {
     squadt_interactor(mcrl2::utilities::squadt::entry_wrapper&);
 
     // Configures tool capabilities.
-    void set_capabilities(sip::tool::capabilities&) const;
+    void set_capabilities(tipi::tool::capabilities&) const;
 
     // Queries the user via SQuADt if needed to obtain configuration information
-    void user_interactive_configuration(sip::configuration&);
+    void user_interactive_configuration(tipi::configuration&);
 
     // Check an existing configuration object to see if it is usable
-    bool check_configuration(sip::configuration const&) const;
+    bool check_configuration(tipi::configuration const&) const;
 
     // Performs the task specified by a configuration
-    bool perform_task(sip::configuration&);
+    bool perform_task(tipi::configuration&);
 };
 
 const char* squadt_interactor::lps_file_for_input = "lps_in";
@@ -59,15 +59,15 @@ const char* squadt_interactor::lps_file_for_input = "lps_in";
 squadt_interactor::squadt_interactor(mcrl2::utilities::squadt::entry_wrapper& w): starter(w) {
 }
 
-void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
+void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
   /* The tool has only one main input combination it takes an LPS and then behaves as a reporter */
-  c.add_input_combination(lps_file_for_input, sip::mime_type("lps", sip::mime_type::application), sip::tool::category::simulation);
+  c.add_input_combination(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::simulation);
 }
 
-void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
+void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 }
 
-bool squadt_interactor::check_configuration(sip::configuration const& c) const {
+bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
   bool valid = c.input_exists(lps_file_for_input);
 
   if (!valid) {
@@ -77,7 +77,7 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   return valid;
 }
 
-bool squadt_interactor::perform_task(sip::configuration& c) {
+bool squadt_interactor::perform_task(tipi::configuration& c) {
   lps_file_argument = c.get_input(lps_file_for_input).get_location();
 
   return starter.perform_entry();

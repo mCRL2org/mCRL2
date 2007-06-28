@@ -61,14 +61,14 @@ class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
 
   private:
 
-    boost::shared_ptr < sip::datatype::enumeration > linearisation_method_enumeration;
+    boost::shared_ptr < tipi::datatype::enumeration > linearisation_method_enumeration;
 
-    boost::shared_ptr < sip::datatype::enumeration > linearisation_phase_enumeration;
+    boost::shared_ptr < tipi::datatype::enumeration > linearisation_phase_enumeration;
 
   private:
 
     /** \brief compiles a t_lin_options instance from a configuration */
-    bool extract_task_options(sip::configuration const& c, t_lin_options&) const;
+    bool extract_task_options(tipi::configuration const& c, t_lin_options&) const;
 
   public:
 
@@ -76,16 +76,16 @@ class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
     squadt_interactor();
 
     /** \brief configures tool capabilities */
-    void set_capabilities(sip::tool::capabilities&) const;
+    void set_capabilities(tipi::tool::capabilities&) const;
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(sip::configuration&);
+    void user_interactive_configuration(tipi::configuration&);
 
     /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(sip::configuration const&) const;
+    bool check_configuration(tipi::configuration const&) const;
 
     /** \brief performs the task specified by a configuration */
-    bool perform_task(sip::configuration&);
+    bool perform_task(tipi::configuration&);
 };
 
 const char* squadt_interactor::mcrl2_file_for_input = "mcrl2_in";
@@ -106,61 +106,61 @@ const char* squadt_interactor::option_end_phase                = "end_phase";
 const char* squadt_interactor::option_add_delta                = "add_delta";
 
 squadt_interactor::squadt_interactor() {
-  linearisation_method_enumeration.reset(new sip::datatype::enumeration("stack"));
+  linearisation_method_enumeration.reset(new tipi::datatype::enumeration("stack"));
 
   *linearisation_method_enumeration % "regular" % "regular2" % "expansion";
 
-  linearisation_phase_enumeration.reset(new sip::datatype::enumeration("all"));
+  linearisation_phase_enumeration.reset(new tipi::datatype::enumeration("all"));
 
   *linearisation_phase_enumeration % "parsing" % "type-checking" % "alphabet_reduction" % "data_implementation";
 }
 
-void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(mcrl2_file_for_input, sip::mime_type("mcrl2", sip::mime_type::text),
-                                                            sip::tool::category::transformation);
+void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
+  c.add_input_combination(mcrl2_file_for_input, tipi::mime_type("mcrl2", tipi::mime_type::text),
+                                                            tipi::tool::category::transformation);
 }
 
-void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
-  using namespace sip;
-  using namespace sip::layout;
-  using namespace sip::datatype;
-  using namespace sip::layout::elements;
+void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
+  using namespace tipi;
+  using namespace tipi::layout;
+  using namespace tipi::datatype;
+  using namespace tipi::layout::elements;
 
   std::string infilename = c.get_input(mcrl2_file_for_input).get_location();
 
   // Set defaults for options
   if (!c.option_exists(option_final_cluster)) {
-    c.add_option(option_final_cluster).set_argument_value< 0, sip::datatype::boolean >(false);
+    c.add_option(option_final_cluster).set_argument_value< 0, tipi::datatype::boolean >(false);
   }
   if (!c.option_exists(option_no_intermediate_cluster)) {
-    c.add_option(option_no_intermediate_cluster).set_argument_value< 0, sip::datatype::boolean >(false);
+    c.add_option(option_no_intermediate_cluster).set_argument_value< 0, tipi::datatype::boolean >(false);
   }
   if (!c.option_exists(option_no_alpha)) {
-    c.add_option(option_no_alpha).set_argument_value< 0, sip::datatype::boolean >(false);
+    c.add_option(option_no_alpha).set_argument_value< 0, tipi::datatype::boolean >(false);
   }
   if (!c.option_exists(option_newstate)) {
-    c.add_option(option_newstate).set_argument_value< 0, sip::datatype::boolean >(false);
+    c.add_option(option_newstate).set_argument_value< 0, tipi::datatype::boolean >(false);
   }
   if (!c.option_exists(option_binary)) {
-    c.add_option(option_binary).set_argument_value< 0, sip::datatype::boolean >(false);
+    c.add_option(option_binary).set_argument_value< 0, tipi::datatype::boolean >(false);
   }
   if (!c.option_exists(option_statenames)) {
-    c.add_option(option_statenames).set_argument_value< 0, sip::datatype::boolean >(false);
+    c.add_option(option_statenames).set_argument_value< 0, tipi::datatype::boolean >(false);
   }
   if (!c.option_exists(option_no_rewrite)) {
-    c.add_option(option_no_rewrite).set_argument_value< 0, sip::datatype::boolean >(false);
+    c.add_option(option_no_rewrite).set_argument_value< 0, tipi::datatype::boolean >(false);
   }
   if (!c.option_exists(option_no_freevars)) {
-    c.add_option(option_no_freevars).set_argument_value< 0, sip::datatype::boolean >(false);
+    c.add_option(option_no_freevars).set_argument_value< 0, tipi::datatype::boolean >(false);
   }
   if (!c.option_exists(option_no_sumelm)) {
-    c.add_option(option_no_sumelm).set_argument_value< 0, sip::datatype::boolean >(false);
+    c.add_option(option_no_sumelm).set_argument_value< 0, tipi::datatype::boolean >(false);
   }
   if (!c.option_exists(option_no_deltaelm)) {
-    c.add_option(option_no_deltaelm).set_argument_value< 0, sip::datatype::boolean >(false);
+    c.add_option(option_no_deltaelm).set_argument_value< 0, tipi::datatype::boolean >(false);
   }
   if (!c.option_exists(option_add_delta)) {
-    c.add_option(option_add_delta).set_argument_value< 0, sip::datatype::boolean >(false);
+    c.add_option(option_add_delta).set_argument_value< 0, tipi::datatype::boolean >(false);
   }
 
   layout::manager::aptr top(layout::vertical_box::create());
@@ -260,7 +260,7 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
    * the same parameters
    */
   if (!c.output_exists(lps_file_for_output)) {
-    c.add_output(lps_file_for_output, sip::mime_type("lps", sip::mime_type::application), c.get_output_name(".lps"));
+    c.add_output(lps_file_for_output, tipi::mime_type("lps", tipi::mime_type::application), c.get_output_name(".lps"));
   }
 
   c.add_option(option_linearisation_method).
@@ -269,22 +269,22 @@ void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
   c.add_option(option_end_phase).
           append_argument(linearisation_phase_enumeration, phase_selector.get_selection());
 
-  c.get_option(option_final_cluster).set_argument_value< 0, sip::datatype::boolean >(clusterfinal->get_status());
-  c.get_option(option_no_intermediate_cluster).set_argument_value< 0, sip::datatype::boolean >(!clusterintermediate->get_status());
-  c.get_option(option_no_alpha).set_argument_value< 0, sip::datatype::boolean >(!alpha->get_status());
-  c.get_option(option_newstate).set_argument_value< 0, sip::datatype::boolean >(newstate->get_status());
-  c.get_option(option_binary).set_argument_value< 0, sip::datatype::boolean >(binary->get_status());
-  c.get_option(option_statenames).set_argument_value< 0, sip::datatype::boolean >(statenames->get_status());
-  c.get_option(option_no_rewrite).set_argument_value< 0, sip::datatype::boolean >(!rewrite->get_status());
-  c.get_option(option_no_freevars).set_argument_value< 0, sip::datatype::boolean >(!freevars->get_status());
-  c.get_option(option_no_sumelm).set_argument_value< 0, sip::datatype::boolean >(!sumelm->get_status());
-  c.get_option(option_no_deltaelm).set_argument_value< 0, sip::datatype::boolean >(!deltaelm->get_status());
-  c.get_option(option_add_delta).set_argument_value< 0, sip::datatype::boolean >(add_delta->get_status());
+  c.get_option(option_final_cluster).set_argument_value< 0, tipi::datatype::boolean >(clusterfinal->get_status());
+  c.get_option(option_no_intermediate_cluster).set_argument_value< 0, tipi::datatype::boolean >(!clusterintermediate->get_status());
+  c.get_option(option_no_alpha).set_argument_value< 0, tipi::datatype::boolean >(!alpha->get_status());
+  c.get_option(option_newstate).set_argument_value< 0, tipi::datatype::boolean >(newstate->get_status());
+  c.get_option(option_binary).set_argument_value< 0, tipi::datatype::boolean >(binary->get_status());
+  c.get_option(option_statenames).set_argument_value< 0, tipi::datatype::boolean >(statenames->get_status());
+  c.get_option(option_no_rewrite).set_argument_value< 0, tipi::datatype::boolean >(!rewrite->get_status());
+  c.get_option(option_no_freevars).set_argument_value< 0, tipi::datatype::boolean >(!freevars->get_status());
+  c.get_option(option_no_sumelm).set_argument_value< 0, tipi::datatype::boolean >(!sumelm->get_status());
+  c.get_option(option_no_deltaelm).set_argument_value< 0, tipi::datatype::boolean >(!deltaelm->get_status());
+  c.get_option(option_add_delta).set_argument_value< 0, tipi::datatype::boolean >(add_delta->get_status());
 
   m_communicator.send_clear_display();
 }
 
-bool squadt_interactor::check_configuration(sip::configuration const& c) const {
+bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
   bool result = true;
 
   result |= c.input_exists(mcrl2_file_for_input);
@@ -294,7 +294,7 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   return (result);
 }
 
-bool squadt_interactor::extract_task_options(sip::configuration const& c, t_lin_options& task_options) const {
+bool squadt_interactor::extract_task_options(tipi::configuration const& c, t_lin_options& task_options) const {
   bool result = true;
 
   if (c.input_exists(mcrl2_file_for_input)) {
@@ -343,12 +343,12 @@ bool squadt_interactor::extract_task_options(sip::configuration const& c, t_lin_
   return (result);
 }
 
-bool squadt_interactor::perform_task(sip::configuration& c) {
+bool squadt_interactor::perform_task(tipi::configuration& c) {
   using namespace boost;
-  using namespace sip;
-  using namespace sip::layout;
-  using namespace sip::datatype;
-  using namespace sip::layout::elements;
+  using namespace tipi;
+  using namespace tipi::layout;
+  using namespace tipi::datatype;
+  using namespace tipi::layout::elements;
 
   bool result = true;
 

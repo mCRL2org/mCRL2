@@ -148,28 +148,28 @@ class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
   public:
 
     /** \brief configures tool capabilities */
-    void set_capabilities(sip::tool::capabilities&) const;
+    void set_capabilities(tipi::tool::capabilities&) const;
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(sip::configuration&);
+    void user_interactive_configuration(tipi::configuration&);
 
     /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(sip::configuration const&) const;
+    bool check_configuration(tipi::configuration const&) const;
 
     /** \brief performs the task specified by a configuration */
-    bool perform_task(sip::configuration&);
+    bool perform_task(tipi::configuration&);
 };
 
 const char* squadt_interactor::lps_file_for_input  = "lps_in";
 
-void squadt_interactor::set_capabilities(sip::tool::capabilities& c) const {
-  c.add_input_combination(lps_file_for_input, sip::mime_type("lps", sip::mime_type::application), sip::tool::category::reporting);
+void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
+  c.add_input_combination(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::reporting);
 }
 
-void squadt_interactor::user_interactive_configuration(sip::configuration& c) {
+void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 }
 
-bool squadt_interactor::check_configuration(sip::configuration const& c) const {
+bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
   bool result = true;
 
   result &= c.input_exists(lps_file_for_input);
@@ -177,15 +177,15 @@ bool squadt_interactor::check_configuration(sip::configuration const& c) const {
   return (result);
 }
 
-bool squadt_interactor::perform_task(sip::configuration& c) {
+bool squadt_interactor::perform_task(tipi::configuration& c) {
   bool result = true;
 
   lps::specification lps_specification;
 
   if (lps_specification.load(c.get_input(lps_file_for_input).get_location())) {
-    using namespace sip;
-    using namespace sip::layout;
-    using namespace sip::layout::elements;
+    using namespace tipi;
+    using namespace tipi::layout;
+    using namespace tipi::layout::elements;
    
     lps::linear_process lps = lps_specification.process();
   

@@ -61,35 +61,35 @@ class squadt_interactor: public mcrl2::utilities::squadt::tool_interface
 
   public:
     /** \brief configures tool capabilities */
-    void set_capabilities(sip::tool::capabilities&) const;
+    void set_capabilities(tipi::tool::capabilities&) const;
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(sip::configuration&);
+    void user_interactive_configuration(tipi::configuration&);
 
     /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(sip::configuration const&) const;
+    bool check_configuration(tipi::configuration const&) const;
 
     /** \brief performs the task specified by a configuration */
-    bool perform_task(sip::configuration&);
+    bool perform_task(tipi::configuration&);
 };
 
 const char* squadt_interactor::lps_file_for_input  = "lps_in";
 const char* squadt_interactor::lps_file_for_output = "lps_out";
 
-void squadt_interactor::set_capabilities(sip::tool::capabilities& capabilities) const
+void squadt_interactor::set_capabilities(tipi::tool::capabilities& capabilities) const
 {
   // The tool has only one main input combination
-  capabilities.add_input_combination(lps_file_for_input, sip::mime_type("lps", sip::mime_type::application), sip::tool::category::transformation);
+  capabilities.add_input_combination(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
 }
 
-void squadt_interactor::user_interactive_configuration(sip::configuration& configuration)
+void squadt_interactor::user_interactive_configuration(tipi::configuration& configuration)
 {
   if (!configuration.output_exists(lps_file_for_output)) {
-    configuration.add_output(lps_file_for_output, sip::mime_type("lps", sip::mime_type::application), configuration.get_output_name(".lps"));
+    configuration.add_output(lps_file_for_output, tipi::mime_type("lps", tipi::mime_type::application), configuration.get_output_name(".lps"));
   }
 }
 
-bool squadt_interactor::check_configuration(sip::configuration const& configuration) const
+bool squadt_interactor::check_configuration(tipi::configuration const& configuration) const
 {
 // Check if everything present
   return (configuration.input_exists(lps_file_for_input) &&
@@ -97,7 +97,7 @@ bool squadt_interactor::check_configuration(sip::configuration const& configurat
          );
 }
 
-bool squadt_interactor::perform_task(sip::configuration& configuration)
+bool squadt_interactor::perform_task(tipi::configuration& configuration)
 {
   tool_options options;
   options.input_file = configuration.get_input(lps_file_for_input).get_location();

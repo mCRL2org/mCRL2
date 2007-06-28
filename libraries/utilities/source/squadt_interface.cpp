@@ -1,6 +1,6 @@
 #include "print/messaging.h"
 #include "mcrl2/utilities/squadt_interface.h"
-#include "sip/utility/logger.h"
+#include "tipi/utility/logger.h"
 
 using namespace mcrl2::utilities;
 
@@ -12,20 +12,20 @@ namespace mcrl2 {
   
       /** \brief Used to relay messages generated using mcrl2_basic::print */
       void relay_message(messageType t, const char* data) {
-        sip::report::type report_type;
+        tipi::report::type report_type;
   
         assert(postman.get() != 0);
       
         switch (t) {
           case gs_notice:
-            report_type = sip::report::notice;
+            report_type = tipi::report::notice;
             break;
           case gs_warning:
-            report_type = sip::report::warning;
+            report_type = tipi::report::warning;
             break;
           case gs_error:
           default:
-            report_type = sip::report::error;
+            report_type = tipi::report::error;
             break;
         }
       
@@ -33,7 +33,7 @@ namespace mcrl2 {
       }  
   
       /** \brief Replace standard messaging functions */
-      void initialise(sip::tool::communicator& t) {
+      void initialise(tipi::tool::communicator& t) {
         postman = std::auto_ptr < printer_helper > (new printer_helper(t));
   
         gsSetCustomMessageHandler(relay_message);
@@ -73,9 +73,9 @@ namespace mcrl2 {
   
           try {
             while (!termination_requested) {
-              switch (m_communicator.await_message(sip::message_any)->get_type()) {
-                case sip::message_configuration: {
-                    sip::configuration& configuration = m_communicator.get_configuration();
+              switch (m_communicator.await_message(tipi::message_any)->get_type()) {
+                case tipi::message_configuration: {
+                    tipi::configuration& configuration = m_communicator.get_configuration();
            
                     /* Insert configuration in tool communicator object */
                     valid_configuration_present = check_configuration(configuration);
@@ -94,7 +94,7 @@ namespace mcrl2 {
                     m_communicator.send_accept_configuration();
                   }
                   break;
-                case sip::message_task_start:
+                case tipi::message_task_start:
                   if (valid_configuration_present) {
                     /* Signal that the job is finished */
                     bool result = perform_task(m_communicator.get_configuration());
@@ -109,7 +109,7 @@ namespace mcrl2 {
                     send_error("Start signal received without valid configuration!");
                   }
                   break;
-                case sip::message_termination:
+                case tipi::message_termination:
            
                   termination_requested = true;
            
@@ -172,19 +172,19 @@ namespace mcrl2 {
       }
   
       void tool_interface::send_notification(std::string const& m) const {
-        m_communicator.send_status_report(sip::report::notice, m);
+        m_communicator.send_status_report(tipi::report::notice, m);
       }
   
       void tool_interface::send_warning(std::string const& m) const {
-        m_communicator.send_status_report(sip::report::warning, m);
+        m_communicator.send_status_report(tipi::report::warning, m);
       }
   
       void tool_interface::send_error(std::string const& m) const {
-        m_communicator.send_status_report(sip::report::error, m);
+        m_communicator.send_status_report(tipi::report::error, m);
       }
   
-      void tool_interface::send_display_layout(std::auto_ptr < sip::layout::manager >& p) {
-        m_communicator.send_display_layout(sip::layout::tool_display::create(p));
+      void tool_interface::send_display_layout(std::auto_ptr < tipi::layout::manager >& p) {
+        m_communicator.send_display_layout(tipi::layout::tool_display::create(p));
       }
   
       void tool_interface::send_clear_display() {
@@ -192,17 +192,17 @@ namespace mcrl2 {
       }
   
       void tool_interface::send_hide_display() {
-        boost::shared_ptr < sip::layout::tool_display > p(new sip::layout::tool_display());
+        boost::shared_ptr < tipi::layout::tool_display > p(new tipi::layout::tool_display());
   
         p->show(false);
   
         m_communicator.send_display_layout(p);
       }
   
-      boost::shared_ptr < sip::datatype::enumeration > rewrite_strategy_enumeration;
+      boost::shared_ptr < tipi::datatype::enumeration > rewrite_strategy_enumeration;
   
       static bool initialise () {
-        rewrite_strategy_enumeration.reset(new sip::datatype::enumeration("inner"));
+        rewrite_strategy_enumeration.reset(new tipi::datatype::enumeration("inner"));
         *rewrite_strategy_enumeration % "innerc" % "jitty" % "jittyc";
   
         return true;
