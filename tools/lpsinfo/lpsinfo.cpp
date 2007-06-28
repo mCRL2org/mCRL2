@@ -184,7 +184,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   try
   {
-    lps_specification.load(c.get_input(lps_file_for_input).get_location()));
+    lps_specification.load(c.get_input(lps_file_for_input).get_location());
     using namespace tipi;
     using namespace tipi::layout;
     using namespace tipi::layout::elements;
@@ -259,7 +259,7 @@ int main(int argc, char** argv) {
       cout << "Input read from " << ((file_name == "-") ? "standard input" : file_name) << endl << endl;
      
       cout << "Number of summands                    : " << lps.summands().size() << endl;
-      cout << "Number of tau-summands                  : " << get_number_of_tau_summands(lps) << endl; 
+      cout << "Number of tau-summands                : " << get_number_of_tau_summands(lps) << endl; 
       cout << "Number of free variables              : " << lps_specification.initial_process().free_variables().size() + lps.free_variables().size() << endl;
       cout << "Number of process parameters          : " << lps.process_parameters().size() << endl; 
       cout << "Number of action labels               : " << lps_specification.action_labels().size() << endl;
