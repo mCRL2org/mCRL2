@@ -2604,7 +2604,8 @@ void Frame::onMenuBar( wxCommandEvent &e )
         mediator->handleSetModeAnalysis();
 
         // hide view menu
-        menuBar->Insert( 2, viewMenu, wxString( wxT( "View" ) ) );
+        //menuBar->Insert( 2, viewMenu, wxString( wxT( "View" ) ) );
+        menuBar->EnableTop( 2, true );
 
         // enable cluster & trace buttons
         if ( listCtrlAttr->GetSelectedItemCount() > 0 )
@@ -2706,7 +2707,8 @@ void Frame::onMenuBar( wxCommandEvent &e )
         mediator->handleSetModeEdit();
 
         // show view menu
-        menuBar->Remove( 2 );
+//        menuBar->Remove( 2 );
+        menuBar->EnableTop( 2, false );
 
         // disable cluster & trace buttons
         buttonClustAttr->Enable( false );
@@ -2725,21 +2727,18 @@ void Frame::onMenuBar( wxCommandEvent &e )
         attributeMenu->Enable( ID_MENU_ITEM_ATTR_CLUST, false );
         attributeMenu->Enable( ID_MENU_ITEM_ATTR_PARTITION, false );
         attributeMenu->Enable( ID_MENU_ITEM_ATTR_DEPARTITION, false );
-        
+
         // hide 2nd panel
         int w, h;
         splitterRgt->GetSize( &w, &h );
         sashRatioRgt = splitterRgt->GetSashPosition()/(double)h;
-        /*
-        splitterRgt->Unsplit( panelBotRgt );
-        */
+        //splitterRgt->Unsplit( panelBotRgt );
         splitterRgt->Unsplit( splitterBotRgt );
         
         panelTopRgt->Layout();
-        /*
-        panelBotRgt->Layout();
-        */
+        //panelBotRgt->Layout();
         splitterBotRgt->Layout();
+
         canvasOne->Refresh();
     }
     else if ( e.GetId() == ID_MENU_ITEM_VIEW_SIM )
