@@ -1,3 +1,12 @@
+// Author(s): Bas Ploeger and Carst Tankink
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mainframe.cpp
+/// \brief Add your file description here.
+
 #include "mainframe.h"
 #include <wx/bitmap.h>
 #include <wx/event.h>

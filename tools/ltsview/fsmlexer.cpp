@@ -1,3 +1,12 @@
+// Author(s): Bas Ploeger and Carst Tankink
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file fsmlexer.cpp
+/// \brief Add your file description here.
+
 #define yy_create_buffer fsm_create_buffer
 #define yy_delete_buffer fsm_delete_buffer
 #define yy_scan_buffer fsm_scan_buffer
