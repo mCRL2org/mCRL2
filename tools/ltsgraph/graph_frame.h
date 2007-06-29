@@ -169,6 +169,8 @@ private:
   wxButton * btn_label_text;
 
   wxStatusBar* stb_coordinates;
+  
+  wxBrush background_brush;
 
 DECLARE_EVENT_TABLE()
 };

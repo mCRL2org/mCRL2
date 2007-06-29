@@ -1,7 +1,7 @@
 #include "graph_frame.h"
 #include "workarounds.h"
 
-const wxColour border_colour_selected = wxT("BLUE");
+static const wxColour &border_colour_selected = *wxBLUE;
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
@@ -41,12 +41,12 @@ BEGIN_EVENT_TABLE(ViewPort, wxPanel)
   EVT_SIZE(ViewPort::OnResize)
 END_EVENT_TABLE()
 
-const int ctrl_radius = 3;
+static const int ctrl_radius = 3;
 
 static vector<Node*> vectNode;
 static vector<edge*> vectEdge;
 
-double GenRandom(const int &max) {
+static double GenRandom(const int &max) {
     int CircleRadius = 0;
     return static_cast <double> (rand()%max+CircleRadius);
 }
@@ -55,6 +55,8 @@ GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& 
   : wxFrame(NULL, -1, title, pos, size, style) {
 
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
+    background_brush.SetColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
+    background_brush.SetStyle(wxSOLID);
  
   StopOpti = true;
   StoppedOpti = true;
@@ -165,7 +167,7 @@ void GraphFrame::BuildLayout() {
   othersSettingsSizer->Add(ck_curve_edges, 0, lflags, 4 );
 
   wxFlexGridSizer* bottomRightSizer = new wxFlexGridSizer( 0, 2, 0, 0 );
-  spinNodeRadius = new wxSpinCtrl(rightPanel, ID_SPIN_RADIUS, wxT(""), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 2, 50, 10);
+  spinNodeRadius = new wxSpinCtrl(rightPanel, ID_SPIN_RADIUS, wxT("10"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 2, 50, 10);
   bottomRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("State radius") ), 0, lflags, 4 );
   bottomRightSizer->Add(spinNodeRadius, 0, rflags, 3 );
   othersSettingsSizer->Add(bottomRightSizer, 1, wxEXPAND | wxALL, 0 );
@@ -680,6 +682,7 @@ bool GraphFrame::OptimizeDrawing(double precision) {
 }
 
 void GraphFrame::Draw(wxAutoBufferedPaintDC * myDC) {
+  myDC->SetBackground(background_brush);
   myDC->Clear();
   
   //Call Edge and Node OnPaint() method (Edge 1st)
