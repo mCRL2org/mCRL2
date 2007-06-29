@@ -1078,13 +1078,12 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     else
       ATtablePut(alphas,(ATerm) a,(ATerm) l);
      
-    {
-      ATermList ll=l;
-      l = filter_allow_list(ll,V);
-      if(ATisEqual(l,ll)){         //everything from alpha(a) is allowed by V -- no need in allow
-        ATtablePut(alphas,(ATerm) a,(ATerm) l); // not to forget: put the list in the table!!!
-	return a; 
-      }
+    
+    ATermList ll=l;
+    l = filter_allow_list(ll,V);
+    if(ATisEqual(l,ll)){         //everything from alpha(a) is allowed by V -- no need in allow
+      ATtablePut(alphas,(ATerm) a,(ATerm) l); // not to forget: put the list in the table!!!
+      return a; 
     }
     
     ATermList ul=untypeMAL(l);
@@ -1124,9 +1123,10 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
       ATtablePut(alphas,(ATerm) a,(ATerm) l);
     }
     else{
-      if(ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),1),nrec_aterm) &&
+      if(// ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),1),nrec_aterm) &&
          ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),0),pCRL_aterm) ){
-        gsWarningMsg("could have pushed a non-trivial allow operation with the argument %P\ninside non-recursive pCRL process %P.\n This could also indicate a forgotten action in this allow operation\n\n",V,pn);
+	ATermList ull=list_minus(untypeMAL(ll),V);
+        gsWarningMsg("an allow operation allowing only the (multi-)actions from %P\nis applied to sequential process %P.\nThis disallows (multi-)actions %T of this process.\nThis warning could also indicate a forgotten (multi-)action in this allow operation.\n\n",V,pn,ull);
       }
 
       a = gsMakeAllow(V,a);
