@@ -2,8 +2,8 @@
 #include "workarounds.h"
 #include "images/lock.xpm"
 
-const wxColour border_color      = wxT("BLACK");
-const wxColour border_color_init = wxT("RED");
+static const wxColour &border_color      = *wxBLACK;
+static const wxColour &border_color_init = *wxRED;
 
 Node::Node(unsigned int _num, double _posX, double _posY, wxString _lbl, bool _initState) : 
              posX(_posX), posY(_posY), lbl(_lbl), num(_num), initState(_initState)
