@@ -6,12 +6,12 @@ alias diagraphica : : <wx>no ;
 
 exe diagraphica
       : [ glob *.cpp ]
+        /libraries/utilities//spinctrlfloat
         /libraries//mcrl2_basic
         /libraries//ticpp
-        /libraries/utilities//spinctrlfloat
         /site-config//wx_gl
-      : <squadt-connectivity>implemented
-        <wx>yes
+      : <wx>yes
+        <squadt-connectivity>implemented
       ;
 
 install-binaries install

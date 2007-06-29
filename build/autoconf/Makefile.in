@@ -33,7 +33,7 @@ endif
 all: $(BJAM) tools man
 
 install: $(BJAM) install-man
-	$(BOOST_BUILD) --install
+	$(BOOST_BUILD) install
 
 tools:
 	$(BOOST_BUILD)

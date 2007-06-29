@@ -59,6 +59,42 @@ if $(OPENGL_NAME) {
   feature.set-default opengl : yes ;
 }
 
+import regex : split match ;
+
+rule libraries_from_string ( name : ldflags + : requirements * : default * : usage-requirements * ) {
+  local splitted                  = [ regex.split $(ldflags) " -" ] ;
+  local library_search_paths ;
+  local library_names ;
+  local framework_names ;
+
+  for part in $(splitted) {
+    if [ MATCH "L(.*)$" : $(part) ] {
+      local search_path = [ MATCH "L([^ ]+)[ ]*$" : $(part) ] ;
+
+      library_search_paths += <search>$(search_path) ;
+    }
+    else if [ MATCH "l(.*)$" : $(part) ] {
+      local library_name = [ MATCH "l([^ ]+)[ ]*$" : $(part) ] ;
+
+      lib $(name)$(library_name)
+          :
+          : <name>$(library_name) $(library_search_paths)
+          :
+          : $(framework_names)
+          ;
+
+      library_names += $(name)$(library_name) ;
+    }
+    else if [ MATCH "framework (.*)$" : $(part) ] {
+      local framework_name = [ MATCH "framework (([^ ]+)[ ]*)" : $(part) ] ;
+
+      framework_names += <framework>$(framework_name) ;
+    }
+  }
+
+  alias $(name) : $(library_names) : $(requirements) : $(default) : $(usage-requirements) ;
+}
+
 # Feature for linking to wx widget libraries
 if $(WX_CPPFLAGS) {
   feature.feature wx : yes no : ;
@@ -67,3 +103,8 @@ else {
   feature.feature wx : no yes : ;
 }
 
+IMPORT $(__name__)
+       : libraries_from_string
+       : $(caller)
+       : libraries_from_string
+       ;
