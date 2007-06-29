@@ -1,3 +1,11 @@
+// Author(s): Aad Mathijssen
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file lpspp.cpp
+
 #define  NAME      "lpspp"
 #define  VERSION   "0.4.4"
 #define  AUTHOR    "Aad Mathijssen"

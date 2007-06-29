@@ -1,5 +1,13 @@
-#ifndef PARSER_LIBPARSE_H
-#define PARSER_LIBPARSE_H
+// Author(s): Aad Mathijssen
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file libparse.h
+
+#ifndef MCRL2_LIBPARSE_H
+#define MCRL2_LIBPARSE_H
 
 #include <iostream>
 #include <vector>
@@ -56,4 +64,4 @@ ATermAppl parse_action_rename(std::istream &sf_stream);
        NULL, otherwise
 */ 
 
-#endif // PARSER_LIBPARSE_H
+#endif // MCRL2_LIBPARSE_H

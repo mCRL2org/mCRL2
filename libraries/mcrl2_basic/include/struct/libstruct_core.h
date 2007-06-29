@@ -1,5 +1,13 @@
-#ifndef MCRL_LIBSTRUCT_CORE_H
-#define MCRL_LIBSTRUCT_CORE_H
+// Author(s): Aad Mathijssen
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file libstruct_core.h
+
+#ifndef MCRL2_LIBSTRUCT_CORE_H
+#define MCRL2_LIBSTRUCT_CORE_H
 
 //This file describes the functions that can be used for the internal ATerm
 //structure.
@@ -3252,4 +3260,4 @@ ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term, bool TryNoSuffix);
 }
 #endif
 
-#endif // MCRL_LIBSTRUCT_CORE_H
+#endif // MCRL2_LIBSTRUCT_CORE_H

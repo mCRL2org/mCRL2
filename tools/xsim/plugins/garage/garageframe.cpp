@@ -1,11 +1,11 @@
-// ---------------------------------
-// garageframe.cpp
-// (c) 2005
-// A.J. Pretorius
+// Author(s): Aad Mathijssen and Hannes Pretorius
 //
-// Dept of Math and Computer Science
-// Technische Universitiet Eindhoven
-// a.j.pretorius@tue.nl
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file garageframe.cpp
+
 // ---------------------------------
 //
 // This class is used to creat the

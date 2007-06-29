@@ -1,5 +1,13 @@
-#ifndef PARSER_REGFRMTRANS_H
-#define PARSER_REGFRMTRANS_H
+// Author(s): Aad Mathijssen
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file regfrmtrans.h
+
+#ifndef MCRL2_REGFRMTRANS_H
+#define MCRL2_REGFRMTRANS_H
 
 #include <aterm2.h>
 
@@ -13,4 +21,4 @@ ATermAppl translate_reg_frms(ATermAppl state_frm);
  *     terms of state and action formulas
  */
 
-#endif // PARSER_REGFRMTRANS_H
+#endif // MCRL2_REGFRMTRANS_H

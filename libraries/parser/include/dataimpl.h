@@ -1,5 +1,13 @@
-#ifndef PARSER_DATAIMPL_H
-#define PARSER_DATAIMPL_H
+// Author(s): Aad Mathijssen
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file dataimpl.h
+
+#ifndef MCRL2_DATAIMPL_H
+#define MCRL2_DATAIMPL_H
 
 #include <aterm2.h>
 #include "mcrl2/lps/specification.h"
@@ -104,4 +112,4 @@ ATermAppl implement_data_action_rename(ATermAppl action_rename,
  *     NULL is returned.
  */
 
-#endif // PARSER_DATAIMPL_H
+#endif // MCRL2_DATAIMPL_H

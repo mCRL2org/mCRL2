@@ -1,4 +1,10 @@
-// Date: 13-06-2006
+// Author(s): Aad Mathijssen
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+// Date: 29-06-2006
 // This document describes the internal format of the mcrl language as close as 
 // possible to the corresponding mCRL2 format. Here:
 // - three phases of implementation are distinguised, namely type checking (tc),

@@ -1,5 +1,13 @@
-#ifndef __LIBPRINT_CXX_H
-#define __LIBPRINT_CXX_H
+// Author(s): Aad Mathijssen
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file libprint.h
+
+#ifndef MCRL2_LIBPRINT_H
+#define MCRL2_LIBPRINT_H
 
 #include <ostream>
 #include <string>
@@ -25,4 +33,4 @@ std::string PrintPart_CXX(const ATerm Part, t_pp_format pp_format);
   Ret: A textual representation of Part pretty printed using method pp_format
 */
 
-#endif //__LIBPRINT_CXX_H
+#endif //MCRL2_LIBPRINT_H

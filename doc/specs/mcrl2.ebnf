@@ -1,3 +1,9 @@
+// Author(s): Aad Mathijssen
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
 //This is an EBNF description for the syntax of the mCRL2 language.
 //In this description:
 //- the symbols <Whitespace> and <Comment> are layout symbols and may occur

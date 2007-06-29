@@ -1,5 +1,13 @@
-#ifndef PARSER_MCRL2LEXER_H
-#define PARSER_MCRL2LEXER_H
+// Author(s): Aad Mathijssen
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2lexer.h
+
+#ifndef MCRL2_MCRL2LEXER_H
+#define MCRL2_MCRL2LEXER_H
 
 #include <istream>
 #include <vector>
@@ -15,4 +23,4 @@ ATermAppl parse_streams(std::vector<std::istream*> &streams);
        NULL, otherwise
 */ 
 
-#endif // PARSER_MCRL2LEXER_H
+#endif // MCRL2_MCRL2LEXER_H

@@ -1,3 +1,11 @@
+// Author(s): Aad Mathijssen
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file libprint_impl.h
+
 //This file contains a generic implementation of the PrintPart functions for
 //both C and C++. It should NEVER be included directly. Use libprint_c.h and
 //libprint.h instead.
