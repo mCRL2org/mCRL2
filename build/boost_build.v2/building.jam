@@ -68,12 +68,12 @@ rule libraries_from_string ( name : ldflags + : requirements * : default * : usa
   local framework_names ;
 
   for part in $(splitted) {
-    if [ MATCH "L(.*)$" : $(part) ] {
+    if [ MATCH "^L(.*)$" : $(part) ] {
       local search_path = [ MATCH "L([^ ]+)[ ]*$" : $(part) ] ;
 
       library_search_paths += <search>$(search_path) ;
     }
-    else if [ MATCH "l(.*)$" : $(part) ] {
+    else if [ MATCH "^l(.*)$" : $(part) ] {
       local library_name = [ MATCH "l([^ ]+)[ ]*$" : $(part) ] ;
 
       lib $(name)$(library_name)

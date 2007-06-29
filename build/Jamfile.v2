@@ -29,7 +29,7 @@ if $(WX_CPPFLAGS) {
   libraries_from_string wx_base : $(WX_BASE_LDFLAGS) : <threading>multi : : <cxxflags>$(WX_CPPFLAGS) <wx>yes ;
 
   if $(OPENGL_NAME) {
-    libraries_from_string wx_gl : $(WX_GL_LDFLAGS) : <threading>multi : : <cxxflags>$(WX_CPPFLAGS) <wx>yes ;
+    libraries_from_string wx_gl : $(WX_GL_LDFLAGS) : <threading>multi : : <cxxflags>$(WX_CPPFLAGS) <wx>yes <library>opengl ;
   }
 }
 else {
