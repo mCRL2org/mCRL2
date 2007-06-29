@@ -2982,13 +2982,13 @@ void Frame::onListCtrlSelect( wxListEvent &e )
             domainMenu->Enable( ID_MENU_ITEM_DOM_RENAME, false );
         }
     }
-    /* else if ( e.GetId() == ID_LIST_CTRL_DOF )
+    else if ( e.GetId() == ID_LIST_CTRL_DOF )
     {
         // get idx of selected item
         int id = e.GetIndex();
         // handle selection
         mediator->handleDOFSel( id );
-
+        /*
         int textStatus = mediator->handleGetDOFTextStatus( id );
         if ( textStatus == DOF::ID_TEXT_NONE )
             radioBoxTextDOF->SetSelection( 0 );
@@ -2998,7 +2998,8 @@ void Frame::onListCtrlSelect( wxListEvent &e )
             radioBoxTextDOF->SetSelection( 2 );
         else if ( textStatus == DOF::ID_TEXT_VAL )
             radioBoxTextDOF->SetSelection( 3 );
-    } */
+        */
+    }
     else if ( e.GetId() == ID_LIST_CTRL_CLUST )
     {
         if ( mediator->getClustMode() == Mediator::CLUST_DISTR_PLOT )

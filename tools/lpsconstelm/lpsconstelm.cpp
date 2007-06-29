@@ -2,22 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-<<<<<<< .mine
 /// \file ./lpsconstelm.cpp
-=======
-// Copyright (c) 2004, 2005 TU/e
-//
-// ----------------------------------------------------------------------
-//
-// file          : lpsconstelm
-// date          : 16-11-2005
-// version       : 0.5.2
-//
-// author(s)     : Frank Stappers  <f.p.m.stappers@student.tue.nl>
-//
-// ======================================================================
->>>>>>> .r3164
-
 
 //LPS framework
 #include "mcrl2/lps/specification.h"
