@@ -1,16 +1,9 @@
-// ======================================================================
+//  Copyright 2007 F.P.M. (Frank) Stappers. Distributed under the Boost
+//  Software License, Version 1.0. (See accompanying file
+//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Copyright (c) 2004, 2005 TU/e
-//
-// ----------------------------------------------------------------------
-//
-// file          : lpsparelm 
-// date          : 15-11-2005
-// version       : 0.5
-//
-// author(s)     : Frank Stappers  <f.p.m.stappers@student.tue.nl>
-//
-// ======================================================================
+/// \file ./lpsparelm.cpp
+
 
 #include "mcrl2/lps/specification.h"
 

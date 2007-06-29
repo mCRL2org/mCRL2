@@ -1,16 +1,9 @@
-// ======================================================================
+//  Copyright 2007 F.P.M. (Frank) Stappers. Distributed under the Boost
+//  Software License, Version 1.0. (See accompanying file
+//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Copyright (c) 2004 - 2007 TU/e
-//
-// ----------------------------------------------------------------------
-//
-// file          : lpsinfo 
-// date          : 11-06-2007
-// version       : 0.5.2
-//
-// author(s)     : Frank Stappers  <f.p.m.stappers@tue.nl>
-//
-// ======================================================================
+/// \file ./lpsinfo.cpp
+
 
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
