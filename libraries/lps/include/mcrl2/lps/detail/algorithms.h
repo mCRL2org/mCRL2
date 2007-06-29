@@ -54,7 +54,7 @@ namespace detail {
   inline
   ATermAppl alpha_reduce(ATermAppl spec)
   {
-    ATermAppl result = gsAlpha(result);
+    ATermAppl result = gsAlpha(spec);
     if (result == NULL)
       throw std::runtime_error("alpha reduction error");
     return result;
