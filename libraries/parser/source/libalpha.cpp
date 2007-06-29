@@ -1123,10 +1123,10 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
       ATtablePut(alphas,(ATerm) a,(ATerm) l);
     }
     else{
-      if(// ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),1),nrec_aterm) &&
+      if(ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),1),nrec_aterm) &&
          ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),0),pCRL_aterm) ){
 	ATermList ull=list_minus(untypeMAL(ll),V);
-        gsWarningMsg("an allow operation allowing only the (multi-)actions from %P\nis applied to sequential process %P.\nThis disallows (multi-)actions %T of this process.\nThis warning could also indicate a forgotten (multi-)action in this allow operation.\n\n",V,pn,ull);
+        gsWarningMsg("an allow operation allowing only the (multi-)actions from %P\nis applied to sequential non-recursive process %P.\nThis disallows (multi-)actions %T of this process.\nThis warning could also indicate a forgotten (multi-)action in this allow operation.\n\n",V,pn,ull);
       }
 
       a = gsMakeAllow(V,a);
