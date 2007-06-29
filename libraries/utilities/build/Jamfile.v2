@@ -9,8 +9,8 @@ project libraries/utilities
 
 include $(TOP)/build/config.jam ;
 
-alias spinctrlfloat : utilities ;
-alias colorbutton   : utilities ;
+alias spinctrlfloat : spinctrlfloat.o ;
+alias colorbutton   : colorbutton.o ;
 
 obj spinctrlfloat.o : spinctrlfloat.cpp : <cxxflags>"$(WX_CPPFLAGS)" <include>../include/mcrl2/utilities ;
 obj colorbutton.o   : colorbutton.cpp   : <cxxflags>"$(WX_CPPFLAGS)" <include>../include/mcrl2/utilities ;
@@ -51,9 +51,9 @@ alias utilities.main
       : <use>/libraries/aterm//headers
         <use>/libraries/mcrl2_basic//headers
         <use>/libraries/rewrite//headers
-        <wx>yes:<source>spinctrlfloat.o
-        <wx>yes:<source>colorbutton.o
-        <wx>yes:<library>/site-config//wx_base
+#        <wx>yes:<source>spinctrlfloat.o
+#        <wx>yes:<source>colorbutton.o
+#        <wx>yes:<library>/site-config//wx_base
         <squadt-support>yes:<source>squadt_interface.main
       ;
 

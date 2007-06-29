@@ -17,7 +17,7 @@ if $(OPENGL_NAME) {
   }
   else {
     if [ modules.peek : OS ] = MACOSX {
-      alias opengl : : <toolset>darwin : : <linkflags>"-framework OpenGL" ;
+      alias opengl : : <toolset>darwin : : <framework>OpenGL ;
     }
     else {
       lib opengl : : <name>$(OPENGL_NAME) : : <os>NT:<library>GLU <os>CYGWIN:<library>GLU ;
