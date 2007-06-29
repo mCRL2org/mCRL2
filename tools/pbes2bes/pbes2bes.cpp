@@ -1119,7 +1119,7 @@ t_tool_options parse_command_line(int argc, char** argv)
 		opt_outputformat = vm["output"].as< string >();
 		if (!((opt_outputformat == "internal") || (opt_outputformat == "binary") || (opt_outputformat == "cwi")))
 		{
-			gsErrorMsg("Unknown outputformat specified. Available outputformats are binary, external and cwi\n");
+			gsErrorMsg("Unknown outputformat specified. Available outputformats are binary, internal and cwi\n");
 			exit(1);
 		}
 	}
@@ -1129,7 +1129,7 @@ t_tool_options parse_command_line(int argc, char** argv)
 		opt_strategy = vm["strategy"].as< string >();
 		if (!((opt_strategy == "finite") || (opt_strategy == "lazy")))
 		{
-			gsErrorMsg("Unknown strategy specified. Available strategies are naive and strategy\n");
+			gsErrorMsg("Unknown strategy specified. Available strategies are finite and lazy\n");
 			exit(1);
 		}
 	}
