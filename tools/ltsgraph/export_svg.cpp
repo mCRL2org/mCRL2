@@ -1,3 +1,9 @@
+//  Copyright 2007 Didier Le Lann, Carst Tankink, Muck van Weerdenburg and Jeroen van der Wulp. Distributed under the Boost
+//  Software License, Version 1.0. (See accompanying file
+//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file ./export_svg.cpp
+
 #include "export_svg.h"
 
 #include <fstream>

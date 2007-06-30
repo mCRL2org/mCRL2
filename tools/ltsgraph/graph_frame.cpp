@@ -1,3 +1,9 @@
+//  Copyright 2007 Didier Le Lann, Carst Tankink, Muck van Weerdenburg and Jeroen van der Wulp. Distributed under the Boost
+//  Software License, Version 1.0. (See accompanying file
+//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file ./graph_frame.cpp
+
 #include "graph_frame.h"
 #include "workarounds.h"
 
@@ -713,8 +719,8 @@ void GraphFrame::on_about(wxCommandEvent& /* event */) {
   wxString caption = wxT("About");
   wxString content = wxT("ltsgraph - Tool for visualising labelled transition systems. \n");
   content += wxT("Developed by Didier Le Lann and Carst Tankink.\n\n");
-  content += wxT("Part of the mCRL2 toolset, revision: ");
-  content.Printf(wxT("%s%s. \n\n"), content.c_str(), REVISION);
+//  content += wxT("Part of the mCRL2 toolset, revision: ");
+//  content.Printf(wxT("%s%s. \n\n"), content.c_str(), REVISION);
 
   content += wxT("Info: http://www.mcrl2.org \n");
   content += wxT("Bug reports: bug@mcrl2.org");
