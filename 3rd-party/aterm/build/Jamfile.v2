@@ -11,8 +11,7 @@ alias aterm.main
        : [ glob *.c ]
          protaterm.cpp
        : <address-model>64:<define>AT_64BIT
-         <threading>single
-       :
+       : <threading>single
        : <address-model>64:<define>AT_64BIT
          <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
        ;

@@ -8,7 +8,7 @@ exe ltsinfo
          /libraries//lts
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
-       : <squadt-connectivity>implemented
+         <squadt-connectivity>implemented
        ;
 
 install-binaries install

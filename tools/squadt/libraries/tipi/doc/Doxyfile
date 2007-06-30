@@ -1,6 +1,6 @@
 @INCLUDE_PATH = ../../../../../doc/doxy
 @INCLUDE = Doxymaster
-PROJECT_NAME           = TIPI
+PROJECT_NAME           = TIPi
 OUTPUT_DIRECTORY       = ../../../../../build/doxy
 HTML_OUTPUT            = tipi
 INPUT                  = ../include ../source

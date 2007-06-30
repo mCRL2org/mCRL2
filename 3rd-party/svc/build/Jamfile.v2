@@ -21,7 +21,7 @@ alias svc.main
          svc2.c
        : <toolset>darwin:<cflags>"-fno-common"
          <use>/libraries/aterm//headers
-         <threading>single
+       : <threading>single
        ;
 
 lib svc
