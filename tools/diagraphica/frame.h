@@ -305,7 +305,7 @@ private:
     // -- ID's ------------------------------------------------------
     enum
     {
-        ID_MENU_ITEM_LOAD_CONFIG,
+        ID_MENU_ITEM_LOAD_CONFIG = wxID_HIGHEST,
         ID_MENU_ITEM_SAVE_CONFIG,
         ID_MENU_ITEM_LOAD_DIAGRAM,
         ID_MENU_ITEM_SAVE_DIAGRAM,

@@ -199,9 +199,9 @@ bool DiaGraph::OnInit()
 {
     // windows debugging
     #ifdef _MSC_VER
-	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+    _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+    //_CrtSetBreakAlloc( 4271 );
     #endif
-	//_CrtSetBreakAlloc( 4271 );
 
     // set mode
     mode = MODE_ANALYSIS;
@@ -211,20 +211,18 @@ bool DiaGraph::OnInit()
 
     // squadt
     #ifdef ENABLE_SQUADT_CONNECTIVITY
-        if (interactor->is_active()) 
-        {
-            // init colleagues
-            initColleagues();
+    if (interactor->is_active())  {
+      // init colleagues
+      initColleagues();
 
-            if (!fsm_file_argument.empty())
-            {
-                openFile(fsm_file_argument);
-            }; 
+      if (!fsm_file_argument.empty()) {
+        openFile(fsm_file_argument);
+      }; 
 
-            critSect = false;
+      critSect = false;
 
-            return true;
-        }
+      return true;
+    }
     #endif
 
     std::string fsm_file_argument;
@@ -240,7 +238,7 @@ bool DiaGraph::OnInit()
     critSect = false;
    
     if (!fsm_file_argument.empty()) {
-//      openFile(fsm_file_argument);
+      openFile(fsm_file_argument);
     }
 
     // start event loop
