@@ -1,3 +1,9 @@
+//  Copyright 2007 Simona Orzan. Distributed under the Boost
+//  Software License, Version 1.0. (See accompanying file
+//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file ./gauss.h
+
 #include <string>
 
 #include "mcrl2/pbes/pbes.h"
@@ -7,8 +13,6 @@
 #include "print/messaging.h"
 
 #define PREDVAR_MARK '$'
-
-// TO DO: make solve_pbes a class with interactive and bound as attributes..
 
 using namespace lps;
 
@@ -32,8 +36,8 @@ void solve_equation_interactive(propositional_variable X,
 
 
 
-// class that takes care of enumerating finite sorts
-// i.e., producing all possible instantiations
+// enumerates finite sorts
+// i.e., produces all possible instantiations
 // for a given sort, or set of sorts
 
 typedef struct s_del {

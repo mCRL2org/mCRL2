@@ -1,3 +1,9 @@
+//  Copyright 2007 Simona Orzan. Distributed under the Boost
+//  Software License, Version 1.0. (See accompanying file
+//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file ./gauss.cpp
+
 
 #include "gauss.h"
 #include "mcrl2/pbes/utility.h"
@@ -20,10 +26,6 @@
 using namespace lps;
 using namespace pbes_expr;
 using namespace mcrl2::utilities;
-
-
- bool pbes_expression_compare
-(pbes_expression p, pbes_expression q, BDD_Prover *prover);
 
 
 pbes_expression pbes_expression_simplify
@@ -185,7 +187,7 @@ pbes_equation solve_equation
 	 gsVerboseMsg("\n\nREWRITTEN: %s\n%d quantifiers left\n",pp(approx_).c_str(),nq);
 #endif
 
-	 // decide whether it's stable.
+	 // decide whether it's stable
 	 //	 stable = pbes_expression_compare(approx_,approx,prover);
 	 stable = (approx_ == approx);
 
@@ -793,34 +795,6 @@ data_variable_list substract(data_variable_list x, data_variable_list y)
 
 
 
-//======================================================================
-
-
-//======================================================================
-// !! Doesn't work when quantifiers are involved. 
-// !! It seems difficult to properly translate pbes quantifiers to data quantifiers (??)
-// !! The prover can't use quantifiers anyway.
-bool pbes_expression_compare
-(pbes_expression p, pbes_expression q, BDD_Prover* prover)
-{
-  // if no quantifiers and no predicates, call the prover
-gsVerboseMsg("Comparing %s (%d) and %s (%d)\n",pp(p).c_str(),p.is_bes(),pp(q).c_str(),is_bes(q));
-  if ((is_bes(p))&&(is_bes(q)))
-    {
-      data_expression dp = pbes_to_data(p);
-      data_expression dq = pbes_to_data(q);
-      ATermAppl formula = gsMakeDataExprEq((ATermAppl)dp,(ATermAppl)dq);
-      
-      //      gsVerboseMsg(" -->prover: %s\n",pp(formula).c_str());
-      prover->set_formula(formula);  
-      Answer a = prover->is_tautology();
-      gsVerboseMsg(" <--prover: %s\n",((a==answer_yes)?"YES":((a==answer_no)?"NO":"DON'T KNOW")));  
-      return ((a == answer_yes)?true:false);      
-    }
-  
-  // else, improvise
-  return false;
-}
 //======================================================================
 
 
