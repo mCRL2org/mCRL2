@@ -64,6 +64,7 @@ import regex : split match ;
 rule libraries_from_string ( name : ldflags + : requirements * : default * : usage-requirements * ) {
   local splitted                  = [ regex.split $(ldflags) " -" ] ;
   local library_search_paths ;
+  local library_link_paths ;
   local library_names ;
   local framework_names ;
 
@@ -72,6 +73,7 @@ rule libraries_from_string ( name : ldflags + : requirements * : default * : usa
       local search_path = [ MATCH "-?L([^ ]+)[ ]*$" : $(part) ] ;
 
       library_search_paths += <search>$(search_path) ;
+      library_link_paths += <link>shared:<dll-path>$(search_path) ;
     }
     else if [ MATCH "^-?l(.*)$" : $(part) ] {
       local library_name = [ MATCH "-?l([^ ]+)[ ]*$" : $(part) ] ;
@@ -80,7 +82,7 @@ rule libraries_from_string ( name : ldflags + : requirements * : default * : usa
           :
           : <name>$(library_name) $(library_search_paths)
           :
-          : $(framework_names)
+          : $(framework_names) $(library_link_paths)
           ;
 
       library_names += $(name)$(library_name) ;
