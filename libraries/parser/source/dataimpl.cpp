@@ -369,11 +369,11 @@ ATermAppl implement_data_state_frm(ATermAppl state_frm,
   return impl_exprs(state_frm, lps_spec);
 }
 
-ATermAppl implement_data_action_rename(ATermAppl action_rename,
-  lps::specification &lps_spec)
-{
+//ATermAppl implement_data_action_rename(ATermAppl action_rename,
+//  lps::specification &lps_spec)
+//{
   //return impl_exprs(action_rename, lps_spec);
-}
+//}
 
 ATermAppl impl_exprs_spec(ATermAppl spec)
 {

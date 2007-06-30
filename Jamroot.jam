@@ -11,7 +11,6 @@ modules.poke : HCACHEFILE : $(BUILD_TOP)/.jamdeps ;
 use-project /site-config               : build ;
 use-project /boost                     : 3rd-party/boost ;
 use-project /libraries                 : libraries ;
-use-project /libraries/tipi            : tools/squadt/libraries/tipi/build ;
 use-project /workarounds               : build/workarounds ;
 
 include $(BUILD_TOOLS)/building.jam ;
@@ -42,6 +41,15 @@ for tool in $(tools) {
   use-project /tools/$(tool) : tools/$(tool) ;
 }
 
+# tools with new directory layout
+local ftools = [ MATCH $(root)/tools/(.*)/build/.* : [ glob $(TOP)/tools/*/build/Jamfile.v2 ] ] ;
+
+for tool in $(ftools) {
+  use-project /tools/$(tool) : tools/$(tool)/build ;
+}
+
+tools += $(ftools) ;
+
 import set ;
 import regex ;
 
@@ -57,18 +65,21 @@ if $(disabled) {
 
 # Install when requested
 if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
+  for tool in $(targets) {
+    alias $(tool)
+          : /tools/$(tool)
+          ;
+  }
 
-  if $(targets) {
-    for tool in $(targets) {
-      alias $(tool)
-            : build
-            ;
-    }
-   
+  if ! $(tools) in $(targets) {
+    ECHO "Building selected tools :" $(targets) ;
+
     targets = /tools/$(targets) ;
   }
   else {
-    targets += build-plugins ;
+    ECHO "Complete toolset build in progress!" ;
+
+    targets += /tools/$(targets) build-plugins ;
   }
 
   stage build
@@ -88,6 +99,8 @@ else {
   feature.set-default install : yes ;
 
   if ! $(tools) in $(targets) {
+    ECHO "Installing selected tools :" $(targets) ;
+
     for tool in $(targets) {
       alias $(tool)
             : install
@@ -102,6 +115,8 @@ else {
     targets = /tools/$(targets) ;
   }
   else {
+    ECHO "Complete toolset installation in progress!" ;
+
     # Complete install
     alias install
             : /tools/$(targets)//install

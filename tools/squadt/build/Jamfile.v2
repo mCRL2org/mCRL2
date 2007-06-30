@@ -1,0 +1,34 @@
+project toolset/squadt
+  : build-dir $(BUILD_TOP)/squadt
+  : source-location ../source
+  : requirements <include>../include
+  ;
+
+import sequence ;
+
+source_files = [ glob *.cpp gui/*.cpp gui/dialog/*.cpp ] ;
+
+alias squadt : : <wx>no ;
+
+exe squadt
+      : [ sequence.insertion-sort $(source_files) ]
+        /site-config//wx_base
+      : <wx>yes
+        <library>/site-config//boost_md5
+        <library>/libraries/tipi//controller_interface
+        <use>/libraries/utilities//headers
+        <library>/libraries//ticpp
+        <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
+        <include>$(SETUP)
+      :
+      : <install>yes:<dependency>install-user-manual-data
+      ;
+
+install-data user-manual
+      : gui/manual.html
+      : squadt
+      ;
+
+install-binaries install
+      : squadt
+      ;

@@ -26,6 +26,9 @@ for library in aterm cvc_lite pstream svc ticpp getopt {
         ;
 }
 
+# Additional library
+use-project /libraries/tipi            : $(TOP)/tools/squadt/libraries/tipi/build ;
+
 lib mcrl2
         : /libraries/lps//dataelm.alias
           /libraries/lps//lps.alias
