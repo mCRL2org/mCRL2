@@ -1,0 +1,948 @@
+<?xml version="1.0" ?>
+<Diagram>
+    <File>abp.fsm</File>
+    <Shape>
+        <XCenter>-0.580176</XCenter>
+        <YCenter>0.225624</YCenter>
+        <XDistanceFromCenter>0.128928</XDistanceFromCenter>
+        <YDistanceFromCenter>0.096696</YDistanceFromCenter>
+        <XHinge>0</XHinge>
+        <YHinge>0</YHinge>
+        <AngleCenter>0</AngleCenter>
+        <Type>TYPE_RECT</Type>
+        <LineWidth>1</LineWidth>
+        <LineColor>
+            <Red>0.5</Red>
+            <Green>0.5</Green>
+            <Blue>0.5</Blue>
+            <Alpha>1</Alpha>
+        </LineColor>
+        <FillColor>
+            <Red>0.75</Red>
+            <Green>0.75</Green>
+            <Blue>0.75</Blue>
+            <Alpha>1</Alpha>
+        </FillColor>
+        <XCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </XCenterDOF>
+        <YCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </YCenterDOF>
+        <WidthDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </WidthDOF>
+        <HeightDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </HeightDOF>
+        <AngleDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </AngleDOF>
+        <ColorDOF>
+            <Attribute>s30</Attribute>
+            <Value>0.160494</Value>
+            <Value>0.679012</Value>
+            <Value>0.0895062</Value>
+            <AuxilaryValue>0.697842</AuxilaryValue>
+            <AuxilaryValue>0.683453</AuxilaryValue>
+            <AuxilaryValue>0.366906</AuxilaryValue>
+        </ColorDOF>
+        <OpacityDOF>
+            <Attribute />
+            <Value>0.25</Value>
+            <Value>0.75</Value>
+            <AuxilaryValue>0</AuxilaryValue>
+            <AuxilaryValue>0</AuxilaryValue>
+        </OpacityDOF>
+    </Shape>
+    <Shape>
+        <XCenter>0.386784</XCenter>
+        <YCenter>0.225624</YCenter>
+        <XDistanceFromCenter>0.128928</XDistanceFromCenter>
+        <YDistanceFromCenter>0.096696</YDistanceFromCenter>
+        <XHinge>0</XHinge>
+        <YHinge>0</YHinge>
+        <AngleCenter>0</AngleCenter>
+        <Type>TYPE_RECT</Type>
+        <LineWidth>1</LineWidth>
+        <LineColor>
+            <Red>0.5</Red>
+            <Green>0.5</Green>
+            <Blue>0.5</Blue>
+            <Alpha>1</Alpha>
+        </LineColor>
+        <FillColor>
+            <Red>0.75</Red>
+            <Green>0.75</Green>
+            <Blue>0.75</Blue>
+            <Alpha>1</Alpha>
+        </FillColor>
+        <XCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </XCenterDOF>
+        <YCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </YCenterDOF>
+        <WidthDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </WidthDOF>
+        <HeightDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </HeightDOF>
+        <AngleDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </AngleDOF>
+        <ColorDOF>
+            <Attribute>s33</Attribute>
+            <Value>0.16358</Value>
+            <Value>0.990741</Value>
+            <Value>0.67284</Value>
+            <Value>0.493827</Value>
+            <AuxilaryValue>0.827338</AuxilaryValue>
+            <AuxilaryValue>-0.582734</AuxilaryValue>
+            <AuxilaryValue>0.827338</AuxilaryValue>
+            <AuxilaryValue>0.798561</AuxilaryValue>
+        </ColorDOF>
+        <OpacityDOF>
+            <Attribute />
+            <Value>0.25</Value>
+            <Value>0.75</Value>
+            <AuxilaryValue>0</AuxilaryValue>
+            <AuxilaryValue>0</AuxilaryValue>
+        </OpacityDOF>
+    </Shape>
+    <Shape>
+        <XCenter>-0.096696</XCenter>
+        <YCenter>0.48348</YCenter>
+        <XDistanceFromCenter>0.225624</XDistanceFromCenter>
+        <YDistanceFromCenter>0.096696</YDistanceFromCenter>
+        <XHinge>0</XHinge>
+        <YHinge>0</YHinge>
+        <AngleCenter>0</AngleCenter>
+        <Type>TYPE_RECT</Type>
+        <LineWidth>1</LineWidth>
+        <LineColor>
+            <Red>0.5</Red>
+            <Green>0.5</Green>
+            <Blue>0.5</Blue>
+            <Alpha>1</Alpha>
+        </LineColor>
+        <FillColor>
+            <Red>0.75</Red>
+            <Green>0.75</Green>
+            <Blue>0.75</Blue>
+            <Alpha>1</Alpha>
+        </FillColor>
+        <XCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </XCenterDOF>
+        <YCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </YCenterDOF>
+        <WidthDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </WidthDOF>
+        <HeightDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </HeightDOF>
+        <AngleDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </AngleDOF>
+        <ColorDOF>
+            <Attribute>s31</Attribute>
+            <Value>0.160494</Value>
+            <Value>0.666667</Value>
+            <Value>0.990741</Value>
+            <Value>0.311728</Value>
+            <AuxilaryValue>0.438849</AuxilaryValue>
+            <AuxilaryValue>0.410072</AuxilaryValue>
+            <AuxilaryValue>0.381295</AuxilaryValue>
+            <AuxilaryValue>-0.194245</AuxilaryValue>
+        </ColorDOF>
+        <OpacityDOF>
+            <Attribute />
+            <Value>0.25</Value>
+            <Value>0.75</Value>
+            <AuxilaryValue>0</AuxilaryValue>
+            <AuxilaryValue>0</AuxilaryValue>
+        </OpacityDOF>
+    </Shape>
+    <Shape>
+        <XCenter>-0.096696</XCenter>
+        <YCenter>-0.032232</YCenter>
+        <XDistanceFromCenter>0.225624</XDistanceFromCenter>
+        <YDistanceFromCenter>0.096696</YDistanceFromCenter>
+        <XHinge>0</XHinge>
+        <YHinge>0</YHinge>
+        <AngleCenter>0</AngleCenter>
+        <Type>TYPE_RECT</Type>
+        <LineWidth>1</LineWidth>
+        <LineColor>
+            <Red>0.5</Red>
+            <Green>0.5</Green>
+            <Blue>0.5</Blue>
+            <Alpha>1</Alpha>
+        </LineColor>
+        <FillColor>
+            <Red>0.75</Red>
+            <Green>0.75</Green>
+            <Blue>0.75</Blue>
+            <Alpha>1</Alpha>
+        </FillColor>
+        <XCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </XCenterDOF>
+        <YCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </YCenterDOF>
+        <WidthDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </WidthDOF>
+        <HeightDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </HeightDOF>
+        <AngleDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </AngleDOF>
+        <ColorDOF>
+            <Attribute>s32</Attribute>
+            <Value>0.160494</Value>
+            <Value>0.675926</Value>
+            <Value>0.996914</Value>
+            <Value>0.29321</Value>
+            <AuxilaryValue>0.741007</AuxilaryValue>
+            <AuxilaryValue>0.71223</AuxilaryValue>
+            <AuxilaryValue>0.726619</AuxilaryValue>
+            <AuxilaryValue>0.165468</AuxilaryValue>
+        </ColorDOF>
+        <OpacityDOF>
+            <Attribute />
+            <Value>0.25</Value>
+            <Value>0.75</Value>
+            <AuxilaryValue>0</AuxilaryValue>
+            <AuxilaryValue>0</AuxilaryValue>
+        </OpacityDOF>
+    </Shape>
+    <Shape>
+        <XCenter>-0.386784</XCenter>
+        <YCenter>0.354552</YCenter>
+        <XDistanceFromCenter>0.064464</XDistanceFromCenter>
+        <YDistanceFromCenter>-0.096696</YDistanceFromCenter>
+        <XHinge>0</XHinge>
+        <YHinge>0</YHinge>
+        <AngleCenter>0</AngleCenter>
+        <Type>TYPE_ARROW</Type>
+        <LineWidth>1</LineWidth>
+        <LineColor>
+            <Red>0.5</Red>
+            <Green>0.5</Green>
+            <Blue>0.5</Blue>
+            <Alpha>1</Alpha>
+        </LineColor>
+        <FillColor>
+            <Red>0.75</Red>
+            <Green>0.75</Green>
+            <Blue>0.75</Blue>
+            <Alpha>1</Alpha>
+        </FillColor>
+        <XCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </XCenterDOF>
+        <YCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </YCenterDOF>
+        <WidthDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </WidthDOF>
+        <HeightDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </HeightDOF>
+        <AngleDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </AngleDOF>
+        <ColorDOF>
+            <Attribute />
+            <Value>0.25</Value>
+            <Value>0.75</Value>
+            <AuxilaryValue>0</AuxilaryValue>
+            <AuxilaryValue>0</AuxilaryValue>
+        </ColorDOF>
+        <OpacityDOF>
+            <Attribute />
+            <Value>0.25</Value>
+            <Value>0.75</Value>
+            <AuxilaryValue>0</AuxilaryValue>
+            <AuxilaryValue>0</AuxilaryValue>
+        </OpacityDOF>
+    </Shape>
+    <Shape>
+        <XCenter>0.193392</XCenter>
+        <YCenter>0.354552</YCenter>
+        <XDistanceFromCenter>0.064464</XDistanceFromCenter>
+        <YDistanceFromCenter>0.096696</YDistanceFromCenter>
+        <XHinge>0</XHinge>
+        <YHinge>0</YHinge>
+        <AngleCenter>0</AngleCenter>
+        <Type>TYPE_ARROW</Type>
+        <LineWidth>1</LineWidth>
+        <LineColor>
+            <Red>0.5</Red>
+            <Green>0.5</Green>
+            <Blue>0.5</Blue>
+            <Alpha>1</Alpha>
+        </LineColor>
+        <FillColor>
+            <Red>0.75</Red>
+            <Green>0.75</Green>
+            <Blue>0.75</Blue>
+            <Alpha>1</Alpha>
+        </FillColor>
+        <XCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </XCenterDOF>
+        <YCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </YCenterDOF>
+        <WidthDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </WidthDOF>
+        <HeightDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </HeightDOF>
+        <AngleDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </AngleDOF>
+        <ColorDOF>
+            <Attribute />
+            <Value>0.25</Value>
+            <Value>0.75</Value>
+            <AuxilaryValue>0</AuxilaryValue>
+            <AuxilaryValue>0</AuxilaryValue>
+        </ColorDOF>
+        <OpacityDOF>
+            <Attribute />
+            <Value>0.25</Value>
+            <Value>0.75</Value>
+            <AuxilaryValue>0</AuxilaryValue>
+            <AuxilaryValue>0</AuxilaryValue>
+        </OpacityDOF>
+    </Shape>
+    <Shape>
+        <XCenter>0.193392</XCenter>
+        <YCenter>0.096696</YCenter>
+        <XDistanceFromCenter>-0.064464</XDistanceFromCenter>
+        <YDistanceFromCenter>0.096696</YDistanceFromCenter>
+        <XHinge>0</XHinge>
+        <YHinge>0</YHinge>
+        <AngleCenter>0</AngleCenter>
+        <Type>TYPE_ARROW</Type>
+        <LineWidth>1</LineWidth>
+        <LineColor>
+            <Red>0.5</Red>
+            <Green>0.5</Green>
+            <Blue>0.5</Blue>
+            <Alpha>1</Alpha>
+        </LineColor>
+        <FillColor>
+            <Red>0.75</Red>
+            <Green>0.75</Green>
+            <Blue>0.75</Blue>
+            <Alpha>1</Alpha>
+        </FillColor>
+        <XCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </XCenterDOF>
+        <YCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </YCenterDOF>
+        <WidthDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </WidthDOF>
+        <HeightDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </HeightDOF>
+        <AngleDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </AngleDOF>
+        <ColorDOF>
+            <Attribute />
+            <Value>0.25</Value>
+            <Value>0.75</Value>
+            <AuxilaryValue>0</AuxilaryValue>
+            <AuxilaryValue>0</AuxilaryValue>
+        </ColorDOF>
+        <OpacityDOF>
+            <Attribute />
+            <Value>0.25</Value>
+            <Value>0.75</Value>
+            <AuxilaryValue>0</AuxilaryValue>
+            <AuxilaryValue>0</AuxilaryValue>
+        </OpacityDOF>
+    </Shape>
+    <Shape>
+        <XCenter>-0.386784</XCenter>
+        <YCenter>0.096696</YCenter>
+        <XDistanceFromCenter>-0.064464</XDistanceFromCenter>
+        <YDistanceFromCenter>-0.096696</YDistanceFromCenter>
+        <XHinge>0</XHinge>
+        <YHinge>0</YHinge>
+        <AngleCenter>0</AngleCenter>
+        <Type>TYPE_ARROW</Type>
+        <LineWidth>1</LineWidth>
+        <LineColor>
+            <Red>0.5</Red>
+            <Green>0.5</Green>
+            <Blue>0.5</Blue>
+            <Alpha>1</Alpha>
+        </LineColor>
+        <FillColor>
+            <Red>0.75</Red>
+            <Green>0.75</Green>
+            <Blue>0.75</Blue>
+            <Alpha>1</Alpha>
+        </FillColor>
+        <XCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </XCenterDOF>
+        <YCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </YCenterDOF>
+        <WidthDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </WidthDOF>
+        <HeightDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </HeightDOF>
+        <AngleDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </AngleDOF>
+        <ColorDOF>
+            <Attribute />
+            <Value>0.25</Value>
+            <Value>0.75</Value>
+            <AuxilaryValue>0</AuxilaryValue>
+            <AuxilaryValue>0</AuxilaryValue>
+        </ColorDOF>
+        <OpacityDOF>
+            <Attribute />
+            <Value>0.25</Value>
+            <Value>0.75</Value>
+            <AuxilaryValue>0</AuxilaryValue>
+            <AuxilaryValue>0</AuxilaryValue>
+        </OpacityDOF>
+    </Shape>
+    <Shape>
+        <XCenter>0.064464</XCenter>
+        <YCenter>0.515712</YCenter>
+        <XDistanceFromCenter>0.064464</XDistanceFromCenter>
+        <YDistanceFromCenter>0.064464</YDistanceFromCenter>
+        <XHinge>0</XHinge>
+        <YHinge>0</YHinge>
+        <AngleCenter>0</AngleCenter>
+        <Type>TYPE_RECT</Type>
+        <LineWidth>1</LineWidth>
+        <LineColor>
+            <Red>0.5</Red>
+            <Green>0.5</Green>
+            <Blue>0.5</Blue>
+            <Alpha>1</Alpha>
+        </LineColor>
+        <FillColor>
+            <Red>0.75</Red>
+            <Green>0.75</Green>
+            <Blue>0.75</Blue>
+            <Alpha>1</Alpha>
+        </FillColor>
+        <XCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </XCenterDOF>
+        <YCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </YCenterDOF>
+        <WidthDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </WidthDOF>
+        <HeightDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </HeightDOF>
+        <AngleDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </AngleDOF>
+        <ColorDOF>
+            <Attribute>b4</Attribute>
+            <Value>0.299383</Value>
+            <Value>0.993827</Value>
+            <AuxilaryValue>0.467626</AuxilaryValue>
+            <AuxilaryValue>0.467626</AuxilaryValue>
+        </ColorDOF>
+        <OpacityDOF>
+            <Attribute />
+            <Value>0.25</Value>
+            <Value>0.75</Value>
+            <AuxilaryValue>0</AuxilaryValue>
+            <AuxilaryValue>0</AuxilaryValue>
+        </OpacityDOF>
+    </Shape>
+    <Shape>
+        <XCenter>-0.064464</XCenter>
+        <YCenter>0.515712</YCenter>
+        <XDistanceFromCenter>0.064464</XDistanceFromCenter>
+        <YDistanceFromCenter>0.064464</YDistanceFromCenter>
+        <XHinge>0</XHinge>
+        <YHinge>0</YHinge>
+        <AngleCenter>0</AngleCenter>
+        <Type>TYPE_ELLIPSE</Type>
+        <LineWidth>1</LineWidth>
+        <LineColor>
+            <Red>0.5</Red>
+            <Green>0.5</Green>
+            <Blue>0.5</Blue>
+            <Alpha>1</Alpha>
+        </LineColor>
+        <FillColor>
+            <Red>0.75</Red>
+            <Green>0.75</Green>
+            <Blue>0.75</Blue>
+            <Alpha>1</Alpha>
+        </FillColor>
+        <XCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </XCenterDOF>
+        <YCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </YCenterDOF>
+        <WidthDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </WidthDOF>
+        <HeightDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </HeightDOF>
+        <AngleDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </AngleDOF>
+        <ColorDOF>
+            <Attribute>d7</Attribute>
+            <Value>0.669753</Value>
+            <Value>0.166667</Value>
+            <AuxilaryValue>0.669065</AuxilaryValue>
+            <AuxilaryValue>-0.107914</AuxilaryValue>
+        </ColorDOF>
+        <OpacityDOF>
+            <Attribute />
+            <Value>0.25</Value>
+            <Value>0.75</Value>
+            <AuxilaryValue>0</AuxilaryValue>
+            <AuxilaryValue>0</AuxilaryValue>
+        </OpacityDOF>
+    </Shape>
+    <Shape>
+        <XCenter>-0.515712</XCenter>
+        <YCenter>0.257856</YCenter>
+        <XDistanceFromCenter>0.064464</XDistanceFromCenter>
+        <YDistanceFromCenter>0.064464</YDistanceFromCenter>
+        <XHinge>0</XHinge>
+        <YHinge>0</YHinge>
+        <AngleCenter>0</AngleCenter>
+        <Type>TYPE_RECT</Type>
+        <LineWidth>1</LineWidth>
+        <LineColor>
+            <Red>0.5</Red>
+            <Green>0.5</Green>
+            <Blue>0.5</Blue>
+            <Alpha>1</Alpha>
+        </LineColor>
+        <FillColor>
+            <Red>0.75</Red>
+            <Green>0.75</Green>
+            <Blue>0.75</Blue>
+            <Alpha>1</Alpha>
+        </FillColor>
+        <XCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </XCenterDOF>
+        <YCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </YCenterDOF>
+        <WidthDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </WidthDOF>
+        <HeightDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </HeightDOF>
+        <AngleDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </AngleDOF>
+        <ColorDOF>
+            <Attribute>b</Attribute>
+            <Value>0.299383</Value>
+            <Value>0.993827</Value>
+            <AuxilaryValue>0.395683</AuxilaryValue>
+            <AuxilaryValue>0.338129</AuxilaryValue>
+        </ColorDOF>
+        <OpacityDOF>
+            <Attribute />
+            <Value>0.25</Value>
+            <Value>0.75</Value>
+            <AuxilaryValue>0</AuxilaryValue>
+            <AuxilaryValue>0</AuxilaryValue>
+        </OpacityDOF>
+    </Shape>
+    <Shape>
+        <XCenter>-0.64464</XCenter>
+        <YCenter>0.257856</YCenter>
+        <XDistanceFromCenter>0.064464</XDistanceFromCenter>
+        <YDistanceFromCenter>0.064464</YDistanceFromCenter>
+        <XHinge>0</XHinge>
+        <YHinge>0</YHinge>
+        <AngleCenter>0</AngleCenter>
+        <Type>TYPE_ELLIPSE</Type>
+        <LineWidth>1</LineWidth>
+        <LineColor>
+            <Red>0.5</Red>
+            <Green>0.5</Green>
+            <Blue>0.5</Blue>
+            <Alpha>1</Alpha>
+        </LineColor>
+        <FillColor>
+            <Red>0.75</Red>
+            <Green>0.75</Green>
+            <Blue>0.75</Blue>
+            <Alpha>1</Alpha>
+        </FillColor>
+        <XCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </XCenterDOF>
+        <YCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </YCenterDOF>
+        <WidthDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </WidthDOF>
+        <HeightDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </HeightDOF>
+        <AngleDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </AngleDOF>
+        <ColorDOF>
+            <Attribute>d</Attribute>
+            <Value>0.67284</Value>
+            <Value>0.169753</Value>
+            <AuxilaryValue>0.568345</AuxilaryValue>
+            <AuxilaryValue>-0.00719424</AuxilaryValue>
+        </ColorDOF>
+        <OpacityDOF>
+            <Attribute />
+            <Value>0.25</Value>
+            <Value>0.75</Value>
+            <AuxilaryValue>0</AuxilaryValue>
+            <AuxilaryValue>0</AuxilaryValue>
+        </OpacityDOF>
+    </Shape>
+    <Shape>
+        <XCenter>0.451248</XCenter>
+        <YCenter>0.257856</YCenter>
+        <XDistanceFromCenter>0.064464</XDistanceFromCenter>
+        <YDistanceFromCenter>0.064464</YDistanceFromCenter>
+        <XHinge>0</XHinge>
+        <YHinge>0</YHinge>
+        <AngleCenter>0</AngleCenter>
+        <Type>TYPE_RECT</Type>
+        <LineWidth>1</LineWidth>
+        <LineColor>
+            <Red>0.5</Red>
+            <Green>0.5</Green>
+            <Blue>0.5</Blue>
+            <Alpha>1</Alpha>
+        </LineColor>
+        <FillColor>
+            <Red>0.75</Red>
+            <Green>0.75</Green>
+            <Blue>0.75</Blue>
+            <Alpha>1</Alpha>
+        </FillColor>
+        <XCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </XCenterDOF>
+        <YCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </YCenterDOF>
+        <WidthDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </WidthDOF>
+        <HeightDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </HeightDOF>
+        <AngleDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </AngleDOF>
+        <ColorDOF>
+            <Attribute>b2</Attribute>
+            <Value>0.314815</Value>
+            <Value>0.996914</Value>
+            <AuxilaryValue>0.352518</AuxilaryValue>
+            <AuxilaryValue>0.352518</AuxilaryValue>
+        </ColorDOF>
+        <OpacityDOF>
+            <Attribute />
+            <Value>0.25</Value>
+            <Value>0.75</Value>
+            <AuxilaryValue>0</AuxilaryValue>
+            <AuxilaryValue>0</AuxilaryValue>
+        </OpacityDOF>
+    </Shape>
+    <Shape>
+        <XCenter>0.32232</XCenter>
+        <YCenter>0.257856</YCenter>
+        <XDistanceFromCenter>0.064464</XDistanceFromCenter>
+        <YDistanceFromCenter>0.064464</YDistanceFromCenter>
+        <XHinge>0</XHinge>
+        <YHinge>0</YHinge>
+        <AngleCenter>0</AngleCenter>
+        <Type>TYPE_ELLIPSE</Type>
+        <LineWidth>1</LineWidth>
+        <LineColor>
+            <Red>0.5</Red>
+            <Green>0.5</Green>
+            <Blue>0.5</Blue>
+            <Alpha>1</Alpha>
+        </LineColor>
+        <FillColor>
+            <Red>0.75</Red>
+            <Green>0.75</Green>
+            <Blue>0.75</Blue>
+            <Alpha>1</Alpha>
+        </FillColor>
+        <XCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0.000442391</Value>
+        </XCenterDOF>
+        <YCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </YCenterDOF>
+        <WidthDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </WidthDOF>
+        <HeightDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </HeightDOF>
+        <AngleDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </AngleDOF>
+        <ColorDOF>
+            <Attribute>d6</Attribute>
+            <Value>0.666667</Value>
+            <Value>0.169753</Value>
+            <AuxilaryValue>0.582734</AuxilaryValue>
+            <AuxilaryValue>-0.0791367</AuxilaryValue>
+        </ColorDOF>
+        <OpacityDOF>
+            <Attribute />
+            <Value>0.25</Value>
+            <Value>0.75</Value>
+            <AuxilaryValue>0</AuxilaryValue>
+            <AuxilaryValue>0</AuxilaryValue>
+        </OpacityDOF>
+    </Shape>
+    <Shape>
+        <XCenter>0.064464</XCenter>
+        <YCenter>0</YCenter>
+        <XDistanceFromCenter>0.064464</XDistanceFromCenter>
+        <YDistanceFromCenter>0.064464</YDistanceFromCenter>
+        <XHinge>0</XHinge>
+        <YHinge>0</YHinge>
+        <AngleCenter>0</AngleCenter>
+        <Type>TYPE_RECT</Type>
+        <LineWidth>1</LineWidth>
+        <LineColor>
+            <Red>0.5</Red>
+            <Green>0.5</Green>
+            <Blue>0.5</Blue>
+            <Alpha>1</Alpha>
+        </LineColor>
+        <FillColor>
+            <Red>0.75</Red>
+            <Green>0.75</Green>
+            <Blue>0.75</Blue>
+            <Alpha>1</Alpha>
+        </FillColor>
+        <XCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </XCenterDOF>
+        <YCenterDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </YCenterDOF>
+        <WidthDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </WidthDOF>
+        <HeightDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </HeightDOF>
+        <AngleDOF>
+            <Attribute />
+            <Value>0</Value>
+            <Value>0</Value>
+        </AngleDOF>
+        <ColorDOF>
+            <Attribute>b3</Attribute>
+            <Value>0.299383</Value>
+            <Value>0.990741</Value>
+            <AuxilaryValue>0.366906</AuxilaryValue>
+            <AuxilaryValue>0.280576</AuxilaryValue>
+        </ColorDOF>
+        <OpacityDOF>
+            <Attribute />
+            <Value>0.25</Value>
+            <Value>0.75</Value>
+            <AuxilaryValue>0</AuxilaryValue>
+            <AuxilaryValue>0</AuxilaryValue>
+        </OpacityDOF>
+    </Shape>
+</Diagram>
