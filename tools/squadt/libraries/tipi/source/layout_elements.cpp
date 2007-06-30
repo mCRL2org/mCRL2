@@ -64,6 +64,10 @@ namespace tipi {
         activate_handlers();
       }
 
+      void button::activate() {
+        activate_handlers();
+      }
+
       /**
        * \param[in] m the mediator object to use
        **/

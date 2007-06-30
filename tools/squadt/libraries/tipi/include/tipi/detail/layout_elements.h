@@ -76,6 +76,9 @@ namespace tipi {
 
           /** \brief Change the label */
           void set_label(std::string const&);
+
+          /** \brief Activates the button */
+          void activate();
      
           /** \brief Instantiate a layout element, through a mediator */
           layout::mediator::wrapper_aptr instantiate(layout::mediator*);

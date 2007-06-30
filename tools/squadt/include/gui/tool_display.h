@@ -54,20 +54,6 @@ namespace squadt {
           /** \brief Delegate to actually send a display update */
           boost::function < void (tipi::layout::element const&) > send_display_update;
 
-        private:
-     
-          /** \brief Handler for when a button was clicked */
-          void button_clicked(wxCommandEvent&);
-     
-          /** \brief Handler for when radio buttons changed state */
-          void radio_button_selected(wxCommandEvent&);
-     
-          /** \brief Handler for when radio buttons changed state */
-          void checkbox_clicked(wxCommandEvent&);
-     
-          /** \brief Handler for when radio buttons changed state */
-          void text_field_changed(wxCommandEvent&);
-
         public:
 
           /** \brief Constructor */

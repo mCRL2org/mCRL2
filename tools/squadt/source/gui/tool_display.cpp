@@ -164,6 +164,28 @@ namespace squadt {
       };
 
       /**
+       * Helper class for associating objects of tipi::layout::element with
+       * their wxWidgets counterpart
+       *
+       * This class would not have been necessary if wxWidgets provided
+       * functionality to register function objects as event handlers
+       **/
+      template < typename S >
+      class event_helper : public wxEvtHandler, public wxClientData {
+
+        protected:
+
+          S& tipi_element;
+
+        public:
+
+          event_helper(tipi::layout::element& s) : tipi_element(static_cast < S& > (s)) {
+          }
+
+          void do_changes(wxCommandEvent&);
+      };
+
+      /**
        * \param w the window to which to attach elements
        * \param s the event handler that deals with change events
        **/
@@ -384,6 +406,11 @@ namespace squadt {
         t->SetLabel(wxString(s.c_str(), wxConvLocal));
       }
 
+      template <>
+      void event_helper< layout::elements::button >::do_changes(wxCommandEvent& e) {
+        tipi_element.activate();
+      }
+     
       /**
        * \param[in] e the element that is associated with the new control
        * \param[in] s the text of the label
@@ -404,8 +431,11 @@ namespace squadt {
         /* Connect change event */
         change_event_handler->associate(t, e);
 
-        current_window->Connect(t->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
-                  wxCommandEventHandler(state_change_handler::button_clicked), 0, change_event_handler);
+        event_helper< layout::elements::button >* l = new event_helper< layout::elements::button >(const_cast < tipi::layout::element& > (*e));
+
+        t->Connect(t->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
+                  wxCommandEventHandler(event_helper< layout::elements::button >::do_changes), l, l);
+     
      
         return (mediator::wrapper_aptr(new wrapper(t)));
       }
@@ -418,6 +448,11 @@ namespace squadt {
         wxButton* t = static_cast < wxButton* > (static_cast < wrapper* > (w)->release_window());
 
         t->SetLabel(wxString(s.c_str(), wxConvLocal));
+      }
+
+      template <>
+      void event_helper< layout::elements::radio_button >::do_changes(wxCommandEvent& e) {
+        tipi_element.select();
       }
 
       /**
@@ -436,8 +471,10 @@ namespace squadt {
         /* Connect change event */
         change_event_handler->associate(t, e);
 
-        current_window->Connect(t->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED,
-                  wxCommandEventHandler(state_change_handler::radio_button_selected), 0, change_event_handler);
+        event_helper< layout::elements::radio_button >* l = new event_helper< layout::elements::radio_button >(const_cast < tipi::layout::element& > (*e));
+
+        t->Connect(t->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED,
+                  wxCommandEventHandler(event_helper< layout::elements::radio_button >::do_changes), l, l);
      
         return (mediator::wrapper_aptr(new wrapper(t)));
       }
@@ -454,6 +491,11 @@ namespace squadt {
         t->SetValue(b);
       }
 
+      template <>
+      void event_helper< layout::elements::checkbox >::do_changes(wxCommandEvent& e) {
+        tipi_element.set_status(static_cast < wxCheckBox* > (e.GetEventObject())->GetValue());
+      }
+
       /**
        * \param[in] e the element that is associated with the new control
        * \param[in] s the text of the label
@@ -467,8 +509,10 @@ namespace squadt {
         /* Connect change event */
         change_event_handler->associate(t, e);
 
-        current_window->Connect(t->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-                  wxCommandEventHandler(state_change_handler::checkbox_clicked), 0, change_event_handler);
+        event_helper< layout::elements::checkbox >* l = new event_helper< layout::elements::checkbox >(const_cast < tipi::layout::element& > (*e));
+
+        t->Connect(t->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+                  wxCommandEventHandler(event_helper< layout::elements::checkbox >::do_changes), l, l);
      
         return (mediator::wrapper_aptr(new wrapper(t)));
       }
@@ -517,28 +561,6 @@ namespace squadt {
         t->SetValue(c - min);
       }
 
-      /**
-       * Helper class for associating objects of tipi::layout::element with
-       * their wxWidgets counterpart
-       *
-       * This class would not have been necessary if wxWidgets provided
-       * functionality to register function objects as event handlers
-       **/
-      template < typename S >
-      class event_helper : public wxEvtHandler, public wxClientData {
-
-        protected:
-
-          S& tipi_element;
-
-        public:
-
-          event_helper(tipi::layout::element& s) : tipi_element(static_cast < S& > (s)) {
-          }
-
-          void do_changes(wxCommandEvent&);
-      };
-
       template <>
       void event_helper< layout::elements::text_field >::do_changes(wxCommandEvent& e) {
         tipi_element.set_text(std::string(static_cast < wxTextCtrl* > (e.GetEventObject())->GetValue().fn_str()));
@@ -573,41 +595,6 @@ namespace squadt {
       }
 
       tool_display_mediator::~tool_display_mediator() {
-      }
-
-      void state_change_handler::button_clicked(wxCommandEvent& e) {
-        layout::elements::button const* b = static_cast < layout::elements::button const* > (element_for_window[e.GetEventObject()]);
-
-        send_display_update(*b);
-      }
-
-      void state_change_handler::radio_button_selected(wxCommandEvent& e) {
-        layout::elements::radio_button* r   = const_cast < layout::elements::radio_button* >
-                        (static_cast < layout::elements::radio_button const* > (element_for_window[e.GetEventObject()]));
-
-        r->select();
-
-        send_display_update(*r);
-      }
-
-      void state_change_handler::checkbox_clicked(wxCommandEvent& e) {
-        wxCheckBox*                 wxc = static_cast < wxCheckBox* > (e.GetEventObject());
-        layout::elements::checkbox* c   = const_cast < layout::elements::checkbox* >
-                        (static_cast < layout::elements::checkbox const* > (element_for_window[wxc]));
-
-        c->set_status(wxc->GetValue());
-
-        send_display_update(*c);
-      }
-     
-      void state_change_handler::text_field_changed(wxCommandEvent& e) {
-        wxTextCtrl*                   wxt = static_cast < wxTextCtrl* > (e.GetEventObject());
-        layout::elements::text_field* t   = const_cast < layout::elements::text_field* >
-                        (static_cast < layout::elements::text_field const* > (element_for_window[wxt]));
-
-        t->set_text(std::string(wxt->GetValue().fn_str()));
-
-        send_display_update(*t);
       }
 
       /**

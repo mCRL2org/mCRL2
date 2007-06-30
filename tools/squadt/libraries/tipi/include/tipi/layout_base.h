@@ -67,7 +67,7 @@ namespace tipi {
       protected:
 
         /** \brief Activate all handlers */
-        void activate_handlers(bool = false);
+        void activate_handlers(bool = true);
 
         /** \brief Set the event handler object that will dispatch the events for this object */
         void set_event_handler(basic_event_handler* e);
