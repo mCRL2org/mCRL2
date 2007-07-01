@@ -27,9 +27,19 @@ alias squadt_interface.main
         <define>ENABLE_SQUADT_CONNECTIVITY
       ;
 
+# mCRL2 Tool for SQuADt interface
+lib mtsi
+      : squadt_interface.main
+      ;
+
 alias squadt_interface
-      :
-      : <source>/libraries//utilities
+      : mtsi
+      : <link>static
+      ;
+
+alias squadt_interface
+      : /libraries//utilities
+      : <link>shared
       ;
 
 alias squadt_interface.alias
@@ -54,7 +64,7 @@ alias utilities.main
 #        <wx>yes:<source>spinctrlfloat.o
 #        <wx>yes:<source>colorbutton.o
 #        <wx>yes:<library>/site-config//wx_base
-        <squadt-support>yes:<source>squadt_interface.main
+        <squadt-support>yes,<link>shared:<source>squadt_interface.main
       ;
 
 lib utilities

@@ -192,7 +192,7 @@ namespace tipi {
         void remove_handler(const typename M::type_identifier_t, handler_type);
 
         /** \brief Destructor */
-        ~basic_messenger_impl();
+        virtual ~basic_messenger_impl();
     };
 
     /**

@@ -8,7 +8,23 @@ namespace mcrl2 {
   namespace utilities {
     namespace squadt {
 
-      std::auto_ptr < printer_helper > postman;
+      using ::mcrl2::utilities::messageType;
+  
+      class message_relay {
+        friend void relay_message(messageType t, const char* data);
+   
+        private:
+   
+          /* The communicator object to use */
+          tipi::tool::communicator& tc;
+   
+        public:
+   
+          message_relay(tipi::tool::communicator& t) : tc(t) {
+          }
+      };
+  
+      std::auto_ptr < message_relay > postman;
   
       /** \brief Used to relay messages generated using mcrl2_basic::print */
       void relay_message(messageType t, const char* data) {
@@ -34,7 +50,7 @@ namespace mcrl2 {
   
       /** \brief Replace standard messaging functions */
       void initialise(tipi::tool::communicator& t) {
-        postman = std::auto_ptr < printer_helper > (new printer_helper(t));
+        postman = std::auto_ptr < message_relay > (new message_relay(t));
   
         gsSetCustomMessageHandler(relay_message);
   
@@ -56,18 +72,19 @@ namespace mcrl2 {
       }
   
       void tool_interface::initialise() {
+        /* Initialise squadt utility pseudo-library */
+        mcrl2::utilities::squadt::initialise(m_communicator);
       }
   
       void tool_interface::finalise() {
+        /* Unregister message relay */
+        mcrl2::utilities::squadt::finalise();
       }
   
       bool tool_interface::try_run() {
         if (active) {
           bool valid_configuration_present = false;
           bool termination_requested       = false;
-  
-          /* Initialise squadt utility pseudo-library */
-          mcrl2::utilities::squadt::initialise(m_communicator);
   
           initialise();
   
@@ -128,9 +145,6 @@ namespace mcrl2 {
           finalise();
   
           m_communicator.send_signal_termination();
-  
-          /* Unregister message relay */
-          mcrl2::utilities::squadt::finalise();
   
           active = false;
   

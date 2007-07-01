@@ -6,31 +6,11 @@
 #include <tipi/tool.h>
 
 #include "mcrl2/utilities/tipi_ext.h"
-#include "print/messaging.h"
 
 /** \brief Helps relaying messages printed through the mcrl2_basic::print */
 namespace mcrl2 {
   namespace utilities {
     namespace squadt {
-
-      using ::mcrl2::utilities::messageType;
-  
-      class printer_helper {
-        friend void relay_message(messageType t, const char* data);
-   
-        private:
-   
-          /* The communicator object to use */
-          tipi::tool::communicator& tc;
-   
-        public:
-   
-          printer_helper(tipi::tool::communicator& t) : tc(t) {
-          }
-      };
-  
-      void initialise(tipi::tool::communicator& t);
-      void finalise(tipi::tool::communicator& t);
   
       /**
        * \brief A convenient interface for tool developers to make use of the

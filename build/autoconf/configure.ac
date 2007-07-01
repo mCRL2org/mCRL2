@@ -527,19 +527,20 @@ else
   AC_SUBST([IATERM_LDFLAGS],["${ATERM_LDFLAGS} -lATerm"])
 fi
 
-eval "eval PREFIX_DIR=\\\"${prefix}\\\""
-eval "eval EXEC_PREFIX_DIR=\\\"${exec_prefix}\\\""
+PREFIX_DIR="${prefix}"
+eval EXEC_PREFIX_DIR="${exec_prefix}"
 
-prefix="\$\(prefix\)"
+prefix="\$(prefix)"
+
+eval DATA_DIR="${datadir}/mcrl2"
+eval INCLUDE_DIR="${includedir}/mcrl2"
+eval MAN_DIR="${mandir}"
+eval "eval BIN_DIR=${bindir}"
+eval "eval LIB_DIR=${libdir}/mcrl2"
+
 includedir="$includedir/mcrl2"
 datadir="$datadir/mcrl2"
 libdir="$libdir/mcrl2"
-
-eval "eval DATA_DIR=${datadir}"
-eval "eval BIN_DIR=${bindir}"
-eval "eval LIB_DIR=${libdir}"
-eval INCLUDE_DIR="${includedir}"
-eval "eval MAN_DIR=${mandir}"
 
 AC_SUBST([PREFIX_DIR],[])
 AC_SUBST([EXEC_PREFIX_DIR],[])

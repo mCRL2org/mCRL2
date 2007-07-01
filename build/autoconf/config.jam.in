@@ -46,18 +46,8 @@ prefix      = [ MATCH "^--prefix=(.+)" : [ modules.peek : ARGV ] ] ;
 exec_prefix = [ MATCH "^--exec-prefix=(.+)" : [ modules.peek : ARGV ] ] ;
 
 # Installation related variables
-if ! $(prefix) {
-  prefix = "@PREFIX_DIR@" ;
-}
-else {
-  prefix = "$(prefix)" ;
-}
-if ! $(exec_prefix) {
-  exec_prefix = "@EXEC_PREFIX_DIR@" ;
-}
-else {
-  exec-prefix = "$(exec_prefix)" ;
-}
+prefix      ?= "@PREFIX_DIR@" ;
+exec_prefix ?= "@EXEC_PREFIX_DIR@" ;
 
 BIN_DIR         = "@BIN_DIR@" ;
 LIB_DIR         = "@LIB_DIR@" ;
