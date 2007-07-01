@@ -7,7 +7,7 @@
 #ifndef TIPI_SCHEMES_TCC_
 #define TIPI_SCHEMES_TCC_
 
-#include <tipi/detail/schemes.h>
+#include "tipi/detail/schemes.hpp"
 
 namespace tipi {
 

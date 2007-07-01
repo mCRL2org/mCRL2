@@ -17,12 +17,12 @@
 #include <boost/thread/thread.hpp>
 #include <boost/filesystem/convenience.hpp>
 
-#include <tipi/visitors.h>
+#include "tipi/visitors.hpp"
 
-#include "task_monitor.h"
-#include "processor.h"
-#include "project_manager.h"
-#include "executor.h"
+#include "task_monitor.hpp"
+#include "processor.hpp"
+#include "project_manager.hpp"
+#include "executor.hpp"
 #include "tool_manager.tcc"
 
 namespace squadt {

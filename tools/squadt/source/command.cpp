@@ -7,7 +7,7 @@
 /// \file command.cpp
 /// \brief Add your file description here.
 
-#include "command.h"
+#include "command.hpp"
 
 namespace squadt {
   namespace execution {

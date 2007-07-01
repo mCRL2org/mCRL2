@@ -10,11 +10,11 @@
 
 #include <boost/bind.hpp>
 
-#include <tipi/detail/layout_manager.h>
-#include <tipi/detail/layout_elements.h>
-#include <tipi/display.h>
-#include <tipi/object.h>
-#include <tipi/tool.h>
+#include "tipi/detail/layout_manager.hpp"
+#include "tipi/detail/layout_elements.hpp"
+#include "tipi/display.hpp"
+#include "tipi/object.hpp"
+#include "tipi/tool.hpp"
 
 namespace tipi {
 

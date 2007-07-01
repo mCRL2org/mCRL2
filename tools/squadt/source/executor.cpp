@@ -18,7 +18,7 @@
 #include <boost/weak_ptr.hpp>
 #include <boost/foreach.hpp>
 
-#include <tipi/utility/generic_visitor.h>
+#include "tipi/utility/generic_visitor.hpp"
 
 #include "executor.tcc"
 

@@ -7,14 +7,14 @@
 /// \file gui/main.cpp
 /// \brief Add your file description here.
 
-#include "gui/main.h"
-#include "gui/about.h"
-#include "gui/manual.h"
-#include "gui/project.h"
-#include "gui/resources.h"
-#include "gui/dialog/project_settings.h"
-#include "gui/dialog/preferences.h"
-#include "tool_manager.h"
+#include "gui/main.hpp"
+#include "gui/about.hpp"
+#include "gui/manual.hpp"
+#include "gui/project.hpp"
+#include "gui/resources.hpp"
+#include "gui/dialog/project_settings.hpp"
+#include "gui/dialog/preferences.hpp"
+#include "tool_manager.hpp"
 
 #include <wx/menu.h>
 

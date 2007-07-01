@@ -4,7 +4,7 @@
 //
 /// \file include/tipi/utility/generic_visitor.tcc
 
-#include "tipi/utility/generic_visitor.h"
+#include "tipi/utility/generic_visitor.hpp"
 
 namespace utility {
   template < typename S, typename R >

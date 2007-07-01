@@ -16,8 +16,8 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 
-#include "gui/main.h"
-#include "gui/dialog/processor_settings.h"
+#include "gui/main.hpp"
+#include "gui/dialog/processor_settings.hpp"
 
 namespace squadt {
   namespace GUI {

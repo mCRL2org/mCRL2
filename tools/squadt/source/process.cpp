@@ -30,8 +30,8 @@
 #include <boost/format.hpp>
 #include <boost/thread/thread.hpp>
 
-#include "task_monitor.h"
-#include "command.h"
+#include "task_monitor.hpp"
+#include "command.hpp"
 #include "setup.h"
 
 namespace squadt {

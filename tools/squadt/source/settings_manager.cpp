@@ -11,9 +11,9 @@
 #include <exception>
 #include <cstdio>
 
-#include "setup.h"
+#include <setup.h>
 
-#include "settings_manager.h"
+#include "settings_manager.hpp"
 
 namespace squadt {
 

@@ -10,9 +10,9 @@
 #ifndef TOOL_MANAGER_TCC__
 #define TOOL_MANAGER_TCC__
 
-#include "tool_manager.h"
-#include "task_monitor.h"
-#include "executor.h"
+#include "tool_manager.hpp"
+#include "task_monitor.hpp"
+#include "executor.hpp"
 
 namespace squadt {
   /// \cond INTERNAL_DOCS

@@ -11,12 +11,12 @@
 #include <sstream>
 #include <memory>
 
-#include <tipi/layout_base.h>
-#include <tipi/object.h>
-#include <tipi/detail/layout_elements.h>
-#include <tipi/detail/layout_manager.h>
-#include <tipi/detail/layout_mediator.h>
-#include <tipi/detail/event_handlers.h>
+#include "tipi/layout_base.hpp"
+#include "tipi/object.hpp"
+#include "tipi/detail/layout_elements.hpp"
+#include "tipi/detail/layout_manager.hpp"
+#include "tipi/detail/layout_mediator.hpp"
+#include "tipi/detail/event_handlers.hpp"
 
 namespace tipi {
   namespace layout {

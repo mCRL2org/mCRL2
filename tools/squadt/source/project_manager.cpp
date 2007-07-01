@@ -22,10 +22,10 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/function.hpp>
 
-#include "build_system.h"
+#include "build_system.hpp"
 #include "project_manager.tcc"
-#include "settings_manager.h"
-#include "visitors.h"
+#include "settings_manager.hpp"
+#include "visitors.hpp"
 
 namespace squadt {
   /// \cond INTERNAL_DOCS

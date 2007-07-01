@@ -11,7 +11,7 @@
 #include <wx/sizer.h>
 #include <wx/statline.h>
 
-#include "gui/dialog/base.h"
+#include "gui/dialog/base.hpp"
 
 namespace squadt {
   namespace GUI {

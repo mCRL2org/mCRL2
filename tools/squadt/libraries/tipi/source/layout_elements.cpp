@@ -4,8 +4,8 @@
 //
 /// \file source/layout_elements.cpp
 
-#include <tipi/layout_base.h>
-#include <tipi/detail/layout_elements.h>
+#include "tipi/layout_base.hpp"
+#include "tipi/detail/layout_elements.hpp"
 
 namespace tipi {
   namespace layout {

@@ -7,7 +7,7 @@
 /// \file type_registry.cpp
 /// \brief Add your file description here.
 
-#include "type_registry.h"
+#include "type_registry.hpp"
 
 #include <functional>
 #include <algorithm>
@@ -16,13 +16,13 @@
 #include <boost/regex.hpp>
 #include <boost/bind.hpp>
 
-#include <tipi/mime_type.h>
+#include "tipi/mime_type.hpp"
 
 #include <wx/mimetype.h>
 
-#include "tool_manager.h"
-#include "command.h"
-#include "tool.h"
+#include "tool_manager.hpp"
+#include "command.hpp"
+#include "tool.hpp"
 
 wxMimeTypesManager global_mime_types_manager;
 

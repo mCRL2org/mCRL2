@@ -6,10 +6,10 @@
 
 #include <boost/shared_array.hpp>
 
-#include <tipi/tool/category.h>
-#include <tipi/controller/capabilities.h>
+#include "tipi/tool/category.hpp"
+#include "tipi/controller/capabilities.hpp"
 #include <tipi/detail/tool.tcc>
-#include <tipi/detail/event_handlers.h>
+#include "tipi/detail/event_handlers.hpp"
 
 namespace tipi {
   namespace tool {

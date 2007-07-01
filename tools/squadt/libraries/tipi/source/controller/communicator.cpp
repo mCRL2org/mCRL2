@@ -10,7 +10,7 @@
 #include <boost/bind.hpp>
 
 #include <tipi/detail/controller.tcc>
-#include <tipi/detail/event_handlers.h>
+#include "tipi/detail/event_handlers.hpp"
 
 namespace tipi {
   namespace controller {

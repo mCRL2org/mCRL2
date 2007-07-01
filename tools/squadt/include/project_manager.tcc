@@ -10,7 +10,7 @@
 #ifndef PROJECT_MANAGER_TCC_
 #define PROJECT_MANAGER_TCC_
 
-#include "project_manager.h"
+#include "project_manager.hpp"
 
 namespace squadt {
 

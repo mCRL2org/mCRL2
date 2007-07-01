@@ -6,10 +6,10 @@
 
 #define TIPI_IMPORT_STATIC_DEFINITIONS
 
-#include <tipi/configuration.h>
-#include <tipi/tool/category.h>
-#include <tipi/detail/basic_messenger.h>
-#include <tipi/common.h>
+#include "tipi/configuration.hpp"
+#include "tipi/tool/category.hpp"
+#include "tipi/detail/basic_messenger.hpp"
+#include "tipi/common.hpp"
 
 namespace tipi {
   namespace messaging {

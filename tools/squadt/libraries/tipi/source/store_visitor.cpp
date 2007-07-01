@@ -12,15 +12,15 @@
 #include <boost/foreach.hpp>
 #include <boost/regex.hpp>
 
-#include <tipi/visitors.h>
-#include <tipi/report.h>
-#include <tipi/controller/capabilities.h>
-#include <tipi/tool/capabilities.h>
-#include <tipi/detail/layout_elements.h>
-#include <tipi/detail/layout_manager.h>
+#include "tipi/visitors.hpp"
+#include "tipi/report.hpp"
+#include "tipi/controller/capabilities.hpp"
+#include "tipi/tool/capabilities.hpp"
+#include "tipi/detail/layout_elements.hpp"
+#include "tipi/detail/layout_manager.hpp"
 #include <tipi/utility/generic_visitor.tcc>
-#include <tipi/display.h>
-#include <tipi/common.h>
+#include "tipi/display.hpp"
+#include "tipi/common.hpp"
 
 namespace tipi {
 

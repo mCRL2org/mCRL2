@@ -7,7 +7,7 @@
 /// \file executor.tcc
 /// \brief Add your file description here.
 
-#include "executor.h"
+#include "executor.hpp"
 
 namespace squadt {
   /// \cond INTERNAL_DOCS

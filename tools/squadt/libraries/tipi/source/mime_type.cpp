@@ -7,7 +7,7 @@
 #include <boost/foreach.hpp>
 #include <boost/regex.hpp>
 
-#include "tipi/mime_type.h"
+#include "tipi/mime_type.hpp"
 
 namespace tipi {
   const char* const       mime_type::main_type_as_string[] = { "application", "audio", "image", "message", "multipart", "text", "video", "unknown", 0 };

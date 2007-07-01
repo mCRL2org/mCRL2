@@ -10,14 +10,14 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 
-#include "build_system.h"
+#include "build_system.hpp"
 
-#include "visitors.h"
-#include "settings_manager.h"
-#include "type_registry.h"
-#include "tool_manager.h"
-#include "executor.h"
-#include "tool.h"
+#include "visitors.hpp"
+#include "settings_manager.hpp"
+#include "type_registry.hpp"
+#include "tool_manager.hpp"
+#include "executor.hpp"
+#include "tool.hpp"
 
 namespace squadt {
 

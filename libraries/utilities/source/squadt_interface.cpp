@@ -1,6 +1,6 @@
 #include "print/messaging.h"
 #include "mcrl2/utilities/squadt_interface.h"
-#include "tipi/utility/logger.h"
+#include "tipi/utility/logger.hpp"
 
 using namespace mcrl2::utilities;
 

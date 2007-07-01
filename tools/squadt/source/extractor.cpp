@@ -12,8 +12,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 
-#include <tipi/visitors.h>
-#include "extractor.h"
+#include "tipi/visitors.hpp"
+#include "extractor.hpp"
 
 namespace squadt {
 

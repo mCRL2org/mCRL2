@@ -8,8 +8,8 @@
 #include <boost/test/unit_test_monitor.hpp>
 
 #include <tipi/detail/basic_messenger.tcc>
-#include <tipi/tool.h>
-#include <tipi/controller.h>
+#include "tipi/tool.hpp"
+#include "tipi/controller.hpp"
 
 #define BOOST_TEST_SHOW_PROGRESS yes
 

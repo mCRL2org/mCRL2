@@ -10,9 +10,9 @@
 
 #include <boost/bind.hpp>
 
-#include <tipi/controller/capabilities.h>
-#include <tipi/tool/capabilities.h>
-#include <tipi/visitors.h>
+#include "tipi/controller/capabilities.hpp"
+#include "tipi/tool/capabilities.hpp"
+#include "tipi/visitors.hpp"
 
 namespace tipi {
   namespace tool {

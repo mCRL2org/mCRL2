@@ -13,21 +13,21 @@
 #include <boost/filesystem/convenience.hpp>
 #include <boost/foreach.hpp>
 
-#include "build_system.h"
-#include "settings_manager.h"
+#include "build_system.hpp"
+#include "settings_manager.hpp"
 #include "tool_manager.tcc"
 #include "project_manager.tcc"
-#include "type_registry.h"
+#include "type_registry.hpp"
 #include "executor.tcc"
 #include "processor.tcc"
 
 #include <tipi/utility/generic_visitor.tcc>
 
-#include "visitors.h"
+#include "visitors.hpp"
 
-#include <tipi/visitors.h>
+#include "tipi/visitors.hpp"
 
-#include <ticpp.h>
+#include "ticpp.h"
 
 namespace squadt {
 

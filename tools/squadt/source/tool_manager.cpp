@@ -16,20 +16,20 @@
 #include <boost/filesystem/convenience.hpp>
 #include <boost/foreach.hpp>
 
-#include <tipi/utility/generic_visitor.h>
+#include "tipi/utility/generic_visitor.hpp"
 
 #include <tipi/detail/controller.tcc>
 
-#include "settings_manager.h"
+#include "settings_manager.hpp"
 #include "tool_manager.tcc"
-#include "task_monitor.h"
-#include "executor.h"
-#include "command.h"
-#include "extractor.h"
-#include "processor.h"
-#include "executor.h"
+#include "task_monitor.hpp"
+#include "executor.hpp"
+#include "command.hpp"
+#include "extractor.hpp"
+#include "processor.hpp"
+#include "executor.hpp"
 
-#include "setup.h"
+#include <setup.h>
 
 namespace squadt {
 
@@ -51,7 +51,9 @@ namespace squadt {
   /// \cond INTERNAL_DOCS
   const long tool_manager_impl::default_port = 10947;
 
-  char const* tool_manager_impl::default_tools[] = {"diagraphica", "lps2pbes", "lpsbinary", "lpsconstelm", "lpsdecluster", "lpsinfo", "lpsparelm", "lpsuntime", "lps2lts",                                                     "lpssumelm", "ltsconvert", "ltsinfo", "ltsgraph", "ltsview", "mcrl22lps", "pbes2bes", "pbes2bool", "pnml2mcrl2", "xsim", 0};
+  char const* tool_manager_impl::default_tools[] = {"diagraphica", "lps2pbes", "lpsbinary", "lpsconstelm", "lpsdecluster", "lpsinfo",
+                                                    "lpsparelm", "lpsuntime", "lps2lts", "lpssumelm", "ltsconvert", "ltsinfo",
+                                                    "ltsgraph", "ltsview", "mcrl22lps", "pbes2bes", "pbes2bool", "pnml2mcrl2", "xsim", 0};
 
 
   tool_manager_impl::tool_manager_impl() : tipi::controller::communicator(), free_identifier(0) {

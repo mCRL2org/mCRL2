@@ -3,7 +3,7 @@
 
 #include <boost/cstdint.hpp>
 
-#include <tipi/tool.h>
+#include <tipi/tool.hpp>
 
 #include "mcrl2/utilities/tipi_ext.h"
 

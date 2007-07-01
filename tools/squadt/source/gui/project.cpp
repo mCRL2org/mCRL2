@@ -20,17 +20,17 @@
 #include <boost/filesystem/convenience.hpp>
 #include <boost/ref.hpp>
 
-#include "gui/main.h"
-#include "gui/project.h"
-#include "gui/resources.h"
-#include "gui/tool_display.h"
-#include "gui/dialog/base.h"
-#include "gui/dialog/project_settings.h"
-#include "gui/dialog/processor_settings.h"
-#include "project_manager.h"
-#include "tool_manager.h"
-#include "type_registry.h"
-#include "build_system.h"
+#include "gui/main.hpp"
+#include "gui/project.hpp"
+#include "gui/resources.hpp"
+#include "gui/tool_display.hpp"
+#include "gui/dialog/base.hpp"
+#include "gui/dialog/project_settings.hpp"
+#include "gui/dialog/processor_settings.hpp"
+#include "project_manager.hpp"
+#include "tool_manager.hpp"
+#include "type_registry.hpp"
+#include "build_system.hpp"
 
 #include <wx/choicdlg.h>
 #include <wx/filedlg.h>

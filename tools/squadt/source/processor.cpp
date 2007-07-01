@@ -20,11 +20,11 @@
 #include <boost/format.hpp>
 #include <boost/foreach.hpp>
 
-#include <tipi/controller.h>
-#include <tipi/utility/logger.h>
+#include "tipi/controller.hpp"
+#include "tipi/utility/logger.hpp"
 
 #include "processor.tcc"
-#include "task_monitor.h"
+#include "task_monitor.hpp"
 
 namespace squadt {
 

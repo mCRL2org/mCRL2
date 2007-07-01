@@ -8,8 +8,8 @@
 #include <boost/foreach.hpp>
 #include <boost/filesystem/convenience.hpp>
 
-#include <tipi/configuration.h>
-#include <tipi/visitors.h>
+#include "tipi/configuration.hpp"
+#include "tipi/visitors.hpp"
 
 namespace tipi {
 

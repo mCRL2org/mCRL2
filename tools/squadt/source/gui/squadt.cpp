@@ -15,15 +15,15 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
-#include <tipi/utility/print_logger.h>
+#include "tipi/utility/print_logger.hpp"
 
-#include "settings_manager.h"
-#include "tool_manager.h"
-#include "build_system.h"
-#include "executor.h"
+#include "settings_manager.hpp"
+#include "tool_manager.hpp"
+#include "build_system.hpp"
+#include "executor.hpp"
 
-#include "gui/splash.h"
-#include "gui/main.h"
+#include "gui/splash.hpp"
+#include "gui/main.hpp"
 
 #include <wx/wx.h>
 #include <wx/filename.h>

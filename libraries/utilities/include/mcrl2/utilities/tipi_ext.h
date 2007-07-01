@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 
-#include <tipi/tool.h>
+#include <tipi/tool.hpp>
 
 namespace mcrl2 {
   namespace utilities {

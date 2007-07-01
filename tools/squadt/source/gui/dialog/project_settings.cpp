@@ -9,9 +9,9 @@
 
 #include <boost/filesystem/operations.hpp>
 
-#include "gui/dialog/project_settings.h"
-#include "settings_manager.h"
-#include "project_manager.h"
+#include "gui/dialog/project_settings.hpp"
+#include "settings_manager.hpp"
+#include "project_manager.hpp"
 
 #include <wx/panel.h>
 #include <wx/filename.h>

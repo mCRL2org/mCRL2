@@ -13,11 +13,11 @@
 #include <boost/foreach.hpp>
 
 #define IMPORT_STATIC_DEFINITIONS
-#include <transport/detail/basics.h>
+#include "transport/detail/basics.hpp"
 #include <transport/detail/transceiver.tcc>
-#include <transport/detail/socket_listener.h>
-#include <transport/detail/direct_transceiver.h>
-#include <transport/detail/socket_transceiver.h>
+#include "transport/detail/socket_listener.hpp"
+#include "transport/detail/direct_transceiver.hpp"
+#include "transport/detail/socket_transceiver.hpp"
 
 namespace transport {
 

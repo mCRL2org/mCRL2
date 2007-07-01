@@ -7,10 +7,10 @@
 /// \file gui/dialog/preferences.cpp
 /// \brief Add your file description here.
 
-#include "gui/dialog/preferences.h"
-#include "build_system.h"
-#include "tool_manager.h"
-#include "executor.h"
+#include "gui/dialog/preferences.hpp"
+#include "build_system.hpp"
+#include "tool_manager.hpp"
+#include "executor.hpp"
 
 #include <boost/foreach.hpp>
 
@@ -23,8 +23,8 @@
 #include <wx/slider.h>
 #include <wx/sizer.h>
 
-#include <tipi/controller.h>
-#include <tipi/utility/logger.h>
+#include "tipi/controller.hpp"
+#include "tipi/utility/logger.hpp"
 
 // Compatibility with wx 2.6.*
 #if (wxMAJOR_VERSION <= 2) && (wxMINOR_VERSION < 8)

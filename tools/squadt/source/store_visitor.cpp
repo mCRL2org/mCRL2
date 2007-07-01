@@ -7,7 +7,7 @@
 /// \file store_visitor.cpp
 /// \brief Add your file description here.
 
-#include "visitors.h"
+#include "visitors.hpp"
 
 #include <fstream>
 #include <exception>
@@ -16,11 +16,11 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
 
-#include "build_system.h"
-#include "settings_manager.h"
+#include "build_system.hpp"
+#include "settings_manager.hpp"
 #include "project_manager.tcc"
 #include "tool_manager.tcc"
-#include "type_registry.h"
+#include "type_registry.hpp"
 #include "executor.tcc"
 #include "processor.tcc"
 

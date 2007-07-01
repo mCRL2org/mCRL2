@@ -22,10 +22,10 @@
 #include <boost/thread/condition.hpp>
 #include <boost/thread/xtime.hpp>
 
-#include <transport/transporter.h>
+#include "transport/transporter.hpp"
 
-#include <tipi/detail/basic_messenger.h>
-#include <tipi/common.h>
+#include "tipi/detail/basic_messenger.hpp"
+#include "tipi/common.hpp"
 
 namespace tipi {
 

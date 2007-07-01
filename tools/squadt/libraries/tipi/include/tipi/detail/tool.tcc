@@ -4,14 +4,14 @@
 //
 /// \file include/tipi/detail/tool.tcc
 
-#include <tipi/common.h>
+#include "tipi/common.hpp"
 #include <tipi/detail/basic_messenger.tcc>
-#include <tipi/tool.h>
-#include <tipi/tool/capabilities.h>
-#include <tipi/layout_base.h>
-#include <tipi/detail/message.h>
-#include <tipi/detail/command_line_interface.h>
-#include <tipi/visitors.h>
+#include "tipi/tool.hpp"
+#include "tipi/tool/capabilities.hpp"
+#include "tipi/layout_base.hpp"
+#include "tipi/detail/message.hpp"
+#include "tipi/detail/command_line_interface.hpp"
+#include "tipi/visitors.hpp"
 
 namespace tipi {
   namespace tool {

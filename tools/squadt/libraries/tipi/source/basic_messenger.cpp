@@ -5,7 +5,7 @@
 /// \file source/basic_messenger.cpp
 
 #include <tipi/detail/basic_messenger.tcc>
-#include <tipi/common.h>
+#include "tipi/common.hpp"
 
 namespace tipi {
 

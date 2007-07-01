@@ -11,18 +11,18 @@
 #include <boost/tuple/tuple.hpp>
 
 #include <tipi/utility/generic_visitor.tcc>
-#include <tipi/visitors.h>
-#include <tipi/report.h>
-#include <tipi/tool/capabilities.h>
-#include <tipi/controller/capabilities.h>
-#include <tipi/basic_datatype.h>
-#include <tipi/detail/layout_elements.h>
-#include <tipi/detail/layout_manager.h>
-#include <tipi/display.h>
-#include <tipi/detail/event_handlers.h>
-#include <tipi/common.h>
+#include "tipi/visitors.hpp"
+#include "tipi/report.hpp"
+#include "tipi/tool/capabilities.hpp"
+#include "tipi/controller/capabilities.hpp"
+#include "tipi/basic_datatype.hpp"
+#include "tipi/detail/layout_elements.hpp"
+#include "tipi/detail/layout_manager.hpp"
+#include "tipi/display.hpp"
+#include "tipi/detail/event_handlers.hpp"
+#include "tipi/common.hpp"
 
-#include <ticpp.h>
+#include "ticpp.h"
 
 namespace tipi {
   /// \cond INTERNAL_DOCS

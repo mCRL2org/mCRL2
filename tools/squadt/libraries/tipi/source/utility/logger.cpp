@@ -4,7 +4,7 @@
 //
 /// \file source/utility/logger.cpp
 
-#include <tipi/utility/logger.h>
+#include "tipi/utility/logger.hpp"
 
 namespace tipi {
   namespace utility {

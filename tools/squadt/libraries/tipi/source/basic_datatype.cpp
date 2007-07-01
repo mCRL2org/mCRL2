@@ -4,7 +4,7 @@
 //
 /// \file source/basic_datatype.cpp
 
-#include <tipi/basic_datatype.h>
+#include "tipi/basic_datatype.hpp"
 
 #include <boost/regex.hpp>
 

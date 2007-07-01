@@ -14,10 +14,10 @@
 #include <boost/shared_array.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <tipi/detail/command_line_interface.h>
+#include "tipi/detail/command_line_interface.hpp"
 #include <tipi/detail/tool.tcc>
 #include <tipi/detail/schemes.tcc>
-#include <tipi/utility/logger.h>
+#include "tipi/utility/logger.hpp"
 
 namespace tipi {
 
