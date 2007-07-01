@@ -9,13 +9,9 @@
 #include <cassert>
 #include <cerrno>
 #include <unistd.h>
+#include <process.h>
 
-#define getpid   _getpid
-
-inline pid_t waitpid(pid_t pid, int* status, int options) {
-
-  return _cwait (status, pid, _WAIT_CHILD);
-}
+#define getpid _getpid
 
 #ifndef WIFEXITED
   #define WIFEXITED(S) 1

@@ -18,20 +18,14 @@ alias transport
     : <library>/site-config//boost_thread
       <library>/site-config//boost_system
       <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
-      <os>CYGWIN:<define>__USE_W32_SOCKETS
-      <os>CYGWIN:<define>_WIN32_WINNT=0x0500
-      <os>NT:<define>__USE_W32_SOCKETS
-      <os>NT:<define>_WIN32_WINNT=0x0500
       <threading>multi
+      <os>NT:<use>/site-config//winsock
+      <os>CYGWIN:<use>/site-config//winsock
     :
     : <library>/site-config//boost_thread
       <library>/site-config//boost_system
       <os>NT:<library>/site-config//winsock
       <os>CYGWIN:<library>/site-config//winsock
-      <os>CYGWIN:<define>__USE_W32_SOCKETS
-      <os>CYGWIN:<define>_WIN32_WINNT=0x0500
-      <os>NT:<define>__USE_W32_SOCKETS
-      <os>NT:<define>_WIN32_WINNT=0x0500
     ;
 
 obj restore_visitor.o
@@ -70,8 +64,8 @@ alias messenger
       <library>/site-config//boost_filesystem
     ;
 
-obj tool_communicator.o : tool/communicator.cpp ;
-obj controller_communicator.o : controller/communicator.cpp ;
+obj tool_communicator.o       : tool/communicator.cpp       : <use>transport ;
+obj controller_communicator.o : controller/communicator.cpp : <use>transport ;
 
 lib tipi-controller
     : controller_communicator.o

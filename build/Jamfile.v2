@@ -79,7 +79,18 @@ lib z  : : <name>"z" ;
 lib m  : : <name>"m" ;
 lib dl : : <name>"dl" ;
 
-alias winsock : winsock32 ws2_32 ;
+alias winsock
+    : winsock32 ws2_32
+    : <os>CYGWIN:<define>__USE_W32_SOCKETS
+      <os>CYGWIN:<define>_WIN32_WINNT=0x0500
+      <os>NT:<define>__USE_W32_SOCKETS
+      <os>NT:<define>_WIN32_WINNT=0x0500
+    :
+    : <os>CYGWIN:<define>__USE_W32_SOCKETS
+      <os>CYGWIN:<define>_WIN32_WINNT=0x0500
+      <os>NT:<define>__USE_W32_SOCKETS
+      <os>NT:<define>_WIN32_WINNT=0x0500
+    ;
 
 lib winsock32 : : <name>"wsock32" ;
 lib ws2_32 : : <name>"ws2_32" ;

@@ -15,6 +15,8 @@
 #include <map>
 #include <iostream>
 
+#include <workarounds.h>
+
 #include <boost/ref.hpp>
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
