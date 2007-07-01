@@ -4,8 +4,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pbes2bes/sort_functions.cpp
-/// \brief Header file for a number of functions on sorts.
+/// \file sort_functions.h
+/// \brief Add your file description here.
 
 #include "mcrl2/pbes/pbes.h"
 

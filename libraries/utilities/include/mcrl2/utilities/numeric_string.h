@@ -1,3 +1,12 @@
+// Author(s): Aad Mathijssen
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file include/mcrl2/utilities/numeric_string.h
+/// \brief Add your file description here.
+
 #ifndef __NUMERIC_STRING_FUNCTIONS_H__
 #define __NUMERIC_STRING_FUNCTIONS_H__
 

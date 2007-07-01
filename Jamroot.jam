@@ -28,6 +28,7 @@ project toolset
           $(OPTIMISATIONS)
           <link>$(LINK_VARIANT)
           $(BUILD_OPTIONS)
+          <warnings>off
        ;
 
 include $(BUILD_TOOLS)/installing.jam ;

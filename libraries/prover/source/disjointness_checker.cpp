@@ -1,3 +1,12 @@
+// Author(s): Luc Engelen
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file source/disjointness_checker.cpp
+/// \brief Add your file description here.
+
 // Implementation of class Disjointness_Checker
 // file: disjointness_checker.cpp
 

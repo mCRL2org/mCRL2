@@ -4,8 +4,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pbes2bes/pbes2bes.cpp
-/// \brief Main file for the tool pbes2bes.
+/// \file pbes2bes.cpp
+/// \brief Add your file description here.
 
 #define NAME "pbes2bes"
 #define VERSION "0.1.4"
@@ -1172,5 +1172,3 @@ t_tool_options parse_command_line(int argc, char** argv)
 	tool_options.opt_strategy = opt_strategy;
 	return tool_options;
 }
-
-
