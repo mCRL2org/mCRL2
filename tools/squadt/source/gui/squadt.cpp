@@ -33,7 +33,7 @@
 #include <wx/msgdlg.h>
 
 const char* program_name    = "squadt";
-const char* program_version = "0.3.0";
+const char* program_version = "1.0.0";
 
 /**
  * \namespace squadt
@@ -163,7 +163,7 @@ bool Squadt::OnInit() {
     
     wxImage logo(logo_xpm);
     
-    splash* splash_window(new splash(&logo, 1));
+    splash* splash_window = new splash(&logo, 1);
 
     try {
       global_build_system.initialise(
