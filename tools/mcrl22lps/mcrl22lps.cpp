@@ -1,3 +1,12 @@
+// Author(s): Jan Friso Groote
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl22lps.cpp
+/// \brief Add your file description here.
+
 #include <cassert>
 #include <stdbool.h>
 #include <getopt.h>

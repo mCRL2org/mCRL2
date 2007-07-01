@@ -1,3 +1,12 @@
+// Author(s): Luc Engelen
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file include/mcrl2/utilities/sort_info.h
+/// \brief Add your file description here.
+
 // Interface to classes Sort_Info
 // file: sort_info.h
 

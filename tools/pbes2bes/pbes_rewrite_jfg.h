@@ -1,3 +1,12 @@
+// Author(s): Alexander van Dam
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file pbes_rewrite_jfg.h
+/// \brief Add your file description here.
+
 #include "librewrite.h"
 #include "mcrl2/pbes/pbes.h"
 #include "libprint_c.h"

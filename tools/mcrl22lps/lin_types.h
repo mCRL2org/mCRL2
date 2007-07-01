@@ -1,5 +1,14 @@
-#ifndef __LIN_TYPES_H
-#define __LIN_TYPES_H
+// Author(s): Jan Friso Groote
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file lin_types.h
+/// \brief Add your file description here.
+
+#ifndef MCRL2_LIN_TYPES_H
+#define MCRL2_LIN_TYPES_H
 
 #include <stdbool.h>
 #include <string>
@@ -52,4 +61,4 @@ struct t_lin_options {
   {}
 };
 
-#endif //__LIN_TYPES_H
+#endif //MCRL2_LIN_TYPES_H

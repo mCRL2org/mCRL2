@@ -4,8 +4,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pbes2bes/pbes_rewrite.cpp
-/// \brief Source file for the PBES rewriter.
+/// \file pbes_rewrite.cpp
+/// \brief Add your file description here.
 
 #include "pbes_rewrite.h"
 #include "mcrl2/pbes/utility.h"
@@ -305,4 +305,3 @@ pbes_expression_list get_or_expressions(pbes_expression_list or_list, data_speci
 	}
 	return reverse(result);
 }
-
