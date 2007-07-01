@@ -1,4 +1,4 @@
-#if !(defined(_MSC_VER) || defined(__MINGW32__))
+#if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
 
 // Implementation of class SMT_Solver_CVC_Lite
 // file: smt_solver_cvc_lite.cpp
