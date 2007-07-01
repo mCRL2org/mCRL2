@@ -12,6 +12,8 @@ exe ltsgraph
          /site-config//wx_base
        : <wx>yes
          <squadt-connectivity>implemented
+         <os>NT:<linkflags>"-Wl,-subsystem:windows -mwindows"
+         <os>CYGWIN:<linkflags>"-Wl,-subsystem:windows -mwindows"
        ;
 
 install-binaries install

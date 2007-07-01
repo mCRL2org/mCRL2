@@ -20,6 +20,8 @@ exe squadt
         <library>/libraries//ticpp
         <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
         <include>$(SETUP)
+        <os>NT:<linkflags>"-Wl,-subsystem:windows -mwindows"
+        <os>CYGWIN:<linkflags>"-Wl,-subsystem:windows -mwindows"
       :
       : <install>yes:<dependency>install-user-manual-data
       ;

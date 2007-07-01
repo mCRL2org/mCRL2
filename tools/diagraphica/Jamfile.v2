@@ -12,6 +12,8 @@ exe diagraphica
         /site-config//wx_gl
       : <wx>yes
         <squadt-connectivity>implemented
+        <os>NT:<linkflags>"-Wl,-subsystem:windows -mwindows"
+        <os>CYGWIN:<linkflags>"-Wl,-subsystem:windows -mwindows"
       ;
 
 install-binaries install
