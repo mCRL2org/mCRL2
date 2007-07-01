@@ -40,7 +40,6 @@ if ! squadt in [ MATCH "--disable-(squadt)-support" : $(FULL_COMMAND_LINE) ] {
   feature.compose <squadt-connectivity>implemented
         : <squadt-interface>enabled
           <library>/libraries/utilities//squadt_interface
-          <library>/libraries/tipi//tool_interface
         ;
 }
 else {

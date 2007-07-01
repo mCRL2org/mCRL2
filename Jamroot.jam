@@ -21,6 +21,7 @@ project toolset
           <define>_FILE_OFFSET_BITS=64
           <define>REVISION=\\\"$(REVISION)-$(BUILD_VARIANT)-$(LINK_VARIANT)\\\"
           <use>/workarounds//configuration
+          <link>static,<squadt-support>yes:<threading>multi
        : default-build
           <address-model>$(ADDRESS_MODEL)
           <variant>$(BUILD_VARIANT)
