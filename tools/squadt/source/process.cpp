@@ -20,6 +20,9 @@
 # include <workarounds.h>
 # include <tchar.h>
 #else
+# if defined(__CYGWIN__)
+#  define _POSIX_SOURCE
+# endif
 # include <unistd.h>
 # include <sys/wait.h>
 #endif
