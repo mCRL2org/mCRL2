@@ -109,3 +109,7 @@ IMPORT $(__name__)
        : $(caller)
        : libraries_from_string
        ;
+
+if [ modules.peek : OS ] != MACOSX {
+  feature.feature bundle : yes no ;
+}
