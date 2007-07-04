@@ -2,7 +2,7 @@ path-constant TOP             : . ;
 path-constant BUILD_TOOLS     : ./build/boost_build.v2 ; # Common build directory
 path-constant BUILD_TOP       : ./build/bin ;            # Common build directory
 path-constant BOOST_ROOT      : ./3rd-party/boost ;      # Boost prefix (packaged sources)
-path-constant SETUP           : ./tools ;                  # Header file for run-time configuration
+path-constant SETUP           : ./tools ;                # Header file for run-time configuration
 
 # Activate header cache
 modules.poke : HCACHEFILE : $(BUILD_TOP)/.jamdeps ;
@@ -20,6 +20,7 @@ project toolset
        : requirements
           <define>_FILE_OFFSET_BITS=64
           <define>REVISION=\\\"$(REVISION)-$(BUILD_VARIANT)-$(LINK_VARIANT)\\\"
+          <toolset>darwin,<bundle>no:<dylib-install-location>"$(LIB_DIR)"
           <use>/workarounds//configuration
           <link>static,<squadt-support>yes:<threading>multi
        : default-build
@@ -122,10 +123,11 @@ else {
     # Complete install
     alias install
             : /tools/$(targets)//install
-              install-shared-libraries
               install-examples
               install-headers
             : <os>MACOSX,<wx>yes:<source>install-mac-bundles
+              <dll-path>$(LIB_DIR)
+              <dependency>install-shared-libraries
             ;
 
     # General examples
@@ -151,7 +153,7 @@ else {
 #          ;
 
   stage install-shared-libraries
-          : $(targets)
+          : $(targets)//install
           : <location>$(LIB_DIR)
             <dll-path>$(LIB_DIR)
             <install-dependencies>on <install-type>SHARED_LIB
@@ -160,16 +162,16 @@ else {
   stage install-shared-libraries
           : $(targets)
           : <location>$(BIN_DIR)
+            <dll-path>$(LIB_DIR)
             <os>NT
-            <dll-path>$(BIN_DIR)
             <install-dependencies>on <install-type>SHARED_LIB
           ;
 
   stage install-shared-libraries
           : $(targets)
           : <location>$(BIN_DIR)
+            <dll-path>$(LIB_DIR)
             <os>CYGWIN
-            <dll-path>$(BIN_DIR)
             <install-dependencies>on <install-type>SHARED_LIB
           ;
 }
