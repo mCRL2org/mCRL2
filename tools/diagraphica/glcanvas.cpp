@@ -12,13 +12,13 @@
 #include "glcanvas.h"
 
 
-int attribList[10] = {
+int attribList[11] = {
     WX_GL_RGBA, 
     WX_GL_DOUBLEBUFFER,
     WX_GL_MIN_ALPHA,    8,
     WX_GL_MIN_RED,      8,
     WX_GL_MIN_BLUE,     8,
-    WX_GL_MIN_GREEN,    8 };
+    WX_GL_MIN_GREEN,    8, 0 };
 
 
 // -- constructors and desctructor ----------------------------------
@@ -37,7 +37,7 @@ GLCanvas::GLCanvas(
 		wxNO_FULL_REPAINT_ON_RESIZE | 
         wxCLIP_CHILDREN,
         wxString( wxT("") ),
-        attribList ),
+        attribList ), 
       Colleague( m )
 // ----------------------------------
 {
@@ -336,7 +336,7 @@ void GLCanvas::clear()
 // ------------------------------------------------------------------
 {
     if ( IsShown() && 
-         GetParent()->IsShown() )
+         GetParent()->IsShown() && GetContext() )
     {
         // this is current context
         SetCurrent();
@@ -373,9 +373,13 @@ void GLCanvas::display()
 //                   top    = (1/apsect)*1
 // ------------------------------------------------------------------
 {
+    if (!GetContext()) return;
     // get current size of canvas
     int width, height;
     GetClientSize( &width, &height );
+
+	// this is current context
+    SetCurrent();
 
     // set up viewing volume
     glMatrixMode( GL_PROJECTION );
@@ -441,7 +445,7 @@ void GLCanvas::onEvtPaint( wxPaintEvent &event )
 // be repainted and redraw.
 // ------------------------------------------------------------------
 {
-    if ( IsShown() ) {
+    if ( IsShown() && GetContext() ) {
         // this is current context
         SetCurrent();
         wxPaintDC dc( this );
@@ -596,7 +600,10 @@ void GLCanvas::onMouseMotion( wxMouseEvent &event )
 void GLCanvas::onMouseWheel( wxMouseEvent &event )
 // -----------------------------------------------
 {
-    int delta = event.GetWheelRotation();
+    // this is current context
+    SetCurrent();
+    
+	int delta = event.GetWheelRotation();
 
     if ( delta > 0 )
     {
@@ -625,6 +632,9 @@ void GLCanvas:: onEnterMouse( wxMouseEvent &event )
 // events to be caught and handled.
 // -------------------------------------------------------------------
 {
+    // this is current context
+    SetCurrent();
+    
     SetFocus();
     mediator->handleMouseEnterEvent( this );
     Refresh();
@@ -638,6 +648,9 @@ void GLCanvas:: onLeaveMouse( wxMouseEvent &event )
 // This function simply sets resets cursor to the default icon.
 // -------------------------------------------------------------------
 {
+    // this is current context
+    SetCurrent();
+    
 	mediator->handleMouseLeaveEvent( this );
     Refresh();
 }
@@ -671,7 +684,10 @@ void GLCanvas::onKeyUp( wxKeyEvent &event )
 // the focus to this canvas.
 // ------------------------------------------------------------------
 {
-    mediator->handleKeyUpEvent(this,event.GetKeyCode() );
+    // this is current context
+    SetCurrent();
+    
+	mediator->handleKeyUpEvent(this,event.GetKeyCode() );
     event.Skip();
 
     Refresh();
