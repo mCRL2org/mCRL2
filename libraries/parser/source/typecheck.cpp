@@ -1388,9 +1388,15 @@ static ATbool gstcAddFunction(ATermAppl OpId, const char *msg, bool high_level){
   //    ThrowMF("Double declaration of constant and %s %T\n", msg, Name);
   //  }
 
-  if(high_level && (ATAtableGet(gssystem.constants, (ATerm)Name) || ATLtableGet(gssystem.functions, (ATerm)Name))){
-    gsErrorMsg("attempt to redeclare the system identifier with %s %P\n", msg, Name);
-    return ATfalse;
+  if(ATAtableGet(gssystem.constants, (ATerm)Name) || ATLtableGet(gssystem.functions, (ATerm)Name)){
+    if(high_level){
+      gsErrorMsg("attempt to redeclare the system identifier with %s %P\n", msg, Name);
+      return ATfalse;
+    }
+    else {
+      //ignore the implemented buil-in function/constant
+      return Result;
+    }
   }
 
   ATermList Types=ATLtableGet(context.functions, (ATerm)Name);
