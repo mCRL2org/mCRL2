@@ -11,7 +11,6 @@
 #define CLUSTER_H
 #include <vector>
 #include <map>
-#include "utils.h"
 
 #ifndef STATE_H
   #include "state.h"
@@ -30,27 +29,31 @@ class Comp_ClusterVolume {
 
 class Cluster {
   private:
-    std::map< int, int >	actionLabelCounts;
-    Cluster*	ancestor;
-    float			baseRadius;
-    bool			deadlock;
-    std::vector< Cluster* >	descendants;
-    int				markedState;
-    int				markedTransitionCount;
-    float			position;
-    int       rank;
-    int       positionInRank;
-    float			size;
-    std::vector< State* >	states;
+    std::map< int, int > actionLabelCounts;
+    Cluster* ancestor;
+    float baseRadius;
+    bool deadlock;
+    std::vector< Cluster* > descendants;
+    int markedState;
+    int markedTransitionCount;
+    float position;
+    int rank;
+    int positionInRank;
+    float size;
+    std::vector< State* > states;
+    float topRadius;
+    float volume;
+
     std::vector< State* > undecidedStates;
-    float			topRadius;
-    float			volume;
-    std::vector< Utils::Slot* > slots;
+    std::vector< std::vector< std::vector< State* > > > slots;
 
     int visObject;
     int visObjectTop;
 
     bool selected;
+
+    void slotUndecided(unsigned int ring,unsigned int from,unsigned int to);
+    void spreadSlots(unsigned int ring);
 
   public:
     // Constructor & destructor.
@@ -60,7 +63,7 @@ class Cluster {
     // Methods on descendants and ancestors.
     void      addDescendant(Cluster* c);
     Cluster*  getDescendant(int i) const;
-    int	      getNumDescendants() const;
+    int       getNumDescendants() const;
     bool      hasDescendants() const;
 
     void      setAncestor(Cluster* c);
@@ -76,20 +79,20 @@ class Cluster {
     void         markState();
     void         setDeadlock( bool b );
     void         unmarkState();
-    int          getNumSlots();
-    Utils::Slot*  getSlot(int index) const;
-    int          occupySlot(float pos);
+    unsigned int getTotalNumSlots() const;
+    unsigned int getNumSlots(unsigned int ring) const;
+    void         occupySlot(unsigned int ring,float pos,State* s);
+    void         occupyCenterSlot(State* s);
     void         resolveSlots();
-    void         slotUndecided();
-    void         spreadSlots();
 
     // Methods on transitions
     void      addActionLabel(int l);
     bool      hasMarkedTransition() const;
-    int	      markActionLabel(int l);
+    int       markActionLabel(int l);
     int       unmarkActionLabel(int l);
     
     // General cluster information
+    void      center();
     void      computeSizeAndDescendantPositions();
     float     getBaseRadius() const;
     float     getPosition() const;
@@ -99,6 +102,7 @@ class Cluster {
     float     getTopRadius() const;
     float     getSize() const;
     float     getVolume() const;
+    bool      isCentered() const;
     void      setPosition(float p);
 
     // Methods for visualization

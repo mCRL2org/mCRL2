@@ -128,7 +128,7 @@ class LTS {
     //Pre:  ss is correctly sorted by rank.
     //Post: states in ss are positioned bottom-up, maximizing node distance per
     //      rank.
-    void resolveClusterSlots(std::vector< State* > &undecided);
+    void resolveClusterSlots();
 };
 
 #endif // LTS_H

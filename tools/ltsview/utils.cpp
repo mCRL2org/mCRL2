@@ -12,6 +12,7 @@
 
 namespace Utils
 {
+
 bool operator==(RGB_Color c1,RGB_Color c2) {
   return c1.r == c2.r && c1.g == c2.g && c1.b == c2.b;
 }
@@ -36,11 +37,15 @@ Utils::Point3D operator*(float s,Point3D p) {
 }
 
 Utils::Vect operator+(Vect v1, Vect v2) {
-  Vect result;
-  result.x = v1.x + v2.x;
-  result.y = v1.y + v2.y;
+  Vect result = { v1.x + v2.x, v1.y + v2.y };
   return result;
 }
+
+Utils::Vect operator*(float s,Vect v) {
+  Vect result = { s*v.x, s*v.y };
+  return result;
+}
+
 float length(Point3D p) {
   return sqrt(p.x*p.x + p.y*p.y + p.z*p.z);
 }
@@ -166,31 +171,27 @@ Utils::RGB_Color HSV_to_RGB(HSV_Color c) {
 }
 
 int round_to_int(double f) {
-  double intpart;
-  modf(f + 0.5,&intpart);
-  return static_cast< int > (intpart);
+  return static_cast< int > (f+0.5);
 }
 
-float vec_to_ang(Utils::Vect v) {
-  return atan2(v.y, v.x);
+float vec_to_deg(Utils::Vect v) {
+  float r = atan2(v.y,v.x);
+  if (r < 0.0f) {
+    r += 2*PI;
+  }
+  return rad_to_deg(r);
 }
 
-Utils::Vect ang_to_vec( float phi) {
+Utils::Vect deg_to_vec(float deg) {
   Vect v;
-  if (rad_to_deg(phi) < -0.9f) {
-    v.x = 0;
-    v.y = 0;
-  }
-  else {
-    v.x = cos(phi);
-    v.y = sin(phi);
-  }
-
+  float r = deg_to_rad(deg);
+  v.x = cos(r);
+  v.y = sin(r);
   return v;
 }
 
-float vec_length( Vect v) {
-  return sqrt(v.x*v.x + v.y *  v.y);
+float vec_length(Vect v) {
+  return sqrt(v.x*v.x + v.y*v.y);
 }
 
 Interpolater::Interpolater(RGB_Color rgb1,RGB_Color rgb2,int n,bool l) {
@@ -217,10 +218,10 @@ Interpolater::Interpolater(RGB_Color rgb1,RGB_Color rgb2,int n,bool l) {
 }
 
 Utils::RGB_Color Interpolater::getColor(int i) {
-	float r = float(i);
-	if (N > 1) {
-  	r /= float(N);
-	}
+  float r = float(i);
+  if (N > 1) {
+    r /= float(N);
+  }
   HSV_Color result;
   if (is_long) {
     if (abs(delta_h1) < abs(delta_h2)) {

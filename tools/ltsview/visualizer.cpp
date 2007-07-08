@@ -15,130 +15,131 @@ using namespace std;
 using namespace Utils;
 
 Visualizer::Visualizer(Mediator* owner,Settings* ss) {
-	lts = NULL;
-	mediator = owner;
-	settings = ss;
-	settings->subscribe(BranchRotation,this);
-	settings->subscribe(BranchTilt,this);
-	settings->subscribe(InterpolateColor1,this);
-	settings->subscribe(InterpolateColor2,this);
-	settings->subscribe(LongInterpolation,this);
-	settings->subscribe(MarkedColor,this);
+  lts = NULL;
+  mediator = owner;
+  settings = ss;
+  settings->subscribe(BranchRotation,this);
+  settings->subscribe(BranchTilt,this);
+  settings->subscribe(InterpolateColor1,this);
+  settings->subscribe(InterpolateColor2,this);
+  settings->subscribe(LongInterpolation,this);
+  settings->subscribe(MarkedColor,this);
 
-	visObjectFactory = new VisObjectFactory();
-	primitiveFactory = new PrimitiveFactory(settings);
-	sin_obt = float(sin(deg_to_rad(settings->getInt(BranchTilt))));
-	cos_obt = float(cos(deg_to_rad(settings->getInt(BranchTilt))));
+  visObjectFactory = new VisObjectFactory();
+  primitiveFactory = new PrimitiveFactory(settings);
+  sin_obt = float(sin(deg_to_rad(settings->getInt(BranchTilt))));
+  cos_obt = float(cos(deg_to_rad(settings->getInt(BranchTilt))));
 
-	visStyle = CONES;
-	update_matrices = false;
-        update_abs = true;
-	update_colors = false;
-	create_objects = false;
+  visStyle = CONES;
+  update_matrices = false;
+  update_abs = true;
+  update_colors = false;
+  create_objects = false;
 }
 
 Visualizer::~Visualizer() {
-	delete visObjectFactory;
-	delete primitiveFactory;
+  delete visObjectFactory;
+  delete primitiveFactory;
 }
 
 float Visualizer::getHalfStructureHeight() const {
-	if (lts == NULL) {
-		return 0.0f;
-	}
-	return settings->getFloat(ClusterHeight)*(lts->getNumRanks()-1) / 2.0f;
+  if (lts == NULL) {
+    return 0.0f;
+  }
+  return settings->getFloat(ClusterHeight)*(lts->getNumRanks()-1) / 2.0f;
 }
 
 void Visualizer::setLTS(LTS* l) {
-	lts = l;
-	float ratio = lts->getInitialState()->getCluster()->getSize() /
-		(lts->getNumRanks()-1);
-	settings->setFloat(ClusterHeight,max(4,round_to_int(40.0f * ratio)) / 10.0f);
-	traverseTree(true);
+  lts = l;
+  float ratio = lts->getInitialState()->getCluster()->getSize() /
+    (lts->getNumRanks()-1);
+  settings->setFloat(ClusterHeight,max(4,round_to_int(40.0f * ratio)) / 10.0f);
+  traverseTree(true);
+  update_abs = true;
 }
 
 Utils::VisStyle Visualizer::getVisStyle() const {
-	return visStyle;
+  return visStyle;
 }
 
 void Visualizer::setMarkStyle(Utils::MarkStyle ms) {
-	markStyle = ms;
-	update_colors = true;
+  markStyle = ms;
+  update_colors = true;
 }
 
 void Visualizer::setVisStyle(Utils::VisStyle vs) {
-	if (visStyle != vs) {
-		visStyle = vs;
-		traverseTree(true);
-	}
+  if (visStyle != vs) {
+    visStyle = vs;
+    traverseTree(true);
+  }
 }
 
 void Visualizer::notify(SettingID s) {
-	switch (s) {
-		case BranchTilt:
-			sin_obt = float(sin(deg_to_rad(settings->getInt(BranchTilt))));
-			cos_obt = float(cos(deg_to_rad(settings->getInt(BranchTilt))));
-			update_matrices = true;
-                        update_abs = true;
-			break;
-		case BranchRotation:
-			update_matrices = true;
-                        update_abs = true;
-			break;
-		case InterpolateColor1:
-		case InterpolateColor2:
-		case LongInterpolation:
-			if (markStyle == NO_MARKS) {
-				update_colors = true;
-			}
-			break;
-		case MarkedColor:
-			if (markStyle != NO_MARKS) {
-				update_colors = true;
-			}
-		default:
-			break;
-	}
+  switch (s) {
+    case BranchTilt:
+      sin_obt = float(sin(deg_to_rad(settings->getInt(BranchTilt))));
+      cos_obt = float(cos(deg_to_rad(settings->getInt(BranchTilt))));
+      update_matrices = true;
+      update_abs = true;
+      break;
+    case BranchRotation:
+      update_matrices = true;
+      update_abs = true;
+      break;
+    case InterpolateColor1:
+    case InterpolateColor2:
+    case LongInterpolation:
+      if (markStyle == NO_MARKS) {
+        update_colors = true;
+      }
+      break;
+    case MarkedColor:
+      if (markStyle != NO_MARKS) {
+        update_colors = true;
+      }
+    default:
+      break;
+  }
 }
 
 void Visualizer::computeBoundsInfo(float &bcw,float &bch) {
-	bcw = 0.0f;
-	bch = 0.0f;
-	if (lts != NULL) {
-		computeSubtreeBounds(lts->getInitialState()->getCluster(),bcw,bch);
-	}
+  bcw = 0.0f;
+  bch = 0.0f;
+  if (lts != NULL) {
+    computeSubtreeBounds(lts->getInitialState()->getCluster(),bcw,bch);
+  }
 }
 
 void Visualizer::computeSubtreeBounds(Cluster* root,float &bw,float &bh) {
-	// compute the bounding cylinder of the structure.
-	if (!root->hasDescendants()) {
-		bw = root->getTopRadius();
-		bh = 2.0f * root->getTopRadius();
-	}
-	else {
-		Cluster *desc;
-		int i;
-		for (i = 0; i < root->getNumDescendants(); ++i) {
-			desc = root->getDescendant(i);
-			if (desc->getPosition() < -0.9f) {
-				// descendant is centered
-				float dw = 0.0f;
-				float dh = 0.0f;
-				computeSubtreeBounds(desc,dw,dh);
-				bw = max(bw,dw);
-				bh = max(bh,dh);
-			}
-			else {
-				float dw = 0.0f;
-				float dh = 0.0f;
-				computeSubtreeBounds(desc,dw,dh);
-				bw = max(bw,root->getBaseRadius() + dh*sin_obt + dw*cos_obt);
-				bh = max(bh,dh*cos_obt + dw*sin_obt);
-			}
-		}
-		bw = max(bw,root->getTopRadius());
-		bh += settings->getFloat(ClusterHeight);
-	}
+  // compute the bounding cylinder of the structure.
+  if (!root->hasDescendants()) {
+    bw = root->getTopRadius();
+    bh = 2.0f * root->getTopRadius();
+  }
+  else {
+    Cluster *desc;
+    int i;
+    for (i = 0; i < root->getNumDescendants(); ++i) {
+      desc = root->getDescendant(i);
+      if (desc->isCentered()) {
+        // descendant is centered
+        float dw = 0.0f;
+        float dh = 0.0f;
+        computeSubtreeBounds(desc,dw,dh);
+        bw = max(bw,dw);
+        bh = max(bh,dh);
+      }
+      else {
+        float dw = 0.0f;
+        float dh = 0.0f;
+        computeSubtreeBounds(desc,dw,dh);
+        bw = max(bw,root->getBaseRadius() + dh*sin_obt + dw*cos_obt);
+        bh = max(bh,dh*cos_obt + dw*sin_obt);
+      }
+    }
+    bw = max(bw,root->getTopRadius());
+    bh += settings->getFloat(ClusterHeight);
+  }
 }
 
 // ------------- STRUCTURE -----------------------------------------------------
@@ -159,27 +160,27 @@ void Visualizer::drawStructure() {
 }
 
 void Visualizer::traverseTree(bool co) {
-	if (lts == NULL) {
-		return;
-	}
-	create_objects = co;
-	if (co) {
-		visObjectFactory->clear();
-		update_colors = true;
-	}
-	glPushMatrix();
-	glLoadIdentity();
-	switch (visStyle) {
-		case CONES:
-			traverseTreeC(lts->getInitialState()->getCluster(),true,0);
-			break;
-		case TUBES:
-			traverseTreeT(lts->getInitialState()->getCluster(),0);
-			break;
-		default:
-			break;
-	}
-	glPopMatrix();
+  if (lts == NULL) {
+    return;
+  }
+  create_objects = co;
+  if (co) {
+    visObjectFactory->clear();
+    update_colors = true;
+  }
+  glPushMatrix();
+  glLoadIdentity();
+  switch (visStyle) {
+    case CONES:
+      traverseTreeC(lts->getInitialState()->getCluster(),true,0);
+      break;
+    case TUBES:
+      traverseTreeT(lts->getInitialState()->getCluster(),0);
+      break;
+    default:
+      break;
+  }
+  glPopMatrix();
 }
 
 void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
@@ -192,54 +193,48 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
     ids.push_back(root->getRank());
     ids.push_back(root->getPositionInRank());
 
-    if (create_objects) 
-    {
+    if (create_objects) {
       root->setVisObject(visObjectFactory->makeObject(
-		 primitiveFactory->makeSphere(), ids));
+     primitiveFactory->makeSphere(), ids));
     } 
-    else 
-    {
+    else {
       visObjectFactory->updateObjectMatrix(root->getVisObject());
     }
     glPopMatrix();
   }
-  else 
-  {
+  else {
     int drot = rot + settings->getInt(BranchRotation);
     
     if (drot >= 360) {
       drot -= 360;
     }
-		
+    
     glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
     
-    for (int i = 0; i < root->getNumDescendants(); ++i) 
-    {
+    for (int i = 0; i < root->getNumDescendants(); ++i) {
       Cluster* desc = root->getDescendant(i);
       
-      if (desc->getPosition() < -0.9f) {
+      if (desc->isCentered()) {
         if (root->getNumDescendants() > 1) {
-	    traverseTreeC(desc,false,drot);
-	} 
-        else
-        {
-	  traverseTreeC(desc,false,rot);
-	}
-      } 
-      else 
-      {
-	glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
+          traverseTreeC(desc,false,drot);
+        }
+        else {
+          traverseTreeC(desc,false,rot);
+        }
+      }
+      else {
+        glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
         glTranslatef(root->getBaseRadius(),0.0f,0.0f);
-	glRotatef(settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
-	traverseTreeC(desc,true,drot);
-	glRotatef(-settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
-	glTranslatef(-root->getBaseRadius(),0.0f,0.0f);
-	glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
+        glRotatef(settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
+        traverseTreeC(desc,true,drot);
+        glRotatef(-settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
+        glTranslatef(-root->getBaseRadius(),0.0f,0.0f);
+        glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
       }
     }
     
     glTranslatef(0.0f,0.0f,-settings->getFloat(ClusterHeight));
-		
+    
     float r = root->getBaseRadius() / root->getTopRadius();
     glPushMatrix();
     glTranslatef(0.0f,0.0f,0.5f*settings->getFloat(ClusterHeight));
@@ -255,18 +250,16 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
 
       if (create_objects) {
         root->setVisObject(visObjectFactory->makeObject(
-	    primitiveFactory->makeTruncatedCone(r,topClosed,
-			root->getNumDescendants() > 1), ids));
+      primitiveFactory->makeTruncatedCone(r,topClosed,
+      root->getNumDescendants() > 1), ids));
       }
-      else 
-      {
-	visObjectFactory->updateObjectMatrix(root->getVisObject());
+      else {
+        visObjectFactory->updateObjectMatrix(root->getVisObject());
       }
       glPopName();
       glPopName();
     } 
-    else 
-    {
+    else {
       glScalef(root->getTopRadius(),root->getTopRadius(),
           settings->getFloat(ClusterHeight));
       
@@ -275,13 +268,12 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
       ids.push_back(root->getPositionInRank());
       
       if (create_objects) {
-	root->setVisObject(visObjectFactory->makeObject(
-          primitiveFactory->makeTruncatedCone(r,root->getNumDescendants() > 1,
-					topClosed), ids));
+        root->setVisObject(visObjectFactory->makeObject(
+              primitiveFactory->makeTruncatedCone(r,root->getNumDescendants() >
+                1, topClosed), ids));
       } 
-      else 
-      {
-	visObjectFactory->updateObjectMatrix(root->getVisObject());
+      else {
+        visObjectFactory->updateObjectMatrix(root->getVisObject());
       }
       glPopName();
       glPopName();
@@ -290,193 +282,162 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
   }
 }
 
-void Visualizer::traverseTreeT(Cluster *root,int rot) 
-{
-  if (!root->hasDescendants()) 
-  {
+void Visualizer::traverseTreeT(Cluster *root,int rot) {
+  if (!root->hasDescendants()) {
   // root has no descendants; so draw it as a hemispheroid
     glPushMatrix();
     glScalef(root->getTopRadius(),root->getTopRadius(),
-	 min(root->getTopRadius(),settings->getFloat(ClusterHeight)));
+        min(root->getTopRadius(),settings->getFloat(ClusterHeight)));
     
-    if (create_objects) 
-    {
+    if (create_objects) {
       //TODO: Add identifiers to ids.
       vector<int> ids; 
-        
-      if (root == lts->getInitialState()->getCluster()) 
-      {
+      if (root == lts->getInitialState()->getCluster()) {
         // exception: draw root as a sphere if it is the initial cluster
         root->setVisObject(visObjectFactory->makeObject(
-                         primitiveFactory->makeSphere(), ids));
+              primitiveFactory->makeSphere(), ids));
       } 
-      else 
-      {
+      else {
         root->setVisObject(visObjectFactory->makeObject(
-                           primitiveFactory->makeHemisphere(), ids));
+              primitiveFactory->makeHemisphere(), ids));
       }
     } 
-    else 
-    {
+    else {
       visObjectFactory->updateObjectMatrix(root->getVisObject());
     }
     glPopMatrix();
   }
-  else
-  {
+  else {
     int drot = rot + settings->getInt(BranchRotation);
     
-    if (drot >= 360) 
-    {
+    if (drot >= 360) {
       drot -= 360;
     }
-		
+    
     float baserad = 0.0f;
     
-    for (int i = 0; i < root->getNumDescendants(); ++i) 
-    {
+    for (int i = 0; i < root->getNumDescendants(); ++i) {
       Cluster* desc = root->getDescendant(i);
       
-      if (desc->getPosition() < -0.9f) 
-      {
+      if (desc->isCentered()) {
         baserad = desc->getTopRadius();
-	glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
-	
-        if (root->getNumDescendants() > 1) 
-        {
-	  traverseTreeT(desc,drot);
-	} 
-        else 
-        {
+        glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
+  
+        if (root->getNumDescendants() > 1) {
+          traverseTreeT(desc,drot);
+        } 
+        else {
           traverseTreeT(desc,rot);
         }
-	
+  
         glTranslatef(0.0f,0.0f,-settings->getFloat(ClusterHeight));
       }
-      else 
-      {
-	glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
-			
-	// make the connecting cone
-	float sz = sqrt(settings->getFloat(ClusterHeight) *
-	  settings->getFloat(ClusterHeight) +
-	    (root->getBaseRadius() - root->getTopRadius()) *
-              (root->getBaseRadius() - root->getTopRadius()));
-	float alpha = atan(settings->getFloat(ClusterHeight) /
-            fabs(root->getBaseRadius() - root->getTopRadius()));
-	float sign = 1.0f;
-	  
-        if (root->getBaseRadius() - root->getTopRadius() < 0.0f) 
-        {
-	  sign = -1.0f;
-	}
-	glPushMatrix();
-	glTranslatef(root->getTopRadius(),0.0f,0.0f);
-	glRotatef(sign*(90.0f-rad_to_deg(alpha)),0.0f,1.0f,0.0f);
-	glScalef(sz,sz,sz);
-	  
-        if (create_objects) 
-        {
+      else {
+        glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
+      
+        // make the connecting cone
+        float sz = sqrt(settings->getFloat(ClusterHeight) *
+          settings->getFloat(ClusterHeight) +
+            (root->getBaseRadius() - root->getTopRadius()) *
+                    (root->getBaseRadius() - root->getTopRadius()));
+        float alpha = atan(settings->getFloat(ClusterHeight) /
+                  fabs(root->getBaseRadius() - root->getTopRadius()));
+        float sign = 1.0f;
+          
+        if (root->getBaseRadius() - root->getTopRadius() < 0.0f) {
+          sign = -1.0f;
+        }
+        glPushMatrix();
+        glTranslatef(root->getTopRadius(),0.0f,0.0f);
+        glRotatef(sign*(90.0f-rad_to_deg(alpha)),0.0f,1.0f,0.0f);
+        glScalef(sz,sz,sz);
+    
+        if (create_objects) {
           //TODO Add identifiers to ids
           vector<int> ids;
-	  desc->setVisObjectTop(visObjectFactory->makeObject(
-	  primitiveFactory->makeObliqueCone(alpha,
-          desc->getTopRadius()/sz,sign), ids));
-	}
-        else 
-        {
+          desc->setVisObjectTop(visObjectFactory->makeObject(
+          primitiveFactory->makeObliqueCone(alpha,
+                desc->getTopRadius()/sz,sign), ids));
+        }
+        else {
           visObjectFactory->updateObjectMatrix(desc->getVisObjectTop());
-	}
-	glPopMatrix();
-				
+        }
+        glPopMatrix();
+        
         // recurse into the subtree
         glTranslatef(root->getBaseRadius(),0.0f,
             settings->getFloat(ClusterHeight));
-	glRotatef(settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
-	traverseTreeT(desc,drot);
-	glRotatef(-settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
+        glRotatef(settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
+        traverseTreeT(desc,drot);
+        glRotatef(-settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
         glTranslatef(-root->getBaseRadius(),0.0f,
             -settings->getFloat(ClusterHeight));
         glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
       }
     }
-		
-    if (baserad <= 0.0f) 
-    {
+    
+    if (baserad <= 0.0f) {
       // root has no centered descendant, so draw it as a hemispheroid
       glPushMatrix();
       glScalef(root->getTopRadius(),root->getTopRadius(),
             min(root->getTopRadius(),settings->getFloat(ClusterHeight)));
-      if (create_objects) 
-      {
+      if (create_objects) {
         // TODO: Add identifiers to ids
         vector<int> ids;
         
-        if (root == lts->getInitialState()->getCluster()) 
-        {
+        if (root == lts->getInitialState()->getCluster()) {
           // exception: draw root as a sphere if it is the initial cluster
           root->setVisObject(visObjectFactory->makeObject(
-                           primitiveFactory->makeSphere(), ids));
+                primitiveFactory->makeSphere(), ids));
         } 
-        else 
-        {
+        else {
           root->setVisObject(visObjectFactory->makeObject(
-              primitiveFactory->makeHemisphere(), ids));
+                primitiveFactory->makeHemisphere(), ids));
         }
       } 
-      else 
-      {
+      else {
         visObjectFactory->updateObjectMatrix(root->getVisObject());
       }
       glPopMatrix();
     } 
-    else 
-    {
+    else {
       // root has centered descendant; so draw it as a truncated cone
       float r = baserad / root->getTopRadius();
       glPushMatrix();
       glTranslatef(0.0f,0.0f,0.5f*settings->getFloat(ClusterHeight));
       
-      if (r > 1.0f) 
-      {
-	r = 1.0f / r;
+      if (r > 1.0f) {
+        r = 1.0f / r;
         glRotatef(180.0f,1.0f,0.0f,0.0f);
         glScalef(baserad,baserad,settings->getFloat(ClusterHeight));
-        if (create_objects) 
-        {
+        if (create_objects) {
           // TODO: Add identifiers to ids
           vector<int> ids;
-          if (root == lts->getInitialState()->getCluster()) 
-          {
+          if (root == lts->getInitialState()->getCluster()) {
             // exception: draw root with top closed if it is the initial cluster
             root->setVisObject(visObjectFactory->makeObject(
                   primitiveFactory->makeTruncatedCone(r,true,false), ids));
           }
-          else 
-          {
+          else {
             root->setVisObject(visObjectFactory->makeObject(
-              primitiveFactory->makeTruncatedCone(r,false,false), ids));
+                  primitiveFactory->makeTruncatedCone(r,false,false), ids));
           }
         } 
-        else 
-        {
+        else {
           visObjectFactory->updateObjectMatrix(root->getVisObject());
         }
       } 
-      else 
-      {
+      else {
         glScalef(root->getTopRadius(),root->getTopRadius(),
                 settings->getFloat(ClusterHeight));
-        if (create_objects) 
-        {
+        if (create_objects) {
           //TODO: Add identifiers to ids
           vector<int> ids;
           
           root->setVisObject(visObjectFactory->makeObject(
               primitiveFactory->makeTruncatedCone(r,false,false), ids));
         } 
-        else 
-        {
+        else {
           visObjectFactory->updateObjectMatrix(root->getVisObject());
         }
       }
@@ -486,80 +447,71 @@ void Visualizer::traverseTreeT(Cluster *root,int rot)
 }
 
 float Visualizer::compute_cone_scale_x(float phi,float r,float x) {
-	float f = r/x * sin(phi);
-	return r * cos(phi) / sqrt(1.0f - f*f);
+  float f = r/x * sin(phi);
+  return r * cos(phi) / sqrt(1.0f - f*f);
 }
 
 void Visualizer::updateColors() {
   int r,i;
   RGB_Color c;
-  if (markStyle == NO_MARKS) 
-  {
+  if (markStyle == NO_MARKS) {
     Interpolater ipr(settings->getRGB(InterpolateColor1),
         settings->getRGB(InterpolateColor2),lts->getNumRanks(),
-	settings->getBool(LongInterpolation));
+        settings->getBool(LongInterpolation));
     
-    for (r = 0; r < lts->getNumRanks(); ++r) 
-    {
-      
-      for (i = 0; i < lts->getNumClustersAtRank(r); ++i) 
-      {
+    for (r = 0; r < lts->getNumRanks(); ++r) {
+      for (i = 0; i < lts->getNumClustersAtRank(r); ++i) {
         if(lts->getClusterAtRank(r,i)->isSelected())
         {
           c.r = 0;
           c.g = 255;
           c.b = 0;
         }
-        else 
+        else
         {
           c = ipr.getColor(r);
         }
 
         // set color of cluster[r,i]
-	visObjectFactory->updateObjectColor(
-	    lts->getClusterAtRank(r,i)->getVisObject(),c);
+        visObjectFactory->updateObjectColor(
+            lts->getClusterAtRank(r,i)->getVisObject(),c);
       }
     }
   } 
-  else 
-  {
+  else {
     c = settings->getRGB(MarkedColor);
     
-    for (r = 0; r < lts->getNumRanks(); ++r) 
-    {
-      for (i = 0; i < lts->getNumClustersAtRank(r); ++i) 
-      {
+    for (r = 0; r < lts->getNumRanks(); ++r) {
+      for (i = 0; i < lts->getNumClustersAtRank(r); ++i) {
         // set color of cluster[r,i]
-        if (isMarked(lts->getClusterAtRank(r,i))) 
-        {
+        if (isMarked(lts->getClusterAtRank(r,i))) {
             visObjectFactory->updateObjectColor(
-              lts->getClusterAtRank(r,i)->getVisObject(),c);
-	} 
-        else 
-        {
-	  visObjectFactory->updateObjectColor(
-		lts->getClusterAtRank(r,i)->getVisObject(),RGB_WHITE);
-	}
+                lts->getClusterAtRank(r,i)->getVisObject(),c);
+        } 
+        else {
+          visObjectFactory->updateObjectColor(
+          lts->getClusterAtRank(r,i)->getVisObject(),RGB_WHITE);
+        }
       }
     }
   }
 }
 
 void Visualizer::sortClusters(Point3D viewpoint) {
-	visObjectFactory->sortObjects(viewpoint);
+  visObjectFactory->sortObjects(viewpoint);
 }
 
 bool Visualizer::isMarked(Cluster* c) {
-	return ((markStyle == MARK_STATES && c->hasMarkedState()) ||
-					(markStyle == MARK_DEADLOCKS && c->hasDeadlock()) ||
-					(markStyle == MARK_TRANSITIONS && c->hasMarkedTransition()));
+  return ((markStyle == MARK_STATES && c->hasMarkedState()) ||
+          (markStyle == MARK_DEADLOCKS && c->hasDeadlock()) ||
+          (markStyle == MARK_TRANSITIONS && c->hasMarkedTransition()));
 }
 
 // ------------- STATES --------------------------------------------------------
 
 void Visualizer::drawStates(bool simulating) {
   if (lts == NULL) {
-  	return;
+    return;
   }
   drawStates(lts->getInitialState()->getCluster(),0, simulating);
 }
@@ -767,7 +719,7 @@ void Visualizer::computeStateAbsPos(State* root, int rot, Point3D initVect) {
     initVect.z = M[13];
   }
 
-  if(root->getPosition() < -0.9f) {
+  if (root->isCentered()) {
     // The outgoing vector of the state lies settings->getFloat(ClusterHeight) above the state.
     glTranslatef(0.0f, 0.0f, 2 * settings->getFloat(ClusterHeight));
     glGetFloatv(GL_MODELVIEW_MATRIX, N);
@@ -793,9 +745,9 @@ void Visualizer::computeStateAbsPos(State* root, int rot, Point3D initVect) {
   }
   else {
     // The outgoing vector of the state points out of the cluster, in the 
-    // direction the state itself is positioned. Furhtermore, it points 
+    // direction the state itself is positioned. Furthermore, it points 
     // settings->getFloat(ClusterHeight) up.
-    glRotatef(-root->getPosition(), 0.0f, 0.0f, 1.0f);
+    glRotatef(-root->getPositionAngle(), 0.0f, 0.0f, 1.0f);
 
     glTranslatef(startCluster->getTopRadius() * 3, 0.0f, -settings->getFloat(ClusterHeight));
     glGetFloatv(GL_MODELVIEW_MATRIX, N);
@@ -803,22 +755,24 @@ void Visualizer::computeStateAbsPos(State* root, int rot, Point3D initVect) {
                              N[14] - initVect.y,
                             -N[13] + initVect.z };
     root->setOutgoingControl(outgoingVect);
-    glTranslatef(-startCluster->getTopRadius() * 2, 0.0f, settings->getFloat(ClusterHeight));
+    glTranslatef(-startCluster->getTopRadius() * 3, 0.0f, settings->getFloat(ClusterHeight));
     
+    glTranslatef(root->getPositionRadius(), 0.0f, 0.0f);
     glGetFloatv(GL_MODELVIEW_MATRIX, M);
     Point3D rootPos = { M[12] - initVect.x, 
                         M[14] - initVect.y, 
                       - M[13] + initVect.z};                    
     root->setPositionAbs(rootPos);
+    glTranslatef(-root->getPositionRadius(), 0.0f, 0.0f);
 
-    glTranslatef( startCluster->getTopRadius() * 2, 0.0f, settings->getFloat(ClusterHeight));
+    glTranslatef( startCluster->getTopRadius() * 3, 0.0f, settings->getFloat(ClusterHeight));
     glGetFloatv(GL_MODELVIEW_MATRIX, N);
     Point3D incomingVect = { N[12] - initVect.x,
                              N[14] - initVect.y,
                             -N[13] + initVect.z };
     root->setIncomingControl(incomingVect);
     glTranslatef(-startCluster->getTopRadius() * 3, 0.0f, -settings->getFloat(ClusterHeight));
-    glRotatef(root->getPosition(), 0.0f, 0.0f, 1.0f);
+    glRotatef(root->getPositionAngle(), 0.0f, 0.0f, 1.0f);
   }
 
   for(int i = 0; i != root->getNumOutTransitions(); ++i) {
@@ -840,7 +794,7 @@ void Visualizer::computeStateAbsPos(State* root, int rot, Point3D initVect) {
 
       if (endState->getRank() != root->getRank()) {
         
-        if (endCluster->getPosition() < -0.9f) {
+        if (endCluster->isCentered()) {
           //endCluster is centered, only descend
           glTranslatef(0.0f, 0.0f, settings->getFloat(ClusterHeight));
           computeStateAbsPos(endState, 
@@ -885,9 +839,9 @@ void Visualizer::drawStates(Cluster* root, int rot, bool simulating) {
         glColor4ub(c.r,c.g,c.b,255);
       }
       glPushMatrix();
-      if (s->getPosition() >= -0.9f) {
-        glRotatef(-s->getPosition(),0.0f,0.0f,1.0f);
-        glTranslatef(root->getTopRadius(),0.0f,0.0f);  
+      if (!s->isCentered()) {
+        glRotatef(-s->getPositionAngle(),0.0f,0.0f,1.0f);
+        glTranslatef(s->getPositionRadius(),0.0f,0.0f);  
       }
       glScalef(ns,ns,ns);
      
@@ -899,13 +853,13 @@ void Visualizer::drawStates(Cluster* root, int rot, bool simulating) {
   }
 
   int drot = rot + settings->getInt(BranchRotation);
-	if (drot >= 360) { 
-		drot -= 360;
-	}
+  if (drot >= 360) { 
+    drot -= 360;
+  }
   Cluster *desc;
   for (int i = 0; i < root->getNumDescendants(); ++i) {
     desc = root->getDescendant(i);
-    if (desc->getPosition() < -0.9f) {
+    if (desc->isCentered()) {
       // descendant is centered
       glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
       drawStates(desc,(root->getNumDescendants()>1)?drot:rot, simulating);
@@ -955,23 +909,23 @@ void Visualizer::drawTransitions(State* root,bool disp_fp,bool disp_bp) {
 
     // Draw transition from root to endState
     if (outTransition->isBackpointer() && disp_bp) {
-    	if (isMarked(outTransition)) {
-    		RGB_Color c = settings->getRGB(MarkedColor);
-      	glColor4ub(c.r,c.g,c.b,255);
-    	} else {
-    		RGB_Color c = settings->getRGB(UpEdgeColor);
-      	glColor4ub(c.r,c.g,c.b,255);
-    	}
+      if (isMarked(outTransition)) {
+        RGB_Color c = settings->getRGB(MarkedColor);
+        glColor4ub(c.r,c.g,c.b,255);
+      } else {
+        RGB_Color c = settings->getRGB(UpEdgeColor);
+        glColor4ub(c.r,c.g,c.b,255);
+      }
       drawBackPointer(root,endState);
     }
     if (!outTransition->isBackpointer() && disp_fp) {
-    	if (isMarked(outTransition)) {
-    		RGB_Color c = settings->getRGB(MarkedColor);
-      	glColor4ub(c.r,c.g,c.b,255);
-    	} else {
-    		RGB_Color c = settings->getRGB(DownEdgeColor);
-      	glColor4ub(c.r,c.g,c.b,255);
-    	}
+      if (isMarked(outTransition)) {
+        RGB_Color c = settings->getRGB(MarkedColor);
+        glColor4ub(c.r,c.g,c.b,255);
+      } else {
+        RGB_Color c = settings->getRGB(DownEdgeColor);
+        glColor4ub(c.r,c.g,c.b,255);
+      }
       drawForwardPointer(root,endState);
     }
     
@@ -1096,8 +1050,7 @@ void Visualizer::drawBackPointer(State* startState, State* endState) {
   Point3D endControl = endState->getIncomingControl();
   Point3D endPoint = endState->getPositionAbs();
 
-  if ((startState->getPosition() < -0.9f) && (endState->getPosition() < -0.9f)) 
-  {
+  if (startState->isCentered() && endState->isCentered()) {
     startControl.x = startPoint.x * 1.25;
     endControl.x = startControl.x;
   }

@@ -14,7 +14,7 @@
 
 namespace Utils {
   const double PI = 3.14159265359;
-  const double tau = 0.80;
+  const unsigned int NUM_RINGS = 2;
 
   enum RankStyle      {ITERATIVE,CYCLIC};
   enum MarkStyle      {NO_MARKS,MARK_DEADLOCKS,MARK_STATES,MARK_TRANSITIONS};
@@ -48,18 +48,10 @@ namespace Utils {
   };
 
   struct MarkRule {
-    int		            paramIndex;
-    bool	            isActivated;
-    bool        	    isNegated;
-    std::vector< bool >     valueSet;
-  };
-  
-  struct Slot {
-    int   occupying;  //INV: 0 <= occupying 
-    int   under_consideration; 
-    float total_size_ac; //AntiClockwise
-    float total_size_c; //Clockwise
-
+    int paramIndex;
+    bool isActivated;
+    bool isNegated;
+    std::vector< bool > valueSet;
   };
 
   struct Vect {
@@ -81,13 +73,14 @@ namespace Utils {
   Point3D operator-(Point3D p1,Point3D p2);
   Point3D operator*(float s,Point3D p);
   Vect operator+(Vect v1,Vect v2);
+  Vect operator*(float s,Vect v);
   float length(Point3D p);
   void normalize(Point3D &p);
   float dot_product(Point3D p1,Point3D p2);
   Point3D cross_product(Point3D p1,Point3D p2);
-  float vec_to_ang(Vect v); //RET: atan2f(Vect.y, Vect.x)
-  Vect ang_to_vec(float phi); //RET: V, such that V.x = cos(phi) /\ V.y = sin(phi)
-  float vec_length(Vect v); //RET: || v ||
+  float vec_to_deg(Vect v);
+  Vect deg_to_vec(float deg);
+  float vec_length(Vect v);
   
   class Interpolater {
     private:

@@ -14,7 +14,8 @@ using namespace Utils;
 State::State() {
   cluster = NULL;
   rank = 0;
-  position = -1.0f;
+  positionRadius = 0.0f;
+  positionAngle = -1.0f;
   marked = false;
   visitState = DFS_WHITE;
   id = 0;
@@ -113,44 +114,41 @@ void State::setRank( int r )
   rank = r;
 }
 
-int State::getSlot() const
-{
-  return slot;
+bool State::isCentered() const {
+  return positionAngle < -0.9f;
 }
 
-void State::setSlot( int s )
-{
-  slot = s;
+void State::center() {
+  positionRadius = 0.0f;
+  positionAngle = -1.0f;
 }
 
-
-float State::getPosition() const
-{
-  return position;
+float State::getPositionAngle() const {
+  return positionAngle;
 }
 
-Point3D State::getPositionAbs() const
-{
+float State::getPositionRadius() const {
+  return positionRadius;
+}
+
+Point3D State::getPositionAbs() const {
   return positionAbs;
 }
 
-Point3D State::getOutgoingControl() const 
-{
+Point3D State::getOutgoingControl() const {
   return outgoingControl;
 }
 
-Point3D State::getIncomingControl() const 
-{
+Point3D State::getIncomingControl() const {
   return incomingControl;
 }
 
-void State::setPosition( float p )
-{
-  position = p;
+void State::setPosition(float r,float a) {
+  positionRadius = r;
+  positionAngle = a;
 }
 
-void State::setPositionAbs(Point3D p)
-{
+void State::setPositionAbs(Point3D p) {
   positionAbs = p;
 }
 
@@ -174,14 +172,20 @@ void State::setCluster( Cluster* c )
   cluster = c;
 }
 
-void State::getSubordinates( set< State* > &ss ) const
-{
-  ss = subordinates;
+std::set<State*>::iterator State::getSubordinatesBegin() const {
+  return subordinates.begin();
 }
 
-void State::getSuperiors( set< State* > &ss ) const
-{
-  ss = superiors;
+std::set<State*>::iterator State::getSubordinatesEnd() const {
+  return subordinates.end();
+}
+
+std::set<State*>::iterator State::getSuperiorsBegin() const {
+  return superiors.begin();
+}
+
+std::set<State*>::iterator State::getSuperiorsEnd() const {
+  return superiors.end();
 }
 
 void State::getComrades( set< State* > &ss ) const

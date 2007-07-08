@@ -37,6 +37,7 @@ class State {
     void      addParameterValue(int valindex);
     void      addSubordinate( State* s );
     void      addSuperior( State* s );
+    void      center();
     void      clearHierarchyInfo();
     void      deselect();
     void      DFSfinish();
@@ -55,56 +56,54 @@ class State {
     Transition* getLoopi( int i ) const;
     int       getNumberOfLoops() const;
 
-    float     getPosition() const;
+    float     getPositionAngle() const;
+    float     getPositionRadius() const;
     Utils::Point3D getPositionAbs() const;
     Utils::Point3D getOutgoingControl() const;
     Utils::Point3D getIncomingControl() const;
-    int	      getRank() const;
+    int        getRank() const;
     bool      isSimulated() const;
-    int       getSlot() const;
-    void      getSubordinates( std::set< State* > &ss ) const;
-    void      getSuperiors( std::set< State* > &ss ) const;
-    int	      getParameterValue(int parindex);
+    std::set<State*>::iterator getSubordinatesBegin() const;
+    std::set<State*>::iterator getSubordinatesEnd() const;
+    std::set<State*>::iterator getSuperiorsBegin() const;
+    std::set<State*>::iterator getSuperiorsEnd() const;
+    int        getParameterValue(int parindex);
+    bool      isCentered() const;
     bool      isDeadlock() const;
     bool      isMarked() const;
     bool      isSelected() const;
     void      mark();
     void      select();
     void      setCluster( Cluster* c );
-    void      setPosition( float p );
+    void      setPosition(float r,float a);
     void      setPositionAbs( Utils::Point3D p );
     void      setOutgoingControl( Utils::Point3D p);
     void      setIncomingControl( Utils::Point3D p);
     void      setID(int id);
     void      setRank( int r );
-    void      setSlot( int s );
     void      setSimulated(bool simulated);
     void      unmark();
    
   private:
-    Cluster*		  cluster;
-    std::set< State* >	  comrades;
-    //float		  currentProbability;
-    int	                  id;
+    Cluster*      cluster;
+    std::set< State* >    comrades;
+    int                    id;
     std::vector< Transition* > inTransitions;
     std::vector< Transition* > loops;
-    bool		  marked;
-    //float		  probability;
+    bool      marked;
     std::vector< Transition* > outTransitions;
-    float		  position;
-    Utils::Point3D	  positionAbs;
+    float      positionAngle;
+    float      positionRadius;
+    Utils::Point3D    positionAbs;
     Utils::Point3D        outgoingControl;
     Utils::Point3D        incomingControl;
-    int			  rank;
+    int        rank;
     bool                  simulated;
-    int                   slot; // The slot this state occupies
     std::vector< int >    stateVector;
-    std::set< State* >	  subordinates;
-    std::set< State* >	  superiors;
+    std::set< State* >    subordinates;
+    std::set< State* >    superiors;
     Utils::DFSState       visitState;
     bool                  selected;
-
-
 };
 
 #endif //STATE_H
