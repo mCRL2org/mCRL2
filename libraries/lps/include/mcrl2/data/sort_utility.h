@@ -10,6 +10,7 @@
 #ifndef MCRL2_DATA_SORT_UTILITY_H
 #define MCRL2_DATA_SORT_UTILITY_H
 
+#include <assert.h>
 #include "mcrl2/data/data.h"
 #include "mcrl2/lps/specification.h"
 
@@ -94,7 +95,7 @@ bool is_finite(const function_list& fl, const lps::sort& s, const lps::sort_list
   function_list cl = get_constructors(fl, s);
 
   //If a sort has not got any constructors it is infinite
-  if (cl.size() == 0)
+  if (cl.empty())
   {
     result = false;
   }
@@ -110,6 +111,17 @@ bool is_finite(const function_list& fl, const lps::sort& s, const lps::sort_list
 
   return result;
 }
+
+///\pre s is a sort that occurs in data_specfication data
+///\ret true iff there exists a constructor function with s as target sort
+inline bool is_constructorsort(const lps::sort &s,const data_specification &data)
+{ // This function is added by Jan Friso Groote on 8/7/2007.
+  // cl contains all constructors with target sort s. 
+
+  assert(occurs_in(data.sorts(),s));
+  return (!data.constructors(s).empty());
+}
+
 
 } // namespace lps
 
