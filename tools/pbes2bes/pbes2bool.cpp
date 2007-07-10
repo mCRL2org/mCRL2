@@ -400,7 +400,7 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
                    atermpp::indexed_set &variable_index,
                    unsigned long &nr_of_generated_variables,
                    const bool to_bdd)
-{ 
+{ // std::cerr << " add_prop_var " << pp(p) << std::endl;
   if (is_propositional_variable_instantiation(p))
   { pair<unsigned long,bool> pr=variable_index.put(p);
     if (pr.second) /* add p to indexed set */
@@ -471,7 +471,7 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
   { return bes::false_();
   }
     
-  cerr << "Unexpected expression " << pp(p) << "\n";
+  cerr << "Unexpected expression. Most likely because expression fails to rewrite to true or false: " << pp(p) << "\n";
   assert(0);
   return bes::false_();
 }
@@ -500,11 +500,11 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
 
   variable_index.put(bes::true_()); /* Put first a dummy term that
                                        gets index 0 in the indexed set, to
-                                       prevent variables from getting a index 0 */
-  variable_index.put(pbes_spec.initial_state());
+                                       prevent variables from getting an index 0 */
 
   // Data rewriter
   Rewriter *rewriter = createRewriter(data);
+  variable_index.put(pbes_expression_substitute_and_rewrite(pbes_spec.initial_state(),data,rewriter));
 
   // Needed hashtables
   equation_system eqsys = pbes_spec.equations();
@@ -556,14 +556,13 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
       elist++;
     }
     assert(elist==current_variable_instantiation.parameters().end());
+    // std::cerr << " current pbes expression " << pp(current_pbes_expression) << std::endl;
     lps::pbes_expression new_pbes_expression = pbes_expression_substitute_and_rewrite(
                               current_pbes_expression, data, rewriter);
-
     bes::bes_expression new_bes_expression=
          add_propositional_variable_instantiations_to_indexed_set_and_translate(
                       new_pbes_expression,variable_index,nr_of_generated_variables,
                       tool_options.opt_outputformat=="none");
-    
 
     bes_equations.add_equation(
               nr_of_processed_variables+1,
@@ -686,7 +685,7 @@ static bes_expression evaluate_bex(
   { 
     bes::variable_type v=bes::get_variable(condition(b));
     if (bes_equations.get_rank(v)>=rank)
-    { // cerr << "HIER1\n";
+    { 
       bes_expression b1=evaluate_bex(then_branch(b),approximation,rank);
       bes_expression b2=evaluate_bex(else_branch(b),approximation,rank);
       return BDDif(approximation[v],b1,b2);
@@ -694,7 +693,6 @@ static bes_expression evaluate_bex(
     else
     { /* the condition has lower rank than the variable rank,
          leave it untouched */
-      // cerr << "HIER2\n";
       bes_expression b1=evaluate_bex(then_branch(b),approximation,rank);
       bes_expression b2=evaluate_bex(else_branch(b),approximation,rank);
       if ((b1==then_branch(b)) && (b2==else_branch(b)))
