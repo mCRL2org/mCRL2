@@ -693,7 +693,14 @@ namespace squadt {
       }
     }
 
-    void tool_display::remove() {
+    tool_display::~tool_display() {
+      remove(false);
+    }
+
+    /**
+     * \param[in] u whether or not to schedule a GUI update
+     **/
+    void tool_display::remove(bool u) {
       struct local {
         static void trampoline(tool_display* display) {
           display->current_layout.reset();
@@ -716,7 +723,10 @@ namespace squadt {
       event_handler.get_monitor()->reset_display_layout_handler();
       event_handler.get_monitor()->reset_status_message_handler();
 
-      context->gui_builder.schedule_update(boost::bind(&local::trampoline, this));
+      if (u) {
+        context->gui_builder.schedule_update(boost::bind(&local::trampoline, this));
+      }
+
       /* End tool execution, if it was still running */
       event_handler.get_monitor()->finish();
     }

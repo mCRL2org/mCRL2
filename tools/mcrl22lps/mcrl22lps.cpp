@@ -278,17 +278,19 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   c.add_option(option_end_phase).
           append_argument(linearisation_phase_enumeration, phase_selector.get_selection());
 
-  c.get_option(option_final_cluster).set_argument_value< 0, tipi::datatype::boolean >(clusterfinal->get_status());
-  c.get_option(option_no_intermediate_cluster).set_argument_value< 0, tipi::datatype::boolean >(!clusterintermediate->get_status());
-  c.get_option(option_no_alpha).set_argument_value< 0, tipi::datatype::boolean >(!alpha->get_status());
-  c.get_option(option_newstate).set_argument_value< 0, tipi::datatype::boolean >(newstate->get_status());
-  c.get_option(option_binary).set_argument_value< 0, tipi::datatype::boolean >(binary->get_status());
-  c.get_option(option_statenames).set_argument_value< 0, tipi::datatype::boolean >(statenames->get_status());
-  c.get_option(option_no_rewrite).set_argument_value< 0, tipi::datatype::boolean >(!rewrite->get_status());
-  c.get_option(option_no_freevars).set_argument_value< 0, tipi::datatype::boolean >(!freevars->get_status());
-  c.get_option(option_no_sumelm).set_argument_value< 0, tipi::datatype::boolean >(!sumelm->get_status());
-  c.get_option(option_no_deltaelm).set_argument_value< 0, tipi::datatype::boolean >(!deltaelm->get_status());
-  c.get_option(option_add_delta).set_argument_value< 0, tipi::datatype::boolean >(add_delta->get_status());
+  using tipi::datatype::boolean;
+
+  c.get_option(option_final_cluster).set_argument_value< 0, boolean >(clusterfinal->get_status());
+  c.get_option(option_no_intermediate_cluster).set_argument_value< 0, boolean >(!clusterintermediate->get_status());
+  c.get_option(option_no_alpha).set_argument_value< 0, boolean >(!alpha->get_status());
+  c.get_option(option_newstate).set_argument_value< 0, boolean >(newstate->get_status());
+  c.get_option(option_binary).set_argument_value< 0, boolean >(binary->get_status());
+  c.get_option(option_statenames).set_argument_value< 0, boolean >(statenames->get_status());
+  c.get_option(option_no_rewrite).set_argument_value< 0, boolean >(!rewrite->get_status());
+  c.get_option(option_no_freevars).set_argument_value< 0, boolean >(!freevars->get_status());
+  c.get_option(option_no_sumelm).set_argument_value< 0, boolean >(!sumelm->get_status());
+  c.get_option(option_no_deltaelm).set_argument_value< 0, boolean >(!deltaelm->get_status());
+  c.get_option(option_add_delta).set_argument_value< 0, boolean >(add_delta->get_status());
 
   m_communicator.send_clear_display();
 }

@@ -33,12 +33,12 @@ namespace squadt {
      * \param[in] p the process to remove
      **/
     inline void executor_impl::remove(process* p) {
-      std::list < process::sptr >::iterator i = std::find_if(processes.begin(), processes.end(),
-                              boost::bind(std::equal_to < process* >(), p,
-                                      boost::bind(&process::sptr::get, _1)));
+      for (std::list < process::sptr >::iterator i = processes.begin(); i != processes.end(); ++i) {
+        if (i->get() == p) {
+          processes.erase(i);
 
-      if (i != processes.end()) {
-        processes.erase(i);
+          break;
+        }
       }
     }
  
@@ -47,7 +47,7 @@ namespace squadt {
      * \param[in] w a pointer to the associated implementation object
      **/
     inline void executor_impl::start_process(const command& c, boost::shared_ptr < executor_impl >& w) {
-      process::sptr p(new process(boost::bind(&executor_impl::handle_process_termination, this, _1, w)));
+      process::sptr p(process::create(boost::bind(&executor_impl::handle_process_termination, this, _1, w)));
 
       processes.push_back(p);
 
@@ -60,7 +60,7 @@ namespace squadt {
      * \param[in] w a pointer to the associated implementation object
      **/
     inline void executor_impl::start_process(const command& c, task_monitor::sptr& l, boost::shared_ptr < executor_impl >& w) {
-      process::sptr p(new process(boost::bind(&executor_impl::handle_process_termination, this, _1, w), l));
+      process::sptr p(process::create(boost::bind(&executor_impl::handle_process_termination, this, _1, w), l));
 
       if (l.get() != 0) {
         l->attach_process(p);

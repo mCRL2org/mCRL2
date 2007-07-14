@@ -121,9 +121,13 @@ namespace transport {
           send_monitor.wait(s);
         }
       
-        boost::mutex::scoped_lock l(operation_lock);
+        boost::mutex::scoped_lock ll(operation_lock);
 
-        socket.close();
+        try {
+          socket.close();
+        }
+        catch (boost::system::system_error&) {
+        }
 
         basic_transceiver::handle_disconnect(this);
       }
@@ -267,6 +271,15 @@ namespace transport {
         async_write(socket, asio::buffer(buffer.get(), s.str().size()), 
                boost::asio::transfer_all(),
                bind(&socket_transceiver::handle_write, this, w, buffer, _1));
+      }
+    }
+
+    socket_transceiver::~socket_transceiver() {
+      boost::mutex::scoped_lock s(send_lock);
+
+      /* Wait until send operations complete */
+      if (0 < send_count) {
+        send_monitor.wait(s);
       }
     }
   }

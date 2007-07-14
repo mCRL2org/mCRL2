@@ -99,7 +99,7 @@ namespace squadt {
         bool is_busy() const;
 
         /** \brief Disconnects from a running process (or make sure no connection exists) */
-        void disconnect(execution::process*);
+        void disconnect(boost::weak_ptr < execution::process >&);
 
         /** \brief Unblocks waiters and requests a tool to prepare termination */
         void finish(bool = false);

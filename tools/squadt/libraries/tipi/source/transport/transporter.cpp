@@ -152,9 +152,15 @@ namespace transport {
   void transporter::disconnect() {
     boost::recursive_mutex::scoped_lock l(lock);
 
-    for (connection_list::const_iterator i = connections.begin(); i != connections.end(); i = connections.begin()) {
-      (*i)->disconnect(*i);
+    for (connection_list::const_iterator i = connections.begin(); i != connections.end(); ++i) {
+      basic_transceiver* p = (*i).get();
+
+      p->owner = 0;
+
+      p->disconnect(*i);
     }
+
+    connections.clear();
   }
 
   /**
@@ -175,7 +181,10 @@ namespace transport {
       ++i;
     }
 
+    (*i)->owner = 0;
     (*i)->disconnect(*i);
+
+    connections.erase(i);
   }
 
   /**
@@ -194,7 +203,10 @@ namespace transport {
                                                       bind(&basic_transceiver::ptr::get, _1))));
 
     if (i != connections.end()) {
+      (*i)->owner = 0;
       (*i)->disconnect(*i);
+
+      connections.erase(i);
     }
   }
 

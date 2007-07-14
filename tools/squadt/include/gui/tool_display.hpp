@@ -157,7 +157,10 @@ namespace squadt {
         void set_title(wxString);
 
         /** \brief Removes itself from the parent window */
-        void remove();
+        void remove(bool = true);
+
+        /** \brief Destructor */
+        ~tool_display();
     };
   }
 }
