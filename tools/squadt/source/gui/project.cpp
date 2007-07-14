@@ -78,6 +78,12 @@ namespace squadt {
         
     project::~project() {
       manager->store();
+
+      object_view = 0;
+
+      /* Close tool displays */
+      process_display_view->GetSizer()->Clear(true);
+
       manager.reset();
     }
 
@@ -243,10 +249,10 @@ namespace squadt {
       wxSizer* s = process_display_view->GetSizer();
        
       GUI::tool_display* display = new GUI::tool_display(process_display_view, this, p);
-       
+
       s->Insert(0, display, 0, wxEXPAND|wxALL, 2);
       s->Layout();
-       
+
       display->set_title(wxString(t.c_str(), wxConvLocal));
        
       return display;
@@ -576,53 +582,57 @@ namespace squadt {
      * \return whether or not there were no conflicts
      **/
     bool project::add_outputs_as_objects(wxTreeItemId s, processor::sptr tp) {
-      std::set < std::string > existing;
-
-      /* Gather existing objects */
-      wxTreeItemIdValue cookie;   // For wxTreeCtrl traversal
-
-      for (wxTreeItemId j = object_view->GetFirstChild(s, cookie); j.IsOk(); j = object_view->GetNextChild(s, cookie)) {
-        processor::object_descriptor::sptr object = static_cast < tool_data* > (object_view->GetItemData(j))->get_object();
-
-        if (object.get() != 0) {
-          existing.insert(std::string(object_view->GetItemText(j).fn_str()));
+      if (object_view != 0) {
+        std::set < std::string > existing;
+       
+        /* Gather existing objects */
+        wxTreeItemIdValue cookie;   // For wxTreeCtrl traversal
+       
+        for (wxTreeItemId j = object_view->GetFirstChild(s, cookie); j.IsOk(); j = object_view->GetNextChild(s, cookie)) {
+          processor::object_descriptor::sptr object = static_cast < tool_data* > (object_view->GetItemData(j))->get_object();
+       
+          if (object.get() != 0) {
+            existing.insert(std::string(object_view->GetItemText(j).fn_str()));
+          }
+          else {
+            /* Remove from view */
+            object_view->DeleteChildren(j);
+          }
+        }
+       
+        std::auto_ptr < project_manager::conflict_list > conflicts(manager->get_conflict_list(tp));
+       
+        if (tp->number_of_outputs() == 0 || 0 < conflicts->size()) {
+          manager->remove(tp.get());
+        }
+       
+        if (0 < conflicts->size()) {
+          for (project_manager::conflict_list::iterator j = conflicts->begin(); j != conflicts->end(); ++j) {
+            gui_builder.schedule_update(boost::bind(&project::report_conflict, this,
+                wxString(boost::str(boost::format("The file %s was already part of the project but has now also been produced by %s."
+                  "The original file will be restored.") % (*j)->location % tp->get_tool()->get_name()).c_str(), wxConvLocal)));
+       
+            (*j)->self_check(*manager);
+       
+            boost::shared_ptr < processor > g((*j)->generator.lock());
+       
+            if (g.get() != 0) {
+              manager->update_status(g.get());
+            }
+          }
         }
         else {
-          /* Remove from view */
-          object_view->DeleteChildren(j);
-        }
-      }
-
-      std::auto_ptr < project_manager::conflict_list > conflicts(manager->get_conflict_list(tp));
-
-      if (tp->number_of_outputs() == 0 || 0 < conflicts->size()) {
-        manager->remove(tp.get());
-      }
-
-      if (0 < conflicts->size()) {
-        for (project_manager::conflict_list::iterator j = conflicts->begin(); j != conflicts->end(); ++j) {
-          gui_builder.schedule_update(boost::bind(&project::report_conflict, this,
-              wxString(boost::str(boost::format("The file %s was already part of the project but has now also been produced by %s."
-                "The original file will be restored.") % (*j)->location % tp->get_tool()->get_name()).c_str(), wxConvLocal)));
-
-          (*j)->self_check(*manager);
-
-          boost::shared_ptr < processor > g((*j)->generator.lock());
-
-          if (g.get() != 0) {
-            manager->update_status(g.get());
+          for (processor::output_object_iterator j = tp->get_output_iterator(); j.valid(); ++j) {
+            if (existing.find(boost::filesystem::path((*j)->location).leaf()) == existing.end()) {
+              add_to_object_view(s, j.pointer());
+            }
           }
         }
-      }
-      else {
-        for (processor::output_object_iterator j = tp->get_output_iterator(); j.valid(); ++j) {
-          if (existing.find(boost::filesystem::path((*j)->location).leaf()) == existing.end()) {
-            add_to_object_view(s, j.pointer());
-          }
-        }
+       
+        return (conflicts->size() == 0);
       }
 
-      return (conflicts->size() == 0);
+      return false;
     }
 
     void project::report_conflict(wxString const& s) {

@@ -90,9 +90,14 @@ namespace tipi {
         if (p.get() != 0) {
           boost::shared_ptr < controller::capabilities > n(new controller::capabilities);
 
-          tipi::visitors::restore(*n, p->to_string());
+          try {
+            tipi::visitors::restore(*n, p->to_string());
           
-          boost::dynamic_pointer_cast < communicator_impl > (impl)->current_controller_capabilities = n;
+            boost::dynamic_pointer_cast < communicator_impl > (impl)->current_controller_capabilities = n;
+          }
+          catch (std::runtime_error& e) {
+            get_logger()->log(1, "Failure with interpretation of message: `" + std::string(e.what()) + "'\n");
+          }
 
           break;
         }

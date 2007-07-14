@@ -59,7 +59,7 @@ namespace squadt {
         std::auto_ptr < command >            m_command;
 
         /** \brief The process object that serves as interface to this object */
-        process*                             interface_pointer;
+        boost::weak_ptr < process >          interface_pointer;
 
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
         STARTUPINFO         si;
@@ -71,24 +71,21 @@ namespace squadt {
 
       private:
 
+#if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
         /** \brief Executed at process termination */
-        void termination_handler(pid_t);
+        static void termination_handler(boost::weak_ptr < process >, PROCESS_INFORMATION&);
+#else
+        /** \brief Executed at process termination */
+        static void termination_handler(boost::weak_ptr < process >, pid_t);
+#endif
 
         /** \brief Initialisation procedure */
         void initialise();
  
-      private:
-
-        /** \brief The default listener for changes in status */
-        static boost::shared_ptr < task_monitor >      default_monitor;
-
       public:
 
-        /** \brief Constructor */
-        process_impl(process::handler);
-    
         /** \brief Constructor with listener */
-        process_impl(process::handler, boost::shared_ptr < task_monitor >&);
+        process_impl(boost::shared_ptr < process >&, process::handler, boost::shared_ptr < task_monitor >&);
  
         /** \brief Start the process by executing a command */
         void execute(const command&);
@@ -106,20 +103,13 @@ namespace squadt {
         ~process_impl();
     };
 
-    boost::shared_ptr < task_monitor > process_impl::default_monitor;
-
-    /**
-     * \param h the function to call when the process terminates
-     **/
-    process_impl::process_impl(process::handler h) : current_status(process::stopped), signal_termination(h), monitor(default_monitor) {
-      initialise();
-    }
-
     /**
      * \param[in] h the function to call when the process terminates
      * \param[in] l a reference to a listener for process status change events
      **/
-    process_impl::process_impl(process::handler h, boost::shared_ptr < task_monitor >& l) : current_status(process::stopped), signal_termination(h), monitor(l) {
+    process_impl::process_impl(boost::shared_ptr < process >& p, process::handler h, boost::shared_ptr < task_monitor >& l) :
+        current_status(process::stopped), signal_termination(h), monitor(l), interface_pointer(p) {
+
       initialise();
     }
 
@@ -136,7 +126,9 @@ namespace squadt {
     process_impl::~process_impl() {
       /* Inform listener */
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
-      terminate();
+      if (current_status != process::running && current_status != process::stopped) {
+        terminate();
+      }
 #else
       if (identifier) {
         terminate();
@@ -172,43 +164,58 @@ namespace squadt {
 #endif
     }
  
-    inline pid_t process_impl::get_identifier() const {
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
+    inline pid_t process_impl::get_identifier() const {
       return (static_cast < pid_t > (pi.dwProcessId));
-#else
-      return (identifier);
-#endif
     }
 
-    void process_impl::termination_handler(pid_t identifier) {
-      boost::shared_ptr < process_impl > guard(interface_pointer->impl);
-
-#if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
-      if (pi.hProcess != 0) {
+    /**
+     * \param[in,out] ph the process handle
+     **/
+    void process_impl::termination_handler(boost::weak_ptr < process > p, HANDLE ph) {
+      if (ph != 0) {
         DWORD exit_code;
+    
+        WaitForSingleObject(ph, INFINITE);
+    
+        boost::shared_ptr < process > alive(p.lock());
 
-        WaitForSingleObject(pi.hProcess, INFINITE);
+        if (alive.get())  {
+          boost::shared_ptr < process_impl >& impl(alive->impl);
 
-        if (GetExitCodeProcess(pi.hProcess, &exit_code)) {
-          current_status = (exit_code == 0) ? process::completed : process::aborted;
+          impl->current_status = (GetExitCodeProcess(ph, &exit_code) && exit_code == 0) ? process::completed : process::aborted;
+
+          impl->signal_status();
+       
+          impl->signal_termination(alive.get());
         }
-        else {
-          current_status = process::aborted;
-        }
-     }
+      }
+    }
 #else
+    inline pid_t process_impl::get_identifier() const {
+      return (identifier);
+    }
+
+    void process_impl::termination_handler(boost::weak_ptr < process > p, pid_t identifier) {
       int exit_code;
 
       waitpid(identifier, &exit_code, 0);
 
-      current_status = (WIFEXITED(exit_code)) ? process::completed : process::aborted;
-#endif
-      signal_status();
+      boost::shared_ptr < process > alive(p.lock());
 
-      signal_termination(interface_pointer);
+      if (alive.get())  {
+        boost::shared_ptr < process_impl >& impl(alive->impl);
+
+        impl->current_status = (WIFEXITED(exit_code)) ? process::completed : process::aborted;
+
+        impl->signal_status();
+
+        impl->signal_termination(alive.get());
+      }
     }
+#endif
 
-    /** Signals the current state to the monitor */
+    /** \brief Signals the current state to the monitor */
     void process_impl::signal_status() const {
       boost::shared_ptr < task_monitor > l = monitor.lock();
 
@@ -254,27 +261,54 @@ namespace squadt {
       if (current_status == process::running) {
         using namespace boost;
 
+#if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
         /* Wait for the process to terminate */
-        thread t(bind(&process_impl::termination_handler, this, identifier));
+        thread t(bind(&process_impl::termination_handler, interface_pointer, pi));
+#else
+        thread t(bind(&process_impl::termination_handler, interface_pointer, identifier));
+#endif
       }
       else {
-        signal_termination(interface_pointer);
+        signal_termination(interface_pointer.lock().get());
       }
     }
  
     /**
      * \param[in] h the function to call when the process terminates
      **/
-    process::process(handler h) : impl(new process_impl(h)) {
-      impl->interface_pointer = this;
+    process::process(handler h) {
     }
  
     /**
      * \param[in] h the function to call when the process terminates
      * \param[in] l a reference to a listener for process status change events
      **/
-    process::process(handler h, boost::shared_ptr < task_monitor >& l) : impl(new process_impl(h, l)) {
-      impl->interface_pointer = this;
+    process::process(handler h, boost::shared_ptr < task_monitor >& l) {
+    }
+
+    boost::shared_ptr < task_monitor > default_monitor;
+
+    /**
+     * \param[in] h the function to call when the process terminates
+     **/
+    boost::shared_ptr < process > process::create(handler h) {
+      boost::shared_ptr < process > p(new process(h));
+
+      p->impl.reset(new process_impl(p, h, default_monitor));
+
+      return p;
+    }
+ 
+    /**
+     * \param[in] h the function to call when the process terminates
+     * \param[in] l a reference to a listener for process status change events
+     **/
+    boost::shared_ptr < process > process::create(handler h, boost::shared_ptr < task_monitor >& l) {
+      boost::shared_ptr < process > p(new process(h, l));
+
+      p->impl.reset(new process_impl(p, h, l));
+
+      return p;
     }
  
     pid_t process::get_identifier() const {

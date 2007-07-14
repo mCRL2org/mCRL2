@@ -19,7 +19,7 @@ namespace squadt {
     task_monitor::task_monitor() : tipi::controller::communicator(new task_monitor_impl) {
     }
 
-    void task_monitor::disconnect(execution::process*) {
+    void task_monitor::disconnect(boost::weak_ptr < execution::process >&) {
       boost::dynamic_pointer_cast < task_monitor_impl > (impl)->connected = false;
 
       impl->disconnect();

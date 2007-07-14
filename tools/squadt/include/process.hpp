@@ -56,13 +56,21 @@ namespace squadt {
         /** \brief Pointer to implementation object (handle-body idiom) */
         boost::shared_ptr < process_impl >             impl;
 
-      public:
-    
+      private:
+
         /** \brief Constructor */
         process(handler);
     
         /** \brief Constructor with listener */
         process(handler, boost::shared_ptr < task_monitor >&);
+
+      public:
+
+        /** \brief Factory method */
+        static boost::shared_ptr < process > create(handler);
+    
+        /** \brief Factory method */
+        static boost::shared_ptr < process > create(handler, boost::shared_ptr < task_monitor >&);
     
         /** \brief Start the process by executing a command */
         void execute(const command&);

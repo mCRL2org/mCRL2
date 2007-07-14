@@ -129,13 +129,13 @@ namespace transport {
         inline void connect(const ip_address_t& = transport::ip_any, port_t const& = default_port);
 
         /** \brief Terminate connection with peer */
-        inline void disconnect(basic_transceiver::ptr);
+        void disconnect(boost::shared_ptr < basic_transceiver >);
 
         /** \brief Start listening for new data */
         void activate();
 
         /** \brief Destructor */
-        inline ~socket_transceiver();
+        ~socket_transceiver();
     };
 
     /**
@@ -198,15 +198,6 @@ namespace transport {
      **/
     inline void socket_transceiver::disconnect(basic_transceiver::ptr p) {
       disconnect(this_ptr.lock(), p);
-    }
-
-    inline socket_transceiver::~socket_transceiver() {
-      boost::mutex::scoped_lock s(send_lock);
-
-      /* Wait until send operations complete */
-      if (0 < send_count) {
-        send_monitor.wait(s);
-      }
     }
   }
 }
