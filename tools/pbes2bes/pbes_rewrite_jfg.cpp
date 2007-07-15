@@ -176,7 +176,59 @@ pbes_expression pbes_expression_rewrite_and_simplify(
   return result;
 }
 
+/**************************************************************************************************/
 
+static void distribute_and(const pbes_expression &expr,atermpp::set < pbes_expression> &conjunction_set)
+{ /* distribute the conjuncts of expr over the conjunction_set */
+  if (pbes_expr::is_and(expr))
+  { distribute_and(lhs(expr),conjunction_set);
+    distribute_and(lhs(expr),conjunction_set);
+  }
+  else
+  { conjunction_set.insert(expr);
+  }
+}
+
+static pbes_expression make_conjunction(const atermpp::set < pbes_expression> &conjunction_set)
+{ pbes_expression t=pbes_expr::true_();
+
+  for(atermpp::set < pbes_expression>::iterator i=conjunction_set.begin();
+          i!=conjunction_set.end() ; i++)
+  { if (pbes_expr::is_true(t))
+    { t=*i;
+    }
+    else
+    { t=pbes_expr::and_(*i,t);
+    } 
+  }
+  return t;
+}
+
+static void distribute_or(const pbes_expression &expr,atermpp::set < pbes_expression> &disjunction_set)
+{ /* distribute the conjuncts of expr over the conjunction_set */
+  if (pbes_expr::is_or(expr))
+  { distribute_or(lhs(expr),disjunction_set);
+    distribute_or(lhs(expr),disjunction_set);
+  }
+  else
+  { disjunction_set.insert(expr);
+  }
+}
+
+static pbes_expression make_disjunction(const atermpp::set < pbes_expression> &disjunction_set)
+{ pbes_expression t=pbes_expr::false_();
+
+  for(atermpp::set < pbes_expression>::iterator i=disjunction_set.begin();
+          i!=disjunction_set.end() ; i++)
+  { if (pbes_expr::is_false(t))
+    { t=*i;
+    }
+    else
+    { t=pbes_expr::or_(*i,t);
+    } 
+  }
+  return t;
+}
 
 pbes_expression pbes_expression_substitute_and_rewrite(
                    const pbes_expression &p, 
@@ -184,18 +236,22 @@ pbes_expression pbes_expression_substitute_and_rewrite(
                    Rewriter *rewriter)
 { 
   pbes_expression result;
+
+  // std::cerr << "Rewrite1: " << pp(p) << std::endl << std::endl;
   
   if (is_and(p))
   { // p = and(left, right)
     //Rewrite left and right as far as possible
     pbes_expression left = pbes_expression_substitute_and_rewrite(lhs(p), 
                                data, rewriter);
+    // std::cerr << "LEFT " << pp(left) << std::endl;
     if (is_false(left))
     { result = false_();
     }
     else
     { pbes_expression right = pbes_expression_substitute_and_rewrite(rhs(p), 
                  data, rewriter);
+      // std::cerr << "RIGHT " << pp(right) << std::endl;
       //Options for left and right
       if (is_false(right))
       { result = false_();
@@ -241,11 +297,11 @@ pbes_expression pbes_expression_substitute_and_rewrite(
     result = p;
   }
   else if (is_forall(p))
-  { // p == forall(data_expression_list, pbes_expression)
+  { 
 
     data_variable_list data_vars = quant_vars(p);
-    
     pbes_expression expr = pbes_expression_substitute_and_rewrite(quant_expr(p), data, rewriter);
+    // std::cerr << "Forall " << pp(data_vars) << "." << pp(expr) << std::endl;
 
     // If no data_vars
     if (data_vars.empty())
@@ -254,52 +310,71 @@ pbes_expression pbes_expression_substitute_and_rewrite(
     }
     else
     { /* Replace the quantified variables of constructor sorts by constructors. 
-         E.g. forall x:Nat.phi(x) is replaced by phi(0) && forall x':Nat.phi(x').
-         Simplify the resulting expressions. */
+         E.g. forall x:Nat.phi(x) is replaced by phi(0) && forall x':Nat.phi(successor(x')),
+         assuming 0 and successor are the constructors of Nat  (which is btw. not the case
+         in de data-implementation of mCRL2).  Simplify the resulting expressions. */ 
+
       fresh_variable_generator variable_generator;
       unsigned int no_variables=0;
       variable_generator.set_context(expr);
       variable_generator.set_hint("x");
       data_variable_list new_data_vars;
+      atermpp::set < pbes_expression > conjunction_set;
+      distribute_and(expr,conjunction_set);
       bool constructor_sorts_found=true;
       for( ; constructor_sorts_found ; )
       { constructor_sorts_found=false;
         for (data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
         { 
-          if (occurs_in_var(expr,*i))
-          { pbes_expression resulting_conjunction(pbes_expr::true_());
-            if (!is_constructorsort(i->sort(),data))
-            { /* The sort of variable i is not a constructor sort.  */
-              new_data_vars=push_front(new_data_vars,*i);
-            }
-            else
-            { function_list func=data.constructors(i->sort());
-              for (function_list::iterator f=func.begin() ; f!=func.end(); f++)
+          if (!is_constructorsort(i->sort(),data))
+          { /* The sort of variable i is not a constructor sort.  */
+                new_data_vars=push_front(new_data_vars,*i);
+          }
+          else
+          {
+            atermpp::set <pbes_expression> new_conjunction_set;
+            for(atermpp::set <pbes_expression >::iterator t=conjunction_set.begin() ;
+                         t!=conjunction_set.end() ; t++)
+            { 
+              if (!occurs_in_var(*t,*i))
+              { new_conjunction_set.insert(*t);
+              }
+              else
               { 
-                sort_list domain_sorts=(f->sort()).domain_sorts();
-                for( sort_list::iterator s=domain_sorts.begin() ;
-                     s!=domain_sorts.end() ; s++ )
-                { variable_generator.set_sort(*s);
-                  constructor_sorts_found=constructor_sorts_found || is_constructorsort(*s,data);
-                  data_variable new_data_variable=variable_generator();
-                  no_variables++;
-                  if ((no_variables % 10)==0)
-                  { std::cerr << "Used " << no_variables << " variables when eliminating universal quantifier\n";
-                    std::cerr << "Vars: " << pp(data_vars) << "\nExpression: " << pp(expr) << std::endl;
+                function_list func=data.constructors(i->sort());
+                for (function_list::iterator f=func.begin() ; f!=func.end(); f++)
+                { 
+                  sort_list domain_sorts=(f->sort()).domain_sorts();
+                  data_variable_list function_arguments;
+                  for( sort_list::iterator s=domain_sorts.begin() ;
+                       s!=domain_sorts.end() ; s++ )
+                  { variable_generator.set_sort(*s);
+                    constructor_sorts_found=constructor_sorts_found || is_constructorsort(*s,data);
+                    data_variable new_data_variable=variable_generator();
+                    no_variables++;
+                    if ((no_variables % 100)==0)
+                    { std::cerr << "Used " << no_variables << " variables when eliminating universal quantifier\n";
+                      std::cerr << "Vars: " << pp(data_vars) << "\nExpression: " << pp(*t) << std::endl;
+                    }
+                    new_data_vars=push_front(new_data_vars,new_data_variable);
+                    function_arguments=push_front(function_arguments,new_data_variable);
                   }
-                  new_data_vars=push_front(new_data_vars,new_data_variable);
+                  pbes_expression d(gsMakeDataApplList(*f,reverse(function_arguments)));
+                  rewriter->setSubstitution(*i,rewriter->toRewriteFormat(d));
+                  pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter));
+                  rewriter->clearSubstitution(*i);
+                  if (pbes_expr::is_false(r)) /* the resulting expression is false, so we can terminate */
+                  { 
+                    // std::cerr << "Result forall False" << std::endl << std::endl;
+                    return pbes_expr::false_();
+                  }
+                  else 
+                  { new_conjunction_set.insert(r);
+                  }
                 }
-                pbes_expression d(gsMakeDataApplList(*f,reverse(new_data_vars)));
-                rewriter->setSubstitution(*i,rewriter->toRewriteFormat(d));
-                resulting_conjunction=(pbes_expr::is_true(resulting_conjunction)?
-                                           pbes_expression_substitute_and_rewrite(expr,data,rewriter):
-                                           pbes_expr::and_(
-                                              resulting_conjunction,
-                                              pbes_expression_substitute_and_rewrite(expr,data,rewriter)));
-                rewriter->clearSubstitution(*i);
               }
             }
-            expr=resulting_conjunction;
+            conjunction_set=new_conjunction_set;
           }
         }
         data_vars=new_data_vars;
@@ -312,66 +387,91 @@ pbes_expression pbes_expression_substitute_and_rewrite(
         gsErrorMsg("Aborting\n");
         exit(1);
       }
+      result=make_conjunction(conjunction_set);
     }
-    result=expr;
+   // std::cerr << "Result forall " << pp(result) << std::endl << std::endl;
   }
   else if (is_exists(p))
-  { // p = exists(data_expression_list, pbes_expression)
-    // std::cerr << "Eliminate exists: " << pp(p) << std::endl;
+  { 
+    // std::cerr << "Exists full " << pp(p) << std::endl;
     data_variable_list data_vars = quant_vars(p);
-    
     pbes_expression expr = pbes_expression_substitute_and_rewrite(quant_expr(p), data, rewriter);
+    // std::cerr << "ExistsXX " << pp(data_vars) << "." << pp(expr) << std::endl;
 
     // If no data_vars
     if (data_vars.empty())
+    { 
       result = expr;
+    }
     else
     { /* Replace the quantified variables of constructor sorts by constructors. 
-         E.g. forall x:Nat.phi(x) is replaced by phi(0) && forall x':Nat.phi(x').
-         Simplify the resulting expressions. */
+         E.g. forall x:Nat.phi(x) is replaced by phi(0) || forall x':Nat.phi(successor(x')),
+         assuming 0 and successor are the constructors of Nat  (which is btw. not the case
+         in de data-implementation of mCRL2).  Simplify the resulting expressions. */ 
+
       fresh_variable_generator variable_generator;
       unsigned int no_variables=0;
       variable_generator.set_context(expr);
       variable_generator.set_hint("x");
       data_variable_list new_data_vars;
+      atermpp::set < pbes_expression > disjunction_set;
+      distribute_or(expr,disjunction_set);
       bool constructor_sorts_found=true;
       for( ; constructor_sorts_found ; )
       { constructor_sorts_found=false;
         for (data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
         { 
-          if (occurs_in_var(expr,*i))
-          { pbes_expression resulting_disjunction(pbes_expr::false_());
-            if (!is_constructorsort(i->sort(),data))
-            { /* The sort of variable i is not a constructor sort.  */
-              new_data_vars=push_front(new_data_vars,*i);
-            }
-            else
-            { function_list func=data.constructors(i->sort());
-              for (function_list::iterator f=func.begin() ; f!=func.end(); f++)
-              { sort_list domain_sorts=(f->sort()).domain_sorts();
-                for( sort_list::iterator s=domain_sorts.begin() ;
-                     s!=domain_sorts.end() ; s++ )
-                { variable_generator.set_sort(*s);
-                  constructor_sorts_found=constructor_sorts_found || is_constructorsort(*s,data);
-                  data_variable new_data_variable=variable_generator();
-                  no_variables++;
-                  if ((no_variables % 10)==0)
-                  { std::cerr << "Used " << no_variables << " variables when eliminating existential quantifier\n";
-                    std::cerr << "Vars: " << pp(data_vars) << "\nExpression: " << pp(expr) << std::endl;
+          if (!is_constructorsort(i->sort(),data))
+          { /* The sort of variable i is not a constructor sort.  */
+                new_data_vars=push_front(new_data_vars,*i);
+          }
+          else
+          {
+            atermpp::set <pbes_expression> new_disjunction_set;
+            for(atermpp::set <pbes_expression >::iterator t=disjunction_set.begin() ;
+                         t!=disjunction_set.end() ; t++)
+            { 
+              if (!occurs_in_var(*t,*i))
+              { new_disjunction_set.insert(*t);
+              }
+              else
+              { 
+                function_list func=data.constructors(i->sort());
+                for (function_list::iterator f=func.begin() ; f!=func.end(); f++)
+                { 
+                  sort_list domain_sorts=(f->sort()).domain_sorts();
+                  // std::cerr << "Function " << f->name() << " Domain sorts " << domain_sorts << std::endl;
+                  data_variable_list function_arguments;
+                  for( sort_list::iterator s=domain_sorts.begin() ;
+                       s!=domain_sorts.end() ; s++ )
+                  { variable_generator.set_sort(*s);
+                    constructor_sorts_found=constructor_sorts_found || is_constructorsort(*s,data);
+                    data_variable new_data_variable=variable_generator();
+                    no_variables++;
+                    if ((no_variables % 100)==0)
+                    { std::cerr << "Used " << no_variables << " variables when eliminating existential quantifier\n";
+                      std::cerr << "Vars: " << pp(data_vars) << "\nExpression: " << pp(*t) << std::endl;
+                    }
+                    new_data_vars=push_front(new_data_vars,new_data_variable);
+                    function_arguments=push_front(function_arguments,new_data_variable);
                   }
-                  new_data_vars=push_front(new_data_vars,new_data_variable);
+                  pbes_expression d(gsMakeDataApplList(*f,reverse(function_arguments)));
+                  rewriter->setSubstitution(*i,rewriter->toRewriteFormat(d));
+                  // std::cerr << "SetSubstitution: " << *i << "    " << pp(d) << std::endl;
+                  pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter));
+                  rewriter->clearSubstitution(*i);
+                  if (pbes_expr::is_true(r)) /* the resulting expression is true, so we can terminate */
+                  { 
+                    // std::cerr << "Result exists True" << std::endl << std::endl;
+                    return pbes_expr::true_();
+                  }
+                  else 
+                  { new_disjunction_set.insert(r);
+                  }
                 }
-                pbes_expression d(gsMakeDataApplList(*f,reverse(new_data_vars)));
-                rewriter->setSubstitution(*i,rewriter->toRewriteFormat(d));
-                resulting_disjunction=(pbes_expr::is_false(resulting_disjunction)?
-                                          pbes_expression_substitute_and_rewrite(expr,data,rewriter):
-                                          pbes_expr::or_(
-                                              resulting_disjunction,
-                                              pbes_expression_substitute_and_rewrite(expr,data,rewriter)));
-                rewriter->clearSubstitution(*i);
               }
             }
-            expr=resulting_disjunction;
+            disjunction_set=new_disjunction_set;
           }
         }
         data_vars=new_data_vars;
@@ -384,9 +484,9 @@ pbes_expression pbes_expression_substitute_and_rewrite(
         gsErrorMsg("Aborting\n");
         exit(1);
       }
+      result=make_disjunction(disjunction_set);
     }
-    result=expr;
-
+    // std::cerr << "Result exists " << pp(result) << std::endl << std::endl;
   }
   else if (is_propositional_variable_instantiation(p))
   { // p is a propositional variable
@@ -398,7 +498,7 @@ pbes_expression pbes_expression_substitute_and_rewrite(
   else
   { // p is a data_expression
     data_expression d = rewriter->rewrite(p);
-    // std::cerr << "Rewrite: " << pp(p) << "\nResult: " <<  pp(d) << "\n  " << d << std::endl;
+    // std::cerr << "Rewrite2: " << pp(p) << "\nResult: " <<  pp(d) << "\n  " << d << std::endl;
     if (data_expr::is_true(d))
     { result = pbes_expr::true_();
     }
@@ -411,7 +511,7 @@ pbes_expression pbes_expression_substitute_and_rewrite(
     }
   }
   
-  // std::cerr << "Hier: " << pp(result) << std::endl;
+  // std::cerr << "Result: " << pp(result) << "\n\n";
   return result;
 }
 

@@ -540,6 +540,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
   {
     propositional_variable_instantiation current_variable_instantiation = 
           propositional_variable_instantiation(variable_index.get(nr_of_processed_variables+1));
+    // std::cerr << " current expression " << pp(current_variable_instantiation) << std::endl;
     
     // Get equation which belongs to the current propvarinst and their needed parts
     pbes_equation current_pbeq = pbes_equation(pbes_equations.get(current_variable_instantiation.name()));
@@ -552,13 +553,14 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
            vlist!=current_variable.parameters().end() ; vlist++)
     { 
       assert(elist!=current_variable_instantiation.parameters().end());
+      // std::cerr << "Substitution: " << *vlist << "  " << *elist << std::endl;
       rewriter->setSubstitution(*vlist,rewriter->toRewriteFormat(*elist));
       elist++;
     }
     assert(elist==current_variable_instantiation.parameters().end());
-    // std::cerr << " current pbes expression " << pp(current_pbes_expression) << std::endl;
     lps::pbes_expression new_pbes_expression = pbes_expression_substitute_and_rewrite(
                               current_pbes_expression, data, rewriter);
+    // std::cerr << " new pbes expression " << pp(new_pbes_expression) << std::endl;
     bes::bes_expression new_bes_expression=
          add_propositional_variable_instantiations_to_indexed_set_and_translate(
                       new_pbes_expression,variable_index,nr_of_generated_variables,
@@ -571,7 +573,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
               new_bes_expression);
 
     nr_of_processed_variables++;
-    if (nr_of_processed_variables % 1000 == 0)
+    if (nr_of_processed_variables % 100 == 0)
     { 
       gsVerboseMsg("Processed %d and generated %d boolean variables\n", 
                                  nr_of_processed_variables,nr_of_generated_variables);
