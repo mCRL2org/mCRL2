@@ -1,5 +1,5 @@
 #include "byteencoding.h"
-#include "ieee754.h"
+//#include "ieee754.h"
 
 #if __STDC_VERSION__ >= 199901L
   /* "inline" is a keyword */
@@ -51,7 +51,7 @@ inline static int unsignedToSignedInt(unsigned int unsignedInt){
  * the down side is that encoding large and negative values will require one extra byte.
  */
 int BEserializeMultiByteInt(int i, char *c){
-	unsigned int ui = signedToUnsignedInt(i);
+/*	unsigned int ui = signedToUnsignedInt(i);
 	
 	if((ui & 0xffffff80U) == 0){
 		c[0] = (char) (ui & SEVENBITS);
@@ -77,7 +77,7 @@ int BEserializeMultiByteInt(int i, char *c){
 	}
 	c[3] = (char) (((ui >> 21) & SEVENBITS) | SIGNBIT);
 	
-	c[4] = (char) ((ui >> 28) & SEVENBITS);
+	c[4] = (char) ((ui >> 28) & SEVENBITS);*/
 	return 5;
 }
 
@@ -85,7 +85,7 @@ int BEserializeMultiByteInt(int i, char *c){
  * Serializes a double value using IEEE 754 encoding.
  */
 void BEserializeDouble(double d, char *c){
-	unsigned int negative, exponent, mantissa0, mantissa1;
+/*	unsigned int negative, exponent, mantissa0, mantissa1;
 	union ieee754_double u;
 	
 	u.d = d;
@@ -103,7 +103,7 @@ void BEserializeDouble(double d, char *c){
 	c[4] = mantissa0 & 0x000000ffU;
 	c[5] = (mantissa0 & 0x0000ff00U) >> 8;
 	c[6] = ((mantissa0 & 0x000f0000U) >> 16) | ((exponent & 0x0000000fU) << 4);
-	c[7] = ((exponent & 0x00007f0U) >> 4) | (negative & 0x00000001U) << 7;
+	c[7] = ((exponent & 0x00007f0U) >> 4) | (negative & 0x00000001U) << 7;*/
 }
 
 
@@ -151,7 +151,7 @@ int BEdeserializeMultiByteInt(char *c, unsigned int *count){
  * Deserializes a double in IEEE 754 encoding from the given sequence of bytes.
  */
 double BEdeserializeDouble(char *c){
-	union ieee754_double u;
+/*	union ieee754_double u;
 	
 	unsigned int mantissa1 = 	(c[0] & 0x000000ffU) |
 								(c[1] & 0x000000ffU) << 8 |
@@ -172,5 +172,5 @@ double BEdeserializeDouble(char *c){
 	u.ieee.mantissa0 = mantissa0;
 	u.ieee.mantissa1 = mantissa1;
 	
-	return u.d;
+	return u.d;*/ return 0.0;
 }
