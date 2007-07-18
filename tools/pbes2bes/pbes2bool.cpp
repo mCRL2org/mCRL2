@@ -71,6 +71,7 @@ namespace po = boost::program_options;
 typedef struct{
   string opt_outputformat;
   string opt_strategy;
+  RewriteStrategy rewrite_strategy;
   string infilename;
   string outfilename;
 } t_tool_options;
@@ -480,11 +481,12 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
 //------------------------------
 
 // Global variables
-  atermpp::indexed_set variable_index(10000, 50);     
+//  atermpp::indexed_set variable_index(10000, 50);     
   bes::equations bes_equations;
 
 static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
 {
+
   // Verbose msg: doing naive algorithm
   gsVerboseMsg("Computing BES from PBES using lazy algorithm...\n");
   
@@ -498,12 +500,14 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
   unsigned long nr_of_processed_variables = 0;
   unsigned long nr_of_generated_variables = 1;
 
+  atermpp::indexed_set variable_index(10000, 50);
+
   variable_index.put(bes::true_()); /* Put first a dummy term that
                                        gets index 0 in the indexed set, to
                                        prevent variables from getting an index 0 */
 
   // Data rewriter
-  Rewriter *rewriter = createRewriter(data);
+  Rewriter *rewriter = createRewriter(data,tool_options.rewrite_strategy);
   variable_index.put(pbes_expression_substitute_and_rewrite(pbes_spec.initial_state(),data,rewriter));
 
   // Needed hashtables
@@ -1071,6 +1075,7 @@ t_tool_options parse_command_line(int argc, char** argv)
   t_tool_options tool_options;
   string opt_outputformat;
   string opt_strategy;
+  string opt_rewriter;
   vector< string > file_names;
 
   po::options_description desc;
@@ -1079,6 +1084,11 @@ t_tool_options parse_command_line(int argc, char** argv)
       ("strategy,s",  po::value<string>(&opt_strategy)->default_value("lazy"), "use strategy arg (default 'lazy');\n"
        "The following strategies are available:\n"
        "lazy    Compute only boolean equations which can be reached from the initial state\n")
+      ("rewriter,R", po::value<string>(&opt_rewriter)->default_value("inner"), "indicate the rewriter to be used. Options are:\n"
+       "inner   Use the interpreting innermost rewriter (default),\n"
+       "jitty   Use the interpreting just in time rewriter,\n"
+       "innerc  Use the compiling innermost rewriter (not for Windows),\n"
+       "jittyc  Use the compiling just in time rewriter (fastest, not for Windows).\n")
       ("output,o",  po::value<string>(&opt_outputformat)->default_value("none"), "use outputformat arg (default 'none');\n"
                "available outputformats are none, vasy and cwi")
       ("verbose,v",  "turn on the display of short intermediate gsMessages")
@@ -1143,14 +1153,29 @@ t_tool_options parse_command_line(int argc, char** argv)
     }
   }
 
-  if (vm.count("strategy")) // Output format
+  if (vm.count("strategy")) // Bes solving strategy (currently only one available)
   {
     opt_strategy = vm["strategy"].as< string >();
     if (!(opt_strategy == "lazy"))
     {
-      gsErrorMsg("Unknown strategy specified. Available strategies are naive and strategy\n");
+      gsErrorMsg("Unknown strategy specified. The only vailable strategy is lazy\n");
       exit(1);
     }
+  }
+
+  if (vm.count("rewriter")) // Select the rewiter to be used
+  { 
+    opt_rewriter = vm["rewriter"].as< string >();
+    if (!(opt_rewriter == "inner") &&
+        !(opt_rewriter == "jitty") &&
+        !(opt_rewriter == "innerc") &&
+        !(opt_rewriter == "jittyc"))
+    { 
+      gsErrorMsg("Unknown rewriter specified. Available rewriters are inner, jitty, innerc and jittyc\n");
+      exit(1);
+    }
+
+        
   }
   
   if (vm.count("file_names"))
@@ -1189,6 +1214,20 @@ t_tool_options parse_command_line(int argc, char** argv)
   
   tool_options.opt_outputformat = opt_outputformat;
   tool_options.opt_strategy = opt_strategy;
+  if (opt_rewriter=="inner")
+  { tool_options.rewrite_strategy=GS_REWR_INNER;
+  }
+  else if (opt_rewriter=="jitty")
+  { tool_options.rewrite_strategy=GS_REWR_JITTY;
+  }
+  else if (opt_rewriter=="innerc")
+  { tool_options.rewrite_strategy=GS_REWR_INNERC;
+  }
+  else if (opt_rewriter=="jittyc")
+  { tool_options.rewrite_strategy=GS_REWR_JITTYC;
+  }
+  else assert(0); // Unknown rewriter specified. Should have been caught above.
+  
   return tool_options;
 }
 
