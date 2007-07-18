@@ -12,10 +12,6 @@
 #include "_afun.h"
 #include "memory.h"
 
-#ifdef DMALLOC
-#include <dmalloc.h>
-#endif
-
 /*}}}  */
 /*{{{  defines */
 
@@ -66,7 +62,7 @@ static ATerm rparse_term(int *c, byte_reader *reader, ATermIndexedSet abbrevs);
 static void resize_parse_buffer(int n)
 {
   parse_buffer_size = n;
-  parse_buffer = (char *) realloc(parse_buffer, parse_buffer_size);
+  parse_buffer = (char *) AT_realloc(parse_buffer, parse_buffer_size);
   if (!parse_buffer) {
     ATerror("resize_parse_buffer(tafio.c): cannot allocate parse buffer of size %d\n", 
 	    parse_buffer_size);
@@ -379,7 +375,7 @@ char *ATwriteToSharedString(ATerm t, int *len)
 
   if (!initialized) {
     writer.type = STRING_WRITER;
-    writer.u.string_data.buf = (unsigned char *)calloc(BUFSIZ, 1);
+    writer.u.string_data.buf = (unsigned char *)AT_calloc(BUFSIZ, 1);
     writer.u.string_data.max_size = BUFSIZ;
     initialized = ATtrue;
   }
@@ -529,7 +525,7 @@ static ATerm rparse_blob(int *c, byte_reader *reader)
 
   len = strtoul(lenspec, (char**)NULL, 10);
 
-  data = (char *)malloc(len);
+  data = (char *)AT_malloc(len);
   if (!data) {
     ATerror("out of memory in rparse_blob\n");
   }
@@ -623,7 +619,7 @@ static ATerm rparse_quoted_appl(int *c, byte_reader *reader, ATermIndexedSet abb
 
   /* Wrap up this function application */
   sym = ATmakeSymbol(name, ATgetLength(args), ATtrue);
-  free(name);
+  AT_free(name);
   return (ATerm)ATmakeApplList(sym, args);
 }
 
@@ -671,7 +667,7 @@ static ATermAppl rparse_unquoted_appl(int *c, byte_reader *reader, ATermIndexedS
 		
   /* Wrap up this function application */
   sym = ATmakeSymbol(name, ATgetLength(args), ATfalse);
-  free(name);
+  AT_free(name);
   return ATmakeApplList(sym, args);
 }
 

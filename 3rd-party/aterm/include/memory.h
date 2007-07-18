@@ -98,6 +98,27 @@ void AT_printAllTerms(FILE *file);
 void AT_printAllAFunCounts(FILE *file);
 unsigned long AT_getAllocatedCount();
 
+struct _ATprotected_block {
+	ATerm* term;                     /* Pointer to the allocated block */
+	size_t size;                     /* Size of the allocated block, in bytes */
+	size_t protsize;                 /* Protected size (the actual size that is in use) */
+	struct _ATprotected_block *next, *prev; /* Chain */
+};
+typedef struct _ATprotected_block *ATprotected_block;
+
+/* Protected Memory management functions */
+void *AT_malloc(size_t size);
+void *AT_calloc(size_t nmemb, size_t size);
+void *AT_realloc(void *ptr, size_t size);
+void AT_free(void* ptr);
+ATerm *AT_alloc_protected(size_t nelem);
+ATerm *AT_alloc_protected_minmax(size_t minnelem, size_t maxnelem);
+ATerm *AT_realloc_protected(ATerm *term, size_t nelem);
+ATerm *AT_realloc_protected_minmax(ATerm *term, size_t minnelem, size_t maxnelem);
+ATerm *AT_grow_protected(ATerm* term, size_t nelem);
+void AT_free_protected(ATerm* term);
+void AT_free_protected_blocks();
+
 #define AT_getMaxTermSize() (maxTermSize)
 
 #ifdef __cplusplus

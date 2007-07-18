@@ -24,8 +24,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <blocklist.h>
-#include <huffman.h>
+#include <svc/blocklist.h>
+#include <svc/huffman.h>
 
 void BLdump(FILE *, BList *);
 

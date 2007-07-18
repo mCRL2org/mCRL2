@@ -7,6 +7,7 @@
 #include "make.h"
 #include "deprecated.h"
 #include "util.h"
+#include "memory.h"
 
 #include <assert.h>
 
@@ -28,7 +29,7 @@ typedef struct
 /*}}}  */
 /*{{{  globals */
 
-char make_id[] = "$Id: make.c 21232 2007-02-05 14:54:20Z eriks $";
+char make_id[] = "$Id: make.c 23071 2007-07-02 10:06:17Z eriks $";
 
 static Symbol symbol_int;
 static Symbol symbol_str;
@@ -92,7 +93,7 @@ ATerm AT_getPattern(const char *pat)
       return bucket->term;
     }
     else {
-      free(bucket->pat);
+      AT_free(bucket->pat);
     }
   }
   else {

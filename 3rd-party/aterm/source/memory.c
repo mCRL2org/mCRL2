@@ -62,7 +62,7 @@
 /*}}}  */
 /*{{{  globals */
 
-char memory_id[] = "$Id: memory.c 21917 2007-03-14 11:45:54Z eriks $";
+char memory_id[] = "$Id: memory.c 23071 2007-07-02 10:06:17Z eriks $";
 
 unsigned int maxTermSize = INITIAL_MAX_TERM_SIZE;
 
@@ -103,9 +103,7 @@ static int hash_info_after_gc[MAX_INFO_SIZES][3];
 
 static ATbool at_check = ATfalse;
 
-static ATerm *tempArray = NULL;
-static unsigned int tempArraySize = 0;      /* Total size of the temp array */
-static unsigned int tempArrayProtected = 0; /* How many items are currently in use */
+extern void AT_initMemmgnt();
 
 /*}}}  */
 
@@ -171,76 +169,6 @@ static int term_size(ATerm t)
 }
 
 /*}}}  */
-
-void AT_initTempArray()
-{
-  tempArray = NULL;
-  tempArraySize = 0;
-  tempArrayProtected = 0;
-}
-
-ATerm* AT_getTempArray(unsigned int size)
-{
-  ATerm* newTempArray;
-  
-  if (size > tempArraySize) {
-
-    /* First, try to double the size of existing array */
-    if ((!low_memory)&&(tempArraySize*2 > size)) {
-      newTempArray = (ATerm*) realloc(tempArray, sizeof(ATerm) * tempArraySize*2);
-      if (newTempArray) {
-        tempArray = newTempArray;
-        tempArraySize *= 2;
-      }
-    }
-  	
-    /* Not enough space? (tempArraySize*2 was not big enough, or realloc above failed) */
-    if (size > tempArraySize) {
-      newTempArray = (ATerm*) realloc(tempArray, sizeof(ATerm) * size);
-      if (newTempArray) {
-        tempArray = newTempArray;
-        tempArraySize = size;
-      }
-    }  		
-  	
-    if (tempArraySize < size)
-      ATerror("AT_getTempArray: cannot allocate space for %d terms.\n", size);
-    else if (!silent)
-      fprintf(stderr, "temporary aterm array size = %d terms.\n", tempArraySize);
-  }
-  
-  tempArrayProtected = size;
-  
-  return tempArray;
-}
-
-void AT_releaseTempArray()
-{
-  tempArrayProtected = 0;
-}
-
-void AT_freeTempArray()
-{
-  if (tempArray) {
-    if (tempArrayProtected == 0) {
-      free(tempArray);
-      tempArray = NULL;
-      tempArraySize = 0;
-
-      if (!silent)
-        fprintf(stderr, "Freed temporary aterm array size.\n");
-    }
-    else if (tempArraySize > tempArrayProtected) {
-      ATerm* newTempArray = (ATerm*) realloc((void*)tempArray, tempArrayProtected*sizeof(ATerm));
-      if (newTempArray) {
-        tempArray = newTempArray;
-        tempArraySize = tempArrayProtected;
-        if (!silent)
-          fprintf(stderr, "Partially freed temporary aterm array size.\n");
-      }
-    }
-  }
-}
 
 /*{{{  static HashNumber hash_number(ATerm t, int size) */
 
@@ -334,17 +262,13 @@ void resize_hashtable()
 
   oldsize = table_size;  
   table_class++;
-  table_size = 1<<table_class;
+  table_size = ((HashNumber)1)<<table_class;
   table_mask = table_size-1;
   if (!silent)
     fprintf(stderr, "resizing hashtable, class = %d\n", table_class);
 
   /*{{{  Create new term table */
-  newtable = (ATerm *) realloc(hashtable, table_size * sizeof(ATerm));
-  if (!newtable) {
-    AT_freeTempArray();
-    newtable = (ATerm *) realloc(hashtable, table_size * sizeof(ATerm));
-  }
+  newtable = (ATerm *) AT_realloc(hashtable, table_size * sizeof(ATerm));
   
   if (newtable)
     hashtable = newtable;
@@ -352,7 +276,7 @@ void resize_hashtable()
     fprintf(stderr, "warning: could not resize hashtable to class %d.\n",
             table_class);
     table_class--;
-    table_size = 1<<table_class;
+    table_size = ((HashNumber)1)<<table_class;
     table_mask = table_size-1;
     return;
   }
@@ -461,7 +385,7 @@ void AT_initMemory(unsigned int argc, char *argv[])
               TERM_CHECK_OPT);
 #endif
       fprintf(stderr, "    %-20s: initial maximum term size " 
-              "(minimum=%d, default=%d)\n", TERM_SIZE_OPT " <size>", (unsigned int) MIN_TERM_SIZE, maxTermSize);
+              "(minimum=%ld, default=%d)\n", TERM_SIZE_OPT " <size>", MIN_TERM_SIZE, maxTermSize);
     } 
   }
 
@@ -469,12 +393,12 @@ void AT_initMemory(unsigned int argc, char *argv[])
 
   /*{{{  Initialize blocks */
   
-  terminfo = (TermInfo*) calloc(maxTermSize, sizeof(TermInfo));
+  terminfo = (TermInfo*) AT_calloc(maxTermSize, sizeof(TermInfo));
   
   /*}}}  */
   /*{{{  Create term term table */
 
-  hashtable = (ATerm *)calloc(table_size, sizeof(ATerm ));
+  hashtable = (ATerm *)AT_calloc(table_size, sizeof(ATerm ));
   if(!hashtable) {
     ATerror("AT_initMemory: cannot allocate term table of size %d\n", 
             table_size);
@@ -514,7 +438,7 @@ void AT_initMemory(unsigned int argc, char *argv[])
   /*}}}  */
 #endif
 
-  AT_initTempArray();
+  AT_initMemmgnt();
 }
 
 /*}}}  */
@@ -584,11 +508,9 @@ void AT_cleanupMemory()
   }
 #endif
 
-  free(hashtable);
-
-  free(terminfo);
-
-  AT_freeTempArray();
+  AT_free(hashtable);
+  AT_free(terminfo);
+  AT_free_protected_blocks();
 }
 
 /*}}}  */
@@ -617,12 +539,7 @@ static void allocate_block(unsigned int size)
     at_freeblocklist = at_freeblocklist->next_by_size;
     at_freeblocklist_size--;
   } else {
-    newblock = (Block *)calloc(1, sizeof(Block));
-    if (newblock == NULL) {
-      /* calloc, failed. Free the temporary array and try again */
-      AT_freeTempArray();
-      newblock = (Block *)calloc(1, sizeof(Block));
-    }
+    newblock = (Block *)AT_calloc(1, sizeof(Block));
 #ifdef GC_VERBOSE
     fprintf(stderr,"allocate_block %p with calloc\n",newblock);
 #endif
@@ -843,17 +760,11 @@ void AT_growMaxTermSize(unsigned int neededsize)
   fprintf(stderr, "Growing administrative structures to accomodate terms of size %d\n", newsize);
 #endif
 
-  newterminfo = (TermInfo*)realloc((void*)terminfo, newsize*sizeof(TermInfo));
-  if (!newterminfo) {
-    /* Realloc failed; try to free some unneeded memory */
-    AT_freeTempArray();
-    AT_collect();
-    newterminfo = (TermInfo*)realloc((void*)terminfo, newsize*sizeof(TermInfo));
-  }
+  newterminfo = (TermInfo*)AT_realloc((void*)terminfo, newsize*sizeof(TermInfo));
   if ((!newterminfo)&&(newsize>neededsize)) {
     /* Realloc failed again; try with needed size */
     newsize = neededsize;
-    newterminfo = (TermInfo*)realloc((void*)terminfo, newsize*sizeof(TermInfo));
+    newterminfo = (TermInfo*)AT_realloc((void*)terminfo, newsize*sizeof(TermInfo));
   }
   if (!newsize) {
     ATerror("AT_growMaxTermSize: cannot allocate %d extra TermInfo elements.\n", newsize-maxTermSize);
@@ -1014,7 +925,7 @@ void AT_freeTerm(unsigned int size, ATerm t)
       /*printf("destructed = %d\n",destructed);*/
     if (!destructed) {
         /*printf("free BlobData(%d)\n",ATgetBlobData((ATermBlob)t));*/
-      free(ATgetBlobData((ATermBlob)t));
+      AT_free(ATgetBlobData((ATermBlob)t));
     }
   }
 
@@ -1065,7 +976,7 @@ ATermAppl ATmakeAppl(Symbol sym, ...)
   header = APPL_HEADER(0, arity > MAX_INLINE_ARITY ?
                        MAX_INLINE_ARITY+1 : arity, sym);
 
-  buffer = AT_getTempArray(arity);
+  buffer = AT_alloc_protected(arity);
   
   hnr = START(header);
   va_start(args, sym);
@@ -1094,9 +1005,7 @@ ATermAppl ATmakeAppl(Symbol sym, ...)
   }
 
   if (!cur) {
-    ATprotectArray(buffer, arity);
     cur = (ATermAppl) AT_allocate(TERM_SIZE_APPL(arity));
-    ATunprotectArray(buffer);
     /* Delay masking until after AT_allocate */
     hnr &= table_mask;
     cur->header = header;
@@ -1107,7 +1016,7 @@ ATermAppl ATmakeAppl(Symbol sym, ...)
     hashtable[hnr] = (ATerm) cur;
   }
   
-  AT_releaseTempArray();
+  AT_free_protected(buffer);
 
   return cur;
 }
@@ -1810,7 +1719,7 @@ ATermList ATinsert(ATermList tail, ATerm el)
   
   /* If length exceeds the maximum length that can be stored in the header,
      store MAX_LENGTH-1 in the header. ATgetLength will then count the length of the
-     list instead of rely on the header
+     list instead of using on the header
   */
   if (curLength >= MAX_LENGTH-1)
     newLength = MAX_LENGTH-1;
@@ -2173,9 +2082,7 @@ ATermList ATmakeList(unsigned int n, ...)
   unsigned int i;
   va_list args;
   ATermList l;
-  ATerm* elems;
-  
-  elems = AT_getTempArray(n);
+  ATerm* elems = AT_alloc_protected(n);
 
   va_start(args, n);
   for (i=0; i<n; i++) {
@@ -2183,14 +2090,12 @@ ATermList ATmakeList(unsigned int n, ...)
   }
   va_end(args);
 
-  ATprotectArray(elems, n);
   l = ATempty;
   for (i=n; i>0; i--) {
     l = ATinsert(l, elems[i-1]);
   }
-  ATunprotectArray(elems);
   
-  AT_releaseTempArray();
+  AT_free_protected(elems);
 
   return l;
 }
@@ -2556,7 +2461,7 @@ void AT_printAllAFunCounts(FILE *file)
     }
   }
 
-  afuns = (AFun *)calloc(nr_syms, sizeof(AFun));
+  afuns = (AFun *)AT_calloc(nr_syms, sizeof(AFun));
   assert(afuns);
 
   for(i=0; i<nr_syms; i++) {

@@ -25,7 +25,7 @@
 
 /*{{{  global variables */
 
-char gc_id[] = "$Id: gc.c 21782 2007-03-09 11:19:26Z eriks $";
+char gc_id[] = "$Id: gc.c 23071 2007-07-02 10:06:17Z eriks $";
 
 static ATerm *stackBot = NULL;
 
@@ -47,6 +47,8 @@ static clock_t mark_time[3]        = { 0, MYMAXINT, 0 };
 extern int     nr_marks;
 #endif
 static FILE *gc_f = NULL;
+
+extern ATprotected_block protected_blocks;
 
 AFun at_parked_symbol = -1;
 
@@ -210,6 +212,7 @@ VOIDCDECL mark_phase()
   ATerm *stackTop;
   ATerm *start, *stop;
   ProtEntry *prot;
+  ATprotected_block pblock;
 
 #if defined(_MSC_VER) && defined(WIN32)
 
@@ -296,7 +299,12 @@ VOIDCDECL mark_phase()
   }
 
   for (prot=at_prot_memory; prot != NULL; prot=prot->next) {
-    mark_memory((ATerm *)prot->start, (ATerm *)(((char *)prot->start) + prot->size));
+    mark_memory((ATerm *)prot->start, (ATerm *)(((void *)prot->start) + prot->size));
+  }
+  
+  for (pblock=protected_blocks; pblock != NULL; pblock=pblock->next) {
+    if (pblock->protsize>0)
+      mark_memory(pblock->term, &pblock->term[pblock->protsize]);
   }
   
   at_mark_young = ATfalse;
@@ -323,6 +331,7 @@ VOIDCDECL mark_phase_young()
   ATerm *stackTop;
   ATerm *start, *stop;
   ProtEntry *prot;
+  ATprotected_block pblock;
 
 #if defined(_MSC_VER) && defined(WIN32)
 
@@ -408,7 +417,12 @@ VOIDCDECL mark_phase_young()
   }
 
   for (prot=at_prot_memory; prot != NULL; prot=prot->next) {
-    mark_memory_young((ATerm *)prot->start, (ATerm *)(((char *)prot->start) + prot->size));
+    mark_memory_young((ATerm *)prot->start, (ATerm *)(((void *)prot->start) + prot->size));
+  }
+  
+  for (pblock=protected_blocks; pblock != NULL; pblock=pblock->next) {
+    if (pblock->protsize>0)
+      mark_memory_young(pblock->term, &pblock->term[pblock->protsize]);
   }
   
   at_mark_young = ATtrue;
@@ -565,7 +579,7 @@ static void reclaim_empty_block(unsigned int blocks, int size, Block *removed_bl
 #ifdef GC_VERBOSE
     fprintf(stderr,"free block %d\n",(int)removed_block);
 #endif
-    free(removed_block);
+    AT_free(removed_block);
   }
 }
 
@@ -823,6 +837,7 @@ void major_sweep_phase_young()
             old_in_block++;
           } else {
             young_in_block++;
+            INCREMENT_AGE(t->header);
           }
 	} else {
 	  switch(ATgetType(t)) {
@@ -972,8 +987,10 @@ void minor_sweep_phase_young()
 	if(IS_MARKED(t->header) || IS_OLD(t->header)) {
           if(IS_OLD(t->header)) {
             old_in_block++;
+          }else{
+          	INCREMENT_AGE(t->header);
           }
-	  CLR_MARK(t->header);
+          CLR_MARK(t->header);
           alive_in_block++;
           empty = 0;
           assert(!IS_MARKED(t->header));
@@ -1295,11 +1312,7 @@ void AT_collect_minor()
 /*}}}  */
 #endif
 
-#ifdef WIN32
 #define CLOCK_DIVISOR CLOCKS_PER_SEC
-#else
-#define CLOCK_DIVISOR CLK_TCK
-#endif
 
 /*{{{  void AT_cleanupGC() */
 

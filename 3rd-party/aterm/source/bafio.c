@@ -16,10 +16,6 @@
 #include "util.h"
 #include "byteio.h"
 
-#ifdef DMALLOC
-#include <dmalloc.h>
-#endif
-
 /*}}}  */
 /*{{{  defines */
 
@@ -118,7 +114,7 @@ typedef struct
 /*}}}  */
 /*{{{  variables */
 
-char bafio_id[] = "$Id: bafio.c 21959 2007-03-15 15:07:13Z eriks $";
+char bafio_id[] = "$Id: bafio.c 23071 2007-07-02 10:06:17Z eriks $";
 
 static int nr_unique_symbols = -1;
 static sym_read_entry *read_symbols;
@@ -407,7 +403,7 @@ readString(byte_reader *reader)
   if (text_buffer_size < (len+1))
     {
       text_buffer_size = len*1.5;
-      text_buffer = (char *) realloc(text_buffer, text_buffer_size);
+      text_buffer = (char *) AT_realloc(text_buffer, text_buffer_size);
       if(!text_buffer)
 	ATerror("out of memory in readString (%d)\n", text_buffer_size);
     }
@@ -560,13 +556,13 @@ static void gather_top_symbols(sym_entry *cur_entry, int cur_arg,
 
   tss = &cur_entry->top_symbols[cur_arg];
   tss->nr_symbols = total_top_symbols;
-  tss->symbols = (top_symbol *) calloc(total_top_symbols,
+  tss->symbols = (top_symbol *) AT_calloc(total_top_symbols,
 				       sizeof(top_symbol));
   if (!tss->symbols)
     ATerror("build_arg_tables: out of memory (top_symbols: %d)\n",
 	    total_top_symbols);
   tss->toptable_size = (total_top_symbols*5)/4;
-  tss->toptable = (top_symbol **) calloc(tss->toptable_size,
+  tss->toptable = (top_symbol **) AT_calloc(tss->toptable_size,
 					 sizeof(top_symbol *));
   if (!tss->toptable)
     ATerror("build_arg_tables: out of memory (table_size: %d)\n",
@@ -608,7 +604,7 @@ static void build_arg_tables()
     if(arity == 0)
       cur_entry->top_symbols = NULL;
     else {
-      cur_entry->top_symbols = (top_symbols *)calloc(arity, 
+      cur_entry->top_symbols = (top_symbols *)AT_calloc(arity, 
 						     sizeof(top_symbols));
       if(!cur_entry->top_symbols)
 	ATerror("build_arg_tables: out of memory (arity: %d)\n", arity);
@@ -1010,30 +1006,30 @@ static void free_write_space()
   for(i=0; i<nr_unique_symbols; i++) {
     sym_entry *entry = &sym_entries[i];
 
-    free(entry->terms);
+    AT_free(entry->terms);
     entry->terms = NULL;
-    free(entry->termtable);
+    AT_free(entry->termtable);
     entry->termtable = NULL;
 
     for(j=0; j<entry->arity; j++) {
       top_symbols *topsyms = &entry->top_symbols[j];
       if(topsyms->symbols) {
-	free(topsyms->symbols);
+	AT_free(topsyms->symbols);
 	topsyms->symbols = NULL;
       }
       if(topsyms->toptable) {
-	free(topsyms->toptable);
+	AT_free(topsyms->toptable);
 	topsyms->toptable = NULL;
       }
-      /*free(topsyms);*/
+      /*AT_free(topsyms);*/
     }
 
     if(entry->top_symbols) {
-      free(entry->top_symbols);
+      AT_free(entry->top_symbols);
       entry->top_symbols = NULL;
     }
   }
-  free(sym_entries);
+  AT_free(sym_entries);
 
   sym_entries = NULL;
 }
@@ -1060,7 +1056,7 @@ write_baf(ATerm t, byte_writer *writer)
   }
   nr_unique_symbols = AT_calcUniqueSymbols(t);
 
-  sym_entries = (sym_entry *) calloc(nr_unique_symbols, sizeof(sym_entry));
+  sym_entries = (sym_entry *) AT_calloc(nr_unique_symbols, sizeof(sym_entry));
   if(!sym_entries)
     ATerror("write_baf: out of memory (%d unique symbols!\n",
 	    nr_unique_symbols);
@@ -1079,14 +1075,14 @@ write_baf(ATerm t, byte_writer *writer)
       sym_entries[cur].id = lcv;
       sym_entries[cur].arity = ATgetArity(lcv);
       sym_entries[cur].nr_terms = entry->count;
-      sym_entries[cur].terms = (trm_bucket *) calloc(entry->count,
+      sym_entries[cur].terms = (trm_bucket *) AT_calloc(entry->count,
 						     sizeof(trm_bucket));
       if (!sym_entries[cur].terms)
 	ATerror("write_baf: out of memory (sym: %d, terms: %d)\n",
 		lcv, entry->count);
       sym_entries[cur].termtable_size = (entry->count*5)/4;
       sym_entries[cur].termtable =
-	(trm_bucket **) calloc(sym_entries[cur].termtable_size,
+	(trm_bucket **) AT_calloc(sym_entries[cur].termtable_size,
 			       sizeof(trm_bucket *));
       if (!sym_entries[cur].termtable)
 	ATerror("write_baf: out of memory (termtable_size: %d\n",
@@ -1167,7 +1163,7 @@ unsigned char *ATwriteToBinaryString(ATerm t, int *len)
 
   if (!initialized) {
     writer.type = STRING_WRITER;
-    writer.u.string_data.buf = (unsigned char *)calloc(BUFSIZ, 1);
+    writer.u.string_data.buf = (unsigned char *)AT_calloc(BUFSIZ, 1);
     writer.u.string_data.max_size = BUFSIZ;
     initialized = ATtrue;
   }
@@ -1292,10 +1288,12 @@ static ATbool read_all_symbols(byte_reader *reader)
       return ATfalse;
     read_symbols[i].nr_terms = val;
     read_symbols[i].term_width = bit_width(val);
-    read_symbols[i].terms = (ATerm *)calloc(val, sizeof(ATerm));
+    if(val == 0)
+      read_symbols[i].terms = NULL;
+    else
+      read_symbols[i].terms = (ATerm *)AT_alloc_protected(val);
     if(!read_symbols[i].terms)
       ATerror("read_symbols: could not allocate space for %d terms.\n", val);
-    ATprotectArray(read_symbols[i].terms, val);
 
     /*}}}  */
 		
@@ -1306,17 +1304,17 @@ static ATbool read_all_symbols(byte_reader *reader)
       read_symbols[i].sym_width = NULL;
       read_symbols[i].topsyms = NULL;
     } else {
-      read_symbols[i].nr_topsyms = (int *)calloc(arity, sizeof(int));
+      read_symbols[i].nr_topsyms = (int *)AT_calloc(arity, sizeof(int));
       if(!read_symbols[i].nr_topsyms)
 	ATerror("read_all_symbols: out of memory trying to allocate "
 		"space for %d arguments.\n", arity);
 
-      read_symbols[i].sym_width = (int *)calloc(arity, sizeof(int));
+      read_symbols[i].sym_width = (int *)AT_calloc(arity, sizeof(int));
       if(!read_symbols[i].sym_width)
 	ATerror("read_all_symbols: out of memory trying to allocate "
 		"space for %d arguments .\n", arity);
 
-      read_symbols[i].topsyms = (int **)calloc(arity, sizeof(int *));
+      read_symbols[i].topsyms = (int **)AT_calloc(arity, sizeof(int *));
       if(!read_symbols[i].topsyms)
 	ATerror("read_all_symbols: out of memory trying to allocate "
 		"space for %d arguments.\n", arity);
@@ -1330,7 +1328,7 @@ static ATbool read_all_symbols(byte_reader *reader)
 
       read_symbols[i].nr_topsyms[j] = val;
       read_symbols[i].sym_width[j] = bit_width(val);
-      read_symbols[i].topsyms[j] = (int *)calloc(val, sizeof(int));
+      read_symbols[i].topsyms[j] = (int *)AT_calloc(val, sizeof(int));
       if(!read_symbols[i].topsyms[j])
 	ATerror("read_symbols: could not allocate space for %d top symbols.\n",
 		val);
@@ -1366,8 +1364,7 @@ static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
   ATerm result;
 
   if(arity > MAX_INLINE_ARITY) {
-    args = calloc(arity, sizeof(ATerm));
-    ATprotectArray(args, arity);
+    args = AT_alloc_protected(arity);
     if(!args)
       ATerror("could not allocate space for %d arguments.\n", arity);
     /* !!! leaks memory on the "return NULL" paths */
@@ -1445,7 +1442,7 @@ static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
       if((len = readString(reader)) < 0)
 	return NULL;
 
-      data = malloc(len);
+      data = AT_malloc(len);
       if(!data)
 	ATerror("could not allocate space for blob of size %d\n", len);
 
@@ -1482,8 +1479,7 @@ static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
   }
 
   if(arity > MAX_INLINE_ARITY) {
-    ATunprotectArray(args);
-    free(args);
+    AT_free_protected(args);
   }
 
   return result;
@@ -1504,23 +1500,21 @@ static void free_read_space()
   for(i=0; i<nr_unique_symbols; i++) {
     sym_read_entry *entry = &read_symbols[i];
 
-    if(entry->terms) {
-      ATunprotectArray(entry->terms);
-      free(entry->terms);
-    }
+    if(entry->terms)
+      AT_free_protected(entry->terms);
     if(entry->nr_topsyms)
-      free(entry->nr_topsyms);
+      AT_free(entry->nr_topsyms);
     if(entry->sym_width)
-      free(entry->sym_width);
+      AT_free(entry->sym_width);
 
     for(j=0; j<entry->arity; j++)
-      free(entry->topsyms[j]);
+      AT_free(entry->topsyms[j]);
     if(entry->topsyms)
-      free(entry->topsyms);
+      AT_free(entry->topsyms);
     
     ATunprotectSymbol(entry->sym);
   }
-  free(read_symbols);
+  AT_free(read_symbols);
 }
 
 /*}}}  */
@@ -1582,7 +1576,7 @@ ATerm read_baf(byte_reader *reader)
   /*}}}  */
   /*{{{  Allocate symbol space */
 
-  read_symbols = (sym_read_entry *)calloc(nr_unique_symbols,
+  read_symbols = (sym_read_entry *)AT_calloc(nr_unique_symbols,
 					  sizeof(sym_read_entry));
   if (!read_symbols) {
     ATerror("read_baf: out of memory when allocating %d syms.\n",

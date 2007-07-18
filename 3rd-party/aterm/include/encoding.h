@@ -11,7 +11,7 @@ extern "C"
 #endif/* __cplusplus */
 
 #ifndef SIZEOF_LONG
-#define SIZEOF_LONG sizeof(long)
+#define SIZEOF_LONG (sizeof(long))
 #endif
 
 /*
@@ -64,7 +64,7 @@ typedef unsigned long header_type;
 #define MAX_LENGTH       (1 << LENGTH_BITS)
 
 #define GET_AGE(h)       ((unsigned int)(((h) & MASK_AGE) >> SHIFT_AGE))
-#define SET_AGE(h, a)    do { (h) = ((h) & ~MASK_AGE) | ((a) << SHIFT_AGE); } while (0)
+#define SET_AGE(h, a)    do { h = ((h) & ~MASK_AGE) | (((a) << SHIFT_AGE) & MASK_AGE); } while (0)
 
 #define YOUNG_AGE        0
 #define OLD_AGE          3
@@ -94,7 +94,7 @@ typedef unsigned long header_type;
 #define TERM_SIZE_PLACEHOLDER (sizeof(struct __ATermPlaceholder)/SIZEOF_LONG)
 #define TERM_SIZE_SYMBOL      (sizeof(struct _SymEntry)/SIZEOF_LONG)
 
-#define IS_MARKED(h)          (((h) & MASK_MARK) ? ATtrue : ATfalse)
+#define IS_MARKED(h)          ((h) & MASK_MARK)
 #define GET_TYPE(h)           ((unsigned int)(((h) & MASK_TYPE) >> SHIFT_TYPE))
 #define HAS_ANNO(h)           (((h) & MASK_ANNO) ? ATtrue : ATfalse)
 #define GET_ARITY(h)	      ((unsigned int)(((h) & MASK_ARITY) >> SHIFT_ARITY))

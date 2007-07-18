@@ -19,14 +19,11 @@
 #include "aterm2.h"
 #include "_aterm.h"
 #include "util.h"
+#include "memory.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-
-#ifdef DMALLOC
-#include <dmalloc.h>
-#endif
 
 /*}}}  */
 /*{{{  defines */
@@ -37,7 +34,7 @@
 		    searched */
 #define INITIAL_NR_OF_TABLES 8
 #define TABLE_SHIFT 13
-#define ELEMENTS_PER_TABLE (1<<TABLE_SHIFT)
+#define ELEMENTS_PER_TABLE (1L<<TABLE_SHIFT)
 #define modELEMENTS_PER_TABLE(n) ((n) & (ELEMENTS_PER_TABLE-1))
 #define divELEMENTS_PER_TABLE(n) ((n) >> TABLE_SHIFT)
 
@@ -164,57 +161,68 @@ static ATerm tableGet(ATerm **tableindex, long n)
 static void insertKeyValue(ATermIndexedSet s, 
 			   long n, ATerm t, ATerm v)
 {
-  long x,y,i;
+  long x,y;
   ATerm *keytable, *valuetable;
+  long nr_tables = s->nr_tables;
 
   x = divELEMENTS_PER_TABLE(n);
-  if (x>=s->nr_tables) { 
-    s->keys = (ATerm **)realloc(s->keys,
-				sizeof(ATerm *)*s->nr_tables*2);
+  y = modELEMENTS_PER_TABLE(n);
+
+  if (x>=nr_tables) { 
+    s->keys = (ATerm **)AT_realloc(s->keys,
+				sizeof(ATerm *)*nr_tables*2);
     if (s->keys==NULL) { 
       ATerror("insertKeyValue: Cannot extend key table\n");
     }
+    memset((void*)&s->keys[nr_tables], 0, sizeof(ATerm*)*nr_tables); 
 
     if (s->values!=NULL) { 
-      s->values = (ATerm **)realloc(s->values,
-				    sizeof(ATerm *)*2*s->nr_tables);
+      s->values = (ATerm **)AT_realloc(s->values,
+				    sizeof(ATerm *)*nr_tables*2);
       if(s->values == NULL) { 
 	ATerror("insertKeyValue: Cannot extend value table\n");
       }
+      memset((void*)&s->values[nr_tables], 0, sizeof(ATerm*)*nr_tables); 
     }
 
-    for(i=s->nr_tables; i<2*s->nr_tables; i++) { 
-      s->keys[i] = NULL; 
-      if (s->values != NULL) {
-	s->values[i] = NULL;
-      }
-    }
-    s->nr_tables = s->nr_tables*2;
+    s->nr_tables = nr_tables*2;
   }
 
   keytable = s->keys[x];
   if (keytable == NULL) { 
     /* create a new key table */
-    keytable = calloc(sizeof(ATerm), ELEMENTS_PER_TABLE);
+    keytable = AT_alloc_protected_minmax(y+1, ELEMENTS_PER_TABLE);
     s->keys[x] = keytable;
     if (keytable == NULL) { 
       ATerror("insertKeyValue: Cannot create new key table\n");
     }
-    ATprotectArray(keytable, ELEMENTS_PER_TABLE);
 
     if (s->values != NULL) { 
-      valuetable = calloc(sizeof(ATerm), ELEMENTS_PER_TABLE);
+      valuetable = AT_alloc_protected_minmax(y+1, ELEMENTS_PER_TABLE);
       s->values[x] = valuetable;
       if (valuetable == NULL) { 
 	ATerror("insertKeyValue: Cannot create new value table\n");
       }
-      ATprotectArray(valuetable, ELEMENTS_PER_TABLE);
+    }
+  }
+  else if (n == s->nr_entries-1) {
+    keytable = AT_grow_protected((void*)s->keys[x], y+1);
+    s->keys[x] = keytable;
+    if (keytable == NULL) { 
+      ATerror("insertKeyValue: Cannot grow key table\n");
+    }
+
+    if (s->values != NULL) { 
+      valuetable = AT_grow_protected((void*)s->values[x], y+1);
+      s->values[x] = valuetable;
+      if (valuetable == NULL) { 
+	ATerror("insertKeyValue: Cannot grow value table\n");
+      }
     }
   }
 
   assert(keytable != NULL);
 
-  y = modELEMENTS_PER_TABLE(n);
   keytable[y] = t;
   if(s->values != NULL) { 
     s->values[x][y] = v; 
@@ -263,11 +271,12 @@ static void hashResizeSet(ATermIndexedSet s)
   newsizeMinus1 = calculateNewSize(s->sizeMinus1,
 				   s->nr_deletions, s->nr_entries);
 
-  newhashtable = (long *)realloc(s->hashtable, 
-  				 sizeof(long) * (newsizeMinus1+1));
+  newhashtable = (long *)AT_malloc(sizeof(long) * (newsizeMinus1+1));
   
   if (newhashtable!=NULL) 
   { /* the hashtable has properly been resized */
+    AT_free(s->hashtable);
+  	
     s->hashtable = newhashtable;
     s->sizeMinus1=newsizeMinus1;
     s->max_entries = ((s->sizeMinus1/100)*s->max_load);
@@ -338,7 +347,7 @@ ATermIndexedSet ATindexedSetCreate(long initial_size, int max_load_pct)
   long i;
   ATermIndexedSet hashset;
 
-  hashset = (ATermIndexedSet)malloc(sizeof(struct _ATermTable));
+  hashset = (ATermIndexedSet)AT_malloc(sizeof(struct _ATermTable));
   if (hashset==NULL) { 
     ATerror("ATindexedSetCreate: cannot allocate new ATermIndexedSet n");
   }
@@ -348,7 +357,7 @@ ATermIndexedSet ATindexedSetCreate(long initial_size, int max_load_pct)
   hashset->max_load = max_load_pct;
   hashset->max_entries = ((hashset->sizeMinus1/100)*hashset->max_load);
   hashset->hashtable=
-    (long *)malloc(sizeof(long)*(1+hashset->sizeMinus1));
+    (long *)AT_malloc(sizeof(long)*(1+hashset->sizeMinus1));
   if (hashset->hashtable==NULL) { 
     ATerror("ATindexedSetCreate: cannot allocate ATermIndexedSet "
 	    "of %d entries\n", initial_size);
@@ -358,7 +367,7 @@ ATermIndexedSet ATindexedSetCreate(long initial_size, int max_load_pct)
   }
 
   hashset->nr_tables = INITIAL_NR_OF_TABLES;
-  hashset->keys = (ATerm **)calloc(hashset->nr_tables,
+  hashset->keys = (ATerm **)AT_calloc(hashset->nr_tables,
 				   sizeof(ATerm *));
   if (hashset->keys == NULL) {
     ATerror("ATindexedSetCreate: cannot creat key index table\n");
@@ -366,7 +375,7 @@ ATermIndexedSet ATindexedSetCreate(long initial_size, int max_load_pct)
 
   hashset->nr_free_tables = INITIAL_NR_OF_TABLES;
   hashset->first_free_position = 0;
-  hashset->free_table=calloc(sizeof(long *),
+  hashset->free_table=AT_calloc(sizeof(long *),
 			     hashset->nr_free_tables);
   if (hashset->free_table == NULL) { 
     ATerror("ATindexedSetCreate: cannot allocate table to store deleted elements\n");
@@ -520,7 +529,7 @@ ATermTable ATtableCreate(long initial_size, int max_load_pct)
   hashtable = (ATermTable)ATindexedSetCreate(initial_size,
 					     max_load_pct);
 
-  hashtable->values = (ATerm **)calloc(hashtable->nr_tables,
+  hashtable->values = (ATerm **)AT_calloc(hashtable->nr_tables,
 				       sizeof(ATerm *));
 
   if (hashtable->values == NULL) { 
@@ -537,32 +546,30 @@ void ATtableDestroy(ATermTable table)
 { 
   long i;
 
-  free(table->hashtable);
+  AT_free(table->hashtable);
   for(i=0; ((i<table->nr_tables) && (table->keys[i]!=NULL)) ; i++) { 
-    ATunprotectArray(table->keys[i]);
-    free(table->keys[i]);
+    AT_free_protected(table->keys[i]);
   }
 
-  free(table->keys);
+  AT_free(table->keys);
 
   if(table->values != NULL) { 
     for(i=0; ((i<table->nr_tables) && 
 	      (table->values[i]!=NULL)); i++) { 
-      ATunprotectArray(table->values[i]);
-      free(table->values[i]);
+      AT_free_protected(table->values[i]);
     }
 
-    free(table->values);
+    AT_free(table->values);
   }
 
   for(i=0; ((i<table->nr_free_tables) &&
 	    (table->free_table[i]!=NULL)) ; i++) { 
-    free(table->free_table[i]);
+    AT_free(table->free_table[i]);
   }
 
-  free(table->free_table);
+  AT_free(table->free_table);
 
-  free(table);
+  AT_free(table);
 }
 
 /*}}}  */
@@ -580,17 +587,19 @@ void ATtableReset(ATermTable table)
   }
 
   for(i=0; ((i<table->nr_tables) && 
-	    (table->keys[i]!=NULL)); i++) { 
-    memset(table->keys[i], 0, sizeof(ATerm)*ELEMENTS_PER_TABLE);
+	    (table->keys[i]!=NULL)); i++) {
+    table->keys[i] = AT_realloc_protected_minmax(table->keys[i], 0, ELEMENTS_PER_TABLE);	 
     if (table->values!=NULL) {
-      memset(table->values[i], 0, sizeof(ATerm)*ELEMENTS_PER_TABLE);
+      table->values[i] = AT_realloc_protected_minmax(table->values[i], 0, ELEMENTS_PER_TABLE);	 
     }
   }
 
+/*
   for(i=0; ((i<table->nr_free_tables) &&
 	    (table->free_table[i]!=NULL)); i++) { 
     memset(table->free_table[i], 0, ELEMENTS_PER_TABLE);
   }
+*/
   table->first_free_position = 0;
 }
 
@@ -626,7 +635,7 @@ ATerm ATtableGet(ATermTable table, ATerm key)
 
 void ATtableRemove(ATermTable table, ATerm key)
 { 
-  long start,c,v,x,y,i;
+  long start,c,v,x,y;
   long *ltable;
 
   start = hashcode(key,table->sizeMinus1);
@@ -652,14 +661,13 @@ void ATtableRemove(ATermTable table, ATerm key)
 
   x=divELEMENTS_PER_TABLE(table->first_free_position);
   if (x>=table->nr_free_tables) { 
-    table->free_table = (long **)realloc(table->free_table,
+    table->free_table = (long **)AT_realloc(table->free_table,
 					 sizeof(long)*table->nr_free_tables*2);
     if (table->free_table==NULL) {
       ATerror("ATtableRemove: Cannot allocate memory for free table index\n");
     }
-    for(i=table->nr_free_tables; i<2*table->nr_free_tables; i++) {
-      table->free_table[i] = NULL;
-    }
+
+    memset((void*)&table->free_table[table->nr_free_tables], 0, table->nr_free_tables);
 
     table->nr_free_tables = table->nr_free_tables*2;
   }
@@ -667,7 +675,7 @@ void ATtableRemove(ATermTable table, ATerm key)
   ltable = table->free_table[x];
   if (ltable == NULL) {
     /* create a new key table */
-    ltable = calloc(sizeof(long),ELEMENTS_PER_TABLE);
+    ltable = AT_malloc(sizeof(long)*ELEMENTS_PER_TABLE);
     table->free_table[x] = ltable;
     if (ltable == NULL) { 
       ATerror("ATtableRemove: Cannot create new free table\n");

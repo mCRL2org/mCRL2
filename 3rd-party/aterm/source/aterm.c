@@ -17,11 +17,8 @@
 #include "version.h"
 #include "atypes.h"
 #include "tafio.h"
+#include "safio.h"
 #include "md5.h"
-
-#ifdef DMALLOC
-#include <dmalloc.h>
-#endif
 
 /*}}}  */
 /*{{{  defines */
@@ -55,7 +52,7 @@
 /*}}}  */
 /*{{{  globals */
 
-char            aterm_id[] = "$Id: aterm.c 21959 2007-03-15 15:07:13Z eriks $";
+char            aterm_id[] = "$Id: aterm.c 23071 2007-07-02 10:06:17Z eriks $";
 
 /* Flag to tell whether to keep quiet or not. */
 ATbool silent	  = ATtrue;
@@ -107,8 +104,6 @@ extern char *strdup(const char *s);
 static ATerm    fparse_term(int *c, FILE * f);
 static ATerm    sparse_term(int *c, char **s);
 static ATerm AT_diff(ATerm t1, ATerm t2, ATermList *diffs);
-
-extern void AT_freeTempArray();
 
 /*}}}  */
 
@@ -211,7 +206,7 @@ ATinit(int argc, char *argv[], ATerm * bottomOfStack)
   /*{{{  Initialize buffer */
 
   buffer_size = DEFAULT_BUFFER_SIZE;
-  buffer = (char *) malloc(DEFAULT_BUFFER_SIZE);
+  buffer = (char *) AT_malloc(DEFAULT_BUFFER_SIZE);
   if (!buffer)
     ATerror("ATinit: cannot allocate string buffer of size %d\n",
 	    DEFAULT_BUFFER_SIZE);
@@ -220,7 +215,7 @@ ATinit(int argc, char *argv[], ATerm * bottomOfStack)
   /*{{{  Initialize protected terms */
 
   at_prot_table_size = INITIAL_PROT_TABLE_SIZE;
-  at_prot_table = (ProtEntry **)calloc(at_prot_table_size, sizeof(ProtEntry *));
+  at_prot_table = (ProtEntry **)AT_calloc(at_prot_table_size, sizeof(ProtEntry *));
   if(!at_prot_table)
     ATerror("ATinit: cannot allocate space for prot-table of size %ud\n",
 	    at_prot_table_size);
@@ -229,7 +224,7 @@ ATinit(int argc, char *argv[], ATerm * bottomOfStack)
   /*{{{  Initialize mark stack */
 
   /* Allocate initial mark stack */
-  mark_stack = (ATerm *) malloc(sizeof(ATerm) * INITIAL_MARK_STACK_SIZE);
+  mark_stack = (ATerm *) AT_malloc(sizeof(ATerm) * INITIAL_MARK_STACK_SIZE);
   if (!mark_stack)
     ATerror("cannot allocate marks stack of %ud entries.\n",
 	    INITIAL_MARK_STACK_SIZE);
@@ -410,16 +405,14 @@ void ATprotectArray(ATerm *start, unsigned int size)
 
 #ifndef NDEBUG
   for(i=0; i<size; i++) {
-    assert(start[i] == NULL || 
-	   AT_isValidTerm(start[i])); /* Check the precondition */
+    assert(start[i] == NULL || AT_isValidTerm(start[i])); /* Check the precondition */
   }
 #endif
 
   if(!free_prot_entries) {
-    ProtEntry *entries = (ProtEntry *)calloc(PROTECT_EXPAND_SIZE, 
-					     sizeof(ProtEntry));
-    if(!entries)
-      ATerror("out of memory in ATprotect.\n");
+    ProtEntry *entries = (ProtEntry *)AT_calloc(PROTECT_EXPAND_SIZE, sizeof(ProtEntry));
+    if(!entries) ATerror("out of memory in ATprotect.\n");
+    
     for(i=0; i<PROTECT_EXPAND_SIZE; i++) {
       entries[i].next = free_prot_entries;
       free_prot_entries = &entries[i];
@@ -479,13 +472,7 @@ void ATaddProtectFunction(ATermProtFunc f)
   {
     if (!at_prot_functions) {
       at_prot_functions_size = PROTECT_FUNC_INITIAL_SIZE;
-      new_at_prot_functions = (ATermProtFunc *) malloc(at_prot_functions_size*sizeof(ATermProtFunc));
-
-      /* Initial allocation failed; try again after releasing the temporary array */
-      if ( !new_at_prot_functions ) {
-        AT_freeTempArray();
-        new_at_prot_functions = (ATermProtFunc *) malloc(at_prot_functions_size*sizeof(ATermProtFunc));
-      }
+      new_at_prot_functions = (ATermProtFunc *) AT_malloc(at_prot_functions_size*sizeof(ATermProtFunc));
     }
     else {
       if (low_memory)
@@ -493,18 +480,12 @@ void ATaddProtectFunction(ATermProtFunc f)
       else
         at_prot_functions_size += PROTECT_FUNC_EXPAND_SIZE;
     
-      new_at_prot_functions = (ATermProtFunc *) realloc(at_prot_functions, at_prot_functions_size*sizeof(ATermProtFunc));
+      new_at_prot_functions = (ATermProtFunc *) AT_realloc(at_prot_functions, at_prot_functions_size*sizeof(ATermProtFunc));
 
-      /* Initial reallocation failed; try again after releasing the temporary array */
-      if ( !new_at_prot_functions ) {
-        AT_freeTempArray();
-        new_at_prot_functions = (ATermProtFunc *) realloc(at_prot_functions, at_prot_functions_size*sizeof(ATermProtFunc));
-      }
-    
       /* Reallocation failed again; try with a single extra element */
       if ( (!new_at_prot_functions) && (!low_memory) ) {
         at_prot_functions_size = old_at_prot_functions_size + 1;
-        new_at_prot_functions = (ATermProtFunc *) realloc(at_prot_functions, at_prot_functions_size*sizeof(ATermProtFunc));
+        new_at_prot_functions = (ATermProtFunc *) AT_realloc(at_prot_functions, at_prot_functions_size*sizeof(ATermProtFunc));
       }
     }
       
@@ -557,7 +538,7 @@ void AT_printAllProtectedTerms(FILE *file)
 
 void ATprotectMemory(void *start, unsigned long size)
 {
-  ProtEntry *entry = (ProtEntry *)malloc(sizeof(ProtEntry));
+  ProtEntry *entry = (ProtEntry *)AT_malloc(sizeof(ProtEntry));
   if (entry == NULL) {
     ATerror("out of memory in ATprotectMemory.\n");
   }
@@ -582,7 +563,7 @@ void ATunprotectMemory(void *start)
       } else {
 	at_prot_memory = entry->next;
       }
-      free(entry);
+      AT_free(entry);
       break;
     }
     prev = entry;
@@ -782,7 +763,7 @@ static void
 resize_buffer(int n)
 {
   buffer_size = n;
-  buffer = (char *) realloc(buffer, buffer_size);
+  buffer = (char *) AT_realloc(buffer, buffer_size);
   if (!buffer)
     ATerror("resize_buffer(aterm.c): cannot allocate string buffer of size %d\n", buffer_size);
 }
@@ -1472,7 +1453,7 @@ static ATerm fparse_blob(int *c, FILE *f)
 
   len = (size_t)strtoul(lenspec, (char**)NULL, 10);
 
-  data = (char *)malloc(len);
+  data = (char *)AT_malloc(len);
   if (!data) {
     ATerror("out of memory in fparse_blob\n");
   }
@@ -1565,7 +1546,7 @@ fparse_quoted_appl(int *c, FILE * f)
 
   /* Wrap up this function application */
   sym = ATmakeSymbol(name, ATgetLength(args), ATtrue);
-  free(name);
+  AT_free(name);
   return (ATerm)ATmakeApplList(sym, args);
 }
 
@@ -1618,7 +1599,7 @@ fparse_unquoted_appl(int *c, FILE * f)
   /* Wrap up this function application */
   sym = ATmakeSymbol(name ? name : "", ATgetLength(args), ATfalse);
   if (name != NULL) {
-    free(name);
+    AT_free(name);
   }
 
   return ATmakeApplList(sym, args);
@@ -1860,6 +1841,11 @@ ATerm ATreadFromFile(FILE *file)
   } else if (c == START_OF_SHARED_TEXT_FILE) {
     /* Might be a shared text file */
     return AT_readFromSharedTextFile(&c, file);
+  } else if (c == SAF_IDENTIFICATION_TOKEN) {
+  	int token = ungetc(SAF_IDENTIFICATION_TOKEN, file);
+  	if(token != SAF_IDENTIFICATION_TOKEN) ATerror("Unable to unget the SAF identification token.\n");
+  	
+  	return ATreadFromSAFFile(file);
   } else {
     /* Probably a text file */
     line = 0;
@@ -1950,7 +1936,7 @@ static ATerm sparse_blob(int *c, char **s)
 
   *s += (LENSPEC+1);
 
-  data = malloc(len);
+  data = AT_malloc(len);
   if (!data) {
     ATerror("out of memory in sparse_blob (%d)\n", len);
   }
@@ -2053,7 +2039,7 @@ sparse_quoted_appl(int *c, char **s)
 
   /* Wrap up this function application */
   sym = ATmakeSymbol(name, ATgetLength(args), ATtrue);
-  free(name);
+  AT_free(name);
   return (ATerm)ATmakeApplList(sym, args);
 }
 
@@ -2105,7 +2091,7 @@ sparse_unquoted_appl(int *c, char **s)
   /* Wrap up this function application */
   sym = ATmakeSymbol(name ? name : "", ATgetLength(args), ATfalse);
   if (name != NULL) {
-    free(name);
+    AT_free(name);
   }
 
   return ATmakeApplList(sym, args);
@@ -2339,7 +2325,7 @@ void AT_markTerm(ATerm t)
 
       /* We need to resize the mark stack */
       mark_stack_size = mark_stack_size * 2;
-      mark_stack = (ATerm *) realloc(mark_stack, sizeof(ATerm) * mark_stack_size);
+      mark_stack = (ATerm *) AT_realloc(mark_stack, sizeof(ATerm) * mark_stack_size);
       if (!mark_stack)
 	ATerror("cannot realloc mark stack to %ud entries.\n", mark_stack_size);
       limit = mark_stack + mark_stack_size - MARK_STACK_MARGE;
@@ -2372,8 +2358,6 @@ void AT_markTerm(ATerm t)
       continue;
 
     SET_MARK(t->header);
-    
-    INCREMENT_AGE(t->header);
     
     if(HAS_ANNO(t->header))
       *current++ = AT_getAnnotations(t);
@@ -2460,7 +2444,7 @@ void AT_markTerm_young(ATerm t)
       current_index = current - mark_stack;
       /* We need to resize the mark stack */
       mark_stack_size = mark_stack_size * 2;
-      mark_stack = (ATerm *) realloc(mark_stack, sizeof(ATerm) * mark_stack_size);
+      mark_stack = (ATerm *) AT_realloc(mark_stack, sizeof(ATerm) * mark_stack_size);
       if (!mark_stack)
 	ATerror("cannot realloc mark stack to %d entries.\n", mark_stack_size);
       limit = mark_stack + mark_stack_size - MARK_STACK_MARGE;
@@ -2496,8 +2480,6 @@ void AT_markTerm_young(ATerm t)
 
     SET_MARK(t->header);
       /*fprintf(stderr,"MINOR YOUNG MARK(%x)\n",(unsigned int)t);*/
-      /*fprintf(stderr,"YOUNG INCREMENT_AGE(%x,%d)\n",(unsigned int)t,GET_AGE(t->header));*/
-    INCREMENT_AGE(t->header);
 
     if(HAS_ANNO(t->header))
       *current++ = AT_getAnnotations(t);
@@ -2575,7 +2557,7 @@ AT_unmarkTerm(ATerm t)
 
       /* We need to resize the mark stack */
       mark_stack_size = mark_stack_size * 2;
-      mark_stack = (ATerm *) realloc(mark_stack, sizeof(ATerm) * mark_stack_size);
+      mark_stack = (ATerm *) AT_realloc(mark_stack, sizeof(ATerm) * mark_stack_size);
       if (!mark_stack)
 	ATerror("cannot realloc mark stack to %d entries.\n", mark_stack_size);
       limit = mark_stack + mark_stack_size - MARK_STACK_MARGE;

@@ -1,14 +1,19 @@
 project aterm
        : source-location ../source
-       : build-dir $(BUILD_TOP)
+       : build-dir $(BUILD_TOP)/aterm
        : requirements
           <toolset>darwin:<cflags>-std=c99
           <toolset>gcc:<cflags>-std=c99
           <include>../include
        ;
 
+obj aterm_hashtable.o
+       : hashtable.c
+       ;
+
 alias aterm.main
-       : [ glob *.c ]
+       : [ glob *.c : hashtable.c ]
+         aterm_hashtable.o
          protaterm.cpp
        : <address-model>64:<define>AT_64BIT
        : <threading>single

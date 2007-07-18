@@ -9,10 +9,6 @@
 #include "util.h"
 #include "debug.h"
 
-#ifdef DMALLOC
-#include <dmalloc.h>
-#endif
-
 /*}}}  */
 /*{{{  defines */
 
@@ -34,7 +30,7 @@
 /*}}}  */
 /*{{{  globals */
 
-char afun_id[] = "$Id: afun.c 21776 2007-03-09 09:15:52Z eriks $";
+char afun_id[] = "$Id: afun.c 23071 2007-07-02 10:06:17Z eriks $";
 
 static unsigned int table_class = INITIAL_AFUN_TABLE_CLASS;
 static unsigned long table_size  = AT_TABLE_SIZE(INITIAL_AFUN_TABLE_CLASS);
@@ -70,7 +66,7 @@ static void resize_table()
   unsigned long new_size  = AT_TABLE_SIZE(new_class);
   unsigned long new_mask  = AT_TABLE_MASK(new_class);
 
-  at_lookup_table = (SymEntry *)realloc(at_lookup_table, new_size*sizeof(SymEntry));
+  at_lookup_table = (SymEntry *)AT_realloc(at_lookup_table, new_size*sizeof(SymEntry));
   at_lookup_table_alias = (ATerm *)at_lookup_table;
   if (!at_lookup_table) {
     ATerror("afun.c:resize_table - could not allocate space for lookup table of %ld afuns\n", new_size);
@@ -80,7 +76,7 @@ static void resize_table()
     first_free = i;
   }
 
-  hash_table = (SymEntry *)realloc(hash_table, new_size*sizeof(SymEntry));
+  hash_table = (SymEntry *)AT_realloc(hash_table, new_size*sizeof(SymEntry));
   if (!hash_table) {
     ATerror("afun.c:resize_table - could not allocate space for hashtable of %ld afuns\n", new_size);
   }
@@ -133,13 +129,13 @@ void AT_initSymbol(int argc, char *argv[])
     }
   }
 
-  hash_table = (SymEntry *) calloc(table_size, sizeof(SymEntry));
+  hash_table = (SymEntry *) AT_calloc(table_size, sizeof(SymEntry));
   if (hash_table == NULL) {
     ATerror("AT_initSymbol: cannot allocate %ld hash-entries.\n",
 	    table_size);
   }
 
-  at_lookup_table = (SymEntry *) calloc(table_size, sizeof(SymEntry));
+  at_lookup_table = (SymEntry *) AT_calloc(table_size, sizeof(SymEntry));
   at_lookup_table_alias = (ATerm *)at_lookup_table;
   if (at_lookup_table == NULL) {
     ATerror("AT_initSymbol: cannot allocate %ld lookup-entries.\n",
@@ -152,7 +148,7 @@ void AT_initSymbol(int argc, char *argv[])
   }
   at_lookup_table[table_size-1] = (SymEntry) SYM_SET_NEXT_FREE(-1);		/* Sentinel */
 
-  protected_symbols = (Symbol *)calloc(INITIAL_PROTECTED_SYMBOLS, 
+  protected_symbols = (Symbol *)AT_calloc(INITIAL_PROTECTED_SYMBOLS, 
 				       sizeof(Symbol));
   if(!protected_symbols) {
     ATerror("AT_initSymbol: cannot allocate initial protection buffer.\n");
@@ -474,7 +470,7 @@ void AT_freeSymbol(SymEntry sym)
   }
   
   /* Free symbol name */
-  free(sym->name);
+  AT_free(sym->name);
   sym->name = NULL;
   
   at_lookup_table[sym->id] = (SymEntry)SYM_SET_NEXT_FREE(first_free);
@@ -519,7 +515,7 @@ void ATprotectSymbol(Symbol sym)
 
   if(nr_protected_symbols >= max_protected_symbols) {
     max_protected_symbols += SYM_PROTECT_EXPAND_SIZE;
-    protected_symbols = (Symbol *)realloc(protected_symbols,
+    protected_symbols = (Symbol *)AT_realloc(protected_symbols,
 					  max_protected_symbols * sizeof(Symbol));
     if(!protected_symbols)
       ATerror("ATprotectSymbol: no space to hold %ld protected symbols.\n",

@@ -5,10 +5,7 @@
 #include "_afun.h"
 #include "byteio.h"
 #include "util.h"
-
-#ifdef DMALLOC
-#include <dmalloc.h>
-#endif
+#include "memory.h"
 
 /*{{{  static void resize_buffer(byte_writer *writer, int delta) */
 
@@ -21,7 +18,7 @@ static void resize_buffer(byte_writer *writer, int delta)
   size_needed = writer->u.string_data.cur_size + delta;
   if (size_needed >= writer->u.string_data.max_size) {
     new_size = MAX(size_needed, writer->u.string_data.max_size*2);
-    writer->u.string_data.buf = realloc(writer->u.string_data.buf, new_size);
+    writer->u.string_data.buf = AT_realloc(writer->u.string_data.buf, new_size);
     if (!writer->u.string_data.buf) {
       ATerror("bafio: unable to resize buffer to %d bytes.\n", new_size);
     }
