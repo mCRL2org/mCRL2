@@ -117,12 +117,15 @@ namespace squadt {
       /** \brief Have the tool executor terminate all running tools */
       void terminate();
 
+      /** \brief Disconnect and terminate running tools and shutdown listener */
+      void shutdown();
+
       /** \brief Destructor */
       ~tool_manager();
   };
 
   inline tool_manager::~tool_manager() {
-    terminate();
+    shutdown();
   }
 }
 

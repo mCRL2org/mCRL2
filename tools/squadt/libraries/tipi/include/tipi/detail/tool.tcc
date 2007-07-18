@@ -51,13 +51,13 @@ namespace tipi {
         communicator_impl();
 
         /** \brief Constructor that takes controller connection arguments from the command line */
-        bool activate(int&, char** const);
+        bool activate(tipi::tool::communicator*, int&, char** const);
 
         /** \brief Constructor that takes controller connection arguments from the command line */
-        bool activate(char*&);
+        bool activate(tipi::tool::communicator*, char*&);
 
         /** \brief Attempts to build a connection using a scheme object */
-        bool activate(command_line_interface::scheme_ptr const&, long const&);
+        bool activate(tipi::tool::communicator*, command_line_interface::scheme_ptr const&, long const&);
 
         /** \brief Send a layout specification for the display space reserved for this tool */
         void send_display_layout(layout::tool_display::sptr);
@@ -79,29 +79,29 @@ namespace tipi {
     /**
      * \param[in,out] argv a pointer to the list of command line arguments
      **/
-    inline bool communicator_impl::activate(char*& argv) {
+    inline bool communicator_impl::activate(tipi::tool::communicator* c, char*& argv) {
       command_line_interface::argument_extractor e(argv);
 
-      return (activate(e.get_scheme(), e.get_identifier())); 
+      return (activate(c, e.get_scheme(), e.get_identifier())); 
     }
 
     /**
      * \param[in,out] argc the number of command line arguments
      * \param[in,out] argv a pointer to the list of command line arguments
      **/
-    inline bool communicator_impl::activate(int& argc, char** const argv) {
+    inline bool communicator_impl::activate(tipi::tool::communicator* c, int& argc, char** const argv) {
       command_line_interface::argument_extractor e(argc, argv);
 
-      return (activate(e.get_scheme(), e.get_identifier())); 
+      return (activate(c, e.get_scheme(), e.get_identifier())); 
     }
 
     /**
      * \param[in] s a scheme object that represents the method of connecting
      * \param[in] id an identifier used in the connection
      **/
-    inline bool communicator_impl::activate(command_line_interface::scheme_ptr const& s, long const& id) {
+    inline bool communicator_impl::activate(tipi::tool::communicator* c, command_line_interface::scheme_ptr const& s, long const& id) {
       if (s.get() != 0) {
-        s->connect(this);
+        s->connect(c);
  
         instance_identifier = id;
  

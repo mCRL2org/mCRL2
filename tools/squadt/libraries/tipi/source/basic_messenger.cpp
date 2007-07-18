@@ -22,27 +22,29 @@ namespace tipi {
 
     /** Default constructor */
     template < >
-    basic_messenger< tipi::message >::basic_messenger() : impl(new basic_messenger_impl< tipi::message >) {
+    basic_messenger< tipi::message >::basic_messenger() :
+        transport::transporter(boost::shared_ptr < transport::transporter_impl > (new basic_messenger_impl< tipi::message >)) {
     }
 
     /**
      * \param[in] l pointer to a logger object
      **/
     template < >
-    basic_messenger< tipi::message >::basic_messenger(boost::shared_ptr < utility::logger > l) : impl(new basic_messenger_impl< tipi::message >(l)) {
+    basic_messenger< tipi::message >::basic_messenger(boost::shared_ptr < utility::logger > l) :
+        transport::transporter(boost::shared_ptr < transport::transporter_impl > (new basic_messenger_impl< tipi::message >(l))) {
     }
 
     /**
      * \param[in] i pointer to an implementation object
      **/
     template < >
-    basic_messenger< tipi::message >::basic_messenger(basic_messenger_impl< tipi::message >* i) : impl(i) {
+    basic_messenger< tipi::message >::basic_messenger(boost::shared_ptr < basic_messenger_impl< tipi::message > > const& c) : transport::transporter(c) {
     }
  
     /** Get the current logger */
     template < >
     utility::logger* basic_messenger< tipi::message >::get_logger() {
-      return (impl->logger.get());
+      return (boost::static_pointer_cast < basic_messenger_impl< tipi::message > > (impl)->logger.get());
     }
 
     /** Returns the standard logger */
@@ -60,7 +62,7 @@ namespace tipi {
     /** Disconnects from all peers */
     template < >
     void basic_messenger< tipi::message >::disconnect() {
-      impl->disconnect();
+      boost::static_pointer_cast < basic_messenger_impl< tipi::message > > (impl)->disconnect();
     }
 
     /**
@@ -68,7 +70,7 @@ namespace tipi {
      **/
     template < >
     void basic_messenger< tipi::message >::send_message(const tipi::message& m) {
-      impl->send_message(m);
+      boost::static_pointer_cast < basic_messenger_impl< tipi::message > > (impl)->send_message(m);
     }
 
     /**
@@ -77,7 +79,7 @@ namespace tipi {
      **/
     template < >
     void basic_messenger< tipi::message >::add_handler(const tipi::message::type_identifier_t t, handler_type h) {
-      impl->add_handler(t, h);
+      boost::static_pointer_cast < basic_messenger_impl< tipi::message > > (impl)->add_handler(t, h);
     }
 
     /**
@@ -85,7 +87,7 @@ namespace tipi {
      **/
     template < >
     void basic_messenger< tipi::message >::clear_handlers(const tipi::message::type_identifier_t t) {
-      impl->clear_handlers(t);
+      boost::static_pointer_cast < basic_messenger_impl< tipi::message > > (impl)->clear_handlers(t);
     }
 
     /**
@@ -102,7 +104,7 @@ namespace tipi {
      **/
     template < >
     const boost::shared_ptr< tipi::message > basic_messenger< tipi::message >::await_message(tipi::message::type_identifier_t t) {
-      return (impl->await_message(t));
+      return boost::static_pointer_cast < basic_messenger_impl< tipi::message > > (impl)->await_message(t);
     }
 
     /**
@@ -111,7 +113,7 @@ namespace tipi {
      **/
     template < >
     const boost::shared_ptr< tipi::message > basic_messenger< tipi::message >::await_message(tipi::message::type_identifier_t t, long const& ts) {
-      return (impl->await_message(t, ts));
+      return boost::static_pointer_cast < basic_messenger_impl< tipi::message > > (impl)->await_message(t, ts);
     }
   }
 }

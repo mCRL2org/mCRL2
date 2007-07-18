@@ -7,12 +7,13 @@
 #ifndef TRANSCEIVER_H
 #define TRANSCEIVER_H
 
+#include <boost/weak_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
 
 namespace transport {
 
-  class transporter;
+  class transporter_impl;
 
   namespace transceiver {
 
@@ -20,7 +21,7 @@ namespace transport {
      * \brief Base class for transceivers
      **/
     class basic_transceiver : private boost::noncopyable {
-      friend class transport::transporter;
+      friend class transport::transporter_impl;
 
       public:
 
@@ -30,12 +31,12 @@ namespace transport {
       protected:
 
         /** \brief The local owner on this side of the connection */
-        transporter* owner;
+        boost::weak_ptr < transporter_impl > owner;
 
       private:
 
         /** \brief Get the current owner */
-        inline transporter const* get_owner() const;
+        inline transporter_impl const* get_owner() const;
 
       protected:
 
@@ -51,10 +52,10 @@ namespace transport {
       public:
 
         /** \brief Constructor */
-        inline basic_transceiver(transporter*);
+        inline basic_transceiver(boost::shared_ptr < transporter_impl > const&);
      
         /** \brief Function that facilitates disconnection (on both sides of a connection) */
-        virtual void disconnect(basic_transceiver::ptr) = 0;
+        virtual void disconnect(boost::shared_ptr < basic_transceiver > const&) = 0;
      
         /** \brief Send a string input stream to the peer */
         virtual void send(const std::string&) = 0;

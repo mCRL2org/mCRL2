@@ -7,28 +7,30 @@
 #ifndef TRANSPORT_TRANSCEIVER_TCC
 #define TRANSPORT_TRANSCEIVER_TCC
 
-#include "transport/transporter.hpp"
+#include "transport/detail/transporter.tcc"
 
 namespace transport {
   namespace transceiver {
 
-    inline transporter const* basic_transceiver::get_owner() const {
-      return (owner);
+    inline transporter_impl const* basic_transceiver::get_owner() const {
+      return (owner.lock().get());
     }
 
     /**
      * @param o a pointer to the owner
      **/
-    inline basic_transceiver::basic_transceiver(transporter* o) : owner(o) {
-      assert(o != 0);
+    inline basic_transceiver::basic_transceiver(boost::shared_ptr < transporter_impl > const& o) : owner(o) {
+      assert(o.get() != 0);
     }
 
     /**
      * @param d an string that represents the data to be delivered
      **/
     inline void basic_transceiver::deliver(const std::string& d) {
-      if (owner != 0) {
-        owner->deliver(d, this);
+      boost::shared_ptr < transporter_impl > o(owner.lock());
+
+      if (o.get()) {
+        o->deliver(d, this);
       }
     }
 
@@ -36,18 +38,22 @@ namespace transport {
      * @param d an input stream with the data that is to be delivered
      **/
     inline void basic_transceiver::deliver(std::istream& d) {
-      if (owner != 0) {
-        owner->deliver(d, this);
+      boost::shared_ptr < transporter_impl > o(owner.lock());
+
+      if (o.get()) {
+        o->deliver(d, this);
       }
     }
 
     /**
-     * @param t a pointer to the owner
+     * @param t a pointer to the end point of which the connection is termineted
      **/
     inline void basic_transceiver::handle_disconnect(basic_transceiver* t) {
+      boost::shared_ptr < transporter_impl > o(owner.lock());
+
       /* Remove instance from the list of connections */
-      if (owner != 0) {
-        owner->disassociate(t);
+      if (o.get()) {
+        o->disassociate(t);
       }
     }
 

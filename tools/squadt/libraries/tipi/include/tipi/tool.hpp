@@ -46,15 +46,13 @@ namespace tipi {
         /** \brief Set the current tool configuration object */
         inline void set_configuration(boost::shared_ptr < configuration >);
 
-      protected:
- 
-        /** \brief Alternate constructor */
-        communicator(communicator_impl*);
-
       public:
  
         /** \brief Default constructor */
         communicator();
+ 
+        /** \brief Constructor for derived implementation object */
+        communicator(boost::shared_ptr < tipi::tool::communicator_impl > const&);
  
         /** \brief Activate the communicator via connection arguments from the command line */
         bool activate(int&, char** const);

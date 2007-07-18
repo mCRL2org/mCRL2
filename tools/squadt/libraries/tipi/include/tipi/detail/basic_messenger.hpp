@@ -12,6 +12,7 @@
 
 #include "tipi/utility/print_logger.hpp"
 
+#include "transport/transporter.hpp"
 #include "tipi/detail/message.hpp"
 
 namespace transport {
@@ -32,17 +33,12 @@ namespace tipi {
      * M is the type of a messenger::message or derived type
      */
     template < class M >
-    class basic_messenger {
-
-      protected:
-
-        /** \brief Shared pointer to an implementation object */
-        boost::shared_ptr < basic_messenger_impl < M > > impl;
+    class basic_messenger : public transport::transporter {
 
       protected:
  
         /** \brief Alternate constructor */
-        basic_messenger(basic_messenger_impl< M >*);
+        basic_messenger(boost::shared_ptr < basic_messenger_impl< M > > const&);
 
       public:
 

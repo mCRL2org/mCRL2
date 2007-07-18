@@ -120,6 +120,8 @@ namespace squadt {
 
   void build_system::shutdown() {
     store();
+
+    m_tool_manager->shutdown();
   }
 
   void build_system::restore() {

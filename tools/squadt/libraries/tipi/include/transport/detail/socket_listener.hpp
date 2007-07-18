@@ -36,7 +36,7 @@ namespace transport {
       public:
 
         /** \brief Constructor */
-        socket_listener(transport::transporter&, ip_address_t const&, port_t const& = 0);
+        socket_listener(boost::shared_ptr < transport::transporter_impl > const&, ip_address_t const&, port_t const& = 0);
 
         /** \brief Activate the listener */
         void activate(basic_listener::ptr);

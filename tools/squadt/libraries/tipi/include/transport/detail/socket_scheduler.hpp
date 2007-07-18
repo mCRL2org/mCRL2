@@ -72,7 +72,7 @@ namespace transport {
       if (!active) {
         active = true;
 
-        thread = shared_ptr < boost::thread > (new boost::thread(bind(&socket_scheduler::task, this)));
+        thread.reset(new boost::thread(bind(&socket_scheduler::task, this)));
       }
     }
 

@@ -15,14 +15,14 @@ namespace tipi {
 
     /** \brief Builds a connection between a tool communicator and a controller communicator */
     template < typename M >
-    inline void traditional_scheme< M >::connect(basic_messenger_impl< M >* t) const {
+    inline void traditional_scheme< M >::connect(basic_messenger< M >* t) const {
       /** Not yet implemented */
       throw std::runtime_error("Sorry direct connection is not yet implemented");
     }
  
     /** \brief Builds a connection between a tool communicator and a controller communicator */
     template < typename M >
-    inline void socket_scheme< M >::connect(basic_messenger_impl< M >* t) const {
+    inline void socket_scheme< M >::connect(basic_messenger< M >* t) const {
       t->connect(host_name, static_cast < transport::port_t > (port));
     }
   }

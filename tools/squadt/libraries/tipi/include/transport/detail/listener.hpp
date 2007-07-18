@@ -31,7 +31,7 @@ namespace transport {
       protected:
 
         /** \brief The communicator that will take over the accepted connections */
-        transport::transporter& owner;
+        boost::weak_ptr < transport::transporter_impl > owner;
 
         /** \brief Associates the owner with the connection */
         inline void associate(transceiver::basic_transceiver::ptr);
@@ -39,7 +39,7 @@ namespace transport {
       public:
 
         /** \brief Constructor */
-        inline basic_listener(transport::transporter& m);
+        inline basic_listener(boost::shared_ptr < transport::transporter_impl > const& m);
 
         /** \brief Shutdown the listener */
         virtual void shutdown() = 0;

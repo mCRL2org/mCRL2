@@ -3,7 +3,7 @@
 //  (C) Copyright Aleksey Gurtovoy 2002. 
 //  (C) Copyright David Abrahams 2002 - 2003. 
 //  (C) Copyright Toon Knapen 2003. 
-//  (C) Copyright Boris Gubenko 2006.
+//  (C) Copyright Boris Gubenko 2006 - 2007.
 //  Use, modification and distribution are subject to the 
 //  Boost Software License, Version 1.0. (See accompanying file 
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,7 +12,8 @@
 
 //  HP aCC C++ compiler setup:
 
-#if (__HP_aCC >= 61200) && defined(__EDG__)
+#if (((__HP_aCC >= 61200) && defined(__EDG__)) ||\
+     ((__HP_aCC >= 38000) && defined(__hpxstd98)))
 #include "boost/config/compiler/common_edg.hpp"
 #endif
 
@@ -51,6 +52,15 @@
 #    define BOOST_NO_MEMBER_TEMPLATE_KEYWORD
 #endif
 
+// This macro should not be defined when compiling in strict ansi
+// mode, but, currently, we don't have the ability to determine
+// what standard mode we are compiling with. Some future version
+// of aCC6 compiler will provide predefined macros reflecting the
+// compilation options, including the standard mode.
+#if (__HP_aCC >= 60000)
+#    define BOOST_NO_TWO_PHASE_NAME_LOOKUP
+#endif
+
 #define BOOST_COMPILER "HP aCC version " BOOST_STRINGIZE(__HP_aCC)
 
 //
@@ -60,8 +70,9 @@
 #  error "Compiler not supported or configured - please reconfigure"
 #endif
 //
-// last known and checked version is 61300:
-#if (__HP_aCC > 61300)
+// last known and checked version for HP-UX/ia64 is 61300
+// last known and checked version for PA-RISC is 38000
+#if ((__HP_aCC > 61300) || ((__HP_aCC > 38000) && defined(__hpxstd98)))
 #  if defined(BOOST_ASSERT_CONFIG)
 #     error "Unknown compiler version - please run the configure tests and report the results"
 #  endif

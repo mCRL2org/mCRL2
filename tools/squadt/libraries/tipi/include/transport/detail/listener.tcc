@@ -13,10 +13,14 @@ namespace transport {
   namespace listener {
 
     inline void basic_listener::associate(transceiver::basic_transceiver::ptr t) {
-      owner.associate(t);
+      boost::shared_ptr < transporter_impl > c(owner.lock());
+
+      if (c.get()) {
+        c->associate(c,t);
+      }
     }
 
-    inline basic_listener::basic_listener(transporter& m) : owner(m) {
+    inline basic_listener::basic_listener(boost::shared_ptr < transporter_impl > const& m) : owner(m) {
     }
 
     inline basic_listener::~basic_listener() {

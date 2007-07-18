@@ -17,6 +17,7 @@ namespace transport {
     /* Class that is used internally for direct transmitting/receiving */
     class direct_transceiver : public basic_transceiver {
       friend class transport::transporter;
+      friend class transport::transporter_impl;
   
       private:
  
@@ -27,15 +28,15 @@ namespace transport {
         inline void deliver(std::istream& input);
 
         /** Constructor for use by the transporter constructor */
-        inline direct_transceiver(transporter* o);
+        inline direct_transceiver(boost::shared_ptr < transporter_impl > const& o);
 
         /** Constructor for use by the transporter constructor */
-        inline direct_transceiver(transporter* o, direct_transceiver* p);
+        inline direct_transceiver(boost::shared_ptr < transporter_impl > const& o, boost::shared_ptr < direct_transceiver > const& p);
 
       public:
 
         /** Terminate the connection with the peer */
-        inline void disconnect(basic_transceiver::ptr);
+        inline void disconnect(boost::shared_ptr < basic_transceiver > const&);
 
         /** Send a string input stream to the peer */
         inline void send(const std::string& data);
@@ -50,29 +51,30 @@ namespace transport {
     /**
      * @param o the transporter to associate with
      **/
-    inline direct_transceiver::direct_transceiver(transporter* o) : basic_transceiver(o) {
+    inline direct_transceiver::direct_transceiver(boost::shared_ptr < transporter_impl > const& o) : basic_transceiver(o) {
     }
 
     /**
      * @param o the transporter to associate with
+     * @param p the other end point
      **/
-    inline direct_transceiver::direct_transceiver(transporter* o, direct_transceiver* p) : basic_transceiver(o), peer(p) {
+    inline direct_transceiver::direct_transceiver(boost::shared_ptr < transporter_impl > const& o, boost::shared_ptr < direct_transceiver > const& p) : basic_transceiver(o), peer(p.get()) {
+      assert(p.get() != 0);
+
       p->peer = this;
     }
 
     /**
      * @param p a shared pointer to this object
      **/
-    inline void direct_transceiver::disconnect(basic_transceiver::ptr p) {
-      transporter* o = owner;
+    inline void direct_transceiver::disconnect(boost::shared_ptr < basic_transceiver > const& p) {
+      boost::weak_ptr < transporter_impl > o(owner);
 
       peer->handle_disconnect(this);
 
       owner = o;
 
       handle_disconnect(peer);
-
-      owner = 0;
     }
 
     /**

@@ -114,6 +114,9 @@ namespace squadt {
 
       /** \brief Have the tool executor terminate all running tools */
       void terminate();
+
+      /** \brief Disconnect and terminate running tools */
+      void shutdown();
   };
 
   /// \endcond

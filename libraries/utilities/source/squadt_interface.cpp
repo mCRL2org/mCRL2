@@ -154,6 +154,8 @@ namespace mcrl2 {
           finalise();
   
           m_communicator.send_signal_termination();
+
+          m_communicator.disconnect();
   
           active = false;
   

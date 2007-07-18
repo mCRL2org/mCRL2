@@ -26,7 +26,7 @@ namespace tipi {
         virtual ~scheme() = 0;
  
         /** \brief Builds a connection between a tool communicator and a controller communicator */
-        virtual void connect(basic_messenger_impl< M >*) const = 0;
+        virtual void connect(basic_messenger< M >*) const = 0;
     };
  
     /** \brief Derived class for the traditional scheme */
@@ -38,7 +38,7 @@ namespace tipi {
         inline traditional_scheme();
  
         /** Builds a connection between a tool communicator and a controller communicator, using the traditional scheme */
-        inline void connect(basic_messenger_impl< M >*) const;
+        inline void connect(basic_messenger< M >*) const;
     };
  
     /** \brief Derived class for the socket scheme */
@@ -57,7 +57,7 @@ namespace tipi {
         inline socket_scheme();
  
         /** Builds a connection between a tool communicator and a controller communicator, using the socket scheme */
-        inline void connect(basic_messenger_impl< M >*) const;
+        inline void connect(basic_messenger< M >*) const;
     };
 
     /** \brief Destructor */

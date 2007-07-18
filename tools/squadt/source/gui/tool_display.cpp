@@ -626,7 +626,7 @@ namespace squadt {
       /* Connect event handlers */
       s->set_display_layout_handler(boost::bind(&GUI::tool_display::schedule_layout_change, this, _1));
       s->set_status_message_handler(boost::bind(&GUI::tool_display::schedule_log_update, this, _1));
-      event_handler.send_display_update = boost::bind(&tipi::controller::communicator::send_display_update, static_cast < tipi::controller::communicator& > (*s), _1, boost::static_pointer_cast < tipi::display const > (current_layout));
+      event_handler.send_display_update = boost::bind(&tipi::controller::communicator::send_display_update, boost::static_pointer_cast < tipi::controller::communicator > (s).get(), _1, boost::static_pointer_cast < tipi::display const > (current_layout));
     }
 
     void tool_display::build() {
@@ -781,7 +781,7 @@ namespace squadt {
 
         // Tie handler to the new layout object
         event_handler.send_display_update = boost::bind(&tipi::controller::communicator::send_display_update,
-                static_cast < tipi::controller::communicator& > (*event_handler.monitor), _1, boost::static_pointer_cast < tipi::display const > (current_layout));
+                boost::static_pointer_cast < tipi::controller::communicator > (event_handler.monitor).get(), _1, boost::static_pointer_cast < tipi::display const > (current_layout));
 
         std::auto_ptr < wxSizer > root(new wxBoxSizer(wxVERTICAL));
 

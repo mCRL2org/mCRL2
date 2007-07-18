@@ -7,17 +7,13 @@
 #ifndef TRANSPORTER_H
 #define TRANSPORTER_H
 
-#include <exception>
 #include <string>
-#include <list>
-#include <istream>
+#include <iosfwd>
 
 #include <boost/noncopyable.hpp>
-#include <boost/thread/recursive_mutex.hpp>
 
 #include "transport/detail/basics.hpp"
 #include "transport/detail/transceiver.hpp"
-#include "transport/detail/listener.hpp"
 
 /*
  * Socket/Direct communication abstraction
@@ -37,58 +33,26 @@
  */
 
 namespace transport {
+  using namespace transceiver;
 
-  using transceiver::basic_transceiver;
-  using listener::basic_listener;
+  class transporter_impl;
 
-  class transporter : boost::noncopyable {
-    friend class basic_transceiver;
-    friend class basic_listener;
+  /**
+   * \brief Connection component used for data transport
+   **/
+  class transporter : private boost::noncopyable {
+    friend class transporter_impl;
 
-    public:
+    protected:
 
-      /** \brief Convenience type to hide the shared pointer */
-      typedef std::list < basic_transceiver::ptr >    connection_list;
-
-      /** \brief Convenience type to hide the shared pointer */
-      typedef std::list < basic_listener::ptr >       listener_list;
-
-    private:
-
-      /** \brief To obtain mutual exclusion for operations on the list of connections */
-      mutable boost::recursive_mutex lock;
-
-      /** \brief Listeners (for socket communication etc) */
-      listener_list                  listeners;
-
-      /** \brief The list with connections */
-      connection_list                connections;
-
-    private:
-
-      /** \brief Abstract function for the delivery of streamed data to the client program */
-      virtual void deliver(std::istream&, basic_transceiver const*) = 0;
-
-      /** \brief Abstract function for the delivery of streamed data to the client program */
-      virtual void deliver(std::string const&, basic_transceiver const*) = 0;
-
-      /** \brief Associate a connection with this transporter */
-      void associate(const basic_transceiver::ptr&);
-
-      /** \brief Associate a connection with this transporter */
-      void associate(basic_transceiver*);
-
-      /** \brief Disassociate a connection from this transporter */
-      basic_transceiver::ptr disassociate(basic_transceiver*);
+      /** \brief Pointer to implementation object (handle/body idiom) */
+      boost::shared_ptr < transporter_impl > impl;
 
     public:
   
       /** \brief Default constructor with no initial connections */
-      inline transporter();
+      transporter(boost::shared_ptr < transporter_impl > const&);
  
-      /** \brief Destructor */
-      virtual ~transporter();
-  
       /** \brief Creates direct connection to another transporter object */
       void connect(transporter&);
 
@@ -108,7 +72,7 @@ namespace transport {
       void disconnect(transporter&);
 
       /** \brief Pass a connection through to another transporter */
-      inline void relay_connection(transporter*, basic_transceiver*);
+      void relay_connection(transporter*, basic_transceiver*);
 
       /** \brief Activate a socket listener */
       void add_listener(ip_address_t const& = ip_any, port_t const& port = 0);
@@ -120,68 +84,20 @@ namespace transport {
       void remove_listener(size_t number = 0);
   
       /** \brief Communicate a string with all peers */
-      inline void send(const std::string&);
+      void send(const std::string&);
  
       /** \brief Communicate data from a stream with all peers */
-      inline void send(std::istream&);
+      void send(std::istream&);
 
       /** \brief Returns an object with the local hosts name and addresses */
       static host_name_t get_local_host();
 
       /** \brief The number of active listeners */
-      inline size_t number_of_listeners() const;
+      size_t number_of_listeners() const;
 
       /** \brief The number of active connections */
-      inline size_t number_of_connections() const;
+      size_t number_of_connections() const;
   };
-
-  inline transporter::transporter() {
-  }
- 
-  inline size_t transporter::number_of_listeners() const {
-    return (listeners.size());
-  }
-
-  inline size_t transporter::number_of_connections() const {
-    boost::recursive_mutex::scoped_lock l(lock);
-
-    return (connections.size());
-  }
-
-  /**
-   * @param d the data to be sent
-   **/
-  inline void transporter::send(const std::string& d) {
-    boost::recursive_mutex::scoped_lock l(lock);
-
-    for (connection_list::const_iterator i = connections.begin(); i != connections.end(); ++i) {
-      (*i)->send(d);
-    }
-  }
-
-  /**
-   * @param s stream that contains the data to be sent
-   **/
-  inline void transporter::send(std::istream& s) {
-    boost::recursive_mutex::scoped_lock l(lock);
-
-    for (connection_list::const_iterator i = connections.begin(); i != connections.end(); ++i) {
-      (*i)->send(s);
-    }
-  }
-
-  /**
-   * @param[in,out] t the transporter to relay the connection to
-   * @param[in] c the transceiver that represents the local end point of the connection
-   **/
-  inline void transporter::relay_connection(transporter* t, basic_transceiver* c) {
-    assert(t != 0);
-
-    boost::recursive_mutex::scoped_lock l(lock);
-    boost::recursive_mutex::scoped_lock tl(t->lock);
-
-    t->associate(c);
-  }
 }
 
 #endif

@@ -51,15 +51,13 @@ namespace tipi {
         /** \brief Function type that for communicating display layouts */
         typedef boost::function < void (tipi::report::sptr) >                                   status_message_handler_function;
 
-      protected:
- 
-        /** \brief Alternate constructor */
-        communicator(communicator_impl*);
-
       public:
 
         /** \brief Default constructor */
         communicator();
+
+        /** \brief Constructor for derived implementation objects */
+        communicator(boost::shared_ptr < tipi::controller::communicator_impl > const&);
 
         /** \brief Get the controller_capabilities object that is send to tools */
         const controller::capabilities& get_controller_capabilities();

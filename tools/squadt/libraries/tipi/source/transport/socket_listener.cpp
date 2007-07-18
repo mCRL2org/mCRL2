@@ -21,8 +21,9 @@ namespace transport {
      * @param a the address to listen on
      * @param p the port to listen on
      **/
-    socket_listener::socket_listener(transporter& m, const ip_address_t& a, port_t const& p) :
+    socket_listener::socket_listener(boost::shared_ptr < transport::transporter_impl > const& m, const ip_address_t& a, port_t const& p) :
       basic_listener(m), acceptor(socket_transceiver::scheduler.io_service), dispatcher(socket_transceiver::scheduler.io_service)  {
+
       using namespace boost;
       using namespace boost::asio;
 
@@ -48,7 +49,7 @@ namespace transport {
      **/
     void socket_listener::activate(basic_listener::ptr l) {
       /* Create a new socket transceiver that is not yet connected to the transporter */
-      socket_transceiver::ptr t = socket_transceiver::create(&owner);
+      boost::shared_ptr < socket_transceiver > t(socket_transceiver::create(owner.lock()));
 
       acceptor.async_accept(t->socket, bind(&socket_listener::handle_accept, this, boost::asio::placeholders::error, t, l));
 
@@ -67,7 +68,7 @@ namespace transport {
 
         t->activate();
 
-        t = socket_transceiver::create(&owner);
+        t = socket_transceiver::create(owner.lock());
 
         /* Listen for new connections */
         acceptor.async_accept(t->socket, dispatcher.wrap(bind(&socket_listener::handle_accept, this, boost::asio::placeholders::error, t, l)));

@@ -24,7 +24,7 @@ namespace transport {
     boost::asio::socket_base::linger      option_linger(false, 0);
 
     /* Start listening */
-    void socket_transceiver::activate(socket_transceiver::wptr w) {
+    void socket_transceiver::activate(boost::weak_ptr < socket_transceiver > w) {
       socket_transceiver::sptr l(w.lock());
 
       if (l.get() != 0) {
@@ -46,7 +46,7 @@ namespace transport {
      *
      * \pre w.lock.get() must be `this'
      **/
-    void socket_transceiver::connect(socket_transceiver::wptr w, ip_address_t const& a, port_t const& p) {
+    void socket_transceiver::connect(boost::weak_ptr< socket_transceiver > w, ip_address_t const& a, port_t const& p) {
       socket_transceiver::sptr l(w.lock());
 
       if (l.get() != 0) {
@@ -80,7 +80,7 @@ namespace transport {
         }
         else {
           if (e == asio::error::eof) {
-            handle_disconnect(this);
+            basic_transceiver::handle_disconnect(this);
           }
           else if (e != asio::error::operation_aborted) {
             /* The safe default error handling */
@@ -95,7 +95,7 @@ namespace transport {
      * \param[in] h the host name to use
      * \param[in] p the port to use
      **/
-    void socket_transceiver::connect(socket_transceiver::wptr w, const std::string& h, port_t const& p) {
+    void socket_transceiver::connect(boost::weak_ptr< socket_transceiver > w, const std::string& h, port_t const& p) {
       using namespace boost::asio;
 
       socket_transceiver::sptr l(w.lock());
@@ -110,27 +110,33 @@ namespace transport {
     /**
      * @param w a reference to a weak pointer for this object (w.lock().get() == this (or 0)
      **/
-    void socket_transceiver::disconnect(socket_transceiver::wptr w, basic_transceiver::ptr) {
+    void socket_transceiver::disconnect(boost::weak_ptr< socket_transceiver >& w, boost::shared_ptr < basic_transceiver > const&) {
       socket_transceiver::sptr l(w.lock());
 
       if (l.get() != 0) {
-        boost::mutex::scoped_lock s(send_lock);
-
-        /* Wait until send operations complete */
-        if (0 < send_count) {
-          send_monitor.wait(s);
-        }
-      
-        boost::mutex::scoped_lock ll(operation_lock);
-
-        try {
-          socket.close();
-        }
-        catch (boost::system::system_error&) {
-        }
-
-        basic_transceiver::handle_disconnect(this);
+        handle_disconnect();
       }
+    }
+
+    void socket_transceiver::handle_disconnect() {
+      boost::mutex::scoped_lock s(send_lock);
+
+      /* Wait until send operations complete */
+      if (0 < send_count) {
+        send_monitor.wait(s);
+      }
+      
+      boost::mutex::scoped_lock ll(operation_lock);
+
+      boost::system::error_code ec;
+
+      socket.close(ec);
+
+      if (ec) {
+        std::cerr << boost::system::system_error(ec).what() << std::endl; // An error occurred.
+      }
+
+      basic_transceiver::handle_disconnect(this);
     }
 
     transport::host_name_t socket_transceiver::get_local_host() {
@@ -152,7 +158,7 @@ namespace transport {
      * @param w a reference to a weak pointer for this object (w.lock().get() == this (or 0)
      * @param e reference to an asio error object
      **/
-    void socket_transceiver::handle_receive(socket_transceiver::wptr w, const boost::system::error_code& e) {
+    void socket_transceiver::handle_receive(boost::weak_ptr< socket_transceiver > w, const boost::system::error_code& e) {
       /* Object still exists, so do the receiving and delivery */
       using namespace boost;
       using namespace boost::asio;
@@ -179,7 +185,7 @@ namespace transport {
         else {
           if (e == asio::error::eof || e == asio::error::connection_reset) {
             /* The safe default error handling */
-            handle_disconnect(this);
+            basic_transceiver::handle_disconnect(this);
           }
           else if (e != asio::error::operation_aborted) {
             throw (boost::system::system_error(e));
@@ -192,7 +198,7 @@ namespace transport {
      * @param w a reference to a weak pointer for this object (w.lock().get() == this (or 0)
      * @param e reference to an asio error object
      **/
-    void socket_transceiver::handle_write(socket_transceiver::wptr w, boost::shared_array < char >, const boost::system::error_code& e) {
+    void socket_transceiver::handle_write(boost::weak_ptr< socket_transceiver > w, boost::shared_array < char >, const boost::system::error_code& e) {
       using namespace boost;
 
       socket_transceiver::ptr s = w.lock();
@@ -208,7 +214,7 @@ namespace transport {
         if (e) {
           if (e == asio::error::eof || e == asio::error::connection_reset) {
             /* Connection was closed by peer */
-            handle_disconnect(this);
+            basic_transceiver::handle_disconnect(this);
           }
           else if (e != boost::asio::error::operation_aborted) {
             throw (boost::system::system_error(e));
@@ -221,7 +227,7 @@ namespace transport {
      * @param w a reference to a weak pointer for this object (w.lock().get() == this (or 0)
      * @param d the data that is to be sent
      **/
-    void socket_transceiver::send(socket_transceiver::wptr w ,const std::string& d) {
+    void socket_transceiver::send(boost::weak_ptr< socket_transceiver > w ,const std::string& d) {
       socket_transceiver::sptr l(w.lock());
 
       if (l.get() != 0) {
@@ -246,7 +252,7 @@ namespace transport {
      * @param w a reference to a weak pointer for this object (w.lock().get() == this (or 0)
      * @param d the stream that contains the data that is to be sent
      **/
-    void socket_transceiver::send(socket_transceiver::wptr w, std::istream& d) {
+    void socket_transceiver::send(boost::weak_ptr< socket_transceiver > w, std::istream& d) {
       using namespace boost;
       using namespace boost::asio;
 
@@ -275,12 +281,7 @@ namespace transport {
     }
 
     socket_transceiver::~socket_transceiver() {
-      boost::mutex::scoped_lock s(send_lock);
-
-      /* Wait until send operations complete */
-      if (0 < send_count) {
-        send_monitor.wait(s);
-      }
+      handle_disconnect();
     }
   }
 }

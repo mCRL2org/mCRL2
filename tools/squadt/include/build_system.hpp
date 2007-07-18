@@ -79,7 +79,7 @@ namespace squadt {
 
     public:
 
-      /** Follows the syntax defined in RFC 2045 */
+      /** \brief Follows the syntax defined in RFC 2045 */
       typedef tipi::mime_type         mime_type;
 
       /** \brief Convenience type alias */

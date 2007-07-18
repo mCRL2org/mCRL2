@@ -14,10 +14,12 @@
 namespace tipi {
   namespace tool {
 
-    communicator::communicator(communicator_impl* c) : tipi::messenger(c) {
+    communicator::communicator() :
+        tipi::messenger(boost::shared_ptr < tipi::messaging::basic_messenger_impl < tipi::message > >(new communicator_impl)) {
     }
 
-    communicator::communicator() : tipi::messenger(new communicator_impl) {
+    communicator::communicator(boost::shared_ptr < tipi::tool::communicator_impl > const& c) :
+        tipi::messenger(boost::static_pointer_cast < tipi::messaging::basic_messenger_impl < tipi::message > > (c)) {
     }
 
     /**
@@ -27,11 +29,11 @@ namespace tipi {
      * \return whether options were found and whether a connection is being opened with a controller
      **/
     bool communicator::activate(int& argc, char** const argv) {
-      return (boost::dynamic_pointer_cast < communicator_impl > (impl)->activate(argc, argv));
+      return (boost::static_pointer_cast < communicator_impl > (impl)->activate(this, argc, argv));
     }
 
     bool communicator::activate(char*& argv) {
-      return (boost::dynamic_pointer_cast < communicator_impl > (impl)->activate(argv));
+      return (boost::static_pointer_cast < communicator_impl > (impl)->activate(this, argv));
     }
 
     bool communicator::activate(std::vector < std::string > const& arguments) {
@@ -49,7 +51,7 @@ namespace tipi {
      * \return a pointer to the tool capabilities object that is sent to the controller on request
      **/
     tool::capabilities& communicator::get_tool_capabilities() {
-      return (boost::dynamic_pointer_cast < communicator_impl > (impl)->current_tool_capabilities);
+      return (boost::static_pointer_cast < communicator_impl > (impl)->current_tool_capabilities);
     }
  
     /**
@@ -59,29 +61,29 @@ namespace tipi {
      * \return a reference to the current tool configuration object
      **/
     configuration& communicator::get_configuration() {
-      return (*boost::dynamic_pointer_cast < communicator_impl > (impl)->current_configuration);
+      return (*boost::static_pointer_cast < communicator_impl > (impl)->current_configuration);
     }
  
     void communicator::set_configuration(boost::shared_ptr < configuration > c) {
-      boost::dynamic_pointer_cast < communicator_impl > (impl)->current_configuration = c;
+      boost::static_pointer_cast < communicator_impl > (impl)->current_configuration = c;
     }
  
     /**
      * \return p which is a pointer to the most recently retrieved controller capabilities object or 0
      **/
     const boost::shared_ptr < controller::capabilities > communicator::get_controller_capabilities() const {
-      if (boost::dynamic_pointer_cast < communicator_impl > (impl)->current_controller_capabilities.get() == 0) {
+      if (boost::static_pointer_cast < communicator_impl > (impl)->current_controller_capabilities.get() == 0) {
         throw std::runtime_error("Controller capabilities are unknown");
       }
  
-      return (boost::dynamic_pointer_cast < communicator_impl > (impl)->current_controller_capabilities);
+      return (boost::static_pointer_cast < communicator_impl > (impl)->current_controller_capabilities);
     }
  
     /* Request details about the amount of space that the controller currently has reserved for this tool */
     void communicator::request_controller_capabilities() {
       message m(tipi::message_controller_capabilities);
  
-      impl->send_message(m);
+      boost::static_pointer_cast < communicator_impl > (impl)->send_message(m);
  
       /* Await the reply */
       do {
@@ -93,7 +95,7 @@ namespace tipi {
           try {
             tipi::visitors::restore(*n, p->to_string());
           
-            boost::dynamic_pointer_cast < communicator_impl > (impl)->current_controller_capabilities = n;
+            boost::static_pointer_cast < communicator_impl > (impl)->current_controller_capabilities = n;
           }
           catch (std::runtime_error& e) {
             get_logger()->log(1, "Failure with interpretation of message: `" + std::string(e.what()) + "'\n");
@@ -106,13 +108,13 @@ namespace tipi {
  
     /* Send a specification of the current configuration (it may change during tool execution) */
     void communicator::send_accept_configuration() {
-      boost::shared_ptr < configuration > c(boost::dynamic_pointer_cast < communicator_impl > (impl)->current_configuration);
+      boost::shared_ptr < configuration > c(boost::static_pointer_cast < communicator_impl > (impl)->current_configuration);
 
       c->set_fresh(false);
 
       message m(tipi::visitors::store(*c), tipi::message_configuration);
  
-      impl->send_message(m);
+      boost::static_pointer_cast < communicator_impl > (impl)->send_message(m);
     }
  
     /**
@@ -123,7 +125,7 @@ namespace tipi {
 
       message m(tipi::visitors::store(c), tipi::message_configuration);
  
-      impl->send_message(m);
+      boost::static_pointer_cast < communicator_impl > (impl)->send_message(m);
     }
  
     /**
@@ -145,40 +147,40 @@ namespace tipi {
             v.visit(*reinterpret_cast < tipi::layout::element const* > (e), reinterpret_cast < tipi::layout::element_identifier > (e));
           }
 
-          impl->send_message(tipi::message(c, tipi::message_display_update));
+          boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(c, tipi::message_display_update));
         }
       };
 
       if (d->get_manager()) {
-        d->get_manager()->get_event_handler()->add(boost::bind(trampoline::send_display_data, boost::dynamic_pointer_cast < communicator_impl > (impl), _1));
+        d->get_manager()->get_event_handler()->add(boost::bind(trampoline::send_display_data, boost::static_pointer_cast < communicator_impl > (impl), _1));
       }
 
-      boost::dynamic_pointer_cast < communicator_impl > (impl)->send_display_layout(d);
+      boost::static_pointer_cast < communicator_impl > (impl)->send_display_layout(d);
     }
 
     void communicator::send_clear_display() {
-      boost::dynamic_pointer_cast < communicator_impl > (impl)->send_clear_display();
+      boost::static_pointer_cast < communicator_impl > (impl)->send_clear_display();
     }
 
     /* Send a signal that the tool is about to terminate */
     void communicator::send_signal_done(bool b) {
       message m((b) ? "success" : "", tipi::message_task_done);
  
-      impl->send_message(m);
+      boost::static_pointer_cast < communicator_impl > (impl)->send_message(m);
     }
 
     /* Send a signal that the tool is about to terminate */
     void communicator::send_signal_termination() {
       message m(tipi::message_termination);
  
-      impl->send_message(m);
+      boost::static_pointer_cast < communicator_impl > (impl)->send_message(m);
     }
  
     /* Send a status report to the controller */
     void communicator::send_report(tipi::report const& r) const {
       message m(tipi::visitors::store(r), tipi::message_report);
  
-      impl->send_message(m);
+      boost::static_pointer_cast < communicator_impl > (impl)->send_message(m);
     }
 
     /**
@@ -203,12 +205,12 @@ namespace tipi {
         v.visit(*e,reinterpret_cast < tipi::layout::element_identifier> (e));
       }
 
-      impl->send_message(tipi::message(c, tipi::message_display_update));
+      boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(c, tipi::message_display_update));
     }
 
     void communicator::await_configuration() const {
       // wait for configuration offer
-      impl->await_message(tipi::message_configuration);
+      boost::static_pointer_cast < communicator_impl > (impl)->await_message(tipi::message_configuration);
     }
   }
 }

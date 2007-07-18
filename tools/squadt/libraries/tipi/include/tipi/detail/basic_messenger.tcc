@@ -24,7 +24,7 @@
 #include <boost/thread/condition.hpp>
 #include <boost/thread/xtime.hpp>
 
-#include "transport/transporter.hpp"
+#include "transport/detail/transporter.tcc"
 
 #include "tipi/detail/basic_messenger.hpp"
 #include "tipi/common.hpp"
@@ -39,7 +39,7 @@ namespace tipi {
      * M is the type of a messenger::message or derived type
      */
     template < class M >
-    class basic_messenger_impl : public transport::transporter {
+    class basic_messenger_impl : public transport::transporter_impl {
       friend class basic_messenger< M >;
 
       private:
@@ -218,7 +218,7 @@ namespace tipi {
       boost::recursive_mutex::scoped_lock w(waiter_lock);
       boost::mutex::scoped_lock           ww(delivery_lock);
 
-      transporter::disconnect();
+      transporter_impl::disconnect();
 
       task_queue.clear();
       message_queue.clear();

@@ -58,7 +58,7 @@ namespace squadt {
 
   tool_manager_impl::tool_manager_impl() : tipi::controller::communicator(), free_identifier(0) {
     /* Listen for incoming socket connections on the loopback interface with the default port */
-    impl->add_listener(transport::ip_any, default_port);
+    add_listener(transport::ip_any, default_port);
 
     /* Set handler for incoming instance identification messages */
     add_handler(tipi::message_instance_identification, boost::bind(&tool_manager_impl::handle_relay_connection, this, _1));
@@ -129,12 +129,18 @@ namespace squadt {
   }
 
   void tool_manager_impl::terminate() {
-    using namespace execution;
-
     /* Request the local tool executor to terminate the running processes known to this tool manager */
     for (validated_instance_list::const_iterator i = validated_instances.begin(); i != validated_instances.end(); ++i) {
       global_build_system.get_executor()->terminate((*i)->get_process());
     }
+  }
+
+  void tool_manager_impl::shutdown() {
+    using namespace execution;
+
+    terminate();
+
+    disconnect();
   }
   
   void tool_manager_impl::factory_configuration() {
@@ -149,7 +155,6 @@ namespace squadt {
 
       tools.push_back(boost::shared_ptr < tool > (new tool(*t, (default_path / file_name).native_file_string())));
     }
-
   }
 
   /**
@@ -226,7 +231,7 @@ namespace squadt {
 
     execution::task_monitor::sptr p(instances[id]);
 
-    impl->relay_connection(p->impl.get(), const_cast < transport::transceiver::basic_transceiver* > (m->get_originator()));
+    relay_connection(p.get(), const_cast < transport::transceiver::basic_transceiver* > (m->get_originator()));
 
     /* Signal the listener that a connection has been established */
     p->signal_connection(m->get_originator());
@@ -350,6 +355,11 @@ namespace squadt {
   /** \brief Have the tool executor terminate all running tools */
   void tool_manager::terminate() {
     impl->terminate();
+  }
+
+  /** \brief Have the tool executor terminate all running tools */
+  void tool_manager::shutdown() {
+    impl->shutdown();
   }
 }
 

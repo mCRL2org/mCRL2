@@ -39,9 +39,6 @@ namespace transport {
         /** \brief Convenience type to hide the boost shared pointer implementation */
         typedef boost::shared_ptr < socket_transceiver >  sptr;
 
-        /** \brief Convenience type to hide the boost shared pointer implementation */
-        typedef boost::weak_ptr < socket_transceiver >    wptr;
-
       private:
 
         /** \brief Host name resolver */
@@ -59,59 +56,62 @@ namespace transport {
       private:
 
         /** \brief The input buffer */
-        boost::shared_array < char >     buffer;
+        boost::shared_array < char >           buffer;
 
         /** \brief The local endpoint of a connection */
-        boost::asio::ip::tcp::socket     socket;
+        boost::asio::ip::tcp::socket           socket;
  
         /** \brief Used to make operations: read, write and disconnect mutually exclusive */
-        boost::mutex                     operation_lock;
+        boost::mutex                           operation_lock;
 
         /** \brief Used to make sure that an object is not deleted when its methods are still executing */
-        socket_transceiver::wptr         this_ptr;
+        boost::weak_ptr < socket_transceiver > this_ptr;
 
         /** \brief Used to make it possible to wait for send operations to complete */
-        boost::mutex                     send_lock;
+        boost::mutex                           send_lock;
 
         /** \brief Used to make it possible to wait for send operations to complete */
-        boost::condition                 send_monitor;
+        boost::condition                       send_monitor;
 
         /** \brief The amount of send operations that are currently in progress */
-        unsigned int                     send_count;
+        unsigned int                           send_count;
 
       private:
 
         /** \brief Constructor that connects to a port on an address */
-        inline socket_transceiver(transporter* o);
+        inline socket_transceiver(boost::shared_ptr < transporter_impl > const&);
 
         /** \brief Wrapper for connect() that ensures establishes that the object is not freed yet */
-        void connect(wptr, const std::string&, port_t const&);
+        void connect(boost::weak_ptr < socket_transceiver >, const std::string&, port_t const&);
 
         /** \brief Wrapper for connect() that ensures establishes that the object is not freed yet */
-        void connect(wptr, const ip_address_t&, port_t const&);
+        void connect(boost::weak_ptr < socket_transceiver >, const ip_address_t&, port_t const&);
 
         /** \brief Send a string input stream to the peer */
-        void send(wptr, const std::string&);
+        void send(boost::weak_ptr < socket_transceiver >, const std::string&);
   
         /** \brief Send the contents of an input stream to the peer */
-        void send(wptr, std::istream&);
+        void send(boost::weak_ptr < socket_transceiver >, std::istream&);
 
         /** \brief Terminate the connection with the peer */
-        void disconnect(wptr, basic_transceiver::ptr);
+        void disconnect(boost::weak_ptr < socket_transceiver >&, basic_transceiver::ptr const&);
 
         /** \brief Start listening for new data */
-        void activate(wptr);
+        void activate(boost::weak_ptr < socket_transceiver >);
 
         /** \brief Read from the socket */
-        void handle_receive(wptr, const boost::system::error_code&);
+        void handle_receive(boost::weak_ptr < socket_transceiver >, const boost::system::error_code&);
 
         /** \brief Process results from a write operation on the socket */
-        void handle_write(wptr, boost::shared_array < char >, const boost::system::error_code&);
+        void handle_write(boost::weak_ptr < socket_transceiver >, boost::shared_array < char >, const boost::system::error_code&);
+
+        /** \brief Actual disconnection operation */
+        void handle_disconnect();
 
       public:
 
         /** \brief Factory function */
-        static inline socket_transceiver::ptr create(transporter*);
+        static inline socket_transceiver::ptr create(boost::shared_ptr < transporter_impl > const&);
 
         /** \brief Returns an object with the local hosts name and addresses */
         static host_name_t get_local_host();
@@ -129,7 +129,7 @@ namespace transport {
         inline void connect(const ip_address_t& = transport::ip_any, port_t const& = default_port);
 
         /** \brief Terminate connection with peer */
-        void disconnect(boost::shared_ptr < basic_transceiver >);
+        void disconnect(boost::shared_ptr < basic_transceiver > const&);
 
         /** \brief Start listening for new data */
         void activate();
@@ -141,7 +141,7 @@ namespace transport {
     /**
      * @param o a transporter to which to deliver data
      **/
-    inline socket_transceiver::socket_transceiver(transporter* o) : basic_transceiver(o),
+    inline socket_transceiver::socket_transceiver(boost::shared_ptr < transporter_impl > const& o) : basic_transceiver(o),
                 buffer(new char[input_buffer_size + 1]), socket(scheduler.io_service), send_count(0) {
 
       buffer[input_buffer_size] = '\0';
@@ -150,10 +150,10 @@ namespace transport {
     /**
      * @param o a transporter to which to deliver data
      **/
-    boost::shared_ptr < socket_transceiver > socket_transceiver::create(transporter* o) {
+    boost::shared_ptr < socket_transceiver > socket_transceiver::create(boost::shared_ptr < transporter_impl > const& o) {
       socket_transceiver::ptr t(new socket_transceiver(o));
 
-      t->this_ptr = socket_transceiver::wptr(t);
+      t->this_ptr = boost::weak_ptr < socket_transceiver >(t);
 
       return (t);
     }
@@ -196,8 +196,8 @@ namespace transport {
     /**
      * \attention Wrapper for the similar looking private function
      **/
-    inline void socket_transceiver::disconnect(basic_transceiver::ptr p) {
-      disconnect(this_ptr.lock(), p);
+    inline void socket_transceiver::disconnect(boost::shared_ptr < basic_transceiver > const& p) {
+      disconnect(this_ptr, p);
     }
   }
 }
