@@ -27,26 +27,15 @@ namespace squadt {
    **/
   class extractor : public execution::task_monitor {
 
-    public:
-
-      /** \brief Convenience type for hiding shared pointer implementation */
-      typedef boost::shared_ptr < extractor > ptr;
-
     private:
 
       /** \brief handler that accomplishes the actual task */
-      void handle_store_tool_capabilities(const tipi::message_ptr& m, tool& t);
-
-      /** \brief terminates the associated process after a timeout period, if not already finished */
-      void terminate_after_timeout(const boost::weak_ptr < void >);
+      static void handle_store_tool_capabilities(boost::shared_ptr < extractor >, const tipi::message_ptr& m, boost::shared_ptr < tool > t);
 
     public:
 
-      /** \brief Constructor */
-      extractor(tool&);
-
       /** \brief Starts the extraction */
-      void extract();
+      bool extract(boost::shared_ptr < extractor > const&, boost::shared_ptr < tool > const&);
   };
 }
 

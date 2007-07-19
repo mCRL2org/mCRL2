@@ -20,7 +20,6 @@
 #include <boost/system/system_error.hpp>
 
 #include "transport/transporter.hpp"
-#include "transport/detail/basics.hpp"
 #include <transport/detail/transceiver.tcc>
 #include "transport/detail/socket_scheduler.hpp"
 
@@ -48,7 +47,7 @@ namespace transport {
         static socket_scheduler                 scheduler;
 
         /** \brief Default port for socket connections */
-        static port_t                           default_port;
+        static short int                        default_port;
 
         /** \brief Size of the input buffer */
         static unsigned int                     input_buffer_size;
@@ -82,10 +81,10 @@ namespace transport {
         inline socket_transceiver(boost::shared_ptr < transporter_impl > const&);
 
         /** \brief Wrapper for connect() that ensures establishes that the object is not freed yet */
-        void connect(boost::weak_ptr < socket_transceiver >, const std::string&, port_t const&);
+        void connect(boost::weak_ptr < socket_transceiver >, const std::string&, short int const&);
 
         /** \brief Wrapper for connect() that ensures establishes that the object is not freed yet */
-        void connect(boost::weak_ptr < socket_transceiver >, const ip_address_t&, port_t const&);
+        void connect(boost::weak_ptr < socket_transceiver >, const boost::asio::ip::address&, short int const&);
 
         /** \brief Send a string input stream to the peer */
         void send(boost::weak_ptr < socket_transceiver >, const std::string&);
@@ -114,7 +113,7 @@ namespace transport {
         static inline socket_transceiver::ptr create(boost::shared_ptr < transporter_impl > const&);
 
         /** \brief Returns an object with the local hosts name and addresses */
-        static host_name_t get_local_host();
+        static std::string get_local_host();
 
         /** \brief Send a string input stream to the peer */
         void send(const std::string&);
@@ -123,10 +122,10 @@ namespace transport {
         void send(std::istream&);
 
         /** \brief Wrapper for connect() that ensures establishes that the object is not freed yet */
-        inline void connect(const std::string&, port_t const& = default_port);
+        inline void connect(const std::string&, short int const& = default_port);
 
         /** \brief Wrapper for connect() that ensures establishes that the object is not freed yet */
-        inline void connect(const ip_address_t& = transport::ip_any, port_t const& = default_port);
+        inline void connect(const boost::asio::ip::address& = boost::asio::ip::address_v4::any(), short int const& = default_port);
 
         /** \brief Terminate connection with peer */
         void disconnect(boost::shared_ptr < basic_transceiver > const&);
@@ -161,14 +160,14 @@ namespace transport {
     /**
      * \attention Wrapper for the similar looking private function
      **/
-    inline void socket_transceiver::connect(const ip_address_t& a, port_t const& p) {
+    inline void socket_transceiver::connect(const boost::asio::ip::address& a, short int const& p) {
       connect(this_ptr.lock(), a, p);
     }
 
     /**
      * \attention Wrapper for the similar looking private function
      **/
-    inline void socket_transceiver::connect(const std::string& a, port_t const& p) {
+    inline void socket_transceiver::connect(const std::string& a, short int const& p) {
       connect(this_ptr.lock(), a, p);
     }
 

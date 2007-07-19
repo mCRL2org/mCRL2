@@ -23,7 +23,7 @@ namespace tipi {
     /** \brief Builds a connection between a tool communicator and a controller communicator */
     template < typename M >
     inline void socket_scheme< M >::connect(basic_messenger< M >* t) const {
-      t->connect(host_name, static_cast < transport::port_t > (port));
+      t->connect(host_name, static_cast < short int > (port));
     }
   }
 }

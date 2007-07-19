@@ -103,7 +103,7 @@ namespace squadt {
       void query_tools(boost::function < void (const std::string&) >);
 
       /** \brief Get the tool_capabilities object for a tool */
-      bool query_tool(tool&);
+      bool query_tool(boost::shared_ptr < tool > const&);
 
       /** \brief Reverts to the default configuration */
       void factory_configuration();

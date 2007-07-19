@@ -12,8 +12,6 @@
 #include <boost/ref.hpp>
 #include <boost/foreach.hpp>
 
-#define IMPORT_STATIC_DEFINITIONS
-#include "transport/detail/basics.hpp"
 #include "transport/detail/transporter.tcc"
 #include "transport/detail/transceiver.tcc"
 #include "transport/detail/socket_listener.hpp"
@@ -87,7 +85,7 @@ namespace transport {
    * \param a an address
    * \param p a port
    **/
-  void transporter_impl::connect(boost::shared_ptr < basic_transceiver > const& c, const ip_address_t& a, port_t const& p) {
+  void transporter_impl::connect(boost::shared_ptr < basic_transceiver > const& c, const boost::asio::ip::address& a, short int const& p) {
     boost::recursive_mutex::scoped_lock l(lock);
 
     boost::dynamic_pointer_cast < socket_transceiver > (c)->connect(a, p);
@@ -99,7 +97,7 @@ namespace transport {
    * \param h a hostname
    * \param p a port
    **/
-  void transporter_impl::connect(boost::shared_ptr < basic_transceiver > const& c, const std::string& h, port_t const& p) {
+  void transporter_impl::connect(boost::shared_ptr < basic_transceiver > const& c, const std::string& h, short int const& p) {
     boost::recursive_mutex::scoped_lock l(lock);
 
     boost::dynamic_pointer_cast < socket_transceiver > (c)->connect(h, p);
@@ -136,19 +134,21 @@ namespace transport {
   basic_transceiver::ptr transporter_impl::disassociate(basic_transceiver* t) {
     basic_transceiver::ptr p;
 
-    assert(t->owner.lock().get() == this);
-
     boost::recursive_mutex::scoped_lock l(lock);
 
-    for (connection_list::iterator i = connections.begin(); i != connections.end(); ++i) {
-      if (i->get() == t) {
-        p = *i;
-       
-        connections.erase(i);
-       
-        t->owner.reset();
-
-        break;
+    if (t->owner.lock().get() != 0) {
+      assert(t->owner.lock().get() == this);
+     
+      for (connection_list::iterator i = connections.begin(); i != connections.end(); ++i) {
+        if (i->get() == t) {
+          p = *i;
+         
+          connections.erase(i);
+         
+          t->owner.reset();
+     
+          break;
+        }
       }
     }
 
@@ -246,7 +246,7 @@ namespace transport {
    * \param a an address
    * \param p a port
    **/
-  void transporter_impl::add_listener(boost::shared_ptr < transporter_impl > const& c, const ip_address_t& a, port_t const& p) {
+  void transporter_impl::add_listener(boost::shared_ptr < transporter_impl > const& c, const boost::asio::ip::address& a, short int const& p) {
     basic_listener::ptr new_listener(new socket_listener(c, a, p));
 
     listeners.push_back(new_listener);
@@ -258,7 +258,7 @@ namespace transport {
    * \param a an address
    * \param p a port
    **/
-  void transporter_impl::add_listener(boost::shared_ptr < transporter_impl > const& c, const host_name_t& a, port_t const& p) {
+  void transporter_impl::add_listener(boost::shared_ptr < transporter_impl > const& c, std::string const& a, short int const& p) {
     basic_listener::ptr new_listener(new socket_listener(c, boost::asio::ip::address_v4::from_string(a), p));
 
     listeners.push_back(new_listener);
@@ -310,23 +310,23 @@ namespace transport {
   }
 
   /**
-   * \param a an address
+   * \param a a hostname or IP address
    * \param p a port
    **/
-  void transporter::connect(const ip_address_t& a, port_t const& p) {
+  void transporter::connect(std::string const& a, short int const& p) {
     basic_transceiver::ptr c(socket_transceiver::create(impl));
 
-    impl->connect(c, a,p);
-  }
-
-  /**
-   * \param h a hostname
-   * \param p a port
-   **/
-  void transporter::connect(const std::string& h, port_t const& p) {
-    basic_transceiver::ptr c(socket_transceiver::create(impl));
-
-    impl->connect(c,h,p);
+    try {
+      if (a.empty()) {
+        impl->connect(c,boost::asio::ip::address_v4::loopback(),p);
+      }
+      else {
+        impl->connect(c,boost::asio::ip::address::from_string(a),p);
+      }
+    }
+    catch (...) {
+      impl->connect(c,a,p);
+    }
   }
 
   void transporter::disconnect() {
@@ -342,19 +342,21 @@ namespace transport {
   }
 
   /**
-   * \param a an address
+   * \param a a hostname or IP address
    * \param p a port
    **/
-  void transporter::add_listener(const ip_address_t& a, port_t const& p) {
-    impl->add_listener(impl, a, p);
-  }
-
-  /**
-   * \param a an address
-   * \param p a port
-   **/
-  void transporter::add_listener(const host_name_t& a, port_t const& p) {
-    impl->add_listener(impl, a,p);
+  void transporter::add_listener(std::string const& a, short int const& p) {
+    try {
+      if (a.empty()) {
+        impl->add_listener(impl, boost::asio::ip::address_v4::any(), p);
+      }
+      else {
+        impl->add_listener(impl, boost::asio::ip::address::from_string(a), p);
+      }
+    }
+    catch (...) {
+      impl->add_listener(impl, a, p);
+    }
   }
 
   /**
@@ -386,7 +388,7 @@ namespace transport {
     impl->relay_connection(t,c);
   }
 
-  host_name_t transporter::get_local_host() {
+  std::string transporter::get_local_host() {
     return (socket_transceiver::get_local_host());
   }
 }

@@ -12,7 +12,6 @@
 
 #include <boost/noncopyable.hpp>
 
-#include "transport/detail/basics.hpp"
 #include "transport/detail/transceiver.hpp"
 
 /*
@@ -57,10 +56,7 @@ namespace transport {
       void connect(transporter&);
 
       /** \brief Creates socket connection to another transporter object (using a loopback connection by default) */
-      void connect(ip_address_t const& = ip_loopback, port_t const& = 0);
-
-      /** \brief Creates socket connection to another transporter object (using a loopback connection by default) */
-      void connect(host_name_t const&, port_t const& = 0);
+      void connect(std::string const& = "", short int const& = 0);
 
       /** \brief Disconnect all */
       void disconnect();
@@ -75,10 +71,7 @@ namespace transport {
       void relay_connection(transporter*, basic_transceiver*);
 
       /** \brief Activate a socket listener */
-      void add_listener(ip_address_t const& = ip_any, port_t const& port = 0);
-
-      /** \brief Activate a socket listener */
-      void add_listener(host_name_t const&, port_t const& port = 0);
+      void add_listener(std::string const& = "", short int const& port = 0);
 
       /** \brief Activate a socket listener by its number */
       void remove_listener(size_t number = 0);
@@ -89,8 +82,8 @@ namespace transport {
       /** \brief Communicate data from a stream with all peers */
       void send(std::istream&);
 
-      /** \brief Returns an object with the local hosts name and addresses */
-      static host_name_t get_local_host();
+      /** \brief Returns the local hosts name or IP address */
+      static std::string get_local_host();
 
       /** \brief The number of active listeners */
       size_t number_of_listeners() const;

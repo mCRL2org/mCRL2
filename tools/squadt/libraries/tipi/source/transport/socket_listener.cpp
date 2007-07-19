@@ -21,7 +21,7 @@ namespace transport {
      * @param a the address to listen on
      * @param p the port to listen on
      **/
-    socket_listener::socket_listener(boost::shared_ptr < transport::transporter_impl > const& m, const ip_address_t& a, port_t const& p) :
+    socket_listener::socket_listener(boost::shared_ptr < transport::transporter_impl > const& m, const boost::asio::ip::address& a, short int const& p) :
       basic_listener(m), acceptor(socket_transceiver::scheduler.io_service), dispatcher(socket_transceiver::scheduler.io_service)  {
 
       using namespace boost;

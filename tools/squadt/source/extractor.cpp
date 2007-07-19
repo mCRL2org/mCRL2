@@ -7,7 +7,6 @@
 /// \file extractor.cpp
 /// \brief Add your file description here.
 
-#include <boost/ref.hpp>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
@@ -18,16 +17,15 @@
 namespace squadt {
 
   /**
+   * \param[in] e pointer to this element or lifetime management
    * \param[in] t reference to the tool object to use for storage
+   *
+   * \pre get_process().get() is not 0 and e.get() == this
    **/
-  extractor::extractor(tool& t) : task_monitor() {
-    add_handler(tipi::message_tool_capabilities, bind(&extractor::handle_store_tool_capabilities, this, _1, boost::ref(t)));
-  }
+  bool extractor::extract(boost::shared_ptr < extractor > const& e, boost::shared_ptr < tool > const& t) {
+    bool return_value = false;
 
-  /**
-   * \pre associated_process.get() is not 0
-   **/
-  void extractor::extract() {
+    add_handler(tipi::message_tool_capabilities, bind(&extractor::handle_store_tool_capabilities, e, _1, t));
 
     /* Await connection */
     await_connection(5);
@@ -35,17 +33,21 @@ namespace squadt {
     if (is_connected()) {
       request_tool_capabilities();
 
-      await_message(tipi::message_tool_capabilities, 1);
+      return_value = await_message(tipi::message_tool_capabilities, 1).get() != 0;
     }
+
+    finish();
+
+    return return_value;
   }
 
   /**
    * \param[in] m the message that was just delivered
    * \param[in,out] t the tool object in which to store the result
    **/
-  void extractor::handle_store_tool_capabilities(const tipi::message_ptr& m, tool& t) {
-    t.m_capabilities.reset(new tipi::tool::capabilities);
+  void extractor::handle_store_tool_capabilities(boost::shared_ptr < extractor >, const tipi::message_ptr& m, boost::shared_ptr < tool > t) {
+    t->m_capabilities.reset(new tipi::tool::capabilities);
 
-    tipi::visitors::restore(*t.m_capabilities, m->to_string());
+    tipi::visitors::restore(*t->m_capabilities, m->to_string());
   }
 }

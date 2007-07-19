@@ -18,7 +18,7 @@ namespace transport {
 
     boost::asio::ip::tcp::resolver socket_transceiver::resolver(scheduler.io_service);
 
-    transport::port_t socket_transceiver::default_port = 10947;
+    short int socket_transceiver::default_port = 10947;
 
     boost::asio::socket_base::keep_alive  option_keep_alive(true);
     boost::asio::socket_base::linger      option_linger(false, 0);
@@ -46,7 +46,7 @@ namespace transport {
      *
      * \pre w.lock.get() must be `this'
      **/
-    void socket_transceiver::connect(boost::weak_ptr< socket_transceiver > w, ip_address_t const& a, port_t const& p) {
+    void socket_transceiver::connect(boost::weak_ptr< socket_transceiver > w, boost::asio::ip::address const& a, short int const& p) {
       socket_transceiver::sptr l(w.lock());
 
       if (l.get() != 0) {
@@ -95,7 +95,7 @@ namespace transport {
      * \param[in] h the host name to use
      * \param[in] p the port to use
      **/
-    void socket_transceiver::connect(boost::weak_ptr< socket_transceiver > w, const std::string& h, port_t const& p) {
+    void socket_transceiver::connect(boost::weak_ptr< socket_transceiver > w, const std::string& h, short int const& p) {
       using namespace boost::asio;
 
       socket_transceiver::sptr l(w.lock());
@@ -139,7 +139,7 @@ namespace transport {
       basic_transceiver::handle_disconnect(this);
     }
 
-    transport::host_name_t socket_transceiver::get_local_host() {
+    std::string socket_transceiver::get_local_host() {
       using namespace boost::asio;
 
       std::string current_host_name(ip::host_name());

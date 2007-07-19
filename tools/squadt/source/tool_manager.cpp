@@ -57,8 +57,8 @@ namespace squadt {
 
 
   tool_manager_impl::tool_manager_impl() : tipi::controller::communicator(), free_identifier(0) {
-    /* Listen for incoming socket connections on the loopback interface with the default port */
-    add_listener(transport::ip_any, default_port);
+    /* Listen for incoming socket connections on the default interface with the default port */
+    add_listener("", default_port);
 
     /* Set handler for incoming instance identification messages */
     add_handler(tipi::message_instance_identification, boost::bind(&tool_manager_impl::handle_relay_connection, this, _1));
@@ -85,7 +85,7 @@ namespace squadt {
     execution::command c(t.get_location(), w);
 
     c.append_argument(boost::str(boost::format(socket_connect_pattern)
-                            % transport::ip_loopback % default_port));
+                            % boost::asio::ip::address_v4::loopback() % default_port));
     c.append_argument(boost::str(boost::format(identifier_pattern)
                             % id));
     c.append_argument(boost::str(boost::format(log_filter_level_pattern)
@@ -101,16 +101,16 @@ namespace squadt {
    *
    * \attention This function blocks.
    **/
-  bool tool_manager_impl::query_tool(tool& t) {
+  bool tool_manager_impl::query_tool(boost::shared_ptr < tool > const& t) {
     /* Sanity check: establish tool existence */
-    if (t.get_location().empty() || !boost::filesystem::exists(boost::filesystem::path(t.get_location()))) {
+    if (t->get_location().empty() || !boost::filesystem::exists(boost::filesystem::path(t->get_location()))) {
       return (false);
     }
 
     /* Create extractor object, that will retrieve the data from the running tool process */
-    boost::shared_ptr < extractor > e(new extractor(t));
+    boost::shared_ptr < extractor > e(new extractor());
 
-    execute(t, boost::filesystem::current_path().native_file_string(),
+    execute(*t, boost::filesystem::current_path().native_file_string(),
                boost::dynamic_pointer_cast < execution::task_monitor > (e), false);
 
     /* Wait until the process has been identified */
@@ -118,11 +118,7 @@ namespace squadt {
 
     if (p.get() != 0) {
       /* Start extracting */
-      e->extract();
-
-      global_build_system.get_executor()->terminate(p);
-
-      return (true);
+      return e->extract(e, t);
     }
 
     return (false);
@@ -297,7 +293,7 @@ namespace squadt {
     tool_manager::tool_const_sequence tools(get_tools());
 
     BOOST_FOREACH(tool_list::value_type t, tools) {
-      impl->query_tool(*t);
+      impl->query_tool(t);
     }
   }
 
@@ -314,7 +310,7 @@ namespace squadt {
     BOOST_FOREACH(tool_list::value_type t, tools) {
       h(t->get_name());
 
-      if (!impl->query_tool(*t)) {
+      if (!impl->query_tool(t)) {
         retry_list.push_back(t);
       }
     }
@@ -323,7 +319,7 @@ namespace squadt {
     BOOST_FOREACH(tool_list::value_type t, retry_list) {
       h(t->get_name());
 
-      if (!impl->query_tool(*t)) {
+      if (!impl->query_tool(t)) {
         /* TODO log failure */
       }
     }
@@ -334,7 +330,7 @@ namespace squadt {
    *
    * \attention This function blocks.
    **/
-  bool tool_manager::query_tool(tool& t) {
+  bool tool_manager::query_tool(boost::shared_ptr < tool > const& t) {
     return (impl->query_tool(t));
   }
 
