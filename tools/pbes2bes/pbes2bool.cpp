@@ -575,7 +575,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
               new_bes_expression);
 
     nr_of_processed_variables++;
-    if (nr_of_processed_variables % 100 == 0)
+    if (nr_of_processed_variables % 1000 == 0)
     { 
       gsVerboseMsg("Processed %d and generated %d boolean variables\n", 
                                  nr_of_processed_variables,nr_of_generated_variables);
