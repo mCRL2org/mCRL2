@@ -17,6 +17,7 @@
 #include "libstruct.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/sort_utility.h"
+#include "pbes_rewrite_jfg.h"
 
 using namespace lps;
 using namespace pbes_expr;
@@ -32,10 +33,33 @@ using namespace mcrl2::utilities;
 //                 | PBESExists(<DataVarId>+, <PBExpr>)
 //                 | <PropVarInst>
 
-pbes_expression pbes_expression_substitute_and_rewrite(
-                       const pbes_expression &p,
-                       const data_specification &data,
-                       Rewriter *rewriter);
+
+
+static data_expression initialize_internal_true(data_expression t,Rewriter *r)
+{
+  t=(data_expression)r->toRewriteFormat(data_expr::true_());
+  t.protect();
+  return t;
+}
+
+static bool is_true_in_internal_rewrite_format(data_expression d,Rewriter *rewriter)
+{ static data_expression internal_true=initialize_internal_true(internal_true,rewriter);
+  return d==internal_true;
+}
+
+
+static data_expression initialize_internal_false(data_expression t,Rewriter *r)
+{
+  t=(data_expression)r->toRewriteFormat(data_expr::false_());
+  t.protect();
+  return t;
+}
+
+static bool is_false_in_internal_rewrite_format(data_expression d,Rewriter *rewriter)
+{ static data_expression internal_false=initialize_internal_false(internal_false,rewriter);
+  return d==internal_false;
+}
+
 
 struct compare_data_variable
 {
@@ -59,7 +83,8 @@ bool occurs_in_var(aterm_appl l, data_variable v)
 
 pbes_expression pbes_expression_rewrite_and_simplify(
                    pbes_expression p, 
-                   Rewriter *rewriter)
+                   Rewriter *rewriter,
+                   const t_tool_options &tool_options)
 {
   pbes_expression result;
   
@@ -74,12 +99,12 @@ pbes_expression pbes_expression_rewrite_and_simplify(
   else if (is_and(p))
   { // p = and(left, right)
     //Rewrite left and right as far as possible
-    pbes_expression left = pbes_expression_rewrite_and_simplify(lhs(p),rewriter);
+    pbes_expression left = pbes_expression_rewrite_and_simplify(lhs(p),rewriter,tool_options);
     if (is_false(left))
     { result = false_();
     }
     else
-    { pbes_expression right = pbes_expression_rewrite_and_simplify(rhs(p),rewriter);
+    { pbes_expression right = pbes_expression_rewrite_and_simplify(rhs(p),rewriter,tool_options);
       //Options for left and right
       if (is_false(right))
       { result = false_();
@@ -96,12 +121,12 @@ pbes_expression pbes_expression_rewrite_and_simplify(
   else if (is_or(p))
   { // p = or(left, right)
     //Rewrite left and right as far as possible
-    pbes_expression left = pbes_expression_rewrite_and_simplify(lhs(p),rewriter);
+    pbes_expression left = pbes_expression_rewrite_and_simplify(lhs(p),rewriter,tool_options);
     if (is_true(left))
     { result = true_();
     }
     else 
-    { pbes_expression right = pbes_expression_rewrite_and_simplify(rhs(p),rewriter);
+    { pbes_expression right = pbes_expression_rewrite_and_simplify(rhs(p),rewriter,tool_options);
       if (is_true(right))
       { result = true_();
       }
@@ -117,7 +142,7 @@ pbes_expression pbes_expression_rewrite_and_simplify(
   else if (is_forall(p))
   { // p = forall(data_expression_list, pbes_expression)
     data_variable_list data_vars = quant_vars(p);
-    pbes_expression expr = pbes_expression_rewrite_and_simplify(quant_expr(p),rewriter);
+    pbes_expression expr = pbes_expression_rewrite_and_simplify(quant_expr(p),rewriter,tool_options);
     //Remove data_vars which do not occur in expr
     data_variable_list occurred_data_vars;
     for (data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
@@ -138,7 +163,7 @@ pbes_expression pbes_expression_rewrite_and_simplify(
   else if (is_exists(p))
   { // p = exists(data_expression_list, pbes_expression)
     data_variable_list data_vars = quant_vars(p);
-    pbes_expression expr = pbes_expression_rewrite_and_simplify(quant_expr(p),rewriter);
+    pbes_expression expr = pbes_expression_rewrite_and_simplify(quant_expr(p),rewriter,tool_options);
     //Remove data_vars which does not occur in expr
     data_variable_list occurred_data_vars;
     for (data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
@@ -159,18 +184,45 @@ pbes_expression pbes_expression_rewrite_and_simplify(
   { // p is a propositional variable
     propositional_variable_instantiation propvar = p;
     identifier_string name = propvar.name();
-    data_expression_list parameters = rewriter->rewriteList(propvar.parameters());
+    data_expression_list parameters;
+    if (tool_options.opt_precompile_pbes)
+    { 
+      for( data_expression_list::iterator l=propvar.parameters().begin();
+           l!=propvar.parameters().begin(); l++)
+      { parameters=push_front(parameters,
+                              (data_expression)rewriter->rewriteInternal(
+                                rewriter->toRewriteFormat(*l)));
+      }
+      parameters=reverse(parameters);
+    }
+    else
+    { parameters=rewriter->rewriteList(propvar.parameters());
+    }
     result = pbes_expression(propositional_variable_instantiation(name, parameters));
   }
   else
   { // p is a data_expression
-    data_expression d = rewriter->rewrite(p);
-    if (is_true(d))
-      result = true_();
-    else if (is_false(d))
-      result = false_();
+    
+    if (tool_options.opt_precompile_pbes)
+    { 
+    data_expression d = (data_expression)rewriter->rewriteInternal(rewriter->toRewriteFormat(p));
+      if (is_true_in_internal_rewrite_format(d,rewriter))
+         result = true_();
+      else if (is_false_in_internal_rewrite_format(d,rewriter))
+         result = false_();
+      else
+         result = val(d);
+    }
     else
-      result = val(d);
+    { 
+      data_expression d = rewriter->rewrite(p);
+      if (is_true(d))
+        result = true_();
+      else if (is_false(d))
+        result = false_();
+      else
+        result = val(d);
+    }
   }
   
   return result;
@@ -233,7 +285,8 @@ static pbes_expression make_disjunction(const atermpp::set < pbes_expression> &d
 pbes_expression pbes_expression_substitute_and_rewrite(
                    const pbes_expression &p, 
                    const data_specification &data, 
-                   Rewriter *rewriter)
+                   Rewriter *rewriter,
+                   const t_tool_options &tool_options)
 { 
   pbes_expression result;
 
@@ -243,14 +296,14 @@ pbes_expression pbes_expression_substitute_and_rewrite(
   { // p = and(left, right)
     //Rewrite left and right as far as possible
     pbes_expression left = pbes_expression_substitute_and_rewrite(lhs(p), 
-                               data, rewriter);
+                               data, rewriter,tool_options);
     // std::cerr << "LEFT " << pp(left) << std::endl;
     if (is_false(left))
     { result = false_();
     }
     else
     { pbes_expression right = pbes_expression_substitute_and_rewrite(rhs(p), 
-                 data, rewriter);
+                 data, rewriter,tool_options);
       // std::cerr << "RIGHT " << pp(right) << std::endl;
       //Options for left and right
       if (is_false(right))
@@ -269,13 +322,13 @@ pbes_expression pbes_expression_substitute_and_rewrite(
   { // p = or(left, right)
     //Rewrite left and right as far as possible
     pbes_expression left = pbes_expression_substitute_and_rewrite(lhs(p), 
-                 data, rewriter);
+                 data, rewriter,tool_options);
     if (is_true(left))
     { result = true_();
     }
     else 
     { pbes_expression right = pbes_expression_substitute_and_rewrite(rhs(p), 
-                 data, rewriter);
+                 data, rewriter,tool_options);
       if (is_true(right))
       { result = true_();
       }
@@ -300,7 +353,7 @@ pbes_expression pbes_expression_substitute_and_rewrite(
   { 
 
     data_variable_list data_vars = quant_vars(p);
-    pbes_expression expr = pbes_expression_substitute_and_rewrite(quant_expr(p), data, rewriter);
+    pbes_expression expr = pbes_expression_substitute_and_rewrite(quant_expr(p), data, rewriter,tool_options);
     // std::cerr << "Forall " << pp(data_vars) << "." << pp(expr) << std::endl;
 
     // If no data_vars
@@ -361,7 +414,7 @@ pbes_expression pbes_expression_substitute_and_rewrite(
                   }
                   pbes_expression d(gsMakeDataApplList(*f,reverse(function_arguments)));
                   rewriter->setSubstitution(*i,rewriter->toRewriteFormat(d));
-                  pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter));
+                  pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter,tool_options));
                   rewriter->clearSubstitution(*i);
                   if (pbes_expr::is_false(r)) /* the resulting expression is false, so we can terminate */
                   { 
@@ -395,7 +448,7 @@ pbes_expression pbes_expression_substitute_and_rewrite(
   { 
     // std::cerr << "Exists full " << pp(p) << std::endl;
     data_variable_list data_vars = quant_vars(p);
-    pbes_expression expr = pbes_expression_substitute_and_rewrite(quant_expr(p), data, rewriter);
+    pbes_expression expr = pbes_expression_substitute_and_rewrite(quant_expr(p), data, rewriter,tool_options);
     // std::cerr << "ExistsXX " << pp(data_vars) << "." << pp(expr) << std::endl;
 
     // If no data_vars
@@ -458,7 +511,7 @@ pbes_expression pbes_expression_substitute_and_rewrite(
                   pbes_expression d(gsMakeDataApplList(*f,reverse(function_arguments)));
                   rewriter->setSubstitution(*i,rewriter->toRewriteFormat(d));
                   // std::cerr << "SetSubstitution: " << *i << "    " << pp(d) << std::endl;
-                  pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter));
+                  pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter,tool_options));
                   rewriter->clearSubstitution(*i);
                   if (pbes_expr::is_true(r)) /* the resulting expression is true, so we can terminate */
                   { 
@@ -492,22 +545,45 @@ pbes_expression pbes_expression_substitute_and_rewrite(
   { // p is a propositional variable
     propositional_variable_instantiation propvar = p;
     identifier_string name = propvar.name();
-    data_expression_list parameters = rewriter->rewriteList(propvar.parameters());
+    data_expression_list parameters;
+    if (tool_options.opt_precompile_pbes)
+    { parameters = rewriter->rewriteInternalList(propvar.parameters());
+    }
+    else
+    { parameters = rewriter->rewriteList(propvar.parameters());
+    }
     result = pbes_expression(propositional_variable_instantiation(name, parameters));
   }
   else
   { // p is a data_expression
-    data_expression d = rewriter->rewrite(p);
-    // std::cerr << "Rewrite2: " << pp(p) << "\nResult: " <<  pp(d) << "\n  " << d << std::endl;
-    if (data_expr::is_true(d))
-    { result = pbes_expr::true_();
-    }
-    else if (data_expr::is_false(d))
-    { result = pbes_expr::false_();
+    if (tool_options.opt_precompile_pbes)  
+    {
+      data_expression d = (data_expression)rewriter->rewriteInternal((aterm)p);
+      // std::cerr << "Rewrite2: " << pp(p) << "\nResult: " <<  pp(d) << "\n  " << d << std::endl;
+      if (is_true_in_internal_rewrite_format(d,rewriter))   
+      { result = pbes_expr::true_();
+      }
+      else if (is_false_in_internal_rewrite_format(d,rewriter))
+      { result = pbes_expr::false_();
+      }
+      else
+      { 
+        result = val(d);
+      }
     }
     else
-    { 
-      result = val(d);
+    {
+      data_expression d = rewriter->rewrite(p);
+      if (data_expr::is_true(d))
+      { result = pbes_expr::true_();
+      }
+      else if (data_expr::is_false(d))
+      { result = pbes_expr::false_();
+      }
+      else
+      { 
+        result = val(d);
+      }
     }
   }
   

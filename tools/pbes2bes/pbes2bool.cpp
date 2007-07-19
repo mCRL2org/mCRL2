@@ -68,56 +68,49 @@ namespace po = boost::program_options;
 
 //Type definitions
 //----------------
-typedef struct{
-  string opt_outputformat;
-  string opt_strategy;
-  RewriteStrategy rewrite_strategy;
-  string infilename;
-  string outfilename;
-} t_tool_options;
 
-typedef struct {
-  data_variable_list finite_var;    // List of all finite variables
-  data_variable_list infinite_var;  // List of all infinite variables
-  data_expression_list finite_exp;  // List of all finite expressions
-  data_expression_list infinite_exp;  // List of all infinite expressions
-
-  void protect()
-  {
-    finite_var.protect();
-    infinite_var.protect();
-    finite_exp.protect();
-    infinite_exp.protect();
-  }
-  
-  void unprotect()
-  {
-    finite_var.unprotect();
-    infinite_var.unprotect();
-    finite_exp.unprotect();
-    infinite_exp.unprotect();
-  }
-  void mark()
-  {
-    finite_var.mark();
-    infinite_var.mark();
-    finite_exp.mark();
-    infinite_exp.mark();
-  }
-} t_instantiations;
+//typedef struct {
+  //data_variable_list finite_var;    // List of all finite variables
+  //data_variable_list infinite_var;  // List of all infinite variables
+  //data_expression_list finite_exp;  // List of all finite expressions
+  //data_expression_list infinite_exp;  // List of all infinite expressions
+//
+  //void protect()
+  //{
+    //finite_var.protect();
+    //infinite_var.protect();
+    //finite_exp.protect();
+    //infinite_exp.protect();
+  //}
+  //
+  //void unprotect()
+  //{
+    //finite_var.unprotect();
+    //infinite_var.unprotect();
+    //finite_exp.unprotect();
+    //infinite_exp.unprotect();
+  //}
+  //void mark()
+  //{
+    //finite_var.mark();
+    //infinite_var.mark();
+    //finite_exp.mark();
+    //infinite_exp.mark();
+  //}
+//} t_instantiations;
 
 
 // Specify how the ATerms in t_instantiations need to be protected using a traits class
-namespace atermpp
-{
-  template<>
-  struct aterm_traits<t_instantiations>
-  {
-    static void protect(t_instantiations t) { t.protect(); }
-    static void unprotect(t_instantiations t) { t.unprotect(); }
-    static void mark(t_instantiations t) { t.mark(); }
-  };
-} // namespace atermpp
+//namespace atermpp
+//{
+  //template<>
+  //struct aterm_traits<t_instantiations>
+  //{
+    //static void protect(t_instantiations t) { t.protect(); }
+    //static void unprotect(t_instantiations t) { t.unprotect(); }
+    //static void mark(t_instantiations t) { t.mark(); }
+  //};
+// } // namespace atermpp
 
 //Function declarations used by main program
 //------------------------------------------
@@ -508,7 +501,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
 
   // Data rewriter
   Rewriter *rewriter = createRewriter(data,tool_options.rewrite_strategy);
-  variable_index.put(pbes_expression_substitute_and_rewrite(pbes_spec.initial_state(),data,rewriter));
+  variable_index.put(pbes_expression_rewrite_and_simplify(pbes_spec.initial_state(),rewriter,tool_options));
 
   // Needed hashtables
   equation_system eqsys = pbes_spec.equations();
@@ -530,7 +523,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
   { 
     pbes_equations.put(eqi->variable().name(), 
         pbes_equation(eqi->symbol(),eqi->variable(),
-            pbes_expression_rewrite_and_simplify(eqi->formula(),rewriter)));
+            pbes_expression_rewrite_and_simplify(eqi->formula(),rewriter,tool_options)));
     if (eqi->symbol()!=current_fixpoint_symbol)
     { current_fixpoint_symbol=eqi->symbol();
       rank=rank+1;
@@ -563,7 +556,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
     }
     assert(elist==current_variable_instantiation.parameters().end());
     lps::pbes_expression new_pbes_expression = pbes_expression_substitute_and_rewrite(
-                              current_pbes_expression, data, rewriter);
+                              current_pbes_expression, data, rewriter,tool_options);
     // std::cerr << " new pbes expression " << pp(new_pbes_expression) << std::endl;
     bes::bes_expression new_bes_expression=
          add_propositional_variable_instantiations_to_indexed_set_and_translate(
@@ -1075,6 +1068,7 @@ t_tool_options parse_command_line(int argc, char** argv)
   t_tool_options tool_options;
   string opt_outputformat;
   string opt_strategy;
+  bool opt_precompile_pbes=false;
   string opt_rewriter;
   vector< string > file_names;
 
@@ -1085,10 +1079,11 @@ t_tool_options parse_command_line(int argc, char** argv)
        "The following strategies are available:\n"
        "lazy    Compute only boolean equations which can be reached from the initial state\n")
       ("rewriter,R", po::value<string>(&opt_rewriter)->default_value("inner"), "indicate the rewriter to be used. Options are:\n"
-       "inner   Use the interpreting innermost rewriter (default),\n"
-       "jitty   Use the interpreting just in time rewriter,\n"
-       "innerc  Use the compiling innermost rewriter (not for Windows),\n"
-       "jittyc  Use the compiling just in time rewriter (fastest, not for Windows).\n")
+       "inner   interpreting innermost rewriter (default),\n"
+       "jitty   interpreting just in time rewriter,\n"
+       "innerc  compiling innermost rewriter (not for Windows),\n"
+       "jittyc  compiling just in time rewriter (fastest, not for Windows).\n")
+      ("precompile,P", "Precompile the pbes for faster rewriting. Does not work when the toolset is compiled in debug mode")
       ("output,o",  po::value<string>(&opt_outputformat)->default_value("none"), "use outputformat arg (default 'none');\n"
                "available outputformats are none, vasy and cwi")
       ("verbose,v",  "turn on the display of short intermediate gsMessages")
@@ -1124,6 +1119,10 @@ t_tool_options parse_command_line(int argc, char** argv)
     cerr << desc;
 
     exit(0);
+  }
+ 
+  if (vm.count("precompile"))
+  { opt_precompile_pbes=true;
   }
 
   if (vm.count("version"))
@@ -1227,6 +1226,8 @@ t_tool_options parse_command_line(int argc, char** argv)
   { tool_options.rewrite_strategy=GS_REWR_JITTYC;
   }
   else assert(0); // Unknown rewriter specified. Should have been caught above.
+
+  tool_options.opt_precompile_pbes=opt_precompile_pbes;
   
   return tool_options;
 }
