@@ -551,7 +551,12 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
     { 
       assert(elist!=current_variable_instantiation.parameters().end());
       // std::cerr << "Substitution: " << *vlist << "  " << *elist << std::endl;
-      rewriter->setSubstitution(*vlist,rewriter->toRewriteFormat(*elist));
+      if (tool_options.opt_precompile_pbes)
+      { rewriter->setSubstitution(*vlist,(aterm)*elist);
+      }
+      else
+      { rewriter->setSubstitution(*vlist,rewriter->toRewriteFormat(*elist));
+      }
       elist++;
     }
     assert(elist==current_variable_instantiation.parameters().end());

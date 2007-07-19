@@ -188,8 +188,9 @@ pbes_expression pbes_expression_rewrite_and_simplify(
     if (tool_options.opt_precompile_pbes)
     { 
       for( data_expression_list::iterator l=propvar.parameters().begin();
-           l!=propvar.parameters().begin(); l++)
-      { parameters=push_front(parameters,
+           l!=propvar.parameters().end(); l++)
+      { 
+        parameters=push_front(parameters,
                               (data_expression)rewriter->rewriteInternal(
                                 rewriter->toRewriteFormat(*l)));
       }
