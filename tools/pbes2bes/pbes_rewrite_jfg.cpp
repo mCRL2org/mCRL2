@@ -35,10 +35,10 @@ using namespace mcrl2::utilities;
 
 
 
-static data_expression initialize_internal_true(data_expression t,Rewriter *r)
+static data_expression initialize_internal_true(data_expression &t,Rewriter *r)
 {
   t=(data_expression)r->toRewriteFormat(data_expr::true_());
-  t.protect();
+  ATprotect((ATerm*)(&t));
   return t;
 }
 
@@ -48,10 +48,10 @@ static bool is_true_in_internal_rewrite_format(data_expression d,Rewriter *rewri
 }
 
 
-static data_expression initialize_internal_false(data_expression t,Rewriter *r)
+static data_expression initialize_internal_false(data_expression &t,Rewriter *r)
 {
   t=(data_expression)r->toRewriteFormat(data_expr::false_());
-  t.protect();
+  ATprotect((ATerm*)(&t));
   return t;
 }
 
