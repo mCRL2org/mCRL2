@@ -241,7 +241,7 @@ int log2(int n)
 }
 
 ///\ret 2^n
-int powerof2(int n)
+int powerof2_(int n)
 {
   int result = 1;
   for ( ; n>0; --n)
@@ -309,7 +309,7 @@ data_expression make_if_tree(const data_variable_list& new_parameters,
   else
   {
     n = enumerated_elements.size();
-    m = powerof2(new_parameters.size() - 1);
+    m = powerof2_(new_parameters.size() - 1);
     //m == 2^(new_parameters.size() - 1)
 
     if (m > n)
@@ -492,7 +492,7 @@ data_assignment_list replace_enumerated_parameter_in_data_assignment(const data_
     while (!elts.empty())
     {
       // Iterate over the elements that get the boolean value new_parameters.front() == false
-      for(int j = 0; j < powerof2(i-1); ++j)
+      for(int j = 0; j < powerof2_(i-1); ++j)
       {
         if (!elts.empty())
         {
@@ -501,7 +501,7 @@ data_assignment_list replace_enumerated_parameter_in_data_assignment(const data_
       }
 
       // Iterate over the elements that get the boolean value new_parameters.front() == true
-      for(int j = 0; j < powerof2(i-1); ++j)
+      for(int j = 0; j < powerof2_(i-1); ++j)
       {
         if (!elts.empty())
         {
