@@ -720,6 +720,7 @@ static int upperpowerof2(int i)
 
 static ATermAppl RewriteTerm(ATermAppl t)
 { 
+  // gsfprintf(stderr,"Rewrite %P\n",t);
   if (mayrewrite) t=rewr->rewrite(t);
   return t;
 }
@@ -734,7 +735,7 @@ static ATermList RewriteTermList(ATermList t)
 
 static ATermAppl RewriteAction(ATermAppl t)
 {
-  gsfprintf(stderr,"REWR %T\n",t);
+  // gsfprintf(stderr,"REWR %T\n",t);
   return t;
 }
 
@@ -749,7 +750,7 @@ static ATermAppl RewriteProcess(ATermAppl t)
 
 static ATermAppl RewriteMultAct(ATermAppl t)
 {
-  gsfprintf(stderr,"REWR %T\n",t);
+  // gsfprintf(stderr,"REWR %T\n",t);
   return t;
 }
 
@@ -2256,8 +2257,7 @@ static ATermAppl distributeActionOverConditions(
        return r; 
   }
   if (gsIsIfThenElse(restterm))
-  { //XXX
-    //gsDebugMsg("6 Process %T is not in pCRL format.\n", restterm);
+  { 
     /* Here we check whether the process body has the form
        a (c -> x <> y). For state space generation it turns out
        to be beneficial to rewrite this to c-> a x + !c -> a y, as in
@@ -2432,8 +2432,7 @@ static ATermAppl bodytovarheadGNF(
       }
       if ((gsIsIfThenElse(body2)) && (s<=sum))
       {
-        //XXX
-        //gsDebugMsg("Process %T not in pCRL format.\n", body2);
+        
         /* Here we check whether the process body has the form
            a (c -> x <> y). For state space generation it turns out
            to be beneficial to rewrite this to c-> a x + !c -> a y, as in
@@ -3362,17 +3361,6 @@ static void makepCRLprocs_rec(ATermAppl t)
   { makepCRLprocs_rec(ATAgetArgument(t,1)); 
     return;
   }
-
-/* Replaced by IfThenElse
-  if (gsIsIfThen
-  { //XXX
-    gsDebugMsg("13 Process %T is not in pCRL format.\n", t);
-    assert(isDeltaAtZero(ATAgetArgument(t,2)));
-    makepCRLprocs_rec(ATAgetArgument(t,1)); 
-    return;
-  }
-*/
-
 
   if (gsIsProcess(t)) 
   { t=ATAgetArgument(t,0); /* get procId */
@@ -7437,12 +7425,21 @@ static ATermAppl makesingleultimatedelaycondition(
                      ATermAppl actiontime,
                      specificationbasictype *spec)
 { 
-  ATermAppl result=RewriteTerm(
-                     gsMakeDataExprAnd(
-                       condition,
-                       gsMakeDataExprLTE(timevariable,actiontime)));
-  ATermList variables=ATinsertA(ATempty,timevariable);
+  // gsfprintf(stderr,"singledelay %P  %P\n",condition,actiontime);
 
+  ATermAppl result;
+  ATermList variables=ATempty;
+  if (gsIsNil(actiontime))
+  { result=condition;
+  }
+  else
+  { result=RewriteTerm(
+             gsMakeDataExprAnd(
+             condition,
+             gsMakeDataExprLTE(timevariable,actiontime)));
+    variables=ATinsertA(variables,timevariable);
+  }
+  // gsfprintf(stderr,"HIER\n");
   for ( ; freevars!=ATempty ; freevars=ATgetNext(freevars) )
   { ATermAppl freevar=ATAgetFirst(freevars);
     if (occursinterm(freevar,result))
@@ -7483,6 +7480,7 @@ static ATermAppl makesingleultimatedelaycondition(
     end_equation_section();
     result=gsMakeDataExprExists(eqn);
   }
+  // gsfprintf(stderr,"AAA %P\n", result);
 
   return result;
 }
@@ -7493,6 +7491,7 @@ static ATermAppl getUltimateDelayCondition(
                  ATermAppl timevariable,
                  specificationbasictype *spec)
 {  
+   // gsfprintf(stderr,"AAA %P\n",sumlist);
    ATermAppl result=gsMakeDataExprFalse();
    for (ATermList walker=sumlist; (walker!=ATempty);
                                walker=ATgetNext(walker))
@@ -7501,8 +7500,10 @@ static ATermAppl getUltimateDelayCondition(
      ATermAppl actiontime=linGetActionTime(summand);
      ATermAppl condition=linGetCondition(summand);
 
-     if (actiontime==gsMakeNil())
-     { return gsMakeDataExprTrue();
+     if ((actiontime==gsMakeNil()) && gsIsDataExprTrue(condition)) 
+     { 
+       // gsfprintf(stderr,"Result True\n",result);
+       return gsMakeDataExprTrue();
      }
 
      result=gsMakeDataExprOr(result,
@@ -7514,6 +7515,7 @@ static ATermAppl getUltimateDelayCondition(
                      actiontime,
                      spec));
   }
+  // gsfprintf(stderr,"Result %P\n",result);
   return result;
 }
 
@@ -7545,6 +7547,8 @@ static ATermList combinesumlist(
   ATermAppl ultimatedelaycondition=
                substitute_data(rename_list,par2,
                    getUltimateDelayCondition(sumlist2,parametersOfsumlist2,timevar,spec));
+
+
 
   for (ATermList walker1=sumlist1; (walker1!=ATempty); 
                         walker1=ATgetNext(walker1)) 
