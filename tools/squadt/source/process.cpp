@@ -73,7 +73,7 @@ namespace squadt {
 
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
         /** \brief Executed at process termination */
-        static void termination_handler(boost::weak_ptr < process >, PROCESS_INFORMATION&);
+        static void termination_handler(boost::weak_ptr < process >, HANDLE&);
 #else
         /** \brief Executed at process termination */
         static void termination_handler(boost::weak_ptr < process >, pid_t);
@@ -263,7 +263,7 @@ namespace squadt {
 
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
         /* Wait for the process to terminate */
-        thread t(bind(&process_impl::termination_handler, interface_pointer, pi));
+        thread t(bind(&process_impl::termination_handler, interface_pointer, pi.hProcess));
 #else
         thread t(bind(&process_impl::termination_handler, interface_pointer, identifier));
 #endif
