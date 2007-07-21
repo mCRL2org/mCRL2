@@ -432,12 +432,12 @@ static int existsort(ATermAppl sortterm)
 }
 
 static int existsorts(ATermList sorts)
-   { for( ; (!ATisEmpty(sorts)) ; sorts=ATgetNext(sorts))
-     { if (!existsort(ATAgetFirst(sorts)))
-       return 0;
-     }
-     return 1;
-   }
+{ for( ; (!ATisEmpty(sorts)) ; sorts=ATgetNext(sorts))
+  { if (!existsort(ATAgetFirst(sorts)))
+    return 0;
+  }
+  return 1;
+}
 #endif
 
 //prototype
@@ -7425,7 +7425,6 @@ static ATermAppl makesingleultimatedelaycondition(
                      ATermAppl actiontime,
                      specificationbasictype *spec)
 { 
-  // gsfprintf(stderr,"singledelay %P  %P\n",condition,actiontime);
 
   ATermAppl result;
   ATermList variables=ATempty;
@@ -7439,7 +7438,6 @@ static ATermAppl makesingleultimatedelaycondition(
              gsMakeDataExprLTE(timevariable,actiontime)));
     variables=ATinsertA(variables,timevariable);
   }
-  // gsfprintf(stderr,"HIER\n");
   for ( ; freevars!=ATempty ; freevars=ATgetNext(freevars) )
   { ATermAppl freevar=ATAgetFirst(freevars);
     if (occursinterm(freevar,result))
@@ -7466,7 +7464,10 @@ static ATermAppl makesingleultimatedelaycondition(
   used_sumvars = ATreverse(used_sumvars);
 
   if(!ATisEmpty(used_sumvars)) {
-    // Make a new process equation
+    // Make a new data equation.
+    if (!existsort(realsort))
+    { insertsort(realsort,spec);
+    }
     ATermAppl newopid = gsMakeOpId(fresh_name("ExistsFun"),
       gsMakeSortArrowList(getsorts(variables), 
                           gsMakeSortArrowList(getsorts(used_sumvars), 
@@ -7480,7 +7481,6 @@ static ATermAppl makesingleultimatedelaycondition(
     end_equation_section();
     result=gsMakeDataExprExists(eqn);
   }
-  // gsfprintf(stderr,"AAA %P\n", result);
 
   return result;
 }
@@ -7491,7 +7491,6 @@ static ATermAppl getUltimateDelayCondition(
                  ATermAppl timevariable,
                  specificationbasictype *spec)
 {  
-   // gsfprintf(stderr,"AAA %P\n",sumlist);
    ATermAppl result=gsMakeDataExprFalse();
    for (ATermList walker=sumlist; (walker!=ATempty);
                                walker=ATgetNext(walker))
@@ -7502,7 +7501,6 @@ static ATermAppl getUltimateDelayCondition(
 
      if ((actiontime==gsMakeNil()) && gsIsDataExprTrue(condition)) 
      { 
-       // gsfprintf(stderr,"Result True\n",result);
        return gsMakeDataExprTrue();
      }
 
@@ -7515,7 +7513,6 @@ static ATermAppl getUltimateDelayCondition(
                      actiontime,
                      spec));
   }
-  // gsfprintf(stderr,"Result %P\n",result);
   return result;
 }
 
