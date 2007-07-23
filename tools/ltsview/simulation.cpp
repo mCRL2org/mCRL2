@@ -123,6 +123,12 @@ void Simulation::followTrans() {
     posTrans[i]->getEndState()->setSimulated(false);
   }
 
+
+  for(size_t i = 0; i < stateHis.size(); ++i)
+  {
+    stateHis[i]->setSimulated(true);
+  }
+
   nextState->setSimulated(true);
   
   stateHis.push_back(nextState);
