@@ -172,7 +172,7 @@ namespace squadt {
     /**
      * \param[in,out] ph the process handle
      **/
-    void process_impl::termination_handler(boost::weak_ptr < process > p, HANDLE ph) {
+    void process_impl::termination_handler(boost::weak_ptr < process > p, HANDLE& ph) {
       if (ph != 0) {
         DWORD exit_code;
     

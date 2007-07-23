@@ -395,7 +395,7 @@ static ATermList linGetSorts(ATermList l)
                    gsGetSort(ATAgetFirst(l)));
 }
 
-#ifndef NDEBUG
+//#ifndef NDEBUG
 /* these functions are only used in an assert or in #ifndef NDEBUG */
 
 //Prototype
@@ -438,7 +438,7 @@ static int existsorts(ATermList sorts)
   }
   return 1;
 }
-#endif
+//#endif
 
 //prototype
 static void insertsort(ATermAppl sorts, specificationbasictype *spec); 
