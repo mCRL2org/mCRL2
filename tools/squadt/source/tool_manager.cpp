@@ -61,7 +61,7 @@ namespace squadt {
     add_listener("", default_port);
 
     /* Set handler for incoming instance identification messages */
-    add_handler(tipi::message_instance_identification, boost::bind(&tool_manager_impl::handle_relay_connection, this, _1));
+    add_handler(tipi::message_identification, boost::bind(&tool_manager_impl::handle_relay_connection, this, _1));
   }
 
   /**

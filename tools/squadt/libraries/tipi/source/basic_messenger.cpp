@@ -12,12 +12,6 @@ namespace tipi {
   namespace messaging {
 
     template < >
-    const std::string basic_messenger_impl< tipi::message >::tag_open("<message>");
-
-    template < >
-    const std::string basic_messenger_impl< tipi::message >::tag_close("</message>");
-
-    template < >
     boost::shared_ptr < utility::logger > basic_messenger_impl< tipi::message >::standard_logger(new utility::print_logger(std::clog));
 
     /** Default constructor */

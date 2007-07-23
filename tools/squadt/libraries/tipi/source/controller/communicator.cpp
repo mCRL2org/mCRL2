@@ -46,7 +46,7 @@ namespace tipi {
 
     /* Request a tool what input configurations it has available */
     void communicator::request_tool_capabilities() {
-      boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message_tool_capabilities);
+      boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message_capabilities);
     }
  
     /* Send the selected input configuration */
@@ -115,7 +115,7 @@ namespace tipi {
         v.visit(e, display->find(&e));
       }
 
-      boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(c, tipi::message_display_update));
+      boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(c, tipi::message_display_data));
     }
 
     /**
@@ -139,7 +139,7 @@ namespace tipi {
                 display->find(reinterpret_cast < tipi::layout::element const* > (e))); 
             } 
 
-            g->send_message(tipi::message(c, tipi::message_display_update)); 
+            g->send_message(tipi::message(c, tipi::message_display_data)); 
           }
         } 
       }; 

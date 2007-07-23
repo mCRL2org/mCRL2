@@ -200,16 +200,6 @@ bool Squadt::OnInit() {
 
       SetUseBestVisual(true);
     }
-    catch (boost::system::system_error& e) {
-      /* Disable splash */
-      splash_window->set_done();
-
-      wxMessageDialog error_dialog(0, wxString(e.what(), wxConvLocal), wxT("Fatal"), wxOK|wxICON_ERROR);
-      
-      error_dialog.ShowModal();
-
-      return (false);
-    }
     catch (...) {
       splash_window->set_done();
 

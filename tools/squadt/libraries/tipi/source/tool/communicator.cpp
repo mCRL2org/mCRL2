@@ -81,13 +81,13 @@ namespace tipi {
  
     /* Request details about the amount of space that the controller currently has reserved for this tool */
     void communicator::request_controller_capabilities() {
-      message m(tipi::message_controller_capabilities);
+      message m(tipi::message_capabilities);
  
       boost::static_pointer_cast < communicator_impl > (impl)->send_message(m);
  
       /* Await the reply */
       do {
-        message_ptr p = await_message(tipi::message_controller_capabilities);
+        message_ptr p = await_message(tipi::message_capabilities);
  
         if (p.get() != 0) {
           boost::shared_ptr < controller::capabilities > n(new controller::capabilities);
@@ -147,7 +147,7 @@ namespace tipi {
             v.visit(*reinterpret_cast < tipi::layout::element const* > (e), reinterpret_cast < tipi::layout::element_identifier > (e));
           }
 
-          boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(c, tipi::message_display_update));
+          boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(c, tipi::message_display_data));
         }
       };
 
@@ -205,7 +205,7 @@ namespace tipi {
         v.visit(*e,reinterpret_cast < tipi::layout::element_identifier> (e));
       }
 
-      boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(c, tipi::message_display_update));
+      boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(c, tipi::message_display_data));
     }
 
     void communicator::await_configuration() const {

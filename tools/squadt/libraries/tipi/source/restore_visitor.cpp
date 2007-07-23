@@ -135,7 +135,7 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::message& o) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "message-meta");
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "message");
 
     tree->GetAttributeOrDefault("type", &o.m_type, tipi::message::message_unknown);
 

@@ -7,7 +7,9 @@
 \usepackage{alltt}
 \usepackage[top=3cm,left=3cm,bottom=3cm,right=3cm]{geometry}
 
-\title{A Protocol for Controlling Tools}
+\title{A Protocol for Interactively Controlling Tools}
+
+\newtheorem{example}{Example}
 
 \newcommand{\msg}[1]{\texttt{#1}}
 
@@ -107,7 +109,7 @@
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-     message type:    & \msg{instance\_identification} \\
+     message type:    & \msg{identification} \\
      \hline
      direction:       & tool to controller \\
      data:            & token \\
@@ -115,12 +117,12 @@
     \end{tabular}
    \end{figure}
 
-   \noindent When started the tool is given a token which it should sent as part of this
-   message. If the controller does not receive a such a message as first
-   message or the token inside the message does not match one of the expected
-   tokens, then the connection must be severed. Messages of this type must be
-   ignored if they are not the first message after the connection has been
-   established.
+   \noindent When started the tool is given a token which it should sent as
+   part of this message. If the controller does not receive a such a message as
+   first message or the token inside the message does not match one of the
+   expected tokens, then the connection must be severed. Messages of this type
+   must be ignored if they are not the first message after the connection has
+   been established.
 
   \subsection{Capabilities}
 
@@ -133,7 +135,7 @@
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-     message type:    & \msg{controller\_capabilities} \\
+     message type:    & \msg{capabilities} \\
      \hline
      direction:       & tool to controller \\
      data:            & none \\
@@ -147,7 +149,7 @@
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message type:   & \msg{controller\_capabilities} \\
+      message type:   & \msg{capabilities} \\
      \hline
       direction:      & controller to tool \\
       data:           & Version $\times$ Dimensions \\
@@ -172,7 +174,7 @@
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message type:   & \msg{tool\_capabilities} \\
+      message type:   & \msg{capabilities} \\
      \hline
       direction:      & controller to tool \\
       data:           & none \\
@@ -186,15 +188,15 @@
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message type:   & \msg{tool\_capabilities} \\
+      message type:   & \msg{capabilities} \\
      \hline
       direction:      & tool to controller \\
       data:           & version $\times$ List (input-combination) \\
-                      &  version          = struct major : Nat $|$ minor : Nat \\
+                      &  version           = struct major : Nat $|$ minor : Nat \\
                       &  input-combination = category $\times$ List (data-source) \\
-                      &  category         = String,   a name that characterises the function of the tool \\
-                      &  data-source      = id $\times$ format \\
-                      &  format           = mime-type, storage format specifier for the tools main input \\
+                      &  category          = String,   a name that characterises the function of the tool \\
+                      &  data-source       = id $\times$ format \\
+                      &  format            = mime-type, storage format specifier for the tools main input \\
      \hline
     \end{tabular}
    \end{figure}
@@ -387,7 +389,7 @@
    \begin{figure}[H]
     \begin{tabular}{|ll|}
      \hline
-      message type:   & \msg{interaction\_data} \\
+      message type:   & \msg{display\_data} \\
      \hline
       direction:      & controller to tool \\
       data:           & Id $\rightarrow$ State \\
@@ -440,13 +442,25 @@
     \end{tabular}
    \end{figure}
 
- \section{Implementation} \label{s:message_definitions}
+ \section{Implementation} \label{s:implementation}
+
+   Our only requirements are that messages can be typed, that message order is
+   preserved and we have a means of authenticating an incoming connection. We
+   aim to have initial support Windows 2000/XP, for Mac OS X version 10.4, and
+   GNU/Linux and do not want separate solutions for each of these platforms. An
+   existing protocol that we considered is XMPP by the IETF (RFC 3920). It is a
+   simple protocol between a client and a server that uses two XML streams and
+   further features connection authentication mechanism.  Unfortunately no
+   single client/server side implementations existed that was usable on all
+   target platforms and creating our own implementation would have taken to
+   much time. So a lightweight custom protocol was chosen, instead of using an
+   existing protocol. 
 
   \subsection{Transport}
 
    \noindent The TCP/IP protocol suite is chosen as the means of transport. It is
    well-known and supported by a lot of programming languages. The protocol
-   requires connection-state a tool is authenticated once and on failure the
+   requires connection-state, a tool is authenticated once and on failure the
    connection is terminated. In addition, because meaning is assigned to the
    order of messages, the protocol requires that messages are delivered in the
    same order as which they were offered to the sender. All requirements are
@@ -456,22 +470,27 @@
 
    \noindent The choice for XML is obvious we aim for extensibility and XML to some
    extend allows changes to the format extensions to the format there is wide
-   support in many programming languages and it makes the messages readable,
-   making it easy to print and manually verify the structure and contents.
-  
-  \subsection{XML Structure}
+   support in many programming languages. With XML it is possible to create a
+   good parser that is to some extent resistant to extensions, meaning it will
+   also work on future versions of the format that may contain additional
+   information.  Another benefit of using XML is it makes the messages
+   readable, making it easy to print and manually verify the structure and
+   contents.
 
-   \noindent messages are wrapped in the <message> tag. The first child element
-   is the tag <message-meta>. The message meta tag has one mandatory attribute
-   \textit{type} that specifies the type of the message and occur only once. 
-   For example:
+   \subsubsection{XML Structure}
 
-   \begin{example}
-    <message>
-     <message-meta type="termination">
+    \noindent messages are wrapped in the <message> tag. A mandatory attribute
+    is \textit{type} that specifies the type of the message, it may occur only
+    once. For example:
+ 
+    \begin{example}
+     <message type="termination">
       <![CDATA[message content]]>
-     </message-meta>
-    </message>
-   \end{example}
+     </message>
+    \end{example}
+
+    The content of a message is wrapped as so-called CDATA section. It means
+    that the data inside is not interpreted when parsing a message. So a
+    message that has invalid XML as content can still be valid XML itself.
 
 \end{document}

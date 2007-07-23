@@ -36,8 +36,8 @@ namespace tipi {
  
       private:
 
-        /** \brief Send details about the amount of space that the controller currently has reserved for this tool */
-        void request_tool_capabilities_handler();
+        /** \brief Send details about the controllers capabilities */
+        void handle_capabilities_request(const tipi::messenger::message_ptr&);
 
         /** \brief Handler for incoming data resulting from user interaction with the display relayed by the controller */
         void receive_display_data_handler(const tipi::messenger::message_ptr&, layout::tool_display::sptr);
@@ -72,7 +72,7 @@ namespace tipi {
     inline communicator_impl::communicator_impl() : current_tool_capabilities() {
  
       /* Register event handlers for some message types */
-      add_handler(tipi::message_tool_capabilities, boost::bind(&communicator_impl::request_tool_capabilities_handler, this));
+      add_handler(tipi::message_capabilities, boost::bind(&communicator_impl::handle_capabilities_request, this, _1));
       add_handler(tipi::message_configuration, boost::bind(&communicator_impl::receive_configuration_handler, this, _1));
     }
  
@@ -106,7 +106,7 @@ namespace tipi {
         instance_identifier = id;
  
         /* Identify the tool instance to the controller */
-        tipi::message m(boost::str(boost::format("%u") % id), tipi::message_instance_identification);
+        tipi::message m(boost::str(boost::format("%u") % id), tipi::message_identification);
  
         send_message(m);
       }
@@ -119,15 +119,15 @@ namespace tipi {
 
       send_message(m);
 
-      clear_handlers(tipi::message_display_update);
+      clear_handlers(tipi::message_display_data);
 
-      add_handler(tipi::message_display_update, boost::bind(&communicator_impl::receive_display_data_handler, this, _1, d));
+      add_handler(tipi::message_display_data, boost::bind(&communicator_impl::receive_display_data_handler, this, _1, d));
     }
 
     inline void communicator_impl::send_clear_display() {
       layout::tool_display display;
 
-      clear_handlers(tipi::message_display_update);
+      clear_handlers(tipi::message_display_data);
 
       tipi::message m(tipi::visitors::store(display), tipi::message_display_layout);
 
@@ -135,10 +135,12 @@ namespace tipi {
     }
 
     /* Send a specification of the tools capabilities */
-    inline void communicator_impl::request_tool_capabilities_handler() {
-      tipi::message m(tipi::visitors::store(current_tool_capabilities), tipi::message_tool_capabilities);
+    inline void communicator_impl::handle_capabilities_request(const tipi::messenger::message_ptr& m) {
+      if (m->is_empty()) {
+        tipi::message m(tipi::visitors::store(current_tool_capabilities), tipi::message_capabilities);
  
-      send_message(m);
+        send_message(m);
+      }
     }
  
     /**

@@ -25,7 +25,7 @@ namespace squadt {
   bool extractor::extract(boost::shared_ptr < extractor > const& e, boost::shared_ptr < tool > const& t) {
     bool return_value = false;
 
-    add_handler(tipi::message_tool_capabilities, bind(&extractor::handle_store_tool_capabilities, e, _1, t));
+    add_handler(tipi::message_capabilities, bind(&extractor::handle_store_tool_capabilities, e, _1, t));
 
     /* Await connection */
     await_connection(5);
@@ -33,7 +33,7 @@ namespace squadt {
     if (is_connected()) {
       request_tool_capabilities();
 
-      return_value = await_message(tipi::message_tool_capabilities, 1).get() != 0;
+      return_value = await_message(tipi::message_capabilities, 1).get() != 0;
     }
 
     finish();

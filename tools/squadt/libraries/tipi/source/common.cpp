@@ -21,27 +21,26 @@ namespace tipi {
     /** The type identifier for messages of any type */
     template < >
     const tipi::message_identifier_t message< tipi::message_identifier_t, tipi::message_unknown, tipi::message_any >::message_any     = tipi::message_any;
+
+    static char const* message_identifier_strings[] = {
+      "any",
+      "capabilities",
+      "configuration",
+      "display_layout",
+      "display_data",
+      "identification",
+      "report",
+      "task_start",
+      "task_done",
+      "termination",
+      "unknown"
+    };
   }
 
   /** \brief textual identifiers for each element of message_identifier_t */
   template < >
   std::string as_string(message_identifier_t const& t) {
-    static char const* message_identifier_strings[] = {
-      "unknown",
-      "any",
-      "instance_identification",
-      "controller_capabilities",
-      "tool_capabilities",
-      "configuration",
-      "task_start",
-      "task_done",
-      "display_layout",
-      "display_update",
-      "termination",
-      "report"
-    };
-
-    return (message_identifier_strings[t]);
+    return (messaging::message_identifier_strings[t]);
   }
 }
 

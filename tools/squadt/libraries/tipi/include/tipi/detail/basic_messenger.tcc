@@ -104,12 +104,6 @@ namespace tipi {
         /** \brief Type for the message queue */
         typedef std::deque < boost::shared_ptr < M > >                                         message_queue_t;
 
-        /** \brief The XML-like tag used for wrapping the content */
-        static const std::string                                                               tag_open;
-
-        /** \brief The XML-like tag used for wrapping the content */
-        static const std::string                                                               tag_close;
-
         /** \brief Standard (clog) logging component */
         static boost::shared_ptr < utility::logger >                                           standard_logger;
 
@@ -252,7 +246,7 @@ namespace tipi {
       logger->log(1, boost::format("sent     id : %u, type : %s\n") % getpid() % as_string(m.get_type()));
       logger->log(2, boost::format(" data : \"%s\"\n") % m.to_string());
 
-      send(tag_open + tipi::visitors::store(m) + tag_close);
+      send(tipi::visitors::store(m));
     }
  
     template < class M >
@@ -304,13 +298,13 @@ namespace tipi {
      * \param data a stream that contains the data to be delivered
      * \param o a pointer to the transceiver on which the data was received
      *
-     * \pre A message is of the form tag_open...tag_close
-     * \pre Both tag_close == tag_open start with == '<' and do not further contain this character 
-     *
-     * \attention Works under the assumption that tag_close.size() < data.size()
+     * \attention Works under the assumption that tag_message_close.size() < data.size()
      **/
     template < class M >
     void basic_messenger_impl< M >::deliver(const std::string& data, typename M::end_point o) {
+      static const std::string tag_message_open("<message ");
+      static const std::string tag_message_close("</message>");
+
       std::string::const_iterator i = data.begin();
 
       while (i != data.end()) {
@@ -321,18 +315,15 @@ namespace tipi {
 
           if (0 < partially_matched) {
             /* A prefix of the close message tag was matched before */
-            j              = std::mismatch(tag_close.begin() + partially_matched, tag_close.end(), j).first;
+            j = std::mismatch(tag_message_close.begin() + partially_matched, tag_message_close.end(), j).first;
 
-            const size_t c = (j - tag_close.begin()) - partially_matched;
+            const size_t c = (j - tag_message_close.begin()) - partially_matched;
 
-            if (j == tag_close.end()) {
+            if (j == tag_message_close.end()) {
               /* Signal that message is closed */
               message_open = false;
 
-              /* Remove previously matched part from buffer */
-              buffer.resize(buffer.size() - c);
-
-              i += tag_close.size() - c;
+              i += tag_message_close.size() - c;
             }
 
             partially_matched = 0;
@@ -340,31 +331,30 @@ namespace tipi {
 
           if (message_open) {
             /* Continuing search for the end of the current message; next: try to match close tag */
-            size_t n = data.find(tag_close, i - data.begin());
+            size_t n = data.find(tag_message_close, i - data.begin());
            
             if (n != std::string::npos) {
               /* End message sequence matched; signal message close */
               message_open = false;
 
-              j = data.begin() + n;
+              j = data.begin() + n + tag_message_close.size();
 
               /* Append data to buffer */
               buffer.append(i, j);
 
-              /* Skip close tag */
-              i = j + tag_close.size();
+              i = j;
             }
             else {
               const std::string::const_iterator b = data.end();
-              const size_t                      s = data.size() - (std::min)(tag_close.size(), data.size());
+              const size_t                      s = data.size() - (std::min)(tag_message_close.size(), data.size());
 
-              /* End message sequence not matched look for partial match in data[(i - tag_close.size())..i] */
+              /* End message sequence not matched look for partial match in data[(i - tag_message_close.size())..i] */
               n = data.substr(s).rfind('<');
 
               if (n != std::string::npos) {
                 const std::string::const_iterator k = data.begin() + s + n;
                
-                j = std::mismatch(k, b, tag_close.begin()).first;
+                j = std::mismatch(k, b, tag_message_close.begin()).first;
                
                 if (j == b) {
                   partially_matched = (j - k);
@@ -410,13 +400,15 @@ namespace tipi {
         }
         else {
           if (0 < partially_matched) {
-            const std::string::const_iterator k = tag_open.begin() + partially_matched;
+            const std::string::const_iterator k = tag_message_open.begin() + partially_matched;
 
             /* Part of a start message tag was matched */
-            j = std::mismatch(k, tag_open.end(), i).first;
+            j = std::mismatch(k, tag_message_open.end(), i).first;
 
-            if (j == tag_open.end()) {
-              i = data.begin() + tag_open.size() - partially_matched;
+            if (j == tag_message_open.end()) {
+              i = data.begin() + tag_message_open.size() - partially_matched;
+
+              buffer.assign(tag_message_open);
 
               message_open = true;
             }
@@ -425,17 +417,17 @@ namespace tipi {
           }
 
           if (!message_open) {
-            size_t n = data.find(tag_open, i - data.begin());
+            size_t n = data.find(tag_message_open, i - data.begin());
            
             if (n != std::string::npos) {
               /* Skip message tag */
-              i = data.begin() + n + tag_open.size();
+              i = data.begin() + n;
            
               message_open = true;
             }
             else {
               const std::string::const_iterator b = data.end();
-              const size_t                      s = data.size() - (std::min)(tag_open.size(), data.size());
+              const size_t                      s = data.size() - (std::min)(tag_message_open.size(), data.size());
 
               n = data.substr(s).rfind('<');
 
@@ -443,7 +435,7 @@ namespace tipi {
                 const std::string::const_iterator k = data.begin() + s + n;
                
                 /* End message sequence not matched look for partial match in data[(i - tag_close.size())..i] */
-                j = std::mismatch(k, b, tag_open.begin()).first;
+                j = std::mismatch(k, b, tag_message_open.begin()).first;
                
                 if (j == b) {
                   partially_matched = (j - k);

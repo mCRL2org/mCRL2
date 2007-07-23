@@ -46,7 +46,7 @@ namespace tipi {
         void status_message_handler(messenger::message_ptr const&, status_message_handler_function);
 
         /** \brief Send details about the amount of space that the controller currently has reserved for this tool */
-        void request_controller_capabilities_handler();
+        void handle_capabilities_request(messenger::message_ptr const& m);
  
         /** \brief Event handler for storing configurations */
         void tool_configuration_handler(messenger::message_ptr const& m);
@@ -87,7 +87,7 @@ namespace tipi {
       using namespace boost;
 
       /* set default handlers for delivery events */
-      add_handler(tipi::message_controller_capabilities, bind(&communicator_impl::request_controller_capabilities_handler, this));
+      add_handler(tipi::message_capabilities, bind(&communicator_impl::handle_capabilities_request, this, _1));
       add_handler(tipi::message_configuration, bind(&communicator_impl::tool_configuration_handler, this, _1));
     }
     
@@ -113,7 +113,7 @@ namespace tipi {
     }
 
     inline void communicator_impl::deactivate_display_update_handler() {
-      clear_handlers(tipi::message_display_update);
+      clear_handlers(tipi::message_display_data);
     }
 
     /**
@@ -129,10 +129,10 @@ namespace tipi {
 
       if (g.get() != 0) {
         /* Remove any previous handlers */
-        clear_handlers(tipi::message_display_update);
+        clear_handlers(tipi::message_display_data);
 
         if (!h.empty()) {
-          add_handler(tipi::message_display_update, boost::bind(&communicator_impl::display_update_handler, this, _1, d, h));
+          add_handler(tipi::message_display_data, boost::bind(&communicator_impl::display_update_handler, this, _1, d, h));
         }
       }
     }
@@ -188,10 +188,12 @@ namespace tipi {
     }
 
     /* Reply details about the amount of reserved display space */
-    inline void communicator_impl::request_controller_capabilities_handler() {
-      message m(visitors::store(communicator::m_controller_capabilities), tipi::message_controller_capabilities);
+    inline void communicator_impl::handle_capabilities_request(const messenger::message_ptr& m) {
+      if (m->is_empty()) {
+        message m(visitors::store(communicator::m_controller_capabilities), tipi::message_capabilities);
 
-      send_message(m);
+        send_message(m);
+      }
     }
  
     /**

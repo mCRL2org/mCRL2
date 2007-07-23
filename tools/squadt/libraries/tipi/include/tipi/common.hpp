@@ -139,18 +139,17 @@ namespace tipi {
 
   /** \brief Type for tipi protocol message identification */
   enum message_identifier_t {
-     message_unknown,                          ///< \brief unspecified or unknown (or should be derived from content)
      message_any,                              ///< \brief matches any of the types below
-     message_instance_identification,          ///< \brief the unique identifier assigned to a tool instance
-     message_controller_capabilities,          ///< \brief request/response of controller capabilities
-     message_tool_capabilities,                ///< \brief request/response of tool capabilities
+     message_capabilities,                     ///< \brief request/response of tool/controller capabilities
      message_configuration,                    ///< \brief offer/accept tool configuration
+     message_display_layout,                   ///< \brief the controller a layout description for the display
+     message_display_data,                     ///< \brief the controller a data to be displayed using the current display layout
+     message_identification,                   ///< \brief the unique identifier assigned to a tool instance
+     message_report,                           ///< \brief send the controller a report of a tools operation
      message_task_start,                       ///< \brief signal to a tool for starting a task
      message_task_done,                        ///< \brief signal to controller that task execution has finished
-     message_display_layout,                   ///< \brief the controller a layout description for the display
-     message_display_update,                   ///< \brief the controller a data to be displayed using the current display layout
      message_termination,                      ///< \brief request/response of tool termination
-     message_report                            ///< \brief send the controller a report of a tools operation
+     message_unknown                           ///< \brief unspecified or unknown (or should be derived from content)
   };
 
   template <> std::string as_string(message_identifier_t const&);

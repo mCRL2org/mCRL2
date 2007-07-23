@@ -119,15 +119,21 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::store_visitor_impl >::visit(tipi::message const& o) {
-    out << "<message-meta type=\"" << o.m_type << "\">"
-        << "<![CDATA[";
+    out << "<message type=\"" << o.m_type << "\">";
 
     size_t i = 0;
     size_t j = o.m_content.find(']', 0); 
+    bool   f = true;
 
     while (j < o.m_content.size() - 3) {
       if (o.m_content[++j] == ']') {
         if (o.m_content[++j] == '>') {
+          if (f) {
+            out << "<![CDATA[";
+
+            f = false;
+          }
+
           out << o.m_content.substr(i,j - i) << "]]><![CDATA[>";
 
           i = ++j;
@@ -137,7 +143,21 @@ namespace utility {
       j = o.m_content.find(']', j); 
     }
 
-    out << o.m_content.substr(i) << "]]></message-meta>";
+    if (!o.m_content.substr(i).empty()) {
+      if (f) {
+        out << "<![CDATA[";
+
+        f = false;
+      }
+
+      out << o.m_content.substr(i);
+    }
+
+    if (!f) {
+      out << "]]>";
+    }
+
+    out << "</message>";
   }
 
   /**
