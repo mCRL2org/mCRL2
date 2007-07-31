@@ -8,7 +8,6 @@
 /// \brief Add your file description here.
 
 #include <cmath>
-#include <iostream>
 #include <wx/image.h>
 #include "glcanvas.h"
 #include "ids.h"
@@ -610,6 +609,7 @@ void GLCanvas::processHits(const GLint hits, GLuint buffer[], bool doubleC) {
   // Choose the nearest object and store it.
   for(GLint j=0; j < hits; ++j) 
   {
+
     names = *buffer;
     buffer++; // buffer points to the minimal z value of the hit.
     minDepth = static_cast<float>(*buffer)/0x7fffffff;
@@ -617,6 +617,8 @@ void GLCanvas::processHits(const GLint hits, GLuint buffer[], bool doubleC) {
     buffer++; // buffer points to the first name on the stack
   
     GLuint objType = *buffer;
+
+
 
     for (unsigned int k = 0; k < names; k++) 
     {
@@ -631,23 +633,24 @@ void GLCanvas::processHits(const GLint hits, GLuint buffer[], bool doubleC) {
     if (minDepth < curMinDepth && (!stateSelected || objType == STATE ||
         objType == SIMSTATE) && names > 0)
     {
-      stateSelected = true;
+      stateSelected = objType == STATE || objType == SIMSTATE;
       curMinDepth = minDepth;
     }
+    
     
   }
 
   selectedType = static_cast<PickState>(selectedObject[0]);
+  
+  mediator->deselect();
   switch (selectedType) {
     case STATE: 
       mediator->selectStateByID(selectedObject[1]);
       break;
     case CLUSTER: 
-      //printf("Cluster selected \n");
-      //std::cerr << "Rank: " << selectedObject[1] << std::endl;
-      //std::cerr << "Position in rank: " << selectedObject[2] << std::endl;
-      //mediator->selectCluster(selectedObject[1], selectedObject[2]);
+      mediator->selectCluster(selectedObject[1], selectedObject[2]);
       break;
+
     case SIMSTATE:
       mediator->selectStateByID(selectedObject[1]);
       // As part of selectStateByID, a simulation follow-up state was selected
@@ -658,11 +661,10 @@ void GLCanvas::processHits(const GLint hits, GLuint buffer[], bool doubleC) {
       }
       break;
     default:
-      //printf("Nothing selected.\n");
       selectedType = PICKNONE;
-      mediator->deselect();
       break;
   }
+  visualizer->notify(Selection);
 }
 
 

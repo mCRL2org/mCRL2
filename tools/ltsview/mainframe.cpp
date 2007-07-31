@@ -46,6 +46,10 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU  (myID_CYCLIC,MainFrame::onRankStyle)
   EVT_MENU  (myID_CONES_STYLE,MainFrame::onVisStyle)
   EVT_MENU  (myID_TUBES_STYLE,MainFrame::onVisStyle)
+  EVT_MENU  (myID_ZOOM_IN_ABOVE, MainFrame::onZoomInAbove)
+  EVT_MENU  (myID_ZOOM_IN_BELOW, MainFrame::onZoomInBelow)
+  EVT_MENU  (myID_ZOOM_OUT, MainFrame::onZoomOut)
+
   EVT_BUTTON(wxID_RESET, MainFrame::onResetButton)
   EVT_RADIOBUTTON(myID_MARK_RADIOBUTTON, MainFrame::onMarkRadio)
   EVT_CHOICE(myID_MARK_ANYALL, MainFrame::onMarkAnyAll)
@@ -58,6 +62,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_BUTTON(myID_SIM_START_BUTTON, MainFrame::onSimStartButton)
   EVT_BUTTON(myID_SIM_RESET_BUTTON, MainFrame::onSimResetButton)
   EVT_BUTTON(myID_SIM_STOP_BUTTON, MainFrame::onSimStopButton)
+
   EVT_LIST_ITEM_SELECTED(myID_SIM_TRANSITIONS_VIEW, 
                          MainFrame::onSimTransitionSelected)
   EVT_LIST_ITEM_ACTIVATED(myID_SIM_TRANSITIONS_VIEW, 
@@ -106,6 +111,13 @@ void MainFrame::setupMenuBar() {
   viewMenu->Append(wxID_RESET, wxT("&Reset viewpoint\tF2"),
       wxT("Set the viewpoint to the default position"));
   viewMenu->AppendSeparator();
+  viewMenu->Append(myID_ZOOM_IN_ABOVE, wxT("Zoom into &above\tZ"),
+      wxT("Zooms into the selected cluster and the clusters above it"));
+  viewMenu->Append(myID_ZOOM_IN_BELOW, wxT("Zoom into &below\tX"),
+      wxT("Zooms into the selected cluster and the clusters below it"));
+  viewMenu->Append(myID_ZOOM_OUT, wxT("Zoom &out\tC"),
+      wxT("Zooms out one level"));
+  viewMenu->AppendSeparator();
   viewMenu->AppendRadioItem(myID_ITERATIVE,wxT("Iterative ranking"),
     wxT("Apply iterative ranking"));
   viewMenu->AppendRadioItem(myID_CYCLIC,wxT("Cyclic ranking"),
@@ -137,9 +149,9 @@ void MainFrame::setupMenuBar() {
     settings->getBool(DisplayWireframe));
 
   toolMenu->AppendRadioItem(myID_SELECT,wxT("&Select\tS"),wxT("Select tool"));
-  toolMenu->AppendRadioItem(myID_PAN,wxT("&Pan\tP"),wxT("Pan tool"));
-  toolMenu->AppendRadioItem(myID_ZOOM,wxT("&Zoom\tZ"),wxT("Zoom tool"));
-  toolMenu->AppendRadioItem(myID_ROTATE,wxT("&Rotate\tR"),wxT("Rotate tool"));
+  toolMenu->AppendRadioItem(myID_PAN,wxT("&Pan\tD"),wxT("Pan tool"));
+  toolMenu->AppendRadioItem(myID_ZOOM,wxT("&Zoom\tA"),wxT("Zoom tool"));
+  toolMenu->AppendRadioItem(myID_ROTATE,wxT("&Rotate\tF"),wxT("Rotate tool"));
 
   helpMenu->Append(wxID_ABOUT,wxT("&About"));
   
@@ -535,6 +547,23 @@ void MainFrame::onMarkTransition(wxCommandEvent& event) {
   markTransitionsRadio->SetValue(true);
 }
 
+void MainFrame::onZoomInBelow(wxCommandEvent& event)
+{
+  mediator->zoomInBelow();
+  glCanvas->display(); 
+}
+
+void MainFrame::onZoomInAbove(wxCommandEvent& event)
+{
+  mediator->zoomInAbove();
+  glCanvas->display();
+}
+
+void MainFrame::onZoomOut(wxCommandEvent& event)
+{
+  mediator->zoomOut();
+  glCanvas->display();
+}
 
 // Simulation event handlers implementations
 void MainFrame::onSimStartButton(wxCommandEvent& event) {

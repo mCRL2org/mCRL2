@@ -20,6 +20,7 @@
 
 class LTS {
   public:
+
     LTS( Mediator* owner );
     ~LTS();
     void	activateMarkRule(const int index,const bool activate);
@@ -27,6 +28,8 @@ class LTS {
     void	addMarkRule(Utils::MarkRule* r,int index=-1);
     int		addParameter(std::string parname,std::string partype);
     void	addParameterValue(int parindex,std::string parvalue);
+    void        addCluster(Cluster* c);
+    void        addClusterAndBelow(Cluster* c);
     void	addState(State* s);
     void	addTransition(Transition* t);
     void	applyIterativeRanking();
@@ -69,16 +72,34 @@ class LTS {
     void	setMatchAnyMarkRule(bool b);
     void	unmarkAction(std::string label);
 
+    // Zooming procedures.
+    // Zooms into the structure starting from the initial cluster/state and upto
+    // selectedCluster, if any. 
+    LTS*        zoomIntoAbove(); 
+
+    // Zooms into the structure starting from the selectedCluster, upto the
+    // end of the structure. 
+    LTS*        zoomIntoBelow();
+
+    // Zooms out to the previous level.
+    LTS*        zoomOut();
+    void        setLastCluster(Cluster* c);
+    void        setPreviousLevel(LTS* prev);
+    void        fromAbove();
+
     // Method for simulation
     Simulation* getSimulation() const;
 
   private:
     // Variables
+    bool lastWasAbove;
     std::vector< std::vector< Cluster* > >	clustersInRank;
     int	deadlockCount;
+    LTS*        previousLevel;
     State*	initialState;
     State*      selectedState;
     Cluster*    selectedCluster;
+    Cluster*    lastCluster;
     std::vector< State* >	markedStates;
     int	markedTransitionCount;
     std::vector< Utils::MarkRule* >	markRules;

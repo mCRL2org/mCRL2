@@ -444,3 +444,32 @@ int LTSViewApp::getNumberOfObjects() {
 
   return result;
 }
+
+void LTSViewApp::zoomInBelow()
+{
+  LTS* newLTS = lts->zoomIntoBelow();
+  deselect();
+  lts = newLTS;
+  visualizer->setLTS(lts);
+}
+
+void LTSViewApp::zoomInAbove()
+{
+  LTS* newLTS = lts->zoomIntoAbove();
+  deselect();
+  lts = newLTS;
+  visualizer->setLTS(lts);
+}
+
+void LTSViewApp::zoomOut()
+{
+  LTS* oldLTS = lts;
+  lts = oldLTS->zoomOut();
+  visualizer->setLTS(lts);
+
+  if (oldLTS != lts) 
+  {
+    delete oldLTS;
+  }
+
+}

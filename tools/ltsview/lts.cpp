@@ -22,46 +22,53 @@ LTS::LTS(Mediator* owner) {
   simulation = new Simulation();
   selectedState = NULL;
   selectedCluster = NULL;
+  lastCluster = NULL;
+  previousLevel = NULL;
+  lastWasAbove = false;
 }
 
 LTS::~LTS()
 {
-  unsigned int i,r;
-  for (i = 0; i < unmarkedStates.size(); ++i) {
-    delete unmarkedStates[i];
-  }
-  unmarkedStates.clear();
-  for (i = 0; i < markedStates.size(); ++i) {
-    delete markedStates[i];
-  }
-  markedStates.clear();
-  statesInRank.clear();
-  initialState = NULL;
-  
-  for (i = 0; i < label_marks.size(); ++i) {
-    delete label_marks[i];
-  }
-  label_marks.clear();
-  
-  for (i = 0; i < transitions.size(); ++i) {
-    delete transitions[i];
-  }
-  transitions.clear();
-
-  for (r = 0; r < clustersInRank.size(); ++r) {
-    for (i = 0; i < clustersInRank[r].size(); ++i) {
-      delete clustersInRank[r][i];
+  if (previousLevel == NULL)
+  {
+    // This LTS is the top level LTS, so delete all its contents.
+    unsigned int i,r;
+    for (i = 0; i < unmarkedStates.size(); ++i) {
+      delete unmarkedStates[i];
     }
-  }
-  clustersInRank.clear();
+    unmarkedStates.clear();
+    for (i = 0; i < markedStates.size(); ++i) {
+      delete markedStates[i];
+    }
+    markedStates.clear();
+    statesInRank.clear();
+    initialState = NULL;
+    
+    for (i = 0; i < label_marks.size(); ++i) {
+      delete label_marks[i];
+    }
+    label_marks.clear();
+    
+    for (i = 0; i < transitions.size(); ++i) {
+      delete transitions[i];
+    }
+    transitions.clear();
+    
+    for (r = 0; r < clustersInRank.size(); ++r) {
+      for (i = 0; i < clustersInRank[r].size(); ++i) {
+        delete clustersInRank[r][i];
+      }
+    }
+    clustersInRank.clear();
 
-  for (i = 0; i < markRules.size(); ++i) {
-    delete markRules[i];
+    for (i = 0; i < markRules.size(); ++i) {
+      delete markRules[i];
+    }
+    markRules.clear();
+   
+    simulation->stop();
+    delete simulation;
   }
-  markRules.clear();
- 
-  simulation->stop();
-  delete simulation;
 }
 
 int LTS::addParameter(string parname,string partype) {
@@ -121,6 +128,7 @@ void LTS::selectStateByID(int id) {
       markedStates[i]->select();
       // For fast deselection
       selectedState = markedStates[i];
+      selectedCluster = NULL;
 
       if ((simulation != NULL) && (simulation->getStarted()))
       { 
@@ -181,6 +189,39 @@ int LTS::addLabel(string label) {
 void LTS::setInitialState(State* s) {
   initialState = s;
 }
+
+void LTS::addCluster(Cluster* c)
+{
+  unsigned int rank = c->getRank();
+  unsigned int pos = c->getPositionInRank();
+
+  // Check to see if there is already a rank for this cluster
+  if (clustersInRank.size() <= rank)
+  {
+    clustersInRank.resize(rank + 1);
+  }
+  
+  if(clustersInRank[rank].size() <= pos)
+  {
+    clustersInRank[rank].resize(pos + 1);
+  }
+
+  clustersInRank[rank][pos] = c;
+}
+
+void LTS::addClusterAndBelow(Cluster* c) 
+{
+  if (c != NULL)
+  {
+    addCluster(c);
+
+    for (int i = 0; i < c->getNumDescendants(); ++i)
+    {
+      addClusterAndBelow(c->getDescendant(i));
+    }
+  }
+}
+
 
 void LTS::addState( State* s )
 {
@@ -1098,6 +1139,101 @@ void LTS::unmarkAction(string label) {
       markedTransitionCount += (**c_it).unmarkActionLabel(l);
     }
   }
+}
+
+LTS* LTS::zoomIntoAbove()
+{
+  if (selectedCluster != NULL)
+  {
+    LTS* newLTS = new LTS(mediator);
+    newLTS->setPreviousLevel(this);
+    newLTS->setInitialState(initialState);
+    newLTS->setLastCluster(selectedCluster); 
+    
+    Cluster* child = NULL;
+    Cluster* parent = selectedCluster;
+    
+
+    do {      
+      for (int i = 0; i < parent->getNumDescendants(); ++i)
+      {
+        if (child == NULL || parent->getDescendant(i) != child)
+        {
+          parent->severDescendant(i);
+        }
+      }
+      newLTS->addCluster(parent);
+      child = parent;
+      parent = child->getAncestor();
+    } while (child != initialState->getCluster());
+    newLTS->fromAbove();
+    return newLTS;
+  }
+  else {
+    return this;
+  }
+}
+
+LTS* LTS::zoomIntoBelow()
+{
+  if (selectedCluster != NULL) 
+  {
+    LTS* newLTS = new LTS(mediator);
+    newLTS->setPreviousLevel(this);
+    
+    newLTS->addClusterAndBelow(selectedCluster);
+    
+    newLTS->setInitialState(selectedCluster->getState(0)); 
+    return newLTS;
+  }
+  else 
+  {
+    return this;
+  }
+}
+
+LTS* LTS::zoomOut()
+{
+  if (previousLevel != NULL)
+  {
+    if(lastWasAbove)
+    {
+        
+      Cluster* child = NULL;
+      Cluster* parent = lastCluster;
+
+      do {      
+        for (int i = 0; i < parent->getNumDescendants(); ++i)
+        {
+            parent->healSeverance(i);
+        }
+        child = parent;
+        parent = child->getAncestor();
+      } while (child != initialState->getCluster());
+
+    }
+
+    return previousLevel;
+  }
+  else
+  {
+    return this;
+  }
+}
+
+void LTS::setLastCluster(Cluster* c)
+{
+  lastCluster = c;
+}
+
+void LTS::setPreviousLevel(LTS* prev)
+{
+  previousLevel = prev;
+}
+
+void LTS::fromAbove()
+{
+  lastWasAbove = true;
 }
 
 Simulation* LTS::getSimulation() const

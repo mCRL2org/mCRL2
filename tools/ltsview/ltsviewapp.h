@@ -53,6 +53,11 @@ class LTSViewApp : public wxApp, public Mediator {
     void          selectCluster(const int rank, const int pos);
     void          deselect();
     int           getNumberOfObjects();
+    
+    void          zoomInBelow();
+    void          zoomInAbove();
+    void          zoomOut();
+
 };
 
 DECLARE_APP(LTSViewApp)

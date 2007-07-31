@@ -35,12 +35,14 @@ enum SettingID {
   InterpolateColor1,
   InterpolateColor2,
   MarkedColor,
+  Selection,
   StateColor,
   SimPrevColor,
   SimCurrColor,
   SimSelColor,
   SimPosColor,
   BackgroundColor,
+  Zoom,
   NUM_OF_SETTINGID /* should always be last! */
 };
 

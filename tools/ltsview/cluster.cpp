@@ -31,11 +31,19 @@ Cluster::Cluster(int r) {
   markedTransitionCount = 0;
   rank = r;
   selected = false;
+  severedDescendantsC = 0;
+
+  for(size_t i = 0; i < descendants.size(); ++i)
+  {
+    std::vector<bool> dummy;
+    severedDescendants.push_back(dummy);
+  }
 }
 
 Cluster::~Cluster() {
   actionLabelCounts.clear();
   descendants.clear();
+  severedDescendants.clear();
   states.clear();
   slots.clear();
 }
@@ -62,6 +70,8 @@ void Cluster::setPosition(float p) {
 
 void Cluster::addDescendant(Cluster* c) {
   descendants.push_back(c);
+  std::vector<bool> dummy;
+  severedDescendants.push_back(dummy);
 }
 
 State* Cluster::getState(int i) const {
@@ -81,12 +91,40 @@ int Cluster::getNumDescendants() const {
 }
 
 Cluster* Cluster::getDescendant(int i) const {
-  return descendants[i];
+  if (severedDescendants[i].size() > 0)
+  {
+    return NULL;
+  }
+  else {
+    return descendants[i];
+  }
 }
 
 bool Cluster::hasDescendants() const {
-  return (descendants.size() != 0);
+  return descendants.size() != 0;
 }
+
+void Cluster::severDescendant( int i ) 
+{
+
+  severedDescendants[i].push_back(true);
+  ++severedDescendantsC;
+}
+
+void Cluster::healSeverance(int i)
+{
+  if (severedDescendants[i].size() > 0) 
+  {
+    severedDescendants[i].pop_back();
+    --severedDescendantsC;
+  }
+}
+
+bool Cluster::hasSeveredDescendants()
+{
+  return severedDescendantsC > 0;
+}
+
 
 float Cluster::getSize() const {
   return size;

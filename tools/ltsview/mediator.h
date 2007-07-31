@@ -32,6 +32,9 @@ class Mediator {
     virtual void      selectCluster(const int rank, const int pos) = 0;
     virtual void      deselect() = 0;
     virtual int       getNumberOfObjects() = 0;
+    virtual void      zoomInBelow() = 0;
+    virtual void      zoomInAbove() = 0;
+    virtual void      zoomOut() = 0;
 
 
     // Simulation start. 

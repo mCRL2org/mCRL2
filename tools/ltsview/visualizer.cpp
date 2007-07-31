@@ -10,7 +10,6 @@
 #include <cmath>
 #include <cstdlib>
 #include "visualizer.h"
-#include <iostream>
 using namespace std;
 using namespace Utils;
 
@@ -51,8 +50,9 @@ float Visualizer::getHalfStructureHeight() const {
 
 void Visualizer::setLTS(LTS* l) {
   lts = l;
-  float ratio = lts->getInitialState()->getCluster()->getSize() /
-    (lts->getNumRanks()-1);
+
+  float ratio = lts->getInitialState()->getCluster()->getSize() / 
+                (lts->getNumRanks() - 1);
   settings->setFloat(ClusterHeight,max(4,round_to_int(40.0f * ratio)) / 10.0f);
   traverseTree(true);
   update_abs = true;
@@ -97,6 +97,10 @@ void Visualizer::notify(SettingID s) {
       if (markStyle != NO_MARKS) {
         update_colors = true;
       }
+      break;
+    case Selection:
+      update_colors = true;
+      break;
     default:
       break;
   }
@@ -106,7 +110,8 @@ void Visualizer::computeBoundsInfo(float &bcw,float &bch) {
   bcw = 0.0f;
   bch = 0.0f;
   if (lts != NULL) {
-    computeSubtreeBounds(lts->getInitialState()->getCluster(),bcw,bch);
+    computeSubtreeBounds(lts->getInitialState()->getCluster(),
+                          bcw, bch);
   }
 }
 
@@ -121,20 +126,23 @@ void Visualizer::computeSubtreeBounds(Cluster* root,float &bw,float &bh) {
     int i;
     for (i = 0; i < root->getNumDescendants(); ++i) {
       desc = root->getDescendant(i);
-      if (desc->isCentered()) {
-        // descendant is centered
-        float dw = 0.0f;
-        float dh = 0.0f;
-        computeSubtreeBounds(desc,dw,dh);
-        bw = max(bw,dw);
-        bh = max(bh,dh);
-      }
-      else {
-        float dw = 0.0f;
-        float dh = 0.0f;
-        computeSubtreeBounds(desc,dw,dh);
-        bw = max(bw,root->getBaseRadius() + dh*sin_obt + dw*cos_obt);
-        bh = max(bh,dh*cos_obt + dw*sin_obt);
+      if (desc != NULL)
+      {
+        if (desc->isCentered()) {
+          // descendant is centered
+          float dw = 0.0f;
+          float dh = 0.0f;
+          computeSubtreeBounds(desc,dw,dh);
+          bw = max(bw,dw);
+          bh = max(bh,dh);
+        }
+        else {
+          float dw = 0.0f;
+          float dh = 0.0f;
+          computeSubtreeBounds(desc,dw,dh);
+          bw = max(bw,root->getBaseRadius() + dh*sin_obt + dw*cos_obt);
+          bh = max(bh,dh*cos_obt + dw*sin_obt);
+        }
       }
     }
     bw = max(bw,root->getTopRadius());
@@ -172,10 +180,10 @@ void Visualizer::traverseTree(bool co) {
   glLoadIdentity();
   switch (visStyle) {
     case CONES:
-      traverseTreeC(lts->getInitialState()->getCluster(),true,0);
+      traverseTreeC(lts->getInitialState()->getCluster(), true, 0);
       break;
     case TUBES:
-      traverseTreeT(lts->getInitialState()->getCluster(),0);
+      traverseTreeT(lts->getInitialState()->getCluster(), 0);
       break;
     default:
       break;
@@ -213,23 +221,25 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
     
     for (int i = 0; i < root->getNumDescendants(); ++i) {
       Cluster* desc = root->getDescendant(i);
-      
-      if (desc->isCentered()) {
-        if (root->getNumDescendants() > 1) {
-          traverseTreeC(desc,false,drot);
+      if (desc != NULL) 
+      { 
+        if (desc->isCentered()) {
+          if (root->getNumDescendants() > 1) {
+            traverseTreeC(desc,false,drot);
+          } 
+          else {
+            traverseTreeC(desc,false,rot);
+          }
         }
         else {
-          traverseTreeC(desc,false,rot);
+          glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
+          glTranslatef(root->getBaseRadius(),0.0f,0.0f);
+          glRotatef(settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
+          traverseTreeC(desc,true,drot);
+          glRotatef(-settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
+          glTranslatef(-root->getBaseRadius(),0.0f,0.0f);
+          glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
         }
-      }
-      else {
-        glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
-        glTranslatef(root->getBaseRadius(),0.0f,0.0f);
-        glRotatef(settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
-        traverseTreeC(desc,true,drot);
-        glRotatef(-settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
-        glTranslatef(-root->getBaseRadius(),0.0f,0.0f);
-        glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
       }
     }
     
@@ -251,7 +261,7 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
       if (create_objects) {
         root->setVisObject(visObjectFactory->makeObject(
       primitiveFactory->makeTruncatedCone(r,topClosed,
-      root->getNumDescendants() > 1), ids));
+      root->getNumDescendants() > 1 || root->hasSeveredDescendants() ), ids));
       }
       else {
         visObjectFactory->updateObjectMatrix(root->getVisObject());
@@ -269,8 +279,9 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
       
       if (create_objects) {
         root->setVisObject(visObjectFactory->makeObject(
-              primitiveFactory->makeTruncatedCone(r,root->getNumDescendants() >
-                1, topClosed), ids));
+              primitiveFactory->makeTruncatedCone(r,
+                root->getNumDescendants() > 1 || root->hasSeveredDescendants(), 
+                topClosed), ids));
       } 
       else {
         visObjectFactory->updateObjectMatrix(root->getVisObject());
@@ -318,61 +329,63 @@ void Visualizer::traverseTreeT(Cluster *root,int rot) {
     
     for (int i = 0; i < root->getNumDescendants(); ++i) {
       Cluster* desc = root->getDescendant(i);
-      
-      if (desc->isCentered()) {
-        baserad = desc->getTopRadius();
-        glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
-  
-        if (root->getNumDescendants() > 1) {
-          traverseTreeT(desc,drot);
-        } 
-        else {
-          traverseTreeT(desc,rot);
-        }
-  
-        glTranslatef(0.0f,0.0f,-settings->getFloat(ClusterHeight));
-      }
-      else {
-        glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
-      
-        // make the connecting cone
-        float sz = sqrt(settings->getFloat(ClusterHeight) *
-          settings->getFloat(ClusterHeight) +
-            (root->getBaseRadius() - root->getTopRadius()) *
-                    (root->getBaseRadius() - root->getTopRadius()));
-        float alpha = atan(settings->getFloat(ClusterHeight) /
-                  fabs(root->getBaseRadius() - root->getTopRadius()));
-        float sign = 1.0f;
-          
-        if (root->getBaseRadius() - root->getTopRadius() < 0.0f) {
-          sign = -1.0f;
-        }
-        glPushMatrix();
-        glTranslatef(root->getTopRadius(),0.0f,0.0f);
-        glRotatef(sign*(90.0f-rad_to_deg(alpha)),0.0f,1.0f,0.0f);
-        glScalef(sz,sz,sz);
+      if (desc != NULL)
+      {
+        if (desc->isCentered()) {
+          baserad = desc->getTopRadius();
+          glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
     
-        if (create_objects) {
-          //TODO Add identifiers to ids
-          vector<int> ids;
-          desc->setVisObjectTop(visObjectFactory->makeObject(
-          primitiveFactory->makeObliqueCone(alpha,
-                desc->getTopRadius()/sz,sign), ids));
+          if (root->getNumDescendants() > 1) {
+            traverseTreeT(desc,drot);
+          } 
+          else {
+            traverseTreeT(desc,rot);
+          }
+    
+          glTranslatef(0.0f,0.0f,-settings->getFloat(ClusterHeight));
         }
         else {
-          visObjectFactory->updateObjectMatrix(desc->getVisObjectTop());
-        }
-        glPopMatrix();
+          glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
         
-        // recurse into the subtree
-        glTranslatef(root->getBaseRadius(),0.0f,
-            settings->getFloat(ClusterHeight));
-        glRotatef(settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
-        traverseTreeT(desc,drot);
-        glRotatef(-settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
-        glTranslatef(-root->getBaseRadius(),0.0f,
-            -settings->getFloat(ClusterHeight));
-        glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
+          // make the connecting cone
+          float sz = sqrt(settings->getFloat(ClusterHeight) *
+            settings->getFloat(ClusterHeight) +
+              (root->getBaseRadius() - root->getTopRadius()) *
+                      (root->getBaseRadius() - root->getTopRadius()));
+          float alpha = atan(settings->getFloat(ClusterHeight) /
+                    fabs(root->getBaseRadius() - root->getTopRadius()));
+          float sign = 1.0f;
+            
+          if (root->getBaseRadius() - root->getTopRadius() < 0.0f) {
+            sign = -1.0f;
+          }
+          glPushMatrix();
+          glTranslatef(root->getTopRadius(),0.0f,0.0f);
+          glRotatef(sign*(90.0f-rad_to_deg(alpha)),0.0f,1.0f,0.0f);
+          glScalef(sz,sz,sz);
+      
+          if (create_objects) {
+            //TODO Add identifiers to ids
+            vector<int> ids;
+            desc->setVisObjectTop(visObjectFactory->makeObject(
+            primitiveFactory->makeObliqueCone(alpha,
+                  desc->getTopRadius()/sz,sign), ids));
+          }
+          else {
+            visObjectFactory->updateObjectMatrix(desc->getVisObjectTop());
+          }
+          glPopMatrix();
+          
+          // recurse into the subtree
+          glTranslatef(root->getBaseRadius(),0.0f,
+              settings->getFloat(ClusterHeight));
+          glRotatef(settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
+          traverseTreeT(desc,drot);
+          glRotatef(-settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
+          glTranslatef(-root->getBaseRadius(),0.0f,
+              -settings->getFloat(ClusterHeight));
+          glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
+        }
       }
     }
     
@@ -413,14 +426,18 @@ void Visualizer::traverseTreeT(Cluster *root,int rot) {
         if (create_objects) {
           // TODO: Add identifiers to ids
           vector<int> ids;
+          // draw root with top closed if it is the initial cluster
           if (root == lts->getInitialState()->getCluster()) {
-            // exception: draw root with top closed if it is the initial cluster
             root->setVisObject(visObjectFactory->makeObject(
-                  primitiveFactory->makeTruncatedCone(r,true,false), ids));
+              primitiveFactory->makeTruncatedCone(r, true, 
+                root->hasSeveredDescendants()), ids));
           }
-          else {
+          else
+          {
             root->setVisObject(visObjectFactory->makeObject(
-                  primitiveFactory->makeTruncatedCone(r,false,false), ids));
+              primitiveFactory->makeTruncatedCone(r, 
+              root->hasSeveredDescendants(),
+              false), ids));
           }
         } 
         else {
@@ -435,7 +452,8 @@ void Visualizer::traverseTreeT(Cluster *root,int rot) {
           vector<int> ids;
           
           root->setVisObject(visObjectFactory->makeObject(
-              primitiveFactory->makeTruncatedCone(r,false,false), ids));
+              primitiveFactory->makeTruncatedCone(r,false,
+                root->hasSeveredDescendants()), ids));
         } 
         else {
           visObjectFactory->updateObjectMatrix(root->getVisObject());
@@ -456,25 +474,30 @@ void Visualizer::updateColors() {
   RGB_Color c;
   if (markStyle == NO_MARKS) {
     Interpolater ipr(settings->getRGB(InterpolateColor1),
-        settings->getRGB(InterpolateColor2),lts->getNumRanks(),
+        settings->getRGB(InterpolateColor2),
+        lts->getNumRanks(),
         settings->getBool(LongInterpolation));
     
     for (r = 0; r < lts->getNumRanks(); ++r) {
       for (i = 0; i < lts->getNumClustersAtRank(r); ++i) {
-        if(lts->getClusterAtRank(r,i)->isSelected())
-        {
-          c.r = 0;
-          c.g = 255;
-          c.b = 0;
-        }
-        else
-        {
-          c = ipr.getColor(r);
-        }
+        Cluster* cl = lts->getClusterAtRank(r,i);
 
-        // set color of cluster[r,i]
-        visObjectFactory->updateObjectColor(
-            lts->getClusterAtRank(r,i)->getVisObject(),c);
+        if (cl != NULL)
+        {
+          if(cl->isSelected())
+          {
+            c.r = 0;
+            c.g = 255;
+            c.b = 0;
+          }
+          else
+          {
+            c = ipr.getColor(r);
+          }
+
+          // set color of cluster[r,i]
+          visObjectFactory->updateObjectColor(cl->getVisObject(),c);
+        }
       }
     }
   } 
@@ -483,14 +506,18 @@ void Visualizer::updateColors() {
     
     for (r = 0; r < lts->getNumRanks(); ++r) {
       for (i = 0; i < lts->getNumClustersAtRank(r); ++i) {
-        // set color of cluster[r,i]
-        if (isMarked(lts->getClusterAtRank(r,i))) {
+        Cluster* cl = lts->getClusterAtRank(r,i);
+        if (cl != NULL)
+        {
+          // set color of cluster[r,i]
+          if (isMarked(lts->getClusterAtRank(r,i))) {
+              visObjectFactory->updateObjectColor(
+                  cl->getVisObject(),c);
+          } 
+          else {
             visObjectFactory->updateObjectColor(
-                lts->getClusterAtRank(r,i)->getVisObject(),c);
-        } 
-        else {
-          visObjectFactory->updateObjectColor(
-          lts->getClusterAtRank(r,i)->getVisObject(),RGB_WHITE);
+            cl->getVisObject(),RGB_WHITE);
+          }
         }
       }
     }
@@ -502,9 +529,15 @@ void Visualizer::sortClusters(Point3D viewpoint) {
 }
 
 bool Visualizer::isMarked(Cluster* c) {
-  return ((markStyle == MARK_STATES && c->hasMarkedState()) ||
-          (markStyle == MARK_DEADLOCKS && c->hasDeadlock()) ||
-          (markStyle == MARK_TRANSITIONS && c->hasMarkedTransition()));
+  if (c != NULL)
+  {
+    return ((markStyle == MARK_STATES && c->hasMarkedState()) ||
+            (markStyle == MARK_DEADLOCKS && c->hasDeadlock()) ||
+            (markStyle == MARK_TRANSITIONS && c->hasMarkedTransition()));
+  }
+  else {
+    return false;
+  }
 }
 
 // ------------- STATES --------------------------------------------------------
@@ -536,9 +569,6 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
     update_abs = false;
   }
 
-   // We want to see marked states during simulation, so draw these first
-/*  Cluster* root = lts->getInitialState()->getCluster();
-  drawSimMarkedStates(root, 0); */
     
   // Draw previous states of the simulation, in the colour specified in the
   // settings (default: white)
@@ -859,19 +889,22 @@ void Visualizer::drawStates(Cluster* root, int rot, bool simulating) {
   Cluster *desc;
   for (int i = 0; i < root->getNumDescendants(); ++i) {
     desc = root->getDescendant(i);
-    if (desc->isCentered()) {
-      // descendant is centered
-      glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
-      drawStates(desc,(root->getNumDescendants()>1)?drot:rot, simulating);
-      glTranslatef(0.0f,0.0f,-settings->getFloat(ClusterHeight));
-    } else {
-      glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
-      glTranslatef(root->getBaseRadius(),0.0f,settings->getFloat(ClusterHeight));
-      glRotatef(settings->getInt(BranchTilt), 0.0f, 1.0f, 0.0f);
-      drawStates(desc,drot, simulating);
-      glRotatef(-settings->getInt(BranchTilt), 0.0f, 1.0f, 0.0f);
-      glTranslatef(-root->getBaseRadius(),0.0f,-settings->getFloat(ClusterHeight));
-      glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
+    if (desc != NULL)
+    {
+      if (desc->isCentered()) {
+        // descendant is centered
+        glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
+        drawStates(desc,(root->getNumDescendants()>1)?drot:rot, simulating);
+        glTranslatef(0.0f,0.0f,-settings->getFloat(ClusterHeight));
+      } else {
+        glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
+        glTranslatef(root->getBaseRadius(),0.0f,settings->getFloat(ClusterHeight));
+        glRotatef(settings->getInt(BranchTilt), 0.0f, 1.0f, 0.0f);
+        drawStates(desc,drot, simulating);
+        glRotatef(-settings->getInt(BranchTilt), 0.0f, 1.0f, 0.0f);
+        glTranslatef(-root->getBaseRadius(),0.0f,-settings->getFloat(ClusterHeight));
+        glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
+      }
     }
   }
 }

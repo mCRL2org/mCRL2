@@ -37,7 +37,7 @@ class MainFrame : public wxFrame, public simReader {
     void  onDisplay(wxCommandEvent& event);
     void  onExit(wxCommandEvent& event);
     void  onOpen(wxCommandEvent& event);
-    void        onSavePic(wxCommandEvent& event);
+    void  onSavePic(wxCommandEvent& event);
     void  onRankStyle(wxCommandEvent& event);
     void  onVisStyle(wxCommandEvent& event);
     void  onRemoveMarkRuleButton(wxCommandEvent& event);
@@ -50,6 +50,9 @@ class MainFrame : public wxFrame, public simReader {
     void  onMarkRuleEdit(wxCommandEvent& event);
     void  onMarkTransition(wxCommandEvent& event);
     
+    void  onZoomInBelow(wxCommandEvent& event);
+    void  onZoomInAbove(wxCommandEvent& event);
+    void  onZoomOut(wxCommandEvent& event);
     // Simulation event handlers
     void        onSimStartButton(wxCommandEvent& event);
     void        onSimResetButton(wxCommandEvent& event);

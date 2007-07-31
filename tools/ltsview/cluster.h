@@ -34,6 +34,8 @@ class Cluster {
     float baseRadius;
     bool deadlock;
     std::vector< Cluster* > descendants;
+    std::vector<std::vector<bool> > severedDescendants;
+    unsigned int severedDescendantsC;
     int markedState;
     int markedTransitionCount;
     float position;
@@ -65,6 +67,17 @@ class Cluster {
     Cluster*  getDescendant(int i) const;
     int       getNumDescendants() const;
     bool      hasDescendants() const;
+    
+
+    // Lets the cluster pretend that it does not have descendant i (for
+    // zooming)
+    void      severDescendant(int i);
+
+    // Restores the severance
+    void      healSeverance( int i);
+
+
+    bool      hasSeveredDescendants();
 
     void      setAncestor(Cluster* c);
     Cluster*  getAncestor() const;
