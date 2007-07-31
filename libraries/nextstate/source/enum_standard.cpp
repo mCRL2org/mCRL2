@@ -434,7 +434,14 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
 			error = true;
 			fs_reset();
 		} else {
-			for (ATermList l=(ATermList) ATtableGet(info.constructors,(ATerm) sort); !ATisEmpty(l); l=ATgetNext(l))
+			ATermList l = (ATermList) ATtableGet(info.constructors,(ATerm) sort);
+			if ( ATisEmpty(l) )
+			{
+				gsErrorMsg("cannot enumerate elements of sort %P; it does not have constructor functions\n",sort);
+				error = true;
+				fs_reset();
+			}
+			for (; !ATisEmpty(l); l=ATgetNext(l))
 			{
 				ATermAppl cons_tup = (ATermAppl) ATgetFirst(l);
 				ATermAppl cons_term = (ATermAppl) ATgetArgument(cons_tup,0);
