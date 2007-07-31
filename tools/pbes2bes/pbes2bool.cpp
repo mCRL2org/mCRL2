@@ -370,16 +370,16 @@ int main(int argc, char** argv)
 //-------------------
 void calculate_bes(pbes pbes_spec, t_tool_options tool_options)
 {
-  if (!pbes_spec.is_well_formed())
+  /* if (!pbes_spec.is_well_formed())
   {
     gsErrorMsg("The PBES is not well formed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
     exit(1);
-  }
+  } */
   if (!pbes_spec.is_closed())
   {
     gsErrorMsg("The PBES is not closed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
     exit(1);
-  }
+  } 
 
   do_lazy_algorithm(pbes_spec, tool_options);
   //return new pbes
@@ -466,7 +466,7 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
   }
     
   cerr << "Unexpected expression. Most likely because expression fails to rewrite to true or false: " << pp(p) << "\n";
-  assert(0);
+  exit(1);
   return bes::false_();
 }
 
