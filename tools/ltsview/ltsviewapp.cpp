@@ -148,8 +148,8 @@ int main(int argc, char **argv) {
   squadt_interactor c(starter);
   if(!c.try_interaction(argc, argv)) {
     command_line = true;
-    return wxEntry(argc, argv);
 
+    return wxEntry(argc, argv);
   }
   return 0;
 # else

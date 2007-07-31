@@ -13,9 +13,10 @@
 #include "lts/liblts.h"
 
 std::string lts_file_argument;
-bool command_line = true;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
+bool command_line = false;
+
 // SQuADT protocol interface
 # include <mcrl2/utilities/squadt_interface.h>
 
@@ -93,8 +94,8 @@ void print_help() {
        << "Draw graphs and optimize their layout in a graphical environment. If INFILE (LTS file : *.aut or *.svc) is supplied \n"
        << "the tool will use this file as input for drawing.\n"
        << "\n"
-	   	 << "Use left click to drag the nodes and right click to fix the nodes. \n"
-	   	 << "\n"
+       << "Use left click to drag the nodes and right click to fix the nodes. \n"
+       << "\n"
        << "Mandatory arguments to long options are mandatory for short options too.\n"
        << "  -h, --help            display this help message\n"
        << "  --version             displays version information and exits \n";
@@ -120,7 +121,7 @@ class GraphApp : public wxApp
         cmdln.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
         cmdln.SetLogo(wxT("Graphical tool for visualizing graph."));
 
-        if ( cmdln.Parse() ) {
+        if ( cmdln.Parse()) {
           return false;
         }
 
@@ -193,14 +194,12 @@ int main(int argc, char **argv)
   ATerm bot;
   ATinit(argc,argv,&bot);
 # ifdef ENABLE_SQUADT_CONNECTIVITY
-  command_line = false;
   mcrl2::utilities::squadt::entry_wrapper starter(argc, argv);
 
   squadt_interactor c(starter);
 
   if(!c.try_interaction(argc, argv)) {
     command_line = true;
-    /* On purpose we do not catch exceptions */
 
     return wxEntry(argc, argv);
   }
