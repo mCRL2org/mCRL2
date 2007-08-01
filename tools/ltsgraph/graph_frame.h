@@ -139,7 +139,7 @@ private:
   bool curve_edges;
 
   ViewPort * leftPanel;
-  wxPanel * rightPanel;
+  wxScrolledWindow * rightPanel;
 
   wxMenuBar * menu;
   wxMenu * file;

@@ -93,8 +93,8 @@ void GraphFrame::BuildLayout() {
  
   wxSplitterWindow * sw = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE & !wxSP_PERMIT_UNSPLIT);
   leftPanel = new ViewPort( sw, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER );
-  rightPanel = new wxPanel( sw, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER );
-
+  rightPanel = new wxScrolledWindow( sw, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER|wxVSCROLL );
+  rightPanel->SetScrollbars(0, 10, 0, 100);
   sw->SetMinimumPaneSize(10);
   sw->SplitVertically(leftPanel,rightPanel);
   sw->SetSashPosition(rightPanelWidth,true);
