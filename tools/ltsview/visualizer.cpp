@@ -54,8 +54,8 @@ void Visualizer::setLTS(LTS* l) {
   float ratio = lts->getInitialState()->getCluster()->getSize() / 
                 (lts->getNumRanks() - 1);
   settings->setFloat(ClusterHeight,max(4,round_to_int(40.0f * ratio)) / 10.0f);
-  traverseTree(true);
   update_abs = true;
+  traverseTree(true);
 }
 
 Utils::VisStyle Visualizer::getVisStyle() const {
@@ -502,7 +502,6 @@ void Visualizer::updateColors() {
     }
   } 
   else {
-    c = settings->getRGB(MarkedColor);
     
     for (r = 0; r < lts->getNumRanks(); ++r) {
       for (i = 0; i < lts->getNumClustersAtRank(r); ++i) {
@@ -510,15 +509,30 @@ void Visualizer::updateColors() {
         if (cl != NULL)
         {
           // set color of cluster[r,i]
-          if (isMarked(lts->getClusterAtRank(r,i))) {
-              visObjectFactory->updateObjectColor(
-                  cl->getVisObject(),c);
-          } 
-          else {
+          if (!cl->isSelected())
+          {
+            if (isMarked(cl)) 
+            {
+                c = settings->getRGB(MarkedColor);
+                visObjectFactory->updateObjectColor(
+                    cl->getVisObject(),c);
+            } 
+            else 
+            {
+                visObjectFactory->updateObjectColor(
+                cl->getVisObject(),RGB_WHITE);
+            }
+          }
+          else 
+          {
+            c.r = 0;
+            c.g = 255;
+            c.b = 0;
             visObjectFactory->updateObjectColor(
-            cl->getVisObject(),RGB_WHITE);
+              cl->getVisObject(), c);
           }
         }
+        
       }
     }
   }

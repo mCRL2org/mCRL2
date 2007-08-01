@@ -207,6 +207,27 @@ void LTS::addCluster(Cluster* c)
   }
 
   clustersInRank[rank][pos] = c;
+
+  if (statesInRank.size() <= rank)
+  {
+    statesInRank.resize(rank + 1);
+  }
+
+  for (int i = 0; i < c->getNumStates(); ++i)
+  {
+    State* s = c->getState(i);
+
+    if (s->isMarked())
+    {
+      markedStates.push_back(s);
+    }
+    else
+    {
+      unmarkedStates.push_back(s);
+    }
+
+    statesInRank[rank].push_back(s);
+  }
 }
 
 void LTS::addClusterAndBelow(Cluster* c) 
@@ -1122,7 +1143,10 @@ void LTS::markAction(string label) {
       cs_it != clustersInRank.end(); ++cs_it) {
     for (vector< Cluster* >::iterator c_it = cs_it->begin();
         c_it != cs_it->end(); ++c_it) {
-      markedTransitionCount += (**c_it).markActionLabel(l);
+      if (*c_it != NULL)
+      {
+        markedTransitionCount += (**c_it).markActionLabel(l);
+      }
     }
   }
 }
@@ -1136,7 +1160,10 @@ void LTS::unmarkAction(string label) {
       cs_it != clustersInRank.end(); ++cs_it) {
     for (vector< Cluster* >::iterator c_it = cs_it->begin();
         c_it != cs_it->end(); ++c_it) {
-      markedTransitionCount += (**c_it).unmarkActionLabel(l);
+      if(*c_it != NULL)
+      {
+        markedTransitionCount += (**c_it).unmarkActionLabel(l);
+      }
     }
   }
 }
@@ -1153,7 +1180,6 @@ LTS* LTS::zoomIntoAbove()
     Cluster* child = NULL;
     Cluster* parent = selectedCluster;
     
-
     do {      
       for (int i = 0; i < parent->getNumDescendants(); ++i)
       {
@@ -1166,7 +1192,38 @@ LTS* LTS::zoomIntoAbove()
       child = parent;
       parent = child->getAncestor();
     } while (child != initialState->getCluster());
+
     newLTS->fromAbove();
+
+    for(size_t i = 0; i < markRules.size(); ++i)
+    {
+      newLTS->addMarkRule(markRules[i], i);
+    }
+
+    newLTS->setMatchAnyMarkRule(matchAny);
+
+    for(size_t i = 0; i < parameterNames.size(); ++i)
+    {
+      int par = newLTS->addParameter(parameterNames[i], parameterTypes[i]);
+
+      for(size_t j = 0; j < valueTable[i].size(); ++j)
+      {
+        newLTS->addParameterValue(par, valueTable[i][j]);
+      }
+    }
+
+    for(size_t i = 0; i < labels.size(); ++i)
+    {
+      newLTS->addLabel(labels[i]);
+      
+      if(*label_marks[i])
+      {
+        newLTS->markAction(labels[i]);
+      }
+    }
+
+
+
     return newLTS;
   }
   else {
@@ -1183,7 +1240,34 @@ LTS* LTS::zoomIntoBelow()
     
     newLTS->addClusterAndBelow(selectedCluster);
     
-    newLTS->setInitialState(selectedCluster->getState(0)); 
+    newLTS->setInitialState(selectedCluster->getState(0));
+    
+    for(size_t i = 0; i < markRules.size(); ++i)
+    {
+      newLTS->addMarkRule(markRules[i], i);
+    }
+
+    newLTS->setMatchAnyMarkRule(matchAny);
+
+    for(size_t i = 0; i < parameterNames.size(); ++i)
+    {
+      int par = newLTS->addParameter(parameterNames[i], parameterTypes[i]);
+
+      for(size_t j = 0; j < valueTable[i].size(); ++j)
+      {
+        newLTS->addParameterValue(par, valueTable[i][j]);
+      }
+    }
+
+    for(size_t i = 0; i < labels.size(); ++i)
+    {
+      newLTS->addLabel(labels[i]);
+      
+      if(*label_marks[i])
+      {
+        newLTS->markAction(labels[i]);
+      }
+    }
     return newLTS;
   }
   else 
