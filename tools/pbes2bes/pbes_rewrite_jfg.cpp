@@ -291,21 +291,18 @@ pbes_expression pbes_expression_substitute_and_rewrite(
 { 
   pbes_expression result;
 
-  // std::cerr << "Rewrite1: " << pp(p) << std::endl << std::endl;
   
   if (is_and(p))
   { // p = and(left, right)
     //Rewrite left and right as far as possible
     pbes_expression left = pbes_expression_substitute_and_rewrite(lhs(p), 
                                data, rewriter,tool_options);
-    // std::cerr << "LEFT " << pp(left) << std::endl;
     if (is_false(left))
     { result = false_();
     }
     else
     { pbes_expression right = pbes_expression_substitute_and_rewrite(rhs(p), 
                  data, rewriter,tool_options);
-      // std::cerr << "RIGHT " << pp(right) << std::endl;
       //Options for left and right
       if (is_false(right))
       { result = false_();
@@ -355,7 +352,6 @@ pbes_expression pbes_expression_substitute_and_rewrite(
 
     data_variable_list data_vars = quant_vars(p);
     pbes_expression expr = pbes_expression_substitute_and_rewrite(quant_expr(p), data, rewriter,tool_options);
-    // std::cerr << "Forall " << pp(data_vars) << "." << pp(expr) << std::endl;
 
     // If no data_vars
     if (data_vars.empty())
@@ -408,7 +404,9 @@ pbes_expression pbes_expression_substitute_and_rewrite(
                     no_variables++;
                     if ((no_variables % 100)==0)
                     { std::cerr << "Used " << no_variables << " variables when eliminating universal quantifier\n";
-                      std::cerr << "Vars: " << pp(data_vars) << "\nExpression: " << pp(*t) << std::endl;
+                      if (!tool_options.opt_precompile_pbes)
+                      { std::cerr << "Vars: " << pp(data_vars) << "\nExpression: " << pp(*t) << std::endl;
+                      }
                     }
                     new_data_vars=push_front(new_data_vars,new_data_variable);
                     function_arguments=push_front(function_arguments,new_data_variable);
@@ -419,7 +417,6 @@ pbes_expression pbes_expression_substitute_and_rewrite(
                   rewriter->clearSubstitution(*i);
                   if (pbes_expr::is_false(r)) /* the resulting expression is false, so we can terminate */
                   { 
-                    // std::cerr << "Result forall False" << std::endl << std::endl;
                     return pbes_expr::false_();
                   }
                   else 
@@ -437,20 +434,22 @@ pbes_expression pbes_expression_substitute_and_rewrite(
 
       if (!new_data_vars.empty())
       { 
-        std::cerr << "Cannot eliminate universal quantifiers of variables " << pp(new_data_vars) << " in " << pp(p) << std::endl;
+        if (tool_options.opt_precompile_pbes)
+        { std::cerr << "Cannot eliminate universal quantifiers of variables " << pp(new_data_vars) << std::endl;
+        }
+        else
+        { std::cerr << "Cannot eliminate universal quantifiers of variables " << pp(new_data_vars) << " in " << pp(p) << std::endl;
+        }
         gsErrorMsg("Aborting\n");
         exit(1);
       }
       result=make_conjunction(conjunction_set);
     }
-   // std::cerr << "Result forall " << pp(result) << std::endl << std::endl;
   }
   else if (is_exists(p))
   { 
-    // std::cerr << "Exists full " << pp(p) << std::endl;
     data_variable_list data_vars = quant_vars(p);
     pbes_expression expr = pbes_expression_substitute_and_rewrite(quant_expr(p), data, rewriter,tool_options);
-    // std::cerr << "ExistsXX " << pp(data_vars) << "." << pp(expr) << std::endl;
 
     // If no data_vars
     if (data_vars.empty())
@@ -504,19 +503,19 @@ pbes_expression pbes_expression_substitute_and_rewrite(
                     no_variables++;
                     if ((no_variables % 100)==0)
                     { std::cerr << "Used " << no_variables << " variables when eliminating existential quantifier\n";
-                      std::cerr << "Vars: " << pp(data_vars) << "\nExpression: " << pp(*t) << std::endl;
+                      if (!tool_options.opt_precompile_pbes)
+                      { std::cerr << "Vars: " << pp(data_vars) << "\nExpression: " << pp(*t) << std::endl;
+                      }
                     }
                     new_data_vars=push_front(new_data_vars,new_data_variable);
                     function_arguments=push_front(function_arguments,new_data_variable);
                   }
                   pbes_expression d(gsMakeDataApplList(*f,reverse(function_arguments)));
                   rewriter->setSubstitution(*i,rewriter->toRewriteFormat(d));
-                  // std::cerr << "SetSubstitution: " << *i << "    " << pp(d) << std::endl;
                   pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter,tool_options));
                   rewriter->clearSubstitution(*i);
                   if (pbes_expr::is_true(r)) /* the resulting expression is true, so we can terminate */
                   { 
-                    // std::cerr << "Result exists True" << std::endl << std::endl;
                     return pbes_expr::true_();
                   }
                   else 
@@ -534,13 +533,17 @@ pbes_expression pbes_expression_substitute_and_rewrite(
 
       if (!new_data_vars.empty())
       { 
-        std::cerr << "Cannot eliminate existential quantifiers of variables " << pp(new_data_vars) << " in " << pp(p) << std::endl;
+        if (tool_options.opt_precompile_pbes)
+        { std::cerr << "Cannot eliminate existential quantifiers of variables " << pp(new_data_vars) << " in " << pp(p) << std::endl;
+        }
+        else
+        { std::cerr << "Cannot eliminate existential quantifiers of variables " << pp(new_data_vars) << std::endl;
+        }
         gsErrorMsg("Aborting\n");
         exit(1);
       }
       result=make_disjunction(disjunction_set);
     }
-    // std::cerr << "Result exists " << pp(result) << std::endl << std::endl;
   }
   else if (is_propositional_variable_instantiation(p))
   { // p is a propositional variable
@@ -560,7 +563,6 @@ pbes_expression pbes_expression_substitute_and_rewrite(
     if (tool_options.opt_precompile_pbes)  
     {
       data_expression d = (data_expression)rewriter->rewriteInternal((aterm)p);
-      // std::cerr << "Rewrite2: " << pp(p) << "\nResult: " <<  pp(d) << "\n  " << d << std::endl;
       if (is_true_in_internal_rewrite_format(d,rewriter))   
       { result = pbes_expr::true_();
       }
@@ -588,7 +590,6 @@ pbes_expression pbes_expression_substitute_and_rewrite(
     }
   }
   
-  // std::cerr << "Result: " << pp(result) << "\n\n";
   return result;
 }
 
