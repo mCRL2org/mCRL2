@@ -144,7 +144,7 @@ using atermpp::list_arg2;
   inline
   action_formula forall(data_variable_list l, action_formula p)
   {
-    return action_formula(gsMakeActExists(l, p));
+    return action_formula(gsMakeActForall(l, p));
   }
 
   /// \brief Returns the existential quantification of the formula p over the variables in l
@@ -473,7 +473,7 @@ using atermpp::list_arg2;
   inline
   state_formula forall(data_variable_list l, state_formula p)
   {
-    return state_formula(gsMakeStateExists(l, p));
+    return state_formula(gsMakeStateForall(l, p));
   }
 
   /// \brief Returns must applied to r and p
