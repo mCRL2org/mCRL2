@@ -501,7 +501,9 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
 
   // Data rewriter
   Rewriter *rewriter = createRewriter(data,tool_options.rewrite_strategy);
-  variable_index.put(pbes_expression_rewrite_and_simplify(pbes_spec.initial_state(),rewriter,tool_options));
+  variable_index.put(pbes_expression_rewrite_and_simplify(pbes_spec.initial_state(),
+                     rewriter,
+                     tool_options.opt_precompile_pbes));
 
   // Needed hashtables
   equation_system eqsys = pbes_spec.equations();
@@ -523,7 +525,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
   { 
     pbes_equations.put(eqi->variable().name(), 
         pbes_equation(eqi->symbol(),eqi->variable(),
-            pbes_expression_rewrite_and_simplify(eqi->formula(),rewriter,tool_options)));
+            pbes_expression_rewrite_and_simplify(eqi->formula(),rewriter,tool_options.opt_precompile_pbes)));
     if (eqi->symbol()!=current_fixpoint_symbol)
     { current_fixpoint_symbol=eqi->symbol();
       rank=rank+1;

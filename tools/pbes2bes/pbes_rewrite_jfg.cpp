@@ -8,7 +8,7 @@
 /// \brief Add your file description here.
 
 #include "pbes_rewrite.h"
-#include "mcrl2/pbes/utility.h"
+// #include "mcrl2/pbes/utility.h"
 #include "print/messaging.h"
 #include "atermpp/substitute.h"
 #include "atermpp/indexed_set.h"
@@ -35,37 +35,37 @@ using namespace mcrl2::utilities;
 
 
 
-static data_expression initialize_internal_true(data_expression &t,Rewriter *r)
+static data_expression initialize_internal_trueD(data_expression &t,Rewriter *r)
 {
   t=(data_expression)r->toRewriteFormat(data_expr::true_());
   ATprotect((ATerm*)(&t));
   return t;
 }
 
-static bool is_true_in_internal_rewrite_format(data_expression d,Rewriter *rewriter)
-{ static data_expression internal_true=initialize_internal_true(internal_true,rewriter);
+static bool is_true_in_internal_rewrite_formatD(data_expression d,Rewriter *rewriter)
+{ static data_expression internal_true=initialize_internal_trueD(internal_true,rewriter);
   return d==internal_true;
 }
 
 
-static data_expression initialize_internal_false(data_expression &t,Rewriter *r)
+static data_expression initialize_internal_falseD(data_expression &t,Rewriter *r)
 {
   t=(data_expression)r->toRewriteFormat(data_expr::false_());
   ATprotect((ATerm*)(&t));
   return t;
 }
 
-static bool is_false_in_internal_rewrite_format(data_expression d,Rewriter *rewriter)
-{ static data_expression internal_false=initialize_internal_false(internal_false,rewriter);
+static bool is_false_in_internal_rewrite_formatD(data_expression d,Rewriter *rewriter)
+{ static data_expression internal_false=initialize_internal_falseD(internal_false,rewriter);
   return d==internal_false;
 }
 
 
-struct compare_data_variable
+struct compare_data_variableD
 {
   aterm v;
 
-  compare_data_variable(data_variable v_)
+  compare_data_variableD(data_variable v_)
     : v(aterm_appl(v_))
   {}
   
@@ -78,10 +78,10 @@ struct compare_data_variable
 ///\ret variable v occurs in l.
 bool occurs_in_var(aterm_appl l, data_variable v)
 {
-  return find_if(l, compare_data_variable(v)) != aterm();
+  return find_if(l, compare_data_variableD(v)) != aterm();
 }
 
-pbes_expression pbes_expression_rewrite_and_simplify(
+pbes_expression pbes_expression_rewrite_and_simplifyDEPRECATED(
                    pbes_expression p, 
                    Rewriter *rewriter,
                    const t_tool_options &tool_options)
@@ -99,12 +99,12 @@ pbes_expression pbes_expression_rewrite_and_simplify(
   else if (is_and(p))
   { // p = and(left, right)
     //Rewrite left and right as far as possible
-    pbes_expression left = pbes_expression_rewrite_and_simplify(lhs(p),rewriter,tool_options);
+    pbes_expression left = pbes_expression_rewrite_and_simplifyDEPRECATED(lhs(p),rewriter,tool_options);
     if (is_false(left))
     { result = false_();
     }
     else
-    { pbes_expression right = pbes_expression_rewrite_and_simplify(rhs(p),rewriter,tool_options);
+    { pbes_expression right = pbes_expression_rewrite_and_simplifyDEPRECATED(rhs(p),rewriter,tool_options);
       //Options for left and right
       if (is_false(right))
       { result = false_();
@@ -121,12 +121,12 @@ pbes_expression pbes_expression_rewrite_and_simplify(
   else if (is_or(p))
   { // p = or(left, right)
     //Rewrite left and right as far as possible
-    pbes_expression left = pbes_expression_rewrite_and_simplify(lhs(p),rewriter,tool_options);
+    pbes_expression left = pbes_expression_rewrite_and_simplifyDEPRECATED(lhs(p),rewriter,tool_options);
     if (is_true(left))
     { result = true_();
     }
     else 
-    { pbes_expression right = pbes_expression_rewrite_and_simplify(rhs(p),rewriter,tool_options);
+    { pbes_expression right = pbes_expression_rewrite_and_simplifyDEPRECATED(rhs(p),rewriter,tool_options);
       if (is_true(right))
       { result = true_();
       }
@@ -142,7 +142,7 @@ pbes_expression pbes_expression_rewrite_and_simplify(
   else if (is_forall(p))
   { // p = forall(data_expression_list, pbes_expression)
     data_variable_list data_vars = quant_vars(p);
-    pbes_expression expr = pbes_expression_rewrite_and_simplify(quant_expr(p),rewriter,tool_options);
+    pbes_expression expr = pbes_expression_rewrite_and_simplifyDEPRECATED(quant_expr(p),rewriter,tool_options);
     //Remove data_vars which do not occur in expr
     data_variable_list occurred_data_vars;
     for (data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
@@ -163,7 +163,7 @@ pbes_expression pbes_expression_rewrite_and_simplify(
   else if (is_exists(p))
   { // p = exists(data_expression_list, pbes_expression)
     data_variable_list data_vars = quant_vars(p);
-    pbes_expression expr = pbes_expression_rewrite_and_simplify(quant_expr(p),rewriter,tool_options);
+    pbes_expression expr = pbes_expression_rewrite_and_simplifyDEPRECATED(quant_expr(p),rewriter,tool_options);
     //Remove data_vars which does not occur in expr
     data_variable_list occurred_data_vars;
     for (data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
@@ -207,9 +207,9 @@ pbes_expression pbes_expression_rewrite_and_simplify(
     if (tool_options.opt_precompile_pbes)
     { 
     data_expression d = (data_expression)rewriter->rewriteInternal(rewriter->toRewriteFormat(p));
-      if (is_true_in_internal_rewrite_format(d,rewriter))
+      if (is_true_in_internal_rewrite_formatD(d,rewriter))
          result = true_();
-      else if (is_false_in_internal_rewrite_format(d,rewriter))
+      else if (is_false_in_internal_rewrite_formatD(d,rewriter))
          result = false_();
       else
          result = val(d);
@@ -563,10 +563,10 @@ pbes_expression pbes_expression_substitute_and_rewrite(
     if (tool_options.opt_precompile_pbes)  
     {
       data_expression d = (data_expression)rewriter->rewriteInternal((aterm)p);
-      if (is_true_in_internal_rewrite_format(d,rewriter))   
+      if (is_true_in_internal_rewrite_formatD(d,rewriter))   
       { result = pbes_expr::true_();
       }
-      else if (is_false_in_internal_rewrite_format(d,rewriter))
+      else if (is_false_in_internal_rewrite_formatD(d,rewriter))
       { result = pbes_expr::false_();
       }
       else

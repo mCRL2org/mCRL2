@@ -1,0 +1,14 @@
+project toolset/pbesrewr
+       : build-dir $(BUILD_TOP)/pbesrewr
+       ;
+
+exe pbesrewr
+       : pbesrewr.cpp
+         /libraries//mcrl2_basic
+         /libraries//lps
+         /site-config//boost_program_options
+       : <include>.
+       ;
+
+install-binaries install
+       : pbesrewr ;

@@ -1,0 +1,95 @@
+<refentry id="pbesrewr">
+ <info>
+  <date>2005-2007</date>
+ </info>
+
+<refmeta>
+  <refentrytitle>pbesrewr</refentrytitle>
+  <manvolnum>1</manvolnum>
+  <refmiscinfo class="source">pbesrewr</refmiscinfo>
+  <refmiscinfo class="version"></refmiscinfo>
+  <refmiscinfo class="manual">User Commands</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+  <refname>pbesrewr</refname>
+  <refpurpose>rewrites and simplify a PBES</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>&pbesrewr;</command>
+    <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
+    <arg choice="opt">&infile;</arg>
+    <arg choice="opt">&outfile;</arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  <para>
+    Rewrite the data expressions in a PBES, simplify and and or expressions and
+    remove quantified variables that are not used
+    in &infile;.  If &infile; is not supplied a PBES is read from &stdin;. 
+    The output is written to &outfile;, or if not supplied to &stdout;.
+  </para>
+</refsect1>
+
+<refsect1>
+  <title>Options</title>
+  <para>
+    <variablelist>
+
+      <varlistentry>
+        <term>&opt_h;</term>
+        <term>&opt_help;</term>
+          <listitem>
+            <para>display help information and exit</para>
+          </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_version;</term>
+        <listitem>
+          <para>display version information and exit</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_v;</term>
+        <term>&opt_verbose;</term>
+        <listitem>
+          <para>displays progress information during the run of the program.</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_d;</term>
+        <term>&opt_debug;</term>
+        <listitem>
+          <para>displays debug information during the run of the program.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_R;</term>
+        <term>&opt_rewriter;</term>
+        <listitem>
+          <para>Allows to select a rewriter. Possibilities are inner, jitty, innerc and jittyc.
+                Inner stands for the innermost rewriter, jitty for the just in time rewriter.
+                If a c is added, then the compiling rewriter is used. Compiling rewriting is 
+                not available on windows. 
+          </para>
+        </listitem>
+      </varlistentry>
+
+    </variablelist>
+  </para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>Written by Jan Friso Groote. </para>
+</refsect1>
+
+</refentry>

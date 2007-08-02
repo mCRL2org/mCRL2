@@ -31,7 +31,7 @@ typedef struct{
 // is set in the tool_options, the data expressions in the resulting pbes are
 // translated to internal rewrite format.
 
-lps::pbes_expression pbes_expression_rewrite_and_simplify(
+lps::pbes_expression pbes_expression_rewrite_and_simplifyDEPRECATED(
               lps::pbes_expression p,
               Rewriter *rewriter,
               const t_tool_options &tool_options);
