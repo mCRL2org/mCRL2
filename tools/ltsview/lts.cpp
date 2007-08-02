@@ -95,7 +95,7 @@ string LTS::getParameterValue(int parindex,int valindex) {
   return valueTable[parindex][valindex];
 }
 
-void LTS::selectStateByID(int id) {
+State* LTS::selectStateByID(int id) {
   // FIXME Naive implementation
   for(size_t i = 0; i < unmarkedStates.size(); ++i) {
     if ( unmarkedStates[i]->getID() == id) {
@@ -119,7 +119,7 @@ void LTS::selectStateByID(int id) {
       }
 
       // Escape from function
-      return;
+      return selectedState;
     }
   }
 
@@ -144,6 +144,7 @@ void LTS::selectStateByID(int id) {
       }
     }
   }
+  return selectedState;
 }
 
 void LTS::selectCluster(const int rank, const int pos)

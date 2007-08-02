@@ -31,7 +31,7 @@ class MainFrame : public wxFrame, public simReader {
     GLCanvas*  getGLCanvas() const;
     void  loadTitle();
 
-    void        onAbout(wxCommandEvent &event);
+    void  onAbout(wxCommandEvent &event);
     void  onActivateTool(wxCommandEvent& event);
     void  onAddMarkRuleButton(wxCommandEvent& event);
     void  onDisplay(wxCommandEvent& event);
@@ -75,6 +75,8 @@ class MainFrame : public wxFrame, public simReader {
     void  startRendering();
     void  stopRendering();
     void  updateProgressDialog(int val,std::string msg);
+    void  addParameter(std::string par);
+    void  setParameterValue(std::string par, std::string value);
 
     // Implemented for simReader interface
     virtual void refresh();
@@ -84,14 +86,14 @@ class MainFrame : public wxFrame, public simReader {
 //    double previousTime; /* needed for computing the frame rate (FPS) */
 //    int    frameCount; /* needed for computing the frame rate (FPS) */
     wxFileName        filename;
-    GLCanvas*          glCanvas;
-    wxChoice*          markAnyAllChoice;
+    GLCanvas*         glCanvas;
+    wxChoice*         markAnyAllChoice;
     wxRadioButton*    markDeadlocksRadio;
     wxCheckListBox*   markStatesListBox;
     wxRadioButton*    markStatesRadio;
     wxCheckListBox*   markTransitionsListBox;
     wxRadioButton*    markTransitionsRadio;
-    Mediator*          mediator;
+    Mediator*         mediator;
     wxRadioButton*    nomarksRadio;
     wxStaticText*     ncLabel;
     wxStaticText*     nmsLabel;
@@ -103,6 +105,7 @@ class MainFrame : public wxFrame, public simReader {
     SavePicDialog*     savePicDialog;
     SettingsDialog*   settingsDialog;
     Settings*         settings;
+    wxFlexGridSizer*  selSizer;
 
     // Buttons for simulation
     wxButton* simStartButton;
@@ -122,6 +125,8 @@ class MainFrame : public wxFrame, public simReader {
     void setupSimPanel(wxPanel* panel);
 //    void setupSettingsPanel(wxPanel* panel);
 
+    std::map<std::string, wxStaticText*> parameters;
+    wxScrolledWindow* selectionInfo;
     DECLARE_EVENT_TABLE()
 };
 #endif

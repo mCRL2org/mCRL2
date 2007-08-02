@@ -56,7 +56,7 @@ class LTS {
     std::string getParameterName(int parindex);
     std::string getParameterType(int parindex);
     std::string getParameterValue(int parindex,int valindex);
-    void        selectStateByID(int id);
+    State*      selectStateByID(int id);
     void        selectCluster(const int rank, const int pos);
     void        deselect();
     void	markAction(std::string label);

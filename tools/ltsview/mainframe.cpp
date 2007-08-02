@@ -191,34 +191,71 @@ void MainFrame::setupRightPanel(wxPanel* panel) {
   int lf = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
   int rf = wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL;
   
+  wxNotebook* topNotebook = new wxNotebook(panel, wxID_ANY);
+  
+  wxPanel* infoPanel  = new wxPanel(topNotebook, wxID_ANY);
   // setup the top part (information box)
   wxFlexGridSizer* topSizer = new wxFlexGridSizer(6,2,0,0);
-  nsLabel = new wxStaticText(panel,wxID_ANY,wxEmptyString,wxDefaultPosition,
+  nsLabel = new wxStaticText(infoPanel,wxID_ANY,wxEmptyString,wxDefaultPosition,
     wxDefaultSize,wxALIGN_RIGHT|wxST_NO_AUTORESIZE);
-  ntLabel = new wxStaticText(panel,wxID_ANY,wxEmptyString,wxDefaultPosition,
+  ntLabel = new wxStaticText(infoPanel,wxID_ANY,wxEmptyString,wxDefaultPosition,
     wxDefaultSize,wxALIGN_RIGHT|wxST_NO_AUTORESIZE);
-  ncLabel = new wxStaticText(panel,wxID_ANY,wxEmptyString,wxDefaultPosition,
+  ncLabel = new wxStaticText(infoPanel,wxID_ANY,wxEmptyString,wxDefaultPosition,
     wxDefaultSize,wxALIGN_RIGHT|wxST_NO_AUTORESIZE);
-  nrLabel = new wxStaticText(panel,wxID_ANY,wxEmptyString,wxDefaultPosition,
+  nrLabel = new wxStaticText(infoPanel,wxID_ANY,wxEmptyString,wxDefaultPosition,
     wxDefaultSize,wxALIGN_RIGHT|wxST_NO_AUTORESIZE);
-  nmsLabel = new wxStaticText(panel,wxID_ANY,wxEmptyString,wxDefaultPosition,
+  nmsLabel = new wxStaticText(infoPanel,
+                              wxID_ANY,wxEmptyString,wxDefaultPosition,
     wxDefaultSize,wxALIGN_RIGHT|wxST_NO_AUTORESIZE);
-  nmtLabel = new wxStaticText(panel,wxID_ANY,wxEmptyString,wxDefaultPosition,
+  nmtLabel = new wxStaticText(infoPanel,
+                              wxID_ANY,wxEmptyString,wxDefaultPosition,
     wxDefaultSize,wxALIGN_RIGHT|wxST_NO_AUTORESIZE);
   
   topSizer->AddGrowableCol(1);
-  topSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("States:")),0,lf,3);
+  topSizer->Add(new wxStaticText(infoPanel,wxID_ANY,wxT("States:")),0,lf,3);
   topSizer->Add(nsLabel,0,rf,3);
-  topSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Transitions:")),0,lf,3);
+  topSizer->Add(new wxStaticText(infoPanel,
+                                 wxID_ANY,wxT("Transitions:")),0,lf,3);
   topSizer->Add(ntLabel,0,rf,3);
-  topSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Clusters:")),0,lf,3);
+  topSizer->Add(new wxStaticText(infoPanel,wxID_ANY,wxT("Clusters:")),0,lf,3);
   topSizer->Add(ncLabel,0,rf,3);
-  topSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Ranks:")),0,lf,3);
+  topSizer->Add(new wxStaticText(infoPanel,wxID_ANY,wxT("Ranks:")),0,lf,3);
   topSizer->Add(nrLabel,0,rf,3);
-  topSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Marked states:")),0,rf,3);
+  topSizer->Add(new wxStaticText(infoPanel,
+                                 wxID_ANY,wxT("Marked states:")),0,rf,3);
   topSizer->Add(nmsLabel,0,rf,3);
-  topSizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Marked transitions:")),0,rf,3);
+  topSizer->Add(new wxStaticText(infoPanel,
+                                 wxID_ANY,wxT("Marked transitions:")),0,rf,3);
   topSizer->Add(nmtLabel,0,rf,3);
+  
+  topSizer->Fit(infoPanel);
+  infoPanel->SetSizer(topSizer);
+  infoPanel->Fit();
+  infoPanel->Layout();
+
+  topNotebook->AddPage(infoPanel, wxT("LTS information"), false);
+
+  // TODO: Layout page with selection information
+  selectionInfo = new wxScrolledWindow(topNotebook);
+  selectionInfo->SetScrollRate(0,5);
+  
+
+  selSizer = new wxFlexGridSizer(1, 2, 0, 0);
+  selSizer->AddGrowableCol(1);
+//  selSizer->SetFlexibleDirection(wxVERTICAL);
+  selSizer->Add(new wxStaticText(selectionInfo, wxID_ANY, 
+                                 wxT("Parameter")),0,lf,3);
+  selSizer->Add(new wxStaticText(selectionInfo, wxID_ANY, 
+                                 wxT("Value"), wxDefaultPosition, 
+                                            wxDefaultSize, 
+                                            wxALIGN_RIGHT|wxST_NO_AUTORESIZE), 
+                                            0, rf, 3);
+  selSizer->Fit(selectionInfo);
+  selectionInfo->SetSizer(selSizer);
+  selectionInfo->Fit();
+  selectionInfo->Layout();
+
+  topNotebook->AddPage(selectionInfo, wxT("State information"), false);
 
   // setup the bottom part (notebook)
   wxNotebook* bottomNotebook = new wxNotebook(panel, wxID_ANY);
@@ -233,7 +270,7 @@ void MainFrame::setupRightPanel(wxPanel* panel) {
   bottomNotebook->AddPage(simPanel, wxT("Simulation"), false); 
 
   
-  sizer->Add(topSizer, 0, wxEXPAND | wxALL, 5);
+  sizer->Add(topNotebook, 0, wxEXPAND | wxALL, 5);
   sizer->Add(bottomNotebook, 0, wxEXPAND | wxALL, 5);
   sizer->Fit(panel);
   panel->SetSizer(sizer);
@@ -712,6 +749,35 @@ void MainFrame::stopRendering() {
   }*/
   SetStatusText(wxT(""),0);
   GetStatusBar()->Update();
+}
+
+void MainFrame::addParameter(std::string par)
+{
+  if (parameters.find(par) == parameters.end())
+  {
+    std::pair<std::string, wxStaticText*> param(par, 
+        new wxStaticText(selectionInfo, wxID_ANY, wxEmptyString,
+                         wxDefaultPosition, wxDefaultSize,
+                         wxALIGN_RIGHT|wxST_NO_AUTORESIZE));
+
+    parameters.insert(param);
+
+    selSizer->SetRows(selSizer->GetRows() + 1);
+    selSizer->Add(new wxStaticText(selectionInfo, wxID_ANY, 
+                  wxString(par.c_str(), wxConvLocal)), 0,
+                  wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL|wxALL,3);
+    selSizer->Add(parameters.find(par)->second, 0,
+                        wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxEXPAND | wxALL, 3);
+  }
+}
+
+void MainFrame::setParameterValue(std::string par, std::string value)
+{
+  addParameter(par);
+  map<string, wxStaticText*>::iterator it = parameters.find(par);
+  
+  it->second->SetLabel(wxString(value.c_str(), wxConvLocal));
+  it->second->GetParent()->Fit();
 }
 
 void MainFrame::refresh() {

@@ -397,25 +397,60 @@ void LTSViewApp::startSim() {
 }
 
 int LTSViewApp::getNumberOfParams() const {
-  return lts->getNumParameters();
+  if (lts != NULL)
+  {
+    return lts->getNumParameters();
+  }
+  else
+  {
+    return 0;
+  }
 }
 string LTSViewApp::getActionLabel(const int i) const {
-  return lts->getLabel(i);
+  if (lts != NULL)
+  {
+    return lts->getLabel(i);
+  }
+  else 
+  {
+    return "";
+  }
 }
 
 string LTSViewApp::getParName(const int i) const {
-  return lts->getParameterName(i);
+  if (lts != NULL)
+  {
+    return lts->getParameterName(i);
+  }
+  else 
+  {
+    return "";
+  }
 }
 
 string LTSViewApp::getParValue(const int i, const int j) const {
-  return lts->getParameterValue(i, j);
+  if (lts != NULL)
+  {
+    return lts->getParameterValue(i, j);
+  }
+  else
+  {
+    return "";
+  }
 }
 
 
 void LTSViewApp::selectStateByID(const int id) {
   if (lts != NULL)
   {
-    lts->selectStateByID(id);
+    State* s = lts->selectStateByID(id);
+
+    for(int i = 0; i < lts->getNumParameters(); ++i)
+    {
+      string paramName = lts->getParameterName(i);
+      string paramValue = lts->getParameterValue(i, s->getParameterValue(i));
+      mainFrame->setParameterValue(paramName, paramValue);
+    }
   }
 }
 
@@ -465,6 +500,7 @@ void LTSViewApp::zoomOut()
 {
   LTS* oldLTS = lts;
   lts = oldLTS->zoomOut();
+  oldLTS->deselect();
   visualizer->setLTS(lts);
 
   if (oldLTS != lts) 
