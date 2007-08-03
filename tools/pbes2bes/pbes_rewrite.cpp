@@ -82,7 +82,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 		data_variable_list occured_data_vars;
 		for (data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
 		{
-			if (occurs_in(expr, *i)) // The var occurs in expr
+			if (occurs_inL(expr, *i)) // The var occurs in expr
 				occured_data_vars = push_back(occured_data_vars, *i);
 		}
 
@@ -121,7 +121,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 		data_variable_list occured_data_vars;
 		for (data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
 		{
-			if (occurs_in(expr, *i)) // The var occurs in expr
+			if (occurs_inL(expr, *i)) // The var occurs in expr
 				occured_data_vars = push_back(occured_data_vars, *i);
 		}
 		
@@ -198,7 +198,7 @@ bool element_in_propvarinstlist(data_variable_list vars, std::set< propositional
 	{
 		for (data_variable_list::iterator dvl = vars.begin(); dvl != vars.end(); dvl++)
 		{
-			if (occurs_in(*dvl, *pvi))
+			if (occurs_inL(*dvl, *pvi))
 			{
 				result = true;
 			}
@@ -222,7 +222,7 @@ struct compare_data_variable
 };
 
 ///\ret variable v occurs in l.
-bool occurs_in(aterm_appl l, data_variable v)
+bool occurs_inL(aterm_appl l, data_variable v)
 {
   return find_if(l, compare_data_variable(v)) != aterm();
 }

@@ -40,7 +40,7 @@ bool occurs_in(list_type l, lps::sort s)
 }
 
 ///\ret the list of all functions f of sort s in fl
-function_list get_constructors(const function_list& fl, const lps::sort& s)
+inline function_list get_constructors(const function_list& fl, const lps::sort& s)
 {
   function_list result;
   for(function_list::iterator i = fl.begin(); i != fl.end(); ++i)
@@ -55,7 +55,7 @@ function_list get_constructors(const function_list& fl, const lps::sort& s)
 }
 
 ///\ret true if f has 1 or more arguments, false otherwise
-bool has_arguments(const function& f)
+inline bool has_arguments(const function& f)
 {
   return !gsIsSortId(aterm_appl(f.argument(1)));
 }
@@ -65,7 +65,7 @@ bool is_finite(const function_list& fl, const lps::sort& s, const lps::sort_list
 
 ///\ret true if all sorts in sl are finite, false otherwise
 ///Note that when a constructor sort is in visited we hold the sort as infinite because loops are created!
-bool is_finite(const function_list& fl, const lps::sort_list& sl, const lps::sort_list visited = lps::sort_list())
+inline bool is_finite(const function_list& fl, const lps::sort_list& sl, const lps::sort_list visited = lps::sort_list())
 {
   bool result = true;
   
@@ -89,7 +89,7 @@ bool is_finite(const function_list& fl, const lps::sort_list& sl, const lps::sor
 
 ///\pre fl is a list of constructors
 ///\ret sort s is finite
-bool is_finite(const function_list& fl, const lps::sort& s, const lps::sort_list visited = lps::sort_list())
+inline bool is_finite(const function_list& fl, const lps::sort& s, const lps::sort_list visited = lps::sort_list())
 {
   bool result = true;
   function_list cl = get_constructors(fl, s);

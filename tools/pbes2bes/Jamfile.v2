@@ -25,7 +25,6 @@ exe pbes2bes
 
 exe pbes2bool
        : pbes2bool.cpp
-         pbes_rewrite_jfg.cpp
          /libraries//lps
          /libraries//rewrite
          /site-config//boost_program_options

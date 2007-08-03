@@ -32,7 +32,7 @@ lps::pbes_expression_list get_or_expressions(lps::pbes_expression_list or_list, 
 // - is false otherwise
 bool element_in_propvarinstlist(lps::data_variable_list vars, std::set< lps::propositional_variable_instantiation > pvilist);
 
-// occurs_in returns if a data variable occurs in an aterm_appl l
-bool occurs_in(atermpp::aterm_appl l, lps::data_variable v);
+// occurs_inL returns if a data variable occurs in an aterm_appl l
+bool occurs_inL(atermpp::aterm_appl l, lps::data_variable v);
 
 bool has_propvarinsts(std::set< lps::propositional_variable_instantiation > propvars, lps::data_variable_list data_vars);

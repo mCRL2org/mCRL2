@@ -53,8 +53,8 @@
 #include "atermpp/table.h"
 
 //Tool-specific
-#include "pbes_rewrite_jfg.h"
-#include "sort_functions.h"
+// #include "pbes_rewrite_jfg.h"
+// #include "sort_functions.h"
 #include "bes.h"
 
 using namespace std;
@@ -68,6 +68,19 @@ namespace po = boost::program_options;
 
 //Type definitions
 //----------------
+//
+
+// data structure containing the options that pbes2bool can have.
+
+typedef struct{
+   std::string opt_outputformat;
+   std::string opt_strategy;
+   bool opt_precompile_pbes;
+   RewriteStrategy rewrite_strategy;
+   std::string infilename;
+   std::string outfilename;
+} t_tool_options;
+
 
 //typedef struct {
   //data_variable_list finite_var;    // List of all finite variables
@@ -563,7 +576,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
     }
     assert(elist==current_variable_instantiation.parameters().end());
     lps::pbes_expression new_pbes_expression = pbes_expression_substitute_and_rewrite(
-                              current_pbes_expression, data, rewriter,tool_options);
+                              current_pbes_expression, data, rewriter,tool_options.opt_precompile_pbes);
     // std::cerr << " new pbes expression " << pp(new_pbes_expression) << std::endl;
     bes::bes_expression new_bes_expression=
          add_propositional_variable_instantiations_to_indexed_set_and_translate(
