@@ -194,7 +194,8 @@ proc X(b:Board)=
                     ) -> movedown(x,y,getPiece(x,y,b)).X(moveDown(x,y,b))+
         sum x,y:Pos.(x<=7 && y<=7 &&
                      upMovable(x,y,b)
-                    ) -> moveup(x,y,getPiece(x,y,b)).X(moveUp(x,y,b));
+                    ) -> moveup(x,y,getPiece(x,y,b)).X(moveUp(x,y,b))+
+        delta;
 
 init X(initialBoard);
 

@@ -130,8 +130,8 @@ proc X(f:Board)=
           f!=finalBoard) -> jump.
             X(setPiece(r1,r2,empty,
                 setPiece(p1,p2,getPiece(r1,r2,f),
-                  setPiece(q1,q2,getPiece(p1,p2,f),f))))+
-     (f==finalBoard) -> ready.delta;
+                  setPiece(q1,q2,getPiece(p1,p2,f),f))))<>delta+
+     (f==finalBoard) -> ready.delta<>delta;
 
 
 init hide({jump},X(initialBoard));

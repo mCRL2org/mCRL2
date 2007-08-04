@@ -34,8 +34,8 @@ act  r1,s4: D;
 
 proc S(l,m:Nat,q:DBuf) =
         sum d:D. (m<n) ->
-                r1(d).S(l,m+1,insert(d,(l+m) mod n,q))+
-        sum k:Nat. (k<m) -> s2(q((l+k) mod n),(l+k) mod 2*n).S(l,m,q)+
+                r1(d).S(l,m+1,insert(d,(l+m) mod n,q))<>delta+
+        sum k:Nat. (k<m) -> s2(q((l+k) mod n),(l+k) mod 2*n).S(l,m,q)<>delta+
         sum k:Nat. r6(k).S(k,(m-k+l) mod 2*n,q);
 
      R(l':Nat,q':DBuf,b:BBuf) =
@@ -43,7 +43,7 @@ proc S(l,m:Nat,q:DBuf) =
                   -> R(l',insert(d,k mod n,q'),insert(true,k mod n,b)) 
                   <> R(l',q',b))+
         b(l' mod n) -> s4(q'(l' mod n)).
-                          R((l'+1) mod 2*n,q',insert(false,l' mod n,b))+
+                          R((l'+1) mod 2*n,q',insert(false,l' mod n,b))<>delta+
         s5(nextempty_mod(l',b,n,n)).R(l',q',b);
 
      K = sum d:D,k:Nat. r2(d,k).(i.s3(d,k)+i).K;

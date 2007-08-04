@@ -15,7 +15,7 @@ proc P(b:Bool)        = request(b).P0(b,0) + send(b,0).P(b);
                
      P1(b:Bool,n:Nat) =
         (sum m:Nat. get(!(b),m).
-          ((n < m || m == 0) -> C1(b,n) + (m <= n && m != 0) -> P1(b,n))) + send(b,n).P1(b,n);
+          ((n < m || m == 0) -> C1(b,n) <> P1(b,n))) + send(b,n).P1(b,n);
 
      C1(b:Bool,n:Nat) = enter(b).C2(b,n) + send(b,n).C1(b,n);
 

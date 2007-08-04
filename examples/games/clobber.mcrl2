@@ -108,7 +108,8 @@ proc Clobber(b:Board,WhiteMoves:Bool)=
        (WhiteMoves && !CanMove(1,1,White,Black,b)) ->
              BlackWins.Clobber(b,WhiteMoves)+
        (!WhiteMoves && !CanMove(1,1,Black,White,b)) ->
-             WhiteWins.Clobber(b,WhiteMoves);
+             WhiteWins.Clobber(b,WhiteMoves)+
+       delta;
 
 
 init Clobber([[Black,White,Black,White],

@@ -112,7 +112,7 @@ proc  Deliver(m:Message, R:List(Nat), A:List(Nat) ) =
 	(
 	  ( (inl(a,A)) ->
 	    s_btos(m,a).
-	    ( (remove(a,A) == []) -> Bus(R) <> Deliver(m,R,remove(a,A)) )
+	    ( (remove(a,A) == []) -> Bus(R) <> Deliver(m,R,remove(a,A)) )<>delta
 	  )
 	  +
 	  r_open_relay(a).Deliver(m,remove(a,R),A)
@@ -127,7 +127,7 @@ proc  Lift0(n:Nat) =
 	    r_btos(msg,n).
 	    ( (state(msg) == STARTUP) ->
 		s_stable.s_stob(mes(1,STANDBY),n).
-		Lift2(n,1,address(msg),STANDBY,false)
+		Lift2(n,1,address(msg),STANDBY,false)<>delta
 	    )
 	)
 	+
@@ -140,7 +140,7 @@ proc  Lift0(n:Nat) =
 		  Lift1(n,S(address(msg)),S(address(msg)))
 	      <> s_stob(mes(S(address(msg)),STARTUP),n).
 		Lift1(n,S(address(msg)),S(address(msg)))
-	      )
+	      )<>delta
 	  );
 
 proc  Lift1(n:Nat,m:Nat,nos:Nat) =
@@ -151,7 +151,7 @@ proc  Lift1(n:Nat,m:Nat,nos:Nat) =
 		( (address(msg) == P(m)) ->
 		    s_stob(mes(m,STANDBY),n).Lift2(n,m,nos,STANDBY,false)
 		<> Lift2(n,m,nos,STANDBY,false)
-		)
+		)<>delta
 	    )
 	  );
 
@@ -161,7 +161,7 @@ proc  Lift2(n:Nat,m:Nat,nos:Nat,s:State,c:Bool) =
 	    up(n).Lift2(n,m,nos,UP,true)
 	    +
 	    down(n).Lift2(n,m,nos,DOWN,true)
-	  )
+	  ) <> delta
 	+
 	sum msg:Message .
 	  r_btos(msg,n).
@@ -174,15 +174,14 @@ proc  Lift2(n:Nat,m:Nat,nos:Nat,s:State,c:Bool) =
 		)
 	      <> s_stob(mes(m,state(msg)),n).Lift2(n,m,nos,state(msg),c)
 	      )
-	    <> ( c ->
-		Lift2(n,m,nos,s,c)
-	      <> Lift2(n,m,nos,state(msg),c)
+	    <> ( c -> Lift2(n,m,nos,s,c)
+	           <> Lift2(n,m,nos,state(msg),c)
 	      )
 	    )
 	  );
 	  
 proc  Lift3(n:Nat,m:Nat,nos:Nat,s:State,count:Nat) =
-	(s != STANDBY ) -> released(n).Lift3(n,m,nos,STANDBY,nos)
+	(s != STANDBY ) -> released(n).Lift3(n,m,nos,STANDBY,nos)<>delta
 	+
 	sum msg:Message.
 	  r_btos(msg,n).

@@ -12,6 +12,6 @@ act a;
 map N:Pos;
 eqn N=1000;
 
-proc X(i:Pos)=sum j:Pos.(j<=i+1 && j<=N)->a.X(j);
+proc X(i:Pos)=sum j:Pos.(j<=i+1 && j<=N)->a.X(j)<>delta;
 
 init X(1);

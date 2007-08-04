@@ -97,7 +97,8 @@ proc Hex(b:Board,RedMoves:Bool)=
             !Wins(Red,b))
            -> BlueMove(x,y).Hex(Put(Blue,x,y,b),true)+
        Wins(Red,b) -> RedWins.Hex(b,RedMoves)+
-       Wins(Blue,b) -> BlueWins.Hex(b,RedMoves);
+       Wins(Blue,b) -> BlueWins.Hex(b,RedMoves)+
+       delta;
 
 init Hex([[Empty,Empty,Empty,Empty],
           [Empty,Empty,Empty,Empty],

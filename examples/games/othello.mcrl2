@@ -206,7 +206,8 @@ proc Othello(b:Board,WhiteMoves:Bool)=
            WhiteWins.Othello(b,WhiteMoves)+
        (!CanMove(Red,b) && !CanMove(White,b) && 
                      Count(Red,1,1,b)==Count(White,1,1,b)) ->
-           Draw.Othello(b,WhiteMoves);
+           Draw.Othello(b,WhiteMoves)+
+       delta;
 
 
 init Othello([[Empty,Empty,Empty,Empty],

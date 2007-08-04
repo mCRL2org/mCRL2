@@ -52,7 +52,7 @@ proc N(i:Pos,v:Pos)=sN((i mod N)+1,v).M(i,v);
 
 proc Q(i:Pos,q:List(Pos))=
         sum w:Pos.rQ(i,w).Q(i,w|>q)+
-        (q!=[]) -> sQ(i,rhead(q)).Q(i,rtail(q));
+        (q!=[]) -> sQ(i,rhead(q)).Q(i,rtail(q))<>delta;
 
 init hide({c},
        allow({c,leader},

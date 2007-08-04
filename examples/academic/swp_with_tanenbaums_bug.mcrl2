@@ -142,10 +142,10 @@ act skip,lost;
 
 proc CH(cq:List(Frame),cs:CS) = 
            sum fr:Frame.rc1(fr).((#cq<ChannelBufferSize) -> CH(fr|>cq,cs) <> CH(fr|>tail(cq),cs)) +
-           (cs==accept && (#cq)!=0) -> (skip.CH(cq,deliver) + skip.CH(cq,lost) + skip.CH(cq,error))+
-           (cs==deliver && #cq!=0) -> sc2(rhead(cq)).CH(rtail(cq),accept)+
-           (cs==error && #cq!=0) -> sc2(ce).CH(rtail(cq),accept)+
-           (cs==lost && #cq!=0) -> lost.CH(rtail(cq),accept);
+           (cs==accept && (#cq)!=0) -> (skip.CH(cq,deliver) + skip.CH(cq,lost) + skip.CH(cq,error))<>delta+
+           (cs==deliver && #cq!=0) -> sc2(rhead(cq)).CH(rtail(cq),accept)<>delta+
+           (cs==error && #cq!=0) -> sc2(ce).CH(rtail(cq),accept)<>delta+
+           (cs==lost && #cq!=0) -> lost.CH(rtail(cq),accept)<>delta;
 
 
 % The sliding window protocol entity
@@ -160,13 +160,13 @@ act ri1,si2  : DP;
 proc IMP = IMP(0,0,0,[],[],false);
 
      IMP(fts,fta,ftr:Nat,sbuf,rbuf:Buffer,nfs:Bool) = 
-          ((fta+MaxBuf) mod MaxSeq==fts) -> error2(fts).IMP(fts,fta,ftr,sbuf,rbuf,nfs)+
+          ((fta+MaxBuf) mod MaxSeq==fts) -> error2(fts).IMP(fts,fta,ftr,sbuf,rbuf,nfs)<>delta+
           error3(ftr).IMP(fts,fta,ftr,sbuf,rbuf,nfs)+
           ((((fts+MaxBuf) mod MaxSeq)!=fta) -> 
-             sum d:DP.ri1(d).
+             ( sum d:DP.ri1(d).
                       si3(dframe(dat,d,fts,(ftr-1) mod MaxSeq)).
                       si5(start,fts).
-                      IMP((fts+1) mod MaxSeq,fta,ftr,insert(d,fts,sbuf),rbuf,nfs)) +
+                      IMP((fts+1) mod MaxSeq,fta,ftr,insert(d,fts,sbuf),rbuf,nfs))<>delta) +
 
           sum e:DP,rfr:Nat,rac:Nat.
                      ri4(dframe(dat,e,rfr,rac)).
@@ -194,7 +194,7 @@ proc IMP = IMP(0,0,0,[],[],false);
                       si3(dframe(dat,retr(tfs,sbuf),tfs,(ftr-1) mod MaxSeq)).
                       si5(start,tfs).
                       IMP(fts,fta,ftr,sbuf,rbuf,nfs) +
-          ri6(act_).si3(naframe(ack,(ftr-1) mod MaxSeq)).IMP(fts,fta,ftr,sbuf,rbuf,nfs);
+          ri6(act_).si3(naframe(ack,(ftr-1) mod MaxSeq)).IMP(fts,fta,ftr,sbuf,rbuf,nfs) ;
 
     DEL(fts,fta,ftr,rac:Nat,sbuf,rbuf:Buffer,nfs:Bool) = 
       in_table(ftr,rbuf) -> si2(retr(ftr,rbuf)).DEL(fts,fta,(ftr+1) mod MaxSeq,rac,sbuf,del(ftr,rbuf),false)
@@ -206,7 +206,7 @@ proc IMP = IMP(0,0,0,[],[],false);
           <> ACK(fts,fta,ftr,rac,sbuf,rbuf,nfs);
 
     ACK(fts,fta,ftr,rac:Nat,sbuf,rbuf:Buffer,nfs:Bool) = 
-      inWindow(rac,fta,fts) -> si5(stop,fta).ACK(fts,(fta+1) mod MaxSeq,ftr,rac,sbuf,rbuf,nfs)
+       inWindow(rac,fta,fts) -> si5(stop,fta).ACK(fts,(fta+1) mod MaxSeq,ftr,rac,sbuf,rbuf,nfs)
                              <> IMP(fts,fta,ftr,sbuf,rbuf,nfs);
  
 
@@ -222,9 +222,9 @@ proc TIM = TIM([],false);
            sum fn1:Nat.rt1(start,fn1).TIM(insert(fn1,ttab),false) +
            rt1(start,act_).TIM(ttab,true) + 
            rt1(stop,act_).TIM(ttab,false) +
-           sum fn2:Nat.in_table(fn2,ttab) -> (rt1(stop,fn2) + st2(fn2)).TIM(del(fn2,ttab),atr) +
-           atr -> st2(act_).TIM(ttab,false) +
-           !atr -> sum n:Nat.error1(n).TIM(ttab,atr);
+           sum fn2:Nat.in_table(fn2,ttab) -> (rt1(stop,fn2) + st2(fn2)).TIM(del(fn2,ttab),atr)<>delta +
+           atr -> st2(act_).TIM(ttab,false) 
+               <> sum n:Nat.error1(n).TIM(ttab,atr);
 
 % Below all the components above are combined into one process.
 

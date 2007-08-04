@@ -91,12 +91,12 @@ proc Train_p= ((Variant==4) -> p1 . p0 <> p0 . p1 ). Guard_p . enter_p . leave_p
      Train_q= q0 . q1 . Guard_q . enter_q . leave_q . q2 . Train_q;
 
      Guard_p= 
-       (Variant!=1) -> get_xq(false)+
-       (Variant!=2) -> get_v(true);
+       (Variant!=1) -> get_xq(false)<>delta+
+       (Variant!=2) -> get_v(true)<>delta;
 
      Guard_q= 
-       (Variant!=1) -> get_xp(false)+
-       (Variant!=2) -> get_v(false);
+       (Variant!=1) -> get_xp(false)<>delta+
+       (Variant!=2) -> get_v(false)<>delta;
 
      Xp(b:Bool)=
        set_xp_ . Xp(true)+
