@@ -64,14 +64,14 @@ namespace transport {
      **/
     void socket_listener::handle_accept(const boost::system::error_code& e, transceiver::socket_transceiver::ptr t, basic_listener::ptr l) {
       if (!e) {
+        transceiver::socket_transceiver::ptr new_t(socket_transceiver::create(owner.lock()));
+
+        /* Listen for new connections */
+        acceptor.async_accept(new_t->socket, dispatcher.wrap(bind(&socket_listener::handle_accept, this, boost::asio::placeholders::error, new_t, l)));
+
         socket_listener::associate(t);
 
         t->activate();
-
-        t = socket_transceiver::create(owner.lock());
-
-        /* Listen for new connections */
-        acceptor.async_accept(t->socket, dispatcher.wrap(bind(&socket_listener::handle_accept, this, boost::asio::placeholders::error, t, l)));
       }
       else if (e == boost::asio::error::connection_aborted) {
         /* Listen for new connections */

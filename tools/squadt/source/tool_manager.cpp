@@ -97,7 +97,7 @@ namespace squadt {
   }
 
   /**
-   * \param[in] t the tool that is to be run
+   * \param[in] t the tool to run
    *
    * \attention This function blocks.
    **/

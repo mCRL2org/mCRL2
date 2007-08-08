@@ -114,7 +114,7 @@ namespace transport {
       socket_transceiver::sptr l(w.lock());
 
       if (l.get() != 0) {
-        handle_disconnect();
+        basic_transceiver::handle_disconnect(this);
       }
     }
 
@@ -135,8 +135,6 @@ namespace transport {
       if (ec) {
         std::cerr << boost::system::system_error(ec).what() << std::endl; // An error occurred.
       }
-
-      basic_transceiver::handle_disconnect(this);
     }
 
     std::string socket_transceiver::get_local_host() {
@@ -183,6 +181,8 @@ namespace transport {
           scheduler.run();
         }
         else {
+          l.unlock();
+
           if (e == asio::error::eof || e == asio::error::connection_reset) {
             /* The safe default error handling */
             basic_transceiver::handle_disconnect(this);
@@ -212,6 +212,8 @@ namespace transport {
 
         /* Object still exists, so continue processing the write operation */
         if (e) {
+          k.unlock();
+
           if (e == asio::error::eof || e == asio::error::connection_reset) {
             /* Connection was closed by peer */
             basic_transceiver::handle_disconnect(this);

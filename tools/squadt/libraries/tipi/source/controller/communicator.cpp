@@ -109,13 +109,16 @@ namespace tipi {
     void communicator::send_display_update(tipi::layout::element const& e, boost::shared_ptr < tipi::display const >& display) {
       std::string        c;
 
-      {
+      try {
         tipi::store_visitor v(c);
 
         v.visit(e, display->find(&e));
-      }
 
-      boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(c, tipi::message_display_data));
+        boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(c, tipi::message_display_data));
+      }
+      catch (bool b) {
+        // find failed for some reason
+      }
     }
 
     /**
@@ -132,14 +135,17 @@ namespace tipi {
           if (g.get() != 0) {
             std::string c; 
 
-            { 
+            try { 
               tipi::store_visitor v(c); 
 
               v.visit(*reinterpret_cast < tipi::layout::element const* > (e),
                 display->find(reinterpret_cast < tipi::layout::element const* > (e))); 
-            } 
 
-            g->send_message(tipi::message(c, tipi::message_display_data)); 
+              g->send_message(tipi::message(c, tipi::message_display_data)); 
+            } 
+            catch (bool b) {
+              // find failed for some reason
+            }
           }
         } 
       }; 

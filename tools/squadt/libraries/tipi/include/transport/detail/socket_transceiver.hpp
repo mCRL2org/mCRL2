@@ -149,8 +149,8 @@ namespace transport {
     /**
      * @param o a transporter to which to deliver data
      **/
-    boost::shared_ptr < socket_transceiver > socket_transceiver::create(boost::shared_ptr < transporter_impl > const& o) {
-      socket_transceiver::ptr t(new socket_transceiver(o));
+    inline boost::shared_ptr < socket_transceiver > socket_transceiver::create(boost::shared_ptr < transporter_impl > const& o) {
+      boost::shared_ptr < socket_transceiver > t(new socket_transceiver(o));
 
       t->this_ptr = boost::weak_ptr < socket_transceiver >(t);
 

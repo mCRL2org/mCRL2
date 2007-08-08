@@ -50,7 +50,7 @@ namespace squadt {
         /** \brief A pointer to the process associated to this listener or 0 */
         process::sptr                                   associated_process;
 
-        /** \brief The event handler that have been registered */
+        /** \brief The event handlers that have been registered */
         handler_map                                     handlers;
 
       private:
