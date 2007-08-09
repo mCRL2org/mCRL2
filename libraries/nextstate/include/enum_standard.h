@@ -29,7 +29,8 @@ typedef struct {
 
 		int *max_vars;
 
-		ATerm opidAnd,eqstr;
+		ATerm opidAnd;
+		ATermIndexedSet eqs;
 		AFun tupAFun;
 		
 		bool (EnumeratorSolutionsStandard::*FindEquality)(ATerm,ATermList,ATerm*,ATerm*);
@@ -104,6 +105,7 @@ class EnumeratorSolutionsStandard : public EnumeratorSolutions
 		void EliminateVars(fs_expr *e);
 		bool IsInner3Eq(ATerm a);
 		bool IsInnerCEq(ATermAppl a);
+		bool FindInnerCEquality_aux(ATerm t);
 		ATerm build_solution_single(ATerm t, ATermList substs);
 		ATermList build_solution2(ATermList vars, ATermList substs);
 		ATermList build_solution(ATermList vars, ATermList substs);

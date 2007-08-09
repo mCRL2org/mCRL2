@@ -132,17 +132,7 @@ ATermList EnumeratorSolutionsStandard::ss_pop()
 
 bool EnumeratorSolutionsStandard::IsInner3Eq(ATerm a)
 {
-	if ( ATisInt(a) )
-	{
-		a = (ATerm) info.rewr_obj->fromRewriteFormat(a);
-	}
-
-	if ( ATisEqual(ATgetArgument((ATermAppl) a,0),info.eqstr) )
-	{
-		return true;
-	} else {
-		return false;
-	}
+	return ATindexedSetGetIndex(info.eqs,a) >= 0;
 }
 
 bool EnumeratorSolutionsStandard::FindInner3Equality(ATerm t, ATermList vars, ATerm *v, ATerm *e)
@@ -190,95 +180,51 @@ bool EnumeratorSolutionsStandard::FindInner3Equality(ATerm t, ATermList vars, AT
 	return false;
 }
 
-//static ATerm *ceqs = NULL; // UNPROTECTED!!! (should be safe though)
-//static int num_ceqs;
-//static int ceqs_size;
-//#define CEQS_STEP 20
 bool EnumeratorSolutionsStandard::IsInnerCEq(ATermAppl a)
 {
-/*	if ( (ceqs == NULL) )
-	{
-		ceqs = (ATerm *) malloc(CEQS_STEP*sizeof(ATerm));
-		ceqs_size = CEQS_STEP;
-		num_ceqs = 0;
-	}
-
-	ATerm b = ATgetArgument(a,0);
-	if ( ATisAppl(b) && gsIsDataVarId((ATermAppl) b) )
-	{
-		return false;
-	}
-	for (int i=0; i<num_ceqs; i++)
-	{
-		if ( ATisEqual(b,ceqs[i]) )
-		{
-			return true;
-		}
-	}
-*/
-	a = info.rewr_obj->fromRewriteFormat((ATerm) a);
-	a = (ATermAppl) ATgetArgument(a,0);
-	a = (ATermAppl) ATgetArgument(a,0);
-
-	if ( ATisEqual(ATgetArgument(a,0),info.eqstr) )
-	{
-/*		if ( num_ceqs >= ceqs_size )
-		{
-			ceqs_size += CEQS_STEP;
-			ceqs = (ATerm *) realloc(ceqs,ceqs_size*sizeof(ATerm));
-		}
-		ceqs[num_ceqs] = (ATerm) a;
-		num_ceqs++;
-*/
-		return true;
-	} else {
-		return false;
-	}
+	return ATindexedSetGetIndex(info.eqs,ATgetArgument(a,0)) >= 0;
 }
 
+static struct { ATermList vars; ATerm *v; ATerm *e; } FindInnerCEquality_struct;
 bool EnumeratorSolutionsStandard::FindInnerCEquality(ATerm t, ATermList vars, ATerm *v, ATerm *e)
 {
-	ATermList s;
-	ATermAppl a;
+	FindInnerCEquality_struct.vars = vars;
+	FindInnerCEquality_struct.v = v;
+	FindInnerCEquality_struct.e = e;
+	return FindInnerCEquality_aux(t);
+}
 
-	s = ATmakeList1((ATerm) t);
-	while ( !ATisEmpty(s) )
+bool EnumeratorSolutionsStandard::FindInnerCEquality_aux(ATerm t)
+{
+	if ( gsIsDataVarId((ATermAppl) t) || (ATgetArity(ATgetAFun((ATermAppl) t)) != 3) )
 	{
-		ATermAppl a1,a2;
+		return false;
+	}
 
-		a = (ATermAppl) ATgetFirst(s);
-		s = ATgetNext(s);
-
-		if ( gsIsDataVarId(a) || (ATgetArity(ATgetAFun(a)) != 3) )
+	if ( ATisEqual(ATgetArgument((ATermAppl) t,0),info.opidAnd) )
+	{
+		return FindInnerCEquality_aux(ATgetArgument((ATermAppl) t,1))
+		    || FindInnerCEquality_aux(ATgetArgument((ATermAppl) t,2));
+	} else if ( IsInnerCEq((ATermAppl) t) ) {
+		ATermAppl a1 = (ATermAppl) ATgetArgument((ATermAppl) t,1);
+		ATermAppl a2 = (ATermAppl) ATgetArgument((ATermAppl) t,2);
+		if ( !ATisEqual(a1,a2) )
 		{
-			continue;
-		}
-
-		if ( ATisEqual(ATgetArgument(a,0),info.opidAnd) )
-		{
-			s = ATinsert(s,ATgetArgument(a,2));
-			s = ATinsert(s,ATgetArgument(a,1));
-		} else if ( IsInnerCEq(a) ) {
-			a1 = (ATermAppl) ATgetArgument(a,1);
-			a2 = (ATermAppl) ATgetArgument(a,2);
-			if ( !ATisEqual(a1,a2) )
+			if ( gsIsDataVarId(a1) && (ATindexOf(FindInnerCEquality_struct.vars,(ATerm) a1,0) >= 0) && !gsOccurs((ATerm) a1,(ATerm) a2) )
 			{
-				if ( gsIsDataVarId(a1) && (ATindexOf(vars,(ATerm) a1,0) >= 0) && !gsOccurs((ATerm) a1,(ATerm) a2) )
-				{
-					*v = (ATerm) a1;
-					*e = (ATerm) a2;
-					return true;
-				}
-				if ( gsIsDataVarId(a2) && (ATindexOf(vars,(ATerm) a2,0) >= 0) && !gsOccurs((ATerm) a2,(ATerm) a1) )
-				{
-					*v = (ATerm) a2;
-					*e = (ATerm) a1;
-					return true;
-				}
+				*FindInnerCEquality_struct.v = (ATerm) a1;
+				*FindInnerCEquality_struct.e = (ATerm) a2;
+				return true;
+			}
+			if ( gsIsDataVarId(a2) && (ATindexOf(FindInnerCEquality_struct.vars,(ATerm) a2,0) >= 0) && !gsOccurs((ATerm) a2,(ATerm) a1) )
+			{
+				*FindInnerCEquality_struct.v = (ATerm) a2;
+				*FindInnerCEquality_struct.e = (ATerm) a1;
+				return true;
 			}
 		}
 	}
-
+	
 	return false;
 }
 
@@ -632,15 +578,29 @@ EnumeratorStandard::EnumeratorStandard(ATermAppl spec, Rewriter *r, bool clean_u
 		info.build_solution_aux = &EnumeratorSolutionsStandard::build_solution_aux_inner3;
 		info.opidAnd = info.rewr_obj->toRewriteFormat(gsMakeOpIdAnd());
 		ATprotect(&info.opidAnd);
-		info.eqstr = (ATerm) gsString2ATermAppl("==");
-		ATprotect(&info.eqstr);
+		info.eqs = ATindexedSetCreate(100,50);
+		for (ATermList maps = ATLgetArgument(ATAgetArgument(data_spec,2),0); !ATisEmpty(maps); maps=ATgetNext(maps))
+		{
+			if ( !strcmp(ATgetName(ATgetAFun(ATgetArgument(ATAgetFirst(maps),0))),"==") )
+			{
+				ATbool b;
+				ATindexedSetPut(info.eqs,info.rewr_obj->toRewriteFormat(ATAgetFirst(maps)),&b);
+			}
+		}
 	} else {
 		info.FindEquality = &EnumeratorSolutionsStandard::FindInnerCEquality;
 		info.build_solution_aux = &EnumeratorSolutionsStandard::build_solution_aux_innerc;
 		info.opidAnd = ATgetArgument((ATermAppl) info.rewr_obj->toRewriteFormat(gsMakeOpIdAnd()),0);
 		ATprotect(&info.opidAnd);
-		info.eqstr = (ATerm) gsString2ATermAppl("==");
-		ATprotect(&info.eqstr);
+		info.eqs = ATindexedSetCreate(100,50);
+		for (ATermList maps = ATLgetArgument(ATAgetArgument(data_spec,2),0); !ATisEmpty(maps); maps=ATgetNext(maps))
+		{
+			if ( !strcmp(ATgetName(ATgetAFun(ATgetArgument(ATAgetFirst(maps),0))),"==") )
+			{
+				ATbool b;
+				ATindexedSetPut(info.eqs,ATgetArgument((ATermAppl) info.rewr_obj->toRewriteFormat(ATAgetFirst(maps)),0),&b);
+			}
+		}
 	}
 
 	info.tupAFun = ATmakeAFun("@tup@",2,ATfalse);
@@ -665,7 +625,7 @@ EnumeratorStandard::~EnumeratorStandard()
 	ATunprotect(&info.rewr_false);
 
 	ATunprotect(&info.opidAnd);
-	ATunprotect(&info.eqstr);
+	ATindexedSetDestroy(info.eqs);
 	
 	ATunprotectAFun(info.tupAFun);
 
