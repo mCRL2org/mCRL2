@@ -354,7 +354,7 @@ static void distribute_and(const pbes_expression &expr,atermpp::set < pbes_expre
 static pbes_expression make_conjunction(const atermpp::set < pbes_expression> &conjunction_set)
 { pbes_expression t=pbes_expr::true_();
 
-  for(atermpp::set < pbes_expression>::iterator i=conjunction_set.begin();
+  for(atermpp::set < pbes_expression>::const_iterator i=conjunction_set.begin();
           i!=conjunction_set.end() ; i++)
   { if (pbes_expr::is_true(t))
     { t=*i;
@@ -384,7 +384,7 @@ static void distribute_or(const pbes_expression &expr,atermpp::set < pbes_expres
 static pbes_expression make_disjunction(const atermpp::set < pbes_expression> &disjunction_set)
 { pbes_expression t=pbes_expr::false_();
 
-  for(atermpp::set < pbes_expression>::iterator i=disjunction_set.begin();
+  for(atermpp::set < pbes_expression>::const_iterator i=disjunction_set.begin();
           i!=disjunction_set.end() ; i++)
   { if (pbes_expr::is_false(t))
     { t=*i;
