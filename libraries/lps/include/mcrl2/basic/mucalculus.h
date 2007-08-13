@@ -141,16 +141,20 @@ using atermpp::list_arg2;
   }
   
   /// \brief Returns the universal quantification of the formula p over the variables in l
+  /// \pre l may not be empty
   inline
   action_formula forall(data_variable_list l, action_formula p)
   {
+    assert(!l.empty());
     return action_formula(gsMakeActForall(l, p));
   }
 
   /// \brief Returns the existential quantification of the formula p over the variables in l
+  /// \pre l may not be empty
   inline
   action_formula exists(data_variable_list l, action_formula p)
   {
+    assert(!l.empty());
     return action_formula(gsMakeActExists(l, p));
   }
 
@@ -463,16 +467,20 @@ using atermpp::list_arg2;
   }
   
   /// \brief Returns the existential quantification of the formula p over the variables in l
+  /// \pre l may not be empty
   inline
   state_formula exists(data_variable_list l, state_formula p)
   {
+    assert(!l.empty());
     return state_formula(gsMakeStateExists(l, p));
   }
   
   /// \brief Returns the universal quantification of the formula p over the variables in l
+  /// \pre l may not be empty
   inline
   state_formula forall(data_variable_list l, state_formula p)
   {
+    assert(!l.empty());
     return state_formula(gsMakeStateForall(l, p));
   }
 

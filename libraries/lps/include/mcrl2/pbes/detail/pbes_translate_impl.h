@@ -277,9 +277,10 @@ void forall_permutations(Iter first, Iter last, Function f)
   }
 }
 
-// TODO: check if this assumption is correct: Precondition: a and b are sorted
+/// Returns true if the actions in a and b have the same names, and the same sorts.
+/// \pre a and b are sorted w.r.t. to the names of the actions.
 inline
-bool equal_names(const std::vector<action>& a, const std::vector<action>& b)
+bool equal_action_signatures(const std::vector<action>& a, const std::vector<action>& b)
 {
   if(a.size() != b.size())
   {
@@ -288,7 +289,7 @@ bool equal_names(const std::vector<action>& a, const std::vector<action>& b)
   std::vector<action>::const_iterator i, j;
   for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
   {
-    if (i->label().name() != j->label().name())
+    if (i->label().name() != j->label().name() || i->label().sorts() != j->label().sorts())
       return false;
   }
   return true;
@@ -352,7 +353,7 @@ pbes_expression equal_data_parameters(action_list a, action_list b)
   std::sort(va.begin(), va.end(), compare_action_name());
   std::sort(vb.begin(), vb.end(), compare_action_name());
 
-  if (!equal_names(va, vb))
+  if (!equal_action_signatures(va, vb))
     return p::false_();
 
   // compute the intervals of a with equal names
@@ -422,7 +423,7 @@ pbes_expression not_equal_data_parameters(action_list a, action_list b)
   std::sort(va.begin(), va.end(), compare_action_name());
   std::sort(vb.begin(), vb.end(), compare_action_name());
 
-  if (!equal_names(va, vb))
+  if (!equal_action_signatures(va, vb))
     return p::true_();
 
   // compute the intervals of a with equal names
@@ -705,10 +706,7 @@ namespace pbes_timed
         rhs = rhs.substitute(make_substitution(T, ti));
         rhs = rhs.substitute(assignment_list_substitution(gi));
 
-        pbes_expression p = or_(or_(or_(p1, p2), p3), rhs);
-        if (y.size() > 0) {
-          p = forall(y, p);
-        }
+        pbes_expression p = forall(y, or_(or_(or_(p1, p2), p3), rhs));
         v.push_back(p);
       }
       return multi_and(v.begin(), v.end());
@@ -742,10 +740,7 @@ namespace pbes_timed
         rhs = rhs.substitute(make_substitution(T, ti));
         rhs = rhs.substitute(assignment_list_substitution(gi));
 
-        pbes_expression p = and_(and_(and_(p1, p2), p3), rhs);
-        if (y.size() > 0) {
-          p = exists(y, p);
-        }
+        pbes_expression p = exists(y, and_(and_(and_(p1, p2), p3), rhs));
         v.push_back(p);
       }
       return multi_or(v.begin(), v.end());
@@ -972,10 +967,7 @@ namespace pbes_untimed
         pbes_expression p2 = val(data_expr::not_(ci));
         rhs = rhs.substitute(assignment_list_substitution(gi));
 
-        pbes_expression p = or_(or_(p1, p2), rhs);
-        if (y.size() > 0) {
-          p = forall(y, p);
-        }
+        pbes_expression p = forall(y, or_(or_(p1, p2), rhs));
         v.push_back(p);
       }
       return multi_and(v.begin(), v.end());
@@ -1004,10 +996,7 @@ namespace pbes_untimed
         pbes_expression p2 = val(ci);
         rhs = rhs.substitute(assignment_list_substitution(gi));
 
-        pbes_expression p = and_(and_(p1, p2), rhs);
-        if (y.size() > 0) {
-          p = exists(y, p);
-        }
+        pbes_expression p = exists(y, and_(and_(p1, p2), rhs));
         v.push_back(p);
       }
       return multi_or(v.begin(), v.end());

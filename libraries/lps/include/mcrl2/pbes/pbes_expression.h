@@ -163,17 +163,23 @@ pbes_expression val(data_expression d)
       return pbes_expression(gsMakePBESOr(p,q));
   }
   
-  /// \brief Returns the universal quantification of the expression p over the variables in l
+  /// \brief Returns the universal quantification of the expression p over the variables in l.
+  /// If l is empty, p is returned.
   inline
   pbes_expression forall(data_variable_list l, pbes_expression p)
   {
+    if (l.empty())
+      return p;
     return pbes_expression(gsMakePBESForall(l, p));
   }
   
-  /// \brief Returns the existential quantification of the expression p over the variables in l
+  /// \brief Returns the existential quantification of the expression p over the variables in l.
+  /// If l is empty, p is returned.
   inline
   pbes_expression exists(data_variable_list l, pbes_expression p)
   {
+    if (l.empty())
+      return p;
     return pbes_expression(gsMakePBESExists(l, p));
   }
 
