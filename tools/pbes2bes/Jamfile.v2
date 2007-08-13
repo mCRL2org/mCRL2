@@ -1,6 +1,8 @@
 project toolset/pbes2bes
-       : build-dir $(BUILD_TOP)/pbes2bes
-       ;
+   : build-dir $(BUILD_TOP)/pbes2bes
+   : requirements
+       <source>/libraries//parser
+   ;
 
 obj sort_functions.o
        : sort_functions.cpp
