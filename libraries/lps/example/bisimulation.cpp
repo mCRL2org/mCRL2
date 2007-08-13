@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
   try
   {
     M.load(argv[1]);
-    S.load(argv[1]);
+    S.load(argv[2]);
     pbes result = strong_bisimulation(M, S);
     result.save(argv[3]);
   }

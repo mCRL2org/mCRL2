@@ -77,7 +77,8 @@ pbes strong_bisimulation(const specification& M, const specification& S)
   eqn.push_back(pbes_equation(fixpoint_symbol::nu(), Xsm, sm_formula));
   
   data_specification data = M.data();
-  return pbes(data, eqn, Xms_init);
+  propositional_variable_instantiation init(ms_name, M.initial_process().state() + S.initial_process().state());
+  return pbes(data, eqn, init);
 }
 
 } // namespace lps
