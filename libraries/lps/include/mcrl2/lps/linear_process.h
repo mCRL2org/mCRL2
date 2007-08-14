@@ -120,7 +120,7 @@ class linear_process: public aterm_appl
       for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
       {
         std::set<data_variable> summation_variables = detail::make_set(i->summation_variables());
-        std::set<data_variable> used_variables = find_variables(make_list(i->condition(), i->actions(), i->time()));
+        std::set<data_variable> used_variables = find_variables(make_list(i->condition(), i->actions(), i->time(), i->assignments()));
         std::set<data_variable> bound_variables = detail::set_union(parameters, summation_variables);
         std::set<data_variable> free_variables = detail::set_difference(used_variables, bound_variables);
         result.insert(free_variables.begin(), free_variables.end());
