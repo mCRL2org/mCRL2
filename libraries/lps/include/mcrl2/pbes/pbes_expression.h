@@ -64,7 +64,7 @@ class pbes_expression: public aterm_appl
     /// The Substitution object must supply the method aterm operator()(aterm).
     ///
     template <typename Substitution>
-    pbes_expression substitute(Substitution f)
+    pbes_expression substitute(Substitution f) const
     {
       return pbes_expression(f(*this));
     }     
