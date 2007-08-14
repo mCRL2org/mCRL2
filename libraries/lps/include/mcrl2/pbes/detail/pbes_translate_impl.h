@@ -594,6 +594,8 @@ namespace pbes_timed
       return sat_top(a, not_arg(b));
     } else if (is_and(b)) {
       return p::or_(sat_bot(a, lhs(b)), sat_bot(a, rhs(b)));
+    } else if (is_or(b)) {
+      return p::and_(sat_bot(a, lhs(b)), sat_bot(a, rhs(b)));
     } else if (is_forall(b)) {
       data_variable_list x = quant_vars(b);
       assert(x.size() > 0);
@@ -632,6 +634,8 @@ namespace pbes_timed
       return sat_bot(a, not_arg(b));
     } else if (is_and(b)) {
       return p::and_(sat_top(a, lhs(b)), sat_top(a, rhs(b)));
+    } else if (is_or(b)) {
+      return p::or_(sat_top(a, lhs(b)), sat_top(a, rhs(b)));
     } else if (is_forall(b)) {
       data_variable_list x = quant_vars(b);
       assert(x.size() > 0);
@@ -851,6 +855,8 @@ namespace pbes_untimed
       return sat_top(a, not_arg(b));
     } else if (is_and(b)) {
       return p::or_(sat_bot(a, lhs(b)), sat_bot(a, rhs(b)));
+    } else if (is_or(b)) {
+      return p::and_(sat_bot(a, lhs(b)), sat_bot(a, rhs(b)));
     } else if (is_forall(b)) {
       data_variable_list x = quant_vars(b);
       action_formula alpha = quant_form(b);
@@ -891,6 +897,8 @@ namespace pbes_untimed
       return sat_bot(a, not_arg(b));
     } else if (is_and(b)) {
       return p::and_(sat_top(a, lhs(b)), sat_top(a, rhs(b)));
+    } else if (is_or(b)) {
+      return p::or_(sat_top(a, lhs(b)), sat_top(a, rhs(b)));
     } else if (is_forall(b)) {
       data_variable_list x = quant_vars(b);
       action_formula alpha = quant_form(b);

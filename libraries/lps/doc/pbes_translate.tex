@@ -290,8 +290,12 @@ $
 & \isdef & \mathbf{Sat}_\bot(a \at t, \alpha)\\
 \mathbf{Sat}_\top(a \at t, \alpha \wedge \beta)
 & \isdef & \mathbf{Sat}_\top(a \at t, \alpha) \wedge \mathbf{Sat}_\top(a \at t, \beta)\\
+\mathbf{Sat}_\top(a \at t, \alpha \vee \beta)
+& \isdef & \mathbf{Sat}_\top(a \at t, \alpha) \vee \mathbf{Sat}_\top(a \at t, \beta)\\
 \mathbf{Sat}_\top(a \at t, \forall{x {:} D}. \alpha)
 & \isdef & \forall{y {:} D}. (\mathbf{Sat}_\top(a \at t, \alpha[x := y])\\
+\mathbf{Sat}_\top(a \at t, \exists{x {:} D}. \alpha)
+& \isdef & \exists{y {:} D}. (\mathbf{Sat}_\top(a \at t, \alpha[x := y])\\
 \\
 \mathbf{Sat}_\bot(a \at t, b)
 & \isdef & \left\{%
@@ -310,8 +314,12 @@ true & \text{otherwise}%
 & \isdef & \mathbf{Sat}_\top(a \at t, \alpha)\\
 \mathbf{Sat}_\bot(a \at t, \alpha \wedge \beta)
 & \isdef & \mathbf{Sat}_\bot(a \at t, \alpha) \vee \mathbf{Sat}_\bot(a \at t, \beta)\\
+\mathbf{Sat}_\bot(a \at t, \alpha \vee \beta)
+& \isdef & \mathbf{Sat}_\bot(a \at t, \alpha) \wedge \mathbf{Sat}_\bot(a \at t, \beta)\\
 \mathbf{Sat}_\bot(a \at t, \forall{x {:} D}. \alpha)
 & \isdef & \exists{y {:} D}. \mathbf{Sat}_\bot(a \at t, \alpha[x := y])\\
+\mathbf{Sat}_\bot(a \at t, \exists{x {:} D}. \alpha)
+& \isdef & \forall{y {:} D}. \mathbf{Sat}_\bot(a \at t, \alpha[x := y])\\
 \end{tightarray}
 $
 }

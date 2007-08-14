@@ -7,8 +7,9 @@ Action formulas are defined by the following grammar:
 %               \mid \alpha \land \alpha
 %               \mid \forall x{:}D.\alpha \mid a(d) \mid \alpha\at t.
 \alpha & ::= & c \mid \neg \alpha
-               \mid \alpha \land \alpha
-               \mid \forall x{:}D.\alpha \mid a(d) \mid \alpha\at t.
+               \mid \alpha \land \alpha \mid \alpha \lor \alpha
+               \mid \forall x{:}D.\alpha \mid \exists x{:}D.\alpha
+               \mid a(d) \mid \alpha\at t.
 \end{tightarray}\]
 
 \subsection{parameterised boolean equations}
