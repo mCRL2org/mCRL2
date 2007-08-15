@@ -30,6 +30,7 @@
 
 #include <assert.h>
 #include <aterm2.h>
+#include "data_reconstruct.h"
 #include "libprint_types.h"
 #include "libstruct.h"
 #include "print/messaging.h"
@@ -270,33 +271,6 @@ static void PRINT_FUNC(PrintListEnumElts)(PRINT_OUTTYPE OutStream,
        - the elements of the list are printed as a comma-separated list
 */
 
-static void PRINT_FUNC(PrintPos)(PRINT_OUTTYPE OutStream,
-  const ATermAppl PosExpr, int PrecLevel);
-/*Pre: OutStream points to a stream to which can be written
-       PosExpr is a data expression of sort Pos
-       PrecLevel indicates the precedence level of the context of the part
-       0 <= PrecLevel
-  Ret: A textual representation of the expression is written to OutStream, in
-       in which:
-       - PrecLevel is taken into account
-       - each constant is represented by its corresponding positive number
-       - each non-constant is of the form cDub(b_1)(...(cDub(b_n)(p))) and is
-         represented by 2^n*p + 2^(n-1)*b_n + ... + b1
-*/
-
-static void PRINT_FUNC(PrintPosMult)(PRINT_OUTTYPE OutStream,
-  const ATermAppl PosExpr, int PrecLevel, char *Mult);
-/*Pre: OutStream points to a stream to which can be written
-       PosExpr is a data expression of sort Pos
-       PrecLevel indicates the precedence level of the context of the part
-       0 <= PrecLevel
-       Mult is the string representation of a natural number
-  Ret: A textual representation of Mult * PosExpr is written to OutStream, i.e.
-       if PosExpr is the form cDub(b_1)(...(cDub(b_n)(p))), then it is
-       represented by (Mult*2^n)*p + (Mult*2^(n-1))*b_n + ... + Mult*b1
-       Also PrecLevel is taken into account
-*/
-
 static ATermList gsGroupDeclsBySort(const ATermList Decls);
 /*Pre: Decls is an ATermList containing declarations of the form
        Decl(Name, Sort) from the internal format
@@ -328,12 +302,6 @@ static bool gsHasConsistentContextList(const ATermTable DataVarDecls,
 
 static bool gsIsListEnumImpl(ATermAppl DataExpr);
 //Ret: DataExpr is the implementation of a list enumeration
-
-static bool gsIsOpIdSetBagComp(ATermAppl Term);
-//Ret: DataExpr is an operation identifier of a set/bag comprehension
-
-static bool gsIsOpIdQuant(ATermAppl Term);
-//Ret: DataExpr is an operation identifier of a universal/existential quantifier
 
 static bool gsIsOpIdPrefix(ATermAppl Term);
 //Ret: DataExpr is a prefix operation identifier
@@ -379,13 +347,11 @@ inline static void PRINT_FUNC(dbg_prints)(const char *Value)
   assert(false);
 #endif
 #if defined(PRINT_C)
-  if (gsDebug) fprintf(stderr, Value);
+//  if (gsDebug) fprintf(stderr, Value);
 #elif defined(PRINT_CXX)
-  if (gsDebug) std::cerr << Value;
+//  if (gsDebug) std::cerr << Value;
 #endif
 }
-
-//implementation
 
 void PRINT_FUNC(PrintPart_)(PRINT_OUTTYPE OutStream, const ATerm Part,
   t_pp_format pp_format)
@@ -398,12 +364,18 @@ void PRINT_FUNC(PrintPart_)(PRINT_OUTTYPE OutStream, const ATerm Part,
     OutStream << ATwriteToString(Part) << std::endl;
 #endif
   } else {
-    if (ATgetType(Part) == AT_APPL) {
-      PRINT_FUNC(PrintPart_Appl)(OutStream, (ATermAppl) Part, pp_format,
+    ATerm ReconstructedPart;
+    if (gsIsSpecV1((ATermAppl) Part)) {
+      ReconstructedPart = reconstruct_exprs(Part, (ATermAppl) Part);
+    } else {
+      ReconstructedPart = reconstruct_exprs(Part, NULL);
+    }
+    if (ATgetType(ReconstructedPart) == AT_APPL) {
+      PRINT_FUNC(PrintPart_Appl)(OutStream, (ATermAppl) ReconstructedPart, pp_format,
         false, 0);
-    } else if (ATgetType(Part) == AT_LIST) {
+    } else if (ATgetType(ReconstructedPart) == AT_LIST) {
       PRINT_FUNC(fprints)(OutStream, "[");
-      PRINT_FUNC(PrintPart_List)(OutStream, (ATermList) Part,
+      PRINT_FUNC(PrintPart_List)(OutStream, (ATermList) ReconstructedPart,
         pp_format, false, 0, "", ", ");
       PRINT_FUNC(fprints)(OutStream, "]");
     } else {
@@ -1108,46 +1080,6 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(PrintPart_BagEnum)(OutStream, Args,
           pp_format, ShowSorts, 0, NULL, ", ");
         PRINT_FUNC(fprints)(OutStream, "}");
-      } else if (gsIsOpIdSetBagComp(Head) && ArgsLength == 1) {
-        //set/bag comprehension
-        PRINT_FUNC(dbg_prints)("printing set/bag comprehension\n");
-        PRINT_FUNC(fprints)(OutStream, "{ ");
-        ATermAppl Body = ATAelementAt(Args, 0);
-        // it should be safe to do the assignment to Var!
-        assert(ATgetLength(ATLgetArgument(gsGetSort(Body), 0)) == 1);
-        ATermAppl Var =
-          gsMakeDataVarId(gsFreshString2ATermAppl("x", (ATerm) Body, true),
-            ATAgetFirst(ATLgetArgument(gsGetSort(Body), 0))
-          );
-        PRINT_FUNC(PrintDecl)(OutStream, Var, pp_format, true);
-        PRINT_FUNC(fprints)(OutStream, " | ");        
-        Body = gsMakeDataAppl1(Body, Var);
-        PRINT_FUNC(PrintDataExpr)(OutStream, Body, pp_format, ShowSorts, 0);
-        PRINT_FUNC(fprints)(OutStream, " }");
-      } else if (gsIsOpIdQuant(Head) && ArgsLength == 1) {
-        //quantification
-        if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, "(");
-        PRINT_FUNC(PrintPart_Appl)(OutStream, Head,
-          pp_format, ShowSorts, PrecLevel);
-        PRINT_FUNC(fprints)(OutStream, " ");
-        ATermAppl Body = ATAelementAt(Args, 0);
-        ATermList Sorts = ATLgetArgument(gsGetSort(Body), 0);
-        ATermList Vars = ATmakeList0();
-        ATermList Context = ATmakeList1((ATerm) Body);
-        while (!ATisEmpty(Sorts))
-        {
-          ATermAppl Var = gsMakeDataVarId(gsFreshString2ATermAppl("x", (ATerm) Context, true),
-              ATAgetFirst(Sorts));
-          Context = ATinsert(Context, (ATerm) Var);
-          Vars = ATinsert(Vars, (ATerm) Var); 
-          Sorts = ATgetNext(Sorts);
-        }
-        Vars = ATreverse(Vars);
-        PRINT_FUNC(PrintDecls)(OutStream, Vars, pp_format, NULL, ", ");
-        PRINT_FUNC(fprints)(OutStream, ". ");        
-        Body = gsMakeDataAppl(Body, Vars);
-        PRINT_FUNC(PrintDataExpr)(OutStream, Body, pp_format, ShowSorts, 1);
-        if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, ")");
       } else if (gsIsOpIdPrefix(Head) && ArgsLength == 1) {
         //print prefix expression
         PRINT_FUNC(dbg_prints)("printing prefix expression\n");
@@ -1173,11 +1105,6 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
           pp_format, ShowSorts, gsPrecOpIdInfixRight(HeadName));
         if (PrecLevel > gsPrecOpIdInfix(HeadName))
           PRINT_FUNC(fprints)(OutStream, ")");
-     } else if (ATisEqual(Head, gsMakeOpIdC1()) ||
-          (ATisEqual(Head, gsMakeOpIdCDub()) && ArgsLength == 2)) {
-        //print positive number
-        PRINT_FUNC(dbg_prints)("printing positive number\n");
-        PRINT_FUNC(PrintPos)(OutStream, DataExpr, PrecLevel);
       } else if (ATisEqual(Head, gsMakeOpIdC0())) {
         //print 0
         PRINT_FUNC(fprints)(OutStream, "0");
@@ -1762,75 +1689,6 @@ void PRINT_FUNC(PrintListEnumElts)(PRINT_OUTTYPE OutStream,
   }
 }
 
-void PRINT_FUNC(PrintPos)(PRINT_OUTTYPE OutStream, const ATermAppl PosExpr, int PrecLevel)
-{
-  if (gsIsPosConstant(PosExpr)) {
-    char *PosValue = gsPosValue(PosExpr);
-    PRINT_FUNC(fprints)(OutStream, PosValue);
-    free(PosValue);
-  } else {
-    PRINT_FUNC(PrintPosMult)(OutStream, PosExpr, PrecLevel, "1");
-  }
-}
-
-void PRINT_FUNC(PrintPosMult)(PRINT_OUTTYPE OutStream, const ATermAppl PosExpr, int PrecLevel,
-  char *Mult)
-{
-  ATermAppl Head = gsGetDataExprHead(PosExpr);
-  ATermList Args = gsGetDataExprArgs(PosExpr);
-  if (ATisEqual(PosExpr, gsMakeOpIdC1())) {
-    //PosExpr is 1; print Mult
-    PRINT_FUNC(fprints)(OutStream, Mult);
-  } else if (ATisEqual(Head, gsMakeOpIdCDub())) {
-    //PosExpr is of the form cDub(b,p); print (Mult*2)*v(p) + Mult*v(b)
-    ATermAppl BoolArg = ATAelementAt(Args, 0);
-    ATermAppl PosArg = ATAelementAt(Args, 1);
-    char *NewMult = gsStringDub(Mult, 0);
-    if (ATisEqual(BoolArg, gsMakeDataExprFalse())) {
-      //Mult*v(b) = 0
-      PRINT_FUNC(PrintPosMult)(OutStream, PosArg, PrecLevel, NewMult);
-    } else {
-      //Mult*v(b) > 0
-      if (PrecLevel > gsPrecOpIdInfix(gsMakeOpIdNameAdd())) {
-        PRINT_FUNC(fprints)(OutStream, "(");
-      }
-      //print (Mult*2)*v(p)
-      PRINT_FUNC(PrintPosMult)(OutStream, PosArg, 
-        gsPrecOpIdInfixLeft(gsMakeOpIdNameAdd()), NewMult);
-      PRINT_FUNC(fprints)(OutStream, " + ");
-      if (ATisEqual(BoolArg, gsMakeDataExprTrue())) {
-        //Mult*v(b) = Mult
-        PRINT_FUNC(fprints)(OutStream, Mult);
-      } else if (strcmp(Mult, "1") == 0) {
-        //Mult*v(b) = v(b)
-        PRINT_FUNC(PrintPart_Appl)(OutStream, BoolArg,
-          ppDefault, false, gsPrecOpIdInfixRight(gsMakeOpIdNameAdd()));
-      } else {
-        //print Mult*v(b)
-        PRINT_FUNC(fprints)(OutStream, Mult);
-        PRINT_FUNC(fprints)(OutStream, "*");
-        PRINT_FUNC(PrintPart_Appl)(OutStream, BoolArg,
-          ppDefault, false, gsPrecOpIdInfixRight(gsMakeOpIdNameMult()));
-      }
-      if (PrecLevel > gsPrecOpIdInfix(gsMakeOpIdNameAdd())) {
-        PRINT_FUNC(fprints)(OutStream, ")");
-      }
-    }
-    free(NewMult);
-  } else {
-    //PosExpr is not a Pos constructor
-    if (strcmp(Mult, "1") == 0) {
-      PRINT_FUNC(PrintPart_Appl)(OutStream, PosExpr,
-        ppDefault, false, PrecLevel);
-    } else {
-      PRINT_FUNC(fprints)(OutStream, Mult);
-      PRINT_FUNC(fprints)(OutStream, "*");
-      PRINT_FUNC(PrintPart_Appl)(OutStream, PosExpr,
-        ppDefault, false, gsPrecOpIdInfixRight(gsMakeOpIdNameMult()));
-    }
-  }
-}
-
 ATermList gsGroupDeclsBySort(const ATermList Decls)
 {
   int DeclsLength = ATgetLength(Decls);
@@ -1932,24 +1790,6 @@ bool gsIsListEnumImpl(ATermAppl DataExpr)
   } else {
     return ATisEqual(HeadName, gsMakeOpIdNameEmptyList());
   }
-}
-
-bool gsIsOpIdSetBagComp(ATermAppl Term)
-{
-  if (!gsIsOpId(Term)) {
-    return false;
-  }
-  ATermAppl OpIdName = ATAgetArgument(Term, 0);
-  return (OpIdName == gsMakeOpIdNameSetComp()) || (OpIdName == gsMakeOpIdNameBagComp());
-}
-
-bool gsIsOpIdQuant(ATermAppl Term)
-{
-  if (!gsIsOpId(Term)) {
-    return false;
-  }
-  ATermAppl OpIdName = ATAgetArgument(Term, 0);
-  return (OpIdName == gsMakeOpIdNameForall()) || (OpIdName == gsMakeOpIdNameExists());
 }
 
 bool gsIsOpIdPrefix(ATermAppl Term)
@@ -2127,3 +1967,5 @@ int gsPrecOpIdInfixRight(ATermAppl OpIdName)
     return -1;
   }
 }
+
+

@@ -2185,6 +2185,7 @@ ATermAppl gsMakeDataExprGTESubtB(ATermAppl DataExprBit, ATermAppl DataExprLHS,
 ATermAppl gsMakeDataExprMult(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
   assert(ATisEqual(gsGetSort(DataExprLHS), gsGetSort(DataExprRHS)));
+  //assert(ATisEqual(gsGetSortExprResult(gsGetSort(DataExprLHS)), gsGetSortExprResult(gsGetSort(DataExprRHS))));
   return gsMakeDataAppl2(gsMakeOpIdMult(gsGetSort(DataExprLHS)),
     DataExprLHS, DataExprRHS);
 }
@@ -3034,43 +3035,99 @@ bool gsIsDataExprNumber(ATermAppl DataExpr)
 
 bool gsIsDataExprListEnum(ATermAppl DataExpr)
 {
-  assert(gsIsDataExpr(DataExpr));
   if (gsIsDataAppl(DataExpr)) {
     DataExpr = ATAgetArgument(DataExpr, 0);
-  }
-  if (gsIsOpId(DataExpr)) {
-    ATermAppl Name = ATAgetArgument(DataExpr, 0);
-    return Name == gsMakeOpIdNameListEnum();
+    if (gsIsOpId(DataExpr)) {
+      return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameListEnum());
+    }
   }
   return false;
 }
 
 bool gsIsDataExprSetEnum(ATermAppl DataExpr)
 {
-  assert(gsIsDataExpr(DataExpr));
   if (gsIsDataAppl(DataExpr)) {
     DataExpr = ATAgetArgument(DataExpr, 0);
-  }
-  if (gsIsOpId(DataExpr)) {
-    ATermAppl Name = ATAgetArgument(DataExpr, 0);
-    return Name == gsMakeOpIdNameSetEnum();
+    if (gsIsOpId(DataExpr)) {
+      return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameSetEnum());
+    }
   }
   return false;
 }
 
 bool gsIsDataExprBagEnum(ATermAppl DataExpr)
 {
-  assert(gsIsDataExpr(DataExpr));
   if (gsIsDataAppl(DataExpr)) {
     DataExpr = ATAgetArgument(DataExpr, 0);
-  }
-  if (gsIsOpId(DataExpr)) {
-    ATermAppl Name = ATAgetArgument(DataExpr, 0);
-    return Name == gsMakeOpIdNameBagEnum();
+    if (gsIsOpId(DataExpr)) {
+      return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameBagEnum());
+    }
   }
   return false;
 }
 
+bool gsIsDataExprSetComp(ATermAppl DataExpr)
+{
+  if (gsIsDataAppl(DataExpr)) {
+    DataExpr = ATAgetArgument(DataExpr, 0);
+    if (gsIsOpId(DataExpr)) {
+      return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameSetComp());
+    }
+  }
+  return false;
+}
+
+bool gsIsDataExprBagComp(ATermAppl DataExpr)
+{
+  if (gsIsDataAppl(DataExpr)) {
+    DataExpr = ATAgetArgument(DataExpr, 0);
+    if (gsIsOpId(DataExpr)) {
+      return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameBagComp());
+    }
+  }
+  return false;
+}
+
+bool gsIsDataExprForall(ATermAppl DataExpr)
+{
+  if (gsIsDataAppl(DataExpr)) {
+    DataExpr = ATAgetArgument(DataExpr, 0);
+    if (gsIsOpId(DataExpr)) {
+      return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameForall());
+    }
+  }
+  return false;
+}
+
+bool gsIsDataExprExists(ATermAppl DataExpr)
+{
+  if (gsIsDataAppl(DataExpr)) {
+    DataExpr = ATAgetArgument(DataExpr, 0);
+    if (gsIsOpId(DataExpr)) {
+      return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameExists());
+    }
+  }
+  return false;
+}
+
+bool gsIsDataExprC1(ATermAppl DataExpr)
+{
+  if (gsIsOpId(DataExpr)) {
+    return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameC1());
+  } 
+  return false;
+}
+
+bool gsIsDataExprCDub(ATermAppl DataExpr)
+{
+  if (gsIsDataAppl(DataExpr)) {
+    DataExpr = ATAgetArgument(DataExpr, 0);
+    if (gsIsOpId(DataExpr)) {
+      return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameCDub());
+    }
+  }
+  return false;
+}
 
 //Multiactions
 //------------

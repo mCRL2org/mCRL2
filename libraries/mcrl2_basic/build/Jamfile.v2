@@ -13,7 +13,7 @@ rule prepend ( prefix : elements * ) {
   return $(prefix)$(elements) ;
 }
 
-local STRUCT_SOURCES = [ prepend struct/ : libstruct libstruct_core ] ; 
+local STRUCT_SOURCES = [ prepend struct/ : libstruct libstruct_core libstruct_ir ] ; 
 
 lib struct
        : $(STRUCT_SOURCES).o
@@ -24,7 +24,7 @@ lib struct
          <dependency>/libraries/utilities//aterm-extension
        ;
 
-local PRINT_SOURCES = [ prepend print/ : libprint libprint_c messaging ] ;
+local PRINT_SOURCES = [ prepend print/ : libprint libprint_c messaging data_reconstruct ] ;
 
 lib print
        : $(PRINT_SOURCES).o

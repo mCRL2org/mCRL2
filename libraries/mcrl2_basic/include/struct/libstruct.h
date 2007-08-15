@@ -1333,6 +1333,32 @@ bool gsIsDataExprBagEnum(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: the data expression is a bag enumeration
 
+bool gsIsDataExprSetComp(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: the data expression is a set comprehension
+
+bool gsIsDataExprBagComp(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: the data expression is a bag comprehension
+
+bool gsIsDataExprForall(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: the data expression is the implementation of
+//     a universal quantification.
+
+bool gsIsDataExprExists(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: the data expression is the implementation of
+//     an existential quantification.
+
+bool gsIsDataExprC1(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: the data expression is a constructor for 1
+
+bool gsIsDataExprCDub(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: the data expression is a constructor CDub.
+
 //Multiactions
 //------------
 
@@ -1353,7 +1379,7 @@ bool gsIsProcExpr(ATermAppl Term);
 //--------------------
 
 bool gsIsStateFrm(ATermAppl Term);
-//Pre: Term is not NULL
+
 //Ret: Term is a state formula
 
 bool gsIsRegFrm(ATermAppl Term);

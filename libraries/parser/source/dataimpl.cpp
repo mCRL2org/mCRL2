@@ -13,6 +13,7 @@
 
 #include "dataimpl.h"
 #include "libstruct.h"
+#include "libstruct_ir.h"
 #include "print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
@@ -127,29 +128,6 @@ static ATermAppl impl_bag_enum(ATermList elts, ATermAppl sort_expr);
 //Ret: Implementation of the bag enumeration of the elements in elts with
 //     result sort sort_expr
 
-static ATermList get_free_vars(ATermAppl data_expr);
-//Pre: data_expr is a data expression that adheres to the internal syntax after
-//     type checking
-//Ret: The free variables in data_expr
-
-static void get_free_vars_appl(ATermAppl data_expr, ATermList bound_vars,
-  ATermList* p_free_vars);
-//Pre: data_expr is a data expression or a bag enumeration element that adheres
-//     to the internal format after type checking
-//     bound_vars and *p_free_vars are lists of data variables, and represent the
-//     bound/free variables of the context of data_expr
-//Post:*p_free_vars is extended with the free variables in data_expr that did not
-//     already occur in *p_free_vars or bound_vars
-
-static void get_free_vars_list(ATermList data_exprs, ATermList bound_vars,
-  ATermList* p_free_vars);
-//Pre: data_exprs is a list of data expressions or bag enumeration elements that
-//     adhere to the internal format after type checking
-//     bound_vars and *p_free_vars are lists of data variables, and represent the
-//     bound/free variables of the context of data_exprs
-//Post:*p_free_vars is extended with the free variables in data_exprs that did not
-//     already occur in *p_free_vars or bound_vars
-
 static ATermList get_function_sorts(ATerm term);
 //Pre: term adheres to the internal format
 //Ret: a list of all function sorts occurring in term, where each element is
@@ -251,12 +229,6 @@ static void split_sort_decls(ATermList sort_decls, ATermList *p_sort_ids,
 //Post:*p_sort_ids and *p_sort_refs contain the sort_id's and sort_ref's from
 //     sort_decls, in the same order
 
-static const char *struct_prefix = "Struct@";
-static const char *list_prefix   = "List@";
-static const char *set_prefix    = "Set@";
-static const char *bag_prefix    = "Bag@";
-static const char *lambda_prefix = "lambda@";
-
 static ATermAppl make_fresh_struct_sort_id(ATerm term);
 //Pre: term is not NULL
 //Ret: sort identifier for the implementation of a structured sort with prefix
@@ -284,27 +256,6 @@ static ATermAppl make_fresh_lambda_op_id(ATermAppl sort_expr, ATerm term);
 //     abstraction, where s is sort_expr and n is a name with prefix
 //     lambda_prefix, that does not occur in term
 
-static bool is_struct_sort_id(ATermAppl sort_expr);
-//Pre: sort_expr is sort expression
-//Ret: sort_expr is the implementation of a structured sort
-
-static bool is_list_sort_id(ATermAppl sort_expr);
-//Pre: sort_expr is sort expression
-//Ret: sort_expr is the implementation of a list sort
-
-static bool is_set_sort_id(ATermAppl sort_expr);
-//Pre: sort_expr is sort expression
-//Ret: sort_expr is the implementation of a set sort
-
-static bool is_bag_sort_id(ATermAppl sort_expr);
-//Pre: sort_expr is sort expression
-//Ret: sort_expr is the implementation of a bag sort
-
-//static bool is_lambda_op_id(ATermAppl data_expr);
-////Pre: data_expr is a data expression
-////Ret: data_expr is an operation identifier for the implementation of a lambda
-////     abstraction
-
 static void impl_sort_bool(t_data_decls *p_data_decls);
 //Pre: p_data_decls represents a pointer to new data declarations
 //Post:an implementation of sort Bool is added to *p_data_decls
@@ -329,6 +280,11 @@ static void impl_sort_real(t_data_decls *p_data_decls);
 //Pre: p_data_decls represents a pointer to new data declarations
 //Post:an implementation of sort Real is added to *p_data_decls
 
+static const char* struct_prefix = "Struct@";
+static const char* list_prefix   = "List@";
+static const char* set_prefix    = "Set@";
+static const char* bag_prefix    = "Bag@";
+static const char* lambda_prefix = "lambda@";
 
 //implementation
 //--------------
@@ -655,7 +611,8 @@ ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
       }
     }
   } else if (gsIsDataAppl(part)) {
-    //part is a product data application; replace by data applications
+    //part is a product data application
+    //there are some cases that need implementation work
     ATermList l = ATLgetArgument(part, 1);
     ATermAppl newpart = ATAgetArgument(part, 0);
     if (gsIsOpId(newpart)) {
@@ -904,94 +861,6 @@ ATermAppl impl_bag_enum(ATermList elts, ATermAppl sort_expr)
   return result;
 }
 
-ATermList get_free_vars(ATermAppl data_expr)
-{
-  ATermList result = ATmakeList0();
-  get_free_vars_appl(data_expr, ATmakeList0(), &result);
-  return ATreverse(result);
-}
-
-void get_free_vars_appl(ATermAppl data_expr, ATermList bound_vars,
-  ATermList* p_free_vars)
-{
-  if (gsIsDataVarId(data_expr)) {
-    //data_expr is a data variable; add it to *p_free_vars if it does not occur in
-    //bound_vars or *p_free_vars
-    if ((ATindexOf(bound_vars, (ATerm) data_expr, 0) == -1) &&
-        (ATindexOf(*p_free_vars, (ATerm) data_expr, 0) == -1)) {
-      *p_free_vars = ATinsert(*p_free_vars, (ATerm) data_expr);
-    }
-  } else if (gsIsOpId(data_expr)) {
-    //data_expr is an operation identifier or a number; do nothing
-  } else if (gsIsDataAppl(data_expr)) {
-    //data_expr is a product data application; get free variables from the
-    //arguments
-    get_free_vars_appl(ATAgetArgument(data_expr, 0), bound_vars, p_free_vars);
-    get_free_vars_list(ATLgetArgument(data_expr, 1), bound_vars, p_free_vars);
-  } else if (gsIsBinder(data_expr)) {
-    ATermAppl binding_operator = ATAgetArgument(data_expr, 0);
-    if (gsIsSetBagComp(binding_operator) || gsIsSetComp(binding_operator)
-        || gsIsBagComp(binding_operator)) {
-      //data_expr is a set or bag comprehension; get free variables from the body
-      //where bound_vars is extended with the variable declaration
-      ATermList vars = ATLgetArgument(data_expr, 1);
-      ATermAppl var = ATAgetFirst(vars);
-      if (ATindexOf(bound_vars, (ATerm) var, 0) == -1) {
-        bound_vars = ATinsert(bound_vars, (ATerm) var);
-      }
-      get_free_vars_appl(ATAgetArgument(data_expr, 2), bound_vars, p_free_vars);
-    } else if (gsIsLambda(binding_operator) || gsIsForall(binding_operator) ||
-      gsIsExists(binding_operator)) {
-      //data_expr is a lambda abstraction or a quantification; get free variables
-      //from the body where bound_vars is extended with the variable declaration
-      ATermList vars = ATLgetArgument(data_expr, 1);
-      while (!ATisEmpty(vars)) {
-        ATermAppl var = ATAgetFirst(vars);
-        if (ATindexOf(bound_vars, (ATerm) var, 0) == -1) {
-          bound_vars = ATinsert(bound_vars, (ATerm) var);
-        }
-        vars = ATgetNext(vars);
-      }
-      get_free_vars_appl(ATAgetArgument(data_expr, 2), bound_vars, p_free_vars);
-    }
-  } else if (gsIsWhr(data_expr)) {
-    //data_expr is a where clause; get free variables from the rhs's of the
-    //where clause declarations and from the body where bound_vars is extended
-    //with the lhs's of the where clause declarations
-    ATermList whr_decls = ATLgetArgument(data_expr, 1);
-    //get free variables from the rhs's of the where clause declarations
-    while (!ATisEmpty(whr_decls)) {
-      get_free_vars_appl(ATAgetArgument(ATAgetFirst(whr_decls), 1),
-        bound_vars, p_free_vars);
-      whr_decls = ATgetNext(whr_decls);
-    }
-    //get free variables from the body
-    whr_decls = ATLgetArgument(data_expr, 1);
-    while (!ATisEmpty(whr_decls)) {
-      ATermAppl whr_decl = ATAgetFirst(whr_decls);
-      ATermAppl var = ATAgetArgument(whr_decl, 0);
-      if (ATindexOf(bound_vars, (ATerm) var, 0) == -1) {
-        bound_vars = ATinsert(bound_vars, (ATerm) var);
-      }
-      whr_decls = ATgetNext(whr_decls);
-    }
-    get_free_vars_appl(ATAgetArgument(data_expr, 0), bound_vars, p_free_vars);
-  } else {
-    gsErrorMsg("%P is not a data expression or a bag enumeration element\n",\
-      data_expr);
-  }
-}
-
-void get_free_vars_list(ATermList data_exprs, ATermList bound_vars,
-  ATermList *p_free_vars)
-{
-  while (!ATisEmpty(data_exprs))
-  {
-    get_free_vars_appl(ATAgetFirst(data_exprs), bound_vars, p_free_vars);
-    data_exprs = ATgetNext(data_exprs);
-  }
-}
- 
 ATermList get_function_sorts(ATerm term)
 {
   ATermList func_sorts = ATmakeList0();
@@ -1897,66 +1766,6 @@ ATermAppl make_fresh_lambda_op_id(ATermAppl sort_expr, ATerm term)
   return gsMakeOpId(gsFreshString2ATermAppl(lambda_prefix, term, false),
     sort_expr);
 }
-
-bool is_struct_sort_id(ATermAppl sort_expr)
-{
-  if (gsIsSortId(sort_expr)) {
-    return strncmp(
-      struct_prefix,
-      ATgetName(ATgetAFun(ATAgetArgument(sort_expr, 0))),
-      strlen(struct_prefix)) == 0;
-  } else {
-    return false;
-  }
-}
-
-bool is_list_sort_id(ATermAppl sort_expr)
-{
-  if (gsIsSortId(sort_expr)) {
-    return strncmp(
-      list_prefix,
-      ATgetName(ATgetAFun(ATAgetArgument(sort_expr, 0))),
-      strlen(list_prefix)) == 0;
-  } else {
-    return false;
-  }
-}
-
-bool is_set_sort_id(ATermAppl sort_expr)
-{
-  if (gsIsSortId(sort_expr)) {
-    return strncmp(
-      set_prefix,
-      ATgetName(ATgetAFun(ATAgetArgument(sort_expr, 0))),
-      strlen(set_prefix)) == 0;
-  } else {
-    return false;
-  }
-}
-
-bool is_bag_sort_id(ATermAppl sort_expr)
-{
-  if (gsIsSortId(sort_expr)) {
-    return strncmp(
-      bag_prefix,
-      ATgetName(ATgetAFun(ATAgetArgument(sort_expr, 0))),
-      strlen(bag_prefix)) == 0;
-  } else {
-    return false;
-  }
-}
-
-//bool is_lambda_op_id(ATermAppl data_expr)
-//{
-//  if (gsIsOpId(data_expr)) {
-//    return strncmp(
-//      lambda_prefix,
-//      ATgetName(ATgetAFun(ATAgetArgument(data_expr, 0))),
-//      strlen(lambda_prefix)) == 0;
-//  } else {
-//    return false;
-//  }
-//}
 
 void split_sort_decls(ATermList sort_decls, ATermList *p_sort_ids,
   ATermList *p_sort_refs)
