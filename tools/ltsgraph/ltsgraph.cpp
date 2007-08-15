@@ -112,7 +112,9 @@ class GraphApp : public wxApp
     bool OnInit() {
 
       gsEnableConstructorFunctions();
+#ifdef ENABLE_SQUADT_CONNECTIVITY
       if(command_line) {
+#endif
         // Not SQuADT-connected, parse commandline
         wxCmdLineParser cmdln(argc,argv);
 	   
@@ -138,7 +140,9 @@ class GraphApp : public wxApp
         if ( cmdln.GetParamCount() > 0 ) {
           lts_file_argument = std::string(cmdln.GetParam(0).fn_str());
         }
+#ifdef ENABLE_SQUADT_CONNECTIVITY
       }    
+#endif
 
       init_frame(lts_file_argument);
       return true;
