@@ -5,6 +5,8 @@
 /// \file ./gauss.cpp
 
 
+
+
 #include "gauss.h"
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/data/utility.h"
@@ -50,6 +52,11 @@ void free_vars_and_no_quants(data_expression d, int* nq, data_variable_list *fv)
 
 
 sort_instantiator si;
+
+
+
+
+
 
 
 //======================================================================

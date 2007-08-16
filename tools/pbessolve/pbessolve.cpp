@@ -64,9 +64,9 @@ typedef struct{
 } t_tool_options; 
  
  
-// the possible answers of PBESsolve 
-typedef enum{TRUE, FALSE, UNDECIDED} t_result; 
- 
+
+
+
 //======================================== 
  
  
@@ -75,8 +75,9 @@ string infilename;
  
 //Local functions ======================== 
 static t_tool_options parse_command_line(int argc, char** argv); 
-pbes load_pbes(); 
-t_result interpret_solution(pbes pbes_spec, equation_system es_solution); 
+pbes load_pbes();
+pbes_expression interpret_solution(pbes pbes_spec, 
+			    equation_system es_solution); 
 //======================================== 
  
  
@@ -105,13 +106,15 @@ int main(int argc, char** argv)
   //Every equation is the result of a  
   //(possibly interactive and/or bounded)  
   //approximation process 
-  equation_system es_solution = solve_pbes(pbes_spec, tool_options.interactive, tool_options.bound); 
+  equation_system es_solution = 
+    solve_pbes(pbes_spec, tool_options.interactive, tool_options.bound); 
    
-  //Interpret the solution 
-  t_result result = interpret_solution(pbes_spec, es_solution); 
+  //Interpret the solution in the initial state
+  pbes_expression sol_initial_state = 
+    interpret_solution(pbes_spec, es_solution); 
    
-  //Print result	 
-  gsVerboseMsg("PBES Solution: %s\n", (result==TRUE)?"true":((result==FALSE)?"false":"don't know")); 
+  cout << "PBES solution: %s\n",pp(sol_initial_state).c_str();
+
   return 0; 
 } 
 //======================================== 
@@ -119,8 +122,9 @@ int main(int argc, char** argv)
  
  
  
- 
-//copied from pbes2bes =================== 
+//========================================= 
+// Loads a PBES from a file. 
+// (function copied from pbes2bes)
 pbes load_pbes() 
 { 
   pbes pbes_spec; 
@@ -233,10 +237,39 @@ t_tool_options parse_command_line(int argc, char** argv)
  
  
 //======================================== 
-t_result interpret_solution (pbes pbes_spec, equation_system es_solution) 
+// evaluate solution in the initial state
+pbes_expression interpret_solution (pbes pbes_spec, 
+				    equation_system es_solution) 
 { 
-  // To implement. 
-  return UNDECIDED; 
+
+  propositional_variable_instantiation s = pbes_spec.initial_state();
+  data_expression_list del = s.parameters();
+
+  // find the solution equation for state s
+  equation_system::iterator e;
+  for (e = es_solution.begin(); 
+       ((e != es_solution.end()) && (s.name() != e->variable().name())); 
+       e++);
+  if (e == es_solution.end()){
+    gsErrorMsg("solution for variable %s not found!",pp(s).c_str());
+    exit(1);
+  }
+  
+  data_variable_list dvl = e->variable().parameters();
+  pbes_expression p = 
+    e->formula().substitute(make_list_substitution(dvl,del));
+
+ SMT_Solver_Type sol = solver_type_cvc_lite_fast;
+  BDD_Prover* prover = new BDD_Prover(pbes_spec.data(), GS_REWR_INNER, 0, false, sol, false);
+  pbes_expression result = rewrite_pbes_expression(p, prover);
+
+
+  // in the resulting expression, the predicate instances should
+  // be further replaced with their solutions, etc.
+  // How to do this with substitute functions, without decomposing 
+  // the pbes_expression???
+
+  return result;
 } 
 //======================================== 
  

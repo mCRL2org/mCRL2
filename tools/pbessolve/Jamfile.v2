@@ -14,6 +14,7 @@ obj gauss.o
 exe pbessolve
        : pbessolve.cpp
 	 gauss.o
+	txt2pbes
 	 /libraries//lps
 	 /libraries//rewrite
          /libraries//parser
@@ -21,8 +22,17 @@ exe pbessolve
        : <include>.
        ;
 
+exe txt2pbes
+       : txt2pbes.cpp
+         /libraries//lps
+         /libraries//rewrite
+         /libraries//parser
+         /site-config//boost_program_options
+       : <include>.
+       ;
+
 install-binaries install
-       : pbessolve
+       : txt2pbes pbessolve
        :
        : <status>experimental
        ;
