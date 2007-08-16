@@ -646,11 +646,17 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
     //DataExpr is a product data application; return the result sort of the
     //first argument
     ATermAppl Expr = ATAgetArgument(DataExpr, 0);
+    // If Expr is again a DataAppl the recursive call of gsGetSort will
+    // return a SortId instead of a SortArrow,
+    // this gives rise to the second case distinction!
     ATermAppl HeadSort = gsGetSort(Expr);
-    if (gsIsSortArrow(HeadSort))
+    if (gsIsSortArrow(HeadSort)) {
       Result = ATAgetArgument(HeadSort, 1);
-    else
+    } else if (gsIsSortId(HeadSort)) {
+      Result = HeadSort;
+    } else {
       Result = gsMakeSortUnknown();
+    }
   } else if (gsIsBinder(DataExpr)) {
       ATermAppl BindingOperator = ATAgetArgument(DataExpr, 0);
       if (gsIsForall(BindingOperator) || gsIsExists(BindingOperator)) {

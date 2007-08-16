@@ -108,10 +108,10 @@ ATerm reconstruct_exprs(ATerm Part, const ATermAppl Spec)
 {
   assert ((Spec == NULL) || gsIsSpecV1(Spec));
   if (Spec == NULL) {
-    gsVerboseMsg("No specification given, "
+    gsDebugMsg("No specification given, "
                  "therefore not all components can be reconstructed\n");
   } else {
-    gsVerboseMsg("Specification provided, performing full reconstruction\n");
+    gsDebugMsg("Specification provided, performing full reconstruction\n");
   }
 
   ATerm Result;
@@ -123,7 +123,7 @@ ATerm reconstruct_exprs(ATerm Part, const ATermAppl Spec)
     assert(false);
   }
   Result = beta_reduce_term(Result);
-  gsVerboseMsg("Finished data reconstruction\n");
+  gsDebugMsg("Finished data reconstruction\n");
   return Result;
 }
 
@@ -132,7 +132,7 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, const ATermAppl Spec)
   assert ((Spec == NULL) || gsIsSpecV1(Spec));
 
   if(gsIsSpecV1(Part) && (Spec != NULL)) {
-    gsVerboseMsg("Removing headers from specification\n");
+    gsDebugMsg("Removing headers from specification\n");
     Part = remove_headers_from_spec(Part);
   }
 
