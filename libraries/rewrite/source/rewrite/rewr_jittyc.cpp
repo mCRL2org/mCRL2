@@ -789,18 +789,14 @@ static void term2seq(ATerm t, ATermList *s, int *var_cnt)
 				*s = ATinsert(*s, store);
 			}
 		} else {
-			ATermList l;
+			int arity = ATgetArity(ATgetAFun((ATermAppl) t));
 	
-			l = ATgetArguments((ATermAppl) t);
-			t = ATgetFirst(l);
-			l = ATgetNext(l);
+			*s = ATinsert(*s, (ATerm) ATmakeAppl3(afunF,ATgetArgument((ATermAppl) t,0),dummy,dummy));
 	
-			*s = ATinsert(*s, (ATerm) ATmakeAppl3(afunF,(ATerm) t,dummy,dummy));
-	
-			for (; !ATisEmpty(l); l=ATgetNext(l))
+			for (int i=1; i<arity; ++i)
 			{
-				term2seq(ATgetFirst(l),s,var_cnt);
-				if ( !ATisEmpty(ATgetNext(l)) )
+				term2seq(ATgetArgument((ATermAppl) t,i),s,var_cnt);
+				if ( i<arity-1 )
 				{
 					*s = ATinsert(*s, (ATerm) ATmakeAppl1(afunN,dummy));
 				}
@@ -851,17 +847,15 @@ static ATermList get_used_vars(ATerm t)
 static ATermList create_sequence(ATermList rule, int *var_cnt)
 {
 	ATermAppl pat = (ATermAppl) ATelementAt(rule,2);
+	int pat_arity = ATgetArity(ATgetAFun(pat));
 	ATerm cond = ATelementAt(rule,1);
 	ATerm rslt = ATelementAt(rule,3);
-	ATermList pars = ATmakeList0();
 	ATermList rseq = ATmakeList0();
 	
-	pars = ATgetNext(ATgetArguments(pat));
-	//ATfprintf(stderr,"pattern pars: %t\n",pars);
-	for (; !ATisEmpty(pars); pars=ATgetNext(pars))
+	for (int i=1; i<pat_arity; ++i)
 	{
-		term2seq(ATgetFirst(pars),&rseq,var_cnt);
-		if ( !ATisEmpty(ATgetNext(pars)) )
+		term2seq(ATgetArgument(pat,i),&rseq,var_cnt);
+		if ( i<pat_arity-1 )
 		{
 			rseq = ATinsert(rseq, (ATerm) ATmakeAppl1(afunN,dummy));
 		}
@@ -1322,18 +1316,20 @@ static ATermList get_doubles(ATerm a, ATermList &vars)
 			vars = ATinsert(vars,a);
 			return ATmakeList0();
 		}
-	} else {
+	} else if ( ATisList(a) )
+	{
 		ATermList l = ATmakeList0();
-		ATermList m;
-		if ( ATisList(a) )
+		for (ATermList m=(ATermList) a;!ATisEmpty(m); m=ATgetNext(m))
 		{
-			m = (ATermList) a;
-		} else {
-			m = ATgetArguments((ATermAppl) a);
+			l = ATconcat(get_doubles(ATgetFirst(m),vars),l);
 		}
-		for (;!ATisEmpty(m); m=ATgetNext(m))
+		return l;
+	} else { // ATisAppl(a)
+		int arity = ATgetArity(ATgetAFun((ATermAppl) a));
+		ATermList l = ATmakeList0();
+		for (int i=0; i<arity; ++i)
 		{
-			l = ATconcat(l,get_doubles(ATgetFirst(m),vars));
+			l = ATconcat(get_doubles(ATgetArgument((ATermAppl) a,i),vars),l);
 		}
 		return l;
 	}
@@ -1347,18 +1343,20 @@ static ATermList get_vars(ATerm a)
 	} else if ( ATisAppl(a) && gsIsDataVarId((ATermAppl) a) )
 	{
 		return ATmakeList1(a);
-	} else {
+	} else if ( ATisList(a) )
+	{
 		ATermList l = ATmakeList0();
-		ATermList m;
-		if ( ATisList(a) )
+		for (ATermList m=(ATermList) a; !ATisEmpty(m); m=ATgetNext(m))
 		{
-			m = (ATermList) a;
-		} else {
-			m = ATgetArguments((ATermAppl) a);
+			l = ATconcat(get_vars(ATgetFirst(m)),l);
 		}
-		for (;!ATisEmpty(m); m=ATgetNext(m))
+		return l;
+	} else { // ATisAppl(a)
+		ATermList l = ATmakeList0();
+		int arity = ATgetArity(ATgetAFun((ATermAppl) a));
+		for (int i=0; i<arity; ++i)
 		{
-			l = ATconcat(l,get_vars(ATgetFirst(m)));
+			l = ATconcat(get_vars(ATgetArgument((ATermAppl) a,i)),l);
 		}
 		return l;
 	}
@@ -1398,19 +1396,19 @@ static ATermList dep_vars(ATermList eqn)
       ATermList evars = get_vars(ATgetArgument(pars,i+1));
       for (; !ATisEmpty(evars); evars=ATgetNext(evars))
       {
-        int j=0;
+        int j=i-1; // ATgetLength(ATgetNext(vars))-1
         for (ATermList o=ATgetNext(vars); !ATisEmpty(o); o=ATgetNext(o))
         {
           if ( ATindexOf(ATLgetFirst(o),ATgetFirst(evars),0) >= 0 )
           {
             bs[j] = true;
           }
-          j++;
+          --j;
         }
       }
     } else {
       // Argument is a variable; check whether it occurred before
-      int j = -1;
+      int j = i-1; // ATgetLength(vars)-1-1
       bool b = false;
       for (ATermList o=vars; !ATisEmpty(o); o=ATgetNext(o))
       {
@@ -1421,7 +1419,7 @@ static ATermList dep_vars(ATermList eqn)
             bs[j] = true;
           b = true;
         }
-        j++;
+        --j;
       }
       if ( b )
       {
@@ -1430,7 +1428,7 @@ static ATermList dep_vars(ATermList eqn)
       }
     }
     // Add vars used in expression
-    vars = ATappend(vars,(ATerm) get_vars(ATgetArgument(pars,i+1)));
+    vars = ATinsert(vars,(ATerm) get_vars(ATgetArgument(pars,i+1)));
   }
 
   ATermList deps = ATmakeList0();
@@ -1508,19 +1506,19 @@ static ATermList create_strategy(ATermList rules, int opid, unsigned int arity, 
         ATermList evars = get_vars(ATgetArgument(pars,i+1));
         for (; !ATisEmpty(evars); evars=ATgetNext(evars))
         {
-          int j=0;
+          int j=i-1; // ATgetLength(ATgetNext(vars))-1
           for (ATermList o=ATgetNext(vars); !ATisEmpty(o); o=ATgetNext(o))
           {
             if ( ATindexOf(ATLgetFirst(o),ATgetFirst(evars),0) >= 0 )
             {
               bs[j] = true;
             }
-            j++;
+            --j;
           }
         }
       } else {
         // Argument is a variable; check whether it occurred before
-        int j = -1;
+        int j = i-1; // ATgetLength(vars)-1-1
         bool b = false;
         for (ATermList o=vars; !ATisEmpty(o); o=ATgetNext(o))
         {
@@ -1531,7 +1529,7 @@ static ATermList create_strategy(ATermList rules, int opid, unsigned int arity, 
               bs[j] = true;
             b = true;
           }
-          j++;
+          --j;
         }
         if ( b )
         {
@@ -1540,7 +1538,7 @@ static ATermList create_strategy(ATermList rules, int opid, unsigned int arity, 
         }
       }
       // Add vars used in expression
-      vars = ATappend(vars,(ATerm) get_vars(ATgetArgument(pars,i+1)));
+      vars = ATinsert(vars,(ATerm) get_vars(ATgetArgument(pars,i+1)));
     }
     //gsfprintf(stderr,"vars: %T\n",vars);
 
