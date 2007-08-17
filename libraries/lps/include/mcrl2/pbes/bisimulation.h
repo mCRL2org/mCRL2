@@ -1,5 +1,6 @@
 #include "atermpp/make_list.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
 #include "mcrl2/data/utility.h" // fresh_identifier
@@ -55,9 +56,10 @@ pbes strong_bisimulation(const specification& M, const specification& S)
 { 
   using atermpp::make_list;
   namespace p = lps::pbes_expr;
-
-  const linear_process& m = M.process();
+    
+  const linear_process& m1 = M.process();
   const linear_process& s = S.process();
+  linear_process m = detail::remove_parameter_clashes(m1, s);
 
   identifier_string ms_name = fresh_identifier(make_list(M, S), "Xms");
   identifier_string sm_name = fresh_identifier(make_list(S, M), "Xsm");
