@@ -72,58 +72,41 @@ namespace po = boost::program_options;
 
 // data structure containing the options that pbes2bool can have.
 
+
+enum transformation_strategy {
+     lazy,          // generate equations but do not optimize on the fly
+     optimize,      // optimize by substituting true and false for already
+                    // investigated variables in a rhs, while generating this rhs.
+     on_the_fly,    // make a distinction between variables that occur somewhere,
+                    // and variables that do not occur somewhere. When generating
+                    // a rhs, optimize this rhs as in "optimize". If the rhs is
+                    // equal to T or F, substitute this value throughout the
+                    // equation system, and maintain which variables become unused
+                    // by doing so, as these do not have to be investigated further.
+                    // E.g. if a rhs is  X1 && X2, X1 does not occur elsewhere and
+                    // X2 turns out to be equal to false, then X1 is moved to the
+                    // set of irrelevant variables, and not investigated further.
+     on_the_fly_with_fixed_points
+                    // Do the same as with on the fly, but for each generated variable
+                    // in the rhs, investigate whether this variable lies on a loop
+                    // such that depending on its fixed point, it can be set to true
+                    // or false. Due to the breadth first nature of the main algorithm
+                    // the existence of such loops must be investigated separately
+                    // for each variable, which can take a lot of time.
+};
+
+
+
 typedef struct{
    std::string opt_outputformat;
-   std::string opt_strategy;
+//   std::string opt_strategy;
+   transformation_strategy opt_strategy;
    bool opt_precompile_pbes;
    RewriteStrategy rewrite_strategy;
    std::string infilename;
    std::string outfilename;
 } t_tool_options;
 
-
-//typedef struct {
-  //data_variable_list finite_var;    // List of all finite variables
-  //data_variable_list infinite_var;  // List of all infinite variables
-  //data_expression_list finite_exp;  // List of all finite expressions
-  //data_expression_list infinite_exp;  // List of all infinite expressions
-//
-  //void protect()
-  //{
-    //finite_var.protect();
-    //infinite_var.protect();
-    //finite_exp.protect();
-    //infinite_exp.protect();
-  //}
-  //
-  //void unprotect()
-  //{
-    //finite_var.unprotect();
-    //infinite_var.unprotect();
-    //finite_exp.unprotect();
-    //infinite_exp.unprotect();
-  //}
-  //void mark()
-  //{
-    //finite_var.mark();
-    //infinite_var.mark();
-    //finite_exp.mark();
-    //infinite_exp.mark();
-  //}
-//} t_instantiations;
-
-
-// Specify how the ATerms in t_instantiations need to be protected using a traits class
-//namespace atermpp
-//{
-  //template<>
-  //struct aterm_traits<t_instantiations>
-  //{
-    //static void protect(t_instantiations t) { t.protect(); }
-    //static void unprotect(t_instantiations t) { t.unprotect(); }
-    //static void mark(t_instantiations t) { t.mark(); }
-  //};
-// } // namespace atermpp
 
 //Function declarations used by main program
 //------------------------------------------
@@ -178,7 +161,7 @@ static bool process(t_tool_options const& tool_options)
   }
   else 
   { 
-    gsMessage("The pbes is %s valid\n", solve_bes() ? "" : "not");
+    gsMessage("The pbes is %svalid\n", solve_bes() ? "" : "not ");
   }
 
   return true;
@@ -199,10 +182,6 @@ class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
       none,
       vasy,
       cwi
-    };
-
-    enum transformation_strategy {
-      lazy
     };
 
     static const char* option_transformation_strategy;
@@ -282,7 +261,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   top->add(new label("Transformation strategy :"));
 
   mcrl2::utilities::squadt::radio_button_helper < transformation_strategy >
-        transformation_selector(top, lazy, "lazy: only boolean equations reachable from the initial state");
+        transformation_selector(top, lazy, "lazy:       generate all boolean equations reachable from the initial state");
 
   if (c.option_exists(option_transformation_strategy)) {
     transformation_selector.set_selection(static_cast < transformation_strategy > (
@@ -338,13 +317,24 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
 }
 
 bool squadt_interactor::perform_task(tipi::configuration& c) {
-  static std::string strategies[] = { "lazy" };
+  // static std::string strategies[] = { "lazy", "fly" };
   static std::string formats[]    = { "none", "vasy", "cwi" };
 
   t_tool_options tool_options;
 
   tool_options.opt_outputformat = formats[c.get_option_argument< size_t >(option_selected_output_format)];
-  tool_options.opt_strategy     = strategies[c.get_option_argument< size_t >(option_transformation_strategy)];
+  switch (c.get_option_argument< size_t >(option_transformation_strategy))
+  { case 1: tool_options.opt_strategy=lazy;
+            break;
+    case 2: tool_options.opt_strategy=optimize;
+            break;
+    case 3: tool_options.opt_strategy=on_the_fly;
+            break;
+    case 4: tool_options.opt_strategy=on_the_fly_with_fixed_points;
+            break;
+    default: assert(0); // other options are not possible
+  }
+  // tool_options.opt_strategy     = c.get_option_argument< size_t >(option_transformation_strategy);
   tool_options.infilename       = c.get_input(pbes_file_for_input).get_location();
 
   if (c.output_exists(bes_file_for_output)) {
@@ -406,28 +396,46 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
                    const lps::pbes_expression p,
                    atermpp::indexed_set &variable_index,
                    unsigned long &nr_of_generated_variables,
-                   const bool to_bdd)
-{ // std::cerr << " add_prop_var " << pp(p) << std::endl;
+                   const bool to_bdd,
+                   const transformation_strategy strategy,
+                   bes::equations  &bes_equations) 
+{ 
   if (is_propositional_variable_instantiation(p))
   { pair<unsigned long,bool> pr=variable_index.put(p);
-    if (pr.second) /* add p to indexed set */
+    if (pr.second) /* p is added to the indexed set, so it is a new variable */
     { nr_of_generated_variables++;
-    }
-    if (to_bdd)
-    { return bes::if_(bes::variable(pr.first),bes::true_(),bes::false_());
+      if (to_bdd)
+      { return bes::if_(bes::variable(pr.first),bes::true_(),bes::false_());
+      }
+      else 
+      { return bes::variable(pr.first);
+      }
     }
     else 
-    { return bes::variable(pr.first);
+    {
+      if (strategy>lazy)
+      { bes_expression b=bes_equations.get_rhs(pr.first);
+        if (bes::is_true(b) || bes::is_false(b))
+        { // fprintf(stderr,"*");
+          return b;
+        }
+      }
+      if (to_bdd)
+      { return bes::if_(bes::variable(pr.first),bes::true_(),bes::false_());
+      }
+      else 
+      { return bes::variable(pr.first);
+      }
     }
   }
   else if (pbes_expr::is_and(p))
   { bes::bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            pbes_expr::lhs(p),variable_index,nr_of_generated_variables,to_bdd);
+                            pbes_expr::lhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,bes_equations);
     if (is_false(b1))
     { return b1;
     }
     bes::bes_expression b2=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            pbes_expr::rhs(p),variable_index,nr_of_generated_variables,to_bdd);
+                            pbes_expr::rhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,bes_equations);
     if (is_false(b2))
     { return b2;
     }
@@ -447,13 +455,13 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
   else if (pbes_expr::is_or(p))
   { 
     bes::bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            pbes_expr::lhs(p),variable_index,nr_of_generated_variables,to_bdd);
+                            pbes_expr::lhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,bes_equations);
     if (bes::is_true(b1))
     { return b1;
     }
 
     bes::bes_expression b2=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            pbes_expr::rhs(p),variable_index,nr_of_generated_variables,to_bdd);
+                            pbes_expr::rhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,bes_equations);
     if (bes::is_true(b2))
     { return b2;
     }
@@ -494,7 +502,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
 {
 
   // Verbose msg: doing naive algorithm
-  gsVerboseMsg("Computing BES from PBES using lazy algorithm...\n");
+  gsVerboseMsg("Computing BES from PBES ...\n");
   
   data_specification data = pbes_spec.data();
 
@@ -512,11 +520,25 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
                                        gets index 0 in the indexed set, to
                                        prevent variables from getting an index 0 */
 
+  /* The following list contains that variables that need to be explored.
+     This list is only relevant if tool_options.opt_strategy>=on_the_fly,
+     as in the other case the variables to be investigated are those
+     with indices between nre_of_processed_variables and nr_of_generated
+     variables. */
+  deque < bes::variable_type> todo;
+  if (tool_options.opt_strategy>=on_the_fly)
+  { todo.push_front(1);
+  }
+
   // Data rewriter
   Rewriter *rewriter = createRewriter(data,tool_options.rewrite_strategy);
   variable_index.put(pbes_expression_rewrite_and_simplify(pbes_spec.initial_state(),
                      rewriter,
                      tool_options.opt_precompile_pbes));
+  if (tool_options.opt_strategy>=on_the_fly)
+  { bes_equations.store_variable_occurrences();
+    bes_equations.count_variable_relevance_on();
+  }
 
   // Needed hashtables
   equation_system eqsys = pbes_spec.equations();
@@ -548,52 +570,129 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
 
   gsVerboseMsg("Computing BES....\n");
   // As long as there are states to be explored
-  while (nr_of_processed_variables < nr_of_generated_variables)
+  while ((tool_options.opt_strategy>=on_the_fly)
+             ?todo.size()>0
+             :(nr_of_processed_variables < nr_of_generated_variables))
   {
-    propositional_variable_instantiation current_variable_instantiation = 
-          propositional_variable_instantiation(variable_index.get(nr_of_processed_variables+1));
-    // std::cerr << " current expression " << pp(current_variable_instantiation) << std::endl;
-    
-    // Get equation which belongs to the current propvarinst and their needed parts
-    pbes_equation current_pbeq = pbes_equation(pbes_equations.get(current_variable_instantiation.name()));
-    propositional_variable current_variable = current_pbeq.variable();
-    pbes_expression current_pbes_expression = current_pbeq.formula();
-
-    // Add the required substitutions
-    data_expression_list::iterator elist=current_variable_instantiation.parameters().begin();
-    for(data_variable_list::iterator vlist=current_variable.parameters().begin() ;
-           vlist!=current_variable.parameters().end() ; vlist++)
+    bes::variable_type variable_to_be_processed;
+    if (tool_options.opt_strategy>=on_the_fly)
+    { variable_to_be_processed=todo.front();
+      todo.pop_front();
+    }
+    else
+    { variable_to_be_processed=nr_of_processed_variables+1;
+    }
+ 
+    if (bes_equations.is_relevant(variable_to_be_processed)) 
+           // If v is not relevant, it does not need to be investigated.
     { 
-      assert(elist!=current_variable_instantiation.parameters().end());
-      // std::cerr << "Substitution: " << *vlist << "  " << *elist << std::endl;
-      if (tool_options.opt_precompile_pbes)
-      { rewriter->setSubstitution(*vlist,(aterm)*elist);
+      // fprintf(stderr,"Process variable %d\n",(unsigned int)variable_to_be_processed);
+
+      propositional_variable_instantiation current_variable_instantiation =
+            propositional_variable_instantiation(variable_index.get(variable_to_be_processed));
+      
+      // Get equation which belongs to the current propvarinst
+      pbes_equation current_pbeq = pbes_equation(pbes_equations.get(current_variable_instantiation.name()));
+  
+      // Add the required substitutions
+      data_expression_list::iterator elist=current_variable_instantiation.parameters().begin();
+      for(data_variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
+             vlist!=current_pbeq.variable().parameters().end() ; vlist++)
+      { 
+        assert(elist!=current_variable_instantiation.parameters().end());
+        
+        if (tool_options.opt_precompile_pbes)
+        { rewriter->setSubstitution(*vlist,(aterm)*elist);
+        }
+        else
+        { rewriter->setSubstitution(*vlist,rewriter->toRewriteFormat(*elist));
+        }
+        elist++;
+      }
+      assert(elist==current_variable_instantiation.parameters().end());
+      lps::pbes_expression new_pbes_expression = pbes_expression_substitute_and_rewrite(
+                                current_pbeq.formula(), data, rewriter,tool_options.opt_precompile_pbes);
+      
+      bes::bes_expression new_bes_expression=
+           add_propositional_variable_instantiations_to_indexed_set_and_translate(
+                        new_pbes_expression,
+                        variable_index,
+                        nr_of_generated_variables,
+                        tool_options.opt_outputformat=="none",
+                        tool_options.opt_strategy,
+                        bes_equations);
+  
+      if ((tool_options.opt_strategy>=on_the_fly))
+      { 
+        bes_equations.add_equation(
+                variable_to_be_processed,
+                current_pbeq.symbol(),
+                atermpp::aterm_int(variable_rank.get(current_pbeq.variable().name())).value(),
+                new_bes_expression,
+                todo);
       }
       else
-      { rewriter->setSubstitution(*vlist,rewriter->toRewriteFormat(*elist));
+      { bes_equations.add_equation(
+                variable_to_be_processed,
+                current_pbeq.symbol(),
+                atermpp::aterm_int(variable_rank.get(current_pbeq.variable().name())).value(),
+                new_bes_expression);
       }
-      elist++;
+  
+      if (tool_options.opt_strategy>=on_the_fly) 
+      { 
+        if (tool_options.opt_strategy>=on_the_fly_with_fixed_points)
+        { // find a variable in the new_bes_expression from which `variable' to be
+          // processed is reachable. If so, new_bes_expression can be set to
+          // true or false.
+          if (bes_equations.get_fixpoint_symbol(variable_to_be_processed)==fixpoint_symbol::nu())
+          { if (bes_equations.find_nu_loop(new_bes_expression,variable_to_be_processed))
+            { new_bes_expression=bes::true_();
+            }
+          }
+          else           
+          { if (bes_equations.find_mu_loop(new_bes_expression,variable_to_be_processed))
+            { new_bes_expression=bes::false_();
+            }
+          }
+        }
+        if (bes::is_true(new_bes_expression)||bes::is_false(new_bes_expression))
+        { 
+          // new_bes_expression is true or false and opt_strategy is on the fly or higher. 
+          // This means we must optimize the bes by substituting true/false for this variable
+          // everywhere. For this we use the occurrence set.
+  
+          deque <bes::variable_type> to_set_to_true_or_false;
+          to_set_to_true_or_false.push_front(variable_to_be_processed);
+          for( ; !to_set_to_true_or_false.empty() ; )
+          {
+            bes::variable_type w=to_set_to_true_or_false.front();
+            to_set_to_true_or_false.pop_front();
+            for( set <bes::variable_type>::iterator 
+                      v=bes_equations.variable_occurrence_set_begin(w);
+                      v!=bes_equations.variable_occurrence_set_end(w); 
+                      v++)
+            {
+              gsVerboseMsg("+ %d\n",(unsigned long)*v);
+              bes_expression b=bes_equations.get_rhs(*v);
+              // bes_equations.remove_variables_from_occurrence_sets(*v,b,w);
+              b=substitute_true_false(b,w,bes_equations.get_rhs(w));
+              if (bes::is_true(b)||bes::is_false(b))
+              { to_set_to_true_or_false.push_front(*v);
+              }
+              // bes_equations.add_variables_to_occurrence_sets(*v,b);
+              bes_equations.set_rhs(*v,b,w);
+            }
+            bes_equations.clear_variable_occurrence_set(w);
+          }
+        }
+      }
     }
-    assert(elist==current_variable_instantiation.parameters().end());
-    lps::pbes_expression new_pbes_expression = pbes_expression_substitute_and_rewrite(
-                              current_pbes_expression, data, rewriter,tool_options.opt_precompile_pbes);
-    // std::cerr << " new pbes expression " << pp(new_pbes_expression) << std::endl;
-    bes::bes_expression new_bes_expression=
-         add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                      new_pbes_expression,variable_index,nr_of_generated_variables,
-                      tool_options.opt_outputformat=="none");
-
-    bes_equations.add_equation(
-              nr_of_processed_variables+1,
-              current_pbeq.symbol(),
-              atermpp::aterm_int(variable_rank.get(current_pbeq.variable().name())).value(),
-              new_bes_expression);
-
     nr_of_processed_variables++;
     if (nr_of_processed_variables % 1000 == 0)
     { 
       gsVerboseMsg("Processed %d and generated %d boolean variables\n", 
-                                 nr_of_processed_variables,nr_of_generated_variables);
+                                   nr_of_processed_variables,nr_of_generated_variables);
     }
   }
 }
@@ -628,26 +727,6 @@ static bes_expression substitute_fp(
   }
   assert(is_true(b)||is_false(b));
   return b;
-}
-
-
-static void add_variables_to_set(
-                bes::variable_type v,
-                bes_expression b,
-                std::vector<std::set <bes::variable_type> > &variable_occurrence_set,
-                const unsigned long current_rank)
-{ 
-  if (bes::is_true(b)||bes::is_false(b))
-  { return;
-  }
-  assert(is_if(b));
-  if (current_rank==bes_equations.get_rank(get_variable(condition(b))))
-  { variable_occurrence_set[get_variable(condition(b))].insert(v);
-  }
-  // Using hash tables this can be made more efficient, by employing
-  // sharing of the aterm representing b.
-  add_variables_to_set(v,then_branch(b),variable_occurrence_set,current_rank);
-  add_variables_to_set(v,else_branch(b),variable_occurrence_set,current_rank);
 }
 
 
@@ -728,42 +807,50 @@ static bes_expression evaluate_bex(
 
 static bool solve_bes()
 { 
-  gsVerboseMsg("Solving BES...\n");
-  atermpp::vector<bes_expression> approximation(bes_equations.nr_of_equations()+1);
+  gsVerboseMsg("Solving BES... %d\n",bes_equations.nr_of_variables());
+  atermpp::vector<bes_expression> approximation(bes_equations.nr_of_variables()+1);
 
   /* Set the approximation to its initial value */
-  for(bes::variable_type v=bes_equations.nr_of_equations(); v>0; v--)
-  { if (bes::is_true(bes_equations.get_rhs(v)))
-    { approximation[v]=bes::true_();
+  for(bes::variable_type v=bes_equations.nr_of_variables(); v>0; v--)
+  { 
+    bes_expression b=bes_equations.get_rhs(v);
+    if (b!=bes::dummy())
+    { if (bes::is_true(bes_equations.get_rhs(v)))
+      { approximation[v]=bes::true_();
+      }
+      else if (bes::is_false(bes_equations.get_rhs(v)))
+      { approximation[v]=bes::false_();
+      }
+      else if (bes_equations.get_fixpoint_symbol(v)==fixpoint_symbol::mu())
+      { approximation[v]=bes::false_();
+      } 
+      else
+      { approximation[v]=bes::true_();
+      }
     }
-    else if (bes::is_false(bes_equations.get_rhs(v)))
-    { approximation[v]=bes::false_();
-    }
-    else if (bes_equations.get_fixpoint_symbol(v)==fixpoint_symbol::mu())
-    { approximation[v]=bes::false_();
-    } 
-    else
-    { approximation[v]=bes::true_();
-    }
+    // ATfprintf(stderr,"APPROX %d   %t\n",v,(ATerm)approximation[v]);
   }
+
+  bes_equations.store_variable_occurrences();
 
   for(unsigned long current_rank=bes_equations.max_rank;
       current_rank>0 ; current_rank--)
   { 
-    std::vector<std::set <bes::variable_type> > 
-              variable_occurrence_set(bes_equations.nr_of_equations()+1);
+    // std::vector<std::set <bes::variable_type> > 
+    //          variable_occurrence_set(bes_equations.nr_of_variables()+1);
     set <bes::variable_type> todo;
 
-    /* put all variables of equations in the variable occurrence set, provided
-       the rank of these variables have the current rank. A variable v is put
-       in the set at index w, if w occurs in the rhs of v.
-       Moreover, put all variables of current_rank in todo, because these are
-       involved in the current iteration process.  */
-
-    for(bes::variable_type v=bes_equations.nr_of_equations(); v>0; v--)
-    { if (bes_equations.get_rank(v)==current_rank)
-      { todo.insert(v);
-        add_variables_to_set(v,bes_equations.get_rhs(v),variable_occurrence_set,current_rank);
+    for(bes::variable_type v=bes_equations.nr_of_variables(); v>0; v--)
+    { if (bes_equations.is_relevant(v) && (bes_equations.get_rank(v)==current_rank))
+      { 
+        bes_expression t=evaluate_bex(bes_equations.get_rhs(v),approximation,current_rank);
+        
+          // ATfprintf(stderr,"HUH11 approximation:%t  t:%t\n",(ATerm)approximation[v],(ATerm)t);
+        if (t!=approximation[v])
+        { // ATfprintf(stderr,"Set premature approximation[%d]=%t\n",v,(ATerm)t);
+          approximation[v]=t;
+          todo.insert(v);
+        }
       }
     }
   
@@ -772,15 +859,21 @@ static bool solve_bes()
     { set<bes::variable_type>::iterator w= todo.begin();
       bes::variable_type w_value=*w;
       todo.erase(w);
-      for(set <bes::variable_type>::iterator u=variable_occurrence_set[w_value].begin();
-          u!=variable_occurrence_set[w_value].end(); u++)
-      { 
-        bes_expression t=evaluate_bex(bes_equations.get_rhs(*u),approximation,current_rank);
+
+      for(set <bes::variable_type>::iterator 
+         u=bes_equations.variable_occurrence_set_begin(w_value);
+         u!=bes_equations.variable_occurrence_set_end(w_value); 
+         u++)
+      { // fprintf(stderr,"Occurrence of %d in %d\n",w_value, *u);
+        if (bes_equations.is_relevant(*u) && (bes_equations.get_rank(*u)==current_rank))
+        { bes_expression t=evaluate_bex(bes_equations.get_rhs(*u),approximation,current_rank);
         
-        assert(bes_equations.get_rank(*u)==current_rank);
-        if (t!=approximation[*u])
-        { approximation[*u]=t;
-          todo.insert(*u);
+          // ATfprintf(stderr,"HUH approximation:%t  t:%t\n",(ATerm)approximation[*u],(ATerm)t);
+          if (t!=approximation[*u])
+          { // ATfprintf(stderr,"Set approximation[%d]=%t\n",*u,(ATerm)t);
+            approximation[*u]=t;
+            todo.insert(*u);
+          }
         }
       }
     }
@@ -788,16 +881,18 @@ static bool solve_bes()
     /* substitute the stable solution for the current rank in all other
        equations. */
  
-    for(bes::variable_type v=bes_equations.nr_of_equations(); v>0; v--)
-    { if (bes_equations.get_rank(v)==current_rank)
-      { bes_equations.set_rhs(v,approximation[v]);
-      }
-      else 
-      { bes_equations.set_rhs(v,substitute_rank(bes_equations.get_rhs(v),current_rank,approximation));
+    for(bes::variable_type v=bes_equations.nr_of_variables(); v>0; v--)
+    { if (bes_equations.is_relevant(v))
+      { if (bes_equations.get_rank(v)==current_rank)
+        { bes_equations.set_rhs(v,approximation[v]);
+        }
+        else 
+        { bes_equations.set_rhs(v,substitute_rank(bes_equations.get_rhs(v),current_rank,approximation));
+        }
       }
     }
   }
-
+  // ATfprintf(stderr,"Approximation[000]=%t\n",(ATerm)approximation[1]);
   assert(bes::is_true(approximation[1])||
          bes::is_false(approximation[1]));
   return bes::is_true(approximation[1]);  /* 1 is the index of the initial variable */
@@ -856,7 +951,7 @@ static bes_expression translate_equation_for_vasy(const unsigned long i,
   { 
     if (s==or_form)
     { /* make a new equation B=b, and return B */
-      bes::variable_type v=bes_equations.nr_of_equations()+1;
+      bes::variable_type v=bes_equations.nr_of_variables()+1;
       bes_equations.add_equation(v,
                                  bes_equations.get_fixpoint_symbol(i),
                                  bes_equations.get_rank(i),
@@ -874,7 +969,7 @@ static bes_expression translate_equation_for_vasy(const unsigned long i,
   { 
     if (s==and_form)
     { /* make a new equation B=b, and return B */
-      bes::variable_type v=bes_equations.nr_of_equations()+1;
+      bes::variable_type v=bes_equations.nr_of_variables()+1;
       bes_equations.add_equation(v,
                                  bes_equations.get_fixpoint_symbol(i),
                                  bes_equations.get_rank(i),
@@ -911,17 +1006,17 @@ static void save_bes_in_vasy_format(string outfilename)
      equations are added during the translation process in "translate_equation_for_vasy" 
      that must alos be translated. */
 
-  for(unsigned long i=1; i<=bes_equations.nr_of_equations() ; i++)
+  for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
     { 
         bes_equations.set_rhs(i,translate_equation_for_vasy(i,bes_equations.get_rhs(i),both));
     }
 
   /* Second give a consecutive index to each variable of a particular rank */
 
-  std::vector<unsigned long> variable_index(bes_equations.nr_of_equations()+1);
+  std::vector<unsigned long> variable_index(bes_equations.nr_of_variables()+1);
   for(unsigned long r=1 ; r<=bes_equations.max_rank ; r++)
   { unsigned long index=0;
-    for(unsigned long i=1; i<=bes_equations.nr_of_equations() ; i++)
+    for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
     { if (bes_equations.get_rank(i)==r)
       { 
         variable_index[i]=index;
@@ -943,8 +1038,8 @@ static void save_bes_in_vasy_format(string outfilename)
 
   for(unsigned long r=1 ; r<=bes_equations.max_rank ; r++)
   { bool first=true;
-    for(unsigned long i=1; i<=bes_equations.nr_of_equations() ; i++)
-    { if (bes_equations.get_rank(i)==r)
+    for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
+    { if (bes_equations.is_relevant(i) && (bes_equations.get_rank(i)==r))
       { if (first)
         { ((outfilename=="-")?cout:outputfile) << 
              "block " << 
@@ -1027,8 +1122,8 @@ static void save_bes_in_cwi_format(string outfilename)
   }
 
   for(unsigned long r=1 ; r<=bes_equations.max_rank ; r++)
-  { for(unsigned long i=1; i<=bes_equations.nr_of_equations() ; i++)
-    { if (bes_equations.get_rank(i)==r)
+  { for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
+    { if (bes_equations.is_relevant(i) && (bes_equations.get_rank(i)==r) )
       { ((outfilename=="-")?cout:outputfile) << 
               ((bes_equations.get_fixpoint_symbol(i)==fixpoint_symbol::mu()) ? "min X" : "max X") << i << "=";
         save_rhs_in_cwi_form(((outfilename=="-")?cout:outputfile),bes_equations.get_rhs(i));
@@ -1095,9 +1190,21 @@ t_tool_options parse_command_line(int argc, char** argv)
   po::options_description desc;
 
   desc.add_options()
-      ("strategy,s",  po::value<string>(&opt_strategy)->default_value("lazy"), "use strategy arg (default 'lazy');\n"
+      ("strategy,s",  po::value<string>(&opt_strategy)->default_value("0"), "use strategy arg (default '0');\n"
        "The following strategies are available:\n"
-       "lazy    Compute only boolean equations which can be reached from the initial state\n")
+       "0       Compute all boolean equations which can be reached from the initial state, without\n"
+       "        any optimization (default). This is is the most data efficient option per generated equation.\n"
+       "1       Optimize by immediately substituting the the right hand sides for already investigated\n"
+       "        variables that are true or false when generating a expression. This is as memory efficient as\n"
+       "        0.\n"
+       "2       In addition to 1, also substitute variables that are true or false into an already generated \n"
+       "        right hand sides. This can mean that certain variables become unreachable (e.g. X0 in X0 && X1,\n"
+       "        when X1 becomes false, assuming X0 does not occur elsewhere. It will be maintained which variables\n"
+       "        have become unreachable as these do not have to be investigated. Depending on the PBES, this can\n"
+       "        reduce the size of the generated BES substantially, but requires a larger memory footstamp.\n"
+       "3       In addition to 2, investigate for generated variables whether they occur on a loop, such that\n"
+       "        they can be set to true or false, depending on the fixed point symbol. This can increase the time\n"
+       "        needed to generate an equation substantially\n")
       ("rewriter,R", po::value<string>(&opt_rewriter)->default_value("inner"), "indicate the rewriter to be used. Options are:\n"
        "inner   interpreting innermost rewriter (default),\n"
        "jitty   interpreting just in time rewriter,\n"
@@ -1175,9 +1282,9 @@ t_tool_options parse_command_line(int argc, char** argv)
   if (vm.count("strategy")) // Bes solving strategy (currently only one available)
   {
     opt_strategy = vm["strategy"].as< string >();
-    if (!(opt_strategy == "lazy"))
+    if (!(opt_strategy == "0" || opt_strategy == "1" || opt_strategy == "2" || opt_strategy == "3" ))
     {
-      gsErrorMsg("Unknown strategy specified. The only vailable strategy is lazy\n");
+      gsErrorMsg("Unknown strategy specified. The available strategies are 0, 1, 2, and 3\n");
       exit(1);
     }
   }
@@ -1232,7 +1339,21 @@ t_tool_options parse_command_line(int argc, char** argv)
   tool_options.outfilename = outfilename;
   
   tool_options.opt_outputformat = opt_outputformat;
-  tool_options.opt_strategy = opt_strategy;
+
+  if (opt_strategy=="0")
+  { tool_options.opt_strategy=lazy;
+  }
+  else if (opt_strategy=="1")
+  { tool_options.opt_strategy=optimize;
+  }
+  else if (opt_strategy=="2")
+  { tool_options.opt_strategy=on_the_fly;
+  }
+  else if (opt_strategy=="3")
+  { tool_options.opt_strategy=on_the_fly_with_fixed_points;
+  }
+  else assert(0); // Unknown strategy. Should not occur here, as there is a check for this above.
+  
   if (opt_rewriter=="inner")
   { tool_options.rewrite_strategy=GS_REWR_INNER;
   }
