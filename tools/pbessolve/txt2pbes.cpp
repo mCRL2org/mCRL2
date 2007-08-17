@@ -15,7 +15,7 @@
 #define VERSION "0.0.1" 
  
 
- #define debug
+// #define debug
  
  
 //C++ 
@@ -82,7 +82,7 @@ string outfilename;
 //=======================================
 data_expression to_nat_expression(int n)
 // constructs expressions 
-// E ::= 0 | 1 | i | j | k | E + E
+// N ::= 0 | 1 | i | j | k | N + N
 //=======================================
 {
   
@@ -110,9 +110,11 @@ data_expression to_nat_expression(int n)
 
 
 
-
+//=======================================
 data_expression to_bool_expression(int n)
-{ // parse a boolean expression
+//=======================================
+{ // parse an expression of boolean type, without quantifiers.
+  // B = T | F | a | b | c | (N=N) | (N<N) | !B | B && B | B || B
  switch (ps->op[n])
     {  
     case 'T': 
@@ -126,6 +128,12 @@ data_expression to_bool_expression(int n)
 	data_expression dv = data_expression(v);
 	return (dv);
       };
+    case '<': 
+      return (lps::data_expr::less(to_nat_expression(ps->arg1[n]),
+				   to_nat_expression(ps->arg2[n])));     
+    case '=': 
+      return(lps::data_expr::equal_to(to_nat_expression(ps->arg1[n]),
+				      to_nat_expression(ps->arg2[n])));
     case '!':
       return (lps::data_expr::not_(to_bool_expression(ps->arg1[n])));
     case '&':
@@ -149,6 +157,7 @@ data_expression get_data_expr(int n)
     return (to_bool_expression(n));
 }
 
+
 //=========================================
 data_expression_list get_expr_list(int n)
 //=========================================
@@ -165,7 +174,7 @@ data_expression_list get_expr_list(int n)
       d = push_back(d,e);
     }
 #ifdef debug
-  cout<<"Expr_list: "<< pp(d).c_str() <<"\n";
+  cerr<<"Expr_list: "<< pp(d).c_str() <<"\n";
 #endif
   
   return d;
@@ -181,7 +190,7 @@ pbes_expression to_pbes_expression(int n){
 
   using namespace pbes_expr;
 #ifdef debug
-  cout<<"to_pbes_expression, position "<< n <<"\n";
+  cerr<<"to_pbes_expression, position "<< n <<"\n";
 #endif
   pbes_expression res;
   switch (ps->op[n])
@@ -203,22 +212,22 @@ pbes_expression to_pbes_expression(int n){
     case 'X': case 'Y': case 'Z': 
       {
 	string s(""); s = s + ps->op[n];
-	//	cout<<"\n1\n";
+	//	cerr<<"\n1\n";
 	propositional_variable_instantiation propinst;
-	//	cout<<"\n2\n";
+	//	cerr<<"\n2\n";
 	
 	if (ps->arg1[n]==0) // no parameters
 	  {	  propinst = propositional_variable_instantiation(s);
-	    //	    cout<<"\n3\n";
+	    //	    cerr<<"\n3\n";
 }
 	else
 	  {
 	  propinst = propositional_variable_instantiation
 	    (s, get_expr_list(ps->arg1[n]));	  
-	  //	cout<<"\n4\n";
+	  //	cerr<<"\n4\n";
 
 	  }
-	//	cout<<"\n5\n";
+	//	cerr<<"\n5\n";
 
 	res = pbes_expression(propinst);
 	break;
@@ -243,16 +252,16 @@ pbes_expression to_pbes_expression(int n){
       break;
       // NEG pbes_expression 
       // in fact it only works for data_expressions under negation, 
-      // since there is no pbes_expr constructor
+      // since there is no pbes_expression constructor
       // for negation
     case '!':
-      res = val(lps::data_expr::not_(to_nat_expression(ps->arg1[n])));      
+      res = val(lps::data_expr::not_(to_bool_expression(ps->arg1[n])));      
       break;
     default: 
       gsErrorMsg("cannot parse pbes_expression"); exit(0);
     }
 #ifdef debug
-  cout << "result: "<<pp(res).c_str()<<"\n";
+  cerr << "result: "<<pp(res).c_str()<<"\n";
 #endif
   return res;
 }
@@ -279,14 +288,14 @@ data_variable_list get_var_list(int n)
 	case 'a': case 'b': case 'c':
 	  {s = s +  ps->op[vn] + ":Bool";break;}
 	default:
-	  cout << "Data variable name expected, got "<< ps->op[vn] <<"\n";
+	  cerr << "Data variable name expected, got "<< ps->op[vn] <<"\n";
 	};
 
       data_variable v = data_variable(s);
       d = push_back(d,v);
     }
 #ifdef debug
-  cout<<"Var_list: "<< pp(d).c_str() <<"\n";
+  cerr<<"Var_list: "<< pp(d).c_str() <<"\n";
 #endif
   
   return d;
@@ -344,13 +353,13 @@ data_expression_list standard_instance(data_variable_list dv){
     else if ((iname == "i") || (iname == "j") || (iname == "k"))
       de = data_expr::nat(0);
     else {
-      cout << "standard_instance: Expected a,b,c,d,i,j,k\n";
+      cerr << "standard_instance: Expected a,b,c,d,i,j,k\n";
       return del;
     }
     del = push_back(del,de);
   }
 #ifdef debug
-  cout<<"Instantiated "<<pp(dv).c_str()<<" as "<<pp(del).c_str()<<"\n";
+  cerr<<"Instantiated "<<pp(dv).c_str()<<" as "<<pp(del).c_str()<<"\n";
 #endif
   return del;
 }
@@ -361,8 +370,8 @@ data_expression_list standard_instance(data_variable_list dv){
 lps::data_specification get_minimal_data_spec()
 {
   std::stringstream ss;
-  ss << "map i: Nat; b:Bool; init delta;";
-  
+  //  ss << "map i:Nat; b:Bool; init delta;";
+  ss << "map b:Bool; init delta;";
   ATermAppl r = lps::detail::parse_specification(ss);
   r = lps::detail::type_check_specification(r);
   r = lps::detail::implement_data_specification(r);
@@ -380,10 +389,10 @@ pbes pbes_simple_to_pbes(){
   int i;
   pos = pos-1;
 #ifdef debug
-  cout <<"\nps:\n";
+  cerr <<"\nps:\n";
   for (i=0;i<ps->nops;i++)
-    cout<<i<<" : "<<ps->op[i]<<" "<<ps->arg1[i]<<" "<<ps->arg2[i]<<"\n";
-  cout << "\nStarting parsing at position " << pos <<"\n";  
+    cerr<<i<<" : "<<ps->op[i]<<" "<<ps->arg1[i]<<" "<<ps->arg2[i]<<"\n";
+  cerr << "\nStarting parsing at position " << pos <<"\n";  
 #endif
   
   equation_system eqs = equation_system(); 
@@ -391,7 +400,7 @@ pbes pbes_simple_to_pbes(){
     if (ps->op[i] == 'Q') // new equation
       {
 #ifdef debug
-	cout<<"New equation starting at position "<< i <<"\n";
+	cerr<<"New equation starting at position "<< i <<"\n";
 #endif
 	pbes_equation pbeq = to_pbes_eq(i);
 	eqs = eqs + pbeq;
@@ -439,7 +448,7 @@ pbes make_pbes(const string fileName){
 
        //    }
 #ifdef debug  
-  cout << "txt parsed. Now making a pbes.\n";
+  cerr << "txt parsed. Now making a pbes.\n";
 #endif
   return pbes_simple_to_pbes();
 }
@@ -512,16 +521,18 @@ cerr <<"pbes-expr   ::= \"T\" | \"F\" | boolvar | nat-expr \"<\" nat-expr \
 | \"!\" pbes-expr | \"(\" pbes-expr \")\"\n\n";
 
     cerr<<"boolvar     ::= \"a\" | \"b\" | \"c\"\n\n\
-natvar      ::= \"i\" | \"j\" | \"k\"\n\n\	
+natvar      ::= \"i\" | \"j\" | \"k\"\n\n\
 nat-expr    ::= \"1\" | natvar | nat-expr \"+\" nat-expr | \"(\" nat-expr \")\"\n\n\
-predvar-inst::= \"X\" \"(\" params-inst \")\" | \"Y\" \"(\" params-inst \")\" \  
+predvar-inst::= \"X\" \"(\" params-inst \")\" | \"Y\" \"(\" params-inst \")\" \
 | \"Z\" \"(\" params-inst \")\"\n\n\
 params	    ::=  boolvar | natvar | params \",\" boolvar | params \",\" natvar\n\n\
 params-inst ::= boolvar	| \"!\" boolvar	| nat-expr | boolvar \",\" params-inst \
 | \"!\" boolvar \",\" params-inst | nat-expr\",\" params-inst\n\n";
 
     cerr<<"\nEXAMPLES:\n\n";
-    cerr<<"mu X(b,i) = b && X(T,i+1)\n\n";
+    cerr<<"mu X(i) = (i<1) && X(i+1)\n\n";
+    cerr<<"mu X(b,i)   = (Y(b, i, i+1+1) && b) || !b\n";
+    cerr<<"nu Y(b,i,j) = X(!b,i) && Y(b,i+1,j) && ((i+1) < j)\n\n";
 }
 
    
@@ -549,14 +560,14 @@ int main(int argc, char** argv)
     {
       outfilename = infilename + ".pbes";
 
-      gsVerboseMsg("Creating pbes ( '%s' ) from text ( '%s' )",outfilename,infilename);
+      cerr <<"Creating pbes ("<<outfilename<< ") from text (" << infilename <<") \n";
       //Create the pbes from the input text 
       pbes p = make_pbes(infilename); 
 
       if(!p.save(outfilename, false))
 	gsErrorMsg("writing failed\n");
 
-      gsVerboseMsg("done");
+      cerr <<"done\n";
 
     }
 

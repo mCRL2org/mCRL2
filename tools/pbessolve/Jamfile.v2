@@ -21,8 +21,17 @@ exe pbessolve
        : <include>.
        ;
 
+exe txt2pbes
+       : txt2pbes.cpp
+         /libraries//lps
+         /libraries//rewrite
+         /libraries//parser
+         /site-config//boost_program_options
+       : <include>.
+       ;
+
 install-binaries install
-       : pbessolve
+       : pbessolve txt2pbes
        :
        : <status>experimental
        ;
