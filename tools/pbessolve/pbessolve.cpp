@@ -113,7 +113,7 @@ int main(int argc, char** argv)
   pbes_expression sol_initial_state = 
     interpret_solution(pbes_spec, es_solution); 
    
-  cout << "PBES solution: %s\n",pp(sol_initial_state).c_str();
+  cout << "PBES solution: " << pp(sol_initial_state).c_str() << "\n";
 
   return 0; 
 } 

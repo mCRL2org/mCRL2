@@ -15,7 +15,7 @@
 #define VERSION "0.0.1" 
  
 
-// #define debug
+ #define debug
  
  
 //C++ 
@@ -82,12 +82,14 @@ string outfilename;
 //=======================================
 data_expression to_nat_expression(int n)
 // constructs expressions 
-// E ::= 1 | i | j | k | E + E
+// E ::= 0 | 1 | i | j | k | E + E
 //=======================================
 {
   
   switch (ps->op[n])
     {  
+    case '0': 
+      return (lps::data_expr::nat(0));
     case '1': 
       return (lps::data_expr::nat(1));
     case 'i': case 'j': case 'k':
@@ -431,9 +433,9 @@ pbes make_pbes(const string fileName){
   else
     {
 */
-      ps = new (struct spbes);
- pos = 0; add(' ',0,0); pos++;  // convenient
-       parsePBES(fileName);
+  ps = new (struct spbes);
+  pos = 0; add(' ',0,0); pos++;  // convenient
+  parsePBES(fileName);
 
        //    }
 #ifdef debug  
@@ -547,11 +549,15 @@ int main(int argc, char** argv)
     {
       outfilename = infilename + ".pbes";
 
-      //Load the pbes 
+      gsVerboseMsg("Creating pbes ( '%s' ) from text ( '%s' )",outfilename,infilename);
+      //Create the pbes from the input text 
       pbes p = make_pbes(infilename); 
-      
+
       if(!p.save(outfilename, false))
 	gsErrorMsg("writing failed\n");
+
+      gsVerboseMsg("done");
+
     }
 
   return 0; 
