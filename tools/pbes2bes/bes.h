@@ -18,6 +18,10 @@
 #include "atermpp/table.h"
 #include "mcrl2/pbes/pbes.h"
 
+#define RELEVANCE_MASK 1
+#define FIXPOINT_MASK 2
+#define RANK_SHIFT 2
+
 namespace bes 
 {
   using atermpp::aterm_int;
@@ -128,16 +132,6 @@ namespace bes
     return BESIf;
   }
 
-  /* inline bes_expression false_()
-  { static bes_expression BESfalse=initBESfalse(BESfalse);
-    return BESfalse;
-  }
-
-  inline bes_expression true_()
-  { static bes_expression BEStrue=initBEStrue(BEStrue);
-    return BEStrue;
-  } */
-
   bes_expression BESfalse;
   inline bes_expression false_()
   { return (BESfalse?BESfalse:BESfalse=initBESfalse(BESfalse));
@@ -169,8 +163,13 @@ namespace bes
                            (aterm)(b2)));
   }
 
+  inline bool is_variable(bes_expression b)
+  { return b.type()==AT_INT;
+  }
+
   inline bes_expression if_(bes_expression b1,bes_expression b2,bes_expression b3)
-  { return bes_expression(
+  { 
+    return bes_expression(
                ATmakeAppl3(AFunBESIf(),
                            (aterm)(b1),
                            (aterm)(b2),
@@ -221,10 +220,6 @@ namespace bes
   inline bes_expression rhs(bes_expression b)
   { assert(is_and(b) || is_or(b));
     return bes_expression(aterm_appl(b)(1));
-  }
-
-  inline bool is_variable(bes_expression b)
-  { return b.type()==AT_INT;
   }
 
   inline bes_expression condition(bes_expression b)
@@ -459,7 +454,10 @@ namespace bes
       // the first position of the vectors (i.e. position 0)
       // is not used.
       //
-      // In the first bit it is indicated whether
+      // The first bit it is indicated whether this
+      // equation is relevant. It is 0 if not relevant.
+      // It is 1 if relevant.
+      // In the second bit it is indicated whether
       // the equation is nu (0) or a mu (1), the rest of the
       // bits indicate the rank+1 of this equation.
       // The value 0 for control_info indicates a wrong value.
@@ -469,7 +467,6 @@ namespace bes
       bool variable_occurrences_are_stored;
       std::vector< std::set <bes::variable_type> > variable_occurrence_sets;
       bool count_variable_relevance;
-      std::vector<unsigned long> relevance_count;
 
     public:
       unsigned long max_rank;
@@ -480,9 +477,12 @@ namespace bes
           variable_occurrences_are_stored(false),
           variable_occurrence_sets(1),
           count_variable_relevance(false),
-          relevance_count(1,0),
           max_rank(0)
       {}
+
+      inline unsigned long nr_of_variables()
+      { return control_info.size()-1; /* there is no equation at position 0 */
+      }
 
       inline void check_vector_sizes(variable_type v)
       { if (v>nr_of_variables())
@@ -491,43 +491,12 @@ namespace bes
           if (variable_occurrences_are_stored)
           { variable_occurrence_sets.resize(v+1,std::set<variable_type>());
           }
-          if (count_variable_relevance)
-          { relevance_count.resize(v+1,0);
-          }
+//          if (count_variable_relevance)
+//          { relevance_count.resize(v+1,0);
+//          }
         }
       }
 
-      void add_equation(variable_type v, 
-                        fixpoint_symbol sigma,
-                        unsigned long rank,
-                        bes_expression rhs,
-                        std::deque <variable_type> &todo=NULL_QUEUE)
-      { assert(rank>0);  // rank must be positive.
-        assert(v>0);     // variables are represented by numbers >0.
-        // std::cerr << "Add equation " << v << std::endl;
-
-        check_vector_sizes(v);
-        // the vector at position v is now guaranteed to exist.
-  
-        // if the control info is 0, the value at variable
-        // is not initialized.
-
-        control_info[v]=(sigma.is_nu()?0:1)+2*(rank+1);
-        right_hand_sides[v]=rhs;
-        if (rank>max_rank)
-        { max_rank=rank;
-        }
-        if (variable_occurrences_are_stored)
-        { add_variables_to_occurrence_sets(v,rhs);
-        }
-        if (count_variable_relevance)
-        { add_variable_relevance_rec(rhs,todo); 
-        }
-      }
-
-      inline unsigned long nr_of_variables()
-      { return control_info.size()-1; /* there is no equation at position 0 */
-      }
 
       inline fixpoint_symbol get_fixpoint_symbol(variable_type v)
       {
@@ -535,7 +504,7 @@ namespace bes
         assert(v<=nr_of_variables());
         assert(control_info[v]>0);
 
-        return (((control_info[v] % 2) ==0) ? fixpoint_symbol::nu() : fixpoint_symbol::mu());
+        return (((control_info[v] & FIXPOINT_MASK) ==0) ? fixpoint_symbol::nu() : fixpoint_symbol::mu());
       }
 
 
@@ -545,25 +514,57 @@ namespace bes
         assert(v<=nr_of_variables());
         assert(control_info[v]>0);
   
-        return (control_info[v] / 2)-1;
+        return (control_info[v] >> RANK_SHIFT)-1;
       }
 
-      inline void set_rhs(variable_type v,bes_expression b,variable_type v_except=0)
+      void add_equation(variable_type v, 
+                        fixpoint_symbol sigma,
+                        unsigned long rank,
+                        bes_expression rhs,
+                        std::deque <variable_type> &todo=NULL_QUEUE)
+      { assert(rank>0);  // rank must be positive.
+        assert(v>0);     // variables are represented by numbers >0.
+        std::cerr << "Add equation " << v << std::endl;
+
+        check_vector_sizes(v);
+        // the vector at position v is now guaranteed to exist.
+  
+        // if the control info is 0, the value at variable
+        // is not initialized.
+
+        control_info[v]=1+(((sigma.is_nu()?0:1)+((rank+1)>>1))>>1);
+        right_hand_sides[v]=rhs;
+        if (rank>max_rank)
+        { max_rank=rank;
+        }
+        if (variable_occurrences_are_stored)
+        { add_variables_to_occurrence_sets(v,rhs);
+        }
+        if (count_variable_relevance)
+        { set_variable_relevance_rec(rhs,todo);
+        }
+      }
+
+      inline void set_rhs(variable_type v,
+                          bes_expression b,
+                          variable_type v_except=0,
+                          std::deque <variable_type> &todo=NULL_QUEUE)
       { /* set the right hand side of v to b. Update the variable occurrences
            of v in the variables occurrence sets of variables occurring in b, but
            do not update the variable occurrence sets of v_except */
         assert(v>0);
         assert(v<=nr_of_variables());
-        bes_expression old_rhs=right_hand_sides[v];
-        if ((count_variable_relevance)&&(relevance_count[v]>0))
-        { add_variable_relevance_rec(b);
-          remove_variable_relevance_rec(old_rhs);
-        }
+
+        control_info[v]=control_info[v]|RELEVANCE_MASK;  // make this variable relevant.
         if (variable_occurrences_are_stored)
-        { remove_variables_from_occurrence_sets(v,old_rhs,v_except);
+        { remove_variables_from_occurrence_sets(v,right_hand_sides[v],v_except);
           add_variables_to_occurrence_sets(v,b);
         }
         right_hand_sides[v]=b;
+        if (count_variable_relevance)
+        { set_variable_relevance_rec(b,todo);
+        }
+
       }
 
       inline bes_expression get_rhs(variable_type v)
@@ -617,7 +618,7 @@ namespace bes
     
         assert(is_if(b)); // other cases must still be done here.
         assert(get_variable(condition(b))>0);
-        // std::cerr << "ADD " << v << " TO SET " << get_variable(condition(b)) << std::endl;
+        std::cerr << "ADD " << v << " TO SET " << get_variable(condition(b)) << std::endl;
         variable_type w=get_variable(condition(b));
         check_vector_sizes(w);
         variable_occurrence_sets[w].insert(v);
@@ -668,10 +669,21 @@ namespace bes
         }
       }
 
-      void add_variable_relevance_rec(
+      void reset_variable_relevance(void)
+      {
+        for(std::vector <unsigned long>::iterator v=control_info.begin() ;
+                 v!=control_info.end() ;
+                 v++)
+        { *v =(*v)^ RELEVANCE_MASK;  // XOR
+        }
+      }
+
+      void set_variable_relevance_rec(
                     bes_expression b,
                     std::deque <variable_type> &todo=NULL_QUEUE)
       { 
+        ATfprintf(stderr,"Set variable relevance for %t\n",(ATerm)b);
+        assert(count_variable_relevance);
         if (is_true(b)||is_false(b)||is_dummy(b))
         { return;
         }
@@ -680,13 +692,9 @@ namespace bes
         { variable_type v=get_variable(b);
           assert(v>0);
           check_vector_sizes(v);
-          if (relevance_count[v]>0)
-          { relevance_count[v]++;
-            return;
-          }
-          else
-          { relevance_count[v]=1;
-            if (get_rhs(v)==dummy())
+          if (!is_relevant(v))
+          { control_info[v]=control_info[v]|RELEVANCE_MASK;  // Make relevant
+            if (get_rhs(v)==dummy()) // v is relevant an unprocessed. Put in on the todo stack.
             { 
               if (&todo!=&NULL_QUEUE)
               { // fprintf(stderr,"push back %d\n",(unsigned int)v);
@@ -695,86 +703,54 @@ namespace bes
               return;
             }
             else
-            { add_variable_relevance_rec(get_rhs(v),todo);  
+            { set_variable_relevance_rec(get_rhs(v),todo);  
               return;
             }
           }
+          return;
         }
         
         if (is_if(b))
-        { add_variable_relevance_rec(condition(b),todo);
-          add_variable_relevance_rec(then_branch(b),todo);
-          add_variable_relevance_rec(else_branch(b),todo);
+        { set_variable_relevance_rec(condition(b),todo);
+          set_variable_relevance_rec(then_branch(b),todo);
+          set_variable_relevance_rec(else_branch(b),todo);
           return;
         }  
 
         if (is_and(b)||is_or(b))
-        { add_variable_relevance_rec(lhs(b),todo);
-          add_variable_relevance_rec(rhs(b),todo);
+        { set_variable_relevance_rec(lhs(b),todo);
+          set_variable_relevance_rec(rhs(b),todo);
           return;
         }
 
+        ATfprintf(stderr,"HUH %t\n",(ATerm)b);
         assert(0); // do not expect other term formats.
       }
 
-      void remove_variable_relevance_rec(bes_expression b)
-      {
-        if (is_true(b)||is_false(b)||is_dummy(b))
-        { return;
-        }
-
-        if (is_variable(b))
-        { variable_type v=get_variable(b);
-          assert(v>0);
-          assert(v<=nr_of_variables());
-          assert(relevance_count[v]>0);
-          if (relevance_count[v]>1)
-          { relevance_count[v]--;
-            return;
+      void refresh_relevances(std::deque <variable_type> &todo=NULL_QUEUE)
+      { if (count_variable_relevance)
+        { reset_variable_relevance();
+          if (&todo!=&NULL_QUEUE)
+          { todo.clear();
           }
-          else
-          { relevance_count[v]=0;
-            // fprintf(stderr,"NOT RELEVANT ANYMORE %lu\n",(unsigned long)v);
-            remove_variable_relevance_rec(get_rhs(v));
-            return;
-          }
+          set_variable_relevance_rec(variable(1),todo);
+          std::cerr << "Reset relevances. Length of todo list: " << todo.size() << std::endl;
         }
-
-        if (is_if(b))
-        { remove_variable_relevance_rec(condition(b));
-          remove_variable_relevance_rec(then_branch(b));
-          remove_variable_relevance_rec(else_branch(b));
-          return;
-        }  
-    
-        if (is_and(b)||is_or(b))
-        { remove_variable_relevance_rec(lhs(b));
-          remove_variable_relevance_rec(rhs(b));
-          return;
-        }
-
-        assert(0); // do not expect other term formats.
       }
 
       void count_variable_relevance_on(void)
       {
         assert(!count_variable_relevance);
         count_variable_relevance=true;
-        check_vector_sizes(1); // variable 1 should at least exist to
-                               // set its relevance.
-        relevance_count.resize(nr_of_variables()+1,0);
-        relevance_count[1]=1; // The initial variable is relevant.
-        bes_expression b=get_rhs(1);
-        if (b!=dummy())
-        { add_variable_relevance_rec(get_rhs(1));
-        }
+        refresh_relevances();
       }
 
       bool is_relevant(variable_type v)
       { 
         assert(0<v);
         check_vector_sizes(v);
-        return ((!count_variable_relevance) || (relevance_count[v]>0));
+        /* all variables are relevant if relevancy is not maintained */
+        return (!count_variable_relevance || (control_info[v] & RELEVANCE_MASK));
       }
 
       bool find_nu_loop(bes_expression b,variable_type v)
@@ -865,6 +841,7 @@ namespace bes
         assert(is_or(b));
         return false;
       }
+
   };
 
 

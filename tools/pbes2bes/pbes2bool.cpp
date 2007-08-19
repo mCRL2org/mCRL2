@@ -568,12 +568,16 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
     variable_rank.put(eqi->variable().name(),atermpp::aterm_int(rank));
   }
 
+  unsigned long relevance_counter=0;
+  unsigned long relevance_counter_limit=100;
+
   gsVerboseMsg("Computing BES....\n");
   // As long as there are states to be explored
   while ((tool_options.opt_strategy>=on_the_fly)
              ?todo.size()>0
              :(nr_of_processed_variables < nr_of_generated_variables))
-  {
+  { 
+    cerr << "HIER " << nr_of_processed_variables << endl;
     bes::variable_type variable_to_be_processed;
     if (tool_options.opt_strategy>=on_the_fly)
     { variable_to_be_processed=todo.front();
@@ -586,7 +590,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
     if (bes_equations.is_relevant(variable_to_be_processed)) 
            // If v is not relevant, it does not need to be investigated.
     { 
-      // fprintf(stderr,"Process variable %d\n",(unsigned int)variable_to_be_processed);
+      fprintf(stderr,"Process variable %d\n",(unsigned int)variable_to_be_processed);
 
       propositional_variable_instantiation current_variable_instantiation =
             propositional_variable_instantiation(variable_index.get(variable_to_be_processed));
@@ -622,6 +626,22 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
                         tool_options.opt_strategy,
                         bes_equations);
   
+      if (tool_options.opt_strategy>=on_the_fly_with_fixed_points)
+      { // find a variable in the new_bes_expression from which `variable' to be
+        // processed is reachable. If so, new_bes_expression can be set to
+        // true or false.
+        if (bes_equations.get_fixpoint_symbol(variable_to_be_processed)==fixpoint_symbol::nu())
+        { if (bes_equations.find_nu_loop(new_bes_expression,variable_to_be_processed))
+          { new_bes_expression=bes::true_();
+          }
+        }
+        else           
+        { if (bes_equations.find_mu_loop(new_bes_expression,variable_to_be_processed))
+          { new_bes_expression=bes::false_();
+          }
+        }
+      }
+
       if ((tool_options.opt_strategy>=on_the_fly))
       { 
         bes_equations.add_equation(
@@ -630,6 +650,18 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
                 atermpp::aterm_int(variable_rank.get(current_pbeq.variable().name())).value(),
                 new_bes_expression,
                 todo);
+
+        /* So now and then (after doing as many operations on the size of bes_equations,
+           the relevances of variables must be reset, to avoid investigating irrelevant
+           variables. There is an invariant in the system that all variables reachable
+           from the initial variable 1, are always relevant. Furthermore, relevant 
+           variables that need to be investigated are always in the todo list */
+        relevance_counter++;
+        if (relevance_counter>relevance_counter_limit)
+        { relevance_counter_limit=bes_equations.nr_of_variables();
+          relevance_counter=0;
+          bes_equations.refresh_relevances(todo);
+        }
       }
       else
       { bes_equations.add_equation(
@@ -641,21 +673,6 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
   
       if (tool_options.opt_strategy>=on_the_fly) 
       { 
-        if (tool_options.opt_strategy>=on_the_fly_with_fixed_points)
-        { // find a variable in the new_bes_expression from which `variable' to be
-          // processed is reachable. If so, new_bes_expression can be set to
-          // true or false.
-          if (bes_equations.get_fixpoint_symbol(variable_to_be_processed)==fixpoint_symbol::nu())
-          { if (bes_equations.find_nu_loop(new_bes_expression,variable_to_be_processed))
-            { new_bes_expression=bes::true_();
-            }
-          }
-          else           
-          { if (bes_equations.find_mu_loop(new_bes_expression,variable_to_be_processed))
-            { new_bes_expression=bes::false_();
-            }
-          }
-        }
         if (bes::is_true(new_bes_expression)||bes::is_false(new_bes_expression))
         { 
           // new_bes_expression is true or false and opt_strategy is on the fly or higher. 
@@ -675,12 +692,11 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
             {
               gsVerboseMsg("+ %d\n",(unsigned long)*v);
               bes_expression b=bes_equations.get_rhs(*v);
-              // bes_equations.remove_variables_from_occurrence_sets(*v,b,w);
               b=substitute_true_false(b,w,bes_equations.get_rhs(w));
               if (bes::is_true(b)||bes::is_false(b))
               { to_set_to_true_or_false.push_front(*v);
               }
-              // bes_equations.add_variables_to_occurrence_sets(*v,b);
+              relevance_counter++;
               bes_equations.set_rhs(*v,b,w);
             }
             bes_equations.clear_variable_occurrence_set(w);
@@ -697,7 +713,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
   }
 }
 
-/* substitute true or false in fixpoint equation */
+/* substitute true or false in fixpoint equation * /
 static bes_expression substitute_fp(
                 const bes_expression b,
                 const bes::variable_type v)
@@ -705,8 +721,8 @@ static bes_expression substitute_fp(
   {
     if (v==bes::get_variable(condition(b)))
     {
-      /* first check whether v and cond refer to the same variable, as
-       * cond can then be substituted by true (for nu) or false (for mu) */
+      / * first check whether v and cond refer to the same variable, as
+       * cond can then be substituted by true (for nu) or false (for mu) * /
       if (bes_equations.get_fixpoint_symbol(v)==fixpoint_symbol::mu())
       { return else_branch(b); // substitute_bex(v,w,else_branch(b));
       }
@@ -715,7 +731,7 @@ static bes_expression substitute_fp(
       }
     }
     else 
-    { /* the condition is not equal to v */
+    { / * the condition is not equal to v * /
       bes_expression b1=substitute_fp(then_branch(b),v);
       bes_expression b2=substitute_fp(else_branch(b),v);
       if ((b1==then_branch(b)) && (b2==else_branch(b)))
@@ -727,7 +743,7 @@ static bes_expression substitute_fp(
   }
   assert(is_true(b)||is_false(b));
   return b;
-}
+} */
 
 
 /* substitute boolean equation expression */
@@ -892,7 +908,8 @@ static bool solve_bes()
       }
     }
   }
-  // ATfprintf(stderr,"Approximation[000]=%t\n",(ATerm)approximation[1]);
+
+  ATfprintf(stderr,"Approximation[1]=%t\n",(ATerm)approximation[1]);
   assert(bes::is_true(approximation[1])||
          bes::is_false(approximation[1]));
   return bes::is_true(approximation[1]);  /* 1 is the index of the initial variable */
