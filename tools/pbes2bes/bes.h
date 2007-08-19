@@ -56,10 +56,10 @@ namespace bes
 //
 
   std::deque<variable_type> NULL_QUEUE;
+  bool opt_use_hashtables=false;
 
   class bes_expression: public aterm
   {
-
     public:
       bes_expression()
         : aterm()
@@ -80,6 +80,10 @@ namespace bes
         return *this;
       }
   };
+
+  void use_hashtables(void)
+  { opt_use_hashtables=true;
+  }
 
   static bes_expression initBEStrue(bes_expression &BEStrue)
   { BEStrue = ATmakeAppl0(ATmakeAFun("BESTrue", 0, ATfalse));
@@ -244,8 +248,48 @@ namespace bes
     return ((aterm_int)b).value();
   }
 
+  static bes_expression substitute_true_false_rec(
+                      bes_expression b, 
+                      const variable_type v, 
+                      const bes_expression b_subst,
+                      atermpp::table &hashtable)
+  { assert(is_true(b_subst)||is_false(b_subst));
+    if (is_true(b)||is_false(b))
+    { return b;
+    }
+    
+    bes_expression result;
+
+    if (opt_use_hashtables)
+    { result=hashtable.get(b);
+      if (result!=NULL)
+      { return result;
+      }
+    }
+    
+    assert(is_if(b));
+    if (v==get_variable(condition(b)))
+    { if (is_true(b_subst))
+      { result=then_branch(b);
+      }
+      else
+      { assert(is_false(b_subst));
+        result=else_branch(b);
+      }
+    }
+    else
+    { result=if_(condition(b),
+                   substitute_true_false_rec(then_branch(b),v,b_subst,hashtable),
+                   substitute_true_false_rec(else_branch(b),v,b_subst,hashtable));
+    }
+    if (opt_use_hashtables)
+    { hashtable.put(b,result); 
+    }
+    return result;
+  }
+
   bes_expression substitute_true_false(
-                      const bes_expression b, 
+                      bes_expression b, 
                       const variable_type v, 
                       const bes_expression b_subst)
   { assert(is_true(b_subst)||is_false(b_subst));
@@ -253,20 +297,22 @@ namespace bes
     { return b;
     }
     
+    static atermpp::table hashtable1(10,50);
+
     assert(is_if(b));
-    if (v==get_variable(condition(b)))
-    { if (is_true(b_subst))
-      { return then_branch(b);
-      }
-      assert(is_false(b_subst));
-      return else_branch(b);
+    bes_expression result=substitute_true_false_rec(b,v,b_subst,hashtable1);
+
+    if (opt_use_hashtables) 
+    { hashtable1.reset();
     }
-    return if_(condition(b),
-                 substitute_true_false(then_branch(b),v,b_subst),
-                 substitute_true_false(else_branch(b),v,b_subst));
+    return result;
   }
 
-  static bes_expression BDDif_rec(bes_expression b1, bes_expression b2, bes_expression b3,atermpp::table &hashtable);
+  static bes_expression BDDif_rec(
+                             bes_expression b1, 
+                             bes_expression b2, 
+                             bes_expression b3,
+                             atermpp::table &hashtable);
 
 
   bes_expression BDDif(bes_expression b1, bes_expression b2, bes_expression b3)
@@ -466,6 +512,7 @@ namespace bes
       atermpp::vector<bes_expression> right_hand_sides;
       bool variable_occurrences_are_stored;
       std::vector< std::set <bes::variable_type> > variable_occurrence_sets;
+      atermpp::indexed_set variable_relevance_indexed_set;
       bool count_variable_relevance;
 
     public:
@@ -476,6 +523,7 @@ namespace bes
           right_hand_sides(1),
           variable_occurrences_are_stored(false),
           variable_occurrence_sets(1),
+          variable_relevance_indexed_set(10,50),
           count_variable_relevance(false),
           max_rank(0)
       {}
@@ -524,7 +572,7 @@ namespace bes
                         std::deque <variable_type> &todo=NULL_QUEUE)
       { assert(rank>0);  // rank must be positive.
         assert(v>0);     // variables are represented by numbers >0.
-        std::cerr << "Add equation " << v << std::endl;
+        // std::cerr << "Add equation " << v << std::endl;
 
         check_vector_sizes(v);
         // the vector at position v is now guaranteed to exist.
@@ -556,11 +604,12 @@ namespace bes
         assert(v<=nr_of_variables());
 
         control_info[v]=control_info[v]|RELEVANCE_MASK;  // make this variable relevant.
-        if (variable_occurrences_are_stored)
-        { remove_variables_from_occurrence_sets(v,right_hand_sides[v],v_except);
+        bes_expression old_rhs=right_hand_sides[v];
+        if ((variable_occurrences_are_stored)&& (old_rhs!=b))
+        { remove_variables_from_occurrence_sets(v,old_rhs,v_except);
           add_variables_to_occurrence_sets(v,b);
+          right_hand_sides[v]=b;
         }
-        right_hand_sides[v]=b;
         if (count_variable_relevance)
         { set_variable_relevance_rec(b,todo);
         }
@@ -586,14 +635,12 @@ namespace bes
         variable_occurrence_sets[v].clear();
       }
 
-      
       std::set< bes::variable_type >::iterator 
             variable_occurrence_set_begin(variable_type v)
       { assert(variable_occurrences_are_stored);
         assert(v>0);
         check_vector_sizes(v);
         return variable_occurrence_sets[v].begin();
-
       }
 
       std::set< bes::variable_type >::iterator 
@@ -602,42 +649,66 @@ namespace bes
         assert(v>0);
         check_vector_sizes(v);
         return variable_occurrence_sets[v].end();
+      }
 
+      void add_variables_to_occurrence_sets(
+                      bes::variable_type v,
+                      bes_expression b,
+                      const bool use_indexed_set,
+                      atermpp::indexed_set &indexed_set)
+      { 
+        assert(v>0);
+        assert(variable_occurrences_are_stored);
+
+        if (bes::is_true(b)||bes::is_false(b)||bes::is_dummy(b))
+        { return;
+        }
+    
+        if (use_indexed_set)
+        { if (!(indexed_set.put(b)).second)  // b is already in the set.
+          return;
+        }
+
+        check_vector_sizes(v);
+        assert(is_if(b)); // other cases must still be done here.
+        assert(get_variable(condition(b))>0);
+        // std::cerr << "ADD " << v << " TO SET " << get_variable(condition(b)) << std::endl;
+        variable_type w=get_variable(condition(b));
+        check_vector_sizes(w);
+        variable_occurrence_sets[w].insert(v);
+
+        add_variables_to_occurrence_sets(v,then_branch(b),use_indexed_set,indexed_set);
+        add_variables_to_occurrence_sets(v,else_branch(b),use_indexed_set,indexed_set);
       }
 
       void add_variables_to_occurrence_sets(
                       bes::variable_type v,
                       bes_expression b)
-      { 
-        assert(v>0);
-        assert(variable_occurrences_are_stored);
-        check_vector_sizes(v);
-        if (bes::is_true(b)||bes::is_false(b))
-        { return;
+      { static atermpp::indexed_set indexed_set1(10,50);
+
+        add_variables_to_occurrence_sets(v,b,opt_use_hashtables,indexed_set1);
+        if (opt_use_hashtables)
+        { indexed_set1.reset();
         }
-    
-        assert(is_if(b)); // other cases must still be done here.
-        assert(get_variable(condition(b))>0);
-        std::cerr << "ADD " << v << " TO SET " << get_variable(condition(b)) << std::endl;
-        variable_type w=get_variable(condition(b));
-        check_vector_sizes(w);
-        variable_occurrence_sets[w].insert(v);
-        // Using hash tables this can be made more efficient, by employing
-        // sharing of the aterm representing b.
-        add_variables_to_occurrence_sets(v,then_branch(b));
-        add_variables_to_occurrence_sets(v,else_branch(b));
       }
 
       void remove_variables_from_occurrence_sets(
                      const bes::variable_type v,
-                     const bes_expression b,
-                     const bes::variable_type v_except)
+                     bes_expression b,
+                     const bes::variable_type v_except,
+                     const bool use_indexed_set,
+                     atermpp::indexed_set &indexed_set)
       { 
         assert(v>0);
         assert(variable_occurrences_are_stored);
         check_vector_sizes(v);
-        if (bes::is_true(b)||bes::is_false(b))
+        if (bes::is_true(b)||bes::is_false(b)||bes::is_dummy(b))
         { return;
+        }
+
+        if (use_indexed_set)
+        { if (!(indexed_set.put(b)).second)  // b is already in the set.
+          return;
         }
 
         assert(is_if(b)); // other cases must still be done here.
@@ -648,9 +719,23 @@ namespace bes
         }
         // Using hash tables this can be made more efficient, by employing
         // sharing of the aterm representing b.
-        remove_variables_from_occurrence_sets(v,then_branch(b),v_except);
-        remove_variables_from_occurrence_sets(v,else_branch(b),v_except);
+        remove_variables_from_occurrence_sets(v,then_branch(b),v_except,use_indexed_set,indexed_set);
+        remove_variables_from_occurrence_sets(v,else_branch(b),v_except,use_indexed_set,indexed_set);
       }
+
+      void remove_variables_from_occurrence_sets(
+                     const bes::variable_type v,
+                     bes_expression b,
+                     const bes::variable_type v_except)
+      {
+        static atermpp::indexed_set indexed_set2(10,50);
+
+        remove_variables_from_occurrence_sets(v,b,v_except,opt_use_hashtables,indexed_set2);
+        if (opt_use_hashtables)
+        { indexed_set2.reset();
+        }
+      }
+
 
       void store_variable_occurrences(void)
       {
@@ -669,25 +754,34 @@ namespace bes
         }
       }
 
+
       void reset_variable_relevance(void)
       {
         for(std::vector <unsigned long>::iterator v=control_info.begin() ;
                  v!=control_info.end() ;
                  v++)
-        { *v =(*v)^ RELEVANCE_MASK;  // XOR
+        { *v =(*v)& ~RELEVANCE_MASK;  // reset the relevance bit to 0
         }
       }
+  
 
       void set_variable_relevance_rec(
                     bes_expression b,
                     std::deque <variable_type> &todo=NULL_QUEUE)
       { 
-        ATfprintf(stderr,"Set variable relevance for %t\n",(ATerm)b);
         assert(count_variable_relevance);
         if (is_true(b)||is_false(b)||is_dummy(b))
         { return;
         }
 
+        if (opt_use_hashtables)
+        { if (!(variable_relevance_indexed_set.put(b)).second)
+          { /* The relevance for the variables in this term has already been set */
+            return;
+          }
+        }
+
+        // ATfprintf(stderr,"Set variable relevance for %t\n",(ATerm)b);
         if (is_variable(b))
         { variable_type v=get_variable(b);
           assert(v>0);
@@ -730,11 +824,15 @@ namespace bes
       void refresh_relevances(std::deque <variable_type> &todo=NULL_QUEUE)
       { if (count_variable_relevance)
         { reset_variable_relevance();
+          if (opt_use_hashtables)
+          { variable_relevance_indexed_set.reset();
+          }
           if (&todo!=&NULL_QUEUE)
           { todo.clear();
           }
           set_variable_relevance_rec(variable(1),todo);
-          std::cerr << "Reset relevances. Length of todo list: " << todo.size() << std::endl;
+          // std::cerr << "Reset relevancies of variables. Length of todo list: " << todo.size() << 
+          //        "Nr of vars: " << nr_of_variables() << std::endl;
         }
       }
 

@@ -51,6 +51,7 @@
 #include "atermpp/utility.h"
 #include "atermpp/indexed_set.h"
 #include "atermpp/table.h"
+#include "_aterm.h"
 
 //Tool-specific
 // #include "pbes_rewrite_jfg.h"
@@ -101,8 +102,9 @@ typedef struct{
    std::string opt_outputformat;
 //   std::string opt_strategy;
    transformation_strategy opt_strategy;
-   bool opt_precompile_pbes;
    RewriteStrategy rewrite_strategy;
+   bool opt_precompile_pbes;
+   bool opt_use_hashtables;
    std::string infilename;
    std::string outfilename;
 } t_tool_options;
@@ -139,7 +141,7 @@ static void save_rhs_in_vasy_form(ostream &outputfile,
 
 static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options);
 
-static bool solve_bes();
+static bool solve_bes(const t_tool_options &);
 
 // Create a propositional variable instantiation with the checks needed in the naive algorithm
 
@@ -149,6 +151,10 @@ static bool process(t_tool_options const& tool_options)
   pbes pbes_spec = load_pbes(tool_options);
 
   //Process the pbes
+
+  if (tool_options.opt_use_hashtables)
+  { bes::use_hashtables();
+  }
   calculate_bes(pbes_spec, tool_options);
 
   if (tool_options.opt_outputformat == "cwi")
@@ -161,7 +167,7 @@ static bool process(t_tool_options const& tool_options)
   }
   else 
   { 
-    gsMessage("The pbes is %svalid\n", solve_bes() ? "" : "not ");
+    gsMessage("The pbes is %svalid\n", solve_bes(tool_options) ? "" : "not ");
   }
 
   return true;
@@ -570,6 +576,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
 
   unsigned long relevance_counter=0;
   unsigned long relevance_counter_limit=100;
+  #define RELEVANCE_DIVIDE_FACTOR 10
 
   gsVerboseMsg("Computing BES....\n");
   // As long as there are states to be explored
@@ -577,7 +584,6 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
              ?todo.size()>0
              :(nr_of_processed_variables < nr_of_generated_variables))
   { 
-    cerr << "HIER " << nr_of_processed_variables << endl;
     bes::variable_type variable_to_be_processed;
     if (tool_options.opt_strategy>=on_the_fly)
     { variable_to_be_processed=todo.front();
@@ -590,7 +596,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
     if (bes_equations.is_relevant(variable_to_be_processed)) 
            // If v is not relevant, it does not need to be investigated.
     { 
-      fprintf(stderr,"Process variable %d\n",(unsigned int)variable_to_be_processed);
+      // fprintf(stderr,"Process variable %d\n",(unsigned int)variable_to_be_processed);
 
       propositional_variable_instantiation current_variable_instantiation =
             propositional_variable_instantiation(variable_index.get(variable_to_be_processed));
@@ -625,6 +631,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
                         tool_options.opt_outputformat=="none",
                         tool_options.opt_strategy,
                         bes_equations);
+      // ATfprintf(stderr,"Resulting expression %d\n",AT_calcCoreSize(new_bes_expression));
   
       if (tool_options.opt_strategy>=on_the_fly_with_fixed_points)
       { // find a variable in the new_bes_expression from which `variable' to be
@@ -658,7 +665,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
            variables that need to be investigated are always in the todo list */
         relevance_counter++;
         if (relevance_counter>relevance_counter_limit)
-        { relevance_counter_limit=bes_equations.nr_of_variables();
+        { relevance_counter_limit=bes_equations.nr_of_variables()/RELEVANCE_DIVIDE_FACTOR; 
           relevance_counter=0;
           bes_equations.refresh_relevances(todo);
         }
@@ -690,7 +697,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
                       v!=bes_equations.variable_occurrence_set_end(w); 
                       v++)
             {
-              gsVerboseMsg("+ %d\n",(unsigned long)*v);
+              // gsVerboseMsg("+ %d\n",(unsigned long)*v);
               bes_expression b=bes_equations.get_rhs(*v);
               b=substitute_true_false(b,w,bes_equations.get_rhs(w));
               if (bes::is_true(b)||bes::is_false(b))
@@ -713,118 +720,130 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
   }
 }
 
-/* substitute true or false in fixpoint equation * /
-static bes_expression substitute_fp(
-                const bes_expression b,
-                const bes::variable_type v)
-{ if (is_if(b))
-  {
-    if (v==bes::get_variable(condition(b)))
-    {
-      / * first check whether v and cond refer to the same variable, as
-       * cond can then be substituted by true (for nu) or false (for mu) * /
-      if (bes_equations.get_fixpoint_symbol(v)==fixpoint_symbol::mu())
-      { return else_branch(b); // substitute_bex(v,w,else_branch(b));
-      }
-      else
-      { return then_branch(b); // substitute_bex(v,w,then_branch(b));
-      }
-    }
-    else 
-    { / * the condition is not equal to v * /
-      bes_expression b1=substitute_fp(then_branch(b),v);
-      bes_expression b2=substitute_fp(else_branch(b),v);
-      if ((b1==then_branch(b)) && (b2==else_branch(b)))
-      { return b;
-      }
-      bes_expression br=BDDif(bes::if_(condition(b),bes::true_(),bes::false_()),b1,b2);
-      return br;
-    }
-  }
-  assert(is_true(b)||is_false(b));
-  return b;
-} */
-
-
 /* substitute boolean equation expression */
 static bes_expression substitute_rank(
-                const bes_expression b,
+                bes_expression b,
                 const unsigned long current_rank,
-                const atermpp::vector<bes_expression> &approximation)
+                const atermpp::vector<bes_expression> &approximation,
+                const bool use_hashtable,
+                atermpp::table &hashtable)
 { /* substitute variables with rank larger and equal
      than current_rank with their approximations. */
      
+  if (bes::is_true(b)||bes::is_false(b)||bes::is_dummy(b))
+  { return b;
+  }
+
+  bes_expression result;
+  if (use_hashtable)
+  { result=hashtable.get(b);
+    if (result!=NULL)
+    { return result;
+    }
+  }
+
   if (is_if(b))
   { 
     bes::variable_type v=bes::get_variable(condition(b));
     if (bes_equations.get_rank(v)==current_rank)
     {
       if (bes::is_true(approximation[v]))
-      { return substitute_rank(then_branch(b),current_rank,approximation);
+      { result=substitute_rank(then_branch(b),current_rank,approximation,use_hashtable,hashtable);
       }
-      if (bes::is_false(approximation[v]))
-      { return substitute_rank(else_branch(b),current_rank,approximation);
+      else if (bes::is_false(approximation[v]))
+      { result=substitute_rank(else_branch(b),current_rank,approximation,use_hashtable,hashtable);
       }
-
-      bes_expression b1=substitute_rank(then_branch(b),current_rank,approximation);
-      bes_expression b2=substitute_rank(else_branch(b),current_rank,approximation);
-      return BDDif(approximation[v],b1,b2);
+      else
+      { bes_expression b1=substitute_rank(then_branch(b),current_rank,approximation,use_hashtable,hashtable);
+        bes_expression b2=substitute_rank(else_branch(b),current_rank,approximation,use_hashtable,hashtable);
+        result=BDDif(approximation[v],b1,b2);
+      }
     }
     else
     { /* the condition is not equal to v */
-      bes_expression b1=substitute_rank(then_branch(b),current_rank,approximation);
-      bes_expression b2=substitute_rank(else_branch(b),current_rank,approximation);
+      bes_expression b1=substitute_rank(then_branch(b),current_rank,approximation,use_hashtable,hashtable);
+      bes_expression b2=substitute_rank(else_branch(b),current_rank,approximation,use_hashtable,hashtable);
       if ((b1==then_branch(b)) && (b2==else_branch(b)))
-      { return b;
+      { result=b;
       }
-      bes_expression br=BDDif(bes::if_(condition(b),bes::true_(),bes::false_()),b1,b2);
-      return br;
+      else 
+      { result=BDDif(bes::if_(condition(b),bes::true_(),bes::false_()),b1,b2);
+      }
     }
   }
+  else 
+  { ATfprintf(stderr,"AAAA %t\n",(ATerm)b);
+    assert(0);  // expect an if, a true or a false.
+  }
 
-  assert(bes::is_true(b)||bes::is_false(b));
-  return b;
+  if (use_hashtable)
+  { hashtable.put(b,result);
+  }
+  return result;
 }
 
 /* substitute boolean equation expression */
+
 static bes_expression evaluate_bex(
-                const bes_expression b,
+                bes_expression b,
                 const atermpp::vector<bes_expression> &approximation,
-                const unsigned long rank)
+                const unsigned long rank,
+                const bool use_hashtable,
+                atermpp::table &hashtable)
 { /* substitute the approximation for variables in b, given
      by approximation, for all those variables that have a 
-     rank higher or equal to the variable rank */
+     rank higher or equal to the variable rank;
+     IMPROVE USING HASH TABLE */
+
+  if (bes::is_true(b)||bes::is_false(b))
+  { return b;
+  }
+  
+  bes_expression result;
+  if (use_hashtable)
+  { result=hashtable.get(b);
+    if (result!=NULL)
+    return result;
+  }
 
   if (is_if(b))
   { 
     bes::variable_type v=bes::get_variable(condition(b));
     if (bes_equations.get_rank(v)>=rank)
     { 
-      bes_expression b1=evaluate_bex(then_branch(b),approximation,rank);
-      bes_expression b2=evaluate_bex(else_branch(b),approximation,rank);
-      return BDDif(approximation[v],b1,b2);
+      bes_expression b1=evaluate_bex(then_branch(b),approximation,rank,use_hashtable,hashtable);
+      bes_expression b2=evaluate_bex(else_branch(b),approximation,rank,use_hashtable,hashtable);
+      result=BDDif(approximation[v],b1,b2);
     }
     else
     { /* the condition has lower rank than the variable rank,
          leave it untouched */
-      bes_expression b1=evaluate_bex(then_branch(b),approximation,rank);
-      bes_expression b2=evaluate_bex(else_branch(b),approximation,rank);
+      bes_expression b1=evaluate_bex(then_branch(b),approximation,rank,use_hashtable,hashtable);
+      bes_expression b2=evaluate_bex(else_branch(b),approximation,rank,use_hashtable,hashtable);
       if ((b1==then_branch(b)) && (b2==else_branch(b)))
-      { return b;
+      { result=b;
       }
-      bes_expression br=BDDif(bes::if_(condition(b),bes::true_(),bes::false_()),b1,b2);
-      return br;
+      else 
+      { result=BDDif(bes::if_(condition(b),bes::true_(),bes::false_()),b1,b2);
+      }
     }
   }
+  else 
+  { assert(0); //expect an if, true or false;
+  }
 
-  assert(bes::is_true(b)||bes::is_false(b));
-  return b;
+  if (use_hashtable)
+  { hashtable.put(b,result);
+  }
+  return result;
 }
 
-static bool solve_bes()
+static bool solve_bes(const t_tool_options &tool_options)
 { 
   gsVerboseMsg("Solving BES... %d\n",bes_equations.nr_of_variables());
   atermpp::vector<bes_expression> approximation(bes_equations.nr_of_variables()+1);
+
+  atermpp::table bex_hashtable(10,5);
 
   /* Set the approximation to its initial value */
   for(bes::variable_type v=bes_equations.nr_of_variables(); v>0; v--)
@@ -852,25 +871,33 @@ static bool solve_bes()
   for(unsigned long current_rank=bes_equations.max_rank;
       current_rank>0 ; current_rank--)
   { 
-    // std::vector<std::set <bes::variable_type> > 
-    //          variable_occurrence_set(bes_equations.nr_of_variables()+1);
+
+    /* Calculate the stable solution for the current rank */
+
     set <bes::variable_type> todo;
 
     for(bes::variable_type v=bes_equations.nr_of_variables(); v>0; v--)
     { if (bes_equations.is_relevant(v) && (bes_equations.get_rank(v)==current_rank))
       { 
-        bes_expression t=evaluate_bex(bes_equations.get_rhs(v),approximation,current_rank);
+        bes_expression t=evaluate_bex(
+                             bes_equations.get_rhs(v),
+                             approximation,
+                             current_rank,
+                             tool_options.opt_use_hashtables,
+                             bex_hashtable);
         
-          // ATfprintf(stderr,"HUH11 approximation:%t  t:%t\n",(ATerm)approximation[v],(ATerm)t);
         if (t!=approximation[v])
-        { // ATfprintf(stderr,"Set premature approximation[%d]=%t\n",v,(ATerm)t);
+        { 
+          if (tool_options.opt_use_hashtables)
+          { bex_hashtable.reset();  /* we change approximation, so the 
+                                       hashtable becomes invalid */
+          }
           approximation[v]=t;
           todo.insert(v);
         }
       }
     }
   
-    /* Calculate the stable solution for the current rank */
     for( ; todo.size()>0 ; )
     { set<bes::variable_type>::iterator w= todo.begin();
       bes::variable_type w_value=*w;
@@ -882,11 +909,20 @@ static bool solve_bes()
          u++)
       { // fprintf(stderr,"Occurrence of %d in %d\n",w_value, *u);
         if (bes_equations.is_relevant(*u) && (bes_equations.get_rank(*u)==current_rank))
-        { bes_expression t=evaluate_bex(bes_equations.get_rhs(*u),approximation,current_rank);
+        { bes_expression t=evaluate_bex(
+                              bes_equations.get_rhs(*u),
+                              approximation,
+                              current_rank,
+                              tool_options.opt_use_hashtables,
+                              bex_hashtable);
         
           // ATfprintf(stderr,"HUH approximation:%t  t:%t\n",(ATerm)approximation[*u],(ATerm)t);
           if (t!=approximation[*u])
           { // ATfprintf(stderr,"Set approximation[%d]=%t\n",*u,(ATerm)t);
+            if (tool_options.opt_use_hashtables)
+            { bex_hashtable.reset();  /* we change approximation, so the 
+                                         hashtable becomes invalid */
+            }
             approximation[*u]=t;
             todo.insert(*u);
           }
@@ -896,6 +932,9 @@ static bool solve_bes()
 
     /* substitute the stable solution for the current rank in all other
        equations. */
+    if (tool_options.opt_use_hashtables)
+    { bex_hashtable.reset();  
+    }
  
     for(bes::variable_type v=bes_equations.nr_of_variables(); v>0; v--)
     { if (bes_equations.is_relevant(v))
@@ -903,10 +942,21 @@ static bool solve_bes()
         { bes_equations.set_rhs(v,approximation[v]);
         }
         else 
-        { bes_equations.set_rhs(v,substitute_rank(bes_equations.get_rhs(v),current_rank,approximation));
+        { bes_equations.set_rhs(
+                         v,
+                         substitute_rank(
+                                   bes_equations.get_rhs(v),
+                                   current_rank,
+                                   approximation,
+                                   tool_options.opt_use_hashtables,
+                                   bex_hashtable));
         }
       }
     }
+    if (tool_options.opt_use_hashtables)
+    { bex_hashtable.reset();  
+    }
+ 
   }
 
   ATfprintf(stderr,"Approximation[1]=%t\n",(ATerm)approximation[1]);
@@ -1201,6 +1251,7 @@ t_tool_options parse_command_line(int argc, char** argv)
   string opt_outputformat;
   string opt_strategy;
   bool opt_precompile_pbes=false;
+  bool opt_use_hashtables=false;
   string opt_rewriter;
   vector< string > file_names;
 
@@ -1228,6 +1279,7 @@ t_tool_options parse_command_line(int argc, char** argv)
        "innerc  compiling innermost rewriter (not for Windows),\n"
        "jittyc  compiling just in time rewriter (fastest, not for Windows).\n")
       ("precompile,P", "Precompile the pbes for faster rewriting. Does not work when the toolset is compiled in debug mode")
+      ("hashtables,H", "Use hashtables when substituting in bes equations.")
       ("output,o",  po::value<string>(&opt_outputformat)->default_value("none"), "use outputformat arg (default 'none');\n"
                "available outputformats are none, vasy and cwi")
       ("verbose,v",  "turn on the display of short intermediate gsMessages")
@@ -1267,6 +1319,10 @@ t_tool_options parse_command_line(int argc, char** argv)
  
   if (vm.count("precompile"))
   { opt_precompile_pbes=true;
+  }
+
+  if (vm.count("hashtables"))
+  { opt_use_hashtables=true;
   }
 
   if (vm.count("version"))
@@ -1386,6 +1442,7 @@ t_tool_options parse_command_line(int argc, char** argv)
   else assert(0); // Unknown rewriter specified. Should have been caught above.
 
   tool_options.opt_precompile_pbes=opt_precompile_pbes;
+  tool_options.opt_use_hashtables=opt_use_hashtables;
   
   return tool_options;
 }
