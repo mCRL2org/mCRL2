@@ -254,7 +254,8 @@ namespace bes
                       const bes_expression b_subst,
                       atermpp::table &hashtable)
   { assert(is_true(b_subst)||is_false(b_subst));
-    if (is_true(b)||is_false(b))
+
+    if (is_true(b)||is_false(b)||is_dummy(b))
     { return b;
     }
     
@@ -267,21 +268,75 @@ namespace bes
       }
     }
     
-    assert(is_if(b));
-    if (v==get_variable(condition(b)))
-    { if (is_true(b_subst))
-      { result=then_branch(b);
+    if (is_if(b))
+    { if (v==get_variable(condition(b)))
+      { if (is_true(b_subst))
+        { result=then_branch(b);
+        }
+        else
+        { assert(is_false(b_subst));
+          result=else_branch(b);
+        }
       }
       else
-      { assert(is_false(b_subst));
-        result=else_branch(b);
+      { result=if_(condition(b),
+                     substitute_true_false_rec(then_branch(b),v,b_subst,hashtable),
+                     substitute_true_false_rec(else_branch(b),v,b_subst,hashtable));
       }
     }
-    else
-    { result=if_(condition(b),
-                   substitute_true_false_rec(then_branch(b),v,b_subst,hashtable),
-                   substitute_true_false_rec(else_branch(b),v,b_subst,hashtable));
+    else if (is_variable(b))
+    { if (v==get_variable(b))
+      { result=b_subst;
+      }
+      else
+      { result=b;
+      }
     }
+    else if (is_and(b))
+    { 
+      bes_expression b1=substitute_true_false_rec(lhs(b),v,b_subst,hashtable);
+      if (is_false(b1))
+      { result=false_();
+      }
+      else
+      { bes_expression b2=substitute_true_false_rec(rhs(b),v,b_subst,hashtable);
+        if (is_false(b2))
+        { result=false_();
+        }
+        else if (is_true(b1))
+        { result=b2;
+        }
+        else if (is_true(b2))
+        { result=b1;
+        }
+        else
+        { result=and_(b1,b2);
+        }
+      }
+    }
+    else if (is_or(b))
+    { 
+      bes_expression b1=substitute_true_false_rec(lhs(b),v,b_subst,hashtable);
+      if (is_true(b1))
+      { result=true_();
+      }
+      else
+      { bes_expression b2=substitute_true_false_rec(rhs(b),v,b_subst,hashtable);
+        if (is_true(b2))
+        { result=true_();
+        }
+        else if (is_false(b1))
+        { result=b2;
+        }
+        else if (is_false(b2))
+        { result=b1;
+        }
+        else
+        { result=or_(b1,b2);
+        }
+      }
+    }
+
     if (opt_use_hashtables)
     { hashtable.put(b,result); 
     }
@@ -293,13 +348,13 @@ namespace bes
                       const variable_type v, 
                       const bes_expression b_subst)
   { assert(is_true(b_subst)||is_false(b_subst));
-    if (is_true(b)||is_false(b))
+
+    if (is_true(b)||is_false(b)||is_dummy(b))
     { return b;
     }
     
     static atermpp::table hashtable1(10,50);
 
-    assert(is_if(b));
     bes_expression result=substitute_true_false_rec(b,v,b_subst,hashtable1);
 
     if (opt_use_hashtables) 
@@ -580,7 +635,8 @@ namespace bes
         // if the control info is 0, the value at variable
         // is not initialized.
 
-        control_info[v]=1+(((sigma.is_nu()?0:1)+((rank+1)>>1))>>1);
+        control_info[v]=1+(((sigma.is_nu()?0:1)+((rank+1)<<1))<<1);
+        // fprintf(stderr,"RRRRR %lu\n",control_info[v]);
         right_hand_sides[v]=rhs;
         if (rank>max_rank)
         { max_rank=rank;
@@ -669,16 +725,35 @@ namespace bes
           return;
         }
 
-        check_vector_sizes(v);
-        assert(is_if(b)); // other cases must still be done here.
-        assert(get_variable(condition(b))>0);
-        // std::cerr << "ADD " << v << " TO SET " << get_variable(condition(b)) << std::endl;
-        variable_type w=get_variable(condition(b));
-        check_vector_sizes(w);
-        variable_occurrence_sets[w].insert(v);
+        if (is_if(b)) 
+        { assert(get_variable(condition(b))>0);
+          // std::cerr << "ADD " << v << " TO SET " << get_variable(condition(b)) << std::endl;
+          variable_type w=get_variable(condition(b));
+          check_vector_sizes(w);
+          variable_occurrence_sets[w].insert(v);
 
-        add_variables_to_occurrence_sets(v,then_branch(b),use_indexed_set,indexed_set);
-        add_variables_to_occurrence_sets(v,else_branch(b),use_indexed_set,indexed_set);
+          add_variables_to_occurrence_sets(v,then_branch(b),use_indexed_set,indexed_set);
+          add_variables_to_occurrence_sets(v,else_branch(b),use_indexed_set,indexed_set);
+          return;
+        }
+
+        if (is_variable(b))
+        { variable_type w=get_variable(b);
+          check_vector_sizes(w);
+          variable_occurrence_sets[w].insert(v);
+          return;
+        }
+
+        if (is_and(b)||is_or(b))
+        { 
+          add_variables_to_occurrence_sets(v,lhs(b),use_indexed_set,indexed_set);
+          add_variables_to_occurrence_sets(v,rhs(b),use_indexed_set,indexed_set);
+          return;
+        }
+
+        ATfprintf(stderr,"HUHA %t\n",(ATerm)b);
+        assert(0); // do not expect other term formats.
+
       }
 
       void add_variables_to_occurrence_sets(
@@ -711,16 +786,32 @@ namespace bes
           return;
         }
 
-        assert(is_if(b)); // other cases must still be done here.
-        bes::variable_type w=get_variable(condition(b));
-        assert(w<=nr_of_variables());
-        if (w!=v_except)
-        { variable_occurrence_sets[w].erase(v);
+        if (is_if(b))
+        { bes::variable_type w=get_variable(condition(b));
+          assert(w<=nr_of_variables());
+          if (w!=v_except)
+          { variable_occurrence_sets[w].erase(v);
+          }
+          // Using hash tables this can be made more efficient, by employing
+          // sharing of the aterm representing b.
+          remove_variables_from_occurrence_sets(v,then_branch(b),v_except,use_indexed_set,indexed_set);
+          remove_variables_from_occurrence_sets(v,else_branch(b),v_except,use_indexed_set,indexed_set);
+          return;
         }
-        // Using hash tables this can be made more efficient, by employing
-        // sharing of the aterm representing b.
-        remove_variables_from_occurrence_sets(v,then_branch(b),v_except,use_indexed_set,indexed_set);
-        remove_variables_from_occurrence_sets(v,else_branch(b),v_except,use_indexed_set,indexed_set);
+        else if (is_variable(b))
+        { bes::variable_type w=get_variable(b);
+          assert(w<=nr_of_variables());
+          if (w!=v_except)
+          { variable_occurrence_sets[w].erase(v);
+          }
+          return;
+        }
+        else if (is_or(b)||is_and(b))
+        {
+          remove_variables_from_occurrence_sets(v,lhs(b),v_except,use_indexed_set,indexed_set);
+          remove_variables_from_occurrence_sets(v,rhs(b),v_except,use_indexed_set,indexed_set);
+          return;
+        }
       }
 
       void remove_variables_from_occurrence_sets(

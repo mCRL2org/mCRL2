@@ -637,14 +637,17 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
       { // find a variable in the new_bes_expression from which `variable' to be
         // processed is reachable. If so, new_bes_expression can be set to
         // true or false.
-        if (bes_equations.get_fixpoint_symbol(variable_to_be_processed)==fixpoint_symbol::nu())
-        { if (bes_equations.find_nu_loop(new_bes_expression,variable_to_be_processed))
-          { new_bes_expression=bes::true_();
+
+        if (current_pbeq.symbol()==fixpoint_symbol::mu())
+        { 
+          if (bes_equations.find_mu_loop(new_bes_expression,variable_to_be_processed))
+          { new_bes_expression=bes::false_();
           }
         }
         else           
-        { if (bes_equations.find_mu_loop(new_bes_expression,variable_to_be_processed))
-          { new_bes_expression=bes::false_();
+        { 
+          if (bes_equations.find_nu_loop(new_bes_expression,variable_to_be_processed))
+          { new_bes_expression=bes::true_();
           }
         }
       }
@@ -1190,7 +1193,8 @@ static void save_bes_in_cwi_format(string outfilename)
 
   for(unsigned long r=1 ; r<=bes_equations.max_rank ; r++)
   { for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
-    { if (bes_equations.is_relevant(i) && (bes_equations.get_rank(i)==r) )
+    { //fprintf(stderr,"PPPP %d   %lu\n",bes_equations.is_relevant(i) ,bes_equations.get_rank(i));
+      if (bes_equations.is_relevant(i) && (bes_equations.get_rank(i)==r) )
       { ((outfilename=="-")?cout:outputfile) << 
               ((bes_equations.get_fixpoint_symbol(i)==fixpoint_symbol::mu()) ? "min X" : "max X") << i << "=";
         save_rhs_in_cwi_form(((outfilename=="-")?cout:outputfile),bes_equations.get_rhs(i));
