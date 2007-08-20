@@ -1543,7 +1543,8 @@ void add(char op, int first, int second)
 
 
 void pbeserror(const char *str) {
-        std::cout << "Parse error: " << str << " :::" << yytext << ", " << yychar <<":::\n";
+        std::cout << str << ": " << yytext << "\n";
+	exit(1);
  //       throw oss.str();
 }
 
@@ -1555,30 +1556,11 @@ void parsePBES( std::string fileName ) {
       	throw std::string("Cannot open file for reading:\n" + fileName);
        }
   else 	{
-    // INITIALISE
-    // reset the lexer position variables
-//    lineNo = 1;
-  //  posNo = 1;
-    // initialize the string buffer for read string-valued tokens
-    //string_buffer_size = 128;
-    //string_buffer = (char*)malloc(string_buffer_size*sizeof(char));
-
-//    fsmparserlts = lts;
 
     pbesin = infile;
 
-    
-
     pbesparse();
 
-
-//    states.clear();
-  //              labels.clear();
-    //fsmparserlts = NULL;
-      //          state = NULL;
-    //free(string_buffer);
-    //string_buffer = NULL;
-    //string_buffer_size = 0;
   }
 }
 

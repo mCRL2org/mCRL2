@@ -55,9 +55,18 @@
 #include "atermpp/vector.h" 
 #include "atermpp/set.h" 
 #include "gc.h" 
+
+
+// only for debug
+//#include "mcrl2_basic/include/struct/libstruct_core.h"
  
 //#include "pbes_simple.h"
 #include "pbesparser.cpp"
+
+
+
+
+
 
 
 
@@ -224,6 +233,8 @@ pbes_expression to_pbes_expression(int n){
 	  {
 	  propinst = propositional_variable_instantiation
 	    (s, get_expr_list(ps->arg1[n]));	  
+	  if (!is_propositional_variable_instantiation(propinst))
+	    gsVerboseMsg(" \n\n\nNEEEE\n\n\n");
 	  //	cerr<<"\n4\n";
 
 	  }
@@ -563,6 +574,9 @@ int main(int argc, char** argv)
       cerr <<"Creating pbes ("<<outfilename<< ") from text (" << infilename <<") \n";
       //Create the pbes from the input text 
       pbes p = make_pbes(infilename); 
+
+      //	  if (!gsIsPBES(p))
+      //	    gsVerboseMsg(" \n\n\nNEE\n\n\n");
 
       if(!p.save(outfilename, false))
 	gsErrorMsg("writing failed\n");
