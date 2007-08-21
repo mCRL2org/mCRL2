@@ -39,6 +39,8 @@ int test_main(int, char*[])
   aterm_real r(2.5);
   aterm_appl f(function_symbol("f", 2), aterm("x"), aterm("y"));
   BOOST_CHECK(f.to_string() == "f(x,y)");
+  aterm_appl f1(function_symbol("f", 0));
+  BOOST_CHECK(f1.to_string() == "f");
 
   atermpp::aterm_string s("s"); // g++ 3.4.4 complains if atermpp:: is removed :-(
   // aterm_string s1("s1(x)"); will generate an error!
