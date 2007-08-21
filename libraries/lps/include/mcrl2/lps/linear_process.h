@@ -13,8 +13,10 @@
 #include <string>
 #include <cassert>
 #include <algorithm>
+#include <functional>
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
+#include "atermpp/filtered_list.h"
 #include "atermpp/algorithm.h"
 #include "atermpp/utility.h"
 #include "mcrl2/data/utility.h"        // find_variables
@@ -26,6 +28,16 @@ namespace lps {
 using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 using atermpp::aterm_appl;
 using atermpp::read_from_named_file;
+
+struct is_non_delta_summand
+{
+  bool operator()(const summand& s) const
+  {
+    return !s.is_delta();
+  }
+};
+
+typedef atermpp::filtered_list<summand_list, is_non_delta_summand> non_delta_summand_list;
 
 ///////////////////////////////////////////////////////////////////////////////
 // linear_process
@@ -58,7 +70,7 @@ class linear_process: public aterm_appl
     {
       assert(detail::check_term_LinearProcess(m_term));
 
-      // unpack LPS(.,.,.) term     
+      // unpack LPS(.,.,.) term
       aterm_appl::iterator i = lps.begin();
       m_free_variables     = data_variable_list(*i++);
       m_process_parameters = data_variable_list(*i++);
@@ -70,6 +82,13 @@ class linear_process: public aterm_appl
     summand_list summands() const
     {
       return m_summands;
+    }
+
+    /// Returns the sequence of non delta summands.
+    ///
+    non_delta_summand_list non_delta_summands() const
+    {
+      return non_delta_summand_list(m_summands, is_non_delta_summand());
     }
 
     /// Returns the sequence of free variables.
@@ -107,7 +126,7 @@ class linear_process: public aterm_appl
       data_variable_list p = m_process_parameters.substitute(f);
       summand_list       s = m_summands          .substitute(f);
       return linear_process(d, p, s);
-    }     
+    }
 
     /// Returns the set of free variables that appear in the process.
     /// This set is a subset of <tt>free_variables()</tt>.

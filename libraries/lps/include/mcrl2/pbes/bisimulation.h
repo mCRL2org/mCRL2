@@ -13,7 +13,7 @@ pbes_expression step(const linear_process& m, const summand& m_summand, const li
   namespace p = lps::pbes_expr;
 
   atermpp::vector<pbes_expression> terms;
-  for (summand_list::iterator i = s.summands().begin(); i != s.summands().end(); ++i)
+  for (non_delta_summand_list::iterator i = s.non_delta_summands().begin(); i != s.non_delta_summands().end(); ++i)
   {
     pbes_expression term1 = p::val(i->condition());
     pbes_expression term2 = detail::equal_data_parameters(m_summand.actions(), i->actions());
@@ -38,7 +38,7 @@ pbes_expression match(const linear_process& m, const linear_process& s, identifi
   namespace p = lps::pbes_expr;
 
   atermpp::vector<pbes_expression> terms;
-  for (summand_list::iterator i = m.summands().begin(); i != m.summands().end(); ++i)
+  for (non_delta_summand_list::iterator i = m.non_delta_summands().begin(); i != m.non_delta_summands().end(); ++i)
   {
     pbes_expression term1 = i->condition();
     pbes_expression term2 = step(m, *i, s, X);
