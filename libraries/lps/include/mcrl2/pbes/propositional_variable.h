@@ -18,7 +18,7 @@
 #include "mcrl2/data/data.h"
 #include "mcrl2/basic/pretty_print.h"
 #include "mcrl2/lps/detail/utility.h"
-#include "libstruct.h"
+#include "struct/libstruct.h"
 
 namespace lps {
 

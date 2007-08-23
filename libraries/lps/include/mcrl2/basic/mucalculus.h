@@ -21,7 +21,7 @@
 #include "mcrl2/data/sort.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/data/data.h"
-#include "libstruct.h"
+#include "struct/libstruct.h"
 
 namespace lps {
 

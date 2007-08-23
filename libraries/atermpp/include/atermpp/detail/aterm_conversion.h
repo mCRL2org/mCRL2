@@ -10,6 +10,8 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_CONVERSION_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_CONVERSION_H
 
+#include "aterm2.h"
+
 namespace { // unnamed namespace
 
   // --- term ---

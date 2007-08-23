@@ -18,7 +18,7 @@
 #include <fstream>
 #include "aterm2.h"
 #include "print/messaging.h"
-#include "libstruct.h"
+#include "struct/libstruct.h"
 #include "libparse.h"
 #include "typecheck.h"
 #include "libalpha.h"

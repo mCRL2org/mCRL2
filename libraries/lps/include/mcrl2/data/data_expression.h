@@ -15,7 +15,7 @@
 #include "mcrl2/data/sort.h"
 #include "mcrl2/basic/pretty_print.h"
 #include "mcrl2/basic/detail/soundness_checks.h"
-#include "libstruct.h"
+#include "struct/libstruct.h"
 
 namespace lps {
 

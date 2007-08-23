@@ -8,7 +8,7 @@
 /// \brief Add your file description here.
 
 #include <sstream>
-#include "libstruct.h"
+#include "struct/libstruct.h"
 #include "libparse.h"
 #include "typecheck.h"
 #include "gc.h"

@@ -11,7 +11,7 @@
 #include "mcrl2/lps/detail/tools.h"
 #include "print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "libstruct.h"
+#include "struct/libstruct.h"
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;

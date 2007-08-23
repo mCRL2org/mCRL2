@@ -11,6 +11,7 @@
 #define MCRL2_ATERMPP_ATERM_BLOB_H
 
 #include "atermpp/aterm.h"
+#include "atermpp/detail/aterm_conversion.h"
 
 namespace atermpp
 {

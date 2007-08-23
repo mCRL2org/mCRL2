@@ -21,7 +21,7 @@
 #include "dataimpl.h" // implement_data_data_expr
 
 // JFG:
-#include "librewrite.h"
+#include "rewrite/librewrite.h"
 
 namespace lps {
 

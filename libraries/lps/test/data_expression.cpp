@@ -11,7 +11,7 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/data/data.h"
-#include "libstruct.h"
+#include "struct/libstruct.h"
 
 using namespace std;
 using namespace atermpp;

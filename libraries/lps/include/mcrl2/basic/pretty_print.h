@@ -11,7 +11,7 @@
 #define MCRL2_BASIC_PRETTY_PRINT_H
 
 #include "atermpp/atermpp.h"
-#include "libprint.h"
+#include "print/libprint.h"
 #include <string>
 
 namespace lps {

@@ -18,7 +18,7 @@
 #include "mcrl2/basic/pretty_print.h"
 #include "mcrl2/basic/detail/soundness_checks.h"
 #include "mcrl2/basic/detail/constructors.h"
-#include "libstruct.h"
+#include "struct/libstruct.h"
 
 /// The namespace of the mCRL2 tool set (will be renamed to mcrl2).
 namespace lps {
