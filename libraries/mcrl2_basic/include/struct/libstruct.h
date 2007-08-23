@@ -870,10 +870,9 @@ ATermAppl gsMakeDataExprPred(ATermAppl DataExpr);
 //     - Int, if DataExpr has sort Int
 
 ATermAppl gsMakeDataExprDub(ATermAppl DataExprBit, ATermAppl DataExprNum);
-//Pre: DataExprbit and DataExprNum are data expressions of sort Pos, Nat or
-//     Int, and Bool, respectively, which we denote by n and b
+//Pre: DataExprbit and DataExprNum are data expressions of sort Bool and
+//     Nat or Int, respectively, which we denote by b and n
 //Ret: Data expression for '2*n + |b|'. The result has sort:
-//     - Pos, if DataExpr has sort Pos
 //     - Pos, if DataExpr has sort Nat
 //     - Int, if DataExpr has sort Int
 

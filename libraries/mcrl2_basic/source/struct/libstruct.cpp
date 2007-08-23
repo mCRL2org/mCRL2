@@ -32,6 +32,9 @@ bool IsPNSort(ATermAppl SortExpr);
 bool IsPNISort(ATermAppl SortExpr);
 //Ret: SortExpr is a sort expression for Pos, Nat or Int
 
+bool IsNISort(ATermAppl SortExpr);
+//Ret: SortExpr is a sort expression for Nat or Int
+
 bool IsPNIRSort(ATermAppl SortExpr);
 //Ret: SortExpr is a sort expression for Pos, Nat, Int or Real
 
@@ -1511,7 +1514,7 @@ ATermAppl gsMakeOpIdPred(ATermAppl SortExpr)
 ATermAppl gsMakeOpIdDub(ATermAppl SortExpr)
 {
   assert(ConstructorFunctionsEnabled);
-  assert(IsPNISort(SortExpr));
+  assert(IsNISort(SortExpr));
   return gsMakeOpId(gsMakeOpIdNameDub(),
     gsMakeSortArrow2(gsMakeSortExprBool(), SortExpr, SortExpr));
 }
@@ -2143,6 +2146,7 @@ ATermAppl gsMakeDataExprPred(ATermAppl DataExpr)
 ATermAppl gsMakeDataExprDub(ATermAppl DataExprBit, ATermAppl DataExprNum)
 {
   assert(ATisEqual(gsGetSort(DataExprBit), gsMakeSortExprBool()));
+  assert(IsNISort(DataExprNum));
   return gsMakeDataAppl2(gsMakeOpIdDub(gsGetSort(DataExprNum)),
     DataExprBit, DataExprNum);
 }
@@ -3262,6 +3266,13 @@ bool IsPNISort(ATermAppl SortExpr)
 {
   return
     IsPNSort(SortExpr) ||
+    ATisEqual(SortExpr, gsMakeSortExprInt());
+}
+
+bool IsNISort(ATermAppl SortExpr)
+{
+  return
+    ATisEqual(SortExpr, gsMakeSortExprNat()) ||
     ATisEqual(SortExpr, gsMakeSortExprInt());
 }
 
