@@ -279,7 +279,7 @@ namespace bes
         }
       }
       else
-      { result=if_(condition(b),
+      { result=ifAUX_(condition(b),
                      substitute_true_false_rec(then_branch(b),v,b_subst,hashtable),
                      substitute_true_false_rec(else_branch(b),v,b_subst,hashtable));
       }
@@ -375,6 +375,7 @@ namespace bes
     
     static atermpp::table hashtable(100,75);
 
+    // ATfprintf(stderr,"BDDif b1: %t\nb2:%t\nb3: %t\n\n",(ATerm)b1,(ATerm)b2, (ATerm)b3);
     bes_expression b=BDDif_rec(b1,b2,b3,hashtable);
     // hashtable.reset(); This costs a lot of time, currently.
     return b;

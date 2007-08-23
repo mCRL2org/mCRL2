@@ -576,7 +576,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
 
   unsigned long relevance_counter=0;
   unsigned long relevance_counter_limit=100;
-  #define RELEVANCE_DIVIDE_FACTOR 10
+  #define RELEVANCE_DIVIDE_FACTOR 100
 
   gsVerboseMsg("Computing BES....\n");
   // As long as there are states to be explored
@@ -606,6 +606,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
   
       // Add the required substitutions
       data_expression_list::iterator elist=current_variable_instantiation.parameters().begin();
+      // ATfprintf(stderr,"HIER1\n");
       for(data_variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
              vlist!=current_pbeq.variable().parameters().end() ; vlist++)
       { 
@@ -619,18 +620,22 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
         }
         elist++;
       }
+      // ATfprintf(stderr,"HIER2\n");
       assert(elist==current_variable_instantiation.parameters().end());
       lps::pbes_expression new_pbes_expression = pbes_expression_substitute_and_rewrite(
                                 current_pbeq.formula(), data, rewriter,tool_options.opt_precompile_pbes);
       
+      // ATfprintf(stderr,"HIER3 \n");
+      // cerr << pp(new_pbes_expression);
       bes::bes_expression new_bes_expression=
            add_propositional_variable_instantiations_to_indexed_set_and_translate(
                         new_pbes_expression,
                         variable_index,
                         nr_of_generated_variables,
-                        tool_options.opt_outputformat=="none",
+                        tool_options.opt_use_hashtables,
                         tool_options.opt_strategy,
                         bes_equations);
+      // ATfprintf(stderr,"HIER4\n");
       // ATfprintf(stderr,"Resulting expression %d\n",AT_calcCoreSize(new_bes_expression));
   
       if (tool_options.opt_strategy>=on_the_fly_with_fixed_points)
@@ -694,6 +699,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
           for( ; !to_set_to_true_or_false.empty() ; )
           {
             bes::variable_type w=to_set_to_true_or_false.front();
+            // gsVerboseMsg("------------------ %d\n",(unsigned long)w);
             to_set_to_true_or_false.pop_front();
             for( set <bes::variable_type>::iterator 
                       v=bes_equations.variable_occurrence_set_begin(w);
@@ -721,6 +727,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
                                    nr_of_processed_variables,nr_of_generated_variables);
     }
   }
+  bes_equations.refresh_relevances();
 }
 
 /* substitute boolean equation expression */
@@ -745,7 +752,63 @@ static bes_expression substitute_rank(
     }
   }
 
-  if (is_if(b))
+  if (is_variable(b))
+  { bes::variable_type v=bes::get_variable(b);
+    if (bes_equations.get_rank(v)==current_rank)
+    {
+      result=approximation[v];
+    }
+    else
+    {
+      result=b;
+    }
+  }
+
+  else if (is_and(b))
+  { bes_expression b1=substitute_rank(lhs(b),current_rank,approximation,use_hashtable,hashtable);
+    if (is_false(b1))
+    { result=b1;
+    }
+    else
+    { bes_expression b2=substitute_rank(rhs(b),current_rank,approximation,use_hashtable,hashtable);
+      if (is_false(b2))
+      { result=b2;
+      }
+      else if (is_true(b1))
+      { result=b2;
+      }
+      else if (is_true(b2))
+      { result=b1;
+      }
+      else
+      { result=and_(b1,b2);
+      }
+    }
+  }
+  else if (is_or(b))
+  { bes_expression b1=substitute_rank(lhs(b),current_rank,approximation,use_hashtable,hashtable);
+    if (is_true(b1))
+    { result=b1;
+    }
+    else
+    { bes_expression b2=substitute_rank(rhs(b),current_rank,approximation,use_hashtable,hashtable);
+      if (is_true(b2))
+      { result=b2;
+      }
+      else if (is_false(b1))
+      { result=b2;
+      }
+      else if (is_false(b2))
+      { result=b1;
+      }
+      else
+      { result=or_(b1,b2);
+      }
+    }
+  }
+
+
+  else if (is_if(b))
   { 
     bes::variable_type v=bes::get_variable(condition(b));
     if (bes_equations.get_rank(v)==current_rank)
@@ -775,8 +838,8 @@ static bes_expression substitute_rank(
     }
   }
   else 
-  { ATfprintf(stderr,"AAAA %t\n",(ATerm)b);
-    assert(0);  // expect an if, a true or a false.
+  { 
+    assert(0);  // expect an if, variable, and, or, or a true or a false here.
   }
 
   if (use_hashtable)
@@ -809,7 +872,62 @@ static bes_expression evaluate_bex(
     return result;
   }
 
-  if (is_if(b))
+  if (is_variable(b))
+  {
+    bes::variable_type v=bes::get_variable(b);
+    if (bes_equations.get_rank(v)>=rank)
+    { 
+      result=approximation[v];
+    }
+    else
+    { /* the condition has lower rank than the variable rank,
+         leave it untouched */
+      result=b;
+    }
+  }
+  else if (is_and(b))
+  { bes_expression b1=evaluate_bex(lhs(b),approximation,rank,use_hashtable,hashtable);
+    if (is_false(b1))
+    { result=b1;
+    }
+    else
+    { bes_expression b2=evaluate_bex(rhs(b),approximation,rank,use_hashtable,hashtable);
+      if (is_false(b2))
+      { result=b2;
+      }
+      else if (is_true(b1))
+      { result=b2;
+      }
+      else if (is_true(b2))
+      { result=b1;
+      }
+      else
+      { result=and_(b1,b2);
+      }
+    }
+  }
+  else if (is_or(b))
+  { bes_expression b1=evaluate_bex(lhs(b),approximation,rank,use_hashtable,hashtable);
+    if (is_true(b1))
+    { result=b1;
+    }
+    else
+    { bes_expression b2=evaluate_bex(rhs(b),approximation,rank,use_hashtable,hashtable);
+      if (is_true(b2))
+      { result=b2;
+      }
+      else if (is_false(b1))
+      { result=b2;
+      }
+      else if (is_false(b2))
+      { result=b1;
+      }
+      else
+      { result=or_(b1,b2);
+      }
+    }
+  }
+  else if (is_if(b))
   { 
     bes::variable_type v=bes::get_variable(condition(b));
     if (bes_equations.get_rank(v)>=rank)
@@ -832,7 +950,7 @@ static bes_expression evaluate_bex(
     }
   }
   else 
-  { assert(0); //expect an if, true or false;
+  { assert(0); //expect an if, true or false, and, variable or or;
   }
 
   if (use_hashtable)
@@ -890,7 +1008,7 @@ static bool solve_bes(const t_tool_options &tool_options)
                              bex_hashtable);
         
         if (t!=approximation[v])
-        { 
+        {
           if (tool_options.opt_use_hashtables)
           { bex_hashtable.reset();  /* we change approximation, so the 
                                        hashtable becomes invalid */
@@ -962,7 +1080,7 @@ static bool solve_bes(const t_tool_options &tool_options)
  
   }
 
-  ATfprintf(stderr,"Approximation[1]=%t\n",(ATerm)approximation[1]);
+  // ATfprintf(stderr,"Approximation[1]=%t\n",(ATerm)approximation[1]);
   assert(bes::is_true(approximation[1])||
          bes::is_false(approximation[1]));
   return bes::is_true(approximation[1]);  /* 1 is the index of the initial variable */
@@ -1264,26 +1382,25 @@ t_tool_options parse_command_line(int argc, char** argv)
   desc.add_options()
       ("strategy,s",  po::value<string>(&opt_strategy)->default_value("0"), "use strategy arg (default '0');\n"
        "The following strategies are available:\n"
-       "0       Compute all boolean equations which can be reached from the initial state, without\n"
-       "        any optimization (default). This is is the most data efficient option per generated equation.\n"
-       "1       Optimize by immediately substituting the the right hand sides for already investigated\n"
-       "        variables that are true or false when generating a expression. This is as memory efficient as\n"
-       "        0.\n"
-       "2       In addition to 1, also substitute variables that are true or false into an already generated \n"
-       "        right hand sides. This can mean that certain variables become unreachable (e.g. X0 in X0 && X1,\n"
-       "        when X1 becomes false, assuming X0 does not occur elsewhere. It will be maintained which variables\n"
-       "        have become unreachable as these do not have to be investigated. Depending on the PBES, this can\n"
-       "        reduce the size of the generated BES substantially, but requires a larger memory footstamp.\n"
-       "3       In addition to 2, investigate for generated variables whether they occur on a loop, such that\n"
-       "        they can be set to true or false, depending on the fixed point symbol. This can increase the time\n"
-       "        needed to generate an equation substantially\n")
+       "0) Compute all boolean equations which can be reached from the initial state, without"
+       "any optimization (default). This is is the most data efficient option per generated equation.\n"
+       "1) Optimize by immediately substituting the the right hand sides for already investigated"
+       "variables that are true or false when generating a expression. This is as memory efficient as 0.\n"
+       "2) In addition to 1, also substitute variables that are true or false into an already generated"
+       "right hand sides. This can mean that certain variables become unreachable (e.g. X0 in X0 && X1,"
+       "when X1 becomes false, assuming X0 does not occur elsewhere. It will be maintained which variables"
+       "have become unreachable as these do not have to be investigated. Depending on the PBES, this can"
+       "reduce the size of the generated BES substantially, but requires a larger memory footstamp.\n"
+       "3) In addition to 2, investigate for generated variables whether they occur on a loop, such that"
+       "they can be set to true or false, depending on the fixed point symbol. This can increase the time"
+       "needed to generate an equation substantially")
       ("rewriter,R", po::value<string>(&opt_rewriter)->default_value("inner"), "indicate the rewriter to be used. Options are:\n"
        "inner   interpreting innermost rewriter (default),\n"
        "jitty   interpreting just in time rewriter,\n"
        "innerc  compiling innermost rewriter (not for Windows),\n"
        "jittyc  compiling just in time rewriter (fastest, not for Windows).\n")
       ("precompile,P", "Precompile the pbes for faster rewriting. Does not work when the toolset is compiled in debug mode")
-      ("hashtables,H", "Use hashtables when substituting in bes equations.")
+      ("hashtables,H", "Use hashtables when substituting in bes equations, and translate internal expressions to binary decision diagrams (discouraged, due to heavy performance penalties).")
       ("output,o",  po::value<string>(&opt_outputformat)->default_value("none"), "use outputformat arg (default 'none');\n"
                "available outputformats are none, vasy and cwi")
       ("verbose,v",  "turn on the display of short intermediate gsMessages")
