@@ -303,7 +303,7 @@ namespace utility {
   void visitor< tipi::restore_visitor_impl >::visit(tipi::object& o) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "object");
 
-    o.m_mime_type = tipi::mime_type(tree->GetAttributeValue("mime-type"));
+    o.m_mime_type = tipi::mime_type(tree->GetAttributeValue("format"));
     
     tree->GetAttribute("location", &o.m_location, false);
   }
@@ -389,12 +389,12 @@ namespace utility {
           c.m_input_combinations.insert(
               tipi::tool::capabilities::input_combination(
                   tipi::tool::category::fit(e->GetAttributeValue("category")),
-                  tipi::mime_type(e->GetAttributeValue("format")), e->GetAttributeValue("identifier")));
+                  tipi::mime_type(e->GetAttributeValue("format")), e->GetAttributeValue("id")));
         }
         else if (e->Value() == "output-configuration") {
           c.m_output_combinations.insert(
               tipi::tool::capabilities::output_combination(
-                      tipi::mime_type(e->GetAttributeValue("format")), e->GetAttributeValue("identifier")));
+                      tipi::mime_type(e->GetAttributeValue("format")), e->GetAttributeValue("id")));
         }
       }
     }
@@ -458,7 +458,7 @@ namespace utility {
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::elements::button& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "button");
 
-    tree->GetAttribute("label", &c.m_label);
+    c.m_label = tree->GetText(false);
 
     c.m_event_handler->process(&c, false);
   }
@@ -480,7 +480,8 @@ namespace utility {
 
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "radio-button");
 
-    tree->GetAttribute("label", &c.m_label);
+    c.m_label = tree->GetText(false);
+
     tree->GetAttributeOrDefault("selected", &c.m_selected, false);
 
     if (c.m_selected) {
@@ -499,15 +500,16 @@ namespace utility {
 
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "radio-button");
 
-    tree->GetAttribute("label", &c.m_label);
+    c.m_label = tree->GetText(false);
 
     tree->GetAttributeOrDefault("connected", &c.m_connection, &c);
-    tree->GetAttributeOrDefault("first", &c.m_first, false);
     tree->GetAttributeOrDefault("selected", &c.m_selected, false);
 
     if (c.m_connection != &c) {
       if (0 < element_by_id.count(reinterpret_cast < tipi::layout::element_identifier > (c.m_connection))) {
         radio_button* i = &c;
+
+        static_cast < radio_button* > (element_by_id[reinterpret_cast < tipi::layout::element_identifier > (c.m_connection)])->m_first = true;
 
         while (0 < element_by_id.count(reinterpret_cast < tipi::layout::element_identifier > (i->m_connection))) {
           if (element_by_id[reinterpret_cast < tipi::layout::element_identifier > (i->m_connection)] == &c) {
@@ -543,8 +545,9 @@ namespace utility {
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::elements::checkbox& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "checkbox");
 
-    tree->GetAttribute("label", &c.m_label);
-    tree->GetAttributeOrDefault("status", &c.m_status, false);
+    c.m_label = tree->GetText(false);
+
+    tree->GetAttributeOrDefault("checked", &c.m_status, false);
 
     c.m_event_handler->process(&c, false);
   }
@@ -630,8 +633,8 @@ namespace utility {
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::properties& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "properties");
 
-    c.m_alignment_horizontal = text_to_horizontal_alignment(tree->GetAttributeValueOrDefault("horizontal-alignment", "right"));
-    c.m_alignment_vertical   = text_to_vertical_alignment(tree->GetAttributeValueOrDefault("vertical-alignment", "bottom"));
+    c.m_alignment_horizontal = text_to_horizontal_alignment(tree->GetAttributeValueOrDefault("alignment-horizontal", "right"));
+    c.m_alignment_vertical   = text_to_vertical_alignment(tree->GetAttributeValueOrDefault("alignment-vertical", "bottom"));
     c.m_visible              = text_to_visibility(tree->GetAttributeValueOrDefault("visibility", "visible"));
 
     tree->GetAttribute("margin-top", &c.m_margin.top, false);

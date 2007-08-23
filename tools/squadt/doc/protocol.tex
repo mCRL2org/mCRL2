@@ -1,0 +1,846 @@
+\documentclass{article}
+\usepackage[UKenglish]{babel}
+\usepackage{graphicx}
+\usepackage{calc}
+\usepackage{latexsym,amssymb,amsfonts,amsthm,amsmath}
+\usepackage{float}
+\usepackage[top=3cm,left=3cm,bottom=3cm,right=3cm]{geometry}
+
+\title{A Protocol for Interactively Controlling Software Tools}
+\author{J. van der Wulp}
+
+\newtheorem{example}{Example}
+
+\newcommand{\msg}[1]{\texttt{#1}}
+
+\bibliographystyle{alpha}
+
+\begin{document}
+
+\maketitle
+
+ \section{Introduction}
+
+  The communication protocol described in this document has been designed out
+  of need for an abstract control layer for an interactive tool integration
+  platform. There existed a set of very concrete ideas of this system itself,
+  and the protocol has been designed to fit its specific needs. Nevertheless
+  the protocol that is the subject of this document is described as independent
+  as possible from the system in order to show that it, or at the very least
+  the underlying ideas, can be used outside it as well.
+
+  At the moment the platform/system mentioned above, is a proof-of-concept
+  implementation in the form of a desktop application called deskSQuADT. It is
+  by no means meant to be functionally complete in any way. There are plenty
+  ideas on what works and what does not work and should be changed in possible
+  future implementations.  There is also a lot of ideas for extending the
+  application for instance to make communication between tools possible as
+  well. At the moment it is not the intention to incorporate all of this
+  functionality into this protocol. The scope of this protocol is to
+  interactively control single tools in much the same way as in which the tool
+  is used outside the system.  The only added functionality that the system
+  provides are on the level of integration: consistency and automatism through
+  repeatability.
+
+  In abstract, the system provides a number of facilities that can be used by
+  tools to communicate with the user. The tools provide services that are made
+  accessible to the user of the system. The system acts as a controller for
+  multiple tools at the same time and therefore the system will be referred to
+  as controller in the remainder of this document. Similarly, a tool is the
+  communication partner of the controller.
+%  \\[4pt]
+%  The protocol described in this document is designed to be as minimal as
+%  possible around the core ideas behind the system. Some care was taken to
+%  allow future extensions.
+
+  The remainder of this text is structured as follows. First the important
+  concepts are introduced, to give the reader an overview of what things are
+  involved. Next an abstract overview is given on what messages are, what types
+  of messages are used in the protocol, the meaning of those message and how
+  the messages may interact. All of this is followed by a section that
+  discusses the implementation, the design choices that were made with
+  motivation and an elaborate description of what messages look like in detail.
+
+ \section{Concepts}
+
+  \subsection{System}
+
+   The system is a software application for interactive software tool
+   integration.  The current instantiation of this system is a desktop
+   application called deskSQuADT, but in the remainder of this document it will
+   simply be referred to as system.
+
+   The protocol described in this document describes how the system and a
+   software tool communicate.  The protocol is the layer between the tools and
+   this application we simply call system in this document.  It is likely that
+   the protocol will be extended in the future as more functionality becomes
+   available in the system.
+   
+  \subsection{Tool}
+
+   A tool is a software program that can be executed multiple times
+   concurrently on the same or a different computer. The tool offers services
+   to its environment, controlled by the user by means of the system. The
+   end-user that is part of the environment has particular goals in mind and
+   using the right combination of tools can help to achieve these goals.
+
+   So a tool can be any computer program. Existing tools with a command line
+   interface or more complex programs with graphical user interfaces.
+   There can be large differences between the required degree of user
+   interactivity for different tools. The only goal for a user is to get the
+   tool to perform the task that the user wants it to do.
+
+  \subsection{Configuration}
+
+   Tools may offer different services to the environment, but an end-user is
+   interested in it only completing the task at hand. Most tools are
+   configurable, by which we mean that it can be configured to perform a
+   certain task within the functionality provided by the tool. For instance we
+   want to configure a tool that computes prime numbers to compute the first
+   1000 prime numbers and then terminate execution.
+
+   The process of configuration is to bring the tool in a state where it will
+   perform the desired task. A formalism is needed to capture this state such
+   that it can be reproduced later. For our purposes a \textit{configuration}
+   is a concrete specification that can be used to bring a tool into a state
+   where it will perform the desired task.
+
+  \subsection{Tool Display}
+
+   A tool offers services and the system offers a tool facilities for
+   communication with the user (and perhaps in the future possibly also other
+   tools). One of the facilities that is available for this purpose is the tool
+   display. Any tool instance is associated with a graphical display through
+   which it can communicate with a user, that exists as long as the tool is
+   running.
+   
+%   The full extend to which the display can be manipulated will not be
+%   described in this document. The original idea was that the protocol
+%   provides the means for putting user interface controls on the display and
+%   to support interaction with these controls. This however, requires the
+%   protocol description to be updated every time as. It is up to the system to
+%   provide a number of these interface controls that a tool requires for
+%   operation.
+
+%  A tool is a software program or some hardware wrapped by a program. In modern
+%  operating systems programs are started as a process, an in-memory instance of
+%  the program. From here on we talk about a tool as a communication partner of
+%  the controller.
+%  \\[4pt]
+  
+ \section{Messages (Abstract)} \label{s:message_definitions}
+
+  All messages are typed and message content is based on both the type and
+  direction (controller-to-tool or tool-to-controller). Meaning that a
+  different direction changes the semantics of a message with the same type, as
+  well as vice versa. Messages can be divided into two classes requests and
+  acknowledgements determined by type and direction. A request always requires
+  an acknowledgement as a response within a certain timeout period. There are
+  no further restrictions on message sequences, meaning for example that it is
+  possible to receive a request, send a request (or more than one) and then
+  sent the acknowledgement. Eventually an acknowledgement should be sent on the
+  request or the timeout occurs and the other side may abort the connection.
+  
+  For protocol initiation a client/server architecture can be assumed, after
+  that the initiative of communication is determined by which side sends a
+  request. This means the protocol behaves asynchronously, at any moment a
+  request can arrive for any of the communication partners. The context of a
+  message is the ordered list of all sent and received messages before this new
+  message.  This document describes version 1.0 of the protocol.
+
+  \subsection{Instance identification}
+
+   When a tool is started it will initiate communication with a controller.
+   The details on how the communication can be initiated is somehow
+   communicated outside this protocol. On new incoming communication the
+   controller has no way of knowing what lives on the other side of the
+   connection. The tool should identify itself by presenting a secret. The
+   first message after a connection has been established must be structured as
+   follows.
+   
+   \begin{figure}[H]
+    \begin{tabular}{|ll|}
+     \hline
+     message type:    & \msg{identification} \\
+     \hline
+     direction:       & tool to controller \\
+     data:            & token \\
+     \hline
+    \end{tabular}
+   \end{figure}
+
+   \noindent When started the tool is given a token which it should sent as
+   part of this message. If the controller does not receive a such a message as
+   first message or the token inside the message does not match one of the
+   expected tokens, then the connection must be severed. Messages of this type
+   must be ignored if they are not the first message after the connection has
+   been established.
+
+  \subsection{Capabilities}
+
+   The controller provides facilities for tools. A tool must have been
+   programmed to use a specific facility. We want to allow differences between
+   the set of available services between different versions or configurations
+   of the controller. To this end we introduce a message type for communicating
+   this kind of information. From any context a message:
+
+   \begin{figure}[H]
+    \begin{tabular}{|ll|}
+     \hline
+     message type:    & \msg{capabilities} \\
+     \hline
+     direction:       & tool to controller \\
+     data:            & none \\
+     \hline
+    \end{tabular}
+   \end{figure}
+
+   \noindent represents a request for capabilities. The controller must respond
+   to this message with the following message.
+
+   \begin{figure}[H]
+    \begin{tabular}{|ll|}
+     \hline
+      message type:   & \msg{capabilities} \\
+     \hline
+      direction:      & controller to tool \\
+      data:           & Version = struct major : Nat $|$ minor : Nat \\
+     \hline
+    \end{tabular}
+   \end{figure}
+
+   The only facility available to tools with the first version of the protocol
+   is the tool display. The controller creates and associates a display with
+   every tool. The tool can use the display to communicate with the user. This
+   facility is assumed to be always present, so the only information carried by
+   the response message sent to a tool is the version of the protocol used by
+   controller.
+   \\[4pt]
+   A similar information need exists on the side of the controller. The idea is
+   that every connected tool offers its services to a controller.  Simply put,
+   in order to make use of such a service there must be an indication of what
+   is required for using the tool, and what can be obtained by making use of the
+   services it provide. From any
+   context a message:
+   
+   \begin{figure}[H]
+    \begin{tabular}{|ll|}
+     \hline
+      message type:   & \msg{capabilities} \\
+     \hline
+      direction:      & controller to tool \\
+      data:           & none \\
+     \hline
+    \end{tabular}
+   \end{figure}
+
+   \noindent serves as a request for such information. A tool must respond to
+   this message with  the following message.
+
+   \begin{figure}[H]
+    \begin{tabular}{|ll|}
+     \hline
+      message type:   & \msg{capabilities} \\
+     \hline
+      direction:      & tool to controller \\
+      data:           & version $\times$ List (input-configuration) \\
+                      &  version             = struct major : Nat $|$ minor : Nat \\
+                      &  input-configuration = category $\times$ List (data-source) \\
+                      &  category            = String,   a name that characterises the function of the tool \\
+                      &  data-source         = id $\times$ format \\
+                      &  format              = mime-type, storage format specifier for the tools main input \\
+     \hline
+    \end{tabular}
+   \end{figure}
+
+   The information communicated is the protocol version used by the tool and a
+   list of so-called input configurations. An input configuration represents a
+   specific configuration of the tool. It consists of a category, which is a
+   name that can be used by the controller to categorise tools based on
+   functionality, and a list of identifiers for data sources. The data sources
+   are typically files that reside somewhere on local or network storage but
+   can also be unbounded data streams. The format is a string that describes
+   the format of the data.
+
+  \subsection{Tool Configuration}
+
+   The controller indirectly makes use of the services provided by a tool by
+   configuring the tool to perform a task within the range of services it
+   provides. Configuration and task execution are separated and the latter is
+   discussed in the next subsection.
+   \\[4pt]
+   Tool configuration is performed in two steps. First the controller sends a
+   configuration, the tool inspects this configuration and responds with a
+   verdict on whether or not the configuration can be used to successfully
+   configure the tool (i.e. it is deemed acceptable). Such a message may be
+   sent from any context and has the following structure:
+   
+   \begin{figure}[H]
+    \begin{tabular}{|ll|}
+     \hline
+      message type:   & \msg{configuration} \\
+     \hline
+      direction       & controller to tool \\
+      data:           & fresh $\times$ category $\times$ List (option) $\times$ inputs $\times$ outputs \\
+                      & \ inputs  = List (object) \\
+                      & \ outputs = List (object) \\
+                      & \ fresh   = Bool, whether the configuration is fresh \\
+                      & \ option  = id $\times$ data-type $\times$ values \\
+                      & \ object  = id $\times$ format $\times$ URI \\
+                      & \ values  = List(String) \\
+     \hline
+    \end{tabular}
+   \end{figure}
+
+   \noindent To sent a message of this type the controller must have a
+   configuration, which consists of a category name that specifies the kind of
+   functionality the configuration will provide, the inputs and outputs to the
+   tool as well as options and values for these options. The controller can
+   obtain configurations in two ways. It can cast a single input configuration as
+   received from a previous \msg{tool\_capabilities} message into a
+   configuration, in which case the configuration is marked as fresh. On the
+   other hand the controller can use a configuration that was previously
+   accepted by a tool.
+   \\[4pt]
+   Often before sending a response the tool will communicate with the user (see
+   subsection \ref{ss:user_interaction}) to get additional configuration
+   parameters. A response message has the same structure structure as the request. 
+
+   \begin{figure}[H]
+    \begin{tabular}{|ll|}
+     \hline
+      message type:   & \msg{configuration} \\
+     \hline
+      direction       & tool to controller \\
+      data:           & fresh $\times$ category $\times$ List (option) $\times$ inputs $\times$ outputs \\
+                      & \ inputs  = List (object) \\
+                      & \ outputs = List (object) \\
+                      & \ fresh   = Bool, whether the configuration is fresh \\
+                      & \ option  = id $\times$ data-type $\times$ values \\
+                      & \ object  = id $\times$ format $\times$ URI \\
+                      & \ values  = List(String) \\
+     \hline
+    \end{tabular}
+   \end{figure}
+
+   \noindent The data in the acknowledgement represents the complete
+   configuration and not incremental differences of some kind. For the response
+   message the freshness attribute is interpreted differently.  When fresh then
+   the previously sent configuration is rejected, otherwise it is accepted and
+   the rest of the data specifies the accepted configuration.  An accepted
+   configuration means that configuration is complete and task execution may
+   start.  The tool can freely modify and extend any configuration information
+   except for the category and other information present in the
+   input-configuration on which the configuration was originally based.
+   \\[4pt]
+   \noindent About the configuration specifications: every option is uniquely
+   identified, and so is every object. The reason is to make it easier for a
+   tool developer to test for availability of options/objects.  An option
+   represents an atomic unit in the configurable behaviour of a tool. For
+   validation purposes a data type can be specified against which the values
+   for the option are matched. An object is a file associated with a format and
+   a location.
+
+  \subsection{Task Execution}
+
+   \noindent When tool configuration is complete the controller may start task
+   execution by sending a message with the following structure.
+
+   \begin{figure}[H]
+    \begin{tabular}{|ll|}
+     \hline
+      message type:   & \msg{task\_start} \\
+     \hline
+      direction       & controller to tool \\
+     \hline
+    \end{tabular}
+   \end{figure}
+
+   \noindent The controller has to ensure that the input objects in a
+   configuration exist before a tool is started. And that the output objects
+   can be created or modified.
+   \\[4pt]
+   When a task has been completed the tool must send a response to the
+   controller that signals this fact. From a context where a \msg{task\_start}
+   has been received and no subsequent \msg{task\_done} has been sent a tool
+   may send a message with the following structure:
+
+   \begin{figure}[H]
+    \begin{tabular}{|ll|}
+     \hline
+      message type:   & \msg{task\_done} \\
+     \hline
+      direction       & tool to controller \\
+      data            & result : Bool \\
+     \hline
+    \end{tabular}
+   \end{figure}
+
+   \noindent which signifies that execution of the task has finished. In addition it also
+   tells whether or not the task has been completed successfully or not.
+
+  \subsection{Tool Report}
+
+   From any context a tool can send a report that signifies a warning, error or
+   just some information.
+
+   \begin{figure}[H]
+    \begin{tabular}{|ll|}
+     \hline
+      message type:   & \msg{report} \\
+     \hline
+      direction:      & tool to controller \\
+      data:           & struct notice $|$ warning $|$ error $\times$ description \\
+     \hline
+    \end{tabular}
+   \end{figure}
+
+   \noindent The controller will probably pass it through to the user but
+   it has no effect on protocol state. Before termination a tool can report to
+   the controller about what has been done. This report can contain anything
+   from general information to errors. A controller will display this in some
+   way to the user.
+
+  \subsection{User interaction} \label{ss:user_interaction}
+
+   For user interaction a tool depends on the controller. The controller offers
+   a display to the user on behalf of a tool. Using the display is a two step
+   process. First the contents of the display is created from a layout
+   specification that consists of controls and layout constraints. This step
+   can be repeated to change the content of the display. Then updates are sent
+   to the tool based on user interaction with the display and a tool can send
+   updates to change the state of controls on the display.
+   \\[4pt]
+   A minimal set of controls is available for constructing layouts\footnote{It
+   would be nice if these controls are not part of the protocol but added
+   through the extension mechanism (because they are highly implementation
+   specific)}. From any context the following message:
+   
+   \begin{figure}[H]
+    \begin{tabular}{|ll|}
+     \hline
+      message type:   & \msg{display\_layout} \\
+     \hline
+      direction:      & tool to controller \\
+      data:           & List (layout\_element) Where :\\
+                      & \ layout\_element :  element\_type \\
+                      & \ \ element\_type   : VerticalBox $|$ HorizontalBox $|$ ProgressBar $|$ \\
+                      & \ \ \ \ RadioButton $|$ Button $|$ Label $|$ TextField $|$ Checkbox \\
+                      & \ \ vertical\_box   = List(layout\_element $\times$ horizontal\_alignment) \\
+                      & \ \ horizontal\_box = List(layout\_element $\times$ vertical\_alignment) \\
+                      & \ \ progress\_bar = Nat $\times$ Nat $\times$ Nat \\
+                      & \ \ radio\_button = id $\times$ Bool \\
+                      & \ \ button        = id $\times$ string \\
+                      & \ \ label         = id $\times$ string \\
+                      & \ \ text\_field   = id $\times$ String \\
+%                      & \ \ text\_field   = id $\times$ type $\times$ String \\
+%                      & \ \ \ type        = Bool $|$ integer $|$ real $|$ enumeration $|$ string \\
+     \hline
+    \end{tabular}
+   \end{figure}
+
+   \noindent containing a layout specification can be sent. Every layout
+   element has a unique identifier that can be used in subsequent messages to
+   change the state (tool-side) or signal updates to the states in accordance
+   to user interaction (controller-side).  A user can interact with the
+   display, and results are communicated back to a tool with a message with the
+   following structure.
+
+   \begin{figure}[H]
+    \begin{tabular}{|ll|}
+     \hline
+      message type:   & \msg{display\_data} \\
+     \hline
+      direction:      & controller to tool \\
+      data:           & Id $\rightarrow$ State \\
+     \hline
+    \end{tabular}
+   \end{figure}
+
+   \noindent A tool can send updates to controls on a display by their
+   identifier using a message with the following structure:
+
+   \begin{figure}[H]
+    \begin{tabular}{|ll|}
+     \hline
+      message type:   & \msg{display\_data} \\
+     \hline
+      direction:      & tool to controller \\
+      data:           & Id $\rightarrow$ State \\
+     \hline
+    \end{tabular}
+   \end{figure}
+
+  \subsection{Tool Termination}
+
+   \noindent The controller can request a tool to terminate. This facility is present to
+   allow tools tools to free resources and remove outputs or leave them in a
+   consistent state.
+
+   \begin{figure}[H]
+    \begin{tabular}{|ll|}
+     \hline
+      message type:    & \msg{termination} \\
+     \hline
+      direction:       & controller to tool \\
+      data:            & none \\
+     \hline
+    \end{tabular}
+   \end{figure}
+
+   \noindent As a response the tool should sent a message with the following
+   structure, or risk being terminated after a timeout period.
+
+   \begin{figure}[H]
+    \begin{tabular}{|ll|}
+     \hline
+      message type:   & \msg{termination} \\
+     \hline
+      direction:      & tool to controller \\
+      data:           & none \\
+     \hline
+    \end{tabular}
+   \end{figure}
+
+ \section{Implementation} \label{s:implementation}
+
+   Our only requirements are that messages can be typed, that message order is
+   preserved and we have a means of authenticating an incoming connection. We
+   aim to have initial support for Windows 2000/XP, for Mac OS X version 10.4,
+   and GNU/Linux and do not settle for separate solutions for each of these
+   platforms. An existing communication protocol that we considered is XMPP
+   (Extensible Messaging and Presence Protocol, \cite{rfc3920}). It is a
+   simple protocol between a client and a server that uses two XML streams and
+   further features connection authentication mechanism.
+
+   XMPP has the notion of a message that can be sent from client to client, on
+   top of it our protocol can be implemented.   Unfortunately no single
+   client/server side implementations exist at the time that are usable on all
+   target platforms without also introducing quite a number of other
+   dependencies. Creating our own implementation would have taken to much time,
+   especially when we would have implemented all of XMPP.  So we choose a lightweight
+   custom implementation, instead of using XMPP with 3rd-party client and
+   server implementations.
+
+  \subsection{Transport}
+
+   \noindent The TCP/IP protocol suite is chosen as the means of transport. It is
+   well-known and supported by a lot of programming languages. The protocol
+   requires connection-state, a tool is authenticated once and on failure the
+   connection is terminated. In addition, because meaning is assigned to the
+   order of messages, the protocol requires that messages are delivered in the
+   same order as which they were offered to the sender. All requirements are
+   all supported by TCP/IP, note that for UDP/IP this is not the case.
+
+  \subsection{Message Structure}
+
+   \noindent The choice for XML is obvious we aim for extensibility and XML to some
+   extend allows changes to the format extensions to the format there is wide
+   support in many programming languages. With XML it is possible to create a
+   good parser that is to some extent resistant to extensions, meaning it will
+   also work on future versions of the format that may contain additional
+   information.  Another benefit of using XML is it makes the messages
+   readable, making it easy to print and manually verify the structure and
+   contents.
+
+   \subsubsection{XML Structure}
+
+    \noindent messages are wrapped in the \textbf{message} element. A mandatory attribute
+    is \textbf{type} that specifies the type of the message, it may occur only
+    once. For example:
+ 
+    \begin{verbatim}
+     <message type="termination"><![CDATA[message content]]></message>\end{verbatim}
+
+    The content of a message is wrapped as so-called CDATA section. It means
+    that the data inside is not interpreted when parsing a message. As a
+    consequence a message that has invalid XML as content can still be valid
+    XML itself.
+
+  \subsection{Message Content}
+
+   To specify the structure of an XML document type one makes use of either the
+   DTD or the XML Schema standard. However many people find this difficult to
+   read so the translation of the functional specification of the previous
+   section to XML is suggested by means of examples. Needless to mention: all
+   messages must be valid XML.
+
+  \subsubsection{Authentication}
+
+   Instead of a full-featured authentication scheme we choose a simple instance
+   identification scheme. Of course security is something that should be part
+   of the design and the security of this solution is very poor from that
+   perspective. It only solves the technical problem of identifying the peer
+   assuming that everyone has good intentions. This is something we did
+   realise. The only justification for this is in the fact implementing
+   cross-platform authentication is still a non-trivial undertaking despite of
+   all libraries that are available today.  At this point, security is not a
+   focus point in this project and getting a multi-platform software
+   application to prove the viability of interactive tool integration is.
+
+   As far as the message structure is concerned; an identification message
+   contains a single string as content. The string represents the token
+   mentioned in the previous section, that is used by the controller to
+   identify the communication partner.
+
+  \subsubsection{Capabilities}
+
+   Messages for communicating the capabilities of each of the communication
+   partners contain at the very least the version of the protocol. For example:
+
+    \begin{verbatim}
+     <capabilities>
+      <protocol-version major="1" minor="0"/>
+     </capabilities>\end{verbatim}
+
+   A capabilities message sent in reply to a request for capabilities by the
+   controller. Contains the input-configurations in addition to the version
+   number. So in addition the \textbf{capabilities} element may contain any
+   number of \textbf{input-configuration} elements as follows:
+
+    \begin{verbatim}
+     <capabilities>
+      <protocol-version major="1" minor="0"/>
+      <input-configuration category="" format="" id=""/>
+     </capabilities>\end{verbatim}
+
+    All attributes: \textbf{category}, \textbf{format} and \textbf{id} are
+    mandatory.  The \textbf{category} attribute is an arbitrary string which
+    represents a name that characterises functionality targeted by the input
+    configuration. The \textbf{id} attribute represents a unique identifier for
+    an input object in a future configuration, the \textbf{format} attribute
+    specifies the format of this object.
+
+    By creating an \textbf{configuration} element, adding a Boolean attribute
+    \textbf{fresh} set to true and adding a single object of type input with
+    the same values for the \textbf{id} and \textbf{format} attributes as an
+    \textbf{input-configuration} a valid (initial) configuration can be obtained.
+
+  \subsubsection{Configuration}
+
+   The purpose of a configuration specification is to differentiate different
+   behaviours of a tool and to be able to make a deterministic selection of the
+   desired behaviour. Of course it depends on the developer of a tool if
+   different behaviour can be observed from outside and to which extend this
+   behaviour can be selected before run-time and maybe controlled interactively
+   at run-time.
+
+   This is not a novelty, programs with command line interfaces take arguments
+   that are used to (re)produce this state non-interactively by means of a
+   single string. The model behind this method of expressing a configuration is
+   based on the idea that tasks consist of a sequence of operations each of
+   which can be parametrised. A configuration is a selection between available
+   operations and values for the parameters of each of these operations. On the
+   command line such a configuration is represented as a string that consists
+   of so-called options followed by values for the arguments of this option. We
+   choose to reuse this model but will not use the same implementation as the
+   traditional command-line interface.
+
+   The controller is assumed to be oblivious to the data that is produced by
+   tools. In particular the controller has registers what data is produced and
+   the name by which this data is available, but it has no access to this data
+   to inspect it. The application of a tools is restricted by the kind of data
+   that they can take as input so a method is required to describe this
+   information about the data. Such information is usually called the file-type
+   or format and traditionally this information is encoded in a filename. A
+   more modern approach is MIME (Multipurpose Internet Mail Extensions, \cite{rfc2822})
+   that is widely used by applications and in other communication protocols.
+
+   The structure of the data contained in a configuration message was specified
+   at a higher level in the previous section. The translation to XML is as
+   follows:
+
+    \begin{verbatim}
+     <configuration fresh="true" category="debugging">
+      <option id="-v">
+       <argument type="integer">1</argument>
+      </option>
+      <object id="in" type="input" location="" format=""/>
+      <object id="out" type="output" location="" format=""/>
+     </configuration>\end{verbatim}
+
+   \noindent When the \text{fresh} attribute is not available it is assumed to
+   be false. The \textbf{id} attributes to \textbf{option} and \textbf{object}
+   elements represent the identifiers and all must be unique within the
+   containing \textbf{configuration} element.  A \textbf{configuration} element
+   can contain an arbitrary number of \textbf{object} and \textbf{option}
+   elements in any order.
+
+   An \textbf{option} element may contain an arbitrary number of
+   \textbf{argument} elements that each represent a single typed-argument to the
+   option. A number of predefined types is available for arguments to options:
+   string, enumeration, integer, natural, positive, real. The types are used
+   later to relieve the tool developer from having to ensure that the values that
+   a user inputs as a string have the correct pattern.
+
+   An \textbf{object} element must contain the \textbf{type} attribute, which
+   specifies whether the tool takes it as input or produces it as output. It is
+   forbidden to have two objects in the same configuration with different
+   values for the \textbf{type} attribute. The \textbf{location} attribute is a
+   URI (see \cite{rfc3305}), and the \textbf{format} attribute represents a data format
+   characterisation using the syntax of the MIME standard.
+
+  \subsubsection{Display}
+   
+   Display manipulation is restricted to filling the display with interface
+   controls, by means of a layout specification, and modifying the state of
+   these controls. In particular it is not possible to manipulate the layout
+   itself. By now it sounds that we would have been better of picking up
+   HTML/CSS. As far as functionality is considered HTML/CSS could have solved
+   the problem. However we lack resources to complete the implementation in the
+   first place and then make it work reliably on the targeted platforms and
+   support it.
+
+   We have chosen a limited subset of controls that can be used by tools in
+   display layouts for version one of the protocol. It has however always been
+   the intention of making it easy to add new controls to the repertoire. A
+   quick detailed treatment for all controls follows:
+
+    \begin{verbatim}
+     <display-layout>
+      <layout-manager>
+       <box-layout-manager variant="vertical" id="">
+        ...
+       </box-layout-manager>
+      </layout-manager>
+     </configuration>\end{verbatim}
+
+   A display layout specification is represented by a \textbf{display-layout}
+   element that contains a single \text{layout-manager} element. The layout
+   manager specifies the way in which elements are laid out across the display.
+   All elements are laid out on the screen horizontally, or vertically and are
+   expanded to fill space. The \textbf{box-layout-manager} has a
+   \textbf{variant} attribute that specifies the direction in which the
+   elements directly contained in it are laid out on the available space. The
+   layout managers can be nested for more control on relative position of
+   elements.
+
+   All elements in the layout have an \textbf{id} attribute that must be unique
+   within the scope of the containing \textbf{display-layout} element. The
+   available elements are: \textbf{box-layout-manager}, \textbf{progress-bar},
+   \textbf{radio-button}, \textbf{button}, \textbf{label}, \textbf{checkbox},
+   \textbf{text\_field}.  These elements will be introduced later in this
+   subsection.
+
+   A number of layout properties provide more control over how elements are
+   positioned and if they are visible and functional (enabled/disabled). The
+   available properties are: alignment, margins (top, right, bottom, left),
+   vertical alignment (top, middle, bottom), horizontal-alignment (left,
+   center, right), element visibility and element activity. Every element that
+   is a child of a layout manager is associated with a value for each of the
+   layout properties.  Having an explicit value for each of the properties for
+   each element in the specification would drastically increase its size, so a
+   set of implicitly assumed default values are chosen.  The default properties
+   are: alignment is left, no margins, elements are enabled and visible. The
+   effective properties of an element are relative to that of the previous
+   child. For example:
+
+    \begin{verbatim}
+ <box-layout-manager variant="vertical" id="">
+  <properties margin-top="1" margin-bottom="1" horizontal-alignment="right">
+  <button>Ok</button>
+  <properties>
+  <button>Cancel</button>
+ </box-layout-manager>\end{verbatim}
+
+   The layout properties for both buttons are the same, top and bottom margins
+   are one pixel, vertical alignment is middle and horizontal alignment is right
+   and both elements are visible and enabled. The \textbf{properties} element
+   directly preceding a control defines the properties for that control. If
+   there is no properties element then the previous \textbf{properties} element
+   within the same layout manager defines the layout properties for that
+   element.
+
+   Now that it is clear what the structure of a layout specification looks
+   like, the available controls will be described in more detail.The simplest
+   controls are the label and the button.
+
+    \begin{verbatim}
+  <label id="x"><![CDATA[Cancel]]></label>
+  <button id="y"><![CDATA[Cancel]]></button>
+  <checkbox id="y" checked="true"><![CDATA[Cancel]]></checkbox>\end{verbatim}
+
+   Please recall that for all controls the \textbf{id} attribute is mandatory.
+   This example shows a label and a button with text Cancel. When the button is
+   pressed this is communicated by sending a \msg{display\_data} message with the
+   complete button specification. The checkbox has a description and is always
+   in one of two states: checked or not. A more complex example is the
+   radio-button control, because it is not a stand-alone control.
+
+    \begin{verbatim}
+  <radio-button id="x" connected="y"><![CDATA[first]]></radio-button>
+  <radio-button id="y" connected="x" selected="true"><![CDATA[second]]></radio-button>\end{verbatim}
+
+   Radio buttons are always grouped at all times only a single button in the
+   group is be depressed.  By default the first radio button is selected, if
+   another radio button should be selected then the \textbf{select} attribute
+   must have value true. The radio buttons are connected by means of the
+   \textbf{connected} attribute that contains the value of the \textbf{id}
+   attribute of another radio button in the group. If the selection is changed
+   then only the specification of the radio button that gets selected needs to
+   be send by means of a \msg{display\_data} message to inform the other side
+   of this event.
+
+    \begin{verbatim}
+  <text-field id="x"><text><![CDATA[100]]><text></text-field>\end{verbatim}
+
+   The text field displays an input control for the user to put in text. It is
+   much the same as the button control, but it contains a child element
+   \textbf{text} that holds the content of the control. The reason for this
+   difference is that pattern checking may be added in the future that may
+   signal whether the data entered by the user matches the expectations of the
+   tool developer. For example if the input box should contain a number then it
+   cannot contain non-digit characters.
+
+   The last control that was not treated is the progress bar. As the name
+   suggests it is used to show progress to a user. It models progress by means
+   of a sub range of the integer domain, specified by a minimum and maximum
+   value and shows progress by colouring part of this domain up to some
+   `current' value (that must be in the domain). The example is self
+   explanatory:
+
+    \begin{verbatim}
+  <progress-bar id="x" minimum="10" maximum="20" current="15"/>\end{verbatim}
+
+   Updates to change the status of a control have the exact same specification
+   as in the layout specification. The \textbf{id} attribute identifies the
+   control of which the status is to be updated. The remaining attributes
+   specify the new value for the attribute with the same name and child
+   elements specify other aspects of the state.
+
+  \subsection{Extensibility}
+
+   Protocol extension is performed by increasing the major version number and
+   introducing the changes. The increase in version number is supposed to make
+   it easy to test whether additional functionality with respect to previous
+   versions is available and/or to signal compatibility mode. The nature of the
+   changes is not described and therefore not restricted. Changes can be
+   anything but only proper extensions are recommended.
+
+  \section{Conclusion}
+
+   The goal of the protocol is to control tools; configure them to do a
+   specific task, start and stop task execution and allow (semi-)automatic
+   repeat of a configuration. In addition it also includes remote generation of
+   a graphical user interface in order to allow a user-friendly configuration
+   process. The last functionality is mentioned separately because strictly
+   speaking it is not a part of the controlling functionality, it is only
+   needed to obtain a configuration, something which \emph{is} part of that
+   functionality.
+
+   Since the decision was made to create a custom implementation for our
+   protocol, the XMPP protocol has been formalised by the IETF and it is now an
+   open internet standard. It was (and remains) an option to use our protocol
+   on top of XMPP, because he notion of a message is approximately the same for
+   the protocols.
+   
+   It is still interesting to consider implementing this protocol on top of
+   XMPP, because the latter has additional functionality that can be used to
+   help solve other tool integration problems. An example of this is active
+   communication between multiple tools through a publish-subscribe mechanism.
+   A future extension to the protocol or perhaps even another protocol can
+   offer such functionality.
+
+  \bibliography{rfc}
+
+\end{document}

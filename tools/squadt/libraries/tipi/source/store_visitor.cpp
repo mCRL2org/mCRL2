@@ -170,7 +170,7 @@ namespace utility {
       out << " location=\"" << o.m_location << "\"";
     }
 
-    out << " mime-type=\"" << o.m_mime_type << "\"";
+    out << " format=\"" << o.m_mime_type << "\"";
   }
 
   /**
@@ -368,12 +368,12 @@ namespace utility {
     for (tipi::tool::capabilities::input_combination_list::const_iterator i = c.m_input_combinations.begin(); i != c.m_input_combinations.end(); ++i) {
       out << "<input-configuration category=\"" << (*i).m_category
           << "\" format=\"" << (*i).m_mime_type
-          << "\" identifier=\"" << (*i).m_identifier << "\"/>";
+          << "\" id=\"" << (*i).m_identifier << "\"/>";
     }
 
     for (tipi::tool::capabilities::output_combination_list::const_iterator i = c.m_output_combinations.begin(); i != c.m_output_combinations.end(); ++i) {
       out << "<output-configuration format=\"" << (*i).m_mime_type
-          << "\" identifier=\"" << (*i).m_identifier << "\"/>";
+          << "\" id=\"" << (*i).m_identifier << "\"/>";
     }
  
     out << "</capabilities>";
@@ -431,7 +431,7 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::button const& c, tipi::layout::element_identifier const& id) {
-    out << "<button id=\"" << id << "\" label=\"" << c.m_label << "\"/>";
+    out << "<button id=\"" << id << "\"><![CDATA[" << c.m_label << "]]></button>";
   }
 
   /**
@@ -441,17 +441,14 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::radio_button const& c, tipi::layout::element_identifier const& id) {
-    out << "<radio-button id=\"" << id << "\" label=\"" << c.m_label
+    out << "<radio-button id=\"" << id 
         << "\" connected=\"" << c.m_connection;
 
     if (c.m_selected) {
       out << "\" selected=\"" << c.m_selected;
     }
-    if (c.m_first) {
-      out << "\" first=\"true";
-    }
 
-    out << "\"/>";
+    out << "\"><![CDATA[" << c.m_label << "]]></radio-button>";
   }
 
   /**
@@ -461,7 +458,7 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::checkbox const& c, tipi::layout::element_identifier const& id) {
-    out << "<checkbox id=\"" << id << "\" label=\"" << c.m_label << "\" status=\"" << c.m_status << "\"/>";
+    out << "<checkbox id=\"" << id << "\" checked=\"" << c.m_status << "\"><![CDATA[" << c.m_label << "]]></checkbox>";
   }
 
   /**
@@ -497,8 +494,8 @@ namespace utility {
   template <>
   void visitor< tipi::store_visitor_impl >::visit(tipi::layout::properties const& c) {
     out << "<properties "
-        << "horizontal-alignment=\"" << tipi::alignment_to_text[c.m_alignment_horizontal]
-        << "\" vertical-alignment=\"" << tipi::alignment_to_text[c.m_alignment_vertical]
+        << "alignment-horizontal=\"" << tipi::alignment_to_text[c.m_alignment_horizontal]
+        << "\" alignment-vertical=\"" << tipi::alignment_to_text[c.m_alignment_vertical]
         << "\" margin-top=\"" << c.m_margin.top
         << "\" margin-left=\"" << c.m_margin.left
         << "\" margin-bottom=\"" << c.m_margin.bottom

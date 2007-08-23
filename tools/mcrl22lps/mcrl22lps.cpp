@@ -278,6 +278,10 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   c.add_option(option_end_phase).
           append_argument(linearisation_phase_enumeration, phase_selector.get_selection());
 
+  if (phase_selector.get_selection() != phNone) { // file will not be produced
+    c.remove_output(lps_file_for_output);
+  }
+
   using tipi::datatype::boolean;
 
   c.get_option(option_final_cluster).set_argument_value< 0, boolean >(clusterfinal->get_status());
@@ -292,7 +296,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   c.get_option(option_no_deltaelm).set_argument_value< 0, boolean >(!deltaelm->get_status());
   c.get_option(option_add_delta).set_argument_value< 0, boolean >(add_delta->get_status());
 
-  m_communicator.send_clear_display();
+  send_clear_display();
 }
 
 bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
