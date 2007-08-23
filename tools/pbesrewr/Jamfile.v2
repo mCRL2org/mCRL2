@@ -6,6 +6,8 @@ exe pbesrewr
        : pbesrewr.cpp
          /libraries//mcrl2_basic
          /libraries//lps
+         /libraries//parser
+         /libraries//rewrite
          /site-config//boost_program_options
        : <include>.
        ;
