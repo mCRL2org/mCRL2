@@ -95,6 +95,10 @@ static inline ATermAppl pn2gsMakeDataApplProd2(ATermAppl Op, ATermAppl Left, ATe
   return gsMakeDataAppl(Op,ATmakeList2((ATerm)Left,(ATerm)Right));
 }
 
+static inline ATermAppl pn2gsMakeIfThenUntimed(ATermAppl Cond, ATermAppl Then){
+  return gsMakeIfThenElse(Cond,Then,gsMakeDelta());
+}
+
 static ATermList pn2gsMakeIds(ATermList l);
 static ATermList pn2gsMakeDataVarIds(ATermList l, ATermAppl Type);
 static ATermAppl pn2gsMakeBagVars(ATermList l);
@@ -1256,13 +1260,13 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       ATermAppl Process;
       ATermAppl SubProcess0;
       ATermAppl CondIf0;
-      ATermAppl CondThan0;
+      ATermAppl CondThen0;
       ATermAppl SubProcess1;
       ATermAppl CondIf1;
-      ATermAppl CondThan1;
+      ATermAppl CondThen1;
       ATermAppl SubProcess2;
       ATermAppl CondIf2;
-      ATermAppl CondThan2;
+      ATermAppl CondThen2;
       ATermAppl SumVar0 = gsMakeDataVarId(ATmakeAppl0(ATmakeAFun("y", 0, ATtrue)), gsMakeSortIdPos());
       ATermAppl SumVar1 = gsMakeDataVarId(ATmakeAppl0(ATmakeAFun("z", 0, ATtrue)), gsMakeSortIdPos());
       ATermList SumVars;
@@ -1276,22 +1280,22 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       // create first sum-sub-process
       SumVars = ATmakeList1((ATerm)SumVar0);
       CondIf0 = pn2gsMakeDataApplProd2(OpLTE,SumVar0,MaxConcIn);
-      CondThan0 = gsMakeSeq(gsMakeParamId(CurrentPlaceAdd, ATmakeList1((ATerm)SumVar0)), gsMakeParamId(CurrentPlace, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpAdd,SumVar0,ProcVar))));
-      SubProcess0 = gsMakeSum(SumVars, gsMakeIfThen(CondIf0, CondThan0));
+      CondThen0 = gsMakeSeq(gsMakeParamId(CurrentPlaceAdd, ATmakeList1((ATerm)SumVar0)), gsMakeParamId(CurrentPlace, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpAdd,SumVar0,ProcVar))));
+      SubProcess0 = gsMakeSum(SumVars, pn2gsMakeIfThenUntimed(CondIf0, CondThen0));
       gsDebugMsg("Parameter %T is %d a Sum\n", SubProcess0, gsIsSum(SubProcess0));
 
       // create second sum-sub-process
       SumVars = ATmakeList1((ATerm)SumVar1);
       CondIf1 = pn2gsMakeDataApplProd2(OpLTE,SumVar1, pn2gsMakeDataApplProd2(OpMin, MaxConcOut, ProcVar));
-      CondThan1 = gsMakeSeq(gsMakeParamId(CurrentPlaceRem, ATmakeList1((ATerm)SumVar1)), gsMakeParamId(CurrentPlace, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax,Number0, pn2gsMakeDataApplProd2(OpSubt,ProcVar,SumVar1)))));
-      SubProcess1 = gsMakeSum(SumVars, gsMakeIfThen(CondIf1, CondThan1));
+      CondThen1 = gsMakeSeq(gsMakeParamId(CurrentPlaceRem, ATmakeList1((ATerm)SumVar1)), gsMakeParamId(CurrentPlace, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax,Number0, pn2gsMakeDataApplProd2(OpSubt,ProcVar,SumVar1)))));
+      SubProcess1 = gsMakeSum(SumVars, pn2gsMakeIfThenUntimed(CondIf1, CondThen1));
       gsDebugMsg("Parameter %T is %d a Sum\n", SubProcess1, gsIsSum(SubProcess1));
 
       // create third sum-sub-process
       SumVars = ATmakeList2((ATerm)SumVar0, (ATerm)SumVar1);
       CondIf2 = pn2gsMakeDataApplProd2(OpAnd, CondIf0, CondIf1);
-      CondThan2 = gsMakeSeq(gsMakeSync(gsMakeParamId(CurrentPlaceAdd, ATmakeList1((ATerm)SumVar0)), gsMakeParamId(CurrentPlaceRem, ATmakeList1((ATerm)SumVar1))), gsMakeParamId(CurrentPlace, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax,Number0,pn2gsMakeDataApplProd2(OpSubt,pn2gsMakeDataApplProd2(OpAdd,SumVar0,ProcVar), SumVar1)))));
-      SubProcess2 = gsMakeSum(SumVars, gsMakeIfThen(CondIf2, CondThan2));
+      CondThen2 = gsMakeSeq(gsMakeSync(gsMakeParamId(CurrentPlaceAdd, ATmakeList1((ATerm)SumVar0)), gsMakeParamId(CurrentPlaceRem, ATmakeList1((ATerm)SumVar1))), gsMakeParamId(CurrentPlace, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax,Number0,pn2gsMakeDataApplProd2(OpSubt,pn2gsMakeDataApplProd2(OpAdd,SumVar0,ProcVar), SumVar1)))));
+      SubProcess2 = gsMakeSum(SumVars, pn2gsMakeIfThenUntimed(CondIf2, CondThen2));
       gsDebugMsg("Parameter %T is %d a Sum\n", SubProcess2, gsIsSum(SubProcess2));
 
       // create P_pi
@@ -1304,9 +1308,9 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       /* Creation of P_pi_add */
       ATermAppl ProcVar = gsMakeDataVarId(pn2gsPlaceParameter(CurrentPlaceAdd),gsMakeSortIdPos());
       ATermAppl CondIf = pn2gsMakeDataApplProd2(OpGT,ProcVar, Number1);
-      ATermAppl CondThan = gsMakeSync(gsMakeParamId(CurrentPlaceIn, ATmakeList0()), gsMakeParamId(CurrentPlaceAdd, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax,Number1, pn2gsMakeDataApplProd2(OpSubt,ProcVar, Number1)))));
+      ATermAppl CondThen = gsMakeSync(gsMakeParamId(CurrentPlaceIn, ATmakeList0()), gsMakeParamId(CurrentPlaceAdd, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax,Number1, pn2gsMakeDataApplProd2(OpSubt,ProcVar, Number1)))));
       ATermAppl CondElse = gsMakeParamId(CurrentPlaceIn, ATmakeList0());
-      ATermAppl Process = gsMakeIfThenElse(CondIf, CondThan, CondElse);
+      ATermAppl Process = gsMakeIfThenElse(CondIf, CondThen, CondElse);
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceAdd, ATmakeList1((ATerm)gsMakeSortIdPos())), ATmakeList1((ATerm)ProcVar), Process));
       gsDebugMsg("Process: %T created.\n", CurrentPlaceAdd);
     }
@@ -1327,9 +1331,9 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       /* Creation of P_pi_rem */
       ATermAppl ProcVar = gsMakeDataVarId(pn2gsPlaceParameter(CurrentPlaceRem),gsMakeSortIdPos());
       ATermAppl CondIf = pn2gsMakeDataApplProd2(OpGT,ProcVar, Number1);
-      ATermAppl CondThan = gsMakeSync(gsMakeParamId(CurrentPlaceOut, ATmakeList0()), gsMakeParamId(CurrentPlaceRem, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax, Number1, pn2gsMakeDataApplProd2(OpSubt,ProcVar, Number1)))));
+      ATermAppl CondThen = gsMakeSync(gsMakeParamId(CurrentPlaceOut, ATmakeList0()), gsMakeParamId(CurrentPlaceRem, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax, Number1, pn2gsMakeDataApplProd2(OpSubt,ProcVar, Number1)))));
       ATermAppl CondElse = gsMakeParamId(CurrentPlaceOut, ATmakeList0());
-      ATermAppl Process = gsMakeIfThenElse(CondIf, CondThan, CondElse);
+      ATermAppl Process = gsMakeIfThenElse(CondIf, CondThen, CondElse);
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceRem, ATmakeList1((ATerm)gsMakeSortIdPos())), ATmakeList1((ATerm)ProcVar), Process));
       gsDebugMsg("Process: %T created.\n", CurrentPlaceRem);
     }
@@ -2767,7 +2771,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
     }
 
     if(Cond)
-      Summand=gsMakeIfThen(Cond,Summand);
+      Summand=pn2gsMakeIfThenUntimed(Cond,Summand);
 
     //colored (sums)
     if(Type){
@@ -2885,7 +2889,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
       
 //       if(j>0){ //generate the condition
 // 	ATermAppl Cond=pn2gsMakeDataApplProd2(OpLTE,NumberJ,VarX);//make j<=x
-// 	Summand=gsMakeIfThen(Cond,Summand);
+// 	Summand=pn2gsMakeIfThenUntimed(Cond,Summand);
 //       }
       
 //       if(Body){
@@ -2940,7 +2944,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
       
 //       //generate the condition
 //       ATermAppl Cond=pn2gsMakeDataApplProd2(OpEq,VarX,Number0);//make j<=x
-//       Summand=gsMakeIfThen(Cond,Summand);
+//       Summand=pn2gsMakeIfThenUntimed(Cond,Summand);
       
 //       if(Body){
 // 	if(Summand) Body=gsMakeChoice(Summand,Body);
@@ -3174,7 +3178,7 @@ static ATermAppl pn2gsMakeMultiAction(ATermList ActionList, ATermList ParamList)
     // 2) add predicate (if any)
     ATermAppl Predicate=ATAtableGet(context.trans_predicate,(ATerm)TransID);
     if(!ATisEqual(Predicate,Appl0)){
-      Body=gsMakeIfThen(Predicate,Body);
+      Body=pn2gsMakeIfThenUntimed(Predicate,Body);
     }
     // 3) add sums if any
     if(ATgetLength(SumList)){
