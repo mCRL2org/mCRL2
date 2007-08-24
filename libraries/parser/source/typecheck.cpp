@@ -861,7 +861,7 @@ void gstcDataInit(void){
   //more
   gstcAddSystemFunction(gsMakeOpIdAbs(gsMakeSortIdPos()));
   gstcAddSystemFunction(gsMakeOpIdAbs(gsMakeSortIdNat()));
-  gstcAddSystemFunction(gsMakeOpIdAbs(gsMakeSortIdNat()));
+  gstcAddSystemFunction(gsMakeOpIdAbs(gsMakeSortIdInt()));
   gstcAddSystemFunction(gsMakeOpIdAbs(gsMakeSortIdReal()));
   //more
   gstcAddSystemFunction(gsMakeOpIdNeg(gsMakeSortIdPos()));
