@@ -2146,7 +2146,7 @@ ATermAppl gsMakeDataExprPred(ATermAppl DataExpr)
 ATermAppl gsMakeDataExprDub(ATermAppl DataExprBit, ATermAppl DataExprNum)
 {
   assert(ATisEqual(gsGetSort(DataExprBit), gsMakeSortExprBool()));
-  assert(IsNISort(DataExprNum));
+  assert(IsNISort(gsGetSort(DataExprNum)));
   return gsMakeDataAppl2(gsMakeOpIdDub(gsGetSort(DataExprNum)),
     DataExprBit, DataExprNum);
 }
