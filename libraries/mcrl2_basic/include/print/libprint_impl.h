@@ -271,6 +271,47 @@ static void PRINT_FUNC(PrintListEnumElts)(PRINT_OUTTYPE OutStream,
        - the elements of the list are printed as a comma-separated list
 */
 
+static void PRINT_FUNC(PrintLinearProcessSummand)(PRINT_OUTTYPE OutStream,
+  const ATermAppl LinearProcessSummand, const ATermList VarDecls,
+  t_pp_format pp_format, bool ShowSorts);
+/*Pre: OutStream points to a stream to which can be written
+       LinearProcessSummand is a linear process summand
+       VarDecls is a list of variable declarations, or NULL
+       pp_format != ppInternal
+       ShowSorts indicates if the sorts of DataExpr should be shown
+  Post:A textual representation of the expression is written to OutStream, in
+       which:
+       - ShowSorts is taken into account
+       - if pp_format != ppDebug and VarDecls != NULL, the next state of the
+         summand is printed without assignments
+*/
+
+static ATermList GetAssignmentsRHS(ATermList Assignments);
+/*Pre: Assignments is a list of assignments of data expressions to data
+       variables
+  Ret: The right-hand sides the assignments
+*/
+
+static ATermList SubstituteAssignments_list(ATermList Vars,
+  ATermList Assignments);
+/*Pre: Vars is a list of data variables
+       Assignments is a list of assignments of data expressions to data
+       variables
+  Ret: Vars in which each element v is replaced by the right-hand side of the
+       first assignment in Assignments in which v occurs as a left-hand side,
+       or by v itself, if it doesn't occur at all as a left-hand side.
+*/
+
+static ATermAppl SubstituteAssignments_appl(ATermAppl Var,
+  ATermList Assignments);
+/*Pre: Var is a data variable
+       Assignments is a list of assignments of data expressions to data
+       variables
+  Ret: The right-hand side of the first assignment in Assignments in which Var
+       occurs as a left-hand side. Var, if it doesn't occur at all as a
+       left-hand side.
+*/
+
 static ATermList gsGroupDeclsBySort(const ATermList Decls);
 /*Pre: Decls is an ATermList containing declarations of the form
        Decl(Name, Sort) from the internal format
@@ -615,8 +656,15 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     } else {
       //SummandsLength > 0
       PRINT_FUNC(fprints)(OutStream, "\n       ");
-      PRINT_FUNC(PrintPart_List)(OutStream, Summands, pp_format,
-        ShowSorts, PrecLevel, NULL, "\n     + ");
+      ATermList l = Summands;
+      while (!ATisEmpty(l)) {
+        if (!ATisEqual(l, Summands)) {
+          PRINT_FUNC(fprints)(OutStream, "\n     + ");
+        }
+        PRINT_FUNC(PrintLinearProcessSummand)(OutStream, ATAgetFirst(l),
+          VarDecls, pp_format, ShowSorts);
+        l = ATgetNext(l);
+      }
       PRINT_FUNC(fprints)(OutStream, ";\n");
     }
     PRINT_FUNC(fprints)(OutStream, "\n");
@@ -635,45 +683,8 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 3),
       pp_format, ShowSorts, 0);
   } else if (gsIsLinearProcessSummand(Part)) {
+    PRINT_FUNC(PrintLinearProcessSummand)(OutStream, Part, NULL, pp_format, ShowSorts);
     //print summand
-    PRINT_FUNC(dbg_prints)("printing LPS summand\n");
-    //print data summations
-    ATermList SumVarDecls = ATLgetArgument(Part, 0);
-    if (ATgetLength(SumVarDecls) > 0) {
-      PRINT_FUNC(fprints)(OutStream, "sum ");
-      PRINT_FUNC(PrintDecls)(OutStream, SumVarDecls, pp_format, NULL, ",");
-      PRINT_FUNC(fprints)(OutStream, ".\n         ");
-    }
-    //print condition
-    ATermAppl Cond = ATAgetArgument(Part, 1);
-    if (!gsIsNil(Cond)) {
-      PRINT_FUNC(PrintPart_Appl)(OutStream, Cond, pp_format, ShowSorts, 11);
-      PRINT_FUNC(fprints)(OutStream, " ->\n         ");
-    }
-    //print multiaction
-    ATermAppl MultAct = ATAgetArgument(Part, 2);
-    ATermAppl Time = ATAgetArgument(Part, 3);
-    bool IsTimed = !gsIsNil(Time);
-    PRINT_FUNC(PrintPart_Appl)(OutStream, MultAct, pp_format, ShowSorts,
-      (IsTimed)?6:5);
-    //print time
-    if (IsTimed) {
-      PRINT_FUNC(fprints)(OutStream, " @ ");
-      PRINT_FUNC(PrintPart_Appl)(OutStream, Time, pp_format, ShowSorts, 11);
-    }
-    //print process reference
-    if (!gsIsDelta(MultAct)) {
-      PRINT_FUNC(fprints)(OutStream, " .\n         ");
-      ATermList Assignments = ATLgetArgument(Part, 4);
-      int AssignmentsLength = ATgetLength(Assignments);
-      PRINT_FUNC(fprints)(OutStream, "P");
-      if (AssignmentsLength > 0) {
-        PRINT_FUNC(fprints)(OutStream, "(");
-        PRINT_FUNC(PrintPart_List)(OutStream, Assignments,
-          pp_format, ShowSorts, PrecLevel, NULL, ", ");
-        PRINT_FUNC(fprints)(OutStream, ")");
-      }
-    }
   } else if (gsIsProcessInit(Part)) {
     //print initialisation
     PRINT_FUNC(dbg_prints)("printing initialisation\n");
@@ -701,6 +712,9 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     ATermList Args = ATLgetArgument(Part, 1);
     if (ATgetLength(Args) > 0) {
       PRINT_FUNC(fprints)(OutStream, "(");
+      if (pp_format == ppDefault) {
+        Args = GetAssignmentsRHS(Args);
+      }
       PRINT_FUNC(PrintPart_List)(OutStream, Args,
         pp_format, ShowSorts, 0, NULL, ", ");
       PRINT_FUNC(fprints)(OutStream, ")");
@@ -1687,6 +1701,92 @@ void PRINT_FUNC(PrintListEnumElts)(PRINT_OUTTYPE OutStream,
       PRINT_FUNC(PrintListEnumElts)(OutStream, Arg1, pp_format, ShowSorts);
     }
   }
+}
+
+void PRINT_FUNC(PrintLinearProcessSummand)(PRINT_OUTTYPE OutStream,
+  const ATermAppl Summand, const ATermList VarDecls,
+  t_pp_format pp_format, bool ShowSorts)
+{
+  assert(gsIsLinearProcessSummand(Summand));
+  PRINT_FUNC(dbg_prints)("printing LPS summand\n");
+  //print data summations
+  ATermList SumVarDecls = ATLgetArgument(Summand, 0);
+  if (ATgetLength(SumVarDecls) > 0) {
+    PRINT_FUNC(fprints)(OutStream, "sum ");
+    PRINT_FUNC(PrintDecls)(OutStream, SumVarDecls, pp_format, NULL, ",");
+    PRINT_FUNC(fprints)(OutStream, ".\n         ");
+  }
+  //print condition
+  ATermAppl Cond = ATAgetArgument(Summand, 1);
+  if (!gsIsNil(Cond)) {
+    PRINT_FUNC(PrintPart_Appl)(OutStream, Cond, pp_format, ShowSorts, 11);
+    PRINT_FUNC(fprints)(OutStream, " ->\n         ");
+  }
+  //print multiaction
+  ATermAppl MultAct = ATAgetArgument(Summand, 2);
+  ATermAppl Time = ATAgetArgument(Summand, 3);
+  bool IsTimed = !gsIsNil(Time);
+  PRINT_FUNC(PrintPart_Appl)(OutStream, MultAct, pp_format, ShowSorts,
+    (IsTimed)?6:5);
+  //print time
+  if (IsTimed) {
+    PRINT_FUNC(fprints)(OutStream, " @ ");
+    PRINT_FUNC(PrintPart_Appl)(OutStream, Time, pp_format, ShowSorts, 11);
+  }
+  //print process reference
+  if (!gsIsDelta(MultAct)) {
+    PRINT_FUNC(fprints)(OutStream, " .\n         ");
+    PRINT_FUNC(fprints)(OutStream, "P");
+    ATermList Assignments = ATLgetArgument(Summand, 4);
+    if (VarDecls != NULL && pp_format == ppDefault) {
+      if (ATgetLength(VarDecls) > 0) {
+        PRINT_FUNC(fprints)(OutStream, "(");
+        PRINT_FUNC(PrintPart_List)(OutStream,
+          SubstituteAssignments_list(VarDecls, Assignments),
+          pp_format, ShowSorts, 0, NULL, ", ");
+        PRINT_FUNC(fprints)(OutStream, ")");
+      }
+    } else {
+      PRINT_FUNC(fprints)(OutStream, "(");
+      PRINT_FUNC(PrintPart_List)(OutStream, Assignments,
+        pp_format, ShowSorts, 0, NULL, ", ");
+      PRINT_FUNC(fprints)(OutStream, ")");
+    }
+  }
+}
+
+ATermList GetAssignmentsRHS(ATermList Assignments) {
+  ATermList l = ATmakeList0();
+  while (!ATisEmpty(Assignments)) {
+    l = ATinsert(l, ATgetArgument(ATAgetFirst(Assignments), 1));
+    Assignments = ATgetNext(Assignments);
+  }
+  return ATreverse(l);
+}
+
+ATermList SubstituteAssignments_list(ATermList Vars, ATermList Assignments)
+{
+  ATermList l = ATmakeList0();
+  while (!ATisEmpty(Vars)) {
+    l = ATinsert(l, (ATerm) SubstituteAssignments_appl(ATAgetFirst(Vars), Assignments));
+    Vars = ATgetNext(Vars);
+  }
+  return ATreverse(l);
+}
+
+ATermAppl SubstituteAssignments_appl(ATermAppl Var, ATermList Assignments)
+{
+  ATermAppl Result = Var;
+  bool found = false;
+  while (!ATisEmpty(Assignments) && !found) {
+    ATermAppl Assignment = ATAgetFirst(Assignments);
+    if (ATisEqual(Var, ATAgetArgument(Assignment, 0))) {
+      Result = ATAgetArgument(Assignment, 1);
+      found = true;
+    }
+    Assignments = ATgetNext(Assignments);
+  }
+  return Result;
 }
 
 ATermList gsGroupDeclsBySort(const ATermList Decls)
