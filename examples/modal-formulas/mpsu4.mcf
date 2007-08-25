@@ -1,0 +1,7 @@
+% This file describes the modal formulas for property 4 used in section
+% 5.3 of Designing and understanding the behaviour of systems
+% by J.F. Groote and M.A. Reniers.
+
+[true*.atInnermost.!(motorLeft||releaseBrake)*.pressUndock]
+      mu X.[!unlockDock && !motorLeft && !releaseBrake]X
+

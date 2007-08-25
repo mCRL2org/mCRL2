@@ -1,0 +1,10 @@
+% This file describes the modal formulas for property 2 used in section
+% 5.3 of Designing and understanding the behaviour of systems
+% by J.F. Groote and M.A. Reniers.
+
+([true*.pressStop]mu X.[!motorOff]X)
+&&
+([true*.pressStop]mu X.[!releaseBrake]X)
+&&
+([true*.pressStop]mu X.[!unlockDock]X)
+
