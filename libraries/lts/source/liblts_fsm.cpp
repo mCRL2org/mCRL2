@@ -16,7 +16,7 @@
 #include "libstruct.h"
 #include "libparse.h"
 #include "typecheck.h"
-#include "dataimpl.h"
+#include "mcrl2/dataimpl.h"
 #include "libprint.h"
 #include "lts/liblts.h"
 #include "mcrl2/lps/specification.h"

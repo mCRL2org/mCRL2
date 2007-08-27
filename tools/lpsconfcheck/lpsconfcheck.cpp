@@ -16,7 +16,7 @@
 #include "getopt.h"
 #include "libparse.h"
 #include "typecheck.h"
-#include "dataimpl.h"
+#include "mcrl2/dataimpl.h"
 #include "print/messaging.h"
 #include "libstruct.h"
 #include <string>

@@ -7,6 +7,7 @@ obj lin_std.o
        : <use>/libraries/rewrite//headers
          <use>/libraries/mcrl2_basic//headers
          <use>/libraries/utilities//headers
+         <use>/libraries/data//headers
          <use>/libraries/parser//headers # for libalpha
        ;
 
@@ -19,6 +20,7 @@ exe mcrl22lps
          /libraries//utilities
          /libraries//rewrite
          /libraries/parser//alpha
+         /libraries//data
        : <toolset>msvc:<library>/libraries//getopt
          <squadt-connectivity>implemented
        ;

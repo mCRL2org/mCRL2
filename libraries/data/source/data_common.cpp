@@ -8,19 +8,15 @@
 
 #include <aterm2.h>
 
+#include "mcrl2/data_common.h"
 #include "libstruct.h"
-#include "libstruct_ir.h"
 #include "print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace ::mcrl2::utilities;
 
-static const char* struct_prefix = "Struct@";
-static const char* list_prefix   = "List@";
-static const char* set_prefix    = "Set@";
-static const char* bag_prefix    = "Bag@";
-static const char* lambda_prefix = "lambda@";
-
+// Static declarations
+// -------------------
 static void get_free_vars_appl(ATermAppl data_expr, ATermList bound_vars,
   ATermList* p_free_vars);
 //Pre: data_expr is a data expression or a bag enumeration element that adheres
@@ -39,68 +35,41 @@ static void get_free_vars_list(ATermList data_exprs, ATermList bound_vars,
 //Post:*p_free_vars is extended with the free variables in data_exprs that did not
 //     already occur in *p_free_vars or bound_vars
 
+static void get_function_sorts_appl(ATermAppl part, ATermList *p_func_sorts);
+//Pre: part is a part of a specification
+//     *p_func_sorts represents the function sorts that are already found
+//Post:*p_func_sorts is extended with the function sorts in part that did not
+//     already occur in *p_func_sorts
+
+static void get_function_sorts_list(ATermList parts, ATermList *p_func_sorts);
+//Pre: parts is a list of parts of a specification
+//     *p_func_sorts represents the function sorts that are already found
+//Post:*p_funct_sorts is extended with the function sorts in parts that did not
+//     already occur in *p_func_sorts
 
 // implementation
 // -------------------------------------------------------------
-
-bool is_struct_sort_id(ATermAppl sort_expr)
+ATermList merge_list(ATermList l, ATermList m)
 {
-  if (gsIsSortId(sort_expr)) {
-    return strncmp(
-      struct_prefix,
-      ATgetName(ATgetAFun(ATAgetArgument(sort_expr, 0))),
-      strlen(struct_prefix)) == 0;
-  } else {
-    return false;
+  for (; !ATisEmpty(m); m=ATgetNext(m))
+  {
+    if ( ATindexOf(l,ATgetFirst(m),0) == -1 )
+    {
+      ATinsert(l,ATgetFirst(m));
+    }
   }
+
+  return l;
 }
 
-bool is_list_sort_id(ATermAppl sort_expr)
+ATermList subtract_list(ATermList l, ATermList m)
 {
-  if (gsIsSortId(sort_expr)) {
-    return strncmp(
-      list_prefix,
-      ATgetName(ATgetAFun(ATAgetArgument(sort_expr, 0))),
-      strlen(list_prefix)) == 0;
-  } else {
-    return false;
+  for (; !ATisEmpty(m); m=ATgetNext(m))
+  {
+    l = ATremoveElement(l,ATgetFirst(m));
   }
-}
 
-bool is_set_sort_id(ATermAppl sort_expr)
-{
-  if (gsIsSortId(sort_expr)) {
-    return strncmp(
-      set_prefix,
-      ATgetName(ATgetAFun(ATAgetArgument(sort_expr, 0))),
-      strlen(set_prefix)) == 0;
-  } else {
-    return false;
-  }
-}
-
-bool is_bag_sort_id(ATermAppl sort_expr)
-{
-  if (gsIsSortId(sort_expr)) {
-    return strncmp(
-      bag_prefix,
-      ATgetName(ATgetAFun(ATAgetArgument(sort_expr, 0))),
-      strlen(bag_prefix)) == 0;
-  } else {
-    return false;
-  }
-}
-
-bool is_lambda_op_id(ATermAppl data_expr)
-{
-  if (gsIsOpId(data_expr)) {
-    return strncmp(
-      lambda_prefix,
-      ATgetName(ATgetAFun(ATAgetArgument(data_expr, 0))),
-      strlen(lambda_prefix)) == 0;
-  } else {
-    return false;
-  }
+  return l;
 }
 
 ATermList get_free_vars(ATermAppl data_expr)
@@ -188,6 +157,43 @@ void get_free_vars_list(ATermList data_exprs, ATermList bound_vars,
   {
     get_free_vars_appl(ATAgetFirst(data_exprs), bound_vars, p_free_vars);
     data_exprs = ATgetNext(data_exprs);
+  }
+}
+
+ATermList get_function_sorts(ATerm term)
+{
+  ATermList func_sorts = ATmakeList0();
+  if (ATgetType(term) == AT_APPL) {
+    get_function_sorts_appl((ATermAppl) term, &func_sorts);
+  } else { //ATgetType(term) == AT_LIST
+    get_function_sorts_list((ATermList) term, &func_sorts);
+  }
+  return func_sorts;
+}
+
+void get_function_sorts_appl(ATermAppl part, ATermList *p_func_sorts)
+{
+  if (gsIsSortArrow(part)) {
+    if (ATindexOf(*p_func_sorts, (ATerm) part, 0) == -1) {
+      *p_func_sorts = ATinsert(*p_func_sorts, (ATerm) part);
+    }    
+  }
+  int nr_args = ATgetArity(ATgetAFun(part));      
+  for (int i = 0; i < nr_args; i++) {
+    ATerm arg = ATgetArgument(part, i);
+    if (ATgetType(arg) == AT_APPL)
+      get_function_sorts_appl((ATermAppl) arg, p_func_sorts);
+    else //ATgetType(arg) == AT_LIST
+      get_function_sorts_list((ATermList) arg, p_func_sorts);
+  }
+}
+ 
+void get_function_sorts_list(ATermList parts, ATermList *p_func_sorts)
+{
+  while (!ATisEmpty(parts))
+  {
+    get_function_sorts_appl(ATAgetFirst(parts), p_func_sorts);
+    parts = ATgetNext(parts);
   }
 }
 

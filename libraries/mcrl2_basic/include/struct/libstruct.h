@@ -1240,6 +1240,18 @@ bool gsIsDataExprIf(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: DataExpr is an if then else
 
+bool gsIsDataExprC0(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: the data expression is a constructor for 0
+
+bool gsIsDataExprC1(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: the data expression is a constructor for 1
+
+bool gsIsDataExprCDub(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: the data expression is a constructor CDub.
+
 bool gsIsDataExprCNat(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: DataExpr is a CInt
@@ -1251,6 +1263,10 @@ bool gsIsDataExprCInt(ATermAppl DataExpr);
 bool gsIsDataExprCReal(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: DataExpr is a CReal
+
+bool gsIsDataExprCNeg(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a CNeg
 
 bool gsIsDataExprLTE(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
@@ -1349,14 +1365,6 @@ bool gsIsDataExprExists(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: the data expression is the implementation of
 //     an existential quantification.
-
-bool gsIsDataExprC1(ATermAppl DataExpr);
-//Pre: DataExpr is a data expression
-//Ret: the data expression is a constructor for 1
-
-bool gsIsDataExprCDub(ATermAppl DataExpr);
-//Pre: DataExpr is a data expression
-//Ret: the data expression is a constructor CDub.
 
 //Multiactions
 //------------

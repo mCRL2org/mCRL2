@@ -6,6 +6,7 @@ exe lpsinvelm
        : lpsinvelm.cpp
          /libraries//parser
          /libraries//prover
+         /libraries//data
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
 #         <toolset>gcc:<define>CVC_LITE_LIB

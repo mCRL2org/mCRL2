@@ -16,7 +16,7 @@
 #include "mcrl2/lps/specification.h"
 #include "libparse.h"
 #include "typecheck.h"
-#include "dataimpl.h"
+#include "mcrl2/dataimpl.h"
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;

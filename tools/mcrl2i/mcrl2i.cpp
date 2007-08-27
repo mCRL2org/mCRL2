@@ -30,7 +30,7 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "libparse.h"
 #include "typecheck.h"
-#include "dataimpl.h"
+#include "mcrl2/dataimpl.h"
 
 using namespace std;
 using namespace lps;

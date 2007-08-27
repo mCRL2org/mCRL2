@@ -18,7 +18,7 @@
 #include "mcrl2/data/sort_utility.h"
 #include "mcrl2/data/sort.h"
 #include "atermpp/algorithm.h"
-#include "dataimpl.h" // implement_data_data_expr
+#include "mcrl2/dataimpl.h" // implement_data_data_expr
 
 // JFG:
 #include "rewrite/librewrite.h"

@@ -13,7 +13,7 @@ rule prepend ( prefix : elements * ) {
   return $(prefix)$(elements) ;
 }
 
-local STRUCT_SOURCES = [ prepend struct/ : libstruct libstruct_core libstruct_ir ] ; 
+local STRUCT_SOURCES = [ prepend struct/ : libstruct libstruct_core ] ; 
 
 lib struct
        : $(STRUCT_SOURCES).o
@@ -24,16 +24,19 @@ lib struct
          <dependency>/libraries/utilities//aterm-extension
        ;
 
-local PRINT_SOURCES = [ prepend print/ : libprint libprint_c messaging data_reconstruct ] ;
+local PRINT_SOURCES = [ prepend print/ : libprint libprint_c messaging ] ;
 
 lib print
        : $(PRINT_SOURCES).o
        : <use>/libraries//prover
+         <dependency>/libraries//data
          <dependency>/libraries/utilities//aterm-extension
          <dependency>rewrite
          <dependency>struct
        :
        : <library>rewrite
+         <library>/libraries//data
+         <include>../../data/include
          <include>../include/print
        ;
 
@@ -47,6 +50,7 @@ for object in $(MCRL2_BASIC_SOURCES) {
         <include>../include/struct
         <use>/libraries/aterm//headers
         <use>/libraries/utilities//headers
+        <use>/libraries/data//headers
       ;
 }
 
@@ -55,6 +59,7 @@ alias mcrl2_basic.main
          [ glob ../source/auxiliary/*.cpp ]
        : <include>../include/print
          <include>../include/struct
+         <use>/libraries/data//headers
          <toolset>gcc:<use>/libraries//pstream
          <toolset>darwin:<use>/libraries//pstream
          <include>$(SETUP)
@@ -69,8 +74,10 @@ alias mcrl2_basic.main
 lib mcrl2_basic
        : mcrl2_basic.main
        : <link>static
+         <use>/libraries/data//headers
        :
        : <library>/libraries//aterm
+         <library>/libraries//data
          <library>/libraries//utilities
          <toolset>gcc:<linkflags>-Wl,-export-dynamic
        ;
@@ -78,6 +85,7 @@ lib mcrl2_basic
 alias mcrl2_basic
        : /libraries//mcrl2
        : <link>shared
+         <use>/libraries/data//headers
        ;
 
 alias mcrl2_basic.alias

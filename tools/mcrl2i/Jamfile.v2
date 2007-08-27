@@ -9,6 +9,7 @@ exe mcrl2i
          /libraries//lps
          /libraries//rewrite
          /libraries//nextstate
+         /libraries//data
        : <toolset>msvc:<library>/libraries//getopt
        ;
 

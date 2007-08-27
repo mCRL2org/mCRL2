@@ -30,12 +30,12 @@
 
 #include <assert.h>
 #include <aterm2.h>
-#include "data_reconstruct.h"
 #include "libprint_types.h"
 #include "libstruct.h"
 #include "print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"
+#include "mcrl2/data_reconstruct.h"
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;
@@ -405,11 +405,14 @@ void PRINT_FUNC(PrintPart_)(PRINT_OUTTYPE OutStream, const ATerm Part,
     OutStream << ATwriteToString(Part) << std::endl;
 #endif
   } else {
-    ATerm ReconstructedPart;
-    if (gsIsSpecV1((ATermAppl) Part)) {
-      ReconstructedPart = reconstruct_exprs(Part, (ATermAppl) Part);
-    } else {
-      ReconstructedPart = reconstruct_exprs(Part, NULL);
+    ATerm ReconstructedPart = Part;
+    // Do not do data reconstruction in case of a debug print
+    if (pp_format != ppDebug) {
+      if (gsIsSpecV1((ATermAppl) Part)) {
+        ReconstructedPart = reconstruct_exprs(Part, (ATermAppl) Part);
+      } else {
+        ReconstructedPart = reconstruct_exprs(Part, NULL);
+      }
     }
     if (ATgetType(ReconstructedPart) == AT_APPL) {
       PRINT_FUNC(PrintPart_Appl)(OutStream, (ATermAppl) ReconstructedPart, pp_format,
@@ -1119,21 +1122,6 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
           pp_format, ShowSorts, gsPrecOpIdInfixRight(HeadName));
         if (PrecLevel > gsPrecOpIdInfix(HeadName))
           PRINT_FUNC(fprints)(OutStream, ")");
-      } else if (ATisEqual(Head, gsMakeOpIdC0())) {
-        //print 0
-        PRINT_FUNC(fprints)(OutStream, "0");
-      } else if ((ATisEqual(Head, gsMakeOpIdCNat()) ||
-          ATisEqual(Head, gsMakeOpIdCInt()) ||
-          ATisEqual(Head, gsMakeOpIdCReal())) && ArgsLength == 1) {
-        //print argument (ArgsLength == 1)
-        PRINT_FUNC(PrintPart_Appl)(OutStream, ATAelementAt(Args, 0),
-          pp_format, ShowSorts, PrecLevel);
-      } else if (ATisEqual(Head, gsMakeOpIdCNeg()) && ArgsLength == 1) {
-        //print negation (ArgsLength == 1)
-        PRINT_FUNC(dbg_prints)("printing negation\n");
-        PRINT_FUNC(fprints)(OutStream, "-");
-        PRINT_FUNC(PrintPart_Appl)(OutStream, ATAelementAt(Args, 0),
-          pp_format, ShowSorts, 11);
       } else if (gsIsId(DataExpr)) {
         //print untyped data variable or operation identifier
         PRINT_FUNC(dbg_prints)("printing untyped data variable or operation identifier\n");

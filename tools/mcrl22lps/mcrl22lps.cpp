@@ -25,7 +25,7 @@
 #include "libparse.h"
 #include "typecheck.h"
 #include "libalpha.h"
-#include "dataimpl.h"
+#include "mcrl2/dataimpl.h"
 
 #define NAME "mcrl22lps"
 #define VERSION "0.2.1"

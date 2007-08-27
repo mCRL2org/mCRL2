@@ -1,0 +1,45 @@
+project data
+       : source-location ../source
+       : build-dir $(BUILD_TOP)
+       : requirements
+          <include>../include
+       : usage-requirements
+          <include>../include
+       ;
+
+alias data.main
+       : dataimpl.cpp
+         data_reconstruct.cpp
+         data_common.cpp
+       : <use>/libraries/lps//headers
+         <use>/libraries/mcrl2_basic//headers
+         <use>/libraries/utilities//headers
+       : <threading>single
+       : <use>/libraries/lps//headers
+         <use>/libraries/mcrl2_basic//headers
+       ;
+
+lib data
+       : data.main
+       : <link>static
+       :
+       : <use>/libraries/mcrl2_basic//headers
+       ;
+
+alias data
+       : /libraries//mcrl2
+       : <link>shared
+         <use>/libraries/lps//headers
+         <use>/libraries/mcrl2_basic//headers
+       ;
+
+alias data.alias
+       : data.main
+       ;
+
+alias headers
+       :
+       : <use>/libraries/mcrl2_basic//headers
+       ;
+
+explicit data.main data.alias ;

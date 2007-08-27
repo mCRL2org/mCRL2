@@ -10,6 +10,7 @@
 #define MCRL2_DATAIMPL_H
 
 #include <aterm2.h>
+#include "mcrl2/data_common.h"
 #include "mcrl2/lps/specification.h"
 
 //Global preconditions:
@@ -111,5 +112,73 @@ ATermAppl implement_data_action_rename(ATermAppl action_rename,
  *     If something went wrong, an appropriate error message is printed and
  *     NULL is returned.
  */
+
+/* ============================================================================
+ * Detailed data implementation, this is used by data reconstruction only!
+ * ============================================================================
+ */
+ATermAppl impl_sort_list(ATermAppl sort_list, ATermList *p_substs,
+  t_data_decls *p_data_decls);
+//Pre: sort_list is a list sort
+//     p_substs is a pointer to a list of substitutions induced by the context
+//     of sort_list
+//     p_data_decls represents a pointer to new data declarations, induced by
+//     the context of sort_list
+//Post:an implementation of sort_list is added to *p_data_decls and new induced
+//     substitutions are added *p_substs
+//Ret: a sort identifier which is the implementation of sort_list
+
+ATermAppl impl_sort_set(ATermAppl sort_set, ATermList *p_substs,
+  t_data_decls *p_data_decls);
+//Pre: sort_set is a set sort
+//     p_substs is a pointer to a list of substitutions induced by the context
+//     of sort_set
+//     p_data_decls represents a pointer to new data declarations, induced by
+//     the context of sort_set
+//Post:an implementation of sort_set is added to *p_data_decls and new induced
+//     substitutions are added *p_substs
+//Ret: a sort identifier which is the implementation of sort_set
+
+ATermAppl impl_sort_bag(ATermAppl sort_bag, ATermList *p_substs,
+  t_data_decls *p_data_decls);
+//Pre: sort_bag is a bag sort
+//     p_substs is a pointer to a list of substitutions induced by the context
+//     of sort_bag
+//     p_data_decls represents a pointer to new data declarations, induced by
+//     the context of sort_bag
+//Post:an implementation of sort_bag is added to *p_data_decls and new induced
+//     substitutions are added *p_substs
+//Ret: a sort identifier which is the implementation of sort_bag
+
+void impl_sort_bool(t_data_decls *p_data_decls);
+//Pre: p_data_decls represents a pointer to new data declarations
+//Post:an implementation of sort Bool is added to *p_data_decls
+
+void impl_sort_pos(t_data_decls *p_data_decls);
+//Pre: p_data_decls represents a pointer to new data declarations
+//Post:an implementation of sort Pos is added to *p_data_decls
+
+void impl_sort_nat(t_data_decls *p_data_decls);
+//Pre: p_data_decls represents a pointer to new data declarations
+//Post:an implementation of sort Nat is added to *p_data_decls
+
+void impl_sort_nat_pair(t_data_decls *p_data_decls);
+//Pre: p_data_decls represents a pointer to new data declarations
+//Post:an implementation of sort PairNat is added to *p_data_decls
+
+void impl_sort_int(t_data_decls *p_data_decls);
+//Pre: p_data_decls represents a pointer to new data declarations
+//Post:an implementation of sort Int is added to *p_data_decls
+
+void impl_sort_real(t_data_decls *p_data_decls);
+//Pre: p_data_decls represents a pointer to new data declarations
+//Post:an implementation of sort Real is added to *p_data_decls
+
+void impl_function_sort(ATermAppl sort_arrow, t_data_decls *p_data_decls);
+//Pre: sort_arrow is an arrow sort that adheres to the internal syntax after
+//     data implementation
+//     p_data_decls represents a pointer to new data declarations, induced by
+//     the context of part
+//Post:an implementation of function sort sort_arrow is added to *p_data_decls
 
 #endif // MCRL2_DATAIMPL_H

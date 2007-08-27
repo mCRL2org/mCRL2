@@ -15,7 +15,7 @@
 #include <boost/format.hpp>
 #endif
 
-#include "dataimpl.h"
+#include "mcrl2/dataimpl.h"
 #include "libstruct.h"
 #include "print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"

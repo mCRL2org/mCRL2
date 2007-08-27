@@ -14,6 +14,7 @@ alias lts.main
        : <use>/libraries/parser//headers
          <use>/libraries/svc//headers
          <use>/libraries/lps//headers
+         <use>/libraries/data//headers
          <library>/site-config//BCG
        : <threading>single
        : <library>/site-config//BCG

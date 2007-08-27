@@ -17,7 +17,7 @@
 #include "libstruct.h"
 #include "libparse.h"
 #include "typecheck.h"
-#include "dataimpl.h"
+#include "mcrl2/dataimpl.h"
 #include "prover/bdd_path_eliminator.h"
 #include <mcrl2/lps/linear_process.h>
 #include <mcrl2/lps/specification.h>

@@ -12,11 +12,11 @@ alias parser.main
          mcrl2lexer.cpp
          libparse.cpp
          typecheck.cpp
-         dataimpl.cpp
          regfrmtrans.cpp
        : <use>/libraries/lps//headers
          <use>/libraries/mcrl2_basic//headers
          <use>/libraries/utilities//headers
+         <use>/libraries/data//headers
        : <threading>single
        : <use>/libraries/lps//headers
          <use>/libraries/mcrl2_basic//headers

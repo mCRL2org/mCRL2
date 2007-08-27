@@ -35,6 +35,7 @@ lib mcrl2
           /libraries/lts//lts.alias
           /libraries/svc//svc.alias
           /libraries/aterm//aterm.alias
+          /libraries/data//data.alias
           /libraries/parser//parser.alias
           /libraries/parser//alpha.alias
           /libraries/mcrl2_basic//mcrl2_basic.alias
