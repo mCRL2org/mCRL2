@@ -6385,9 +6385,9 @@ eval EXEC_PREFIX_DIR="${exec_prefix}"
 
 prefix="\$(prefix)"
 
-eval DATA_DIR="${datadir}/mcrl2"
 eval INCLUDE_DIR="${includedir}/mcrl2"
-eval MAN_DIR="${mandir}"
+eval "eval DATA_DIR=${datadir}/mcrl2"
+eval "eval MAN_DIR=${mandir}"
 eval "eval BIN_DIR=${bindir}"
 eval "eval LIB_DIR=${libdir}/mcrl2"
 
