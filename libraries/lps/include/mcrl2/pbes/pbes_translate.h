@@ -11,6 +11,7 @@
 #define MCRL2_PBES_PBES_TRANSLATE_H
 
 #include "mcrl2/basic/mucalculus.h"
+#include "mcrl2/data/utility.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/lps/detail/algorithm.h"
@@ -39,7 +40,7 @@ pbes pbes_translate(const state_formula& formula, const specification& spec, boo
   if (!is_mu(f) && !is_nu(f))
   {
     aterm_list context = make_list(f, spec);
-    identifier_string X = fresh_identifier(context, "X");
+    identifier_string X = fresh_identifier(context, std::string("X"));
     f = nu(X, data_assignment_list(), f);
   }  
   linear_process lps = spec.process();

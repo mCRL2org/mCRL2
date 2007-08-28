@@ -101,6 +101,47 @@ data_variable_replacer<T1, T2> make_data_variable_replacer(const T1& t1, const T
   return data_variable_replacer<T1, T2>(t1, t2);
 }
 
+/// Function object that can be used by the partial_replace algorithm
+/// to replace the names of data variables in an arbitrary term.
+template <typename SrcList, typename DestList>
+struct data_variable_name_replacer
+{
+  const SrcList& src_;
+  const DestList& dest_;
+  
+  data_variable_name_replacer(const SrcList& src, const DestList& dest)
+    : src_(src), dest_(dest)
+  {
+    assert(src_.size() == dest_.size());
+  }
+  
+  std::pair<aterm_appl, bool> operator()(aterm_appl t) const
+  {
+    if (!is_data_variable(t))
+    {
+      return std::make_pair(t, true); // continue the recursion
+    }
+    data_variable v(t);
+    typename SrcList::const_iterator i = src_.begin();
+    typename DestList::const_iterator j = dest_.begin();
+    for (; i != src_.end(); ++i, ++j)
+    {
+      if (v.name() == *i)
+      {
+        return std::make_pair(data_variable(*j, v.sort()), false); // don't continue the recursion
+      }
+    }
+    return std::make_pair(t, false); // don't continue the recursion
+  }
+};
+
+/// Utility function for creating a data_variable_name_replacer.
+template <typename T1, typename T2>
+data_variable_name_replacer<T1, T2> make_data_variable_name_replacer(const T1& t1, const T2& t2)
+{
+  return data_variable_name_replacer<T1, T2>(t1, t2);
+}
+
 /// Renames the parameters in proc1 that occur in the process parameters of proc1 and proc2.
 /// The given postfix is appended to the name of the variables, if needed digits are added.
 inline

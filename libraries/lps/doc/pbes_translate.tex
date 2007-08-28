@@ -25,16 +25,14 @@ $\sigma X(x_f:D_f := d).~\varphi$ is first translated into $\nu X().~\varphi$.
 We assume that $T: \snnreal$ is a unique fresh time variable that is generated
 by the algorithm.
 
+\newpage
+
 %-------------------------------------%
 %           function h
 %-------------------------------------%
 \begin{table}[htb]
 {\centering\small
 $\begin{tightarray}{lll}
-
-% StateImp
-h (\varphi \Rightarrow \psi) & \isdef &
-h (\neg \varphi) \vee h (\psi) \\
 
 % not <DataExpr>
 h (\neg c) & \isdef  &
@@ -107,8 +105,79 @@ propositional variables.} \\
 
 % not StateNu
 h (\neg \nu X(x {:}D:=d).~ \varphi)~~~ & \isdef~~~ &
-\mu X(x {:}D:=d).~ h(\neg \varphi[X := \neg X])
+\mu X(x {:}D:=d).~ h(\neg \varphi[X := \neg X]) \\
 
+% <DataExpr>
+h(c) & \isdef  &
+c \\
+
+% StateTrue
+h (\strue) & \isdef &
+\strue \\
+
+% StateFalse
+h (\sfalse) & \isdef &
+\sfalse \\
+
+% StateNot
+% \\
+
+% StateAnd
+h (\varphi \wedge \psi) & \isdef &
+h (\varphi) \wedge h (\psi) \\
+
+% StateOr
+h (\varphi \vee \psi) & \isdef &
+h (\varphi) \vee h (\psi) \\
+
+% StateImp
+h (\varphi \Rightarrow \psi) & \isdef &
+h (\varphi) \vee h (\neg \psi) \\
+
+% StateForall
+h (\forall{x {:} D}. \varphi) & \isdef &
+\forall{x {:} D}. h(\varphi)   \\
+
+% StateExists
+h (\exists{x {:} D}. \varphi) & \isdef &
+\exists{x {:} D}. h(\varphi)   \\
+
+% StateMust
+h ([\alpha] \varphi) & \isdef &
+   [\alpha] h(\varphi) \\
+
+% StateMay
+h ( \langle \alpha \rangle \varphi) & \isdef &
+   \langle \alpha \rangle h(\varphi) \\
+
+% StateYaled
+h (\nabla) & \isdef &
+   \nabla \\
+
+% StateYaledTimed
+h (\nabla(t)) & \isdef &
+   \nabla(t) \\
+
+% StateDelay
+h (\Delta) & \isdef &
+   \Delta \\
+
+% StateDelayTimed
+h (\Delta(t)) & \isdef &
+   \Delta(t) \\
+
+% StateVar
+h (X(d)) & \isdef &
+   X(d) \\
+
+% StateMu
+h (\mu X(x {:}D:=d).~ \varphi)~~~ & \isdef~~~ &
+  \mu X(x {:}D:=d).~ h(\varphi)
+\\
+
+% StateNu
+h (\nu X(x {:}D:=d).~ \varphi)~~~ & \isdef~~~ &
+  \nu X(x {:}D:=d).~ h(\varphi)
 \end{tightarray}
 $}
 \caption{normalization of a state formula}

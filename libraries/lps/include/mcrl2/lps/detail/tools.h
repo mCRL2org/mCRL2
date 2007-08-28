@@ -47,7 +47,7 @@ namespace detail {
 
     ATermAppl result = parse_specification(spec_stream);
     result = type_check_specification(result);
-    // result = alpha_reduce(result);
+    result = alpha_reduce(result);
     result = implement_data_specification(result);
     return linearise(result, options);
   }

@@ -69,19 +69,60 @@ data_variable_list fresh_variables(data_variable_list t, const std::set<std::str
   return atermpp::reverse(result);
 }
 
+/// Creates an identifier built from name and index.
+struct default_identifier_creator
+{
+  std::string operator()(const std::string& name, int index) const
+  {
+    if (index <= 0)
+      return name;
+    return str(boost::format(name + "%02d") % index++);
+  }
+};
+
+/// Creates an identifier built from name and index.
+struct postfix_identifier_creator
+{
+  std::string postfix_;
+  
+  postfix_identifier_creator(const std::string& postfix)
+    : postfix_(postfix)
+  { }   
+  
+  std::string operator()(const std::string& name, int index) const
+  {
+    if (index <= 0)
+      return name + postfix_;
+    return str(boost::format(name + "%02d" + postfix_) % index++);
+  }
+};
+
+/// \brief Returns an identifier that doesn't appear in the term context
+template <typename IdentifierCreator>
+identifier_string fresh_identifier(const std::set<identifier_string>& context, const std::string& hint, IdentifierCreator id_creator = IdentifierCreator())
+{
+  int index = 0;
+  identifier_string s;
+  do
+  {
+    s = identifier_string(id_creator(hint, index++));
+  }
+  while(context.find(s) != context.end());
+  return s;
+}
+
+/// \brief Returns an identifier that doesn't appear in the term context
+template <typename Term, class IdentifierCreator>
+identifier_string fresh_identifier(Term context, const std::string& hint, IdentifierCreator id_creator = IdentifierCreator())
+{
+  return fresh_identifier(identifiers(context), hint, id_creator);
+}
+
 /// \brief Returns an identifier that doesn't appear in the term context
 template <typename Term>
-identifier_string fresh_identifier(Term context, std::string hint)
+identifier_string fresh_identifier(const Term& context, const std::string& hint)
 {
-  std::set<identifier_string> ids = identifiers(context);
-  identifier_string s(hint);
-  int index = 0;
-  while (ids.find(s) != ids.end())
-  {   
-    std::string name = str(boost::format(hint + "%02d") % index++);
-    s = identifier_string(name);
-  }
-  return s;
+  return fresh_identifier(context, hint, default_identifier_creator());
 }
 
 /// \brief Returns a variable that doesn't appear in context

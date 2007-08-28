@@ -35,8 +35,63 @@ const std::string SPECIFICATION =
 "                                         \n"
 "init P(0);                               \n";
 
+const std::string MPSU_SPECIFICATION = 
+"% This file describes a controller for a simplified Movable Patient                   \n"
+"% Support Unit. It is described in Fokkink, Groote and Reniers,                       \n"
+"% Modelling reactive systems.                                                         \n"
+"%                                                                                     \n"
+"% Jan Friso Groote, September, 2006.                                                  \n"
+"                                                                                      \n"
+"sort Mode = struct Normal | Emergency ;                                               \n"
+"     MotorStatus = struct turnleft | turnright | stopped ;                            \n"
+"                                                                                      \n"
+"act pressStop, pressResume,                                                           \n"
+"    pressUndock, pressLeft,                                                           \n"
+"    pressRight, motorLeft,                                                            \n"
+"    motorRight, motorOff,                                                             \n"
+"    applyBrake, releaseBrake,                                                         \n"
+"    isDocked, unlockDock,                                                             \n"
+"    atInnermost, atOutermost;                                                         \n"
+"                                                                                      \n"
+"proc Controller(m:Mode,docked,rightmost,leftmost:Bool,ms:MotorStatus)=                \n"
+"       pressStop.Controller(Emergency,docked,rightmost,leftmost,ms)+                  \n"
+"       pressResume.Controller(Normal,docked,rightmost,leftmost,ms)+                   \n"
+"       pressUndock.                                                                   \n"
+"         (docked && rightmost)                                                        \n"
+"                -> applyBrake.unlockDock.Controller(m,false,rightmost,leftmost,ms)    \n"
+"                <> Controller(m,docked,rightmost,leftmost,ms)+                        \n"
+"       pressLeft.                                                                     \n"
+"          (docked && ms!=turnleft && !leftmost && m==Normal)                          \n"
+"                -> releaseBrake.motorLeft.                                            \n"
+"                     Controller(m,docked,false,leftmost,turnleft)                     \n"
+"                <> Controller(m,docked,rightmost,leftmost,ms)+                        \n"
+"       pressRight.                                                                    \n"
+"          (docked && ms!=turnright && !rightmost && m==Normal)                        \n"
+"                -> releaseBrake.motorRight.                                           \n"
+"                     Controller(m,docked,rightmost,false,turnright)                   \n"
+"                <> Controller(m,docked,rightmost,leftmost,ms)+                        \n"
+"       isDocked.Controller(m,true,rightmost,leftmost,ms)+                             \n"
+"       atInnermost.motorOff.applyBrake.Controller(m,docked,true,false,stopped)+       \n"
+"       atOutermost.motorOff.applyBrake.Controller(m,docked,false,true,stopped);       \n"
+"                                                                                      \n"
+"                                                                                      \n"
+"                                                                                      \n"
+"init Controller(Normal,true,false,false,stopped);                                     \n";
+
 const std::string FORMULA  = "nu X(n:Nat = 1). [forall m:Nat. a(m)](val(n < 10)  && X(n+2))";
 const std::string FORMULA2 = "forall m:Nat. [a(m)]false";
+
+const std::string MPSU_FORMULA =
+"% This file describes the modal formulas for property 5 used in section \n"
+"% 5.3 of Designing and understanding the behaviour of systems           \n"
+"% by J.F. Groote and M.A. Reniers.                                      \n"
+"                                                                        \n"
+"nu X(b1:Bool=false, b2:Bool=true,b3:Bool=true,b4:Bool=true).            \n"
+"        val(b1 && b2 && b3 && b4) => ([pressLeft]                       \n"
+"              (mu Y.[!motorLeft &&                                      \n"
+"                    !unlockDock &&                                      \n"
+"                    !pressStop &&                                       \n"
+"                    !atInnermost]Y))                                    \n";
 
 void test_pbes()
 {
@@ -87,6 +142,12 @@ void test_normalize()
   std::cout << "f  = " << pp(f) << std::endl;
   std::cout << "f1 = " << pp(f1) << std::endl;
   BOOST_CHECK(f1 == f2);
+
+
+  specification mpsu_spec = mcrl22lps(MPSU_SPECIFICATION);
+  state_formula mpsu_formula = mcf2statefrm(MPSU_FORMULA, mpsu_spec);
+  bool timed = false;
+  pbes p = lps2pbes(mpsu_spec, mpsu_formula, timed); 
 }
 
 void test_xyz_generator()
