@@ -259,7 +259,7 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, const ATermAppl Spec)
     Part = gsMakeDataExprNeg(ATAgetFirst(ATLgetArgument(Part, 0)));
   } else if (gsIsSortExpr(Part)) {
     // Reconstruct sort expressions if needed
-    if (is_list_sort_id(Part)) {
+    if (is_list_sort_id(Part) && Spec != NULL) {
       ATermAppl cons_spec = ATAgetArgument(ATAgetArgument(Spec,0), 1);
       ATermList cons_ops = ATLgetArgument(cons_spec, 0);
       bool found = false;
@@ -274,7 +274,7 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, const ATermAppl Spec)
         }
         cons_ops = ATgetNext(cons_ops);
       }
-    } else if (is_set_sort_id(Part)) {
+    } else if (is_set_sort_id(Part) && Spec != NULL) {
       ATermAppl map_spec = ATAgetArgument(ATAgetArgument(Spec, 0), 2);
       ATermList ops = ATLgetArgument(map_spec, 0);
       bool found = false;
@@ -291,7 +291,7 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, const ATermAppl Spec)
         }
         ops = ATgetNext(ops);
       }
-    } else if (is_bag_sort_id(Part)) {
+    } else if (is_bag_sort_id(Part) && Spec != NULL) {
       ATermAppl map_spec = ATAgetArgument(ATAgetArgument(Spec, 0), 2);
       ATermList ops = ATLgetArgument(map_spec, 0);
       bool found = false;
