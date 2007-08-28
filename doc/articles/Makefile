@@ -9,7 +9,7 @@ clean   :
 	texi2dvi $^
 
 %.ps    : %.dvi
-	dvips $^
+	dvips -t a4 $^
 
 %.pdf   : %.ps
 	ps2pdf $^

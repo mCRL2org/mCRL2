@@ -18,7 +18,7 @@ ifeq ($(HOST_OS),WINDOWS)
 BJAM_BUILD         = build.bat runtime-link=static link=static
 endif
 
-BOOST_BUILD       := $(BJAM) --prefix=${prefix} @BUILD_EXTRA@@BUILD_VARIANT@
+BOOST_BUILD       := $(BJAM) --prefix=${prefix} @BUILD_OPTIONS@
 
 DOCBOOK_XSL_PREFIX = "@abs_top_srcdir@/3rd-party/docbook/xsl"
 XSLTPROC           = XML_CATALOG_FILES=$(DOCBOOK_XSL_PREFIX)/catalog.xml @XSLTPROC@

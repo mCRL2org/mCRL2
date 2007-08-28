@@ -174,13 +174,9 @@ AC_ARG_ENABLE(
   AS_HELP_STRING([--disable-optimisation],
                  [disables compile-time optimisation])
 )
-if test "x$enable_optimisation" = xno; then
- OPTIMISATIONS="disable"
- BUILD_EXTRA="optimization=speed $BUILD_EXTRA"
-else
- OPTIMISATIONS="enable"
+if test "x$enable_optimisation" = xyes; then
+ BUILD_OPTIONS="optimization=speed $BUILD_OPTIONS"
 fi
-AC_SUBST([OPTIMISATIONS],[])
 
 # Check for debug/profile options
 AC_ARG_ENABLE(
@@ -192,8 +188,8 @@ if test "x$enable_debug" = xyes; then
   CFLAGS="$CFLAGS -g -Wall $OFLAGS -W -pedantic"
   CXXFLAGS="$CXXFLAGS -g -Wall $OFLAGS -W"
   BFLAGS="-t $BFLAGS"
-  BUILD_VARIANT="debug"
-  BUILD_EXTRA="debug-symbols=on runtime-debugging=on $BUILD_EXTRA"
+  BUILD_VARIANT=""
+  BUILD_OPTIONS="debug-symbols=on runtime-debugging=on $BUILD_OPTIONS"
 else
   CPPFLAGS="-DNDEBUG $CPPFLAGS"
   CFLAGS="$CFLAGS $OFLAGS -w"
@@ -207,8 +203,8 @@ AC_ARG_ENABLE(
   AS_HELP_STRING([--enable-profile],[adds profiling support to libraries and executables])
 )
 if test "x$enable_profile" = xyes; then
-  BUILD_VARIANT="profile"
-  BUILD_EXTRA="profiling=on $BUILD_EXTRA"
+  BUILD_VARIANT=""
+  BUILD_OPTIONS="profiling=on $BUILD_OPTIONS"
   CPPFLAGS="-pg $CPPFLAGS"
   LDFLAGS="-pg $LDFLAGS"
 fi
@@ -231,7 +227,7 @@ AC_ARG_ENABLE(
   ])
 )
 if test "x$enable_experimental" = xyes; then
-  BUILD_EXTRA="--enable-experimental $BUILD_EXTRA"
+  BUILD_OPTIONS="--enable-experimental $BUILD_OPTIONS"
 fi
 
 # Check whether symbol table stripping from binaries is requested
@@ -241,7 +237,7 @@ AC_ARG_ENABLE(
   ])
 )
 if test "x$enable_deprecated" = xyes; then
-  BUILD_EXTRA="--enable-deprecated $BUILD_EXTRA"
+  BUILD_OPTIONS="--enable-deprecated $BUILD_OPTIONS"
 fi
 
 # Check whether optimization must be suppressed
@@ -251,7 +247,7 @@ AC_ARG_ENABLE(
   ])
 )
 if test "x$enable_squadt_support" = xno; then
-  BUILD_EXTRA="--disable-squadt-support $BUILD_EXTRA"
+  BUILD_OPTIONS="--disable-squadt-support $BUILD_OPTIONS"
 fi
 
 # Check for ATerm library and header files
@@ -510,7 +506,7 @@ fi
 
 AC_SUBST([BUILD_VARIANT],[])
 AC_SUBST([LINK_VARIANT],[])
-AC_SUBST([BUILD_EXTRA])
+AC_SUBST([BUILD_OPTIONS])
 
 if test "$BUILD_ATERM" = "builtin"; then
   eval "eval IATERM_CPPFLAGS=\\\"${includedir}/mcrl2/aterm\\\""

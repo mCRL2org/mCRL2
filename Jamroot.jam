@@ -19,16 +19,13 @@ project toolset
        : build-dir $(BUILD_TOP)
        : requirements
           <define>_FILE_OFFSET_BITS=64
-          <define>REVISION=\\\"$(REVISION)-$(BUILD_VARIANT)-$(LINK_VARIANT)\\\"
+          <define>REVISION=\\\"$(BUILD_TAG)\\\"
           <toolset>darwin,<bundle>no:<dylib-install-location>"$(LIB_DIR)"
           <use>/workarounds//configuration
           <link>static,<squadt-support>yes:<threading>multi
        : default-build
           <address-model>$(ADDRESS_MODEL)
-          <variant>$(BUILD_VARIANT)
-          $(OPTIMISATIONS)
-          <link>$(LINK_VARIANT)
-          $(BUILD_OPTIONS)
+          $(DEFAULT_BUILD_OPTIONS)
        ;
 
 include $(BUILD_TOOLS)/installing.jam ;

@@ -7,25 +7,12 @@ rule import_user_config {
 }
 
 # Build specific settings
-BUILD_VARIANT      = "@BUILD_VARIANT@" ;
-LINK_VARIANT       = [ MATCH link=(.*) : [ modules.peek : ARGV ] ] ;
-
-if ! $(LINK_VARIANT) {
-  LINK_VARIANT = "@LINK_VARIANT@" ;
-}
-
-if ! [ MATCH (address-model).* : [ modules.peek : ARGV ] ] {
-  ADDRESS_MODEL = "@ADDRESS_MODEL@" ;
-}
-
-if ! ( "@OPTIMISATIONS@" = "disable" ) {
-  OPTIMISATIONS = <optimization>speed ;
-}
-else {
-  OPTIMISATIONS = <optimization>off ;
-}
-
-BUILD_EXTRA = "@BUILD_EXTRA@" ;
+BUILD_OPTIONS  = "@BUILD_OPTIONS@" ;
+ADDRESS_MODEL ?= "@ADDRESS_MODEL@" ;
+LINK_VARIANT  ?= "@LINK_VARIANT@" ;
+LINK_VARIANT  ?= "shared" ;
+BUILD_VARIANT ?= "@BUILD_VARIANT@" ;
+BUILD_VARIANT ?= "custom" ;
 
 # Library specific variables
 WX_CPPFLAGS        = "@WX_CPPFLAGS@" ;

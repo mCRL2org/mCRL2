@@ -23,65 +23,75 @@
 
   The communication protocol described in this document has been designed out
   of need for an abstract control layer for an interactive tool integration
-  platform. There existed a set of very concrete ideas of this system itself,
-  and the protocol has been designed to fit its specific needs. Nevertheless
-  the protocol that is the subject of this document is described as independent
-  as possible from the system in order to show that it, or at the very least
-  the underlying ideas, can be used outside it as well.
+  platform. In which a tool is a software program that can be used to fulfill
+  certain tasks. There existed a set of very concrete ideas of the platform
+  itself, and the protocol has been designed to fit some of its specific needs.
 
-  At the moment the platform/system mentioned above, is a proof-of-concept
-  implementation in the form of a desktop application called deskSQuADT. It is
-  by no means meant to be functionally complete in any way. There are plenty
-  ideas on what works and what does not work and should be changed in possible
-  future implementations.  There is also a lot of ideas for extending the
-  application for instance to make communication between tools possible as
-  well. At the moment it is not the intention to incorporate all of this
-  functionality into this protocol. The scope of this protocol is to
-  interactively control single tools in much the same way as in which the tool
-  is used outside the system.  The only added functionality that the system
-  provides are on the level of integration: consistency and automatism through
-  repeatability.
+  There exists a proof-of-concept implementation of the platform mentioned
+  previously in the shape of a desktop application called deskSQuADT. The first
+  part of the name refers to the fact that it is a desktop application, and the
+  second part stands for Systems Quality, Analysis and Design Toolset.  The
+  deskSQuADT application is distributed as part of the mCRL2 toolset (see
+  \cite{groote_et_al:DSP:2007:862}), a collection of tools around the formal
+  modelling language mCRL2 that can be used for verification and analysis.  In
+  and by itself deskSQuADT cannot be called a toolset, but the idea is that it
+  integrates the tools that are connected, in this case some of the mCRL2
+  tools.   The protocol described in this document is currently the primary
+  means by which tools are connected.
+%  Nevertheless the protocol that is the subject of this document is described
+%  as independent as possible from the system in order to show that it, or at
+%  the very least the underlying ideas, can be used outside it as well.
 
-  In abstract, the system provides a number of facilities that can be used by
+  The deskSQuADT application is by no means meant to be functionally complete
+  in any way. There are plenty ideas on what works and what does not work and
+  should be changed in possible future implementations.  There are also a lot
+  of ideas for future extension, for instance to make communication between
+  tools possible as well. It is not necessarily the intention to incorporate
+  all of such functionality into this protocol. The scope of this protocol is
+  to interactively control single tools in much the same way as in which the
+  standalone tool would be used.  The only added functionality provided is on
+  the level of integration: consistency and automatism through repeatability.
+
+  In abstract, the platform provides a number of facilities that can be used by
   tools to communicate with the user. The tools provide services that are made
-  accessible to the user of the system. The system acts as a controller for
-  multiple tools at the same time and therefore the system will be referred to
-  as controller in the remainder of this document. Similarly, a tool is the
-  communication partner of the controller.
+  accessible to the user of the platform. The platform acts as a controller
+  (possibly for multiple tools at the same time) and therefore the system will
+  be referred to as (the) controller in the remainder of this document.
+  Similarly, a tool is the communication partner of the controller.
 %  \\[4pt]
 %  The protocol described in this document is designed to be as minimal as
 %  possible around the core ideas behind the system. Some care was taken to
 %  allow future extensions.
 
   The remainder of this text is structured as follows. First the important
-  concepts are introduced, to give the reader an overview of what things are
-  involved. Next an abstract overview is given on what messages are, what types
-  of messages are used in the protocol, the meaning of those message and how
-  the messages may interact. All of this is followed by a section that
-  discusses the implementation, the design choices that were made with
-  motivation and an elaborate description of what messages look like in detail.
+  concepts are introduced, to give the reader an overview of things involved.
+  Next an abstract overview is given on the structure of communication: what
+  messages are, what types of messages are used in the protocol, the meaning of
+  those message and how the messages may interact. All of this is followed by a
+  section that discusses implementation aspects such as the design choices that
+  were made, along with motivation and an elaborate description of what
+  messages look like in detail.
 
  \section{Concepts}
 
   \subsection{System}
 
    The system is a software application for interactive software tool
-   integration.  The current instantiation of this system is a desktop
-   application called deskSQuADT, but in the remainder of this document it will
-   simply be referred to as system.
+   integration. A concrete example of such a system would be deskSQuADT, but in
+   the remainder of this document we will talk about system.
 
-   The protocol described in this document describes how the system and a
-   software tool communicate.  The protocol is the layer between the tools and
-   this application we simply call system in this document.  It is likely that
-   the protocol will be extended in the future as more functionality becomes
-   available in the system.
+%   The protocol described in this document describes how the system and a
+%   software tool communicate.
+   
+%   It is likely that the protocol will be extended in the future as more
+%   functionality becomes available in the system.
    
   \subsection{Tool}
 
    A tool is a software program that can be executed multiple times
-   concurrently on the same or a different computer. The tool offers services
-   to its environment, controlled by the user by means of the system. The
-   end-user that is part of the environment has particular goals in mind and
+   concurrently on the same or a different machine.  A tool offers services
+   to its environment, controlled by the user by means of the system. Using the right combination of tools the particular goals that an end-user has in mind can be The
+   end-user, that is part of the environment, has particular goals in mind and
    using the right combination of tools can help to achieve these goals.
 
    So a tool can be any computer program. Existing tools with a command line
@@ -509,9 +519,10 @@
    aim to have initial support for Windows 2000/XP, for Mac OS X version 10.4,
    and GNU/Linux and do not settle for separate solutions for each of these
    platforms. An existing communication protocol that we considered is XMPP
-   (Extensible Messaging and Presence Protocol, \cite{rfc3920}). It is a
-   simple protocol between a client and a server that uses two XML streams and
-   further features connection authentication mechanism.
+   (Extensible Messaging and Presence Protocol, \cite{rfc3920}). It is a simple
+   protocol between a client and a server that uses two XML (see
+   \cite{Sperberg-McQueen:06:EML}) streams and further features connection
+   authentication mechanism.
 
    XMPP has the notion of a message that can be sent from client to client, on
    top of it our protocol can be implemented.   Unfortunately no single
@@ -560,10 +571,10 @@
   \subsection{Message Content}
 
    To specify the structure of an XML document type one makes use of either the
-   DTD or the XML Schema standard. However many people find this difficult to
-   read so the translation of the functional specification of the previous
-   section to XML is suggested by means of examples. Needless to mention: all
-   messages must be valid XML.
+   DTD or the XML Schema standard \cite{Malhotra:06:XSP}. However many people
+   find this difficult to read so the translation of the functional
+   specification of the previous section to XML is suggested by means of
+   examples. Needless to mention: all messages must be valid XML.
 
   \subsubsection{Authentication}
 
@@ -841,6 +852,7 @@
    A future extension to the protocol or perhaps even another protocol can
    offer such functionality.
 
-  \bibliography{rfc}
+  \enlargethispage*{4pt}
+  \bibliography{references}
 
 \end{document}

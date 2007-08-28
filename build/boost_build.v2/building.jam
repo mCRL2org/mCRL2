@@ -1,6 +1,32 @@
 import feature ;
+import regex ;
+
+# Possible overrides from command line
+ADDRESS_MODEL = [ MATCH address-model(.*) : [ modules.peek : ARGV ] ] ;
+LINK_VARIANT  = [ MATCH link=(.*) : [ modules.peek : ARGV ] ] ;
 
 include $(TOP)/build/config.jam ;
+
+# Generate default build options
+for option in [ regex.split $(BUILD_OPTIONS) " " ] {
+  if $(option) {
+    local temporary = [ MATCH ([^=]+)= : $(option) ] ;
+
+    if $(temporary) { 
+      value  = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
+
+      DEFAULT_BUILD_OPTIONS += <$(temporary)>$(value) ;
+    }
+    else if ! [ MATCH (--) : $(option) ] {
+      DEFAULT_BUILD_OPTIONS += $(option) ;
+    }
+  }
+}
+
+if $(BUILD_VARIANT) && $(BUILD_VARIANT) != "custom" {
+  DEFAULT_BUILD_OPTIONS += <variant>$(BUILD_VARIANT) ;
+}
+
 include $(BUILD_TOOLS)/testing.jam ;
 
 # Make sure the revision variable is defined
@@ -13,6 +39,7 @@ if ! $(REVISION) {
 }
 
 FULL_COMMAND_LINE = [ modules.peek : ARGV ] $(BUILD_EXTRA) ;
+BUILD_TAG         = "$(REVISION)-$(BUILD_VARIANT)-$(LINK_VARIANT)" ;
 
 # Feature to mark tools as basic experimental or deprecated
 feature.feature status : basic experimental deprecated : composite ;
