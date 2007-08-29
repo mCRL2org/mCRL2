@@ -670,7 +670,7 @@ void gstcSplitSortDecls(ATermList SortDecls, ATermList *PSortIds,
 
 ATermAppl gstcUpdateSortSpec(ATermAppl Spec, ATermAppl SortSpec)
 {
-  assert(gsIsSpecV1(Spec));
+  assert(gsIsSpecV1(Spec) || gsIsActionRename(Spec));
   assert(gsIsSortSpec(SortSpec));
   ATermAppl DataSpec = ATAgetArgument(Spec, 0);
   DataSpec = ATsetArgument(DataSpec, (ATerm) SortSpec, 0);
@@ -680,7 +680,7 @@ ATermAppl gstcUpdateSortSpec(ATermAppl Spec, ATermAppl SortSpec)
 
 ATermAppl gstcFoldSortRefs(ATermAppl Spec)
 {
-  assert(gsIsSpecV1(Spec));
+  assert(gsIsSpecV1(Spec) || gsIsActionRename(Spec));
   gsDebugMsg("specification before folding:\n%T\n\n", Spec);
   //get sort declarations
   ATermAppl DataSpec = ATAgetArgument(Spec, 0);
