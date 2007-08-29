@@ -222,6 +222,10 @@ static t_tool_options parse_command_line(int argc, char **argv)
   return tool_options;
 }
 
+ATermAppl rename(ATermAppl action_rename,ATermAppl lps_oldspec,ATermAppl lps_newspec){
+  return NULL;
+}
+
 ATermAppl rename_lps_actions(t_tool_options tool_options)
 {
   string infilename = tool_options.infilename;
@@ -289,7 +293,7 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
 
   //implement standard data types and type constructors on the result
   gsVerboseMsg("implementing standard data types and type constructors...\n");
-  implement_data_action_rename(action_rename, lps_oldspec);
+  //lps_newspec = implement_data_action_rename(action_rename, lps_oldspec);
   if (lps_oldspec == NULL) {
     gsErrorMsg("data implementation failed\n");
     return NULL;
@@ -300,7 +304,7 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
 
   //rename all assigned actions
   gsVerboseMsg("renaming actions...\n");
-  //lps_newspec = translate_reg_frms(result);//TODO: change function name, implement
+  //lps_newspec = rename(action_rename, lps_oldspec, lps_newspec);
   if (lps_oldspec == NULL) {
     return NULL;
   }

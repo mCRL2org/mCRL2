@@ -2490,6 +2490,11 @@ action_rename_rule:
       safe_assign($$, gsMakeActionRenameRule(ATmakeList0(), $1, $3, $5));
       gsDebugMsg("parsed rename assignement\n %T\n", $$);
     }
+  | param_id IMP proc_expr
+    {
+      safe_assign($$, gsMakeActionRenameRule(ATmakeList0(), gsMakeNil(), $1, $3));
+      gsDebugMsg("parsed rename assignement\n %T\n", $$);
+    }
   ;
 
 %% 
