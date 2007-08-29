@@ -117,10 +117,12 @@ ATerm NextStateStandard::getTreeElement(ATerm tree, int index)
 {
 	int n = info.statelen;
 	int m = 0;
-	int t = n/2;
-
-	while ( 1 )
+	while ( m+1 != n )
 	{
+		int t = (m+n)/2;
+
+		assert( (ATgetType(tree) == AT_APPL) && ATisEqualAFun(ATgetAFun((ATermAppl) tree),info.pairAFun) );
+
 		if ( index < t )
 		{
 			tree = ATgetArgument((ATermAppl) tree,0);
@@ -129,16 +131,8 @@ ATerm NextStateStandard::getTreeElement(ATerm tree, int index)
 			tree = ATgetArgument((ATermAppl) tree,1);
 			m = t;
 		}
-
-		if ( (t == 1) || (t == index) )
-			break;
-
-		t = (n+m)/2;
 	}
-	while ( (ATgetType(tree) == AT_APPL) && ATisEqualAFun(ATgetAFun((ATermAppl) tree),info.pairAFun) )
-	{
-		tree = ATgetArgument((ATermAppl) tree,0);
-	}
+
 	return tree;
 }
 
