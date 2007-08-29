@@ -256,7 +256,7 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, const ATermAppl Spec)
   } else if (gsIsDataExprCReal(Part)) {
     Part = gsMakeDataExprInt2Real(ATAgetFirst(ATLgetArgument(Part, 1)));
   } else if (gsIsDataExprCNeg(Part)) {
-    Part = gsMakeDataExprNeg(ATAgetFirst(ATLgetArgument(Part, 0)));
+    Part = gsMakeDataExprNeg(ATAgetFirst(ATLgetArgument(Part, 1)));
   } else if (gsIsSortExpr(Part)) {
     // Reconstruct sort expressions if needed
     if (is_list_sort_id(Part) && Spec != NULL) {
