@@ -362,6 +362,7 @@
 <!ENTITY mcrl22lps "<command>mcrl22lps</command>">
 <!ENTITY pbes2bes "<command>pbes2bes</command>">
 <!ENTITY pbesinfo "<command>pbesinfo</command>">
+<!ENTITY pbespp "<command>pbespp</command>">
 <!ENTITY pnml2mcrl2 "<command>pnml2mcrl2</command>">
 <!ENTITY sim "<command>sim</command>">
 <!ENTITY tbf2lps "<command>tbf2lps</command>">
@@ -394,6 +395,7 @@
 <!ENTITY mcrl22lps-lnk "<link linkend='mcrl22lps'>&mcrl22lps;</link>">
 <!ENTITY pbes2bes-lnk "<link linkend='pbes2bes'>&pbes2bes;</link>">
 <!ENTITY pbesinfo-lnk "<link linkend='pbesinfo'>&pbesinfo;</link>">
+<!ENTITY pbespp-lnk "<link linkend='pbespp'>&pbespp;</link>">
 <!ENTITY pnml2mcrl2-lnk "<link linkend='pnml2mcrl2'>&pnml2mcrl2;</link>">
 <!ENTITY tbf2lps-lnk "<link linkend='tbf2lps'>&tbf2lps;</link>">
 <!ENTITY tracepp-lnk "<link linkend='tracepp'>&tracepp;</link>">
@@ -425,6 +427,7 @@
 <!ENTITY fmcrl22lps SYSTEM "../tools/mcrl22lps/mcrl22lps.xml">
 <!ENTITY fpbes2bes SYSTEM "../tools/pbes2bes/pbes2bes.xml">
 <!ENTITY fpbesinfo SYSTEM "../tools/pbesinfo/pbesinfo.xml">
+<!ENTITY fpbespp SYSTEM "../tools/pbespp/pbespp.xml">
 <!ENTITY fpnml2mcrl2 SYSTEM "../tools/pnml2mcrl2/pnml2mcrl2.xml">
 <!ENTITY fsim SYSTEM "../tools/xsim/sim.xml">
 <!ENTITY ftbf2lps SYSTEM "../tools/tbf2lps/tbf2lps.xml">
@@ -461,6 +464,7 @@
   <chapter id="chap-pbes"><title>Parameterised Boolean Equation Systems</title>
     &fpbes2bes;
     &fpbesinfo;
+    &fpbespp;
   </chapter>
   <chapter id="chap-lts"><title>Labelled Transition Systems</title>
     &fltscompare;
