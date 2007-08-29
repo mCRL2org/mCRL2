@@ -1,0 +1,12 @@
+<SpecChi> 		::= ProcSpec(<VarSpec>, <StatementSpec>)
+
+<VarSpec>		::= VarSpec(<VarID>*)
+				  | Nil
+
+<VarID>			::= DataVarID(<String>, <TypeExp>)
+
+<TypeExp>		::= <TypeID>
+
+<TypeID>		::= Type(<String>)
+
+<StatementSpec>	::= Skip

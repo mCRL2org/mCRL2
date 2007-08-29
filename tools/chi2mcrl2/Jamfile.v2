@@ -1,0 +1,18 @@
+project toolset/chi2mcrl2
+       : build-dir $(BUILD_TOP)/chi2mcrl2
+       ;
+
+exe chi2mcrl2
+       : chi2mcrl2.cpp
+		 chiparser.cpp
+		 chilexer.cpp
+		 /libraries//aterm
+       : <include>.
+         <squadt-connectivity>implemented
+       ;
+
+install-binaries install
+       : chi2mcrl2
+       :
+       : <status>experimental
+       ;
