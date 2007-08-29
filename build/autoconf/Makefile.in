@@ -56,6 +56,7 @@ $(MAN_MANIFEST): $(wildcard tools/*/*.xml tools/*/doc/*.xml)
 man: $(MAN_MANIFEST)
 
 install-man: man
+	@echo "installing documentation"
 	@install -d $(mandir)
 	@cp -rf build/man/* $(mandir)
 

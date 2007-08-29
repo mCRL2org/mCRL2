@@ -89,16 +89,30 @@
   \subsection{Tool}
 
    A tool is a software program that can be executed multiple times
-   concurrently on the same or a different machine.  A tool offers services
-   to its environment, controlled by the user by means of the system. Using the right combination of tools the particular goals that an end-user has in mind can be The
-   end-user, that is part of the environment, has particular goals in mind and
-   using the right combination of tools can help to achieve these goals.
+   concurrently on the same or a different machine.  A tool offers services to
+   its environment, controlled by the user by means of the system. It is
+   assumed that the end-user has particular goals in mind that require the use
+   of functionality provided by a combination of different tools. The system
+   will assist the user by finding and using the right tool at intermediate
+   steps toward achieving the final goal.
 
-   So a tool can be any computer program. Existing tools with a command line
-   interface or more complex programs with graphical user interfaces.
-   There can be large differences between the required degree of user
-   interactivity for different tools. The only goal for a user is to get the
-   tool to perform the task that the user wants it to do.
+   Applying a tool is assumed to consists of reading input and produce some
+   result (output).  This result may or may not be a stepping stone for
+   applying another tool on that result (or part thereof).  For example one
+   tool generates a 3D model of a tree at random and another tool can be used
+   to view and manipulate this model. The result is not required to be
+   concrete. For example a visualisation tool might to give a user insight
+   through different views on the input, but has otherwise probably no concrete
+   result that another tool can continue with.
+
+   The only direct communication between tools is uni-directional trough
+   persistent storage (think of files in a filesystem) and uni directional.
+
+   So a tool can be any computer program. It can be tools with a command line
+   interface or more complex programs with graphical user interfaces.  There
+   can be large differences between the required degree of user interactivity
+   for different tools. The only goal for a user is to get the tool to perform
+   the task that the user wants it to do.
 
   \subsection{Configuration}
 
