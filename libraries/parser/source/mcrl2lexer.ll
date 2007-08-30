@@ -84,12 +84,12 @@ Number     "0"|([1-9][0-9]*)
 
 "%".*      { col_nr += YYLeng(); /* comment */ }
 
-"sort_expr" { process_string(); return TAG_SORT_EXPR; }
-"data_expr" { process_string(); return TAG_DATA_EXPR; }
-"mult_act"  { process_string(); return TAG_MULT_ACT; }
-"proc_expr" { process_string(); return TAG_PROC_EXPR; }
-"spec"      { process_string(); return TAG_SPEC; }
-"state_frm" { process_string(); return TAG_STATE_FRM; }
+"sort_expr"     { process_string(); return TAG_SORT_EXPR; }
+"data_expr"     { process_string(); return TAG_DATA_EXPR; }
+"mult_act"      { process_string(); return TAG_MULT_ACT; }
+"proc_expr"     { process_string(); return TAG_PROC_EXPR; }
+"proc_spec"     { process_string(); return TAG_PROC_SPEC; }
+"state_frm"     { process_string(); return TAG_STATE_FRM; }
 "action_rename" { process_string(); return TAG_ACTION_RENAME; }
 
 "||_"      { process_string(); return LMERGE; }

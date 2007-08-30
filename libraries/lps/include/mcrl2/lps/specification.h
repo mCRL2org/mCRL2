@@ -90,7 +90,7 @@ class specification: public aterm_appl
 
   public:
     specification()
-      : aterm_appl(detail::constructSpec())
+      : aterm_appl(detail::constructProcSpec())
     {
       assert(is_well_typed());
     }

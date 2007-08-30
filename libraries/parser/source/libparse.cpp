@@ -40,7 +40,7 @@ ATermAppl parse_proc_expr(istream &pe_stream) {
 }
 
 ATermAppl parse_spec(istream &spec_stream) {
-  return parse_tagged_stream("spec", spec_stream);
+  return parse_tagged_stream("proc_spec", spec_stream);
 }
 
 ATermAppl parse_state_frm(istream &pe_stream) {

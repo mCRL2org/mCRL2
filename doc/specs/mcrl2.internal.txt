@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-// Date: 29-06-2007
+// Date: 29-08-2007
 // This document describes the internal format of the mCRL2 language and the
 // corresponding mu-calculus formulas. Here:
 // - the following phases of implementation are distinguised:
@@ -190,11 +190,11 @@
 <CommExpr>     ::= CommExpr(<MultActName>, <StringOrNil>)
 
 
-//mCRL2 specifications
+//Process specifications
 //--------------------
 
-//specification
-<Spec>         ::= SpecV1(<DataSpec>, <ActSpec>, <ProcEqnSpec>, <Init>)
+//process specification
+<ProcSpec>     ::= SpecV1(<DataSpec>, <ActSpec>, <ProcEqnSpec>, <ProcInit>)
 
 //action specification
 <ActSpec>      ::= ActSpec(<ActId>*)
@@ -217,8 +217,8 @@
                ::= <MultAct>
                  | Delta
 
-//process expressions or data expression
-<Init>         ::= ProcessInit(<DataVarId>*, <ProcExpr>)                 [-lin]
+//process initialisation
+<ProcInit>     ::= ProcessInit(<DataVarId>*, <ProcExpr>)                 [-lin]
                  | LinearProcessInit(<DataVarId>*, <DataVarIdInit>*)     [+lin]
 
 

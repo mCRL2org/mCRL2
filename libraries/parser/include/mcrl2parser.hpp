@@ -42,7 +42,7 @@
      TAG_DATA_EXPR = 259,
      TAG_MULT_ACT = 260,
      TAG_PROC_EXPR = 261,
-     TAG_SPEC = 262,
+     TAG_PROC_SPEC = 262,
      TAG_STATE_FRM = 263,
      TAG_ACTION_RENAME = 264,
      LMERGE = 265,
@@ -161,12 +161,13 @@ extern ATermIndexedSet parser_protect_table;
 #define YYMAXDEPTH 160000
 
 //local declarations
-ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
-//Pre: SpecElts contains one initialisation and zero or more occurrences of
-//     sort, constructor, operation, equation, action and process
-//     specifications.
-//Ret: specification containing one sort, constructor, operation, equation,
-//     action and process specification, and one initialisation, in that order.
+ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts);
+//Pre: SpecElts contains one process initialisation and zero or more
+//     occurrences of sort, constructor, operation, data equation, action and
+//     process equation specifications.
+//Ret: process specification containing one sort, constructor, operation,
+//     data equation, action and process equation specification, and one
+//     process initialisation, in that order.
 
 ATermAppl gsActionRenameEltsToActionRename(ATermList SpecElts);
 //Pre: ActionRenameElts contains zero or more occurrences of
@@ -180,13 +181,13 @@ ATermAppl gsActionRenameEltsToActionRename(ATermList SpecElts);
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE 
-#line 65 "mcrl2parser.yy"
+#line 66 "mcrl2parser.yy"
 {
   ATermAppl appl;
   ATermList list;
 }
 /* Line 2604 of glr.c.  */
-#line 190 "mcrl2parser.hpp"
+#line 191 "mcrl2parser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

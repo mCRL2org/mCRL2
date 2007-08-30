@@ -45,12 +45,13 @@ extern ATermIndexedSet parser_protect_table;
 #define YYMAXDEPTH 160000
 
 //local declarations
-ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
-//Pre: SpecElts contains one initialisation and zero or more occurrences of
-//     sort, constructor, operation, equation, action and process
-//     specifications.
-//Ret: specification containing one sort, constructor, operation, equation,
-//     action and process specification, and one initialisation, in that order.
+ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts);
+//Pre: SpecElts contains one process initialisation and zero or more
+//     occurrences of sort, constructor, operation, data equation, action and
+//     process equation specifications.
+//Ret: process specification containing one sort, constructor, operation,
+//     data equation, action and process equation specification, and one
+//     process initialisation, in that order.
 
 ATermAppl gsActionRenameEltsToActionRename(ATermList SpecElts);
 //Pre: ActionRenameElts contains zero or more occurrences of
@@ -79,15 +80,15 @@ ATermAppl gsActionRenameEltsToActionRename(ATermList SpecElts);
 //terminals
 //---------
 
-%token <appl> TAG_SORT_EXPR TAG_DATA_EXPR TAG_MULT_ACT TAG_PROC_EXPR TAG_SPEC
-%token <appl> TAG_STATE_FRM TAG_ACTION_RENAME
+%token <appl> TAG_SORT_EXPR TAG_DATA_EXPR TAG_MULT_ACT TAG_PROC_EXPR
+%token <appl> TAG_PROC_SPEC TAG_STATE_FRM TAG_ACTION_RENAME
 %token <appl> LMERGE ARROW LTE GTE CONS SNOC CONCAT EQ NEQ AND BARS IMP BINIT
 %token <appl> ELSE
 %token <appl> STAR PLUS MINUS EQUALS DOT COMMA COLON SEMICOLON QMARK EXCLAM AT
 %token <appl> HASH BAR
 %token <appl> LPAR RPAR PBRACK LBRACK RBRACK LANG RANG PBRACE LBRACE RBRACE
-%token <appl> KWSORT KWCONS KWMAP KWVAR KWEQN KWACT KWPROC KWINIT KWSTRUCT
-%token <appl> BOOL POS NAT INT REAL LIST SET BAG
+%token <appl> KWSORT KWCONS KWMAP KWVAR KWEQN KWACT KWPROC KWINIT
+%token <appl> KWSTRUCT BOOL POS NAT INT REAL LIST SET BAG
 %token <appl> CTRUE CFALSE DIV MOD IN LAMBDA FORALL EXISTS WHR END 
 %token <appl> DELTA TAU SUM BLOCK ALLOW HIDE RENAME COMM
 %token <appl> VAL MU NU DELAY YALED NIL
@@ -121,9 +122,10 @@ ATermAppl gsActionRenameEltsToActionRename(ATermList SpecElts);
 %type <appl> proc_expr_sync_wo_cond proc_expr_sync_rhs
 %type <appl> proc_expr_sync_rhs_wo_cond proc_expr_primary proc_constant
 %type <appl> proc_quant mult_act_name ren_expr comm_expr
-//specifications
-%type <appl> spec spec_elt sort_spec cons_spec map_spec eqn_spec
-%type <appl> eqn_decl act_spec proc_spec proc_decl initialisation
+//process specifications
+%type <appl> proc_spec proc_spec_elt sort_spec cons_spec map_spec
+%type <appl> data_eqn_spec data_eqn_decl act_spec proc_eqn_spec proc_eqn_decl
+%type <appl> proc_init
 //state formulas
 %type <appl> state_frm state_frm_quant state_frm_imp state_frm_imp_rhs
 %type <appl> state_frm_and state_frm_and_rhs state_frm_prefix
@@ -149,10 +151,11 @@ ATermAppl gsActionRenameEltsToActionRename(ATermList SpecElts);
 %type <list> mult_act_names_set mult_act_names_cs ids_bs
 //multi-actions
 %type <list> param_ids_bs
-//specifications
-%type <list> spec_elts sorts_decls_scs sorts_decl domain ops_decls_scs
-%type <list> ops_decl eqn_sect eqn_decls_scs data_vars_decls_scs data_vars_decl
-%type <list> acts_decls_scs acts_decl proc_decls_scs data_vars_decls_cs
+//process specifications
+%type <list> proc_spec_elts sorts_decls_scs sorts_decl domain ops_decls_scs
+%type <list> ops_decl data_eqn_sect data_eqn_decls_scs data_vars_decls_scs
+%type <list> data_vars_decl acts_decls_scs acts_decl proc_eqn_decls_scs
+%type <list> data_vars_decls_cs
 //state formulas
 %type <list> fixpoint_params data_var_decl_inits_cs
 //action rename
@@ -186,7 +189,7 @@ start:
       safe_assign($$, $2);
       spec_tree = $$;
     }
-  | TAG_SPEC spec
+  | TAG_PROC_SPEC proc_spec
     {
       safe_assign($$, $2);
       spec_tree = $$;
@@ -1454,68 +1457,68 @@ mult_act_names_cs:
     }
   ;
 
-//Specifications
-//--------------
+//Process specifications
+//----------------------
 
-//specification
-spec:
-  spec_elts
+//process specification
+proc_spec:
+  proc_spec_elts
     {
-      safe_assign($$, gsSpecEltsToSpec(ATreverse($1)));
-      gsDebugMsg("parsed specification\n  %T\n", $$);
+      safe_assign($$, gsProcSpecEltsToSpec(ATreverse($1)));
+      gsDebugMsg("parsed process specification\n  %T\n", $$);
     }
   ;
 
-//specification elements
-spec_elts:
-  spec_elt
+//process specification elements
+proc_spec_elts:
+  proc_spec_elt
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed specification elements\n  %T\n", $$);
+      gsDebugMsg("parsed process specification elements\n  %T\n", $$);
     }
-   | spec_elts spec_elt
+   | proc_spec_elts proc_spec_elt
     {
       safe_assign($$, ATinsert($1, (ATerm) $2));
-      gsDebugMsg("parsed specification elements\n  %T\n", $$);
+      gsDebugMsg("parsed process specification elements\n  %T\n", $$);
     }
    ;
 
-//specification element
-spec_elt:
+//process specification element
+proc_spec_elt:
   sort_spec
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed specification element\n  %T\n", $$);
+      gsDebugMsg("parsed process specification element\n  %T\n", $$);
     } 
   | cons_spec
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed specification element\n  %T\n", $$);
+      gsDebugMsg("parsed process specification element\n  %T\n", $$);
     }
   | map_spec
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed specification element\n  %T\n", $$);
+      gsDebugMsg("parsed process specification element\n  %T\n", $$);
     }
-  | eqn_spec
+  | data_eqn_spec
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed specification element\n  %T\n", $$);
+      gsDebugMsg("parsed process specification element\n  %T\n", $$);
     }
   | act_spec
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed specification element\n  %T\n", $$);
+      gsDebugMsg("parsed process specification element\n  %T\n", $$);
     }
-  | proc_spec
+  | proc_eqn_spec
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed specification element\n  %T\n", $$);
+      gsDebugMsg("parsed process specification element\n  %T\n", $$);
     }
-  | initialisation
+  | proc_init
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed specification element\n  %T\n", $$);
+      gsDebugMsg("parsed process specification element\n  %T\n", $$);
     }
   ;
 
@@ -1620,23 +1623,23 @@ ops_decl:
     }
   ;
 
-//equation specification
-eqn_spec:
-  eqn_sect    
+//data equation specification
+data_eqn_spec:
+  data_eqn_sect    
     {
       safe_assign($$, gsMakeDataEqnSpec($1));
-      gsDebugMsg("parsed equation specification\n  %T\n", $$);
+      gsDebugMsg("parsed data equation specification\n  %T\n", $$);
     }
   ;
 
-//equation section
-eqn_sect:
-  KWEQN eqn_decls_scs
+//data equation section
+data_eqn_sect:
+  KWEQN data_eqn_decls_scs
     {
       safe_assign($$, ATreverse($2));
-      gsDebugMsg("parsed equation section\n  %T\n", $$);
+      gsDebugMsg("parsed data equation section\n  %T\n", $$);
     }
-  | KWVAR data_vars_decls_scs KWEQN eqn_decls_scs
+  | KWVAR data_vars_decls_scs KWEQN data_eqn_decls_scs
     {
       safe_assign($$, ATmakeList0());
       int n = ATgetLength($4);
@@ -1645,35 +1648,35 @@ eqn_sect:
         $$ = ATinsert($$, (ATerm) gsMakeDataEqn($2, ATAgetArgument(DataEqn, 1),
           ATAgetArgument(DataEqn, 2), ATAgetArgument(DataEqn, 3)));
       }
-      gsDebugMsg("parsed equation section\n  %T\n", $$);
+      gsDebugMsg("parsed data equation section\n  %T\n", $$);
     }
   ;
 
-//declaration of one or more equations, separated by semicolons
-eqn_decls_scs:
-  eqn_decl SEMICOLON
+//declaration of one or more data equations, separated by semicolons
+data_eqn_decls_scs:
+  data_eqn_decl SEMICOLON
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed equation declarations\n  %T\n", $$);
+      gsDebugMsg("parsed data equation declarations\n  %T\n", $$);
     }
-  | eqn_decls_scs eqn_decl SEMICOLON
+  | data_eqn_decls_scs data_eqn_decl SEMICOLON
     {
       safe_assign($$, ATinsert($1, (ATerm) $2));
       gsDebugMsg("parsed equation declarations\n  %T\n", $$);
     }
   ;
 
-//equation declaration
-eqn_decl:
+//data equation declaration
+data_eqn_decl:
   data_expr EQUALS data_expr
     {
       safe_assign($$, gsMakeDataEqn(ATmakeList0(), gsMakeNil(), $1, $3));
-      gsDebugMsg("parsed equation declaration\n  %T\n", $$);
+      gsDebugMsg("parsed data equation declaration\n  %T\n", $$);
     }
   | data_expr ARROW data_expr EQUALS data_expr
     {
       safe_assign($$, gsMakeDataEqn(ATmakeList0(), $1, $3, $5));
-      gsDebugMsg("parsed equation declaration\n  %T\n", $$);
+      gsDebugMsg("parsed data equation declaration\n  %T\n", $$);
     }
   ;
 
@@ -1751,31 +1754,31 @@ acts_decl:
     }
   ;
 
-//process specification
-proc_spec:
-  KWPROC proc_decls_scs
+//process equation specification
+proc_eqn_spec:
+  KWPROC proc_eqn_decls_scs
     {
       safe_assign($$, gsMakeProcEqnSpec(ATreverse($2)));
-      gsDebugMsg("parsed process specification\n  %T\n", $$);
+      gsDebugMsg("parsed process equation specification\n  %T\n", $$);
     }
   ;
 
-//one or more process declarations, separated by semicolons
-proc_decls_scs:
-  proc_decl SEMICOLON
+//one or more process equation declarations, separated by semicolons
+proc_eqn_decls_scs:
+  proc_eqn_decl SEMICOLON
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed process declarations\n  %T\n", $$);
+      gsDebugMsg("parsed process equation declarations\n  %T\n", $$);
     }
-  | proc_decls_scs proc_decl SEMICOLON
+  | proc_eqn_decls_scs proc_eqn_decl SEMICOLON
     {
       safe_assign($$, ATinsert($1, (ATerm) $2));
-      gsDebugMsg("parsed process declarations\n  %T\n", $$);
+      gsDebugMsg("parsed process equation declarations\n  %T\n", $$);
     }
   ;
 
-//process declaration
-proc_decl:
+//process equation declaration
+proc_eqn_decl:
   ID EQUALS proc_expr
     {
       $$ = gsMakeProcEqn(
@@ -1810,8 +1813,8 @@ data_vars_decls_cs:
     }
   ;
 
-//initialisation
-initialisation:
+//process initialisation
+proc_init:
   KWINIT proc_expr SEMICOLON
     {
       safe_assign($$, gsMakeProcessInit(ATmakeList0(), $2));
@@ -2382,8 +2385,10 @@ act_frm_primary:
     }
   ;
 
-//Action rename
-//----------------
+//Action rename specifications
+//----------------------------
+
+//action rename
 action_rename:
   action_rename_elts
     {
@@ -2423,7 +2428,7 @@ action_rename_elt:
       safe_assign($$, $1);
       gsDebugMsg("parsed action rename element\n  %T\n", $$);
     }
-  | eqn_spec
+  | data_eqn_spec
     {
       safe_assign($$, $1);
       gsDebugMsg("parsed action rename element\n  %T\n", $$);
@@ -2499,7 +2504,7 @@ action_rename_rule:
 
 %% 
 
-ATermAppl gsSpecEltsToSpec(ATermList SpecElts)
+ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
 {
   ATermAppl Result = NULL;
   ATermList SortDecls = ATmakeList0();
@@ -2508,15 +2513,15 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts)
   ATermList DataEqnDecls = ATmakeList0();
   ATermList ActDecls = ATmakeList0();
   ATermList ProcEqnDecls = ATmakeList0();
-  ATermAppl Init = NULL;
+  ATermAppl ProcInit = NULL;
   int n = ATgetLength(SpecElts);
   for (int i = 0; i < n; i++) {
     ATermAppl SpecElt = ATAelementAt(SpecElts, i);
     if (gsIsProcessInit(SpecElt)) {
-      if (Init == NULL) {
-        Init = SpecElt;
+      if (ProcInit == NULL) {
+        ProcInit = SpecElt;
       } else {
-        //Init != NULL
+        //ProcInit != NULL
         gsErrorMsg("parse error: multiple initialisations\n");
         return NULL;
       }
@@ -2538,7 +2543,7 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts)
     }
   }
   //check whether an initialisation is present
-  if (Init == NULL) {
+  if (ProcInit == NULL) {
     gsErrorMsg("parse error: missing initialisation\n");
     return NULL;
   }
@@ -2551,7 +2556,7 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts)
     ),
     gsMakeActSpec(ActDecls),
     gsMakeProcEqnSpec(ProcEqnDecls),
-    Init
+    ProcInit
   );
   return Result;
 }

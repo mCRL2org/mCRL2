@@ -3046,9 +3046,9 @@ ATermAppl gsMakeSortsPossible(ATermList SortExpr_0)
 }
 
 inline
-ATermAppl gsMakeSpecV1(ATermAppl DataSpec_0, ATermAppl ActSpec_1, ATermAppl ProcEqnSpec_2, ATermAppl Init_3)
+ATermAppl gsMakeSpecV1(ATermAppl DataSpec_0, ATermAppl ActSpec_1, ATermAppl ProcEqnSpec_2, ATermAppl ProcInit_3)
 {
-  return ATmakeAppl4(gsAFunSpecV1(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) ProcEqnSpec_2, (ATerm) Init_3);
+  return ATmakeAppl4(gsAFunSpecV1(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) ProcEqnSpec_2, (ATerm) ProcInit_3);
 }
 
 inline

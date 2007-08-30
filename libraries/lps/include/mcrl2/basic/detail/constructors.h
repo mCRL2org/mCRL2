@@ -162,9 +162,9 @@ ATermAppl constructSortDecl();
 ATermAppl constructDataExprOrNil();
 ATermAppl constructParamIdOrAction();
 ATermAppl constructProcExpr();
-ATermAppl constructSpec();
+ATermAppl constructProcSpec();
 ATermAppl constructMultActOrDelta();
-ATermAppl constructInit();
+ATermAppl constructProcInit();
 ATermAppl constructStateFrm();
 ATermAppl constructRegFrm();
 ATermAppl constructActFrm();
@@ -479,7 +479,7 @@ ATermAppl constructDataSpec()
 inline
 ATermAppl initConstructSpecV1(ATermAppl& t)
 {
-  t = ATmakeAppl4(gsAFunSpecV1(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructActSpec()), reinterpret_cast<ATerm>(constructProcEqnSpec()), reinterpret_cast<ATerm>(constructInit()));
+  t = ATmakeAppl4(gsAFunSpecV1(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructActSpec()), reinterpret_cast<ATerm>(constructProcEqnSpec()), reinterpret_cast<ATerm>(constructProcInit()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -2042,9 +2042,9 @@ ATermAppl constructProcExpr()
   return constructParamId();
 }
 
-// Spec
+// ProcSpec
 inline
-ATermAppl constructSpec()
+ATermAppl constructProcSpec()
 {
   return constructSpecV1();
 }
@@ -2056,9 +2056,9 @@ ATermAppl constructMultActOrDelta()
   return constructMultAct();
 }
 
-// Init
+// ProcInit
 inline
-ATermAppl constructInit()
+ATermAppl constructProcInit()
 {
   return constructProcessInit();
 }
