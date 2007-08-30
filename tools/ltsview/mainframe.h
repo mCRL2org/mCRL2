@@ -16,12 +16,15 @@
 #include <wx/filename.h>
 #include <wx/listctrl.h>
 #include <wx/progdlg.h>
+#include <wx/splitter.h>
+
 #include "settingsdialog.h"
 #include "savepicdialog.h"
 #include "glcanvas.h"
 #include "mediator.h"
 #include "settings.h"
 #include "simreader.h"
+
 
 class MainFrame : public wxFrame, public simReader {
   public:
@@ -116,11 +119,11 @@ class MainFrame : public wxFrame, public simReader {
 
     // List views used in simulation
     wxListView* simTransView; // Transition information
-    wxListView* simStateView; // State information
+//    wxListView* simStateView; // State information
 
     void setupMainArea();
     void setupMenuBar();
-    void setupRightPanel(wxPanel* panel);
+    void setupRightPanel(wxSplitterWindow* panel);
     void setupMarkPanel(wxPanel* panel);
     void setupSimPanel(wxPanel* panel);
 //    void setupSettingsPanel(wxPanel* panel);
