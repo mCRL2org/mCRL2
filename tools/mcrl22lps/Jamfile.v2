@@ -2,25 +2,13 @@ project toolset/mcrl22lps
        : build-dir $(BUILD_TOP)/mcrl22lps
        ;
 
-obj lin_std.o
-       : lin_std.cpp
-       : <use>/libraries/rewrite//headers
-         <use>/libraries/mcrl2_basic//headers
-         <use>/libraries/utilities//headers
-         <use>/libraries/data//headers
-         <use>/libraries/parser//headers # for libalpha
-       ;
-
-explicit lin_std.o ;
-
 exe mcrl22lps
        : mcrl22lps.cpp
-         lin_std.o
          /libraries//parser
          /libraries//utilities
          /libraries//rewrite
-         /libraries/parser//alpha
          /libraries//data
+         /libraries//lps
        : <toolset>msvc:<library>/libraries//getopt
          <squadt-connectivity>implemented
        ;
@@ -28,7 +16,7 @@ exe mcrl22lps
 exe alpha
        : alpha.cpp
          /libraries//parser
-         /libraries/parser//alpha
+         /libraries//lps
          /libraries//utilities
          /libraries//rewrite
        : <toolset>msvc:<library>/libraries//getopt

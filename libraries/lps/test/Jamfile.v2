@@ -4,7 +4,6 @@ project libraries/lps/test
    : requirements
        <use>/boost//headers
        <source>/libraries//parser
-       <source>/libraries/parser//alpha
        <source>/libraries//rewrite
        <source>/libraries//mcrl2_basic
        <source>/libraries//lps
@@ -12,20 +11,19 @@ project libraries/lps/test
        <source>/site-config//boost_filesystem
    ;
 
-# these files should become available as part of a library
-obj lin_std.o : ../../../tools/mcrl22lps/lin_std.cpp ;
-
-exe generate_lps2pbes_result : generate_lps2pbes_result.cpp lin_std.o ;
+exe generate_lps2pbes_result : generate_lps2pbes_result.cpp ;
 
 test-suite lps
     :
-      [ run_with_input lps2pbes_test.cpp lin_std.o : pbes : test ]
-      [ run pbes_test.cpp lin_std.o ]
+      #[ run linear_process_test.cpp ]
+      #[ run substitute_test.cpp ]
+      [ run_with_input lps2pbes_test.cpp : pbes : test ]
+      [ run pbes_test.cpp ]
       [ run data_expression.cpp ]
       [ run data_test.cpp ]
-      [ run time.cpp lin_std.o ]
+      [ run time.cpp ]
       [ run data_utility_test.cpp ]
-      [ run aterm_algorithm_test.cpp lin_std.o ]
+      [ run aterm_algorithm_test.cpp ]
       [ run operators.cpp ]
       [ run sort_test.cpp ]
       [ run replace_test.cpp ]

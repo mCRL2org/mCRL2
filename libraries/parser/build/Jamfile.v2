@@ -40,35 +40,9 @@ alias parser.alias
        : parser.main
        ;
 
-alias alpha.main
-       : libalpha.cpp
-       : <use>/libraries/mcrl2_basic//headers
-         <use>/libraries/utilities//headers
-       : <threading>single
-       ;
-
-lib alpha
-       : alpha.main
-       : <link>static
-       :
-       : <library>/libraries//mcrl2_basic
-       ;
-
-alias alpha
-       : /libraries//mcrl2
-       : <link>shared
-       ;
-
-alias alpha.alias
-       : alpha.main
-       :
-       :
-       : <use>/libraries/mcrl2_basic//headers
-       ;
-
 alias headers
        :
        : <use>/libraries/mcrl2_basic//headers
        ;
 
-explicit parser.main parser.alias alpha.main alpha.alias ;
+explicit parser.main parser.alias ;

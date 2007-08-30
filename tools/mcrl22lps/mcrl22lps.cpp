@@ -17,8 +17,8 @@
 #include <cstdio>
 #include <fstream>
 #include "aterm2.h"
-#include "lin_types.h"
-#include "lin_std.h"
+#include "mcrl2/lps/lin_types.h"
+#include "mcrl2/lps/lin_std.h"
 #include "print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "libstruct.h"

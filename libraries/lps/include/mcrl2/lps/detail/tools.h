@@ -30,11 +30,13 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/lps/detail/algorithms.h"
+#include "mcrl2/lps/mcrl22lps.h"
 
 namespace lps {
 
 namespace detail {
 
+/*
   /// Linearises the specification.
   inline
   specification mcrl22lps(const std::string& spec, t_lin_options options = t_lin_options())
@@ -51,6 +53,7 @@ namespace detail {
     result = implement_data_specification(result);
     return linearise(result, options);
   }
+*/
 
   inline
   pbes lps2pbes(const specification& spec, const state_formula& formula, bool timed)

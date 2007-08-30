@@ -7,8 +7,9 @@
 /// \file libdataelm.cpp
 
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/lin_std.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/lps/detail/tools.h"
 #include "print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "struct/libstruct.h"
@@ -182,7 +183,7 @@ ATermAppl removeUnusedData(ATermAppl ATSpec, bool keep_basis)
 	if ( keep_basis )
 	{
 		/* Add sorts/functions that should always be available */
-		specification basis_spec = detail::mcrl22lps("init delta;");
+		specification basis_spec = mcrl22lps("init delta;");
 		data_specification data = basis_spec.data();
 		for (sort_list::iterator i = data.sorts().begin(); i != data.sorts().end(); i++)
 		{

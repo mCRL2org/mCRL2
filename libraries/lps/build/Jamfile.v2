@@ -3,42 +3,61 @@ project lps
        : build-dir $(BUILD_TOP)
        : requirements
           <include>../include
+          <dependency>/boost//headers
+          <dependency>/libraries//atermpp
        : usage-requirements
           <include>../include
+          <dependency>/boost//headers
+          <dependency>/libraries//atermpp
+       ;
+
+alias lps.main
+       : source/lin_std.cpp
+         source/libalpha.cpp
+       : <use>/libraries/parser//headers
+         <use>/libraries/rewrite//headers
+         <use>/libraries/lps//headers
+       : <threading>single
+       ;
+
+lib lps
+       : lps.main
+         /libraries//parser
+         /libraries//rewrite
+       : <link>static
+       :
+       : <library>/libraries//parser
+         <library>/libraries//rewrite
+         <use>/libraries/lps//headers
        ;
 
 alias lps
-       :
-       : <dependency>data-specification
-       :
-       : <dependency>/boost//headers
-         <dependency>data-specification
+       : /libraries//mcrl2
+       : <link>shared
        ;
 
-alias lps.alias : lps ;
+alias lps.alias
+       : lps.main
+       :
+       :
+       : <use>/libraries/parser//headers
+         <use>/libraries/rewrite//headers
+         <use>/libraries/lps//headers
+       ;
 
 alias data-specification
        :
        : <link>static
-         <use>/libraries/atermpp//headers
-       :
-       : <use>/boost//headers
-         <use>/libraries//atermpp
        ;
 
 alias data-specification
        :
        : <link>shared
-         <use>/libraries/atermpp//headers
-       :
-       : <use>/boost//headers
-         <use>/libraries/atermpp//headers
        ;
 
 # The functionality provided by this library belongs in the LPS framework
 alias dataelm.main
        : source/libdataelm.cpp
-         /tools/mcrl22lps//lin_std.o
        : <use>/libraries/parser//headers
          <use>/libraries/rewrite//headers
          <use>/libraries/lps//headers
@@ -49,11 +68,12 @@ lib dataelm
        : dataelm.main
          /libraries//parser
          /libraries//rewrite
+         /libraries//lps
        : <link>static
        :
        : <library>/libraries//parser
          <library>/libraries//rewrite
-         <use>/libraries/lps//headers
+         <library>/libraries//lps
        ;
 
 alias dataelm
@@ -72,11 +92,6 @@ alias dataelm.alias
 
 # This target must not be used, it exists solely for the parser library which should not depend on the lps framework
 alias headers
-       :
-       :
-       :
-       : <use>/libraries/atermpp//headers
-         <use>/boost//headers
        ;
 
 explicit dataelm.main dataelm.alias lps.alias ;
