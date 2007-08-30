@@ -4,7 +4,6 @@ project toolset/lps2torx
 
 exe lps2torx
        : lps2torx.cpp
-         /libraries//mcrl2_basic
          /libraries/lps//dataelm
          /libraries//nextstate
        : <include>.

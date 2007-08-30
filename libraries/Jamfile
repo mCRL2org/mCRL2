@@ -37,7 +37,6 @@ lib mcrl2
           /libraries/aterm//aterm.alias
           /libraries/data//data.alias
           /libraries/parser//parser.alias
-          /libraries/parser//alpha.alias
           /libraries/mcrl2_basic//mcrl2_basic.alias
           /libraries/prover//prover.alias
           /libraries/rewrite//rewrite.alias

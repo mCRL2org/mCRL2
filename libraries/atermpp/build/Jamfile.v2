@@ -1,4 +1,4 @@
-project aterm
+project atermpp
        : source-location ../source
        : build-dir $(BUILD_TOP)
        ;
@@ -19,7 +19,7 @@ alias atermpp
        ;
 
 alias atermpp
-       : /libraries//mcrl2
+       : # /libraries//mcrl2
        : <link>shared
        :
        : <include>../include

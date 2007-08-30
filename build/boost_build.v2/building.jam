@@ -7,6 +7,9 @@ LINK_VARIANT  = [ MATCH link=(.*) : [ modules.peek : ARGV ] ] ;
 
 include $(TOP)/build/config.jam ;
 
+LINK_VARIANT  ?= shared ;
+BUILD_VARIANT ?= custom ;
+
 # Generate default build options
 for option in [ regex.split $(BUILD_OPTIONS) " " ] {
   if $(option) {

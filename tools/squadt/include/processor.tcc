@@ -565,7 +565,8 @@ namespace squadt {
         }
 
         if (!boost::filesystem::exists(g->get_path_for_name(object.get_location())) && check) {
-          throw std::runtime_error("Critical error, output file with name: " + object.get_location() + " does not exist!\n");
+          std::cerr << "Critical error, output file with name: " << object.get_location() << " does not exist!\n";
+          continue;
         }
 
         /* Remove object from p if it is part of the new configuration too */

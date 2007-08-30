@@ -8,11 +8,11 @@ rule import_user_config {
 
 # Build specific settings
 BUILD_OPTIONS  = "@BUILD_OPTIONS@" ;
-ADDRESS_MODEL ?= "@ADDRESS_MODEL@" ;
-LINK_VARIANT  ?= "@LINK_VARIANT@" ;
-LINK_VARIANT  ?= "shared" ;
-BUILD_VARIANT ?= "@BUILD_VARIANT@" ;
-BUILD_VARIANT ?= "custom" ;
+ADDRESS_MODEL ?= @ADDRESS_MODEL@ ;
+LINK_VARIANT  ?= @LINK_VARIANT@ ;
+BUILD_VARIANT ?= @BUILD_VARIANT@ ;
+LINK_VARIANT  ?= shared ;
+BUILD_VARIANT ?= custom ;
 
 # Library specific variables
 WX_CPPFLAGS        = "@WX_CPPFLAGS@" ;
