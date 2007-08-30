@@ -59,8 +59,8 @@ namespace po = boost::program_options;
  
 // the command line options 
 typedef struct{ 
- bool interactive; 
- int bound; 
+  bool interactive; 
+  int bound; 
 } t_tool_options; 
  
  
@@ -77,7 +77,7 @@ string infilename;
 static t_tool_options parse_command_line(int argc, char** argv); 
 pbes load_pbes();
 pbes_expression interpret_solution(pbes pbes_spec, 
-			    equation_system es_solution); 
+				   equation_system es_solution); 
 //======================================== 
  
  
@@ -107,7 +107,8 @@ int main(int argc, char** argv)
   //(possibly interactive and/or bounded)  
   //approximation process 
   equation_system es_solution = 
-    solve_pbes(pbes_spec, tool_options.interactive, tool_options.bound); 
+    solve_pbes(pbes_spec, tool_options.interactive, 
+	       tool_options.bound); 
    
   //Interpret the solution in the initial state
   pbes_expression sol_initial_state = 
@@ -171,7 +172,7 @@ t_tool_options parse_command_line(int argc, char** argv)
   po::options_description desc; 
   desc.add_options() 
     ("interactive,i","turn on the manual guidance of the approximation process") 
-    ("bound,b",po::value<int>(&opt_bound)->default_value(0), "limit the number of approximation steps\nExample: -b 10\n") 
+    ("bound,b",po::value<int>(&opt_bound)->default_value(0), "limit the number of approximation steps\nExample: -b 10\n")
     ("verbose,v",	"turn on the display of short intermediate messages") 
     ("debug,d",		"turn on the display of detailed intermediate messages") 
     ("version",		"display version information") 
@@ -244,7 +245,7 @@ pbes_expression interpret_solution (pbes pbes_spec,
 
   propositional_variable_instantiation s = pbes_spec.initial_state();
   data_expression_list del = s.parameters();
-
+  
   // find the solution equation for state s
   equation_system::iterator e;
   for (e = es_solution.begin(); 
@@ -255,13 +256,15 @@ pbes_expression interpret_solution (pbes pbes_spec,
     exit(1);
   }
   
+  // instantiate the rhs with the actual parameters given by s
+  pbes_expression result;
   data_variable_list dvl = e->variable().parameters();
   pbes_expression p = 
     e->formula().substitute(make_list_substitution(dvl,del));
-
- SMT_Solver_Type sol = solver_type_cvc_lite_fast;
+  
+  SMT_Solver_Type sol = solver_type_cvc_lite_fast;
   BDD_Prover* prover = new BDD_Prover(pbes_spec.data(), GS_REWR_INNER, 0, false, sol, false);
-  pbes_expression result = rewrite_pbes_expression(p, prover);
+  result = rewrite_pbes_expression(p, prover);
 
 
   // in the resulting expression, the predicate instances should

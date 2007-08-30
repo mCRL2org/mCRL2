@@ -15,7 +15,7 @@
 #define VERSION "0.0.1" 
  
 
-// #define debug
+#define debug
  
  
 //C++ 
@@ -45,6 +45,13 @@
 #include "mcrl2/data/sort.h" 
  
 #include "mcrl2/lps/detail/algorithms.h"
+
+
+#include "libparse.h"
+#include "typecheck.h"
+#include "libalpha.h"
+#include "dataimpl.h"
+
 
 //ATERM-specific 
 #include "atermpp/substitute.h" 
@@ -382,11 +389,24 @@ lps::data_specification get_minimal_data_spec()
 {
   std::stringstream ss;
   //  ss << "map i:Nat; b:Bool; init delta;";
-  ss << "map b:Bool; init delta;";
-  ATermAppl r = lps::detail::parse_specification(ss);
-  r = lps::detail::type_check_specification(r);
-  r = lps::detail::implement_data_specification(r);
-  
+  ss << "init delta@0;";
+  ATermAppl r = parse_spec(ss);
+#ifdef debug
+  cerr<<"typecheck\n";
+#endif
+  r = type_check_spec(r);
+#ifdef debug
+  cerr<<"implement data spec\n";
+#endif
+  r = implement_data_spec(r);
+#ifdef debug
+  cerr<<"linearise spec\n";
+#endif
+  r = linearise_std(r,t_lin_options());
+#ifdef debug
+  cerr<<"ready\n";
+#endif
+
   lps::specification spec(r);
   return spec.data();
 }
