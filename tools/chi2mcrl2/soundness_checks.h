@@ -86,15 +86,25 @@ bool check_rule_NumberString(Term t)
 
 //--- begin generated code
 template <typename Term> bool check_rule_SpecChi(Term t);
+template <typename Term> bool check_rule_DecSpec(Term t);
 template <typename Term> bool check_rule_VarSpec(Term t);
+template <typename Term> bool check_rule_VarExpID(Term t);
 template <typename Term> bool check_rule_VarID(Term t);
 template <typename Term> bool check_rule_TypeExp(Term t);
 template <typename Term> bool check_rule_TypeID(Term t);
+template <typename Term> bool check_rule_Expr(Term t);
 template <typename Term> bool check_rule_StatementSpec(Term t);
+template <typename Term> bool check_rule_Statement(Term t);
+template <typename Term> bool check_term_UnaryExpression(Term t);
+template <typename Term> bool check_term_Assignment(Term t);
 template <typename Term> bool check_term_Nil(Term t);
 template <typename Term> bool check_term_Skip(Term t);
+template <typename Term> bool check_term_Expression(Term t);
 template <typename Term> bool check_term_DataVarID(Term t);
+template <typename Term> bool check_term_StatementSpec(Term t);
+template <typename Term> bool check_term_DataVarExprID(Term t);
 template <typename Term> bool check_term_VarSpec(Term t);
+template <typename Term> bool check_term_BinaryExpression(Term t);
 template <typename Term> bool check_term_ProcSpec(Term t);
 template <typename Term> bool check_term_Type(Term t);
 
@@ -105,10 +115,23 @@ bool check_rule_SpecChi(Term t)
 }
 
 template <typename Term>
+bool check_rule_DecSpec(Term t)
+{
+  return    check_rule_VarSpec(t)
+         || check_term_Nil(t);
+}
+
+template <typename Term>
 bool check_rule_VarSpec(Term t)
 {
-  return    check_term_VarSpec(t)
-         || check_term_Nil(t);
+  return    check_term_VarSpec(t);
+}
+
+template <typename Term>
+bool check_rule_VarExpID(Term t)
+{
+  return    check_term_DataVarExprID(t)
+         || check_rule_VarID(t);
 }
 
 template <typename Term>
@@ -130,9 +153,91 @@ bool check_rule_TypeID(Term t)
 }
 
 template <typename Term>
+bool check_rule_Expr(Term t)
+{
+  return    check_term_Expression(t)
+         || check_term_UnaryExpression(t)
+         || check_term_BinaryExpression(t);
+}
+
+template <typename Term>
 bool check_rule_StatementSpec(Term t)
 {
-  return    check_term_Skip(t);
+  return    check_term_StatementSpec(t);
+}
+
+template <typename Term>
+bool check_rule_Statement(Term t)
+{
+  return    check_term_Skip(t)
+         || check_term_Assignment(t);
+}
+
+// UnaryExpression(String, Expr, TypeID)
+template <typename Term>
+bool check_term_UnaryExpression(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsUnaryExpression(a))
+    return false;
+
+  // check the children
+  if (a.size() != 3)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_String<aterm>))
+    {
+      std::cerr << "check_rule_String" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_Expr<aterm>))
+    {
+      std::cerr << "check_rule_Expr" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(2), check_rule_TypeID<aterm>))
+    {
+      std::cerr << "check_rule_TypeID" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+  return true;
+}
+
+// Assignment(Expr+, Expr+)
+template <typename Term>
+bool check_term_Assignment(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsAssignment(a))
+    return false;
+
+  // check the children
+  if (a.size() != 2)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a(0), check_rule_Expr<aterm>, 1))
+    {
+      std::cerr << "check_rule_Expr" << std::endl;
+      return false;
+    }
+  if (!check_list_argument(a(1), check_rule_Expr<aterm>, 1))
+    {
+      std::cerr << "check_rule_Expr" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+  return true;
 }
 
 // Nil()
@@ -173,7 +278,38 @@ bool check_term_Skip(Term t)
   return true;
 }
 
-// DataVarID(String, TypeExp)
+// Expression(String, TypeID)
+template <typename Term>
+bool check_term_Expression(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsExpression(a))
+    return false;
+
+  // check the children
+  if (a.size() != 2)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_String<aterm>))
+    {
+      std::cerr << "check_rule_String" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_TypeID<aterm>))
+    {
+      std::cerr << "check_rule_TypeID" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+  return true;
+}
+
+// DataVarID(String+, TypeExp)
 template <typename Term>
 bool check_term_DataVarID(Term t)
 {
@@ -189,7 +325,7 @@ bool check_term_DataVarID(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_String<aterm>))
+  if (!check_list_argument(a(0), check_rule_String<aterm>, 1))
     {
       std::cerr << "check_rule_String" << std::endl;
       return false;
@@ -204,7 +340,64 @@ bool check_term_DataVarID(Term t)
   return true;
 }
 
-// VarSpec(VarID*)
+// StatementSpec(Statement+)
+template <typename Term>
+bool check_term_StatementSpec(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsStatementSpec(a))
+    return false;
+
+  // check the children
+  if (a.size() != 1)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a(0), check_rule_Statement<aterm>, 1))
+    {
+      std::cerr << "check_rule_Statement" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+  return true;
+}
+
+// DataVarExprID(VarID, Exp)
+template <typename Term>
+bool check_term_DataVarExprID(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsDataVarExprID(a))
+    return false;
+
+  // check the children
+  if (a.size() != 2)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_VarID<aterm>))
+    {
+      std::cerr << "check_rule_VarID" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_Exp<aterm>))
+    {
+      std::cerr << "check_rule_Exp" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+  return true;
+}
+
+// VarSpec(VarExpID+)
 template <typename Term>
 bool check_term_VarSpec(Term t)
 {
@@ -220,9 +413,9 @@ bool check_term_VarSpec(Term t)
   if (a.size() != 1)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_VarID<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_VarExpID<aterm>, 1))
     {
-      std::cerr << "check_rule_VarID" << std::endl;
+      std::cerr << "check_rule_VarExpID" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -230,7 +423,48 @@ bool check_term_VarSpec(Term t)
   return true;
 }
 
-// ProcSpec(VarSpec, StatementSpec)
+// BinaryExpression(String, Expr, Expr, TypeID)
+template <typename Term>
+bool check_term_BinaryExpression(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsBinaryExpression(a))
+    return false;
+
+  // check the children
+  if (a.size() != 4)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_String<aterm>))
+    {
+      std::cerr << "check_rule_String" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_Expr<aterm>))
+    {
+      std::cerr << "check_rule_Expr" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(2), check_rule_Expr<aterm>))
+    {
+      std::cerr << "check_rule_Expr" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(3), check_rule_TypeID<aterm>))
+    {
+      std::cerr << "check_rule_TypeID" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+  return true;
+}
+
+// ProcSpec(DecSpec+, StatementSpec)
 template <typename Term>
 bool check_term_ProcSpec(Term t)
 {
@@ -246,9 +480,9 @@ bool check_term_ProcSpec(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_VarSpec<aterm>))
+  if (!check_list_argument(a(0), check_rule_DecSpec<aterm>, 1))
     {
-      std::cerr << "check_rule_VarSpec" << std::endl;
+      std::cerr << "check_rule_DecSpec" << std::endl;
       return false;
     }
   if (!check_term_argument(a(1), check_rule_StatementSpec<aterm>))

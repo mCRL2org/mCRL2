@@ -513,6 +513,10 @@ static yyconst flex_int16_t yy_chk[211] =
 #define yywrap chiyywrap
 #endif
 
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
+
 int line = 1, col = 1;
 
 extern ATermAppl spec_tree;
@@ -564,7 +568,7 @@ int chiyyFlexLexer::yylex(void) { return 1; }
 chiLexer *lexer = NULL;       /* lexer object, used by parse_streams */
 
 
-#line 568 "chilexer.cpp"
+#line 572 "chilexer.cpp"
 
 #define INITIAL 0
 
@@ -664,9 +668,9 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 79 "chilexer.ll"
+#line 83 "chilexer.ll"
 
-#line 670 "chilexer.cpp"
+#line 674 "chilexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -751,346 +755,346 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 80 "chilexer.ll"
-{ col += (int) strlen(yytext); /* whitespace */ }
+#line 84 "chilexer.ll"
+{ col_nr += YYLeng(); /* whitespace */ }
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 81 "chilexer.ll"
-{ col = 0; ++line; /* newline */ }
+#line 85 "chilexer.ll"
+{ col_nr = 1; ++line_nr; /* newline */ }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 82 "chilexer.ll"
-{ col += (int) strlen(yytext); /* comment */ }
+#line 86 "chilexer.ll"
+{ col_nr += YYLeng(); /* comment */ }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 84 "chilexer.ll"
+#line 88 "chilexer.ll"
 { process_string(); return BP; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 85 "chilexer.ll"
+#line 89 "chilexer.ll"
 { process_string(); return EP; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 86 "chilexer.ll"
+#line 90 "chilexer.ll"
 { process_string(); return BARS; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 87 "chilexer.ll"
+#line 91 "chilexer.ll"
 { process_string(); return ALT; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 88 "chilexer.ll"
+#line 92 "chilexer.ll"
 { process_string(); return SEP; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 89 "chilexer.ll"
+#line 93 "chilexer.ll"
 { process_string(); return STAR; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 90 "chilexer.ll"
+#line 94 "chilexer.ll"
 { process_string(); return GUARD_REP; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 92 "chilexer.ll"
+#line 96 "chilexer.ll"
 { process_string(); return GG; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 93 "chilexer.ll"
+#line 97 "chilexer.ll"
 { process_string(); return PROC_SEP; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 94 "chilexer.ll"
+#line 98 "chilexer.ll"
 { process_string(); return COMMA; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 95 "chilexer.ll"
+#line 99 "chilexer.ll"
 { process_string(); return COLON; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 96 "chilexer.ll"
+#line 100 "chilexer.ll"
 { process_string(); return DEFINES; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 97 "chilexer.ll"
+#line 101 "chilexer.ll"
 { process_string(); return ASSIGNMENT; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 98 "chilexer.ll"
+#line 102 "chilexer.ll"
 { process_string(); return MINUS; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 99 "chilexer.ll"
+#line 103 "chilexer.ll"
 { process_string(); return PLUS; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 100 "chilexer.ll"
+#line 104 "chilexer.ll"
 { process_string(); return EQUAL; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 101 "chilexer.ll"
+#line 105 "chilexer.ll"
 { process_string(); return NOTEQUAL; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 102 "chilexer.ll"
+#line 106 "chilexer.ll"
 { process_string(); return LEQ; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 103 "chilexer.ll"
+#line 107 "chilexer.ll"
 { process_string(); return GEQ; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 104 "chilexer.ll"
+#line 108 "chilexer.ll"
 { process_string(); return AND; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 105 "chilexer.ll"
+#line 109 "chilexer.ll"
 { process_string(); return AND; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 106 "chilexer.ll"
+#line 110 "chilexer.ll"
 { process_string(); return AND; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 107 "chilexer.ll"
+#line 111 "chilexer.ll"
 { process_string(); return OR; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 108 "chilexer.ll"
+#line 112 "chilexer.ll"
 { process_string(); return OR; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 109 "chilexer.ll"
+#line 113 "chilexer.ll"
 { process_string(); return GUARD; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 110 "chilexer.ll"
+#line 114 "chilexer.ll"
 { process_string(); return IMPLIES; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 111 "chilexer.ll"
+#line 115 "chilexer.ll"
 { process_string(); return NOT;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 112 "chilexer.ll"
+#line 116 "chilexer.ll"
 { process_string(); return EXCLAMATION;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 113 "chilexer.ll"
+#line 117 "chilexer.ll"
 { process_string(); return LBRACE; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 114 "chilexer.ll"
+#line 118 "chilexer.ll"
 { process_string(); return RBRACE; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 115 "chilexer.ll"
+#line 119 "chilexer.ll"
 { process_string(); return LBRACKET; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 116 "chilexer.ll"
+#line 120 "chilexer.ll"
 { process_string(); return RBRACKET; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 117 "chilexer.ll"
+#line 121 "chilexer.ll"
 { process_string(); return DOT; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 118 "chilexer.ll"
+#line 122 "chilexer.ll"
 { process_string(); return RECV; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 119 "chilexer.ll"
+#line 123 "chilexer.ll"
 { process_string(); return RECVSEND; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 120 "chilexer.ll"
+#line 124 "chilexer.ll"
 { process_string(); return SENDRECV; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 121 "chilexer.ll"
+#line 125 "chilexer.ll"
 { process_string(); return SSEND; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 122 "chilexer.ll"
+#line 126 "chilexer.ll"
 { process_string(); return RRECV; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 123 "chilexer.ll"
+#line 127 "chilexer.ll"
 { process_string(); return DERIVATIVE; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 124 "chilexer.ll"
+#line 128 "chilexer.ll"
 { process_string(); return POWER; }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 125 "chilexer.ll"
+#line 129 "chilexer.ll"
 { process_string(); return MOD; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 126 "chilexer.ll"
+#line 130 "chilexer.ll"
 { process_string(); return DIV; }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 128 "chilexer.ll"
+#line 132 "chilexer.ll"
 { process_string(); return PROC; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 129 "chilexer.ll"
+#line 133 "chilexer.ll"
 { process_string(); return VAR; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 130 "chilexer.ll"
+#line 134 "chilexer.ll"
 { process_string(); return ENUM; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 131 "chilexer.ll"
+#line 135 "chilexer.ll"
 { process_string(); return SKIP; }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 132 "chilexer.ll"
+#line 136 "chilexer.ll"
 { process_string(); return TRUE; }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 133 "chilexer.ll"
+#line 137 "chilexer.ll"
 { process_string(); return FALSE; }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 134 "chilexer.ll"
+#line 138 "chilexer.ll"
 { process_string(); return CHAN; }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 135 "chilexer.ll"
+#line 139 "chilexer.ll"
 { process_string(); return MIN; }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 136 "chilexer.ll"
+#line 140 "chilexer.ll"
 { process_string(); return MAX; }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 138 "chilexer.ll"
+#line 142 "chilexer.ll"
 { process_string(); return CONST; }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 139 "chilexer.ll"
+#line 143 "chilexer.ll"
 { process_string(); return TIME; }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 142 "chilexer.ll"
+#line 146 "chilexer.ll"
 { process_string(); return TYPE; }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 143 "chilexer.ll"
+#line 147 "chilexer.ll"
 { process_string(); return TYPE; }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 144 "chilexer.ll"
+#line 148 "chilexer.ll"
 { process_string(); return TYPE; }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 145 "chilexer.ll"
+#line 149 "chilexer.ll"
 { process_string(); return TYPE; }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 146 "chilexer.ll"
+#line 150 "chilexer.ll"
 { process_string(); return TYPE; }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 148 "chilexer.ll"
+#line 152 "chilexer.ll"
 { process_string();return DEADLOCK; }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 149 "chilexer.ll"
+#line 153 "chilexer.ll"
 { process_string(); return OLD;}
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 151 "chilexer.ll"
+#line 155 "chilexer.ll"
 { process_string(); return ID; }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 152 "chilexer.ll"
+#line 156 "chilexer.ll"
 { process_string(); return NUMBER; }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 153 "chilexer.ll"
+#line 157 "chilexer.ll"
 { process_string(); return REALNUMBER; }
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 154 "chilexer.ll"
+#line 158 "chilexer.ll"
 { col_nr += YYLeng(); yyerror("unknown character"); }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 157 "chilexer.ll"
+#line 161 "chilexer.ll"
 ECHO;
 	YY_BREAK
-#line 1094 "chilexer.cpp"
+#line 1098 "chilexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1972,7 +1976,7 @@ void chiyyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 157 "chilexer.ll"
+#line 161 "chilexer.ll"
 
 
 
@@ -2031,7 +2035,6 @@ int chiLexer::yywrap(void) {
 void chiLexer::process_string(void) {
   col_nr += YYLeng();
   chiyylval.appl = gsString2ATermAppl(YYText());
-  printf("Token processed \n");
 }
 
 ATermAppl chiLexer::parse_stream (std::istream &stream ) {

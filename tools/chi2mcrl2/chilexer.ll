@@ -13,6 +13,10 @@
 #define yywrap chiyywrap
 #endif
 
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
+
 int line = 1, col = 1;
 
 extern ATermAppl spec_tree;
@@ -77,9 +81,9 @@ identifier  {letter}[a-zA-Z0-9\_']*
 %option nounput
 
 %%
-[ \t]      { col += (int) strlen(yytext); /* whitespace */ }
-\r?\n      { col = 0; ++line; /* newline */ }
-"%".*      { col += (int) strlen(yytext); /* comment */ }
+[ \t]      { col_nr += YYLeng(); /* whitespace */ }
+\r?\n      { col_nr = 1; ++line_nr; /* newline */ }
+"%".*      { col_nr += YYLeng(); /* comment */ }
 
 "|["    { process_string(); return BP; }
 "]|"    { process_string(); return EP; }
@@ -211,7 +215,6 @@ int chiLexer::yywrap(void) {
 void chiLexer::process_string(void) {
   col_nr += YYLeng();
   chiyylval.appl = gsString2ATermAppl(YYText());
-  printf("Token processed \n");
 }
 
 ATermAppl chiLexer::parse_stream (std::istream &stream ) {

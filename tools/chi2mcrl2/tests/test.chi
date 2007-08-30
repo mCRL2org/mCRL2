@@ -1,5 +1,3 @@
-proc Test( chan blaat?:nat ) =
-|[  var blaat : nat = 0,
-		blaat : nat,
-	chan blaat!?: nat 
-:: true and 10 ->  a := 3 ]|
+proc Test( ) =
+|[  var blaat : nat = +0  
+:: skip ]|

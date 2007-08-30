@@ -1,12 +1,24 @@
-<SpecChi> 		::= ProcSpec(<VarSpec>, <StatementSpec>)
+<SpecChi> 		::= ProcSpec(<DecSpec>+, <StatementSpec>)
 
-<VarSpec>		::= VarSpec(<VarID>*)
-				  | Nil
+<DecSpec>		::= <VarSpec>
+                  | Nil
 
-<VarID>			::= DataVarID(<String>, <TypeExp>)
+<VarSpec>		::= VarSpec(<VarExpID>+)
+
+<VarExpID>		::= DataVarExprID(<VarID>, <Exp> ) 
+				  |	<VarID> 
+
+<VarID>			::= DataVarID(<String>+, <TypeExp>)
 
 <TypeExp>		::= <TypeID>
 
 <TypeID>		::= Type(<String>)
 
-<StatementSpec>	::= Skip
+<Expr>			::= Expression(<String>, <TypeID> )
+				  | UnaryExpression(<String>, <Expr>, <TypeID> )
+				  | BinaryExpression(<String>, <Expr>, <Expr> , <TypeID> )
+
+<StatementSpec>	::= StatementSpec(<Statement>+)
+
+<Statement>		::= Skip
+				  | Assignment(<Expr>+,<Expr>+)

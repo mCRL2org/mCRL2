@@ -119,6 +119,10 @@
 extern int yylex( void );
 extern char* yytext; */
 
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
+
 //external declarations from lexer.l
 void chiyyerror( const char *s );
 int chiyylex( void );
@@ -141,13 +145,13 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE 
-#line 37 "chiparser.yy"
+#line 41 "chiparser.yy"
 {
   ATermAppl appl;
   ATermList list;
 }
-/* Line 2604 of glr.c.  */
-#line 151 "chiparser.hpp"
+/* Line 2616 of glr.c.  */
+#line 155 "chiparser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

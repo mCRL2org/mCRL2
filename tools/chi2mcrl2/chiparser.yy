@@ -14,6 +14,10 @@
 extern int yylex( void );
 extern char* yytext; */
 
+#ifdef __cplusplus
+using namespace ::mcrl2::utilities;
+#endif
+
 //external declarations from lexer.l
 void chiyyerror( const char *s );
 int chiyylex( void );
@@ -48,15 +52,16 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
  */
 
 %token PROC MODEL_DEF ENUM
-%token VAR CONST CHAN
-%token SKIP BARS ALT
-%token COLON TYPE
-%token ID TIME 
-%token BP EP PROC_SEP SEP COMMA DEFINES ASSIGNMENT MINUS PLUS GG 
-%token LBRACE RBRACE LBRACKET RBRACKET
-%token AND OR GUARD NOT EQUAL OLD
-%token BOOL NUMBER INT REALNUMBER TRUE FALSE DOT DEADLOCK IMPLIES NOTEQUAL GEQ LEQ MAX MIN DIV MOD POWER
+%token <appl> VAR CONST CHAN
+%token <appl> SKIP BARS ALT
+%token <appl> COLON TYPE
+%token <appl> ID TIME 
+%token <appl> BP EP PROC_SEP SEP COMMA DEFINES ASSIGNMENT MINUS PLUS GG 
+%token <appl> LBRACE RBRACE LBRACKET RBRACKET
+%token <appl> AND OR GUARD NOT EQUAL OLD
+%token <appl> BOOL NUMBER INT REALNUMBER TRUE FALSE DOT DEADLOCK IMPLIES NOTEQUAL GEQ LEQ MAX MIN DIV MOD POWER
 %token RECV EXCLAMATION SENDRECV RECVSEND SSEND RRECV STAR GUARD_REP DERIVATIVE
+
 %left '-' '+'
 %left '*' '/'       /* order '+','-','*','/' */
 %right '^'          /* exponentiation        */
@@ -65,7 +70,22 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %glr-parser
 %debug
 %verbose
- 
+/* 
+ *  TERMINALS
+ *  ---------
+ */
+
+%type <appl> Type BasicType
+%type <appl> IdentifierType IdentifierTypeExpression
+%type <appl> NatIntExpression BasicExpression BooleanExpression Expression 
+%type <appl> BoolNatIntExpression 
+%type <appl> LocalVariables Identifier AssignmentStatement 
+%type <appl> ProcessBody Statement
+
+%type <list> Identifier_csp Expression_csp 
+%type <list> IdentifierTypeExpression_csp IdentifierType_csp
+%type <list> LocalVariables_csp
+
 /* 
  *  GRAMMER 
  *  -------
@@ -84,36 +104,72 @@ ProcessDefinition:
 	;
 
 Identifier: ID
+		{ 
+ 	  	  safe_assign($$, $1 );
+      	  gsDebugMsg("parsed id's\n  %T\n", $$);
+		}
 
 ProcessBody: 
 	  BP Statement EP
+      	{ //safe_assign($$, gsMakeProcSpec( ATmakeList1((ATerm) gsMakeNil) ,$1));
+      	  gsDebugMsg("parsed ProcessBody  \n  %T\n", $$);	
+		}
 	| BP LocalVariables_csp PROC_SEP Statement EP
+      	{ //safe_assign($$, gsMakeProcSpec($1, $2));
+      	  gsDebugMsg("parsed ProcessBody  \n  %T\n", $$);	
+		}
 	;
 
 LocalVariables_csp: 
 	  LocalVariables 
+      	{ safe_assign($$, ATmakeList1((ATerm) $1));
+      	  gsDebugMsg("parsed localvariables  \n  %T\n", $$);	
+		}
 	| LocalVariables_csp COMMA LocalVariables
+      	{ safe_assign($$, ATinsert($1, (ATerm) $3));
+      	  gsDebugMsg("parsed localvariables \n  %T\n", $$);	
+		}
 	;
 
 LocalVariables: 
 	  VAR IdentifierTypeExpression_csp
-	| CHAN ChannelDefinition_csp
+		{
+		  safe_assign($$, gsMakeVarSpec( $2 ));
+		  gsDebugMsg("parsed VariableList \n %T\n", $$);
+		}
+/*	| CHAN ChannelDefinition_csp */
 //	| RecursionDefinition
 	;
 
 IdentifierTypeExpression_csp:
 	  IdentifierTypeExpression
+      	{ safe_assign($$, ATmakeList1((ATerm) $1));
+      	  gsDebugMsg("parsed id-element \n  %T\n", $$);	
+		}
 	| IdentifierTypeExpression_csp COMMA IdentifierTypeExpression 
+      	{ safe_assign($$, ATinsert($1, (ATerm) $3));
+      	  gsDebugMsg("parsed id-element \n  %T\n", $$);	
+		}
 	;
 
 IdentifierTypeExpression:
 	  IdentifierType 
 	| IdentifierType DEFINES Expression
+		{
+		  safe_assign($$, gsMakeDataVarExprID ( $1, $3 ) );
+		  gsDebugMsg("parsed Identifier Type With Expression \n %T\n", $$);
+		}
 	;
 
 IdentifierType_csp:
 	  IdentifierType
+      	{ safe_assign($$, ATmakeList1((ATerm) $1));
+      	  gsDebugMsg("parsed id-element \n  %T\n", $$);	
+		}
 	| IdentifierType_csp COMMA IdentifierType
+      	{ safe_assign($$, ATinsert($1, (ATerm) $3));
+      	  gsDebugMsg("parsed id-element \n  %T\n", $$);	
+		}
 	;
 
 FormalParameter_csp: 
@@ -128,6 +184,10 @@ FormalParameter:
 
 IdentifierType:
 	  Identifier_csp COLON Type
+		{
+		  safe_assign($$, gsMakeDataVarID ( $1, $3 ) );
+		  gsDebugMsg("parsed IdentifierType\n %T\n", $$);
+		}
 	;
 
 ChannelDeclaration_csp:
@@ -175,11 +235,15 @@ Type:
 /*	| ContainerType
 	| FuntionType
 	| DistributionType */
-	| LBRACKET Type RBRACKET
+/*	| LBRACKET Type RBRACKET */
 	;
 
 BasicType:
  	  TYPE
+		{ 
+ 	  	  safe_assign($$, gsMakeType( $1) );
+      	  gsDebugMsg("parsed Type \n  %T\n", $$);
+		}
 //	| Identifier
 //	| Identifier DOT Identier
 	;
@@ -209,8 +273,14 @@ BasicStatement:
 
 AssignmentStatement:
 	  OptGuard OptChannel Expression_csp ASSIGNMENT Expression_csp
+     	{ //safe_assign($$, gsMakeAssignment((ATerm) $3, (ATerm) $4) );
+      	  gsDebugMsg("parsed skip statement \n  %T\n", $$);	
+		}
 	| OptGuard OptChannel SKIP
-	| OptGuard LBRACE Expression_csp RBRACE COLON Expression_csp GG Identifier
+      	{ safe_assign($$, gsMakeSkip() );
+      	  gsDebugMsg("parsed skip statement \n  %T\n", $$);	
+		}
+//	| OptGuard LBRACE Expression_csp RBRACE COLON Expression_csp GG Identifier
 	;
 
 OptGuard: /* empty */
@@ -219,16 +289,28 @@ OptGuard: /* empty */
 
 OptChannel: /* empty */
 	| Expression COLON
-
+	;
 
 Identifier_csp: 
 	  Identifier
+		{ /* empty */
+		  /* Identifier is propagated */
+		}
 	| Identifier_csp COMMA Identifier
+      	{ safe_assign($$, ATinsert($1, (ATerm) $3));
+      	  gsDebugMsg("parsed id's\n  %T\n", $$);	
+		}
 	;
 
 Expression_csp:
 	  Expression
+      	{ safe_assign($$, ATmakeList1((ATerm) $1));
+      	  gsDebugMsg("parsed expression-element \n  %T\n", $$);	
+		}
 	| Expression_csp COMMA Expression
+      	{ safe_assign($$, ATinsert($1, (ATerm) $3));
+      	  gsDebugMsg("parsed expression-element\n  %T\n", $$);	
+		}
 	;
 
 CommStatement:
@@ -275,7 +357,7 @@ Expression: //NUMBER
 	| BasicExpression
 	| BooleanExpression
 	| NatIntExpression
-	| BoolNatIntExpression
+	| BoolNatIntExpression 
 /*	| IntExpression
 	| RealExpression */
 //	| StringExpression
@@ -290,8 +372,20 @@ Expression: //NUMBER
 
 
 BasicExpression:
-	  OLD LBRACKET Expression RBRACKET 
-	|  Identifier
+	 Identifier
+		{
+			/**  
+			  * Lookup Identifier Type
+			  *
+  			  **/	 
+ 	  		safe_assign($$, 
+				gsMakeExpression( $1, 
+					gsMakeType( gsString2ATermAppl("unknown")) 
+				)
+			);
+      		gsDebugMsg("parsed Expression's\n  %T\n", $$);
+		}
+//	  OLD LBRACKET Expression RBRACKET 
 //	  Identifier DOT Identifier
 //	| Identifier DERIVATIVE
 //	| Expression LANGLE TemplateValue RANGLE
@@ -300,19 +394,61 @@ BasicExpression:
 
 BooleanExpression:
 	  FALSE
+		{ 
+ 	  		safe_assign($$, 
+				gsMakeExpression( $1, 
+					gsMakeType( gsString2ATermAppl("bool" )) 
+				)
+			);
+      		gsDebugMsg("parsed Expression's\n  %T\n", $$);
+		}
 	| TRUE
-	| NOT Expression
+		{ 
+ 	  		safe_assign($$, 
+				gsMakeExpression( $1, 
+					gsMakeType( gsString2ATermAppl("bool" )) 
+				)
+			);
+      		gsDebugMsg("parsed Expression's\n  %T\n", $$);
+		}
+/*	| NOT Expression
 	| EXCLAMATION Expression
 	| Expression AND Expression 
 	| Expression OR Expression 
-	| Expression IMPLIES Expression 
+	| Expression IMPLIES Expression */
 	;	
 	
 NatIntExpression: 
 	  NUMBER 
+		{ 
+ 	  		safe_assign($$, 
+				gsMakeExpression( $1, 
+					gsMakeType( gsString2ATermAppl("nat" )) 
+				)
+			);
+      		gsDebugMsg("parsed Expression's\n  %T\n", $$);
+		}
 	| PLUS NUMBER
+		{ 
+ 	  		safe_assign($$, 
+				gsMakeUnaryExpression( $1, 
+					$2, 
+					gsMakeType( gsString2ATermAppl("nat" )) 
+				)
+			);
+      		gsDebugMsg("parsed UnaryExpression's\n  %T\n", $$);
+		}
 	| MINUS NUMBER
-	| Expression '^' Expression
+		{ 
+ 	  		safe_assign($$, 
+				gsMakeUnaryExpression($1, 
+					$2, 
+					gsMakeType( gsString2ATermAppl("nat" )) 
+				)
+			);
+      		gsDebugMsg("parsed UnaryExpression's\n  %T\n", $$);
+		}
+/*	| Expression '^' Expression
 	| Expression '*' Expression
 	| Expression '/' Expression
 	| Expression '+' Expression
@@ -324,12 +460,24 @@ NatIntExpression:
 	| Expression '<' Expression
 	| Expression '>' Expression
 	| Expression LEQ Expression
-	| Expression GEQ Expression
+	| Expression GEQ Expression */
 	;
 
 BoolNatIntExpression:
 	  Expression EQUAL Expression
+		{ 
+ 	  		safe_assign($$, gsMakeBinaryExpression( $2, $1, $3, 
+					gsMakeType( gsString2ATermAppl("bool" )) 
+			));
+      		gsDebugMsg("parsed UnaryExpression's\n  %T\n", $$);
+		}
 	| Expression NOTEQUAL Expression
+		{ 
+ 	  		safe_assign($$, gsMakeBinaryExpression( $2, $1, $3,  
+					gsMakeType( gsString2ATermAppl("bool" )) 
+			));
+      		gsDebugMsg("parsed UnaryExpression's\n  %T\n", $$);
+		}
 	;	
 
 /*
@@ -466,9 +614,11 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts)
     return NULL;
   }
 */
-  Result = gsMakeProcSpec(
+  Result = NULL;
+  /*
+  gsMakeProcSpec(
     gsMakeVarSpec(VarDecl),
     StatementSpec
-  );
+  ); */
   return Result;
 }

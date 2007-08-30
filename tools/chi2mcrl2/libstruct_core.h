@@ -31,6 +31,72 @@ void gsEnableCoreConstructorFunctions()
 {}
 
 //--- begin generated code
+// Assignment
+inline
+AFun initAFunAssignment(AFun& f)
+{
+  f = ATmakeAFun("Assignment", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunAssignment()
+{
+  static AFun AFunAssignment = initAFunAssignment(AFunAssignment);
+  return AFunAssignment;
+}
+
+inline
+bool gsIsAssignment(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunAssignment();
+}
+
+// BinaryExpression
+inline
+AFun initAFunBinaryExpression(AFun& f)
+{
+  f = ATmakeAFun("BinaryExpression", 4, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunBinaryExpression()
+{
+  static AFun AFunBinaryExpression = initAFunBinaryExpression(AFunBinaryExpression);
+  return AFunBinaryExpression;
+}
+
+inline
+bool gsIsBinaryExpression(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunBinaryExpression();
+}
+
+// DataVarExprID
+inline
+AFun initAFunDataVarExprID(AFun& f)
+{
+  f = ATmakeAFun("DataVarExprID", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunDataVarExprID()
+{
+  static AFun AFunDataVarExprID = initAFunDataVarExprID(AFunDataVarExprID);
+  return AFunDataVarExprID;
+}
+
+inline
+bool gsIsDataVarExprID(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunDataVarExprID();
+}
+
 // DataVarID
 inline
 AFun initAFunDataVarID(AFun& f)
@@ -51,6 +117,28 @@ inline
 bool gsIsDataVarID(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunDataVarID();
+}
+
+// Expression
+inline
+AFun initAFunExpression(AFun& f)
+{
+  f = ATmakeAFun("Expression", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunExpression()
+{
+  static AFun AFunExpression = initAFunExpression(AFunExpression);
+  return AFunExpression;
+}
+
+inline
+bool gsIsExpression(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunExpression();
 }
 
 // Nil
@@ -119,6 +207,28 @@ bool gsIsSkip(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunSkip();
 }
 
+// StatementSpec
+inline
+AFun initAFunStatementSpec(AFun& f)
+{
+  f = ATmakeAFun("StatementSpec", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunStatementSpec()
+{
+  static AFun AFunStatementSpec = initAFunStatementSpec(AFunStatementSpec);
+  return AFunStatementSpec;
+}
+
+inline
+bool gsIsStatementSpec(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunStatementSpec();
+}
+
 // Type
 inline
 AFun initAFunType(AFun& f)
@@ -139,6 +249,28 @@ inline
 bool gsIsType(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunType();
+}
+
+// UnaryExpression
+inline
+AFun initAFunUnaryExpression(AFun& f)
+{
+  f = ATmakeAFun("UnaryExpression", 3, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunUnaryExpression()
+{
+  static AFun AFunUnaryExpression = initAFunUnaryExpression(AFunUnaryExpression);
+  return AFunUnaryExpression;
+}
+
+inline
+bool gsIsUnaryExpression(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunUnaryExpression();
 }
 
 // VarSpec
@@ -164,9 +296,33 @@ bool gsIsVarSpec(ATermAppl Term)
 }
 
 inline
-ATermAppl gsMakeDataVarID(ATermAppl String_0, ATermAppl TypeExp_1)
+ATermAppl gsMakeAssignment(ATermList Expr_0, ATermList Expr_1)
+{
+  return ATmakeAppl2(gsAFunAssignment(), (ATerm) Expr_0, (ATerm) Expr_1);
+}
+
+inline
+ATermAppl gsMakeBinaryExpression(ATermAppl String_0, ATermAppl Expr_1, ATermAppl Expr_2, ATermAppl TypeID_3)
+{
+  return ATmakeAppl4(gsAFunBinaryExpression(), (ATerm) String_0, (ATerm) Expr_1, (ATerm) Expr_2, (ATerm) TypeID_3);
+}
+
+inline
+ATermAppl gsMakeDataVarExprID(ATermAppl VarID_0, ATermAppl Exp_1)
+{
+  return ATmakeAppl2(gsAFunDataVarExprID(), (ATerm) VarID_0, (ATerm) Exp_1);
+}
+
+inline
+ATermAppl gsMakeDataVarID(ATermList String_0, ATermAppl TypeExp_1)
 {
   return ATmakeAppl2(gsAFunDataVarID(), (ATerm) String_0, (ATerm) TypeExp_1);
+}
+
+inline
+ATermAppl gsMakeExpression(ATermAppl String_0, ATermAppl TypeID_1)
+{
+  return ATmakeAppl2(gsAFunExpression(), (ATerm) String_0, (ATerm) TypeID_1);
 }
 
 inline
@@ -176,9 +332,9 @@ ATermAppl gsMakeNil()
 }
 
 inline
-ATermAppl gsMakeProcSpec(ATermAppl VarSpec_0, ATermAppl StatementSpec_1)
+ATermAppl gsMakeProcSpec(ATermList DecSpec_0, ATermAppl StatementSpec_1)
 {
-  return ATmakeAppl2(gsAFunProcSpec(), (ATerm) VarSpec_0, (ATerm) StatementSpec_1);
+  return ATmakeAppl2(gsAFunProcSpec(), (ATerm) DecSpec_0, (ATerm) StatementSpec_1);
 }
 
 inline
@@ -188,15 +344,27 @@ ATermAppl gsMakeSkip()
 }
 
 inline
+ATermAppl gsMakeStatementSpec(ATermList Statement_0)
+{
+  return ATmakeAppl1(gsAFunStatementSpec(), (ATerm) Statement_0);
+}
+
+inline
 ATermAppl gsMakeType(ATermAppl String_0)
 {
   return ATmakeAppl1(gsAFunType(), (ATerm) String_0);
 }
 
 inline
-ATermAppl gsMakeVarSpec(ATermList VarID_0)
+ATermAppl gsMakeUnaryExpression(ATermAppl String_0, ATermAppl Expr_1, ATermAppl TypeID_2)
 {
-  return ATmakeAppl1(gsAFunVarSpec(), (ATerm) VarID_0);
+  return ATmakeAppl3(gsAFunUnaryExpression(), (ATerm) String_0, (ATerm) Expr_1, (ATerm) TypeID_2);
+}
+
+inline
+ATermAppl gsMakeVarSpec(ATermList VarExpID_0)
+{
+  return ATmakeAppl1(gsAFunVarSpec(), (ATerm) VarExpID_0);
 }
 //--- end generated code
 
