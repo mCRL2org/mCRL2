@@ -20,7 +20,8 @@ distclean: clean
 	@$(RM) -r build/Makefile config.log config.status build/config.jam tools/setup.h
 	$(RM) -rf build/bin
 
-parsers: mcrl2parser ltsview-fsmparser liblts-fsmparser
+parsers: mcrl2parser chiparser ltsview-fsmparser liblts-fsmparser
+	cp /usr/include/FlexLexer.h build/workarounds/all
 
 liblts-fsmparser:
 	cd libraries/lts/source; \
@@ -38,7 +39,11 @@ mcrl2parser:
 	flex -Pmcrl2 -omcrl2lexer.cpp mcrl2lexer.ll; \
 	bison -p mcrl2 -d -o mcrl2parser.cpp mcrl2parser.yy; \
 	mv mcrl2parser.hpp ../include
-	cp /usr/include/FlexLexer.h build/workarounds/all
+
+chiparser:
+	cd tools/chi2mcrl2; \
+	flex -Pchi -ochilexer.cpp chilexer.ll; \
+	bison -p chi -d -o chiparser.cpp chiparser.yy
 
 configure: build/autoconf/configure.ac
 	autoconf -o $@ -W all $<
