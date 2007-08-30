@@ -69,6 +69,10 @@ namespace Utils {
   HSV_Color RGB_to_HSV(RGB_Color c);
   RGB_Color HSV_to_RGB(HSV_Color c);
 
+  // Blends c1 and c2 according to the formula: 
+  // result = c1 * factor + c2 *(1 - factor)
+  RGB_Color blend_RGB(RGB_Color c1, RGB_Color c2, float factor);
+
   Point3D operator+(Point3D p1,Point3D p2);
   Point3D operator-(Point3D p1,Point3D p2);
   Point3D operator*(float s,Point3D p);

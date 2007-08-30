@@ -209,17 +209,11 @@ void GLCanvas::display(bool coll_caller) {
       if (!lightRenderMode || settings->getBool(NavShowStates)) {
 
         if (settings->getBool(DisplayStates)) {         
-          if (!simulating)
-          {
-            // Identify that we are drawing states
-            glPushName(STATE);
-          }
+          // Identify that we are drawing states
+          glPushName(STATE);
 
           visualizer->drawStates(simulating);
-          if (!simulating) 
-          {
-            glPopName();
-          }
+          glPopName();
         }
       }
       

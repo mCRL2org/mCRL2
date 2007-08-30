@@ -9,6 +9,8 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <iostream> 
+
 #include "visualizer.h"
 using namespace std;
 using namespace Utils;
@@ -484,15 +486,12 @@ void Visualizer::updateColors() {
 
         if (cl != NULL)
         {
+          c = ipr.getColor(r);
+          
           if(cl->isSelected())
           {
-            c.r = 0;
-            c.g = 255;
-            c.b = 0;
-          }
-          else
-          {
-            c = ipr.getColor(r);
+            RGB_Color orange = {255, 122, 0};
+            c = blend_RGB(c, orange, 0.5);
           }
 
           // set color of cluster[r,i]
@@ -509,30 +508,24 @@ void Visualizer::updateColors() {
         if (cl != NULL)
         {
           // set color of cluster[r,i]
-          if (!cl->isSelected())
+          if (isMarked(cl)) 
           {
-            if (isMarked(cl)) 
-            {
-                c = settings->getRGB(MarkedColor);
-                visObjectFactory->updateObjectColor(
-                    cl->getVisObject(),c);
-            } 
-            else 
-            {
-                visObjectFactory->updateObjectColor(
-                cl->getVisObject(),RGB_WHITE);
-            }
-          }
+            c = settings->getRGB(MarkedColor);
+          } 
           else 
           {
-            c.r = 0;
-            c.g = 255;
-            c.b = 0;
-            visObjectFactory->updateObjectColor(
-              cl->getVisObject(), c);
+            c = RGB_WHITE; 
+          }
+          
+          if (cl->isSelected()) 
+          {
+            RGB_Color orange = {255, 122, 0};
+            c = blend_RGB(c, orange, 0.5);
+            
           }
         }
-        
+        visObjectFactory->updateObjectColor(
+             cl->getVisObject(),c);
       }
     }
   }
@@ -611,23 +604,45 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
     for (size_t j = 0; j < posStates.size(); ++j) {
       isPossible = (s == posStates[j]);
     }
-    
+
+    RGB_Color c;
+
     if (isMarked(s))
     {
-      glColor4ub(markStateColor.r, markStateColor.g, markStateColor.b, 255);
+      c.r = markStateColor.r;
+      c.g = markStateColor.g;
+      c.b = markStateColor.b;
     }
   
     else
     {
-      glColor4ub(hisStateColor.r, hisStateColor.g, hisStateColor.b, 255);
+      c.r = hisStateColor.r;
+      c.g = hisStateColor.g;
+      c.b = hisStateColor.b;
     }
+
+    if (s->isSelected())
+    {
+      RGB_Color orange = {255, 122, 0};
+
+      c = blend_RGB(c, orange, 0.5);
+    }
+
+    glColor4ub(c.r, c.g, c.b, 255);
+
     if (!isPossible) {
+      glPushName(STATE);
+      glPushName(s->getID());
+
       Point3D p = s->getPositionAbs();
       glPushMatrix(); 
       glTranslatef(p.x, p.y, p.z);
       glScalef(ns, ns, ns);
       primitiveFactory->drawSimpleSphere();
       glPopMatrix();
+      
+      glPopName();
+      glPopName();
     }
   }
  
@@ -643,9 +658,19 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
   {
     currStateColor = settings->getRGB(SimCurrColor);
   }
+  
+  if (currState->isSelected())
+  {
+    RGB_Color orange = {255, 122, 0};
+    currStateColor = blend_RGB(currStateColor, orange, 0.5);
+  }
 
   glColor4ub(currStateColor.r, currStateColor.g, currStateColor.b, 255);
   Point3D currentPos = currState->getPositionAbs();
+
+  glPushName(STATE);
+  glPushName(currState->getID());
+
   glPushMatrix();
   glTranslatef(currentPos.x, currentPos.y, currentPos.z);
 
@@ -655,6 +680,9 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
   glScalef(1.5 *ns, 1.5* ns, 1.5 * ns);
   primitiveFactory->drawSimpleSphere();
   glPopMatrix(); 
+
+  glPopName();
+  glPopName();
   
   // Draw the future states
 
@@ -677,6 +705,12 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
         c = settings->getRGB(MarkedColor);
       }
    
+      if (endState->isSelected())
+      {
+        RGB_Color orange = {255, 122, 0};
+        c = blend_RGB(c, orange, 0.5);
+      }
+
       glColor4ub(c.r, c.g, c.b, 255);
       Point3D p = endState->getPositionAbs();
       glPushMatrix();
@@ -697,6 +731,12 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
       {
         c = settings->getRGB(MarkedColor);
       }
+      
+      if (endState->isSelected())
+      {
+        RGB_Color orange;
+        c = blend_RGB(c, orange, 0.5);
+      }
 
       glColor4ub(c.r, c.g, c.b, 255);
       Point3D p = endState->getPositionAbs();
@@ -714,12 +754,21 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
 
 void Visualizer::drawSimMarkedStates(Cluster* root, int rot) {
   float ns = settings->getFloat(NodeSize);
-  RGB_Color c = settings->getRGB(MarkedColor);
-  glColor4ub(c.r, c.g, c.b, 255);
 
-  for (int i = 0; i < lts->getNumMarkedStates(); ++i) {
+  for (int i = 0; i < lts->getNumMarkedStates(); ++i) 
+  {
     State* s = lts->getMarkedState(i);
-    
+
+    RGB_Color c = settings->getRGB(MarkedColor);
+
+    if (s->isSelected())
+    {
+      RGB_Color orange = {255, 122, 0};
+      c = blend_RGB(c, orange, 0.5);
+    }
+
+    glColor4ub(c.r, c.g, c.b, 255);
+
     Point3D p = s->getPositionAbs();
     glPushMatrix(); 
     glTranslatef(p.x, p.y, p.z);
@@ -868,20 +917,24 @@ void Visualizer::drawStates(Cluster* root, int rot, bool simulating) {
     State *s = root->getState(i);
     if(!(simulating && s->isSimulated()))
     {
+      RGB_Color c;
       if (isMarked(s)) 
       {
-        RGB_Color c = settings->getRGB(MarkedColor);
-        glColor4ub(c.r,c.g,c.b,255);
-      } 
-      else if (s->isSelected()) 
-      {
-        glColor4ub(0, 0, 0, 255);
+        c = settings->getRGB(MarkedColor);
       } 
       else 
       {
-        RGB_Color c = settings->getRGB(StateColor);
-        glColor4ub(c.r,c.g,c.b,255);
+        c = settings->getRGB(StateColor);
       }
+
+      if (s->isSelected())
+      {
+        RGB_Color orange = {255, 122, 0};
+        c = blend_RGB(c, orange, 0.5);
+      }
+
+      glColor4ub(c.r,c.g,c.b,255);
+
       glPushMatrix();
       if (!s->isCentered()) {
         glRotatef(-s->getPositionAngle(),0.0f,0.0f,1.0f);
