@@ -23,6 +23,8 @@ for option in [ regex.split $(BUILD_OPTIONS) " " ] {
   }
 }
 
+DEFAULT_BUILD_OPTIONS += <link>$(LINK_VARIANT) ;
+
 if $(BUILD_VARIANT) && $(BUILD_VARIANT) != "custom" {
   DEFAULT_BUILD_OPTIONS += <variant>$(BUILD_VARIANT) ;
 }
