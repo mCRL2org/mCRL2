@@ -168,8 +168,8 @@ void MainFrame::setupMainArea() {
   mainSizer->AddGrowableCol(0);
   mainSizer->AddGrowableRow(0);
 
-  wxPanel* rightPanel = new wxPanel(this,wxID_ANY,wxDefaultPosition,
-      wxDefaultSize,wxRAISED_BORDER);
+  wxSplitterWindow* rightPanel = new wxSplitterWindow(this,wxID_ANY,
+    wxDefaultPosition, wxDefaultSize);
   setupRightPanel(rightPanel);
 
   int attribList[] = { WX_GL_RGBA,WX_GL_DOUBLEBUFFER,0 };
@@ -181,12 +181,17 @@ void MainFrame::setupMainArea() {
   mainSizer->Fit(this);
   SetSizer(mainSizer);
   Layout();
+
+  // Now that we know the window size, update minimum pane size of the right 
+  // panel and update Sash position accordingly.
+  rightPanel->SetMinimumPaneSize(50);
+  rightPanel->SetSashPosition(rightPanel->GetClientSize().GetHeight()/2, true);
 }
 
-void MainFrame::setupRightPanel(wxPanel* panel) {
-  wxFlexGridSizer* sizer = new wxFlexGridSizer(2,1,0,0);
-  sizer->AddGrowableCol(0);
-  sizer->AddGrowableRow(1);
+void MainFrame::setupRightPanel(wxSplitterWindow* panel) {
+  //wxFlexGridSizer* sizer = new wxFlexGridSizer(2,1,0,0);
+  //sizer->AddGrowableCol(0);
+  //sizer->AddGrowableRow(1);
 
   int lf = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
   int rf = wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL;
@@ -270,12 +275,17 @@ void MainFrame::setupRightPanel(wxPanel* panel) {
   bottomNotebook->AddPage(simPanel, wxT("Simulation"), false); 
 
   
-  sizer->Add(topNotebook, 0, wxEXPAND | wxALL, 5);
-  sizer->Add(bottomNotebook, 0, wxEXPAND | wxALL, 5);
-  sizer->Fit(panel);
-  panel->SetSizer(sizer);
-  panel->Fit();
+  //sizer->Add(topNotebook, 0, wxEXPAND | wxALL, 5);
+  //sizer->Add(bottomNotebook, 0, wxEXPAND | wxALL, 5);
+  //sizer->Fit(panel);
+  //panel->SetSizer(sizer);
+  //panel->Fit();
+
+  panel->SplitHorizontally(topNotebook, bottomNotebook);
+  panel->SetSashGravity(1.0);
+  
   panel->Layout();
+  panel->UpdateSize();
 }
 
 void MainFrame::setupMarkPanel(wxPanel* panel) {
@@ -404,7 +414,7 @@ void MainFrame::setupSimPanel(wxPanel* panel) {
 
 
   // Information about current state
-  wxStaticBoxSizer* simStateSizer = new wxStaticBoxSizer(wxVERTICAL, panel, 
+  /*wxStaticBoxSizer* simStateSizer = new wxStaticBoxSizer(wxVERTICAL, panel, 
                                                          wxT("Current state"));
   simStateView = new wxListView(panel, myID_SIM_STATE_VIEW, 
                                          wxDefaultPosition, wxSize(200, 100), 
@@ -414,7 +424,7 @@ void MainFrame::setupSimPanel(wxPanel* panel) {
   simStateView->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
 
   simStateSizer->Add(simStateView, 1, flags|wxEXPAND, border);
-  simSizer->Add(simStateSizer, 0, wxEXPAND|wxALL, border);
+  simSizer->Add(simStateSizer, 0, wxEXPAND|wxALL, border);*/
   
   panel->SetSizer(simSizer);
   panel->Fit();
@@ -423,8 +433,8 @@ void MainFrame::setupSimPanel(wxPanel* panel) {
   // Now the panel has been laid out, we can get fill up the columns
   simTransView->SetColumnWidth(1, simTransView->GetClientSize().GetWidth() - 
                                simTransView->GetColumnWidth(0));
-  simStateView->SetColumnWidth(1, simStateView->GetClientSize().GetWidth() - 
-                               simStateView->GetColumnWidth(0));
+  /*simStateView->SetColumnWidth(1, simStateView->GetClientSize().GetWidth() - 
+                               simStateView->GetColumnWidth(0));*/
 }
 
 GLCanvas* MainFrame::getGLCanvas() const {
@@ -864,7 +874,7 @@ void MainFrame::refresh() {
 
 
       // Refresh the state list with the information about the current state
-      simStateView->DeleteAllItems();
+      /*simStateView->DeleteAllItems();
       
       if (currState != NULL) {
         for(int i = 0; i < mediator->getNumberOfParams(); ++i) {
@@ -877,7 +887,7 @@ void MainFrame::refresh() {
             mediator->getParValue(i, currState->getParameterValue(i)).c_str(), 
               wxConvLocal));
         }
-      }
+      }*/
     }
   }
   Layout();
