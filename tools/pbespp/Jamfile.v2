@@ -5,6 +5,7 @@ project toolset/pbespp
 exe pbespp
        : pbespp.cpp
          /libraries//mcrl2_basic
+         /libraries//pbes
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
        ;

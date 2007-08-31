@@ -326,7 +326,7 @@ class pbes
     /// Otherwise an ascii representation is saved. In general the binary format is
     /// much more compact than the ascii representation.
     ///
-    bool save(const std::string& filename, bool binary = true)
+    bool save(const std::string& filename, bool binary = true) const
     {
       aterm t = ATermAppl(*this);
       if (binary)

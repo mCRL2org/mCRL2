@@ -2,22 +2,12 @@ project toolset/pbes2bes
    : build-dir $(BUILD_TOP)/pbes2bes
    : requirements
        <source>/libraries//parser
+       <source>/libraries//lps
+       <source>/libraries//pbes
    ;
-
-obj sort_functions.o
-       : sort_functions.cpp
-         /libraries//lps
-         /libraries//rewrite
-         /libraries//parser
-         /site-config//boost_program_options
-       : <include>.
-       ;
 
 exe pbes2bes
        : pbes2bes.cpp
-         pbes_rewrite.cpp
-         sort_functions.o
-         /libraries//lps
          /libraries//rewrite
          /libraries//parser
          /site-config//boost_program_options
@@ -27,7 +17,6 @@ exe pbes2bes
 
 exe pbes2bool
        : pbes2bool.cpp
-         /libraries//lps
          /libraries//rewrite
          /site-config//boost_program_options
        : <include>.

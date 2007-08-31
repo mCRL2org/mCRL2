@@ -5,6 +5,7 @@ project toolset/lps2pbes
 exe lps2pbes
        : lps2pbes.cpp
          /libraries//lps
+         /libraries//pbes
          /libraries//parser
          /libraries//mcrl2_basic
          /libraries//data

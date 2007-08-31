@@ -1,0 +1,52 @@
+project pbes
+       : source-location ..
+       : build-dir $(BUILD_TOP)
+       : requirements
+          <include>../include
+          <dependency>/boost//headers
+          <dependency>/libraries//atermpp
+          <dependency>/libraries//lps
+       : usage-requirements
+          <include>../include
+          <dependency>/boost//headers
+          <dependency>/libraries//atermpp
+          <dependency>/libraries//lps
+       ;
+
+alias pbes.main
+       : source/sort_functions.cpp
+         source/pbes_rewrite.cpp
+         source/pbes2bool.cpp
+       : <use>/libraries/parser//headers
+         <use>/libraries/rewrite//headers
+         <use>/libraries/lps//headers
+       : <threading>single
+       ;
+
+lib pbes
+       : pbes.main
+         /libraries//parser
+         /libraries//rewrite
+         /libraries//lps
+       : <link>static
+       :
+       : <library>/libraries//parser
+         <library>/libraries//rewrite
+         <library>/libraries//lps
+       ;
+
+alias pbes
+       : /libraries//mcrl2
+       : <link>shared
+       ;
+
+alias pbes.alias
+       : pbes.main
+       :
+       :
+       : <use>/libraries/parser//headers
+         <use>/libraries/rewrite//headers
+         <use>/libraries/lps//headers
+       ;
+
+explicit pbes.alias ;

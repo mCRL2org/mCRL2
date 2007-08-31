@@ -1,30 +1,24 @@
 import testing ;
 
-project libraries/lps/test
+project libraries/pbes/test
    : requirements
        <use>/boost//headers
        <source>/libraries//parser
        <source>/libraries//rewrite
        <source>/libraries//mcrl2_basic
        <source>/libraries//lps
+       <source>/libraries//pbes
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem
    ;
 
 exe generate_lps2pbes_result : generate_lps2pbes_result.cpp ;
 
-test-suite lps
+test-suite pbes
     :
-      #[ run linear_process_test.cpp ]
-      #[ run substitute_test.cpp ]
-      [ run data_expression.cpp ]
-      [ run data_test.cpp ]
-      [ run time.cpp ]
-      [ run data_utility_test.cpp ]
-      [ run aterm_algorithm_test.cpp ]
-      [ run operators.cpp ]
-      [ run sort_test.cpp ]
-      [ run replace_test.cpp ]
+      [ run_with_input lps2pbes_test.cpp : pbes : test ]
+      [ run pbes_test.cpp ]
+      [ run bisimulation_test.cpp ]
     ;
 
 install dist 

@@ -55,8 +55,20 @@ namespace bes
 // below we define functions to construct bes_expressions using aterms.
 //
 
-  std::deque<variable_type> NULL_QUEUE;
-  bool opt_use_hashtables=false;
+  // wrap global variables in a class, to enable multiple inclusion of this header file
+  // note, T is only a dummy
+  template <class T>
+  struct bes_global_variables
+  {
+    static std::deque<variable_type> NULL_QUEUE;
+    static bool opt_use_hashtables;
+  };
+
+  template <class T>
+  bool bes_global_variables<T>::opt_use_hashtables = false;
+
+  template <class T>
+  std::deque<variable_type> bes_global_variables<T>::NULL_QUEUE;
 
   class bes_expression: public aterm
   {
@@ -81,61 +93,64 @@ namespace bes
       }
   };
 
+  inline
   void use_hashtables(void)
-  { opt_use_hashtables=true;
+  { bes_global_variables<int>::opt_use_hashtables=true;
   }
 
-  static bes_expression initBEStrue(bes_expression &BEStrue)
+/*
+  inline bes_expression initBEStrue(bes_expression &BEStrue)
   { BEStrue = ATmakeAppl0(ATmakeAFun("BESTrue", 0, ATfalse));
     ATprotect(reinterpret_cast<ATerm*>(&BEStrue));
     return BEStrue;
   }
 
-  static bes_expression initBESfalse(bes_expression &BESfalse)
+  inline bes_expression initBESfalse(bes_expression &BESfalse)
   { BESfalse = ATmakeAppl0(ATmakeAFun("BESFalse", 0, ATfalse));
     ATprotect(reinterpret_cast<ATerm*>(&BESfalse));
     return BESfalse;
   }
 
-  static bes_expression initBESdummy(bes_expression &BESdummy)
+  inline bes_expression initBESdummy(bes_expression &BESdummy)
   { BESdummy = ATmakeAppl0(ATmakeAFun("BESDummy", 0, ATfalse));
     ATprotect(reinterpret_cast<ATerm*>(&BESdummy));
     return BESdummy;
   }
-
-  static AFun initAFunBESAnd(AFun& f)
+*/
+  inline AFun initAFunBESAnd(AFun& f)
   { f = ATmakeAFun("BESAnd", 2, ATfalse);
     ATprotectAFun(f);
     return f;
   }
 
-  static inline AFun AFunBESAnd()
+  inline AFun AFunBESAnd()
   { static AFun BESAnd = initAFunBESAnd(BESAnd);
     return BESAnd;
   }
 
-  static AFun initAFunBESOr(AFun& f)
+  inline AFun initAFunBESOr(AFun& f)
   { f = ATmakeAFun("BESOr", 2, ATfalse);
     ATprotectAFun(f);
     return f;
   }
 
-  static inline AFun AFunBESOr()
+  inline AFun AFunBESOr()
   { static AFun BESOr = initAFunBESOr(BESOr);
     return BESOr;
   }
 
-  static AFun initAFunBESIf(AFun& f)
+  inline AFun initAFunBESIf(AFun& f)
   { f = ATmakeAFun("BESIf", 3, ATfalse);
     ATprotectAFun(f);
     return f;
   }
 
-  static inline AFun AFunBESIf()
+  inline AFun AFunBESIf()
   { static AFun BESIf = initAFunBESIf(BESIf);
     return BESIf;
   }
 
+/* This can't be put in a header file
   bes_expression BESfalse;
   inline bes_expression false_()
   { return (BESfalse?BESfalse:BESfalse=initBESfalse(BESfalse));
@@ -151,6 +166,112 @@ namespace bes
   inline bes_expression dummy()
   {
     return (BESdummy?BESdummy:BESdummy=initBESdummy(BESdummy));
+  }
+*/
+
+  // BESFalse
+  inline
+  AFun initAFunBESFalse(AFun& f)
+  {
+    f = ATmakeAFun("BESFalse", 0, ATfalse);
+    ATprotectAFun(f);
+    return f;
+  }
+  
+  inline
+  AFun gsAFunBESFalse()
+  {
+    static AFun AFunBESFalse = initAFunBESFalse(AFunBESFalse);
+    return AFunBESFalse;
+  }
+  
+  inline
+  bool gsIsBESFalse(ATermAppl Term)
+  {
+    return ATgetAFun(Term) == gsAFunBESFalse();
+  }
+  
+  // BESTrue
+  inline
+  AFun initAFunBESTrue(AFun& f)
+  {
+    f = ATmakeAFun("BESTrue", 0, ATfalse);
+    ATprotectAFun(f);
+    return f;
+  }
+  
+  inline
+  AFun gsAFunBESTrue()
+  {
+    static AFun AFunBESTrue = initAFunBESTrue(AFunBESTrue);
+    return AFunBESTrue;
+  }
+  
+  inline
+  bool gsIsBESTrue(ATermAppl Term)
+  {
+    return ATgetAFun(Term) == gsAFunBESTrue();
+  }
+  
+  // BESDummy
+  inline
+  AFun initAFunBESDummy(AFun& f)
+  {
+    f = ATmakeAFun("BESDummy", 0, ATfalse);
+    ATprotectAFun(f);
+    return f;
+  }
+  
+  inline
+  AFun gsAFunBESDummy()
+  {
+    static AFun AFunBESDummy = initAFunBESDummy(AFunBESDummy);
+    return AFunBESDummy;
+  }
+  
+  inline
+  bool gsIsBESDummy(ATermAppl Term)
+  {
+    return ATgetAFun(Term) == gsAFunBESDummy();
+  }
+
+  inline
+  ATermAppl gsMakeBESFalse()
+  {
+    return ATmakeAppl0(gsAFunBESFalse());
+  }
+
+  inline
+  ATermAppl gsMakeBESTrue()
+  {
+    return ATmakeAppl0(gsAFunBESTrue());
+  }
+  
+  inline
+  ATermAppl gsMakeBESDummy()
+  {
+    return ATmakeAppl0(gsAFunBESDummy());
+  }
+
+  /// \brief Returns the expression true
+  inline
+  bes_expression true_()
+  {
+    return bes_expression(gsMakeBESTrue());
+  }
+
+  /// \brief Returns the expression false
+  inline
+  bes_expression false_()
+  {
+    return bes_expression(gsMakeBESFalse());
+  }
+
+  /// \brief Returns the expression dummy (???)
+  inline
+  bes_expression dummy()
+  {
+    return bes_expression(gsMakeBESDummy());
   }
 
   inline bes_expression and_(bes_expression b1,bes_expression b2)
@@ -180,7 +301,7 @@ namespace bes
                            (aterm)(b3)));
   }
 
-  static inline bes_expression ifAUX_(bes_expression b1,bes_expression b2,bes_expression b3)
+  inline bes_expression ifAUX_(bes_expression b1,bes_expression b2,bes_expression b3)
   { if (b2==b3)
     { return b2;
     }
@@ -248,7 +369,7 @@ namespace bes
     return ((aterm_int)b).value();
   }
 
-  static bes_expression substitute_true_false_rec(
+  inline bes_expression substitute_true_false_rec(
                       bes_expression b, 
                       const variable_type v, 
                       const bes_expression b_subst,
@@ -261,7 +382,7 @@ namespace bes
     
     bes_expression result;
 
-    if (opt_use_hashtables)
+    if (bes_global_variables<int>::opt_use_hashtables)
     { result=hashtable.get(b);
       if (result!=NULL)
       { return result;
@@ -337,12 +458,13 @@ namespace bes
       }
     }
 
-    if (opt_use_hashtables)
+    if (bes_global_variables<int>::opt_use_hashtables)
     { hashtable.put(b,result); 
     }
     return result;
   }
 
+  inline
   bes_expression substitute_true_false(
                       bes_expression b, 
                       const variable_type v, 
@@ -357,20 +479,21 @@ namespace bes
 
     bes_expression result=substitute_true_false_rec(b,v,b_subst,hashtable1);
 
-    if (opt_use_hashtables) 
+    if (bes_global_variables<int>::opt_use_hashtables) 
     { hashtable1.reset();
     }
     return result;
   }
 
-  static bes_expression BDDif_rec(
+  inline
+  bes_expression BDDif_rec(
                              bes_expression b1, 
                              bes_expression b2, 
                              bes_expression b3,
                              atermpp::table &hashtable);
 
 
-  bes_expression BDDif(bes_expression b1, bes_expression b2, bes_expression b3)
+  inline bes_expression BDDif(bes_expression b1, bes_expression b2, bes_expression b3)
   { 
     
     static atermpp::table hashtable(100,75);
@@ -381,7 +504,7 @@ namespace bes
     return b;
   }
 
-  static bes_expression BDDif_rec(bes_expression b1, bes_expression b2, bes_expression b3,atermpp::table &hashtable)
+  inline bes_expression BDDif_rec(bes_expression b1, bes_expression b2, bes_expression b3,atermpp::table &hashtable)
   { /* Assume that b1, b2 and b3 are ordered BDDs. Return an
        ordered BDD */
 
@@ -625,7 +748,7 @@ namespace bes
                         fixpoint_symbol sigma,
                         unsigned long rank,
                         bes_expression rhs,
-                        std::deque <variable_type> &todo=NULL_QUEUE)
+                        std::deque <variable_type> &todo=bes_global_variables<int>::NULL_QUEUE)
       { assert(rank>0);  // rank must be positive.
         assert(v>0);     // variables are represented by numbers >0.
         // std::cerr << "Add equation " << v << std::endl;
@@ -653,7 +776,7 @@ namespace bes
       inline void set_rhs(variable_type v,
                           bes_expression b,
                           variable_type v_except=0,
-                          std::deque <variable_type> &todo=NULL_QUEUE)
+                          std::deque <variable_type> &todo=bes_global_variables<int>::NULL_QUEUE)
       { /* set the right hand side of v to b. Update the variable occurrences
            of v in the variables occurrence sets of variables occurring in b, but
            do not update the variable occurrence sets of v_except */
@@ -762,8 +885,8 @@ namespace bes
                       bes_expression b)
       { static atermpp::indexed_set indexed_set1(10,50);
 
-        add_variables_to_occurrence_sets(v,b,opt_use_hashtables,indexed_set1);
-        if (opt_use_hashtables)
+        add_variables_to_occurrence_sets(v,b,bes_global_variables<int>::opt_use_hashtables,indexed_set1);
+        if (bes_global_variables<int>::opt_use_hashtables)
         { indexed_set1.reset();
         }
       }
@@ -822,8 +945,8 @@ namespace bes
       {
         static atermpp::indexed_set indexed_set2(10,50);
 
-        remove_variables_from_occurrence_sets(v,b,v_except,opt_use_hashtables,indexed_set2);
-        if (opt_use_hashtables)
+        remove_variables_from_occurrence_sets(v,b,v_except,bes_global_variables<int>::opt_use_hashtables,indexed_set2);
+        if (bes_global_variables<int>::opt_use_hashtables)
         { indexed_set2.reset();
         }
       }
@@ -859,14 +982,14 @@ namespace bes
 
       void set_variable_relevance_rec(
                     bes_expression b,
-                    std::deque <variable_type> &todo=NULL_QUEUE)
+                    std::deque <variable_type> &todo=bes_global_variables<int>::NULL_QUEUE)
       { 
         assert(count_variable_relevance);
         if (is_true(b)||is_false(b)||is_dummy(b))
         { return;
         }
 
-        if (opt_use_hashtables)
+        if (bes_global_variables<int>::opt_use_hashtables)
         { if (!(variable_relevance_indexed_set.put(b)).second)
           { /* The relevance for the variables in this term has already been set */
             return;
@@ -882,7 +1005,7 @@ namespace bes
           { control_info[v]=control_info[v]|RELEVANCE_MASK;  // Make relevant
             if (get_rhs(v)==dummy()) // v is relevant an unprocessed. Put in on the todo stack.
             { 
-              if (&todo!=&NULL_QUEUE)
+              if (&todo!=&bes_global_variables<int>::NULL_QUEUE)
               { // fprintf(stderr,"push back %d\n",(unsigned int)v);
                 todo.push_back(v);
               }
@@ -913,13 +1036,13 @@ namespace bes
         assert(0); // do not expect other term formats.
       }
 
-      void refresh_relevances(std::deque <variable_type> &todo=NULL_QUEUE)
+      void refresh_relevances(std::deque <variable_type> &todo=bes_global_variables<int>::NULL_QUEUE)
       { if (count_variable_relevance)
         { reset_variable_relevance();
-          if (opt_use_hashtables)
+          if (bes_global_variables<int>::opt_use_hashtables)
           { variable_relevance_indexed_set.reset();
           }
-          if (&todo!=&NULL_QUEUE)
+          if (&todo!=&bes_global_variables<int>::NULL_QUEUE)
           { todo.clear();
           }
           set_variable_relevance_rec(variable(1),todo);

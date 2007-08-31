@@ -5,6 +5,7 @@ project toolset/pbessolve
 obj gauss.o
        : gauss.cpp
          /libraries//lps
+         /libraries//pbes
          /libraries//rewrite
          /libraries//parser
          /site-config//boost_program_options
@@ -15,6 +16,7 @@ exe pbessolve
        : pbessolve.cpp
 	 gauss.o
 	 /libraries//lps
+   /libraries//pbes
 	 /libraries//rewrite
          /libraries//parser
          /site-config//boost_program_options
@@ -24,6 +26,7 @@ exe pbessolve
 exe txt2pbes
        : txt2pbes.cpp
          /libraries//lps
+         /libraries//pbes
          /libraries//rewrite
          /libraries//parser
          /site-config//boost_program_options
