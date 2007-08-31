@@ -58,6 +58,7 @@ doxy:
 	@cd libraries/mcrl2_basic/doc; doxygen
 	@cd libraries/nextstate/doc; doxygen
 	@cd libraries/parser/doc; doxygen
+	@cd libraries/pbes/doc; doxygen
 	@cd libraries/prover/doc; doxygen
 	@cd libraries/rewrite/doc; doxygen
 	@cd libraries/trace/doc; doxygen
