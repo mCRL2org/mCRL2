@@ -7,7 +7,7 @@
 /// \file lpsactionrename.cpp
 /// \brief Add your file description here.
 
-#define NAME "lpsactionupdate"
+#define NAME "lpsactionrename"
 #define VERSION "0.0"
 
 #include <cstdio>
@@ -43,9 +43,8 @@ typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL, PH_REG_FRM_TRANS 
 //t_tool_options represents the options of the tool 
 typedef struct {
   bool pretty;
-  bool untimed;
   t_phase end_phase;
-  string formfilename;
+  string action_rename_filename;
   string infilename;
   string outfilename;
 } t_tool_options;
@@ -61,7 +60,8 @@ static t_tool_options parse_command_line(int argc, char **argv);
 //Ret:  the parsed command line options
 
 static ATermAppl rename_lps_actions(t_tool_options tool_options); //TODO:change description
-//Pre:  tool_options.formfilename contains a state formula
+//Pre:  tool_options.action_rename_filename contains a action rename
+//      specification
 //      tool_options.infilename contains an LPS ("" indicates stdin)
 //      tool_options.end_phase indicates at which phase conversion stops
 //Ret:  if end_phase == PH_NONE, the PBES generated from the state formula and
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
   ATinit(argc,argv,&stackbot);
   gsEnableConstructorFunctions();
 
-  //process state formula
+  //process action rename specfication
   ATermAppl result = rename_lps_actions(tool_options);
   if (result == NULL) {
     return 1;
@@ -118,14 +118,12 @@ static t_tool_options parse_command_line(int argc, char **argv)
   //declarations for getopt
   t_phase opt_end_phase = PH_NONE;
   bool opt_pretty = false;
-  bool opt_untimed = false;
-  string formfilename = "";
-  #define SHORT_OPTIONS "f:p:ehquvd"
+  string action_rename_filename = "";
+  #define SHORT_OPTIONS "f:p:ehqvd"
   #define VERSION_OPTION CHAR_MAX + 1
   struct option long_options[] = {
-    { "formula",   required_argument,  NULL,  'f' },
+    { "file",      required_argument,  NULL,  'f' },
     { "end-phase", required_argument,  NULL,  'p' },
-    { "untimed",   no_argument,        NULL,  'u' },
     { "external",  no_argument,        NULL,  'e' },
     { "help",      no_argument,        NULL,  'h' },
     { "version",   no_argument,        NULL,  VERSION_OPTION },
@@ -139,7 +137,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
   while ((option = getopt_long(argc, argv, SHORT_OPTIONS, long_options, NULL)) != -1) {
     switch (option) {
       case 'f': /* formula */
-        formfilename = optarg;
+        action_rename_filename = optarg;
         break;
       case 'p': /* end-phase */
         if (strcmp(optarg, "pa") == 0) {
@@ -148,15 +146,10 @@ static t_tool_options parse_command_line(int argc, char **argv)
           opt_end_phase = PH_TYPE_CHECK;
         } else if (strcmp(optarg, "di") == 0) {
           opt_end_phase = PH_DATA_IMPL;
-        } else if (strcmp(optarg, "rft") == 0) {
-          opt_end_phase = PH_REG_FRM_TRANS;
         } else {
           gsErrorMsg("option -p has illegal argument '%s'\n", optarg);
           exit(1);
         }
-        break;
-      case 'u': /* untimed */
-        opt_untimed = true;
         break;
       case 'e': /* pretty */
         opt_pretty = true;
@@ -183,7 +176,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
     }
   }
   //check for presence of -f
-  if (formfilename == "") {
+  if (action_rename_filename == "") {
     gsErrorMsg("option -f is not specified\n");
     exit(1);
   }
@@ -215,8 +208,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
   }
   tool_options.end_phase    = opt_end_phase;
   tool_options.pretty       = opt_pretty;
-  tool_options.untimed      = opt_untimed;
-  tool_options.formfilename = formfilename;
+  tool_options.action_rename_filename = action_rename_filename;
   tool_options.infilename   = infilename;
   tool_options.outfilename  = outfilename;
   return tool_options;
@@ -230,7 +222,7 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
 {
   string infilename = tool_options.infilename;
   string outfilename = tool_options.outfilename;
-  string formfilename = tool_options.formfilename;
+  string action_rename_filename = tool_options.action_rename_filename;
   t_phase end_phase = tool_options.end_phase;
 
   lps::specification lps_oldspec = lps::specification();
@@ -263,10 +255,10 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
 
 
   //parse the action rename file
-  gsVerboseMsg("parsing action rename from '%s'...\n", formfilename.c_str());
-  ifstream formstream(formfilename.c_str(), ifstream::in|ifstream::binary);
+  gsVerboseMsg("parsing action rename from '%s'...\n", action_rename_filename.c_str());
+  ifstream formstream(action_rename_filename.c_str(), ifstream::in|ifstream::binary);
   if (!formstream.is_open()) {
-    gsErrorMsg("cannot open formula file '%s'\n", formfilename.c_str());
+    gsErrorMsg("cannot open formula file '%s'\n", action_rename_filename.c_str());
     return NULL;
   }
   ATermAppl action_rename = parse_action_rename(formstream);
@@ -275,7 +267,7 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
     gsErrorMsg("parsing failed\n");
     return NULL;
   }
-  gsDebugMsg("parsing succeded\n");
+  gsDebugMsg("parsing succeeded\n");
   if (end_phase == PH_PARSE) {
     return action_rename;
   }
@@ -326,18 +318,16 @@ static void print_help(char *name)
 {
   fprintf(stderr, //TODO: change
     "Usage: %s [OPTION]... -f FILE [INFILE [OUTFILE]]\n"
-    "Convert the state formula in FILE and the LPS in INFILE to a parameterised\n"
-    "boolean equation system (PBES) and save it to OUTFILE.\n"
+    "Apply the action rename specification in FILE to the LPS in INFILE and save it\n"
+    "to OUTFILE.\n"
     "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is\n"
     "used.\n"
     "\n"
-    "Mandatory arguments to long options are mandatory for short options too.\n"
-    "  -f, --formula=FILE    use the state formula from FILE\n"
-    "  -p, --end-phase=PHASE stop conversion after phase PHASE and output the\n"
-    "                        result; PHASE can be 'pa' (parse), 'tc' (type check),\n"
-    "                        'di' (data implementation) or 'rft' (regular formula\n"
-    "                        translation)\n"
-    "  -u, --untimed         apply special conversion for untimed LPS's\n"
+    "  -fFILE, --file=FILE   use the state formula from FILE\n"
+    "  -pPHASE, --end-phase=PHASE\n"
+    "                        stop conversion after phase PHASE and output the\n"
+    "                        result; PHASE can be 'pa' (parse), 'tc' (type check) or\n"
+    "                        'di' (data implementation)\n"
     "  -e, --external        return the result in the external format\n"
     "  -h, --help            display this help message and terminate\n"
     "      --version         display version information and terminate\n"

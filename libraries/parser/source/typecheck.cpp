@@ -550,7 +550,7 @@ ATermAppl type_check_action_rename(ATermAppl action_rename, lps::specification &
            gsWarningMsg("Ignoring the previous error(s), the formula will be typechecked without action label information.\n");
          gsDebugMsg ("type checking of action renamings read-in phase of LPS finished\n");
 
-	 assert(gsIsActionRename(action_rename));
+	 assert(gsIsActionRenameSpec(action_rename));
 
          ATermAppl data_spec = ATAgetArgument(action_rename, 0);
          if(!gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
@@ -610,7 +610,7 @@ ATermAppl type_check_action_rename(ATermAppl action_rename, lps::specification &
            if(!gsIsNil(Cond) && !(gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Cond,gsMakeSortIdBool()))){ b = false; break; }
 
            ATermAppl Right=ATAgetArgument(Rule,3);
-           assert(gsIsParamId(Right));
+           assert(gsIsParamId(Right) || gsIsTau(Right) || gsIsDelta(Right));
            Right=gstcTraverseActProcVarConstP(DeclaredVars,Right);
            if(!Right) { b = false; break; }
 
@@ -670,7 +670,7 @@ void gstcSplitSortDecls(ATermList SortDecls, ATermList *PSortIds,
 
 ATermAppl gstcUpdateSortSpec(ATermAppl Spec, ATermAppl SortSpec)
 {
-  assert(gsIsSpecV1(Spec) || gsIsActionRename(Spec));
+  assert(gsIsSpecV1(Spec) || gsIsActionRenameSpec(Spec));
   assert(gsIsSortSpec(SortSpec));
   ATermAppl DataSpec = ATAgetArgument(Spec, 0);
   DataSpec = ATsetArgument(DataSpec, (ATerm) SortSpec, 0);
@@ -680,7 +680,7 @@ ATermAppl gstcUpdateSortSpec(ATermAppl Spec, ATermAppl SortSpec)
 
 ATermAppl gstcFoldSortRefs(ATermAppl Spec)
 {
-  assert(gsIsSpecV1(Spec) || gsIsActionRename(Spec));
+  assert(gsIsSpecV1(Spec) || gsIsActionRenameSpec(Spec));
   gsDebugMsg("specification before folding:\n%T\n\n", Spec);
   //get sort declarations
   ATermAppl DataSpec = ATAgetArgument(Spec, 0);

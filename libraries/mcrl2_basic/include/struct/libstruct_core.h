@@ -295,28 +295,6 @@ bool gsIsAction(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunAction();
 }
 
-// ActionRename
-inline
-AFun initAFunActionRename(AFun& f)
-{
-  f = ATmakeAFun("ActionRename", 3, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunActionRename()
-{
-  static AFun AFunActionRename = initAFunActionRename(AFunActionRename);
-  return AFunActionRename;
-}
-
-inline
-bool gsIsActionRename(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunActionRename();
-}
-
 // ActionRenameRule
 inline
 AFun initAFunActionRenameRule(AFun& f)
@@ -359,6 +337,28 @@ inline
 bool gsIsActionRenameRules(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunActionRenameRules();
+}
+
+// ActionRenameSpec
+inline
+AFun initAFunActionRenameSpec(AFun& f)
+{
+  f = ATmakeAFun("ActionRenameSpec", 3, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunActionRenameSpec()
+{
+  static AFun AFunActionRenameSpec = initAFunActionRenameSpec(AFunActionRenameSpec);
+  return AFunActionRenameSpec;
+}
+
+inline
+bool gsIsActionRenameSpec(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunActionRenameSpec();
 }
 
 // Allow
@@ -2590,21 +2590,21 @@ ATermAppl gsMakeAction(ATermAppl ActId_0, ATermList DataExpr_1)
 }
 
 inline
-ATermAppl gsMakeActionRename(ATermAppl DataSpec_0, ATermAppl ActSpec_1, ATermAppl ActionRenameRules_2)
+ATermAppl gsMakeActionRenameRule(ATermList DataVarId_0, ATermAppl DataExprOrNil_1, ATermAppl ParamIdOrAction_2, ATermAppl ActionRenameRuleRHS_3)
 {
-  return ATmakeAppl3(gsAFunActionRename(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) ActionRenameRules_2);
-}
-
-inline
-ATermAppl gsMakeActionRenameRule(ATermList DataVarId_0, ATermAppl DataExprOrNil_1, ATermAppl ParamId_2, ATermAppl ProcExpr_3)
-{
-  return ATmakeAppl4(gsAFunActionRenameRule(), (ATerm) DataVarId_0, (ATerm) DataExprOrNil_1, (ATerm) ParamId_2, (ATerm) ProcExpr_3);
+  return ATmakeAppl4(gsAFunActionRenameRule(), (ATerm) DataVarId_0, (ATerm) DataExprOrNil_1, (ATerm) ParamIdOrAction_2, (ATerm) ActionRenameRuleRHS_3);
 }
 
 inline
 ATermAppl gsMakeActionRenameRules(ATermList ActionRenameRule_0)
 {
   return ATmakeAppl1(gsAFunActionRenameRules(), (ATerm) ActionRenameRule_0);
+}
+
+inline
+ATermAppl gsMakeActionRenameSpec(ATermAppl DataSpec_0, ATermAppl ActSpec_1, ATermAppl ActionRenameRules_2)
+{
+  return ATmakeAppl3(gsAFunActionRenameSpec(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) ActionRenameRules_2);
 }
 
 inline

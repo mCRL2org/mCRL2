@@ -796,6 +796,32 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
       PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, i),
         pp_format, ShowSorts, PrecLevel);
     }
+  } else if (gsIsActionRenameSpec(Part)) {
+    //print action rename specification
+    PRINT_FUNC(dbg_prints)("printing action rename specification\n");
+    for (int i = 0; i < 3; i++) {
+      PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, i),
+        pp_format, ShowSorts, PrecLevel);
+    }
+  } else if (gsIsActionRenameRule(Part)) {
+    //print action rename rule (without variables)
+    PRINT_FUNC(dbg_prints)("printing action rename rule\n");
+    ATermAppl Condition = ATAgetArgument(Part, 1);
+    if (!gsIsNil(Condition)) {
+      PRINT_FUNC(PrintPart_Appl)(OutStream, Condition,
+        pp_format, ShowSorts, 0);
+      PRINT_FUNC(fprints)(OutStream, "  ->  ");
+    }
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 2),
+      pp_format, ShowSorts, 0);
+    PRINT_FUNC(fprints)(OutStream, "  =>  ");
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 3),
+      pp_format, ShowSorts, 0);
+  } else if (gsIsActionRenameRules(Part)) {
+    //print action rename rules
+    PRINT_FUNC(dbg_prints)("printing action rename rules\n");
+    PRINT_FUNC(PrintEqns)(OutStream, ATLgetArgument(Part, 0),
+      pp_format, ShowSorts, PrecLevel);
   } else {
 #if defined(PRINT_C)
     gsErrorMsg("the term %T is not part of the internal format\n", Part);
@@ -864,8 +890,12 @@ void PRINT_FUNC(PrintEqns)(PRINT_OUTTYPE OutStream, const ATermList Eqns,
       }
       if (gsIsDataEqn(Eqn)) {
         PRINT_FUNC(fprints)(OutStream, "eqn  ");
-      } else { //gsIsProcEqn(Eqn)
+      } else if (gsIsProcEqn(Eqn)) {
         PRINT_FUNC(fprints)(OutStream, "proc ");
+      } else if (gsIsActionRenameRule(Eqn)) {
+        PRINT_FUNC(fprints)(OutStream, "rename\n     ");
+      } else {
+        assert(false);
       }
       PRINT_FUNC(PrintPart_Appl)(OutStream, Eqn,
         pp_format, ShowSorts, PrecLevel);
@@ -917,8 +947,12 @@ void PRINT_FUNC(PrintEqns)(PRINT_OUTTYPE OutStream, const ATermList Eqns,
           }
           if (gsIsDataEqn(Eqn)) {
             PRINT_FUNC(fprints)(OutStream, "eqn  ");
-          } else { //gsIsProcEqn(Eqn)
+          } else if (gsIsProcEqn(Eqn)) {
             PRINT_FUNC(fprints)(OutStream, "proc ");
+          } else if (gsIsActionRenameRule(Eqn)) {
+            PRINT_FUNC(fprints)(OutStream, "rename\n     ");
+          } else {
+            assert(false);
           }
           PRINT_FUNC(PrintPart_List)(OutStream, ATgetSlice(Eqns, StartPrefix, i),
              pp_format, ShowSorts, PrecLevel, ";\n", "     ");

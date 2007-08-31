@@ -114,20 +114,21 @@ template <typename Term> bool check_rule_ProcVarId(Term t);
 template <typename Term> bool check_rule_MultActName(Term t);
 template <typename Term> bool check_rule_RenameExpr(Term t);
 template <typename Term> bool check_rule_CommExpr(Term t);
-template <typename Term> bool check_rule_Spec(Term t);
+template <typename Term> bool check_rule_ProcSpec(Term t);
 template <typename Term> bool check_rule_ActSpec(Term t);
 template <typename Term> bool check_rule_ProcEqnSpec(Term t);
 template <typename Term> bool check_rule_ProcEqn(Term t);
 template <typename Term> bool check_rule_LinearProcessSummand(Term t);
 template <typename Term> bool check_rule_MultActOrDelta(Term t);
-template <typename Term> bool check_rule_Init(Term t);
+template <typename Term> bool check_rule_ProcInit(Term t);
 template <typename Term> bool check_rule_StateFrm(Term t);
 template <typename Term> bool check_rule_DataVarIdInit(Term t);
 template <typename Term> bool check_rule_RegFrm(Term t);
 template <typename Term> bool check_rule_ActFrm(Term t);
 template <typename Term> bool check_rule_ActionRenameRules(Term t);
 template <typename Term> bool check_rule_ActionRenameRule(Term t);
-template <typename Term> bool check_rule_ActionRename(Term t);
+template <typename Term> bool check_rule_ActionRenameRuleRHS(Term t);
+template <typename Term> bool check_rule_ActionRenameSpec(Term t);
 template <typename Term> bool check_rule_PBES(Term t);
 template <typename Term> bool check_rule_PropVarInst(Term t);
 template <typename Term> bool check_rule_PBEqn(Term t);
@@ -145,7 +146,6 @@ template <typename Term> bool check_term_StateImp(Term t);
 template <typename Term> bool check_term_PBESExists(Term t);
 template <typename Term> bool check_term_StateForall(Term t);
 template <typename Term> bool check_term_SortId(Term t);
-template <typename Term> bool check_term_ActionRename(Term t);
 template <typename Term> bool check_term_StateNu(Term t);
 template <typename Term> bool check_term_DataSpec(Term t);
 template <typename Term> bool check_term_SpecV1(Term t);
@@ -202,6 +202,7 @@ template <typename Term> bool check_term_Seq(Term t);
 template <typename Term> bool check_term_DataVarIdInit(Term t);
 template <typename Term> bool check_term_Process(Term t);
 template <typename Term> bool check_term_ActAnd(Term t);
+template <typename Term> bool check_term_ActionRenameSpec(Term t);
 template <typename Term> bool check_term_PBES(Term t);
 template <typename Term> bool check_term_StateVar(Term t);
 template <typename Term> bool check_term_LMerge(Term t);
@@ -430,7 +431,7 @@ bool check_rule_CommExpr(Term t)
 }
 
 template <typename Term>
-bool check_rule_Spec(Term t)
+bool check_rule_ProcSpec(Term t)
 {
   return    check_term_SpecV1(t);
 }
@@ -467,7 +468,7 @@ bool check_rule_MultActOrDelta(Term t)
 }
 
 template <typename Term>
-bool check_rule_Init(Term t)
+bool check_rule_ProcInit(Term t)
 {
   return    check_term_LinearProcessInit(t);
 }
@@ -536,9 +537,17 @@ bool check_rule_ActionRenameRule(Term t)
 }
 
 template <typename Term>
-bool check_rule_ActionRename(Term t)
+bool check_rule_ActionRenameRuleRHS(Term t)
 {
-  return    check_term_ActionRename(t);
+  return    check_rule_Action(t)
+         || check_term_Delta(t)
+         || check_term_Tau(t);
+}
+
+template <typename Term>
+bool check_rule_ActionRenameSpec(Term t)
+{
+  return    check_term_ActionRenameSpec(t);
 }
 
 template <typename Term>
@@ -926,42 +935,6 @@ bool check_term_SortId(Term t)
   return true;
 }
 
-// ActionRename(DataSpec, ActSpec, ActionRenameRules)
-template <typename Term>
-bool check_term_ActionRename(Term t)
-{
-  // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
-  if (term.type() != AT_APPL)
-    return false;
-  aterm_appl a(term);
-  if (!gsIsActionRename(a))
-    return false;
-
-  // check the children
-  if (a.size() != 3)
-    return false;
-#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_DataSpec<aterm>))
-    {
-      std::cerr << "check_rule_DataSpec" << std::endl;
-      return false;
-    }
-  if (!check_term_argument(a(1), check_rule_ActSpec<aterm>))
-    {
-      std::cerr << "check_rule_ActSpec" << std::endl;
-      return false;
-    }
-  if (!check_term_argument(a(2), check_rule_ActionRenameRules<aterm>))
-    {
-      std::cerr << "check_rule_ActionRenameRules" << std::endl;
-      return false;
-    }
-#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-  return true;
-}
-
 // StateNu(String, DataVarIdInit*, StateFrm)
 template <typename Term>
 bool check_term_StateNu(Term t)
@@ -1039,7 +1012,7 @@ bool check_term_DataSpec(Term t)
   return true;
 }
 
-// SpecV1(DataSpec, ActSpec, ProcEqnSpec, Init)
+// SpecV1(DataSpec, ActSpec, ProcEqnSpec, ProcInit)
 template <typename Term>
 bool check_term_SpecV1(Term t)
 {
@@ -1070,9 +1043,9 @@ bool check_term_SpecV1(Term t)
       std::cerr << "check_rule_ProcEqnSpec" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(3), check_rule_Init<aterm>))
+  if (!check_term_argument(a(3), check_rule_ProcInit<aterm>))
     {
-      std::cerr << "check_rule_Init" << std::endl;
+      std::cerr << "check_rule_ProcInit" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2137,7 +2110,7 @@ bool check_term_StateAnd(Term t)
   return true;
 }
 
-// ActionRenameRule(DataVarId*, DataExprOrNil, ParamId, ProcExpr)
+// ActionRenameRule(DataVarId*, DataExprOrNil, ParamIdOrAction, ActionRenameRuleRHS)
 template <typename Term>
 bool check_term_ActionRenameRule(Term t)
 {
@@ -2163,14 +2136,14 @@ bool check_term_ActionRenameRule(Term t)
       std::cerr << "check_rule_DataExprOrNil" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(2), check_rule_ParamId<aterm>))
+  if (!check_term_argument(a(2), check_rule_ParamIdOrAction<aterm>))
     {
-      std::cerr << "check_rule_ParamId" << std::endl;
+      std::cerr << "check_rule_ParamIdOrAction" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(3), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(3), check_rule_ActionRenameRuleRHS<aterm>))
     {
-      std::cerr << "check_rule_ProcExpr" << std::endl;
+      std::cerr << "check_rule_ActionRenameRuleRHS" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2533,6 +2506,42 @@ bool check_term_ActAnd(Term t)
   if (!check_term_argument(a(1), check_rule_ActFrm<aterm>))
     {
       std::cerr << "check_rule_ActFrm" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+  return true;
+}
+
+// ActionRenameSpec(DataSpec, ActSpec, ActionRenameRules)
+template <typename Term>
+bool check_term_ActionRenameSpec(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsActionRenameSpec(a))
+    return false;
+
+  // check the children
+  if (a.size() != 3)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_DataSpec<aterm>))
+    {
+      std::cerr << "check_rule_DataSpec" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_ActSpec<aterm>))
+    {
+      std::cerr << "check_rule_ActSpec" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(2), check_rule_ActionRenameRules<aterm>))
+    {
+      std::cerr << "check_rule_ActionRenameRules" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS

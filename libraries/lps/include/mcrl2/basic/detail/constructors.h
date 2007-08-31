@@ -55,7 +55,6 @@ ATermAppl constructSortRef();
 ATermAppl constructProcEqnSpec();
 ATermAppl constructStateForall();
 ATermAppl constructSortId();
-ATermAppl constructActionRename();
 ATermAppl constructStateNu();
 ATermAppl constructRegNil();
 ATermAppl constructDataSpec();
@@ -122,6 +121,7 @@ ATermAppl constructSeq();
 ATermAppl constructDataVarIdInit();
 ATermAppl constructProcess();
 ATermAppl constructActAnd();
+ATermAppl constructActionRenameSpec();
 ATermAppl constructPBES();
 ATermAppl constructStateVar();
 ATermAppl constructActionRenameRule();
@@ -168,6 +168,7 @@ ATermAppl constructProcInit();
 ATermAppl constructStateFrm();
 ATermAppl constructRegFrm();
 ATermAppl constructActFrm();
+ATermAppl constructActionRenameRuleRHS();
 ATermAppl constructFixPoint();
 ATermAppl constructPBExpr();
 
@@ -408,22 +409,6 @@ inline
 ATermAppl constructSortId()
 {
   static ATermAppl t = initConstructSortId(t);
-  return t;
-}
-
-// ActionRename
-inline
-ATermAppl initConstructActionRename(ATermAppl& t)
-{
-  t = ATmakeAppl3(gsAFunActionRename(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructActSpec()), reinterpret_cast<ATerm>(constructActionRenameRules()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructActionRename()
-{
-  static ATermAppl t = initConstructActionRename(t);
   return t;
 }
 
@@ -1483,6 +1468,22 @@ ATermAppl constructActAnd()
   return t;
 }
 
+// ActionRenameSpec
+inline
+ATermAppl initConstructActionRenameSpec(ATermAppl& t)
+{
+  t = ATmakeAppl3(gsAFunActionRenameSpec(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructActSpec()), reinterpret_cast<ATerm>(constructActionRenameRules()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructActionRenameSpec()
+{
+  static ATermAppl t = initConstructActionRenameSpec(t);
+  return t;
+}
+
 // PBES
 inline
 ATermAppl initConstructPBES(ATermAppl& t)
@@ -1519,7 +1520,7 @@ ATermAppl constructStateVar()
 inline
 ATermAppl initConstructActionRenameRule(ATermAppl& t)
 {
-  t = ATmakeAppl4(gsAFunActionRenameRule(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructDataExprOrNil()), reinterpret_cast<ATerm>(constructParamId()), reinterpret_cast<ATerm>(constructProcExpr()));
+  t = ATmakeAppl4(gsAFunActionRenameRule(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructDataExprOrNil()), reinterpret_cast<ATerm>(constructParamIdOrAction()), reinterpret_cast<ATerm>(constructActionRenameRuleRHS()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -2082,6 +2083,13 @@ inline
 ATermAppl constructActFrm()
 {
   return constructMultAct();
+}
+
+// ActionRenameRuleRHS
+inline
+ATermAppl constructActionRenameRuleRHS()
+{
+  return constructParamId();
 }
 
 // FixPoint
