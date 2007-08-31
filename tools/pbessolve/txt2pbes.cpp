@@ -50,7 +50,7 @@
 #include "libparse.h"
 #include "typecheck.h"
 #include "libalpha.h"
-#include "dataimpl.h"
+#include "mcrl2/dataimpl.h"
 
 
 //ATERM-specific 
