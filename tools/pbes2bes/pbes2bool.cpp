@@ -288,6 +288,8 @@ t_tool_options parse_command_line(int argc, char** argv)
   string opt_strategy;
   bool opt_precompile_pbes=false;
   bool opt_use_hashtables=false;
+  bool opt_construct_counter_example=false;
+
   string opt_rewriter;
   vector< string > file_names;
 
@@ -313,6 +315,8 @@ t_tool_options parse_command_line(int argc, char** argv)
        "jitty   interpreting just in time rewriter,\n"
        "innerc  compiling innermost rewriter (not for Windows),\n"
        "jittyc  compiling just in time rewriter (fastest, not for Windows).\n")
+      ("counter,c", "Print at the end a tree labelled with instantiations of the left hand side of"
+       "equations. This tree is an indication of how pbes2bool came to the validity/invalidity of the PBES.")
       ("precompile,P", "Precompile the pbes for faster rewriting. Does not work when the toolset is compiled in debug mode")
       ("hashtables,H", "Use hashtables when substituting in bes equations, and translate internal expressions to binary decision diagrams (discouraged, due to heavy performance penalties).")
       ("output,o",  po::value<string>(&opt_outputformat)->default_value("none"), "use outputformat arg (default 'none');\n"
@@ -358,6 +362,10 @@ t_tool_options parse_command_line(int argc, char** argv)
 
   if (vm.count("hashtables"))
   { opt_use_hashtables=true;
+  }
+
+  if (vm.count("counter"))
+  { opt_construct_counter_example=true;
   }
 
   if (vm.count("version"))
@@ -477,6 +485,7 @@ t_tool_options parse_command_line(int argc, char** argv)
   else assert(0); // Unknown rewriter specified. Should have been caught above.
 
   tool_options.opt_precompile_pbes=opt_precompile_pbes;
+  tool_options.opt_construct_counter_example=opt_construct_counter_example;
   tool_options.opt_use_hashtables=opt_use_hashtables;
   
   return tool_options;

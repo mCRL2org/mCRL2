@@ -17,6 +17,8 @@
 #include "atermpp/aterm_int.h"
 #include "atermpp/table.h"
 #include "mcrl2/pbes/pbes.h"
+#include <algorithm>
+#include <deque>
 
 #define RELEVANCE_MASK 1
 #define FIXPOINT_MASK 2
@@ -373,7 +375,8 @@ namespace bes
                       bes_expression b, 
                       const variable_type v, 
                       const bes_expression b_subst,
-                      atermpp::table &hashtable)
+                      atermpp::table &hashtable,
+                      std::deque < variable_type > &counter_example_queue=bes_global_variables<int>::NULL_QUEUE)
   { assert(is_true(b_subst)||is_false(b_subst));
 
     if (is_true(b)||is_false(b)||is_dummy(b))
@@ -391,7 +394,10 @@ namespace bes
     
     if (is_if(b))
     { if (v==get_variable(condition(b)))
-      { if (is_true(b_subst))
+      { if (&counter_example_queue!=&bes_global_variables<int>::NULL_QUEUE)
+        { counter_example_queue.push_front(v);
+        }
+        if (is_true(b_subst))
         { result=then_branch(b);
         }
         else
@@ -401,13 +407,17 @@ namespace bes
       }
       else
       { result=ifAUX_(condition(b),
-                     substitute_true_false_rec(then_branch(b),v,b_subst,hashtable),
-                     substitute_true_false_rec(else_branch(b),v,b_subst,hashtable));
+                     substitute_true_false_rec(then_branch(b),v,b_subst,hashtable,counter_example_queue),
+                     substitute_true_false_rec(else_branch(b),v,b_subst,hashtable,counter_example_queue));
       }
     }
     else if (is_variable(b))
     { if (v==get_variable(b))
       { result=b_subst;
+        if (&counter_example_queue!=&bes_global_variables<int>::NULL_QUEUE)
+        { counter_example_queue.push_front(v);
+        }
+
       }
       else
       { result=b;
@@ -415,12 +425,12 @@ namespace bes
     }
     else if (is_and(b))
     { 
-      bes_expression b1=substitute_true_false_rec(lhs(b),v,b_subst,hashtable);
+      bes_expression b1=substitute_true_false_rec(lhs(b),v,b_subst,hashtable,counter_example_queue);
       if (is_false(b1))
       { result=false_();
       }
       else
-      { bes_expression b2=substitute_true_false_rec(rhs(b),v,b_subst,hashtable);
+      { bes_expression b2=substitute_true_false_rec(rhs(b),v,b_subst,hashtable,counter_example_queue);
         if (is_false(b2))
         { result=false_();
         }
@@ -437,12 +447,12 @@ namespace bes
     }
     else if (is_or(b))
     { 
-      bes_expression b1=substitute_true_false_rec(lhs(b),v,b_subst,hashtable);
+      bes_expression b1=substitute_true_false_rec(lhs(b),v,b_subst,hashtable,counter_example_queue);
       if (is_true(b1))
       { result=true_();
       }
       else
-      { bes_expression b2=substitute_true_false_rec(rhs(b),v,b_subst,hashtable);
+      { bes_expression b2=substitute_true_false_rec(rhs(b),v,b_subst,hashtable,counter_example_queue);
         if (is_true(b2))
         { result=true_();
         }
@@ -468,7 +478,8 @@ namespace bes
   bes_expression substitute_true_false(
                       bes_expression b, 
                       const variable_type v, 
-                      const bes_expression b_subst)
+                      const bes_expression b_subst,
+                      std::deque < variable_type > &counter_example_queue=bes_global_variables<int>::NULL_QUEUE)
   { assert(is_true(b_subst)||is_false(b_subst));
 
     if (is_true(b)||is_false(b)||is_dummy(b))
@@ -477,7 +488,7 @@ namespace bes
     
     static atermpp::table hashtable1(10,50);
 
-    bes_expression result=substitute_true_false_rec(b,v,b_subst,hashtable1);
+    bes_expression result=substitute_true_false_rec(b,v,b_subst,hashtable1,counter_example_queue);
 
     if (bes_global_variables<int>::opt_use_hashtables) 
     { hashtable1.reset();
@@ -693,6 +704,22 @@ namespace bes
       std::vector< std::set <bes::variable_type> > variable_occurrence_sets;
       atermpp::indexed_set variable_relevance_indexed_set;
       bool count_variable_relevance;
+      std::vector < std::deque < bes::variable_type> > data_to_construct_counter_example;
+      bool construct_counter_example;
+
+    protected:
+      inline void check_vector_sizes(variable_type v)
+      { if (v>nr_of_variables())
+        { control_info.resize(v+1,0);
+          right_hand_sides.resize(v+1,dummy());
+          if (variable_occurrences_are_stored)
+          { variable_occurrence_sets.resize(v+1,std::set<variable_type>());
+          }
+         if (construct_counter_example)
+          { data_to_construct_counter_example.resize(v+1,std::deque<variable_type>());
+          }
+        }
+      }
 
     public:
       unsigned long max_rank;
@@ -704,26 +731,14 @@ namespace bes
           variable_occurrence_sets(1),
           variable_relevance_indexed_set(10,50),
           count_variable_relevance(false),
+          data_to_construct_counter_example(1),
+          construct_counter_example(false),
           max_rank(0)
       {}
 
       inline unsigned long nr_of_variables()
       { return control_info.size()-1; /* there is no equation at position 0 */
       }
-
-      inline void check_vector_sizes(variable_type v)
-      { if (v>nr_of_variables())
-        { control_info.resize(v+1,0);
-          right_hand_sides.resize(v+1,dummy());
-          if (variable_occurrences_are_stored)
-          { variable_occurrence_sets.resize(v+1,std::set<variable_type>());
-          }
-//          if (count_variable_relevance)
-//          { relevance_count.resize(v+1,0);
-//          }
-        }
-      }
-
 
       inline fixpoint_symbol get_fixpoint_symbol(variable_type v)
       {
@@ -1066,7 +1081,42 @@ namespace bes
         return (!count_variable_relevance || (control_info[v] & RELEVANCE_MASK));
       }
 
-      bool find_nu_loop(bes_expression b,variable_type v)
+      void construct_counter_example_on(void)
+      {
+        assert(!construct_counter_example);
+        construct_counter_example=true;
+        data_to_construct_counter_example.resize(nr_of_variables()+1,std::deque<variable_type>());
+      }
+
+      //std::front_insert_iterator< std::deque <variable_type> > 
+      std::deque <variable_type>  
+                   &counter_example_queue(variable_type v)
+      { assert(construct_counter_example);
+        check_vector_sizes(v);
+        //return std::front_insertor(data_to_construct_counter_example[v]);
+        return data_to_construct_counter_example[v];
+      }
+
+      static std::deque<variable_type>::iterator dummy_deque_iterator;
+
+      std::deque<variable_type>::iterator counter_example_begin(variable_type v)
+      { assert(construct_counter_example);
+        if (v>nr_of_variables())
+        { return dummy_deque_iterator;
+        }
+        return data_to_construct_counter_example[v].begin();
+      }
+
+      std::deque<variable_type>::iterator counter_example_end(variable_type v)
+      { assert(construct_counter_example);
+        if (v>nr_of_variables())
+        { return dummy_deque_iterator;
+        }
+        return data_to_construct_counter_example[v].end();
+      }
+
+      bool find_nu_loop(bes_expression b,variable_type v,
+                      std::deque < variable_type > &counter_example_queue=bes_global_variables<int>::NULL_QUEUE)
       { if (is_false(b) || is_true(b) || is_dummy(b))
         { return false;
         }
@@ -1077,16 +1127,19 @@ namespace bes
           { return false;
           }
           if (w==v)
-          { if (is_true(then_branch(b)))
+          { if ( construct_counter_example)
+            { counter_example_queue.push_front(w);
+            }
+            if (is_true(then_branch(b)))
             { return true;
             }
             return false;
           }
           if (is_true(then_branch(b)))
-          { return find_nu_loop(else_branch(b),v);
+          { return find_nu_loop(else_branch(b),v,counter_example_queue);
           }
           if (is_true(else_branch(b)))
-          { return find_nu_loop(then_branch(b),v);
+          { return find_nu_loop(then_branch(b),v,counter_example_queue);
           }
           return false;
         }
@@ -1094,12 +1147,15 @@ namespace bes
         if (is_variable(b))
         { variable_type w=get_variable(b);
           if (w==v)
-          { return true;
+          { if ( construct_counter_example)
+            { counter_example_queue.push_front(w);
+            }
+            return true;
           }
           if (w>v)
           { return false;
           }
-          return find_nu_loop(get_rhs(w),v);
+          return find_nu_loop(get_rhs(w),v,counter_example_queue);
         }
 
         if (is_and(b))
@@ -1107,11 +1163,11 @@ namespace bes
         }
         
         assert(is_or(b));
-        return find_nu_loop(lhs(b),v) || find_nu_loop(rhs(b),v);
+        return find_nu_loop(lhs(b),v,counter_example_queue) || find_nu_loop(rhs(b),v,counter_example_queue);
       }
 
-      
-      bool find_mu_loop(bes_expression b,variable_type v)
+      bool find_mu_loop(bes_expression b,variable_type v,
+                      std::deque < variable_type > &counter_example_queue=bes_global_variables<int>::NULL_QUEUE)
       { if (is_false(b) || is_true(b) || is_dummy(b))
         { return false;
         }
@@ -1122,16 +1178,21 @@ namespace bes
           { return false;
           }
           if (w==v)
-          { if (is_false(else_branch(b)))
+          { 
+            if ( construct_counter_example)
+            { counter_example_queue.push_front(w);
+            }
+
+            if (is_false(else_branch(b)))
             { return true;
             }
             return false;
           }
           if (is_false(then_branch(b)))
-          { return find_mu_loop(else_branch(b),v);
+          { return find_mu_loop(else_branch(b),v,counter_example_queue);
           }
           if (is_false(else_branch(b)))
-          { return find_mu_loop(then_branch(b),v);
+          { return find_mu_loop(then_branch(b),v,counter_example_queue);
           }
           return false;
         }
@@ -1139,16 +1200,19 @@ namespace bes
         if (is_variable(b))
         { variable_type w=get_variable(b);
           if (w==v)
-          { return true;
+          { if ( construct_counter_example)
+            { counter_example_queue.push_front(w);
+            }
+            return true;
           }
           if (w>v)
           { return false;
           }
-          return find_mu_loop(get_rhs(w),v);
+          return find_mu_loop(get_rhs(w),v,counter_example_queue);
         }
 
         if (is_and(b))
-        { return find_mu_loop(lhs(b),v) || find_mu_loop(rhs(b),v);
+        { return find_mu_loop(lhs(b),v,counter_example_queue) || find_mu_loop(rhs(b),v,counter_example_queue);
         }
 
         assert(is_or(b));

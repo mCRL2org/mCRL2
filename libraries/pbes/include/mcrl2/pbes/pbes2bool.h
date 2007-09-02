@@ -37,6 +37,7 @@ struct t_tool_options
    RewriteStrategy rewrite_strategy;
    bool opt_precompile_pbes;
    bool opt_use_hashtables;
+   bool opt_construct_counter_example;
    std::string infilename;
    std::string outfilename;
     
