@@ -25,7 +25,6 @@
 #include "mcrl2/dataimpl.h"
 #include "regfrmtrans.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/lps/lin_types.h"
 #include "mcrl2/lps/lin_std.h"
 
@@ -76,42 +75,6 @@ namespace detail {
     if (result == NULL)
       throw std::runtime_error("linearisation error");
     return aterm_appl(result);
-  }
-
-  inline
-  ATermAppl parse_state_formula(istream& from)
-  {
-    ATermAppl result = parse_state_frm(from);
-    if (result == NULL)
-      throw std::runtime_error("parse error in parse_state_frm()");
-    return result;
-  }
-  
-  inline
-  ATermAppl type_check_state_formula(ATermAppl formula, specification spec)
-  {
-    ATermAppl result = type_check_state_frm(formula, spec);
-    if (result == NULL)
-      throw std::runtime_error("type check error");
-    return result;
-  }
-  
-  inline
-  ATermAppl implement_data_state_formula(ATermAppl formula, specification spec)
-  {
-    ATermAppl result = implement_data_state_frm(formula, spec);
-    if (result == NULL)
-      throw std::runtime_error("data implementation error");
-    return result;
-  }
-  
-  inline
-  state_formula translate_regular_formula(ATermAppl formula)
-  {
-    ATermAppl result = translate_reg_frms(formula);
-    if (result == NULL)
-      throw std::runtime_error("formula translation error");
-    return result;
   }
 } // namespace detail
 
