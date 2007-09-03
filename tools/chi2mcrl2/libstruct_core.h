@@ -332,7 +332,7 @@ ATermAppl gsMakeNil()
 }
 
 inline
-ATermAppl gsMakeProcSpec(ATermList DecSpec_0, ATermAppl StatementSpec_1)
+ATermAppl gsMakeProcSpec(ATermList DecSpec_0, ATermList StatementSpec_1)
 {
   return ATmakeAppl2(gsAFunProcSpec(), (ATerm) DecSpec_0, (ATerm) StatementSpec_1);
 }

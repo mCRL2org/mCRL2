@@ -79,10 +79,10 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %type <appl> IdentifierType IdentifierTypeExpression
 %type <appl> NatIntExpression BasicExpression BooleanExpression Expression 
 %type <appl> BoolNatIntExpression 
-%type <appl> LocalVariables Identifier AssignmentStatement 
+%type <appl> LocalVariables Identifier// AssignmentStatement 
 %type <appl> ProcessBody Statement
 
-%type <list> Identifier_csp Expression_csp 
+%type <list> Identifier_csp //Expression_csp 
 %type <list> IdentifierTypeExpression_csp IdentifierType_csp
 %type <list> LocalVariables_csp
 
@@ -115,7 +115,7 @@ ProcessBody:
       	  gsDebugMsg("parsed ProcessBody  \n  %T\n", $$);	
 		}
 	| BP LocalVariables_csp PROC_SEP Statement EP
-      	{ //safe_assign($$, gsMakeProcSpec($1, $2));
+      	{ //safe_assign($$, gsMakeProcSpec(ATmakeList1((ATerm) $1)));
       	  gsDebugMsg("parsed ProcessBody  \n  %T\n", $$);	
 		}
 	;
@@ -211,7 +211,7 @@ IdentifierChannelDeclaration:
 	| Identifier RECVSEND
 	;
 
-ChannelDefinition_csp:
+/* ChannelDefinition_csp:
 	  ChannelDefinition
 	| ChannelDefinition_csp COMMA ChannelDefinition
 	;
@@ -229,7 +229,7 @@ IdentifierChannelDefinition:
 	  Identifier SENDRECV
 	| Identifier RECVSEND
 	;
-	
+*/	
 Type: 
 	  BasicType
 /*	| ContainerType
@@ -254,7 +254,8 @@ BasicType:
   **/
 
 Statement: 
-	  LBRACKET Statement RBRACKET
+	SKIP
+/*	  LBRACKET Statement RBRACKET
 	| BasicStatement
 	| UnaryStatement
 	| BinaryStatement
@@ -282,17 +283,17 @@ AssignmentStatement:
 		}
 //	| OptGuard LBRACE Expression_csp RBRACE COLON Expression_csp GG Identifier
 	;
-
-OptGuard: /* empty */
-	| Expression GUARD
+*/
+//OptGuard: /* empty */
+/*	| Expression GUARD
 	;
-
-OptChannel: /* empty */
-	| Expression COLON
+*/
+//OptChannel: /* empty */
+/*	| Expression COLON
 	;
-
+*/
 Identifier_csp: 
-	  Identifier
+	  Identifier 
 		{ /* empty */
 		  /* Identifier is propagated */
 		}
@@ -302,7 +303,7 @@ Identifier_csp:
 		}
 	;
 
-Expression_csp:
+/*Expression_csp:
 	  Expression
       	{ safe_assign($$, ATmakeList1((ATerm) $1));
       	  gsDebugMsg("parsed expression-element \n  %T\n", $$);	
@@ -312,8 +313,8 @@ Expression_csp:
       	  gsDebugMsg("parsed expression-element\n  %T\n", $$);	
 		}
 	;
-
-CommStatement:
+*/
+/*CommStatement:
 	  OptGuard Expression EXCLAMATION Expression_csp
 	| OptGuard Expression SSEND Expression_csp
 	| OptGuard Expression EXCLAMATION
@@ -324,8 +325,8 @@ CommStatement:
 	| OptGuard Expression RECV
 	| OptGuard Expression RRECV 
 	| OptGuard RRECV Expression_csp 
-	;
-	
+	;*/
+/*	
 Instantiation:
 	  Identifier LBRACE Expression_csp RBRACE
 	| Identifier
@@ -345,7 +346,7 @@ UnaryStatement:
 AdvancedStatement:
 	  DEADLOCK
 	;
-	
+*/	
 /**
   * EXPRESSIONS
   *
@@ -576,8 +577,8 @@ void reset_parser(void)
 ATermAppl gsSpecEltsToSpec(ATermList SpecElts)
 {
   ATermAppl Result = NULL;
-  ATermList VarDecl = ATmakeList0();
-  ATermAppl StatementSpec = NULL; 
+  //ATermList VarDecl = ATmakeList0();
+  //ATermAppl StatementSpec = NULL; 
   //int n = ATgetLength(SpecElts);
 
 /*  

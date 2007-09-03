@@ -1,6 +1,6 @@
-<SpecChi> 		::= ProcSpec(<DecSpec>+, <StatementSpec>)
+<SpecChi> 		::= ProcSpec(<DecSpec>)
 
-<DecSpec>		::= <VarSpec>
+<DecSpec>		::= DecSpec(<VarSpec>+)
                   | Nil
 
 <VarSpec>		::= VarSpec(<VarExpID>+)

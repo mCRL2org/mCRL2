@@ -464,7 +464,7 @@ bool check_term_BinaryExpression(Term t)
   return true;
 }
 
-// ProcSpec(DecSpec+, StatementSpec)
+// ProcSpec(DecSpec+, StatementSpec+)
 template <typename Term>
 bool check_term_ProcSpec(Term t)
 {
@@ -485,7 +485,7 @@ bool check_term_ProcSpec(Term t)
       std::cerr << "check_rule_DecSpec" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_StatementSpec<aterm>))
+  if (!check_list_argument(a(1), check_rule_StatementSpec<aterm>, 1))
     {
       std::cerr << "check_rule_StatementSpec" << std::endl;
       return false;

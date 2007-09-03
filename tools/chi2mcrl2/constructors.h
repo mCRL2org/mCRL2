@@ -225,7 +225,7 @@ ATermAppl constructBinaryExpression()
 inline
 ATermAppl initConstructProcSpec(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunProcSpec(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructStatementSpec()));
+  t = ATmakeAppl2(gsAFunProcSpec(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructList()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
