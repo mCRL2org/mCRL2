@@ -16,7 +16,8 @@
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/lps/detail/tools.h"
+#include "mcrl2/pbes/detail/tools.h"
+#include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/basic/detail/read_text.h"
 #include "test_specifications.h"
 

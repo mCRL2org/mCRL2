@@ -12,7 +12,7 @@
 #include <boost/test/minimal.hpp>
 #include "atermpp/aterm.h"
 #include "mcrl2/lps/linear_process.h"
-#include "mcrl2/lps/detail/tools.h"
+#include "mcrl2/lps/mcrl22lps.h"
 
 using namespace std;
 using namespace atermpp;

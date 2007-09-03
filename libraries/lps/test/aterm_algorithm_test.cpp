@@ -16,7 +16,7 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/sort.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/detail/tools.h"
+#include "mcrl2/lps/mcrl22lps.h"
 
 using namespace std;
 using namespace atermpp;

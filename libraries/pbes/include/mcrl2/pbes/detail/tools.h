@@ -4,11 +4,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/detail/tools.h
+/// \file mcrl2/pbes/detail/tools.h
 /// \brief Add your file description here.
 
-#ifndef LPS_DETAIL_TOOLS
-#define LPS_DETAIL_TOOLS
+#ifndef PBES_DETAIL_TOOLS
+#define PBES_DETAIL_TOOLS
 
 #include <stdexcept>
 #include <sstream>
@@ -35,25 +35,6 @@
 namespace lps {
 
 namespace detail {
-
-/*
-  /// Linearises the specification.
-  inline
-  specification mcrl22lps(const std::string& spec, t_lin_options options = t_lin_options())
-  {   
-    lin_std_initialize_global_variables();
-    
-    // the lineariser expects data from a stream...
-    std::stringstream spec_stream;
-    spec_stream << spec;
-
-    ATermAppl result = parse_specification(spec_stream);
-    result = type_check_specification(result);
-    result = alpha_reduce(result);
-    result = implement_data_specification(result);
-    return linearise(result, options);
-  }
-*/
 
   inline
   pbes lps2pbes(const specification& spec, const state_formula& formula, bool timed)
@@ -87,4 +68,4 @@ namespace detail {
 
 } // namespace lps
 
-#endif // LPS_DETAIL_TOOLS
+#endif // PBES_DETAIL_TOOLS

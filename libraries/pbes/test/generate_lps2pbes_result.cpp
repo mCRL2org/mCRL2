@@ -13,7 +13,8 @@
 #include <iostream>
 #include <string>
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/lps/detail/tools.h"
+#include "mcrl2/pbes/detail/tools.h"
+#include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/basic/detail/read_text.h"
 
 using namespace atermpp;
@@ -28,7 +29,7 @@ int main(int argc, char* argv[])
 
   if (argc < 4)
   {
-    std::cerr << "Usage: " << argv[0] << " specification_file formula_file (timed/untimed)" << endl;
+    std::cerr << "Usage: " << argv[0] << " specification_file formula_file (timed/untimed)" << std::endl;
     return 1;
   }
 

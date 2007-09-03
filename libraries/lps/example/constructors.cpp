@@ -9,7 +9,7 @@
 
 #include <iostream>
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/detail/tools.h"
+#include "mcrl2/lps/mcrl22lps.h"
 #include "test_specifications.h"
 
 using namespace std;

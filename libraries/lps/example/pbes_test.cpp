@@ -11,7 +11,8 @@
 #include <string>
 #include <cstdlib>
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/lps/detail/tools.h"
+#include "mcrl2/pbes/detail/tools.h"
+#include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/basic/detail/read_text.h"
 
 using namespace std;
