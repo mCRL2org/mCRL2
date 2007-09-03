@@ -129,6 +129,17 @@ void inline initialize_data_decls(t_data_decls *p_data_decls)
   p_data_decls->data_eqns = ATmakeList0();
 }
 
+#define data_decls_is_initialised(data_decls)\
+(data_decls.sorts != NULL && data_decls.cons_ops  != NULL &&\
+ data_decls.ops   != NULL && data_decls.data_eqns != NULL)
+//Ret: indicates whether the elements of data_decls are initialised
+
+ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls);
+//Pre: spec is a specification that adheres to the internal syntax of an
+//     arbitary phase
+//Ret: spec in which the data declarations from data_decls are added
+
+
 //Pre: substs is a list of substitutions
 //     recursive denotes wheter to apply substitutions recursively through the terms
 //Post: p_data_decls in which substs have been applied to sorts, cons_ops, ops and data_eqns
