@@ -464,9 +464,9 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
             {
               // gsVerboseMsg("+ %d\n",(unsigned long)*v);
               bes_expression b=bes_equations.get_rhs(*v);
-              if (opt_construct_counter_example)
+              if (tool_options.opt_construct_counter_example)
               { b=substitute_true_false(b,w,bes_equations.get_rhs(w),
-                                         bes_equations.counter_example_queue(v));
+                                         bes_equations.counter_example_queue(*v));
               }
               else
               { b=substitute_true_false(b,w,bes_equations.get_rhs(w));
