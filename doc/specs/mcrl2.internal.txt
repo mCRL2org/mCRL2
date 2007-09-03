@@ -298,10 +298,13 @@
 //------
 
 // PBES equation system
-<PBES>         ::= PBES(<DataSpec>, <PBEqn>*, <PropVarInst>)
+<PBES>         ::= PBES(<DataSpec>, <PBEqnSpec>, <PBInit>)
 
-// propositional variable instantiation
-<PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*)
+// parameterized boolean equation specification
+<PBEqnSpec>    ::= PBEqnSpec(<DataVarId>*, <PBEqn>*)
+
+// parameterized boolean initialization
+<PBInit>       ::= PBInit(<DataVarId>*, <PropVarInst>)
 
 // parameterized boolean equation
 <PBEqn>        ::= PBEqn(<FixPoint>, <PropVarDecl>, <PBExpr>)
@@ -323,3 +326,5 @@
                  | PBESExists(<DataVarId>+, <PBExpr>)
                  | <PropVarInst>
 
+// propositional variable instantiation
+<PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*)

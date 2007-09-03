@@ -29,6 +29,7 @@
 #include "mcrl2/basic/pretty_print.h"
 #include "mcrl2/lps/detail/utility.h"
 #include "mcrl2/pbes/pbes_equation.h"
+#include "mcrl2/pbes/pbes_initializer.h"
 
 namespace lps {
 
@@ -135,19 +136,24 @@ atermpp::set<data_variable> free_pbes_variables(EquationIterator first, Equation
 ///
 class equation_system: public atermpp::vector<pbes_equation>
 {
+  protected:
+    atermpp::set<data_variable> m_free_variables;
+    
   public:
     equation_system()
     {}
 
     /// Constructs an equation_system containing equation e.
     ///
-    equation_system(pbes_equation e)
+    equation_system(pbes_equation e, atermpp::set<data_variable> free_variables = atermpp::set<data_variable>())
+      : m_free_variables(free_variables)
     {
       push_back(e);
     }
 
-    equation_system(pbes_equation_list l)
-      : atermpp::vector<pbes_equation>(l.begin(), l.end())
+    equation_system(pbes_equation_list l, atermpp::set<data_variable> free_variables = atermpp::set<data_variable>())
+      : atermpp::vector<pbes_equation>(l.begin(), l.end()),
+        m_free_variables(free_variables)
     {}
   
     /// Applies a substitution to this equation system.
@@ -252,9 +258,21 @@ class equation_system: public atermpp::vector<pbes_equation>
     
     /// Computes the set of free variables.
     ///
-    atermpp::set<data_variable> free_variables() const
+    atermpp::set<data_variable> compute_free_variables() const
     {
       return free_pbes_variables(begin(), end());
+    }
+
+    /// Returns the free variables of this equation system.
+    const atermpp::set<data_variable>& free_variables() const
+    {
+      return m_free_variables;
+    }
+
+    /// Returns the free variables of this equation system.
+    atermpp::set<data_variable>& free_variables()
+    {
+      return m_free_variables;     
     }
 };
 
@@ -262,7 +280,8 @@ class equation_system: public atermpp::vector<pbes_equation>
 // pbes
 /// \brief parameterized boolean equation system
 ///
-// <PBES>         ::= PBES(<DataSpec>, <PBEqn>*, <PropVarInst>)
+// <PBES>         ::= PBES(<DataSpec>, <PBEqnSpec>, <PBInit>)
+
 class pbes
 {
   friend struct atermpp::aterm_traits<pbes>;
@@ -270,11 +289,21 @@ class pbes
   protected:
     data_specification m_data;
     equation_system m_equations;
-    propositional_variable_instantiation m_initial_state;
+    pbes_initializer m_initial_state;
 
     ATerm term() const
     {
       return reinterpret_cast<ATerm>(ATermAppl(*this));
+    }
+
+    /// Initialize the pbes with an aterm_appl.
+    ///
+    void init_term(aterm_appl t)
+    {
+      aterm_appl::iterator i = t.begin();
+      m_data          = aterm_appl(*i++);
+      m_equations     = equation_system(pbes_equation_list(aterm_appl(*i++)(0)));
+      m_initial_state = pbes_initializer(aterm_appl(*i)(0));
     }
 
   public:
@@ -283,11 +312,22 @@ class pbes
 
     pbes(data_specification data,
          equation_system equations, 
-         propositional_variable_instantiation initial_state)
+         pbes_initializer initial_state)
       :
         m_data(data),
         m_equations(equations),
         m_initial_state(initial_state)
+    {
+      assert(detail::check_rule_PBES(term()));
+    }
+
+    pbes(data_specification data,
+         equation_system equations, 
+         propositional_variable_instantiation initial_state)
+      :
+        m_data(data),
+        m_equations(equations),
+        m_initial_state(pbes_initializer(data_variable_list(), initial_state))
     {
       assert(detail::check_rule_PBES(term()));
     }
@@ -312,10 +352,7 @@ class pbes
       if (!t || t.type() != AT_APPL || !detail::check_rule_PBES(aterm_appl(t)))
         throw std::runtime_error(std::string("Error in pbes::load(): could not read from file " + filename));
 
-      aterm_appl::iterator i = aterm_appl(t).begin();
-      m_data          = data_specification(*i++);
-      m_equations     = equation_system(pbes_equation_list(*i++));
-      m_initial_state = propositional_variable_instantiation(*i);
+      init_term(aterm_appl(t));
 
       //if (!is_well_typed())
       //  throw std::runtime_error("Error in pbes::load(): term is not well typed");
@@ -357,8 +394,10 @@ class pbes
     ///
     operator ATermAppl() const
     {
-      pbes_equation_list l(m_equations.begin(), m_equations.end());
-      return gsMakePBES(m_data, l, m_initial_state);
+      // convert the equation system to ATerm format
+      data_variable_list free_variables(m_equations.free_variables().begin(), m_equations.free_variables().end());
+      pbes_equation_list equations(m_equations.begin(), m_equations.end());
+      return gsMakePBES(m_data, gsMakePBEqnSpec(free_variables, equations), m_initial_state);
     }
 
     /// Returns the set of binding variables of the pbes, i.e. the
@@ -401,7 +440,8 @@ class pbes
       atermpp::set<data_variable> result = m_equations.free_variables();
         
       // add the (free) variables appearing in the initial state
-      for (data_expression_list::iterator i = m_initial_state.parameters().begin(); i != m_initial_state.parameters().end(); ++i)
+      const data_expression_list parameters = m_initial_state.variable().parameters();
+      for (data_expression_list::iterator i = parameters.begin(); i != parameters.end(); ++i)
         atermpp::for_each(*i, data_variable_collector(data_variable_list(), atermpp::vector<data_variable>(), result));
 
       return result;

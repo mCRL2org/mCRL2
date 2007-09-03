@@ -130,11 +130,13 @@ template <typename Term> bool check_rule_ActionRenameRule(Term t);
 template <typename Term> bool check_rule_ActionRenameRuleRHS(Term t);
 template <typename Term> bool check_rule_ActionRenameSpec(Term t);
 template <typename Term> bool check_rule_PBES(Term t);
-template <typename Term> bool check_rule_PropVarInst(Term t);
+template <typename Term> bool check_rule_PBEqnSpec(Term t);
+template <typename Term> bool check_rule_PBInit(Term t);
 template <typename Term> bool check_rule_PBEqn(Term t);
 template <typename Term> bool check_rule_FixPoint(Term t);
 template <typename Term> bool check_rule_PropVarDecl(Term t);
 template <typename Term> bool check_rule_PBExpr(Term t);
+template <typename Term> bool check_rule_PropVarInst(Term t);
 template <typename Term> bool check_term_ProcEqn(Term t);
 template <typename Term> bool check_term_Hide(Term t);
 template <typename Term> bool check_term_SortArrow(Term t);
@@ -169,6 +171,7 @@ template <typename Term> bool check_term_BagComp(Term t);
 template <typename Term> bool check_term_StateDelay(Term t);
 template <typename Term> bool check_term_StructCons(Term t);
 template <typename Term> bool check_term_Mu(Term t);
+template <typename Term> bool check_term_PBEqnSpec(Term t);
 template <typename Term> bool check_term_ActNot(Term t);
 template <typename Term> bool check_term_Block(Term t);
 template <typename Term> bool check_term_Rename(Term t);
@@ -227,6 +230,7 @@ template <typename Term> bool check_term_ActExists(Term t);
 template <typename Term> bool check_term_Allow(Term t);
 template <typename Term> bool check_term_PropVarDecl(Term t);
 template <typename Term> bool check_term_ActImp(Term t);
+template <typename Term> bool check_term_PBInit(Term t);
 template <typename Term> bool check_term_ActTrue(Term t);
 
 template <typename Term>
@@ -557,9 +561,15 @@ bool check_rule_PBES(Term t)
 }
 
 template <typename Term>
-bool check_rule_PropVarInst(Term t)
+bool check_rule_PBEqnSpec(Term t)
 {
-  return    check_term_PropVarInst(t);
+  return    check_term_PBEqnSpec(t);
+}
+
+template <typename Term>
+bool check_rule_PBInit(Term t)
+{
+  return    check_term_PBInit(t);
 }
 
 template <typename Term>
@@ -592,6 +602,12 @@ bool check_rule_PBExpr(Term t)
          || check_term_PBESForall(t)
          || check_term_PBESExists(t)
          || check_rule_PropVarInst(t);
+}
+
+template <typename Term>
+bool check_rule_PropVarInst(Term t)
+{
+  return    check_term_PropVarInst(t);
 }
 
 // ProcEqn(DataVarId*, ProcVarId, DataVarId*, ProcExpr)
@@ -1598,6 +1614,37 @@ bool check_term_Mu(Term t)
   return true;
 }
 
+// PBEqnSpec(DataVarId*, PBEqn*)
+template <typename Term>
+bool check_term_PBEqnSpec(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsPBEqnSpec(a))
+    return false;
+
+  // check the children
+  if (a.size() != 2)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
+    {
+      std::cerr << "check_rule_DataVarId" << std::endl;
+      return false;
+    }
+  if (!check_list_argument(a(1), check_rule_PBEqn<aterm>, 0))
+    {
+      std::cerr << "check_rule_PBEqn" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+  return true;
+}
+
 // ActNot(ActFrm)
 template <typename Term>
 bool check_term_ActNot(Term t)
@@ -2549,7 +2596,7 @@ bool check_term_ActionRenameSpec(Term t)
   return true;
 }
 
-// PBES(DataSpec, PBEqn*, PropVarInst)
+// PBES(DataSpec, PBEqnSpec, PBInit)
 template <typename Term>
 bool check_term_PBES(Term t)
 {
@@ -2570,14 +2617,14 @@ bool check_term_PBES(Term t)
       std::cerr << "check_rule_DataSpec" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(1), check_rule_PBEqn<aterm>, 0))
+  if (!check_term_argument(a(1), check_rule_PBEqnSpec<aterm>))
     {
-      std::cerr << "check_rule_PBEqn" << std::endl;
+      std::cerr << "check_rule_PBEqnSpec" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(2), check_rule_PropVarInst<aterm>))
+  if (!check_term_argument(a(2), check_rule_PBInit<aterm>))
     {
-      std::cerr << "check_rule_PropVarInst" << std::endl;
+      std::cerr << "check_rule_PBInit" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3275,6 +3322,37 @@ bool check_term_ActImp(Term t)
   if (!check_term_argument(a(1), check_rule_ActFrm<aterm>))
     {
       std::cerr << "check_rule_ActFrm" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+  return true;
+}
+
+// PBInit(DataVarId*, PropVarInst)
+template <typename Term>
+bool check_term_PBInit(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsPBInit(a))
+    return false;
+
+  // check the children
+  if (a.size() != 2)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
+    {
+      std::cerr << "check_rule_DataVarId" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_PropVarInst<aterm>))
+    {
+      std::cerr << "check_rule_PropVarInst" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS

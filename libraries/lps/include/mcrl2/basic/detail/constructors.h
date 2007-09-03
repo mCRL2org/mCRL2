@@ -84,6 +84,7 @@ ATermAppl constructStateDelay();
 ATermAppl constructRegAlt();
 ATermAppl constructStructCons();
 ATermAppl constructMu();
+ATermAppl constructPBEqnSpec();
 ATermAppl constructActNot();
 ATermAppl constructBlock();
 ATermAppl constructRename();
@@ -150,6 +151,7 @@ ATermAppl constructAllow();
 ATermAppl constructPropVarDecl();
 ATermAppl constructActImp();
 ATermAppl constructSortBag();
+ATermAppl constructPBInit();
 ATermAppl constructActTrue();
 ATermAppl constructRegTransOrNil();
 ATermAppl constructId();
@@ -876,6 +878,22 @@ ATermAppl constructMu()
   return t;
 }
 
+// PBEqnSpec
+inline
+ATermAppl initConstructPBEqnSpec(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunPBEqnSpec(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructList()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructPBEqnSpec()
+{
+  static ATermAppl t = initConstructPBEqnSpec(t);
+  return t;
+}
+
 // ActNot
 inline
 ATermAppl initConstructActNot(ATermAppl& t)
@@ -1488,7 +1506,7 @@ ATermAppl constructActionRenameSpec()
 inline
 ATermAppl initConstructPBES(ATermAppl& t)
 {
-  t = ATmakeAppl3(gsAFunPBES(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructPropVarInst()));
+  t = ATmakeAppl3(gsAFunPBES(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructPBEqnSpec()), reinterpret_cast<ATerm>(constructPBInit()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -1929,6 +1947,22 @@ inline
 ATermAppl constructSortBag()
 {
   static ATermAppl t = initConstructSortBag(t);
+  return t;
+}
+
+// PBInit
+inline
+ATermAppl initConstructPBInit(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunPBInit(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructPropVarInst()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructPBInit()
+{
+  static ATermAppl t = initConstructPBInit(t);
   return t;
 }
 

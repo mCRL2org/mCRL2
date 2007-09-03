@@ -1329,6 +1329,50 @@ bool gsIsPBEqn(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunPBEqn();
 }
 
+// PBEqnSpec
+inline
+AFun initAFunPBEqnSpec(AFun& f)
+{
+  f = ATmakeAFun("PBEqnSpec", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunPBEqnSpec()
+{
+  static AFun AFunPBEqnSpec = initAFunPBEqnSpec(AFunPBEqnSpec);
+  return AFunPBEqnSpec;
+}
+
+inline
+bool gsIsPBEqnSpec(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunPBEqnSpec();
+}
+
+// PBInit
+inline
+AFun initAFunPBInit(AFun& f)
+{
+  f = ATmakeAFun("PBInit", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunPBInit()
+{
+  static AFun AFunPBInit = initAFunPBInit(AFunPBInit);
+  return AFunPBInit;
+}
+
+inline
+bool gsIsPBInit(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunPBInit();
+}
+
 // ParamId
 inline
 AFun initAFunParamId(AFun& f)
@@ -2824,9 +2868,9 @@ ATermAppl gsMakeOpId(ATermAppl String_0, ATermAppl SortExpr_1)
 }
 
 inline
-ATermAppl gsMakePBES(ATermAppl DataSpec_0, ATermList PBEqn_1, ATermAppl PropVarInst_2)
+ATermAppl gsMakePBES(ATermAppl DataSpec_0, ATermAppl PBEqnSpec_1, ATermAppl PBInit_2)
 {
-  return ATmakeAppl3(gsAFunPBES(), (ATerm) DataSpec_0, (ATerm) PBEqn_1, (ATerm) PropVarInst_2);
+  return ATmakeAppl3(gsAFunPBES(), (ATerm) DataSpec_0, (ATerm) PBEqnSpec_1, (ATerm) PBInit_2);
 }
 
 inline
@@ -2869,6 +2913,18 @@ inline
 ATermAppl gsMakePBEqn(ATermAppl FixPoint_0, ATermAppl PropVarDecl_1, ATermAppl PBExpr_2)
 {
   return ATmakeAppl3(gsAFunPBEqn(), (ATerm) FixPoint_0, (ATerm) PropVarDecl_1, (ATerm) PBExpr_2);
+}
+
+inline
+ATermAppl gsMakePBEqnSpec(ATermList DataVarId_0, ATermList PBEqn_1)
+{
+  return ATmakeAppl2(gsAFunPBEqnSpec(), (ATerm) DataVarId_0, (ATerm) PBEqn_1);
+}
+
+inline
+ATermAppl gsMakePBInit(ATermList DataVarId_0, ATermAppl PropVarInst_1)
+{
+  return ATmakeAppl2(gsAFunPBInit(), (ATerm) DataVarId_0, (ATerm) PropVarInst_1);
 }
 
 inline
