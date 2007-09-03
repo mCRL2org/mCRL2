@@ -149,7 +149,8 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
                    const bool to_bdd,
                    const transformation_strategy strategy,
                    const bool construct_counter_example,
-                   bes::equations  &bes_equations) 
+                   bes::equations  &bes_equations,
+                   const bes::variable_type current_variable) 
 { 
   if (is_propositional_variable_instantiation(p))
   { pair<unsigned long,bool> pr=variable_index.put(p);
@@ -169,7 +170,7 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
         if (bes::is_true(b) || bes::is_false(b))
         { // fprintf(stderr,"*");
           if (construct_counter_example)
-          { bes_equations.add_counter_example(lhs,pr.first);
+          { bes_equations.counter_example_queue(current_variable).push_front(pr.first);
           }
 
           return b;
@@ -185,12 +186,12 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
   }
   else if (pbes_expr::is_and(p))
   { bes::bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            pbes_expr::lhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,construct_counter_example,bes_equations);
+                            pbes_expr::lhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,construct_counter_example,bes_equations,current_variable);
     if (is_false(b1))
     { return b1;
     }
     bes::bes_expression b2=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            pbes_expr::rhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,construct_counter_example,bes_equations);
+                            pbes_expr::rhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,construct_counter_example,bes_equations,current_variable);
     if (is_false(b2))
     { return b2;
     }
@@ -210,13 +211,13 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
   else if (pbes_expr::is_or(p))
   { 
     bes::bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            pbes_expr::lhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,construct_counter_example,bes_equations);
+                            pbes_expr::lhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,construct_counter_example,bes_equations,current_variable);
     if (bes::is_true(b1))
     { return b1;
     }
 
     bes::bes_expression b2=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            pbes_expr::rhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,construct_counter_example,bes_equations);
+                            pbes_expr::rhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,construct_counter_example,bes_equations,current_variable);
     if (bes::is_true(b2))
     { return b2;
     }
@@ -388,7 +389,8 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
                         tool_options.opt_use_hashtables,
                         tool_options.opt_strategy,
                         tool_options.opt_construct_counter_example,
-                        bes_equations);
+                        bes_equations,
+                        variable_to_be_processed);
       // ATfprintf(stderr,"HIER4\n");
       // ATfprintf(stderr,"Resulting expression %d\n",AT_calcCoreSize(new_bes_expression));
   
@@ -462,8 +464,9 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
             {
               // gsVerboseMsg("+ %d\n",(unsigned long)*v);
               bes_expression b=bes_equations.get_rhs(*v);
-              if (op_construct_counter_example)
-              { b=substitute_true_false(b,w,bes_equations.get_rhs(w),counter_example_queue(v));
+              if (opt_construct_counter_example)
+              { b=substitute_true_false(b,w,bes_equations.get_rhs(w),
+                                         bes_equations.counter_example_queue(v));
               }
               else
               { b=substitute_true_false(b,w,bes_equations.get_rhs(w));
