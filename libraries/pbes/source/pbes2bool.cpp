@@ -288,7 +288,7 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
 
   // Data rewriter
   Rewriter *rewriter = createRewriter(data,tool_options.rewrite_strategy);
-  variable_index.put(pbes_expression_rewrite_and_simplify(pbes_spec.initial_state(),
+  variable_index.put(pbes_expression_rewrite_and_simplify(pbes_spec.initial_state().variable(),
                      rewriter,
                      tool_options.opt_precompile_pbes));
   if (tool_options.opt_strategy>=on_the_fly)

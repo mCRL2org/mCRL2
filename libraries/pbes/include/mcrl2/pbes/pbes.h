@@ -303,7 +303,7 @@ class pbes
       aterm_appl::iterator i = t.begin();
       m_data          = aterm_appl(*i++);
       m_equations     = equation_system(pbes_equation_list(aterm_appl(*i++)(0)));
-      m_initial_state = pbes_initializer(aterm_appl(*i)(0));
+      m_initial_state = pbes_initializer(*i);
     }
 
   public:
@@ -339,7 +339,7 @@ class pbes
     }
 
     /// Returns the initial state.
-    propositional_variable_instantiation initial_state() const
+    pbes_initializer initial_state() const
     {
       return m_initial_state;
     }
