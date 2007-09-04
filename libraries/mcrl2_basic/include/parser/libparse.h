@@ -57,9 +57,9 @@ ATermAppl parse_state_frm(std::istream &sf_stream);
        NULL, otherwise
 */ 
 
-ATermAppl parse_action_rename(std::istream &sf_stream);
+ATermAppl parse_action_rename_spec(std::istream &sf_stream);
 /*Pre: sf_stream is an input stream from which can be read       
-  Post:the content of sf_stream is parsed as an mCRL2 without proc or init and with action rename rules
+  Post:the content of sf_stream is parsed as an action rename specification
   Ret: the parsed rename rule file, if everything went ok
        NULL, otherwise
 */ 

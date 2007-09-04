@@ -25,11 +25,6 @@ using namespace ::mcrl2::utilities;
 //------------------
 
 
-static ATermAppl impl_exprs_spec(ATermAppl spec);
-//Pre: spec is a specification that adheres to the internal syntax after
-//     type checking in which sort references are maximally folded
-//Ret: spec in which all expressions are implemented
-
 static ATermAppl impl_exprs(ATermAppl expr, lps::specification &lps_spec);
 //Pre: expr represents a part of the internal syntax after type checking
 //     in which sort references are maximally folded
@@ -179,7 +174,32 @@ static ATermAppl make_fresh_lambda_op_id(ATermAppl sort_expr, ATerm term);
 
 ATermAppl implement_data_spec(ATermAppl spec)
 {
-  return impl_exprs_spec(spec);
+  assert(gsIsSpecV1(spec));
+  int occ = gsCount((ATerm) gsMakeSortUnknown(), (ATerm) spec);
+  if (occ > 0) {
+    gsErrorMsg("specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
+    return NULL;
+  }
+  //implement system sort and data expressions occurring in spec
+  ATermList substs     = ATmakeList0();
+  t_data_decls data_decls;
+  initialize_data_decls(&data_decls);
+  spec = impl_exprs_appl(spec, &substs, &data_decls);
+  //perform substitutions on data declarations
+  data_decls.sorts     = gsSubstValues_List(substs, data_decls.sorts,     true);
+  data_decls.cons_ops  = gsSubstValues_List(substs, data_decls.cons_ops,  true);
+  data_decls.ops       = gsSubstValues_List(substs, data_decls.ops,       true);
+  data_decls.data_eqns = gsSubstValues_List(substs, data_decls.data_eqns, true);
+  //add implementation of sort Pos and Bool
+  impl_sort_pos(&data_decls);
+  impl_sort_bool(&data_decls);
+  //add new data declarations to spec
+  spec = add_data_decls(spec, data_decls);
+  //implement sort references
+  spec = impl_sort_refs(spec);
+  //implement function sorts
+  spec = impl_function_sorts_spec(spec);
+  return spec;
 }
 
 ATermAppl implement_data_sort_expr(ATermAppl sort_expr,
@@ -212,41 +232,34 @@ ATermAppl implement_data_state_frm(ATermAppl state_frm,
   return impl_exprs(state_frm, lps_spec);
 }
 
-ATermAppl implement_data_action_rename(ATermAppl action_rename,
+ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec,
   lps::specification &lps_spec)
 {
-  assert(0);
-  return NULL;/*impl_exprs(action_rename, lps_spec);*/
-}
-
-ATermAppl impl_exprs_spec(ATermAppl spec)
-{
-  assert(gsIsSpecV1(spec));
-  int occ = gsCount((ATerm) gsMakeSortUnknown(), (ATerm) spec);
+  //assert(0);
+  //return NULL;/*impl_exprs(action_rename, lps_spec);*/
+  assert(gsIsActionRenameSpec(ar_spec));
+  int occ = gsCount((ATerm) gsMakeSortUnknown(), (ATerm) ar_spec);
   if (occ > 0) {
-    gsErrorMsg("specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
+    gsErrorMsg("action rename specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
     return NULL;
   }
-  //implement system sort and data expressions occurring in spec
+  //implement system sort and data expressions occurring in ar_spec based on
+  //the data declarations in lps_spec
   ATermList substs     = ATmakeList0();
-  t_data_decls data_decls;
-  initialize_data_decls(&data_decls);
-  spec = impl_exprs_appl(spec, &substs, &data_decls);
+  t_data_decls data_decls = get_data_decls(lps_spec);
+  ar_spec = impl_exprs_appl(ar_spec, &substs, &data_decls);
   //perform substitutions on data declarations
   data_decls.sorts     = gsSubstValues_List(substs, data_decls.sorts,     true);
   data_decls.cons_ops  = gsSubstValues_List(substs, data_decls.cons_ops,  true);
   data_decls.ops       = gsSubstValues_List(substs, data_decls.ops,       true);
   data_decls.data_eqns = gsSubstValues_List(substs, data_decls.data_eqns, true);
-  //add implementation of sort Pos and Bool
-  impl_sort_pos(&data_decls);
-  impl_sort_bool(&data_decls);
-  //add new data declarations to spec
-  spec = add_data_decls(spec, data_decls);
+  //add new data declarations to ar_spec
+  ar_spec = add_data_decls(ar_spec, data_decls);
   //implement sort references
-  spec = impl_sort_refs(spec);
+  ar_spec = impl_sort_refs(ar_spec);
   //implement function sorts
-  spec = impl_function_sorts_spec(spec);
-  return spec;
+  ar_spec = impl_function_sorts_spec(ar_spec);
+  return ar_spec;
 }
 
 static ATermAppl impl_exprs(ATermAppl expr, lps::specification &lps_spec)
@@ -298,7 +311,7 @@ static ATermAppl impl_exprs(ATermAppl expr, lps::specification &lps_spec)
 
 ATermAppl impl_sort_refs(ATermAppl spec)
 {
-  assert(gsIsSpecV1(spec));
+  assert(gsIsSpecV1(spec) || gsIsActionRenameSpec(spec));
   //get sort declarations
   ATermAppl data_spec = ATAgetArgument(spec, 0);
   ATermAppl sort_spec = ATAgetArgument(data_spec, 0);
@@ -341,7 +354,7 @@ ATermAppl impl_sort_refs(ATermAppl spec)
 
 ATermAppl impl_function_sorts_spec(ATermAppl spec)
 {
-  assert(gsIsSpecV1(spec));
+  assert(gsIsSpecV1(spec) || gsIsActionRenameSpec(spec));
   //get function sorts occurring in spec
   ATermList func_sorts = get_function_sorts((ATerm) spec);
   //get operation declarations
@@ -350,10 +363,7 @@ ATermAppl impl_function_sorts_spec(ATermAppl spec)
   ATermList op_decls = ATLgetArgument(op_spec, 0);
   //initalise data declarations
   t_data_decls data_decls;
-  data_decls.sorts     = ATmakeList0();
-  data_decls.cons_ops  = ATmakeList0();
-  data_decls.ops       = ATmakeList0();
-  data_decls.data_eqns = ATmakeList0();
+  initialize_data_decls(&data_decls);
   //implement function sorts that are not already implemented
   while (!ATisEmpty(func_sorts))
   {

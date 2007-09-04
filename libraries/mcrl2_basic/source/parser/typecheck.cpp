@@ -535,7 +535,7 @@ failed:
   return Result;
 }
 
-ATermAppl type_check_action_rename(ATermAppl action_rename, lps::specification &lps_spec){
+ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, lps::specification &lps_spec){
   ATermAppl Result=NULL;
   gsDebugMsg ("type checking phase started\n");
   gstcDataInit();
@@ -550,9 +550,9 @@ ATermAppl type_check_action_rename(ATermAppl action_rename, lps::specification &
            gsWarningMsg("Ignoring the previous error(s), the formula will be typechecked without action label information.\n");
          gsDebugMsg ("type checking of action renamings read-in phase of LPS finished\n");
 
-	 assert(gsIsActionRenameSpec(action_rename));
+	 assert(gsIsActionRenameSpec(ar_spec));
 
-         ATermAppl data_spec = ATAgetArgument(action_rename, 0);
+         ATermAppl data_spec = ATAgetArgument(ar_spec, 0);
          if(!gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
 	   goto failed;
 	 }
@@ -566,7 +566,7 @@ ATermAppl type_check_action_rename(ATermAppl action_rename, lps::specification &
            goto failed;
          }
          body.equations=ATLgetArgument(ATAgetArgument(data_spec,3),0);
-         if(!gstcReadInActs(ATLgetArgument(ATAgetArgument(action_rename,1),0))) {
+         if(!gstcReadInActs(ATLgetArgument(ATAgetArgument(ar_spec,1),0))) {
            goto failed;
          }
          gsDebugMsg ("type checking action renamings read-in phase of the ActionRename finished\n");
@@ -577,12 +577,12 @@ ATermAppl type_check_action_rename(ATermAppl action_rename, lps::specification &
          gsDebugMsg ("type checking transform VarConstTypeData phase finished\n");
 
          data_spec=ATsetArgument(data_spec, (ATerm) gsMakeDataEqnSpec(body.equations),3);
-         Result=ATsetArgument(action_rename,(ATerm)data_spec,0);
+         Result=ATsetArgument(ar_spec,(ATerm)data_spec,0);
          Result=gstcFoldSortRefs(Result);
          
           
          // now the action renaming rules themselves.
-         ATermAppl ActionRenameRules=ATAgetArgument(action_rename, 2);
+         ATermAppl ActionRenameRules=ATAgetArgument(ar_spec, 2);
 	 ATermList NewRules=ATmakeList0();
 
          ATermTable DeclaredVars=ATtableCreate(63,50);

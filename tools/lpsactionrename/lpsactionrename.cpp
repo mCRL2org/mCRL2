@@ -38,7 +38,7 @@ using namespace lps;
 //----------------
 
 //t_phase represents the phases at which the program should be able to stop
-typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL, PH_REG_FRM_TRANS } t_phase;
+typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL } t_phase;
 
 //t_tool_options represents the options of the tool 
 typedef struct {
@@ -60,7 +60,7 @@ static t_tool_options parse_command_line(int argc, char **argv);
 //Ret:  the parsed command line options
 
 static ATermAppl rename_lps_actions(t_tool_options tool_options); //TODO:change description
-//Pre:  tool_options.action_rename_filename contains a action rename
+//Pre:  tool_options.action_rename_filename contains an action rename
 //      specification
 //      tool_options.infilename contains an LPS ("" indicates stdin)
 //      tool_options.end_phase indicates at which phase conversion stops
@@ -68,6 +68,12 @@ static ATermAppl rename_lps_actions(t_tool_options tool_options); //TODO:change 
 //      the LPS
 //      if end_phase != PH_NONE, the state formula after phase end_phase
 //      NULL, if something went wrong
+
+static lps::specification rename(ATermAppl action_rename_spec, lps::specification &lps_spec);
+//Pre: action_rename_spec contains an action rename specification
+//     lps_spec is an LPS specification
+//Ret: lps_spec in which all actions are renamed according to
+//     action_rename_spec
 
 static void print_help(char *name);
 static void print_version(void);
@@ -214,8 +220,10 @@ static t_tool_options parse_command_line(int argc, char **argv)
   return tool_options;
 }
 
-ATermAppl rename(ATermAppl action_rename,ATermAppl lps_oldspec,ATermAppl lps_newspec){
-  return NULL;
+lps::specification rename(ATermAppl action_rename_spec, lps::specification &lps_spec)
+{
+  //TODO
+  return lps_spec;
 }
 
 ATermAppl rename_lps_actions(t_tool_options tool_options)
@@ -261,47 +269,44 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
     gsErrorMsg("cannot open formula file '%s'\n", action_rename_filename.c_str());
     return NULL;
   }
-  ATermAppl action_rename = parse_action_rename(formstream);
+  ATermAppl action_rename_spec = parse_action_rename_spec(formstream);
   formstream.close();
-  if (action_rename == NULL) {
+  if (action_rename_spec == NULL) {
     gsErrorMsg("parsing failed\n");
     return NULL;
   }
   gsDebugMsg("parsing succeeded\n");
   if (end_phase == PH_PARSE) {
-    return action_rename;
+    return action_rename_spec;
   }
 
   //type check formula
   gsVerboseMsg("type checking...\n");
-  action_rename = type_check_action_rename(action_rename, lps_oldspec);
-  if (action_rename == NULL) {
+  action_rename_spec = type_check_action_rename_spec(action_rename_spec, lps_oldspec);
+  if (action_rename_spec == NULL) {
     gsErrorMsg("type checking failed\n");
     return NULL;
   }
   if (end_phase == PH_TYPE_CHECK) {
-    return action_rename;
+    return action_rename_spec;
   }
 
   //implement standard data types and type constructors on the result
   gsVerboseMsg("implementing standard data types and type constructors...\n");
-  //lps_newspec = implement_data_action_rename(action_rename, lps_oldspec);
-  if (lps_oldspec == NULL) {
+  action_rename_spec = implement_data_action_rename_spec(action_rename_spec, lps_oldspec);
+  if (action_rename_spec == NULL) {
     gsErrorMsg("data implementation failed\n");
     return NULL;
   }
   if (end_phase == PH_DATA_IMPL) {
-    return lps_oldspec;
+    return action_rename_spec;
   }
 
   //rename all assigned actions
   gsVerboseMsg("renaming actions...\n");
-  //lps_newspec = rename(action_rename, lps_oldspec, lps_newspec);
-  if (lps_oldspec == NULL) {
+  lps_newspec = rename(action_rename_spec, lps_oldspec);
+  if (lps_newspec == NULL) {
     return NULL;
-  }
-  if (end_phase == PH_DATA_IMPL) {
-    return lps_newspec;
   }
  
   //type check the new LPS

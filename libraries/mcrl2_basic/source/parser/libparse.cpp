@@ -47,7 +47,7 @@ ATermAppl parse_state_frm(istream &pe_stream) {
   return parse_tagged_stream("state_frm", pe_stream);
 }
 
-ATermAppl parse_action_rename(istream &pe_stream) {
+ATermAppl parse_action_rename_spec(istream &pe_stream) {
   return parse_tagged_stream("action_rename", pe_stream);
 }
 
