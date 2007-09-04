@@ -145,13 +145,13 @@ class equation_system: public atermpp::vector<pbes_equation>
 
     /// Constructs an equation_system containing equation e.
     ///
-    equation_system(pbes_equation e, atermpp::set<data_variable> free_variables = atermpp::set<data_variable>())
+    equation_system(const pbes_equation& e, atermpp::set<data_variable> free_variables = atermpp::set<data_variable>())
       : m_free_variables(free_variables)
     {
       push_back(e);
     }
 
-    equation_system(pbes_equation_list l, atermpp::set<data_variable> free_variables = atermpp::set<data_variable>())
+    equation_system(const pbes_equation_list& l, atermpp::set<data_variable> free_variables = atermpp::set<data_variable>())
       : atermpp::vector<pbes_equation>(l.begin(), l.end()),
         m_free_variables(free_variables)
     {}
@@ -302,7 +302,12 @@ class pbes
     {
       aterm_appl::iterator i = t.begin();
       m_data          = aterm_appl(*i++);
-      m_equations     = equation_system(pbes_equation_list(aterm_appl(*i++)(0)));
+      aterm_appl eqn_spec = *i++;
+      pbes_equation_list l = eqn_spec(0);
+      data_variable_list v = eqn_spec(1);
+      atermpp::set<data_variable> s;
+      std::copy(v.begin(), v.end(), std::inserter(s, s.begin()));
+      m_equations     = equation_system(l, s);
       m_initial_state = pbes_initializer(*i);
     }
 
