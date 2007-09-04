@@ -306,7 +306,6 @@ class pbes
       aterm_appl eqn_spec = *i++;
       data_variable_list freevars = eqn_spec(0);
       pbes_equation_list eqn = eqn_spec(1);
-std::cout << "eqn.size() = " << eqn.size() << std::endl;      
       atermpp::set<data_variable> v;
       std::copy(freevars.begin(), freevars.end(), std::inserter(v, v.begin()));
       m_equations     = equation_system(eqn, v);
