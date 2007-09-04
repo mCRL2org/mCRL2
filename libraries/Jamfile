@@ -29,9 +29,11 @@ for library in aterm cvc_lite pstream svc ticpp getopt {
 # Additional library
 use-project /libraries/tipi            : $(TOP)/tools/squadt/libraries/tipi/build ;
 
+# Shared build large large mcrl2 library
 lib mcrl2
         : /libraries/lps//dataelm.alias
           /libraries/lps//lps.alias
+          /libraries/pbes//pbes.alias
           /libraries/lts//lts.alias
           /libraries/svc//svc.alias
           /libraries/aterm//aterm.alias

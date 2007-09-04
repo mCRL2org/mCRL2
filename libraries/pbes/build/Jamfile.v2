@@ -5,12 +5,10 @@ project pbes
           <include>../include
           <dependency>/boost//headers
           <dependency>/libraries//atermpp
-          <dependency>/libraries//lps
        : usage-requirements
           <include>../include
           <dependency>/boost//headers
           <dependency>/libraries//atermpp
-          <dependency>/libraries//lps
        ;
 
 alias pbes.main
