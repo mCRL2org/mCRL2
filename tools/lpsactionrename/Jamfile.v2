@@ -5,8 +5,6 @@ project toolset/lpsactionrename
 exe lpsactionrename
        : lpsactionrename.cpp
          /libraries//lps
-         /libraries//parser
-         /libraries//mcrl2_basic
          /libraries//data
        : <include>.
          <toolset>msvc:<library>/libraries//getopt

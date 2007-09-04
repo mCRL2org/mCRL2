@@ -7,7 +7,6 @@ obj gauss.o
          /libraries//lps
          /libraries//pbes
          /libraries//rewrite
-         /libraries//parser
          /site-config//boost_program_options
        : <include>.
        ;
@@ -16,9 +15,8 @@ exe pbessolve
        : pbessolve.cpp
 	 gauss.o
 	 /libraries//lps
-   /libraries//pbes
+         /libraries//pbes
 	 /libraries//rewrite
-         /libraries//parser
          /site-config//boost_program_options
        : <include>.
        ;
@@ -28,7 +26,6 @@ exe txt2pbes
          /libraries//lps
          /libraries//pbes
          /libraries//rewrite
-         /libraries//parser
          /site-config//boost_program_options
        : <include>.
        ;
