@@ -5,7 +5,6 @@ project toolset/lpsconfcheck
 exe lpsconfcheck
        : lpsconfcheck.cpp
          /libraries//prover
-         /libraries//parser
          /libraries//data
        : <include>.
          <toolset>msvc:<library>/libraries//getopt

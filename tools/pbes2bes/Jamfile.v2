@@ -1,7 +1,6 @@
 project toolset/pbes2bes
    : build-dir $(BUILD_TOP)/pbes2bes
    : requirements
-       <source>/libraries//parser
        <source>/libraries//lps
        <source>/libraries//pbes
    ;
@@ -9,7 +8,6 @@ project toolset/pbes2bes
 exe pbes2bes
        : pbes2bes.cpp
          /libraries//rewrite
-         /libraries//parser
          /site-config//boost_program_options
        : <include>.
          <squadt-connectivity>implemented

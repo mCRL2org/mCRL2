@@ -14,7 +14,8 @@ project lps
 alias lps.main
        : source/lin_std.cpp
          source/libalpha.cpp
-       : <use>/libraries/parser//headers
+         source/libdataelm.cpp
+       : <use>/libraries/mcrl2_basic//headers
          <use>/libraries/rewrite//headers
          <use>/libraries/lps//headers
        : <threading>single
@@ -22,11 +23,11 @@ alias lps.main
 
 lib lps
        : lps.main
-         /libraries//parser
+         /libraries//mcrl2_basic
          /libraries//rewrite
        : <link>static
        :
-       : <library>/libraries//parser
+       : <library>/libraries//mcrl2_basic
          <library>/libraries//rewrite
          <use>/libraries/lps//headers
        ;
@@ -40,7 +41,7 @@ alias lps.alias
        : lps.main
        :
        :
-       : <use>/libraries/parser//headers
+       : <use>/libraries/mcrl2_basic//headers
          <use>/libraries/rewrite//headers
          <use>/libraries/lps//headers
        ;
@@ -53,45 +54,9 @@ alias data-specification
 alias data-specification
        :
        : <link>shared
-       ;
-
-# The functionality provided by this library belongs in the LPS framework
-alias dataelm.main
-       : source/libdataelm.cpp
-       : <use>/libraries/parser//headers
-         <use>/libraries/rewrite//headers
-         <use>/libraries/lps//headers
-       : <threading>single
-       ;
-
-lib dataelm
-       : dataelm.main
-         /libraries//parser
-         /libraries//rewrite
-         /libraries//lps
-       : <link>static
-       :
-       : <library>/libraries//parser
-         <library>/libraries//rewrite
-         <library>/libraries//lps
-       ;
-
-alias dataelm
-       : /libraries//mcrl2
-       : <link>shared
-       ;
-
-alias dataelm.alias
-       : dataelm.main
-       :
-       :
-       : <use>/libraries/parser//headers
-         <use>/libraries/rewrite//headers
-         <use>/libraries/lps//headers
        ;
 
 # This target must not be used, it exists solely for the parser library which should not depend on the lps framework
-alias headers
-       ;
+alias headers ;
 
 explicit dataelm.main dataelm.alias lps.alias ;

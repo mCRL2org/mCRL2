@@ -4,7 +4,6 @@ project lpsinvelm
 
 exe lpsinvelm
        : lpsinvelm.cpp
-         /libraries//parser
          /libraries//prover
          /libraries//data
        : <include>.

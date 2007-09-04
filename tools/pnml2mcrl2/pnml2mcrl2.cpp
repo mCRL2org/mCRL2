@@ -231,7 +231,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   //==================================================
   // ATmakeAFunId functions as ATmakeAFun(name,0,ATtrue)
   //==================================================
-  static inline AFun ATmakeAFunId(char *name){
+  static inline AFun ATmakeAFunId(char const*name){
     return ATmakeAFun(name, 0, ATtrue);
   }
 
@@ -332,7 +332,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     
     for (cur = cur->FirstChildElement(false); cur != 0; cur = cur->NextSiblingElement(false)) {
       if (cur->Value() == "text") {
-        return ATmakeAppl0(pn2gsCheckAFun(ATmakeAFunId(const_cast < char* > (cur->GetText().c_str()))));
+        return ATmakeAppl0(pn2gsCheckAFun(ATmakeAFunId(cur->GetText().c_str())));
       }
     }
 
@@ -408,7 +408,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     ATermAppl Aid;
     if (char const* id = cur->GetAttributeValue("id", false).c_str()) {
       // the place has an id, put it in Aid
-      Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(const_cast < char* > (id)))));
+      Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(id))));
       gsDebugMsg("    id: '%T'\n", Aid); 
     } else {
       // the place has NO id, so translation should be aborted!
@@ -540,7 +540,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     ATermAppl Aid;
     if (char const* id = cur->GetAttributeValue("id", false).c_str()) {
       // the transition has an id, put it in Aid
-      Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(const_cast < char* > (id)))));
+      Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(id))));
       gsDebugMsg("    id: '%T'\n", Aid); 
     } else {
       // the transition has NO id, so translation should be aborted!
@@ -628,7 +628,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     ATermAppl Aid;
     if (char const* id = cur->GetAttributeValue("id", false).c_str()) {
       // the arc has an id, put it in Aid
-      Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(const_cast < char* > (id)))));
+      Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(id))));
       gsDebugMsg("    id: '%T'\n", Aid); 
     } else {
       // the arc has NO id, so translation should be aborted!
@@ -640,7 +640,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     // second, we want to retrieve the source and the target of the arc
     ATermAppl Asource;
     if (char const* source = cur->GetAttributeValue("source", false).c_str()) {
-      Asource = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(const_cast < char* > (source)))));
+      Asource = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(source))));
       gsDebugMsg("    source: '%T'\n", Asource);
     } else {
       // the arc has NO source, so the arc will not be translated!
@@ -650,7 +650,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     
     ATermAppl Atarget;
     if (char const* target = cur->GetAttributeValue("target", false).c_str()) {
-      Atarget = ATmakeAppl0(pn2gsCheckAFun(ATmakeAFunId(const_cast < char* > (target))));
+      Atarget = ATmakeAppl0(pn2gsCheckAFun(ATmakeAFunId(target)));
       gsDebugMsg("    target: '%T'\n", Atarget);
     } else {
       // the arc has NO target, so the arc will not be translated!
@@ -778,7 +778,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     ATermAppl ANetID;
     if (char const* id = cur->GetAttributeValue("id", false).c_str()) {
       // the net has an id, put it in ANetID
-      ANetID = ATmakeAppl0(ATprependAFun("Net_",pn2gsCheckAFun(ATmakeAFunId(const_cast < char* > (id)))));
+      ANetID = ATmakeAppl0(ATprependAFun("Net_",pn2gsCheckAFun(ATmakeAFunId(id))));
     } else {
       ANetID = ATmakeAppl0(ATmakeAFun("Net_Petri_net", 0, ATtrue));
       gsWarningMsg("NO NET-ID FOUND!\n");
@@ -2303,7 +2303,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     ticpp::Document doc(InFileName);
    
     try {
-      if (InFileName == "-") {
+      if (strcmp(InFileName,"-")) {
         std::cin >> doc;
       }
       else {
@@ -2491,7 +2491,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
         }
       }
       
-      char *InFileName;
+      char const* InFileName;
       if ( argc-optind < 1 ){
         InFileName = "-";
       } else {

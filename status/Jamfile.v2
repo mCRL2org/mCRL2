@@ -12,10 +12,9 @@ import testing ;
 # Tests from Jamfiles in individual library test subdirectories
 # Please keep these in alphabetic order by test-suite name
 
-build-project ../3rd-party/svc/test ;            # test-suite svc
-build-project ../libraries/atermpp/test ;    # test-suite atermpp
-build-project ../libraries/lps/test ;        # test-suite lps
-build-project ../libraries/lts/test ;        # test-suite lts
-build-project ../libraries/parser/test ;     # test-suite parser
-build-project ../libraries/prover/test ;     # test-suite prover
-build-project ../tools/mcrl22lps/test ;
+build-project ../3rd-party/svc/test ;         # test-suite svc
+build-project ../libraries/atermpp/test ;     # test-suite atermpp
+build-project ../libraries/lps/test ;         # test-suite lps
+build-project ../libraries/lts/test ;         # test-suite lts
+build-project ../libraries/mcrl2_basic/test ; # test-suite mcrl2 basic
+build-project ../libraries/prover/test ;      # test-suite prover

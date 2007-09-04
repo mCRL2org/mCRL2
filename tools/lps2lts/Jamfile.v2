@@ -6,10 +6,10 @@ exe lps2lts
        : lps2lts.cpp
          exploration.cpp
 	 lts.cpp
-         /libraries/lps//dataelm
          /libraries//nextstate
          /libraries//mcrl2_basic
          /libraries//trace
+         /libraries//lps
          /libraries//lts
        : <toolset>msvc:<library>/libraries//getopt
          <squadt-connectivity>implemented

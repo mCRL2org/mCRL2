@@ -4,8 +4,7 @@ project lpsdataelm
 
 exe lpsdataelm
        : lpsdataelm.cpp
-         /libraries/lps//dataelm
-         /libraries//mcrl2_basic
+         /libraries/lps
          /site-config//boost_program_options
        :
        ;

@@ -5,7 +5,6 @@ project toolset/pnml2mcrl2
 exe pnml2mcrl2
        : pnml2mcrl2.cpp
          /libraries//mcrl2_basic
-         /libraries//parser
          /libraries//ticpp
        : <include>.
          <toolset>msvc:<library>/libraries//getopt

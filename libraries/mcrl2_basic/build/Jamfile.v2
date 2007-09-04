@@ -15,51 +15,21 @@ rule prepend ( prefix : elements * ) {
 
 local STRUCT_SOURCES = [ prepend struct/ : libstruct libstruct_core ] ; 
 
-lib struct
-       : $(STRUCT_SOURCES).o
-         /libraries//aterm
-       : <include>../include/struct
-       :
-       : <include>../include/struct
-         <dependency>/libraries/utilities//aterm-extension
-       ;
+local PARSER_SOURCES = [ prepend parser/ : mcrl2parser mcrl2lexer libparse typecheck regfrmtrans ] ;
 
 local PRINT_SOURCES = [ prepend print/ : libprint libprint_c messaging ] ;
 
-lib print
-       : $(PRINT_SOURCES).o
-       : <use>/libraries//prover
-         <dependency>/libraries//data
-         <dependency>/libraries/utilities//aterm-extension
-         <dependency>rewrite
-         <dependency>struct
-       :
-       : <library>rewrite
-         <library>/libraries//data
-         <include>../../data/include
-         <include>../include/print
-       ;
-
-local MCRL2_BASIC_SOURCES = $(LOWLEVEL_SOURCES) $(PRINT_SOURCES) $(STRUCT_SOURCES) ;
-
-for object in $(MCRL2_BASIC_SOURCES) {
-  obj $(object).o
-      : $(object).cpp
-      : <include>$(SETUP)
-        <include>../include/print
-        <include>../include/struct
-        <use>/libraries/aterm//headers
-        <use>/libraries/utilities//headers
-        <use>/libraries/data//headers
-      ;
-}
+local MCRL2_BASIC_SOURCES = $(LOWLEVEL_SOURCES) $(PRINT_SOURCES) $(STRUCT_SOURCES) $(PARSER_SOURCES) ;
 
 alias mcrl2_basic.main
-       : $(MCRL2_BASIC_SOURCES).o
+       : $(MCRL2_BASIC_SOURCES).cpp
          [ glob ../source/auxiliary/*.cpp ]
        : <include>../include/print
          <include>../include/struct
+         <include>../include/parser
+         <use>/libraries/lps//headers
          <use>/libraries/data//headers
+         <use>/libraries/utilities//headers
          <toolset>gcc:<use>/libraries//pstream
          <toolset>darwin:<use>/libraries//pstream
          <include>$(SETUP)
@@ -68,6 +38,7 @@ alias mcrl2_basic.main
          <os>LINUX:<library>/site-config//dl
          <os>CYGWIN:<library>/site-config//m
          <include>../include/print
+         <include>../include/parser
          <include>../include/struct
        ;
 

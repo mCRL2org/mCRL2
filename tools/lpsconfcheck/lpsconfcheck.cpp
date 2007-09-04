@@ -255,7 +255,7 @@ using namespace ::mcrl2::utilities;
     /// \param a_argv is an array of all arguments passed on the command line
 
     void LPS_Conf_Check::get_options(int a_argc, char* a_argv[]) {
-      char* v_short_options = "i:gs:nmacp:hqvdr:t:z:o";
+      const char* v_short_options = "i:gs:nmacp:hqvdr:t:z:o";
 
       f_tool_command = a_argv[0];
 

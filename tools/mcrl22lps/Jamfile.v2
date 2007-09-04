@@ -4,7 +4,6 @@ project toolset/mcrl22lps
 
 exe mcrl22lps
        : mcrl22lps.cpp
-         /libraries//parser
          /libraries//utilities
          /libraries//rewrite
          /libraries//data
@@ -15,7 +14,6 @@ exe mcrl22lps
 
 exe alpha
        : alpha.cpp
-         /libraries//parser
          /libraries//lps
          /libraries//utilities
          /libraries//rewrite

@@ -31,14 +31,12 @@ use-project /libraries/tipi            : $(TOP)/tools/squadt/libraries/tipi/buil
 
 # Shared build large large mcrl2 library
 lib mcrl2
-        : /libraries/lps//dataelm.alias
-          /libraries/lps//lps.alias
+        : /libraries/lps//lps.alias
           /libraries/pbes//pbes.alias
           /libraries/lts//lts.alias
           /libraries/svc//svc.alias
           /libraries/aterm//aterm.alias
           /libraries/data//data.alias
-          /libraries/parser//parser.alias
           /libraries/mcrl2_basic//mcrl2_basic.alias
           /libraries/prover//prover.alias
           /libraries/rewrite//rewrite.alias

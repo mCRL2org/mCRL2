@@ -3,7 +3,6 @@ import testing ;
 project libraries/lps/test
    : requirements
        <use>/boost//headers
-       <source>/libraries//parser
        <source>/libraries//rewrite
        <source>/libraries//mcrl2_basic
        <source>/libraries//lps

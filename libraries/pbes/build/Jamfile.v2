@@ -15,7 +15,7 @@ alias pbes.main
        : source/sort_functions.cpp
          source/pbes_rewrite.cpp
          source/pbes2bool.cpp
-       : <use>/libraries/parser//headers
+       : <use>/libraries/mcrl2_basic//headers
          <use>/libraries/rewrite//headers
          <use>/libraries/lps//headers
        : <threading>single
@@ -23,12 +23,12 @@ alias pbes.main
 
 lib pbes
        : pbes.main
-         /libraries//parser
+         /libraries//mcrl2_basic
          /libraries//rewrite
          /libraries//lps
        : <link>static
        :
-       : <library>/libraries//parser
+       : <library>/libraries//mcrl2_basic
          <library>/libraries//rewrite
          <library>/libraries//lps
        ;
@@ -42,7 +42,7 @@ alias pbes.alias
        : pbes.main
        :
        :
-       : <use>/libraries/parser//headers
+       : <use>/libraries/mcrl2_basic//headers
          <use>/libraries/rewrite//headers
          <use>/libraries/lps//headers
        ;

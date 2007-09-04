@@ -198,7 +198,7 @@ using namespace ::mcrl2::utilities;
     /// \param a_argv is an array of all arguments passed on the command line
 
     void LPS_Form_Check::get_options(int a_argc, char* a_argv[]) {
-      char* v_short_options = "f:cwp:hqvdr:t:z:o";
+      const char* v_short_options = "f:cwp:hqvdr:t:z:o";
 
       struct option v_long_options[] = {
         {"formulas",         required_argument, 0, 'f'},

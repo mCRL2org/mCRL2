@@ -11,7 +11,7 @@ project lts
 
 alias lts.main
        : [ glob *.cpp ]
-       : <use>/libraries/parser//headers
+       : <use>/libraries/mcrl2_basic//headers
          <use>/libraries/svc//headers
          <use>/libraries/lps//headers
          <use>/libraries/data//headers
@@ -22,11 +22,11 @@ alias lts.main
 
 lib lts
        : lts.main
-         /libraries//parser
+         /libraries//mcrl2_basic
          /libraries//svc
        : <link>static
        :
-       : <library>/libraries//parser
+       : <library>/libraries//mcrl2_basic
          <library>/libraries//svc
        ;
 
@@ -44,7 +44,7 @@ alias headers
        :
        :
        :
-       : <use>/libraries/parser//headers
+       : <use>/libraries/mcrl2_basic//headers
          <use>/libraries/svc//headers
        ;
 

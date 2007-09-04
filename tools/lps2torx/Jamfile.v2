@@ -4,7 +4,7 @@ project toolset/lps2torx
 
 exe lps2torx
        : lps2torx.cpp
-         /libraries/lps//dataelm
+         /libraries/lps
          /libraries//nextstate
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
