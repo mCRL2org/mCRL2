@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-// Date: 31-08-2007
+// Date: 04-09-2007
 // This document describes the internal format of the mCRL2 language and the
 // corresponding mu-calculus formulas. Here:
 // - the following phases of implementation are distinguised:
@@ -191,7 +191,7 @@
 
 
 //Process specifications
-//--------------------
+//----------------------
 
 //process specification
 <ProcSpec>     ::= SpecV1(<DataSpec>, <ActSpec>, <ProcEqnSpec>, <ProcInit>)
@@ -297,26 +297,26 @@
 //PBES's
 //------
 
-// PBES equation system
+//PBES equation system
 <PBES>         ::= PBES(<DataSpec>, <PBEqnSpec>, <PBInit>)
 
-// parameterized boolean equation specification
+//parameterized boolean equation specification
 <PBEqnSpec>    ::= PBEqnSpec(<DataVarId>*, <PBEqn>*)
 
-// parameterized boolean initialization
+//parameterized boolean initialization
 <PBInit>       ::= PBInit(<DataVarId>*, <PropVarInst>)
 
-// parameterized boolean equation
+//parameterized boolean equation
 <PBEqn>        ::= PBEqn(<FixPoint>, <PropVarDecl>, <PBExpr>)
 
-// fixpoint symbol
+//fixpoint symbol
 <FixPoint>     ::= Mu
                  | Nu
 
-// propositional variable declaration
+//propositional variable declaration
 <PropVarDecl>  ::= PropVarDecl(<String>, <DataVarId>*)
 
-// parameterized boolean expression
+//parameterized boolean expression
 <PBExpr>       ::= <DataExpr>
                  | PBESTrue
                  | PBESFalse
@@ -326,5 +326,5 @@
                  | PBESExists(<DataVarId>+, <PBExpr>)
                  | <PropVarInst>
 
-// propositional variable instantiation
+//propositional variable instantiation
 <PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*)

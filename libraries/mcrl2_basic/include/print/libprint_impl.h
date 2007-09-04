@@ -740,10 +740,21 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(dbg_prints)("printing regular formula\n");
     PRINT_FUNC(PrintRegFrm)(OutStream, Part, pp_format, ShowSorts, PrecLevel);
   } else if (gsIsPBES(Part)) {
-    //print PBES
-    PRINT_FUNC(dbg_prints)("printing PBES\n");
-    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0),
-      pp_format, ShowSorts, PrecLevel);
+    //print PBES specification
+    PRINT_FUNC(dbg_prints)("printing PBES specification\n");
+    for (int i = 0; i < 3; i++) {
+      PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, i),
+        pp_format, ShowSorts, PrecLevel);
+    }
+  } else if (gsIsPBEqnSpec(Part)) {
+    //print parameterised boolean equation specification
+    PRINT_FUNC(dbg_prints)("printing parameterised boolean equation specification\n");
+    ATermList Vars = ATLgetArgument(Part, 0);
+    if (ATgetLength(Vars) > 0) {
+      PRINT_FUNC(fprints)(OutStream, "var  ");
+      PRINT_FUNC(PrintDecls)(OutStream, gsGroupDeclsBySort(Vars),
+        pp_format, ";\n", "     ");
+    }
     ATermList PBEqns = ATLgetArgument(Part, 1);
     if (ATgetLength(PBEqns) > 0) {
       PRINT_FUNC(fprints)(OutStream, "pbes ");
@@ -751,8 +762,17 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
         pp_format, ShowSorts, PrecLevel, ";\n", "     ");
       PRINT_FUNC(fprints)(OutStream, "\n");
     }
+  } else if (gsIsPBInit(Part)) {
+    //print parameterised boolean initialisation
+    PRINT_FUNC(dbg_prints)("printing parameterised boolean initialisation\n");
+    ATermList Vars = ATLgetArgument(Part, 0);
+    if (ATgetLength(Vars) > 0) {
+      PRINT_FUNC(fprints)(OutStream, "var  ");
+      PRINT_FUNC(PrintDecls)(OutStream, gsGroupDeclsBySort(Vars),
+        pp_format, ";\n", "     ");
+    }
     PRINT_FUNC(fprints)(OutStream, "init ");
-    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 2),
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1),
       pp_format, ShowSorts, PrecLevel);
     PRINT_FUNC(fprints)(OutStream, ";\n");
   } else if (gsIsPBEqn(Part)) {
