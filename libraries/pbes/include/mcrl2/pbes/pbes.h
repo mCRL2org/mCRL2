@@ -281,6 +281,7 @@ class equation_system: public atermpp::vector<pbes_equation>
 /// \brief parameterized boolean equation system
 ///
 // <PBES>         ::= PBES(<DataSpec>, <PBEqnSpec>, <PBInit>)
+// <PBEqnSpec>    ::= PBEqnSpec(<DataVarId>*, <PBEqn>*)
 
 class pbes
 {
@@ -303,11 +304,12 @@ class pbes
       aterm_appl::iterator i = t.begin();
       m_data          = aterm_appl(*i++);
       aterm_appl eqn_spec = *i++;
-      pbes_equation_list l = eqn_spec(0);
-      data_variable_list v = eqn_spec(1);
-      atermpp::set<data_variable> s;
-      std::copy(v.begin(), v.end(), std::inserter(s, s.begin()));
-      m_equations     = equation_system(l, s);
+      data_variable_list freevars = eqn_spec(0);
+      pbes_equation_list eqn = eqn_spec(1);
+std::cout << "eqn.size() = " << eqn.size() << std::endl;      
+      atermpp::set<data_variable> v;
+      std::copy(freevars.begin(), freevars.end(), std::inserter(v, v.begin()));
+      m_equations     = equation_system(eqn, v);
       m_initial_state = pbes_initializer(*i);
     }
 
