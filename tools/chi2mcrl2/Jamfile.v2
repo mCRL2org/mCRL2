@@ -4,9 +4,10 @@ project toolset/chi2mcrl2
 
 exe chi2mcrl2
        : chi2mcrl2.cpp
-		 chiparser.cpp
-		 chilexer.cpp
-		 /libraries//aterm
+         chiparser.cpp
+         chilexer.cpp
+         /libraries//aterm
+         /libraries//mcrl2_basic
        : <include>.
          <squadt-connectivity>implemented
        ;
