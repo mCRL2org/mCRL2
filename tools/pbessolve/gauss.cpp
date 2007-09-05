@@ -30,7 +30,8 @@
 #include "mcrl2/lps/specification.h"
 #include "print/messaging.h"
 
-//#define debug
+
+#define debug
 
 
 int PESdeep=0; // for debug, the depth of pbes_expression_simplify calls
@@ -214,8 +215,9 @@ pbes_equation solve_equation
 #endif
 
 	 // decide whether it's stable
-	 stable = pbes_expression_compare(approx_,approx,prover);
-	 //stable = (approx_ == approx);
+	 // pbes_expression_compare is not reliable
+	 // stable = pbes_expression_compare(approx_,approx,prover);
+	 stable = (approx_ == approx);
 
 #ifdef debug
 	 if (!stable) gsVerboseMsg("Not"); gsVerboseMsg(" stable\n");
@@ -387,15 +389,27 @@ pbes_expression update_expression(pbes_expression e, equation_system es_solution
 	 aterm_appl x = gsMakeBinder(gsMakeExists(),quant_vars(e),pbes_to_data(quant_expr(e)));
 	 return (gsMakeDataExprExists(x));
   } 
- else if (is_propositional_variable_instantiation(e)) 
-	{
-	 identifier_string vname = var_name(e)+PREDVAR_MARK;
-	 data_expression_list parameters = var_val(e);
-	 sort_list sorts = apply(parameters, gsGetSort);
-	 lps::sort vsort = gsMakeSortArrowList(sorts, sname::bool_());
-	 data_variable v = data_variable(gsMakeDataVarId(vname, vsort));
-	 return gsMakeDataApplList(v, parameters);
-  }
+ else 
+   if (is_propositional_variable_instantiation(e)) 
+     {
+       identifier_string vname = var_name(e)+PREDVAR_MARK;
+       data_expression_list parameters = var_val(e);
+       if (parameters.empty())
+	 {
+	   lps::sort vsort = gsMakeSortIdBool();
+	   data_variable v = data_variable(gsMakeDataVarId(vname, vsort));
+	   return data_expression(v);
+	 }
+       else
+	 {
+	   std::cerr<<"A";
+	   sort_list sorts = apply(parameters, gsGetSort);
+	   std::cerr<<"B";
+	   lps::sort vsort = gsMakeSortArrowList(sorts, sname::bool_());
+	   data_variable v = data_variable(gsMakeDataVarId(vname, vsort));
+	   return gsMakeDataApplList(v, parameters);
+	 }
+     }
  return data_expression(); // to prevent compiler warnings
 }
 
@@ -498,11 +512,6 @@ pbes_expression update_expression(pbes_expression e, equation_system es_solution
 
 
 
-
-
-
-
-
 //======================================================================
 // Rewrites (simplifies) e according to the
 // rewriting rules of first-order logic.
@@ -517,10 +526,46 @@ pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* prover)
   if (is_data(e)) gsVerboseMsg("data expression already!");
 #endif
 
+ // simplify using the prover
+
+ prover->set_formula(e); 
+
+ e = prover->get_bdd();
+
+  return e;
+}
+//======================================================================
+
+
+
+
+
+
+
+
+
+//======================================================================
+// Rewrites (simplifies) e according to the
+// rewriting rules of first-order logic.
+// only works for quantifier-free expressions.
+pbes_expression rewrite_pbes_expression_via_data(pbes_expression e, BDD_Prover* prover)
+//=====================================
+
+{
+
+#ifdef debug
+  gsVerboseMsg("REWRITE_PBES_EXPRESSION %s\n", pp(e).c_str());
+  if (is_data(e)) gsVerboseMsg("data expression already!");
+#endif
+
  // translate e to a data_expression
  //gsVerboseMsg(" ->pbes_to_data: %s\n",pp(e).c_str());
+
+
  data_expression de = pbes_to_data(e); 
- //gsVerboseMsg(" <-pbes_to_data: %s\n",pp(de).c_str());
+ 
+
+//gsVerboseMsg(" <-pbes_to_data: %s\n",pp(de).c_str());
  
  /* THIS DOESN'T SIMPLIFY ENOUGH
  // rewrite it with Muck's data rewriter
@@ -531,7 +576,10 @@ pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* prover)
 
  // simplify using the prover
  //gsVerboseMsg(" ->prover: %s\n",pp(de).c_str());
+
  prover->set_formula(de); 
+
+
  //gsVerboseMsg(" <--Bdd from prover: %P\n", prover->get_bdd());
 
  data_expression d = prover->get_bdd();
@@ -694,9 +742,6 @@ gsVerboseMsg("waiting Bdd from prover... ");
   //  else // expr is true, false or a variable
   else
     {
-#ifdef debug
-      gsVerboseMsg("UNKNOWN pbes_expr: %s\n", pp(expr).c_str());
-#endif
       expr_simplified = expr;
     }
 
@@ -996,9 +1041,16 @@ void solve_equation_interactive(propositional_variable X,
 
 
 //======================================================================
-// !! Doesn't work when quantifiers are involved.
-// !! It seems difficult to properly translate pbes quantifiers to data quantifiers (??)
+// i need a safe and fast way to translate pbes_expressions to 
+// ATermAppls understood by the prover.
+// Via data expressions, it's too expensive and unsure
+// ( It seems difficult to properly translate pbes quantifiers to 
+// data quantifiers)
 // !! The prover can't use quantifiers anyway.
+// They should be translated as functions.
+//
+// The code below is an unsuccesful attempt 
+// (because pbes_to_data causes assertion failures) 
 bool pbes_expression_compare
 (pbes_expression p, pbes_expression q, BDD_Prover* prover)
 {

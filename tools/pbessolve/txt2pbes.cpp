@@ -15,7 +15,8 @@
 #define VERSION "0.0.1" 
  
 
-#define debug
+
+// #define debug
  
  
 //C++ 
@@ -52,6 +53,8 @@
 #include "libalpha.h"
 #include "mcrl2/dataimpl.h"
 
+// command-line options
+#include <getopt.h>
 
 //ATERM-specific 
 #include "atermpp/substitute.h" 
@@ -87,9 +90,10 @@ namespace po = boost::program_options;
  
 //Type definitions ====================== 
  
- 
+
 string infilename; 
 string outfilename; 
+
 //t_pbes_simple ps;
 
 
@@ -485,94 +489,117 @@ pbes make_pbes(const string fileName){
 }
 
  
- 
-//========================
-void parse_command_line(int argc, char** argv){
-//========================
 
-  po::options_description desc; 
-  desc.add_options() 
-    ("verbose,v",	"turn on the display of short intermediate messages") 
-    ("debug,d",		"turn on the display of detailed intermediate messages") 
-    ("version",		"display version information") 
-    ("syntax,s", "display the syntax and examples of the input txt")
-    ("help,h",		"display this help") 
-    ; 
-   
-  po::options_description hidden("Hidden options"); 
-  hidden.add_options() 
-    ("INFILE",              po::value<string>(), "input file") 
-    ; 
-   
-  po::options_description cmdline_options; 
-  cmdline_options.add(desc).add(hidden);  
-   
-  po::positional_options_description p; 
-  p.add("INFILE", -1); 
-   
-  po::variables_map vm; 
-  po::store(po::command_line_parser(argc, argv).options(cmdline_options).positional(p).run(), vm); 
-  po::notify(vm); 
-   
-  if (vm.count("help")) { 
-    cerr << "Usage: " << argv[0] << " [OPTION]... INFILE" << endl; 
-    cerr << "Parses the content of INFILE into a pbes specification.The result is written to INFILE.pbes" << endl; 
-    cerr << endl; 
-    cerr << desc <<endl; 
-    exit(0); 
-  } 
-   
-  if (vm.count("version")) { 
-    cerr << NAME << " " << VERSION  << endl; 
-    exit(0); 
-  } 
-   
-  if (vm.count("debug")) {
-    gsSetDebugMsg(); 
-    pbesdebug = 1;
-  }
 
-  if (vm.count("verbose")) 
-    gsSetVerboseMsg(); 
-   
-  if (vm.count("syntax")){
-    cerr<<"\nSYNTAX of the simple pbes text language\n";
-    cerr<<"(This is an extreme simplification of the official PBES grammar.)\n\n";
-    cerr<<"pbes        ::= pbes-eq pbes-eq .... \n\
-\n\
-pbes-eq     ::= \"mu\" predvar \"=\" pbes-expr  | \"nu\" predvar \"=\" pbes-expr \n\
-\n\
-predvar	    ::= \"X\" | \"Y\" | \"Z\" | \"X\" \"(\" params \")\" \
+
+void print_help(void)
+{
+  fprintf(stderr,
+    "\nUsage: txt2pbes [OPTION]... [INFILE [OUTFILE]]\n"
+    "Parses the content of INFILE into a pbes specification.The result is written to OUTFILE\n"
+    "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is\n"
+    "used.\n"
+    "  -s, --syntax          display the syntax (and examples) of the expected text input\n"    	  
+    "  -h, --help            display this help message and terminate\n"
+    "  -v, --verbose         display concise intermediate messages\n"
+    "  -d, --debug           display detailed intermediate messages\n"
+  );
+}
+
+void print_syntax(void)
+{
+  cerr<<"\nSYNTAX of the simple pbes text language\n";
+  cerr<<"(This is an extreme simplification of the official PBES grammar.)\n\n";
+  cerr<<"pbes        ::= pbes-eq pbes-eq .... \n"<<
+"pbes-eq     ::= \"mu\" predvar \"=\" pbes-expr  | \"nu\" predvar \"=\" pbes-expr \n"
+"predvar     ::= \"X\" | \"Y\" | \"Z\" | \"X\" \"(\" params \")\"	\
 | \"Y\" \"(\" params \")\" | \"Z\" \"(\" params \")\"\n\n";
-
-cerr <<"pbes-expr   ::= \"T\" | \"F\" | boolvar | nat-expr \"<\" nat-expr \
-| nat-expr \"=\" nat-expr \
-| predvar-inst \n\
-                | pbes-expr \"&&\" pbes-expr | pbes-expr \"||\" pbes-expr \
+  
+  cerr <<"pbes-expr   ::= \"T\" | \"F\" | boolvar | nat-expr \"<\" nat-expr \
+| nat-expr \"=\" nat-expr						\
+| predvar-inst \n"<<
+"  | pbes-expr \"&&\" pbes-expr | pbes-expr \"||\" pbes-expr \
 | \"!\" pbes-expr | \"(\" pbes-expr \")\"\n\n";
-
-    cerr<<"boolvar     ::= \"a\" | \"b\" | \"c\"\n\n\
-natvar      ::= \"i\" | \"j\" | \"k\"\n\n\
-nat-expr    ::= \"1\" | natvar | nat-expr \"+\" nat-expr | \"(\" nat-expr \")\"\n\n\
-predvar-inst::= \"X\" \"(\" params-inst \")\" | \"Y\" \"(\" params-inst \")\" \
-| \"Z\" \"(\" params-inst \")\"\n\n\
-params	    ::=  boolvar | natvar | params \",\" boolvar | params \",\" natvar\n\n\
-params-inst ::= boolvar	| \"!\" boolvar	| nat-expr | boolvar \",\" params-inst \
+  
+  cerr<<"boolvar     ::= \"a\" | \"b\" | \"c\"\n"<<
+"natvar      ::= \"i\" | \"j\" | \"k\"\n"<<				
+"nat-expr    ::= \"1\" | natvar | nat-expr \"+\" nat-expr | \"(\" nat-expr \")\"\n"<<
+"predvar-inst::= \"X\" \"(\" params-inst \")\" | \"Y\" \"(\" params-inst \")\" \
+| \"Z\" \"(\" params-inst \")\"\n"<<					
+    "params	    ::=  boolvar | natvar | params \",\" boolvar | params \",\" natvar\n"<<
+"params-inst ::= boolvar	| \"!\" boolvar	| nat-expr | boolvar \",\" params-inst \
 | \"!\" boolvar \",\" params-inst | nat-expr\",\" params-inst\n\n";
-
-    cerr<<"\nEXAMPLES:\n\n";
-    cerr<<"mu X(i) = (i<1) && X(i+1)\n\n";
-    cerr<<"mu X(b,i)   = (Y(b, i, i+1+1) && b) || !b\n";
-    cerr<<"nu Y(b,i,j) = X(!b,i) && Y(b,i+1,j) && ((i+1) < j)\n\n";
-}
-
-   
-  infilename = (0 < vm.count("INFILE")) ? vm["INFILE"].as<string>() : "-"; 
-
+  
+  cerr<<"\nEXAMPLES:\n\n";
+  cerr<<"mu X(i) = (i<1) && X(i+1)\n\n";
+  cerr<<"mu X(b,i)   = (Y(b, i, i+1+1) && b) || !b\n";
+  cerr<<"nu Y(b,i,j) = X(!b,i) && Y(b,i+1,j) && ((i+1) < j)\n\n";
 }
 
 
+void print_more_info(char *name)
+{
+  fprintf(stderr, "Use %s --help for options\n", name);
+}
+
+
+
+//========================== 
+void parse_command_line(int argc, char **argv)
+//==========================
+{
+#define SHORT_OPTIONS "hvds"
+#define VERSION_OPTION CHAR_MAX + 1;
+  struct option long_options[] = {
+    { "syntax",   no_argument,        NULL,  's' },
+    { "help",      no_argument,        NULL,  'h' },
+     { "verbose",   no_argument,        NULL,  'v' },
+    { "debug",     no_argument,        NULL,  'd' },
+    { 0, 0, 0, 0 }
+  };
+  int option;
+  //parse options
+  while ((option = getopt_long(argc, argv, SHORT_OPTIONS, long_options, NULL)) != -1) {
+    switch (option) {
+    case 's': /* syntax */
+      print_syntax();
+      exit(0);
+    case 'h': /* help */
+      print_help();
+      exit(0);
+    case 'v': /* verbose */
+      gsSetVerboseMsg();
+      break;
+    case 'd': /* debug */
+      gsSetDebugMsg();
+      break;
+    default:
+      print_more_info(argv[0]);
+      exit(1);
+    }
+  }
  
+  //check for wrong number of arguments
+  int noargc; //non-option argument count
+  noargc = argc - optind;
+  if (noargc > 2) {
+    fprintf(stderr, "%s: too many arguments\n", NAME);
+    print_more_info(argv[0]);
+    exit(1);
+  } 
+  else {
+    //noargc >= 0 && noargc <= 2
+    if (noargc > 0) {
+      infilename = argv[optind];
+    }
+    if (noargc == 2) {
+      outfilename = argv[optind + 1];
+    }
+  }
+}
+
+
+
  
  
  
@@ -586,24 +613,23 @@ int main(int argc, char** argv)
    
   parse_command_line(argc, argv);
 
-  // infilename is now filled in
-  if (infilename != "-")
-    {
-      outfilename = infilename + ".pbes";
+  cerr <<"Creating pbes ("<<outfilename<< ") from text (" << infilename <<") \n";
 
-      cerr <<"Creating pbes ("<<outfilename<< ") from text (" << infilename <<") \n";
-      //Create the pbes from the input text 
-      pbes p = make_pbes(infilename); 
+  //Create the pbes from the input text 
+  pbes p = make_pbes(infilename); 
+  ATermAppl ap = p;
 
-      //	  if (!gsIsPBES(p))
-      //	    gsVerboseMsg(" \n\n\nNEE\n\n\n");
-
-      if(!p.save(outfilename, false))
-	gsErrorMsg("writing failed\n");
-
-      cerr <<"done\n";
-
+  if (outfilename == "") {
+    gsVerboseMsg("The resulting PBES is:\n");
+    PrintPart_CXX(cout, (ATerm) ap, ppDefault);
+    cout << endl;
+  } else 
+    if(!p.save(outfilename, false)){
+      gsErrorMsg("writing to %s failed\n",outfilename);
+      exit(1);
     }
+  
+  cerr <<"done\n";  
 
   return 0; 
 } 

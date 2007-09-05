@@ -36,6 +36,9 @@ void solve_equation_interactive(propositional_variable X,
 
 
 
+
+
+
 // enumerates finite sorts
 // i.e., produces all possible instantiations
 // for a given sort, or set of sorts

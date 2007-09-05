@@ -28,7 +28,8 @@
 
 //LPS-Framework 
 #include "mcrl2/pbes/pbes.h" 
-#include "mcrl2/pbes/utility.h" 
+
+//#include "mcrl2/pbes/utility.h" 
 #include "mcrl2/data/data_operators.h" 
 #include "mcrl2/data/sort.h" 
 //#include "mcrl2/data/sort_utility.h" 
@@ -52,6 +53,7 @@ using namespace mcrl2::utilities;
  
 using atermpp::make_substitution; 
  
+using namespace ::mcrl2::utilities;
 
 namespace po = boost::program_options; 
  
@@ -146,7 +148,7 @@ pbes load_pbes()
     try
     {
       pbes_spec.load(infilename);
-    }
+  }
     catch (std::runtime_error e)
     { 
       gsErrorMsg("Cannot open PBES from '%s'\n", infilename.c_str()); 
@@ -243,7 +245,7 @@ pbes_expression interpret_solution (pbes pbes_spec,
 				    equation_system es_solution) 
 { 
 
-  propositional_variable_instantiation s = pbes_spec.initial_state();
+  propositional_variable_instantiation s = pbes_spec.initial_state().variable();
   data_expression_list del = s.parameters();
   
   // find the solution equation for state s
