@@ -43,7 +43,7 @@ if ! $(REVISION) {
   }
 }
 
-FULL_COMMAND_LINE = [ modules.peek : ARGV ] $(BUILD_EXTRA) ;
+FULL_COMMAND_LINE = [ modules.peek : ARGV ] $(BUILD_OPTIONS) ;
 BUILD_TAG         = "$(REVISION)-$(BUILD_VARIANT)-$(LINK_VARIANT)" ;
 
 # Feature to mark tools as basic experimental or deprecated
