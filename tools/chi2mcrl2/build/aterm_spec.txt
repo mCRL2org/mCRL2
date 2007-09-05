@@ -1,11 +1,18 @@
-<SpecChi> 		::= ProcSpec(<DecSpec>)
-
-<DecSpec>		::= DecSpec(<VarSpec>+)
+<SpecChi> 		::= ChiSpec(<ProcDef>*)
                   | Nil
 
-<VarSpec>		::= VarSpec(<VarExpID>+)
+<ProcDef>		::= ProcDef(<String>, <ProcDecl>, <ProcBody>)
 
-<VarExpID>		::= DataVarExprID(<VarID>, <Exp> ) 
+<ProcDecl>		::= ProcDecl(<Decl>*) 
+
+<Decl>			::=VarDecl(<VarID>+)
+
+<ProcBody>		::= ProcSpec(<VarSpec>*, <Statement>)
+
+<VarSpec>		::= VarSpec(<VarExpID>+)
+				  | ChanSpec(<ChanID>+)
+
+<VarExpID>		::= DataVarExprID( <VarID>, <Expr> ) 
 				  |	<VarID> 
 
 <VarID>			::= DataVarID(<String>+, <TypeExp>)
@@ -14,11 +21,25 @@
 
 <TypeID>		::= Type(<String>)
 
+<ChannelID>		::= ChannelID(<VarID>, <SendType>, <TypeID>)
+					
+			
 <Expr>			::= Expression(<String>, <TypeID> )
-				  | UnaryExpression(<String>, <Expr>, <TypeID> )
-				  | BinaryExpression(<String>, <Expr>, <Expr> , <TypeID> )
+				  | UnaryExpression(  <String>, <TypeID>, <Expr> )
+				  | BinaryExpression( <String>, <TypeID>, <Expr>, <Expr> )
 
-<StatementSpec>	::= StatementSpec(<Statement>+)
+<Statement>		::= SkipStat(OptGuard,OptChannel,Skip)
+				  | AssignmentStat(OptGuard,OptChannel,<Expr>+,<Expr>+)
+				  | AssignmentGGStat(OptGuard,OptChannel,<Expr>+,<Expr>+)
+                  | ParenthesisedStat( <Statement> )
+				  | SepStat(<Statement>,<Statement>)
+				  | AltStat(<Statement>,<Statement>)
+				  | ParStat(<Statement>,<Statement>)
+  				  | StarStat(<Statement>)
+			      | GuardedStarStat(<Expr>,<Statement>)
+				  | DeltaStat
+					
+<OptGuard>		::= <Expr> 
+				  |	Nil
 
-<Statement>		::= Skip
-				  | Assignment(<Expr>+,<Expr>+)
+<OptChannel>	::= Nil

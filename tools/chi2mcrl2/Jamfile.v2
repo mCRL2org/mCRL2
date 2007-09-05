@@ -6,6 +6,7 @@ exe chi2mcrl2
        : chi2mcrl2.cpp
          chiparser.cpp
          chilexer.cpp
+         translate.cpp
          /libraries//aterm
          /libraries//mcrl2_basic
        : <include>.

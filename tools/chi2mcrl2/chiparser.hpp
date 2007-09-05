@@ -104,16 +104,19 @@
 /* Copy the first part of user declarations.  */
 #line 1 "chiparser.yy"
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
 //#include "symtab.h"
 #include <iostream>
-#include "libstruct.h"
+#include "libstruct_core.h"
 #include <aterm2.h>
 #include "print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
+#include <list>
+#include <map>
 
 /*extern int yyerror(const char *s);
 extern int yylex( void );
@@ -121,6 +124,7 @@ extern char* yytext; */
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;
+using namespace std;
 #endif
 
 //external declarations from lexer.l
@@ -128,11 +132,13 @@ void chiyyerror( const char *s );
 int chiyylex( void );
 extern ATermAppl spec_tree;
 extern ATermIndexedSet parser_protect_table;
+extern int scope_lvl;
+extern map<ATerm, ATerm> var_type_map;
 
 #define YYMAXDEPTH 160000
 
 //local declarations
-ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
+ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
 //Pre: SpecElts contains one initialisation and zero or more occurrences of
 //     sort, constructor, operation, equation, action and process
 //     specifications.
@@ -145,13 +151,13 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE 
-#line 41 "chiparser.yy"
+#line 47 "chiparser.yy"
 {
   ATermAppl appl;
   ATermList list;
 }
-/* Line 2604 of glr.c.  */
-#line 155 "chiparser.hpp"
+/* Line 2616 of glr.c.  */
+#line 161 "chiparser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

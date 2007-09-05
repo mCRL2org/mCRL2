@@ -1,14 +1,17 @@
 %{
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
 //#include "symtab.h"
 #include <iostream>
-#include "libstruct.h"
+#include "libstruct_core.h"
 #include <aterm2.h>
 #include "print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
+#include <list>
+#include <map>
 
 /*extern int yyerror(const char *s);
 extern int yylex( void );
@@ -16,6 +19,7 @@ extern char* yytext; */
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;
+using namespace std;
 #endif
 
 //external declarations from lexer.l
@@ -23,11 +27,13 @@ void chiyyerror( const char *s );
 int chiyylex( void );
 extern ATermAppl spec_tree;
 extern ATermIndexedSet parser_protect_table;
+extern int scope_lvl;
+extern map<ATerm, ATerm> var_type_map;
 
 #define YYMAXDEPTH 160000
 
 //local declarations
-ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
+ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
 //Pre: SpecElts contains one initialisation and zero or more occurrences of
 //     sort, constructor, operation, equation, action and process
 //     specifications.
@@ -60,7 +66,7 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %token <appl> LBRACE RBRACE LBRACKET RBRACKET
 %token <appl> AND OR GUARD NOT EQUAL OLD
 %token <appl> BOOL NUMBER INT REALNUMBER TRUE FALSE DOT DEADLOCK IMPLIES NOTEQUAL GEQ LEQ MAX MIN DIV MOD POWER
-%token RECV EXCLAMATION SENDRECV RECVSEND SSEND RRECV STAR GUARD_REP DERIVATIVE
+%token <appl> RECV EXCLAMATION SENDRECV RECVSEND SSEND RRECV STAR GUARD_REP DERIVATIVE
 
 %left '-' '+'
 %left '*' '/'       /* order '+','-','*','/' */
@@ -79,12 +85,14 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %type <appl> IdentifierType IdentifierTypeExpression
 %type <appl> NatIntExpression BasicExpression BooleanExpression Expression 
 %type <appl> BoolNatIntExpression 
-%type <appl> LocalVariables Identifier// AssignmentStatement 
-%type <appl> ProcessBody Statement
+%type <appl> LocalVariables Identifier AssignmentStatement 
+%type <appl> ProcessBody OptGuard BasicStatement OptChannel Statement BinaryStatement UnaryStatement
+%type <appl> AdvancedStatement //IdentifierChannelDefinition ChannelDefinition
+%type <appl> ChiProgram ProcessDefinition FormalParameter 
 
-%type <list> Identifier_csp //Expression_csp 
+%type <list> Identifier_csp Expression_csp FormalParameter_csp 
 %type <list> IdentifierTypeExpression_csp IdentifierType_csp
-%type <list> LocalVariables_csp
+%type <list> LocalVariables_csp //ChannelDefinition_csp IdentifierChannelDefinition_csp
 
 /* 
  *  GRAMMER 
@@ -93,14 +101,60 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
  
 %%
 
-ChiProgram: ProcessDefinition { printf("inputs contains a valid Chi-specification\n"); }
+ChiProgram: ProcessDefinition 
+		{ 
+    	  gsDebugMsg("inputs contains a valid Chi-specification\n"); 
+		  spec_tree = $1;
+		}
 	; 
 
 ProcessDefinition: 
-	  PROC Identifier LBRACKET RBRACKET DEFINES ProcessBody
-	| PROC Identifier LBRACKET FormalParameter_csp RBRACKET DEFINES ProcessBody
-//	| PROC Identifier ExplicitTemplates LBRACKET RBRACKET DEFINES ProcessBody
+	  ProcOpenScope Identifier LBRACKET RBRACKET DEFINES ProcessBody
+		{ 
+      	  safe_assign($$, gsMakeProcDef($2, gsMakeProcDecl(ATmakeList0()) ,$6));
+      	  gsDebugMsg("parsed proc Def \n  %T\n", $$);
+		}
+	| ProcOpenScope Identifier LBRACKET FormalParameter_csp RBRACKET DEFINES ProcessBody
+		{ 
+      	  safe_assign($$, gsMakeProcDef($2, gsMakeProcDecl($4), $7));
+      	  gsDebugMsg("parsed proc Def\n  %T\n", $$);
+		}
+//	| PROC Identifier ExplicitTemplates LBRACKET RBRACKET DEFINES ProcessBody  
+/*     When adding these lines don't forget to:
+       + update the aterm_spec.txt and translator function
+       + update the translator function with ExplicedTemplates */ 
 //	| PROC Identifier ExplicitTemplates LBRACKET FormalParameter_csp RBRACKET DEFINES ProcessBody 
+/*     When adding these lines don't forget to:
+       + update the aterm_spec.txt and translator function
+       + update the translator function with ExplicedTemplates */ 
+	;
+
+ProcOpenScope:
+	PROC
+		{
+		  scope_lvl++;
+		  gsDebugMsg("Increase Scope to: %d\n",scope_lvl);
+		}
+	;
+
+ProcessBody: 
+	  BP Statement ProcCloseScope
+      	{ safe_assign($$, gsMakeProcSpec( ATmakeList0(), $2 ));
+      	  gsDebugMsg("parsed ProcessBody  \n  %T\n", $$);	
+		}
+	| BP LocalVariables_csp PROC_SEP Statement ProcCloseScope
+      	{ safe_assign($$, gsMakeProcSpec( $2, $4));
+      	  gsDebugMsg("parsed ProcessBody  \n  %T\n", $$);	
+		}
+	;
+
+ProcCloseScope:
+	EP	
+		{
+		  assert(scope_lvl > 0);
+		  scope_lvl--;
+		  gsDebugMsg("Decrease Scope to; %d\n",scope_lvl);
+		}
 	;
 
 Identifier: ID
@@ -108,17 +162,6 @@ Identifier: ID
  	  	  safe_assign($$, $1 );
       	  gsDebugMsg("parsed id's\n  %T\n", $$);
 		}
-
-ProcessBody: 
-	  BP Statement EP
-      	{ //safe_assign($$, gsMakeProcSpec( ATmakeList1((ATerm) gsMakeNil) ,$1));
-      	  gsDebugMsg("parsed ProcessBody  \n  %T\n", $$);	
-		}
-	| BP LocalVariables_csp PROC_SEP Statement EP
-      	{ //safe_assign($$, gsMakeProcSpec(ATmakeList1((ATerm) $1)));
-      	  gsDebugMsg("parsed ProcessBody  \n  %T\n", $$);	
-		}
-	;
 
 LocalVariables_csp: 
 	  LocalVariables 
@@ -154,6 +197,9 @@ IdentifierTypeExpression_csp:
 
 IdentifierTypeExpression:
 	  IdentifierType 
+		{
+		  safe_assign($$, $1 );
+		}
 	| IdentifierType DEFINES Expression
 		{
 		  safe_assign($$, gsMakeDataVarExprID ( $1, $3 ) );
@@ -174,23 +220,51 @@ IdentifierType_csp:
 
 FormalParameter_csp: 
 	  FormalParameter 
+      	{ safe_assign($$, ATmakeList1((ATerm) $1));
+      	  gsDebugMsg("parsed formalparameter variables  \n  %T\n", $$);	
+		}
 	| FormalParameter_csp COMMA FormalParameter
+      	{ safe_assign($$, ATinsert($1, (ATerm) $3));
+      	  gsDebugMsg("parsed formalparameter variables \n  %T\n", $$);	
+		}
 	;
 
 FormalParameter:
 	  VAR IdentifierType_csp
-  	| CHAN ChannelDeclaration_csp
+		{
+		  safe_assign($$, gsMakeVarDecl( $2 ));
+		  gsDebugMsg("parsed VariableList \n %T\n", $$);
+		}
+ // 	| CHAN ChannelDeclaration_csp
 	;
 
 IdentifierType:
 	  Identifier_csp COLON Type
 		{
+		  /**
+			* Build TypeCheck table for declared variables
+			*
+			* TODO: Add scope
+			*
+			**/
+		  ATermList list = $1;
+		  int n = ATgetLength( list );
+		  for(int i = 0; i < n ; ++i ){
+			 if (var_type_map.end() != var_type_map.find(ATgetFirst( list )))
+			 {
+			   gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
+			   exit(1);
+			 };
+			 var_type_map[ATgetFirst( list )]= (ATerm) $3;
+			 list = ATgetTail( list, 1 ) ;
+		  }	;
 		  safe_assign($$, gsMakeDataVarID ( $1, $3 ) );
 		  gsDebugMsg("parsed IdentifierType\n %T\n", $$);
-		}
+		  gsDebugMsg("Typecheck Table %d\n", var_type_map.size()); 
+  		}
 	;
 
-ChannelDeclaration_csp:
+/*ChannelDeclaration_csp:
 	  ChannelDeclaration
 	| ChannelDeclaration_csp COMMA ChannelDeclaration
 	;
@@ -210,26 +284,52 @@ IdentifierChannelDeclaration:
 	| Identifier SENDRECV
 	| Identifier RECVSEND
 	;
-
+*/
 /* ChannelDefinition_csp:
 	  ChannelDefinition
+      	{ safe_assign($$, ATmakeList1((ATerm) $1));
+      	  gsDebugMsg("parsed id-element \n  %T\n", $$);	
+		}
 	| ChannelDefinition_csp COMMA ChannelDefinition
+      	{ safe_assign($$, ATinsert($1, (ATerm) $3));
+      	  gsDebugMsg("parsed id-element \n  %T\n", $$);	
+		}
 	;
 
 ChannelDefinition:
 	  IdentifierChannelDefinition_csp COLON Type
+		{
+		  safe_assign($$, gsMakeChannelDefID ( $1, $3 ) );
+		  gsDebugMsg("parsed Identifier Type With Expression \n %T\n", $$);
+		}
 	;
 			
 IdentifierChannelDefinition_csp:
 	  IdentifierChannelDefinition
+	  ChannelDefinition
+      	{ safe_assign($$, ATmakeList1((ATerm) $1));
+      	  gsDebugMsg("parsed id-element \n  %T\n", $$);	
+		}
 	| IdentifierChannelDefinition_csp COMMA IdentifierChannelDefinition
+      	{ safe_assign($$, ATinsert($1, (ATerm) $3));
+      	  gsDebugMsg("parsed id-element \n  %T\n", $$);	
+		}
 	;
 	  
 IdentifierChannelDefinition:
 	  Identifier SENDRECV
+		{
+		  safe_assign($$, gsMakeChannelID ( $1, gsString2ATermAppl("sendrecv", gsString2ATermAppl("unknown") ) );
+		  gsDebugMsg("parsed Identifier Type With Expression \n %T\n", $$);
+		}
 	| Identifier RECVSEND
+		{
+		  safe_assign($$, gsMakeChannelID ( $1, gsString2ATermAppl("recvsend",gsString2ATermAppl("unknown") ) );
+		  gsDebugMsg("parsed Identifier Type With Expression \n %T\n", $$);
+		}
 	;
-*/	
+*/
+
 Type: 
 	  BasicType
 /*	| ContainerType
@@ -249,13 +349,15 @@ BasicType:
 	;
 
 /**
-  * STATEMETNS
+  * STATEMENTS
   *
   **/
 
 Statement: 
-	SKIP
-/*	  LBRACKET Statement RBRACKET
+	  LBRACKET Statement RBRACKET
+      	{ safe_assign($$, gsMakeParenthesisedStat( $2));
+      	  gsDebugMsg("parsed id-element \n  %T\n", $$);	
+		}
 	| BasicStatement
 	| UnaryStatement
 	| BinaryStatement
@@ -263,39 +365,64 @@ Statement:
 
 BasicStatement:
 	  AssignmentStatement
-	| CommStatement
+/*	| CommStatement
 //	| DelayStatement
 	| Instantiation
 //	| HybridStatement
 //	| ReturnStatement
-//	| FoldStatement
+//	| FoldStatement */
 	| AdvancedStatement
 	;
 
 AssignmentStatement:
 	  OptGuard OptChannel Expression_csp ASSIGNMENT Expression_csp
-     	{ //safe_assign($$, gsMakeAssignment((ATerm) $3, (ATerm) $4) );
+     	{ safe_assign($$, gsMakeAssignmentStat($1, $2, $3, $5) );
       	  gsDebugMsg("parsed skip statement \n  %T\n", $$);	
 		}
-	| OptGuard OptChannel SKIP
-      	{ safe_assign($$, gsMakeSkip() );
+	|
+	  OptGuard OptChannel SKIP
+      	{ safe_assign($$, gsMakeSkipStat( $1, $2, gsMakeSkip() ));
       	  gsDebugMsg("parsed skip statement \n  %T\n", $$);	
 		}
 //	| OptGuard LBRACE Expression_csp RBRACE COLON Expression_csp GG Identifier
 	;
-*/
-//OptGuard: /* empty */
-/*	| Expression GUARD
+
+OptGuard: /* empty */
+     	{ safe_assign($$, gsMakeNil() );
+		}
+	| Expression GUARD
+     	{ 
+			/**
+			  * Type Checking
+			  *
+			  **/
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("bool")))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+
+			safe_assign($$, $1 );
+      	  	gsDebugMsg("parsed OptGuard \n  %T\n", $$);	
+		}
 	;
-*/
-//OptChannel: /* empty */
-/*	| Expression COLON
+
+OptChannel: /* empty */
+     	{ safe_assign($$, gsMakeNil() );
+		}
+	| Expression COLON
+      	{ safe_assign($$, $1);
+		  gsErrorMsg("OptChannel not yet implemented");
+		  assert(false);
+      	  gsDebugMsg("parsed OptChannel \n  %T\n", $$);	
+		}
 	;
-*/
+
 Identifier_csp: 
 	  Identifier 
-		{ /* empty */
-		  /* Identifier is propagated */
+      	{ safe_assign($$, ATmakeList1((ATerm) $1));
+      	  gsDebugMsg("parsed id's \n  %T\n", $$);	
 		}
 	| Identifier_csp COMMA Identifier
       	{ safe_assign($$, ATinsert($1, (ATerm) $3));
@@ -303,7 +430,7 @@ Identifier_csp:
 		}
 	;
 
-/*Expression_csp:
+Expression_csp:
 	  Expression
       	{ safe_assign($$, ATmakeList1((ATerm) $1));
       	  gsDebugMsg("parsed expression-element \n  %T\n", $$);	
@@ -313,7 +440,7 @@ Identifier_csp:
       	  gsDebugMsg("parsed expression-element\n  %T\n", $$);	
 		}
 	;
-*/
+
 /*CommStatement:
 	  OptGuard Expression EXCLAMATION Expression_csp
 	| OptGuard Expression SSEND Expression_csp
@@ -331,22 +458,40 @@ Instantiation:
 	  Identifier LBRACE Expression_csp RBRACE
 	| Identifier
 	;
-
+*/
 BinaryStatement:
 	  Statement SEP Statement
+      	{ safe_assign($$, gsMakeSepStat( $1, $3));
+      	  gsDebugMsg("parsed skip statement \n  %T\n", $$);	
+		}
 	| Statement ALT Statement
-	| Statement BARS Statement
+      	{ safe_assign($$, gsMakeAltStat( $1, $3));
+      	  gsDebugMsg("parsed skip statement \n  %T\n", $$);	
+		}
+	| Statement BARS Statement 
+      	{ safe_assign($$, gsMakeParStat( $1, $3));
+      	  gsDebugMsg("parsed skip statement \n  %T\n", $$);	
+		}
 	;
 
 UnaryStatement:
 	  STAR Statement
+      	{ safe_assign($$, gsMakeStarStat( $2));
+      	  gsDebugMsg("parsed skip statement \n  %T\n", $$);	
+		}
 	| Expression GUARD_REP Statement
+      	{ safe_assign($$, gsMakeGuardedStarStat( $1, $3));
+      	  gsDebugMsg("parsed skip statement \n  %T\n", $$);	
+		}
 	;
 
 AdvancedStatement:
 	  DEADLOCK
+      	{ safe_assign($$, gsMakeDeltaStat());
+      	  gsDebugMsg("parsed deadlock statement \n  %T\n", $$);	
+		}
 	;
-*/	
+
 /**
   * EXPRESSIONS
   *
@@ -355,6 +500,20 @@ AdvancedStatement:
 
 Expression: //NUMBER
 	  LBRACKET Expression RBRACKET
+		{ 
+			/**
+			  * Type Checking inherhit
+			  *
+			  **/	
+
+ 	  		safe_assign($$, 
+				gsMakeUnaryExpression( gsString2ATermAppl("()" ),
+				ATAgetArgument($2,1), 
+				$2 ) 
+			);
+      		gsDebugMsg("parsed Negation Expression's\n  %T\n", $$);
+		}
+		
 	| BasicExpression
 	| BooleanExpression
 	| NatIntExpression
@@ -368,23 +527,34 @@ Expression: //NUMBER
 //	| VectorExpression
 //	| RecordExpression
 //	| DistributionExpression
-//	| FucntionExpression
+//	| FunctionExpression
 	;	
 
 
 BasicExpression:
 	 Identifier
 		{
-			/**  
-			  * Lookup Identifier Type
-			  *
-  			  **/	 
- 	  		safe_assign($$, 
-				gsMakeExpression( $1, 
-					gsMakeType( gsString2ATermAppl("unknown")) 
-				)
-			);
-      		gsDebugMsg("parsed Expression's\n  %T\n", $$);
+		  /**  
+		    * Lookup Identifier Type
+		    *
+		    * TODO: Add scope
+		    *
+		    **/
+		  
+		  // Determine if the expression is defined already 
+		  if (var_type_map.end() == var_type_map.find( (ATerm) $1))
+		    {
+		      gsErrorMsg("Variable %T is not defined!\n", $1 );
+		      exit(1);
+		    };
+		  
+		  //Type the expression
+ 	  	  safe_assign($$, 
+			gsMakeExpression( $1, 
+			  (ATermAppl) var_type_map[(ATerm) $1] 
+			)
+		  );
+      	  gsDebugMsg("parsed Expression's\n  %T\n", $$);
 		}
 //	  OLD LBRACKET Expression RBRACKET 
 //	  Identifier DOT Identifier
@@ -412,11 +582,125 @@ BooleanExpression:
 			);
       		gsDebugMsg("parsed Expression's\n  %T\n", $$);
 		}
-/*	| NOT Expression
+	| NOT Expression
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("bool")))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, 
+				gsMakeUnaryExpression( gsString2ATermAppl("!" ),
+				gsMakeType( gsString2ATermAppl("bool" ) ), 
+				$2 ) 
+			);
+      		gsDebugMsg("parsed Negation Expression's\n  %T\n", $$);
+		}
 	| EXCLAMATION Expression
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("bool")))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, 
+				gsMakeUnaryExpression( gsString2ATermAppl("!" ),
+				gsMakeType( gsString2ATermAppl("bool" ) ), 
+				$2 ) 
+			);
+      		gsDebugMsg("parsed Negation Expression's\n  %T\n", $$);
+		}
 	| Expression AND Expression 
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("bool")))
+
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, 
+				gsMakeBinaryExpression( gsString2ATermAppl("&&" ),
+				gsMakeType( gsString2ATermAppl("bool" ) ),
+				$1 , 
+				$3  
+				)
+			);
+      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+		}
 	| Expression OR Expression 
-	| Expression IMPLIES Expression */
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("bool")))
+
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, 
+				gsMakeBinaryExpression( gsString2ATermAppl("||" ),
+				gsMakeType( gsString2ATermAppl("bool" ) ),
+				$1 , 
+				$3  
+				)
+			);
+      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+		}
+	| Expression IMPLIES Expression 
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("bool")))
+
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, 
+				gsMakeBinaryExpression( gsString2ATermAppl("->" ),
+				gsMakeType( gsString2ATermAppl("bool" ) ),
+				$1 , 
+				$3  
+				)
+			);
+      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+		}
 	;	
 	
 NatIntExpression: 
@@ -431,94 +715,421 @@ NatIntExpression:
 		}
 	| PLUS NUMBER
 		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) == gsString2ATermAppl("nat"))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
  	  		safe_assign($$, 
 				gsMakeUnaryExpression( $1, 
-					$2, 
-					gsMakeType( gsString2ATermAppl("nat" )) 
+					gsMakeType( gsString2ATermAppl("nat" ) ),
+					$2 
 				)
 			);
       		gsDebugMsg("parsed UnaryExpression's\n  %T\n", $$);
 		}
 	| MINUS NUMBER
 		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) == gsMakeType(gsString2ATermAppl("nat")))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
  	  		safe_assign($$, 
 				gsMakeUnaryExpression($1, 
-					$2, 
-					gsMakeType( gsString2ATermAppl("nat" )) 
+					gsMakeType( gsString2ATermAppl("nat" ) ),
+					$2
 				)
 			);
       		gsDebugMsg("parsed UnaryExpression's\n  %T\n", $$);
 		}
-/*	| Expression '^' Expression
+	| Expression '^' Expression
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, 
+				gsMakeBinaryExpression( gsString2ATermAppl("^" ),
+				gsMakeType( gsString2ATermAppl("nat" ) ),
+				$1 , 
+				$3  
+				) 
+			);
+      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+		}
 	| Expression '*' Expression
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, 
+				gsMakeBinaryExpression( gsString2ATermAppl("*" ),
+				gsMakeType( gsString2ATermAppl("nat" ) ),
+				$1 , 
+				$3  
+				) 
+			);
+      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+		}
 	| Expression '/' Expression
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, 
+				gsMakeBinaryExpression( gsString2ATermAppl("/" ),
+				gsMakeType( gsString2ATermAppl("nat" ) ),
+				$1 , 
+				$3  
+				) 
+			);
+      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+		}
 	| Expression '+' Expression
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, 
+				gsMakeBinaryExpression( gsString2ATermAppl("+" ),
+				gsMakeType( gsString2ATermAppl("nat" ) ),
+				$1 , 
+				$3  
+				) 
+			);
+      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+		}
 	| Expression '-' Expression
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, 
+				gsMakeBinaryExpression( gsString2ATermAppl("-" ),
+				gsMakeType( gsString2ATermAppl("nat" ) ),
+				$1 , 
+				$3  
+				) 
+			);
+      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+		}
 	| Expression MOD Expression
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, 
+				gsMakeBinaryExpression( gsString2ATermAppl("MOD" ),
+				gsMakeType( gsString2ATermAppl("nat" ) ),
+				$1 , 
+				$3  
+				) 
+			);
+      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+		}
 	| Expression DIV Expression
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, 
+				gsMakeBinaryExpression( gsString2ATermAppl("DIV" ),
+				gsMakeType( gsString2ATermAppl("nat" ) ),
+				$1 , 
+				$3  
+				) 
+			);
+      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+		}
 	| Expression MIN Expression
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, 
+				gsMakeBinaryExpression( gsString2ATermAppl("MIN" ),
+				gsMakeType( gsString2ATermAppl("nat" ) ),
+				$1 , 
+				$3  
+				) 
+			);
+      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+		}
 	| Expression MAX Expression
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, 
+				gsMakeBinaryExpression( gsString2ATermAppl("MAX" ),
+				gsMakeType( gsString2ATermAppl("nat" ) ),
+				$1 , 
+				$3  
+				) 
+			);
+      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+		}
 	| Expression '<' Expression
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, 
+				gsMakeBinaryExpression( gsString2ATermAppl("<" ),
+				gsMakeType( gsString2ATermAppl("nat" ) ),
+				$1 , 
+				$3  
+				) 
+			);
+      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+		}
 	| Expression '>' Expression
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, 
+				gsMakeBinaryExpression( gsString2ATermAppl(">" ),
+				gsMakeType( gsString2ATermAppl("nat" ) ),
+				$1 , 
+				$3  
+				) 
+			);
+      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+		}
 	| Expression LEQ Expression
-	| Expression GEQ Expression */
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, 
+				gsMakeBinaryExpression( gsString2ATermAppl("<=" ),
+				gsMakeType( gsString2ATermAppl("nat" ) ),
+				$1 , 
+				$3  
+				) 
+			);
+      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+		}
+	| Expression GEQ Expression 
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, 
+				gsMakeBinaryExpression( gsString2ATermAppl(">=" ),
+				gsMakeType( gsString2ATermAppl("nat" ) ),
+				$1 , 
+				$3  
+				) 
+			);
+      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+		}
 	;
 
 BoolNatIntExpression:
 	  Expression EQUAL Expression
-		{ 
- 	  		safe_assign($$, gsMakeBinaryExpression( $2, $1, $3, 
-					gsMakeType( gsString2ATermAppl("bool" )) 
-			));
+		{
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+		
+			safe_assign($$, gsMakeBinaryExpression( $2,  
+					gsMakeType( gsString2ATermAppl("bool" )), 
+			$1, $3));
       		gsDebugMsg("parsed UnaryExpression's\n  %T\n", $$);
 		}
 	| Expression NOTEQUAL Expression
 		{ 
- 	  		safe_assign($$, gsMakeBinaryExpression( $2, $1, $3,  
-					gsMakeType( gsString2ATermAppl("bool" )) 
-			));
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, gsMakeBinaryExpression( $2,  
+					gsMakeType( gsString2ATermAppl("bool" )), 
+			$1, $3));
       		gsDebugMsg("parsed UnaryExpression's\n  %T\n", $$);
 		}
 	;	
 
-/*
-RealExpression:
-	  TIME
-	| REALNUMBER 
-	| RealUnaryOperator Expression
-	| Expression RealBinaryOperator Expression
-	;
-
-RealUnaryOperator:
-	  PLUS
-	| MINUS 
-	;
-
-RealBinaryOperator:
-	  '^'
-	| '*'
-	| '/' 
-	| '+'
-	| '-'
-	| MIN
-	| MAX
-	| '<'
-	| '>' 
-	| LEQ
-	| GEQ
-	| EQUAL
-	| NOTEQUAL 
-	;
-
-
-BooleanBinaryOperator:
-	  EQUAL
-	| NOTEQUAL
-	| AND
-	| OR
-	| IMPLIES
-	;
-*/
 
 /* Precedence for '+','-' vs '*',  '/' is NOT defined here.
  * Instead, the two %left commands above perform that role.
@@ -547,79 +1158,3 @@ BooleanBinaryOperator:
 ; */
 %%
 
-//struct symtab * symlook(char *s)
-//{
-//  struct symtab *sp;
-// 
-//  for(sp = symtab; sp < &symtab[NSYMS]; sp++) {
-//    if(sp->name && !strcmp(sp->name,s))
-//      return sp;
-//
-//    if(!sp->name) {
-//      sp->name = (char *) strdup(s);
-//      return sp;
-//    }
-//  }
-//  yyerror("** Too many symbols check symlook in parser.y **");
-//    exit(1);
-//}
-
-void resetType()
-{
-  //count = 0;
-}
-
-void reset_parser(void)
-{
-  //num = 0;
-}
-
-ATermAppl gsSpecEltsToSpec(ATermList SpecElts)
-{
-  ATermAppl Result = NULL;
-  //ATermList VarDecl = ATmakeList0();
-  //ATermAppl StatementSpec = NULL; 
-  //int n = ATgetLength(SpecElts);
-
-/*  
-  for (int i = 0; i < n; i++) {
-    ATermAppl SpecElt = ATAelementAt(SpecElts, i);
-    if (gsIsProcessInit(SpecElt)) {
-      if (Init == NULL) {
-        Init = SpecElt;
-      } else {
-        //Init != NULL
-        gsErrorMsg("parse error: multiple initialisations\n");
-        return NULL;
-      }
-    } else {
-      ATermList SpecEltArg0 = ATLgetArgument(SpecElt, 0);
-      if (gsIsSortSpec(SpecElt)) {
-        SortDecls = ATconcat(SortDecls, SpecEltArg0);
-      } else if (gsIsConsSpec(SpecElt)) {
-        ConsDecls = ATconcat(ConsDecls, SpecEltArg0);
-      } else if (gsIsMapSpec(SpecElt)) {
-        MapDecls = ATconcat(MapDecls, SpecEltArg0);
-      } else if (gsIsDataEqnSpec(SpecElt)) {
-        DataEqnDecls = ATconcat(DataEqnDecls, SpecEltArg0);
-      } else if (gsIsActSpec(SpecElt)) {
-        ActDecls = ATconcat(ActDecls, SpecEltArg0);
-      } else if (gsIsProcEqnSpec(SpecElt)) {
-        ProcEqnDecls = ATconcat(ProcEqnDecls, SpecEltArg0);
-      }
-    }
-  }
-  //check whether an initialisation is present
-  if (Init == NULL) {
-    gsErrorMsg("parse error: missing initialisation\n");
-    return NULL;
-  }
-*/
-  Result = NULL;
-  /*
-  gsMakeProcSpec(
-    gsMakeVarSpec(VarDecl),
-    StatementSpec
-  ); */
-  return Result;
-}

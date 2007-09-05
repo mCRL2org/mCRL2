@@ -40,20 +40,37 @@ ATermList constructList()
 }
 
 //--- begin generated code
-ATermAppl constructUnaryExpression();
-ATermAppl constructAssignment();
-ATermAppl constructNil();
-ATermAppl constructSkip();
-ATermAppl constructExpression();
-ATermAppl constructDataVarID();
-ATermAppl constructStatementSpec();
+ATermAppl constructChiSpec();
+ATermAppl constructChanSpec();
+ATermAppl constructChannelID();
+ATermAppl constructDeltaStat();
+ATermAppl constructStarStat();
 ATermAppl constructDataVarExprID();
-ATermAppl constructVarSpec();
-ATermAppl constructBinaryExpression();
-ATermAppl constructProcSpec();
 ATermAppl constructType();
+ATermAppl constructSepStat();
+ATermAppl constructOptGuard();
+ATermAppl constructNil();
+ATermAppl constructAltStat();
+ATermAppl constructDataVarID();
+ATermAppl constructAssignmentGGStat();
+ATermAppl constructParStat();
+ATermAppl constructAssignmentStat();
+ATermAppl constructProcDecl();
+ATermAppl constructParenthesisedStat();
+ATermAppl constructSkipStat();
+ATermAppl constructBinaryExpression();
+ATermAppl constructOptChannel();
+ATermAppl constructExpression();
+ATermAppl constructProcDef();
+ATermAppl constructUnaryExpression();
+ATermAppl constructSkip();
+ATermAppl constructVarDecl();
+ATermAppl constructVarSpec();
+ATermAppl constructProcSpec();
+ATermAppl constructGuardedStarStat();
 ATermAppl constructSpecChi();
-ATermAppl constructDecSpec();
+ATermAppl constructDecl();
+ATermAppl constructProcBody();
 ATermAppl constructVarExpID();
 ATermAppl constructVarID();
 ATermAppl constructTypeExp();
@@ -61,115 +78,83 @@ ATermAppl constructTypeID();
 ATermAppl constructExpr();
 ATermAppl constructStatement();
 
-// UnaryExpression
+// ChiSpec
 inline
-ATermAppl initConstructUnaryExpression(ATermAppl& t)
+ATermAppl initConstructChiSpec(ATermAppl& t)
 {
-  t = ATmakeAppl3(gsAFunUnaryExpression(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructTypeID()));
+  t = ATmakeAppl1(gsAFunChiSpec(), reinterpret_cast<ATerm>(constructList()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructUnaryExpression()
+ATermAppl constructChiSpec()
 {
-  static ATermAppl t = initConstructUnaryExpression(t);
+  static ATermAppl t = initConstructChiSpec(t);
   return t;
 }
 
-// Assignment
+// ChanSpec
 inline
-ATermAppl initConstructAssignment(ATermAppl& t)
+ATermAppl initConstructChanSpec(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunAssignment(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructList()));
+  t = ATmakeAppl1(gsAFunChanSpec(), reinterpret_cast<ATerm>(constructList()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructAssignment()
+ATermAppl constructChanSpec()
 {
-  static ATermAppl t = initConstructAssignment(t);
+  static ATermAppl t = initConstructChanSpec(t);
   return t;
 }
 
-// Nil
+// ChannelID
 inline
-ATermAppl initConstructNil(ATermAppl& t)
+ATermAppl initConstructChannelID(ATermAppl& t)
 {
-  t = ATmakeAppl0(gsAFunNil());
+  t = ATmakeAppl3(gsAFunChannelID(), reinterpret_cast<ATerm>(constructVarID()), reinterpret_cast<ATerm>(constructSendType()), reinterpret_cast<ATerm>(constructTypeID()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructNil()
+ATermAppl constructChannelID()
 {
-  static ATermAppl t = initConstructNil(t);
+  static ATermAppl t = initConstructChannelID(t);
   return t;
 }
 
-// Skip
+// DeltaStat
 inline
-ATermAppl initConstructSkip(ATermAppl& t)
+ATermAppl initConstructDeltaStat(ATermAppl& t)
 {
-  t = ATmakeAppl0(gsAFunSkip());
+  t = ATmakeAppl0(gsAFunDeltaStat());
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructSkip()
+ATermAppl constructDeltaStat()
 {
-  static ATermAppl t = initConstructSkip(t);
+  static ATermAppl t = initConstructDeltaStat(t);
   return t;
 }
 
-// Expression
+// StarStat
 inline
-ATermAppl initConstructExpression(ATermAppl& t)
+ATermAppl initConstructStarStat(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunExpression(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructTypeID()));
+  t = ATmakeAppl1(gsAFunStarStat(), reinterpret_cast<ATerm>(constructStatement()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructExpression()
+ATermAppl constructStarStat()
 {
-  static ATermAppl t = initConstructExpression(t);
-  return t;
-}
-
-// DataVarID
-inline
-ATermAppl initConstructDataVarID(ATermAppl& t)
-{
-  t = ATmakeAppl2(gsAFunDataVarID(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructTypeExp()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructDataVarID()
-{
-  static ATermAppl t = initConstructDataVarID(t);
-  return t;
-}
-
-// StatementSpec
-inline
-ATermAppl initConstructStatementSpec(ATermAppl& t)
-{
-  t = ATmakeAppl1(gsAFunStatementSpec(), reinterpret_cast<ATerm>(constructList()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructStatementSpec()
-{
-  static ATermAppl t = initConstructStatementSpec(t);
+  static ATermAppl t = initConstructStarStat(t);
   return t;
 }
 
@@ -177,7 +162,7 @@ ATermAppl constructStatementSpec()
 inline
 ATermAppl initConstructDataVarExprID(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunDataVarExprID(), reinterpret_cast<ATerm>(constructVarID()), reinterpret_cast<ATerm>(constructExp()));
+  t = ATmakeAppl2(gsAFunDataVarExprID(), reinterpret_cast<ATerm>(constructVarID()), reinterpret_cast<ATerm>(constructExpr()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -186,54 +171,6 @@ inline
 ATermAppl constructDataVarExprID()
 {
   static ATermAppl t = initConstructDataVarExprID(t);
-  return t;
-}
-
-// VarSpec
-inline
-ATermAppl initConstructVarSpec(ATermAppl& t)
-{
-  t = ATmakeAppl1(gsAFunVarSpec(), reinterpret_cast<ATerm>(constructList()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructVarSpec()
-{
-  static ATermAppl t = initConstructVarSpec(t);
-  return t;
-}
-
-// BinaryExpression
-inline
-ATermAppl initConstructBinaryExpression(ATermAppl& t)
-{
-  t = ATmakeAppl4(gsAFunBinaryExpression(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructTypeID()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructBinaryExpression()
-{
-  static ATermAppl t = initConstructBinaryExpression(t);
-  return t;
-}
-
-// ProcSpec
-inline
-ATermAppl initConstructProcSpec(ATermAppl& t)
-{
-  t = ATmakeAppl2(gsAFunProcSpec(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructList()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructProcSpec()
-{
-  static ATermAppl t = initConstructProcSpec(t);
   return t;
 }
 
@@ -253,18 +190,361 @@ ATermAppl constructType()
   return t;
 }
 
+// SepStat
+inline
+ATermAppl initConstructSepStat(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunSepStat(), reinterpret_cast<ATerm>(constructStatement()), reinterpret_cast<ATerm>(constructStatement()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructSepStat()
+{
+  static ATermAppl t = initConstructSepStat(t);
+  return t;
+}
+
+// OptGuard
+inline
+ATermAppl initConstructOptGuard(ATermAppl& t)
+{
+  t = ATmakeAppl0(gsAFunOptGuard());
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructOptGuard()
+{
+  static ATermAppl t = initConstructOptGuard(t);
+  return t;
+}
+
+// Nil
+inline
+ATermAppl initConstructNil(ATermAppl& t)
+{
+  t = ATmakeAppl0(gsAFunNil());
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructNil()
+{
+  static ATermAppl t = initConstructNil(t);
+  return t;
+}
+
+// AltStat
+inline
+ATermAppl initConstructAltStat(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunAltStat(), reinterpret_cast<ATerm>(constructStatement()), reinterpret_cast<ATerm>(constructStatement()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructAltStat()
+{
+  static ATermAppl t = initConstructAltStat(t);
+  return t;
+}
+
+// DataVarID
+inline
+ATermAppl initConstructDataVarID(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunDataVarID(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructTypeExp()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructDataVarID()
+{
+  static ATermAppl t = initConstructDataVarID(t);
+  return t;
+}
+
+// AssignmentGGStat
+inline
+ATermAppl initConstructAssignmentGGStat(ATermAppl& t)
+{
+  t = ATmakeAppl4(gsAFunAssignmentGGStat(), reinterpret_cast<ATerm>(constructOptGuard()), reinterpret_cast<ATerm>(constructOptChannel()), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructList()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructAssignmentGGStat()
+{
+  static ATermAppl t = initConstructAssignmentGGStat(t);
+  return t;
+}
+
+// ParStat
+inline
+ATermAppl initConstructParStat(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunParStat(), reinterpret_cast<ATerm>(constructStatement()), reinterpret_cast<ATerm>(constructStatement()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructParStat()
+{
+  static ATermAppl t = initConstructParStat(t);
+  return t;
+}
+
+// AssignmentStat
+inline
+ATermAppl initConstructAssignmentStat(ATermAppl& t)
+{
+  t = ATmakeAppl4(gsAFunAssignmentStat(), reinterpret_cast<ATerm>(constructOptGuard()), reinterpret_cast<ATerm>(constructOptChannel()), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructList()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructAssignmentStat()
+{
+  static ATermAppl t = initConstructAssignmentStat(t);
+  return t;
+}
+
+// ProcDecl
+inline
+ATermAppl initConstructProcDecl(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunProcDecl(), reinterpret_cast<ATerm>(constructList()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructProcDecl()
+{
+  static ATermAppl t = initConstructProcDecl(t);
+  return t;
+}
+
+// ParenthesisedStat
+inline
+ATermAppl initConstructParenthesisedStat(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunParenthesisedStat(), reinterpret_cast<ATerm>(constructStatement()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructParenthesisedStat()
+{
+  static ATermAppl t = initConstructParenthesisedStat(t);
+  return t;
+}
+
+// SkipStat
+inline
+ATermAppl initConstructSkipStat(ATermAppl& t)
+{
+  t = ATmakeAppl3(gsAFunSkipStat(), reinterpret_cast<ATerm>(constructOptGuard()), reinterpret_cast<ATerm>(constructOptChannel()), reinterpret_cast<ATerm>(constructSkip()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructSkipStat()
+{
+  static ATermAppl t = initConstructSkipStat(t);
+  return t;
+}
+
+// BinaryExpression
+inline
+ATermAppl initConstructBinaryExpression(ATermAppl& t)
+{
+  t = ATmakeAppl4(gsAFunBinaryExpression(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructTypeID()), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructExpr()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructBinaryExpression()
+{
+  static ATermAppl t = initConstructBinaryExpression(t);
+  return t;
+}
+
+// OptChannel
+inline
+ATermAppl initConstructOptChannel(ATermAppl& t)
+{
+  t = ATmakeAppl0(gsAFunOptChannel());
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructOptChannel()
+{
+  static ATermAppl t = initConstructOptChannel(t);
+  return t;
+}
+
+// Expression
+inline
+ATermAppl initConstructExpression(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunExpression(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructTypeID()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructExpression()
+{
+  static ATermAppl t = initConstructExpression(t);
+  return t;
+}
+
+// ProcDef
+inline
+ATermAppl initConstructProcDef(ATermAppl& t)
+{
+  t = ATmakeAppl3(gsAFunProcDef(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructProcDecl()), reinterpret_cast<ATerm>(constructProcBody()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructProcDef()
+{
+  static ATermAppl t = initConstructProcDef(t);
+  return t;
+}
+
+// UnaryExpression
+inline
+ATermAppl initConstructUnaryExpression(ATermAppl& t)
+{
+  t = ATmakeAppl3(gsAFunUnaryExpression(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructTypeID()), reinterpret_cast<ATerm>(constructExpr()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructUnaryExpression()
+{
+  static ATermAppl t = initConstructUnaryExpression(t);
+  return t;
+}
+
+// Skip
+inline
+ATermAppl initConstructSkip(ATermAppl& t)
+{
+  t = ATmakeAppl0(gsAFunSkip());
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructSkip()
+{
+  static ATermAppl t = initConstructSkip(t);
+  return t;
+}
+
+// VarDecl
+inline
+ATermAppl initConstructVarDecl(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunVarDecl(), reinterpret_cast<ATerm>(constructList()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructVarDecl()
+{
+  static ATermAppl t = initConstructVarDecl(t);
+  return t;
+}
+
+// VarSpec
+inline
+ATermAppl initConstructVarSpec(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunVarSpec(), reinterpret_cast<ATerm>(constructList()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructVarSpec()
+{
+  static ATermAppl t = initConstructVarSpec(t);
+  return t;
+}
+
+// ProcSpec
+inline
+ATermAppl initConstructProcSpec(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunProcSpec(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructStatement()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructProcSpec()
+{
+  static ATermAppl t = initConstructProcSpec(t);
+  return t;
+}
+
+// GuardedStarStat
+inline
+ATermAppl initConstructGuardedStarStat(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunGuardedStarStat(), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructStatement()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructGuardedStarStat()
+{
+  static ATermAppl t = initConstructGuardedStarStat(t);
+  return t;
+}
+
 // SpecChi
 inline
 ATermAppl constructSpecChi()
 {
-  return constructProcSpec();
+  return constructChiSpec();
 }
 
-// DecSpec
+// Decl
 inline
-ATermAppl constructDecSpec()
+ATermAppl constructDecl()
 {
-  return constructVarSpec();
+  return constructVarDecl();
+}
+
+// ProcBody
+inline
+ATermAppl constructProcBody()
+{
+  return constructProcSpec();
 }
 
 // VarExpID
@@ -306,7 +586,7 @@ ATermAppl constructExpr()
 inline
 ATermAppl constructStatement()
 {
-  return constructSkip();
+  return constructSkipStat();
 }
 //--- end generated code
 

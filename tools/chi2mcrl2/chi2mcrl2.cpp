@@ -18,6 +18,7 @@
 #include <iostream> 	//Required by cin
 #include "chilexer.h"
 #include <print/messaging.h>
+#include "translate.h"
 
 //#include <cstdlib>
 //#include <cstring>
@@ -34,10 +35,7 @@
 #define INFILEEXT ".chi"
 #define OUTFILEEXT ".mcrl2"
 
-#ifdef __cplusplus
 using namespace ::mcrl2::utilities;
-#endif
-
 using namespace std;
 
 //t_options represents the options of the translator 
@@ -60,7 +58,8 @@ static bool parse_command_line(int argc, char *argv[],t_options &options)
 
   #define ShortOptions   "hqvd"
   #define VersionOption  CHAR_MAX + 1
-  struct option LongOptions[] = {
+  struct option LongOptions[] = 
+  {
     { "help",        no_argument,       NULL, 'h' },
     { "version",     no_argument,       NULL, VersionOption },
     { "quiet",       no_argument,       NULL, 'q' },
@@ -102,16 +101,19 @@ static bool parse_command_line(int argc, char *argv[],t_options &options)
   //check for wrong number of arguments
   int noargc; //non-option argument count
   noargc = argc - optind;
-  if (noargc > 2) {
+  if (noargc > 2) 
+  {
     fprintf(stderr, "%s: too many arguments\n", NAME);
     PrintMoreInfo(argv[0]);
     return false;
   } else {
     //noargc >= 0 && noargc <= 2
-    if (noargc > 0) {
+    if (noargc > 0) 
+	{
       options.infilename = argv[optind];
     }
-    if (noargc == 2) {
+    if (noargc == 2) 
+	{
       options.outfilename = argv[optind + 1];
     }
   }
@@ -124,14 +126,16 @@ ATermAppl translate_file(t_options &options)
   ATermAppl result = NULL;
   
   //parse specification
-  if (options.infilename == "") {
+  if (options.infilename == "")
+  {
     //parse specification from stdin
     printf("Parsing input from stdin...\n");
     result = parse_stream(cin);
   } else {
     //parse specification from infilename
     ifstream instream(options.infilename.c_str(), ifstream::in|ifstream::binary);
-    if (!instream.is_open()) {
+    if (!instream.is_open()) 
+	{
       gsErrorMsg("cannot open input file '%s'\n", options.infilename.c_str());
       printf("Cannot open input file '%s'\n", options.infilename.c_str());
       return NULL;
@@ -141,10 +145,11 @@ ATermAppl translate_file(t_options &options)
 	result = parse_stream(instream);
     instream.close();
   }
+  
+  
   if (result == NULL) 
   {
-    //gsErrorMsg("parsing failed\n");
-    printf("Output failed\n");
+    gsErrorMsg("parsing failed\n");
     return NULL;
   }
 
@@ -184,7 +189,9 @@ int main(int argc, char *argv[])
   //initialise ATerm library
   ATerm         stack_bottom;
   t_options     options;
-
+ 
+  CAsttransform asttransform;
+  
   ATinit(argc,argv,&stack_bottom);
 
   //enable constructor functions
@@ -197,20 +204,23 @@ int main(int argc, char *argv[])
       if (result == NULL) {
         return 1;
       }
-
+	 
+ 	  gsDebugMsg("Transforming AST to mcrl2 specification\n");
+	  asttransform.translator(result);
+	  
       //store the result
       if (options.outfilename == "") {
-        //gsVerboseMsg("saving result to stdout...\n");
+        gsVerboseMsg("saving result to stdout...\n");
         ATwriteToBinaryFile((ATerm) result, stdout);
         fprintf(stdout, "\n");
       } else { //outfilename != NULL
         //open output filename
         FILE *outstream = fopen(options.outfilename.c_str(), "wb");
         if (outstream == NULL) {
-          //gsErrorMsg("cannot open output file '%s'\n", lin_options.outfilename.c_str());
+          gsErrorMsg("cannot open output file '%s'\n", options.outfilename.c_str());
           return 1;
         }
-        //gsVerboseMsg("saving result to '%s'...\n", lin_options.outfilename.c_str());
+        gsVerboseMsg("saving result to '%s'...\n", options.outfilename.c_str());
         ATwriteToBinaryFile((ATerm) result, outstream);
         fclose(outstream);
       }

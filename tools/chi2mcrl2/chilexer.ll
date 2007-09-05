@@ -4,9 +4,10 @@
 #include <string.h>
 #include <math.h>
 #include <iostream>
-#include "libstruct.h"
+#include "libstruct_core.h"
 #include <vector>
 #include "print/messaging.h"
+#include <map>
 
 //fix for newer versions of flex (>= 2.5.31)
 #ifndef yywrap
@@ -15,9 +16,13 @@
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;
+using namespace std;
 #endif
 
 int line = 1, col = 1;
+int scope_lvl;
+
+map<ATerm, ATerm> var_type_map;
 
 extern ATermAppl spec_tree;
 extern ATermIndexedSet parser_protect_table;
@@ -150,6 +155,7 @@ real	{ process_string(); return TYPE; }
 string  { process_string(); return TYPE; }
 
 deadlock { process_string();return DEADLOCK; }
+delta 	{ process_string();return DEADLOCK; }
 old		{ process_string(); return OLD;}
 
 {identifier}    { process_string(); return ID; }

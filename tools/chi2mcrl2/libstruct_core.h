@@ -31,26 +31,70 @@ void gsEnableCoreConstructorFunctions()
 {}
 
 //--- begin generated code
-// Assignment
+// AltStat
 inline
-AFun initAFunAssignment(AFun& f)
+AFun initAFunAltStat(AFun& f)
 {
-  f = ATmakeAFun("Assignment", 2, ATfalse);
+  f = ATmakeAFun("AltStat", 2, ATfalse);
   ATprotectAFun(f);
   return f;
 }
 
 inline
-AFun gsAFunAssignment()
+AFun gsAFunAltStat()
 {
-  static AFun AFunAssignment = initAFunAssignment(AFunAssignment);
-  return AFunAssignment;
+  static AFun AFunAltStat = initAFunAltStat(AFunAltStat);
+  return AFunAltStat;
 }
 
 inline
-bool gsIsAssignment(ATermAppl Term)
+bool gsIsAltStat(ATermAppl Term)
 {
-  return ATgetAFun(Term) == gsAFunAssignment();
+  return ATgetAFun(Term) == gsAFunAltStat();
+}
+
+// AssignmentGGStat
+inline
+AFun initAFunAssignmentGGStat(AFun& f)
+{
+  f = ATmakeAFun("AssignmentGGStat", 4, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunAssignmentGGStat()
+{
+  static AFun AFunAssignmentGGStat = initAFunAssignmentGGStat(AFunAssignmentGGStat);
+  return AFunAssignmentGGStat;
+}
+
+inline
+bool gsIsAssignmentGGStat(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunAssignmentGGStat();
+}
+
+// AssignmentStat
+inline
+AFun initAFunAssignmentStat(AFun& f)
+{
+  f = ATmakeAFun("AssignmentStat", 4, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunAssignmentStat()
+{
+  static AFun AFunAssignmentStat = initAFunAssignmentStat(AFunAssignmentStat);
+  return AFunAssignmentStat;
+}
+
+inline
+bool gsIsAssignmentStat(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunAssignmentStat();
 }
 
 // BinaryExpression
@@ -73,6 +117,72 @@ inline
 bool gsIsBinaryExpression(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunBinaryExpression();
+}
+
+// ChanSpec
+inline
+AFun initAFunChanSpec(AFun& f)
+{
+  f = ATmakeAFun("ChanSpec", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunChanSpec()
+{
+  static AFun AFunChanSpec = initAFunChanSpec(AFunChanSpec);
+  return AFunChanSpec;
+}
+
+inline
+bool gsIsChanSpec(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunChanSpec();
+}
+
+// ChannelID
+inline
+AFun initAFunChannelID(AFun& f)
+{
+  f = ATmakeAFun("ChannelID", 3, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunChannelID()
+{
+  static AFun AFunChannelID = initAFunChannelID(AFunChannelID);
+  return AFunChannelID;
+}
+
+inline
+bool gsIsChannelID(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunChannelID();
+}
+
+// ChiSpec
+inline
+AFun initAFunChiSpec(AFun& f)
+{
+  f = ATmakeAFun("ChiSpec", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunChiSpec()
+{
+  static AFun AFunChiSpec = initAFunChiSpec(AFunChiSpec);
+  return AFunChiSpec;
+}
+
+inline
+bool gsIsChiSpec(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunChiSpec();
 }
 
 // DataVarExprID
@@ -119,6 +229,28 @@ bool gsIsDataVarID(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunDataVarID();
 }
 
+// DeltaStat
+inline
+AFun initAFunDeltaStat(AFun& f)
+{
+  f = ATmakeAFun("DeltaStat", 0, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunDeltaStat()
+{
+  static AFun AFunDeltaStat = initAFunDeltaStat(AFunDeltaStat);
+  return AFunDeltaStat;
+}
+
+inline
+bool gsIsDeltaStat(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunDeltaStat();
+}
+
 // Expression
 inline
 AFun initAFunExpression(AFun& f)
@@ -139,6 +271,28 @@ inline
 bool gsIsExpression(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunExpression();
+}
+
+// GuardedStarStat
+inline
+AFun initAFunGuardedStarStat(AFun& f)
+{
+  f = ATmakeAFun("GuardedStarStat", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunGuardedStarStat()
+{
+  static AFun AFunGuardedStarStat = initAFunGuardedStarStat(AFunGuardedStarStat);
+  return AFunGuardedStarStat;
+}
+
+inline
+bool gsIsGuardedStarStat(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunGuardedStarStat();
 }
 
 // Nil
@@ -163,6 +317,138 @@ bool gsIsNil(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunNil();
 }
 
+// OptChannel
+inline
+AFun initAFunOptChannel(AFun& f)
+{
+  f = ATmakeAFun("OptChannel", 0, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunOptChannel()
+{
+  static AFun AFunOptChannel = initAFunOptChannel(AFunOptChannel);
+  return AFunOptChannel;
+}
+
+inline
+bool gsIsOptChannel(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunOptChannel();
+}
+
+// OptGuard
+inline
+AFun initAFunOptGuard(AFun& f)
+{
+  f = ATmakeAFun("OptGuard", 0, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunOptGuard()
+{
+  static AFun AFunOptGuard = initAFunOptGuard(AFunOptGuard);
+  return AFunOptGuard;
+}
+
+inline
+bool gsIsOptGuard(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunOptGuard();
+}
+
+// ParStat
+inline
+AFun initAFunParStat(AFun& f)
+{
+  f = ATmakeAFun("ParStat", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunParStat()
+{
+  static AFun AFunParStat = initAFunParStat(AFunParStat);
+  return AFunParStat;
+}
+
+inline
+bool gsIsParStat(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunParStat();
+}
+
+// ParenthesisedStat
+inline
+AFun initAFunParenthesisedStat(AFun& f)
+{
+  f = ATmakeAFun("ParenthesisedStat", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunParenthesisedStat()
+{
+  static AFun AFunParenthesisedStat = initAFunParenthesisedStat(AFunParenthesisedStat);
+  return AFunParenthesisedStat;
+}
+
+inline
+bool gsIsParenthesisedStat(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunParenthesisedStat();
+}
+
+// ProcDecl
+inline
+AFun initAFunProcDecl(AFun& f)
+{
+  f = ATmakeAFun("ProcDecl", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunProcDecl()
+{
+  static AFun AFunProcDecl = initAFunProcDecl(AFunProcDecl);
+  return AFunProcDecl;
+}
+
+inline
+bool gsIsProcDecl(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunProcDecl();
+}
+
+// ProcDef
+inline
+AFun initAFunProcDef(AFun& f)
+{
+  f = ATmakeAFun("ProcDef", 3, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunProcDef()
+{
+  static AFun AFunProcDef = initAFunProcDef(AFunProcDef);
+  return AFunProcDef;
+}
+
+inline
+bool gsIsProcDef(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunProcDef();
+}
+
 // ProcSpec
 inline
 AFun initAFunProcSpec(AFun& f)
@@ -183,6 +469,28 @@ inline
 bool gsIsProcSpec(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunProcSpec();
+}
+
+// SepStat
+inline
+AFun initAFunSepStat(AFun& f)
+{
+  f = ATmakeAFun("SepStat", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunSepStat()
+{
+  static AFun AFunSepStat = initAFunSepStat(AFunSepStat);
+  return AFunSepStat;
+}
+
+inline
+bool gsIsSepStat(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunSepStat();
 }
 
 // Skip
@@ -207,26 +515,48 @@ bool gsIsSkip(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunSkip();
 }
 
-// StatementSpec
+// SkipStat
 inline
-AFun initAFunStatementSpec(AFun& f)
+AFun initAFunSkipStat(AFun& f)
 {
-  f = ATmakeAFun("StatementSpec", 1, ATfalse);
+  f = ATmakeAFun("SkipStat", 3, ATfalse);
   ATprotectAFun(f);
   return f;
 }
 
 inline
-AFun gsAFunStatementSpec()
+AFun gsAFunSkipStat()
 {
-  static AFun AFunStatementSpec = initAFunStatementSpec(AFunStatementSpec);
-  return AFunStatementSpec;
+  static AFun AFunSkipStat = initAFunSkipStat(AFunSkipStat);
+  return AFunSkipStat;
 }
 
 inline
-bool gsIsStatementSpec(ATermAppl Term)
+bool gsIsSkipStat(ATermAppl Term)
 {
-  return ATgetAFun(Term) == gsAFunStatementSpec();
+  return ATgetAFun(Term) == gsAFunSkipStat();
+}
+
+// StarStat
+inline
+AFun initAFunStarStat(AFun& f)
+{
+  f = ATmakeAFun("StarStat", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunStarStat()
+{
+  static AFun AFunStarStat = initAFunStarStat(AFunStarStat);
+  return AFunStarStat;
+}
+
+inline
+bool gsIsStarStat(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunStarStat();
 }
 
 // Type
@@ -273,6 +603,28 @@ bool gsIsUnaryExpression(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunUnaryExpression();
 }
 
+// VarDecl
+inline
+AFun initAFunVarDecl(AFun& f)
+{
+  f = ATmakeAFun("VarDecl", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunVarDecl()
+{
+  static AFun AFunVarDecl = initAFunVarDecl(AFunVarDecl);
+  return AFunVarDecl;
+}
+
+inline
+bool gsIsVarDecl(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunVarDecl();
+}
+
 // VarSpec
 inline
 AFun initAFunVarSpec(AFun& f)
@@ -296,21 +648,51 @@ bool gsIsVarSpec(ATermAppl Term)
 }
 
 inline
-ATermAppl gsMakeAssignment(ATermList Expr_0, ATermList Expr_1)
+ATermAppl gsMakeAltStat(ATermAppl Statement_0, ATermAppl Statement_1)
 {
-  return ATmakeAppl2(gsAFunAssignment(), (ATerm) Expr_0, (ATerm) Expr_1);
+  return ATmakeAppl2(gsAFunAltStat(), (ATerm) Statement_0, (ATerm) Statement_1);
 }
 
 inline
-ATermAppl gsMakeBinaryExpression(ATermAppl String_0, ATermAppl Expr_1, ATermAppl Expr_2, ATermAppl TypeID_3)
+ATermAppl gsMakeAssignmentGGStat(ATermAppl OptGuard_0, ATermAppl OptChannel_1, ATermList Expr_2, ATermList Expr_3)
 {
-  return ATmakeAppl4(gsAFunBinaryExpression(), (ATerm) String_0, (ATerm) Expr_1, (ATerm) Expr_2, (ATerm) TypeID_3);
+  return ATmakeAppl4(gsAFunAssignmentGGStat(), (ATerm) OptGuard_0, (ATerm) OptChannel_1, (ATerm) Expr_2, (ATerm) Expr_3);
 }
 
 inline
-ATermAppl gsMakeDataVarExprID(ATermAppl VarID_0, ATermAppl Exp_1)
+ATermAppl gsMakeAssignmentStat(ATermAppl OptGuard_0, ATermAppl OptChannel_1, ATermList Expr_2, ATermList Expr_3)
 {
-  return ATmakeAppl2(gsAFunDataVarExprID(), (ATerm) VarID_0, (ATerm) Exp_1);
+  return ATmakeAppl4(gsAFunAssignmentStat(), (ATerm) OptGuard_0, (ATerm) OptChannel_1, (ATerm) Expr_2, (ATerm) Expr_3);
+}
+
+inline
+ATermAppl gsMakeBinaryExpression(ATermAppl String_0, ATermAppl TypeID_1, ATermAppl Expr_2, ATermAppl Expr_3)
+{
+  return ATmakeAppl4(gsAFunBinaryExpression(), (ATerm) String_0, (ATerm) TypeID_1, (ATerm) Expr_2, (ATerm) Expr_3);
+}
+
+inline
+ATermAppl gsMakeChanSpec(ATermList ChanID_0)
+{
+  return ATmakeAppl1(gsAFunChanSpec(), (ATerm) ChanID_0);
+}
+
+inline
+ATermAppl gsMakeChannelID(ATermAppl VarID_0, ATermAppl SendType_1, ATermAppl TypeID_2)
+{
+  return ATmakeAppl3(gsAFunChannelID(), (ATerm) VarID_0, (ATerm) SendType_1, (ATerm) TypeID_2);
+}
+
+inline
+ATermAppl gsMakeChiSpec(ATermList ProcDef_0)
+{
+  return ATmakeAppl1(gsAFunChiSpec(), (ATerm) ProcDef_0);
+}
+
+inline
+ATermAppl gsMakeDataVarExprID(ATermAppl VarID_0, ATermAppl Expr_1)
+{
+  return ATmakeAppl2(gsAFunDataVarExprID(), (ATerm) VarID_0, (ATerm) Expr_1);
 }
 
 inline
@@ -320,9 +702,21 @@ ATermAppl gsMakeDataVarID(ATermList String_0, ATermAppl TypeExp_1)
 }
 
 inline
+ATermAppl gsMakeDeltaStat()
+{
+  return ATmakeAppl0(gsAFunDeltaStat());
+}
+
+inline
 ATermAppl gsMakeExpression(ATermAppl String_0, ATermAppl TypeID_1)
 {
   return ATmakeAppl2(gsAFunExpression(), (ATerm) String_0, (ATerm) TypeID_1);
+}
+
+inline
+ATermAppl gsMakeGuardedStarStat(ATermAppl Expr_0, ATermAppl Statement_1)
+{
+  return ATmakeAppl2(gsAFunGuardedStarStat(), (ATerm) Expr_0, (ATerm) Statement_1);
 }
 
 inline
@@ -332,9 +726,51 @@ ATermAppl gsMakeNil()
 }
 
 inline
-ATermAppl gsMakeProcSpec(ATermList DecSpec_0, ATermList StatementSpec_1)
+ATermAppl gsMakeOptChannel()
 {
-  return ATmakeAppl2(gsAFunProcSpec(), (ATerm) DecSpec_0, (ATerm) StatementSpec_1);
+  return ATmakeAppl0(gsAFunOptChannel());
+}
+
+inline
+ATermAppl gsMakeOptGuard()
+{
+  return ATmakeAppl0(gsAFunOptGuard());
+}
+
+inline
+ATermAppl gsMakeParStat(ATermAppl Statement_0, ATermAppl Statement_1)
+{
+  return ATmakeAppl2(gsAFunParStat(), (ATerm) Statement_0, (ATerm) Statement_1);
+}
+
+inline
+ATermAppl gsMakeParenthesisedStat(ATermAppl Statement_0)
+{
+  return ATmakeAppl1(gsAFunParenthesisedStat(), (ATerm) Statement_0);
+}
+
+inline
+ATermAppl gsMakeProcDecl(ATermList Decl_0)
+{
+  return ATmakeAppl1(gsAFunProcDecl(), (ATerm) Decl_0);
+}
+
+inline
+ATermAppl gsMakeProcDef(ATermAppl String_0, ATermAppl ProcDecl_1, ATermAppl ProcBody_2)
+{
+  return ATmakeAppl3(gsAFunProcDef(), (ATerm) String_0, (ATerm) ProcDecl_1, (ATerm) ProcBody_2);
+}
+
+inline
+ATermAppl gsMakeProcSpec(ATermList VarSpec_0, ATermAppl Statement_1)
+{
+  return ATmakeAppl2(gsAFunProcSpec(), (ATerm) VarSpec_0, (ATerm) Statement_1);
+}
+
+inline
+ATermAppl gsMakeSepStat(ATermAppl Statement_0, ATermAppl Statement_1)
+{
+  return ATmakeAppl2(gsAFunSepStat(), (ATerm) Statement_0, (ATerm) Statement_1);
 }
 
 inline
@@ -344,9 +780,15 @@ ATermAppl gsMakeSkip()
 }
 
 inline
-ATermAppl gsMakeStatementSpec(ATermList Statement_0)
+ATermAppl gsMakeSkipStat(ATermAppl OptGuard_0, ATermAppl OptChannel_1, ATermAppl Skip_2)
 {
-  return ATmakeAppl1(gsAFunStatementSpec(), (ATerm) Statement_0);
+  return ATmakeAppl3(gsAFunSkipStat(), (ATerm) OptGuard_0, (ATerm) OptChannel_1, (ATerm) Skip_2);
+}
+
+inline
+ATermAppl gsMakeStarStat(ATermAppl Statement_0)
+{
+  return ATmakeAppl1(gsAFunStarStat(), (ATerm) Statement_0);
 }
 
 inline
@@ -356,9 +798,15 @@ ATermAppl gsMakeType(ATermAppl String_0)
 }
 
 inline
-ATermAppl gsMakeUnaryExpression(ATermAppl String_0, ATermAppl Expr_1, ATermAppl TypeID_2)
+ATermAppl gsMakeUnaryExpression(ATermAppl String_0, ATermAppl TypeID_1, ATermAppl Expr_2)
 {
-  return ATmakeAppl3(gsAFunUnaryExpression(), (ATerm) String_0, (ATerm) Expr_1, (ATerm) TypeID_2);
+  return ATmakeAppl3(gsAFunUnaryExpression(), (ATerm) String_0, (ATerm) TypeID_1, (ATerm) Expr_2);
+}
+
+inline
+ATermAppl gsMakeVarDecl(ATermList VarID_0)
+{
+  return ATmakeAppl1(gsAFunVarDecl(), (ATerm) VarID_0);
 }
 
 inline

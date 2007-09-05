@@ -1,3 +1,5 @@
-proc Test( ) =
-|[  var blaat : nat = +0  
-:: skip ]|
+proc Test( var r, k: nat, z: bool  ) =
+|[ var a, b : bool = false,
+       c    : nat ,
+       d    : bool 
+:: a and d -> skip ; deadlock  ]|
