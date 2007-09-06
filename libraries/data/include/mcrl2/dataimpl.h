@@ -182,4 +182,23 @@ void impl_function_sort(ATermAppl sort_arrow, t_data_decls *p_data_decls);
 //     the context of part
 //Post:an implementation of function sort sort_arrow is added to *p_data_decls
 
+ATermAppl apply_op_id_to_vars(ATermAppl op_id, ATermList *p_args,
+                                   ATermList *p_vars, ATerm context);
+//Pre: op_id is an operation identifier of sort s_op_id; here s_op_id is:
+//     - either a sort identifier
+//     - or it is of the form s_0 x ... x s_n -> s, where the s_i and s are
+//       sort expressions
+//     p_args points to a list
+//     p_vars points to a list of DataVarIds
+//     context is some term
+//Ret: op_id, if s_op_id is a sort identifier
+//     op_id(v_0,...,v_n), if s_op_id is of the form s_0 x ... x s_n -> s;
+//     here for 1 <= i <= n, v_i is a data variable of sort s_i different from
+//     the other v_j, and either
+//     - v_i occurs in *p_vars
+//     - v_i does not occur in *p_vars and context
+//Post:*p_args = [v_0,...,v_n]
+//     *p_vars is extended with newly introduced v_i (which did not occur in
+//     *p_vars and context)
+
 #endif // MCRL2_DATAIMPL_H

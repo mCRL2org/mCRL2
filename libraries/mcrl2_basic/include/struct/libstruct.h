@@ -1254,7 +1254,11 @@ bool gsIsDataExprCDub(ATermAppl DataExpr);
 
 bool gsIsDataExprCNat(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
-//Ret: DataExpr is a CInt
+//Ret: DataExpr is a CNat
+
+bool gsIsDataExprCPair(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a CPair
 
 bool gsIsDataExprCInt(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
@@ -1308,6 +1312,10 @@ bool gsIsDataExprPred(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: DataExpr is a predecessor
 
+bool gsIsDataExprDub(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a Dub
+
 bool gsIsDataExprAdd(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: DataExpr is an addition
@@ -1320,9 +1328,21 @@ bool gsIsDataExprSubt(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: DataExpr is a substraction
 
+bool gsIsDataExprGTESubt(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a GTESubt
+
+bool gsIsDataExprGTESubtB(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a GTESubtB
+
 bool gsIsDataExprMult(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: DataExpr is a multiplication
+
+bool gsIsDataExprMultIR(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a MultIR
 
 bool gsIsDataExprDiv(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
@@ -1331,6 +1351,22 @@ bool gsIsDataExprDiv(ATermAppl DataExpr);
 bool gsIsDataExprMod(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: DataExpr is a mod
+
+bool gsIsDataExprDivMod(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a DivMod
+
+bool gsIsDataExprGDivMod(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a GDivMod
+
+bool gsIsDataExprGGDivMod(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a GGDivMod
+
+bool gsIsDataExprEven(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is an Even
 
 bool gsIsDataExprNumber(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression

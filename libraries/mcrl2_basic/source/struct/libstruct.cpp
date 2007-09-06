@@ -2879,6 +2879,16 @@ bool gsIsDataExprCNat(ATermAppl DataExpr)
   return false;
 }
 
+bool gsIsDataExprCPair(ATermAppl DataExpr)
+{
+  if(gsIsDataAppl(DataExpr)) {
+    ATermAppl t = ATAgetArgument(DataExpr,0);
+    if(gsIsOpId(t)) 
+      return ATisEqual(ATAgetArgument(t,0), gsMakeOpIdNameCPair());
+  }
+  return false;
+}
+
 bool gsIsDataExprCInt(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
@@ -3009,6 +3019,16 @@ bool gsIsDataExprPred(ATermAppl DataExpr)
   return false;
 }
 
+bool gsIsDataExprDub(ATermAppl DataExpr)
+{
+  if(gsIsDataAppl(DataExpr)) {
+    ATermAppl t = ATAgetArgument(DataExpr,0);
+    if(gsIsOpId(t))
+      return ATAgetArgument(t,0) == gsMakeOpIdNameDub();
+  }
+  return false;
+}
+
 bool gsIsDataExprAdd(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
@@ -3039,12 +3059,42 @@ bool gsIsDataExprSubt(ATermAppl DataExpr)
   return false;
 }
 
+bool gsIsDataExprGTESubt(ATermAppl DataExpr)
+{
+  if(gsIsDataAppl(DataExpr)) {
+    ATermAppl t = ATAgetArgument(DataExpr,0);
+    if(gsIsOpId(t))
+      return ATAgetArgument(t,0) == gsMakeOpIdNameGTESubt();
+  }
+  return false;
+}
+
+bool gsIsDataExprGTESubtB(ATermAppl DataExpr)
+{
+  if(gsIsDataAppl(DataExpr)) {
+    ATermAppl t = ATAgetArgument(DataExpr,0);
+    if(gsIsOpId(t))
+      return ATAgetArgument(t,0) == gsMakeOpIdNameGTESubtB();
+  }
+  return false;
+}
+
 bool gsIsDataExprMult(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t))
       return ATAgetArgument(t,0) == gsMakeOpIdNameMult();
+  }
+  return false;
+}
+
+bool gsIsDataExprMultIR(ATermAppl DataExpr)
+{
+  if(gsIsDataAppl(DataExpr)) {
+    ATermAppl t = ATAgetArgument(DataExpr,0);
+    if(gsIsOpId(t))
+      return ATAgetArgument(t,0) == gsMakeOpIdNameMultIR();
   }
   return false;
 }
@@ -3065,6 +3115,46 @@ bool gsIsDataExprMod(ATermAppl DataExpr)
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t))
       return ATAgetArgument(t,0) == gsMakeOpIdNameMod();
+  }
+  return false;
+}
+
+bool gsIsDataExprDivMod(ATermAppl DataExpr)
+{
+  if(gsIsDataAppl(DataExpr)) {
+    ATermAppl t = ATAgetArgument(DataExpr,0);
+    if(gsIsOpId(t))
+      return ATAgetArgument(t,0) == gsMakeOpIdNameDivMod();
+  }
+  return false;
+}
+
+bool gsIsDataExprGDivMod(ATermAppl DataExpr)
+{
+  if(gsIsDataAppl(DataExpr)) {
+    ATermAppl t = ATAgetArgument(DataExpr,0);
+    if(gsIsOpId(t))
+      return ATAgetArgument(t,0) == gsMakeOpIdNameGDivMod();
+  }
+  return false;
+}
+
+bool gsIsDataExprGGDivMod(ATermAppl DataExpr)
+{
+  if(gsIsDataAppl(DataExpr)) {
+    ATermAppl t = ATAgetArgument(DataExpr,0);
+    if(gsIsOpId(t))
+      return ATAgetArgument(t,0) == gsMakeOpIdNameGGDivMod();
+  }
+  return false;
+}
+
+bool gsIsDataExprEven(ATermAppl DataExpr)
+{
+  if(gsIsDataAppl(DataExpr)) {
+    ATermAppl t = ATAgetArgument(DataExpr,0);
+    if(gsIsOpId(t))
+      return ATAgetArgument(t,0) == gsMakeOpIdNameEven();
   }
   return false;
 }

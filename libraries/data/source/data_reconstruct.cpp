@@ -140,6 +140,13 @@ static inline void subtract_slice_data_decls(t_data_decls* p_data_decls_1, t_dat
   p_data_decls_1->data_eqns = subtract_list_slice(p_data_decls_1->data_eqns, p_data_decls_2->data_eqns);
 }
 
+//pre: sort_id is a Sort identifier, data_decls is a set of data declarations.
+//ret: if sort_id represents an implementation of a structured sort, the implementation is removed
+//     from p_data_decls, and replaced with sort sort_id = struct ...
+static void remove_struct_sort_impl(ATermAppl sort_id, t_data_decls* p_data_decls);
+
+static ATermAppl bool_to_numeric(ATermAppl BoolExpr, ATermAppl SortExpr);
+
 // implementation
 // ----------------------------------------------
 ATerm reconstruct_exprs(ATerm Part, const ATermAppl Spec)
@@ -279,12 +286,53 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, const ATermAppl Spec)
       Part = gsMakeOpId(gsString2ATermAppl("0"), gsMakeSortExprNat());
     } else if (gsIsDataExprCNat(Part)) {
       Part = gsMakeDataExprPos2Nat(ATAgetFirst(ATLgetArgument(Part, 1)));
+    } else if (gsIsDataExprCPair(Part)) {
+      // TODO What can we do with this?
+    } else if (gsIsDataExprCNeg(Part)) {
+      Part = gsMakeDataExprNeg(ATAgetFirst(ATLgetArgument(Part, 1)));
     } else if (gsIsDataExprCInt(Part)) {
       Part = gsMakeDataExprNat2Int(ATAgetFirst(ATLgetArgument(Part, 1)));
     } else if (gsIsDataExprCReal(Part)) {
       Part = gsMakeDataExprInt2Real(ATAgetFirst(ATLgetArgument(Part, 1)));
-    } else if (gsIsDataExprCNeg(Part)) {
-      Part = gsMakeDataExprNeg(ATAgetFirst(ATLgetArgument(Part, 1)));
+    } else if (gsIsDataExprDub(Part)) {
+      /*
+      TODO
+      ATermList Args = ATLgetArgument(Part, 1);
+      ATermAppl BoolArg = ATAelementAt(Args, 0);
+      ATermAppl PosArg = ATAelementAt(Args, 1);
+      ATermAppl Sort = gsGetSortExprResult(PosArg);
+      ATermAppl Mult = gsMakeDataExprMult(gsMakeOpId(gsString2ATermAppl("2"), Sort), PosArg);
+      if (ATisEqual(BoolArg, gsMakeDataExprTrue())) {
+        Part = gsMakeDataExprAdd(Mult, gsMakeOpId(gsString2ATermAppl("1"), Sort));
+      } else if (ATisEqual(BoolArg, gsMakeDataExprFalse())) {
+        Part = Mult;
+      } else {
+        Part = gsMakeDataExprAdd(Mult, bool_to_numeric(BoolArg, Sort));
+      } */
+    } else if (gsIsDataExprAddC(Part)) {
+      // TODO
+    } else if (gsIsDataExprGTESubt(Part)) {
+      // TODO
+    } else if (gsIsDataExprGTESubtB(Part)) {
+      // TODO
+    } else if (gsIsDataExprMultIR(Part)) {
+      // TODO
+    } else if (gsIsDataExprDivMod(Part)) {
+      // TODO
+    } else if (gsIsDataExprGDivMod(Part)) {
+      // TODO
+    } else if (gsIsDataExprGGDivMod(Part)) {
+      // TODO
+    } else if (gsIsDataExprEven(Part)) {
+      // TODO
+    /*
+    } else if (gsIsDataExprListEnum(Part)) {
+      // TODO
+    } else if (gsIsDataExprSetEnum(Part)) {
+      // TODO
+    } else if (gsIsDataExprBagEnum(Part)) {
+      // TODO
+    */
     }
   } else if (gsIsSortExpr(Part)) {
     // Reconstruct sort expressions if needed
@@ -387,7 +435,15 @@ ATermList reconstruct_exprs_list(ATermList Parts, const ATermAppl Spec)
 
 ATermAppl bool_to_nat(ATermAppl BoolExpr)
 {
-  return gsMakeDataExprIf(BoolExpr, gsMakeOpId(gsString2ATermAppl("1"), gsMakeSortExprNat()), gsMakeOpId(gsString2ATermAppl("0"), gsMakeSortExprNat()));
+  return bool_to_numeric(BoolExpr, gsMakeSortExprNat());
+}
+
+ATermAppl bool_to_numeric(ATermAppl BoolExpr, ATermAppl SortExpr)
+{
+  // TODO Maybe enforce that SortExpr is a PNIR sort
+  return gsMakeDataExprIf(BoolExpr,
+           gsMakeOpId(gsString2ATermAppl("1"), SortExpr), 
+           gsMakeOpId(gsString2ATermAppl("0"), SortExpr));
 }
 
 ATermAppl reconstruct_pos_mult(ATermAppl PosExpr, char* Mult)
@@ -410,14 +466,17 @@ ATermAppl reconstruct_pos_mult(ATermAppl PosExpr, char* Mult)
       //Mult*v(b) > 0
       if (ATisEqual(BoolArg, gsMakeDataExprTrue())) {
         //Mult*v(b) = Mult
-        return gsMakeDataExprAdd(PosArg, gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprPos()));
+        return gsMakeDataExprAdd(PosArg, 
+                 gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprPos()));
       } else if (strcmp(Mult, "1") == 0) {
         //Mult*v(b) = v(b)
         return gsMakeDataExprAdd(PosArg, bool_to_nat(BoolArg));
       } else {
         //Mult*v(b)
-        return gsMakeDataExprAdd(PosArg, gsMakeDataExprMult(gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprPos()), 
-                                                            bool_to_nat(BoolArg)));
+        return gsMakeDataExprAdd(PosArg, 
+                 gsMakeDataExprMult(gsMakeOpId(gsString2ATermAppl(Mult), 
+                                      gsMakeSortExprPos()), 
+                                    bool_to_nat(BoolArg)));
       }
     }
   } else {
@@ -425,7 +484,9 @@ ATermAppl reconstruct_pos_mult(ATermAppl PosExpr, char* Mult)
     if (strcmp(Mult, "1") == 0) {
       return PosExpr;
     } else {
-      return gsMakeDataExprMult(gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprPos()), PosExpr);
+      return gsMakeDataExprMult(
+               gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprPos()), 
+               PosExpr);
     }
   }
 }
@@ -452,7 +513,8 @@ ATermAppl reconstruct_lambda_op(const ATermAppl Part, const ATermAppl Spec)
         ATermList Vars = ATLgetArgument(DataEqn, 0);
         ATermAppl Body = ATAgetArgument(DataEqn, 3);
         if (ATgetLength(Vars) != ATgetLength(BoundVars)) {
-          //There are free variables in the expression, construct an additional lambda expression
+          //There are free variables in the expression, construct an additional 
+          //lambda expression
           ATermList FreeVars = ATmakeList0();
           while(!ATisEmpty(Vars)) {
             ATermAppl Var = ATAgetFirst(Vars);
@@ -543,13 +605,9 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec)
   gsDebugMsg("Removing system defined sorts from data declarations\n");
   if (ATindexOf(data_decls.sorts, (ATerm) gsMakeSortExprBool(), 0) != -1) {
     impl_sort_bool    (&data_decls_impl);
-    subtract_slice_data_decls(&data_decls, &data_decls_impl);
-    initialize_data_decls(&data_decls_impl);
   }
   if (ATindexOf(data_decls.sorts, (ATerm) gsMakeSortExprPos(), 0) != -1) {
     impl_sort_pos     (&data_decls_impl);
-    subtract_slice_data_decls(&data_decls, &data_decls_impl);
-    initialize_data_decls(&data_decls_impl);
   }
   if (ATindexOf(data_decls.sorts, (ATerm) gsMakeSortExprNat(), 0) != -1) {
     // Nat is included in the implementation of other sorts, as well as that it
@@ -585,9 +643,12 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec)
   {
     ATermAppl sort = ATAgetFirst(sorts);
     if (is_struct_sort_id(sort)) {
+
       //TODO
     } else if (is_list_sort_id(sort)) {
       remove_list_sort_from_data_decls(sort, &data_decls);
+    } else {
+      remove_struct_sort_impl(sort, &data_decls);
     }
   }
 
@@ -1006,5 +1067,255 @@ ATermAppl find_elt_sort_for_list_impl(ATermAppl list_impl_sort, t_data_decls* p_
     cons_ops = ATgetNext(cons_ops);
   }
   return result;
+}
+
+void remove_struct_sort_impl(ATermAppl sort_id, t_data_decls* p_data_decls)
+{
+  gsDebugMsg("Establishing whether %T is an implementation of a structured sort\n", sort_id);
+  // For a sort to be a structured sort, it needs to have a set of constructor operators.
+  // With this also come a set of system defined data equations.
+  
+  bool is_struct_sort_impl = true;
+  t_data_decls struct_sort_decls;
+  initialize_data_decls(&struct_sort_decls);
+
+  struct_sort_decls.sorts = ATmakeList1((ATerm) sort_id);
+
+  // Compute constructor operations.
+  ATermList cons_ops = p_data_decls->cons_ops;
+  while (!ATisEmpty(cons_ops))
+  {
+    ATermAppl cons_op = ATAgetFirst(cons_ops);
+    if (ATisEqual(gsGetSortExprResult(gsGetSort(cons_op)), sort_id)) {
+      struct_sort_decls.cons_ops = ATinsert(struct_sort_decls.cons_ops, (ATerm) cons_op);
+    }
+    cons_ops = ATgetNext(cons_ops);
+  }
+  struct_sort_decls.cons_ops = ATreverse(struct_sort_decls.cons_ops);
+
+  // Compute mappings.
+  struct_sort_decls.ops = ATmakeList(3,
+      (ATerm) gsMakeOpIdEq(sort_id),
+      (ATerm) gsMakeOpIdNeq(sort_id),
+      (ATerm) gsMakeOpIdIf(sort_id));
+
+  // Check if all mappings exist
+  ATermList ops = struct_sort_decls.ops;
+  while (!ATisEmpty(ops) && is_struct_sort_impl) {
+    ATermAppl op = ATAgetFirst(ops);
+    is_struct_sort_impl = ATindexOf(p_data_decls->ops, (ATerm) op, 0) != -1;
+    ops = ATgetNext(ops);
+  }
+
+  // Compute data equations
+  ATermList op_eqns = ATmakeList0();
+  cons_ops = struct_sort_decls.cons_ops;
+  ATermAppl nil = gsMakeNil();
+  ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
+  // XXX more intelligent variable names would be nice
+  ATermAppl x = gsMakeDataVarId(gsString2ATermAppl("x"), sort_id);
+  ATermAppl y = gsMakeDataVarId(gsString2ATermAppl("y"), sort_id);
+  ATermList xyl = ATmakeList2((ATerm) x, (ATerm) y);
+  ATermList bxl = ATmakeList2((ATerm) b, (ATerm) x);
+  ATermList vars = ATmakeList3((ATerm) b, (ATerm) x, (ATerm) y);
+  ATermList rhsv = ATmakeList0();
+  ATermList lhsv = ATmakeList0();
+  ATermList id_ctx = ATmakeList0();
+  if (is_struct_sort_impl) {
+    // For every pair of constructor operations data equations should exist. Calculate these,
+    // and see if they occur in p_data_decls.
+    // FIXME: This is largely copied from the data implementation
+    // find a way to identify these two versions in a separate function!
+
+    op_eqns = ATinsert(op_eqns,
+      (ATerm) gsMakeDataEqn(ATmakeList1((ATerm) x), nil, gsMakeDataExprEq(x, x), gsMakeDataExprTrue()));
+    for (ATermList l=cons_ops; !ATisEmpty(l); l=ATgetNext(l))
+    {
+      for (ATermList m=cons_ops; !ATisEmpty(m); m=ATgetNext(m))
+      {
+        ATermAppl cons_op_lhs = ATAgetFirst(l);
+        ATermAppl cons_op_rhs = ATAgetFirst(m);
+        // Save vars list
+        // Apply constructor cons_op_lhs to (fresh) variables and store its
+        // arguments in lhsv
+        ATermAppl cons_expr_lhs = apply_op_id_to_vars(cons_op_lhs, &lhsv, &vars, (ATerm) id_ctx);
+        // Apply constructor cons_op_rhs to (fresh) variables and store its
+        // arguments in rhsv (making sure we don't use the vars that occur in t)
+        ATermList tmpvars = subtract_list(vars, lhsv);
+        ATermAppl cons_expr_rhs = apply_op_id_to_vars(ATAgetFirst(m), &rhsv, &tmpvars, (ATerm) ATconcat(lhsv, id_ctx));
+        // Update vars
+        vars = merge_list(vars, rhsv);
+        // Combine variable lists of lhs and rhs
+        ATermList vs = ATconcat(lhsv, rhsv);
+        // Create right result
+        ATermAppl result_expr = NULL;
+        if ( ATisEqual(cons_op_lhs, cons_op_rhs) )
+        {
+          // Constructors are the same, so match all variables
+          if (ATisEmpty(lhsv)) {
+            result_expr = gsMakeDataExprTrue();
+          } else {
+            for (; !ATisEmpty(lhsv); lhsv = ATgetNext(lhsv), rhsv = ATgetNext(rhsv))
+            {
+              if ( result_expr == NULL )
+              {
+                result_expr = gsMakeDataExprEq(ATAgetFirst(lhsv), ATAgetFirst(rhsv));
+              } else {
+                result_expr = gsMakeDataExprAnd(result_expr,
+                  gsMakeDataExprEq(ATAgetFirst(lhsv), ATAgetFirst(rhsv)));
+              }
+            }
+          }
+        } else {
+          // Different constructor, so not equal
+          result_expr = gsMakeDataExprFalse();
+        }
+        // Add equation to op_eqns
+        op_eqns = ATinsert(op_eqns, (ATerm) gsMakeDataEqn(vs, nil,
+          gsMakeDataExprEq(cons_expr_lhs, cons_expr_rhs), result_expr));
+      }
+    }
+    //store equation for inequality in op_eqns
+    op_eqns = ATinsert(op_eqns, (ATerm) gsMakeDataEqn(xyl, nil,
+      gsMakeDataExprNeq(x,y), gsMakeDataExprNot(gsMakeDataExprEq(x,y))));
+    //store equations for 'if' in op_eqns
+    op_eqns = ATconcat(ATmakeList(3,
+        (ATerm) gsMakeDataEqn(xyl, nil, gsMakeDataExprIf(gsMakeDataExprTrue(), x, y),x),
+        (ATerm) gsMakeDataEqn(xyl, nil, gsMakeDataExprIf(gsMakeDataExprFalse(), x, y),y),
+        (ATerm) gsMakeDataEqn(bxl, nil, gsMakeDataExprIf(b, x, x),x)
+      ), op_eqns);
+  }
+
+  struct_sort_decls.data_eqns = op_eqns;
+
+  while (!ATisEmpty(op_eqns) && is_struct_sort_impl)
+  {
+    ATermAppl op_eqn = ATAgetFirst(op_eqns);
+    if (ATindexOf(p_data_decls->data_eqns, (ATerm) op_eqn, 0) == -1) {
+      // op_eqn does not occur in the original, so sort_id is not an implementation
+      // of a structured sort!
+      is_struct_sort_impl = false;
+    }
+    op_eqns = ATgetNext(op_eqns);
+  }
+
+  if (is_struct_sort_impl) {
+    // sort is an implementation of a structured sort, do actual reconstruction
+    gsDebugMsg("Removing structured sort implementation %T\n", sort_id);
+    ATermList struct_conss = ATmakeList0();
+    ATermList cons_ops = ATreverse(struct_sort_decls.cons_ops);
+    while (!ATisEmpty(cons_ops)) {
+      ATermAppl cons_op = ATAgetFirst(cons_ops);
+      ATermAppl cons_name = gsGetName(cons_op);
+      
+      // Find out if there are projection functions for cons_op
+      // Each of the arguments of cons_op (say arg_i:S_arg_i) may have its projection function pr_i.
+      // pr_i : S -> S_arg_i, where S is the range sort of cons_op.
+      // then pr is defined by an equation
+      // pr_i(cons_op(arg_0:S_arg_0, ..., arg_n:S_arg_n)) = arg_i,
+      // and this is the only definition of pr_i
+      ATermList struct_projs = ATmakeList0();
+      ATermAppl cons_sort = gsGetSort(cons_op);
+      ATermList cons_sort_domain = ATmakeList0();
+      if (gsIsSortArrow(cons_sort)) {
+        cons_sort_domain = ATLgetArgument(cons_sort, 0);
+      }
+      unsigned int index = 0;
+      while (!ATisEmpty(cons_sort_domain)) {
+        int count = 0;
+        ATermAppl proj_op = NULL;
+        ATermAppl proj_eqn = NULL;
+        for (ATermList data_eqns = p_data_decls->data_eqns; !ATisEmpty(data_eqns); data_eqns = ATgetNext(data_eqns))
+        {
+          ATermAppl data_eqn = ATAgetFirst(data_eqns);
+          ATermAppl lhs = ATAgetArgument(data_eqn, 2);
+          ATermAppl rhs = ATAgetArgument(data_eqn, 3);
+          if (gsIsDataAppl(lhs)) {
+            ATermAppl op = ATAgetArgument(lhs, 0);
+            ATermList args = ATLgetArgument(lhs, 1);
+            ATermAppl cons_expr = apply_op_id_to_vars(cons_op, &lhsv, &vars, (ATerm) id_ctx);
+            if (ATgetLength(args) == 1
+                && ATisEqual(cons_expr, ATAgetFirst(args))) {
+              ATermList cons_expr_args = ATLgetArgument(cons_expr, 1);
+              assert(ATgetLength(cons_expr_args) >= index);
+              if (ATisEqual(rhs, ATAelementAt(cons_expr_args, index))) {
+                // op has the correct signature to be a projection function
+                proj_op = op;
+                proj_eqn = data_eqn;
+                ++count;
+              }
+            }
+          }
+        }
+        if (count == 1)
+        {
+          struct_sort_decls.ops = ATinsert(struct_sort_decls.ops, (ATerm) proj_op);
+          struct_sort_decls.data_eqns = ATinsert(struct_sort_decls.data_eqns, (ATerm) proj_eqn);
+          struct_projs = ATinsert(struct_projs, (ATerm) gsMakeStructProj(gsGetName(proj_op), ATAgetFirst(cons_sort_domain)));
+        } else {
+          struct_projs = ATinsert(struct_projs, (ATerm) gsMakeStructProj(nil, ATAgetFirst(cons_sort_domain)));
+        }
+        ++index;
+        cons_sort_domain = ATgetNext(cons_sort_domain);
+      }
+
+      // Find out if there is a recogniser function for cons_op, with S the sort of cons_op
+      // Let cons_expr be cons_op(v_0,...,v_n).
+      // Now if there is a recogniser function for cons_op, there must be a data equation of the form
+      // recogniser(cons_expr) = true.
+      // For recogniser to really be a recogniser function, it should hold that
+      // recogniser(c_expr) = false, where c_expr is c_op(v_0,...,v_n), for all cons operators c_op, other than cons_op
+      ATermAppl recogniser = nil;
+      ATermAppl cons_expr = apply_op_id_to_vars(cons_op, &lhsv, &vars, (ATerm) id_ctx);
+      for (ATermList data_eqns = p_data_decls->data_eqns; !ATisEmpty(data_eqns) && recogniser==nil; data_eqns = ATgetNext(data_eqns))
+      {
+        ATermAppl data_eqn = ATAgetFirst(data_eqns);
+        ATermAppl lhs = ATAgetArgument(data_eqn, 2);
+        ATermAppl rhs = ATAgetArgument(data_eqn, 3);
+        if (gsIsDataAppl(lhs)) {
+          ATermAppl op = ATAgetArgument(lhs, 0);
+          ATermList args = ATLgetArgument(lhs, 1);
+          if (ATgetLength(args) == 1                     // Because of the form of recogniser functions 
+              && ATisEqual(ATAgetFirst(args), cons_expr) // Now the only argument should be cons_expr,
+              && ATisEqual(rhs, gsMakeDataExprTrue())) { // and the rhs should be true, then the equation is of
+                                                         // the form op(cons_expr) = true
+            // Check if all equations exist, such that op(c_expr) = false, and op(cons_expr) = true;
+            bool is_recogniser = true; // op is a recogniser function
+            ATermList tmp_eqns = ATmakeList0(); // data equations that should exist for op to be a recogniser,
+                                                // used for easy removal of the recogniser functions
+            for (ATermList l = struct_sort_decls.cons_ops; !ATisEmpty(l) && is_recogniser; l = ATgetNext(l)) {
+              ATermAppl c_op = ATAgetFirst(l);
+              ATermAppl c_expr = apply_op_id_to_vars(c_op, &lhsv, &vars, (ATerm) id_ctx);
+              ATermAppl eqn = gsMakeDataEqn(lhsv, nil,
+                gsMakeDataAppl1(op, c_expr),
+                ATisEqual(c_op, cons_op)?gsMakeDataExprTrue():gsMakeDataExprFalse());
+              tmp_eqns = ATinsert(tmp_eqns, (ATerm) eqn);
+              is_recogniser = ATindexOf(p_data_decls->data_eqns, (ATerm) eqn, 0) != -1;
+            }
+            if (is_recogniser) {
+              recogniser = op;
+              // Store map and equations in decls
+              struct_sort_decls.ops = ATinsert(struct_sort_decls.ops, (ATerm) recogniser);
+              struct_sort_decls.data_eqns = ATconcat(struct_sort_decls.data_eqns, tmp_eqns);
+            }
+          }
+        }
+      }
+     
+      // Create struct constructor for this constructor operator
+      ATermAppl struct_cons = gsMakeStructCons(cons_name, struct_projs, recogniser);
+      struct_conss = ATinsert(struct_conss, (ATerm) struct_cons);
+      cons_ops = ATgetNext(cons_ops);
+
+    }
+    // Remove implementation from data declarations
+    subtract_data_decls(p_data_decls, &struct_sort_decls);
+    ATermAppl struct_sort = gsMakeSortStruct(struct_conss);
+
+    ATermAppl sort_name = ATAgetArgument(sort_id, 0);
+    ATermAppl sort_ref = gsMakeSortRef(sort_name, struct_sort);
+
+    p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) sort_ref);
+  } // end if is_struct_sort_impl
 }
 
