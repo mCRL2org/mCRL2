@@ -162,10 +162,14 @@ namespace squadt {
 
         time.sec += ts;
 
-        while (associated_process.get() == 0 || !connected) {
+        while (!connected) {
           /* Other side has not connected and the process has not been registered as terminated */
           if (!register_condition.timed_wait(l, time)) {
             /* Timeout occurred */
+            break;
+          }
+
+          if (associated_process.get() == 0) {
             break;
           }
         }
@@ -178,9 +182,13 @@ namespace squadt {
     inline void task_monitor_impl::await_connection() {
       boost::mutex::scoped_lock l(register_lock);
  
-      while (!connected || associated_process.get() == 0) {
+      while (!connected) {
         /* Other side has not connected and the process has not been registered as terminated */
         register_condition.wait(l);
+
+        if (associated_process.get() == 0) {
+          break;
+        }
       }
     }
 

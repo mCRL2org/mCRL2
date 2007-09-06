@@ -83,6 +83,8 @@ bool parse_command_line(int argc, wxChar** argv, boost::function < void (squadt:
  
     c = parser.Parse(false) == 0;
  
+    tipi::controller::communicator::get_standard_logger()->set_filter_level(1);
+
     if (c) {
       if (parser.Found(wxT("c"))) {
         if (0 < parser.GetParamCount()) {
@@ -120,7 +122,7 @@ bool parse_command_line(int argc, wxChar** argv, boost::function < void (squadt:
         return (false);
       }
       if (parser.Found(wxT("q"))) {
-        tipi::controller::communicator::get_standard_logger()->set_filter_level(1);
+        tipi::controller::communicator::get_standard_logger()->set_filter_level(0);
       }
       if (parser.Found(wxT("version"))) {
         std::cerr << program_name << " " << program_version << " (revision " << REVISION << ")" << std::endl;
