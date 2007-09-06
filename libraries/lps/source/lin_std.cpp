@@ -4853,6 +4853,36 @@ static enumeratedtype *create_enumeratedtype
         }
         end_equation_section();
       }
+
+      ATermAppl nonequalitymapping=gsMakeOpIdNeq(w->sortId);
+      insertmapping(nonequalitymapping,spec);
+      ATermAppl v1=getfreshvariable("v",w->sortId);
+      ATermAppl v2=getfreshvariable("v",w->sortId);
+      ATermAppl b=getfreshvariable("b",gsMakeSortExprBool());
+
+      declare_equation_variables(ATinsertA(ATinsertA(ATinsertA(ATempty,v1),v2),b));
+      newequation(NULL,
+                   gsMakeDataExprNeq(v1,v2),
+                   gsMakeDataExprNot(gsMakeDataExprEq(v1,v2)),spec);
+
+      ATermAppl ifmapping=gsMakeOpIdIf(w->sortId);
+      insertmapping(ifmapping,spec);
+
+      newequation(NULL,
+                   gsMakeDataExprIf(gsMakeDataExprTrue(),v1,v2),
+                   v1,spec);
+
+      newequation(NULL,
+                   gsMakeDataExprIf(gsMakeDataExprFalse(),v1,v2),
+                   v2,spec);
+
+      newequation(NULL,
+                   gsMakeDataExprIf(b,v1,v1),
+                   v1,spec);
+      end_equation_section();
+
+      
+      
     }
     w->functions=ATempty;
     w->next=enumeratedtypelist;
