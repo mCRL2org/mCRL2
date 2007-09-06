@@ -43,6 +43,7 @@ struct t_tool_options
     
    t_tool_options()
      : opt_outputformat("none"),
+       rewrite_strategy(GS_REWR_INNER),
        opt_strategy(lazy),
        opt_precompile_pbes(false),
        opt_use_hashtables(false)
