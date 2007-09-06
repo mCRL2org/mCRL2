@@ -564,7 +564,7 @@ void reachability_check(lts &l)
   gsVerboseMsg("checking reachability of input LTS...\n");
   if ( !l.reachability_check() )
   {
-    gsErrorMsg("not all states of the input LTS are reachable from the initial state; this will invoke unspecified behaviour in LTS tools (including this one)!\n");
+    gsWarningMsg("not all states of the input LTS are reachable from the initial state; this will invoke unspecified behaviour in LTS tools (including this one)!\n");
   }
 }
 
