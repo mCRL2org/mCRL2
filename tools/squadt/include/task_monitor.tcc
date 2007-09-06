@@ -386,7 +386,7 @@ namespace squadt {
           boost::thread::sleep(timeout);
         }
       }
-      if (associated_process.get() != 0) {
+      if (associated_process) {
         std::string log_message(boost::str(
                 boost::format("process terminated (tool %s pid(%u))\n") %
                         associated_process->get_executable_name() %
@@ -401,6 +401,8 @@ namespace squadt {
 
       connected = false;
       done      = true;
+
+      associated_process.reset();
 
       /* Signal completion to waiters */
       register_condition.notify_all();
