@@ -19,9 +19,7 @@
 
 #include "boost/format.hpp"
 #include "mcrl2/data/data.h"
-#include "mcrl2/data/sort.h"
-#include "mcrl2/basic/identifier_string.h"
-#include "mcrl2/lps/detail/utility.h"
+#include "mcrl2/lps/detail/data_utility.h"
 #include "atermpp/algorithm.h"
 #include "atermpp/aterm.h"
 #include "atermpp/set.h"
@@ -31,6 +29,15 @@ namespace lps {
 
 using atermpp::aterm;
 using atermpp::aterm_traits;
+
+/// Returns true if the expressions x and y have the same sort.
+struct equal_data_expression_sort
+{
+  bool operator()(const data_expression& x, const data_expression& y) const
+  {
+    return x.sort() == y.sort();
+  }
+};
 
 /// \brief Returns the set of all identifier strings occurring in the term t
 template <typename Term>

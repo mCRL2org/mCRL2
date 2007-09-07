@@ -17,9 +17,9 @@
 #include "atermpp/aterm_traits.h"
 #include "atermpp/atermpp.h"
 #include "mcrl2/basic/identifier_string.h"
-#include "mcrl2/lps/detail/utility.h"
 #include "mcrl2/data/sort.h"
 #include "mcrl2/lps/action.h"
+#include "mcrl2/lps/detail/action_utility.h"
 #include "mcrl2/data/data.h"
 #include "struct/libstruct.h"
 

@@ -23,6 +23,7 @@
 #include "mcrl2/basic/pretty_print.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/detail/utility.h"
+#include "mcrl2/lps/detail/action_utility.h"
 
 namespace lps {
 

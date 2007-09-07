@@ -10,7 +10,7 @@
 #ifndef MCRL2_DATA_SORT_UTILITY_H
 #define MCRL2_DATA_SORT_UTILITY_H
 
-#include <assert.h>
+#include <cassert>
 #include "mcrl2/data/data.h"
 #include "mcrl2/lps/specification.h"
 

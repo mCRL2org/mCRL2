@@ -19,7 +19,7 @@
 #include "atermpp/utility.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/lps/action.h"
-#include "mcrl2/lps/detail/utility.h"
+#include "mcrl2/lps/detail/action_utility.h"
 
 namespace lps {
 

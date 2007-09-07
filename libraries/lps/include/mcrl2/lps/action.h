@@ -11,8 +11,9 @@
 #define MCRL2_LPS_ACTION_H
 
 #include <cassert>
-#include "mcrl2/lps/action_label.h"
 #include "mcrl2/data/data.h"
+#include "mcrl2/data/utility.h"
+#include "mcrl2/lps/action_label.h"
 
 namespace lps {
 
@@ -83,6 +84,23 @@ inline
 bool is_action(aterm_appl t)
 {
   return gsIsAction(t);
+}
+
+/// Returns true if the actions a and b have the same label, and the sorts of the
+/// arguments of a and b are equal.
+inline
+bool equal_signatures(const action& a, const action& b)
+{
+  if (a.label() != b.label())
+    return false;
+
+  const data_expression_list& a_args = a.arguments();
+  const data_expression_list& b_args = b.arguments();
+  
+  if (a_args.size() != b_args.size())
+    return false;
+
+  return std::equal(a_args.begin(), a_args.end(), b_args.begin(), equal_data_expression_sort());
 }
 
 } // namespace lps

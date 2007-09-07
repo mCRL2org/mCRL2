@@ -22,6 +22,7 @@
 #include "mcrl2/data/utility.h"        // find_variables
 #include "mcrl2/lps/summand.h"
 #include "mcrl2/lps/process_initializer.h"
+#include "mcrl2/lps/detail/utility.h"
 
 namespace lps {
 

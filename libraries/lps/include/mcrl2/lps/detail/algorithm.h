@@ -17,10 +17,9 @@
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
 #include "atermpp/algorithm.h"
-#include "mcrl2/lps/linear_process.h"
-#include "mcrl2/lps/detail/utility.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/utility.h"
+#include "mcrl2/lps/linear_process.h"
 
 namespace lps {
   
