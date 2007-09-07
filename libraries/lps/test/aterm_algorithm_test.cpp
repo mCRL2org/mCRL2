@@ -82,11 +82,40 @@ bool occurs_in(data_expression d, data_variable v)
   return find_if(aterm_appl(d), compare_variable(v)) != aterm();
 }
 
+inline
+bool is_variable(aterm t)
+{
+  return t.type() == AT_APPL && is_data_variable(aterm_appl(t));
+};
+
+/// Search for a data variable in the term t. Precondition: t must contain
+/// at least one variable.
+template <typename Term>
+data_variable find_variable(Term t)
+{
+  aterm result = atermpp::find_if(t, is_variable);
+  assert((result)); // check if a variable has been found
+  return aterm_appl(result);
+}
+
+void test_find_variable()
+{
+  using namespace lps::data_expr;
+
+  data_variable d("d:D");
+  data_variable e("e:E");
+  data_expression d_e = and_(d, e); 
+  data_variable v = atermpp::find_if(d_e, is_data_variable);
+  BOOST_CHECK(v == d);
+}
+
 int test_main(int, char*[])
 {
   aterm bottom_of_stack;
   aterm_init(bottom_of_stack);
   gsEnableConstructorFunctions();
+
+  test_find_variable();
 
   specification spec = mcrl22lps(SPECIFICATION);
   linear_process lps = spec.process();
