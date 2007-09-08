@@ -8,6 +8,24 @@
 #include "print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include <cstdio>
+#include <vector>
+#include <map>
+
+#define RPV RecProcessVariable
+#define RVT RecVariableType
+
+typedef struct
+  {
+    std::string Name;
+    std::string Type; 
+    std::string InitValue;
+  } RecProcessVariable;
+
+typedef struct
+   {
+     std::string Name;
+     std::string Type;
+   } RecVariableType;
 
 class CAsttransform
 {
@@ -21,15 +39,23 @@ class CAsttransform
     bool StrcmpIsFun(const char* str, ATermAppl aterm);
     std::string variable_prefix;
     int scope_level;
-    std::string manipulateDeclaredProcessVariables(ATermList input);
-    std::string manipulateDeclaredProcessDefinition(ATermAppl input);
-    std::string manipulateDeclaredProcessVariable(ATermAppl input); 
+    std::vector<RVT> manipulateDeclaredProcessDefinition(ATermAppl input);
+    std::vector<RVT> manipulateDeclaredProcessVariables(ATermList input);
 
-    std::string getVariablesNamesFromList(ATermList input);
+    std::vector<RPV> manipulateProcessSpecification(ATermAppl input);
+    std::vector<RPV> manipulateProcessVariableDeclarations(ATermList input); 
+    
+    std::vector<std::string> getVariablesNamesFromList(ATermList input);
+    std::vector<RVT> manipulateDeclaredProcessVariable(ATermAppl input); 
+    std::string manipulateExpression(ATermAppl input);
+    void manipulateStatements(ATermAppl input);
+
 
     //Future implementation
     std::string manipulateExplicitTemplates(ATermList input);
     std::string manipulateDeclaredProcessChannels(ATermList input);
-};
+    std::map<std::string, RecProcessVariable> ProcessVariableMap;
+}
+;
 
 #endif

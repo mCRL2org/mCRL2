@@ -116,7 +116,7 @@ ProcessDefinition:
 		}
 	| ProcOpenScope Identifier LBRACKET FormalParameter_csp RBRACKET DEFINES ProcessBody
 		{ 
-      	  safe_assign($$, gsMakeProcDef($2, gsMakeProcDecl($4), $7));
+      	  safe_assign($$, gsMakeProcDef($2, gsMakeProcDecl(ATreverse($4)), $7));
       	  gsDebugMsg("parsed proc Def\n  %T\n", $$);
 		}
 //	| PROC Identifier ExplicitTemplates LBRACKET RBRACKET DEFINES ProcessBody  
@@ -177,7 +177,7 @@ LocalVariables_csp:
 LocalVariables: 
 	  VAR IdentifierTypeExpression_csp
 		{
-		  safe_assign($$, gsMakeVarSpec( $2 ));
+		  safe_assign($$, gsMakeVarSpec( ATreverse( $2 ) ) );
 		  gsDebugMsg("parsed VariableList \n %T\n", $$);
 		}
 /*	| CHAN ChannelDefinition_csp */
@@ -232,7 +232,7 @@ FormalParameter_csp:
 FormalParameter:
 	  VAR IdentifierType_csp
 		{
-		  safe_assign($$, gsMakeVarDecl( $2 ));
+		  safe_assign($$, gsMakeVarDecl( ATreverse($2) ) );
 		  gsDebugMsg("parsed VariableList \n %T\n", $$);
 		}
  // 	| CHAN ChannelDeclaration_csp
@@ -258,7 +258,7 @@ IdentifierType:
 			 var_type_map[ATgetFirst( list )]= (ATerm) $3;
 			 list = ATgetTail( list, 1 ) ;
 		  }	;
-		  safe_assign($$, gsMakeDataVarID ( $1, $3 ) );
+		  safe_assign($$, gsMakeDataVarID (ATreverse($1), $3 ) );
 		  gsDebugMsg("parsed IdentifierType\n %T\n", $$);
 		  gsDebugMsg("Typecheck Table %d\n", var_type_map.size()); 
   		}

@@ -1,5 +1,5 @@
 proc Test( var r, k: nat, z: bool  ) =
 |[ var a, b : bool = false,
-       c    : nat ,
+   var    c    : nat ,
        d    : bool 
-:: a and d -> skip ; deadlock  ]|
+:: a and b -> skip ; deadlock  ]|
