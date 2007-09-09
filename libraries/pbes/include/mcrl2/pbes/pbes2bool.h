@@ -34,8 +34,8 @@ struct t_tool_options
    std::string opt_outputformat;
 //   std::string opt_strategy;
    transformation_strategy opt_strategy;
-   RewriteStrategy rewrite_strategy;
    bool opt_precompile_pbes;
+   RewriteStrategy rewrite_strategy;
    bool opt_use_hashtables;
    bool opt_construct_counter_example;
    std::string infilename;
@@ -44,9 +44,10 @@ struct t_tool_options
    t_tool_options()
      : opt_outputformat("none"),
        opt_strategy(lazy),
-       rewrite_strategy(GS_REWR_INNER),
        opt_precompile_pbes(false),
-       opt_use_hashtables(false)
+       rewrite_strategy(GS_REWR_INNER),
+       opt_use_hashtables(false),
+       opt_construct_counter_example(false)
    {}
 };
 

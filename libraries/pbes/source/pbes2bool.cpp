@@ -65,7 +65,11 @@ namespace po = boost::program_options;
 
 //Function declarations used by main program
 //------------------------------------------
-static void calculate_bes(pbes pbes_spec, t_tool_options tool_options);
+static void calculate_bes(pbes pbes_spec, 
+                          t_tool_options tool_options,
+                          bes::equations &bes_equations,
+                          atermpp::indexed_set &variable_index);
+
 //Post: tool_options.infilename contains a PBES ("-" indicates stdin)
 //Ret:  The BES generated from the PBES
 
@@ -73,21 +77,51 @@ pbes load_pbes(t_tool_options tool_options);
 //Post: tool_options.infilename contains a PBES ("-" indicates stdin)
 //Ret: The pbes loaded from infile
 
-static void save_bes_in_cwi_format(string outfilename);
-static void save_bes_in_vasy_format(string outfilename);
+static void save_bes_in_cwi_format(string outfilename,bes::equations &bes_equations);
+static void save_bes_in_vasy_format(string outfilename,bes::equations &bes_equations);
 //Post: pbes_spec is saved in cwi-format
 //Ret: -
 
-static void save_rhs_in_cwi_form(ostream &outputfile, bes_expression p);
+static void save_rhs_in_cwi_form(ostream &outputfile, 
+                                     bes_expression p,
+                                     bes::equations &bes_equations);
 static void save_rhs_in_vasy_form(ostream &outputfile, 
                                      bes_expression p,
                                      vector<unsigned long> &variable_index,
-                                     const unsigned long current_rank);
+                                     const unsigned long current_rank, 
+                                     bes::equations &bes_equations);
+
 // Function used to convert a pbes_expression to the variant used by the cwi-output
 
-static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options);
+static void print_counter_example_rec(bes::variable_type current_var,
+                                      std::string indent,
+                                      bes::equations &bes_equations,
+                                      atermpp::indexed_set &variable_index)
+{
+  for(std::deque < bes::variable_type>::iterator walker=bes_equations.counter_example_begin(current_var);
+      walker!=bes_equations.counter_example_end(current_var) ; walker++)
+  { cerr << indent;
+    ATfprintf(stderr,"%t\n",(ATerm)variable_index.get(*walker));
+    print_counter_example_rec(*walker,indent+"  ",bes_equations,variable_index);
+  }
+}
 
-static bool solve_bes(const t_tool_options &);
+static void print_counter_example(bes::equations &bes_equations,
+                                  atermpp::indexed_set &variable_index)
+{
+  cerr << "Here is your much desired counter example\n";
+  
+  print_counter_example_rec(1,"",bes_equations,variable_index);
+}
+
+static void do_lazy_algorithm(pbes pbes_spec, 
+                              t_tool_options tool_options,
+                              bes::equations &bes_equations,
+                              atermpp::indexed_set &variable_index);
+
+static bool solve_bes(const t_tool_options &,
+                      bes::equations &,
+                      atermpp::indexed_set &);
 
 // Create a propositional variable instantiation with the checks needed in the naive algorithm
 
@@ -101,19 +135,29 @@ bool process(t_tool_options const& tool_options)
   if (tool_options.opt_use_hashtables)
   { bes::use_hashtables();
   }
-  calculate_bes(pbes_spec, tool_options);
+  atermpp::indexed_set variable_index(10000, 50); 
+  bes::equations bes_equations;
+
+  calculate_bes(pbes_spec, tool_options,bes_equations,variable_index);
+  if (!tool_options.opt_construct_counter_example)
+  { variable_index.reset();
+  }
 
   if (tool_options.opt_outputformat == "cwi")
   { // in CWI format only if the result is a BES, otherwise Binary
-    save_bes_in_cwi_format(tool_options.outfilename);
+    save_bes_in_cwi_format(tool_options.outfilename,bes_equations);
   }
   else if (tool_options.opt_outputformat == "vasy")
   { //Save resulting bes if necessary.
-    save_bes_in_vasy_format(tool_options.outfilename);
+    save_bes_in_vasy_format(tool_options.outfilename,bes_equations);
   }
   else 
   { 
-    gsMessage("The pbes is %svalid\n", solve_bes(tool_options) ? "" : "not ");
+    gsMessage("The pbes is %svalid\n", solve_bes(tool_options,bes_equations,variable_index) ? "" : "not ");
+  }
+
+  if (tool_options.opt_construct_counter_example)
+  { print_counter_example(bes_equations,variable_index);
   }
 
   return true;
@@ -121,7 +165,10 @@ bool process(t_tool_options const& tool_options)
 
 //function calculate_bes
 //-------------------
-void calculate_bes(pbes pbes_spec, t_tool_options tool_options)
+void calculate_bes(pbes pbes_spec, 
+                   t_tool_options tool_options,
+                   bes::equations &bes_equations,
+                   atermpp::indexed_set &variable_index)
 {
   /* if (!pbes_spec.is_well_formed())
   {
@@ -134,7 +181,7 @@ void calculate_bes(pbes pbes_spec, t_tool_options tool_options)
     exit(1);
   } 
 
-  do_lazy_algorithm(pbes_spec, tool_options);
+  do_lazy_algorithm(pbes_spec, tool_options,bes_equations,variable_index);
   //return new pbes
   return;
 }
@@ -252,9 +299,12 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
 
 // Global variables
 //  atermpp::indexed_set variable_index(10000, 50);     
-  bes::equations bes_equations;
+//  bes::equations bes_equations;
 
-static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
+static void do_lazy_algorithm(pbes pbes_spec, 
+                              t_tool_options tool_options,
+                              bes::equations &bes_equations,
+                              atermpp::indexed_set &variable_index)
 {
 
   // Verbose msg: doing naive algorithm
@@ -270,7 +320,9 @@ static void do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
   unsigned long nr_of_processed_variables = 0;
   unsigned long nr_of_generated_variables = 1;
 
-  atermpp::indexed_set variable_index(10000, 50);
+  // atermpp::indexed_set variable_index(10000, 50); 
+  // In order to generate a counterexample, this must also be known outside
+  // this procedure.
 
   variable_index.put(bes::true_()); /* Put first a dummy term that
                                        gets index 0 in the indexed set, to
@@ -499,6 +551,7 @@ static bes_expression substitute_rank(
                 bes_expression b,
                 const unsigned long current_rank,
                 const atermpp::vector<bes_expression> &approximation,
+                bes::equations &bes_equations,
                 const bool use_hashtable,
                 atermpp::table &hashtable)
 { /* substitute variables with rank larger and equal
@@ -529,12 +582,12 @@ static bes_expression substitute_rank(
   }
 
   else if (is_and(b))
-  { bes_expression b1=substitute_rank(lhs(b),current_rank,approximation,use_hashtable,hashtable);
+  { bes_expression b1=substitute_rank(lhs(b),current_rank,approximation,bes_equations,use_hashtable,hashtable);
     if (is_false(b1))
     { result=b1;
     }
     else
-    { bes_expression b2=substitute_rank(rhs(b),current_rank,approximation,use_hashtable,hashtable);
+    { bes_expression b2=substitute_rank(rhs(b),current_rank,approximation,bes_equations,use_hashtable,hashtable);
       if (is_false(b2))
       { result=b2;
       }
@@ -550,12 +603,12 @@ static bes_expression substitute_rank(
     }
   }
   else if (is_or(b))
-  { bes_expression b1=substitute_rank(lhs(b),current_rank,approximation,use_hashtable,hashtable);
+  { bes_expression b1=substitute_rank(lhs(b),current_rank,approximation,bes_equations,use_hashtable,hashtable);
     if (is_true(b1))
     { result=b1;
     }
     else
-    { bes_expression b2=substitute_rank(rhs(b),current_rank,approximation,use_hashtable,hashtable);
+    { bes_expression b2=substitute_rank(rhs(b),current_rank,approximation,bes_equations,use_hashtable,hashtable);
       if (is_true(b2))
       { result=b2;
       }
@@ -578,21 +631,25 @@ static bes_expression substitute_rank(
     if (bes_equations.get_rank(v)==current_rank)
     {
       if (bes::is_true(approximation[v]))
-      { result=substitute_rank(then_branch(b),current_rank,approximation,use_hashtable,hashtable);
+      { result=substitute_rank(then_branch(b),current_rank,approximation,bes_equations,use_hashtable,hashtable);
       }
       else if (bes::is_false(approximation[v]))
-      { result=substitute_rank(else_branch(b),current_rank,approximation,use_hashtable,hashtable);
+      { result=substitute_rank(else_branch(b),current_rank,approximation,bes_equations,use_hashtable,hashtable);
       }
       else
-      { bes_expression b1=substitute_rank(then_branch(b),current_rank,approximation,use_hashtable,hashtable);
-        bes_expression b2=substitute_rank(else_branch(b),current_rank,approximation,use_hashtable,hashtable);
+      { bes_expression b1=substitute_rank(then_branch(b),current_rank,approximation,
+                                          bes_equations,use_hashtable,hashtable);
+        bes_expression b2=substitute_rank(else_branch(b),current_rank,approximation,
+                                          bes_equations,use_hashtable,hashtable);
         result=BDDif(approximation[v],b1,b2);
       }
     }
     else
     { /* the condition is not equal to v */
-      bes_expression b1=substitute_rank(then_branch(b),current_rank,approximation,use_hashtable,hashtable);
-      bes_expression b2=substitute_rank(else_branch(b),current_rank,approximation,use_hashtable,hashtable);
+      bes_expression b1=substitute_rank(then_branch(b),current_rank,approximation,
+                                        bes_equations,use_hashtable,hashtable);
+      bes_expression b2=substitute_rank(else_branch(b),current_rank,approximation,
+                                        bes_equations,use_hashtable,hashtable);
       if ((b1==then_branch(b)) && (b2==else_branch(b)))
       { result=b;
       }
@@ -618,6 +675,7 @@ static bes_expression evaluate_bex(
                 bes_expression b,
                 const atermpp::vector<bes_expression> &approximation,
                 const unsigned long rank,
+                bes::equations &bes_equations,
                 const bool use_hashtable,
                 atermpp::table &hashtable)
 { /* substitute the approximation for variables in b, given
@@ -650,12 +708,12 @@ static bes_expression evaluate_bex(
     }
   }
   else if (is_and(b))
-  { bes_expression b1=evaluate_bex(lhs(b),approximation,rank,use_hashtable,hashtable);
+  { bes_expression b1=evaluate_bex(lhs(b),approximation,rank,bes_equations,use_hashtable,hashtable);
     if (is_false(b1))
     { result=b1;
     }
     else
-    { bes_expression b2=evaluate_bex(rhs(b),approximation,rank,use_hashtable,hashtable);
+    { bes_expression b2=evaluate_bex(rhs(b),approximation,rank,bes_equations,use_hashtable,hashtable);
       if (is_false(b2))
       { result=b2;
       }
@@ -671,12 +729,12 @@ static bes_expression evaluate_bex(
     }
   }
   else if (is_or(b))
-  { bes_expression b1=evaluate_bex(lhs(b),approximation,rank,use_hashtable,hashtable);
+  { bes_expression b1=evaluate_bex(lhs(b),approximation,rank,bes_equations,use_hashtable,hashtable);
     if (is_true(b1))
     { result=b1;
     }
     else
-    { bes_expression b2=evaluate_bex(rhs(b),approximation,rank,use_hashtable,hashtable);
+    { bes_expression b2=evaluate_bex(rhs(b),approximation,rank,bes_equations,use_hashtable,hashtable);
       if (is_true(b2))
       { result=b2;
       }
@@ -696,15 +754,15 @@ static bes_expression evaluate_bex(
     bes::variable_type v=bes::get_variable(condition(b));
     if (bes_equations.get_rank(v)>=rank)
     { 
-      bes_expression b1=evaluate_bex(then_branch(b),approximation,rank,use_hashtable,hashtable);
-      bes_expression b2=evaluate_bex(else_branch(b),approximation,rank,use_hashtable,hashtable);
+      bes_expression b1=evaluate_bex(then_branch(b),approximation,rank,bes_equations,use_hashtable,hashtable);
+      bes_expression b2=evaluate_bex(else_branch(b),approximation,rank,bes_equations,use_hashtable,hashtable);
       result=BDDif(approximation[v],b1,b2);
     }
     else
     { /* the condition has lower rank than the variable rank,
          leave it untouched */
-      bes_expression b1=evaluate_bex(then_branch(b),approximation,rank,use_hashtable,hashtable);
-      bes_expression b2=evaluate_bex(else_branch(b),approximation,rank,use_hashtable,hashtable);
+      bes_expression b1=evaluate_bex(then_branch(b),approximation,rank,bes_equations,use_hashtable,hashtable);
+      bes_expression b2=evaluate_bex(else_branch(b),approximation,rank,bes_equations,use_hashtable,hashtable);
       if ((b1==then_branch(b)) && (b2==else_branch(b)))
       { result=b;
       }
@@ -723,7 +781,9 @@ static bes_expression evaluate_bex(
   return result;
 }
 
-bool solve_bes(const t_tool_options &tool_options)
+bool solve_bes(const t_tool_options &tool_options,
+               bes::equations &bes_equations,
+               atermpp::indexed_set &variable_index)
 { 
   gsVerboseMsg("Solving BES... %d\n",bes_equations.nr_of_variables());
   atermpp::vector<bes_expression> approximation(bes_equations.nr_of_variables()+1);
@@ -768,6 +828,7 @@ bool solve_bes(const t_tool_options &tool_options)
                              bes_equations.get_rhs(v),
                              approximation,
                              current_rank,
+                             bes_equations,
                              tool_options.opt_use_hashtables,
                              bex_hashtable);
         
@@ -798,6 +859,7 @@ bool solve_bes(const t_tool_options &tool_options)
                               bes_equations.get_rhs(*u),
                               approximation,
                               current_rank,
+                              bes_equations,
                               tool_options.opt_use_hashtables,
                               bex_hashtable);
         
@@ -833,6 +895,7 @@ bool solve_bes(const t_tool_options &tool_options)
                                    bes_equations.get_rhs(v),
                                    current_rank,
                                    approximation,
+                                   bes_equations,
                                    tool_options.opt_use_hashtables,
                                    bex_hashtable));
         }
@@ -891,7 +954,8 @@ typedef enum { both, and_form, or_form} expression_sort;
 
 static bes_expression translate_equation_for_vasy(const unsigned long i,
                                         const bes_expression b,
-                                        const expression_sort s)
+                                        const expression_sort s,
+                                        bes::equations &bes_equations)
 {
   if (bes::is_true(b))
   { return b;
@@ -912,8 +976,8 @@ static bes_expression translate_equation_for_vasy(const unsigned long i,
     }
     else
     {
-      bes_expression b1=translate_equation_for_vasy(i,lhs(b),and_form);
-      bes_expression b2=translate_equation_for_vasy(i,rhs(b),and_form);
+      bes_expression b1=translate_equation_for_vasy(i,lhs(b),and_form,bes_equations);
+      bes_expression b2=translate_equation_for_vasy(i,rhs(b),and_form,bes_equations);
       return and_(b1,b2);
     }
   }
@@ -930,8 +994,8 @@ static bes_expression translate_equation_for_vasy(const unsigned long i,
     }
     else
     {
-      bes_expression b1=translate_equation_for_vasy(i,lhs(b),or_form);
-      bes_expression b2=translate_equation_for_vasy(i,rhs(b),or_form);
+      bes_expression b1=translate_equation_for_vasy(i,lhs(b),or_form,bes_equations);
+      bes_expression b2=translate_equation_for_vasy(i,rhs(b),or_form,bes_equations);
       return or_(b1,b2);
     }
   }
@@ -948,7 +1012,7 @@ static bes_expression translate_equation_for_vasy(const unsigned long i,
 }
 
 
-static void save_bes_in_vasy_format(string outfilename)
+static void save_bes_in_vasy_format(string outfilename,bes::equations &bes_equations)
 {
   gsVerboseMsg("Converting result to VASY-format...\n");
   // Use an indexed set to keep track of the variables and their vasy-representations
@@ -960,7 +1024,7 @@ static void save_bes_in_vasy_format(string outfilename)
 
   for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
     { 
-        bes_equations.set_rhs(i,translate_equation_for_vasy(i,bes_equations.get_rhs(i),both));
+        bes_equations.set_rhs(i,translate_equation_for_vasy(i,bes_equations.get_rhs(i),both,bes_equations));
     }
 
   /* Second give a consecutive index to each variable of a particular rank */
@@ -1004,7 +1068,8 @@ static void save_bes_in_vasy_format(string outfilename)
         save_rhs_in_vasy_form(((outfilename=="-")?cout:outputfile),
                                  bes_equations.get_rhs(i),
                                  variable_index,
-                                 r);
+                                 r,
+                                 bes_equations);
         ((outfilename=="-")?cout:outputfile) << endl;
       }
     }
@@ -1019,7 +1084,8 @@ static void save_bes_in_vasy_format(string outfilename)
 static void save_rhs_in_vasy_form(ostream &outputfile, 
                                      bes_expression b,
                                      std::vector<unsigned long> &variable_index,
-                                     const unsigned long current_rank)
+                                     const unsigned long current_rank,
+                                     bes::equations &bes_equations)
 {
   if (bes::is_true(b))
   { outputfile << "true";
@@ -1030,16 +1096,16 @@ static void save_rhs_in_vasy_form(ostream &outputfile,
   else if (bes::is_and(b))
   {
     //BESAnd(a,b) => a and b
-    save_rhs_in_vasy_form(outputfile,lhs(b),variable_index,current_rank);
+    save_rhs_in_vasy_form(outputfile,lhs(b),variable_index,current_rank,bes_equations);
     outputfile << " and ";
-    save_rhs_in_vasy_form(outputfile,rhs(b),variable_index,current_rank);
+    save_rhs_in_vasy_form(outputfile,rhs(b),variable_index,current_rank,bes_equations);
   }
   else if (bes::is_or(b))
   {
     //BESOr(a,b) => a or b
-    save_rhs_in_vasy_form(outputfile,lhs(b),variable_index,current_rank);
+    save_rhs_in_vasy_form(outputfile,lhs(b),variable_index,current_rank,bes_equations);
     outputfile << " or ";
-    save_rhs_in_vasy_form(outputfile,rhs(b),variable_index,current_rank);
+    save_rhs_in_vasy_form(outputfile,rhs(b),variable_index,current_rank,bes_equations);
   }
   else if (bes::is_variable(b))
   {
@@ -1059,7 +1125,7 @@ static void save_rhs_in_vasy_form(ostream &outputfile,
 
 //function save_bes_in_cwi_format
 //--------------------------------
-static void save_bes_in_cwi_format(string outfilename)
+static void save_bes_in_cwi_format(string outfilename,bes::equations &bes_equations)
 {
   gsVerboseMsg("Converting result to CWI-format...\n");
   // Use an indexed set to keep track of the variables and their cwi-representations
@@ -1079,7 +1145,7 @@ static void save_bes_in_cwi_format(string outfilename)
       if (bes_equations.is_relevant(i) && (bes_equations.get_rank(i)==r) )
       { ((outfilename=="-")?cout:outputfile) << 
               ((bes_equations.get_fixpoint_symbol(i)==fixpoint_symbol::mu()) ? "min X" : "max X") << i << "=";
-        save_rhs_in_cwi_form(((outfilename=="-")?cout:outputfile),bes_equations.get_rhs(i));
+        save_rhs_in_cwi_form(((outfilename=="-")?cout:outputfile),bes_equations.get_rhs(i),bes_equations);
         ((outfilename=="-")?cout:outputfile) << endl;
       }
     }
@@ -1090,7 +1156,7 @@ static void save_bes_in_cwi_format(string outfilename)
 
 //function save_rhs_in_cwi
 //---------------------------
-static void save_rhs_in_cwi_form(ostream &outputfile, bes_expression b)
+static void save_rhs_in_cwi_form(ostream &outputfile, bes_expression b,bes::equations &bes_equations)
 {
   if (bes::is_true(b))
   { outputfile << "T";
@@ -1102,18 +1168,18 @@ static void save_rhs_in_cwi_form(ostream &outputfile, bes_expression b)
   {
     //BESAnd(a,b) => (a & b)
     outputfile << "(";
-    save_rhs_in_cwi_form(outputfile,lhs(b));
+    save_rhs_in_cwi_form(outputfile,lhs(b),bes_equations);
     outputfile << "&";
-    save_rhs_in_cwi_form(outputfile,rhs(b));
+    save_rhs_in_cwi_form(outputfile,rhs(b),bes_equations);
     outputfile << ")";
   }
   else if (bes::is_or(b))
   {
     //BESOr(a,b) => (a | b)
     outputfile << "(";
-    save_rhs_in_cwi_form(outputfile,lhs(b));
+    save_rhs_in_cwi_form(outputfile,lhs(b),bes_equations);
     outputfile << "|";
-    save_rhs_in_cwi_form(outputfile,rhs(b));
+    save_rhs_in_cwi_form(outputfile,rhs(b),bes_equations);
     outputfile << ")";
   }
   else if (bes::is_variable(b))
