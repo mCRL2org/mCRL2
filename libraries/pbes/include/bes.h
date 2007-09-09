@@ -1097,7 +1097,7 @@ namespace bes
         return data_to_construct_counter_example[v];
       }
 
-      static std::deque<variable_type>::iterator dummy_deque_iterator;
+      std::deque<variable_type>::iterator dummy_deque_iterator;
 
       std::deque<variable_type>::iterator counter_example_begin(variable_type v)
       { assert(construct_counter_example);
