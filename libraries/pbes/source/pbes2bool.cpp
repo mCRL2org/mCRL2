@@ -100,8 +100,16 @@ static void print_counter_example_rec(bes::variable_type current_var,
 {
   for(std::deque < bes::variable_type>::iterator walker=bes_equations.counter_example_begin(current_var);
       walker!=bes_equations.counter_example_end(current_var) ; walker++)
-  { cerr << indent;
-    ATfprintf(stderr,"%t\n",(ATerm)variable_index.get(*walker));
+  { 
+    propositional_variable_instantiation X(variable_index.get(*walker));
+    cerr << indent << X.name() ; 
+    data_expression_list tl=X.parameters();
+    for(data_expression_list::iterator t=tl.begin();
+        t!=tl.end(); t++)
+    { cerr << (t==tl.begin()?"(":",") << pp(*t);
+    }
+    cerr << ")" << endl;
+    // ATfprintf(stderr,"%t\n",(ATerm)variable_index.get(*walker));
     print_counter_example_rec(*walker,indent+"  ",bes_equations,variable_index);
   }
 }
