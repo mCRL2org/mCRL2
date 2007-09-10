@@ -151,7 +151,7 @@ static ATermAppl bool_to_numeric(ATermAppl BoolExpr, ATermAppl SortExpr);
 // ----------------------------------------------
 ATerm reconstruct_exprs(ATerm Part, const ATermAppl Spec)
 {
-  assert ((Spec == NULL) || gsIsSpecV1(Spec));
+  assert ((Spec == NULL) || gsIsSpecV1(Spec) || gsIsPBES(Spec));
   if (Spec == NULL) {
     gsDebugMsg("No specification given, "
                  "therefore not all components can be reconstructed\n");
@@ -171,9 +171,9 @@ ATerm reconstruct_exprs(ATerm Part, const ATermAppl Spec)
 
 ATermAppl reconstruct_exprs_appl(ATermAppl Part, const ATermAppl Spec)
 {
-  assert ((Spec == NULL) || gsIsSpecV1(Spec));
+  assert ((Spec == NULL) || gsIsSpecV1(Spec) || gsIsPBES(Spec));
 
-  if(gsIsSpecV1(Part) && (Spec != NULL)) {
+  if((gsIsSpecV1(Part) || gsIsPBES(Part)) && (Spec != NULL)) {
     gsDebugMsg("Removing headers from specification\n");
     Part = remove_headers_without_binders_from_spec(Part);
   }
@@ -295,12 +295,10 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, const ATermAppl Spec)
     } else if (gsIsDataExprCReal(Part)) {
       Part = gsMakeDataExprInt2Real(ATAgetFirst(ATLgetArgument(Part, 1)));
     } else if (gsIsDataExprDub(Part)) {
-      /*
-      TODO
       ATermList Args = ATLgetArgument(Part, 1);
       ATermAppl BoolArg = ATAelementAt(Args, 0);
       ATermAppl PosArg = ATAelementAt(Args, 1);
-      ATermAppl Sort = gsGetSortExprResult(PosArg);
+      ATermAppl Sort = gsGetSortExprResult(gsGetSort(PosArg));
       ATermAppl Mult = gsMakeDataExprMult(gsMakeOpId(gsString2ATermAppl("2"), Sort), PosArg);
       if (ATisEqual(BoolArg, gsMakeDataExprTrue())) {
         Part = gsMakeDataExprAdd(Mult, gsMakeOpId(gsString2ATermAppl("1"), Sort));
@@ -308,7 +306,7 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, const ATermAppl Spec)
         Part = Mult;
       } else {
         Part = gsMakeDataExprAdd(Mult, bool_to_numeric(BoolArg, Sort));
-      } */
+      }
     } else if (gsIsDataExprAddC(Part)) {
       // TODO
     } else if (gsIsDataExprGTESubt(Part)) {
@@ -412,7 +410,7 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, const ATermAppl Spec)
     Part = beta_reduce(Part, &Context, false);
   } 
 
-  if (gsIsSpecV1(Part) && Spec != NULL) {
+  if ((gsIsSpecV1(Part) || gsIsPBES(Part)) && Spec != NULL) {
     Part = remove_headers_with_binders_from_spec(Part, Spec);
   }
 
@@ -421,7 +419,7 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, const ATermAppl Spec)
 
 ATermList reconstruct_exprs_list(ATermList Parts, const ATermAppl Spec)
 {
-  assert ((Spec == NULL) || gsIsSpecV1(Spec));
+  assert ((Spec == NULL) || gsIsSpecV1(Spec) || gsIsPBES(Spec));
 
   ATermList result = ATmakeList0();
   while (!ATisEmpty(Parts))
@@ -493,7 +491,7 @@ ATermAppl reconstruct_pos_mult(ATermAppl PosExpr, char* Mult)
 
 ATermAppl reconstruct_lambda_op(const ATermAppl Part, const ATermAppl Spec)
 {
-  assert(gsIsSpecV1(Spec));
+  assert(gsIsSpecV1(Spec) || gsIsPBES(Spec));
   assert(is_lambda_op_id(Part));
   gsDebugMsg("Reconstructing lambda operator %T\n", Part);
 
@@ -547,8 +545,7 @@ bool is_lambda_expr(const ATermAppl Part)
 ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec)
 {
   gsDebugMsg("Removing headers from specification\n");
-  assert(gsIsSpecV1(Spec));
-  // Superfluous declarations are in MapSpec and DataEqnSpec
+  assert(gsIsSpecV1(Spec) || gsIsPBES(Spec));
   ATermAppl DataSpec = ATAgetArgument(Spec, 0);
 
   gsDebugMsg("Dissecting data specification\n");
@@ -642,20 +639,12 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec)
   for (ATermList sorts = data_decls.sorts; !ATisEmpty(sorts); sorts = ATgetNext(sorts))
   {
     ATermAppl sort = ATAgetFirst(sorts);
-    if (is_struct_sort_id(sort)) {
-
-      //TODO
-    } else if (is_list_sort_id(sort)) {
+    if (is_list_sort_id(sort)) {
       remove_list_sort_from_data_decls(sort, &data_decls);
     } else {
       remove_struct_sort_impl(sort, &data_decls);
     }
   }
-
-/*
-  // Additional processing of ConsOps
-  // TODO
-*/
 
   // Additional processing of ops
   gsDebugMsg("Removing implementations of operators\n");
@@ -696,17 +685,25 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec)
   MapSpec     = gsMakeMapSpec    (data_decls.ops);
   DataEqnSpec = gsMakeDataEqnSpec(data_decls.data_eqns);
   DataSpec    = gsMakeDataSpec   (SortSpec, ConsSpec, MapSpec, DataEqnSpec);
-  Spec        = gsMakeSpecV1(DataSpec,
-                             ATAgetArgument(Spec, 1),
-                             ATAgetArgument(Spec, 2),
-                             ATAgetArgument(Spec, 3));
+  if (gsIsSpecV1(Spec)) {
+    Spec        = gsMakeSpecV1(DataSpec,
+                               ATAgetArgument(Spec, 1),
+                               ATAgetArgument(Spec, 2),
+                               ATAgetArgument(Spec, 3));
+  } else { //gsIsPBES(Spec)
+    Spec = gsMakePBES(DataSpec,
+                      ATAgetArgument(Spec, 1),
+                      ATAgetArgument(Spec, 2));
+  }
   return Spec;
 }
 
 ATermAppl remove_headers_with_binders_from_spec(ATermAppl Spec, ATermAppl OrigSpec)
 {
-  assert(gsIsSpecV1(Spec));
-  assert(gsIsSpecV1(OrigSpec));
+  assert((gsIsSpecV1(Spec) && gsIsSpecV1(OrigSpec))
+    || (gsIsPBES(Spec) && gsIsPBES(OrigSpec)));
+
+  // DataSpec is the same argument for SpecV1 as well as PBES!
   // Superfluous declarations are in DataSpec
   ATermAppl DataSpec = ATAgetArgument(Spec, 0);
 
@@ -741,10 +738,16 @@ ATermAppl remove_headers_with_binders_from_spec(ATermAppl Spec, ATermAppl OrigSp
   MapSpec     = gsMakeMapSpec    (data_decls.ops);
   DataEqnSpec = gsMakeDataEqnSpec(data_decls.data_eqns);
   DataSpec    = gsMakeDataSpec   (SortSpec, ConsSpec, MapSpec, DataEqnSpec);
-  Spec        = gsMakeSpecV1(DataSpec,
-                             ATAgetArgument(Spec, 1),
-                             ATAgetArgument(Spec, 2),
-                             ATAgetArgument(Spec, 3));
+  if (gsIsSpecV1(Spec)) {
+    Spec        = gsMakeSpecV1(DataSpec,
+                               ATAgetArgument(Spec, 1),
+                               ATAgetArgument(Spec, 2),
+                               ATAgetArgument(Spec, 3));
+  } else { //gsIsPBES(Spec)
+    Spec = gsMakePBES(DataSpec,
+                      ATAgetArgument(Spec, 1),
+                      ATAgetArgument(Spec, 2));
+  }
   return Spec;
 }
 
@@ -1005,7 +1008,7 @@ void remove_set_sort_from_data_decls(ATermAppl set_sort, t_data_decls* p_data_de
   gsDebugMsg("Removing implementation of set sort %T from specification\n", set_sort);
   assert(gsIsSortExprSet(set_sort));
   assert(spec != NULL);
-  assert(gsIsSpecV1(spec));
+  assert(gsIsSpecV1(spec) || gsIsPBES(spec));
   
   t_data_decls set_decls;
   initialize_data_decls(&set_decls);
@@ -1028,7 +1031,7 @@ void remove_bag_sort_from_data_decls(ATermAppl bag_sort, t_data_decls* p_data_de
   gsDebugMsg("Removing implementation of bag sort %T from specification\n", bag_sort);
   assert(gsIsSortExprBag(bag_sort));
   assert(spec != NULL);
-  assert(gsIsSpecV1(spec));
+  assert(gsIsSpecV1(spec) || gsIsPBES(spec));
  
   // Initialize implementation
   t_data_decls bag_decls;
@@ -1310,12 +1313,14 @@ void remove_struct_sort_impl(ATermAppl sort_id, t_data_decls* p_data_decls)
     }
     // Remove implementation from data declarations
     subtract_data_decls(p_data_decls, &struct_sort_decls);
-    ATermAppl struct_sort = gsMakeSortStruct(struct_conss);
 
-    ATermAppl sort_name = ATAgetArgument(sort_id, 0);
-    ATermAppl sort_ref = gsMakeSortRef(sort_name, struct_sort);
+    if (!is_struct_sort_id(sort_id)) {
+      ATermAppl struct_sort = gsMakeSortStruct(struct_conss);
+      ATermAppl sort_name = ATAgetArgument(sort_id, 0);
+      ATermAppl sort_ref = gsMakeSortRef(sort_name, struct_sort);
 
-    p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) sort_ref);
+      p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) sort_ref);
+    }
   } // end if is_struct_sort_impl
 }
 
