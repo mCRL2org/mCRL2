@@ -77,12 +77,12 @@ void GLCanvas::initialize() {
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
   glEnable(GL_DEPTH_TEST);
-  glEnable(GL_COLOR_MATERIAL);
   
   GLfloat light_col[] = { 0.2f,0.2f,0.2f };
   glMaterialfv(GL_FRONT,GL_SPECULAR,light_col);
   glMaterialf(GL_FRONT,GL_SHININESS,8.0f);
   glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
+  glEnable(GL_COLOR_MATERIAL);
 
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
@@ -217,6 +217,12 @@ void GLCanvas::display(bool coll_caller) {
         }
       }
       
+      // Disable lighting while drawing transitions, otherwise their colours
+      // change with the viewpoint
+      glDisable(GL_NORMALIZE);
+      glDisable(GL_LIGHTING);
+      glDisable(GL_LIGHT0);
+
       visualizer->drawTransitions(
           settings->getBool(DisplayTransitions)
             && (!lightRenderMode || settings->getBool(NavShowTransitions)),
@@ -233,6 +239,13 @@ void GLCanvas::display(bool coll_caller) {
           !lightRenderMode || settings->getBool(NavShowBackpointers),
           sim->getTransHis(), sim->getPosTrans(), sim->getChosenTrans());
       }  
+      
+      // Enable lighting again, if required
+      if (!lightRenderMode || settings->getBool(NavLighting)) {
+        glEnable(GL_NORMALIZE);
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);
+      }
       
       if (!lightRenderMode || settings->getBool(NavTransparency)) {
         // determine current viewpoint in world coordinates
