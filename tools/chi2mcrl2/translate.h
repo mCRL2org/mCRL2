@@ -10,9 +10,11 @@
 #include <cstdio>
 #include <vector>
 #include <map>
+#include <sstream>
 
 #define RPV RecProcessVariable
 #define RVT RecVariableType
+#define RAT RecActionTransition
 
 typedef struct
   {
@@ -27,10 +29,29 @@ typedef struct
      std::string Type;
    } RecVariableType;
 
+
+typedef struct
+  {
+    int state;
+    std::string guard;
+    std::string action;
+    std::map<std::string, std::string> vectorUpdate;
+    int nextstate;
+  } RecActionTransition;
+
+template <class T>
+inline std::string to_string (const T& t)
+{
+  std::stringstream ss;
+  ss << t;
+  return ss.str();
+}
+
 class CAsttransform
 {
   public:
   	bool translator(ATermAppl ast);
+    std::string getResult();
   private:
 	std::string manipulateProcess(ATermAppl input);
 //    std::string manipulateVariables();
@@ -48,13 +69,20 @@ class CAsttransform
     std::vector<std::string> getVariablesNamesFromList(ATermList input);
     std::vector<RVT> manipulateDeclaredProcessVariable(ATermAppl input); 
     std::string manipulateExpression(ATermAppl input);
-    void manipulateStatements(ATermAppl input);
+    int manipulateStatements(ATermAppl input, int current, int next);
 
 
     //Future implementation
     std::string manipulateExplicitTemplates(ATermList input);
     std::string manipulateDeclaredProcessChannels(ATermList input);
     std::map<std::string, RecProcessVariable> ProcessVariableMap;
+
+    std::vector<RAT> transitionSystem ;
+
+    int statementorder;
+    int statementlevel;
+
+    std::vector<int> bypass;
 }
 ;
 

@@ -6,6 +6,7 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "translate.h"
 #include <vector> 
+#include <sstream>
 
 using namespace ::mcrl2::utilities;
 using namespace std;
@@ -14,7 +15,7 @@ bool CAsttransform::translator(ATermAppl ast)
 {
   if( StrcmpIsFun( "ProcDef", ast ) )
   {
-    manipulateProcess( ast );
+    mcrl2_result = manipulateProcess( ast );
   }
   return true;
 }
@@ -22,7 +23,7 @@ bool CAsttransform::translator(ATermAppl ast)
 bool CAsttransform::StrcmpIsFun( const char* str, ATermAppl aterm) 
 {
   return ATgetAFun( aterm ) == 
-	ATmakeAFun( str, ATgetArity( ATgetAFun( aterm ) ), ATisQuoted( ATgetAFun( aterm ) ) ); 
+	ATmakeAFun( str, ATgetArity( ATgetAFun( aterm ) ), ATisQuoted( ATgetAFun( aterm ) ) );
 }
 
 std::string CAsttransform::manipulateProcess(ATermAppl input)
@@ -38,6 +39,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
   RPV tmpRPV;
   vector<RVT>::iterator itRVT;
   vector<RPV>::iterator itRPV;
+  vector<RAT>::iterator itRAT;
   map<std::string, RPV>::iterator itMap;
   string result;
 
@@ -65,23 +67,91 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
         ProcessVariableMap[itRPV->Name] = *itRPV;
       }
 
-  //Write the output for a process 
-  result = processName;
+  //Write the output for a process
+  result = "proc \n   ";
+  result.append(processName);
   result.append("(");
   for( itMap = ProcessVariableMap.begin(); itMap != ProcessVariableMap.end(); itMap++)
     {
-      /*if (itMap != ProcessVariableMap.begin())
-        {*/
+      if (itMap != ProcessVariableMap.begin())
+        {
           result.append(", ");
-      /*  }*/
+        }
       result.append(itMap->first);
       result.append(": ");
       result.append((itMap->second).Type);
     }
-  result.append("_state_: nat");
-  result.append(")=");
-  cout << result << endl;
-  return ""; 
+  result.append(", state: Nat");
+  result.append(")= \n");
+    
+  for( itRAT = transitionSystem.begin(); itRAT != transitionSystem.end(); itRAT++ ) 
+    { 
+      if (itRAT != transitionSystem.begin()){
+         result.append("\t+ ");
+      } else {
+         result.append("\t  ");
+      };
+      
+      //append Guard;
+      result.append("( ");
+      result.append(itRAT->guard);
+
+      //append current state
+      result.append("state == ");
+      result.append(to_string(itRAT->state));
+      result.append(") -> ");
+      result.append(itRAT->action);
+
+      if(itRAT->nextstate != -1)
+        {
+          result.append(".");
+          result.append(processName);
+          result.append("(");
+		  for( itMap = ProcessVariableMap.begin(); itMap != ProcessVariableMap.end(); itMap++)
+			{
+			  result.append(itMap->first);
+			  result.append(", ");
+			}
+          //append vectorupdate
+          // TODO: with assignments
+          //append next state
+          result.append(to_string(itRAT->nextstate));
+          result.append(")\n");
+        } else {
+          result.append("\n");
+        }
+    }
+  result.append("\t;\n");
+
+
+  //write initialisation
+  result.append("\ninit ");
+  //Should be provided by MODEL()=|[ ]|
+  result.append(processName);
+  result.append("(");
+  for( itMap = ProcessVariableMap.begin(); itMap != ProcessVariableMap.end(); itMap++)
+    { 
+      if ( !(itMap->second).InitValue.empty() ) 
+      { 
+        result.append((itMap->second).InitValue);
+      } else {
+	 //TODO: remove if model is supported and replace code by assertion
+	    if ((itMap->second).Type == "Bool" )
+		  {
+		    result.append("false"); 
+		  };
+	    if ((itMap->second).Type == "Nat" )
+	  	  {
+		    result.append("0"); 
+		  };
+      //end TODO
+	  }
+    result.append(", ");
+    }
+  result.append("0");
+  result.append(");\n");
+
+  return result; 
 }
 
 std::vector<RVT> CAsttransform::manipulateDeclaredProcessDefinition(ATermAppl input)
@@ -223,7 +293,24 @@ std::vector<RPV> CAsttransform::manipulateProcessSpecification(ATermAppl input)
 	}
     
     //Process Statements
-    manipulateStatements((ATermAppl) ATgetArgument(input, 1));
+    int lastelement = manipulateStatements((ATermAppl) ATgetArgument(input, 1),0, -1);
+    //Process bypasses
+    std::vector<int>::iterator bypassIt;
+    for( bypassIt = bypass.begin(); bypassIt != bypass.end(); bypassIt++ ) 
+    {
+       transitionSystem.at(*bypassIt).nextstate = lastelement;
+    }
+    //Last element is the succesfull termination therefore all nextsate's == lastelement to -1
+    std::vector<RAT>::iterator tsIt;
+    for( tsIt = transitionSystem.begin(); tsIt != transitionSystem.end(); tsIt++ ) 
+    {
+       if ((*tsIt).nextstate == lastelement)
+         {
+           (*tsIt).nextstate = -1;
+         }
+    }
+
+
   }
   return result; 
 }
@@ -256,11 +343,11 @@ std::vector<RPV> CAsttransform::manipulateProcessVariableDeclarations(ATermList 
 			  tmpRPV.Name = it->Name;
               tmpRPV.Type = it->Type;
 			  /* Set Initial Value -- See Future NOTE */
-			  if (tmpRPV.Type == "bool" )
+			  if (tmpRPV.Type == "Bool" )
 			    {
 			  	  tmpRPV.InitValue = "false"; 
 				};
-			  if (tmpRPV.Type == "nat" )
+			  if (tmpRPV.Type == "Nat" )
 			    {
 			      tmpRPV.InitValue = "0"; 
 				};
@@ -305,14 +392,60 @@ std::string CAsttransform::manipulateExpression(ATermAppl input)
   return "";
 } 
 
-void CAsttransform::manipulateStatements(ATermAppl input)
+int CAsttransform::manipulateStatements(ATermAppl input, int current, int next)
 {
   gsDebugMsg("input of manipulateStatements: %T\n", input);
+  RAT transition;
 
-  int statementLevel = 1;
-  int numberOfStatements = ATgetArity( ATgetAFun( (ATerm) input ) );
- 
-  cout << numberOfStatements << endl; 
-  exit(1);
-  return;
+  if ( StrcmpIsFun( "DeltaStat", input ) )
+    {
+      transition.state = current;
+      transition.nextstate = next;
+      transition.action = "delta";
+      transitionSystem.push_back(transition);
+      return next;
+     }
+  if ( StrcmpIsFun( "SkipStat", input ) )
+    {
+      transition.state = current;
+      transition.nextstate = next;
+      transition.action = "tau";
+      transitionSystem.push_back(transition);
+      return next;
+    }
+  if ( StrcmpIsFun( "SepStat", input ) )
+    {
+      next = manipulateStatements( (ATermAppl) ATgetArgument(input,0), current, current + 1 );
+      next = manipulateStatements( (ATermAppl) ATgetArgument(input,1), next, next+1  );
+      return next;
+    }
+  if ( StrcmpIsFun( "AltStat", input ) )
+    {
+      next = manipulateStatements( (ATermAppl) ATgetArgument(input,0), current, next );
+      bypass.push_back(transitionSystem.size()-1);
+
+      next = manipulateStatements( (ATermAppl) ATgetArgument(input,1), current, next );
+      return next;
+    }
+
+  if ( StrcmpIsFun( "ParenthesisedStat", input ) )
+    {
+      next = manipulateStatements( (ATermAppl) ATgetArgument(input,0), current, current + 1 );
+      //Process bypasses
+      std::vector<int>::iterator bypassIt;
+      for( bypassIt = bypass.begin(); bypassIt != bypass.end(); bypassIt++ ) 
+      {
+         transitionSystem.at(*bypassIt).nextstate = next;
+      }
+      //empty bypass-vector;
+      bypass.clear();
+      return next;
+    }
+  return current;
 }
+
+std::string CAsttransform::getResult() 
+{
+  return mcrl2_result;
+}
+

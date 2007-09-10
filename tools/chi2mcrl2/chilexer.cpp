@@ -1044,12 +1044,12 @@ YY_RULE_SETUP
 case 57:
 YY_RULE_SETUP
 #line 151 "chilexer.ll"
-{ process_string(); return TYPE; }
+{ process_string(); return BOOL; }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
 #line 152 "chilexer.ll"
-{ process_string(); return TYPE; }
+{ process_string(); return NAT; }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP

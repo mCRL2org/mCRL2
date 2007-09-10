@@ -60,14 +60,15 @@ ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
 %token PROC MODEL_DEF ENUM
 %token <appl> VAR CONST CHAN
 %token <appl> SKIP BARS ALT
-%token <appl> COLON TYPE
+%token <appl> COLON TYPE BOOL NAT
 %token <appl> ID TIME 
 %token <appl> BP EP PROC_SEP SEP COMMA DEFINES ASSIGNMENT MINUS PLUS GG 
 %token <appl> LBRACE RBRACE LBRACKET RBRACKET
 %token <appl> AND OR GUARD NOT EQUAL OLD
-%token <appl> BOOL NUMBER INT REALNUMBER TRUE FALSE DOT DEADLOCK IMPLIES NOTEQUAL GEQ LEQ MAX MIN DIV MOD POWER
+%token <appl> NUMBER INT REALNUMBER TRUE FALSE DOT DEADLOCK IMPLIES NOTEQUAL GEQ LEQ MAX MIN DIV MOD POWER
 %token <appl> RECV EXCLAMATION SENDRECV RECVSEND SSEND RRECV STAR GUARD_REP DERIVATIVE
 
+%left ALT SEP
 %left '-' '+'
 %left '*' '/'       /* order '+','-','*','/' */
 %right '^'          /* exponentiation        */
@@ -339,9 +340,19 @@ Type:
 	;
 
 BasicType:
- 	  TYPE
+ 	  BOOL 
 		{ 
- 	  	  safe_assign($$, gsMakeType( $1) );
+          safe_assign($$, gsMakeType( gsString2ATermAppl( "Bool" ) ) );
+      	  gsDebugMsg("parsed Type \n  %T\n", $$);
+		}
+ 	| NAT
+		{ 
+          safe_assign($$, gsMakeType( gsString2ATermAppl("Nat" ) ) );
+      	  gsDebugMsg("parsed Type \n  %T\n", $$);
+		}
+ 	| TYPE
+		{ 
+          safe_assign($$, gsMakeType( $1 ) );
       	  gsDebugMsg("parsed Type \n  %T\n", $$);
 		}
 //	| Identifier
@@ -396,7 +407,7 @@ OptGuard: /* empty */
 			  * Type Checking
 			  *
 			  **/
-			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("bool")))
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Bool")))
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -462,26 +473,26 @@ Instantiation:
 BinaryStatement:
 	  Statement SEP Statement
       	{ safe_assign($$, gsMakeSepStat( $1, $3));
-      	  gsDebugMsg("parsed skip statement \n  %T\n", $$);	
+      	  gsDebugMsg("parsed SEP statement \n  %T\n", $$);	
 		}
 	| Statement ALT Statement
       	{ safe_assign($$, gsMakeAltStat( $1, $3));
-      	  gsDebugMsg("parsed skip statement \n  %T\n", $$);	
+      	  gsDebugMsg("parsed ALT statement \n  %T\n", $$);	
 		}
 	| Statement BARS Statement 
       	{ safe_assign($$, gsMakeParStat( $1, $3));
-      	  gsDebugMsg("parsed skip statement \n  %T\n", $$);	
+      	  gsDebugMsg("parsed Paralell statement \n  %T\n", $$);	
 		}
 	;
 
 UnaryStatement:
 	  STAR Statement
       	{ safe_assign($$, gsMakeStarStat( $2));
-      	  gsDebugMsg("parsed skip statement \n  %T\n", $$);	
+      	  gsDebugMsg("parsed STAR statement \n  %T\n", $$);	
 		}
 	| Expression GUARD_REP Statement
       	{ safe_assign($$, gsMakeGuardedStarStat( $1, $3));
-      	  gsDebugMsg("parsed skip statement \n  %T\n", $$);	
+      	  gsDebugMsg("parsed GuardedSTAR statement \n  %T\n", $$);	
 		}
 	;
 
@@ -568,7 +579,7 @@ BooleanExpression:
 		{ 
  	  		safe_assign($$, 
 				gsMakeExpression( $1, 
-					gsMakeType( gsString2ATermAppl("bool" )) 
+					gsMakeType( gsString2ATermAppl("Bool" )) 
 				)
 			);
       		gsDebugMsg("parsed Expression's\n  %T\n", $$);
@@ -577,7 +588,7 @@ BooleanExpression:
 		{ 
  	  		safe_assign($$, 
 				gsMakeExpression( $1, 
-					gsMakeType( gsString2ATermAppl("bool" )) 
+					gsMakeType( gsString2ATermAppl("Bool" )) 
 				)
 			);
       		gsDebugMsg("parsed Expression's\n  %T\n", $$);
@@ -588,7 +599,7 @@ BooleanExpression:
 			  * Type Checking
 			  *
 			  **/	
-			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("bool")))
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Bool")))
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -596,7 +607,7 @@ BooleanExpression:
 
  	  		safe_assign($$, 
 				gsMakeUnaryExpression( gsString2ATermAppl("!" ),
-				gsMakeType( gsString2ATermAppl("bool" ) ), 
+				gsMakeType( gsString2ATermAppl("Bool" ) ), 
 				$2 ) 
 			);
       		gsDebugMsg("parsed Negation Expression's\n  %T\n", $$);
@@ -607,7 +618,7 @@ BooleanExpression:
 			  * Type Checking
 			  *
 			  **/	
-			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("bool")))
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Bool")))
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -615,7 +626,7 @@ BooleanExpression:
 
  	  		safe_assign($$, 
 				gsMakeUnaryExpression( gsString2ATermAppl("!" ),
-				gsMakeType( gsString2ATermAppl("bool" ) ), 
+				gsMakeType( gsString2ATermAppl("Bool" ) ), 
 				$2 ) 
 			);
       		gsDebugMsg("parsed Negation Expression's\n  %T\n", $$);
@@ -631,7 +642,7 @@ BooleanExpression:
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
 				};
-			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("bool")))
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Bool")))
 
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
@@ -640,7 +651,7 @@ BooleanExpression:
 
  	  		safe_assign($$, 
 				gsMakeBinaryExpression( gsString2ATermAppl("&&" ),
-				gsMakeType( gsString2ATermAppl("bool" ) ),
+				gsMakeType( gsString2ATermAppl("Bool" ) ),
 				$1 , 
 				$3  
 				)
@@ -658,7 +669,7 @@ BooleanExpression:
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
 				};
-			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("bool")))
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Bool")))
 
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
@@ -667,7 +678,7 @@ BooleanExpression:
 
  	  		safe_assign($$, 
 				gsMakeBinaryExpression( gsString2ATermAppl("||" ),
-				gsMakeType( gsString2ATermAppl("bool" ) ),
+				gsMakeType( gsString2ATermAppl("Bool" ) ),
 				$1 , 
 				$3  
 				)
@@ -685,7 +696,7 @@ BooleanExpression:
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
 				};
-			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("bool")))
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Bool")))
 
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
@@ -694,7 +705,7 @@ BooleanExpression:
 
  	  		safe_assign($$, 
 				gsMakeBinaryExpression( gsString2ATermAppl("->" ),
-				gsMakeType( gsString2ATermAppl("bool" ) ),
+				gsMakeType( gsString2ATermAppl("Bool" ) ),
 				$1 , 
 				$3  
 				)
@@ -708,7 +719,7 @@ NatIntExpression:
 		{ 
  	  		safe_assign($$, 
 				gsMakeExpression( $1, 
-					gsMakeType( gsString2ATermAppl("nat" )) 
+					gsMakeType( gsString2ATermAppl("Nat" )) 
 				)
 			);
       		gsDebugMsg("parsed Expression's\n  %T\n", $$);
@@ -719,7 +730,7 @@ NatIntExpression:
 			  * Type Checking
 			  *
 			  **/	
-			if(ATAgetArgument($1,1) == gsString2ATermAppl("nat"))
+			if(ATAgetArgument($1,1) == gsString2ATermAppl("Nat"))
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -727,7 +738,7 @@ NatIntExpression:
 
  	  		safe_assign($$, 
 				gsMakeUnaryExpression( $1, 
-					gsMakeType( gsString2ATermAppl("nat" ) ),
+					gsMakeType( gsString2ATermAppl("Nat" ) ),
 					$2 
 				)
 			);
@@ -739,7 +750,7 @@ NatIntExpression:
 			  * Type Checking
 			  *
 			  **/	
-			if(ATAgetArgument($1,1) == gsMakeType(gsString2ATermAppl("nat")))
+			if(ATAgetArgument($1,1) == gsMakeType(gsString2ATermAppl("Nat")))
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -747,7 +758,7 @@ NatIntExpression:
 
  	  		safe_assign($$, 
 				gsMakeUnaryExpression($1, 
-					gsMakeType( gsString2ATermAppl("nat" ) ),
+					gsMakeType( gsString2ATermAppl("Nat" ) ),
 					$2
 				)
 			);
@@ -764,7 +775,7 @@ NatIntExpression:
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
 				};
-			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Nat")))
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -772,7 +783,7 @@ NatIntExpression:
 
  	  		safe_assign($$, 
 				gsMakeBinaryExpression( gsString2ATermAppl("^" ),
-				gsMakeType( gsString2ATermAppl("nat" ) ),
+				gsMakeType( gsString2ATermAppl("Nat" ) ),
 				$1 , 
 				$3  
 				) 
@@ -790,7 +801,7 @@ NatIntExpression:
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
 				};
-			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Nat")))
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -798,7 +809,7 @@ NatIntExpression:
 
  	  		safe_assign($$, 
 				gsMakeBinaryExpression( gsString2ATermAppl("*" ),
-				gsMakeType( gsString2ATermAppl("nat" ) ),
+				gsMakeType( gsString2ATermAppl("Nat" ) ),
 				$1 , 
 				$3  
 				) 
@@ -816,7 +827,7 @@ NatIntExpression:
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
 				};
-			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Nat")))
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -824,7 +835,7 @@ NatIntExpression:
 
  	  		safe_assign($$, 
 				gsMakeBinaryExpression( gsString2ATermAppl("/" ),
-				gsMakeType( gsString2ATermAppl("nat" ) ),
+				gsMakeType( gsString2ATermAppl("Nat" ) ),
 				$1 , 
 				$3  
 				) 
@@ -842,7 +853,7 @@ NatIntExpression:
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
 				};
-			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Nat")))
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -850,7 +861,7 @@ NatIntExpression:
 
  	  		safe_assign($$, 
 				gsMakeBinaryExpression( gsString2ATermAppl("+" ),
-				gsMakeType( gsString2ATermAppl("nat" ) ),
+				gsMakeType( gsString2ATermAppl("Nat" ) ),
 				$1 , 
 				$3  
 				) 
@@ -868,7 +879,7 @@ NatIntExpression:
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
 				};
-			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Nat")))
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -876,7 +887,7 @@ NatIntExpression:
 
  	  		safe_assign($$, 
 				gsMakeBinaryExpression( gsString2ATermAppl("-" ),
-				gsMakeType( gsString2ATermAppl("nat" ) ),
+				gsMakeType( gsString2ATermAppl("Nat" ) ),
 				$1 , 
 				$3  
 				) 
@@ -894,7 +905,7 @@ NatIntExpression:
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
 				};
-			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Nat")))
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -902,7 +913,7 @@ NatIntExpression:
 
  	  		safe_assign($$, 
 				gsMakeBinaryExpression( gsString2ATermAppl("MOD" ),
-				gsMakeType( gsString2ATermAppl("nat" ) ),
+				gsMakeType( gsString2ATermAppl("Nat" ) ),
 				$1 , 
 				$3  
 				) 
@@ -920,7 +931,7 @@ NatIntExpression:
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
 				};
-			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Nat")))
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -928,7 +939,7 @@ NatIntExpression:
 
  	  		safe_assign($$, 
 				gsMakeBinaryExpression( gsString2ATermAppl("DIV" ),
-				gsMakeType( gsString2ATermAppl("nat" ) ),
+				gsMakeType( gsString2ATermAppl("Nat" ) ),
 				$1 , 
 				$3  
 				) 
@@ -946,7 +957,7 @@ NatIntExpression:
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
 				};
-			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Nat")))
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -954,7 +965,7 @@ NatIntExpression:
 
  	  		safe_assign($$, 
 				gsMakeBinaryExpression( gsString2ATermAppl("MIN" ),
-				gsMakeType( gsString2ATermAppl("nat" ) ),
+				gsMakeType( gsString2ATermAppl("Nat" ) ),
 				$1 , 
 				$3  
 				) 
@@ -972,7 +983,7 @@ NatIntExpression:
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
 				};
-			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Nat")))
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -980,7 +991,7 @@ NatIntExpression:
 
  	  		safe_assign($$, 
 				gsMakeBinaryExpression( gsString2ATermAppl("MAX" ),
-				gsMakeType( gsString2ATermAppl("nat" ) ),
+				gsMakeType( gsString2ATermAppl("Nat" ) ),
 				$1 , 
 				$3  
 				) 
@@ -998,7 +1009,7 @@ NatIntExpression:
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
 				};
-			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Nat")))
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -1006,7 +1017,7 @@ NatIntExpression:
 
  	  		safe_assign($$, 
 				gsMakeBinaryExpression( gsString2ATermAppl("<" ),
-				gsMakeType( gsString2ATermAppl("nat" ) ),
+				gsMakeType( gsString2ATermAppl("Nat" ) ),
 				$1 , 
 				$3  
 				) 
@@ -1024,7 +1035,7 @@ NatIntExpression:
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
 				};
-			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Nat")))
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -1032,7 +1043,7 @@ NatIntExpression:
 
  	  		safe_assign($$, 
 				gsMakeBinaryExpression( gsString2ATermAppl(">" ),
-				gsMakeType( gsString2ATermAppl("nat" ) ),
+				gsMakeType( gsString2ATermAppl("Nat" ) ),
 				$1 , 
 				$3  
 				) 
@@ -1050,7 +1061,7 @@ NatIntExpression:
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
 				};
-			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Nat")))
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -1058,7 +1069,7 @@ NatIntExpression:
 
  	  		safe_assign($$, 
 				gsMakeBinaryExpression( gsString2ATermAppl("<=" ),
-				gsMakeType( gsString2ATermAppl("nat" ) ),
+				gsMakeType( gsString2ATermAppl("Nat" ) ),
 				$1 , 
 				$3  
 				) 
@@ -1076,7 +1087,7 @@ NatIntExpression:
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
 				};
-			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("nat")))
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Nat")))
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -1084,7 +1095,7 @@ NatIntExpression:
 
  	  		safe_assign($$, 
 				gsMakeBinaryExpression( gsString2ATermAppl(">=" ),
-				gsMakeType( gsString2ATermAppl("nat" ) ),
+				gsMakeType( gsString2ATermAppl("Nat" ) ),
 				$1 , 
 				$3  
 				) 
@@ -1107,7 +1118,7 @@ BoolNatIntExpression:
 				};
 		
 			safe_assign($$, gsMakeBinaryExpression( $2,  
-					gsMakeType( gsString2ATermAppl("bool" )), 
+					gsMakeType( gsString2ATermAppl("Bool" )), 
 			$1, $3));
       		gsDebugMsg("parsed UnaryExpression's\n  %T\n", $$);
 		}
@@ -1124,7 +1135,7 @@ BoolNatIntExpression:
 				};
 
  	  		safe_assign($$, gsMakeBinaryExpression( $2,  
-					gsMakeType( gsString2ATermAppl("bool" )), 
+					gsMakeType( gsString2ATermAppl("Bool" )), 
 			$1, $3));
       		gsDebugMsg("parsed UnaryExpression's\n  %T\n", $$);
 		}

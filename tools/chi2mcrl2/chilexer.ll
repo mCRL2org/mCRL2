@@ -148,8 +148,8 @@ const   { process_string(); return CONST; }
 time	{ process_string(); return TIME; }
 
 
-bool	{ process_string(); return TYPE; }
-nat     { process_string(); return TYPE; }
+bool	{ process_string(); return BOOL; }
+nat     { process_string(); return NAT; }
 int		{ process_string(); return TYPE; }
 real	{ process_string(); return TYPE; }
 string  { process_string(); return TYPE; }

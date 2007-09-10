@@ -129,7 +129,7 @@ ATermAppl translate_file(t_options &options)
   if (options.infilename == "")
   {
     //parse specification from stdin
-    printf("Parsing input from stdin...\n");
+    gsVerboseMsg("Parsing input from stdin...\n");
     result = parse_stream(cin);
   } else {
     //parse specification from infilename
@@ -140,8 +140,7 @@ ATermAppl translate_file(t_options &options)
       printf("Cannot open input file '%s'\n", options.infilename.c_str());
       return NULL;
     }
-    //gsVerboseMsg("parsing input file '%s'...\n", options.infilename.c_str());
-    printf("Parsing input file '%s'...\n", options.infilename.c_str());
+    gsVerboseMsg("Parsing input file '%s'...\n", options.infilename.c_str());
 	result = parse_stream(instream);
     instream.close();
   }
@@ -189,7 +188,7 @@ int main(int argc, char *argv[])
   //initialise ATerm library
   ATerm         stack_bottom;
   t_options     options;
- 
+  std::string mcrl2spec; 
   CAsttransform asttransform;
   
   ATinit(argc,argv,&stack_bottom);
@@ -206,13 +205,15 @@ int main(int argc, char *argv[])
       }
 	 
  	  gsDebugMsg("Transforming AST to mcrl2 specification\n");
-	  asttransform.translator(result);
+	  if (asttransform.translator(result))
+        {
+          mcrl2spec = asttransform.getResult();
+        }
 	  
       //store the result
       if (options.outfilename == "") {
         gsVerboseMsg("saving result to stdout...\n");
-        ATwriteToBinaryFile((ATerm) result, stdout);
-        fprintf(stdout, "\n");
+        printf("%s",mcrl2spec.c_str());
       } else { //outfilename != NULL
         //open output filename
         FILE *outstream = fopen(options.outfilename.c_str(), "wb");
@@ -221,7 +222,7 @@ int main(int argc, char *argv[])
           return 1;
         }
         gsVerboseMsg("saving result to '%s'...\n", options.outfilename.c_str());
-        ATwriteToBinaryFile((ATerm) result, outstream);
+        //ATwriteToBinaryFile( result, outstream);
         fclose(outstream);
       }
     }
