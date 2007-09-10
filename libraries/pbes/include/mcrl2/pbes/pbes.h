@@ -30,6 +30,7 @@
 #include "mcrl2/lps/detail/utility.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbes_initializer.h"
+#include "mcrl2/pbes/detail/free_variables.h"
 
 namespace lps {
 
@@ -37,98 +38,6 @@ using namespace std::rel_ops; // for definition of operator!= in terms of operat
 using atermpp::aterm;
 using atermpp::aterm_appl;
 using atermpp::read_from_named_file;
-
-/// INTERNAL ONLY
-/// Computes the free variables in a data expression.
-struct data_variable_collector
-{
-  const data_variable_list& m_bound_variables;
-  const atermpp::vector<data_variable>& m_quantifier_stack;
-  atermpp::set<data_variable>& m_result;
-    
-  data_variable_collector(const data_variable_list& bound_variables,
-                          const atermpp::vector<data_variable>& quantifier_stack,
-                          atermpp::set<data_variable>& result
-                         )
-    : m_bound_variables(bound_variables), m_quantifier_stack(quantifier_stack), m_result(result)
-  {}
-  
-  bool operator()(aterm_appl t)
-  {
-    if (is_data_variable(t))
-    {
-      if (std::find(m_bound_variables.begin(), m_bound_variables.end(), t) == m_bound_variables.end()
-          && std::find(m_quantifier_stack.begin(), m_quantifier_stack.end(), t) == m_quantifier_stack.end()
-         )
-      {
-        m_result.insert(data_variable(t));
-      }
-      return false;
-    }
-    return true;
-  }
-};
-
-/// INTERNAL ONLY
-/// Computes the free variables in the pbes expression t.
-///
-inline
-void collect_free_pbes_variables(pbes_expression t,
-                                 const data_variable_list& bound_variables,
-                                 atermpp::vector<data_variable>& quantifier_stack,
-                                 atermpp::set<data_variable>& result
-                                )
-{
-  using namespace lps::pbes_expr;
-
-  if(is_and(t)) {
-    collect_free_pbes_variables(lhs(t), bound_variables, quantifier_stack, result);
-    collect_free_pbes_variables(rhs(t), bound_variables, quantifier_stack, result);
-  }
-  else if(is_or(t)) {
-    collect_free_pbes_variables(lhs(t), bound_variables, quantifier_stack, result);
-    collect_free_pbes_variables(rhs(t), bound_variables, quantifier_stack, result);
-  }
-  else if(is_forall(t)) {
-    data_variable_list vars = quant_vars(t);   
-    std::copy(vars.begin(), vars.end(), std::back_inserter(quantifier_stack));
-    collect_free_pbes_variables(quant_expr(t), bound_variables, quantifier_stack, result);
-    quantifier_stack.erase(quantifier_stack.end() - vars.size(), quantifier_stack.end());
-  }
-  else if(is_exists(t)) {
-    data_variable_list vars = quant_vars(t);   
-    std::copy(vars.begin(), vars.end(), std::back_inserter(quantifier_stack));
-    collect_free_pbes_variables(quant_expr(t), bound_variables, quantifier_stack, result);
-    quantifier_stack.erase(quantifier_stack.end() - vars.size(), quantifier_stack.end());
-  }
-  else if(is_propositional_variable_instantiation(t)) {
-    data_expression_list l = propositional_variable_instantiation(t).parameters();
-    for (data_expression_list::iterator i = l.begin(); i != l.end(); ++i)
-      atermpp::for_each(*i, data_variable_collector(bound_variables, quantifier_stack, result));
-  }
-  else if(is_true(t)) {
-  }
-  else if(is_false(t)) {
-  }
-  else if(is_data(t)) {
-    atermpp::for_each(t, data_variable_collector(bound_variables, quantifier_stack, result));
-  }
-}
-
-/// INTERNAL ONLY
-/// Computes the free variables in the sequence of pbes equations [first, last[.
-///
-template <typename EquationIterator>
-atermpp::set<data_variable> free_pbes_variables(EquationIterator first, EquationIterator last)
-{
-  atermpp::set<data_variable> result;
-  for (EquationIterator i = first; i != last; ++i)
-  {
-    atermpp::vector<data_variable> quantifier_stack;
-    collect_free_pbes_variables(i->formula(), i->variable().parameters(), quantifier_stack, result);
-  }
-  return result;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // equation_system
@@ -219,24 +128,6 @@ class equation_system: public atermpp::vector<pbes_equation>
       return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end());
     }
 
-    /// Returns true if all binding predicate variables of the equation_system are unique.
-    /// Note that this does not imply that the names of the binding predicate
-    /// variables are unique.
-    ///
-    bool is_well_formed() const
-    {
-      atermpp::set<propositional_variable> variables;
-      for (const_iterator i = begin(); i != end(); ++i)
-      {
-        propositional_variable p = i->variable();
-        atermpp::set<propositional_variable>::iterator j = variables.find(p);
-        if (j != variables.end())
-          return false;
-        variables.insert(p);
-      }
-      return true;
-    }
-
     /// Returns an ascii representation of the equation system.
     ///
     std::string to_string() const
@@ -256,13 +147,6 @@ class equation_system: public atermpp::vector<pbes_equation>
       return true;
     }
     
-    /// Computes the set of free variables.
-    ///
-    atermpp::set<data_variable> compute_free_variables() const
-    {
-      return free_pbes_variables(begin(), end());
-    }
-
     /// Returns the free variables of this equation system.
     const atermpp::set<data_variable>& free_variables() const
     {
@@ -274,7 +158,38 @@ class equation_system: public atermpp::vector<pbes_equation>
     {
       return m_free_variables;     
     }
+
+    /// Returns true if
+    /// <ul>
+    /// <li>all binding predicate variables of the equation_system are unique. Note that this does not imply that the names of the binding predicate variables are unique.</li>
+    /// <li>the free variables occurring in the equations are contained in free_variables()       </li>
+    /// <li></li>
+    /// </ul>
+    ///
+    bool is_well_typed() const
+    {
+      // check )
+      atermpp::set<propositional_variable> variables;
+      for (const_iterator i = begin(); i != end(); ++i)
+      {
+        propositional_variable p = i->variable();
+        atermpp::set<propositional_variable>::iterator j = variables.find(p);
+        if (j != variables.end())
+          return false;
+        variables.insert(p);
+      }
+
+      return true;
+    }
 };
+
+/// Computes the free variables that occur in the pbes equation system.
+///
+inline
+std::set<data_variable> compute_free_variables(const equation_system& eqn)
+{
+  return detail::free_pbes_variables(eqn.begin(), eqn.end());
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // pbes
@@ -360,8 +275,8 @@ class pbes
 
       init_term(aterm_appl(t));
 
-      //if (!is_well_typed())
-      //  throw std::runtime_error("Error in pbes::load(): term is not well typed");
+      if (!is_well_typed())
+        throw std::runtime_error("Error in pbes::load(): term is not well typed");
     }
 
     /// Writes the pbes to file and returns true if the operation succeeded.
@@ -371,6 +286,9 @@ class pbes
     ///
     bool save(const std::string& filename, bool binary = true) const
     {
+      if (!is_well_typed())
+        throw std::runtime_error("Error in pbes::load(): term is not well typed");
+
       aterm t = ATermAppl(*this);
       if (binary)
       {
@@ -429,15 +347,7 @@ class pbes
       return m_equations.is_closed();
     }
 
-    /// Returns true if all binding predicate variables of the pbes are unique.
-    /// Note that this does not imply that the names of the binding predicate
-    /// variables are unique.
-    ///
-    bool is_well_formed() const
-    {
-      return m_equations.is_well_formed();
-    }
-
+/*
     /// Computes the set of free variables.
     ///
     atermpp::set<data_variable> free_variables() const
@@ -452,6 +362,7 @@ class pbes
 
       return result;
     }
+*/
 
     /// Protects the term from being freed during garbage collection.
     ///
@@ -475,7 +386,63 @@ class pbes
     {
       m_initial_state.mark();
     }
+
+    /// Returns true if
+    /// <ul>
+    /// <li>the sorts occurring in the free variables of the equations are declared in the data specification</li>
+    /// <li>the sorts occurring in the binding variable parameters are declared in the data specification </li>
+    /// <li>the sorts occurring in the quantifier variables of the equations are declared in the data specification </li>
+    ///
+    /// <li>the free variables of the equations have unique sorts</li>
+    /// <li>the binding variables of the equations have unique names (well formedness)</li>
+    ///
+    /// <li>the data specification is well typed</li>
+    /// <li>the equations are well typed</li>
+    /// <li>the initial state is well typed</li>
+    /// </ul>
+    ///
+    /// N.B. Conflicts between the types of instantiations and declarations of binding variables are not checked!
+    bool is_well_typed() const
+    {
+      std::set<lps::sort> sorts = detail::make_set(data().sorts());
+
+      // check )
+      if (!(detail::check_variable_sorts(equations().free_variables(), sorts)))
+      {
+        data_variable_list free_variables(equations().free_variables().begin(), equations().free_variables().end());
+        std::cerr << "pbes::is_well_typed() failed: some of the sorts of the free variables " << pp(free_variables) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
+        return false;
+      }
+
+      // check )
+      if (!data().is_well_typed())
+      {
+        return false;
+      }
+
+      // check )
+      if (!equations().is_well_typed())
+      {
+        return false;
+      }
+
+      // check )
+      if (!initial_state().is_well_typed())
+      {
+        return false;
+      }
+
+      return true;
+    }
 };
+
+/// Computes the free variables that occur in the pbes.
+///
+inline
+std::set<data_variable> compute_free_variables(const pbes& p)
+{
+  return compute_free_variables(p.equations());
+}
 
 } // namespace lps
 

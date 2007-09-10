@@ -332,7 +332,7 @@ int main(int argc, char** argv)
 /// \brief Instantiate free variables and create the (P)BES with the chosen strategy.
 pbes create_bes(pbes pbes_spec, t_tool_options tool_options)
 {
-	if (!pbes_spec.is_well_formed())
+	if (!pbes_spec.is_well_typed())
 	{
 		gsErrorMsg("The PBES is not well formed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
 		exit(1);
@@ -344,7 +344,7 @@ pbes create_bes(pbes pbes_spec, t_tool_options tool_options)
 	}
 
 	// Instantiate free variables in the system
-	atermpp::set< data_variable > freevars = pbes_spec.free_variables();
+	atermpp::set< data_variable > freevars = pbes_spec.equations().free_variables();
 	if (freevars.size() > 0)
 	{
 		gsVerboseMsg("Instantiating free variables\n");

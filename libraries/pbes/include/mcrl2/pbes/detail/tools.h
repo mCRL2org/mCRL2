@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/detail/tools.h
+/// \file tools.h
 /// \brief Add your file description here.
 
 #ifndef PBES_DETAIL_TOOLS

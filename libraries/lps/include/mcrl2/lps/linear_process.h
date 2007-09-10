@@ -23,6 +23,7 @@
 #include "mcrl2/lps/summand.h"
 #include "mcrl2/lps/process_initializer.h"
 #include "mcrl2/lps/detail/utility.h"
+#include "mcrl2/lps/detail/free_variables.h"
 
 namespace lps {
 
@@ -39,6 +40,11 @@ struct is_non_delta_summand
 };
 
 typedef atermpp::filtered_list<summand_list, is_non_delta_summand> non_delta_summand_list;
+
+class linear_process; // prototype declaration
+
+inline
+std::set<data_variable> compute_free_variables(const linear_process& process); // prototype declaration
 
 ///////////////////////////////////////////////////////////////////////////////
 // linear_process
@@ -150,15 +156,42 @@ class linear_process: public aterm_appl
 
     /// Returns true if
     /// <ul>
-    /// <li>the summands are well typed</li>
+    /// <li>the free variables occurring in the process are contained in free_variables()        </li>
     /// <li>the process parameters have unique names</li>
     /// <li>the free variables have unique names</li>
     /// <li>the names of the process parameters do not appear as the name of a summation variable</li>
     /// <li>the left hand sides of the assignments of summands are contained in the process parameters</li>
+    ///
+    /// <li>the summands are well typed</li>
     /// </ul>
     ///
     bool is_well_typed() const
     {
+      // check 6)
+      std::set<data_variable> declared_free_variables  = detail::make_set(free_variables());
+      std::set<data_variable> occurring_free_variables = compute_free_variables(*this);
+      if (!(std::includes(declared_free_variables.begin(),
+                          declared_free_variables.end(),
+                          occurring_free_variables.begin(),
+                          occurring_free_variables.end()
+                         )
+          ))
+      {
+        std::cerr << "linear_process::is_well_typed() failed: some of the free variables were not declared\n";
+        std::cerr << "declared free variables: ";
+        for (std::set<data_variable>::iterator i = declared_free_variables.begin(); i != declared_free_variables.end(); ++i)
+        {
+          std::cerr << pp(*i) << " ";
+        }
+        std::cerr << "occurring free variables: ";
+        for (std::set<data_variable>::iterator i = occurring_free_variables.begin(); i != occurring_free_variables.end(); ++i)
+        {
+          std::cerr << pp(*i) << " ";
+        }
+        std::cerr << std::endl;
+        return false;
+      }
+
       // check 1)
       for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
       {
@@ -208,6 +241,28 @@ class linear_process: public aterm_appl
       return true;
     }
   };
+
+/// \brief Computes the free variables that occur in the specification
+inline
+std::set<data_variable> compute_free_variables(const linear_process& process)
+{
+  std::set<data_variable> result;
+  std::set<data_variable> process_parameters = detail::make_set(process.process_parameters());
+  for (summand_list::iterator i = process.summands().begin(); i != process.summands().end(); ++i)
+  {
+    detail::collect_free_variables(*i, process_parameters, std::inserter(result, result.end()));
+  }
+  return result;
+}
+
+/// \brief Computes the action labels that occur in the process
+inline
+std::set<action_label> compute_action_labels(const linear_process& process)
+{
+  std::set<action_label> result;
+  atermpp::find_all_if(process, is_action_label, std::inserter(result, result.end()));
+  return result;
+}
 
 /// \brief Sets the free variables of l and returns the result
 inline

@@ -93,27 +93,30 @@ bool check_assignment_variables(data_assignment_list assignments, data_variable_
   return true;
 }
 
+/// Function object for checking if a term is a constant sort.
+struct is_constant_sort
+{
+  bool operator()(aterm_appl t) const
+  {
+    return is_sort(t) && !lps::sort(t).is_arrow();
+  }
+};
+
 /// Returns true if the domain sorts and the range sort of the given sort s are
 /// contained in sorts.
 inline bool check_sort(lps::sort s, const std::set<lps::sort>& sorts)
 {
-  if (sorts.find(s.range_sort()) == sorts.end())
-    return false;
-  sort_list domain_sorts = s.domain_sorts();
-  for (sort_list::iterator i = domain_sorts.begin(); i != domain_sorts.end(); ++i)
-  {
-    if (sorts.find(*i) == sorts.end())
-      return false;
-  }
-  return true;
+  std::set<lps::sort> s_sorts;
+  atermpp::find_all_if(s, is_constant_sort(), std::inserter(s_sorts, s_sorts.begin()));
+  return std::includes(sorts.begin(), sorts.end(), s_sorts.begin(), s_sorts.end());
 }
 
 /// Returns true if the domain sorts and the range sort of the given variables are contained
 /// in sorts.
-inline
-bool check_variable_sorts(data_variable_list variables, const std::set<lps::sort>& sorts)
+template <typename VariableContainer>
+bool check_variable_sorts(const VariableContainer& variables, const std::set<lps::sort>& sorts)
 {
-  for (data_variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
+  for (typename VariableContainer::const_iterator i = variables.begin(); i != variables.end(); ++i)
   {
     if (!check_sort(i->sort(), sorts))
       return false;

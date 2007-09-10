@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/detail/algorithm.h
+/// \file algorithm.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_LPS_DETAIL_ALGORITHM_H

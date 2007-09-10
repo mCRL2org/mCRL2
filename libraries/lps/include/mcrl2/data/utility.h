@@ -10,12 +10,13 @@
 #ifndef MCRL2_DATA_UTILITY_H
 #define MCRL2_DATA_UTILITY_H
 
+#include <algorithm>
+#include <functional>
+#include <iterator>
+#include <set>
 #include <string>
 #include <utility>
-#include <set>
 #include <vector>
-#include <iterator>
-#include <algorithm>
 
 #include "boost/format.hpp"
 #include "mcrl2/data/data.h"
@@ -36,6 +37,15 @@ struct equal_data_expression_sort
   bool operator()(const data_expression& x, const data_expression& y) const
   {
     return x.sort() == y.sort();
+  }
+};
+
+/// \brief Function object that returns the name of a data variable
+struct variable_name: public std::unary_function<data_variable, identifier_string>
+{
+  identifier_string operator()(const data_variable& v) const
+  {
+    return v.name();
   }
 };
 

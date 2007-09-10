@@ -179,7 +179,7 @@ void test_free_variables()
   pbes p;
   try {
     p.load("abp_fv.pbes");
-    atermpp::set< data_variable > freevars = p.free_variables();
+    atermpp::set< data_variable > freevars = p.equations().free_variables();
     cout << freevars.size() << endl;
     BOOST_CHECK(freevars.size() == 20);
     for (atermpp::set< data_variable >::iterator i = freevars.begin(); i != freevars.end(); ++i)

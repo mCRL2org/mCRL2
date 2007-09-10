@@ -105,7 +105,7 @@ void test_find_variable()
   data_variable d("d:D");
   data_variable e("e:E");
   data_expression d_e = and_(d, e); 
-  data_variable v = atermpp::find_if(d_e, is_data_variable);
+  data_variable v = find_variable(d_e);
   BOOST_CHECK(v == d);
 }
 

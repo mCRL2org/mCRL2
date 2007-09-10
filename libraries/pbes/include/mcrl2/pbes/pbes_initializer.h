@@ -84,6 +84,16 @@ class pbes_initializer: public aterm_appl
     {
       return pbes_initializer(f(aterm(*this)));
     }     
+
+    /// Returns true if
+    /// <ul>
+    /// <li></li>
+    /// </ul>
+    ///
+    bool is_well_typed() const
+    {
+      return true;
+    }
 };
 
 } // namespace lps

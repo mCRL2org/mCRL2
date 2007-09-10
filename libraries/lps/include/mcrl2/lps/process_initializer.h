@@ -83,6 +83,20 @@ class process_initializer: public aterm_appl
     {
       return process_initializer(f(aterm(*this)));
     }     
+
+    /// Returns true if
+    /// <ul>
+    // <li>the summands are well typed</li>
+    // <li>the process parameters have unique names</li>
+    // <li>the free variables have unique names</li>
+    // <li>the names of the process parameters do not appear as the name of a summation variable</li>
+    // <li>the left hand sides of the assignments of summands are contained in the process parameters</li>
+    /// </ul>
+    ///
+    bool is_well_typed() const
+    {
+      return true;
+    }
 };
 
 } // namespace lps

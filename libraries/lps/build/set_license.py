@@ -42,11 +42,11 @@ def remove_license(text):
             break
     return text
 
-def replace_include_guards(text, filename):
-    filename = path(filename).splitext()[0]
-    guard = re.sub('/', '_', filename).upper() + '_H'
-    if not guard.startswith('MCRL2_'):
-        guard = 'MCRL2_' + guard
+def replace_include_guards(text, file):
+    filename = file.splitext()[0]
+    filename = re.sub(r'[/\\]', '_', filename)
+    filename = re.sub(r'.*mcrl2', 'mcrl2', filename)
+    guard = filename.upper() + '_H'
     m = re.compile(r'#ifndef\s*(\w*)_H\s*#define\s*(\w*)_H[\w\W]*#endif\s*//\s*(\w*)_H\s*$', re.M).match(text)
     if m != None and (m.group(1) == m.group(2) == m.group(3)):
         text = re.sub(m.group(1) + '_H', guard, text)
@@ -75,21 +75,24 @@ def process_dir(year, author, dir, ext):
         print filename
         text = old_text
         text = remove_license(text)
-        text = replace_include_guards(text, filename)
+        text = replace_include_guards(text, file)
         text = add_license(text, filename, year, author)       
         if text != old_text:
             file.write_text(text)
 
 year = '2007'
 author = 'Wieger Wesselink'
-process_dir(year, author, '../include', '*.h')
-process_dir(year, author, '../source', '*.cpp')
-process_dir(year, author, '../example', '*.cpp')
-process_dir(year, author, '../example', '*.h')
-process_dir(year, author, '../test', '*.cpp')
-process_dir(year, author, '../../atermpp/include', '*.h')
-process_dir(year, author, '../../atermpp/example', '*.cpp')
-process_dir(year, author, '../../atermpp/example', '*.h')
-process_dir(year, author, '../../atermpp/test', '*.cpp')
+#process_dir(year, author, '../include', '*.h')
+#process_dir(year, author, '../source', '*.cpp')
+#process_dir(year, author, '../example', '*.cpp')
+#process_dir(year, author, '../example', '*.h')
+#process_dir(year, author, '../test', '*.cpp')
+#process_dir(year, author, '../../atermpp/include', '*.h')
+#process_dir(year, author, '../../atermpp/example', '*.cpp')
+#process_dir(year, author, '../../atermpp/example', '*.h')
+#process_dir(year, author, '../../atermpp/test', '*.cpp')
+#process_dir(year, author, '../../lps/include/mcrl2/data/detail', '*.h')
+#process_dir(year, author, '../../pbes/include/mcrl2/pbes/detail', '*.h')
+process_dir(year, author, '../../lps/include/mcrl2/lps/detail', '*.h')
 
 raw_input('done')

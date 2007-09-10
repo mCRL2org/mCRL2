@@ -1,3 +1,8 @@
+#include <algorithm>
+#include <iterator>
+#include <set>
+#include <vector>
+#include <boost/iterator/transform_iterator.hpp>
 #include "atermpp/make_list.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
@@ -51,15 +56,6 @@ pbes_expression match(const linear_process& m, const linear_process& s, identifi
   }
   return p::multi_and(terms.begin(), terms.end());
 }
-
-/// \brief Function object that returns the name of a data variable
-struct variable_name: public std::unary_function<data_variable, identifier_string>
-{
-  identifier_string operator()(const data_variable& v) const
-  {
-    return v.name();
-  }
-};
 
 /// Rename all summation variables in lps that occur in forbidden_names.
 inline

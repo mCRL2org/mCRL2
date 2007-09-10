@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/detail/pbes_translate_impl.h
+/// \file pbes_translate_impl.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_PBES_DETAIL_PBES_TRANSLATE_IMPL_H

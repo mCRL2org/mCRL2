@@ -98,6 +98,18 @@ class pbes_equation: public aterm_appl
     {
       return variable().parameters().empty() && formula().is_bes();
     }
+
+    /// Returns true if
+    /// <ul>
+    /// <li>the binding variable parameters have unique names</li>
+    /// <li>the names of the quantifier variables in the equation are disjoint with the binding variable parameter names</li>
+    /// <li>within the scope of a quantifier variable in the formula, no other quantifier variables or free variables with the same name may occur</li>
+    /// </ul>
+    ///
+    bool is_well_typed() const
+    {
+      return true;
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

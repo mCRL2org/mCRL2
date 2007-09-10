@@ -144,7 +144,7 @@ int main(int argc, char** argv)
 		equation_system eqsys;
 		eqsys = pbes_specification.equations();
 		
-		bool pbes_well_formed = pbes_specification.is_well_formed();
+		bool pbes_well_formed = pbes_specification.is_well_typed();
 		bool pbes_closed = pbes_specification.is_closed();
 
 		// Vectors for storing intermediate results

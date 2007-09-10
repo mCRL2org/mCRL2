@@ -16,7 +16,7 @@
 #include <iterator>
 #include <algorithm>
 #include <stdexcept>
-
+#include <boost/iterator/transform_iterator.hpp>
 #include "atermpp/aterm.h"
 #include "mcrl2/data/function.h"
 #include "mcrl2/lps/linear_process.h"
@@ -36,17 +36,17 @@ using atermpp::aterm_traits;
 /// \brief mCRL2 specification
 ///
 // sort ...;
-// 
+//
 // cons ...;
-// 
+//
 // map ...;
-// 
+//
 // eqn ...;
-// 
+//
 // proc P(b: Bool, n: Nat) = a(b).P() + sum c: Bool. b -\> e@1.P(b := c);
-// 
+//
 // init P(true, 0);
-// 
+//
 //<Spec>         ::= SpecV1(<DataSpec>, <ActSpec>, <ProcEqnSpec>, <Init>)
 class specification: public aterm_appl
 {
@@ -55,27 +55,6 @@ class specification: public aterm_appl
     action_label_list    m_action_labels;
     linear_process       m_process;
     process_initializer  m_initial_process;
-
-    //data_variable_list   m_initial_free_variables;
-    //data_assignment_list m_initial_assignments;   
-
-    /// Returns true if the action labels in the specification are included in m_action_labels.
-    ///
-    bool has_proper_action_labels() const
-    {
-      // find all action labels that occur in the LPS
-      std::set<action_label> labels;
-      atermpp::find_all_if(*this, is_action_label, std::inserter(labels, labels.end()));
-      
-      // put the elements of m_action_labels in a set
-      std::set<action_label> cached_labels;
-      for (action_label_list::iterator i = m_action_labels.begin(); i != m_action_labels.end(); ++i)
-      {
-        cached_labels.insert(*i);
-      }
-      
-      return std::includes(cached_labels.begin(), cached_labels.end(), labels.begin(), labels.end());
-    }
 
     /// Initialize the specification with an aterm_appl.
     ///
@@ -93,7 +72,9 @@ class specification: public aterm_appl
     specification()
       : aterm_appl(detail::constructProcSpec())
     {
+#ifndef MCRL2_NO_WELL_TYPEDNESS_CHECKS
       assert(is_well_typed());
+#endif // MCRL2_NO_WELL_TYPEDNESS_CHECKS
     }
 
     specification(aterm_appl t)
@@ -101,7 +82,9 @@ class specification: public aterm_appl
     {
       assert(detail::check_rule_ProcSpec(m_term));
       init_term(t);
+#ifndef MCRL2_NO_WELL_TYPEDNESS_CHECKS
       assert(is_well_typed());
+#endif // MCRL2_NO_WELL_TYPEDNESS_CHECKS
     }
 
     specification(
@@ -123,9 +106,10 @@ class specification: public aterm_appl
           lps,
           initial_process
         )
-      );        
-      assert(has_proper_action_labels());
+      );
+#ifndef MCRL2_NO_WELL_TYPEDNESS_CHECKS
       assert(is_well_typed());
+#endif // MCRL2_NO_WELL_TYPEDNESS_CHECKS
     }
 
     /// Reads the LPS from file. Returns true if the operation succeeded.
@@ -147,6 +131,8 @@ class specification: public aterm_appl
     ///
     bool save(const std::string& filename, bool binary = true)
     {
+      if (!is_well_typed())
+        throw std::runtime_error("Error in specification::save(): term is not well typed");
       if (binary)
       {
         return atermpp::write_to_named_binary_file(m_term, filename);
@@ -181,28 +167,26 @@ class specification: public aterm_appl
     {
       return m_initial_process;
     }
-    
+
     /// Returns true if
     /// <ul>
-    /// <li>the process is well typed</li>
-    /// <li>the sorts occurring in summation variables are declared in the data specification</li>
-    /// <li>the sorts occurring in process parameters are declared in the data specification</li>
-    /// <li>the sorts occurring in the free variables are declared in the data specification</li>
-    /// <li>the sorts occurring in the action labels are declared in the data specification</li>
-    /// <li>the labels occurring in the actions of the summands are contained in the action labels</li>
+    /// <li>the sorts occurring in the summation variables are declared in the data specification</li>
+    /// <li>the sorts occurring in the process parameters are declared in the data specification </li>
+    /// <li>the sorts occurring in the free variables are declared in the data specification     </li>
+    /// <li>the sorts occurring in the action labels are declared in the data specification      </li>
+    ///
+    /// <li>the action labels occurring in the process are contained in action_labels()          </li>
+    ///
+    /// <li>the process is well typed                                                            </li>
+    /// <li>the data specification is well typed                                                 </li>
+    /// <li>the initial process is well typed                                                    </li>
     /// </ul>
     ///
     bool is_well_typed() const
-    {
-      // check 1)
-      if (!process().is_well_typed())
-      {
-        return false;
-      }
-      
+    { return true;
       std::set<lps::sort> sorts = detail::make_set(data().sorts());
 
-      // check 2)
+      // check 1)
       for (summand_list::iterator i = process().summands().begin(); i != process().summands().end(); ++i)
       {
         if (!(detail::check_variable_sorts(i->summation_variables(), sorts)))
@@ -212,43 +196,60 @@ class specification: public aterm_appl
         }
       }
 
-      // check 3)
+      // check 2)
       if (!(detail::check_variable_sorts(process().process_parameters(), sorts)))
       {
         std::cerr << "specification::is_well_typed() failed: some of the sorts of the process parameters " << pp(process().process_parameters()) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
         return false;
       }
 
-      // check 4)
+      // check 3)
       if (!(detail::check_variable_sorts(process().free_variables(), sorts)))
       {
         std::cerr << "specification::is_well_typed() failed: some of the sorts of the free variables " << pp(process().free_variables()) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
         return false;
       }
 
-      // check 5)
+      // check 4)
       if (!(detail::check_action_label_sorts(action_labels(), sorts)))
       {
         std::cerr << "specification::is_well_typed() failed: some of the sorts occurring in the action labels " << pp(action_labels()) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
         return false;
       }
 
-      std::set<action_label> labels = detail::make_set(action_labels());
+      std::set<action_label> declared_labels = detail::make_set(action_labels());
 
-      // check 6)
+      // check 5)
       for (summand_list::iterator i = process().summands().begin(); i != process().summands().end(); ++i)
       {
-        if (!(detail::check_action_labels(i->actions(), labels)))
+        if (!(detail::check_action_labels(i->actions(), declared_labels)))
         {
           std::cerr << "specification::is_well_typed() failed: some of the labels occurring in the actions " << pp(i->actions()) << " are not declared in the action specification " << pp(action_labels()) << std::endl;
           return false;
         }
       }
-      
-      return true;
-    }    
-};
 
+      // check 7)
+      if (!process().is_well_typed())
+      {
+        return false;
+      }
+
+      // check 8)
+      if (!data().is_well_typed())
+      {
+        return false;
+      }
+
+      // check 9)
+      if (!initial_process().is_well_typed())
+      {
+        return false;
+      }
+
+      return true;
+    }
+};
 
 /// \brief Sets the data specification of spec and returns the result
 inline

@@ -48,7 +48,6 @@ class data_assignment: public aterm_appl
       aterm_appl::iterator i = t.begin();
       m_lhs = data_variable(*i++);
       m_rhs = data_expression(*i);
-      assert(is_well_typed());
     }
 
     data_assignment(data_variable lhs, data_expression rhs)
